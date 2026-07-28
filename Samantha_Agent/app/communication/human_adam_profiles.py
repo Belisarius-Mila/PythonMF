@@ -49,6 +49,10 @@ from app.communication.human_adam_workstream_catalog import (
     CanonicalWorkstream,
     CanonicalWorkstreamCapabilities,
 )
+from app.communication.janicka_r2_backend import (
+    JANICKA_R2_WORKSTREAM_ID,
+    JanickaR2Backend,
+)
 from app.communication.human_adam_workstream_memory import WorkstreamMemoryRegistry
 from app.communication.legacy_tvbcp_migration import (
     private_context_developer_instructions,
@@ -152,26 +156,67 @@ def private_archive_root(
     return root
 
 
+def owned_private_root(
+    capabilities: CanonicalWorkstreamCapabilities,
+    *,
+    project_root: Path = PROJECT_ROOT,
+) -> Path | None:
+    capabilities.validate()
+    if not capabilities.owned_private_root:
+        return None
+    root = (Path(project_root).resolve() / capabilities.owned_private_root).resolve()
+    private_root = (Path(project_root).resolve() / "data" / "private").resolve()
+    if root == private_root or private_root not in root.parents:
+        raise ValueError("Owned private capability míří mimo povolený private root.")
+    return root
+
+
 def workstream_sandbox_policy(
     capabilities: CanonicalWorkstreamCapabilities,
     *,
     project_root: Path = PROJECT_ROOT,
 ) -> dict[str, Any]:
-    root = private_archive_root(capabilities, project_root=project_root)
+    archive_root = private_archive_root(capabilities, project_root=project_root)
+    owned_root = owned_private_root(capabilities, project_root=project_root)
     canonical_private_root = (
         Path(project_root).resolve() / "data" / "private"
     ).resolve()
-    writable_roots = (
-        []
-        if capabilities.source_data_read_only
-        else [str(root if root is not None else canonical_private_root)]
-    )
+    if archive_root is not None:
+        writable_roots = [str(archive_root)]
+    elif owned_root is not None:
+        writable_roots = [str(owned_root)]
+    elif capabilities.source_data_read_only:
+        writable_roots = []
+    else:
+        writable_roots = [str(canonical_private_root)]
     policy = {
         **HUMAN_ADAM_SANDBOX_POLICY,
         "networkAccess": False,
         "writableRoots": writable_roots,
     }
     return policy
+
+
+def workstream_private_capability_backend(
+    record: CanonicalWorkstream,
+    *,
+    project_root: Path,
+    canonical_private_root: Path,
+) -> object | None:
+    root = owned_private_root(
+        record.capabilities,
+        project_root=project_root,
+    )
+    if root is None:
+        return None
+    if record.workstream_id != JANICKA_R2_WORKSTREAM_ID:
+        raise AppServerError(
+            "Vlastněný private backend není pro pracovní proud registrovaný."
+        )
+    return JanickaR2Backend.bind(
+        canonical_private_root=canonical_private_root,
+        document_root=root,
+    )
 
 
 def private_archive_developer_instructions(
@@ -434,6 +479,15 @@ class HumanAdamProfileManager:
             record.capabilities,
             project_root=base.workspace.canonical_project_root,
         )
+        private_capability_backend = workstream_private_capability_backend(
+            record,
+            project_root=base.workspace.canonical_project_root,
+            canonical_private_root=base.workspace.canonical_private_root,
+        )
+        if isinstance(private_capability_backend, JanickaR2Backend):
+            capability_instructions += (
+                private_capability_backend.developer_instructions()
+            )
         service = HumanAdamService(
             runtime=base.runtime,
             workspace=base.workspace,
@@ -447,6 +501,7 @@ class HumanAdamProfileManager:
                 record.capabilities,
                 project_root=base.workspace.canonical_project_root,
             ),
+            private_capability_backend=private_capability_backend,
             tvbcp_relative_path=Path(binding.tvbcp_relative_path),
             tvbcp_title=f"{binding.name} – TVBCP",
         )
@@ -1333,6 +1388,11 @@ class HumanAdamProfileManager:
                             "logs, handoff or TVBCP.",
                         )
                     )
+                    private_backend = service.private_capability_backend
+                    if isinstance(private_backend, JanickaR2Backend):
+                        control_lines.extend(
+                            private_backend.development_control_lines()
+                        )
                 else:
                     control_lines.extend(
                         (
@@ -3627,6 +3687,15 @@ def build_human_adam_profiles() -> HumanAdamProfileManager:
             record.capabilities,
             project_root=human_service.workspace.canonical_project_root,
         )
+        private_capability_backend = workstream_private_capability_backend(
+            record,
+            project_root=human_service.workspace.canonical_project_root,
+            canonical_private_root=human_service.workspace.canonical_private_root,
+        )
+        if isinstance(private_capability_backend, JanickaR2Backend):
+            capability_instructions += (
+                private_capability_backend.developer_instructions()
+            )
         private_context_instructions = private_context_developer_instructions(
             workstream_id=record.workstream_id,
         )

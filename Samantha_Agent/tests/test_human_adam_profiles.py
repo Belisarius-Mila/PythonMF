@@ -17,6 +17,7 @@ from app.communication.human_adam_profiles import (
     human_adam_owned_wip_recovery_action,
     human_adam_profile_switch_action,
     human_adam_project_continuity_action,
+    owned_private_root,
     private_archive_root,
     workstream_sandbox_policy,
 )
@@ -28,7 +29,11 @@ from app.communication.deferred_integration import (
     DeferredIntegrationError,
 )
 from app.communication.human_adam_turn_completion import TurnCompletionMetadata
-from app.communication.human_adam_workstream_catalog import WORKSTREAM_CATALOG
+from app.communication.human_adam_workstream_catalog import (
+    WORKSTREAM_CATALOG,
+    CanonicalWorkstreamCapabilities,
+)
+from app.communication.janicka_r2_backend import JanickaR2Backend
 from app.communication.human_adam_operations import (
     FAMILY_CALENDAR_TEST_EMAIL_PREVIEW,
     OPERATION_MARKER_END,
@@ -1701,7 +1706,8 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self,
     ) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
-            manager, _human_workspace, *_rest = self.make_manager(Path(temp_dir))
+            manager, human_workspace, *_rest = self.make_manager(Path(temp_dir))
+            human_workspace.canonical_private_root.mkdir(parents=True)
             lazy = FakeLazyThreads(Path(temp_dir) / "lazy")
             manager.workstream_threads = lazy  # type: ignore[assignment]
             manager.activate_grouped_workstream(
@@ -1719,12 +1725,24 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
                 lazy.hubs["project-r2-adam-janicka"].last_send["model_input_text"]
             )
             sandbox_policy = manager.active_service.sandbox_policy
+            private_backend = manager.active_service.private_capability_backend
+            self.assertIsInstance(private_backend, JanickaR2Backend)
+            assert isinstance(private_backend, JanickaR2Backend)
+            created = private_backend.document_store().create_text(
+                name="Bezpečný plán.txt",
+                text="Obsah vznikl pouze v testovacím private kořeni.",
+            )
+            expected_document_root = owned_private_root(
+                workstream_capabilities("project-r2-adam-janicka"),
+                project_root=human_workspace.canonical_project_root,
+            )
 
         self.assertTrue(capabilities["development"])
         self.assertTrue(capabilities["checkpoint"])
         self.assertTrue(capabilities["one_turn_write"])
         self.assertEqual(capabilities["write_authorization"], "one_turn")
         self.assertTrue(capabilities["source_data_read_only"])
+        self.assertTrue(capabilities["owned_private_write"])
         self.assertTrue(capabilities["deployment"])
         self.assertFalse(capabilities["github_batch"])
         self.assertIn("lease_state=authorized_once", model_input)
@@ -1736,9 +1754,75 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             "Never change or delete source user data under canonical_private_root",
             model_input,
         )
-        self.assertEqual(sandbox_policy["writableRoots"], [])
+        self.assertIn(
+            "r2_document_access=manage_owned_txt_documents",
+            model_input,
+        )
+        self.assertIn(
+            f"r2_document_root={expected_document_root}",
+            model_input,
+        )
+        self.assertIn(
+            "r2_document_confirmation_required=delete",
+            model_input,
+        )
+        self.assertIn("JanickaR2DocumentStore", model_input)
+        self.assertEqual(created.name, "Bezpečný plán.txt")
+        self.assertEqual(
+            private_backend.document_root,
+            expected_document_root,
+        )
+        self.assertEqual(
+            sandbox_policy["writableRoots"],
+            [str(expected_document_root)],
+        )
         self.assertFalse(sandbox_policy["networkAccess"])
         self.assertEqual(writable["automatic_completion"]["state"], "not_needed")
+
+    def test_read_only_source_capability_without_owned_root_stays_non_writable(
+        self,
+    ) -> None:
+        capabilities = CanonicalWorkstreamCapabilities(
+            source_data_read_only=True,
+        )
+
+        sandbox_policy = workstream_sandbox_policy(capabilities)
+
+        self.assertEqual(sandbox_policy["writableRoots"], [])
+        self.assertFalse(sandbox_policy["networkAccess"])
+
+    def test_r2_document_access_does_not_require_development_lease(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, *_rest = self.make_manager(Path(temp_dir))
+            lazy = FakeLazyThreads(Path(temp_dir) / "lazy")
+            manager.workstream_threads = lazy  # type: ignore[assignment]
+            manager.activate_grouped_workstream(
+                workstream_id="project-r2-adam-janicka",
+                confirmed=True,
+            )
+
+            result = manager.send(
+                text="Vytvoř mi nový dokument Plán.txt.",
+                client_message_id="r2-document-create-001",
+            )
+            model_input = str(
+                lazy.hubs["project-r2-adam-janicka"].last_send["model_input_text"]
+            )
+            expected_root = (
+                human_workspace.canonical_private_root
+                / "communication/workstreams/project-r2-adam-janicka/documents"
+            ).resolve()
+
+        self.assertIn("writable=false", model_input)
+        self.assertIn("workspace_writable=false", model_input)
+        self.assertIn("canonical_private_access=read_only", model_input)
+        self.assertIn(
+            "r2_document_access=manage_owned_txt_documents",
+            model_input,
+        )
+        self.assertIn(f"r2_document_root={expected_root}", model_input)
+        self.assertNotIn("[AUTOMATIC_STEP_COMPLETION]", model_input)
+        self.assertEqual(result["automatic_completion"]["state"], "not_needed")
 
     def test_family_calendar_operation_is_blocked_when_turn_leaves_changes(self) -> None:
         receipt = (

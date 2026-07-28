@@ -34,6 +34,7 @@ class CanonicalWorkstreamCapabilities:
     source_data_read_only: bool = False
     private_archive_confirmation_required: tuple[str, ...] = ()
     private_archive_root: str = ""
+    owned_private_root: str = ""
 
     def validate(self) -> None:
         flags = (
@@ -54,26 +55,47 @@ class CanonicalWorkstreamCapabilities:
         if not enabled:
             if self.private_archive_confirmation_required or self.private_archive_root:
                 raise ValueError("Pracovní proud má neplatné private archive capability.")
-            return
-        if not all(flags[:3]):
-            raise ValueError("Pracovní proud má neúplné private archive capability.")
+        else:
+            if not all(flags[:3]):
+                raise ValueError("Pracovní proud má neúplné private archive capability.")
+            if (
+                self.private_archive_confirmation_required
+                != PRIVATE_ARCHIVE_CONFIRMATION_CATEGORIES
+            ):
+                raise ValueError(
+                    "Pracovní proud má neplatné private archive potvrzovací kategorie."
+                )
+            self._validate_private_root(
+                self.private_archive_root,
+                kind="private archive",
+            )
+        if not isinstance(self.owned_private_root, str):
+            raise ValueError("Pracovní proud má neplatný owned private root.")
+        if self.owned_private_root:
+            if not self.source_data_read_only or enabled:
+                raise ValueError(
+                    "Vlastněný private kořen vyžaduje read-only zdrojová data "
+                    "a nesmí se překrývat s přímým archivem."
+                )
+            self._validate_private_root(
+                self.owned_private_root,
+                kind="owned private",
+            )
+
+    @staticmethod
+    def _validate_private_root(value: str, *, kind: str) -> None:
+        if not isinstance(value, str):
+            raise ValueError(f"Pracovní proud má neplatný {kind} root.")
+        root = PurePosixPath(value)
         if (
-            self.private_archive_confirmation_required
-            != PRIVATE_ARCHIVE_CONFIRMATION_CATEGORIES
-        ):
-            raise ValueError("Pracovní proud má neplatné private archive potvrzovací kategorie.")
-        if not isinstance(self.private_archive_root, str):
-            raise ValueError("Pracovní proud má neplatný private archive root.")
-        root = PurePosixPath(self.private_archive_root)
-        if (
-            not self.private_archive_root
+            not value
             or root.is_absolute()
             or ".." in root.parts
             or root.parts[:2] != ("data", "private")
             or len(root.parts) < 3
-            or root.as_posix() != self.private_archive_root
+            or root.as_posix() != value
         ):
-            raise ValueError("Pracovní proud má neplatný private archive root.")
+            raise ValueError(f"Pracovní proud má neplatný {kind} root.")
 
     @property
     def private_archive_enabled(self) -> bool:
@@ -86,6 +108,7 @@ class CanonicalWorkstreamCapabilities:
             "private_archive_read": self.private_archive_read,
             "private_archive_single_edit": self.private_archive_single_edit,
             "source_data_read_only": self.source_data_read_only,
+            "owned_private_write": bool(self.owned_private_root),
             "private_archive_confirmation_required": list(
                 self.private_archive_confirmation_required
             ),
@@ -219,6 +242,10 @@ WORKSTREAM_CATALOG = validate_workstream_catalog(
             "R2-Adam / Janička",
             capabilities=CanonicalWorkstreamCapabilities(
                 source_data_read_only=True,
+                owned_private_root=(
+                    "data/private/communication/workstreams/"
+                    "project-r2-adam-janicka/documents"
+                ),
             ),
         ),
         _record(

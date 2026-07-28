@@ -138,6 +138,7 @@ class HumanAdamService:
         hub: CanonicalSessionHub | None = None,
         developer_instructions: str = HUMAN_ADAM_DEVELOPER_INSTRUCTIONS,
         sandbox_policy: dict[str, Any] | None = None,
+        private_capability_backend: object | None = None,
         tvbcp_relative_path: Path = CANONICAL_TVBCP_RELATIVE_PATH,
         tvbcp_title: str = "Architektura komunikace Samantha",
     ):
@@ -153,6 +154,7 @@ class HumanAdamService:
         self.sandbox_policy = copy.deepcopy(
             default_sandbox_policy if sandbox_policy is None else sandbox_policy
         )
+        self.private_capability_backend = private_capability_backend
         self.tvbcp_relative_path = Path(tvbcp_relative_path)
         self.tvbcp_title = str(tvbcp_title).strip() or "Projektový TVBCP"
         self._profile: dict[str, Any] = {}

@@ -47,6 +47,7 @@ COMPILE_PATHS = (
     "app/communication/human_adam_workstream_memory.py",
     "app/communication/human_adam_workstream_selection.py",
     "app/communication/human_adam_workstream_threads.py",
+    "app/communication/janicka_r2_backend.py",
     "app/communication/janicka_r2_documents.py",
     "app/communication/legacy_tvbcp_migration.py",
     "app/communication/human_adam_turn_completion.py",

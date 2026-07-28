@@ -150,6 +150,14 @@ class WorkstreamCatalogTests(unittest.TestCase):
         )
 
         self.assertTrue(r2_adam.capabilities.source_data_read_only)
+        self.assertEqual(
+            r2_adam.capabilities.owned_private_root,
+            (
+                "data/private/communication/workstreams/"
+                "project-r2-adam-janicka/documents"
+            ),
+        )
+        self.assertTrue(r2_adam.capabilities.status_fields()["owned_private_write"])
         self.assertFalse(r2_adam.capabilities.private_archive_direct)
         self.assertFalse(r2_adam.capabilities.private_archive_single_edit)
 
@@ -199,6 +207,34 @@ class WorkstreamCatalogTests(unittest.TestCase):
 
         with self.assertRaisesRegex(ValueError, "private archive root"):
             validate_workstream_catalog((invalid,))
+
+    def test_owned_private_root_requires_read_only_sources_and_safe_path(self) -> None:
+        for capabilities in (
+            CanonicalWorkstreamCapabilities(
+                owned_private_root="data/private/r2-documents",
+            ),
+            CanonicalWorkstreamCapabilities(
+                source_data_read_only=True,
+                owned_private_root="../private/r2-documents",
+            ),
+            CanonicalWorkstreamCapabilities(
+                source_data_read_only=True,
+                owned_private_root="data/private/../r2-documents",
+            ),
+        ):
+            with self.subTest(capabilities=capabilities):
+                record = CanonicalWorkstream(
+                    "project-invalid-owned-private",
+                    "Project",
+                    "Neplatný vlastněný prostor",
+                    "active",
+                    "2",
+                    ("Neplatný vlastněný prostor",),
+                    capabilities=capabilities,
+                )
+
+                with self.assertRaises(ValueError):
+                    validate_workstream_catalog((record,))
 
     def test_paused_vocabulary_projects_come_from_confirmed_capability_map(self) -> None:
         capability_map = (PROJECT_ROOT / "memory/technical/project_capability_map.md").read_text(

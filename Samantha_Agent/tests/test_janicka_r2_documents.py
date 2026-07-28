@@ -5,6 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from app.communication.janicka_r2_backend import JanickaR2Backend
 from app.communication.janicka_r2_documents import (
     MAX_R2_DOCUMENT_TEXT_BYTES,
     R2_DOCUMENTS_RELATIVE_ROOT,
@@ -219,6 +220,17 @@ class JanickaR2DocumentStoreTests(unittest.TestCase):
                 JanickaR2DocumentStore(canonical_private_root=missing)
             with self.assertRaises(JanickaR2DocumentError):
                 JanickaR2DocumentStore(canonical_private_root=linked_root)
+
+    def test_backend_binding_rejects_any_root_other_than_r2_documents(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            private_root = Path(temp_dir) / "canonical-private"
+            private_root.mkdir()
+
+            with self.assertRaisesRegex(ValueError, "mimo"):
+                JanickaR2Backend.bind(
+                    canonical_private_root=private_root,
+                    document_root=private_root / "documents",
+                )
 
 
 if __name__ == "__main__":
