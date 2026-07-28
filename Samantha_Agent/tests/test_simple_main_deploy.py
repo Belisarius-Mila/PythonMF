@@ -5,9 +5,11 @@ import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from app.communication.human_adam_workspace import HumanAdamWorkspaceManager
 from app.communication.simple_main_deploy import (
+    DEFAULT_DEPLOYMENT_SMOKE_TIMEOUT_SECONDS,
     DEPLOYED,
     PENDING_RESTART,
     SIMPLE_MAIN_DEPLOYMENT_CONFIRMATION,
@@ -20,6 +22,7 @@ from app.communication.simple_main_deploy import (
     prepare_simple_main_deployment,
     verify_simple_main_deployment,
 )
+from app.communication.simple_main_deploy import _default_smoke_runner
 from scripts.cockpit_smoke_check import DEFAULT_CHECKS, SmokeResult
 from tests.test_human_adam_takeover import prepare_with_origin
 from tests.test_human_adam_workspace import git
@@ -78,6 +81,19 @@ def request(head: str) -> SimpleMainDeploymentRequest:
 
 
 class SimpleMainDeploymentTests(unittest.TestCase):
+    def test_default_smoke_runner_allows_heavy_status_endpoint_to_finish(self) -> None:
+        with patch(
+            "app.communication.simple_main_deploy.run_smoke_check",
+            return_value=[],
+        ) as smoke:
+            self.assertEqual(_default_smoke_runner(), [])
+
+        smoke.assert_called_once_with(
+            "http://127.0.0.1:8770",
+            DEFAULT_DEPLOYMENT_SMOKE_TIMEOUT_SECONDS,
+        )
+        self.assertEqual(DEFAULT_DEPLOYMENT_SMOKE_TIMEOUT_SECONDS, 15.0)
+
     def test_confirmation_names_runtime_target_unambiguously(self) -> None:
         self.assertEqual(
             SIMPLE_MAIN_DEPLOYMENT_CONFIRMATION,

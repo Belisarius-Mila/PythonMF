@@ -35,6 +35,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_SIMPLE_MAIN_DEPLOYMENT_RECEIPT = (
     PROJECT_ROOT / "data" / "private" / "communication" / "simple_main_deployment.json"
 )
+DEFAULT_DEPLOYMENT_SMOKE_TIMEOUT_SECONDS = 15.0
 SIMPLE_MAIN_DEPLOYMENT_SCHEMA = 2
 LEGACY_SIMPLE_MAIN_DEPLOYMENT_SCHEMA = 1
 PENDING_RESTART = "pending_restart"
@@ -537,7 +538,10 @@ def prepare_simple_main_deployment(
 
 
 def _default_smoke_runner() -> Sequence[SmokeResult]:
-    return run_smoke_check("http://127.0.0.1:8770", 3.0)
+    return run_smoke_check(
+        "http://127.0.0.1:8770",
+        DEFAULT_DEPLOYMENT_SMOKE_TIMEOUT_SECONDS,
+    )
 
 
 def _verified_deployment_result(
