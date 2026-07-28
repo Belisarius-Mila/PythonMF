@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import stat
 import tempfile
 import unittest
@@ -15,6 +16,10 @@ from app.communication.janicka_r2_compiler import (
     R2_DOCUMENT_INSPECTION_PREFIX,
     JanickaR2CompilationError,
 )
+from app.communication.janicka_r2_document_selection import (
+    R2_DOCUMENT_SEARCH_CAPABILITY,
+    JanickaR2DocumentSelectionError,
+)
 from app.communication.janicka_r2_documents import (
     MAX_R2_DOCUMENT_TEXT_BYTES,
     R2_DOCUMENTS_RELATIVE_ROOT,
@@ -26,6 +31,7 @@ from app.communication.janicka_r2_documents import (
     normalize_r2_document_name,
     r2_document_trash_confirmation,
 )
+from app.documents.search_service import document_reference
 
 
 class JanickaR2DocumentStoreTests(unittest.TestCase):
@@ -318,6 +324,231 @@ class JanickaR2DocumentStoreTests(unittest.TestCase):
                 "Původní obsah.",
             )
 
+    def test_search_returns_redacted_human_choices_without_reading_or_writing(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            private_root = Path(temp_dir) / "canonical-private"
+            private_root.mkdir()
+            backend = JanickaR2Backend.bind(
+                canonical_private_root=private_root,
+                document_root=private_root / R2_DOCUMENTS_RELATIVE_ROOT,
+            )
+            inspected_ids: list[str] = []
+
+            def search_documents(_query: str, max_results: int) -> dict[str, object]:
+                self.assertEqual(max_results, 5)
+                return {
+                    "ok": True,
+                    "results": [
+                        {
+                            "source_type": "document",
+                            "document_id": "doc-katastr",
+                            "document_ref": document_reference("doc-katastr"),
+                            "title": "Katastrální dokument",
+                            "document_type": "výpis",
+                            "domain": "nemovitost",
+                            "reading_status_label": "OK",
+                            "snippet": (
+                                "Kontakt test@example.com a odkaz "
+                                "https://example.com/private."
+                            ),
+                            "stored_path": "soukroma/cesta/dokument.pdf",
+                        },
+                        {
+                            "source_type": "purchase",
+                            "document_id": "purchase-hidden",
+                            "document_ref": "purref-0123456789abcdef",
+                            "title": "Nákup",
+                        },
+                    ],
+                }
+
+            flow = backend.document_selection_flow(
+                document_search=search_documents,
+                document_inspector=lambda document_id: (
+                    inspected_ids.append(document_id)
+                    or R2_DOCUMENT_INSPECTION_PREFIX
+                ),
+            )
+            result = flow.search_documents("katastrální dokument")
+            serialized = str(result.as_dict())
+
+            self.assertEqual(result.count, 1)
+            self.assertEqual(
+                result.candidates[0].selection_ref,
+                document_reference("doc-katastr"),
+            )
+            self.assertIn("[e-mail redigovan]", serialized)
+            self.assertIn("[URL redigovano]", serialized)
+            self.assertNotIn("doc-katastr", serialized)
+            self.assertNotIn("soukroma/cesta", serialized)
+            self.assertEqual(inspected_ids, [])
+            self.assertEqual(backend.document_store().list_documents(), ())
+
+    def test_compile_requires_current_human_selection_before_one_inspection(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            private_root = Path(temp_dir) / "canonical-private"
+            private_root.mkdir()
+            backend = JanickaR2Backend.bind(
+                canonical_private_root=private_root,
+                document_root=private_root / R2_DOCUMENTS_RELATIVE_ROOT,
+            )
+            inspected_ids: list[str] = []
+            payload = {
+                "ok": True,
+                "results": [
+                    {
+                        "source_type": "document",
+                        "document_id": "doc-vybrany",
+                        "document_ref": document_reference("doc-vybrany"),
+                        "title": "Vybraný dokument",
+                        "document_type": "document",
+                        "domain": "home",
+                        "reading_status_label": "OK",
+                        "snippet": "Bezpečný náhled.",
+                    }
+                ],
+            }
+            flow = backend.document_selection_flow(
+                document_search=lambda _query, _limit: payload,
+                document_inspector=lambda document_id: (
+                    inspected_ids.append(document_id)
+                    or f"{R2_DOCUMENT_INSPECTION_PREFIX}\nBezpečný výtah."
+                ),
+            )
+            search_result = flow.search_documents("vybraný dokument")
+
+            with self.assertRaises(JanickaR2DocumentSelectionError):
+                flow.compile_selected_document(
+                    name="Odmítnutý výběr.txt",
+                    query="vybraný dokument",
+                    selection_ref="docref-0000000000000000",
+                )
+
+            self.assertEqual(inspected_ids, [])
+            self.assertEqual(backend.document_store().list_documents(), ())
+
+            result = flow.compile_selected_document(
+                name="Lidsky vybraný.txt",
+                query="vybraný dokument",
+                selection_ref=search_result.candidates[0].selection_ref,
+                now=datetime(2026, 7, 28, 15, 0, tzinfo=timezone.utc),
+            )
+
+            self.assertEqual(inspected_ids, ["doc-vybrany"])
+            self.assertEqual(result.document.name, "Lidsky vybraný.txt")
+            self.assertEqual(
+                backend.document_store().list_documents(),
+                (result.document,),
+            )
+
+    def test_compile_rejects_selection_that_disappeared_before_write(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            private_root = Path(temp_dir) / "canonical-private"
+            private_root.mkdir()
+            backend = JanickaR2Backend.bind(
+                canonical_private_root=private_root,
+                document_root=private_root / R2_DOCUMENTS_RELATIVE_ROOT,
+            )
+            inspected_ids: list[str] = []
+            responses: list[dict[str, object]] = [
+                {
+                    "ok": True,
+                    "results": [
+                        {
+                            "source_type": "document",
+                            "document_id": "doc-docasny",
+                            "document_ref": document_reference("doc-docasny"),
+                            "title": "Dočasný dokument",
+                            "document_type": "document",
+                            "domain": "home",
+                            "reading_status_label": "OK",
+                            "snippet": "Bezpečný náhled.",
+                        }
+                    ],
+                },
+                {"ok": True, "results": []},
+            ]
+            flow = backend.document_selection_flow(
+                document_search=lambda _query, _limit: responses.pop(0),
+                document_inspector=lambda document_id: (
+                    inspected_ids.append(document_id)
+                    or R2_DOCUMENT_INSPECTION_PREFIX
+                ),
+            )
+            search_result = flow.search_documents("dočasný dokument")
+
+            with self.assertRaises(JanickaR2DocumentSelectionError):
+                flow.compile_selected_document(
+                    name="Zmizelý.txt",
+                    query="dočasný dokument",
+                    selection_ref=search_result.candidates[0].selection_ref,
+                )
+
+            self.assertEqual(inspected_ids, [])
+            self.assertEqual(backend.document_store().list_documents(), ())
+
+    def test_default_selection_flow_binds_search_and_inspection_to_backend_vault(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            project_root = Path(temp_dir) / "canonical-project"
+            private_root = project_root / "data" / "private"
+            vault = private_root / "documents"
+            stored = vault / "vault" / "home" / "doc-bound" / "bound.txt"
+            stored.parent.mkdir(parents=True)
+            stored.write_text("Svazany synteticky dokument.", encoding="utf-8")
+            index = vault / "index"
+            index.mkdir()
+            metadata = {
+                "document_id": "doc-bound",
+                "title": "Svázaný dokument",
+                "original_filename": "bound.txt",
+                "stored_path": (
+                    "data/private/documents/vault/home/doc-bound/bound.txt"
+                ),
+                "domain": "home",
+                "document_type": "document",
+                "reading_status": "ok",
+            }
+            (index / "documents_index.jsonl").write_text(
+                json.dumps(metadata, ensure_ascii=False) + "\n",
+                encoding="utf-8",
+            )
+            (index / "text_index.jsonl").write_text(
+                json.dumps(
+                    {
+                        "document_id": "doc-bound",
+                        "text": "Svazany synteticky dokument.",
+                    },
+                    ensure_ascii=False,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            backend = JanickaR2Backend.bind(
+                canonical_private_root=private_root,
+                document_root=private_root / R2_DOCUMENTS_RELATIVE_ROOT,
+            )
+            flow = backend.document_selection_flow()
+
+            search_result = flow.search_documents("svazany synteticky")
+            result = flow.compile_selected_document(
+                name="Svázaný výstup.txt",
+                query="svazany synteticky",
+                selection_ref=search_result.candidates[0].selection_ref,
+            )
+
+            self.assertEqual(search_result.count, 1)
+            self.assertEqual(result.document.name, "Svázaný výstup.txt")
+            self.assertIn(
+                "Svazany synteticky dokument.",
+                backend.document_store().read_text("Svázaný výstup.txt"),
+            )
+
     def test_compiler_rejects_unsafe_id_and_unverified_source_output(self) -> None:
         invalid_cases = (
             ("../doc-test", R2_DOCUMENT_INSPECTION_PREFIX),
@@ -350,17 +581,24 @@ class JanickaR2DocumentStoreTests(unittest.TestCase):
                     self.assertEqual(backend.document_store().list_documents(), ())
 
     def test_first_compiler_source_is_registered_read_only_and_redacted(self) -> None:
-        capability = next(
+        inspect_capability = next(
             item
             for item in CAPABILITIES
             if item.capability_id == R2_DOCUMENT_INSPECTION_CAPABILITY
         )
+        search_capability = next(
+            item
+            for item in CAPABILITIES
+            if item.capability_id == R2_DOCUMENT_SEARCH_CAPABILITY
+        )
 
-        self.assertEqual(capability.risk, RiskLevel.READ_ONLY)
-        self.assertEqual(capability.writes, ())
-        self.assertFalse(capability.requires_confirmation)
-        self.assertEqual(capability.audit, AuditPolicy.REDACTED)
-        self.assertEqual(capability.tool, R2_DOCUMENT_INSPECTION_CAPABILITY)
+        for capability in (search_capability, inspect_capability):
+            with self.subTest(capability=capability.capability_id):
+                self.assertEqual(capability.risk, RiskLevel.READ_ONLY)
+                self.assertEqual(capability.writes, ())
+                self.assertFalse(capability.requires_confirmation)
+                self.assertEqual(capability.audit, AuditPolicy.REDACTED)
+                self.assertEqual(capability.tool, capability.capability_id)
 
 
 if __name__ == "__main__":

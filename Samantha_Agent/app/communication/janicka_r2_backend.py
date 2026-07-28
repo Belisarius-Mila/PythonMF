@@ -3,12 +3,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from functools import partial
 from pathlib import Path
 
 from app.communication.janicka_r2_compiler import (
     DocumentInspector,
     JanickaR2DocumentCompiler,
     inspect_registered_document,
+)
+from app.communication.janicka_r2_document_selection import (
+    DocumentSearchProvider,
+    JanickaR2DocumentSelectionFlow,
+    search_registered_documents,
 )
 from app.communication.janicka_r2_documents import (
     R2_DOCUMENTS_RELATIVE_ROOT,
@@ -55,13 +61,40 @@ class JanickaR2Backend:
     def document_compiler(
         self,
         *,
-        document_inspector: DocumentInspector = inspect_registered_document,
+        document_inspector: DocumentInspector | None = None,
     ) -> JanickaR2DocumentCompiler:
         """Return the R2 compiler bound to this backend's guarded store."""
 
         return JanickaR2DocumentCompiler(
             store=self.document_store(),
-            document_inspector=document_inspector,
+            document_inspector=(
+                document_inspector
+                or partial(
+                    inspect_registered_document,
+                    vault_dir=self.canonical_private_root / "documents",
+                )
+            ),
+        )
+
+    def document_selection_flow(
+        self,
+        *,
+        document_search: DocumentSearchProvider | None = None,
+        document_inspector: DocumentInspector | None = None,
+    ) -> JanickaR2DocumentSelectionFlow:
+        """Return the two-step read-only search and human-selection flow."""
+
+        return JanickaR2DocumentSelectionFlow(
+            compiler=self.document_compiler(
+                document_inspector=document_inspector,
+            ),
+            document_search=(
+                document_search
+                or partial(
+                    search_registered_documents,
+                    vault_dir=self.canonical_private_root / "documents",
+                )
+            ),
         )
 
     def developer_instructions(self) -> str:
@@ -77,7 +110,11 @@ class JanickaR2Backend:
             "nevypisuj soukromy fulltext do logu a nepouzivej sit. Kompilace z "
             "dokumentoveho vaultu smi pouzit jen jeden explicitni document_id pres "
             "registrovanou read-only schopnost inspect_document_text a "
-            "JanickaR2DocumentCompiler; vystup je vzdy novy TXT bez prepisu."
+            "JanickaR2DocumentCompiler; vystup je vzdy novy TXT bez prepisu. Pred "
+            "kompilaci pouzij registrovanou read-only schopnost "
+            "search_private_documents pres JanickaR2DocumentSelectionFlow, ukaz jen "
+            "redigovane volby a pockej na lidsky vybranou selection_ref; ani jedinou "
+            "shodu nevybirej automaticky."
         )
 
     def development_control_lines(self) -> tuple[str, ...]:
@@ -94,4 +131,8 @@ class JanickaR2Backend:
             "rule=Compilation may use one explicit document_id through the registered "
             "read-only inspect_document_text capability and JanickaR2DocumentCompiler. "
             "The source remains unchanged and the TXT output is create-only.",
+            "rule=Before compilation, use the registered read-only "
+            "search_private_documents capability through JanickaR2DocumentSelectionFlow. "
+            "Show only redacted candidates and require one human-selected selection_ref; "
+            "never auto-select even a single match.",
         )

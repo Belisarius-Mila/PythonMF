@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Callable
 
 from app.communication.janicka_r2_documents import (
@@ -45,12 +46,21 @@ class JanickaR2CompilationResult:
         }
 
 
-def inspect_registered_document(document_id: str) -> str:
+def inspect_registered_document(
+    document_id: str,
+    *,
+    vault_dir: Path | None = None,
+) -> str:
     """Call the existing registered tool implementation lazily at runtime."""
 
     from app.documents.tools import inspect_document_text_text
 
-    return inspect_document_text_text(document_id=document_id)
+    if vault_dir is None:
+        return inspect_document_text_text(document_id=document_id)
+    return inspect_document_text_text(
+        document_id=document_id,
+        vault_dir=vault_dir,
+    )
 
 
 class JanickaR2DocumentCompiler:

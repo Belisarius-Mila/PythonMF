@@ -92,6 +92,10 @@ async def second():
             COMPILE_PATHS,
         )
         self.assertIn(
+            "app/communication/janicka_r2_document_selection.py",
+            COMPILE_PATHS,
+        )
+        self.assertIn(
             "app/communication/janicka_r2_documents.py",
             COMPILE_PATHS,
         )
