@@ -1,4 +1,4 @@
-"""Read-only preview of a future family-calendar automation activation."""
+"""Read-only preview of family-calendar automation activation."""
 
 from __future__ import annotations
 
@@ -49,7 +49,7 @@ _UNCHANGED_CONFIG_FIELDS = (
 
 @dataclass(frozen=True, repr=False)
 class FamilyCalendarAutomationPreview:
-    """A redacted plan that has no apply or delivery path."""
+    """A redacted plan that does not itself mutate state or deliver email."""
 
     status: str
     issues: tuple[str, ...]
@@ -219,8 +219,8 @@ class FamilyCalendarAutomationPreview:
             "confirmation_required": True,
             "required_confirmation": FAMILY_CALENDAR_AUTOMATION_CONFIRMATION,
             "target_mode_supported_by_runtime": target_mode_supported,
-            "activation_implementation_available": False,
-            "apply_available": False,
+            "activation_implementation_available": True,
+            "apply_available": True,
             "automatic_sending_enabled": False,
             "current_load_state_probed": True,
             "writes_performed": False,

@@ -69,8 +69,8 @@ class FamilyCalendarAutomationPreviewTests(unittest.TestCase):
             {check["name"] for check in document["prerequisite_checks"]},
         )
         self.assertTrue(document["target_mode_supported_by_runtime"])
-        self.assertFalse(document["activation_implementation_available"])
-        self.assertFalse(document["apply_available"])
+        self.assertTrue(document["activation_implementation_available"])
+        self.assertTrue(document["apply_available"])
         self.assertFalse(document["automatic_sending_enabled"])
         self.assertEqual(
             document["required_confirmation"],
@@ -246,7 +246,7 @@ class FamilyCalendarAutomationPreviewTests(unittest.TestCase):
 
         self.assertEqual(exit_code, 0)
         self.assertEqual(document["status"], "preview")
-        self.assertFalse(document["apply_available"])
+        self.assertTrue(document["apply_available"])
         self.assertFalse(document["writes_performed"])
         self.assertFalse(document["transport_called"])
         self.assertNotIn(PRIVATE_ADDRESS, output.getvalue())

@@ -1,3 +1,37 @@
+<!-- SAMANTHA_CURRENT_STATUS_START -->
+## Aktuální stav
+
+- Obnoveno potvrzeným checkpointem: 2026-07-28 21:52 CEST
+
+### Hotovo
+- Aktivační brána bezpečně a potvrzovaně přepíná automatizaci z dry-run do enabled s ověřeným rollbackem
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+
+### Otevřeno
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
+
+### Rizika
+- Žádné další doložené provozní riziko.
+
+### Další krok
+- Zkontrolovat změny a vytvořit checkpoint v Cockpitu
+
+### Rozhodnutí
+- V tomto kroku nebylo přijato nové kanonické rozhodnutí.
+
+### Navrhované další kroky
+- Po checkpointu spustit pouze redigovaný aktivační preview; samotné apply potvrdit samostatně
+
+### Technický stav checkpointu
+- Změna je otestovaná (1217 testů).
+- Git před checkpointem: lokální `main` na `b87f89dd0bdc`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `b87f89dd0bdc` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-07-28T19:09:50+00:00.
+- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
+- Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
+<!-- SAMANTHA_CURRENT_STATUS_END -->
+
 # Handoff pracovního proudu: Rodinný kalendář
 
 Nazev: Rodinný kalendář
@@ -527,3 +561,15 @@ Bezpecnost / neukladat:
 - Commit: `Doplnit ostrý režim rodinného kalendáře`
 - Další krok: samostatně implementovat potvrzovanou aktivační apply bránu.
   Režim zatím neměnit a nic automaticky neodesílat.
+
+### Automatický checkpoint 2026-07-28 21:52 CEST
+
+- Pracovní proud: `project-family-calendar`
+- Hotovo: Aktivační brána bezpečně a potvrzovaně přepíná automatizaci z dry-run do enabled s ověřeným rollbackem; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.; Lokální commity čekají na samostatný denní GitHub balíček.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: plná Cockpit brána: 1217 testů, 290.5 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (7): `Samantha_Agent/app/family_calendar_delivery_automation_preview.py`, `Samantha_Agent/scripts/cockpit_quality_gate.py`, `Samantha_Agent/tests/test_cockpit_quality_gate.py`, `Samantha_Agent/tests/test_family_calendar_delivery_automation_preview.py`, `Samantha_Agent/app/family_calendar_delivery_automation_activation.py`, `Samantha_Agent/scripts/family_calendar_delivery_automation_activate.py`, `Samantha_Agent/tests/test_family_calendar_delivery_automation_activation.py`
+- Commit: `Implement confirmed family calendar activation gate`
+- Další krok: Zkontrolovat změny a vytvořit checkpoint v Cockpitu

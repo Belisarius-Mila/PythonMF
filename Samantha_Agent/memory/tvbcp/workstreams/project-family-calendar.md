@@ -1,3 +1,37 @@
+<!-- SAMANTHA_CURRENT_STATUS_START -->
+## Aktuální stav
+
+- Obnoveno potvrzeným checkpointem: 2026-07-28 21:52 CEST
+
+### Hotovo
+- Aktivační brána bezpečně a potvrzovaně přepíná automatizaci z dry-run do enabled s ověřeným rollbackem
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+
+### Otevřeno
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
+
+### Rizika
+- Žádné další doložené provozní riziko.
+
+### Další krok
+- Zkontrolovat změny a vytvořit checkpoint v Cockpitu
+
+### Rozhodnutí
+- V tomto kroku nebylo přijato nové kanonické rozhodnutí.
+
+### Navrhované další kroky
+- Po checkpointu spustit pouze redigovaný aktivační preview; samotné apply potvrdit samostatně
+
+### Technický stav checkpointu
+- Změna je otestovaná (1217 testů).
+- Git před checkpointem: lokální `main` na `b87f89dd0bdc`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `b87f89dd0bdc` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-07-28T19:09:50+00:00.
+- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
+- Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
+<!-- SAMANTHA_CURRENT_STATUS_END -->
+
 # TVBCP: Rodinný kalendář
 
 Pracovni proud: `project-family-calendar`
@@ -588,3 +622,30 @@ Technický důkaz: prošlo 218 kalendářových testů a úplná Cockpit Quality
 s 1252 testy. Živý kontrolní běh zůstal `dry_run`, našel nula kandidátů,
 nevolal koordinátor ani transport a nezměnil konfiguraci nebo stavové
 úložiště. Skutečné Keychain tajemství ani síť nebyly při tomto kroku použity.
+
+### 2026-07-28 21:52 CEST – Aktivační brána bezpečně a potvrzovaně přepíná automatizaci z dry-run do enabled s ověřeným rollbackem
+
+Hotovo:
+- Aktivační brána bezpečně a potvrzovaně přepíná automatizaci z dry-run do enabled s ověřeným rollbackem
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+
+Otevřeno:
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
+
+Rizika:
+- Žádné další doložené provozní riziko.
+
+Rozhodnutí:
+- V tomto kroku nebylo přijato nové kanonické rozhodnutí.
+
+Další krok:
+- Zkontrolovat změny a vytvořit checkpoint v Cockpitu
+
+Navrhované další kroky:
+- Po checkpointu spustit pouze redigovaný aktivační preview; samotné apply potvrdit samostatně
+
+Technický důkaz:
+- plná Cockpit brána: 1217 testů, 290.5 s, výsledek OK.
+- Pracovní proud: `project-family-calendar`.
+- Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
