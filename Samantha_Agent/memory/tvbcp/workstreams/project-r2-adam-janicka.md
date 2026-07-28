@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-28 14:07 CEST
+- Obnoveno potvrzeným checkpointem: 2026-07-28 14:35 CEST
 
 ### Hotovo
-- R2-Adam umí vytvořit nový TXT z redigovaného výtahu jednoho přesně vybraného dokumentu, aniž by změnil zdroj nebo přepsal existující výstup.
+- R2-Adam nyní bezpečně nalezne indexovaný dokument i při odděleném kořeni kódu a soukromého vaultu.
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
@@ -15,19 +15,18 @@
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Vytvořit checkpoint, nasadit změnu a živě zkompilovat nový TXT z jednoho konkrétně vybraného dokumentu.
+- Vytvořit checkpoint, nasadit změnu a zopakovat živou kompilaci vybraného dokumentu.
 
 ### Rozhodnutí
-- První kompilovaný zdroj R2-Adama je registrovaná read-only schopnost inspect_document_text nad jedním explicitním document_id; výstup je vždy create-only TXT.
+- V tomto kroku nebylo přijato nové kanonické rozhodnutí.
 
 ### Navrhované další kroky
-- Po živém ověření přidat bezpečné hledání dokumentu a lidský výběr document_id před kompilací.
-- Později doplnit vlastní kompaktní soukromý kontext R2-Adama.
+- Po živém ověření doplnit bezpečné hledání dokumentu a lidský výběr document_id.
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `621552cf20f1`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `621552cf20f1` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-07-28T11:48:02+00:00.
+- Git před checkpointem: lokální `main` na `65f09c317b76`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `65f09c317b76` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-07-28T12:09:38+00:00.
 - Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -182,5 +181,32 @@ Navrhované další kroky:
 
 Technický důkaz:
 - rychlá Cockpit brána syntaxe a whitespace: 4.0 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
+- Pracovní proud: `project-r2-adam-janicka`.
+- Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+
+### 2026-07-28 14:35 CEST – R2-Adam nyní bezpečně nalezne indexovaný dokument i při odděleném kořeni kódu a soukromého vaultu.
+
+Hotovo:
+- R2-Adam nyní bezpečně nalezne indexovaný dokument i při odděleném kořeni kódu a soukromého vaultu.
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+
+Otevřeno:
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
+
+Rizika:
+- Žádné další doložené provozní riziko.
+
+Rozhodnutí:
+- V tomto kroku nebylo přijato nové kanonické rozhodnutí.
+
+Další krok:
+- Vytvořit checkpoint, nasadit změnu a zopakovat živou kompilaci vybraného dokumentu.
+
+Navrhované další kroky:
+- Po živém ověření doplnit bezpečné hledání dokumentu a lidský výběr document_id.
+
+Technický důkaz:
+- rychlá Cockpit brána syntaxe a whitespace: 4.1 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `project-r2-adam-janicka`.
 - Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.

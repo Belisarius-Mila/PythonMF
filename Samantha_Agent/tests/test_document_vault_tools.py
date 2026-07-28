@@ -2030,6 +2030,68 @@ print(json.dumps(result, ensure_ascii=False))
             self.assertIn("valid_until", result)
             self.assertIn("2026-07-31", result)
 
+    def test_inspect_document_by_id_uses_explicit_vault_for_project_relative_path(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            vault = root / "canonical-project" / "data" / "private" / "documents"
+            stored = vault / "vault" / "warranty" / "doc-portable" / "portable.txt"
+            stored.parent.mkdir(parents=True)
+            stored.write_text("Prenositelny synteticky vytah.", encoding="utf-8")
+            index = vault / "index" / "documents_index.jsonl"
+            index.parent.mkdir()
+            index.write_text(
+                json.dumps(
+                    {
+                        "document_id": "doc-portable",
+                        "stored_path": (
+                            "data/private/documents/vault/warranty/"
+                            "doc-portable/portable.txt"
+                        ),
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            result = inspect_document_text_text(
+                document_id="doc-portable",
+                vault_dir=vault,
+            )
+
+            self.assertIn("Inspekce dokumentu (read-only):", result)
+            self.assertIn("Prenositelny synteticky vytah.", result)
+
+    def test_inspect_document_by_id_rejects_index_path_outside_explicit_vault(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            vault = root / "documents"
+            outside = root / "outside.txt"
+            outside.write_text("Text mimo povoleny vault.", encoding="utf-8")
+            index = vault / "index" / "documents_index.jsonl"
+            index.parent.mkdir(parents=True)
+            index.write_text(
+                json.dumps(
+                    {
+                        "document_id": "doc-outside",
+                        "stored_path": str(outside),
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            result = inspect_document_text_text(
+                document_id="doc-outside",
+                vault_dir=vault,
+            )
+
+            self.assertIn("soubor nebyl nalezen", result)
+            self.assertNotIn("Text mimo povoleny vault.", result)
+
     def test_save_document_due_reminder_requires_second_confirmation(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             reminders_path = Path(temp_dir) / "reminders.json"

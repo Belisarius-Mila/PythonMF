@@ -1949,11 +1949,46 @@ def resolve_document_source(source_path: str, document_id: str, vault_dir: Path)
         return "Chybi source_path nebo document_id."
     for item in read_jsonl(vault_dir / "index" / "documents_index.jsonl"):
         if item.get("document_id") == document_id:
-            path = PROJECT_ROOT / str(item.get("stored_path", ""))
-            if path.exists():
+            path = resolve_indexed_document_path(
+                stored_path=str(item.get("stored_path", "")),
+                vault_dir=vault_dir,
+            )
+            if path is not None:
                 return path
             return f"Dokument {document_id} je v indexu, ale soubor nebyl nalezen."
     return f"Document ID {document_id} nebyl nalezen v private indexu."
+
+
+def resolve_indexed_document_path(stored_path: str, vault_dir: Path) -> Path | None:
+    raw_path = Path(stored_path)
+    if not stored_path.strip():
+        return None
+    try:
+        vault_root = vault_dir.resolve(strict=True)
+    except (OSError, RuntimeError):
+        return None
+
+    candidates: list[Path] = []
+    if raw_path.is_absolute():
+        candidates.append(raw_path)
+    else:
+        documents_relative_root = DEFAULT_DOCUMENTS_DIR.relative_to(PROJECT_ROOT)
+        try:
+            vault_relative_path = raw_path.relative_to(documents_relative_root)
+        except ValueError:
+            pass
+        else:
+            candidates.append(vault_root / vault_relative_path)
+        candidates.append(PROJECT_ROOT / raw_path)
+
+    for candidate in candidates:
+        try:
+            resolved = candidate.resolve(strict=True)
+        except (OSError, RuntimeError):
+            continue
+        if resolved.is_file() and (resolved == vault_root or vault_root in resolved.parents):
+            return resolved
+    return None
 
 
 def move_document_inbox_item(
