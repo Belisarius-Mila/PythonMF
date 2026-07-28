@@ -16,6 +16,7 @@ from scripts.cockpit_quality_gate import (
     cockpit_javascript_source,
     janicka_r2_javascript_source,
     node_binary,
+    r2_adam_chat_javascript_source,
     source_metrics,
     run_checked,
 )
@@ -27,6 +28,12 @@ class CockpitQualityGateTests(unittest.TestCase):
 
         self.assertIn("async function searchDocuments()", source)
         self.assertIn("async function createDocument()", source)
+
+    def test_r2_adam_chat_javascript_is_included_in_syntax_gate(self) -> None:
+        source = r2_adam_chat_javascript_source()
+
+        self.assertIn("async function ensureConnected()", source)
+        self.assertIn("async function sendMessage(event)", source)
 
     def test_workflow_triggers_cover_communication_layer_and_match(self) -> None:
         workflow_path = PROJECT_ROOT.parent / ".github" / "workflows" / "cockpit-quality-gate.yml"
@@ -99,6 +106,10 @@ async def second():
             COMPILE_PATHS,
         )
         self.assertIn(
+            "app/communication/janicka_r2_chat.py",
+            COMPILE_PATHS,
+        )
+        self.assertIn(
             "app/communication/janicka_r2_compiler.py",
             COMPILE_PATHS,
         )
@@ -115,6 +126,7 @@ async def second():
             COMPILE_PATHS,
         )
         self.assertIn("tests.test_janicka_r2_cockpit", TEST_MODULES)
+        self.assertIn("tests.test_janicka_r2_chat", TEST_MODULES)
         self.assertIn("app/command_cheatsheet.py", COMPILE_PATHS)
         self.assertIn("app/development_branch_lifecycle.py", COMPILE_PATHS)
         self.assertIn("scripts/development_branch_audit.py", COMPILE_PATHS)

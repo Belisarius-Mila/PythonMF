@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-28 15:14 CEST
+- Obnoveno potvrzeným checkpointem: 2026-07-28 17:16 CEST
 
 ### Hotovo
-- Janička má samostatnou stránku pro bezpečné hledání, ruční výběr a vytvoření nového TXT bez terminálu.
+- Janička má samostatný čistý chat R2-Adam s vlastním trvalým vláknem a bez vývojových ovladačů.
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
@@ -15,18 +15,19 @@
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Vytvořit checkpoint, nasadit změnu a ručně projít hledání, výběr a vytvoření jednoho nového TXT.
+- Vytvořit checkpoint, nasadit změnu a živě odeslat první neškodnou zprávu v novém chatu R2-Adam.
 
 ### Rozhodnutí
-- R2 dokumentové UI je samostatná stránka; Cockpit obsahuje pouze minimální tlačítko a routování.
+- R2-Adam používá jednoduché chatové UI odvozené od Human-Adam, ale nemá TVBCP, pracovní proudy, Git ani vývojové funkce.
 
 ### Navrhované další kroky
-- Po živém UI ověření pokračovat vlastním kompaktním soukromým kontextem R2-Adama.
+- Doplnit přirozený chatový tok pro vyhledání více zdrojů, vytvoření dokumentu a jeho náhled.
+- Poté přidat samostatně potvrzovaný tisk a e-mail.
 
 ### Technický stav checkpointu
-- Změna je otestovaná (1182 testů).
-- Git před checkpointem: lokální `main` na `4df9fbd12f13`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `4df9fbd12f13` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-07-28T12:51:19+00:00.
+- Změna je otestovaná (1188 testů).
+- Git před checkpointem: lokální `main` na `b974d24bb86e`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `b974d24bb86e` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-07-28T13:21:22+00:00.
 - Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -157,3 +158,15 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (5): `Samantha_Agent/app/cockpit.py`, `Samantha_Agent/scripts/cockpit_quality_gate.py`, `Samantha_Agent/tests/test_cockpit_quality_gate.py`, `Samantha_Agent/app/communication/janicka_r2_cockpit.py`, `Samantha_Agent/tests/test_janicka_r2_cockpit.py`
 - Commit: `Add thin Janička R2 document UI`
 - Další krok: Vytvořit checkpoint, nasadit změnu a ručně projít hledání, výběr a vytvoření jednoho nového TXT.
+
+### Automatický checkpoint 2026-07-28 17:16 CEST
+
+- Pracovní proud: `project-r2-adam-janicka`
+- Hotovo: Janička má samostatný čistý chat R2-Adam s vlastním trvalým vláknem a bez vývojových ovladačů.; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.; Lokální commity čekají na samostatný denní GitHub balíček.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: plná Cockpit brána: 1188 testů, 319.3 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (6): `Samantha_Agent/app/cockpit.py`, `Samantha_Agent/scripts/cockpit_quality_gate.py`, `Samantha_Agent/tests/test_cockpit_quality_gate.py`, `Samantha_Agent/tests/test_janicka_r2_cockpit.py`, `Samantha_Agent/app/communication/janicka_r2_chat.py`, `Samantha_Agent/tests/test_janicka_r2_chat.py`
+- Commit: `Add standalone R2-Adam chat`
+- Další krok: Vytvořit checkpoint, nasadit změnu a živě odeslat první neškodnou zprávu v novém chatu R2-Adam.

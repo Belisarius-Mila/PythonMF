@@ -90,6 +90,13 @@ from app.communication.simple_main_deploy import (
     load_simple_main_deployment_receipt,
 )
 from app.communication.human_adam_ui import HUMAN_ADAM_HTML
+from app.communication.janicka_r2_chat import (
+    R2_ADAM_CHAT_HTML,
+    JanickaR2ChatAdapter,
+    janicka_r2_chat_connect_action,
+    janicka_r2_chat_send_action,
+    janicka_r2_chat_status_action,
+)
 from app.communication.janicka_r2_cockpit import (
     JANICKA_R2_DOCUMENTS_HTML,
     JanickaR2CockpitAdapter,
@@ -283,6 +290,11 @@ JANICKA_R2_COCKPIT = JanickaR2CockpitAdapter.bind(
     canonical_private_root=HUMAN_ADAM.profiles[
         HUMAN_ADAM.default_profile_id
     ]["service"].workspace.canonical_private_root,
+)
+JANICKA_R2_CHAT = JanickaR2ChatAdapter.bind(
+    base_service=HUMAN_ADAM.profiles[
+        HUMAN_ADAM.default_profile_id
+    ]["service"],
 )
 MEMORY_INDEX_PATH = PROJECT_ROOT / "memory" / "MEMORY_INDEX.md"
 RECOVERY_HANDOFF_PATHS = (
@@ -8544,6 +8556,22 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "ui_presence",
     },
     {
+        "path": "/api/r2-adam/connect",
+        "label": "Pripojit samostatnou relaci R2-Adam",
+        "risk": "local_service",
+        "confirmation": "automatic_on_explicit_r2_page_open",
+        "handler_name": "janicka_r2_chat_connect_action",
+        "test_level": "direct",
+    },
+    {
+        "path": "/api/r2-adam/send",
+        "label": "Odeslat zpravu do uzce ohraniceneho chatu R2-Adam",
+        "risk": "private_write",
+        "confirmation": "explicit_chat_message_owned_txt_only",
+        "handler_name": "janicka_r2_chat_send_action",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/janicka-r2/documents/search",
         "label": "Vyhledat redigovane volby dokumentu pro Janicku R2",
         "risk": "read_only_via_post",
@@ -9180,6 +9208,9 @@ class CockpitServer:
                 if parsed.path == "/human-adam/":
                     self.respond_html(HUMAN_ADAM_HTML)
                     return
+                if parsed.path == "/r2-adam/":
+                    self.respond_html(R2_ADAM_CHAT_HTML)
+                    return
                 if parsed.path == "/email-processing/":
                     self.respond_html(EMAIL_PROCESSING_HTML)
                     return
@@ -9220,6 +9251,11 @@ class CockpitServer:
                     return
                 if parsed.path == "/api/live-status":
                     self.respond_json(cockpit_live_status())
+                    return
+                if parsed.path == "/api/r2-adam/status":
+                    self.respond_json(
+                        janicka_r2_chat_status_action(adapter=JANICKA_R2_CHAT)
+                    )
                     return
                 if parsed.path == "/api/human-adam/status":
                     self.respond_json(human_adam_status_action(service=HUMAN_ADAM))
@@ -9441,6 +9477,21 @@ class CockpitServer:
                 if parsed.path == "/api/speech/edge-tts":
                     payload = self.read_json()
                     self.respond_json(cockpit_edge_tts_action(text=str(payload.get("text", ""))))
+                    return
+                if parsed.path == "/api/r2-adam/connect":
+                    self.read_json()
+                    self.respond_json(
+                        janicka_r2_chat_connect_action(adapter=JANICKA_R2_CHAT)
+                    )
+                    return
+                if parsed.path == "/api/r2-adam/send":
+                    payload = self.read_json()
+                    self.respond_json(
+                        janicka_r2_chat_send_action(
+                            payload,
+                            adapter=JANICKA_R2_CHAT,
+                        )
+                    )
                     return
                 if parsed.path == "/api/janicka-r2/documents/search":
                     payload = self.read_json()
@@ -12466,10 +12517,10 @@ COCKPIT_HTML = """<!doctype html>
           </div>
           <div class="janicka-action">
             <div>
-              <div class="janicka-action-title">Vytvořit TXT z dokumentu</div>
-              <div class="janicka-action-text">Najít zdroj, ručně ho vybrat a vytvořit nový textový dokument R2-Adama.</div>
+              <div class="janicka-action-title">R2-Adam</div>
+              <div class="janicka-action-text">Zeptat se, vyhledat podklady a připravit nový dokument přímo v samostatném chatu.</div>
             </div>
-            <button id="janickaR2DocumentsBtn" type="button">Otevřít</button>
+            <button id="janickaR2ChatBtn" type="button">Otevřít chat</button>
           </div>
           <div class="janicka-action">
             <div>
@@ -13060,7 +13111,7 @@ COCKPIT_HTML = """<!doctype html>
     const janickaModal = document.getElementById("janickaModal");
     const janickaCloseBtn = document.getElementById("janickaCloseBtn");
     const janickaFindDocumentBtn = document.getElementById("janickaFindDocumentBtn");
-    const janickaR2DocumentsBtn = document.getElementById("janickaR2DocumentsBtn");
+    const janickaR2ChatBtn = document.getElementById("janickaR2ChatBtn");
     const janickaPrintDocumentBtn = document.getElementById("janickaPrintDocumentBtn");
     const janickaEmailBtn = document.getElementById("janickaEmailBtn");
     const janickaLekarnaBtn = document.getElementById("janickaLekarnaBtn");
@@ -13421,7 +13472,7 @@ COCKPIT_HTML = """<!doctype html>
         "janickaBtn",
         "janickaCloseBtn",
         "janickaFindDocumentBtn",
-        "janickaR2DocumentsBtn",
+        "janickaR2ChatBtn",
         "janickaPrintDocumentBtn",
         "janickaEmailBtn",
         "janickaLekarnaBtn",
@@ -18830,16 +18881,16 @@ COCKPIT_HTML = """<!doctype html>
     janickaBtn.addEventListener("click", openJanickaModal);
     janickaCloseBtn.addEventListener("click", closeJanickaModal);
     janickaFindDocumentBtn.addEventListener("click", () => focusDocumentSearchForJanicka("Zadej, co chceš najít. Po otevření detailu lze dokument přečíst, otevřít nebo vytisknout."));
-    janickaR2DocumentsBtn.addEventListener("click", () => {
+    janickaR2ChatBtn.addEventListener("click", () => {
       const r2Window = window.open(
-        "/janicka-r2-documents/",
-        "SamanthaJanickaR2Documents",
+        "/r2-adam/",
+        "SamanthaR2Adam",
         "popup=yes,width=980,height=900,left=150,top=60"
       );
       if (r2Window) {
         r2Window.focus();
       } else {
-        window.location.href = "/janicka-r2-documents/";
+        window.location.href = "/r2-adam/";
       }
     });
     janickaPrintDocumentBtn.addEventListener("click", () => focusDocumentSearchForJanicka("Najdi dokument k tisku a v jeho detailu použij tlačítko Tisknout."));

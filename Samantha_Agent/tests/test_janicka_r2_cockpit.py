@@ -162,9 +162,8 @@ class JanickaR2CockpitTests(unittest.TestCase):
         self.assertNotIn("stored_path", JANICKA_R2_DOCUMENTS_HTML)
         self.assertNotIn("/api/email", JANICKA_R2_DOCUMENTS_HTML)
 
-    def test_cockpit_exposes_button_page_and_narrow_post_registry_cards(self) -> None:
-        self.assertIn('id="janickaR2DocumentsBtn"', cockpit_module.COCKPIT_HTML)
-        self.assertIn("/janicka-r2-documents/", cockpit_module.COCKPIT_HTML)
+    def test_cockpit_keeps_legacy_page_and_narrow_post_registry_cards(self) -> None:
+        self.assertNotIn('id="janickaR2DocumentsBtn"', cockpit_module.COCKPIT_HTML)
         source = Path(cockpit_module.__file__).read_text(encoding="utf-8")
         self.assertIn(
             'if parsed.path == "/janicka-r2-documents/":',
