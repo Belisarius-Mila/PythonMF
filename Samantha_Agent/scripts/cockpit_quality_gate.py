@@ -48,6 +48,7 @@ COMPILE_PATHS = (
     "app/communication/human_adam_workstream_selection.py",
     "app/communication/human_adam_workstream_threads.py",
     "app/communication/janicka_r2_backend.py",
+    "app/communication/janicka_r2_cockpit.py",
     "app/communication/janicka_r2_compiler.py",
     "app/communication/janicka_r2_document_selection.py",
     "app/communication/janicka_r2_documents.py",
@@ -155,6 +156,7 @@ TEST_MODULES = (
     "tests.test_human_adam_workstream_memory",
     "tests.test_human_adam_workstream_selection",
     "tests.test_human_adam_workstream_threads",
+    "tests.test_janicka_r2_cockpit",
     "tests.test_janicka_r2_documents",
     "tests.test_legacy_tvbcp_migration",
     "tests.test_human_adam_turn_completion",
@@ -344,6 +346,24 @@ def human_adam_javascript_source() -> str:
     return "\n".join(scripts)
 
 
+def janicka_r2_javascript_source() -> str:
+    project_root = str(PROJECT_ROOT)
+    if project_root not in sys.path:
+        sys.path.insert(0, project_root)
+    from app.communication.janicka_r2_cockpit import JANICKA_R2_DOCUMENTS_HTML
+
+    scripts = re.findall(
+        r"<script(?:\s[^>]*)?>(.*?)</script>",
+        JANICKA_R2_DOCUMENTS_HTML,
+        flags=re.DOTALL,
+    )
+    if not scripts:
+        raise SystemExit(
+            "Janička R2 javascript syntax failed: stránka neobsahuje script blok"
+        )
+    return "\n".join(scripts)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run the canonical Samantha Cockpit quality gate.")
     parser.add_argument(
@@ -381,6 +401,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         "Human–Adam javascript syntax",
         [node_binary(), "--check", "-"],
         input_text=human_adam_javascript_source(),
+    )
+    run_checked(
+        "Janička R2 javascript syntax",
+        [node_binary(), "--check", "-"],
+        input_text=janicka_r2_javascript_source(),
     )
     run_checked("shell syntax", ["/bin/zsh", "-n", *SHELL_PATHS])
     if not args.skip_unit_tests:

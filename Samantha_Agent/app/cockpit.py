@@ -90,6 +90,12 @@ from app.communication.simple_main_deploy import (
     load_simple_main_deployment_receipt,
 )
 from app.communication.human_adam_ui import HUMAN_ADAM_HTML
+from app.communication.janicka_r2_cockpit import (
+    JANICKA_R2_DOCUMENTS_HTML,
+    JanickaR2CockpitAdapter,
+    janicka_r2_document_compile_action,
+    janicka_r2_document_search_action,
+)
 from app.backup.activity_state import backup_activity_status
 from app.family_calendar import (
     DEFAULT_FAMILY_CALENDAR_PREFILL,
@@ -273,6 +279,11 @@ GIT_ROOT = PROJECT_ROOT.parent
 ACTIVE_PROJECTS_PATH = PROJECT_ROOT / "memory" / "ACTIVE_PROJECTS.md"
 PROJECT_CAPABILITY_MAP_PATH = PROJECT_ROOT / "memory" / "technical" / "project_capability_map.md"
 JANICKA_COOKBOOK_PATH = PROJECT_ROOT / "memory" / "projects" / "janicka_cockpit_kucharka.md"
+JANICKA_R2_COCKPIT = JanickaR2CockpitAdapter.bind(
+    canonical_private_root=HUMAN_ADAM.profiles[
+        HUMAN_ADAM.default_profile_id
+    ]["service"].workspace.canonical_private_root,
+)
 MEMORY_INDEX_PATH = PROJECT_ROOT / "memory" / "MEMORY_INDEX.md"
 RECOVERY_HANDOFF_PATHS = (
     PROJECT_ROOT / "memory" / "handoffs" / "cockpit_recovery_center_priority_2026_06_03.md",
@@ -8533,6 +8544,22 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "ui_presence",
     },
     {
+        "path": "/api/janicka-r2/documents/search",
+        "label": "Vyhledat redigovane volby dokumentu pro Janicku R2",
+        "risk": "read_only_via_post",
+        "confirmation": "none_readonly",
+        "handler_name": "janicka_r2_document_search_action",
+        "test_level": "direct",
+    },
+    {
+        "path": "/api/janicka-r2/documents/compile",
+        "label": "Vytvorit novy TXT z lidsky vybraneho dokumentu",
+        "risk": "private_write",
+        "confirmation": "explicit_ui_selection_create_only",
+        "handler_name": "janicka_r2_document_compile_action",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/human-adam/transcribe",
         "label": "Prepsat hlas do editovatelneho Human-Adam konceptu",
         "risk": "external_ai",
@@ -9162,6 +9189,9 @@ class CockpitServer:
                 if parsed.path == "/janicka-kucharka/":
                     self.respond_html(janicka_cookbook_page_html())
                     return
+                if parsed.path == "/janicka-r2-documents/":
+                    self.respond_html(JANICKA_R2_DOCUMENTS_HTML)
+                    return
                 if parsed.path == "/lekarna-admin/":
                     self.respond_html(lekarna_admin_page_html())
                     return
@@ -9411,6 +9441,24 @@ class CockpitServer:
                 if parsed.path == "/api/speech/edge-tts":
                     payload = self.read_json()
                     self.respond_json(cockpit_edge_tts_action(text=str(payload.get("text", ""))))
+                    return
+                if parsed.path == "/api/janicka-r2/documents/search":
+                    payload = self.read_json()
+                    self.respond_json(
+                        janicka_r2_document_search_action(
+                            payload,
+                            adapter=JANICKA_R2_COCKPIT,
+                        )
+                    )
+                    return
+                if parsed.path == "/api/janicka-r2/documents/compile":
+                    payload = self.read_json()
+                    self.respond_json(
+                        janicka_r2_document_compile_action(
+                            payload,
+                            adapter=JANICKA_R2_COCKPIT,
+                        )
+                    )
                     return
                 if parsed.path == "/api/human-adam/transcribe":
                     payload = self.read_json()
@@ -12418,6 +12466,13 @@ COCKPIT_HTML = """<!doctype html>
           </div>
           <div class="janicka-action">
             <div>
+              <div class="janicka-action-title">Vytvořit TXT z dokumentu</div>
+              <div class="janicka-action-text">Najít zdroj, ručně ho vybrat a vytvořit nový textový dokument R2-Adama.</div>
+            </div>
+            <button id="janickaR2DocumentsBtn" type="button">Otevřít</button>
+          </div>
+          <div class="janicka-action">
+            <div>
               <div class="janicka-action-title">Vytisknout dokument</div>
               <div class="janicka-action-text">Nejdřív dokument najít, pak v detailu použít tisk.</div>
             </div>
@@ -13005,6 +13060,7 @@ COCKPIT_HTML = """<!doctype html>
     const janickaModal = document.getElementById("janickaModal");
     const janickaCloseBtn = document.getElementById("janickaCloseBtn");
     const janickaFindDocumentBtn = document.getElementById("janickaFindDocumentBtn");
+    const janickaR2DocumentsBtn = document.getElementById("janickaR2DocumentsBtn");
     const janickaPrintDocumentBtn = document.getElementById("janickaPrintDocumentBtn");
     const janickaEmailBtn = document.getElementById("janickaEmailBtn");
     const janickaLekarnaBtn = document.getElementById("janickaLekarnaBtn");
@@ -13365,6 +13421,7 @@ COCKPIT_HTML = """<!doctype html>
         "janickaBtn",
         "janickaCloseBtn",
         "janickaFindDocumentBtn",
+        "janickaR2DocumentsBtn",
         "janickaPrintDocumentBtn",
         "janickaEmailBtn",
         "janickaLekarnaBtn",
@@ -18773,6 +18830,18 @@ COCKPIT_HTML = """<!doctype html>
     janickaBtn.addEventListener("click", openJanickaModal);
     janickaCloseBtn.addEventListener("click", closeJanickaModal);
     janickaFindDocumentBtn.addEventListener("click", () => focusDocumentSearchForJanicka("Zadej, co chceš najít. Po otevření detailu lze dokument přečíst, otevřít nebo vytisknout."));
+    janickaR2DocumentsBtn.addEventListener("click", () => {
+      const r2Window = window.open(
+        "/janicka-r2-documents/",
+        "SamanthaJanickaR2Documents",
+        "popup=yes,width=980,height=900,left=150,top=60"
+      );
+      if (r2Window) {
+        r2Window.focus();
+      } else {
+        window.location.href = "/janicka-r2-documents/";
+      }
+    });
     janickaPrintDocumentBtn.addEventListener("click", () => focusDocumentSearchForJanicka("Najdi dokument k tisku a v jeho detailu použij tlačítko Tisknout."));
     janickaEmailBtn.addEventListener("click", () => {
       openEmailProcessing();
