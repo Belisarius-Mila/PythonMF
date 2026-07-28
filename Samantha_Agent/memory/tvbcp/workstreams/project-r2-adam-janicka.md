@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-28 17:55 CEST
+- Obnoveno potvrzeným checkpointem: 2026-07-28 18:35 CEST
 
 ### Hotovo
-- R2 chat nyní ukazuje aktuální dokumenty v kompaktní liště a otevírá jejich plný obsah v samostatné celostránkové čtečce.
+- R2-Adam může v chatu bezpečně vytvořit nový přehled z více výslovně potvrzených zdrojů, aniž by jejich obsah nafukoval chat.
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
@@ -15,18 +15,19 @@
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Vytvořit checkpoint, nasadit změnu a živě otevřít jeden existující TXT z dokumentové lišty.
+- Vytvořit checkpoint, nasadit změnu a provést živý chatový test se dvěma neškodnými zdroji.
 
 ### Rozhodnutí
-- Plný obsah TXT se nezobrazuje v historii chatu; chat ukazuje pouze metadata a bezpečný odkaz do samostatné čtečky.
+- V tomto kroku nebylo přijato nové kanonické rozhodnutí.
 
 ### Navrhované další kroky
-- Pokračovat R2.1-B2: vytvoření strukturovaného TXT z více lidsky potvrzených read-only zdrojů přímo v chatu.
+- Po živém ověření doplnit samostatně potvrzovaný tisk dokumentu.
+- Později doplnit potvrzované odeslání dokumentu e-mailem.
 
 ### Technický stav checkpointu
-- Změna je otestovaná (1191 testů).
-- Git před checkpointem: lokální `main` na `84400963bb0b`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `84400963bb0b` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-07-28T15:18:51+00:00.
+- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
+- Git před checkpointem: lokální `main` na `8725254148f4`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `8725254148f4` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-07-28T16:12:32+00:00.
 - Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -317,5 +318,33 @@ Navrhované další kroky:
 
 Technický důkaz:
 - plná Cockpit brána: 1191 testů, 277.4 s, výsledek OK.
+- Pracovní proud: `project-r2-adam-janicka`.
+- Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+
+### 2026-07-28 18:35 CEST – R2-Adam může v chatu bezpečně vytvořit nový přehled z více výslovně potvrzených zdrojů, aniž by jejich obsah nafukoval chat.
+
+Hotovo:
+- R2-Adam může v chatu bezpečně vytvořit nový přehled z více výslovně potvrzených zdrojů, aniž by jejich obsah nafukoval chat.
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+
+Otevřeno:
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
+
+Rizika:
+- Žádné další doložené provozní riziko.
+
+Rozhodnutí:
+- V tomto kroku nebylo přijato nové kanonické rozhodnutí.
+
+Další krok:
+- Vytvořit checkpoint, nasadit změnu a provést živý chatový test se dvěma neškodnými zdroji.
+
+Navrhované další kroky:
+- Po živém ověření doplnit samostatně potvrzovaný tisk dokumentu.
+- Později doplnit potvrzované odeslání dokumentu e-mailem.
+
+Technický důkaz:
+- rychlá Cockpit brána syntaxe a whitespace: 4.2 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `project-r2-adam-janicka`.
 - Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.

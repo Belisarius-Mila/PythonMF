@@ -114,7 +114,12 @@ class JanickaR2Backend:
             "kompilaci pouzij registrovanou read-only schopnost "
             "search_private_documents pres JanickaR2DocumentSelectionFlow, ukaz jen "
             "redigovane volby a pockej na lidsky vybranou selection_ref; ani jedinou "
-            "shodu nevybirej automaticky."
+            "shodu nevybirej automaticky. Pro prehled z vice dokumentu nejdrive ukaz "
+            "redigovane volby a pockej na vyslovny lidsky vyber dvou az peti "
+            "selection_ref. Pak pres prepare_selected_sources nacti pouze tyto zdroje, "
+            "nevypisuj jejich text do chatu a sestav pozadovany strukturovany prehled. "
+            "Novy TXT vytvor vyhradne pres compile_selected_overview se stejnym dotazem, "
+            "volbami a source_set_ref; zmena zdroju musi vynutit novy vyber."
         )
 
     def development_control_lines(self) -> tuple[str, ...]:
@@ -135,4 +140,9 @@ class JanickaR2Backend:
             "search_private_documents capability through JanickaR2DocumentSelectionFlow. "
             "Show only redacted candidates and require one human-selected selection_ref; "
             "never auto-select even a single match.",
+            "rule=A multi-source overview may use two to five explicit human-selected "
+            "selection_refs through JanickaR2DocumentSelectionFlow. Prepare only the "
+            "confirmed sources, never paste their text or the generated TXT into chat, "
+            "and create the output only through compile_selected_overview with the "
+            "matching source_set_ref. Source changes require a new human selection.",
         )

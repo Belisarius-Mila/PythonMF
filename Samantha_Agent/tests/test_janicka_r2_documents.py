@@ -491,6 +491,250 @@ class JanickaR2DocumentStoreTests(unittest.TestCase):
             self.assertEqual(inspected_ids, [])
             self.assertEqual(backend.document_store().list_documents(), ())
 
+    def test_multi_source_overview_uses_only_confirmed_current_sources(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            private_root = Path(temp_dir) / "canonical-private"
+            private_root.mkdir()
+            backend = JanickaR2Backend.bind(
+                canonical_private_root=private_root,
+                document_root=private_root / R2_DOCUMENTS_RELATIVE_ROOT,
+            )
+            payload = {
+                "ok": True,
+                "results": [
+                    {
+                        "source_type": "document",
+                        "document_id": "doc-pojisteni-2024",
+                        "document_ref": document_reference("doc-pojisteni-2024"),
+                        "title": "Pojištění 2024",
+                        "document_type": "faktura",
+                        "domain": "auto",
+                        "reading_status_label": "OK",
+                        "snippet": "Syntetický náhled 2024.",
+                    },
+                    {
+                        "source_type": "document",
+                        "document_id": "doc-pojisteni-2025",
+                        "document_ref": document_reference("doc-pojisteni-2025"),
+                        "title": "Pojištění 2025",
+                        "document_type": "faktura",
+                        "domain": "auto",
+                        "reading_status_label": "OK",
+                        "snippet": "Syntetický náhled 2025.",
+                    },
+                ],
+            }
+            inspected_ids: list[str] = []
+
+            def inspect_document(document_id: str) -> str:
+                inspected_ids.append(document_id)
+                return (
+                    f"{R2_DOCUMENT_INSPECTION_PREFIX}\n"
+                    f"Syntetický podklad {document_id[-4:]}."
+                )
+
+            flow = backend.document_selection_flow(
+                document_search=lambda _query, _limit: payload,
+                document_inspector=inspect_document,
+            )
+            search_result = flow.search_documents("pojištění auta")
+            selected_refs = [
+                candidate.selection_ref
+                for candidate in search_result.candidates
+            ]
+            source_set = flow.prepare_selected_sources(
+                query="pojištění auta",
+                selection_refs=selected_refs,
+            )
+
+            self.assertEqual(source_set.source_count, 2)
+            self.assertRegex(source_set.source_set_ref, r"^r2set-[0-9a-f]{32}$")
+            self.assertNotIn("Syntetický podklad", str(source_set.metadata()))
+            self.assertNotIn("Syntetický podklad", repr(source_set))
+
+            result = flow.compile_selected_overview(
+                name="Přehled pojištění.txt",
+                query="pojištění auta",
+                selection_refs=selected_refs,
+                source_set_ref=source_set.source_set_ref,
+                overview_text=(
+                    "2024-06-30 | Pojišťovna A | 12 000 Kč\n"
+                    "2025-06-30 | Pojišťovna B | 13 000 Kč"
+                ),
+                now=datetime(2026, 7, 28, 16, 0, tzinfo=timezone.utc),
+            )
+            stored = backend.document_store().read_text(
+                "Přehled pojištění.txt"
+            )
+
+        self.assertEqual(result.source_count, 2)
+        self.assertEqual(
+            inspected_ids,
+            [
+                "doc-pojisteni-2024",
+                "doc-pojisteni-2025",
+                "doc-pojisteni-2024",
+                "doc-pojisteni-2025",
+            ],
+        )
+        self.assertIn("R2-Adam – přehled z potvrzených zdrojů", stored)
+        self.assertIn("Počet potvrzených zdrojů: 2", stored)
+        self.assertIn("Pojištění 2024 (faktura; auto)", stored)
+        self.assertIn("2025-06-30 | Pojišťovna B | 13 000 Kč", stored)
+        self.assertNotIn("doc-pojisteni-2024", stored)
+        self.assertNotIn("doc-pojisteni-2025", stored)
+
+    def test_multi_source_overview_requires_two_unique_human_choices(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            private_root = Path(temp_dir) / "canonical-private"
+            private_root.mkdir()
+            backend = JanickaR2Backend.bind(
+                canonical_private_root=private_root,
+                document_root=private_root / R2_DOCUMENTS_RELATIVE_ROOT,
+            )
+            ref = document_reference("doc-jeden")
+            payload = {
+                "ok": True,
+                "results": [
+                    {
+                        "source_type": "document",
+                        "document_id": "doc-jeden",
+                        "document_ref": ref,
+                        "title": "Jeden dokument",
+                        "document_type": "faktura",
+                        "domain": "auto",
+                        "reading_status_label": "OK",
+                        "snippet": "Syntetický náhled.",
+                    }
+                ],
+            }
+            inspected_ids: list[str] = []
+            flow = backend.document_selection_flow(
+                document_search=lambda _query, _limit: payload,
+                document_inspector=lambda document_id: (
+                    inspected_ids.append(document_id)
+                    or R2_DOCUMENT_INSPECTION_PREFIX
+                ),
+            )
+
+            for selection_refs in ([ref], [ref, ref]):
+                with self.subTest(selection_refs=selection_refs):
+                    with self.assertRaises(JanickaR2DocumentSelectionError):
+                        flow.prepare_selected_sources(
+                            query="jeden dokument",
+                            selection_refs=selection_refs,
+                        )
+
+            self.assertEqual(inspected_ids, [])
+            self.assertEqual(backend.document_store().list_documents(), ())
+
+    def test_multi_source_overview_rejects_changed_sources_before_write(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            private_root = Path(temp_dir) / "canonical-private"
+            private_root.mkdir()
+            backend = JanickaR2Backend.bind(
+                canonical_private_root=private_root,
+                document_root=private_root / R2_DOCUMENTS_RELATIVE_ROOT,
+            )
+            document_ids = ("doc-prvni", "doc-druhy")
+            payload = {
+                "ok": True,
+                "results": [
+                    {
+                        "source_type": "document",
+                        "document_id": document_id,
+                        "document_ref": document_reference(document_id),
+                        "title": f"Zdroj {index}",
+                        "document_type": "faktura",
+                        "domain": "auto",
+                        "reading_status_label": "OK",
+                        "snippet": "Syntetický náhled.",
+                    }
+                    for index, document_id in enumerate(document_ids, start=1)
+                ],
+            }
+            inspection_round = 0
+
+            def inspect_document(document_id: str) -> str:
+                nonlocal inspection_round
+                inspection_round += 1
+                version = "první" if inspection_round <= 2 else "změněná"
+                return (
+                    f"{R2_DOCUMENT_INSPECTION_PREFIX}\n"
+                    f"{version} verze {document_id}."
+                )
+
+            flow = backend.document_selection_flow(
+                document_search=lambda _query, _limit: payload,
+                document_inspector=inspect_document,
+            )
+            selection_refs = [
+                document_reference(document_id)
+                for document_id in document_ids
+            ]
+            source_set = flow.prepare_selected_sources(
+                query="dva zdroje",
+                selection_refs=selection_refs,
+            )
+
+            with self.assertRaisesRegex(
+                JanickaR2DocumentSelectionError,
+                "změnily",
+            ):
+                flow.compile_selected_overview(
+                    name="Neaktuální přehled.txt",
+                    query="dva zdroje",
+                    selection_refs=selection_refs,
+                    source_set_ref=source_set.source_set_ref,
+                    overview_text="Přehled ze starých podkladů.",
+                )
+
+            self.assertEqual(backend.document_store().list_documents(), ())
+
+    def test_multi_source_existing_output_stops_before_private_search(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            private_root = Path(temp_dir) / "canonical-private"
+            private_root.mkdir()
+            backend = JanickaR2Backend.bind(
+                canonical_private_root=private_root,
+                document_root=private_root / R2_DOCUMENTS_RELATIVE_ROOT,
+            )
+            backend.document_store().create_text(
+                name="Existující přehled.txt",
+                text="Původní obsah.",
+            )
+            search_called = False
+
+            def search_documents(_query: str, _limit: int) -> dict[str, object]:
+                nonlocal search_called
+                search_called = True
+                return {"ok": True, "results": []}
+
+            flow = backend.document_selection_flow(
+                document_search=search_documents,
+                document_inspector=lambda _document_id: (
+                    R2_DOCUMENT_INSPECTION_PREFIX
+                ),
+            )
+
+            with self.assertRaises(JanickaR2DocumentExistsError):
+                flow.compile_selected_overview(
+                    name="Existující přehled.txt",
+                    query="dva zdroje",
+                    selection_refs=[
+                        document_reference("doc-prvni"),
+                        document_reference("doc-druhy"),
+                    ],
+                    source_set_ref="r2set-" + ("0" * 32),
+                    overview_text="Nový obsah.",
+                )
+
+            self.assertFalse(search_called)
+            self.assertEqual(
+                backend.document_store().read_text("Existující přehled.txt"),
+                "Původní obsah.",
+            )
+
     def test_default_selection_flow_binds_search_and_inspection_to_backend_vault(
         self,
     ) -> None:

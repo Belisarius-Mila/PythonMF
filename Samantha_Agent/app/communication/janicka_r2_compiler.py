@@ -88,12 +88,8 @@ class JanickaR2DocumentCompiler:
     ) -> JanickaR2CompilationResult:
         """Create one TXT from a selected redacted inspection without replacement."""
 
-        safe_name = normalize_r2_document_name(name)
+        safe_name = self.ensure_new_document_name(name)
         safe_document_id = self._validate_document_id(document_id)
-        if any(item.name == safe_name for item in self._store.list_documents()):
-            raise JanickaR2DocumentExistsError(
-                "Dokument s tímto názvem už existuje."
-            )
         source_text = self._read_source(safe_document_id)
         compiled_at = self._compiled_at(now)
         rendered = self._render(
@@ -107,6 +103,49 @@ class JanickaR2DocumentCompiler:
             document=document,
             source_type=R2_DOCUMENT_INSPECTION_CAPABILITY,
             source_count=1,
+            compiled_at=compiled_at,
+        )
+
+    def ensure_new_document_name(self, name: object) -> str:
+        """Validate a create-only target before any private source is inspected."""
+
+        safe_name = normalize_r2_document_name(name)
+        if any(item.name == safe_name for item in self._store.list_documents()):
+            raise JanickaR2DocumentExistsError(
+                "Dokument s tímto názvem už existuje."
+            )
+        return safe_name
+
+    def inspect_document_source(self, document_id: object) -> str:
+        """Return one validated read-only inspection for a confirmed workflow."""
+
+        return self._read_source(self._validate_document_id(document_id))
+
+    def _compile_confirmed_overview(
+        self,
+        *,
+        name: object,
+        overview_text: object,
+        source_labels: tuple[str, ...],
+        now: datetime | None = None,
+    ) -> JanickaR2CompilationResult:
+        """Persist an overview already guarded by the multi-source selection flow."""
+
+        safe_name = self.ensure_new_document_name(name)
+        safe_overview = self._validate_overview_text(overview_text)
+        safe_labels = self._validate_source_labels(source_labels)
+        compiled_at = self._compiled_at(now)
+        rendered = self._render_overview(
+            name=safe_name,
+            overview_text=safe_overview,
+            source_labels=safe_labels,
+            compiled_at=compiled_at,
+        )
+        document = self._store.create_text(name=safe_name, text=rendered)
+        return JanickaR2CompilationResult(
+            document=document,
+            source_type=R2_DOCUMENT_INSPECTION_CAPABILITY,
+            source_count=len(safe_labels),
             compiled_at=compiled_at,
         )
 
@@ -151,6 +190,33 @@ class JanickaR2DocumentCompiler:
         return moment.replace(microsecond=0).isoformat()
 
     @staticmethod
+    def _validate_overview_text(value: object) -> str:
+        if not isinstance(value, str):
+            raise JanickaR2CompilationError("Obsah přehledu musí být text.")
+        text = value.strip()
+        if not text or "\x00" in text:
+            raise JanickaR2CompilationError(
+                "Obsah přehledu je prázdný nebo obsahuje nepovolený znak."
+            )
+        return text
+
+    @staticmethod
+    def _validate_source_labels(value: tuple[str, ...]) -> tuple[str, ...]:
+        if not isinstance(value, tuple) or not 2 <= len(value) <= 5:
+            raise JanickaR2CompilationError(
+                "Přehled vyžaduje dva až pět potvrzených zdrojů."
+            )
+        labels: list[str] = []
+        for item in value:
+            label = " ".join(str(item or "").replace("\x00", " ").split())[:240]
+            if not label:
+                raise JanickaR2CompilationError(
+                    "Přehled obsahuje neplatný popis zdroje."
+                )
+            labels.append(label)
+        return tuple(labels)
+
+    @staticmethod
     def _render(
         *,
         name: str,
@@ -171,3 +237,26 @@ class JanickaR2DocumentCompiler:
                 "",
             )
         )
+
+    @staticmethod
+    def _render_overview(
+        *,
+        name: str,
+        overview_text: str,
+        source_labels: tuple[str, ...],
+        compiled_at: str,
+    ) -> str:
+        lines = [
+            "R2-Adam – přehled z potvrzených zdrojů",
+            f"Název: {name}",
+            f"Vytvořeno: {compiled_at}",
+            f"Zdroj: {R2_DOCUMENT_INSPECTION_CAPABILITY}",
+            f"Počet potvrzených zdrojů: {len(source_labels)}",
+            "Použité zdroje:",
+            *(f"- {label}" for label in source_labels),
+            "",
+            "Přehled:",
+            overview_text,
+            "",
+        ]
+        return "\n".join(lines)

@@ -182,6 +182,18 @@ class JanickaR2ChatTests(unittest.TestCase):
                 "nikdy nevyvijej",
                 adapter.service.developer_instructions,
             )
+            self.assertIn(
+                "prepare_selected_sources",
+                adapter.service.developer_instructions,
+            )
+            self.assertIn(
+                "compile_selected_overview",
+                adapter.service.developer_instructions,
+            )
+            self.assertIn(
+                "dvou az peti",
+                adapter.service.developer_instructions,
+            )
 
     def test_public_status_keeps_chat_but_hides_runtime_and_thread_details(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

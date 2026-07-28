@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import hashlib
+import hmac
 import re
 from collections.abc import Callable, Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 
@@ -18,9 +19,12 @@ from app.documents.vault import safe_text
 
 R2_DOCUMENT_SEARCH_CAPABILITY = "search_private_documents"
 MAX_R2_DOCUMENT_SEARCH_RESULTS = 5
+MIN_R2_OVERVIEW_SOURCES = 2
+MAX_R2_OVERVIEW_SOURCES = 5
 _MAX_R2_DOCUMENT_QUERY_CHARS = 200
 _DOCUMENT_ID_RE = re.compile(r"[a-z0-9][a-z0-9_.-]{0,139}")
 _SELECTION_REF_RE = re.compile(r"docref-[a-f0-9]{16}")
+_SOURCE_SET_REF_RE = re.compile(r"r2set-[a-f0-9]{32}")
 
 DocumentSearchProvider = Callable[[str, int], Mapping[str, object]]
 
@@ -66,6 +70,51 @@ class JanickaR2DocumentSearchResult:
             "source_type": R2_DOCUMENT_SEARCH_CAPABILITY,
             "count": self.count,
             "candidates": [item.as_dict() for item in self.candidates],
+        }
+
+
+@dataclass(frozen=True)
+class JanickaR2ConfirmedSource:
+    """One human-selected source with text reserved for internal R2 processing."""
+
+    selection_ref: str
+    title: str
+    document_type: str
+    domain: str
+    read_only_text: str = field(repr=False)
+
+    @property
+    def label(self) -> str:
+        return f"{self.title} ({self.document_type}; {self.domain})"
+
+
+@dataclass(frozen=True)
+class JanickaR2ConfirmedSourceSet:
+    """Fresh read-only material bound to one opaque source-set reference."""
+
+    query: str
+    source_set_ref: str
+    sources: tuple[JanickaR2ConfirmedSource, ...]
+
+    @property
+    def source_count(self) -> int:
+        return len(self.sources)
+
+    def metadata(self) -> dict[str, object]:
+        """Return orchestration metadata without any source fulltext."""
+
+        return {
+            "source_set_ref": self.source_set_ref,
+            "source_count": self.source_count,
+            "sources": [
+                {
+                    "selection_ref": source.selection_ref,
+                    "title": source.title,
+                    "document_type": source.document_type,
+                    "domain": source.domain,
+                }
+                for source in self.sources
+            ],
         }
 
 
@@ -130,6 +179,85 @@ class JanickaR2DocumentSelectionFlow:
         return self._compiler.compile_document_inspection(
             name=name,
             document_id=document_id,
+            now=now,
+        )
+
+    def prepare_selected_sources(
+        self,
+        *,
+        query: object,
+        selection_refs: object,
+    ) -> JanickaR2ConfirmedSourceSet:
+        """Freshly inspect two to five explicit human selections without writing."""
+
+        safe_query = self._validate_query(query)
+        safe_refs = self._validate_selection_refs(selection_refs)
+        result, document_ids = self._load_candidates(safe_query)
+        candidates = {
+            candidate.selection_ref: candidate
+            for candidate in result.candidates
+        }
+        if any(selection_ref not in candidates for selection_ref in safe_refs):
+            raise JanickaR2DocumentSelectionError(
+                "Některá vybraná položka už není v aktuálních výsledcích hledání."
+            )
+
+        sources: list[JanickaR2ConfirmedSource] = []
+        for selection_ref in safe_refs:
+            candidate = candidates[selection_ref]
+            try:
+                source_text = self._compiler.inspect_document_source(
+                    document_ids[selection_ref]
+                )
+            except Exception as exc:
+                raise JanickaR2DocumentSelectionError(
+                    "Read-only načtení potvrzených zdrojů se nepodařilo."
+                ) from exc
+            sources.append(
+                JanickaR2ConfirmedSource(
+                    selection_ref=selection_ref,
+                    title=candidate.title,
+                    document_type=candidate.document_type,
+                    domain=candidate.domain,
+                    read_only_text=source_text,
+                )
+            )
+        confirmed = tuple(sources)
+        return JanickaR2ConfirmedSourceSet(
+            query=safe_query,
+            source_set_ref=self._source_set_reference(
+                query=safe_query,
+                sources=confirmed,
+            ),
+            sources=confirmed,
+        )
+
+    def compile_selected_overview(
+        self,
+        *,
+        name: object,
+        query: object,
+        selection_refs: object,
+        source_set_ref: object,
+        overview_text: object,
+        now: datetime | None = None,
+    ) -> JanickaR2CompilationResult:
+        """Create one overview only while the confirmed source set is unchanged."""
+
+        safe_name = self._compiler.ensure_new_document_name(name)
+        expected_ref = self._validate_source_set_ref(source_set_ref)
+        source_set = self.prepare_selected_sources(
+            query=query,
+            selection_refs=selection_refs,
+        )
+        if not hmac.compare_digest(source_set.source_set_ref, expected_ref):
+            raise JanickaR2DocumentSelectionError(
+                "Potvrzené zdroje se změnily. Zobraz je znovu a vyžádej nové potvrzení."
+            )
+        return self._compiler._compile_confirmed_overview(
+            name=safe_name,
+            overview_text=overview_text,
+            source_labels=tuple(source.label for source in source_set.sources),
             now=now,
         )
 
@@ -218,6 +346,49 @@ class JanickaR2DocumentSelectionFlow:
                 "Kompilace vyžaduje jednu platnou lidskou volbu selection_ref."
             )
         return selection_ref
+
+    @classmethod
+    def _validate_selection_refs(cls, value: object) -> tuple[str, ...]:
+        if (
+            isinstance(value, (str, bytes))
+            or not isinstance(value, (list, tuple))
+            or not MIN_R2_OVERVIEW_SOURCES <= len(value) <= MAX_R2_OVERVIEW_SOURCES
+        ):
+            raise JanickaR2DocumentSelectionError(
+                "Přehled vyžaduje dvě až pět výslovně vybraných voleb selection_ref."
+            )
+        selection_refs = tuple(cls._validate_selection_ref(item) for item in value)
+        if len(set(selection_refs)) != len(selection_refs):
+            raise JanickaR2DocumentSelectionError(
+                "Každý potvrzený zdroj smí být vybrán pouze jednou."
+            )
+        return selection_refs
+
+    @staticmethod
+    def _validate_source_set_ref(value: object) -> str:
+        source_set_ref = str(value or "").strip()
+        if not _SOURCE_SET_REF_RE.fullmatch(source_set_ref):
+            raise JanickaR2DocumentSelectionError(
+                "Vytvoření přehledu vyžaduje platný potvrzený source_set_ref."
+            )
+        return source_set_ref
+
+    @staticmethod
+    def _source_set_reference(
+        *,
+        query: str,
+        sources: tuple[JanickaR2ConfirmedSource, ...],
+    ) -> str:
+        digest = hashlib.blake2s(digest_size=16, person=b"R2SrcSet")
+        digest.update(query.encode("utf-8"))
+        for source in sources:
+            digest.update(b"\x00")
+            digest.update(source.selection_ref.encode("ascii"))
+            digest.update(b"\x00")
+            digest.update(source.label.encode("utf-8"))
+            digest.update(b"\x00")
+            digest.update(source.read_only_text.encode("utf-8"))
+        return f"r2set-{digest.hexdigest()}"
 
     @staticmethod
     def _document_reference(document_id: str) -> str:
