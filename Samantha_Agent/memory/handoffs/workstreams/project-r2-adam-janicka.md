@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-28 13:46 CEST
+- Obnoveno potvrzeným checkpointem: 2026-07-28 14:07 CEST
 
 ### Hotovo
-- R2-Adam má backendově připojený vlastní TXT prostor a mimo něj zůstávají soukromá zdrojová data pouze pro čtení.
+- R2-Adam umí vytvořit nový TXT z redigovaného výtahu jednoho přesně vybraného dokumentu, aniž by změnil zdroj nebo přepsal existující výstup.
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
@@ -15,18 +15,19 @@
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Vytvořit checkpoint, nasadit změnu a živě ověřit vytvoření a změnu jednoho neškodného TXT dokumentu.
+- Vytvořit checkpoint, nasadit změnu a živě zkompilovat nový TXT z jednoho konkrétně vybraného dokumentu.
 
 ### Rozhodnutí
-- Jediným zapisovatelným private prostorem R2-Adama je jeho vyhrazený dokumentový adresář obsluhovaný přes JanickaR2DocumentStore.
+- První kompilovaný zdroj R2-Adama je registrovaná read-only schopnost inspect_document_text nad jedním explicitním document_id; výstup je vždy create-only TXT.
 
 ### Navrhované další kroky
-- Přidat kompilaci dokumentu z prvního registrovaného read-only zdroje jako R2.0-C.
+- Po živém ověření přidat bezpečné hledání dokumentu a lidský výběr document_id před kompilací.
+- Později doplnit vlastní kompaktní soukromý kontext R2-Adama.
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `ee56e49a41de`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `ee56e49a41de` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-07-28T11:12:05+00:00.
+- Git před checkpointem: lokální `main` na `621552cf20f1`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `621552cf20f1` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-07-28T11:48:02+00:00.
 - Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -109,3 +110,15 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (8): `Samantha_Agent/app/communication/human_adam_profiles.py`, `Samantha_Agent/app/communication/human_adam_service.py`, `Samantha_Agent/app/communication/human_adam_workstream_catalog.py`, `Samantha_Agent/scripts/cockpit_quality_gate.py`, `Samantha_Agent/tests/test_human_adam_profiles.py`, `Samantha_Agent/tests/test_human_adam_workstream_catalog.py`, `Samantha_Agent/tests/test_janicka_r2_documents.py`, `Samantha_Agent/app/communication/janicka_r2_backend.py`
 - Commit: `Connect R2-Adam document backend safely`
 - Další krok: Vytvořit checkpoint, nasadit změnu a živě ověřit vytvoření a změnu jednoho neškodného TXT dokumentu.
+
+### Automatický checkpoint 2026-07-28 14:07 CEST
+
+- Pracovní proud: `project-r2-adam-janicka`
+- Hotovo: R2-Adam umí vytvořit nový TXT z redigovaného výtahu jednoho přesně vybraného dokumentu, aniž by změnil zdroj nebo přepsal existující výstup.; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.; Lokální commity čekají na samostatný denní GitHub balíček.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: rychlá Cockpit brána syntaxe a whitespace: 4.0 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu
+- Změněné cesty před paměťovým zápisem (5): `Samantha_Agent/app/communication/janicka_r2_backend.py`, `Samantha_Agent/scripts/cockpit_quality_gate.py`, `Samantha_Agent/tests/test_cockpit_quality_gate.py`, `Samantha_Agent/tests/test_janicka_r2_documents.py`, `Samantha_Agent/app/communication/janicka_r2_compiler.py`
+- Commit: `Compile R2 TXT from one read-only document source`
+- Další krok: Vytvořit checkpoint, nasadit změnu a živě zkompilovat nový TXT z jednoho konkrétně vybraného dokumentu.

@@ -3,9 +3,18 @@ from __future__ import annotations
 import stat
 import tempfile
 import unittest
+from datetime import datetime, timezone
 from pathlib import Path
 
+from app.capabilities.models import AuditPolicy, RiskLevel
+from app.capabilities.registry import CAPABILITIES
 from app.communication.janicka_r2_backend import JanickaR2Backend
+from app.communication.janicka_r2_compiler import (
+    MAX_R2_SOURCE_TEXT_BYTES,
+    R2_DOCUMENT_INSPECTION_CAPABILITY,
+    R2_DOCUMENT_INSPECTION_PREFIX,
+    JanickaR2CompilationError,
+)
 from app.communication.janicka_r2_documents import (
     MAX_R2_DOCUMENT_TEXT_BYTES,
     R2_DOCUMENTS_RELATIVE_ROOT,
@@ -231,6 +240,127 @@ class JanickaR2DocumentStoreTests(unittest.TestCase):
                     canonical_private_root=private_root,
                     document_root=private_root / "documents",
                 )
+
+    def test_compiler_creates_new_txt_from_one_registered_read_only_source(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            private_root = Path(temp_dir) / "canonical-private"
+            private_root.mkdir()
+            document_root = private_root / R2_DOCUMENTS_RELATIVE_ROOT
+            backend = JanickaR2Backend.bind(
+                canonical_private_root=private_root,
+                document_root=document_root,
+            )
+            inspected_ids: list[str] = []
+
+            def inspect_document(document_id: str) -> str:
+                inspected_ids.append(document_id)
+                return (
+                    f"{R2_DOCUMENT_INSPECTION_PREFIX}\n"
+                    "- Soubor: synteticky.pdf\n\n"
+                    "Nahled textu:\nBezpečný syntetický výtah."
+                )
+
+            result = backend.document_compiler(
+                document_inspector=inspect_document,
+            ).compile_document_inspection(
+                name="Kompilovaný přehled.txt",
+                document_id="doc-zaruka",
+                now=datetime(2026, 7, 28, 12, 0, tzinfo=timezone.utc),
+            )
+            stored = backend.document_store().read_text(
+                "Kompilovaný přehled.txt"
+            )
+
+        self.assertEqual(inspected_ids, ["doc-zaruka"])
+        self.assertEqual(result.document.name, "Kompilovaný přehled.txt")
+        self.assertEqual(result.source_type, R2_DOCUMENT_INSPECTION_CAPABILITY)
+        self.assertEqual(result.source_count, 1)
+        self.assertEqual(result.compiled_at, "2026-07-28T12:00:00+00:00")
+        self.assertIn("R2-Adam – kompilovaný dokument", stored)
+        self.assertIn("Zdroj: inspect_document_text", stored)
+        self.assertIn("Document ID: doc-zaruka", stored)
+        self.assertIn("Bezpečný syntetický výtah.", stored)
+        self.assertNotIn("doc-zaruka", str(result.as_dict()))
+        self.assertNotIn(str(private_root), str(result.as_dict()))
+
+    def test_compiler_refuses_existing_output_before_reading_source(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            private_root = Path(temp_dir) / "canonical-private"
+            private_root.mkdir()
+            backend = JanickaR2Backend.bind(
+                canonical_private_root=private_root,
+                document_root=private_root / R2_DOCUMENTS_RELATIVE_ROOT,
+            )
+            backend.document_store().create_text(
+                name="Existující.txt",
+                text="Původní obsah.",
+            )
+            source_called = False
+
+            def inspect_document(_document_id: str) -> str:
+                nonlocal source_called
+                source_called = True
+                return R2_DOCUMENT_INSPECTION_PREFIX
+
+            with self.assertRaises(JanickaR2DocumentExistsError):
+                backend.document_compiler(
+                    document_inspector=inspect_document,
+                ).compile_document_inspection(
+                    name="Existující.txt",
+                    document_id="doc-test",
+                )
+
+            self.assertFalse(source_called)
+            self.assertEqual(
+                backend.document_store().read_text("Existující.txt"),
+                "Původní obsah.",
+            )
+
+    def test_compiler_rejects_unsafe_id_and_unverified_source_output(self) -> None:
+        invalid_cases = (
+            ("../doc-test", R2_DOCUMENT_INSPECTION_PREFIX),
+            ("doc-test", "Document ID nebyl nalezen."),
+            ("doc-test", f"{R2_DOCUMENT_INSPECTION_PREFIX}\x00"),
+            (
+                "doc-test",
+                R2_DOCUMENT_INSPECTION_PREFIX
+                + ("x" * (MAX_R2_SOURCE_TEXT_BYTES + 1)),
+            ),
+        )
+        for document_id, source_text in invalid_cases:
+            with self.subTest(document_id=document_id, source_size=len(source_text)):
+                with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+                    private_root = Path(temp_dir) / "canonical-private"
+                    private_root.mkdir()
+                    backend = JanickaR2Backend.bind(
+                        canonical_private_root=private_root,
+                        document_root=private_root / R2_DOCUMENTS_RELATIVE_ROOT,
+                    )
+
+                    with self.assertRaises(JanickaR2CompilationError):
+                        backend.document_compiler(
+                            document_inspector=lambda _document_id: source_text,
+                        ).compile_document_inspection(
+                            name="Odmítnutý.txt",
+                            document_id=document_id,
+                        )
+
+                    self.assertEqual(backend.document_store().list_documents(), ())
+
+    def test_first_compiler_source_is_registered_read_only_and_redacted(self) -> None:
+        capability = next(
+            item
+            for item in CAPABILITIES
+            if item.capability_id == R2_DOCUMENT_INSPECTION_CAPABILITY
+        )
+
+        self.assertEqual(capability.risk, RiskLevel.READ_ONLY)
+        self.assertEqual(capability.writes, ())
+        self.assertFalse(capability.requires_confirmation)
+        self.assertEqual(capability.audit, AuditPolicy.REDACTED)
+        self.assertEqual(capability.tool, R2_DOCUMENT_INSPECTION_CAPABILITY)
 
 
 if __name__ == "__main__":

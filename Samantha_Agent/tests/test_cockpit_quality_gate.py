@@ -88,6 +88,10 @@ async def second():
         self.assertIn("app/codex_approval_state.py", COMPILE_PATHS)
         self.assertIn("app/communication/human_adam_profiles.py", COMPILE_PATHS)
         self.assertIn(
+            "app/communication/janicka_r2_compiler.py",
+            COMPILE_PATHS,
+        )
+        self.assertIn(
             "app/communication/janicka_r2_documents.py",
             COMPILE_PATHS,
         )

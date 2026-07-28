@@ -5,6 +5,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
+from app.communication.janicka_r2_compiler import (
+    DocumentInspector,
+    JanickaR2DocumentCompiler,
+    inspect_registered_document,
+)
 from app.communication.janicka_r2_documents import (
     R2_DOCUMENTS_RELATIVE_ROOT,
     JanickaR2DocumentStore,
@@ -47,6 +52,18 @@ class JanickaR2Backend:
             canonical_private_root=self.canonical_private_root,
         )
 
+    def document_compiler(
+        self,
+        *,
+        document_inspector: DocumentInspector = inspect_registered_document,
+    ) -> JanickaR2DocumentCompiler:
+        """Return the R2 compiler bound to this backend's guarded store."""
+
+        return JanickaR2DocumentCompiler(
+            store=self.document_store(),
+            document_inspector=document_inspector,
+        )
+
     def developer_instructions(self) -> str:
         return (
             " R2-Adam ma jedinou zapisovatelnou vyjimku pro vlastni TXT dokumenty: "
@@ -57,7 +74,10 @@ class JanickaR2Backend:
             "bypass. Bez dalsiho potvrzeni lze jeden dokument vytvorit, precist, vypsat "
             "nebo zmenit. Odebrani je pouze obnovitelny move_to_trash a vyzaduje presnou "
             "potvrzovaci vetu konkretniho dokumentu. Nikdy trvale nemaz obsah kose, "
-            "nevypisuj soukromy fulltext do logu a nepouzivej sit."
+            "nevypisuj soukromy fulltext do logu a nepouzivej sit. Kompilace z "
+            "dokumentoveho vaultu smi pouzit jen jeden explicitni document_id pres "
+            "registrovanou read-only schopnost inspect_document_text a "
+            "JanickaR2DocumentCompiler; vystup je vzdy novy TXT bez prepisu."
         )
 
     def development_control_lines(self) -> tuple[str, ...]:
@@ -71,4 +91,7 @@ class JanickaR2Backend:
             "rule=Create, read, list and replace are allowed only for one requested TXT "
             "document. Removal must use confirmed recoverable move_to_trash; never "
             "permanently delete private documents.",
+            "rule=Compilation may use one explicit document_id through the registered "
+            "read-only inspect_document_text capability and JanickaR2DocumentCompiler. "
+            "The source remains unchanged and the TXT output is create-only.",
         )
