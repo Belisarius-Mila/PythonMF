@@ -702,8 +702,7 @@ class HumanAdamProfileManager:
             loaded = load_simple_main_deployment_receipt(
                 self.simple_main_deployment_receipt_path
             )
-            if str(loaded.get("workstream_id") or "") == workstream_id:
-                receipt = loaded
+            receipt = loaded
         except (AppServerError, OSError, TypeError, ValueError):
             receipt = {}
         legacy: dict[str, object] = {}
@@ -774,12 +773,7 @@ class HumanAdamProfileManager:
         return {
             **legacy,
             "operational_context": {
-                "deployment_expected": (
-                    self.workstream_backends.binding(
-                        workstream_id
-                    ).compatibility_adapter
-                    is not None
-                ),
+                "deployment_expected": True,
                 "deployment": deployment_evidence,
                 "runtime": {
                     "reachable": runtime_status.get("reachable")
@@ -803,11 +797,30 @@ class HumanAdamProfileManager:
         *,
         operation: str = "Jednoduché nasazení",
     ) -> None:
-        """Block a shared Git operation while any profile turn is active or uncertain."""
+        """Block a shared Git operation while any workstream turn is unsafe."""
 
-        for profile_id, profile in self.profiles.items():
-            session = profile["service"].hub.snapshot()
-            label = str(profile.get("label") or profile_id)
+        services: list[tuple[str, HumanAdamService]] = [
+            (
+                self.workstream_backends.binding(
+                    self.active_workstream_id
+                ).record.name,
+                self.active_service,
+            )
+        ]
+        services.extend(
+            (
+                str(profile.get("label") or profile_id),
+                profile["service"],
+            )
+            for profile_id, profile in self.profiles.items()
+        )
+        seen_hubs: set[int] = set()
+        for label, service in services:
+            hub_key = id(service.hub)
+            if hub_key in seen_hubs:
+                continue
+            seen_hubs.add(hub_key)
+            session = service.hub.snapshot()
             if session.get("turn_busy") or session.get("active_turn"):
                 raise SessionBusyError(
                     f"{operation} nelze připravit: profil {label} má aktivní tah."
@@ -816,6 +829,58 @@ class HumanAdamProfileManager:
                 raise SessionBusyError(
                     f"{operation} nelze připravit: profil {label} má nevyřešené doručení."
                 )
+
+    def _canonical_binding(
+        self,
+        workstream_id: str,
+    ) -> CanonicalWorkstreamBinding:
+        """Resolve one canonical identity without relying on active UI state."""
+
+        backend_binding = self.workstream_backends.binding(workstream_id)
+        adapter = backend_binding.compatibility_adapter
+        if adapter is not None:
+            profile_binding = self.profiles[adapter.profile_id].get(
+                "workstream_binding"
+            )
+            if isinstance(profile_binding, CanonicalWorkstreamBinding):
+                return profile_binding
+        memory_binding = (
+            self.workstream_memory.binding(workstream_id)
+            if self.workstream_memory is not None
+            else None
+        )
+        if memory_binding is not None:
+            return CanonicalWorkstreamBinding(
+                workstream_id=memory_binding.workstream_id,
+                workstream_type=memory_binding.workstream_type,
+                name=memory_binding.name,
+                handoff_relative_path=memory_binding.handoff_relative_path,
+                tvbcp_relative_path=memory_binding.tvbcp_relative_path,
+            )
+        raise AppServerError(
+            "Pracovní proud nemá kanonickou paměťovou vazbu."
+        )
+
+    def _active_canonical_binding(self) -> CanonicalWorkstreamBinding:
+        return self._canonical_binding(self.active_workstream_id)
+
+    def _peer_workspaces(
+        self,
+        active_workspace: HumanAdamWorkspaceManager,
+    ) -> tuple[HumanAdamWorkspaceManager, ...]:
+        """Return unique compatibility workspaces other than the active one."""
+
+        active_key = active_workspace.workspace_root.resolve()
+        peers: list[HumanAdamWorkspaceManager] = []
+        seen: set[Path] = {active_key}
+        for profile in self.profiles.values():
+            workspace = profile["service"].workspace
+            key = workspace.workspace_root.resolve()
+            if key in seen:
+                continue
+            seen.add(key)
+            peers.append(workspace)
+        return tuple(peers)
 
     def _main_remote_sync_workspaces(self) -> tuple[HumanAdamWorkspaceManager, ...]:
         """Return unique clean profiles aligned with the current local main."""
@@ -859,7 +924,6 @@ class HumanAdamProfileManager:
     def audit_main_remote_sync(self) -> dict[str, Any]:
         """Offer a general read-only fast-forward plan for clean origin/main."""
 
-        self._assert_legacy_only_backend(operation="Audit dorovnání main")
         with self.profile_operation() as service:
             self._assert_all_profile_sessions_idle(operation="Dorovnání main")
             workspaces = self._main_remote_sync_workspaces()
@@ -877,7 +941,6 @@ class HumanAdamProfileManager:
 
         if not self.github_batch_mode:
             raise AppServerError("Dávkový GitHub režim není aktivní.")
-        self._assert_legacy_only_backend(operation="Audit denního GitHub balíčku")
         with self.profile_operation() as service:
             self._assert_all_profile_sessions_idle(
                 operation="Audit denního GitHub balíčku"
@@ -903,7 +966,6 @@ class HumanAdamProfileManager:
 
         if not self.github_batch_mode:
             raise AppServerError("Dávkový GitHub režim není aktivní.")
-        self._assert_legacy_only_backend(operation="Denní GitHub balíček")
         with self.profile_operation() as service:
             self._assert_all_profile_sessions_idle(
                 operation="Denní GitHub balíček"
@@ -925,7 +987,6 @@ class HumanAdamProfileManager:
     ) -> dict[str, Any]:
         """Apply one exact audited fast-forward and align every clean profile."""
 
-        self._assert_legacy_only_backend(operation="Dorovnání main")
         with self.profile_operation() as service:
             self._assert_all_profile_sessions_idle(operation="Dorovnání main")
             workspaces = self._main_remote_sync_workspaces()
@@ -986,22 +1047,11 @@ class HumanAdamProfileManager:
         surface invokes this method in phase 2.2.
         """
 
-        self._assert_legacy_only_backend(operation="Nasazení")
         with self.profile_operation() as service:
             self._assert_all_profile_sessions_idle()
-            active_id = self.active_profile_id
-            profile = self.profiles[active_id]
-            binding = profile.get("workstream_binding")
-            if not isinstance(binding, CanonicalWorkstreamBinding):
-                raise AppServerError(
-                    "Aktivní profil nemá v terminálu zaregistrovaný kanonický pracovní proud."
-                )
+            binding = self._active_canonical_binding()
             source_head = str(service.workspace.status().get("source_head") or "")
-            peers = tuple(
-                candidate["service"].workspace
-                for profile_id, candidate in self.profiles.items()
-                if profile_id != active_id
-            )
+            peers = self._peer_workspaces(service.workspace)
             result = prepare_clean_main_deployment(
                 workspace=service.workspace,
                 request=SimpleMainDeploymentRequest(
@@ -1042,21 +1092,10 @@ class HumanAdamProfileManager:
     def audit_simple_main_deployment(self) -> dict[str, Any]:
         """Audit the active canonical workstream for one clean-main deployment."""
 
-        self._assert_legacy_only_backend(operation="Audit nasazení")
         with self.profile_operation() as service:
             self._assert_all_profile_sessions_idle()
-            active_id = self.active_profile_id
-            profile = self.profiles[active_id]
-            binding = profile.get("workstream_binding")
-            if not isinstance(binding, CanonicalWorkstreamBinding):
-                raise AppServerError(
-                    "Aktivní profil nemá v terminálu zaregistrovaný kanonický pracovní proud."
-                )
-            peers = tuple(
-                candidate["service"].workspace
-                for profile_id, candidate in self.profiles.items()
-                if profile_id != active_id
-            )
+            binding = self._active_canonical_binding()
+            peers = self._peer_workspaces(service.workspace)
             result = audit_clean_main_deployment(
                 workspace=service.workspace,
                 workstream_id=binding.workstream_id,
@@ -1093,24 +1132,8 @@ class HumanAdamProfileManager:
                 self.simple_main_deployment_receipt_path
             )
             workstream_id = str(receipt.get("workstream_id") or "")
-            owner_id = self.workstream_backends.compatibility_profile_id(workstream_id)
-            active_id = self.active_profile_id
-            if owner_id != active_id:
-                raise AppServerError(
-                    "Ověření nasazení patří jinému pracovnímu proudu; nejdřív jej znovu aktivuj."
-                )
-            profile = self.profiles[active_id]
-            binding = profile.get("workstream_binding")
-            if (
-                not isinstance(binding, CanonicalWorkstreamBinding)
-                or binding.workstream_id != workstream_id
-            ):
-                raise AppServerError("Účtenka nasazení neodpovídá aktivnímu pracovnímu proudu.")
-            peers = tuple(
-                candidate["service"].workspace
-                for profile_id, candidate in self.profiles.items()
-                if profile_id != active_id
-            )
+            binding = self._canonical_binding(workstream_id)
+            peers = self._peer_workspaces(service.workspace)
             result = verify_clean_main_deployment(
                 workspace=service.workspace,
                 observed_pid=observed_pid,
@@ -1141,8 +1164,8 @@ class HumanAdamProfileManager:
             "tvbcp": True,
             "development": one_turn_write,
             "checkpoint": one_turn_write,
-            "deployment": not lazy,
-            "github_batch": self.github_batch_mode and not lazy,
+            "deployment": True,
+            "github_batch": self.github_batch_mode,
             "lazy_backend": lazy,
             "writable_pilot": writable_pilot,
             "one_turn_write": one_turn_write,
@@ -1167,16 +1190,12 @@ class HumanAdamProfileManager:
     def status(self) -> dict[str, Any]:
         try:
             selection = self.grouped_workstream_status()
-            active = selection.get("active") or {}
-            active_workstream_id = str(active.get("workstream_id") or "")
             payload = self.active_service.status()
             last_deployment = load_completed_simple_main_deployment(
                 self.simple_main_deployment_receipt_path,
-                expected_workstream_id=active_workstream_id,
             )
             recent_deployment = load_recent_simple_main_deployment(
                 self.simple_main_deployment_receipt_path,
-                expected_workstream_id=active_workstream_id,
             )
             return {
                 **payload,
@@ -2079,15 +2098,8 @@ class HumanAdamProfileManager:
             else "Checkpoint je hotový; jeden čistý profil se dorovná při příštím Připojit."
         )
         checkpoint_short = str(checkpoint.get("checkpoint_short") or "")
-        profile = self.profiles.get(active_id) or {}
-        binding = profile.get("workstream_binding")
-        deployed = (
-            load_completed_simple_main_deployment(
-                self.simple_main_deployment_receipt_path,
-                expected_workstream_id=binding.workstream_id,
-            )
-            if isinstance(binding, CanonicalWorkstreamBinding)
-            else None
+        deployed = load_completed_simple_main_deployment(
+            self.simple_main_deployment_receipt_path,
         )
         deployed_short = str((deployed or {}).get("main_short") or "")
         if deployed_short and deployed_short == checkpoint_short:
@@ -2296,9 +2308,11 @@ class HumanAdamProfileManager:
                     "writes_performed": False,
                     "pending": False,
                     "state": "not_applicable",
-                    "label": "Audit čekající integrace se zde nepoužívá",
-                    "message": "Odložená integrace je povolená pouze pro Human–Adam.",
-                    "next_step": "Použij pravidla aktivního pracovního proudu.",
+                    "label": "Žádný odložený WIP",
+                    "message": (
+                        "Aktivní pracovní proud používá přímý checkpoint do main."
+                    ),
+                    "next_step": "Žádná samostatná integrace není potřeba.",
                     "requires_service_decision": False,
                     "overlap_count": 0,
                     "overlap_paths": [],

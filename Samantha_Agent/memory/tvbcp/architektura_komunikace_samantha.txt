@@ -3665,3 +3665,37 @@ Technický důkaz:
 - rychlá Cockpit brána syntaxe a whitespace: 4.6 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `layer-human-adam-development`.
 - Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+
+### 2026-07-28 10:58 CEST – Globální operace panelu Práce jsou nezávislé na aktivním pracovním proudu
+
+Hotovo:
+- Audit a odeslání denního GitHub balíčku, dorovnání `main`, audit nasazení,
+  potvrzené nasazení a ověření restartu už nejsou omezené na kompatibilní proud
+  Human–Adam.
+- Všechny proudy vidí stejný globální stav běžícího Cockpitu i po přepnutí
+  aktivního proudu. Konkrétní vývojová a private oprávnění jednotlivých proudů
+  zůstávají zachovaná.
+- Nerelevantní sekce čekající integrace je u direct-main proudů skutečně skrytá;
+  atribut `hidden` už nepřebíjí společný styl boxu.
+
+Rozhodnutí:
+- GitHub balíček, dorovnání `main` a nasazení Cockpitu jsou vlastnosti
+  kanonického repozitáře a runtime, nikoli vlastnosti jednoho pracovního proudu.
+- Ekvivalence proudů znamená stejné uživatelské možnosti globálních operací.
+  Odložená integrace se dál zobrazuje jen tam, kde skutečně vznikl odložený WIP;
+  direct-main proud ji nepotřebuje.
+
+Další krok:
+- Vytvořit lokální checkpoint a samostatně potvrzeně nasadit aktuální `main` do
+  Cockpitu; GitHub ponechat do denního balíčku.
+
+Navrhované další kroky:
+- Po nasazení v R2-Adamu otevřít panel Práce a jednou vizuálně ověřit, že se
+  nezobrazí technická hláška čekající integrace a audit denního balíčku už není
+  odmítnut kvůli typu proudu.
+
+Technický důkaz:
+- Cílená rozšířená sada prošla 179/179 testy.
+- Plná Cockpit Quality Gate prošla 1162 testy za 407,6 s.
+- Python, JavaScript, shell, whitespace a regresní test přepnutí mezi proudy
+  jsou zelené.

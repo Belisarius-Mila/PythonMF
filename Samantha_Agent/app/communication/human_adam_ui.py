@@ -86,6 +86,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     #projectContinuityMeta { margin:0; color:var(--muted); font-size:13px; overflow-wrap:anywhere; }
     #projectContinuityReasons { margin:0; padding-left:22px; color:var(--muted); font-size:13px; }
     .integration-audit-box { margin:12px 16px; padding:14px; border:1px solid #93c5fd; border-radius:13px; display:grid; gap:8px; background:#eff6ff; }
+    .integration-audit-box[hidden] { display:none; }
     .integration-audit-box.ready { border-color:#86efac; background:#f0fdf4; }
     .integration-audit-box.warn { border-color:#fbbf24; background:#fffbeb; }
     .integration-audit-box.blocked { border-color:#fca5a5; background:#fef2f2; }

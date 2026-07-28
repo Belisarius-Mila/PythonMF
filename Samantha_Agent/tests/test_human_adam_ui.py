@@ -638,6 +638,7 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertNotIn("MMTX pilot", HUMAN_ADAM_HTML)
         self.assertNotIn("semaphore.can_deploy", HUMAN_ADAM_HTML)
         self.assertIn("To projde jen při čistých workspaces bez čekajícího WIP", HUMAN_ADAM_HTML)
+        self.assertIn(".integration-audit-box[hidden] { display:none; }", HUMAN_ADAM_HTML)
 
     def test_project_continuity_ui_is_read_only_and_non_blocking(self) -> None:
         start = HUMAN_ADAM_HTML.index("async function loadProjectContinuity()")

@@ -340,18 +340,20 @@ def load_simple_main_deployment_receipt(path: Path) -> dict[str, Any]:
 def load_completed_simple_main_deployment(
     path: Path,
     *,
-    expected_workstream_id: str,
+    expected_workstream_id: str = "",
 ) -> dict[str, Any] | None:
-    """Return a persistent safe summary for one expected canonical workstream."""
+    """Return a persistent safe summary, optionally filtered by workstream."""
 
     clean_expected = str(expected_workstream_id or "").strip().casefold()
-    if not _WORKSTREAM_ID_RE.fullmatch(clean_expected):
+    if clean_expected and not _WORKSTREAM_ID_RE.fullmatch(clean_expected):
         return None
     try:
         receipt = load_simple_main_deployment_receipt(path)
     except SimpleMainDeploymentError:
         return None
-    if receipt.get("state") != DEPLOYED or receipt.get("workstream_id") != clean_expected:
+    if receipt.get("state") != DEPLOYED:
+        return None
+    if clean_expected and receipt.get("workstream_id") != clean_expected:
         return None
     return {
         "state": DEPLOYED,
@@ -374,11 +376,11 @@ def load_completed_simple_main_deployment(
 def load_recent_simple_main_deployment(
     path: Path,
     *,
-    expected_workstream_id: str,
+    expected_workstream_id: str = "",
     now_factory: Callable[[], str] = utc_now,
     max_age_seconds: int = RECENT_DEPLOYMENT_MAX_AGE_SECONDS,
 ) -> dict[str, Any] | None:
-    """Return a short safe summary of one recently verified deployment."""
+    """Return a recent safe summary, optionally filtered by workstream."""
 
     summary = load_completed_simple_main_deployment(
         path,

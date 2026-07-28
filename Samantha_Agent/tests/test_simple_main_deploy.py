@@ -541,6 +541,7 @@ class SimpleMainDeploymentTests(unittest.TestCase):
                 receipt_path,
                 expected_workstream_id="project-library",
             )
+            global_summary = load_completed_simple_main_deployment(receipt_path)
             foreign = load_completed_simple_main_deployment(
                 receipt_path,
                 expected_workstream_id="project-mmtx",
@@ -567,6 +568,7 @@ class SimpleMainDeploymentTests(unittest.TestCase):
 
         self.assertIsNotNone(persistent)
         self.assertEqual(persistent["workstream_id"], "project-library")
+        self.assertEqual(global_summary, persistent)
         self.assertEqual(persistent["main_short"], "a" * 12)
         self.assertNotIn("main_head", persistent)
         self.assertNotIn("expected_code_stamp", persistent)

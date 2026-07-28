@@ -715,7 +715,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertEqual(lazy.open_calls, [])
         self.assertTrue(lazy.hubs["project-mmtx"].connected)
 
-    def test_status_exposes_only_recent_deployment_for_active_workstream(self) -> None:
+    def test_status_exposes_global_recent_deployment_after_workstream_switch(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             manager, *_rest = self.make_manager(Path(temp_dir))
             recovery = {
@@ -726,19 +726,15 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
                 "gate": {"passed": True, "test_count": 904, "duration_seconds": 272.5},
                 "smoke": {"passed": True, "check_count": 5},
             }
-            def for_workstream(_path, *, expected_workstream_id, **_kwargs):
-                return (
-                    recovery
-                    if expected_workstream_id == "layer-human-adam-development"
-                    else None
-                )
+            def global_deployment(_path, **_kwargs):
+                return recovery
 
             with patch(
                 "app.communication.human_adam_profiles.load_completed_simple_main_deployment",
-                side_effect=for_workstream,
+                side_effect=global_deployment,
             ), patch(
                 "app.communication.human_adam_profiles.load_recent_simple_main_deployment",
-                side_effect=for_workstream,
+                side_effect=global_deployment,
             ):
                 status = manager.status()
                 manager.switch(profile_id="knihovna", confirmed=True)
@@ -746,8 +742,8 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
 
         self.assertEqual(status["last_simple_main_deployment"], recovery)
         self.assertEqual(status["recent_simple_main_deployment"], recovery)
-        self.assertIsNone(other_status["last_simple_main_deployment"])
-        self.assertIsNone(other_status["recent_simple_main_deployment"])
+        self.assertEqual(other_status["last_simple_main_deployment"], recovery)
+        self.assertEqual(other_status["recent_simple_main_deployment"], recovery)
         self.assertNotIn("deployment_confirmation", status)
         self.assertNotIn("deployment_diagnostic", status)
 
@@ -1033,7 +1029,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         )
         self.assertIn("Pracovni proud: project-mmtx", request.handoff_initial_content)
         self.assertIn("# TVBCP: MMTX", request.tvbcp_initial_content)
-        self.assertFalse(
+        self.assertTrue(
             request.operational_context["deployment_expected"]
         )
         self.assertEqual(result["workstream"]["name"], "MMTX")
@@ -1347,9 +1343,11 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertNotIn("work_profile", result)
         self.assertEqual(result["workstream"]["id"], "layer-human-adam-development")
 
-    def test_simple_deployment_verification_rejects_different_active_workstream(self) -> None:
+    def test_simple_deployment_verification_is_global_after_workstream_switch(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
-            manager, *_rest = self.make_manager(Path(temp_dir))
+            manager, human_workspace, library_workspace, *_rest = self.make_manager(
+                Path(temp_dir)
+            )
             manager.switch(profile_id="knihovna", confirmed=True)
             with patch(
                 "app.communication.human_adam_profiles.load_simple_main_deployment_receipt",
@@ -1358,14 +1356,108 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
                     "workstream_id": "layer-human-adam-development",
                 },
             ), patch(
-                "app.communication.human_adam_profiles.verify_clean_main_deployment"
+                "app.communication.human_adam_profiles.verify_clean_main_deployment",
+                return_value={"ok": True, "state": "deployed"},
             ) as verify:
-                with self.assertRaisesRegex(AppServerError, "jinému pracovnímu proudu"):
-                    manager.verify_simple_main_deployment(
-                        observed_pid=654,
-                        observed_code_stamp="0123456789abcdef",
-                    )
-                verify.assert_not_called()
+                result = manager.verify_simple_main_deployment(
+                    observed_pid=654,
+                    observed_code_stamp="0123456789abcdef",
+                )
+
+        self.assertEqual(result["workstream"]["id"], "layer-human-adam-development")
+        self.assertIs(verify.call_args.kwargs["workspace"], library_workspace)
+        self.assertEqual(
+            verify.call_args.kwargs["peer_workspaces"],
+            (human_workspace,),
+        )
+
+    def test_lazy_workstream_uses_global_git_batch_sync_and_deployment_backends(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, library_workspace, *_rest = self.make_manager(
+                Path(temp_dir)
+            )
+            lazy = FakeLazyThreads(Path(temp_dir) / "lazy")
+            manager.workstream_threads = lazy  # type: ignore[assignment]
+            manager.github_batch_mode = True
+            manager.activate_grouped_workstream(
+                workstream_id="project-r2-adam-janicka",
+                confirmed=True,
+            )
+            with patch(
+                "app.communication.human_adam_profiles.audit_clean_main_remote_sync",
+                return_value={
+                    "ok": True,
+                    "state": "aligned",
+                    "local_head": "a" * 40,
+                    "origin_head": "a" * 40,
+                },
+            ) as sync_audit, patch(
+                "app.communication.human_adam_profiles.audit_daily_github_batch",
+                return_value={
+                    "ok": True,
+                    "state": "local_ahead",
+                    "local_head": "a" * 40,
+                    "origin_head": "b" * 40,
+                    "commit_count": 2,
+                },
+            ) as batch_audit, patch(
+                "app.communication.human_adam_profiles.prepare_clean_main_deployment",
+                return_value={"ok": True, "state": "pending_restart"},
+            ) as deploy:
+                sync = manager.audit_main_remote_sync()
+                batch = manager.audit_github_batch()
+                prepared = manager.prepare_simple_main_deployment(
+                    previous_pid=654,
+                    confirmed=True,
+                )
+
+            with patch(
+                "app.communication.human_adam_profiles.load_simple_main_deployment_receipt",
+                return_value={
+                    "state": "pending_restart",
+                    "workstream_id": "project-r2-adam-janicka",
+                },
+            ), patch(
+                "app.communication.human_adam_profiles.verify_clean_main_deployment",
+                return_value={"ok": True, "state": "deployed"},
+            ) as verify:
+                verified = manager.verify_simple_main_deployment(
+                    observed_pid=777,
+                    observed_code_stamp="0123456789abcdef",
+                )
+
+        self.assertTrue(manager.status()["workstream_capabilities"]["deployment"])
+        self.assertTrue(manager.status()["workstream_capabilities"]["github_batch"])
+        self.assertTrue(sync["profiles_ready"])
+        self.assertEqual(batch["commit_count"], 2)
+        self.assertEqual(
+            sync_audit.call_args.kwargs["source_repo"],
+            human_workspace.source_repo,
+        )
+        self.assertEqual(
+            batch_audit.call_args.kwargs["source_repo"],
+            human_workspace.source_repo,
+        )
+        deploy_call = deploy.call_args.kwargs
+        self.assertIs(deploy_call["workspace"], human_workspace)
+        self.assertEqual(deploy_call["peer_workspaces"], (library_workspace,))
+        self.assertEqual(
+            deploy_call["request"].workstream_id,
+            "project-r2-adam-janicka",
+        )
+        self.assertEqual(
+            prepared["workstream"]["id"],
+            "project-r2-adam-janicka",
+        )
+        verify_call = verify.call_args.kwargs
+        self.assertIs(verify_call["workspace"], human_workspace)
+        self.assertEqual(verify_call["peer_workspaces"], (library_workspace,))
+        self.assertEqual(
+            verified["workstream"]["id"],
+            "project-r2-adam-janicka",
+        )
 
     def test_grouped_router_switches_legacy_to_lazy_through_public_action(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -1406,7 +1498,8 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             result["workstream_capabilities"]["write_authorization"],
             "one_turn",
         )
-        self.assertFalse(result["workstream_capabilities"]["deployment"])
+        self.assertTrue(result["workstream_capabilities"]["deployment"])
+        self.assertFalse(result["workstream_capabilities"]["github_batch"])
         self.assertEqual(lazy.open_calls, ["project-mmtx"])
         self.assertEqual(persisted["schema_version"], 2)
         self.assertEqual(persisted["active_workstream_id"], "project-mmtx")
@@ -1444,7 +1537,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertEqual(human_hub.last_send, {})
         self.assertEqual(sent["automatic_completion"]["state"], "not_needed")
 
-    def test_mmtx_service_reads_canonical_tvbcp_but_blocks_manual_checkpoint_and_deploy(self) -> None:
+    def test_mmtx_service_reads_canonical_tvbcp_and_keeps_manual_wip_checkpoint_blocked(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             manager, human_workspace, *_rest = self.make_manager(Path(temp_dir))
             lazy = FakeLazyThreads(Path(temp_dir) / "lazy")
@@ -1462,11 +1555,11 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             development = manager.development_status()
             with self.assertRaisesRegex(AppServerError, "Ruční WIP checkpoint"):
                 manager.checkpoint(confirmed=True, message="Zakázaný checkpoint")
-            with self.assertRaisesRegex(
-                AppServerError,
-                "Audit nasazení lazy pracovního proudu zatím není povolené",
-            ):
-                manager.audit_simple_main_deployment()
+            with patch(
+                "app.communication.human_adam_profiles.audit_clean_main_deployment",
+                return_value={"ok": True, "ready": True, "main_head": "a" * 40},
+            ) as audit:
+                deployment = manager.audit_simple_main_deployment()
 
         self.assertEqual(tvbcp["content"], "# TVBCP: MMTX\n")
         self.assertEqual(tvbcp["relative_path"], binding.tvbcp_relative_path)
@@ -1476,6 +1569,9 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertFalse(development["can_acquire_profile"])
         self.assertFalse(development["can_checkpoint"])
         self.assertFalse(development["can_deploy"])
+        self.assertTrue(deployment["ready"])
+        self.assertEqual(deployment["workstream"]["id"], "project-mmtx")
+        self.assertEqual(audit.call_args.kwargs["workstream_id"], "project-mmtx")
 
     def test_family_calendar_has_one_turn_write_without_mmtx_pilot_label(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -1490,11 +1586,6 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             )
 
             capabilities = manager.status()["workstream_capabilities"]
-            with self.assertRaisesRegex(
-                AppServerError,
-                "Audit nasazení lazy pracovního proudu zatím není povolené",
-            ):
-                manager.audit_simple_main_deployment()
             read_only = manager.send(
                 text="Jen analyzuj kalendář",
                 client_message_id="calendar-read-only-001",
@@ -1531,6 +1622,8 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertTrue(capabilities["development"])
         self.assertTrue(capabilities["checkpoint"])
         self.assertTrue(capabilities["one_turn_write"])
+        self.assertTrue(capabilities["deployment"])
+        self.assertFalse(capabilities["github_batch"])
         self.assertEqual(capabilities["write_authorization"], "one_turn")
         self.assertFalse(capabilities["writable_pilot"])
         self.assertIn("writable=false", read_only_input)
@@ -1632,7 +1725,8 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertTrue(capabilities["one_turn_write"])
         self.assertEqual(capabilities["write_authorization"], "one_turn")
         self.assertTrue(capabilities["source_data_read_only"])
-        self.assertFalse(capabilities["deployment"])
+        self.assertTrue(capabilities["deployment"])
+        self.assertFalse(capabilities["github_batch"])
         self.assertIn("lease_state=authorized_once", model_input)
         self.assertIn("lease_owner_id=project-r2-adam-janicka", model_input)
         self.assertIn("workspace_writable=true", model_input)
