@@ -3077,7 +3077,7 @@ class CockpitTests(unittest.TestCase):
         self.assertFalse(result["ok"])
         self.assertEqual(result["status"], "confirmation_required")
 
-    def test_generic_codex_approval_and_tvbcp_routes_replace_voice_names(self) -> None:
+    def test_generic_codex_approval_remains_and_legacy_tvbcp_routes_are_absent(self) -> None:
         registered_paths = {item["path"] for item in COCKPIT_POST_ACTIONS}
         post_routes = set(self.cockpit_do_post_routes())
         get_routes = set(self.cockpit_do_get_routes())
@@ -3086,7 +3086,7 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("/api/codex-approval/clear", post_routes)
         self.assertNotIn("/api/voice-mode/codex-approval/clear", registered_paths)
         self.assertNotIn("/api/voice-mode/codex-approval/clear", post_routes)
-        self.assertIn("/api/tvbcp", get_routes)
+        self.assertNotIn("/api/tvbcp", get_routes)
         self.assertNotIn("/api/voice-bridge/tvbcp", get_routes)
 
     def test_live_status_refresh_renders_only_codex_approval(self) -> None:
@@ -3217,13 +3217,13 @@ class CockpitTests(unittest.TestCase):
         self.assertNotIn("toggleVoiceMode", COCKPIT_HTML)
         self.assertNotIn("directVoiceRecordingSupported", COCKPIT_HTML)
         self.assertNotIn("voiceTranscript", COCKPIT_HTML)
-        self.assertIn("tvbcpOpenBtn", COCKPIT_HTML)
-        self.assertIn("tvbcpModal", COCKPIT_HTML)
-        self.assertIn("tvbcpCloseBtn", COCKPIT_HTML)
-        self.assertIn("openTvbcpModal", COCKPIT_HTML)
-        self.assertIn("closeTvbcpModal", COCKPIT_HTML)
-        self.assertIn('tvbcpContent.textContent = data.content', COCKPIT_HTML)
-        self.assertIn('tvbcpContent.scrollTop = tvbcpContent.scrollHeight', COCKPIT_HTML)
+        self.assertNotIn("tvbcpOpenBtn", COCKPIT_HTML)
+        self.assertNotIn("tvbcpModal", COCKPIT_HTML)
+        self.assertNotIn("tvbcpCloseBtn", COCKPIT_HTML)
+        self.assertNotIn("openTvbcpModal", COCKPIT_HTML)
+        self.assertNotIn("closeTvbcpModal", COCKPIT_HTML)
+        self.assertNotIn('tvbcpContent.textContent = data.content', COCKPIT_HTML)
+        self.assertNotIn('tvbcpContent.scrollTop = tvbcpContent.scrollHeight', COCKPIT_HTML)
         self.assertNotIn('window.open("/voice-bridge/tvbcp/"', COCKPIT_HTML)
         self.assertNotIn("startVoiceRecording", COCKPIT_HTML)
         self.assertNotIn("transcribeVoiceRecording", COCKPIT_HTML)

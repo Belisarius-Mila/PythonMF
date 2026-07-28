@@ -1,33 +1,33 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-27 22:05 CEST
+- Obnoveno potvrzeným checkpointem: 2026-07-28 06:12 CEST
 
 ### Hotovo
-- Přidána potvrzovaná bezeztrátová migrace starého private TVBCP do soukromého kontextu proudu Brainstorm včetně bezpečných instrukcí a testů.
-- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Staré TVBCP tlačítko, modal, endpoint a výhradní obslužný kód jsou z Cockpitu odstraněné, zatímco Brainstorm kontext i projektový TVBCP Human–Adam zůstávají zachované.
 
 ### Otevřeno
 - Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
-- Lokální commity čekají na samostatný denní GitHub balíček.
 
 ### Rizika
-- Žádné další doložené provozní riziko.
+- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
 
 ### Další krok
-- Nasadit aktuální main; samotnou private migraci spustit až samostatnou přesnou potvrzovací větou.
+- Provést checkpoint a nasazení, potom pokračovat fází 9.4e-b.
 
 ### Rozhodnutí
-- V tomto kroku nebylo přijato nové kanonické rozhodnutí.
+- Starý Cockpit TVBCP se vyřazuje až po ověřené bezeztrátové migraci do proudu Brainstorm / nápady; private zdroj se nemaže.
 
 ### Navrhované další kroky
-- Žádné další návrhy nad rámec bezprostředního kroku.
+- V 9.4e-b odstranit poslední aktivní zastaralé Voice Bridge formulace bez přepisování historie.
+- V 9.4e-c spustit úplnou Cockpit Quality Gate a smoke test.
+- Adam-R2 zahájit samostatně po uzavření fáze 9.4e.
 
 ### Technický stav checkpointu
-- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `9976bd01b51a`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `9976bd01b51a` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-07-27T19:28:59+00:00.
-- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+- Změna je otestovaná (1147 testů).
+- Git před checkpointem: lokální `main` na `64d1e79d8151`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `38ef3ac1e1fb` · je starší než ověřený main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-07-28T03:12:13+00:00.
+- Read-only živý stav: main=`aligned`, deployment=`verified_other_main`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -2463,3 +2463,15 @@ Technický důkaz:
 - Prošlo 167 cílených testů.
 - Úplná Cockpit Quality Gate prošla 1150 testy; Python, JavaScript, shell,
   whitespace a Git safety kontroly jsou zelené.
+
+### Automatický checkpoint 2026-07-28 06:12 CEST
+
+- Pracovní proud: `layer-human-adam-development`
+- Hotovo: Staré TVBCP tlačítko, modal, endpoint a výhradní obslužný kód jsou z Cockpitu odstraněné, zatímco Brainstorm kontext i projektový TVBCP Human–Adam zůstávají zachované.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Rizika: Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: plná Cockpit brána: 1147 testů, 299.7 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (8): `Samantha_Agent/app/cockpit.py`, `Samantha_Agent/app/tvbcp.py`, `Samantha_Agent/scripts/cockpit_quality_gate.py`, `Samantha_Agent/scripts/tvbcp.py`, `Samantha_Agent/tests/test_cockpit.py`, `Samantha_Agent/tests/test_cockpit_quality_gate.py`, `Samantha_Agent/tests/test_cockpit_voice_frontend_retirement.py`, `Samantha_Agent/tests/test_tvbcp.py`
+- Commit: `Retire obsolete Cockpit TVBCP surface`
+- Další krok: Provést checkpoint a nasazení, potom pokračovat fází 9.4e-b.

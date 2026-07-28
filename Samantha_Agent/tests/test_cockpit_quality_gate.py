@@ -240,7 +240,9 @@ async def second():
             "app/speech/adam_voice_mode.py",
             "app/speech/terminal_bridge.py",
             "app/speech/voice_inbox.py",
+            "app/tvbcp.py",
             "scripts/adam_voice_reply.py",
+            "scripts/tvbcp.py",
         )
         retired_tests = (
             "tests.test_voice_bridge_coordinator",
@@ -248,6 +250,7 @@ async def second():
             "tests.test_voice_bridge_state",
             "tests.test_adam_voice_mode",
             "tests.test_terminal_bridge",
+            "tests.test_tvbcp",
             "tests.test_voice_inbox",
         )
 

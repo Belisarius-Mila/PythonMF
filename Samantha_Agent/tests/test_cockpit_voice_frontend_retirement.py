@@ -90,8 +90,11 @@ class CockpitVoiceFrontendRetirementTests(unittest.TestCase):
             with self.subTest(marker=marker):
                 self.assertNotIn(marker, html)
 
-    def test_generic_speech_codex_approval_and_tvbcp_access_remain(self) -> None:
+    def test_generic_speech_and_codex_approval_remain_without_legacy_tvbcp(self) -> None:
         html = cockpit_html()
+        human_adam_source = (
+            PROJECT_ROOT / "app" / "communication" / "human_adam_ui.py"
+        ).read_text(encoding="utf-8")
 
         self.assertIn('id="dashboardSpeakBtn"', html)
         self.assertIn('id="dashboardSpeakSelectionBtn"', html)
@@ -102,10 +105,12 @@ class CockpitVoiceFrontendRetirementTests(unittest.TestCase):
         self.assertIn("renderCodexApproval(data.codex_approval || {});", html)
         self.assertIn("/api/codex-approval/clear", html)
         self.assertNotIn("/api/voice-mode/codex-approval/clear", html)
-        self.assertIn('id="tvbcpOpenBtn"', html)
-        self.assertIn("openTvbcpModal", html)
-        self.assertIn("/api/tvbcp", html)
+        self.assertNotIn('id="tvbcpOpenBtn"', html)
+        self.assertNotIn("openTvbcpModal", html)
+        self.assertNotIn("/api/tvbcp", html)
         self.assertNotIn("/api/voice-bridge/tvbcp", html)
+        self.assertIn('id="tvbcpOpenBtn"', human_adam_source)
+        self.assertIn("async function loadTvbcp()", human_adam_source)
 
     def test_human_adam_microphone_and_generic_backend_routes_remain(self) -> None:
         cockpit_source = (PROJECT_ROOT / "app" / "cockpit.py").read_text(encoding="utf-8")
@@ -120,10 +125,10 @@ class CockpitVoiceFrontendRetirementTests(unittest.TestCase):
             "/api/speech/speak",
             "/api/speech/edge-tts",
             "/api/codex-approval/clear",
-            "/api/tvbcp",
         ):
             with self.subTest(route=route):
                 self.assertIn(route, cockpit_source)
+        self.assertNotIn("/api/tvbcp", cockpit_source)
 
         for route in (
             "/api/speech/transcribe",
@@ -146,7 +151,7 @@ class CockpitVoiceFrontendRetirementTests(unittest.TestCase):
 
         self.assertIn('"path": "/api/codex-approval/clear"', source)
         self.assertIn('if parsed.path == "/api/codex-approval/clear"', source)
-        self.assertIn('if parsed.path == "/api/tvbcp"', source)
+        self.assertNotIn('if parsed.path == "/api/tvbcp"', source)
         self.assertNotIn("/api/voice-mode/codex-approval/clear", source)
         self.assertNotIn("/api/voice-bridge/tvbcp", source)
 
@@ -166,6 +171,7 @@ class CockpitVoiceFrontendRetirementTests(unittest.TestCase):
             "/api/voice-bridge/terminate-stale",
         }
         retired_get_routes = {
+            "/api/tvbcp",
             "/api/voice-mode/latest-response",
             "/api/voice-mode/safe-readonly",
         }
@@ -182,7 +188,6 @@ class CockpitVoiceFrontendRetirementTests(unittest.TestCase):
             with self.subTest(route=route):
                 self.assertIn(route, registered_paths)
                 self.assertIn(route, post_routes)
-        self.assertIn("/api/tvbcp", get_routes)
 
     def test_orphaned_cockpit_voice_handlers_and_glue_are_retired(self) -> None:
         source = (PROJECT_ROOT / "app" / "cockpit.py").read_text(encoding="utf-8")
@@ -334,15 +339,18 @@ class CockpitVoiceFrontendRetirementTests(unittest.TestCase):
             "app/speech/adam_voice_mode.py",
             "app/speech/terminal_bridge.py",
             "app/speech/voice_inbox.py",
+            "app/tvbcp.py",
             "tests/test_voice_bridge_coordinator.py",
             "tests/test_voice_bridge_runtime.py",
             "tests/test_voice_bridge_state.py",
             "tests/test_adam_voice_mode.py",
             "tests/test_terminal_bridge.py",
+            "tests/test_tvbcp.py",
             "tests/test_voice_inbox.py",
             "scripts/adam_voice_mode.py",
             "scripts/adam_voice_pending.py",
             "scripts/adam_voice_reply.py",
+            "scripts/tvbcp.py",
             "scripts/voice_inbox_triage.py",
             "scripts/adam_bridge_readiness_report.py",
         )
