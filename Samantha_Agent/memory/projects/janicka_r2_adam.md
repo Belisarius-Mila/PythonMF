@@ -1,7 +1,7 @@
 # R2-Adam / Janička
 
 Priorita: 2
-Stav: samostatný aktivní projekt, návrh před implementací
+Stav: samostatný aktivní projekt, připravený vývojový proud; funkční R2 před implementací
 Založeno: 2026-07-17
 Historický pracovní název: R-A2
 
@@ -89,6 +89,17 @@ konkrétním zadání, v nezbytném rozsahu a s jasným náhledem před odeslán
   idempotence, `delivery_unknown`, časomíra a případný zvuk.
 - Soukromý kompaktní kontext mimo Git; není kopií chatu ani projektovým TVBCP.
 - Registrované read-only zdroje a jediná úzká exportní/outbound schopnost.
+
+## Vývojový proud
+
+Od 2026-07-28 lze v pracovním proudu `R2-Adam / Janička` jednorázově potvrdit
+vývoj projektového kódu tlačítkem `Zahájit vývoj`. Úspěšný tah smí vytvořit
+lokální checkpoint; nasazení z lazy proudu zůstává oddělené.
+
+Toto vývojové oprávnění nemění roli budoucího R2-Adama. Zdrojová soukromá data
+Samanthy zůstávají read-only i během vývojového tahu a jejich kořen není
+zapisovatelný v sandboxu. Funkční R2-Adam, jeho soukromý kontext a exportní
+workflow dosud implementované nejsou.
 
 ## Otevřené kroky před implementací
 

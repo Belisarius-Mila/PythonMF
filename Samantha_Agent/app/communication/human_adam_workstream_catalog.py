@@ -31,6 +31,7 @@ class CanonicalWorkstreamCapabilities:
     private_archive_direct: bool = False
     private_archive_read: bool = False
     private_archive_single_edit: bool = False
+    source_data_read_only: bool = False
     private_archive_confirmation_required: tuple[str, ...] = ()
     private_archive_root: str = ""
 
@@ -39,17 +40,22 @@ class CanonicalWorkstreamCapabilities:
             self.private_archive_direct,
             self.private_archive_read,
             self.private_archive_single_edit,
+            self.source_data_read_only,
         )
         if any(type(flag) is not bool for flag in flags):
             raise ValueError("Pracovní proud má neplatné private archive capability.")
+        if self.source_data_read_only and any(flags[:3]):
+            raise ValueError(
+                "Read-only zdrojová data nelze kombinovat s přímou editací archivu."
+            )
         if not isinstance(self.private_archive_confirmation_required, tuple):
             raise ValueError("Pracovní proud má neplatné private archive capability.")
-        enabled = any(flags)
+        enabled = any(flags[:3])
         if not enabled:
             if self.private_archive_confirmation_required or self.private_archive_root:
                 raise ValueError("Pracovní proud má neplatné private archive capability.")
             return
-        if not all(flags):
+        if not all(flags[:3]):
             raise ValueError("Pracovní proud má neúplné private archive capability.")
         if (
             self.private_archive_confirmation_required
@@ -79,6 +85,7 @@ class CanonicalWorkstreamCapabilities:
             "private_archive_direct": self.private_archive_direct,
             "private_archive_read": self.private_archive_read,
             "private_archive_single_edit": self.private_archive_single_edit,
+            "source_data_read_only": self.source_data_read_only,
             "private_archive_confirmation_required": list(
                 self.private_archive_confirmation_required
             ),
@@ -210,6 +217,9 @@ WORKSTREAM_CATALOG = validate_workstream_catalog(
             "active",
             "2",
             "R2-Adam / Janička",
+            capabilities=CanonicalWorkstreamCapabilities(
+                source_data_read_only=True,
+            ),
         ),
         _record(
             "project-family-emergency-plan",

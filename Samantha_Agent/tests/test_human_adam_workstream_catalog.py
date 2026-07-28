@@ -138,8 +138,20 @@ class WorkstreamCatalogTests(unittest.TestCase):
             all(
                 record.capabilities == CanonicalWorkstreamCapabilities()
                 for record in other_records
+                if record.workstream_id != "project-r2-adam-janicka"
             )
         )
+
+    def test_r2_adam_declares_read_only_source_data(self) -> None:
+        r2_adam = next(
+            record
+            for record in WORKSTREAM_CATALOG
+            if record.workstream_id == "project-r2-adam-janicka"
+        )
+
+        self.assertTrue(r2_adam.capabilities.source_data_read_only)
+        self.assertFalse(r2_adam.capabilities.private_archive_direct)
+        self.assertFalse(r2_adam.capabilities.private_archive_single_edit)
 
     def test_private_archive_capability_metadata_is_not_tied_to_one_catalog_id(
         self,

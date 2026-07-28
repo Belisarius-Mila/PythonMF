@@ -121,7 +121,7 @@ PROFILE_ID_RE = re.compile(r"[a-z][a-z0-9_-]{1,31}")
 LEGACY_PROFILE_STATE_SCHEMA = 1
 WORKSTREAM_STATE_SCHEMA = 2
 ONE_TURN_WRITABLE_LAZY_WORKSTREAM_IDS = frozenset(
-    {"project-mmtx", "project-family-calendar"}
+    {"project-mmtx", "project-family-calendar", "project-r2-adam-janicka"}
 )
 
 
@@ -161,12 +161,15 @@ def workstream_sandbox_policy(
     canonical_private_root = (
         Path(project_root).resolve() / "data" / "private"
     ).resolve()
+    writable_roots = (
+        []
+        if capabilities.source_data_read_only
+        else [str(root if root is not None else canonical_private_root)]
+    )
     policy = {
         **HUMAN_ADAM_SANDBOX_POLICY,
         "networkAccess": False,
-        "writableRoots": [
-            str(root if root is not None else canonical_private_root)
-        ],
+        "writableRoots": writable_roots,
     }
     return policy
 
@@ -1297,20 +1300,35 @@ class HumanAdamProfileManager:
                 )
             else:
                 canonical_private_root = service.workspace.canonical_private_root
-                control_lines.extend(
-                    (
-                        f"workspace_writable={'true' if writable else 'false'}",
-                        "canonical_private_access=read_diagnose_and_explicit_single_edit",
-                        f"canonical_private_root={canonical_private_root}",
-                        "canonical_private_confirmation_required="
-                        "delete,bulk_change,external_send,secret_operation,system_change",
-                        "rule=When workspace_writable=false, do not change workspace files "
-                        "or Git. One clearly requested, non-destructive private edit under "
-                        "canonical_private_root remains allowed. Read and diagnose this "
-                        "canonical root directly; never infer its absence from the isolated "
-                        "workspace. Never copy private content into Git, logs, handoff or TVBCP.",
+                if capability_metadata.source_data_read_only:
+                    control_lines.extend(
+                        (
+                            f"workspace_writable={'true' if writable else 'false'}",
+                            "canonical_private_access=read_only",
+                            f"canonical_private_root={canonical_private_root}",
+                            "canonical_private_confirmation_required=none",
+                            "rule=Development authorization applies only to project code, "
+                            "tests, Git-safe memory and Git. Never change or delete source "
+                            "user data under canonical_private_root, even when "
+                            "workspace_writable=true. Never copy private content into Git, "
+                            "logs, handoff or TVBCP.",
+                        )
                     )
-                )
+                else:
+                    control_lines.extend(
+                        (
+                            f"workspace_writable={'true' if writable else 'false'}",
+                            "canonical_private_access=read_diagnose_and_explicit_single_edit",
+                            f"canonical_private_root={canonical_private_root}",
+                            "canonical_private_confirmation_required="
+                            "delete,bulk_change,external_send,secret_operation,system_change",
+                            "rule=When workspace_writable=false, do not change workspace files "
+                            "or Git. One clearly requested, non-destructive private edit under "
+                            "canonical_private_root remains allowed. Read and diagnose this "
+                            "canonical root directly; never infer its absence from the isolated "
+                            "workspace. Never copy private content into Git, logs, handoff or TVBCP.",
+                        )
+                    )
                 if integration_deferred:
                     control_lines.extend(
                         (

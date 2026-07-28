@@ -296,11 +296,17 @@ class FakeLazyThreads:
         self.hubs = {
             "project-mmtx": FakeHub("mmtx-thread"),
             "project-family-calendar": FakeHub("family-calendar-thread"),
+            "project-r2-adam-janicka": FakeHub("r2-adam-thread"),
             "project-lekarna": FakeHub("lekarna-thread"),
         }
 
     def status(self) -> dict[str, object]:
-        ids = ("project-mmtx", "project-family-calendar", "project-lekarna")
+        ids = (
+            "project-mmtx",
+            "project-family-calendar",
+            "project-r2-adam-janicka",
+            "project-lekarna",
+        )
         return {
             "ok": True,
             "active_workstream_id": self.active_workstream_id,
@@ -1597,6 +1603,48 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             "[AUTOMATIC_OPERATION_REQUEST]",
             str(lazy.hubs["project-family-calendar"].last_send["model_input_text"]),
         )
+
+    def test_r2_adam_allows_one_turn_development_but_keeps_source_data_read_only(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, _human_workspace, *_rest = self.make_manager(Path(temp_dir))
+            lazy = FakeLazyThreads(Path(temp_dir) / "lazy")
+            manager.workstream_threads = lazy  # type: ignore[assignment]
+            manager.activate_grouped_workstream(
+                workstream_id="project-r2-adam-janicka",
+                confirmed=True,
+            )
+
+            capabilities = manager.status()["workstream_capabilities"]
+            writable = manager.send(
+                text="Implementuj malý krok R2-Adama.",
+                client_message_id="r2-adam-write-001",
+                write_intent=True,
+            )
+            model_input = str(
+                lazy.hubs["project-r2-adam-janicka"].last_send["model_input_text"]
+            )
+            sandbox_policy = manager.active_service.sandbox_policy
+
+        self.assertTrue(capabilities["development"])
+        self.assertTrue(capabilities["checkpoint"])
+        self.assertTrue(capabilities["one_turn_write"])
+        self.assertEqual(capabilities["write_authorization"], "one_turn")
+        self.assertTrue(capabilities["source_data_read_only"])
+        self.assertFalse(capabilities["deployment"])
+        self.assertIn("lease_state=authorized_once", model_input)
+        self.assertIn("lease_owner_id=project-r2-adam-janicka", model_input)
+        self.assertIn("workspace_writable=true", model_input)
+        self.assertIn("canonical_private_access=read_only", model_input)
+        self.assertIn("canonical_private_confirmation_required=none", model_input)
+        self.assertIn(
+            "Never change or delete source user data under canonical_private_root",
+            model_input,
+        )
+        self.assertEqual(sandbox_policy["writableRoots"], [])
+        self.assertFalse(sandbox_policy["networkAccess"])
+        self.assertEqual(writable["automatic_completion"]["state"], "not_needed")
 
     def test_family_calendar_operation_is_blocked_when_turn_leaves_changes(self) -> None:
         receipt = (
