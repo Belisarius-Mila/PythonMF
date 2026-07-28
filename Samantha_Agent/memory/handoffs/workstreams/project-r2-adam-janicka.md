@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-28 18:35 CEST
+- Obnoveno potvrzeným checkpointem: 2026-07-28 19:19 CEST
 
 ### Hotovo
-- R2-Adam může v chatu bezpečně vytvořit nový přehled z více výslovně potvrzených zdrojů, aniž by jejich obsah nafukoval chat.
+- R2-Adam umí bezpečně vytvořit úplný soupis nebo přehled z více než pěti potvrzených dokumentů bez tichého oříznutí výsledků.
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
@@ -15,10 +15,10 @@
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Vytvořit checkpoint, nasadit změnu a provést živý chatový test se dvěma neškodnými zdroji.
+- Vytvořit checkpoint, nasadit změnu a živě ověřit soupis z více než pěti dokumentů.
 
 ### Rozhodnutí
-- V tomto kroku nebylo přijato nové kanonické rozhodnutí.
+- Požadavek na všechny dokumenty se nesmí tiše omezit na prvních pět; názvy se zpracují z metadat a obsahové přehledy po dávkách.
 
 ### Navrhované další kroky
 - Po živém ověření doplnit samostatně potvrzovaný tisk dokumentu.
@@ -26,8 +26,8 @@
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `8725254148f4`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `8725254148f4` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-07-28T16:12:32+00:00.
+- Git před checkpointem: lokální `main` na `37bb35bb2862`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `37bb35bb2862` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-07-28T16:45:46+00:00.
 - Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -194,3 +194,15 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (6): `Samantha_Agent/app/communication/janicka_r2_backend.py`, `Samantha_Agent/app/communication/janicka_r2_chat.py`, `Samantha_Agent/app/communication/janicka_r2_compiler.py`, `Samantha_Agent/app/communication/janicka_r2_document_selection.py`, `Samantha_Agent/tests/test_janicka_r2_chat.py`, `Samantha_Agent/tests/test_janicka_r2_documents.py`
 - Commit: `Add confirmed multi-source R2 overviews`
 - Další krok: Vytvořit checkpoint, nasadit změnu a provést živý chatový test se dvěma neškodnými zdroji.
+
+### Automatický checkpoint 2026-07-28 19:19 CEST
+
+- Pracovní proud: `project-r2-adam-janicka`
+- Hotovo: R2-Adam umí bezpečně vytvořit úplný soupis nebo přehled z více než pěti potvrzených dokumentů bez tichého oříznutí výsledků.; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.; Lokální commity čekají na samostatný denní GitHub balíček.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: rychlá Cockpit brána syntaxe a whitespace: 4.3 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu
+- Změněné cesty před paměťovým zápisem (10): `Samantha_Agent/app/communication/janicka_r2_backend.py`, `Samantha_Agent/app/communication/janicka_r2_chat.py`, `Samantha_Agent/app/communication/janicka_r2_compiler.py`, `Samantha_Agent/app/communication/janicka_r2_document_selection.py`, `Samantha_Agent/app/documents/search_service.py`, `Samantha_Agent/scripts/cockpit_quality_gate.py`, `Samantha_Agent/tests/test_cockpit_quality_gate.py`, `Samantha_Agent/tests/test_document_search_service.py`, `Samantha_Agent/tests/test_janicka_r2_chat.py`, `Samantha_Agent/tests/test_janicka_r2_complete_selection.py`
+- Commit: `Support complete batched R2 document sets`
+- Další krok: Vytvořit checkpoint, nasadit změnu a živě ověřit soupis z více než pěti dokumentů.

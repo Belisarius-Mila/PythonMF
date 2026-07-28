@@ -17,8 +17,10 @@ from app.communication.janicka_r2_documents import (
 
 
 R2_DOCUMENT_INSPECTION_CAPABILITY = "inspect_document_text"
+R2_DOCUMENT_SEARCH_CAPABILITY = "search_private_documents"
 R2_DOCUMENT_INSPECTION_PREFIX = "Inspekce dokumentu (read-only):"
 MAX_R2_SOURCE_TEXT_BYTES = 256 * 1024
+MAX_R2_COMPLETE_SOURCES = 200
 _DOCUMENT_ID_RE = re.compile(r"[a-z0-9][a-z0-9_.-]{0,139}")
 
 DocumentInspector = Callable[[str], str]
@@ -149,6 +151,44 @@ class JanickaR2DocumentCompiler:
             compiled_at=compiled_at,
         )
 
+    def _compile_confirmed_complete_overview(
+        self,
+        *,
+        name: object,
+        overview_text: object,
+        source_count: object,
+        source_type: object,
+        now: datetime | None = None,
+    ) -> JanickaR2CompilationResult:
+        """Persist a body guarded by a complete confirmed search snapshot."""
+
+        safe_name = self.ensure_new_document_name(name)
+        safe_overview = self._validate_overview_text(overview_text)
+        safe_count = self._validate_complete_source_count(source_count)
+        safe_source_type = str(source_type or "").strip()
+        if safe_source_type not in {
+            R2_DOCUMENT_INSPECTION_CAPABILITY,
+            R2_DOCUMENT_SEARCH_CAPABILITY,
+        }:
+            raise JanickaR2CompilationError(
+                "Úplný přehled nemá platný registrovaný typ zdroje."
+            )
+        compiled_at = self._compiled_at(now)
+        rendered = self._render_complete_overview(
+            name=safe_name,
+            overview_text=safe_overview,
+            source_count=safe_count,
+            source_type=safe_source_type,
+            compiled_at=compiled_at,
+        )
+        document = self._store.create_text(name=safe_name, text=rendered)
+        return JanickaR2CompilationResult(
+            document=document,
+            source_type=safe_source_type,
+            source_count=safe_count,
+            compiled_at=compiled_at,
+        )
+
     def _read_source(self, document_id: str) -> str:
         try:
             value = self._document_inspector(document_id)
@@ -217,6 +257,20 @@ class JanickaR2DocumentCompiler:
         return tuple(labels)
 
     @staticmethod
+    def _validate_complete_source_count(value: object) -> int:
+        try:
+            count = int(value)
+        except (TypeError, ValueError) as exc:
+            raise JanickaR2CompilationError(
+                "Úplný přehled nemá platný počet zdrojů."
+            ) from exc
+        if not 1 <= count <= MAX_R2_COMPLETE_SOURCES:
+            raise JanickaR2CompilationError(
+                f"Úplný přehled podporuje nejvýše {MAX_R2_COMPLETE_SOURCES} zdrojů."
+            )
+        return count
+
+    @staticmethod
     def _render(
         *,
         name: str,
@@ -260,3 +314,26 @@ class JanickaR2DocumentCompiler:
             "",
         ]
         return "\n".join(lines)
+
+    @staticmethod
+    def _render_complete_overview(
+        *,
+        name: str,
+        overview_text: str,
+        source_count: int,
+        source_type: str,
+        compiled_at: str,
+    ) -> str:
+        return "\n".join(
+            (
+                "R2-Adam – přehled z úplné potvrzené sady",
+                f"Název: {name}",
+                f"Vytvořeno: {compiled_at}",
+                f"Zdroj: {source_type}",
+                f"Počet potvrzených zdrojů: {source_count}",
+                "",
+                "Přehled:",
+                overview_text,
+                "",
+            )
+        )

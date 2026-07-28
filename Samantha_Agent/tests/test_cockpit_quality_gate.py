@@ -128,6 +128,7 @@ async def second():
         )
         self.assertIn("tests.test_janicka_r2_cockpit", TEST_MODULES)
         self.assertIn("tests.test_janicka_r2_chat", TEST_MODULES)
+        self.assertIn("tests.test_janicka_r2_complete_selection", TEST_MODULES)
         self.assertIn("app/command_cheatsheet.py", COMPILE_PATHS)
         self.assertIn("app/development_branch_lifecycle.py", COMPILE_PATHS)
         self.assertIn("scripts/development_branch_audit.py", COMPILE_PATHS)

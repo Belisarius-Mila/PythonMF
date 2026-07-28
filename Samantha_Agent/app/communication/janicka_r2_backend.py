@@ -12,8 +12,10 @@ from app.communication.janicka_r2_compiler import (
     inspect_registered_document,
 )
 from app.communication.janicka_r2_document_selection import (
+    DocumentPageSearchProvider,
     DocumentSearchProvider,
     JanickaR2DocumentSelectionFlow,
+    search_registered_document_page,
     search_registered_documents,
 )
 from app.communication.janicka_r2_documents import (
@@ -80,6 +82,7 @@ class JanickaR2Backend:
         self,
         *,
         document_search: DocumentSearchProvider | None = None,
+        document_page_search: DocumentPageSearchProvider | None = None,
         document_inspector: DocumentInspector | None = None,
     ) -> JanickaR2DocumentSelectionFlow:
         """Return the two-step read-only search and human-selection flow."""
@@ -92,6 +95,13 @@ class JanickaR2Backend:
                 document_search
                 or partial(
                     search_registered_documents,
+                    vault_dir=self.canonical_private_root / "documents",
+                )
+            ),
+            document_page_search=(
+                document_page_search
+                or partial(
+                    search_registered_document_page,
                     vault_dir=self.canonical_private_root / "documents",
                 )
             ),
@@ -119,7 +129,14 @@ class JanickaR2Backend:
             "selection_ref. Pak pres prepare_selected_sources nacti pouze tyto zdroje, "
             "nevypisuj jejich text do chatu a sestav pozadovany strukturovany prehled. "
             "Novy TXT vytvor vyhradne pres compile_selected_overview se stejnym dotazem, "
-            "volbami a source_set_ref; zmena zdroju musi vynutit novy vyber."
+            "volbami a source_set_ref; zmena zdroju musi vynutit novy vyber. Kdyz "
+            "zadani pozaduje vsechny shody, pouzij search_complete_document_set. Ukaz "
+            "pocet a vsechny redigovane nazvy, pockej na vyslovne potvrzeni celeho "
+            "result_set_ref a nikdy nevydavej oriznuty vysledek za uplny. Pro pouhy "
+            "soupis nazvu pouzij compile_complete_title_list bez fulltextove inspekce. "
+            "Pro obsahovy prehled nacti potvrzenou sadu pres "
+            "prepare_complete_source_batch po davkach a zapis ji jen pres "
+            "compile_complete_overview se vsemi batch_refs."
         )
 
     def development_control_lines(self) -> tuple[str, ...]:
@@ -145,4 +162,10 @@ class JanickaR2Backend:
             "confirmed sources, never paste their text or the generated TXT into chat, "
             "and create the output only through compile_selected_overview with the "
             "matching source_set_ref. Source changes require a new human selection.",
+            "rule=A request for all matches must use search_complete_document_set and "
+            "human confirmation of the displayed complete result_set_ref. Never present "
+            "a truncated search as complete. A title-only list must use "
+            "compile_complete_title_list without fulltext inspection. A content overview "
+            "must prepare every confirmed five-source batch and pass every batch_ref to "
+            "compile_complete_overview. Overly broad searches must fail closed.",
         )

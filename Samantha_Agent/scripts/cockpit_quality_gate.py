@@ -159,6 +159,7 @@ TEST_MODULES = (
     "tests.test_human_adam_workstream_threads",
     "tests.test_janicka_r2_chat",
     "tests.test_janicka_r2_cockpit",
+    "tests.test_janicka_r2_complete_selection",
     "tests.test_janicka_r2_documents",
     "tests.test_legacy_tvbcp_migration",
     "tests.test_human_adam_turn_completion",

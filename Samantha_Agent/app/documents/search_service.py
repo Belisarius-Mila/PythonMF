@@ -45,6 +45,7 @@ READING_STATUS_ALIASES = {
     "nahrazeno-lepsi-kopii": "superseded",
     "nahrazeno_lepsi_kopii": "superseded",
 }
+MAX_DOCUMENT_SEARCH_PAGE_SIZE = 20
 
 
 def normalize_reading_status(value: str) -> str:
@@ -90,10 +91,21 @@ def search_document_index(
     vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
     purchases_dir: Path | None = None,
     limit: int = 8,
+    offset: int = 0,
+    source_type: str = "",
 ) -> dict[str, Any]:
     terms = [term.casefold() for term in tokenize(query) if len(term) >= 2]
     if not terms:
-        return {"ok": False, "message": "Zadej konkrétnější dotaz.", "results": []}
+        return {
+            "ok": False,
+            "message": "Zadej konkrétnější dotaz.",
+            "count": 0,
+            "total_count": 0,
+            "offset": 0,
+            "has_more": False,
+            "next_offset": None,
+            "results": [],
+        }
     query_intent = document_search_query_intent(query=query, terms=terms)
 
     documents = {
@@ -164,17 +176,52 @@ def search_document_index(
                 "snippet": sanitize_output(snippet),
             }
         )
-    resolved_purchases_dir = purchases_dir
-    if resolved_purchases_dir is None:
-        resolved_purchases_dir = DEFAULT_PURCHASES_DIR if vault_dir == DEFAULT_DOCUMENTS_DIR else vault_dir.parent / "purchases"
-    results.extend(search_purchase_manifests(query=query, terms=terms, purchases_dir=resolved_purchases_dir))
-    limited_results = sorted(results, key=lambda row: int(row.get("score", 0)), reverse=True)[
-        : max(1, min(limit, 20))
-    ]
+    safe_source_type = str(source_type or "").strip()
+    if safe_source_type:
+        if safe_source_type not in {"document", "purchase"}:
+            raise ValueError("Vyhledávání dostalo neplatný typ zdroje.")
+    if safe_source_type != "document":
+        resolved_purchases_dir = purchases_dir
+        if resolved_purchases_dir is None:
+            resolved_purchases_dir = (
+                DEFAULT_PURCHASES_DIR
+                if vault_dir == DEFAULT_DOCUMENTS_DIR
+                else vault_dir.parent / "purchases"
+            )
+        results.extend(
+            search_purchase_manifests(
+                query=query,
+                terms=terms,
+                purchases_dir=resolved_purchases_dir,
+            )
+        )
+    if safe_source_type:
+        results = [
+            row
+            for row in results
+            if str(row.get("source_type", "")) == safe_source_type
+        ]
+    sorted_results = sorted(
+        results,
+        key=lambda row: (
+            -int(row.get("score", 0)),
+            str(row.get("source_type", "")),
+            str(row.get("document_id", "")),
+        ),
+    )
+    safe_limit = max(1, min(int(limit), MAX_DOCUMENT_SEARCH_PAGE_SIZE))
+    safe_offset = max(0, int(offset))
+    limited_results = sorted_results[safe_offset : safe_offset + safe_limit]
+    next_offset = safe_offset + len(limited_results)
+    has_more = next_offset < len(sorted_results)
     return {
         "ok": True,
         "query": query,
         "count": len(limited_results),
+        "total_count": len(sorted_results),
+        "offset": safe_offset,
+        "has_more": has_more,
+        "next_offset": next_offset if has_more else None,
         "results": limited_results,
         "message": "Nalezena shoda." if limited_results else "V dokumentech ani nákupech jsem nenašla shodu.",
     }
