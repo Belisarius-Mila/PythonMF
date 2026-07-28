@@ -48,7 +48,7 @@ class WorkstreamCatalogTests(unittest.TestCase):
             _active_project_names() | {"Vocabulary FR", "Vocabulary IT"},
         )
         self.assertEqual(
-            Counter(source_names)["TTS / Adam Voice Remote Cockpit"],
+            Counter(source_names)["TTS / české audio nástroje"],
             2,
         )
         self.assertEqual(
@@ -57,7 +57,7 @@ class WorkstreamCatalogTests(unittest.TestCase):
                 for source_name, count in Counter(source_names).items()
                 if count > 1
             },
-            {"TTS / Adam Voice Remote Cockpit": 2},
+            {"TTS / české audio nástroje": 2},
         )
         self.assertEqual(
             misc_ids,

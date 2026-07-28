@@ -1,5 +1,15 @@
 # Janička Cockpit / používání a převzetí Samanthy
 
+## Aktuální stav od 2026-07-28
+
+Janička zůstává netechnickým rozcestníkem k existujícím funkcím Cockpitu.
+Stará light komunikace, terminálový most i nouzové otevírání plného Adama byly
+z aktivního UI a runtime odstraněny.
+
+Komunikační funkce se do Janičky vrátí až jako samostatný funkční Adam-R2.
+Níže uvedené datované popisy starých komunikačních cest jsou historické
+checkpointy a nesmějí se používat jako aktuální provozní návod.
+
 ## Stav
 
 Založeno 2026-06-06 jako samostatný projekt.

@@ -1,33 +1,35 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-28 06:12 CEST
+- Obnoveno potvrzeným checkpointem: 2026-07-28 06:39 CEST
 
 ### Hotovo
-- Staré TVBCP tlačítko, modal, endpoint a výhradní obslužný kód jsou z Cockpitu odstraněné, zatímco Brainstorm kontext i projektový TVBCP Human–Adam zůstávají zachované.
+- Aktivní registry, návody a modelové instrukce už nesměřují ke starému VoiceBridge ani odstraněné komunikaci Janičky; historické důkazy zůstávají zachované.
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
 - Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
 
 ### Rizika
-- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
+- Žádné další doložené provozní riziko.
 
 ### Další krok
-- Provést checkpoint a nasazení, potom pokračovat fází 9.4e-b.
+- Provést checkpoint a nasazení, potom spustit závěrečnou fázi 9.4e-c s úplnou Cockpit Quality Gate a smoke testem.
 
 ### Rozhodnutí
-- Starý Cockpit TVBCP se vyřazuje až po ověřené bezeztrátové migraci do proudu Brainstorm / nápady; private zdroj se nemaže.
+- Staré komunikační cesty zůstávají pouze historií; Janička dostane komunikaci až prostřednictvím funkčního Adam-R2.
 
 ### Navrhované další kroky
-- V 9.4e-b odstranit poslední aktivní zastaralé Voice Bridge formulace bez přepisování historie.
-- V 9.4e-c spustit úplnou Cockpit Quality Gate a smoke test.
-- Adam-R2 zahájit samostatně po uzavření fáze 9.4e.
+- Uzavřít fázi 9.4 úplnou regresní bránou a živým smoke testem.
+- Adam-R2 zahájit jako samostatný projekt až po uzavření amputace legacy komunikace.
+- Při vhodné příležitosti obnovit ověřenou externí zálohu.
 
 ### Technický stav checkpointu
-- Změna je otestovaná (1147 testů).
-- Git před checkpointem: lokální `main` na `64d1e79d8151`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `38ef3ac1e1fb` · je starší než ověřený main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-07-28T03:12:13+00:00.
-- Read-only živý stav: main=`aligned`, deployment=`verified_other_main`, runtime=`connected`.
+- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
+- Git před checkpointem: lokální `main` na `0364e9c63cfa`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `0364e9c63cfa` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-07-28T04:14:59+00:00.
+- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -2475,3 +2477,15 @@ Technický důkaz:
 - Změněné cesty před paměťovým zápisem (8): `Samantha_Agent/app/cockpit.py`, `Samantha_Agent/app/tvbcp.py`, `Samantha_Agent/scripts/cockpit_quality_gate.py`, `Samantha_Agent/scripts/tvbcp.py`, `Samantha_Agent/tests/test_cockpit.py`, `Samantha_Agent/tests/test_cockpit_quality_gate.py`, `Samantha_Agent/tests/test_cockpit_voice_frontend_retirement.py`, `Samantha_Agent/tests/test_tvbcp.py`
 - Commit: `Retire obsolete Cockpit TVBCP surface`
 - Další krok: Provést checkpoint a nasazení, potom pokračovat fází 9.4e-b.
+
+### Automatický checkpoint 2026-07-28 06:39 CEST
+
+- Pracovní proud: `layer-human-adam-development`
+- Hotovo: Aktivní registry, návody a modelové instrukce už nesměřují ke starému VoiceBridge ani odstraněné komunikaci Janičky; historické důkazy zůstávají zachované.; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.; Lokální commity čekají na samostatný denní GitHub balíček.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: rychlá Cockpit brána syntaxe a whitespace: 4.6 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu
+- Změněné cesty před paměťovým zápisem (13): `Samantha_Agent/app/codex_approval_state.py`, `Samantha_Agent/app/communication/human_adam_workstream_catalog.py`, `Samantha_Agent/app/samantha_agent.py`, `Samantha_Agent/memory/ACTIVE_PROJECTS.md`, `Samantha_Agent/memory/MEMORY_INDEX.md`, `Samantha_Agent/memory/WORKSTREAMS.md`, `Samantha_Agent/memory/projects/email_readonly_oauth.md`, `Samantha_Agent/memory/projects/janicka_cockpit_kucharka.md`, `Samantha_Agent/memory/projects/janicka_cockpit_takeover.md`, `Samantha_Agent/memory/projects/tts_edge_audio_tools.md`, `Samantha_Agent/memory/technical/session_recovery_rules.md`, `Samantha_Agent/tests/test_cockpit_voice_frontend_retirement.py`, `Samantha_Agent/tests/test_human_adam_workstream_catalog.py`
+- Commit: `Retire active legacy communication guidance`
+- Další krok: Provést checkpoint a nasazení, potom spustit závěrečnou fázi 9.4e-c s úplnou Cockpit Quality Gate a smoke testem.

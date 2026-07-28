@@ -58,7 +58,7 @@ nesmi smesovat s Knihovnou clanku.
 | `project-family-memory-films` | `Project` | Family Memory Films / USA 2019 | active | 1 | Family Memory Films / USA 2019 |
 | `project-multilo` | `Project` | MultiLO | active | 2 | MultiLO |
 | `project-tax-2025` | `Project` | Daňové přiznání 2025 | active | 3 | Tax |
-| `project-cockpit` | `Project` | Cockpit / hlavní architektura | active | 1 | Cockpit hlavni architektura + Recovery centrum + legacy VoiceBridge |
+| `project-cockpit` | `Project` | Cockpit / hlavní architektura | active | 1 | Cockpit hlavni architektura + Recovery centrum; stará komunikační větev je vyřazená |
 | `layer-human-adam-development` | `Project` | Human–Adam | active | 1 | App-server rozhrani / novy Adam; historicke ID je zachovano kvuli runtime kompatibilite. |
 | `project-capability-catalog` | `Project` | Katalog projektů a schopností | active | 1 | Mapovani projektu a schopnosti |
 | `project-samantha-infrastructure` | `Project` | Samantha Infrastructure | active | 1 | Samantha Infrastructure + Codex full access / Guard proti mazani |
@@ -69,7 +69,7 @@ nesmi smesovat s Knihovnou clanku.
 | `tool-backup-restore` | `Tool` | Záloha a obnova | active | 1 | Samantha external backup |
 | `tool-media-image-resize` | `Tool` | Zmenšování obrázků | active | 1 | Media image resize utility |
 | `tool-vocabulary-image-pipeline` | `Tool` | PictNew / obrázky ke slovíčkům | active | 2 | PictNew / Vocabulary image workflow |
-| `tool-tts` | `Tool` | TTS | active | 1 | TTS / Adam Voice Remote Cockpit; jen obecny TTS vykonavatel. |
+| `tool-tts` | `Tool` | TTS | active | 1 | TTS / české audio nástroje; jen obecný TTS vykonavatel. |
 | `misc-brainstorm` | `Misc` | Brainstorm / nápady | active | 2 | Dohoda univerzalniho katalogu; bez projektoveho zdroje. |
 | `misc-unclassified-development` | `Misc` | Miscellaneous / nezařazený vývoj | active | 2 | Dohoda univerzalniho katalogu; bez projektoveho zdroje. |
 
@@ -77,7 +77,8 @@ nesmi smesovat s Knihovnou clanku.
 
 - `Reminders / platebni SMS` je funkcni cast Spravy dokumentu, ne samostatny
   proud.
-- `Cockpit Recovery centrum` a legacy VoiceBridge patri pod projekt Cockpit.
+- Historická komunikační větev patřila pod projekt Cockpit a po svém vyřazení
+  netvoří samostatný aktivní proud.
 - Prime hlasove zadavani v Human–Adam patri pod projekt Human–Adam; obecne TTS
   zustava samostatnym toolem.
 - `Codex full access / Guard proti mazani` patri pod Samantha Infrastructure.
@@ -111,8 +112,8 @@ dva zachovane legacy pary; dalsi vzniknou az prvnim skutecnym checkpointem.
 - Typ pracovniho proudu je `Project`, `Tool`, `Layer` nebo `Misc`.
 - Jeden proud muze sloucit vice starych radku `ACTIVE_PROJECTS.md`.
 - Jeden historicky kombinovany radek muze byt pri vyjasneni rozdelen mezi
-  projekt a tool; konkretne TTS zustava toolem a legacy VoiceBridge patri pod
-  Cockpit.
+  projekt a tool; konkretne TTS zustava toolem a vyřazená komunikační větev
+  zůstává pouze historií projektu Cockpit.
 - Test katalogu hlida, ze zadny zivy radek `ACTIVE_PROJECTS.md` nezmizel a ze
   dokumentacni i kodovy katalog maji stejna ID a poradi.
 - Katalog neobsahuje soukrome identifikatory vlaken, profilu ani cestu k

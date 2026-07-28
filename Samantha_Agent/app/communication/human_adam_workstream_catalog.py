@@ -312,7 +312,7 @@ WORKSTREAM_CATALOG = validate_workstream_catalog(
             "1",
             "Cockpit hlavni architektura / modernizace",
             "Cockpit Recovery centrum",
-            "TTS / Adam Voice Remote Cockpit",
+            "TTS / české audio nástroje",
         ),
         _record(
             "layer-human-adam-development",
@@ -404,7 +404,7 @@ WORKSTREAM_CATALOG = validate_workstream_catalog(
             "TTS",
             "active",
             "1",
-            "TTS / Adam Voice Remote Cockpit",
+            "TTS / české audio nástroje",
         ),
         # Default uncategorized streams agreed for the universal catalog.
         _record("misc-brainstorm", "Misc", "Brainstorm / nápady", "active", "2"),

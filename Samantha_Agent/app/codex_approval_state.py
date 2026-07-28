@@ -9,7 +9,7 @@ from typing import Any
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-# Keep the existing private location during the VoiceBridge retirement.
+# Keep the existing private location; changing private storage is out of scope.
 CODEX_APPROVAL_REQUEST_PATH = (
     PROJECT_ROOT / "data" / "private" / "voice_inbox" / "codex_approval_request.json"
 )

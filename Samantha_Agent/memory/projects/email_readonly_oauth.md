@@ -231,7 +231,7 @@ Aktualni dalsi krok:
   Presna veta pro odeslani ma preferovane obsahovat `draft_id`, odesilaci token
   ulozeny u draftu a jasny souhlas s odeslanim, napr.
   `Potvrzuji, odeslat draft <draft_id> kódem <token>.` Tento tvar neobsahuje
-  plnou adresu a funguje pres VoiceBridge i tam, kde se osobni udaje rediguji.
+  plnou adresu a funguje i v textovém kanálu, kde se osobní údaje redigují.
 - Potvrzeni s plnou e-mailovou adresou prijemce zustava kompatibilni fallback,
   ale nema se preferovat v hlasovem kanalu. Pokud potvrzovaci veta obsahuje
   osobni e-mailovou adresu nebo jiny citlivy udaj, ma se zobrazit/poslat textove

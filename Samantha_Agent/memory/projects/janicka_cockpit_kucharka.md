@@ -111,43 +111,18 @@ potvrzení.
 
 ## Zeptat se Adama
 
-Tlačítko otevře textový chat.
+Komunikace s Adamem teď v Janičce není dostupná. Staré chatové tlačítko bylo
+odstraněno a nemá se nahrazovat technickým fallbackem.
 
-Použít vždy, když Jana neví, kterým tlačítkem začít.
-
-Dotaz se předává přímo Adamovi. Pokud Adam zrovna neběží, Cockpit ho zkusí
-spustit. Není to hlasový pokyn a nic se samo nemaže, neposílá ani nepřesouvá.
-
-Dobré věty:
-
-- `Najdi mi poslední dokument k pojištění auta.`
-- `Potřebuji vytisknout fakturu.`
-- `Kde najdu léky na bolest v krku?`
-- `Shrň mi, co mám udělat dál.`
-
-Není potřeba psát technické příkazy.
+Tato možnost se vrátí až s funkčním Adamem-R2. Do té doby Jana používá pouze
+viditelné nekomunikační funkce Janičky; pokud potřebuje pomoc mimo ně, obrátí
+se na Mílu nebo jinou domluvenou technickou pomoc.
 
 ## Když běžný Adam nestačí
 
-Použít, když Jana potřebuje plnější pomoc než běžný chat v Janičce, například
-když je potřeba déle hledat, číst více podezřelých položek nebo krok po kroku
-řešit složitější věc.
-
-Postup:
-
-1. V Janičce kliknout na `Otevřít plného Adama`.
-2. Otevře se nové okno Terminalu.
-3. Až se Adam ozve, psát normální větou, co Jana potřebuje.
-
-Jana nemusí znát příkazy. Má popsat cíl lidsky, například:
-
-- `Potřebuji najít starší e-mail k hlášení nájemníků.`
-- `Nevím, co je urgentní, pomoz mi zkontrolovat připomenutí.`
-- `Najdi dokument jen pro čtení, nic neposílej a nemaž.`
-
-Když se nové okno neotevře, Janička ukazuje ruční postup. Základ je otevřít
-aplikaci Terminal, přejít do projektu Samanthy a spustit plného Adama. Pokud
-si Jana není jistá, má raději zavolat technickou pomoc.
+Janička už neotevírá plného Adama ani Terminal. Pokud viditelné funkce
+nestačí, Jana má požádat Mílu nebo jinou domluvenou technickou pomoc.
+Samostatná komunikační cesta vznikne až v projektu Adam-R2.
 
 ## Připomenutí
 

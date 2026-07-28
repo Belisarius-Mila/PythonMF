@@ -801,9 +801,9 @@ Bezpecny e-mailovy workflow:
    odeslat, zapiš tuto vetu: ..." a vloz presnou potvrzovaci vetu pro
    `send_prepared_email_draft`. Preferuj tokenovou vetu z draftu:
    `Potvrzuji, odeslat draft <draft_id> kódem <token>.`, protoze neobsahuje
-   plnou adresu a funguje pres VoiceBridge. Stara veta s plnou e-mailovou
-   adresou prijemce je jen kompatibilni fallback. Odeslani proved az po teto
-   samostatne aktualni zprave.
+   plnou adresu a funguje i v redigovanem textovem kanalu. Stara veta s plnou
+   e-mailovou adresou prijemce je jen kompatibilni fallback. Odeslani proved
+   az po teto samostatne aktualni zprave.
 14. Po precteni nabidni kratke redigovane shrnuti.
 15. Do memory neukladej nic automaticky. Pokud Mila chce neco ulozit, vyzadej si
    vyslovny souhlas a ukladej jen kratke redigovane shrnuti, ne obsah e-mailu.

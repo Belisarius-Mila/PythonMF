@@ -22,7 +22,7 @@ Pokud chce Mila rovnou predat nove relaci startovni pokyn, lze ho napsat za
 prikaz:
 
 ```bash
-samantha "Nyni prechazime k tematu voice bridge."
+samantha "Nyni prechazime k tematu spravy dokumentu."
 ```
 
 Pri vzniku nove `screen` relace se tento text vlozi do startovniho promptu Codexu.

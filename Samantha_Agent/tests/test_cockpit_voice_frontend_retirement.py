@@ -359,6 +359,61 @@ class CockpitVoiceFrontendRetirementTests(unittest.TestCase):
             with self.subTest(retired_path=retired_path):
                 self.assertFalse((PROJECT_ROOT / retired_path).exists())
 
+    def test_active_guidance_does_not_route_through_retired_voice_bridge(self) -> None:
+        active_projects = (
+            PROJECT_ROOT / "memory" / "ACTIVE_PROJECTS.md"
+        ).read_text(encoding="utf-8")
+        active_project_rows = "\n".join(
+            line for line in active_projects.splitlines() if line.startswith("| ")
+        )
+        workstreams = (PROJECT_ROOT / "memory" / "WORKSTREAMS.md").read_text(
+            encoding="utf-8"
+        )
+        memory_index = (PROJECT_ROOT / "memory" / "MEMORY_INDEX.md").read_text(
+            encoding="utf-8"
+        )
+        janicka_cookbook = (
+            PROJECT_ROOT / "memory" / "projects" / "janicka_cockpit_kucharka.md"
+        ).read_text(encoding="utf-8")
+        janicka_project = (
+            PROJECT_ROOT / "memory" / "projects" / "janicka_cockpit_takeover.md"
+        ).read_text(encoding="utf-8")
+        janicka_current = janicka_project.split("## Stav", 1)[0]
+        tts_project = (
+            PROJECT_ROOT / "memory" / "projects" / "tts_edge_audio_tools.md"
+        ).read_text(encoding="utf-8")
+        tts_current = tts_project.split("## Stav", 1)[0]
+
+        self.assertIn("TTS / české audio nástroje", active_project_rows)
+        self.assertNotIn("TTS / Adam Voice Remote Cockpit", active_project_rows)
+        self.assertNotIn("VoiceBridge", active_project_rows)
+        self.assertNotIn("Voice Bridge", active_project_rows)
+        self.assertIn("Komunikace se vrátí až jako samostatný funkční Adam-R2", active_projects)
+        self.assertNotIn("legacy VoiceBridge", workstreams)
+        self.assertIn("TTS / české audio nástroje", workstreams)
+        self.assertIn("komunikace se vrátí až jako samostatný funkční Adam-R2", memory_index)
+        self.assertNotIn("samantha_janicka", janicka_cookbook)
+        self.assertNotIn("Otevřít plného Adama", janicka_cookbook)
+        self.assertIn("Adam-R2", janicka_current)
+        self.assertIn("historickými checkpointy", tts_current)
+
+        for relative_path in (
+            "app/codex_approval_state.py",
+            "app/samantha_agent.py",
+            "memory/projects/email_readonly_oauth.md",
+            "memory/technical/session_recovery_rules.md",
+        ):
+            with self.subTest(relative_path=relative_path):
+                source = (PROJECT_ROOT / relative_path).read_text(encoding="utf-8")
+                self.assertNotIn("VoiceBridge", source)
+                self.assertNotIn("Voice Bridge", source)
+                self.assertNotIn("voice bridge", source)
+
+        migration_source = (
+            PROJECT_ROOT / "app" / "communication" / "legacy_tvbcp_migration.py"
+        ).read_text(encoding="utf-8")
+        self.assertIn('PROJECT_ROOT / "data" / "private" / "voice_bridge"', migration_source)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,5 +1,14 @@
 # TTS: české audio nástroje přes edge-tts
 
+## Aktuální stav od 2026-07-28
+
+Aktivní zůstávají pouze obecné TTS nástroje, lokální předčítání a obecné
+předčítání odpovědí. Mikrofon Human–Adam patří projektu Human–Adam.
+
+Starý terminálový komunikační transport, watcher, TTY marker a jeho Cockpit
+ovládání byly vyřazeny. Níže uvedené datované bloky o této cestě jsou
+historickými checkpointy, nikoli provozním návodem ani plánem na její obnovu.
+
 ## Stav
 
 V projektu `PythonMF` byly vytvořeny nástroje pro generování českého MP3 audia pomocí knihovny `edge-tts`.
