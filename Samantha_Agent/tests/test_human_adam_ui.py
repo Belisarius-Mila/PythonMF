@@ -494,7 +494,7 @@ class HumanAdamUiTests(unittest.TestCase):
         )
         self.assertIn("Dokončit vlastněný WIP", HUMAN_ADAM_HTML)
 
-    def test_work_button_is_compact_and_opens_detail_only_when_needed(self) -> None:
+    def test_work_button_is_compact_and_explicit_click_always_opens_detail(self) -> None:
         compact_start = HUMAN_ADAM_HTML.index("function workspaceRequiresWorkDetail(workspace)")
         compact_end = HUMAN_ADAM_HTML.index("function renderStatus(payload)", compact_start)
         compact_source = HUMAN_ADAM_HTML[compact_start:compact_end]
@@ -531,13 +531,15 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertGreaterEqual(HUMAN_ADAM_HTML.count("renderCompactWorkStatus("), 3)
         self.assertIn("return payload;", load_source)
         self.assertIn("return null;", load_source)
-        self.assertIn(
-            "const showDetail = !payload || workspaceRequiresWorkDetail(payload) || workstreamDeploymentEnabled;",
-            open_source,
+        self.assertIn('workOpenBtn.addEventListener("click", openWork);', HUMAN_ADAM_HTML)
+        self.assertNotIn("const showDetail =", open_source)
+        self.assertNotIn("if (!showDetail)", open_source)
+        self.assertNotIn("Detail není potřeba", open_source)
+        self.assertIn("workPanel.hidden = false;", open_source)
+        self.assertLess(
+            open_source.index("const payload = await loadWork();"),
+            open_source.index("workPanel.hidden = false;"),
         )
-        self.assertIn("if (!showDetail)", open_source)
-        self.assertIn("Práce je čistá a synchronní s main. Detail není potřeba.", open_source)
-        self.assertLess(open_source.index("if (!showDetail)"), open_source.index("workPanel.hidden = false;"))
         self.assertNotIn('method:"POST"', open_source)
 
     def test_work_panel_renders_shared_read_only_live_status_fail_closed(

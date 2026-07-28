@@ -2267,12 +2267,6 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     workOpenBtn.disabled = true;
     const payload = await loadWork();
     workOpenBtn.disabled = busy;
-    const showDetail = !payload || workspaceRequiresWorkDetail(payload) || workstreamDeploymentEnabled;
-    if (!showDetail) {
-      workPanel.hidden = true;
-      notice.textContent = "Práce je čistá a synchronní s main. Detail není potřeba.";
-      return;
-    }
     threadRotationPanel.hidden = true;
     tvbcpPanel.hidden = true;
     workPanel.hidden = false;

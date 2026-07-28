@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-28 09:42 CEST
+- Obnoveno potvrzeným checkpointem: 2026-07-28 10:17 CEST
 
 ### Hotovo
-- Janička může ve svém dokumentovém prostoru vytvářet a číst TXT dokumenty do velikosti 10 MiB.
+- Kliknutí na Práce nyní vždy otevře panel Pracovní změny i u čistého lazy proudu bez nasazení.
 
 ### Otevřeno
 - Lokální commity čekají na samostatný denní GitHub balíček.
@@ -13,18 +13,17 @@
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Pokračovat backendovým napojením document store na R2-Adama.
+- Po nasazení ručně ověřit kliknutí na Práce v čistém R2-Adam proudu.
 
 ### Rozhodnutí
-- Maximální velikost jednoho TXT dokumentu R2-Adama je 10 MiB.
+- Explicitní kliknutí na Práce má vždy otevřít detail pracovních změn; kompaktní stav tlačítka zůstává pouze informativní.
 
 ### Navrhované další kroky
-- Při budoucím náhledu zobrazovat jen omezenou část velkého dokumentu.
-- Při e-mailovém draftu kontrolovat velikost přílohy samostatně.
+- Žádné další návrhy nad rámec bezprostředního kroku.
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `8aa7cfc51814`; GitHub může být starší a čeká na denní balíček.
+- Git před checkpointem: lokální `main` na `fb118d3fdbec`; GitHub může být starší a čeká na denní balíček.
 - Poslední serverově potvrzené nasazení: serverová deployment receipt pro tento proud není dostupná.
 - Read-only živý stav: main=`local_ahead`, deployment=`unverified`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
@@ -100,5 +99,30 @@ Navrhované další kroky:
 
 Technický důkaz:
 - rychlá Cockpit brána syntaxe a whitespace: 7.1 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
+- Pracovní proud: `project-r2-adam-janicka`.
+- Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`unverified`, runtime=`connected`.
+
+### 2026-07-28 10:17 CEST – Kliknutí na Práce nyní vždy otevře panel Pracovní změny i u čistého lazy proudu bez nasazení.
+
+Hotovo:
+- Kliknutí na Práce nyní vždy otevře panel Pracovní změny i u čistého lazy proudu bez nasazení.
+
+Otevřeno:
+- Lokální commity čekají na samostatný denní GitHub balíček.
+
+Rizika:
+- Žádné další doložené provozní riziko.
+
+Rozhodnutí:
+- Explicitní kliknutí na Práce má vždy otevřít detail pracovních změn; kompaktní stav tlačítka zůstává pouze informativní.
+
+Další krok:
+- Po nasazení ručně ověřit kliknutí na Práce v čistém R2-Adam proudu.
+
+Navrhované další kroky:
+- Nebyly zachyceny další návrhy nad rámec bezprostředního kroku.
+
+Technický důkaz:
+- rychlá Cockpit brána syntaxe a whitespace: 5.9 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `project-r2-adam-janicka`.
 - Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`unverified`, runtime=`connected`.
