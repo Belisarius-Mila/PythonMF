@@ -1,0 +1,889 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Samantha Cockpit</title>
+  <style>
+{{SAMANTHA_CSS}}  </style>
+</head>
+<body>
+  <header>
+    <h1>Samantha Cockpit</h1>
+    <div class="toolbar">
+      <button class="janicka-button" id="janickaBtn">Janička</button>
+      <button class="primary" id="humanAdamOpenBtn">Human–Adam</button>
+      <button class="secondary" id="refreshBtn">Obnovit</button>
+      <button class="secondary" id="webAppsBtn">Webové aplikace</button>
+      <button class="secondary" id="libraryBtn">Knihovna</button>
+      <button class="secondary" id="familyCalendarBtn">Rodinný kalendář</button>
+      <button class="secondary" id="projectsBtn">Projekty</button>
+      <button class="secondary" id="remindersBtn">Připomenutí</button>
+      <button class="secondary" id="emailProcessingBtn">E-maily</button>
+      <button class="secondary" id="serviceBtn">Servis</button>
+      <button class="primary" id="scanDocuBtn">ScanDocu</button>
+      <button class="secondary" id="scanDocuReviewBtn">Revidovat dokumenty</button>
+    </div>
+  </header>
+  <main>
+    <div class="today-dashboard" aria-label="Dnešní přehled">
+      <section class="dashboard-card">
+        <h2>Dnes</h2>
+        <div class="dashboard-body">
+          <div class="dashboard-metrics">
+            <div class="metric"><span id="todayNewPdfCount" class="metric-value">0</span><span class="metric-label">nová PDF</span></div>
+            <div class="metric"><span id="todayReviewCount" class="metric-value">0</span><span class="metric-label">k revizi</span></div>
+            <div class="metric"><span id="todayProblemCount" class="metric-value">0</span><span class="metric-label">problémy</span></div>
+          </div>
+          <div id="todayHint" class="status-line"></div>
+        </div>
+      </section>
+      <section class="dashboard-card">
+        <h2>Stav</h2>
+        <div class="dashboard-body dashboard-list">
+          <div id="dashboardOverall" class="dashboard-overall dashboard-overall-loading" role="button" tabindex="0" title="Otevřít detail stavu">
+            <span id="dashboardOverallLabel" class="dashboard-overall-label">Načítám</span>
+            <span id="dashboardOverallReason" class="dashboard-overall-reason">Skládám hlavní a samostatně načítané kontroly.</span>
+          </div>
+          <div id="dashboardMorningSentence" class="status-line">Ranní stav se načte spolu s Cockpitem.</div>
+          <div class="dashboard-row"><span class="dashboard-label">Dokumenty</span><span id="dashboardDocuments" class="dashboard-value"></span></div>
+          <div class="dashboard-row"><span class="dashboard-label">Připomenutí</span><span id="dashboardReminders" class="dashboard-value"></span></div>
+          <div class="dashboard-row"><span class="dashboard-label">Záloha</span><span id="dashboardBackup" class="dashboard-value"></span></div>
+          <div class="dashboard-row"><span class="dashboard-label">Systém</span><span id="dashboardQuantitative" class="dashboard-value"></span></div>
+          <details class="service-panel">
+            <summary>Další stav</summary>
+            <div class="dashboard-list">
+              <div class="dashboard-row"><span class="dashboard-label">ScanDocu</span><span id="dashboardScanDocu" class="dashboard-value"></span></div>
+              <div class="dashboard-row"><span class="dashboard-label">Projekty</span><span id="dashboardProjects" class="dashboard-value"></span></div>
+              <div class="dashboard-row"><span class="dashboard-label">Kontrola</span><span id="dashboardConsistency" class="dashboard-value"></span></div>
+              <div class="dashboard-row"><span class="dashboard-label">Rychlé poznámky</span><span id="dashboardQuickNotes" class="dashboard-value"></span></div>
+              <div class="dashboard-row"><span class="dashboard-label">Git</span><span id="dashboardGit" class="dashboard-value"></span></div>
+            </div>
+          </details>
+        </div>
+      </section>
+      <section class="dashboard-card">
+        <h2>Rychlé akce</h2>
+        <div class="dashboard-body">
+          <div class="quick-actions">
+            <button class="primary" id="dashboardProcessBtn">Zpracovat další</button>
+            <button class="secondary" id="dashboardReviewBtn">Revidovat další</button>
+		        <button class="secondary" id="dashboardUrgentRemindersBtn">Důležitá připomenutí</button>
+		        <button class="secondary" id="dashboardRefreshBtn">Obnovit stav</button>
+	          </div>
+          <div id="dashboardActionHint" class="status-line"></div>
+        </div>
+      </section>
+	    </div>
+	    <div id="statusLine" class="status-line">Načítám stav...</div>
+		    <section id="urgentReminderAlert" class="urgent-alert hidden" aria-live="polite">
+		      <div class="urgent-alert-head">
+		        <div id="urgentReminderAlertTitle" class="urgent-alert-title">Důležitá připomenutí</div>
+		        <button class="secondary" id="urgentReminderAlertBtn">Otevřít</button>
+		      </div>
+		      <div id="urgentReminderAlertList" class="urgent-alert-list"></div>
+		    </section>
+		    <section>
+		      <h2>Co teď dělat</h2>
+		      <div class="body">
+		        <div id="actionQueueStatus" class="status-line">Načítám doporučené akce...</div>
+		        <div id="actionQueueList" class="action-queue"></div>
+		      </div>
+		    </section>
+        <section id="codexApprovalCard" class="voice-card warn hidden" aria-live="assertive">
+          <div class="voice-card-title">Codex čeká na potvrzení</div>
+          <div class="voice-card-field">
+            <div class="voice-card-label">Co chci udělat</div>
+            <div id="codexApprovalCommand" class="voice-card-text"></div>
+          </div>
+          <div class="voice-card-field">
+            <div class="voice-card-label">Proč</div>
+            <div id="codexApprovalReason" class="voice-card-text"></div>
+          </div>
+          <div class="voice-card-field">
+            <div class="voice-card-label">Riziko</div>
+            <div id="codexApprovalRisk" class="voice-card-text"></div>
+          </div>
+          <div class="voice-card-field">
+            <div class="voice-card-label">Co má Míla udělat</div>
+            <div id="codexApprovalNextStep" class="voice-card-text"></div>
+          </div>
+          <div id="codexApprovalConfirmationBlock" class="voice-card-field hidden">
+            <div class="voice-card-label">Přesná potvrzovací věta</div>
+            <div id="codexApprovalConfirmationText" class="voice-card-text"></div>
+            <textarea id="codexApprovalConfirmationInput" spellcheck="false"></textarea>
+          </div>
+          <div class="voice-card-actions">
+            <button class="secondary hidden" id="codexApprovalCopyConfirmationBtn">Kopírovat větu</button>
+            <button class="primary" id="codexApprovalOpenHumanAdamBtn">Otevřít Human–Adam</button>
+            <button class="secondary" id="codexApprovalClearBtn">Vyčistit kartu</button>
+          </div>
+        </section>
+    <details id="documentsPanel" class="section-toggle">
+      <summary>Dokumenty</summary>
+		    <section>
+      <h2>Práce s dokumenty</h2>
+      <div class="body">
+        <div class="work-grid">
+          <div class="work-card">
+            <h3>Nová PDF ve Downloads za 7 dní</h3>
+            <div id="newPdfCount" class="work-count">0</div>
+            <div class="actions">
+              <button class="primary" id="processNextBtn">Zpracovat další dokument</button>
+            </div>
+            <div id="newPdfList" class="work-list"></div>
+          </div>
+          <div class="work-card">
+            <h3>Uložené dokumenty k revizi</h3>
+            <div id="reviewCount" class="work-count">0</div>
+            <div class="actions">
+              <button class="secondary" id="reviewNextBtn">Revidovat další uložený</button>
+            </div>
+            <div id="reviewList" class="work-list"></div>
+          </div>
+          <div class="work-card">
+            <h3>Problémy</h3>
+            <div id="problemCount" class="work-count">0</div>
+            <div class="status-line">Akční chyby ve frontě</div>
+            <div id="problemList" class="work-list"></div>
+          </div>
+          <div class="work-card">
+            <h3>Dokumentový intake</h3>
+            <div id="documentIntakeCount" class="work-count">0</div>
+            <div id="documentIntakeSummary" class="status-line">Downloads / e-mail / mobilní sken / lokální inbox</div>
+            <div id="documentIntakeList" class="work-list"></div>
+          </div>
+          <div class="work-card">
+            <h3>Dokumenty k revizi</h3>
+            <div id="reviewReportCount" class="work-count">?</div>
+            <div class="actions">
+              <button class="secondary" id="reviewReportBtn">Načti report</button>
+            </div>
+            <div id="reviewReportStatus" class="status-line">Report zatím není načtený. Skupiny: Bez textu / OCR, Krátký text, Doplnit údaje, K revizi, V pořádku.</div>
+            <div id="reviewReportList" class="work-list review-report-list"></div>
+          </div>
+          <div class="work-card">
+            <h3>Klasifikace</h3>
+            <div id="documentClassificationCount" class="work-count">0</div>
+            <div id="documentClassificationStatus" class="status-line">Kvalita metadat dokumentů.</div>
+            <div id="documentClassificationList" class="work-list"></div>
+          </div>
+          <div class="work-card">
+            <h3>Termíny v dokumentech</h3>
+            <div id="documentDueCount" class="work-count">0</div>
+            <div id="documentDueStatus" class="status-line">Kandidáti na připomínky z dokumentů.</div>
+            <div id="documentDueList" class="work-list"></div>
+          </div>
+          <div class="work-card">
+            <h3>Související dokumenty</h3>
+            <div id="documentCasesCount" class="work-count">0</div>
+            <div id="documentCasesStatus" class="status-line">Seskupení podle věci nebo protistrany.</div>
+            <div id="documentCasesList" class="work-list"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+    </details>
+    <section>
+      <h2>Najít dokument</h2>
+      <div class="body">
+        <div class="search-controls">
+          <input id="documentSearchInput" type="search" placeholder="Hledat podle názvu, typu, protistrany, věci, tagu nebo textu">
+          <button class="primary" id="documentSearchBtn">Hledat</button>
+        </div>
+        <div id="documentSearchStatus" class="status-line"></div>
+        <div id="documentSearchResults" class="search-results"></div>
+      </div>
+    </section>
+    <details id="servicePanel" class="section-toggle">
+      <summary>Servis</summary>
+      <section>
+        <h2>Servisní akce</h2>
+        <div class="body">
+          <div class="quick-actions service-actions">
+            <button class="secondary" id="dashboardTerminalBtn">Terminál v projektu</button>
+            <button class="secondary" id="dashboardQuantitativeBtn">Systémový souhrn</button>
+            <button class="secondary" id="dashboardProjectAuditBtn">Systémový audit</button>
+            <button class="secondary" id="dashboardQuickNotesBtn">Rychlé poznámky</button>
+            <button class="secondary" id="dashboardRecoveryBtn">Recovery centrum</button>
+            <button class="secondary" id="dashboardCommandCheatsheetBtn">Pamatováček</button>
+            <button class="secondary" id="dashboardAutosaveCleanupBtn">Autosave úklid</button>
+            <button class="secondary" id="dashboardDiagnosticsBtn">Diagnostika</button>
+            <button class="secondary" id="dashboardRestartBtn">Restart Cockpitu</button>
+            <button class="secondary" id="dashboardSpeakBtn">Přečíst stav</button>
+            <button class="secondary" id="dashboardSpeakSelectionBtn">Přečíst výběr</button>
+          </div>
+        </div>
+      </section>
+      <section>
+        <h2>Autosave úklid</h2>
+        <div class="body">
+          <div class="voice-card">
+            <div class="voice-card-title">Staré session snapshoty</div>
+            <div id="autosaveCleanupStatus" class="status-line">Dry-run zatím nebyl spuštěný.</div>
+            <div class="voice-card-actions">
+              <button class="secondary" id="autosaveCleanupPreviewBtn" type="button">Spočítat úklid</button>
+              <button class="secondary danger" id="autosaveCleanupApplyBtn" type="button" disabled>Vyčistit staré autosave</button>
+            </div>
+            <pre id="autosaveCleanupOutput" class="voice-card-text"></pre>
+          </div>
+        </div>
+      </section>
+      <section>
+        <h2>Technický stav Cockpitu</h2>
+        <div class="body">
+		      <div id="frontendHealthPanel" class="health-panel" aria-label="Health stav Cockpitu">
+		        <div class="health-grid">
+		          <div class="health-item"><span class="health-label">Frontend</span><span id="frontendHealthJs" class="health-value warn">JS se zatím nespustil</span></div>
+		          <div class="health-item"><span class="health-label">Tlačítka</span><span id="frontendHealthButtons" class="health-value warn">čekám na napojení</span></div>
+		          <div class="health-item"><span class="health-label">API</span><span id="frontendHealthApi" class="health-value warn">čekám na kontrolu</span></div>
+		          <div class="health-item"><span class="health-label">Poslední chyba</span><span id="frontendHealthError" class="health-value ok">žádná</span></div>
+		        </div>
+		      </div>
+        </div>
+      </section>
+      <section>
+        <h2>Vývojový runner</h2>
+        <div class="body">
+          <div id="devRunnerPanel" class="voice-card">
+            <div class="voice-card-title">Pevné vývojové akce</div>
+            <div class="status-line">Spouští jen allowlistované příkazy pro opakované ladění, ne volný shell.</div>
+            <div class="voice-card-actions">
+              <button class="secondary" data-dev-runner="cockpit_tests">Testy Cockpitu</button>
+              <button class="secondary" data-dev-runner="cockpit_py_compile">Python syntax</button>
+              <button class="secondary" data-dev-runner="git_diff_check">Diff check</button>
+            </div>
+            <pre id="devRunnerOutput" class="voice-card-text"></pre>
+          </div>
+        </div>
+      </section>
+      <h2>Servisní přehledy</h2>
+    <div class="grid">
+      <section>
+        <h2>PDF ve Downloads za 7 dní</h2>
+        <div class="body">
+          <div id="downloadPills" class="pills"></div>
+          <table>
+            <thead><tr><th>Soubor</th><th>Stav</th><th>Změněno</th></tr></thead>
+            <tbody id="downloadsBody"></tbody>
+          </table>
+        </div>
+      </section>
+      <div class="stack">
+        <section>
+          <h2>ScanDocu</h2>
+          <div class="body">
+            <div id="scanDocuState" class="status-line"></div>
+            <div id="actionMessage" class="message hidden"></div>
+          </div>
+        </section>
+        <section>
+          <h2>Záloha</h2>
+          <div class="body"><pre id="backupText"></pre></div>
+        </section>
+      </div>
+    </div>
+    <section>
+      <h2>Souhrn vaultu</h2>
+      <div class="body"><div id="vaultText" class="vault-summary"></div></div>
+    </section>
+    <section>
+      <h2>Kontrola nesrovnalostí</h2>
+      <div class="body"><div id="consistencyText" class="consistency-panel"></div></div>
+    </section>
+    </details>
+  </main>
+  <div id="janickaModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="janickaTitle">
+    <div class="modal janicka-modal">
+      <div class="modal-header">
+        <h2 id="janickaTitle">Janička</h2>
+        <button class="secondary" id="janickaCloseBtn">Zavřít</button>
+      </div>
+      <div class="modal-body">
+        <div class="janicka-intro">
+          <h3 class="janicka-title">Samantha bez technické vrstvy</h3>
+          <p class="janicka-subtitle">Tahle obrazovka je vstup pro Janu. Neomezuje přístup; jen převádí hotové části Samanthy do srozumitelných kroků.</p>
+        </div>
+        <div class="janicka-grid" aria-label="Janička rozcestník">
+          <div class="janicka-action">
+            <div>
+              <div class="janicka-action-title">Najít dokument</div>
+              <div class="janicka-action-text">Vyhledat smlouvu, fakturu, dopis nebo jiný uložený dokument.</div>
+            </div>
+            <button id="janickaFindDocumentBtn" type="button">Hledat</button>
+          </div>
+          <div class="janicka-action">
+            <div>
+              <div class="janicka-action-title">R2-Adam</div>
+              <div class="janicka-action-text">Zeptat se, vyhledat podklady a připravit nový dokument přímo v samostatném chatu.</div>
+            </div>
+            <button id="janickaR2ChatBtn" type="button">Otevřít chat</button>
+          </div>
+          <div class="janicka-action">
+            <div>
+              <div class="janicka-action-title">Vytisknout dokument</div>
+              <div class="janicka-action-text">Nejdřív dokument najít, pak v detailu použít tisk.</div>
+            </div>
+            <button id="janickaPrintDocumentBtn" type="button">Najít k tisku</button>
+          </div>
+          <div class="janicka-action">
+            <div>
+              <div class="janicka-action-title">E-maily</div>
+              <div class="janicka-action-text">Otevřít pracovní přehled e-mailů a jejich příloh.</div>
+            </div>
+            <button id="janickaEmailBtn" type="button">Otevřít</button>
+          </div>
+          <div class="janicka-action">
+            <div>
+              <div class="janicka-action-title">Lékárna</div>
+              <div class="janicka-action-text">Najít domácí léky podle názvu nebo potíží.</div>
+            </div>
+            <button id="janickaLekarnaBtn" type="button">Otevřít</button>
+          </div>
+          <div class="janicka-action">
+            <div>
+              <div class="janicka-action-title">Rodinné projekty</div>
+              <div class="janicka-action-text">Otevřít připravené rodinné fotky a videa, například USA.</div>
+            </div>
+            <button id="janickaFamilyBtn" type="button">Otevřít</button>
+          </div>
+          <div class="janicka-action">
+            <div>
+              <div class="janicka-action-title">Připomenutí</div>
+              <div class="janicka-action-text">Zobrazit důležité termíny a otevřené připomínky.</div>
+            </div>
+            <button id="janickaRemindersBtn" type="button">Zobrazit</button>
+          </div>
+          <div class="janicka-action">
+            <div>
+              <div class="janicka-action-title">Nouzové převzetí</div>
+              <div class="janicka-action-text">Otevřít recovery přehled a odkazy na navazující pozůstalostní plán.</div>
+            </div>
+            <button class="secondary" id="janickaRecoveryBtn" type="button">Otevřít</button>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="secondary" id="janickaWebAppsBtn" type="button">Všechny aplikace</button>
+          <button class="secondary" id="janickaProjectsBtn" type="button">Projekty</button>
+          <button class="secondary" id="janickaCookbookBtn" type="button">Kuchařka</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <button class="janicka-return hidden" id="janickaReturnBtn" type="button">Zpět k Janičce</button>
+  <div id="janickaFamilyModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="janickaFamilyTitle">
+    <div class="modal janicka-family-modal">
+      <div class="modal-header">
+        <h2 id="janickaFamilyTitle">Rodinné projekty</h2>
+        <button class="secondary" id="janickaFamilyCloseBtn">Zpět k Janičce</button>
+      </div>
+      <div class="modal-body">
+        <div class="janicka-intro">
+          <h3 class="janicka-title">Fotky, videa a rodinné výstupy</h3>
+          <p class="janicka-subtitle">Tady jsou bezpečné vstupy k připraveným rodinným věcem. Původní fotky a videa se odsud nemažou ani nepřesouvají.</p>
+        </div>
+        <div class="janicka-family-list">
+          <div class="janicka-action">
+            <div>
+              <div class="janicka-action-title">Rodinný výběr videí a fotek</div>
+              <div class="janicka-action-text">Otevřít lokální přehled pro třídění rodinných videí, výběr záběrů a přípravu sestřihu.</div>
+            </div>
+            <button id="janickaFamilyOrganizerBtn" type="button">Otevřít</button>
+          </div>
+          <div class="janicka-action">
+            <div>
+              <div class="janicka-action-title">Přehled projektů</div>
+              <div class="janicka-action-text">Zobrazit aktivní rodinné projekty a další kroky, když není jasné, co otevřít.</div>
+            </div>
+            <button class="secondary" id="janickaFamilyProjectsBtn" type="button">Zobrazit</button>
+          </div>
+        </div>
+        <div id="janickaFamilyStatus" class="status-line">Vyber, co chceš otevřít.</div>
+      </div>
+    </div>
+  </div>
+  <div id="remindersModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="remindersTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="remindersTitle">Připomenutí</h2>
+        <button class="secondary" id="remindersCloseBtn">Zavřít</button>
+      </div>
+      <div class="modal-body">
+        <div id="remindersStatus" class="status-line">Načítám připomínky...</div>
+        <div id="remindersList" class="reminder-list"></div>
+      </div>
+    </div>
+  </div>
+  <div id="webAppsModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="webAppsTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="webAppsTitle">Webové aplikace</h2>
+        <button class="secondary" id="webAppsCloseBtn">Zavřít</button>
+      </div>
+      <div class="modal-body">
+        <div id="webAppsStatus" class="status-line">Načítám aplikace...</div>
+        <div id="webAppsList" class="app-list"></div>
+      </div>
+    </div>
+  </div>
+  <div id="libraryModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="libraryTitle">
+    <div class="modal library-modal">
+      <div class="modal-header">
+        <h2 id="libraryTitle">Knihovna</h2>
+        <button class="secondary" id="libraryCloseBtn">Zavřít</button>
+      </div>
+      <div class="modal-body">
+        <div class="library-tabs" aria-label="Kategorie knihovny">
+          <button class="secondary library-tab" type="button" data-library-category="all">Všechny</button>
+          <button class="secondary library-tab active" type="button" data-library-category="recipes">Recepty</button>
+          <button class="secondary library-tab" type="button" data-library-category="science">Vědecké články</button>
+          <button class="secondary library-tab" type="button" data-library-category="ai_tools">Samantha / AI nástroje</button>
+          <button class="secondary library-tab" type="button" data-library-category="travel_places">Cestování / místa</button>
+          <button class="secondary library-tab" type="button" data-library-category="other">Ostatní</button>
+          <button class="secondary library-tab read-queue" type="button" data-library-category="all" data-library-read-state="to_read">K přečtení</button>
+        </div>
+        <div class="library-controls">
+          <label class="library-field">
+            <span class="library-field-label">Hledat ve vybrané kategorii</span>
+            <input id="librarySearchInput" type="search" placeholder="Název nebo slova z článku">
+          </label>
+          <button class="primary library-field-button" id="librarySearchBtn" type="button">Hledat</button>
+        </div>
+        <div id="libraryStatus" class="status-line">Načítám knihovnu...</div>
+        <div class="library-add-toolbar" aria-label="Přidat obsah do knihovny">
+          <button class="secondary" id="libraryAddUrlBtn" type="button" aria-expanded="false" aria-controls="libraryArchivePanel">Přidat z webu</button>
+          <button class="secondary" id="libraryAddTextBtn" type="button" aria-expanded="false" aria-controls="libraryTextPanel">Přidat vlastní text</button>
+        </div>
+        <div id="libraryArchivePanel" class="library-add-panel hidden">
+          <h3 class="library-add-title">Přidat článek z webu</h3>
+          <div class="library-archive-grid">
+            <label class="library-field">
+              <span class="library-field-label">Adresa článku (URL)</span>
+              <input id="libraryArchiveUrlInput" type="url" placeholder="https://…">
+            </label>
+            <label class="library-field">
+              <span class="library-field-label">Kategorie</span>
+              <select id="libraryArchiveCategory">
+                <option value="recipes" selected>Recepty</option>
+                <option value="science">Vědecké články</option>
+                <option value="ai_tools">Samantha / AI nástroje</option>
+                <option value="travel_places">Cestování / místa</option>
+                <option value="other">Ostatní</option>
+              </select>
+            </label>
+            <label class="library-field">
+              <span class="library-field-label">Tagy (volitelné)</span>
+              <input id="libraryArchiveTagsInput" type="text" placeholder="např. zdraví, studie">
+              <span class="library-field-hint">Více tagů odděluj čárkou.</span>
+            </label>
+            <button class="primary library-field-button" id="libraryArchiveBtn" type="button">Uložit URL</button>
+          </div>
+          <div id="libraryArchiveStatus" class="status-line">Vlož URL, vyber kategorii a ulož ji do soukromé knihovny.</div>
+        </div>
+        <div id="libraryTextPanel" class="library-add-panel hidden">
+          <h3 class="library-add-title">Přidat vlastní text</h3>
+          <div class="library-text-grid">
+            <label class="library-field">
+              <span class="library-field-label">Název (volitelný)</span>
+              <input id="libraryTextTitleInput" type="text" placeholder="Název znalostní karty">
+              <span class="library-field-hint">Když zůstane prázdný, použije se první řádek textu.</span>
+            </label>
+            <label class="library-field">
+              <span class="library-field-label">Kategorie</span>
+              <select id="libraryTextCategory">
+                <option value="recipes" selected>Recepty</option>
+                <option value="science">Vědecké články</option>
+                <option value="ai_tools">Samantha / AI nástroje</option>
+                <option value="travel_places">Cestování / místa</option>
+                <option value="other">Ostatní</option>
+              </select>
+            </label>
+            <label class="library-field">
+              <span class="library-field-label">Zdroj nebo původ (volitelný)</span>
+              <input id="libraryTextSourceInput" type="text" placeholder="např. vlastní poznámka nebo ChatGPT">
+            </label>
+            <label class="library-field">
+              <span class="library-field-label">Poznámka ke zdroji (volitelná)</span>
+              <input id="libraryTextSourceNoteInput" type="text" placeholder="Upřesnění původu textu">
+            </label>
+          </div>
+          <label class="library-field">
+            <span class="library-field-label">Tagy (volitelné)</span>
+            <input id="libraryTextTagsInput" type="text" placeholder="např. recept, rodina">
+            <span class="library-field-hint">Více tagů odděluj čárkou.</span>
+          </label>
+          <label class="library-field">
+            <span class="library-field-label">Text karty</span>
+            <textarea id="libraryTextBodyInput" class="library-text-area" placeholder="Vlož text receptu, poznámky nebo výstřižku"></textarea>
+          </label>
+          <div class="actions compact-actions">
+            <button class="primary" id="libraryTextSaveBtn" type="button">Uložit text</button>
+          </div>
+          <div id="libraryTextStatus" class="status-line">Text bez URL se uloží jako interní znalostní karta.</div>
+        </div>
+        <div class="library-layout">
+          <div id="libraryList" class="library-list"></div>
+          <div id="libraryReader" class="library-reader" aria-live="polite">
+            <div class="library-reader-head">
+              <h3 id="libraryReaderTitle" class="library-reader-title">Vyber článek</h3>
+              <div id="libraryReaderMeta" class="library-meta library-reader-meta">Vlevo vyber položku nebo použij fulltextové hledání.</div>
+              <div class="library-reader-actions" aria-label="Akce vybraného článku">
+                <div class="library-action-group" aria-label="Akce článku">
+                  <span class="library-action-group-label">Článek</span>
+                  <button class="secondary" id="libraryEditBtn" type="button" disabled>Upravit</button>
+                  <button class="secondary" id="libraryOpenSourceBtn" type="button" disabled>Otevřít na webu</button>
+                </div>
+                <div class="library-action-group" aria-label="Stav čtení">
+                  <span class="library-action-group-label">Čtení</span>
+                  <button class="secondary" id="libraryToReadBtn" type="button" disabled>K přečtení</button>
+                  <button class="secondary" id="libraryDoneBtn" type="button" disabled>Hotovo</button>
+                  <button class="secondary" id="libraryClearReadStateBtn" type="button" disabled>Zrušit příznak</button>
+                </div>
+                <div class="library-action-group" aria-label="Export článku">
+                  <span class="library-action-group-label">Export</span>
+                  <button class="secondary" id="libraryExportPrepareBtn" type="button" disabled>Připravit PDF</button>
+                  <button class="primary" id="libraryExportSendBtn" type="button" disabled>Odeslat export</button>
+                </div>
+                <div class="library-action-group" aria-label="Správa článku">
+                  <span class="library-action-group-label">Správa</span>
+                  <button class="secondary danger" id="libraryDeleteBtn" type="button" disabled>Vyřadit z knihovny</button>
+                </div>
+              </div>
+              <div id="libraryExportStatus" class="status-line">Export PDF se připraví lokálně a odešle až po potvrzení.</div>
+            </div>
+            <div id="libraryEditPanel" class="library-edit-panel hidden">
+              <div class="library-edit-grid">
+                <label class="library-field">
+                  <span class="library-field-label">Název článku</span>
+                  <input id="libraryEditTitleInput" type="text" placeholder="Název článku">
+                </label>
+                <label class="library-field">
+                  <span class="library-field-label">Kategorie</span>
+                  <select id="libraryEditCategoryInput">
+                    <option value="recipes">Recepty</option>
+                    <option value="science">Vědecké články</option>
+                    <option value="ai_tools">Samantha / AI nástroje</option>
+                    <option value="travel_places">Cestování / místa</option>
+                    <option value="other">Ostatní</option>
+                  </select>
+                </label>
+              </div>
+              <label class="library-field">
+                <span class="library-field-label">Tagy</span>
+                <input id="libraryEditTagsInput" type="text" placeholder="Tagy oddělené čárkou">
+              </label>
+              <div class="library-edit-source-grid">
+                <label class="library-field">
+                  <span class="library-field-label">Zdroj nebo původ</span>
+                  <input id="libraryEditSourceInput" type="text" placeholder="Název zdroje">
+                </label>
+                <label class="library-field">
+                  <span class="library-field-label">Poznámka ke zdroji</span>
+                  <input id="libraryEditSourceNoteInput" type="text" placeholder="Upřesnění původu textu">
+                </label>
+              </div>
+              <label class="library-field">
+                <span class="library-field-label">Text článku</span>
+                <textarea id="libraryEditTextInput" class="library-edit-text" placeholder="Text článku"></textarea>
+              </label>
+              <div class="actions compact-actions">
+                <button class="primary" id="libraryEditSaveBtn" type="button">Uložit úpravy</button>
+                <button class="secondary" id="libraryEditCancelBtn" type="button">Zrušit</button>
+              </div>
+              <div id="libraryEditStatus" class="status-line">Úpravy se uloží pouze do této soukromé karty.</div>
+            </div>
+            <section id="libraryAttachmentSection" class="library-attachment-section hidden" aria-labelledby="libraryAttachmentSectionTitle">
+              <div class="library-attachment-section-head">
+                <h4 id="libraryAttachmentSectionTitle" class="library-attachment-section-title">Přílohy</h4>
+                <span class="library-meta">Přidání, otevření, popisek a odebrání</span>
+              </div>
+              <div class="library-attachment-grid">
+                <label class="library-field">
+                  <span class="library-field-label">Fotografie</span>
+                  <input id="libraryAttachmentFileInput" type="file" accept="image/*">
+                </label>
+                <label class="library-field">
+                  <span class="library-field-label">Popisek fotografie</span>
+                  <input id="libraryAttachmentLabelInput" type="text" placeholder="Co je na fotografii">
+                </label>
+                <label class="library-field">
+                  <span class="library-field-label">Tagy přidané ke kartě (volitelné)</span>
+                  <input id="libraryAttachmentTagsInput" type="text" placeholder="např. scan, originál">
+                  <span class="library-field-hint">Přidají se celé kartě, ne pouze této příloze.</span>
+                </label>
+                <button class="primary library-field-button" id="libraryAttachmentSaveBtn" type="button" disabled>Přidat fotografii</button>
+              </div>
+              <label class="library-field">
+                <span class="library-field-label">Poznámka k fotografii (volitelná)</span>
+                <input id="libraryAttachmentNoteInput" type="text" placeholder="Doplňující informace k příloze">
+              </label>
+              <div id="libraryAttachmentStatus" class="status-line">Vyber fotografii; přidá se až po stisknutí tlačítka.</div>
+              <div id="libraryReaderAttachments" class="library-reader-attachments"></div>
+            </section>
+            <div id="libraryFullTextNotice" class="library-full-text-notice hidden">
+              <span id="libraryFullTextMessage">Zobrazená je pouze první část dlouhého článku.</span>
+              <button class="secondary" id="libraryShowFullTextBtn" type="button">Načíst celý text</button>
+            </div>
+            <div id="libraryReaderText" class="library-reader-text"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="familyCalendarModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="familyCalendarTitle">
+    <div class="modal family-calendar-modal">
+      <div class="modal-header">
+        <h2 id="familyCalendarTitle">Rodinný kalendář</h2>
+        <button class="secondary" id="familyCalendarCloseBtn" type="button">Zavřít</button>
+      </div>
+      <div class="modal-body">
+        <div class="family-calendar-intro">Přehled narozenin a svátků. Rok narození slouží k výpočtu věku; e-mailové odesílání zatím není aktivní.</div>
+        <div id="familyCalendarUpcoming" class="family-calendar-upcoming" aria-live="polite"></div>
+        <form id="familyCalendarPreviewForm" class="family-calendar-preview" autocomplete="off">
+          <h3>Náhled upozornění</h3>
+          <div class="family-calendar-intro">Zobrazuje jen dnešní D-2 nebo D-1 náhledy. Nic se neodesílá ani neukládá.</div>
+          <div class="family-calendar-preview-grid">
+            <label class="library-field">
+              <span class="library-field-label">Příjemce 1</span>
+              <input id="familyCalendarRecipientOne" type="email" maxlength="320" autocomplete="off" spellcheck="false" required>
+            </label>
+            <label class="library-field">
+              <span class="library-field-label">Příjemce 2</span>
+              <input id="familyCalendarRecipientTwo" type="email" maxlength="320" autocomplete="off" spellcheck="false" required>
+            </label>
+          </div>
+          <div class="actions compact-actions">
+            <button class="secondary" id="familyCalendarPreviewBtn" type="submit">Zobrazit náhled</button>
+          </div>
+          <div id="familyCalendarPreviewStatus" class="status-line" aria-live="polite">Aplikace adresy neukládá a po zavření okna je z formuláře vymaže.</div>
+          <div id="familyCalendarPreviewResults" class="family-calendar-preview-results"></div>
+        </form>
+        <form id="familyCalendarForm" class="family-calendar-form">
+          <h3 id="familyCalendarFormTitle">Přidat osobu</h3>
+          <input id="familyCalendarPersonId" type="hidden">
+          <div class="family-calendar-form-grid">
+            <label class="library-field">
+              <span class="library-field-label">Jméno nebo oslovení</span>
+              <input id="familyCalendarNameInput" type="text" maxlength="120" autocomplete="off" placeholder="např. Alena" required>
+            </label>
+            <label class="library-field">
+              <span class="library-field-label">Vztah nebo rozlišení</span>
+              <input id="familyCalendarRelationInput" type="text" maxlength="80" autocomplete="off" placeholder="např. teta">
+            </label>
+            <label class="library-field">
+              <span class="library-field-label">Datum narození</span>
+              <input id="familyCalendarBirthDateInput" type="date">
+              <span class="library-field-hint">Včetně roku, aby Cockpit mohl zobrazit věk.</span>
+            </label>
+            <label class="library-field">
+              <span class="library-field-label">Datum svátku</span>
+              <span class="family-calendar-name-day">
+                <input id="familyCalendarNameDayDayInput" type="number" min="1" max="31" inputmode="numeric" placeholder="den" aria-label="Den svátku">
+                <input id="familyCalendarNameDayMonthInput" type="number" min="1" max="12" inputmode="numeric" placeholder="měsíc" aria-label="Měsíc svátku">
+              </span>
+              <span class="library-field-hint">Stačí den a měsíc.</span>
+            </label>
+          </div>
+          <div class="family-calendar-checks">
+            <label class="family-calendar-check"><input id="familyCalendarRemindersInput" type="checkbox" checked> Připravovat upozornění</label>
+            <label class="family-calendar-check"><input id="familyCalendarActiveInput" type="checkbox" checked> Aktivní záznam</label>
+          </div>
+          <div class="actions compact-actions">
+            <button class="primary" id="familyCalendarSaveBtn" type="submit">Uložit osobu</button>
+            <button class="secondary" id="familyCalendarResetBtn" type="button">Vyčistit formulář</button>
+          </div>
+          <div id="familyCalendarFormStatus" class="status-line">Doplň alespoň datum narození nebo datum svátku.</div>
+        </form>
+        <div id="familyCalendarStatus" class="status-line">Načítám rodinný kalendář…</div>
+        <div class="family-calendar-table-wrap">
+          <table class="family-calendar-table">
+            <thead>
+              <tr>
+                <th>Osoba</th>
+                <th>Datum narození</th>
+                <th>Věk</th>
+                <th>Datum svátku</th>
+                <th>Upozornění</th>
+                <th>Stav</th>
+              </tr>
+            </thead>
+            <tbody id="familyCalendarTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="projectsModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="projectsTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="projectsTitle">Projekty a schopnosti</h2>
+        <button class="secondary" id="projectsCloseBtn">Zavřít</button>
+      </div>
+      <div class="modal-body">
+        <div id="projectsStatus" class="status-line">Načítám projekty a schopnosti...</div>
+        <div class="project-toolbar" aria-label="Filtr projektů a schopností">
+          <button class="secondary active" type="button" data-project-filter="all">Vše</button>
+          <button class="secondary" type="button" data-project-filter="projects">Projekty</button>
+          <button class="secondary" type="button" data-project-filter="archived">Archiv</button>
+          <button class="secondary" type="button" data-project-filter="tools">Tooly</button>
+          <button class="secondary" type="button" data-project-filter="infrastructure">Vrstvy</button>
+	          <button class="secondary" type="button" data-project-filter="priority1">Priorita 1</button>
+	          <button class="secondary" type="button" data-project-filter="remind">Připomenout</button>
+	          <button class="secondary" type="button" data-project-filter="waiting">Čeká na mě</button>
+	          <button class="secondary" type="button" data-project-filter="needs_attention">Doplnit</button>
+	        </div>
+        <div id="projectsList" class="project-list"></div>
+      </div>
+    </div>
+  </div>
+	  <div id="quickNotesModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="quickNotesTitle">
+	    <div class="modal">
+	      <div class="modal-header">
+	        <h2 id="quickNotesTitle">Rychlé poznámky</h2>
+        <button class="secondary" id="quickNotesCloseBtn">Zavřít</button>
+      </div>
+      <div class="modal-body">
+        <div id="quickNotesStatus" class="status-line">Načítám rychlé poznámky...</div>
+        <div id="quickNotesList" class="project-list"></div>
+	      </div>
+	    </div>
+	  </div>
+	  <div id="urgentRemindersModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="urgentRemindersTitle">
+	    <div class="modal">
+	      <div class="modal-header">
+	        <h2 id="urgentRemindersTitle">Důležitá připomenutí</h2>
+        <button class="secondary" id="urgentRemindersCloseBtn">Zavřít</button>
+      </div>
+      <div class="modal-body">
+        <div id="urgentRemindersStatus" class="status-line">Načítám důležitá připomenutí...</div>
+        <div id="urgentRemindersList" class="project-list"></div>
+	      </div>
+	    </div>
+	  </div>
+		  <div id="recoveryModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="recoveryTitle">
+		    <div class="modal">
+		      <div class="modal-header">
+		        <h2 id="recoveryTitle">Recovery centrum</h2>
+	        <button class="secondary" id="recoveryCloseBtn">Zavřít</button>
+	      </div>
+	      <div class="modal-body">
+	        <div id="recoveryStatus" class="status-line">Načítám recovery stav...</div>
+	        <div class="recovery-grid">
+	          <div class="recovery-card">
+	            <h3>Autosave</h3>
+	            <div id="recoveryAutosave" class="project-meta"></div>
+	          </div>
+	          <div class="recovery-card">
+	            <h3>Git</h3>
+	            <div id="recoveryGit" class="project-meta"></div>
+	          </div>
+	        </div>
+	        <div class="recovery-card">
+	          <h3>Aktivní navázání</h3>
+	          <div id="recoveryProject" class="project-next"></div>
+	        </div>
+	        <div class="recovery-card">
+	          <h3>Handoffy</h3>
+	          <div id="recoveryHandoffs" class="recovery-list"></div>
+	        </div>
+	        <div class="recovery-card">
+	          <h3>Příkazy</h3>
+	          <div id="recoveryCommands" class="recovery-list"></div>
+	          <div class="voice-card-actions">
+	            <button class="secondary" id="recoveryCommandCheatsheetBtn" type="button">Otevřít celý pamatováček</button>
+	          </div>
+	        </div>
+	      </div>
+	    </div>
+	  </div>
+	  <div id="commandCheatsheetModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="commandCheatsheetTitle">
+	    <div class="modal">
+	      <div class="modal-header">
+	        <h2 id="commandCheatsheetTitle">Pamatováček</h2>
+	        <button class="secondary" id="commandCheatsheetCloseBtn">Zavřít</button>
+	      </div>
+	      <div class="modal-body">
+	        <div id="commandCheatsheetStatus" class="status-line">Načítám pamatováček...</div>
+	        <div id="commandCheatsheetList" class="command-cheatsheet-list"></div>
+	      </div>
+	    </div>
+	  </div>
+	  <div id="diagnosticsModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="diagnosticsTitle">
+	    <div class="modal">
+	      <div class="modal-header">
+	        <h2 id="diagnosticsTitle">Diagnostika</h2>
+	        <button class="secondary" id="diagnosticsCloseBtn">Zavřít</button>
+	      </div>
+	      <div class="modal-body">
+	        <div id="diagnosticsStatus" class="status-line">Načítám diagnostiku...</div>
+	        <div class="recovery-card">
+	          <h3>Stav</h3>
+	          <div id="diagnosticsStatusSignals" class="diagnostics-list"></div>
+	        </div>
+	        <div class="recovery-card">
+	          <h3>Frontend</h3>
+	          <div id="diagnosticsFrontend" class="project-meta"></div>
+	        </div>
+	        <div class="recovery-card">
+	          <h3>Endpointy</h3>
+	          <div id="diagnosticsEndpointList" class="diagnostics-list"></div>
+	        </div>
+	        <div class="recovery-card">
+	          <h3>Poslední chyby</h3>
+	          <div id="diagnosticsErrorList" class="diagnostics-list"></div>
+	        </div>
+	      </div>
+	    </div>
+	  </div>
+		  <div id="quantitativeModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="quantitativeTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="quantitativeTitle">Systémový souhrn</h2>
+        <button class="secondary" id="quantitativeCloseBtn">Zavřít</button>
+      </div>
+      <div class="modal-body quantitative-panel">
+        <div id="quantitativeStatus" class="status-line">Načítám kvantitativní status...</div>
+        <div class="quantitative-grid">
+          <div class="quantitative-card">
+            <h3>Aktuální stav</h3>
+            <pre id="quantitativeCurrent"></pre>
+          </div>
+          <div class="quantitative-card">
+            <h3>Poslední snapshot</h3>
+            <pre id="quantitativePrevious"></pre>
+          </div>
+        </div>
+        <div class="quantitative-card">
+          <h3>Diff</h3>
+          <div id="quantitativeDiffTotals" class="quantitative-summary"></div>
+          <div id="quantitativeDiffList" class="quantitative-diff-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="projectAuditModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="projectAuditTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="projectAuditTitle">Systémový audit</h2>
+        <div class="quick-actions">
+          <button class="secondary" id="projectAuditSaveBtn">Uložit full audit</button>
+          <button class="secondary" id="projectAuditCloseBtn">Zavřít</button>
+        </div>
+      </div>
+      <div class="modal-body quantitative-panel">
+        <div id="projectAuditStatus" class="status-line">Načítám systémový audit...</div>
+        <div class="quantitative-card">
+          <h3>Poslední uložené audity</h3>
+          <div id="projectAuditRecentList" class="project-list"></div>
+        </div>
+        <div class="quantitative-card">
+          <h3>Aktuální report</h3>
+          <pre id="projectAuditText" class="project-audit-report"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+{{SAMANTHA_JAVASCRIPT}}	  </script>
+</body>
+</html>

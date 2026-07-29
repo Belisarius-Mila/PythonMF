@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Archiv e-mailů</title>
+  <style>
+{{SAMANTHA_CSS}}  </style>
+</head>
+<body>
+  <header>
+    <h1>Archiv e-mailů</h1>
+    <div class="actions">
+      <button class="secondary" id="returnBtn">Zpět do Cockpitu</button>
+      <button class="primary" id="refreshBtn">Obnovit</button>
+    </div>
+  </header>
+  <main>
+    <section>
+      <h2>Hledání</h2>
+      <div class="body">
+        <div class="toolbar">
+          <input id="searchInput" placeholder="UID, předmět, odesílatel...">
+          <button class="primary" id="searchBtn">Hledat</button>
+        </div>
+        <div class="status" id="status">Načítám archiv...</div>
+        <div class="list" id="archiveList"></div>
+      </div>
+    </section>
+    <section>
+      <h2>Detail</h2>
+      <div class="body" id="detailPane">
+        <div class="empty">Vyber e-mail ze seznamu.</div>
+      </div>
+    </section>
+  </main>
+  <script>
+{{SAMANTHA_JAVASCRIPT}}  </script>
+</body>
+</html>

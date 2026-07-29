@@ -3,6 +3,8 @@ from __future__ import annotations
 import unittest
 from pathlib import Path
 
+from app.cockpit_frontend import COCKPIT_HTML
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
@@ -15,23 +17,21 @@ class CodexApprovalCockpitContractTests(unittest.TestCase):
         self.assertNotIn("from app.speech.adam_voice_mode import", source)
         self.assertIn("codex_approval=load_codex_approval_request", source)
         self.assertIn("codex_approval_loader=codex_approval_loader or load_codex_approval_request", source)
-        self.assertIn("codex_approval: data.codex_approval || {}", source)
-        self.assertIn("renderCodexApproval(data.codex_approval || {});", source)
-        self.assertNotIn("voiceMode.codex_approval", source)
+        self.assertIn("codex_approval: data.codex_approval || {}", COCKPIT_HTML)
+        self.assertIn("renderCodexApproval(data.codex_approval || {});", COCKPIT_HTML)
+        self.assertNotIn("voiceMode.codex_approval", COCKPIT_HTML)
 
     def test_approval_card_remains_after_voice_section_retirement(self) -> None:
-        source = (PROJECT_ROOT / "app" / "cockpit.py").read_text(encoding="utf-8")
-
-        self.assertIn('id="codexApprovalCard"', source)
-        self.assertNotIn('id="voiceCommandDetails"', source)
-        self.assertIn('id="codexApprovalOpenHumanAdamBtn"', source)
-        self.assertIn('window.location.href = "/human-adam/"', source)
-        self.assertIn('postJson("/api/codex-approval/clear"', source)
-        self.assertNotIn("/api/voice-mode/codex-approval/clear", source)
-        self.assertNotIn("codexApprovalSendConfirmationBtn", source)
-        self.assertNotIn("sendCodexApprovalConfirmation", source)
-        self.assertNotIn('data-safe-readonly="git_status"', source)
-        self.assertNotIn('data-safe-readonly="backup_status"', source)
+        self.assertIn('id="codexApprovalCard"', COCKPIT_HTML)
+        self.assertNotIn('id="voiceCommandDetails"', COCKPIT_HTML)
+        self.assertIn('id="codexApprovalOpenHumanAdamBtn"', COCKPIT_HTML)
+        self.assertIn('window.location.href = "/human-adam/"', COCKPIT_HTML)
+        self.assertIn('postJson("/api/codex-approval/clear"', COCKPIT_HTML)
+        self.assertNotIn("/api/voice-mode/codex-approval/clear", COCKPIT_HTML)
+        self.assertNotIn("codexApprovalSendConfirmationBtn", COCKPIT_HTML)
+        self.assertNotIn("sendCodexApprovalConfirmation", COCKPIT_HTML)
+        self.assertNotIn('data-safe-readonly="git_status"', COCKPIT_HTML)
+        self.assertNotIn('data-safe-readonly="backup_status"', COCKPIT_HTML)
 
     def test_notice_script_owns_approval_state_without_voice_mode(self) -> None:
         script_source = (PROJECT_ROOT / "scripts" / "codex_approval_notice.py").read_text(encoding="utf-8")

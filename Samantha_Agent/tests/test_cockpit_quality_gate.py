@@ -50,6 +50,8 @@ class CockpitQualityGateTests(unittest.TestCase):
         push_paths = trigger_paths("push", "\npermissions:")
         required = {
             ".github/workflows/cockpit-quality-gate.yml",
+            "Samantha_Agent/app/cockpit_frontend.py",
+            "Samantha_Agent/app/frontend/**",
             "Samantha_Agent/app/communication/**",
             "Samantha_Agent/tests/test_communication*.py",
             "Samantha_Agent/tests/test_human_adam*.py",
@@ -88,6 +90,8 @@ async def second():
         for relative_path in COMPILE_PATHS:
             self.assertTrue((PROJECT_ROOT / relative_path).is_file(), relative_path)
         self.assertIn("tests.test_cockpit", TEST_MODULES)
+        self.assertIn("tests.test_cockpit_frontend", TEST_MODULES)
+        self.assertIn("app/cockpit_frontend.py", COMPILE_PATHS)
         self.assertIn("app/email/archive_browser.py", COMPILE_PATHS)
         self.assertIn("tests.test_email_archive_browser", TEST_MODULES)
         self.assertNotIn("tests.test_adam_voice_mode", TEST_MODULES)

@@ -4,6 +4,8 @@ import ast
 import unittest
 from pathlib import Path
 
+from app.cockpit_frontend import COCKPIT_HTML
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
@@ -14,12 +16,7 @@ def cockpit_tree() -> ast.Module:
 
 
 def cockpit_html() -> str:
-    for node in cockpit_tree().body:
-        if not isinstance(node, ast.Assign):
-            continue
-        if any(isinstance(target, ast.Name) and target.id == "COCKPIT_HTML" for target in node.targets):
-            return ast.literal_eval(node.value)
-    raise AssertionError("COCKPIT_HTML nebyl nalezen.")
+    return COCKPIT_HTML
 
 
 def cockpit_post_action_paths() -> set[str]:
@@ -321,15 +318,16 @@ class CockpitVoiceFrontendRetirementTests(unittest.TestCase):
 
     def test_cockpit_dev_runner_no_longer_references_voice_bridge_runtime(self) -> None:
         source = (PROJECT_ROOT / "app" / "cockpit.py").read_text(encoding="utf-8")
+        combined_source = source + COCKPIT_HTML
 
         self.assertIn('"id": "cockpit_tests"', source)
-        self.assertIn('data-dev-runner="cockpit_tests"', source)
+        self.assertIn('data-dev-runner="cockpit_tests"', COCKPIT_HTML)
         self.assertIn('"tests.test_cockpit"', source)
-        self.assertNotIn("cockpit_voice_tests", source)
-        self.assertNotIn("tests.test_adam_voice_mode", source)
-        self.assertNotIn("tests.test_terminal_bridge", source)
-        self.assertNotIn("app/speech/adam_voice_mode.py", source)
-        self.assertNotIn("app/speech/terminal_bridge.py", source)
+        self.assertNotIn("cockpit_voice_tests", combined_source)
+        self.assertNotIn("tests.test_adam_voice_mode", combined_source)
+        self.assertNotIn("tests.test_terminal_bridge", combined_source)
+        self.assertNotIn("app/speech/adam_voice_mode.py", combined_source)
+        self.assertNotIn("app/speech/terminal_bridge.py", combined_source)
 
     def test_dead_voice_bridge_entry_layers_are_absent(self) -> None:
         retired_paths = (

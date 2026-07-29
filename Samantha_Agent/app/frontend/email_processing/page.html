@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>E-maily</title>
+  <style>
+{{SAMANTHA_CSS}}  </style>
+</head>
+<body>
+  <header>
+    <h1>E-maily</h1>
+    <div class="toolbar">
+      <button class="secondary" id="refreshBtn" disabled>Obnovit nové</button>
+      <span class="days-control">
+        <span>Za posledních:</span>
+        <input id="emailDaysInput" type="number" min="1" max="14" step="1" value="7" inputmode="numeric" aria-label="Počet dní">
+        <span>dní</span>
+      </span>
+      <button class="primary" id="loadHeadersBtn">Načti emaily</button>
+      <button class="secondary" id="loadPendingBtn">Načti rozpracované</button>
+      <button class="secondary" id="cockpitBtn">← Zpět do Cockpitu</button>
+    </div>
+  </header>
+  <main>
+    <div class="grid">
+      <section>
+        <h2>Pracovní seznam e-mailů</h2>
+        <div class="body">
+          <div id="overviewStatus" class="status-line">Načítám uložený přehled...</div>
+          <div id="overview" class="overview"></div>
+        </div>
+      </section>
+      <aside>
+        <h2>Bezpečnost</h2>
+        <div class="body meta">
+          <div><strong>Režim:</strong> hlavičky a čtení jsou <span class="safe">read-only</span>; tlačítko Hotovo mění pouze vratný příznak Seznamu.</div>
+          <div>Okno startuje prázdné. Nové hlavičky se načtou až tlačítkem.</div>
+          <div><strong>Obnovit nové:</strong> aktivuje se až po načtení seznamu a doplní jen e-maily novější než nejnovější viditelný e-mail.</div>
+          <div><strong>Načti emaily:</strong> doplní jen e-maily ve zvoleném rozsahu 1-14 dní, které ještě nejsou v aktuálním seznamu ani nemají uložené rozhodnutí.</div>
+          <div><strong>Načti rozpracované:</strong> vrátí do seznamu e-maily, které už mají status `Zpracovat` nebo `Koš` a čekají na Work Queue.</div>
+          <div><strong>Koš:</strong> tlačítko zatím jen označí e-mail ke smazání; skutečné smazání bude samostatná potvrzená akce.</div>
+          <div><strong>Hotovo:</strong> u Seznam e-mailu nastaví nebo zruší serverový IMAP příznak, který se ve schránce zobrazí jako hvězdička či příznak.</div>
+          <div><strong>Další krok:</strong> vybrat konkrétní UID a zdroj; načtení e-mailu nebo PDF až po samostatném potvrzení.</div>
+          <div id="sourcePath" class="status-line"></div>
+          <div id="updatedAt" class="status-line"></div>
+          <button class="primary work-button" id="processEmailsBtn" disabled>Zpracovat e-maily</button>
+          <div id="processEmailsStatus" class="status-line">Nejdřív přiřaď status všem viditelným e-mailům.</div>
+          <div class="status-line">Blokové přepínače jako VAK, Finanční správa nebo Faktury nad 2000 Kč jsou až v okně Work Queue po kliknutí na Zpracovat e-maily.</div>
+          <div class="headers-box">
+            <div id="headersBusy" class="busy-row" role="status" aria-live="polite">
+              <span class="spinner" aria-hidden="true"></span>
+              <span id="headersBusyText">Načítám...</span>
+            </div>
+            <div id="newHeadersStatus" class="status-line"></div>
+          </div>
+          <div class="pill-row">
+            <span class="pill">faktury/e-shopy</span>
+            <span class="pill">pojištění/smlouvy</span>
+            <span class="pill">úřady/daně</span>
+            <span class="pill">ostatní</span>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+  <script>
+{{SAMANTHA_JAVASCRIPT}}  </script>
+</body>
+</html>
