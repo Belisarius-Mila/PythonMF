@@ -34,56 +34,18 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   stav se nezmění. Produkční MP3 vytváří až GitHub Pages workflow ve svém
   dočasném runneru.
 
-### LL-002 — Lokální slovníkové obrázky blokovaly dorovnání profilů
+### LL-002 — Slovníkové aplikace: konzistence kódu, mappingu a obrázků
 
-- Problém: Commit neprodukčního obrázku z `PictNew/` do `main` zablokoval
-  bezpečné dorovnání Human–Adam a Knihovna workspace. Profilová pojistka správně
-  odmítá běžné mediální soubory mimo výslovně povolené veřejné cesty.
+- Problém: Obrázky se nemusí zobrazovat, přestože mapping vypadá správně.
+  Příčinou může být záměna variant aplikace nebo mappingu, neúplný `Pict`, jiná
+  cesta na cílovém zařízení, starý obsah v paměti nebo rozdíl ve formátu či
+  názvu souboru. Lokální obrázky navíc nemají znečišťovat Git.
 - Typ: opakující se
 - Řešení nalezeno: 29072026
-- Řešení: Obrázky určené jen pro lokální servis nebo externí iCloud držet
-  fyzicky v pracovním adresáři, ale mimo Git pomocí přesného lokálního exclude.
-  Nerozšiřovat kvůli nim mediální allowlist profilů. Pokud už byl takový soubor
-  omylem commitnutý, zachovat pracovní soubor, bezpečně ho přestat trackovat a
-  teprve potom profily dorovnat.
-
-### LL-003 — Pythonista používala starý mapping navzdory kopírování souborů
-
-- Problém: AppFR na iPhonu nezobrazovala jen některé nové obrázky. Opakované
-  úpravy AppFR a převody WebP na PNG nepomohly, protože oba skutečně načítané
-  `mapping.json` zůstaly ve staré verzi a odkazovaly na neexistující názvy
-  obrázků.
-- Typ: opakující se
-- Řešení nalezeno: 29072026
-- Řešení: Nejdřív spustit diagnostiku přímo v Pythonistě a ověřit skutečný
-  `AppFR.py`, `BASE_DIR`, oba mappingy, počet záznamů, velikost souboru, konkrétní
-  vazby a dekódování obrázků. Staré mappingy nemaž; přejmenuj je a finální
-  mapping nahraj a přejmenuj na `mapping.json` v kořeni aplikace i v `Pict/`.
-  Teprve potom řeš formát nebo metadata obrázků.
-
-### LL-004 — Hlavní a Janiččina AppFR jsou záměrně oddělené varianty
-
-- Problém: `MBSoft/AppFR.py` pro Mílův iPhone a
-  `MBSoft/JanaIphoneFR/AppFR.py` pro Janičku byly chybně považovány za dvě kopie
-  stejné aplikace a oprava byla omylem přenesena i do Janiččiny varianty.
-- Typ: opakující se
-- Řešení nalezeno: 29072026
-- Řešení: Před změnou vždy potvrdit cílového uživatele a přesný zdrojový soubor.
-  Mílova běžná verze je `MBSoft/AppFR.py`; `MBSoft/JanaIphoneFR/AppFR.py` zůstává
-  samostatná a smí se měnit jen při výslovné práci na Janiččině variantě.
-  Přenosovou kopii před předáním ověřit kontrolním součtem proti správnému
-  zdroji.
-
-### LL-005 — Formální shoda slovníku a mappingu nezaručuje zobrazení obrázku
-
-- Problém: AppIT měla pro většinu slov vhodné obrázky, ale starý resolver bral
-  první nalezený mapping, ztrácel skutečnou velikost písmen v názvu souboru a
-  neuměl bezpečně použít části vícevýznamových klíčů. Pouhá kontrola JSON proto
-  nadhodnocovala skutečnou funkčnost aplikace.
-- Typ: opakující se
-- Řešení nalezeno: 29072026
-- Řešení: Auditovat každý řádek CSV přímo stejným resolverem jako aplikace a
-  následně obrázek opravdu dekódovat. Preferovat app-local mappingy, slučovat
-  platné kandidáty, vybírat jen existující cíle, zachovat skutečný název souboru
-  a používat přesné či bezpečné aliasové shody před přímým stemem. Mapping před
-  změnou zazálohovat a doplňovat jen ověřené cíle.
+- Řešení: Každou variantu aplikace udržovat odděleně. Kontrolovat celý řetězec
+  `CSV -> mapping.json -> skutečný soubor v Pict -> dekódování aplikací`,
+  ideálně diagnostikou přímo na cílovém zařízení včetně cest, počtů a
+  kontrolních součtů. Mapping před změnou zálohovat, na zařízení nahrát do všech
+  skutečně používaných míst a aplikaci restartovat. Chybějící obrázky doplňovat
+  podle výsledku úplného auditu. Lokální či iCloudové servisní obrázky držet mimo
+  Git pomocí přesného lokálního exclude.

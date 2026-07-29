@@ -10,9 +10,8 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 - `LESSONS_LEARNED.md` - stručný registr ověřených řešení opakovaných nebo
   zobecnitelných problémů. Při podobném problému se prohledává před návrhem
-  nového řešení; obsahuje soví lokální preview, lokální slovníkové obrázky,
-  diagnostiku starého AppFR mappingu na Pythonistě a oddělení Mílovy a
-  Janiččiny varianty AppFR.
+  nového řešení; obsahuje soví lokální preview a obecnou kontrolu konzistence
+  slovníkových aplikací, mappingů a obrázků na cílovém zařízení.
 - `samantha_core.md` - zakladni kontext: kdo je Mila, co je Samantha Agent, aktualni stav prostredi, kanonicky stav Samantha Agent/RAG a dlouhodoby cil.
 - `contacts.md` - prakticke kontakty, ktere Mila vyslovne povolil ulozit do pameti.
 
