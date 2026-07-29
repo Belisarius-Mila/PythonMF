@@ -33,3 +33,16 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   jen v ignorované složce `data/daily_3am/previews/`; produkční soubory ani denní
   stav se nezmění. Produkční MP3 vytváří až GitHub Pages workflow ve svém
   dočasném runneru.
+
+### LL-002 — Lokální slovníkové obrázky blokovaly dorovnání profilů
+
+- Problém: Commit neprodukčního obrázku z `PictNew/` do `main` zablokoval
+  bezpečné dorovnání Human–Adam a Knihovna workspace. Profilová pojistka správně
+  odmítá běžné mediální soubory mimo výslovně povolené veřejné cesty.
+- Typ: opakující se
+- Řešení nalezeno: 29072026
+- Řešení: Obrázky určené jen pro lokální servis nebo externí iCloud držet
+  fyzicky v pracovním adresáři, ale mimo Git pomocí přesného lokálního exclude.
+  Nerozšiřovat kvůli nim mediální allowlist profilů. Pokud už byl takový soubor
+  omylem commitnutý, zachovat pracovní soubor, bezpečně ho přestat trackovat a
+  teprve potom profily dorovnat.
