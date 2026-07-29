@@ -2,7 +2,49 @@
 
 Projekt zalozen 2026-05-19.
 
-## Aktualni stav 2026-07-05
+## Aktualni stav 2026-07-29
+
+Posledni uspesna ostra recovery zaloha je podle
+`Samantha_Agent/data/backup/activity_state.json` z 2026-07-29:
+
+```text
+/Volumes/SamanthaSecureBackup/SamanthaBackups/snapshots/20260729_154354/PythonMF
+```
+
+Zaloha probehla pres Pythonovy inkrementalni nastroj:
+
+```bash
+.venv/bin/python scripts/backup_samantha_python.py --execute --profile recovery --target /Volumes/SamanthaSecureBackup/SamanthaBackups --progress-every 5000
+```
+
+Vystup ostreho behu:
+
+```text
+files seen: 55798
+files copied: 4162
+files hard-linked: 51636
+files skipped: 0
+bytes copied: 3895868304
+```
+
+Overeni po behu:
+
+- snapshot ma `backup_manifest.txt`, `READ_ME_FIRST_RECOVERY.md`, `PythonMF/`
+  a `codex_home/`,
+- `scripts/backup_status.py` hlasi posledni zalohu v 3dennim intervalu,
+- `codex_home/auth.json` nebyl zalohovan,
+- restore drill obnovil `Samantha_Agent/AGENTS.md` pouze do
+  `/private/tmp/samantha_restore_drill_20260729.TRVqG6/`,
+- SHA-256 obnoveneho a ziveho souboru je shodny:
+  `2ea4fce94dc72d9f10bd663c05a384e10fc41b9411bedb247ead0add7f28684b`.
+
+Prvni ostry pokus skoncil po odpojeni sifrovaneho kontejneru. Nedokonceny
+snapshot `20260729_153749` nema manifest, zustal zachovany a nastroj ho
+nepouziva jako referenci. `diskutil verifyVolume` nasledne potvrdil APFS bez
+chyb a jediny kontrolovany opakovany beh uspesne dobehl. Po zaloze zustalo na
+svazku priblizne `451 GiB` volno.
+
+## Starsi dokumentovany stav 2026-07-05
 
 Posledni uspesna ostra recovery zaloha je podle
 `Samantha_Agent/data/backup/activity_state.json` z 2026-07-05:
