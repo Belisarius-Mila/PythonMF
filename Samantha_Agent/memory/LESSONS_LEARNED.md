@@ -46,3 +46,30 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   Nerozšiřovat kvůli nim mediální allowlist profilů. Pokud už byl takový soubor
   omylem commitnutý, zachovat pracovní soubor, bezpečně ho přestat trackovat a
   teprve potom profily dorovnat.
+
+### LL-003 — Pythonista používala starý mapping navzdory kopírování souborů
+
+- Problém: AppFR na iPhonu nezobrazovala jen některé nové obrázky. Opakované
+  úpravy AppFR a převody WebP na PNG nepomohly, protože oba skutečně načítané
+  `mapping.json` zůstaly ve staré verzi a odkazovaly na neexistující názvy
+  obrázků.
+- Typ: opakující se
+- Řešení nalezeno: 29072026
+- Řešení: Nejdřív spustit diagnostiku přímo v Pythonistě a ověřit skutečný
+  `AppFR.py`, `BASE_DIR`, oba mappingy, počet záznamů, velikost souboru, konkrétní
+  vazby a dekódování obrázků. Staré mappingy nemaž; přejmenuj je a finální
+  mapping nahraj a přejmenuj na `mapping.json` v kořeni aplikace i v `Pict/`.
+  Teprve potom řeš formát nebo metadata obrázků.
+
+### LL-004 — Hlavní a Janiččina AppFR jsou záměrně oddělené varianty
+
+- Problém: `MBSoft/AppFR.py` pro Mílův iPhone a
+  `MBSoft/JanaIphoneFR/AppFR.py` pro Janičku byly chybně považovány za dvě kopie
+  stejné aplikace a oprava byla omylem přenesena i do Janiččiny varianty.
+- Typ: opakující se
+- Řešení nalezeno: 29072026
+- Řešení: Před změnou vždy potvrdit cílového uživatele a přesný zdrojový soubor.
+  Mílova běžná verze je `MBSoft/AppFR.py`; `MBSoft/JanaIphoneFR/AppFR.py` zůstává
+  samostatná a smí se měnit jen při výslovné práci na Janiččině variantě.
+  Přenosovou kopii před předáním ověřit kontrolním součtem proti správnému
+  zdroji.
