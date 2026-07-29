@@ -5,7 +5,7 @@
     const searchBtn = document.getElementById("searchBtn");
     const refreshBtn = document.getElementById("refreshBtn");
     const returnBtn = document.getElementById("returnBtn");
-    let selectedArchiveId = "";
+    let selectedArchiveRef = "";
 
     function escapeHtml(value) {
       return String(value ?? "").replace(/[&<>"']/g, (ch) => ({
@@ -29,8 +29,10 @@
         listNode.innerHTML = '<div class="empty">Nic nenalezeno.</div>';
         return;
       }
-      listNode.innerHTML = items.map((item) => `
-        <button class="item ${item.archive_id === selectedArchiveId ? "active" : ""}" data-archive-id="${escapeHtml(item.archive_id)}">
+      listNode.innerHTML = items.map((item) => {
+        const archiveRef = item.archive_ref || item.archive_id || "";
+        return `
+        <button class="item ${archiveRef === selectedArchiveRef ? "active" : ""}" data-archive-ref="${escapeHtml(archiveRef)}">
           <div class="subject">${escapeHtml(item.subject || item.archive_id)}</div>
           <div class="meta">UID ${escapeHtml(item.uid || "")} | ${escapeHtml(item.date || "")}</div>
           <div class="meta">${escapeHtml(item.sender || "")}</div>
@@ -39,9 +41,10 @@
             <span class="pill">přílohy: ${Number(item.attachments_count || 0)}</span>
           </div>
         </button>
-      `).join("");
-      listNode.querySelectorAll("[data-archive-id]").forEach((button) => {
-        button.addEventListener("click", () => loadDetail(button.dataset.archiveId || ""));
+      `;
+      }).join("");
+      listNode.querySelectorAll("[data-archive-ref]").forEach((button) => {
+        button.addEventListener("click", () => loadDetail(button.dataset.archiveRef || ""));
       });
     }
 
@@ -53,6 +56,7 @@
       const files = data.files || [];
       const attachments = data.attachments || [];
       const downloaded = data.downloaded_attachments || [];
+      const vaulted = data.vault_attachments || [];
       detailPane.innerHTML = `
         <div class="subject">${escapeHtml(data.subject || data.archive_id)}</div>
         <div class="meta">Archive ID: ${escapeHtml(data.archive_id || "")}</div>
@@ -63,6 +67,14 @@
         <div class="files">
           ${files.map((file) => `<a class="button secondary" target="_blank" href="${escapeHtml(file.url)}">${escapeHtml(file.label)} (${fileSize(file.size_bytes)})</a>`).join("")}
         </div>
+        <h2>Přílohy uložené v Document Vaultu</h2>
+        ${vaulted.length ? vaulted.map((item) => `
+          <div class="attachment">
+            <div class="subject">${escapeHtml(item.title || item.filename || "Uložená příloha")}</div>
+            <div class="meta">${escapeHtml(item.document_type || "")} | ${fileSize(item.size_bytes)} | stav: ${escapeHtml(item.reading_status_label || "")}</div>
+            ${item.can_open && item.url ? `<div><a class="button secondary" target="_blank" href="${escapeHtml(item.url)}">Otevřít uloženou přílohu</a></div>` : ""}
+          </div>
+        `).join("") : '<div class="empty">Žádná související příloha ve vaultu nenalezena.</div>'}
         <h2>Stažené přílohy v document inboxu</h2>
         ${downloaded.length ? downloaded.map((item) => `
           <div class="attachment">
@@ -96,11 +108,11 @@
       }
     }
 
-    async function loadDetail(archiveId) {
-      selectedArchiveId = archiveId;
+    async function loadDetail(archiveRef) {
+      selectedArchiveRef = archiveRef;
       detailPane.innerHTML = '<div class="empty">Načítám detail...</div>';
       try {
-        const params = new URLSearchParams({archive_id: archiveId});
+        const params = new URLSearchParams({archive_id: archiveRef});
         const res = await fetch(`/api/email-archive/detail?${params.toString()}`);
         const data = await res.json();
         renderDetail(data);

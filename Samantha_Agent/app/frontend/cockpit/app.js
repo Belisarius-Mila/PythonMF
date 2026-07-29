@@ -5556,6 +5556,22 @@ ${name}
           attachments.map((item) => `${item.filename || "(bez názvu)"} | ${item.content_type || ""} | ${item.size_bytes || 0} B${item.stored_path ? " | " + item.stored_path : ""}`).join("; ")
         );
       }
+      const vaultAttachments = email.vault_attachments || [];
+      vaultAttachments.forEach((item) => {
+        appendSourceRow(
+          detailNode,
+          "Uloženo ve vaultu",
+          `${item.title || item.filename || "Příloha"} | ${item.reading_status_label || ""}`
+        );
+        if (item.can_open && item.document_ref) {
+          const openBtn = document.createElement("button");
+          openBtn.type = "button";
+          openBtn.className = "secondary";
+          openBtn.textContent = "Otevřít uloženou přílohu";
+          openBtn.addEventListener("click", () => openReminderDocument(item.document_ref, openBtn));
+          detailNode.appendChild(openBtn);
+        }
+      });
     }
 
     function renderReminderDocumentSource(documentInfo, detailNode) {

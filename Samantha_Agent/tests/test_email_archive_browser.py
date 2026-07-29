@@ -8,6 +8,7 @@ from pathlib import Path
 from app.email.archive_browser import (
     EMAIL_ARCHIVE_OPENABLE_FILES,
     downloaded_email_archive_attachments,
+    email_archive_reference,
     email_archive_detail_status,
     email_archive_list_status,
     resolve_email_archive_file,
@@ -86,6 +87,7 @@ class EmailArchiveBrowserTests(unittest.TestCase):
             set(listing["items"][0]),
             {
                 "archive_id",
+                "archive_ref",
                 "uid",
                 "subject",
                 "sender",
@@ -103,6 +105,7 @@ class EmailArchiveBrowserTests(unittest.TestCase):
             {
                 "ok",
                 "archive_id",
+                "archive_ref",
                 "uid",
                 "subject",
                 "sender",
@@ -112,6 +115,7 @@ class EmailArchiveBrowserTests(unittest.TestCase):
                 "files",
                 "attachments",
                 "downloaded_attachments",
+                "vault_attachments",
                 "message",
             },
         )
@@ -127,6 +131,111 @@ class EmailArchiveBrowserTests(unittest.TestCase):
             "/email-archive/incoming?name=icloud_uid_13338_07_prihlasovaci-listek.doc",
         )
         self.assertNotIn("sender@example.test", json.dumps(detail, ensure_ascii=False))
+
+    def test_redacted_archive_uses_opaque_reference_and_links_existing_vault_pdf(
+        self,
+    ) -> None:
+        raw_identifier = "1234567890"
+        archive_name = f"email-156688-payment-{raw_identifier}"
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            archive_directory = root / "email_archive"
+            archive_dir = archive_directory / archive_name
+            attachments_dir = archive_dir / "attachments"
+            attachments_dir.mkdir(parents=True)
+            (archive_dir / "metadata.json").write_text(
+                json.dumps(
+                    {
+                        "archive_id": archive_name,
+                        "uid": "156688",
+                        "subject": f"Payment contract {raw_identifier}",
+                        "attachments_count": 1,
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (archive_dir / "body.txt").write_text("payment", encoding="utf-8")
+            (attachments_dir / "attachments.json").write_text(
+                json.dumps(
+                    {
+                        "attachments": [
+                            {
+                                "filename": f"payment-{raw_identifier}.pdf",
+                                "content_type": "application/pdf",
+                                "size_bytes": 12,
+                                "saved": False,
+                            }
+                        ]
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            documents_dir = root / "documents"
+            vault_file = documents_dir / "vault" / "insurance" / "payment.pdf"
+            vault_file.parent.mkdir(parents=True)
+            vault_file.write_bytes(b"%PDF-fixture")
+            index = documents_dir / "index"
+            index.mkdir()
+            document_id = f"doc-email-156688-payment-{raw_identifier}"
+            (index / "documents_index.jsonl").write_text(
+                json.dumps(
+                    {
+                        "document_id": document_id,
+                        "title": f"E-mail UID 156688 attachment {raw_identifier}",
+                        "original_filename": f"payment-{raw_identifier}.pdf",
+                        "domain": "insurance",
+                        "document_type": "invoice",
+                        "reading_status": "ok",
+                        "stored_path": str(vault_file),
+                        "size_bytes": vault_file.stat().st_size,
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            listing = email_archive_list_status(
+                "156688",
+                archive_directory=archive_directory,
+            )
+            archive_ref = listing["items"][0]["archive_ref"]
+            detail = email_archive_detail_status(
+                archive_ref,
+                archive_directory=archive_directory,
+                documents_dir=documents_dir,
+            )
+            redacted_detail = email_archive_detail_status(
+                listing["items"][0]["archive_id"],
+                archive_directory=archive_directory,
+                documents_dir=documents_dir,
+            )
+            metadata_file = resolve_email_archive_file(
+                archive_ref,
+                "metadata",
+                archive_directory=archive_directory,
+            )
+
+        payload = json.dumps({"listing": listing, "detail": detail}, ensure_ascii=False)
+        self.assertEqual(archive_ref, email_archive_reference(archive_name))
+        self.assertTrue(detail["ok"])
+        self.assertTrue(redacted_detail["ok"])
+        self.assertTrue(metadata_file["ok"])
+        self.assertIn("[rodne cislo redigovano]", detail["archive_id"])
+        self.assertNotIn(raw_identifier, payload)
+        self.assertEqual(len(detail["vault_attachments"]), 1)
+        self.assertTrue(detail["vault_attachments"][0]["can_open"])
+        self.assertRegex(
+            detail["vault_attachments"][0]["document_ref"],
+            r"^docref-[0-9a-f]{16}$",
+        )
+        self.assertIn(
+            detail["vault_attachments"][0]["document_ref"],
+            detail["vault_attachments"][0]["url"],
+        )
+        self.assertTrue(
+            all(f"archive_id={archive_ref}" in row["url"] for row in detail["files"])
+        )
 
     def test_list_handles_missing_archive_and_clamps_limit(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

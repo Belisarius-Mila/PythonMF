@@ -3249,6 +3249,7 @@ class CockpitTests(unittest.TestCase):
         self.assertIn('result.kind === "email_archive"', COCKPIT_HTML)
         self.assertIn("EmailArchiveVault", COCKPIT_HTML)
         self.assertIn("Otevřít PDF", COCKPIT_HTML)
+        self.assertIn("Otevřít uloženou přílohu", COCKPIT_HTML)
         self.assertIn("Splněno", COCKPIT_HTML)
         self.assertIn("Zdroj", COCKPIT_HTML)
         self.assertIn("Souhrn vaultu", COCKPIT_HTML)
@@ -4912,7 +4913,10 @@ Dalsi krok:
             root = Path(temp_dir)
             reminders_path = root / "reminders.json"
             archive_dir = root / "email_archive"
-            archive_id = "email-155924-upozorneni-na-dluznou-castku"
+            raw_identifier = "1234567890"
+            archive_id = (
+                f"email-155924-upozorneni-na-dluznou-castku-{raw_identifier}"
+            )
             email_dir = archive_dir / archive_id
             (email_dir / "attachments").mkdir(parents=True)
             (email_dir / "metadata.json").write_text(
@@ -4943,6 +4947,33 @@ Dalsi krok:
                 ),
                 encoding="utf-8",
             )
+            vault_dir = root / "documents"
+            vault_file = vault_dir / "vault" / "insurance" / "upominka.pdf"
+            vault_file.parent.mkdir(parents=True)
+            vault_file.write_bytes(b"%PDF-fixture")
+            index_dir = vault_dir / "index"
+            index_dir.mkdir()
+            (index_dir / "documents_index.jsonl").write_text(
+                json.dumps(
+                    {
+                        "document_id": (
+                            f"doc-email-155924-upominka-{raw_identifier}"
+                        ),
+                        "title": (
+                            "E-mail UID 155924 příloha upomínka "
+                            f"{raw_identifier}"
+                        ),
+                        "original_filename": f"upominka-{raw_identifier}.pdf",
+                        "domain": "insurance",
+                        "document_type": "invoice",
+                        "reading_status": "ok",
+                        "stored_path": str(vault_file),
+                    },
+                    ensure_ascii=False,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
             reminders_path.write_text(
                 json.dumps(
                     {
@@ -4955,7 +4986,10 @@ Dalsi krok:
                                 ),
                                 "source": {
                                     "type": "email_archive",
-                                    "uid": archive_id,
+                                    "uid": (
+                                        "email-155924-upozorneni-na-dluznou-castku-"
+                                        "[rodne cislo redigovano]"
+                                    ),
                                     "date": "Thu, 11 Jun 2026 16:09:42 +0200 (CEST)",
                                     "sender": "ČEZ Prodej, a.s. <[e-mail redigovan]>",
                                 },
@@ -4971,17 +5005,25 @@ Dalsi krok:
                 "archive-reminder",
                 reminders_path=reminders_path,
                 archive_directory=archive_dir,
+                vault_dir=vault_dir,
             )
 
         payload = json.dumps(result, ensure_ascii=False)
         self.assertTrue(result["ok"])
         self.assertEqual(result["kind"], "email_archive")
         self.assertEqual(result["email"]["provider"], "archive")
-        self.assertEqual(result["email"]["uid"], archive_id)
+        self.assertIn("[rodne cislo redigovano]", result["email"]["uid"])
+        self.assertRegex(
+            result["email"]["archive_ref"],
+            r"^archive-ref-[0-9a-f]{16}$",
+        )
         self.assertEqual(result["email"]["subject"], "Upozornění na dlužnou částku")
         self.assertIn("ČEZ Prodej", result["email"]["sender"])
         self.assertIn("[e-mail redigovan]", result["email"]["sender"])
         self.assertEqual(result["email"]["attachments"][0]["filename"], "upominka.pdf")
+        self.assertEqual(len(result["email"]["vault_attachments"]), 1)
+        self.assertTrue(result["email"]["vault_attachments"][0]["can_open"])
+        self.assertNotIn(raw_identifier, payload)
         self.assertNotIn("upominani@example.com", payload)
 
     def test_reminder_source_detail_finds_private_document_context(self) -> None:

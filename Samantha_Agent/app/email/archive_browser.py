@@ -1,13 +1,22 @@
 from __future__ import annotations
 
+import hashlib
 import json
+import re
 from pathlib import Path
 from typing import Any
 from urllib.parse import quote
 
+from app.documents.search_service import (
+    READING_STATUS_LABELS,
+    document_reference,
+    effective_document_reading_status,
+)
 from app.documents.vault import (
     DEFAULT_DOCUMENTS_DIR,
+    PROJECT_ROOT,
     read_json_file,
+    read_jsonl,
     relative_to_project,
     safe_filename,
     safe_text,
@@ -23,6 +32,20 @@ EMAIL_ARCHIVE_OPENABLE_FILES: dict[str, tuple[Path, str]] = {
     "metadata": (Path("metadata.json"), "application/json; charset=utf-8"),
     "attachments": (Path("attachments") / "attachments.json", "application/json; charset=utf-8"),
 }
+EMAIL_ARCHIVE_REFERENCE_PATTERN = re.compile(r"archive-ref-[0-9a-f]{16}")
+
+
+def email_archive_reference(archive_directory_name: str) -> str:
+    digest = hashlib.sha256(archive_directory_name.encode("utf-8")).hexdigest()[:16]
+    return f"archive-ref-{digest}"
+
+
+def email_archive_uid(metadata: dict[str, Any], archive_directory_name: str) -> str:
+    uid = safe_text(str(metadata.get("uid", ""))).strip()
+    if uid.isdigit():
+        return uid
+    match = re.match(r"^email-(\d+)(?:-|$)", archive_directory_name)
+    return match.group(1) if match else ""
 
 
 def email_archive_list_status(
@@ -57,7 +80,7 @@ def email_archive_list_status(
             continue
         subject = safe_text(str(metadata.get("subject", "")))[:260]
         sender = redact_email_addresses(safe_text(str(metadata.get("from", ""))))[:220]
-        uid = safe_text(str(metadata.get("uid", "")))[:80]
+        uid = email_archive_uid(metadata, archive_dir.name)[:80]
         date_text = safe_text(str(metadata.get("date", "")))[:160]
         archived_at = safe_text(str(metadata.get("archived_at", "")))[:120]
         haystack = " ".join([archive_id, uid, subject, sender, date_text]).casefold()
@@ -66,6 +89,7 @@ def email_archive_list_status(
         archives.append(
             {
                 "archive_id": archive_id,
+                "archive_ref": email_archive_reference(archive_dir.name),
                 "uid": uid,
                 "subject": subject,
                 "sender": sender,
@@ -104,7 +128,8 @@ def email_archive_detail_status(
         return {"ok": False, "message": "Archiv nemá čitelná metadata."}
 
     safe_archive_id = safe_text(str(metadata.get("archive_id") or archive_dir.name))
-    uid = safe_text(str(metadata.get("uid", ""))).strip()
+    archive_ref = email_archive_reference(archive_dir.name)
+    uid = email_archive_uid(metadata, archive_dir.name)
     files = []
     for key, (relative, content_type) in EMAIL_ARCHIVE_OPENABLE_FILES.items():
         path = archive_dir / relative
@@ -117,16 +142,21 @@ def email_archive_detail_status(
                 "filename": safe_text(path.name)[:180],
                 "content_type": content_type,
                 "size_bytes": path.stat().st_size,
-                "url": f"/email-archive/file?archive_id={quote(safe_archive_id)}&file={quote(key)}",
+                "url": f"/email-archive/file?archive_id={quote(archive_ref)}&file={quote(key)}",
             }
         )
 
     attachments = read_email_archive_attachment_metadata(archive_dir)
     downloaded = downloaded_email_archive_attachments(uid=uid, documents_dir=documents_dir)
+    vault_attachments = vault_email_archive_attachments(
+        uid=uid,
+        documents_dir=documents_dir,
+    )
 
     return {
         "ok": True,
         "archive_id": safe_archive_id,
+        "archive_ref": archive_ref,
         "uid": uid,
         "subject": safe_text(str(metadata.get("subject", "")))[:260],
         "sender": redact_email_addresses(safe_text(str(metadata.get("from", ""))))[:220],
@@ -136,6 +166,7 @@ def email_archive_detail_status(
         "files": files,
         "attachments": attachments,
         "downloaded_attachments": downloaded,
+        "vault_attachments": vault_attachments,
         "message": "Archiv e-mailu načten read-only.",
     }
 
@@ -206,6 +237,101 @@ def downloaded_email_archive_attachments(
     return result
 
 
+def vault_email_archive_attachments(
+    *,
+    uid: str,
+    documents_dir: Path = DEFAULT_DOCUMENTS_DIR,
+) -> list[dict[str, Any]]:
+    """Return redacted links to already imported documents for one email UID."""
+
+    if not uid or not uid.isdigit():
+        return []
+    uid_pattern = re.compile(rf"(?<!\d){re.escape(uid)}(?!\d)")
+    index_path = documents_dir / "index" / "documents_index.jsonl"
+    result: list[dict[str, Any]] = []
+    for row in read_jsonl(index_path):
+        source_coordinates = " ".join(
+            str(row.get(key, ""))
+            for key in (
+                "document_id",
+                "title",
+                "original_filename",
+                "stored_path",
+                "case_id",
+                "review_source",
+            )
+        )
+        if not uid_pattern.search(source_coordinates):
+            continue
+        document_id = str(row.get("document_id", "")).strip()
+        if not document_id:
+            continue
+        stored_path = _resolve_vault_document_path(
+            str(row.get("stored_path", "")),
+            documents_dir=documents_dir,
+        )
+        reference = document_reference(document_id)
+        reading_status = effective_document_reading_status(row)
+        result.append(
+            {
+                "document_ref": reference,
+                "title": safe_text(
+                    str(
+                        row.get("title")
+                        or row.get("original_filename")
+                        or "Uložená příloha"
+                    )
+                )[:240],
+                "filename": safe_text(str(row.get("original_filename", "")))[:240],
+                "domain": safe_text(str(row.get("domain", "")))[:80],
+                "document_type": safe_text(str(row.get("document_type", "")))[:100],
+                "reading_status": reading_status,
+                "reading_status_label": READING_STATUS_LABELS.get(
+                    reading_status,
+                    reading_status,
+                ),
+                "size_bytes": (
+                    stored_path.stat().st_size
+                    if stored_path is not None
+                    else int(row.get("size_bytes", 0) or 0)
+                ),
+                "can_open": stored_path is not None,
+                "url": (
+                    f"/documents/read?document_id={quote(reference)}"
+                    if stored_path is not None
+                    else ""
+                ),
+            }
+        )
+    return result[:12]
+
+
+def _resolve_vault_document_path(
+    stored_path: str,
+    *,
+    documents_dir: Path,
+) -> Path | None:
+    clean_path = str(stored_path or "").strip()
+    if not clean_path:
+        return None
+    raw = Path(clean_path)
+    try:
+        root = documents_dir.resolve(strict=True)
+    except OSError:
+        return None
+    candidates = [raw] if raw.is_absolute() else [PROJECT_ROOT / raw]
+    if documents_dir != DEFAULT_DOCUMENTS_DIR and not raw.is_absolute():
+        candidates.insert(0, documents_dir / raw)
+    for candidate in candidates:
+        try:
+            resolved = candidate.resolve(strict=True)
+        except OSError:
+            continue
+        if resolved.is_file() and (resolved == root or root in resolved.parents):
+            return resolved
+    return None
+
+
 def resolve_email_archive_dir(
     archive_id: str,
     *,
@@ -220,6 +346,30 @@ def resolve_email_archive_dir(
     ):
         return {"ok": False, "message": "Neplatné ID archivu."}
     archive_dir = archive_directory / safe_archive_id
+    if EMAIL_ARCHIVE_REFERENCE_PATTERN.fullmatch(safe_archive_id):
+        matches = [
+            path
+            for path in archive_directory.glob("*/metadata.json")
+            if email_archive_reference(path.parent.name) == safe_archive_id
+        ]
+        if len(matches) != 1:
+            return {"ok": False, "message": "Archiv nebyl nalezen."}
+        archive_dir = matches[0].parent
+    elif not archive_dir.is_dir():
+        matches = []
+        for metadata_path in archive_directory.glob("*/metadata.json"):
+            try:
+                metadata = read_json_file(metadata_path)
+            except (OSError, ValueError, json.JSONDecodeError):
+                continue
+            display_id = safe_text(
+                str(metadata.get("archive_id") or metadata_path.parent.name)
+            ).strip()
+            if display_id == safe_archive_id:
+                matches.append(metadata_path)
+        if len(matches) != 1:
+            return {"ok": False, "message": "Archiv nebyl nalezen."}
+        archive_dir = matches[0].parent
     try:
         root = archive_directory.resolve(strict=True)
         resolved = archive_dir.resolve(strict=True)

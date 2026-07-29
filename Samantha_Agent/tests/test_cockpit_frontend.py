@@ -19,9 +19,9 @@ from app.cockpit_frontend import (
 EXPECTED_PAGES = {
     "email_archive": (
         EMAIL_ARCHIVE_HTML,
-        9392,
-        192,
-        "e13109a8565bea3d157c9bd3ac7bc8eed0e6fbec2af4b93e57535bbff34d5b85",
+        10221,
+        204,
+        "4f998e3f0b837573ef2d42f270cae35d231cd5bd68db2ddcbcabb24fc2217365",
     ),
     "email_processing": (
         EMAIL_PROCESSING_HTML,
@@ -31,9 +31,9 @@ EXPECTED_PAGES = {
     ),
     "cockpit": (
         COCKPIT_HTML,
-        358671,
-        7363,
-        "0d453347aa45a7ac4895d3b2eb55935a9c0be8d66094dde3746ede5537734f29",
+        359370,
+        7379,
+        "85188dc34b024cdd4acd50857b484a213a123b930e132228235396a9295c7476",
     ),
 }
 

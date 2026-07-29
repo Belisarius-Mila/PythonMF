@@ -217,10 +217,14 @@ from app.urgent_reminders import mark_urgent_reminder_done
 from app.urgent_reminders import sync_urgent_reminders_index
 from app.email.activity_state import DEFAULT_EMAIL_ACTIVITY_STATE_PATH, record_email_archive_completed
 from app.email.archive_browser import (
+    email_archive_reference,
     email_archive_detail_status,
     email_archive_list_status,
+    email_archive_uid,
+    resolve_email_archive_dir,
     resolve_email_archive_file,
     resolve_email_archive_incoming_file,
+    vault_email_archive_attachments,
 )
 from app.email.archive_models import EmailArchiveSource
 from app.email.archive_service import DEFAULT_EMAIL_ARCHIVE_DIR, save_email_archive
@@ -5043,7 +5047,12 @@ def reminder_source_detail_action(
             seznam_provider_factory=seznam_provider_factory,
         )
     if source_type == "email_archive":
-        return reminder_email_archive_source_detail(base=base, source=source, archive_directory=archive_directory)
+        return reminder_email_archive_source_detail(
+            base=base,
+            source=source,
+            archive_directory=archive_directory,
+            vault_dir=vault_dir,
+        )
     if source_type == "private_document":
         return reminder_document_source_detail(base=base, source=source, vault_dir=vault_dir)
     return {
@@ -5141,14 +5150,29 @@ def reminder_email_archive_source_detail(
     base: dict[str, Any],
     source: dict[str, Any],
     archive_directory: Path = DEFAULT_EMAIL_ARCHIVE_DIR,
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
 ) -> dict[str, Any]:
-    archive_id = safe_text(str(source.get("uid", ""))).strip()
-    if not archive_id or "/" in archive_id or "\\" in archive_id or archive_id.startswith("."):
+    archive_id = str(source.get("uid", "")).strip()
+    resolved = resolve_email_archive_dir(
+        archive_id,
+        archive_directory=archive_directory,
+    )
+    if not resolved.get("ok"):
         return {**base, "ok": False, "kind": "email_archive", "message": "Zdrojový e-mailový archiv nemá bezpečné ID."}
-    evidence = email_archive_evidence_summary(evidence_archive_id=archive_id, archive_directory=archive_directory)
+    archive_path = resolved["path"]
+    evidence = email_archive_evidence_summary(
+        evidence_archive_id=archive_path.name,
+        archive_directory=archive_directory,
+    )
     if evidence is None:
         return {**base, "ok": False, "kind": "email_archive", "message": "E-mailový archiv nebyl nalezen."}
-    attachments_path = archive_directory / archive_id / "attachments" / "attachments.json"
+    attachments_path = archive_path / "attachments" / "attachments.json"
+    metadata_path = archive_path / "metadata.json"
+    try:
+        metadata = read_json_file(metadata_path)
+    except (OSError, ValueError, json.JSONDecodeError):
+        metadata = {}
+    email_uid = email_archive_uid(metadata, archive_path.name)
     attachments: list[dict[str, Any]] = []
     try:
         raw_attachments = read_json_file(attachments_path).get("attachments", [])
@@ -5166,6 +5190,17 @@ def reminder_email_archive_source_detail(
                     "part_id": safe_text(str(attachment.get("part_id", "")))[:40],
                 }
             )
+    vault_attachments = vault_email_archive_attachments(
+        uid=email_uid,
+        documents_dir=vault_dir,
+    )
+    safe_evidence = {
+        **evidence,
+        "archive_id": safe_text(str(evidence.get("archive_id", ""))),
+        "archive_ref": email_archive_reference(archive_path.name),
+        "archive_path": safe_text(str(evidence.get("archive_path", ""))),
+        "metadata_path": safe_text(str(evidence.get("metadata_path", ""))),
+    }
     return {
         **base,
         "ok": True,
@@ -5174,14 +5209,16 @@ def reminder_email_archive_source_detail(
         "email": {
             "provider": "archive",
             "folder": "",
-            "uid": archive_id,
+            "uid": safe_text(archive_id),
+            "archive_ref": email_archive_reference(archive_path.name),
             "subject": evidence.get("subject", ""),
             "sender": evidence.get("sender", ""),
             "date": evidence.get("email_date", ""),
             "body_text": "Tělo e-mailu je uložené lokálně v EmailArchiveVault; v Cockpitu se ukazují jen bezpečná metadata.",
             "attachments": attachments,
+            "vault_attachments": vault_attachments,
         },
-        "archive": evidence,
+        "archive": safe_evidence,
     }
 
 
