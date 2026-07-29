@@ -5,6 +5,7 @@ import tempfile
 import unittest
 from datetime import datetime
 from pathlib import Path
+from unittest.mock import patch
 
 
 SCRIPT_PATH = Path(__file__).resolve().parents[1] / "scripts" / "daily_3am.py"
@@ -159,6 +160,119 @@ class Daily3AmTests(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             daily_3am.validate_time_gate_args(args)
+
+    def test_local_preview_rejects_dry_run_and_schedule_gate(self):
+        for argv in (
+            ["--local-preview", "--dry-run"],
+            ["--local-preview", "--only-at-hour", "3"],
+            ["--local-preview", "--window-start-hour", "3", "--window-hours", "5"],
+        ):
+            with self.subTest(argv=argv):
+                args = daily_3am.parse_args(argv)
+                with self.assertRaises(ValueError):
+                    daily_3am.validate_time_gate_args(args)
+
+    def test_local_preview_only_writes_ignored_preview_and_no_daily_state(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo_root = Path(tmp)
+            project_dir = repo_root / "Samantha_Agent"
+            state_dir = project_dir / "data" / "daily_3am"
+            config_dir = project_dir / "config"
+            app_dir = repo_root / "ColorsAndNumbers" / "web_colors_numbers"
+            docs_dir = repo_root / "docs" / "colors-numbers"
+            config_dir.mkdir(parents=True)
+            app_dir.mkdir(parents=True)
+            docs_dir.mkdir(parents=True)
+            csv_path = config_dir / "OwlSpeech.csv"
+            csv_path.write_text(
+                "\n".join(
+                    [
+                        "date,part_a,part_b,part_c,full_text",
+                        '2026-05-28,A,B,C,"Preview text"',
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            public_scripts = (app_dir / "app.js", docs_dir / "app.js")
+            for script_path in public_scripts:
+                script_path.write_text(
+                    'const owlAudio = new Audio("published.mp3?v=1");\n',
+                    encoding="utf-8",
+                )
+
+            def fake_generate(text, output, voice, rate):
+                output.parent.mkdir(parents=True, exist_ok=True)
+                output.write_bytes(f"{text}|{voice}|{rate}".encode("utf-8"))
+
+            with patch.object(daily_3am, "generate_mp3", side_effect=fake_generate):
+                result = daily_3am.main(
+                    [
+                        "--project-dir",
+                        str(project_dir),
+                        "--state-dir",
+                        str(state_dir),
+                        "--log-file",
+                        str(project_dir / "logs" / "daily_3am.log"),
+                        "--run-date",
+                        "2026-05-28",
+                        "--local-preview",
+                    ]
+                )
+
+            preview_path = state_dir / "previews" / "owl_280526.mp3"
+            self.assertEqual(result, daily_3am.EXIT_OK)
+            self.assertIn(b"Preview text", preview_path.read_bytes())
+            self.assertFalse((state_dir / "2026-05-28.json").exists())
+            self.assertFalse((app_dir / "owl_280526.mp3").exists())
+            self.assertFalse((docs_dir / "owl_280526.mp3").exists())
+            for script_path in public_scripts:
+                self.assertEqual(
+                    script_path.read_text(encoding="utf-8"),
+                    'const owlAudio = new Audio("published.mp3?v=1");\n',
+                )
+
+    def test_local_preview_replaces_only_its_task_owned_file(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project_dir = Path(tmp) / "Samantha_Agent"
+            state_dir = project_dir / "data" / "daily_3am"
+            config_dir = project_dir / "config"
+            config_dir.mkdir(parents=True)
+            csv_path = config_dir / "OwlSpeech.csv"
+            csv_path.write_text(
+                "\n".join(
+                    [
+                        "date,part_a,part_b,part_c,full_text",
+                        '2026-05-28,A,B,C,"Replacement preview"',
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            context = daily_3am.DailyContext(
+                project_dir=project_dir,
+                log_file=project_dir / "logs" / "daily_3am.log",
+                state_dir=state_dir,
+                run_date="2026-05-28",
+                started_at=datetime.now(daily_3am.PRAGUE_TZ).isoformat(),
+                dry_run=False,
+                force=False,
+            )
+            preview_path = state_dir / "previews" / "owl_280526.mp3"
+            preview_path.parent.mkdir(parents=True)
+            preview_path.write_bytes(b"old preview")
+
+            result = daily_3am.run_colors_numbers_owl_local_preview(
+                context,
+                audio_generator=lambda text, output, voice, rate: output.write_bytes(
+                    text.encode("utf-8")
+                ),
+            )
+
+            self.assertEqual(result["status"], "completed")
+            self.assertFalse(result["public_files_changed"])
+            self.assertFalse(result["daily_state_changed"])
+            self.assertEqual(preview_path.read_bytes(), b"Replacement preview")
 
     def test_colors_numbers_owl_task_generates_one_off_audio(self):
         with tempfile.TemporaryDirectory() as tmp:

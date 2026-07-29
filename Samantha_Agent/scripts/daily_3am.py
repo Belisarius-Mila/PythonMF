@@ -115,6 +115,14 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--dry-run", action="store_true", help="Run checks without marking the day completed.")
     parser.add_argument("--force", action="store_true", help="Run even if today's state is already completed.")
     parser.add_argument(
+        "--local-preview",
+        action="store_true",
+        help=(
+            "Generate one owl MP3 under data/daily_3am/previews without changing "
+            "public app.js files, production audio, or the completed daily state."
+        ),
+    )
+    parser.add_argument(
         "--only-at-hour",
         type=int,
         default=None,
@@ -191,6 +199,12 @@ def validate_run_date(run_date: str) -> None:
 
 
 def validate_time_gate_args(args: argparse.Namespace) -> None:
+    if args.local_preview and args.dry_run:
+        raise ValueError("--local-preview cannot be combined with --dry-run.")
+    if args.local_preview and (
+        args.only_at_hour is not None or args.window_start_hour is not None
+    ):
+        raise ValueError("--local-preview cannot be combined with a schedule time gate.")
     if args.only_at_hour is not None and not 0 <= args.only_at_hour <= 23:
         raise ValueError("--only-at-hour must be between 0 and 23.")
 
@@ -363,6 +377,47 @@ def colors_numbers_targets(repo_root: Path, filename: str) -> list[tuple[Path, P
             (repo_root / DOCS_COLORS_NUMBERS_APP_DIR / "app.js").resolve(),
         ),
     ]
+
+
+def run_colors_numbers_owl_local_preview(
+    context: DailyContext,
+    *,
+    speech_csv_path: Path | None = None,
+    audio_generator=None,
+) -> dict:
+    """Generate one task-owned preview without touching public repository paths."""
+
+    csv_path = Path(
+        speech_csv_path or context.project_dir / "config" / "OwlSpeech.csv"
+    )
+    row = find_owl_speech_row(csv_path, context.run_date)
+    if row is None:
+        raise DailyTaskError(
+            f"Owl speech CSV has no preview text for {context.run_date}."
+        )
+
+    preview_root = (context.state_dir / "previews").resolve()
+    preview_path = (preview_root / owl_audio_filename(context.run_date)).resolve()
+    ensure_under(preview_path, preview_root)
+    text = (row.get("full_text") or "").strip()
+    voice = (row.get("voice") or COLORS_NUMBERS_DEFAULT_OWL_VOICE).strip()
+    rate = (row.get("rate") or COLORS_NUMBERS_DEFAULT_OWL_RATE).strip()
+    generator = audio_generator or generate_mp3
+
+    logging.info("Generating local ColorsAndNumbers owl preview for %s.", context.run_date)
+    preview_root.mkdir(parents=True, exist_ok=True)
+    generator(text, preview_path, voice, rate)
+    if not preview_path.is_file() or preview_path.stat().st_size <= 0:
+        raise DailyTaskError("Generated local ColorsAndNumbers owl preview is empty.")
+    return {
+        "name": "colors_numbers_owl_local_preview",
+        "status": "completed",
+        "scheduled_date": context.run_date,
+        "preview_path": str(preview_path),
+        "size_bytes": preview_path.stat().st_size,
+        "public_files_changed": False,
+        "daily_state_changed": False,
+    }
 
 
 def run_colors_numbers_owl_csv_task(
@@ -612,6 +667,20 @@ def run_once(context: DailyContext) -> int:
         return EXIT_OK
 
 
+def run_local_preview_once(context: DailyContext) -> int:
+    """Generate one local preview under the shared lock without daily completion."""
+
+    lock_path = context.state_dir / "daily_3am.lock"
+    with FileLock(lock_path):
+        result = run_colors_numbers_owl_local_preview(context)
+        logging.info(
+            "Local owl preview ready: %s (%s bytes).",
+            result["preview_path"],
+            result["size_bytes"],
+        )
+    return EXIT_OK
+
+
 def main(argv: list[str] | None = None) -> int:
     argv = argv if argv is not None else sys.argv[1:]
     try:
@@ -629,6 +698,19 @@ def main(argv: list[str] | None = None) -> int:
         return EXIT_SETUP_ERROR
 
     logging.info("Daily 3 AM entry point invoked.")
+    if args.local_preview:
+        try:
+            return run_local_preview_once(context)
+        except AlreadyRunningError:
+            logging.warning("Daily 3 AM routine is already running; preview was not created.")
+            return EXIT_ALREADY_RUNNING
+        except DailyTaskError:
+            logging.exception("Local owl preview failed.")
+            return EXIT_TASK_ERROR
+        except Exception:
+            logging.exception("Unexpected local owl preview error.")
+            return EXIT_SETUP_ERROR
+
     if args.only_at_hour is not None and now.hour != args.only_at_hour:
         logging.info(
             "Current Europe/Prague hour is %s, expected %s; no-op.",

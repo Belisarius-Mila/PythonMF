@@ -83,6 +83,28 @@ Vynucene opakovani pro dnesek:
 python scripts/daily_3am.py --force
 ```
 
+## Lokalni nahled sovy bez uklidu repozitare
+
+Kontrolni MP3 vytvor takto:
+
+```bash
+python scripts/daily_3am.py --run-date YYYY-MM-DD --local-preview
+```
+
+Rezim `--local-preview`:
+
+- nacte text pro zadane datum z `config/OwlSpeech.csv`,
+- vytvori pouze `data/daily_3am/previews/owl_DDMMYY.mp3`,
+- nezmeni produkcni adresare `ColorsAndNumbers/web_colors_numbers/` ani
+  `docs/colors-numbers/`,
+- nezmeni zadny `app.js`,
+- neoznaci denni ostrou rutinu jako dokoncenou,
+- pri opakovani bezpecne nahradi jen stejnojmenny task-owned preview soubor.
+
+Slozka `data/daily_3am/` je ignorovana Gitem. Po schvaleni nahledu se do `main`
+ulozi pouze vstupni text a produkcni MP3 vytvori GitHub Pages workflow ve svem
+docasnem runneru.
+
 ## Dulezite: spanek, probuzeni a vypnuty Mac
 
 `launchd` spusti ulohu jen tehdy, kdyz macOS bezi.
