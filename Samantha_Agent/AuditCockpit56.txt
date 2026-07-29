@@ -1,420 +1,530 @@
-AUDIT HLAVNI ARCHITEKTURY SAMANTHA COCKPITU
-Verze auditu: 5.6
-Datum: 10. 7. 2026
-
-ROZSAH
-
-Audit se soustredi na jadro Samantha Agentu:
-- Samantha Cockpit,
-- VoiceBridge a hlasovy provoz,
-- dokumentovy vault a ScanDocu,
-- zpracovani a archivaci e-mailu,
-- provozni bezpecnost, vykon a testovani.
-
-Zamerne nejsou hodnoceny jednotlive rodinne projekty, pozustalost, jazykove
-aplikace, lekarna ani dalsi samostatne webove aplikace.
-
-Projekt byl pri auditu pouze cten. Citlive obsahy dokumentu, e-mailu a hlasovych
-pokynu nejsou v tomto souboru uvedeny.
-
-
-HLAVNI ZAVER
-
-Cockpit je funkcni a ma dobrou testovaci zakladnu, ale vyrostl za hranici
-bezpecne udrzitelneho prototypu. Nejvetsi problem neni jedna konkretni chyba.
-HTTP server, uzivatelske rozhrani, VoiceBridge, dokumenty, e-maily, diagnostika
-i servisni operace jsou soustredene v jednom souboru a pracuji nad sdilenymi
-JSON/JSONL daty bez jednotne transakcni vrstvy.
-
-Nedoporucuje se prepis od nuly. Spravny postup je nejdrive stabilizovat vykon,
-soubezne zapisy a pristupovou bezpecnost, potom po castech rozdelit monolit pri
-zachovani stavajicich URL a provoznich pravidel.
-
-
-SOUCASNA ARCHITEKTURA
-
-Prohlizec na Macu nebo iPhonu
-  -> app/cockpit.py
-       -> vlozene HTML, CSS a JavaScript
-       -> rucni GET/POST router
-       -> dashboard a diagnostika
-       -> dokumentove workflow
-       -> e-mailove workflow
-       -> VoiceBridge orchestrace
-       -> spousteni procesu
-       -> prime zapisy JSON/JSONL
-  -> document vault a ScanDocu
-  -> e-mailovi provideři a archivy
-  -> voice inbox, watcher, Terminal a screen
-  -> launchd a dalsi lokalni procesy
-
-Zakladni rozmery:
-- app/cockpit.py ma pres 22 000 radku a vice nez 300 funkci.
-- Cockpit obsluhuje 67 POST a priblizne 41 GET cest.
-- Hlavni vlozena stranka ma priblizne 7 500 radku, 117 tlacitek a stovky
-  JavaScriptovych funkci.
-- Dokumentovy vault ma dalsich vice nez 4 200 radku.
-- E-mailova oblast je rozdelena do mnoha mensich modulu, ale velka cast
-  orchestrace zustava v Cockpitu.
-- Lokalni a Tailscale Cockpit bezi jako dva samostatne procesy nad stejnymi daty.
-
-
-CO JE POSTAVENE DOBRE
-
-- Pri auditu proslo 373 relevantnich testu bez chyby.
-- Zivy read-only smoke test hlavni stranky, health, statusu a recovery prosel.
-- Registr COCKPIT_POST_ACTIONS pokryva vsechny POST cesty a hlida jejich soulad
-  s frontendem.
-- Rizikove operace maji na mnoha mistech dvoukrokove nebo textove potvrzeni.
-- VoiceBridge dodrzuje dulezite pravidlo jednoho vlastnika doruceni prikazu.
-- Lehky /api/server/health spravne oddeluje kontrolu startu od plneho statusu.
-- Cesty k dokumentum a archivum maji ochrany proti opusteni povoleneho adresare.
-- Soukroma data jsou drzena mimo git.
-
-
-NEJVYSSI PRIORITA P0
-
-1. Trisekundova obnova spoustela cely tezky /api/status
-
-Otevreny Cockpit v kratkem intervalu opakoval kontroly dokumentu, terminu,
-ScanDocu, zalohy, pripominek, gitu, VoiceBridge, TTY a screen relaci. Jedno zive
-mereni trvalo priblizne 1,6 sekundy a nejpomalejsi casti byly VoiceBridge a
-dokumentove kontroly. Pri vice otevrenych klientech a dvou serverech se prace
-nasobila.
-
-Prvni doporucena oprava:
-- samostatny lehky /api/live-status pro hlasovy stav,
-- plny /api/status pouze pri otevreni, rucni obnove a v dlouhem intervalu,
-- kratka cache drahe procesni diagnostiky VoiceBridge.
-
-2. Dva servery zapisuji do spolecnych souboru bez koordinace
-
-Dokumenty, e-mailove stavy i hlasove fronty casto pouzivaji prime write_text,
-open("w") nebo open("a") bez spolecneho zamku a bez atomickeho prejmenovani.
-To vytvari riziko ztraceneho zapisu, castecneho JSON, nekompletniho archivu nebo
-nesouladu manifestu a indexu.
-
-Doporuceni:
-- provozovat jednu instanci Cockpitu,
-- vzdaleny pristup vest pres Tailscale proxy k teto instanci,
-- zavest repository vrstvu, file lock a atomicke zapisy,
-- pozdeji prevest pracovni metadata do SQLite; puvodni dokumenty ponechat ve
-  vaultu beze zmeny.
+AKTUÁLNÍ ROADMAPA JÁDRA SAMANTHY A COCKPITU
+Verze: 6.0
+Aktualizováno: 2026-07-29 16:34 CEST
+Určeno pro: Terminálový Adam
+Priorita dokumentu: 1
 
-3. Vzdaleny Cockpit nema aplikacni autentizaci
 
-Server nema prihlaseni, session, CSRF token ani centralni kontrolu Host a Origin.
-Tailscale omezuje sitovy pristup, ale neni nahradou za ochranu aplikace, ktera
-umi soukrome zapisy, spousteni procesu a destruktivni operace.
+1. ÚČEL A ROZSAH
 
-Chybi take:
-- horni limit velikosti requestu,
-- jednotne odpovedi na chybny JSON a neocekavane vyjimky,
-- bezpecny provozni log bez citlivych payloadu,
-- bezpecnostni HTTP hlavicky,
-- centralni vynuceni potvrzovacich pravidel z registru POST akci.
+Tento dokument slučuje:
 
+- původní architektonický audit Cockpitu 5.6 z 10. 7. 2026,
+- jeho aktualizaci Cockpit Dieta D0-D3 z 26. 7. 2026,
+- aktuální projektovou paměť, nejnovější handoffy a TVBCP,
+- živý read-only stav Gitu, Cockpitu, profilových workspace, autosave a zálohy,
+- společné rozhodnutí Míly a Adama z 29. 7. 2026 o pěti následujících směrech.
 
-MONOLIT COCKPITU - PRIORITA P1
+Dokument je řídicí roadmapa, ne kopie chatu a ne úplný historický protokol.
+Zachovává platná rozhodnutí původního auditu, ale staré dokončené kroky už
+nepředkládá jako současné úkoly.
 
-V jednom souboru jsou HTTP infrastruktura, business logika, procesni management,
-tri cele HTML aplikace, CSS, JavaScript, dokumenty, e-maily i VoiceBridge. To
-zvysuje riziko regresi a ztezuje samostatne testovani.
+Hlavní rozsah:
 
-Doporucena cilova struktura:
+- Cockpit a jeho postupná architektonická dieta,
+- pravdivost projektové paměti a její využití Samanthou,
+- e-mailový a dokumentový tok do private vaultu,
+- provozní přejímka R2-Adama pro Janu,
+- opakované automatizace,
+- spolehlivý generátor systémového auditu.
 
-app/cockpit/
-  server.py
-  routes/status.py
-  routes/voice.py
-  routes/documents.py
-  routes/email.py
-  routes/service.py
-  services/status_service.py
-  services/voice_coordinator.py
-  services/document_service.py
-  services/email_service.py
-  repositories/
-  static/
+Mimo bezprostřední rozsah zůstávají samostatné kreativní a rodinné projekty,
+jazykové aplikace, Lékárna, MMTX, interiér a další oblasti, pokud nevznikne
+konkrétní provozní problém nebo nové Mílovo zadání.
 
-Nejdrive pouze extrahovat moduly pri zachovani stavajicich endpointu. Zmena
-frameworku sama o sobe problem nevyresi a nema byt prvnim krokem.
 
+2. ZDROJE PRAVDY A PRAVIDLO AKTUÁLNOSTI
 
-VOICEBRIDGE
+Při rozporu se používá toto pořadí:
 
-VoiceBridge je provozne funkcni, ale jeho stav je rozlozen mezi Cockpit, voice
-inbox, watcher, Terminal bridge, screen, TTY marker a soubory odpovedi.
+1. živý read-only stav Gitu, Cockpitu, runtime, workspace a zálohy,
+2. nejnovější kanonický TVBCP a handoff daného pracovního proudu,
+3. aktuální projektový status,
+4. WORKSTREAMS.md a další kanonické registry,
+5. ACTIVE_PROJECTS.md jako agregovaný orientační registr,
+6. starší handoffy, reporty a historické checkpointy.
 
-Doporucuje se jednotna obalka prikazu:
-- command_id,
-- created_at,
-- source,
-- owner,
-- state,
-- attempt,
-- confirmation_level,
-- last_error.
+Historický text typu „čeká na implementaci“, „čeká na nasazení“ nebo „zítra“
+není současný blocker, pokud novější důkaz potvrzuje další vývoj, checkpoint,
+nasazení nebo živý test.
 
-Navrhovane prechody:
-received -> transcribed -> queued -> claimed -> delivered
-                                     -> approval_required
-                                     -> failed_retryable
-                                     -> failed_final
+Pokud se zdroje rozcházejí a nelze je bezpečně rozhodnout, stav se označí
+„neověřeno“ a nevytvoří se falešné doporučení.
 
-Zachovat stavajici prepis a pravidlo jedineho vlastnika doruceni. Doplneny maji
-byt testy soubehu, obnovy po padu, stareho pending prikazu a presne jednoho
-doruceni.
-
-
-DOKUMENTY
 
-Dokumentovy system ma soubor ve vaultu, manifest, hlavni index, textovy index,
-terminy, cases, reminder vazby, ScanDocu stav a historii akci. Nad temito kroky
-neni jedna transakce, takze operace muze uspet pouze castecne.
+3. OVĚŘENÝ VÝCHOZÍ STAV 29. 7. 2026
 
-Navrhovany intake model:
-discovered -> previewed -> needs_review -> approved -> indexed -> archived
-Vedlejsi stavy: rejected, duplicate, failed.
+Provozní stav při této aktualizaci:
 
-Downloads, e-mailove prilohy a mobilni inbox maji byt pouze ruzne vstupni
-adaptery do stejne fronty.
+- pracovní strom hlavního repozitáře je čistý,
+- lokální main je o 16 hotových commitů před origin/main,
+- GitHub batch audit je připravený, čeká 16 commitů a nepoužije force push,
+- Cockpit odpovídá a runtime je připojený,
+- oba profilové workspace jsou čisté a zarovnané,
+- běžící Cockpit je ověřený na předchozí verzi main, nikoli na současném HEAD,
+- autosave watcher běží,
+- recovery záloha z 29. 7. 2026 je úspěšná a ověřená restore drillem.
 
-Postup:
-1. Read-only DocumentRepository nad dnesnimi JSON/JSONL soubory.
-2. Pres repository postupne vest vsechny zapisy.
-3. Atomicke zapisy, zamky a idempotency klice.
-4. SQLite katalog a fulltextovy index.
-5. Existujici dokumenty pri prvni migraci nepresouvat ani nemazat.
+Čistý main napřed před origin/main je platný stav „GitHub batch pending“.
+Není to dirty strom ani výzva k rozdělování rozpracovaných změn.
 
+Před zahájením větší nové implementace:
 
-E-MAILY
+1. provést read-only audit denního GitHub balíčku,
+2. push provést jen po odpovídajícím potvrzení,
+3. potom samostatně potvrzeně nasadit aktuální main,
+4. ověřit restart a smoke 5/5,
+5. teprve potom zahájit Cockpit Dietu D0.
 
-E-mailova oblast je pojmove roztristena mezi triage, work mode, work session,
-processing decision, work queue, action case, case vault a archive vault.
+Toto provozní uzavření není šestý projekt. Je to vstupní podmínka pro bezpečné
+pokračování. Samotný souhlas s touto roadmapou není automatickým souhlasem
+s pushem nebo nasazením.
 
-Doporucena stabilni identita zpravy:
-provider + account + folder + uid + message_id
 
-Doporuceny pracovni stav:
-new -> reviewed -> action_selected -> archived_local -> attachments_imported
-    -> trash_requested -> trashed -> purged
-Vedlejsi stavy: skipped, retry, error.
+4. CO Z PŮVODNÍHO AUDITU ZŮSTÁVÁ PLATNÉ
 
-Archivace e-mailu, import priloh a presun u poskytovatele maji pouzivat
-idempotency klic a jednoduchy outbox. Sitove a davkove operace maji bezet jako
-background job, nikoliv uvnitr dlouheho HTTP requestu.
-
-
-UZIVATELSKE ROZHRANI
+Hlavní architektonický závěr:
 
-Hlavni obrazovka je dnes spise mapa celeho systemu nez denni kokpit. Schopnosti
-neni treba odstranit, ale rozdelit:
-- Dnes: tri az pet aktualnich ukolu, varovani a globalni hledani.
-- Dokumenty: intake, revize, terminy, cases a hledani.
-- E-maily: nove, k rozhodnuti, zpracovane, kos a archiv.
-- Adam / hlas: posledni pokyn, stav a cekajici potvrzeni.
-- Servis: zaloha, git, diagnostika, recovery a relace.
-- Pokrocile: skryte, dokud nejsou potreba.
-
-HTML, CSS a JavaScript postupne presunout do samostatnych statickych souboru.
-Nedelat soucasne uplny redesign a backendovou migraci.
-
-
-TESTOVANI A PROVOZ
-
-Chybi predevsim:
-- browser end-to-end testy,
-- test soubezneho zapisu dvou procesu,
-- vykonovy limit /api/status,
-- testy bezpecnostnich hlavicek a puvodu requestu,
-- VoiceBridge presne-jednou end-to-end,
-- e-mail -> archiv -> priloha -> document vault,
-- simulace padu uprostred vicekrokove operace.
+Cockpit je funkční a má silnou testovací základnu, ale app/cockpit.py stále
+koncentruje příliš mnoho odpovědností. Správným směrem není přepis od nuly,
+plošné mazání ani změna frameworku. Správným směrem jsou malé
+behavior-preserving řezy při zachování URL, payloadů, potvrzovacích hranic,
+private cest a uživatelského chování.
 
-GitHub workflow nespousti obecnou testovaci sadu a Python zavislosti nejsou
-pripnute na konkretni verze. Doporucuje se samostatne CI pro testy, syntax check,
-zakladni lint a kontrolu reprodukovatelnosti zavislosti.
-
-
-DOPORUCENE PORADI IMPLEMENTACE
-
-Faze 0 - stabilizace:
-1. Oddelit trisekundovy live status od plneho /api/status.
-2. Pridat limity requestu, jednotne chyby a bezpecnostni hlavicky.
-3. Zapnout bezpecny provozni log bez soukromych obsahu.
-4. Zavest atomicky JSON zapis a spolecny file lock.
-5. Doplnit test soubezneho zapisu.
-6. Prejit na jednu serverovou instanci pro lokalni i Tailscale pristup.
-
-Faze 1 - rozdeleni monolitu:
-1. Vyjmout status a health sluzbu.
-2. Vyjmout VoiceBridge coordinator.
-3. Vyjmout dokumentove routy a service vrstvu.
-4. Vyjmout e-mailove routy a service vrstvu.
-5. Presunout frontend do statickych souboru.
-1.6: jednotný read-only document intake pro Downloads, e-mailovou frontu, mobilní a lokální inbox.
-
-Faze 2 - sjednoceni stavu:
-1. Explicitni VoiceBridge state machine.
-2. Jednotny dokumentovy intake model.
-3. Jednotny e-mailovy pracovni model. [HOTOVO 11. 7. 2026]
-4. Repository rozhrani, idempotency a outbox. [HOTOVO 11. 7. 2026: realny e-mailovy audit pilot]
-
-Faze 3 - odolna persistence:
-1. SQLite pro pracovni stavy a metadata.
-2. Fulltext dokumentu.
-3. Migracni a konzistencni audit.
-4. JSON/JSONL docasne ponechat jako export, auditni stopu nebo fallback.
-
-
-DOPORUCENY PRVNI BALIK
-
-1. Lehky live status.
-2. Jedna serverova instance.
-3. Atomicke a zamcene zapisy.
-
-Tyto tri kroky maji nejvyssi pomer prinosu k riziku a vytvori bezpecny zaklad
-pro pozdejsi rozdeleni monolitu. VoiceBridge ani dokumentova data se pri nich
-nemaji funkcne menit.
-
-
-STAV PRVNIHO KROKU PO AUDITU
-
-Dne 10. 7. 2026 byl prvni vykonovy krok implementovan:
-- vznikl GET /api/live-status,
-- trisekundovy interval uz nevola plny /api/status,
-- hlasovy watcher a cekajici potvrzeni se nacitaji cerstve,
-- draha procesni diagnostika VoiceBridge ma patnactisekundovou cache,
-- plny /api/status se automaticky obnovuje jednou za pet minut,
-- rucni obnova nadale pouziva plny status,
-- smoke check nove kontroluje take lehky live status.
-
-Kontrolni mereni po nasazeni:
-- prvni nenacachovany live status priblizne 640 ms,
-- dalsi cachovane live statusy priblizne 2 az 6 ms,
-- kontrolni plny status priblizne 1 070 ms.
-
-Relevantni regresni sada po zmene: 374 testu, vsechny OK.
-
-Navazujici frontendova regrese a oprava:
-- Pri rucnim Mac retestu se ukazalo, ze trisekundovy live monitor sice pouzival
-  lehky endpoint, ale po odpovedi znovu volal cely `renderDashboard(...)`.
-- To zpusobovalo viditelne problikavani horniho panelu u tlacitka `Obnovit`.
-- Live monitor po oprave vola jen `renderVoiceStatus(...)`; dokumenty, zaloha,
-  git, hlavni stav a horni panel se prekresluji pouze pri plnem refreshi.
-- Regresni test vyslovne zakazuje `renderDashboard(...)` uvnitr
-  `refreshLiveStatus()`.
-
-
-STAV DRUHEHO KROKU PO AUDITU
-
-Dne 10. 7. 2026 byl dokoncen prechod na jednu bezici Python instanci Cockpitu:
-- lokalni Cockpit zustava na 127.0.0.1:8770,
-- vzdaleny Tailscale pristup zachovava dosavadni IP adresu a port,
-- Tailscale Serve TCP proxy pouze predava spojeni do lokalni instance,
-- druhy Tailscale cockpit_server.py a jeho launchd runner uz nebezi,
-- puvodni Tailscale launchd plist zustal zachovany pro rychly rollback,
-- migracni nastroj umi status, apply a rollback a pri neuspechu se pokusi
-  puvodni sluzbu automaticky obnovit.
-
-Kontrola po migraci:
-- lokalni i vzdaleny health vraceji stejny PID a stejny code stamp,
-- lokalni i vzdaleny smoke check prosly,
-- restart vyvolany pres vzdalenou adresu prosel a proxy se pripojila k novemu
-  lokalnimu PID,
-- relevantni regresni sada po doplneni migracnich testu: 378 testu, vsechny OK.
-
-Rollback zustava dostupny pres:
-`.venv/bin/python scripts/migrate_cockpit_single_instance.py --rollback`
-
-
-STAV TRETIHO KROKU PO AUDITU
-
-Dne 10. 7. 2026 byla doplnena centralni HTTP ochranna vrstva Cockpitu:
-- JSON telo ma globalni limit 10 MiB; limit zachovava rezervu pro maximalni
-  sestimegabajtovou hlasovou nahravku po base64 prevodu,
-- chybny JSON vraci rizenou 400 odpoved,
-- prilis velky JSON vraci 413 bez nacteni tela,
-- nespravny Content-Type vraci 415,
-- nepodporovany prenos tela je odmitnut,
-- Host je povolen jen pro lokalni nebo Tailscale adresy,
-- cizi Origin/Referer u POST pozadavku vraci 403,
-- neocekavana vyjimka vraci obecnou 500 bez zverejneni vnitrniho textu,
-- vsechny odpovedi maji bezpecnostni hlavicky vcetne CSP, nosniff,
-  SAMEORIGIN, Referrer-Policy a Permissions-Policy,
-- chybove udalosti se ukladaji do private logu bez query, payloadu, hlavicek,
-  e-mailu a hlasoveho textu.
-
-Kontrola po nasazeni:
-- 388 relevantnich testu, vsechny OK,
-- lokalni i vzdaleny smoke check prosly,
-- rizenou 400 odpoved pro chybny JSON overil i zivy server,
-- POST se shodnym Tailscale Origin prosel,
-- lokalni a vzdaleny health nadale vraceji stejny PID jedine instance.
-
-
-AKTUALIZACE ROADMAPY 26. 7. 2026 - COCKPIT DIETA, PRIORITA 1
-
-Mila potvrdil navrat k postupne architektonicke diete Cockpitu jako priorite 1.
-Nejde o prepis od nuly, odstranovani schopnosti ani honbu za libovolnym poctem
-radku. Cilem je zmensovat koncentraci odpovednosti a provazanost tak, aby slo
-jednotlive oblasti vyvijet, testovat a nasazovat v mensich bezpecnych krocich.
-
-Aktualni opakovatelne mereni fyzickych radku:
-- `app/cockpit.py`: 20 745 vsech a 19 620 neprazdnych radku;
-- uzsi provozni jadro Cockpitu: 20 764 neprazdnych radku bez testu a 29 805
-  s primo souvisejicimi testy;
-- cely rozsah Cockpit quality gate: 111 produkcnich souboru a 57 079
-  neprazdnych produkcnich radku;
-- testovaci cast gate: 96 souboru a 34 139 neprazdnych radku;
-- produkce a testy cele gate dohromady: 91 218 neprazdnych radku.
-
-Pro orientaci ma cela gitove sledovana Samantha 201 196 fyzickych textovych
-radku, z toho 175 091 neprazdnych. Toto celkove cislo ale zahrnuje samostatne
-projekty, 42 401 radku testu a 37 197 radku pameti a dokumentace. Neni proto
-samo o sobe spravnou metrikou kvality ani cilem mazani. Hlavni riziko zustava
-velikost `app/cockpit.py` a siroky dopad kazde integracni zmeny.
-
-Kanonicka pravidla diety:
-1. Nova vetsi business logika nevznika v `app/cockpit.py`; monolit obsahuje
-   pouze tenky adapter, registraci nebo kompatibilni routu.
-2. Kazdy rez zachova URL, payloady, potvrzovaci brany, private cesty a dosavadni
-   uzivatelske chovani.
-3. Kazdy novy modul dostane prime testy. Plna Cockpit quality gate zustava
-   release pojistkou, dokud nebude rozdeleni prokazatelne bezpecne.
-4. Pocet radku je smerova metrika, ne duvod k mazani funkcnosti, testu,
-   bezpecnostnich kontrol nebo dokumentace.
-5. V jednom rezu se nemicha backendova extrakce, UI redesign, datova migrace,
-   legacy cleanup ani zmena frameworku.
-
-Aktualizovane poradi:
-
-Dieta D0 - read-only mapa hranic:
-- znovu zmapovat dnesni odpovednosti a call-site zavislosti `app/cockpit.py`;
-- rozlisit tenke adaptery od business logiky, HTML/CSS/JavaScriptu a HTTP
-  infrastruktury;
-- vybrat jednu soudrznou e-mailovou skupinu pro Fazi 1.4;
-- nic nemenit, nemigrovat ani nenasazovat.
-
-Dieta D1 - Faze 1.4, jeden e-mailovy rez:
-- vyjmout pouze vybranou skupinu e-mailovych rout/service logiky nad hotovym
-  work modelem a repository adapterem;
-- v monolitu ponechat kompatibilni adaptery;
-- zachovat vsechny send/delete/archivacni potvrzovaci hranice;
-- projit primymi testy, plnou gate a po potvrzenem nasazeni smoke testem 5/5.
+Původní rizikové oblasti:
+
+- HTTP infrastruktura, routing, HTML, CSS a JavaScript v jednom souboru,
+- dokumentové a e-mailové orchestrace uvnitř Cockpitu,
+- široký dopad každé změny na plnou Cockpit Quality Gate,
+- historická směs aktuálních a překonaných stavů v projektové paměti,
+- vícekrokové dokumentové a e-mailové workflow s vysokými nároky na recovery.
+
+Kanonická pravidla dalšího vývoje:
+
+1. Nová větší business logika nevzniká v app/cockpit.py.
+2. Cockpit dostává pouze tenký adaptér, registraci nebo kompatibilní routu.
+3. Jeden krok řeší jednu odpovědnost.
+4. Backendová extrakce se nemíchá s UI redesignem, datovou migrací ani legacy
+   cleanupem.
+5. Každý nový modul má malou přímou regresní sadu.
+6. Plná Cockpit Quality Gate zůstává release pojistkou.
+7. Po potvrzeném nasazení následuje smoke test 5/5.
+8. Počet řádků je orientační metrika, ne důvod k mazání funkčnosti nebo testů.
+
+
+5. CO JE Z PŮVODNÍHO AUDITU UZAVŘENÉ
+
+Následující body se nesmějí vracet jako nové úkoly bez čerstvého důkazu
+regrese:
+
+- lehký /api/live-status je oddělený od plného /api/status,
+- krátký live refresh nepřekresluje celý dashboard,
+- lokální a vzdálený přístup používají jednu Python instanci Cockpitu,
+- Tailscale cesta vede k téže instanci,
+- centrální HTTP ochrana řeší limity těla, chybný JSON, Content-Type, Host,
+  Origin/Referer, obecné chyby a bezpečnostní hlavičky,
+- provozní chybový log neukládá soukromé payloady,
+- POST registry a potvrzovací hranice jsou pokryté testy,
+- e-mailový work model, repository základ, decision adapter, idempotency a
+  nedestruktivní auditní pilot jsou hotové,
+- stará aktivní komunikační větev VoiceBridge/Janička je vyřazená,
+- Human-Adam a kanonické pracovní proudy fungují,
+- R2-Adam už není návrh před implementací: má vlastní chat, TXT prostor,
+  dokumentovou lištu, čtečku a potvrzovanou práci s úplnými sadami zdrojů,
+- Rodinný kalendář má implementovanou potvrzovanou aktivační bránu; jeho
+  aktuální živý režim se před další akcí musí ověřit read-only,
+- recovery záloha je aktuální.
+
+Původní doporučení „nejdřív live status + jedna instance + základní HTTP
+ochrany“ je historicky splněné a není současnou roadmapou.
+
+
+6. HLAVNÍ ROZHODNUTÍ PRO NÁSLEDUJÍCÍ PRÁCI
+
+Pořadí je závazné jako výchozí doporučení, dokud Míla nerozhodne jinak:
+
+0. uzavřít GitHub batch a nasadit současný main,
+1. Cockpit Dieta D0 a následně jeden malý D1 řez,
+2. narovnat projektovou paměť a ověřit její používání Samanthou,
+3. ověřit jeden úplný tok e-mail -> vault -> R2 TXT,
+4. provést provozní přejímku R2-Adama z pohledu Jany,
+5. dokončit přechod opakovaných automatizací do stabilního provozu,
+6. opravit generátor systémového auditu podle poslední sekce tohoto dokumentu.
+
+V jednom okamžiku se rozvíjí jen jeden z těchto směrů. Další směr se neotevírá
+uvnitř rozpracovaného kroku jako vedlejší „vylepšení“.
+
+
+7. SMĚR 1 - COCKPIT DIETA
+
+Proč je první:
+
+- app/cockpit.py měl při posledním opakovatelném měření 20 745 fyzických a
+  19 620 neprázdných řádků,
+- hlavní systémové riziko je koncentrace odpovědností, ne jedna konkrétní chyba,
+- menší moduly zrychlí vývoj, testování, diagnostiku i bezpečné nasazení všech
+  dalších oblastí.
+
+Dieta D0 - pouze read-only mapa:
+
+1. Znovu změřit současný app/cockpit.py.
+2. Zmapovat:
+   - HTTP infrastrukturu a společné odpovědi,
+   - registry a tenké adaptéry,
+   - business logiku,
+   - vložené HTML, CSS a JavaScript,
+   - dokumentové routy a služby,
+   - e-mailové routy a služby,
+   - servisní a procesní operace.
+3. U e-mailové oblasti vytvořit call-site mapu od routy přes službu až k modelu
+   a repository.
+4. Oddělit skutečné adaptéry od business logiky, která patří mimo monolit.
+5. Vybrat právě jednu soudržnou e-mailovou skupinu pro D1.
+6. Zapsat závislosti, potvrzovací hranice, přímé testy a rizika vybraného řezu.
+
+D0 nesmí:
+
+- měnit kód,
+- přesouvat soubory,
+- měnit endpointy nebo payloady,
+- číst private obsah,
+- dělat e-mailové nebo dokumentové zápisy,
+- spouštět reindex,
+- čistit legacy kód,
+- redesignovat UI,
+- nasazovat.
+
+Výstup D0:
+
+- stručný git-safe report mapy odpovědností,
+- jediný doporučený D1 řez,
+- přesný seznam produkčních a testovacích souborů,
+- seznam zachovávaných URL, payloadů a potvrzovacích hranic,
+- nejmenší implementační krok.
+
+Dieta D1 - jeden e-mailový řez:
+
+- vyjmout pouze skupinu vybranou v D0,
+- použít existující work model a repository, pokud jsou pro skupinu vhodné,
+- v app/cockpit.py ponechat tenké kompatibilní adaptéry,
+- zachovat send/delete/archive potvrzení a private hranice,
+- přidat přímé testy nového modulu,
+- spustit cílené testy, plnou gate a po samostatně potvrzeném nasazení smoke
+  test 5/5.
 
 Dieta D2 - frontend:
-- po stabilizaci backendovych hranic postupne vyjmout HTML, CSS a JavaScript do
-  samostatnych statickych souboru;
-- nedelat soucasne redesign hlavni obrazovky.
 
-Dieta D3 - rychlejsi vyvojova zpetna vazba:
-- ponechat plnou branu pro release;
-- doplnovat mensi domenove sady, aby bezny maly rez nemusel byt diagnostikovan
-  jen pres celou integracni sadu;
-- oslabeni plne brany je mozne az po samostatnem dukazu, ne predem.
+- až po stabilizaci backendových hranic přesouvat HTML, CSS a JavaScript do
+  samostatných statických souborů,
+- nedělat při tom redesign hlavní obrazovky.
 
-Prvni skutecny krok po tomto zapisu je pouze Dieta D0. Stary e-mailovy parser,
-lokalni Janicka vetev, podezrele API cesty a private data zustavaji beze zmeny,
-dokud neprobehne jejich samostatny audit a rozhodnuti.
+Dieta D3 - rychlejší zpětná vazba:
+
+- udržovat malé doménové testovací sady,
+- plnou gate zatím neoslabovat,
+- zmenšení release gate řešit až po samostatném důkazu bezpečnosti.
+
+Nejbližší skutečný vývojový krok po provozním uzavření je pouze D0.
+
+
+8. SMĚR 2 - PRAVDIVÁ PAMĚŤ A RAG
+
+Problém:
+
+Agregovaná paměť může zaostávat za TVBCP, handoffem a živým stavem. Při této
+revizi například ACTIVE_PROJECTS.md stále uváděl R2-Adama jako projekt před
+implementací a Rodinný kalendář před aktivační bránou, přestože novější
+kanonické zdroje dokládají další vývoj. Takový drift vede Adama i systémový
+audit ke špatným doporučením.
+
+Cíl:
+
+- jeden současný stav nesmí být přebíjen starším snapshotem,
+- historická paměť zůstane zachovaná, ale nebude řídit dnešní práci,
+- Samantha musí umět dohledat nejnovější kanonický zdroj bez embeddings.
+
+Nejmenší bezpečný postup:
+
+1. Udělat read-only audit 30 pracovních proudů.
+2. U každého porovnat agregovaný registr s nejnovějším TVBCP/handoffem.
+3. Označit pouze prokazatelné rozpory, ne domněnky.
+4. Opravit nejdřív proudy, které ovlivňují současnou roadmapu:
+   - Cockpit,
+   - Human-Adam,
+   - R2-Adam,
+   - Rodinný kalendář,
+   - Dokumenty,
+   - E-mail,
+   - Automatické úkoly.
+5. Zachovat staré handoffy jako historii, ale odebrat jim aktivní navigační
+   autoritu, pokud jsou překryté.
+6. Provest praktické dotazy přes Samanthu a ověřit, že sama volí vhodný
+   source_type a vrací současný zdroj.
+
+Co nyní nedělat:
+
+- nezavádět embeddings před praktickým testem současného textového hledání,
+- nemazat staré handoffy bez přesného seznamu a potvrzení,
+- nepřepisovat historii TVBCP,
+- nevytvářet další paralelní registr.
+
+
+9. SMĚR 3 - E-MAIL -> PRIVATE VAULT -> R2 TXT
+
+Proč:
+
+Samantha má mnoho hotových dílů, ale největší hodnotu prokáže jejich jediný
+úplný reálný průchod. Tento test současně ověří Cockpit, e-mailový intake,
+dokumentový vault, ScanDocu Review, metadata, hledání a R2-Adama.
+
+Jeden kontrolovaný scénář:
+
+1. V Cockpitu vybrat jeden konkrétní reálný e-mail s PDF a JPEG přílohou.
+2. Read-only ověřit náhled a kandidáty.
+3. Po příslušném potvrzení uložit vybrané přílohy do private vaultu.
+4. V ScanDocu Review doplnit a potvrdit metadata.
+5. Ověřit, že se již zrevidovaný dokument nevrací do chybné fronty.
+6. Přes R2-Adama provést metadata-only hledání.
+7. Ukázat redigované kandidáty a vyžádat potvrzení přesného výběru.
+8. Vytvořit nový create-only TXT přehled v prostoru R2.
+9. Otevřít TXT v samostatné čtečce.
+
+Bezpečnost:
+
+- soukromý obsah se nevypisuje do chatu, Gitu, paměti ani TVBCP,
+- zdrojové dokumenty R2 pouze čte,
+- nejasný document_id nebo neúplná sada selže uzavřeně,
+- „všechny dokumenty“ znamená úplnou potvrzenou sadu,
+- dávky mají nejvýše pět zdrojů,
+- chybějící hodnoty zůstávají „nezjištěno“,
+- TXT vzniká create-only a nepřepisuje existující dokument.
+
+OCR obrazkových příloh se do tohoto testu nepřidává jako vedlejší vývoj. Pokud
+průchod odkryje OCR potřebu, vznikne samostatný návrh.
+
+
+10. SMĚR 4 - PROVOZNÍ PŘEJÍMKA R2-ADAMA PRO JANU
+
+R2-Adam je implementovaný dostatečně na to, aby se nyní neposuzoval podle počtu
+dalších funkcí, ale podle jednoduchého používání.
+
+Přejímací scénář:
+
+1. Otevřít R2-Adama z Janičky bez technického mezikroku.
+2. Položit několik navazujících běžných dotazů.
+3. Ověřit kontinuitu po obnovení stránky.
+4. Vyhledat úplnou sadu dokumentů.
+5. Potvrdit výběr a vytvořit TXT přehled.
+6. Otevřít TXT z dokumentové lišty v samostatné čtečce.
+7. Ověřit návrat do chatu bez ztráty kontextu.
+8. Ověřit, že UI nenabízí Git, TVBCP ani vývojové ovladače.
+
+Teprve podle výsledku vybrat jeden další uživatelský krok:
+
+- potvrzovaný tisk,
+- dvoukrokový e-mailový draft a odeslání,
+- jednodušší formulace nebo ovládání.
+
+Tyto tři možnosti se neimplementují současně.
+
+
+11. SMĚR 5 - OPAKOVANÉ AUTOMATIZACE
+
+Cíl:
+
+Dokončit dvě již rozpracované automatizace a získat z nich obecný provozní
+vzor. Nevytvářet novou abstraktní platformu bez konkrétní potřeby.
+
+Sova / ColorsAndNumbers:
+
+1. Před změnou ověřit současný GitHub Pages zdroj.
+2. Samostatně potvrzeně přepnout Pages z legacy main/docs na GitHub Actions
+   artifact.
+3. Spustit workflow ručně.
+4. Ověřit správné dnešní audio.
+5. Ověřit, že main po workflow zůstal na stejném commitu.
+6. Pro lokální kontrolu dál používat pouze ignorovaný local-preview.
+
+Rodinný kalendář:
+
+1. Nejdřív read-only ověřit aktuální živý mode, readiness, planner a blokující
+   delivery stavy.
+2. Neopakovat aktivační apply jen podle staré paměti.
+3. Aktivace sama není odeslání.
+4. První přirozený plánovaný výsledek sledovat přes redigovaný stav.
+5. Stavy sending, partial a delivery_unknown zůstávají fail-closed a bez
+   automatického retry.
+6. Neprovádět umělé další skutečné odeslání jen kvůli testu.
+
+Společný výsledek:
+
+- každý opakovaný běh má bezpečný read-only stav,
+- je dohledatelné, co běželo a zda to uspělo,
+- nejistý výsledek nezpůsobí automatické opakování,
+- automatizace neznečišťuje vývojový main,
+- ověřené opakující se řešení se stručně promítne do Lessons Learned.
+
+
+12. CO NYNÍ NENÍ PRIORITA
+
+- velký přepis Cockpitu,
+- změna webového frameworku,
+- plošný frontend redesign,
+- dokumentový reindex smíchaný s Dietou D0/D1,
+- mazání starého e-mailového parseru bez samostatného call-site auditu,
+- fyzické mazání historických handoffů,
+- návrat starého VoiceBridge,
+- nové embeddings bez důkazu, že textové hledání nestačí,
+- další Vocabulary FR/IT práce bez nového konkrétního problému,
+- nové R2 funkce před provozní přejímkou,
+- nový obecný automatizační framework před dokončením sovy a kalendáře.
+
+
+13. PROVOZNÍ PRAVIDLA PRO TERMINÁLOVÉHO ADAMA
+
+Před každým implementačním krokem:
+
+1. ověřit aktuální pracovní proud a oprávnění,
+2. přečíst nejnovější TVBCP/handoff vybraného proudu,
+3. ověřit Git, GitHub batch, workspace, deployment, runtime a zálohu,
+4. zkontrolovat Lessons Learned při podobném nebo opakovaném problému,
+5. přesně vymezit jeden krok a související soubory.
+
+Po implementaci:
+
+1. cílené testy a rychlá statická brána,
+2. u rizikových změn plná Cockpit Quality Gate,
+3. git diff --check,
+4. lokální tematický commit pouze vybraných souborů,
+5. žádný automatický push během dne,
+6. profilové workspace zarovnat jen pokud jsou čisté a bezpečně zarovnatelné,
+7. nasazení vždy samostatně a s odpovídajícím potvrzením,
+8. po nasazení ověřit smoke a skutečný uživatelský výsledek.
+
+Private obsah, kontakty, tajemství, zprávy a celé dokumenty nepatří do Gitu,
+paměti, TVBCP, testů ani tohoto auditu.
+
+
+14. POSLEDNÍ ÚKOL ROADMAPY - OPRAVA GENERÁTORU SYSTÉMOVÉHO AUDITU
+
+Proč současný generátor nepomáhá:
+
+Dnešní nově vygenerovaný systémový audit použil zastaralé řádky
+ACTIVE_PROJECTS.md jako současnou pravdu. Výsledkem bylo zejména:
+
+- doporučení starého kroku Rodinného kalendáře, přestože novější TVBCP a
+  provozní důkazy popisují další stav,
+- tvrzení, že R2-Adam je před implementací, přestože má funkční chat,
+  dokumentovou lištu, čtečku a dokumentové workflow,
+- klasifikace čistého main napřed o 16 commitů jako potřeby „oddělit hotové a
+  rozpracované změny“,
+- mechanická volba prvního řádku priority 1 místo skutečné strategické volby,
+- surový počet všech výskytů [PRIPOMENOUT] bez rozlišení aktivní a historické
+  navigace,
+- dlouhý seznam projektů místo krátkého rozhodovacího itineráře,
+- míchání provozních předpokladů, hotové údržby a strategických směrů.
+
+Kořen problému v implementaci:
+
+- app/project_audit_report.py čte jako hlavní projektový zdroj
+  ACTIVE_PROJECTS.md,
+- _prioritize_items řadí převážně podle číselné priority a pořadí tabulky,
+- _quick_recommendations vybírá priority_1[0],
+- každý výskyt slova „ahead“ spouští doporučení na git cleanup,
+- generátor nemá autoritativní resolver nejnovějšího TVBCP/handoffu ani
+  klasifikaci zastaralého agregovaného stavu.
+
+Cílové chování generátoru:
+
+1. Oddělit tři části výsledku:
+   - provozní předpoklady,
+   - nejvýše pět strategických směrů,
+   - informační příloha registru.
+2. Používat pořadí zdrojů pravdy z oddílu 2 tohoto dokumentu.
+3. Znovu použít existující kanonické vazby pracovních proudů a jejich
+   strukturované handoff/TVBCP údaje; nevytvářet druhý katalog.
+4. ACTIVE_PROJECTS.md používat jako fallback a agregovaný registr, ne jako
+   automaticky nejčerstvější pravdu.
+5. Pokud je novější kanonický zdroj v rozporu s agregovaným řádkem:
+   - doporučení založit na novějším ověřeném stavu,
+   - rozpor uvést jako „paměť vyžaduje narovnání“,
+   - starý další krok nevydávat za současný.
+6. Rozlišovat Git stavy:
+   - dirty strom,
+   - clean aligned,
+   - clean local ahead / GitHub batch pending,
+   - remote ahead,
+   - divergence,
+   - neověřeno.
+7. Clean local ahead nesmí doporučovat dělení rozpracovaných změn; má uvést
+   počet hotových commitů čekajících na denní balíček.
+8. Počítat pouze skutečně aktivní připomínky. Historické nebo překryté záznamy
+   mohou být v příloze, ale nesmějí zvyšovat hlavní alarm.
+9. Hotový projekt bez okamžité akce nesmí vytlačit otevřený systémový směr jen
+   proto, že má prioritu 1.
+10. Strategický shortlist hodnotit podle:
+    - provozního blockeru,
+    - explicitní priority,
+    - systémového dopadu,
+    - ověřeného otevřeného kroku,
+    - čerstvosti autoritativního zdroje,
+    - závislosti dalších projektů na daném kroku.
+11. Pokud důkazy nestačí, generátor nesmí hádat; vrátí „neověřeno“ a nejmenší
+    read-only krok k doplnění důkazu.
+12. Quick režim má být krátký rozhodovací itinerář. Full režim může obsahovat
+    úplný registr až jako přílohu.
+
+Nejmenší implementační pořadí:
+
+Fáze A - opravit provozní klasifikaci:
+
+- zavést explicitní Git state místo hledání slova „ahead“,
+- přidat test clean local ahead -> GitHub batch pending,
+- zachovat dirty/divergence fail-closed chování.
+
+Fáze B - aktuálnost zdrojů:
+
+- doplnit strukturovaný resolver kanonického workstreamu,
+- načíst nejnovější současný blok TVBCP/handoffu, pokud existuje,
+- označit rozpor s ACTIVE_PROJECTS.md,
+- přidat regresní scénáře R2-Adam a Rodinný kalendář se zastaralým agregátem.
+
+Fáze C - užitečné doporučení:
+
+- odstranit mechanickou volbu priority_1[0],
+- generovat nejvýše pět seřazených směrů,
+- oddělit hotové/maintenance položky od skutečně otevřených,
+- v quick režimu skrýt dlouhý katalog.
+
+Fáze D - připomínky a výstup:
+
+- rozlišit aktivní a historické [PRIPOMENOUT],
+- ukázat zdroj a stáří důkazu každého doporučeného směru,
+- uvést rozpory paměti jako samostatný úkol k narovnání.
+
+Povinné testy:
+
+- clean main ahead není dirty cleanup,
+- dirty strom zůstává provozní blocker,
+- divergence zůstává fail-closed,
+- novější TVBCP/handoff přebije zastaralý agregovaný další krok,
+- R2-Adam není označen „před implementací“,
+- Rodinný kalendář nedostane starý aktivační krok,
+- historické připomínky nezahlcují aktivní počet,
+- quick report obsahuje nejvýše pět strategických směrů,
+- full report zachová bezpečnou přílohu registru,
+- report nečte ani nevypisuje private obsah,
+- save režim nadále nepřepisuje starší report stejného dne.
+
+Akceptační kritérium:
+
+Po opravě musí nový audit nad stavem 29. 7. 2026 rozpoznat:
+
+- čistý GitHub batch pending,
+- aktuální a ověřenou zálohu,
+- Cockpit Dietu D0 jako první věcný směr,
+- drift projektové paměti jako samostatný systémový problém,
+- dokumentový end-to-end test, R2 přejímku a automatizace jako navazující
+  směry,
+- žádný návrat starého VoiceBridge, starého kalendářového kroku nebo tvrzení,
+  že R2-Adam ještě nebyl implementován.
