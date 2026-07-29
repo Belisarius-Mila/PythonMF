@@ -43,7 +43,7 @@ pro mazani, nevratne zasahy, odesilani ven a skutecne systemove riziko.
 - Python 3.12 je pripraveny.
 - OpenAI API key je pripraveny lokalne, ale nesmi se zapisovat do gitu ani do pametovych souboru.
 
-## Aktualni kanonicky stav 2026-05-23
+## Aktualni kanonicky stav 2026-07-29
 
 Samantha Agent/RAG ma prvni praktickou verzi nad OpenAI Agents SDK a lokalni
 markdown pameti.
@@ -58,6 +58,13 @@ markdown pameti.
 - `search_memory_text` ve vystupu ukazuje typ zdroje (`core`, `projects`,
   `handoffs`, `technical`, `infrastructure`, `stories`) a podporuje volitelny
   filtr `source_type`, aby historicke handoffy neprebijely kanonicky stav.
+- P0 pridal deterministicky read-only audit 30 pracovnich proudu bez cteni
+  private obsahu a bez automatickych oprav.
+- P1 oznacuje vysledky autoritou `canonical`, `aggregate`,
+  `aggregate_unverified`, `reference` nebo `historical`. Zvyseni autority se
+  uplatni jen na pracovni proud rozpoznany z dotazu.
+- P2 po vyslovnem souhlasu zalozilo kanonicky handoff a TVBCP pouze pro
+  `project-samantha-agent-rag`; podrobny soucasny stav je v teto dvojici.
 - Vyhledavani zatim neni vektorova databaze a nepouziva embeddings.
 - Lokalni smoke test 2026-05-23 bez OpenAI API po doplneni `source_type`:
   - dotaz `Samantha Agent RAG search_memory ranking` vraci vysledky oznacene
@@ -70,9 +77,11 @@ markdown pameti.
 
 Aktualni dalsi krok:
 
-- Udelat pristi live retest pres Samanthu/OpenAI a sledovat, jestli agent sam
-  vhodne pouziva `source_type`.
-- Embeddings resit az po overeni, ze vylepsene textove vyhledavani s cache
+- P3 ma opravit pouze prokazany formalni rozpor Mobile Input a zopakovat P0
+  audit.
+- Potom udelat live retest pres Samanthu/OpenAI a sledovat, zda agent sam
+  vhodne pouziva autoritu a `source_type`.
+- Embeddings resit az po overeni, ze textove vyhledavani s autoritou a cache
   nestaci.
 
 ## Historicke handoffy Samantha Agent/RAG

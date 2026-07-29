@@ -12,7 +12,9 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   zobecnitelných problémů. Při podobném problému se prohledává před návrhem
   nového řešení; obsahuje soví lokální preview a obecnou kontrolu konzistence
   slovníkových aplikací, mappingů a obrázků na cílovém zařízení.
-- `samantha_core.md` - zakladni kontext: kdo je Mila, co je Samantha Agent, aktualni stav prostredi, kanonicky stav Samantha Agent/RAG a dlouhodoby cil.
+- `samantha_core.md` - zakladni kontext: kdo je Mila, co je Samantha Agent, aktualni stav prostredi, souhrn vrstvy pameti/RAG a dlouhodoby cil.
+- `handoffs/workstreams/project-samantha-agent-rag.md` - kanonicky aktualni handoff proudu Samantha Agent / RAG; P0 audit, P1 autorita zdroju, P2 materializace a nejblizsi krok P3.
+- `tvbcp/workstreams/project-samantha-agent-rag.md` - kanonicky rozhodovaci dokument pravdive pameti a RAG; precedence zdroju, fail-honest fallback a odklad embeddings.
 - `contacts.md` - prakticke kontakty, ktere Mila vyslovne povolil ulozit do pameti.
 
 ## Reports
@@ -394,7 +396,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `handoffs/vocabularyfr_web_trainer_checkpoint_2026_06_04.md` - VocabularyFR Web Trainer pro Janu: webový MVP prototyp je hotový a commitnutý jako `da93eba Add VocabularyFR web trainer prototype`; další krok je deploy/checklist pro předání `VocabularyFR/web/` Janě a rozhodnutí macOS helper vs. Pythonista/iCloud test.
 - `handoffs/vocabularyfr_jana_images_archive_2026_06_07.md` - VocabularyFR pro Janu archiv: macOS app/Pict opravy, 39 novych obrazku, mapping 841 zaznamu, finalni audit 346/347 konkretnich obrazku, jediny fallback `chez -> preposition` a oprava `school.PNG`/hospital.
 - `handoffs/neuberk_kacenka_south_wall_v6_geometry_checkpoint_2026_06_07.md` - Neuberk Kacenka: checkpoint jizniho pohledu v6; soukrome koncepty maji opraveny pricny snizeny strop, tram smerujici k vychodni stene, komin u dveri a gauc za kominem; dalsi krok je rucni porovnani posledniho kandidata s realnymi fotkami a potom pudorysovy check.
-- `handoffs/samantha_agent_rag_search_memory_ranking_2026_05_19.md` - historicky RAG mezistav: `search_memory` ma vylepseny ranking a vystup; aktualni kanonicky stav je v `samantha_core.md`.
+- `handoffs/samantha_agent_rag_search_memory_ranking_2026_05_19.md` - historicky RAG mezistav z kvetna; aktualni kanonicky stav je v `handoffs/workstreams/project-samantha-agent-rag.md` a `tvbcp/workstreams/project-samantha-agent-rag.md`.
 - `handoffs/session_recovery_autosave_2026_05_18.txt` - handoff ke konverzaci o navazovani po vypadku, `screen`, prikazu `samantha`, `codex resume` a autosave session logu po 10 minutach.
 - `handoffs/test_kratky_handoff_2026_05_18.md` - testovaci handoff s prioritou 3 bez pripomenuti pri startu, overeni pravidla pro kratky handoff.
 - `handoffs/email_seznam_pojisteni_prilohy_2026_05_21.md` - Seznam e-mail: prvnich 500 vysledku pro pojisteni/smlouvy ma worklist, 34 UID slozek a 129 lokalne stazenych priloh v `data/private/email_seznam/`; navazovat jen podle potvrzovaneho read-only/document workflow.
