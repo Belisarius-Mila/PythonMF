@@ -66,15 +66,11 @@ from app.cockpit import (
     document_due_candidates_status,
     document_review_report_status,
     document_work_status,
-    email_archive_detail_status,
-    email_archive_list_status,
     email_header_to_processing_item,
     email_processing_batch_groups,
     email_processing_item_id,
     email_processing_pending_work_items,
     email_processing_pending_purge_items,
-    resolve_email_archive_file,
-    resolve_email_archive_incoming_file,
     classify_email_processing_category,
     latest_email_processing_overview,
     local_seznam_email_source_detail,
@@ -2492,100 +2488,6 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(store["reminders"][0]["due_date"], "2026-05-31")
         self.assertEqual(store["reminders"][0]["amount_due"], "1 360,00 Kč")
         self.assertNotIn("upominani@example.com", json.dumps(store, ensure_ascii=False))
-
-    def test_email_archive_list_and_detail_expose_local_readonly_files(self) -> None:
-        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-            root = Path(temp_dir)
-            archive_dir = root / "email_archive"
-            email_dir = archive_dir / "email-13338-prihlaseni"
-            (email_dir / "attachments").mkdir(parents=True)
-            (email_dir / "metadata.json").write_text(
-                json.dumps(
-                    {
-                        "archive_id": "email-13338-prihlaseni",
-                        "uid": "13338",
-                        "date": "Mon, 9 Mar 2026 13:58:41 +0000",
-                        "from": "ŠORMOVÁ Lada <lada.sormova@example.test>",
-                        "subject": "přihlášení",
-                        "archived_at": "2026-07-09T17:03:27+00:00",
-                        "links_count": 0,
-                        "attachments_count": 2,
-                    },
-                    ensure_ascii=False,
-                ),
-                encoding="utf-8",
-            )
-            (email_dir / "body.html").write_text("<p>test</p>", encoding="utf-8")
-            (email_dir / "body.txt").write_text("test", encoding="utf-8")
-            (email_dir / "original.eml").write_bytes(b"Subject: test\n\nbody")
-            (email_dir / "links.json").write_text("[]", encoding="utf-8")
-            (email_dir / "attachments" / "attachments.json").write_text(
-                json.dumps(
-                    {
-                        "attachments": [
-                            {
-                                "filename": "přihlašovací lístek.doc",
-                                "content_type": "application/msword",
-                                "size_bytes": 34816,
-                                "saved": False,
-                            }
-                        ]
-                    },
-                    ensure_ascii=False,
-                ),
-                encoding="utf-8",
-            )
-            documents = root / "documents"
-            incoming = documents / "inbox" / "incoming"
-            incoming.mkdir(parents=True)
-            (incoming / "icloud_uid_13338_07_prihlasovaci-listek.doc").write_bytes(b"DOC")
-
-            listing = email_archive_list_status("13338", archive_directory=archive_dir)
-            detail = email_archive_detail_status(
-                "email-13338-prihlaseni",
-                archive_directory=archive_dir,
-                documents_dir=documents,
-            )
-
-        self.assertTrue(listing["ok"])
-        self.assertEqual(listing["count"], 1)
-        self.assertEqual(listing["items"][0]["archive_id"], "email-13338-prihlaseni")
-        self.assertTrue(detail["ok"])
-        self.assertEqual(detail["uid"], "13338")
-        self.assertIn("body_html", {item["key"] for item in detail["files"]})
-        self.assertEqual(detail["attachments"][0]["filename"], "přihlašovací lístek.doc")
-        self.assertEqual(detail["downloaded_attachments"][0]["filename"], "icloud_uid_13338_07_prihlasovaci-listek.doc")
-
-    def test_email_archive_file_resolvers_reject_path_traversal(self) -> None:
-        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-            root = Path(temp_dir)
-            archive_dir = root / "email_archive"
-            email_dir = archive_dir / "email-1"
-            email_dir.mkdir(parents=True)
-            (email_dir / "metadata.json").write_text("{}", encoding="utf-8")
-            (email_dir / "body.html").write_text("ok", encoding="utf-8")
-            documents = root / "documents"
-            incoming = documents / "inbox" / "incoming"
-            incoming.mkdir(parents=True)
-            (incoming / "icloud_uid_1_attachment.pdf").write_bytes(b"%PDF")
-
-            ok_file = resolve_email_archive_file("email-1", "body_html", archive_directory=archive_dir)
-            bad_archive = resolve_email_archive_file("../email-1", "body_html", archive_directory=archive_dir)
-            bad_key = resolve_email_archive_file("email-1", "../metadata", archive_directory=archive_dir)
-            ok_attachment = resolve_email_archive_incoming_file(
-                "icloud_uid_1_attachment.pdf",
-                documents_dir=documents,
-            )
-            bad_attachment = resolve_email_archive_incoming_file(
-                "../icloud_uid_1_attachment.pdf",
-                documents_dir=documents,
-            )
-
-        self.assertTrue(ok_file["ok"])
-        self.assertFalse(bad_archive["ok"])
-        self.assertFalse(bad_key["ok"])
-        self.assertTrue(ok_attachment["ok"])
-        self.assertFalse(bad_attachment["ok"])
 
     def test_email_archive_due_candidates_skip_old_message_even_when_archived_today(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
@@ -7056,6 +6958,28 @@ Dalsi krok:
         self.assertIn("emailProcessingBtn", COCKPIT_HTML)
         self.assertIn("/email-processing/", COCKPIT_HTML)
         self.assertIn("openEmailProcessing", COCKPIT_HTML)
+
+    def test_email_archive_keeps_readonly_routes_and_embedded_frontend_contract(self) -> None:
+        expected_routes = {
+            "/email-archive/",
+            "/api/email-archive/list",
+            "/api/email-archive/detail",
+            "/email-archive/file",
+            "/email-archive/incoming",
+        }
+
+        self.assertTrue(expected_routes.issubset(self.cockpit_do_get_routes()))
+        self.assertTrue(expected_routes.isdisjoint(self.cockpit_do_post_routes()))
+        self.assertIn("/api/email-archive/list", cockpit_module.EMAIL_ARCHIVE_HTML)
+        self.assertIn("/api/email-archive/detail", cockpit_module.EMAIL_ARCHIVE_HTML)
+        self.assertEqual(
+            cockpit_module.email_archive_list_status.__module__,
+            "app.email.archive_browser",
+        )
+        self.assertEqual(
+            cockpit_module.resolve_email_archive_file.__module__,
+            "app.email.archive_browser",
+        )
 
     def test_web_apps_catalog_contains_known_apps(self) -> None:
         catalog = web_apps_catalog()

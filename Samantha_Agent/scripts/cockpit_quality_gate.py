@@ -26,6 +26,7 @@ NODE_FALLBACK_PATHS = (
 COMPILE_PATHS = (
     "scripts/work_context_guard.py",
     "app/cockpit.py",
+    "app/email/archive_browser.py",
     "app/command_cheatsheet.py",
     "app/cockpit_code_stamp.py",
     "app/cockpit_status_service.py",
@@ -219,6 +220,7 @@ TEST_MODULES = (
     "tests.test_reminders_store",
     "tests.test_reminders_query_tools",
     "tests.test_cockpit",
+    "tests.test_email_archive_browser",
     "tests.test_codex_approval_cockpit_contract",
     "tests.test_codex_approval_state",
     "tests.test_cockpit_voice_frontend_retirement",

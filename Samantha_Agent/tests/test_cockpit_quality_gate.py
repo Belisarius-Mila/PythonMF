@@ -88,6 +88,8 @@ async def second():
         for relative_path in COMPILE_PATHS:
             self.assertTrue((PROJECT_ROOT / relative_path).is_file(), relative_path)
         self.assertIn("tests.test_cockpit", TEST_MODULES)
+        self.assertIn("app/email/archive_browser.py", COMPILE_PATHS)
+        self.assertIn("tests.test_email_archive_browser", TEST_MODULES)
         self.assertNotIn("tests.test_adam_voice_mode", TEST_MODULES)
         self.assertIn("tests.test_codex_approval_cockpit_contract", TEST_MODULES)
         self.assertIn("tests.test_codex_approval_state", TEST_MODULES)
