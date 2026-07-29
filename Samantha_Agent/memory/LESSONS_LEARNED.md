@@ -73,3 +73,17 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   samostatná a smí se měnit jen při výslovné práci na Janiččině variantě.
   Přenosovou kopii před předáním ověřit kontrolním součtem proti správnému
   zdroji.
+
+### LL-005 — Formální shoda slovníku a mappingu nezaručuje zobrazení obrázku
+
+- Problém: AppIT měla pro většinu slov vhodné obrázky, ale starý resolver bral
+  první nalezený mapping, ztrácel skutečnou velikost písmen v názvu souboru a
+  neuměl bezpečně použít části vícevýznamových klíčů. Pouhá kontrola JSON proto
+  nadhodnocovala skutečnou funkčnost aplikace.
+- Typ: opakující se
+- Řešení nalezeno: 29072026
+- Řešení: Auditovat každý řádek CSV přímo stejným resolverem jako aplikace a
+  následně obrázek opravdu dekódovat. Preferovat app-local mappingy, slučovat
+  platné kandidáty, vybírat jen existující cíle, zachovat skutečný název souboru
+  a používat přesné či bezpečné aliasové shody před přímým stemem. Mapping před
+  změnou zazálohovat a doplňovat jen ověřené cíle.
