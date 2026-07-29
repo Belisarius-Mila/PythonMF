@@ -40,6 +40,7 @@ class VocabTrainer(ui.View):
         self.update_interval = 0.1
         self.words = []
         self.image_map = {}
+        self.image_alias_map = {}
         self.current_word = None
         self.current_index = None
         self.filter_ht = False
@@ -121,6 +122,9 @@ class VocabTrainer(ui.View):
     def _load_image_map(self):
         mapping_paths = [folder / 'mapping.json' for folder in self._picture_folders()]
         mapping_paths.append(JSON_FILE)
+        image_stems = set(self._picture_file_index())
+        exact_candidates = {}
+        alias_candidates = {}
         for mapping_path in mapping_paths:
             if not mapping_path.exists():
                 continue
@@ -128,16 +132,53 @@ class VocabTrainer(ui.View):
                 with open(mapping_path, mode='r', encoding='utf-8') as f:
                     data = json.load(f)
                 if isinstance(data, dict):
-                    image_map = {}
                     for key, value in data.items():
                         key_norm = self._normalize_key(str(key))
                         value_norm = self._normalize_key(str(value))
                         if key_norm and value_norm:
-                            image_map[key_norm] = value_norm
-                    return image_map
+                            exact_candidates.setdefault(key_norm, []).append(value_norm)
+                            for alias in self._mapping_key_parts(key):
+                                alias_candidates.setdefault(alias, []).append(value_norm)
             except Exception as e:
                 self._tts_log('image_map.load.error', path=str(mapping_path), error=repr(e))
-        return {}
+
+        def _best_existing_value(values):
+            ordered = []
+            for value in values:
+                if value and value not in ordered:
+                    ordered.append(value)
+            for value in ordered:
+                if value in image_stems:
+                    return value
+            return ordered[0] if ordered else None
+
+        image_map = {}
+        for key, values in exact_candidates.items():
+            selected = _best_existing_value(values)
+            if selected:
+                image_map[key] = selected
+
+        image_alias_map = {}
+        for alias, values in alias_candidates.items():
+            existing = []
+            for value in values:
+                if value in image_stems and value not in existing:
+                    existing.append(value)
+            if len(existing) == 1:
+                image_alias_map[alias] = existing[0]
+        self.image_alias_map = image_alias_map
+        return image_map
+
+    def _mapping_key_parts(self, text):
+        import re
+
+        parts = re.split(r'[,;/|()]', str(text or ''))
+        normalized = []
+        for part in parts:
+            key = self._normalize_key(part)
+            if len(key) >= 4 and key not in normalized:
+                normalized.append(key)
+        return normalized
 
     def _find_image_path(self, img_base_name):
         if not img_base_name:
@@ -200,8 +241,14 @@ class VocabTrainer(ui.View):
                 return key
         for key in keys:
             mapped = self.image_map.get(key)
-            if mapped:
+            if mapped and mapped in stems:
                 return mapped
+
+        for text in (fr_word, cz_word):
+            for alias in self._mapping_key_parts(text):
+                mapped = self.image_alias_map.get(alias)
+                if mapped and mapped in stems:
+                    return mapped
         return None
 
     def _load_ui_image(self, image_path):
