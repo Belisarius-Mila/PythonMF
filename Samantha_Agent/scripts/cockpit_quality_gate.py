@@ -110,6 +110,7 @@ COMPILE_PATHS = (
     "app/reminders/store.py",
     "app/reminders/query_tools.py",
     "scripts/cockpit_server.py",
+    "scripts/cockpit_fast_feedback.py",
     "scripts/codex_approval_notice.py",
     "scripts/open_cockpit.py",
     "scripts/cockpit_launchd_runner.py",
@@ -148,6 +149,7 @@ SHELL_PATHS = (
 
 TEST_MODULES = (
     "tests.test_cockpit_quality_gate",
+    "tests.test_cockpit_fast_feedback",
     "tests.test_cockpit_frontend",
     "tests.test_cockpit_status_service",
     "tests.test_command_cheatsheet",
