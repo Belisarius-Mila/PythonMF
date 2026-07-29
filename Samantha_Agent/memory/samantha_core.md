@@ -77,10 +77,9 @@ markdown pameti.
 
 Aktualni dalsi krok:
 
-- P3 ma opravit pouze prokazany formalni rozpor Mobile Input a zopakovat P0
-  audit.
-- Potom udelat live retest pres Samanthu/OpenAI a sledovat, zda agent sam
-  vhodne pouziva autoritu a `source_type`.
+- P4 ma udelat read-only live retest pres Samanthu/OpenAI pro sedm proudu
+  soucasne roadmapy a sledovat, zda agent sam vhodne pouziva autoritu a
+  `source_type`.
 - Embeddings resit az po overeni, ze textove vyhledavani s autoritou a cache
   nestaci.
 

@@ -39,10 +39,13 @@ dukazu, ze textove hledani nestaci.
 
 ## Otevrene kroky a rizika
 
-- Jeden formalni rozpor Mobile Input zustava k samostatne oprave v P3.
+- P3 odstranilo jediny strojove prokazany formalni rozpor; obsahova pravdivost
+  dalsich volnych textu tim neni automaticky potvrzena.
 - `aggregate_unverified` je poctivy fallback, ne potvrzeni obsahove spravnosti.
 - Historicky zdroj muze zustat ve vysledcich, ale nesmi predbehnout rozpoznany
   kanonicky zdroj stejneho proudu.
+- Zkraceny dotaz nemusi zatim jednoznacne rozpoznat katalogovy proud; P4 ma
+  odlisit skutecnou potrebu aliasu od obecne textove shody.
 
 ## Chronologicke zaznamy
 
@@ -78,3 +81,37 @@ dukazu, ze textove hledani nestaci.
   nematerializovanych proudu a jeden nezmeneny formalni rozpor.
 - Dotaz `Samantha Agent RAG` vraci jako prvni handoff a TVBCP tohoto proudu s
   autoritou `canonical`; agregat je az dalsi zdroj.
+
+### 2026-07-29 22:39 CEST - P3 oprava formalniho rozporu
+
+#### Hotovo
+
+- Rezim Mobile Input je v agregovanem registru opraven z `active` na `paused`,
+  shodne s kanonickym katalogem a `WORKSTREAMS.md`.
+- Ostatni text, priorita, odkazy a dalsi krok Mobile Input zustaly beze zmeny.
+
+#### Rozhodnuti
+
+- P3 opravuje pouze strojove prokazany rozpor a nerozsiruje se na obsahove
+  prepisovani dalsich projektu.
+
+#### Dalsi krok
+
+- P4 ma read-only overit prakticke dotazy pro Cockpit, Human-Adam, R2-Adam,
+  Rodinny kalendar, Dokumenty, E-mail a Automaticke ukoly.
+
+#### Navrhovane dalsi kroky
+
+- U kazdeho dotazu sledovat vybranou autoritu a pripadny `source_type`.
+- Otestovat plny i zkraceny nazev proudu a pripadne navrhnout jen jednoznacne
+  katalogove aliasy.
+- Opravovat jen prokazany drift, ne domnenky.
+- Embeddings pridat jen pri dolozene nedostatecnosti textoveho hledani.
+
+#### Technicky dukaz
+
+- P0 audit pred P3 dokazoval prave jeden `mode_mismatch` pro
+  `project-mobile-input`; po zmene hlasi nula formalnich rozporu a rezim
+  Mobile Input `paused`.
+- Cilenych 21 testu pameti proslo. Exploracni dotaz se zkracenym nazvem
+  odkryl pouze kandidat k read-only provereni v P4, nikoli dalsi datovy rozpor.

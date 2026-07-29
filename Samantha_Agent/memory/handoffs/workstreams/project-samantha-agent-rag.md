@@ -24,19 +24,24 @@ Co je hotove:
   souhlasu Mily.
 - P0 audit po P2 hlasi tento proud jako `registry_consistent` a prakticky dotaz
   vraci nejprve oba kanonicke dokumenty.
+- P3 opravilo jediny prokazany formalni rozpor: Mobile Input je nyni shodne v
+  katalogu i agregatu `paused`.
 
 Co neni hotove:
-- P0 stale doklada jeden formalni rozpor: Mobile Input je v katalogu
-  `paused`, ale v agregovanem registru `active`.
 - Obsahova pravdivost dalsich pracovnich proudu nebyla plosne prepisovana ani
   automaticky opravovana.
+- Prakticke live dotazy pres Samanthu/OpenAI zatim nebyly soucasti P3.
+- Exploracni lokalni dotaz `Mobile Input Layer` nerozpoznal proud bez celeho
+  katalogoveho nazvu; P4 ma overit bezne varianty dotazu pred zmenou rankingu.
 
 Dalsi krok:
-- P3 ma opravit pouze prokazany rozpor Mobile Input a zopakovat P0 audit.
+- P4 ma read-only overit prakticke dotazy pro sedm proudu soucasne roadmapy a
+  sledovat volbu autority i `source_type`.
 
 Navrhovane dalsi kroky:
 - Potom udelat maly obsahovy audit jen nejdulezitejsich aktivnich proudu.
 - Prakticky overit, zda Samantha sama dobre pouziva autoritu a `source_type`.
+- U zkracenych nazvu overit, zda jsou potreba bezpecne katalogove aliasy.
 - Embeddings resit pouze pokud textove hledani ani po techto krocich nestaci.
 
 Zmenene nebo relevantni soubory:
