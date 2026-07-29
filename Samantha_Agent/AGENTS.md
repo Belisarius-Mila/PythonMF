@@ -14,6 +14,14 @@ Tyto instrukce plati pro praci ve slozce `Samantha_Agent/`.
 
 - Pred praci si vzdy precti `Samantha_Agent/memory/MEMORY_INDEX.md`.
 - Relevantni kontext hledej ve slozce `Samantha_Agent/memory/`.
+- Pri znamem, podobnem nebo opakovanem problemu nejdrive prohledej
+  `memory/LESSONS_LEARNED.md`. Pokud uz obsahuje overene reseni, vyjdi z nej a
+  znovu nevymyslej stejny postup od zacatku.
+- Po prakticky overenem reseni, ktere se muze opakovat nebo zobecnit, pridej
+  kratky zaznam do `memory/LESSONS_LEARNED.md`: problem, typ
+  `opakujici se` / `jednorazovy`, datum nalezeni a reseni. Nezapisuj tam pouhe
+  napady, chatovou historii, hesla, tokeny ani soukromy obsah. LL nenahrazuje
+  projektovy handoff, TVBCP ani detailni projektovou pamet.
 - Pokud v pameti chybi dulezity kontext, upozorni na to a pokracuj s rozumnym predpokladem.
 - Pri startu nove SSH/Codex relace zkontroluj pravidla v `memory/technical/session_recovery_rules.md`.
 - Pokud `MEMORY_INDEX.md` obsahuje polozky oznacene `[PRIPOMENOUT]`, upozorni na ne pri navazovani prace nebo kdyz se Mila pta, na cem pokracovat.

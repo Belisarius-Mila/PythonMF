@@ -8,6 +8,10 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Core
 
+- `LESSONS_LEARNED.md` - stručný registr ověřených řešení opakovaných nebo
+  zobecnitelných problémů. Při podobném problému se prohledává před návrhem
+  nového řešení; první záznam `LL-001` řeší soví lokální preview bez znečištění
+  `main` a blokace profilových workspaces.
 - `samantha_core.md` - zakladni kontext: kdo je Mila, co je Samantha Agent, aktualni stav prostredi, kanonicky stav Samantha Agent/RAG a dlouhodoby cil.
 - `contacts.md` - prakticke kontakty, ktere Mila vyslovne povolil ulozit do pameti.
 
