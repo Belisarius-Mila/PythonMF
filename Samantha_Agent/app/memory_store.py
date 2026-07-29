@@ -1,9 +1,13 @@
 from __future__ import annotations
 
 import re
+import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Iterable
+
+from app.communication.human_adam_workstream_catalog import WORKSTREAM_CATALOG
+from app.communication.human_adam_workstream_memory import WorkstreamMemoryRegistry
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -17,6 +21,18 @@ STARTUP_MEMORY_FILES = (
 )
 MAX_STATUS_ITEMS = 8
 MAX_STATUS_LINE_CHARS = 220
+AUTHORITY_CANONICAL = "canonical"
+AUTHORITY_AGGREGATE = "aggregate"
+AUTHORITY_AGGREGATE_UNVERIFIED = "aggregate_unverified"
+AUTHORITY_REFERENCE = "reference"
+AUTHORITY_HISTORICAL = "historical"
+_TARGET_AUTHORITY_SCORE_BONUS = {
+    AUTHORITY_CANONICAL: 40,
+    AUTHORITY_AGGREGATE: 15,
+    AUTHORITY_AGGREGATE_UNVERIFIED: 10,
+    AUTHORITY_REFERENCE: 0,
+    AUTHORITY_HISTORICAL: 0,
+}
 
 
 @dataclass(frozen=True)
@@ -25,6 +41,8 @@ class MemorySearchResult:
     path: str
     snippet: str
     source_type: str
+    authority: str
+    workstream_id: str
 
 
 @dataclass(frozen=True)
@@ -35,6 +53,8 @@ class MemorySnippetRecord:
     filename_terms: frozenset[str]
     source_type: str
     is_handoff: bool
+    authority: str
+    workstream_id: str
 
 
 @dataclass(frozen=True)
@@ -153,6 +173,7 @@ def search_memory(
         return []
 
     normalized_source_type = _normalize_source_type(source_type)
+    target_workstreams = _query_workstream_ids(terms)
     best_matches_by_path: dict[str, MemorySearchResult] = {}
     index = get_memory_index(memory_dir)
     for record in index.snippets:
@@ -167,14 +188,25 @@ def search_memory(
             path=record.path,
             snippet=record.snippet,
             source_type=record.source_type,
+            authority=record.authority,
+            workstream_id=record.workstream_id,
         )
         current = best_matches_by_path.get(record.path)
-        if current is None or _is_better_memory_result(result, current):
+        if current is None or _is_better_memory_result(
+            result,
+            current,
+            target_workstreams=target_workstreams,
+        ):
             best_matches_by_path[record.path] = result
 
     return sorted(
         best_matches_by_path.values(),
-        key=lambda item: (-item.score, item.path, item.snippet),
+        key=lambda item: (
+            -_memory_rank_score(item, target_workstreams=target_workstreams),
+            -item.score,
+            item.path,
+            item.snippet,
+        ),
     )
 
 
@@ -202,9 +234,19 @@ def search_memory_text(
 
     result_lines = []
     for match in matches[:max_results]:
-        snippet = _compact_memory_snippet(match.snippet)
+        prefix = (
+            f"- [{match.source_type}] {match.path} "
+            f"(autorita {match.authority}, shoda {match.score}): "
+        )
+        snippet = _compact_memory_snippet(
+            match.snippet,
+            max_chars=max(
+                40,
+                MAX_MEMORY_SNIPPET_CHARS + 40 - len(prefix),
+            ),
+        )
         result_lines.append(
-            f"- [{match.source_type}] {match.path} (shoda {match.score}): {snippet}"
+            f"{prefix}{snippet}"
         )
 
     return "\n".join(result_lines)
@@ -294,6 +336,7 @@ def _build_memory_index(
 ) -> MemoryIndex:
     snippets: list[MemorySnippetRecord] = []
     markdown_chars = 0
+    authority_context = _memory_authority_context(memory_dir)
 
     for relative_path, _mtime_ns, _size in fingerprint:
         path = memory_dir / relative_path
@@ -305,6 +348,11 @@ def _build_memory_index(
 
         for snippet in memory_snippets(text):
             compact_snippet = " ".join(snippet.split())
+            authority, workstream_id = _memory_authority(
+                relative_path=relative_path,
+                snippet=compact_snippet,
+                context=authority_context,
+            )
             snippets.append(
                 MemorySnippetRecord(
                     path=relative_path,
@@ -313,6 +361,8 @@ def _build_memory_index(
                     filename_terms=filename_terms,
                     source_type=source_type,
                     is_handoff=is_handoff,
+                    authority=authority,
+                    workstream_id=workstream_id,
                 )
             )
 
@@ -366,12 +416,136 @@ def _memory_score(terms: set[str], record: MemorySnippetRecord) -> int:
 
     # Old handoffs often repeat broad terms. Keep them searchable, but do not let
     # generic historical snippets crowd out project/core memory.
-    if record.is_handoff and not filename_matches and "[PRIPOMENOUT]" not in record.snippet:
+    if (
+        record.authority == AUTHORITY_HISTORICAL
+        and not filename_matches
+        and "[PRIPOMENOUT]" not in record.snippet
+    ):
         score -= 3
-    if record.is_handoff and "handoff" not in terms:
+    if record.authority == AUTHORITY_HISTORICAL and "handoff" not in terms:
         score -= 35
 
     return score
+
+
+@dataclass(frozen=True)
+class _MemoryAuthorityContext:
+    canonical_paths: dict[str, str]
+    memory_ready_workstreams: frozenset[str]
+    aggregate_sources: dict[str, str]
+
+
+def _memory_authority_context(memory_dir: Path) -> _MemoryAuthorityContext:
+    registry = WorkstreamMemoryRegistry()
+    canonical_paths: dict[str, str] = {}
+    memory_ready: set[str] = set()
+    for binding in registry.bindings():
+        handoff_path = _memory_relative_path(binding.handoff_relative_path)
+        tvbcp_path = _memory_relative_path(binding.tvbcp_relative_path)
+        canonical_paths[handoff_path] = binding.workstream_id
+        canonical_paths[tvbcp_path] = binding.workstream_id
+        if (memory_dir / handoff_path).is_file() and (memory_dir / tvbcp_path).is_file():
+            memory_ready.add(binding.workstream_id)
+
+    aggregate_sources: dict[str, str] = {}
+    duplicate_sources: set[str] = set()
+    for record in WORKSTREAM_CATALOG:
+        for source_name in record.source_names:
+            normalized = _normalized_authority_label(source_name)
+            if normalized in aggregate_sources:
+                duplicate_sources.add(normalized)
+                continue
+            aggregate_sources[normalized] = record.workstream_id
+    for duplicate in duplicate_sources:
+        aggregate_sources.pop(duplicate, None)
+
+    return _MemoryAuthorityContext(
+        canonical_paths=canonical_paths,
+        memory_ready_workstreams=frozenset(memory_ready),
+        aggregate_sources=aggregate_sources,
+    )
+
+
+def _memory_authority(
+    *,
+    relative_path: str,
+    snippet: str,
+    context: _MemoryAuthorityContext,
+) -> tuple[str, str]:
+    canonical_workstream = context.canonical_paths.get(relative_path)
+    if canonical_workstream:
+        return AUTHORITY_CANONICAL, canonical_workstream
+
+    source_type = _source_type(relative_path)
+    if relative_path == "ACTIVE_PROJECTS.md":
+        aggregate_workstream = _aggregate_workstream_id(
+            snippet,
+            aggregate_sources=context.aggregate_sources,
+        )
+        if (
+            aggregate_workstream
+            and aggregate_workstream in context.memory_ready_workstreams
+        ):
+            return AUTHORITY_AGGREGATE, aggregate_workstream
+        return AUTHORITY_AGGREGATE_UNVERIFIED, aggregate_workstream
+    if source_type == "handoffs":
+        return AUTHORITY_HISTORICAL, ""
+    return AUTHORITY_REFERENCE, ""
+
+
+def _memory_relative_path(project_relative_path: str) -> str:
+    path = Path(project_relative_path)
+    if not path.parts or path.parts[0] != "memory":
+        raise ValueError("Kanonická paměťová cesta musí začínat memory/.")
+    return Path(*path.parts[1:]).as_posix()
+
+
+def _aggregate_workstream_id(
+    snippet: str,
+    *,
+    aggregate_sources: dict[str, str],
+) -> str:
+    stripped = snippet.strip()
+    if not stripped.startswith("|"):
+        return ""
+    cells = [cell.strip() for cell in stripped.strip("|").split("|")]
+    if not cells:
+        return ""
+    return aggregate_sources.get(_normalized_authority_label(cells[0]), "")
+
+
+def _normalized_authority_label(value: str) -> str:
+    text = unicodedata.normalize("NFKD", str(value or ""))
+    text = "".join(char for char in text if not unicodedata.combining(char))
+    text = text.replace("–", "-").replace("—", "-")
+    return " ".join(text.casefold().split())
+
+
+def _query_workstream_ids(terms: set[str]) -> frozenset[str]:
+    matches: set[str] = set()
+    for record in WORKSTREAM_CATALOG:
+        labels = (
+            record.workstream_id,
+            record.name,
+            *record.source_names,
+        )
+        if any(
+            (label_terms := query_terms(label))
+            and label_terms.issubset(terms)
+            for label in labels
+        ):
+            matches.add(record.workstream_id)
+    return frozenset(matches)
+
+
+def _memory_rank_score(
+    result: MemorySearchResult,
+    *,
+    target_workstreams: frozenset[str],
+) -> int:
+    if not result.workstream_id or result.workstream_id not in target_workstreams:
+        return result.score
+    return result.score + _TARGET_AUTHORITY_SCORE_BONUS[result.authority]
 
 
 _SOURCE_TYPE_ALIASES = {
@@ -406,7 +580,19 @@ def _source_type(relative_path: str) -> str:
 def _is_better_memory_result(
     candidate: MemorySearchResult,
     current: MemorySearchResult,
+    *,
+    target_workstreams: frozenset[str],
 ) -> bool:
+    candidate_rank = _memory_rank_score(
+        candidate,
+        target_workstreams=target_workstreams,
+    )
+    current_rank = _memory_rank_score(
+        current,
+        target_workstreams=target_workstreams,
+    )
+    if candidate_rank != current_rank:
+        return candidate_rank > current_rank
     if candidate.score != current.score:
         return candidate.score > current.score
     if len(candidate.snippet) != len(current.snippet):
@@ -414,11 +600,15 @@ def _is_better_memory_result(
     return candidate.snippet < current.snippet
 
 
-def _compact_memory_snippet(snippet: str) -> str:
+def _compact_memory_snippet(
+    snippet: str,
+    *,
+    max_chars: int = MAX_MEMORY_SNIPPET_CHARS,
+) -> str:
     compact = " ".join(snippet.split())
-    if len(compact) <= MAX_MEMORY_SNIPPET_CHARS:
+    if len(compact) <= max_chars:
         return compact
-    return f"{compact[: MAX_MEMORY_SNIPPET_CHARS - 3].rstrip()}..."
+    return f"{compact[: max_chars - 3].rstrip()}..."
 
 
 def _append_dynamic_sections(

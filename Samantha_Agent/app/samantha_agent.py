@@ -174,7 +174,9 @@ def search_memory(query: str, source_type: str | None = None) -> str:
     """Search local Samantha markdown memory and return relevant excerpts.
 
     Optional source_type can narrow results to core, projects, handoffs,
-    technical, infrastructure, or stories.
+    technical, infrastructure, or stories. Each result states whether its
+    authority is canonical, aggregate, aggregate_unverified, reference, or
+    historical.
     """
     return _search_memory_text(query, source_type=source_type)
 

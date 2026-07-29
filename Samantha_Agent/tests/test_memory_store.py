@@ -82,6 +82,7 @@ class MemoryStoreTests(unittest.TestCase):
             matches = search_memory("email read-only", memory_dir=memory_dir)
 
         self.assertEqual(matches[0].path, "projects/email_readonly_oauth.md")
+        self.assertEqual(matches[0].authority, "reference")
         self.assertGreaterEqual(matches[0].score, 2)
         self.assertIn("read-only workflow", matches[0].snippet)
 
@@ -190,6 +191,101 @@ class MemoryStoreTests(unittest.TestCase):
         self.assertIn("[projects] projects/email_readonly_oauth.md", all_results)
         self.assertNotIn("[handoffs]", all_results.splitlines()[0])
         self.assertIn("[handoffs] handoffs/email_readonly_old.md", handoff_results)
+
+    def test_search_memory_prefers_canonical_workstream_memory_over_aggregate_and_history(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            memory_dir = Path(temp_dir)
+            handoff_dir = memory_dir / "handoffs" / "workstreams"
+            tvbcp_dir = memory_dir / "tvbcp" / "workstreams"
+            historical_dir = memory_dir / "handoffs"
+            handoff_dir.mkdir(parents=True)
+            tvbcp_dir.mkdir(parents=True)
+            (memory_dir / "ACTIVE_PROJECTS.md").write_text(
+                "| Oblast | Priorita | Rezim | Stav |\n"
+                "| --- | --- | --- | --- |\n"
+                "| R2-Adam / Janička | 2 | active | R2 Adam Janička starý stav. |\n",
+                encoding="utf-8",
+            )
+            (
+                handoff_dir / "project-r2-adam-janicka.md"
+            ).write_text(
+                "R2 Adam Janička má současný potvrzený stav.",
+                encoding="utf-8",
+            )
+            (
+                tvbcp_dir / "project-r2-adam-janicka.md"
+            ).write_text(
+                "R2 Adam Janička má současné kanonické rozhodnutí.",
+                encoding="utf-8",
+            )
+            (historical_dir / "r2_adam_janicka_old.md").write_text(
+                "R2 Adam Janička historický stav a starý další krok.",
+                encoding="utf-8",
+            )
+
+            matches = search_memory(
+                "R2 Adam Janička handoff",
+                memory_dir=memory_dir,
+            )
+
+        by_path = {match.path: match for match in matches}
+        self.assertEqual(matches[0].authority, "canonical")
+        self.assertEqual(matches[0].workstream_id, "project-r2-adam-janicka")
+        self.assertEqual(
+            by_path["ACTIVE_PROJECTS.md"].authority,
+            "aggregate",
+        )
+        self.assertEqual(
+            by_path["handoffs/r2_adam_janicka_old.md"].authority,
+            "historical",
+        )
+
+    def test_search_memory_marks_aggregate_unverified_when_canonical_pair_is_missing(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            memory_dir = Path(temp_dir)
+            handoffs_dir = memory_dir / "handoffs"
+            tvbcp_dir = memory_dir / "tvbcp"
+            handoffs_dir.mkdir()
+            tvbcp_dir.mkdir()
+            (memory_dir / "ACTIVE_PROJECTS.md").write_text(
+                "| Oblast | Priorita | Rezim | Stav |\n"
+                "| --- | --- | --- | --- |\n"
+                "| Samantha Agent/RAG | 1 | active | Současný agregovaný stav. |\n",
+                encoding="utf-8",
+            )
+            (handoffs_dir / "samantha_agent_rag_old.md").write_text(
+                "Samantha Agent RAG historický stav.",
+                encoding="utf-8",
+            )
+            (
+                handoffs_dir / "human_adam_layer_workstream_start_2026_07_20.md"
+            ).write_text(
+                "Jiný kanonický proud zmiňuje Samantha Agent RAG.",
+                encoding="utf-8",
+            )
+            (tvbcp_dir / "architektura_komunikace_samantha.txt").write_text(
+                "Kanonický TVBCP jiného proudu.",
+                encoding="utf-8",
+            )
+
+            matches = search_memory("Samantha Agent RAG", memory_dir=memory_dir)
+            formatted = search_memory_text(
+                "Samantha Agent RAG",
+                memory_dir=memory_dir,
+            )
+
+        self.assertEqual(matches[0].path, "ACTIVE_PROJECTS.md")
+        self.assertEqual(matches[0].authority, "aggregate_unverified")
+        self.assertEqual(matches[0].workstream_id, "project-samantha-agent-rag")
+        self.assertNotEqual(
+            matches[0].workstream_id,
+            "layer-human-adam-development",
+        )
+        self.assertIn("autorita aggregate_unverified", formatted)
 
     def test_search_memory_text_rejects_unknown_source_type(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
