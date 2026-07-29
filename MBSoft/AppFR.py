@@ -100,8 +100,8 @@ class VocabTrainer(ui.View):
     def _picture_folders(self):
         project_dir = BASE_DIR.parent
         candidates = [
-            project_dir / 'Pict',
             BASE_DIR / 'Pict',
+            project_dir / 'Pict',
             Path.cwd() / 'Pict',
             Path.home() / 'Documents' / 'Pict',
         ]
@@ -120,8 +120,14 @@ class VocabTrainer(ui.View):
         return folders
 
     def _load_image_map(self):
-        mapping_paths = [folder / 'mapping.json' for folder in self._picture_folders()]
-        mapping_paths.append(JSON_FILE)
+        primary_paths = [BASE_DIR / 'Pict' / 'mapping.json', JSON_FILE]
+        fallback_paths = [folder / 'mapping.json' for folder in self._picture_folders()]
+        mapping_paths = (
+            primary_paths
+            if any(path.exists() for path in primary_paths)
+            else fallback_paths
+        )
+        mapping_paths = list(dict.fromkeys(mapping_paths))
         image_stems = set(self._picture_file_index())
         exact_candidates = {}
         alias_candidates = {}
@@ -237,9 +243,6 @@ class VocabTrainer(ui.View):
         keys = [self._normalize_key(fr_word), self._normalize_key(cz_word)]
         stems = self._picture_stems()
         for key in keys:
-            if key and key in stems:
-                return key
-        for key in keys:
             mapped = self.image_map.get(key)
             if mapped and mapped in stems:
                 return mapped
@@ -249,6 +252,9 @@ class VocabTrainer(ui.View):
                 mapped = self.image_alias_map.get(alias)
                 if mapped and mapped in stems:
                     return mapped
+        for key in keys:
+            if key and key in stems:
+                return key
         return None
 
     def _load_ui_image(self, image_path):
