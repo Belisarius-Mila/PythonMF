@@ -126,3 +126,19 @@ Dalsi krok:
 
 Technicky dukaz:
 - Zmeny jsou v `app/cockpit.py`, `app/frontend/cockpit/page.html`, `app/frontend/cockpit/app.js`, `tests/test_cockpit.py` a `tests/test_cockpit_frontend.py`.
+
+Aktualizace 2026-07-30 17:54 CEST - nasazeni UX2:
+
+Hotovo:
+- Commit `8cc685c` byl rizene nasazen do Cockpitu.
+- Novy proces a kodovy otisk odpovidaji auditovanemu commitu; povinny smoke prosel 5/5.
+- Zivy test potvrdil novy e-mailovy rozcestnik, dokumentovou skupinu a HTTP 200 pro obe puvodni e-mailove stranky.
+- Zivy katalog Webovych aplikaci uz neobsahuje ScanDocu, zpracovani e-mailu ani Archiv e-mailu.
+
+Dalsi krok:
+- Rucne vizualne overit `E-maily -> Zpracovani`, `E-maily -> Archiv` a `Dokumenty -> ScanDocu`.
+
+Technicky dukaz:
+- Nasazeny commit: `8cc685cb38334b1f7a30e2f558066de0521232db`.
+- Cockpit PID po restartu: `39520`.
+- Kodovy otisk: `d6de2659fb0db62f`.
