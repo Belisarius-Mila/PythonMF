@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, urlparse
 
+from .ai_metadata import AIMetadataError, request_codex_metadata_suggestion
 from .consistency_audit import AuditFact, best_asset_label, document_row_to_fact, primary_amount
 from .transactions import (
     DocumentRecordMutation,
@@ -440,6 +441,37 @@ def get_scandocu_candidate(token: str, vault_dir: Path = DEFAULT_DOCUMENTS_DIR) 
         raise ValueError("ScanDocu kandidat nebyl nalezen.")
     data = read_json_file(metadata_path)
     return candidate_from_record(data, metadata_path=metadata_path)
+
+
+def suggest_scandocu_candidate_metadata_with_ai(
+    token: str,
+    *,
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+    analyzer=request_codex_metadata_suggestion,
+) -> dict[str, Any]:
+    """Return a read-only AI comparison for one manually selected candidate."""
+
+    candidate = get_scandocu_candidate(token=token, vault_dir=vault_dir)
+    extraction = extract_text(candidate.working_path)
+    current_metadata = {
+        "title": candidate.title,
+        "domain": candidate.domain,
+        "document_type": candidate.document_type,
+        "counterparty": candidate.counterparty,
+        "related_asset": candidate.related_asset,
+        "tags": list(candidate.tags),
+    }
+    domains = [
+        str(item.get("value", ""))
+        for item in registered_document_domains(vault_dir=vault_dir)
+        if isinstance(item, dict) and str(item.get("value", "")).strip()
+    ]
+    return analyzer(
+        source_name=candidate.source_path.name,
+        source_text=extraction.text,
+        current_metadata=current_metadata,
+        allowed_domains=domains,
+    )
 
 
 def find_scandocu_candidate_metadata_path(token: str, vault_dir: Path = DEFAULT_DOCUMENTS_DIR) -> Path:
@@ -1440,6 +1472,14 @@ class ScanDocuServer:
                         )
                         self.respond_json(result)
                         return
+                    if parsed.path == "/api/ai-metadata":
+                        self.respond_json(
+                            suggest_scandocu_candidate_metadata_with_ai(
+                                token=str(payload.get("token", "")),
+                                vault_dir=app.vault_dir,
+                            )
+                        )
+                        return
                     if parsed.path == "/api/skip":
                         self.respond_json(
                             skip_scandocu_candidate(
@@ -1459,6 +1499,8 @@ class ScanDocuServer:
                     self.respond_json({"error": "not_found"}, status=HTTPStatus.NOT_FOUND)
                 except ValueError as exc:
                     self.respond_json({"error": str(exc)}, status=HTTPStatus.BAD_REQUEST)
+                except AIMetadataError as exc:
+                    self.respond_json({"error": str(exc)}, status=HTTPStatus.SERVICE_UNAVAILABLE)
                 except OSError as exc:
                     self.respond_json({"error": str(exc)}, status=HTTPStatus.INTERNAL_SERVER_ERROR)
 
@@ -1563,6 +1605,14 @@ SCANDOCU_HTML = """<!doctype html>
     .encrypted-box { margin: 12px 0; padding: 12px; border-radius: 7px; background: #fef2f2; border: 1px solid #fecaca; color: #7f1d1d; font-size: 13px; }
     .encrypted-box ol { margin: 8px 0 0; padding-left: 20px; }
     .encrypted-box li { margin: 5px 0; }
+    .ai-box { margin: 12px 0; padding: 12px; border-radius: 7px; background: #eff6ff; border: 1px solid #bfdbfe; color: #1e3a8a; font-size: 13px; }
+    .ai-box h2 { margin: 0 0 7px; font-size: 16px; }
+    .ai-box p { margin: 5px 0; line-height: 1.4; }
+    .ai-fields { display: grid; gap: 7px; margin: 10px 0; }
+    .ai-field { padding-top: 7px; border-top: 1px solid #bfdbfe; }
+    .ai-field:first-child { padding-top: 0; border-top: 0; }
+    .ai-evidence { color: #475569; font-size: 12px; overflow-wrap: anywhere; }
+    .ai-warning { color: #92400e; }
     .checkline { display: flex; gap: 8px; align-items: flex-start; margin-top: 10px; color: #7c2d12; font-weight: 650; }
     .checkline input { width: auto; margin-top: 3px; }
     .hidden { display: none; }
@@ -1632,6 +1682,21 @@ SCANDOCU_HTML = """<!doctype html>
           </ol>
           <p>Heslo nepiš do chatu a neukládej ho do paměti.</p>
         </div>
+        <div class="actions">
+          <button type="button" class="secondary" id="aiSuggestBtn">Navrhnout metadata pomocí AI</button>
+        </div>
+        <div class="field-help">Jen po stisknutí se OCR text tohoto dokumentu odešle do jednorázové read-only relace Codexu. Návrh se sám neuloží.</div>
+        <div id="aiBox" class="ai-box hidden">
+          <h2>AI návrh ke kontrole</h2>
+          <p id="aiSummary"></p>
+          <div id="aiFields" class="ai-fields"></div>
+          <div id="aiDates"></div>
+          <div id="aiWarnings" class="ai-warning"></div>
+          <div class="actions">
+            <button type="button" class="secondary" id="applyAiBtn">Převzít návrh do formuláře</button>
+          </div>
+          <p><strong>Nic ještě není uložené.</strong> Zápis provede až hlavní tlačítko Uložit.</p>
+        </div>
         <label for="title">Název dokumentu</label>
         <input id="title" autocomplete="off">
         <label for="domain">Oblast</label>
@@ -1698,6 +1763,13 @@ SCANDOCU_HTML = """<!doctype html>
       probableDuplicateBox: document.getElementById("probableDuplicateBox"),
       probableDuplicateList: document.getElementById("probableDuplicateList"),
       encryptedBox: document.getElementById("encryptedBox"),
+      aiSuggestBtn: document.getElementById("aiSuggestBtn"),
+      aiBox: document.getElementById("aiBox"),
+      aiSummary: document.getElementById("aiSummary"),
+      aiFields: document.getElementById("aiFields"),
+      aiDates: document.getElementById("aiDates"),
+      aiWarnings: document.getElementById("aiWarnings"),
+      applyAiBtn: document.getElementById("applyAiBtn"),
       allowDuplicate: document.getElementById("allowDuplicate"),
       downloadQuery: document.getElementById("downloadQuery"),
       downloadDate: document.getElementById("downloadDate"),
@@ -1725,6 +1797,7 @@ SCANDOCU_HTML = """<!doctype html>
     };
     let current = null;
     let saving = false;
+    let aiSuggestion = null;
     const appMode = new URLSearchParams(window.location.search).get("mode") === "review" ? "review" : "downloads";
     const isReviewMode = appMode === "review";
     document.querySelector("h1").textContent = isReviewMode ? "ScanDocu Review" : "ScanDocu";
@@ -1751,6 +1824,13 @@ SCANDOCU_HTML = """<!doctype html>
 
     function loadCandidate(data) {
       current = data;
+      aiSuggestion = null;
+      fields.aiBox.classList.add("hidden");
+      fields.aiFields.textContent = "";
+      fields.aiDates.textContent = "";
+      fields.aiWarnings.textContent = "";
+      fields.aiSuggestBtn.disabled = false;
+      fields.aiSuggestBtn.textContent = "Navrhnout metadata pomocí AI";
       const previewKind = data.preview_kind || (data.inline_preview ? "pdf" : "none");
       fields.status.textContent = previewKind === "image"
         ? "Zkontroluj obrázek a metadata."
@@ -1857,6 +1937,96 @@ SCANDOCU_HTML = """<!doctype html>
         return fields.domain.value;
       }
       return fields.domainCustom.value.trim();
+    }
+
+    function displayAiValue(value) {
+      if (Array.isArray(value)) {
+        return value.join(", ");
+      }
+      return String(value || "nezjištěno");
+    }
+
+    async function requestAiSuggestion() {
+      if (!current) return;
+      aiSuggestion = null;
+      fields.aiBox.classList.add("hidden");
+      fields.aiSuggestBtn.disabled = true;
+      fields.aiSuggestBtn.textContent = "AI čte dokument...";
+      fields.status.textContent = "Codex připravuje jen read-only návrh metadat. U většího dokumentu to může chvíli trvat.";
+      try {
+        const res = await fetch("/api/ai-metadata", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({token: current.token})
+        });
+        const data = await res.json();
+        if (!res.ok || data.error || !data.ok) {
+          fields.status.textContent = data.error || "AI návrh se nepodařilo připravit.";
+          return;
+        }
+        aiSuggestion = data;
+        renderAiSuggestion(data);
+        fields.status.textContent = data.message || "AI návrh je připravený ke kontrole; nic nebylo uloženo.";
+      } catch (error) {
+        fields.status.textContent = `AI návrh selhal nebo server neodpověděl: ${error}`;
+      } finally {
+        fields.aiSuggestBtn.disabled = false;
+        fields.aiSuggestBtn.textContent = "Navrhnout metadata pomocí AI";
+      }
+    }
+
+    function renderAiSuggestion(data) {
+      fields.aiSummary.textContent = data.summary || "";
+      fields.aiFields.textContent = "";
+      (data.fields || []).forEach((item) => {
+        const row = document.createElement("div");
+        row.className = "ai-field";
+        const comparison = document.createElement("div");
+        const strong = document.createElement("strong");
+        strong.textContent = `${item.label || item.field}: `;
+        comparison.appendChild(strong);
+        comparison.appendChild(document.createTextNode(
+          `${displayAiValue(item.current)} → ${displayAiValue(item.proposed)} (${item.confidence || "low"})`
+        ));
+        row.appendChild(comparison);
+        if (item.evidence) {
+          const evidence = document.createElement("div");
+          evidence.className = "ai-evidence";
+          evidence.textContent = `Důkaz: „${item.evidence}“`;
+          row.appendChild(evidence);
+        }
+        fields.aiFields.appendChild(row);
+      });
+      fields.aiDates.textContent = "";
+      const dates = data.important_dates || [];
+      if (dates.length) {
+        const heading = document.createElement("strong");
+        heading.textContent = "Důležitá data:";
+        fields.aiDates.appendChild(heading);
+        dates.forEach((item) => {
+          const line = document.createElement("div");
+          line.className = "ai-evidence";
+          line.textContent = `${item.date} | ${item.type} | ${item.confidence} | „${item.evidence}“`;
+          fields.aiDates.appendChild(line);
+        });
+      }
+      fields.aiWarnings.textContent = (data.warnings || []).join(" ");
+      fields.applyAiBtn.disabled = !(data.changed_count > 0);
+      fields.aiBox.classList.remove("hidden");
+    }
+
+    function applyAiSuggestionToForm() {
+      if (!aiSuggestion || !aiSuggestion.suggestion) return;
+      const suggestion = aiSuggestion.suggestion;
+      if (suggestion.title) fields.title.value = suggestion.title;
+      if (suggestion.domain) setDomainValue(suggestion.domain);
+      if (suggestion.document_type) fields.documentType.value = suggestion.document_type;
+      if (suggestion.counterparty) fields.counterparty.value = suggestion.counterparty;
+      if (suggestion.related_asset) fields.relatedAsset.value = suggestion.related_asset;
+      if (Array.isArray(suggestion.tags) && suggestion.tags.length) {
+        fields.tags.value = suggestion.tags.join(", ");
+      }
+      fields.status.textContent = "AI návrh byl přenesen do formuláře. Zkontroluj ho; nic se neuloží, dokud nestiskneš Uložit.";
     }
 
     async function searchDownloads() {
@@ -2063,6 +2233,8 @@ SCANDOCU_HTML = """<!doctype html>
 
     document.getElementById("nextBtn").addEventListener("click", loadNext);
     document.getElementById("cockpitBtn").addEventListener("click", returnToCockpit);
+    fields.aiSuggestBtn.addEventListener("click", requestAiSuggestion);
+    fields.applyAiBtn.addEventListener("click", applyAiSuggestionToForm);
     document.getElementById("continueBtn").addEventListener("click", loadNext);
     document.getElementById("searchAgainBtn").addEventListener("click", () => {
       fields.completionActions.classList.add("hidden");
