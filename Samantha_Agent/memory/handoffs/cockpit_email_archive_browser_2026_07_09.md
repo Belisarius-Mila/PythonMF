@@ -92,3 +92,19 @@ Dalsi krok:
 
 Technicky dukaz:
 - Produkcni a testovaci zmeny jsou v `app/email/archive_browser.py`, `app/frontend/email_archive/app.js`, `tests/test_email_archive_browser.py` a `tests/test_cockpit_frontend.py`.
+
+Aktualizace 2026-07-30 14:37 CEST - nasazeni prvniho UX ladeni:
+
+Hotovo:
+- Commit `94c6eff` byl rizene nasazen do Cockpitu.
+- Novy proces a kodovy otisk odpovidaji auditovanemu commitu; povinny smoke prosel 5/5.
+- Zivy read-only test potvrdil sestupne razeni podle data prijeti nad 117 archivnimi zaznamy.
+- Zivy test detailu potvrdil primy odkaz na originalni PDF a platnou PDF signaturu.
+
+Dalsi krok:
+- Na iPhonu rucne potvrdit poradi zprav a otevreni vsech stran vicestrankoveho PDF.
+
+Technicky dukaz:
+- Nasazeny commit: `94c6eff75ec6c0bd25d79a557d2c4072ebdb9986`.
+- Cockpit PID po restartu: `27805`.
+- Kodovy otisk: `b59ab10222e987b9`.
