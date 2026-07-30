@@ -15,8 +15,13 @@ Historický pracovní název: R-A2
   obsah po dávkách a sestavit nový přehled bez tichého omezení na prvních pět
   položek.
 - Aktuální `main` `20180e2` je nasazený a Cockpit smoke prošel 5/5.
-- Otevřeným krokem už není začátek implementace, ale jeden úplný provozní tok
-  e-mail -> private vault -> R2 TXT a následná přejímka z pohledu Jany.
+- E2 dne 2026-07-30 živě prošlo úplným provozním tokem archivovaný e-mail ->
+  potvrzený import textového PDF do private vaultu -> ručně vybraný zdroj R2 ->
+  nový create-only TXT. Zdroj zůstal bajtově nezměněný a výstup má režim
+  `0600`.
+- Importovaný dokument z E2 čeká na obsahovou a klasifikační kontrolu ve
+  ScanDocu; potom zbývá krátká přejímka TXT čtečky a návratu do chatu z pohledu
+  Jany.
 
 Starší budoucí formulace v návrhových sekcích níže jsou historií původního
 kontraktu. Pro současnou práci má přednost tento stav a kanonický handoff/TVBCP.
@@ -119,8 +124,10 @@ workflow dosud implementované nejsou.
 
 ## Otevřené kroky po implementaci
 
-1. Ověřit jeden úplný tok e-mail -> private vault -> R2 TXT.
-2. Z pohledu Jany ověřit otevření chatu, kontinuitu po obnovení stránky,
+1. Zkontrolovat importovaný dokument z E2 ve ScanDocu bez ukládání jeho obsahu
+   do Gitu, memory nebo chatu.
+2. Z pohledu Jany ověřit otevření nového TXT ve čtečce, otevření chatu,
+   kontinuitu po obnovení stránky,
    potvrzený výběr dokumentů, TXT čtečku a bezpečný návrat do chatu.
 3. Samostatné odeslání nového TXT e-mailem otevírat až jako vlastní
    dvoukrokovou schopnost; současná přejímka je neaktivuje.

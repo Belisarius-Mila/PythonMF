@@ -428,3 +428,34 @@ Technický důkaz:
 - rychlá Cockpit brána syntaxe a whitespace: 4.1 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `project-r2-adam-janicka`.
 - Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+
+### 2026-07-30 09:16 CEST – E2 živě ověřilo úplný tok e-mail -> private vault -> R2 TXT
+
+Hotovo:
+- Jeden existující e-mailový archiv byl podle redigovaných metadat ručně vybrán
+  a po přesném potvrzení z něj bylo do private vaultu importováno jedno PDF
+  s použitelnou textovou vrstvou.
+- R2 našel právě jednu redigovanou volbu a po druhém přesném potvrzení vytvořil
+  nový create-only TXT ve svém vlastněném soukromém prostoru.
+- Zdrojové a uložené PDF se bajtově shodují; kompilace zdroj nezměnila.
+
+Rozhodnutí:
+- Reálný import zůstává ve stavu `needs_review` a jeho definitivní klasifikace
+  se nebude domýšlet bez kontroly ve ScanDocu.
+- Private názvy, UID, obsah, opaque provozní reference ani výsledný TXT se
+  nezapisují do Gitu, memory nebo technického reportu.
+
+Další krok:
+- Zkontrolovat importovaný dokument ve ScanDocu a potom z pohledu Jany otevřít
+  nový TXT v R2 čtečce a ověřit bezpečný návrat do chatu.
+
+Navrhované další kroky:
+- Po přejímce rozhodnout, zda je potřeba samostatný dvoukrokový workflow pro
+  odeslání nového TXT e-mailem; v E2 se nic neodesílalo.
+
+Technický důkaz:
+- E1 syntetický end-to-end test a sousední sada prošly 47/47.
+- Živý PDF import měl textovou vrstvu bez potřeby OCR, vytvořil jediný
+  `needs_review` záznam a R2 hledání vrátilo jedinou aktuální volbu.
+- Nový TXT má bezpečný režim `0600`, guardovanou strukturu a jeden potvrzený
+  zdroj; zdrojový PDF hash zůstal před a po kompilaci stejný.

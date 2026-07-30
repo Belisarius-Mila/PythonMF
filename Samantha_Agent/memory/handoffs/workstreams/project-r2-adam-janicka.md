@@ -1,25 +1,30 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obsahově narovnáno P6b: 2026-07-30 07:25 CEST
+- Obsahově narovnáno P6b a provozně ověřeno E2: 2026-07-30 09:16 CEST
 
 ### Hotovo
 - R2-Adam má vlastní trvalý chat, TXT prostor, dokumentovou lištu a čtečku.
 - Umí bezpečně vyhledat úplnou sadu dokumentů, pracovat po potvrzených dávkách
   a vytvořit nový create-only TXT bez změny zdrojů.
+- E2 živě ověřilo souvislý tok archivovaný e-mail -> potvrzený import jednoho
+  textového PDF do private vaultu -> jediná redigovaná volba R2 -> nový
+  create-only TXT. Zdrojový PDF soubor zůstal bajtově nezměněný.
 - Aktuální `main` `20180e2` je serverově nasazený a Cockpit smoke prošel 5/5.
 
 ### Otevřeno
-- Chybí souvislá provozní přejímka z pohledu Jany přes skutečný tok
-  e-mail -> private vault -> R2 TXT a návrat do chatu.
+- Importovaný dokument z E2 zůstává poctivě ve stavu `needs_review`; nebyla
+  provedena obsahová nebo klasifikační revize ve ScanDocu.
+- Chybí krátká provozní přejímka z pohledu Jany: otevření nového TXT ve čtečce
+  a bezpečný návrat do chatu.
 - Lokální hotové commity zůstávají v denním GitHub balíčku.
 
 ### Rizika
 - Zdrojové dokumenty zůstávají read-only a nejasné údaje se nesmějí domýšlet.
 
 ### Další krok
-- V navazujícím systémovém směru ověřit jeden úplný tok
-  e-mail -> private vault -> R2 TXT.
+- Zkontrolovat importovaný PDF dokument ve ScanDocu bez opisování obsahu do
+  chatu nebo paměti; potom s Janou otevřít nový TXT v R2 čtečce.
 
 ### Rozhodnutí
 - R2-Adam se už neposuzuje jako projekt před implementací; další práce je
@@ -31,6 +36,9 @@
 
 ### Technický stav checkpointu
 - Deployment účtenka: `20180e2`, stav `deployed`, smoke 5/5.
+- E1 přidalo syntetický end-to-end test; cílená sousední sada prošla 47/47.
+- E2 potvrdilo shodu zdrojových a uložených bajtů, textovou vrstvu bez OCR,
+  jednoznačný lidský výběr, nový TXT s režimem `0600` a nezměněný zdroj.
 - P6a potvrdilo, že kanonická dvojice R2 je v rankingu před zastaralým
   agregátem.
 - Historické chronologické bloky níže zůstávají beze změny.
