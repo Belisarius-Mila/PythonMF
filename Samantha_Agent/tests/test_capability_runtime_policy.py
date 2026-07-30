@@ -23,6 +23,30 @@ class CapabilityRuntimePolicyTests(unittest.TestCase):
         self.assertIn("send_confirmed_sms_rcs: risk=external_send", agent.instructions)
         self.assertIn("LOKALNI PAMET:\nTEST MEMORY", agent.instructions)
 
+    def test_agent_instructions_compare_current_memory_without_source_filter(self) -> None:
+        agent = build_agent("TEST MEMORY")
+
+        self.assertIn(
+            "volej search_memory nejprve\nbez source_type",
+            agent.instructions,
+        )
+        self.assertIn(
+            "Pokud prvni hledani vrati relevantni `canonical` zdroj",
+            agent.instructions,
+        )
+        self.assertIn(
+            "uz search_memory nezuzuj ani neopakuj. source_type pouzij jen kdyz Mila",
+            agent.instructions,
+        )
+        self.assertIn(
+            "preferuj `canonical`;\n`aggregate_unverified` nebo `reference`",
+            agent.instructions,
+        )
+        self.assertNotIn(
+            "preferuj search_memory se\nsource_type `core`, `projects` nebo `technical`",
+            agent.instructions,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

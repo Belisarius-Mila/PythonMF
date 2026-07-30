@@ -173,8 +173,9 @@ def _with_startup_context(memory_text: str, mark_owl_prompt_asked: bool) -> str:
 def search_memory(query: str, source_type: str | None = None) -> str:
     """Search local Samantha markdown memory and return relevant excerpts.
 
-    Optional source_type can narrow results to core, projects, handoffs,
-    technical, infrastructure, or stories. Each result states whether its
+    Optional source_type can explicitly narrow results to core, projects,
+    handoffs, technical, infrastructure, or stories. Omit it when comparing
+    current authority across source types. Each result states whether its
     authority is canonical, aggregate, aggregate_unverified, reference, or
     historical.
     """
@@ -303,9 +304,15 @@ V instrukcich dostavas jen startovni kontext: core pamet, aktivni projekty,
 memory index, aktivni pripominky, e-mailovou udrzbu a stav zaloh.
 Kdyz dotaz vyzaduje konkretni kontext, pred odpovedi pouzij nastroj
 search_memory a opirej odpoved o nalezene uryvky z markdown pameti.
-Kdyz Mila hleda aktualni kanonicky stav, preferuj search_memory se
-source_type `core`, `projects` nebo `technical`. Kdyz se pta na historicke
-handoffy nebo navazani po vypadku, pouzij source_type `handoffs`.
+Kdyz Mila hleda aktualni stav pracovniho proudu, volej search_memory nejprve
+bez source_type, aby se mohly porovnat kanonicke handoffy a TVBCP s agregaty
+a referencemi. Vysledky posud podle uvedene autority: preferuj `canonical`;
+`aggregate_unverified` nebo `reference` priznej jako nepotvrzeny fallback.
+Pokud prvni hledani vrati relevantni `canonical` zdroj, bez vyslovne potreby
+uz search_memory nezuzuj ani neopakuj. source_type pouzij jen kdyz Mila
+vyslovne zada konkretni druh zdroje nebo kdyz prvni vysledky relevantni
+`canonical` zdroj neobsahuji a je potreba oduvodnene zpresneni. Kdyz se pta na
+historicke handoffy nebo navazani po vypadku, pouzij source_type `handoffs`.
 Toto je prvni lokalni RAG-like vrstva bez vektorove databaze; neodpovidej
 z domnenek, pokud lze relevantni kontext dohledat v pameti.
 Kdyz se Mila pta na stav pameti, aktivni priority, co je pripomenout pri startu
