@@ -7,7 +7,8 @@ import hmac
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
+from urllib.parse import quote
 
 from app.codex_appserver import AppServerError
 from app.communication.human_adam_service import HumanAdamService, MAX_MESSAGE_CHARS
@@ -24,6 +25,7 @@ from app.communication.session_hub import (
     SessionDeliveryUnknownError,
     SessionHubError,
 )
+from app.email.archive_browser import email_archive_reference_for_document_id
 
 
 R2_CHAT_PROFILE_ID = "janicka_r2_chat"
@@ -63,16 +65,18 @@ R2_CHAT_DEVELOPER_INSTRUCTIONS = (
     "Kdyz najdes konkretni e-mail v lokalnim EmailArchiveVaultu, nepouzivej jako "
     "zdroj zkraceny nahled ani metadata-only souhrn. Read-only nacti "
     "email_archive_detail_status, pracuj s celym dostupnym body_text a respektuj "
-    "body_truncated. Do odpovedi vzdy uved presny neosobni archive_ref ve tvaru "
-    "archive-ref-...; nikdy nevypisuj interni archive_id, UID ani filesystemovou "
-    "cestu. Chat z archive_ref nabidne samostatnou plnou ctecku e-mailu a "
-    "oteviratelne mistni prilohy. Dlouhe telo automaticky nekopiruj cele do "
-    "bubliny, ale pravdive ho shrn a odkaz na ctecku nezapomen. "
+    "body_truncated. Do odpovedi nevypisuj archive_ref, interni archive_id, UID "
+    "ani filesystemovou cestu. Tlacitko na plnou ctecku smi vytvorit pouze server "
+    "z dolozene provenance explicitne pojmenovaneho R2 TXT; nikdy odkaz nevybirej "
+    "z prvni polozky archivu ani ho neodhaduj. Dlouhe telo automaticky nekopiruj "
+    "cele do bubliny, ale pravdive ho shrn. Kdyz serverova vazba neni dolozena, "
+    "otevrene rekni, ze tlacitko nelze bezpecne nabidnout. "
     "Tisk ani e-mail nikdy neproved bez samostatne registrovane schopnosti, nahledu "
     "a vyslovneho potvrzeni konkretni akce; dokud schopnost neni dostupna, otevrene "
     "rekni, ze akci zatim nelze dokoncit."
 )
 R2_DOCUMENT_REF_RE = re.compile(r"r2doc-[0-9a-f]{32}")
+R2_SOURCE_DOCUMENT_ID_RE = re.compile(r"(?m)^Document ID:\s*(\S+)\s*$")
 _PUBLIC_MESSAGE_FIELDS = (
     "client_message_id",
     "client_sent_at",
@@ -102,7 +106,11 @@ def _public_document(info: JanickaR2DocumentInfo) -> dict[str, object]:
     }
 
 
-def _public_session(value: object) -> dict[str, Any]:
+def _public_session(
+    value: object,
+    *,
+    source_links_for_user_text: Callable[[str], list[dict[str, str]]] | None = None,
+) -> dict[str, Any]:
     session = value if isinstance(value, dict) else {}
     raw_messages = session.get("messages")
     messages: list[dict[str, Any]] = []
@@ -110,13 +118,21 @@ def _public_session(value: object) -> dict[str, Any]:
         for item in raw_messages:
             if not isinstance(item, dict):
                 continue
-            messages.append(
-                {
-                    key: item.get(key)
-                    for key in _PUBLIC_MESSAGE_FIELDS
-                    if key in item
-                }
-            )
+            public_item = {
+                key: item.get(key)
+                for key in _PUBLIC_MESSAGE_FIELDS
+                if key in item
+            }
+            if source_links_for_user_text is not None:
+                try:
+                    source_links = source_links_for_user_text(
+                        str(item.get("user_text") or "")
+                    )
+                except (JanickaR2DocumentError, OSError, ValueError):
+                    source_links = []
+                if source_links:
+                    public_item["source_links"] = source_links
+            messages.append(public_item)
     active_turn = session.get("active_turn")
     public_active_turn = (
         {
@@ -195,8 +211,7 @@ class JanickaR2ChatAdapter:
         ]
         return "\n".join(lines)
 
-    @staticmethod
-    def _public_payload(value: object) -> dict[str, Any]:
+    def _public_payload(self, value: object) -> dict[str, Any]:
         payload = value if isinstance(value, dict) else {}
         runtime = payload.get("runtime")
         return {
@@ -208,8 +223,46 @@ class JanickaR2ChatAdapter:
                     isinstance(runtime, dict) and runtime.get("reachable")
                 )
             },
-            "session": _public_session(payload.get("session")),
+            "session": _public_session(
+                payload.get("session"),
+                source_links_for_user_text=self.source_links_for_user_text,
+            ),
         }
+
+    def source_links_for_user_text(self, user_text: str) -> list[dict[str, str]]:
+        """Expose only server-verified source links for one explicitly named R2 TXT."""
+
+        normalized = str(user_text or "").casefold()
+        if not normalized:
+            return []
+        store = self.backend.document_store()
+        named_documents = [
+            item
+            for item in store.list_documents()
+            if item.name.casefold() in normalized
+        ]
+        if len(named_documents) != 1:
+            return []
+        raw_text = store.read_text(named_documents[0].name)
+        match = R2_SOURCE_DOCUMENT_ID_RE.search(raw_text)
+        if match is None:
+            return []
+        archive_ref = email_archive_reference_for_document_id(
+            match.group(1),
+            archive_directory=(
+                self.backend.canonical_private_root.parent / "email" / "archive"
+            ),
+            documents_dir=self.backend.canonical_private_root / "documents",
+        )
+        if not archive_ref:
+            return []
+        return [
+            {
+                "kind": "email_archive",
+                "label": "Otevřít celý e-mail a přílohy",
+                "url": f"/email-archive/?archive={quote(archive_ref)}",
+            }
+        ]
 
     def status(self) -> dict[str, Any]:
         return self._public_payload(self.service.status())
@@ -271,7 +324,8 @@ class JanickaR2ChatAdapter:
             "ok": result.get("ok") is True,
             "duplicate_prevented": result.get("duplicate_prevented") is True,
             "session": _public_session(
-                result.get("session") or self.service.hub.snapshot()
+                result.get("session") or self.service.hub.snapshot(),
+                source_links_for_user_text=self.source_links_for_user_text,
             ),
         }
 
@@ -570,25 +624,30 @@ R2_ADAM_CHAT_HTML = r"""<!doctype html>
     }
   }
 
-  function bubble(text, className, meta) {
+  function bubble(text, className, meta, sourceLinks=[]) {
     const node = document.createElement("article");
     node.className = `bubble ${className}`;
-    const messageText = String(text || "");
+    const rawMessageText = String(text || "");
+    const messageText = className === "adam"
+      ? rawMessageText.replace(/\s*archive-ref-[0-9a-f]{16}\b/g, "").trim()
+      : rawMessageText;
     node.textContent = messageText;
     if (className === "adam") {
-      const refs = [...new Set(messageText.match(/\barchive-ref-[0-9a-f]{16}\b/g) || [])];
-      if (refs.length) {
+      const verifiedLinks = (Array.isArray(sourceLinks) ? sourceLinks : []).filter((item) => (
+        item
+        && item.kind === "email_archive"
+        && /^\/email-archive\/\?archive=archive-ref-[0-9a-f]{16}$/.test(String(item.url || ""))
+      ));
+      if (verifiedLinks.length) {
         const actions = document.createElement("div");
         actions.className = "source-actions";
-        refs.forEach((archiveRef, index) => {
+        verifiedLinks.forEach((item) => {
           const link = document.createElement("a");
           link.className = "source-action";
-          link.href = `/email-archive/?archive=${encodeURIComponent(archiveRef)}`;
+          link.href = item.url;
           link.target = "_blank";
           link.rel = "noopener";
-          link.textContent = refs.length === 1
-            ? "Otevřít celý e-mail a přílohy"
-            : `Otevřít e-mail ${index + 1}`;
+          link.textContent = item.label || "Otevřít celý e-mail a přílohy";
           actions.appendChild(link);
         });
         node.appendChild(actions);
@@ -615,7 +674,12 @@ R2_ADAM_CHAT_HTML = r"""<!doctype html>
       );
       if (item.answer) {
         exchange.appendChild(
-          bubble(item.answer, "adam", `R2-Adam · ${formatTime(item.completed_at)}`)
+          bubble(
+            item.answer,
+            "adam",
+            `R2-Adam · ${formatTime(item.completed_at)}`,
+            item.source_links
+          )
         );
       } else {
         const pending = item.status === "pending"

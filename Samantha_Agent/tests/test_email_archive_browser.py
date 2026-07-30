@@ -12,6 +12,7 @@ from app.email.archive_browser import (
     email_archive_reference,
     email_archive_detail_status,
     email_archive_list_status,
+    email_archive_reference_for_document_id,
     read_email_archive_embedded_attachments,
     read_email_archive_body_text,
     resolve_email_archive_embedded_attachment,
@@ -264,6 +265,39 @@ class EmailArchiveBrowserTests(unittest.TestCase):
         self.assertEqual(resolved["content_type"], "application/pdf")
         self.assertTrue(resolved["data"].startswith(b"%PDF"))
         self.assertFalse(invalid["ok"])
+
+    def test_document_provenance_resolves_exactly_one_source_email(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            archive_directory, archive_dir, documents_dir = self.create_archive_fixture(root)
+            index = documents_dir / "index"
+            index.mkdir()
+            document_id = "doc-synthetic-email-attachment"
+            (index / "documents_index.jsonl").write_text(
+                json.dumps(
+                    {
+                        "document_id": document_id,
+                        "title": "Synthetic attachment from email UID 13338",
+                        "stored_path": "vault/synthetic.pdf",
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            resolved = email_archive_reference_for_document_id(
+                document_id,
+                archive_directory=archive_directory,
+                documents_dir=documents_dir,
+            )
+            unknown = email_archive_reference_for_document_id(
+                "doc-unknown",
+                archive_directory=archive_directory,
+                documents_dir=documents_dir,
+            )
+
+        self.assertEqual(resolved, email_archive_reference(archive_dir.name))
+        self.assertEqual(unknown, "")
 
     def test_list_sorts_by_received_date_instead_of_local_file_mtime(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

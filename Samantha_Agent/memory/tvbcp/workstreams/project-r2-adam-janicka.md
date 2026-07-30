@@ -578,3 +578,33 @@ Technický důkaz:
 - Samostatný Cockpit smoke prošel 5/5.
 - R2 stránka, deep-link čtečka, detailní API a read-only endpoint přílohy
   odpověděly HTTP 200; odpověď přílohy má `no-store` a platnou délku.
+
+### 2026-07-30 22:24 CEST – Odkaz R2 se váže na doložený zdroj, ne na volbu modelu
+
+Hotovo:
+- Živá přejímka odhalila, že model vložil do odpovědi platný, ale nesprávný
+  odkaz na první e-mail archivu.
+- Nová oprava vytváří tlačítko pouze serverově z doložené vazby explicitně
+  pojmenovaného R2 TXT přes jeho zdrojový dokument k právě jednomu e-mailu.
+- Neověřená opaque reference z textu odpovědi se nezobrazuje ani nepoužije pro
+  tlačítko.
+
+Rozhodnutí:
+- Jazykový model nesmí vybírat první položku archivu jako fallback, hádat
+  `archive_ref` ani ho vypisovat člověku.
+- Pokud server nenajde právě jednu doloženou vazbu, tlačítko nevznikne a R2 má
+  omezení přiznat.
+
+Další krok:
+- Po samostatném potvrzení nasadit opravu a znovu stisknout tlačítko u stejné
+  otázky na pojmenovaný E2 TXT.
+
+Navrhované další kroky:
+- Obecné hledání e-mailu bez vazby na pojmenovaný R2 TXT řešit později
+  samostatným strukturovaným výběrem; nerozšiřovat současný bezpečný resolver
+  heuristikou.
+
+Technický důkaz:
+- Živý serverový resolver našel právě jeden správný zdroj a odmítl chybný
+  první e-mail.
+- Cílená sada prošla 22/22 a plná Cockpit brána 1249/1249.

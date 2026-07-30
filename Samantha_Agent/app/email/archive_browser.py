@@ -242,6 +242,57 @@ def email_archive_detail_status(
     }
 
 
+def email_archive_reference_for_document_id(
+    document_id: str,
+    *,
+    archive_directory: Path = DEFAULT_EMAIL_ARCHIVE_DIR,
+    documents_dir: Path = DEFAULT_DOCUMENTS_DIR,
+) -> str:
+    """Resolve one vault document to exactly one source email using stored UID evidence."""
+
+    safe_document_id = str(document_id or "").strip()
+    if not safe_document_id:
+        return ""
+    index_path = documents_dir / "index" / "documents_index.jsonl"
+    source_coordinates = ""
+    for row in read_jsonl(index_path):
+        if str(row.get("document_id", "")).strip() != safe_document_id:
+            continue
+        source_coordinates = " ".join(
+            str(row.get(key, ""))
+            for key in (
+                "document_id",
+                "title",
+                "original_filename",
+                "stored_path",
+                "case_id",
+                "review_source",
+            )
+        )
+        break
+    if not source_coordinates:
+        return ""
+
+    matches: list[str] = []
+    listing = email_archive_list_status(
+        limit=500,
+        archive_directory=archive_directory,
+    )
+    for item in listing.get("items", []):
+        if not isinstance(item, dict):
+            continue
+        uid = str(item.get("uid", "")).strip()
+        archive_ref = str(item.get("archive_ref", "")).strip()
+        if (
+            uid.isdigit()
+            and EMAIL_ARCHIVE_REFERENCE_PATTERN.fullmatch(archive_ref)
+            and re.search(rf"(?<!\d){re.escape(uid)}(?!\d)", source_coordinates)
+        ):
+            matches.append(archive_ref)
+    unique_matches = tuple(dict.fromkeys(matches))
+    return unique_matches[0] if len(unique_matches) == 1 else ""
+
+
 def read_email_archive_body_text(
     archive_id: str,
     *,

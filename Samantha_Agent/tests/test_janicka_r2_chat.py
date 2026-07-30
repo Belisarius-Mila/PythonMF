@@ -18,6 +18,7 @@ from app.communication.janicka_r2_chat import (
     janicka_r2_chat_send_action,
 )
 from app.communication.janicka_r2_documents import R2_DOCUMENTS_RELATIVE_ROOT
+from app.email.archive_browser import email_archive_reference
 
 
 class _Workspace:
@@ -78,6 +79,23 @@ class _Conversation:
             "ok": True,
             "session": self.status()["session"],
         }
+
+
+class _SourceConversation(_Conversation):
+    def status(self) -> dict[str, object]:
+        payload = super().status()
+        payload["session"]["messages"][0].update(
+            {
+                "user_text": (
+                    "Najdi původní e-mail k dokumentu "
+                    "Syntetický přehled.txt"
+                ),
+                "answer": (
+                    "Otevírám zdroj archive-ref-0000000000000000"
+                ),
+            }
+        )
+        return payload
 
 
 class JanickaR2ChatTests(unittest.TestCase):
@@ -148,6 +166,61 @@ class JanickaR2ChatTests(unittest.TestCase):
         self.assertFalse(unknown["ok"])
         self.assertNotIn("text", raw_name)
         self.assertNotIn("text", unknown)
+
+    def test_chat_source_button_uses_server_verified_txt_provenance(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            private_root = root / "private"
+            private_root.mkdir()
+            adapter = self._adapter(root, service=_SourceConversation())
+            adapter.backend.document_store().create_text(
+                name="Syntetický přehled.txt",
+                text=(
+                    "R2-Adam – kompilovaný dokument\n"
+                    "Document ID: doc-synthetic-email-attachment\n\n"
+                    "Nahled textu:\n"
+                    "Syntetický obsah.\n"
+                ),
+            )
+            documents_index = private_root / "documents" / "index"
+            documents_index.mkdir(parents=True)
+            (documents_index / "documents_index.jsonl").write_text(
+                (
+                    '{"document_id":"doc-synthetic-email-attachment",'
+                    '"title":"Synthetic source UID 13338"}\n'
+                ),
+                encoding="utf-8",
+            )
+            archive_dir = root / "email" / "archive" / "email-13338-source"
+            archive_dir.mkdir(parents=True)
+            (archive_dir / "metadata.json").write_text(
+                (
+                    '{"archive_id":"email-13338-source","uid":"13338",'
+                    '"subject":"Synthetic source"}'
+                ),
+                encoding="utf-8",
+            )
+
+            payload = adapter.status()
+
+        message = payload["session"]["messages"][0]
+        self.assertEqual(
+            message["source_links"],
+            [
+                {
+                    "kind": "email_archive",
+                    "label": "Otevřít celý e-mail a přílohy",
+                    "url": (
+                        "/email-archive/?archive="
+                        + email_archive_reference("email-13338-source")
+                    ),
+                }
+            ],
+        )
+        self.assertIn(
+            "archive-ref-0000000000000000",
+            message["answer"],
+        )
 
     def test_document_reader_hides_legacy_compiler_diagnostics(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
@@ -305,7 +378,7 @@ class JanickaR2ChatTests(unittest.TestCase):
         self.assertIn('id="currentDocumentOpenBtn"', R2_ADAM_CHAT_HTML)
         self.assertIn("archive-ref-[0-9a-f]{16}", R2_ADAM_CHAT_HTML)
         self.assertIn("Otevřít celý e-mail a přílohy", R2_ADAM_CHAT_HTML)
-        self.assertIn("/email-archive/?archive=", R2_ADAM_CHAT_HTML)
+        self.assertIn(r"^\/email-archive\/\?archive=archive-ref-", R2_ADAM_CHAT_HTML)
         self.assertIn("textContent", R2_ADAM_CHAT_HTML)
         self.assertNotIn("innerHTML", R2_ADAM_CHAT_HTML)
         for forbidden in (

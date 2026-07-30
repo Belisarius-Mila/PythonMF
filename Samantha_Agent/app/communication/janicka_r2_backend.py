@@ -175,7 +175,8 @@ class JanickaR2Backend:
             "rule=For one concrete archived email, use the read-only "
             "email_archive_detail_status result instead of a snippet or metadata-only "
             "summary. Read the complete available body_text, preserve body_truncated, "
-            "and include only its opaque archive_ref in the answer so the R2 chat can "
-            "offer the full local email reader and attachments. Never expose archive_id, "
-            "UID or a filesystem path.",
+            "but never expose or guess archive_ref, archive_id, UID or a filesystem "
+            "path. Only the server may offer the full local email reader after it "
+            "verifies provenance from one explicitly named R2 TXT. Never select the "
+            "first archive item as a fallback.",
         )
