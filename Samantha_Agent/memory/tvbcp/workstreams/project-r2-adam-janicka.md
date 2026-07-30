@@ -551,3 +551,30 @@ Technický důkaz:
 - Živá read-only kontrola cílového archivu potvrdila nezkrácené tělo o 2 899
   znacích, dvě otevíratelné přílohy a úspěšné rozlišení přílohy z původního EML.
 - Cílená sada prošla 22/22 a plná Cockpit brána 1247/1247.
+
+### 2026-07-30 20:07 CEST – Plná čtečka e-mailu z R2 je nasazená
+
+Hotovo:
+- Funkční commit s předáním e-mailu z R2 do plné místní čtečky byl řízeně
+  nasazen do Cockpitu.
+- Živý průchod potvrdil plný nezkrácený text, dvě otevíratelné přílohy a
+  úspěšnou read-only HTTP odpověď první přílohy.
+
+Rozhodnutí:
+- Nasazení je dokončené backendově; poslední vizuální přejímka zůstává na
+  konkrétním zařízení Míly nebo Jany.
+
+Další krok:
+- V R2 znovu vyhledat konkrétní e-mail, použít nové tlačítko pro celý e-mail a
+  vizuálně zkontrolovat text i obě přílohy.
+
+Navrhované další kroky:
+- Případnou další chybu řešit podle konkrétního formátu nebo mobilního
+  vykreslení, nikoli novým importem celého e-mailu.
+
+Technický důkaz:
+- Deployment účtenka: funkční commit `3c9a3ed`, stav `deployed`, nový proces
+  `50992` a očekávaný kódový otisk `9894d08d149185ad`.
+- Samostatný Cockpit smoke prošel 5/5.
+- R2 stránka, deep-link čtečka, detailní API a read-only endpoint přílohy
+  odpověděly HTTP 200; odpověď přílohy má `no-store` a platnou délku.
