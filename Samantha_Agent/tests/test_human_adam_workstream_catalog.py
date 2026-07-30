@@ -45,7 +45,12 @@ class WorkstreamCatalogTests(unittest.TestCase):
 
         self.assertEqual(
             set(source_names),
-            _active_project_names() | {"Vocabulary FR", "Vocabulary IT"},
+            _active_project_names()
+            | {
+                "iPhone Shortcuts / Mobile Input Layer",
+                "Vocabulary FR",
+                "Vocabulary IT",
+            },
         )
         self.assertEqual(
             Counter(source_names)["TTS / české audio nástroje"],
