@@ -608,3 +608,30 @@ Technický důkaz:
 - Živý serverový resolver našel právě jeden správný zdroj a odmítl chybný
   první e-mail.
 - Cílená sada prošla 22/22 a plná Cockpit brána 1249/1249.
+
+### 2026-07-30 22:31 CEST – Serverově ověřený odkaz E2 je nasazený
+
+Hotovo:
+- Oprava serverově ověřené provenance byla řízeně nasazená do Cockpitu.
+- Historická E2 zpráva nyní dostává právě jeden doložený odkaz na správný
+  zdrojový e-mail; chybná první položka archivu v odkazu není.
+- Neověřený odkaz vložený modelem už tlačítko nevytváří.
+
+Rozhodnutí:
+- Živý serverový důkaz potvrzuje správnost backendové vazby; zbývá pouze
+  vizuální přejímka po obnovení R2 stránky.
+
+Další krok:
+- Obnovit R2 stránku a u existující E2 otázky znovu stisknout tlačítko pro celý
+  e-mail a přílohy.
+
+Navrhované další kroky:
+- Pokud se po obnovení ukáže správný e-mail, uzavřít tento defekt bez dalšího
+  rozšiřování resolveru.
+
+Technický důkaz:
+- Deployment účtenka: funkční commit `b7737cf`, stav `deployed`, nový proces
+  `67756` a očekávaný kódový otisk `f834666827d33b8c`.
+- Samostatný Cockpit smoke prošel 5/5.
+- Živý R2 status vrátil jeden ověřený správný odkaz a žádný odkaz na chybnou
+  první položku.
