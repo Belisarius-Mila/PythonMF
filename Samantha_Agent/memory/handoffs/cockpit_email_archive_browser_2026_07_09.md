@@ -59,3 +59,18 @@ Dalsi krok:
 Bezpecnost:
 - UI zustava pouze pro cteni. Nepribylo zadne odesilani, mazani, presouvani ani zapis do schranky nebo dokumentoveho trezoru.
 - Do testu ani pameti nebyl vlozen soukromy obsah e-mailu nebo prilohy.
+
+Aktualizace 2026-07-30 13:54 CEST - nasazeni UX0 + UX1:
+
+Co je hotove:
+- Commit `d051791` byl rizene nasazen do Cockpitu jako novy proces s odpovidajicim kodovym otiskem.
+- Povinny post-restart smoke test prosel 5/5.
+- Zivy strukturální test potvrdil HTTP 200 pro `/email-archive/`, pritomnost noveho schrankoveho frontendu a funkcni read-only seznam i detail vcetne poli pro telo zpravy.
+
+Dalsi krok:
+- Rucne projit vzhled a ovladani na desktopu a iPhonu a otevrit jednu znamou ulozenou PDF prilohu.
+
+Technicky dukaz:
+- Nasazeny commit: `d051791da4a158159d40f07a566b2bcca78f2a39`.
+- Cockpit PID po restartu: `17232`.
+- Kodovy otisk: `28abaf2394075c6a`.
