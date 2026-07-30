@@ -21,9 +21,9 @@ Historický pracovní název: R-A2
   `0600`.
 - E3 potvrdilo ruční revizi importovaného PDF a jeho dostupnost v Archivu
   e-mailu i dokumentové čtečce. Lidská přejímka odhalila technickou obálku
-  odvozeného TXT; lokální oprava ji u staršího souboru skrývá při zobrazení a
-  nové přehledy ukládá bez diagnostiky. Nasazení a krátký vizuální retest
-  zatím chybí.
+  odvozeného TXT; nasazená oprava ji u staršího souboru skrývá při zobrazení a
+  nové přehledy ukládá bez diagnostiky. Backendový smoke je zelený; chybí už
+  jen krátký vizuální retest.
 
 Starší budoucí formulace v návrhových sekcích níže jsou historií původního
 kontraktu. Pro současnou práci má přednost tento stav a kanonický handoff/TVBCP.
@@ -126,10 +126,9 @@ workflow dosud implementované nejsou.
 
 ## Otevřené kroky po implementaci
 
-1. Po samostatném potvrzení nasadit lokální opravu lidského TXT.
-2. Z pohledu Jany obnovit Archiv e-mailu a R2 čtečku, ověřit samostatné otevření
+1. Z pohledu Jany obnovit Archiv e-mailu a R2 čtečku, ověřit samostatné otevření
    PDF přílohy, čistý začátek TXT a bezpečný návrat do chatu.
-3. Samostatné odeslání nového TXT e-mailem otevírat až jako vlastní
+2. Samostatné odeslání nového TXT e-mailem otevírat až jako vlastní
    dvoukrokovou schopnost; současná přejímka je neaktivuje.
 
 ## Bezpečnost

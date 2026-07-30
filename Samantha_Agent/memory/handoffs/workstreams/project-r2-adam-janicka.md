@@ -1,7 +1,7 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- E3 přejímka a lokální oprava lidského TXT: 2026-07-30 11:47 CEST
+- E3 oprava lidského TXT nasazena: 2026-07-30 12:27 CEST
 
 ### Hotovo
 - R2-Adam má vlastní trvalý chat, TXT prostor, dokumentovou lištu a čtečku.
@@ -13,13 +13,12 @@
 - E3 potvrdilo, že importované PDF je ve vaultu, prošlo ruční revizí a backend
   Archivu e-mailu i dokumentové čtečky je umí otevřít. První lidská přejímka
   současně odhalila zbytečnou diagnostickou obálku v odvozeném TXT.
-- Lokální oprava zobrazuje starší R2 TXT bez technické obálky a nové přehledy
+- Nasazená oprava zobrazuje starší R2 TXT bez technické obálky a nové přehledy
   ukládá rovnou jako lidský text. Starší soukromý TXT ani zdrojové PDF nemění.
-- Aktuální `main` `20180e2` je serverově nasazený a Cockpit smoke prošel 5/5.
+- Funkční commit `9dea930` je serverově nasazený a Cockpit smoke prošel 5/5.
 
 ### Otevřeno
-- Lokální oprava lidského TXT ještě není nasazená.
-- Po nasazení zbývá ručně obnovit Archiv e-mailu a R2 čtečku a potvrdit, že je
+- Zbývá ručně obnovit Archiv e-mailu a R2 čtečku a potvrdit, že je
   příloha viditelná jako samostatné PDF a TXT už nezačíná diagnostikou.
 - Lokální hotové commity zůstávají v denním GitHub balíčku.
 
@@ -27,8 +26,8 @@
 - Zdrojové dokumenty zůstávají read-only a nejasné údaje se nesmějí domýšlet.
 
 ### Další krok
-- Po samostatném potvrzení nasadit lokální opravu a provést krátký živý retest
-  přílohy v Archivu e-mailu a čistého textu v R2 čtečce.
+- Provést krátký vizuální retest přílohy v Archivu e-mailu a čistého textu
+  v R2 čtečce.
 
 ### Rozhodnutí
 - R2-Adam se už neposuzuje jako projekt před implementací; další práce je
@@ -47,6 +46,8 @@
   jednoznačný lidský výběr, nový TXT s režimem `0600` a nezměněný zdroj.
 - E3: uložené PDF i jeho vložená čtečka odpovídají HTTP 200; plná Cockpit
   brána lokální opravy prošla 1241 testy.
+- Deployment funkčního commitu `9dea930` je potvrzený účtenkou a samostatný
+  následný smoke prošel 5/5.
 - P6a potvrdilo, že kanonická dvojice R2 je v rankingu před zastaralým
   agregátem.
 - Historické chronologické bloky níže zůstávají beze změny.

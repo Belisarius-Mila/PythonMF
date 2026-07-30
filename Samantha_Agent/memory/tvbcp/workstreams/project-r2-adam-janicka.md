@@ -491,3 +491,31 @@ Technický důkaz:
 - Filtr nad současným E2 TXT ponechal neprázdný lidský obsah a odstranil všechny
   kontrolované technické markery bez zápisu do soukromého souboru.
 - Cílená sada prošla 40/40 a plná Cockpit brána 1241/1241.
+
+### 2026-07-30 12:27 CEST – Oprava lidského R2 TXT je nasazená
+
+Hotovo:
+- Funkční commit s čištěním nových i starších R2 TXT byl řízeně nasazen do
+  Cockpitu.
+- Živá R2 čtečka vrací neprázdný lidský obsah bez kontrolovaných technických
+  markerů.
+- Archiv e-mailu vrací uloženou přílohu a její vložené PDF je backendově
+  dostupné.
+
+Rozhodnutí:
+- Backendové ověření nenahrazuje poslední vizuální přejímku na zařízení Jany.
+
+Další krok:
+- Obnovit Archiv e-mailu a R2 čtečku a ručně potvrdit samostatné zobrazení PDF,
+  čistý začátek TXT a návrat do chatu.
+
+Navrhované další kroky:
+- Pokud se PDF na iPhonu nadále nezobrazí, řešit úzce mobilní vykreslení
+  konkrétního pohledu; nový import ani další kopii přílohy nevytvářet.
+
+Technický důkaz:
+- Deployment účtenka: funkční commit `9dea930`, stav `deployed`, očekávaný
+  otisk odpovídá běžícímu procesu.
+- Samostatný Cockpit smoke prošel 5/5.
+- Živý TXT má 0 kontrolovaných technických markerů; PDF endpoint odpověděl
+  HTTP 200 s platnou PDF signaturou.
