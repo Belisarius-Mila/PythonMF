@@ -342,31 +342,10 @@ DESKTOP_APP_CATALOG: tuple[dict[str, Any], ...] = (
 )
 WEB_APP_CATALOG: tuple[dict[str, str], ...] = (
     {
-        "id": "scandocu",
-        "title": "ScanDocu",
-        "description": "Kontrola, klasifikace a uložení PDF dokumentů z Downloads do soukromého document vaultu.",
-        "url": SCANDOCU_URL,
-        "kind": "lokální",
-    },
-    {
         "id": "cockpit",
         "title": "Samantha Cockpit",
         "description": "Řídicí panel pro dokumenty, ScanDocu, zálohy a praktické rutiny Samanthy.",
         "url": COCKPIT_URL,
-        "kind": "lokální",
-    },
-    {
-        "id": "email-processing",
-        "title": "E-maily",
-        "description": "Read-only pracovní přehled e-mailových kandidátů a navazující zpracování PDF.",
-        "url": "/email-processing/",
-        "kind": "lokální",
-    },
-    {
-        "id": "email-archive",
-        "title": "Archiv e-mailů",
-        "description": "Read-only prohlížeč lokálně uložených e-mailů z EmailArchiveVault.",
-        "url": "/email-archive/",
         "kind": "lokální",
     },
     {

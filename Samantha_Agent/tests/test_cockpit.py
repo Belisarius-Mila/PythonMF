@@ -6998,8 +6998,27 @@ Dalsi krok:
     def test_cockpit_html_contains_email_processing_controls(self) -> None:
         self.assertIn("E-maily", COCKPIT_HTML)
         self.assertIn("emailProcessingBtn", COCKPIT_HTML)
+        self.assertIn("emailHubModal", COCKPIT_HTML)
+        self.assertIn("emailWorkBtn", COCKPIT_HTML)
+        self.assertIn("emailArchiveBtn", COCKPIT_HTML)
         self.assertIn("/email-processing/", COCKPIT_HTML)
+        self.assertIn("/email-archive/", COCKPIT_HTML)
+        self.assertIn("openEmailHub", COCKPIT_HTML)
         self.assertIn("openEmailProcessing", COCKPIT_HTML)
+        self.assertIn("openEmailArchive", COCKPIT_HTML)
+
+    def test_cockpit_navigation_groups_scandocu_under_documents(self) -> None:
+        self.assertIn('id="documentsBtn">Dokumenty</button>', COCKPIT_HTML)
+        self.assertIn('id="documentsPanel"', COCKPIT_HTML)
+        self.assertIn('id="scanDocuBtn">Otevřít ScanDocu</button>', COCKPIT_HTML)
+        self.assertIn(
+            'id="scanDocuReviewBtn">Revidovat v ScanDocu</button>',
+            COCKPIT_HTML,
+        )
+        self.assertGreater(
+            COCKPIT_HTML.index('id="scanDocuBtn"'),
+            COCKPIT_HTML.index('id="documentsPanel"'),
+        )
 
     def test_email_archive_keeps_readonly_routes_and_embedded_frontend_contract(self) -> None:
         expected_routes = {
@@ -7026,10 +7045,12 @@ Dalsi krok:
     def test_web_apps_catalog_contains_known_apps(self) -> None:
         catalog = web_apps_catalog()
         titles = {item["title"] for item in catalog["apps"]}
+        identifiers = {item["id"] for item in catalog["apps"]}
 
         self.assertTrue(catalog["ok"])
-        self.assertIn("ScanDocu", titles)
-        self.assertIn("E-maily", titles)
+        self.assertNotIn("scandocu", identifiers)
+        self.assertNotIn("email-processing", identifiers)
+        self.assertNotIn("email-archive", identifiers)
         self.assertIn("Lékárna", titles)
         self.assertIn("Lékárna - správa", titles)
         self.assertIn("Family Video Organizer", titles)

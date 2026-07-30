@@ -20,9 +20,8 @@
       <button class="secondary" id="projectsBtn">Projekty</button>
       <button class="secondary" id="remindersBtn">Připomenutí</button>
       <button class="secondary" id="emailProcessingBtn">E-maily</button>
+      <button class="secondary" id="documentsBtn">Dokumenty</button>
       <button class="secondary" id="serviceBtn">Servis</button>
-      <button class="primary" id="scanDocuBtn">ScanDocu</button>
-      <button class="secondary" id="scanDocuReviewBtn">Revidovat dokumenty</button>
     </div>
   </header>
   <main>
@@ -124,6 +123,10 @@
 		    <section>
       <h2>Práce s dokumenty</h2>
       <div class="body">
+        <div class="quick-actions">
+          <button class="primary" id="scanDocuBtn">Otevřít ScanDocu</button>
+          <button class="secondary" id="scanDocuReviewBtn">Revidovat v ScanDocu</button>
+        </div>
         <div class="work-grid">
           <div class="work-card">
             <h3>Nová PDF ve Downloads za 7 dní</h3>
@@ -293,6 +296,39 @@
     </section>
     </details>
   </main>
+  <div id="emailHubModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="emailHubTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="emailHubTitle">E-maily</h2>
+        <button class="secondary" id="emailHubCloseBtn">Zavřít</button>
+      </div>
+      <div class="modal-body">
+        <div class="janicka-intro">
+          <h3 class="janicka-title">Práce s e-maily</h3>
+          <p class="janicka-subtitle">Vyber běžné zpracování nových zpráv, nebo otevři místní archiv již uložených e-mailů.</p>
+        </div>
+        <div class="app-list">
+          <div class="app-card">
+            <div>
+              <div class="app-title">Zpracování e-mailů</div>
+              <div class="app-description">Nové zprávy, pracovní fronta a navazující zpracování příloh.</div>
+              <div class="app-kind">E-maily</div>
+            </div>
+            <button class="button-link" id="emailWorkBtn" type="button">Otevřít</button>
+          </div>
+          <div class="app-card">
+            <div>
+              <div class="app-title">Archiv e-mailů</div>
+              <div class="app-description">Seznam uložených zpráv, jejich text a dostupné přílohy.</div>
+              <div class="app-kind">E-maily · pouze čtení</div>
+            </div>
+            <button class="button-link" id="emailArchiveBtn" type="button">Otevřít</button>
+          </div>
+        </div>
+        <div class="status-line">Archiv nic neodesílá, nemaže ani nepřesouvá ve schránce.</div>
+      </div>
+    </div>
+  </div>
   <div id="janickaModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="janickaTitle">
     <div class="modal janicka-modal">
       <div class="modal-header">

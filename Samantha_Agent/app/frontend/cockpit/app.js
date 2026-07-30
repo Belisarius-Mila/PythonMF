@@ -16,7 +16,13 @@
     const projectsBtn = document.getElementById("projectsBtn");
     const remindersBtn = document.getElementById("remindersBtn");
     const emailProcessingBtn = document.getElementById("emailProcessingBtn");
+    const documentsBtn = document.getElementById("documentsBtn");
     const serviceBtn = document.getElementById("serviceBtn");
+    const documentsPanel = document.getElementById("documentsPanel");
+    const emailHubModal = document.getElementById("emailHubModal");
+    const emailHubCloseBtn = document.getElementById("emailHubCloseBtn");
+    const emailWorkBtn = document.getElementById("emailWorkBtn");
+    const emailArchiveBtn = document.getElementById("emailArchiveBtn");
     const servicePanel = document.getElementById("servicePanel");
     const janickaBtn = document.getElementById("janickaBtn");
     const janickaModal = document.getElementById("janickaModal");
@@ -441,6 +447,12 @@
         "projectsBtn",
         "remindersBtn",
         "emailProcessingBtn",
+        "documentsBtn",
+        "documentsPanel",
+        "emailHubModal",
+        "emailHubCloseBtn",
+        "emailWorkBtn",
+        "emailArchiveBtn",
         "scanDocuBtn",
         "scanDocuReviewBtn",
         "dashboardProcessBtn",
@@ -5812,17 +5824,39 @@ ${item.context || ""}`);
       }
     }
 
-    function openEmailProcessing() {
+    function openEmailHub() {
+      emailHubModal.classList.remove("hidden");
+    }
+
+    function closeEmailHub() {
+      emailHubModal.classList.add("hidden");
+    }
+
+    function openEmailPage(path, windowName) {
+      closeEmailHub();
       const emailWindow = window.open(
-        "/email-processing/",
-        "SamanthaEmailProcessing",
+        path,
+        windowName,
         "popup=yes,width=1280,height=880,left=120,top=70"
       );
       if (emailWindow) {
         emailWindow.focus();
       } else {
-        showMessage("Popup okno bylo blokováno, otevři /email-processing/");
+        showMessage(`Popup okno bylo blokováno, otevři ${path}`);
       }
+    }
+
+    function openEmailProcessing() {
+      openEmailPage("/email-processing/", "SamanthaEmailProcessing");
+    }
+
+    function openEmailArchive() {
+      openEmailPage("/email-archive/", "SamanthaEmailArchive");
+    }
+
+    function openDocumentsPanel() {
+      documentsPanel.open = true;
+      documentsPanel.scrollIntoView({behavior: "smooth", block: "start"});
     }
 
     janickaBtn.addEventListener("click", openJanickaModal);
@@ -5842,7 +5876,8 @@ ${item.context || ""}`);
     });
     janickaPrintDocumentBtn.addEventListener("click", () => focusDocumentSearchForJanicka("Najdi dokument k tisku a v jeho detailu použij tlačítko Tisknout."));
     janickaEmailBtn.addEventListener("click", () => {
-      openEmailProcessing();
+      closeJanickaModal();
+      openEmailHub();
     });
     janickaLekarnaBtn.addEventListener("click", () => {
       openCatalogAppById("lekarna");
@@ -5890,6 +5925,7 @@ ${item.context || ""}`);
       servicePanel.open = true;
       servicePanel.scrollIntoView({behavior: "smooth", block: "start"});
     });
+    documentsBtn.addEventListener("click", openDocumentsPanel);
     dashboardRefreshBtn.addEventListener("click", refresh);
     dashboardProcessBtn.addEventListener("click", () => openScanDocu(false));
     dashboardReviewBtn.addEventListener("click", () => openScanDocu(true));
@@ -5936,7 +5972,10 @@ ${item.context || ""}`);
     projectsBtn.addEventListener("click", openProjectsModal);
     reviewReportBtn.addEventListener("click", loadDocumentReviewReport);
     remindersBtn.addEventListener("click", openRemindersModal);
-    emailProcessingBtn.addEventListener("click", openEmailProcessing);
+    emailProcessingBtn.addEventListener("click", openEmailHub);
+    emailHubCloseBtn.addEventListener("click", closeEmailHub);
+    emailWorkBtn.addEventListener("click", openEmailProcessing);
+    emailArchiveBtn.addEventListener("click", openEmailArchive);
 	    remindersCloseBtn.addEventListener("click", closeRemindersModal);
 		    quickNotesCloseBtn.addEventListener("click", closeQuickNotesModal);
     urgentRemindersCloseBtn.addEventListener("click", closeUrgentRemindersModal);
@@ -5975,6 +6014,11 @@ ${item.context || ""}`);
     webAppsModal.addEventListener("click", (event) => {
       if (event.target === webAppsModal) {
         closeWebAppsModal();
+      }
+    });
+    emailHubModal.addEventListener("click", (event) => {
+      if (event.target === emailHubModal) {
+        closeEmailHub();
       }
     });
     libraryCloseBtn.addEventListener("click", closeLibraryModal);
@@ -6106,6 +6150,8 @@ ${item.context || ""}`);
         closeProjectAuditModal();
       } else if (event.key === "Escape" && !webAppsModal.classList.contains("hidden")) {
         closeWebAppsModal();
+      } else if (event.key === "Escape" && !emailHubModal.classList.contains("hidden")) {
+        closeEmailHub();
       } else if (event.key === "Escape" && !libraryModal.classList.contains("hidden")) {
         closeLibraryModal();
       } else if (event.key === "Escape" && !familyCalendarModal.classList.contains("hidden")) {

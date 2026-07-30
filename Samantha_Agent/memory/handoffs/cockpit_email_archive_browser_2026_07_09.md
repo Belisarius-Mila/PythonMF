@@ -108,3 +108,21 @@ Technicky dukaz:
 - Nasazeny commit: `94c6eff75ec6c0bd25d79a557d2c4072ebdb9986`.
 - Cockpit PID po restartu: `27805`.
 - Kodovy otisk: `b59ab10222e987b9`.
+
+Aktualizace 2026-07-30 15:03 CEST - UX2 pravdiva navigace:
+
+Hotovo:
+- Horni tlacitko `E-maily` otevre maly rozcestnik se samostatnou volbou pro zpracovani novych zprav a pro Archiv e-mailu.
+- Horni technicka tlacitka ScanDocu nahradilo tlacitko `Dokumenty`; ScanDocu a jeho revizni rezim jsou uvnitr dokumentove sekce.
+- Katalog Webovych aplikaci uz neobsahuje ScanDocu, E-maily ani Archiv e-mailu. Skutecne samostatne aplikace v katalogu zustaly.
+- Prime odkazy z konkretni akcni fronty zustaly zachovane, stejne jako vsechny puvodni URL a backendove operace.
+- Cilene testy prosly 226/226 a plna Cockpit quality gate 1246/1246.
+
+Rozhodnuti:
+- Informacni architektura se ridi lidskou oblasti pouziti, ne tim, zda ma schopnost vlastni webovou stranku.
+
+Dalsi krok:
+- Po samostatnem potvrzeni nasadit aktualni `main`, spustit smoke 5/5 a rucne overit `E-maily -> Zpracovani`, `E-maily -> Archiv` a `Dokumenty -> ScanDocu`.
+
+Technicky dukaz:
+- Zmeny jsou v `app/cockpit.py`, `app/frontend/cockpit/page.html`, `app/frontend/cockpit/app.js`, `tests/test_cockpit.py` a `tests/test_cockpit_frontend.py`.
