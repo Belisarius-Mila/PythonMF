@@ -528,6 +528,7 @@ def _query_workstream_ids(terms: set[str]) -> frozenset[str]:
             record.workstream_id,
             record.name,
             *record.source_names,
+            *record.query_aliases,
         )
         if any(
             (label_terms := query_terms(label))

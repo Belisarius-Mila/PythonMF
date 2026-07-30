@@ -36,6 +36,9 @@ dukazu, ze textove hledani nestaci.
   testem 5/5.
 - P2: jedna kanonicka dvojice pro Samantha Agent / RAG a aktualizovane odkazy
   z agregatu a pametoveho indexu.
+- P3: jediny formalni mode drift opraven; Mobile Input je vsude `paused`.
+- P4: read-only prakticka akceptace sedmi proudu a zkracenych nazvu.
+- P5: nefiltrovane prvni hledani autority a dva jednoznacne query aliasy.
 
 ## Otevrene kroky a rizika
 
@@ -44,8 +47,9 @@ dukazu, ze textove hledani nestaci.
 - `aggregate_unverified` je poctivy fallback, ne potvrzeni obsahove spravnosti.
 - Historicky zdroj muze zustat ve vysledcich, ale nesmi predbehnout rozpoznany
   kanonicky zdroj stejneho proudu.
-- Zkraceny dotaz nemusi zatim jednoznacne rozpoznat katalogovy proud; P4 ma
-  odlisit skutecnou potrebu aliasu od obecne textove shody.
+- Obecny `Cockpit` je skutecne nejednoznacny a nesmi dostat tichy alias.
+- P5 je lokalne otestovana, ale do beziciho Cockpitu se nasazuje az samostatne
+  potvrzenym krokem.
 
 ## Chronologicke zaznamy
 
@@ -115,3 +119,41 @@ dukazu, ze textove hledani nestaci.
   Mobile Input `paused`.
 - Cilenych 21 testu pameti proslo. Exploracni dotaz se zkracenym nazvem
   odkryl pouze kandidat k read-only provereni v P4, nikoli dalsi datovy rozpor.
+
+### 2026-07-30 06:46 CEST - P4 akceptace a P5 volba autority
+
+#### Hotovo
+
+- P4 read-only oddelilo zdravy ranking textoveho RAG od chybneho rozhodovani
+  agenta: Samantha pro aktualni stav volila `source_type=projects` a tim
+  vyrazovala kanonicke handoffy a TVBCP.
+- P5a zavedlo prvni hledani bez `source_type`, vyhodnoceni uvedene autority a
+  zastaveni po relevantnim `canonical` vysledku.
+- P5b zavedlo samostatne query aliasy `R2 Adam` a `Kalendář`; runtime binding
+  aliasy zustaly beze zmeny.
+
+#### Rozhodnuti
+
+- `source_type` je explicitni zuzeni nebo druhy krok jen tehdy, kdyz prvni
+  vysledky neobsahuji relevantni kanonicky zdroj.
+- `R2 Adam` a `Kalendář` jsou v katalogu jednoznacne. Samotny `Cockpit` neni a
+  zustava bez aliasu.
+- Ranking ani embeddings se v P5 nemeni.
+
+#### Dalsi krok
+
+- Potvrzene nasadit P5 do Cockpitu a provest smoke test.
+
+#### Navrhovane dalsi kroky
+
+- Po nasazeni zvolit maly obsahovy audit nejdulezitejsich aktivnich proudu.
+- Embeddings otevirat jen pri novem praktickem dukazu, ze textove hledani
+  nestaci.
+
+#### Technicky dukaz
+
+- P5a prosla 24 cilenymi a 1238 uplnymi testy. Finalni live dotazy R2-Adam a
+  Rodinny kalendar provedly jedine nefiltrovane volani a vratily `canonical`.
+- P5b prosla 47 cilenymi a 1240 uplnymi testy. Live `R2 Adam` a `Kalendář`
+  provedly jedine nefiltrovane volani a vratily spravny kanonicky handoff.
+- Nebyl cten private obsah a nebyl proveden zapis do private uloziste.

@@ -4,9 +4,9 @@ Nazev: Samantha Agent / RAG
 Pracovni proud: project-samantha-agent-rag
 Typ: Project
 Priorita: 1
-Stav: rozpracovane
+Stav: ceka na nasazeni
 Pripomenout pri startu: ne
-Datum: 2026-07-29
+Datum: 2026-07-30
 
 Co se resilo:
 - Pravdivost projektove pameti a textoveho RAG nad git-safe Markdown zdroji.
@@ -26,32 +26,44 @@ Co je hotove:
   vraci nejprve oba kanonicke dokumenty.
 - P3 opravilo jediny prokazany formalni rozpor: Mobile Input je nyni shodne v
   katalogu i agregatu `paused`.
+- P4 read-only overilo sedm roadmapovych proudu. Samotny textovy RAG umel
+  vybrat spravny proud a autoritu, ale Samantha pri aktualnim stavu opakovane
+  vnucovala `source_type=projects` a tim vyrazovala kanonicke handoffy.
+- P5a meni prvni hledani aktualniho stavu na nefiltrovane porovnani autorit.
+  Relevantni `canonical` vysledek dalsi zuzeni zastavi; slabsi
+  `aggregate_unverified` a `reference` se priznaji jako fallback.
+- P5b pridalo pouze query aliasy `R2 Adam` a `Kalendář`. Alias nemeni runtime
+  binding a samotny `Cockpit` zustava zamerne nejednoznacny.
 
 Co neni hotove:
 - Obsahova pravdivost dalsich pracovnich proudu nebyla plosne prepisovana ani
   automaticky opravovana.
-- Prakticke live dotazy pres Samanthu/OpenAI zatim nebyly soucasti P3.
-- Exploracni lokalni dotaz `Mobile Input Layer` nerozpoznal proud bez celeho
-  katalogoveho nazvu; P4 ma overit bezne varianty dotazu pred zmenou rankingu.
+- P5 je lokalne implementovana a otestovana, ale jeste nebyla nasazena do
+  beziciho Cockpitu.
+- Obecny dotaz `Cockpit` zustava nejednoznacny mezi hlavnim Cockpitem a
+  Janicka Cockpitem; nema dostat tichy alias.
 
 Dalsi krok:
-- P4 ma read-only overit prakticke dotazy pro sedm proudu soucasne roadmapy a
-  sledovat volbu autority i `source_type`.
+- Potvrzene nasadit aktualni P5 do Cockpitu a provest smoke test.
 
 Navrhovane dalsi kroky:
-- Potom udelat maly obsahovy audit jen nejdulezitejsich aktivnich proudu.
-- Prakticky overit, zda Samantha sama dobre pouziva autoritu a `source_type`.
-- U zkracenych nazvu overit, zda jsou potreba bezpecne katalogove aliasy.
+- Po nasazeni udelat maly obsahovy audit jen nejdulezitejsich aktivnich proudu.
+- U obecneho `Cockpit` zachovat explicitni doptani, ne automaticky vyber.
 - Embeddings resit pouze pokud textove hledani ani po techto krocich nestaci.
 
 Zmenene nebo relevantni soubory:
+- `app/samantha_agent.py`
 - `app/memory_truth_audit.py`
 - `app/memory_store.py`
+- `app/communication/human_adam_workstream_catalog.py`
 - `scripts/samantha_memory_truth_audit.py`
 - `memory/samantha_core.md`
 - `memory/ACTIVE_PROJECTS.md`
 - `memory/MEMORY_INDEX.md`
 - `memory/tvbcp/workstreams/project-samantha-agent-rag.md`
+- `tests/test_capability_runtime_policy.py`
+- `tests/test_human_adam_workstream_catalog.py`
+- `tests/test_memory_store.py`
 
 Bezpecnost / neukladat:
 - Neukladat hesla, tokeny, API klice, private obsah, cele e-maily ani obsah

@@ -114,6 +114,25 @@ class WorkstreamCatalogTests(unittest.TestCase):
             ("Human–Adam / vývojové prostředí",),
         )
 
+    def test_query_aliases_are_unique_and_exclude_ambiguous_cockpit(self) -> None:
+        by_id = {record.workstream_id: record for record in WORKSTREAM_CATALOG}
+        aliases = [
+            alias.casefold()
+            for record in WORKSTREAM_CATALOG
+            for alias in record.query_aliases
+        ]
+
+        self.assertEqual(
+            by_id["project-r2-adam-janicka"].query_aliases,
+            ("R2 Adam",),
+        )
+        self.assertEqual(
+            by_id["project-family-calendar"].query_aliases,
+            ("Kalendář",),
+        )
+        self.assertEqual(by_id["project-cockpit"].query_aliases, ())
+        self.assertEqual(len(aliases), len(set(aliases)))
+
     def test_private_archive_capabilities_are_declared_only_for_knihovna(self) -> None:
         knihovna = next(
             record
@@ -319,6 +338,31 @@ class WorkstreamCatalogTests(unittest.TestCase):
         )
 
         with self.assertRaisesRegex(ValueError, "duplicitní ID"):
+            validate_workstream_catalog(records)
+
+    def test_validation_rejects_duplicate_query_aliases(self) -> None:
+        records = (
+            CanonicalWorkstream(
+                "project-first",
+                "Project",
+                "První projekt",
+                "active",
+                "1",
+                ("Zdroj A",),
+                query_aliases=("Krátký název",),
+            ),
+            CanonicalWorkstream(
+                "project-second",
+                "Project",
+                "Druhý projekt",
+                "active",
+                "2",
+                ("Zdroj B",),
+                query_aliases=("krátký název",),
+            ),
+        )
+
+        with self.assertRaisesRegex(ValueError, "aliasy dotazu"):
             validate_workstream_catalog(records)
 
 

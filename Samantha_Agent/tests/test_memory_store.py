@@ -6,6 +6,7 @@ from pathlib import Path
 
 from app.memory_store import (
     MAX_MEMORY_SNIPPET_CHARS,
+    _query_workstream_ids,
     format_memory_status,
     get_memory_index,
     load_full_memory_context,
@@ -94,6 +95,20 @@ class MemoryStoreTests(unittest.TestCase):
         self.assertIn("read", terms)
         self.assertIn("only", terms)
         self.assertIn("oauth", terms)
+
+    def test_query_aliases_identify_only_unambiguous_short_names(self) -> None:
+        self.assertEqual(
+            _query_workstream_ids(query_terms("R2 Adam")),
+            frozenset({"project-r2-adam-janicka"}),
+        )
+        self.assertEqual(
+            _query_workstream_ids(query_terms("Kalendář")),
+            frozenset({"project-family-calendar"}),
+        )
+        self.assertEqual(
+            _query_workstream_ids(query_terms("Cockpit")),
+            frozenset(),
+        )
 
     def test_search_memory_prefers_filename_matches_over_generic_handoffs(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

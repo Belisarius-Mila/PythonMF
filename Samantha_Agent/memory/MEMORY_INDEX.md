@@ -13,7 +13,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   nového řešení; obsahuje soví lokální preview a obecnou kontrolu konzistence
   slovníkových aplikací, mappingů a obrázků na cílovém zařízení.
 - `samantha_core.md` - zakladni kontext: kdo je Mila, co je Samantha Agent, aktualni stav prostredi, souhrn vrstvy pameti/RAG a dlouhodoby cil.
-- `handoffs/workstreams/project-samantha-agent-rag.md` - kanonicky aktualni handoff proudu Samantha Agent / RAG; P0 audit, P1 autorita zdroju, P2 materializace, P3 oprava formalniho rozporu a nejblizsi krok P4.
+- `handoffs/workstreams/project-samantha-agent-rag.md` - kanonicky aktualni handoff proudu Samantha Agent / RAG; P0-P4 audit a autorita zdroju, P5 nefiltrovane prvni hledani a jednoznacne query aliasy; nejblizsi krok je potvrzene nasazeni a smoke.
 - `tvbcp/workstreams/project-samantha-agent-rag.md` - kanonicky rozhodovaci dokument pravdive pameti a RAG; precedence zdroju, fail-honest fallback a odklad embeddings.
 - `contacts.md` - prakticke kontakty, ktere Mila vyslovne povolil ulozit do pameti.
 

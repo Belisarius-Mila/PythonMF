@@ -125,6 +125,7 @@ class CanonicalWorkstream:
     mode: str
     priority: str
     source_names: tuple[str, ...]
+    query_aliases: tuple[str, ...] = ()
     binding_aliases: tuple[str, ...] = ()
     binding_type_aliases: tuple[str, ...] = ()
     capabilities: CanonicalWorkstreamCapabilities = CanonicalWorkstreamCapabilities()
@@ -147,6 +148,7 @@ def validate_workstream_catalog(
         raise ValueError("Katalog pracovních proudů nesmí být prázdný.")
     seen_ids: set[str] = set()
     seen_names: set[str] = set()
+    seen_query_aliases: set[str] = set()
     for record in catalog:
         if not isinstance(record, CanonicalWorkstream):
             raise ValueError("Katalog obsahuje neověřený pracovní proud.")
@@ -176,6 +178,18 @@ def validate_workstream_catalog(
         )
         if clean_sources != record.source_names or len(set(clean_sources)) != len(clean_sources):
             raise ValueError("Pracovní proud nemá jednoznačné kanonické zdroje.")
+        clean_query_aliases = tuple(
+            _clean_label(alias, kind="alias dotazu") for alias in record.query_aliases
+        )
+        folded_query_aliases = tuple(alias.casefold() for alias in clean_query_aliases)
+        if (
+            clean_query_aliases != record.query_aliases
+            or len(set(folded_query_aliases)) != len(folded_query_aliases)
+            or any(alias in seen_query_aliases for alias in folded_query_aliases)
+        ):
+            raise ValueError("Pracovní proud nemá jednoznačné aliasy dotazu.")
+        if folded_name in folded_query_aliases:
+            raise ValueError("Kanonický název nesmí být zopakován jako alias dotazu.")
         clean_aliases = tuple(
             _clean_label(alias, kind="alias") for alias in record.binding_aliases
         )
@@ -194,6 +208,7 @@ def validate_workstream_catalog(
         record.capabilities.validate()
         seen_ids.add(record.workstream_id)
         seen_names.add(folded_name)
+        seen_query_aliases.update(folded_query_aliases)
     return catalog
 
 
@@ -204,6 +219,7 @@ def _record(
     mode: str,
     priority: str,
     *source_names: str,
+    query_aliases: tuple[str, ...] = (),
     binding_aliases: tuple[str, ...] = (),
     binding_type_aliases: tuple[str, ...] = (),
     capabilities: CanonicalWorkstreamCapabilities = CanonicalWorkstreamCapabilities(),
@@ -215,6 +231,7 @@ def _record(
         mode=mode,
         priority=priority,
         source_names=source_names,
+        query_aliases=query_aliases,
         binding_aliases=binding_aliases,
         binding_type_aliases=binding_type_aliases,
         capabilities=capabilities,
@@ -240,6 +257,7 @@ WORKSTREAM_CATALOG = validate_workstream_catalog(
             "active",
             "2",
             "R2-Adam / Janička",
+            query_aliases=("R2 Adam",),
             capabilities=CanonicalWorkstreamCapabilities(
                 source_data_read_only=True,
                 owned_private_root=(
@@ -296,6 +314,7 @@ WORKSTREAM_CATALOG = validate_workstream_catalog(
             "active",
             "1",
             "Rodinný kalendář",
+            query_aliases=("Kalendář",),
         ),
         _record(
             "project-document-vault",
