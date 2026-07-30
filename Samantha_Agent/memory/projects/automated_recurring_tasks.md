@@ -231,7 +231,20 @@ Workflow nyní:
 Cílených 14 testů denní rutiny a 8 workflow testů prošlo. Python syntaxe, YAML
 parse a `git diff --check` jsou čisté.
 
-Otevřený nasazovací krok: současné Pages stále používají legacy zdroj
-`main/docs`. Po tomto checkpointu je potřeba samostatně potvrzeně přepnout zdroj
-na GitHub Actions, spustit první ruční workflow a ověřit veřejné audio i
-nezměněný commit `main`.
+Tento otevřený nasazovací krok byl později dokončen; aktuální stav je v
+navazujícím bloku níže.
+
+## 2026-07-30 – Pages workflow je živá publikační autorita
+
+- GitHub Pages používají `build_type=workflow`; starý krok přepnutí z
+  `main/docs` už není otevřený.
+- Plánovaný běh `Samantha Daily 3 AM` dne 2026-07-30 skončil úspěšně.
+- Veřejný `app.js` odkazuje na dnešní soví MP3 a soubor vrací HTTP 200,
+  `audio/mp3` a nenulovou velikost.
+- Aktivní kořenový workflow má pouze `contents: read`, používá Pages artifact
+  a neobsahuje commit ani push do `main`.
+
+Další krok:
+
+- Bez okamžité změny. Sledovat příští přirozený plánovaný běh; zasahovat jen
+  při chybě audia, Pages deploymentu nebo neočekávané změně `main`.

@@ -1,35 +1,39 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-28 20:50 CEST
+- Obsahově narovnáno P6b: 2026-07-30 07:25 CEST
 
 ### Hotovo
-- R2-Adam nyní bezpečně zpracuje úplnou potvrzenou sadu pojišťovacích dokumentů a používá strukturované údaje z celého dokumentu.
-- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- R2-Adam má vlastní trvalý chat, TXT prostor, dokumentovou lištu a čtečku.
+- Umí bezpečně vyhledat úplnou sadu dokumentů, pracovat po potvrzených dávkách
+  a vytvořit nový create-only TXT bez změny zdrojů.
+- Aktuální `main` `20180e2` je serverově nasazený a Cockpit smoke prošel 5/5.
 
 ### Otevřeno
-- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
-- Lokální commity čekají na samostatný denní GitHub balíček.
+- Chybí souvislá provozní přejímka z pohledu Jany přes skutečný tok
+  e-mail -> private vault -> R2 TXT a návrat do chatu.
+- Lokální hotové commity zůstávají v denním GitHub balíčku.
 
 ### Rizika
-- Žádné další doložené provozní riziko.
+- Zdrojové dokumenty zůstávají read-only a nejasné údaje se nesmějí domýšlet.
 
 ### Další krok
-- Vytvořit checkpoint, nasadit změnu a zopakovat praktický přehled šesti dokumentů v chatu R2-Adam.
+- V navazujícím systémovém směru ověřit jeden úplný tok
+  e-mail -> private vault -> R2 TXT.
 
 ### Rozhodnutí
-- Chybějící nebo nejednoznačné údaje se označí jako nezjištěno a nikdy se nedomýšlejí.
+- R2-Adam se už neposuzuje jako projekt před implementací; další práce je
+  provozní přejímka při zachování read-only zdrojů a create-only výstupů.
 
 ### Navrhované další kroky
-- Po nasazení potvrdit zobrazenou šestici a ověřit výsledný TXT v dokumentové čtečce.
+- Po úplném toku provést krátkou přejímku z pohledu Jany: kontinuita chatu,
+  potvrzený výběr, TXT čtečka a bezpečný návrat do chatu.
 
 ### Technický stav checkpointu
-- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `9bf1b8660125`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `9bf1b8660125` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-07-28T17:31:08+00:00.
-- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
-- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
-- Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
+- Deployment účtenka: `20180e2`, stav `deployed`, smoke 5/5.
+- P6a potvrdilo, že kanonická dvojice R2 je v rankingu před zastaralým
+  agregátem.
+- Historické chronologické bloky níže zůstávají beze změny.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: R2-Adam / Janička
@@ -210,6 +214,28 @@ Technický důkaz:
 - rychlá Cockpit brána syntaxe a whitespace: 4.1 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `project-r2-adam-janicka`.
 - Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+
+### 2026-07-30 07:25 CEST – P6b odstranilo stav „před implementací“
+
+Hotovo:
+- Aktivní stav R2-Adama odpovídá skutečné funkční vrstvě: vlastní chat, TXT
+  prostor, dokumentová lišta, čtečka a práce s úplnou potvrzenou sadou.
+- Starý implementační start už není vydáván za současný další krok.
+
+Rozhodnutí:
+- Zdrojové dokumenty zůstávají read-only, výstupy create-only a nejasné údaje
+  se označují jako nezjištěno.
+
+Další krok:
+- Ověřit jeden úplný tok e-mail -> private vault -> R2 TXT.
+
+Navrhované další kroky:
+- Potom provést provozní přejímku z pohledu Jany včetně návratu do chatu bez
+  ztráty kontextu.
+
+Technický důkaz:
+- P5 ranking vrací kanonický handoff a TVBCP R2 před agregátem.
+- Aktuální Cockpit běží na `20180e2` a smoke prošel 5/5.
 
 ### 2026-07-28 14:49 CEST – R2-Adam umí bezpečně vyhledat dokumenty a zkompilovat nový TXT až po explicitním lidském výběru.
 

@@ -1,9 +1,25 @@
 # R2-Adam / Janička
 
 Priorita: 2
-Stav: samostatný aktivní projekt, připravený vývojový proud; funkční R2 před implementací
+Stav: samostatný aktivní projekt; funkční R2 implementovaný, čeká provozní přejímka
 Založeno: 2026-07-17
 Historický pracovní název: R-A2
+
+## Aktuální stav 2026-07-30
+
+- R2-Adam má vlastní trvalý chat, soukromý kompaktní kontext, TXT prostor,
+  dokumentovou lištu a samostatnou čtečku bez vývojových ovladačů.
+- Zdrojová data Samanthy zůstávají read-only. Nové TXT výstupy jsou
+  create-only a existující zdroj ani starší export nepřepisují.
+- R2 umí vyhledat úplnou sadu dokumentů, potvrdit přesný výběr, zpracovat
+  obsah po dávkách a sestavit nový přehled bez tichého omezení na prvních pět
+  položek.
+- Aktuální `main` `20180e2` je nasazený a Cockpit smoke prošel 5/5.
+- Otevřeným krokem už není začátek implementace, ale jeden úplný provozní tok
+  e-mail -> private vault -> R2 TXT a následná přejímka z pohledu Jany.
+
+Starší budoucí formulace v návrhových sekcích níže jsou historií původního
+kontraktu. Pro současnou práci má přednost tento stav a kanonický handoff/TVBCP.
 
 ## Cíl
 
@@ -101,17 +117,13 @@ Samanthy zůstávají read-only i během vývojového tahu a jejich kořen není
 zapisovatelný v sandboxu. Funkční R2-Adam, jeho soukromý kontext a exportní
 workflow dosud implementované nejsou.
 
-## Otevřené kroky před implementací
+## Otevřené kroky po implementaci
 
-1. Sepsat přesnou matici povolených zdrojů a citlivých kategorií.
-2. Zvolit private umístění, schéma a verzování Janiččina kontextu.
-3. Navrhnout append-only TXT export store, limity velikosti a názvosloví.
-4. Navrhnout pevný kontakt `Jana`, preview a dvoukrokový draft/send kontrakt.
-5. Rozhodnout UI pro kontrolu a vrácení poslední změny soukromého kontextu.
-6. Připravit testy oddělení vláken, zákazu změn zdrojů, nepřepsání exportu,
-   blokace tajemství, potvrzení odeslání, sent-copy a nejistého doručení.
-7. Teprve potom implementovat nejmenší vertikální řez nad jedním bezpečným
-   read-only zdrojem a jedním TXT exportem.
+1. Ověřit jeden úplný tok e-mail -> private vault -> R2 TXT.
+2. Z pohledu Jany ověřit otevření chatu, kontinuitu po obnovení stránky,
+   potvrzený výběr dokumentů, TXT čtečku a bezpečný návrat do chatu.
+3. Samostatné odeslání nového TXT e-mailem otevírat až jako vlastní
+   dvoukrokovou schopnost; současná přejímka je neaktivuje.
 
 ## Bezpečnost
 

@@ -4,7 +4,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 - `ACTIVE_PROJECTS.md` - registr projektu a oblasti vcetne rezimu `active` / `paused` / `archived`, priorit, stavu, handoffu a dalsich kroku.
 - `WORKSTREAMS.md` - kanonicky registr 30 pracovnich proudu: 24 projektu, 4 tooly a 2 `Misc`. Faze 4.2 pridala lazy soukroma vlakna, faze 4.3 jejich handoff/TVBCP vazby, faze 4.5e jednotny backendovy registr a faze 4.5f jednu perzistentni autoritu `active_workstream_id` ve schematu 2. Human–Adam a Knihovna jsou docasne kompatibilni adaptery nad svymi puvodnimi session a workspaces; ostatnich 28 proudu pouziva lazy private-thread backend. Faze 4.5g-d2 doplnila chybejici samostatny proud Rodinny kalendar s jednorazovou direct-main autorizaci.
-- `projects/family_calendar.md` - Rodinný kalendář jako samostatný projekt mimo Knihovnu; shrnuje dry-run provoz, připravenou ostrou větev `enabled`, fail-closed recovery, soukromé hranice a další krok potvrzované aktivace.
+- `projects/family_calendar.md` - Rodinný kalendář jako samostatný projekt mimo Knihovnu; aktivační apply brána je implementovaná, ale současný soukromý režim je neověřený. Další krok je pouze redigovaný read-only audit režimu, readiness a plánovače.
 
 ## Core
 
@@ -13,18 +13,15 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   nového řešení; obsahuje soví lokální preview a obecnou kontrolu konzistence
   slovníkových aplikací, mappingů a obrázků na cílovém zařízení.
 - `samantha_core.md` - zakladni kontext: kdo je Mila, co je Samantha Agent, aktualni stav prostredi, souhrn vrstvy pameti/RAG a dlouhodoby cil.
-- `handoffs/workstreams/project-samantha-agent-rag.md` - kanonicky aktualni handoff proudu Samantha Agent / RAG; P0-P4 audit a autorita zdroju, P5 nefiltrovane prvni hledani a jednoznacne query aliasy; nejblizsi krok je potvrzene nasazeni a smoke.
+- `handoffs/workstreams/project-samantha-agent-rag.md` - kanonicky aktualni handoff proudu Samantha Agent / RAG; P0-P6 audit, autorita zdroju, nefiltrovane prvni hledani, jednoznacne aliasy a obsahove narovnani. P5 je nasazena a Smer 2 je funkcne uzavreny.
 - `tvbcp/workstreams/project-samantha-agent-rag.md` - kanonicky rozhodovaci dokument pravdive pameti a RAG; precedence zdroju, fail-honest fallback a odklad embeddings.
 - `contacts.md` - prakticke kontakty, ktere Mila vyslovne povolil ulozit do pameti.
 
 ## Reports
 
-- `../AuditCockpit56.txt` - [PRIPOMENOUT] hlavni hluboky audit architektury
-  Samantha Cockpitu, VoiceBridge, dokumentu a e-mailu z 2026-07-10. Aktualizace
-  2026-07-26 znovu stanovila Cockpit dietu jako prioritu 1: bez prepisu a
-  plosneho mazani, po malych behavior-preserving rezech. Nejmensi dalsi krok
-  Dieta D0 je read-only mapa aktualnich hranic monolitu a vyber jedine
-  e-mailove skupiny pro Fazi 1.4.
+- `../AuditCockpit56.txt` - hlavni roadmapa architektury Samanthy a Cockpitu.
+  Cockpit Dieta D0-D3 i pravdiva pamet P0-P6 jsou uzavrene; prvni otevreny
+  vecny smer je jeden uplny tok e-mail -> private vault -> R2 TXT.
 - `reports/cockpit_quality_gate_2026_07_10.md` - git-safe popis kanonicke lokalni a GitHub Actions pojistky; Faze 2.4, e-mailova navigace a docasny TVBCP VoiceBridge protokol maji 611 testu. Realny redigovany outbox pilot overil 22 auditu/delivered, budoucí purge identita prezije zavreni Work Queue a obe e-mailova okna maji explicitni navrat do Cockpitu.
 - `reports/cockpit_persistence_write_map_2026_07_10.md` - git-safe mapa runtime persistence; Faze 2.4 ma repository/idempotency, e-mailovy decision adapter, lease/retry/ack a realny redigovany auditni pilot. Stare nekompletni purge zaznamy se neobnovuji; budoucí trash davky persistuji bezpecnou technickou identitu.
 - `reports/cockpit_dead_legacy_code_inventory_2026_07_10.md` - [PRIPOMENOUT] read-only inventura mrtveho a legacy kodu Cockpitu bez cteni private obsahu: POST registry a JavaScript/DOM vazby jsou konzistentni; Cleanup R1 odstranil jen 39 radku jednoznacnych helperu/importu a prosel 458 testy i obema smoke checky. Stary e-mailovy parser, Janicka vetev a pet API cest zustavaji do samostatneho rozhodnuti.
@@ -55,16 +52,16 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `projects/matysek_english_game_concept.md` - koncept anglické hry pro pětiletého Matýska bez čtení, se scénami, hlasem a příběhem.
 - `projects/mmtx_story_hotspot_app.md` - nový směr MMTX: příběhová Pygame hotspot aplikace s houbami, barvami a dynamickým číslováním.
 - `projects/multilo_stabilization_cleanup.md` - stabilizace MultiLO návratu do kokpitu, cleanup screenů, pending after callbacky a `tk.Entry` v psacích režimech.
-- `projects/email_readonly_oauth.md` - e-mailová integrace Samanthy: read-only hledání/čtení/triage/archivace, Seznam+iCloud provider a od 2026-05-26 samostatné dvoukrokové potvrzené přeposlání přes lokální SMTP draft.
+- `projects/email_readonly_oauth.md` - e-mailová integrace Samanthy: read-only hledání, triage a archivace, oddělený prohlížeč Archivu e-mailu a nasazená oprava redigovaného dohledání příloh. Další krok je úzký post-fix read-only retest.
 - `projects/document_management_private_vault.md` - priorita 1 projekt soukrome spravy dokumentu mimo git; aktualni vstup je ScanDocu pro GPT PDF z Downloads a prototyp Samantha Cockpit jako ovladaci vrstva, mimo git-safe data.
 - `projects/samantha_external_backup.md` - offline zálohování `PythonMF`/Samanthy na externí disk: poslední úspěšná recovery záloha je 2026-07-29 ve snapshotu `20260729_154354`; Pythonový inkrementální běh dokončil 55 798 souborů bez přeskočení a restore drill `AGENTS.md` potvrdil shodný SHA-256.
 - `projects/janicka_cockpit_takeover.md` - Janička Cockpit je aktivní netechnický rozcestník k existujícím funkcím. Stará light komunikace a nouzové otevírání plného Adama jsou vyřazené; komunikace se vrátí až jako samostatný funkční Adam-R2.
-- `projects/janicka_r2_adam.md` - nový samostatný projekt priority 2 pro R2-Adam v Janičce: vlastní trvalé vlákno a soukromý kompaktní kontext mimo Git, read-only přístup ke zdrojovým datům Samanthy a budoucí append-only TXT export s náhledem a dvoukrokovým odesláním na pevný soukromý kontakt Jany.
+- `projects/janicka_r2_adam.md` - funkční samostatný R2-Adam pro Janičku: vlastní chat, soukromý kontext, TXT prostor, dokumentová lišta, čtečka a potvrzovaná práce s úplnými sadami read-only zdrojů. Další krok je úplný tok e-mail -> vault -> R2 TXT a provozní přejímka.
 - `projects/janicka_cockpit_kucharka.md` - první git-safe kuchařka pro Janu k používání Janičky v Cockpitu: dokumenty, tisk, e-maily, Lékárna, rodinné projekty, Adam, připomenutí, nouzové převzetí a bezpečnostní hranice bez citlivých údajů.
 - `projects/pozustalost_rodinny_plan_2026_05_30.txt` - [PRIPOMENOUT] priorita 1 rodinný nouzový balíček / pozůstalost: git-safe návrh struktury pro šifrovaný private balík; technicky nestavět druhý dokumentový systém, ale použít Document Management jako hlavní trezor, pozůstalostní metadata/tagy a samostatný šifrovaný export; soukromé šablony jsou mimo git v `data/private/pozustalost/`.
 - `projects/neuberk_interier_design.md` - projekt Neuberk interiér design: soukromý pracovní prostor pro fotky, plánky, rozměry a návrhy interiéru domu; první místnost je půdní hostovská místnost `Kačenka` pro dcery s dětmi, první čistý překres jedné stěny je hotový mimo git v `data/private/neuberk_interier_design/`.
-- `projects/automated_recurring_tasks.md` - automatické opakující se úkoly a ColorsAndNumbers soví TTS; checkpoint 2026-07-27 mění workflow z přímého commitu/pushe do `main` na GitHub Pages artifact. Nová cesta čeká na samostatně potvrzené přepnutí Pages z legacy `main/docs` na GitHub Actions a první živý retest.
-- `handoffs/colors_numbers_owl_pages_artifact_checkpoint_2026_07_27.md` - aktuální checkpoint odstranění sovího zápisu do `main`: dnešní MP3 je vygenerované, workflow je read-only vůči obsahu repozitáře a otevřený krok je přepnutí Pages zdroje a živý test.
+- `projects/automated_recurring_tasks.md` - automatické opakující se úkoly a ColorsAndNumbers soví TTS; GitHub Pages workflow artifact je živá publikační autorita, plánovaný běh 30. 7. uspěl a `main` se už workflow nemění.
+- `handoffs/colors_numbers_owl_pages_artifact_checkpoint_2026_07_27.md` - historický checkpoint odstranění sovího zápisu do `main`; krok přepnutí Pages byl později dokončen a současný stav je v projektovém souboru.
 - `projects/tomik_video_imovie.md` - [PRIPOMENOUT] projekt priorita 1 pro rodinny iMovie sestřih z malych videi od dcery, tema vnuk Tomik druhy rok; workflow, soukromi, storyboard a exportni checklist.
 - `projects/family_memory_films.md` - obecna platforma pro trideni rodinnych fotek/videi a pripravu vzpominkovych filmu; prvni dataset je USA 2019 na plose Macu, cisty seznam 15 dnu je odsouhlaseny, master prehled `Tomik 2` je ulozen mimo git, predstrihovy formular `03_overview/film_selection_form.html` ma autosave, CSV export, rating fotek/videi a prehravani videi a Adamuv prvni navrh ratingu je aplikovany.
 - `../START_HERE_RECOVERY.md` - krátký kořenový startovací soubor pro iPhone/GitHub: kam kliknout, když původní Mac nejde zapnout.
@@ -97,9 +94,11 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   je nasazený a živý test Human–Adam → Knihovna → Human–Adam prošel se zachovanou
   historií, čistými workspaces a potvrzeným read-only tahem.
 
-- `tvbcp/architektura_komunikace_samantha.txt` - [PRIPOMENOUT] aktivni kanonicka
+- `tvbcp/architektura_komunikace_samantha.txt` - aktivni kanonicka
   smlouva Layeru `Human–Adam / vyvojove prostredi`, propojena s
   `WORKSTREAMS.md` a handoffem `human_adam_layer_workstream_start_2026_07_20.md`.
+  P6b potvrzuje, ze Human–Adam a Knihovna jsou docasne kompatibilni adaptery;
+  jejich zmena neni bez konkretniho problemu aktualni prioritou.
   Od 2026-07-20 ma prednost jednoduchy model: kazdy proud ma vlastni vlakno,
   kratky kontext, TVBCP a handoff; bezny vyvoj jde po jednom cistem kroku primo
   na `main`, bez WIP vetvi, prevzeti a globalniho semaforu. Zachovava zakladni

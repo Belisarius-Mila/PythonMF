@@ -43,7 +43,7 @@ pro mazani, nevratne zasahy, odesilani ven a skutecne systemove riziko.
 - Python 3.12 je pripraveny.
 - OpenAI API key je pripraveny lokalne, ale nesmi se zapisovat do gitu ani do pametovych souboru.
 
-## Aktualni kanonicky stav 2026-07-29
+## Aktualni kanonicky stav 2026-07-30
 
 Samantha Agent/RAG ma prvni praktickou verzi nad OpenAI Agents SDK a lokalni
 markdown pameti.
@@ -65,6 +65,14 @@ markdown pameti.
   uplatni jen na pracovni proud rozpoznany z dotazu.
 - P2 po vyslovnem souhlasu zalozilo kanonicky handoff a TVBCP pouze pro
   `project-samantha-agent-rag`; podrobny soucasny stav je v teto dvojici.
+- P3 opravilo jediny formalni rozpor rezimu Mobile Input.
+- P4 prakticky proverilo sedm roadmapovych proudu a odkrylo chybne vynucovani
+  filtru `projects` agentem.
+- P5 zavedlo nefiltrovane prvni hledani podle autority a jednoznacne aliasy
+  `R2 Adam` a `Kalendář`; nasazeni `20180e2` i smoke 5/5 jsou potvrzene.
+- P6a provedlo obsahovy audit sedmi roadmapovych proudu a P6b narovnalo pouze
+  prokazatelne zastarale aktivni souhrny bez mazani historie a bez hromadneho
+  zakladani kanonickych dvojic.
 - Vyhledavani zatim neni vektorova databaze a nepouziva embeddings.
 - Lokalni smoke test 2026-05-23 bez OpenAI API po doplneni `source_type`:
   - dotaz `Samantha Agent RAG search_memory ranking` vraci vysledky oznacene
@@ -77,11 +85,11 @@ markdown pameti.
 
 Aktualni dalsi krok:
 
-- P4 ma udelat read-only live retest pres Samanthu/OpenAI pro sedm proudu
-  soucasne roadmapy a sledovat, zda agent sam vhodne pouziva autoritu a
-  `source_type`.
-- Embeddings resit az po overeni, ze textove vyhledavani s autoritou a cache
-  nestaci.
+- Smer pravdive pameti P0-P6 je funkcne uzavreny.
+- Dalsi systemovy smer je jeden uplny provozni tok
+  e-mail -> private vault -> R2 TXT.
+- Embeddings resit jen pri novem praktickem dukazu, ze textove vyhledavani s
+  autoritou a cache nestaci.
 
 ## Historicke handoffy Samantha Agent/RAG
 

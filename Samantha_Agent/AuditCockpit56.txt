@@ -1,6 +1,6 @@
 AKTUÁLNÍ ROADMAPA JÁDRA SAMANTHY A COCKPITU
-Verze: 6.0
-Aktualizováno: 2026-07-29 16:34 CEST
+Verze: 6.1
+Aktualizováno: 2026-07-30 07:25 CEST
 Určeno pro: Terminálový Adam
 Priorita dokumentu: 1
 
@@ -52,33 +52,24 @@ Pokud se zdroje rozcházejí a nelze je bezpečně rozhodnout, stav se označí
 „neověřeno“ a nevytvoří se falešné doporučení.
 
 
-3. OVĚŘENÝ VÝCHOZÍ STAV 29. 7. 2026
+3. OVĚŘENÝ VÝCHOZÍ STAV 30. 7. 2026
 
 Provozní stav při této aktualizaci:
 
 - pracovní strom hlavního repozitáře je čistý,
-- lokální main je o 16 hotových commitů před origin/main,
-- GitHub batch audit je připravený, čeká 16 commitů a nepoužije force push,
+- lokální main je o 2 hotové commity před origin/main,
+- pracovní strom je čistý a stav je platný `GitHub batch pending`,
 - Cockpit odpovídá a runtime je připojený,
-- oba profilové workspace jsou čisté a zarovnané,
-- běžící Cockpit je ověřený na předchozí verzi main, nikoli na současném HEAD,
-- autosave watcher běží,
+- aktuální `main` `20180e2` je nasazený a smoke test prošel 5/5,
 - recovery záloha z 29. 7. 2026 je úspěšná a ověřená restore drillem.
 
 Čistý main napřed před origin/main je platný stav „GitHub batch pending“.
 Není to dirty strom ani výzva k rozdělování rozpracovaných změn.
 
-Před zahájením větší nové implementace:
-
-1. provést read-only audit denního GitHub balíčku,
-2. push provést jen po odpovídajícím potvrzení,
-3. potom samostatně potvrzeně nasadit aktuální main,
-4. ověřit restart a smoke 5/5,
-5. teprve potom zahájit Cockpit Dietu D0.
-
-Toto provozní uzavření není šestý projekt. Je to vstupní podmínka pro bezpečné
-pokračování. Samotný souhlas s touto roadmapou není automatickým souhlasem
-s pushem nebo nasazením.
+Původní provozní uzavření, Cockpit Dieta D0-D3 a Směr 2 P0-P6 jsou dokončené.
+Další věcný směr je jeden úplný provozní tok e-mail -> private vault -> R2 TXT.
+Samotný tento dokument není souhlasem s e-mailovým nebo dokumentovým zápisem,
+odesláním, pushem ani nasazením.
 
 
 4. CO Z PŮVODNÍHO AUDITU ZŮSTÁVÁ PLATNÉ
@@ -143,9 +134,9 @@ ochrany“ je historicky splněné a není současnou roadmapou.
 
 Pořadí je závazné jako výchozí doporučení, dokud Míla nerozhodne jinak:
 
-0. uzavřít GitHub batch a nasadit současný main,
-1. Cockpit Dieta D0 a následně jeden malý D1 řez,
-2. narovnat projektovou paměť a ověřit její používání Samanthou,
+0. hotovo: předchozí GitHub batch byl uzavřen a současný main je nasazený,
+1. hotovo: Cockpit Dieta D0-D3,
+2. hotovo: pravdivá paměť a RAG P0-P6,
 3. ověřit jeden úplný tok e-mail -> vault -> R2 TXT,
 4. provést provozní přejímku R2-Adama z pohledu Jany,
 5. dokončit přechod opakovaných automatizací do stabilního provozu,
@@ -159,8 +150,8 @@ uvnitř rozpracovaného kroku jako vedlejší „vylepšení“.
 
 Proč je první:
 
-- app/cockpit.py měl při posledním opakovatelném měření 20 745 fyzických a
-  19 620 neprázdných řádků,
+- app/cockpit.py má po D1 a D2 při měření 30. 7. 2026 10 048 fyzických a
+  9 375 neprázdných řádků,
 - hlavní systémové riziko je koncentrace odpovědností, ne jedna konkrétní chyba,
 - menší moduly zrychlí vývoj, testování, diagnostiku i bezpečné nasazení všech
   dalších oblastí.
@@ -224,7 +215,8 @@ Dieta D3 - rychlejší zpětná vazba:
 - plnou gate zatím neoslabovat,
 - zmenšení release gate řešit až po samostatném důkazu bezpečnosti.
 
-Nejbližší skutečný vývojový krok po provozním uzavření je pouze D0.
+Cockpit Dieta D0-D3 je uzavřená a nasazená. Další dietní řez se nemá otevírat
+uvnitř následujícího provozního směru bez nového konkrétního důvodu.
 
 
 8. SMĚR 2 - PRAVDIVÁ PAMĚŤ A RAG
@@ -518,13 +510,15 @@ Povinné testy:
 
 Akceptační kritérium:
 
-Po opravě musí nový audit nad stavem 29. 7. 2026 rozpoznat:
+Po opravě musí nový audit nad aktuálním stavem rozpoznat:
 
 - čistý GitHub batch pending,
 - aktuální a ověřenou zálohu,
-- Cockpit Dietu D0 jako první věcný směr,
-- drift projektové paměti jako samostatný systémový problém,
-- dokumentový end-to-end test, R2 přejímku a automatizace jako navazující
-  směry,
+- Cockpit Dietu D0-D3 jako uzavřený směr, nikoli nový úkol,
+- pravdivou paměť P0-P6 jako uzavřený směr s poctivým
+  `aggregate_unverified` fallbackem,
+- úplný tok e-mail -> private vault -> R2 TXT jako první věcný směr,
+- R2 přejímku jako navazující směr,
+- automatizaci sovy jako živý Pages workflow bez zápisu do `main`,
 - žádný návrat starého VoiceBridge, starého kalendářového kroku nebo tvrzení,
   že R2-Adam ještě nebyl implementován.

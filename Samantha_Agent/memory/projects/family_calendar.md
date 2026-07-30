@@ -131,9 +131,10 @@
 - Keychain tajemství se čte až po ověření režimu, recovery a nalezení
   kandidáta. Není předáváno v argumentech procesu ani zobrazováno v bezpečném
   výsledku. `disabled` a `dry_run` Keychain ani SMTP nevolají.
-- Aktivační náhled po implementaci nemá implementační blokátor a potvrzuje
-  podporu cílového režimu. Stále ale nemá zápisovou apply větev:
-  `activation_implementation_available=false` a `apply_available=false`.
+- Potvrzovaná aktivační apply brána je implementovaná. Před změnou znovu
+  ověřuje fingerprint a předpoklady, odpojí plánovač, atomicky změní pouze
+  režim, konfiguraci ověří, plánovač znovu načte a dokončí readiness audit;
+  nejasný stav vede k ověřovanému rollbacku bez automatického retry.
 - Živý read-only náhled prošel bez issues a potvrdil připravenou konfiguraci,
   načtený plánovač, Keychain reference a prázdný neblokující stav. Neprovedl
   zápis, runtime mutaci, čtení hesla ani transport.
@@ -141,6 +142,9 @@
   prošly. Kontrolní běh živého plánovače zůstal `dry_run`, našel nula
   kandidátů, nevolal koordinátor ani transport a nezměnil konfiguraci nebo
   stavové úložiště.
+- Implementační checkpoint aktivační brány prošel 1217 testy a je obsažený v
+  nasazeném `main`. P6a záměrně nečetlo současný soukromý režim; jeho dnešní
+  hodnota proto zůstává neověřená.
 
 ## Bezpečnostní hranice
 
@@ -156,10 +160,9 @@
 
 ## Nejmenší další krok
 
-Samostatně implementovat potvrzovanou aktivační bránu podle už schváleného
-pořadí: znovu ověřit fingerprint a předpoklady, odpojit plánovač, atomicky
-změnit pouze režim na `enabled`, konfiguraci ověřit, znovu načíst plánovač a
-ověřit readiness. Do té doby režim neměnit a nic automaticky neodesílat.
+Provést pouze redigovaný read-only audit současného režimu, readiness a
+plánovače. Aktivační apply neopakovat jen podle staré paměti a nic skutečně
+neodesílat kvůli testu.
 
 ## Otevřené riziko
 

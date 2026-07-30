@@ -39,6 +39,8 @@ dukazu, ze textove hledani nestaci.
 - P3: jediny formalni mode drift opraven; Mobile Input je vsude `paused`.
 - P4: read-only prakticka akceptace sedmi proudu a zkracenych nazvu.
 - P5: nefiltrovane prvni hledani autority a dva jednoznacne query aliasy.
+- P6: obsahovy audit sedmi roadmapovych proudu a narovnani pouze prokazatelne
+  zastaralych aktivnich souhrnu.
 
 ## Otevrene kroky a rizika
 
@@ -48,8 +50,8 @@ dukazu, ze textove hledani nestaci.
 - Historicky zdroj muze zustat ve vysledcich, ale nesmi predbehnout rozpoznany
   kanonicky zdroj stejneho proudu.
 - Obecny `Cockpit` je skutecne nejednoznacny a nesmi dostat tichy alias.
-- P5 je lokalne otestovana, ale do beziciho Cockpitu se nasazuje az samostatne
-  potvrzenym krokem.
+- Proudy bez materializovane kanonicke dvojice zustavaji
+  `aggregate_unverified`; P6 je hromadne nematerializuje.
 
 ## Chronologicke zaznamy
 
@@ -157,3 +159,36 @@ dukazu, ze textove hledani nestaci.
 - P5b prosla 47 cilenymi a 1240 uplnymi testy. Live `R2 Adam` a `Kalendář`
   provedly jedine nefiltrovane volani a vratily spravny kanonicky handoff.
 - Nebyl cten private obsah a nebyl proveden zapis do private uloziste.
+
+### 2026-07-30 07:25 CEST - P6 obsahove narovnani aktivni pameti
+
+#### Hotovo
+
+- P5 je nasazena na aktualnim Cockpitu a opakovany smoke test prosel 5/5.
+- P6a porovnalo sedm roadmapovych proudu se zivymi dukazy a odlisilo formalni
+  konzistenci od obsahove pravdivosti.
+- P6b opravilo jen aktivni souhrny a dalsi kroky, ktere byly prokazatelne
+  prekryte novejsim stavem.
+
+#### Rozhodnuti
+
+- Historicke bloky se neprepisuji ani nemazou.
+- Chybejici kanonicke dvojice se kvuli P6 hromadne nezakladaji.
+- Neovereny private provozni stav, zejmena zivy rezim Rodinneho kalendare, se
+  nesmi domyslet.
+
+#### Dalsi krok
+
+- Prejit k jednomu uplnemu overeni toku e-mail -> private vault -> R2 TXT.
+
+#### Navrhovane dalsi kroky
+
+- Po praktickem toku provest provozni prejimku R2-Adama z pohledu Jany.
+- Embeddings otevrit jen pri novem dukazu, ze textove hledani nestaci.
+
+#### Technicky dukaz
+
+- P0 audit nadale hlasi nula formalnich rozporu.
+- P5 ranking vraci pro R2-Adam a Kalendar kanonicke zdroje jako prvni a u
+  nematerializovanych proudu priznava slabsi autoritu.
+- Private obsah nebyl pri P6a ani P6b cten nebo zapisovan.

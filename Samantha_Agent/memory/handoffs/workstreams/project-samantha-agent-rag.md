@@ -4,7 +4,7 @@ Nazev: Samantha Agent / RAG
 Pracovni proud: project-samantha-agent-rag
 Typ: Project
 Priorita: 1
-Stav: ceka na nasazeni
+Stav: rozpracovane
 Pripomenout pri startu: ne
 Datum: 2026-07-30
 
@@ -34,21 +34,29 @@ Co je hotove:
   `aggregate_unverified` a `reference` se priznaji jako fallback.
 - P5b pridalo pouze query aliasy `R2 Adam` a `Kalendář`. Alias nemeni runtime
   binding a samotny `Cockpit` zustava zamerne nejednoznacny.
+- P5 bylo potvrzene nasazeno na `20180e2`; deployment uctenka i opakovany
+  Cockpit smoke potvrzuji 5/5.
+- P6a obsahove porovnalo sedm roadmapovych proudu se zivymi dukazy,
+  kanonickymi dokumenty, projektovymi referencemi a agregaty.
+- P6b narovnalo pouze aktivni souhrny a dalsi kroky; historicke bloky zustaly
+  zachovane a zadna nova lazy kanonicka dvojice nebyla materializovana.
 
 Co neni hotove:
-- Obsahova pravdivost dalsich pracovnich proudu nebyla plosne prepisovana ani
-  automaticky opravovana.
-- P5 je lokalne implementovana a otestovana, ale jeste nebyla nasazena do
-  beziciho Cockpitu.
+- Obsahova pravdivost vsech 30 pracovnich proudu nebyla plosne prepisovana ani
+  automaticky prohlasena za overenou.
+- Proudy bez materializovane kanonicke dvojice zustavaji poctive oznacene jako
+  `aggregate_unverified`.
 - Obecny dotaz `Cockpit` zustava nejednoznacny mezi hlavnim Cockpitem a
   Janicka Cockpitem; nema dostat tichy alias.
 
 Dalsi krok:
-- Potvrzene nasadit aktualni P5 do Cockpitu a provest smoke test.
+- Uzavrit Smer 2 jako funkcni a prejit k jednomu uplnemu overeni toku
+  e-mail -> private vault -> R2 TXT.
 
 Navrhovane dalsi kroky:
-- Po nasazeni udelat maly obsahovy audit jen nejdulezitejsich aktivnich proudu.
 - U obecneho `Cockpit` zachovat explicitni doptani, ne automaticky vyber.
+- Pri dalsi praci sledovat, zda se znovu neobjevi obsahovy drift aktivniho
+  souhrnu proti novejsimu dukazu.
 - Embeddings resit pouze pokud textove hledani ani po techto krocich nestaci.
 
 Zmenene nebo relevantni soubory:

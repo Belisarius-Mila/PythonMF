@@ -1,35 +1,39 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-28 21:52 CEST
+- Obsahově narovnáno P6b: 2026-07-30 07:25 CEST
 
 ### Hotovo
-- Aktivační brána bezpečně a potvrzovaně přepíná automatizaci z dry-run do enabled s ověřeným rollbackem
-- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Potvrzovaná aktivační apply brána je implementovaná včetně revalidace,
+  odpojení plánovače, atomické změny režimu a ověřeného rollbacku.
+- Aktuální `main` `20180e2` je serverově nasazený a Cockpit smoke prošel 5/5.
 
 ### Otevřeno
-- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
-- Lokální commity čekají na samostatný denní GitHub balíček.
+- Současný živý režim, readiness a stav plánovače nebyly v P6a čteny ze
+  soukromé konfigurace a zůstávají neověřené.
+- Samostatný potvrzovaný workflow pro ruční uzavření blokujícího
+  `partial` nebo `delivery_unknown` není doložený.
 
 ### Rizika
-- Žádné další doložené provozní riziko.
+- Neověřený režim se nesmí domýšlet a nejisté doručení se nesmí automaticky
+  opakovat.
 
 ### Další krok
-- Zkontrolovat změny a vytvořit checkpoint v Cockpitu
+- Provést pouze redigovaný read-only audit živého režimu, readiness a
+  plánovače; aktivační apply neopakovat podle staré paměti.
 
 ### Rozhodnutí
-- V tomto kroku nebylo přijato nové kanonické rozhodnutí.
+- Implementovaná aktivační brána není důkazem současného režimu ani pokynem k
+  dalšímu odeslání.
 
 ### Navrhované další kroky
-- Po checkpointu spustit pouze redigovaný aktivační preview; samotné apply potvrdit samostatně
+- První přirozený plánovaný výsledek sledovat pouze přes redigovaný stav.
+- Stavy `sending`, `partial` a `delivery_unknown` ponechat fail-closed.
 
 ### Technický stav checkpointu
-- Změna je otestovaná (1217 testů).
-- Git před checkpointem: lokální `main` na `b87f89dd0bdc`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `b87f89dd0bdc` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-07-28T19:09:50+00:00.
-- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
-- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
-- Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
+- Implementační checkpoint aktivační brány prošel 1217 testy.
+- Deployment účtenka: `20180e2`, stav `deployed`, smoke 5/5.
+- P6a nečetlo soukromý režim ani tajemství.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Rodinný kalendář
@@ -649,3 +653,25 @@ Technický důkaz:
 - plná Cockpit brána: 1217 testů, 290.5 s, výsledek OK.
 - Pracovní proud: `project-family-calendar`.
 - Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+
+### 2026-07-30 07:25 CEST – P6b oddělilo implementaci od živého režimu
+
+Hotovo:
+- Aktivní paměť už nenabízí implementaci aktivační brány jako budoucí krok;
+  brána je implementovaná a nasazený `main` ji obsahuje.
+
+Rozhodnutí:
+- Z implementace se nesmí odvozovat aktuální soukromý režim.
+- P6b nečetlo konfiguraci, příjemce, tajemství ani delivery obsah.
+
+Další krok:
+- Provést redigovaný read-only audit režimu, readiness a plánovače.
+
+Navrhované další kroky:
+- Aktivační apply neopakovat jen podle staré paměti.
+- Přirozený plánovaný výsledek sledovat přes redigovaný stav a nejistotu
+  ponechat fail-closed.
+
+Technický důkaz:
+- Implementační checkpoint prošel 1217 testy.
+- Aktuální Cockpit běží na `20180e2` a smoke prošel 5/5.

@@ -1,37 +1,42 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-28 06:39 CEST
+- Obsahově narovnáno P6b: 2026-07-30 07:25 CEST
 
 ### Hotovo
-- Aktivní registry, návody a modelové instrukce už nesměřují ke starému VoiceBridge ani odstraněné komunikaci Janičky; historické důkazy zůstávají zachované.
-- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Transformace na kanonické pracovní proudy, globální operace panelu Práce a
+  odstranění aktivní legacy komunikace jsou dokončené.
+- Human–Adam a Knihovna zůstávají dočasnými kompatibilními adaptéry nad
+  existujícími vlákny a workspaces; ostatní proudy používají lazy backend.
+- Aktuální `main` `20180e2` je serverově nasazený a Cockpit smoke prošel 5/5.
 
 ### Otevřeno
-- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
-- Lokální commity čekají na samostatný denní GitHub balíček.
+- Profilové adaptéry lze jednou převést na čistě deklarativní schopnosti, ale
+  nyní nejde o provozní problém ani prioritní vývoj.
+- Lokální hotové commity zůstávají v denním GitHub balíčku.
 
 ### Rizika
-- Žádné další doložené provozní riziko.
+- Předčasné odstranění adaptérů by mohlo narušit kontinuitu existujících
+  vláken, workspaces nebo bezpečnostních hranic.
 
 ### Další krok
-- Provést checkpoint a nasazení, potom spustit závěrečnou fázi 9.4e-c s úplnou Cockpit Quality Gate a smoke testem.
+- Bez okamžité implementační akce; pokračovat aktuální roadmapou mimo
+  Human–Adam a adaptéry otevřít jen při konkrétním problému.
 
 ### Rozhodnutí
-- Staré komunikační cesty zůstávají pouze historií; Janička dostane komunikaci až prostřednictvím funkčního Adam-R2.
+- Zachovat oprávněné schopnosti a současnou kontinuitu, ale nepovažovat
+  historické profilové postavení za cílovou architekturu.
 
 ### Navrhované další kroky
-- Uzavřít fázi 9.4 úplnou regresní bránou a živým smoke testem.
-- Adam-R2 zahájit jako samostatný projekt až po uzavření amputace legacy komunikace.
-- Při vhodné příležitosti obnovit ověřenou externí zálohu.
+- Případný budoucí privilege audit vést read-only podle konkrétních capability
+  a profilových větvení.
+- Adaptéry neodstraňovat bez samostatného migračního a regresního důkazu.
 
 ### Technický stav checkpointu
-- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `0364e9c63cfa`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `0364e9c63cfa` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-07-28T04:14:59+00:00.
-- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
-- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
-- Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
+- Deployment účtenka: `20180e2`, stav `deployed`, smoke 5/5.
+- P6a staticky ověřilo právě dva kompatibilní adaptéry a deklarativní private
+  archive capability Knihovny.
+- Historické chronologické bloky níže zůstávají beze změny.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 Nazev: Human–Adam / vyvojove prostredi - zalozeni pracovniho proudu Layer

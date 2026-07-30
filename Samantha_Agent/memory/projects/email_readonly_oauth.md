@@ -428,3 +428,22 @@ Pozdejsi rozsireni:
 - `handoffs/email_fulltext_search_tool_2026_05_21.md`
 - `handoffs/email_seznam_pojisteni_prilohy_2026_05_21.md`
 - `handoffs/email_seznam_readonly_provider_2026_05_22.md`
+
+## Aktuální stav 2026-07-30
+
+- Read-only prohlížeč Archivu e-mailu je vyjmutý z `cockpit.py` do samostatného
+  backendového modulu se zachovanými URL, payloady a private hranicemi.
+- Frontend hlavního Cockpitu, Email Processing a Archivu e-mailu je oddělený
+  do statických souborů bez redesignu.
+- Oprava redigovaného dohledání archivních příloh je implementovaná a obsažená
+  v nasazeném `main` `20180e2`; Cockpit smoke prošel 5/5.
+- Praktický test odhalil chybějící přílohu před opravou. Po nasazení zatím
+  není doložený uživatelský post-fix retest stejného bezpečně dohledaného
+  archivního záznamu.
+
+Nejmenší další krok:
+
+- V Archivu e-mailu zopakovat read-only otevření již známého redigovaného
+  záznamu a potvrdit dostupnost stažené přílohy.
+- Mazání, odesílání, přesun do koše a nové ukládání obsahu zůstávají mimo tento
+  retest a za svými potvrzovacími hranicemi.
