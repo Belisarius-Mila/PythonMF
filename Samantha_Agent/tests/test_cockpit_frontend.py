@@ -19,9 +19,9 @@ from app.cockpit_frontend import (
 EXPECTED_PAGES = {
     "email_archive": (
         EMAIL_ARCHIVE_HTML,
-        31914,
-        930,
-        "db7d257ea100137b69fe5b11987a0df7e6b8a8d8746e432bae57531d08333766",
+        38053,
+        1075,
+        "752121b7a398771703a595a585f0f16bb067bade565faf33a8a2de6cf136bc32",
     ),
     "email_processing": (
         EMAIL_PROCESSING_HTML,
@@ -81,6 +81,9 @@ class CockpitFrontendContractTests(unittest.TestCase):
             "body_text",
             "Otevřít přílohu",
             "Otevřít celé PDF",
+            "AI přečíst e-mail",
+            "/api/email-archive/ai-metadata",
+            "Nic nebylo uloženo ani změněno",
         ):
             with self.subTest(expected=expected):
                 self.assertIn(expected, EMAIL_ARCHIVE_HTML)

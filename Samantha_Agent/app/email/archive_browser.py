@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import tempfile
 from datetime import datetime, timezone
 from email import policy
 from email.parser import BytesParser
@@ -12,6 +13,11 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import quote
 
+from app.documents.ai_metadata import (
+    AIMetadataError,
+    DEFAULT_AI_METADATA_DOMAINS,
+    request_codex_metadata_suggestion,
+)
 from app.documents.search_service import (
     READING_STATUS_LABELS,
     document_reference,
@@ -20,6 +26,7 @@ from app.documents.search_service import (
 from app.documents.vault import (
     DEFAULT_DOCUMENTS_DIR,
     PROJECT_ROOT,
+    extract_text,
     read_json_file,
     read_jsonl,
     relative_to_project,
@@ -239,6 +246,114 @@ def email_archive_detail_status(
         "downloaded_attachments": downloaded,
         "vault_attachments": vault_attachments,
         "message": "Archiv e-mailu načten read-only.",
+    }
+
+
+def email_archive_ai_metadata_suggestion(
+    archive_id: str,
+    attachment_ref: str = "",
+    *,
+    archive_directory: Path = DEFAULT_EMAIL_ARCHIVE_DIR,
+    analyzer=request_codex_metadata_suggestion,
+    extractor=extract_text,
+) -> dict[str, Any]:
+    """Analyze one explicitly opened email and optionally one embedded attachment."""
+
+    resolved = resolve_email_archive_dir(archive_id, archive_directory=archive_directory)
+    if not resolved.get("ok"):
+        raise AIMetadataError("Vybraný e-mail nebyl v místním archivu nalezen.")
+    archive_dir = Path(resolved["path"])
+    try:
+        metadata = read_json_file(archive_dir / "metadata.json")
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        raise AIMetadataError("Vybraný e-mail nemá čitelná metadata.") from exc
+
+    archive_ref = email_archive_reference(archive_dir.name)
+    body_text, body_truncated = read_email_archive_body_text(
+        archive_ref,
+        archive_directory=archive_directory,
+    )
+    subject = safe_text(str(metadata.get("subject", ""))).strip()[:260]
+    sender = redact_email_addresses(safe_text(str(metadata.get("from", ""))))[:220]
+    source_name = subject or "E-mail bez předmětu"
+    source_text = "\n".join(
+        part
+        for part in (
+            f"Předmět: {subject}" if subject else "",
+            f"Odesílatel: {sender}" if sender else "",
+            body_text,
+        )
+        if part
+    )
+    current_metadata: dict[str, Any] = {
+        "title": subject,
+        "domain": "other",
+        "document_type": "email",
+        "counterparty": sender,
+        "related_asset": "",
+        "tags": ["email"],
+    }
+    attachment_filename = ""
+    attachment_extraction_method = ""
+    safe_attachment_ref = str(attachment_ref or "").strip()
+    if safe_attachment_ref:
+        attachment = resolve_email_archive_embedded_attachment(
+            archive_ref,
+            safe_attachment_ref,
+            archive_directory=archive_directory,
+        )
+        if not attachment.get("ok"):
+            raise AIMetadataError("Vybraná příloha nebyla v původním e-mailu nalezena.")
+        attachment_filename = safe_filename(str(attachment.get("filename") or "attachment.bin"))
+        payload = attachment.get("data")
+        if not isinstance(payload, bytes):
+            raise AIMetadataError("Vybraná příloha nemá čitelný obsah.")
+        with tempfile.TemporaryDirectory(prefix="samantha-email-ai-") as temp_dir:
+            attachment_path = Path(temp_dir) / attachment_filename
+            attachment_path.write_bytes(payload)
+            extraction = extractor(attachment_path)
+        attachment_text = str(getattr(extraction, "text", "") or "").strip()
+        attachment_extraction_method = safe_text(str(getattr(extraction, "method", "")))[:120]
+        if not attachment_text:
+            raise AIMetadataError("Z vybrané přílohy se nepodařilo získat text pro AI návrh.")
+        source_name = f"{source_name} — {attachment_filename}"
+        source_text = "\n".join(
+            (
+                source_text,
+                f"Příloha: {attachment_filename}",
+                attachment_text,
+            )
+        )
+        current_metadata = {
+            "title": attachment_filename,
+            "domain": "other",
+            "document_type": "email-attachment",
+            "counterparty": sender,
+            "related_asset": "",
+            "tags": ["email", "email-attachment"],
+        }
+    if not source_text.strip():
+        raise AIMetadataError("E-mail nemá použitelný text pro AI návrh.")
+
+    result = analyzer(
+        source_name=source_name,
+        source_text=source_text,
+        current_metadata=current_metadata,
+        allowed_domains=list(DEFAULT_AI_METADATA_DOMAINS),
+    )
+    return {
+        **result,
+        "source_kind": "email_attachment" if safe_attachment_ref else "email",
+        "archive_ref": archive_ref,
+        "attachment_ref": safe_attachment_ref,
+        "attachment_filename": attachment_filename,
+        "attachment_extraction_method": attachment_extraction_method,
+        "body_truncated": body_truncated,
+        "message": (
+            "AI návrh z e-mailu a vybrané přílohy je pouze ke kontrole; nic nebylo uloženo."
+            if safe_attachment_ref
+            else "AI návrh z e-mailu je pouze ke kontrole; nic nebylo uloženo."
+        ),
     }
 
 

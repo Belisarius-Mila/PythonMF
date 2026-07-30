@@ -11,6 +11,7 @@ from app.email.archive_browser import (
     downloaded_email_archive_attachments,
     email_archive_reference,
     email_archive_detail_status,
+    email_archive_ai_metadata_suggestion,
     email_archive_list_status,
     email_archive_reference_for_document_id,
     read_email_archive_embedded_attachments,
@@ -19,6 +20,7 @@ from app.email.archive_browser import (
     resolve_email_archive_file,
     resolve_email_archive_incoming_file,
 )
+from app.documents.vault import TextExtractionResult
 
 
 class EmailArchiveBrowserTests(unittest.TestCase):
@@ -592,6 +594,105 @@ class EmailArchiveBrowserTests(unittest.TestCase):
             }
 
         self.assertEqual(after, before)
+
+    def test_ai_metadata_reads_one_email_without_mutating_archive(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            archive_directory, archive_dir, _documents_dir = self.create_archive_fixture(root)
+            before = {
+                str(path.relative_to(root)): path.read_bytes()
+                for path in root.rglob("*")
+                if path.is_file()
+            }
+            captured: dict[str, object] = {}
+
+            def analyzer(**kwargs: object) -> dict[str, object]:
+                captured.update(kwargs)
+                return {
+                    "ok": True,
+                    "read_only": True,
+                    "persisted": False,
+                    "fields": [],
+                    "important_dates": [],
+                }
+
+            result = email_archive_ai_metadata_suggestion(
+                email_archive_reference(archive_dir.name),
+                archive_directory=archive_directory,
+                analyzer=analyzer,
+            )
+            after = {
+                str(path.relative_to(root)): path.read_bytes()
+                for path in root.rglob("*")
+                if path.is_file()
+            }
+
+        self.assertTrue(result["read_only"])
+        self.assertFalse(result["persisted"])
+        self.assertEqual(result["source_kind"], "email")
+        self.assertIn("test", str(captured["source_text"]))
+        self.assertEqual(captured["current_metadata"]["document_type"], "email")
+        self.assertEqual(after, before)
+
+    def test_ai_metadata_can_include_one_explicit_embedded_attachment(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            archive_directory, archive_dir, _documents_dir = self.create_archive_fixture(root)
+            (archive_dir / "original.eml").write_bytes(
+                b"MIME-Version: 1.0\r\n"
+                b"Content-Type: multipart/mixed; boundary=\"mix\"\r\n\r\n"
+                b"--mix\r\n"
+                b"Content-Type: text/plain; charset=utf-8\r\n\r\n"
+                b"Synthetic email body.\r\n"
+                b"--mix\r\n"
+                b"Content-Type: application/pdf\r\n"
+                b"Content-Disposition: attachment; filename=\"synthetic.pdf\"\r\n"
+                b"Content-Transfer-Encoding: base64\r\n\r\n"
+                b"JVBERi0xLjQgc3ludGhldGlj\r\n"
+                b"--mix--\r\n"
+            )
+            archive_ref = email_archive_reference(archive_dir.name)
+            attachment = read_email_archive_embedded_attachments(
+                archive_ref,
+                archive_directory=archive_directory,
+            )[0]
+            captured: dict[str, object] = {}
+
+            def analyzer(**kwargs: object) -> dict[str, object]:
+                captured.update(kwargs)
+                return {
+                    "ok": True,
+                    "read_only": True,
+                    "persisted": False,
+                    "fields": [],
+                    "important_dates": [],
+                }
+
+            def extractor(path: Path) -> TextExtractionResult:
+                self.assertEqual(path.name, "synthetic.pdf")
+                self.assertTrue(path.read_bytes().startswith(b"%PDF"))
+                return TextExtractionResult(
+                    text="Synthetic invoice. Due 08.08.2026.",
+                    method="synthetic-pdf",
+                    ocr_needed=False,
+                )
+
+            result = email_archive_ai_metadata_suggestion(
+                archive_ref,
+                attachment_ref=attachment["attachment_ref"],
+                archive_directory=archive_directory,
+                analyzer=analyzer,
+                extractor=extractor,
+            )
+
+        self.assertEqual(result["source_kind"], "email_attachment")
+        self.assertEqual(result["attachment_filename"], "synthetic.pdf")
+        self.assertEqual(result["attachment_extraction_method"], "synthetic-pdf")
+        self.assertIn("Synthetic invoice", str(captured["source_text"]))
+        self.assertEqual(
+            captured["current_metadata"]["document_type"],
+            "email-attachment",
+        )
 
 
 if __name__ == "__main__":

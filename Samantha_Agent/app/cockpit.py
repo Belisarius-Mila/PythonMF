@@ -139,6 +139,7 @@ from app.documents.due_date_service import (
     document_due_candidates_status as build_document_due_candidates_status,
     document_payment_options,
 )
+from app.documents.ai_metadata import AIMetadataError
 from app.documents.intake_service import document_intake_status as build_document_intake_status
 from app.documents.scandocu import DEFAULT_DOWNLOADS_DIR, reviewed_document_ids, scan_downloads_for_pdfs
 from app.documents.review_service import (
@@ -217,6 +218,7 @@ from app.urgent_reminders import mark_urgent_reminder_done
 from app.urgent_reminders import sync_urgent_reminders_index
 from app.email.activity_state import DEFAULT_EMAIL_ACTIVITY_STATE_PATH, record_email_archive_completed
 from app.email.archive_browser import (
+    email_archive_ai_metadata_suggestion,
     email_archive_reference,
     email_archive_detail_status,
     email_archive_list_status,
@@ -4985,6 +4987,19 @@ def email_archive_evidence_summary(
     }
 
 
+def email_archive_ai_metadata_action(
+    archive_id: str,
+    attachment_ref: str = "",
+) -> dict[str, Any]:
+    try:
+        return email_archive_ai_metadata_suggestion(
+            archive_id=archive_id,
+            attachment_ref=attachment_ref,
+        )
+    except AIMetadataError as exc:
+        return {"ok": False, "read_only": True, "persisted": False, "message": str(exc)}
+
+
 def latest_email_archive_metadata_path(*, archive_directory: Path = DEFAULT_EMAIL_ARCHIVE_DIR) -> Path | None:
     candidates = [path for path in archive_directory.glob("*/metadata.json") if path.is_file()]
     if not candidates:
@@ -8813,6 +8828,14 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "direct",
     },
     {
+        "path": "/api/email-archive/ai-metadata",
+        "label": "Navrhnout metadata otevreneho e-mailu nebo jedne prilohy pomoci AI",
+        "risk": "external_ai",
+        "confirmation": "explicit_ui_action_readonly_no_persistence",
+        "handler_name": "email_archive_ai_metadata_action",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/email-processing/preview-attachment",
         "label": "Nacist preview e-mail prilohy",
         "risk": "read_only_via_post",
@@ -9658,6 +9681,15 @@ class CockpitServer:
                             folder=str(payload.get("folder", "INBOX")),
                             uid=str(payload.get("uid", "")),
                             max_chars=max_chars,
+                        )
+                    )
+                    return
+                if parsed.path == "/api/email-archive/ai-metadata":
+                    payload = self.read_json()
+                    self.respond_json(
+                        email_archive_ai_metadata_action(
+                            archive_id=str(payload.get("archive_id", "")),
+                            attachment_ref=str(payload.get("attachment_ref", "")),
                         )
                     )
                     return

@@ -155,7 +155,8 @@
           contentType: item.content_type || "",
           sizeBytes: item.size_bytes,
           location: "email",
-          url: item.url || ""
+          url: item.url || "",
+          attachmentRef: item.attachment_ref || ""
         });
       });
 
@@ -233,8 +234,17 @@
                 ? `<div class="attachment-actions">
                      <a class="action-link" target="_blank" rel="noopener"
                         href="${escapeHtml(card.url)}">${escapeHtml(attachmentActionLabel(card))}</a>
+                     ${card.attachmentRef
+                       ? `<button type="button" class="ai-link"
+                            data-ai-attachment-ref="${escapeHtml(card.attachmentRef)}">AI přečíst e-mail + přílohu</button>`
+                       : ""}
                    </div>`
-                : '<div class="attachment-unavailable">Přílohu nelze otevřít</div>'}
+                : `${card.attachmentRef
+                    ? `<div class="attachment-actions">
+                         <button type="button" class="ai-link"
+                           data-ai-attachment-ref="${escapeHtml(card.attachmentRef)}">AI přečíst e-mail + přílohu</button>
+                       </div>`
+                    : '<div class="attachment-unavailable">Přílohu nelze otevřít</div>'}`}
             </div>
           `).join("")}
         </div>
@@ -261,6 +271,72 @@
           </div>
         </details>
       `;
+    }
+
+    function renderAiMetadataResult(data) {
+      if (!data.ok) {
+        return `<div class="ai-error">${escapeHtml(data.message || "AI návrh se nepodařilo připravit.")}</div>`;
+      }
+      const changedFields = (data.fields || []).filter((item) => item.proposed);
+      const fieldRows = changedFields.map((item) => `
+        <div class="ai-comparison">
+          <div><strong>${escapeHtml(item.label || item.field)}</strong></div>
+          <div>${escapeHtml(
+            `${Array.isArray(item.current) ? item.current.join(", ") : (item.current || "nezjištěno")} → `
+            + `${Array.isArray(item.proposed) ? item.proposed.join(", ") : item.proposed}`
+          )}</div>
+          ${item.evidence
+            ? `<div class="ai-evidence">Důkaz: „${escapeHtml(item.evidence)}“ · ${escapeHtml(item.confidence || "low")}</div>`
+            : ""}
+        </div>
+      `).join("");
+      const dates = (data.important_dates || []).map((item) => `
+        <div class="ai-date">
+          <strong>${escapeHtml(item.date)}</strong> · ${escapeHtml(item.type)} · ${escapeHtml(item.confidence)}
+          <div class="ai-evidence">Důkaz: „${escapeHtml(item.evidence)}“</div>
+        </div>
+      `).join("");
+      const warnings = (data.warnings || []).length
+        ? `<div class="ai-warning">${escapeHtml(data.warnings.join(" "))}</div>`
+        : "";
+      const truncation = data.input_truncated || data.body_truncated
+        ? '<div class="ai-warning">AI neměla celý mimořádně dlouhý text; výsledek ber jako částečný.</div>'
+        : "";
+      return `
+        <div class="ai-summary">${escapeHtml(data.summary || data.message || "")}</div>
+        ${fieldRows || '<div class="ai-evidence">AI nenašla ověřenou změnu základních metadat.</div>'}
+        ${dates ? `<div class="ai-dates"><strong>Důležitá data</strong>${dates}</div>` : ""}
+        ${warnings}
+        ${truncation}
+        <div class="ai-readonly">Jen návrh ke kontrole. Nic nebylo uloženo ani změněno.</div>
+      `;
+    }
+
+    async function requestAiMetadata(attachmentRef, triggerButton) {
+      if (!selectedArchiveRef) return;
+      const resultNode = detailPane.querySelector("[data-ai-result]");
+      if (!resultNode) return;
+      const originalLabel = triggerButton.textContent;
+      triggerButton.disabled = true;
+      triggerButton.textContent = "AI čte…";
+      resultNode.innerHTML = '<div class="ai-loading">Codex připravuje read-only návrh…</div>';
+      try {
+        const response = await fetch("/api/email-archive/ai-metadata", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({
+            archive_id: selectedArchiveRef,
+            attachment_ref: attachmentRef || ""
+          })
+        });
+        const data = await response.json();
+        resultNode.innerHTML = renderAiMetadataResult(data);
+      } catch (error) {
+        resultNode.innerHTML = `<div class="ai-error">AI návrh se nepodařilo načíst: ${escapeHtml(error)}</div>`;
+      } finally {
+        triggerButton.disabled = false;
+        triggerButton.textContent = originalLabel;
+      }
     }
 
     function renderDetail(data) {
@@ -301,12 +377,34 @@
               : ""}
           </section>
 
+          <section class="section-block ai-section" aria-labelledby="aiTitle">
+            <div class="ai-heading">
+              <div>
+                <h3 class="section-title" id="aiTitle">AI návrh metadat</h3>
+                <div class="ai-evidence">Spustí se jen ručně pro tento otevřený e-mail. Návrh se nikam nezapíše.</div>
+              </div>
+              <button type="button" class="ai-action" data-ai-email>AI přečíst e-mail</button>
+            </div>
+            <div class="ai-result" data-ai-result>
+              Zatím nebyla spuštěna žádná AI analýza.
+            </div>
+          </section>
+
           ${renderMoreActions(data.files)}
           <div class="privacy-note">
             Zobrazuje se místní kopie. Tato stránka nic neposílá, nemaže ani nemění ve schránce.
           </div>
         </article>
       `;
+      const emailAiButton = detailPane.querySelector("[data-ai-email]");
+      if (emailAiButton) {
+        emailAiButton.addEventListener("click", () => requestAiMetadata("", emailAiButton));
+      }
+      detailPane.querySelectorAll("[data-ai-attachment-ref]").forEach((button) => {
+        button.addEventListener("click", () => {
+          requestAiMetadata(button.dataset.aiAttachmentRef || "", button);
+        });
+      });
     }
 
     function showMessageList() {

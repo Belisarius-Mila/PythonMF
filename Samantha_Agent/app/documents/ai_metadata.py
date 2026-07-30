@@ -26,6 +26,19 @@ from app.documents.vault import (
 
 AI_METADATA_SCHEMA_VERSION = "2026-07-30-v1"
 AI_METADATA_TIMEOUT_SECONDS = 180.0
+DEFAULT_AI_METADATA_DOMAINS = (
+    "food",
+    "health",
+    "car",
+    "insurance",
+    "energy",
+    "home",
+    "tax",
+    "warranty",
+    "travel",
+    "telecom",
+    "other",
+)
 AI_METADATA_CONFIDENCE = {"low", "medium", "high"}
 AI_METADATA_FIELDS = (
     "title",
@@ -226,6 +239,7 @@ def parse_ai_metadata_answer(
         "schema_version": AI_METADATA_SCHEMA_VERSION,
         "read_only": True,
         "persisted": False,
+        "input_truncated": len(source_text) > MAX_INDEX_TEXT_CHARS,
         "summary": summary or f"AI připravila {changed_count} odlišných návrhů.",
         "current": {field["field"]: field["current"] for field in fields},
         "suggestion": metadata,
