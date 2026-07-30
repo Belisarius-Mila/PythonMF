@@ -33,6 +33,7 @@ EMAIL_ARCHIVE_OPENABLE_FILES: dict[str, tuple[Path, str]] = {
     "attachments": (Path("attachments") / "attachments.json", "application/json; charset=utf-8"),
 }
 EMAIL_ARCHIVE_REFERENCE_PATTERN = re.compile(r"archive-ref-[0-9a-f]{16}")
+EMAIL_ARCHIVE_BODY_TEXT_MAX_BYTES = 512 * 1024
 
 
 def email_archive_reference(archive_directory_name: str) -> str:
@@ -152,6 +153,10 @@ def email_archive_detail_status(
         uid=uid,
         documents_dir=documents_dir,
     )
+    body_text, body_truncated = read_email_archive_body_text(
+        archive_ref,
+        archive_directory=archive_directory,
+    )
 
     return {
         "ok": True,
@@ -164,11 +169,40 @@ def email_archive_detail_status(
         "archived_at": safe_text(str(metadata.get("archived_at", "")))[:120],
         "relative_path": safe_text(str(relative_to_project(archive_dir)))[:500],
         "files": files,
+        "body_text": body_text,
+        "body_truncated": body_truncated,
         "attachments": attachments,
         "downloaded_attachments": downloaded,
         "vault_attachments": vault_attachments,
         "message": "Archiv e-mailu načten read-only.",
     }
+
+
+def read_email_archive_body_text(
+    archive_id: str,
+    *,
+    archive_directory: Path = DEFAULT_EMAIL_ARCHIVE_DIR,
+    max_bytes: int = EMAIL_ARCHIVE_BODY_TEXT_MAX_BYTES,
+) -> tuple[str, bool]:
+    """Read one local plain-text body for the mailbox view without side effects."""
+
+    safe_limit = min(max(1, int(max_bytes)), EMAIL_ARCHIVE_BODY_TEXT_MAX_BYTES)
+    resolved = resolve_email_archive_file(
+        archive_id,
+        "body_txt",
+        archive_directory=archive_directory,
+    )
+    if not resolved.get("ok"):
+        return "", False
+    try:
+        with Path(resolved["path"]).open("rb") as handle:
+            payload = handle.read(safe_limit + 1)
+    except OSError:
+        return "", False
+    truncated = len(payload) > safe_limit
+    if truncated:
+        payload = payload[:safe_limit]
+    return payload.decode("utf-8", errors="replace").replace("\x00", " "), truncated
 
 
 def email_archive_file_label(key: str) -> str:

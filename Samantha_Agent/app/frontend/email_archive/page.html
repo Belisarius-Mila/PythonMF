@@ -8,32 +8,69 @@
 {{SAMANTHA_CSS}}  </style>
 </head>
 <body>
-  <header>
-    <h1>Archiv e-mailů</h1>
-    <div class="actions">
-      <button class="secondary" id="returnBtn">Zpět do Cockpitu</button>
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">✉</div>
+      <div>
+        <h1>Archiv e-mailů</h1>
+        <div class="brand-subtitle">Uložené zprávy a jejich přílohy</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="quiet" id="returnBtn">Zpět do Cockpitu</button>
       <button class="primary" id="refreshBtn">Obnovit</button>
     </div>
   </header>
-  <main>
-    <section>
-      <h2>Hledání</h2>
-      <div class="body">
-        <div class="toolbar">
-          <input id="searchInput" placeholder="UID, předmět, odesílatel...">
-          <button class="primary" id="searchBtn">Hledat</button>
-        </div>
-        <div class="status" id="status">Načítám archiv...</div>
-        <div class="list" id="archiveList"></div>
+
+  <main class="mailbox">
+    <aside class="folder-pane" aria-label="Složky archivu">
+      <div class="folder-title">Pošta</div>
+      <button class="folder active" data-filter="all">
+        <span class="folder-icon" aria-hidden="true">▣</span>
+        <span>Archivované</span>
+        <span class="folder-count" id="allCount">0</span>
+      </button>
+      <button class="folder" data-filter="attachments">
+        <span class="folder-icon" aria-hidden="true">⌕</span>
+        <span>S přílohami</span>
+        <span class="folder-count" id="attachmentCount">0</span>
+      </button>
+      <div class="folder-note">
+        Toto je místní archiv. Zprávy se zde nemažou, nepřesouvají ani neodesílají.
       </div>
+    </aside>
+
+    <section class="message-pane" aria-labelledby="messageListTitle">
+      <div class="message-toolbar">
+        <label class="search-box" for="searchInput">
+          <span aria-hidden="true">⌕</span>
+          <input id="searchInput" type="search" autocomplete="off"
+                 placeholder="Hledat podle předmětu nebo odesílatele">
+        </label>
+        <button class="primary search-button" id="searchBtn">Hledat</button>
+      </div>
+      <div class="list-heading">
+        <h2 id="messageListTitle">Archivované</h2>
+        <div class="status" id="status" role="status">Načítám archiv…</div>
+      </div>
+      <div class="message-list" id="archiveList" aria-live="polite"></div>
     </section>
-    <section>
-      <h2>Detail</h2>
-      <div class="body" id="detailPane">
-        <div class="empty">Vyber e-mail ze seznamu.</div>
+
+    <section class="reader-pane" aria-label="Otevřený e-mail">
+      <div class="reader-toolbar">
+        <button class="quiet mobile-back" id="messageBackBtn">← Zpět na seznam</button>
+        <div class="reader-toolbar-label">Náhled zprávy</div>
+      </div>
+      <div class="reader" id="detailPane">
+        <div class="reader-empty">
+          <div class="reader-empty-icon" aria-hidden="true">✉</div>
+          <h2>Vyber e-mail ze seznamu</h2>
+          <p>Zpráva se otevře tady. Přílohy budou hned pod její hlavičkou.</p>
+        </div>
       </div>
     </section>
   </main>
+
   <script>
 {{SAMANTHA_JAVASCRIPT}}  </script>
 </body>

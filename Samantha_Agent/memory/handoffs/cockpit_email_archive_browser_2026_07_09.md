@@ -37,3 +37,25 @@ Bezpecnost / neukladat:
 - Do handoffu ani gitu neukladat cela tela e-mailu, osobni adresy, odkazy z e-mailu, plne private cesty ani obsah priloh.
 - `data/email/archive/`, `data/private/documents/` a `data/session_autosave/` zustavaji mimo commit.
 - Nova Cockpit stranka je lokalni read-only prohlizec: nevola e-mail provider, nic neposila, nemaze, nepresouva a neotevira externi odkazy.
+
+Aktualizace 2026-07-30 13:49 CEST - UX0 + UX1:
+
+Co je hotove:
+- UX0 potvrdilo, ze stavajici backend je vhodny read-only zaklad, ale puvodni frontend zobrazoval technicke karty, interni identifikatory a tri oddelene seznamy priloh.
+- UX1 meni Archiv e-mailu na rozlozeni ve stylu schranky: slozky a pocty, seznam zprav, hledani, filtr zprav s prilohami a citelny detail.
+- Detail zobrazuje plain-text telo zpravy primo na strance. Backend ho cte bez vedlejsich ucinku, odmita unik mimo archiv a omezuje velikost na 512 kB.
+- Metadata, stazene soubory a dokumenty v trezoru se ve frontendu skladaji do jednoho lidskeho seznamu priloh. Oteviratelna ulozena priloha ma jednu zretelnou akci.
+- Mobilni rozlozeni pouziva prechod seznam -> detail a zretelny navrat zpet.
+- Puvodni read-only URL a puvodni pole API zustaly zachovane; pribyla jen pole `body_text` a `body_truncated`.
+- Cilene testy prosly 233/233. Plna Cockpit quality gate prosla 1243/1243 testy.
+
+Co neni hotove:
+- Zmena zatim neni nasazena do beziciho Cockpitu.
+- V relaci nebyl dostupny pripojeny prohlizec, proto chybi vizualni desktopovy a mobilni pruchod.
+
+Dalsi krok:
+- Po samostatnem potvrzeni nasadit aktualni `main`, spustit smoke test a rucne overit Archiv e-mailu na desktopu i iPhonu vcetne otevreni zname ulozene PDF prilohy.
+
+Bezpecnost:
+- UI zustava pouze pro cteni. Nepribylo zadne odesilani, mazani, presouvani ani zapis do schranky nebo dokumentoveho trezoru.
+- Do testu ani pameti nebyl vlozen soukromy obsah e-mailu nebo prilohy.

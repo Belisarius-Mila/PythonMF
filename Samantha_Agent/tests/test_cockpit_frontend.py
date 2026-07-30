@@ -19,9 +19,9 @@ from app.cockpit_frontend import (
 EXPECTED_PAGES = {
     "email_archive": (
         EMAIL_ARCHIVE_HTML,
-        10221,
-        204,
-        "4f998e3f0b837573ef2d42f270cae35d231cd5bd68db2ddcbcabb24fc2217365",
+        31092,
+        910,
+        "81cd3481e2c6be21373c5e636a2d5d29dd073544d3a5185a1c006b1f1e7ccb67",
     ),
     "email_processing": (
         EMAIL_PROCESSING_HTML,
@@ -72,6 +72,21 @@ class CockpitFrontendContractTests(unittest.TestCase):
         self.assertNotIn('EMAIL_ARCHIVE_HTML = """', source)
         self.assertNotIn('EMAIL_PROCESSING_HTML = """', source)
         self.assertNotIn('COCKPIT_HTML = """', source)
+
+    def test_email_archive_frontend_is_a_human_readable_mailbox(self) -> None:
+        for expected in (
+            "Archivované",
+            "S přílohami",
+            "messageBackBtn",
+            "body_text",
+            "Otevřít přílohu",
+        ):
+            with self.subTest(expected=expected):
+                self.assertIn(expected, EMAIL_ARCHIVE_HTML)
+
+        for technical_label in ("Archive ID:", "UID:", "Metadata příloh", "Složka:"):
+            with self.subTest(technical_label=technical_label):
+                self.assertNotIn(technical_label, EMAIL_ARCHIVE_HTML)
 
 
 class CockpitFrontendFailureTests(unittest.TestCase):

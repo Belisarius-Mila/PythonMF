@@ -11,6 +11,7 @@ from app.email.archive_browser import (
     email_archive_reference,
     email_archive_detail_status,
     email_archive_list_status,
+    read_email_archive_body_text,
     resolve_email_archive_file,
     resolve_email_archive_incoming_file,
 )
@@ -113,6 +114,8 @@ class EmailArchiveBrowserTests(unittest.TestCase):
                 "archived_at",
                 "relative_path",
                 "files",
+                "body_text",
+                "body_truncated",
                 "attachments",
                 "downloaded_attachments",
                 "vault_attachments",
@@ -121,6 +124,8 @@ class EmailArchiveBrowserTests(unittest.TestCase):
         )
         self.assertTrue(detail["ok"])
         self.assertEqual(detail["uid"], "13338")
+        self.assertEqual(detail["body_text"], "test")
+        self.assertFalse(detail["body_truncated"])
         self.assertEqual(
             {item["key"] for item in detail["files"]},
             set(EMAIL_ARCHIVE_OPENABLE_FILES),
@@ -131,6 +136,31 @@ class EmailArchiveBrowserTests(unittest.TestCase):
             "/email-archive/incoming?name=icloud_uid_13338_07_prihlasovaci-listek.doc",
         )
         self.assertNotIn("sender@example.test", json.dumps(detail, ensure_ascii=False))
+
+    def test_plain_body_preview_is_bounded_and_rejects_escaped_symlink(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            archive_directory, archive_dir, _documents_dir = self.create_archive_fixture(root)
+            (archive_dir / "body.txt").write_text("Příliš dlouhý text", encoding="utf-8")
+            preview, truncated = read_email_archive_body_text(
+                email_archive_reference(archive_dir.name),
+                archive_directory=archive_directory,
+                max_bytes=8,
+            )
+
+            outside = root / "outside.txt"
+            outside.write_text("mimo", encoding="utf-8")
+            (archive_dir / "body.txt").unlink()
+            (archive_dir / "body.txt").symlink_to(outside)
+            escaped, escaped_truncated = read_email_archive_body_text(
+                email_archive_reference(archive_dir.name),
+                archive_directory=archive_directory,
+            )
+
+        self.assertTrue(preview)
+        self.assertTrue(truncated)
+        self.assertEqual(escaped, "")
+        self.assertFalse(escaped_truncated)
 
     def test_redacted_archive_uses_opaque_reference_and_links_existing_vault_pdf(
         self,
