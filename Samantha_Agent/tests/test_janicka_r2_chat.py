@@ -149,6 +149,42 @@ class JanickaR2ChatTests(unittest.TestCase):
         self.assertNotIn("text", raw_name)
         self.assertNotIn("text", unknown)
 
+    def test_document_reader_hides_legacy_compiler_diagnostics(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            (root / "private").mkdir()
+            adapter = self._adapter(root)
+            store = adapter.backend.document_store()
+            store.create_text(
+                name="Starší přehled.txt",
+                text=(
+                    "R2-Adam – kompilovaný dokument\n"
+                    "Název: Starší přehled.txt\n"
+                    "Vytvořeno: 2026-07-30T07:00:00+00:00\n"
+                    "Zdroj: inspect_document_text\n"
+                    "Document ID: doc-private\n\n"
+                    "Inspekce dokumentu (read-only):\n"
+                    "- Soubor: private.pdf\n"
+                    "- Textova extrakce: pdftotext\n"
+                    "- OCR potreba: ne\n\n"
+                    "Kandidati na due date:\n"
+                    "- 2018-05-25 | unknown_date | confidence=low | technický šum\n\n"
+                    "Nahled textu:\n"
+                    "Lidsky užitečný obsah. [extracted tables: pdfplumber-tables]\n"
+                    "[page 1 table 1]\n\n"
+                    "Bezpecnost: technická poznámka.\n"
+                ),
+            )
+            listing = adapter.documents()
+            opened = adapter.document(
+                listing["documents"][0]["document_ref"]
+            )
+
+        self.assertEqual(opened["text"], "Lidsky užitečný obsah.")
+        self.assertNotIn("Kandidati na due date", opened["text"])
+        self.assertNotIn("Document ID", opened["text"])
+        self.assertNotIn("pdfplumber", opened["text"])
+
     def test_bind_owns_separate_session_and_only_document_write_root(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             root = Path(temp_dir)

@@ -19,9 +19,16 @@ from app.communication.janicka_r2_documents import (
 R2_DOCUMENT_INSPECTION_CAPABILITY = "inspect_document_text"
 R2_DOCUMENT_SEARCH_CAPABILITY = "search_private_documents"
 R2_DOCUMENT_INSPECTION_PREFIX = "Inspekce dokumentu (read-only):"
+R2_LEGACY_SINGLE_DOCUMENT_PREFIX = "R2-Adam – kompilovaný dokument"
+R2_LEGACY_SELECTED_OVERVIEW_PREFIX = "R2-Adam – přehled z potvrzených zdrojů"
+R2_LEGACY_COMPLETE_OVERVIEW_PREFIX = "R2-Adam – přehled z úplné potvrzené sady"
 MAX_R2_SOURCE_TEXT_BYTES = 256 * 1024
 MAX_R2_COMPLETE_SOURCES = 200
 _DOCUMENT_ID_RE = re.compile(r"[a-z0-9][a-z0-9_.-]{0,139}")
+_EXTRACTION_MARKER_RE = re.compile(
+    r"\[(?:extracted tables:[^\]]+|page\s+\d+\s+table\s+\d+)\]",
+    flags=re.IGNORECASE,
+)
 
 DocumentInspector = Callable[[str], str]
 
@@ -46,6 +53,99 @@ class JanickaR2CompilationResult:
             "source_count": self.source_count,
             "compiled_at": self.compiled_at,
         }
+
+
+def humanize_r2_document_text(value: object) -> str:
+    """Hide legacy compiler diagnostics while leaving ordinary TXT untouched."""
+
+    if not isinstance(value, str):
+        raise JanickaR2CompilationError("Obsah dokumentu musí být text.")
+    text = value.strip()
+    if text.startswith(R2_LEGACY_SINGLE_DOCUMENT_PREFIX):
+        inspection_start = text.find(R2_DOCUMENT_INSPECTION_PREFIX)
+        if inspection_start >= 0:
+            return _humanize_document_inspection(text[inspection_start:])
+    if text.startswith(
+        (
+            R2_LEGACY_SELECTED_OVERVIEW_PREFIX,
+            R2_LEGACY_COMPLETE_OVERVIEW_PREFIX,
+        )
+    ):
+        marker = "\nPřehled:\n"
+        if marker in text:
+            return _clean_human_text(text.split(marker, 1)[1])
+    return value
+
+
+def _humanize_document_inspection(value: str) -> str:
+    """Keep useful extracted content, not vault diagnostics or due-date guesses."""
+
+    lines = value.strip().splitlines()
+    if not lines or lines[0].strip() != R2_DOCUMENT_INSPECTION_PREFIX:
+        raise JanickaR2CompilationError(
+            "Read-only zdroj nevrátil očekávaný dokumentový výtah."
+        )
+
+    human_lines: list[str] = []
+    skip_due_candidates = False
+    in_structured_overview = False
+    for raw_line in lines[1:]:
+        line = raw_line.strip()
+        if line == "Kandidati na due date:":
+            skip_due_candidates = True
+            in_structured_overview = False
+            continue
+        if line == "Strukturovane udaje pro prehled (z celeho dokumentu):":
+            skip_due_candidates = False
+            in_structured_overview = True
+            if human_lines and human_lines[-1]:
+                human_lines.append("")
+            human_lines.append("Důležité údaje:")
+            continue
+        if line == "Nahled textu:":
+            skip_due_candidates = False
+            in_structured_overview = False
+            if human_lines and human_lines[-1]:
+                human_lines.append("")
+            continue
+        if line.startswith("Bezpecnost:"):
+            break
+        if skip_due_candidates:
+            continue
+        if line.startswith(
+            (
+                "- Soubor:",
+                "- Textova extrakce:",
+                "- OCR potreba:",
+                "- Poznamka:",
+            )
+        ):
+            continue
+        if not line:
+            if in_structured_overview:
+                in_structured_overview = False
+            if human_lines and human_lines[-1]:
+                human_lines.append("")
+            continue
+        human_lines.append(raw_line)
+
+    human_text = _clean_human_text("\n".join(human_lines))
+    if not human_text:
+        raise JanickaR2CompilationError(
+            "Read-only zdroj neobsahuje použitelný lidský text."
+        )
+    return human_text
+
+
+def _clean_human_text(value: str) -> str:
+    text = _EXTRACTION_MARKER_RE.sub("", value)
+    lines = [line.rstrip() for line in text.splitlines()]
+    compact: list[str] = []
+    for line in lines:
+        if not line and (not compact or not compact[-1]):
+            continue
+        compact.append(line)
+    return "\n".join(compact).strip()
 
 
 def inspect_registered_document(
@@ -278,19 +378,8 @@ class JanickaR2DocumentCompiler:
         source_text: str,
         compiled_at: str,
     ) -> str:
-        return "\n".join(
-            (
-                "R2-Adam – kompilovaný dokument",
-                f"Název: {name}",
-                f"Vytvořeno: {compiled_at}",
-                f"Zdroj: {R2_DOCUMENT_INSPECTION_CAPABILITY}",
-                f"Document ID: {document_id}",
-                "Rozsah zdroje: redigovaný read-only výtah",
-                "",
-                source_text,
-                "",
-            )
-        )
+        del name, document_id, compiled_at
+        return _humanize_document_inspection(source_text) + "\n"
 
     @staticmethod
     def _render_overview(
@@ -300,20 +389,8 @@ class JanickaR2DocumentCompiler:
         source_labels: tuple[str, ...],
         compiled_at: str,
     ) -> str:
-        lines = [
-            "R2-Adam – přehled z potvrzených zdrojů",
-            f"Název: {name}",
-            f"Vytvořeno: {compiled_at}",
-            f"Zdroj: {R2_DOCUMENT_INSPECTION_CAPABILITY}",
-            f"Počet potvrzených zdrojů: {len(source_labels)}",
-            "Použité zdroje:",
-            *(f"- {label}" for label in source_labels),
-            "",
-            "Přehled:",
-            overview_text,
-            "",
-        ]
-        return "\n".join(lines)
+        del name, source_labels, compiled_at
+        return _clean_human_text(overview_text) + "\n"
 
     @staticmethod
     def _render_complete_overview(
@@ -324,16 +401,5 @@ class JanickaR2DocumentCompiler:
         source_type: str,
         compiled_at: str,
     ) -> str:
-        return "\n".join(
-            (
-                "R2-Adam – přehled z úplné potvrzené sady",
-                f"Název: {name}",
-                f"Vytvořeno: {compiled_at}",
-                f"Zdroj: {source_type}",
-                f"Počet potvrzených zdrojů: {source_count}",
-                "",
-                "Přehled:",
-                overview_text,
-                "",
-            )
-        )
+        del name, source_count, source_type, compiled_at
+        return _clean_human_text(overview_text) + "\n"

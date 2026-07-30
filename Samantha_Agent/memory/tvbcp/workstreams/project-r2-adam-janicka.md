@@ -459,3 +459,35 @@ Technický důkaz:
   `needs_review` záznam a R2 hledání vrátilo jedinou aktuální volbu.
 - Nový TXT má bezpečný režim `0600`, guardovanou strukturu a jeden potvrzený
   zdroj; zdrojový PDF hash zůstal před a po kompilaci stejný.
+
+### 2026-07-30 11:47 CEST – E3 odhalilo technickou obálku lidského TXT a připravilo její bezpečné odstranění
+
+Hotovo:
+- Ruční revize importovaného PDF proběhla a read-only kontrola potvrdila, že
+  Archiv e-mailu i vložená dokumentová čtečka mají k PDF funkční cestu.
+- Lokální oprava odstraňuje z nových R2 TXT servisní hlavičky, kandidáty na
+  datum, interní identity a značky extrakce.
+- Již vytvořený TXT se nepřepisuje; čtečka stejnou technickou obálku skryje až
+  při zobrazení a ponechá lidský obsah.
+
+Rozhodnutí:
+- Servisní inspekce vaultu zůstává beze změny pro diagnostiku. Její výstup ale
+  není vhodný jako začátek dokumentu pro Janu a kompilátor ho musí převést na
+  lidský text.
+- Zdrojový PDF ani existující TXT se kvůli prezentační opravě nemění.
+
+Další krok:
+- Po samostatném potvrzení nasadit lokální commit do Cockpitu a zopakovat
+  otevření uložené přílohy i E2 TXT.
+
+Navrhované další kroky:
+- Při retestu na iPhonu stránku Archivu e-mailu znovu načíst; pokud se PDF
+  nadále vizuálně neukáže, zaznamenat konkrétní pohled a řešit pouze mobilní
+  vykreslení, nikoli nový import.
+
+Technický důkaz:
+- Uložená příloha, dokumentová čtečka i vložené PDF odpověděly HTTP 200;
+  PDF má očekávanou signaturu a velikost se shoduje s uloženým záznamem.
+- Filtr nad současným E2 TXT ponechal neprázdný lidský obsah a odstranil všechny
+  kontrolované technické markery bez zápisu do soukromého souboru.
+- Cílená sada prošla 40/40 a plná Cockpit brána 1241/1241.

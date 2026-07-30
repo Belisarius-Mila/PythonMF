@@ -13,6 +13,7 @@ from app.codex_appserver import AppServerError
 from app.communication.human_adam_service import HumanAdamService, MAX_MESSAGE_CHARS
 from app.communication.human_adam_workspace import HUMAN_ADAM_SANDBOX_POLICY
 from app.communication.janicka_r2_backend import JanickaR2Backend
+from app.communication.janicka_r2_compiler import humanize_r2_document_text
 from app.communication.janicka_r2_documents import (
     R2_DOCUMENTS_RELATIVE_ROOT,
     JanickaR2DocumentError,
@@ -239,7 +240,7 @@ class JanickaR2ChatAdapter:
         return {
             "ok": True,
             "document": _public_document(selected),
-            "text": store.read_text(selected.name),
+            "text": humanize_r2_document_text(store.read_text(selected.name)),
         }
 
     def send(self, payload: object) -> dict[str, Any]:

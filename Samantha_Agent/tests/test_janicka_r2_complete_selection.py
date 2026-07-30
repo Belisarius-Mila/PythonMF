@@ -145,7 +145,7 @@ class JanickaR2CompleteSelectionTests(unittest.TestCase):
         self.assertEqual(inspected_ids, [])
         self.assertEqual(compiled.source_type, R2_DOCUMENT_SEARCH_CAPABILITY)
         self.assertEqual(compiled.source_count, 12)
-        self.assertIn("Počet potvrzených zdrojů: 12", stored)
+        self.assertNotIn("Počet potvrzených zdrojů:", stored)
         for number in range(1, 13):
             self.assertIn(f"{number}. Recept {number:03d}", stored)
             self.assertNotIn(f"doc-recept-{number:03d}", stored)
@@ -197,7 +197,7 @@ class JanickaR2CompleteSelectionTests(unittest.TestCase):
         self.assertNotIn("Syntetický obsah", repr(first))
         self.assertEqual(compiled.source_count, 6)
         self.assertEqual(len(inspected_ids), 12)
-        self.assertIn("Počet potvrzených zdrojů: 6", stored)
+        self.assertNotIn("Počet potvrzených zdrojů:", stored)
         self.assertIn("Souhrn šesti syntetických receptů.", stored)
         self.assertNotIn("doc-recept-", stored)
 

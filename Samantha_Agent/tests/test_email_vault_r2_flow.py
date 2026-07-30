@@ -198,9 +198,10 @@ class EmailVaultR2FlowTests(unittest.TestCase):
             stored = backend.document_store().read_text("Syntetický přehled.txt")
 
             self.assertEqual(created.source_count, 1)
-            self.assertIn("R2-Adam – kompilovaný dokument", stored)
-            self.assertIn("Inspekce dokumentu (read-only):", stored)
             self.assertIn("Synteticka faktura pro integracni test", stored)
+            self.assertNotIn("R2-Adam – kompilovaný dokument", stored)
+            self.assertNotIn("Inspekce dokumentu (read-only):", stored)
+            self.assertNotIn("Kandidati na due date:", stored)
             self.assertEqual(_source_snapshot(documents_dir), source_before_r2)
             output_path = (
                 private_root

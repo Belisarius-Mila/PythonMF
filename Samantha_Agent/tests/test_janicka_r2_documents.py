@@ -284,10 +284,10 @@ class JanickaR2DocumentStoreTests(unittest.TestCase):
         self.assertEqual(result.source_type, R2_DOCUMENT_INSPECTION_CAPABILITY)
         self.assertEqual(result.source_count, 1)
         self.assertEqual(result.compiled_at, "2026-07-28T12:00:00+00:00")
-        self.assertIn("R2-Adam – kompilovaný dokument", stored)
-        self.assertIn("Zdroj: inspect_document_text", stored)
-        self.assertIn("Document ID: doc-zaruka", stored)
-        self.assertIn("Bezpečný syntetický výtah.", stored)
+        self.assertEqual(stored, "Bezpečný syntetický výtah.\n")
+        self.assertNotIn("R2-Adam – kompilovaný dokument", stored)
+        self.assertNotIn("Zdroj: inspect_document_text", stored)
+        self.assertNotIn("Document ID: doc-zaruka", stored)
         self.assertNotIn("doc-zaruka", str(result.as_dict()))
         self.assertNotIn(str(private_root), str(result.as_dict()))
 
@@ -577,9 +577,10 @@ class JanickaR2DocumentStoreTests(unittest.TestCase):
                 "doc-pojisteni-2025",
             ],
         )
-        self.assertIn("R2-Adam – přehled z potvrzených zdrojů", stored)
-        self.assertIn("Počet potvrzených zdrojů: 2", stored)
-        self.assertIn("Pojištění 2024 (faktura; auto)", stored)
+        self.assertNotIn("R2-Adam – přehled z potvrzených zdrojů", stored)
+        self.assertNotIn("Počet potvrzených zdrojů:", stored)
+        self.assertNotIn("Pojištění 2024 (faktura; auto)", stored)
+        self.assertIn("2024-06-30 | Pojišťovna A | 12 000 Kč", stored)
         self.assertIn("2025-06-30 | Pojišťovna B | 13 000 Kč", stored)
         self.assertNotIn("doc-pojisteni-2024", stored)
         self.assertNotIn("doc-pojisteni-2025", stored)

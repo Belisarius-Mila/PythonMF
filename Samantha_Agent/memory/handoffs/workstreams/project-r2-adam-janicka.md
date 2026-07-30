@@ -1,7 +1,7 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obsahově narovnáno P6b a provozně ověřeno E2: 2026-07-30 09:16 CEST
+- E3 přejímka a lokální oprava lidského TXT: 2026-07-30 11:47 CEST
 
 ### Hotovo
 - R2-Adam má vlastní trvalý chat, TXT prostor, dokumentovou lištu a čtečku.
@@ -10,25 +10,31 @@
 - E2 živě ověřilo souvislý tok archivovaný e-mail -> potvrzený import jednoho
   textového PDF do private vaultu -> jediná redigovaná volba R2 -> nový
   create-only TXT. Zdrojový PDF soubor zůstal bajtově nezměněný.
+- E3 potvrdilo, že importované PDF je ve vaultu, prošlo ruční revizí a backend
+  Archivu e-mailu i dokumentové čtečky je umí otevřít. První lidská přejímka
+  současně odhalila zbytečnou diagnostickou obálku v odvozeném TXT.
+- Lokální oprava zobrazuje starší R2 TXT bez technické obálky a nové přehledy
+  ukládá rovnou jako lidský text. Starší soukromý TXT ani zdrojové PDF nemění.
 - Aktuální `main` `20180e2` je serverově nasazený a Cockpit smoke prošel 5/5.
 
 ### Otevřeno
-- Importovaný dokument z E2 zůstává poctivě ve stavu `needs_review`; nebyla
-  provedena obsahová nebo klasifikační revize ve ScanDocu.
-- Chybí krátká provozní přejímka z pohledu Jany: otevření nového TXT ve čtečce
-  a bezpečný návrat do chatu.
+- Lokální oprava lidského TXT ještě není nasazená.
+- Po nasazení zbývá ručně obnovit Archiv e-mailu a R2 čtečku a potvrdit, že je
+  příloha viditelná jako samostatné PDF a TXT už nezačíná diagnostikou.
 - Lokální hotové commity zůstávají v denním GitHub balíčku.
 
 ### Rizika
 - Zdrojové dokumenty zůstávají read-only a nejasné údaje se nesmějí domýšlet.
 
 ### Další krok
-- Zkontrolovat importovaný PDF dokument ve ScanDocu bez opisování obsahu do
-  chatu nebo paměti; potom s Janou otevřít nový TXT v R2 čtečce.
+- Po samostatném potvrzení nasadit lokální opravu a provést krátký živý retest
+  přílohy v Archivu e-mailu a čistého textu v R2 čtečce.
 
 ### Rozhodnutí
 - R2-Adam se už neposuzuje jako projekt před implementací; další práce je
   provozní přejímka při zachování read-only zdrojů a create-only výstupů.
+- Diagnostika vaultu zůstává dostupná servisním nástrojům, ale do lidského R2
+  TXT nepatří. Starší výstup se čistí pouze při zobrazení, ne přepsáním.
 
 ### Navrhované další kroky
 - Po úplném toku provést krátkou přejímku z pohledu Jany: kontinuita chatu,
@@ -39,6 +45,8 @@
 - E1 přidalo syntetický end-to-end test; cílená sousední sada prošla 47/47.
 - E2 potvrdilo shodu zdrojových a uložených bajtů, textovou vrstvu bez OCR,
   jednoznačný lidský výběr, nový TXT s režimem `0600` a nezměněný zdroj.
+- E3: uložené PDF i jeho vložená čtečka odpovídají HTTP 200; plná Cockpit
+  brána lokální opravy prošla 1241 testy.
 - P6a potvrdilo, že kanonická dvojice R2 je v rankingu před zastaralým
   agregátem.
 - Historické chronologické bloky níže zůstávají beze změny.
