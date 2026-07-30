@@ -189,7 +189,7 @@
           sizeBytes: item.size_bytes || previous.sizeBytes,
           readingStatus: item.reading_status_label || "",
           location: "vault",
-          url: item.can_open ? (item.url || "") : ""
+          url: item.can_open ? (item.direct_url || item.url || "") : ""
         });
       });
       return [...cards.values()];
@@ -201,6 +201,15 @@
       }
       if (card.location === "downloaded") return "Staženo do dokumentů";
       return "Soubor této přílohy není v místním archivu uložený";
+    }
+
+    function attachmentActionLabel(card) {
+      const contentType = String(card.contentType || "").toLowerCase();
+      const filename = String(card.filename || "").toLowerCase();
+      if (contentType.includes("pdf") || filename.endsWith(".pdf")) {
+        return "Otevřít celé PDF";
+      }
+      return "Otevřít přílohu";
     }
 
     function renderAttachmentCards(data) {
@@ -222,7 +231,7 @@
               ${card.url
                 ? `<div class="attachment-actions">
                      <a class="action-link" target="_blank" rel="noopener"
-                        href="${escapeHtml(card.url)}">Otevřít přílohu</a>
+                        href="${escapeHtml(card.url)}">${escapeHtml(attachmentActionLabel(card))}</a>
                    </div>`
                 : '<div class="attachment-unavailable">Přílohu nelze otevřít</div>'}
             </div>

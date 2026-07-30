@@ -3,6 +3,11 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+from datetime import datetime, timezone
+from email import policy
+from email.parser import BytesParser
+from email.utils import parsedate_to_datetime
+from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any
 from urllib.parse import quote
@@ -34,6 +39,7 @@ EMAIL_ARCHIVE_OPENABLE_FILES: dict[str, tuple[Path, str]] = {
 }
 EMAIL_ARCHIVE_REFERENCE_PATTERN = re.compile(r"archive-ref-[0-9a-f]{16}")
 EMAIL_ARCHIVE_BODY_TEXT_MAX_BYTES = 512 * 1024
+EMAIL_ARCHIVE_ORIGINAL_MAX_BYTES = 25 * 1024 * 1024
 
 
 def email_archive_reference(archive_directory_name: str) -> str:
@@ -66,11 +72,7 @@ def email_archive_list_status(
             "message": "EmailArchiveVault zatím neexistuje.",
         }
 
-    for metadata_path in sorted(
-        archive_directory.glob("*/metadata.json"),
-        key=lambda path: path.stat().st_mtime if path.exists() else 0,
-        reverse=True,
-    ):
+    for metadata_path in archive_directory.glob("*/metadata.json"):
         try:
             metadata = read_json_file(metadata_path)
         except (OSError, ValueError, json.JSONDecodeError):
@@ -99,10 +101,21 @@ def email_archive_list_status(
                 "links_count": int(metadata.get("links_count", 0) or 0),
                 "attachments_count": int(metadata.get("attachments_count", 0) or 0),
                 "relative_path": safe_text(str(relative_to_project(archive_dir)))[:500],
+                "_sort_timestamp": email_archive_sort_timestamp(
+                    date_text,
+                    archived_at,
+                    metadata_path=metadata_path,
+                ),
             }
         )
-        if len(archives) >= safe_limit:
-            break
+
+    archives.sort(
+        key=lambda item: float(item.get("_sort_timestamp", 0.0) or 0.0),
+        reverse=True,
+    )
+    archives = archives[:safe_limit]
+    for item in archives:
+        item.pop("_sort_timestamp", None)
 
     return {
         "ok": True,
@@ -196,13 +209,174 @@ def read_email_archive_body_text(
         return "", False
     try:
         with Path(resolved["path"]).open("rb") as handle:
-            payload = handle.read(safe_limit + 1)
+            stored_payload = handle.read(EMAIL_ARCHIVE_BODY_TEXT_MAX_BYTES + 1)
     except OSError:
         return "", False
+    stored_text = stored_payload.decode("utf-8", errors="replace").replace("\x00", " ")
+    original_text = read_email_archive_original_body_text(
+        archive_id,
+        archive_directory=archive_directory,
+    )
+    body_text = max((stored_text, original_text), key=len)
+    payload = body_text.encode("utf-8")
     truncated = len(payload) > safe_limit
     if truncated:
         payload = payload[:safe_limit]
-    return payload.decode("utf-8", errors="replace").replace("\x00", " "), truncated
+    return payload.decode("utf-8", errors="ignore"), truncated
+
+
+def read_email_archive_original_body_text(
+    archive_id: str,
+    *,
+    archive_directory: Path = DEFAULT_EMAIL_ARCHIVE_DIR,
+) -> str:
+    """Extract the fullest safe readable alternative from the immutable EML."""
+
+    resolved = resolve_email_archive_file(
+        archive_id,
+        "original_eml",
+        archive_directory=archive_directory,
+    )
+    if not resolved.get("ok"):
+        return ""
+    try:
+        with Path(resolved["path"]).open("rb") as handle:
+            payload = handle.read(EMAIL_ARCHIVE_ORIGINAL_MAX_BYTES + 1)
+    except OSError:
+        return ""
+    if len(payload) > EMAIL_ARCHIVE_ORIGINAL_MAX_BYTES:
+        return ""
+    try:
+        message = BytesParser(policy=policy.default).parsebytes(payload)
+    except (TypeError, ValueError):
+        return ""
+
+    plain_parts: list[str] = []
+    html_parts: list[str] = []
+    for part in message.walk() if message.is_multipart() else [message]:
+        if part.is_multipart() or part.get_content_disposition() == "attachment":
+            continue
+        content_type = part.get_content_type()
+        if content_type not in {"text/plain", "text/html"}:
+            continue
+        decoded = part.get_payload(decode=True)
+        if not isinstance(decoded, bytes):
+            continue
+        charset = part.get_content_charset() or "utf-8"
+        text = decoded.decode(charset, errors="replace")
+        if content_type == "text/plain":
+            plain_parts.append(_normalize_readable_text(text))
+        else:
+            html_parts.append(_html_to_readable_text(text))
+
+    candidates = [
+        "\n\n".join(part for part in plain_parts if part),
+        "\n\n".join(part for part in html_parts if part),
+    ]
+    return max(candidates, key=len, default="")
+
+
+def email_archive_sort_timestamp(
+    message_date: str,
+    archived_at: str,
+    *,
+    metadata_path: Path,
+) -> float:
+    """Sort by received message date, then archive time, then local mtime."""
+
+    clean_message_date = str(message_date or "").strip()
+    if clean_message_date:
+        try:
+            parsed = parsedate_to_datetime(clean_message_date)
+        except (TypeError, ValueError, OverflowError):
+            parsed = None
+        if parsed is not None:
+            if parsed.tzinfo is None:
+                parsed = parsed.replace(tzinfo=timezone.utc)
+            try:
+                return parsed.timestamp()
+            except (OSError, OverflowError, ValueError):
+                pass
+
+    clean_archived_at = str(archived_at or "").strip()
+    if clean_archived_at:
+        try:
+            parsed_archive = datetime.fromisoformat(
+                clean_archived_at.replace("Z", "+00:00")
+            )
+            if parsed_archive.tzinfo is None:
+                parsed_archive = parsed_archive.replace(tzinfo=timezone.utc)
+            return parsed_archive.timestamp()
+        except (OSError, OverflowError, TypeError, ValueError):
+            pass
+
+    try:
+        return metadata_path.stat().st_mtime
+    except OSError:
+        return 0.0
+
+
+class _ReadableHtmlParser(HTMLParser):
+    BLOCK_TAGS = {
+        "address",
+        "article",
+        "br",
+        "div",
+        "footer",
+        "h1",
+        "h2",
+        "h3",
+        "h4",
+        "h5",
+        "h6",
+        "header",
+        "li",
+        "p",
+        "section",
+        "table",
+        "tr",
+    }
+    HIDDEN_TAGS = {"script", "style", "template"}
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.parts: list[str] = []
+        self.hidden_depth = 0
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        del attrs
+        clean_tag = tag.casefold()
+        if clean_tag in self.HIDDEN_TAGS:
+            self.hidden_depth += 1
+        elif not self.hidden_depth and clean_tag in self.BLOCK_TAGS:
+            self.parts.append("\n")
+
+    def handle_endtag(self, tag: str) -> None:
+        clean_tag = tag.casefold()
+        if clean_tag in self.HIDDEN_TAGS:
+            self.hidden_depth = max(0, self.hidden_depth - 1)
+        elif not self.hidden_depth and clean_tag in self.BLOCK_TAGS:
+            self.parts.append("\n")
+
+    def handle_data(self, data: str) -> None:
+        if not self.hidden_depth:
+            self.parts.append(data)
+
+
+def _html_to_readable_text(html_text: str) -> str:
+    parser = _ReadableHtmlParser()
+    try:
+        parser.feed(html_text)
+        parser.close()
+    except (ValueError, TypeError):
+        return ""
+    return _normalize_readable_text("".join(parser.parts))
+
+
+def _normalize_readable_text(text: str) -> str:
+    cleaned = text.replace("\x00", " ")
+    lines = [" ".join(line.split()) for line in cleaned.splitlines()]
+    return "\n".join(line for line in lines if line).strip()
 
 
 def email_archive_file_label(key: str) -> str:
@@ -332,6 +506,11 @@ def vault_email_archive_attachments(
                 "can_open": stored_path is not None,
                 "url": (
                     f"/documents/read?document_id={quote(reference)}"
+                    if stored_path is not None
+                    else ""
+                ),
+                "direct_url": (
+                    f"/documents/pdf?document_id={quote(reference)}"
                     if stored_path is not None
                     else ""
                 ),

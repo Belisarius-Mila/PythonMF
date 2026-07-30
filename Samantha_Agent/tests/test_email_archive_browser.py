@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -162,6 +163,67 @@ class EmailArchiveBrowserTests(unittest.TestCase):
         self.assertEqual(escaped, "")
         self.assertFalse(escaped_truncated)
 
+    def test_detail_prefers_fuller_safe_text_from_original_html_alternative(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            archive_directory, archive_dir, _documents_dir = self.create_archive_fixture(root)
+            (archive_dir / "body.txt").write_text("Krátká verze.", encoding="utf-8")
+            (archive_dir / "original.eml").write_bytes(
+                b"MIME-Version: 1.0\r\n"
+                b"Content-Type: multipart/alternative; boundary=\"alt\"\r\n\r\n"
+                b"--alt\r\n"
+                b"Content-Type: text/plain; charset=utf-8\r\n\r\n"
+                b"Short version.\r\n"
+                b"--alt\r\n"
+                b"Content-Type: text/html; charset=utf-8\r\n\r\n"
+                b"<html><body><p>Full synthetic message.</p>"
+                b"<p>Important second paragraph.</p>"
+                b"<script>privateScript()</script></body></html>\r\n"
+                b"--alt--\r\n"
+            )
+
+            preview, truncated = read_email_archive_body_text(
+                email_archive_reference(archive_dir.name),
+                archive_directory=archive_directory,
+            )
+
+        self.assertIn("Full synthetic message.", preview)
+        self.assertIn("Important second paragraph.", preview)
+        self.assertNotIn("privateScript", preview)
+        self.assertFalse(truncated)
+
+    def test_list_sorts_by_received_date_instead_of_local_file_mtime(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            archive_directory, _archive_dir, _documents_dir = self.create_archive_fixture(root)
+            newer = archive_directory / "email-2-newer"
+            newer.mkdir()
+            newer_metadata = newer / "metadata.json"
+            newer_metadata.write_text(
+                json.dumps(
+                    {
+                        "archive_id": "email-2-newer",
+                        "uid": "2",
+                        "subject": "newer",
+                        "date": "Tue, 10 Mar 2026 13:58:41 +0000",
+                        "archived_at": "2026-01-01T00:00:00+00:00",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            original_metadata = archive_directory / "email-13338-prihlaseni" / "metadata.json"
+            os.utime(newer_metadata, (1, 1))
+            os.utime(original_metadata, (2_000_000_000, 2_000_000_000))
+
+            listing = email_archive_list_status(
+                archive_directory=archive_directory,
+            )
+
+        self.assertEqual(
+            [item["archive_id"] for item in listing["items"]],
+            ["email-2-newer", "email-13338-prihlaseni"],
+        )
+
     def test_redacted_archive_uses_opaque_reference_and_links_existing_vault_pdf(
         self,
     ) -> None:
@@ -262,6 +324,13 @@ class EmailArchiveBrowserTests(unittest.TestCase):
         self.assertIn(
             detail["vault_attachments"][0]["document_ref"],
             detail["vault_attachments"][0]["url"],
+        )
+        self.assertIn(
+            detail["vault_attachments"][0]["document_ref"],
+            detail["vault_attachments"][0]["direct_url"],
+        )
+        self.assertTrue(
+            detail["vault_attachments"][0]["direct_url"].startswith("/documents/pdf?")
         )
         self.assertTrue(
             all(f"archive_id={archive_ref}" in row["url"] for row in detail["files"])

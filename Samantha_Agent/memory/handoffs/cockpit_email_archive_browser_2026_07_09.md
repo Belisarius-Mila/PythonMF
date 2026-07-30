@@ -74,3 +74,21 @@ Technicky dukaz:
 - Nasazeny commit: `d051791da4a158159d40f07a566b2bcca78f2a39`.
 - Cockpit PID po restartu: `17232`.
 - Kodovy otisk: `28abaf2394075c6a`.
+
+Aktualizace 2026-07-30 14:18 CEST - prvni UX ladeni:
+
+Hotovo:
+- Seznam se radi podle data prijeti z hlavicky e-mailu; cas archivace a lokalni mtime jsou jen bezpecne nahradni hodnoty.
+- Detail muze z immutable `original.eml` read-only odvodit uplnejsi textovou alternativu. HTML se nikdy nerenderuje primo; prevadi se na text, ignoruje aktivni obsah a zustava velikostne omezeny.
+- Ulozene PDF se z Archivu otevre primym odkazem na originalni soubor. Mobilni iframe uz neni primarni cestou k priloze.
+- Strukturalni kontrola skutecneho archivu potvrdila, ze testovany PDF soubor je shodny s prilozenym originalem a problem byl ve zpusobu mobilniho zobrazeni, ne v datech.
+- Cilene testy prosly 235/235 a plna Cockpit quality gate 1245/1245.
+
+Rozhodnuti:
+- Soukromy archiv ani dokumentovy trezor se kvuli oprave neprepisuji. Ladeni zustava read-only.
+
+Dalsi krok:
+- Po samostatnem potvrzeni nasadit aktualni `main`, spustit smoke 5/5 a na iPhonu overit poradi zprav a otevreni celeho vicestrankoveho PDF.
+
+Technicky dukaz:
+- Produkcni a testovaci zmeny jsou v `app/email/archive_browser.py`, `app/frontend/email_archive/app.js`, `tests/test_email_archive_browser.py` a `tests/test_cockpit_frontend.py`.
