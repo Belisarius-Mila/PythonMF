@@ -222,6 +222,7 @@ from app.email.archive_browser import (
     email_archive_list_status,
     email_archive_uid,
     resolve_email_archive_dir,
+    resolve_email_archive_embedded_attachment,
     resolve_email_archive_file,
     resolve_email_archive_incoming_file,
     vault_email_archive_attachments,
@@ -9204,6 +9205,15 @@ class CockpitServer:
                     file_key = params.get("file", [""])[0]
                     self.respond_email_archive_file(archive_id=archive_id, file_key=file_key)
                     return
+                if parsed.path == "/email-archive/attachment":
+                    params = parse_qs(parsed.query)
+                    archive_id = params.get("archive_id", [""])[0]
+                    attachment_ref = params.get("attachment", [""])[0]
+                    self.respond_email_archive_attachment(
+                        archive_id=archive_id,
+                        attachment_ref=attachment_ref,
+                    )
+                    return
                 if parsed.path == "/email-archive/incoming":
                     params = parse_qs(parsed.query)
                     name = params.get("name", [""])[0]
@@ -9919,6 +9929,49 @@ class CockpitServer:
                     content_type=str(resolved.get("content_type") or "application/octet-stream"),
                     filename=str(resolved.get("filename") or "attachment"),
                 )
+
+            def respond_email_archive_attachment(
+                self,
+                archive_id: str,
+                attachment_ref: str,
+            ) -> None:
+                resolved = resolve_email_archive_embedded_attachment(
+                    archive_id=archive_id,
+                    attachment_ref=attachment_ref,
+                )
+                if not resolved.get("ok"):
+                    self.respond_json(
+                        {"error": "not_found", "message": resolved.get("message", "")},
+                        status=HTTPStatus.NOT_FOUND,
+                    )
+                    return
+                data = resolved["data"]
+                filename = safe_filename(
+                    str(resolved.get("filename") or "attachment")
+                )
+                content_type = str(
+                    resolved.get("content_type") or "application/octet-stream"
+                )
+                disposition = (
+                    "inline"
+                    if content_type == "application/pdf"
+                    or (
+                        content_type.startswith("image/")
+                        and content_type != "image/svg+xml"
+                    )
+                    or content_type.startswith("text/plain")
+                    else "attachment"
+                )
+                self.send_response(HTTPStatus.OK)
+                self.send_header("Content-Type", content_type)
+                self.send_header(
+                    "Content-Disposition",
+                    f'{disposition}; filename="{filename}"',
+                )
+                self.send_header("Cache-Control", "no-store, max-age=0")
+                self.send_header("Content-Length", str(len(data)))
+                self.end_headers()
+                self.wfile.write(data)
 
             def respond_local_file_bytes(self, *, target: Path, content_type: str, filename: str) -> None:
                 data = target.read_bytes()

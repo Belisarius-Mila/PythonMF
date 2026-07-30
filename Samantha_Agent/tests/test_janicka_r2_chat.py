@@ -303,6 +303,9 @@ class JanickaR2ChatTests(unittest.TestCase):
         self.assertIn("/api/r2-adam/documents", R2_ADAM_CHAT_HTML)
         self.assertIn('id="documentShelf"', R2_ADAM_CHAT_HTML)
         self.assertIn('id="currentDocumentOpenBtn"', R2_ADAM_CHAT_HTML)
+        self.assertIn("archive-ref-[0-9a-f]{16}", R2_ADAM_CHAT_HTML)
+        self.assertIn("Otevřít celý e-mail a přílohy", R2_ADAM_CHAT_HTML)
+        self.assertIn("/email-archive/?archive=", R2_ADAM_CHAT_HTML)
         self.assertIn("textContent", R2_ADAM_CHAT_HTML)
         self.assertNotIn("innerHTML", R2_ADAM_CHAT_HTML)
         for forbidden in (

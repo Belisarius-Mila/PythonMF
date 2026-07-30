@@ -519,3 +519,35 @@ Technický důkaz:
 - Samostatný Cockpit smoke prošel 5/5.
 - Živý TXT má 0 kontrolovaných technických markerů; PDF endpoint odpověděl
   HTTP 200 s platnou PDF signaturou.
+
+### 2026-07-30 19:08 CEST – R2 předává nalezený e-mail do plné místní čtečky
+
+Hotovo:
+- R2 má pro konkrétní archivovaný e-mail pracovat s celým dostupným
+  `body_text`, nikoli jen s úryvkem nebo metadatovým souhrnem.
+- Odpověď R2 nese pouze neprůhledný `archive_ref`; chat z něj nabídne tlačítko
+  pro otevření celého místního e-mailu a jeho příloh.
+- Archiv umí přílohy read-only otevřít také přímo z immutable původního EML,
+  aniž by kvůli zobrazení vytvářel další soubor.
+
+Rozhodnutí:
+- Dlouhé tělo e-mailu se nebude automaticky kopírovat celé do chatové bubliny.
+  Plný text a přílohy patří do samostatné místní čtečky.
+- Veřejný odkaz používá jen opaque reference; interní archive ID, UID,
+  souborová cesta a soukromý obsah zůstávají mimo Git a TVBCP.
+- PDF a běžné obrázky se mohou zobrazit inline; potenciálně aktivní nebo jiné
+  typy příloh se nabídnou jako stažení.
+
+Další krok:
+- Po samostatném potvrzení nasadit aktuální `main` do Cockpitu a z R2 zopakovat
+  hledání konkrétního e-mailu; v odpovědi otevřít nové tlačítko a vizuálně
+  ověřit celý text i přílohy.
+
+Navrhované další kroky:
+- Po přejímce ladit jen konkrétní mobilní formát přílohy, který by se na iPhonu
+  neotevřel; neprovádět nový import ani kopii bez doložené potřeby.
+
+Technický důkaz:
+- Živá read-only kontrola cílového archivu potvrdila nezkrácené tělo o 2 899
+  znacích, dvě otevíratelné přílohy a úspěšné rozlišení přílohy z původního EML.
+- Cílená sada prošla 22/22 a plná Cockpit brána 1247/1247.

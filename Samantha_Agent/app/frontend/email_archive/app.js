@@ -16,6 +16,7 @@
     let activeFilter = "all";
     let listRequestNumber = 0;
     let detailRequestNumber = 0;
+    const requestedArchiveRef = new URLSearchParams(window.location.search).get("archive") || "";
 
     function escapeHtml(value) {
       return String(value ?? "").replace(/[&<>"']/g, (character) => ({
@@ -154,7 +155,7 @@
           contentType: item.content_type || "",
           sizeBytes: item.size_bytes,
           location: "email",
-          url: ""
+          url: item.url || ""
         });
       });
 
@@ -323,10 +324,20 @@
         if (requestNumber !== listRequestNumber) return;
         archiveItems = Array.isArray(data.items) ? data.items : [];
         statusNode.textContent = `${archiveItems.length} e-mailů`;
+        if (
+          requestedArchiveRef
+          && archiveItems.some((item) => (item.archive_ref || item.archive_id) === requestedArchiveRef)
+        ) {
+          selectedArchiveRef = requestedArchiveRef;
+        }
         if (!archiveItems.some((item) => (item.archive_ref || item.archive_id) === selectedArchiveRef)) {
           selectedArchiveRef = "";
         }
         renderList();
+        if (requestedArchiveRef) {
+          await loadDetail(requestedArchiveRef);
+          return;
+        }
         const first = visibleItems()[0];
         if (!selectedArchiveRef && first && window.matchMedia("(min-width: 821px)").matches) {
           await loadDetail(first.archive_ref || first.archive_id || "");

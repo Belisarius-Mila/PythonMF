@@ -38,6 +38,9 @@ EMAIL_ARCHIVE_OPENABLE_FILES: dict[str, tuple[Path, str]] = {
     "attachments": (Path("attachments") / "attachments.json", "application/json; charset=utf-8"),
 }
 EMAIL_ARCHIVE_REFERENCE_PATTERN = re.compile(r"archive-ref-[0-9a-f]{16}")
+EMAIL_ARCHIVE_ATTACHMENT_REFERENCE_PATTERN = re.compile(
+    r"email-attachment-ref-[0-9a-f]{16}"
+)
 EMAIL_ARCHIVE_BODY_TEXT_MAX_BYTES = 512 * 1024
 EMAIL_ARCHIVE_ORIGINAL_MAX_BYTES = 25 * 1024 * 1024
 
@@ -45,6 +48,21 @@ EMAIL_ARCHIVE_ORIGINAL_MAX_BYTES = 25 * 1024 * 1024
 def email_archive_reference(archive_directory_name: str) -> str:
     digest = hashlib.sha256(archive_directory_name.encode("utf-8")).hexdigest()[:16]
     return f"archive-ref-{digest}"
+
+
+def _email_archive_attachment_reference(
+    *,
+    archive_directory_name: str,
+    part_index: int,
+    filename: str,
+) -> str:
+    source = f"{archive_directory_name}\0{int(part_index)}\0{filename}"
+    digest = hashlib.sha256(source.encode("utf-8")).hexdigest()[:16]
+    return f"email-attachment-ref-{digest}"
+
+
+def _normalized_attachment_name(value: str) -> str:
+    return safe_filename(str(value or "")).casefold()
 
 
 def email_archive_uid(metadata: dict[str, Any], archive_directory_name: str) -> str:
@@ -161,6 +179,39 @@ def email_archive_detail_status(
         )
 
     attachments = read_email_archive_attachment_metadata(archive_dir)
+    embedded_attachments = read_email_archive_embedded_attachments(
+        archive_ref,
+        archive_directory=archive_directory,
+    )
+    embedded_by_name: dict[str, list[dict[str, Any]]] = {}
+    for embedded in embedded_attachments:
+        embedded_by_name.setdefault(
+            _normalized_attachment_name(str(embedded.get("filename", ""))),
+            [],
+        ).append(embedded)
+    for attachment in attachments:
+        matches = embedded_by_name.get(
+            _normalized_attachment_name(str(attachment.get("filename", ""))),
+            [],
+        )
+        if not matches:
+            continue
+        embedded = matches.pop(0)
+        attachment["url"] = str(embedded.get("url", ""))
+        attachment["attachment_ref"] = str(
+            embedded.get("attachment_ref", "")
+        )
+        attachment["embedded"] = True
+    known_attachment_names = {
+        _normalized_attachment_name(str(item.get("filename", "")))
+        for item in attachments
+    }
+    attachments.extend(
+        embedded
+        for embedded in embedded_attachments
+        if _normalized_attachment_name(str(embedded.get("filename", "")))
+        not in known_attachment_names
+    )
     downloaded = downloaded_email_archive_attachments(uid=uid, documents_dir=documents_dir)
     vault_attachments = vault_email_archive_attachments(
         uid=uid,
@@ -274,6 +325,142 @@ def read_email_archive_original_body_text(
         "\n\n".join(part for part in html_parts if part),
     ]
     return max(candidates, key=len, default="")
+
+
+def read_email_archive_embedded_attachments(
+    archive_id: str,
+    *,
+    archive_directory: Path = DEFAULT_EMAIL_ARCHIVE_DIR,
+) -> list[dict[str, Any]]:
+    """List attachment parts from one immutable original EML without writing files."""
+
+    resolved = resolve_email_archive_file(
+        archive_id,
+        "original_eml",
+        archive_directory=archive_directory,
+    )
+    if not resolved.get("ok"):
+        return []
+    try:
+        raw = resolved["path"].read_bytes()
+    except OSError:
+        return []
+    if len(raw) > EMAIL_ARCHIVE_ORIGINAL_MAX_BYTES:
+        return []
+    try:
+        message = BytesParser(policy=policy.default).parsebytes(raw)
+    except (TypeError, ValueError):
+        return []
+
+    archive_ref = email_archive_reference(resolved["path"].parent.name)
+    result: list[dict[str, Any]] = []
+    for index, part in enumerate(message.walk()):
+        if part.is_multipart():
+            continue
+        raw_filename = str(part.get_filename() or "").strip()
+        disposition = str(part.get_content_disposition() or "").casefold()
+        if not raw_filename and disposition != "attachment":
+            continue
+        filename = (
+            safe_filename(raw_filename)
+            if raw_filename
+            else f"priloha-{index + 1}.bin"
+        )
+        try:
+            payload = part.get_payload(decode=True)
+        except (LookupError, TypeError, ValueError):
+            continue
+        if not isinstance(payload, bytes) or len(payload) > EMAIL_ARCHIVE_ORIGINAL_MAX_BYTES:
+            continue
+        content_type = safe_text(str(part.get_content_type() or "application/octet-stream"))[
+            :120
+        ]
+        attachment_ref = _email_archive_attachment_reference(
+            archive_directory_name=resolved["path"].parent.name,
+            part_index=index,
+            filename=filename,
+        )
+        result.append(
+            {
+                "attachment_ref": attachment_ref,
+                "filename": safe_text(filename)[:240],
+                "content_type": content_type,
+                "size_bytes": len(payload),
+                "saved": False,
+                "embedded": True,
+                "url": (
+                    "/email-archive/attachment?"
+                    f"archive_id={quote(archive_ref)}&attachment={quote(attachment_ref)}"
+                ),
+            }
+        )
+    return result
+
+
+def resolve_email_archive_embedded_attachment(
+    archive_id: str,
+    attachment_ref: str,
+    *,
+    archive_directory: Path = DEFAULT_EMAIL_ARCHIVE_DIR,
+) -> dict[str, Any]:
+    """Resolve one opaque EML attachment reference to read-only response bytes."""
+
+    safe_ref = str(attachment_ref or "").strip()
+    if not EMAIL_ARCHIVE_ATTACHMENT_REFERENCE_PATTERN.fullmatch(safe_ref):
+        return {"ok": False, "message": "Příloha nemá platný bezpečný odkaz."}
+    resolved = resolve_email_archive_file(
+        archive_id,
+        "original_eml",
+        archive_directory=archive_directory,
+    )
+    if not resolved.get("ok"):
+        return {"ok": False, "message": "Původní e-mail není dostupný."}
+    try:
+        raw = resolved["path"].read_bytes()
+    except OSError:
+        return {"ok": False, "message": "Původní e-mail nelze přečíst."}
+    if len(raw) > EMAIL_ARCHIVE_ORIGINAL_MAX_BYTES:
+        return {"ok": False, "message": "Původní e-mail je příliš velký."}
+    try:
+        message = BytesParser(policy=policy.default).parsebytes(raw)
+    except (TypeError, ValueError):
+        return {"ok": False, "message": "Původní e-mail nelze bezpečně načíst."}
+
+    archive_directory_name = resolved["path"].parent.name
+    for index, part in enumerate(message.walk()):
+        if part.is_multipart():
+            continue
+        raw_filename = str(part.get_filename() or "").strip()
+        disposition = str(part.get_content_disposition() or "").casefold()
+        if not raw_filename and disposition != "attachment":
+            continue
+        filename = (
+            safe_filename(raw_filename)
+            if raw_filename
+            else f"priloha-{index + 1}.bin"
+        )
+        candidate_ref = _email_archive_attachment_reference(
+            archive_directory_name=archive_directory_name,
+            part_index=index,
+            filename=filename,
+        )
+        if candidate_ref != safe_ref:
+            continue
+        try:
+            payload = part.get_payload(decode=True)
+        except (LookupError, TypeError, ValueError):
+            break
+        if not isinstance(payload, bytes) or len(payload) > EMAIL_ARCHIVE_ORIGINAL_MAX_BYTES:
+            break
+        return {
+            "ok": True,
+            "data": payload,
+            "filename": safe_text(filename)[:240],
+            "content_type": safe_text(
+                str(part.get_content_type() or "application/octet-stream")
+            )[:120],
+        }
+    return {"ok": False, "message": "Příloha nebyla v původním e-mailu nalezena."}
 
 
 def email_archive_sort_timestamp(

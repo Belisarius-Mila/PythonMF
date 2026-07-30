@@ -60,6 +60,14 @@ R2_CHAT_DEVELOPER_INSTRUCTIONS = (
     "Vytvor TXT jen pres "
     "compile_complete_overview se vsemi batch_refs. "
     "Je-li dotaz prilis siroky pro uplne potvrzeni, pozadej o jeho zpresneni. "
+    "Kdyz najdes konkretni e-mail v lokalnim EmailArchiveVaultu, nepouzivej jako "
+    "zdroj zkraceny nahled ani metadata-only souhrn. Read-only nacti "
+    "email_archive_detail_status, pracuj s celym dostupnym body_text a respektuj "
+    "body_truncated. Do odpovedi vzdy uved presny neosobni archive_ref ve tvaru "
+    "archive-ref-...; nikdy nevypisuj interni archive_id, UID ani filesystemovou "
+    "cestu. Chat z archive_ref nabidne samostatnou plnou ctecku e-mailu a "
+    "oteviratelne mistni prilohy. Dlouhe telo automaticky nekopiruj cele do "
+    "bubliny, ale pravdive ho shrn a odkaz na ctecku nezapomen. "
     "Tisk ani e-mail nikdy neproved bez samostatne registrovane schopnosti, nahledu "
     "a vyslovneho potvrzeni konkretni akce; dokud schopnost neni dostupna, otevrene "
     "rekni, ze akci zatim nelze dokoncit."
@@ -373,6 +381,8 @@ R2_ADAM_CHAT_HTML = r"""<!doctype html>
     .human { justify-self:end; background:#dbeafe; border-bottom-right-radius:5px; }
     .adam { justify-self:start; background:var(--soft); border-bottom-left-radius:5px; }
     .meta { display:block; margin-top:6px; color:var(--muted); font-size:12px; }
+    .source-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+    .source-action { display:inline-flex; align-items:center; min-height:38px; padding:8px 11px; border:1px solid #93c5fd; border-radius:10px; background:#fff; color:#1d4ed8; font-weight:800; text-decoration:none; }
     .empty { color:var(--muted); text-align:center; margin:30px 0; }
     .composer { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:min(920px,100%); padding:12px max(16px,env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left)); border-top:1px solid var(--line); background:rgba(255,255,255,.98); }
     body.has-documents #chat { padding-bottom:330px; }
@@ -563,7 +573,27 @@ R2_ADAM_CHAT_HTML = r"""<!doctype html>
   function bubble(text, className, meta) {
     const node = document.createElement("article");
     node.className = `bubble ${className}`;
-    node.textContent = text || "";
+    const messageText = String(text || "");
+    node.textContent = messageText;
+    if (className === "adam") {
+      const refs = [...new Set(messageText.match(/\barchive-ref-[0-9a-f]{16}\b/g) || [])];
+      if (refs.length) {
+        const actions = document.createElement("div");
+        actions.className = "source-actions";
+        refs.forEach((archiveRef, index) => {
+          const link = document.createElement("a");
+          link.className = "source-action";
+          link.href = `/email-archive/?archive=${encodeURIComponent(archiveRef)}`;
+          link.target = "_blank";
+          link.rel = "noopener";
+          link.textContent = refs.length === 1
+            ? "Otevřít celý e-mail a přílohy"
+            : `Otevřít e-mail ${index + 1}`;
+          actions.appendChild(link);
+        });
+        node.appendChild(actions);
+      }
+    }
     const small = document.createElement("span");
     small.className = "meta";
     small.textContent = meta || "";

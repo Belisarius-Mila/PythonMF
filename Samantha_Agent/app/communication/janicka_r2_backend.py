@@ -172,4 +172,10 @@ class JanickaR2Backend:
             "compile_complete_overview. When structured full-document fields are "
             "available, use them, preserve missing values as nezjisteno, and never infer "
             "them. Overly broad searches must fail closed.",
+            "rule=For one concrete archived email, use the read-only "
+            "email_archive_detail_status result instead of a snippet or metadata-only "
+            "summary. Read the complete available body_text, preserve body_truncated, "
+            "and include only its opaque archive_ref in the answer so the R2 chat can "
+            "offer the full local email reader and attachments. Never expose archive_id, "
+            "UID or a filesystem path.",
         )

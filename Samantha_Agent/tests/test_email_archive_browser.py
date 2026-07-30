@@ -12,7 +12,9 @@ from app.email.archive_browser import (
     email_archive_reference,
     email_archive_detail_status,
     email_archive_list_status,
+    read_email_archive_embedded_attachments,
     read_email_archive_body_text,
+    resolve_email_archive_embedded_attachment,
     resolve_email_archive_file,
     resolve_email_archive_incoming_file,
 )
@@ -191,6 +193,77 @@ class EmailArchiveBrowserTests(unittest.TestCase):
         self.assertIn("Important second paragraph.", preview)
         self.assertNotIn("privateScript", preview)
         self.assertFalse(truncated)
+
+    def test_detail_opens_attachment_directly_from_immutable_original_eml(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            archive_directory, archive_dir, documents_dir = self.create_archive_fixture(root)
+            (archive_dir / "original.eml").write_bytes(
+                b"MIME-Version: 1.0\r\n"
+                b"Content-Type: multipart/mixed; boundary=\"mix\"\r\n\r\n"
+                b"--mix\r\n"
+                b"Content-Type: text/plain; charset=utf-8\r\n\r\n"
+                b"Synthetic body.\r\n"
+                b"--mix\r\n"
+                b"Content-Type: application/pdf\r\n"
+                b"Content-Disposition: attachment; filename=\"synthetic.pdf\"\r\n"
+                b"Content-Transfer-Encoding: base64\r\n\r\n"
+                b"JVBERi0xLjQgc3ludGhldGlj\r\n"
+                b"--mix--\r\n"
+            )
+            attachments_dir = archive_dir / "attachments"
+            (attachments_dir / "attachments.json").write_text(
+                json.dumps(
+                    {
+                        "attachments": [
+                            {
+                                "filename": "synthetic.pdf",
+                                "content_type": "application/pdf",
+                                "size_bytes": 18,
+                                "saved": False,
+                            }
+                        ]
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            archive_ref = email_archive_reference(archive_dir.name)
+            listed = read_email_archive_embedded_attachments(
+                archive_ref,
+                archive_directory=archive_directory,
+            )
+            detail = email_archive_detail_status(
+                archive_ref,
+                archive_directory=archive_directory,
+                documents_dir=documents_dir,
+            )
+            resolved = resolve_email_archive_embedded_attachment(
+                archive_ref,
+                listed[0]["attachment_ref"],
+                archive_directory=archive_directory,
+            )
+            invalid = resolve_email_archive_embedded_attachment(
+                archive_ref,
+                "../synthetic.pdf",
+                archive_directory=archive_directory,
+            )
+
+        self.assertEqual(len(listed), 1)
+        self.assertRegex(
+            listed[0]["attachment_ref"],
+            r"^email-attachment-ref-[0-9a-f]{16}$",
+        )
+        self.assertIn(
+            f"archive_id={archive_ref}",
+            listed[0]["url"],
+        )
+        self.assertEqual(detail["attachments"][0]["url"], listed[0]["url"])
+        self.assertTrue(detail["attachments"][0]["embedded"])
+        self.assertTrue(resolved["ok"])
+        self.assertEqual(resolved["content_type"], "application/pdf")
+        self.assertTrue(resolved["data"].startswith(b"%PDF"))
+        self.assertFalse(invalid["ok"])
 
     def test_list_sorts_by_received_date_instead_of_local_file_mtime(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

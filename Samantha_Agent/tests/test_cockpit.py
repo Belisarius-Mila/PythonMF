@@ -7026,6 +7026,7 @@ Dalsi krok:
             "/api/email-archive/list",
             "/api/email-archive/detail",
             "/email-archive/file",
+            "/email-archive/attachment",
             "/email-archive/incoming",
         }
 
