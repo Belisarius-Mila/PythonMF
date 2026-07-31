@@ -73,6 +73,22 @@ Každá příští aktualizace slovíček musí v jednom souvislém kroku:
 `FR - Míla`, `FR - Jana`, `IT - Míla`. Pokud nové slovíčko už správné mapování
 a obrázek má, má se i tento nulový výsledek výslovně uvést.
 
+### První živý průchod kontraktu 2026-07-31
+
+- Společný audit zachytil nové řádky současně u Míly i Jany.
+- Sedm nových českých významů znovu použilo vhodné existující obrázky.
+- Vzniklo pět nových schválených obrázků: `stadium.webp`, `team.webp`,
+  `beer.webp`, `shoes.webp` a `courtyard.webp`.
+- Všechny nové obrázky mají 1254 x 1254 px, jsou menší než 250 kB a Mílova
+  i Janina kopie mají shodné kontrolní součty.
+- Kanonický mapping má po potvrzeném apply 969 českých abecedně řazených
+  položek a obě distribuční kopie jsou bajtově shodné.
+- Úplný audit skončil:
+  - `FR - Míla`: 227/227,
+  - `FR - Jana`: 389/389,
+  - `IT - Míla`: 463/463,
+  - mapping hodnoty bez obrázku: 0 u Míly i Jany.
+
 ## Důležité poznatky
 
 Zdroj pravdy má být pouze:
