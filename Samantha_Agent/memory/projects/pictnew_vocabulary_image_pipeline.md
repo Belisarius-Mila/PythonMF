@@ -37,11 +37,12 @@ slovník, který se právě měnil.
 
 Povinně auditovat všechny aktuální zdroje:
 
-- `FR - Míla`: `VocabularyFR/VocabularyFR.csv` a současnou kořenovou/iPhone
-  sadu `VocabularyFR.csv`, dokud nebudou datově sjednocené,
+- `FR - Míla`: `VocabularyFR/VocabularyFR.csv`,
 - `FR - Jana`: připojený iCloud zdroj
   `PythonMF/VocabularyFR/VocabularyFR.csv`,
 - `IT - Míla`: `VocabularyIT/VocabularyIT.csv`.
+
+Kořenový `VocabularyFR.csv` je stará kopie a do společného auditu nepatří.
 
 Pro všechny tyto zdroje existuje jediný společný obsah mapování:
 
@@ -54,7 +55,7 @@ Pro všechny tyto zdroje existuje jediný společný obsah mapování:
 
 Každá příští aktualizace slovíček musí v jednom souvislém kroku:
 
-1. Projít všechny čtyři výše uvedené CSV.
+1. Projít všechny tři výše uvedené CSV.
 2. Porovnat jejich české významy s kanonickým `Pict/mapping.json`.
 3. Ověřit skutečné obrázky v Mílově i Janině adresáři `Pict`.
 4. Nejprve znovu použít vhodný existující obrázek; chybějící obrázek připravit
@@ -63,7 +64,7 @@ Každá příští aktualizace slovíček musí v jednom souvislém kroku:
 6. Po potvrzení upravit pouze kanonický mapping, zachovat jen české klíče a
    abecední řazení.
 7. Stejný výsledný mapping a potřebné obrázky dorovnat do Janina `Pict`.
-8. Ověřit celý řetězec `CSV -> mapping -> skutečný obrázek` pro všechny čtyři
+8. Ověřit celý řetězec `CSV -> mapping -> skutečný obrázek` pro všechny tři
    CSV a porovnat kontrolní součty obou distribučních mappingů.
 9. Na závěr přesně vypsat, které soubory se mají nahrát na iPhony; mapping patří
    pouze do `Pict`.
@@ -76,8 +77,9 @@ a obrázek má, má se i tento nulový výsledek výslovně uvést.
 
 Zdroj pravdy má být pouze:
 
-- `VocabularyFR.csv`
-- `VocabularyIT.csv`
+- `VocabularyFR/VocabularyFR.csv` pro Mílu,
+- připojený `iCloud/PythonMF/VocabularyFR/VocabularyFR.csv` pro Janu,
+- `VocabularyIT/VocabularyIT.csv` pro Mílu,
 - `Pict/mapping.json`
 - skutečný obsah adresáře `Pict/`
 

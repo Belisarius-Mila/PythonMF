@@ -34,7 +34,7 @@ Presny seznam zdroju a distribucni kontrakt je kanonicky popsany v
 Prakticke pravidlo pro Codex:
 
 - nezpracovavat izolovane jen prave zmeneny CSV,
-- vzdy znovu overit oba FR zdroje Mily, iCloud FR Jany a IT Mily,
+- vzdy znovu overit jeden FR zdroj Mily, iCloud FR Jany a IT Mily,
 - udrzovat jeden cesky a abecedne razeny obsah `Pict/mapping.json`,
 - drzet Milovu a Janinu distribucni kopii bajtove shodnou,
 - pri chybejicim obrazku nejdrive hledat existujici vhodny asset,
