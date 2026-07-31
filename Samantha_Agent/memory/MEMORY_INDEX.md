@@ -42,7 +42,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `projects/lekarna_web_app.md` - Webova aplikace Lekarna: publikovana GitHub Pages aplikace se sifrovanym balickem, cockpit UI, hadim dotazem, MP3 napovedou a ChatGPT copy fallbackem; dalsi vyvoj priorita 2.
 - `projects/media_image_resize_utility.md` - obecna bezpecna utilita pro zmensovani obrazku podle cilove velikosti v kB; vychozi cil 250 kB, preset Lekarna 100 kB, preview + potvrzeny apply se zalohou.
 - `projects/tax_priznani_2025.md` - daňové přiznání 2025, výpočty, checklist formuláře a pravidlo neukládat citlivé údaje.
-- `projects/pictnew_vocabulary_image_pipeline.md` - opakovatelný audit a generování obrázků ke slovíčkům FR/IT přes `mapping.json`, `Pict/` a `PictNew/`.
+- `projects/pictnew_vocabulary_image_pipeline.md` - [PRIPOMENOUT] povinný společný audit při každé změně `FR - Míla`, `FR - Jana` nebo `IT - Míla`; jeden český abecední `Pict/mapping.json`, shodná distribuce a kontrola všech CSV i obrázků.
 - `projects/tts_edge_audio_tools.md` - české TTS/MP3 nástroje přes edge-tts, dávkový CSV režim a ruční GUI.
 - `projects/vocabulary_en_web_cards.md` - webové obrazové kartičky EN z `VocabularyEN.csv`, sync do `docs/`, learner MVP a workflow pro chybějící obrázky.
 - `projects/vocabularyfr_web_trainer.md` - VocabularyFR web trainer pro Janu: webový MVP prototyp z desktopové Tkinter aplikace s CSV editací, audio cache, obrázky a auto smyčkou; checkpoint prototypu je commit `da93eba`.

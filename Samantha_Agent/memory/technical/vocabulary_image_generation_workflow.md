@@ -23,6 +23,25 @@ Hlavni zasada:
 Audit / request -> dry-run -> potvrzene placene generovani -> review -> kopie do Pict -> mapping az po dalsim potvrzeni -> git checkpoint
 ```
 
+## Spolecny FR/IT aktualizacni trigger
+
+Od 2026-07-31 znamena zapis novych slovicek do kterekoli oblasti `FR - Mila`,
+`FR - Jana` nebo `IT - Mila` povinny spolecny audit vsech soucasnych zdroju.
+Presny seznam zdroju a distribucni kontrakt je kanonicky popsany v
+`memory/projects/pictnew_vocabulary_image_pipeline.md` v sekci
+`Povinny aktualizacni kontrakt od 2026-07-31`.
+
+Prakticke pravidlo pro Codex:
+
+- nezpracovavat izolovane jen prave zmeneny CSV,
+- vzdy znovu overit oba FR zdroje Mily, iCloud FR Jany a IT Mily,
+- udrzovat jeden cesky a abecedne razeny obsah `Pict/mapping.json`,
+- drzet Milovu a Janinu distribucni kopii bajtove shodnou,
+- pri chybejicim obrazku nejdrive hledat existujici vhodny asset,
+- generovani, presun schvalenych obrazku a mapping apply dal podlehaji svym
+  potvrzovacim hranicim,
+- pred dokoncenim dolozit audit `CSV -> mapping -> Pict` pro vsechny zdroje.
+
 ## Role slozek
 
 ```text

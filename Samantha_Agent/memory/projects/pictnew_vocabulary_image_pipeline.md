@@ -29,6 +29,49 @@ Cílem je vytvořit opakovatelný systém, který po doplnění nových slovíč
 
 Systém má zabránit tomu, aby se při každém novém doplnění slovíček celý proces znovu ručně vymýšlel.
 
+## Povinný aktualizační kontrakt od 2026-07-31
+
+Toto pravidlo se spouští při každém přidání nebo úpravě slovíček v některé z
+oblastí `FR - Míla`, `FR - Jana` nebo `IT - Míla`. Nestačí zkontrolovat jen
+slovník, který se právě měnil.
+
+Povinně auditovat všechny aktuální zdroje:
+
+- `FR - Míla`: `VocabularyFR/VocabularyFR.csv` a současnou kořenovou/iPhone
+  sadu `VocabularyFR.csv`, dokud nebudou datově sjednocené,
+- `FR - Jana`: připojený iCloud zdroj
+  `PythonMF/VocabularyFR/VocabularyFR.csv`,
+- `IT - Míla`: `VocabularyIT/VocabularyIT.csv`.
+
+Pro všechny tyto zdroje existuje jediný společný obsah mapování:
+
+- kanonický zdroj v repozitáři je `Pict/mapping.json`,
+- Janina distribuční kopie je `iCloud/PythonMF/Pict/mapping.json`,
+- obě kopie musí být po každé změně bajtově shodné,
+- jiný aktivní `mapping.json` vedle aplikace, v upload balíčku nebo v pracovním
+  adresáři není dovolený,
+- aplikace na iPhonech čtou mapování pouze z vlastního `Pict/mapping.json`.
+
+Každá příští aktualizace slovíček musí v jednom souvislém kroku:
+
+1. Projít všechny čtyři výše uvedené CSV.
+2. Porovnat jejich české významy s kanonickým `Pict/mapping.json`.
+3. Ověřit skutečné obrázky v Mílově i Janině adresáři `Pict`.
+4. Nejprve znovu použít vhodný existující obrázek; chybějící obrázek připravit
+   nebo generovat jen podle potvrzovacího workflow.
+5. Před změnou mappingu vytvořit zálohu a ukázat preview.
+6. Po potvrzení upravit pouze kanonický mapping, zachovat jen české klíče a
+   abecední řazení.
+7. Stejný výsledný mapping a potřebné obrázky dorovnat do Janina `Pict`.
+8. Ověřit celý řetězec `CSV -> mapping -> skutečný obrázek` pro všechny čtyři
+   CSV a porovnat kontrolní součty obou distribučních mappingů.
+9. Na závěr přesně vypsat, které soubory se mají nahrát na iPhony; mapping patří
+   pouze do `Pict`.
+
+Úkol nelze označit za hotový, dokud audit neprokáže všechny tři oblasti
+`FR - Míla`, `FR - Jana`, `IT - Míla`. Pokud nové slovíčko už správné mapování
+a obrázek má, má se i tento nulový výsledek výslovně uvést.
+
 ## Důležité poznatky
 
 Zdroj pravdy má být pouze:
