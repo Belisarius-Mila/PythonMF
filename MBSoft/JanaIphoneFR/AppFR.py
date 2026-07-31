@@ -58,6 +58,7 @@ class VocabTrainer(ui.View):
         self.update_interval = 0.1
         self.words = []
         self.image_map = {}
+        self.image_folded_map = {}
         self.image_alias_map = {}
         self.current_word = None
         self.current_index = None
@@ -140,16 +141,14 @@ class VocabTrainer(ui.View):
         return folders
 
     def _load_image_map(self):
-        primary_paths = [BASE_DIR / 'Pict' / 'mapping.json', JSON_FILE]
-        fallback_paths = [folder / 'mapping.json' for folder in self._picture_folders()]
-        mapping_paths = (
-            primary_paths
-            if any(path.exists() for path in primary_paths)
-            else fallback_paths
-        )
-        mapping_paths = list(dict.fromkeys(mapping_paths))
+        mapping_paths = [
+            folder / 'mapping.json'
+            for folder in self._picture_folders()
+            if (folder / 'mapping.json').exists()
+        ][:1]
         image_stems = set(self._picture_file_index())
         exact_candidates = {}
+        folded_candidates = {}
         alias_candidates = {}
         for mapping_path in mapping_paths:
             if not mapping_path.exists():
@@ -159,10 +158,12 @@ class VocabTrainer(ui.View):
                     data = json.load(f)
                 if isinstance(data, dict):
                     for key, value in data.items():
-                        key_norm = self._normalize_key(str(key))
+                        key_norm = self._normalize_mapping_key(str(key))
+                        folded_key = self._normalize_key(str(key))
                         value_norm = self._normalize_key(str(value))
                         if key_norm and value_norm:
                             exact_candidates.setdefault(key_norm, []).append(value_norm)
+                            folded_candidates.setdefault(folded_key, []).append(value_norm)
                             for alias in self._mapping_key_parts(key):
                                 alias_candidates.setdefault(alias, []).append(value_norm)
             except Exception as e:
@@ -184,6 +185,16 @@ class VocabTrainer(ui.View):
             if selected:
                 image_map[key] = selected
 
+        image_folded_map = {}
+        for key, values in folded_candidates.items():
+            existing = []
+            for value in values:
+                if value in image_stems and value not in existing:
+                    existing.append(value)
+            if len(existing) == 1:
+                image_folded_map[key] = existing[0]
+        self.image_folded_map = image_folded_map
+
         image_alias_map = {}
         for alias, values in alias_candidates.items():
             existing = []
@@ -201,7 +212,7 @@ class VocabTrainer(ui.View):
         parts = re.split(r'[,;/|()]', str(text or ''))
         normalized = []
         for part in parts:
-            key = self._normalize_key(part)
+            key = self._normalize_mapping_key(part)
             if len(key) >= 4 and key not in normalized:
                 normalized.append(key)
         return normalized
@@ -260,10 +271,19 @@ class VocabTrainer(ui.View):
     def _image_base_name_for_word(self, row):
         fr_word = (row.get('FR') or '').strip()
         cz_word = (row.get('CZ') or '').strip()
-        keys = [self._normalize_key(fr_word), self._normalize_key(cz_word)]
+        mapping_keys = [
+            self._normalize_mapping_key(fr_word),
+            self._normalize_mapping_key(cz_word),
+        ]
+        folded_keys = [self._normalize_key(fr_word), self._normalize_key(cz_word)]
         stems = self._picture_stems()
-        for key in keys:
+        for key in mapping_keys:
             mapped = self.image_map.get(key)
+            if mapped and mapped in stems:
+                return mapped
+
+        for key in folded_keys:
+            mapped = self.image_folded_map.get(key)
             if mapped and mapped in stems:
                 return mapped
 
@@ -272,7 +292,7 @@ class VocabTrainer(ui.View):
                 mapped = self.image_alias_map.get(alias)
                 if mapped and mapped in stems:
                     return mapped
-        for key in keys:
+        for key in folded_keys:
             if key and key in stems:
                 return key
         return None
@@ -646,6 +666,11 @@ class VocabTrainer(ui.View):
         text = unicodedata.normalize('NFD', text)
         text = ''.join(c for c in text if unicodedata.category(c) != 'Mn')
         return re.sub(r'[^a-z0-9]+', '', text)
+
+    def _normalize_mapping_key(self, text):
+        import unicodedata
+        text = unicodedata.normalize('NFC', (text or '').strip().casefold())
+        return ''.join(char for char in text if char.isalnum())
 
     def is_true(self, value):
         """Robust bool check for CSV values."""

@@ -165,7 +165,14 @@ class VocabularyTrainerApp:
         self.cz_voice = self._resolve_cz_voice()
         self.picture_photo = None
         self.picture_base_dirs = self._build_picture_base_dirs()
-        self.synonym_image_map = dict(SYNONYM_IMAGE_MAP)
+        self.synonym_image_map = {
+            self._normalize_mapping_key(key): self._normalize_word(value)
+            for key, value in SYNONYM_IMAGE_MAP.items()
+        }
+        self.synonym_image_folded_map = {
+            self._normalize_word(key): self._normalize_word(value)
+            for key, value in SYNONYM_IMAGE_MAP.items()
+        }
         self.blocked_image_terms = set()
         self._load_external_mapping()
         self.picture_stems = self._discover_picture_stems()
@@ -708,11 +715,21 @@ class VocabularyTrainerApp:
                 with open(path, "r", encoding="utf-8") as f:
                     data = json.load(f)
                 if isinstance(data, dict):
+                    folded_candidates = {}
                     for k, v in data.items():
-                        key = self._normalize_word(str(k))
+                        key = self._normalize_mapping_key(str(k))
+                        folded_key = self._normalize_word(str(k))
                         val = self._normalize_word(str(v))
                         if key and val:
                             self.synonym_image_map[key] = val
+                            folded_candidates.setdefault(folded_key, []).append(val)
+                    for folded_key, values in folded_candidates.items():
+                        unique_values = list(dict.fromkeys(values))
+                        if len(unique_values) == 1:
+                            self.synonym_image_folded_map[folded_key] = unique_values[0]
+                        else:
+                            self.synonym_image_folded_map.pop(folded_key, None)
+                break
             except Exception:
                 continue
         for path in self._blocklist_file_candidates():
@@ -737,6 +754,10 @@ class VocabularyTrainerApp:
             ch for ch in unicodedata.normalize("NFD", val) if unicodedata.category(ch) != "Mn"
         )
         return re.sub(r"[^a-z0-9]+", "", val)
+
+    def _normalize_mapping_key(self, text):
+        val = unicodedata.normalize("NFC", (text or "").strip().casefold())
+        return "".join(char for char in val if char.isalnum())
 
     def _tokenize_words(self, text):
         raw = re.findall(r"[A-Za-zÀ-ÖØ-öø-ÿ'-]+", (text or "").casefold())
@@ -772,10 +793,12 @@ class VocabularyTrainerApp:
     def _choose_picture_stem(self, row):
         it = (row.get("IT") or "").strip()
         cz = (row.get("CZ") or "").strip()
-        it_norm = self._normalize_word(it)
-        cz_norm = self._normalize_word(cz)
-        exact_keys = [it_norm, cz_norm]
-        term_blocked = it_norm in self.blocked_image_terms
+        exact_keys = [
+            self._normalize_mapping_key(it),
+            self._normalize_mapping_key(cz),
+        ]
+        folded_keys = [self._normalize_word(it), self._normalize_word(cz)]
+        term_blocked = folded_keys[0] in self.blocked_image_terms
         tokens = self._tokenize_words(it) + self._tokenize_words(cz)
         generic_tokens = (
             FEMALE_PRONOUNS
@@ -786,13 +809,17 @@ class VocabularyTrainerApp:
             | ADJ_ADV_WORDS
         )
 
-        for key in exact_keys:
+        for key in folded_keys:
             if key and key in self.picture_stems:
                 return key
 
         if not term_blocked:
             for key in exact_keys:
                 mapped = self.synonym_image_map.get(key)
+                if mapped:
+                    return mapped
+            for key in folded_keys:
+                mapped = self.synonym_image_folded_map.get(key)
                 if mapped:
                     return mapped
 
@@ -806,7 +833,7 @@ class VocabularyTrainerApp:
             for key in tokens:
                 if key in generic_tokens or key in self.blocked_image_terms:
                     continue
-                mapped = self.synonym_image_map.get(key)
+                mapped = self.synonym_image_folded_map.get(key)
                 if mapped:
                     return mapped
 
