@@ -37,6 +37,7 @@ FR_CORRECTIONS = {
     332: "Bonne soirée !",
     337: "magasin",
     342: "je ne sais pas",
+    387: "nouveau, nouvelle",
 }
 
 
@@ -276,6 +277,30 @@ SENTENCE_PATCHES = {
     347: SentencePatch(
         "Enfin, le train arrive à la gare.",
         "Konečně vlak přijíždí na nádraží.",
+    ),
+    384: SentencePatch(
+        "J’ai neuf livres.",
+        "Mám devět knih.",
+    ),
+    385: SentencePatch(
+        "La leçon commence à neuf heures.",
+        "Lekce začíná v devět hodin.",
+    ),
+    386: SentencePatch(
+        "Les maths sont intéressantes.",
+        "Matematika je zajímavá.",
+    ),
+    387: SentencePatch(
+        "Il a un nouveau vélo et elle a une nouvelle robe.",
+        "On má nové kolo a ona má nové šaty.",
+    ),
+    388: SentencePatch(
+        "J’apprends le français chaque jour.",
+        "Každý den se učím francouzsky.",
+    ),
+    389: SentencePatch(
+        "Je comprends cette question.",
+        "Rozumím této otázce.",
     ),
 }
 

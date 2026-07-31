@@ -35,6 +35,12 @@ Prakticke pravidlo pro Codex:
 
 - nezpracovavat izolovane jen prave zmeneny CSV,
 - vzdy znovu overit jeden FR zdroj Mily, iCloud FR Jany a IT Mily,
+- u Jana FR vzdy zkontrolovat vsechny dvojice `Sentence` a `SentenceT`,
+  chybejici jednoduche prikladove vety a ceske preklady doplnit; Milovy FR a IT
+  vety automaticky nedoplnovat, protoze si je Mila pise sam,
+- kontrolu Jana FR spustit nejprve bez zapisu prikazem
+  `.venv/bin/python scripts/jana_vocabularyfr_fill_sentences.py`; nenulovy
+  vysledek kvuli chybejicim vetam je povinny podnet k jejich doplneni,
 - udrzovat jeden cesky a abecedne razeny obsah `Pict/mapping.json`,
 - drzet Milovu a Janinu distribucni kopii bajtove shodnou,
 - pri chybejicim obrazku nejdrive hledat existujici vhodny asset,

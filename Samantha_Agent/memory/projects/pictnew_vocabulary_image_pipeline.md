@@ -56,17 +56,22 @@ Pro všechny tyto zdroje existuje jediný společný obsah mapování:
 Každá příští aktualizace slovíček musí v jednom souvislém kroku:
 
 1. Projít všechny tři výše uvedené CSV.
-2. Porovnat jejich české významy s kanonickým `Pict/mapping.json`.
-3. Ověřit skutečné obrázky v Mílově i Janině adresáři `Pict`.
-4. Nejprve znovu použít vhodný existující obrázek; chybějící obrázek připravit
+2. U Janina `FR` CSV vždy zkontrolovat, že každý řádek má francouzskou
+   příkladovou větu v `Sentence` a její český překlad v `SentenceT`. Chybějící
+   dvojice doplnit jednoduchou vhodnou větou a opravit zjevné překlepy ve
+   slovíčku. Mílova `FR` a `IT` CSV tímto pravidlem automaticky neměnit:
+   příkladové věty si Míla doplňuje sám.
+3. Porovnat jejich české významy s kanonickým `Pict/mapping.json`.
+4. Ověřit skutečné obrázky v Mílově i Janině adresáři `Pict`.
+5. Nejprve znovu použít vhodný existující obrázek; chybějící obrázek připravit
    nebo generovat jen podle potvrzovacího workflow.
-5. Před změnou mappingu vytvořit zálohu a ukázat preview.
-6. Po potvrzení upravit pouze kanonický mapping, zachovat jen české klíče a
+6. Před změnou mappingu vytvořit zálohu a ukázat preview.
+7. Po potvrzení upravit pouze kanonický mapping, zachovat jen české klíče a
    abecední řazení.
-7. Stejný výsledný mapping a potřebné obrázky dorovnat do Janina `Pict`.
-8. Ověřit celý řetězec `CSV -> mapping -> skutečný obrázek` pro všechny tři
+8. Stejný výsledný mapping a potřebné obrázky dorovnat do Janina `Pict`.
+9. Ověřit celý řetězec `CSV -> mapping -> skutečný obrázek` pro všechny tři
    CSV a porovnat kontrolní součty obou distribučních mappingů.
-9. Na závěr přesně vypsat, které soubory se mají nahrát na iPhony; mapping patří
+10. Na závěr přesně vypsat, které soubory se mají nahrát na iPhony; mapping patří
    pouze do `Pict`.
 
 Úkol nelze označit za hotový, dokud audit neprokáže všechny tři oblasti
@@ -88,6 +93,9 @@ a obrázek má, má se i tento nulový výsledek výslovně uvést.
   - `FR - Jana`: 389/389,
   - `IT - Míla`: 463/463,
   - mapping hodnoty bez obrázku: 0 u Míly i Jany.
+- Následná kontrola Janina CSV odhalila šest nových řádků bez `Sentence` a
+  `SentenceT`. Dne 2026-07-31 byly věty a překlady doplněny, zjevný překlep
+  `neuvelle` byl opraven na `nouvelle` a audit vět skončil 389/389.
 
 ## Důležité poznatky
 
