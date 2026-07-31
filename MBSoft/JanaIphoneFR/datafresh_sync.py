@@ -1,7 +1,11 @@
+import csv
+import filecmp
 import os
 import shutil
 import time
 
+
+DATAFRESH_API_VERSION = 2
 
 _CLOUD_FOLDER_NAMES = (
     "Desktop",
@@ -64,18 +68,7 @@ def _icloud_root_candidates(fast=False):
         candidates.append(os.path.join(legacy_base, folder_name))
         candidates.append(os.path.join(mobile_docs, folder_name))
 
-    if fast:
-        ordered = []
-        seen = set()
-        for c in candidates:
-            c_abs = os.path.abspath(c)
-            if c_abs in seen:
-                continue
-            seen.add(c_abs)
-            ordered.append(c_abs)
-        return ordered
-
-    if os.path.isdir(mobile_docs_root):
+    if not fast and os.path.isdir(mobile_docs_root):
         try:
             for entry in os.listdir(mobile_docs_root):
                 entry_dir = os.path.join(mobile_docs_root, entry)
@@ -87,7 +80,9 @@ def _icloud_root_candidates(fast=False):
         except Exception:
             pass
 
-    # Dynamic iOS app-group UUID paths (change across installs/devices).
+    # Dynamic iOS app-group UUID paths change across installs/devices.  Include
+    # their shallow File Provider roots even in fast mode; exact path checks are
+    # cheap and avoid silently keeping an old local CSV after an iOS update.
     if os.path.isdir(appgroup_root):
         try:
             for entry in os.listdir(appgroup_root):
@@ -198,19 +193,62 @@ def _hint_match_score(path, app_dir_hints):
     return score
 
 
-def _best_candidate(candidates, app_dir_hints):
+def _csv_profile(path):
+    try:
+        with open(path, mode="r", encoding="utf-8-sig", newline="") as handle:
+            reader = csv.DictReader(handle)
+            headers = [
+                str(header or "").replace("\ufeff", "").strip()
+                for header in (reader.fieldnames or [])
+            ]
+            row_count = sum(1 for _row in reader)
+        return {
+            "ok": bool(headers),
+            "row_count": row_count,
+            "headers": headers,
+            "error": "",
+        }
+    except Exception as exc:
+        return {
+            "ok": False,
+            "row_count": 0,
+            "headers": [],
+            "error": str(exc),
+        }
+
+
+def _best_candidate(candidates, app_dir_hints, prefer_larger_csv=False):
     if not candidates:
         return None
     ranked = []
     for c in candidates:
         backup_penalty = 1 if _is_backup_like_path(c) else 0
         hint_score = _hint_match_score(c, app_dir_hints)
+        csv_rows = 0
+        invalid_csv_penalty = 0
+        if prefer_larger_csv and os.path.splitext(c)[1].lower() == ".csv":
+            profile = _csv_profile(c)
+            csv_rows = profile["row_count"] if profile["ok"] else -1
+            invalid_csv_penalty = 0 if profile["ok"] else 1
         try:
             mtime = os.path.getmtime(c)
         except Exception:
             mtime = 0.0
-        # backup_penalty first (0 is better), then higher hint score, then newer file.
-        ranked.append(((backup_penalty, -hint_score, -mtime), c))
+        # Prefer canonical non-backup locations.  For equivalent CSV locations,
+        # prefer the complete dataset before relying on timestamps copied by
+        # iCloud/File Provider.
+        ranked.append(
+            (
+                (
+                    backup_penalty,
+                    invalid_csv_penalty,
+                    -hint_score,
+                    -csv_rows,
+                    -mtime,
+                ),
+                c,
+            )
+        )
     ranked.sort(key=lambda x: x[0])
     return ranked[0][1]
 
@@ -244,14 +282,23 @@ def _find_source_file(
         return exact_candidates
 
     # Pass 1: prefer exact filename from external sources (not inside local app dir).
-    picked = _best_candidate(_collect_exact([filename], strict), app_dir_hints)
+    prefer_larger_csv = os.path.splitext(filename)[1].lower() == ".csv"
+    picked = _best_candidate(
+        _collect_exact([filename], strict),
+        app_dir_hints,
+        prefer_larger_csv=prefer_larger_csv,
+    )
     if picked:
         return picked, scanned_roots
 
     # Pass 1b: fallback to common filename aliases such as VocabularyFR-2.csv.
     aliases = _source_name_aliases(filename)
     if aliases:
-        picked = _best_candidate(_collect_exact(aliases, strict), app_dir_hints)
+        picked = _best_candidate(
+            _collect_exact(aliases, strict),
+            app_dir_hints,
+            prefer_larger_csv=prefer_larger_csv,
+        )
         if picked:
             return picked, scanned_roots
 
@@ -260,12 +307,20 @@ def _find_source_file(
             return None, scanned_roots
 
         # Fallback 1: broaden relative dirs but still without recursion.
-        picked = _best_candidate(_collect_exact([filename], False), app_dir_hints)
+        picked = _best_candidate(
+            _collect_exact([filename], False),
+            app_dir_hints,
+            prefer_larger_csv=prefer_larger_csv,
+        )
         if picked:
             return picked, scanned_roots
 
         if aliases:
-            picked = _best_candidate(_collect_exact(aliases, False), app_dir_hints)
+            picked = _best_candidate(
+                _collect_exact(aliases, False),
+                app_dir_hints,
+                prefer_larger_csv=prefer_larger_csv,
+            )
             if picked:
                 return picked, scanned_roots
 
@@ -286,7 +341,11 @@ def _find_source_file(
                         exclude_prefix=local_dir_abs,
                     )
                 )
-        picked = _best_candidate(recursive_candidates, app_dir_hints)
+        picked = _best_candidate(
+            recursive_candidates,
+            app_dir_hints,
+            prefer_larger_csv=prefer_larger_csv,
+        )
         if picked:
             return picked, scanned_roots
         return None, scanned_roots
@@ -305,7 +364,11 @@ def _find_source_file(
             recursive_candidates.extend(
                 _find_source_file_recursive(root, candidate_name, exclude_prefix=local_dir_abs)
             )
-    picked = _best_candidate(recursive_candidates, app_dir_hints)
+    picked = _best_candidate(
+        recursive_candidates,
+        app_dir_hints,
+        prefer_larger_csv=prefer_larger_csv,
+    )
     if picked:
         return picked, scanned_roots
 
@@ -344,6 +407,7 @@ def refresh_files_from_icloud(
     allow_recursive=True,
     fast=False,
     max_attempts=8,
+    required_csv_columns=None,
 ):
     os.makedirs(local_dir, exist_ok=True)
     updated = []
@@ -352,7 +416,11 @@ def refresh_files_from_icloud(
     failed = []
     sources = {}
     diagnostics = {}
+    source_rows = {}
+    local_rows = {}
+    ignored_overrides = []
     source_overrides = source_overrides or {}
+    required_csv_columns = required_csv_columns or {}
 
     for filename in filenames:
         dst = os.path.join(local_dir, filename)
@@ -361,16 +429,13 @@ def refresh_files_from_icloud(
         done = False
 
         for attempt in range(max_attempts):
-            # 0) First choice: user-pinned source path (stable and fast).
             pinned = source_overrides.get(filename)
-            if pinned and os.path.exists(pinned):
-                src = pinned
-                scanned_roots = ["pinned-source"]
-            elif manual_only:
-                src = None
-                scanned_roots = ["manual-only-no-pinned-source"]
+            pinned_exists = bool(pinned and os.path.exists(pinned))
+            if manual_only:
+                src = pinned if pinned_exists else None
+                scanned_roots = ["pinned-source"] if src else ["manual-only-no-pinned-source"]
             else:
-                src, scanned_roots = _find_source_file(
+                automatic_src, scanned_roots = _find_source_file(
                     filename,
                     app_dir_hints,
                     local_dir=local_dir,
@@ -378,6 +443,21 @@ def refresh_files_from_icloud(
                     allow_recursive=allow_recursive,
                     fast=fast,
                 )
+                candidates = [
+                    candidate
+                    for candidate in (pinned if pinned_exists else None, automatic_src)
+                    if candidate
+                ]
+                src = _best_candidate(
+                    candidates,
+                    app_dir_hints,
+                    prefer_larger_csv=os.path.splitext(filename)[1].lower() == ".csv",
+                )
+                if pinned_exists and src and os.path.abspath(src) != os.path.abspath(pinned):
+                    ignored_overrides.append(filename)
+
+            if not src and manual_only:
+                src = None
 
             for r in scanned_roots:
                 if r not in all_scanned_roots:
@@ -409,12 +489,46 @@ def refresh_files_from_icloud(
                     unchanged.append(filename)
                     sources[filename] = src
                     diagnostics[filename] = all_scanned_roots
+                    if os.path.splitext(src)[1].lower() == ".csv":
+                        profile = _csv_profile(src)
+                        source_rows[filename] = profile["row_count"]
+                        local_rows[filename] = profile["row_count"]
+                    done = True
+                    break
+                if os.path.splitext(src)[1].lower() == ".csv":
+                    profile = _csv_profile(src)
+                    required = {
+                        str(column or "").replace("\ufeff", "").strip()
+                        for column in required_csv_columns.get(filename, ())
+                        if str(column or "").strip()
+                    }
+                    headers = set(profile["headers"])
+                    missing_columns = sorted(required - headers)
+                    if not profile["ok"] or missing_columns:
+                        detail = profile["error"] or (
+                            "chybi sloupce " + ", ".join(missing_columns)
+                        )
+                        failed.append(f"{filename}: neplatny CSV zdroj ({detail})")
+                        sources[filename] = src
+                        diagnostics[filename] = all_scanned_roots
+                        done = True
+                        break
+                    source_rows[filename] = profile["row_count"]
+                if os.path.exists(dst) and filecmp.cmp(src, dst, shallow=False):
+                    unchanged.append(filename)
+                    sources[filename] = src
+                    diagnostics[filename] = all_scanned_roots
+                    if filename in source_rows:
+                        local_rows[filename] = source_rows[filename]
                     done = True
                     break
                 shutil.copy2(src, dst)
                 updated.append(filename)
                 sources[filename] = src
                 diagnostics[filename] = all_scanned_roots
+                if os.path.splitext(dst)[1].lower() == ".csv":
+                    local_profile = _csv_profile(dst)
+                    local_rows[filename] = local_profile["row_count"]
                 done = True
                 break
             except Exception as exc:
@@ -428,6 +542,9 @@ def refresh_files_from_icloud(
 
         if not done:
             diagnostics[filename] = all_scanned_roots
+        if filename not in local_rows and os.path.exists(dst):
+            if os.path.splitext(dst)[1].lower() == ".csv":
+                local_rows[filename] = _csv_profile(dst)["row_count"]
 
     return {
         "updated": updated,
@@ -436,4 +553,34 @@ def refresh_files_from_icloud(
         "failed": failed,
         "sources": sources,
         "diagnostics": diagnostics,
+        "source_rows": source_rows,
+        "local_rows": local_rows,
+        "ignored_overrides": list(dict.fromkeys(ignored_overrides)),
     }
+
+
+def refresh_result_succeeded(result, filename):
+    return filename in (result.get("updated") or []) or filename in (
+        result.get("unchanged") or []
+    )
+
+
+def datafresh_status_text(result, filename, loaded_rows):
+    failed = result.get("failed") or []
+    if failed:
+        return "✗ DataFresh chyba: " + " | ".join(str(item) for item in failed)
+    if filename in (result.get("missing") or []):
+        return f"✗ DataFresh nenasel iCloud zdroj {filename}"
+    if not refresh_result_succeeded(result, filename):
+        return f"✗ DataFresh nedokoncil aktualizaci {filename}"
+
+    source_rows = (result.get("source_rows") or {}).get(filename)
+    if isinstance(source_rows, int) and source_rows != int(loaded_rows or 0):
+        return (
+            f"✗ DataFresh nesoulad: zdroj {source_rows}, "
+            f"nacteno {int(loaded_rows or 0)}"
+        )
+    state = "Aktualizovano" if filename in (result.get("updated") or []) else "Aktualni"
+    if isinstance(source_rows, int):
+        return f"✓ {state}: {int(loaded_rows or 0)} slovicek (zdroj {source_rows})"
+    return f"✓ {state}: {int(loaded_rows or 0)} slovicek"

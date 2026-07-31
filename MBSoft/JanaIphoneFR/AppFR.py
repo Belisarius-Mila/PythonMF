@@ -11,6 +11,21 @@ from pathlib import Path
 from datafresh_sync import refresh_files_from_icloud
 
 try:
+    from datafresh_sync import (
+        DATAFRESH_API_VERSION,
+        datafresh_status_text,
+        refresh_result_succeeded,
+    )
+except ImportError:
+    DATAFRESH_API_VERSION = 1
+
+    def refresh_result_succeeded(result, filename):
+        return False
+
+    def datafresh_status_text(result, filename, loaded_rows):
+        return '✗ Nahraj spolu s AppFR.py také nový datafresh_sync.py.'
+
+try:
     import console
 except Exception:
     console = None
@@ -33,7 +48,7 @@ TTS_LOG_FILE = BASE_DIR / 'tts_fr_debug.log'
 SOURCES_FILE = BASE_DIR / 'datafresh_sources.json'
 FORCE_MANUAL_DATAFRESH_MAPPING = False
 FAST_DATAFRESH_ONLY = True
-MIN_EXPECTED_VOCAB_ROWS = 367
+VOCAB_REQUIRED_COLUMNS = ('FR', 'CZ')
 IMAGE_EXTENSIONS = ('.png', '.jpg', '.jpeg', '.webp', '.gif')
 
 
@@ -814,12 +829,6 @@ class VocabTrainer(ui.View):
                 cleaned_rows.append(cleaned)
             return cleaned_rows
 
-    def _csv_row_count(self, path):
-        try:
-            return len(self._read_csv_rows(path))
-        except Exception:
-            return 0
-
     def _restore_csv_backup(self, backup_bytes):
         if backup_bytes is None:
             return
@@ -829,17 +838,32 @@ class VocabTrainer(ui.View):
         except Exception as e:
             self._tts_log('datafresh.restore_backup.error', error=repr(e))
 
-    def _reject_stale_vocab_csv_if_needed(self, result, backup_bytes):
-        count = self._csv_row_count(CSV_FILE)
-        if count >= MIN_EXPECTED_VOCAB_ROWS:
+    def _restore_invalid_vocab_csv_if_needed(self, result, backup_bytes):
+        try:
+            rows = self._read_csv_rows(CSV_FILE)
+            headers = set(rows[0]) if rows else set()
+        except Exception:
+            rows = []
+            headers = set()
+        if rows and set(VOCAB_REQUIRED_COLUMNS).issubset(headers):
             return False
         self._restore_csv_backup(backup_bytes)
         failed = result.setdefault('failed', [])
         failed.append(
-            f'{CSV_FILE.name}: odmítnut starý zdroj ({count} řádků, čekám aspoň {MIN_EXPECTED_VOCAB_ROWS})'
+            f'{CSV_FILE.name}: odmitnut neplatny CSV zdroj'
         )
-        self._tts_log('datafresh.reject_stale_csv', rows=count, minimum=MIN_EXPECTED_VOCAB_ROWS)
+        self._tts_log('datafresh.reject_invalid_csv')
         return True
+
+    def _drop_ignored_source_overrides(self, result):
+        changed = False
+        for filename in result.get('ignored_overrides') or []:
+            if filename in self.source_overrides:
+                self.source_overrides.pop(filename, None)
+                changed = True
+                self._tts_log('datafresh.ignore_stale_override', filename=filename)
+        if changed:
+            self._save_source_overrides()
 
     def _reload_words(self):
         if not CSV_FILE.exists():
@@ -863,28 +887,39 @@ class VocabTrainer(ui.View):
                 self._ensure_missing_sources_pinned(missing_pins)
 
         def _run_refresh_once():
-            try:
-                return refresh_files_from_icloud(
-                    local_dir=str(BASE_DIR),
-                    filenames=self.sync_files,
-                    app_dir_hints=self.sync_dir_hints,
-                    source_overrides=self.source_overrides,
-                    strict=True,
-                    manual_only=FORCE_MANUAL_DATAFRESH_MAPPING,
-                    allow_recursive=not FAST_DATAFRESH_ONLY,
-                    fast=FAST_DATAFRESH_ONLY,
-                    max_attempts=1,
-                )
-            except TypeError:
-                # Backward compatibility when older datafresh_sync.py is deployed on iOS.
-                return refresh_files_from_icloud(
-                    local_dir=str(BASE_DIR),
-                    filenames=self.sync_files,
-                    app_dir_hints=self.sync_dir_hints,
-                    source_overrides=self.source_overrides,
-                )
+            if DATAFRESH_API_VERSION < 2:
+                raise RuntimeError('Nahraj spolu s AppFR.py také nový datafresh_sync.py.')
+            refreshed = refresh_files_from_icloud(
+                local_dir=str(BASE_DIR),
+                filenames=self.sync_files,
+                app_dir_hints=self.sync_dir_hints,
+                source_overrides=self.source_overrides,
+                strict=True,
+                manual_only=FORCE_MANUAL_DATAFRESH_MAPPING,
+                allow_recursive=not FAST_DATAFRESH_ONLY,
+                fast=FAST_DATAFRESH_ONLY,
+                max_attempts=1,
+                required_csv_columns={
+                    CSV_FILE.name: VOCAB_REQUIRED_COLUMNS,
+                },
+            )
+            self._drop_ignored_source_overrides(refreshed)
+            return refreshed
 
-        result = _run_refresh_once()
+        try:
+            result = _run_refresh_once()
+        except Exception as e:
+            result = {
+                'updated': [],
+                'unchanged': [],
+                'missing': [],
+                'failed': [str(e)],
+                'sources': {},
+                'diagnostics': {},
+                'source_rows': {},
+                'local_rows': {},
+                'ignored_overrides': [],
+            }
 
         if result.get("missing"):
             if self._ensure_missing_sources_pinned(result.get("missing") or []):
@@ -908,7 +943,7 @@ class VocabTrainer(ui.View):
                 merged_diag[k] = existing
             result["diagnostics"] = merged_diag
 
-        self._reject_stale_vocab_csv_if_needed(result, csv_backup)
+        self._restore_invalid_vocab_csv_if_needed(result, csv_backup)
 
         try:
             # Always reload after DataFresh; file may have changed even when source
@@ -930,39 +965,31 @@ class VocabTrainer(ui.View):
         except Exception as e:
             result["failed"].append(f'{CSV_FILE.name}: load error: {e}')
 
-        lines = []
-        if result["updated"]:
-            lines.append('Aktualizovano: ' + ', '.join(result["updated"]))
-        if result.get("unchanged"):
-            lines.append('Už aktuální: ' + ', '.join(result["unchanged"]))
-        if result["missing"]:
-            lines.append('Nenalezeno: ' + ', '.join(result["missing"]))
-            diagnostics = result.get("diagnostics") or {}
-            diag_parts = []
-            for name in result["missing"]:
-                roots = diagnostics.get(name) or []
-                if roots:
-                    sample = ', '.join(roots[:2])
-                    diag_parts.append(f'{name} roots={len(roots)} sample={sample}')
-            if diag_parts:
-                lines.append('Debug: ' + ' | '.join(diag_parts))
-        if result["failed"]:
-            lines.append('Chyby: ' + ' | '.join(result["failed"]))
-        sources = result.get("sources") or {}
-        if sources:
-            source_lines = [f'{k} <= {v}' for k, v in sources.items()]
-            lines.append('Zdroj: ' + ' | '.join(source_lines))
-        if not lines:
-            lines.append('Bez zmen.')
-        # Zobraz mezivýsledek v lbl_stats (bez alertu = neblokuje).
-        short = lines[0] if lines else 'Probíhá...'
-        self.lbl_stats.text = f'DataFresh: {short}'
-        self.lbl_stats.text_color = '#ff9500'
+        first_status = datafresh_status_text(result, CSV_FILE.name, len(self.words))
+        self.lbl_stats.text = first_status
+        self.lbl_stats.text_color = (
+            '#2e7d32'
+            if refresh_result_succeeded(result, CSV_FILE.name)
+            else '#d32f2f'
+        )
 
         # Automaticky spustíme druhý refresh po 2s — iCloud mezitím stáhne nový soubor.
         def _second_refresh():
-            result2 = _run_refresh_once()
-            self._reject_stale_vocab_csv_if_needed(result2, csv_backup)
+            try:
+                result2 = _run_refresh_once()
+            except Exception as e:
+                result2 = {
+                    'updated': [],
+                    'unchanged': [],
+                    'missing': [],
+                    'failed': [str(e)],
+                    'sources': {},
+                    'diagnostics': {},
+                    'source_rows': {},
+                    'local_rows': {},
+                    'ignored_overrides': [],
+                }
+            self._restore_invalid_vocab_csv_if_needed(result2, csv_backup)
             try:
                 self._reload_words()
                 self.selection_signature = None
@@ -978,13 +1005,26 @@ class VocabTrainer(ui.View):
             except Exception:
                 pass
             total = len(self.words)
-            status = 'Aktualizovano' if result2.get('updated') else 'Hotovo'
-            self.lbl_stats.text = f'✓ {status}: {total} slovicek'
-            self.lbl_stats.text_color = '#2e7d32'
-            def _restore():
-                self.update_stats()
-                self.lbl_stats.text_color = '#8e8e93'
-            ui.delay(_restore, 4.0)
+            final_result = result2
+            if (
+                not refresh_result_succeeded(result2, CSV_FILE.name)
+                and refresh_result_succeeded(result, CSV_FILE.name)
+            ):
+                final_result = result
+            success = refresh_result_succeeded(final_result, CSV_FILE.name)
+            self.lbl_stats.text = datafresh_status_text(
+                final_result,
+                CSV_FILE.name,
+                total,
+            )
+            self.lbl_stats.text_color = '#2e7d32' if success else '#d32f2f'
+            if success:
+                def _restore():
+                    self.update_stats()
+                    self.lbl_stats.text_color = '#8e8e93'
+                ui.delay(_restore, 4.0)
+            else:
+                self._notify('DataFresh', self.lbl_stats.text)
 
         ui.delay(_second_refresh, 2.0)
 
