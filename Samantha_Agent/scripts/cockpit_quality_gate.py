@@ -97,6 +97,7 @@ COMPILE_PATHS = (
     "app/email/work_models.py",
     "app/backup/activity_state.py",
     "app/documents/scandocu.py",
+    "app/documents/archive_browser.py",
     "app/documents/ai_metadata.py",
     "app/documents/case_service.py",
     "app/documents/due_date_service.py",
@@ -238,6 +239,7 @@ TEST_MODULES = (
     "tests.test_email_work_repository",
     "tests.test_email_work_models",
     "tests.test_document_persistence",
+    "tests.test_document_archive_browser",
     "tests.test_document_ai_metadata",
     "tests.test_document_case_service",
     "tests.test_document_due_date_service",
@@ -348,6 +350,24 @@ def cockpit_javascript_source() -> str:
     return "\n".join(scripts)
 
 
+def scandocu_javascript_source() -> str:
+    project_root = str(PROJECT_ROOT)
+    if project_root not in sys.path:
+        sys.path.insert(0, project_root)
+    from app.documents.scandocu import SCANDOCU_ARCHIVE_HTML, SCANDOCU_HTML
+
+    scripts = re.findall(
+        r"<script(?:\s[^>]*)?>(.*?)</script>",
+        SCANDOCU_HTML + SCANDOCU_ARCHIVE_HTML,
+        flags=re.DOTALL,
+    )
+    if not scripts:
+        raise SystemExit(
+            "ScanDocu javascript syntax failed: stránky neobsahují script blok"
+        )
+    return "\n".join(scripts)
+
+
 def human_adam_javascript_source() -> str:
     project_root = str(PROJECT_ROOT)
     if project_root not in sys.path:
@@ -431,6 +451,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         "javascript syntax",
         [node_binary(), "--check", "-"],
         input_text=cockpit_javascript_source(),
+    )
+    run_checked(
+        "ScanDocu javascript syntax",
+        [node_binary(), "--check", "-"],
+        input_text=scandocu_javascript_source(),
     )
     run_checked(
         "Human–Adam javascript syntax",

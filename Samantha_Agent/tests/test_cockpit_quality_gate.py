@@ -17,12 +17,19 @@ from scripts.cockpit_quality_gate import (
     janicka_r2_javascript_source,
     node_binary,
     r2_adam_chat_javascript_source,
+    scandocu_javascript_source,
     source_metrics,
     run_checked,
 )
 
 
 class CockpitQualityGateTests(unittest.TestCase):
+    def test_scandocu_pages_javascript_is_included_in_syntax_gate(self) -> None:
+        source = scandocu_javascript_source()
+
+        self.assertIn("async function requestAiSuggestion()", source)
+        self.assertIn("async function loadDocuments()", source)
+
     def test_janicka_r2_page_javascript_is_included_in_syntax_gate(self) -> None:
         source = janicka_r2_javascript_source()
 
@@ -96,6 +103,8 @@ async def second():
         self.assertIn("app/cockpit_frontend.py", COMPILE_PATHS)
         self.assertIn("app/email/archive_browser.py", COMPILE_PATHS)
         self.assertIn("tests.test_email_archive_browser", TEST_MODULES)
+        self.assertIn("app/documents/archive_browser.py", COMPILE_PATHS)
+        self.assertIn("tests.test_document_archive_browser", TEST_MODULES)
         self.assertNotIn("tests.test_adam_voice_mode", TEST_MODULES)
         self.assertIn("tests.test_codex_approval_cockpit_contract", TEST_MODULES)
         self.assertIn("tests.test_codex_approval_state", TEST_MODULES)

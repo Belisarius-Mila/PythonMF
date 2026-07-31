@@ -14,6 +14,12 @@ from typing import Any
 from urllib.parse import parse_qs, urlparse
 
 from .ai_metadata import AIMetadataError, request_codex_metadata_suggestion
+from .archive_browser import (
+    IMAGE_EXTENSIONS as ARCHIVE_IMAGE_EXTENSIONS,
+    resolve_stored_document_file,
+    stored_document_detail_status,
+    stored_document_list_status,
+)
 from .consistency_audit import AuditFact, best_asset_label, document_row_to_fact, primary_amount
 from .transactions import (
     DocumentRecordMutation,
@@ -1371,7 +1377,12 @@ class ScanDocuServer:
                 parsed = urlparse(self.path)
                 try:
                     if parsed.path == "/":
-                        self.respond_html(SCANDOCU_HTML)
+                        mode = parse_qs(parsed.query).get("mode", [""])[0]
+                        self.respond_html(
+                            SCANDOCU_ARCHIVE_HTML
+                            if mode == "browse"
+                            else SCANDOCU_HTML
+                        )
                         return
                     if parsed.path == "/api/next":
                         mode = parse_qs(parsed.query).get("mode", ["downloads"])[0]
@@ -1408,6 +1419,26 @@ class ScanDocuServer:
                     if parsed.path == "/api/domains":
                         self.respond_json({"domains": registered_document_domains(vault_dir=app.vault_dir)})
                         return
+                    if parsed.path == "/api/documents":
+                        params = parse_qs(parsed.query)
+                        self.respond_json(
+                            stored_document_list_status(
+                                query=params.get("q", [""])[0],
+                                domain=params.get("domain", [""])[0],
+                                reading_status=params.get("reading_status", [""])[0],
+                                vault_dir=app.vault_dir,
+                            )
+                        )
+                        return
+                    if parsed.path == "/api/document":
+                        params = parse_qs(parsed.query)
+                        self.respond_json(
+                            stored_document_detail_status(
+                                document_ref=params.get("document_ref", [""])[0],
+                                vault_dir=app.vault_dir,
+                            )
+                        )
+                        return
                     if parsed.path == "/api/search-downloads":
                         params = parse_qs(parsed.query)
                         self.respond_json(
@@ -1420,6 +1451,35 @@ class ScanDocuServer:
                                     vault_dir=app.vault_dir,
                                 ),
                             }
+                        )
+                        return
+                    if parsed.path == "/vault/document":
+                        params = parse_qs(parsed.query)
+                        resolved = resolve_stored_document_file(
+                            document_ref=params.get("document_ref", [""])[0],
+                            vault_dir=app.vault_dir,
+                        )
+                        if not resolved.get("ok"):
+                            raise ValueError(
+                                str(resolved.get("message", "Dokument nebyl nalezen."))
+                            )
+                        path = resolved["path"]
+                        extension = path.suffix.lower()
+                        content_type = (
+                            "application/pdf"
+                            if extension == ".pdf"
+                            else (
+                                mimetypes.guess_type(path.name)[0]
+                                or "application/octet-stream"
+                            )
+                        )
+                        self.respond_vault_file(
+                            path,
+                            content_type,
+                            as_attachment=(
+                                extension != ".pdf"
+                                and extension not in ARCHIVE_IMAGE_EXTENSIONS
+                            ),
                         )
                         return
                     if parsed.path.startswith("/pdf/"):
@@ -1533,12 +1593,43 @@ class ScanDocuServer:
                 resolved = path.resolve()
                 if root not in resolved.parents:
                     raise ValueError("pozadovany soubor neni ve ScanDocu processing slozce.")
+                self.respond_resolved_file(
+                    resolved,
+                    content_type,
+                    as_attachment=as_attachment,
+                )
+
+            def respond_vault_file(
+                self,
+                path: Path,
+                content_type: str,
+                as_attachment: bool = False,
+            ) -> None:
+                root = app.vault_dir.resolve(strict=True)
+                resolved = path.resolve(strict=True)
+                if root not in resolved.parents:
+                    raise ValueError("Pozadovany soubor neni v dokumentovem vaultu.")
+                self.respond_resolved_file(
+                    resolved,
+                    content_type,
+                    as_attachment=as_attachment,
+                )
+
+            def respond_resolved_file(
+                self,
+                resolved: Path,
+                content_type: str,
+                as_attachment: bool = False,
+            ) -> None:
                 payload = resolved.read_bytes()
                 self.send_response(HTTPStatus.OK)
                 self.send_header("Content-Type", content_type)
                 self.send_header("Content-Length", str(len(payload)))
                 if as_attachment:
-                    self.send_header("Content-Disposition", f'attachment; filename="{safe_filename(path.name)}"')
+                    self.send_header(
+                        "Content-Disposition",
+                        f'attachment; filename="{safe_filename(resolved.name)}"',
+                    )
                 self.end_headers()
                 self.wfile.write(payload)
 
@@ -1629,6 +1720,7 @@ SCANDOCU_HTML = """<!doctype html>
     <h1>ScanDocu</h1>
     <div class="actions" style="margin-top: 0;">
       <button class="secondary" id="cockpitBtn">Zpět do Cockpitu</button>
+      <button class="secondary" id="archiveBtn">Uložené dokumenty</button>
       <button class="secondary" id="nextBtn">Další PDF</button>
     </div>
   </header>
@@ -2233,6 +2325,9 @@ SCANDOCU_HTML = """<!doctype html>
 
     document.getElementById("nextBtn").addEventListener("click", loadNext);
     document.getElementById("cockpitBtn").addEventListener("click", returnToCockpit);
+    document.getElementById("archiveBtn").addEventListener("click", () => {
+      window.location.href = "/?mode=browse";
+    });
     fields.aiSuggestBtn.addEventListener("click", requestAiSuggestion);
     fields.applyAiBtn.addEventListener("click", applyAiSuggestionToForm);
     document.getElementById("continueBtn").addEventListener("click", loadNext);
@@ -2274,6 +2369,700 @@ SCANDOCU_HTML = """<!doctype html>
       await loadNext();
     }
     initializeScanDocu();
+  </script>
+</body>
+</html>
+"""
+
+
+SCANDOCU_ARCHIVE_HTML = """<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Uložené dokumenty</title>
+  <style>
+    :root {
+      --bg: #eef2f7;
+      --panel: #ffffff;
+      --panel-soft: #f7f9fc;
+      --ink: #172033;
+      --muted: #697386;
+      --line: #dce3ed;
+      --line-strong: #c8d2e0;
+      --blue: #2459a8;
+      --blue-dark: #17447f;
+      --blue-soft: #eaf2ff;
+      --amber: #9a5b08;
+      --amber-soft: #fff5df;
+      --green: #18794e;
+      --green-soft: #eaf8f0;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      overflow: hidden;
+    }
+    button, input { font: inherit; }
+    button { border: 0; cursor: pointer; color: inherit; }
+    button:focus-visible, input:focus-visible, a:focus-visible {
+      outline: 3px solid rgba(36, 89, 168, 0.28);
+      outline-offset: 2px;
+    }
+    .app-header {
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 0 22px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+      position: relative;
+      z-index: 3;
+    }
+    .brand, .header-actions, .search-row, .list-heading, .document-line,
+    .reader-toolbar, .detail-actions {
+      display: flex;
+      align-items: center;
+    }
+    .brand { gap: 12px; min-width: 0; }
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 11px;
+      display: grid;
+      place-items: center;
+      background: var(--blue);
+      color: white;
+      font-size: 19px;
+      box-shadow: 0 5px 14px rgba(36, 89, 168, 0.24);
+    }
+    h1 { margin: 0; font-size: 20px; letter-spacing: -0.01em; }
+    .brand-subtitle { color: var(--muted); font-size: 12px; margin-top: 1px; }
+    .header-actions { gap: 8px; }
+    .primary, .quiet, a.action-link {
+      min-height: 38px;
+      border-radius: 9px;
+      padding: 8px 13px;
+      font-weight: 700;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+    }
+    .primary { background: var(--blue); color: white; }
+    .primary:hover { background: var(--blue-dark); }
+    .quiet { background: #edf2f8; color: #284564; }
+    .quiet:hover { background: #e2e9f2; }
+    .document-browser {
+      height: calc(100vh - 72px);
+      display: grid;
+      grid-template-columns: 215px minmax(320px, 410px) minmax(440px, 1fr);
+      background: var(--panel);
+    }
+    .folder-pane {
+      padding: 22px 14px;
+      background: #f4f7fb;
+      border-right: 1px solid var(--line);
+      overflow-y: auto;
+    }
+    .folder-title {
+      padding: 0 11px 10px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .folder {
+      width: 100%;
+      min-height: 42px;
+      display: grid;
+      grid-template-columns: 24px 1fr auto;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 11px;
+      border-radius: 9px;
+      background: transparent;
+      text-align: left;
+      font-weight: 700;
+      color: #40536c;
+    }
+    .folder:hover { background: #e9eff7; }
+    .folder.active { background: var(--blue-soft); color: var(--blue-dark); }
+    .folder-count {
+      min-width: 25px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.78);
+      text-align: center;
+      font-size: 12px;
+    }
+    .domain-folders { display: grid; gap: 2px; }
+    .folder-note {
+      margin: 24px 8px 0;
+      padding-top: 17px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+    .list-pane {
+      min-width: 0;
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr);
+      border-right: 1px solid var(--line);
+      background: var(--panel);
+    }
+    .search-row {
+      gap: 8px;
+      padding: 15px 14px 11px;
+      border-bottom: 1px solid var(--line);
+    }
+    .search-box {
+      flex: 1;
+      min-width: 0;
+      height: 40px;
+      border: 1px solid var(--line-strong);
+      border-radius: 10px;
+      background: var(--panel-soft);
+      padding: 0 11px;
+    }
+    .search-box:focus {
+      border-color: #79a1dc;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(36, 89, 168, 0.10);
+      outline: 0;
+    }
+    .list-heading {
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 15px;
+      background: var(--panel-soft);
+      border-bottom: 1px solid var(--line);
+    }
+    .list-heading h2 { margin: 0; font-size: 14px; }
+    .status { color: var(--muted); font-size: 12px; text-align: right; }
+    .document-list { overflow-y: auto; min-height: 0; }
+    .document-item {
+      width: 100%;
+      display: grid;
+      gap: 5px;
+      padding: 13px 15px;
+      border-bottom: 1px solid #e8edf4;
+      background: white;
+      text-align: left;
+    }
+    .document-item:hover { background: #f7faff; }
+    .document-item.active {
+      background: var(--blue-soft);
+      box-shadow: inset 4px 0 0 var(--blue);
+    }
+    .document-line { justify-content: space-between; gap: 10px; min-width: 0; }
+    .document-title {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 800;
+      color: #26384e;
+    }
+    .document-date { color: var(--muted); font-size: 12px; white-space: nowrap; }
+    .document-subtitle {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: #40536c;
+    }
+    .document-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+    .badge {
+      display: inline-flex;
+      border-radius: 999px;
+      padding: 2px 7px;
+      font-size: 11px;
+      font-weight: 750;
+      background: #edf2f8;
+      color: #40536c;
+    }
+    .badge.review { background: var(--amber-soft); color: var(--amber); }
+    .badge.ok { background: var(--green-soft); color: var(--green); }
+    .reader-pane {
+      min-width: 0;
+      display: grid;
+      grid-template-rows: 45px minmax(0, 1fr);
+      background: #fbfcfe;
+    }
+    .reader-toolbar {
+      justify-content: space-between;
+      padding: 0 18px;
+      border-bottom: 1px solid var(--line);
+      background: var(--panel-soft);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .mobile-back { display: none; min-height: 32px; padding: 5px 9px; }
+    .reader { min-height: 0; overflow-y: auto; }
+    .reader-empty {
+      min-height: 100%;
+      display: grid;
+      place-content: center;
+      justify-items: center;
+      padding: 30px;
+      text-align: center;
+      color: var(--muted);
+    }
+    .reader-empty-icon {
+      width: 58px;
+      height: 58px;
+      display: grid;
+      place-items: center;
+      border-radius: 18px;
+      background: #e9eef5;
+      font-size: 25px;
+      margin-bottom: 12px;
+    }
+    .reader-empty h2 { color: var(--ink); margin: 0 0 6px; font-size: 18px; }
+    .reader-empty p { margin: 0; max-width: 380px; }
+    .document-content { max-width: 1080px; margin: 0 auto; padding: 24px 28px 42px; }
+    .document-heading {
+      padding-bottom: 17px;
+      border-bottom: 1px solid var(--line);
+    }
+    .document-heading h2 {
+      margin: 0 0 12px;
+      font-size: clamp(21px, 2.2vw, 29px);
+      line-height: 1.2;
+      overflow-wrap: anywhere;
+    }
+    .detail-actions { gap: 8px; flex-wrap: wrap; }
+    .detail-meta {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px 18px;
+      padding: 18px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .meta-row { min-width: 0; }
+    .meta-label {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .meta-value { margin-top: 2px; overflow-wrap: anywhere; }
+    .tag-list { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+    .viewer-shell {
+      margin-top: 18px;
+      height: min(66vh, 760px);
+      min-height: 440px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      background: #e5e7eb;
+    }
+    .document-viewer { width: 100%; height: 100%; border: 0; background: white; }
+    .image-viewer { height: 100%; overflow: auto; padding: 14px; text-align: center; background: #111827; }
+    .image-viewer img { max-width: 100%; height: auto; background: white; }
+    .download-card {
+      height: 100%;
+      display: grid;
+      place-content: center;
+      justify-items: center;
+      gap: 12px;
+      padding: 26px;
+      text-align: center;
+      background: white;
+    }
+    details.text-preview {
+      margin-top: 18px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: white;
+      padding: 12px 14px;
+    }
+    details.text-preview summary { cursor: pointer; font-weight: 750; }
+    .text-content { white-space: pre-wrap; overflow-wrap: anywhere; margin-top: 12px; color: #34435a; }
+    .empty-list { padding: 24px 18px; color: var(--muted); text-align: center; }
+    @media (max-width: 900px) {
+      body { overflow: auto; }
+      .app-header { height: auto; min-height: 72px; padding: 11px 13px; align-items: flex-start; }
+      .brand-subtitle { display: none; }
+      .header-actions { flex-wrap: wrap; justify-content: flex-end; }
+      .document-browser { height: auto; min-height: calc(100vh - 72px); display: block; }
+      .folder-pane { display: flex; gap: 6px; overflow-x: auto; padding: 10px; border-right: 0; border-bottom: 1px solid var(--line); }
+      .folder-title, .folder-note { display: none; }
+      .domain-folders { display: flex; gap: 6px; }
+      .folder { width: auto; min-width: max-content; grid-template-columns: auto auto; }
+      .folder span:first-child { display: none; }
+      .list-pane { height: calc(100vh - 135px); border-right: 0; }
+      .reader-pane { display: none; min-height: calc(100vh - 72px); }
+      body.reader-open .folder-pane, body.reader-open .list-pane { display: none; }
+      body.reader-open .reader-pane { display: grid; }
+      .mobile-back { display: inline-flex; }
+      .document-content { padding: 18px 15px 32px; }
+      .detail-meta { grid-template-columns: 1fr; }
+      .viewer-shell { height: 67vh; min-height: 420px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">▤</div>
+      <div>
+        <h1>Uložené dokumenty</h1>
+        <div class="brand-subtitle">Místní dokumentový trezor</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="quiet" id="cockpitBtn">Zpět do Cockpitu</button>
+      <button class="quiet" id="newDocumentBtn">Nový dokument</button>
+      <button class="quiet" id="reviewBtn">Dokumenty k revizi</button>
+      <button class="primary" id="refreshBtn">Obnovit</button>
+    </div>
+  </header>
+
+  <main class="document-browser">
+    <aside class="folder-pane" aria-label="Filtry dokumentů">
+      <div class="folder-title">Dokumenty</div>
+      <button class="folder active" data-reading-status="">
+        <span aria-hidden="true">▣</span><span>Všechny</span>
+        <span class="folder-count" id="allCount">0</span>
+      </button>
+      <button class="folder" data-reading-status="needs_review">
+        <span aria-hidden="true">!</span><span>K revizi</span>
+        <span class="folder-count" id="reviewCount">0</span>
+      </button>
+      <div class="folder-title" style="margin-top: 18px;">Oblasti</div>
+      <div class="domain-folders" id="domainFolders"></div>
+      <div class="folder-note">
+        Toto je pouze čtení místního trezoru. Dokumenty se zde nemažou,
+        nepřesouvají ani neupravují.
+      </div>
+    </aside>
+
+    <section class="list-pane" aria-labelledby="documentListTitle">
+      <div class="search-row">
+        <input class="search-box" id="searchInput" type="search" autocomplete="off"
+               placeholder="Hledat podle názvu, firmy nebo obsahu">
+        <button class="primary" id="searchBtn">Hledat</button>
+      </div>
+      <div class="list-heading">
+        <h2 id="documentListTitle">Všechny dokumenty</h2>
+        <div class="status" id="status" role="status">Načítám dokumenty…</div>
+      </div>
+      <div class="document-list" id="documentList" aria-live="polite"></div>
+    </section>
+
+    <section class="reader-pane" aria-label="Otevřený dokument">
+      <div class="reader-toolbar">
+        <button class="quiet mobile-back" id="documentBackBtn">← Zpět na seznam</button>
+        <div>Náhled dokumentu</div>
+      </div>
+      <div class="reader" id="detailPane">
+        <div class="reader-empty">
+          <div class="reader-empty-icon" aria-hidden="true">▤</div>
+          <h2>Vyber dokument ze seznamu</h2>
+          <p>Celý dokument se otevře tady. Původní soubor zůstává beze změny v místním trezoru.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const listNode = document.getElementById("documentList");
+    const detailPane = document.getElementById("detailPane");
+    const statusNode = document.getElementById("status");
+    const searchInput = document.getElementById("searchInput");
+    const listTitle = document.getElementById("documentListTitle");
+    const allCount = document.getElementById("allCount");
+    const reviewCount = document.getElementById("reviewCount");
+    const domainFolders = document.getElementById("domainFolders");
+    let items = [];
+    let domains = [];
+    let selectedDocumentRef = "";
+    let activeReadingStatus = "";
+    let activeDomain = "";
+    let requestNumber = 0;
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (character) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[character]));
+    }
+
+    function labelForDomain(value) {
+      const labels = {
+        car: "Auto", energy: "Energie", food: "Jídlo", health: "Zdraví",
+        home: "Bydlení", insurance: "Pojištění", other: "Ostatní",
+        tax: "Daně", telecom: "Telefon a internet", travel: "Cestování",
+        warranty: "Záruky"
+      };
+      return labels[value] || value || "Ostatní";
+    }
+
+    function labelForType(value) {
+      const labels = {
+        contract: "smlouva", email: "e-mail", invoice: "faktura",
+        lease: "nájemní smlouva", payment: "platba", policy: "pojistná smlouva",
+        receipt: "účtenka", statement: "výpis"
+      };
+      return labels[value] || value || "dokument";
+    }
+
+    function shortDate(value) {
+      const moment = new Date(String(value || ""));
+      if (Number.isNaN(moment.getTime())) return String(value || "");
+      return new Intl.DateTimeFormat("cs-CZ", {
+        day: "numeric", month: "short", year: "numeric"
+      }).format(moment);
+    }
+
+    function longDate(value) {
+      const moment = new Date(String(value || ""));
+      if (Number.isNaN(moment.getTime())) return String(value || "nezjištěno");
+      return new Intl.DateTimeFormat("cs-CZ", {
+        day: "numeric", month: "long", year: "numeric",
+        hour: "2-digit", minute: "2-digit"
+      }).format(moment);
+    }
+
+    function fileSize(bytes) {
+      const value = Number(bytes || 0);
+      if (value >= 1024 * 1024) return `${(value / (1024 * 1024)).toFixed(1)} MB`;
+      if (value >= 1024) return `${Math.round(value / 1024)} kB`;
+      return value > 0 ? `${value} B` : "nezjištěno";
+    }
+
+    function renderFolders(data) {
+      allCount.textContent = String(data.total_count || 0);
+      reviewCount.textContent = String(data.review_count || 0);
+      domains = data.domains || [];
+      domainFolders.innerHTML = domains.map((domain) => `
+        <button class="folder ${activeDomain === domain.value ? "active" : ""}"
+                data-domain="${escapeHtml(domain.value)}">
+          <span aria-hidden="true">•</span>
+          <span>${escapeHtml(labelForDomain(domain.label || domain.value))}</span>
+          <span class="folder-count">${Number(domain.count || 0)}</span>
+        </button>
+      `).join("");
+      domainFolders.querySelectorAll("[data-domain]").forEach((button) => {
+        button.addEventListener("click", () => {
+          activeDomain = activeDomain === button.dataset.domain ? "" : (button.dataset.domain || "");
+          loadDocuments();
+        });
+      });
+      document.querySelectorAll("[data-reading-status]").forEach((button) => {
+        const active = button.dataset.readingStatus === activeReadingStatus && !activeDomain;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-pressed", active ? "true" : "false");
+      });
+    }
+
+    function renderList() {
+      if (!items.length) {
+        listNode.innerHTML = '<div class="empty-list">Tomuto hledání neodpovídá žádný dokument.</div>';
+        return;
+      }
+      listNode.innerHTML = items.map((item) => `
+        <button class="document-item ${item.document_ref === selectedDocumentRef ? "active" : ""}"
+                data-document-ref="${escapeHtml(item.document_ref)}">
+          <div class="document-line">
+            <div class="document-title">${escapeHtml(item.title || "Dokument bez názvu")}</div>
+            <div class="document-date">${escapeHtml(shortDate(item.imported_at))}</div>
+          </div>
+          <div class="document-subtitle">
+            ${escapeHtml(item.counterparty || item.original_filename || labelForType(item.document_type))}
+          </div>
+          <div class="document-badges">
+            <span class="badge">${escapeHtml(labelForDomain(item.domain))}</span>
+            <span class="badge ${item.reading_status === "needs_review" ? "review" : "ok"}">
+              ${escapeHtml(item.reading_status_label || "")}
+            </span>
+          </div>
+        </button>
+      `).join("");
+      listNode.querySelectorAll("[data-document-ref]").forEach((button) => {
+        button.addEventListener("click", () => loadDetail(button.dataset.documentRef || ""));
+      });
+    }
+
+    async function loadDocuments() {
+      const currentRequest = ++requestNumber;
+      statusNode.textContent = "Načítám…";
+      const params = new URLSearchParams();
+      if (searchInput.value.trim()) params.set("q", searchInput.value.trim());
+      if (activeDomain) params.set("domain", activeDomain);
+      if (activeReadingStatus) params.set("reading_status", activeReadingStatus);
+      try {
+        const response = await fetch(`/api/documents?${params.toString()}`);
+        const data = await response.json();
+        if (currentRequest !== requestNumber) return;
+        if (!response.ok || !data.ok) throw new Error(data.message || data.error || "Seznam není dostupný.");
+        items = data.items || [];
+        renderFolders(data);
+        renderList();
+        statusNode.textContent = `${items.length} z ${data.total_count || items.length}`;
+        listTitle.textContent = activeDomain
+          ? labelForDomain(activeDomain)
+          : (activeReadingStatus === "needs_review" ? "Dokumenty k revizi" : "Všechny dokumenty");
+        if (selectedDocumentRef && !items.some((item) => item.document_ref === selectedDocumentRef)) {
+          selectedDocumentRef = "";
+          renderEmptyDetail();
+        }
+      } catch (error) {
+        items = [];
+        renderList();
+        statusNode.textContent = `Chyba: ${error}`;
+      }
+    }
+
+    function updateActiveDocument() {
+      listNode.querySelectorAll("[data-document-ref]").forEach((button) => {
+        const active = button.dataset.documentRef === selectedDocumentRef;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-current", active ? "true" : "false");
+      });
+    }
+
+    function renderEmptyDetail() {
+      detailPane.innerHTML = `
+        <div class="reader-empty">
+          <div class="reader-empty-icon" aria-hidden="true">▤</div>
+          <h2>Vyber dokument ze seznamu</h2>
+          <p>Celý dokument se otevře tady. Původní soubor zůstává beze změny v místním trezoru.</p>
+        </div>
+      `;
+      document.body.classList.remove("reader-open");
+    }
+
+    function renderDetail(data) {
+      if (!data.ok) {
+        detailPane.innerHTML = `
+          <div class="reader-empty">
+            <div class="reader-empty-icon" aria-hidden="true">!</div>
+            <h2>Dokument se nepodařilo otevřít</h2>
+            <p>${escapeHtml(data.message || "Soubor není dostupný.")}</p>
+          </div>
+        `;
+        return;
+      }
+      const fileUrl = escapeHtml(data.file_url || "#");
+      let viewer = "";
+      if (data.viewer_kind === "pdf") {
+        viewer = `<iframe class="document-viewer" src="${fileUrl}" title="Celý dokument"></iframe>`;
+      } else if (data.viewer_kind === "image") {
+        viewer = `<div class="image-viewer"><img src="${fileUrl}" alt="Celý dokument"></div>`;
+      } else {
+        viewer = `
+          <div class="download-card">
+            <strong>Tento typ souboru se v prohlížeči bezpečně nezobrazuje.</strong>
+            <a class="action-link" href="${fileUrl}">Stáhnout a otevřít soubor</a>
+          </div>
+        `;
+      }
+      const tags = (data.tags || []).map((tag) =>
+        `<span class="badge">${escapeHtml(tag)}</span>`
+      ).join("");
+      const textPreview = data.text_preview
+        ? `<details class="text-preview">
+             <summary>Text nalezený v dokumentu${data.text_truncated ? " (zkrácený)" : ""}</summary>
+             <div class="text-content">${escapeHtml(data.text_preview)}</div>
+           </details>`
+        : "";
+      detailPane.innerHTML = `
+        <article class="document-content">
+          <header class="document-heading">
+            <h2>${escapeHtml(data.title || "Dokument bez názvu")}</h2>
+            <div class="detail-actions">
+              <a class="action-link" target="_blank" rel="noopener" href="${fileUrl}">
+                Otevřít samostatně
+              </a>
+              <span class="badge ${data.reading_status === "needs_review" ? "review" : "ok"}">
+                ${escapeHtml(data.reading_status_label || "")}
+              </span>
+            </div>
+          </header>
+          <div class="detail-meta">
+            <div class="meta-row"><div class="meta-label">Oblast</div><div class="meta-value">${escapeHtml(labelForDomain(data.domain))}</div></div>
+            <div class="meta-row"><div class="meta-label">Typ</div><div class="meta-value">${escapeHtml(labelForType(data.document_type))}</div></div>
+            <div class="meta-row"><div class="meta-label">Protistrana</div><div class="meta-value">${escapeHtml(data.counterparty || "nezjištěno")}</div></div>
+            <div class="meta-row"><div class="meta-label">Související věc</div><div class="meta-value">${escapeHtml(data.related_asset || "nezjištěno")}</div></div>
+            <div class="meta-row"><div class="meta-label">Uloženo</div><div class="meta-value">${escapeHtml(longDate(data.imported_at))}</div></div>
+            <div class="meta-row"><div class="meta-label">Soubor</div><div class="meta-value">${escapeHtml(data.filename || "")} · ${escapeHtml(fileSize(data.size_bytes))}</div></div>
+          </div>
+          ${tags ? `<div class="tag-list">${tags}</div>` : ""}
+          <div class="viewer-shell">${viewer}</div>
+          ${textPreview}
+        </article>
+      `;
+    }
+
+    async function loadDetail(documentRef) {
+      if (!documentRef) return;
+      selectedDocumentRef = documentRef;
+      updateActiveDocument();
+      detailPane.innerHTML = `
+        <div class="reader-empty">
+          <div class="reader-empty-icon" aria-hidden="true">…</div>
+          <h2>Otevírám dokument</h2>
+        </div>
+      `;
+      document.body.classList.add("reader-open");
+      try {
+        const response = await fetch(`/api/document?document_ref=${encodeURIComponent(documentRef)}`);
+        const data = await response.json();
+        if (!response.ok || !data.ok) throw new Error(data.message || data.error || "Dokument není dostupný.");
+        renderDetail(data);
+      } catch (error) {
+        renderDetail({ok: false, message: String(error)});
+      }
+    }
+
+    function returnToCockpit() {
+      const cockpitUrl = "http://127.0.0.1:8770";
+      if (window.opener && !window.opener.closed) {
+        try { window.opener.focus(); } catch (error) {}
+        window.close();
+        return;
+      }
+      window.location.href = cockpitUrl;
+    }
+
+    document.querySelectorAll("[data-reading-status]").forEach((button) => {
+      button.addEventListener("click", () => {
+        activeReadingStatus = button.dataset.readingStatus || "";
+        activeDomain = "";
+        loadDocuments();
+      });
+    });
+    document.getElementById("searchBtn").addEventListener("click", loadDocuments);
+    searchInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        loadDocuments();
+      }
+    });
+    document.getElementById("refreshBtn").addEventListener("click", loadDocuments);
+    document.getElementById("cockpitBtn").addEventListener("click", returnToCockpit);
+    document.getElementById("newDocumentBtn").addEventListener("click", () => {
+      window.location.href = "/";
+    });
+    document.getElementById("reviewBtn").addEventListener("click", () => {
+      window.location.href = "/?mode=review";
+    });
+    document.getElementById("documentBackBtn").addEventListener("click", () => {
+      document.body.classList.remove("reader-open");
+    });
+    loadDocuments();
   </script>
 </body>
 </html>
