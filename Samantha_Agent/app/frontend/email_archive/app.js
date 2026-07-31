@@ -385,7 +385,7 @@
               </div>
               <button type="button" class="ai-action" data-ai-email>AI přečíst e-mail</button>
             </div>
-            <div class="ai-result" data-ai-result>
+            <div class="ai-result" data-ai-result tabindex="0" aria-label="Rolovatelný výsledek AI">
               Zatím nebyla spuštěna žádná AI analýza.
             </div>
           </section>

@@ -373,9 +373,17 @@
     .ai-result {
       margin-top: 13px;
       padding-top: 12px;
+      padding-right: 8px;
       border-top: 1px solid #cfe5d8;
       color: #284738;
+      max-height: min(55vh, 560px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
+      scrollbar-gutter: stable;
     }
+    .ai-result:focus-visible { outline: 3px solid rgba(24, 121, 78, 0.24); outline-offset: 3px; }
     .ai-comparison, .ai-date {
       margin-top: 9px;
       padding-top: 9px;
@@ -441,6 +449,7 @@
         text-align: left;
       }
       .ai-heading { flex-direction: column; }
+      .ai-result { max-height: 52vh; }
     }
     @media (max-width: 820px) {
       body { overflow: auto; }
