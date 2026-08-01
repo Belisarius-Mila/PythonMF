@@ -2494,3 +2494,38 @@ Technický důkaz:
 - Změněné cesty před paměťovým zápisem (13): `Samantha_Agent/app/codex_approval_state.py`, `Samantha_Agent/app/communication/human_adam_workstream_catalog.py`, `Samantha_Agent/app/samantha_agent.py`, `Samantha_Agent/memory/ACTIVE_PROJECTS.md`, `Samantha_Agent/memory/MEMORY_INDEX.md`, `Samantha_Agent/memory/WORKSTREAMS.md`, `Samantha_Agent/memory/projects/email_readonly_oauth.md`, `Samantha_Agent/memory/projects/janicka_cockpit_kucharka.md`, `Samantha_Agent/memory/projects/janicka_cockpit_takeover.md`, `Samantha_Agent/memory/projects/tts_edge_audio_tools.md`, `Samantha_Agent/memory/technical/session_recovery_rules.md`, `Samantha_Agent/tests/test_cockpit_voice_frontend_retirement.py`, `Samantha_Agent/tests/test_human_adam_workstream_catalog.py`
 - Commit: `Retire active legacy communication guidance`
 - Další krok: Provést checkpoint a nasazení, potom spustit závěrečnou fázi 9.4e-c s úplnou Cockpit Quality Gate a smoke testem.
+
+### 2026-08-01 13:01 CEST – Všechny zvolitelné proudy mají jednotný jednorázový vývoj
+
+Hotovo:
+- Historický allowlist `MMTX`, `Rodinný kalendář` a `R2-Adam` byl odstraněn.
+- Každý zvolitelný aktivní i pozastavený proud nyní zveřejňuje schopnosti
+  `development`, `checkpoint` a `one_turn_write`.
+- Tah bez výslovného vývojového záměru zůstává nezapisovací. Při vývojovém
+  záměru se dál ověřuje připojení, nečinný tah, čistota a shoda všech
+  profilových workspaces a kanonická vazba handoffu/TVBCP.
+- Čekající denní GitHub balíček není blokátorem dalšího vývoje.
+
+Rozhodnutí:
+- Pracovní proud určuje kontext, paměť, capability a bezpečnostní hranice;
+  samotná zvolitelná identita proudu nesmí být důvodem k zákazu vývoje.
+- Pozastavený proud lze zapisovat až po jeho výslovném zvolení. Archivované
+  proudy zůstávají mimo výběr a nelze je otevřít pro jednorázový vývoj.
+- Profilový semafor zůstává oddělenou kompatibilní cestou; lazy proudy používají
+  jednorázové serverové oprávnění a automatický kanonický checkpoint.
+
+Další krok:
+- Vytvořit lokální commit do denního GitHub balíčku. Nasazení provést až
+  samostatně potvrzeným krokem.
+
+Navrhované další kroky:
+- Po nasazení zvolit dříve nepovolený proud, například Samantha Agent/RAG, a
+  živě ověřit, že `Zahájit vývoj` lze stisknout.
+- Při živém testu provést jen jeden malý bezpečný krok a ověřit automatický
+  checkpoint do správného handoffu a TVBCP.
+
+Technický důkaz:
+- Cílená sada `tests.test_human_adam_profiles` prošla 106 testy.
+- Plná Cockpit Quality Gate prošla 1263 testy; Python, JavaScript, shell,
+  whitespace a Git-safety kontroly jsou zelené.
+- Běžící Cockpit tuto lokální změnu zatím neobsahuje.

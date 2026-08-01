@@ -124,9 +124,6 @@ KNIHOVNA_WORKSTREAM_ID = "project-knowledge-library"
 PROFILE_ID_RE = re.compile(r"[a-z][a-z0-9_-]{1,31}")
 LEGACY_PROFILE_STATE_SCHEMA = 1
 WORKSTREAM_STATE_SCHEMA = 2
-ONE_TURN_WRITABLE_LAZY_WORKSTREAM_IDS = frozenset(
-    {"project-mmtx", "project-family-calendar", "project-r2-adam-janicka"}
-)
 
 
 def _catalog_workstream(workstream_id: str) -> CanonicalWorkstream:
@@ -1209,11 +1206,11 @@ class HumanAdamProfileManager:
     def _workstream_capabilities(self) -> dict[str, Any]:
         lazy_id = self.active_lazy_workstream_id
         lazy = bool(lazy_id)
-        writable_pilot = lazy_id == "project-mmtx"
-        one_turn_write = not lazy or lazy_id in ONE_TURN_WRITABLE_LAZY_WORKSTREAM_IDS
-        capability_metadata = self.workstream_backends.binding(
+        backend_binding = self.workstream_backends.binding(
             self.active_workstream_id
-        ).record.capabilities
+        )
+        one_turn_write = backend_binding.record.mode != "archived"
+        capability_metadata = backend_binding.record.capabilities
         return {
             "conversation": True,
             "tvbcp": True,
@@ -1222,18 +1219,22 @@ class HumanAdamProfileManager:
             "deployment": True,
             "github_batch": self.github_batch_mode,
             "lazy_backend": lazy,
-            "writable_pilot": writable_pilot,
             "one_turn_write": one_turn_write,
             "write_authorization": "one_turn" if one_turn_write else "read_only",
             **capability_metadata.status_fields(),
         }
 
     def _assert_one_turn_writable_lazy_workstream(self, workstream_id: str) -> None:
-        clean_id = str(workstream_id or "").strip()
-        if clean_id not in ONE_TURN_WRITABLE_LAZY_WORKSTREAM_IDS:
+        clean_id = str(workstream_id or "").strip().casefold()
+        record = _catalog_workstream(clean_id)
+        binding = self.workstream_backends.binding(clean_id)
+        if binding.compatibility_adapter is not None:
             raise AppServerError(
-                "Tento lazy pracovní proud zůstává read-only; jednorázový vývoj "
-                "je povolen jen pro výslovně schválené pracovní proudy."
+                "Požadovaný pracovní proud není lazy backend."
+            )
+        if record.mode == "archived":
+            raise AppServerError(
+                "Archivovaný pracovní proud nelze otevřít pro jednorázový vývoj."
             )
 
     def _assert_legacy_only_backend(self, *, operation: str) -> None:
@@ -1337,9 +1338,6 @@ class HumanAdamProfileManager:
                 if integration_deferred:
                     control_source = "one_turn_isolated_source_wip_authorization"
                 control_owner = active_id
-            elif lazy_id and lazy_id not in ONE_TURN_WRITABLE_LAZY_WORKSTREAM_IDS:
-                control_source = "lazy_read_only_policy"
-                state = "read_only"
             control_lines = [
                 "[DEVELOPMENT_CONTROL]",
                 f"source={control_source}",

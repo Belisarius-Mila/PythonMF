@@ -1496,7 +1496,6 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertTrue(result["workstream_capabilities"]["lazy_backend"])
         self.assertTrue(result["workstream_capabilities"]["development"])
         self.assertTrue(result["workstream_capabilities"]["checkpoint"])
-        self.assertTrue(result["workstream_capabilities"]["writable_pilot"])
         self.assertTrue(result["workstream_capabilities"]["one_turn_write"])
         self.assertNotIn("context_anchor", result["workstream_capabilities"])
         self.assertEqual(
@@ -1630,7 +1629,6 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertTrue(capabilities["deployment"])
         self.assertFalse(capabilities["github_batch"])
         self.assertEqual(capabilities["write_authorization"], "one_turn")
-        self.assertFalse(capabilities["writable_pilot"])
         self.assertIn("writable=false", read_only_input)
         self.assertIn("[AUTOMATIC_OPERATION_REQUEST]", read_only_input)
         self.assertIn("lease_state=authorized_once", writable_input)
@@ -1942,7 +1940,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         )
         self.assertEqual(result["automatic_completion"]["state"], "completed")
 
-    def test_nonpilot_lazy_stream_remains_read_only_even_with_matching_lease(self) -> None:
+    def test_every_selectable_lazy_stream_supports_one_turn_write(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             manager, _human_workspace, *_rest = self.make_manager(Path(temp_dir))
             lazy = FakeLazyThreads(Path(temp_dir) / "lazy")
@@ -1960,53 +1958,59 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
                     topic="Zakázaný lazy vývoj",
                     confirmed=True,
                 )
-            manager.development_semaphore.acquire(
-                owner_id="project-lekarna",
-                owner_label="Lékárna",
-                workspace_label="Testovací lazy workspace",
-                base_head="a" * 40,
-                topic="Simulovaný cizí lease",
-                expected_revision=0,
-                confirmed=True,
+            read_only = manager.send(
+                text="Tento tah pouze analyzuje",
+                client_message_id="universal-read-only-001",
             )
-            sent = manager.send(
-                text="Tento tah musí zůstat read-only",
-                client_message_id="nonpilot-readonly-001",
+            read_only_input = str(
+                lazy.hubs["project-lekarna"].last_send["model_input_text"]
             )
-            with self.assertRaisesRegex(AppServerError, "read-only"):
-                manager.send(
-                    text="Tento zápis musí být odmítnut",
-                    client_message_id="nonpilot-write-001",
-                    write_intent=True,
-                )
+            writable = manager.send(
+                text="Proveď bezpečný vývojový krok",
+                client_message_id="universal-write-001",
+                write_intent=True,
+            )
 
         model_input = str(lazy.hubs["project-lekarna"].last_send["model_input_text"])
-        self.assertFalse(capabilities["development"])
-        self.assertFalse(capabilities["checkpoint"])
-        self.assertFalse(capabilities["writable_pilot"])
-        self.assertFalse(capabilities["one_turn_write"])
-        self.assertEqual(capabilities["write_authorization"], "read_only")
+        self.assertTrue(capabilities["development"])
+        self.assertTrue(capabilities["checkpoint"])
+        self.assertTrue(capabilities["one_turn_write"])
+        self.assertEqual(capabilities["write_authorization"], "one_turn")
         self.assertFalse(development["can_acquire_profile"])
-        self.assertIn("source=lazy_read_only_policy", model_input)
-        self.assertIn("lease_state=read_only", model_input)
-        self.assertIn("lease_owner_id=none", model_input)
-        self.assertIn("writable=false", model_input)
-        self.assertEqual(sent["automatic_completion"]["state"], "not_needed")
+        self.assertIn("lease_state=not_requested", read_only_input)
+        self.assertIn("writable=false", read_only_input)
+        self.assertIn("source=one_turn_direct_main_authorization", model_input)
+        self.assertIn("lease_state=authorized_once", model_input)
+        self.assertIn("lease_owner_id=project-lekarna", model_input)
+        self.assertIn("writable=true", model_input)
+        self.assertEqual(read_only["automatic_completion"]["state"], "not_needed")
+        self.assertEqual(writable["automatic_completion"]["state"], "not_needed")
 
-    def test_nonpilot_lazy_checkpoint_backend_fails_closed(self) -> None:
+    def test_every_selectable_lazy_stream_uses_canonical_checkpoint_backend(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             manager, *_rest = self.make_manager(Path(temp_dir))
             manager.workstream_threads = SimpleNamespace(
                 checkpoint_workstream_id=lambda: "project-lekarna"
             )
 
-            with self.assertRaisesRegex(AppServerError, "read-only"):
-                manager.simple_lazy_workstream_checkpoint(
-                    commit_message="Zakázaný checkpoint",
-                    summary="Nemá vzniknout",
-                    next_step="Zůstat read-only.",
+            with patch(
+                "app.communication.human_adam_profiles.complete_simple_main_checkpoint",
+                return_value={"ok": True, "checkpoint_created": True},
+            ) as checkpoint:
+                result = manager.simple_lazy_workstream_checkpoint(
+                    commit_message="Dokonči krok Lékárny",
+                    summary="Bezpečný vývojový krok",
+                    next_step="Pokračovat dalším malým krokem.",
                     confirmed=True,
                 )
+
+        request = checkpoint.call_args.kwargs["request"]
+        self.assertEqual(request.workstream_id, "project-lekarna")
+        self.assertEqual(
+            request.handoff_relative_path,
+            "memory/handoffs/workstreams/project-lekarna.md",
+        )
+        self.assertTrue(result["checkpoint_created"])
 
     def test_grouped_router_restores_original_legacy_after_lazy_failure(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

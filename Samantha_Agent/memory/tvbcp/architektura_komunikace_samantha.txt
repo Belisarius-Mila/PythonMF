@@ -3729,3 +3729,35 @@ Technický důkaz:
 - P6a ověřilo dva kompatibilní adaptéry, lazy backend ostatních proudů a
   deklarativní private archive capability Knihovny.
 - Aktuální Cockpit běží na `20180e2` a smoke prošel 5/5.
+
+### 2026-08-01 13:01 CEST – Jednotné jednorázové zapisování všech zvolitelných proudů
+
+Hotovo:
+- Odstraněn historický seznam tří lazy proudů, které jediné směly zahájit
+  jednorázový zapisovací tah.
+- Všechny zvolitelné aktivní i pozastavené proudy nyní používají stejnou
+  serverovou cestu vývojového záměru a kanonického checkpointu.
+- Nezapisovací tah dál dostává `writable=false`; oprávnění platí jen pro jeden
+  výslovně zahájený vývojový tah.
+
+Rozhodnutí:
+- Proud vymezuje věcný kontext a bezpečnostní capability, nikoli základní právo
+  vyvíjet. Rozdíly jako read-only zdrojová private data R2-Adama zůstávají
+  zachované nezávisle na možnosti měnit kód aplikace.
+- Archivovaný proud zůstává mimo veřejný výběr. Čistota a shoda workspaces,
+  nečinná relace, kanonická paměť, testovací brána, lokální commit a oddělené
+  potvrzení nasazení zůstávají povinné.
+- Lokální commity čekající na večerní GitHub balíček další vývoj neblokují.
+
+Další krok:
+- Uzavřít implementaci lokálním commitem bez pushnutí a samostatně rozhodnout
+  o nasazení do běžícího Cockpitu.
+
+Navrhované další kroky:
+- Po nasazení živě ověřit jeden dříve nepovolený proud a jeho automatický
+  checkpoint.
+
+Technický důkaz:
+- Cílených 106 testů Human–Adam profilů prošlo.
+- Plná Cockpit Quality Gate prošla 1263 testy a všemi statickými kontrolami.
+- Běžící Cockpit ještě používá předchozí nasazený kód.
