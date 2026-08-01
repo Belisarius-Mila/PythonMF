@@ -11,6 +11,11 @@
 
 ## Aktuální stav
 
+- Živý redigovaný read-only audit 2026-08-01 12:04 CEST potvrdil
+  `config_mode=enabled`, `automation_active=true`, `planner_ready`, čtyři
+  nakonfigurované příjemce a nula blokujících stavů. Nebyl evidován žádný stav
+  `sending`, `partial` ani `delivery_unknown`. Audit nic nezapsal, nečetl
+  tajemství a nevolal transport.
 - Existuje registr osob, validace, výpočet rodinných událostí a věku.
 - Jednorázové předvyplnění proběhne pouze nad prázdným soukromým registrem.
 - Editace je v mobilním Cockpitu dostupná přes viditelné `Upravit údaje`.
@@ -143,8 +148,8 @@
   kandidátů, nevolal koordinátor ani transport a nezměnil konfiguraci nebo
   stavové úložiště.
 - Implementační checkpoint aktivační brány prošel 1217 testy a je obsažený v
-  nasazeném `main`. P6a záměrně nečetlo současný soukromý režim; jeho dnešní
-  hodnota proto zůstává neověřená.
+  nasazeném `main`. P6a záměrně nečetlo současný soukromý režim a projektová
+  paměť jej proto do živého auditu 2026-08-01 vedla jako neověřený.
 
 ## Bezpečnostní hranice
 
@@ -160,9 +165,10 @@
 
 ## Nejmenší další krok
 
-Provést pouze redigovaný read-only audit současného režimu, readiness a
-plánovače. Aktivační apply neopakovat jen podle staré paměti a nic skutečně
-neodesílat kvůli testu.
+Bez nové aktivace nebo testovacího odeslání. První přirozený plánovaný výsledek
+sledovat pouze redigovaně. Každý další dotaz na aktuální režim, readiness nebo
+plánovač znovu ověřit živým read-only auditem, protože tento provozní stav je
+proměnlivý a git-safe paměť je pouze časovaný snapshot.
 
 ## Otevřené riziko
 

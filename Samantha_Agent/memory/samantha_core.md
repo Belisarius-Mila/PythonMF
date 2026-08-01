@@ -73,6 +73,10 @@ markdown pameti.
 - P6a provedlo obsahovy audit sedmi roadmapovych proudu a P6b narovnalo pouze
   prokazatelne zastarale aktivni souhrny bez mazani historie a bez hromadneho
   zakladani kanonickych dvojic.
+- Zivy audit 2026-08-01 odkryl hranici P6: promenliva runtime aktivace
+  Rodinneho kalendare se po provoznim kroku nepropsala do git-safe pameti.
+  Aktualni provozni tvrzeni proto musi pouzit redigovany live audit, ne pouze
+  pametovy snapshot.
 - Vyhledavani zatim neni vektorova databaze a nepouziva embeddings.
 - Lokalni smoke test 2026-05-23 bez OpenAI API po doplneni `source_type`:
   - dotaz `Samantha Agent RAG search_memory ranking` vraci vysledky oznacene
@@ -85,9 +89,9 @@ markdown pameti.
 
 Aktualni dalsi krok:
 
-- Smer pravdive pameti P0-P6 je funkcne uzavreny.
-- Dalsi systemovy smer je jeden uplny provozni tok
-  e-mail -> private vault -> R2 TXT.
+- P0-P6 zustavaji hotove pro autoritu a obsah git-safe pameti.
+- Novy P7 ma uzce doplnit ochranu promenliveho runtime stavu: live audit,
+  nebo priznane stari a nejistota snapshotu.
 - Embeddings resit jen pri novem praktickem dukazu, ze textove vyhledavani s
   autoritou a cache nestaci.
 

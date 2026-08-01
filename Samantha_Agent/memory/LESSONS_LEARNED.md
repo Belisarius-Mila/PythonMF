@@ -49,3 +49,16 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   skutečně používaných míst a aplikaci restartovat. Chybějící obrázky doplňovat
   podle výsledku úplného auditu. Lokální či iCloudové servisní obrázky držet mimo
   Git pomocí přesného lokálního exclude.
+
+### LL-003 — Proměnlivý provozní stav neověřovat jen z projektové paměti
+
+- Problém: Potvrzená aktivace rodinného kalendáře se po runtime kroku
+  nepropsala do kanonické git-safe paměti. Pozdější bezpečný audit nečetl
+  soukromou konfiguraci a aktivní souhrny proto vedly režim jako neověřený.
+- Typ: opakující se
+- Řešení nalezeno: 01082026
+- Řešení: U dotazů typu `je aktivní`, `běží` nebo `je připraveno` nejprve
+  použít dostupný redigovaný read-only live audit. Paměť používat jako
+  historický kontext a bezpečnostní pravidla, ne jako důkaz současného runtime
+  stavu. Po významné provozní změně zapsat git-safe redigovanou účtenku bez
+  tajemství a soukromého obsahu.

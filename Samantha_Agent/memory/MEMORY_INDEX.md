@@ -4,16 +4,16 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 - `ACTIVE_PROJECTS.md` - registr projektu a oblasti vcetne rezimu `active` / `paused` / `archived`, priorit, stavu, handoffu a dalsich kroku.
 - `WORKSTREAMS.md` - kanonicky registr 30 pracovnich proudu: 24 projektu, 4 tooly a 2 `Misc`. Faze 4.2 pridala lazy soukroma vlakna, faze 4.3 jejich handoff/TVBCP vazby, faze 4.5e jednotny backendovy registr a faze 4.5f jednu perzistentni autoritu `active_workstream_id` ve schematu 2. Human–Adam a Knihovna jsou docasne kompatibilni adaptery nad svymi puvodnimi session a workspaces; ostatnich 28 proudu pouziva lazy private-thread backend. Faze 4.5g-d2 doplnila chybejici samostatny proud Rodinny kalendar s jednorazovou direct-main autorizaci.
-- `projects/family_calendar.md` - Rodinný kalendář jako samostatný projekt mimo Knihovnu; aktivační apply brána je implementovaná, ale současný soukromý režim je neověřený. Další krok je pouze redigovaný read-only audit režimu, readiness a plánovače.
+- `projects/family_calendar.md` - Rodinný kalendář jako samostatný projekt mimo Knihovnu; živý redigovaný audit 2026-08-01 potvrdil režim `enabled`, aktivní automatiku, připravený plánovač a nula blokátorů. Proměnlivý provozní stav se má před další odpovědí znovu ověřit read-only, ne odvozovat z paměti.
 
 ## Core
 
 - `LESSONS_LEARNED.md` - stručný registr ověřených řešení opakovaných nebo
   zobecnitelných problémů. Při podobném problému se prohledává před návrhem
-  nového řešení; obsahuje soví lokální preview a obecnou kontrolu konzistence
-  slovníkových aplikací, mappingů a obrázků na cílovém zařízení.
+  nového řešení; obsahuje soví lokální preview, obecnou kontrolu konzistence
+  slovníkových aplikací a pravidlo živého ověření proměnlivého runtime stavu.
 - `samantha_core.md` - zakladni kontext: kdo je Mila, co je Samantha Agent, aktualni stav prostredi, souhrn vrstvy pameti/RAG a dlouhodoby cil.
-- `handoffs/workstreams/project-samantha-agent-rag.md` - kanonicky aktualni handoff proudu Samantha Agent / RAG; P0-P6 audit, autorita zdroju, nefiltrovane prvni hledani, jednoznacne aliasy a obsahove narovnani. P5 je nasazena a Smer 2 je funkcne uzavreny.
+- `handoffs/workstreams/project-samantha-agent-rag.md` - kanonicky aktualni handoff proudu Samantha Agent / RAG; P0-P6 audit a autorita zdroju jsou hotove, ale kalendar odkryl chybejici ochranu promenliveho runtime stavu. Navazujici P7 ma pred aktualnim tvrzenim vyzadat redigovany live audit nebo priznat stari a nejistotu pameti.
 - `tvbcp/workstreams/project-samantha-agent-rag.md` - kanonicky rozhodovaci dokument pravdive pameti a RAG; precedence zdroju, fail-honest fallback a odklad embeddings.
 - `contacts.md` - prakticke kontakty, ktere Mila vyslovne povolil ulozit do pameti.
 

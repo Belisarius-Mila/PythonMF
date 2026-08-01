@@ -28,6 +28,9 @@ dukazu, ze textove hledani nestaci.
   vyslovne dohode; P2 nematerializuje dalsich 23 proudu.
 - Embeddings se odkladaji, dokud prakticke testy neprokazi nedostatecnost
   soucasneho textoveho hledani.
+- Git-safe pamet je u promenliveho runtime stavu pouze casovany snapshot.
+  Aktualni tvrzeni typu `aktivni`, `bezi` nebo `pripraveno` musi prednostne
+  pouzit registrovany redigovany live audit, nebo priznat stari a nejistotu.
 
 ## Milniky
 
@@ -52,6 +55,8 @@ dukazu, ze textove hledani nestaci.
 - Obecny `Cockpit` je skutecne nejednoznacny a nesmi dostat tichy alias.
 - Proudy bez materializovane kanonicke dvojice zustavaji
   `aggregate_unverified`; P6 je hromadne nematerializuje.
+- P6 neresi writeback redigovane provozni uctenky ani povinne live overeni
+  promenliveho runtime stavu.
 
 ## Chronologicke zaznamy
 
@@ -192,3 +197,40 @@ dukazu, ze textove hledani nestaci.
 - P5 ranking vraci pro R2-Adam a Kalendar kanonicke zdroje jako prvni a u
   nematerializovanych proudu priznava slabsi autoritu.
 - Private obsah nebyl pri P6a ani P6b cten nebo zapisovan.
+
+### 2026-08-01 12:04 CEST - P7 otevreno po odhalenem runtime driftu
+
+#### Hotovo
+
+- Zivy redigovany readiness audit potvrdil, ze Rodinny kalendar je
+  `enabled` a aktivni, prestoze kanonicka projektova pamet vedla stav jako
+  neovereny.
+- Dohledana pricina: aktivace probehla po implementacnim checkpointu bez
+  git-safe redigovaneho writebacku. P6 nasledne private runtime necetlo a
+  bezpecne odmitlo aktivaci domyslet.
+
+#### Rozhodnuti
+
+- Pamet a precedence zdroju jsou spravne pro historii a pravidla, ale samy
+  nejsou dukazem aktualniho promenliveho runtime stavu.
+- Dostupny read-only live audit ma pred aktualnim tvrzenim prednost.
+
+#### Dalsi krok
+
+- P7 ma navrhnout a otestovat nejmensi ochranu: pro dotazy `aktivni`, `bezi`
+  nebo `pripraveno` pouzit registrovany redigovany live status; bez nej
+  vyslovne uvest stari a nejistotu snapshotu.
+
+#### Navrhovane dalsi kroky
+
+- Zacit read-only mapovanim existujicich capability a rozhodovaciho mista
+  agenta.
+- Pouzit pouze synteticke testy; necist private obsah a nevolat transport.
+- Provozni writeback drzet redigovany a bez tajemstvi.
+
+#### Technicky dukaz
+
+- Readiness 2026-08-01: `status=active`, `config_mode=enabled`,
+  `automation_active=true`, `planner_ready`, `blocking_count=0`.
+- Git blame priradil souhrn `neovereno` commitu `3c727d7` z P6b; tento audit
+  zamerne necetl private konfiguraci.

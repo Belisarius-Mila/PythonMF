@@ -1,39 +1,39 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obsahově narovnáno P6b: 2026-07-30 07:25 CEST
+- Živě ověřeno read-only: 2026-08-01 12:04 CEST
 
 ### Hotovo
 - Potvrzovaná aktivační apply brána je implementovaná včetně revalidace,
   odpojení plánovače, atomické změny režimu a ověřeného rollbacku.
-- Aktuální `main` `20180e2` je serverově nasazený a Cockpit smoke prošel 5/5.
+- Redigovaný živý audit potvrzuje `config_mode=enabled`,
+  `automation_active=true`, připravený plánovač a nula blokujících stavů.
 
 ### Otevřeno
-- Současný živý režim, readiness a stav plánovače nebyly v P6a čteny ze
-  soukromé konfigurace a zůstávají neověřené.
 - Samostatný potvrzovaný workflow pro ruční uzavření blokujícího
   `partial` nebo `delivery_unknown` není doložený.
 
 ### Rizika
-- Neověřený režim se nesmí domýšlet a nejisté doručení se nesmí automaticky
-  opakovat.
+- Současný audit je časovaný snapshot. Budoucí `sending`, `partial` nebo
+  `delivery_unknown` musí dál zůstat fail-closed a bez automatického retry.
 
 ### Další krok
-- Provést pouze redigovaný read-only audit živého režimu, readiness a
-  plánovače; aktivační apply neopakovat podle staré paměti.
+- Bez nové aktivace nebo testovacího odeslání. První přirozený plánovaný
+  výsledek sledovat pouze redigovaně.
 
 ### Rozhodnutí
-- Implementovaná aktivační brána není důkazem současného režimu ani pokynem k
-  dalšímu odeslání.
+- Kalendář je aktivní. Aktuální provozní stav se při budoucím dotazu musí
+  ověřit redigovaným live auditem, ne pouze z git-safe paměti.
 
 ### Navrhované další kroky
 - První přirozený plánovaný výsledek sledovat pouze přes redigovaný stav.
 - Stavy `sending`, `partial` a `delivery_unknown` ponechat fail-closed.
 
 ### Technický stav checkpointu
-- Implementační checkpoint aktivační brány prošel 1217 testy.
-- Deployment účtenka: `20180e2`, stav `deployed`, smoke 5/5.
-- P6a nečetlo soukromý režim ani tajemství.
+- Readiness: `status=active`, `config_mode=enabled`,
+  `automation_active=true`, `blocking_count=0`, `planner_ready`.
+- Počty stavů: `sending=0`, `partial=0`, `delivery_unknown=0`.
+- Audit byl redigovaný, nic nezapsal, nečetl tajemství a nevolal transport.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Rodinný kalendář
@@ -675,3 +675,29 @@ Navrhované další kroky:
 Technický důkaz:
 - Implementační checkpoint prošel 1217 testy.
 - Aktuální Cockpit běží na `20180e2` a smoke prošel 5/5.
+
+### 2026-08-01 12:04 CEST – Živý audit potvrzuje aktivní automatiku
+
+Hotovo:
+- Redigovaný read-only readiness audit potvrdil režim `enabled`, aktivní
+  automatiku, připravený plánovač a nula blokujících delivery stavů.
+
+Rozhodnutí:
+- Kalendář je aktivní.
+- Git-safe paměť je pro proměnlivý runtime pouze časovaný snapshot. Tvrzení
+  `aktivní`, `běží` nebo `připraveno` se musí přednostně ověřit dostupným
+  redigovaným live auditem.
+
+Další krok:
+- Nic znovu neaktivovat ani neposílat kvůli testu. První přirozený plánovaný
+  výsledek sledovat pouze redigovaně.
+
+Navrhované další kroky:
+- Samostatný ruční workflow pro budoucí uzavření `partial` nebo
+  `delivery_unknown` otevírat jen při skutečné potřebě.
+
+Technický důkaz:
+- `status=active`, `config_mode=enabled`, `automation_active=true`,
+  `planner_ready`, `blocking_count=0`.
+- `sending=0`, `partial=0`, `delivery_unknown=0`.
+- Audit nic nezapsal, nečetl tajemství a nevolal transport.

@@ -48,12 +48,21 @@ Co neni hotove:
   `aggregate_unverified`.
 - Obecny dotaz `Cockpit` zustava nejednoznacny mezi hlavnim Cockpitem a
   Janicka Cockpitem; nema dostat tichy alias.
+- P6 neřeší proměnlivé runtime stavy. Aktivace rodinného kalendáře proběhla po
+  implementačním checkpointu, ale redigovaná provozní účtenka se nepropsala do
+  kanonické git-safe paměti. P6 pak bez čtení private konfigurace stav poctivě,
+  ale neúplně snížilo na `neověřeno`.
 
 Dalsi krok:
-- Uzavrit Smer 2 jako funkcni a prejit k jednomu uplnemu overeni toku
-  e-mail -> private vault -> R2 TXT.
+- P7: navrhnout a otestovat úzkou ochranu proměnlivého provozního stavu.
+  Dotaz typu `aktivní`, `běží` nebo `připraveno` má použít registrovaný
+  redigovaný live audit; pokud není dostupný, musí uvést stáří a nejistotu
+  paměťového snapshotu.
 
 Navrhovane dalsi kroky:
+- Nejprve read-only zmapovat existující live-status capability a místa, kde
+  agent rozhoduje jen z paměti. Potom přidat nejmenší synteticky testovatelnou
+  ochranu bez čtení private obsahu.
 - U obecneho `Cockpit` zachovat explicitni doptani, ne automaticky vyber.
 - Pri dalsi praci sledovat, zda se znovu neobjevi obsahovy drift aktivniho
   souhrnu proti novejsimu dukazu.
