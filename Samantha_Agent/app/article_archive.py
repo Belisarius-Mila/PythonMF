@@ -1910,6 +1910,7 @@ def prepare_article_pdf_export(
         pdf_path=pdf_path,
         title=pdf_title,
         prepared_at=prepared_at,
+        archive_root=archive_root,
     )
 
     subject = f"{LIBRARY_EXPORT_SUBJECT_PREFIX} {item.one_line_title}"
@@ -2115,6 +2116,7 @@ def build_article_pdf(
     pdf_path: Path,
     title: str,
     prepared_at: datetime,
+    archive_root: Path,
 ) -> None:
     try:
         from reportlab.lib import colors
@@ -2123,7 +2125,8 @@ def build_article_pdf(
         from reportlab.lib.units import mm
         from reportlab.pdfbase import pdfmetrics
         from reportlab.pdfbase.ttfonts import TTFont
-        from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
+        from reportlab.platypus import Image as PdfImage
+        from reportlab.platypus import PageBreak, Paragraph, SimpleDocTemplate, Spacer
     except ModuleNotFoundError as exc:  # pragma: no cover - depends on local environment setup
         raise ValueError("ReportLab není nainstalovaný, nejde vytvořit PDF export.") from exc
 
@@ -2179,6 +2182,7 @@ def build_article_pdf(
     story.append(Paragraph("Obsah", heading_style))
     for block in text_to_pdf_blocks(text):
         story.append(Paragraph(block, body_style))
+    image_pages: list[tuple[ArticleAttachment, Any]] = []
     if item.attachments:
         story.append(Paragraph("Přílohy", heading_style))
         for attachment in item.attachments:
@@ -2189,8 +2193,46 @@ def build_article_pdf(
             ]
             if attachment.note:
                 details.append(f"poznámka: {attachment.note}")
+            if attachment.kind.casefold() == "image":
+                image_path = article_pdf_image_path(attachment=attachment, archive_root=archive_root)
+                if image_path is None:
+                    details.append("PDF: obrazový soubor není dostupný")
+                else:
+                    try:
+                        image = PdfImage(str(image_path), lazy=0)
+                        max_width = A4[0] - doc.leftMargin - doc.rightMargin
+                        max_height = A4[1] - doc.topMargin - doc.bottomMargin - 36 * mm
+                        scale = min(
+                            1.0,
+                            max_width / float(image.imageWidth),
+                            max_height / float(image.imageHeight),
+                        )
+                        image.drawWidth = float(image.imageWidth) * scale
+                        image.drawHeight = float(image.imageHeight) * scale
+                        image.hAlign = "CENTER"
+                        image_pages.append((attachment, image))
+                    except Exception:
+                        details.append("PDF: obrazový soubor nelze načíst")
             story.append(Paragraph(escape(" | ".join(details)), meta_style))
+    for index, (attachment, image) in enumerate(image_pages, start=1):
+        story.append(PageBreak())
+        story.append(Paragraph(f"Obrazová příloha {index}", heading_style))
+        story.append(Paragraph(escape(attachment.label), body_style))
+        if attachment.note:
+            story.append(Paragraph(escape(attachment.note), meta_style))
+        story.append(Spacer(1, 4 * mm))
+        story.append(image)
     doc.build(story)
+
+
+def article_pdf_image_path(*, attachment: ArticleAttachment, archive_root: Path) -> Path | None:
+    if attachment.kind.casefold() != "image":
+        return None
+    for relative_path in (attachment.readable_file, attachment.original_file):
+        resolved = resolve_archive_relative_file(archive_root, relative_path)
+        if resolved is not None and resolved.is_file():
+            return resolved
+    return None
 
 
 def register_pdf_font(pdfmetrics: Any, TTFont: Any) -> str:

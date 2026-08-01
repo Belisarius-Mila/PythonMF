@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import gzip
 import json
+import re
 import ssl
 import subprocess
 import tempfile
@@ -1064,6 +1065,132 @@ class ArticleArchiveTests(unittest.TestCase):
         self.assertEqual(metadata["status"], "draft")
         self.assertTrue(metadata["library_export_marker"])
         self.assertIn(export["export_id"], export["confirmation_text"])
+
+    @unittest.skipIf(Image is None or not HAS_REPORTLAB, "Pillow and ReportLab are required")
+    def test_prepare_article_pdf_export_embeds_readable_image_on_separate_page(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            archive_root = Path(temp_dir)
+            result = archive_text_entry(
+                title="Výlet s obrázkem",
+                text="Krátký syntetický text pro PDF export.",
+                category="travel_places",
+                archive_root=archive_root,
+            )
+            article_id = result["item"]["id"]
+            image_buffer = BytesIO()
+            Image.new("RGB", (1800, 900), "#4f7f5f").save(image_buffer, format="PNG")
+            attach_article_image(
+                article_id=article_id,
+                image_bytes=image_buffer.getvalue(),
+                filename="landscape.png",
+                label="Syntetická krajina",
+                note="Syntetická obrazová příloha.",
+                archive_root=archive_root,
+                user_confirmed=True,
+                confirmation_text=ATTACHMENT_CONFIRMATION_PHRASE,
+            )
+            portrait_buffer = BytesIO()
+            Image.new("RGB", (700, 1400), "#7c5f91").save(portrait_buffer, format="PNG")
+            attach_article_image(
+                article_id=article_id,
+                image_bytes=portrait_buffer.getvalue(),
+                filename="portrait.png",
+                label="Syntetický portrét",
+                archive_root=archive_root,
+                user_confirmed=True,
+                confirmation_text=ATTACHMENT_CONFIRMATION_PHRASE,
+            )
+            metadata_path = archive_root / "articles" / article_id / "metadata.json"
+            metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+            for attachment in metadata["attachments"]:
+                (archive_root / attachment["original_file"]).write_bytes(b"unusable original")
+
+            prepared = prepare_article_pdf_export(
+                article_id=article_id,
+                archive_root=archive_root,
+                smtp_config_loader=_smtp_config,
+            )
+            pdf_bytes = Path(prepared["export"]["pdf_path"]).read_bytes()
+
+        self.assertTrue(prepared["ok"])
+        self.assertGreaterEqual(pdf_bytes.count(b"/Subtype /Image"), 2)
+        self.assertGreaterEqual(len(re.findall(rb"/Type\s*/Page\b", pdf_bytes)), 3)
+
+    @unittest.skipIf(Image is None or not HAS_REPORTLAB, "Pillow and ReportLab are required")
+    def test_prepare_article_pdf_export_skips_missing_image_without_failing(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            archive_root = Path(temp_dir)
+            result = archive_text_entry(
+                title="Karta s chybějícím obrázkem",
+                text="PDF se musí vytvořit i bez obrazového souboru.",
+                category="other",
+                archive_root=archive_root,
+            )
+            article_id = result["item"]["id"]
+            image_buffer = BytesIO()
+            Image.new("RGB", (640, 960), "white").save(image_buffer, format="PNG")
+            attach_article_image(
+                article_id=article_id,
+                image_bytes=image_buffer.getvalue(),
+                filename="portrait.png",
+                label="Chybějící příloha",
+                archive_root=archive_root,
+                user_confirmed=True,
+                confirmation_text=ATTACHMENT_CONFIRMATION_PHRASE,
+            )
+            metadata_path = archive_root / "articles" / article_id / "metadata.json"
+            metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+            attachment = metadata["attachments"][0]
+            for field in ("readable_file", "original_file"):
+                (archive_root / attachment[field]).unlink()
+
+            prepared = prepare_article_pdf_export(
+                article_id=article_id,
+                archive_root=archive_root,
+                smtp_config_loader=_smtp_config,
+            )
+            pdf_bytes = Path(prepared["export"]["pdf_path"]).read_bytes()
+
+        self.assertTrue(prepared["ok"])
+        self.assertNotIn(b"/Subtype /Image", pdf_bytes)
+
+    @unittest.skipIf(Image is None or not HAS_REPORTLAB, "Pillow and ReportLab are required")
+    def test_prepare_article_pdf_export_skips_corrupt_image_without_failing(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            archive_root = Path(temp_dir)
+            result = archive_text_entry(
+                title="Karta s poškozeným obrázkem",
+                text="PDF se musí vytvořit i s poškozenou obrazovou přílohou.",
+                category="other",
+                archive_root=archive_root,
+            )
+            article_id = result["item"]["id"]
+            image_buffer = BytesIO()
+            Image.new("RGB", (640, 960), "white").save(image_buffer, format="PNG")
+            attach_article_image(
+                article_id=article_id,
+                image_bytes=image_buffer.getvalue(),
+                filename="portrait.png",
+                label="Poškozená příloha",
+                archive_root=archive_root,
+                user_confirmed=True,
+                confirmation_text=ATTACHMENT_CONFIRMATION_PHRASE,
+            )
+            metadata_path = archive_root / "articles" / article_id / "metadata.json"
+            metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+            attachment = metadata["attachments"][0]
+            for field in ("readable_file", "original_file"):
+                (archive_root / attachment[field]).write_bytes(b"not an image")
+
+            prepared = prepare_article_pdf_export(
+                article_id=article_id,
+                archive_root=archive_root,
+                smtp_config_loader=_smtp_config,
+            )
+            pdf_bytes = Path(prepared["export"]["pdf_path"]).read_bytes()
+
+        self.assertTrue(prepared["ok"])
+        self.assertNotIn(b"/Subtype /Image", pdf_bytes)
 
     @unittest.skipIf(not HAS_REPORTLAB, "ReportLab is not installed")
     def test_send_article_pdf_export_requires_confirmation_then_uses_smtp(self) -> None:

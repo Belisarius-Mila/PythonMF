@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-01 16:50 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-01 17:48 CEST
 
 ### Hotovo
-- Zdravotní informace jsou znovu samostatnou kategorií Knihovny
+- PDF export Knihovny nyní obsahuje čitelné obrazové přílohy na samostatných stránkách
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
@@ -15,18 +15,18 @@
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Převzít a nasadit změnu, potom na iPhonu ověřit záložku Zdravotní informace
+- Převzít a nasadit změnu, potom připravit PDF jedné karty s obrázkem a vizuálně je ověřit bez odeslání
 
 ### Rozhodnutí
-- Existující zdravotní karty zůstávají v kategorii health_info a nepatří do Ostatní
+- Každý dostupný obrázek má vlastní A4 stránku; chybějící nebo poškozený obrázek nezablokuje celý export
 
 ### Navrhované další kroky
-- Později narovnat zastaralý paměťový odkaz na chybějící zdravotní handoff
+- Žádné další návrhy nad rámec bezprostředního kroku.
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `a4383e0c4989`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `a4383e0c4989` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-01T14:27:12+00:00.
+- Git před checkpointem: lokální `main` na `659705632a55`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `659705632a55` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-01T15:26:20+00:00.
 - Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -177,3 +177,15 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (10): `Samantha_Agent/app/article_archive.py`, `Samantha_Agent/app/frontend/cockpit/app.js`, `Samantha_Agent/app/frontend/cockpit/page.html`, `Samantha_Agent/scripts/archive_article_url.py`, `Samantha_Agent/scripts/archive_text_entry.py`, `Samantha_Agent/scripts/clean_article_archive_texts.py`, `Samantha_Agent/scripts/search_article_archive.py`, `Samantha_Agent/tests/test_article_archive.py`, `Samantha_Agent/tests/test_cockpit.py`, `Samantha_Agent/tests/test_cockpit_frontend.py`
 - Commit: `Restore health information library category`
 - Další krok: Převzít a nasadit změnu, potom na iPhonu ověřit záložku Zdravotní informace
+
+### Automatický checkpoint 2026-08-01 17:48 CEST
+
+- Pracovní proud: `project-knowledge-library`
+- Hotovo: PDF export Knihovny nyní obsahuje čitelné obrazové přílohy na samostatných stránkách; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.; Lokální commity čekají na samostatný denní GitHub balíček.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: rychlá Cockpit brána syntaxe a whitespace: 4.5 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu
+- Změněné cesty před paměťovým zápisem (2): `Samantha_Agent/app/article_archive.py`, `Samantha_Agent/tests/test_article_archive.py`
+- Commit: `Embed library images in PDF exports`
+- Další krok: Převzít a nasadit změnu, potom připravit PDF jedné karty s obrázkem a vizuálně je ověřit bez odeslání
