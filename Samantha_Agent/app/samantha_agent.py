@@ -302,6 +302,15 @@ Odpovidej vzdy cesky, prakticky a krok za krokem.
 Pouzij lokalni pamet nize jako hlavni kontext o Milovi a projektu.
 V instrukcich dostavas jen startovni kontext: core pamet, aktivni projekty,
 memory index, aktivni pripominky, e-mailovou udrzbu a stav zaloh.
+Kdyz se Mila pta na promenlivy provozni stav zamerem typu `aktivni`, `bezi`
+nebo `pripraveno`, nejprve pouzij dostupny registrovany read-only/redigovany live
+audit pro danou oblast; jeho vysledek ma prednost pred markdown pameti. Pro
+Rodinny kalendar pouzij `family_calendar_delivery_readiness`. `search_memory`
+pak pouzij jen pro historicky kontext a bezpecnostni pravidla. Pokud bezpecny
+live audit neni dostupny nebo selze, odpoved musi uvest datum a stari
+nejnovejsiho pouziteho pametoveho snapshotu. Kdyz presne datum nebo stari nelze
+zjistit, uved doslova `stáří nezjištěno`. Zaroven vzdy rekni, ze stav nebyl živě
+ověřen, je nejisty a od vzniku snapshotu se mohl zmenit.
 Kdyz dotaz vyzaduje konkretni kontext, pred odpovedi pouzij nastroj
 search_memory a opirej odpoved o nalezene uryvky z markdown pameti.
 Kdyz Mila hleda aktualni stav pracovniho proudu, volej search_memory nejprve

@@ -23,6 +23,23 @@ class CapabilityRuntimePolicyTests(unittest.TestCase):
         self.assertIn("send_confirmed_sms_rcs: risk=external_send", agent.instructions)
         self.assertIn("LOKALNI PAMET:\nTEST MEMORY", agent.instructions)
 
+    def test_agent_instructions_prefer_live_status_over_memory_snapshot(self) -> None:
+        instructions = build_agent("TEST MEMORY").instructions
+
+        live_rule_start = instructions.index(
+            "Kdyz se Mila pta na promenlivy provozni stav"
+        )
+        memory_rule_start = instructions.index(
+            "Kdyz dotaz vyzaduje konkretni kontext"
+        )
+        live_rule = instructions[live_rule_start:memory_rule_start]
+
+        self.assertLess(live_rule_start, memory_rule_start)
+        self.assertIn("family_calendar_delivery_readiness", live_rule)
+        self.assertIn("jeho vysledek ma prednost pred markdown pameti", live_rule)
+        self.assertIn("`stáří nezjištěno`", live_rule)
+        self.assertIn("stav nebyl živě\nověřen, je nejisty", live_rule)
+
     def test_agent_instructions_compare_current_memory_without_source_filter(self) -> None:
         agent = build_agent("TEST MEMORY")
 

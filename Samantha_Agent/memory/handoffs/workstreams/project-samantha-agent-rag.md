@@ -1,3 +1,37 @@
+<!-- SAMANTHA_CURRENT_STATUS_START -->
+## Aktuální stav
+
+- Obnoveno potvrzeným checkpointem: 2026-08-01 14:52 CEST
+
+### Hotovo
+- Samantha před aktuálním provozním tvrzením použije dostupný bezpečný live audit a bez něj přizná stáří i nejistotu paměti.
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+
+### Otevřeno
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
+
+### Rizika
+- Žádné další doložené provozní riziko.
+
+### Další krok
+- V Cockpitu vytvořit jeden čistý checkpoint bez nasazení.
+
+### Rozhodnutí
+- Dostupný bezpečný live audit má přednost; bez něj se uvádí stáří a nejistota snapshotu.
+
+### Navrhované další kroky
+- Po případném pozdějším nasazení ověřit kalendářní routing krátkým read-only dotazem.
+
+### Technický stav checkpointu
+- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
+- Git před checkpointem: lokální `main` na `d1ffd4c0bc56`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `d1ffd4c0bc56` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-01T12:25:16+00:00.
+- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
+- Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
+<!-- SAMANTHA_CURRENT_STATUS_END -->
+
 # Handoff pracovního proudu: Samantha Agent / RAG
 
 Nazev: Samantha Agent / RAG
@@ -86,3 +120,15 @@ Bezpecnost / neukladat:
 - Neukladat hesla, tokeny, API klice, private obsah, cele e-maily ani obsah
   soukromych dokumentu.
 - Historicke handoffy zachovat jako historii; nemazat je kvuli novemu rankingu.
+
+### Automatický checkpoint 2026-08-01 14:52 CEST
+
+- Pracovní proud: `project-samantha-agent-rag`
+- Hotovo: Samantha před aktuálním provozním tvrzením použije dostupný bezpečný live audit a bez něj přizná stáří i nejistotu paměti.; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.; Lokální commity čekají na samostatný denní GitHub balíček.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: rychlá Cockpit brána syntaxe a whitespace: 5.8 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu
+- Změněné cesty před paměťovým zápisem (2): `Samantha_Agent/app/samantha_agent.py`, `Samantha_Agent/tests/test_capability_runtime_policy.py`
+- Commit: `Upřednostnit živý stav před paměťovým snapshotem`
+- Další krok: V Cockpitu vytvořit jeden čistý checkpoint bez nasazení.
