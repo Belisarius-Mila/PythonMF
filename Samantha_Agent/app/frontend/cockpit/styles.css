@@ -208,6 +208,12 @@
     .library-attachment-title { font-weight: 700; overflow-wrap: anywhere; }
     .library-attachment-meta { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
     .library-attachment-image { max-width: 100%; max-height: 420px; object-fit: contain; border: 1px solid #edf0f4; border-radius: 6px; background: #f8fafc; }
+    .library-attachment-preview-trigger { width: 100%; max-width: 100%; border: 0; padding: 0; background: transparent; cursor: zoom-in; }
+    .library-attachment-preview-trigger .library-attachment-image { display: block; margin: 0 auto; }
+    .library-attachment-viewer-backdrop { z-index: 30; padding: 12px; align-items: stretch; }
+    .library-attachment-viewer-modal { width: min(1180px, 100%); max-height: calc(100vh - 24px); display: flex; flex-direction: column; overflow: hidden; }
+    .library-attachment-viewer-body { min-height: 0; flex: 1; display: grid; place-items: center; overflow: auto; padding: 12px; background: #111827; }
+    .library-attachment-viewer-image { display: block; max-width: 100%; max-height: calc(100vh - 110px); object-fit: contain; }
     .library-snippet { color: #344054; font-size: 12px; line-height: 1.45; overflow-wrap: anywhere; }
     .family-calendar-modal { width: min(1080px, 100%); }
     .family-calendar-intro { color: #344054; font-size: 13px; line-height: 1.45; }

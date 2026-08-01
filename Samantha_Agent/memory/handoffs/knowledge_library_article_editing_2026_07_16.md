@@ -1,3 +1,36 @@
+<!-- SAMANTHA_CURRENT_STATUS_START -->
+## Aktuální stav
+
+- Obnoveno potvrzeným checkpointem: 2026-08-01 15:49 CEST
+
+### Hotovo
+- Obrázky se otevírají v Knihovně s jasným tlačítkem pro návrat
+
+### Otevřeno
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
+
+### Rizika
+- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
+
+### Další krok
+- Převzít a nasadit změnu, potom ověřit návrat z obrázku na iPhonu
+
+### Rozhodnutí
+- Obrázkové přílohy se otevírají uvnitř Knihovny místo v nové kartě
+
+### Navrhované další kroky
+- Žádné další návrhy nad rámec bezprostředního kroku.
+
+### Technický stav checkpointu
+- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
+- Git před checkpointem: lokální `main` na `f4092fb481b4`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `d1ffd4c0bc56` · je starší než ověřený main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-01T12:25:16+00:00.
+- Read-only živý stav: main=`local_ahead`, deployment=`verified_other_main`, runtime=`connected`.
+- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
+- Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
+<!-- SAMANTHA_CURRENT_STATUS_END -->
+
 Nazev: Knihovna v Cockpitu – editace článku a příloh
 Priorita: 2
 Stav: hotovo
@@ -119,3 +152,15 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (2): `Samantha_Agent/app/article_archive.py`, `Samantha_Agent/tests/test_article_archive.py`
 - Commit: `Handle gzip-compressed article responses`
 - Další krok: Nasadit změnu a samostatným výslovným pokynem opravit dnešní kartu z uloženého zdroje.
+
+### Automatický checkpoint 2026-08-01 15:49 CEST
+
+- Pracovní proud: `project-knowledge-library`
+- Hotovo: Obrázky se otevírají v Knihovně s jasným tlačítkem pro návrat
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.; Lokální commity čekají na samostatný denní GitHub balíček.
+- Rizika: Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: rychlá Cockpit brána syntaxe a whitespace: 9.1 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu
+- Změněné cesty před paměťovým zápisem (5): `Samantha_Agent/app/frontend/cockpit/app.js`, `Samantha_Agent/app/frontend/cockpit/page.html`, `Samantha_Agent/app/frontend/cockpit/styles.css`, `Samantha_Agent/tests/test_cockpit.py`, `Samantha_Agent/tests/test_cockpit_frontend.py`
+- Commit: `Add in-app library attachment viewer`
+- Další krok: Převzít a nasadit změnu, potom ověřit návrat z obrázku na iPhonu

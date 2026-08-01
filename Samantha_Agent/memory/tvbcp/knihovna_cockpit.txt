@@ -1,3 +1,36 @@
+<!-- SAMANTHA_CURRENT_STATUS_START -->
+## Aktuální stav
+
+- Obnoveno potvrzeným checkpointem: 2026-08-01 15:49 CEST
+
+### Hotovo
+- Obrázky se otevírají v Knihovně s jasným tlačítkem pro návrat
+
+### Otevřeno
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
+
+### Rizika
+- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
+
+### Další krok
+- Převzít a nasadit změnu, potom ověřit návrat z obrázku na iPhonu
+
+### Rozhodnutí
+- Obrázkové přílohy se otevírají uvnitř Knihovny místo v nové kartě
+
+### Navrhované další kroky
+- Žádné další návrhy nad rámec bezprostředního kroku.
+
+### Technický stav checkpointu
+- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
+- Git před checkpointem: lokální `main` na `f4092fb481b4`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `d1ffd4c0bc56` · je starší než ověřený main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-01T12:25:16+00:00.
+- Read-only živý stav: main=`local_ahead`, deployment=`verified_other_main`, runtime=`connected`.
+- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
+- Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
+<!-- SAMANTHA_CURRENT_STATUS_END -->
+
 TVBCP: Knihovna v Samantha Cockpitu
 
 Stav: aktivní projektový TVBCP
@@ -204,3 +237,29 @@ Důkaz: plná Cockpit brána: 1159 testů, 230.7 s, výsledek OK. Checkpoint bac
 profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
 
 Další krok: Nasadit změnu a samostatným výslovným pokynem opravit dnešní kartu z uloženého zdroje.
+
+### 2026-08-01 15:49 CEST – Obrázky se otevírají v Knihovně s jasným tlačítkem pro návrat
+
+Hotovo:
+- Obrázky se otevírají v Knihovně s jasným tlačítkem pro návrat
+
+Otevřeno:
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
+
+Rizika:
+- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
+
+Rozhodnutí:
+- Obrázkové přílohy se otevírají uvnitř Knihovny místo v nové kartě
+
+Další krok:
+- Převzít a nasadit změnu, potom ověřit návrat z obrázku na iPhonu
+
+Navrhované další kroky:
+- Nebyly zachyceny další návrhy nad rámec bezprostředního kroku.
+
+Technický důkaz:
+- rychlá Cockpit brána syntaxe a whitespace: 9.1 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
+- Pracovní proud: `project-knowledge-library`.
+- Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_other_main`, runtime=`connected`.

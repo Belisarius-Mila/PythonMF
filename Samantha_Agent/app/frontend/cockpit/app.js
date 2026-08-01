@@ -90,6 +90,10 @@
     const libraryReaderText = document.getElementById("libraryReaderText");
     const libraryAttachmentSection = document.getElementById("libraryAttachmentSection");
     const libraryReaderAttachments = document.getElementById("libraryReaderAttachments");
+    const libraryAttachmentViewerModal = document.getElementById("libraryAttachmentViewerModal");
+    const libraryAttachmentViewerTitle = document.getElementById("libraryAttachmentViewerTitle");
+    const libraryAttachmentViewerImage = document.getElementById("libraryAttachmentViewerImage");
+    const libraryAttachmentViewerCloseBtn = document.getElementById("libraryAttachmentViewerCloseBtn");
     const libraryEditBtn = document.getElementById("libraryEditBtn");
     const libraryEditPanel = document.getElementById("libraryEditPanel");
     const libraryEditTitleInput = document.getElementById("libraryEditTitleInput");
@@ -280,6 +284,7 @@
     let currentLibrarySelectedItem = null;
     let currentLibrarySelectedText = "";
     let currentLibrarySourceUrl = "";
+    let libraryAttachmentViewerReturnFocus = null;
     let currentLibraryExport = null;
     let currentFamilyCalendarPeople = [];
     let familyCalendarEditorDirty = false;
@@ -4451,6 +4456,27 @@ ${confirmation}`, "");
       return `/api/library/attachment?id=${encodeURIComponent(articleId || "")}&attachment_id=${encodeURIComponent(attachmentId || "")}&variant=${encodeURIComponent(variant || "readable")}`;
     }
 
+    function openLibraryAttachmentViewer(imageUrl, label, returnFocus) {
+      if (!imageUrl) return;
+      libraryAttachmentViewerReturnFocus = returnFocus || document.activeElement;
+      libraryAttachmentViewerTitle.textContent = label || "Náhled přílohy";
+      libraryAttachmentViewerImage.alt = label || "Příloha Knihovny";
+      libraryAttachmentViewerImage.src = imageUrl;
+      libraryAttachmentViewerModal.classList.remove("hidden");
+      libraryAttachmentViewerCloseBtn.focus();
+    }
+
+    function closeLibraryAttachmentViewer() {
+      if (libraryAttachmentViewerModal.classList.contains("hidden")) return;
+      libraryAttachmentViewerModal.classList.add("hidden");
+      libraryAttachmentViewerImage.removeAttribute("src");
+      const returnFocus = libraryAttachmentViewerReturnFocus;
+      libraryAttachmentViewerReturnFocus = null;
+      if (returnFocus && typeof returnFocus.focus === "function" && document.contains(returnFocus)) {
+        returnFocus.focus();
+      }
+    }
+
     function libraryAttachmentDisplayLabel(attachment, category) {
       const label = String(attachment && attachment.label || "").trim();
       if (category === "travel_places" && (!label || label === "Ručně psaný recept")) {
@@ -4598,25 +4624,32 @@ ${phrase}`, "");
         card.appendChild(meta);
         const attachmentId = attachment.id || "";
         const imageSrc = libraryAttachmentUrl(articleId, attachmentId, attachment.has_readable ? "readable" : "original");
-        if (String(attachment.kind || "").toLowerCase().includes("image") || String(attachment.mime_type || "").startsWith("image/")) {
-          const link = document.createElement("a");
-          link.href = imageSrc;
-          link.setAttribute("target", "_blank");
-          link.rel = "noopener";
+        const isImage = String(attachment.kind || "").toLowerCase().includes("image") || String(attachment.mime_type || "").startsWith("image/");
+        if (isImage) {
+          const preview = document.createElement("button");
+          preview.type = "button";
+          preview.className = "library-attachment-preview-trigger";
+          preview.setAttribute("aria-label", `Otevřít náhled: ${displayLabel}`);
           const image = document.createElement("img");
           image.className = "library-attachment-image";
           image.src = libraryAttachmentUrl(articleId, attachmentId, attachment.has_thumb ? "thumb" : "readable");
           image.alt = displayLabel;
-          link.appendChild(image);
-          card.appendChild(link);
+          preview.appendChild(image);
+          preview.addEventListener("click", () => openLibraryAttachmentViewer(imageSrc, displayLabel, preview));
+          card.appendChild(preview);
         }
         const actions = document.createElement("div");
         actions.className = "actions compact-actions";
-        const readable = document.createElement("a");
-        readable.className = "button-link";
-        readable.href = imageSrc;
-        readable.setAttribute("target", "_blank");
-        readable.rel = "noopener";
+        const readable = document.createElement(isImage ? "button" : "a");
+        readable.className = isImage ? "primary" : "button-link";
+        if (isImage) {
+          readable.type = "button";
+          readable.addEventListener("click", () => openLibraryAttachmentViewer(imageSrc, displayLabel, readable));
+        } else {
+          readable.href = imageSrc;
+          readable.setAttribute("target", "_blank");
+          readable.rel = "noopener";
+        }
         readable.textContent = "Otevřít přílohu";
         actions.appendChild(readable);
         if (attachment.has_original) {
@@ -6022,6 +6055,12 @@ ${item.context || ""}`);
       }
     });
     libraryCloseBtn.addEventListener("click", closeLibraryModal);
+    libraryAttachmentViewerCloseBtn.addEventListener("click", closeLibraryAttachmentViewer);
+    libraryAttachmentViewerModal.addEventListener("click", (event) => {
+      if (event.target === libraryAttachmentViewerModal) {
+        closeLibraryAttachmentViewer();
+      }
+    });
     libraryAddUrlBtn.addEventListener("click", () => toggleLibraryAddMode("url"));
     libraryAddTextBtn.addEventListener("click", () => toggleLibraryAddMode("text"));
     libraryArchiveBtn.addEventListener("click", archiveLibraryUrl);
@@ -6142,7 +6181,9 @@ ${item.context || ""}`);
       });
     });
     document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && !remindersModal.classList.contains("hidden")) {
+      if (event.key === "Escape" && !libraryAttachmentViewerModal.classList.contains("hidden")) {
+        closeLibraryAttachmentViewer();
+      } else if (event.key === "Escape" && !remindersModal.classList.contains("hidden")) {
         closeRemindersModal();
       } else if (event.key === "Escape" && !quantitativeModal.classList.contains("hidden")) {
         closeQuantitativeModal();
