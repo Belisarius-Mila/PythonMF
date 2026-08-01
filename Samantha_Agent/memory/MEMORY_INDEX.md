@@ -101,8 +101,9 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   jejich zmena neni bez konkretniho problemu aktualni prioritou.
   Od 2026-08-01 maji vsechny zvolitelne aktivni i pozastavene proudy stejny
   jednorazovy zapisovaci rezim; archivovane proudy zustavaji mimo vyber a bezny
-  tah bez vyvojoveho zameru nic nezapisuje. Implementace prosla plnou branou,
-  ale zatim nebyla nasazena do beziciho Cockpitu.
+  tah bez vyvojoveho zameru nic nezapisuje. Implementace prosla plnou branou a
+  rizene nasazeni `ef3526d` potvrdilo zivy zapisovaci status Samantha Agent/RAG
+  i smoke 5/5.
   Od 2026-07-20 ma prednost jednoduchy model: kazdy proud ma vlastni vlakno,
   kratky kontext, TVBCP a handoff; bezny vyvoj jde po jednom cistem kroku primo
   na `main`, bez WIP vetvi, prevzeti a globalniho semaforu. Zachovava zakladni

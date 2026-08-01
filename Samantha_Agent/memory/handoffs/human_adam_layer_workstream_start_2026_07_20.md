@@ -2529,3 +2529,29 @@ Technický důkaz:
 - Plná Cockpit Quality Gate prošla 1263 testy; Python, JavaScript, shell,
   whitespace a Git-safety kontroly jsou zelené.
 - Běžící Cockpit tuto lokální změnu zatím neobsahuje.
+
+### 2026-08-01 13:12 CEST – Jednotný zapisovací režim je živě nasazený
+
+Hotovo:
+- Commit `ef3526d` byl řízeně nasazen do Cockpitu a serverová účtenka potvrdila
+  stav `deployed`.
+- Aktivní proud Samantha Agent/RAG po restartu hlásí `development=true`,
+  `checkpoint=true`, `one_turn_write=true` a `write_authorization=one_turn`.
+- Human–Adam byl znovu připojený, tah není aktivní a samostatný smoke prošel 5/5.
+
+Rozhodnutí:
+- Funkční oprava je provozně uzavřená. GitHub push zůstává oddělený v denním
+  balíčku a nebyl součástí nasazení.
+
+Další krok:
+- V Human–Adam lze stisknout `Zahájit vývoj` a pokračovat malým krokem P7 v
+  proudu Samantha Agent/RAG.
+
+Navrhované další kroky:
+- Při prvním skutečném vývojovém tahu ověřit správný automatický checkpoint;
+  nový obecný test zápisu není potřeba vynucovat před běžnou prací.
+
+Technický důkaz:
+- Nasazený kódový commit: `ef3526d`.
+- Serverová verifikace: `deployed`, rychlá předrestartová brána, nový proces.
+- Následný Cockpit smoke: 5/5.

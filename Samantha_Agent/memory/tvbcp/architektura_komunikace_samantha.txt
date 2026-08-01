@@ -3761,3 +3761,30 @@ Technický důkaz:
 - Cílených 106 testů Human–Adam profilů prošlo.
 - Plná Cockpit Quality Gate prošla 1263 testy a všemi statickými kontrolami.
 - Běžící Cockpit ještě používá předchozí nasazený kód.
+
+### 2026-08-01 13:12 CEST – Jednotný zapisovací režim je provozně ověřený
+
+Hotovo:
+- Řízené nasazení commitu `ef3526d` dokončilo rychlou předrestartovou bránu,
+  restart a serverovou verifikaci `deployed`.
+- Samantha Agent/RAG živě zveřejňuje všechny očekávané schopnosti jednorázového
+  vývoje. Relace je znovu připojená a nečinná.
+- Samostatný Cockpit smoke prošel 5/5.
+
+Rozhodnutí:
+- Téma nerovných zapisovacích oprávnění proudů je uzavřené v kódu i runtime.
+- Dávkový GitHub push zůstává samostatnou večerní operací a nasazení jej
+  nespustilo.
+
+Další krok:
+- Pokračovat prvním malým P7 krokem přes `Zahájit vývoj` v proudu Samantha
+  Agent/RAG.
+
+Navrhované další kroky:
+- Pokud se u konkrétního proudu objeví blokátor, vyhodnotit skutečnou pojistku
+  workspace nebo capability; nevracet globální allowlist identit.
+
+Technický důkaz:
+- Live status: `development=true`, `checkpoint=true`, `one_turn_write=true`,
+  `write_authorization=one_turn`.
+- Nasazený commit `ef3526d`; následný smoke 5/5.
