@@ -3756,7 +3756,7 @@ Soubor nebude trvale smazán.`);
     }
 
     function syncLibraryCreateCategories(category) {
-      const allowed = new Set(["recipes", "science", "ai_tools", "travel_places", "other"]);
+      const allowed = new Set(["recipes", "science", "health_info", "ai_tools", "travel_places", "other"]);
       if (!allowed.has(category)) return;
       libraryArchiveCategory.value = category;
       libraryTextCategory.value = category;

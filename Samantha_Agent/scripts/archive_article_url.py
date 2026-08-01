@@ -25,7 +25,11 @@ def main() -> int:
     parser.add_argument("url", nargs="?", help="Article URL to fetch.")
     parser.add_argument("--html-file", type=Path, help="Use an already downloaded HTML file instead of fetching URL.")
     parser.add_argument("--archive-root", type=Path, default=DEFAULT_ARCHIVE_ROOT)
-    parser.add_argument("--category", default="other", help="Article category: recipes, science, or other.")
+    parser.add_argument(
+        "--category",
+        default="other",
+        help="Article category: recipes, science, health_info, ai_tools, travel_places, or other.",
+    )
     parser.add_argument("--tag", action="append", default=[], help="Optional tag. Can be used repeatedly.")
     parser.add_argument("--timeout", type=float, default=25.0)
     args = parser.parse_args()

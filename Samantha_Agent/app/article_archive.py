@@ -30,6 +30,7 @@ DEFAULT_LIBRARY_EXPORT_DIR = DEFAULT_ARCHIVE_ROOT / "exports"
 CATEGORY_LABELS = {
     "recipes": "Recepty",
     "science": "Vědecké články",
+    "health_info": "Zdravotní informace",
     "ai_tools": "Samantha / AI nástroje",
     "travel_places": "Cestování / místa",
     "other": "Ostatní",
@@ -371,6 +372,12 @@ def normalize_category(value: str) -> str:
         "veda": "science",
         "vědecké články": "science",
         "vedecke clanky": "science",
+        "health": "health_info",
+        "health_info": "health_info",
+        "zdravotní informace": "health_info",
+        "zdravotni informace": "health_info",
+        "zdraví": "health_info",
+        "zdravi": "health_info",
         "ai": "ai_tools",
         "ai tools": "ai_tools",
         "ai_tools": "ai_tools",
@@ -2094,6 +2101,8 @@ def article_pdf_kind(item: ArticleArchiveItem) -> str:
         return "Recept"
     if item.category == "science":
         return "Vědecký článek"
+    if item.category == "health_info":
+        return "Zdravotní informace"
     if item.category == "ai_tools":
         return "Samantha / AI nástroje"
     return "Znalostní karta"

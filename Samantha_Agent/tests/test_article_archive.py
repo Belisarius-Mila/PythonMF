@@ -509,6 +509,11 @@ class ArticleArchiveTests(unittest.TestCase):
             )
 
         self.assertTrue(marked["ok"])
+        self.assertEqual(marked["item"]["category"], "health_info")
+        self.assertEqual(marked["item"]["category_label"], "Zdravotní informace")
+        self.assertEqual(listed["category"], "health_info")
+        self.assertEqual(listed["category_label"], "Zdravotní informace")
+        self.assertEqual(listed["count"], 1)
         self.assertEqual(marked["item"]["read_state"], "to_read")
         self.assertEqual(marked["item"]["read_note"], "Vrátit se k tomu.")
         self.assertEqual(listed["items"][0]["read_state"], "to_read")
@@ -516,6 +521,23 @@ class ArticleArchiveTests(unittest.TestCase):
         self.assertEqual(to_read["items"][0]["id"], item_id)
         self.assertEqual(cleared["item"]["read_state"], "normal")
         self.assertEqual(cleared["item"]["read_note"], "")
+
+    def test_health_info_category_accepts_czech_label_and_stays_separate_from_other(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            archive_root = Path(temp_dir)
+            result = archive_text_entry(
+                title="Ověřená zdravotní informace",
+                text="Syntetická znalostní karta pro test kategorie.",
+                category="Zdravotní informace",
+                archive_root=archive_root,
+            )
+            health = list_articles(category="health_info", archive_root=archive_root)
+            other = list_articles(category="other", archive_root=archive_root)
+
+        self.assertEqual(result["item"]["category"], "health_info")
+        self.assertEqual(result["item"]["category_label"], "Zdravotní informace")
+        self.assertEqual(health["count"], 1)
+        self.assertEqual(other["count"], 0)
 
     def test_ai_tools_category_is_supported_for_samantha_knowledge(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

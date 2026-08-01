@@ -19,7 +19,11 @@ def main() -> int:
     parser.add_argument("--title", default="", help="Entry title. If omitted, the first text line is used.")
     parser.add_argument("--text-file", type=Path, help="UTF-8 text file to archive. If omitted, stdin is used.")
     parser.add_argument("--archive-root", type=Path, default=DEFAULT_ARCHIVE_ROOT)
-    parser.add_argument("--category", default="other", help="Entry category: recipes, science, ai_tools, or other.")
+    parser.add_argument(
+        "--category",
+        default="other",
+        help="Entry category: recipes, science, health_info, ai_tools, travel_places, or other.",
+    )
     parser.add_argument("--tag", action="append", default=[], help="Optional tag. Can be used repeatedly.")
     parser.add_argument("--source-label", default="Vložený text", help="Human-readable source label.")
     parser.add_argument("--source-note", default="", help="Optional source note.")

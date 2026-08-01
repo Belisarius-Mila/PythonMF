@@ -18,7 +18,11 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Search private archived article text.")
     parser.add_argument("query")
     parser.add_argument("--archive-root", type=Path, default=DEFAULT_ARCHIVE_ROOT)
-    parser.add_argument("--category", default="all", help="recipes, science, other, or all.")
+    parser.add_argument(
+        "--category",
+        default="all",
+        help="recipes, science, health_info, ai_tools, travel_places, other, or all.",
+    )
     parser.add_argument("--limit", type=int, default=8)
     args = parser.parse_args()
 

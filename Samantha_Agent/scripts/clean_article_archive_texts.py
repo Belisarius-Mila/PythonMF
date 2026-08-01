@@ -20,7 +20,11 @@ from app.article_archive import (
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Najde a volitelně vyčistí balast v uložených článcích Knihovny.")
-    parser.add_argument("--category", default="science", help="Kategorie článků: science, recipes, ai_tools, other, all.")
+    parser.add_argument(
+        "--category",
+        default="science",
+        help="Kategorie článků: science, health_info, recipes, ai_tools, travel_places, other, all.",
+    )
     parser.add_argument("--apply", action="store_true", help="Přepsat kandidáty čistou extrakcí ze source.html.")
     parser.add_argument("--confirm", default="", help=f"Potvrzovací věta pro --apply: {CLEANUP_CONFIRMATION_PHRASE}")
     parser.add_argument("--min-removed-chars", type=int, default=1000)
