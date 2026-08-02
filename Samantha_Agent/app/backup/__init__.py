@@ -5,6 +5,7 @@ from .activity_state import (
     format_backup_activity_reminder,
     load_backup_activity_state,
     record_backup_completed,
+    resolve_backup_activity_state_path,
     save_backup_activity_state,
 )
 
@@ -34,6 +35,7 @@ __all__ = [
     "format_backup_activity_reminder",
     "load_backup_activity_state",
     "record_backup_completed",
+    "resolve_backup_activity_state_path",
     "save_backup_activity_state",
     "list_backup_snapshots",
     "preview_backup_restore",

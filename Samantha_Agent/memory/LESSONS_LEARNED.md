@@ -62,3 +62,13 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   historický kontext a bezpečnostní pravidla, ne jako důkaz současného runtime
   stavu. Po významné provozní změně zapsat git-safe redigovanou účtenku bez
   tajemství a soukromého obsahu.
+
+### LL-004 — Sdílený provozní stav nesmí být relativní k profilovému workspace
+
+- Problém: Izolovaný profil hledal záznam poslední zálohy ve své kopii projektu,
+  takže hlásil chybějící zálohu, i když ji kanonický projekt správně evidoval.
+- Typ: opakující se
+- Řešení nalezeno: 02082026
+- Řešení: Provozní stav společný pro všechny profily rozpoznávat přes kanonický
+  kořen projektu. Profilové workspaces stav pouze čtou nebo aktualizují ve
+  společném umístění; nevytvářejí vlastní kopie, které by se mohly rozejít.

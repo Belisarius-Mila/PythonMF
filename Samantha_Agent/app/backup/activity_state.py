@@ -10,8 +10,41 @@ from app.file_persistence import atomic_write_json
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_BACKUP_ACTIVITY_STATE_PATH = PROJECT_ROOT / "data" / "backup" / "activity_state.json"
 BACKUP_WARNING_DAYS = 3
+
+
+def resolve_backup_activity_state_path(project_root: Path = PROJECT_ROOT) -> Path:
+    """Return the shared backup state path for main and isolated workspaces."""
+
+    resolved_root = Path(project_root).resolve()
+    canonical_root = _canonical_project_root(resolved_root)
+    return canonical_root / "data" / "backup" / "activity_state.json"
+
+
+def _canonical_project_root(project_root: Path) -> Path:
+    project_name = project_root.name
+    for candidate in project_root.parents:
+        if candidate.name != project_name:
+            continue
+        relative_parts = project_root.relative_to(candidate).parts
+        if relative_parts == (
+            "data",
+            "private",
+            "appserver_remote",
+            "workspace",
+            project_name,
+        ):
+            return candidate
+        if (
+            len(relative_parts) == 6
+            and relative_parts[:3] == ("data", "private", "human_adam_profiles")
+            and relative_parts[-2:] == ("workspace", project_name)
+        ):
+            return candidate
+    return project_root
+
+
+DEFAULT_BACKUP_ACTIVITY_STATE_PATH = resolve_backup_activity_state_path()
 
 
 @dataclass(frozen=True)

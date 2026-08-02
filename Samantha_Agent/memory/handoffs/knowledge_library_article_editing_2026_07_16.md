@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-01 17:48 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-02 19:07 CEST
 
 ### Hotovo
-- PDF export Knihovny nyní obsahuje čitelné obrazové přílohy na samostatných stránkách
+- Knihovna i Human–Adam nyní rozpoznají jeden společný stav záloh bez lokálních kopií
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
@@ -15,18 +15,18 @@
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Převzít a nasadit změnu, potom připravit PDF jedné karty s obrázkem a vizuálně je ověřit bez odeslání
+- Převzít a nasadit změnu, potom ověřit stav zálohy v Knihovně i Human–Adamovi
 
 ### Rozhodnutí
-- Každý dostupný obrázek má vlastní A4 stránku; chybějící nebo poškozený obrázek nezablokuje celý export
+- Stav poslední zálohy se sdílí přes kanonický kořen projektu a nekopíruje se mezi profilové workspaces
 
 ### Navrhované další kroky
-- Žádné další návrhy nad rámec bezprostředního kroku.
+- Po nasazení spustit read-only kontrolu stavu zálohy v obou profilech
 
 ### Technický stav checkpointu
-- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `659705632a55`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `659705632a55` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-01T15:26:20+00:00.
+- Změna je otestovaná (1272 testů).
+- Git před checkpointem: lokální `main` na `5f059322928b`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `5f059322928b` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-02T13:08:20+00:00.
 - Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -189,3 +189,15 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (2): `Samantha_Agent/app/article_archive.py`, `Samantha_Agent/tests/test_article_archive.py`
 - Commit: `Embed library images in PDF exports`
 - Další krok: Převzít a nasadit změnu, potom připravit PDF jedné karty s obrázkem a vizuálně je ověřit bez odeslání
+
+### Automatický checkpoint 2026-08-02 19:07 CEST
+
+- Pracovní proud: `project-knowledge-library`
+- Hotovo: Knihovna i Human–Adam nyní rozpoznají jeden společný stav záloh bez lokálních kopií; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.; Lokální commity čekají na samostatný denní GitHub balíček.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: plná Cockpit brána: 1272 testů, 293.9 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (4): `Samantha_Agent/app/backup/__init__.py`, `Samantha_Agent/app/backup/activity_state.py`, `Samantha_Agent/memory/LESSONS_LEARNED.md`, `Samantha_Agent/tests/test_backup_activity_state.py`
+- Commit: `Share backup activity state across workspaces`
+- Další krok: Převzít a nasadit změnu, potom ověřit stav zálohy v Knihovně i Human–Adamovi

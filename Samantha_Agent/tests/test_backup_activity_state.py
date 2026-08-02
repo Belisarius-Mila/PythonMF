@@ -11,12 +11,68 @@ from app.backup.activity_state import (
     format_backup_activity_reminder,
     load_backup_activity_state,
     record_backup_completed,
+    resolve_backup_activity_state_path,
     save_backup_activity_state,
 )
 from app.file_persistence import lock_path_for
 
 
 class BackupActivityStateTests(unittest.TestCase):
+    def test_knihovna_workspace_uses_canonical_backup_state(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            canonical_root = Path(temp_dir) / "Samantha_Agent"
+            workspace_root = (
+                canonical_root
+                / "data"
+                / "private"
+                / "human_adam_profiles"
+                / "knihovna"
+                / "workspace"
+                / "Samantha_Agent"
+            )
+            state_path = resolve_backup_activity_state_path(workspace_root)
+
+            save_backup_activity_state(
+                BackupActivityState(last_backup_at="2026-08-02"),
+                path=state_path,
+            )
+            status = backup_activity_status(path=state_path, today="2026-08-02")
+
+            self.assertEqual(
+                state_path,
+                canonical_root.resolve() / "data" / "backup" / "activity_state.json",
+            )
+            self.assertEqual(status["status"], "ok")
+            self.assertFalse(
+                (workspace_root / "data" / "backup" / "activity_state.json").exists()
+            )
+
+    def test_human_adam_workspace_uses_canonical_backup_state(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            canonical_root = Path(temp_dir) / "Samantha_Agent"
+            workspace_root = (
+                canonical_root
+                / "data"
+                / "private"
+                / "appserver_remote"
+                / "workspace"
+                / "Samantha_Agent"
+            )
+
+            self.assertEqual(
+                resolve_backup_activity_state_path(workspace_root),
+                canonical_root.resolve() / "data" / "backup" / "activity_state.json",
+            )
+
+    def test_regular_checkout_keeps_local_backup_state(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            project_root = Path(temp_dir) / "standalone" / "Samantha_Agent"
+
+            self.assertEqual(
+                resolve_backup_activity_state_path(project_root),
+                project_root.resolve() / "data" / "backup" / "activity_state.json",
+            )
+
     def test_missing_state_prompts_for_backup(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             path = Path(temp_dir) / "activity_state.json"
