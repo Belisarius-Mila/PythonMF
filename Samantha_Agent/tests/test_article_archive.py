@@ -22,6 +22,7 @@ from app.article_archive import (
     LIBRARY_EXPORT_EMAIL_MARKER,
     LIBRARY_EXPORT_EMAIL_MARKER_VALUE,
     LIBRARY_EXPORT_SUBJECT_PREFIX,
+    archive_book_entry,
     archive_text_entry,
     archive_url,
     article_text_cleanup_report,
@@ -577,6 +578,102 @@ class ArticleArchiveTests(unittest.TestCase):
         self.assertEqual(result["item"]["category_label"], "Cestování / místa")
         self.assertEqual(listed["count"], 1)
         self.assertEqual(searched["count"], 1)
+
+    def test_books_store_structured_metadata_and_search_author_location_and_summary(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            archive_root = Path(temp_dir)
+            result = archive_book_entry(
+                title="Syntetická cesta krajinou",
+                author="Anna Testovací",
+                summary="Stručný obsah o putování, paměti míst a rodinné historii.",
+                location="Obývák, levá knihovna, druhá police",
+                tags=["historie", "cestování"],
+                archive_root=archive_root,
+            )
+            listed = list_articles(category="knihy", archive_root=archive_root)
+            by_author = search_articles(
+                query="Anna Testovací",
+                category="books",
+                archive_root=archive_root,
+            )
+            by_location = search_articles(
+                query="druhá police",
+                category="books",
+                archive_root=archive_root,
+            )
+            by_summary = search_articles(
+                query="paměti míst",
+                category="books",
+                archive_root=archive_root,
+            )
+
+        self.assertEqual(result["item"]["category"], "books")
+        self.assertEqual(result["item"]["category_label"], "Knihy")
+        self.assertEqual(result["item"]["book_author"], "Anna Testovací")
+        self.assertEqual(
+            result["item"]["book_location"],
+            "Obývák, levá knihovna, druhá police",
+        )
+        self.assertEqual(listed["count"], 1)
+        self.assertEqual(by_author["count"], 1)
+        self.assertEqual(by_location["count"], 1)
+        self.assertEqual(by_summary["count"], 1)
+
+    def test_book_requires_title_author_summary_and_location(self) -> None:
+        required_fields = {
+            "title": "Uveď název knihy",
+            "author": "Uveď autora knihy",
+            "summary": "Vlož stručný obsah knihy",
+            "location": "Uveď umístění knihy",
+        }
+        complete = {
+            "title": "Testovací kniha",
+            "author": "Testovací autor",
+            "summary": "Stručný syntetický obsah.",
+            "location": "Testovací police",
+        }
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            for field, message in required_fields.items():
+                payload = {**complete, field: ""}
+                with self.subTest(field=field):
+                    with self.assertRaisesRegex(ValueError, message):
+                        archive_book_entry(
+                            **payload,
+                            archive_root=Path(temp_dir),
+                        )
+
+    def test_update_book_preserves_structured_metadata_in_registry(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            archive_root = Path(temp_dir)
+            created = archive_book_entry(
+                title="Původní kniha",
+                author="Původní autor",
+                summary="Původní stručný obsah.",
+                location="První police",
+                archive_root=archive_root,
+            )
+            article_id = created["item"]["id"]
+            updated = update_article(
+                article_id=article_id,
+                title="Upravená kniha",
+                text="Upravený stručný obsah knihy.",
+                category="books",
+                book_author="Nový autor",
+                book_location="Pracovna, třetí police",
+                archive_root=archive_root,
+            )
+            reloaded = get_article(
+                article_id=article_id,
+                archive_root=archive_root,
+                max_chars=0,
+            )
+
+        self.assertEqual(updated["item"]["book_author"], "Nový autor")
+        self.assertEqual(
+            reloaded["item"]["book_location"],
+            "Pracovna, třetí police",
+        )
+        self.assertEqual(reloaded["text"], "Upravený stručný obsah knihy.")
 
     def test_trim_to_article_body_removes_recommendations_and_tail_without_losing_article(self) -> None:
         raw_text = "\n".join(

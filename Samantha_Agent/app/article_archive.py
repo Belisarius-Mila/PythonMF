@@ -33,6 +33,7 @@ CATEGORY_LABELS = {
     "health_info": "Zdravotní informace",
     "ai_tools": "Samantha / AI nástroje",
     "travel_places": "Cestování / místa",
+    "books": "Knihy",
     "other": "Ostatní",
 }
 
@@ -102,6 +103,8 @@ class ArticleArchiveItem:
     html_file: str
     text_chars: int
     tags: tuple[str, ...]
+    book_author: str = ""
+    book_location: str = ""
     read_state: str = "normal"
     read_state_label: str = "běžné"
     read_note: str = ""
@@ -125,6 +128,8 @@ class ArticleArchiveItem:
             "canonical_url": self.canonical_url,
             "text_chars": self.text_chars,
             "tags": list(self.tags),
+            "book_author": self.book_author,
+            "book_location": self.book_location,
             "snippet": snippet,
             "read_state": self.read_state,
             "read_state_label": self.read_state_label,
@@ -401,6 +406,12 @@ def normalize_category(value: str) -> str:
         "destinace": "travel_places",
         "vylety": "travel_places",
         "výlety": "travel_places",
+        "book": "books",
+        "books": "books",
+        "kniha": "books",
+        "knihy": "books",
+        "domácí knihovna": "books",
+        "domaci knihovna": "books",
         "other": "other",
         "ostatní": "other",
         "ostatni": "other",
@@ -475,6 +486,49 @@ def archive_text_entry(
         "message": "Text uložen do znalostní databáze.",
         "item": article_item_from_raw(metadata).to_summary(),
     }
+
+
+def archive_book_entry(
+    *,
+    title: str,
+    author: str,
+    summary: str,
+    location: str,
+    tags: list[str] | None = None,
+    archive_root: Path = DEFAULT_ARCHIVE_ROOT,
+) -> dict[str, Any]:
+    clean_title = str(title or "").strip()[:500]
+    clean_author = normalize_book_metadata_value(author, "Uveď autora knihy.")
+    clean_location = normalize_book_metadata_value(location, "Uveď umístění knihy.")
+    clean_summary = normalize_manual_text(summary)
+    if not clean_title:
+        raise ValueError("Uveď název knihy.")
+    if not clean_summary:
+        raise ValueError("Vlož stručný obsah knihy.")
+    metadata = write_text_archive(
+        title=clean_title,
+        text=clean_summary,
+        archive_root=archive_root,
+        now=datetime.now(timezone.utc).replace(microsecond=0),
+        category="books",
+        tags=tags or [],
+        source_label="Domácí knihovna",
+        source_note="",
+        book_author=clean_author,
+        book_location=clean_location,
+    )
+    return {
+        "ok": True,
+        "message": "Kniha byla uložena do soukromé knihovny.",
+        "item": article_item_from_raw(metadata).to_summary(),
+    }
+
+
+def normalize_book_metadata_value(value: str, missing_message: str) -> str:
+    clean = " ".join(str(value or "").split())[:300]
+    if not clean:
+        raise ValueError(missing_message)
+    return clean
 
 
 def attach_article_image(
@@ -565,6 +619,8 @@ def update_article(
     tags: list[str] | None = None,
     source_label: str = "",
     source_note: str = "",
+    book_author: str | None = None,
+    book_location: str | None = None,
     archive_root: Path = DEFAULT_ARCHIVE_ROOT,
     now: datetime | None = None,
 ) -> dict[str, Any]:
@@ -593,12 +649,28 @@ def update_article(
             clean_tags.append(clean)
     if any(attachment.kind == "image" for attachment in item.attachments) and "ma-obrazek" not in clean_tags:
         clean_tags.append("ma-obrazek")
+    normalized_category = normalize_category(category)
+    existing_book_author = str(raw.get("book_author", ""))
+    existing_book_location = str(raw.get("book_location", ""))
+    clean_book_author = " ".join(
+        str(existing_book_author if book_author is None else book_author).split()
+    )[:300]
+    clean_book_location = " ".join(
+        str(existing_book_location if book_location is None else book_location).split()
+    )[:300]
+    if normalized_category == "books":
+        if not clean_book_author:
+            raise ValueError("Uveď autora knihy.")
+        if not clean_book_location:
+            raise ValueError("Uveď umístění knihy.")
     raw["title"] = clean_title
     raw["one_line_title"] = compact_title(clean_title)
-    raw["category"] = normalize_category(category)
+    raw["category"] = normalized_category
     raw["tags"] = clean_tags
     raw["source_label"] = str(source_label or "").strip()[:160]
     raw["source_note"] = str(source_note or "").strip()[:1000]
+    raw["book_author"] = clean_book_author
+    raw["book_location"] = clean_book_location
     raw["text_chars"] = str(len(clean_text))
     raw["updated_at"] = (now or datetime.now(timezone.utc)).replace(microsecond=0).isoformat()
 
@@ -1491,6 +1563,8 @@ def write_text_archive(
     tags: list[str],
     source_label: str,
     source_note: str,
+    book_author: str = "",
+    book_location: str = "",
 ) -> dict[str, Any]:
     clean_text = normalize_manual_text(text)
     item_id = text_entry_id(title, clean_text, now)
@@ -1508,6 +1582,8 @@ def write_text_archive(
         "source_type": "manual_text",
         "source_label": str(source_label or "Vložený text").strip()[:160] or "Vložený text",
         "source_note": str(source_note or "").strip()[:1000],
+        "book_author": " ".join(str(book_author or "").split())[:300],
+        "book_location": " ".join(str(book_location or "").split())[:300],
         "source_url": "",
         "canonical_url": "",
         "archived_at": now.isoformat(),
@@ -1630,6 +1706,8 @@ def article_item_from_raw(raw: dict[str, Any]) -> ArticleArchiveItem:
         html_file=str(raw.get("html_file", "")).strip(),
         text_chars=text_chars,
         tags=tags_tuple,
+        book_author=str(raw.get("book_author", "")).strip(),
+        book_location=str(raw.get("book_location", "")).strip(),
         read_state=read_state,
         read_state_label=READ_STATE_LABELS[read_state],
         read_note=str(raw.get("read_note", "")).strip(),
@@ -1776,11 +1854,19 @@ def search_articles(
         folded = text.casefold()
         source_folded = " ".join([item.source_label, item.source_note]).casefold()
         tags_folded = " ".join(item.tags).casefold()
+        book_metadata_folded = (
+            " ".join([item.book_author, item.book_location]).casefold()
+            if item.category == "books"
+            else ""
+        )
         score = sum(folded.count(term) for term in terms)
         title_score = sum(item.one_line_title.casefold().count(term) for term in terms) * 3
         source_score = sum(source_folded.count(term) for term in terms) * 2
         tag_score = sum(tags_folded.count(term) for term in terms) * 2
-        total_score = score + title_score + source_score + tag_score
+        book_metadata_score = sum(
+            book_metadata_folded.count(term) for term in terms
+        ) * 3
+        total_score = score + title_score + source_score + tag_score + book_metadata_score
         if total_score <= 0:
             continue
         results.append((total_score, item, make_snippet(text, terms)))

@@ -476,13 +476,14 @@
           <button class="secondary library-tab" type="button" data-library-category="health_info">Zdravotní informace</button>
           <button class="secondary library-tab" type="button" data-library-category="ai_tools">Samantha / AI nástroje</button>
           <button class="secondary library-tab" type="button" data-library-category="travel_places">Cestování / místa</button>
+          <button class="secondary library-tab" type="button" data-library-category="books">Knihy</button>
           <button class="secondary library-tab" type="button" data-library-category="other">Ostatní</button>
           <button class="secondary library-tab read-queue" type="button" data-library-category="all" data-library-read-state="to_read">K přečtení</button>
         </div>
         <div class="library-controls">
           <label class="library-field">
             <span class="library-field-label">Hledat ve vybrané kategorii</span>
-            <input id="librarySearchInput" type="search" placeholder="Název nebo slova z článku">
+            <input id="librarySearchInput" type="search" placeholder="Název, autor, umístění nebo text">
           </label>
           <button class="primary library-field-button" id="librarySearchBtn" type="button">Hledat</button>
         </div>
@@ -490,6 +491,7 @@
         <div class="library-add-toolbar" aria-label="Přidat obsah do knihovny">
           <button class="secondary" id="libraryAddUrlBtn" type="button" aria-expanded="false" aria-controls="libraryArchivePanel">Přidat z webu</button>
           <button class="secondary" id="libraryAddTextBtn" type="button" aria-expanded="false" aria-controls="libraryTextPanel">Přidat vlastní text</button>
+          <button class="secondary" id="libraryAddBookBtn" type="button" aria-expanded="false" aria-controls="libraryBookPanel">Přidat knihu</button>
         </div>
         <div id="libraryArchivePanel" class="library-add-panel hidden">
           <h3 class="library-add-title">Přidat článek z webu</h3>
@@ -560,6 +562,36 @@
           </div>
           <div id="libraryTextStatus" class="status-line">Text bez URL se uloží jako interní znalostní karta.</div>
         </div>
+        <div id="libraryBookPanel" class="library-add-panel hidden">
+          <h3 class="library-add-title">Přidat knihu z domácí knihovny</h3>
+          <div class="library-text-grid">
+            <label class="library-field">
+              <span class="library-field-label">Název knihy</span>
+              <input id="libraryBookTitleInput" type="text" placeholder="Název knihy">
+            </label>
+            <label class="library-field">
+              <span class="library-field-label">Autor</span>
+              <input id="libraryBookAuthorInput" type="text" placeholder="Jméno autora nebo autorů">
+            </label>
+            <label class="library-field">
+              <span class="library-field-label">Umístění</span>
+              <input id="libraryBookLocationInput" type="text" placeholder="např. obývák, knihovna vlevo, 2. police">
+            </label>
+            <label class="library-field">
+              <span class="library-field-label">Tagy (volitelné)</span>
+              <input id="libraryBookTagsInput" type="text" placeholder="např. historie, román">
+              <span class="library-field-hint">Více tagů odděluj čárkou.</span>
+            </label>
+          </div>
+          <label class="library-field">
+            <span class="library-field-label">Stručný obsah</span>
+            <textarea id="libraryBookSummaryInput" class="library-text-area" placeholder="Přibližně půl stránky A4: o čem kniha je a proč stojí za přečtení"></textarea>
+          </label>
+          <div class="actions compact-actions">
+            <button class="primary" id="libraryBookSaveBtn" type="button">Uložit knihu</button>
+          </div>
+          <div id="libraryBookStatus" class="status-line">Název, autor, stručný obsah a umístění se uloží jako strukturovaná knižní karta.</div>
+        </div>
         <div class="library-layout">
           <div id="libraryList" class="library-list"></div>
           <div id="libraryReader" class="library-reader" aria-live="polite">
@@ -604,8 +636,19 @@
                     <option value="health_info">Zdravotní informace</option>
                     <option value="ai_tools">Samantha / AI nástroje</option>
                     <option value="travel_places">Cestování / místa</option>
+                    <option value="books">Knihy</option>
                     <option value="other">Ostatní</option>
                   </select>
+                </label>
+              </div>
+              <div id="libraryEditBookFields" class="library-edit-grid hidden">
+                <label class="library-field">
+                  <span class="library-field-label">Autor knihy</span>
+                  <input id="libraryEditBookAuthorInput" type="text" placeholder="Jméno autora nebo autorů">
+                </label>
+                <label class="library-field">
+                  <span class="library-field-label">Umístění knihy</span>
+                  <input id="libraryEditBookLocationInput" type="text" placeholder="Kde je kniha uložená">
                 </label>
               </div>
               <label class="library-field">

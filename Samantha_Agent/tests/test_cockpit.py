@@ -25,6 +25,7 @@ from app.cockpit import (
     create_document_due_reminder_action,
     document_reference,
     library_archive_text_action,
+    library_archive_book_action,
     library_archive_url_action,
     library_article_reextract_preview_action,
     library_attach_image_action,
@@ -490,6 +491,29 @@ class CockpitTests(unittest.TestCase):
             source_note="Bez původní URL.",
         )
 
+    def test_library_archive_book_action_passes_structured_metadata(self) -> None:
+        with patch("app.cockpit.archive_book_entry") as archive_mock:
+            archive_mock.return_value = {"ok": True, "item": {"id": "book-1"}}
+
+            result = library_archive_book_action(
+                {
+                    "title": "Syntetická kniha",
+                    "author": "Testovací autor",
+                    "summary": "Stručný syntetický obsah.",
+                    "location": "Pracovna, druhá police",
+                    "tags": "historie; rodina",
+                }
+            )
+
+        self.assertTrue(result["ok"])
+        archive_mock.assert_called_once_with(
+            title="Syntetická kniha",
+            author="Testovací autor",
+            summary="Stručný syntetický obsah.",
+            location="Pracovna, druhá police",
+            tags=["historie", "rodina"],
+        )
+
     def test_library_attach_image_action_decodes_image_and_adds_family_tags(self) -> None:
         with patch("app.cockpit.attach_article_image") as attach_mock:
             attach_mock.return_value = {"ok": True, "item": {"id": "recipe-1"}, "attachment": {"id": "rukopis"}}
@@ -561,6 +585,8 @@ class CockpitTests(unittest.TestCase):
             tags=["věda", "fotografie"],
             source_label="Mílova poznámka",
             source_note="Lokálně upraveno.",
+            book_author="",
+            book_location="",
         )
 
     def test_library_attachment_edit_and_remove_actions_use_narrow_helpers(self) -> None:
@@ -1221,6 +1247,17 @@ class CockpitTests(unittest.TestCase):
         self.assertIn('value="travel_places"', COCKPIT_HTML)
         self.assertIn('data-library-category="travel_places"', COCKPIT_HTML)
         self.assertIn("Cestování / místa", COCKPIT_HTML)
+        self.assertIn('data-library-category="books"', COCKPIT_HTML)
+        self.assertIn('value="books"', COCKPIT_HTML)
+        self.assertIn("Přidat knihu", COCKPIT_HTML)
+        self.assertIn("libraryBookAuthorInput", COCKPIT_HTML)
+        self.assertIn("libraryBookLocationInput", COCKPIT_HTML)
+        self.assertIn("libraryBookSummaryInput", COCKPIT_HTML)
+        self.assertIn("libraryEditBookAuthorInput", COCKPIT_HTML)
+        self.assertIn("libraryEditBookLocationInput", COCKPIT_HTML)
+        self.assertIn('/api/library/book', COCKPIT_HTML)
+        self.assertIn('item.category === "books" && item.book_author', COCKPIT_HTML)
+        self.assertIn('item.category === "books" && item.book_location', COCKPIT_HTML)
         self.assertIn('data-library-read-state="to_read"', COCKPIT_HTML)
         self.assertIn("K přečtení", COCKPIT_HTML)
         self.assertIn("library-tab read-queue", COCKPIT_HTML)

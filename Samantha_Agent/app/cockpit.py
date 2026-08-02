@@ -43,6 +43,7 @@ from app.article_archive import (
     ATTACHMENT_REMOVE_CONFIRMATION_PHRASE,
     LIBRARY_EXPORT_EMAIL_MARKER,
     LIBRARY_EXPORT_SUBJECT_PREFIX,
+    archive_book_entry,
     archive_text_entry,
     archive_url,
     delete_article,
@@ -661,6 +662,21 @@ def library_archive_text_action(payload: dict[str, Any]) -> dict[str, Any]:
         return {"ok": False, "message": f"Text se nepodařilo uložit: {exc}", "error": "archive_failed"}
 
 
+def library_archive_book_action(payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        return archive_book_entry(
+            title=str(payload.get("title", "")),
+            author=str(payload.get("author", "")),
+            summary=str(payload.get("summary", "")),
+            location=str(payload.get("location", "")),
+            tags=parse_tag_payload(payload.get("tags", [])),
+        )
+    except ValueError as exc:
+        return {"ok": False, "message": str(exc), "error": "invalid_book"}
+    except OSError as exc:
+        return {"ok": False, "message": f"Knihu se nepodařilo uložit: {exc}", "error": "archive_failed"}
+
+
 def library_update_article_action(payload: dict[str, Any]) -> dict[str, Any]:
     try:
         return update_article(
@@ -671,6 +687,8 @@ def library_update_article_action(payload: dict[str, Any]) -> dict[str, Any]:
             tags=parse_tag_payload(payload.get("tags", [])),
             source_label=str(payload.get("source_label", "")),
             source_note=str(payload.get("source_note", "")),
+            book_author=str(payload.get("book_author", "")),
+            book_location=str(payload.get("book_location", "")),
         )
     except ValueError as exc:
         return {"ok": False, "message": str(exc), "error": "invalid_article_update"}
@@ -8676,6 +8694,14 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "direct",
     },
     {
+        "path": "/api/library/book",
+        "label": "Ulozit knihu do knihovny",
+        "risk": "private_write",
+        "confirmation": "validated_book_metadata",
+        "handler_name": "library_archive_book_action",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/library/update",
         "label": "Upravit ulozeny clanek knihovny",
         "risk": "private_write",
@@ -9574,6 +9600,10 @@ class CockpitServer:
                 if parsed.path == "/api/library/text":
                     payload = self.read_json()
                     self.respond_json(library_archive_text_action(payload))
+                    return
+                if parsed.path == "/api/library/book":
+                    payload = self.read_json()
+                    self.respond_json(library_archive_book_action(payload))
                     return
                 if parsed.path == "/api/library/update":
                     payload = self.read_json()

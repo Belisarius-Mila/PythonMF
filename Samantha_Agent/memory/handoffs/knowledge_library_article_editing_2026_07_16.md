@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-02 19:07 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-02 19:39 CEST
 
 ### Hotovo
-- Knihovna i Human–Adam nyní rozpoznají jeden společný stav záloh bez lokálních kopií
+- Knihovna má novou kategorii Knihy s autorem, umístěním, stručným obsahem, formulářem a vyhledáváním
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
@@ -15,18 +15,18 @@
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Převzít a nasadit změnu, potom ověřit stav zálohy v Knihovně i Human–Adamovi
+- Převzít a nasadit změnu, potom na iPhonu uložit jednu syntetickou knihu a ověřit hledání podle autora a umístění
 
 ### Rozhodnutí
-- Stav poslední zálohy se sdílí přes kanonický kořen projektu a nekopíruje se mezi profilové workspaces
+- Knihy zůstávají kartami společné Knihovny; stručný obsah je text karty a autor s umístěním jsou strukturovaná metadata
 
 ### Navrhované další kroky
-- Po nasazení spustit read-only kontrolu stavu zálohy v obou profilech
+- Ve druhé fázi připravit bezpečné generování návrhu stručného obsahu z dodaných podkladů bez automatického ukládání
 
 ### Technický stav checkpointu
-- Změna je otestovaná (1272 testů).
-- Git před checkpointem: lokální `main` na `5f059322928b`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `5f059322928b` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-02T13:08:20+00:00.
+- Změna je otestovaná (1273 testů).
+- Git před checkpointem: lokální `main` na `004e9f5b49c9`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `004e9f5b49c9` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-02T17:17:55+00:00.
 - Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -201,3 +201,15 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (4): `Samantha_Agent/app/backup/__init__.py`, `Samantha_Agent/app/backup/activity_state.py`, `Samantha_Agent/memory/LESSONS_LEARNED.md`, `Samantha_Agent/tests/test_backup_activity_state.py`
 - Commit: `Share backup activity state across workspaces`
 - Další krok: Převzít a nasadit změnu, potom ověřit stav zálohy v Knihovně i Human–Adamovi
+
+### Automatický checkpoint 2026-08-02 19:39 CEST
+
+- Pracovní proud: `project-knowledge-library`
+- Hotovo: Knihovna má novou kategorii Knihy s autorem, umístěním, stručným obsahem, formulářem a vyhledáváním; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.; Lokální commity čekají na samostatný denní GitHub balíček.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: plná Cockpit brána: 1273 testů, 294.5 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (7): `Samantha_Agent/app/article_archive.py`, `Samantha_Agent/app/cockpit.py`, `Samantha_Agent/app/frontend/cockpit/app.js`, `Samantha_Agent/app/frontend/cockpit/page.html`, `Samantha_Agent/tests/test_article_archive.py`, `Samantha_Agent/tests/test_cockpit.py`, `Samantha_Agent/tests/test_cockpit_frontend.py`
+- Commit: `Add structured books to Knowledge Library`
+- Další krok: Převzít a nasadit změnu, potom na iPhonu uložit jednu syntetickou knihu a ověřit hledání podle autora a umístění
