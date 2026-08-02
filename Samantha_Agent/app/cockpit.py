@@ -214,6 +214,8 @@ from app.quick_notes import DEFAULT_ICLOUD_SHORTCUTS_INBOX, DEFAULT_INDEX_PATH a
 from app.quick_notes import ACTION_KIND_LABELS, classify_quick_note_text
 from app.quick_notes import sync_quick_notes_index
 from app.urgent_reminders import DEFAULT_INDEX_PATH as URGENT_REMINDERS_INDEX_PATH
+from app.urgent_reminders import ICLOUD_DOWNLOAD_STUCK_AFTER_SECONDS
+from app.urgent_reminders import deliver_urgent_reminder
 from app.urgent_reminders import mark_urgent_reminder_done
 from app.urgent_reminders import sync_urgent_reminders_index
 from app.email.activity_state import DEFAULT_EMAIL_ACTIVITY_STATE_PATH, record_email_archive_completed
@@ -2111,8 +2113,19 @@ def urgent_reminders_status(
         0,
         int(sync_diagnostics.get("pending_download_count", 0) or 0),
     )
-    if not inbox_exists:
-        message = "Inbox pro mobilní vstupy zatím není synchronizovaný na Mac."
+    pending_oldest_age_seconds = max(
+        0,
+        int(sync_diagnostics.get("pending_oldest_age_seconds", 0) or 0),
+    )
+    sync_stuck = (
+        pending_download_count > 0
+        and pending_oldest_age_seconds >= ICLOUD_DOWNLOAD_STUCK_AFTER_SECONDS
+    )
+    if sync_stuck:
+        message = (
+            "iCloud stažení je zaseknuté. Zobrazuji poslední platný index; "
+            "v iCloud Drive otevři složku Shortcuts a zvol Stáhnout nyní."
+        )
     elif pending_download_count:
         if pending_download_count == 1:
             pending_message = "1 nový iCloud soubor čeká na stažení."
@@ -2124,6 +2137,8 @@ def urgent_reminders_status(
         )
     elif not open_items:
         message = "Žádná otevřená důležitá připomenutí."
+        if not inbox_exists:
+            message += " Přímé doručení přes Tailscale je dostupné; iCloud fallback není připojený."
     else:
         message = f"{len(open_items)} otevřených důležitých připomenutí."
     return {
@@ -2133,7 +2148,9 @@ def urgent_reminders_status(
         "inbox": str(inbox_dir),
         "index": str(relative_to_project(index_path)),
         "sync_pending": pending_download_count > 0,
+        "sync_stuck": sync_stuck,
         "pending_download_count": pending_download_count,
+        "pending_oldest_age_seconds": pending_oldest_age_seconds,
         "counts": {"open": len(open_items), "total": len(reminders)},
         "items": [
             {
@@ -2217,6 +2234,37 @@ def urgent_reminder_done_action(
         "reminder_number": reminder.reminder_number,
         "message": f"Důležitá připomínka #{reminder.reminder_number} označena jako splněná.",
         "urgent_reminders": urgent_reminders_status_from_index(index_path=index_path),
+    }
+
+
+def urgent_reminder_deliver_action(
+    payload: dict[str, Any],
+    *,
+    index_path: Path = URGENT_REMINDERS_INDEX_PATH,
+) -> dict[str, Any]:
+    try:
+        reminder, created = deliver_urgent_reminder(
+            payload.get("text", ""),
+            delivery_id=payload.get("delivery_id", ""),
+            created_at=payload.get("created_at", ""),
+            priority=payload.get("priority", "urgent"),
+            index_path=index_path,
+        )
+    except (OSError, RuntimeError, ValueError) as exc:
+        return {
+            "ok": False,
+            "status": "delivery_failed",
+            "message": f"Důležité připomenutí se nepodařilo doručit: {exc}",
+        }
+    return {
+        "ok": True,
+        "status": "created" if created else "duplicate",
+        "reminder_number": reminder.reminder_number,
+        "message": (
+            f"Důležité připomenutí #{reminder.reminder_number} doručeno."
+            if created
+            else f"Důležité připomenutí #{reminder.reminder_number} už bylo doručeno."
+        ),
     }
 
 
@@ -8540,6 +8588,14 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "indirect",
     },
     {
+        "path": "/api/urgent-reminders/deliver",
+        "label": "Doručit urgentní připomínku ze Zkratky přes Tailscale",
+        "risk": "private_write",
+        "confirmation": "explicit_shortcut_submit_plus_idempotency",
+        "handler_name": "urgent_reminder_deliver_action",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/urgent-reminders/done",
         "label": "Oznacit urgentni pripominku jako splnenou",
         "risk": "private_write",
@@ -9447,6 +9503,10 @@ class CockpitServer:
                             evidence_archive_id=str(payload.get("evidence_archive_id", "")),
                         )
                     )
+                    return
+                if parsed.path == "/api/urgent-reminders/deliver":
+                    payload = self.read_json()
+                    self.respond_json(urgent_reminder_deliver_action(payload))
                     return
                 if parsed.path == "/api/urgent-reminders/done":
                     payload = self.read_json()

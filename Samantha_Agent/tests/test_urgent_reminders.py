@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import errno
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -11,13 +12,62 @@ from pathlib import Path
 from unittest.mock import patch
 
 from app.file_persistence import lock_path_for
-from app.urgent_reminders import mark_urgent_reminder_done, sync_urgent_reminders_index
+from app.urgent_reminders import (
+    deliver_urgent_reminder,
+    mark_urgent_reminder_done,
+    sync_urgent_reminders_index,
+)
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
 class UrgentRemindersTests(unittest.TestCase):
+    def test_direct_delivery_is_idempotent_and_survives_icloud_sync(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            inbox = root / "inbox"
+            inbox.mkdir()
+            index_path = root / "private" / "urgent_reminders" / "index.json"
+
+            first, first_created = deliver_urgent_reminder(
+                "Zavolat zítra ráno.",
+                created_at="2026-08-02T08:15:00+02:00",
+                index_path=index_path,
+            )
+            duplicate, duplicate_created = deliver_urgent_reminder(
+                "Zavolat zítra ráno.",
+                created_at="2026-08-02T18:45:00+02:00",
+                index_path=index_path,
+            )
+            after_sync = sync_urgent_reminders_index(
+                inbox_dir=inbox,
+                index_path=index_path,
+            )
+            stored = json.loads(index_path.read_text(encoding="utf-8"))["reminders"]
+
+        self.assertTrue(first_created)
+        self.assertFalse(duplicate_created)
+        self.assertEqual(first.reminder_number, duplicate.reminder_number)
+        self.assertEqual([item.reminder_number for item in after_sync], [first.reminder_number])
+        self.assertEqual(len(stored), 1)
+        self.assertEqual(stored[0]["source_kind"], "direct_tailscale")
+
+    def test_direct_delivery_validates_input(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            index_path = Path(temp_dir) / "index.json"
+
+            with self.assertRaisesRegex(ValueError, "nesmí být prázdné"):
+                deliver_urgent_reminder("  ", index_path=index_path)
+            with self.assertRaisesRegex(ValueError, "delivery_id"):
+                deliver_urgent_reminder(
+                    "Platný text",
+                    delivery_id="not allowed!",
+                    index_path=index_path,
+                )
+
+        self.assertFalse(index_path.exists())
+
     def test_sync_and_done_use_lock_and_preserve_done_status(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             root = Path(temp_dir)
@@ -100,8 +150,35 @@ class UrgentRemindersTests(unittest.TestCase):
             self.assertEqual(diagnostics["checked_file_count"], 2)
             self.assertEqual(diagnostics["readable_file_count"], 1)
             self.assertEqual(diagnostics["pending_download_count"], 1)
+            self.assertGreaterEqual(diagnostics["pending_oldest_age_seconds"], 0)
             self.assertEqual(sleep_mock.call_count, 2)
             self.assertEqual(len(json.loads(index_path.read_text(encoding="utf-8"))["reminders"]), 1)
+
+    def test_pending_download_diagnostics_report_oldest_file_age(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            inbox = root / "inbox"
+            inbox.mkdir()
+            index_path = root / "index.json"
+            pending = inbox / "samantha_reminder_pending.md"
+            _write_reminder(pending, "Čekající připomenutí")
+            old_timestamp = time.time() - 420
+            os.utime(pending, (old_timestamp, old_timestamp))
+            diagnostics: dict[str, int] = {}
+
+            def deadlocked_read(_path: Path) -> str:
+                raise OSError(errno.EDEADLK, "Resource deadlock avoided")
+
+            with patch("app.urgent_reminders._read_text", side_effect=deadlocked_read):
+                sync_urgent_reminders_index(
+                    inbox_dir=inbox,
+                    index_path=index_path,
+                    sync_diagnostics=diagnostics,
+                    hydration_retry_delays=(),
+                )
+
+        self.assertEqual(diagnostics["pending_download_count"], 1)
+        self.assertGreaterEqual(diagnostics["pending_oldest_age_seconds"], 419)
 
     def test_sync_indexes_file_when_hydration_finishes_during_retry(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

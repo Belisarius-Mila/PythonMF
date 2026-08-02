@@ -109,6 +109,7 @@ from app.cockpit import (
     set_document_reading_status_action,
     start_cockpit_restart_action,
     stored_documents_review_status,
+    urgent_reminder_deliver_action,
     urgent_reminder_done_action,
     urgent_reminders_status,
     update_document_classification_metadata_action,
@@ -4552,6 +4553,63 @@ Dalsi krok:
         self.assertEqual(result["counts"]["open"], 1)
         self.assertEqual(result["items"][0]["reminder_number"], 21)
         self.assertNotIn("source_path", result["items"][0])
+
+    def test_urgent_reminders_status_reports_stuck_icloud_download_after_five_minutes(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            inbox = root / "Shortcuts"
+            inbox.mkdir()
+            index_path = root / "private" / "urgent_reminders" / "index.json"
+
+            def stuck_sync(**kwargs: object) -> list[SimpleNamespace]:
+                diagnostics = kwargs["sync_diagnostics"]
+                assert isinstance(diagnostics, dict)
+                diagnostics.update(
+                    {
+                        "checked_file_count": 1,
+                        "readable_file_count": 0,
+                        "pending_download_count": 1,
+                        "pending_oldest_age_seconds": 301,
+                    }
+                )
+                return []
+
+            with patch("app.cockpit.sync_urgent_reminders_index", side_effect=stuck_sync):
+                result = urgent_reminders_status(inbox_dir=inbox, index_path=index_path)
+
+        self.assertTrue(result["ok"])
+        self.assertTrue(result["sync_pending"])
+        self.assertTrue(result["sync_stuck"])
+        self.assertEqual(result["pending_oldest_age_seconds"], 301)
+        self.assertIn("iCloud stažení je zaseknuté", result["message"])
+        self.assertNotIn("kontrola se automaticky zopakuje", result["message"])
+
+    def test_urgent_reminder_deliver_action_returns_redacted_idempotent_receipt(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            index_path = Path(temp_dir) / "private" / "urgent_reminders" / "index.json"
+            payload = {
+                "text": "Soukromý obsah nesmí být v potvrzení.",
+                "created_at": "2026-08-02T15:20:00+02:00",
+            }
+
+            first = urgent_reminder_deliver_action(payload, index_path=index_path)
+            duplicate = urgent_reminder_deliver_action(payload, index_path=index_path)
+            stored = json.loads(index_path.read_text(encoding="utf-8"))["reminders"]
+
+        self.assertTrue(first["ok"])
+        self.assertEqual(first["status"], "created")
+        self.assertEqual(duplicate["status"], "duplicate")
+        self.assertEqual(first["reminder_number"], duplicate["reminder_number"])
+        self.assertNotIn(payload["text"], json.dumps(first, ensure_ascii=False))
+        self.assertEqual(len(stored), 1)
+
+    def test_urgent_reminder_deliver_action_rejects_empty_text(self) -> None:
+        result = urgent_reminder_deliver_action({"text": ""})
+        null_result = urgent_reminder_deliver_action({"text": None})
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["status"], "delivery_failed")
+        self.assertFalse(null_result["ok"])
 
     def test_urgent_reminder_done_action_hides_open_item_without_deleting_record(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
