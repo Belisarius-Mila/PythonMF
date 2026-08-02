@@ -60,6 +60,7 @@ from app.article_archive import (
     update_article_attachment,
     remove_article_attachment,
 )
+from app.book_summary import BookSummaryGenerationError, generate_book_summary_draft
 from app.autosave_service import (
     SESSION_AUTOSAVE_DIR,
     autosave_runtime_dict as cockpit_autosave_runtime_dict,
@@ -675,6 +676,25 @@ def library_archive_book_action(payload: dict[str, Any]) -> dict[str, Any]:
         return {"ok": False, "message": str(exc), "error": "invalid_book"}
     except OSError as exc:
         return {"ok": False, "message": f"Knihu se nepodařilo uložit: {exc}", "error": "archive_failed"}
+
+
+def library_book_summary_draft_action(payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        draft = generate_book_summary_draft(
+            title=str(payload.get("title", "")),
+            author=str(payload.get("author", "")),
+            source_text=str(payload.get("source_text", "")),
+        )
+    except ValueError as exc:
+        return {"ok": False, "message": str(exc), "error": "invalid_book_summary_source"}
+    except BookSummaryGenerationError as exc:
+        return {"ok": False, "message": str(exc), "error": "book_summary_generation_failed"}
+    return {
+        "ok": True,
+        "message": "Návrh je připravený k ruční kontrole. Kniha zatím nebyla uložena.",
+        "draft": draft,
+        "saved": False,
+    }
 
 
 def library_update_article_action(payload: dict[str, Any]) -> dict[str, Any]:
@@ -8702,6 +8722,14 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "direct",
     },
     {
+        "path": "/api/library/book/summary-draft",
+        "label": "Vytvorit navrh strucneho obsahu knihy",
+        "risk": "external_ai",
+        "confirmation": "explicit_generate_button_no_persistence",
+        "handler_name": "library_book_summary_draft_action",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/library/update",
         "label": "Upravit ulozeny clanek knihovny",
         "risk": "private_write",
@@ -9604,6 +9632,10 @@ class CockpitServer:
                 if parsed.path == "/api/library/book":
                     payload = self.read_json()
                     self.respond_json(library_archive_book_action(payload))
+                    return
+                if parsed.path == "/api/library/book/summary-draft":
+                    payload = self.read_json()
+                    self.respond_json(library_book_summary_draft_action(payload))
                     return
                 if parsed.path == "/api/library/update":
                     payload = self.read_json()

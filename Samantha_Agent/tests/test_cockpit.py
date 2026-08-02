@@ -28,6 +28,7 @@ from app.cockpit import (
     library_archive_book_action,
     library_archive_url_action,
     library_article_reextract_preview_action,
+    library_book_summary_draft_action,
     library_attach_image_action,
     library_delete_article_action,
     library_remove_attachment_action,
@@ -513,6 +514,42 @@ class CockpitTests(unittest.TestCase):
             location="Pracovna, druhá police",
             tags=["historie", "rodina"],
         )
+
+    def test_library_book_summary_draft_action_returns_preview_without_saving(self) -> None:
+        synthetic_draft = "Syntetický návrh obsahu. " * 8
+        with patch("app.cockpit.generate_book_summary_draft", return_value=synthetic_draft) as generate_mock:
+            result = library_book_summary_draft_action(
+                {
+                    "title": "Syntetická kniha",
+                    "author": "Testovací autor",
+                    "source_text": "Syntetické podklady bez soukromých údajů. " * 4,
+                    "location": "Toto se nesmí odeslat",
+                    "tags": "ani tyto tagy",
+                }
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertFalse(result["saved"])
+        self.assertEqual(result["draft"], synthetic_draft)
+        generate_mock.assert_called_once_with(
+            title="Syntetická kniha",
+            author="Testovací autor",
+            source_text="Syntetické podklady bez soukromých údajů. " * 4,
+        )
+
+    def test_library_book_summary_draft_action_reports_safe_errors(self) -> None:
+        with patch("app.cockpit.generate_book_summary_draft", side_effect=ValueError("Podklady jsou krátké.")):
+            invalid = library_book_summary_draft_action({})
+        self.assertFalse(invalid["ok"])
+        self.assertEqual(invalid["error"], "invalid_book_summary_source")
+
+        with patch(
+            "app.cockpit.generate_book_summary_draft",
+            side_effect=cockpit_module.BookSummaryGenerationError("Generování je dočasně nedostupné."),
+        ):
+            unavailable = library_book_summary_draft_action({})
+        self.assertFalse(unavailable["ok"])
+        self.assertEqual(unavailable["error"], "book_summary_generation_failed")
 
     def test_library_attach_image_action_decodes_image_and_adds_family_tags(self) -> None:
         with patch("app.cockpit.attach_article_image") as attach_mock:
@@ -1253,6 +1290,12 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("libraryBookAuthorInput", COCKPIT_HTML)
         self.assertIn("libraryBookLocationInput", COCKPIT_HTML)
         self.assertIn("libraryBookSummaryInput", COCKPIT_HTML)
+        self.assertIn("libraryBookSourceInput", COCKPIT_HTML)
+        self.assertIn("libraryBookSummaryDraftBtn", COCKPIT_HTML)
+        self.assertIn("Podklady pro návrh obsahu (neukládají se)", COCKPIT_HTML)
+        self.assertIn("/api/library/book/summary-draft", COCKPIT_HTML)
+        self.assertIn("function generateLibraryBookSummary()", COCKPIT_HTML)
+        self.assertIn("Kniha se tím neukládá", COCKPIT_HTML)
         self.assertIn("libraryEditBookAuthorInput", COCKPIT_HTML)
         self.assertIn("libraryEditBookLocationInput", COCKPIT_HTML)
         self.assertIn('/api/library/book', COCKPIT_HTML)

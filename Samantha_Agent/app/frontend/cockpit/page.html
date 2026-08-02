@@ -584,13 +584,19 @@
             </label>
           </div>
           <label class="library-field">
+            <span class="library-field-label">Podklady pro návrh obsahu (neukládají se)</span>
+            <textarea id="libraryBookSourceInput" class="library-text-area" placeholder="Vlož anotaci nakladatele, obsah knihy nebo vlastní poznámky"></textarea>
+            <span class="library-field-hint">Po stisku tlačítka se název, autor a tyto podklady odešlou OpenAI. Umístění ani tagy se neodesílají.</span>
+          </label>
+          <label class="library-field">
             <span class="library-field-label">Stručný obsah</span>
             <textarea id="libraryBookSummaryInput" class="library-text-area" placeholder="Přibližně půl stránky A4: o čem kniha je a proč stojí za přečtení"></textarea>
           </label>
           <div class="actions compact-actions">
+            <button class="secondary" id="libraryBookSummaryDraftBtn" type="button">Vytvořit návrh obsahu</button>
             <button class="primary" id="libraryBookSaveBtn" type="button">Uložit knihu</button>
           </div>
-          <div id="libraryBookStatus" class="status-line">Název, autor, stručný obsah a umístění se uloží jako strukturovaná knižní karta.</div>
+          <div id="libraryBookStatus" class="status-line">Návrh obsahu se nejdřív zobrazí k úpravě. Kniha se uloží až tlačítkem Uložit knihu.</div>
         </div>
         <div class="library-layout">
           <div id="libraryList" class="library-list"></div>

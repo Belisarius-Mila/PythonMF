@@ -78,7 +78,9 @@
     const libraryBookAuthorInput = document.getElementById("libraryBookAuthorInput");
     const libraryBookLocationInput = document.getElementById("libraryBookLocationInput");
     const libraryBookTagsInput = document.getElementById("libraryBookTagsInput");
+    const libraryBookSourceInput = document.getElementById("libraryBookSourceInput");
     const libraryBookSummaryInput = document.getElementById("libraryBookSummaryInput");
+    const libraryBookSummaryDraftBtn = document.getElementById("libraryBookSummaryDraftBtn");
     const libraryBookSaveBtn = document.getElementById("libraryBookSaveBtn");
     const libraryBookStatus = document.getElementById("libraryBookStatus");
     const libraryAttachmentFileInput = document.getElementById("libraryAttachmentFileInput");
@@ -439,7 +441,9 @@
         "libraryBookAuthorInput",
         "libraryBookLocationInput",
         "libraryBookTagsInput",
+        "libraryBookSourceInput",
         "libraryBookSummaryInput",
+        "libraryBookSummaryDraftBtn",
         "libraryBookSaveBtn",
         "libraryBookStatus",
         "libraryAttachmentFileInput",
@@ -4167,6 +4171,43 @@ Soubor nebude trvale smazán.`);
       }
     }
 
+    async function generateLibraryBookSummary() {
+      const title = libraryBookTitleInput.value.trim();
+      const author = libraryBookAuthorInput.value.trim();
+      const sourceText = libraryBookSourceInput.value.trim();
+      if (!title || !author) {
+        libraryBookStatus.textContent = "Pro návrh obsahu vyplň název a autora knihy.";
+        (title ? libraryBookAuthorInput : libraryBookTitleInput).focus();
+        return;
+      }
+      if (sourceText.length < 120) {
+        libraryBookStatus.textContent = "Vlož alespoň 120 znaků podkladů pro návrh obsahu.";
+        libraryBookSourceInput.focus();
+        return;
+      }
+      libraryBookSummaryDraftBtn.disabled = true;
+      libraryBookStatus.textContent = "Vytvářím návrh obsahu. Kniha se tím neukládá...";
+      try {
+        const data = await postJson("/api/library/book/summary-draft", {
+          title,
+          author,
+          source_text: sourceText,
+        });
+        if (!data.ok || !data.draft) {
+          libraryBookStatus.textContent = data.message || "Návrh obsahu se nepodařilo vytvořit.";
+          return;
+        }
+        libraryBookSummaryInput.value = data.draft;
+        libraryBookStatus.textContent = data.message || "Návrh je připravený k ruční úpravě.";
+        libraryBookSummaryInput.focus();
+      } catch (err) {
+        recordFrontendError(err);
+        libraryBookStatus.textContent = `Chyba generování návrhu: ${err}`;
+      } finally {
+        libraryBookSummaryDraftBtn.disabled = false;
+      }
+    }
+
     async function saveLibraryBook() {
       const title = libraryBookTitleInput.value.trim();
       const author = libraryBookAuthorInput.value.trim();
@@ -4205,6 +4246,7 @@ Soubor nebude trvale smazán.`);
         libraryBookAuthorInput.value = "";
         libraryBookLocationInput.value = "";
         libraryBookTagsInput.value = "";
+        libraryBookSourceInput.value = "";
         libraryBookSummaryInput.value = "";
         setLibraryAddMode("");
         await loadLibraryCategory("books");
@@ -6173,6 +6215,7 @@ ${item.context || ""}`);
     libraryAddBookBtn.addEventListener("click", () => toggleLibraryAddMode("book"));
     libraryArchiveBtn.addEventListener("click", archiveLibraryUrl);
     libraryTextSaveBtn.addEventListener("click", saveLibraryText);
+    libraryBookSummaryDraftBtn.addEventListener("click", generateLibraryBookSummary);
     libraryBookSaveBtn.addEventListener("click", saveLibraryBook);
     libraryEditBtn.addEventListener("click", openLibraryEditor);
     libraryEditSaveBtn.addEventListener("click", saveLibraryEdits);
