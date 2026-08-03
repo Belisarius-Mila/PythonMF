@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-03 22:14 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-03 22:23 CEST
 
 ### Hotovo
-- Dohledání knih bezpečně rozliší DNS, certifikát a další TLS či síťové chyby
+- Dohledání knih používá ověřený certifi CA balík a zachovává plnou kontrolu TLS
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
@@ -15,18 +15,18 @@
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Převzít a nasadit změnu, znovu vyhledat stejné ISBN a sdělit přesnou novou hlášku
+- Převzít a nasadit změnu, potom znovu dohledat stejné ISBN
 
 ### Rozhodnutí
-- Diagnostika zobrazuje pouze bezpečnou kategorii problému bez interních detailů spojení
+- TLS ověřování zůstává zapnuté; katalog používá deklarovaný certifi CA balík stejně jako ostatní bezpečná spojení projektu
 
 ### Navrhované další kroky
 - Žádné další návrhy nad rámec bezprostředního kroku.
 
 ### Technický stav checkpointu
-- Změna je otestovaná (1279 testů).
-- Git před checkpointem: lokální `main` na `f3040c5df5f2`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `f3040c5df5f2` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-03T19:42:19+00:00.
+- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
+- Git před checkpointem: lokální `main` na `16e624d4c885`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `16e624d4c885` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-03T20:16:45+00:00.
 - Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -531,5 +531,32 @@ Navrhované další kroky:
 
 Technický důkaz:
 - plná Cockpit brána: 1279 testů, 369.2 s, výsledek OK.
+- Pracovní proud: `project-knowledge-library`.
+- Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+
+### 2026-08-03 22:23 CEST – Dohledání knih používá ověřený certifi CA balík a zachovává plnou kontrolu TLS
+
+Hotovo:
+- Dohledání knih používá ověřený certifi CA balík a zachovává plnou kontrolu TLS
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+
+Otevřeno:
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
+
+Rizika:
+- Žádné další doložené provozní riziko.
+
+Rozhodnutí:
+- TLS ověřování zůstává zapnuté; katalog používá deklarovaný certifi CA balík stejně jako ostatní bezpečná spojení projektu
+
+Další krok:
+- Převzít a nasadit změnu, potom znovu dohledat stejné ISBN
+
+Navrhované další kroky:
+- Nebyly zachyceny další návrhy nad rámec bezprostředního kroku.
+
+Technický důkaz:
+- rychlá Cockpit brána syntaxe a whitespace: 6.1 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `project-knowledge-library`.
 - Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.

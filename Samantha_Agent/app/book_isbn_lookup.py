@@ -9,6 +9,8 @@ import urllib.parse
 import urllib.request
 from typing import Any, Callable
 
+import certifi
+
 from app.article_archive import normalize_book_isbn
 
 
@@ -64,6 +66,7 @@ def lookup_book_by_isbn(
     isbn: str,
     opener: Callable[..., Any] | None = None,
     timeout: float = DEFAULT_BOOK_ISBN_LOOKUP_TIMEOUT,
+    tls_context: ssl.SSLContext | None = None,
 ) -> dict[str, Any]:
     normalized_isbn = normalize_book_isbn(isbn)
     if not normalized_isbn:
@@ -89,8 +92,9 @@ def lookup_book_by_isbn(
         method="GET",
     )
     open_request = opener or urllib.request.urlopen
+    verified_tls_context = tls_context or create_book_isbn_tls_context()
     try:
-        with open_request(request, timeout=timeout) as response:
+        with open_request(request, timeout=timeout, context=verified_tls_context) as response:
             raw = response.read(MAX_BOOK_ISBN_LOOKUP_BYTES + 1)
     except urllib.error.HTTPError as exc:
         raise BookIsbnHttpError(int(exc.code or 0)) from exc
@@ -136,6 +140,12 @@ def lookup_book_by_isbn(
         "source_name": OPEN_LIBRARY_SOURCE_NAME,
         "source_url": f"https://openlibrary.org/isbn/{matched_isbn}",
     }
+
+
+def create_book_isbn_tls_context() -> ssl.SSLContext:
+    """Build a verified TLS context from the application's declared CA bundle."""
+
+    return ssl.create_default_context(cafile=certifi.where())
 
 
 def isbn10_to_isbn13(isbn10: str) -> str:

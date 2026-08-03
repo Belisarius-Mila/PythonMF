@@ -6,6 +6,7 @@ import ssl
 import urllib.error
 import urllib.parse
 import unittest
+from unittest.mock import patch
 
 from app.book_isbn_lookup import (
     MAX_BOOK_ISBN_LOOKUP_BYTES,
@@ -17,6 +18,7 @@ from app.book_isbn_lookup import (
     BookIsbnNotFoundError,
     BookIsbnTlsError,
     BookIsbnTimeoutError,
+    create_book_isbn_tls_context,
     isbn10_to_isbn13,
     lookup_book_by_isbn,
 )
@@ -47,10 +49,10 @@ class BookIsbnLookupTests(unittest.TestCase):
                 "number_of_pages": 123,
             }
         }
-        calls: list[tuple[object, float]] = []
+        calls: list[tuple[object, float, object]] = []
 
-        def opener(request: object, *, timeout: float) -> FakeResponse:
-            calls.append((request, timeout))
+        def opener(request: object, *, timeout: float, context: object) -> FakeResponse:
+            calls.append((request, timeout, context))
             return FakeResponse(json.dumps(payload).encode("utf-8"))
 
         result = lookup_book_by_isbn(isbn="978-1-23456-789-7", opener=opener)
@@ -65,7 +67,7 @@ class BookIsbnLookupTests(unittest.TestCase):
         self.assertEqual(result["source_name"], "Open Library")
         self.assertEqual(result["source_url"], "https://openlibrary.org/isbn/9781234567897")
         self.assertEqual(len(calls), 1)
-        request, timeout = calls[0]
+        request, timeout, context = calls[0]
         parsed = urllib.parse.urlparse(request.full_url)
         self.assertEqual((parsed.scheme, parsed.netloc, parsed.path), ("https", "openlibrary.org", "/api/books"))
         self.assertEqual(
@@ -77,6 +79,19 @@ class BookIsbnLookupTests(unittest.TestCase):
             },
         )
         self.assertEqual(timeout, 8.0)
+        self.assertIsInstance(context, ssl.SSLContext)
+
+    def test_tls_context_uses_declared_certifi_ca_bundle(self) -> None:
+        synthetic_context = object()
+        with (
+            patch("app.book_isbn_lookup.certifi.where", return_value="/test/certifi-ca.pem") as certifi_where,
+            patch("app.book_isbn_lookup.ssl.create_default_context", return_value=synthetic_context) as create_context,
+        ):
+            context = create_book_isbn_tls_context()
+
+        self.assertIs(context, synthetic_context)
+        certifi_where.assert_called_once_with()
+        create_context.assert_called_once_with(cafile="/test/certifi-ca.pem")
 
     def test_isbn10_is_looked_up_together_with_its_isbn13_variant(self) -> None:
         payload = {
