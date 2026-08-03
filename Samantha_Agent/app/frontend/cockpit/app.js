@@ -77,6 +77,9 @@
     const libraryBookTitleInput = document.getElementById("libraryBookTitleInput");
     const libraryBookAuthorInput = document.getElementById("libraryBookAuthorInput");
     const libraryBookIsbnInput = document.getElementById("libraryBookIsbnInput");
+    const libraryBookIsbnLookupBtn = document.getElementById("libraryBookIsbnLookupBtn");
+    const libraryBookIsbnLookupStatus = document.getElementById("libraryBookIsbnLookupStatus");
+    const libraryBookIsbnSourceLink = document.getElementById("libraryBookIsbnSourceLink");
     const libraryBookLocationInput = document.getElementById("libraryBookLocationInput");
     const libraryBookTagsInput = document.getElementById("libraryBookTagsInput");
     const libraryBookCoverInput = document.getElementById("libraryBookCoverInput");
@@ -459,6 +462,9 @@
         "libraryBookTitleInput",
         "libraryBookAuthorInput",
         "libraryBookIsbnInput",
+        "libraryBookIsbnLookupBtn",
+        "libraryBookIsbnLookupStatus",
+        "libraryBookIsbnSourceLink",
         "libraryBookLocationInput",
         "libraryBookTagsInput",
         "libraryBookCoverInput",
@@ -4325,6 +4331,51 @@ Soubor nebude trvale smazán.`);
       }
     }
 
+    function clearLibraryBookIsbnLookupResult() {
+      libraryBookIsbnSourceLink.classList.add("hidden");
+      libraryBookIsbnSourceLink.setAttribute("href", "#");
+    }
+
+    async function lookupLibraryBookIsbn() {
+      const isbn = libraryBookIsbnInput.value.trim();
+      clearLibraryBookIsbnLookupResult();
+      if (!isbn) {
+        libraryBookIsbnLookupStatus.textContent = "Nejdřív vyplň ISBN-10 nebo ISBN-13.";
+        libraryBookIsbnInput.focus();
+        return;
+      }
+      libraryBookIsbnLookupBtn.disabled = true;
+      libraryBookIsbnLookupStatus.textContent = "Dohledávám katalogové údaje. Kniha se tím neukládá...";
+      try {
+        const data = await postJson("/api/library/book/isbn-lookup", { isbn });
+        if (!data.ok || !data.lookup) {
+          libraryBookIsbnLookupStatus.textContent = data.message || "Katalogové údaje se nepodařilo dohledat.";
+          return;
+        }
+        const lookup = data.lookup;
+        if (lookup.isbn) libraryBookIsbnInput.value = lookup.isbn;
+        if (lookup.title) libraryBookTitleInput.value = lookup.title;
+        if (lookup.author) libraryBookAuthorInput.value = lookup.author;
+        const details = [];
+        if (lookup.publisher) details.push(`Nakladatel: ${lookup.publisher}`);
+        if (lookup.publish_date) details.push(`Vydání: ${lookup.publish_date}`);
+        if (Number(lookup.number_of_pages) > 0) details.push(`Stran: ${Number(lookup.number_of_pages)}`);
+        const sourceName = lookup.source_name || "veřejný katalog";
+        libraryBookIsbnLookupStatus.textContent = `${data.message || "Údaje jsou předvyplněné."} Zdroj: ${sourceName}.${details.length ? ` ${details.join(" · ")}.` : ""} Ověř je ručně.`;
+        const sourceUrl = String(lookup.source_url || "");
+        if (sourceUrl.startsWith("https://openlibrary.org/isbn/")) {
+          libraryBookIsbnSourceLink.href = sourceUrl;
+          libraryBookIsbnSourceLink.classList.remove("hidden");
+        }
+        (lookup.title ? libraryBookTitleInput : libraryBookAuthorInput).focus();
+      } catch (err) {
+        recordFrontendError(err);
+        libraryBookIsbnLookupStatus.textContent = `Chyba katalogového dohledání: ${err}`;
+      } finally {
+        libraryBookIsbnLookupBtn.disabled = false;
+      }
+    }
+
     async function saveLibraryBook() {
       const title = libraryBookTitleInput.value.trim();
       const author = libraryBookAuthorInput.value.trim();
@@ -4398,6 +4449,8 @@ Soubor nebude trvale smazán.`);
         libraryBookTagsInput.value = "";
         libraryBookSourceInput.value = "";
         libraryBookSummaryInput.value = "";
+        clearLibraryBookIsbnLookupResult();
+        libraryBookIsbnLookupStatus.textContent = "Po stisku se do veřejného katalogu odešle pouze validované ISBN. Výsledek se neuloží automaticky.";
         clearLibraryBookCover();
         setLibraryAddMode("");
         await loadLibraryCategory("books");
@@ -6371,6 +6424,7 @@ ${item.context || ""}`);
     libraryBookCoverInput.addEventListener("change", previewSelectedLibraryBookCover);
     libraryBookCoverDraftBtn.addEventListener("click", recognizeLibraryBookCover);
     libraryBookCoverClearBtn.addEventListener("click", clearLibraryBookCover);
+    libraryBookIsbnLookupBtn.addEventListener("click", lookupLibraryBookIsbn);
     libraryBookSummaryDraftBtn.addEventListener("click", generateLibraryBookSummary);
     libraryBookSaveBtn.addEventListener("click", saveLibraryBook);
     libraryEditBtn.addEventListener("click", openLibraryEditor);

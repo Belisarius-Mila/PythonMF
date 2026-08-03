@@ -62,6 +62,11 @@ from app.article_archive import (
 )
 from app.book_summary import BookSummaryGenerationError, generate_book_summary_draft
 from app.book_cover import BookCoverRecognitionError, recognize_book_cover
+from app.book_isbn_lookup import (
+    BookIsbnLookupError,
+    BookIsbnNotFoundError,
+    lookup_book_by_isbn,
+)
 from app.autosave_service import (
     SESSION_AUTOSAVE_DIR,
     autosave_runtime_dict as cockpit_autosave_runtime_dict,
@@ -717,6 +722,23 @@ def library_book_cover_draft_action(payload: dict[str, Any]) -> dict[str, Any]:
             else "Z fotografie se nepodařilo spolehlivě přečíst název, autora ani ISBN. Vyplň je ručně."
         ),
         "suggestion": suggestion,
+        "saved": False,
+    }
+
+
+def library_book_isbn_lookup_action(payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        lookup = lookup_book_by_isbn(isbn=str(payload.get("isbn", "")))
+    except ValueError as exc:
+        return {"ok": False, "message": str(exc), "error": "invalid_book_isbn"}
+    except BookIsbnNotFoundError as exc:
+        return {"ok": False, "message": str(exc), "error": "book_isbn_not_found"}
+    except BookIsbnLookupError as exc:
+        return {"ok": False, "message": str(exc), "error": "book_isbn_lookup_failed"}
+    return {
+        "ok": True,
+        "message": "Katalogové údaje jsou předvyplněné k ruční kontrole. Kniha zatím nebyla uložena.",
+        "lookup": lookup,
         "saved": False,
     }
 
@@ -8763,6 +8785,14 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "direct",
     },
     {
+        "path": "/api/library/book/isbn-lookup",
+        "label": "Dohledat udaje knihy podle ISBN",
+        "risk": "external_lookup",
+        "confirmation": "explicit_isbn_lookup_button_no_persistence",
+        "handler_name": "library_book_isbn_lookup_action",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/library/update",
         "label": "Upravit ulozeny clanek knihovny",
         "risk": "private_write",
@@ -9673,6 +9703,10 @@ class CockpitServer:
                 if parsed.path == "/api/library/book/cover-draft":
                     payload = self.read_json()
                     self.respond_json(library_book_cover_draft_action(payload))
+                    return
+                if parsed.path == "/api/library/book/isbn-lookup":
+                    payload = self.read_json()
+                    self.respond_json(library_book_isbn_lookup_action(payload))
                     return
                 if parsed.path == "/api/library/update":
                     payload = self.read_json()

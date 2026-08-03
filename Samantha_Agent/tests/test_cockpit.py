@@ -30,6 +30,7 @@ from app.cockpit import (
     library_article_reextract_preview_action,
     library_book_summary_draft_action,
     library_book_cover_draft_action,
+    library_book_isbn_lookup_action,
     library_attach_image_action,
     library_delete_article_action,
     library_remove_attachment_action,
@@ -175,6 +176,7 @@ class CockpitTests(unittest.TestCase):
             "delete_or_purge",
             "dev_runner",
             "external_ai",
+            "external_lookup",
             "external_send",
             "git_commit_push",
             "git_push",
@@ -581,6 +583,54 @@ class CockpitTests(unittest.TestCase):
             unavailable = library_book_summary_draft_action({})
         self.assertFalse(unavailable["ok"])
         self.assertEqual(unavailable["error"], "book_summary_generation_failed")
+
+    def test_library_book_isbn_lookup_action_returns_preview_without_saving(self) -> None:
+        synthetic_lookup = {
+            "isbn": "9781234567897",
+            "title": "Syntetická kniha",
+            "author": "Testovací autor",
+            "publisher": "Testovací nakladatelství",
+            "publish_date": "2026",
+            "number_of_pages": 123,
+            "source_name": "Open Library",
+            "source_url": "https://openlibrary.org/isbn/9781234567897",
+        }
+        with patch("app.cockpit.lookup_book_by_isbn", return_value=synthetic_lookup) as lookup_mock:
+            result = library_book_isbn_lookup_action(
+                {
+                    "isbn": "978-1-23456-789-7",
+                    "location": "Toto se nesmí odeslat",
+                    "summary": "Ani soukromý obsah",
+                    "tags": "ani tagy",
+                }
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertFalse(result["saved"])
+        self.assertEqual(result["lookup"], synthetic_lookup)
+        lookup_mock.assert_called_once_with(isbn="978-1-23456-789-7")
+
+    def test_library_book_isbn_lookup_action_reports_safe_errors(self) -> None:
+        with patch("app.cockpit.lookup_book_by_isbn", side_effect=ValueError("ISBN není platné.")):
+            invalid = library_book_isbn_lookup_action({"isbn": "bad"})
+        self.assertFalse(invalid["ok"])
+        self.assertEqual(invalid["error"], "invalid_book_isbn")
+
+        with patch(
+            "app.cockpit.lookup_book_by_isbn",
+            side_effect=cockpit_module.BookIsbnNotFoundError("Kniha nebyla nalezena."),
+        ):
+            missing = library_book_isbn_lookup_action({"isbn": "9781234567897"})
+        self.assertFalse(missing["ok"])
+        self.assertEqual(missing["error"], "book_isbn_not_found")
+
+        with patch(
+            "app.cockpit.lookup_book_by_isbn",
+            side_effect=cockpit_module.BookIsbnLookupError("Katalog je nedostupný."),
+        ):
+            unavailable = library_book_isbn_lookup_action({"isbn": "9781234567897"})
+        self.assertFalse(unavailable["ok"])
+        self.assertEqual(unavailable["error"], "book_isbn_lookup_failed")
 
     def test_library_attach_image_action_decodes_image_and_adds_family_tags(self) -> None:
         with patch("app.cockpit.attach_article_image") as attach_mock:
@@ -1322,6 +1372,15 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("libraryBookAuthorInput", COCKPIT_HTML)
         self.assertIn("libraryBookLocationInput", COCKPIT_HTML)
         self.assertIn("libraryBookIsbnInput", COCKPIT_HTML)
+        self.assertIn("libraryBookIsbnLookupBtn", COCKPIT_HTML)
+        self.assertIn("libraryBookIsbnLookupStatus", COCKPIT_HTML)
+        self.assertIn("libraryBookIsbnSourceLink", COCKPIT_HTML)
+        self.assertIn("Dohledat podle ISBN", COCKPIT_HTML)
+        self.assertIn("/api/library/book/isbn-lookup", COCKPIT_HTML)
+        self.assertIn("function lookupLibraryBookIsbn()", COCKPIT_HTML)
+        self.assertIn('postJson("/api/library/book/isbn-lookup", { isbn })', COCKPIT_HTML)
+        self.assertIn("Výsledek se neuloží automaticky", COCKPIT_HTML)
+        self.assertIn('sourceUrl.startsWith("https://openlibrary.org/isbn/")', COCKPIT_HTML)
         self.assertIn("libraryEditBookIsbnInput", COCKPIT_HTML)
         self.assertIn("libraryBookCoverInput", COCKPIT_HTML)
         self.assertIn('libraryBookCoverInput" type="file" accept="image/*"', COCKPIT_HTML)
