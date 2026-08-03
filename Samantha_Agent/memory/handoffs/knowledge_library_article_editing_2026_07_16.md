@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-03 21:40 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-03 22:14 CEST
 
 ### Hotovo
-- Dohledání knih rozlišuje síťové chyby a u ISBN-10 současně zkouší odpovídající ISBN-13
+- Dohledání knih bezpečně rozliší DNS, certifikát a další TLS či síťové chyby
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
@@ -15,18 +15,18 @@
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Převzít a nasadit změnu, potom znovu vyzkoušet ISBN 80-204-1453-3 a zaznamenat novou bezpečnou hlášku
+- Převzít a nasadit změnu, znovu vyhledat stejné ISBN a sdělit přesnou novou hlášku
 
 ### Rozhodnutí
-- Katalogové chyby zobrazují pouze bezpečnou kategorii nebo číselný HTTP stav bez interních detailů
+- Diagnostika zobrazuje pouze bezpečnou kategorii problému bez interních detailů spojení
 
 ### Navrhované další kroky
 - Žádné další návrhy nad rámec bezprostředního kroku.
 
 ### Technický stav checkpointu
 - Změna je otestovaná (1279 testů).
-- Git před checkpointem: lokální `main` na `9d3016458473`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `9d3016458473` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-03T17:13:03+00:00.
+- Git před checkpointem: lokální `main` na `f3040c5df5f2`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `f3040c5df5f2` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-03T19:42:19+00:00.
 - Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -273,3 +273,15 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (4): `Samantha_Agent/app/book_isbn_lookup.py`, `Samantha_Agent/app/cockpit.py`, `Samantha_Agent/tests/test_book_isbn_lookup.py`, `Samantha_Agent/tests/test_cockpit.py`
 - Commit: `Improve ISBN lookup diagnostics and fallback`
 - Další krok: Převzít a nasadit změnu, potom znovu vyzkoušet ISBN 80-204-1453-3 a zaznamenat novou bezpečnou hlášku
+
+### Automatický checkpoint 2026-08-03 22:14 CEST
+
+- Pracovní proud: `project-knowledge-library`
+- Hotovo: Dohledání knih bezpečně rozliší DNS, certifikát a další TLS či síťové chyby; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.; Lokální commity čekají na samostatný denní GitHub balíček.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: plná Cockpit brána: 1279 testů, 369.2 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (4): `Samantha_Agent/app/book_isbn_lookup.py`, `Samantha_Agent/app/cockpit.py`, `Samantha_Agent/tests/test_book_isbn_lookup.py`, `Samantha_Agent/tests/test_cockpit.py`
+- Commit: `Add safe ISBN connection diagnostics`
+- Další krok: Převzít a nasadit změnu, znovu vyhledat stejné ISBN a sdělit přesnou novou hlášku

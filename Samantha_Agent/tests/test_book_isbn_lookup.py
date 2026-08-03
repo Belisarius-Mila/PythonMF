@@ -1,16 +1,21 @@
 from __future__ import annotations
 
 import json
+import socket
+import ssl
 import urllib.error
 import urllib.parse
 import unittest
 
 from app.book_isbn_lookup import (
     MAX_BOOK_ISBN_LOOKUP_BYTES,
+    BookIsbnCertificateError,
     BookIsbnConnectionRefusedError,
+    BookIsbnDnsError,
     BookIsbnHttpError,
     BookIsbnLookupError,
     BookIsbnNotFoundError,
+    BookIsbnTlsError,
     BookIsbnTimeoutError,
     isbn10_to_isbn13,
     lookup_book_by_isbn,
@@ -129,6 +134,12 @@ class BookIsbnLookupTests(unittest.TestCase):
     def test_transport_errors_are_distinguished_and_redacted(self) -> None:
         cases = (
             (urllib.error.URLError(TimeoutError("private timeout detail")), BookIsbnTimeoutError),
+            (urllib.error.URLError(socket.gaierror("private DNS detail")), BookIsbnDnsError),
+            (
+                urllib.error.URLError(ssl.SSLCertVerificationError("private certificate detail")),
+                BookIsbnCertificateError,
+            ),
+            (urllib.error.URLError(ssl.SSLError("private TLS detail")), BookIsbnTlsError),
             (urllib.error.URLError(ConnectionRefusedError("private refusal detail")), BookIsbnConnectionRefusedError),
             (urllib.error.URLError("private connection detail"), BookIsbnLookupError),
         )

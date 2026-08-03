@@ -63,10 +63,13 @@ from app.article_archive import (
 from app.book_summary import BookSummaryGenerationError, generate_book_summary_draft
 from app.book_cover import BookCoverRecognitionError, recognize_book_cover
 from app.book_isbn_lookup import (
+    BookIsbnCertificateError,
     BookIsbnConnectionRefusedError,
+    BookIsbnDnsError,
     BookIsbnHttpError,
     BookIsbnLookupError,
     BookIsbnNotFoundError,
+    BookIsbnTlsError,
     BookIsbnTimeoutError,
     lookup_book_by_isbn,
 )
@@ -738,6 +741,12 @@ def library_book_isbn_lookup_action(payload: dict[str, Any]) -> dict[str, Any]:
         return {"ok": False, "message": str(exc), "error": "book_isbn_not_found"}
     except BookIsbnTimeoutError as exc:
         return {"ok": False, "message": str(exc), "error": "book_isbn_lookup_timeout"}
+    except BookIsbnDnsError as exc:
+        return {"ok": False, "message": str(exc), "error": "book_isbn_lookup_dns_error"}
+    except BookIsbnCertificateError as exc:
+        return {"ok": False, "message": str(exc), "error": "book_isbn_lookup_certificate_error"}
+    except BookIsbnTlsError as exc:
+        return {"ok": False, "message": str(exc), "error": "book_isbn_lookup_tls_error"}
     except BookIsbnConnectionRefusedError as exc:
         return {"ok": False, "message": str(exc), "error": "book_isbn_lookup_refused"}
     except BookIsbnHttpError as exc:

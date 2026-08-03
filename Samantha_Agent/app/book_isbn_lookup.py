@@ -3,6 +3,7 @@ from __future__ import annotations
 import errno
 import json
 import socket
+import ssl
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -35,6 +36,18 @@ class BookIsbnConnectionRefusedError(BookIsbnLookupError):
 
 class BookIsbnConnectionError(BookIsbnLookupError):
     """Raised when the fixed external catalog cannot be reached."""
+
+
+class BookIsbnDnsError(BookIsbnConnectionError):
+    """Raised when the fixed external catalog hostname cannot be resolved."""
+
+
+class BookIsbnCertificateError(BookIsbnConnectionError):
+    """Raised when the fixed external catalog certificate cannot be verified."""
+
+
+class BookIsbnTlsError(BookIsbnConnectionError):
+    """Raised when a secure connection to the fixed external catalog fails."""
 
 
 class BookIsbnHttpError(BookIsbnLookupError):
@@ -138,6 +151,12 @@ def _safe_transport_error(exc: BaseException) -> BookIsbnLookupError:
     reason = exc.reason if isinstance(exc, urllib.error.URLError) else exc
     if isinstance(reason, (TimeoutError, socket.timeout)):
         return BookIsbnTimeoutError("Veřejný katalog neodpověděl včas. Zkus to znovu.")
+    if isinstance(reason, socket.gaierror):
+        return BookIsbnDnsError("Název openlibrary.org se nepodařilo přeložit pomocí DNS.")
+    if isinstance(reason, ssl.SSLCertVerificationError):
+        return BookIsbnCertificateError("Python nedokázal ověřit TLS certifikát veřejného katalogu.")
+    if isinstance(reason, ssl.SSLError):
+        return BookIsbnTlsError("Python nedokázal navázat zabezpečené TLS spojení s veřejným katalogem.")
     if isinstance(reason, ConnectionRefusedError) or getattr(reason, "errno", None) == errno.ECONNREFUSED:
         return BookIsbnConnectionRefusedError("Veřejný katalog odmítl spojení. Zkus to později.")
     return BookIsbnConnectionError("K veřejnému katalogu se nepodařilo připojit. Zkus to později.")

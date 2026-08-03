@@ -639,6 +639,26 @@ class CockpitTests(unittest.TestCase):
             timeout = library_book_isbn_lookup_action({"isbn": "9781234567897"})
         self.assertEqual(timeout["error"], "book_isbn_lookup_timeout")
 
+        diagnostic_cases = (
+            (
+                cockpit_module.BookIsbnDnsError("DNS selhalo."),
+                "book_isbn_lookup_dns_error",
+            ),
+            (
+                cockpit_module.BookIsbnCertificateError("Certifikát nelze ověřit."),
+                "book_isbn_lookup_certificate_error",
+            ),
+            (
+                cockpit_module.BookIsbnTlsError("TLS spojení selhalo."),
+                "book_isbn_lookup_tls_error",
+            ),
+        )
+        for diagnostic_error, error_code in diagnostic_cases:
+            with self.subTest(error_code=error_code):
+                with patch("app.cockpit.lookup_book_by_isbn", side_effect=diagnostic_error):
+                    diagnostic = library_book_isbn_lookup_action({"isbn": "9781234567897"})
+                self.assertEqual(diagnostic["error"], error_code)
+
         with patch(
             "app.cockpit.lookup_book_by_isbn",
             side_effect=cockpit_module.BookIsbnConnectionRefusedError("Katalog odmítl spojení."),
