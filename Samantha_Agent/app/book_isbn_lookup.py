@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import errno
 import json
+import socket
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -23,6 +25,27 @@ class BookIsbnNotFoundError(BookIsbnLookupError):
     """Raised when the fixed external catalog has no record for the ISBN."""
 
 
+class BookIsbnTimeoutError(BookIsbnLookupError):
+    """Raised when the fixed external catalog does not answer in time."""
+
+
+class BookIsbnConnectionRefusedError(BookIsbnLookupError):
+    """Raised when the fixed external catalog refuses the connection."""
+
+
+class BookIsbnConnectionError(BookIsbnLookupError):
+    """Raised when the fixed external catalog cannot be reached."""
+
+
+class BookIsbnHttpError(BookIsbnLookupError):
+    """Raised when the fixed external catalog responds with an HTTP error."""
+
+    def __init__(self, status_code: int) -> None:
+        self.status_code = status_code if 100 <= status_code <= 599 else 0
+        status_label = str(self.status_code) if self.status_code else "chybu"
+        super().__init__(f"Veřejný katalog vrátil HTTP {status_label}. Zkus to později.")
+
+
 def lookup_book_by_isbn(
     *,
     isbn: str,
@@ -33,9 +56,13 @@ def lookup_book_by_isbn(
     if not normalized_isbn:
         raise ValueError("Vyplň ISBN knihy.")
 
+    isbn_candidates = [normalized_isbn]
+    if len(normalized_isbn) == 10:
+        isbn_candidates.append(isbn10_to_isbn13(normalized_isbn))
+
     query = urllib.parse.urlencode(
         {
-            "bibkeys": f"ISBN:{normalized_isbn}",
+            "bibkeys": ",".join(f"ISBN:{candidate}" for candidate in isbn_candidates),
             "jscmd": "data",
             "format": "json",
         }
@@ -53,11 +80,9 @@ def lookup_book_by_isbn(
         with open_request(request, timeout=timeout) as response:
             raw = response.read(MAX_BOOK_ISBN_LOOKUP_BYTES + 1)
     except urllib.error.HTTPError as exc:
-        if exc.code == 404:
-            raise BookIsbnNotFoundError("Pro toto ISBN nebyla v katalogu nalezena kniha.") from exc
-        raise BookIsbnLookupError("Veřejný katalog je dočasně nedostupný. Údaje vyplň ručně.") from exc
+        raise BookIsbnHttpError(int(exc.code or 0)) from exc
     except (urllib.error.URLError, OSError, TimeoutError) as exc:
-        raise BookIsbnLookupError("Veřejný katalog je dočasně nedostupný. Údaje vyplň ručně.") from exc
+        raise _safe_transport_error(exc) from exc
 
     if len(raw) > MAX_BOOK_ISBN_LOOKUP_BYTES:
         raise BookIsbnLookupError("Odpověď veřejného katalogu byla příliš velká.")
@@ -68,7 +93,14 @@ def lookup_book_by_isbn(
     if not isinstance(payload, dict):
         raise BookIsbnLookupError("Veřejný katalog vrátil neplatnou odpověď.")
 
-    record = payload.get(f"ISBN:{normalized_isbn}")
+    matched_isbn = ""
+    record: dict[str, Any] | None = None
+    for candidate in isbn_candidates:
+        candidate_record = payload.get(f"ISBN:{candidate}")
+        if isinstance(candidate_record, dict):
+            matched_isbn = candidate
+            record = candidate_record
+            break
     if not isinstance(record, dict):
         raise BookIsbnNotFoundError("Pro toto ISBN nebyla v katalogu nalezena kniha.")
 
@@ -82,14 +114,33 @@ def lookup_book_by_isbn(
 
     return {
         "isbn": normalized_isbn,
+        "matched_isbn": matched_isbn,
         "title": title,
         "author": author,
         "publisher": publisher,
         "publish_date": publish_date,
         "number_of_pages": number_of_pages,
         "source_name": OPEN_LIBRARY_SOURCE_NAME,
-        "source_url": f"https://openlibrary.org/isbn/{normalized_isbn}",
+        "source_url": f"https://openlibrary.org/isbn/{matched_isbn}",
     }
+
+
+def isbn10_to_isbn13(isbn10: str) -> str:
+    normalized = normalize_book_isbn(isbn10)
+    if len(normalized) != 10:
+        raise ValueError("Převod vyžaduje platné ISBN-10.")
+    base = f"978{normalized[:9]}"
+    checksum = (10 - sum((1 if index % 2 == 0 else 3) * int(char) for index, char in enumerate(base)) % 10) % 10
+    return f"{base}{checksum}"
+
+
+def _safe_transport_error(exc: BaseException) -> BookIsbnLookupError:
+    reason = exc.reason if isinstance(exc, urllib.error.URLError) else exc
+    if isinstance(reason, (TimeoutError, socket.timeout)):
+        return BookIsbnTimeoutError("Veřejný katalog neodpověděl včas. Zkus to znovu.")
+    if isinstance(reason, ConnectionRefusedError) or getattr(reason, "errno", None) == errno.ECONNREFUSED:
+        return BookIsbnConnectionRefusedError("Veřejný katalog odmítl spojení. Zkus to později.")
+    return BookIsbnConnectionError("K veřejnému katalogu se nepodařilo připojit. Zkus to později.")
 
 
 def _clean_text(value: Any, limit: int) -> str:

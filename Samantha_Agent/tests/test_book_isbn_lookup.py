@@ -7,8 +7,12 @@ import unittest
 
 from app.book_isbn_lookup import (
     MAX_BOOK_ISBN_LOOKUP_BYTES,
+    BookIsbnConnectionRefusedError,
+    BookIsbnHttpError,
     BookIsbnLookupError,
     BookIsbnNotFoundError,
+    BookIsbnTimeoutError,
+    isbn10_to_isbn13,
     lookup_book_by_isbn,
 )
 
@@ -47,6 +51,7 @@ class BookIsbnLookupTests(unittest.TestCase):
         result = lookup_book_by_isbn(isbn="978-1-23456-789-7", opener=opener)
 
         self.assertEqual(result["isbn"], "9781234567897")
+        self.assertEqual(result["matched_isbn"], "9781234567897")
         self.assertEqual(result["title"], "Syntetická kniha")
         self.assertEqual(result["author"], "Testovací autor")
         self.assertEqual(result["publisher"], "Testovací nakladatelství")
@@ -67,6 +72,31 @@ class BookIsbnLookupTests(unittest.TestCase):
             },
         )
         self.assertEqual(timeout, 8.0)
+
+    def test_isbn10_is_looked_up_together_with_its_isbn13_variant(self) -> None:
+        payload = {
+            "ISBN:9781234567897": {
+                "title": "Syntetická kniha",
+                "authors": [{"name": "Testovací autor"}],
+            }
+        }
+        request_urls: list[str] = []
+
+        def opener(request: object, **_kwargs: object) -> FakeResponse:
+            request_urls.append(request.full_url)
+            return FakeResponse(json.dumps(payload).encode("utf-8"))
+
+        result = lookup_book_by_isbn(isbn="123456789X", opener=opener)
+
+        self.assertEqual(isbn10_to_isbn13("123456789X"), "9781234567897")
+        self.assertEqual(result["isbn"], "123456789X")
+        self.assertEqual(result["matched_isbn"], "9781234567897")
+        self.assertEqual(result["source_url"], "https://openlibrary.org/isbn/9781234567897")
+        parsed_query = urllib.parse.parse_qs(urllib.parse.urlparse(request_urls[0]).query)
+        self.assertEqual(
+            parsed_query["bibkeys"],
+            ["ISBN:123456789X,ISBN:9781234567897"],
+        )
 
     def test_invalid_isbn_is_rejected_before_network(self) -> None:
         called = False
@@ -96,13 +126,36 @@ class BookIsbnLookupTests(unittest.TestCase):
                 opener=lambda *_args, **_kwargs: FakeResponse(b"x" * (MAX_BOOK_ISBN_LOOKUP_BYTES + 1)),
             )
 
-    def test_transport_error_is_redacted(self) -> None:
-        def opener(*_args: object, **_kwargs: object) -> FakeResponse:
-            raise urllib.error.URLError("private transport detail")
+    def test_transport_errors_are_distinguished_and_redacted(self) -> None:
+        cases = (
+            (urllib.error.URLError(TimeoutError("private timeout detail")), BookIsbnTimeoutError),
+            (urllib.error.URLError(ConnectionRefusedError("private refusal detail")), BookIsbnConnectionRefusedError),
+            (urllib.error.URLError("private connection detail"), BookIsbnLookupError),
+        )
+        for transport_error, expected_type in cases:
+            with self.subTest(expected_type=expected_type.__name__):
+                def opener(*_args: object, **_kwargs: object) -> FakeResponse:
+                    raise transport_error
 
-        with self.assertRaises(BookIsbnLookupError) as raised:
+                with self.assertRaises(expected_type) as raised:
+                    lookup_book_by_isbn(isbn="9781234567897", opener=opener)
+                self.assertNotIn("private", str(raised.exception))
+
+    def test_http_error_exposes_only_safe_numeric_status(self) -> None:
+        def opener(*_args: object, **_kwargs: object) -> FakeResponse:
+            raise urllib.error.HTTPError(
+                "https://openlibrary.org/private-detail",
+                429,
+                "private reason",
+                {},
+                None,
+            )
+
+        with self.assertRaises(BookIsbnHttpError) as raised:
             lookup_book_by_isbn(isbn="9781234567897", opener=opener)
-        self.assertNotIn("private transport detail", str(raised.exception))
+        self.assertEqual(raised.exception.status_code, 429)
+        self.assertIn("HTTP 429", str(raised.exception))
+        self.assertNotIn("private", str(raised.exception))
 
 
 if __name__ == "__main__":

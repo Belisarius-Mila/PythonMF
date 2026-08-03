@@ -632,6 +632,28 @@ class CockpitTests(unittest.TestCase):
         self.assertFalse(unavailable["ok"])
         self.assertEqual(unavailable["error"], "book_isbn_lookup_failed")
 
+        with patch(
+            "app.cockpit.lookup_book_by_isbn",
+            side_effect=cockpit_module.BookIsbnTimeoutError("Katalog neodpověděl včas."),
+        ):
+            timeout = library_book_isbn_lookup_action({"isbn": "9781234567897"})
+        self.assertEqual(timeout["error"], "book_isbn_lookup_timeout")
+
+        with patch(
+            "app.cockpit.lookup_book_by_isbn",
+            side_effect=cockpit_module.BookIsbnConnectionRefusedError("Katalog odmítl spojení."),
+        ):
+            refused = library_book_isbn_lookup_action({"isbn": "9781234567897"})
+        self.assertEqual(refused["error"], "book_isbn_lookup_refused")
+
+        with patch(
+            "app.cockpit.lookup_book_by_isbn",
+            side_effect=cockpit_module.BookIsbnHttpError(429),
+        ):
+            http_error = library_book_isbn_lookup_action({"isbn": "9781234567897"})
+        self.assertEqual(http_error["error"], "book_isbn_lookup_http_error")
+        self.assertEqual(http_error["http_status"], 429)
+
     def test_library_attach_image_action_decodes_image_and_adds_family_tags(self) -> None:
         with patch("app.cockpit.attach_article_image") as attach_mock:
             attach_mock.return_value = {"ok": True, "item": {"id": "recipe-1"}, "attachment": {"id": "rukopis"}}

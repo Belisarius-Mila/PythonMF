@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-03 19:10 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-03 21:40 CEST
 
 ### Hotovo
-- Tlačítko Přidat knihu se zobrazuje výhradně v oddílu Knihy
+- Dohledání knih rozlišuje síťové chyby a u ISBN-10 současně zkouší odpovídající ISBN-13
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
@@ -15,18 +15,18 @@
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Převzít a nasadit změnu, potom na iPhonu přepnout mezi Recepty a Knihami a ověřit viditelnost tlačítka
+- Převzít a nasadit změnu, potom znovu vyzkoušet ISBN 80-204-1453-3 a zaznamenat novou bezpečnou hlášku
 
 ### Rozhodnutí
-- V tomto kroku nebylo přijato nové kanonické rozhodnutí.
+- Katalogové chyby zobrazují pouze bezpečnou kategorii nebo číselný HTTP stav bez interních detailů
 
 ### Navrhované další kroky
 - Žádné další návrhy nad rámec bezprostředního kroku.
 
 ### Technický stav checkpointu
-- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `1b2860f36570`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `1b2860f36570` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-03T16:59:49+00:00.
+- Změna je otestovaná (1279 testů).
+- Git před checkpointem: lokální `main` na `9d3016458473`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `9d3016458473` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-03T17:13:03+00:00.
 - Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -261,3 +261,15 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (4): `Samantha_Agent/app/frontend/cockpit/app.js`, `Samantha_Agent/app/frontend/cockpit/page.html`, `Samantha_Agent/tests/test_cockpit.py`, `Samantha_Agent/tests/test_cockpit_frontend.py`
 - Commit: `Show add book action only in Books`
 - Další krok: Převzít a nasadit změnu, potom na iPhonu přepnout mezi Recepty a Knihami a ověřit viditelnost tlačítka
+
+### Automatický checkpoint 2026-08-03 21:40 CEST
+
+- Pracovní proud: `project-knowledge-library`
+- Hotovo: Dohledání knih rozlišuje síťové chyby a u ISBN-10 současně zkouší odpovídající ISBN-13; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.; Lokální commity čekají na samostatný denní GitHub balíček.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: plná Cockpit brána: 1279 testů, 367.4 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (4): `Samantha_Agent/app/book_isbn_lookup.py`, `Samantha_Agent/app/cockpit.py`, `Samantha_Agent/tests/test_book_isbn_lookup.py`, `Samantha_Agent/tests/test_cockpit.py`
+- Commit: `Improve ISBN lookup diagnostics and fallback`
+- Další krok: Převzít a nasadit změnu, potom znovu vyzkoušet ISBN 80-204-1453-3 a zaznamenat novou bezpečnou hlášku
