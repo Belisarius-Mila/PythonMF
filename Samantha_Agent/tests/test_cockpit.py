@@ -29,6 +29,7 @@ from app.cockpit import (
     library_archive_url_action,
     library_article_reextract_preview_action,
     library_book_summary_draft_action,
+    library_book_cover_draft_action,
     library_attach_image_action,
     library_delete_article_action,
     library_remove_attachment_action,
@@ -502,6 +503,7 @@ class CockpitTests(unittest.TestCase):
                     "author": "Testovací autor",
                     "summary": "Stručný syntetický obsah.",
                     "location": "Pracovna, druhá police",
+                    "isbn": "978-1-23456-789-7",
                     "tags": "historie; rodina",
                 }
             )
@@ -512,8 +514,37 @@ class CockpitTests(unittest.TestCase):
             author="Testovací autor",
             summary="Stručný syntetický obsah.",
             location="Pracovna, druhá police",
+            isbn="978-1-23456-789-7",
             tags=["historie", "rodina"],
         )
+
+    def test_library_book_cover_draft_action_returns_preview_without_saving(self) -> None:
+        suggestion = {
+            "title": "Syntetická kniha",
+            "author": "Testovací autor",
+            "isbn": "9781234567897",
+            "confidence": 0.9,
+            "uncertainties": [],
+        }
+        with patch("app.cockpit.recognize_book_cover", return_value=suggestion) as recognize_mock:
+            result = library_book_cover_draft_action(
+                {"image_data_url": "data:image/png;base64,c3ludGhldGlj"}
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertFalse(result["saved"])
+        self.assertEqual(result["suggestion"], suggestion)
+        recognize_mock.assert_called_once_with(
+            image_data_url="data:image/png;base64,c3ludGhldGlj"
+        )
+
+    def test_library_book_cover_draft_action_keeps_unreadable_cover_empty(self) -> None:
+        suggestion = {"title": "", "author": "", "isbn": "", "confidence": 0, "uncertainties": ["Nečitelné."]}
+        with patch("app.cockpit.recognize_book_cover", return_value=suggestion):
+            result = library_book_cover_draft_action({"image_data_url": "synthetic"})
+        self.assertTrue(result["ok"])
+        self.assertFalse(result["saved"])
+        self.assertIn("vyplň je ručně", result["message"].casefold())
 
     def test_library_book_summary_draft_action_returns_preview_without_saving(self) -> None:
         synthetic_draft = "Syntetický návrh obsahu. " * 8
@@ -624,6 +655,7 @@ class CockpitTests(unittest.TestCase):
             source_note="Lokálně upraveno.",
             book_author="",
             book_location="",
+            book_isbn="",
         )
 
     def test_library_attachment_edit_and_remove_actions_use_narrow_helpers(self) -> None:
@@ -1289,6 +1321,16 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("Přidat knihu", COCKPIT_HTML)
         self.assertIn("libraryBookAuthorInput", COCKPIT_HTML)
         self.assertIn("libraryBookLocationInput", COCKPIT_HTML)
+        self.assertIn("libraryBookIsbnInput", COCKPIT_HTML)
+        self.assertIn("libraryEditBookIsbnInput", COCKPIT_HTML)
+        self.assertIn("libraryBookCoverInput", COCKPIT_HTML)
+        self.assertIn('libraryBookCoverInput" type="file" accept="image/*"', COCKPIT_HTML)
+        self.assertIn("libraryBookCoverPreview", COCKPIT_HTML)
+        self.assertIn("libraryBookCoverDraftBtn", COCKPIT_HTML)
+        self.assertIn("/api/library/book/cover-draft", COCKPIT_HTML)
+        self.assertIn("function recognizeLibraryBookCover()", COCKPIT_HTML)
+        self.assertIn('role: "book_cover"', COCKPIT_HTML)
+        self.assertIn("Přidej ji v části Přílohy", COCKPIT_HTML)
         self.assertIn("libraryBookSummaryInput", COCKPIT_HTML)
         self.assertIn("libraryBookSourceInput", COCKPIT_HTML)
         self.assertIn("libraryBookSummaryDraftBtn", COCKPIT_HTML)

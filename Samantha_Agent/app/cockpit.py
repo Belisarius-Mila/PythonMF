@@ -61,6 +61,7 @@ from app.article_archive import (
     remove_article_attachment,
 )
 from app.book_summary import BookSummaryGenerationError, generate_book_summary_draft
+from app.book_cover import BookCoverRecognitionError, recognize_book_cover
 from app.autosave_service import (
     SESSION_AUTOSAVE_DIR,
     autosave_runtime_dict as cockpit_autosave_runtime_dict,
@@ -670,6 +671,7 @@ def library_archive_book_action(payload: dict[str, Any]) -> dict[str, Any]:
             author=str(payload.get("author", "")),
             summary=str(payload.get("summary", "")),
             location=str(payload.get("location", "")),
+            isbn=str(payload.get("isbn", "")),
             tags=parse_tag_payload(payload.get("tags", [])),
         )
     except ValueError as exc:
@@ -697,6 +699,28 @@ def library_book_summary_draft_action(payload: dict[str, Any]) -> dict[str, Any]
     }
 
 
+def library_book_cover_draft_action(payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        suggestion = recognize_book_cover(
+            image_data_url=str(payload.get("image_data_url", "")),
+        )
+    except ValueError as exc:
+        return {"ok": False, "message": str(exc), "error": "invalid_book_cover"}
+    except BookCoverRecognitionError as exc:
+        return {"ok": False, "message": str(exc), "error": "book_cover_recognition_failed"}
+    has_metadata = any(suggestion.get(field) for field in ("title", "author", "isbn"))
+    return {
+        "ok": True,
+        "message": (
+            "Rozpoznané údaje jsou předvyplněné k ruční kontrole. Kniha ani fotografie zatím nebyly uloženy."
+            if has_metadata
+            else "Z fotografie se nepodařilo spolehlivě přečíst název, autora ani ISBN. Vyplň je ručně."
+        ),
+        "suggestion": suggestion,
+        "saved": False,
+    }
+
+
 def library_update_article_action(payload: dict[str, Any]) -> dict[str, Any]:
     try:
         return update_article(
@@ -709,6 +733,7 @@ def library_update_article_action(payload: dict[str, Any]) -> dict[str, Any]:
             source_note=str(payload.get("source_note", "")),
             book_author=str(payload.get("book_author", "")),
             book_location=str(payload.get("book_location", "")),
+            book_isbn=str(payload.get("book_isbn", "")),
         )
     except ValueError as exc:
         return {"ok": False, "message": str(exc), "error": "invalid_article_update"}
@@ -8730,6 +8755,14 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "direct",
     },
     {
+        "path": "/api/library/book/cover-draft",
+        "label": "Rozpoznat udaje z fotografie obalky knihy",
+        "risk": "external_ai",
+        "confirmation": "explicit_cover_recognition_button_no_persistence",
+        "handler_name": "library_book_cover_draft_action",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/library/update",
         "label": "Upravit ulozeny clanek knihovny",
         "risk": "private_write",
@@ -9636,6 +9669,10 @@ class CockpitServer:
                 if parsed.path == "/api/library/book/summary-draft":
                     payload = self.read_json()
                     self.respond_json(library_book_summary_draft_action(payload))
+                    return
+                if parsed.path == "/api/library/book/cover-draft":
+                    payload = self.read_json()
+                    self.respond_json(library_book_cover_draft_action(payload))
                     return
                 if parsed.path == "/api/library/update":
                     payload = self.read_json()

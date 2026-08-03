@@ -587,6 +587,7 @@ class ArticleArchiveTests(unittest.TestCase):
                 author="Anna Testovací",
                 summary="Stručný obsah o putování, paměti míst a rodinné historii.",
                 location="Obývák, levá knihovna, druhá police",
+                isbn="978-1-23456-789-7",
                 tags=["historie", "cestování"],
                 archive_root=archive_root,
             )
@@ -606,6 +607,11 @@ class ArticleArchiveTests(unittest.TestCase):
                 category="books",
                 archive_root=archive_root,
             )
+            by_isbn = search_articles(
+                query="9781234567897",
+                category="books",
+                archive_root=archive_root,
+            )
 
         self.assertEqual(result["item"]["category"], "books")
         self.assertEqual(result["item"]["category_label"], "Knihy")
@@ -614,10 +620,12 @@ class ArticleArchiveTests(unittest.TestCase):
             result["item"]["book_location"],
             "Obývák, levá knihovna, druhá police",
         )
+        self.assertEqual(result["item"]["book_isbn"], "9781234567897")
         self.assertEqual(listed["count"], 1)
         self.assertEqual(by_author["count"], 1)
         self.assertEqual(by_location["count"], 1)
         self.assertEqual(by_summary["count"], 1)
+        self.assertEqual(by_isbn["count"], 1)
 
     def test_book_requires_title_author_summary_and_location(self) -> None:
         required_fields = {
@@ -660,6 +668,7 @@ class ArticleArchiveTests(unittest.TestCase):
                 category="books",
                 book_author="Nový autor",
                 book_location="Pracovna, třetí police",
+                book_isbn="123456789X",
                 archive_root=archive_root,
             )
             reloaded = get_article(
@@ -669,11 +678,24 @@ class ArticleArchiveTests(unittest.TestCase):
             )
 
         self.assertEqual(updated["item"]["book_author"], "Nový autor")
+        self.assertEqual(updated["item"]["book_isbn"], "123456789X")
         self.assertEqual(
             reloaded["item"]["book_location"],
             "Pracovna, třetí police",
         )
         self.assertEqual(reloaded["text"], "Upravený stručný obsah knihy.")
+
+    def test_book_rejects_invalid_isbn(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            with self.assertRaisesRegex(ValueError, "platné ISBN-10 nebo ISBN-13"):
+                archive_book_entry(
+                    title="Syntetická kniha",
+                    author="Testovací autor",
+                    summary="Syntetický stručný obsah.",
+                    location="Testovací police",
+                    isbn="1234567890",
+                    archive_root=Path(temp_dir),
+                )
 
     def test_trim_to_article_body_removes_recommendations_and_tail_without_losing_article(self) -> None:
         raw_text = "\n".join(

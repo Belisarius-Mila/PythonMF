@@ -76,8 +76,15 @@
     const libraryTextStatus = document.getElementById("libraryTextStatus");
     const libraryBookTitleInput = document.getElementById("libraryBookTitleInput");
     const libraryBookAuthorInput = document.getElementById("libraryBookAuthorInput");
+    const libraryBookIsbnInput = document.getElementById("libraryBookIsbnInput");
     const libraryBookLocationInput = document.getElementById("libraryBookLocationInput");
     const libraryBookTagsInput = document.getElementById("libraryBookTagsInput");
+    const libraryBookCoverInput = document.getElementById("libraryBookCoverInput");
+    const libraryBookCoverPreviewWrap = document.getElementById("libraryBookCoverPreviewWrap");
+    const libraryBookCoverPreview = document.getElementById("libraryBookCoverPreview");
+    const libraryBookCoverDraftBtn = document.getElementById("libraryBookCoverDraftBtn");
+    const libraryBookCoverClearBtn = document.getElementById("libraryBookCoverClearBtn");
+    const libraryBookCoverStatus = document.getElementById("libraryBookCoverStatus");
     const libraryBookSourceInput = document.getElementById("libraryBookSourceInput");
     const libraryBookSummaryInput = document.getElementById("libraryBookSummaryInput");
     const libraryBookSummaryDraftBtn = document.getElementById("libraryBookSummaryDraftBtn");
@@ -112,6 +119,7 @@
     const libraryEditBookFields = document.getElementById("libraryEditBookFields");
     const libraryEditBookAuthorInput = document.getElementById("libraryEditBookAuthorInput");
     const libraryEditBookLocationInput = document.getElementById("libraryEditBookLocationInput");
+    const libraryEditBookIsbnInput = document.getElementById("libraryEditBookIsbnInput");
     const libraryEditTagsInput = document.getElementById("libraryEditTagsInput");
     const libraryEditSourceInput = document.getElementById("libraryEditSourceInput");
     const libraryEditSourceNoteInput = document.getElementById("libraryEditSourceNoteInput");
@@ -303,11 +311,13 @@
     let currentFamilyCalendarPeople = [];
     let familyCalendarEditorDirty = false;
     let libraryEditorDirty = false;
+    let libraryBookCoverObjectUrl = "";
     let currentQuantitative = null;
     let currentAutosaveCleanupPlan = null;
     let frontendLastError = "";
     let frontendErrorHistory = [];
     let dashboardStatusSignals = {};
+    const maxLibraryImageBytes = 7 * 1024 * 1024;
 
     function escapeHtml(value) {
       return String(value || "")
@@ -316,6 +326,15 @@
         .replaceAll(">", "&gt;")
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#39;");
+    }
+
+    function blobToDataUrl(blob) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.addEventListener("load", () => resolve(String(reader.result || "")), {once: true});
+        reader.addEventListener("error", () => reject(reader.error || new Error("Soubor se nepodařilo přečíst.")), {once: true});
+        reader.readAsDataURL(blob);
+      });
     }
 
     const diagnosticsEndpoints = [
@@ -439,8 +458,15 @@
         "libraryBookPanel",
         "libraryBookTitleInput",
         "libraryBookAuthorInput",
+        "libraryBookIsbnInput",
         "libraryBookLocationInput",
         "libraryBookTagsInput",
+        "libraryBookCoverInput",
+        "libraryBookCoverPreviewWrap",
+        "libraryBookCoverPreview",
+        "libraryBookCoverDraftBtn",
+        "libraryBookCoverClearBtn",
+        "libraryBookCoverStatus",
         "libraryBookSourceInput",
         "libraryBookSummaryInput",
         "libraryBookSummaryDraftBtn",
@@ -463,6 +489,7 @@
         "libraryEditBookFields",
         "libraryEditBookAuthorInput",
         "libraryEditBookLocationInput",
+        "libraryEditBookIsbnInput",
         "libraryEditTagsInput",
         "libraryEditSourceInput",
         "libraryEditSourceNoteInput",
@@ -3853,6 +3880,7 @@ Soubor nebude trvale smazán.`);
         libraryEditCategoryInput,
         libraryEditBookAuthorInput,
         libraryEditBookLocationInput,
+        libraryEditBookIsbnInput,
         libraryEditTagsInput,
         libraryEditSourceInput,
         libraryEditSourceNoteInput,
@@ -3913,6 +3941,7 @@ Soubor nebude trvale smazán.`);
         libraryEditCategoryInput.value = item.category || "other";
         libraryEditBookAuthorInput.value = item.book_author || "";
         libraryEditBookLocationInput.value = item.book_location || "";
+        libraryEditBookIsbnInput.value = item.book_isbn || "";
         syncLibraryEditBookFields(item.category || "other");
         libraryEditTagsInput.value = Array.isArray(item.tags) ? item.tags.join(", ") : "";
         libraryEditSourceInput.value = item.source_label || "";
@@ -3938,6 +3967,7 @@ Soubor nebude trvale smazán.`);
       const isBook = libraryEditCategoryInput.value === "books";
       const bookAuthor = libraryEditBookAuthorInput.value.trim();
       const bookLocation = libraryEditBookLocationInput.value.trim();
+      const bookIsbn = libraryEditBookIsbnInput.value.trim();
       if (!articleId) {
         libraryEditStatus.textContent = "Nejdřív vyber položku v knihovně.";
         return;
@@ -3965,7 +3995,8 @@ Soubor nebude trvale smazán.`);
           source_label: libraryEditSourceInput.value.trim(),
           source_note: libraryEditSourceNoteInput.value.trim(),
           book_author: bookAuthor,
-          book_location: bookLocation
+          book_location: bookLocation,
+          book_isbn: bookIsbn
         });
         if (!data.ok) {
           libraryEditStatus.textContent = data.message || "Úpravy článku se nepodařilo uložit.";
@@ -4171,6 +4202,92 @@ Soubor nebude trvale smazán.`);
       }
     }
 
+    function validateSelectedLibraryBookCover(maxBytes) {
+      const file = libraryBookCoverInput.files && libraryBookCoverInput.files[0];
+      if (!file) return {file: null, error: ""};
+      const filename = String(file.name || "").toLowerCase();
+      const supportedName = /\.(jpe?g|png|webp|heic|heif)$/.test(filename);
+      if (!String(file.type || "").startsWith("image/") && !supportedName) {
+        return {file: null, error: "Vybraný soubor musí být fotografie JPG, PNG, WEBP nebo HEIC/HEIF."};
+      }
+      if (file.size > maxBytes) {
+        const limitMb = Math.round(maxBytes / (1024 * 1024));
+        return {file: null, error: `Fotografie je větší než ${limitMb} MB. Vyber menší kopii.`};
+      }
+      return {file, error: ""};
+    }
+
+    function clearLibraryBookCover() {
+      libraryBookCoverInput.value = "";
+      if (libraryBookCoverObjectUrl) {
+        URL.revokeObjectURL(libraryBookCoverObjectUrl);
+        libraryBookCoverObjectUrl = "";
+      }
+      libraryBookCoverPreview.removeAttribute("src");
+      libraryBookCoverPreviewWrap.classList.add("hidden");
+      libraryBookCoverStatus.textContent = "Rozpoznání odešle OpenAI pouze vybranou fotografii a nic neuloží.";
+    }
+
+    function previewSelectedLibraryBookCover() {
+      if (libraryBookCoverObjectUrl) {
+        URL.revokeObjectURL(libraryBookCoverObjectUrl);
+        libraryBookCoverObjectUrl = "";
+      }
+      const checked = validateSelectedLibraryBookCover(maxLibraryImageBytes);
+      if (checked.error) {
+        libraryBookCoverPreview.removeAttribute("src");
+        libraryBookCoverPreviewWrap.classList.add("hidden");
+        libraryBookCoverStatus.textContent = checked.error;
+        return;
+      }
+      if (!checked.file) {
+        clearLibraryBookCover();
+        return;
+      }
+      libraryBookCoverObjectUrl = URL.createObjectURL(checked.file);
+      libraryBookCoverPreview.src = libraryBookCoverObjectUrl;
+      libraryBookCoverPreviewWrap.classList.remove("hidden");
+      libraryBookCoverStatus.textContent = "Fotografie je vybraná, ale zatím nebyla odeslána ani uložena.";
+    }
+
+    async function recognizeLibraryBookCover() {
+      const checked = validateSelectedLibraryBookCover(maxLibraryImageBytes);
+      if (checked.error || !checked.file) {
+        libraryBookCoverStatus.textContent = checked.error || "Nejdřív vyber nebo vyfoť obálku knihy.";
+        libraryBookCoverInput.focus();
+        return;
+      }
+      libraryBookCoverDraftBtn.disabled = true;
+      libraryBookCoverStatus.textContent = "Rozpoznávám viditelné údaje. Kniha ani fotografie se tím neukládají...";
+      try {
+        const imageDataUrl = await blobToDataUrl(checked.file);
+        const data = await postJson("/api/library/book/cover-draft", {
+          image_data_url: imageDataUrl,
+        });
+        if (!data.ok) {
+          libraryBookCoverStatus.textContent = data.message || "Údaje z obálky se nepodařilo rozpoznat.";
+          return;
+        }
+        const suggestion = data.suggestion || {};
+        if (suggestion.title) libraryBookTitleInput.value = suggestion.title;
+        if (suggestion.author) libraryBookAuthorInput.value = suggestion.author;
+        if (suggestion.isbn) libraryBookIsbnInput.value = suggestion.isbn;
+        const confidence = Number.isFinite(Number(suggestion.confidence))
+          ? ` Jistota: ${Math.round(Number(suggestion.confidence) * 100)} %.`
+          : "";
+        const uncertainties = Array.isArray(suggestion.uncertainties) && suggestion.uncertainties.length
+          ? ` Ověř ručně: ${suggestion.uncertainties.join("; ")}`
+          : "";
+        libraryBookCoverStatus.textContent = `${data.message || "Údaje jsou předvyplněné."}${confidence}${uncertainties}`;
+        (suggestion.title ? libraryBookTitleInput : libraryBookCoverInput).focus();
+      } catch (err) {
+        recordFrontendError(err);
+        libraryBookCoverStatus.textContent = `Chyba rozpoznání obálky: ${err}`;
+      } finally {
+        libraryBookCoverDraftBtn.disabled = false;
+      }
+    }
+
     async function generateLibraryBookSummary() {
       const title = libraryBookTitleInput.value.trim();
       const author = libraryBookAuthorInput.value.trim();
@@ -4211,6 +4328,7 @@ Soubor nebude trvale smazán.`);
     async function saveLibraryBook() {
       const title = libraryBookTitleInput.value.trim();
       const author = libraryBookAuthorInput.value.trim();
+      const isbn = libraryBookIsbnInput.value.trim();
       const location = libraryBookLocationInput.value.trim();
       const summary = libraryBookSummaryInput.value.trim();
       if (!title || !author || !location || !summary) {
@@ -4226,12 +4344,19 @@ Soubor nebude trvale smazán.`);
       }
       if (!confirmLibraryEditorDiscard()) return;
       closeLibraryEditor(true);
+      const cover = validateSelectedLibraryBookCover(maxLibraryImageBytes);
+      if (cover.error) {
+        libraryBookStatus.textContent = cover.error;
+        libraryBookCoverInput.focus();
+        return;
+      }
       libraryBookSaveBtn.disabled = true;
       libraryBookStatus.textContent = "Ukládám knihu do soukromé knihovny...";
       try {
         const data = await postJson("/api/library/book", {
           title,
           author,
+          isbn,
           location,
           summary,
           tags: libraryBookTagsInput.value.trim(),
@@ -4241,16 +4366,43 @@ Soubor nebude trvale smazán.`);
           return;
         }
         const item = data.item || {};
-        libraryBookStatus.textContent = data.message || "Kniha byla uložena.";
+        let finalMessage = data.message || "Kniha byla uložena.";
+        if (cover.file && item.id) {
+          try {
+            const imageDataUrl = await blobToDataUrl(cover.file);
+            const attachment = await postJson("/api/library/attachment/add", {
+              article_id: item.id,
+              image_data_url: imageDataUrl,
+              filename: cover.file.name || "obalka-knihy.jpg",
+              category: "books",
+              label: "Obálka knihy",
+              role: "book_cover",
+              tags: "obalka",
+              note: "",
+            });
+            finalMessage += attachment.ok
+              ? " Obálka byla připojena."
+              : ` Obálku se nepodařilo připojit: ${attachment.message || "neznámá chyba"}. Přidej ji v části Přílohy.`;
+          } catch (coverError) {
+            recordFrontendError(coverError);
+            finalMessage += ` Obálku se nepodařilo připojit: ${coverError}. Přidej ji v části Přílohy.`;
+          }
+        } else if (cover.file) {
+          finalMessage += " Obálku se nepodařilo připojit, protože odpověď neobsahovala identifikátor nové karty. Přidej ji v části Přílohy.";
+        }
+        libraryBookStatus.textContent = finalMessage;
         libraryBookTitleInput.value = "";
         libraryBookAuthorInput.value = "";
+        libraryBookIsbnInput.value = "";
         libraryBookLocationInput.value = "";
         libraryBookTagsInput.value = "";
         libraryBookSourceInput.value = "";
         libraryBookSummaryInput.value = "";
+        clearLibraryBookCover();
         setLibraryAddMode("");
         await loadLibraryCategory("books");
         if (item.id) await loadLibraryItem(item.id);
+        libraryStatus.textContent = finalMessage;
       } catch (err) {
         recordFrontendError(err);
         libraryBookStatus.textContent = `Chyba uložení knihy: ${err}`;
@@ -4275,8 +4427,8 @@ Soubor nebude trvale smazán.`);
         libraryAttachmentStatus.textContent = "Soubor musí být obrázek.";
         return;
       }
-      if (file.size > 20 * 1024 * 1024) {
-        libraryAttachmentStatus.textContent = "Obrázek je větší než 20 MB. Nejdřív ho zmenši nebo pošli menší kopii.";
+      if (file.size > maxLibraryImageBytes) {
+        libraryAttachmentStatus.textContent = "Obrázek je větší než 7 MB. Nejdřív ho zmenši nebo pošli menší kopii.";
         return;
       }
       libraryAttachmentSaveBtn.disabled = true;
@@ -4545,6 +4697,7 @@ ${confirmation}`, "");
       if (date) parts.push(date);
       if (item.category_label) parts.push(item.category_label);
       if (item.category === "books" && item.book_author) parts.push(`Autor: ${item.book_author}`);
+      if (item.category === "books" && item.book_isbn) parts.push(`ISBN: ${item.book_isbn}`);
       if (item.category === "books" && item.book_location) parts.push(`Umístění: ${item.book_location}`);
       if (item.source_label) parts.push(item.source_label);
       const url = item.canonical_url || item.source_url || "";
@@ -6215,6 +6368,9 @@ ${item.context || ""}`);
     libraryAddBookBtn.addEventListener("click", () => toggleLibraryAddMode("book"));
     libraryArchiveBtn.addEventListener("click", archiveLibraryUrl);
     libraryTextSaveBtn.addEventListener("click", saveLibraryText);
+    libraryBookCoverInput.addEventListener("change", previewSelectedLibraryBookCover);
+    libraryBookCoverDraftBtn.addEventListener("click", recognizeLibraryBookCover);
+    libraryBookCoverClearBtn.addEventListener("click", clearLibraryBookCover);
     libraryBookSummaryDraftBtn.addEventListener("click", generateLibraryBookSummary);
     libraryBookSaveBtn.addEventListener("click", saveLibraryBook);
     libraryEditBtn.addEventListener("click", openLibraryEditor);
@@ -6225,6 +6381,7 @@ ${item.context || ""}`);
       libraryEditCategoryInput,
       libraryEditBookAuthorInput,
       libraryEditBookLocationInput,
+      libraryEditBookIsbnInput,
       libraryEditTagsInput,
       libraryEditSourceInput,
       libraryEditSourceNoteInput,

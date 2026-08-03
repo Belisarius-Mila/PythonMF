@@ -1,33 +1,32 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-02 20:06 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-03 10:57 CEST
 
 ### Hotovo
-- Formulář Knihy bezpečně vytvoří upravitelný návrh obsahu z dodaných podkladů bez automatického uložení
+- Knihy umějí bezpečně rozpoznat údaje z obálky, uložit validované ISBN a připojit fotografii až při uložení karty
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
 - Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
-- Lokální commity čekají na samostatný denní GitHub balíček.
 
 ### Rizika
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Převzít a nasadit změnu, potom na iPhonu ověřit generování ze syntetických podkladů a ruční úpravu návrhu
+- Převzít a nasadit změnu, potom na iPhonu ověřit náhled obálky, rozpoznání, ruční opravu, uložení přílohy a hledání podle ISBN
 
 ### Rozhodnutí
-- OpenAI se po výslovném stisku tlačítka předává pouze název, autor a podkladový text; návrh ani podklady se automaticky neukládají
+- Fotografie se odešle OpenAI pouze po výslovném stisku tlačítka; rozpoznání nic neukládá ani nedohledává a obálka se připojí až k potvrzeně uložené kartě
 
 ### Navrhované další kroky
-- Ve třetí fázi samostatně promyslet fotografii obálky, OCR, ISBN a automatické dohledávání údajů
+- Po živém potvrzení fáze 3A samostatně navrhnout fázi 3B pro důvěryhodné dohledávání údajů podle ISBN
 
 ### Technický stav checkpointu
-- Změna je otestovaná (1275 testů).
-- Git před checkpointem: lokální `main` na `6b588a988905`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `6b588a988905` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-02T17:47:59+00:00.
-- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+- Změna je otestovaná (1277 testů).
+- Git před checkpointem: lokální `main` na `3abc020f9f6e`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `3abc020f9f6e` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-02T20:25:05+00:00.
+- Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -225,3 +224,15 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (7): `Samantha_Agent/app/cockpit.py`, `Samantha_Agent/app/frontend/cockpit/app.js`, `Samantha_Agent/app/frontend/cockpit/page.html`, `Samantha_Agent/tests/test_cockpit.py`, `Samantha_Agent/tests/test_cockpit_frontend.py`, `Samantha_Agent/app/book_summary.py`, `Samantha_Agent/tests/test_book_summary.py`
 - Commit: `Add safe book summary drafts`
 - Další krok: Převzít a nasadit změnu, potom na iPhonu ověřit generování ze syntetických podkladů a ruční úpravu návrhu
+
+### Automatický checkpoint 2026-08-03 10:57 CEST
+
+- Pracovní proud: `project-knowledge-library`
+- Hotovo: Knihy umějí bezpečně rozpoznat údaje z obálky, uložit validované ISBN a připojit fotografii až při uložení karty; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: plná Cockpit brána: 1277 testů, 304.4 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (10): `Samantha_Agent/app/article_archive.py`, `Samantha_Agent/app/cockpit.py`, `Samantha_Agent/app/frontend/cockpit/app.js`, `Samantha_Agent/app/frontend/cockpit/page.html`, `Samantha_Agent/app/frontend/cockpit/styles.css`, `Samantha_Agent/tests/test_article_archive.py`, `Samantha_Agent/tests/test_cockpit.py`, `Samantha_Agent/tests/test_cockpit_frontend.py`, `Samantha_Agent/app/book_cover.py`, `Samantha_Agent/tests/test_book_cover.py`
+- Commit: `Add safe book cover recognition`
+- Další krok: Převzít a nasadit změnu, potom na iPhonu ověřit náhled obálky, rozpoznání, ruční opravu, uložení přílohy a hledání podle ISBN
