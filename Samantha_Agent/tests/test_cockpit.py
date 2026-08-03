@@ -1369,6 +1369,15 @@ class CockpitTests(unittest.TestCase):
         self.assertIn('data-library-category="books"', COCKPIT_HTML)
         self.assertIn('value="books"', COCKPIT_HTML)
         self.assertIn("Přidat knihu", COCKPIT_HTML)
+        self.assertIn('class="secondary hidden" id="libraryAddBookBtn"', COCKPIT_HTML)
+        self.assertIn("function syncLibraryBookAddAvailability(category, readState)", COCKPIT_HTML)
+        self.assertIn('const available = category === "books" && !readState;', COCKPIT_HTML)
+        self.assertIn('libraryAddBookBtn.classList.toggle("hidden", !available);', COCKPIT_HTML)
+        self.assertIn("libraryAddBookBtn.disabled = !available;", COCKPIT_HTML)
+        self.assertIn(
+            "syncLibraryBookAddAvailability(currentLibraryCategory, currentLibraryReadStateFilter);",
+            COCKPIT_HTML,
+        )
         self.assertIn("libraryBookAuthorInput", COCKPIT_HTML)
         self.assertIn("libraryBookLocationInput", COCKPIT_HTML)
         self.assertIn("libraryBookIsbnInput", COCKPIT_HTML)

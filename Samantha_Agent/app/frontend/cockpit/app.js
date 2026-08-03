@@ -3831,6 +3831,15 @@ Soubor nebude trvale smazán.`);
       libraryTextCategory.value = category;
     }
 
+    function syncLibraryBookAddAvailability(category, readState) {
+      const available = category === "books" && !readState;
+      if (!available && !libraryBookPanel.classList.contains("hidden")) {
+        setLibraryAddMode("");
+      }
+      libraryAddBookBtn.classList.toggle("hidden", !available);
+      libraryAddBookBtn.disabled = !available;
+    }
+
     function resetLibraryExportState(message) {
       currentLibraryExport = null;
       libraryExportPrepareBtn.disabled = !currentLibrarySelectedId;
@@ -4042,6 +4051,7 @@ Soubor nebude trvale smazán.`);
       currentLibraryCategory = category || "other";
       currentLibraryReadStateFilter = readState || "";
       syncLibraryCreateCategories(currentLibraryCategory);
+      syncLibraryBookAddAvailability(currentLibraryCategory, currentLibraryReadStateFilter);
       currentLibrarySelectedId = "";
       currentLibrarySelectedText = "";
       updateLibraryReadStateButtons(null);

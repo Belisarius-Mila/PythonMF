@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-03 13:00 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-03 19:10 CEST
 
 ### Hotovo
-- Knihy umějí bezpečně dohledat a předvyplnit katalogové údaje podle ISBN bez automatického uložení
+- Tlačítko Přidat knihu se zobrazuje výhradně v oddílu Knihy
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
@@ -15,18 +15,18 @@
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Převzít a nasadit změnu, potom na iPhonu ověřit známé ISBN, neznámé ISBN a ruční úpravu před uložením
+- Převzít a nasadit změnu, potom na iPhonu přepnout mezi Recepty a Knihami a ověřit viditelnost tlačítka
 
 ### Rozhodnutí
-- Dohledání po výslovném stisku odesílá pouze validované ISBN do pevného katalogu Open Library a výsledek vyžaduje ruční kontrolu
+- V tomto kroku nebylo přijato nové kanonické rozhodnutí.
 
 ### Navrhované další kroky
 - Žádné další návrhy nad rámec bezprostředního kroku.
 
 ### Technický stav checkpointu
-- Změna je otestovaná (1279 testů).
-- Git před checkpointem: lokální `main` na `0e0fb8de9d04`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `0e0fb8de9d04` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-03T09:14:06+00:00.
+- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
+- Git před checkpointem: lokální `main` na `1b2860f36570`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `1b2860f36570` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-03T16:59:49+00:00.
 - Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -450,5 +450,32 @@ Navrhované další kroky:
 
 Technický důkaz:
 - plná Cockpit brána: 1279 testů, 299.1 s, výsledek OK.
+- Pracovní proud: `project-knowledge-library`.
+- Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+
+### 2026-08-03 19:10 CEST – Tlačítko Přidat knihu se zobrazuje výhradně v oddílu Knihy
+
+Hotovo:
+- Tlačítko Přidat knihu se zobrazuje výhradně v oddílu Knihy
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+
+Otevřeno:
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
+
+Rizika:
+- Žádné další doložené provozní riziko.
+
+Rozhodnutí:
+- V tomto kroku nebylo přijato nové kanonické rozhodnutí.
+
+Další krok:
+- Převzít a nasadit změnu, potom na iPhonu přepnout mezi Recepty a Knihami a ověřit viditelnost tlačítka
+
+Navrhované další kroky:
+- Nebyly zachyceny další návrhy nad rámec bezprostředního kroku.
+
+Technický důkaz:
+- rychlá Cockpit brána syntaxe a whitespace: 6.5 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `project-knowledge-library`.
 - Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
