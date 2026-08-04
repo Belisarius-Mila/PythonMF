@@ -153,6 +153,63 @@ class CanonicalVocabularyMappingTests(unittest.TestCase):
                 "tobe",
             )
 
+    def test_pythonista_fr_last_filter_uses_final_csv_rows(self) -> None:
+        ui_module = types.ModuleType("ui")
+        ui_module.View = type("View", (), {})
+        speech_module = types.ModuleType("speech")
+        sync_module = types.ModuleType("datafresh_sync")
+        sync_module.refresh_files_from_icloud = lambda *args, **kwargs: None
+        sync_module.DATAFRESH_API_VERSION = 2
+        sync_module.datafresh_status_text = lambda *args, **kwargs: ""
+        sync_module.refresh_result_succeeded = lambda *args, **kwargs: False
+        modules = {
+            "ui": ui_module,
+            "speech": speech_module,
+            "datafresh_sync": sync_module,
+        }
+        words = [
+            {"FR": f"mot-{index}", "HT": "ano" if index % 2 == 0 else "ne"}
+            for index in range(75)
+        ]
+
+        for index, relative_path in enumerate(
+            (Path("MBSoft/AppFR.py"), Path("MBSoft/JanaIphoneFR/AppFR.py"))
+        ):
+            with patch.dict(sys.modules, modules):
+                module = load_module(f"last_filter_pythonista_{index}", ROOT / relative_path)
+            trainer = module.VocabTrainer.__new__(module.VocabTrainer)
+            trainer.words = words
+            trainer.filter_ht = False
+            trainer.last_count = 20
+            self.assertEqual(trainer._active_indices(), list(range(55, 75)))
+
+            trainer.last_count = 50
+            self.assertEqual(trainer._active_indices(), list(range(25, 75)))
+
+            trainer.filter_ht = True
+            self.assertEqual(
+                trainer._active_indices(),
+                [index for index in range(25, 75) if index % 2 == 0],
+            )
+
+            trainer.last_count = None
+            trainer.filter_ht = False
+            self.assertEqual(trainer._active_indices(), list(range(75)))
+
+            trainer.btn_last_20 = types.SimpleNamespace(background_color=None)
+            trainer.btn_last_50 = types.SimpleNamespace(background_color=None)
+            advances = []
+            trainer.next_word = lambda sender: advances.append(sender)
+            trainer.select_last_20(None)
+            self.assertEqual(trainer.last_count, 20)
+            self.assertEqual(trainer.btn_last_20.background_color, "#007aff")
+            self.assertEqual(trainer.btn_last_50.background_color, "#8e8e93")
+            trainer.select_last_20(None)
+            self.assertIsNone(trainer.last_count)
+            trainer.select_last_50(None)
+            self.assertEqual(trainer.last_count, 50)
+            self.assertEqual(len(advances), 3)
+
 
 if __name__ == "__main__":
     unittest.main()

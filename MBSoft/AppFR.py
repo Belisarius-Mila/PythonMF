@@ -45,6 +45,7 @@ class VocabTrainer(ui.View):
         self.current_word = None
         self.current_index = None
         self.filter_ht = False
+        self.last_count = None
         self.verbe_rows = []
         self.verbe_selected_index = None
         self.verbe_speech_token = 0
@@ -429,10 +430,19 @@ class VocabTrainer(ui.View):
         self.btn_verbes.action = self.open_verbes_screen
         self.add_subview(self.btn_verbes)
 
-        self.lbl_ht = ui.Label(frame=(12, 615, 100, 30), text='Tezky (HT)', alignment=ui.ALIGN_RIGHT)
-        self.add_subview(self.lbl_ht)
-        self.sw_ht = ui.Switch(frame=(120, 615, 50, 30), action=self.update_ht)
-        self.add_subview(self.sw_ht)
+        self.lbl_last = ui.Label(frame=(12, 615, 52, 32), text='Last', alignment=ui.ALIGN_RIGHT)
+        self.add_subview(self.lbl_last)
+        self.btn_last_20 = ui.Button(frame=(72, 615, 44, 32), tint_color='white', corner_radius=8)
+        self.btn_last_20.title = '20'
+        self.btn_last_20.font = ('<system-bold>', 14)
+        self.btn_last_20.action = self.select_last_20
+        self.add_subview(self.btn_last_20)
+        self.btn_last_50 = ui.Button(frame=(124, 615, 44, 32), tint_color='white', corner_radius=8)
+        self.btn_last_50.title = '50'
+        self.btn_last_50.font = ('<system-bold>', 14)
+        self.btn_last_50.action = self.select_last_50
+        self.add_subview(self.btn_last_50)
+        self._update_last_buttons()
 
         # Auto controls (turbo-like cycle)
         self.btn_auto = ui.Button(frame=(230, 575, 42, 32), background_color='#ff9500', tint_color='white', corner_radius=8)
@@ -659,20 +669,23 @@ class VocabTrainer(ui.View):
         self.lbl_stats.text = f'Celkem: {total} | Tezkych (HT): {ht_count}'
 
     def _pool_indices(self):
-        """Indices after HT filter."""
+        """Indices after the Last limit and optional HT filter."""
+        indices = list(range(len(self.words)))
+        if self.last_count:
+            indices = indices[-self.last_count:]
         return [
-            i for i, w in enumerate(self.words)
-            if (not self.filter_ht or self.is_true(w.get('HT')))
+            i for i in indices
+            if (not self.filter_ht or self.is_true(self.words[i].get('HT')))
         ]
 
     def _active_indices(self):
-        """Active set for selection and counter (all or HT-filtered)."""
+        """Active set for selection and counter."""
         pool = self._pool_indices()
         return pool
 
     def _current_selection_signature(self, active_indices):
         """Selection signature to detect set changes and reset cycle."""
-        return (tuple(active_indices), self.filter_ht)
+        return (tuple(active_indices), self.filter_ht, self.last_count)
 
     def _update_remaining_counter(self, active_indices):
         total = len(active_indices)
@@ -993,8 +1006,6 @@ class VocabTrainer(ui.View):
         self.txt_sent_cz.text = ''
         if hasattr(self, 'sw_l'):
             self.sw_l.value = self.is_true(self.current_word.get('L'))
-        self.sw_ht.value = self.is_true(self.current_word.get('HT'))
-
         # Reset and load image
         self.img_view.image = None
         img_base_name = self._image_base_name_for_word(self.current_word)
@@ -1144,15 +1155,26 @@ class VocabTrainer(ui.View):
         self.lbl_f.text = f"Rezim Tezkych (HT): {'ON' if sender.value else 'OFF'}"
         self.next_word(None)
 
+    def _update_last_buttons(self):
+        inactive_color = '#8e8e93'
+        active_color = '#007aff'
+        self.btn_last_20.background_color = active_color if self.last_count == 20 else inactive_color
+        self.btn_last_50.background_color = active_color if self.last_count == 50 else inactive_color
+
+    def _toggle_last_count(self, count):
+        self.last_count = None if self.last_count == count else count
+        self._update_last_buttons()
+        self.next_word(None)
+
+    def select_last_20(self, sender):
+        self._toggle_last_count(20)
+
+    def select_last_50(self, sender):
+        self._toggle_last_count(50)
+
     def update_l(self, sender):
         if self.current_word:
             self.current_word['L'] = 'True' if sender.value else 'False'
-            self.save_current_state()
-
-    def update_ht(self, sender):
-        if self.current_word:
-            self.current_word['HT'] = 'True' if sender.value else 'False'
-            self.update_stats()
             self.save_current_state()
 
     def save_current_state(self):
