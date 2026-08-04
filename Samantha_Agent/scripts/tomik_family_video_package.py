@@ -199,7 +199,9 @@ def populate_video_files(originals_dir: Path, package_videos_dir: Path, videos: 
             continue
         source = originals_dir / original_name
         target = package_videos_dir / original_name
-        if source.exists():
+        if target.exists():
+            available += 1
+        elif source.exists():
             link_or_copy_video(source, target)
             available += 1
         else:

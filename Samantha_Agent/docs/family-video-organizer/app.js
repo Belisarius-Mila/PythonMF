@@ -504,6 +504,9 @@ function wireEvents() {
 
 function init() {
   elements.projectMeta.textContent = state.project;
+  elements.activeDataset.textContent = state.videos.length
+    ? `${state.project} · ${state.videos.length} záznamů`
+    : "Bez načtených dat";
   if (!("showDirectoryPicker" in window)) {
     elements.selectFolderButton.title = "Vyber složku nebo označ všechny MP4 soubory";
   }

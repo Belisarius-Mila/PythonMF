@@ -5,7 +5,10 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from scripts.tomik_family_video_package import build_family_video_package
+from scripts.tomik_family_video_package import (
+    build_family_video_package,
+    populate_video_files,
+)
 
 
 class TomikFamilyVideoPackageTests(unittest.TestCase):
@@ -79,6 +82,24 @@ class TomikFamilyVideoPackageTests(unittest.TestCase):
 
             payload = self._read_videos_data(out_dir / "videos-data.js")
             self.assertEqual(payload["videos"][0]["thumbs"], ["thumbs/clip001__1.jpg"])
+
+    def test_existing_package_video_counts_when_original_is_unavailable(self) -> None:
+        with tempfile.TemporaryDirectory(dir=Path.cwd()) as temp_dir:
+            root = Path(temp_dir)
+            originals_dir = root / "originals"
+            package_videos_dir = root / "package" / "videos"
+            originals_dir.mkdir()
+            package_videos_dir.mkdir(parents=True)
+            (package_videos_dir / "preserved.mp4").write_bytes(b"preserved")
+
+            available, missing = populate_video_files(
+                originals_dir,
+                package_videos_dir,
+                [{"originalName": "preserved.mp4"}],
+            )
+
+            self.assertEqual(available, 1)
+            self.assertEqual(missing, 0)
 
     def _write_app(self, app_dir: Path) -> None:
         app_dir.mkdir(parents=True)

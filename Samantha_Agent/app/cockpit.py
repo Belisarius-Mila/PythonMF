@@ -344,8 +344,36 @@ RECOVERY_HANDOFF_PATHS = (
     PROJECT_ROOT / "memory" / "handoffs" / "cockpit_recovery_center_priority_2026_06_03.md",
     PROJECT_ROOT / "memory" / "handoffs" / "cockpit_development_priorities_2026_06_03.md",
 )
+FAMILY_VIDEO_ORGANIZER_PRIVATE_ROOT = (
+    PROJECT_ROOT
+    / "data"
+    / "private"
+    / "tomik_rok_2"
+    / "family_video_organizer_package"
+)
+FAMILY_VIDEO_ORGANIZER_FALLBACK_ROOT = (
+    PROJECT_ROOT / "docs" / "family-video-organizer"
+)
+
+
+def family_video_organizer_app_root(
+    *,
+    private_root: Path = FAMILY_VIDEO_ORGANIZER_PRIVATE_ROOT,
+    fallback_root: Path = FAMILY_VIDEO_ORGANIZER_FALLBACK_ROOT,
+) -> Path:
+    required_private_files = (
+        private_root / "index.html",
+        private_root / "app.js",
+        private_root / "styles.css",
+        private_root / "videos-data.js",
+    )
+    if all(path.is_file() for path in required_private_files):
+        return private_root
+    return fallback_root
+
+
 LOCAL_WEB_APPS = {
-    "family-video-organizer": PROJECT_ROOT / "docs" / "family-video-organizer",
+    "family-video-organizer": family_video_organizer_app_root(),
 }
 DESKTOP_APP_CATALOG: tuple[dict[str, Any], ...] = (
     {
@@ -427,9 +455,9 @@ WEB_APP_CATALOG: tuple[dict[str, str], ...] = (
     {
         "id": "family-video-organizer",
         "title": "Family Video Organizer",
-        "description": "Lokální prototyp pro třídění rodinných videí, výběr záběrů a přípravu podkladů pro sestřih.",
+        "description": "Soukromý lokální organizér rodinných videí, výběru záběrů a podkladů pro sestřih.",
         "url": "/local-apps/family-video-organizer/",
-        "kind": "lokální prototyp",
+        "kind": "lokální soukromá data",
     },
 )
 

@@ -5982,6 +5982,47 @@ Dalsi krok:
         self.assertIn("Vocabulary IT", apps["vocabulary-it-trainer"]["title"])
         self.assertIn("Vocabulary FR", apps["vocabulary-fr-trainer"]["title"])
 
+    def test_family_video_organizer_prefers_complete_private_package(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            private_root = root / "private-package"
+            fallback_root = root / "fallback"
+            private_root.mkdir()
+            fallback_root.mkdir()
+            for filename in ("index.html", "app.js", "styles.css", "videos-data.js"):
+                (private_root / filename).write_text(filename, encoding="utf-8")
+
+            selected = cockpit_module.family_video_organizer_app_root(
+                private_root=private_root,
+                fallback_root=fallback_root,
+            )
+
+            self.assertEqual(selected, private_root)
+
+    def test_family_video_organizer_falls_back_without_private_data(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            private_root = root / "incomplete-private-package"
+            fallback_root = root / "fallback"
+            private_root.mkdir()
+            fallback_root.mkdir()
+            (private_root / "index.html").write_text("index", encoding="utf-8")
+
+            selected = cockpit_module.family_video_organizer_app_root(
+                private_root=private_root,
+                fallback_root=fallback_root,
+            )
+
+            self.assertEqual(selected, fallback_root)
+
+    def test_family_video_organizer_labels_the_default_dataset(self) -> None:
+        app_source = (
+            cockpit_module.FAMILY_VIDEO_ORGANIZER_FALLBACK_ROOT / "app.js"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("elements.activeDataset.textContent = state.videos.length", app_source)
+        self.assertIn("${state.project} · ${state.videos.length} záznamů", app_source)
+
     def test_open_desktop_app_action_uses_allowlisted_terminal_command(self) -> None:
         calls: list[list[str]] = []
 

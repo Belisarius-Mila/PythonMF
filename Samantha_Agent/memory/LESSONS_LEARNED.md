@@ -84,3 +84,15 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   očekávané změny `HT`, provést povinný společný audit všech tří slovníků,
   mappingů, vět a obrázků a potom změny uložit jako samostatný cílený commit.
   Tréninkový stav bez výslovného pokynu nezahazovat.
+
+### LL-006 — Lokální katalog může omylem otevřít jen ukázková data
+
+- Problém: Family Video Organizer v Cockpitu servíroval verzovanou veřejnou
+  šablonu se třemi ukázkovými záznamy, přestože úplný soukromý balíček existoval.
+  Generátor navíc nepočítal již zachované video, pokud chybělo v původním zdroji.
+- Typ: opakující se
+- Řešení nalezeno: 04082026
+- Řešení: Lokální katalog má přednostně vybrat ověřený soukromý balíček a při
+  jeho neúplnosti bezpečně spadnout na veřejnou šablonu. Po obnově balíčku
+  ověřit počty dat, náhledů a skutečně existujících videí; generátor má jako
+  dostupný započítat i již přítomný cílový soubor.
