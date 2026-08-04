@@ -205,24 +205,24 @@ légume,zelenina,203,La tomate est un légume? Je mange de légumes.,Rajče je z
 dîner,večeře,204,Nous prenons le dîner à huit heures.,Večeříme v osm hodin.,ne,ano,m
 dîner,večeřet,205,Ils dînent au restaurant ce soir.,Dnes večer večeří v restauraci.,ne,ano,
 supermarché,supermarket,206,Le supermarché est près de la gare.,Supermarket je blízko nádraží.,ne,ano,m
-lit,postel,207,Le chat dort sur le lit.,Kočka spí na posteli.,ne,ne,m
-nuit,noc,208,La nuit est calme.,Noc je klidná.,ne,ne,f
-demain,zítra,209,Je viens demain.,Přijdu zítra.,ne,ne,
-chinois,čínský; Číňan; čínština,210,Il parle chinois.,Mluví čínsky / čínštinou.,ne,ne,m
-plusieurs,"několik, více",211,J’ai plusieurs livres à la maison.,Mám doma několik knih.,ne,ne,
-langue,jazyk,212,Le français est une belle langue.,Francouzština je krásný jazyk.,ne,ne,f
-plage,pláž,213,"En été, nous allons souvent à la plage.",V létě často chodíme na pláž.,ne,ne,f
-cours,"kurz, hodina, vyučování, průběh",214,Les cours commencent à huit heures.,Vyučování začíná v osm hodin.,ne,ne,m
-maths,matematika,215,J’ai un cours de maths cet après-midi.,Dnes odpoledne mám hodinu matematiky.,ne,ne,
-cahier,sešit,216,Le cahier est sur la table.,Sešit je na stole.,ne,ne,m
-prof,"učitel, profesor",217,Le prof explique bien la leçon.,Učitel dobře vysvětluje látku.,ne,ne,m
-stade,"stadion, stádium, fáze",218,Le match a lieu au stade.,Zápas se koná na stadionu.,ne,ne,
-acheter,"koupit, kupovat",219,Nous allons acheter un cadeau.,Půjdeme koupit dárek.,ne,ne,
-équipe,"tým, mužstvo",220,Elle travaille dans une grande équipe.,Pracuje ve velkém týmu.,ne,ne,
-cher,"drahý, milý",221,"Ce restaurant est trop cher. Cher Paul, merci pour ta lettre.","Tato restaurace je příliš drahá. Milý Paule, děkuji za tvůj dopis.",ne,ne,
-bière,pivo,222,"Je voudrais une bière, s’il vous plaît.","Chtěl bych jedno pivo, prosím.",ne,ne,
-chaussure,"bota, obuv",223,J’ai acheté une nouvelle paire de chaussures.,Koupil jsem si nový pár bot.,ne,ne,
-gagner,"vyhrát, vydělat, získat",224,Il gagne beaucoup d’argent.,Vydělává hodně peněz.,ne,ne,
-cour,dvůr,225,Les enfants jouent dans la cour.,Děti si hrají na dvoře.,ne,ne,
-détester,"nenávidět, nesnášet",226,Nous détestons nous lever tôt.,Nesnášíme brzké vstávání.,ne,ne,
-course,"závod, běh, nákup",227,Nous allons faire les courses au supermarché.,Jdeme nakoupit do supermarketu.,ne,ne,
+lit,postel,207,Le chat dort sur le lit.,Kočka spí na posteli.,ne,ano,m
+nuit,noc,208,La nuit est calme.,Noc je klidná.,ne,ano,f
+demain,zítra,209,Je viens demain.,Přijdu zítra.,ne,ano,
+chinois,čínský; Číňan; čínština,210,Il parle chinois.,Mluví čínsky / čínštinou.,ne,ano,m
+plusieurs,"několik, více",211,J’ai plusieurs livres à la maison.,Mám doma několik knih.,ne,ano,
+langue,jazyk,212,Le français est une belle langue.,Francouzština je krásný jazyk.,ne,ano,f
+plage,pláž,213,"En été, nous allons souvent à la plage.",V létě často chodíme na pláž.,ne,ano,f
+cours,"kurz, hodina, vyučování, průběh",214,Les cours commencent à huit heures.,Vyučování začíná v osm hodin.,ne,ano,m
+maths,matematika,215,J’ai un cours de maths cet après-midi.,Dnes odpoledne mám hodinu matematiky.,ne,ano,
+cahier,sešit,216,Le cahier est sur la table.,Sešit je na stole.,ne,ano,m
+prof,"učitel, profesor",217,Le prof explique bien la leçon.,Učitel dobře vysvětluje látku.,ne,ano,m
+stade,"stadion, stádium, fáze",218,Le match a lieu au stade.,Zápas se koná na stadionu.,ne,ano,
+acheter,"koupit, kupovat",219,Nous allons acheter un cadeau.,Půjdeme koupit dárek.,ne,ano,
+équipe,"tým, mužstvo",220,Elle travaille dans une grande équipe.,Pracuje ve velkém týmu.,ne,ano,
+cher,"drahý, milý",221,"Ce restaurant est trop cher. Cher Paul, merci pour ta lettre.","Tato restaurace je příliš drahá. Milý Paule, děkuji za tvůj dopis.",ne,ano,
+bière,pivo,222,"Je voudrais une bière, s’il vous plaît.","Chtěl bych jedno pivo, prosím.",ne,ano,
+chaussure,"bota, obuv",223,J’ai acheté une nouvelle paire de chaussures.,Koupil jsem si nový pár bot.,ne,ano,
+gagner,"vyhrát, vydělat, získat",224,Il gagne beaucoup d’argent.,Vydělává hodně peněz.,ne,ano,
+cour,dvůr,225,Les enfants jouent dans la cour.,Děti si hrají na dvoře.,ne,ano,
+détester,"nenávidět, nesnášet",226,Nous détestons nous lever tôt.,Nesnášíme brzké vstávání.,ne,ano,
+course,"závod, běh, nákup",227,Nous allons faire les courses au supermarché.,Jdeme nakoupit do supermarketu.,ne,ano,

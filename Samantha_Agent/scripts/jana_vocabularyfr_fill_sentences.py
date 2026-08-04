@@ -302,6 +302,10 @@ SENTENCE_PATCHES = {
         "Je comprends cette question.",
         "Rozumím této otázce.",
     ),
+    390: SentencePatch(
+        "Je suis un cours de français chaque semaine.",
+        "Každý týden chodím na kurz francouzštiny.",
+    ),
 }
 
 

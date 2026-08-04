@@ -72,3 +72,15 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Řešení: Provozní stav společný pro všechny profily rozpoznávat přes kanonický
   kořen projektu. Profilové workspaces stav pouze čtou nebo aktualizují ve
   společném umístění; nevytvářejí vlastní kopie, které by se mohly rozejít.
+
+### LL-005 — Procvičování slovíček může zablokovat direct-main vývoj
+
+- Problém: Slovníkové aplikace při běžném procvičování zapsaly příznaky `HT`
+  přímo do verzovaných CSV. Zdrojový `main` tím zůstal pracovní, takže Knihovna
+  správně povolila chat, ale bezpečnostní brána odmítla další zapisovací tah.
+- Typ: opakující se
+- Řešení nalezeno: 04082026
+- Řešení: Nejdřív ukončit slovníkové aplikace, ověřit, že diff obsahuje jen
+  očekávané změny `HT`, provést povinný společný audit všech tří slovníků,
+  mappingů, vět a obrázků a potom změny uložit jako samostatný cílený commit.
+  Tréninkový stav bez výslovného pokynu nezahazovat.
