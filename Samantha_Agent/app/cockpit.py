@@ -61,7 +61,13 @@ from app.article_archive import (
     remove_article_attachment,
 )
 from app.book_summary import BookSummaryGenerationError, generate_book_summary_draft
-from app.book_cover import BookCoverRecognitionError, recognize_book_cover
+from app.book_cover import (
+    BookCoverRecognitionError,
+    prepare_book_cover_data_url,
+    prepare_book_image_data_url,
+    recognize_book_cover,
+)
+from app.book_text_ocr import BookTextOcrError, extract_book_text_from_images
 from app.book_isbn_lookup import (
     BookIsbnCertificateError,
     BookIsbnConnectionRefusedError,
@@ -728,6 +734,59 @@ def library_book_cover_draft_action(payload: dict[str, Any]) -> dict[str, Any]:
             else "Z fotografie se nepodařilo spolehlivě přečíst název, autora ani ISBN. Vyplň je ručně."
         ),
         "suggestion": suggestion,
+        "saved": False,
+    }
+
+
+def library_book_cover_prepare_action(payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        prepared_image_data_url = prepare_book_cover_data_url(
+            str(payload.get("image_data_url", "")),
+        )
+    except ValueError as exc:
+        return {"ok": False, "message": str(exc), "error": "invalid_book_cover"}
+    return {
+        "ok": True,
+        "message": "Obálka je bezpečně zmenšená a připravená k připojení po uložení knihy.",
+        "image_data_url": prepared_image_data_url,
+        "filename": "obalka-knihy.jpg",
+        "saved": False,
+    }
+
+
+def library_book_text_ocr_action(payload: dict[str, Any]) -> dict[str, Any]:
+    raw_images = payload.get("image_data_urls", [])
+    image_data_urls = raw_images if isinstance(raw_images, list) else []
+    try:
+        ocr = extract_book_text_from_images(
+            image_data_urls=[str(item or "") for item in image_data_urls],
+        )
+    except ValueError as exc:
+        return {"ok": False, "message": str(exc), "error": "invalid_book_text_photos"}
+    except BookTextOcrError as exc:
+        return {"ok": False, "message": str(exc), "error": "book_text_ocr_failed"}
+    return {
+        "ok": True,
+        "message": "Rozpoznaný text je připravený k ruční kontrole. Fotografie ani kniha nebyly uloženy.",
+        "ocr": ocr,
+        "saved": False,
+    }
+
+
+def library_book_text_photo_prepare_action(payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        prepared_image_data_url = prepare_book_image_data_url(
+            str(payload.get("image_data_url", "")),
+            image_description="fotografii textu knihy",
+            max_edge=1400,
+            jpeg_quality=82,
+        )
+    except ValueError as exc:
+        return {"ok": False, "message": str(exc), "error": "invalid_book_text_photo"}
+    return {
+        "ok": True,
+        "message": "Fotografie textu je dočasně zmenšená pro OCR.",
+        "image_data_url": prepared_image_data_url,
         "saved": False,
     }
 
@@ -8808,6 +8867,30 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "direct",
     },
     {
+        "path": "/api/library/book/cover-prepare",
+        "label": "Zmensit obalku knihy pred ulozenim",
+        "risk": "read_only_via_post",
+        "confirmation": "explicit_book_save_preparation_no_persistence",
+        "handler_name": "library_book_cover_prepare_action",
+        "test_level": "direct",
+    },
+    {
+        "path": "/api/library/book/text-ocr",
+        "label": "Precist text z docasnych fotografii knihy",
+        "risk": "external_ai",
+        "confirmation": "explicit_ocr_button_no_persistence",
+        "handler_name": "library_book_text_ocr_action",
+        "test_level": "direct",
+    },
+    {
+        "path": "/api/library/book/text-photo-prepare",
+        "label": "Docasne zmensit fotografii textu knihy pro OCR",
+        "risk": "read_only_via_post",
+        "confirmation": "explicit_ocr_preparation_no_persistence",
+        "handler_name": "library_book_text_photo_prepare_action",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/library/book/isbn-lookup",
         "label": "Dohledat udaje knihy podle ISBN",
         "risk": "external_lookup",
@@ -9726,6 +9809,18 @@ class CockpitServer:
                 if parsed.path == "/api/library/book/cover-draft":
                     payload = self.read_json()
                     self.respond_json(library_book_cover_draft_action(payload))
+                    return
+                if parsed.path == "/api/library/book/cover-prepare":
+                    payload = self.read_json()
+                    self.respond_json(library_book_cover_prepare_action(payload))
+                    return
+                if parsed.path == "/api/library/book/text-ocr":
+                    payload = self.read_json()
+                    self.respond_json(library_book_text_ocr_action(payload))
+                    return
+                if parsed.path == "/api/library/book/text-photo-prepare":
+                    payload = self.read_json()
+                    self.respond_json(library_book_text_photo_prepare_action(payload))
                     return
                 if parsed.path == "/api/library/book/isbn-lookup":
                     payload = self.read_json()

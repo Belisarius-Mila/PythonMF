@@ -30,6 +30,9 @@ from app.cockpit import (
     library_article_reextract_preview_action,
     library_book_summary_draft_action,
     library_book_cover_draft_action,
+    library_book_cover_prepare_action,
+    library_book_text_ocr_action,
+    library_book_text_photo_prepare_action,
     library_book_isbn_lookup_action,
     library_attach_image_action,
     library_delete_article_action,
@@ -547,6 +550,75 @@ class CockpitTests(unittest.TestCase):
         self.assertTrue(result["ok"])
         self.assertFalse(result["saved"])
         self.assertIn("vyplň je ručně", result["message"].casefold())
+
+    def test_library_book_cover_prepare_action_returns_resized_preview_without_saving(self) -> None:
+        with patch(
+            "app.cockpit.prepare_book_cover_data_url",
+            return_value="data:image/jpeg;base64,c21hbGw=",
+        ) as prepare_mock:
+            result = library_book_cover_prepare_action(
+                {"image_data_url": "data:image/heic;base64,b3JpZ2luYWw="}
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertFalse(result["saved"])
+        self.assertEqual(result["filename"], "obalka-knihy.jpg")
+        self.assertEqual(result["image_data_url"], "data:image/jpeg;base64,c21hbGw=")
+        prepare_mock.assert_called_once_with("data:image/heic;base64,b3JpZ2luYWw=")
+
+    def test_library_book_text_ocr_action_returns_preview_without_saving_or_metadata(self) -> None:
+        synthetic_ocr = {
+            "text": "Syntetický text z fotografie.",
+            "uncertainties": [],
+            "image_count": 1,
+        }
+        with patch("app.cockpit.extract_book_text_from_images", return_value=synthetic_ocr) as ocr_mock:
+            result = library_book_text_ocr_action(
+                {
+                    "image_data_urls": ["data:image/jpeg;base64,cGhvdG8="],
+                    "title": "Toto se nesmí odeslat",
+                    "location": "Ani umístění",
+                    "tags": "Ani tagy",
+                }
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertFalse(result["saved"])
+        self.assertEqual(result["ocr"], synthetic_ocr)
+        ocr_mock.assert_called_once_with(
+            image_data_urls=["data:image/jpeg;base64,cGhvdG8="],
+        )
+
+    def test_library_book_text_ocr_action_reports_safe_errors(self) -> None:
+        with patch("app.cockpit.extract_book_text_from_images", side_effect=ValueError("Vyber fotografii.")):
+            invalid = library_book_text_ocr_action({})
+        self.assertEqual(invalid["error"], "invalid_book_text_photos")
+
+        with patch(
+            "app.cockpit.extract_book_text_from_images",
+            side_effect=cockpit_module.BookTextOcrError("OCR je nedostupné."),
+        ):
+            failed = library_book_text_ocr_action({"image_data_urls": ["synthetic"]})
+        self.assertEqual(failed["error"], "book_text_ocr_failed")
+
+    def test_library_book_text_photo_prepare_action_returns_temporary_resized_copy(self) -> None:
+        with patch(
+            "app.cockpit.prepare_book_image_data_url",
+            return_value="data:image/jpeg;base64,c21hbGw=",
+        ) as prepare_mock:
+            result = library_book_text_photo_prepare_action(
+                {"image_data_url": "data:image/heic;base64,b3JpZ2luYWw="}
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertFalse(result["saved"])
+        self.assertEqual(result["image_data_url"], "data:image/jpeg;base64,c21hbGw=")
+        prepare_mock.assert_called_once_with(
+            "data:image/heic;base64,b3JpZ2luYWw=",
+            image_description="fotografii textu knihy",
+            max_edge=1400,
+            jpeg_quality=82,
+        )
 
     def test_library_book_summary_draft_action_returns_preview_without_saving(self) -> None:
         synthetic_draft = "Syntetický návrh obsahu. " * 8
@@ -1438,9 +1510,30 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("libraryBookCoverPreview", COCKPIT_HTML)
         self.assertIn("libraryBookCoverDraftBtn", COCKPIT_HTML)
         self.assertIn("/api/library/book/cover-draft", COCKPIT_HTML)
+        self.assertIn("/api/library/book/cover-prepare", COCKPIT_HTML)
         self.assertIn("function recognizeLibraryBookCover()", COCKPIT_HTML)
+        self.assertIn("Zmenšená obálka se uloží až s knihou", COCKPIT_HTML)
+        self.assertIn('image_data_url: preparedCover.image_data_url', COCKPIT_HTML)
+        self.assertIn('filename: preparedCover.filename || "obalka-knihy.jpg"', COCKPIT_HTML)
+        self.assertNotIn("const imageDataUrl = await blobToDataUrl(cover.file);", COCKPIT_HTML)
         self.assertIn('role: "book_cover"', COCKPIT_HTML)
         self.assertIn("Přidej ji v části Přílohy", COCKPIT_HTML)
+        self.assertIn('libraryBookOcrPhotoInput" type="file" accept="image/*" capture="environment"', COCKPIT_HTML)
+        self.assertIn("libraryBookOcrReadBtn", COCKPIT_HTML)
+        self.assertIn("libraryBookOcrTextPreview", COCKPIT_HTML)
+        self.assertIn("Nahradit podklady", COCKPIT_HTML)
+        self.assertIn("Přidat k podkladům", COCKPIT_HTML)
+        self.assertIn("function readLibraryBookTextFromPhotos()", COCKPIT_HTML)
+        self.assertIn("function applyLibraryBookOcrText(mode)", COCKPIT_HTML)
+        self.assertIn('/api/library/book/text-photo-prepare', COCKPIT_HTML)
+        self.assertIn('/api/library/book/text-ocr', COCKPIT_HTML)
+        self.assertIn("libraryBookOcrFiles.length >= 3", COCKPIT_HTML)
+        self.assertIn("Dočasné fotografie byly uvolněny", COCKPIT_HTML)
+        self.assertIn("if (!available) clearLibraryBookOcrPhotos();", COCKPIT_HTML)
+        self.assertIn('setLibraryAddMode("");\n      clearLibraryBookOcrPhotos();\n      libraryModal.classList.add("hidden");', COCKPIT_HTML)
+        ocr_start = COCKPIT_HTML.index("async function readLibraryBookTextFromPhotos()")
+        ocr_end = COCKPIT_HTML.index("function applyLibraryBookOcrText(mode)", ocr_start)
+        self.assertNotIn("/api/library/attachment/add", COCKPIT_HTML[ocr_start:ocr_end])
         self.assertIn("libraryBookSummaryInput", COCKPIT_HTML)
         self.assertIn("libraryBookSourceInput", COCKPIT_HTML)
         self.assertIn("libraryBookSummaryDraftBtn", COCKPIT_HTML)

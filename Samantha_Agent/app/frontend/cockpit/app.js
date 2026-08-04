@@ -88,6 +88,15 @@
     const libraryBookCoverDraftBtn = document.getElementById("libraryBookCoverDraftBtn");
     const libraryBookCoverClearBtn = document.getElementById("libraryBookCoverClearBtn");
     const libraryBookCoverStatus = document.getElementById("libraryBookCoverStatus");
+    const libraryBookOcrPhotoInput = document.getElementById("libraryBookOcrPhotoInput");
+    const libraryBookOcrReadBtn = document.getElementById("libraryBookOcrReadBtn");
+    const libraryBookOcrClearBtn = document.getElementById("libraryBookOcrClearBtn");
+    const libraryBookOcrStatus = document.getElementById("libraryBookOcrStatus");
+    const libraryBookOcrPreview = document.getElementById("libraryBookOcrPreview");
+    const libraryBookOcrTextPreview = document.getElementById("libraryBookOcrTextPreview");
+    const libraryBookOcrReplaceBtn = document.getElementById("libraryBookOcrReplaceBtn");
+    const libraryBookOcrAppendBtn = document.getElementById("libraryBookOcrAppendBtn");
+    const libraryBookOcrDiscardBtn = document.getElementById("libraryBookOcrDiscardBtn");
     const libraryBookSourceInput = document.getElementById("libraryBookSourceInput");
     const libraryBookSummaryInput = document.getElementById("libraryBookSummaryInput");
     const libraryBookSummaryDraftBtn = document.getElementById("libraryBookSummaryDraftBtn");
@@ -315,6 +324,8 @@
     let familyCalendarEditorDirty = false;
     let libraryEditorDirty = false;
     let libraryBookCoverObjectUrl = "";
+    let libraryBookOcrFiles = [];
+    let libraryBookOcrDraftText = "";
     let currentQuantitative = null;
     let currentAutosaveCleanupPlan = null;
     let frontendLastError = "";
@@ -473,6 +484,15 @@
         "libraryBookCoverDraftBtn",
         "libraryBookCoverClearBtn",
         "libraryBookCoverStatus",
+        "libraryBookOcrPhotoInput",
+        "libraryBookOcrReadBtn",
+        "libraryBookOcrClearBtn",
+        "libraryBookOcrStatus",
+        "libraryBookOcrPreview",
+        "libraryBookOcrTextPreview",
+        "libraryBookOcrReplaceBtn",
+        "libraryBookOcrAppendBtn",
+        "libraryBookOcrDiscardBtn",
         "libraryBookSourceInput",
         "libraryBookSummaryInput",
         "libraryBookSummaryDraftBtn",
@@ -3790,6 +3810,7 @@ Soubor nebude trvale smazán.`);
       if (!confirmLibraryEditorDiscard()) return false;
       closeLibraryEditor(true);
       setLibraryAddMode("");
+      clearLibraryBookOcrPhotos();
       libraryModal.classList.add("hidden");
       return true;
     }
@@ -3836,6 +3857,7 @@ Soubor nebude trvale smazán.`);
       if (!available && !libraryBookPanel.classList.contains("hidden")) {
         setLibraryAddMode("");
       }
+      if (!available) clearLibraryBookOcrPhotos();
       libraryAddBookBtn.classList.toggle("hidden", !available);
       libraryAddBookBtn.disabled = !available;
     }
@@ -4218,8 +4240,7 @@ Soubor nebude trvale smazán.`);
       }
     }
 
-    function validateSelectedLibraryBookCover(maxBytes) {
-      const file = libraryBookCoverInput.files && libraryBookCoverInput.files[0];
+    function validateLibraryBookImageFile(file, maxBytes) {
       if (!file) return {file: null, error: ""};
       const filename = String(file.name || "").toLowerCase();
       const supportedName = /\.(jpe?g|png|webp|heic|heif)$/.test(filename);
@@ -4233,6 +4254,11 @@ Soubor nebude trvale smazán.`);
       return {file, error: ""};
     }
 
+    function validateSelectedLibraryBookCover(maxBytes) {
+      const file = libraryBookCoverInput.files && libraryBookCoverInput.files[0];
+      return validateLibraryBookImageFile(file, maxBytes);
+    }
+
     function clearLibraryBookCover() {
       libraryBookCoverInput.value = "";
       if (libraryBookCoverObjectUrl) {
@@ -4241,7 +4267,7 @@ Soubor nebude trvale smazán.`);
       }
       libraryBookCoverPreview.removeAttribute("src");
       libraryBookCoverPreviewWrap.classList.add("hidden");
-      libraryBookCoverStatus.textContent = "Rozpoznání odešle OpenAI pouze vybranou fotografii a nic neuloží.";
+      libraryBookCoverStatus.textContent = "Rozpoznání odešle OpenAI pouze vybranou fotografii. Zmenšená obálka se uloží až s knihou.";
     }
 
     function previewSelectedLibraryBookCover() {
@@ -4302,6 +4328,101 @@ Soubor nebude trvale smazán.`);
       } finally {
         libraryBookCoverDraftBtn.disabled = false;
       }
+    }
+
+    function discardLibraryBookOcrDraft() {
+      libraryBookOcrDraftText = "";
+      libraryBookOcrTextPreview.value = "";
+      libraryBookOcrPreview.classList.add("hidden");
+    }
+
+    function clearLibraryBookOcrPhotos(clearDraft = true) {
+      libraryBookOcrFiles = [];
+      libraryBookOcrPhotoInput.value = "";
+      libraryBookOcrReadBtn.disabled = true;
+      if (clearDraft) discardLibraryBookOcrDraft();
+      libraryBookOcrStatus.textContent = "Vyber nebo postupně vyfoť 1–3 snímky. OpenAI je obdrží až po stisku Přečíst text.";
+    }
+
+    function addLibraryBookOcrPhoto() {
+      const file = libraryBookOcrPhotoInput.files && libraryBookOcrPhotoInput.files[0];
+      libraryBookOcrPhotoInput.value = "";
+      const checked = validateLibraryBookImageFile(file, maxLibraryImageBytes);
+      if (checked.error) {
+        libraryBookOcrStatus.textContent = checked.error;
+        return;
+      }
+      if (!checked.file) return;
+      if (libraryBookOcrFiles.length >= 3) {
+        libraryBookOcrStatus.textContent = "Jsou vybrané už 3 fotografie. Nejdřív je přečti nebo odeber.";
+        return;
+      }
+      libraryBookOcrFiles.push(checked.file);
+      libraryBookOcrReadBtn.disabled = false;
+      const count = libraryBookOcrFiles.length;
+      libraryBookOcrStatus.textContent = `Vybráno ${count}/3 fotografií. ${count < 3 ? "Můžeš přidat další snímek." : "Nyní spusť OCR."}`;
+    }
+
+    async function readLibraryBookTextFromPhotos() {
+      if (!libraryBookOcrFiles.length) {
+        libraryBookOcrStatus.textContent = "Nejdřív vyber nebo vyfoť alespoň jeden snímek textu.";
+        libraryBookOcrPhotoInput.focus();
+        return;
+      }
+      libraryBookOcrReadBtn.disabled = true;
+      libraryBookOcrStatus.textContent = "Připravuji fotografie a čtu viditelný text. Snímky se neukládají...";
+      try {
+        const imageDataUrls = [];
+        for (let index = 0; index < libraryBookOcrFiles.length; index += 1) {
+          libraryBookOcrStatus.textContent = `Dočasně zmenšuji fotografii ${index + 1}/${libraryBookOcrFiles.length} pro OCR...`;
+          const originalImageDataUrl = await blobToDataUrl(libraryBookOcrFiles[index]);
+          const preparation = await postJson("/api/library/book/text-photo-prepare", {
+            image_data_url: originalImageDataUrl,
+          });
+          if (!preparation.ok || !preparation.image_data_url) {
+            libraryBookOcrStatus.textContent = preparation.message || "Fotografii textu se nepodařilo připravit.";
+            return;
+          }
+          imageDataUrls.push(preparation.image_data_url);
+        }
+        libraryBookOcrStatus.textContent = "Čtu viditelný text. Dočasné snímky se neukládají...";
+        const data = await postJson("/api/library/book/text-ocr", {
+          image_data_urls: imageDataUrls,
+        });
+        if (!data.ok || !data.ocr || !data.ocr.text) {
+          libraryBookOcrStatus.textContent = data.message || "Text z fotografií se nepodařilo přečíst.";
+          return;
+        }
+        libraryBookOcrDraftText = String(data.ocr.text || "");
+        libraryBookOcrTextPreview.value = libraryBookOcrDraftText;
+        libraryBookOcrPreview.classList.remove("hidden");
+        libraryBookOcrFiles = [];
+        libraryBookOcrPhotoInput.value = "";
+        const uncertainties = Array.isArray(data.ocr.uncertainties) && data.ocr.uncertainties.length
+          ? ` Ověř ručně: ${data.ocr.uncertainties.join("; ")}`
+          : "";
+        libraryBookOcrStatus.textContent = `${data.message || "Text je připravený."} Dočasné fotografie byly uvolněny.${uncertainties}`;
+        libraryBookOcrTextPreview.focus();
+      } catch (err) {
+        recordFrontendError(err);
+        libraryBookOcrStatus.textContent = `Chyba OCR: ${err}`;
+      } finally {
+        libraryBookOcrReadBtn.disabled = libraryBookOcrFiles.length === 0;
+      }
+    }
+
+    function applyLibraryBookOcrText(mode) {
+      if (!libraryBookOcrDraftText) return;
+      if (mode === "append" && libraryBookSourceInput.value.trim()) {
+        libraryBookSourceInput.value = `${libraryBookSourceInput.value.trim()}\n\n${libraryBookOcrDraftText}`;
+      } else {
+        libraryBookSourceInput.value = libraryBookOcrDraftText;
+      }
+      discardLibraryBookOcrDraft();
+      libraryBookOcrStatus.textContent = mode === "append"
+        ? "Rozpoznaný text byl přidán k podkladům. Zkontroluj jej a případně oprav."
+        : "Rozpoznaný text nahradil podklady. Zkontroluj jej a případně oprav.";
+      libraryBookSourceInput.focus();
     }
 
     async function generateLibraryBookSummary() {
@@ -4414,6 +4535,20 @@ Soubor nebude trvale smazán.`);
       libraryBookSaveBtn.disabled = true;
       libraryBookStatus.textContent = "Ukládám knihu do soukromé knihovny...";
       try {
+        let preparedCover = null;
+        if (cover.file) {
+          libraryBookStatus.textContent = "Zmenšuji obálku před uložením knihy...";
+          const originalCoverDataUrl = await blobToDataUrl(cover.file);
+          const preparation = await postJson("/api/library/book/cover-prepare", {
+            image_data_url: originalCoverDataUrl,
+          });
+          if (!preparation.ok || !preparation.image_data_url) {
+            libraryBookStatus.textContent = preparation.message || "Obálku se nepodařilo bezpečně zmenšit.";
+            return;
+          }
+          preparedCover = preparation;
+          libraryBookStatus.textContent = "Obálka je zmenšená. Ukládám knihu do soukromé knihovny...";
+        }
         const data = await postJson("/api/library/book", {
           title,
           author,
@@ -4428,13 +4563,12 @@ Soubor nebude trvale smazán.`);
         }
         const item = data.item || {};
         let finalMessage = data.message || "Kniha byla uložena.";
-        if (cover.file && item.id) {
+        if (preparedCover && item.id) {
           try {
-            const imageDataUrl = await blobToDataUrl(cover.file);
             const attachment = await postJson("/api/library/attachment/add", {
               article_id: item.id,
-              image_data_url: imageDataUrl,
-              filename: cover.file.name || "obalka-knihy.jpg",
+              image_data_url: preparedCover.image_data_url,
+              filename: preparedCover.filename || "obalka-knihy.jpg",
               category: "books",
               label: "Obálka knihy",
               role: "book_cover",
@@ -4448,7 +4582,7 @@ Soubor nebude trvale smazán.`);
             recordFrontendError(coverError);
             finalMessage += ` Obálku se nepodařilo připojit: ${coverError}. Přidej ji v části Přílohy.`;
           }
-        } else if (cover.file) {
+        } else if (preparedCover) {
           finalMessage += " Obálku se nepodařilo připojit, protože odpověď neobsahovala identifikátor nové karty. Přidej ji v části Přílohy.";
         }
         libraryBookStatus.textContent = finalMessage;
@@ -4462,6 +4596,7 @@ Soubor nebude trvale smazán.`);
         clearLibraryBookIsbnLookupResult();
         libraryBookIsbnLookupStatus.textContent = "Po stisku se do veřejného katalogu odešle pouze validované ISBN. Výsledek se neuloží automaticky.";
         clearLibraryBookCover();
+        clearLibraryBookOcrPhotos();
         setLibraryAddMode("");
         await loadLibraryCategory("books");
         if (item.id) await loadLibraryItem(item.id);
@@ -6434,6 +6569,15 @@ ${item.context || ""}`);
     libraryBookCoverInput.addEventListener("change", previewSelectedLibraryBookCover);
     libraryBookCoverDraftBtn.addEventListener("click", recognizeLibraryBookCover);
     libraryBookCoverClearBtn.addEventListener("click", clearLibraryBookCover);
+    libraryBookOcrPhotoInput.addEventListener("change", addLibraryBookOcrPhoto);
+    libraryBookOcrReadBtn.addEventListener("click", readLibraryBookTextFromPhotos);
+    libraryBookOcrClearBtn.addEventListener("click", () => clearLibraryBookOcrPhotos());
+    libraryBookOcrReplaceBtn.addEventListener("click", () => applyLibraryBookOcrText("replace"));
+    libraryBookOcrAppendBtn.addEventListener("click", () => applyLibraryBookOcrText("append"));
+    libraryBookOcrDiscardBtn.addEventListener("click", () => {
+      discardLibraryBookOcrDraft();
+      libraryBookOcrStatus.textContent = "Rozpoznaný text byl zrušen. Fotografie už nejsou uchované.";
+    });
     libraryBookIsbnLookupBtn.addEventListener("click", lookupLibraryBookIsbn);
     libraryBookSummaryDraftBtn.addEventListener("click", generateLibraryBookSummary);
     libraryBookSaveBtn.addEventListener("click", saveLibraryBook);

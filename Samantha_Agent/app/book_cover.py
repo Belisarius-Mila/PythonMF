@@ -93,35 +93,55 @@ def recognize_book_cover(
 
 
 def prepare_book_cover_data_url(image_data_url: str) -> str:
+    return prepare_book_image_data_url(
+        image_data_url,
+        image_description="fotografii obálky",
+    )
+
+
+def prepare_book_image_data_url(
+    image_data_url: str,
+    *,
+    image_description: str,
+    max_edge: int = MAX_BOOK_COVER_EDGE,
+    jpeg_quality: int = 88,
+) -> str:
     value = str(image_data_url or "").strip()
+    description = " ".join(str(image_description or "fotografii").split()) or "fotografii"
+    display_description = description[:1].upper() + description[1:]
     if "," not in value:
-        raise ValueError("Vyber fotografii obálky.")
+        raise ValueError(f"Vyber {description}.")
     header, encoded = value.split(",", 1)
     if not header.startswith("data:") or ";base64" not in header:
-        raise ValueError("Fotografii obálky se nepodařilo přečíst.")
+        raise ValueError(f"{display_description} se nepodařilo přečíst.")
     mime_type = header[5:].split(";", 1)[0].casefold()
     if mime_type not in SUPPORTED_BOOK_COVER_MIME_TYPES:
         raise ValueError("Podporované fotografie jsou JPG, PNG, WEBP a HEIC/HEIF.")
     try:
         raw_bytes = base64.b64decode(encoded, validate=True)
     except (ValueError, binascii.Error) as exc:
-        raise ValueError("Fotografii obálky se nepodařilo přečíst.") from exc
+        raise ValueError(f"{display_description} se nepodařilo přečíst.") from exc
     if not raw_bytes:
-        raise ValueError("Fotografie obálky je prázdná.")
+        raise ValueError(f"{display_description} je prázdná.")
     if len(raw_bytes) > MAX_BOOK_COVER_BYTES:
         raise ValueError("Fotografie obálky je větší než 7 MB. Vyber menší kopii.")
 
     try:
         from PIL import Image, ImageOps
 
+        if mime_type in {"image/heic", "image/heif"}:
+            from pillow_heif import register_heif_opener
+
+            register_heif_opener()
+
         with Image.open(BytesIO(raw_bytes)) as source:
             image = ImageOps.exif_transpose(source).convert("RGB")
-            image.thumbnail((MAX_BOOK_COVER_EDGE, MAX_BOOK_COVER_EDGE), Image.Resampling.LANCZOS)
+            image.thumbnail((max_edge, max_edge), Image.Resampling.LANCZOS)
             output = BytesIO()
-            image.save(output, format="JPEG", quality=88, optimize=True)
+            image.save(output, format="JPEG", quality=jpeg_quality, optimize=True)
             prepared_bytes = output.getvalue()
     except Exception as exc:
-        raise ValueError("Fotografii obálky se nepodařilo bezpečně převést pro rozpoznání.") from exc
+        raise ValueError(f"{display_description} se nepodařilo bezpečně převést.") from exc
     return f"data:image/jpeg;base64,{base64.b64encode(prepared_bytes).decode('ascii')}"
 
 

@@ -7,6 +7,7 @@ from io import BytesIO
 from types import SimpleNamespace
 
 from PIL import Image
+from pillow_heif import from_pillow
 
 from app.book_cover import (
     BookCoverRecognitionError,
@@ -130,6 +131,17 @@ class BookCoverTests(unittest.TestCase):
         with Image.open(BytesIO(payload)) as image:
             self.assertEqual(image.format, "JPEG")
             self.assertLessEqual(max(image.size), 1600)
+
+    def test_preparation_accepts_iphone_heic_and_returns_jpeg(self) -> None:
+        output = BytesIO()
+        from_pillow(Image.new("RGB", (30, 50), color=(70, 90, 110))).save(output, quality=80)
+        source = f"data:image/heic;base64,{base64.b64encode(output.getvalue()).decode('ascii')}"
+
+        prepared = prepare_book_cover_data_url(source)
+
+        self.assertTrue(prepared.startswith("data:image/jpeg;base64,"))
+        with Image.open(BytesIO(base64.b64decode(prepared.split(",", 1)[1]))) as image:
+            self.assertEqual(image.format, "JPEG")
 
 
 if __name__ == "__main__":

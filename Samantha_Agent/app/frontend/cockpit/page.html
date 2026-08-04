@@ -598,7 +598,7 @@
             <label class="library-field">
               <span class="library-field-label">Fotografie obálky (volitelná)</span>
               <input id="libraryBookCoverInput" type="file" accept="image/*">
-              <span class="library-field-hint">Fotografie se připojí k nové kartě až po stisku Uložit knihu.</span>
+              <span class="library-field-hint">Před uložením se vytvoří JPEG s maximální hranou 1600 px. Plný originál z iPhonu se do archivu neuloží.</span>
             </label>
             <div id="libraryBookCoverPreviewWrap" class="library-book-cover-preview-wrap hidden">
               <img id="libraryBookCoverPreview" class="library-book-cover-preview" alt="Náhled vybrané obálky">
@@ -607,7 +607,30 @@
               <button class="secondary" id="libraryBookCoverDraftBtn" type="button">Rozpoznat údaje z obálky</button>
               <button class="secondary" id="libraryBookCoverClearBtn" type="button">Odebrat vybranou fotografii</button>
             </div>
-            <div id="libraryBookCoverStatus" class="status-line">Rozpoznání odešle OpenAI pouze vybranou fotografii a nic neuloží.</div>
+            <div id="libraryBookCoverStatus" class="status-line">Rozpoznání odešle OpenAI pouze vybranou fotografii. Zmenšená obálka se uloží až s knihou.</div>
+          </div>
+          <div class="library-book-ocr-block">
+            <label class="library-field">
+              <span class="library-field-label">Fotografie textu pro OCR (nejvýše 3)</span>
+              <input id="libraryBookOcrPhotoInput" type="file" accept="image/*" capture="environment">
+              <span class="library-field-hint">Vyfoť anotaci, obsah nebo několik stran postupně. Snímky se po přečtení zahodí a do karty se neuloží.</span>
+            </label>
+            <div class="actions compact-actions">
+              <button class="secondary" id="libraryBookOcrReadBtn" type="button" disabled>Přečíst text z fotografií</button>
+              <button class="secondary" id="libraryBookOcrClearBtn" type="button">Odebrat fotografie</button>
+            </div>
+            <div id="libraryBookOcrStatus" class="status-line">Vyber nebo postupně vyfoť 1–3 snímky. OpenAI je obdrží až po stisku Přečíst text.</div>
+            <div id="libraryBookOcrPreview" class="library-book-ocr-preview hidden">
+              <label class="library-field">
+                <span class="library-field-label">Rozpoznaný text k ruční kontrole</span>
+                <textarea id="libraryBookOcrTextPreview" class="library-text-area" readonly></textarea>
+              </label>
+              <div class="actions compact-actions">
+                <button class="secondary" id="libraryBookOcrReplaceBtn" type="button">Nahradit podklady</button>
+                <button class="secondary" id="libraryBookOcrAppendBtn" type="button">Přidat k podkladům</button>
+                <button class="secondary" id="libraryBookOcrDiscardBtn" type="button">Zrušit</button>
+              </div>
+            </div>
           </div>
           <label class="library-field">
             <span class="library-field-label">Podklady pro návrh obsahu (neukládají se)</span>

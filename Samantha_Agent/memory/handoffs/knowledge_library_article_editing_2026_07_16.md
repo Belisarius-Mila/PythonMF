@@ -1,33 +1,32 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-03 22:23 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-04 14:02 CEST
 
 ### Hotovo
-- Dohledání knih používá ověřený certifi CA balík a zachovává plnou kontrolu TLS
-- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Knihy umějí načíst podklady z 1–3 dočasných fotografií a uložit pouze zmenšenou obálku
 
 ### Otevřeno
 - Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
 - Lokální commity čekají na samostatný denní GitHub balíček.
 
 ### Rizika
-- Žádné další doložené provozní riziko.
+- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
 
 ### Další krok
-- Převzít a nasadit změnu, potom znovu dohledat stejné ISBN
+- Převzít a nasadit změnu, potom na iPhonu ověřit OCR, práci s rozpoznaným textem a jedinou zmenšenou přílohu obálky
 
 ### Rozhodnutí
-- TLS ověřování zůstává zapnuté; katalog používá deklarovaný certifi CA balík stejně jako ostatní bezpečná spojení projektu
+- OCR fotografie se nearchivují; ke knize se ukládá pouze zmenšený JPEG obálky bez plného originálu
 
 ### Navrhované další kroky
 - Žádné další návrhy nad rámec bezprostředního kroku.
 
 ### Technický stav checkpointu
-- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `16e624d4c885`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `16e624d4c885` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-03T20:16:45+00:00.
-- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+- Změna je otestovaná (1283 testů).
+- Git před checkpointem: lokální `main` na `5a4a5f8a5cb5`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `21e4f96516e0` · je starší než ověřený main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-03T20:24:40+00:00.
+- Read-only živý stav: main=`local_ahead`, deployment=`verified_other_main`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -297,3 +296,15 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (2): `Samantha_Agent/app/book_isbn_lookup.py`, `Samantha_Agent/tests/test_book_isbn_lookup.py`
 - Commit: `Use certifi for ISBN catalog TLS`
 - Další krok: Převzít a nasadit změnu, potom znovu dohledat stejné ISBN
+
+### Automatický checkpoint 2026-08-04 14:02 CEST
+
+- Pracovní proud: `project-knowledge-library`
+- Hotovo: Knihy umějí načíst podklady z 1–3 dočasných fotografií a uložit pouze zmenšenou obálku
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.; Lokální commity čekají na samostatný denní GitHub balíček.
+- Rizika: Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: plná Cockpit brána: 1283 testů, 369.7 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (10): `Samantha_Agent/app/book_cover.py`, `Samantha_Agent/app/cockpit.py`, `Samantha_Agent/app/frontend/cockpit/app.js`, `Samantha_Agent/app/frontend/cockpit/page.html`, `Samantha_Agent/app/frontend/cockpit/styles.css`, `Samantha_Agent/tests/test_book_cover.py`, `Samantha_Agent/tests/test_cockpit.py`, `Samantha_Agent/tests/test_cockpit_frontend.py`, `Samantha_Agent/app/book_text_ocr.py`, `Samantha_Agent/tests/test_book_text_ocr.py`
+- Commit: `Add temporary book photo OCR`
+- Další krok: Převzít a nasadit změnu, potom na iPhonu ověřit OCR, práci s rozpoznaným textem a jedinou zmenšenou přílohu obálky
