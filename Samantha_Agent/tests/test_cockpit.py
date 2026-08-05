@@ -31,6 +31,8 @@ from app.cockpit import (
     library_book_summary_draft_action,
     library_book_cover_draft_action,
     library_book_cover_prepare_action,
+    library_book_option_add_action,
+    library_book_options_status_action,
     library_book_text_ocr_action,
     library_book_text_photo_prepare_action,
     library_book_isbn_lookup_action,
@@ -522,6 +524,39 @@ class CockpitTests(unittest.TestCase):
             isbn="978-1-23456-789-7",
             tags=["historie", "rodina"],
         )
+
+    def test_library_book_options_actions_list_and_add_private_values(self) -> None:
+        options = {
+            "locations": ["obývák", "jídelna", "půda"],
+            "categories": ["román", "fantasy"],
+        }
+        with patch("app.cockpit.list_book_options", return_value=options):
+            listed = library_book_options_status_action()
+        with patch(
+            "app.cockpit.add_book_option",
+            return_value={
+                "options": {**options, "locations": [*options["locations"], "pracovna"]},
+                "value": "pracovna",
+                "kind": "location",
+                "added": True,
+            },
+        ) as add_option:
+            added = library_book_option_add_action({"kind": "location", "value": "pracovna"})
+
+        self.assertTrue(listed["ok"])
+        self.assertEqual(listed["options"], options)
+        self.assertTrue(added["ok"])
+        self.assertTrue(added["added"])
+        self.assertIn("pracovna", added["options"]["locations"])
+        add_option.assert_called_once_with(kind="location", value="pracovna")
+
+    def test_library_book_option_add_action_reports_validation_error(self) -> None:
+        with patch("app.cockpit.add_book_option", side_effect=ValueError("Neplatná položka.")):
+            result = library_book_option_add_action({"kind": "category", "value": ""})
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["error"], "invalid_book_option")
+        self.assertEqual(result["message"], "Neplatná položka.")
 
     def test_library_book_cover_draft_action_returns_preview_without_saving(self) -> None:
         suggestion = {
@@ -1494,11 +1529,25 @@ class CockpitTests(unittest.TestCase):
         )
         self.assertIn("libraryBookAuthorInput", COCKPIT_HTML)
         self.assertIn("libraryBookLocationInput", COCKPIT_HTML)
+        self.assertIn('libraryBookLocationInput"', COCKPIT_HTML)
+        self.assertIn('<option value="obývák">obývák</option>', COCKPIT_HTML)
+        self.assertIn('<option value="jídelna">jídelna</option>', COCKPIT_HTML)
+        self.assertIn('<option value="půda">půda</option>', COCKPIT_HTML)
+        self.assertIn("libraryBookCategoryChoices", COCKPIT_HTML)
+        self.assertIn("libraryBookAddLocationBtn", COCKPIT_HTML)
+        self.assertIn("libraryBookAddCategoryBtn", COCKPIT_HTML)
+        self.assertIn("Kategorie knihy (volitelné)", COCKPIT_HTML)
+        self.assertIn('/api/library/book/options', COCKPIT_HTML)
+        self.assertIn("function loadLibraryBookOptions()", COCKPIT_HTML)
+        self.assertIn("function addLibraryBookOption(kind)", COCKPIT_HTML)
+        self.assertIn('tags: selectedLibraryBookCategories(libraryBookCategoryChoices)', COCKPIT_HTML)
         self.assertIn("libraryBookIsbnInput", COCKPIT_HTML)
         self.assertIn("libraryBookIsbnLookupBtn", COCKPIT_HTML)
         self.assertIn("libraryBookIsbnLookupStatus", COCKPIT_HTML)
         self.assertIn("libraryBookIsbnSourceLink", COCKPIT_HTML)
         self.assertIn("Dohledat podle ISBN", COCKPIT_HTML)
+        self.assertIn("ISBN z knihy (nepovinné)", COCKPIT_HTML)
+        self.assertIn("ISBN není nutné k uložení", COCKPIT_HTML)
         self.assertIn("/api/library/book/isbn-lookup", COCKPIT_HTML)
         self.assertIn("function lookupLibraryBookIsbn()", COCKPIT_HTML)
         self.assertIn('postJson("/api/library/book/isbn-lookup", { isbn })', COCKPIT_HTML)
@@ -1543,6 +1592,8 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("Kniha se tím neukládá", COCKPIT_HTML)
         self.assertIn("libraryEditBookAuthorInput", COCKPIT_HTML)
         self.assertIn("libraryEditBookLocationInput", COCKPIT_HTML)
+        self.assertIn("libraryEditBookCategoryChoices", COCKPIT_HTML)
+        self.assertIn('libraryEditTagsInput.closest(".library-field").classList.toggle("hidden", isBook);', COCKPIT_HTML)
         self.assertIn('/api/library/book', COCKPIT_HTML)
         self.assertIn('item.category === "books" && item.book_author', COCKPIT_HTML)
         self.assertIn('item.category === "books" && item.book_location', COCKPIT_HTML)

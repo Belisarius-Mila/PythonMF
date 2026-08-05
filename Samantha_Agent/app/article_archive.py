@@ -22,6 +22,8 @@ from typing import Any, Callable
 from urllib.parse import urlparse, urlunparse
 from xml.sax.saxutils import escape
 
+from app.file_persistence import atomic_write_text
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_ARCHIVE_ROOT = PROJECT_ROOT / "data" / "private" / "article_archive"
@@ -54,6 +56,20 @@ READ_STATE_LABELS = {
 }
 SOURCE_REEXTRACT_PREVIEW_ENCODING = "iso-8859-2"
 MAX_DECOMPRESSED_HTML_BYTES = 20 * 1024 * 1024
+BOOK_OPTIONS_FILENAME = "book_options.json"
+DEFAULT_BOOK_LOCATIONS = ("obývák", "jídelna", "půda")
+DEFAULT_BOOK_CATEGORIES = (
+    "román",
+    "fantasy",
+    "sci-fi",
+    "vesmír",
+    "biologie",
+    "matematika",
+    "paleontologie",
+    "knihy pro děti",
+    "knihy pro mládež",
+    "detektivky",
+)
 
 
 @dataclass(frozen=True)
@@ -527,6 +543,85 @@ def archive_book_entry(
         "message": "Kniha byla uložena do soukromé knihovny.",
         "item": article_item_from_raw(metadata).to_summary(),
     }
+
+
+def list_book_options(*, archive_root: Path = DEFAULT_ARCHIVE_ROOT) -> dict[str, list[str]]:
+    options = {
+        "locations": list(DEFAULT_BOOK_LOCATIONS),
+        "categories": list(DEFAULT_BOOK_CATEGORIES),
+    }
+    options_path = archive_root / BOOK_OPTIONS_FILENAME
+    if not options_path.is_file():
+        return options
+    try:
+        stored = json.loads(options_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError("Uložený seznam umístění a kategorií knih je poškozený.") from exc
+    if not isinstance(stored, dict):
+        raise ValueError("Uložený seznam umístění a kategorií knih je poškozený.")
+    for key in ("locations", "categories"):
+        raw_values = stored.get(key, [])
+        if not isinstance(raw_values, list):
+            raise ValueError("Uložený seznam umístění a kategorií knih je poškozený.")
+        options[key] = merge_book_option_values(options[key], raw_values)
+    return options
+
+
+def add_book_option(
+    *,
+    kind: str,
+    value: str,
+    archive_root: Path = DEFAULT_ARCHIVE_ROOT,
+) -> dict[str, Any]:
+    option_key = {"location": "locations", "category": "categories"}.get(str(kind or "").strip())
+    if not option_key:
+        raise ValueError("Vyber, zda přidáváš umístění, nebo kategorii knihy.")
+    clean_value = normalize_book_option_value(value)
+    options = list_book_options(archive_root=archive_root)
+    existing = next(
+        (item for item in options[option_key] if item.casefold() == clean_value.casefold()),
+        "",
+    )
+    added = not bool(existing)
+    selected_value = existing or clean_value
+    if added:
+        options[option_key].append(clean_value)
+        options_path = archive_root / BOOK_OPTIONS_FILENAME
+        atomic_write_text(
+            options_path,
+            json.dumps(options, ensure_ascii=False, indent=2) + "\n",
+        )
+    return {
+        "options": options,
+        "value": selected_value,
+        "kind": str(kind or "").strip(),
+        "added": added,
+    }
+
+
+def normalize_book_option_value(value: str) -> str:
+    clean = " ".join(str(value or "").split())
+    if not clean:
+        raise ValueError("Napiš novou hodnotu, kterou mám přidat do seznamu.")
+    if len(clean) > 80:
+        raise ValueError("Nová hodnota může mít nejvýše 80 znaků.")
+    return clean
+
+
+def merge_book_option_values(defaults: list[str], values: list[Any]) -> list[str]:
+    merged: list[str] = []
+    seen: set[str] = set()
+    for raw_value in [*defaults, *values]:
+        try:
+            clean = normalize_book_option_value(str(raw_value or ""))
+        except ValueError:
+            continue
+        folded = clean.casefold()
+        if folded in seen:
+            continue
+        seen.add(folded)
+        merged.append(clean)
+    return merged
 
 
 def normalize_book_metadata_value(value: str, missing_message: str) -> str:

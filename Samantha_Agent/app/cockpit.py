@@ -43,6 +43,7 @@ from app.article_archive import (
     ATTACHMENT_REMOVE_CONFIRMATION_PHRASE,
     LIBRARY_EXPORT_EMAIL_MARKER,
     LIBRARY_EXPORT_SUBJECT_PREFIX,
+    add_book_option,
     archive_book_entry,
     archive_text_entry,
     archive_url,
@@ -51,6 +52,7 @@ from app.article_archive import (
     get_article_attachment,
     attach_article_image,
     list_articles,
+    list_book_options,
     prepare_article_pdf_export,
     preview_article_source_reextract,
     search_articles,
@@ -723,6 +725,35 @@ def library_archive_book_action(payload: dict[str, Any]) -> dict[str, Any]:
         return {"ok": False, "message": str(exc), "error": "invalid_book"}
     except OSError as exc:
         return {"ok": False, "message": f"Knihu se nepodařilo uložit: {exc}", "error": "archive_failed"}
+
+
+def library_book_options_status_action() -> dict[str, Any]:
+    try:
+        options = list_book_options()
+    except (OSError, ValueError) as exc:
+        return {"ok": False, "message": str(exc), "error": "book_options_unavailable"}
+    return {"ok": True, "options": options}
+
+
+def library_book_option_add_action(payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        result = add_book_option(
+            kind=str(payload.get("kind", "")),
+            value=str(payload.get("value", "")),
+        )
+    except ValueError as exc:
+        return {"ok": False, "message": str(exc), "error": "invalid_book_option"}
+    except OSError as exc:
+        return {"ok": False, "message": f"Seznam knih se nepodařilo uložit: {exc}", "error": "book_options_save_failed"}
+    return {
+        "ok": True,
+        "message": (
+            "Nová položka byla přidána do seznamu."
+            if result["added"]
+            else "Tato položka už v seznamu je."
+        ),
+        **result,
+    }
 
 
 def library_book_summary_draft_action(payload: dict[str, Any]) -> dict[str, Any]:
@@ -8879,6 +8910,14 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "direct",
     },
     {
+        "path": "/api/library/book/options",
+        "label": "Pridat umisteni nebo kategorii knihy",
+        "risk": "private_write",
+        "confirmation": "explicit_add_book_option_button",
+        "handler_name": "library_book_option_add_action",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/library/book/summary-draft",
         "label": "Vytvorit navrh strucneho obsahu knihy",
         "risk": "external_ai",
@@ -9446,6 +9485,9 @@ class CockpitServer:
                         limit = 200
                     self.respond_json(list_articles(category=category, read_state=read_state, limit=limit))
                     return
+                if parsed.path == "/api/library/book/options":
+                    self.respond_json(library_book_options_status_action())
+                    return
                 if parsed.path == "/api/library/search":
                     params = parse_qs(parsed.query)
                     category = params.get("category", ["all"])[0]
@@ -9829,6 +9871,10 @@ class CockpitServer:
                 if parsed.path == "/api/library/book":
                     payload = self.read_json()
                     self.respond_json(library_archive_book_action(payload))
+                    return
+                if parsed.path == "/api/library/book/options":
+                    payload = self.read_json()
+                    self.respond_json(library_book_option_add_action(payload))
                     return
                 if parsed.path == "/api/library/book/summary-draft":
                     payload = self.read_json()

@@ -22,6 +22,7 @@ from app.article_archive import (
     LIBRARY_EXPORT_EMAIL_MARKER,
     LIBRARY_EXPORT_EMAIL_MARKER_VALUE,
     LIBRARY_EXPORT_SUBJECT_PREFIX,
+    add_book_option,
     archive_book_entry,
     archive_text_entry,
     archive_url,
@@ -36,6 +37,7 @@ from app.article_archive import (
     get_article_attachment,
     library_export_confirmation_text,
     list_articles,
+    list_book_options,
     prepare_article_pdf_export,
     preview_article_source_reextract,
     search_articles,
@@ -626,6 +628,46 @@ class ArticleArchiveTests(unittest.TestCase):
         self.assertEqual(by_location["count"], 1)
         self.assertEqual(by_summary["count"], 1)
         self.assertEqual(by_isbn["count"], 1)
+
+    def test_book_options_have_defaults_and_persist_custom_values(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            archive_root = Path(temp_dir)
+            defaults = list_book_options(archive_root=archive_root)
+            added_location = add_book_option(
+                kind="location",
+                value="pracovna",
+                archive_root=archive_root,
+            )
+            added_category = add_book_option(
+                kind="category",
+                value="historie vědy",
+                archive_root=archive_root,
+            )
+            duplicate = add_book_option(
+                kind="category",
+                value=" Historie   vědy ",
+                archive_root=archive_root,
+            )
+            loaded = list_book_options(archive_root=archive_root)
+
+        self.assertEqual(defaults["locations"], ["obývák", "jídelna", "půda"])
+        self.assertIn("román", defaults["categories"])
+        self.assertIn("knihy pro mládež", defaults["categories"])
+        self.assertTrue(added_location["added"])
+        self.assertTrue(added_category["added"])
+        self.assertFalse(duplicate["added"])
+        self.assertEqual(loaded["locations"][-1], "pracovna")
+        self.assertEqual(loaded["categories"].count("historie vědy"), 1)
+
+    def test_book_options_reject_invalid_kind_empty_and_oversized_values(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            archive_root = Path(temp_dir)
+            with self.assertRaisesRegex(ValueError, "zda přidáváš"):
+                add_book_option(kind="unknown", value="test", archive_root=archive_root)
+            with self.assertRaisesRegex(ValueError, "Napiš novou hodnotu"):
+                add_book_option(kind="location", value="  ", archive_root=archive_root)
+            with self.assertRaisesRegex(ValueError, "nejvýše 80"):
+                add_book_option(kind="category", value="x" * 81, archive_root=archive_root)
 
     def test_book_requires_title_author_summary_and_location(self) -> None:
         required_fields = {

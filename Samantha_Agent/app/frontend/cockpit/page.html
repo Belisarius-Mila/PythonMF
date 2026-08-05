@@ -564,7 +564,7 @@
         </div>
         <div id="libraryBookPanel" class="library-add-panel hidden">
           <h3 class="library-add-title">Přidat knihu z domácí knihovny</h3>
-          <div class="library-text-grid">
+          <div class="library-book-basic-grid">
             <label class="library-field">
               <span class="library-field-label">Název knihy</span>
               <input id="libraryBookTitleInput" type="text" placeholder="Název knihy">
@@ -573,26 +573,6 @@
               <span class="library-field-label">Autor</span>
               <input id="libraryBookAuthorInput" type="text" placeholder="Jméno autora nebo autorů">
             </label>
-            <label class="library-field">
-              <span class="library-field-label">ISBN (volitelné)</span>
-              <input id="libraryBookIsbnInput" type="text" inputmode="text" autocomplete="off" placeholder="ISBN-10 nebo ISBN-13">
-            </label>
-            <label class="library-field">
-              <span class="library-field-label">Umístění</span>
-              <input id="libraryBookLocationInput" type="text" placeholder="např. obývák, knihovna vlevo, 2. police">
-            </label>
-            <label class="library-field">
-              <span class="library-field-label">Tagy (volitelné)</span>
-              <input id="libraryBookTagsInput" type="text" placeholder="např. historie, román">
-              <span class="library-field-hint">Více tagů odděluj čárkou.</span>
-            </label>
-          </div>
-          <div class="library-book-isbn-lookup-block">
-            <div class="actions compact-actions">
-              <button class="secondary" id="libraryBookIsbnLookupBtn" type="button">Dohledat podle ISBN</button>
-            </div>
-            <div id="libraryBookIsbnLookupStatus" class="status-line">Po stisku se do veřejného katalogu odešle pouze validované ISBN. Výsledek se neuloží automaticky.</div>
-            <a id="libraryBookIsbnSourceLink" class="library-book-isbn-source hidden" href="#" target="_blank" rel="noopener noreferrer">Otevřít záznam ve zdrojovém katalogu</a>
           </div>
           <div class="library-book-cover-block">
             <label class="library-field">
@@ -641,6 +621,48 @@
             <span class="library-field-label">Stručný obsah</span>
             <textarea id="libraryBookSummaryInput" class="library-text-area" placeholder="Přibližně půl stránky A4: o čem kniha je a proč stojí za přečtení"></textarea>
           </label>
+          <div class="library-book-classification-block">
+            <label class="library-field">
+              <span class="library-field-label">Umístění</span>
+              <select id="libraryBookLocationInput">
+                <option value="">Vyber umístění</option>
+                <option value="obývák">obývák</option>
+                <option value="jídelna">jídelna</option>
+                <option value="půda">půda</option>
+              </select>
+            </label>
+            <div class="library-book-option-add-row">
+              <label class="library-field">
+                <span class="library-field-label">Doplnit jiné umístění</span>
+                <input id="libraryBookNewLocationInput" type="text" maxlength="80" placeholder="Nové umístění">
+              </label>
+              <button class="secondary" id="libraryBookAddLocationBtn" type="button">Přidat umístění</button>
+            </div>
+            <fieldset class="library-book-category-fieldset">
+              <legend>Kategorie knihy (volitelné)</legend>
+              <div id="libraryBookCategoryChoices" class="library-book-category-choices"></div>
+            </fieldset>
+            <div class="library-book-option-add-row">
+              <label class="library-field">
+                <span class="library-field-label">Doplnit jinou kategorii</span>
+                <input id="libraryBookNewCategoryInput" type="text" maxlength="80" placeholder="Nová kategorie">
+              </label>
+              <button class="secondary" id="libraryBookAddCategoryBtn" type="button">Přidat kategorii</button>
+            </div>
+            <div id="libraryBookOptionsStatus" class="status-line">Umístění a kategorie můžeš rozšířit přímo tady.</div>
+          </div>
+          <div class="library-book-isbn-lookup-block">
+            <label class="library-field">
+              <span class="library-field-label">ISBN z knihy (nepovinné)</span>
+              <input id="libraryBookIsbnInput" type="text" inputmode="text" autocomplete="off" placeholder="např. 80-204-1453-3">
+              <span class="library-field-hint">ISBN není nutné k uložení. Pokud ho kniha má, může pomoci předvyplnit název a autora.</span>
+            </label>
+            <div class="actions compact-actions">
+              <button class="secondary" id="libraryBookIsbnLookupBtn" type="button">Dohledat podle ISBN</button>
+            </div>
+            <div id="libraryBookIsbnLookupStatus" class="status-line">Po stisku se do veřejného katalogu odešle pouze validované ISBN. Výsledek se neuloží automaticky. Když se nic nenajde, knihu můžeš normálně uložit ručně.</div>
+            <a id="libraryBookIsbnSourceLink" class="library-book-isbn-source hidden" href="#" target="_blank" rel="noopener noreferrer">Otevřít záznam ve zdrojovém katalogu</a>
+          </div>
           <div class="actions compact-actions">
             <button class="secondary" id="libraryBookSummaryDraftBtn" type="button">Vytvořit návrh obsahu</button>
             <button class="primary" id="libraryBookSaveBtn" type="button">Uložit knihu</button>
@@ -703,12 +725,21 @@
                 </label>
                 <label class="library-field">
                   <span class="library-field-label">Umístění knihy</span>
-                  <input id="libraryEditBookLocationInput" type="text" placeholder="Kde je kniha uložená">
+                  <select id="libraryEditBookLocationInput">
+                    <option value="">Vyber umístění</option>
+                    <option value="obývák">obývák</option>
+                    <option value="jídelna">jídelna</option>
+                    <option value="půda">půda</option>
+                  </select>
                 </label>
                 <label class="library-field">
                   <span class="library-field-label">ISBN (volitelné)</span>
                   <input id="libraryEditBookIsbnInput" type="text" inputmode="text" autocomplete="off" placeholder="ISBN-10 nebo ISBN-13">
                 </label>
+                <fieldset class="library-book-category-fieldset library-edit-book-category-fieldset">
+                  <legend>Kategorie knihy</legend>
+                  <div id="libraryEditBookCategoryChoices" class="library-book-category-choices"></div>
+                </fieldset>
               </div>
               <label class="library-field">
                 <span class="library-field-label">Tagy</span>

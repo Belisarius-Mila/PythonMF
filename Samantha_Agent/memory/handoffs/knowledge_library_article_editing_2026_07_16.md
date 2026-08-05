@@ -1,32 +1,32 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-04 14:02 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-05 08:10 CEST
 
 ### Hotovo
-- Knihy umějí načíst podklady z 1–3 dočasných fotografií a uložit pouze zmenšenou obálku
+- Knihovna nabízí výchozí i vlastní umístění a kategorie knih při založení i editaci.
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
 - Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
-- Lokální commity čekají na samostatný denní GitHub balíček.
 
 ### Rizika
-- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
+- Aktivní relace má neuzavřenou nejistotu doručení.
 
 ### Další krok
-- Převzít a nasadit změnu, potom na iPhonu ověřit OCR, práci s rozpoznaným textem a jedinou zmenšenou přílohu obálky
+- Po samostatně potvrzeném nasazení ručně ověřit založení a editaci knihy s umístěním a více kategoriemi.
 
 ### Rozhodnutí
-- OCR fotografie se nearchivují; ke knize se ukládá pouze zmenšený JPEG obálky bez plného originálu
+- Umístění a kategorie mají výchozí volby a jejich vlastní rozšíření se ukládá soukromě mimo Git.
 
 ### Navrhované další kroky
-- Žádné další návrhy nad rámec bezprostředního kroku.
+- Nasadit checkpoint do Cockpitu až na samostatný Milův pokyn.
 
 ### Technický stav checkpointu
-- Změna je otestovaná (1283 testů).
-- Git před checkpointem: lokální `main` na `5a4a5f8a5cb5`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `21e4f96516e0` · je starší než ověřený main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-03T20:24:40+00:00.
-- Read-only živý stav: main=`local_ahead`, deployment=`verified_other_main`, runtime=`connected`.
+- Změna je otestovaná (1288 testů).
+- Git před checkpointem: lokální `main` na `7a8a3604991e`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `7a8a3604991e` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-04T19:41:47+00:00.
+- Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`delivery_uncertain`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -308,3 +308,15 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (10): `Samantha_Agent/app/book_cover.py`, `Samantha_Agent/app/cockpit.py`, `Samantha_Agent/app/frontend/cockpit/app.js`, `Samantha_Agent/app/frontend/cockpit/page.html`, `Samantha_Agent/app/frontend/cockpit/styles.css`, `Samantha_Agent/tests/test_book_cover.py`, `Samantha_Agent/tests/test_cockpit.py`, `Samantha_Agent/tests/test_cockpit_frontend.py`, `Samantha_Agent/app/book_text_ocr.py`, `Samantha_Agent/tests/test_book_text_ocr.py`
 - Commit: `Add temporary book photo OCR`
 - Další krok: Převzít a nasadit změnu, potom na iPhonu ověřit OCR, práci s rozpoznaným textem a jedinou zmenšenou přílohu obálky
+
+### Automatický checkpoint 2026-08-05 08:10 CEST
+
+- Pracovní proud: `project-knowledge-library`
+- Hotovo: Knihovna nabízí výchozí i vlastní umístění a kategorie knih při založení i editaci.; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Rizika: Aktivní relace má neuzavřenou nejistotu doručení.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: plná Cockpit brána: 1288 testů, 450.4 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (8): `Samantha_Agent/app/article_archive.py`, `Samantha_Agent/app/cockpit.py`, `Samantha_Agent/app/frontend/cockpit/app.js`, `Samantha_Agent/app/frontend/cockpit/page.html`, `Samantha_Agent/app/frontend/cockpit/styles.css`, `Samantha_Agent/tests/test_article_archive.py`, `Samantha_Agent/tests/test_cockpit.py`, `Samantha_Agent/tests/test_cockpit_frontend.py`
+- Commit: `Add book location and category choices`
+- Další krok: Po samostatně potvrzeném nasazení ručně ověřit založení a editaci knihy s umístěním a více kategoriemi.
