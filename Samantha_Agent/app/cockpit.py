@@ -797,6 +797,31 @@ def library_book_cover_draft_action(payload: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def library_book_isbn_photo_action(payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        suggestion = recognize_book_cover(
+            image_data_url=str(payload.get("image_data_url", "")),
+        )
+    except ValueError as exc:
+        return {"ok": False, "message": str(exc), "error": "invalid_book_isbn_photo"}
+    except BookCoverRecognitionError as exc:
+        return {"ok": False, "message": str(exc), "error": "book_isbn_photo_recognition_failed"}
+    isbn = str(suggestion.get("isbn", "") or "")
+    if not isbn:
+        return {
+            "ok": False,
+            "message": "Na fotografii se nepodařilo přečíst platné ISBN. Zkus ostřejší snímek tiráže nebo čárového kódu.",
+            "error": "book_isbn_not_recognized",
+            "saved": False,
+        }
+    return {
+        "ok": True,
+        "message": "ISBN bylo načteno do formuláře. Fotografii jsem neuložil.",
+        "isbn": isbn,
+        "saved": False,
+    }
+
+
 def library_book_cover_prepare_action(payload: dict[str, Any]) -> dict[str, Any]:
     try:
         prepared_image_data_url = prepare_book_cover_data_url(
@@ -8934,6 +8959,14 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "direct",
     },
     {
+        "path": "/api/library/book/isbn-photo",
+        "label": "Precist ISBN z docasne fotografie knihy",
+        "risk": "external_ai",
+        "confirmation": "explicit_isbn_photo_button_no_persistence",
+        "handler_name": "library_book_isbn_photo_action",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/library/book/cover-prepare",
         "label": "Zmensit obalku knihy pred ulozenim",
         "risk": "read_only_via_post",
@@ -9883,6 +9916,10 @@ class CockpitServer:
                 if parsed.path == "/api/library/book/cover-draft":
                     payload = self.read_json()
                     self.respond_json(library_book_cover_draft_action(payload))
+                    return
+                if parsed.path == "/api/library/book/isbn-photo":
+                    payload = self.read_json()
+                    self.respond_json(library_book_isbn_photo_action(payload))
                     return
                 if parsed.path == "/api/library/book/cover-prepare":
                     payload = self.read_json()

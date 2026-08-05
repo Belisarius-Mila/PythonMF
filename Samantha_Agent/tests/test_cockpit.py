@@ -36,6 +36,7 @@ from app.cockpit import (
     library_book_text_ocr_action,
     library_book_text_photo_prepare_action,
     library_book_isbn_lookup_action,
+    library_book_isbn_photo_action,
     library_attach_image_action,
     library_delete_article_action,
     library_remove_attachment_action,
@@ -585,6 +586,35 @@ class CockpitTests(unittest.TestCase):
         self.assertTrue(result["ok"])
         self.assertFalse(result["saved"])
         self.assertIn("vyplň je ručně", result["message"].casefold())
+
+    def test_library_book_isbn_photo_action_returns_only_validated_isbn_without_saving(self) -> None:
+        suggestion = {
+            "title": "Soukromý titul se nesmí vrátit",
+            "author": "Soukromý autor se nesmí vrátit",
+            "isbn": "8020414533",
+            "confidence": 0.96,
+            "uncertainties": [],
+        }
+        with patch("app.cockpit.recognize_book_cover", return_value=suggestion) as recognize_mock:
+            result = library_book_isbn_photo_action({"image_data_url": "synthetic-photo"})
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["isbn"], "8020414533")
+        self.assertFalse(result["saved"])
+        self.assertNotIn("title", result)
+        self.assertNotIn("author", result)
+        recognize_mock.assert_called_once_with(image_data_url="synthetic-photo")
+
+    def test_library_book_isbn_photo_action_rejects_unreadable_photo_without_saving(self) -> None:
+        with patch(
+            "app.cockpit.recognize_book_cover",
+            return_value={"title": "", "author": "", "isbn": "", "confidence": 0, "uncertainties": []},
+        ):
+            result = library_book_isbn_photo_action({"image_data_url": "synthetic-photo"})
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["error"], "book_isbn_not_recognized")
+        self.assertFalse(result["saved"])
 
     def test_library_book_cover_prepare_action_returns_resized_preview_without_saving(self) -> None:
         with patch(
@@ -1542,12 +1572,22 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("function addLibraryBookOption(kind)", COCKPIT_HTML)
         self.assertIn('tags: selectedLibraryBookCategories(libraryBookCategoryChoices)', COCKPIT_HTML)
         self.assertIn("libraryBookIsbnInput", COCKPIT_HTML)
+        self.assertIn('libraryBookIsbnPhotoInput" type="file" accept="image/*" capture="environment"', COCKPIT_HTML)
+        self.assertIn("libraryBookIsbnPhotoReadBtn", COCKPIT_HTML)
+        self.assertIn("libraryBookIsbnPhotoStatus", COCKPIT_HTML)
+        self.assertIn("Načíst ISBN z fotografie", COCKPIT_HTML)
+        self.assertIn("function readLibraryBookIsbnFromPhoto()", COCKPIT_HTML)
+        self.assertIn('postJson("/api/library/book/isbn-photo", {image_data_url: imageDataUrl})', COCKPIT_HTML)
+        self.assertIn("libraryBookIsbnPhotoInput.value = \"\";", COCKPIT_HTML)
         self.assertIn("libraryBookIsbnLookupBtn", COCKPIT_HTML)
         self.assertIn("libraryBookIsbnLookupStatus", COCKPIT_HTML)
         self.assertIn("libraryBookIsbnSourceLink", COCKPIT_HTML)
         self.assertIn("Dohledat podle ISBN", COCKPIT_HTML)
         self.assertIn("ISBN z knihy (nepovinné)", COCKPIT_HTML)
         self.assertIn("ISBN není nutné k uložení", COCKPIT_HTML)
+        isbn_photo_start = COCKPIT_HTML.index("async function readLibraryBookIsbnFromPhoto()")
+        isbn_photo_end = COCKPIT_HTML.index("async function lookupLibraryBookIsbn()", isbn_photo_start)
+        self.assertNotIn("/api/library/attachment/add", COCKPIT_HTML[isbn_photo_start:isbn_photo_end])
         self.assertIn("/api/library/book/isbn-lookup", COCKPIT_HTML)
         self.assertIn("function lookupLibraryBookIsbn()", COCKPIT_HTML)
         self.assertIn('postJson("/api/library/book/isbn-lookup", { isbn })', COCKPIT_HTML)
@@ -3681,6 +3721,10 @@ class CockpitTests(unittest.TestCase):
             ),
             patch("app.cockpit.document_vault_status_summary", return_value="vault ok"),
             patch("app.cockpit.reminders_status", return_value={"ok": True, "counts": {}}),
+            patch(
+                "app.cockpit.urgent_reminders_status",
+                return_value={"ok": True, "count": 0, "items": []},
+            ),
             patch("app.cockpit.probe_scandocu", return_value={"running": False}),
             patch(
                 "app.cockpit.load_codex_approval_request",

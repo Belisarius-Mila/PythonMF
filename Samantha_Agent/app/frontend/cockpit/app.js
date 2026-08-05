@@ -77,6 +77,9 @@
     const libraryBookTitleInput = document.getElementById("libraryBookTitleInput");
     const libraryBookAuthorInput = document.getElementById("libraryBookAuthorInput");
     const libraryBookIsbnInput = document.getElementById("libraryBookIsbnInput");
+    const libraryBookIsbnPhotoInput = document.getElementById("libraryBookIsbnPhotoInput");
+    const libraryBookIsbnPhotoReadBtn = document.getElementById("libraryBookIsbnPhotoReadBtn");
+    const libraryBookIsbnPhotoStatus = document.getElementById("libraryBookIsbnPhotoStatus");
     const libraryBookIsbnLookupBtn = document.getElementById("libraryBookIsbnLookupBtn");
     const libraryBookIsbnLookupStatus = document.getElementById("libraryBookIsbnLookupStatus");
     const libraryBookIsbnSourceLink = document.getElementById("libraryBookIsbnSourceLink");
@@ -483,6 +486,9 @@
         "libraryBookTitleInput",
         "libraryBookAuthorInput",
         "libraryBookIsbnInput",
+        "libraryBookIsbnPhotoInput",
+        "libraryBookIsbnPhotoReadBtn",
+        "libraryBookIsbnPhotoStatus",
         "libraryBookIsbnLookupBtn",
         "libraryBookIsbnLookupStatus",
         "libraryBookIsbnSourceLink",
@@ -3845,6 +3851,7 @@ Soubor nebude trvale smazán.`);
       libraryAddUrlBtn.setAttribute("aria-expanded", showUrl ? "true" : "false");
       libraryAddTextBtn.setAttribute("aria-expanded", showText ? "true" : "false");
       libraryAddBookBtn.setAttribute("aria-expanded", showBook ? "true" : "false");
+      if (!showBook) clearLibraryBookIsbnPhoto();
     }
 
     function toggleLibraryAddMode(mode) {
@@ -4621,6 +4628,42 @@ Soubor nebude trvale smazán.`);
     function clearLibraryBookIsbnLookupResult() {
       libraryBookIsbnSourceLink.classList.add("hidden");
       libraryBookIsbnSourceLink.setAttribute("href", "#");
+    }
+
+    function clearLibraryBookIsbnPhoto() {
+      libraryBookIsbnPhotoInput.value = "";
+      libraryBookIsbnPhotoReadBtn.disabled = false;
+      libraryBookIsbnPhotoStatus.textContent = "Vyfoť stránku s ISBN nebo čárovým kódem; fotografie se k žádné kartě nepřipojí.";
+    }
+
+    async function readLibraryBookIsbnFromPhoto() {
+      const file = libraryBookIsbnPhotoInput.files && libraryBookIsbnPhotoInput.files[0];
+      const checked = validateLibraryBookImageFile(file, maxLibraryImageBytes);
+      if (checked.error || !checked.file) {
+        libraryBookIsbnPhotoStatus.textContent = checked.error || "Nejdřív vyfoť nebo vyber stránku s ISBN.";
+        libraryBookIsbnPhotoInput.focus();
+        return;
+      }
+      libraryBookIsbnPhotoReadBtn.disabled = true;
+      libraryBookIsbnPhotoStatus.textContent = "Čtu ISBN. Fotografie se neukládá...";
+      try {
+        const imageDataUrl = await blobToDataUrl(checked.file);
+        const data = await postJson("/api/library/book/isbn-photo", {image_data_url: imageDataUrl});
+        if (!data.ok || !data.isbn) {
+          libraryBookIsbnPhotoStatus.textContent = data.message || "ISBN se z fotografie nepodařilo přečíst.";
+          return;
+        }
+        libraryBookIsbnInput.value = data.isbn;
+        clearLibraryBookIsbnLookupResult();
+        libraryBookIsbnPhotoStatus.textContent = data.message || "ISBN bylo načteno do formuláře. Fotografii jsem neuložil.";
+        libraryBookIsbnInput.focus();
+      } catch (err) {
+        recordFrontendError(err);
+        libraryBookIsbnPhotoStatus.textContent = `Chyba rozpoznání ISBN: ${err}`;
+      } finally {
+        libraryBookIsbnPhotoInput.value = "";
+        libraryBookIsbnPhotoReadBtn.disabled = false;
+      }
     }
 
     async function lookupLibraryBookIsbn() {
@@ -6735,6 +6778,7 @@ ${item.context || ""}`);
       libraryBookOcrStatus.textContent = "Rozpoznaný text byl zrušen. Fotografie už nejsou uchované.";
     });
     libraryBookIsbnLookupBtn.addEventListener("click", lookupLibraryBookIsbn);
+    libraryBookIsbnPhotoReadBtn.addEventListener("click", readLibraryBookIsbnFromPhoto);
     libraryBookAddLocationBtn.addEventListener("click", () => addLibraryBookOption("location"));
     libraryBookAddCategoryBtn.addEventListener("click", () => addLibraryBookOption("category"));
     libraryBookSummaryDraftBtn.addEventListener("click", generateLibraryBookSummary);
