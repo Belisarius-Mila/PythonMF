@@ -131,8 +131,121 @@ class BookIsbnLookupTests(unittest.TestCase):
         self.assertFalse(called)
 
     def test_unknown_isbn_has_specific_safe_result(self) -> None:
+        responses = iter((b"{}", b'{"docs": []}'))
+
         with self.assertRaises(BookIsbnNotFoundError):
-            lookup_book_by_isbn(isbn="9781234567897", opener=lambda *_args, **_kwargs: FakeResponse(b"{}"))
+            lookup_book_by_isbn(
+                isbn="9781234567897",
+                opener=lambda *_args, **_kwargs: FakeResponse(next(responses)),
+            )
+
+    def test_empty_exact_lookup_falls_back_to_search_index(self) -> None:
+        search_payload = {
+            "docs": [
+                {
+                    "title": "Syntetická kniha ze search indexu",
+                    "author_name": ["Testovací autor"],
+                    "publisher": ["Testovací nakladatelství"],
+                    "first_publish_year": 2025,
+                    "number_of_pages_median": 245,
+                    "isbn": ["978-1-23456-789-7"],
+                }
+            ]
+        }
+        request_urls: list[str] = []
+
+        def opener(request: object, **_kwargs: object) -> FakeResponse:
+            request_urls.append(request.full_url)
+            if request.full_url.startswith("https://openlibrary.org/api/books?"):
+                return FakeResponse(b"{}")
+            return FakeResponse(json.dumps(search_payload).encode("utf-8"))
+
+        result = lookup_book_by_isbn(isbn="9781234567897", opener=opener)
+
+        self.assertEqual(result["matched_isbn"], "9781234567897")
+        self.assertEqual(result["title"], "Syntetická kniha ze search indexu")
+        self.assertEqual(result["author"], "Testovací autor")
+        self.assertEqual(result["publisher"], "Testovací nakladatelství")
+        self.assertEqual(result["publish_date"], "2025")
+        self.assertEqual(result["number_of_pages"], 245)
+        self.assertEqual(len(request_urls), 2)
+        search_url = urllib.parse.urlparse(request_urls[1])
+        self.assertEqual(
+            (search_url.scheme, search_url.netloc, search_url.path),
+            ("https", "openlibrary.org", "/search.json"),
+        )
+        self.assertEqual(
+            urllib.parse.parse_qs(search_url.query),
+            {
+                "isbn": ["9781234567897"],
+                "fields": [
+                    "title,author_name,publisher,first_publish_year,number_of_pages_median,isbn"
+                ],
+                "limit": ["10"],
+            },
+        )
+
+    def test_search_index_rejects_record_without_exact_requested_isbn(self) -> None:
+        search_payload = {
+            "docs": [
+                {
+                    "title": "Jiná syntetická kniha",
+                    "author_name": ["Jiný autor"],
+                    "isbn": ["neplatná hodnota", "9780306406157"],
+                }
+            ]
+        }
+
+        def opener(request: object, **_kwargs: object) -> FakeResponse:
+            if request.full_url.startswith("https://openlibrary.org/api/books?"):
+                return FakeResponse(b"{}")
+            return FakeResponse(json.dumps(search_payload).encode("utf-8"))
+
+        with self.assertRaises(BookIsbnNotFoundError):
+            lookup_book_by_isbn(isbn="9781234567897", opener=opener)
+
+    def test_isbn10_search_fallback_also_tries_isbn13_variant(self) -> None:
+        isbn13 = "9781234567897"
+        responses = iter(
+            (
+                b"{}",
+                b'{"docs": []}',
+                json.dumps(
+                    {
+                        "docs": [
+                            {
+                                "title": "Syntetická kniha podle ISBN-13",
+                                "author_name": ["Testovací autor"],
+                                "isbn": [isbn13],
+                            }
+                        ]
+                    }
+                ).encode("utf-8"),
+            )
+        )
+        request_urls: list[str] = []
+
+        def opener(request: object, **_kwargs: object) -> FakeResponse:
+            request_urls.append(request.full_url)
+            return FakeResponse(next(responses))
+
+        result = lookup_book_by_isbn(isbn="123456789X", opener=opener)
+
+        self.assertEqual(result["matched_isbn"], isbn13)
+        self.assertEqual(len(request_urls), 3)
+        first_search = urllib.parse.parse_qs(urllib.parse.urlparse(request_urls[1]).query)
+        second_search = urllib.parse.parse_qs(urllib.parse.urlparse(request_urls[2]).query)
+        self.assertEqual(first_search["isbn"], ["123456789X"])
+        self.assertEqual(second_search["isbn"], [isbn13])
+
+    def test_search_index_requires_docs_list(self) -> None:
+        responses = iter((b"{}", b"{}"))
+
+        with self.assertRaises(BookIsbnLookupError):
+            lookup_book_by_isbn(
+                isbn="9781234567897",
+                opener=lambda *_args, **_kwargs: FakeResponse(next(responses)),
+            )
 
     def test_malformed_and_oversized_responses_are_rejected(self) -> None:
         with self.assertRaises(BookIsbnLookupError):
