@@ -3788,3 +3788,28 @@ Technický důkaz:
 - Live status: `development=true`, `checkpoint=true`, `one_turn_write=true`,
   `write_authorization=one_turn`.
 - Nasazený commit `ef3526d`; následný smoke 5/5.
+
+### 2026-08-05 12:52 CEST – Dokončení má vlastní serverovou pravdu
+
+Hotovo:
+- Jednorázový zapisovací tah má redigovaný private stav od zahájení přes přijetí
+  účtenky až po dokončený nebo neúspěšný checkpoint.
+- Ověřený výsledek je dostupný v Cockpitu a v dalším modelovém kontextu.
+- Git úspěch se uzná jen při dosažitelném checkpointu v historii `main` a
+  bezpečném stavu workspace.
+
+Rozhodnutí:
+- Účtenka modelu není důkaz dokončení; autoritou je serverová stavová vrstva.
+- Neuzavřený stav se fail-closed nepřepíše dalším zapisovacím tahem.
+- Registr zůstává private a neobsahuje chat ani věcný obsah vývoje.
+
+Další krok:
+- Uložit změnu lokálním commitem; nasazení zůstává oddělené.
+
+Navrhované další kroky:
+- Po nasazení ověřit živý úspěšný checkpoint, serverovou kartu a správnou
+  odpověď Human–Adama v následujícím tahu.
+
+Technický důkaz:
+- 250 cílených testů prošlo.
+- Plná Cockpit Quality Gate: 1301 testů, 304,824 s, výsledek OK.

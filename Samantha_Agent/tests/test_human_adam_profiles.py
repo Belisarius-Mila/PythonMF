@@ -3337,6 +3337,95 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertIn("jednou audit nasazení do Cockpitu", result["entry"]["answer"])
         self.assertEqual(human_hub.replaced_answers[-1][0], "completion-001")
 
+    def test_next_turn_receives_verified_server_completion_result(self) -> None:
+        receipt = (
+            "Vývoj je hotový.\n\n"
+            "[HUMAN_ADAM_STEP_COMPLETION]\n"
+            '{"commit_message":"Complete guarded step","summary":"Pojistka je hotová",'
+            '"next_step":"Nasadit samostatně"}\n'
+            "[/HUMAN_ADAM_STEP_COMPLETION]"
+        )
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, _library_workspace, human_hub, _library_hub = (
+                self.make_manager(Path(temp_dir))
+            )
+            manager.connect()
+            human_hub.on_send = lambda: setattr(human_workspace, "dirty", True)
+            human_hub.next_answer = receipt
+            with patch(
+                "app.communication.human_adam_profiles.complete_simple_main_checkpoint",
+                return_value={
+                    "ok": True,
+                    "checkpoint_head": "c" * 40,
+                    "checkpoint_short": "c" * 12,
+                    "all_workspaces_aligned": True,
+                    "remote_push_deferred": True,
+                    "pending_remote_commit_count": 6,
+                },
+            ):
+                completed = manager.send(
+                    text="Dokonči hlídaný krok",
+                    client_message_id="guarded-completion-001",
+                    write_intent=True,
+                )
+            human_workspace.dirty = False
+            human_hub.on_send = None
+            human_hub.next_answer = "Předchozí stav jsem ověřil."
+            with patch.object(
+                manager,
+                "_checkpoint_reachable_from_main",
+                return_value=True,
+            ):
+                status = manager.last_step_completion_status()
+                manager.send(
+                    text="Je předchozí vývoj hotový?",
+                    client_message_id="guarded-followup-001",
+                )
+
+        model_input = str(human_hub.last_send["model_input_text"])
+        self.assertTrue(
+            completed["automatic_completion"]["completion_status_persisted"]
+        )
+        self.assertEqual(status["state"], "checkpoint_completed")
+        self.assertEqual(status["checkpoint_short"], "c" * 12)
+        self.assertIn("[LAST_STEP_COMPLETION]", model_input)
+        self.assertIn("state=checkpoint_completed", model_input)
+        self.assertIn(f"checkpoint={'c' * 12}", model_input)
+        self.assertIn("server block is the authority", model_input)
+
+    def test_checkpoint_failure_is_durable_for_next_status(self) -> None:
+        receipt = (
+            "Změna je připravená.\n\n"
+            "[HUMAN_ADAM_STEP_COMPLETION]\n"
+            '{"commit_message":"Fail guarded step","summary":"Změna čeká",'
+            '"next_step":"Opravit bránu"}\n'
+            "[/HUMAN_ADAM_STEP_COMPLETION]"
+        )
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, _library_workspace, human_hub, _library_hub = (
+                self.make_manager(Path(temp_dir))
+            )
+            manager.connect()
+            human_hub.on_send = lambda: setattr(human_workspace, "dirty", True)
+            human_hub.next_answer = receipt
+            with patch(
+                "app.communication.human_adam_profiles.complete_simple_main_checkpoint",
+                side_effect=AppServerError("Simulovaná chyba brány."),
+            ):
+                result = manager.send(
+                    text="Proveď hlídaný krok",
+                    client_message_id="guarded-failure-001",
+                    write_intent=True,
+                )
+            status = manager.last_step_completion_status()
+
+        self.assertEqual(result["automatic_completion"]["state"], "failed")
+        self.assertTrue(
+            result["automatic_completion"]["completion_status_persisted"]
+        )
+        self.assertEqual(status["state"], "checkpoint_failed")
+        self.assertEqual(status["failure_code"], "checkpoint_failed")
+
     def test_dirty_writable_turn_without_receipt_stays_visible_and_uncommitted(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             manager, human_workspace, _library_workspace, human_hub, _library_hub = self.make_manager(

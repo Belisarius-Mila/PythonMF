@@ -2555,3 +2555,29 @@ Technický důkaz:
 - Nasazený kódový commit: `ef3526d`.
 - Serverová verifikace: `deployed`, rychlá předrestartová brána, nový proces.
 - Následný Cockpit smoke: 5/5.
+
+### 2026-08-05 12:52 CEST – Serverová pojistka dokončení vývojového tahu
+
+Hotovo:
+- Výsledek účtenky se ukládá do samostatného redigovaného private registru jako
+  stav tahu, checkpoint, GitHub čekání a úspěch uložení odpovědi.
+- Další modelový tah dostává blok `LAST_STEP_COMPLETION`; Cockpit zobrazuje
+  stejný serverový výsledek odděleně od textu modelu.
+- Úspěšný checkpoint se znovu ověřuje proti historii `main` a čistému workspace.
+  Neuzavřený nebo nejistý stav blokuje nový zapisovací tah.
+
+Rozhodnutí:
+- Modelová účtenka pouze žádá o dokončení. Autoritou pro skutečný výsledek je
+  serverový stav ověřený proti Gitu a workspace.
+- Registr neukládá chat, souhrn vývoje ani soukromý obsah.
+
+Další krok:
+- Vytvořit lokální commit. Nasazení do běžícího Cockpitu zůstává samostatné.
+
+Navrhované další kroky:
+- Po potvrzeném nasazení živě ověřit jeden malý zapisovací tah a následný dotaz
+  Human–Adamovi, zda předchozí checkpoint uspěl.
+
+Technický důkaz:
+- Cílená rozšířená sada prošla 250 testy.
+- Plná Cockpit Quality Gate prošla 1301 testy za 304,824 s.

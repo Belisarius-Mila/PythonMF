@@ -45,6 +45,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     #deploymentReceipt { margin:8px 0 0; padding:6px 10px; border-radius:10px; color:var(--ok); background:#ecfdf3; font-size:13px; }
     #deploymentReceipt.stale { color:var(--warn); background:#fff7ed; }
     #deploymentReceipt[hidden] { display:none; }
+    #stepCompletionReceipt { margin:8px 0 0; padding:6px 10px; border-radius:10px; color:var(--ok); background:#ecfdf3; font-size:13px; font-weight:700; }
+    #stepCompletionReceipt.running { color:#1d4ed8; background:#eff6ff; }
+    #stepCompletionReceipt.warn { color:var(--warn); background:#fff7ed; }
+    #stepCompletionReceipt[hidden] { display:none; }
     #chat { flex:1; padding:14px 18px 180px; display:flex; flex-direction:column; gap:14px; }
     .exchange { display:grid; gap:8px; }
     .bubble { max-width:86%; padding:12px 14px; border-radius:16px; white-space:pre-wrap; overflow-wrap:anywhere; }
@@ -185,6 +189,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       </div>
       <div id="turnActivity" role="status" aria-live="polite" hidden></div>
     </div>
+    <div id="stepCompletionReceipt" role="status" aria-live="polite" hidden></div>
     <div id="deploymentReceipt" role="status" aria-live="polite" hidden></div>
   </header>
   <div id="notice" role="status" aria-live="polite"></div>
@@ -379,6 +384,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
 <script>
   const chat = document.getElementById("chat");
   const notice = document.getElementById("notice");
+  const stepCompletionReceipt = document.getElementById("stepCompletionReceipt");
   const deploymentReceipt = document.getElementById("deploymentReceipt");
   const mobileStatusSummary = document.getElementById("mobileStatusSummary");
   const mobileStatusText = document.getElementById("mobileStatusText");
@@ -1117,6 +1123,55 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     return currentWorkstreamLiveStatus.deployment;
   }
 
+  function renderStepCompletion(status) {
+    const valid = Boolean(
+      status
+      && typeof status === "object"
+      && status.schema_version === 1
+      && status.server_authoritative === true
+    );
+    const state = valid ? String(status.state || "unverified") : "unverified";
+    const checkpoint = valid ? String(status.checkpoint_short || "").trim() : "";
+    const pendingCount = valid ? Number(status.pending_remote_commit_count || 0) : 0;
+    const deploymentState = valid ? String(status.deployment_state || "unknown") : "unknown";
+    stepCompletionReceipt.className = "";
+    if (state === "none") {
+      stepCompletionReceipt.textContent = "";
+      stepCompletionReceipt.hidden = true;
+      return;
+    }
+    if (state === "checkpoint_completed") {
+      const remote = status.remote_push_deferred === true
+        ? ` · GitHub balíček čeká (${pendingCount})`
+        : "";
+      const deployment = deploymentState === "verified_current"
+        ? " · nasazeno"
+        : " · nasazení čeká";
+      stepCompletionReceipt.textContent = `Vývoj dokončen ✓ · Git checkpoint ${checkpoint || "ověřen"}${remote}${deployment}`;
+    } else if (state === "turn_started" || state === "receipt_accepted") {
+      stepCompletionReceipt.classList.add("running");
+      stepCompletionReceipt.textContent = state === "receipt_accepted"
+        ? "Účtenka přijata · server dokončuje kontrolní bránu a checkpoint"
+        : "Zapisovací tah běží · server čeká na výsledek";
+    } else if (state === "integration_deferred") {
+      stepCompletionReceipt.classList.add("warn");
+      stepCompletionReceipt.textContent = "Vývoj je zachovaný, ale integrace čeká na potvrzené převzetí";
+    } else {
+      stepCompletionReceipt.classList.add("warn");
+      const labels = {
+        delivery_uncertain: "Doručení výsledku je nejisté",
+        turn_failed: "Zapisovací tah nedoběhl",
+        receipt_missing: "Chybí dokončovací účtenka",
+        receipt_invalid: "Dokončovací účtenka je neplatná",
+        checkpoint_failed: "Checkpoint se nedokončil",
+        attention_required: "Výsledek checkpointu neodpovídá aktuálnímu Git stavu",
+        unverified: "Výsledek posledního vývoje nelze serverově ověřit",
+      };
+      stepCompletionReceipt.textContent = `Vývoj vyžaduje kontrolu · ${labels[state] || "stav není ověřený"}`;
+    }
+    stepCompletionReceipt.hidden = false;
+  }
+
   function renderStatus(payload) {
     renderWorkstreams(payload);
     const session = payload && payload.session ? payload.session : null;
@@ -1144,6 +1199,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     else workspaceBadge.textContent = "Workspace čistý";
     workspaceBadge.className = workspace.has_git_remote || workspaceDiverged || workspace.sync_available || workspace.dirty || workspace.local_checkpoint_ahead ? "badge warn" : "badge";
     renderCompactWorkStatus(workspace);
+    renderStepCompletion(payload && payload.last_step_completion ? payload.last_step_completion : null);
     renderDevelopmentBadge(payload && payload.development_semaphore ? payload.development_semaphore : null);
     const deployment = verifiedDeploymentRecord(
       payload && payload.last_simple_main_deployment
@@ -1955,6 +2011,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     renderHandoffProposal(payload.handoff_proposal || null);
     renderPendingIntegrationAudit(payload.pending_integration_audit || null);
     renderWorkstreamLiveStatus(payload.workstream_live_status || null);
+    renderStepCompletion(payload.last_step_completion || null);
     renderBatchWorkflow(payload);
     workChanges.replaceChildren();
     const pending = Array.isArray(payload.changes) ? payload.changes : [];

@@ -5,6 +5,7 @@ from __future__ import annotations
 import atexit
 import json
 import re
+import subprocess
 import threading
 from contextlib import contextmanager
 from datetime import datetime, timezone
@@ -30,6 +31,20 @@ from app.communication.human_adam_service import (
     DEVELOPMENT_CONTROL_DEVELOPER_INSTRUCTIONS,
     HUMAN_ADAM_DEVELOPER_INSTRUCTIONS,
     HumanAdamService,
+)
+from app.communication.human_adam_completion_status import (
+    CHECKPOINT_COMPLETED,
+    CHECKPOINT_FAILED,
+    DELIVERY_UNCERTAIN as COMPLETION_DELIVERY_UNCERTAIN,
+    INTEGRATION_DEFERRED as COMPLETION_INTEGRATION_DEFERRED,
+    RECEIPT_ACCEPTED,
+    RECEIPT_INVALID,
+    RECEIPT_MISSING,
+    TURN_FAILED,
+    HumanAdamCompletionStatusError,
+    HumanAdamCompletionStatusStore,
+    completion_status_model_block,
+    public_completion_status,
 )
 from app.communication.human_adam_workspace import (
     HUMAN_ADAM_SANDBOX_POLICY,
@@ -117,6 +132,9 @@ PRIVATE_WORKSTREAM_THREAD_ROOT = PRIVATE_COMMUNICATION_ROOT / "workstreams"
 DEFAULT_PROFILE_STATE_PATH = PRIVATE_COMMUNICATION_ROOT / "human_adam_active_profile.json"
 DEFAULT_DEVELOPMENT_SEMAPHORE_PATH = PRIVATE_COMMUNICATION_ROOT / "development_semaphore.json"
 DEFAULT_HUMAN_SESSION_PATH = PRIVATE_COMMUNICATION_ROOT / "canonical_session.json"
+DEFAULT_COMPLETION_STATUS_PATH = (
+    PRIVATE_COMMUNICATION_ROOT / "human_adam_completion_status.json"
+)
 KNIHOVNA_PROFILE_ROOT = PRIVATE_PROFILE_ROOT / "knihovna"
 KNIHOVNA_TVBCP_RELATIVE_PATH = Path("memory/tvbcp/knihovna_cockpit.txt")
 HUMAN_ADAM_WORKSTREAM_ID = "layer-human-adam-development"
@@ -288,6 +306,7 @@ class HumanAdamProfileManager:
         project_continuity: ProjectContinuityService | None = None,
         simple_main_deployment_receipt_path: Path | None = None,
         deferred_integration_store: DeferredIntegrationStore | None = None,
+        completion_status_store: HumanAdamCompletionStatusStore | None = None,
         workstream_threads: WorkstreamThreadRegistry | None = None,
         workstream_memory: WorkstreamMemoryRegistry | None = None,
         github_batch_mode: bool = False,
@@ -367,6 +386,14 @@ class HumanAdamProfileManager:
                 )
                 if self.state_path == DEFAULT_PROFILE_STATE_PATH
                 else self.state_path.with_name("deferred_integration.json")
+            )
+        )
+        self.completion_status_store = (
+            completion_status_store
+            or HumanAdamCompletionStatusStore(
+                DEFAULT_COMPLETION_STATUS_PATH
+                if self.state_path == DEFAULT_PROFILE_STATE_PATH
+                else self.state_path.with_name("completion_status.json")
             )
         )
         self.workstream_threads = workstream_threads
@@ -1243,6 +1270,98 @@ class HumanAdamProfileManager:
                 f"{operation} lazy pracovního proudu zatím není povolené."
             )
 
+    @staticmethod
+    def _checkpoint_reachable_from_main(
+        *,
+        source_repo: Path,
+        checkpoint_head: str,
+        source_head: str,
+    ) -> bool | None:
+        if not re.fullmatch(r"[0-9a-f]{40}", checkpoint_head):
+            return None
+        if not re.fullmatch(r"[0-9a-f]{40}", source_head):
+            return None
+        try:
+            completed = subprocess.run(
+                [
+                    "/usr/bin/git",
+                    "-C",
+                    str(source_repo),
+                    "merge-base",
+                    "--is-ancestor",
+                    checkpoint_head,
+                    source_head,
+                ],
+                capture_output=True,
+                text=True,
+                timeout=10,
+                check=False,
+            )
+        except (OSError, subprocess.TimeoutExpired):
+            return None
+        if completed.returncode == 0:
+            return True
+        if completed.returncode == 1:
+            return False
+        return None
+
+    def last_step_completion_status(self) -> dict[str, Any]:
+        """Return the latest server result, rechecked against Git and workspace."""
+
+        observed_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+        try:
+            service = self.active_service
+            workstream_id = self.active_workstream_id
+            record = self.completion_status_store.load(
+                workstream_id=workstream_id
+            )
+            source_snapshot = service.workspace.status()
+            deployment = load_completed_simple_main_deployment(
+                self.simple_main_deployment_receipt_path,
+            )
+            reachable = (
+                self._checkpoint_reachable_from_main(
+                    source_repo=service.workspace.source_repo,
+                    checkpoint_head=record.checkpoint_head,
+                    source_head=str(source_snapshot.get("source_head") or ""),
+                )
+                if record is not None and record.state == CHECKPOINT_COMPLETED
+                else None
+            )
+            return public_completion_status(
+                record=record,
+                observed_at=observed_at,
+                source_snapshot=source_snapshot,
+                deployment_snapshot=deployment,
+                checkpoint_reachable=reachable,
+                server_operation_active=self._operation_lock.locked(),
+            )
+        except (
+            AppServerError,
+            HumanAdamCompletionStatusError,
+            OSError,
+            TypeError,
+            ValueError,
+        ):
+            return {
+                "schema_version": 1,
+                "server_authoritative": True,
+                "state": "unverified",
+                "record_state": "unverified",
+                "workstream_id": "",
+                "checkpoint_short": "",
+                "current_main_short": "",
+                "git_verified": False,
+                "workspace_verified": False,
+                "answer_persisted": None,
+                "remote_push_deferred": False,
+                "pending_remote_commit_count": 0,
+                "deployment_state": "unknown",
+                "failure_code": "",
+                "observed_at": observed_at,
+                "updated_at": "",
+            }
+
     def status(self) -> dict[str, Any]:
         try:
             selection = self.grouped_workstream_status()
@@ -1261,6 +1380,7 @@ class HumanAdamProfileManager:
                 "development_semaphore": self.development_status(),
                 "last_simple_main_deployment": last_deployment,
                 "recent_simple_main_deployment": recent_deployment,
+                "last_step_completion": self.last_step_completion_status(),
             }
         except (AppServerError, SessionHubError, OSError, ValueError) as exc:
             return {
@@ -1276,6 +1396,7 @@ class HumanAdamProfileManager:
                 },
                 "github_batch_mode": self.github_batch_mode,
                 "development_semaphore": self.development_status(),
+                "last_step_completion": self.last_step_completion_status(),
             }
 
     @contextmanager
@@ -1425,8 +1546,15 @@ class HumanAdamProfileManager:
                     observed_code_stamp=observed_code_stamp
                 )
             )
+            completion_status_block = completion_status_model_block(
+                self.last_step_completion_status()
+            )
             development_control_block = (
-                live_status_block + "\n\n" + "\n".join(control_lines)
+                live_status_block
+                + "\n\n"
+                + completion_status_block
+                + "\n\n"
+                + "\n".join(control_lines)
             )
             completion_instruction = automatic_completion_instruction(
                 writable=writable,
@@ -1443,12 +1571,19 @@ class HumanAdamProfileManager:
                 development_control_block = (
                     development_control_block + "\n\n" + operation_instruction
                 )
+            client_message_id = str(kwargs.get("client_message_id") or "").strip()
+            if writable:
+                workspace_before_turn = service.workspace.status()
+                self.completion_status_store.begin(
+                    workstream_id=self.active_workstream_id,
+                    client_message_id=client_message_id,
+                    base_head=str(workspace_before_turn.get("head") or ""),
+                )
             ownership_started = bool(
                 write_intent
                 and active_id == "human_adam"
                 and not lazy_id
             )
-            client_message_id = str(kwargs.get("client_message_id") or "").strip()
             if ownership_started:
                 self.deferred_integration_store.begin(
                     workstream_id=self.active_workstream_id,
@@ -1462,6 +1597,31 @@ class HumanAdamProfileManager:
                     development_control_block=development_control_block,
                 )
             except Exception:
+                if writable:
+                    try:
+                        session = service.hub.snapshot()
+                        uncertain = self._has_uncertain_delivery(session)
+                        self.completion_status_store.update(
+                            workstream_id=self.active_workstream_id,
+                            client_message_id=client_message_id,
+                            state=(
+                                COMPLETION_DELIVERY_UNCERTAIN
+                                if uncertain
+                                else TURN_FAILED
+                            ),
+                            failure_code=(
+                                "delivery_uncertain"
+                                if uncertain
+                                else "turn_failed"
+                            ),
+                        )
+                    except (
+                        HumanAdamCompletionStatusError,
+                        OSError,
+                        TypeError,
+                        ValueError,
+                    ):
+                        pass
                 if ownership_started:
                     try:
                         session = service.hub.snapshot()
@@ -1484,6 +1644,7 @@ class HumanAdamProfileManager:
                 writable=writable,
                 integration_deferred=integration_deferred,
                 ownership_started=ownership_started,
+                client_message_id=client_message_id,
                 result=result,
             )
             return {
@@ -1815,9 +1976,41 @@ class HumanAdamProfileManager:
         writable: bool,
         integration_deferred: bool = False,
         ownership_started: bool = False,
+        client_message_id: str = "",
         result: dict[str, Any],
     ) -> dict[str, Any]:
         """Finish a delivered writable turn, or leave its work visibly recoverable."""
+
+        def record_completion_state(
+            state: str,
+            *,
+            checkpoint_head: str = "",
+            failure_code: str = "",
+            answer_persisted: bool | None = None,
+            remote_push_deferred: bool = False,
+            pending_remote_commit_count: int = 0,
+        ) -> bool:
+            if not writable:
+                return True
+            try:
+                self.completion_status_store.update(
+                    workstream_id=self.active_workstream_id,
+                    client_message_id=client_message_id,
+                    state=state,
+                    checkpoint_head=checkpoint_head,
+                    failure_code=failure_code,
+                    answer_persisted=answer_persisted,
+                    remote_push_deferred=remote_push_deferred,
+                    pending_remote_commit_count=pending_remote_commit_count,
+                )
+                return True
+            except (
+                HumanAdamCompletionStatusError,
+                OSError,
+                TypeError,
+                ValueError,
+            ):
+                return False
 
         if result.get("duplicate_prevented") is True:
             if ownership_started:
@@ -1860,6 +2053,10 @@ class HumanAdamProfileManager:
             }
         entry = result.get("entry")
         if not isinstance(entry, dict):
+            record_completion_state(
+                TURN_FAILED,
+                failure_code="turn_failed",
+            )
             return {
                 **result,
                 "automatic_operation": {"state": "unavailable", "attempted": False},
@@ -1902,6 +2099,11 @@ class HumanAdamProfileManager:
                     entry=entry,
                     answer=answer,
                 )
+                completion_status_persisted = record_completion_state(
+                    CHECKPOINT_FAILED,
+                    failure_code="checkpoint_failed",
+                    answer_persisted=answer_persisted,
+                )
                 return {
                     **result,
                     "entry": entry,
@@ -1910,6 +2112,7 @@ class HumanAdamProfileManager:
                         "attempted": False,
                         "ownership_marker": False,
                         "answer_persisted": answer_persisted,
+                        "completion_status_persisted": completion_status_persisted,
                     },
                 }
         if operation.state != "absent":
@@ -1924,6 +2127,11 @@ class HumanAdamProfileManager:
                     entry=entry,
                     answer=answer,
                 )
+                completion_status_persisted = record_completion_state(
+                    RECEIPT_MISSING,
+                    failure_code="metadata_missing",
+                    answer_persisted=answer_persisted,
+                )
                 return {
                     **result,
                     "entry": entry,
@@ -1935,6 +2143,7 @@ class HumanAdamProfileManager:
                     "automatic_completion": {
                         "state": "metadata_missing",
                         "attempted": False,
+                        "completion_status_persisted": completion_status_persisted,
                     },
                 }
             if operation.state != "valid" or operation.request is None:
@@ -1948,6 +2157,11 @@ class HumanAdamProfileManager:
                     entry=entry,
                     answer=answer,
                 )
+                completion_status_persisted = record_completion_state(
+                    TURN_FAILED,
+                    failure_code="turn_failed",
+                    answer_persisted=answer_persisted,
+                )
                 return {
                     **result,
                     "entry": entry,
@@ -1959,6 +2173,7 @@ class HumanAdamProfileManager:
                     "automatic_completion": {
                         "state": "not_needed",
                         "attempted": False,
+                        "completion_status_persisted": completion_status_persisted,
                     },
                 }
             try:
@@ -1986,6 +2201,11 @@ class HumanAdamProfileManager:
                 entry=entry,
                 answer=answer,
             )
+            completion_status_persisted = record_completion_state(
+                TURN_FAILED,
+                failure_code="turn_failed",
+                answer_persisted=answer_persisted,
+            )
             return {
                 **result,
                 "entry": entry,
@@ -1999,9 +2219,14 @@ class HumanAdamProfileManager:
                 "automatic_completion": {
                     "state": "not_needed",
                     "attempted": False,
+                    "completion_status_persisted": completion_status_persisted,
                 },
             }
         if not dirty and parsed.state == "absent":
+            record_completion_state(
+                TURN_FAILED,
+                failure_code="turn_failed",
+            )
             return {
                 **result,
                 "automatic_operation": {"state": "not_needed", "attempted": False},
@@ -2016,6 +2241,11 @@ class HumanAdamProfileManager:
                 entry=entry,
                 answer=answer,
             )
+            completion_status_persisted = record_completion_state(
+                TURN_FAILED,
+                failure_code="turn_failed",
+                answer_persisted=answer_persisted,
+            )
             return {
                 **result,
                 "entry": entry,
@@ -2023,6 +2253,7 @@ class HumanAdamProfileManager:
                     "state": "no_changes",
                     "attempted": False,
                     "answer_persisted": answer_persisted,
+                    "completion_status_persisted": completion_status_persisted,
                 },
             }
 
@@ -2040,6 +2271,19 @@ class HumanAdamProfileManager:
                     entry=entry,
                     answer=answer,
                 )
+                completion_status_persisted = record_completion_state(
+                    (
+                        RECEIPT_MISSING
+                        if parsed.state == "absent"
+                        else RECEIPT_INVALID
+                    ),
+                    failure_code=(
+                        "metadata_missing"
+                        if parsed.state == "absent"
+                        else "metadata_invalid"
+                    ),
+                    answer_persisted=answer_persisted,
+                )
                 return {
                     **result,
                     "entry": entry,
@@ -2049,6 +2293,7 @@ class HumanAdamProfileManager:
                         "ownership_marker": bool(ownership_record),
                         "metadata_recovery_required": True,
                         "answer_persisted": answer_persisted,
+                        "completion_status_persisted": completion_status_persisted,
                     },
                 }
             note = (
@@ -2063,6 +2308,11 @@ class HumanAdamProfileManager:
                 entry=entry,
                 answer=answer,
             )
+            completion_status_persisted = record_completion_state(
+                COMPLETION_INTEGRATION_DEFERRED,
+                failure_code="integration_deferred",
+                answer_persisted=answer_persisted,
+            )
             return {
                 **result,
                 "entry": entry,
@@ -2071,6 +2321,7 @@ class HumanAdamProfileManager:
                     "attempted": False,
                     "ownership_marker": bool(ownership_record),
                     "answer_persisted": answer_persisted,
+                    "completion_status_persisted": completion_status_persisted,
                 },
             }
 
@@ -2084,6 +2335,19 @@ class HumanAdamProfileManager:
                 service=service,
                 entry=entry,
                 answer=answer,
+            )
+            completion_status_persisted = record_completion_state(
+                (
+                    RECEIPT_MISSING
+                    if parsed.state == "absent"
+                    else RECEIPT_INVALID
+                ),
+                failure_code=(
+                    "metadata_missing"
+                    if parsed.state == "absent"
+                    else "metadata_invalid"
+                ),
+                answer_persisted=answer_persisted,
             )
             return {
                 **result,
@@ -2108,6 +2372,19 @@ class HumanAdamProfileManager:
                 entry=entry,
                 answer=answer,
             )
+            completion_status_persisted = record_completion_state(
+                (
+                    RECEIPT_MISSING
+                    if parsed.state == "absent"
+                    else RECEIPT_INVALID
+                ),
+                failure_code=(
+                    "metadata_missing"
+                    if parsed.state == "absent"
+                    else "metadata_invalid"
+                ),
+                answer_persisted=answer_persisted,
+            )
             return {
                 **result,
                 "entry": entry,
@@ -2118,6 +2395,30 @@ class HumanAdamProfileManager:
                     "ownership_marker": bool(ownership_record),
                     "metadata_recovery_required": True,
                     "answer_persisted": answer_persisted,
+                    "completion_status_persisted": completion_status_persisted,
+                },
+            }
+
+        receipt_status_persisted = record_completion_state(RECEIPT_ACCEPTED)
+        if not receipt_status_persisted:
+            note = (
+                "Automatický checkpoint se nespustil: serverový stav dokončení "
+                "nelze bezpečně uložit. Změny zůstaly viditelné ve workspace."
+            )
+            answer = self._completion_answer(parsed.visible_answer, note)
+            answer_persisted = self._store_completed_answer(
+                service=service,
+                entry=entry,
+                answer=answer,
+            )
+            return {
+                **result,
+                "entry": entry,
+                "automatic_completion": {
+                    "state": "completion_status_unavailable",
+                    "attempted": False,
+                    "answer_persisted": answer_persisted,
+                    "completion_status_persisted": False,
                 },
             }
 
@@ -2138,6 +2439,11 @@ class HumanAdamProfileManager:
                 entry=entry,
                 answer=answer,
             )
+            completion_status_persisted = record_completion_state(
+                CHECKPOINT_FAILED,
+                failure_code="checkpoint_failed",
+                answer_persisted=answer_persisted,
+            )
             return {
                 **result,
                 "entry": entry,
@@ -2146,6 +2452,7 @@ class HumanAdamProfileManager:
                     "attempted": True,
                     "message": str(exc),
                     "answer_persisted": answer_persisted,
+                    "completion_status_persisted": completion_status_persisted,
                 },
             }
 
@@ -2196,6 +2503,17 @@ class HumanAdamProfileManager:
             entry=entry,
             answer=answer,
         )
+        completion_status_persisted = record_completion_state(
+            CHECKPOINT_COMPLETED,
+            checkpoint_head=str(checkpoint.get("checkpoint_head") or ""),
+            answer_persisted=answer_persisted,
+            remote_push_deferred=(
+                checkpoint.get("remote_push_deferred") is True
+            ),
+            pending_remote_commit_count=int(
+                checkpoint.get("pending_remote_commit_count") or 0
+            ),
+        )
         marker_cleared = True
         if ownership_started:
             try:
@@ -2213,6 +2531,7 @@ class HumanAdamProfileManager:
                 "checkpoint": checkpoint,
                 "ownership_marker_cleared": marker_cleared,
                 "answer_persisted": answer_persisted,
+                "completion_status_persisted": completion_status_persisted,
             },
         }
 
@@ -2342,6 +2661,7 @@ class HumanAdamProfileManager:
             "workstream_live_status": self.workstream_live_status(
                 observed_code_stamp=observed_code_stamp
             ),
+            "last_step_completion": self.last_step_completion_status(),
             "pending_integration_audit": self.pending_integration_status(
                 work_review=work
             ),

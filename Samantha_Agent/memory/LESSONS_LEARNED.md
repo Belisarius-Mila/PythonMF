@@ -107,3 +107,15 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Řešení: Ve stavových unit testech stubovat všechny loadery napojené na externí
   nebo soukromé zdroje, včetně urgentních připomínek. Po opravě nejprve spustit
   přímo dříve visící test a potom celou plnou bránu.
+
+### LL-008 — Modelová účtenka není důkaz serverového dokončení
+
+- Problém: Human–Adam vystavil dokončovací účtenku a server vytvořil checkpoint,
+  ale výsledek se doplnil jen do lokální odpovědi. Další modelový tah proto
+  nemusel vědět, zda brána a Git operace skutečně uspěly.
+- Typ: opakující se
+- Řešení nalezeno: 05082026
+- Řešení: Výsledek zapisovacího tahu ukládat jako samostatný redigovaný private
+  serverový stav. Před dalším tahem jej ověřit proti historii `main` a čistotě
+  workspace, zobrazit v Cockpitu a vložit do modelového kontextu. Neuzavřený,
+  nejistý nebo neověřitelný stav nesmí nový zapisovací tah tiše přepsat.

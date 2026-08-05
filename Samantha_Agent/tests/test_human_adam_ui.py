@@ -69,6 +69,7 @@ class HumanAdamUiTests(unittest.TestCase):
             "deployAuditBtn",
             "deployConfirmation",
             "deployBtn",
+            "stepCompletionReceipt",
             "deploymentReceipt",
             "turnActivity",
             "mobileStatusSummary",
@@ -80,6 +81,18 @@ class HumanAdamUiTests(unittest.TestCase):
             "voiceStatus",
         ):
             self.assertIn(f'id="{element_id}"', HUMAN_ADAM_HTML)
+
+    def test_ui_renders_server_authoritative_step_completion_separately(self) -> None:
+        self.assertIn("function renderStepCompletion(status)", HUMAN_ADAM_HTML)
+        self.assertIn("status.server_authoritative === true", HUMAN_ADAM_HTML)
+        self.assertIn('state === "checkpoint_completed"', HUMAN_ADAM_HTML)
+        self.assertIn("Vývoj dokončen ✓ · Git checkpoint", HUMAN_ADAM_HTML)
+        self.assertIn("Účtenka přijata · server dokončuje", HUMAN_ADAM_HTML)
+        self.assertIn("Checkpoint se nedokončil", HUMAN_ADAM_HTML)
+        self.assertIn(
+            "renderStepCompletion(payload && payload.last_step_completion",
+            HUMAN_ADAM_HTML,
+        )
         self.assertIn("Odesláno", HUMAN_ADAM_HTML)
         self.assertIn("Adam pracuje…", HUMAN_ADAM_HTML)
         self.assertIn("Doručení potvrzeno", HUMAN_ADAM_HTML)
