@@ -133,8 +133,21 @@ def sync_urgent_reminders_index(
 ) -> list[UrgentReminder]:
     observed: list[dict[str, Any]] = []
     reminder_files = _iter_reminder_files(inbox_dir)
+    indexed_records = _load_index(index_path)
+    indexed_by_path = {
+        str(record.get("source_path", "")): record
+        for record in indexed_records
+    }
+    files_requiring_read = [
+        path
+        for path in reminder_files
+        if not _source_snapshot_matches_index(
+            path,
+            indexed_by_path.get(str(path)),
+        )
+    ]
     readable_texts, pending_downloads = _read_texts_with_hydration_retry(
-        reminder_files,
+        files_requiring_read,
         retry_delays=hydration_retry_delays,
         sleeper=sleeper,
     )
@@ -278,6 +291,25 @@ def _iter_reminder_files(inbox_dir: Path) -> list[Path]:
             and path.name.casefold().startswith(URGENT_REMINDER_FILE_PREFIX)
         ),
         key=lambda path: (path.stat().st_mtime, path.name.casefold()),
+    )
+
+
+def _source_snapshot_matches_index(path: Path, record: object) -> bool:
+    """Return true only when an unavailable source is already safely indexed."""
+
+    if not isinstance(record, dict):
+        return False
+    try:
+        stat = path.stat()
+        indexed_size = int(record.get("size_bytes", -1))
+    except (OSError, TypeError, ValueError):
+        return False
+    indexed_modified_at = str(record.get("modified_at") or "")
+    indexed_body = str(record.get("body_text") or record.get("summary") or "")
+    return bool(
+        indexed_body
+        and indexed_size == stat.st_size
+        and indexed_modified_at == _format_timestamp(stat.st_mtime)
     )
 
 

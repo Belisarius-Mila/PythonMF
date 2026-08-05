@@ -133,3 +133,15 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   chatový tah, čekající úlohu obnoví po restartu a přechodnou chybu procesu
   brány zopakuje nejvýše jednou; chybu testů neopakuje. Idempotentní klíč uložený
   v commit traileru umožní dokončit zachovaný commit bez vytvoření druhého.
+
+### LL-010 — iCloud placeholder není automaticky nové čekající doručení
+
+- Problém: Cockpit počítal každý odložený iCloud soubor s chybou `EDEADLK` jako
+  nové čekající stažení, i když už měl tentýž soubor úplně uložený v private
+  indexu a připomenutí mohlo být dávno splněné. Karta proto trvale hlásila
+  zaseknutý iCloud a opakovala pomalé hydratační pokusy.
+- Typ: opakující se
+- Řešení nalezeno: 05082026
+- Řešení: Před hydratací porovnat přesnou cestu, velikost, čas změny a přítomnost
+  uloženého těla. Pouze úplná shoda znamená bezpečně indexovaný nezměněný zdroj;
+  nový, změněný nebo neúplný placeholder zůstává čekajícím stažením.

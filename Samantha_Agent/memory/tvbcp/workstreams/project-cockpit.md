@@ -78,3 +78,33 @@ Technický důkaz:
 - plná Cockpit brána: 1269 testů, 281.3 s, výsledek OK.
 - Pracovní proud: `project-cockpit`.
 - Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`disconnected`.
+
+### 2026-08-05 22:41 CEST – Už indexované iCloud placeholdery nevytvářejí falešné čekání
+
+Hotovo:
+- Synchronizace důležitých připomenutí před hydratačním pokusem ověří, zda je
+  zdroj už úplně a beze změny zachycený v private indexu.
+- Přesně shodná cesta, velikost a čas změny s uloženým tělem se znovu nestahují
+  a nezvyšují počet čekajících položek.
+- Nový, změněný nebo neúplně indexovaný placeholder zůstává fail-closed
+  čekajícím stažením.
+
+Rozhodnutí:
+- Stav iCloud hydratace se nesmí zaměňovat se stavem doručení připomenutí.
+  Odložený soubor může být již bezpečně indexovaný.
+- Přímé Tailscale doručení zůstává samostatným navazujícím krokem; tato změna
+  neupravuje ani neinstaluje iPhonovou zkratku.
+
+Další krok:
+- Vytvořit lokální commit. Nasazení do běžícího Cockpitu zůstává samostatné.
+
+Navrhované další kroky:
+- Po nasazení ověřit, že karta ponechá otevřená připomenutí, ale odstraní pouze
+  falešný počet iCloud čekání.
+- Potom nakonfigurovat přímou Tailscale zkratku a provést jedno živé doručení.
+
+Technický důkaz:
+- Cílená sada 14 testů prošla.
+- Suchý běh nad kopií živého indexu vrátil otevřená připomenutí bez falešného
+  čekajícího nebo zaseknutého iCloudu.
+- Plná Cockpit Quality Gate prošla 1311 testy za 338,409 s.

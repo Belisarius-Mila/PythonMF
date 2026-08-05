@@ -154,6 +154,63 @@ class UrgentRemindersTests(unittest.TestCase):
             self.assertEqual(sleep_mock.call_count, 2)
             self.assertEqual(len(json.loads(index_path.read_text(encoding="utf-8"))["reminders"]), 1)
 
+    def test_indexed_unchanged_placeholder_is_not_reported_as_pending(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            inbox = root / "inbox"
+            inbox.mkdir()
+            index_path = root / "private" / "urgent_reminders" / "index.json"
+            source = inbox / "samantha_reminder_indexed.md"
+            _write_reminder(source, "Již indexované připomenutí")
+            sync_urgent_reminders_index(inbox_dir=inbox, index_path=index_path)
+            diagnostics: dict[str, int] = {}
+
+            with patch(
+                "app.urgent_reminders._read_text",
+                side_effect=AssertionError("Nezměněný indexovaný zdroj se nemá znovu číst."),
+            ) as read_mock:
+                reminders = sync_urgent_reminders_index(
+                    inbox_dir=inbox,
+                    index_path=index_path,
+                    sync_diagnostics=diagnostics,
+                    hydration_retry_delays=(),
+                )
+
+        self.assertEqual([item.reminder_number for item in reminders], [1])
+        self.assertEqual(diagnostics["checked_file_count"], 1)
+        self.assertEqual(diagnostics["readable_file_count"], 0)
+        self.assertEqual(diagnostics["pending_download_count"], 0)
+        self.assertEqual(diagnostics["pending_oldest_age_seconds"], 0)
+        read_mock.assert_not_called()
+
+    def test_changed_indexed_placeholder_remains_pending_until_readable(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            inbox = root / "inbox"
+            inbox.mkdir()
+            index_path = root / "private" / "urgent_reminders" / "index.json"
+            source = inbox / "samantha_reminder_changed.md"
+            _write_reminder(source, "Dříve indexované připomenutí")
+            sync_urgent_reminders_index(inbox_dir=inbox, index_path=index_path)
+            changed_timestamp = source.stat().st_mtime + 5
+            os.utime(source, (changed_timestamp, changed_timestamp))
+            diagnostics: dict[str, int] = {}
+
+            with patch(
+                "app.urgent_reminders._read_text",
+                side_effect=OSError(errno.EDEADLK, "Resource deadlock avoided"),
+            ):
+                reminders = sync_urgent_reminders_index(
+                    inbox_dir=inbox,
+                    index_path=index_path,
+                    sync_diagnostics=diagnostics,
+                    hydration_retry_delays=(),
+                )
+
+        self.assertEqual([item.reminder_number for item in reminders], [1])
+        self.assertEqual(diagnostics["pending_download_count"], 1)
+        self.assertGreaterEqual(diagnostics["pending_oldest_age_seconds"], 0)
+
     def test_pending_download_diagnostics_report_oldest_file_age(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             root = Path(temp_dir)

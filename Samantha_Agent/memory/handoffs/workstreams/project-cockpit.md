@@ -73,3 +73,24 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (5): `Samantha_Agent/app/cockpit.py`, `Samantha_Agent/app/urgent_reminders.py`, `Samantha_Agent/tests/test_cockpit.py`, `Samantha_Agent/tests/test_urgent_reminders.py`, `Samantha_Agent/generated_shortcuts/Samantha_Dulezite_pripomenuti.xml`
 - Commit: `Deliver urgent reminders directly to Cockpit`
 - Další krok: Samostatně auditovat a potvrdit nasazení do Cockpitu; potom v iPhonové zkratce doplnit soukromou Tailscale adresu a provést jeden živý doručovací test.
+
+### 2026-08-05 22:41 CEST – Falešné iCloud čekání odstraněno v kódu
+
+Hotovo:
+- Nezměněný iCloud placeholder, který je už úplně uložený v private indexu, se
+  nepovažuje za nové čekající stažení.
+- Nový, změněný nebo neúplný zdroj zůstává varováním.
+
+Rozhodnutí:
+- iCloud hydratace a doručení připomenutí jsou dva různé stavy.
+- Přímá iPhonová Tailscale zkratka není součástí tohoto kroku.
+
+Další krok:
+- Lokálně commitnout a samostatně nasadit; potom zkontrolovat kartu v živém
+  Cockpitu.
+
+Navrhované další kroky:
+- Dokončit konfiguraci přímé Tailscale zkratky a živý doručovací test.
+
+Technický důkaz:
+- Cíleně 14 testů; plná Cockpit Quality Gate 1311 testů, vše OK.
