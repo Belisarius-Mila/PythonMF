@@ -96,3 +96,14 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   jeho neúplnosti bezpečně spadnout na veřejnou šablonu. Po obnově balíčku
   ověřit počty dat, náhledů a skutečně existujících videí; generátor má jako
   dostupný započítat i již přítomný cílový soubor.
+
+### LL-007 — Unit test nesmí číst živý iCloudový zdroj
+
+- Problém: Plná checkpointová brána zůstala viset v testu hlavního stavu
+  Cockpitu, protože test neizoloval načítání urgentních připomínek a sáhl do
+  živého iCloudového zdroje.
+- Typ: opakující se
+- Řešení nalezeno: 05082026
+- Řešení: Ve stavových unit testech stubovat všechny loadery napojené na externí
+  nebo soukromé zdroje, včetně urgentních připomínek. Po opravě nejprve spustit
+  přímo dříve visící test a potom celou plnou bránu.
