@@ -48,6 +48,7 @@ CURRENT_STATUS_START = "<!-- SAMANTHA_CURRENT_STATUS_START -->"
 CURRENT_STATUS_END = "<!-- SAMANTHA_CURRENT_STATUS_END -->"
 _WORKSTREAM_ID_RE = re.compile(r"[a-z][a-z0-9_-]{1,63}")
 _SHORT_HEAD_RE = re.compile(r"[0-9a-f]{7,12}")
+_HEAD_RE = re.compile(r"[0-9a-f]{40}")
 _SENSITIVE_TEXT_RE = re.compile(
     r"(?i)\b(?:api[_ -]?key|access[_ -]?token|auth[_ -]?token|token|password|heslo|app-specific password)\b\s*[:=]\s*\S+"
 )
@@ -87,6 +88,7 @@ class SimpleMainCheckpointRequest:
     tvbcp_initial_content: str = ""
     decision: str = ""
     proposed_next_steps: tuple[str, ...] = ()
+    idempotency_key: str = ""
     last_deployed_main_short: str = ""
     last_deployed_at: str = ""
     last_deployed_test_count: int = 0
@@ -176,11 +178,21 @@ def _safe_request(request: SimpleMainCheckpointRequest) -> SimpleMainCheckpointR
         proposed_next_steps=_safe_proposed_next_steps(
             request.proposed_next_steps
         ),
+        idempotency_key=_safe_idempotency_key(request.idempotency_key),
         operational_context=_safe_operational_context(
             request.operational_context
         ),
         **deployment,
     )
+
+
+def _safe_idempotency_key(value: object) -> str:
+    key = str(value or "").strip().casefold()
+    if key and not re.fullmatch(r"[0-9a-f]{64}", key):
+        raise SimpleMainCheckpointError(
+            "Checkpoint nemá platný idempotentní identifikátor."
+        )
+    return key
 
 
 def _safe_operational_context(value: object) -> dict[str, Any]:
@@ -861,6 +873,168 @@ def _is_ancestor(source_repo: Path, ancestor: str, descendant: str) -> bool:
     return completed.returncode == 0
 
 
+def _find_idempotent_commit(repo: Path, idempotency_key: str) -> str:
+    if not idempotency_key:
+        return ""
+    completed = subprocess.run(
+        [
+            "/usr/bin/git",
+            "-C",
+            str(repo),
+            "log",
+            "--all",
+            "--max-count=100",
+            "--format=%H%x00%B%x00",
+        ],
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=True,
+    )
+    parts = completed.stdout.split("\0")
+    trailer = f"Human-Adam-Completion: {idempotency_key}"
+    for index in range(0, len(parts) - 1, 2):
+        head = parts[index].strip().casefold()
+        body = parts[index + 1]
+        if _HEAD_RE.fullmatch(head) and trailer in body.splitlines():
+            return head
+    return ""
+
+
+def _recover_idempotent_checkpoint(
+    *,
+    workspace: HumanAdamWorkspaceManager,
+    request: SimpleMainCheckpointRequest,
+    peer_workspaces: Sequence[HumanAdamWorkspaceManager],
+    progress: Callable[[str, str], None],
+    takeover: Callable[..., dict[str, Any]],
+    defer_remote_push: bool,
+) -> dict[str, Any] | None:
+    """Finish or recognize a commit created by this exact durable job."""
+
+    key = request.idempotency_key
+    if not key:
+        return None
+    checkpoint_head = _find_idempotent_commit(workspace.workspace_root, key)
+    source_match = _find_idempotent_commit(workspace.source_repo, key)
+    if not checkpoint_head and not source_match:
+        return None
+    if checkpoint_head and source_match and checkpoint_head != source_match:
+        raise SimpleMainCheckpointError(
+            "Idempotentní dokončení našlo dva různé checkpoint commity."
+        )
+    checkpoint_head = checkpoint_head or source_match
+    status = workspace.status()
+    if status.get("dirty") or status.get("remotes"):
+        raise SimpleMainCheckpointError(
+            "Zachovaný checkpoint nelze obnovit: workspace už obsahuje jiné změny."
+        )
+
+    progress("idempotent_recovery", "running")
+    source_head = str(status.get("source_head") or "").casefold()
+    workspace_head = str(status.get("head") or "").casefold()
+    if (
+        workspace_head == checkpoint_head
+        and source_head != checkpoint_head
+        and status.get("local_checkpoint_ahead")
+    ):
+        takeover(
+            confirmation=LEGACY_FAST_FORWARD_CONFIRMATION,
+            push=not defer_remote_push,
+            defer_remote_push=defer_remote_push,
+            workspace=workspace,
+            progress_callback=progress,
+        )
+    else:
+        if not _is_ancestor(workspace.source_repo, checkpoint_head, source_head):
+            raise SimpleMainCheckpointError(
+                "Zachovaný checkpoint není bezpečně obsažený v lokálním main."
+            )
+        if status.get("source_update_available"):
+            workspace.sync_from_main(confirmed=True)
+
+    final = workspace.status()
+    final_source_head = str(final.get("source_head") or "").casefold()
+    if (
+        final.get("workspace_relation") != "aligned"
+        or final.get("dirty")
+        or final.get("remotes")
+        or not _is_ancestor(workspace.source_repo, checkpoint_head, final_source_head)
+    ):
+        raise SimpleMainCheckpointError(
+            "Obnovený checkpoint nedoložil čisté zarovnání s lokálním main."
+        )
+    peer_rows: list[dict[str, Any]] = []
+    for peer_index, peer in enumerate(peer_workspaces, start=1):
+        if peer.workspace_root == workspace.workspace_root:
+            continue
+        try:
+            peer_status = peer.status()
+            if peer_status.get("source_update_available"):
+                peer_status = peer.sync_from_main(confirmed=True)
+            aligned = bool(
+                peer_status.get("workspace_relation") == "aligned"
+                and not peer_status.get("dirty")
+                and not peer_status.get("local_checkpoint_ahead")
+                and not peer_status.get("remotes")
+            )
+            peer_rows.append(
+                {
+                    "workspace": f"peer-{peer_index}",
+                    "aligned": aligned,
+                    "message": "" if aligned else "Čistý profil se nepodařilo doložit jako zarovnaný.",
+                }
+            )
+        except (AppServerError, OSError, ValueError) as exc:
+            peer_rows.append(
+                {
+                    "workspace": f"peer-{peer_index}",
+                    "aligned": False,
+                    "message": str(exc),
+                }
+            )
+    pending_remote_commit_count = int(
+        subprocess.run(
+            [
+                "/usr/bin/git",
+                "-C",
+                str(workspace.source_repo),
+                "rev-list",
+                "--count",
+                "origin/main..HEAD",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=30,
+            check=True,
+        ).stdout.strip()
+        or 0
+    )
+    progress("idempotent_recovery", "passed")
+    return {
+        "ok": True,
+        "operation": "simple_main_checkpoint",
+        "checkpoint_head": checkpoint_head,
+        "checkpoint_short": checkpoint_head[:12],
+        "commit_message": request.commit_message,
+        "workstream_id": request.workstream_id,
+        "gate": {
+            "passed": True,
+            "test_count": 0,
+            "duration_seconds": 0.0,
+            "mode": "recovered",
+        },
+        "handoff_path": request.handoff_relative_path,
+        "tvbcp_path": request.tvbcp_relative_path,
+        "pushed": not defer_remote_push,
+        "remote_push_deferred": defer_remote_push,
+        "pending_remote_commit_count": pending_remote_commit_count,
+        "peer_workspaces": peer_rows,
+        "all_workspaces_aligned": all(row["aligned"] for row in peer_rows),
+        "idempotent_recovery": True,
+    }
+
+
 def _preflight_workspace(
     workspace: HumanAdamWorkspaceManager,
     *,
@@ -921,6 +1095,16 @@ def complete_simple_main_checkpoint(
             progress_callback(stage, outcome)
 
     try:
+        recovered = _recover_idempotent_checkpoint(
+            workspace=workspace,
+            request=safe_request,
+            peer_workspaces=peer_workspaces,
+            progress=progress,
+            takeover=takeover,
+            defer_remote_push=defer_remote_push,
+        )
+        if recovered is not None:
+            return recovered
         progress("preflight", "running")
         initial = _preflight_workspace(workspace, require_changes=True)
         peer_preflight_statuses: list[dict[str, Any]] = []
@@ -1055,6 +1239,7 @@ def complete_simple_main_checkpoint(
             checkpoint = workspace.checkpoint(
                 confirmed=True,
                 message=safe_request.commit_message,
+                idempotency_key=safe_request.idempotency_key,
             )
         except (AppServerError, OSError, ValueError) as exc:
             _restore_memory_pair(

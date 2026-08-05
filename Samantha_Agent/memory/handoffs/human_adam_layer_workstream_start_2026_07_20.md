@@ -2581,3 +2581,28 @@ Navrhované další kroky:
 Technický důkaz:
 - Cílená rozšířená sada prošla 250 testy.
 - Plná Cockpit Quality Gate prošla 1301 testy za 304,824 s.
+
+### 2026-08-05 13:37 CEST – Samoobnovitelné serverové dokončení
+
+Hotovo:
+- Dokončení zapisovacího tahu je trvalá private úloha oddělená od životnosti
+  chatového HTTP požadavku.
+- Worker obnoví čekající úlohu po restartu, ověří přesný otisk WIP a pomocí
+  commit traileru bezpečně naváže i po pádu mezi commitem a převzetím do main.
+- Přechodné selhání procesu brány zopakuje nejvýše jednou; chybu testů nebo
+  změněný workspace neopakuje.
+
+Rozhodnutí:
+- Úspěch se dál uznává jen podle serverového stavu, Gitu a workspace. Zařazení
+  úlohy není totéž co dokončený checkpoint.
+- File lease a idempotentní klíč brání souběžnému workeru a dvojímu commitu.
+
+Další krok:
+- Vytvořit lokální commit; nasazení zůstává samostatné.
+
+Navrhované další kroky:
+- Po nasazení provést malý živý tah a kontrolovaný restart v průběhu dokončení.
+
+Technický důkaz:
+- Cílený balík: 174 testů.
+- Plná Cockpit Quality Gate: 1309 testů, 288,459 s, OK.

@@ -119,3 +119,17 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   serverový stav. Před dalším tahem jej ověřit proti historii `main` a čistotě
   workspace, zobrazit v Cockpitu a vložit do modelového kontextu. Neuzavřený,
   nejistý nebo neověřitelný stav nesmí nový zapisovací tah tiše přepsat.
+
+### LL-009 — Dokončení nesmí být životně závislé na chatovém HTTP tahu
+
+- Problém: I se správnou modelovou účtenkou a serverovou diagnostikou mohl pád
+  nebo restart Cockpitu přerušit testovací bránu, checkpoint či převzetí do
+  `main`; po návratu z chatu už neexistoval vykonavatel, který by přesně stejnou
+  práci bezpečně dokončil.
+- Typ: opakující se
+- Řešení nalezeno: 05082026
+- Řešení: Po přijetí platné účtenky uložit samostatnou private dokončovací úlohu
+  s přesným otiskem WIP, Git základem a idempotentním klíčem. Worker běží mimo
+  chatový tah, čekající úlohu obnoví po restartu a přechodnou chybu procesu
+  brány zopakuje nejvýše jednou; chybu testů neopakuje. Idempotentní klíč uložený
+  v commit traileru umožní dokončit zachovaný commit bez vytvoření druhého.

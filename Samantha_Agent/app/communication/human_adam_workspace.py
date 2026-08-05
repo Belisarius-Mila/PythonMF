@@ -894,7 +894,13 @@ class HumanAdamWorkspaceManager:
                 "pending_integration_audit": pending_integration_audit,
             }
 
-    def checkpoint(self, *, confirmed: bool, message: str = "") -> dict[str, Any]:
+    def checkpoint(
+        self,
+        *,
+        confirmed: bool,
+        message: str = "",
+        idempotency_key: str = "",
+    ) -> dict[str, Any]:
         with self._lock:
             if not confirmed:
                 raise AppServerError("Checkpoint vyžaduje výslovné potvrzení v Cockpitu.")
@@ -915,7 +921,15 @@ class HumanAdamWorkspaceManager:
             if not staged_paths or any(self._blocked_checkpoint_path(item) for item in staged_paths):
                 raise AppServerError("Checkpoint safety check odmítl staged obsah.")
             safe_message = " ".join(str(message or "").split())[:120] or "WIP Human-Adam checkpoint"
-            _git_output(self.workspace_root, ["commit", "-m", safe_message], timeout=60)
+            safe_key = str(idempotency_key or "").strip().casefold()
+            if safe_key and not re.fullmatch(r"[0-9a-f]{64}", safe_key):
+                raise AppServerError("Checkpoint nemá platný idempotentní identifikátor.")
+            commit_args = ["commit", "-m", safe_message]
+            if safe_key:
+                commit_args.extend(
+                    ["-m", f"Human-Adam-Completion: {safe_key}"]
+                )
+            _git_output(self.workspace_root, commit_args, timeout=60)
             result = self.status()
             return {
                 **result,

@@ -7,6 +7,7 @@ import json
 import re
 import subprocess
 import threading
+import time
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
@@ -27,6 +28,7 @@ from app.communication.deferred_integration import (
     DeferredIntegrationError,
     DeferredIntegrationStore,
 )
+from app.communication.checkpoint_quality_gate import HumanAdamGateError
 from app.communication.human_adam_service import (
     DEVELOPMENT_CONTROL_DEVELOPER_INSTRUCTIONS,
     HUMAN_ADAM_DEVELOPER_INSTRUCTIONS,
@@ -45,6 +47,18 @@ from app.communication.human_adam_completion_status import (
     HumanAdamCompletionStatusStore,
     completion_status_model_block,
     public_completion_status,
+)
+from app.communication.human_adam_completion_job import (
+    ACTIVE_STATES as ACTIVE_COMPLETION_JOB_STATES,
+    COMPLETED as COMPLETION_JOB_COMPLETED,
+    FAILED as COMPLETION_JOB_FAILED,
+    RETRY_WAITING,
+    RUNNING as COMPLETION_JOB_RUNNING,
+    HumanAdamCompletionJob,
+    HumanAdamCompletionJobError,
+    HumanAdamCompletionJobStore,
+    completion_idempotency_key,
+    workspace_fingerprint,
 )
 from app.communication.human_adam_workspace import (
     HUMAN_ADAM_SANDBOX_POLICY,
@@ -134,6 +148,9 @@ DEFAULT_DEVELOPMENT_SEMAPHORE_PATH = PRIVATE_COMMUNICATION_ROOT / "development_s
 DEFAULT_HUMAN_SESSION_PATH = PRIVATE_COMMUNICATION_ROOT / "canonical_session.json"
 DEFAULT_COMPLETION_STATUS_PATH = (
     PRIVATE_COMMUNICATION_ROOT / "human_adam_completion_status.json"
+)
+DEFAULT_COMPLETION_JOB_PATH = (
+    PRIVATE_COMMUNICATION_ROOT / "human_adam_completion_job.json"
 )
 KNIHOVNA_PROFILE_ROOT = PRIVATE_PROFILE_ROOT / "knihovna"
 KNIHOVNA_TVBCP_RELATIVE_PATH = Path("memory/tvbcp/knihovna_cockpit.txt")
@@ -307,6 +324,9 @@ class HumanAdamProfileManager:
         simple_main_deployment_receipt_path: Path | None = None,
         deferred_integration_store: DeferredIntegrationStore | None = None,
         completion_status_store: HumanAdamCompletionStatusStore | None = None,
+        completion_job_store: HumanAdamCompletionJobStore | None = None,
+        background_completion: bool | None = None,
+        completion_fingerprint: Callable[[Path], str] = workspace_fingerprint,
         workstream_threads: WorkstreamThreadRegistry | None = None,
         workstream_memory: WorkstreamMemoryRegistry | None = None,
         github_batch_mode: bool = False,
@@ -396,13 +416,33 @@ class HumanAdamProfileManager:
                 else self.state_path.with_name("completion_status.json")
             )
         )
+        self.completion_job_store = (
+            completion_job_store
+            or HumanAdamCompletionJobStore(
+                DEFAULT_COMPLETION_JOB_PATH
+                if self.state_path == DEFAULT_PROFILE_STATE_PATH
+                else self.state_path.with_name("completion_job.json")
+            )
+        )
+        self.background_completion = (
+            self.state_path == DEFAULT_PROFILE_STATE_PATH
+            if background_completion is None
+            else bool(background_completion)
+        )
+        self.completion_fingerprint = completion_fingerprint
         self.workstream_threads = workstream_threads
         self.github_batch_mode = bool(github_batch_mode)
         self._lazy_services: dict[str, HumanAdamService] = {}
         self._state_lock = threading.RLock()
         self._operation_lock = threading.Lock()
+        self._completion_worker_lock = threading.Lock()
+        self._completion_worker: threading.Thread | None = None
+        self._completion_rendered_answers: dict[str, str] = {}
+        self._closing = threading.Event()
         self._state_error = ""
         self._active_profile_id, self._active_workstream_id = self._load_active_state()
+        if self.background_completion:
+            self._start_completion_worker()
 
     def _load_active_state(self) -> tuple[str, str]:
         default_workstream_id = self.workstream_backends.compatibility_workstream_id(
@@ -1328,16 +1368,25 @@ class HumanAdamProfileManager:
                 if record is not None and record.state == CHECKPOINT_COMPLETED
                 else None
             )
+            completion_job = self.completion_job_store.load()
+            job_active = bool(
+                completion_job is not None
+                and completion_job.workstream_id == workstream_id
+                and completion_job.state in ACTIVE_COMPLETION_JOB_STATES
+            )
             return public_completion_status(
                 record=record,
                 observed_at=observed_at,
                 source_snapshot=source_snapshot,
                 deployment_snapshot=deployment,
                 checkpoint_reachable=reachable,
-                server_operation_active=self._operation_lock.locked(),
+                server_operation_active=(
+                    self._operation_lock.locked() or job_active
+                ),
             )
         except (
             AppServerError,
+            HumanAdamCompletionJobError,
             HumanAdamCompletionStatusError,
             OSError,
             TypeError,
@@ -1881,6 +1930,7 @@ class HumanAdamProfileManager:
         service: HumanAdamService,
         active_id: str,
         metadata: TurnCompletionMetadata,
+        idempotency_key: str = "",
     ) -> dict[str, Any]:
         lazy_id = self.active_lazy_workstream_id
         if lazy_id:
@@ -1957,6 +2007,7 @@ class HumanAdamProfileManager:
                 tvbcp_initial_content=tvbcp_initial,
                 decision=metadata.decision,
                 proposed_next_steps=metadata.proposed_next_steps,
+                idempotency_key=idempotency_key,
                 **self._checkpoint_operational_snapshot(
                     binding_id,
                     service=service,
@@ -1967,6 +2018,397 @@ class HumanAdamProfileManager:
             defer_remote_push=self.github_batch_mode,
             allow_quick_gate=self.github_batch_mode,
         )
+
+    @staticmethod
+    def _completion_job_commit_exists(
+        service: HumanAdamService,
+        idempotency_key: str,
+    ) -> bool:
+        trailer = f"Human-Adam-Completion: {idempotency_key}"
+        for repo in (service.workspace.workspace_root, service.workspace.source_repo):
+            try:
+                completed = subprocess.run(
+                    [
+                        "/usr/bin/git",
+                        "-C",
+                        str(repo),
+                        "log",
+                        "--all",
+                        "--max-count=100",
+                        "--format=%B%x00",
+                    ],
+                    capture_output=True,
+                    text=True,
+                    timeout=30,
+                    check=True,
+                )
+            except (OSError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
+                continue
+            if any(trailer in body.splitlines() for body in completed.stdout.split("\0")):
+                return True
+        return False
+
+    @staticmethod
+    def _transient_completion_failure(exc: BaseException) -> bool:
+        current: BaseException | None = exc
+        seen: set[int] = set()
+        while current is not None and id(current) not in seen:
+            seen.add(id(current))
+            if (
+                isinstance(current, HumanAdamGateError)
+                and current.failure_type in {"gate_timeout", "gate_process_error"}
+            ):
+                return True
+            current = current.__cause__ or current.__context__
+        return False
+
+    def _service_for_completion_job(
+        self,
+        job: HumanAdamCompletionJob,
+    ) -> HumanAdamService:
+        binding = self.workstream_backends.binding(job.workstream_id)
+        adapter = binding.compatibility_adapter
+        if adapter is not None:
+            if adapter.profile_id != job.profile_id:
+                raise HumanAdamCompletionJobError(
+                    "Dokončovací úloha neodpovídá pracovnímu profilu."
+                )
+            return adapter.service
+        if self.active_lazy_workstream_id != job.workstream_id:
+            raise HumanAdamCompletionJobError(
+                "Dokončovací úloha neodpovídá aktivnímu pracovnímu proudu."
+            )
+        return self._lazy_service(job.workstream_id)
+
+    def _completion_job_answer(
+        self,
+        *,
+        job: HumanAdamCompletionJob,
+        note: str,
+    ) -> bool:
+        try:
+            service = self._service_for_completion_job(job)
+            entry = {
+                "client_message_id": job.client_message_id,
+                "answer": job.visible_answer,
+            }
+            rendered = self._completion_answer(job.visible_answer, note)
+            self._completion_rendered_answers[job.client_message_id] = rendered
+            return self._store_completed_answer(
+                service=service,
+                entry=entry,
+                answer=rendered,
+            )
+        except (AppServerError, HumanAdamCompletionJobError, OSError, ValueError):
+            return False
+
+    def _finish_completion_job_success(
+        self,
+        *,
+        job: HumanAdamCompletionJob,
+        checkpoint: dict[str, Any],
+    ) -> dict[str, Any]:
+        checkpoint_short = str(checkpoint.get("checkpoint_short") or "")
+        all_aligned = checkpoint.get("all_workspaces_aligned") is not False
+        alignment_note = (
+            "Všechny profilové workspaces jsou čisté a synchronizované."
+            if all_aligned
+            else "Checkpoint je hotový; jeden čistý profil se dorovná při příštím Připojit."
+        )
+        deployed = load_completed_simple_main_deployment(
+            self.simple_main_deployment_receipt_path,
+        )
+        deployed_short = str((deployed or {}).get("main_short") or "")
+        if deployed_short and deployed_short == checkpoint_short:
+            runtime_note = (
+                f"Běžící Cockpit je serverově ověřený na stejném commitu "
+                f"`{checkpoint_short}`."
+            )
+        elif deployed_short:
+            runtime_note = (
+                f"Běžící Cockpit používá commit `{deployed_short}`; nový commit "
+                f"`{checkpoint_short}` v něm zatím neběží. Pokud má změna ovlivnit "
+                "Cockpit, proveď v panelu Práce jednou audit nasazení do Cockpitu "
+                "a jednou potvrzené nasazení."
+            )
+        else:
+            runtime_note = (
+                "Běžící verzi Cockpitu nelze serverově potvrdit; Git checkpoint "
+                "sám nasazení do Cockpitu nedokládá."
+            )
+        if checkpoint.get("remote_push_deferred") is True:
+            git_note = (
+                f"Lokální Git dokončen: commit `{checkpoint_short}` je začleněný "
+                f"do main; GitHub push čeká v denním balíčku "
+                f"({int(checkpoint.get('pending_remote_commit_count') or 0)} commitů). "
+            )
+        else:
+            git_note = (
+                f"Git dokončen: testy prošly, commit `{checkpoint_short}` je "
+                "začleněný do main a pushnutý na GitHub. "
+            )
+        answer_persisted = self._completion_job_answer(
+            job=job,
+            note=git_note + alignment_note + " " + runtime_note,
+        )
+        try:
+            self.completion_status_store.update(
+                workstream_id=job.workstream_id,
+                client_message_id=job.client_message_id,
+                state=CHECKPOINT_COMPLETED,
+                checkpoint_head=str(checkpoint.get("checkpoint_head") or ""),
+                answer_persisted=answer_persisted,
+                remote_push_deferred=checkpoint.get("remote_push_deferred") is True,
+                pending_remote_commit_count=int(
+                    checkpoint.get("pending_remote_commit_count") or 0
+                ),
+            )
+            completion_status_persisted = True
+        except (
+            HumanAdamCompletionStatusError,
+            OSError,
+            TypeError,
+            ValueError,
+        ):
+            completion_status_persisted = False
+        finished = self.completion_job_store.update(
+            job,
+            state=COMPLETION_JOB_COMPLETED,
+            checkpoint_head=str(checkpoint.get("checkpoint_head") or ""),
+            failure_code="",
+        )
+        marker_cleared = True
+        if job.profile_id == "human_adam":
+            try:
+                self.deferred_integration_store.clear(
+                    client_message_id=job.client_message_id
+                )
+            except DeferredIntegrationError:
+                marker_cleared = False
+        return {
+            "state": "completed" if all_aligned else "completed_sync_pending",
+            "attempted": True,
+            "checkpoint": checkpoint,
+            "answer_persisted": answer_persisted,
+            "completion_status_persisted": completion_status_persisted,
+            "ownership_marker_cleared": marker_cleared,
+            "job_state": finished.state,
+        }
+
+    def _finish_completion_job_failure(
+        self,
+        *,
+        job: HumanAdamCompletionJob,
+        exc: BaseException,
+        failure_code: str,
+    ) -> dict[str, Any]:
+        answer_persisted = self._completion_job_answer(
+            job=job,
+            note=(
+                f"Samoobnovitelné dokončení bylo bezpečně zastaveno: {exc} "
+                "Rozpracované změny nebo zachovaný lokální commit zůstaly viditelné."
+            ),
+        )
+        try:
+            self.completion_status_store.update(
+                workstream_id=job.workstream_id,
+                client_message_id=job.client_message_id,
+                state=CHECKPOINT_FAILED,
+                failure_code="checkpoint_failed",
+                answer_persisted=answer_persisted,
+            )
+            completion_status_persisted = True
+        except (
+            HumanAdamCompletionStatusError,
+            OSError,
+            TypeError,
+            ValueError,
+        ):
+            completion_status_persisted = False
+        finally:
+            self.completion_job_store.update(
+                job,
+                state=COMPLETION_JOB_FAILED,
+                failure_code=failure_code,
+            )
+        return {
+            "state": "failed",
+            "attempted": True,
+            "message": str(exc),
+            "answer_persisted": answer_persisted,
+            "completion_status_persisted": completion_status_persisted,
+            "job_state": COMPLETION_JOB_FAILED,
+        }
+
+    def _execute_completion_job(
+        self,
+        *,
+        operation_already_locked: bool,
+    ) -> dict[str, Any] | None:
+        lease = self.completion_job_store.acquire_worker_lease()
+        if lease is None:
+            return None
+        operation_acquired = False
+        try:
+            if not operation_already_locked:
+                while not self._closing.is_set():
+                    if self._operation_lock.acquire(timeout=0.5):
+                        operation_acquired = True
+                        break
+                if not operation_acquired:
+                    return None
+            while True:
+                job = self.completion_job_store.load()
+                if job is None or job.state not in ACTIVE_COMPLETION_JOB_STATES:
+                    return None
+                service = self._service_for_completion_job(job)
+                commit_exists = self._completion_job_commit_exists(
+                    service,
+                    job.idempotency_key,
+                )
+                workspace = service.workspace.status()
+                if not commit_exists:
+                    if (
+                        str(workspace.get("head") or "").casefold() != job.base_head
+                        or not workspace.get("dirty")
+                        or self.completion_fingerprint(service.workspace.workspace_root)
+                        != job.workspace_fingerprint
+                    ):
+                        return self._finish_completion_job_failure(
+                            job=job,
+                            exc=HumanAdamCompletionJobError(
+                                "Workspace už neodpovídá přesnému otisku přijaté práce."
+                            ),
+                            failure_code="workspace_changed",
+                        )
+                running = self.completion_job_store.update(
+                    job,
+                    state=COMPLETION_JOB_RUNNING,
+                    attempts=min(2, job.attempts + 1),
+                    failure_code="",
+                )
+                metadata = TurnCompletionMetadata(
+                    commit_message=running.commit_message,
+                    summary=running.summary,
+                    next_step=running.next_step,
+                    decision=running.decision,
+                    proposed_next_steps=running.proposed_next_steps,
+                )
+                try:
+                    checkpoint = self._completion_checkpoint(
+                        service=service,
+                        active_id=running.profile_id,
+                        metadata=metadata,
+                        idempotency_key=running.idempotency_key,
+                    )
+                except (AppServerError, SessionHubError, OSError, ValueError) as exc:
+                    if (
+                        self._transient_completion_failure(exc)
+                        and running.attempts < 2
+                    ):
+                        self.completion_job_store.update(
+                            running,
+                            state=RETRY_WAITING,
+                            failure_code="transient_gate_failure",
+                        )
+                        time.sleep(0.2)
+                        continue
+                    return self._finish_completion_job_failure(
+                        job=running,
+                        exc=exc,
+                        failure_code=(
+                            "transient_retry_exhausted"
+                            if self._transient_completion_failure(exc)
+                            else "checkpoint_failed"
+                        ),
+                    )
+                return self._finish_completion_job_success(
+                    job=running,
+                    checkpoint=checkpoint,
+                )
+        finally:
+            if operation_acquired:
+                self._operation_lock.release()
+            lease.close()
+
+    def _start_completion_worker(self) -> None:
+        try:
+            job = self.completion_job_store.load()
+        except HumanAdamCompletionJobError:
+            return
+        if job is None or job.state not in ACTIVE_COMPLETION_JOB_STATES:
+            return
+        with self._completion_worker_lock:
+            if self._completion_worker is not None and self._completion_worker.is_alive():
+                return
+            worker = threading.Thread(
+                target=self._execute_completion_job,
+                kwargs={"operation_already_locked": False},
+                name="human-adam-completion",
+                daemon=True,
+            )
+            self._completion_worker = worker
+            worker.start()
+
+    def _schedule_completion_job(
+        self,
+        *,
+        service: HumanAdamService,
+        active_id: str,
+        client_message_id: str,
+        metadata: TurnCompletionMetadata,
+        visible_answer: str,
+    ) -> dict[str, Any]:
+        workspace = service.workspace.status()
+        base_head = str(workspace.get("head") or "").strip().casefold()
+        fingerprint = self.completion_fingerprint(service.workspace.workspace_root)
+        workstream_id = self.active_workstream_id
+        key = completion_idempotency_key(
+            workstream_id=workstream_id,
+            client_message_id=client_message_id,
+            base_head=base_head,
+            workspace_fingerprint=fingerprint,
+        )
+        job = self.completion_job_store.create(
+            workstream_id=workstream_id,
+            profile_id=active_id,
+            client_message_id=client_message_id,
+            base_head=base_head,
+            workspace_fingerprint=fingerprint,
+            idempotency_key=key,
+            commit_message=metadata.commit_message,
+            summary=metadata.summary,
+            next_step=metadata.next_step,
+            decision=metadata.decision,
+            proposed_next_steps=metadata.proposed_next_steps,
+            visible_answer=visible_answer,
+        )
+        pending_note = (
+            "Implementace je připravená; server nyní samostatně dokončuje testovací "
+            "bránu, checkpoint a začlenění do lokálního main. Úloha přežije restart "
+            "Cockpitu a stejný commit nevytvoří podruhé."
+        )
+        answer_persisted = self._completion_job_answer(job=job, note=pending_note)
+        if self.background_completion:
+            self._start_completion_worker()
+            response = {
+                "state": "queued",
+                "attempted": False,
+                "durable": True,
+                "answer_persisted": answer_persisted,
+            }
+        else:
+            completed = self._execute_completion_job(operation_already_locked=True)
+            response = completed or {
+                "state": "queued",
+                "attempted": False,
+                "durable": True,
+                "answer_persisted": answer_persisted,
+            }
+        rendered = self._completion_rendered_answers.pop(client_message_id, "")
+        if rendered:
+            response["rendered_answer"] = rendered
+        return response
 
     def _complete_successful_turn(
         self,
@@ -2423,14 +2865,22 @@ class HumanAdamProfileManager:
             }
 
         try:
-            checkpoint = self._completion_checkpoint(
+            automatic_completion = self._schedule_completion_job(
                 service=service,
                 active_id=active_id,
+                client_message_id=str(entry.get("client_message_id") or ""),
                 metadata=parsed.metadata,
+                visible_answer=parsed.visible_answer,
             )
-        except (AppServerError, SessionHubError, OSError, ValueError) as exc:
+        except (
+            AppServerError,
+            HumanAdamCompletionJobError,
+            SessionHubError,
+            OSError,
+            ValueError,
+        ) as exc:
             note = (
-                f"Automatické dokončení bylo bezpečně zastaveno: {exc} "
+                f"Samoobnovitelné dokončení se nepodařilo bezpečně naplánovat: {exc} "
                 "Rozpracované změny nebo zachovaný lokální commit zůstaly viditelné."
             )
             answer = self._completion_answer(parsed.visible_answer, note)
@@ -2455,83 +2905,16 @@ class HumanAdamProfileManager:
                     "completion_status_persisted": completion_status_persisted,
                 },
             }
-
-        all_aligned = checkpoint.get("all_workspaces_aligned") is not False
-        alignment_note = (
-            "Všechny profilové workspaces jsou čisté a synchronizované."
-            if all_aligned
-            else "Checkpoint je hotový; jeden čistý profil se dorovná při příštím Připojit."
-        )
-        checkpoint_short = str(checkpoint.get("checkpoint_short") or "")
-        deployed = load_completed_simple_main_deployment(
-            self.simple_main_deployment_receipt_path,
-        )
-        deployed_short = str((deployed or {}).get("main_short") or "")
-        if deployed_short and deployed_short == checkpoint_short:
-            runtime_note = (
-                f"Běžící Cockpit je serverově ověřený na stejném commitu "
-                f"`{checkpoint_short}`."
-            )
-        elif deployed_short:
-            runtime_note = (
-                f"Běžící Cockpit používá commit `{deployed_short}`; nový commit "
-                f"`{checkpoint_short}` v něm zatím neběží. Pokud má změna ovlivnit "
-                "Cockpit, proveď v panelu Práce jednou audit nasazení do Cockpitu "
-                "a jednou potvrzené nasazení."
-            )
-        else:
-            runtime_note = (
-                "Běžící verzi Cockpitu nelze serverově potvrdit; tento Git checkpoint "
-                "sám nasazení do Cockpitu nedokládá."
-            )
-        note = (
-            (
-                f"Lokální Git dokončen: commit `{checkpoint_short}` je začleněný "
-                f"do main; GitHub push čeká v denním balíčku "
-                f"({int(checkpoint.get('pending_remote_commit_count') or 0)} commitů). "
-                if checkpoint.get("remote_push_deferred") is True
-                else (
-                    f"Git dokončen: testy prošly, commit `{checkpoint_short}` je "
-                    "začleněný do main a pushnutý na GitHub. "
-                )
-            )
-            + f"{alignment_note} {runtime_note}"
-        )
-        answer = self._completion_answer(parsed.visible_answer, note)
-        answer_persisted = self._store_completed_answer(
-            service=service,
-            entry=entry,
-            answer=answer,
-        )
-        completion_status_persisted = record_completion_state(
-            CHECKPOINT_COMPLETED,
-            checkpoint_head=str(checkpoint.get("checkpoint_head") or ""),
-            answer_persisted=answer_persisted,
-            remote_push_deferred=(
-                checkpoint.get("remote_push_deferred") is True
-            ),
-            pending_remote_commit_count=int(
-                checkpoint.get("pending_remote_commit_count") or 0
-            ),
-        )
-        marker_cleared = True
-        if ownership_started:
-            try:
-                self.deferred_integration_store.clear(
-                    client_message_id=str(entry.get("client_message_id") or ""),
-                )
-            except DeferredIntegrationError:
-                marker_cleared = False
+        rendered_answer = str(automatic_completion.get("rendered_answer") or "")
+        if rendered_answer:
+            entry["answer"] = rendered_answer
         return {
             **result,
             "entry": entry,
             "automatic_completion": {
-                "state": "completed" if all_aligned else "completed_sync_pending",
-                "attempted": True,
-                "checkpoint": checkpoint,
-                "ownership_marker_cleared": marker_cleared,
-                "answer_persisted": answer_persisted,
-                "completion_status_persisted": completion_status_persisted,
+                key: value
+                for key, value in automatic_completion.items()
+                if key != "rendered_answer"
             },
         }
 
@@ -3825,6 +4208,7 @@ class HumanAdamProfileManager:
             self._operation_lock.release()
 
     def close(self) -> None:
+        self._closing.set()
         if self.workstream_threads is not None:
             self.workstream_threads.close()
         for profile in self.profiles.values():

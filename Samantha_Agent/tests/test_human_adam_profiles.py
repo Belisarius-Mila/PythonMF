@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import tempfile
 import threading
+import time
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
@@ -29,6 +30,8 @@ from app.communication.deferred_integration import (
     DeferredIntegrationError,
 )
 from app.communication.human_adam_turn_completion import TurnCompletionMetadata
+from app.communication.checkpoint_quality_gate import HumanAdamGateError
+from app.communication.simple_main_checkpoint import SimpleMainCheckpointError
 from app.communication.human_adam_workstream_catalog import (
     WORKSTREAM_CATALOG,
     CanonicalWorkstreamCapabilities,
@@ -450,8 +453,19 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             project_continuity=project_continuity,
             workstream_threads=workstream_threads,
             workstream_memory=WorkstreamMemoryRegistry(),
+            completion_fingerprint=lambda _root: "f" * 64,
         )
         return manager, human_workspace, library_workspace, human_hub, library_hub
+
+    @staticmethod
+    def wait_for_completion_job(manager, *, timeout: float = 3.0):
+        deadline = time.monotonic() + timeout
+        while time.monotonic() < deadline:
+            job = manager.completion_job_store.load()
+            if job is not None and job.state in {"completed", "failed"}:
+                return job
+            time.sleep(0.02)
+        raise AssertionError("Dokončovací worker se v testu neuzavřel.")
 
     @staticmethod
     def make_project_continuity(root: Path) -> tuple[ProjectContinuityService, str, str]:
@@ -3336,6 +3350,160 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         )
         self.assertIn("jednou audit nasazení do Cockpitu", result["entry"]["answer"])
         self.assertEqual(human_hub.replaced_answers[-1][0], "completion-001")
+
+    def test_background_completion_returns_queued_and_finishes_after_chat_turn(self) -> None:
+        receipt = (
+            "Změna je připravená.\n\n"
+            "[HUMAN_ADAM_STEP_COMPLETION]\n"
+            '{"commit_message":"Complete background step","summary":"Krok je hotový",'
+            '"next_step":"Ověřit výsledek"}\n'
+            "[/HUMAN_ADAM_STEP_COMPLETION]"
+        )
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, _library_workspace, human_hub, _library_hub = (
+                self.make_manager(Path(temp_dir))
+            )
+            manager.background_completion = True
+            manager.connect()
+            human_hub.on_send = lambda: setattr(human_workspace, "dirty", True)
+            human_hub.next_answer = receipt
+            release = threading.Event()
+
+            def delayed_checkpoint(**_kwargs: object) -> dict[str, object]:
+                release.wait(timeout=2)
+                return {
+                    "ok": True,
+                    "checkpoint_head": "c" * 40,
+                    "checkpoint_short": "c" * 12,
+                    "all_workspaces_aligned": True,
+                    "remote_push_deferred": True,
+                    "pending_remote_commit_count": 1,
+                }
+
+            with patch(
+                "app.communication.human_adam_profiles.complete_simple_main_checkpoint",
+                side_effect=delayed_checkpoint,
+            ):
+                result = manager.send(
+                    text="Dokonči krok na pozadí",
+                    client_message_id="background-completion-001",
+                    write_intent=True,
+                )
+                self.assertEqual(result["automatic_completion"]["state"], "queued")
+                self.assertIn("server nyní samostatně dokončuje", result["entry"]["answer"])
+                release.set()
+                job = self.wait_for_completion_job(manager)
+
+            self.assertEqual(job.state, "completed")
+            self.assertIn("Lokální Git dokončen", human_hub.replaced_answers[-1][1])
+
+    def test_restart_worker_retries_only_transient_gate_failure_once(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, _library_workspace, _human_hub, _library_hub = (
+                self.make_manager(Path(temp_dir))
+            )
+            human_workspace.dirty = True
+            manager.completion_status_store.begin(
+                workstream_id="layer-human-adam-development",
+                client_message_id="restart-completion-001",
+                base_head="a" * 40,
+            )
+            manager.completion_status_store.update(
+                workstream_id="layer-human-adam-development",
+                client_message_id="restart-completion-001",
+                state="receipt_accepted",
+            )
+            manager.completion_job_store.create(
+                workstream_id="layer-human-adam-development",
+                profile_id="human_adam",
+                client_message_id="restart-completion-001",
+                base_head="a" * 40,
+                workspace_fingerprint="f" * 64,
+                idempotency_key="e" * 64,
+                commit_message="Resume exact step",
+                summary="Obnovený krok",
+                next_step="Ověřit výsledek",
+                decision="",
+                proposed_next_steps=(),
+                visible_answer="Krok byl připraven.",
+            )
+            attempts = 0
+
+            def flaky_checkpoint(**_kwargs: object) -> dict[str, object]:
+                nonlocal attempts
+                attempts += 1
+                if attempts == 1:
+                    gate = HumanAdamGateError(
+                        "Přechodné selhání procesu brány.",
+                        failure_type="gate_process_error",
+                    )
+                    try:
+                        raise gate
+                    except HumanAdamGateError as exc:
+                        raise SimpleMainCheckpointError(
+                            "Brána se přechodně nespustila."
+                        ) from exc
+                return {
+                    "ok": True,
+                    "checkpoint_head": "d" * 40,
+                    "checkpoint_short": "d" * 12,
+                    "all_workspaces_aligned": True,
+                    "remote_push_deferred": True,
+                    "pending_remote_commit_count": 2,
+                }
+
+            manager.background_completion = True
+            with patch(
+                "app.communication.human_adam_profiles.complete_simple_main_checkpoint",
+                side_effect=flaky_checkpoint,
+            ):
+                manager._start_completion_worker()
+                job = self.wait_for_completion_job(manager)
+
+            self.assertEqual(job.state, "completed")
+            self.assertEqual(job.attempts, 2)
+            self.assertEqual(attempts, 2)
+
+    def test_restart_worker_refuses_changed_workspace_fingerprint(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, _library_workspace, _human_hub, _library_hub = (
+                self.make_manager(Path(temp_dir))
+            )
+            human_workspace.dirty = True
+            manager.completion_status_store.begin(
+                workstream_id="layer-human-adam-development",
+                client_message_id="changed-workspace-001",
+                base_head="a" * 40,
+            )
+            manager.completion_status_store.update(
+                workstream_id="layer-human-adam-development",
+                client_message_id="changed-workspace-001",
+                state="receipt_accepted",
+            )
+            manager.completion_job_store.create(
+                workstream_id="layer-human-adam-development",
+                profile_id="human_adam",
+                client_message_id="changed-workspace-001",
+                base_head="a" * 40,
+                workspace_fingerprint="0" * 64,
+                idempotency_key="1" * 64,
+                commit_message="Must not checkpoint changed WIP",
+                summary="Otisk už nesouhlasí",
+                next_step="Vyžádat servisní kontrolu",
+                decision="",
+                proposed_next_steps=(),
+                visible_answer="Krok byl připraven.",
+            )
+            manager.background_completion = True
+            with patch(
+                "app.communication.human_adam_profiles.complete_simple_main_checkpoint",
+            ) as checkpoint:
+                manager._start_completion_worker()
+                job = self.wait_for_completion_job(manager)
+
+            self.assertEqual(job.state, "failed")
+            self.assertEqual(job.failure_code, "workspace_changed")
+            checkpoint.assert_not_called()
 
     def test_next_turn_receives_verified_server_completion_result(self) -> None:
         receipt = (

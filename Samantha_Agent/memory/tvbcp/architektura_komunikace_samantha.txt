@@ -3813,3 +3813,38 @@ Navrhované další kroky:
 Technický důkaz:
 - 250 cílených testů prošlo.
 - Plná Cockpit Quality Gate: 1301 testů, 304,824 s, výsledek OK.
+
+### 2026-08-05 13:37 CEST – Samoobnovitelné dokončení vývojového tahu
+
+Hotovo:
+- Platná dokončovací účtenka nově vytváří samostatnou private úlohu, která není
+  životně svázaná s chatovým HTTP tahem a po restartu Cockpitu se znovu spustí.
+- Úloha před checkpointem ověřuje přesný otisk WIP a Git základ; změněný
+  workspace bezpečně odmítne.
+- Checkpoint nese idempotentní trailer. Pokud proces skončí po vytvoření commitu,
+  obnovený worker tentýž commit dohledá, dokončí převzetí do `main` a nevytvoří
+  druhý commit.
+- Přechodné selhání spuštění nebo timeout brány se opakuje nejvýše jednou.
+  Skutečný neúspěch testů ani změněný workspace se automaticky neopakují.
+
+Rozhodnutí:
+- Chat potvrzuje pouze bezpečné zařazení úlohy; konečný úspěch nadále potvrzuje
+  serverová stavová vrstva ověřená proti Gitu a workspace.
+- V jednom okamžiku smí běžet jediný dokončovací worker. Private file lease
+  brání souběhu dvou procesů a trvalý stav blokuje nový zapisovací tah, dokud
+  předchozí úloha neskončí.
+
+Další krok:
+- Uložit změnu lokálním commitem. Nasazení do běžícího Cockpitu zůstává
+  samostatně potvrzovanou operací.
+
+Navrhované další kroky:
+- Po nasazení živě ověřit malý zapisovací tah a kontrolovaný restart během
+  čekající dokončovací úlohy.
+
+Technický důkaz:
+- Cílený checkpointový balík prošel 174 testy.
+- Plná Cockpit Quality Gate prošla 1309 testy za 288,459 s.
+- Regresní testy pokrývají trvalé načtení, jediný worker lease, restartové
+  obnovení, jeden přechodný retry, změněný otisk a dvojí spuštění bez druhého
+  commitu.

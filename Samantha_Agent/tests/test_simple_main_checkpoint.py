@@ -111,6 +111,41 @@ def fixed_now() -> datetime:
 
 
 class SimpleMainCheckpointTests(unittest.TestCase):
+    def test_idempotent_retry_recovers_same_commit_without_second_commit(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source, manager = prepare_environment(root)
+            target = manager.project_root / "app" / "feature.py"
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text("READY = True\n", encoding="utf-8")
+            request = checkpoint_request(idempotency_key="f" * 64)
+
+            first = complete_simple_main_checkpoint(
+                workspace=manager,
+                request=request,
+                confirmed=True,
+                gate_runner=passing_gate_runner,
+                now_factory=fixed_now,
+                defer_remote_push=True,
+                allow_quick_gate=True,
+            )
+            commit_count = git(source, "rev-list", "--count", "HEAD")
+            body = git(source, "show", "-s", "--format=%B", "HEAD")
+            recovered = complete_simple_main_checkpoint(
+                workspace=manager,
+                request=request,
+                confirmed=True,
+                gate_runner=failing_gate_runner,
+                now_factory=fixed_now,
+                defer_remote_push=True,
+                allow_quick_gate=True,
+            )
+
+            self.assertIn("Human-Adam-Completion: " + "f" * 64, body)
+            self.assertEqual(recovered["checkpoint_head"], first["checkpoint_head"])
+            self.assertTrue(recovered["idempotent_recovery"])
+            self.assertEqual(git(source, "rev-list", "--count", "HEAD"), commit_count)
+
     def test_quick_deployment_snapshot_is_complete_with_smoke_five_of_five(
         self,
     ) -> None:
