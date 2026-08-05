@@ -1,32 +1,33 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-05 08:10 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-05 09:54 CEST
 
 ### Hotovo
-- Knihovna nabízí výchozí i vlastní umístění a kategorie knih při založení i editaci.
+- Formulář knih má přehlednější pořadí, barevně odlišené oddíly a samostatné finální uložení
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
 - Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
 
 ### Rizika
-- Aktivní relace má neuzavřenou nejistotu doručení.
+- Žádné další doložené provozní riziko.
 
 ### Další krok
-- Po samostatně potvrzeném nasazení ručně ověřit založení a editaci knihy s umístěním a více kategoriemi.
+- Převzít a nasadit změnu, potom na iPhonu ověřit pořadí prvků a čitelnost barevných oddílů
 
 ### Rozhodnutí
-- Umístění a kategorie mají výchozí volby a jejich vlastní rozšíření se ukládá soukromě mimo Git.
+- Návrh obsahu se vytváří před umístěním a kategoriemi; tlačítko Uložit knihu je samostatně až na konci formuláře
 
 ### Navrhované další kroky
-- Nasadit checkpoint do Cockpitu až na samostatný Milův pokyn.
+- Žádné další návrhy nad rámec bezprostředního kroku.
 
 ### Technický stav checkpointu
-- Změna je otestovaná (1288 testů).
-- Git před checkpointem: lokální `main` na `7a8a3604991e`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `7a8a3604991e` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-04T19:41:47+00:00.
-- Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`delivery_uncertain`.
+- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
+- Git před checkpointem: lokální `main` na `eecebbfe16e1`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `eecebbfe16e1` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-05T06:16:01+00:00.
+- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -320,3 +321,15 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (8): `Samantha_Agent/app/article_archive.py`, `Samantha_Agent/app/cockpit.py`, `Samantha_Agent/app/frontend/cockpit/app.js`, `Samantha_Agent/app/frontend/cockpit/page.html`, `Samantha_Agent/app/frontend/cockpit/styles.css`, `Samantha_Agent/tests/test_article_archive.py`, `Samantha_Agent/tests/test_cockpit.py`, `Samantha_Agent/tests/test_cockpit_frontend.py`
 - Commit: `Add book location and category choices`
 - Další krok: Po samostatně potvrzeném nasazení ručně ověřit založení a editaci knihy s umístěním a více kategoriemi.
+
+### Automatický checkpoint 2026-08-05 09:54 CEST
+
+- Pracovní proud: `project-knowledge-library`
+- Hotovo: Formulář knih má přehlednější pořadí, barevně odlišené oddíly a samostatné finální uložení; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.; Lokální commity čekají na samostatný denní GitHub balíček.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: rychlá Cockpit brána syntaxe a whitespace: 6.4 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu
+- Změněné cesty před paměťovým zápisem (4): `Samantha_Agent/app/frontend/cockpit/page.html`, `Samantha_Agent/app/frontend/cockpit/styles.css`, `Samantha_Agent/tests/test_cockpit.py`, `Samantha_Agent/tests/test_cockpit_frontend.py`
+- Commit: `Improve mobile book form flow`
+- Další krok: Převzít a nasadit změnu, potom na iPhonu ověřit pořadí prvků a čitelnost barevných oddílů

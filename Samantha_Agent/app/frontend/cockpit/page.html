@@ -575,6 +575,7 @@
             </label>
           </div>
           <div class="library-book-cover-block">
+            <h4 class="library-book-section-title">Obálka knihy</h4>
             <label class="library-field">
               <span class="library-field-label">Fotografie obálky (volitelná)</span>
               <input id="libraryBookCoverInput" type="file" accept="image/*">
@@ -590,6 +591,7 @@
             <div id="libraryBookCoverStatus" class="status-line">Rozpoznání odešle OpenAI pouze vybranou fotografii. Zmenšená obálka se uloží až s knihou.</div>
           </div>
           <div class="library-book-ocr-block">
+            <h4 class="library-book-section-title">Načtení textu z fotografií</h4>
             <label class="library-field">
               <span class="library-field-label">Fotografie textu pro OCR (nejvýše 3)</span>
               <input id="libraryBookOcrPhotoInput" type="file" accept="image/*" capture="environment">
@@ -612,16 +614,23 @@
               </div>
             </div>
           </div>
-          <label class="library-field">
-            <span class="library-field-label">Podklady pro návrh obsahu (neukládají se)</span>
-            <textarea id="libraryBookSourceInput" class="library-text-area" placeholder="Vlož anotaci nakladatele, obsah knihy nebo vlastní poznámky"></textarea>
-            <span class="library-field-hint">Po stisku tlačítka se název, autor a tyto podklady odešlou OpenAI. Umístění ani tagy se neodesílají.</span>
-          </label>
-          <label class="library-field">
-            <span class="library-field-label">Stručný obsah</span>
-            <textarea id="libraryBookSummaryInput" class="library-text-area" placeholder="Přibližně půl stránky A4: o čem kniha je a proč stojí za přečtení"></textarea>
-          </label>
+          <div class="library-book-summary-block">
+            <h4 class="library-book-section-title">Stručný obsah knihy</h4>
+            <label class="library-field">
+              <span class="library-field-label">Podklady pro návrh obsahu (neukládají se)</span>
+              <textarea id="libraryBookSourceInput" class="library-text-area" placeholder="Vlož anotaci nakladatele, obsah knihy nebo vlastní poznámky"></textarea>
+              <span class="library-field-hint">Po stisku tlačítka se název, autor a tyto podklady odešlou OpenAI. Umístění ani kategorie se neodesílají.</span>
+            </label>
+            <div class="actions compact-actions">
+              <button class="secondary" id="libraryBookSummaryDraftBtn" type="button">Vytvořit návrh obsahu</button>
+            </div>
+            <label class="library-field">
+              <span class="library-field-label">Stručný obsah</span>
+              <textarea id="libraryBookSummaryInput" class="library-text-area" placeholder="Přibližně půl stránky A4: o čem kniha je a proč stojí za přečtení"></textarea>
+            </label>
+          </div>
           <div class="library-book-classification-block">
+            <h4 class="library-book-section-title">Umístění a kategorie</h4>
             <label class="library-field">
               <span class="library-field-label">Umístění</span>
               <select id="libraryBookLocationInput">
@@ -652,6 +661,7 @@
             <div id="libraryBookOptionsStatus" class="status-line">Umístění a kategorie můžeš rozšířit přímo tady.</div>
           </div>
           <div class="library-book-isbn-lookup-block">
+            <h4 class="library-book-section-title">Katalogové dohledání</h4>
             <label class="library-field">
               <span class="library-field-label">ISBN z knihy (nepovinné)</span>
               <input id="libraryBookIsbnInput" type="text" inputmode="text" autocomplete="off" placeholder="např. 80-204-1453-3">
@@ -663,8 +673,7 @@
             <div id="libraryBookIsbnLookupStatus" class="status-line">Po stisku se do veřejného katalogu odešle pouze validované ISBN. Výsledek se neuloží automaticky. Když se nic nenajde, knihu můžeš normálně uložit ručně.</div>
             <a id="libraryBookIsbnSourceLink" class="library-book-isbn-source hidden" href="#" target="_blank" rel="noopener noreferrer">Otevřít záznam ve zdrojovém katalogu</a>
           </div>
-          <div class="actions compact-actions">
-            <button class="secondary" id="libraryBookSummaryDraftBtn" type="button">Vytvořit návrh obsahu</button>
+          <div class="actions compact-actions library-book-save-actions">
             <button class="primary" id="libraryBookSaveBtn" type="button">Uložit knihu</button>
           </div>
           <div id="libraryBookStatus" class="status-line">Návrh obsahu se nejdřív zobrazí k úpravě. Kniha se uloží až tlačítkem Uložit knihu.</div>
