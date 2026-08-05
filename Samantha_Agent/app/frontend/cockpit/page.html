@@ -487,6 +487,33 @@
           </label>
           <button class="primary library-field-button" id="librarySearchBtn" type="button">Hledat</button>
         </div>
+        <section id="libraryBookOverview" class="library-book-overview hidden" aria-labelledby="libraryBookOverviewTitle">
+          <div class="library-book-overview-head">
+            <h3 id="libraryBookOverviewTitle">Přehled knih</h3>
+            <strong id="libraryBookOverviewCount">Celkem 0 knih</strong>
+          </div>
+          <div class="library-book-view-tabs" aria-label="Způsob zobrazení knih">
+            <button class="secondary active" type="button" data-library-book-view="all">Všechny</button>
+            <button class="secondary" type="button" data-library-book-view="category">Podle kategorií</button>
+            <button class="secondary" type="button" data-library-book-view="author">Podle autorů</button>
+            <button class="secondary" type="button" data-library-book-view="location">Podle umístění</button>
+          </div>
+          <div class="library-book-filter-grid">
+            <label class="library-field">
+              <span class="library-field-label">Kategorie</span>
+              <select id="libraryBookCategoryFilter"><option value="">Všechny kategorie</option></select>
+            </label>
+            <label class="library-field">
+              <span class="library-field-label">Autor</span>
+              <select id="libraryBookAuthorFilter"><option value="">Všichni autoři</option></select>
+            </label>
+            <label class="library-field">
+              <span class="library-field-label">Umístění</span>
+              <select id="libraryBookLocationFilter"><option value="">Všechna umístění</option></select>
+            </label>
+            <button class="secondary library-field-button" id="libraryBookClearFiltersBtn" type="button">Zrušit filtry</button>
+          </div>
+        </section>
         <div id="libraryStatus" class="status-line">Načítám knihovnu...</div>
         <div class="library-add-toolbar" aria-label="Přidat obsah do knihovny">
           <button class="secondary" id="libraryAddUrlBtn" type="button" aria-expanded="false" aria-controls="libraryArchivePanel">Přidat z webu</button>

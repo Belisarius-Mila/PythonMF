@@ -1953,6 +1953,22 @@ def list_articles(
     }
 
 
+def list_books_overview(*, archive_root: Path = DEFAULT_ARCHIVE_ROOT) -> dict[str, Any]:
+    books = [item for item in load_article_registry(archive_root) if item.category == "books"]
+    books.sort(
+        key=lambda item: (
+            item.one_line_title.casefold(),
+            item.book_author.casefold(),
+            item.id,
+        )
+    )
+    return {
+        "ok": True,
+        "count": len(books),
+        "items": [item.to_summary() for item in books],
+    }
+
+
 def search_articles(
     *,
     query: str,

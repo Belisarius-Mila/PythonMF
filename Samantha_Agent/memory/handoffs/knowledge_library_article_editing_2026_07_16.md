@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-05 11:35 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-05 12:15 CEST
 
 ### Hotovo
-- Knihovna umí z dočasné fotografie načíst ověřené ISBN bez ukládání snímku.
+- Knihovna nabízí úplný seznam knih s pohledy podle kategorií, autorů a umístění i kombinovatelnými filtry
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
@@ -15,20 +15,19 @@
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Po samostatném potvrzení nasadit checkpoint a živě ověřit načtení ISBN na mobilu.
+- Převzít a nasadit změnu, potom na iPhonu ověřit všechny čtyři pohledy, kombinované filtry a otevření karty
 
 ### Rozhodnutí
-- Fotografie se používá pouze k rozpoznání ISBN a neukládá se do Knihovny.
+- Přehled knih se sestavuje z celého registru; kniha s více kategoriemi může být zobrazena ve více skupinách
 
 ### Navrhované další kroky
-- Nasadit dokončený checkpoint do Cockpitu.
-- Ověřit načtení ISBN z fotografie na iPhonu.
+- Žádné další návrhy nad rámec bezprostředního kroku.
 
 ### Technický stav checkpointu
 - Změna je otestovaná (1290 testů).
-- Git před checkpointem: lokální `main` na `fbd4a6e0b065`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `fbd4a6e0b065` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-05T07:57:06+00:00.
-- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`disconnected`.
+- Git před checkpointem: lokální `main` na `244c5c4afccb`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `244c5c4afccb` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-05T09:43:21+00:00.
+- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -346,3 +345,15 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (6): `Samantha_Agent/app/cockpit.py`, `Samantha_Agent/app/frontend/cockpit/app.js`, `Samantha_Agent/app/frontend/cockpit/page.html`, `Samantha_Agent/app/frontend/cockpit/styles.css`, `Samantha_Agent/tests/test_cockpit.py`, `Samantha_Agent/tests/test_cockpit_frontend.py`
 - Commit: `Add ISBN photo capture for books`
 - Další krok: Po samostatném potvrzení nasadit checkpoint a živě ověřit načtení ISBN na mobilu.
+
+### Automatický checkpoint 2026-08-05 12:15 CEST
+
+- Pracovní proud: `project-knowledge-library`
+- Hotovo: Knihovna nabízí úplný seznam knih s pohledy podle kategorií, autorů a umístění i kombinovatelnými filtry; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.; Lokální commity čekají na samostatný denní GitHub balíček.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: plná Cockpit brána: 1290 testů, 406.3 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (8): `Samantha_Agent/app/article_archive.py`, `Samantha_Agent/app/cockpit.py`, `Samantha_Agent/app/frontend/cockpit/app.js`, `Samantha_Agent/app/frontend/cockpit/page.html`, `Samantha_Agent/app/frontend/cockpit/styles.css`, `Samantha_Agent/tests/test_article_archive.py`, `Samantha_Agent/tests/test_cockpit.py`, `Samantha_Agent/tests/test_cockpit_frontend.py`
+- Commit: `Add grouped book overview`
+- Další krok: Převzít a nasadit změnu, potom na iPhonu ověřit všechny čtyři pohledy, kombinované filtry a otevření karty

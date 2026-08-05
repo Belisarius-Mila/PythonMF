@@ -53,6 +53,7 @@ from app.article_archive import (
     attach_article_image,
     list_articles,
     list_book_options,
+    list_books_overview,
     prepare_article_pdf_export,
     preview_article_source_reextract,
     search_articles,
@@ -9520,6 +9521,9 @@ class CockpitServer:
                     return
                 if parsed.path == "/api/library/book/options":
                     self.respond_json(library_book_options_status_action())
+                    return
+                if parsed.path == "/api/library/books/overview":
+                    self.respond_json(list_books_overview())
                     return
                 if parsed.path == "/api/library/search":
                     params = parse_qs(parsed.query)

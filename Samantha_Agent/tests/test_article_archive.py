@@ -38,6 +38,7 @@ from app.article_archive import (
     library_export_confirmation_text,
     list_articles,
     list_book_options,
+    list_books_overview,
     prepare_article_pdf_export,
     preview_article_source_reextract,
     search_articles,
@@ -658,6 +659,34 @@ class ArticleArchiveTests(unittest.TestCase):
         self.assertFalse(duplicate["added"])
         self.assertEqual(loaded["locations"][-1], "pracovna")
         self.assertEqual(loaded["categories"].count("historie vědy"), 1)
+
+    def test_books_overview_returns_complete_alphabetical_registry(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            archive_root = Path(temp_dir)
+            rows = [
+                {
+                    "id": f"book-{index:03d}",
+                    "title": f"Kniha {500 - index:03d}",
+                    "one_line_title": f"Kniha {500 - index:03d}",
+                    "category": "books",
+                    "text_file": f"articles/book-{index:03d}/article.txt",
+                    "book_author": f"Autor {index % 5}",
+                    "book_location": "obývák",
+                    "tags": ["román"],
+                }
+                for index in range(501)
+            ]
+            (archive_root / "registry.jsonl").write_text(
+                "".join(json.dumps(row, ensure_ascii=False) + "\n" for row in rows),
+                encoding="utf-8",
+            )
+            overview = list_books_overview(archive_root=archive_root)
+
+        self.assertTrue(overview["ok"])
+        self.assertEqual(overview["count"], 501)
+        self.assertEqual(len(overview["items"]), 501)
+        self.assertEqual(overview["items"][0]["title"], "Kniha 000")
+        self.assertEqual(overview["items"][-1]["title"], "Kniha 500")
 
     def test_book_options_reject_invalid_kind_empty_and_oversized_values(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
