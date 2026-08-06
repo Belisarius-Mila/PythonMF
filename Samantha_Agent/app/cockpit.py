@@ -395,6 +395,7 @@ DESKTOP_APP_CATALOG: tuple[dict[str, Any], ...] = (
         "kind": "desktopová aplikace",
         "working_dir": GIT_ROOT / "VocabularyFR",
         "script": GIT_ROOT / "VocabularyFR" / "vocab_trainer_fr.py",
+        "interpreter": Path("/usr/local/bin/python3.12"),
     },
 )
 WEB_APP_CATALOG: tuple[dict[str, str], ...] = (
@@ -636,9 +637,22 @@ def open_desktop_app_action(
             "message": f"{app['title']} nejde spustit, chybí lokální soubor aplikace.",
             "app": {key: app[key] for key in ("id", "title", "description", "kind")},
         }
+    configured_interpreter = app.get("interpreter")
+    if configured_interpreter:
+        interpreter = Path(configured_interpreter)
+        if not interpreter.is_file() or not os.access(interpreter, os.X_OK):
+            return {
+                "ok": False,
+                "status": "missing_app_interpreter",
+                "message": f"{app['title']} nejde spustit, chybí její ověřený Python.",
+                "app": {key: app[key] for key in ("id", "title", "description", "kind")},
+            }
+        interpreter_command = shell_quote_for_applescript(str(interpreter))
+    else:
+        interpreter_command = "python3"
     shell_command = (
         f"cd {shell_quote_for_applescript(str(working_dir))}; "
-        f"python3 {shell_quote_for_applescript(str(script_path))}"
+        f"{interpreter_command} {shell_quote_for_applescript(str(script_path))}"
     )
     script = (
         'tell application "Terminal"\n'

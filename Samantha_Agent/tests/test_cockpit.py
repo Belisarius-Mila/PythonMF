@@ -6195,6 +6195,44 @@ Dalsi krok:
         self.assertEqual(calls[0][0], "/usr/bin/osascript")
         self.assertIn("VocabularyIT", calls[0][2])
         self.assertIn("vocab_trainer_it.py", calls[0][2])
+        self.assertIn("python3", calls[0][2])
+
+    def test_open_vocabulary_fr_uses_same_python_as_vscode(self) -> None:
+        calls: list[list[str]] = []
+
+        def fake_runner(args, **kwargs):
+            calls.append(args)
+            return subprocess.CompletedProcess(args=args, returncode=0, stdout="", stderr="")
+
+        result = open_desktop_app_action({"app_id": "vocabulary-fr-trainer"}, runner=fake_runner)
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["status"], "launched")
+        self.assertIn("/usr/local/bin/python3.12", calls[0][2])
+        self.assertNotIn("; python3 ", calls[0][2])
+
+    def test_open_desktop_app_rejects_missing_configured_interpreter(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            script = root / "trainer.py"
+            script.write_text("print('test')\n", encoding="utf-8")
+            app = {
+                "id": "test-trainer",
+                "title": "Test trainer",
+                "description": "Test",
+                "kind": "desktopová aplikace",
+                "working_dir": root,
+                "script": script,
+                "interpreter": root / "missing-python",
+            }
+            with patch("app.cockpit.desktop_app_by_id", return_value=app):
+                result = open_desktop_app_action(
+                    {"app_id": "test-trainer"},
+                    runner=lambda *args, **kwargs: self.fail("should not launch"),
+                )
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["status"], "missing_app_interpreter")
 
     def test_open_desktop_app_action_rejects_unknown_app(self) -> None:
         result = open_desktop_app_action(
