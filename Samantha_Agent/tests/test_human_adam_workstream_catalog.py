@@ -133,6 +133,15 @@ class WorkstreamCatalogTests(unittest.TestCase):
         self.assertEqual(by_id["project-cockpit"].query_aliases, ())
         self.assertEqual(len(aliases), len(set(aliases)))
 
+    def test_all_workstreams_allow_read_only_network_research(self) -> None:
+        self.assertTrue(WORKSTREAM_CATALOG)
+        self.assertTrue(
+            all(
+                record.capabilities.network_read_only_research
+                for record in WORKSTREAM_CATALOG
+            )
+        )
+
     def test_private_archive_capabilities_are_declared_only_for_knihovna(self) -> None:
         knihovna = next(
             record
@@ -148,6 +157,7 @@ class WorkstreamCatalogTests(unittest.TestCase):
         self.assertEqual(
             knihovna.capabilities,
             CanonicalWorkstreamCapabilities(
+                network_read_only_research=True,
                 private_archive_direct=True,
                 private_archive_read=True,
                 private_archive_single_edit=True,
@@ -156,6 +166,9 @@ class WorkstreamCatalogTests(unittest.TestCase):
                 ),
                 private_archive_root="data/private/article_archive",
             ),
+        )
+        self.assertTrue(
+            knihovna.capabilities.status_fields()["network_read_only_research"]
         )
         self.assertTrue(other_records)
         self.assertTrue(
@@ -182,6 +195,7 @@ class WorkstreamCatalogTests(unittest.TestCase):
             ),
         )
         self.assertTrue(r2_adam.capabilities.status_fields()["owned_private_write"])
+        self.assertTrue(r2_adam.capabilities.network_read_only_research)
         self.assertFalse(r2_adam.capabilities.private_archive_direct)
         self.assertFalse(r2_adam.capabilities.private_archive_single_edit)
 

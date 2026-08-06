@@ -28,6 +28,7 @@ PRIVATE_ARCHIVE_CONFIRMATION_CATEGORIES = (
 class CanonicalWorkstreamCapabilities:
     """Declarative, git-safe capability metadata for one workstream."""
 
+    network_read_only_research: bool = True
     private_archive_direct: bool = False
     private_archive_read: bool = False
     private_archive_single_edit: bool = False
@@ -38,6 +39,7 @@ class CanonicalWorkstreamCapabilities:
 
     def validate(self) -> None:
         flags = (
+            self.network_read_only_research,
             self.private_archive_direct,
             self.private_archive_read,
             self.private_archive_single_edit,
@@ -45,18 +47,19 @@ class CanonicalWorkstreamCapabilities:
         )
         if any(type(flag) is not bool for flag in flags):
             raise ValueError("Pracovní proud má neplatné private archive capability.")
-        if self.source_data_read_only and any(flags[:3]):
+        archive_flags = flags[1:4]
+        if self.source_data_read_only and any(archive_flags):
             raise ValueError(
                 "Read-only zdrojová data nelze kombinovat s přímou editací archivu."
             )
         if not isinstance(self.private_archive_confirmation_required, tuple):
             raise ValueError("Pracovní proud má neplatné private archive capability.")
-        enabled = any(flags[:3])
+        enabled = any(archive_flags)
         if not enabled:
             if self.private_archive_confirmation_required or self.private_archive_root:
                 raise ValueError("Pracovní proud má neplatné private archive capability.")
         else:
-            if not all(flags[:3]):
+            if not all(archive_flags):
                 raise ValueError("Pracovní proud má neúplné private archive capability.")
             if (
                 self.private_archive_confirmation_required
@@ -104,6 +107,7 @@ class CanonicalWorkstreamCapabilities:
 
     def status_fields(self) -> dict[str, object]:
         return {
+            "network_read_only_research": self.network_read_only_research,
             "private_archive_direct": self.private_archive_direct,
             "private_archive_read": self.private_archive_read,
             "private_archive_single_edit": self.private_archive_single_edit,
@@ -298,6 +302,7 @@ WORKSTREAM_CATALOG = validate_workstream_catalog(
             "2",
             "Znalostni databaze / Knihovna clanku / Knowledge inbox",
             capabilities=CanonicalWorkstreamCapabilities(
+                network_read_only_research=True,
                 private_archive_direct=True,
                 private_archive_read=True,
                 private_archive_single_edit=True,

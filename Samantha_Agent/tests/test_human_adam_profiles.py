@@ -398,6 +398,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         library_workspace = FakeWorkspace(root / "library", prepared=target_prepared)
         human_hub = FakeHub("human-thread")
         library_hub = FakeHub("library-thread")
+        human_capabilities = workstream_capabilities("layer-human-adam-development")
         library_capabilities = workstream_capabilities("project-knowledge-library")
         human = HumanAdamService(
             runtime=runtime,  # type: ignore[arg-type]
@@ -406,6 +407,10 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             work_profile_id="human_adam",
             hub=human_hub,  # type: ignore[arg-type]
             profile_getter=fake_profile,
+            sandbox_policy=workstream_sandbox_policy(
+                human_capabilities,
+                project_root=human_workspace.canonical_project_root,
+            ),
         )
         library = HumanAdamService(
             runtime=runtime,  # type: ignore[arg-type]
@@ -1788,7 +1793,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             sandbox_policy["writableRoots"],
             [str(expected_document_root)],
         )
-        self.assertFalse(sandbox_policy["networkAccess"])
+        self.assertTrue(sandbox_policy["networkAccess"])
         self.assertEqual(writable["automatic_completion"]["state"], "not_needed")
 
     def test_read_only_source_capability_without_owned_root_stays_non_writable(
@@ -1801,7 +1806,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         sandbox_policy = workstream_sandbox_policy(capabilities)
 
         self.assertEqual(sandbox_policy["writableRoots"], [])
-        self.assertFalse(sandbox_policy["networkAccess"])
+        self.assertTrue(sandbox_policy["networkAccess"])
 
     def test_r2_document_access_does_not_require_development_lease(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -2791,17 +2796,26 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             model_input,
         )
         self.assertEqual(sandbox_policy["writableRoots"], [str(expected_root)])
-        self.assertFalse(sandbox_policy["networkAccess"])
+        self.assertTrue(sandbox_policy["networkAccess"])
 
-    def test_knihovna_policy_keeps_network_closed_and_one_writable_root(self) -> None:
+    def test_knihovna_policy_allows_read_only_research_network_and_one_writable_root(self) -> None:
         capabilities = workstream_capabilities("project-knowledge-library")
         sandbox_policy = workstream_sandbox_policy(capabilities)
         archive_root = private_archive_root(capabilities)
 
-        self.assertFalse(sandbox_policy["networkAccess"])
+        self.assertTrue(sandbox_policy["networkAccess"])
         self.assertEqual(
             sandbox_policy["writableRoots"],
             [str(archive_root)],
+        )
+        self.assertIn("HTTPS GET nebo HEAD", KNIHOVNA_DEVELOPER_INSTRUCTIONS)
+        self.assertIn(
+            "Nepouzivej POST, PUT, PATCH ani DELETE",
+            KNIHOVNA_DEVELOPER_INSTRUCTIONS,
+        )
+        self.assertIn(
+            "Sitove opravneni nikdy nerozsiruje DEVELOPMENT_CONTROL",
+            KNIHOVNA_DEVELOPER_INSTRUCTIONS,
         )
         self.assertIn("pres API app.article_archive", KNIHOVNA_DEVELOPER_INSTRUCTIONS)
         self.assertIn("Mazani nebo odebirani", KNIHOVNA_DEVELOPER_INSTRUCTIONS)
@@ -2819,7 +2833,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
                 project_root=project_root,
             )
 
-        self.assertFalse(sandbox_policy["networkAccess"])
+        self.assertTrue(sandbox_policy["networkAccess"])
         self.assertEqual(
             sandbox_policy["writableRoots"],
             [str((project_root / "data" / "private").resolve())],

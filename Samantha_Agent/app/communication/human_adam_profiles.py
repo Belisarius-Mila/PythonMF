@@ -223,7 +223,7 @@ def workstream_sandbox_policy(
         writable_roots = [str(canonical_private_root)]
     policy = {
         **HUMAN_ADAM_SANDBOX_POLICY,
-        "networkAccess": False,
+        "networkAccess": capabilities.network_read_only_research,
         "writableRoots": writable_roots,
     }
     return policy
@@ -274,14 +274,54 @@ def private_archive_developer_instructions(
         "systemovy zasah vyzaduji samostatne Milovo potvrzeni; pouzij existujici "
         "presnou potvrzovaci branu prislusneho API. Nikdy tyto operace neobchazej "
         "primym zapisem nebo obecnym shellovym prikazem. Mimo deklarovany koren "
-        "zustava vse mimo workspace bez zapisu, sit zustava zakazana a Git, "
+        "zustava vse mimo workspace bez zapisu, sit se ridi samostatnou capability "
+        "pracovniho proudu a Git, "
         "checkpoint, commit, push i nasazeni dale obsluhuje pouze Cockpit. Pri cteni "
         "nebo uprave nevypisuj do terminalu cely soukromy fulltext; vrat jen redigovany "
         "technicky vysledek."
     )
 
 
+def network_read_only_developer_instructions(
+    capabilities: CanonicalWorkstreamCapabilities,
+) -> str:
+    capabilities.validate()
+    if not capabilities.network_read_only_research:
+        return " Sit zustava zakazana."
+    return (
+        " Sit je povolena pouze pro read-only vyzkum verejnych zdroju: webove "
+        "hledani, verejnou dokumentaci a diagnosticke HTTPS GET nebo HEAD dotazy "
+        "na katalogy a API. Nepouzivej POST, PUT, PATCH ani DELETE, neodesilej "
+        "formulare, e-maily, webhooky, soubory ani jina data ven a neprihlasuj se "
+        "k externim sluzbam. Neprovadej pres sit Git operace, push ani nasazeni. "
+        "Soukrome ISBN nebo jiny soukromy identifikator pouzij v dotazu jen na "
+        "Miluv vyslovny pokyn. Pokud zdroj vyzaduje API klic, ucet, souhlas s "
+        "podminkami nebo externi zapis, pouze to oznam a akci neprovadej. Sitove "
+        "opravneni nikdy nerozsiruje DEVELOPMENT_CONTROL ani zapisova prava."
+    )
+
+
+def workstream_capability_developer_instructions(
+    capabilities: CanonicalWorkstreamCapabilities,
+    *,
+    project_root: Path = PROJECT_ROOT,
+) -> str:
+    return (
+        private_archive_developer_instructions(
+            capabilities,
+            project_root=project_root,
+        )
+        + network_read_only_developer_instructions(capabilities)
+    )
+
+
+_HUMAN_ADAM_CAPABILITIES = _catalog_workstream(HUMAN_ADAM_WORKSTREAM_ID).capabilities
 _KNIHOVNA_CAPABILITIES = _catalog_workstream(KNIHOVNA_WORKSTREAM_ID).capabilities
+
+HUMAN_ADAM_PROFILE_DEVELOPER_INSTRUCTIONS = (
+    HUMAN_ADAM_DEVELOPER_INSTRUCTIONS
+    + workstream_capability_developer_instructions(_HUMAN_ADAM_CAPABILITIES)
+)
 
 KNIHOVNA_DEVELOPER_INSTRUCTIONS = (
     HUMAN_ADAM_WORKSPACE_DEVELOPER_INSTRUCTIONS
@@ -301,7 +341,7 @@ KNIHOVNA_DEVELOPER_INSTRUCTIONS = (
         "V bezne odpovedi uvadej jen samotny nazev souboru, pripadne nejkratsi nutnou "
         "relativni cestu pri shodnych nazvech."
     )
-    + private_archive_developer_instructions(_KNIHOVNA_CAPABILITIES)
+    + workstream_capability_developer_instructions(_KNIHOVNA_CAPABILITIES)
 )
 
 
@@ -539,7 +579,7 @@ class HumanAdamProfileManager:
         hub = self.workstream_threads.active_hub(expected_workstream_id=clean_id)
         base = self.profiles[self.default_profile_id]["service"]
         state_root = self.workstream_threads.state_root / clean_id
-        capability_instructions = private_archive_developer_instructions(
+        capability_instructions = workstream_capability_developer_instructions(
             record.capabilities,
             project_root=base.workspace.canonical_project_root,
         )
@@ -560,7 +600,9 @@ class HumanAdamProfileManager:
             codex_binary=base.codex_binary,
             profile_getter=base.profile_getter,
             hub=hub,
-            developer_instructions=base.developer_instructions + capability_instructions,
+            developer_instructions=(
+                HUMAN_ADAM_DEVELOPER_INSTRUCTIONS + capability_instructions
+            ),
             sandbox_policy=workstream_sandbox_policy(
                 record.capabilities,
                 project_root=base.workspace.canonical_project_root,
@@ -4356,7 +4398,11 @@ def build_human_adam_profiles() -> HumanAdamProfileManager:
         workspace=human_workspace,
         state_path=DEFAULT_HUMAN_SESSION_PATH,
         work_profile_id="human_adam",
-        developer_instructions=HUMAN_ADAM_DEVELOPER_INSTRUCTIONS,
+        developer_instructions=HUMAN_ADAM_PROFILE_DEVELOPER_INSTRUCTIONS,
+        sandbox_policy=workstream_sandbox_policy(
+            _HUMAN_ADAM_CAPABILITIES,
+            project_root=human_workspace.canonical_project_root,
+        ),
     )
     knihovna_workspace = HumanAdamWorkspaceManager(
         workspace_root=KNIHOVNA_PROFILE_ROOT / "workspace",
@@ -4385,7 +4431,7 @@ def build_human_adam_profiles() -> HumanAdamProfileManager:
         project_prefix = Path(human_service.workspace.project_dir_name)
         handoff_path = (project_prefix / memory_binding.handoff_relative_path).as_posix()
         tvbcp_path = (project_prefix / memory_binding.tvbcp_relative_path).as_posix()
-        capability_instructions = private_archive_developer_instructions(
+        capability_instructions = workstream_capability_developer_instructions(
             record.capabilities,
             project_root=human_service.workspace.canonical_project_root,
         )
