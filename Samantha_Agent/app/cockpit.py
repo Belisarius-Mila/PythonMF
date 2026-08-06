@@ -387,6 +387,7 @@ DESKTOP_APP_CATALOG: tuple[dict[str, Any], ...] = (
         "kind": "desktopová aplikace",
         "working_dir": GIT_ROOT / "VocabularyIT",
         "script": GIT_ROOT / "VocabularyIT" / "vocab_trainer_it.py",
+        "interpreter": Path("/usr/local/bin/python3.12"),
     },
     {
         "id": "vocabulary-fr-trainer",

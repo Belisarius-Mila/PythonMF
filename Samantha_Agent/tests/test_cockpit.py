@@ -6181,7 +6181,7 @@ Dalsi krok:
         self.assertIn("elements.activeDataset.textContent = state.videos.length", app_source)
         self.assertIn("${state.project} · ${state.videos.length} záznamů", app_source)
 
-    def test_open_desktop_app_action_uses_allowlisted_terminal_command(self) -> None:
+    def test_open_vocabulary_it_uses_same_python_as_vscode(self) -> None:
         calls: list[list[str]] = []
 
         def fake_runner(args, **kwargs):
@@ -6195,7 +6195,8 @@ Dalsi krok:
         self.assertEqual(calls[0][0], "/usr/bin/osascript")
         self.assertIn("VocabularyIT", calls[0][2])
         self.assertIn("vocab_trainer_it.py", calls[0][2])
-        self.assertIn("python3", calls[0][2])
+        self.assertIn("/usr/local/bin/python3.12", calls[0][2])
+        self.assertNotIn("; python3 ", calls[0][2])
 
     def test_open_vocabulary_fr_uses_same_python_as_vscode(self) -> None:
         calls: list[list[str]] = []
