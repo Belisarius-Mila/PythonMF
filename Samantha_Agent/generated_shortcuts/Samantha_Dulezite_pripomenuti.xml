@@ -10,9 +10,9 @@
 			<key>WFWorkflowActionParameters</key>
 			<dict>
 				<key>WFCommentActionText</key>
-				<string>Samantha – důležité připomenutí.
+				<string>Samantha – připomenutí přes Cockpit.
 
-Pošle zadaný text přímo do soukromého Cockpitu přes Tailscale HTTPS. Nepoužívá iCloud Drive.</string>
+Pošle zadaný text přímo do soukromého Cockpitu přes Tailscale HTTPS. Nepoužívá iCloud Drive a po doručení ukáže potvrzení. Stejnou zkratku může použít Míla i Jana.</string>
 			</dict>
 		</dict>
 		<dict>
@@ -25,7 +25,7 @@ Pošle zadaný text přímo do soukromého Cockpitu přes Tailscale HTTPS. Nepou
 
 This shortcut was created via the following user prompt:
 
-&gt; Nahradit iCloud přenos důležitého připomenutí přímým doručením přes Tailscale.</string>
+&gt; Můžeš připravit upravenou zkratku pro telefon? A bude ji moci použít Jana ze svého iPhonu? Cockpit již přes Tailscale běží.</string>
 			</dict>
 		</dict>
 		<dict>
@@ -251,7 +251,7 @@ This shortcut was created via the following user prompt:
 	<key>WFWorkflowIcon</key>
 	<dict>
 		<key>WFWorkflowIconGlyphNumber</key>
-		<integer>59667</integer>
+		<integer>61487</integer>
 		<key>WFWorkflowIconStartColor</key>
 		<integer>4282601983</integer>
 	</dict>
@@ -277,7 +277,7 @@ This shortcut was created via the following user prompt:
 	<key>WFWorkflowMinimumClientVersionString</key>
 	<string>900</string>
 	<key>WFWorkflowName</key>
-	<string>Samantha – důležité připomenutí</string>
+	<string>Samantha – připomenutí přes Cockpit</string>
 	<key>WFWorkflowOutputContentItemClasses</key>
 	<array/>
 	<key>WFWorkflowTypes</key>
