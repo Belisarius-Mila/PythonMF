@@ -25,7 +25,7 @@ Pošle zadaný text přímo do soukromého Cockpitu přes Tailscale HTTPS. Nepou
 
 This shortcut was created via the following user prompt:
 
-&gt; Můžeš připravit upravenou zkratku pro telefon? A bude ji moci použít Jana ze svého iPhonu? Cockpit již přes Tailscale běží.</string>
+&gt; Opravit chybu „Nebylo zadáno URL“ tak, aby akce Načíst obsah URL skutečně převzala adresu z předchozí akce URL.</string>
 			</dict>
 		</dict>
 		<dict>
@@ -162,15 +162,23 @@ This shortcut was created via the following user prompt:
 				<dict>
 					<key>Value</key>
 					<dict>
-						<key>OutputName</key>
-						<string>Cockpit delivery URL</string>
-						<key>OutputUUID</key>
-						<string>366ADA55-FCFC-4990-A7EA-621C75A776B3</string>
-						<key>Type</key>
-						<string>ActionOutput</string>
+						<key>attachmentsByRange</key>
+						<dict>
+							<key>{0, 1}</key>
+							<dict>
+								<key>OutputName</key>
+								<string>Cockpit delivery URL</string>
+								<key>OutputUUID</key>
+								<string>366ADA55-FCFC-4990-A7EA-621C75A776B3</string>
+								<key>Type</key>
+								<string>ActionOutput</string>
+							</dict>
+						</dict>
+						<key>string</key>
+						<string>￼</string>
 					</dict>
 					<key>WFSerializationType</key>
-					<string>WFTextTokenAttachment</string>
+					<string>WFTextTokenString</string>
 				</dict>
 			</dict>
 		</dict>
@@ -277,7 +285,7 @@ This shortcut was created via the following user prompt:
 	<key>WFWorkflowMinimumClientVersionString</key>
 	<string>900</string>
 	<key>WFWorkflowName</key>
-	<string>Samantha – připomenutí přes Cockpit</string>
+	<string>Samantha – připomenutí přes Cockpit 2</string>
 	<key>WFWorkflowOutputContentItemClasses</key>
 	<array/>
 	<key>WFWorkflowTypes</key>
