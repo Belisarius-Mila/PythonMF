@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-05 22:05 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-06 20:20 CEST
 
 ### Hotovo
-- Dohledání knih nyní po prázdné přesné odpovědi bezpečně zkusí také vyhledávací index Open Library
+- Existující knihu lze při editaci doplnit o ISBN z fotografie a bezpečně dohledat její katalogové údaje
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
@@ -15,18 +15,18 @@
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Převzít a nasadit změnu, potom znovu otestovat ISBN načtených knih na iPhonu
+- Nasadit změnu a na iPhonu ověřit celý postup u existující knihy
 
 ### Rozhodnutí
-- Výsledek záložního hledání se přijme pouze při přesné shodě ISBN
+- Fotografie se po přečtení zahodí a katalogové údaje se uloží pouze tlačítkem Uložit úpravy
 
 ### Navrhované další kroky
-- Pokud ani rozšířené hledání nepokryje české knihy, samostatně navrhnout další český katalog
+- Pokud Open Library nadále nepokryje české knihy, samostatně navrhnout další český katalog
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `2dedb7d51c1e`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `2dedb7d51c1e` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-05T11:49:06+00:00.
+- Git před checkpointem: lokální `main` na `ae67bea05c07`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `ae67bea05c07` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-06T17:49:28+00:00.
 - Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -719,5 +719,32 @@ Navrhované další kroky:
 
 Technický důkaz:
 - rychlá Cockpit brána syntaxe a whitespace: 48.7 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
+- Pracovní proud: `project-knowledge-library`.
+- Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+
+### 2026-08-06 20:20 CEST – Existující knihu lze při editaci doplnit o ISBN z fotografie a bezpečně dohledat její katalogové údaje
+
+Hotovo:
+- Existující knihu lze při editaci doplnit o ISBN z fotografie a bezpečně dohledat její katalogové údaje
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+
+Otevřeno:
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
+
+Rizika:
+- Žádné další doložené provozní riziko.
+
+Rozhodnutí:
+- Fotografie se po přečtení zahodí a katalogové údaje se uloží pouze tlačítkem Uložit úpravy
+
+Další krok:
+- Nasadit změnu a na iPhonu ověřit celý postup u existující knihy
+
+Navrhované další kroky:
+- Pokud Open Library nadále nepokryje české knihy, samostatně navrhnout další český katalog
+
+Technický důkaz:
+- rychlá Cockpit brána syntaxe a whitespace: 14.7 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `project-knowledge-library`.
 - Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.

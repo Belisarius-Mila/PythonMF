@@ -146,6 +146,12 @@
     const libraryEditBookAuthorInput = document.getElementById("libraryEditBookAuthorInput");
     const libraryEditBookLocationInput = document.getElementById("libraryEditBookLocationInput");
     const libraryEditBookIsbnInput = document.getElementById("libraryEditBookIsbnInput");
+    const libraryEditBookIsbnPhotoInput = document.getElementById("libraryEditBookIsbnPhotoInput");
+    const libraryEditBookIsbnPhotoReadBtn = document.getElementById("libraryEditBookIsbnPhotoReadBtn");
+    const libraryEditBookIsbnPhotoStatus = document.getElementById("libraryEditBookIsbnPhotoStatus");
+    const libraryEditBookIsbnLookupBtn = document.getElementById("libraryEditBookIsbnLookupBtn");
+    const libraryEditBookIsbnLookupStatus = document.getElementById("libraryEditBookIsbnLookupStatus");
+    const libraryEditBookIsbnSourceLink = document.getElementById("libraryEditBookIsbnSourceLink");
     const libraryEditBookCategoryChoices = document.getElementById("libraryEditBookCategoryChoices");
     const libraryEditTagsInput = document.getElementById("libraryEditTagsInput");
     const libraryEditSourceInput = document.getElementById("libraryEditSourceInput");
@@ -551,6 +557,12 @@
         "libraryEditBookAuthorInput",
         "libraryEditBookLocationInput",
         "libraryEditBookIsbnInput",
+        "libraryEditBookIsbnPhotoInput",
+        "libraryEditBookIsbnPhotoReadBtn",
+        "libraryEditBookIsbnPhotoStatus",
+        "libraryEditBookIsbnLookupBtn",
+        "libraryEditBookIsbnLookupStatus",
+        "libraryEditBookIsbnSourceLink",
         "libraryEditBookCategoryChoices",
         "libraryEditTagsInput",
         "libraryEditSourceInput",
@@ -4090,6 +4102,9 @@ Soubor nebude trvale smazán.`);
         libraryEditBookAuthorInput,
         libraryEditBookLocationInput,
         libraryEditBookIsbnInput,
+        libraryEditBookIsbnPhotoInput,
+        libraryEditBookIsbnPhotoReadBtn,
+        libraryEditBookIsbnLookupBtn,
         libraryEditTagsInput,
         libraryEditSourceInput,
         libraryEditSourceNoteInput,
@@ -4110,6 +4125,15 @@ Soubor nebude trvale smazán.`);
       libraryEditBookLocationInput.required = isBook;
     }
 
+    function resetLibraryEditBookIsbnTools() {
+      libraryEditBookIsbnPhotoInput.value = "";
+      libraryEditBookIsbnPhotoReadBtn.disabled = false;
+      libraryEditBookIsbnLookupBtn.disabled = false;
+      libraryEditBookIsbnPhotoStatus.textContent = "Vyfoť stránku s ISBN nebo čárovým kódem; fotografie se ke kartě nepřipojí.";
+      libraryEditBookIsbnLookupStatus.textContent = "Výsledek pouze předvyplní tuto editaci. Karta se změní až po stisku Uložit úpravy.";
+      clearLibraryBookIsbnLookupResult(libraryEditBookIsbnSourceLink);
+    }
+
     function confirmLibraryEditorDiscard() {
       if (libraryEditPanel.classList.contains("hidden") || !libraryEditorDirty) return true;
       return window.confirm("Máš neuložené úpravy článku. Chceš je zahodit?");
@@ -4121,6 +4145,7 @@ Soubor nebude trvale smazán.`);
       libraryEditorDirty = false;
       setLibraryEditorFieldsDisabled(false);
       libraryEditSaveBtn.disabled = false;
+      resetLibraryEditBookIsbnTools();
       libraryEditStatus.textContent = "Úpravy se uloží pouze do této soukromé karty.";
       syncLibraryEditBookFields("");
       return true;
@@ -4155,6 +4180,7 @@ Soubor nebude trvale smazán.`);
         libraryEditBookAuthorInput.value = item.book_author || "";
         setLibraryBookLocationValue(libraryEditBookLocationInput, item.book_location || "");
         libraryEditBookIsbnInput.value = item.book_isbn || "";
+        resetLibraryEditBookIsbnTools();
         syncLibraryEditBookFields(item.category || "other");
         libraryEditTagsInput.value = Array.isArray(item.tags) ? item.tags.join(", ") : "";
         setLibraryBookSelectedCategories(libraryEditBookCategoryChoices, Array.isArray(item.tags) ? item.tags : []);
@@ -4788,9 +4814,9 @@ Soubor nebude trvale smazán.`);
       }
     }
 
-    function clearLibraryBookIsbnLookupResult() {
-      libraryBookIsbnSourceLink.classList.add("hidden");
-      libraryBookIsbnSourceLink.setAttribute("href", "#");
+    function clearLibraryBookIsbnLookupResult(sourceLink = libraryBookIsbnSourceLink) {
+      sourceLink.classList.add("hidden");
+      sourceLink.setAttribute("href", "#");
     }
 
     function clearLibraryBookIsbnPhoto() {
@@ -4799,74 +4825,135 @@ Soubor nebude trvale smazán.`);
       libraryBookIsbnPhotoStatus.textContent = "Vyfoť stránku s ISBN nebo čárovým kódem; fotografie se k žádné kartě nepřipojí.";
     }
 
-    async function readLibraryBookIsbnFromPhoto() {
-      const file = libraryBookIsbnPhotoInput.files && libraryBookIsbnPhotoInput.files[0];
+    async function readLibraryBookIsbnFromPhotoInto({
+      photoInput,
+      readButton,
+      photoStatus,
+      isbnInput,
+      sourceLink,
+      onUpdated = null,
+    }) {
+      const file = photoInput.files && photoInput.files[0];
       const checked = validateLibraryBookImageFile(file, maxLibraryImageBytes);
       if (checked.error || !checked.file) {
-        libraryBookIsbnPhotoStatus.textContent = checked.error || "Nejdřív vyfoť nebo vyber stránku s ISBN.";
-        libraryBookIsbnPhotoInput.focus();
+        photoStatus.textContent = checked.error || "Nejdřív vyfoť nebo vyber stránku s ISBN.";
+        photoInput.focus();
         return;
       }
-      libraryBookIsbnPhotoReadBtn.disabled = true;
-      libraryBookIsbnPhotoStatus.textContent = "Čtu ISBN. Fotografie se neukládá...";
+      readButton.disabled = true;
+      photoStatus.textContent = "Čtu ISBN. Fotografie se neukládá...";
       try {
         const imageDataUrl = await blobToDataUrl(checked.file);
         const data = await postJson("/api/library/book/isbn-photo", {image_data_url: imageDataUrl});
         if (!data.ok || !data.isbn) {
-          libraryBookIsbnPhotoStatus.textContent = data.message || "ISBN se z fotografie nepodařilo přečíst.";
+          photoStatus.textContent = data.message || "ISBN se z fotografie nepodařilo přečíst.";
           return;
         }
-        libraryBookIsbnInput.value = data.isbn;
-        clearLibraryBookIsbnLookupResult();
-        libraryBookIsbnPhotoStatus.textContent = data.message || "ISBN bylo načteno do formuláře. Fotografii jsem neuložil.";
-        libraryBookIsbnInput.focus();
+        isbnInput.value = data.isbn;
+        clearLibraryBookIsbnLookupResult(sourceLink);
+        photoStatus.textContent = data.message || "ISBN bylo načteno do formuláře. Fotografii jsem neuložil.";
+        if (typeof onUpdated === "function") onUpdated();
+        isbnInput.focus();
       } catch (err) {
         recordFrontendError(err);
-        libraryBookIsbnPhotoStatus.textContent = `Chyba rozpoznání ISBN: ${err}`;
+        photoStatus.textContent = `Chyba rozpoznání ISBN: ${err}`;
       } finally {
-        libraryBookIsbnPhotoInput.value = "";
-        libraryBookIsbnPhotoReadBtn.disabled = false;
+        photoInput.value = "";
+        readButton.disabled = false;
       }
     }
 
-    async function lookupLibraryBookIsbn() {
-      const isbn = libraryBookIsbnInput.value.trim();
-      clearLibraryBookIsbnLookupResult();
+    async function readLibraryBookIsbnFromPhoto() {
+      return readLibraryBookIsbnFromPhotoInto({
+        photoInput: libraryBookIsbnPhotoInput,
+        readButton: libraryBookIsbnPhotoReadBtn,
+        photoStatus: libraryBookIsbnPhotoStatus,
+        isbnInput: libraryBookIsbnInput,
+        sourceLink: libraryBookIsbnSourceLink,
+      });
+    }
+
+    async function readLibraryEditBookIsbnFromPhoto() {
+      return readLibraryBookIsbnFromPhotoInto({
+        photoInput: libraryEditBookIsbnPhotoInput,
+        readButton: libraryEditBookIsbnPhotoReadBtn,
+        photoStatus: libraryEditBookIsbnPhotoStatus,
+        isbnInput: libraryEditBookIsbnInput,
+        sourceLink: libraryEditBookIsbnSourceLink,
+        onUpdated: markLibraryEditorDirty,
+      });
+    }
+
+    async function lookupLibraryBookIsbnInto({
+      isbnInput,
+      titleInput,
+      authorInput,
+      lookupButton,
+      lookupStatus,
+      sourceLink,
+      onUpdated = null,
+    }) {
+      const isbn = isbnInput.value.trim();
+      clearLibraryBookIsbnLookupResult(sourceLink);
       if (!isbn) {
-        libraryBookIsbnLookupStatus.textContent = "Nejdřív vyplň ISBN-10 nebo ISBN-13.";
-        libraryBookIsbnInput.focus();
+        lookupStatus.textContent = "Nejdřív vyplň ISBN-10 nebo ISBN-13.";
+        isbnInput.focus();
         return;
       }
-      libraryBookIsbnLookupBtn.disabled = true;
-      libraryBookIsbnLookupStatus.textContent = "Dohledávám katalogové údaje. Kniha se tím neukládá...";
+      lookupButton.disabled = true;
+      lookupStatus.textContent = "Dohledávám katalogové údaje. Kniha se tím neukládá...";
       try {
         const data = await postJson("/api/library/book/isbn-lookup", { isbn });
         if (!data.ok || !data.lookup) {
-          libraryBookIsbnLookupStatus.textContent = data.message || "Katalogové údaje se nepodařilo dohledat.";
+          lookupStatus.textContent = data.message || "Katalogové údaje se nepodařilo dohledat.";
           return;
         }
         const lookup = data.lookup;
-        if (lookup.isbn) libraryBookIsbnInput.value = lookup.isbn;
-        if (lookup.title) libraryBookTitleInput.value = lookup.title;
-        if (lookup.author) libraryBookAuthorInput.value = lookup.author;
+        if (lookup.isbn) isbnInput.value = lookup.isbn;
+        if (lookup.title) titleInput.value = lookup.title;
+        if (lookup.author) authorInput.value = lookup.author;
         const details = [];
         if (lookup.publisher) details.push(`Nakladatel: ${lookup.publisher}`);
         if (lookup.publish_date) details.push(`Vydání: ${lookup.publish_date}`);
         if (Number(lookup.number_of_pages) > 0) details.push(`Stran: ${Number(lookup.number_of_pages)}`);
         const sourceName = lookup.source_name || "veřejný katalog";
-        libraryBookIsbnLookupStatus.textContent = `${data.message || "Údaje jsou předvyplněné."} Zdroj: ${sourceName}.${details.length ? ` ${details.join(" · ")}.` : ""} Ověř je ručně.`;
+        lookupStatus.textContent = `${data.message || "Údaje jsou předvyplněné."} Zdroj: ${sourceName}.${details.length ? ` ${details.join(" · ")}.` : ""} Ověř je ručně.`;
         const sourceUrl = String(lookup.source_url || "");
         if (sourceUrl.startsWith("https://openlibrary.org/isbn/")) {
-          libraryBookIsbnSourceLink.href = sourceUrl;
-          libraryBookIsbnSourceLink.classList.remove("hidden");
+          sourceLink.href = sourceUrl;
+          sourceLink.classList.remove("hidden");
         }
-        (lookup.title ? libraryBookTitleInput : libraryBookAuthorInput).focus();
+        if (typeof onUpdated === "function") onUpdated();
+        (lookup.title ? titleInput : authorInput).focus();
       } catch (err) {
         recordFrontendError(err);
-        libraryBookIsbnLookupStatus.textContent = `Chyba katalogového dohledání: ${err}`;
+        lookupStatus.textContent = `Chyba katalogového dohledání: ${err}`;
       } finally {
-        libraryBookIsbnLookupBtn.disabled = false;
+        lookupButton.disabled = false;
       }
+    }
+
+    async function lookupLibraryBookIsbn() {
+      return lookupLibraryBookIsbnInto({
+        isbnInput: libraryBookIsbnInput,
+        titleInput: libraryBookTitleInput,
+        authorInput: libraryBookAuthorInput,
+        lookupButton: libraryBookIsbnLookupBtn,
+        lookupStatus: libraryBookIsbnLookupStatus,
+        sourceLink: libraryBookIsbnSourceLink,
+      });
+    }
+
+    async function lookupLibraryEditBookIsbn() {
+      return lookupLibraryBookIsbnInto({
+        isbnInput: libraryEditBookIsbnInput,
+        titleInput: libraryEditTitleInput,
+        authorInput: libraryEditBookAuthorInput,
+        lookupButton: libraryEditBookIsbnLookupBtn,
+        lookupStatus: libraryEditBookIsbnLookupStatus,
+        sourceLink: libraryEditBookIsbnSourceLink,
+        onUpdated: markLibraryEditorDirty,
+      });
     }
 
     async function saveLibraryBook() {
@@ -6954,6 +7041,8 @@ ${item.context || ""}`);
     });
     libraryBookIsbnLookupBtn.addEventListener("click", lookupLibraryBookIsbn);
     libraryBookIsbnPhotoReadBtn.addEventListener("click", readLibraryBookIsbnFromPhoto);
+    libraryEditBookIsbnLookupBtn.addEventListener("click", lookupLibraryEditBookIsbn);
+    libraryEditBookIsbnPhotoReadBtn.addEventListener("click", readLibraryEditBookIsbnFromPhoto);
     libraryBookAddLocationBtn.addEventListener("click", () => addLibraryBookOption("location"));
     libraryBookAddCategoryBtn.addEventListener("click", () => addLibraryBookOption("category"));
     libraryBookSummaryDraftBtn.addEventListener("click", generateLibraryBookSummary);

@@ -777,10 +777,27 @@
                     <option value="půda">půda</option>
                   </select>
                 </label>
-                <label class="library-field">
-                  <span class="library-field-label">ISBN (volitelné)</span>
-                  <input id="libraryEditBookIsbnInput" type="text" inputmode="text" autocomplete="off" placeholder="ISBN-10 nebo ISBN-13">
-                </label>
+                <div class="library-book-isbn-lookup-block library-edit-book-isbn-lookup-block">
+                  <h4 class="library-book-section-title">Katalogové dohledání</h4>
+                  <div class="library-book-isbn-photo-row">
+                    <label class="library-field">
+                      <span class="library-field-label">Fotografie ISBN nebo tiráže</span>
+                      <input id="libraryEditBookIsbnPhotoInput" type="file" accept="image/*" capture="environment">
+                      <span class="library-field-hint">Použije se jen k přečtení ISBN a poté se zahodí.</span>
+                    </label>
+                    <button class="secondary" id="libraryEditBookIsbnPhotoReadBtn" type="button">Načíst ISBN z fotografie</button>
+                  </div>
+                  <div id="libraryEditBookIsbnPhotoStatus" class="status-line">Vyfoť stránku s ISBN nebo čárovým kódem; fotografie se ke kartě nepřipojí.</div>
+                  <label class="library-field">
+                    <span class="library-field-label">ISBN (volitelné)</span>
+                    <input id="libraryEditBookIsbnInput" type="text" inputmode="text" autocomplete="off" placeholder="ISBN-10 nebo ISBN-13">
+                  </label>
+                  <div class="actions compact-actions">
+                    <button class="secondary" id="libraryEditBookIsbnLookupBtn" type="button">Dohledat podle ISBN</button>
+                  </div>
+                  <div id="libraryEditBookIsbnLookupStatus" class="status-line">Výsledek pouze předvyplní tuto editaci. Karta se změní až po stisku Uložit úpravy.</div>
+                  <a id="libraryEditBookIsbnSourceLink" class="library-book-isbn-source hidden" href="#" target="_blank" rel="noopener noreferrer">Otevřít záznam ve zdrojovém katalogu</a>
+                </div>
                 <fieldset class="library-book-category-fieldset library-edit-book-category-fieldset">
                   <legend>Kategorie knihy</legend>
                   <div id="libraryEditBookCategoryChoices" class="library-book-category-choices"></div>
