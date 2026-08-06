@@ -10,6 +10,7 @@ from pathlib import Path
 from app.file_persistence import lock_path_for
 from app.quick_notes import (
     classify_quick_note_text,
+    deliver_quick_note,
     list_quick_notes_text,
     quick_notes_action_status_text,
     show_quick_note_detail_text,
@@ -21,6 +22,45 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
 class QuickNotesTests(unittest.TestCase):
+    def test_direct_delivery_is_idempotent_and_survives_icloud_sync(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            inbox = root / "missing-icloud"
+            index_path = root / "private" / "index.json"
+
+            first, first_created = deliver_quick_note(
+                "Nápad doručený přímo přes Tailscale.",
+                delivery_id="quick-note-test-001",
+                created_at="2026-08-06T09:00:00+02:00",
+                index_path=index_path,
+            )
+            duplicate, duplicate_created = deliver_quick_note(
+                "Nápad doručený přímo přes Tailscale.",
+                delivery_id="quick-note-test-001",
+                created_at="2026-08-06T09:00:00+02:00",
+                index_path=index_path,
+            )
+            synced = sync_quick_notes_index(inbox_dir=inbox, index_path=index_path)
+            listed = list_quick_notes_text(inbox_dir=inbox, index_path=index_path)
+
+        self.assertTrue(first_created)
+        self.assertFalse(duplicate_created)
+        self.assertEqual(first.note_number, duplicate.note_number)
+        self.assertEqual(len(synced), 1)
+        self.assertEqual(synced[0].source_kind, "direct_tailscale")
+        self.assertEqual(synced[0].body_text, "Nápad doručený přímo přes Tailscale.")
+        self.assertIn("Nápad doručený přímo přes Tailscale.", listed)
+
+    def test_direct_delivery_validates_input(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            index_path = Path(temp_dir) / "private" / "index.json"
+            with self.assertRaises(ValueError):
+                deliver_quick_note("", index_path=index_path)
+            with self.assertRaises(ValueError):
+                deliver_quick_note(None, index_path=index_path)  # type: ignore[arg-type]
+            with self.assertRaises(ValueError):
+                deliver_quick_note("Text", delivery_id="bad id", index_path=index_path)
+
     def test_list_assigns_stable_numbers_and_safe_snippets(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

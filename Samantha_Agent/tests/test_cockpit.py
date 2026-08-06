@@ -96,6 +96,7 @@ from app.cockpit import (
     prepare_document_print_action,
     projects_status,
     purge_trash_confirmation_phrase,
+    quick_note_deliver_action,
     quick_note_detail_status,
     quick_notes_status,
     project_audit_recent_reports,
@@ -3301,6 +3302,9 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("openQuickNotesModal", COCKPIT_HTML)
         self.assertIn("loadQuickNoteDetail", COCKPIT_HTML)
         self.assertIn("quickNoteTriageLine", COCKPIT_HTML)
+        self.assertIn("QUICK_NOTES_MONITOR_MS = 30 * 1000", COCKPIT_HTML)
+        self.assertIn("window.setInterval(refreshQuickNotesSummary, QUICK_NOTES_MONITOR_MS)", COCKPIT_HTML)
+        self.assertIn("quickNotesRefreshInFlight", COCKPIT_HTML)
         self.assertIn("Klasifikace", COCKPIT_HTML)
         self.assertIn("dashboardUrgentRemindersBtn", COCKPIT_HTML)
         self.assertIn("urgentReminderAlert", COCKPIT_HTML)
@@ -5045,6 +5049,42 @@ Dalsi krok:
         self.assertEqual(first["reminder_number"], duplicate["reminder_number"])
         self.assertNotIn(payload["text"], json.dumps(first, ensure_ascii=False))
         self.assertEqual(len(stored), 1)
+
+    def test_quick_note_deliver_action_returns_redacted_idempotent_receipt_and_detail(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            index_path = root / "private" / "quick_notes" / "index.json"
+            inbox = root / "missing-icloud"
+            payload = {
+                "text": "Soukromý obsah QN nesmí být v potvrzení.",
+                "created_at": "2026-08-06T09:15:00+02:00",
+            }
+
+            first = quick_note_deliver_action(payload, index_path=index_path)
+            duplicate = quick_note_deliver_action(payload, index_path=index_path)
+            detail = quick_note_detail_status(
+                note_number=int(first["note_number"]),
+                inbox_dir=inbox,
+                index_path=index_path,
+            )
+            stored = json.loads(index_path.read_text(encoding="utf-8"))["notes"]
+
+        self.assertTrue(first["ok"])
+        self.assertEqual(first["status"], "created")
+        self.assertEqual(duplicate["status"], "duplicate")
+        self.assertEqual(first["note_number"], duplicate["note_number"])
+        self.assertNotIn(payload["text"], json.dumps(first, ensure_ascii=False))
+        self.assertEqual(len(stored), 1)
+        self.assertTrue(detail["ok"])
+        self.assertEqual(detail["body_text"], payload["text"])
+
+    def test_quick_note_deliver_action_rejects_empty_text(self) -> None:
+        result = quick_note_deliver_action({"text": ""})
+        null_result = quick_note_deliver_action({"text": None})
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["status"], "delivery_failed")
+        self.assertFalse(null_result["ok"])
 
     def test_urgent_reminder_deliver_action_rejects_empty_text(self) -> None:
         result = urgent_reminder_deliver_action({"text": ""})

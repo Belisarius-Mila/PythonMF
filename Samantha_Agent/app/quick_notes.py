@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import hashlib
 import json
+import re
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -17,6 +19,9 @@ DEFAULT_PRIVATE_DIR = PROJECT_ROOT / "data" / "private" / "quick_notes"
 DEFAULT_INDEX_PATH = DEFAULT_PRIVATE_DIR / "index.json"
 SUPPORTED_SUFFIXES = {".md", ".txt"}
 IGNORED_FILE_PREFIXES = ("samantha_reminder_",)
+DIRECT_SOURCE_KIND = "direct_tailscale"
+MAX_DIRECT_QUICK_NOTE_CHARS = 8_000
+_DELIVERY_ID_PATTERN = re.compile(r"^[A-Za-z0-9._:-]{8,160}$")
 
 
 @dataclass(frozen=True)
@@ -30,6 +35,8 @@ class QuickNote:
     size_bytes: int
     category: str
     status: str
+    source_kind: str = ""
+    body_text: str = ""
 
 
 @dataclass(frozen=True)
@@ -54,6 +61,80 @@ ACTION_KIND_LABELS = {
 }
 
 
+def deliver_quick_note(
+    text: str,
+    *,
+    delivery_id: str = "",
+    created_at: str = "",
+    index_path: Path = DEFAULT_INDEX_PATH,
+) -> tuple[QuickNote, bool]:
+    """Atomically store one direct Shortcut delivery and deduplicate retries."""
+
+    if not isinstance(text, str):
+        raise ValueError("Quick Note musí být text.")
+    body_text = text.strip()
+    if not body_text:
+        raise ValueError("Quick Note nesmí být prázdná.")
+    if len(body_text) > MAX_DIRECT_QUICK_NOTE_CHARS:
+        raise ValueError(f"Quick Note smí mít nejvýše {MAX_DIRECT_QUICK_NOTE_CHARS} znaků.")
+    if not isinstance(created_at, str) or not isinstance(delivery_id, str):
+        raise ValueError("Metadata doručení musí být textová.")
+    safe_created_at = created_at.strip()[:80]
+    safe_delivery_id = delivery_id.strip()
+    if safe_delivery_id and not _DELIVERY_ID_PATTERN.fullmatch(safe_delivery_id):
+        raise ValueError("delivery_id má neplatný formát.")
+    if not safe_delivery_id:
+        delivery_day = _delivery_day(safe_created_at)
+        digest_input = f"quick-note-v1\0{delivery_day}\0{body_text}".encode("utf-8")
+        safe_delivery_id = hashlib.sha256(digest_input).hexdigest()
+
+    now = _now_iso()
+    source_path = f"direct://quick-note/{safe_delivery_id}"
+    stored: dict[str, Any] | None = None
+    created = False
+
+    def store_delivery(current: Any) -> dict[str, list[dict[str, Any]]]:
+        nonlocal stored, created
+        records = _index_records(current)
+        for record in records:
+            if (
+                str(record.get("source_kind", "")) == DIRECT_SOURCE_KIND
+                and str(record.get("delivery_id", "")) == safe_delivery_id
+            ):
+                stored = dict(record)
+                return {"notes": records}
+        record = {
+            "note_number": _next_note_number(records),
+            "source_path": source_path,
+            "source_kind": DIRECT_SOURCE_KIND,
+            "delivery_id": safe_delivery_id,
+            "title": "Samantha Quick Note",
+            "snippet": _one_line(body_text),
+            "body_text": body_text,
+            "created_at": safe_created_at or now,
+            "modified_at": now,
+            "size_bytes": len(body_text.encode("utf-8")),
+            "category": "inbox",
+            "status": "inbox",
+            "first_seen_at": now,
+            "last_seen_at": now,
+        }
+        records.append(record)
+        stored = dict(record)
+        created = True
+        return {"notes": records}
+
+    update_json_file(
+        index_path,
+        store_delivery,
+        default={"notes": []},
+        sort_keys=True,
+    )
+    if stored is None:  # pragma: no cover - defensive transaction invariant.
+        raise RuntimeError("Přímé doručení Quick Note nevytvořilo potvrzení.")
+    return _record_to_note(stored), created
+
+
 def list_quick_notes_text(
     *,
     inbox_dir: Path = DEFAULT_ICLOUD_SHORTCUTS_INBOX,
@@ -62,7 +143,7 @@ def list_quick_notes_text(
 ) -> str:
     notes = sync_quick_notes_index(inbox_dir=inbox_dir, index_path=index_path)
     active_notes = [note for note in notes if note.status == "inbox"]
-    if not inbox_dir.exists():
+    if not inbox_dir.exists() and not active_notes:
         return (
             "Samantha quick notes inbox zatim neexistuje nebo neni synchronizovany na Mac.\n"
             f"Ocekavana slozka: `{inbox_dir}`\n"
@@ -100,7 +181,7 @@ def quick_notes_action_status_text(
 ) -> str:
     notes = sync_quick_notes_index(inbox_dir=inbox_dir, index_path=index_path)
     active_notes = [note for note in notes if note.status == "inbox"]
-    if not inbox_dir.exists():
+    if not inbox_dir.exists() and not active_notes:
         return (
             "Quick Notes akční inbox zatím nejde načíst, protože iCloud složka není synchronizovaná na Mac.\n"
             f"Očekávaná složka: `{inbox_dir}`"
@@ -151,10 +232,13 @@ def show_quick_note_detail_text(
     if note is None:
         return f"Poznamka cislo {note_number} nebyla nalezena v quick notes inboxu."
 
-    try:
-        text = note.source_path.read_text(encoding="utf-8", errors="replace")
-    except OSError as exc:
-        return f"Poznamku cislo {note_number} se nepodarilo precist: {exc}"
+    if note.body_text:
+        text = note.body_text
+    else:
+        try:
+            text = note.source_path.read_text(encoding="utf-8", errors="replace")
+        except OSError as exc:
+            return f"Poznamku cislo {note_number} se nepodarilo precist: {exc}"
 
     truncated = len(text) > max_chars
     body = text[:max_chars].rstrip()
@@ -390,7 +474,7 @@ def sync_quick_notes_index(
     return [
         _record_to_note(record)
         for record in sorted(records, key=lambda item: int(item.get("note_number", 0)))
-        if Path(str(record.get("source_path", ""))).exists()
+        if _record_source_available(record)
     ]
 
 
@@ -501,6 +585,19 @@ def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
+def _delivery_day(created_at: str) -> str:
+    match = re.match(r"^(\d{4}-\d{2}-\d{2})", created_at)
+    if match:
+        return match.group(1)
+    return datetime.now(timezone.utc).date().isoformat()
+
+
+def _record_source_available(record: dict[str, Any]) -> bool:
+    if str(record.get("source_kind", "")) == DIRECT_SOURCE_KIND:
+        return True
+    return Path(str(record.get("source_path", ""))).exists()
+
+
 def _next_note_number(records: list[dict[str, Any]]) -> int:
     numbers = [
         int(record.get("note_number", 0))
@@ -521,4 +618,6 @@ def _record_to_note(record: dict[str, Any]) -> QuickNote:
         size_bytes=int(record.get("size_bytes") or 0),
         category=str(record.get("category") or "inbox"),
         status=str(record.get("status") or "inbox"),
+        source_kind=str(record.get("source_kind") or ""),
+        body_text=str(record.get("body_text") or ""),
     )

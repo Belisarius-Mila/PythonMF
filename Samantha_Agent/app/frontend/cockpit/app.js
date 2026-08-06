@@ -834,9 +834,11 @@
 
     const FULL_STATUS_MONITOR_MS = 5 * 60 * 1000;
     const INTAKE_EMAIL_MONITOR_MS = 30 * 60 * 1000;
+    const QUICK_NOTES_MONITOR_MS = 30 * 1000;
     const URGENT_REMINDERS_MONITOR_MS = 30 * 1000;
     let refreshInFlight = false;
     let liveStatusRefreshInFlight = false;
+    let quickNotesRefreshInFlight = false;
     let urgentRemindersRefreshInFlight = false;
     let emailIntakeMonitorInFlight = false;
     let lastMainRefreshStartedAt = 0;
@@ -2382,6 +2384,8 @@
     }
 
     async function refreshQuickNotesSummary() {
+      if (quickNotesRefreshInFlight) return;
+      quickNotesRefreshInFlight = true;
       setDashboardPendingIfEmpty(dashboardQuickNotes, "načítám...");
       try {
         const quickNotes = await fetchJson("/api/quick-notes/status");
@@ -2404,6 +2408,8 @@
         recordFrontendError(err);
         setDashboardValue(dashboardQuickNotes, `<span class="warn">chyba načtení</span>`);
         setDashboardStatusSignal("quickNotes", "warn", `QN: chyba načtení (${err})`);
+      } finally {
+        quickNotesRefreshInFlight = false;
       }
     }
 
@@ -7133,22 +7139,27 @@ ${item.context || ""}`);
 	    runFrontendHealthCheck();
 	    window.setInterval(runFrontendHealthCheck, 60000);
 	    window.setInterval(() => refresh({silent: true, includeSecondary: false}), FULL_STATUS_MONITOR_MS);
+      window.setInterval(refreshQuickNotesSummary, QUICK_NOTES_MONITOR_MS);
       window.setInterval(refreshUrgentRemindersSummary, URGENT_REMINDERS_MONITOR_MS);
       window.setInterval(runEmailIntakeMonitor, INTAKE_EMAIL_MONITOR_MS);
       window.addEventListener("focus", () => {
         refreshLiveStatus();
         refreshMainStatusOnReturn();
+        refreshQuickNotesSummary();
       });
       window.addEventListener("pageshow", () => {
         refreshLiveStatus();
         refreshMainStatusOnReturn();
+        refreshQuickNotesSummary();
       });
       document.addEventListener("visibilitychange", () => {
         if (!document.hidden) {
           refreshLiveStatus();
           refreshMainStatusOnReturn();
+          refreshQuickNotesSummary();
         }
       });
 	    refresh();
+      window.setTimeout(refreshQuickNotesSummary, 3000);
       window.setTimeout(refreshUrgentRemindersSummary, 3000);
       window.setTimeout(runEmailIntakeMonitor, 5000);

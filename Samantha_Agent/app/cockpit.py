@@ -235,6 +235,7 @@ from app.project_audit_report import REPORTS_DIR as PROJECT_AUDIT_REPORTS_DIR
 from app.project_audit_report import format_project_audit_result, run_samantha_project_audit
 from app.quick_notes import DEFAULT_ICLOUD_SHORTCUTS_INBOX, DEFAULT_INDEX_PATH as QUICK_NOTES_INDEX_PATH
 from app.quick_notes import ACTION_KIND_LABELS, classify_quick_note_text
+from app.quick_notes import deliver_quick_note
 from app.quick_notes import sync_quick_notes_index
 from app.urgent_reminders import DEFAULT_INDEX_PATH as URGENT_REMINDERS_INDEX_PATH
 from app.urgent_reminders import ICLOUD_DOWNLOAD_STUCK_AFTER_SECONDS
@@ -2009,12 +2010,14 @@ def quick_notes_status(
         reverse=True,
     )
     shown = active_notes[: max(1, limit)]
-    if not inbox_exists:
+    if not inbox_exists and not active_notes:
         message = "Quick Notes inbox zatím není synchronizovaný na Mac."
     elif not active_notes:
         message = "Quick Notes inbox je prázdný."
     else:
         message = f"{len(active_notes)} poznámek v Quick Notes inboxu."
+        if not inbox_exists:
+            message += " Přímé doručení přes Tailscale je dostupné; iCloud fallback není připojený."
     return {
         "ok": True,
         "message": message,
@@ -2120,6 +2123,7 @@ def quick_note_detail_status(
         snippet=note.snippet,
         size_bytes=note.size_bytes,
         source_path=note.source_path,
+        stored_body_text=note.body_text,
         max_chars=max_chars,
     )
 
@@ -2177,6 +2181,7 @@ def quick_note_detail_from_index(
         snippet=safe_text(str(record.get("snippet", "") or ""))[:300],
         size_bytes=quick_note_size(record),
         source_path=Path(str(record.get("source_path", "") or "")),
+        stored_body_text=str(record.get("body_text", "") or ""),
         max_chars=max_chars,
     )
     if sync_error is not None:
@@ -2197,12 +2202,16 @@ def quick_note_detail_payload(
     size_bytes: int,
     source_path: Path,
     max_chars: int,
+    stored_body_text: str = "",
 ) -> dict[str, Any]:
     body_text = ""
     truncated = False
     message = f"Quick Note #{note_number} načtena."
     source_suffix = source_path.suffix.lower()
-    if not source_path.is_file() or source_suffix not in {".md", ".txt"}:
+    if stored_body_text:
+        truncated = len(stored_body_text) > max_chars
+        body_text = stored_body_text[:max_chars].rstrip()
+    elif not source_path.is_file() or source_suffix not in {".md", ".txt"}:
         message = f"Quick Note #{note_number} je v indexu, ale zdrojový soubor nejde bezpečně přečíst."
     else:
         try:
@@ -2516,6 +2525,36 @@ def urgent_reminder_deliver_action(
             f"Důležité připomenutí #{reminder.reminder_number} doručeno."
             if created
             else f"Důležité připomenutí #{reminder.reminder_number} už bylo doručeno."
+        ),
+    }
+
+
+def quick_note_deliver_action(
+    payload: dict[str, Any],
+    *,
+    index_path: Path = QUICK_NOTES_INDEX_PATH,
+) -> dict[str, Any]:
+    try:
+        note, created = deliver_quick_note(
+            payload.get("text", ""),
+            delivery_id=payload.get("delivery_id", ""),
+            created_at=payload.get("created_at", ""),
+            index_path=index_path,
+        )
+    except (OSError, RuntimeError, ValueError) as exc:
+        return {
+            "ok": False,
+            "status": "delivery_failed",
+            "message": f"Quick Note se nepodařilo doručit: {exc}",
+        }
+    return {
+        "ok": True,
+        "status": "created" if created else "duplicate",
+        "note_number": note.note_number,
+        "message": (
+            f"Quick Note #{note.note_number} doručena."
+            if created
+            else f"Quick Note #{note.note_number} už byla doručena."
         ),
     }
 
@@ -8840,6 +8879,14 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "indirect",
     },
     {
+        "path": "/api/quick-notes/deliver",
+        "label": "Doručit Quick Note ze Zkratky přes Tailscale",
+        "risk": "private_write",
+        "confirmation": "explicit_shortcut_submit_plus_idempotency",
+        "handler_name": "quick_note_deliver_action",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/urgent-reminders/deliver",
         "label": "Doručit urgentní připomínku ze Zkratky přes Tailscale",
         "risk": "private_write",
@@ -9833,6 +9880,10 @@ class CockpitServer:
                             evidence_archive_id=str(payload.get("evidence_archive_id", "")),
                         )
                     )
+                    return
+                if parsed.path == "/api/quick-notes/deliver":
+                    payload = self.read_json()
+                    self.respond_json(quick_note_deliver_action(payload))
                     return
                 if parsed.path == "/api/urgent-reminders/deliver":
                     payload = self.read_json()
