@@ -87,14 +87,10 @@ def resolve_data_dir() -> Path:
 
 
 def resolve_prefs_path() -> Path:
-    if not (getattr(sys, "frozen", False) or _is_macos_app_runtime()):
-        return _resource_base_dir() / "user_item_prefs.csv"
     return _ensure_file_in_support_dir("user_item_prefs.csv")
 
 
 def resolve_progress_path() -> Path:
-    if not (getattr(sys, "frozen", False) or _is_macos_app_runtime()):
-        return _resource_base_dir() / "progress.json"
     return _ensure_file_in_support_dir("progress.json")
 
 
