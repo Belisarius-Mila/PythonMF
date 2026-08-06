@@ -381,6 +381,15 @@ LOCAL_WEB_APPS = {
 }
 DESKTOP_APP_CATALOG: tuple[dict[str, Any], ...] = (
     {
+        "id": "multilo",
+        "title": "MultiLO",
+        "description": "Desktopová výuková aplikace pro více jazyků s lokálními daty, obrázky a postupem uživatelů.",
+        "kind": "desktopová aplikace",
+        "working_dir": GIT_ROOT / "MultiLO",
+        "script": GIT_ROOT / "MultiLO" / "step2_cockpit.py",
+        "interpreter": Path("/usr/local/bin/python3.12"),
+    },
+    {
         "id": "vocabulary-it-trainer",
         "title": "Vocabulary IT trainer",
         "description": "Desktopový italský slovníkový trenažér s obrázky a lokálními CSV daty.",
@@ -441,6 +450,14 @@ WEB_APP_CATALOG: tuple[dict[str, str], ...] = (
         "description": "Obrazové kartičky pro anglická slovíčka, připravené z lokální slovníkové evidence.",
         "url": "https://belisarius-mila.github.io/PythonMF/vocabulary-en/",
         "kind": "GitHub Pages",
+    },
+    {
+        "id": "multilo",
+        "title": "MultiLO",
+        "description": "Desktopová výuková aplikace pro více jazyků s lokálními daty, obrázky a postupem uživatelů.",
+        "url": "",
+        "kind": "desktopová aplikace",
+        "launch_type": "desktop",
     },
     {
         "id": "vocabulary-it-trainer",
