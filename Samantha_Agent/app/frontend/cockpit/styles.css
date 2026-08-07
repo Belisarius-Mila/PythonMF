@@ -344,6 +344,9 @@
     .reminder-source pre { margin: 0; border: 1px solid #edf0f4; border-radius: 7px; padding: 9px; background: white; max-height: 320px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
     .reminder-source-row { color: #344054; font-size: 12px; overflow-wrap: anywhere; }
     .vault-summary { display: grid; gap: 10px; }
+    .vault-current { display: grid; gap: 10px; }
+    .vault-metrics { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .vault-summary-actions { display: flex; gap: 8px; flex-wrap: wrap; }
     .vault-summary pre { border: 1px solid #edf0f4; border-radius: 7px; padding: 10px; background: #fbfcfe; }
     .vault-summary details { border: 1px solid #edf0f4; border-radius: 7px; padding: 9px 10px; background: #fbfcfe; }
     .vault-summary summary { cursor: pointer; font-weight: 650; }
@@ -367,3 +370,5 @@
     .service-actions { margin-top: 10px; }
     @media (max-width: 1050px) { .today-dashboard { grid-template-columns: 1fr; } .work-grid { grid-template-columns: 1fr; } }
 	    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .dashboard-metrics { grid-template-columns: 1fr; } .quick-actions { grid-template-columns: 1fr; } .health-grid { grid-template-columns: 1fr; } .search-controls { grid-template-columns: 1fr; } .search-result-head { grid-template-columns: 1fr; } .search-result-head-actions { justify-content: flex-start; } .recovery-grid { grid-template-columns: 1fr; } .janicka-grid { grid-template-columns: 1fr; } .janicka-action { grid-template-columns: 1fr; } .library-archive-grid { grid-template-columns: 1fr; } .library-text-grid { grid-template-columns: 1fr; } .library-book-basic-grid { grid-template-columns: 1fr; } .library-book-category-choices { grid-template-columns: 1fr; } .library-book-option-add-row { grid-template-columns: 1fr; } .library-book-isbn-photo-row { grid-template-columns: 1fr; } .library-book-filter-grid { grid-template-columns: 1fr; } .library-attachment-grid { grid-template-columns: 1fr; } .library-edit-grid { grid-template-columns: 1fr; } .library-edit-source-grid { grid-template-columns: 1fr; } .library-controls { grid-template-columns: 1fr; } .library-layout { grid-template-columns: 1fr; } .library-action-group { justify-content: flex-start; } .library-action-group-label { width: 100%; text-align: left; } .family-calendar-form-grid { grid-template-columns: 1fr; } .family-calendar-preview-grid { grid-template-columns: 1fr; } header { height: auto; padding: 12px 16px; align-items: flex-start; gap: 10px; flex-direction: column; } .app-card { grid-template-columns: 1fr; } }
+    @media (max-width: 900px) { .vault-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 520px) { .vault-metrics { grid-template-columns: 1fr; } }

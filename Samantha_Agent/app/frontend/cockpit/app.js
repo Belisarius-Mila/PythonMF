@@ -885,7 +885,7 @@
           ? `<span class="ok">ScanDocu běží</span> | ${data.scandocu.url}`
           : `<span class="warn">ScanDocu neběží</span> | ${data.scandocu ? data.scandocu.url : ""}`;
 	        backupText.textContent = data.backup || "";
-	        renderVaultSummary(data.vault || "");
+	        renderVaultSummary(data.vault || "", data.document_work || {});
 	        renderDashboard(data);
         renderUrgentReminderAlert(data.urgent_reminders || {});
 	        renderActionQueue(data.action_queue || {});
@@ -2625,7 +2625,45 @@
       return "Dokumentová fronta je klidná.";
     }
 
-    function renderVaultSummary(text) {
+    function vaultSummaryCount(raw, label) {
+      const prefix = `- ${label}:`;
+      const line = raw
+        .split(/\r?\n/)
+        .find((candidate) => candidate.startsWith(prefix));
+      if (!line) return null;
+      const match = line.slice(prefix.length).trim().match(/^(\d+)/);
+      return match ? Number(match[1]) : null;
+    }
+
+    function appendVaultMetric(target, label, value, tone = "") {
+      const metric = document.createElement("div");
+      metric.className = "metric";
+      const metricValue = document.createElement("span");
+      metricValue.className = `metric-value${tone ? " " + tone : ""}`;
+      metricValue.textContent = value === null ? "—" : String(value);
+      const metricLabel = document.createElement("span");
+      metricLabel.className = "metric-label";
+      metricLabel.textContent = label;
+      metric.appendChild(metricValue);
+      metric.appendChild(metricLabel);
+      target.appendChild(metric);
+    }
+
+    function vaultTechnicalDetails(raw) {
+      const hiddenPrefixes = [
+        "Document vault status",
+        "- Dokumentu v indexu:",
+        "- Inbox incoming (ceka na zpracovani):",
+        "Dalsi krok:"
+      ];
+      return raw
+        .split(/\r?\n/)
+        .filter((line) => !hiddenPrefixes.some((prefix) => line.startsWith(prefix)))
+        .join("\n")
+        .trim();
+    }
+
+    function renderVaultSummary(text, work = {}) {
       vaultText.innerHTML = "";
       const raw = text || "";
       if (!raw) {
@@ -2635,21 +2673,60 @@
         vaultText.appendChild(empty);
         return;
       }
-      const marker = "\n- Inbox audit";
-      const markerIndex = raw.indexOf(marker);
-      const currentText = markerIndex >= 0 ? raw.slice(0, markerIndex).trim() : raw.trim();
-      const auditText = markerIndex >= 0 ? raw.slice(markerIndex + 1).trim() : "";
-      const current = document.createElement("pre");
-      current.textContent = currentText;
+      const summary = work.summary || {};
+      const review = work.review || {};
+      const documentCount = vaultSummaryCount(raw, "Dokumentu v indexu");
+      const inboxCount = vaultSummaryCount(raw, "Inbox incoming (ceka na zpracovani)");
+      const reviewCount = Number(summary.review_pending_count || review.pending_count || 0);
+      const problemCount = Number(summary.problem_count || 0);
+
+      const current = document.createElement("div");
+      current.className = "vault-current";
+      const title = document.createElement("div");
+      title.className = "voice-card-title";
+      title.textContent = "Aktuální stav dokumentů";
+      const metrics = document.createElement("div");
+      metrics.className = "dashboard-metrics vault-metrics";
+      appendVaultMetric(metrics, "Uloženo v trezoru", documentCount);
+      appendVaultMetric(metrics, "Čeká v inboxu", inboxCount, inboxCount > 0 ? "warn" : "ok");
+      appendVaultMetric(metrics, "K revizi", reviewCount, reviewCount > 0 ? "warn" : "ok");
+      appendVaultMetric(metrics, "Problémy", problemCount, problemCount > 0 ? "bad" : "ok");
+      const hint = document.createElement("div");
+      hint.className = "status-line";
+      hint.textContent = inboxCount > 0
+        ? `V inboxu čeká ${inboxCount} souborů na zpracování.`
+        : reviewCount > 0
+          ? `Inbox je prázdný; ${reviewCount} uložených dokumentů čeká na revizi.`
+          : problemCount > 0
+            ? `Inbox je prázdný; ${problemCount} položek vyžaduje ruční kontrolu.`
+            : "Dokumentový trezor nyní nevyžaduje žádnou akci.";
+      const actions = document.createElement("div");
+      actions.className = "vault-summary-actions";
+      const openDocuments = document.createElement("button");
+      openDocuments.className = "secondary";
+      openDocuments.type = "button";
+      openDocuments.textContent = "Zpracovat další dokument";
+      openDocuments.addEventListener("click", openDocumentsPanel);
+      actions.appendChild(openDocuments);
+      current.appendChild(title);
+      current.appendChild(metrics);
+      current.appendChild(hint);
+      current.appendChild(actions);
       vaultText.appendChild(current);
-      if (auditText) {
+
+      const technicalText = vaultTechnicalDetails(raw);
+      if (technicalText) {
         const details = document.createElement("details");
         const summary = document.createElement("summary");
-        summary.textContent = "Auditní historie inboxu";
-        const audit = document.createElement("pre");
-        audit.textContent = auditText;
+        summary.textContent = "Historie a technické podrobnosti";
+        const note = document.createElement("div");
+        note.className = "status-line";
+        note.textContent = "Stará auditní stopa slouží jen ke zpětné kontrole přesunů a mazání.";
+        const technical = document.createElement("pre");
+        technical.textContent = technicalText;
         details.appendChild(summary);
-        details.appendChild(audit);
+        details.appendChild(note);
+        details.appendChild(technical);
         vaultText.appendChild(details);
       }
     }

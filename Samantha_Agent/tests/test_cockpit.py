@@ -3720,9 +3720,17 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("Otevřít uloženou přílohu", COCKPIT_HTML)
         self.assertIn("Splněno", COCKPIT_HTML)
         self.assertIn("Zdroj", COCKPIT_HTML)
-        self.assertIn("Souhrn vaultu", COCKPIT_HTML)
-        self.assertIn("Auditní historie inboxu", COCKPIT_HTML)
-        self.assertIn('const marker = "\\n- Inbox audit";', COCKPIT_HTML)
+        self.assertIn("Dokumentový trezor", COCKPIT_HTML)
+        self.assertIn("Aktuální stav dokumentů", COCKPIT_HTML)
+        self.assertIn("Historie a technické podrobnosti", COCKPIT_HTML)
+        self.assertIn("Zpracovat další dokument", COCKPIT_HTML)
+        self.assertIn('renderVaultSummary(data.vault || "", data.document_work || {})', COCKPIT_HTML)
+        self.assertIn("function vaultSummaryCount(raw, label)", COCKPIT_HTML)
+        self.assertIn("function vaultTechnicalDetails(raw)", COCKPIT_HTML)
+        self.assertIn('"Dalsi krok:"', COCKPIT_HTML)
+        self.assertIn("vault-metrics", COCKPIT_HTML)
+        self.assertNotIn("scan_document_inbox", COCKPIT_HTML)
+        self.assertNotIn("Auditní historie inboxu", COCKPIT_HTML)
 
     def test_document_work_cards_are_ordered_by_daily_workflow_columns(self) -> None:
         headings = [
