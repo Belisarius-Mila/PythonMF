@@ -13,10 +13,13 @@ from app.communication.human_adam_workspace import HumanAdamWorkspaceManager
 from app.communication.simple_main_checkpoint import (
     CURRENT_STATUS_END,
     CURRENT_STATUS_START,
+    CheckpointStatusProjection,
     SimpleMainCheckpointError,
     SimpleMainCheckpointRequest,
     _checkpoint_status_projection,
     _safe_deployment_snapshot,
+    _update_active_project_row,
+    _write_checkpoint_memory,
     _replace_current_status,
     complete_simple_main_checkpoint,
     _format_timestamp,
@@ -66,7 +69,18 @@ def prepare_environment(
         "# Demo TVBCP\n",
         encoding="utf-8",
     )
+    (project / "memory" / "ACTIVE_PROJECTS.md").write_text(
+        """# Project Registry
+
+| Oblast | Priorita | Rezim | Stav | Memory soubor | Handoff | Dalsi krok |
+| --- | --- | --- | --- | --- | --- | --- |
+| App-server rozhrani / novy Adam | 1 | active | Původní stav Human–Adam. | `memory.md` | `handoff.md` | Původní další krok. |
+| MMTX | 1 | active | Původní stav MMTX. | `mmtx.md` | zatim neni | Původní další krok MMTX. |
+""",
+        encoding="utf-8",
+    )
     git(source, "add", "Samantha_Agent/scripts/cockpit_quality_gate.py")
+    git(source, "add", "Samantha_Agent/memory/ACTIVE_PROJECTS.md")
     git(source, "add", "Samantha_Agent/memory/handoffs/demo.md")
     git(source, "add", "Samantha_Agent/memory/tvbcp/demo.txt")
     git(source, "commit", "-m", "Add workstream memory")
@@ -111,6 +125,114 @@ def fixed_now() -> datetime:
 
 
 class SimpleMainCheckpointTests(unittest.TestCase):
+    def test_memory_transaction_restores_pair_when_aggregate_write_fails(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            handoff = root / "handoff.md"
+            tvbcp = root / "tvbcp.md"
+            active_projects = root / "ACTIVE_PROJECTS.md"
+            handoff.write_text("old handoff\n", encoding="utf-8")
+            tvbcp.write_text("old tvbcp\n", encoding="utf-8")
+            active_projects.write_text("old aggregate\n", encoding="utf-8")
+
+            def fail_aggregate(path: Path, text: str) -> None:
+                target = Path(path)
+                if target == active_projects:
+                    raise OSError("simulated aggregate failure")
+                target.write_text(text, encoding="utf-8")
+
+            with patch(
+                "app.communication.simple_main_checkpoint."
+                "atomic_replace_text_under_external_lock",
+                side_effect=fail_aggregate,
+            ):
+                with self.assertRaisesRegex(
+                    SimpleMainCheckpointError,
+                    "Projektovou paměť",
+                ):
+                    _write_checkpoint_memory(
+                        handoff_path=handoff,
+                        tvbcp_path=tvbcp,
+                        active_projects_path=active_projects,
+                        handoff_content="new handoff\n",
+                        tvbcp_content="new tvbcp\n",
+                        active_projects_content="new aggregate\n",
+                        original_handoff="old handoff\n",
+                        original_tvbcp="old tvbcp\n",
+                        original_active_projects="old aggregate\n",
+                        handoff_existed=True,
+                        tvbcp_existed=True,
+                    )
+
+            self.assertEqual(handoff.read_text(encoding="utf-8"), "old handoff\n")
+            self.assertEqual(tvbcp.read_text(encoding="utf-8"), "old tvbcp\n")
+            self.assertEqual(
+                active_projects.read_text(encoding="utf-8"),
+                "old aggregate\n",
+            )
+
+    def test_active_project_projection_updates_only_primary_catalog_row(self) -> None:
+        content = """| Oblast | Priorita | Rezim | Stav | Memory soubor | Handoff | Dalsi krok |
+| --- | --- | --- | --- | --- | --- | --- |
+| Cockpit hlavni architektura / modernizace | 1 | active | Starý hlavní stav. | `main.md` | `main-handoff.md` | Starý hlavní krok. |
+| Cockpit Recovery centrum | 1 | active | Recovery zůstává. | `recovery.md` | `recovery-handoff.md` | Recovery krok. |
+| TTS / české audio nástroje | 1 | active | TTS zůstává. | `tts.md` | `tts-handoff.md` | TTS krok. |
+"""
+        projection = CheckpointStatusProjection(
+            completed=("Nová schopnost funguje.",),
+            open_items=("Čeká na nasazení.",),
+            risks=("Bez dalšího rizika.",),
+            next_step="Provést ruční retest.",
+        )
+
+        updated, source_name = _update_active_project_row(
+            content,
+            workstream_id="project-cockpit",
+            timestamp="2026-08-07 15:00 CEST",
+            projection=projection,
+        )
+
+        self.assertEqual(
+            source_name,
+            "Cockpit hlavni architektura / modernizace",
+        )
+        self.assertIn("Checkpoint 2026-08-07 15:00 CEST", updated)
+        self.assertIn("Provést ruční retest.", updated)
+        self.assertIn("Recovery zůstává.", updated)
+        self.assertIn("TTS zůstává.", updated)
+        self.assertNotIn("Starý hlavní stav.", updated)
+
+    def test_active_project_projection_fails_closed_on_missing_or_duplicate_row(
+        self,
+    ) -> None:
+        projection = CheckpointStatusProjection(
+            completed=("Hotovo.",),
+            open_items=("Nic.",),
+            risks=("Nic.",),
+            next_step="Pokračovat.",
+        )
+        row = (
+            "| App-server rozhrani / novy Adam | 1 | active | Stav. | "
+            "`memory.md` | `handoff.md` | Krok. |\n"
+        )
+
+        with self.assertRaisesRegex(SimpleMainCheckpointError, "právě jeden"):
+            _update_active_project_row(
+                "| Jiný proud | 1 | active | Stav. | x | y | z |\n",
+                workstream_id="layer-human-adam-development",
+                timestamp="2026-08-07 15:00 CEST",
+                projection=projection,
+            )
+        with self.assertRaisesRegex(SimpleMainCheckpointError, "právě jeden"):
+            _update_active_project_row(
+                row + row,
+                workstream_id="layer-human-adam-development",
+                timestamp="2026-08-07 15:00 CEST",
+                projection=projection,
+            )
+
     def test_idempotent_retry_recovers_same_commit_without_second_commit(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -337,6 +459,9 @@ class SimpleMainCheckpointTests(unittest.TestCase):
             tvbcp = (manager.project_root / "memory" / "tvbcp" / "demo.txt").read_text(
                 encoding="utf-8"
             )
+            active_projects = (
+                manager.project_root / "memory" / "ACTIVE_PROJECTS.md"
+            ).read_text(encoding="utf-8")
             source_subject = git(source, "log", "-1", "--format=%s")
             source_branches_after = git(source, "branch", "--format=%(refname:short)")
             workspace_branches_after = git(
@@ -401,6 +526,9 @@ class SimpleMainCheckpointTests(unittest.TestCase):
         self.assertEqual(handoff.count(CURRENT_STATUS_END), 1)
         self.assertEqual(tvbcp.count(CURRENT_STATUS_START), 1)
         self.assertEqual(tvbcp.count(CURRENT_STATUS_END), 1)
+        self.assertIn("Checkpoint 2026-07-20 07:00 CEST", active_projects)
+        self.assertIn("Ručně ověřit výsledek", active_projects)
+        self.assertNotIn("Původní stav Human–Adam", active_projects)
         self.assertNotIn("čeká na nasazení", handoff)
         self.assertEqual(commit_count, 1)
         self.assertEqual(progress[0:4], [
@@ -647,6 +775,7 @@ class SimpleMainCheckpointTests(unittest.TestCase):
         self.assertIn("Jednoduchý backend dokončil jeden krok", tvbcp)
         self.assertIn(handoff_relative, committed_paths)
         self.assertIn(tvbcp_relative, committed_paths)
+        self.assertIn("memory/ACTIVE_PROJECTS.md", committed_paths)
 
     def test_missing_memory_without_template_is_rejected_before_gate(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -699,6 +828,8 @@ class SimpleMainCheckpointTests(unittest.TestCase):
             _source, manager = prepare_environment(root)
             changed = manager.project_root / "tracked.py"
             changed.write_text("VALUE = 23\n", encoding="utf-8")
+            active_projects = manager.project_root / "memory/ACTIVE_PROJECTS.md"
+            original_active_projects = active_projects.read_text(encoding="utf-8")
             handoff = manager.project_root / "memory/handoffs/workstreams/project-mmtx.md"
             tvbcp = manager.project_root / "memory/tvbcp/workstreams/project-mmtx.md"
 
@@ -727,6 +858,10 @@ class SimpleMainCheckpointTests(unittest.TestCase):
 
             self.assertFalse(handoff.exists())
             self.assertFalse(tvbcp.exists())
+            self.assertEqual(
+                active_projects.read_text(encoding="utf-8"),
+                original_active_projects,
+            )
             self.assertTrue(changed.exists())
             self.assertTrue(manager.status()["dirty"])
 

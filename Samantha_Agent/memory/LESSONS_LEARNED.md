@@ -156,5 +156,7 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Řešení: Před projektovým reportem porovnat Git stáří agregátu s kanonickými
   handoffy/TVBCP. Pokud je kanonická paměť novější, report musí drift viditelně
   přiznat a doporučit synchronizaci; nesmí starý souhrn prezentovat bez
-  varování. Po významném checkpointu aktualizovat i příslušný řádek
-  `ACTIVE_PROJECTS.md`, nebo zařadit tuto synchronizaci do uzavíracího workflow.
+  varování. Potvrzený Human–Adam checkpoint od 2026-08-07 aktualizuje handoff,
+  TVBCP i primární řádek `ACTIVE_PROJECTS.md` v jediném commitu a při chybě
+  trojici obnoví. Terminálové commity mimo tento workflow se dál dorovnávají
+  ručně.

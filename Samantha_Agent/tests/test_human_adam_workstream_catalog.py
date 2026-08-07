@@ -30,7 +30,30 @@ def _active_project_names() -> set[str]:
     return rows
 
 
+def _all_registry_names() -> list[str]:
+    rows: list[str] = []
+    for line in (PROJECT_ROOT / "memory/ACTIVE_PROJECTS.md").read_text(
+        encoding="utf-8"
+    ).splitlines():
+        if not line.startswith("| ") or line.startswith("| ---") or "Oblast |" in line:
+            continue
+        rows.append(line.strip().strip("|").split("|", 1)[0].strip())
+    return rows
+
+
 class WorkstreamCatalogTests(unittest.TestCase):
+    def test_every_workstream_has_one_primary_aggregate_row(self) -> None:
+        registry_names = _all_registry_names()
+
+        for record in WORKSTREAM_CATALOG:
+            primary_name = (
+                record.source_names[0]
+                if record.source_names
+                else record.name
+            )
+            with self.subTest(workstream_id=record.workstream_id):
+                self.assertEqual(registry_names.count(primary_name), 1)
+
     def test_catalog_covers_every_active_registry_row_and_two_default_misc_streams(self) -> None:
         source_names = [
             source_name
@@ -42,9 +65,14 @@ class WorkstreamCatalogTests(unittest.TestCase):
             for record in WORKSTREAM_CATALOG
             if record.workstream_type == "Misc"
         }
+        misc_names = {
+            record.name
+            for record in WORKSTREAM_CATALOG
+            if record.workstream_type == "Misc"
+        }
 
         self.assertEqual(
-            set(source_names),
+            set(source_names) | misc_names,
             _active_project_names()
             | {
                 "iPhone Shortcuts / Mobile Input Layer",

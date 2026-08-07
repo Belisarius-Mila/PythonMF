@@ -1,42 +1,43 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Stav znovu ověřen: 2026-08-07 13:59 CEST
+- Stav znovu ověřen: 2026-08-07 16:03 CEST
 
 ### Hotovo
-- Všechny zvolitelné proudy mají jednotný jednorázový vývoj a registrovaný
-  read-only webový průzkum.
-- Serverový stav dokončení a restartově odolná idempotentní úloha chrání
-  checkpoint před pádem HTTP tahu nebo restartem.
-- Čistý poradní tah lze označit jako dokončený bez změn místo falešného
-  selhání.
+- Potvrzený checkpoint nyní v jednom checkpointovém commitu aktualizuje
+  kanonický handoff, TVBCP i primární řádek proudu v `ACTIVE_PROJECTS.md`.
+- Chybějící, duplicitní nebo katalogově rozporný řádek zablokuje zápis před
+  commitem; selhání zápisu nebo commitu vrátí všechny tři soubory.
+- Všech 30 pracovních proudů má jednoznačný agregovaný řádek. Obecné proudy
+  Brainstorm a Misc zůstávají typem `Misc` a mapují se kanonickým názvem.
 
 ### Otevřeno
-- Human–Adam a Knihovna zůstávají dočasnými kompatibilními adaptéry; jejich
-  migrace není nyní provozní priorita.
-- Lokální `main` obsahuje knihovní commit novější než běžící Cockpit.
+- Implementace je otestovaná, ale zatím není nasazená do běžícího Cockpitu.
+- Terminálové commity mimo Human–Adam checkpoint dál vyžadují ruční aktualizaci
+  projektové paměti, pokud mění věcný stav projektu.
 
 ### Rizika
-- Completion job záměrně neopakuje skutečné selhání testů nebo změněný
-  workspace; takový WIP vyžaduje bezpečné převzetí.
+- U proudů s více agregovanými oblastmi se automaticky mění pouze první
+  kanonický zdroj; vedlejší řádky Recovery, TTS nebo platební SMS se nepřepisují
+  obecným checkpointovým souhrnem.
 
 ### Další krok
-- Pokračovat běžným vývojem; při nové hlášce nejdřív porovnat serverový stav,
-  completion job, Git a workspace.
+- Po samostatně potvrzeném nasazení ověřit první přirozený Human–Adam checkpoint
+  a následný audit s nulovým driftem.
 
 ### Rozhodnutí
-- Modelová účtenka není autoritou výsledku. Autoritou je serverový stav ověřený
-  proti Gitu a workspace.
+- Agregát se synchronizuje uvnitř existujícího autoritativního checkpointu,
+  nikoli druhým následným commitem nebo samostatným watcherem.
 
 ### Navrhované další kroky
-- Adaptéry neodstraňovat bez samostatného migračního a regresního důkazu.
-- Synchronizaci projektového agregátu přidat později do uzavíracího workflow.
+- Audit driftu ponechat jako nezávislou kontrolní pojistku.
+- Automatické čištění `MEMORY_INDEX.md` nepřidávat; připomenutí vyžadují věcné
+  lidské rozhodnutí.
 
 ### Technický stav checkpointu
-- Dokončovací pojistky a poradní klasifikace jsou obsažené v živě nasazeném
-  `91dc700`; smoke 5/5.
-- Poslední knihovní checkpoint byl serverově dokončen a oba profilové
-  workspaces byly při nasazení čisté a zarovnané.
+- Cílené checkpointové, katalogové a paměťové testy: 47 OK.
+- Sousední profilové a reportové testy: 120 OK.
+- Plná Cockpit Quality Gate: 1329 testů, výsledek OK.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 Nazev: Human–Adam / vyvojove prostredi - zalozeni pracovniho proudu Layer
@@ -2628,3 +2629,29 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Pojistky jsou obsažené v živě nasazeném `91dc700`; smoke 5/5.
+
+### 2026-08-07 16:03 CEST – Checkpoint synchronizuje tři vrstvy projektové paměti
+
+Hotovo:
+- Potvrzený checkpoint aktualizuje handoff, TVBCP a primární řádek proudu v
+  `ACTIVE_PROJECTS.md` před vytvořením jediného checkpointového commitu.
+- Při chybě zápisu nebo commitu obnoví všechny tři původní obsahy.
+- Všech 30 proudů včetně Brainstorm a Misc má jednoznačný agregovaný řádek.
+
+Rozhodnutí:
+- Synchronizace je součástí stávajícího autoritativního checkpointu. Nevzniká
+  druhý commit, watcher ani paralelní registr.
+- U proudu s více zdrojovými řádky se mění pouze první kanonický zdroj.
+
+Další krok:
+- Po samostatně potvrzeném nasazení ověřit první přirozený checkpoint a
+  následný audit s nulovým driftem.
+
+Navrhované další kroky:
+- Ponechat audit driftu jako nezávislou pojistku.
+- Terminálové změny věcného stavu dál ručně promítat do projektové paměti.
+
+Technický důkaz:
+- 47 cílených checkpointových, katalogových a paměťových testů prošlo.
+- 120 sousedních profilových a reportových testů prošlo.
+- Plná Cockpit Quality Gate prošla 1329 testy.

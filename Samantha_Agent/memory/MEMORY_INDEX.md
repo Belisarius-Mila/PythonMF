@@ -138,8 +138,9 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 - `handoffs/human_adam_layer_workstream_start_2026_07_20.md` - kanonický aktuální
   handoff Human–Adam. Dokončovací stav je autoritativně perzistentní,
-  samoobnovitelný po restartu a čistý poradní tah může skončit bez změn místo
-  falešného selhání; následující podrobný text zachycuje historický vývoj.
+  samoobnovitelný po restartu a potvrzený checkpoint synchronizuje handoff,
+  TVBCP i primární řádek `ACTIVE_PROJECTS.md` v jediném commitu; následující
+  podrobný text zachycuje historický vývoj.
   Transformace verejneho modelu na kanonicke pracovni proudy je po
   fazich 4.5g-c1 az c2f funkcne uzavrena. Zavadejici verejna
   `active_profile_*` metadata, osirely deployment-completion endpoint, UI

@@ -320,8 +320,9 @@ TVBCP každého materializovaného proudu. Pokud je kanonická dvojice novějš�
 - doporučí nejprve synchronizovat `ACTIVE_PROJECTS.md`;
 - starý agregovaný stav už nepředstaví bez varování jako spolehlivě aktuální.
 
-Jde o diagnostickou pojistku, nikoli automatický přepis paměti. Audit stále nic
-nemění, nemaže ani nezakládá TVBCP pro lazy proudy. Trvalým provozním pravidlem
-je při významném projektovém checkpointu dorovnat v jednom kroku kanonický
-handoff, TVBCP a odpovídající řádek `ACTIVE_PROJECTS.md`; uzavřeným historickým
-handoffům současně odebrat `[PRIPOMENOUT]`.
+Audit sám zůstává diagnostickou pojistkou a nic nemění, nemaže ani nezakládá
+TVBCP pro lazy proudy. Od 2026-08-07 však potvrzený Human–Adam checkpoint
+dorovnává v jednom checkpointovém commitu kanonický handoff, TVBCP a primární
+řádek `ACTIVE_PROJECTS.md`. Chybějící nebo duplicitní řádek a neshoda
+priority/režimu operaci zablokují; při chybě zápisu nebo commitu se trojice
+vrátí. Terminálové commity mimo tento workflow se dál dorovnávají ručně.

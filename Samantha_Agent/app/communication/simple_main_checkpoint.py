@@ -29,6 +29,9 @@ from app.communication.human_adam_workspace import (
     SAFE_CHECKPOINT_CHANGE_TYPES,
     HumanAdamWorkspaceManager,
 )
+from app.communication.human_adam_workstream_catalog import (
+    WORKSTREAM_CATALOG_BY_ID,
+)
 from app.communication.workstream_live_status import (
     LIVE_STATUS_SCHEMA_VERSION,
     build_workstream_live_status,
@@ -46,6 +49,7 @@ MAX_MEMORY_FILE_CHARS = 2_000_000
 MAX_CHANGED_PATHS_IN_HANDOFF = 40
 CURRENT_STATUS_START = "<!-- SAMANTHA_CURRENT_STATUS_START -->"
 CURRENT_STATUS_END = "<!-- SAMANTHA_CURRENT_STATUS_END -->"
+ACTIVE_PROJECTS_RELATIVE_PATH = Path("memory/ACTIVE_PROJECTS.md")
 _WORKSTREAM_ID_RE = re.compile(r"[a-z][a-z0-9_-]{1,63}")
 _SHORT_HEAD_RE = re.compile(r"[0-9a-f]{7,12}")
 _HEAD_RE = re.compile(r"[0-9a-f]{40}")
@@ -372,6 +376,101 @@ def _read_memory_file(path: Path) -> str:
     if len(content) > MAX_MEMORY_FILE_CHARS:
         raise SimpleMainCheckpointError("Checkpointová paměť překročila bezpečný limit.")
     return content
+
+
+def _active_projects_path(project_root: Path) -> Path:
+    root = project_root.resolve()
+    unresolved = root / ACTIVE_PROJECTS_RELATIVE_PATH
+    path = unresolved.resolve()
+    if (
+        root not in path.parents
+        or unresolved.is_symlink()
+        or not path.is_file()
+    ):
+        raise SimpleMainCheckpointError(
+            "Kanonický registr ACTIVE_PROJECTS.md nebyl nalezen."
+        )
+    current = root
+    for part in path.relative_to(root).parts[:-1]:
+        current = current / part
+        if current.is_symlink():
+            raise SimpleMainCheckpointError(
+                "Kanonický registr ACTIVE_PROJECTS.md nebyl nalezen."
+            )
+    return path
+
+
+def _active_projects_cell(value: object) -> str:
+    return " ".join(str(value or "").replace("|", "/").split())
+
+
+def _active_project_status(
+    *,
+    timestamp: str,
+    projection: CheckpointStatusProjection,
+) -> str:
+    completed = "; ".join(projection.completed)
+    open_items = "; ".join(projection.open_items)
+    risks = "; ".join(projection.risks)
+    return _active_projects_cell(
+        f"Checkpoint {timestamp}. Hotovo: {completed} "
+        f"Otevřeno: {open_items} Rizika: {risks}"
+    )
+
+
+def _update_active_project_row(
+    content: str,
+    *,
+    workstream_id: str,
+    timestamp: str,
+    projection: CheckpointStatusProjection,
+) -> tuple[str, str]:
+    record = WORKSTREAM_CATALOG_BY_ID.get(workstream_id)
+    if record is None:
+        raise SimpleMainCheckpointError(
+            "Pracovní proud nemá jednoznačný řádek v ACTIVE_PROJECTS.md."
+        )
+    if record.source_names:
+        source_name = record.source_names[0]
+    elif record.workstream_type == "Misc":
+        source_name = record.name
+    else:
+        raise SimpleMainCheckpointError(
+            "Pracovní proud nemá jednoznačný řádek v ACTIVE_PROJECTS.md."
+        )
+    matched_indexes: list[int] = []
+    rendered_lines: list[str] = []
+    for index, raw_line in enumerate(content.splitlines(keepends=True)):
+        body = raw_line.rstrip("\r\n")
+        ending = raw_line[len(body) :]
+        if not body.lstrip().startswith("|"):
+            rendered_lines.append(raw_line)
+            continue
+        cells = [cell.strip() for cell in body.strip().strip("|").split("|")]
+        if not cells or cells[0] != source_name:
+            rendered_lines.append(raw_line)
+            continue
+        if len(cells) != 7:
+            raise SimpleMainCheckpointError(
+                "Řádek pracovního proudu v ACTIVE_PROJECTS.md má neplatný formát."
+            )
+        if cells[1] != record.priority or cells[2].casefold() != record.mode:
+            raise SimpleMainCheckpointError(
+                "Priorita nebo režim pracovního proudu v ACTIVE_PROJECTS.md "
+                "neodpovídá kanonickému katalogu."
+            )
+        matched_indexes.append(index)
+        cells[3] = _active_project_status(
+            timestamp=timestamp,
+            projection=projection,
+        )
+        cells[6] = _active_projects_cell(projection.next_step)
+        rendered_lines.append("| " + " | ".join(cells) + " |" + ending)
+    if len(matched_indexes) != 1:
+        raise SimpleMainCheckpointError(
+            "Pracovní proud nemá právě jeden primární řádek v ACTIVE_PROJECTS.md."
+        )
+    return "".join(rendered_lines), source_name
 
 
 def _append_block(content: str, block: str) -> str:
@@ -750,52 +849,106 @@ def _current_status_block(
 {CURRENT_STATUS_END}"""
 
 
-def _write_memory_pair(
+def _write_checkpoint_memory(
     *,
     handoff_path: Path,
     tvbcp_path: Path,
+    active_projects_path: Path,
     handoff_content: str,
     tvbcp_content: str,
+    active_projects_content: str,
     original_handoff: str,
+    original_tvbcp: str,
+    original_active_projects: str,
     handoff_existed: bool,
+    tvbcp_existed: bool,
 ) -> None:
     atomic_replace_text_under_external_lock(handoff_path, handoff_content)
     try:
         atomic_replace_text_under_external_lock(tvbcp_path, tvbcp_content)
     except OSError as exc:
-        if handoff_existed:
-            atomic_replace_text_under_external_lock(handoff_path, original_handoff)
-        elif handoff_path.read_text(encoding="utf-8") == handoff_content:
-            handoff_path.unlink()
-        raise SimpleMainCheckpointError("TVBCP checkpointu se nepodařilo zapsat.") from exc
+        _restore_written_memory(
+            path=handoff_path,
+            original=original_handoff,
+            written=handoff_content,
+            existed=handoff_existed,
+        )
+        raise SimpleMainCheckpointError(
+            "Projektovou paměť checkpointu se nepodařilo zapsat."
+        ) from exc
+    try:
+        atomic_replace_text_under_external_lock(
+            active_projects_path,
+            active_projects_content,
+        )
+    except OSError as exc:
+        _restore_written_memory(
+            path=tvbcp_path,
+            original=original_tvbcp,
+            written=tvbcp_content,
+            existed=tvbcp_existed,
+        )
+        _restore_written_memory(
+            path=handoff_path,
+            original=original_handoff,
+            written=handoff_content,
+            existed=handoff_existed,
+        )
+        raise SimpleMainCheckpointError(
+            "Projektovou paměť checkpointu se nepodařilo zapsat."
+        ) from exc
 
 
-def _restore_memory_pair(
+def _restore_written_memory(
+    *,
+    path: Path,
+    original: str,
+    written: str,
+    existed: bool,
+) -> None:
+    try:
+        if path.read_text(encoding="utf-8") != written:
+            return
+        if existed:
+            atomic_replace_text_under_external_lock(path, original)
+        else:
+            path.unlink()
+    except OSError:
+        return
+
+
+def _restore_checkpoint_memory(
     *,
     handoff_path: Path,
     tvbcp_path: Path,
+    active_projects_path: Path,
     original_handoff: str,
     original_tvbcp: str,
+    original_active_projects: str,
     written_handoff: str,
     written_tvbcp: str,
+    written_active_projects: str,
     handoff_existed: bool = True,
     tvbcp_existed: bool = True,
 ) -> None:
-    try:
-        if handoff_path.read_text(encoding="utf-8") == written_handoff:
-            if handoff_existed:
-                atomic_replace_text_under_external_lock(handoff_path, original_handoff)
-            else:
-                handoff_path.unlink()
-        if tvbcp_path.read_text(encoding="utf-8") == written_tvbcp:
-            if tvbcp_existed:
-                atomic_replace_text_under_external_lock(tvbcp_path, original_tvbcp)
-            else:
-                tvbcp_path.unlink()
-    except OSError:
-        # Never overwrite an unexpected concurrent edit while handling another
-        # failure.  The remaining dirty files are visible to the user.
-        return
+    _restore_written_memory(
+        path=handoff_path,
+        original=original_handoff,
+        written=written_handoff,
+        existed=handoff_existed,
+    )
+    _restore_written_memory(
+        path=tvbcp_path,
+        original=original_tvbcp,
+        written=written_tvbcp,
+        existed=tvbcp_existed,
+    )
+    _restore_written_memory(
+        path=active_projects_path,
+        original=original_active_projects,
+        written=written_active_projects,
+        existed=True,
+    )
 
 
 def _validate_change_rows(
@@ -1144,6 +1297,8 @@ def complete_simple_main_checkpoint(
         )
         if handoff_path == tvbcp_path:
             raise SimpleMainCheckpointError("Handoff a TVBCP musí být dva různé soubory.")
+        active_projects_path = _active_projects_path(workspace.project_root)
+        original_active_projects = _read_memory_file(active_projects_path)
 
         progress("gate", "running")
         initial_changes = list(initial.get("changes") or [])
@@ -1223,14 +1378,25 @@ def complete_simple_main_checkpoint(
             _replace_current_status(original_tvbcp, current_status),
             tvbcp_block,
         )
+        written_active_projects, active_project_name = _update_active_project_row(
+            original_active_projects,
+            workstream_id=safe_request.workstream_id,
+            timestamp=timestamp,
+            projection=projection,
+        )
         progress("memory", "running")
-        _write_memory_pair(
+        _write_checkpoint_memory(
             handoff_path=handoff_path,
             tvbcp_path=tvbcp_path,
+            active_projects_path=active_projects_path,
             handoff_content=written_handoff,
             tvbcp_content=written_tvbcp,
+            active_projects_content=written_active_projects,
             original_handoff=original_handoff,
+            original_tvbcp=original_tvbcp,
+            original_active_projects=original_active_projects,
             handoff_existed=handoff_existed,
+            tvbcp_existed=tvbcp_existed,
         )
         progress("memory", "passed")
 
@@ -1242,26 +1408,32 @@ def complete_simple_main_checkpoint(
                 idempotency_key=safe_request.idempotency_key,
             )
         except (AppServerError, OSError, ValueError) as exc:
-            _restore_memory_pair(
+            _restore_checkpoint_memory(
                 handoff_path=handoff_path,
                 tvbcp_path=tvbcp_path,
+                active_projects_path=active_projects_path,
                 original_handoff=original_handoff,
                 original_tvbcp=original_tvbcp,
+                original_active_projects=original_active_projects,
                 written_handoff=written_handoff,
                 written_tvbcp=written_tvbcp,
+                written_active_projects=written_active_projects,
                 handoff_existed=handoff_existed,
                 tvbcp_existed=tvbcp_existed,
             )
             progress("commit", "failed")
             raise SimpleMainCheckpointError("Checkpoint commit se nepodařilo vytvořit.") from exc
         if checkpoint.get("checkpoint_created") is not True:
-            _restore_memory_pair(
+            _restore_checkpoint_memory(
                 handoff_path=handoff_path,
                 tvbcp_path=tvbcp_path,
+                active_projects_path=active_projects_path,
                 original_handoff=original_handoff,
                 original_tvbcp=original_tvbcp,
+                original_active_projects=original_active_projects,
                 written_handoff=written_handoff,
                 written_tvbcp=written_tvbcp,
+                written_active_projects=written_active_projects,
                 handoff_existed=handoff_existed,
                 tvbcp_existed=tvbcp_existed,
             )
@@ -1371,6 +1543,9 @@ def complete_simple_main_checkpoint(
             },
             "handoff_path": safe_request.handoff_relative_path,
             "tvbcp_path": safe_request.tvbcp_relative_path,
+            "active_projects_path": ACTIVE_PROJECTS_RELATIVE_PATH.as_posix(),
+            "active_project_name": active_project_name,
+            "active_project_updated": True,
             "pushed": not defer_remote_push,
             "remote_push_deferred": defer_remote_push,
             "pending_remote_commit_count": pending_remote_commit_count,

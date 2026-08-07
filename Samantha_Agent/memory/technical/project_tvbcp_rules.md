@@ -69,6 +69,24 @@ opakování a textovou omáčku.
 
 Tyto vrstvy se navzájem nenahrazují.
 
+## Synchronizace při automatickém checkpointu
+
+- Potvrzený Human–Adam checkpoint aktualizuje v jednom checkpointovém commitu
+  kanonický handoff, TVBCP a primární řádek pracovního proudu v
+  `ACTIVE_PROJECTS.md`.
+- Primární řádek je první kanonický zdroj pracovního proudu. U obecného proudu
+  typu `Misc` se použije jeho kanonický název. Vedlejší agregované oblasti se
+  obecným checkpointem nepřepisují.
+- Chybějící, duplicitní nebo katalogově rozporný řádek je fail-closed blokátor.
+- Pokud selže zápis některého ze tří souborů nebo nevznikne checkpointový
+  commit, původní obsah všech tří souborů se obnoví, pokud mezitím nevznikla
+  cizí souběžná změna.
+- Nevzniká druhý dokumentační commit ani watcher. Audit driftu zůstává
+  nezávislou kontrolní pojistkou.
+- Toto pravidlo nepokrývá běžný terminálový commit mimo Human–Adam checkpoint.
+  Pokud takový commit mění věcný stav projektu, projektová paměť se dorovná
+  ručně v témže tematickém kroku.
+
 ## Ukončení nebo archivace
 
 Při dokončení projektu se do TVBCP doplní konečný výsledek, důkazy testů,
