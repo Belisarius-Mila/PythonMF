@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import errno
 import json
+import re
 import socket
 import ssl
 import urllib.error
@@ -17,6 +18,8 @@ from app.article_archive import normalize_book_isbn
 OPEN_LIBRARY_BOOKS_API = "https://openlibrary.org/api/books"
 OPEN_LIBRARY_SEARCH_API = "https://openlibrary.org/search.json"
 OPEN_LIBRARY_SOURCE_NAME = "Open Library"
+KNIHOVNY_SEARCH_API = "https://www.knihovny.cz/api/v1/search"
+KNIHOVNY_SOURCE_NAME = "Knihovny.cz"
 MAX_BOOK_ISBN_LOOKUP_BYTES = 512 * 1024
 DEFAULT_BOOK_ISBN_LOOKUP_TIMEOUT = 8.0
 
@@ -77,6 +80,114 @@ def lookup_book_by_isbn(
     if len(normalized_isbn) == 10:
         isbn_candidates.append(isbn10_to_isbn13(normalized_isbn))
 
+    open_request = opener or urllib.request.urlopen
+    verified_tls_context = tls_context or create_book_isbn_tls_context()
+    primary_error: BookIsbnLookupError | None = None
+    try:
+        result = _lookup_book_in_knihovny(
+            normalized_isbn,
+            isbn_candidates,
+            opener=open_request,
+            timeout=timeout,
+            tls_context=verified_tls_context,
+        )
+    except BookIsbnLookupError as exc:
+        primary_error = exc
+    else:
+        try:
+            open_library = _lookup_book_in_open_library(
+                normalized_isbn,
+                isbn_candidates,
+                opener=open_request,
+                timeout=timeout,
+                tls_context=verified_tls_context,
+            )
+        except BookIsbnLookupError:
+            open_library = None
+        if open_library:
+            for field in ("publisher", "publish_date", "publication_year", "number_of_pages"):
+                if open_library.get(field):
+                    result[field] = open_library[field]
+        return result
+
+    try:
+        return _lookup_book_in_open_library(
+            normalized_isbn,
+            isbn_candidates,
+            opener=open_request,
+            timeout=timeout,
+            tls_context=verified_tls_context,
+        )
+    except BookIsbnLookupError as fallback_error:
+        if primary_error is not None and not isinstance(primary_error, BookIsbnNotFoundError):
+            raise primary_error
+        raise fallback_error
+
+
+def _lookup_book_in_knihovny(
+    normalized_isbn: str,
+    isbn_candidates: list[str],
+    *,
+    opener: Callable[..., Any],
+    timeout: float,
+    tls_context: ssl.SSLContext,
+) -> dict[str, Any]:
+    for candidate in isbn_candidates:
+        query = urllib.parse.urlencode(
+            {
+                "lookfor": candidate,
+                "type": "ISN",
+                "limit": 10,
+            }
+        )
+        payload = _request_json(
+            f"{KNIHOVNY_SEARCH_API}?{query}",
+            opener=opener,
+            timeout=timeout,
+            tls_context=tls_context,
+            catalog_host="www.knihovny.cz",
+        )
+        if payload.get("status") != "OK":
+            raise BookIsbnLookupError("Český katalog vrátil neplatnou odpověď.")
+        records = payload.get("records", [])
+        if not isinstance(records, list):
+            raise BookIsbnLookupError("Český katalog vrátil neplatnou odpověď.")
+        for record in records:
+            if not isinstance(record, dict):
+                continue
+            title = _clean_text(record.get("title"), 500)
+            author = _knihovny_author(record.get("authors"))
+            if not title and not author:
+                continue
+            record_id = _clean_text(record.get("id"), 300)
+            source_url = ""
+            if record_id:
+                safe_record_id = urllib.parse.quote(record_id, safe="._-")
+                source_url = f"https://www.knihovny.cz/Record/{safe_record_id}"
+            return {
+                "isbn": normalized_isbn,
+                "matched_isbn": candidate,
+                "title": title,
+                "author": author,
+                "publisher": "",
+                "publish_date": "",
+                "publication_year": "",
+                "number_of_pages": 0,
+                "source_name": KNIHOVNY_SOURCE_NAME,
+                "source_url": source_url,
+            }
+    raise BookIsbnNotFoundError("Pro toto ISBN nebyla v českém katalogu nalezena kniha.")
+
+
+def _lookup_book_in_open_library(
+    normalized_isbn: str,
+    isbn_candidates: list[str],
+    *,
+    opener: Callable[..., Any],
+    timeout: float,
+    tls_context: ssl.SSLContext,
+) -> dict[str, Any]:
+
     query = urllib.parse.urlencode(
         {
             "bibkeys": ",".join(f"ISBN:{candidate}" for candidate in isbn_candidates),
@@ -84,13 +195,12 @@ def lookup_book_by_isbn(
             "format": "json",
         }
     )
-    open_request = opener or urllib.request.urlopen
-    verified_tls_context = tls_context or create_book_isbn_tls_context()
     payload = _request_json(
         f"{OPEN_LIBRARY_BOOKS_API}?{query}",
-        opener=open_request,
+        opener=opener,
         timeout=timeout,
-        tls_context=verified_tls_context,
+        tls_context=tls_context,
+        catalog_host="openlibrary.org",
     )
 
     matched_isbn = ""
@@ -104,9 +214,9 @@ def lookup_book_by_isbn(
     if not isinstance(record, dict):
         matched_isbn, record = _lookup_book_in_search_index(
             isbn_candidates,
-            opener=open_request,
+            opener=opener,
             timeout=timeout,
-            tls_context=verified_tls_context,
+            tls_context=tls_context,
         )
 
     title = _clean_text(record.get("title"), 500)
@@ -126,6 +236,7 @@ def lookup_book_by_isbn(
         "author": author,
         "publisher": publisher,
         "publish_date": publish_date,
+        "publication_year": _extract_publication_year(publish_date),
         "number_of_pages": number_of_pages,
         "source_name": OPEN_LIBRARY_SOURCE_NAME,
         "source_url": f"https://openlibrary.org/isbn/{matched_isbn}",
@@ -153,6 +264,7 @@ def _lookup_book_in_search_index(
             opener=opener,
             timeout=timeout,
             tls_context=tls_context,
+            catalog_host="openlibrary.org",
         )
         docs = payload.get("docs")
         if not isinstance(docs, list):
@@ -172,6 +284,7 @@ def _request_json(
     opener: Callable[..., Any],
     timeout: float,
     tls_context: ssl.SSLContext,
+    catalog_host: str,
 ) -> dict[str, Any]:
     request = urllib.request.Request(
         url,
@@ -187,7 +300,7 @@ def _request_json(
     except urllib.error.HTTPError as exc:
         raise BookIsbnHttpError(int(exc.code or 0)) from exc
     except (urllib.error.URLError, OSError, TimeoutError) as exc:
-        raise _safe_transport_error(exc) from exc
+        raise _safe_transport_error(exc, catalog_host=catalog_host) from exc
 
     if len(raw) > MAX_BOOK_ISBN_LOOKUP_BYTES:
         raise BookIsbnLookupError("Odpověď veřejného katalogu byla příliš velká.")
@@ -215,12 +328,12 @@ def isbn10_to_isbn13(isbn10: str) -> str:
     return f"{base}{checksum}"
 
 
-def _safe_transport_error(exc: BaseException) -> BookIsbnLookupError:
+def _safe_transport_error(exc: BaseException, *, catalog_host: str) -> BookIsbnLookupError:
     reason = exc.reason if isinstance(exc, urllib.error.URLError) else exc
     if isinstance(reason, (TimeoutError, socket.timeout)):
         return BookIsbnTimeoutError("Veřejný katalog neodpověděl včas. Zkus to znovu.")
     if isinstance(reason, socket.gaierror):
-        return BookIsbnDnsError("Název openlibrary.org se nepodařilo přeložit pomocí DNS.")
+        return BookIsbnDnsError(f"Název {catalog_host} se nepodařilo přeložit pomocí DNS.")
     if isinstance(reason, ssl.SSLCertVerificationError):
         return BookIsbnCertificateError("Python nedokázal ověřit TLS certifikát veřejného katalogu.")
     if isinstance(reason, ssl.SSLError):
@@ -243,6 +356,31 @@ def _join_catalog_values(value: Any, limit: int) -> str:
         if name:
             names.append(name)
     return ", ".join(names)[:limit]
+
+
+def _knihovny_author(value: Any) -> str:
+    if not isinstance(value, dict):
+        return ""
+    for group in ("primary", "secondary", "corporate"):
+        raw_group = value.get(group)
+        candidates = list(raw_group) if isinstance(raw_group, dict) else raw_group
+        if not isinstance(candidates, list):
+            continue
+        names: list[str] = []
+        for candidate in candidates:
+            raw_name = candidate.get("name") if isinstance(candidate, dict) else candidate
+            name = _clean_text(raw_name, 300)
+            name = re.sub(r",\s*[0-9]{4}(?:-[0-9]{0,4})?\s*$", "", name).strip(" ,")
+            if name and name not in names:
+                names.append(name)
+        if names:
+            return ", ".join(names)[:300]
+    return ""
+
+
+def _extract_publication_year(value: Any) -> str:
+    match = re.search(r"(?<![0-9])([12][0-9]{3})(?![0-9])", str(value or ""))
+    return match.group(1) if match else ""
 
 
 def _matched_search_isbn(record: dict[str, Any], isbn_candidates: list[str]) -> str:

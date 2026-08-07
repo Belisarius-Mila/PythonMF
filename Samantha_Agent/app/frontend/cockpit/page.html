@@ -712,6 +712,15 @@
             </div>
             <div id="libraryBookIsbnLookupStatus" class="status-line">Po stisku se do veřejného katalogu odešle pouze validované ISBN. Výsledek se neuloží automaticky. Když se nic nenajde, knihu můžeš normálně uložit ručně.</div>
             <a id="libraryBookIsbnSourceLink" class="library-book-isbn-source hidden" href="#" target="_blank" rel="noopener noreferrer">Otevřít záznam ve zdrojovém katalogu</a>
+            <div id="libraryBookCatalogComparison" class="library-book-catalog-comparison hidden" aria-live="polite">
+              <strong>Údaje z katalogu neodpovídají údajům z obálky</strong>
+              <div id="libraryBookCatalogDifferences" class="library-book-catalog-differences"></div>
+              <div class="actions compact-actions">
+                <button class="secondary" id="libraryBookCatalogKeepBtn" type="button">Ponechat údaje z obálky</button>
+                <button class="primary" id="libraryBookCatalogReplaceBtn" type="button">Přepsat údaji z katalogu</button>
+              </div>
+              <span class="library-field-hint">Volba pouze upraví formulář. Kniha se uloží až tlačítkem Uložit knihu.</span>
+            </div>
           </div>
           <div class="actions compact-actions library-book-save-actions">
             <button class="primary" id="libraryBookSaveBtn" type="button">Uložit knihu</button>
@@ -805,6 +814,15 @@
                   </div>
                   <div id="libraryEditBookIsbnLookupStatus" class="status-line">Výsledek pouze předvyplní tuto editaci. Karta se změní až po stisku Uložit úpravy.</div>
                   <a id="libraryEditBookIsbnSourceLink" class="library-book-isbn-source hidden" href="#" target="_blank" rel="noopener noreferrer">Otevřít záznam ve zdrojovém katalogu</a>
+                  <div id="libraryEditBookCatalogComparison" class="library-book-catalog-comparison hidden" aria-live="polite">
+                    <strong>Údaje z katalogu neodpovídají údajům z obálky</strong>
+                    <div id="libraryEditBookCatalogDifferences" class="library-book-catalog-differences"></div>
+                    <div class="actions compact-actions">
+                      <button class="secondary" id="libraryEditBookCatalogKeepBtn" type="button">Ponechat údaje z obálky</button>
+                      <button class="primary" id="libraryEditBookCatalogReplaceBtn" type="button">Přepsat údaji z katalogu</button>
+                    </div>
+                    <span class="library-field-hint">Volba pouze upraví editaci. Karta se změní až tlačítkem Uložit úpravy.</span>
+                  </div>
                 </div>
                 <fieldset class="library-book-category-fieldset library-edit-book-category-fieldset">
                   <legend>Kategorie knihy</legend>

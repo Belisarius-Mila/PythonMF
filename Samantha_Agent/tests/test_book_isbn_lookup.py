@@ -39,13 +39,28 @@ class FakeResponse:
 
 
 class BookIsbnLookupTests(unittest.TestCase):
-    def test_lookup_sends_only_normalized_isbn_to_fixed_catalog(self) -> None:
-        payload = {
+    def test_knihovny_is_primary_and_open_library_only_enriches_details(self) -> None:
+        knihovny_payload = {
+            "status": "OK",
+            "resultCount": 1,
+            "records": [
+                {
+                    "id": "synthetic.record-1",
+                    "title": "Syntetická česká kniha",
+                    "authors": {
+                        "primary": {"Testovací autor, 1970-": []},
+                        "secondary": {},
+                        "corporate": [],
+                    },
+                }
+            ],
+        }
+        open_library_payload = {
             "ISBN:9781234567897": {
-                "title": "Syntetická kniha",
-                "authors": [{"name": "Testovací autor"}],
+                "title": "Odlišný katalogový název",
+                "authors": [{"name": "Odlišný katalogový autor"}],
                 "publishers": [{"name": "Testovací nakladatelství"}],
-                "publish_date": "2026",
+                "publish_date": "Vydání 2026",
                 "number_of_pages": 123,
             }
         }
@@ -53,29 +68,31 @@ class BookIsbnLookupTests(unittest.TestCase):
 
         def opener(request: object, *, timeout: float, context: object) -> FakeResponse:
             calls.append((request, timeout, context))
+            payload = knihovny_payload if "knihovny.cz" in request.full_url else open_library_payload
             return FakeResponse(json.dumps(payload).encode("utf-8"))
 
         result = lookup_book_by_isbn(isbn="978-1-23456-789-7", opener=opener)
 
         self.assertEqual(result["isbn"], "9781234567897")
         self.assertEqual(result["matched_isbn"], "9781234567897")
-        self.assertEqual(result["title"], "Syntetická kniha")
+        self.assertEqual(result["title"], "Syntetická česká kniha")
         self.assertEqual(result["author"], "Testovací autor")
         self.assertEqual(result["publisher"], "Testovací nakladatelství")
-        self.assertEqual(result["publish_date"], "2026")
+        self.assertEqual(result["publish_date"], "Vydání 2026")
+        self.assertEqual(result["publication_year"], "2026")
         self.assertEqual(result["number_of_pages"], 123)
-        self.assertEqual(result["source_name"], "Open Library")
-        self.assertEqual(result["source_url"], "https://openlibrary.org/isbn/9781234567897")
-        self.assertEqual(len(calls), 1)
+        self.assertEqual(result["source_name"], "Knihovny.cz")
+        self.assertEqual(result["source_url"], "https://www.knihovny.cz/Record/synthetic.record-1")
+        self.assertEqual(len(calls), 2)
         request, timeout, context = calls[0]
         parsed = urllib.parse.urlparse(request.full_url)
-        self.assertEqual((parsed.scheme, parsed.netloc, parsed.path), ("https", "openlibrary.org", "/api/books"))
+        self.assertEqual((parsed.scheme, parsed.netloc, parsed.path), ("https", "www.knihovny.cz", "/api/v1/search"))
         self.assertEqual(
             urllib.parse.parse_qs(parsed.query),
             {
-                "bibkeys": ["ISBN:9781234567897"],
-                "jscmd": ["data"],
-                "format": ["json"],
+                "lookfor": ["9781234567897"],
+                "type": ["ISN"],
+                "limit": ["10"],
             },
         )
         self.assertEqual(timeout, 8.0)
@@ -94,7 +111,7 @@ class BookIsbnLookupTests(unittest.TestCase):
         create_context.assert_called_once_with(cafile="/test/certifi-ca.pem")
 
     def test_isbn10_is_looked_up_together_with_its_isbn13_variant(self) -> None:
-        payload = {
+        open_library_payload = {
             "ISBN:9781234567897": {
                 "title": "Syntetická kniha",
                 "authors": [{"name": "Testovací autor"}],
@@ -104,19 +121,25 @@ class BookIsbnLookupTests(unittest.TestCase):
 
         def opener(request: object, **_kwargs: object) -> FakeResponse:
             request_urls.append(request.full_url)
-            return FakeResponse(json.dumps(payload).encode("utf-8"))
+            parsed = urllib.parse.urlparse(request.full_url)
+            if parsed.netloc == "www.knihovny.cz":
+                lookfor = urllib.parse.parse_qs(parsed.query)["lookfor"][0]
+                records = []
+                if lookfor == "9781234567897":
+                    records = [{"id": "synthetic.record-13", "title": "Syntetická kniha", "authors": {}}]
+                return FakeResponse(json.dumps({"status": "OK", "resultCount": len(records), "records": records}).encode("utf-8"))
+            return FakeResponse(json.dumps(open_library_payload).encode("utf-8"))
 
         result = lookup_book_by_isbn(isbn="123456789X", opener=opener)
 
         self.assertEqual(isbn10_to_isbn13("123456789X"), "9781234567897")
         self.assertEqual(result["isbn"], "123456789X")
         self.assertEqual(result["matched_isbn"], "9781234567897")
-        self.assertEqual(result["source_url"], "https://openlibrary.org/isbn/9781234567897")
-        parsed_query = urllib.parse.parse_qs(urllib.parse.urlparse(request_urls[0]).query)
-        self.assertEqual(
-            parsed_query["bibkeys"],
-            ["ISBN:123456789X,ISBN:9781234567897"],
-        )
+        self.assertEqual(result["source_url"], "https://www.knihovny.cz/Record/synthetic.record-13")
+        first_query = urllib.parse.parse_qs(urllib.parse.urlparse(request_urls[0]).query)
+        second_query = urllib.parse.parse_qs(urllib.parse.urlparse(request_urls[1]).query)
+        self.assertEqual(first_query["lookfor"], ["123456789X"])
+        self.assertEqual(second_query["lookfor"], ["9781234567897"])
 
     def test_invalid_isbn_is_rejected_before_network(self) -> None:
         called = False
@@ -131,7 +154,7 @@ class BookIsbnLookupTests(unittest.TestCase):
         self.assertFalse(called)
 
     def test_unknown_isbn_has_specific_safe_result(self) -> None:
-        responses = iter((b"{}", b'{"docs": []}'))
+        responses = iter((b'{"status":"OK","resultCount":0}', b"{}", b'{"docs": []}'))
 
         with self.assertRaises(BookIsbnNotFoundError):
             lookup_book_by_isbn(
@@ -156,6 +179,8 @@ class BookIsbnLookupTests(unittest.TestCase):
 
         def opener(request: object, **_kwargs: object) -> FakeResponse:
             request_urls.append(request.full_url)
+            if request.full_url.startswith("https://www.knihovny.cz/api/v1/search?"):
+                return FakeResponse(b'{"status":"OK","resultCount":0}')
             if request.full_url.startswith("https://openlibrary.org/api/books?"):
                 return FakeResponse(b"{}")
             return FakeResponse(json.dumps(search_payload).encode("utf-8"))
@@ -168,8 +193,8 @@ class BookIsbnLookupTests(unittest.TestCase):
         self.assertEqual(result["publisher"], "Testovací nakladatelství")
         self.assertEqual(result["publish_date"], "2025")
         self.assertEqual(result["number_of_pages"], 245)
-        self.assertEqual(len(request_urls), 2)
-        search_url = urllib.parse.urlparse(request_urls[1])
+        self.assertEqual(len(request_urls), 3)
+        search_url = urllib.parse.urlparse(request_urls[2])
         self.assertEqual(
             (search_url.scheme, search_url.netloc, search_url.path),
             ("https", "openlibrary.org", "/search.json"),
@@ -197,6 +222,8 @@ class BookIsbnLookupTests(unittest.TestCase):
         }
 
         def opener(request: object, **_kwargs: object) -> FakeResponse:
+            if request.full_url.startswith("https://www.knihovny.cz/api/v1/search?"):
+                return FakeResponse(b'{"status":"OK","resultCount":0}')
             if request.full_url.startswith("https://openlibrary.org/api/books?"):
                 return FakeResponse(b"{}")
             return FakeResponse(json.dumps(search_payload).encode("utf-8"))
@@ -208,6 +235,8 @@ class BookIsbnLookupTests(unittest.TestCase):
         isbn13 = "9781234567897"
         responses = iter(
             (
+                b'{"status":"OK","resultCount":0}',
+                b'{"status":"OK","resultCount":0}',
                 b"{}",
                 b'{"docs": []}',
                 json.dumps(
@@ -232,14 +261,14 @@ class BookIsbnLookupTests(unittest.TestCase):
         result = lookup_book_by_isbn(isbn="123456789X", opener=opener)
 
         self.assertEqual(result["matched_isbn"], isbn13)
-        self.assertEqual(len(request_urls), 3)
-        first_search = urllib.parse.parse_qs(urllib.parse.urlparse(request_urls[1]).query)
-        second_search = urllib.parse.parse_qs(urllib.parse.urlparse(request_urls[2]).query)
+        self.assertEqual(len(request_urls), 5)
+        first_search = urllib.parse.parse_qs(urllib.parse.urlparse(request_urls[3]).query)
+        second_search = urllib.parse.parse_qs(urllib.parse.urlparse(request_urls[4]).query)
         self.assertEqual(first_search["isbn"], ["123456789X"])
         self.assertEqual(second_search["isbn"], [isbn13])
 
     def test_search_index_requires_docs_list(self) -> None:
-        responses = iter((b"{}", b"{}"))
+        responses = iter((b'{"status":"OK","resultCount":0}', b"{}", b"{}"))
 
         with self.assertRaises(BookIsbnLookupError):
             lookup_book_by_isbn(

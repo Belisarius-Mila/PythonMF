@@ -243,6 +243,12 @@
     .library-book-save-actions .primary { min-width: 180px; }
     .library-book-isbn-source { color: #1d4ed8; font-size: 13px; width: fit-content; }
     .library-book-isbn-source.hidden { display: none; }
+    .library-book-catalog-comparison { border: 1px solid #f59e0b; border-radius: 8px; background: #fff7ed; padding: 10px; display: grid; gap: 8px; }
+    .library-book-catalog-comparison.hidden { display: none; }
+    .library-book-catalog-comparison > strong { color: #9a3412; }
+    .library-book-catalog-differences { display: grid; gap: 7px; }
+    .library-book-catalog-difference { border-top: 1px solid #fed7aa; padding-top: 7px; display: grid; gap: 3px; }
+    .library-book-catalog-difference:first-child { border-top: 0; padding-top: 0; }
     .library-book-cover-preview-wrap { display: grid; place-items: center; min-height: 120px; }
     .library-book-cover-preview-wrap.hidden { display: none; }
     .library-book-cover-preview { display: block; max-width: min(100%, 360px); max-height: 360px; object-fit: contain; border: 1px solid #dbe4ef; border-radius: 7px; background: white; }

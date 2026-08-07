@@ -731,9 +731,10 @@ class CockpitTests(unittest.TestCase):
             "author": "Testovací autor",
             "publisher": "Testovací nakladatelství",
             "publish_date": "2026",
+            "publication_year": "2026",
             "number_of_pages": 123,
-            "source_name": "Open Library",
-            "source_url": "https://openlibrary.org/isbn/9781234567897",
+            "source_name": "Knihovny.cz",
+            "source_url": "https://www.knihovny.cz/Record/synthetic.record-1",
         }
         with patch("app.cockpit.lookup_book_by_isbn", return_value=synthetic_lookup) as lookup_mock:
             result = library_book_isbn_lookup_action(
@@ -1493,6 +1494,21 @@ class CockpitTests(unittest.TestCase):
         self.assertFalse(result["ok"])
         self.assertEqual(result["status"], "unexpected_path")
 
+    def test_library_isbn_catalog_comparison_is_inline_and_preview_only(self) -> None:
+        lookup_start = COCKPIT_HTML.index("async function lookupLibraryBookIsbnInto")
+        lookup_end = COCKPIT_HTML.index("async function lookupLibraryBookIsbn()", lookup_start)
+        lookup_source = COCKPIT_HTML[lookup_start:lookup_end]
+
+        self.assertIn("Údaje z katalogu neodpovídají údajům z obálky", COCKPIT_HTML)
+        self.assertIn("Ponechat údaje z obálky", COCKPIT_HTML)
+        self.assertIn("Přepsat údaji z katalogu", COCKPIT_HTML)
+        self.assertIn("if (mismatches.length)", lookup_source)
+        self.assertIn("renderLibraryBookCatalogDifferences", lookup_source)
+        self.assertIn("libraryBookCatalogYearStatus(yearInput, lookup)", lookup_source)
+        self.assertNotIn("window.confirm", lookup_source)
+        self.assertNotIn('/api/library/update', lookup_source)
+        self.assertNotIn('/api/library/book"', lookup_source)
+
     def test_cockpit_html_contains_library_attachment_view(self) -> None:
         self.assertIn("libraryReaderAttachments", COCKPIT_HTML)
         self.assertIn("/api/library/attachment", COCKPIT_HTML)
@@ -1611,7 +1627,14 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("function lookupLibraryBookIsbn()", COCKPIT_HTML)
         self.assertIn('postJson("/api/library/book/isbn-lookup", { isbn })', COCKPIT_HTML)
         self.assertIn("Výsledek se neuloží automaticky", COCKPIT_HTML)
-        self.assertIn('sourceUrl.startsWith("https://openlibrary.org/isbn/")', COCKPIT_HTML)
+        self.assertIn('["www.knihovny.cz", "openlibrary.org"].includes(parsedSourceUrl.hostname)', COCKPIT_HTML)
+        self.assertIn("libraryBookCatalogComparison", COCKPIT_HTML)
+        self.assertIn("libraryBookCatalogKeepBtn", COCKPIT_HTML)
+        self.assertIn("libraryBookCatalogReplaceBtn", COCKPIT_HTML)
+        self.assertIn("Údaje z katalogu neodpovídají údajům z obálky", COCKPIT_HTML)
+        self.assertIn('resolveLibraryBookCatalogComparison("create", false)', COCKPIT_HTML)
+        self.assertIn('resolveLibraryBookCatalogComparison("create", true)', COCKPIT_HTML)
+        self.assertIn("applyLibraryBookCatalogYear", COCKPIT_HTML)
         self.assertIn("libraryEditBookIsbnInput", COCKPIT_HTML)
         self.assertIn('libraryEditBookIsbnPhotoInput" type="file" accept="image/*" capture="environment"', COCKPIT_HTML)
         self.assertIn("libraryEditBookIsbnPhotoReadBtn", COCKPIT_HTML)
@@ -1619,6 +1642,11 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("libraryEditBookIsbnLookupBtn", COCKPIT_HTML)
         self.assertIn("libraryEditBookIsbnLookupStatus", COCKPIT_HTML)
         self.assertIn("libraryEditBookIsbnSourceLink", COCKPIT_HTML)
+        self.assertIn("libraryEditBookCatalogComparison", COCKPIT_HTML)
+        self.assertIn("libraryEditBookCatalogKeepBtn", COCKPIT_HTML)
+        self.assertIn("libraryEditBookCatalogReplaceBtn", COCKPIT_HTML)
+        self.assertIn('resolveLibraryBookCatalogComparison("edit", false)', COCKPIT_HTML)
+        self.assertIn('resolveLibraryBookCatalogComparison("edit", true)', COCKPIT_HTML)
         self.assertIn("function readLibraryEditBookIsbnFromPhoto()", COCKPIT_HTML)
         self.assertIn("function lookupLibraryEditBookIsbn()", COCKPIT_HTML)
         self.assertIn("onUpdated: markLibraryEditorDirty", COCKPIT_HTML)

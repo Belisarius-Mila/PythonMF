@@ -938,7 +938,7 @@ def library_book_isbn_lookup_action(payload: dict[str, Any]) -> dict[str, Any]:
         return {"ok": False, "message": str(exc), "error": "book_isbn_lookup_failed"}
     return {
         "ok": True,
-        "message": "Katalogové údaje jsou předvyplněné k ruční kontrole. Kniha zatím nebyla uložena.",
+        "message": "Katalogový záznam je připravený k porovnání. Kniha zatím nebyla uložena.",
         "lookup": lookup,
         "saved": False,
     }

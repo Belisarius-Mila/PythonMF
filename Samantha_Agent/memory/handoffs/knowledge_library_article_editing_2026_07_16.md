@@ -1,33 +1,33 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-07 08:57 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-07 09:27 CEST
 
 ### Hotovo
-- Knihy nyní ukládají a zobrazují volitelný rok vydání
+- ISBN dohledání nyní porovnává údaje z obálky a bezpečně doplňuje rok vydání
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
 - Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
 - Lokální commity čekají na samostatný denní GitHub balíček.
 
 ### Rizika
-- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
+- Žádné další doložené provozní riziko.
 
 ### Další krok
-- Nasadit změnu a na iPhonu ověřit založení i editaci knihy s rokem vydání
+- Nasadit změnu a na iPhonu ověřit shodu, neshodu i obě volby porovnání
 
 ### Rozhodnutí
-- Rok vydání je volitelné čtyřmístné pole a starší knihy mohou zůstat bez něj
+- Knihovny.cz je primární katalog, Open Library záložní zdroj; neshody se řeší volbou ve formuláři bez automatického uložení
 
 ### Navrhované další kroky
-- Doplnit Knihovny.cz jako primární katalog a Open Library jako fallback
-- Při katalogovém dohledání nepřepisovat odlišné údaje bez ručního výběru
+- Žádné další návrhy nad rámec bezprostředního kroku.
 
 ### Technický stav checkpointu
-- Změna je otestovaná (1324 testů).
-- Git před checkpointem: lokální `main` na `543b34ea7faa`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `01d5a6622e20` · je starší než ověřený main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-07T06:03:59+00:00.
-- Read-only živý stav: main=`local_ahead`, deployment=`verified_other_main`, runtime=`disconnected`.
+- Změna je otestovaná (1325 testů).
+- Git před checkpointem: lokální `main` na `91dc7008cda4`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `91dc7008cda4` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-07T06:58:08+00:00.
+- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -393,3 +393,15 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (7): `Samantha_Agent/app/article_archive.py`, `Samantha_Agent/app/cockpit.py`, `Samantha_Agent/app/frontend/cockpit/app.js`, `Samantha_Agent/app/frontend/cockpit/page.html`, `Samantha_Agent/tests/test_article_archive.py`, `Samantha_Agent/tests/test_cockpit.py`, `Samantha_Agent/tests/test_cockpit_frontend.py`
 - Commit: `Add book publication year metadata`
 - Další krok: Nasadit změnu a na iPhonu ověřit založení i editaci knihy s rokem vydání
+
+### Automatický checkpoint 2026-08-07 09:27 CEST
+
+- Pracovní proud: `project-knowledge-library`
+- Hotovo: ISBN dohledání nyní porovnává údaje z obálky a bezpečně doplňuje rok vydání; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.; Lokální commity čekají na samostatný denní GitHub balíček.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: plná Cockpit brána: 1325 testů, 405.1 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (8): `Samantha_Agent/app/book_isbn_lookup.py`, `Samantha_Agent/app/cockpit.py`, `Samantha_Agent/app/frontend/cockpit/app.js`, `Samantha_Agent/app/frontend/cockpit/page.html`, `Samantha_Agent/app/frontend/cockpit/styles.css`, `Samantha_Agent/tests/test_book_isbn_lookup.py`, `Samantha_Agent/tests/test_cockpit.py`, `Samantha_Agent/tests/test_cockpit_frontend.py`
+- Commit: `Add Czech ISBN catalog comparison`
+- Další krok: Nasadit změnu a na iPhonu ověřit shodu, neshodu i obě volby porovnání
