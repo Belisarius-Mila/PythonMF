@@ -1,33 +1,33 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-06 20:20 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-07 08:57 CEST
 
 ### Hotovo
-- Existující knihu lze při editaci doplnit o ISBN z fotografie a bezpečně dohledat její katalogové údaje
-- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Knihy nyní ukládají a zobrazují volitelný rok vydání
 
 ### Otevřeno
 - Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
 - Lokální commity čekají na samostatný denní GitHub balíček.
 
 ### Rizika
-- Žádné další doložené provozní riziko.
+- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
 
 ### Další krok
-- Nasadit změnu a na iPhonu ověřit celý postup u existující knihy
+- Nasadit změnu a na iPhonu ověřit založení i editaci knihy s rokem vydání
 
 ### Rozhodnutí
-- Fotografie se po přečtení zahodí a katalogové údaje se uloží pouze tlačítkem Uložit úpravy
+- Rok vydání je volitelné čtyřmístné pole a starší knihy mohou zůstat bez něj
 
 ### Navrhované další kroky
-- Pokud Open Library nadále nepokryje české knihy, samostatně navrhnout další český katalog
+- Doplnit Knihovny.cz jako primární katalog a Open Library jako fallback
+- Při katalogovém dohledání nepřepisovat odlišné údaje bez ručního výběru
 
 ### Technický stav checkpointu
-- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `ae67bea05c07`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `ae67bea05c07` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-06T17:49:28+00:00.
-- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+- Změna je otestovaná (1324 testů).
+- Git před checkpointem: lokální `main` na `543b34ea7faa`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `01d5a6622e20` · je starší než ověřený main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-07T06:03:59+00:00.
+- Read-only živý stav: main=`local_ahead`, deployment=`verified_other_main`, runtime=`disconnected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -381,3 +381,15 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (5): `Samantha_Agent/app/frontend/cockpit/app.js`, `Samantha_Agent/app/frontend/cockpit/page.html`, `Samantha_Agent/app/frontend/cockpit/styles.css`, `Samantha_Agent/tests/test_cockpit.py`, `Samantha_Agent/tests/test_cockpit_frontend.py`
 - Commit: `Add ISBN tools to book editing`
 - Další krok: Nasadit změnu a na iPhonu ověřit celý postup u existující knihy
+
+### Automatický checkpoint 2026-08-07 08:57 CEST
+
+- Pracovní proud: `project-knowledge-library`
+- Hotovo: Knihy nyní ukládají a zobrazují volitelný rok vydání
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.; Lokální commity čekají na samostatný denní GitHub balíček.
+- Rizika: Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: plná Cockpit brána: 1324 testů, 308.9 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (7): `Samantha_Agent/app/article_archive.py`, `Samantha_Agent/app/cockpit.py`, `Samantha_Agent/app/frontend/cockpit/app.js`, `Samantha_Agent/app/frontend/cockpit/page.html`, `Samantha_Agent/tests/test_article_archive.py`, `Samantha_Agent/tests/test_cockpit.py`, `Samantha_Agent/tests/test_cockpit_frontend.py`
+- Commit: `Add book publication year metadata`
+- Další krok: Nasadit změnu a na iPhonu ověřit založení i editaci knihy s rokem vydání

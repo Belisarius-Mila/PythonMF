@@ -122,6 +122,7 @@ class ArticleArchiveItem:
     book_author: str = ""
     book_location: str = ""
     book_isbn: str = ""
+    book_publication_year: str = ""
     read_state: str = "normal"
     read_state_label: str = "běžné"
     read_note: str = ""
@@ -148,6 +149,7 @@ class ArticleArchiveItem:
             "book_author": self.book_author,
             "book_location": self.book_location,
             "book_isbn": self.book_isbn,
+            "book_publication_year": self.book_publication_year,
             "snippet": snippet,
             "read_state": self.read_state,
             "read_state_label": self.read_state_label,
@@ -513,6 +515,7 @@ def archive_book_entry(
     summary: str,
     location: str,
     isbn: str = "",
+    publication_year: str = "",
     tags: list[str] | None = None,
     archive_root: Path = DEFAULT_ARCHIVE_ROOT,
 ) -> dict[str, Any]:
@@ -520,6 +523,7 @@ def archive_book_entry(
     clean_author = normalize_book_metadata_value(author, "Uveď autora knihy.")
     clean_location = normalize_book_metadata_value(location, "Uveď umístění knihy.")
     clean_isbn = normalize_book_isbn(isbn)
+    clean_publication_year = normalize_book_publication_year(publication_year)
     clean_summary = normalize_manual_text(summary)
     if not clean_title:
         raise ValueError("Uveď název knihy.")
@@ -537,6 +541,7 @@ def archive_book_entry(
         book_author=clean_author,
         book_location=clean_location,
         book_isbn=clean_isbn,
+        book_publication_year=clean_publication_year,
     )
     return {
         "ok": True,
@@ -646,6 +651,15 @@ def normalize_book_isbn(value: str) -> str:
     raise ValueError("ISBN musí být platné ISBN-10 nebo ISBN-13.")
 
 
+def normalize_book_publication_year(value: str) -> str:
+    clean = str(value or "").strip()
+    if not clean:
+        return ""
+    if not re.fullmatch(r"[0-9]{4}", clean):
+        raise ValueError("Rok vydání musí mít čtyři číslice.")
+    return clean
+
+
 def attach_article_image(
     *,
     article_id: str,
@@ -737,6 +751,7 @@ def update_article(
     book_author: str | None = None,
     book_location: str | None = None,
     book_isbn: str | None = None,
+    book_publication_year: str | None = None,
     archive_root: Path = DEFAULT_ARCHIVE_ROOT,
     now: datetime | None = None,
 ) -> dict[str, Any]:
@@ -769,6 +784,7 @@ def update_article(
     existing_book_author = str(raw.get("book_author", ""))
     existing_book_location = str(raw.get("book_location", ""))
     existing_book_isbn = str(raw.get("book_isbn", ""))
+    existing_book_publication_year = str(raw.get("book_publication_year", ""))
     clean_book_author = " ".join(
         str(existing_book_author if book_author is None else book_author).split()
     )[:300]
@@ -776,6 +792,9 @@ def update_article(
         str(existing_book_location if book_location is None else book_location).split()
     )[:300]
     clean_book_isbn = normalize_book_isbn(existing_book_isbn if book_isbn is None else book_isbn)
+    clean_book_publication_year = normalize_book_publication_year(
+        existing_book_publication_year if book_publication_year is None else book_publication_year
+    )
     if normalized_category == "books":
         if not clean_book_author:
             raise ValueError("Uveď autora knihy.")
@@ -790,6 +809,7 @@ def update_article(
     raw["book_author"] = clean_book_author
     raw["book_location"] = clean_book_location
     raw["book_isbn"] = clean_book_isbn
+    raw["book_publication_year"] = clean_book_publication_year
     raw["text_chars"] = str(len(clean_text))
     raw["updated_at"] = (now or datetime.now(timezone.utc)).replace(microsecond=0).isoformat()
 
@@ -1685,6 +1705,7 @@ def write_text_archive(
     book_author: str = "",
     book_location: str = "",
     book_isbn: str = "",
+    book_publication_year: str = "",
 ) -> dict[str, Any]:
     clean_text = normalize_manual_text(text)
     item_id = text_entry_id(title, clean_text, now)
@@ -1705,6 +1726,7 @@ def write_text_archive(
         "book_author": " ".join(str(book_author or "").split())[:300],
         "book_location": " ".join(str(book_location or "").split())[:300],
         "book_isbn": normalize_book_isbn(book_isbn),
+        "book_publication_year": normalize_book_publication_year(book_publication_year),
         "source_url": "",
         "canonical_url": "",
         "archived_at": now.isoformat(),
@@ -1830,6 +1852,7 @@ def article_item_from_raw(raw: dict[str, Any]) -> ArticleArchiveItem:
         book_author=str(raw.get("book_author", "")).strip(),
         book_location=str(raw.get("book_location", "")).strip(),
         book_isbn=str(raw.get("book_isbn", "")).strip(),
+        book_publication_year=str(raw.get("book_publication_year", "")).strip(),
         read_state=read_state,
         read_state_label=READ_STATE_LABELS[read_state],
         read_note=str(raw.get("read_note", "")).strip(),
@@ -1993,7 +2016,14 @@ def search_articles(
         source_folded = " ".join([item.source_label, item.source_note]).casefold()
         tags_folded = " ".join(item.tags).casefold()
         book_metadata_folded = (
-            " ".join([item.book_author, item.book_location, item.book_isbn]).casefold()
+            " ".join(
+                [
+                    item.book_author,
+                    item.book_location,
+                    item.book_isbn,
+                    item.book_publication_year,
+                ]
+            ).casefold()
             if item.category == "books"
             else ""
         )

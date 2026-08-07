@@ -513,6 +513,7 @@ class CockpitTests(unittest.TestCase):
                     "summary": "Stručný syntetický obsah.",
                     "location": "Pracovna, druhá police",
                     "isbn": "978-1-23456-789-7",
+                    "publication_year": "1998",
                     "tags": "historie; rodina",
                 }
             )
@@ -524,6 +525,7 @@ class CockpitTests(unittest.TestCase):
             summary="Stručný syntetický obsah.",
             location="Pracovna, druhá police",
             isbn="978-1-23456-789-7",
+            publication_year="1998",
             tags=["historie", "rodina"],
         )
 
@@ -886,6 +888,7 @@ class CockpitTests(unittest.TestCase):
             book_author="",
             book_location="",
             book_isbn="",
+            book_publication_year="",
         )
 
     def test_library_attachment_edit_and_remove_actions_use_narrow_helpers(self) -> None:
@@ -1669,11 +1672,13 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("Kniha se tím neukládá", COCKPIT_HTML)
         self.assertIn("libraryEditBookAuthorInput", COCKPIT_HTML)
         self.assertIn("libraryEditBookLocationInput", COCKPIT_HTML)
+        self.assertIn("libraryEditBookPublicationYearInput", COCKPIT_HTML)
         self.assertIn("libraryEditBookCategoryChoices", COCKPIT_HTML)
         self.assertIn('libraryEditTagsInput.closest(".library-field").classList.toggle("hidden", isBook);', COCKPIT_HTML)
         self.assertIn('/api/library/book', COCKPIT_HTML)
         self.assertIn('item.category === "books" && item.book_author', COCKPIT_HTML)
         self.assertIn('item.category === "books" && item.book_location', COCKPIT_HTML)
+        self.assertIn('item.category === "books" && item.book_publication_year', COCKPIT_HTML)
         self.assertIn('data-library-read-state="to_read"', COCKPIT_HTML)
         self.assertIn("K přečtení", COCKPIT_HTML)
         self.assertIn("library-tab read-queue", COCKPIT_HTML)

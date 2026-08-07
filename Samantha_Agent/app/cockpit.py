@@ -753,6 +753,7 @@ def library_archive_book_action(payload: dict[str, Any]) -> dict[str, Any]:
             summary=str(payload.get("summary", "")),
             location=str(payload.get("location", "")),
             isbn=str(payload.get("isbn", "")),
+            publication_year=str(payload.get("publication_year", "")),
             tags=parse_tag_payload(payload.get("tags", [])),
         )
     except ValueError as exc:
@@ -956,6 +957,7 @@ def library_update_article_action(payload: dict[str, Any]) -> dict[str, Any]:
             book_author=str(payload.get("book_author", "")),
             book_location=str(payload.get("book_location", "")),
             book_isbn=str(payload.get("book_isbn", "")),
+            book_publication_year=str(payload.get("book_publication_year", "")),
         )
     except ValueError as exc:
         return {"ok": False, "message": str(exc), "error": "invalid_article_update"}

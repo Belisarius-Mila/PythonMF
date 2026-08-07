@@ -76,6 +76,7 @@
     const libraryTextStatus = document.getElementById("libraryTextStatus");
     const libraryBookTitleInput = document.getElementById("libraryBookTitleInput");
     const libraryBookAuthorInput = document.getElementById("libraryBookAuthorInput");
+    const libraryBookPublicationYearInput = document.getElementById("libraryBookPublicationYearInput");
     const libraryBookIsbnInput = document.getElementById("libraryBookIsbnInput");
     const libraryBookIsbnPhotoInput = document.getElementById("libraryBookIsbnPhotoInput");
     const libraryBookIsbnPhotoReadBtn = document.getElementById("libraryBookIsbnPhotoReadBtn");
@@ -144,6 +145,7 @@
     const libraryEditCategoryInput = document.getElementById("libraryEditCategoryInput");
     const libraryEditBookFields = document.getElementById("libraryEditBookFields");
     const libraryEditBookAuthorInput = document.getElementById("libraryEditBookAuthorInput");
+    const libraryEditBookPublicationYearInput = document.getElementById("libraryEditBookPublicationYearInput");
     const libraryEditBookLocationInput = document.getElementById("libraryEditBookLocationInput");
     const libraryEditBookIsbnInput = document.getElementById("libraryEditBookIsbnInput");
     const libraryEditBookIsbnPhotoInput = document.getElementById("libraryEditBookIsbnPhotoInput");
@@ -4177,6 +4179,7 @@ Soubor nebude trvale smazán.`);
         libraryEditTitleInput,
         libraryEditCategoryInput,
         libraryEditBookAuthorInput,
+        libraryEditBookPublicationYearInput,
         libraryEditBookLocationInput,
         libraryEditBookIsbnInput,
         libraryEditBookIsbnPhotoInput,
@@ -4255,6 +4258,7 @@ Soubor nebude trvale smazán.`);
         libraryEditTitleInput.value = item.title || item.one_line_title || "";
         libraryEditCategoryInput.value = item.category || "other";
         libraryEditBookAuthorInput.value = item.book_author || "";
+        libraryEditBookPublicationYearInput.value = item.book_publication_year || "";
         setLibraryBookLocationValue(libraryEditBookLocationInput, item.book_location || "");
         libraryEditBookIsbnInput.value = item.book_isbn || "";
         resetLibraryEditBookIsbnTools();
@@ -4283,6 +4287,7 @@ Soubor nebude trvale smazán.`);
       const text = libraryEditTextInput.value.trim();
       const isBook = libraryEditCategoryInput.value === "books";
       const bookAuthor = libraryEditBookAuthorInput.value.trim();
+      const bookPublicationYear = libraryEditBookPublicationYearInput.value.trim();
       const bookLocation = libraryEditBookLocationInput.value.trim();
       const bookIsbn = libraryEditBookIsbnInput.value.trim();
       const selectedBookCategories = selectedLibraryBookCategories(libraryEditBookCategoryChoices);
@@ -4318,6 +4323,7 @@ Soubor nebude trvale smazán.`);
           source_label: libraryEditSourceInput.value.trim(),
           source_note: libraryEditSourceNoteInput.value.trim(),
           book_author: bookAuthor,
+          book_publication_year: bookPublicationYear,
           book_location: bookLocation,
           book_isbn: bookIsbn
         });
@@ -5036,6 +5042,7 @@ Soubor nebude trvale smazán.`);
     async function saveLibraryBook() {
       const title = libraryBookTitleInput.value.trim();
       const author = libraryBookAuthorInput.value.trim();
+      const publicationYear = libraryBookPublicationYearInput.value.trim();
       const isbn = libraryBookIsbnInput.value.trim();
       const location = libraryBookLocationInput.value.trim();
       const summary = libraryBookSummaryInput.value.trim();
@@ -5078,6 +5085,7 @@ Soubor nebude trvale smazán.`);
         const data = await postJson("/api/library/book", {
           title,
           author,
+          publication_year: publicationYear,
           isbn,
           location,
           summary,
@@ -5114,6 +5122,7 @@ Soubor nebude trvale smazán.`);
         libraryBookStatus.textContent = finalMessage;
         libraryBookTitleInput.value = "";
         libraryBookAuthorInput.value = "";
+        libraryBookPublicationYearInput.value = "";
         libraryBookIsbnInput.value = "";
         libraryBookLocationInput.value = "";
         setLibraryBookSelectedCategories(libraryBookCategoryChoices, []);
@@ -5423,6 +5432,7 @@ ${confirmation}`, "");
       if (date) parts.push(date);
       if (item.category_label) parts.push(item.category_label);
       if (item.category === "books" && item.book_author) parts.push(`Autor: ${item.book_author}`);
+      if (item.category === "books" && item.book_publication_year) parts.push(`Rok vydání: ${item.book_publication_year}`);
       if (item.category === "books" && item.book_isbn) parts.push(`ISBN: ${item.book_isbn}`);
       if (item.category === "books" && item.book_location) parts.push(`Umístění: ${item.book_location}`);
       if (item.source_label) parts.push(item.source_label);

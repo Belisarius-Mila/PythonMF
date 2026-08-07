@@ -591,6 +591,7 @@ class ArticleArchiveTests(unittest.TestCase):
                 summary="Stručný obsah o putování, paměti míst a rodinné historii.",
                 location="Obývák, levá knihovna, druhá police",
                 isbn="978-1-23456-789-7",
+                publication_year="1998",
                 tags=["historie", "cestování"],
                 archive_root=archive_root,
             )
@@ -615,6 +616,11 @@ class ArticleArchiveTests(unittest.TestCase):
                 category="books",
                 archive_root=archive_root,
             )
+            by_publication_year = search_articles(
+                query="1998",
+                category="books",
+                archive_root=archive_root,
+            )
 
         self.assertEqual(result["item"]["category"], "books")
         self.assertEqual(result["item"]["category_label"], "Knihy")
@@ -624,11 +630,13 @@ class ArticleArchiveTests(unittest.TestCase):
             "Obývák, levá knihovna, druhá police",
         )
         self.assertEqual(result["item"]["book_isbn"], "9781234567897")
+        self.assertEqual(result["item"]["book_publication_year"], "1998")
         self.assertEqual(listed["count"], 1)
         self.assertEqual(by_author["count"], 1)
         self.assertEqual(by_location["count"], 1)
         self.assertEqual(by_summary["count"], 1)
         self.assertEqual(by_isbn["count"], 1)
+        self.assertEqual(by_publication_year["count"], 1)
 
     def test_book_options_have_defaults_and_persist_custom_values(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
@@ -740,6 +748,7 @@ class ArticleArchiveTests(unittest.TestCase):
                 book_author="Nový autor",
                 book_location="Pracovna, třetí police",
                 book_isbn="123456789X",
+                book_publication_year="2004",
                 archive_root=archive_root,
             )
             reloaded = get_article(
@@ -750,6 +759,7 @@ class ArticleArchiveTests(unittest.TestCase):
 
         self.assertEqual(updated["item"]["book_author"], "Nový autor")
         self.assertEqual(updated["item"]["book_isbn"], "123456789X")
+        self.assertEqual(updated["item"]["book_publication_year"], "2004")
         self.assertEqual(
             reloaded["item"]["book_location"],
             "Pracovna, třetí police",
@@ -765,6 +775,18 @@ class ArticleArchiveTests(unittest.TestCase):
                     summary="Syntetický stručný obsah.",
                     location="Testovací police",
                     isbn="1234567890",
+                    archive_root=Path(temp_dir),
+                )
+
+    def test_book_rejects_invalid_publication_year(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            with self.assertRaisesRegex(ValueError, "čtyři číslice"):
+                archive_book_entry(
+                    title="Syntetická kniha",
+                    author="Testovací autor",
+                    summary="Syntetický stručný obsah.",
+                    location="Testovací police",
+                    publication_year="98",
                     archive_root=Path(temp_dir),
                 )
 
