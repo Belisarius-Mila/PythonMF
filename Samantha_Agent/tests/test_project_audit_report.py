@@ -89,7 +89,7 @@ class ProjectAuditReportTests(unittest.TestCase):
         self.assertIn("PictNew", text)
         self.assertNotIn("Stary test", text)
         self.assertNotIn("data/private", text)
-        self.assertIn("Nejdriv rozhodnout git stav", text)
+        self.assertNotIn("Nejdriv rozhodnout git stav", text)
         self.assertIn("Drift projektové paměti", text)
 
     def test_audit_warns_when_canonical_memory_is_newer_than_aggregate(self) -> None:

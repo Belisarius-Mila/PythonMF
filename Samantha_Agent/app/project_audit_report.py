@@ -352,7 +352,8 @@ def _quick_recommendations(
     priority_1: Sequence[ProjectAuditItem],
 ) -> tuple[str, ...]:
     items: list[str] = []
-    if _git_dirty_count(git_summary) >= 4 or "ahead" in git_summary:
+    normalized_git_summary = git_summary.casefold()
+    if _git_dirty_count(git_summary) >= 4 or "behind" in normalized_git_summary:
         items.append("Nejdriv rozhodnout git stav: oddelit hotove commity od rozpracovanych zmen a pred pushem spustit safety check.")
     if not backup_ok:
         items.append("Pred vetsi praci vyresit backup warning a udelat novou recovery zalohu, pokud je dostupny externi disk.")
