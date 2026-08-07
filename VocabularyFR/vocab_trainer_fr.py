@@ -1,3 +1,4 @@
+import argparse
 import csv
 import json
 import os
@@ -59,7 +60,10 @@ def _app_parent_dir():
     return os.path.dirname(_app_container_dir())
 
 
-def resolve_csv_path():
+def resolve_csv_path(data_dir=None):
+    if data_dir:
+        return os.path.join(os.path.abspath(os.path.expanduser(data_dir)), CSV_FILENAME)
+
     # Prefer "portable" data next to .app when possible, fallback to Application Support.
     if getattr(sys, "frozen", False) or _is_macos_app_runtime():
         exe_dir = os.path.dirname(sys.executable)
@@ -177,9 +181,12 @@ def resolve_pict_csv_path(base_csv_path):
 
 
 class VocabularyTrainerApp:
-    def __init__(self, master, csv_path):
+    def __init__(self, master, csv_path, pict_dir=None):
         self.master = master
         self.csv_path = csv_path
+        self.pict_dir = (
+            os.path.abspath(os.path.expanduser(pict_dir)) if pict_dir else None
+        )
         self.master.title("Vocabulary FR Trainer")
         self.master.configure(bg="white")
         self.master.geometry("1320x800")
@@ -787,6 +794,7 @@ class VocabularyTrainerApp:
         support_dir = _app_support_dir()
         portable_parent_dir = os.path.dirname(csv_dir) if csv_dir else ""
         for d in (
+            self.pict_dir,
             os.path.join(portable_parent_dir, "Pict"),
             os.path.join(support_dir, "Pict"),
             os.path.join(project_dir, "Pict"),
@@ -1017,7 +1025,7 @@ class VocabularyTrainerApp:
             return ""
         csv_dir = os.path.dirname(self.csv_path)
         code_dir = os.path.dirname(__file__)
-        for base in (code_dir, csv_dir):
+        for base in (*self.picture_base_dirs, code_dir, csv_dir):
             for name in names:
                 path = os.path.join(base, name)
                 if os.path.exists(path):
@@ -2690,7 +2698,29 @@ class VocabularyTrainerApp:
         self.edit_entry.bind("<FocusOut>", save_edit)
 
 
-if __name__ == "__main__":
+def parse_runtime_arguments(argv=None):
+    parser = argparse.ArgumentParser(description="Vocabulary FR desktop trainer")
+    parser.add_argument(
+        "--data-dir",
+        help="Directory containing writable VocabularyFR CSV files.",
+    )
+    parser.add_argument(
+        "--pict-dir",
+        help="Directory containing shared pictures and mapping.json.",
+    )
+    return parser.parse_args(argv)
+
+
+def main(argv=None):
+    arguments = parse_runtime_arguments(argv)
     root = tk.Tk()
-    app = VocabularyTrainerApp(root, resolve_csv_path())
+    VocabularyTrainerApp(
+        root,
+        resolve_csv_path(arguments.data_dir),
+        pict_dir=arguments.pict_dir,
+    )
     root.mainloop()
+
+
+if __name__ == "__main__":
+    main()
