@@ -24,6 +24,7 @@ COMPLETION_STATUS_SCHEMA = 1
 TURN_STARTED = "turn_started"
 DELIVERY_UNCERTAIN = "delivery_uncertain"
 TURN_FAILED = "turn_failed"
+NO_CHANGES_COMPLETED = "no_changes_completed"
 RECEIPT_MISSING = "receipt_missing"
 RECEIPT_INVALID = "receipt_invalid"
 RECEIPT_ACCEPTED = "receipt_accepted"
@@ -39,6 +40,7 @@ _RECORD_STATES = frozenset(
         TURN_STARTED,
         DELIVERY_UNCERTAIN,
         TURN_FAILED,
+        NO_CHANGES_COMPLETED,
         RECEIPT_MISSING,
         RECEIPT_INVALID,
         RECEIPT_ACCEPTED,
@@ -502,6 +504,7 @@ def completion_status_model_block(status: object) -> str:
             f"pending_remote_commit_count={_safe_count(value.get('pending_remote_commit_count'))}",
             "rule=A model receipt only requests completion; this server block is the authority for its actual result.",
             "rule=When state=checkpoint_completed, explicitly acknowledge the verified checkpoint if asked whether the previous development finished.",
+            "rule=When state=no_changes_completed, the delivered turn was explicitly reclassified as a clean advisory result without file or Git changes.",
             "rule=When state is failed, missing, uncertain or attention_required, do not claim completion.",
             "[/LAST_STEP_COMPLETION]",
         )

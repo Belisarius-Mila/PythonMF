@@ -3575,6 +3575,81 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertIn(f"checkpoint={'c' * 12}", model_input)
         self.assertIn("server block is the authority", model_input)
 
+    def test_clean_delivered_advisory_turn_can_be_explicitly_reclassified(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, _library_workspace, human_hub, _library_hub = (
+                self.make_manager(Path(temp_dir))
+            )
+            client_message_id = "clean-advisory-turn-001"
+            manager.completion_status_store.begin(
+                workstream_id="layer-human-adam-development",
+                client_message_id=client_message_id,
+                base_head="a" * 40,
+            )
+            manager.completion_status_store.update(
+                workstream_id="layer-human-adam-development",
+                client_message_id=client_message_id,
+                state="turn_failed",
+                failure_code="turn_failed",
+            )
+            human_hub.messages.append(
+                {
+                    "client_message_id": client_message_id,
+                    "status": "completed",
+                    "delivery_confirmed": True,
+                    "recovery_required": False,
+                    "answer": "Doporučuji tuto variantu; žádný soubor jsem neměnil.",
+                }
+            )
+
+            result = manager.reclassify_last_clean_failed_turn_as_no_changes(
+                confirmed=True,
+            )
+            status = manager.last_step_completion_status()
+
+        self.assertFalse(human_workspace.dirty)
+        self.assertEqual(result["state"], "no_changes_completed")
+        self.assertTrue(result["workspace_verified"])
+        self.assertTrue(result["delivery_verified"])
+        self.assertTrue(result["audit_preserved"])
+        self.assertEqual(status["state"], "no_changes_completed")
+        self.assertFalse(status["git_verified"])
+
+    def test_advisory_reclassification_refuses_dirty_workspace(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, _library_workspace, human_hub, _library_hub = (
+                self.make_manager(Path(temp_dir))
+            )
+            client_message_id = "dirty-advisory-turn-001"
+            manager.completion_status_store.begin(
+                workstream_id="layer-human-adam-development",
+                client_message_id=client_message_id,
+                base_head="a" * 40,
+            )
+            manager.completion_status_store.update(
+                workstream_id="layer-human-adam-development",
+                client_message_id=client_message_id,
+                state="turn_failed",
+                failure_code="turn_failed",
+            )
+            human_hub.messages.append(
+                {
+                    "client_message_id": client_message_id,
+                    "status": "completed",
+                    "delivery_confirmed": True,
+                    "recovery_required": False,
+                    "answer": "Poradní odpověď.",
+                }
+            )
+            human_workspace.dirty = True
+
+            with self.assertRaisesRegex(AppServerError, "Workspace není čistý"):
+                manager.reclassify_last_clean_failed_turn_as_no_changes(
+                    confirmed=True,
+                )
+
     def test_checkpoint_failure_is_durable_for_next_status(self) -> None:
         receipt = (
             "Změna je připravená.\n\n"

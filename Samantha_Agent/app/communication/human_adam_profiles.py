@@ -39,6 +39,7 @@ from app.communication.human_adam_completion_status import (
     CHECKPOINT_FAILED,
     DELIVERY_UNCERTAIN as COMPLETION_DELIVERY_UNCERTAIN,
     INTEGRATION_DEFERRED as COMPLETION_INTEGRATION_DEFERRED,
+    NO_CHANGES_COMPLETED,
     RECEIPT_ACCEPTED,
     RECEIPT_INVALID,
     RECEIPT_MISSING,
@@ -1858,6 +1859,103 @@ class HumanAdamProfileManager:
                     f"Workspace {row['label']} není synchronní s main; vývoj zůstává uzamčený."
                 )
         return False
+
+    def reclassify_last_clean_failed_turn_as_no_changes(
+        self,
+        *,
+        confirmed: bool,
+    ) -> dict[str, Any]:
+        """Reclassify one proven clean advisory turn without erasing its audit trail."""
+
+        if not confirmed:
+            raise AppServerError(
+                "Překlasifikace čistého poradního tahu vyžaduje výslovné potvrzení."
+            )
+        with self.profile_operation() as service:
+            self._assert_all_profile_sessions_idle()
+            workstream_id = self.active_workstream_id
+            record = self.completion_status_store.load(
+                workstream_id=workstream_id
+            )
+            if (
+                record is None
+                or record.state != TURN_FAILED
+                or record.failure_code != "turn_failed"
+                or record.checkpoint_head
+            ):
+                raise AppServerError(
+                    "Poslední stav není čistý neúspěšný tah vhodný k překlasifikaci."
+                )
+            workspace = service.workspace.status()
+            if (
+                workspace.get("ok") is not True
+                or workspace.get("prepared") is not True
+                or bool(workspace.get("dirty"))
+                or int(workspace.get("source_pending_changes") or 0) != 0
+                or workspace.get("workspace_relation") not in {"aligned", "source_ahead"}
+                or bool(workspace.get("local_checkpoint_ahead"))
+                or bool(workspace.get("local_checkpoint_preserved"))
+                or int(workspace.get("local_commit_count") or 0) != 0
+            ):
+                raise AppServerError(
+                    "Workspace není čistý; poradní tah nelze bezpečně překlasifikovat."
+                )
+            session = service.hub.snapshot()
+            messages = session.get("messages")
+            entry = (
+                next(
+                    (
+                        item
+                        for item in messages
+                        if isinstance(item, dict)
+                        and item.get("client_message_id") == record.client_message_id
+                    ),
+                    None,
+                )
+                if isinstance(messages, list)
+                else None
+            )
+            if (
+                not isinstance(entry, dict)
+                or entry.get("status") != "completed"
+                or entry.get("delivery_confirmed") is not True
+                or bool(entry.get("recovery_required"))
+            ):
+                raise AppServerError(
+                    "Původní tah nemá úplný důkaz bezpečného doručení."
+                )
+            answer = entry.get("answer")
+            if (
+                parse_turn_completion(answer).state != "absent"
+                or parse_human_adam_operation(answer).state != "absent"
+            ):
+                raise AppServerError(
+                    "Původní tah obsahuje dokončovací nebo provozní účtenku."
+                )
+            job = self.completion_job_store.load()
+            if (
+                job is not None
+                and job.client_message_id == record.client_message_id
+                and job.state in ACTIVE_COMPLETION_JOB_STATES
+            ):
+                raise AppServerError(
+                    "Dokončovací job tohoto tahu je stále aktivní."
+                )
+            updated = self.completion_status_store.update(
+                workstream_id=workstream_id,
+                client_message_id=record.client_message_id,
+                state=NO_CHANGES_COMPLETED,
+                failure_code="",
+                answer_persisted=record.answer_persisted,
+            )
+        return {
+            "ok": True,
+            "state": updated.state,
+            "workstream_id": updated.workstream_id,
+            "workspace_verified": True,
+            "delivery_verified": True,
+            "audit_preserved": True,
+        }
 
     def _assert_isolated_source_wip_write_ready(
         self,

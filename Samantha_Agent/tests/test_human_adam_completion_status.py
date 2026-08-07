@@ -9,6 +9,7 @@ from pathlib import Path
 from app.communication.human_adam_completion_status import (
     ATTENTION_REQUIRED,
     CHECKPOINT_COMPLETED,
+    NO_CHANGES_COMPLETED,
     RECEIPT_ACCEPTED,
     HumanAdamCompletionStatusError,
     HumanAdamCompletionStatusStore,
@@ -35,6 +36,34 @@ def clean_workspace(*, source_head: str = CHECKPOINT_HEAD) -> dict[str, object]:
 
 
 class HumanAdamCompletionStatusStoreTests(unittest.TestCase):
+    def test_failed_turn_can_be_reclassified_without_erasing_audit_identity(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "completion.json"
+            store = HumanAdamCompletionStatusStore(path)
+            started = store.begin(
+                workstream_id=WORKSTREAM_ID,
+                client_message_id=CLIENT_MESSAGE_ID,
+                base_head=BASE_HEAD,
+            )
+            store.update(
+                workstream_id=WORKSTREAM_ID,
+                client_message_id=CLIENT_MESSAGE_ID,
+                state="turn_failed",
+                failure_code="turn_failed",
+            )
+
+            reclassified = store.update(
+                workstream_id=WORKSTREAM_ID,
+                client_message_id=CLIENT_MESSAGE_ID,
+                state=NO_CHANGES_COMPLETED,
+            )
+
+            self.assertEqual(reclassified.state, NO_CHANGES_COMPLETED)
+            self.assertEqual(reclassified.client_message_id, started.client_message_id)
+            self.assertEqual(reclassified.base_head, started.base_head)
+            self.assertEqual(reclassified.failure_code, "")
+            self.assertEqual(reclassified.checkpoint_head, "")
+
     def test_completed_record_is_private_and_round_trips(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             path = Path(temp_dir) / "completion.json"
@@ -131,6 +160,37 @@ class HumanAdamCompletionStatusStoreTests(unittest.TestCase):
 
 
 class HumanAdamCompletionPublicStatusTests(unittest.TestCase):
+    def test_no_changes_record_is_a_neutral_verified_public_state(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            store = HumanAdamCompletionStatusStore(
+                Path(temp_dir) / "completion.json"
+            )
+            store.begin(
+                workstream_id=WORKSTREAM_ID,
+                client_message_id=CLIENT_MESSAGE_ID,
+                base_head=BASE_HEAD,
+            )
+            record = store.update(
+                workstream_id=WORKSTREAM_ID,
+                client_message_id=CLIENT_MESSAGE_ID,
+                state=NO_CHANGES_COMPLETED,
+            )
+
+            status = public_completion_status(
+                record=record,
+                observed_at="2026-08-07T06:30:00+00:00",
+                source_snapshot=clean_workspace(source_head=BASE_HEAD),
+                deployment_snapshot=None,
+                checkpoint_reachable=None,
+            )
+            block = completion_status_model_block(status)
+
+            self.assertEqual(status["state"], NO_CHANGES_COMPLETED)
+            self.assertTrue(status["workspace_verified"])
+            self.assertFalse(status["git_verified"])
+            self.assertIn("state=no_changes_completed", block)
+            self.assertIn("clean advisory result", block)
+
     def completed_record(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             store = HumanAdamCompletionStatusStore(

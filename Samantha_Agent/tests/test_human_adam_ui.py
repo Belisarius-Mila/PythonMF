@@ -87,6 +87,8 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("status.server_authoritative === true", HUMAN_ADAM_HTML)
         self.assertIn('state === "checkpoint_completed"', HUMAN_ADAM_HTML)
         self.assertIn("Vývoj dokončen ✓ · Git checkpoint", HUMAN_ADAM_HTML)
+        self.assertIn('state === "no_changes_completed"', HUMAN_ADAM_HTML)
+        self.assertIn("Poradní tah dokončen ✓ · bez změn souborů", HUMAN_ADAM_HTML)
         self.assertIn("Účtenka přijata · server dokončuje", HUMAN_ADAM_HTML)
         self.assertIn("Checkpoint se nedokončil", HUMAN_ADAM_HTML)
         self.assertIn(

@@ -1148,6 +1148,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         ? " · nasazeno"
         : " · nasazení čeká";
       stepCompletionReceipt.textContent = `Vývoj dokončen ✓ · Git checkpoint ${checkpoint || "ověřen"}${remote}${deployment}`;
+    } else if (state === "no_changes_completed") {
+      stepCompletionReceipt.textContent = "Poradní tah dokončen ✓ · bez změn souborů";
     } else if (state === "turn_started" || state === "receipt_accepted") {
       stepCompletionReceipt.classList.add("running");
       stepCompletionReceipt.textContent = state === "receipt_accepted"
