@@ -306,6 +306,10 @@ SENTENCE_PATCHES = {
         "Je suis un cours de français chaque semaine.",
         "Každý týden chodím na kurz francouzštiny.",
     ),
+    391: SentencePatch(
+        "Ma nouvelle collègue est très sympa.",
+        "Moje nová kolegyně je velmi sympatická.",
+    ),
 }
 
 
