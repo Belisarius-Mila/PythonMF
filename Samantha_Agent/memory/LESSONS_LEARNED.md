@@ -145,3 +145,16 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Řešení: Před hydratací porovnat přesnou cestu, velikost, čas změny a přítomnost
   uloženého těla. Pouze úplná shoda znamená bezpečně indexovaný nezměněný zdroj;
   nový, změněný nebo neúplný placeholder zůstává čekajícím stažením.
+
+### LL-011 — Projektový audit nesmí tiše vydávat starý agregát za aktuální stav
+
+- Problém: Automatické checkpointy správně aktualizovaly kanonické handoffy a
+  TVBCP, ale ne souhrnný `ACTIVE_PROJECTS.md`. Systémový audit četl hlavně tento
+  starší agregát, takže nové milníky opakoval jako zastaralý aktuální stav.
+- Typ: opakující se
+- Řešení nalezeno: 07082026
+- Řešení: Před projektovým reportem porovnat Git stáří agregátu s kanonickými
+  handoffy/TVBCP. Pokud je kanonická paměť novější, report musí drift viditelně
+  přiznat a doporučit synchronizaci; nesmí starý souhrn prezentovat bez
+  varování. Po významném checkpointu aktualizovat i příslušný řádek
+  `ACTIVE_PROJECTS.md`, nebo zařadit tuto synchronizaci do uzavíracího workflow.

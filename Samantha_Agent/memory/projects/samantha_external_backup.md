@@ -547,6 +547,21 @@ vypise, zda je zaloha v 3dennim intervalu nebo se ma pripomenout.
 - Pred prvni ostrou zalohou zkontrolovat dry-run statistiku a cil.
 - Nepouzivat automaticke mazani na zaloze v prvni verzi.
 
+## Aktualni provozni stav 2026-08-07
+
+- Posledni uspesny recovery snapshot je `20260802_153855`.
+- Stav je ulozeny v kanonickem projektu a ctou jej vsechny profilove
+  workspaces; nevznikaji oddelene profilove kopie.
+- K 2026-08-07 je snapshot starsi nez tri dny, proto `backup_status.py`
+  spravne zobrazuje upozorneni.
+- Handoff o neviditelnem USB disku z 2026-07-14 je historicky incident, ne
+  dukaz aktualniho stavu disku.
+
+Dalsi krok:
+
+- Pripojit sifrovany externi disk, spustit standardni potvrzenou recovery
+  zalohu a po dokonceni znovu overit `backup_status.py`.
+
 ## Cilena obnova
 
 Samantha ma mit tooly pro cilene vytazeni jednoho souboru nebo slozky ze

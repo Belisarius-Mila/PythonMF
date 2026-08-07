@@ -5,6 +5,8 @@ import tempfile
 import unittest
 from datetime import datetime
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import patch
 
 from app.backup.activity_state import record_backup_completed
 from app.project_audit_report import (
@@ -88,6 +90,55 @@ class ProjectAuditReportTests(unittest.TestCase):
         self.assertNotIn("Stary test", text)
         self.assertNotIn("data/private", text)
         self.assertIn("Nejdriv rozhodnout git stav", text)
+        self.assertIn("Drift projektové paměti", text)
+
+    def test_audit_warns_when_canonical_memory_is_newer_than_aggregate(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            project_root = root / "Samantha_Agent"
+            memory_dir = project_root / "memory"
+            memory_dir.mkdir(parents=True)
+            (memory_dir / "ACTIVE_PROJECTS.md").write_text(
+                ACTIVE_PROJECTS_SAMPLE,
+                encoding="utf-8",
+            )
+            (memory_dir / "MEMORY_INDEX.md").write_text(
+                MEMORY_INDEX_SAMPLE,
+                encoding="utf-8",
+            )
+            backup_path = project_root / "data" / "backup" / "activity_state.json"
+            record_backup_completed("2026-06-23", path=backup_path)
+            memory_truth = SimpleNamespace(
+                rows=(
+                    SimpleNamespace(
+                        name="Cockpit",
+                        canonical_newer_than_aggregate=True,
+                    ),
+                    SimpleNamespace(
+                        name="Knihovna",
+                        canonical_newer_than_aggregate=False,
+                    ),
+                )
+            )
+
+            with patch(
+                "app.project_audit_report.run_memory_truth_audit",
+                return_value=memory_truth,
+            ):
+                result = run_samantha_project_audit(
+                    mode="quick",
+                    memory_dir=memory_dir,
+                    project_root=project_root,
+                    repo_root=root,
+                    backup_state_path=backup_path,
+                    runner=fake_git_runner,
+                )
+            text = format_project_audit_result(result)
+
+        self.assertEqual(result.memory_drift_count, 1)
+        self.assertEqual(result.memory_drift_workstreams, ("Cockpit",))
+        self.assertIn("1 proudů má novější kanonický handoff/TVBCP", text)
+        self.assertIn("synchronizovat ACTIVE_PROJECTS.md", text)
 
     def test_save_writes_git_safe_report_to_reports_dir(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

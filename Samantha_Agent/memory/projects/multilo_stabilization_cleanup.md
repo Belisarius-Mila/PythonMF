@@ -217,3 +217,17 @@ A dostupné testy MultiLO plus ruční retest návratu do kokpitu.
 
 Souhrn ChatGPT/Codex konverzace k MultiLO, stabilizaci zamrzání při návratu do kokpitu, přesunu tlačítka návratu, nahrazení `CTkEntry` za `tk.Entry`, review lifecycle screenů, zavedení `cleanup()` API a opravě `MonthsScreen._back()`.
 
+## Aktualni stav 2026-08-07
+
+- Pro Janin Mac je pripraveny novy samostatny aplikacni balik s Pythonem 3.12
+  a Tk 8.6.13; puvodni balik nebyl prepsany.
+- Balik zachovava uzivatelska data v `Application Support/MultiLO`.
+- Lokalni MultiLO je pridane do katalogu aplikaci v Cockpitu.
+- Puvodni stabilizacni pravidla `cleanup()`, ruseni callbacku a pouziti
+  `tk.Entry` zustavaji platna.
+
+Dalsi krok:
+
+- Na Janine Macu ukoncit starou aplikaci, nahradit ji novym balickem bez
+  mazani `Application Support/MultiLO` a kratce overit start a navrat do
+  kokpitu.

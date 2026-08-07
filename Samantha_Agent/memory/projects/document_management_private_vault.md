@@ -581,3 +581,20 @@ soubor, technicky workflow a posledni aktivni handoff.
 - `handoffs/document_vault_print_workflow_2026_05_22.md` - implementace a test
   dvoukrokoveho print workflow; fyzicke overeni bylo pozdeji potvrzeno Milou na
   TXT dokumentu o zkratkach.
+
+## Aktualni orientacni stav 2026-08-07
+
+- Document vault a ScanDocu zustavaji kanonickym soukromym dokumentovym
+  systemem; nevznikl druhy paralelni trezor.
+- Servisni obrazovka Cockpitu byla zjednodusena: hlavni cast ukazuje aktualni
+  cekajici inbox a stav trezoru, historicke agregace jsou az v rozbalovacich
+  technickych podrobnostech.
+- Zmena nic nemazala a zachovala auditni historii i vsechny existujici
+  backendove operace.
+- Historicke pocty dokumentu nejsou samy o sobe pracovnim ukolem.
+
+Dalsi krok:
+
+- Az bude prostor pro terminalovy test, projit jeden skutecny e-mail s PDF a
+  JPEG prilohou: nahled, ulozeni do vaultu a doplneni metadat ve ScanDocu
+  Review.

@@ -134,6 +134,21 @@ Bezpecnost:
 - `data/private/` zustava mimo git. Do gitu patri jen generator, UI, testy a
   pametovy handoff bez soukromych videi.
 
+## Aktualni kanonicky stav 2026-08-07
+
+- Cockpit otevira lokalni Family Video Organizer nad overenym soukromym
+  balickem, ne nad verejnou trizaznamovou ukazkou.
+- Pokud uplny soukromy balicek neni dostupny nebo je neuplny, aplikace
+  bezpecne pouzije verejnou sablonu.
+- Generator zapocitava jako dostupne i video, ktere uz je zachovane v cilovem
+  balicku, i kdyz chybi v puvodnim zdroji.
+- Soukroma data, nahledy a videa zustavaji mimo Git.
+
+Dalsi krok:
+
+- Nadale cekat na dcerin export JSON. Po prijeti nejdriv provest read-only
+  kontrolu; import do short/family vyberu zustava samostatne potvrzovany.
+
 ## Historicke handoffy
 
 Tyto handoffy ponechat jako auditni historii, ale nepouzivat je jako aktivni

@@ -1,42 +1,42 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obsahově narovnáno P6b: 2026-07-30 07:25 CEST
+- Stav znovu ověřen: 2026-08-07 13:59 CEST
 
 ### Hotovo
-- Transformace na kanonické pracovní proudy, globální operace panelu Práce a
-  odstranění aktivní legacy komunikace jsou dokončené.
-- Human–Adam a Knihovna zůstávají dočasnými kompatibilními adaptéry nad
-  existujícími vlákny a workspaces; ostatní proudy používají lazy backend.
-- Aktuální `main` `20180e2` je serverově nasazený a Cockpit smoke prošel 5/5.
+- Všechny zvolitelné proudy mají jednotný jednorázový vývoj a registrovaný
+  read-only webový průzkum.
+- Serverový stav dokončení a restartově odolná idempotentní úloha chrání
+  checkpoint před pádem HTTP tahu nebo restartem.
+- Čistý poradní tah lze označit jako dokončený bez změn místo falešného
+  selhání.
 
 ### Otevřeno
-- Profilové adaptéry lze jednou převést na čistě deklarativní schopnosti, ale
-  nyní nejde o provozní problém ani prioritní vývoj.
-- Lokální hotové commity zůstávají v denním GitHub balíčku.
+- Human–Adam a Knihovna zůstávají dočasnými kompatibilními adaptéry; jejich
+  migrace není nyní provozní priorita.
+- Lokální `main` obsahuje knihovní commit novější než běžící Cockpit.
 
 ### Rizika
-- Předčasné odstranění adaptérů by mohlo narušit kontinuitu existujících
-  vláken, workspaces nebo bezpečnostních hranic.
+- Completion job záměrně neopakuje skutečné selhání testů nebo změněný
+  workspace; takový WIP vyžaduje bezpečné převzetí.
 
 ### Další krok
-- Bez okamžité implementační akce; pokračovat aktuální roadmapou mimo
-  Human–Adam a adaptéry otevřít jen při konkrétním problému.
+- Pokračovat běžným vývojem; při nové hlášce nejdřív porovnat serverový stav,
+  completion job, Git a workspace.
 
 ### Rozhodnutí
-- Zachovat oprávněné schopnosti a současnou kontinuitu, ale nepovažovat
-  historické profilové postavení za cílovou architekturu.
+- Modelová účtenka není autoritou výsledku. Autoritou je serverový stav ověřený
+  proti Gitu a workspace.
 
 ### Navrhované další kroky
-- Případný budoucí privilege audit vést read-only podle konkrétních capability
-  a profilových větvení.
 - Adaptéry neodstraňovat bez samostatného migračního a regresního důkazu.
+- Synchronizaci projektového agregátu přidat později do uzavíracího workflow.
 
 ### Technický stav checkpointu
-- Deployment účtenka: `20180e2`, stav `deployed`, smoke 5/5.
-- P6a staticky ověřilo právě dva kompatibilní adaptéry a deklarativní private
-  archive capability Knihovny.
-- Historické chronologické bloky níže zůstávají beze změny.
+- Dokončovací pojistky a poradní klasifikace jsou obsažené v živě nasazeném
+  `91dc700`; smoke 5/5.
+- Poslední knihovní checkpoint byl serverově dokončen a oba profilové
+  workspaces byly při nasazení čisté a zarovnané.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP – Architektura komunikace Samantha
@@ -3848,3 +3848,25 @@ Technický důkaz:
 - Regresní testy pokrývají trvalé načtení, jediný worker lease, restartové
   obnovení, jeden přechodný retry, změněný otisk a dvojí spuštění bez druhého
   commitu.
+
+### 2026-08-07 13:59 CEST – Dokončení a poradní tah jsou provozně narovnané
+
+Hotovo:
+- Completion úloha úspěšně dokončila převzatý knihovní WIP po bezpečném
+  dorovnání na `main`.
+- Poradní tah bez souborových změn má vlastní neutrální stav.
+- Všechny proudy mohou registrovaný read-only webový průzkum.
+
+Rozhodnutí:
+- Text odpovědi ani modelová účtenka nejsou důkazem dokončení; rozhoduje
+  serverový stav, Git a workspace.
+
+Další krok:
+- Pokračovat běžným vývojem a zasahovat jen při novém doloženém selhání.
+
+Navrhované další kroky:
+- Doplnit automatickou synchronizaci `ACTIVE_PROJECTS.md` až jako samostatný
+  malý workflow krok.
+
+Technický důkaz:
+- Pojistky jsou obsažené v živě nasazeném `91dc700`; smoke 5/5.

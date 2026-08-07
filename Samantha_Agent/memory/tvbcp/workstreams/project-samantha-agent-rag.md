@@ -1,35 +1,35 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-01 14:52 CEST
+- Stav znovu ověřen: 2026-08-07 13:59 CEST
 
 ### Hotovo
+- P7 je implementované a obsažené v živě nasazeném Cockpitu.
 - Samantha před aktuálním provozním tvrzením použije dostupný bezpečný live audit a bez něj přizná stáří i nejistotu paměti.
-- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
-- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
-- Lokální commity čekají na samostatný denní GitHub balíček.
+- Obsahová pravdivost všech 30 proudů není automaticky doložená; dnešní audit
+  proto opravuje jen prokazatelný drift.
 
 ### Rizika
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- V Cockpitu vytvořit jeden čistý checkpoint bez nasazení.
+- Bez okamžité implementace; při příštím provozním dotazu ověřit live-first
+  chování na skutečné odpovědi.
 
 ### Rozhodnutí
 - Dostupný bezpečný live audit má přednost; bez něj se uvádí stáří a nejistota snapshotu.
 
 ### Navrhované další kroky
-- Po případném pozdějším nasazení ověřit kalendářní routing krátkým read-only dotazem.
+- Automatický projektový audit má nově přiznat, když je kanonická paměť novější
+  než `ACTIVE_PROJECTS.md`.
 
 ### Technický stav checkpointu
-- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `d1ffd4c0bc56`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `d1ffd4c0bc56` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-01T12:25:16+00:00.
-- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
-- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
-- Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
+- Commit P7 `f4092fb` je předkem živě nasazeného commitu `91dc700`.
+- Cockpit deployment je serverově ověřený a smoke prošel 5/5.
+- Audit autority paměti před opravou našel šest proudů s novější kanonickou
+  pamětí než agregátem.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Samantha Agent / RAG
@@ -295,3 +295,23 @@ Technický důkaz:
 - rychlá Cockpit brána syntaxe a whitespace: 5.8 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `project-samantha-agent-rag`.
 - Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+
+### 2026-08-07 13:59 CEST – P7 uzavřeno a drift agregátu znovu zachycen
+
+Hotovo:
+- P7 live-first ochrana je součástí běžícího Cockpitu.
+- Dnešní audit prokázal, že kanonické handoffy/TVBCP mohou být novější než
+  souhrnný registr.
+
+Rozhodnutí:
+- `ACTIVE_PROJECTS.md` zůstává lidský agregát, ale report musí jeho stáří
+  porovnat s kanonickou pamětí a případný drift přiznat.
+
+Další krok:
+- Ověřit nové varování na znovu vygenerovaném systémovém auditu.
+
+Navrhované další kroky:
+- Později zařadit synchronizaci agregátu do uzavíracího checkpoint workflow.
+
+Technický důkaz:
+- P7 commit `f4092fb` je obsažený v živě nasazeném `91dc700`; smoke 5/5.

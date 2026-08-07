@@ -1,7 +1,7 @@
 # Navrh: opakovatelny systemovy audit projektu, toolu a vrstev
 
 Datum: 2026-06-23
-Stav: navrh pred implementaci
+Stav: implementováno; pojistka driftu projektové paměti doplněna 2026-08-07
 Navazuje na: `memory/reports/systemovy_audit_projekty_tooly_vrstvy_2026_06_23.txt`
 
 ## Cil
@@ -303,3 +303,25 @@ samantha_project_audit(mode="full", save=True)
 Pred ulozenim neni potreba specialni potvrzeni, protoze jde o git-safe report
 do `memory/reports/`. Potvrzeni bude potreba az u navazujicich akci, ktere by
 menily data, commitovaly nebo spoustely shell workflow.
+
+## Doplnění 2026-08-07: pojistka proti zastaralému agregátu
+
+Audit 2026-08-07 ukázal, že automatické checkpointy aktualizují kanonický
+handoff a TVBCP, ale ne vždy také souhrnný `ACTIVE_PROJECTS.md`. Terminálové
+commity navíc nemusí aktualizovat žádnou projektovou paměť, pokud daný krok
+výslovně neuzavírá projektový checkpoint. Systémový audit proto mohl převzít
+starý řádek agregátu a vydat jej za dnešní stav.
+
+Generátor nyní před sestavením reportu spouští read-only audit autority paměti.
+Porovná poslední Git timestamp `ACTIVE_PROJECTS.md` s kanonickým handoffem a
+TVBCP každého materializovaného proudu. Pokud je kanonická dvojice novější:
+
+- report viditelně uvede počet a názvy dotčených proudů;
+- doporučí nejprve synchronizovat `ACTIVE_PROJECTS.md`;
+- starý agregovaný stav už nepředstaví bez varování jako spolehlivě aktuální.
+
+Jde o diagnostickou pojistku, nikoli automatický přepis paměti. Audit stále nic
+nemění, nemaže ani nezakládá TVBCP pro lazy proudy. Trvalým provozním pravidlem
+je při významném projektovém checkpointu dorovnat v jednom kroku kanonický
+handoff, TVBCP a odpovídající řádek `ACTIVE_PROJECTS.md`; uzavřeným historickým
+handoffům současně odebrat `[PRIPOMENOUT]`.

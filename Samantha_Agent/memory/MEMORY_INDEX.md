@@ -13,8 +13,8 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   nového řešení; obsahuje soví lokální preview, obecnou kontrolu konzistence
   slovníkových aplikací a pravidlo živého ověření proměnlivého runtime stavu.
 - `samantha_core.md` - zakladni kontext: kdo je Mila, co je Samantha Agent, aktualni stav prostredi, souhrn vrstvy pameti/RAG a dlouhodoby cil.
-- `handoffs/workstreams/project-samantha-agent-rag.md` - kanonicky aktualni handoff proudu Samantha Agent / RAG; P0-P6 audit a autorita zdroju jsou hotove, ale kalendar odkryl chybejici ochranu promenliveho runtime stavu. Navazujici P7 ma pred aktualnim tvrzenim vyzadat redigovany live audit nebo priznat stari a nejistotu pameti.
-- `tvbcp/workstreams/project-samantha-agent-rag.md` - kanonicky rozhodovaci dokument pravdive pameti a RAG; precedence zdroju, fail-honest fallback a odklad embeddings.
+- `handoffs/workstreams/project-samantha-agent-rag.md` - kanonicky aktualni handoff proudu Samantha Agent / RAG; P0-P7 je hotové, P7 vyžaduje před proměnlivým provozním tvrzením redigovaný live audit nebo přiznání stáří a nejistoty paměti. Audit 2026-08-07 navíc odhalil zastarávání `ACTIVE_PROJECTS.md`; systémový report nyní tento drift výslovně hlásí.
+- `tvbcp/workstreams/project-samantha-agent-rag.md` - kanonicky rozhodovací dokument pravdivé paměti a RAG; precedence zdrojů, fail-honest fallback, P7 live-state pravidlo a pojistka proti tichému vydávání starého agregátu za aktuální stav.
 - `contacts.md` - prakticke kontakty, ktere Mila vyslovne povolil ulozit do pameti.
 
 ## Reports
@@ -25,8 +25,9 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `reports/cockpit_quality_gate_2026_07_10.md` - git-safe popis kanonicke lokalni a GitHub Actions pojistky; Faze 2.4, e-mailova navigace a docasny TVBCP VoiceBridge protokol maji 611 testu. Realny redigovany outbox pilot overil 22 auditu/delivered, budoucí purge identita prezije zavreni Work Queue a obe e-mailova okna maji explicitni navrat do Cockpitu.
 - `reports/cockpit_persistence_write_map_2026_07_10.md` - git-safe mapa runtime persistence; Faze 2.4 ma repository/idempotency, e-mailovy decision adapter, lease/retry/ack a realny redigovany auditni pilot. Stare nekompletni purge zaznamy se neobnovuji; budoucí trash davky persistuji bezpecnou technickou identitu.
 - `reports/cockpit_dead_legacy_code_inventory_2026_07_10.md` - [PRIPOMENOUT] read-only inventura mrtveho a legacy kodu Cockpitu bez cteni private obsahu: POST registry a JavaScript/DOM vazby jsou konzistentni; Cleanup R1 odstranil jen 39 radku jednoznacnych helperu/importu a prosel 458 testy i obema smoke checky. Stary e-mailovy parser, Janicka vetev a pet API cest zustavaji do samostatneho rozhodnuti.
-- `reports/systemovy_audit_projekty_tooly_vrstvy_2026_07_09.txt` - systemovy audit k 2026-07-09: projekty, tooly, vrstvy, provozni poznamka, backup warning, capability audit a doporuceni pro vyber dalsi prace; report je git-safe a necetl private vault/fulltexty.
-- `reports/systemovy_audit_projekty_tooly_vrstvy_2026_06_30_161548.txt` - [PRIPOMENOUT] aktualni systemovy audit k 2026-06-30 16:15: projekty, tooly, vrstvy, priority, provozni stav, capability gaps a navrh nejmensiho dalsiho kroku; audit vznikl z cisteho gitu a bez hlavních health varovani.
+- `reports/systemovy_audit_projekty_tooly_vrstvy_2026_08_07.txt` - vstupní snapshot auditu před opravou projektové paměti; doložil, že report přebíral zastaralé údaje z `ACTIVE_PROJECTS.md`, a proto se nemá používat jako aktuální autorita po tomto dorovnání.
+- `reports/systemovy_audit_projekty_tooly_vrstvy_2026_07_09.txt` - historický systémový audit k 2026-07-09: projekty, tooly, vrstvy, provozní poznámka, backup warning, capability audit a doporučení pro tehdejší výběr práce.
+- `reports/systemovy_audit_projekty_tooly_vrstvy_2026_06_30_161548.txt` - historický systémový audit k 2026-06-30 16:15; tehdejší stav projektů, toolů, vrstev a capability gaps, nikoli dnešní připomínka.
 - `reports/systemovy_audit_projekty_tooly_vrstvy_2026_06_30_151531.txt` - historicky systemovy audit k 2026-06-30 15:15: projekty, tooly, vrstvy, priority, provozni stav, capability gaps a tehdejsi navrh nejmensiho dalsiho kroku.
 - `reports/systemovy_audit_projekty_tooly_vrstvy_2026_06_23.txt` - historicky systemovy audit: projekty, tooly, vrstvy, tehdejsi priority, provozni stav, capability gaps a navrh tehdejsiho nejmensiho dalsiho kroku.
 - `reports/systemovy_audit_projekty_tooly_vrstvy_2026_06_11.txt` - historicky strukturovany audit podle QN #40 a QN #13: projekty, tooly a vrstvy serazene podle priorit 1-3, odhad rozpracovanosti v %, dalsi kroky a navrh tehdejsiho itinerare.
@@ -45,16 +46,18 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `projects/pictnew_vocabulary_image_pipeline.md` - [PRIPOMENOUT] povinný společný audit při každé změně `FR - Míla`, `FR - Jana` nebo `IT - Míla`; jeden český abecední `Pict/mapping.json`, shodná distribuce a kontrola všech CSV i obrázků.
 - `projects/tts_edge_audio_tools.md` - české TTS/MP3 nástroje přes edge-tts, dávkový CSV režim a ruční GUI.
 - `projects/vocabulary_en_web_cards.md` - webové obrazové kartičky EN z `VocabularyEN.csv`, sync do `docs/`, learner MVP a workflow pro chybějící obrázky.
-- `projects/vocabularyfr_web_trainer.md` - VocabularyFR web trainer pro Janu: webový MVP prototyp z desktopové Tkinter aplikace s CSV editací, audio cache, obrázky a auto smyčkou; checkpoint prototypu je commit `da93eba`.
+- `projects/vocabularyfr_web_trainer.md` - historický webový MVP prototyp pro Janu. Aktuální používaný stav FR aplikací je v kanonických proudech `project-vocabulary-fr`; Last 20/50 i lokální Tk spuštění z Cockpitu Míla potvrdil jako funkční.
+- `handoffs/workstreams/project-vocabulary-fr.md`; `tvbcp/workstreams/project-vocabulary-fr.md` - kanonický aktuální stav Vocabulary FR: Last 20/50/HT je ověřené, lokální Tk spuštění z Cockpitu funguje a proud je pozastavený.
+- `handoffs/workstreams/project-vocabulary-it.md`; `tvbcp/workstreams/project-vocabulary-it.md` - kanonický aktuální stav Vocabulary IT: Last 20/50/HT je ověřené, lokální Tk spuštění z Cockpitu funguje a proud je pozastavený.
 - `projects/fraška_dante_esa_concept.md` - koncept eseje o frašce, dantovské ose, egu, smíření a nově definovaných pojmech.
 - `projects/pohadkova_knizka_gpt_canva.md` - domácí dětská knížka z GPT pohádek, Canva sazba, stylová bible a workflow pro ilustrace.
 - `projects/vedecke_clanky.md` - širší znalostní databáze / knihovna článků: původně knihovna průlomových vědeckých článků v `data/vedecke_clanky/`, od 2026-06-10 Cockpit `Knihovna` a soukromý fulltextový archiv webových článků v `data/private/article_archive/`; podle korekce 2026-06-11 patří dohromady s Knowledge inboxem jako jeden směr osobní znalostní databáze; 2026-07-01 byla opravena archivace staršího českého HTML kódování a UI potvrzení uložení URL.
 - `projects/matysek_english_game_concept.md` - koncept anglické hry pro pětiletého Matýska bez čtení, se scénami, hlasem a příběhem.
 - `projects/mmtx_story_hotspot_app.md` - nový směr MMTX: příběhová Pygame hotspot aplikace s houbami, barvami a dynamickým číslováním.
-- `projects/multilo_stabilization_cleanup.md` - stabilizace MultiLO návratu do kokpitu, cleanup screenů, pending after callbacky a `tk.Entry` v psacích režimech.
+- `projects/multilo_stabilization_cleanup.md` - MultiLO je stabilizované, pro Janu existuje nový podepsaný balíček s Pythonem 3.12/Tk 8.6.13 a lokální aplikace je přidaná do katalogu Cockpitu; projekt je pozastavený do výměny aplikace na Janině Macu.
 - `projects/email_readonly_oauth.md` - e-mailová integrace Samanthy: read-only hledání, triage a archivace; UX0+UX1, ladění archivu i UX2 pravdivé navigace jsou nasazené. E-maily mají vlastní rozcestník Zpracování / Archiv a nejsou v katalogu Webových aplikací.
-- `projects/document_management_private_vault.md` - priorita 1 projekt soukrome spravy dokumentu mimo git; aktualni vstup je ScanDocu pro GPT PDF z Downloads a prototyp Samantha Cockpit jako ovladaci vrstva, mimo git-safe data.
-- `projects/samantha_external_backup.md` - offline zálohování `PythonMF`/Samanthy na externí disk: poslední úspěšná recovery záloha je 2026-07-29 ve snapshotu `20260729_154354`; Pythonový inkrementální běh dokončil 55 798 souborů bez přeskočení a restore drill `AGENTS.md` potvrdil shodný SHA-256.
+- `projects/document_management_private_vault.md` - hlavní soukromý dokumentový systém mimo Git; servisní obrazovka od 2026-08-07 ukazuje nahoře pracovní stav inboxu a historické agregace až v technických podrobnostech. Další věcný krok je pozdější reálný e-mailový PDF/JPEG test.
+- `projects/samantha_external_backup.md` - offline zálohování `PythonMF`/Samanthy na externí disk: poslední úspěšná recovery záloha je snapshot `20260802_153855`; k 2026-08-07 je starší než tři dny a vyžaduje nový pravidelný běh.
 - `projects/janicka_cockpit_takeover.md` - Janička Cockpit je aktivní netechnický rozcestník k existujícím funkcím. Stará light komunikace a nouzové otevírání plného Adama jsou vyřazené; komunikace se vrátí až jako samostatný funkční Adam-R2.
 - `projects/janicka_r2_adam.md` - funkční samostatný R2-Adam pro Janičku: vlastní chat, soukromý kontext, TXT prostor, dokumentová lišta, čtečka a potvrzovaná práce s úplnými sadami read-only zdrojů. E2 živě ověřilo úplný tok e-mail -> vault -> create-only R2 TXT. E3 potvrdilo ruční revizi a backendovou dostupnost PDF; oprava lidského TXT je nasazená a čeká už jen na krátký vizuální retest.
 - `projects/janicka_cockpit_kucharka.md` - první git-safe kuchařka pro Janu k používání Janičky v Cockpitu: dokumenty, tisk, e-maily, Lékárna, rodinné projekty, Adam, připomenutí, nouzové převzetí a bezpečnostní hranice bez citlivých údajů.
@@ -62,7 +65,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `projects/neuberk_interier_design.md` - projekt Neuberk interiér design: soukromý pracovní prostor pro fotky, plánky, rozměry a návrhy interiéru domu; první místnost je půdní hostovská místnost `Kačenka` pro dcery s dětmi, první čistý překres jedné stěny je hotový mimo git v `data/private/neuberk_interier_design/`.
 - `projects/automated_recurring_tasks.md` - automatické opakující se úkoly a ColorsAndNumbers soví TTS; GitHub Pages workflow artifact je živá publikační autorita, plánovaný běh 30. 7. uspěl a `main` se už workflow nemění.
 - `handoffs/colors_numbers_owl_pages_artifact_checkpoint_2026_07_27.md` - historický checkpoint odstranění sovího zápisu do `main`; krok přepnutí Pages byl později dokončen a současný stav je v projektovém souboru.
-- `projects/tomik_video_imovie.md` - [PRIPOMENOUT] projekt priorita 1 pro rodinny iMovie sestřih z malych videi od dcery, tema vnuk Tomik druhy rok; workflow, soukromi, storyboard a exportni checklist.
+- `projects/tomik_video_imovie.md` - rodinný video projekt; Family Video Organizer je napojený na skutečný soukromý dataset místo ukázkových dat. Další výběr a střih pokračuje až podle Mílova věcného zadání.
 - `projects/family_memory_films.md` - obecna platforma pro trideni rodinnych fotek/videi a pripravu vzpominkovych filmu; prvni dataset je USA 2019 na plose Macu, cisty seznam 15 dnu je odsouhlaseny, master prehled `Tomik 2` je ulozen mimo git, predstrihovy formular `03_overview/film_selection_form.html` ma autosave, CSV export, rating fotek/videi a prehravani videi a Adamuv prvni navrh ratingu je aplikovany.
 - `../START_HERE_RECOVERY.md` - krátký kořenový startovací soubor pro iPhone/GitHub: kam kliknout, když původní Mac nejde zapnout.
 - `RECOVERY_CARD_NEW_MAC.md` - polopatická nouzová karta pro obnovu Samanthy na novém Macu z GitHubu a externí recovery zálohy.
@@ -132,8 +135,11 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Handoffs
 
-- `handoffs/human_adam_layer_workstream_start_2026_07_20.md` - [PRIPOMENOUT]
-  priorita 1: transformace verejneho modelu na kanonicke pracovni proudy je po
+- `handoffs/human_adam_layer_workstream_start_2026_07_20.md` - kanonický aktuální
+  handoff Human–Adam. Dokončovací stav je autoritativně perzistentní,
+  samoobnovitelný po restartu a čistý poradní tah může skončit bez změn místo
+  falešného selhání; následující podrobný text zachycuje historický vývoj.
+  Transformace verejneho modelu na kanonicke pracovni proudy je po
   fazich 4.5g-c1 az c2f funkcne uzavrena. Zavadejici verejna
   `active_profile_*` metadata, osirely deployment-completion endpoint, UI
   karta, action surface, legacy readery a jejich servisni vazby byly odstraneny
@@ -186,7 +192,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   `private_archive_direct` aktivniho proudu. Cilenych 66 testu proslo; zbyva
   commit/push a potvrzene nasazeni tohoto zpresneni.
 
-- `handoffs/human_adam_work_help_and_wip_lifecycle_2026_07_19.md` - [PRIPOMENOUT]
+- `handoffs/human_adam_work_help_and_wip_lifecycle_2026_07_19.md` - historický checkpoint;
   priorita 1: obsah napovedy `Prace -> ?` byl rucne potvrzeny, ale maly vnitrni
   rolovaci box byl hur citelny. Ergonomicka oprava ve vetvi
   `wip/human-adam-work-help-layout-20260719` odstranuje vlastni `max-height` a
@@ -195,7 +201,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   restart na PID `33066`, petibodovy smoke test i zive HTML jsou zelene; zbyva
   pouze rucni vizualni retest.
 
-- `handoffs/human_adam_plan_help_and_adoption_2026_07_19.md` - [PRIPOMENOUT]
+- `handoffs/human_adam_plan_help_and_adoption_2026_07_19.md` - historický checkpoint;
   priorita 1: staticka napoveda `?` v okne `Plan` je implementovana bez API a
   bez moznosti menit profil, kotvu, vlakno, TVBCP nebo Git. Obsahuje beznou
   praci, sestikrokovou rotaci, reseni blokeru a nouzovy navrat. Plna Cockpit
@@ -204,7 +210,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   cvicne overeni a nekolik dni zazit soucasne workflow; teprve potom zahajit
   read-only kontrolu aktualnosti handoffu.
 
-- `handoffs/development_branch_lifecycle_phase1_wip_2026_07_19.md` - [PRIPOMENOUT]
+- `handoffs/development_branch_lifecycle_phase1_wip_2026_07_19.md` - historický checkpoint
   priorita 1: prvni read-only faze rizeni zivotniho cyklu WIP vetvi ma
   samostatne auditni jadro, CLI, workflow registraci, GET endpoint a male
   ovladani v panelu `Prace`. Pripojeny nebo rozpracovany worktree je vzdy
@@ -212,7 +218,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   Plna Cockpit brana prosla 824 testy; zbyva potvrzene prevzeti do `main`,
   nasazeni, restart a zivy read-only test.
 
-- `handoffs/global_development_semaphore_wip_2026_07_19.md` - [PRIPOMENOUT]
+- `handoffs/global_development_semaphore_wip_2026_07_19.md` - historický checkpoint
   priorita 1: commit `90ed06c` nasadil trvaly globalni vyvojovy semafor pro
   Human-Adam, Knihovnu a terminal, read-only modelovy guard a fail-closed
   checkpoint/nasazeni pri cizim WIP. Plna brana prosla 815 testy, rizeny restart
@@ -220,28 +226,28 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   deployment guard nebo kontrolovany `pre-push` hook je zapsany k samostatnemu
   navrhu a nesmi se instalovat automaticky.
 
-- `handoffs/human_adam_thread_rotation_backend_wip_2026_07_19.md` - [PRIPOMENOUT]
+- `handoffs/human_adam_thread_rotation_backend_wip_2026_07_19.md` - historický checkpoint
   priorita 1: izolovany WIP obsahuje hotovou bezpecnou rucni rotaci dlouheho
   profiloveho vlakna vcetne profilove zamknuteho API a ovladani v panelu `Plan`.
   Stare vlakno a historie zustavaji zachovane; audit je fail-closed a apply
   vyzaduje aktivni kotvu i presnou vetu. Plna brana prosla 804 testy. Zbyva
   potvrzene prevzeti do `main`, nasazeni, vizualni kontrola a zivy profilovy test.
 
-- `handoffs/human_adam_profile_switch_recovery_2026_07_18.md` - [PRIPOMENOUT]
+- `handoffs/human_adam_profile_switch_recovery_2026_07_18.md` - historický checkpoint;
   priorita 1: přepínání Human–Adam / Knihovna už nemá trvale blokovat stará
   nejistá doručení, pokud po nich proběhl potvrzeně dokončený tah. Nová nejistota
   zůstává fail-closed a UI ukáže chybu ve viditelné části i na iPhonu. Plná brána
   prošla 768 testy; zbývá synchronizace profilů, restart a živý test oběma
   směry.
 
-- `handoffs/human_adam_preserved_wip_visibility_2026_07_18.md` - [PRIPOMENOUT]
+- `handoffs/human_adam_preserved_wip_visibility_2026_07_18.md` - historický checkpoint;
   priorita 1: TVBCP checkpoint, který při souběhu vypadal jako ztracený, byl
   bezeztrátově obnoven a nasazen jako `ebd47b9`. Nová backend/UI oprava odlišuje
   přímo auditovatelný WIP od zachovaného rozvětveného WIP, ukáže jeho počet a
   cesty, ale audit ponechá fail-closed. Plná brána prošla 766 testy; po
   checkpointu/pushi zbývá restart a běžný smoke test.
 
-- `handoffs/human_adam_revision_failure_history_2026_07_17.md` - [PRIPOMENOUT]
+- `handoffs/human_adam_revision_failure_history_2026_07_17.md` - historický checkpoint;
   priorita 1: očekávaná revize chrání soukromou kotvu před přepsáním ze starší
   karty a oddělené private registry Human–Adam/Knihovna drží posledních 20
   redigovaných selhání bez zpráv, logů a soukromých textů. Plná brána prošla 764
@@ -262,17 +268,17 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   rozlišuje také `/new` od úplného ukončení přes `/exit` nebo `/quit`;
   plná Cockpit brána prošla 776 testy, zbývá řízený restart a vizuální retest na
   Macu nebo iPhonu.
-- `handoffs/appserver_human_adam_text_remote_verified_restart_backup_2026_07_14.md` - [PRIPOMENOUT]
+- `handoffs/appserver_human_adam_text_remote_verified_restart_backup_2026_07_14.md` - historický checkpoint;
   priorita 1 před restartem Macu: vzdálená textová práce a samoobslužné nasazení
   jsou opakovaně ověřené až po sticky účtenku, bod `5bac508` a 703 testů. Po
   startu přes `samantha` nejdřív ověřit externí disk a provést zastaralou recovery
   zálohu; potom pokračovat časomírou dlouhého tahu a hlasovým vstupem.
-- `handoffs/samantha_communication_architecture_checkpoint_2026_07_13.md` - [PRIPOMENOUT]
+- `handoffs/samantha_communication_architecture_checkpoint_2026_07_13.md` - historický základ
   priorita 1 checkpoint nove kanonicke komunikace: jeden trvaly Adam a app-server
   thread, Cockpit Mac/iPhone pro beznou praci, terminal pro vyvoj a nezavisly
   failover, projektovy TVBCP a pravidlo po prijeti nove cesty odstranit legacy
   watcher/TTY/duplicitni komunikacni vetve misto udrzovani fallbacku fallbacku.
-- `handoffs/external_backup_disk_usb_not_detected_2026_07_14.md` - [PRIPOMENOUT]
+- `handoffs/external_backup_disk_usb_not_detected_2026_07_14.md` - historický incident;
   externi recovery disk se 2026-07-14 neenumeroval na USB/Thunderbolt ani jako
   disk; neprovadet First Aid, dokud jej macOS neuvidi. Posledni zaloha je z
   2026-07-09; dalsi krok je jiny datovy kabel, primy jiny port a napajeni.
@@ -280,8 +286,8 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `handoffs/colors_numbers_private_photo_gallery_proposal_2026_07_13.md` - pozastaveny navrh tlacitka `Foto` a lokalni galerie nejvyse tri fotografii v obrazovce `Numbers`; kvuli verejnemu repozitari/GitHub Pages se doporucuje pouze lokalni `IndexedDB`, komprese a odstraneni EXIF/GPS, bez commitovani rodinnych fotografii. Nic neimplementovat bez noveho rozhodnuti Mily.
 - `handoffs/appserver_lab_thread_registry_context_capsule_2026_07_13.md` - historicky checkpoint vyrazeneho read-only App-server LAB. Samostatna sluzba, probe, API, tlacitko a modal byly 2026-07-15 odstraneny; bez dalsiho retestu.
 - `handoffs/appserver_lab_lifecycle_verified_2026_07_13.md` - historicky zaklad read-only LAB: automaticky 50/50 reliability probe a Miluv rucni lifecycle test s disconnect/resume/restart; vsech 7 pokynu bylo dokoncenych bez chyby nebo duplicity. Navazujici stav registru a capsule je v `handoffs/appserver_lab_thread_registry_context_capsule_2026_07_13.md`.
-- `handoffs/cockpit_architecture_current_2026_07_10.md` - [PRIPOMENOUT] jediny
-  prubezny handoff modernizace Cockpitu. Faze 2.1 az 2.4 jsou historicky hotove;
+- `handoffs/cockpit_architecture_current_2026_07_10.md` - historická průběžná
+  roadmapa modernizace Cockpitu. Faze 2.1 az 2.4 jsou historicky hotove;
   aktualni priorita 1 je Cockpit dieta. Mereni 2026-07-26 ukazuje 19 620
   neprazdnych radku v `app/cockpit.py` a 91 218 produkcnich plus testovacich
   radku v cele gate. Dalsi krok je pouze read-only Dieta D0, potom jeden
@@ -302,7 +308,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `handoffs/cockpit_hotkey_fallback_port_2026_07_07.md` - Cockpit global hotkey / start fallback: hotkey fungoval, ale port `8770` byl mrtve obsazeny starymi Python procesy; `open_cockpit.py` ted umi nouzove spustit lokalni Cockpit na dalsim volnem portu, typicky `8771`; po restartu Macu retestovat navrat na standardni `8770`.
 - `handoffs/cockpit_session_autosave_cleanup_2026_06_30.md` - Cockpit autosave cleanup a provozni oprava: retence ponechava posledni 3 dny, 12 nejnovejsich snapshotu a latest soubory; managed relace watcher nespousteji, watcher ma singleton lock a rychle ukonceni sleepu, Cockpit ukazuje watcher count. Zivy nadbytecny Janička watcher byl ukoncen bez mazani snapshotu; aktualne bezi jeden watcher.
 - `handoffs/cockpit_remote_exact_confirmation_cards_2026_06_27.md` - historický checkpoint vzniku potvrzovací karty; karta zůstává obecná, tehdejší transport potvrzení je vyřazený.
-- `handoffs/cockpit_audit_live_2026_06_28.md` - [PRIPOMENOUT] zivy handoff aktualniho Cockpit auditu: potvrzovaci karty, dokumentovy panel, ScanDocu/JPEG revize a ergonomicke opravy jsou hotove a pushnute; dalsi krok je pokracovat rucnim auditem po blocich a tento handoff prubezne aktualizovat.
+- `handoffs/cockpit_audit_live_2026_06_28.md` - historický checkpoint Cockpit auditu; potvrzovací karty, dokumentový panel, ScanDocu/JPEG revize a tehdejší ergonomické opravy byly dokončené.
 - `handoffs/codex_full_access_voicebridge_guard_next_2026_06_29.md` - historicky full-access navazovaci handoff: vypnuti Codex sandboxu, dokonceni VoiceBridge testu a puvodni plan Guardu proti mazani; prekryto aktualnim stavem v `ACTIVE_PROJECTS.md` a pravidlem `technical/global_safety_brake.md`.
 - `handoffs/voicebridge_full_access_email_confirmation_closed_2026_06_29.md` - VoiceBridge full-access blok je uzavreny: textove mezistavy, browser autoread, neoverene GUI doruceni bez falesneho uspechu, watcher start kontrola a tokenove potvrzovani e-mailovych draftu prosly realnym testem; puvodni plan zalozit Guard je prekryty existujicim `technical/global_safety_brake.md`.
 - `handoffs/voicebridge_operational_contract_2026_06_30.md` - historický provozní kontrakt odstraněné komunikační cesty; slouží pouze jako archivní důkaz a není aktuálním návodem.
@@ -386,11 +392,11 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `handoffs/network_domaci_wifi_router_vs_mac_2026_05_21.md` - aktualni network/reconnect stav: domaci watchdog ukazal 29 vypadku za 30 minut a casto selhal i ping na gateway `192.168.1.1`; pracovni Wi-Fi retest mel 319/320 OK, takze dalsi krok je domaci router/Wi-Fi/ruseni/linka a retest po zasahu.
 - `handoffs/network_https_reconnect_diagnostic_2026_05_21.md` - historicky network mezistav: prvni HTTPS failure diagnostika a vznik `scripts/network_watchdog.py`; prekryto novejsim handoffem `network_domaci_wifi_router_vs_mac_2026_05_21.md` a kanonickym stavem v `infrastructure/macos_network_recovery.md`.
 - `handoffs/payment_sms_reminder_tool_done_2026_05_21.md` - Platebni SMS workflow je hotovy: `inspect_payment_page_for_reminder` read-only overi splatnost z HTTPS stranky/API bez plne URL/tokenu, `save_payment_sms_reminder` ulozi overovaci nebo platebni pripominku a `save_payment_case_document` ulozi lokalni fakturu/prilohu do `data/private/payment_cases/`.
-- `handoffs/mobile_document_scan_shortcuts_and_processing_2026_05_26.md` - [PRIPOMENOUT] dokumentovy vault: iPhone zkratka `Skenovat dokument pro Samanthu v4` uklada vice stran do `SamanthaDocumentInbox`, zkratka pro zpracovani vytvari `process_request.json`, `scan_mobile_document_inbox` a `prepare_mobile_document_batch` jsou implementovane a realny batch `scan_B` byl pripraven do pracovního PDF; dalsi krok je potvrzovany finalni import do vaultu.
-- `handoffs/mobile_document_processing_raw_bw_classification_2026_05_27.md` - [PRIPOMENOUT] dokumentovy vault: hlavni nova cesta je ScanDocu pro GPT PDF z Downloads; prototyp Samantha Cockpit bezi a oprava samostatneho okna ScanDocu je overena; dalsi krok je ranni realny test dalsiho dokumentu.
-- `handoffs/document_management_scandocu_reimport_checkpoint_2026_05_28.md` - [PRIPOMENOUT] dokumentovy vault: ScanDocu umi revidovat uz ulozene dokumenty, lepe cte metadata vozidel a preskakuje stare sifrovane varianty po ulozeni odemcene kopie; dalsi krok priorita 1 je po nove kopii v Downloads pokracovat dokument po dokumentu ve znovuukladani/revizi uz ulozenych priloh.
+- `handoffs/mobile_document_scan_shortcuts_and_processing_2026_05_26.md` - historický checkpoint mobilního dokumentového intake.
+- `handoffs/mobile_document_processing_raw_bw_classification_2026_05_27.md` - historický checkpoint raného ScanDocu workflow.
+- `handoffs/document_management_scandocu_reimport_checkpoint_2026_05_28.md` - historický checkpoint reimportu a revize uložených dokumentů.
 - `handoffs/document_management_cockpit_voice_command_inbox_2026_05_29.md` - dokumentovy vault/cockpit: koncept hlasoveho nebo textoveho command inboxu z iPhonu pres iCloud, read-only intent routing pro dokumenty/e-maily/statusy a potvrzovaci brany pro tisk, archivaci, mazani a odesilani.
-- `handoffs/document_management_morning_action_plan_2026_06_04.md` - [PRIPOMENOUT] ranni akcni plan dokumentu po stabilizaci Cockpitu: zacit read-only mapovanim zero-text/OCR a re-review kandidatu, potom panel/report `Dokumenty k revizi`; navazujici oblasti jsou jednotny intake Downloads/e-mail/mobilni sken, cases/vazby, ergonomie klasifikace a due-date -> reminders.
+- `handoffs/document_management_morning_action_plan_2026_06_04.md` - historický ranní plán dokumentů; dnešní další krok je vedený v `ACTIVE_PROJECTS.md`.
 - `handoffs/cockpit_web_apps_checkpoint_2026_05_29.md` - Samantha Cockpit: pridane tlacitko Webove aplikace, katalog aplikaci, samostatne popup otevirani aby zavreni aplikace nezavrelo Cockpit; lokalni commity Cockpitu a UTF-8 opravy jsou hotove, dalsi krok je pripadny push.
 - `handoffs/cockpit_dashboard_terminal_launch_checkpoint_2026_05_29.md` - historicky Samantha Cockpit dashboard/terminal launch checkpoint: provozni dashboard, stavovy panel, akcni tlacitka, Samantha chat a Codex CLI; tehdejsi repo nesoulad je uzavreny a checkpoint zustava jen jako historicky popis funkce.
 - `handoffs/cockpit_global_hotkey_agent_2026_06_01.md` - Samantha Cockpit: globalni klavesova zkratka pres vlastni Swift/Carbon hotkey agenta a LaunchAgent; Finder Services cesta byla nespolehliva, novy agent funguje po rucnim testu `Ctrl + Option + Cmd + C`.
@@ -407,7 +413,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `handoffs/email_seznam_readonly_provider_2026_05_22.md` - aktualni e-mailovy stav: iCloud read-only vrstvy existuji, Seznam Mail read-only provider a `Unified Inbox` jsou implementovane, lokalni Seznam `.env` je vyplneny a smoke test hlavicek 2026-05-23 prosel bez vypisu predmetu/adres.
 - `handoffs/email_outbound_sms_triage_next_2026_05_28.md` - historicky e-mailovy outbound/SMS triage checkpoint: e-mail outbound uklada kopii do iCloud Sent Messages, `send_confirmed_sms_rcs` ma potvrzovaci branu a kontrolu `is_sent/is_delivered/error`; překryto aktuálním e-mailovým stavem a VoiceBridge potvrzovacím kontraktem.
 - `handoffs/email_processing_cleanup_and_documents_next_2026_06_03.md` - historicky Email Processing cleanup checkpoint: Work Queue ma oddelene zpracovani, presun do kose a trvale smazani z kose; překryto aktuálním stavem `iCloud Mail read-only / Email Cases`.
-- `handoffs/document_management_cockpit_case_health_checkpoint_2026_06_04.md` - [PRIPOMENOUT] Document Management / Cockpit checkpoint: hotove `Dokumenty k revizi`, cases/vazby, klasifikace, terminy v dokumentech a detail case v2 s pripominkami, terminovymi kandidaty, konflikty a `case_health`; dalsi krok je rucni UI retest detailu case a potom rozhodnout OCR/re-review vs. sjednoceny intake.
+- `handoffs/document_management_cockpit_case_health_checkpoint_2026_06_04.md` - historický Document Management checkpoint; dnešní další krok je vedený v `ACTIVE_PROJECTS.md`.
 - `handoffs/email_processing_cockpit_decision_ui_2026_06_01.md` - historicky Email Processing decision UI checkpoint: 7denni e-mailovy prehled jako rozhodovaci karty; potvrzovaci hranice cteni/stahovani/mazani zustavaji v aktualnim e-mailovem stavu.
 - `handoffs/email_work_queue_detail_checkpoint_2026_06_01.md` - historicky Email Work Queue detail checkpoint: read-only detail, batch ulozeni do EmailArchiveVault a PDF import do private document vaultu; překryto aktuálním stavem e-mailové oblasti.
 - `handoffs/email_work_queue_batch_filters_2026_06_14.md` - Email Work Queue ma obecne blokove filtry pro davkove zpracovani: Finanční správa, VAK, Faktury nad 2000 Kč, Faktury/e-shopy, PDF, velke PDF a Ostatni; davkove zpracovani posila jen aktualne vybrany blok.
@@ -416,7 +422,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `handoffs/email_work_queue_batch_tomorrow_2026_06_01.md` - historicky Email Work Queue batch checkpoint: batch endpoint, PDF prilohy do document vault fulltextu a kos s potvrzovaci vetou; překryto aktuálním stavem e-mailové oblasti.
 - `handoffs/email_weekly_overview_resume_2026_06_01.md` - historicky Email management read-only prehled hlavicek a soukromy resume detail; navazovani pres konkretni UID je překryto aktuálními e-mailovými workflow pravidly.
 - `handoffs/iphone_shortcuts_najit_auto_done_2026_05_23.md` - hotovy checkpoint iPhone zkratek: Shortcuts Playground plugin pro Codex je nainstalovany, `Najit auto v3.shortcut` funguje u Mily i Jany a kanonicke pouceni je v `technical/iphone_shortcuts_playground.md`.
-- `handoffs/iphone_shortcuts_quick_notes_continue_2026_05_23.md` - [PRIPOMENOUT] zitrejsi navazani na iPhone zkratky: quick notes zkratka funguje, Samantha umi ocislovany seznam/detail poznamek a dalsi krok je vybrat dalsi malou zkratku nebo akci z poznamky.
+- `handoffs/iphone_shortcuts_quick_notes_continue_2026_05_23.md` - historický checkpoint původní iCloud Quick Notes cesty; aktuální přímé Tailscale doručení je funkční a vedené v proudu Cockpit.
 - `handoffs/iphone_shortcuts_freeze_infrastructure_layer_2026_05_25.md` - aktualni zmrazovaci handoff pro iPhone Shortcuts / Mobile Input Layer: doplneny puvodni seznam 7 kandidatu na zkratky, stav hotovych zkratek, bezpecnostni hranice a pravidlo nepokracovat bez vyslovneho navratu.
 - `handoffs/quick_notes_infsystem_top3_feedback_2026_05_24.md` - doslovne ulozeny feedback k QN #13 systemova mapa, QN #10 ziva znalostni databaze a QN #4/#6 bezpecny akcni inbox; ceka na brzké zapracovani.
 - `handoffs/quick_notes_action_inbox_preclassification_2026_06_19.md` - Quick Notes akcni inbox: read-only predklasifikace QN na pripominku/projekt/tool/ukol/citlivou akci/archiv/napad, CLI `--status` a Samantha tool `quick_notes_action_status`; dalsi krok je rucne vybrat prvni potvrzovanou akci.

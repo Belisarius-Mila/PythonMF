@@ -10,6 +10,7 @@ from typing import Callable, Sequence
 from app.backup.activity_state import DEFAULT_BACKUP_ACTIVITY_STATE_PATH, backup_activity_status
 from app.capability_audit import format_samantha_capability_audit
 from app.health_check import run_samantha_health_check
+from app.memory_truth_audit import git_file_evidence, run_memory_truth_audit
 from app.quantitative_status import run_samantha_quantitative_status
 
 
@@ -59,6 +60,8 @@ class ProjectAuditResult:
     backup_summary: str
     backup_ok: bool
     reminder_count: int
+    memory_drift_count: int
+    memory_drift_workstreams: tuple[str, ...]
     health_warnings: tuple[str, ...]
     quick_recommendations: tuple[str, ...]
     priority_1: tuple[ProjectAuditItem, ...]
@@ -132,12 +135,26 @@ def run_samantha_project_audit(
     capability = _parse_capability_summary(capability_text)
     local_totals = _stats_totals(quantitative.local_stats)
     git_totals = _stats_totals(quantitative.git_stats)
+    memory_truth = run_memory_truth_audit(
+        project_root=project_root,
+        evidence_loader=lambda relative_path: git_file_evidence(
+            project_root,
+            relative_path,
+            runner=runner,
+        ),
+    )
+    memory_drift_workstreams = tuple(
+        row.name
+        for row in memory_truth.rows
+        if row.canonical_newer_than_aggregate
+    )
 
     priority_1, priority_2, priority_3 = _prioritize_items(rows, reminders, normalized_mode)
     recommendations = _quick_recommendations(
         git_summary=health.git_summary,
         backup_ok=bool(backup.get("ok")),
         reminder_count=len(reminders),
+        memory_drift_count=len(memory_drift_workstreams),
         capability=capability,
         priority_1=priority_1,
     )
@@ -156,6 +173,8 @@ def run_samantha_project_audit(
         backup_summary=_one_line(str(backup.get("message", ""))),
         backup_ok=bool(backup.get("ok")),
         reminder_count=len(reminders),
+        memory_drift_count=len(memory_drift_workstreams),
+        memory_drift_workstreams=memory_drift_workstreams,
         health_warnings=tuple(_sanitize_text(warning) for warning in health.warnings),
         quick_recommendations=recommendations,
         priority_1=priority_1,
@@ -220,7 +239,7 @@ def format_project_audit_result(result: ProjectAuditResult) -> str:
         "Nazev: Systemovy audit Samanthy - projekty, tooly, vrstvy",
         f"Datum: {result.created_at[:10]}",
         f"Mode: {result.mode}",
-        "Zdroj: ACTIVE_PROJECTS.md, MEMORY_INDEX.md, health check, backup status, quantitative status, capability audit",
+        "Zdroj: ACTIVE_PROJECTS.md, MEMORY_INDEX.md, audit autority paměti, health check, backup status, quantitative status, capability audit",
         "Ucel: Opakovatelny lidsky itinerar pro vyber, na co navazat.",
         "",
         "Bezpecnost:",
@@ -235,6 +254,7 @@ def format_project_audit_result(result: ProjectAuditResult) -> str:
         f"- Git: {result.git_summary}",
         f"- Zaloha: {result.backup_summary}",
         f"- Aktivnich `[PRIPOMENOUT]`: {result.reminder_count}",
+        _memory_drift_line(result),
         f"- Kvantitativne: lokalne {result.local_files} souboru / {result.local_lines} radku; git tracked {result.git_files} souboru / {result.git_lines} radku.",
         _capability_line(result.capability_summary),
         "",
@@ -291,6 +311,7 @@ def format_project_audit_result(result: ProjectAuditResult) -> str:
         "Rizika:",
         f"- Git/provozni stav: {result.git_summary}.",
         f"- Pocet aktivnich `[PRIPOMENOUT]`: {result.reminder_count}.",
+        f"- Kanonická paměť novější než ACTIVE_PROJECTS.md: {result.memory_drift_count} proudů.",
         "- Automaticky report sklada fakta; konecny vyber priority porad potvrzuje Mila.",
         "",
         f"Nejmensi dalsi krok: {result.quick_recommendations[0] if result.quick_recommendations else 'Vybrat jeden aktivni projekt a potvrdit dalsi krok.'}",
@@ -326,6 +347,7 @@ def _quick_recommendations(
     git_summary: str,
     backup_ok: bool,
     reminder_count: int,
+    memory_drift_count: int,
     capability: CapabilityAuditSummary,
     priority_1: Sequence[ProjectAuditItem],
 ) -> tuple[str, ...]:
@@ -334,6 +356,12 @@ def _quick_recommendations(
         items.append("Nejdriv rozhodnout git stav: oddelit hotove commity od rozpracovanych zmen a pred pushem spustit safety check.")
     if not backup_ok:
         items.append("Pred vetsi praci vyresit backup warning a udelat novou recovery zalohu, pokud je dostupny externi disk.")
+    if memory_drift_count:
+        items.append(
+            "Nejdřív synchronizovat ACTIVE_PROJECTS.md s novějšími kanonickými "
+            f"handoffy/TVBCP ({memory_drift_count} proudů); projektové stavy v tomto "
+            "reportu mohou být zastaralé."
+        )
     if reminder_count >= 40:
         items.append("Zmensit sum v pameti: vybrat malou davku zastaralych `[PRIPOMENOUT]` a presunout je mimo startovni pozornost.")
     if capability.unmapped_tools:
@@ -342,6 +370,22 @@ def _quick_recommendations(
         items.append(f"Jako vecny smer vybrat jednu prioritu 1: {priority_1[0].name}. Dalsi krok: {priority_1[0].next_step}")
     items.append("Nemichat dnes vice velkych smeru; generator ma byt podklad pro vyber jedne konkretni navaznosti.")
     return tuple(_sanitize_text(item) for item in _dedupe(items)[:5])
+
+
+def _memory_drift_line(result: ProjectAuditResult) -> str:
+    if not result.memory_drift_count:
+        return "- Drift projektové paměti: nezjištěn."
+    names = ", ".join(result.memory_drift_workstreams[:6])
+    suffix = (
+        ""
+        if result.memory_drift_count <= 6
+        else f" a dalších {result.memory_drift_count - 6}"
+    )
+    return (
+        "- Drift projektové paměti: "
+        f"{result.memory_drift_count} proudů má novější kanonický handoff/TVBCP "
+        f"než ACTIVE_PROJECTS.md ({names}{suffix})."
+    )
 
 
 def _build_layers(

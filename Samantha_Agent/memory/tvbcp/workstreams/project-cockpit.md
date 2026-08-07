@@ -1,35 +1,35 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-02 14:10 CEST
+- Stav znovu ověřen: 2026-08-07 13:59 CEST
 
 ### Hotovo
-- Důležitá připomenutí lze doručit přímo přes Tailscale do soukromého Cockpitu; opakované doručení je idempotentní a iCloud zůstává záložní cestou.
-- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Přímé Tailscale doručení důležitých připomenutí i Quick Notes funguje a iCloud
+  zůstává fallbackem.
+- VocabularyFR, VocabularyIT a MultiLO mají funkční lokální vstupy z Cockpitu.
+- Servisní souhrn dokumentového trezoru ukazuje aktuální stav před historií.
 
 ### Otevřeno
-- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
-- Lokální commity čekají na samostatný denní GitHub balíček.
+- Lokální `main` obsahuje jeden novější knihovní commit než běžící Cockpit;
+  nejde o blokátor Cockpit architektury.
 
 ### Rizika
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Samostatně auditovat a potvrdit nasazení do Cockpitu; potom v iPhonové zkratce doplnit soukromou Tailscale adresu a provést jeden živý doručovací test.
+- Bez okamžité architektonické změny; pokračovat podle konkrétní uživatelské
+  zkušenosti nebo provozní chyby.
 
 ### Rozhodnutí
-- Přímé Tailscale doručení je primární cesta a iCloud soubory zůstávají bezpečným fallbackem.
+- Přímé Tailscale doručení je primární cesta a iCloud soubory zůstávají
+  bezpečným fallbackem; servisní historie nemá přebíjet aktuální pracovní stav.
 
 ### Navrhované další kroky
-- Opravit recovery dokončovací účtenky také pro lazy pracovní proudy, aby se stejný WIP blok neopakoval.
+- Při dalším UI auditu oddělit aktuální úkol od historických technických detailů.
 
 ### Technický stav checkpointu
-- Změna je otestovaná (1269 testů).
-- Git před checkpointem: lokální `main` na `af834d3ce909`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `af834d3ce909` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-01T15:54:02+00:00.
-- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`disconnected`.
-- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
-- Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
+- Běžící Cockpit je serverově ověřený na `91dc700`; smoke prošel 5/5.
+- Oba profilové workspaces byly při posledním nasazení čisté a zarovnané.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Cockpit / hlavní architektura
@@ -108,3 +108,24 @@ Technický důkaz:
 - Suchý běh nad kopií živého indexu vrátil otevřená připomenutí bez falešného
   čekajícího nebo zaseknutého iCloudu.
 - Plná Cockpit Quality Gate prošla 1311 testy za 338,409 s.
+
+### 2026-08-07 13:59 CEST – Současný Cockpit a servisní orientace narovnány
+
+Hotovo:
+- Přímé zkratky připomenutí a Quick Notes jsou funkční.
+- Lokální vstupy VocabularyFR, VocabularyIT a MultiLO jsou zapojené.
+- Dokumentový trezor v Servisu ukazuje nejdřív aktuální stav a historii až po
+  rozbalení.
+
+Rozhodnutí:
+- Historické servisní statistiky zůstávají dostupné, ale nejsou výchozím
+  pracovním úkolem.
+
+Další krok:
+- Bez okamžité změny; sledovat konkrétní uživatelskou zkušenost.
+
+Navrhované další kroky:
+- Při dalším systémovém auditu ověřit stáří agregované projektové paměti.
+
+Technický důkaz:
+- Běžící Cockpit je serverově ověřený na `91dc700`; smoke 5/5.
