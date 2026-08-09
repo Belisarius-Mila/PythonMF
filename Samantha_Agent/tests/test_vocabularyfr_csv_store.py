@@ -6,7 +6,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -46,6 +46,147 @@ def write_csv(path: Path, fieldnames: list[str], rows: list[dict[str, str]]) -> 
 
 
 class VocabularyCsvStoreTests(unittest.TestCase):
+    def test_packaged_runtime_initializes_one_app_support_source_once(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            support_dir = root / "Application Support" / "VocabularyFR"
+            portable_dir = root / "portable"
+            bundle_dir = root / "bundle"
+            portable_dir.mkdir()
+            bundle_dir.mkdir()
+            seed_content = {
+                trainer.CSV_FILENAME: b"FR,CZ\nbonjour,ahoj\n",
+                trainer.VERBE_CSV_FILENAME: b"InfFR,InfCZ\netre,byt\n",
+                trainer.PICT_CSV_FILENAME: b"FRP,CZP,ENP\nun,jeden,one\n",
+            }
+            for filename, content in seed_content.items():
+                (bundle_dir / filename).write_bytes(content)
+
+            with (
+                patch.object(trainer, "_is_macos_app_runtime", return_value=True),
+                patch.object(trainer, "_app_support_dir", return_value=str(support_dir)),
+                patch.object(trainer, "_app_container_dir", return_value=str(portable_dir)),
+                patch.object(trainer, "_MODULE_DIR", str(bundle_dir)),
+                patch.object(trainer.sys, "_MEIPASS", str(bundle_dir), create=True),
+            ):
+                csv_path = Path(trainer.resolve_csv_path())
+                self.assertEqual(csv_path, support_dir / trainer.CSV_FILENAME)
+                self.assertEqual(
+                    Path(trainer.resolve_verbe_csv_path(str(csv_path))),
+                    support_dir / trainer.VERBE_CSV_FILENAME,
+                )
+                self.assertEqual(
+                    Path(trainer.resolve_pict_csv_path(str(csv_path))),
+                    support_dir / trainer.PICT_CSV_FILENAME,
+                )
+                for filename, content in seed_content.items():
+                    self.assertEqual((support_dir / filename).read_bytes(), content)
+                    self.assertEqual((support_dir / filename).stat().st_mode & 0o777, 0o600)
+
+                (bundle_dir / trainer.CSV_FILENAME).write_bytes(b"changed bundle")
+                (portable_dir / trainer.CSV_FILENAME).write_bytes(b"changed portable")
+                self.assertEqual(Path(trainer.resolve_csv_path()), csv_path)
+                self.assertEqual(csv_path.read_bytes(), seed_content[trainer.CSV_FILENAME])
+
+    def test_packaged_runtime_refuses_silent_legacy_portable_migration(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            support_dir = root / "Application Support" / "VocabularyFR"
+            portable_dir = root / "portable"
+            bundle_dir = root / "bundle"
+            portable_dir.mkdir()
+            bundle_dir.mkdir()
+            legacy = portable_dir / trainer.CSV_FILENAME
+            legacy.write_bytes(b"private legacy data")
+            for filename in trainer.RUNTIME_CSV_FILENAMES:
+                (bundle_dir / filename).write_bytes(b"seed")
+
+            with (
+                patch.object(trainer, "_is_macos_app_runtime", return_value=True),
+                patch.object(trainer, "_app_support_dir", return_value=str(support_dir)),
+                patch.object(trainer, "_app_container_dir", return_value=str(portable_dir)),
+                patch.object(trainer, "_MODULE_DIR", str(bundle_dir)),
+                patch.object(trainer.sys, "_MEIPASS", str(bundle_dir), create=True),
+            ):
+                with self.assertRaisesRegex(
+                    trainer.VocabularyRuntimeDataError,
+                    "nebude je tiše kopírovat",
+                ):
+                    trainer.resolve_csv_path()
+
+            self.assertFalse(support_dir.exists())
+            self.assertEqual(legacy.read_bytes(), b"private legacy data")
+
+    def test_incomplete_packaged_seed_writes_nothing(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            support_dir = root / "Application Support" / "VocabularyFR"
+            portable_dir = root / "portable"
+            bundle_dir = root / "bundle"
+            portable_dir.mkdir()
+            bundle_dir.mkdir()
+            (bundle_dir / trainer.CSV_FILENAME).write_bytes(b"main seed")
+
+            with (
+                patch.object(trainer, "_is_macos_app_runtime", return_value=True),
+                patch.object(trainer, "_app_support_dir", return_value=str(support_dir)),
+                patch.object(trainer, "_app_container_dir", return_value=str(portable_dir)),
+                patch.object(trainer, "_MODULE_DIR", str(bundle_dir)),
+                patch.object(trainer.sys, "_MEIPASS", str(bundle_dir), create=True),
+            ):
+                with self.assertRaisesRegex(
+                    trainer.VocabularyRuntimeDataError,
+                    trainer.VERBE_CSV_FILENAME,
+                ):
+                    trainer.resolve_csv_path()
+
+            self.assertFalse(support_dir.exists())
+
+    def test_explicit_data_dir_is_canonical_without_implicit_initialization(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            explicit_dir = root / "explicit"
+            support_dir = root / "Application Support" / "VocabularyFR"
+            portable_dir = root / "portable"
+            bundle_dir = root / "bundle"
+            portable_dir.mkdir()
+            bundle_dir.mkdir()
+            (portable_dir / trainer.CSV_FILENAME).write_bytes(b"legacy")
+
+            with (
+                patch.object(trainer, "_is_macos_app_runtime", return_value=True),
+                patch.object(trainer, "_app_support_dir", return_value=str(support_dir)),
+                patch.object(trainer, "_app_container_dir", return_value=str(portable_dir)),
+                patch.object(trainer.sys, "_MEIPASS", str(bundle_dir), create=True),
+            ):
+                csv_path = Path(trainer.resolve_csv_path(str(explicit_dir)))
+
+            self.assertEqual(csv_path, explicit_dir / trainer.CSV_FILENAME)
+            self.assertFalse(explicit_dir.exists())
+            self.assertFalse(support_dir.exists())
+
+    def test_close_does_not_mirror_active_csv_to_portable_location(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            active = root / "support" / trainer.CSV_FILENAME
+            portable = root / "portable" / trainer.CSV_FILENAME
+            active.parent.mkdir()
+            portable.parent.mkdir()
+            active.write_bytes(b"canonical")
+            portable.write_bytes(b"legacy")
+
+            app = trainer.VocabularyTrainerApp.__new__(trainer.VocabularyTrainerApp)
+            app.master = Mock()
+            with (
+                patch.object(app, "stop_turbo"),
+                patch.object(app, "_persist_current_status_flags"),
+            ):
+                app._on_main_window_close()
+
+            self.assertEqual(active.read_bytes(), b"canonical")
+            self.assertEqual(portable.read_bytes(), b"legacy")
+            app.master.destroy.assert_called_once_with()
+
     def test_atomic_save_creates_verified_backup_and_updates_snapshot(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             root = Path(temp_dir)

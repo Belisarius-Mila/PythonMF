@@ -5,7 +5,12 @@ a = Analysis(
     ['vocab_trainer_fr.py'],
     pathex=[],
     binaries=[],
-    datas=[('VocabularyFR.csv', '.'), ('VerbeFR.csv', '.'), ('../Pict', 'Pict')],
+    datas=[
+        ('VocabularyFR.csv', '.'),
+        ('VerbeFR.csv', '.'),
+        ('FR_Pict.csv', '.'),
+        ('../Pict', 'Pict'),
+    ],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

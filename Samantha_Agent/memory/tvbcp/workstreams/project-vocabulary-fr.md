@@ -152,3 +152,29 @@ Technický důkaz:
 - Cílené testy 19/19, plná Cockpit brána 1330/1330 a společný obrazový audit 6/6.
 - Janin živý CSV byl kontrolován pouze read-only: 391 řádků, 0 plánovaných oprav Sentence/SentenceT.
 - Privátní záloha je mimo Git a obsahuje manifest i kontrolní součty.
+
+### 2026-08-09 23:30 CEST – Jeden kanonický datový adresář bez tiché synchronizace
+
+Hotovo:
+- Zdrojová aplikace používá CSV v projektovém adresáři, explicitní `--data-dir` používá přesně zadané umístění a budoucí zabalená `.app` používá Application Support.
+- Tiché kopírování tří CSV při startu i ukončení bylo odstraněné.
+- První start balíčku smí pouze create-only založit úplnou trojici CSV z interních seedů. Pokud najde starší přenosná data, zastaví se bez migrace a bez přepsání.
+- Oddělený instalátor nyní zahrnuje i podpůrný modul bezpečného CSV zápisu.
+
+Rozhodnutí:
+- Pro zabalenou aplikaci je jedinou zapisovatelnou autoritou Application Support; pro Janin oddělený účet je autoritou explicitní `--data-dir`.
+- Žádná z těchto cest se automaticky nesynchronizuje s kopií vedle programu.
+- Živá Janina aplikace ani CSV nejsou součástí této zdrojové iterace.
+
+Další krok:
+- Připravit izolovaný testovací build a na pracovní kopii tří CSV ověřit start, zápis a restart.
+
+Navrhované další kroky:
+- Doplnit bezpečné znovunačtení po konfliktu.
+- Potom opravit český palec, jednopoložkový interval a víceslovná slovesa.
+- O samostatném nasazení k Janě rozhodnout až po úspěšném reálném testu balíčku.
+
+Technický důkaz:
+- Cílené testy 18/18, plná Cockpit brána 1330/1330 a společný slovníkový audit 6/6.
+- Janin CSV prošel pouze read-only auditem: 391 řádků a 0 plánovaných oprav Sentence/SentenceT.
+- Nebyl vytvořen build ani spuštěn instalační apply.

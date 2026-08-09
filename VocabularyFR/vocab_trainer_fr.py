@@ -4,9 +4,9 @@ import json
 import os
 import random
 import re
-import shutil
 import subprocess
 import sys
+import tempfile
 import threading
 import time
 import unicodedata
@@ -32,6 +32,15 @@ APP_NAME = "VocabularyFR"
 CSV_FILENAME = "VocabularyFR.csv"
 VERBE_CSV_FILENAME = "VerbeFR.csv"
 PICT_CSV_FILENAME = "FR_Pict.csv"
+RUNTIME_CSV_FILENAMES = (
+    CSV_FILENAME,
+    VERBE_CSV_FILENAME,
+    PICT_CSV_FILENAME,
+)
+
+
+class VocabularyRuntimeDataError(RuntimeError):
+    """Raised when a packaged app cannot select one safe writable data source."""
 
 # Keep Python defaults intentionally small; most mapping is loaded from Pict/mapping.json.
 SYNONYM_IMAGE_MAP = {}
@@ -69,128 +78,127 @@ def _app_container_dir():
     return os.path.abspath(os.path.join(exe_dir, "..", "..", ".."))
 
 
-def _app_parent_dir():
-    return os.path.dirname(_app_container_dir())
+def _is_packaged_runtime():
+    return bool(getattr(sys, "frozen", False) or _is_macos_app_runtime())
+
+
+def _bundled_seed_path(filename):
+    candidates = []
+    meipass = getattr(sys, "_MEIPASS", None)
+    if meipass:
+        candidates.append(os.path.join(meipass, filename))
+    candidates.append(os.path.join(_MODULE_DIR, filename))
+    for candidate in candidates:
+        if os.path.isfile(candidate) and not os.path.islink(candidate):
+            return candidate
+    return None
+
+
+def _copy_seed_create_only(source, target):
+    target_dir = os.path.dirname(target)
+    os.makedirs(target_dir, mode=0o700, exist_ok=True)
+    temporary_path = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="wb",
+            dir=target_dir,
+            prefix=f".{os.path.basename(target)}.",
+            suffix=".tmp",
+            delete=False,
+        ) as temporary:
+            temporary_path = temporary.name
+            with open(source, "rb") as bundled:
+                for chunk in iter(lambda: bundled.read(1024 * 1024), b""):
+                    temporary.write(chunk)
+            temporary.flush()
+            os.fsync(temporary.fileno())
+        os.chmod(temporary_path, 0o600)
+        try:
+            os.link(temporary_path, target)
+        except FileExistsError:
+            pass
+    finally:
+        if temporary_path and os.path.exists(temporary_path):
+            os.unlink(temporary_path)
+
+    if not os.path.isfile(target) or os.path.islink(target):
+        raise VocabularyRuntimeDataError(
+            f"Kanonický datový soubor {os.path.basename(target)} není bezpečný běžný soubor."
+        )
+
+
+def _initialize_packaged_data_dir(data_dir):
+    if os.path.lexists(data_dir) and (
+        not os.path.isdir(data_dir) or os.path.islink(data_dir)
+    ):
+        raise VocabularyRuntimeDataError(
+            "Kanonický adresář Application Support není bezpečný běžný adresář."
+        )
+
+    missing = []
+    for filename in RUNTIME_CSV_FILENAMES:
+        target = os.path.join(data_dir, filename)
+        if os.path.lexists(target):
+            if not os.path.isfile(target) or os.path.islink(target):
+                raise VocabularyRuntimeDataError(
+                    f"Kanonický datový soubor {filename} není bezpečný běžný soubor."
+                )
+            continue
+        missing.append((filename, target))
+
+    if not missing:
+        return
+
+    portable_dir = _app_container_dir()
+    legacy = [
+        filename
+        for filename, _target in missing
+        if os.path.isfile(os.path.join(portable_dir, filename))
+    ]
+    if legacy:
+        names = ", ".join(legacy)
+        raise VocabularyRuntimeDataError(
+            "Aplikace našla starší přenosná data vedle .app, ale nebude je tiše "
+            f"kopírovat do Application Support ({names}). Nejdřív ověř zdroj a "
+            "proveď řízenou migraci, nebo aplikaci spusť s explicitním --data-dir."
+        )
+
+    seeds = []
+    for filename, target in missing:
+        source = _bundled_seed_path(filename)
+        if source is None:
+            raise VocabularyRuntimeDataError(
+                f"V balíčku chybí počáteční datový soubor {filename}; nic nebylo přepsáno."
+            )
+        seeds.append((source, target))
+
+    for source, target in seeds:
+        _copy_seed_create_only(source, target)
+
+
+def resolve_data_dir(data_dir=None):
+    if data_dir:
+        return os.path.abspath(os.path.expanduser(data_dir))
+    if _is_packaged_runtime():
+        return _app_support_dir()
+    return _MODULE_DIR
 
 
 def resolve_csv_path(data_dir=None):
-    if data_dir:
-        return os.path.join(os.path.abspath(os.path.expanduser(data_dir)), CSV_FILENAME)
-
-    # Prefer "portable" data next to .app when possible, fallback to Application Support.
-    if getattr(sys, "frozen", False) or _is_macos_app_runtime():
-        exe_dir = os.path.dirname(sys.executable)
-        app_container_dir = _app_container_dir()
-        app_parent = _app_parent_dir()
-        # "Portable" CSV should live in the folder that contains the .app bundle
-        # (e.g. .../PythonMF/VocabularyFR), not inside the .app and not one level above.
-        portable_csv = os.path.join(app_container_dir, CSV_FILENAME)
-
-        if os.path.exists(portable_csv):
-            return portable_csv
-
-        support_dir = _app_support_dir()
-        os.makedirs(support_dir, exist_ok=True)
-        target_csv = os.path.join(support_dir, CSV_FILENAME)
-
-        source_candidates = []
-        # If user already has data in Application Support, migrate a copy next to .app first.
-        if os.path.exists(target_csv):
-            source_candidates.append(target_csv)
-        meipass = getattr(sys, "_MEIPASS", None)
-        if meipass:
-            source_candidates.append(os.path.join(meipass, CSV_FILENAME))
-
-        source_candidates.append(os.path.join(app_container_dir, CSV_FILENAME))
-        source_candidates.append(os.path.join(app_parent, CSV_FILENAME))
-        source_candidates.append(os.path.join(exe_dir, CSV_FILENAME))
-
-        # Try to initialize a portable CSV next to .app first.
-        for source in source_candidates:
-            if os.path.exists(source):
-                try:
-                    shutil.copy2(source, portable_csv)
-                    return portable_csv
-                except Exception:
-                    continue
-
-        # Then initialize Application Support CSV.
-        if os.path.exists(target_csv):
-            return target_csv
-        for source in source_candidates:
-            if os.path.exists(source):
-                shutil.copy2(source, target_csv)
-                return target_csv
-
-        # First run without bundled CSV: create an empty valid file.
-        with open(target_csv, "w", encoding="utf-8", newline="") as f:
-            writer = csv.DictWriter(
-                f, fieldnames=["FR", "CZ", "Order", "Sentence", "SentenceT", "L", "HT", "gender_fr"]
-            )
-            writer.writeheader()
-        return target_csv
-
-    return os.path.join(os.path.dirname(__file__), CSV_FILENAME)
+    resolved_data_dir = resolve_data_dir(data_dir)
+    if data_dir is None and _is_packaged_runtime():
+        _initialize_packaged_data_dir(resolved_data_dir)
+    return os.path.join(resolved_data_dir, CSV_FILENAME)
 
 
 def resolve_verbe_csv_path(base_csv_path):
-    # Keep verbs data aligned with the selected vocabulary CSV location.
-    if base_csv_path:
-        candidate = os.path.join(os.path.dirname(base_csv_path), VERBE_CSV_FILENAME)
-        if os.path.exists(candidate):
-            return candidate
-
-    # Bundled app fallback: resolve in portable location first, then App Support.
-    if getattr(sys, "frozen", False) or _is_macos_app_runtime():
-        exe_dir = os.path.dirname(sys.executable)
-        app_container_dir = _app_container_dir()
-        app_parent = _app_parent_dir()
-        portable_csv = os.path.join(app_container_dir, VERBE_CSV_FILENAME)
-        if os.path.exists(portable_csv):
-            return portable_csv
-
-        support_dir = _app_support_dir()
-        os.makedirs(support_dir, exist_ok=True)
-        target_csv = os.path.join(support_dir, VERBE_CSV_FILENAME)
-
-        source_candidates = []
-        if os.path.exists(target_csv):
-            source_candidates.append(target_csv)
-        meipass = getattr(sys, "_MEIPASS", None)
-        if meipass:
-            source_candidates.append(os.path.join(meipass, VERBE_CSV_FILENAME))
-
-        source_candidates.append(os.path.join(app_container_dir, VERBE_CSV_FILENAME))
-        source_candidates.append(os.path.join(app_parent, VERBE_CSV_FILENAME))
-        source_candidates.append(os.path.join(exe_dir, VERBE_CSV_FILENAME))
-
-        # Try to initialize portable verbs CSV next to .app first.
-        for source in source_candidates:
-            if os.path.exists(source):
-                try:
-                    shutil.copy2(source, portable_csv)
-                    return portable_csv
-                except Exception:
-                    continue
-
-        # Then initialize Application Support verbs CSV.
-        if os.path.exists(target_csv):
-            return target_csv
-        for source in source_candidates:
-            if os.path.exists(source):
-                shutil.copy2(source, target_csv)
-                return target_csv
-
-        # No source found; return target path so caller can show clear missing-file error.
-        return target_csv
-
-    return os.path.join(os.path.dirname(__file__), VERBE_CSV_FILENAME)
+    data_dir = os.path.dirname(base_csv_path) if base_csv_path else resolve_data_dir()
+    return os.path.join(data_dir, VERBE_CSV_FILENAME)
 
 
 def resolve_pict_csv_path(base_csv_path):
-    if base_csv_path:
-        return os.path.join(os.path.dirname(base_csv_path), PICT_CSV_FILENAME)
-    return os.path.join(os.path.dirname(__file__), PICT_CSV_FILENAME)
+    data_dir = os.path.dirname(base_csv_path) if base_csv_path else resolve_data_dir()
+    return os.path.join(data_dir, PICT_CSV_FILENAME)
 
 
 class VocabularyTrainerApp:
@@ -286,7 +294,6 @@ class VocabularyTrainerApp:
         self.verbes_tree = None
         self.verbe_rows = []
         self.verbe_csv_path = resolve_verbe_csv_path(self.csv_path)
-        self._sync_portable_and_appsupport_on_startup()
         self.verbe_detail_vars = {}
         self.verbe_text_widgets = {}
         self.verbe_groups = []
@@ -299,48 +306,6 @@ class VocabularyTrainerApp:
         self.new_sentence_t_var = tk.StringVar(value="")
         self.new_gender_fr_var = tk.StringVar(value="")
 
-    def _portable_data_dir(self):
-        if getattr(sys, "frozen", False) or _is_macos_app_runtime():
-            return _app_container_dir()
-        return os.path.dirname(__file__)
-
-    def _copy_if_exists(self, src, dst):
-        if not src or not dst or not os.path.exists(src):
-            return False
-        try:
-            os.makedirs(os.path.dirname(dst), exist_ok=True)
-            shutil.copy2(src, dst)
-            return True
-        except Exception:
-            return False
-
-    def _sync_portable_and_appsupport_on_startup(self):
-        # Goal: after unzip/install, keep Application Support in sync with CSVs
-        # placed next to the .app in PythonMF/VocabularyFR.
-        if not (getattr(sys, "frozen", False) or _is_macos_app_runtime()):
-            return
-        portable_dir = self._portable_data_dir()
-        support_dir = _app_support_dir()
-        os.makedirs(support_dir, exist_ok=True)
-        for filename in (CSV_FILENAME, VERBE_CSV_FILENAME, PICT_CSV_FILENAME):
-            src = os.path.join(portable_dir, filename)
-            dst = os.path.join(support_dir, filename)
-            self._copy_if_exists(src, dst)
-
-    def _sync_csvs_to_portable_on_exit(self):
-        # Goal: when app closes, mirror active CSV files back next to the app.
-        if not (getattr(sys, "frozen", False) or _is_macos_app_runtime()):
-            return
-        portable_dir = self._portable_data_dir()
-        os.makedirs(portable_dir, exist_ok=True)
-        pairs = [
-            (self.csv_path, os.path.join(portable_dir, CSV_FILENAME)),
-            (self.verbe_csv_path, os.path.join(portable_dir, VERBE_CSV_FILENAME)),
-            (self.pict_csv_path, os.path.join(portable_dir, PICT_CSV_FILENAME)),
-        ]
-        for src, dst in pairs:
-            self._copy_if_exists(src, dst)
-
     def _on_main_window_close(self):
         try:
             self.stop_turbo()
@@ -348,10 +313,6 @@ class VocabularyTrainerApp:
             pass
         try:
             self._persist_current_status_flags()
-        except Exception:
-            pass
-        try:
-            self._sync_csvs_to_portable_on_exit()
         except Exception:
             pass
         self.master.destroy()
@@ -2762,12 +2723,19 @@ def parse_runtime_arguments(argv=None):
 def main(argv=None):
     arguments = parse_runtime_arguments(argv)
     root = tk.Tk()
+    try:
+        csv_path = resolve_csv_path(arguments.data_dir)
+    except VocabularyRuntimeDataError as exc:
+        messagebox.showerror("VocabularyFR – bezpečný výběr dat", str(exc))
+        root.destroy()
+        return 1
     VocabularyTrainerApp(
         root,
-        resolve_csv_path(arguments.data_dir),
+        csv_path,
         pict_dir=arguments.pict_dir,
     )
     root.mainloop()
+    return 0
 
 
 if __name__ == "__main__":

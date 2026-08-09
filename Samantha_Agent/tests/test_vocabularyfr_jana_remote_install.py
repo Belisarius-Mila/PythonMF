@@ -93,6 +93,10 @@ class VocabularyFRJanaInstallTests(unittest.TestCase):
                 paths["vocabulary_csv"].read_bytes(),
             )
             self.assertTrue((paths["shared_root"] / "Pict" / "a.png").is_file())
+            self.assertEqual(
+                (paths["shared_root"] / "app" / "vocabulary_csv_store.py").read_bytes(),
+                paths["csv_store"].read_bytes(),
+            )
             launcher = paths["launcher"].read_text(encoding="utf-8")
             self.assertIn("--data-dir", launcher)
             self.assertIn(str(paths["data_dir"]), launcher)
@@ -207,6 +211,8 @@ class VocabularyFRJanaInstallTests(unittest.TestCase):
         python.chmod(0o755)
         trainer_path = sources / "vocab_trainer_fr.py"
         trainer_path.write_text("# trainer\n", encoding="utf-8")
+        csv_store = sources / "vocabulary_csv_store.py"
+        csv_store.write_text("# CSV store\n", encoding="utf-8")
         vocabulary_csv = sources / "current.csv"
         self._write_vocabulary(vocabulary_csv)
         verbe_csv = sources / "VerbeFR.csv"
@@ -229,6 +235,7 @@ class VocabularyFRJanaInstallTests(unittest.TestCase):
             "launcher": home / "Desktop" / "VocabularyFR.command",
             "python": python,
             "trainer": trainer_path,
+            "csv_store": csv_store,
             "vocabulary_csv": vocabulary_csv,
             "verbe_csv": verbe_csv,
             "pict_csv": pict_csv,
@@ -249,6 +256,7 @@ class VocabularyFRJanaInstallTests(unittest.TestCase):
             python_path=paths["python"],
             sources=installer.InstallSources(
                 trainer=paths["trainer"],
+                csv_store=paths["csv_store"],
                 vocabulary_csv=paths["vocabulary_csv"],
                 verbe_csv=paths["verbe_csv"],
                 pict_csv=paths["pict_csv"],

@@ -48,7 +48,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `projects/tts_edge_audio_tools.md` - české TTS/MP3 nástroje přes edge-tts, dávkový CSV režim a ruční GUI.
 - `projects/vocabulary_en_web_cards.md` - webové obrazové kartičky EN z `VocabularyEN.csv`, sync do `docs/`, learner MVP a workflow pro chybějící obrázky.
 - `projects/vocabularyfr_web_trainer.md` - historický webový MVP prototyp pro Janu. Aktuální používaný stav FR aplikací je v kanonických proudech `project-vocabulary-fr`; Last 20/50 i lokální Tk spuštění z Cockpitu Míla potvrdil jako funkční.
-- `handoffs/workstreams/project-vocabulary-fr.md`; `tvbcp/workstreams/project-vocabulary-fr.md` - kanonický aktuální stav Vocabulary FR: probíhá bezpečnostní stabilizace CSV; první vrstva přidala atomický zápis, hash konfliktu, zálohu před prvním zápisem relace a zachování rozšířeného schématu, zatím bez nasazení k Janě.
+- `handoffs/workstreams/project-vocabulary-fr.md`; `tvbcp/workstreams/project-vocabulary-fr.md` - kanonický aktuální stav Vocabulary FR: dvě zdrojové bezpečnostní vrstvy přidaly atomický zápis, hash konfliktu a jediný datový adresář bez tiché obousměrné synchronizace. Starší přenosná data se bez ověření nemigrují; build ani nasazení k Janě zatím neproběhly.
 - `handoffs/workstreams/project-vocabulary-it.md`; `tvbcp/workstreams/project-vocabulary-it.md` - kanonický aktuální stav Vocabulary IT: Last 20/50/HT je ověřené, lokální Tk spuštění z Cockpitu funguje a proud je pozastavený.
 - `projects/fraška_dante_esa_concept.md` - koncept eseje o frašce, dantovské ose, egu, smíření a nově definovaných pojmech.
 - `projects/pohadkova_knizka_gpt_canva.md` - domácí dětská knížka z GPT pohádek, Canva sazba, stylová bible a workflow pro ilustrace.

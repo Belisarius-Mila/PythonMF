@@ -1,36 +1,36 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-09 22:51 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-09 23:30 CEST
 
 ### Hotovo
-- Před vývojem vznikla ověřená privátní záloha aktuální Janiny aplikace, původního distribučního ZIPu a pracovních CSV.
-- VocabularyFR ukládá hlavní CSV přes samostatnou atomickou vrstvu s kontrolou hashe, zálohou před prvním zápisem relace a zachováním neznámých sloupců.
-- Uložení prázdného seznamu nyní vytvoří platné CSV pouze s hlavičkou.
+- Hlavní CSV dál chrání atomický zápis, hash konfliktu, jedna záloha před prvním zápisem relace a zachování neznámých sloupců.
+- Každý běh nyní používá jediný datový adresář: zdrojový projekt, explicitní `--data-dir`, nebo u budoucí zabalené aplikace Application Support.
+- Tiché kopírování CSV při startu i ukončení bylo odstraněné. První start balíčku zakládá tři CSV create-only z úplných interních seedů; nalezená starší přenosná data vyvolají bezpečný stop místo migrace.
+- Oddělený instalátor nyní přenáší i podpůrný modul bezpečného CSV zápisu.
 
 ### Otevřeno
-- Nová datová vrstva zatím není zabalená ani nasazená do Janiny používané aplikace.
-- Zůstává odstranit obousměrné kopírování mezi přenosným umístěním a Application Support a doplnit bezpečné znovunačtení po konfliktu.
+- Změna zatím není zabalená ani nasazená do Janiny používané aplikace.
+- Stále chybí uživatelsky bezpečné znovunačtení po konfliktu CSV.
 
 ### Rizika
-- Reálný balíček ještě neprošel ručním testem na Janině Macu; současná funkční aplikace proto zůstala beze změny.
+- Skutečná `.app` ještě neprošla izolovaným testem startu, zápisu a restartu; živá Janina aplikace a data proto zůstaly beze změny.
 
 ### Další krok
-- V další oddělené iteraci určit jediný kanonický datový soubor a odstranit tiché obousměrné synchronizační kopie bez migrace živých dat.
+- Připravit izolovaný testovací build a na pracovní kopii tří CSV ověřit start, zápis a restart bez zásahu do živých dat.
 
 ### Rozhodnutí
-- První bezpečnostní iterace mění jen ukládání hlavního VocabularyFR.csv; živá Janina aplikace se nenasazuje bez samostatného potvrzení a testu balíčku.
+- Kanonickým umístěním zabalené aplikace je Application Support. Explicitní `--data-dir` je samostatná autorita pro Janin oddělený účet; žádná cesta se automaticky nesynchronizuje s kopií vedle programu.
 
 ### Navrhované další kroky
-- Doplnit uživatelsky bezpečné znovunačtení při souběžné změně CSV.
-- Potom opravit český palec, jednopoložkový interval a detekci víceslovných sloves.
-- Až následně připravit reprodukovatelný Janin build a ruční test zápisu i zvuku.
+- Doplnit bezpečné znovunačtení při konfliktu.
+- Potom opravit český palec, jednopoložkový interval a víceslovná slovesa.
+- Až po izolovaném buildu a testu rozhodnout o samostatném nasazení k Janě.
 
 ### Technický stav checkpointu
-- Cílená sada prošla 19/19, plná Cockpit brána 1330/1330 a společný slovníkový audit 6/6.
-- Janin živý CSV byl pouze read-only ověřen: 391 řádků a 0 plánovaných oprav Sentence/SentenceT.
-- Předvývojová záloha je v privátní necommitované oblasti a má kontrolní součty i manifest obnovy.
-- Nasazení nové verze nebylo součástí tohoto kroku.
+- Cílená sada prošla 18/18, plná Cockpit brána 1330/1330 a společný slovníkový audit 6/6.
+- Janin CSV prošel pouze read-only auditem: 391 řádků a 0 plánovaných oprav Sentence/SentenceT.
+- Žádný build, instalační apply ani zápis do živého Janina CSV nebyl proveden.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: Vocabulary FR
@@ -102,3 +102,11 @@ Bezpecnost / neukladat:
 - Další krok: Určit jediný kanonický datový soubor a odstranit tiché obousměrné kopírování s bezpečnou migrací.
 - Navrhované další kroky: Doplnit znovunačtení po konfliktu; potom malé logické opravy; následně správce zvuku a reprodukovatelný build.
 - Technický důkaz: cílené testy 19/19, plná brána 1330/1330, obrazový audit 6/6 a Janin read-only větný audit 391 řádků bez plánované změny.
+
+### 2026-08-09 23:30 CEST – Jeden kanonický datový adresář bez tiché synchronizace
+
+- Hotovo: Zdrojový běh, explicitní `--data-dir` a budoucí zabalená aplikace mají každý právě jeden určený datový adresář. Kopírování mezi přenosným umístěním a Application Support při startu i ukončení bylo odstraněné. První start balíčku umí pouze create-only inicializaci z úplných interních seedů; starší přenosná data bez ověření odmítne migrovat. Instalátor přenáší i podpůrný modul bezpečného CSV zápisu.
+- Rozhodnutí: Pro zabalenou `.app` je kanonický Application Support, pro Janin oddělený spouštěč explicitní `--data-dir`. Živá aplikace ani data se v tomto kroku nemění.
+- Další krok: Připravit izolovaný testovací build a na pracovní kopii tří CSV ověřit start, zápis a restart.
+- Navrhované další kroky: Doplnit bezpečné znovunačtení po konfliktu; potom malé logické opravy; nasazení k Janě řešit až samostatně po reálném testu.
+- Technický důkaz: cílené testy 18/18, plná brána 1330/1330, společný audit 6/6 a Janin read-only větný audit 391 řádků bez plánované změny.

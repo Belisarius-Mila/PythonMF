@@ -51,6 +51,10 @@ Janin aktuální slovník se bere pouze ze zadaného iCloudového CSV. `VerbeFR.
 a `FR_Pict.csv` se při první instalaci založí z aktuálních projektových verzí a
 potom jsou už Janinými samostatnými pracovními soubory.
 
+Spouštěč předává `--data-dir`, takže tento adresář je jediným pracovním zdrojem
+všech tří CSV. Aplikace při startu ani ukončení nevytváří druhou kopii vedle
+programu a nesynchronizuje ji s Application Support.
+
 ## 3. První živé ověření
 
 1. Jana se přes Sdílení obrazovky přihlásí do svého účtu.
@@ -60,5 +64,7 @@ potom jsou už Janinými samostatnými pracovními soubory.
 4. Zvuk je nutné ověřit v reálné vzdálené relaci; instalátor přenos zvuku
    netestuje.
 
-Spuštění bez `--data-dir` a `--pict-dir` zůstává kompatibilní s dosavadním
-Mílovým lokálním používáním aplikace.
+Zdrojové spuštění bez `--data-dir` dál používá CSV v projektovém adresáři.
+Budoucí zabalená `.app` bez `--data-dir` používá jako jediný datový adresář
+`~/Library/Application Support/VocabularyFR`. Pokud při prvním startu najde jen
+starší přenosná CSV vedle `.app`, nic nekopíruje a vyžádá si ověřenou migraci.

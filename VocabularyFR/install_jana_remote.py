@@ -25,6 +25,7 @@ INSTALL_CONFIRMATION = "INSTALL_VOCABULARYFR_FOR_JANA"
 CSV_FILENAME = "VocabularyFR.csv"
 VERBE_FILENAME = "VerbeFR.csv"
 PICT_CSV_FILENAME = "FR_Pict.csv"
+CSV_STORE_FILENAME = "vocabulary_csv_store.py"
 LAUNCHER_FILENAME = "VocabularyFR.command"
 SHARED_ROOT = Path("/Users/Shared/VocabularyFR")
 DEFAULT_PYTHON = Path("/usr/local/bin/python3.12")
@@ -48,6 +49,7 @@ class VocabularyFRInstallError(RuntimeError):
 @dataclass(frozen=True, repr=False)
 class InstallSources:
     trainer: Path
+    csv_store: Path
     vocabulary_csv: Path
     verbe_csv: Path
     pict_csv: Path
@@ -292,6 +294,7 @@ def plan_vocabularyfr_install(
         raise VocabularyFRInstallError("Python GUI runtime is missing tkinter or Pillow.")
     checked_sources = InstallSources(
         trainer=_regular_file(sources.trainer, "trainer source"),
+        csv_store=_regular_file(sources.csv_store, "CSV store source"),
         vocabulary_csv=_regular_file(sources.vocabulary_csv, "vocabulary source"),
         verbe_csv=_regular_file(sources.verbe_csv, "verbs source"),
         pict_csv=_regular_file(sources.pict_csv, "picture table source"),
@@ -309,6 +312,7 @@ def plan_vocabularyfr_install(
 
     labelled_sources = [
         ("shared/app/vocab_trainer_fr.py", checked_sources.trainer),
+        (f"shared/app/{CSV_STORE_FILENAME}", checked_sources.csv_store),
         ("shared/app/MaleFox.PNG", checked_sources.male_fox),
         ("shared/app/FemaleFox.PNG", checked_sources.female_fox),
         (f"data/{CSV_FILENAME}", checked_sources.vocabulary_csv),
@@ -380,6 +384,7 @@ def _verify_created_install(plan: VocabularyFRInstallPlan) -> None:
     shared_pict = plan.shared_root / "Pict"
     pairs = [
         (plan.sources.trainer, shared_app / "vocab_trainer_fr.py", 0o644),
+        (plan.sources.csv_store, shared_app / CSV_STORE_FILENAME, 0o644),
         (plan.sources.male_fox, shared_app / "MaleFox.PNG", 0o644),
         (plan.sources.female_fox, shared_app / "FemaleFox.PNG", 0o644),
         (plan.sources.vocabulary_csv, plan.data_dir / CSV_FILENAME, 0o600),
@@ -471,6 +476,7 @@ def apply_vocabularyfr_install(
             directory.chmod(0o755)
 
         _copy_file(current.sources.trainer, shared_app / "vocab_trainer_fr.py", 0o644)
+        _copy_file(current.sources.csv_store, shared_app / CSV_STORE_FILENAME, 0o644)
         _copy_file(current.sources.male_fox, shared_app / "MaleFox.PNG", 0o644)
         _copy_file(current.sources.female_fox, shared_app / "FemaleFox.PNG", 0o644)
         for source in _picture_inventory(current.sources.pict_dir)[0]:
@@ -524,6 +530,7 @@ def _default_sources(source_csv: Path) -> InstallSources:
     project_dir = Path(__file__).resolve().parent
     return InstallSources(
         trainer=project_dir / "vocab_trainer_fr.py",
+        csv_store=project_dir / CSV_STORE_FILENAME,
         vocabulary_csv=source_csv,
         verbe_csv=project_dir / VERBE_FILENAME,
         pict_csv=project_dir / PICT_CSV_FILENAME,
