@@ -1,43 +1,43 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-07 21:55 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-09 22:51 CEST
 
 ### Hotovo
-- Připraven dvoukrokový instalátor oddělené VocabularyFR pro Janin účet včetně návodu a testů
-- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Před vývojem vznikla ověřená privátní záloha aktuální Janiny aplikace, původního distribučního ZIPu a pracovních CSV.
+- VocabularyFR ukládá hlavní CSV přes samostatnou atomickou vrstvu s kontrolou hashe, zálohou před prvním zápisem relace a zachováním neznámých sloupců.
+- Uložení prázdného seznamu nyní vytvoří platné CSV pouze s hlavičkou.
 
 ### Otevřeno
-- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
-- Lokální commity čekají na samostatný denní GitHub balíček.
+- Nová datová vrstva zatím není zabalená ani nasazená do Janiny používané aplikace.
+- Zůstává odstranit obousměrné kopírování mezi přenosným umístěním a Application Support a doplnit bezpečné znovunačtení po konfliktu.
 
 ### Rizika
-- Žádné další doložené provozní riziko.
+- Reálný balíček ještě neprošel ručním testem na Janině Macu; současná funkční aplikace proto zůstala beze změny.
 
 ### Další krok
-- Spustit redigovaný náhled instalace s Janiným aktuálním iCloudovým CSV
+- V další oddělené iteraci určit jediný kanonický datový soubor a odstranit tiché obousměrné synchronizační kopie bez migrace živých dat.
 
 ### Rozhodnutí
-- Program a obrázky budou společné pouze ke čtení, zatímco Janina pracovní CSV zůstanou v jejím uživatelském účtu
+- První bezpečnostní iterace mění jen ukládání hlavního VocabularyFR.csv; živá Janina aplikace se nenasazuje bez samostatného potvrzení a testu balíčku.
 
 ### Navrhované další kroky
-- Po ověření fingerprintu provést instalaci přes sudo
-- V Janině vzdálené relaci ověřit spuštění, zápis L nebo HT a přenos zvuku
+- Doplnit uživatelsky bezpečné znovunačtení při souběžné změně CSV.
+- Potom opravit český palec, jednopoložkový interval a detekci víceslovných sloves.
+- Až následně připravit reprodukovatelný Janin build a ruční test zápisu i zvuku.
 
 ### Technický stav checkpointu
-- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `57564dc9d7ff`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `57564dc9d7ff` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-07T17:18:31+00:00.
-- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
-- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
-- Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
+- Cílená sada prošla 19/19, plná Cockpit brána 1330/1330 a společný slovníkový audit 6/6.
+- Janin živý CSV byl pouze read-only ověřen: 391 řádků a 0 plánovaných oprav Sentence/SentenceT.
+- Předvývojová záloha je v privátní necommitované oblasti a má kontrolní součty i manifest obnovy.
+- Nasazení nové verze nebylo součástí tohoto kroku.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Vocabulary FR
 
 Pracovni proud: `project-vocabulary-fr`
 Typ: `Project`
-Rezim: `paused`
+Rezim: `active`
 
 ## Cil a hranice
 
@@ -127,3 +127,28 @@ Technický důkaz:
 - rychlá Cockpit brána syntaxe a whitespace: 9.0 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `project-vocabulary-fr`.
 - Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+
+### 2026-08-09 22:51 CEST – První bezpečnostní vrstva ukládání VocabularyFR.csv
+
+Hotovo:
+- Před vývojem vznikla ověřená privátní záloha používané aplikace, původního distribučního ZIPu a pracovních dat.
+- Hlavní CSV se nově zapisuje přes dočasný soubor, ověření znovunačtení, zálohu původní verze a atomickou výměnu.
+- Hash načtené verze brání přepsání souboru, který se mezitím změnil jinde.
+- Prázdný seznam se uloží jako platné hlavičkové CSV a neznámé sloupce zůstanou zachované.
+
+Rozhodnutí:
+- První iterace se omezuje na hlavní VocabularyFR.csv.
+- Současná Janina aplikace se nemění ani nenasazuje bez samostatného buildu a reálného testu.
+
+Další krok:
+- Určit jediný kanonický datový soubor a odstranit tiché obousměrné kopírování s bezpečnou migrací.
+
+Navrhované další kroky:
+- Doplnit bezpečné znovunačtení při konfliktu.
+- Potom opravit český palec, jednopoložkový interval a víceslovná slovesa.
+- Následně oddělit správce zvuku a zakotvit reprodukovatelný build.
+
+Technický důkaz:
+- Cílené testy 19/19, plná Cockpit brána 1330/1330 a společný obrazový audit 6/6.
+- Janin živý CSV byl kontrolován pouze read-only: 391 řádků, 0 plánovaných oprav Sentence/SentenceT.
+- Privátní záloha je mimo Git a obsahuje manifest i kontrolní součty.

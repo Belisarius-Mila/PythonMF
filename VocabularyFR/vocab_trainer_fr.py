@@ -15,6 +15,19 @@ from tkinter import ttk
 from tkinter import messagebox
 from PIL import Image, ImageTk
 
+_MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
+if _MODULE_DIR not in sys.path:
+    sys.path.insert(0, _MODULE_DIR)
+
+from vocabulary_csv_store import (  # noqa: E402
+    VOCABULARY_FIELDNAMES,
+    VocabularyCsvConflictError,
+    VocabularyCsvError,
+    merged_fieldnames,
+    read_csv_document,
+    save_csv_atomic,
+)
+
 APP_NAME = "VocabularyFR"
 CSV_FILENAME = "VocabularyFR.csv"
 VERBE_CSV_FILENAME = "VerbeFR.csv"
@@ -192,6 +205,11 @@ class VocabularyTrainerApp:
         self.master.geometry("1320x800")
         self.master.protocol("WM_DELETE_WINDOW", self._on_main_window_close)
 
+        self.csv_fieldnames = tuple(VOCABULARY_FIELDNAMES)
+        self.csv_snapshot = None
+        self.csv_session_backup_created = False
+        self.csv_write_blocked_reason = ""
+        self.csv_backup_dir = os.path.join(_app_support_dir(), "Backups")
         self.rows = self._load_csv()
         self.current_index = None
         self.hidden_side = None  # "FR" or "CZ"
@@ -728,10 +746,10 @@ class VocabularyTrainerApp:
     def _load_csv(self):
         if not os.path.exists(self.csv_path):
             raise FileNotFoundError(self.csv_path)
-        with open(self.csv_path, "r", encoding="utf-8-sig", newline="") as f:
-            reader = csv.DictReader(f)
-            rows = [row for row in reader]
-        rows = self._repair_rows(rows)
+        document = read_csv_document(self.csv_path)
+        self.csv_fieldnames = merged_fieldnames(document.fieldnames, document.rows)
+        self.csv_snapshot = document.snapshot
+        rows = self._repair_rows(document.rows)
         return rows
 
     def _repair_rows(self, rows):
@@ -756,7 +774,12 @@ class VocabularyTrainerApp:
             if learned == "ano" and hard_training == "ano":
                 learned = "ne"
 
-            repaired.append(
+            repaired_row = {
+                key: value
+                for key, value in row.items()
+                if key is not None and key not in VOCABULARY_FIELDNAMES
+            }
+            repaired_row.update(
                 {
                     "FR": fr,
                     "CZ": cz,
@@ -768,6 +791,7 @@ class VocabularyTrainerApp:
                     "gender_fr": gender_fr if gender_fr in ("m", "f") else "",
                 }
             )
+            repaired.append(repaired_row)
 
         for i, row in enumerate(repaired, start=1):
             row["Order"] = str(i)
@@ -775,16 +799,40 @@ class VocabularyTrainerApp:
         return repaired
 
     def _write_rows(self, rows):
-        fieldnames = ["FR", "CZ", "Order", "Sentence", "SentenceT", "L", "HT", "gender_fr"]
-        with open(self.csv_path, "w", encoding="utf-8", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=fieldnames)
-            writer.writeheader()
-            writer.writerows(rows)
+        if self.csv_snapshot is None:
+            raise VocabularyCsvError("Chybí kontrolní otisk načteného CSV.")
+        result = save_csv_atomic(
+            self.csv_path,
+            rows,
+            fieldnames=self.csv_fieldnames,
+            expected_snapshot=self.csv_snapshot,
+            backup_dir=self.csv_backup_dir,
+            create_backup=not self.csv_session_backup_created,
+        )
+        self.csv_snapshot = result.snapshot
+        self.csv_fieldnames = result.fieldnames
+        if result.backup_path is not None:
+            self.csv_session_backup_created = True
 
     def _save_csv(self):
-        if not self.rows:
-            return
-        self._write_rows(self.rows)
+        if self.csv_write_blocked_reason:
+            return False
+        try:
+            self._write_rows(self.rows)
+        except VocabularyCsvConflictError as exc:
+            self.csv_write_blocked_reason = str(exc)
+            messagebox.showerror(
+                "VocabularyFR.csv se změnil",
+                f"{exc}\n\nSoubor nebyl přepsán. Zavři aplikaci a načti aktuální data znovu.",
+            )
+            return False
+        except (VocabularyCsvError, OSError) as exc:
+            messagebox.showerror(
+                "VocabularyFR.csv se nepodařilo uložit",
+                f"Soubor nebyl nahrazen.\n\n{exc}",
+            )
+            return False
+        return True
 
     def _build_picture_base_dirs(self):
         dirs = []
