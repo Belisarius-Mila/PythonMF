@@ -36,7 +36,18 @@ Cockpit sestaví pouze pevný lokální příkaz a otevře aplikaci v Terminalu.
 - Před nasazením se spouští úplná Cockpit quality gate.
 - Po nasazení se živě ověří API katalogu a skutečný start procesu aplikace.
 
+## Nasazení 2026-08-10
+
+- Úplná Cockpit quality gate prošla 1334/1334 testy.
+- Řízené nasazení bylo svázané s proudem `project-to-be-to-have`.
+- Restart vytvořil nový Cockpit proces a povinný smoke prošel 5/5.
+- Živý `/api/web-apps` vrátil dlaždici `ToBeToHave` jako desktopovou aplikaci.
+- Živý spouštěcí endpoint vrátil `launched` a proces
+  `ToBeTraining/tobe_trenink.py` skutečně běžel přes Python 3.12.
+- Zdrojový skript, obě výuková CSV a dokumenty v `ToBeTraining/` zůstaly beze
+  změny.
+
 ## Další krok
 
-Po prvním živém spuštění řešit další úpravy aplikace nebo lekcí jen podle
-konkrétního zadání Míly.
+Není nutná žádná okamžitá změna. Další úpravy aplikace nebo lekcí řešit jen
+podle konkrétního zadání Míly.
