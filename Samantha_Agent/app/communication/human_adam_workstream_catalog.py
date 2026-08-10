@@ -419,6 +419,15 @@ WORKSTREAM_CATALOG = validate_workstream_catalog(
             "Automaticke opakujici se ukoly / ColorsAndNumbers",
         ),
         _record(
+            "project-to-be-to-have",
+            "Project",
+            "ToBeToHave",
+            "active",
+            "2",
+            "ToBeToHave",
+            query_aliases=("To Be Training", "ToBeTraining"),
+        ),
+        _record(
             "project-vocabulary-fr",
             "Project",
             "Vocabulary FR",

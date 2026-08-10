@@ -128,6 +128,7 @@ neni registrovane, nebo ho navrhnout jako novou kartu.
 | MMTX | `MatysekANJ/MMTX.py`, `MatysekANJ/web_mmtx/`, `docs/` | L1 | Pygame/web vyukova aplikace, hotspoty, sceny, audio podklady. | Workflow pro sync webu do `docs/` a smoke test; pred zmenami cist MMTX memory a handoff. |
 | Matysek English Game concept | `MatysekANJ/anglictina_matysek_V3.py` | L0/L1 | Koncept a starsi Pygame experimenty. | Nechat V3 stabilni; hlavni smer je MMTX. |
 | MultiLO | `MultiLO/` | L1 | Desktop vyukova aplikace, testy `test_multilo_core.py`, `test_storage.py`, rucni retest checklist. | Registrovat read-only/test workflow pro `py_compile` a unit testy; zapisove zmeny delat jen po konkretni zadani. |
+| ToBeToHave | `ToBeTraining/` | L1 | Desktopová Tk aplikace pro to be, to have a to go; Cockpit ji spouští allowlistovaně a obě CSV používá pouze ke čtení. | Při změnách držet `py_compile`, kontrolu obou CSV schémat a samostatné zadání pro zásah do výukového obsahu. |
 | PictNew / FR+IT obrazky | `pict_new_audit.py`, `pict_new_prepare.py`, `image_generator.py`, `Pict/`, `PictNew/`, `VocabularyFR/`, `VocabularyIT/` | L1 | Overeny rucni workflow: audit/request -> dry-run -> potvrzene placene batch generovani -> review -> kopie do `Pict/` -> mapping az po dalsim potvrzeni. Kanonicky postup je v `technical/vocabulary_image_generation_workflow.md`. | Registrovat PictNew workflow s oddelenymi kroky: prepare, dry-run, confirmed generate, copy approved, mapping preview/apply se zalohou. |
 | VocabularyEN web cards | `VocabularyEN/`, `docs/vocabulary-en/`, `docs/data/` | L1 | Sync CSV do `docs`, learner web MVP, localStorage stav. | Registrovat sync workflow `VocabularyEN -> docs`; test pres lokalni HTTP server pri UI zmenach. |
 | TTS edge audio | `scripts/generate_tts.py`, `scripts/tts_gui.py` | L1 | Davkove MP3 z CSV a rucni GUI pres `edge-tts`. | Registrovat davkove TTS workflow; GUI spoustet jen na Miluv pokyn a s vedomim, ze otevre okno. |
@@ -152,7 +153,6 @@ doplnit memory kartu.
 | `MBSoft/` | FR/IT aplikace, launchery, sync skripty | Slovnikove aplikace pro mobil/iPhone workflow. |
 | `RestauracePTKL/` | texty, postavy, `restaurace_lines.py`, web | Anglicky pribeh/restauracni vyukovy projekt. |
 | `Sportka/` | navrhy a CSV losovani | Analyticky/hravy projekt pro Sportku. |
-| `ToBeTraining/` | `tobe_trenink.py`, Pygame varianta, CSV | Anglictina, trenink slovesa to be. |
 | `VocabularyES/` | CSV a `vocab_trainer_es.py` | Slovnikova desktop aplikace. |
 | `VocabularyLA/` | CSV a `vocab_trainer_la.py` | Slovnikova desktop aplikace. |
 | `ZalohyPY/` | stare kopie kodu a CSV | Lokalni archiv/stare zalohy; nepouzivat jako zdroj pravdy bez overeni. |
@@ -179,7 +179,7 @@ memory kartu nebo uz ji maji.
 | Vocabulary ES | `VocabularyES/` | Mensi samostatny slovnikovy projekt, zatim bez memory karty. |
 | Vocabulary LA | `VocabularyLA/` | Mensi samostatny slovnikovy projekt, zatim bez memory karty. |
 | Colors and Numbers | `ColorsAndNumbers/`, `docs/colors-numbers/`, `assets/openmoji_numbers/` | Jeden projekt; web a desktop jsou varianty, `assets/` je sdileny zdroj. |
-| To Be Training | `ToBeTraining/` | Samostatna vyukova aplikace/prototyp. |
+| ToBeToHave | `ToBeTraining/` | Jeden kanonický projekt; názvy To Be Training a ToBeTraining jsou zachované jako vyhledávací aliasy. |
 | Animals Quiz | `Animals/` | Maly samostatny vyukovy projekt. |
 | Animals Film | `AnimalsFilmPY/` | Samostatny sekvencni vyukovy projekt. |
 | Restaurace PTKL | `RestauracePTKL/`, `docs/restaurace-ptkl/` | Jeden dialogovy projekt; web je vystup. |

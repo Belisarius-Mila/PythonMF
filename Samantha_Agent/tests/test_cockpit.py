@@ -6200,6 +6200,41 @@ Dalsi krok:
         self.assertEqual(apps["multilo"]["launch_type"], "desktop")
         self.assertEqual(apps["multilo"]["title"], "MultiLO")
 
+    def test_web_apps_catalog_contains_to_be_to_have_desktop_app(self) -> None:
+        apps = {item["id"]: item for item in web_apps_catalog()["apps"]}
+
+        self.assertEqual(apps["to-be-to-have"]["launch_type"], "desktop")
+        self.assertEqual(apps["to-be-to-have"]["title"], "ToBeToHave")
+
+    def test_to_be_to_have_csv_sources_have_expected_schema_and_rows(self) -> None:
+        app_root = cockpit_module.GIT_ROOT / "ToBeTraining"
+        expected = {
+            "tobevety.csv": (
+                {"Lekce", "Otázka", "Kladná odpověď", "Záporná odpověď"},
+                1,
+            ),
+            "verb_conjugation.csv": (
+                {
+                    "Pronoun",
+                    "Verb",
+                    "Adverbial",
+                    "QuestionAux",
+                    "QuestionVerb",
+                    "Translation",
+                },
+                1,
+            ),
+        }
+
+        for filename, (required_columns, minimum_rows) in expected.items():
+            with self.subTest(filename=filename):
+                with (app_root / filename).open(
+                    encoding="utf-8-sig", newline=""
+                ) as handle:
+                    rows = list(csv.DictReader(handle, delimiter=";"))
+                self.assertTrue(required_columns.issubset(rows[0]))
+                self.assertGreaterEqual(len(rows), minimum_rows)
+
     def test_family_video_organizer_prefers_complete_private_package(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             root = Path(temp_dir)
@@ -6286,6 +6321,25 @@ Dalsi krok:
         self.assertEqual(calls[0][0], "/usr/bin/osascript")
         self.assertIn("MultiLO", calls[0][2])
         self.assertIn("step2_cockpit.py", calls[0][2])
+        self.assertIn("/usr/local/bin/python3.12", calls[0][2])
+        self.assertNotIn("; python3 ", calls[0][2])
+
+    def test_open_to_be_to_have_uses_python_312_and_canonical_entrypoint(self) -> None:
+        calls: list[list[str]] = []
+
+        def fake_runner(args, **kwargs):
+            calls.append(args)
+            return subprocess.CompletedProcess(args=args, returncode=0, stdout="", stderr="")
+
+        result = open_desktop_app_action(
+            {"app_id": "to-be-to-have"}, runner=fake_runner
+        )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["status"], "launched")
+        self.assertEqual(calls[0][0], "/usr/bin/osascript")
+        self.assertIn("ToBeTraining", calls[0][2])
+        self.assertIn("tobe_trenink.py", calls[0][2])
         self.assertIn("/usr/local/bin/python3.12", calls[0][2])
         self.assertNotIn("; python3 ", calls[0][2])
 

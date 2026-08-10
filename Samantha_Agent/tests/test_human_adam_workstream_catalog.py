@@ -96,17 +96,31 @@ class WorkstreamCatalogTests(unittest.TestCase):
             misc_ids,
             {"misc-brainstorm", "misc-unclassified-development"},
         )
-        self.assertEqual(len(WORKSTREAM_CATALOG), 30)
+        self.assertEqual(len(WORKSTREAM_CATALOG), 31)
 
     def test_catalog_has_expected_type_distribution(self) -> None:
         self.assertEqual(
             Counter(record.workstream_type for record in WORKSTREAM_CATALOG),
-            {"Project": 24, "Tool": 4, "Misc": 2},
+            {"Project": 25, "Tool": 4, "Misc": 2},
         )
         self.assertEqual(
             Counter(record.mode for record in WORKSTREAM_CATALOG),
-            {"active": 27, "paused": 3},
+            {"active": 28, "paused": 3},
         )
+
+    def test_to_be_to_have_is_an_active_project_with_legacy_name_aliases(self) -> None:
+        project = next(
+            record
+            for record in WORKSTREAM_CATALOG
+            if record.workstream_id == "project-to-be-to-have"
+        )
+
+        self.assertEqual(project.name, "ToBeToHave")
+        self.assertEqual(project.workstream_type, "Project")
+        self.assertEqual(project.mode, "active")
+        self.assertEqual(project.priority, "2")
+        self.assertEqual(project.source_names, ("ToBeToHave",))
+        self.assertEqual(project.query_aliases, ("To Be Training", "ToBeTraining"))
 
     def test_family_calendar_is_a_distinct_active_project(self) -> None:
         calendar = next(

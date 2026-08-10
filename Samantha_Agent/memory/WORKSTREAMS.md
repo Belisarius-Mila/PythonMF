@@ -10,9 +10,9 @@ prace je `Project`, konkretni opakovatelny vykonavatel je `Tool`, sdilena
 infrastrukturni schopnost muze byt `Layer` a `Misc` je jen skutecne nezarazena
 prace.
 
-Katalog slucuje vsech 29 zivych oblasti z `ACTIVE_PROJECTS.md`, pridava
+Katalog slucuje vsech 30 zivych oblasti z `ACTIVE_PROJECTS.md`, pridava
 pozastavene projekty Vocabulary FR a Vocabulary IT a dva dohodnute vychozi
-proudy `Misc`. Vysledkem je 30 proudu: 24 projektu, 4 tooly a 2 `Misc`.
+proudy `Misc`. Vysledkem je 31 proudu: 25 projektu, 4 tooly a 2 `Misc`.
 Rezimy `paused` a `archived` jsou validni; tri projekty jsou nyni `paused`.
 
 Markdown se za behu neparsuje a neni zdrojem UI, vlaken, workspace, semaforu
@@ -64,6 +64,7 @@ nesmi smesovat s Knihovnou clanku.
 | `project-samantha-infrastructure` | `Project` | Samantha Infrastructure | active | 1 | Samantha Infrastructure + Codex full access / Guard proti mazani |
 | `project-mobile-input` | `Project` | iPhone Shortcuts / Mobile Input | paused | 2 | iPhone Shortcuts / Mobile Input Layer |
 | `project-colors-and-numbers` | `Project` | ColorsAndNumbers / automatické úkoly | active | 1 | Automaticke opakujici se ukoly / ColorsAndNumbers |
+| `project-to-be-to-have` | `Project` | ToBeToHave | active | 2 | ToBeToHave; navazuje na původní názvy To Be Training a ToBeTraining. |
 | `project-vocabulary-fr` | `Project` | Vocabulary FR | paused | 2 | Potvrzeny kanonicky projekt v `project_capability_map.md`; lokalni a webova varianta patri dohromady. |
 | `project-vocabulary-it` | `Project` | Vocabulary IT | paused | 2 | Potvrzeny kanonicky projekt v `project_capability_map.md`; lokalni a webova varianta patri dohromady. |
 | `tool-backup-restore` | `Tool` | Záloha a obnova | active | 1 | Samantha external backup |
@@ -91,7 +92,7 @@ nesmi smesovat s Knihovnou clanku.
 Faze 4.2 zachovava oba drive overene proudy jako rezervovane legacy vazby, aby
 pred migraci nevzniklo druhe vlakno Human–Adam ani Knihovny. Zbyvajicich 27
 proudu melo pripraveny lazy soukromy slot; po doplneni Rodinneho kalendare je
-lazy proudu 28. Zadny se nezaklada pri startu
+lazy proudu 28 a po doplnění ToBeToHave 29. Zadny se nezaklada pri startu
 Cockpitu. Human–Adam si docasne ponechava historicky runtime typ `Layer` a
 starsi nazev jako kompatibilni alias; katalog ho uz kanonicky vede jako
 `Project` / `Human–Adam`.
