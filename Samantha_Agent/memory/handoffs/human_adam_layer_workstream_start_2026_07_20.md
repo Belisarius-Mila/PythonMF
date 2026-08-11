@@ -1,43 +1,35 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Stav znovu ověřen: 2026-08-07 16:03 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-11 15:08 CEST
 
 ### Hotovo
-- Potvrzený checkpoint nyní v jednom checkpointovém commitu aktualizuje
-  kanonický handoff, TVBCP i primární řádek proudu v `ACTIVE_PROJECTS.md`.
-- Chybějící, duplicitní nebo katalogově rozporný řádek zablokuje zápis před
-  commitem; selhání zápisu nebo commitu vrátí všechny tři soubory.
-- Všech 30 pracovních proudů má jednoznačný agregovaný řádek. Obecné proudy
-  Brainstorm a Misc zůstávají typem `Misc` a mapují se kanonickým názvem.
+- Adamovy dokončené odpovědi lze jedním tlačítkem zkopírovat bez doprovodných metadat
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
-- Implementace je otestovaná, ale zatím není nasazená do běžícího Cockpitu.
-- Terminálové commity mimo Human–Adam checkpoint dál vyžadují ruční aktualizaci
-  projektové paměti, pokud mění věcný stav projektu.
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
 
 ### Rizika
-- U proudů s více agregovanými oblastmi se automaticky mění pouze první
-  kanonický zdroj; vedlejší řádky Recovery, TTS nebo platební SMS se nepřepisují
-  obecným checkpointovým souhrnem.
+- Žádné další doložené provozní riziko.
 
 ### Další krok
-- Po samostatně potvrzeném nasazení ověřit první přirozený Human–Adam checkpoint
-  a následný audit s nulovým driftem.
+- Po checkpointu a nasazení živě ověřit kopírování na Macu nebo iPhonu
 
 ### Rozhodnutí
-- Agregát se synchronizuje uvnitř existujícího autoritativního checkpointu,
-  nikoli druhým následným commitem nebo samostatným watcherem.
+- V tomto kroku nebylo přijato nové kanonické rozhodnutí.
 
 ### Navrhované další kroky
-- Audit driftu ponechat jako nezávislou kontrolní pojistku.
-- Automatické čištění `MEMORY_INDEX.md` nepřidávat; připomenutí vyžadují věcné
-  lidské rozhodnutí.
+- Žádné další návrhy nad rámec bezprostředního kroku.
 
 ### Technický stav checkpointu
-- Cílené checkpointové, katalogové a paměťové testy: 47 OK.
-- Sousední profilové a reportové testy: 120 OK.
-- Plná Cockpit Quality Gate: 1329 testů, výsledek OK.
+- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
+- Git před checkpointem: lokální `main` na `49fd89417f97`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `49fd89417f97` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-11T09:06:11+00:00.
+- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
+- Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 Nazev: Human–Adam / vyvojove prostredi - zalozeni pracovniho proudu Layer
@@ -2655,3 +2647,15 @@ Technický důkaz:
 - 47 cílených checkpointových, katalogových a paměťových testů prošlo.
 - 120 sousedních profilových a reportových testů prošlo.
 - Plná Cockpit Quality Gate prošla 1329 testy.
+
+### Automatický checkpoint 2026-08-11 15:08 CEST
+
+- Pracovní proud: `layer-human-adam-development`
+- Hotovo: Adamovy dokončené odpovědi lze jedním tlačítkem zkopírovat bez doprovodných metadat; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.; Lokální commity čekají na samostatný denní GitHub balíček.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: rychlá Cockpit brána syntaxe a whitespace: 4.8 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu
+- Změněné cesty před paměťovým zápisem (2): `Samantha_Agent/app/communication/human_adam_ui.py`, `Samantha_Agent/tests/test_human_adam_ui.py`
+- Commit: `Add copy button to Human-Adam replies`
+- Další krok: Po checkpointu a nasazení živě ověřit kopírování na Macu nebo iPhonu

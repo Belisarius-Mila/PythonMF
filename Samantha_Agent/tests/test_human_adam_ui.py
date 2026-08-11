@@ -1104,7 +1104,7 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn('<button id="voiceRecordBtn" type="button">Nahrát pokyn</button>', HUMAN_ADAM_HTML)
         self.assertIn('<button id="voiceStopBtn" type="button" hidden disabled>', HUMAN_ADAM_HTML)
 
-    def test_completed_adam_answers_get_explicit_speech_control_only(self) -> None:
+    def test_completed_adam_answers_get_explicit_reply_controls_only(self) -> None:
         bubble_start = HUMAN_ADAM_HTML.index("function bubble(text, className, meta, spokenText=\"\")")
         bubble_end = HUMAN_ADAM_HTML.index("function renderSession(session)", bubble_start)
         bubble_source = HUMAN_ADAM_HTML[bubble_start:bubble_end]
@@ -1118,6 +1118,26 @@ class HumanAdamUiTests(unittest.TestCase):
         pending_branch = render_source.index("else exchange.appendChild")
         self.assertNotIn("answerSpeechControl", render_source[pending_branch:])
         self.assertIn("Přečíst odpověď", HUMAN_ADAM_HTML)
+        self.assertIn("Kopírovat", HUMAN_ADAM_HTML)
+
+    def test_answer_copy_uses_exact_answer_text_with_browser_fallback(self) -> None:
+        copy_start = HUMAN_ADAM_HTML.index("function copyAnswerFallback(text)")
+        copy_end = HUMAN_ADAM_HTML.index("function answerSpeechControl(text)", copy_start)
+        copy_source = HUMAN_ADAM_HTML[copy_start:copy_end]
+        control_start = copy_end
+        control_end = HUMAN_ADAM_HTML.index("function bubble(", control_start)
+        control_source = HUMAN_ADAM_HTML[control_start:control_end]
+
+        self.assertIn("navigator.clipboard.writeText(answer)", copy_source)
+        self.assertIn('document.execCommand("copy")', copy_source)
+        self.assertIn("copyAnswerFallback(answer)", copy_source)
+        self.assertIn("Adamova odpověď je zkopírovaná.", copy_source)
+        self.assertIn('copyButton.textContent = "Kopírovat";', control_source)
+        self.assertIn(
+            'copyButton.addEventListener("click", () => copyAnswer(text, copyButton));',
+            control_source,
+        )
+        self.assertNotIn("/api/", copy_source)
 
     def test_answer_speech_starts_only_from_explicit_button_click(self) -> None:
         control_start = HUMAN_ADAM_HTML.index("function answerSpeechControl(text)")

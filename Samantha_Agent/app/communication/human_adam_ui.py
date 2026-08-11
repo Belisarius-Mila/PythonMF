@@ -56,7 +56,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     .adam { justify-self:start; background:var(--soft); border-bottom-left-radius:5px; }
     .meta { display:block; margin-top:6px; color:var(--muted); font-size:12px; }
     .reply-actions { display:flex; gap:8px; margin-top:8px; }
-    .reply-speech { padding:6px 9px; font-size:12px; white-space:nowrap; }
+    .reply-speech,.reply-copy { padding:6px 9px; font-size:12px; white-space:nowrap; }
     .composer { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:min(920px,100%); padding:12px max(16px,env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left)); border-top:1px solid var(--line); background:rgba(255,255,255,.98); }
     textarea { width:100%; min-height:86px; max-height:230px; resize:vertical; border:1px solid #bac7d8; border-radius:13px; padding:12px; font:inherit; color:var(--ink); }
     .voice-controls { display:flex; align-items:center; gap:8px; min-width:0; }
@@ -1013,6 +1013,50 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     window.speechSynthesis.speak(utterance);
   }
 
+  function copyAnswerFallback(text) {
+    const field = document.createElement("textarea");
+    field.value = String(text || "");
+    field.setAttribute("readonly", "");
+    field.style.position = "fixed";
+    field.style.opacity = "0";
+    field.style.pointerEvents = "none";
+    document.body.appendChild(field);
+    field.focus();
+    field.select();
+    field.setSelectionRange(0, field.value.length);
+    let copied = false;
+    try {
+      copied = Boolean(document.execCommand("copy"));
+    } finally {
+      field.remove();
+    }
+    return copied;
+  }
+
+  async function copyAnswer(text, button) {
+    const answer = String(text || "");
+    if (!answer) return;
+    button.disabled = true;
+    let copied = false;
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        try {
+          await navigator.clipboard.writeText(answer);
+          copied = true;
+        } catch (_error) {
+          copied = false;
+        }
+      }
+      if (!copied) copied = copyAnswerFallback(answer);
+      if (!copied) throw new Error("clipboard unavailable");
+      notice.textContent = "Adamova odpověď je zkopírovaná.";
+    } catch (_error) {
+      notice.textContent = "Odpověď se nepodařilo zkopírovat. Označ její text ručně.";
+    } finally {
+      button.disabled = false;
+    }
+  }
+
   function answerSpeechControl(text) {
     const actions = document.createElement("div");
     actions.className = "reply-actions";
@@ -1023,7 +1067,13 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     button.disabled = !speechPlaybackSupported();
     button.setAttribute("aria-pressed", "false");
     button.addEventListener("click", () => speakAnswer(text, button));
-    actions.appendChild(button);
+    const copyButton = document.createElement("button");
+    copyButton.type = "button";
+    copyButton.className = "reply-copy";
+    copyButton.textContent = "Kopírovat";
+    copyButton.setAttribute("aria-label", "Kopírovat Adamovu odpověď");
+    copyButton.addEventListener("click", () => copyAnswer(text, copyButton));
+    actions.append(button, copyButton);
     return actions;
   }
 
