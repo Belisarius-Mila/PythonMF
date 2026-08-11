@@ -6206,6 +6206,12 @@ Dalsi krok:
         self.assertEqual(apps["to-be-to-have"]["launch_type"], "desktop")
         self.assertEqual(apps["to-be-to-have"]["title"], "ToBeToHave")
 
+    def test_web_apps_catalog_contains_kptl_desktop_app(self) -> None:
+        apps = {item["id"]: item for item in web_apps_catalog()["apps"]}
+
+        self.assertEqual(apps["kptl-introduction"]["launch_type"], "desktop")
+        self.assertEqual(apps["kptl-introduction"]["title"], "KPTL Introduction")
+
     def test_to_be_to_have_csv_sources_have_expected_schema_and_rows(self) -> None:
         app_root = cockpit_module.GIT_ROOT / "ToBeTraining"
         expected = {
@@ -6340,6 +6346,24 @@ Dalsi krok:
         self.assertEqual(calls[0][0], "/usr/bin/osascript")
         self.assertIn("ToBeTraining", calls[0][2])
         self.assertIn("tobe_trenink.py", calls[0][2])
+        self.assertIn("/usr/local/bin/python3.12", calls[0][2])
+        self.assertNotIn("; python3 ", calls[0][2])
+
+    def test_open_kptl_uses_python_312_and_canonical_entrypoint(self) -> None:
+        calls: list[list[str]] = []
+
+        def fake_runner(args, **kwargs):
+            calls.append(args)
+            return subprocess.CompletedProcess(args=args, returncode=0, stdout="", stderr="")
+
+        result = open_desktop_app_action(
+            {"app_id": "kptl-introduction"}, runner=fake_runner
+        )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["status"], "launched")
+        self.assertEqual(calls[0][0], "/usr/bin/osascript")
+        self.assertIn("kptl_viewer.py", calls[0][2])
         self.assertIn("/usr/local/bin/python3.12", calls[0][2])
         self.assertNotIn("; python3 ", calls[0][2])
 
