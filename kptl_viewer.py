@@ -5,23 +5,24 @@ import csv
 import random
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-DATA_FILE = SCRIPT_DIR / "KPTL_Introduction.txt"
-VOCAB_FILE = SCRIPT_DIR / "SlovnikKPLT.csv"
+ASSET_DIR = SCRIPT_DIR / "RestauracePTKL"
+DATA_FILE = ASSET_DIR / "KPTL_Introduction.txt"
+VOCAB_FILE = ASSET_DIR / "SlovnikKPLT.csv"
 IMAGE_FILES = {
-    "Kate": SCRIPT_DIR / "Kate.png",
-    "Peter": SCRIPT_DIR / "Peter.png",
-    "Tom": SCRIPT_DIR / "Tom.png",
-    "Lucy": SCRIPT_DIR / "Lucy.png",
+    "Kate": ASSET_DIR / "Kate.png",
+    "Peter": ASSET_DIR / "Peter.jpg",
+    "Tom": ASSET_DIR / "Tom.jpg",
+    "Lucy": ASSET_DIR / "Lucy.png",
 }
-JANE_LEO_IMAGE = SCRIPT_DIR / "JaneLeo.png"
-LUCY_HOUSE_IMAGE = SCRIPT_DIR / "LucyHouse.PNG"
-LUCY_MOLLY_IMAGE = SCRIPT_DIR / "LucyMolly.png"
-KATE_GEORGE_IMAGE = SCRIPT_DIR / "GeorgeUniversity.PNG"
-KATE_BIKE_IMAGE = SCRIPT_DIR / "KateBike.PNG"
-PETER_MOTHER_IMAGE = SCRIPT_DIR / "PeterMother.PNG"
-PETER_STARS_IMAGE = SCRIPT_DIR / "PeterStars.PNG"
-TOM_AMELIA_IMAGE = SCRIPT_DIR / "TomAmelia.PNG"
-TOM_CAT_IMAGE = SCRIPT_DIR / "TomCat.PNG"
+JANE_LEO_IMAGE = ASSET_DIR / "JaneLeo.png"
+LUCY_HOUSE_IMAGE = ASSET_DIR / "LucyHouse.PNG"
+LUCY_MOLLY_IMAGE = ASSET_DIR / "LucyMolly.png"
+KATE_GEORGE_IMAGE = ASSET_DIR / "GeorgeUniversity.PNG"
+KATE_BIKE_IMAGE = ASSET_DIR / "KateBike.PNG"
+PETER_MOTHER_IMAGE = ASSET_DIR / "PeterMother.PNG"
+PETER_STARS_IMAGE = ASSET_DIR / "PeterStars.PNG"
+TOM_AMELIA_IMAGE = ASSET_DIR / "TomAmelia.PNG"
+TOM_CAT_IMAGE = ASSET_DIR / "TomCat.PNG"
 
 
 def speak_english(text: str):
