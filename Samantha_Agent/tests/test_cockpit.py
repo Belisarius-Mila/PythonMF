@@ -4,6 +4,7 @@ import base64
 import csv
 import json
 import re
+import runpy
 import subprocess
 import tempfile
 import unittest
@@ -6211,6 +6212,102 @@ Dalsi krok:
 
         self.assertEqual(apps["kptl-introduction"]["launch_type"], "desktop")
         self.assertEqual(apps["kptl-introduction"]["title"], "KPTL Introduction")
+
+    def test_kptl_quiz_has_eight_balanced_questions_per_character(self) -> None:
+        module = runpy.run_path(str(cockpit_module.GIT_ROOT / "kptl_viewer.py"))
+        questions_by_person = module["QUIZ_QUESTIONS"]
+        ordered_questions = module["ordered_quiz_questions"]()
+
+        self.assertEqual(set(questions_by_person), {"Kate", "Lucy", "Peter", "Tom"})
+        self.assertEqual(len(ordered_questions), 32)
+        self.assertEqual(
+            [person for person, *_rest in ordered_questions[:4]],
+            ["Kate", "Lucy", "Peter", "Tom"],
+        )
+        for person, questions in questions_by_person.items():
+            with self.subTest(person=person):
+                self.assertEqual(len(questions), 8)
+                self.assertEqual(sum(expected_yes for _, expected_yes, _ in questions), 4)
+                self.assertEqual(len({question for question, _, _ in questions}), 8)
+                self.assertEqual(
+                    sum(question.startswith("Does ") for question, _, _ in questions),
+                    4,
+                )
+                for question, _expected_yes, answer in questions:
+                    self.assertTrue(question.startswith(("Is ", "Are ", "Does ")))
+                    self.assertIn(". ", answer)
+                    if question.startswith("Does "):
+                        self.assertIn("does", answer.split(". ", 1)[0].lower())
+
+    def test_kptl_quiz_keeps_three_items_and_waits_before_final_score(self) -> None:
+        source = (cockpit_module.GIT_ROOT / "kptl_viewer.py").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn('text="Quiz"', source)
+        self.assertIn('text="YES"', source)
+        self.assertIn('text="NO"', source)
+        self.assertIn("self.quiz_history = self.quiz_history[-3:]", source)
+        self.assertIn(
+            "self._wait_for_speech(speech_process, self._show_final_quiz_score)",
+            source,
+        )
+        self.assertIn(
+            "self._wait_for_speech(speech_process, self._enable_quiz_next)",
+            source,
+        )
+        self.assertIn("Počet správných odpovědí", source)
+        self.assertIn("Počet chybných odpovědí", source)
+
+    def test_kptl_quiz_scores_answers_and_finishes_after_last_response(self) -> None:
+        module = runpy.run_path(str(cockpit_module.GIT_ROOT / "kptl_viewer.py"))
+        app_class = module["KPTLApp"]
+        app_class.answer_quiz.__globals__["speak_english"] = lambda _text: None
+        app = app_class.__new__(app_class)
+
+        class FakeWidget:
+            def __init__(self) -> None:
+                self.values = {"bg": "white"}
+
+            def config(self, **kwargs) -> None:
+                self.values.update(kwargs)
+
+            def cget(self, key):
+                return self.values.get(key, "")
+
+        app.root = SimpleNamespace(after=lambda _delay, callback: callback())
+        app.quiz_frame = FakeWidget()
+        app.quiz_progress_label = FakeWidget()
+        app.quiz_yes_button = FakeWidget()
+        app.quiz_no_button = FakeWidget()
+        app.quiz_next_button = FakeWidget()
+        app.quiz_score_label = FakeWidget()
+        app.quiz_history_labels = [FakeWidget(), FakeWidget(), FakeWidget()]
+        app.quiz_questions = [
+            ("Peter", "Is Peter tall?", True, "Yes, he is. Peter is tall."),
+            ("Lucy", "Is Lucy eleven?", False, "No, she isn't. Lucy is ten."),
+        ]
+        app.quiz_index = 0
+        app.quiz_correct = 0
+        app.quiz_wrong = 0
+        app.quiz_answered = False
+        app.quiz_history = [
+            {"number": 1, "question": "Is Peter tall?", "answer": ""}
+        ]
+
+        app.answer_quiz(True)
+        self.assertEqual(app.quiz_correct, 1)
+        self.assertEqual(app.quiz_wrong, 0)
+        self.assertEqual(app.quiz_next_button.values["state"], "normal")
+        self.assertEqual(app.quiz_history[-1]["answer"], "Yes, he is. Peter is tall.")
+
+        app.next_quiz_question()
+        app.answer_quiz(True)
+        self.assertEqual(app.quiz_correct, 1)
+        self.assertEqual(app.quiz_wrong, 1)
+        self.assertEqual(app.quiz_progress_label.values["text"], "Quiz completed")
+        self.assertIn("Počet správných odpovědí: 1", app.quiz_score_label.values["text"])
+        self.assertIn("Počet chybných odpovědí: 1", app.quiz_score_label.values["text"])
 
     def test_to_be_to_have_csv_sources_have_expected_schema_and_rows(self) -> None:
         app_root = cockpit_module.GIT_ROOT / "ToBeTraining"

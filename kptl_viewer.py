@@ -23,13 +23,64 @@ PETER_MOTHER_IMAGE = ASSET_DIR / "PeterMother.PNG"
 PETER_STARS_IMAGE = ASSET_DIR / "PeterStars.PNG"
 TOM_AMELIA_IMAGE = ASSET_DIR / "TomAmelia.PNG"
 TOM_CAT_IMAGE = ASSET_DIR / "TomCat.PNG"
+QUIZ_CHARACTER_ORDER = ("Kate", "Lucy", "Peter", "Tom")
+QUIZ_QUESTIONS: dict[str, tuple[tuple[str, bool, str], ...]] = {
+    "Kate": (
+        ("Is Kate tall?", True, "Yes, she is. Kate is tall."),
+        ("Does Kate have dark hair?", True, "Yes, she does. Kate has dark hair."),
+        ("Are Kate's parents teachers?", True, "Yes, they are. Kate's parents are teachers."),
+        ("Does Kate have an older brother?", True, "Yes, she does. Kate has an older brother."),
+        ("Is Kate ten years old?", False, "No, she isn't. Kate is eleven years old."),
+        ("Is Kate small?", False, "No, she isn't. Kate is tall and slim."),
+        ("Does Kate have blue eyes?", False, "No, she doesn't. Kate has brown eyes."),
+        ("Does Kate have a big garden?", False, "No, she doesn't. Kate has a small garden."),
+    ),
+    "Lucy": (
+        ("Is Lucy ten years old?", True, "Yes, she is. Lucy is ten years old."),
+        ("Is Lucy small?", True, "Yes, she is. Lucy is small."),
+        ("Does Lucy have blue eyes?", True, "Yes, she does. Lucy has blue eyes."),
+        ("Does Lucy have a swimming pool?", True, "Yes, she does. Lucy has a swimming pool."),
+        ("Is Lucy eleven years old?", False, "No, she isn't. Lucy is ten years old."),
+        ("Is Lucy's father a teacher?", False, "No, he isn't. Lucy's father is a doctor."),
+        ("Does Lucy have dark hair?", False, "No, she doesn't. Lucy has fair hair."),
+        ("Does Lucy have a small garden?", False, "No, she doesn't. Lucy has a big garden."),
+    ),
+    "Peter": (
+        ("Is Peter eleven years old?", True, "Yes, he is. Peter is eleven years old."),
+        ("Is Peter tall?", True, "Yes, he is. Peter is tall."),
+        ("Does Peter have dark hair?", True, "Yes, he does. Peter has dark hair."),
+        ("Does Peter have green eyes?", True, "Yes, he does. Peter has green eyes."),
+        ("Is Peter small?", False, "No, he isn't. Peter is tall and athletic."),
+        ("Is Peter a bad student?", False, "No, he isn't. Peter is a good student."),
+        ("Does Peter have a brother or sister?", False, "No, he doesn't. Peter has no brother or sister."),
+        ("Does Peter have blue eyes?", False, "No, he doesn't. Peter has green eyes."),
+    ),
+    "Tom": (
+        ("Is Tom eight years old?", True, "Yes, he is. Tom is eight years old."),
+        ("Is Tom small?", True, "Yes, he is. Tom is small."),
+        ("Does Tom have red hair?", True, "Yes, he does. Tom has red hair."),
+        ("Does Tom have a younger sister?", True, "Yes, he does. Tom has a younger sister."),
+        ("Is Tom eleven years old?", False, "No, he isn't. Tom is eight years old."),
+        ("Is Tom's father a doctor?", False, "No, he isn't. Tom's father is a carpenter."),
+        ("Does Tom have green eyes?", False, "No, he doesn't. Tom has blue eyes."),
+        ("Does Tom have a big house?", False, "No, he doesn't. Tom lives in a small house."),
+    ),
+}
+
+
+def ordered_quiz_questions() -> list[tuple[str, str, bool, str]]:
+    return [
+        (person, *QUIZ_QUESTIONS[person][question_index])
+        for question_index in range(8)
+        for person in QUIZ_CHARACTER_ORDER
+    ]
 
 
 def speak_english(text: str):
     try:
-        subprocess.Popen(["say", "-v", "Samantha", text])
+        return subprocess.Popen(["say", "-v", "Samantha", text])
     except Exception:
-        pass
+        return None
 
 
 def parse_introductions(path: Path) -> dict[str, list[str]]:
@@ -168,6 +219,13 @@ class KPTLApp:
         self.current_vocab: tuple[str, str, str] | None = None
         self.vocab_active = False
         self.saved_text = ""
+        self.quiz_questions = ordered_quiz_questions()
+        self.quiz_index = 0
+        self.quiz_correct = 0
+        self.quiz_wrong = 0
+        self.quiz_answered = False
+        self.quiz_history: list[dict[str, str | int]] = []
+        self.main_geometry = ""
 
         self.images: dict[str, tk.PhotoImage | None] = {
             name: load_photo(path) for name, path in IMAGE_FILES.items()
@@ -180,7 +238,8 @@ class KPTLApp:
         self.leo_seen = False
         self.jane_leo_shown = False
 
-        main = tk.Frame(root)
+        self.main_frame = tk.Frame(root)
+        main = self.main_frame
         main.pack(fill="both", expand=True, padx=10, pady=10)
         main.grid_rowconfigure(0, weight=1)
         main.grid_rowconfigure(1, weight=0, minsize=70)
@@ -251,6 +310,15 @@ class KPTLApp:
             command=self.vocab_click,
             width=10,
         ).pack(side="right", padx=8)
+        tk.Button(
+            btn_left,
+            text="Quiz",
+            font=("Helvetica", 18, "bold"),
+            command=self.open_quiz,
+            width=10,
+        ).pack(side="right", padx=8)
+
+        self._build_quiz_screen()
 
     def select_person(self, name: str):
         self.current_name = name
@@ -345,6 +413,189 @@ class KPTLApp:
             en, pron, cz = self.current_vocab
             self.text_label.config(text=f"{en}    {pron}    {cz}")
             self.vocab_mode = 0
+
+    def _build_quiz_screen(self):
+        self.quiz_frame = tk.Frame(self.root, padx=28, pady=22)
+
+        tk.Label(
+            self.quiz_frame,
+            text="Quiz: Kate, Lucy, Peter and Tom",
+            font=("Helvetica", 28, "bold"),
+        ).pack(pady=(0, 8))
+
+        self.quiz_progress_label = tk.Label(
+            self.quiz_frame,
+            text="",
+            font=("Helvetica", 16, "bold"),
+        )
+        self.quiz_progress_label.pack(pady=(0, 12))
+
+        history_frame = tk.Frame(self.quiz_frame)
+        history_frame.pack(fill="both", expand=True)
+        self.quiz_history_labels: list[tk.Label] = []
+        for _ in range(3):
+            label = tk.Label(
+                history_frame,
+                text="",
+                font=("Helvetica", 19),
+                justify="left",
+                anchor="w",
+                wraplength=990,
+                padx=18,
+                pady=12,
+                height=3,
+            )
+            label.pack(fill="x", pady=6)
+            self.quiz_history_labels.append(label)
+
+        answer_buttons = tk.Frame(self.quiz_frame)
+        answer_buttons.pack(pady=14)
+        self.quiz_yes_button = tk.Button(
+            answer_buttons,
+            text="YES",
+            font=("Helvetica", 22, "bold"),
+            command=lambda: self.answer_quiz(True),
+            width=10,
+            bg="#d9f2d9",
+        )
+        self.quiz_yes_button.pack(side="left", padx=16)
+        self.quiz_no_button = tk.Button(
+            answer_buttons,
+            text="NO",
+            font=("Helvetica", 22, "bold"),
+            command=lambda: self.answer_quiz(False),
+            width=10,
+            bg="#f7d7d7",
+        )
+        self.quiz_no_button.pack(side="left", padx=16)
+
+        navigation = tk.Frame(self.quiz_frame)
+        navigation.pack(pady=8)
+        self.quiz_next_button = tk.Button(
+            navigation,
+            text="Next",
+            font=("Helvetica", 18, "bold"),
+            command=self.next_quiz_question,
+            width=10,
+            state="disabled",
+        )
+        self.quiz_next_button.pack(side="left", padx=12)
+        tk.Button(
+            navigation,
+            text="Back",
+            font=("Helvetica", 18, "bold"),
+            command=self.close_quiz,
+            width=10,
+        ).pack(side="left", padx=12)
+
+        self.quiz_score_label = tk.Label(
+            self.quiz_frame,
+            text="",
+            font=("Helvetica", 20, "bold"),
+            justify="center",
+        )
+        self.quiz_score_label.pack(pady=(10, 0))
+
+    def open_quiz(self):
+        self.main_geometry = self.root.geometry()
+        self.main_frame.pack_forget()
+        self.quiz_frame.pack(fill="both", expand=True)
+        self.root.geometry("1100x720")
+        self.quiz_questions = ordered_quiz_questions()
+        self.quiz_index = 0
+        self.quiz_correct = 0
+        self.quiz_wrong = 0
+        self.quiz_answered = False
+        self.quiz_history = []
+        self.quiz_score_label.config(text="")
+        self._show_current_quiz_question()
+
+    def close_quiz(self):
+        self.quiz_frame.pack_forget()
+        self.main_frame.pack(fill="both", expand=True, padx=10, pady=10)
+        if self.main_geometry:
+            self.root.geometry(self.main_geometry)
+
+    def _show_current_quiz_question(self):
+        _person, question, _expected_yes, _answer = self.quiz_questions[self.quiz_index]
+        self.quiz_answered = False
+        self.quiz_history.append(
+            {
+                "number": self.quiz_index + 1,
+                "question": question,
+                "answer": "",
+            }
+        )
+        self.quiz_history = self.quiz_history[-3:]
+        self._render_quiz_history()
+        self.quiz_progress_label.config(
+            text=f"Question {self.quiz_index + 1} of {len(self.quiz_questions)}"
+        )
+        self.quiz_yes_button.config(state="normal")
+        self.quiz_no_button.config(state="normal")
+        self.quiz_next_button.config(state="disabled")
+        speak_english(question)
+
+    def _render_quiz_history(self):
+        for label, item in zip(self.quiz_history_labels, self.quiz_history):
+            answer = str(item["answer"])
+            text = f'{item["number"]}. {item["question"]}'
+            if answer:
+                text = f"{text}\n{answer}"
+            label.config(text=text, relief="groove", bg="white")
+
+        for label in self.quiz_history_labels[len(self.quiz_history):]:
+            label.config(text="", relief="flat", bg=self.quiz_frame.cget("bg"))
+
+    def answer_quiz(self, selected_yes: bool):
+        if self.quiz_answered:
+            return
+        _person, _question, expected_yes, answer = self.quiz_questions[self.quiz_index]
+        self.quiz_answered = True
+        if selected_yes == expected_yes:
+            self.quiz_correct += 1
+            feedback = "Excellent."
+        else:
+            self.quiz_wrong += 1
+            feedback = "Wrong."
+
+        self.quiz_history[-1]["answer"] = answer
+        self._render_quiz_history()
+        self.quiz_yes_button.config(state="disabled")
+        self.quiz_no_button.config(state="disabled")
+        speech_process = speak_english(f"{feedback} {answer}")
+
+        if self.quiz_index == len(self.quiz_questions) - 1:
+            self.quiz_progress_label.config(text="Finishing the quiz...")
+            self.quiz_next_button.config(state="disabled")
+            self._wait_for_speech(speech_process, self._show_final_quiz_score)
+        else:
+            self.quiz_next_button.config(state="disabled")
+            self._wait_for_speech(speech_process, self._enable_quiz_next)
+
+    def next_quiz_question(self):
+        if not self.quiz_answered or self.quiz_index >= len(self.quiz_questions) - 1:
+            return
+        self.quiz_index += 1
+        self._show_current_quiz_question()
+
+    def _wait_for_speech(self, process, callback):
+        if process is None or process.poll() is not None:
+            callback()
+            return
+        self.root.after(100, lambda: self._wait_for_speech(process, callback))
+
+    def _enable_quiz_next(self):
+        self.quiz_next_button.config(state="normal")
+
+    def _show_final_quiz_score(self):
+        self.quiz_progress_label.config(text="Quiz completed")
+        self.quiz_score_label.config(
+            text=(
+                f"Počet správných odpovědí: {self.quiz_correct}\n"
+                f"Počet chybných odpovědí: {self.quiz_wrong}"
+            )
+        )
 
     def on_jane_leo_resize(self, event: tk.Event):
         if not self.jane_leo_shown:
