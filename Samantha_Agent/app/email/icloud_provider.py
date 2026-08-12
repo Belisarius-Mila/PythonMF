@@ -697,7 +697,7 @@ def _select_writable_folder(imap: imaplib.IMAP4_SSL, folder: str) -> None:
 
 def _select_writable_folder_optional(imap: imaplib.IMAP4_SSL, folder: str) -> bool:
     try:
-        status, _data = imap.select(folder, readonly=False)
+        status, _data = imap.select(_mailbox_command_arg(folder), readonly=False)
     except imaplib.IMAP4.error:
         return False
     return status == "OK"
