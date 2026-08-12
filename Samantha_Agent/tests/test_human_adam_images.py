@@ -8,7 +8,6 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from app.communication.human_adam_images import (
-    HUMAN_ADAM_WORKSTREAM_ID,
     HumanAdamImageCandidateStore,
     HumanAdamImageError,
     generation_confirmation,
@@ -20,9 +19,13 @@ from app.communication.human_adam_images import (
     is_image_generation_request,
     prepare_image_prompt,
 )
+from app.communication.human_adam_workstream_catalog import (
+    CanonicalWorkstreamCapabilities,
+)
 
 
 PNG_BYTES = b"\x89PNG\r\n\x1a\n" + b"private-test-image"
+HUMAN_ADAM_TEST_WORKSTREAM_ID = "layer-human-adam-development"
 
 
 class FakeImages:
@@ -43,8 +46,21 @@ class FakeClient:
 
 
 class FakeService:
-    def __init__(self, workstream_id: str = HUMAN_ADAM_WORKSTREAM_ID):
+    def __init__(
+        self,
+        workstream_id: str = HUMAN_ADAM_TEST_WORKSTREAM_ID,
+        *,
+        capabilities: object | None = None,
+    ):
         self.active_workstream_id = workstream_id
+        configured = capabilities or CanonicalWorkstreamCapabilities(
+            image_generation=True
+        )
+        self.workstream_backends = SimpleNamespace(
+            binding=lambda _workstream_id: SimpleNamespace(
+                record=SimpleNamespace(capabilities=configured)
+            )
+        )
 
 
 class HumanAdamImageTests(unittest.TestCase):
@@ -57,10 +73,16 @@ class HumanAdamImageTests(unittest.TestCase):
     def tearDown(self) -> None:
         self.temporary.cleanup()
 
-    def prepare(self, suffix: str = "one") -> dict[str, object]:
+    def prepare(
+        self,
+        suffix: str = "one",
+        *,
+        workstream_id: str = HUMAN_ADAM_TEST_WORKSTREAM_ID,
+    ) -> dict[str, object]:
         return self.store.prepare(
             request_text="Vygeneruj obrázek modré sovy na šířku.",
             client_message_id=f"human-adam-message-{suffix}",
+            workstream_id=workstream_id,
         )
 
     def generate(self, suffix: str = "one") -> tuple[dict[str, object], FakeClient]:
@@ -69,6 +91,7 @@ class HumanAdamImageTests(unittest.TestCase):
         generated = self.store.generate(
             candidate_id=str(record["candidate_id"]),
             confirmation=generation_confirmation(str(record["candidate_id"])),
+            workstream_id=HUMAN_ADAM_TEST_WORKSTREAM_ID,
             client=client,
         )
         return generated, client
@@ -106,11 +129,15 @@ class HumanAdamImageTests(unittest.TestCase):
             self.store.generate(
                 candidate_id=str(record["candidate_id"]),
                 confirmation="ano",
+                workstream_id=HUMAN_ADAM_TEST_WORKSTREAM_ID,
                 client=client,
             )
 
         self.assertEqual(client.images.calls, [])
-        self.assertEqual(self.store.public_list()[0]["status"], "prepared")
+        self.assertEqual(
+            self.store.public_list(workstream_id=HUMAN_ADAM_TEST_WORKSTREAM_ID)[0]["status"],
+            "prepared",
+        )
 
     def test_confirmed_generation_uses_allowlisted_parameters_and_create_only_file(self) -> None:
         generated, client = self.generate()
@@ -128,7 +155,10 @@ class HumanAdamImageTests(unittest.TestCase):
     def test_safe_image_load_returns_only_file_inside_candidate_directory(self) -> None:
         generated, _client = self.generate()
 
-        path, mime_type = self.store.image_path(str(generated["candidate_id"]))
+        path, mime_type = self.store.image_path(
+            str(generated["candidate_id"]),
+            workstream_id=HUMAN_ADAM_TEST_WORKSTREAM_ID,
+        )
 
         self.assertEqual(path.parent, self.root.resolve() / str(generated["candidate_id"]))
         self.assertEqual(path.name, "image.png")
@@ -138,10 +168,14 @@ class HumanAdamImageTests(unittest.TestCase):
         generated, _client = self.generate()
 
         approved = self.store.decide(
-            candidate_id=str(generated["candidate_id"]), decision="approve"
+            candidate_id=str(generated["candidate_id"]),
+            decision="approve",
+            workstream_id=HUMAN_ADAM_TEST_WORKSTREAM_ID,
         )
         restarted = HumanAdamImageCandidateStore(self.root)
-        loaded = restarted.public_list()[0]
+        loaded = restarted.public_list(
+            workstream_id=HUMAN_ADAM_TEST_WORKSTREAM_ID
+        )[0]
 
         self.assertEqual(approved["status"], "approved")
         self.assertEqual(loaded["status"], "approved")
@@ -152,19 +186,58 @@ class HumanAdamImageTests(unittest.TestCase):
         generated, _client = self.generate("reject")
 
         rejected = self.store.decide(
-            candidate_id=str(generated["candidate_id"]), decision="reject"
+            candidate_id=str(generated["candidate_id"]),
+            decision="reject",
+            workstream_id=HUMAN_ADAM_TEST_WORKSTREAM_ID,
         )
-        loaded = HumanAdamImageCandidateStore(self.root).public_list()[0]
+        loaded = HumanAdamImageCandidateStore(self.root).public_list(
+            workstream_id=HUMAN_ADAM_TEST_WORKSTREAM_ID
+        )[0]
 
         self.assertEqual(rejected["status"], "rejected")
         self.assertEqual(loaded["status"], "rejected")
         self.assertTrue((self.root / str(generated["candidate_id"]) / "image.png").exists())
 
+    def test_legacy_human_adam_candidate_is_migrated_without_cross_stream_visibility(self) -> None:
+        record = self.prepare("legacy")
+        metadata_path = self.root / str(record["candidate_id"]) / "candidate.json"
+        metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+        metadata["schema_version"] = 1
+        metadata.pop("workstream_id")
+        metadata_path.write_text(json.dumps(metadata), encoding="utf-8")
+
+        restarted = HumanAdamImageCandidateStore(self.root)
+        human_records = restarted.public_list(
+            workstream_id=HUMAN_ADAM_TEST_WORKSTREAM_ID
+        )
+        other_records = restarted.public_list(
+            workstream_id="project-r2-adam-janicka"
+        )
+        migrated = json.loads(metadata_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(len(human_records), 1)
+        self.assertEqual(other_records, [])
+        self.assertEqual(migrated["schema_version"], 2)
+        self.assertEqual(
+            migrated["workstream_id"], HUMAN_ADAM_TEST_WORKSTREAM_ID
+        )
+
     def test_invalid_candidate_id_is_rejected_by_load_generate_and_decision(self) -> None:
         for operation in (
-            lambda: self.store.image_path("../outside"),
-            lambda: self.store.generate(candidate_id="bad", confirmation="bad", client=FakeClient()),
-            lambda: self.store.decide(candidate_id="bad", decision="approve"),
+            lambda: self.store.image_path(
+                "../outside", workstream_id=HUMAN_ADAM_TEST_WORKSTREAM_ID
+            ),
+            lambda: self.store.generate(
+                candidate_id="bad",
+                confirmation="bad",
+                workstream_id=HUMAN_ADAM_TEST_WORKSTREAM_ID,
+                client=FakeClient(),
+            ),
+            lambda: self.store.decide(
+                candidate_id="bad",
+                decision="approve",
+                workstream_id=HUMAN_ADAM_TEST_WORKSTREAM_ID,
+            ),
         ):
             with self.subTest(operation=operation):
                 with self.assertRaisesRegex(HumanAdamImageError, "neplatné ID"):
@@ -182,10 +255,14 @@ class HumanAdamImageTests(unittest.TestCase):
         metadata_path.write_text(json.dumps(metadata), encoding="utf-8")
 
         with self.assertRaisesRegex(HumanAdamImageError, "mimo adresář kandidáta"):
-            self.store.image_path(str(record["candidate_id"]))
+            self.store.image_path(
+                str(record["candidate_id"]),
+                workstream_id=HUMAN_ADAM_TEST_WORKSTREAM_ID,
+            )
 
-    def test_actions_fail_closed_outside_human_adam_workstream(self) -> None:
-        other = FakeService("project-r2-adam-janicka")
+    def test_declared_capability_allows_another_workstream(self) -> None:
+        other_id = "project-r2-adam-janicka"
+        other = FakeService(other_id)
         payload = {
             "request_text": "Vygeneruj obrázek sovy.",
             "client_message_id": "human-adam-message-other",
@@ -193,14 +270,73 @@ class HumanAdamImageTests(unittest.TestCase):
 
         prepared = human_adam_image_prepare_action(payload, service=other, store=self.store)
         listed = human_adam_image_candidates_action(service=other, store=self.store)
-        generated = human_adam_image_generate_action({}, service=other, store=self.store, client=FakeClient())
-        decided = human_adam_image_decision_action({}, service=other, store=self.store)
-        resolved = human_adam_image_file_action("bad", service=other, store=self.store)
 
-        for result in (prepared, listed, generated, decided, resolved):
+        self.assertTrue(prepared["ok"])
+        self.assertEqual(len(listed["candidates"]), 1)
+        metadata = json.loads(
+            next(self.root.glob("img_*/candidate.json")).read_text(encoding="utf-8")
+        )
+        self.assertEqual(metadata["workstream_id"], other_id)
+
+    def test_candidate_is_not_visible_or_mutable_from_another_workstream(self) -> None:
+        other_id = "project-r2-adam-janicka"
+        record = self.prepare("isolated", workstream_id=other_id)
+        human = FakeService(HUMAN_ADAM_TEST_WORKSTREAM_ID)
+
+        listed = human_adam_image_candidates_action(service=human, store=self.store)
+        generated = human_adam_image_generate_action(
+            {
+                "candidate_id": record["candidate_id"],
+                "confirmation": generation_confirmation(str(record["candidate_id"])),
+            },
+            service=human,
+            store=self.store,
+            client=FakeClient(),
+        )
+        decided = human_adam_image_decision_action(
+            {"candidate_id": record["candidate_id"], "decision": "approve"},
+            service=human,
+            store=self.store,
+        )
+        resolved = human_adam_image_file_action(
+            str(record["candidate_id"]), service=human, store=self.store
+        )
+
+        self.assertEqual(listed["candidates"], [])
+        for result in (generated, decided, resolved):
             self.assertFalse(result["ok"])
-            self.assertIn("pouze v proudu Human–Adam", result["message"])
+            self.assertIn("nepatří do aktivního pracovního proudu", result["message"])
+
+    def test_missing_capability_fails_closed_without_private_write(self) -> None:
+        disabled = FakeService(
+            "project-r2-adam-janicka",
+            capabilities=CanonicalWorkstreamCapabilities(image_generation=False),
+        )
+        payload = {
+            "request_text": "Vygeneruj obrázek sovy.",
+            "client_message_id": "human-adam-message-disabled",
+        }
+
+        result = human_adam_image_prepare_action(
+            payload, service=disabled, store=self.store
+        )
+
+        self.assertFalse(result["ok"])
+        self.assertIn("nemá povolené generování obrázků", result["message"])
         self.assertFalse(self.root.exists())
+
+    def test_invalid_capability_configuration_fails_closed(self) -> None:
+        invalid = FakeService(
+            "project-r2-adam-janicka",
+            capabilities=CanonicalWorkstreamCapabilities(image_generation="yes"),
+        )
+
+        result = human_adam_image_candidates_action(
+            service=invalid, store=self.store
+        )
+
+        self.assertFalse(result["ok"])
+        self.assertIn("nelze bezpečně ověřit", result["message"])
 
 
 if __name__ == "__main__":

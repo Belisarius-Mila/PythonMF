@@ -184,6 +184,32 @@ class WorkstreamCatalogTests(unittest.TestCase):
             )
         )
 
+    def test_all_workstreams_declare_image_generation_capability(self) -> None:
+        self.assertTrue(WORKSTREAM_CATALOG)
+        self.assertTrue(
+            all(record.capabilities.image_generation for record in WORKSTREAM_CATALOG)
+        )
+        self.assertTrue(
+            all(
+                record.capabilities.status_fields()["image_generation"]
+                for record in WORKSTREAM_CATALOG
+            )
+        )
+
+    def test_image_generation_capability_can_be_disabled_per_workstream(self) -> None:
+        record = CanonicalWorkstream(
+            "project-without-images",
+            "Project",
+            "Proud bez obrázků",
+            "active",
+            "2",
+            ("Zdroj proudu bez obrázků",),
+            capabilities=CanonicalWorkstreamCapabilities(image_generation=False),
+        )
+
+        self.assertEqual(validate_workstream_catalog((record,)), (record,))
+        self.assertFalse(record.capabilities.status_fields()["image_generation"])
+
     def test_private_archive_capabilities_are_declared_only_for_knihovna(self) -> None:
         knihovna = next(
             record
@@ -200,6 +226,7 @@ class WorkstreamCatalogTests(unittest.TestCase):
             knihovna.capabilities,
             CanonicalWorkstreamCapabilities(
                 network_read_only_research=True,
+                image_generation=True,
                 private_archive_direct=True,
                 private_archive_read=True,
                 private_archive_single_edit=True,
@@ -215,7 +242,8 @@ class WorkstreamCatalogTests(unittest.TestCase):
         self.assertTrue(other_records)
         self.assertTrue(
             all(
-                record.capabilities == CanonicalWorkstreamCapabilities()
+                record.capabilities
+                == CanonicalWorkstreamCapabilities(image_generation=True)
                 for record in other_records
                 if record.workstream_id != "project-r2-adam-janicka"
             )
@@ -238,6 +266,7 @@ class WorkstreamCatalogTests(unittest.TestCase):
         )
         self.assertTrue(r2_adam.capabilities.status_fields()["owned_private_write"])
         self.assertTrue(r2_adam.capabilities.network_read_only_research)
+        self.assertTrue(r2_adam.capabilities.image_generation)
         self.assertFalse(r2_adam.capabilities.private_archive_direct)
         self.assertFalse(r2_adam.capabilities.private_archive_single_edit)
 

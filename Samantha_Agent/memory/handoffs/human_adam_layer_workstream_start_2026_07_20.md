@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-12 11:56 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-12 13:54 CEST
 
 ### Hotovo
-- Human–Adam připraví obrazový návrh, po samostatném potvrzení vytvoří private kandidáta a umožní jej schválit nebo zamítnout bez publikace
+- Generování obrázků je dostupné ve všech současných proudech a řídí je výhradně deklarativní capability konfigurace
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
@@ -15,18 +15,18 @@
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Po checkpointu samostatně potvrdit nasazení a živě ověřit jeden neškodný obrázkový požadavek
+- Samostatně potvrdit nasazení a živě ověřit generování ve dvou různých pracovních proudech
 
 ### Rozhodnutí
-- Obrázkové kandidáty zůstávají private a schválení nikdy nepublikuje ani nevkládá soubor do projektu
+- Obrazová schopnost se přiřazuje pracovním proudům deklarativně; kandidáti zůstávají private a izolovaní podle proudu
 
 ### Navrhované další kroky
 - Žádné další návrhy nad rámec bezprostředního kroku.
 
 ### Technický stav checkpointu
-- Změna je otestovaná (1354 testů).
-- Git před checkpointem: lokální `main` na `e056cb8d08df`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `e056cb8d08df` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-11T16:11:41+00:00.
+- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
+- Git před checkpointem: lokální `main` na `fd7a0860b011`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `fd7a0860b011` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-12T10:00:32+00:00.
 - Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -2671,3 +2671,15 @@ Technický důkaz:
 - Změněné cesty před paměťovým zápisem (9): `Samantha_Agent/app/capabilities/registry.py`, `Samantha_Agent/app/cockpit.py`, `Samantha_Agent/app/communication/human_adam_ui.py`, `Samantha_Agent/scripts/cockpit_quality_gate.py`, `Samantha_Agent/tests/test_capability_registry.py`, `Samantha_Agent/tests/test_cockpit.py`, `Samantha_Agent/tests/test_human_adam_ui.py`, `Samantha_Agent/app/communication/human_adam_images.py`, `Samantha_Agent/tests/test_human_adam_images.py`
 - Commit: `Add confirmed Human-Adam image candidates`
 - Další krok: Po checkpointu samostatně potvrdit nasazení a živě ověřit jeden neškodný obrázkový požadavek
+
+### Automatický checkpoint 2026-08-12 13:54 CEST
+
+- Pracovní proud: `layer-human-adam-development`
+- Hotovo: Generování obrázků je dostupné ve všech současných proudech a řídí je výhradně deklarativní capability konfigurace; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.; Lokální commity čekají na samostatný denní GitHub balíček.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: rychlá Cockpit brána syntaxe a whitespace: 6.7 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu
+- Změněné cesty před paměťovým zápisem (6): `Samantha_Agent/app/communication/human_adam_images.py`, `Samantha_Agent/app/communication/human_adam_ui.py`, `Samantha_Agent/app/communication/human_adam_workstream_catalog.py`, `Samantha_Agent/tests/test_human_adam_images.py`, `Samantha_Agent/tests/test_human_adam_ui.py`, `Samantha_Agent/tests/test_human_adam_workstream_catalog.py`
+- Commit: `Enable image generation by workstream capability`
+- Další krok: Samostatně potvrdit nasazení a živě ověřit generování ve dvou různých pracovních proudech

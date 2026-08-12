@@ -1136,7 +1136,9 @@ class HumanAdamUiTests(unittest.TestCase):
             send_source.index("await api(HUMAN_ADAM_SEND_PATH"),
             send_source.index("await prepareImageCandidate(text, clientId);"),
         )
-        self.assertIn('activeWorkstreamId !== HUMAN_ADAM_IMAGE_WORKSTREAM', HUMAN_ADAM_HTML)
+        self.assertIn("imageGenerationEnabled = capabilities.image_generation === true;", HUMAN_ADAM_HTML)
+        self.assertIn("if (!imageGenerationEnabled || !looksLikeImageGenerationRequest", HUMAN_ADAM_HTML)
+        self.assertNotIn("HUMAN_ADAM_IMAGE_WORKSTREAM", HUMAN_ADAM_HTML)
         self.assertIn('api("/api/human-adam/images/prepare"', HUMAN_ADAM_HTML)
 
     def test_image_card_requires_separate_generation_confirmation_and_has_review_controls(self) -> None:
@@ -1165,6 +1167,8 @@ class HumanAdamUiTests(unittest.TestCase):
         render_source = HUMAN_ADAM_HTML[render_start:render_end]
 
         self.assertIn('api("/api/human-adam/images")', load_source)
+        self.assertIn("const requestedWorkstreamId = activeWorkstreamId;", load_source)
+        self.assertIn("requestedWorkstreamId !== activeWorkstreamId", load_source)
         self.assertIn("imageCandidatesByMessage = next;", load_source)
         self.assertIn("imageCandidatesByMessage.get", render_source)
         self.assertIn("candidate.image_url", HUMAN_ADAM_HTML)

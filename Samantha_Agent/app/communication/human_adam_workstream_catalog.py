@@ -8,7 +8,7 @@ records, but an unbound record does not create or start any private resource.
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import PurePosixPath
 from typing import Iterable
 
@@ -29,6 +29,7 @@ class CanonicalWorkstreamCapabilities:
     """Declarative, git-safe capability metadata for one workstream."""
 
     network_read_only_research: bool = True
+    image_generation: bool = False
     private_archive_direct: bool = False
     private_archive_read: bool = False
     private_archive_single_edit: bool = False
@@ -40,14 +41,19 @@ class CanonicalWorkstreamCapabilities:
     def validate(self) -> None:
         flags = (
             self.network_read_only_research,
+            self.image_generation,
             self.private_archive_direct,
             self.private_archive_read,
             self.private_archive_single_edit,
             self.source_data_read_only,
         )
         if any(type(flag) is not bool for flag in flags):
-            raise ValueError("Pracovní proud má neplatné private archive capability.")
-        archive_flags = flags[1:4]
+            raise ValueError("Pracovní proud má neplatná capability metadata.")
+        archive_flags = (
+            self.private_archive_direct,
+            self.private_archive_read,
+            self.private_archive_single_edit,
+        )
         if self.source_data_read_only and any(archive_flags):
             raise ValueError(
                 "Read-only zdrojová data nelze kombinovat s přímou editací archivu."
@@ -108,6 +114,7 @@ class CanonicalWorkstreamCapabilities:
     def status_fields(self) -> dict[str, object]:
         return {
             "network_read_only_research": self.network_read_only_research,
+            "image_generation": self.image_generation,
             "private_archive_direct": self.private_archive_direct,
             "private_archive_read": self.private_archive_read,
             "private_archive_single_edit": self.private_archive_single_edit,
@@ -227,6 +234,7 @@ def _record(
     binding_aliases: tuple[str, ...] = (),
     binding_type_aliases: tuple[str, ...] = (),
     capabilities: CanonicalWorkstreamCapabilities = CanonicalWorkstreamCapabilities(),
+    image_generation: bool = True,
 ) -> CanonicalWorkstream:
     return CanonicalWorkstream(
         workstream_id=workstream_id,
@@ -238,7 +246,7 @@ def _record(
         query_aliases=query_aliases,
         binding_aliases=binding_aliases,
         binding_type_aliases=binding_type_aliases,
-        capabilities=capabilities,
+        capabilities=replace(capabilities, image_generation=image_generation),
     )
 
 

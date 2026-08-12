@@ -539,8 +539,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   let threadRotationAudit = null;
   let imageCandidatesByMessage = new Map();
   let imageCandidatesLoading = false;
+  let imageGenerationEnabled = false;
   const HUMAN_ADAM_SEND_PATH = "/api/human-adam/send";
-  const HUMAN_ADAM_IMAGE_WORKSTREAM = "layer-human-adam-development";
   const RESULT_WATCH_MAX_ATTEMPTS = 60;
   const RESULT_WATCH_MAX_DELAY_MS = 30000;
 
@@ -1110,16 +1110,18 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   }
 
   async function loadImageCandidates() {
-    if (activeWorkstreamId !== HUMAN_ADAM_IMAGE_WORKSTREAM) {
+    if (!imageGenerationEnabled) {
       imageCandidatesByMessage = new Map();
       if (lastSession) renderSession(lastSession);
       return;
     }
     if (imageCandidatesLoading) return;
+    const requestedWorkstreamId = activeWorkstreamId;
     imageCandidatesLoading = true;
     try {
       const payload = await api("/api/human-adam/images");
       if (!payload.ok) throw new Error(payload.message || "Kandidáty obrázků nelze načíst.");
+      if (requestedWorkstreamId !== activeWorkstreamId) return;
       const next = new Map();
       for (const candidate of Array.isArray(payload.candidates) ? payload.candidates : []) {
         const messageId = String(candidate.client_message_id || "");
@@ -1131,6 +1133,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       notice.textContent = `Obrázkové karty nelze načíst: ${error.message}`;
     } finally {
       imageCandidatesLoading = false;
+      if (requestedWorkstreamId !== activeWorkstreamId && imageGenerationEnabled) {
+        void loadImageCandidates();
+      }
     }
   }
 
@@ -1247,7 +1252,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   }
 
   async function prepareImageCandidate(requestText, clientMessageId) {
-    if (activeWorkstreamId !== HUMAN_ADAM_IMAGE_WORKSTREAM || !looksLikeImageGenerationRequest(requestText)) return true;
+    if (!imageGenerationEnabled || !looksLikeImageGenerationRequest(requestText)) return true;
     try {
       const payload = await api("/api/human-adam/images/prepare", {
         method:"POST",
@@ -1495,6 +1500,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     activeWorkstreamLabel = String(activeWorkstream.workstream_name || "Pracovní proud");
     workstreamDevelopmentEnabled = capabilities.development !== false;
     workstreamDeploymentEnabled = capabilities.deployment !== false;
+    imageGenerationEnabled = capabilities.image_generation === true;
     privateArchiveHelp.hidden = capabilities.private_archive_direct !== true;
     activeWorkstreamId = nextWorkstreamId;
     activeWorkstreamBackend = String(activeWorkstream.backend || "lazy_private_thread");

@@ -13,6 +13,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from app.communication.human_adam_workstream_catalog import WORKSTREAM_ID_RE
 from app.file_persistence import atomic_write_json
 
 
@@ -20,7 +21,8 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_CANDIDATE_ROOT = (
     PROJECT_ROOT / "data" / "private" / "communication" / "human_adam_image_candidates"
 )
-HUMAN_ADAM_WORKSTREAM_ID = "layer-human-adam-development"
+LEGACY_SCHEMA_1_WORKSTREAM_ID = "layer-human-adam-development"
+CURRENT_CANDIDATE_SCHEMA = 2
 IMAGE_CANDIDATE_ID_RE = re.compile(r"img_[0-9a-f]{32}")
 CLIENT_MESSAGE_ID_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:-]{7,127}")
 IMAGE_REQUEST_RE = re.compile(
@@ -100,6 +102,13 @@ def validate_client_message_id(client_message_id: str) -> str:
     clean_id = str(client_message_id or "").strip()
     if not CLIENT_MESSAGE_ID_RE.fullmatch(clean_id):
         raise HumanAdamImageError("Požadavek nemá platné ID chatové zprávy.")
+    return clean_id
+
+
+def validate_workstream_id(workstream_id: str) -> str:
+    clean_id = str(workstream_id or "").strip().casefold()
+    if not WORKSTREAM_ID_RE.fullmatch(clean_id):
+        raise HumanAdamImageError("Obrázkový kandidát nemá platný pracovní proud.")
     return clean_id
 
 
@@ -188,10 +197,16 @@ class HumanAdamImageCandidateStore:
 
     def _save(self, record: dict[str, Any]) -> None:
         candidate_id = validate_candidate_id(str(record.get("candidate_id") or ""))
+        validate_workstream_id(str(record.get("workstream_id") or ""))
         record["updated_at"] = utc_now()
         atomic_write_json(self._metadata_path(candidate_id), record, ensure_ascii=False, indent=2)
 
-    def _load(self, candidate_id: str) -> dict[str, Any]:
+    def _load(
+        self,
+        candidate_id: str,
+        *,
+        expected_workstream_id: str | None = None,
+    ) -> dict[str, Any]:
         import json
 
         metadata_path = self._metadata_path(candidate_id)
@@ -201,10 +216,25 @@ class HumanAdamImageCandidateStore:
             raise HumanAdamImageError("Kandidát obrázku neexistuje.") from exc
         except (OSError, json.JSONDecodeError) as exc:
             raise HumanAdamImageError("Kandidáta obrázku nelze bezpečně načíst.") from exc
-        if not isinstance(loaded, dict) or loaded.get("schema_version") != 1:
+        if not isinstance(loaded, dict) or loaded.get("schema_version") not in {
+            1,
+            CURRENT_CANDIDATE_SCHEMA,
+        }:
             raise HumanAdamImageError("Kandidát obrázku má neznámé schéma.")
         if str(loaded.get("candidate_id") or "") != validate_candidate_id(candidate_id):
             raise HumanAdamImageError("Kandidát obrázku má nekonzistentní ID.")
+        if loaded.get("schema_version") == 1:
+            loaded["schema_version"] = CURRENT_CANDIDATE_SCHEMA
+            loaded["workstream_id"] = LEGACY_SCHEMA_1_WORKSTREAM_ID
+            self._save(loaded)
+        record_workstream_id = validate_workstream_id(
+            str(loaded.get("workstream_id") or "")
+        )
+        if (
+            expected_workstream_id is not None
+            and record_workstream_id != validate_workstream_id(expected_workstream_id)
+        ):
+            raise HumanAdamImageError("Kandidát obrázku nepatří do aktivního pracovního proudu.")
         if str(loaded.get("status") or "") not in ALLOWED_STATUSES:
             raise HumanAdamImageError("Kandidát obrázku má neplatný stav.")
         if loaded.get("status") == "generating":
@@ -213,19 +243,27 @@ class HumanAdamImageCandidateStore:
             self._save(loaded)
         return loaded
 
-    def prepare(self, *, request_text: str, client_message_id: str) -> dict[str, Any]:
+    def prepare(
+        self,
+        *,
+        request_text: str,
+        client_message_id: str,
+        workstream_id: str,
+    ) -> dict[str, Any]:
         clean_message_id = validate_client_message_id(client_message_id)
+        clean_workstream_id = validate_workstream_id(workstream_id)
         prompt, parameters = prepare_image_prompt(request_text)
         with self._lock:
-            for existing in self.list_records():
+            for existing in self.list_records(workstream_id=clean_workstream_id):
                 if existing.get("client_message_id") == clean_message_id:
                     return existing
             candidate_id = f"img_{uuid.uuid4().hex}"
             now = utc_now()
             record: dict[str, Any] = {
-                "schema_version": 1,
+                "schema_version": CURRENT_CANDIDATE_SCHEMA,
                 "candidate_id": candidate_id,
                 "version": 1,
+                "workstream_id": clean_workstream_id,
                 "client_message_id": clean_message_id,
                 "request_text": str(request_text).strip(),
                 "prompt": prompt,
@@ -247,13 +285,14 @@ class HumanAdamImageCandidateStore:
         *,
         candidate_id: str,
         confirmation: str,
+        workstream_id: str,
         client: Any | None = None,
     ) -> dict[str, Any]:
         clean_id = validate_candidate_id(candidate_id)
         if str(confirmation or "").strip() != generation_confirmation(clean_id):
             raise HumanAdamImageError("Placené generování vyžaduje samostatné přesné potvrzení.")
         with self._lock:
-            record = self._load(clean_id)
+            record = self._load(clean_id, expected_workstream_id=workstream_id)
             if record["status"] != "prepared":
                 raise HumanAdamImageError("Tento kandidát už nelze znovu generovat.")
             record["status"] = "generating"
@@ -280,12 +319,21 @@ class HumanAdamImageCandidateStore:
                 self._save(record)
                 raise
 
-    def decide(self, *, candidate_id: str, decision: str) -> dict[str, Any]:
+    def decide(
+        self,
+        *,
+        candidate_id: str,
+        decision: str,
+        workstream_id: str,
+    ) -> dict[str, Any]:
         clean_decision = str(decision or "").strip().casefold()
         if clean_decision not in {"approve", "reject"}:
             raise HumanAdamImageError("Rozhodnutí kandidáta není platné.")
         with self._lock:
-            record = self._load(candidate_id)
+            record = self._load(
+                candidate_id,
+                expected_workstream_id=workstream_id,
+            )
             if record["status"] != "generated":
                 raise HumanAdamImageError("Rozhodnout lze pouze právě vygenerovanou verzi.")
             record["status"] = "approved" if clean_decision == "approve" else "rejected"
@@ -293,9 +341,17 @@ class HumanAdamImageCandidateStore:
             self._save(record)
             return record
 
-    def image_path(self, candidate_id: str) -> tuple[Path, str]:
+    def image_path(
+        self,
+        candidate_id: str,
+        *,
+        workstream_id: str,
+    ) -> tuple[Path, str]:
         with self._lock:
-            record = self._load(candidate_id)
+            record = self._load(
+                candidate_id,
+                expected_workstream_id=workstream_id,
+            )
             if record["status"] not in {"generated", "approved", "rejected"}:
                 raise HumanAdamImageError("Obrázek tohoto kandidáta ještě není dostupný.")
             image_file = str(record.get("image_file") or "")
@@ -314,14 +370,21 @@ class HumanAdamImageCandidateStore:
                 raise HumanAdamImageError("Typ obrazového souboru neodpovídá kandidátovi.")
             return target, expected_mime
 
-    def list_records(self) -> list[dict[str, Any]]:
+    def list_records(
+        self,
+        *,
+        workstream_id: str,
+    ) -> list[dict[str, Any]]:
+        clean_workstream_id = validate_workstream_id(workstream_id)
         if not self.root.exists():
             return []
         records: list[dict[str, Any]] = []
         for path in sorted(self.root.iterdir()):
             if path.is_dir() and IMAGE_CANDIDATE_ID_RE.fullmatch(path.name):
                 try:
-                    records.append(self._load(path.name))
+                    record = self._load(path.name)
+                    if record.get("workstream_id") == clean_workstream_id:
+                        records.append(record)
                 except HumanAdamImageError:
                     continue
         return sorted(records, key=lambda item: str(item.get("created_at") or ""))[-100:]
@@ -345,25 +408,48 @@ class HumanAdamImageCandidateStore:
             "image_url": f"/api/human-adam/images/file?id={candidate_id}" if generated else "",
         }
 
-    def public_list(self) -> list[dict[str, Any]]:
+    def public_list(
+        self,
+        *,
+        workstream_id: str,
+    ) -> list[dict[str, Any]]:
         with self._lock:
-            return [self.public(record) for record in self.list_records()]
+            return [
+                self.public(record)
+                for record in self.list_records(workstream_id=workstream_id)
+            ]
 
 
 HUMAN_ADAM_IMAGE_STORE = HumanAdamImageCandidateStore()
 
 
-def _require_human_adam_workstream(service: Any) -> None:
-    if str(service.active_workstream_id or "") != HUMAN_ADAM_WORKSTREAM_ID:
-        raise HumanAdamImageError("Obrázkové kandidáty jsou dostupné pouze v proudu Human–Adam.")
+def _active_image_workstream(service: Any) -> str:
+    try:
+        workstream_id = validate_workstream_id(service.active_workstream_id)
+        capabilities = service.workstream_backends.binding(
+            workstream_id
+        ).record.capabilities
+        capabilities.validate()
+    except Exception as exc:
+        raise HumanAdamImageError(
+            "Capability generování obrázků nelze bezpečně ověřit."
+        ) from exc
+    if capabilities.image_generation is not True:
+        raise HumanAdamImageError(
+            "Aktivní pracovní proud nemá povolené generování obrázků."
+        )
+    return workstream_id
 
 
 def human_adam_image_candidates_action(
     *, service: Any, store: HumanAdamImageCandidateStore = HUMAN_ADAM_IMAGE_STORE
 ) -> dict[str, Any]:
     try:
-        _require_human_adam_workstream(service)
-        return {"ok": True, "candidates": store.public_list()}
+        workstream_id = _active_image_workstream(service)
+        return {
+            "ok": True,
+            "candidates": store.public_list(workstream_id=workstream_id),
+        }
     except (HumanAdamImageError, OSError, ValueError) as exc:
         return {"ok": False, "status": "human_adam_images_failed", "message": str(exc), "candidates": []}
 
@@ -375,10 +461,11 @@ def human_adam_image_prepare_action(
     store: HumanAdamImageCandidateStore = HUMAN_ADAM_IMAGE_STORE,
 ) -> dict[str, Any]:
     try:
-        _require_human_adam_workstream(service)
+        workstream_id = _active_image_workstream(service)
         record = store.prepare(
             request_text=str(payload.get("request_text") or ""),
             client_message_id=str(payload.get("client_message_id") or ""),
+            workstream_id=workstream_id,
         )
         return {"ok": True, "candidate": store.public(record)}
     except (HumanAdamImageError, OSError, ValueError) as exc:
@@ -393,11 +480,12 @@ def human_adam_image_generate_action(
     client: Any | None = None,
 ) -> dict[str, Any]:
     try:
-        _require_human_adam_workstream(service)
+        workstream_id = _active_image_workstream(service)
         record = store.generate(
             candidate_id=str(payload.get("candidate_id") or ""),
             confirmation=str(payload.get("confirmation") or ""),
             client=client,
+            workstream_id=workstream_id,
         )
         return {"ok": True, "candidate": store.public(record)}
     except (HumanAdamImageError, OSError, ValueError) as exc:
@@ -417,10 +505,11 @@ def human_adam_image_decision_action(
     store: HumanAdamImageCandidateStore = HUMAN_ADAM_IMAGE_STORE,
 ) -> dict[str, Any]:
     try:
-        _require_human_adam_workstream(service)
+        workstream_id = _active_image_workstream(service)
         record = store.decide(
             candidate_id=str(payload.get("candidate_id") or ""),
             decision=str(payload.get("decision") or ""),
+            workstream_id=workstream_id,
         )
         return {"ok": True, "candidate": store.public(record)}
     except (HumanAdamImageError, OSError, ValueError) as exc:
@@ -434,8 +523,11 @@ def human_adam_image_file_action(
     store: HumanAdamImageCandidateStore = HUMAN_ADAM_IMAGE_STORE,
 ) -> dict[str, Any]:
     try:
-        _require_human_adam_workstream(service)
-        path, mime_type = store.image_path(candidate_id)
+        workstream_id = _active_image_workstream(service)
+        path, mime_type = store.image_path(
+            candidate_id,
+            workstream_id=workstream_id,
+        )
         return {"ok": True, "path": path, "mime_type": mime_type, "filename": path.name}
     except (HumanAdamImageError, OSError, ValueError) as exc:
         return {"ok": False, "status": "human_adam_image_file_failed", "message": str(exc)}
