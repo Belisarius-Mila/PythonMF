@@ -1,3 +1,38 @@
+<!-- SAMANTHA_CURRENT_STATUS_START -->
+## Aktuální stav
+
+- Obnoveno potvrzeným checkpointem: 2026-08-12 21:13 CEST
+
+### Hotovo
+- Benji v prototypu upřednostňuje Andrewa a používá pouze mužské anglické alternativy
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+
+### Otevřeno
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
+
+### Rizika
+- Žádné další doložené provozní riziko.
+
+### Další krok
+- Poslechnout Benjiho hlas v prototypu na iPhonu a Macu
+
+### Rozhodnutí
+- Harryho hlas zůstává beze změny; Benji má Andrewa jako první volbu a nesmí přejít na ženský hlas
+
+### Navrhované další kroky
+- Po poslechovém ověření připravit pevné Andrew MP3 pro stejný hlas na všech zařízeních
+- Potom pokračovat výslechem Bunnyho, Fiony, Sunnyho a Bruna se schválenými hlasy
+
+### Technický stav checkpointu
+- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
+- Git před checkpointem: lokální `main` na `4f46659da681`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `4f46659da681` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-12T18:19:38+00:00.
+- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
+- Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
+<!-- SAMANTHA_CURRENT_STATUS_END -->
+
 # TVBCP: MMTX
 
 Pracovni proud: `project-mmtx`
@@ -42,3 +77,31 @@ Bruna; potom přidat počítání pěti ovcí a otevření branky.
 Technický důkaz: Prošly 3/3 cílené testy, JavaScript syntaxe a
 `git diff --check`. PNG má kanonické rozměry 1672 x 941 a jeho kontrolní otisk
 odpovídá schválenému private kandidátu.
+
+### 2026-08-12 21:13 CEST – Benji v prototypu upřednostňuje Andrewa a používá pouze mužské anglické alternativy
+
+Hotovo:
+- Benji v prototypu upřednostňuje Andrewa a používá pouze mužské anglické alternativy
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+
+Otevřeno:
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
+
+Rizika:
+- Žádné další doložené provozní riziko.
+
+Rozhodnutí:
+- Harryho hlas zůstává beze změny; Benji má Andrewa jako první volbu a nesmí přejít na ženský hlas
+
+Další krok:
+- Poslechnout Benjiho hlas v prototypu na iPhonu a Macu
+
+Navrhované další kroky:
+- Po poslechovém ověření připravit pevné Andrew MP3 pro stejný hlas na všech zařízeních
+- Potom pokračovat výslechem Bunnyho, Fiony, Sunnyho a Bruna se schválenými hlasy
+
+Technický důkaz:
+- rychlá Cockpit brána syntaxe a whitespace: 6.8 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
+- Pracovní proud: `project-mmtx`.
+- Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.

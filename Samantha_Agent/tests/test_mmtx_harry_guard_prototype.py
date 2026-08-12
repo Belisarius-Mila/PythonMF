@@ -64,6 +64,18 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
 
         self.assertIn('await speakText(entry.textEn, "en", entry.characterId)', script)
         self.assertIn('if (isBilingual()) await speakText(entry.textCz, "cs", entry.characterId)', script)
+        benji_voice_profile = script.split(
+            "const BENJI_ENGLISH_VOICE_ORDER = [", 1
+        )[1].split("];", 1)[0]
+        expected_order = ["andrew", "evan", "alex", "aaron", "daniel"]
+        positions = [benji_voice_profile.index(f'"{name}"') for name in expected_order]
+        self.assertEqual(positions, sorted(positions))
+        for female_fallback in ("samantha", "ava", "fable"):
+            self.assertNotIn(female_fallback, benji_voice_profile)
+        self.assertIn(
+            'if (lang === "en" && characterId === "benji" && !voice)',
+            script,
+        )
         repeat_body = script.split("async function repeatLast()", 1)[1].split(
             "function toggleLanguage()", 1
         )[0]

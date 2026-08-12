@@ -27,6 +27,19 @@ const LANGUAGE_MODES = {
   bilingual: "en-cz",
 };
 
+// Keep Benji on a male voice even when the browser exposes voices in a
+// different order. Andrew matches the approved Scene 3 voice when available.
+const BENJI_ENGLISH_VOICE_ORDER = [
+  "andrew",
+  "evan",
+  "alex",
+  "aaron",
+  "daniel",
+  "reed",
+  "eddy",
+  "fred",
+];
+
 const STAGES = {
   waitingStart: "waitingStart",
   intro: "intro",
@@ -121,10 +134,17 @@ function voiceFor(lang, characterId) {
   const languagePrefix = lang === "cs" ? "cs" : "en";
   const matching = voices.filter((voice) => String(voice.lang || "").toLowerCase().startsWith(languagePrefix));
   if (!matching.length) return null;
+  if (lang === "en" && characterId === "benji") {
+    for (const preferredName of BENJI_ENGLISH_VOICE_ORDER) {
+      const selectedVoice = matching.find((voice) => voice.name.toLowerCase().includes(preferredName));
+      if (selectedVoice) return selectedVoice;
+    }
+    return null;
+  }
   if (lang === "en") {
     const preferred = characterId === "harry"
       ? /daniel|roger|guy|alex|aaron/i
-      : /andrew|evan|alex|samantha|ava|fable/i;
+      : /samantha|ava|fable/i;
     return matching.find((voice) => preferred.test(voice.name)) || matching[0];
   }
   return matching[0];
@@ -158,6 +178,10 @@ function speakText(text, lang, characterId) {
     utterance.rate = lang === "cs" ? 0.9 : 0.94;
     utterance.volume = lang === "cs" ? 0.68 : 0.9;
     const voice = voiceFor(lang, characterId);
+    if (lang === "en" && characterId === "benji" && !voice) {
+      finish();
+      return;
+    }
     if (voice) utterance.voice = voice;
     utterance.onend = finish;
     utterance.onerror = finish;
