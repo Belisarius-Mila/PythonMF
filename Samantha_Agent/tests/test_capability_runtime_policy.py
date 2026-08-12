@@ -15,6 +15,12 @@ class CapabilityRuntimePolicyTests(unittest.TestCase):
         self.assertIn("read_email_body_by_uid: risk=private_export", text)
         self.assertIn("confirmation=exact_current_message", text)
         self.assertNotIn("list_recent_email_headers: risk=read_only", text)
+        self.assertIn("Durably consented external generation capabilities:", text)
+        self.assertIn(
+            "generate_human_adam_image_candidate: risk=external_generation",
+            text,
+        )
+        self.assertIn("generate_project_audio_asset: risk=external_generation", text)
 
     def test_agent_instructions_include_runtime_policy(self) -> None:
         agent = build_agent("TEST MEMORY")

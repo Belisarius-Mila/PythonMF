@@ -1141,7 +1141,7 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertNotIn("HUMAN_ADAM_IMAGE_WORKSTREAM", HUMAN_ADAM_HTML)
         self.assertIn('api("/api/human-adam/images/prepare"', HUMAN_ADAM_HTML)
 
-    def test_image_card_requires_separate_generation_confirmation_and_has_review_controls(self) -> None:
+    def test_image_card_uses_durable_consent_with_safe_confirmation_fallback(self) -> None:
         generate_start = HUMAN_ADAM_HTML.index("async function generateImageCandidate(candidate, button)")
         generate_end = HUMAN_ADAM_HTML.index("async function decideImageCandidate", generate_start)
         generate_source = HUMAN_ADAM_HTML[generate_start:generate_end]
@@ -1149,14 +1149,20 @@ class HumanAdamUiTests(unittest.TestCase):
         card_end = HUMAN_ADAM_HTML.index("async function prepareImageCandidate", card_start)
         card_source = HUMAN_ADAM_HTML[card_start:card_end]
 
-        self.assertIn("window.confirm", generate_source)
+        self.assertIn("!trustedExternalGenerationEnabled && !window.confirm", generate_source)
         self.assertIn("candidate.prompt", generate_source)
         self.assertIn("candidate.confirmation_text", generate_source)
+        self.assertIn('confirmation:trustedExternalGenerationEnabled ? ""', generate_source)
         self.assertIn('api("/api/human-adam/images/generate"', generate_source)
         for label in ("Otevřít náhled", "Schválit", "Zamítnout"):
             self.assertIn(label, card_source)
         self.assertIn('candidate.status !== "generated"', card_source)
         self.assertIn("Nic se nebude publikovat ani vkládat do projektu.", HUMAN_ADAM_HTML)
+        self.assertIn("status.enabled === true", HUMAN_ADAM_HTML)
+        self.assertIn("Externí generování", HUMAN_ADAM_HTML)
+        self.assertIn('api("/api/human-adam/trusted-external-generation"', HUMAN_ADAM_HTML)
+        self.assertIn("Odvolat trvalý souhlas", HUMAN_ADAM_HTML)
+        self.assertIn("trustedExternalGenerationRevokeText", HUMAN_ADAM_HTML)
 
     def test_image_cards_reload_from_private_api_without_base64_or_paths(self) -> None:
         load_start = HUMAN_ADAM_HTML.index("async function loadImageCandidates()")

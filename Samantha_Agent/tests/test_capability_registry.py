@@ -39,13 +39,28 @@ class CapabilityRegistryTests(unittest.TestCase):
         self.assertTrue(record.requires_confirmation)
         self.assertEqual(record.confirmation_policy, ConfirmationPolicy.EXACT_CURRENT_MESSAGE)
 
-    def test_human_adam_image_generation_is_registered_as_confirmed_external_send(self) -> None:
+    def test_generation_capabilities_use_durable_external_generation_consent(self) -> None:
         record = get_capability("generate_human_adam_image_candidate")
 
-        self.assertEqual(record.risk, RiskLevel.EXTERNAL_SEND)
-        self.assertTrue(record.requires_confirmation)
-        self.assertEqual(record.confirmation_policy, ConfirmationPolicy.EXACT_CURRENT_MESSAGE)
+        self.assertEqual(record.risk, RiskLevel.EXTERNAL_GENERATION)
+        self.assertFalse(record.requires_confirmation)
+        self.assertEqual(
+            record.metadata["durable_consent"],
+            "trusted_external_generation_v1",
+        )
         self.assertIn("HumanAdamImageCandidateStore.generate", record.tool)
+
+        audio = get_capability("generate_project_audio_asset")
+        self.assertEqual(audio.risk, RiskLevel.EXTERNAL_GENERATION)
+        self.assertFalse(audio.requires_confirmation)
+        self.assertEqual(
+            audio.metadata["durable_consent"],
+            "trusted_external_generation_v1",
+        )
+        self.assertEqual(
+            audio.tool,
+            "app.speech.edge_tts_mp3.synthesize_edge_tts_mp3_sync",
+        )
 
     def test_confirmed_local_write_capabilities_require_confirmation(self) -> None:
         for capability_id in (

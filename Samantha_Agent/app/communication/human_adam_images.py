@@ -14,6 +14,9 @@ from pathlib import Path
 from typing import Any
 
 from app.communication.human_adam_workstream_catalog import WORKSTREAM_ID_RE
+from app.communication.trusted_external_generation import (
+    trusted_external_generation_text_allowed,
+)
 from app.file_persistence import atomic_write_json
 
 
@@ -286,13 +289,26 @@ class HumanAdamImageCandidateStore:
         candidate_id: str,
         confirmation: str,
         workstream_id: str,
+        durable_consent: bool = False,
         client: Any | None = None,
     ) -> dict[str, Any]:
         clean_id = validate_candidate_id(candidate_id)
-        if str(confirmation or "").strip() != generation_confirmation(clean_id):
-            raise HumanAdamImageError("Placené generování vyžaduje samostatné přesné potvrzení.")
         with self._lock:
             record = self._load(clean_id, expected_workstream_id=workstream_id)
+            durable_allowed = durable_consent and trusted_external_generation_text_allowed(
+                str(record.get("request_text") or "")
+            )
+            if (
+                not durable_allowed
+                and str(confirmation or "").strip() != generation_confirmation(clean_id)
+            ):
+                if durable_consent:
+                    raise HumanAdamImageError(
+                        "Trvalý souhlas nelze použít pro obsah, který vypadá citlivě."
+                    )
+                raise HumanAdamImageError(
+                    "Placené generování vyžaduje samostatné přesné potvrzení."
+                )
             if record["status"] != "prepared":
                 raise HumanAdamImageError("Tento kandidát už nelze znovu generovat.")
             record["status"] = "generating"
@@ -315,7 +331,11 @@ class HumanAdamImageCandidateStore:
                 return record
             except Exception:
                 record["status"] = "prepared"
-                record["generation_note"] = "Generování selhalo; před dalším pokusem je nutné nové potvrzení."
+                record["generation_note"] = (
+                    "Generování selhalo; pokus lze bezpečně zopakovat."
+                    if durable_consent
+                    else "Generování selhalo; před dalším pokusem je nutné nové potvrzení."
+                )
                 self._save(record)
                 raise
 
@@ -441,6 +461,20 @@ def _active_image_workstream(service: Any) -> str:
     return workstream_id
 
 
+def _trusted_external_generation_enabled(service: Any) -> bool:
+    """Accept only the exact active durable consent; any ambiguity fails closed."""
+    try:
+        status = service.trusted_external_generation_consent.status()
+    except Exception:
+        return False
+    return bool(
+        isinstance(status, dict)
+        and status.get("enabled") is True
+        and status.get("state") == "active"
+        and status.get("consent_id") == "trusted_external_generation_v1"
+    )
+
+
 def human_adam_image_candidates_action(
     *, service: Any, store: HumanAdamImageCandidateStore = HUMAN_ADAM_IMAGE_STORE
 ) -> dict[str, Any]:
@@ -486,6 +520,7 @@ def human_adam_image_generate_action(
             confirmation=str(payload.get("confirmation") or ""),
             client=client,
             workstream_id=workstream_id,
+            durable_consent=_trusted_external_generation_enabled(service),
         )
         return {"ok": True, "candidate": store.public(record)}
     except (HumanAdamImageError, OSError, ValueError) as exc:

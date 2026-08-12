@@ -51,6 +51,7 @@ class FakeService:
         workstream_id: str = HUMAN_ADAM_TEST_WORKSTREAM_ID,
         *,
         capabilities: object | None = None,
+        durable_generation: bool = False,
     ):
         self.active_workstream_id = workstream_id
         configured = capabilities or CanonicalWorkstreamCapabilities(
@@ -60,6 +61,13 @@ class FakeService:
             binding=lambda _workstream_id: SimpleNamespace(
                 record=SimpleNamespace(capabilities=configured)
             )
+        )
+        self.trusted_external_generation_consent = SimpleNamespace(
+            status=lambda: {
+                "consent_id": "trusted_external_generation_v1",
+                "enabled": durable_generation,
+                "state": "active" if durable_generation else "missing",
+            }
         )
 
 
@@ -151,6 +159,56 @@ class HumanAdamImageTests(unittest.TestCase):
         self.assertEqual(public["image_url"], f'/api/human-adam/images/file?id={generated["candidate_id"]}')
         self.assertNotIn("path", public)
         self.assertNotIn("request_text", public)
+
+    def test_active_durable_consent_replaces_candidate_specific_confirmation(self) -> None:
+        record = self.prepare("durable")
+        client = FakeClient()
+        service = FakeService(durable_generation=True)
+
+        result = human_adam_image_generate_action(
+            {"candidate_id": record["candidate_id"], "confirmation": ""},
+            service=service,
+            store=self.store,
+            client=client,
+        )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["candidate"]["status"], "generated")
+        self.assertEqual(len(client.images.calls), 1)
+
+    def test_missing_durable_consent_keeps_candidate_confirmation_gate(self) -> None:
+        record = self.prepare("no-durable")
+        client = FakeClient()
+
+        result = human_adam_image_generate_action(
+            {"candidate_id": record["candidate_id"], "confirmation": ""},
+            service=self.service,
+            store=self.store,
+            client=client,
+        )
+
+        self.assertFalse(result["ok"])
+        self.assertIn("samostatné přesné potvrzení", result["message"])
+        self.assertEqual(client.images.calls, [])
+
+    def test_durable_consent_does_not_cover_obviously_sensitive_prompt(self) -> None:
+        record = self.store.prepare(
+            request_text="Vygeneruj obrázek podle data/private/dokument.txt.",
+            client_message_id="human-adam-message-sensitive",
+            workstream_id=HUMAN_ADAM_TEST_WORKSTREAM_ID,
+        )
+        client = FakeClient()
+
+        result = human_adam_image_generate_action(
+            {"candidate_id": record["candidate_id"], "confirmation": ""},
+            service=FakeService(durable_generation=True),
+            store=self.store,
+            client=client,
+        )
+
+        self.assertFalse(result["ok"])
+        self.assertIn("vypadá citlivě", result["message"])
+        self.assertEqual(client.images.calls, [])
 
     def test_safe_image_load_returns_only_file_inside_candidate_directory(self) -> None:
         generated, _client = self.generate()

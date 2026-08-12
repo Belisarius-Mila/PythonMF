@@ -850,17 +850,31 @@ CAPABILITIES: tuple[CapabilityRecord, ...] = (
     ),
     CapabilityRecord(
         capability_id="generate_human_adam_image_candidate",
-        label="Generate one confirmed Human–Adam image candidate",
-        risk=RiskLevel.EXTERNAL_SEND,
+        label="Generate one Human–Adam image candidate under durable consent",
+        risk=RiskLevel.EXTERNAL_GENERATION,
         reads=("one reviewed prompt and allowlisted image parameters",),
         writes=("one versioned private Human–Adam image candidate",),
-        requires_confirmation=True,
-        confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE,
-        voice_allowed=VoicePolicy.APPROVAL_ONLY,
-        mobile_allowed=MobilePolicy.APPROVAL_CARD,
+        requires_confirmation=False,
+        voice_allowed=VoicePolicy.ALLOWED,
+        mobile_allowed=MobilePolicy.ALLOWED,
         audit=AuditPolicy.REDACTED,
         tool="app.communication.human_adam_images.HumanAdamImageCandidateStore.generate",
-        notes="Calls the image API only after candidate-specific confirmation; never publishes or inserts the result.",
+        notes="Calls the image API only when global durable consent is active and the prompt is public, fictional or non-sensitive; never publishes the result.",
+        metadata={"durable_consent": "trusted_external_generation_v1"},
+    ),
+    CapabilityRecord(
+        capability_id="generate_project_audio_asset",
+        label="Generate a project audio asset under durable consent",
+        risk=RiskLevel.EXTERNAL_GENERATION,
+        reads=("public, fictional or non-sensitive project text", "registered voice selection"),
+        writes=("generated audio asset in the active project",),
+        requires_confirmation=False,
+        voice_allowed=VoicePolicy.ALLOWED,
+        mobile_allowed=MobilePolicy.ALLOWED,
+        audit=AuditPolicy.REDACTED,
+        tool="app.speech.edge_tts_mp3.synthesize_edge_tts_mp3_sync",
+        notes="Generates MP3 bytes only while global durable consent is active; the active development step may save them to its project but never publishes them.",
+        metadata={"durable_consent": "trusted_external_generation_v1"},
     ),
     CapabilityRecord(
         capability_id="review_human_adam_image_candidate",
@@ -1260,4 +1274,9 @@ def validate_registry(records: tuple[CapabilityRecord, ...] = CAPABILITIES) -> t
                 errors.append(f"{record.capability_id} external_send must use exact_current_message")
             if record.audit == AuditPolicy.FULL_LOCAL:
                 errors.append(f"{record.capability_id} external_send cannot use full_local audit")
+        if record.risk == RiskLevel.EXTERNAL_GENERATION:
+            if record.requires_confirmation:
+                errors.append(f"{record.capability_id} external_generation cannot use per-action confirmation")
+            if record.metadata.get("durable_consent") != "trusted_external_generation_v1":
+                errors.append(f"{record.capability_id} external_generation needs durable consent metadata")
     return tuple(errors)

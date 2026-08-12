@@ -19,6 +19,7 @@ class RiskLevel(_StringEnum):
     LOCAL_WRITE = "local_write"
     GIT_COMMIT = "git_commit"
     GIT_PUBLISH = "git_publish"
+    EXTERNAL_GENERATION = "external_generation"
     EXTERNAL_SEND = "external_send"
     DESTRUCTIVE = "destructive"
     PRIVATE_EXPORT = "private_export"
@@ -105,6 +106,13 @@ class CapabilityRecord:
             raise ValueError("confirmation_policy must be none when requires_confirmation is false")
         if self.risk in STRICT_CONFIRMATION_RISKS and not self.requires_confirmation:
             raise ValueError(f"{self.risk.value} capabilities require confirmation")
+        if self.risk == RiskLevel.EXTERNAL_GENERATION:
+            if self.requires_confirmation:
+                raise ValueError("external_generation uses durable consent, not per-action confirmation")
+            if self.metadata.get("durable_consent") != "trusted_external_generation_v1":
+                raise ValueError("external_generation requires trusted durable consent metadata")
+            if self.audit == AuditPolicy.FULL_LOCAL:
+                raise ValueError("external_generation cannot use full_local audit")
         if self.voice_allowed == VoicePolicy.APPROVAL_ONLY and not self.requires_confirmation:
             raise ValueError("voice approval_only requires confirmation")
         if self.mobile_allowed == MobilePolicy.APPROVAL_CARD and not self.requires_confirmation:

@@ -146,6 +146,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     .live-work-status-box[data-state="attention_required"],.live-work-status-box[data-state="unverified"] { border-color:#fed7aa; background:#fff7ed; }
     .live-work-status-box h3 { margin:0 0 5px; font-size:15px; }
     .live-work-status-box p { margin:0; color:var(--muted); font-size:13px; }
+    .live-work-status-box input { width:100%; margin-top:8px; border:1px solid #bac7d8; border-radius:11px; padding:10px 12px; font:inherit; }
     .live-work-status-box ul { margin:8px 0 0; padding-left:22px; }
     .live-work-status-box li { margin:4px 0; line-height:1.35; }
     .thread-rotation-box { margin-top:14px; padding-top:12px; border-top:1px solid #dbe3ee; display:grid; gap:8px; }
@@ -342,6 +343,13 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       <p id="liveWorkStatusMeta" role="status">Stav se načte až po otevření panelu Práce.</p>
       <ul id="liveWorkStatusAxes"></ul>
     </section>
+    <section class="live-work-status-box" id="trustedExternalGenerationBox" data-state="unverified" aria-label="Trvalý souhlas s externím generováním">
+      <h3>Externí generování</h3>
+      <p id="trustedExternalGenerationMeta" role="status">Stav trvalého souhlasu se načítá.</p>
+      <p id="trustedExternalGenerationConfirmation"></p>
+      <input id="trustedExternalGenerationInput" maxlength="700" autocomplete="off" spellcheck="false" placeholder="Vlož přesnou potvrzovací větu">
+      <button id="trustedExternalGenerationBtn" type="button" disabled>Načítám…</button>
+    </section>
     <div id="workMeta">Stav se načte až po otevření.</div>
     <ul id="workChanges"></ul>
     <section class="integration-audit-box" id="integrationAuditBox" aria-label="Audit a potvrzovaná brána čekající integrace" hidden>
@@ -480,6 +488,11 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const projectContinuityAuditBtn = document.getElementById("projectContinuityAuditBtn");
   const projectContinuityMeta = document.getElementById("projectContinuityMeta");
   const projectContinuityReasons = document.getElementById("projectContinuityReasons");
+  const trustedExternalGenerationBox = document.getElementById("trustedExternalGenerationBox");
+  const trustedExternalGenerationMeta = document.getElementById("trustedExternalGenerationMeta");
+  const trustedExternalGenerationConfirmation = document.getElementById("trustedExternalGenerationConfirmation");
+  const trustedExternalGenerationInput = document.getElementById("trustedExternalGenerationInput");
+  const trustedExternalGenerationBtn = document.getElementById("trustedExternalGenerationBtn");
   const checkpointMessage = document.getElementById("checkpointMessage");
   const checkpointBtn = document.getElementById("checkpointBtn");
   const deployMeta = document.getElementById("deployMeta");
@@ -540,6 +553,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   let imageCandidatesByMessage = new Map();
   let imageCandidatesLoading = false;
   let imageGenerationEnabled = false;
+  let trustedExternalGenerationEnabled = false;
+  let trustedExternalGenerationGrantText = "";
+  let trustedExternalGenerationRevokeText = "";
   const HUMAN_ADAM_SEND_PATH = "/api/human-adam/send";
   const RESULT_WATCH_MAX_ATTEMPTS = 60;
   const RESULT_WATCH_MAX_DELAY_MS = 30000;
@@ -1101,7 +1117,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
 
   function imageCandidateStatus(candidate) {
     const labels = {
-      prepared:"Čeká na samostatné potvrzení generování",
+      prepared:trustedExternalGenerationEnabled
+        ? "Připraveno ke generování v rámci trvalého souhlasu"
+        : "Čeká na samostatné potvrzení generování",
       generated:"Vygenerovaná verze čeká na rozhodnutí",
       approved:"Tato verze je schválená · není publikovaná",
       rejected:"Tato verze je zamítnutá",
@@ -1142,13 +1160,18 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   async function generateImageCandidate(candidate, button) {
     const parameters = candidate && candidate.parameters ? candidate.parameters : {};
     const summary = `${parameters.model || "model neuveden"} · ${parameters.size || "rozměr neuveden"} · kvalita ${parameters.quality || "neuvedena"}`;
-    if (!window.confirm(`Placené generování obrázku?\n\n${candidate.prompt}\n\n${summary}\n\nVznikne pouze private kandidát; nic se nepublikuje ani nevloží do projektu.`)) return;
+    if (!trustedExternalGenerationEnabled && !window.confirm(`Placené generování obrázku?\n\n${candidate.prompt}\n\n${summary}\n\nVznikne pouze private kandidát; nic se nepublikuje ani nevloží do projektu.`)) return;
     button.disabled = true;
-    notice.textContent = "Generuji potvrzeného obrazového kandidáta…";
+    notice.textContent = trustedExternalGenerationEnabled
+      ? "Generuji obrazového kandidáta v rámci trvalého souhlasu…"
+      : "Generuji potvrzeného obrazového kandidáta…";
     try {
       const payload = await api("/api/human-adam/images/generate", {
         method:"POST",
-        body:JSON.stringify({candidate_id:candidate.candidate_id,confirmation:candidate.confirmation_text}),
+        body:JSON.stringify({
+          candidate_id:candidate.candidate_id,
+          confirmation:trustedExternalGenerationEnabled ? "" : candidate.confirmation_text,
+        }),
       });
       if (!payload.ok) throw new Error(payload.message || "Generování obrázku selhalo.");
       notice.textContent = "Obrázek je připravený jako private kandidát. Není publikovaný ani vložený do projektu.";
@@ -1491,6 +1514,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   function renderWorkstreams(payload) {
     const selection = payload && payload.workstream_selection ? payload.workstream_selection : {};
     const capabilities = payload && payload.workstream_capabilities ? payload.workstream_capabilities : {};
+    const generationConsent = payload && payload.trusted_external_generation ? payload.trusted_external_generation : {};
     const activeWorkstream = selection && selection.active ? selection.active : {};
     const workstreams = selection && Array.isArray(selection.workstreams) ? selection.workstreams : [];
     const nextWorkstreamId = String(activeWorkstream.workstream_id || "");
@@ -1501,6 +1525,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     workstreamDevelopmentEnabled = capabilities.development !== false;
     workstreamDeploymentEnabled = capabilities.deployment !== false;
     imageGenerationEnabled = capabilities.image_generation === true;
+    renderTrustedExternalGeneration(generationConsent);
     privateArchiveHelp.hidden = capabilities.private_archive_direct !== true;
     activeWorkstreamId = nextWorkstreamId;
     activeWorkstreamBackend = String(activeWorkstream.backend || "lazy_private_thread");
@@ -1531,6 +1556,65 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       profileSelect.appendChild(optionGroup);
     }
     syncControls();
+  }
+
+  function renderTrustedExternalGeneration(consent) {
+    const status = consent && typeof consent === "object" ? consent : {};
+    trustedExternalGenerationEnabled = status.enabled === true
+      && status.state === "active"
+      && status.consent_id === "trusted_external_generation_v1";
+    trustedExternalGenerationGrantText = String(status.grant_confirmation_text || "");
+    trustedExternalGenerationRevokeText = String(status.revoke_confirmation_text || "");
+    trustedExternalGenerationBox.dataset.state = trustedExternalGenerationEnabled ? "verified" : "unverified";
+    trustedExternalGenerationMeta.textContent = trustedExternalGenerationEnabled
+      ? "Aktivní pro registrované generátory a pouze veřejný, smyšlený nebo jiný necitlivý obsah. Nezahrnuje publikování, Git push ani nasazení."
+      : "Neaktivní. Generativní služby dál vyžadují vlastní potvrzení nebo zůstávají blokované.";
+    trustedExternalGenerationBtn.textContent = trustedExternalGenerationEnabled
+      ? "Odvolat trvalý souhlas"
+      : "Aktivovat trvalý souhlas";
+    const required = trustedExternalGenerationEnabled
+      ? trustedExternalGenerationRevokeText
+      : trustedExternalGenerationGrantText;
+    trustedExternalGenerationConfirmation.textContent = required
+      ? `Přesná věta: ${required}`
+      : "Potvrzovací větu nelze bezpečně načíst.";
+    trustedExternalGenerationInput.value = "";
+    syncTrustedExternalGenerationControl();
+  }
+
+  function syncTrustedExternalGenerationControl() {
+    const required = trustedExternalGenerationEnabled
+      ? trustedExternalGenerationRevokeText
+      : trustedExternalGenerationGrantText;
+    trustedExternalGenerationBtn.disabled = !required
+      || trustedExternalGenerationInput.value.trim() !== required;
+  }
+
+  async function changeTrustedExternalGeneration() {
+    const operation = trustedExternalGenerationEnabled ? "revoke" : "grant";
+    const required = trustedExternalGenerationEnabled
+      ? trustedExternalGenerationRevokeText
+      : trustedExternalGenerationGrantText;
+    if (!required) return;
+    const entered = trustedExternalGenerationInput.value.trim();
+    if (entered.trim() !== required) {
+      trustedExternalGenerationMeta.textContent = "Potvrzovací věta nesouhlasí; stav se nezměnil.";
+      return;
+    }
+    trustedExternalGenerationBtn.disabled = true;
+    try {
+      const payload = await api("/api/human-adam/trusted-external-generation", {
+        method:"POST",
+        body:JSON.stringify({operation,confirmation:entered.trim()}),
+      });
+      if (!payload.ok) throw new Error(payload.message || "Stav souhlasu se nepodařilo změnit.");
+      renderTrustedExternalGeneration(payload.trusted_external_generation || {});
+      notice.textContent = payload.message || "Stav trvalého souhlasu byl změněn.";
+    } catch (error) {
+      trustedExternalGenerationMeta.textContent = `Stav souhlasu se nezměnil: ${error.message}`;
+    } finally {
+      syncTrustedExternalGenerationControl();
+    }
   }
 
   function showProfileSwitchFailure(message) {
@@ -3062,6 +3146,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   developmentReleaseBtn.addEventListener("click", () => changeDevelopmentSemaphore("release"));
   developmentProject.addEventListener("change", () => updateDevelopmentHandoffs(""));
   projectContinuityAuditBtn.addEventListener("click", loadProjectContinuity);
+  trustedExternalGenerationInput.addEventListener("input", syncTrustedExternalGenerationControl);
+  trustedExternalGenerationBtn.addEventListener("click", changeTrustedExternalGeneration);
   checkpointBtn.addEventListener("click", createCheckpoint);
   deployAuditBtn.addEventListener("click", auditDeployment);
   mainSyncBtn.addEventListener("click", applyMainRemoteSync);

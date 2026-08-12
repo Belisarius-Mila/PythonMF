@@ -2683,3 +2683,16 @@ Technický důkaz:
 - Změněné cesty před paměťovým zápisem (6): `Samantha_Agent/app/communication/human_adam_images.py`, `Samantha_Agent/app/communication/human_adam_ui.py`, `Samantha_Agent/app/communication/human_adam_workstream_catalog.py`, `Samantha_Agent/tests/test_human_adam_images.py`, `Samantha_Agent/tests/test_human_adam_ui.py`, `Samantha_Agent/tests/test_human_adam_workstream_catalog.py`
 - Commit: `Enable image generation by workstream capability`
 - Další krok: Samostatně potvrdit nasazení a živě ověřit generování ve dvou různých pracovních proudech
+
+### Servisní dokončení 2026-08-12 22:33 CEST
+
+- Pracovní proud: `layer-human-adam-development`
+- Hotovo: Globální, trvalý a odvolatelný souhlas s registrovaným externím
+  generováním je oddělený od běžného externího odesílání a platí ve všech
+  pracovních proudech pouze pro necitlivý obsah.
+- Bezpečnost: Souhlas zůstává private, poškozený stav selže uzavřeně, zjevně
+  citlivý prompt paušální souhlas nepoužije a publikování, Git push, nasazení,
+  nákupy, přihlášení i destruktivní akce zůstávají mimo rozsah.
+- Ověření: cílená sada 486/486; plná Cockpit Quality Gate 1403/1403.
+- Další krok: Po samostatně potvrzeném nasazení ověřit stav v panelu Práce a
+  jeden neškodný smyšlený obrazový požadavek.

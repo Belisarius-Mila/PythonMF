@@ -18,9 +18,14 @@ from app.communication.human_adam_profiles import (
     human_adam_owned_wip_recovery_action,
     human_adam_profile_switch_action,
     human_adam_project_continuity_action,
+    human_adam_trusted_external_generation_action,
     owned_private_root,
     private_archive_root,
     workstream_sandbox_policy,
+)
+from app.communication.trusted_external_generation import (
+    GRANT_CONFIRMATION_TEXT,
+    REVOKE_CONFIRMATION_TEXT,
 )
 from app.communication.deferred_integration import (
     DEFERRED_INTEGRATION_CONFIRMATION,
@@ -1560,6 +1565,91 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertEqual(human_hub.last_send, {})
         self.assertEqual(sent["automatic_completion"]["state"], "not_needed")
 
+    def test_durable_external_generation_consent_is_injected_across_workstreams(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, *_workspaces, human_hub, _library_hub = self.make_manager(
+                Path(temp_dir)
+            )
+            manager.trusted_external_generation_consent.grant()
+            lazy = FakeLazyThreads(Path(temp_dir) / "lazy")
+            manager.workstream_threads = lazy  # type: ignore[assignment]
+
+            manager.connect()
+            manager.send(
+                text="Navrhni veřejnou ilustraci.",
+                client_message_id="generation-human-001",
+            )
+            human_input = str(human_hub.last_send["model_input_text"])
+
+            human_adam_profile_switch_action(
+                {"workstream_id": "project-mmtx", "confirmed": True},
+                service=manager,
+            )
+            manager.send(
+                text="Vytvoř smyšlený hlas postavy.",
+                client_message_id="generation-mmtx-001",
+            )
+            lazy_input = str(lazy.hubs["project-mmtx"].last_send["model_input_text"])
+            status = manager.status()["trusted_external_generation"]
+
+        for model_input in (human_input, lazy_input):
+            self.assertIn("trusted_external_generation=enabled", model_input)
+            self.assertIn(
+                "trusted_external_generation_confirmation_required=none_within_scope",
+                model_input,
+            )
+            self.assertIn("private_data", model_input)
+            self.assertIn("publishing", model_input)
+            self.assertIn("deployment", model_input)
+        self.assertTrue(status["enabled"])
+
+    def test_external_generation_consent_control_requires_exact_grant_and_revoke(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, *_rest = self.make_manager(Path(temp_dir))
+
+            rejected = human_adam_trusted_external_generation_action(
+                {"operation": "grant", "confirmation": "ano"},
+                service=manager,
+            )
+            granted = human_adam_trusted_external_generation_action(
+                {"operation": "grant", "confirmation": GRANT_CONFIRMATION_TEXT},
+                service=manager,
+            )
+            revoked = human_adam_trusted_external_generation_action(
+                {"operation": "revoke", "confirmation": REVOKE_CONFIRMATION_TEXT},
+                service=manager,
+            )
+
+        self.assertFalse(rejected["ok"])
+        self.assertTrue(granted["trusted_external_generation"]["enabled"])
+        self.assertEqual(
+            granted["trusted_external_generation"]["grant_confirmation_text"],
+            GRANT_CONFIRMATION_TEXT,
+        )
+        self.assertTrue(revoked["ok"])
+        self.assertEqual(
+            revoked["trusted_external_generation"]["state"],
+            "revoked",
+        )
+
+    def test_external_generation_consent_is_fail_closed_until_granted(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, *_workspaces, human_hub, _library_hub = self.make_manager(
+                Path(temp_dir)
+            )
+            manager.connect()
+            manager.send(
+                text="Jen analyzuj.",
+                client_message_id="generation-disabled-001",
+            )
+            model_input = str(human_hub.last_send["model_input_text"])
+
+        self.assertIn("trusted_external_generation=disabled", model_input)
+        self.assertIn(
+            "trusted_external_generation_confirmation_required=explicit_durable_consent",
+            model_input,
+        )
+
     def test_mmtx_service_reads_canonical_tvbcp_and_keeps_manual_wip_checkpoint_blocked(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             manager, human_workspace, *_rest = self.make_manager(Path(temp_dir))
@@ -2817,6 +2907,8 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             "Sitove opravneni nikdy nerozsiruje DEVELOPMENT_CONTROL",
             KNIHOVNA_DEVELOPER_INSTRUCTIONS,
         )
+        self.assertIn("trusted_external_generation=enabled", KNIHOVNA_DEVELOPER_INSTRUCTIONS)
+        self.assertIn("risk=external_generation", KNIHOVNA_DEVELOPER_INSTRUCTIONS)
         self.assertIn("pres API app.article_archive", KNIHOVNA_DEVELOPER_INSTRUCTIONS)
         self.assertIn("Mazani nebo odebirani", KNIHOVNA_DEVELOPER_INSTRUCTIONS)
         self.assertIn("hromadna zmena", KNIHOVNA_DEVELOPER_INSTRUCTIONS)

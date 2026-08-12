@@ -117,6 +117,7 @@ from app.communication.human_adam_profiles import (
     human_adam_owned_wip_recovery_action,
     human_adam_project_continuity_action,
     human_adam_profile_switch_action,
+    human_adam_trusted_external_generation_action,
 )
 from app.communication.session_hub import SessionHubError
 from app.communication.simple_main_deploy import (
@@ -8771,6 +8772,14 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "direct",
     },
     {
+        "path": "/api/human-adam/trusted-external-generation",
+        "label": "Udělit nebo odvolat trvalý souhlas s bezpečným externím generováním",
+        "risk": "external_ai",
+        "confirmation": "exact_durable_consent_or_revoke_phrase",
+        "handler_name": "human_adam_trusted_external_generation_action",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/human-adam/images/prepare",
         "label": "Pripravit private nahled zadani obrazku v Human-Adam",
         "risk": "private_write",
@@ -8780,9 +8789,9 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
     },
     {
         "path": "/api/human-adam/images/generate",
-        "label": "Vygenerovat jeden potvrzeny private obrazkovy kandidat",
+        "label": "Vygenerovat jeden private obrazkovy kandidat",
         "risk": "external_ai",
-        "confirmation": "candidate_specific_exact_phrase",
+        "confirmation": "durable_global_consent_or_candidate_specific_exact_phrase",
         "handler_name": "human_adam_image_generate_action",
         "test_level": "direct",
     },
@@ -9855,6 +9864,15 @@ class CockpitServer:
                         janicka_r2_document_compile_action(
                             payload,
                             adapter=JANICKA_R2_COCKPIT,
+                        )
+                    )
+                    return
+                if parsed.path == "/api/human-adam/trusted-external-generation":
+                    payload = self.read_json()
+                    self.respond_json(
+                        human_adam_trusted_external_generation_action(
+                            payload,
+                            service=HUMAN_ADAM,
                         )
                     )
                     return

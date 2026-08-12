@@ -13,6 +13,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Iterator
 
+from app.capabilities import RiskLevel, all_capabilities
 from app.codex_appserver import AppServerError
 from app.communication.development_semaphore import (
     TERMINAL_OWNER_ID,
@@ -131,6 +132,11 @@ from app.communication.simple_main_deploy import (
     load_simple_main_deployment_receipt,
     prepare_simple_main_deployment as prepare_clean_main_deployment,
     verify_simple_main_deployment as verify_clean_main_deployment,
+)
+from app.communication.trusted_external_generation import (
+    GRANT_CONFIRMATION_TEXT,
+    REVOKE_CONFIRMATION_TEXT,
+    TrustedExternalGenerationConsentStore,
 )
 from app.communication.workstream_live_status import (
     build_workstream_live_status,
@@ -298,7 +304,13 @@ def network_read_only_developer_instructions(
         "Soukrome ISBN nebo jiny soukromy identifikator pouzij v dotazu jen na "
         "Miluv vyslovny pokyn. Pokud zdroj vyzaduje API klic, ucet, souhlas s "
         "podminkami nebo externi zapis, pouze to oznam a akci neprovadej. Sitove "
-        "opravneni nikdy nerozsiruje DEVELOPMENT_CONTROL ani zapisova prava."
+        "opravneni nikdy nerozsiruje DEVELOPMENT_CONTROL ani zapisova prava. "
+        "Jedinou vyjimkou je generativni volani, pokud aktualni DEVELOPMENT_CONTROL "
+        "vyslovne uvadi trusted_external_generation=enabled a operace pouziva "
+        "registrovanou capability s risk=external_generation. Tato vyjimka plati "
+        "jen pro verejny, smysleny nebo jiny necitlivy vstup a lokalni ulozeni "
+        "vysledku; nikdy pro private data, tajemstvi, komunikaci s lidmi, publikovani, "
+        "nakupy, prihlaseni, Git push, nasazeni nebo destruktivni operace."
     )
 
 
@@ -370,6 +382,7 @@ class HumanAdamProfileManager:
         completion_fingerprint: Callable[[Path], str] = workspace_fingerprint,
         workstream_threads: WorkstreamThreadRegistry | None = None,
         workstream_memory: WorkstreamMemoryRegistry | None = None,
+        trusted_external_generation_consent: TrustedExternalGenerationConsentStore | None = None,
         github_batch_mode: bool = False,
     ):
         if not profiles or default_profile_id not in profiles:
@@ -472,6 +485,17 @@ class HumanAdamProfileManager:
         )
         self.completion_fingerprint = completion_fingerprint
         self.workstream_threads = workstream_threads
+        canonical_private_root = self.profiles[default_profile_id][
+            "service"
+        ].workspace.canonical_private_root
+        self.trusted_external_generation_consent = (
+            trusted_external_generation_consent
+            or TrustedExternalGenerationConsentStore(
+                canonical_private_root
+                / "communication"
+                / "trusted_external_generation_consent.json"
+            )
+        )
         self.github_batch_mode = bool(github_batch_mode)
         self._lazy_services: dict[str, HumanAdamService] = {}
         self._state_lock = threading.RLock()
@@ -1468,6 +1492,7 @@ class HumanAdamProfileManager:
                 **payload,
                 "workstream_selection": selection,
                 "workstream_capabilities": self._workstream_capabilities(),
+                "trusted_external_generation": self.trusted_external_generation_consent.status(),
                 "github_batch_mode": self.github_batch_mode,
                 "development_semaphore": self.development_status(),
                 "last_simple_main_deployment": last_deployment,
@@ -1486,6 +1511,7 @@ class HumanAdamProfileManager:
                     "workstreams": [],
                     "workstream_count": 0,
                 },
+                "trusted_external_generation": self.trusted_external_generation_consent.status(),
                 "github_batch_mode": self.github_batch_mode,
                 "development_semaphore": self.development_status(),
                 "last_step_completion": self.last_step_completion_status(),
@@ -1560,6 +1586,15 @@ class HumanAdamProfileManager:
                 f"writable={'true' if writable else 'false'}",
                 f"integration_deferred={'true' if integration_deferred else 'false'}",
             ]
+            control_lines.extend(
+                self.trusted_external_generation_consent.development_control_lines(
+                    registered_capability_ids=tuple(
+                        record.capability_id
+                        for record in all_capabilities()
+                        if record.risk == RiskLevel.EXTERNAL_GENERATION
+                    )
+                )
+            )
             capability_metadata = self.workstream_backends.binding(
                 self.active_workstream_id
             ).record.capabilities
@@ -4386,6 +4421,44 @@ def human_adam_profile_switch_action(
             "ok": False,
             "status": "human_adam_profile_switch_failed",
             "message": str(exc),
+        }
+
+
+def human_adam_trusted_external_generation_action(
+    payload: dict[str, Any],
+    *,
+    service: HumanAdamProfileManager,
+) -> dict[str, Any]:
+    try:
+        operation = str(payload.get("operation") or "").strip().casefold()
+        confirmation = str(payload.get("confirmation") or "").strip()
+        if operation == "grant":
+            if confirmation != GRANT_CONFIRMATION_TEXT:
+                raise AppServerError(
+                    "Trvalý souhlas vyžaduje přesné schválené znění."
+                )
+            status = service.trusted_external_generation_consent.grant()
+            message = "Trvalý souhlas s bezpečným externím generováním je aktivní."
+        elif operation == "revoke":
+            if confirmation != REVOKE_CONFIRMATION_TEXT:
+                raise AppServerError(
+                    "Odvolání souhlasu vyžaduje přesnou potvrzovací větu."
+                )
+            status = service.trusted_external_generation_consent.revoke()
+            message = "Trvalý souhlas s externím generováním byl odvolán."
+        else:
+            raise AppServerError("Neznámá operace trvalého souhlasu.")
+        return {
+            "ok": True,
+            "trusted_external_generation": status,
+            "message": message,
+        }
+    except (AppServerError, OSError, ValueError) as exc:
+        return {
+            "ok": False,
+            "status": "trusted_external_generation_update_failed",
+            "message": str(exc),
+            "trusted_external_generation": service.trusted_external_generation_consent.status(),
         }
 
 

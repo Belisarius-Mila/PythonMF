@@ -3994,3 +3994,34 @@ Navrhované další kroky:
 Technický důkaz:
 - Cílené checkpointové testy prošly 71/71.
 - Plná Cockpit Quality Gate prošla 1364/1364 testů včetně syntaxe a whitespace.
+
+### 2026-08-12 22:33 CEST – Trvalý souhlas s bezpečným externím generováním je globální a odvolatelný
+
+Hotovo:
+- Registrované generování obrázků a hlasu používá jednu globální kategorii
+  `external_generation`, kterou dostávají všechny pracovní proudy.
+- Souhlas je uložený pouze v private nastavení, je fail-closed a má společný
+  stav i ovládání v panelu Práce.
+- Zjevně citlivý prompt nemůže využít paušální souhlas.
+
+Rozhodnutí:
+- Trvalé oprávnění platí pouze pro veřejný, smyšlený nebo jiný necitlivý obsah
+  a lokální uložení výsledku do aktivního projektu či jeho private kandidátní
+  oblasti.
+- Oprávnění nezahrnuje private data, tajemství, komunikaci s lidmi,
+  publikování, nákupy, přihlašování, Git push, nasazení ani destruktivní akce.
+- Udělení i odvolání vyžaduje přesnou větu; nejasný nebo poškozený stav se
+  vyhodnotí jako vypnutý.
+
+Další krok:
+- Po samostatně potvrzeném nasazení živě ověřit stav souhlasu v panelu Práce a
+  jeden neškodný smyšlený obrazový požadavek.
+
+Navrhované další kroky:
+- Další generativní službu přidat až s reálným registrovaným nástrojem a
+  vlastním testovaným datovým rozsahem.
+
+Technický důkaz:
+- Cílená sada prošla 486/486 testů.
+- Plná Cockpit Quality Gate prošla 1403/1403 testů včetně Python, JavaScript,
+  shell a whitespace kontrol.

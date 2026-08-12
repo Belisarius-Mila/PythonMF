@@ -63,6 +63,32 @@ class CapabilityRecordTests(unittest.TestCase):
         self.assertTrue(record.is_high_risk)
         self.assertEqual(record.to_dict()["confirmation_policy"], "exact_current_message")
 
+    def test_external_generation_requires_durable_consent_metadata(self) -> None:
+        with self.assertRaisesRegex(ValueError, "trusted durable consent metadata"):
+            CapabilityRecord(
+                capability_id="generate_project_asset",
+                label="Generate project asset",
+                risk=RiskLevel.EXTERNAL_GENERATION,
+                reads=("public prompt",),
+                writes=("local project asset",),
+                audit=AuditPolicy.REDACTED,
+                tool="registered_generator",
+            )
+
+        record = CapabilityRecord(
+            capability_id="generate_project_asset",
+            label="Generate project asset",
+            risk=RiskLevel.EXTERNAL_GENERATION,
+            reads=("public prompt",),
+            writes=("local project asset",),
+            audit=AuditPolicy.REDACTED,
+            tool="registered_generator",
+            metadata={"durable_consent": "trusted_external_generation_v1"},
+        )
+
+        self.assertFalse(record.requires_confirmation)
+        self.assertEqual(record.risk, RiskLevel.EXTERNAL_GENERATION)
+
     def test_invalid_capability_id_is_rejected(self) -> None:
         with self.assertRaisesRegex(ValueError, "invalid capability_id"):
             CapabilityRecord(

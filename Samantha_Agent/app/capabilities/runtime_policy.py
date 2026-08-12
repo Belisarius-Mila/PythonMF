@@ -12,6 +12,11 @@ def format_runtime_capability_policy(
     """Build the compact runtime policy section injected into Samantha's prompt."""
     capability_records = tuple(records if records is not None else all_capabilities())
     confirmed_records = tuple(record for record in capability_records if record.requires_confirmation)
+    generation_records = tuple(
+        record
+        for record in capability_records
+        if record.risk.value == "external_generation"
+    )
 
     lines = [
         "Capability registry runtime policy:",
@@ -23,17 +28,36 @@ def format_runtime_capability_policy(
     ]
     if not confirmed_records:
         lines.append("- None.")
-        return "\n".join(lines)
-
-    for record in sorted(confirmed_records, key=lambda item: item.capability_id):
-        lines.append(
-            "- "
-            f"{record.capability_id}: "
-            f"risk={record.risk.value}; "
-            f"confirmation={record.confirmation_policy.value}; "
-            f"voice={record.voice_allowed.value}; "
-            f"mobile={record.mobile_allowed.value}; "
-            f"audit={record.audit.value}; "
-            f"tool={record.tool}."
+    else:
+        for record in sorted(confirmed_records, key=lambda item: item.capability_id):
+            lines.append(
+                "- "
+                f"{record.capability_id}: "
+                f"risk={record.risk.value}; "
+                f"confirmation={record.confirmation_policy.value}; "
+                f"voice={record.voice_allowed.value}; "
+                f"mobile={record.mobile_allowed.value}; "
+                f"audit={record.audit.value}; "
+                f"tool={record.tool}."
+            )
+    lines.extend(
+        (
+            "",
+            "Durably consented external generation capabilities:",
+            "- These are available only when the current DEVELOPMENT_CONTROL explicitly "
+            "contains trusted_external_generation=enabled.",
         )
+    )
+    if not generation_records:
+        lines.append("- None.")
+    else:
+        for record in sorted(generation_records, key=lambda item: item.capability_id):
+            lines.append(
+                "- "
+                f"{record.capability_id}: "
+                f"risk={record.risk.value}; "
+                f"consent={record.metadata['durable_consent']}; "
+                f"audit={record.audit.value}; "
+                f"tool={record.tool}."
+            )
     return "\n".join(lines)

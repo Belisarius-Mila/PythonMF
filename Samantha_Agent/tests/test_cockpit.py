@@ -286,13 +286,25 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(cards["/api/human-adam/images/generate"]["risk"], "external_ai")
         self.assertEqual(
             cards["/api/human-adam/images/generate"]["confirmation"],
-            "candidate_specific_exact_phrase",
+            "durable_global_consent_or_candidate_specific_exact_phrase",
         )
         self.assertEqual(cards["/api/human-adam/images/decision"]["risk"], "private_write")
         self.assertIn("/api/human-adam/images", self.cockpit_do_get_routes())
         self.assertIn("/api/human-adam/images/file", self.cockpit_do_get_routes())
         for path in cards:
             self.assertIn(path, self.cockpit_do_post_routes())
+
+        consent = next(
+            item
+            for item in COCKPIT_POST_ACTIONS
+            if item["path"] == "/api/human-adam/trusted-external-generation"
+        )
+        self.assertEqual(consent["risk"], "external_ai")
+        self.assertEqual(
+            consent["confirmation"],
+            "exact_durable_consent_or_revoke_phrase",
+        )
+        self.assertIn(consent["path"], self.cockpit_do_post_routes())
 
     def test_human_adam_context_anchor_http_api_is_fully_retired(self) -> None:
         self.assertNotIn(
