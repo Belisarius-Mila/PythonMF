@@ -970,7 +970,8 @@ def _validate_change_rows(
             )
         if not workspace.checkpoint_path_allowed(path):
             raise SimpleMainCheckpointError(
-                "Checkpoint obsahuje blokovanou private, env nebo mediální cestu."
+                "Checkpoint obsahuje blokovanou soukromou, env, balíkovou "
+                "nebo příliš velkou mediální cestu."
             )
         if "D" in symbols:
             deletion_count += 1

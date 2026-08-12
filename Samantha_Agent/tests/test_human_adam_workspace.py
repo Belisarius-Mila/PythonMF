@@ -9,8 +9,10 @@ from unittest.mock import patch
 from app.codex_appserver import AppServerError
 from app.communication.human_adam_workspace import (
     CANONICAL_PRIVATE_ROOT,
+    CHECKPOINT_MEDIA_SUFFIXES,
     HUMAN_ADAM_SANDBOX_POLICY,
     HUMAN_ADAM_WORKSPACE_DEVELOPER_INSTRUCTIONS,
+    MAX_CHECKPOINT_MEDIA_BYTES,
     HumanAdamWorkspaceManager,
     _status_rows,
 )
@@ -50,6 +52,58 @@ def make_source(root: Path) -> Path:
 
 
 class HumanAdamWorkspaceManagerTests(unittest.TestCase):
+    def test_checkpoint_path_policy_allows_media_anywhere_but_not_private_or_packages(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            manager = HumanAdamWorkspaceManager(
+                source_repo=root / "source",
+                workspace_root=root / "cell",
+                metadata_path=root / "meta.json",
+            )
+
+            for suffix in CHECKPOINT_MEDIA_SUFFIXES:
+                self.assertTrue(
+                    manager.checkpoint_path_allowed(
+                        f"Samantha_Agent/docs/prototype/public-asset{suffix}"
+                    ),
+                    suffix,
+                )
+
+            self.assertFalse(
+                manager.checkpoint_path_allowed(
+                    "Samantha_Agent/data/private/public-looking.png"
+                )
+            )
+            self.assertFalse(
+                manager.checkpoint_path_allowed("Samantha_Agent/docs/release.zip")
+            )
+            self.assertFalse(
+                manager.checkpoint_path_allowed("Samantha_Agent/docs/manual.pdf")
+            )
+
+    def test_checkpoint_rejects_media_larger_than_repository_limit(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = make_source(root)
+            manager = HumanAdamWorkspaceManager(
+                source_repo=source,
+                workspace_root=root / "cell",
+                metadata_path=root / "meta.json",
+            )
+            manager.prepare()
+            media = manager.project_root / "docs" / "prototype" / "too-large.mp4"
+            media.parent.mkdir(parents=True)
+            with media.open("wb") as handle:
+                handle.truncate(MAX_CHECKPOINT_MEDIA_BYTES + 1)
+
+            self.assertFalse(
+                manager.checkpoint_path_allowed(
+                    "Samantha_Agent/docs/prototype/too-large.mp4"
+                )
+            )
+            with self.assertRaisesRegex(AppServerError, "příliš velkou mediální"):
+                manager.checkpoint(confirmed=True, message="Reject large media")
+
     def test_workspace_instructions_allow_only_explicit_non_bulk_deletion(self) -> None:
         self.assertIn(
             "schvaleneho vyvojoveho planu",
@@ -737,7 +791,7 @@ class HumanAdamWorkspaceManagerTests(unittest.TestCase):
             )
             self.assertEqual(synced["remotes"], [])
 
-    def test_sync_from_main_still_rejects_media_outside_public_allowlist(self) -> None:
+    def test_sync_from_main_allows_media_outside_old_public_allowlist(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             source = make_source(root)
@@ -746,18 +800,39 @@ class HumanAdamWorkspaceManagerTests(unittest.TestCase):
                 workspace_root=root / "cell",
                 metadata_path=root / "meta.json",
             )
-            prepared = manager.prepare()
+            manager.prepare()
             media = source / "Samantha_Agent" / "public-test.mp3"
-            media.write_bytes(b"not-allowlisted")
+            media.write_bytes(b"public-audio-anywhere")
             git(source, "add", "Samantha_Agent/public-test.mp3")
-            git(source, "commit", "-m", "Add blocked audio")
+            git(source, "commit", "-m", "Add public audio outside old allowlist")
 
-            with self.assertRaises(AppServerError):
-                manager.sync_from_main(confirmed=True)
+            synced = manager.sync_from_main(confirmed=True)
 
-            self.assertEqual(git(manager.workspace_root, "rev-parse", "HEAD"), prepared["head"])
-            self.assertFalse((manager.workspace_root / "Samantha_Agent" / "public-test.mp3").exists())
+            self.assertTrue(synced["synced"])
+            self.assertEqual(
+                (manager.workspace_root / "Samantha_Agent" / "public-test.mp3").read_bytes(),
+                b"public-audio-anywhere",
+            )
             self.assertEqual(git(manager.workspace_root, "remote"), "")
+
+    def test_source_sync_rejects_media_larger_than_repository_limit(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            manager = HumanAdamWorkspaceManager(
+                source_repo=root / "source",
+                workspace_root=root / "cell",
+                metadata_path=root / "meta.json",
+            )
+            with patch(
+                "app.communication.human_adam_workspace._git_output",
+                return_value=str(MAX_CHECKPOINT_MEDIA_BYTES + 1),
+            ):
+                allowed = manager._source_sync_path_allowed(
+                    "Samantha_Agent/docs/prototype/too-large.mp4",
+                    fetched_head="future-head",
+                )
+
+        self.assertFalse(allowed)
 
     def test_prepare_never_overwrites_unknown_existing_directory(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

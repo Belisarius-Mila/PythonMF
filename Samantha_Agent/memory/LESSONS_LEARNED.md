@@ -172,3 +172,15 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   před MOVE/COPY. Při diagnostice nejdřív read-only ověřit skutečnou složku
   označenou `\\Trash` a jednoznačné nalezení kandidátů podle Message-ID; teprve
   potom opakovat samostatně potvrzené nevratné mazání.
+
+### LL-013 — Checkpoint nemá blokovat veřejná média jen podle přípony
+
+- Problém: Human–Adam odmítl veřejný obrázek webového prototypu, protože
+  checkpoint považoval každé PNG, MP3 nebo jiné médium za citlivé bez ohledu na
+  jeho skutečnou cestu.
+- Typ: opakující se
+- Řešení nalezeno: 12082026
+- Řešení: Běžné obrázky, audio a video povolit v libovolné verzované části repa
+  do 25 MiB na soubor. Nadále blokovat soukromé a env cesty i neprůhledné
+  dokumenty a balíky; stejný kontrakt používat při checkpointu, převzetí i
+  synchronizaci workspace z `main`.

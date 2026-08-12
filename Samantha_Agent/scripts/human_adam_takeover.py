@@ -146,8 +146,11 @@ def build_takeover_plan(
         ):
             raise TakeoverError("Checkpoint obsahuje přejmenování nebo netypickou změnu.")
         path = parts[1]
-        if manager._blocked_checkpoint_path(path):
-            raise TakeoverError("Checkpoint obsahuje blokovanou private, env nebo mediální cestu.")
+        if not manager.checkpoint_path_allowed(path):
+            raise TakeoverError(
+                "Checkpoint obsahuje blokovanou soukromou, env, balíkovou "
+                "nebo příliš velkou mediální cestu."
+            )
         if parts[0][:1] == "D":
             deletion_count += 1
         changes.append({"status": parts[0], "path": path})

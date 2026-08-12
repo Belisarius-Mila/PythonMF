@@ -3970,3 +3970,27 @@ Technický důkaz:
 - rychlá Cockpit brána syntaxe a whitespace: 6.7 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `layer-human-adam-development`.
 - Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+
+### 2026-08-12 20:13 CEST – Veřejná média už checkpoint neblokuje jen podle přípony
+
+Hotovo:
+- Checkpoint, převzetí i synchronizace Human–Adam workspace používají stejné
+  pravidlo pro verzované obrázky, audio a video.
+- Starý adresářový allowlist médií byl odstraněn.
+
+Rozhodnutí:
+- Běžná média jsou povolená v libovolné verzované části repa do 25 MiB na
+  soubor. Soukromé a env cesty zůstávají blokované.
+- Neprůhledné dokumenty a balíky `.doc`, `.docx`, `.pdf`, `.zip` a `.dmg`
+  zůstávají mimo automatický checkpoint.
+
+Další krok:
+- Pravidlo začne platit v živém Cockpitu až po samostatně potvrzeném nasazení.
+
+Navrhované další kroky:
+- Při prvním přirozeném mediálním checkpointu ověřit výsledek v panelu Práce;
+  nevytvářet kvůli tomu umělý veřejný soubor.
+
+Technický důkaz:
+- Cílené checkpointové testy prošly 71/71.
+- Plná Cockpit Quality Gate prošla 1364/1364 testů včetně syntaxe a whitespace.

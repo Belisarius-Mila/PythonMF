@@ -53,12 +53,16 @@ BLOCKED_CHECKPOINT_PARTS = (
 )
 BLOCKED_CHECKPOINT_NAMES = {".env", ".env.local", ".env.production"}
 BLOCKED_CHECKPOINT_SUFFIXES = {
-    ".aac",
-    ".aif",
-    ".aiff",
     ".dmg",
     ".doc",
     ".docx",
+    ".pdf",
+    ".zip",
+}
+CHECKPOINT_MEDIA_SUFFIXES = {
+    ".aac",
+    ".aif",
+    ".aiff",
     ".heic",
     ".jpeg",
     ".jpg",
@@ -66,17 +70,11 @@ BLOCKED_CHECKPOINT_SUFFIXES = {
     ".mov",
     ".mp3",
     ".mp4",
-    ".pdf",
     ".png",
     ".wav",
     ".webp",
-    ".zip",
 }
-PUBLIC_SOURCE_MEDIA_PREFIXES = (
-    "ColorsAndNumbers/web_colors_numbers/",
-    "docs/colors-numbers/",
-)
-MAX_PUBLIC_SOURCE_MEDIA_BYTES = 8 * 1024 * 1024
+MAX_CHECKPOINT_MEDIA_BYTES = 25 * 1024 * 1024
 MAX_AUTO_MATERIALIZE_GIT_METADATA_BYTES = 16 * 1024 * 1024
 MAX_SAFE_DELETED_PATHS_PER_STEP = 10
 SAFE_CHECKPOINT_CHANGE_TYPES = frozenset({"A", "D", "M"})
@@ -584,12 +582,19 @@ class HumanAdamWorkspaceManager:
                 raise AppServerError(
                     "Main obsahuje hromadné mazání; automatický update vyžaduje servisní potvrzení."
                 )
-            incoming_paths = [path for _, paths in incoming_rows for path in paths]
             if any(
-                not self._source_sync_path_allowed(path, fetched_head=fetched_head)
-                for path in incoming_paths
+                not self._source_sync_path_allowed(
+                    path,
+                    fetched_head=fetched_head,
+                    deleted=status[:1] == "D",
+                )
+                for status, paths in incoming_rows
+                for path in paths
             ):
-                raise AppServerError("Main obsahuje pro Human–Adam blokovaný private, env nebo mediální soubor.")
+                raise AppServerError(
+                    "Main obsahuje pro Human–Adam blokovanou soukromou, env, "
+                    "balíkovou nebo příliš velkou mediální cestu."
+                )
 
             _git_output(self.workspace_root, ["diff", "--check", "HEAD", "FETCH_HEAD"])
             _git_output(
@@ -688,19 +693,42 @@ class HumanAdamWorkspaceManager:
         )
 
     def checkpoint_path_allowed(self, path_text: str) -> bool:
-        """Return the existing checkpoint path policy without exposing contents."""
-        return not self._blocked_checkpoint_path(path_text)
-
-    def _source_sync_path_allowed(self, path_text: str, *, fetched_head: str) -> bool:
-        if not self._blocked_checkpoint_path(path_text):
-            return True
-        normalized = path_text.replace("\\", "/").strip('"')
-        path = Path(normalized)
-        if (
-            path.suffix.lower() not in BLOCKED_CHECKPOINT_SUFFIXES
-            or not any(normalized.startswith(prefix) for prefix in PUBLIC_SOURCE_MEDIA_PREFIXES)
-        ):
+        """Allow ordinary repository media while preserving private and size guards."""
+        if self._blocked_checkpoint_path(path_text):
             return False
+        normalized = path_text.replace("\\", "/").strip('"')
+        relative = Path(normalized)
+        if relative.is_absolute() or ".." in relative.parts:
+            return False
+        if relative.suffix.lower() not in CHECKPOINT_MEDIA_SUFFIXES:
+            return True
+        candidate = self.workspace_root / relative
+        if not candidate.exists():
+            return True
+        try:
+            return (
+                candidate.is_file()
+                and not candidate.is_symlink()
+                and 0 <= candidate.stat().st_size <= MAX_CHECKPOINT_MEDIA_BYTES
+            )
+        except OSError:
+            return False
+
+    def _source_sync_path_allowed(
+        self,
+        path_text: str,
+        *,
+        fetched_head: str,
+        deleted: bool = False,
+    ) -> bool:
+        if self._blocked_checkpoint_path(path_text):
+            return False
+        normalized = path_text.replace("\\", "/").strip('"')
+        relative = Path(normalized)
+        if relative.is_absolute() or ".." in relative.parts:
+            return False
+        if deleted or relative.suffix.lower() not in CHECKPOINT_MEDIA_SUFFIXES:
+            return True
         try:
             size = int(
                 _git_output(
@@ -710,7 +738,7 @@ class HumanAdamWorkspaceManager:
             )
         except (AppServerError, ValueError):
             return False
-        return 0 <= size <= MAX_PUBLIC_SOURCE_MEDIA_BYTES
+        return 0 <= size <= MAX_CHECKPOINT_MEDIA_BYTES
 
     def _pending_integration_audit(
         self,
@@ -910,15 +938,18 @@ class HumanAdamWorkspaceManager:
             changes = list(current.get("changes") or [])
             if not changes:
                 return {**current, "checkpoint_created": False, "message": "Není co checkpointovat."}
-            blocked = [row["path"] for row in changes if self._blocked_checkpoint_path(row["path"])]
+            blocked = [row["path"] for row in changes if not self.checkpoint_path_allowed(row["path"])]
             if blocked:
-                raise AppServerError("Checkpoint obsahuje blokovaný private, env nebo mediální soubor.")
+                raise AppServerError(
+                    "Checkpoint obsahuje blokovanou soukromou, env, balíkovou "
+                    "nebo příliš velkou mediální cestu."
+                )
             self._ensure_local_commit_identity()
             _git_output(self.workspace_root, ["diff", "--check"])
             _git_output(self.workspace_root, ["add", "--all", "--", "."])
             staged = _git_output(self.workspace_root, ["diff", "--cached", "--name-only"])
             staged_paths = [item for item in staged.splitlines() if item]
-            if not staged_paths or any(self._blocked_checkpoint_path(item) for item in staged_paths):
+            if not staged_paths or any(not self.checkpoint_path_allowed(item) for item in staged_paths):
                 raise AppServerError("Checkpoint safety check odmítl staged obsah.")
             safe_message = " ".join(str(message or "").split())[:120] or "WIP Human-Adam checkpoint"
             safe_key = str(idempotency_key or "").strip().casefold()

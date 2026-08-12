@@ -959,6 +959,29 @@ class SimpleMainCheckpointTests(unittest.TestCase):
             )
             self.assertEqual(manager.status()["workspace_relation"], "aligned")
 
+    def test_public_media_anywhere_completes_simple_main_checkpoint(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source, manager = prepare_environment(root)
+            media = manager.project_root / "docs" / "mmtx" / "scene.png"
+            media.parent.mkdir(parents=True)
+            media.write_bytes(b"public-mmtx-image")
+
+            result = complete_simple_main_checkpoint(
+                workspace=manager,
+                request=checkpoint_request(),
+                confirmed=True,
+                gate_runner=passing_gate_runner,
+                gate_log_path=root / "gate.log",
+            )
+
+            self.assertTrue(result["ok"])
+            self.assertEqual(
+                (source / "Samantha_Agent" / "docs" / "mmtx" / "scene.png").read_bytes(),
+                b"public-mmtx-image",
+            )
+            self.assertEqual(manager.status()["workspace_relation"], "aligned")
+
     def test_bulk_deletion_and_unsafe_memory_request_fail_before_checkpoint(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
