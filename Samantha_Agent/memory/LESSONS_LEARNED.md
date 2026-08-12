@@ -160,3 +160,15 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   TVBCP i primární řádek `ACTIVE_PROJECTS.md` v jediném commitu a při chybě
   trojici obnoví. Terminálové commity mimo tento workflow se dál dorovnávají
   ručně.
+
+### LL-012 — IMAP složka s mezerou musí být při SELECT správně zakódovaná
+
+- Problém: Trvalé mazání iCloud e-mailů z koše opakovaně selhávalo, protože
+  skutečná složka `Deleted Messages` byla předána příkazu IMAP SELECT bez
+  uvozovek a server ji odmítl jako chybný příkaz.
+- Typ: opakující se
+- Řešení nalezeno: 12082026
+- Řešení: Před IMAP SELECT zakódovat název složky stejnou bezpečnou funkcí jako
+  před MOVE/COPY. Při diagnostice nejdřív read-only ověřit skutečnou složku
+  označenou `\\Trash` a jednoznačné nalezení kandidátů podle Message-ID; teprve
+  potom opakovat samostatně potvrzené nevratné mazání.
