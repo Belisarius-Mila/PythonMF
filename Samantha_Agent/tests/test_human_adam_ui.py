@@ -1105,7 +1105,7 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn('<button id="voiceStopBtn" type="button" hidden disabled>', HUMAN_ADAM_HTML)
 
     def test_completed_adam_answers_get_explicit_reply_controls_only(self) -> None:
-        bubble_start = HUMAN_ADAM_HTML.index("function bubble(text, className, meta, spokenText=\"\")")
+        bubble_start = HUMAN_ADAM_HTML.index("function bubble(text, className, meta, spokenText=\"\", imageCandidate=null)")
         bubble_end = HUMAN_ADAM_HTML.index("function renderSession(session)", bubble_start)
         bubble_source = HUMAN_ADAM_HTML[bubble_start:bubble_end]
         render_start = bubble_end
@@ -1114,11 +1114,62 @@ class HumanAdamUiTests(unittest.TestCase):
 
         self.assertIn("if (spokenText) node.appendChild(answerSpeechControl(spokenText));", bubble_source)
         self.assertIn('bubble(item.answer, "adam"', render_source)
-        self.assertIn("item.answer));", render_source)
+        self.assertIn("item.answer, imageCandidatesByMessage.get", render_source)
         pending_branch = render_source.index("else exchange.appendChild")
         self.assertNotIn("answerSpeechControl", render_source[pending_branch:])
         self.assertIn("Přečíst odpověď", HUMAN_ADAM_HTML)
         self.assertIn("Kopírovat", HUMAN_ADAM_HTML)
+
+    def test_image_request_prepares_persistent_candidate_only_after_normal_chat_result(self) -> None:
+        detection_start = HUMAN_ADAM_HTML.index("function looksLikeImageGenerationRequest(text)")
+        detection_end = HUMAN_ADAM_HTML.index("function imageCandidateStatus", detection_start)
+        detection_source = HUMAN_ADAM_HTML[detection_start:detection_end]
+        send_start = HUMAN_ADAM_HTML.index("async function sendMessage(event)")
+        send_end = HUMAN_ADAM_HTML.index('composer.addEventListener("submit", sendMessage);', send_start)
+        send_source = HUMAN_ADAM_HTML[send_start:send_end]
+
+        self.assertIn("vygeneruj", detection_source)
+        self.assertIn("obrázek", detection_source)
+        self.assertIn("await api(HUMAN_ADAM_SEND_PATH", send_source)
+        self.assertIn("await prepareImageCandidate(text, clientId);", send_source)
+        self.assertLess(
+            send_source.index("await api(HUMAN_ADAM_SEND_PATH"),
+            send_source.index("await prepareImageCandidate(text, clientId);"),
+        )
+        self.assertIn('activeWorkstreamId !== HUMAN_ADAM_IMAGE_WORKSTREAM', HUMAN_ADAM_HTML)
+        self.assertIn('api("/api/human-adam/images/prepare"', HUMAN_ADAM_HTML)
+
+    def test_image_card_requires_separate_generation_confirmation_and_has_review_controls(self) -> None:
+        generate_start = HUMAN_ADAM_HTML.index("async function generateImageCandidate(candidate, button)")
+        generate_end = HUMAN_ADAM_HTML.index("async function decideImageCandidate", generate_start)
+        generate_source = HUMAN_ADAM_HTML[generate_start:generate_end]
+        card_start = HUMAN_ADAM_HTML.index("function imageCandidateCard(candidate)")
+        card_end = HUMAN_ADAM_HTML.index("async function prepareImageCandidate", card_start)
+        card_source = HUMAN_ADAM_HTML[card_start:card_end]
+
+        self.assertIn("window.confirm", generate_source)
+        self.assertIn("candidate.prompt", generate_source)
+        self.assertIn("candidate.confirmation_text", generate_source)
+        self.assertIn('api("/api/human-adam/images/generate"', generate_source)
+        for label in ("Otevřít náhled", "Schválit", "Zamítnout"):
+            self.assertIn(label, card_source)
+        self.assertIn('candidate.status !== "generated"', card_source)
+        self.assertIn("Nic se nebude publikovat ani vkládat do projektu.", HUMAN_ADAM_HTML)
+
+    def test_image_cards_reload_from_private_api_without_base64_or_paths(self) -> None:
+        load_start = HUMAN_ADAM_HTML.index("async function loadImageCandidates()")
+        load_end = HUMAN_ADAM_HTML.index("async function generateImageCandidate", load_start)
+        load_source = HUMAN_ADAM_HTML[load_start:load_end]
+        render_start = HUMAN_ADAM_HTML.index("function renderSession(session)")
+        render_end = HUMAN_ADAM_HTML.index("function workspaceRequiresWorkDetail", render_start)
+        render_source = HUMAN_ADAM_HTML[render_start:render_end]
+
+        self.assertIn('api("/api/human-adam/images")', load_source)
+        self.assertIn("imageCandidatesByMessage = next;", load_source)
+        self.assertIn("imageCandidatesByMessage.get", render_source)
+        self.assertIn("candidate.image_url", HUMAN_ADAM_HTML)
+        self.assertNotIn("candidate.base64", HUMAN_ADAM_HTML)
+        self.assertNotIn("candidate.path", HUMAN_ADAM_HTML)
 
     def test_answer_copy_uses_exact_answer_text_with_browser_fallback(self) -> None:
         copy_start = HUMAN_ADAM_HTML.index("function copyAnswerFallback(text)")

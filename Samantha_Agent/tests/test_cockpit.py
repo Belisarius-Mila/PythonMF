@@ -267,6 +267,33 @@ class CockpitTests(unittest.TestCase):
         route_end = source.index('if parsed.path == "/api/human-adam/connect":', route_start)
         self.assertIn("self.respond_json(human_adam_transcribe_action(payload))", source[route_start:route_end])
 
+    def test_human_adam_image_candidate_routes_have_narrow_registry_cards(self) -> None:
+        cards = {
+            item["path"]: item
+            for item in COCKPIT_POST_ACTIONS
+            if item["path"].startswith("/api/human-adam/images/")
+        }
+
+        self.assertEqual(
+            set(cards),
+            {
+                "/api/human-adam/images/prepare",
+                "/api/human-adam/images/generate",
+                "/api/human-adam/images/decision",
+            },
+        )
+        self.assertEqual(cards["/api/human-adam/images/prepare"]["risk"], "private_write")
+        self.assertEqual(cards["/api/human-adam/images/generate"]["risk"], "external_ai")
+        self.assertEqual(
+            cards["/api/human-adam/images/generate"]["confirmation"],
+            "candidate_specific_exact_phrase",
+        )
+        self.assertEqual(cards["/api/human-adam/images/decision"]["risk"], "private_write")
+        self.assertIn("/api/human-adam/images", self.cockpit_do_get_routes())
+        self.assertIn("/api/human-adam/images/file", self.cockpit_do_get_routes())
+        for path in cards:
+            self.assertIn(path, self.cockpit_do_post_routes())
+
     def test_human_adam_context_anchor_http_api_is_fully_retired(self) -> None:
         self.assertNotIn(
             "/api/human-adam/context-anchor",

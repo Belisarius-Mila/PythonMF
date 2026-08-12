@@ -39,6 +39,14 @@ class CapabilityRegistryTests(unittest.TestCase):
         self.assertTrue(record.requires_confirmation)
         self.assertEqual(record.confirmation_policy, ConfirmationPolicy.EXACT_CURRENT_MESSAGE)
 
+    def test_human_adam_image_generation_is_registered_as_confirmed_external_send(self) -> None:
+        record = get_capability("generate_human_adam_image_candidate")
+
+        self.assertEqual(record.risk, RiskLevel.EXTERNAL_SEND)
+        self.assertTrue(record.requires_confirmation)
+        self.assertEqual(record.confirmation_policy, ConfirmationPolicy.EXACT_CURRENT_MESSAGE)
+        self.assertIn("HumanAdamImageCandidateStore.generate", record.tool)
+
     def test_confirmed_local_write_capabilities_require_confirmation(self) -> None:
         for capability_id in (
             "archive_email_by_uid",
@@ -81,6 +89,8 @@ class CapabilityRegistryTests(unittest.TestCase):
             "prepare_forward_email_by_uid",
             "run_email_triage_session",
             "run_unified_email_triage_session",
+            "prepare_human_adam_image_candidate",
+            "review_human_adam_image_candidate",
         ):
             with self.subTest(capability_id=capability_id):
                 record = get_capability(capability_id)

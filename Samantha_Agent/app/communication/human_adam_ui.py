@@ -55,8 +55,20 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     .human { justify-self:end; background:#dbeafe; border-bottom-right-radius:5px; }
     .adam { justify-self:start; background:var(--soft); border-bottom-left-radius:5px; }
     .meta { display:block; margin-top:6px; color:var(--muted); font-size:12px; }
-    .reply-actions { display:flex; gap:8px; margin-top:8px; }
+    .reply-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
     .reply-speech,.reply-copy { padding:6px 9px; font-size:12px; white-space:nowrap; }
+    .image-candidate-card { width:min(520px,100%); margin-top:10px; padding:12px; border:1px solid #bfdbfe; border-radius:13px; display:grid; gap:9px; background:#fff; white-space:normal; }
+    .image-candidate-card[data-status="approved"] { border-color:#86efac; background:#f0fdf4; }
+    .image-candidate-card[data-status="rejected"] { border-color:#fca5a5; background:#fef2f2; }
+    .image-candidate-card h3 { margin:0; font-size:15px; }
+    .image-candidate-preview { width:100%; max-height:280px; object-fit:contain; border:1px solid var(--line); border-radius:10px; background:var(--soft); }
+    .image-candidate-placeholder { padding:18px 12px; border:1px dashed #93c5fd; border-radius:10px; color:var(--muted); background:#eff6ff; text-align:center; }
+    .image-candidate-prompt { margin:0; padding:9px; border-radius:9px; color:var(--ink); background:var(--soft); white-space:pre-wrap; overflow-wrap:anywhere; font-size:13px; }
+    .image-candidate-meta { margin:0; color:var(--muted); font-size:12px; overflow-wrap:anywhere; }
+    .image-candidate-actions { display:flex; flex-wrap:wrap; gap:8px; }
+    .image-candidate-actions button,.image-candidate-actions a { padding:7px 10px; font-size:12px; }
+    .image-candidate-actions .approve { color:var(--ok); border-color:#86efac; background:#ecfdf3; }
+    .image-candidate-actions .reject { color:#991b1b; border-color:#fca5a5; background:#fef2f2; }
     .composer { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:min(920px,100%); padding:12px max(16px,env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left)); border-top:1px solid var(--line); background:rgba(255,255,255,.98); }
     textarea { width:100%; min-height:86px; max-height:230px; resize:vertical; border:1px solid #bac7d8; border-radius:13px; padding:12px; font:inherit; color:var(--ink); }
     .voice-controls { display:flex; align-items:center; gap:8px; min-width:0; }
@@ -525,7 +537,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   let activeSpeechButton = null;
   let activeSpeechUtterance = null;
   let threadRotationAudit = null;
+  let imageCandidatesByMessage = new Map();
+  let imageCandidatesLoading = false;
   const HUMAN_ADAM_SEND_PATH = "/api/human-adam/send";
+  const HUMAN_ADAM_IMAGE_WORKSTREAM = "layer-human-adam-development";
   const RESULT_WATCH_MAX_ATTEMPTS = 60;
   const RESULT_WATCH_MAX_DELAY_MS = 30000;
 
@@ -1077,7 +1092,176 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     return actions;
   }
 
-  function bubble(text, className, meta, spokenText="") {
+  function looksLikeImageGenerationRequest(text) {
+    const value = String(text || "");
+    const action = "(?:vytvoř|vytvor|vygeneruj|nakresli|udělej|udelej|navrhni)";
+    const image = "(?:obrázek|obrazek|ilustraci|ilustrace|grafiku|vizuál|vizual)";
+    return new RegExp(`\\b${action}\\b[\\s\\S]{0,120}\\b${image}\\b|\\b${image}\\b[\\s\\S]{0,120}\\b${action}\\b`, "i").test(value);
+  }
+
+  function imageCandidateStatus(candidate) {
+    const labels = {
+      prepared:"Čeká na samostatné potvrzení generování",
+      generated:"Vygenerovaná verze čeká na rozhodnutí",
+      approved:"Tato verze je schválená · není publikovaná",
+      rejected:"Tato verze je zamítnutá",
+    };
+    return labels[String(candidate && candidate.status || "")] || "Stav kandidáta nelze ověřit";
+  }
+
+  async function loadImageCandidates() {
+    if (activeWorkstreamId !== HUMAN_ADAM_IMAGE_WORKSTREAM) {
+      imageCandidatesByMessage = new Map();
+      if (lastSession) renderSession(lastSession);
+      return;
+    }
+    if (imageCandidatesLoading) return;
+    imageCandidatesLoading = true;
+    try {
+      const payload = await api("/api/human-adam/images");
+      if (!payload.ok) throw new Error(payload.message || "Kandidáty obrázků nelze načíst.");
+      const next = new Map();
+      for (const candidate of Array.isArray(payload.candidates) ? payload.candidates : []) {
+        const messageId = String(candidate.client_message_id || "");
+        if (messageId) next.set(messageId, candidate);
+      }
+      imageCandidatesByMessage = next;
+      if (lastSession) renderSession(lastSession);
+    } catch (error) {
+      notice.textContent = `Obrázkové karty nelze načíst: ${error.message}`;
+    } finally {
+      imageCandidatesLoading = false;
+    }
+  }
+
+  async function generateImageCandidate(candidate, button) {
+    const parameters = candidate && candidate.parameters ? candidate.parameters : {};
+    const summary = `${parameters.model || "model neuveden"} · ${parameters.size || "rozměr neuveden"} · kvalita ${parameters.quality || "neuvedena"}`;
+    if (!window.confirm(`Placené generování obrázku?\n\n${candidate.prompt}\n\n${summary}\n\nVznikne pouze private kandidát; nic se nepublikuje ani nevloží do projektu.`)) return;
+    button.disabled = true;
+    notice.textContent = "Generuji potvrzeného obrazového kandidáta…";
+    try {
+      const payload = await api("/api/human-adam/images/generate", {
+        method:"POST",
+        body:JSON.stringify({candidate_id:candidate.candidate_id,confirmation:candidate.confirmation_text}),
+      });
+      if (!payload.ok) throw new Error(payload.message || "Generování obrázku selhalo.");
+      notice.textContent = "Obrázek je připravený jako private kandidát. Není publikovaný ani vložený do projektu.";
+      await loadImageCandidates();
+    } catch (error) {
+      notice.textContent = `Obrázek nebyl vygenerován: ${error.message}`;
+    } finally {
+      button.disabled = false;
+    }
+  }
+
+  async function decideImageCandidate(candidate, decision, button) {
+    const label = decision === "approve" ? "schválit" : "zamítnout";
+    if (!window.confirm(`Opravdu ${label} pouze tuto verzi obrázku? Nic se nebude publikovat ani vkládat do projektu.`)) return;
+    button.disabled = true;
+    try {
+      const payload = await api("/api/human-adam/images/decision", {
+        method:"POST",
+        body:JSON.stringify({candidate_id:candidate.candidate_id,decision}),
+      });
+      if (!payload.ok) throw new Error(payload.message || "Rozhodnutí se neuložilo.");
+      notice.textContent = decision === "approve"
+        ? "Tato verze je označená jako schválená. Nic dalšího se nestalo."
+        : "Tato verze je označená jako zamítnutá.";
+      await loadImageCandidates();
+    } catch (error) {
+      notice.textContent = `Rozhodnutí se neuložilo: ${error.message}`;
+    } finally {
+      button.disabled = false;
+    }
+  }
+
+  function imageCandidateCard(candidate) {
+    const card = document.createElement("section");
+    card.className = "image-candidate-card";
+    card.dataset.status = String(candidate.status || "unknown");
+    const title = document.createElement("h3");
+    title.textContent = `Obrázkový kandidát · verze ${Number(candidate.version || 1)}`;
+    card.appendChild(title);
+    if (candidate.image_url) {
+      const image = document.createElement("img");
+      image.className = "image-candidate-preview";
+      image.src = `${candidate.image_url}&v=${encodeURIComponent(candidate.updated_at || "")}`;
+      image.alt = "Náhled vygenerovaného obrazového kandidáta";
+      image.loading = "lazy";
+      card.appendChild(image);
+    } else {
+      const placeholder = document.createElement("div");
+      placeholder.className = "image-candidate-placeholder";
+      placeholder.textContent = "Náhled zadání · placené API ještě nebylo zavoláno";
+      card.appendChild(placeholder);
+    }
+    const prompt = document.createElement("p");
+    prompt.className = "image-candidate-prompt";
+    prompt.textContent = String(candidate.prompt || "");
+    card.appendChild(prompt);
+    const parameters = candidate.parameters || {};
+    const meta = document.createElement("p");
+    meta.className = "image-candidate-meta";
+    meta.textContent = `${imageCandidateStatus(candidate)} · ${parameters.model || "—"} · ${parameters.size || "—"} · kvalita ${parameters.quality || "—"}`;
+    card.appendChild(meta);
+    if (candidate.generation_note) {
+      const note = document.createElement("p");
+      note.className = "image-candidate-meta";
+      note.textContent = candidate.generation_note;
+      card.appendChild(note);
+    }
+    const actions = document.createElement("div");
+    actions.className = "image-candidate-actions";
+    if (candidate.status === "prepared") {
+      const generateButton = document.createElement("button");
+      generateButton.type = "button";
+      generateButton.textContent = "Potvrdit generování";
+      generateButton.addEventListener("click", () => generateImageCandidate(candidate, generateButton));
+      actions.appendChild(generateButton);
+    }
+    if (candidate.image_url) {
+      const open = document.createElement("a");
+      open.className = "back";
+      open.href = candidate.image_url;
+      open.target = "_blank";
+      open.rel = "noopener";
+      open.textContent = "Otevřít náhled";
+      actions.appendChild(open);
+      const approve = document.createElement("button");
+      approve.type = "button";
+      approve.className = "approve";
+      approve.textContent = "Schválit";
+      approve.disabled = candidate.status !== "generated";
+      approve.addEventListener("click", () => decideImageCandidate(candidate, "approve", approve));
+      const reject = document.createElement("button");
+      reject.type = "button";
+      reject.className = "reject";
+      reject.textContent = "Zamítnout";
+      reject.disabled = candidate.status !== "generated";
+      reject.addEventListener("click", () => decideImageCandidate(candidate, "reject", reject));
+      actions.append(approve, reject);
+    }
+    card.appendChild(actions);
+    return card;
+  }
+
+  async function prepareImageCandidate(requestText, clientMessageId) {
+    if (activeWorkstreamId !== HUMAN_ADAM_IMAGE_WORKSTREAM || !looksLikeImageGenerationRequest(requestText)) return true;
+    try {
+      const payload = await api("/api/human-adam/images/prepare", {
+        method:"POST",
+        body:JSON.stringify({request_text:requestText,client_message_id:clientMessageId}),
+      });
+      if (!payload.ok) throw new Error(payload.message || "Náhled zadání obrázku nelze připravit.");
+      return true;
+    } catch (error) {
+      notice.textContent = `Adam odpověděl, ale obrázkový náhled nevznikl: ${error.message}`;
+      return false;
+    }
+  }
+
+  function bubble(text, className, meta, spokenText="", imageCandidate=null) {
     const node = document.createElement("article");
     node.className = `bubble ${className}`;
     node.textContent = text;
@@ -1086,6 +1270,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     small.textContent = meta;
     node.appendChild(small);
     if (spokenText) node.appendChild(answerSpeechControl(spokenText));
+    if (imageCandidate) node.appendChild(imageCandidateCard(imageCandidate));
     return node;
   }
 
@@ -1099,7 +1284,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       exchange.className = "exchange";
       exchange.appendChild(bubble(item.user_text || "", "human", `Odesláno ${formatTime(item.client_sent_at || item.received_at)}`));
       const confirmed = item.delivery_confirmed ? "Doručení potvrzeno" : (item.status === "delivery_unknown" ? "Doručení nejisté – neposílat automaticky znovu" : "Zpracování nedokončeno");
-      if (item.answer) exchange.appendChild(bubble(item.answer, "adam", `Adam · ${formatTime(item.completed_at)} · ${confirmed}`, item.answer));
+      if (item.answer) exchange.appendChild(bubble(item.answer, "adam", `Adam · ${formatTime(item.completed_at)} · ${confirmed}`, item.answer, imageCandidatesByMessage.get(String(item.client_message_id || "")) || null));
       else exchange.appendChild(bubble(item.status === "pending" ? "Adam pracuje…" : confirmed, "adam", formatTime(item.received_at)));
       chat.appendChild(exchange);
     }
@@ -1279,6 +1464,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     deploymentReceipt.hidden = !deployment;
     renderTurnState(session);
     renderSession(session);
+    void loadImageCandidates();
   }
 
   function renderDevelopmentBadge(semaphore) {
@@ -2815,6 +3001,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         notice.textContent = "Odpověď doručena a potvrzena.";
         playCompletionMediaSound();
       });
+      await prepareImageCandidate(text, clientId);
     }
     await loadStatus();
     if (failure) notice.textContent = failure;

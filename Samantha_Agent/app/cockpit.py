@@ -100,6 +100,14 @@ from app.communication.human_adam_service import (
     human_adam_tvbcp_action,
     human_adam_work_review_action,
 )
+from app.communication.human_adam_images import (
+    HUMAN_ADAM_IMAGE_STORE,
+    human_adam_image_candidates_action,
+    human_adam_image_decision_action,
+    human_adam_image_file_action,
+    human_adam_image_generate_action,
+    human_adam_image_prepare_action,
+)
 from app.communication.human_adam_profiles import (
     HUMAN_ADAM,
     HumanAdamProfileManager,
@@ -8763,6 +8771,30 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "direct",
     },
     {
+        "path": "/api/human-adam/images/prepare",
+        "label": "Pripravit private nahled zadani obrazku v Human-Adam",
+        "risk": "private_write",
+        "confirmation": "none_preview_only_no_paid_api",
+        "handler_name": "human_adam_image_prepare_action",
+        "test_level": "direct",
+    },
+    {
+        "path": "/api/human-adam/images/generate",
+        "label": "Vygenerovat jeden potvrzeny private obrazkovy kandidat",
+        "risk": "external_ai",
+        "confirmation": "candidate_specific_exact_phrase",
+        "handler_name": "human_adam_image_generate_action",
+        "test_level": "direct",
+    },
+    {
+        "path": "/api/human-adam/images/decision",
+        "label": "Schvalit nebo zamitnout konkretni verzi obrazkoveho kandidata",
+        "risk": "private_write",
+        "confirmation": "explicit_candidate_button_no_publish",
+        "handler_name": "human_adam_image_decision_action",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/human-adam/transcribe",
         "label": "Prepsat hlas do editovatelneho Human-Adam konceptu",
         "risk": "external_ai",
@@ -9545,6 +9577,18 @@ class CockpitServer:
                         )
                     )
                     return
+                if parsed.path == "/api/human-adam/images":
+                    self.respond_json(
+                        human_adam_image_candidates_action(
+                            service=HUMAN_ADAM,
+                            store=HUMAN_ADAM_IMAGE_STORE,
+                        )
+                    )
+                    return
+                if parsed.path == "/api/human-adam/images/file":
+                    params = parse_qs(parsed.query)
+                    self.respond_human_adam_image(params.get("id", [""])[0])
+                    return
                 if parsed.path == "/api/human-adam/status":
                     self.respond_json(human_adam_status_action(service=HUMAN_ADAM))
                     return
@@ -9811,6 +9855,36 @@ class CockpitServer:
                         janicka_r2_document_compile_action(
                             payload,
                             adapter=JANICKA_R2_COCKPIT,
+                        )
+                    )
+                    return
+                if parsed.path == "/api/human-adam/images/prepare":
+                    payload = self.read_json()
+                    self.respond_json(
+                        human_adam_image_prepare_action(
+                            payload,
+                            service=HUMAN_ADAM,
+                            store=HUMAN_ADAM_IMAGE_STORE,
+                        )
+                    )
+                    return
+                if parsed.path == "/api/human-adam/images/generate":
+                    payload = self.read_json()
+                    self.respond_json(
+                        human_adam_image_generate_action(
+                            payload,
+                            service=HUMAN_ADAM,
+                            store=HUMAN_ADAM_IMAGE_STORE,
+                        )
+                    )
+                    return
+                if parsed.path == "/api/human-adam/images/decision":
+                    payload = self.read_json()
+                    self.respond_json(
+                        human_adam_image_decision_action(
+                            payload,
+                            service=HUMAN_ADAM,
+                            store=HUMAN_ADAM_IMAGE_STORE,
                         )
                     )
                     return
@@ -10405,6 +10479,28 @@ class CockpitServer:
                 data = json.dumps(payload, ensure_ascii=False, indent=2).encode("utf-8")
                 self.send_response(status)
                 self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Cache-Control", "no-store, max-age=0")
+                self.send_header("Content-Length", str(len(data)))
+                self.end_headers()
+                self.wfile.write(data)
+
+            def respond_human_adam_image(self, candidate_id: str) -> None:
+                resolved = human_adam_image_file_action(
+                    candidate_id,
+                    service=HUMAN_ADAM,
+                    store=HUMAN_ADAM_IMAGE_STORE,
+                )
+                if not resolved.get("ok"):
+                    self.respond_json(
+                        {"ok": False, "error": "not_found", "message": resolved.get("message", "")},
+                        status=HTTPStatus.NOT_FOUND,
+                    )
+                    return
+                target = resolved["path"]
+                data = target.read_bytes()
+                self.send_response(HTTPStatus.OK)
+                self.send_header("Content-Type", str(resolved["mime_type"]))
+                self.send_header("Content-Disposition", f'inline; filename="{safe_filename(str(resolved["filename"]))}"')
                 self.send_header("Cache-Control", "no-store, max-age=0")
                 self.send_header("Content-Length", str(len(data)))
                 self.end_headers()
