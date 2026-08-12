@@ -36,3 +36,14 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (1): `MatysekANJ/PROJECT_NOTES_MMTX.md`
 - Commit: `Document MMTX Human-Adam workstream`
 - Další krok: Ověřit čistý main, synchronizaci legacy workspaces a vznik kanonického MMTX handoffu a TVBCP
+
+### Terminálový checkpoint 2026-08-12 19:17 CEST
+
+- Pracovní proud: `project-mmtx`
+- Souhrn: Samostatný prototyp Harry–Benji je připravený mimo živou třetí scénu.
+- Hotovo: Režimy `EN` a `EN + CZ`, systémová výslovnost, bezpečné `Repeat`, výběr Benjiho a úkol `YES/NO`; schválený obrazový kandidát je součástí prototypu.
+- Ověření: 3/3 cílené testy, JavaScript syntaxe a `git diff --check` prošly; obrazový soubor odpovídá schválenému private kandidátu.
+- Rozhodnutí: Prototyp zůstává samostatný a zatím není napojený do produkčního průchodu Forest Journey.
+- Další krok: Ručně ověřit vzhled, ovládání a systémové hlasy na Macu a iPhonu.
+- Navrhované další kroky: Po ověření doplnit výslech dalších postav; následně počítání pěti ovcí a otevření branky.
+- Bezpečnost: Private zdrojový kandidát ani interní identifikátory nejsou v handoffu uloženy.

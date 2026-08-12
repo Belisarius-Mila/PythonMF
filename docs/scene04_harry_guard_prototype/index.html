@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MMTX prototyp — Harry a Benji</title>
+    <link rel="stylesheet" href="styles.css?v=20260812a">
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="scene-card" aria-label="Prototyp rozhovoru Harryho a Benjiho">
+        <div class="scene" id="scene">
+          <img
+            class="scene-image"
+            src="harry_benji_prototype_01.png"
+            alt="Benji a jeho přátelé stojí před ovčáckým psem Harrym u zavřené ohrady s pěti ovcemi"
+          >
+
+          <div class="scene-hud">
+            <span class="prototype-badge">PROTOTYP</span>
+            <div class="scene-actions">
+              <button class="ui-button language-button" id="languageButton" type="button" aria-label="Změnit jazykový režim">
+                EN + CZ
+              </button>
+              <button class="ui-button" id="repeatButton" type="button" aria-label="Zopakovat poslední větu" disabled>
+                <span aria-hidden="true">🔁</span>
+                <span>Repeat</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="scene-overlay" id="overlay" aria-label="Postavy ve scéně"></div>
+
+          <div class="speech-bubble hidden" id="speechBubble" aria-live="polite">
+            <span class="speaker-name" id="speakerName"></span>
+            <span class="speech-english" id="speechEnglish"></span>
+            <span class="speech-czech" id="speechCzech"></span>
+          </div>
+
+          <div class="task-prompt hidden" id="taskPrompt" aria-live="polite">
+            <span class="task-icon" aria-hidden="true">👆</span>
+            <span>
+              <strong id="taskEnglish"></strong>
+              <small id="taskCzech"></small>
+            </span>
+          </div>
+
+          <div class="answer-panel hidden" id="answerPanel" aria-label="Vyber odpověď">
+            <button class="answer-button yes" id="yesButton" type="button">YES</button>
+            <button class="answer-button no" id="noButton" type="button">NO</button>
+          </div>
+
+          <div class="complete-banner hidden" id="completeBanner" aria-live="polite">
+            <span aria-hidden="true">🍃</span>
+            <span>
+              <strong>Prototype complete</strong>
+              <small>Prototyp je dokončený.</small>
+            </span>
+          </div>
+
+          <button class="audio-gate" id="audioGate" type="button">
+            <strong>Klepni a poslouchej</strong>
+            <span>Tap and listen</span>
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <script src="script.js?v=20260812a"></script>
+  </body>
+</html>
