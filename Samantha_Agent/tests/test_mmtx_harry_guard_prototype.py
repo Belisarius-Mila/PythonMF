@@ -16,6 +16,7 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
             "styles.css",
             "script.js",
             "harry_benji_prototype_01.png",
+            "audio",
         }
         self.assertEqual({path.name for path in PROTOTYPE_ROOT.iterdir()}, expected)
 
@@ -25,11 +26,26 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
         self.assertIn('id="yesButton"', html)
         self.assertIn('id="noButton"', html)
         self.assertIn('src="harry_benji_prototype_01.png"', html)
+        self.assertIn('script.js?v=20260813a', html)
 
         production_script = (
             PROJECT_ROOT / "docs" / "scene03_journey_to_the_lake" / "script.js"
         ).read_text(encoding="utf-8")
         self.assertNotIn("scene04_harry_guard_prototype", production_script)
+
+    def test_benji_has_four_fixed_andrew_mp3_assets(self) -> None:
+        audio_root = PROTOTYPE_ROOT / "audio" / "english"
+        expected = {
+            "scene04_benji_hello_we_are_friendly_en.mp3",
+            "scene04_benji_i_have_a_map_en.mp3",
+            "scene04_benji_no_i_do_not_chase_sheep_en.mp3",
+            "scene04_benji_i_help_little_animals_en.mp3",
+        }
+        self.assertEqual({path.name for path in audio_root.iterdir()}, expected)
+        for filename in expected:
+            audio = (audio_root / filename).read_bytes()
+            self.assertGreater(len(audio), 8000)
+            self.assertEqual(audio[:2], b"\xff\xf3")
 
     def test_image_has_canonical_scene_dimensions(self) -> None:
         image = PROTOTYPE_ROOT / "harry_benji_prototype_01.png"
@@ -59,8 +75,22 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
             "state.stage !== STAGES.chooseYesNo",
             "function updateRepeatAvailability()",
             "STAGES.complete",
+            'const BENJI_AUDIO_VERSION = "20260813a"',
+            "async function speakText(text, lang, characterId)",
+            "await playFixedAudio(fixedAudio, text.length)",
+            "function primeFixedAudio()",
+            "primeFixedAudio();",
+            "fixedAudioCache",
         ):
             self.assertIn(expected, script)
+
+        for audio_file in (
+            "scene04_benji_hello_we_are_friendly_en.mp3",
+            "scene04_benji_i_have_a_map_en.mp3",
+            "scene04_benji_no_i_do_not_chase_sheep_en.mp3",
+            "scene04_benji_i_help_little_animals_en.mp3",
+        ):
+            self.assertIn(audio_file, script)
 
         self.assertIn('await speakText(entry.textEn, "en", entry.characterId)', script)
         self.assertIn('if (isBilingual()) await speakText(entry.textCz, "cs", entry.characterId)', script)

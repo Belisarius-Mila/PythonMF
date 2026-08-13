@@ -27,6 +27,14 @@ const LANGUAGE_MODES = {
   bilingual: "en-cz",
 };
 
+const BENJI_AUDIO_VERSION = "20260813a";
+const BENJI_ENGLISH_AUDIO = new Map([
+  ["Hello. We are friendly.", `audio/english/scene04_benji_hello_we_are_friendly_en.mp3?v=${BENJI_AUDIO_VERSION}`],
+  ["I have a map.", `audio/english/scene04_benji_i_have_a_map_en.mp3?v=${BENJI_AUDIO_VERSION}`],
+  ["No. I do not chase sheep.", `audio/english/scene04_benji_no_i_do_not_chase_sheep_en.mp3?v=${BENJI_AUDIO_VERSION}`],
+  ["I help little animals.", `audio/english/scene04_benji_i_help_little_animals_en.mp3?v=${BENJI_AUDIO_VERSION}`],
+]);
+
 // Keep Benji on a male voice even when the browser exposes voices in a
 // different order. Andrew matches the approved Scene 3 voice when available.
 const BENJI_ENGLISH_VOICE_ORDER = [
@@ -93,6 +101,10 @@ const state = {
 let voices = [];
 let speechTimeout = 0;
 let speechResolve = null;
+let activeAudio = null;
+let audioTimeout = 0;
+let audioResolve = null;
+const fixedAudioCache = new Map();
 
 function loadLanguageMode() {
   try {
@@ -151,6 +163,17 @@ function voiceFor(lang, characterId) {
 }
 
 function cancelSpeech() {
+  window.clearTimeout(audioTimeout);
+  audioTimeout = 0;
+  if (activeAudio) {
+    activeAudio.pause();
+    activeAudio = null;
+  }
+  if (audioResolve) {
+    const resolve = audioResolve;
+    audioResolve = null;
+    resolve(false);
+  }
   window.clearTimeout(speechTimeout);
   speechTimeout = 0;
   window.speechSynthesis?.cancel?.();
@@ -161,7 +184,88 @@ function cancelSpeech() {
   }
 }
 
-function speakText(text, lang, characterId) {
+function playFixedAudio(src, textLength) {
+  return new Promise((resolve) => {
+    let finished = false;
+    const audio = fixedAudioCache.get(src) || new Audio(src);
+    fixedAudioCache.set(src, audio);
+    const finish = (played) => {
+      if (finished) return;
+      finished = true;
+      window.clearTimeout(audioTimeout);
+      audioTimeout = 0;
+      if (!played) audio.pause();
+      audio.onended = null;
+      audio.onerror = null;
+      if (activeAudio === audio) activeAudio = null;
+      if (audioResolve === finish) audioResolve = null;
+      resolve(played);
+    };
+    audio.preload = "auto";
+    audio.playsInline = true;
+    audio.muted = false;
+    audio.volume = 0.9;
+    audio.currentTime = 0;
+    audio.onended = () => finish(true);
+    audio.onerror = () => finish(false);
+    activeAudio = audio;
+    audioResolve = finish;
+    let playback;
+    try {
+      playback = audio.play();
+    } catch (_error) {
+      finish(false);
+      return;
+    }
+    if (playback && typeof playback.catch === "function") {
+      playback.catch(() => finish(false));
+    }
+    audioTimeout = window.setTimeout(
+      () => finish(false),
+      Math.max(3500, textLength * 140),
+    );
+  });
+}
+
+function primeFixedAudio() {
+  const sources = [...BENJI_ENGLISH_AUDIO.values()];
+  sources.forEach((src) => {
+    const audio = fixedAudioCache.get(src) || new Audio(src);
+    fixedAudioCache.set(src, audio);
+    audio.preload = "auto";
+    audio.playsInline = true;
+    audio.load();
+  });
+  const firstAudio = fixedAudioCache.get(sources[0]);
+  if (!firstAudio) return;
+  firstAudio.muted = true;
+  firstAudio.volume = 0;
+  let playback;
+  try {
+    playback = firstAudio.play();
+  } catch (_error) {
+    firstAudio.muted = false;
+    firstAudio.volume = 0.9;
+    return;
+  }
+  if (playback && typeof playback.then === "function") {
+    playback.then(() => {
+      firstAudio.pause();
+      firstAudio.currentTime = 0;
+      firstAudio.muted = false;
+      firstAudio.volume = 0.9;
+    }).catch(() => {
+      firstAudio.muted = false;
+      firstAudio.volume = 0.9;
+    });
+  }
+}
+
+async function speakText(text, lang, characterId) {
+  if (lang === "en" && characterId === "benji") {
+    const fixedAudio = BENJI_ENGLISH_AUDIO.get(text);
+    if (fixedAudio && await playFixedAudio(fixedAudio, text.length)) return;
+  }
   if (!text || !("speechSynthesis" in window)) return Promise.resolve();
   return new Promise((resolve) => {
     let finished = false;
@@ -362,6 +466,7 @@ async function startPrototype() {
   if (state.stage !== STAGES.waitingStart) return;
   audioGate.classList.add("hidden");
   loadVoices();
+  primeFixedAudio();
   await runIntro();
 }
 
