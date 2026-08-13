@@ -1,35 +1,33 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-13 22:50 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-13 23:03 CEST
 
 ### Hotovo
-- Sérii výslechů doplnil pátý obraz s Brunem a Harrym
-- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Opravený Brunův výslech nyní zachovává celou skupinu včetně jasně viditelného Benjiho
 
 ### Otevřeno
 - Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
 - Lokální commity čekají na samostatný denní GitHub balíček.
 
 ### Rizika
-- Žádné další doložené provozní riziko.
+- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
 
 ### Další krok
-- Zapojit pět obrazů do jednotlivých výslechů prototypu
+- Použít opravenou verzi při zapojení obrazů do prototypu
 
 ### Rozhodnutí
-- Harry vyslechne také Bruna kvůli podezření na podhrabání ohrady
+- Brunova scéna musí v pozadí zobrazovat Bunnyho, Fionu, Sunnyho i Benjiho
 
 ### Navrhované další kroky
-- Doplnit dialog Harry–Bruno
-- Dokončit výslechy Sunnyho a Fiony
-- Po pěti výsleších přidat počítání ovcí a otevření branky
+- Po vizuálním potvrzení lze původní verzi ponechat jen jako historického kandidáta
+- Zapojit všech pět schválených obrazů do výslechů
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `ba658286f5de`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `ba658286f5de` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-13T20:09:47+00:00.
-- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+- Git před checkpointem: lokální `main` na `2e1f911bb43c`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `ba658286f5de` · je starší než ověřený main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-13T20:09:47+00:00.
+- Read-only živý stav: main=`local_ahead`, deployment=`verified_other_main`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -155,3 +153,15 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (2): `Samantha_Agent/tests/test_mmtx_harry_guard_prototype.py`, `docs/scene04_harry_guard_prototype/harry_interrogation_bruno_01.png`
 - Commit: `Add Bruno interrogation artwork`
 - Další krok: Zapojit pět obrazů do jednotlivých výslechů prototypu
+
+### Automatický checkpoint 2026-08-13 23:03 CEST
+
+- Pracovní proud: `project-mmtx`
+- Hotovo: Opravený Brunův výslech nyní zachovává celou skupinu včetně jasně viditelného Benjiho
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.; Lokální commity čekají na samostatný denní GitHub balíček.
+- Rizika: Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: rychlá Cockpit brána syntaxe a whitespace: 5.6 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu
+- Změněné cesty před paměťovým zápisem (2): `Samantha_Agent/tests/test_mmtx_harry_guard_prototype.py`, `docs/scene04_harry_guard_prototype/harry_interrogation_bruno_02.png`
+- Commit: `Correct Bruno artwork with Benji`
+- Další krok: Použít opravenou verzi při zapojení obrazů do prototypu
