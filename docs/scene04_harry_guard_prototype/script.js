@@ -1,5 +1,5 @@
 /**
- * MMTX prototype: Harry questions Benji at the sheep gate.
+ * MMTX prototype: Harry questions Benji and Bunny at the sheep gate.
  *
  * Standalone by design. It is not linked from the production journey yet.
  */
@@ -35,6 +35,14 @@ const BENJI_ENGLISH_AUDIO = new Map([
   ["I help little animals.", `audio/english/scene04_benji_i_help_little_animals_en.mp3?v=${BENJI_AUDIO_VERSION}`],
 ]);
 
+const BUNNY_AUDIO_VERSION = "20260813a";
+const BUNNY_ENGLISH_AUDIO = new Map([
+  ["Not me.", `audio/english/scene04_bunny_not_me_en.mp3?v=${BUNNY_AUDIO_VERSION}`],
+  ["I am Bunny.", `audio/english/scene04_bunny_i_am_bunny_en.mp3?v=${BUNNY_AUDIO_VERSION}`],
+  ["No. I have my own carrots.", `audio/english/scene04_bunny_no_i_have_my_own_carrots_en.mp3?v=${BUNNY_AUDIO_VERSION}`],
+  ["I only want to go to the lake.", `audio/english/scene04_bunny_i_only_want_to_go_to_the_lake_en.mp3?v=${BUNNY_AUDIO_VERSION}`],
+]);
+
 // Keep Benji on a male voice even when the browser exposes voices in a
 // different order. Andrew matches the approved Scene 3 voice when available.
 const BENJI_ENGLISH_VOICE_ORDER = [
@@ -48,6 +56,13 @@ const BENJI_ENGLISH_VOICE_ORDER = [
   "fred",
 ];
 
+const BUNNY_ENGLISH_VOICE_ORDER = [
+  "ana",
+  "samantha",
+  "ava",
+  "fable",
+];
+
 const STAGES = {
   waitingStart: "waitingStart",
   intro: "intro",
@@ -55,6 +70,10 @@ const STAGES = {
   benjiAnswer: "benjiAnswer",
   chooseYesNo: "chooseYesNo",
   wrongYes: "wrongYes",
+  chooseBunny: "chooseBunny",
+  bunnyAnswer: "bunnyAnswer",
+  chooseBunnyYesNo: "chooseBunnyYesNo",
+  wrongBunnyYes: "wrongBunnyYes",
   finishing: "finishing",
   complete: "complete",
 };
@@ -88,6 +107,20 @@ const lines = {
   noChase: dialogue("benji", "No. I do not chase sheep.", "Ne. Nehoním ovce."),
   helper: dialogue("benji", "I help little animals.", "Pomáhám malým zvířátkům."),
   trust: dialogue("harry", "Hmm. Maybe I can trust you.", "Hmm. Možná ti můžu věřit."),
+  rabbitIntro: dialogue("harry", "Wait! What about the rabbit?", "Počkejte! A co ten králík?"),
+  rabbitPrompt: prompt("Who is the rabbit?", "Kdo je králík?"),
+  bunnyAnswer: dialogue("bunny", "I am Bunny.", "Já jsem Bunny."),
+  carrotQuestion: prompt(
+    "Do you want to eat the carrots in my garden?",
+    "Chceš sníst mrkev z mé zahrádky?",
+  ),
+  ownCarrots: dialogue("bunny", "No. I have my own carrots.", "Ne. Mám vlastní mrkev."),
+  lakeOnly: dialogue("bunny", "I only want to go to the lake.", "Chci jen jít k jezeru."),
+  bunnyAccepted: dialogue(
+    "harry",
+    "Good answer, Bunny. But the gate stays closed.",
+    "Dobrá odpověď, Bunny. Ale branka zůstává zavřená.",
+  ),
 };
 
 const state = {
@@ -152,6 +185,12 @@ function voiceFor(lang, characterId) {
       if (selectedVoice) return selectedVoice;
     }
     return null;
+  }
+  if (lang === "en" && characterId === "bunny") {
+    for (const preferredName of BUNNY_ENGLISH_VOICE_ORDER) {
+      const selectedVoice = matching.find((voice) => voice.name.toLowerCase().includes(preferredName));
+      if (selectedVoice) return selectedVoice;
+    }
   }
   if (lang === "en") {
     const preferred = characterId === "harry"
@@ -222,13 +261,16 @@ function playFixedAudio(src, textLength) {
     }
     audioTimeout = window.setTimeout(
       () => finish(false),
-      Math.max(3500, textLength * 140),
+      Math.max(4500, textLength * 180),
     );
   });
 }
 
 function primeFixedAudio() {
-  const sources = [...BENJI_ENGLISH_AUDIO.values()];
+  const sources = [
+    ...BENJI_ENGLISH_AUDIO.values(),
+    ...BUNNY_ENGLISH_AUDIO.values(),
+  ];
   sources.forEach((src) => {
     const audio = fixedAudioCache.get(src) || new Audio(src);
     fixedAudioCache.set(src, audio);
@@ -262,8 +304,10 @@ function primeFixedAudio() {
 }
 
 async function speakText(text, lang, characterId) {
-  if (lang === "en" && characterId === "benji") {
-    const fixedAudio = BENJI_ENGLISH_AUDIO.get(text);
+  if (lang === "en" && (characterId === "benji" || characterId === "bunny")) {
+    const fixedAudio = characterId === "benji"
+      ? BENJI_ENGLISH_AUDIO.get(text)
+      : BUNNY_ENGLISH_AUDIO.get(text);
     if (fixedAudio && await playFixedAudio(fixedAudio, text.length)) return;
   }
   if (!text || !("speechSynthesis" in window)) return Promise.resolve();
@@ -336,6 +380,8 @@ function updateRepeatAvailability() {
   const repeatableStages = new Set([
     STAGES.chooseBenji,
     STAGES.chooseYesNo,
+    STAGES.chooseBunny,
+    STAGES.chooseBunnyYesNo,
     STAGES.complete,
   ]);
   repeatButton.disabled = !state.lastRepeatable || !repeatableStages.has(state.stage);
@@ -349,7 +395,8 @@ function setStage(stage) {
 
 function renderHotspots() {
   overlay.replaceChildren();
-  const canChooseCharacter = state.stage === STAGES.chooseBenji;
+  const canChooseCharacter = state.stage === STAGES.chooseBenji || state.stage === STAGES.chooseBunny;
+  const targetCharacterId = state.stage === STAGES.chooseBunny ? "bunny" : "benji";
   for (const [characterId, character] of Object.entries(characters)) {
     const button = document.createElement("button");
     button.type = "button";
@@ -362,7 +409,7 @@ function renderHotspots() {
     button.disabled = !canChooseCharacter;
     if (canChooseCharacter) {
       button.classList.add("enabled");
-      if (characterId === "benji") button.classList.add("target");
+      if (characterId === targetCharacterId) button.classList.add("target");
       button.addEventListener("click", () => chooseCharacter(characterId));
     }
     overlay.appendChild(button);
@@ -383,60 +430,78 @@ async function runIntro() {
 }
 
 async function chooseCharacter(characterId) {
-  if (state.stage !== STAGES.chooseBenji) return;
-  if (characterId !== "benji") {
+  if (state.stage !== STAGES.chooseBenji && state.stage !== STAGES.chooseBunny) return;
+  const choosingBunny = state.stage === STAGES.chooseBunny;
+  const targetCharacterId = choosingBunny ? "bunny" : "benji";
+  const question = choosingBunny ? lines.rabbitPrompt : lines.mapQuestion;
+  const answerStage = choosingBunny ? STAGES.bunnyAnswer : STAGES.benjiAnswer;
+  const chooseStage = choosingBunny ? STAGES.chooseBunny : STAGES.chooseBenji;
+  if (characterId !== targetCharacterId) {
     const flowId = ++state.flowId;
     cancelSpeech();
-    setStage(STAGES.benjiAnswer);
+    setStage(answerStage);
     const wrongLine = { ...lines.notMe, characterId };
     if (!(await playEntry(wrongLine, flowId))) return;
-    if (!(await playEntry(lines.mapQuestion, flowId))) return;
+    if (!(await playEntry(question, flowId))) return;
     hideSpeech();
-    showTask(lines.mapQuestion);
-    setStage(STAGES.chooseBenji);
+    showTask(question);
+    setStage(chooseStage);
     return;
   }
 
   const flowId = ++state.flowId;
   cancelSpeech();
   hideTask();
-  setStage(STAGES.benjiAnswer);
-  if (!(await playEntry(lines.mapAnswer, flowId))) return;
-  if (!(await playEntry(lines.sheepQuestion, flowId))) return;
+  setStage(answerStage);
+  const answer = choosingBunny ? lines.bunnyAnswer : lines.mapAnswer;
+  const yesNoQuestion = choosingBunny ? lines.carrotQuestion : lines.sheepQuestion;
+  if (!(await playEntry(answer, flowId))) return;
+  if (!(await playEntry(yesNoQuestion, flowId))) return;
   hideSpeech();
-  showTask(lines.sheepQuestion);
+  showTask(yesNoQuestion);
   answerPanel.classList.remove("hidden");
-  setStage(STAGES.chooseYesNo);
+  setStage(choosingBunny ? STAGES.chooseBunnyYesNo : STAGES.chooseYesNo);
 }
 
 async function chooseYes() {
-  if (state.stage !== STAGES.chooseYesNo) return;
+  if (state.stage !== STAGES.chooseYesNo && state.stage !== STAGES.chooseBunnyYesNo) return;
+  const questioningBunny = state.stage === STAGES.chooseBunnyYesNo;
+  const question = questioningBunny ? lines.carrotQuestion : lines.sheepQuestion;
   const flowId = ++state.flowId;
   cancelSpeech();
   answerPanel.classList.add("hidden");
   hideTask();
-  setStage(STAGES.wrongYes);
+  setStage(questioningBunny ? STAGES.wrongBunnyYes : STAGES.wrongYes);
   if (!(await playEntry(lines.listenAgain, flowId))) return;
-  if (!(await playEntry(lines.sheepQuestion, flowId))) return;
+  if (!(await playEntry(question, flowId))) return;
   hideSpeech();
-  showTask(lines.sheepQuestion);
+  showTask(question);
   answerPanel.classList.remove("hidden");
-  setStage(STAGES.chooseYesNo);
+  setStage(questioningBunny ? STAGES.chooseBunnyYesNo : STAGES.chooseYesNo);
 }
 
 async function chooseNo() {
-  if (state.stage !== STAGES.chooseYesNo) return;
+  if (state.stage !== STAGES.chooseYesNo && state.stage !== STAGES.chooseBunnyYesNo) return;
+  const questioningBunny = state.stage === STAGES.chooseBunnyYesNo;
   const flowId = ++state.flowId;
   cancelSpeech();
   answerPanel.classList.add("hidden");
   hideTask();
   setStage(STAGES.finishing);
-  for (const entry of [lines.noChase, lines.helper, lines.trust]) {
+  const entries = questioningBunny
+    ? [lines.ownCarrots, lines.lakeOnly, lines.bunnyAccepted]
+    : [lines.noChase, lines.helper, lines.trust, lines.rabbitIntro, lines.rabbitPrompt];
+  for (const entry of entries) {
     if (!(await playEntry(entry, flowId))) return;
   }
   hideSpeech();
-  completeBanner.classList.remove("hidden");
-  setStage(STAGES.complete);
+  if (questioningBunny) {
+    completeBanner.classList.remove("hidden");
+    setStage(STAGES.complete);
+    return;
+  }
+  showTask(lines.rabbitPrompt);
+  setStage(STAGES.chooseBunny);
 }
 
 async function repeatLast() {
@@ -451,6 +516,8 @@ async function repeatLast() {
     hideSpeech();
     if (resumeStage === STAGES.chooseBenji) showTask(lines.mapQuestion);
     if (resumeStage === STAGES.chooseYesNo) showTask(lines.sheepQuestion);
+    if (resumeStage === STAGES.chooseBunny) showTask(lines.rabbitPrompt);
+    if (resumeStage === STAGES.chooseBunnyYesNo) showTask(lines.carrotQuestion);
   } finally {
     updateRepeatAvailability();
   }

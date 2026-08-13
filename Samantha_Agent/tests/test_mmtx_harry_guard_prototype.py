@@ -26,20 +26,26 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
         self.assertIn('id="yesButton"', html)
         self.assertIn('id="noButton"', html)
         self.assertIn('src="harry_benji_prototype_01.png"', html)
-        self.assertIn('script.js?v=20260813a', html)
+        self.assertIn('script.js?v=20260813b', html)
+        self.assertIn("Two interviews complete", html)
+        self.assertIn("Dva výslechy jsou dokončené.", html)
 
         production_script = (
             PROJECT_ROOT / "docs" / "scene03_journey_to_the_lake" / "script.js"
         ).read_text(encoding="utf-8")
         self.assertNotIn("scene04_harry_guard_prototype", production_script)
 
-    def test_benji_has_four_fixed_andrew_mp3_assets(self) -> None:
+    def test_benji_and_bunny_have_fixed_voice_mp3_assets(self) -> None:
         audio_root = PROTOTYPE_ROOT / "audio" / "english"
         expected = {
             "scene04_benji_hello_we_are_friendly_en.mp3",
             "scene04_benji_i_have_a_map_en.mp3",
             "scene04_benji_no_i_do_not_chase_sheep_en.mp3",
             "scene04_benji_i_help_little_animals_en.mp3",
+            "scene04_bunny_not_me_en.mp3",
+            "scene04_bunny_i_am_bunny_en.mp3",
+            "scene04_bunny_no_i_have_my_own_carrots_en.mp3",
+            "scene04_bunny_i_only_want_to_go_to_the_lake_en.mp3",
         }
         self.assertEqual({path.name for path in audio_root.iterdir()}, expected)
         for filename in expected:
@@ -70,12 +76,21 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
             '"No. I do not chase sheep."',
             '"I help little animals."',
             '"Hmm. Maybe I can trust you."',
+            '"Wait! What about the rabbit?"',
+            '"Who is the rabbit?"',
+            '"I am Bunny."',
+            '"Do you want to eat the carrots in my garden?"',
+            '"No. I have my own carrots."',
+            '"I only want to go to the lake."',
+            '"Good answer, Bunny. But the gate stays closed."',
             "async function repeatLast()",
-            'characterId !== "benji"',
+            'targetCharacterId = choosingBunny ? "bunny" : "benji"',
             "state.stage !== STAGES.chooseYesNo",
+            "state.stage !== STAGES.chooseBunnyYesNo",
             "function updateRepeatAvailability()",
             "STAGES.complete",
             'const BENJI_AUDIO_VERSION = "20260813a"',
+            'const BUNNY_AUDIO_VERSION = "20260813a"',
             "async function speakText(text, lang, characterId)",
             "await playFixedAudio(fixedAudio, text.length)",
             "function primeFixedAudio()",
@@ -89,6 +104,10 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
             "scene04_benji_i_have_a_map_en.mp3",
             "scene04_benji_no_i_do_not_chase_sheep_en.mp3",
             "scene04_benji_i_help_little_animals_en.mp3",
+            "scene04_bunny_not_me_en.mp3",
+            "scene04_bunny_i_am_bunny_en.mp3",
+            "scene04_bunny_no_i_have_my_own_carrots_en.mp3",
+            "scene04_bunny_i_only_want_to_go_to_the_lake_en.mp3",
         ):
             self.assertIn(audio_file, script)
 
@@ -106,6 +125,26 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
             'if (lang === "en" && characterId === "benji" && !voice)',
             script,
         )
+        bunny_voice_profile = script.split(
+            "const BUNNY_ENGLISH_VOICE_ORDER = [", 1
+        )[1].split("];", 1)[0]
+        self.assertLess(
+            bunny_voice_profile.index('"ana"'),
+            bunny_voice_profile.index('"samantha"'),
+        )
+        choose_no_body = script.split("async function chooseNo()", 1)[1].split(
+            "async function repeatLast()", 1
+        )[0]
+        self.assertIn(
+            "[lines.noChase, lines.helper, lines.trust, lines.rabbitIntro, lines.rabbitPrompt]",
+            choose_no_body,
+        )
+        self.assertIn(
+            "[lines.ownCarrots, lines.lakeOnly, lines.bunnyAccepted]",
+            choose_no_body,
+        )
+        self.assertIn("setStage(STAGES.chooseBunny)", choose_no_body)
+        self.assertIn("if (questioningBunny)", choose_no_body)
         repeat_body = script.split("async function repeatLast()", 1)[1].split(
             "function toggleLanguage()", 1
         )[0]
