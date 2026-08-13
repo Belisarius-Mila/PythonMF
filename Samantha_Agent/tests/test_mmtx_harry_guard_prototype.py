@@ -17,6 +17,7 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
             "script.js",
             "harry_benji_prototype_01.png",
             "harry_interrogation_benji_01.png",
+            "harry_interrogation_bruno_01.png",
             "harry_interrogation_bunny_01.png",
             "harry_interrogation_fiona_01.png",
             "harry_interrogation_sunny_01.png",
@@ -63,6 +64,7 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
         expected_images = {
             "harry_benji_prototype_01.png",
             "harry_interrogation_benji_01.png",
+            "harry_interrogation_bruno_01.png",
             "harry_interrogation_bunny_01.png",
             "harry_interrogation_fiona_01.png",
             "harry_interrogation_sunny_01.png",
