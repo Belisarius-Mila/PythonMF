@@ -16,6 +16,10 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
             "styles.css",
             "script.js",
             "harry_benji_prototype_01.png",
+            "harry_interrogation_benji_01.png",
+            "harry_interrogation_bunny_01.png",
+            "harry_interrogation_fiona_01.png",
+            "harry_interrogation_sunny_01.png",
             "audio",
         }
         self.assertEqual({path.name for path in PROTOTYPE_ROOT.iterdir()}, expected)
@@ -56,14 +60,22 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
             self.assertEqual(audio[:2], b"\xff\xf3")
 
     def test_image_has_canonical_scene_dimensions(self) -> None:
-        image = PROTOTYPE_ROOT / "harry_benji_prototype_01.png"
-        with image.open("rb") as handle:
-            self.assertEqual(handle.read(8), b"\x89PNG\r\n\x1a\n")
-            chunk_length = struct.unpack(">I", handle.read(4))[0]
-            self.assertEqual(handle.read(4), b"IHDR")
-            width, height = struct.unpack(">II", handle.read(8))
-        self.assertEqual(chunk_length, 13)
-        self.assertEqual((width, height), (1672, 941))
+        expected_images = {
+            "harry_benji_prototype_01.png",
+            "harry_interrogation_benji_01.png",
+            "harry_interrogation_bunny_01.png",
+            "harry_interrogation_fiona_01.png",
+            "harry_interrogation_sunny_01.png",
+        }
+        for filename in expected_images:
+            image = PROTOTYPE_ROOT / filename
+            with self.subTest(filename=filename), image.open("rb") as handle:
+                self.assertEqual(handle.read(8), b"\x89PNG\r\n\x1a\n")
+                chunk_length = struct.unpack(">I", handle.read(4))[0]
+                self.assertEqual(handle.read(4), b"IHDR")
+                width, height = struct.unpack(">II", handle.read(8))
+                self.assertEqual(chunk_length, 13)
+                self.assertEqual((width, height), (1672, 941))
 
     def test_dialogue_and_interaction_contract_is_explicit(self) -> None:
         script = (PROTOTYPE_ROOT / "script.js").read_text(encoding="utf-8")

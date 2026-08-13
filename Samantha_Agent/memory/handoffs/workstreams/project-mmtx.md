@@ -1,34 +1,34 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-13 11:20 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-13 18:16 CEST
 
 ### Hotovo
-- Vznikly dvě poslechové ukázky Benjiho s hlasem klonovaným podle první scény
+- Čtyři výslechy mají připravené vlastní obrazové scény s příslušným zvířátkem v popředí
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
 - Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
-- Lokální commity čekají na samostatný denní GitHub balíček.
 
 ### Rizika
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Poslechnout oba kandidáty a rozhodnout, zda jimi nahradit Andrewův hlas
+- Zapojit obrazy do jednotlivých fází dialogu a připravit třetí výslech Sunnyho
 
 ### Rozhodnutí
-- Nové Benjiho věty nejprve porovnáme jako F5 kandidáty podle zamčené reference z první scény
+- Samostatné obrazy výslechů budou patřit Benjimu, Bunnymu, Sunnymu a Fioně; Bruno zůstává členem skupiny
 
 ### Navrhované další kroky
-- Po schválení vygenerovat zbývající dvě Benjiho věty stejným F5 nastavením
-- Nahradit všechny čtyři Benjiho nahrávky v prototypu a znovu ověřit celý průchod
+- Doplnit přepínání obrazů mezi výslechy
+- Navrhnout a implementovat dialog Harry–Sunny o ořeších
+- Poté doplnit výslech Fiony, počítání pěti ovcí a otevření branky
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `329909ebe7b9`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `329909ebe7b9` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-13T06:04:53+00:00.
-- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+- Git před checkpointem: lokální `main` na `8d21590be245`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `8d21590be245` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-13T10:04:15+00:00.
+- Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -130,3 +130,15 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (3): `Samantha_Agent/tests/test_mmtx_harry_guard_prototype.py`, `docs/scene04_harry_guard_prototype/audio/english/scene04_benji_f5_candidate_hello_we_are_friendly_en.mp3`, `docs/scene04_harry_guard_prototype/audio/english/scene04_benji_f5_candidate_no_i_do_not_chase_sheep_en.mp3`
 - Commit: `Add F5 Benji voice candidates`
 - Další krok: Poslechnout oba kandidáty a rozhodnout, zda jimi nahradit Andrewův hlas
+
+### Automatický checkpoint 2026-08-13 18:16 CEST
+
+- Pracovní proud: `project-mmtx`
+- Hotovo: Čtyři výslechy mají připravené vlastní obrazové scény s příslušným zvířátkem v popředí; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: rychlá Cockpit brána syntaxe a whitespace: 8.7 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu
+- Změněné cesty před paměťovým zápisem (5): `Samantha_Agent/tests/test_mmtx_harry_guard_prototype.py`, `docs/scene04_harry_guard_prototype/harry_interrogation_benji_01.png`, `docs/scene04_harry_guard_prototype/harry_interrogation_bunny_01.png`, `docs/scene04_harry_guard_prototype/harry_interrogation_fiona_01.png`, `docs/scene04_harry_guard_prototype/harry_interrogation_sunny_01.png`
+- Commit: `Add Harry interrogation scene artwork`
+- Další krok: Zapojit obrazy do jednotlivých fází dialogu a připravit třetí výslech Sunnyho
