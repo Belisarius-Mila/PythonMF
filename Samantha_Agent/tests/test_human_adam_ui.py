@@ -1289,13 +1289,38 @@ class HumanAdamUiTests(unittest.TestCase):
         ios_source = record_source[ios_start:ios_end]
 
         self.assertIn("iPad|iPhone|iPod", detector_source)
-        self.assertIn('navigator.platform === "MacIntel"', detector_source)
+        self.assertIn("Macintosh|MacIntel|Mac OS X", detector_source)
         self.assertIn("navigator.maxTouchPoints", detector_source)
+        self.assertIn('"audioSession" in navigator', detector_source)
         self.assertIn("input.focus();", ios_source)
         self.assertIn("mikrofon klávesnice iPhonu", ios_source)
         self.assertNotIn("getUserMedia", ios_source)
         self.assertNotIn("MediaRecorder", ios_source)
         self.assertLess(ios_start, record_source.index("if (!window.isSecureContext)"))
+
+    def test_voice_capture_switches_webkit_audio_session_and_has_ios_fallback(self) -> None:
+        configure_start = HUMAN_ADAM_HTML.index(
+            "function configureVoiceCaptureAudioSession()"
+        )
+        configure_end = HUMAN_ADAM_HTML.index(
+            "function writeWavText", configure_start
+        )
+        configure_source = HUMAN_ADAM_HTML[configure_start:configure_end]
+        release_start = HUMAN_ADAM_HTML.index("function releaseVoiceStream()")
+        release_end = HUMAN_ADAM_HTML.index("function blobToBase64", release_start)
+        release_source = HUMAN_ADAM_HTML[release_start:release_end]
+        record_start = HUMAN_ADAM_HTML.index("async function startVoiceRecording()")
+        record_end = HUMAN_ADAM_HTML.index("function stopVoiceRecording", record_start)
+        record_source = HUMAN_ADAM_HTML[record_start:record_end]
+
+        self.assertIn('navigator.audioSession.type = "play-and-record"', configure_source)
+        self.assertIn("configureCompletionAudioSession();", release_source)
+        self.assertLess(
+            record_source.index("configureVoiceCaptureAudioSession();"),
+            record_source.index("voiceStream = await navigator.mediaDevices.getUserMedia"),
+        )
+        self.assertIn("isAudioSessionCaptureCategoryError(error)", record_source)
+        self.assertIn("použij mikrofon klávesnice", record_source)
 
     def test_active_turn_blocks_new_voice_recording_but_not_manual_status(self) -> None:
         controls_start = HUMAN_ADAM_HTML.index("function syncControls()")

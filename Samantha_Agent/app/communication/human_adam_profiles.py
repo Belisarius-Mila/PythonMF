@@ -2833,8 +2833,12 @@ class HumanAdamProfileManager:
                 answer=answer,
             )
             completion_status_persisted = record_completion_state(
-                TURN_FAILED,
-                failure_code="turn_failed",
+                (
+                    NO_CHANGES_COMPLETED
+                    if operation_state == "completed"
+                    else TURN_FAILED
+                ),
+                failure_code=("" if operation_state == "completed" else "turn_failed"),
                 answer_persisted=answer_persisted,
             )
             return {
@@ -2854,14 +2858,17 @@ class HumanAdamProfileManager:
                 },
             }
         if not dirty and parsed.state == "absent":
-            record_completion_state(
-                TURN_FAILED,
-                failure_code="turn_failed",
+            completion_status_persisted = record_completion_state(
+                NO_CHANGES_COMPLETED,
             )
             return {
                 **result,
                 "automatic_operation": {"state": "not_needed", "attempted": False},
-                "automatic_completion": {"state": "not_needed", "attempted": False},
+                "automatic_completion": {
+                    "state": "no_changes" if writable else "not_needed",
+                    "attempted": False,
+                    "completion_status_persisted": completion_status_persisted,
+                },
             }
 
         if not dirty:
@@ -2873,8 +2880,7 @@ class HumanAdamProfileManager:
                 answer=answer,
             )
             completion_status_persisted = record_completion_state(
-                TURN_FAILED,
-                failure_code="turn_failed",
+                NO_CHANGES_COMPLETED,
                 answer_persisted=answer_persisted,
             )
             return {

@@ -520,6 +520,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   let voiceStarting = false;
   let voiceRecording = false;
   let voiceTranscribing = false;
+  let voiceCaptureAudioSessionConfigured = false;
   let turnTimerId = null;
   let activeTurnStartedAt = "";
   let resultWatchTimerId = null;
@@ -579,6 +580,18 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       navigator.audioSession.type = "playback";
       return navigator.audioSession.type === "playback";
     } catch (_error) {
+      return false;
+    }
+  }
+
+  function configureVoiceCaptureAudioSession() {
+    if (typeof navigator === "undefined" || !("audioSession" in navigator) || !navigator.audioSession) return false;
+    try {
+      navigator.audioSession.type = "play-and-record";
+      voiceCaptureAudioSessionConfigured = navigator.audioSession.type === "play-and-record";
+      return voiceCaptureAudioSessionConfigured;
+    } catch (_error) {
+      voiceCaptureAudioSessionConfigured = false;
       return false;
     }
   }
@@ -866,6 +879,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   function releaseVoiceStream() {
     if (voiceStream) voiceStream.getTracks().forEach((track) => track.stop());
     voiceStream = null;
+    if (voiceCaptureAudioSessionConfigured) configureCompletionAudioSession();
+    voiceCaptureAudioSessionConfigured = false;
   }
 
   function blobToBase64(blob) {
@@ -895,8 +910,21 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
 
   function isIOSDevice() {
     const userAgent = String(navigator.userAgent || "");
-    return /iPad|iPhone|iPod/.test(userAgent)
-      || (navigator.platform === "MacIntel" && Number(navigator.maxTouchPoints || 0) > 1);
+    const platform = String(navigator.platform || "");
+    const userAgentPlatform = String(
+      navigator.userAgentData && navigator.userAgentData.platform || ""
+    );
+    const touchPoints = Number(navigator.maxTouchPoints || 0);
+    const identity = `${userAgent} ${platform} ${userAgentPlatform}`;
+    return /iPad|iPhone|iPod/i.test(identity)
+      || (/Macintosh|MacIntel|Mac OS X/i.test(identity) && touchPoints > 0)
+      || ("audioSession" in navigator && touchPoints > 0);
+  }
+
+  function isAudioSessionCaptureCategoryError(error) {
+    return /AudioSession category is not compatible with audio capture/i.test(
+      String(error && error.message || error || "")
+    );
   }
 
   async function startVoiceRecording() {
@@ -917,6 +945,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     try {
       voiceStarting = true;
       syncControls();
+      configureVoiceCaptureAudioSession();
       voiceStream = await navigator.mediaDevices.getUserMedia({audio:true});
       voiceStarting = false;
       if (sendInFlight || sessionTurnBusy) {
@@ -944,7 +973,12 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       voiceRecording = false;
       releaseVoiceStream();
       syncControls();
-      voiceStatus.textContent = `Mikrofon se nepodařilo spustit: ${error.message || error}`;
+      if (isAudioSessionCaptureCategoryError(error)) {
+        input.focus();
+        voiceStatus.textContent = "Záznam prohlížeče není na tomto iPhonu kompatibilní; použij mikrofon klávesnice a text před odesláním zkontroluj.";
+      } else {
+        voiceStatus.textContent = `Mikrofon se nepodařilo spustit: ${error.message || error}`;
+      }
     }
   }
 

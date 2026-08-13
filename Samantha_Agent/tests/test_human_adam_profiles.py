@@ -1788,7 +1788,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertIn("lease_state=not_requested", expired_input)
         self.assertIn("writable=false", expired_input)
         self.assertEqual(read_only["automatic_completion"]["state"], "not_needed")
-        self.assertEqual(writable["automatic_completion"]["state"], "not_needed")
+        self.assertEqual(writable["automatic_completion"]["state"], "no_changes")
         self.assertEqual(expired["automatic_completion"]["state"], "not_needed")
         self.assertEqual(
             binding.handoff_relative_path,
@@ -1924,7 +1924,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             [str(expected_document_root)],
         )
         self.assertTrue(sandbox_policy["networkAccess"])
-        self.assertEqual(writable["automatic_completion"]["state"], "not_needed")
+        self.assertEqual(writable["automatic_completion"]["state"], "no_changes")
 
     def test_read_only_source_capability_without_owned_root_stays_non_writable(
         self,
@@ -2133,7 +2133,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertIn("lease_owner_id=project-lekarna", model_input)
         self.assertIn("writable=true", model_input)
         self.assertEqual(read_only["automatic_completion"]["state"], "not_needed")
-        self.assertEqual(writable["automatic_completion"]["state"], "not_needed")
+        self.assertEqual(writable["automatic_completion"]["state"], "no_changes")
 
     def test_every_selectable_lazy_stream_uses_canonical_checkpoint_backend(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -3748,6 +3748,31 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertTrue(result["audit_preserved"])
         self.assertEqual(status["state"], "no_changes_completed")
         self.assertFalse(status["git_verified"])
+
+    def test_clean_delivered_writable_turn_is_automatically_completed_without_changes(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, _library_workspace, human_hub, _library_hub = (
+                self.make_manager(Path(temp_dir))
+            )
+            manager.connect()
+            human_hub.next_answer = "Zobrazuji pouze existující náhled; nic jsem nezměnil."
+
+            result = manager.send(
+                text="Zobraz existující náhled",
+                client_message_id="clean-writable-preview-001",
+                write_intent=True,
+            )
+            status = manager.last_step_completion_status()
+
+        self.assertFalse(human_workspace.dirty)
+        self.assertEqual(result["automatic_completion"]["state"], "no_changes")
+        self.assertTrue(
+            result["automatic_completion"]["completion_status_persisted"]
+        )
+        self.assertEqual(status["state"], "no_changes_completed")
+        self.assertEqual(status["failure_code"], "")
 
     def test_advisory_reclassification_refuses_dirty_workspace(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
