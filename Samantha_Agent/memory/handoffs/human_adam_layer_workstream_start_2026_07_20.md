@@ -2696,3 +2696,14 @@ Technický důkaz:
 - Ověření: cílená sada 486/486; plná Cockpit Quality Gate 1403/1403.
 - Další krok: Po samostatně potvrzeném nasazení ověřit stav v panelu Práce a
   jeden neškodný smyšlený obrazový požadavek.
+
+### Servisní oprava 2026-08-13 18:51 CEST
+
+- Pracovní proud: `layer-human-adam-development`
+- Hotovo: Klient privátního app-serveru bezpečně obnoví i vlákno obsahující
+  generovaný obrázek; konečný lokální limit rámce je 32 MiB místo 8 MiB.
+- Příčina: Původní MMTX `thread/resume` vrátil rámec přibližně 18 MiB a spojení
+  skončilo kódem `MESSAGE_TOO_BIG`, přestože proces i socket byly zdravé.
+- Ověření: cíleně 5/5, reálné obnovení původního vlákna prošlo a plná Cockpit
+  Quality Gate prošla 1403/1403 za 425,2 s.
+- Další krok: Samostatně potvrdit nasazení a živě ověřit Připojit v MMTX.

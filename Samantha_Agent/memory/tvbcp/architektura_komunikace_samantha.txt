@@ -4025,3 +4025,28 @@ Technický důkaz:
 - Cílená sada prošla 486/486 testů.
 - Plná Cockpit Quality Gate prošla 1403/1403 testů včetně Python, JavaScript,
   shell a whitespace kontrol.
+
+### 2026-08-13 18:51 CEST – Obnova mediálního vlákna má bezpečnou 32MiB rezervu
+
+Hotovo:
+- Byla nalezena přesná příčina nepřipojitelného MMTX vlákna: odpověď
+  `thread/resume` s generovaným obrázkem měla přibližně 18 MiB a překročila
+  původní 8MiB limit lokálního WebSocket klienta.
+- Privátní Unix-socket transport má nyní konečný limit 32 MiB.
+
+Rozhodnutí:
+- Limit zůstává omezený a mění se pouze pro lokální app-server rámec; nemění
+  povolenou velikost veřejných uploadů, promptů ani checkpointovaných souborů.
+
+Další krok:
+- Samostatně potvrdit nasazení a živě ověřit tlačítko Připojit ve stejném MMTX
+  vlákně.
+
+Navrhované další kroky:
+- Pokud mediální vlákna budou dále výrazně růst, řešit jejich řízenou rotaci;
+  limit znovu nezvyšovat bez naměřené potřeby.
+
+Technický důkaz:
+- Cílené testy app-server klienta prošly 5/5.
+- Přímé obnovení původního MMTX vlákna s novým limitem prošlo.
+- Plná Cockpit Quality Gate prošla 1403/1403 testů za 425,2 s.

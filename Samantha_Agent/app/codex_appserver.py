@@ -31,7 +31,10 @@ CODEX_PATH_PREFIXES = (
     "/usr/sbin",
     "/sbin",
 )
-UNIX_APP_SERVER_MAX_MESSAGE_BYTES = 8 * 1024 * 1024
+# Resuming a persistent thread may return its accumulated media items in one
+# local WebSocket frame.  Keep a finite limit, but leave enough headroom for a
+# conversation containing a generated image (observed frame: about 18 MiB).
+UNIX_APP_SERVER_MAX_MESSAGE_BYTES = 32 * 1024 * 1024
 
 
 def utc_now() -> str:

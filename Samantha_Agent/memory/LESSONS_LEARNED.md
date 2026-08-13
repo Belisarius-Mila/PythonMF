@@ -184,3 +184,16 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   do 25 MiB na soubor. Nadále blokovat soukromé a env cesty i neprůhledné
   dokumenty a balíky; stejný kontrakt používat při checkpointu, převzetí i
   synchronizaci workspace z `main`.
+
+### LL-014 — Vlákno s generovaným obrázkem může překročit rámec app-serveru
+
+- Problém: Human–Adam se po vytvoření obrázku nedokázal znovu připojit, přestože
+  Cockpit, app-server i privátní socket běžely. Obnova vlákna vrátila jeden
+  WebSocket rámec o velikosti přibližně 18 MiB a klient jej odmítl původním
+  limitem 8 MiB jako `MESSAGE_TOO_BIG`.
+- Typ: opakující se
+- Řešení nalezeno: 13082026
+- Řešení: U privátního Unix-socket transportu zachovat konečný limit, ale zvýšit
+  jej na 32 MiB. Při podobné chybě ověřit nejdřív vnitřní příčinu WebSocket
+  uzavření; samotná existence socketu a úspěšný `initialize` ještě nedokládají,
+  že se vejde odpověď `thread/resume` s nahromaděnými médii.
