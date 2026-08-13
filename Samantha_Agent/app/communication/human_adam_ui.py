@@ -58,6 +58,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     .reply-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
     .reply-speech,.reply-copy { padding:6px 9px; font-size:12px; white-space:nowrap; }
     .image-candidate-card { width:min(520px,100%); margin-top:10px; padding:12px; border:1px solid #bfdbfe; border-radius:13px; display:grid; gap:9px; background:#fff; white-space:normal; }
+    .image-candidate-gallery { width:100%; margin-top:10px; display:grid; grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr)); gap:12px; }
+    .image-candidate-gallery .image-candidate-card { width:100%; margin-top:0; }
     .image-candidate-card[data-status="approved"] { border-color:#86efac; background:#f0fdf4; }
     .image-candidate-card[data-status="rejected"] { border-color:#fca5a5; background:#fef2f2; }
     .image-candidate-card h3 { margin:0; font-size:15px; }
@@ -1143,7 +1145,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       const next = new Map();
       for (const candidate of Array.isArray(payload.candidates) ? payload.candidates : []) {
         const messageId = String(candidate.client_message_id || "");
-        if (messageId) next.set(messageId, candidate);
+        if (!messageId) continue;
+        const candidates = next.get(messageId) || [];
+        candidates.push(candidate);
+        next.set(messageId, candidates);
       }
       imageCandidatesByMessage = next;
       if (lastSession) renderSession(lastSession);
@@ -1289,7 +1294,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     }
   }
 
-  function bubble(text, className, meta, spokenText="", imageCandidate=null) {
+  function bubble(text, className, meta, spokenText="", imageCandidates=[]) {
     const node = document.createElement("article");
     node.className = `bubble ${className}`;
     node.textContent = text;
@@ -1298,7 +1303,15 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     small.textContent = meta;
     node.appendChild(small);
     if (spokenText) node.appendChild(answerSpeechControl(spokenText));
-    if (imageCandidate) node.appendChild(imageCandidateCard(imageCandidate));
+    if (Array.isArray(imageCandidates) && imageCandidates.length) {
+      const gallery = document.createElement("section");
+      gallery.className = "image-candidate-gallery";
+      gallery.setAttribute("aria-label", `Obrázkové návrhy (${imageCandidates.length})`);
+      for (const candidate of imageCandidates) {
+        gallery.appendChild(imageCandidateCard(candidate));
+      }
+      node.appendChild(gallery);
+    }
     return node;
   }
 
@@ -1312,7 +1325,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       exchange.className = "exchange";
       exchange.appendChild(bubble(item.user_text || "", "human", `Odesláno ${formatTime(item.client_sent_at || item.received_at)}`));
       const confirmed = item.delivery_confirmed ? "Doručení potvrzeno" : (item.status === "delivery_unknown" ? "Doručení nejisté – neposílat automaticky znovu" : "Zpracování nedokončeno");
-      if (item.answer) exchange.appendChild(bubble(item.answer, "adam", `Adam · ${formatTime(item.completed_at)} · ${confirmed}`, item.answer, imageCandidatesByMessage.get(String(item.client_message_id || "")) || null));
+      if (item.answer) exchange.appendChild(bubble(item.answer, "adam", `Adam · ${formatTime(item.completed_at)} · ${confirmed}`, item.answer, imageCandidatesByMessage.get(String(item.client_message_id || "")) || []));
       else exchange.appendChild(bubble(item.status === "pending" ? "Adam pracuje…" : confirmed, "adam", formatTime(item.received_at)));
       chat.appendChild(exchange);
     }
@@ -2685,6 +2698,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     checkpointBtn.disabled = true;
     workMeta.textContent = "Vytvářím bezpečný lokální checkpoint…";
     let failure = "";
+    let imageImportFailure = "";
     try {
       const payload = await api("/api/human-adam/checkpoint", {method:"POST", body:JSON.stringify({confirmed:true,message:checkpointTitle})});
       if (!payload.ok) throw new Error(payload.message || "Checkpoint selhal.");
@@ -3091,10 +3105,14 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         notice.textContent = "Odpověď doručena a potvrzena.";
         playCompletionMediaSound();
       });
+      if (payload.image_import && payload.image_import.state === "failed") {
+        imageImportFailure = `Obrázky byly vygenerované, ale nepodařilo se je bezpečně převzít do galerie: ${payload.image_import.message || "neznámá chyba"}`;
+      }
       await prepareImageCandidate(text, clientId);
     }
     await loadStatus();
     if (failure) notice.textContent = failure;
+    else if (imageImportFailure) notice.textContent = imageImportFailure;
   }
 
   composer.addEventListener("submit", sendMessage);

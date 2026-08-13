@@ -221,6 +221,7 @@ class FakeHub:
         self.on_send = None
         self.replaced_answers: list[tuple[str, str]] = []
         self.fail_connect = False
+        self.generated_images: list[dict[str, str]] = []
 
     def snapshot(self) -> dict[str, object]:
         return {
@@ -248,7 +249,9 @@ class FakeHub:
                 "status": "completed",
                 "delivery_confirmed": True,
                 "answer": self.next_answer,
+                "user_text": str(kwargs.get("text") or ""),
             },
+            "_generated_images": list(self.generated_images),
         }
 
     def replace_completed_answer(
@@ -1564,6 +1567,43 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertIn("writable=false", str(lazy_send["model_input_text"]))
         self.assertEqual(human_hub.last_send, {})
         self.assertEqual(sent["automatic_completion"]["state"], "not_needed")
+
+    def test_completed_turn_imports_transient_images_before_public_response(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, *_workspaces, _human_hub, _library_hub = self.make_manager(
+                Path(temp_dir)
+            )
+            lazy = FakeLazyThreads(Path(temp_dir) / "lazy")
+            manager.workstream_threads = lazy  # type: ignore[assignment]
+            human_adam_profile_switch_action(
+                {"workstream_id": "project-mmtx", "confirmed": True},
+                service=manager,
+            )
+            lazy.hubs["project-mmtx"].generated_images = [
+                {
+                    "item_id": "exec-image-12345678",
+                    "result": "aW1hZ2U=",
+                    "revised_prompt": "Smyšlená sova",
+                }
+            ]
+            with patch(
+                "app.communication.human_adam_profiles.import_completed_generated_images",
+                return_value={"state": "completed", "imported_count": 1},
+            ) as importer:
+                result = manager.send(
+                    text="Vygeneruj obrázek smyšlené sovy.",
+                    client_message_id="generation-import-001",
+                )
+
+        importer.assert_called_once()
+        self.assertEqual(
+            importer.call_args.kwargs["client_message_id"],
+            "generation-import-001",
+        )
+        self.assertEqual(len(importer.call_args.kwargs["generated_images"]), 1)
+        self.assertEqual(result["image_import"]["state"], "completed")
+        self.assertNotIn("_generated_images", result)
+        self.assertNotIn("aW1hZ2U=", json.dumps(result))
 
     def test_durable_external_generation_consent_is_injected_across_workstreams(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

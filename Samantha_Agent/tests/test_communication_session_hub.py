@@ -22,6 +22,7 @@ class FakeClient:
     fail_send = False
     fail_resume = False
     next_thread_ids: list[str] = []
+    generated_images: tuple[dict[str, str], ...] = ()
 
     def __init__(self) -> None:
         self.running = True
@@ -72,6 +73,7 @@ class FakeClient:
             turn_started_confirmed=True,
             user_item_count=1,
             duration_ms=1,
+            generated_images=self.__class__.generated_images,
         )
 
     def close(self) -> None:
@@ -86,6 +88,7 @@ class CanonicalSessionHubTests(unittest.TestCase):
         FakeClient.fail_send = False
         FakeClient.fail_resume = False
         FakeClient.next_thread_ids = []
+        FakeClient.generated_images = ()
 
     def make_hub(self, root: Path) -> CanonicalSessionHub:
         return CanonicalSessionHub(
@@ -122,6 +125,24 @@ class CanonicalSessionHubTests(unittest.TestCase):
         self.assertTrue(first["entry"]["delivery_confirmed"])
         self.assertTrue(duplicate["duplicate_prevented"])
         self.assertEqual(FakeClient.instances[0].sent, 1)
+
+    def test_generated_images_are_returned_transiently_but_not_persisted(self) -> None:
+        FakeClient.generated_images = (
+            {
+                "item_id": "exec-image-12345678",
+                "result": "aW1hZ2U=",
+                "revised_prompt": "Smyšlená sova",
+            },
+        )
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            hub = self.make_hub(root)
+            result = hub.send(text="Obrázek", client_message_id="message-image-0001")
+            persisted = (root / "session.json").read_text(encoding="utf-8")
+
+        self.assertEqual(len(result["_generated_images"]), 1)
+        self.assertNotIn("aW1hZ2U=", persisted)
+        self.assertNotIn("generated_images", persisted)
 
     def test_completed_answer_can_be_safely_post_processed_and_persisted(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

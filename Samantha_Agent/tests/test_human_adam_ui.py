@@ -1105,7 +1105,7 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn('<button id="voiceStopBtn" type="button" hidden disabled>', HUMAN_ADAM_HTML)
 
     def test_completed_adam_answers_get_explicit_reply_controls_only(self) -> None:
-        bubble_start = HUMAN_ADAM_HTML.index("function bubble(text, className, meta, spokenText=\"\", imageCandidate=null)")
+        bubble_start = HUMAN_ADAM_HTML.index("function bubble(text, className, meta, spokenText=\"\", imageCandidates=[])")
         bubble_end = HUMAN_ADAM_HTML.index("function renderSession(session)", bubble_start)
         bubble_source = HUMAN_ADAM_HTML[bubble_start:bubble_end]
         render_start = bubble_end
@@ -1175,8 +1175,13 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn('api("/api/human-adam/images")', load_source)
         self.assertIn("const requestedWorkstreamId = activeWorkstreamId;", load_source)
         self.assertIn("requestedWorkstreamId !== activeWorkstreamId", load_source)
+        self.assertIn("const candidates = next.get(messageId) || [];", load_source)
+        self.assertIn("candidates.push(candidate);", load_source)
         self.assertIn("imageCandidatesByMessage = next;", load_source)
         self.assertIn("imageCandidatesByMessage.get", render_source)
+        self.assertIn('gallery.className = "image-candidate-gallery";', HUMAN_ADAM_HTML)
+        self.assertIn("for (const candidate of imageCandidates)", HUMAN_ADAM_HTML)
+        self.assertIn("Obrázkové návrhy (${imageCandidates.length})", HUMAN_ADAM_HTML)
         self.assertIn("candidate.image_url", HUMAN_ADAM_HTML)
         self.assertNotIn("candidate.base64", HUMAN_ADAM_HTML)
         self.assertNotIn("candidate.path", HUMAN_ADAM_HTML)

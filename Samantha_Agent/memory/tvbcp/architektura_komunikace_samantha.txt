@@ -4050,3 +4050,34 @@ Technický důkaz:
 - Cílené testy app-server klienta prošly 5/5.
 - Přímé obnovení původního MMTX vlákna s novým limitem prošlo.
 - Plná Cockpit Quality Gate prošla 1403/1403 testů za 425,2 s.
+
+### 2026-08-13 20:26 CEST – Obrazové výstupy tahu se trvale převádějí do galerie
+
+Hotovo:
+- Dokončený tah předává všechny své `imageGeneration` výstupy serverové vrstvě,
+  která je idempotentně uloží jako samostatné private kandidáty.
+- Jedna chatová zpráva může zobrazit galerii více verzí se samostatným
+  schválením nebo zamítnutím.
+- Čtyři dříve nezobrazené MMTX obrázky byly create-only převzaty a zůstávají ve
+  stavu čekajícím na rozhodnutí.
+
+Rozhodnutí:
+- Obrazová data ani lokální cesty se neukládají do session JSON a nevracejí se
+  ve veřejné odpovědi; prohlížeč dostává jen kandidátní URL.
+- Import je omezený na osm dokončených obrázků na tah, 25 MiB na soubor a
+  pracovní proud s capability generování obrázků.
+
+Další krok:
+- Po dokončení plné brány samostatně potvrdit nasazení a živě ověřit galerii
+  čtyř současných MMTX obrázků.
+
+Navrhované další kroky:
+- V galerii rozhodnout o každé verzi zvlášť; schválení nadále nic nepublikuje ani
+  nevkládá do projektu.
+
+Technický důkaz:
+- Cílená a integrační sada prošla 501/501 testů včetně JavaScript syntaxe.
+- Plná Cockpit Quality Gate prošla 1409/1409 testů za 442,1 s včetně Python,
+  JavaScript, shell a whitespace kontrol.
+- Private API eviduje jeden starší schválený a čtyři nové nerozhodnuté
+  kandidáty ve správných zprávách.

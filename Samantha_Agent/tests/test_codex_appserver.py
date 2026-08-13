@@ -11,6 +11,7 @@ from app.codex_appserver import (
     TurnReceipt,
     UNIX_APP_SERVER_MAX_MESSAGE_BYTES,
     UnixSocketAppServerTransport,
+    completed_generated_images,
     codex_environment,
 )
 
@@ -39,6 +40,35 @@ class CodexContractTests(unittest.TestCase):
         self.assertTrue(TurnReceipt(user_item_count=1, **base).delivered)
         self.assertFalse(TurnReceipt(user_item_count=2, **base).delivered)
         self.assertFalse(TurnReceipt(user_item_count=1, **(base | {"turn_started_confirmed": False})).delivered)
+
+    def test_receipt_public_dict_exposes_only_generated_image_count(self) -> None:
+        receipt = TurnReceipt(
+            client_message_id="appserver-client-12345678",
+            thread_id="thread",
+            turn_id="turn",
+            requested_at="a",
+            accepted_at="b",
+            started_at="c",
+            completed_at="d",
+            status="completed",
+            answer="ano",
+            turn_started_confirmed=True,
+            user_item_count=1,
+            duration_ms=1,
+            generated_images=(
+                {
+                    "item_id": "exec-image-12345678",
+                    "result": "secret-base64",
+                    "revised_prompt": "prompt",
+                },
+            ),
+        )
+
+        public = receipt.as_dict()
+
+        self.assertEqual(public["generated_image_count"], 1)
+        self.assertNotIn("generated_images", public)
+        self.assertNotIn("secret-base64", json.dumps(public))
 
     def test_codex_environment_adds_service_runtime_paths(self) -> None:
         env = codex_environment({"PATH": "/custom/bin", "HOME": "/tmp/home"})
@@ -85,6 +115,37 @@ class CodexContractTests(unittest.TestCase):
             unix_connect.call_args.kwargs["max_size"],
             UNIX_APP_SERVER_MAX_MESSAGE_BYTES,
         )
+
+    def test_completed_images_are_bounded_deduplicated_and_drop_saved_paths(self) -> None:
+        items = [
+            {
+                "type": "imageGeneration",
+                "id": "exec-image-12345678",
+                "status": "completed",
+                "result": "aW1hZ2U=",
+                "revisedPrompt": "Smyšlená modrá sova",
+                "savedPath": "/private/secret/generated.png",
+            },
+            {
+                "type": "imageGeneration",
+                "id": "exec-image-12345678",
+                "status": "completed",
+                "result": "aW1hZ2U=",
+            },
+            {
+                "type": "imageGeneration",
+                "id": "exec-image-incomplete",
+                "status": "inProgress",
+                "result": "aW1hZ2U=",
+            },
+        ]
+
+        images = completed_generated_images(items)
+
+        self.assertEqual(len(images), 1)
+        self.assertEqual(images[0]["item_id"], "exec-image-12345678")
+        self.assertEqual(images[0]["result"], "aW1hZ2U=")
+        self.assertNotIn("savedPath", images[0])
 
 
 class _FakeUnixConnection:

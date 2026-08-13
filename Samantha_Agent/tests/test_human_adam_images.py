@@ -16,6 +16,7 @@ from app.communication.human_adam_images import (
     human_adam_image_file_action,
     human_adam_image_generate_action,
     human_adam_image_prepare_action,
+    import_completed_generated_images,
     is_image_generation_request,
     prepare_image_prompt,
 )
@@ -159,6 +160,66 @@ class HumanAdamImageTests(unittest.TestCase):
         self.assertEqual(public["image_url"], f'/api/human-adam/images/file?id={generated["candidate_id"]}')
         self.assertNotIn("path", public)
         self.assertNotIn("request_text", public)
+
+    def test_completed_turn_imports_multiple_images_idempotently(self) -> None:
+        outputs = [
+            {
+                "item_id": f"exec-image-{index:08d}",
+                "result": base64.b64encode(PNG_BYTES + bytes([index])).decode("ascii"),
+                "revised_prompt": f"Smyšlená sova {index}",
+            }
+            for index in range(1, 5)
+        ]
+
+        first = self.store.import_generated_images(
+            client_message_id="human-adam-message-gallery",
+            workstream_id=HUMAN_ADAM_TEST_WORKSTREAM_ID,
+            request_text="Vygeneruj čtyři obrázky smyšlené sovy.",
+            generated_images=outputs,
+        )
+        repeated = self.store.import_generated_images(
+            client_message_id="human-adam-message-gallery",
+            workstream_id=HUMAN_ADAM_TEST_WORKSTREAM_ID,
+            request_text="Vygeneruj čtyři obrázky smyšlené sovy.",
+            generated_images=outputs,
+        )
+        public = self.store.public_list(
+            workstream_id=HUMAN_ADAM_TEST_WORKSTREAM_ID
+        )
+
+        self.assertEqual(len(first), 4)
+        self.assertEqual(
+            [record["candidate_id"] for record in repeated],
+            [record["candidate_id"] for record in first],
+        )
+        self.assertEqual(len(public), 4)
+        self.assertEqual([candidate["version"] for candidate in public], [1, 2, 3, 4])
+        self.assertTrue(all(candidate["status"] == "generated" for candidate in public))
+        self.assertTrue(all(candidate["image_url"] for candidate in public))
+        self.assertNotIn("source_item_id", json.dumps(public, ensure_ascii=False))
+        self.assertNotIn("aW1hZ2U", json.dumps(public, ensure_ascii=False))
+
+    def test_transient_import_action_returns_only_safe_candidate_ids(self) -> None:
+        result = import_completed_generated_images(
+            service=self.service,
+            client_message_id="human-adam-message-import",
+            request_text="Vygeneruj obrázek smyšlené sovy.",
+            generated_images=[
+                {
+                    "item_id": "exec-image-import-12345678",
+                    "result": base64.b64encode(PNG_BYTES).decode("ascii"),
+                    "revised_prompt": "Smyšlená sova",
+                }
+            ],
+            store=self.store,
+        )
+
+        self.assertEqual(result["state"], "completed")
+        self.assertEqual(result["imported_count"], 1)
+        self.assertRegex(result["candidate_ids"][0], r"^img_[0-9a-f]{32}$")
+        serialized = json.dumps(result)
+        self.assertNotIn("aW1hZ2U", serialized)
+        self.assertNotIn("source_item", serialized)
 
     def test_active_durable_consent_replaces_candidate_specific_confirmation(self) -> None:
         record = self.prepare("durable")

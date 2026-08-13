@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import base64
 import binascii
+import hashlib
 import os
 import re
 import tempfile
@@ -227,8 +228,10 @@ class HumanAdamImageCandidateStore:
         if str(loaded.get("candidate_id") or "") != validate_candidate_id(candidate_id):
             raise HumanAdamImageError("Kandidát obrázku má nekonzistentní ID.")
         if loaded.get("schema_version") == 1:
-            loaded["schema_version"] = CURRENT_CANDIDATE_SCHEMA
             loaded["workstream_id"] = LEGACY_SCHEMA_1_WORKSTREAM_ID
+            loaded["schema_version"] = CURRENT_CANDIDATE_SCHEMA
+            loaded["source_kind"] = "confirmed_candidate_generation"
+            loaded["source_item_id"] = ""
             self._save(loaded)
         record_workstream_id = validate_workstream_id(
             str(loaded.get("workstream_id") or "")
@@ -278,6 +281,8 @@ class HumanAdamImageCandidateStore:
                 "updated_at": now,
                 "decided_at": "",
                 "generation_note": "",
+                "source_kind": "confirmed_candidate_generation",
+                "source_item_id": "",
             }
             self._candidate_dir(candidate_id).mkdir(parents=True, exist_ok=False)
             self._save(record)
@@ -338,6 +343,114 @@ class HumanAdamImageCandidateStore:
                 )
                 self._save(record)
                 raise
+
+    def import_generated_images(
+        self,
+        *,
+        client_message_id: str,
+        workstream_id: str,
+        request_text: str,
+        generated_images: object,
+    ) -> list[dict[str, Any]]:
+        """Idempotently import completed app-server images as private candidates."""
+
+        clean_message_id = validate_client_message_id(client_message_id)
+        clean_workstream_id = validate_workstream_id(workstream_id)
+        clean_request = str(request_text or "").strip()
+        if not isinstance(generated_images, (list, tuple)):
+            raise HumanAdamImageError("Obrazové výstupy tahu nemají platný seznam.")
+        if len(generated_images) > 8:
+            raise HumanAdamImageError("Jeden tah obsahuje příliš mnoho obrazových výstupů.")
+
+        imported: list[dict[str, Any]] = []
+        with self._lock:
+            existing_records = self.list_records(
+                workstream_id=clean_workstream_id
+            )
+            versions = [
+                int(record.get("version") or 1)
+                for record in existing_records
+                if record.get("client_message_id") == clean_message_id
+            ]
+            next_version = max(versions, default=0) + 1
+            for generated in generated_images:
+                if not isinstance(generated, dict):
+                    raise HumanAdamImageError("Obrazový výstup tahu není platný.")
+                source_item_id = str(generated.get("item_id") or "").strip()
+                encoded = str(generated.get("result") or "").strip()
+                revised_prompt = str(generated.get("revised_prompt") or "").strip()
+                if not re.fullmatch(r"[A-Za-z0-9_-]{8,128}", source_item_id):
+                    raise HumanAdamImageError("Obrazový výstup tahu nemá platné ID.")
+                if not encoded or len(encoded) > ((MAX_IMAGE_BYTES + 2) // 3 * 4 + 8):
+                    raise HumanAdamImageError("Obrazový výstup tahu má nepovolenou velikost.")
+                try:
+                    raw = base64.b64decode(encoded, validate=True)
+                except (binascii.Error, ValueError) as exc:
+                    raise HumanAdamImageError(
+                        "Obrazový výstup tahu nemá platná data."
+                    ) from exc
+                if not raw or len(raw) > MAX_IMAGE_BYTES:
+                    raise HumanAdamImageError("Obrazový výstup tahu má nepovolenou velikost.")
+                image_file, mime_type = _image_kind(raw)
+                digest = hashlib.sha256(
+                    f"{clean_workstream_id}\0{clean_message_id}\0{source_item_id}".encode(
+                        "utf-8"
+                    )
+                ).hexdigest()[:32]
+                candidate_id = f"img_{digest}"
+                candidate_dir = self._candidate_dir(candidate_id)
+                if candidate_dir.exists():
+                    record = self._load(
+                        candidate_id,
+                        expected_workstream_id=clean_workstream_id,
+                    )
+                    if (
+                        record.get("client_message_id") != clean_message_id
+                        or record.get("source_kind") != "app_server_image_generation"
+                        or record.get("source_item_id") != source_item_id
+                    ):
+                        raise HumanAdamImageError(
+                            "Existující obrazový kandidát neodpovídá zdrojovému výstupu."
+                        )
+                    imported.append(record)
+                    continue
+
+                now = utc_now()
+                record = {
+                    "schema_version": CURRENT_CANDIDATE_SCHEMA,
+                    "candidate_id": candidate_id,
+                    "version": next_version,
+                    "workstream_id": clean_workstream_id,
+                    "client_message_id": clean_message_id,
+                    "request_text": clean_request,
+                    "prompt": revised_prompt or clean_request or "Obrazový výstup Human–Adam",
+                    "parameters": {
+                        "model": "Human–Adam image generation",
+                        "size": "generated",
+                        "quality": "generated",
+                        "output_format": image_file.rsplit(".", 1)[-1],
+                    },
+                    "status": "generated",
+                    "image_file": image_file,
+                    "mime_type": mime_type,
+                    "created_at": now,
+                    "updated_at": now,
+                    "decided_at": "",
+                    "generation_note": "Automaticky převzato z dokončeného obrazového výstupu Human–Adam.",
+                    "source_kind": "app_server_image_generation",
+                    "source_item_id": source_item_id,
+                }
+                candidate_dir.mkdir(parents=True, exist_ok=False)
+                try:
+                    _atomic_create_bytes(candidate_dir / image_file, raw)
+                    self._save(record)
+                except Exception:
+                    (candidate_dir / image_file).unlink(missing_ok=True)
+                    candidate_dir.rmdir()
+                    raise
+                imported.append(record)
+                next_version += 1
+        return imported
 
     def decide(
         self,
@@ -407,7 +520,15 @@ class HumanAdamImageCandidateStore:
                         records.append(record)
                 except HumanAdamImageError:
                     continue
-        return sorted(records, key=lambda item: str(item.get("created_at") or ""))[-100:]
+        return sorted(
+            records,
+            key=lambda item: (
+                str(item.get("created_at") or ""),
+                str(item.get("client_message_id") or ""),
+                int(item.get("version") or 1),
+                str(item.get("candidate_id") or ""),
+            ),
+        )[-100:]
 
     def public(self, record: dict[str, Any]) -> dict[str, Any]:
         candidate_id = validate_candidate_id(str(record.get("candidate_id") or ""))
@@ -473,6 +594,42 @@ def _trusted_external_generation_enabled(service: Any) -> bool:
         and status.get("state") == "active"
         and status.get("consent_id") == "trusted_external_generation_v1"
     )
+
+
+def import_completed_generated_images(
+    *,
+    service: Any,
+    client_message_id: str,
+    request_text: str,
+    generated_images: object,
+    store: HumanAdamImageCandidateStore = HUMAN_ADAM_IMAGE_STORE,
+) -> dict[str, Any]:
+    """Import transient app-server image outputs without exposing their bytes."""
+
+    images = list(generated_images) if isinstance(generated_images, (list, tuple)) else []
+    if not images:
+        return {"state": "not_needed", "imported_count": 0}
+    try:
+        workstream_id = _active_image_workstream(service)
+        imported = store.import_generated_images(
+            client_message_id=client_message_id,
+            workstream_id=workstream_id,
+            request_text=request_text,
+            generated_images=images,
+        )
+        return {
+            "state": "completed",
+            "imported_count": len(imported),
+            "candidate_ids": [
+                str(record.get("candidate_id") or "") for record in imported
+            ],
+        }
+    except (HumanAdamImageError, OSError, TypeError, ValueError) as exc:
+        return {
+            "state": "failed",
+            "imported_count": 0,
+            "message": str(exc),
+        }
 
 
 def human_adam_image_candidates_action(

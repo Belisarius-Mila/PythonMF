@@ -98,6 +98,7 @@ class TurnReceipt:
     turn_started_confirmed: bool
     user_item_count: int
     duration_ms: int
+    generated_images: tuple[dict[str, str], ...] = ()
 
     @property
     def delivered(self) -> bool:
@@ -109,7 +110,46 @@ class TurnReceipt:
         )
 
     def as_dict(self) -> dict[str, Any]:
-        return asdict(self) | {"delivered": self.delivered}
+        payload = asdict(self)
+        payload.pop("generated_images", None)
+        return payload | {
+            "delivered": self.delivered,
+            "generated_image_count": len(self.generated_images),
+        }
+
+
+def completed_generated_images(items: object) -> tuple[dict[str, str], ...]:
+    """Return bounded image-generation outputs without local saved paths."""
+
+    if not isinstance(items, list):
+        return ()
+    images: list[dict[str, str]] = []
+    seen_ids: set[str] = set()
+    for item in items:
+        if not isinstance(item, dict) or item.get("type") != "imageGeneration":
+            continue
+        item_id = str(item.get("id") or "").strip()
+        status = str(item.get("status") or "").strip()
+        encoded = str(item.get("result") or "").strip()
+        revised_prompt = str(item.get("revisedPrompt") or "").strip()
+        if (
+            status != "completed"
+            or not re.fullmatch(r"[A-Za-z0-9_-]{8,128}", item_id)
+            or not encoded
+            or item_id in seen_ids
+        ):
+            continue
+        seen_ids.add(item_id)
+        images.append(
+            {
+                "item_id": item_id,
+                "result": encoded,
+                "revised_prompt": revised_prompt[:8_000],
+            }
+        )
+        if len(images) >= 8:
+            break
+    return tuple(images)
 
 
 def read_codex_version(
@@ -469,6 +509,7 @@ class CodexAppServerClient:
         started_at = ""
         user_items: list[dict[str, Any]] = []
         agent_messages: list[str] = []
+        generated_images: tuple[dict[str, str], ...] = ()
         status = ""
         while not status:
             event = self.transport.receive(
@@ -488,6 +529,13 @@ class CodexAppServerClient:
                     user_items.append(item)
                 if item.get("type") == "agentMessage" and isinstance(item.get("text"), str):
                     agent_messages.append(item["text"])
+                if item.get("type") == "imageGeneration":
+                    completed_image = completed_generated_images([item])
+                    if completed_image and all(
+                        existing["item_id"] != completed_image[0]["item_id"]
+                        for existing in generated_images
+                    ):
+                        generated_images = (*generated_images, completed_image[0])[:8]
             if method == "turn/completed":
                 completed_turn = params.get("turn")
                 if not isinstance(completed_turn, dict):
@@ -512,6 +560,9 @@ class CodexAppServerClient:
                     user_items = authoritative_users
                     if authoritative_answers:
                         agent_messages = authoritative_answers
+                    authoritative_images = completed_generated_images(completed_items)
+                    if authoritative_images:
+                        generated_images = authoritative_images
 
         receipt = TurnReceipt(
             client_message_id=message_id,
@@ -526,6 +577,7 @@ class CodexAppServerClient:
             turn_started_confirmed=turn_started_confirmed,
             user_item_count=len(user_items),
             duration_ms=round((time.monotonic() - started_monotonic) * 1000),
+            generated_images=generated_images,
         )
         if not receipt.delivered:
             raise AppServerContractError("Turn nebyl jednoznačně potvrzen jako doručený a dokončený.")

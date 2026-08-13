@@ -35,6 +35,7 @@ from app.communication.human_adam_service import (
     HUMAN_ADAM_DEVELOPER_INSTRUCTIONS,
     HumanAdamService,
 )
+from app.communication.human_adam_images import import_completed_generated_images
 from app.communication.human_adam_completion_status import (
     CHECKPOINT_COMPLETED,
     CHECKPOINT_FAILED,
@@ -1765,6 +1766,18 @@ class HumanAdamProfileManager:
                     except (DeferredIntegrationError, OSError, TypeError, ValueError):
                         pass
                 raise
+            transient_images = result.pop("_generated_images", [])
+            delivered_entry = result.get("entry")
+            image_import = import_completed_generated_images(
+                service=self,
+                client_message_id=client_message_id,
+                request_text=(
+                    str(delivered_entry.get("user_text") or "")
+                    if isinstance(delivered_entry, dict)
+                    else ""
+                ),
+                generated_images=transient_images,
+            )
             completed = self._complete_successful_turn(
                 service=service,
                 active_id=active_id,
@@ -1777,6 +1790,7 @@ class HumanAdamProfileManager:
             return {
                 **completed,
                 "workspace_synced": workspace_synced,
+                "image_import": image_import,
             }
 
     def _sync_clean_active_workspace_from_main(

@@ -197,3 +197,16 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   jej na 32 MiB. Při podobné chybě ověřit nejdřív vnitřní příčinu WebSocket
   uzavření; samotná existence socketu a úspěšný `initialize` ještě nedokládají,
   že se vejde odpověď `thread/resume` s nahromaděnými médii.
+
+### LL-015 — Obrazový výstup modelového tahu není automaticky kandidát chatu
+
+- Problém: Human–Adam správně vytvořil několik `imageGeneration` výstupů, ale
+  session hub persistoval pouze textovou odpověď. UI četlo jiné private
+  kandidátní úložiště, takže obrázky existovaly uvnitř app-server vlákna, ale v
+  chatu se nezobrazily.
+- Typ: opakující se
+- Řešení nalezeno: 13082026
+- Řešení: Při potvrzeném dokončení tahu zachytit nejvýše osm dokončených
+  obrazových položek, před veřejnou odpovědí je idempotentně a create-only
+  importovat do private kandidátů a pro jednu zprávu zobrazit galerii. Base64
+  data ani lokální cesty nepersistovat do session JSON a nevystavovat přes API.

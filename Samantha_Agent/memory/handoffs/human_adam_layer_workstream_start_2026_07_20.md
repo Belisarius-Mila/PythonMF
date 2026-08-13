@@ -2707,3 +2707,18 @@ Technický důkaz:
 - Ověření: cíleně 5/5, reálné obnovení původního vlákna prošlo a plná Cockpit
   Quality Gate prošla 1403/1403 za 425,2 s.
 - Další krok: Samostatně potvrdit nasazení a živě ověřit Připojit v MMTX.
+
+### Servisní vývoj 2026-08-13 20:26 CEST
+
+- Pracovní proud: `layer-human-adam-development`
+- Hotovo: Více obrazových výstupů jednoho dokončeného tahu se idempotentně
+  převádí do private kandidátů a UI je zobrazuje jako galerii.
+- Bezpečnost: Nejvýše osm obrázků na tah a 25 MiB na soubor; žádné base64 ani
+  lokální cesty v session JSON nebo veřejném API; jednotlivé verze zůstávají
+  bez publikace a čekají na rozhodnutí.
+- Obnova: Čtyři dříve nezobrazené MMTX obrázky jsou zachráněné jako čtyři
+  samostatné kandidátní verze.
+- Ověření: cílená a integrační sada 501/501; plná Cockpit Quality Gate
+  1409/1409 za 442,1 s.
+- Další krok: Vytvořit checkpoint a samostatně potvrzené nasazení; potom živě
+  ověřit galerii čtyř obrázků.

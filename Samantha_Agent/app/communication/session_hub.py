@@ -426,6 +426,13 @@ class CanonicalSessionHub:
                 self._state["active_turn"] = None
                 self._state["connection_state"] = "connected"
                 self._save_locked()
-                return {"ok": True, "duplicate_prevented": False, "entry": copy.deepcopy(entry)}
+                return {
+                    "ok": True,
+                    "duplicate_prevented": False,
+                    "entry": copy.deepcopy(entry),
+                    "_generated_images": [
+                        dict(image) for image in receipt.generated_images
+                    ],
+                }
         finally:
             self._turn_lock.release()
