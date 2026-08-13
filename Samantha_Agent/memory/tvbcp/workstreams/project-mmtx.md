@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-13 07:57 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-13 11:20 CEST
 
 ### Hotovo
-- Prototyp pokračuje druhým výslechem Bunnyho s interaktivní otázkou a pevným hlasem Ana
+- Vznikly dvě poslechové ukázky Benjiho s hlasem klonovaným podle první scény
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
@@ -15,19 +15,19 @@
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Poslechnout druhý výslech na iPhonu a Macu a ověřit Bunnyho hlas i tempo
+- Poslechnout oba kandidáty a rozhodnout, zda jimi nahradit Andrewův hlas
 
 ### Rozhodnutí
-- Druhý výslech se týká mrkve v zahrádce; Bunny používá en-US-AnaNeural a Harry po odpovědi ponechá branku zavřenou
+- Nové Benjiho věty nejprve porovnáme jako F5 kandidáty podle zamčené reference z první scény
 
 ### Navrhované další kroky
-- Přidat třetí výslech se Sunnym a podezřením na ořechy
-- Potom doplnit výslech Fiony a Bruna, počítání ovcí a otevření branky
+- Po schválení vygenerovat zbývající dvě Benjiho věty stejným F5 nastavením
+- Nahradit všechny čtyři Benjiho nahrávky v prototypu a znovu ověřit celý průchod
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `7265156f60d1`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `7265156f60d1` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-13T05:45:17+00:00.
+- Git před checkpointem: lokální `main` na `329909ebe7b9`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `329909ebe7b9` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-13T06:04:53+00:00.
 - Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -157,5 +157,33 @@ Navrhované další kroky:
 
 Technický důkaz:
 - rychlá Cockpit brána syntaxe a whitespace: 7.0 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
+- Pracovní proud: `project-mmtx`.
+- Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+
+### 2026-08-13 11:20 CEST – Vznikly dvě poslechové ukázky Benjiho s hlasem klonovaným podle první scény
+
+Hotovo:
+- Vznikly dvě poslechové ukázky Benjiho s hlasem klonovaným podle první scény
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+
+Otevřeno:
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
+
+Rizika:
+- Žádné další doložené provozní riziko.
+
+Rozhodnutí:
+- Nové Benjiho věty nejprve porovnáme jako F5 kandidáty podle zamčené reference z první scény
+
+Další krok:
+- Poslechnout oba kandidáty a rozhodnout, zda jimi nahradit Andrewův hlas
+
+Navrhované další kroky:
+- Po schválení vygenerovat zbývající dvě Benjiho věty stejným F5 nastavením
+- Nahradit všechny čtyři Benjiho nahrávky v prototypu a znovu ověřit celý průchod
+
+Technický důkaz:
+- rychlá Cockpit brána syntaxe a whitespace: 5.8 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `project-mmtx`.
 - Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.

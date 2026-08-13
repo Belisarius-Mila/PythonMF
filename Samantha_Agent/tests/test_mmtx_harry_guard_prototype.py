@@ -38,6 +38,8 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
     def test_benji_and_bunny_have_fixed_voice_mp3_assets(self) -> None:
         audio_root = PROTOTYPE_ROOT / "audio" / "english"
         expected = {
+            "scene04_benji_f5_candidate_hello_we_are_friendly_en.mp3",
+            "scene04_benji_f5_candidate_no_i_do_not_chase_sheep_en.mp3",
             "scene04_benji_hello_we_are_friendly_en.mp3",
             "scene04_benji_i_have_a_map_en.mp3",
             "scene04_benji_no_i_do_not_chase_sheep_en.mp3",
