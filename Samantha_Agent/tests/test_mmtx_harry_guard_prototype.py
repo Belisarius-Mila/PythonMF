@@ -33,16 +33,16 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
         self.assertIn('id="yesButton"', html)
         self.assertIn('id="noButton"', html)
         self.assertIn('src="harry_benji_prototype_01.png"', html)
-        self.assertIn('script.js?v=20260814a', html)
-        self.assertIn("Two interviews complete", html)
-        self.assertIn("Dva výslechy jsou dokončené.", html)
+        self.assertIn('script.js?v=20260814b', html)
+        self.assertIn("Three interviews complete", html)
+        self.assertIn("Tři výslechy jsou dokončené.", html)
 
         production_script = (
             PROJECT_ROOT / "docs" / "scene03_journey_to_the_lake" / "script.js"
         ).read_text(encoding="utf-8")
         self.assertNotIn("scene04_harry_guard_prototype", production_script)
 
-    def test_benji_and_bunny_have_fixed_voice_mp3_assets(self) -> None:
+    def test_benji_bunny_and_sunny_have_fixed_voice_mp3_assets(self) -> None:
         audio_root = PROTOTYPE_ROOT / "audio" / "english"
         expected = {
             "scene04_benji_f5_candidate_hello_we_are_friendly_en.mp3",
@@ -55,6 +55,9 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
             "scene04_bunny_i_am_bunny_en.mp3",
             "scene04_bunny_no_i_have_my_own_carrots_en.mp3",
             "scene04_bunny_i_only_want_to_go_to_the_lake_en.mp3",
+            "scene04_sunny_hello_i_am_sunny_en.mp3",
+            "scene04_sunny_no_i_have_my_own_nuts_en.mp3",
+            "scene04_sunny_i_want_to_go_to_the_lake_with_my_friends_en.mp3",
         }
         self.assertEqual({path.name for path in audio_root.iterdir()}, expected)
         for filename in expected:
@@ -102,15 +105,24 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
             '"No. I have my own carrots."',
             '"I only want to go to the lake."',
             '"Good answer, Bunny. But the gate stays closed."',
+            '"Now, what about the squirrel?"',
+            '"Who is the squirrel?"',
+            '"Hello! I am Sunny."',
+            '"Do you want to eat the nuts from my tree?"',
+            '"No. I have my own nuts."',
+            '"I want to go to the lake with my friends."',
+            '"Good answer, Sunny. But I have more questions."',
             "async function repeatLast()",
-            'targetCharacterId = choosingBunny ? "bunny" : "benji"',
-            "state.stage !== STAGES.chooseYesNo",
-            "state.stage !== STAGES.chooseBunnyYesNo",
+            'targetCharacterId = choosingBunny ? "bunny" : choosingSunny ? "sunny" : "benji"',
+            "[STAGES.chooseYesNo, STAGES.chooseBunnyYesNo, STAGES.chooseSunnyYesNo]",
+            "STAGES.chooseSunnyYesNo",
             "function updateRepeatAvailability()",
             "STAGES.complete",
             'const BENJI_AUDIO_VERSION = "20260813a"',
             'const BUNNY_AUDIO_VERSION = "20260813a"',
+            'const SUNNY_AUDIO_VERSION = "20260814a"',
             'src: "harry_interrogation_bunny_01.png"',
+            'src: "harry_interrogation_sunny_01.png"',
             "const SCENE_HOTSPOTS = Object.freeze({",
             "function setSceneImage(sceneId)",
             "function primeSceneImages()",
@@ -132,6 +144,9 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
             "scene04_bunny_i_am_bunny_en.mp3",
             "scene04_bunny_no_i_have_my_own_carrots_en.mp3",
             "scene04_bunny_i_only_want_to_go_to_the_lake_en.mp3",
+            "scene04_sunny_hello_i_am_sunny_en.mp3",
+            "scene04_sunny_no_i_have_my_own_nuts_en.mp3",
+            "scene04_sunny_i_want_to_go_to_the_lake_with_my_friends_en.mp3",
         ):
             self.assertIn(audio_file, script)
 
@@ -156,6 +171,13 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
             bunny_voice_profile.index('"ana"'),
             bunny_voice_profile.index('"samantha"'),
         )
+        sunny_voice_profile = script.split(
+            "const SUNNY_ENGLISH_VOICE_ORDER = [", 1
+        )[1].split("];", 1)[0]
+        self.assertLess(
+            sunny_voice_profile.index('"michelle"'),
+            sunny_voice_profile.index('"nova"'),
+        )
         choose_no_body = script.split("async function chooseNo()", 1)[1].split(
             "async function repeatLast()", 1
         )[0]
@@ -170,8 +192,19 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
             "[lines.ownCarrots, lines.lakeOnly, lines.bunnyAccepted]",
             choose_no_body,
         )
+        self.assertIn('setSceneImage("sunny")', choose_no_body)
+        self.assertIn("[lines.squirrelIntro, lines.squirrelPrompt]", choose_no_body)
+        self.assertLess(
+            choose_no_body.index('setSceneImage("sunny")'),
+            choose_no_body.index("[lines.squirrelIntro, lines.squirrelPrompt]"),
+        )
+        self.assertIn(
+            "[lines.ownNuts, lines.lakeWithFriends, lines.sunnyAccepted]",
+            choose_no_body,
+        )
         self.assertIn("setStage(STAGES.chooseBunny)", choose_no_body)
         self.assertIn("if (questioningBunny)", choose_no_body)
+        self.assertIn("if (questioningSunny)", choose_no_body)
         repeat_body = script.split("async function repeatLast()", 1)[1].split(
             "function toggleLanguage()", 1
         )[0]

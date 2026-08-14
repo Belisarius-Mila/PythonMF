@@ -1,34 +1,33 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-14 07:42 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-14 09:09 CEST
 
 ### Hotovo
-- Druhý výslech nyní používá vlastní Bunnyho obraz a odpovídající klikací místa
+- Prototyp nyní obsahuje třetí výslech Sunnyho s vlastním obrazem a pevným hlasem
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
 - Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
-- Lokální commity čekají na samostatný denní GitHub balíček.
 
 ### Rizika
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Ručně ověřit přechod obrazu a klepnutí na Bunnyho na iPhonu nebo Macu
+- Ručně ověřit třetí výslech, Sunnyho hlas a klikací místo na iPhonu nebo Macu
 
 ### Rozhodnutí
-- Bunnyho obraz se přepne ještě před Harryho úvodní otázkou druhého výslechu
+- Sunny používá kanonický hlas en-US-MichelleNeural
 
 ### Navrhované další kroky
-- Po vizuálním ověření připravit a zapojit třetí výslech Sunnyho
-- Později zapojit obrazy Fiony a Bruna
+- Zapojit čtvrtý výslech Fiony
+- Poté doplnit Brunův výslech, počítání ovcí a otevření branky
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `34b78beed948`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `34b78beed948` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-13T21:10:40+00:00.
-- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+- Git před checkpointem: lokální `main` na `6a65af50bf67`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `6a65af50bf67` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-14T06:24:02+00:00.
+- Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -178,3 +177,15 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (3): `Samantha_Agent/tests/test_mmtx_harry_guard_prototype.py`, `docs/scene04_harry_guard_prototype/index.html`, `docs/scene04_harry_guard_prototype/script.js`
 - Commit: `Switch prototype to Bunny interrogation scene`
 - Další krok: Ručně ověřit přechod obrazu a klepnutí na Bunnyho na iPhonu nebo Macu
+
+### Automatický checkpoint 2026-08-14 09:09 CEST
+
+- Pracovní proud: `project-mmtx`
+- Hotovo: Prototyp nyní obsahuje třetí výslech Sunnyho s vlastním obrazem a pevným hlasem; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: rychlá Cockpit brána syntaxe a whitespace: 7.4 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu
+- Změněné cesty před paměťovým zápisem (6): `Samantha_Agent/tests/test_mmtx_harry_guard_prototype.py`, `docs/scene04_harry_guard_prototype/index.html`, `docs/scene04_harry_guard_prototype/script.js`, `docs/scene04_harry_guard_prototype/audio/english/scene04_sunny_hello_i_am_sunny_en.mp3`, `docs/scene04_harry_guard_prototype/audio/english/scene04_sunny_i_want_to_go_to_the_lake_with_my_friends_en.mp3`, `docs/scene04_harry_guard_prototype/audio/english/scene04_sunny_no_i_have_my_own_nuts_en.mp3`
+- Commit: `Add Harry and Sunny interrogation prototype`
+- Další krok: Ručně ověřit třetí výslech, Sunnyho hlas a klikací místo na iPhonu nebo Macu
