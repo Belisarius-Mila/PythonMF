@@ -1,5 +1,5 @@
 /**
- * MMTX prototype: Harry questions Benji, Bunny and Sunny at the sheep gate.
+ * MMTX prototype: Harry questions Benji, Bunny, Sunny and Fiona at the sheep gate.
  *
  * Standalone by design. It is not linked from the production journey yet.
  */
@@ -51,6 +51,13 @@ const SUNNY_ENGLISH_AUDIO = new Map([
   ["I want to go to the lake with my friends.", `audio/english/scene04_sunny_i_want_to_go_to_the_lake_with_my_friends_en.mp3?v=${SUNNY_AUDIO_VERSION}`],
 ]);
 
+const FIONA_AUDIO_VERSION = "20260814a";
+const FIONA_ENGLISH_AUDIO = new Map([
+  ["Hi. I am Fiona.", `audio/english/scene04_fiona_hi_i_am_fiona_en.mp3?v=${FIONA_AUDIO_VERSION}`],
+  ["No. I do not catch chickens.", `audio/english/scene04_fiona_no_i_do_not_catch_chickens_en.mp3?v=${FIONA_AUDIO_VERSION}`],
+  ["I want to go to the lake with my friends.", `audio/english/scene04_fiona_i_want_to_go_to_the_lake_with_my_friends_en.mp3?v=${FIONA_AUDIO_VERSION}`],
+]);
+
 // Keep Benji on a male voice even when the browser exposes voices in a
 // different order. Andrew matches the approved Scene 3 voice when available.
 const BENJI_ENGLISH_VOICE_ORDER = [
@@ -80,6 +87,15 @@ const SUNNY_ENGLISH_VOICE_ORDER = [
   "karen",
 ];
 
+const FIONA_ENGLISH_VOICE_ORDER = [
+  "jenny",
+  "shimmer",
+  "samantha",
+  "ava",
+  "victoria",
+  "karen",
+];
+
 const STAGES = {
   waitingStart: "waitingStart",
   intro: "intro",
@@ -95,6 +111,10 @@ const STAGES = {
   sunnyAnswer: "sunnyAnswer",
   chooseSunnyYesNo: "chooseSunnyYesNo",
   wrongSunnyYes: "wrongSunnyYes",
+  chooseFiona: "chooseFiona",
+  fionaAnswer: "fionaAnswer",
+  chooseFionaYesNo: "chooseFionaYesNo",
+  wrongFionaYes: "wrongFionaYes",
   finishing: "finishing",
   complete: "complete",
 };
@@ -121,6 +141,10 @@ const SCENE_IMAGES = Object.freeze({
     src: "harry_interrogation_sunny_01.png",
     alt: "Sunny mluví s ovčáckým psem Harrym pod ořešákem u zavřené ohrady s pěti ovcemi",
   },
+  fiona: {
+    src: "harry_interrogation_fiona_01.png",
+    alt: "Fiona mluví s ovčáckým psem Harrym u dvora se slepicemi a zavřené ohrady s pěti ovcemi",
+  },
 });
 
 const SCENE_HOTSPOTS = Object.freeze({
@@ -141,6 +165,14 @@ const SCENE_HOTSPOTS = Object.freeze({
     fiona: { x: 18, y: 35, w: 12, h: 28 },
     sunny: { x: 22, y: 38, w: 24, h: 48 },
     harry: { x: 52, y: 28, w: 40, h: 58 },
+  }),
+  fiona: Object.freeze({
+    bunny: { x: 0, y: 37, w: 10, h: 24 },
+    bruno: { x: 9, y: 34, w: 10, h: 27 },
+    sunny: { x: 16, y: 38, w: 10, h: 24 },
+    benji: { x: 22, y: 36, w: 12, h: 28 },
+    fiona: { x: 18, y: 32, w: 23, h: 58 },
+    harry: { x: 52, y: 28, w: 40, h: 60 },
   }),
 });
 
@@ -195,6 +227,28 @@ const lines = {
     "harry",
     "Good answer, Sunny. But I have more questions.",
     "Dobrá odpověď, Sunny. Ale mám další otázky.",
+  ),
+  foxIntro: dialogue("harry", "And what about the fox?", "A co ta liška?"),
+  foxPrompt: prompt("Who is the fox?", "Kdo je liška?"),
+  fionaAnswer: dialogue("fiona", "Hi. I am Fiona.", "Ahoj. Já jsem Fiona."),
+  chickenQuestion: prompt(
+    "Do you want to catch a chicken in my yard?",
+    "Chceš chytit slepičku na mém dvorku?",
+  ),
+  noChickens: dialogue(
+    "fiona",
+    "No. I do not catch chickens.",
+    "Ne. Nechytám slepice.",
+  ),
+  fionaLakeWithFriends: dialogue(
+    "fiona",
+    "I want to go to the lake with my friends.",
+    "Chci jít s kamarády k jezeru.",
+  ),
+  fionaAccepted: dialogue(
+    "harry",
+    "Good answer, Fiona. But I have one more question.",
+    "Dobrá odpověď, Fiono. Ale mám ještě jednu otázku.",
   ),
 };
 
@@ -294,6 +348,12 @@ function voiceFor(lang, characterId) {
       if (selectedVoice) return selectedVoice;
     }
   }
+  if (lang === "en" && characterId === "fiona") {
+    for (const preferredName of FIONA_ENGLISH_VOICE_ORDER) {
+      const selectedVoice = matching.find((voice) => voice.name.toLowerCase().includes(preferredName));
+      if (selectedVoice) return selectedVoice;
+    }
+  }
   if (lang === "en") {
     const preferred = characterId === "harry"
       ? /daniel|roger|guy|alex|aaron/i
@@ -373,6 +433,7 @@ function primeFixedAudio() {
     ...BENJI_ENGLISH_AUDIO.values(),
     ...BUNNY_ENGLISH_AUDIO.values(),
     ...SUNNY_ENGLISH_AUDIO.values(),
+    ...FIONA_ENGLISH_AUDIO.values(),
   ];
   sources.forEach((src) => {
     const audio = fixedAudioCache.get(src) || new Audio(src);
@@ -407,12 +468,14 @@ function primeFixedAudio() {
 }
 
 async function speakText(text, lang, characterId) {
-  if (lang === "en" && (characterId === "benji" || characterId === "bunny" || characterId === "sunny")) {
+  if (lang === "en" && ["benji", "bunny", "sunny", "fiona"].includes(characterId)) {
     const fixedAudio = characterId === "benji"
       ? BENJI_ENGLISH_AUDIO.get(text)
       : characterId === "bunny"
         ? BUNNY_ENGLISH_AUDIO.get(text)
-        : SUNNY_ENGLISH_AUDIO.get(text);
+        : characterId === "sunny"
+          ? SUNNY_ENGLISH_AUDIO.get(text)
+          : FIONA_ENGLISH_AUDIO.get(text);
     if (fixedAudio && await playFixedAudio(fixedAudio, text.length)) return;
   }
   if (!text || !("speechSynthesis" in window)) return Promise.resolve();
@@ -489,6 +552,8 @@ function updateRepeatAvailability() {
     STAGES.chooseBunnyYesNo,
     STAGES.chooseSunny,
     STAGES.chooseSunnyYesNo,
+    STAGES.chooseFiona,
+    STAGES.chooseFionaYesNo,
     STAGES.complete,
   ]);
   repeatButton.disabled = !state.lastRepeatable || !repeatableStages.has(state.stage);
@@ -502,12 +567,19 @@ function setStage(stage) {
 
 function renderHotspots() {
   overlay.replaceChildren();
-  const canChooseCharacter = [STAGES.chooseBenji, STAGES.chooseBunny, STAGES.chooseSunny].includes(state.stage);
+  const canChooseCharacter = [
+    STAGES.chooseBenji,
+    STAGES.chooseBunny,
+    STAGES.chooseSunny,
+    STAGES.chooseFiona,
+  ].includes(state.stage);
   const targetCharacterId = state.stage === STAGES.chooseBunny
     ? "bunny"
     : state.stage === STAGES.chooseSunny
       ? "sunny"
-      : "benji";
+      : state.stage === STAGES.chooseFiona
+        ? "fiona"
+        : "benji";
   const sceneHotspots = SCENE_HOTSPOTS[state.sceneId] || SCENE_HOTSPOTS.group;
   for (const [characterId, character] of Object.entries(characters)) {
     const rect = sceneHotspots[characterId];
@@ -544,13 +616,14 @@ async function runIntro() {
 }
 
 async function chooseCharacter(characterId) {
-  if (![STAGES.chooseBenji, STAGES.chooseBunny, STAGES.chooseSunny].includes(state.stage)) return;
+  if (![STAGES.chooseBenji, STAGES.chooseBunny, STAGES.chooseSunny, STAGES.chooseFiona].includes(state.stage)) return;
   const choosingBunny = state.stage === STAGES.chooseBunny;
   const choosingSunny = state.stage === STAGES.chooseSunny;
-  const targetCharacterId = choosingBunny ? "bunny" : choosingSunny ? "sunny" : "benji";
-  const question = choosingBunny ? lines.rabbitPrompt : choosingSunny ? lines.squirrelPrompt : lines.mapQuestion;
-  const answerStage = choosingBunny ? STAGES.bunnyAnswer : choosingSunny ? STAGES.sunnyAnswer : STAGES.benjiAnswer;
-  const chooseStage = choosingBunny ? STAGES.chooseBunny : choosingSunny ? STAGES.chooseSunny : STAGES.chooseBenji;
+  const choosingFiona = state.stage === STAGES.chooseFiona;
+  const targetCharacterId = choosingBunny ? "bunny" : choosingSunny ? "sunny" : choosingFiona ? "fiona" : "benji";
+  const question = choosingBunny ? lines.rabbitPrompt : choosingSunny ? lines.squirrelPrompt : choosingFiona ? lines.foxPrompt : lines.mapQuestion;
+  const answerStage = choosingBunny ? STAGES.bunnyAnswer : choosingSunny ? STAGES.sunnyAnswer : choosingFiona ? STAGES.fionaAnswer : STAGES.benjiAnswer;
+  const chooseStage = choosingBunny ? STAGES.chooseBunny : choosingSunny ? STAGES.chooseSunny : choosingFiona ? STAGES.chooseFiona : STAGES.chooseBenji;
   if (characterId !== targetCharacterId) {
     const flowId = ++state.flowId;
     cancelSpeech();
@@ -568,50 +641,66 @@ async function chooseCharacter(characterId) {
   cancelSpeech();
   hideTask();
   setStage(answerStage);
-  const answer = choosingBunny ? lines.bunnyAnswer : choosingSunny ? lines.sunnyAnswer : lines.mapAnswer;
-  const yesNoQuestion = choosingBunny ? lines.carrotQuestion : choosingSunny ? lines.nutQuestion : lines.sheepQuestion;
+  const answer = choosingBunny ? lines.bunnyAnswer : choosingSunny ? lines.sunnyAnswer : choosingFiona ? lines.fionaAnswer : lines.mapAnswer;
+  const yesNoQuestion = choosingBunny ? lines.carrotQuestion : choosingSunny ? lines.nutQuestion : choosingFiona ? lines.chickenQuestion : lines.sheepQuestion;
   if (!(await playEntry(answer, flowId))) return;
   if (!(await playEntry(yesNoQuestion, flowId))) return;
   hideSpeech();
   showTask(yesNoQuestion);
   answerPanel.classList.remove("hidden");
-  setStage(choosingBunny ? STAGES.chooseBunnyYesNo : choosingSunny ? STAGES.chooseSunnyYesNo : STAGES.chooseYesNo);
+  setStage(choosingBunny ? STAGES.chooseBunnyYesNo : choosingSunny ? STAGES.chooseSunnyYesNo : choosingFiona ? STAGES.chooseFionaYesNo : STAGES.chooseYesNo);
 }
 
 async function chooseYes() {
-  if (![STAGES.chooseYesNo, STAGES.chooseBunnyYesNo, STAGES.chooseSunnyYesNo].includes(state.stage)) return;
+  if (![STAGES.chooseYesNo, STAGES.chooseBunnyYesNo, STAGES.chooseSunnyYesNo, STAGES.chooseFionaYesNo].includes(state.stage)) return;
   const questioningBunny = state.stage === STAGES.chooseBunnyYesNo;
   const questioningSunny = state.stage === STAGES.chooseSunnyYesNo;
-  const question = questioningBunny ? lines.carrotQuestion : questioningSunny ? lines.nutQuestion : lines.sheepQuestion;
+  const questioningFiona = state.stage === STAGES.chooseFionaYesNo;
+  const question = questioningBunny ? lines.carrotQuestion : questioningSunny ? lines.nutQuestion : questioningFiona ? lines.chickenQuestion : lines.sheepQuestion;
   const flowId = ++state.flowId;
   cancelSpeech();
   answerPanel.classList.add("hidden");
   hideTask();
-  setStage(questioningBunny ? STAGES.wrongBunnyYes : questioningSunny ? STAGES.wrongSunnyYes : STAGES.wrongYes);
+  setStage(questioningBunny ? STAGES.wrongBunnyYes : questioningSunny ? STAGES.wrongSunnyYes : questioningFiona ? STAGES.wrongFionaYes : STAGES.wrongYes);
   if (!(await playEntry(lines.listenAgain, flowId))) return;
   if (!(await playEntry(question, flowId))) return;
   hideSpeech();
   showTask(question);
   answerPanel.classList.remove("hidden");
-  setStage(questioningBunny ? STAGES.chooseBunnyYesNo : questioningSunny ? STAGES.chooseSunnyYesNo : STAGES.chooseYesNo);
+  setStage(questioningBunny ? STAGES.chooseBunnyYesNo : questioningSunny ? STAGES.chooseSunnyYesNo : questioningFiona ? STAGES.chooseFionaYesNo : STAGES.chooseYesNo);
 }
 
 async function chooseNo() {
-  if (![STAGES.chooseYesNo, STAGES.chooseBunnyYesNo, STAGES.chooseSunnyYesNo].includes(state.stage)) return;
+  if (![STAGES.chooseYesNo, STAGES.chooseBunnyYesNo, STAGES.chooseSunnyYesNo, STAGES.chooseFionaYesNo].includes(state.stage)) return;
   const questioningBunny = state.stage === STAGES.chooseBunnyYesNo;
   const questioningSunny = state.stage === STAGES.chooseSunnyYesNo;
+  const questioningFiona = state.stage === STAGES.chooseFionaYesNo;
   const flowId = ++state.flowId;
   cancelSpeech();
   answerPanel.classList.add("hidden");
   hideTask();
   setStage(STAGES.finishing);
-  if (questioningSunny) {
-    for (const entry of [lines.ownNuts, lines.lakeWithFriends, lines.sunnyAccepted]) {
+  if (questioningFiona) {
+    for (const entry of [lines.noChickens, lines.fionaLakeWithFriends, lines.fionaAccepted]) {
       if (!(await playEntry(entry, flowId))) return;
     }
     hideSpeech();
     completeBanner.classList.remove("hidden");
     setStage(STAGES.complete);
+    return;
+  }
+
+  if (questioningSunny) {
+    for (const entry of [lines.ownNuts, lines.lakeWithFriends, lines.sunnyAccepted]) {
+      if (!(await playEntry(entry, flowId))) return;
+    }
+    setSceneImage("fiona");
+    for (const entry of [lines.foxIntro, lines.foxPrompt]) {
+      if (!(await playEntry(entry, flowId))) return;
+    }
+    hideSpeech();
+    showTask(lines.foxPrompt);
+    setStage(STAGES.chooseFiona);
     return;
   }
 
@@ -657,6 +746,8 @@ async function repeatLast() {
     if (resumeStage === STAGES.chooseBunnyYesNo) showTask(lines.carrotQuestion);
     if (resumeStage === STAGES.chooseSunny) showTask(lines.squirrelPrompt);
     if (resumeStage === STAGES.chooseSunnyYesNo) showTask(lines.nutQuestion);
+    if (resumeStage === STAGES.chooseFiona) showTask(lines.foxPrompt);
+    if (resumeStage === STAGES.chooseFionaYesNo) showTask(lines.chickenQuestion);
   } finally {
     updateRepeatAvailability();
   }
