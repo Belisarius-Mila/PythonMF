@@ -35,9 +35,9 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
         self.assertIn('id="noButton"', html)
         self.assertIn('src="harry_benji_prototype_01.png"', html)
         self.assertIn('styles.css?v=20260814a', html)
-        self.assertIn('script.js?v=20260814c', html)
-        self.assertIn("Four interviews complete", html)
-        self.assertIn("Čtyři výslechy jsou dokončené.", html)
+        self.assertIn('script.js?v=20260814d', html)
+        self.assertIn("Five interviews complete", html)
+        self.assertIn("Pět výslechů je dokončených.", html)
         target_style = styles.split(".hotspot.target {", 1)[1].split("}", 1)[0]
         self.assertIn("z-index: 2;", target_style)
 
@@ -65,6 +65,9 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
             "scene04_fiona_hi_i_am_fiona_en.mp3",
             "scene04_fiona_no_i_do_not_catch_chickens_en.mp3",
             "scene04_fiona_i_want_to_go_to_the_lake_with_my_friends_en.mp3",
+            "scene04_bruno_hello_i_am_bruno_en.mp3",
+            "scene04_bruno_no_i_do_not_dig_under_fences_en.mp3",
+            "scene04_bruno_i_want_to_go_to_the_lake_with_my_friends_en.mp3",
         }
         self.assertEqual({path.name for path in audio_root.iterdir()}, expected)
         for filename in expected:
@@ -125,9 +128,16 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
             '"Do you want to catch a chicken in my yard?"',
             '"No. I do not catch chickens."',
             '"Good answer, Fiona. But I have one more question."',
+            '"One more! What about the badger?"',
+            '"Who is the badger?"',
+            '"Hello. I am Bruno."',
+            '"Do you want to dig under my fence?"',
+            '"No. I do not dig under fences."',
+            '"Good answer, Bruno. I believe you."',
             "async function repeatLast()",
-            'choosingFiona ? "fiona" : "benji"',
+            'choosingBruno ? "bruno" : "benji"',
             "STAGES.chooseFionaYesNo",
+            "STAGES.chooseBrunoYesNo",
             "STAGES.chooseSunnyYesNo",
             "function updateRepeatAvailability()",
             "STAGES.complete",
@@ -135,9 +145,11 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
             'const BUNNY_AUDIO_VERSION = "20260813a"',
             'const SUNNY_AUDIO_VERSION = "20260814a"',
             'const FIONA_AUDIO_VERSION = "20260814a"',
+            'const BRUNO_AUDIO_VERSION = "20260814a"',
             'src: "harry_interrogation_bunny_01.png"',
             'src: "harry_interrogation_sunny_01.png"',
             'src: "harry_interrogation_fiona_01.png"',
+            'src: "harry_interrogation_bruno_02.png"',
             "const SCENE_HOTSPOTS = Object.freeze({",
             "function setSceneImage(sceneId)",
             "function primeSceneImages()",
@@ -165,6 +177,9 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
             "scene04_fiona_hi_i_am_fiona_en.mp3",
             "scene04_fiona_no_i_do_not_catch_chickens_en.mp3",
             "scene04_fiona_i_want_to_go_to_the_lake_with_my_friends_en.mp3",
+            "scene04_bruno_hello_i_am_bruno_en.mp3",
+            "scene04_bruno_no_i_do_not_dig_under_fences_en.mp3",
+            "scene04_bruno_i_want_to_go_to_the_lake_with_my_friends_en.mp3",
         ):
             self.assertIn(audio_file, script)
 
@@ -203,6 +218,13 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
             fiona_voice_profile.index('"jenny"'),
             fiona_voice_profile.index('"shimmer"'),
         )
+        bruno_voice_profile = script.split(
+            "const BRUNO_ENGLISH_VOICE_ORDER = [", 1
+        )[1].split("];", 1)[0]
+        self.assertLess(
+            bruno_voice_profile.index('"daniel"'),
+            bruno_voice_profile.index('"guy"'),
+        )
         choose_no_body = script.split("async function chooseNo()", 1)[1].split(
             "async function repeatLast()", 1
         )[0]
@@ -237,10 +259,21 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
             "[lines.noChickens, lines.fionaLakeWithFriends, lines.fionaAccepted]",
             choose_no_body,
         )
+        self.assertIn('setSceneImage("bruno")', choose_no_body)
+        self.assertIn("[lines.badgerIntro, lines.badgerPrompt]", choose_no_body)
+        self.assertLess(
+            choose_no_body.index('setSceneImage("bruno")'),
+            choose_no_body.index("[lines.badgerIntro, lines.badgerPrompt]"),
+        )
+        self.assertIn(
+            "[lines.noDigging, lines.brunoLakeWithFriends, lines.brunoAccepted]",
+            choose_no_body,
+        )
         self.assertIn("setStage(STAGES.chooseBunny)", choose_no_body)
         self.assertIn("if (questioningBunny)", choose_no_body)
         self.assertIn("if (questioningSunny)", choose_no_body)
         self.assertIn("if (questioningFiona)", choose_no_body)
+        self.assertIn("if (questioningBruno)", choose_no_body)
         repeat_body = script.split("async function repeatLast()", 1)[1].split(
             "function toggleLanguage()", 1
         )[0]
