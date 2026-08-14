@@ -2892,13 +2892,18 @@
 	      return [
 	        data.message || "Autosave úklid spočítán.",
 	        "",
-	        `Retence: ponechat posledních ${plan.retention_days || 3} dní`,
+	        Number(plan.retention_days || 0) > 0
+	          ? `Retence: ponechat posledních ${plan.retention_days} dní`
+	          : "Retence podle stáří: vypnutá",
 	        `Pojistka: ponechat nejnovějších ${plan.keep_latest_snapshots || 12} časových snapshotů`,
 	        `Timestampované soubory: ${plan.scanned_timestamped_files || 0}`,
 	        `Chráněné soubory: ${plan.protected_timestamped_files || 0}`,
 	        `Ke smazání: ${plan.delete_count || 0}`,
 	        `Odhad uvolnění: ${reclaim.toFixed(2)} GiB`,
 	        `Autosave watchery: ${Number(runtime.watcher_count || 0)} (očekáván 1)`,
+	        runtime.disk_free_gib == null
+	          ? "SSD volné místo: nezjištěno"
+	          : `SSD volné místo: ${Number(runtime.disk_free_gib).toFixed(1)} GiB (${runtime.disk_state || "unknown"})`,
 	        runtime.warning ? `Varování: ${runtime.warning}` : "Autosave watcher stav: OK",
 	        "",
 	        data.safety_note || "Obsah autosave logů se nečte."
@@ -2912,7 +2917,7 @@
 	      if (autosaveCleanupOutput) autosaveCleanupOutput.textContent = "";
 	      try {
 	        const data = await postJson("/api/session-autosave/cleanup", {
-	          retention_days: 3,
+	          retention_days: 0,
 	          keep_latest_snapshots: 12,
 	          apply: false
 	        });
@@ -2947,7 +2952,7 @@
 	        "Vyčistit staré autosave snapshoty?\n\n" +
 	        `Smazat se má ${deleteCount} starých timestampovaných souborů.\n` +
 	        `Odhad uvolnění: ${reclaim.toFixed(2)} GiB.\n\n` +
-	        "Zůstanou latest soubory, poslední 3 dny a nejnovější pojistné snapshoty."
+	        "Zůstanou latest soubory a 12 nejnovějších časových snapshotů."
 	      );
 	      if (!ok) return;
 	      autosaveCleanupApplyBtn.disabled = true;
@@ -2955,7 +2960,7 @@
 	      if (autosaveCleanupStatus) autosaveCleanupStatus.textContent = "Mažu staré autosave snapshoty...";
 	      try {
 	        const data = await postJson("/api/session-autosave/cleanup", {
-	          retention_days: 3,
+	          retention_days: 0,
 	          keep_latest_snapshots: 12,
 	          apply: true,
 	          confirmation_text: "SMAZAT STARE AUTOSAVE"

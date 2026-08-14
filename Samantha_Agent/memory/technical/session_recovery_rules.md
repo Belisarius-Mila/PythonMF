@@ -315,11 +315,15 @@ Bezpecny dry-run:
 
 Vychozi pravidlo:
 
-- ponechat vsechny timestampovane snapshoty za posledni 3 dny,
-- jako pojistku ponechat nejnovejsich 12 casovych snapshotu, i kdyby byly starsi,
+- `latest_session.jsonl` a `latest_session.txt` obnovovat kazdych 10 minut,
+- novy timestampovany JSONL/TXT snapshot vytvorit nejvyse jednou za hodinu,
+- automaticky ponechat jen nejnovejsich 12 casovych snapshotu,
 - nikdy nemazat `latest_session.jsonl`, `latest_session.txt`, `latest_info.txt`
   ani jine soubory, ktere neodpovidaji tvaru `session_YYYYMMDD_HHMMSS.jsonl/txt`,
 - necist obsah autosave souboru, jen nazvy a velikosti.
+
+Autosave stav hlasi volne misto na SSD. Pod 30 GiB jde o varovani a pod 15 GiB
+o kriticky stav.
 
 Ostre provedeni vyzaduje explicitni potvrzeni:
 

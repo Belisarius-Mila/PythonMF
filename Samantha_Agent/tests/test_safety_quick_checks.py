@@ -8,6 +8,7 @@ import signal
 import subprocess
 from datetime import datetime
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 from scripts.git_safety_check import (
@@ -159,11 +160,47 @@ class SystemQuickCheckTests(unittest.TestCase):
             def fake_runner(*args, **kwargs):
                 return subprocess.CompletedProcess(args[0], 0, "123 1 00:01 zsh scripts/autosave_codex_session.sh --watch\n", "")
 
-            status = autosave_status(latest_info_path=path, warn_minutes=20, runner=fake_runner)
+            status = autosave_status(
+                latest_info_path=path,
+                warn_minutes=20,
+                runner=fake_runner,
+                disk_usage_getter=lambda _path: SimpleNamespace(free=100 * 1024**3),
+            )
 
         self.assertTrue(status.ok)
         self.assertTrue(status.watcher_running)
         self.assertEqual(status.watcher_pids, (123,))
+
+    def test_autosave_status_warns_and_critically_warns_for_low_disk_space(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "latest_info.txt"
+            path.write_text("Saved at: test\n", encoding="utf-8")
+
+            def fake_runner(*args, **kwargs):
+                return subprocess.CompletedProcess(
+                    args[0],
+                    0,
+                    "123 1 00:01 zsh scripts/autosave_codex_session.sh --watch\n",
+                    "",
+                )
+
+            warning = autosave_status(
+                latest_info_path=path,
+                runner=fake_runner,
+                disk_usage_getter=lambda _path: SimpleNamespace(free=29 * 1024**3),
+            )
+            critical = autosave_status(
+                latest_info_path=path,
+                runner=fake_runner,
+                disk_usage_getter=lambda _path: SimpleNamespace(free=14 * 1024**3),
+            )
+
+        self.assertFalse(warning.ok)
+        self.assertEqual(warning.disk_state, "warning")
+        self.assertIn("< 30 GiB", warning.warning)
+        self.assertFalse(critical.ok)
+        self.assertEqual(critical.disk_state, "critical")
+        self.assertIn("< 15 GiB", critical.warning)
 
     def test_autosave_line_warns_for_stale_file(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -274,6 +311,66 @@ class SystemQuickCheckTests(unittest.TestCase):
                     os.killpg(first.pid, signal.SIGKILL)
                     first.communicate(timeout=5)
 
+    def test_autosave_one_shot_keeps_latest_current_and_twelve_hourly_history_snapshots(self) -> None:
+        script = Path(__file__).resolve().parents[1] / "scripts" / "autosave_codex_session.sh"
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            out_dir = root / "autosave"
+            sessions_dir = root / "sessions"
+            out_dir.mkdir()
+            sessions_dir.mkdir()
+            source = sessions_dir / "rollout-test.jsonl"
+            source.write_text(
+                '{"timestamp":"2026-08-14T00:00:00Z","type":"event_msg","payload":{"type":"agent_message","message":"first"}}\n',
+                encoding="utf-8",
+            )
+            old_mtime = time.time() - 7200
+            for index in range(13):
+                stamp = f"202601{index + 1:02d}_120000"
+                for suffix in ("jsonl", "txt"):
+                    snapshot = out_dir / f"session_{stamp}.{suffix}"
+                    snapshot.write_text("old", encoding="utf-8")
+                    os.utime(snapshot, (old_mtime, old_mtime))
+            env = os.environ.copy()
+            env.update(
+                {
+                    "SAMANTHA_AUTOSAVE_OUT_DIR": str(out_dir),
+                    "SAMANTHA_CODEX_SESSIONS_DIR": str(sessions_dir),
+                    "SAMANTHA_AUTOSAVE_HISTORY_SECONDS": "3600",
+                    "SAMANTHA_AUTOSAVE_KEEP_HISTORY": "12",
+                }
+            )
+
+            first = subprocess.run(
+                ["/bin/zsh", str(script)],
+                env=env,
+                capture_output=True,
+                text=True,
+                timeout=15,
+                check=False,
+            )
+            history_after_first = sorted(out_dir.glob("session_*.jsonl"))
+            source.write_text(
+                '{"timestamp":"2026-08-14T00:10:00Z","type":"event_msg","payload":{"type":"agent_message","message":"second"}}\n',
+                encoding="utf-8",
+            )
+            second = subprocess.run(
+                ["/bin/zsh", str(script)],
+                env=env,
+                capture_output=True,
+                text=True,
+                timeout=15,
+                check=False,
+            )
+
+            self.assertEqual(first.returncode, 0, first.stderr)
+            self.assertEqual(second.returncode, 0, second.stderr)
+            self.assertEqual(len(history_after_first), 12)
+            self.assertEqual(len(tuple(out_dir.glob("session_*.jsonl"))), 12)
+            self.assertEqual(len(tuple(out_dir.glob("session_*.txt"))), 12)
+            self.assertIn("second", (out_dir / "latest_session.jsonl").read_text(encoding="utf-8"))
+            self.assertIn("hodinovy interval", (out_dir / "latest_info.txt").read_text(encoding="utf-8"))
+
     def test_format_autosave_status_suggests_confirmed_restart_when_stopped(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             path = Path(temp_dir) / "latest_info.txt"
@@ -331,6 +428,22 @@ class SystemQuickCheckTests(unittest.TestCase):
 
 
 class AutosaveCleanupTests(unittest.TestCase):
+    def test_cleanup_defaults_keep_only_twelve_newest_snapshot_times(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            for index in range(13):
+                (root / f"session_202601{index + 1:02d}_120000.jsonl").write_text(
+                    "snapshot",
+                    encoding="utf-8",
+                )
+
+            plan = build_cleanup_plan(autosave_dir=root)
+
+        self.assertEqual(plan.retention_days, 0)
+        self.assertEqual(plan.keep_latest_snapshots, 12)
+        self.assertEqual(plan.protected_timestamped_files, 12)
+        self.assertEqual(plan.delete_count, 1)
+
     def test_cleanup_plan_deletes_only_old_timestamped_snapshots(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

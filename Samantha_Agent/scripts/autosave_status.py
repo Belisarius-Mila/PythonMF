@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import subprocess
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
@@ -17,6 +18,8 @@ AUTOSAVE_DIR = PROJECT_ROOT / "data" / "session_autosave"
 LATEST_INFO_PATH = AUTOSAVE_DIR / "latest_info.txt"
 WATCHER_SCRIPT_NAME = "autosave_codex_session.sh"
 DEFAULT_WARN_MINUTES = 20
+DEFAULT_DISK_WARNING_GIB = 30
+DEFAULT_DISK_CRITICAL_GIB = 15
 PS_COMMAND = ["ps", "-axo", "pid=,ppid=,etime=,command="]
 
 
@@ -29,6 +32,8 @@ class AutosaveStatus:
     watcher_running: bool
     watcher_count: int
     watcher_pids: tuple[int, ...]
+    disk_free_gib: float | None
+    disk_state: str
     warning: str
 
 
@@ -37,6 +42,7 @@ def autosave_status(
     latest_info_path: Path = LATEST_INFO_PATH,
     warn_minutes: int = DEFAULT_WARN_MINUTES,
     runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+    disk_usage_getter: Callable[[Path], object] = shutil.disk_usage,
 ) -> AutosaveStatus:
     latest_age_minutes: int | None = None
     latest_modified_at = ""
@@ -50,6 +56,29 @@ def autosave_status(
             warnings.append(f"posledni autosave je stary {latest_age_minutes} min (warn > {warn_minutes})")
     else:
         warnings.append("chybi latest_info.txt")
+
+    disk_free_gib: float | None = None
+    disk_state = "unknown"
+    try:
+        disk_usage = disk_usage_getter(latest_info_path.parent)
+        disk_free_bytes = int(getattr(disk_usage, "free"))
+        disk_free_gib = round(disk_free_bytes / 1024**3, 1)
+        if disk_free_bytes < DEFAULT_DISK_CRITICAL_GIB * 1024**3:
+            disk_state = "critical"
+            warnings.append(
+                f"kriticky malo mista na SSD: {disk_free_gib:.1f} GiB "
+                f"(< {DEFAULT_DISK_CRITICAL_GIB} GiB)"
+            )
+        elif disk_free_bytes < DEFAULT_DISK_WARNING_GIB * 1024**3:
+            disk_state = "warning"
+            warnings.append(
+                f"malo mista na SSD: {disk_free_gib:.1f} GiB "
+                f"(< {DEFAULT_DISK_WARNING_GIB} GiB)"
+            )
+        else:
+            disk_state = "ok"
+    except (OSError, TypeError, ValueError, AttributeError) as exc:
+        warnings.append(f"volne misto na SSD nelze zjistit: {exc}")
 
     watcher_pids, ps_warning = find_autosave_watchers(runner=runner)
     if ps_warning:
@@ -67,6 +96,8 @@ def autosave_status(
         watcher_running=bool(watcher_pids),
         watcher_count=len(watcher_pids),
         watcher_pids=tuple(watcher_pids),
+        disk_free_gib=disk_free_gib,
+        disk_state=disk_state,
         warning="; ".join(warnings),
     )
 
@@ -118,6 +149,10 @@ def format_autosave_status(status: AutosaveStatus) -> str:
     lines.append(f"- watcher count: {status.watcher_count}")
     if status.watcher_pids:
         lines.append(f"- watcher pids: {', '.join(str(pid) for pid in status.watcher_pids)}")
+    if status.disk_free_gib is None:
+        lines.append("- SSD free: nezjisteno")
+    else:
+        lines.append(f"- SSD free: {status.disk_free_gib:.1f} GiB ({status.disk_state})")
     if status.warning:
         lines.append(f"- warning: {status.warning}")
     if not status.watcher_running:

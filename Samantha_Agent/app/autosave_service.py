@@ -50,7 +50,7 @@ def session_autosave_cleanup_action(
     autosave_dir: Path = SESSION_AUTOSAVE_DIR,
     autosave_runtime_getter: Callable[..., Any] = read_autosave_runtime_status,
 ) -> dict[str, Any]:
-    retention_days = _bounded_int(payload.get("retention_days"), default=3, minimum=0, maximum=30)
+    retention_days = _bounded_int(payload.get("retention_days"), default=0, minimum=0, maximum=30)
     keep_latest = _bounded_int(payload.get("keep_latest_snapshots"), default=12, minimum=0, maximum=200)
     plan = build_session_autosave_cleanup_plan(
         autosave_dir=autosave_dir,
@@ -97,7 +97,10 @@ def session_autosave_cleanup_action(
         "message": f"Úklid autosave hotov: smazáno {removed} starých snapshotů.",
         "plan": plan_dict,
         "runtime": runtime,
-        "safety_note": "Ponechané jsou aktuální latest soubory, poslední 3 dny a pojistka nejnovějších snapshotů.",
+        "safety_note": (
+            "Ponechané jsou aktuální latest soubory a nastavený počet "
+            "nejnovějších časových snapshotů."
+        ),
     }
 
 
@@ -108,6 +111,8 @@ def autosave_runtime_dict(status: Any) -> dict[str, Any]:
         "ok": bool(getattr(status, "ok", False)),
         "watcher_running": bool(getattr(status, "watcher_running", False)),
         "watcher_count": int(getattr(status, "watcher_count", len(watcher_pids)) or 0),
+        "disk_free_gib": getattr(status, "disk_free_gib", None),
+        "disk_state": str(getattr(status, "disk_state", "unknown") or "unknown"),
         "warning": warning,
     }
 

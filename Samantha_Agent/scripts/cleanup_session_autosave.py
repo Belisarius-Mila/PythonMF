@@ -19,7 +19,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 AUTOSAVE_DIR = PROJECT_ROOT / "data" / "session_autosave"
 CONFIRM_TEXT = "SMAZAT STARE AUTOSAVE"
 SNAPSHOT_RE = re.compile(r"^session_(?P<stamp>\d{8}_\d{6})\.(?P<ext>jsonl|txt)$")
-DEFAULT_RETENTION_DAYS = 3
+DEFAULT_RETENTION_DAYS = 0
 DEFAULT_KEEP_LATEST_SNAPSHOTS = 12
 
 
@@ -141,7 +141,10 @@ def format_bytes(size: int) -> str:
 def format_plan(plan: CleanupPlan, *, applied: bool = False, removed: int = 0) -> str:
     lines = ["Samantha session autosave cleanup:"]
     lines.append(f"- adresar: {plan.autosave_dir}")
-    lines.append(f"- retence: ponechat vse za poslednich {plan.retention_days} dni")
+    if plan.retention_days:
+        lines.append(f"- retence: ponechat vse za poslednich {plan.retention_days} dni")
+    else:
+        lines.append("- retence podle stari: vypnuta")
     lines.append(f"- pojistka: ponechat nejnovejsich {plan.keep_latest_snapshots} casovych snapshotu")
     lines.append(f"- timestampovane soubory: {plan.scanned_timestamped_files}")
     lines.append(f"- chranene timestampovane soubory: {plan.protected_timestamped_files}")

@@ -210,3 +210,15 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   obrazových položek, před veřejnou odpovědí je idempotentně a create-only
   importovat do private kandidátů a pro jednu zprávu zobrazit galerii. Base64
   data ani lokální cesty nepersistovat do session JSON a nevystavovat přes API.
+
+### LL-016 — Retence podle dnů neomezuje autosave dlouhé relace
+
+- Problém: Autosave každých deset minut ukládal celou rostoucí Codex relaci a
+  třídenní retence proto chránila stovky téměř shodných velkých kopií. Ruční
+  úklid fungoval, ale při dlouhé relaci uvolnil jen malou část prostoru.
+- Typ: opakující se
+- Řešení nalezeno: 14082026
+- Řešení: Aktuální `latest` obnovu dál přepisovat každých deset minut, historický
+  JSONL/TXT pár vytvářet nejvýše jednou za hodinu a po každém autosave
+  automaticky ponechat pouze 12 nejnovějších časů. Stav autosave současně hlásí
+  varování pod 30 GiB a kritický stav pod 15 GiB volného místa.
