@@ -129,3 +129,32 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Běžící Cockpit je serverově ověřený na `91dc700`; smoke 5/5.
+
+### 2026-08-14 17:24 CEST – Autosave má omezený růst a hlídá volné místo
+
+Hotovo:
+- Aktuální obnovovací kopie zůstává ukládaná každých deset minut.
+- Historický JSONL/TXT pár vzniká nejvýše jednou za hodinu a automatická
+  retence ponechává jen 12 nejnovějších časů.
+- Autosave stav a servisní panel Cockpitu hlásí varování pod 30 GiB a kritický
+  stav pod 15 GiB volného místa.
+- Cockpit byl po implementaci řízeně restartován a ověřen novým procesem.
+
+Rozhodnutí:
+- Nouzový autosave není dlouhodobý archiv; přednost má čerstvá desetiminutová
+  obnova a omezená hodinová historie.
+- Skutečné jednorázové odstranění starých nouzových kopií zůstává oddělenou
+  destruktivní akcí pod globální bezpečnostní brzdou.
+
+Další krok:
+- Po přesné potvrzovací větě jednorázově ponechat 12 nejnovějších časů,
+  restartovat watcher na nový kontrakt a ověřit uvolněné místo.
+
+Navrhované další kroky:
+- Po aktivaci pouze sledovat, zda se velikost autosave stabilizuje přibližně na
+  12 hodinových kopiích aktuální relace.
+
+Technický důkaz:
+- Implementační commit: `e5335ad`.
+- Plná Cockpit Quality Gate: 1414/1414 testů, výsledek OK.
+- První řízené nasazení: nový proces a smoke 5/5.
