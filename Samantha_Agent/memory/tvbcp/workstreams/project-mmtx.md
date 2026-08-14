@@ -1,33 +1,34 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-13 23:03 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-14 07:42 CEST
 
 ### Hotovo
-- Opravený Brunův výslech nyní zachovává celou skupinu včetně jasně viditelného Benjiho
+- Druhý výslech nyní používá vlastní Bunnyho obraz a odpovídající klikací místa
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
 - Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
 - Lokální commity čekají na samostatný denní GitHub balíček.
 
 ### Rizika
-- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
+- Žádné další doložené provozní riziko.
 
 ### Další krok
-- Použít opravenou verzi při zapojení obrazů do prototypu
+- Ručně ověřit přechod obrazu a klepnutí na Bunnyho na iPhonu nebo Macu
 
 ### Rozhodnutí
-- Brunova scéna musí v pozadí zobrazovat Bunnyho, Fionu, Sunnyho i Benjiho
+- Bunnyho obraz se přepne ještě před Harryho úvodní otázkou druhého výslechu
 
 ### Navrhované další kroky
-- Po vizuálním potvrzení lze původní verzi ponechat jen jako historického kandidáta
-- Zapojit všech pět schválených obrazů do výslechů
+- Po vizuálním ověření připravit a zapojit třetí výslech Sunnyho
+- Později zapojit obrazy Fiony a Bruna
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `2e1f911bb43c`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `ba658286f5de` · je starší než ověřený main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-13T20:09:47+00:00.
-- Read-only živý stav: main=`local_ahead`, deployment=`verified_other_main`, runtime=`connected`.
+- Git před checkpointem: lokální `main` na `34b78beed948`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `34b78beed948` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-13T21:10:40+00:00.
+- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -270,3 +271,31 @@ Technický důkaz:
 - rychlá Cockpit brána syntaxe a whitespace: 5.6 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `project-mmtx`.
 - Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_other_main`, runtime=`connected`.
+
+### 2026-08-14 07:42 CEST – Druhý výslech nyní používá vlastní Bunnyho obraz a odpovídající klikací místa
+
+Hotovo:
+- Druhý výslech nyní používá vlastní Bunnyho obraz a odpovídající klikací místa
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+
+Otevřeno:
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
+
+Rizika:
+- Žádné další doložené provozní riziko.
+
+Rozhodnutí:
+- Bunnyho obraz se přepne ještě před Harryho úvodní otázkou druhého výslechu
+
+Další krok:
+- Ručně ověřit přechod obrazu a klepnutí na Bunnyho na iPhonu nebo Macu
+
+Navrhované další kroky:
+- Po vizuálním ověření připravit a zapojit třetí výslech Sunnyho
+- Později zapojit obrazy Fiony a Bruna
+
+Technický důkaz:
+- rychlá Cockpit brána syntaxe a whitespace: 5.5 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
+- Pracovní proud: `project-mmtx`.
+- Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.

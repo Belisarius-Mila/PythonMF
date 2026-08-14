@@ -5,6 +5,7 @@
  */
 
 const scene = document.getElementById("scene");
+const sceneImage = document.getElementById("sceneImage");
 const overlay = document.getElementById("overlay");
 const speechBubble = document.getElementById("speechBubble");
 const speakerName = document.getElementById("speakerName");
@@ -87,6 +88,31 @@ const characters = {
   harry: { label: "Harry", rect: { x: 58, y: 29, w: 34, h: 56 } },
 };
 
+const SCENE_IMAGES = Object.freeze({
+  group: {
+    src: "harry_benji_prototype_01.png",
+    alt: "Benji a jeho přátelé stojí před ovčáckým psem Harrym u zavřené ohrady s pěti ovcemi",
+  },
+  bunny: {
+    src: "harry_interrogation_bunny_01.png",
+    alt: "Bunny mluví s ovčáckým psem Harrym u zahrádky a zavřené ohrady s pěti ovcemi",
+  },
+});
+
+const SCENE_HOTSPOTS = Object.freeze({
+  group: Object.freeze(Object.fromEntries(
+    Object.entries(characters).map(([characterId, character]) => [characterId, character.rect]),
+  )),
+  bunny: Object.freeze({
+    bunny: { x: 22, y: 29, w: 20, h: 61 },
+    bruno: { x: 1, y: 31, w: 11, h: 25 },
+    fiona: { x: 9, y: 32, w: 10, h: 24 },
+    sunny: { x: 16, y: 39, w: 10, h: 21 },
+    benji: { x: 21, y: 37, w: 11, h: 24 },
+    harry: { x: 47, y: 22, w: 45, h: 68 },
+  }),
+});
+
 function dialogue(characterId, textEn, textCz) {
   return { kind: "dialogue", characterId, textEn, textCz };
 }
@@ -125,6 +151,7 @@ const lines = {
 
 const state = {
   stage: STAGES.waitingStart,
+  sceneId: "group",
   languageMode: loadLanguageMode(),
   lastRepeatable: null,
   flowId: 0,
@@ -138,6 +165,26 @@ let activeAudio = null;
 let audioTimeout = 0;
 let audioResolve = null;
 const fixedAudioCache = new Map();
+
+function setSceneImage(sceneId) {
+  const nextScene = SCENE_IMAGES[sceneId];
+  if (!nextScene) return;
+  state.sceneId = sceneId;
+  if (sceneImage.getAttribute("src") !== nextScene.src) {
+    sceneImage.src = nextScene.src;
+  }
+  sceneImage.alt = nextScene.alt;
+  renderHotspots();
+}
+
+function primeSceneImages() {
+  for (const sceneConfig of Object.values(SCENE_IMAGES)) {
+    if (sceneConfig.src === sceneImage.getAttribute("src")) continue;
+    const image = new Image();
+    image.decoding = "async";
+    image.src = sceneConfig.src;
+  }
+}
 
 function loadLanguageMode() {
   try {
@@ -397,14 +444,16 @@ function renderHotspots() {
   overlay.replaceChildren();
   const canChooseCharacter = state.stage === STAGES.chooseBenji || state.stage === STAGES.chooseBunny;
   const targetCharacterId = state.stage === STAGES.chooseBunny ? "bunny" : "benji";
+  const sceneHotspots = SCENE_HOTSPOTS[state.sceneId] || SCENE_HOTSPOTS.group;
   for (const [characterId, character] of Object.entries(characters)) {
+    const rect = sceneHotspots[characterId] || character.rect;
     const button = document.createElement("button");
     button.type = "button";
     button.className = "hotspot";
-    button.style.left = `${character.rect.x}%`;
-    button.style.top = `${character.rect.y}%`;
-    button.style.width = `${character.rect.w}%`;
-    button.style.height = `${character.rect.h}%`;
+    button.style.left = `${rect.x}%`;
+    button.style.top = `${rect.y}%`;
+    button.style.width = `${rect.w}%`;
+    button.style.height = `${rect.h}%`;
     button.setAttribute("aria-label", character.label);
     button.disabled = !canChooseCharacter;
     if (canChooseCharacter) {
@@ -488,18 +537,24 @@ async function chooseNo() {
   answerPanel.classList.add("hidden");
   hideTask();
   setStage(STAGES.finishing);
-  const entries = questioningBunny
-    ? [lines.ownCarrots, lines.lakeOnly, lines.bunnyAccepted]
-    : [lines.noChase, lines.helper, lines.trust, lines.rabbitIntro, lines.rabbitPrompt];
-  for (const entry of entries) {
-    if (!(await playEntry(entry, flowId))) return;
-  }
-  hideSpeech();
   if (questioningBunny) {
+    for (const entry of [lines.ownCarrots, lines.lakeOnly, lines.bunnyAccepted]) {
+      if (!(await playEntry(entry, flowId))) return;
+    }
+    hideSpeech();
     completeBanner.classList.remove("hidden");
     setStage(STAGES.complete);
     return;
   }
+
+  for (const entry of [lines.noChase, lines.helper, lines.trust]) {
+    if (!(await playEntry(entry, flowId))) return;
+  }
+  setSceneImage("bunny");
+  for (const entry of [lines.rabbitIntro, lines.rabbitPrompt]) {
+    if (!(await playEntry(entry, flowId))) return;
+  }
+  hideSpeech();
   showTask(lines.rabbitPrompt);
   setStage(STAGES.chooseBunny);
 }
@@ -533,6 +588,7 @@ async function startPrototype() {
   if (state.stage !== STAGES.waitingStart) return;
   audioGate.classList.add("hidden");
   loadVoices();
+  primeSceneImages();
   primeFixedAudio();
   await runIntro();
 }

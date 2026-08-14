@@ -29,10 +29,11 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
         html = (PROTOTYPE_ROOT / "index.html").read_text(encoding="utf-8")
         self.assertIn('id="languageButton"', html)
         self.assertIn('id="repeatButton"', html)
+        self.assertIn('id="sceneImage"', html)
         self.assertIn('id="yesButton"', html)
         self.assertIn('id="noButton"', html)
         self.assertIn('src="harry_benji_prototype_01.png"', html)
-        self.assertIn('script.js?v=20260813b', html)
+        self.assertIn('script.js?v=20260814a', html)
         self.assertIn("Two interviews complete", html)
         self.assertIn("Dva výslechy jsou dokončené.", html)
 
@@ -109,10 +110,15 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
             "STAGES.complete",
             'const BENJI_AUDIO_VERSION = "20260813a"',
             'const BUNNY_AUDIO_VERSION = "20260813a"',
+            'src: "harry_interrogation_bunny_01.png"',
+            "const SCENE_HOTSPOTS = Object.freeze({",
+            "function setSceneImage(sceneId)",
+            "function primeSceneImages()",
             "async function speakText(text, lang, characterId)",
             "await playFixedAudio(fixedAudio, text.length)",
             "function primeFixedAudio()",
             "primeFixedAudio();",
+            "primeSceneImages();",
             "fixedAudioCache",
         ):
             self.assertIn(expected, script)
@@ -153,9 +159,12 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
         choose_no_body = script.split("async function chooseNo()", 1)[1].split(
             "async function repeatLast()", 1
         )[0]
-        self.assertIn(
-            "[lines.noChase, lines.helper, lines.trust, lines.rabbitIntro, lines.rabbitPrompt]",
-            choose_no_body,
+        self.assertIn("[lines.noChase, lines.helper, lines.trust]", choose_no_body)
+        self.assertIn("setSceneImage(\"bunny\")", choose_no_body)
+        self.assertIn("[lines.rabbitIntro, lines.rabbitPrompt]", choose_no_body)
+        self.assertLess(
+            choose_no_body.index('setSceneImage("bunny")'),
+            choose_no_body.index("[lines.rabbitIntro, lines.rabbitPrompt]"),
         )
         self.assertIn(
             "[lines.ownCarrots, lines.lakeOnly, lines.bunnyAccepted]",
