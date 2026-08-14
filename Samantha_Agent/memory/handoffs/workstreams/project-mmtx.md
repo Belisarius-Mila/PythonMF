@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-14 10:01 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-14 10:56 CEST
 
 ### Hotovo
-- Prototyp nyní obsahuje čtvrtý výslech Fiony s vlastním obrazem a pevným hlasem
+- Fionin blikající box nyní spolehlivě přijímá první klepnutí i v překryvu s ostatními postavami
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
@@ -14,19 +14,19 @@
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Ručně ověřit Fionin výslech, hlas a klikací místo na iPhonu nebo Macu
+- Ověřit Fionin výslech jedním klepnutím na iPhonu nebo Macu
 
 ### Rozhodnutí
-- Fiona používá kanonický hlas en-US-JennyNeural
+- V tomto kroku nebylo přijato nové kanonické rozhodnutí.
 
 ### Navrhované další kroky
-- Zapojit poslední výslech Bruna s opraveným obrazem obsahujícím Benjiho
+- Zapojit poslední výslech Bruna
 - Poté doplnit počítání pěti ovcí a otevření branky
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `b9293021d09f`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `b9293021d09f` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-14T07:24:10+00:00.
+- Git před checkpointem: lokální `main` na `93c7a7979b01`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `93c7a7979b01` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-14T08:08:27+00:00.
 - Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -201,3 +201,15 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (6): `Samantha_Agent/tests/test_mmtx_harry_guard_prototype.py`, `docs/scene04_harry_guard_prototype/index.html`, `docs/scene04_harry_guard_prototype/script.js`, `docs/scene04_harry_guard_prototype/audio/english/scene04_fiona_hi_i_am_fiona_en.mp3`, `docs/scene04_harry_guard_prototype/audio/english/scene04_fiona_i_want_to_go_to_the_lake_with_my_friends_en.mp3`, `docs/scene04_harry_guard_prototype/audio/english/scene04_fiona_no_i_do_not_catch_chickens_en.mp3`
 - Commit: `Add Harry and Fiona interrogation prototype`
 - Další krok: Ručně ověřit Fionin výslech, hlas a klikací místo na iPhonu nebo Macu
+
+### Automatický checkpoint 2026-08-14 10:56 CEST
+
+- Pracovní proud: `project-mmtx`
+- Hotovo: Fionin blikající box nyní spolehlivě přijímá první klepnutí i v překryvu s ostatními postavami; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: rychlá Cockpit brána syntaxe a whitespace: 5.9 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu
+- Změněné cesty před paměťovým zápisem (3): `Samantha_Agent/tests/test_mmtx_harry_guard_prototype.py`, `docs/scene04_harry_guard_prototype/index.html`, `docs/scene04_harry_guard_prototype/styles.css`
+- Commit: `Fix overlapping Fiona hotspot`
+- Další krok: Ověřit Fionin výslech jedním klepnutím na iPhonu nebo Macu

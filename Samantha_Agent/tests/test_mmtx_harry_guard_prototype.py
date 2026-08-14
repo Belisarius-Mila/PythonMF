@@ -27,15 +27,19 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
         self.assertEqual({path.name for path in PROTOTYPE_ROOT.iterdir()}, expected)
 
         html = (PROTOTYPE_ROOT / "index.html").read_text(encoding="utf-8")
+        styles = (PROTOTYPE_ROOT / "styles.css").read_text(encoding="utf-8")
         self.assertIn('id="languageButton"', html)
         self.assertIn('id="repeatButton"', html)
         self.assertIn('id="sceneImage"', html)
         self.assertIn('id="yesButton"', html)
         self.assertIn('id="noButton"', html)
         self.assertIn('src="harry_benji_prototype_01.png"', html)
+        self.assertIn('styles.css?v=20260814a', html)
         self.assertIn('script.js?v=20260814c', html)
         self.assertIn("Four interviews complete", html)
         self.assertIn("Čtyři výslechy jsou dokončené.", html)
+        target_style = styles.split(".hotspot.target {", 1)[1].split("}", 1)[0]
+        self.assertIn("z-index: 2;", target_style)
 
         production_script = (
             PROJECT_ROOT / "docs" / "scene03_journey_to_the_lake" / "script.js"

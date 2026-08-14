@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-14 10:01 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-14 10:56 CEST
 
 ### Hotovo
-- Prototyp nyní obsahuje čtvrtý výslech Fiony s vlastním obrazem a pevným hlasem
+- Fionin blikající box nyní spolehlivě přijímá první klepnutí i v překryvu s ostatními postavami
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
@@ -14,19 +14,19 @@
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Ručně ověřit Fionin výslech, hlas a klikací místo na iPhonu nebo Macu
+- Ověřit Fionin výslech jedním klepnutím na iPhonu nebo Macu
 
 ### Rozhodnutí
-- Fiona používá kanonický hlas en-US-JennyNeural
+- V tomto kroku nebylo přijato nové kanonické rozhodnutí.
 
 ### Navrhované další kroky
-- Zapojit poslední výslech Bruna s opraveným obrazem obsahujícím Benjiho
+- Zapojit poslední výslech Bruna
 - Poté doplnit počítání pěti ovcí a otevření branky
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `b9293021d09f`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `b9293021d09f` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-14T07:24:10+00:00.
+- Git před checkpointem: lokální `main` na `93c7a7979b01`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `93c7a7979b01` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-14T08:08:27+00:00.
 - Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -350,5 +350,32 @@ Navrhované další kroky:
 
 Technický důkaz:
 - rychlá Cockpit brána syntaxe a whitespace: 8.1 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
+- Pracovní proud: `project-mmtx`.
+- Read-only živý stav při checkpointu: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
+
+### 2026-08-14 10:56 CEST – Fionin blikající box nyní spolehlivě přijímá první klepnutí i v překryvu s ostatními postavami
+
+Hotovo:
+- Fionin blikající box nyní spolehlivě přijímá první klepnutí i v překryvu s ostatními postavami
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+
+Otevřeno:
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+
+Rizika:
+- Žádné další doložené provozní riziko.
+
+Rozhodnutí:
+- V tomto kroku nebylo přijato nové kanonické rozhodnutí.
+
+Další krok:
+- Ověřit Fionin výslech jedním klepnutím na iPhonu nebo Macu
+
+Navrhované další kroky:
+- Zapojit poslední výslech Bruna
+- Poté doplnit počítání pěti ovcí a otevření branky
+
+Technický důkaz:
+- rychlá Cockpit brána syntaxe a whitespace: 5.9 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `project-mmtx`.
 - Read-only živý stav při checkpointu: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
