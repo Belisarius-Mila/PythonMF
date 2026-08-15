@@ -222,3 +222,16 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   JSONL/TXT pár vytvářet nejvýše jednou za hodinu a po každém autosave
   automaticky ponechat pouze 12 nejnovějších časů. Stav autosave současně hlásí
   varování pod 30 GiB a kritický stav pod 15 GiB volného místa.
+
+### LL-017 — Logická velikost souborů není zaručený zisk volného místa na APFS
+
+- Problém: Cleanup správně smazal potvrzenou sadu starých autosave souborů, ale
+  odhad uvolnění vznikl součtem jejich logických velikostí. Volné místo na SSD
+  proto nevzrostlo o hlášený součet; copy-on-write bloky mohly být sdílené a
+  souběžně místo používaly cache, VM/swap a otevřené smazané soubory.
+- Typ: opakující se
+- Řešení nalezeno: 15082026
+- Řešení: Před cleanupem i po něm odděleně měřit logickou velikost, fyzicky
+  alokované bloky a `df`. Uživatelům nikdy neslibovat logický součet jako
+  skutečně uvolnitelné GiB. Proměnlivé cache a VM ověřit znovu po restartu;
+  CloudKit ani jiné systémové cache nemazat automaticky.
