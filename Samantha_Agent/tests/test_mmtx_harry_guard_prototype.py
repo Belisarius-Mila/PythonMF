@@ -7,6 +7,31 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 PROTOTYPE_ROOT = PROJECT_ROOT / "docs" / "scene04_harry_guard_prototype"
+GLOSSARY_SLUGS = {
+    "answer",
+    "badger",
+    "believe",
+    "catch",
+    "chase",
+    "chicken",
+    "closed",
+    "come_closer",
+    "dig",
+    "eat",
+    "fence",
+    "fox",
+    "gate",
+    "little_animals",
+    "own",
+    "question",
+    "rabbit",
+    "sheep",
+    "squirrel",
+    "trust",
+    "under",
+    "yard",
+}
+GLOSSARY_AUDIO_FILES = {f"scene04_vocab_{slug}_en.mp3" for slug in GLOSSARY_SLUGS}
 
 
 class MmtxHarryGuardPrototypeTests(unittest.TestCase):
@@ -30,16 +55,22 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
         styles = (PROTOTYPE_ROOT / "styles.css").read_text(encoding="utf-8")
         self.assertIn('id="languageButton"', html)
         self.assertIn('id="repeatButton"', html)
+        self.assertIn('id="dictionaryButton"', html)
+        self.assertIn('id="dictionaryPanel"', html)
+        self.assertIn('id="dictionaryList"', html)
         self.assertIn('id="sceneImage"', html)
         self.assertIn('id="yesButton"', html)
         self.assertIn('id="noButton"', html)
         self.assertIn('src="harry_benji_prototype_01.png"', html)
-        self.assertIn('styles.css?v=20260814a', html)
-        self.assertIn('script.js?v=20260814d', html)
+        self.assertIn('styles.css?v=20260815a', html)
+        self.assertIn('script.js?v=20260815a', html)
         self.assertIn("Five interviews complete", html)
         self.assertIn("Pět výslechů je dokončených.", html)
         target_style = styles.split(".hotspot.target {", 1)[1].split("}", 1)[0]
         self.assertIn("z-index: 2;", target_style)
+        self.assertIn(".dictionary-panel {", styles)
+        self.assertIn(".dictionary-list {", styles)
+        self.assertIn(".dictionary-item {", styles)
 
         production_script = (
             PROJECT_ROOT / "docs" / "scene03_journey_to_the_lake" / "script.js"
@@ -68,7 +99,7 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
             "scene04_bruno_hello_i_am_bruno_en.mp3",
             "scene04_bruno_no_i_do_not_dig_under_fences_en.mp3",
             "scene04_bruno_i_want_to_go_to_the_lake_with_my_friends_en.mp3",
-        }
+        } | GLOSSARY_AUDIO_FILES
         self.assertEqual({path.name for path in audio_root.iterdir()}, expected)
         for filename in expected:
             audio = (audio_root / filename).read_bytes()
@@ -146,6 +177,8 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
             'const SUNNY_AUDIO_VERSION = "20260814a"',
             'const FIONA_AUDIO_VERSION = "20260814a"',
             'const BRUNO_AUDIO_VERSION = "20260814a"',
+            'const DICTIONARY_AUDIO_VERSION = "20260815a"',
+            "const VOCABULARY = Object.freeze([",
             'src: "harry_interrogation_bunny_01.png"',
             'src: "harry_interrogation_sunny_01.png"',
             'src: "harry_interrogation_fiona_01.png"',
@@ -159,6 +192,12 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
             "primeFixedAudio();",
             "primeSceneImages();",
             "fixedAudioCache",
+            "function renderDictionary()",
+            "async function playVocabularyItem(item)",
+            "function toggleDictionary()",
+            "function updateDictionaryAvailability()",
+            'dictionaryButton.addEventListener("click", toggleDictionary)',
+            "...VOCABULARY.map((item) => item.audio)",
         ):
             self.assertIn(expected, script)
 
@@ -182,6 +221,63 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
             "scene04_bruno_i_want_to_go_to_the_lake_with_my_friends_en.mp3",
         ):
             self.assertIn(audio_file, script)
+
+        vocabulary_block = script.split(
+            "const VOCABULARY = Object.freeze([", 1
+        )[1].split("].map((item)", 1)[0]
+        expected_vocabulary = {
+            "come closer": "přijít blíž",
+            "chase": "honit",
+            "sheep": "ovce",
+            "little animals": "malá zvířátka",
+            "trust": "důvěřovat",
+            "rabbit": "králík",
+            "eat": "jíst",
+            "own": "vlastní",
+            "gate": "branka",
+            "closed": "zavřený",
+            "squirrel": "veverka",
+            "question": "otázka",
+            "answer": "odpověď",
+            "fox": "liška",
+            "catch": "chytit",
+            "chicken": "slepice",
+            "yard": "dvorek",
+            "badger": "jezevec",
+            "dig": "hrabat",
+            "under": "pod",
+            "fence": "plot",
+            "believe": "věřit",
+        }
+        self.assertEqual(vocabulary_block.count("{ en:"), len(expected_vocabulary))
+        for english, czech in expected_vocabulary.items():
+            self.assertIn(f'en: "{english}"', vocabulary_block)
+            self.assertIn(f'cz: "{czech}"', vocabulary_block)
+        for previously_practised in (
+            "map",
+            "carrot",
+            "nuts",
+            "garden",
+            "tree",
+            "friendly",
+            "lake",
+            "friends",
+        ):
+            self.assertNotIn(f'en: "{previously_practised}"', vocabulary_block)
+        for slug in GLOSSARY_SLUGS:
+            self.assertIn(f'file: "{slug}"', vocabulary_block)
+
+        dictionary_playback = script.split(
+            "async function playVocabularyItem(item)", 1
+        )[1].split("function toggleDictionary()", 1)[0]
+        self.assertIn("await playFixedAudio(item.audio, item.en.length)", dictionary_playback)
+        self.assertIn('await speakText(item.en, "en", "dictionary")', dictionary_playback)
+        self.assertIn('if (isBilingual()) await speakText(item.cz, "cs", "dictionary")', dictionary_playback)
+        dictionary_availability = script.split(
+            "function updateDictionaryAvailability()", 1
+        )[1].split("function updateDictionaryLanguageUi()", 1)[0]
+        self.assertIn("state.stage === STAGES.complete", dictionary_availability)
+        self.assertIn('dictionaryButton.classList.toggle("hidden", !isComplete)', dictionary_availability)
 
         self.assertIn('await speakText(entry.textEn, "en", entry.characterId)', script)
         self.assertIn('if (isBilingual()) await speakText(entry.textCz, "cs", entry.characterId)', script)

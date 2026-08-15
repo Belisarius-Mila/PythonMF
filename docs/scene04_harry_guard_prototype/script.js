@@ -21,6 +21,9 @@ const completeBanner = document.getElementById("completeBanner");
 const audioGate = document.getElementById("audioGate");
 const languageButton = document.getElementById("languageButton");
 const repeatButton = document.getElementById("repeatButton");
+const dictionaryButton = document.getElementById("dictionaryButton");
+const dictionaryPanel = document.getElementById("dictionaryPanel");
+const dictionaryList = document.getElementById("dictionaryList");
 
 const LANGUAGE_STORAGE_KEY = "mmtx-language-mode";
 const LANGUAGE_MODES = {
@@ -64,6 +67,35 @@ const BRUNO_ENGLISH_AUDIO = new Map([
   ["No. I do not dig under fences.", `audio/english/scene04_bruno_no_i_do_not_dig_under_fences_en.mp3?v=${BRUNO_AUDIO_VERSION}`],
   ["I want to go to the lake with my friends.", `audio/english/scene04_bruno_i_want_to_go_to_the_lake_with_my_friends_en.mp3?v=${BRUNO_AUDIO_VERSION}`],
 ]);
+
+const DICTIONARY_AUDIO_VERSION = "20260815a";
+const VOCABULARY = Object.freeze([
+  { en: "come closer", cz: "přijít blíž", emoji: "👣", file: "come_closer" },
+  { en: "chase", cz: "honit", emoji: "🐾", file: "chase" },
+  { en: "sheep", cz: "ovce", emoji: "🐑", file: "sheep" },
+  { en: "little animals", cz: "malá zvířátka", emoji: "🐾", file: "little_animals" },
+  { en: "trust", cz: "důvěřovat", emoji: "🤝", file: "trust" },
+  { en: "rabbit", cz: "králík", emoji: "🐇", file: "rabbit" },
+  { en: "eat", cz: "jíst", emoji: "🍽️", file: "eat" },
+  { en: "own", cz: "vlastní", emoji: "🎒", file: "own" },
+  { en: "gate", cz: "branka", emoji: "🚪", file: "gate" },
+  { en: "closed", cz: "zavřený", emoji: "🔒", file: "closed" },
+  { en: "squirrel", cz: "veverka", emoji: "🐿️", file: "squirrel" },
+  { en: "question", cz: "otázka", emoji: "❓", file: "question" },
+  { en: "answer", cz: "odpověď", emoji: "💬", file: "answer" },
+  { en: "fox", cz: "liška", emoji: "🦊", file: "fox" },
+  { en: "catch", cz: "chytit", emoji: "🙌", file: "catch" },
+  { en: "chicken", cz: "slepice", emoji: "🐔", file: "chicken" },
+  { en: "yard", cz: "dvorek", emoji: "🏡", file: "yard" },
+  { en: "badger", cz: "jezevec", emoji: "🦡", file: "badger" },
+  { en: "dig", cz: "hrabat", emoji: "🕳️", file: "dig" },
+  { en: "under", cz: "pod", emoji: "⬇️", file: "under" },
+  { en: "fence", cz: "plot", emoji: "🪵", file: "fence" },
+  { en: "believe", cz: "věřit", emoji: "💚", file: "believe" },
+].map((item) => Object.freeze({
+  ...item,
+  audio: `audio/english/scene04_vocab_${item.file}_en.mp3?v=${DICTIONARY_AUDIO_VERSION}`,
+})));
 
 // Keep Benji on a male voice even when the browser exposes voices in a
 // different order. Andrew matches the approved Scene 3 voice when available.
@@ -407,6 +439,12 @@ function voiceFor(lang, characterId) {
       if (selectedVoice) return selectedVoice;
     }
   }
+  if (lang === "en" && characterId === "dictionary") {
+    for (const preferredName of FIONA_ENGLISH_VOICE_ORDER) {
+      const selectedVoice = matching.find((voice) => voice.name.toLowerCase().includes(preferredName));
+      if (selectedVoice) return selectedVoice;
+    }
+  }
   if (lang === "en" && characterId === "bruno") {
     for (const preferredName of BRUNO_ENGLISH_VOICE_ORDER) {
       const selectedVoice = matching.find((voice) => voice.name.toLowerCase().includes(preferredName));
@@ -494,6 +532,7 @@ function primeFixedAudio() {
     ...SUNNY_ENGLISH_AUDIO.values(),
     ...FIONA_ENGLISH_AUDIO.values(),
     ...BRUNO_ENGLISH_AUDIO.values(),
+    ...VOCABULARY.map((item) => item.audio),
   ];
   sources.forEach((src) => {
     const audio = fixedAudioCache.get(src) || new Audio(src);
@@ -623,10 +662,77 @@ function updateRepeatAvailability() {
   repeatButton.disabled = !state.lastRepeatable || !repeatableStages.has(state.stage);
 }
 
+function closeDictionary() {
+  dictionaryPanel.classList.add("hidden");
+  dictionaryButton.classList.remove("active-panel");
+  dictionaryButton.setAttribute("aria-expanded", "false");
+}
+
+function updateDictionaryAvailability() {
+  const isComplete = state.stage === STAGES.complete;
+  dictionaryButton.disabled = !isComplete;
+  dictionaryButton.classList.toggle("hidden", !isComplete);
+  if (!isComplete) closeDictionary();
+}
+
+function updateDictionaryLanguageUi() {
+  dictionaryList.querySelectorAll(".dictionary-translation").forEach((translation) => {
+    translation.classList.toggle("hidden", !isBilingual());
+  });
+}
+
+function renderDictionary() {
+  dictionaryList.replaceChildren();
+  VOCABULARY.forEach((item) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "dictionary-item";
+    button.setAttribute("aria-label", `${item.en} — ${item.cz}`);
+
+    const emoji = document.createElement("span");
+    emoji.className = "dictionary-emoji";
+    emoji.setAttribute("aria-hidden", "true");
+    emoji.textContent = item.emoji;
+
+    const word = document.createElement("span");
+    word.className = "dictionary-word";
+    word.textContent = item.en;
+
+    const translation = document.createElement("span");
+    translation.className = "dictionary-translation";
+    translation.textContent = item.cz;
+
+    button.append(emoji, word, translation);
+    button.addEventListener("click", () => playVocabularyItem(item));
+    dictionaryList.appendChild(button);
+  });
+  updateDictionaryLanguageUi();
+}
+
+async function playVocabularyItem(item) {
+  if (state.stage !== STAGES.complete) return;
+  const flowId = ++state.flowId;
+  cancelSpeech();
+  const played = await playFixedAudio(item.audio, item.en.length);
+  if (flowId !== state.flowId) return;
+  if (!played) await speakText(item.en, "en", "dictionary");
+  if (flowId !== state.flowId) return;
+  if (isBilingual()) await speakText(item.cz, "cs", "dictionary");
+}
+
+function toggleDictionary() {
+  if (state.stage !== STAGES.complete || dictionaryButton.disabled) return;
+  const willOpen = dictionaryPanel.classList.contains("hidden");
+  dictionaryPanel.classList.toggle("hidden", !willOpen);
+  dictionaryButton.classList.toggle("active-panel", willOpen);
+  dictionaryButton.setAttribute("aria-expanded", willOpen ? "true" : "false");
+}
+
 function setStage(stage) {
   state.stage = stage;
   renderHotspots();
   updateRepeatAvailability();
+  updateDictionaryAvailability();
 }
 
 function renderHotspots() {
@@ -819,6 +925,7 @@ async function repeatLast() {
   const resumeStage = state.stage;
   const flowId = ++state.flowId;
   cancelSpeech();
+  closeDictionary();
   repeatButton.disabled = true;
   try {
     await playEntry(state.lastRepeatable, flowId, { remember: false });
@@ -843,6 +950,7 @@ function toggleLanguage() {
   state.languageMode = isBilingual() ? LANGUAGE_MODES.english : LANGUAGE_MODES.bilingual;
   saveLanguageMode();
   updateLanguageUi();
+  updateDictionaryLanguageUi();
 }
 
 async function startPrototype() {
@@ -857,9 +965,12 @@ async function startPrototype() {
 audioGate.addEventListener("click", startPrototype);
 languageButton.addEventListener("click", toggleLanguage);
 repeatButton.addEventListener("click", repeatLast);
+dictionaryButton.addEventListener("click", toggleDictionary);
 yesButton.addEventListener("click", chooseYes);
 noButton.addEventListener("click", chooseNo);
 window.speechSynthesis?.addEventListener?.("voiceschanged", loadVoices);
 
 updateLanguageUi();
+renderDictionary();
+updateDictionaryAvailability();
 renderHotspots();

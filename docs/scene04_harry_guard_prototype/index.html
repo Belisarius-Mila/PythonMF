@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>MMTX prototyp — Harry a pět výslechů</title>
-    <link rel="stylesheet" href="styles.css?v=20260814a">
+    <link rel="stylesheet" href="styles.css?v=20260815a">
   </head>
   <body>
     <main class="app-shell">
@@ -26,6 +26,10 @@
               <button class="ui-button" id="repeatButton" type="button" aria-label="Zopakovat poslední větu" disabled>
                 <span aria-hidden="true">🔁</span>
                 <span>Repeat</span>
+              </button>
+              <button class="ui-button dictionary-button hidden" id="dictionaryButton" type="button" aria-label="Slovníček nových slov" aria-expanded="false" disabled>
+                <span aria-hidden="true">📖</span>
+                <span>Words</span>
               </button>
             </div>
           </div>
@@ -59,6 +63,14 @@
             </span>
           </div>
 
+          <div class="dictionary-panel hidden" id="dictionaryPanel" aria-label="Slovníček nových slov">
+            <div class="dictionary-title">
+              <strong>New words</strong>
+              <small>Nová slovíčka</small>
+            </div>
+            <div class="dictionary-list" id="dictionaryList"></div>
+          </div>
+
           <button class="audio-gate" id="audioGate" type="button">
             <strong>Klepni a poslouchej</strong>
             <span>Tap and listen</span>
@@ -67,6 +79,6 @@
       </section>
     </main>
 
-    <script src="script.js?v=20260814d"></script>
+    <script src="script.js?v=20260815a"></script>
   </body>
 </html>

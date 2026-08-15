@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-14 11:48 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-15 11:11 CEST
 
 ### Hotovo
-- Prototyp nyní obsahuje Brunův pátý výslech s vlastním obrazem a hlubším hlasem
+- Závěr prototypu nabízí slovníček 22 nových slov s anglickou výslovností a volitelnou češtinou
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
@@ -14,18 +14,18 @@
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Ručně ověřit Brunův hlas a klikací oblast v nasazeném prototypu
+- Ručně ověřit slovníček, jeho rozložení a výslovnost na iPhonu
 
 ### Rozhodnutí
-- V tomto kroku nebylo přijato nové kanonické rozhodnutí.
+- Slovníček se zpřístupní až po pátém výslechu a český překlad se řídí režimem EN nebo EN + CZ
 
 ### Navrhované další kroky
 - Navázat závěrečným počítáním pěti ovcí a otevřením branky
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `b13454a0d00f`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `b13454a0d00f` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-14T09:25:42+00:00.
+- Git před checkpointem: lokální `main` na `9d84c5f8f650`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `9d84c5f8f650` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-14T15:15:10+00:00.
 - Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -402,5 +402,31 @@ Navrhované další kroky:
 
 Technický důkaz:
 - rychlá Cockpit brána syntaxe a whitespace: 5.6 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
+- Pracovní proud: `project-mmtx`.
+- Read-only živý stav při checkpointu: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
+
+### 2026-08-15 11:11 CEST – Závěr prototypu nabízí slovníček 22 nových slov s anglickou výslovností a volitelnou češtinou
+
+Hotovo:
+- Závěr prototypu nabízí slovníček 22 nových slov s anglickou výslovností a volitelnou češtinou
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+
+Otevřeno:
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+
+Rizika:
+- Žádné další doložené provozní riziko.
+
+Rozhodnutí:
+- Slovníček se zpřístupní až po pátém výslechu a český překlad se řídí režimem EN nebo EN + CZ
+
+Další krok:
+- Ručně ověřit slovníček, jeho rozložení a výslovnost na iPhonu
+
+Navrhované další kroky:
+- Navázat závěrečným počítáním pěti ovcí a otevřením branky
+
+Technický důkaz:
+- rychlá Cockpit brána syntaxe a whitespace: 6.0 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `project-mmtx`.
 - Read-only živý stav při checkpointu: main=`aligned`, deployment=`verified_current`, runtime=`connected`.

@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-14 11:48 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-15 11:11 CEST
 
 ### Hotovo
-- Prototyp nyní obsahuje Brunův pátý výslech s vlastním obrazem a hlubším hlasem
+- Závěr prototypu nabízí slovníček 22 nových slov s anglickou výslovností a volitelnou češtinou
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
@@ -14,18 +14,18 @@
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Ručně ověřit Brunův hlas a klikací oblast v nasazeném prototypu
+- Ručně ověřit slovníček, jeho rozložení a výslovnost na iPhonu
 
 ### Rozhodnutí
-- V tomto kroku nebylo přijato nové kanonické rozhodnutí.
+- Slovníček se zpřístupní až po pátém výslechu a český překlad se řídí režimem EN nebo EN + CZ
 
 ### Navrhované další kroky
 - Navázat závěrečným počítáním pěti ovcí a otevřením branky
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `b13454a0d00f`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `b13454a0d00f` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-14T09:25:42+00:00.
+- Git před checkpointem: lokální `main` na `9d84c5f8f650`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `9d84c5f8f650` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-14T15:15:10+00:00.
 - Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -224,3 +224,15 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (6): `Samantha_Agent/tests/test_mmtx_harry_guard_prototype.py`, `docs/scene04_harry_guard_prototype/index.html`, `docs/scene04_harry_guard_prototype/script.js`, `docs/scene04_harry_guard_prototype/audio/english/scene04_bruno_hello_i_am_bruno_en.mp3`, `docs/scene04_harry_guard_prototype/audio/english/scene04_bruno_i_want_to_go_to_the_lake_with_my_friends_en.mp3`, `docs/scene04_harry_guard_prototype/audio/english/scene04_bruno_no_i_do_not_dig_under_fences_en.mp3`
 - Commit: `Add Bruno interrogation to Harry prototype`
 - Další krok: Ručně ověřit Brunův hlas a klikací oblast v nasazeném prototypu
+
+### Automatický checkpoint 2026-08-15 11:11 CEST
+
+- Pracovní proud: `project-mmtx`
+- Hotovo: Závěr prototypu nabízí slovníček 22 nových slov s anglickou výslovností a volitelnou češtinou; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: rychlá Cockpit brána syntaxe a whitespace: 6.0 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu
+- Změněné cesty před paměťovým zápisem (26): `Samantha_Agent/tests/test_mmtx_harry_guard_prototype.py`, `docs/scene04_harry_guard_prototype/index.html`, `docs/scene04_harry_guard_prototype/script.js`, `docs/scene04_harry_guard_prototype/styles.css`, `docs/scene04_harry_guard_prototype/audio/english/scene04_vocab_answer_en.mp3`, `docs/scene04_harry_guard_prototype/audio/english/scene04_vocab_badger_en.mp3`, `docs/scene04_harry_guard_prototype/audio/english/scene04_vocab_believe_en.mp3`, `docs/scene04_harry_guard_prototype/audio/english/scene04_vocab_catch_en.mp3`, `docs/scene04_harry_guard_prototype/audio/english/scene04_vocab_chase_en.mp3`, `docs/scene04_harry_guard_prototype/audio/english/scene04_vocab_chicken_en.mp3`, `docs/scene04_harry_guard_prototype/audio/english/scene04_vocab_closed_en.mp3`, `docs/scene04_harry_guard_prototype/audio/english/scene04_vocab_come_closer_en.mp3`, `docs/scene04_harry_guard_prototype/audio/english/scene04_vocab_dig_en.mp3`, `docs/scene04_harry_guard_prototype/audio/english/scene04_vocab_eat_en.mp3`, `docs/scene04_harry_guard_prototype/audio/english/scene04_vocab_fence_en.mp3`, `docs/scene04_harry_guard_prototype/audio/english/scene04_vocab_fox_en.mp3`, `docs/scene04_harry_guard_prototype/audio/english/scene04_vocab_gate_en.mp3`, `docs/scene04_harry_guard_prototype/audio/english/scene04_vocab_little_animals_en.mp3`, `docs/scene04_harry_guard_prototype/audio/english/scene04_vocab_own_en.mp3`, `docs/scene04_harry_guard_prototype/audio/english/scene04_vocab_question_en.mp3`, `docs/scene04_harry_guard_prototype/audio/english/scene04_vocab_rabbit_en.mp3`, `docs/scene04_harry_guard_prototype/audio/english/scene04_vocab_sheep_en.mp3`, `docs/scene04_harry_guard_prototype/audio/english/scene04_vocab_squirrel_en.mp3`, `docs/scene04_harry_guard_prototype/audio/english/scene04_vocab_trust_en.mp3`, `docs/scene04_harry_guard_prototype/audio/english/scene04_vocab_under_en.mp3`, `docs/scene04_harry_guard_prototype/audio/english/scene04_vocab_yard_en.mp3`
+- Commit: `Add final glossary to Harry prototype`
+- Další krok: Ručně ověřit slovníček, jeho rozložení a výslovnost na iPhonu
