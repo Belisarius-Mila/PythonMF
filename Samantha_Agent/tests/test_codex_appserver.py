@@ -7,6 +7,7 @@ from unittest.mock import patch
 
 from app.codex_appserver import (
     AppServerContractError,
+    CodexAppServerClient,
     CodexVersion,
     TurnReceipt,
     UNIX_APP_SERVER_MAX_MESSAGE_BYTES,
@@ -69,6 +70,47 @@ class CodexContractTests(unittest.TestCase):
         self.assertEqual(public["generated_image_count"], 1)
         self.assertNotIn("generated_images", public)
         self.assertNotIn("secret-base64", json.dumps(public))
+
+    def test_client_preserves_matching_user_item_when_final_turn_omits_inputs(self) -> None:
+        transport = _ScriptedTransport(
+            completed_items=[
+                {"type": "agentMessage", "id": "agent-final", "text": "ano"},
+            ]
+        )
+
+        with patch(
+            "app.codex_appserver.read_codex_version",
+            return_value=CodexVersion.parse("codex-cli 0.147.0"),
+        ):
+            client = CodexAppServerClient(transport_factory=lambda **_kwargs: transport)
+            receipt = client.send_text(
+                thread_id="thread-1",
+                client_message_id="message-1",
+                text="test",
+            )
+
+        self.assertTrue(receipt.delivered)
+        self.assertEqual(receipt.user_item_count, 1)
+
+    def test_client_rejects_different_user_item_in_final_turn(self) -> None:
+        transport = _ScriptedTransport(
+            completed_items=[
+                {"type": "userMessage", "id": "user-other", "clientId": "message-other"},
+                {"type": "agentMessage", "id": "agent-final", "text": "ano"},
+            ]
+        )
+
+        with patch(
+            "app.codex_appserver.read_codex_version",
+            return_value=CodexVersion.parse("codex-cli 0.147.0"),
+        ):
+            client = CodexAppServerClient(transport_factory=lambda **_kwargs: transport)
+            with self.assertRaises(AppServerContractError):
+                client.send_text(
+                    thread_id="thread-1",
+                    client_message_id="message-1",
+                    text="test",
+                )
 
     def test_codex_environment_adds_service_runtime_paths(self) -> None:
         env = codex_environment({"PATH": "/custom/bin", "HOME": "/tmp/home"})
@@ -161,6 +203,70 @@ class _FakeUnixConnection:
 
     def close(self) -> None:
         self.closed = True
+
+
+class _ScriptedTransport:
+    def __init__(self, *, completed_items: list[dict[str, str]]) -> None:
+        self.running = True
+        self.process_id = 0
+        self._completed_items = completed_items
+        self._events = [
+            {
+                "method": "turn/started",
+                "params": {"threadId": "thread-1", "turn": {"id": "turn-1"}},
+            },
+            {
+                "method": "item/completed",
+                "params": {
+                    "threadId": "thread-1",
+                    "turnId": "turn-1",
+                    "item": {
+                        "type": "userMessage",
+                        "id": "user-1",
+                        "clientId": "message-1",
+                    },
+                },
+            },
+            {
+                "method": "item/completed",
+                "params": {
+                    "threadId": "thread-1",
+                    "turnId": "turn-1",
+                    "item": {"type": "agentMessage", "id": "agent-1", "text": "ano"},
+                },
+            },
+            {
+                "method": "turn/completed",
+                "params": {
+                    "threadId": "thread-1",
+                    "turn": {
+                        "id": "turn-1",
+                        "status": "completed",
+                        "items": self._completed_items,
+                    },
+                },
+            },
+        ]
+
+    def request(self, method: str, _params: dict[str, object]) -> dict[str, object]:
+        if method == "initialize":
+            return {}
+        if method == "turn/start":
+            return {"turn": {"id": "turn-1"}}
+        raise AssertionError(f"Neočekávaný požadavek: {method}")
+
+    def notify(self, _method: str, _params: dict[str, object] | None = None) -> None:
+        return None
+
+    def receive(self, predicate, *, description: str) -> dict[str, object]:
+        while self._events:
+            event = self._events.pop(0)
+            if predicate(event):
+                return event
+        raise AssertionError(f"Chybí událost: {description}")
+
+    def close(self) -> None:
+        self.running = False
 
 
 if __name__ == "__main__":

@@ -247,3 +247,15 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   dokončení jen z právě jednoho lokálního záznamu se shodným vláknem a client
   ID, shodnou finální odpovědí a následným `task_complete`; při jakékoli
   nejednoznačnosti zachovat `delivery_unknown` a vyžádat ruční recovery audit.
+
+### LL-019 — Finální app-server událost nemusí opakovat vstupní položku
+
+- Problém: Codex 0.147 poslal správnou `userMessage` přes `item/completed`, ale
+  finální `turn/completed` obsahoval pouze výstupní položky. Klient dříve
+  ověřený vstup zahodil, dokončený tah označil za nejistý a uzavřel spojení.
+- Typ: opakující se
+- Řešení nalezeno: 16082026
+- Řešení: Zachovat dříve přijatou `userMessage` pouze při přesné shodě
+  `clientId` a jen pokud finální tah neobsahuje žádnou uživatelskou položku.
+  Pokud finále uživatelskou položku obsahuje, použít ji autoritativně a při
+  neshodě dál selhat uzavřeně.

@@ -543,12 +543,15 @@ class CodexAppServerClient:
                 status = str(completed_turn.get("status") or "")
                 completed_items = completed_turn.get("items")
                 if isinstance(completed_items, list) and completed_items:
-                    authoritative_users = [
+                    completed_user_items = [
                         item
                         for item in completed_items
-                        if isinstance(item, dict)
-                        and item.get("type") == "userMessage"
-                        and item.get("clientId") == message_id
+                        if isinstance(item, dict) and item.get("type") == "userMessage"
+                    ]
+                    authoritative_users = [
+                        item
+                        for item in completed_user_items
+                        if item.get("clientId") == message_id
                     ]
                     authoritative_answers = [
                         str(item.get("text"))
@@ -557,7 +560,12 @@ class CodexAppServerClient:
                         and item.get("type") == "agentMessage"
                         and str(item.get("text") or "").strip()
                     ]
-                    user_items = authoritative_users
+                    # Codex 0.147 may omit input items from the final turn while
+                    # still reporting the matching userMessage via item/completed.
+                    # Preserve that earlier proof only when the final turn does
+                    # not contain any user message of its own.
+                    if completed_user_items:
+                        user_items = authoritative_users
                     if authoritative_answers:
                         agent_messages = authoritative_answers
                     authoritative_images = completed_generated_images(completed_items)
