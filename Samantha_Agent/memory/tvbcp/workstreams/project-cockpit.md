@@ -158,3 +158,28 @@ Technický důkaz:
 - Implementační commit: `e5335ad`.
 - Plná Cockpit Quality Gate: 1414/1414 testů, výsledek OK.
 - První řízené nasazení: nový proces a smoke 5/5.
+
+### 2026-08-16 08:04 CEST – Autosave cleanup odděluje tři různé metriky místa
+
+Hotovo:
+- Dry-run ukazuje zvlášť logickou velikost kandidátů a fyzicky alokované bloky.
+- Potvrzený úklid měří volné místo filesystemu před a po smazání a zachová
+  výsledný report místo jeho okamžitého přepsání novým dry-runem.
+- Reálný read-only dry-run nad autosave stavem hlásil nula kandidátů a nic
+  nesmazal.
+
+Rozhodnutí:
+- Ani logická velikost, ani alokované bloky nejsou na APFS příslibem skutečně
+  uvolněného místa. Skutečný výsledek je pouze naměřený rozdíl volného místa.
+- Dry-run proto skutečný zisk neslibuje; ten se zobrazí až po potvrzeném úklidu.
+
+Další krok:
+- Samostatně potvrdit nasazení do Cockpitu a po restartu živě ověřit nový text
+  dry-runu bez provedení mazání.
+
+Navrhované další kroky:
+- Na Macu a iPhonu zkontrolovat čitelnost tří oddělených metrik.
+
+Technický důkaz:
+- Cílených šest testů prošlo.
+- Plná Cockpit Quality Gate prošla 1414/1414 testy.

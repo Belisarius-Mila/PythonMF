@@ -460,10 +460,12 @@ class AutosaveCleanupTests(unittest.TestCase):
                 keep_latest_snapshots=0,
                 now=datetime(2026, 6, 30, 12, 0, 0),
             )
+            expected_allocated_bytes = (old_jsonl.stat().st_blocks + old_txt.stat().st_blocks) * 512
 
         self.assertEqual(plan.delete_count, 2)
         self.assertEqual({Path(item.path).name for item in plan.delete_files}, {old_jsonl.name, old_txt.name})
-        self.assertEqual(plan.reclaim_bytes, 20)
+        self.assertEqual(plan.logical_bytes, 20)
+        self.assertEqual(plan.allocated_bytes, expected_allocated_bytes)
 
     def test_cleanup_plan_keeps_latest_snapshots_even_when_old(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -499,6 +501,10 @@ class AutosaveCleanupTests(unittest.TestCase):
 
         self.assertIn("dry-run", text)
         self.assertIn("--apply --confirm", text)
+        self.assertIn("logicka velikost kandidatu", text)
+        self.assertIn("fyzicky alokovane bloky kandidatu", text)
+        self.assertIn("skutecna zmena volneho mista: zmeri se az po", text)
+        self.assertNotIn("odhad uvolneni", text)
 
 
 class WorkContextGuardTests(unittest.TestCase):

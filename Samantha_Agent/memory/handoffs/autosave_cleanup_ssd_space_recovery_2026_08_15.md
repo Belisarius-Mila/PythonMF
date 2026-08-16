@@ -1,6 +1,6 @@
 Nazev: Autosave cleanup, realne misto na SSD a navazani po restartu
 Priorita: 1
-Stav: ceka na retest
+Stav: rozpracovane
 Pripomenout pri startu: ano
 Datum: 2026-08-15
 
@@ -28,31 +28,34 @@ Co je hotove:
   jsou casove promenlive a po restartu se musi znovu zmerit.
 - CloudKit cache, iCloud data, APFS snapshoty ani jina data mimo omezeny autosave
   cleanup nebyla mazana.
+- Restart Macu byl nasledne potvrzen a read-only mereni ukazalo vyrazny navrat
+  volneho mista po poklesu docasne CloudKit cache a VM/swap. Autosave zustal
+  priblizne na puvodni velikosti.
+- Matematika autosave cleanupu je lokalne opravena: report oddeluje logickou
+  velikost kandidatu, soucet fyzicky alokovanych bloku a skutecnou zmenu volneho
+  mista namerenou pred a po potvrzenem uklidu.
+- Dry-run uz neslibuje odhad uvolneni. Vyslovne uvadi, ze alokovane APFS bloky
+  mohou byt sdilene a skutecny vysledek je znamy az po mereni.
+- Cilenych sest testu a plna Cockpit Quality Gate 1414/1414 prosly. Realny
+  dry-run hlasil nula kandidatu a nic nesmazal.
 
 Co neni hotove:
-- Nebyl dolozen restart celeho Macu; posledni read-only `kern.boottime` stale
-  ukazoval beh systemu od 2026-07-23.
-- Po skutecnem restartu chybi nove mereni volneho SSD, VM/swap, otevrenych
-  smazanych souboru, CloudKit cache a autosave stavu.
-- Cockpit stale potrebuje opravit matematiku reportu: oddelit logickou velikost
-  kandidatu, fyzicky alokovane bloky a skutecnou zmenu volneho mista pred/po.
+- Opravena matematika zatim neni nasazena do beziciho Cockpitu; nasazeni,
+  restart a zivy UI retest zustavaji samostatnou potvrzovanou akci.
 - Mila chce po restartu Samanthy pripomenout aktualizaci
   `AuditCockpit56_Mila.txt`. V aktualnim checkoutu existuje pouze
   `AuditCockpit56.txt`; pred zmenou je nutne vyjasnit, zda ma vzniknout novy
   soubor s `_Mila`, nebo jde o stavajici roadmapu. Nic neprejmenovavat naslepo.
 
 Dalsi krok:
-- Po restartu Macu spustit `samantha` a hned Mílovi pripomenout:
-  `Aktualizovat AuditCockpit56_Mila.txt.`
-- Potom pouze read-only zmerit skutecne volne misto a stav autosave/VM/CloudKit.
-- Teprve z noveho vychoziho mereni navrhnout a implementovat opravu matematiky
-  Cockpitu.
+- Samostatne potvrdit nasazeni opraveneho reportu do Cockpitu a po restartu
+  zive overit dry-run text bez skutecneho mazani.
+- Mílovi pripomenout `Aktualizovat AuditCockpit56_Mila.txt`, ale pred zmenou
+  vyjasnit, zda ma vzniknout novy soubor, nebo se ma upravit `AuditCockpit56.txt`.
 
 Navrhovane dalsi kroky:
 - Vyjasnit cilovy nazev auditniho souboru a doplnit do nej potvrzeny vysledek.
-- V Cockpitu zobrazovat vedle logicke velikosti fyzickou alokaci a namereny
-  rozdil volneho mista; testy nesmi vydavat logicky soucet za zarucene
-  uvolnitelne GiB.
+- Po nasazeni rucne zkontrolovat citelnost tri oddelenych metrik na Macu i iPhonu.
 - CloudKit cache nemazat automaticky ani naslepo. Pripadny zasah resit jako
   samostatne rizikove rozhodnuti az podle noveho mereni.
 
@@ -61,6 +64,10 @@ Zmenene nebo relevantni soubory:
 - `scripts/autosave_status.py`
 - `scripts/cleanup_session_autosave.py`
 - `app/autosave_service.py`
+- `app/frontend/cockpit/app.js`
+- `tests/test_cockpit.py`
+- `tests/test_cockpit_frontend.py`
+- `tests/test_safety_quick_checks.py`
 - `AuditCockpit56.txt`
 - `memory/technical/session_recovery_rules.md`
 

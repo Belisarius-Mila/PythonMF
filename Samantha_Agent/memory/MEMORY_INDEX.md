@@ -76,11 +76,11 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 ## Infrastructure Recovery
 
 - `handoffs/autosave_cleanup_ssd_space_recovery_2026_08_15.md` - [PRIPOMENOUT]
-  priorita 1 po potvrzenem autosave cleanupu: po restartu spustit `samantha`,
-  znovu read-only zmerit SSD/autosave/VM/CloudKit, opravit v Cockpitu rozdil
-  mezi logickou velikosti, fyzickymi bloky a realnym ziskem a Mílovi pripomenout
-  aktualizaci `AuditCockpit56_Mila.txt`; nejdrive vyjasnit nazev, protoze v
-  checkoutu je zatim pouze `AuditCockpit56.txt`.
+  priorita 1 po potvrzenem autosave cleanupu: restart a read-only mereni jsou
+  dolozene a Cockpit matematika je lokalne opravena s plnou branou 1414/1414,
+  ale jeste neni nasazena. Mílovi pripomenout aktualizaci
+  `AuditCockpit56_Mila.txt`; nejdrive vyjasnit nazev, protoze v checkoutu je
+  zatim pouze `AuditCockpit56.txt`.
 - `infrastructure/klicove_prikazy_pamatovacek.md` - Mílův stručný git-safe
   pamatováček: návrat k jediné relaci Adam–Codex, bezpečné převzetí připojeného
   `screen`, Cockpit, read-only Git stav, záloha, autosave a seznam příkazů, které

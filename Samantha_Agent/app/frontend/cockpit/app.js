@@ -2888,7 +2888,17 @@
 	    function formatAutosaveCleanupPlan(data) {
 	      const plan = data.plan || {};
 	      const runtime = data.runtime || {};
-	      const reclaim = Number(plan.reclaim_gib || 0);
+	      const measurement = data.disk_measurement || {};
+	      const logical = Number(plan.logical_gib || 0);
+	      const allocated = Number(plan.allocated_gib || 0);
+	      const freeChange = measurement.free_change_gib;
+	      const currentFree = measurement.free_after_gib == null
+	        ? runtime.disk_free_gib
+	        : measurement.free_after_gib;
+	      const actualChangeLine = freeChange === null || freeChange === undefined
+	        ? "Skutečná změna volného místa: změří se až po potvrzeném úklidu"
+	        : `Skutečná změna volného místa: ${Number(freeChange) >= 0 ? "+" : ""}${Number(freeChange).toFixed(3)} GiB ` +
+	          `(před ${Number(measurement.free_before_gib).toFixed(3)} GiB, po ${Number(measurement.free_after_gib).toFixed(3)} GiB)`;
 	      return [
 	        data.message || "Autosave úklid spočítán.",
 	        "",
@@ -2899,13 +2909,16 @@
 	        `Timestampované soubory: ${plan.scanned_timestamped_files || 0}`,
 	        `Chráněné soubory: ${plan.protected_timestamped_files || 0}`,
 	        `Ke smazání: ${plan.delete_count || 0}`,
-	        `Odhad uvolnění: ${reclaim.toFixed(2)} GiB`,
+	        `Logická velikost kandidátů: ${logical.toFixed(3)} GiB`,
+	        `Fyzicky alokované bloky kandidátů: ${allocated.toFixed(3)} GiB`,
+	        actualChangeLine,
 	        `Autosave watchery: ${Number(runtime.watcher_count || 0)} (očekáván 1)`,
-	        runtime.disk_free_gib == null
+	        currentFree == null
 	          ? "SSD volné místo: nezjištěno"
-	          : `SSD volné místo: ${Number(runtime.disk_free_gib).toFixed(1)} GiB (${runtime.disk_state || "unknown"})`,
+	          : `SSD volné místo: ${Number(currentFree).toFixed(1)} GiB (${runtime.disk_state || "unknown"})`,
 	        runtime.warning ? `Varování: ${runtime.warning}` : "Autosave watcher stav: OK",
 	        "",
+	        data.measurement_note || "Alokované bloky nejsou zárukou skutečně uvolněného místa.",
 	        data.safety_note || "Obsah autosave logů se nečte."
 	      ].join("\n");
 	    }
@@ -2943,7 +2956,8 @@
 	      }
 	      const plan = currentAutosaveCleanupPlan || {};
 	      const deleteCount = Number(plan.delete_count || 0);
-	      const reclaim = Number(plan.reclaim_gib || 0);
+	      const logical = Number(plan.logical_gib || 0);
+	      const allocated = Number(plan.allocated_gib || 0);
 	      if (!deleteCount) {
 	        if (autosaveCleanupStatus) autosaveCleanupStatus.textContent = "Není co mazat.";
 	        return;
@@ -2951,7 +2965,9 @@
 	      const ok = window.confirm(
 	        "Vyčistit staré autosave snapshoty?\n\n" +
 	        `Smazat se má ${deleteCount} starých timestampovaných souborů.\n` +
-	        `Odhad uvolnění: ${reclaim.toFixed(2)} GiB.\n\n` +
+	        `Logická velikost: ${logical.toFixed(3)} GiB.\n` +
+	        `Fyzicky alokované bloky: ${allocated.toFixed(3)} GiB.\n` +
+	        "Skutečná změna volného místa se změří až po úklidu.\n\n" +
 	        "Zůstanou latest soubory a 12 nejnovějších časových snapshotů."
 	      );
 	      if (!ok) return;
@@ -2970,7 +2986,6 @@
 	        if (autosaveCleanupOutput) autosaveCleanupOutput.textContent = formatAutosaveCleanupPlan(data);
 	        showMessage(data.message || "Autosave úklid hotov.");
 	        await refresh({silent: true, includeSecondary: false});
-	        await previewAutosaveCleanup(autosaveCleanupPreviewBtn);
 	      } catch (err) {
 	        recordFrontendError(err);
 	        if (autosaveCleanupStatus) autosaveCleanupStatus.textContent = `Chyba autosave úklidu: ${err}`;

@@ -12,6 +12,7 @@ from scripts.cleanup_session_autosave import (
     CONFIRM_TEXT as AUTOSAVE_CLEANUP_CONFIRM_TEXT,
     apply_cleanup as apply_session_autosave_cleanup,
     build_cleanup_plan as build_session_autosave_cleanup_plan,
+    filesystem_free_bytes,
 )
 
 
@@ -49,6 +50,7 @@ def session_autosave_cleanup_action(
     *,
     autosave_dir: Path = SESSION_AUTOSAVE_DIR,
     autosave_runtime_getter: Callable[..., Any] = read_autosave_runtime_status,
+    disk_free_getter: Callable[[Path], int] = filesystem_free_bytes,
 ) -> dict[str, Any]:
     retention_days = _bounded_int(payload.get("retention_days"), default=0, minimum=0, maximum=30)
     keep_latest = _bounded_int(payload.get("keep_latest_snapshots"), default=12, minimum=0, maximum=200)
@@ -71,12 +73,19 @@ def session_autosave_cleanup_action(
             "applied": False,
             "message": (
                 f"Dry-run: ke smazání {plan.delete_count} autosave souborů, "
-                f"odhad uvolnění {plan_dict['reclaim_gib']} GiB.{runtime_note}"
+                f"logická velikost {plan_dict['logical_gib']} GiB a fyzická alokace "
+                f"{plan_dict['allocated_gib']} GiB. Skutečná změna volného místa se změří "
+                f"až po potvrzeném úklidu.{runtime_note}"
             ),
             "confirmation_text": AUTOSAVE_CLEANUP_CONFIRM_TEXT,
             "plan": plan_dict,
             "runtime": runtime,
+            "disk_measurement": _disk_measurement_dict(),
             "safety_note": "Obsah autosave logů se nečetl; kontrolují se jen názvy a velikosti.",
+            "measurement_note": (
+                "Alokované bloky mohou být na APFS sdílené; skutečný zisk ukáže pouze "
+                "rozdíl volného místa před a po úklidu."
+            ),
         }
     if str(payload.get("confirmation_text", "")) != AUTOSAVE_CLEANUP_CONFIRM_TEXT:
         return {
@@ -88,18 +97,32 @@ def session_autosave_cleanup_action(
             "plan": plan_dict,
             "runtime": runtime,
         }
+    disk_free_before = disk_free_getter(autosave_dir)
     removed = apply_session_autosave_cleanup(plan)
+    disk_free_after = disk_free_getter(autosave_dir)
+    disk_measurement = _disk_measurement_dict(before=disk_free_before, after=disk_free_after)
+    runtime_after = autosave_runtime_dict(
+        autosave_runtime_getter(latest_info_path=autosave_dir / "latest_info.txt")
+    )
     return {
         "ok": True,
         "status": "applied",
         "applied": True,
         "removed": removed,
-        "message": f"Úklid autosave hotov: smazáno {removed} starých snapshotů.",
+        "message": (
+            f"Úklid autosave hotov: smazáno {removed} starých snapshotů; skutečná změna "
+            f"volného místa {disk_measurement['free_change_gib']:+.2f} GiB."
+        ),
         "plan": plan_dict,
-        "runtime": runtime,
+        "runtime": runtime_after,
+        "disk_measurement": disk_measurement,
         "safety_note": (
             "Ponechané jsou aktuální latest soubory a nastavený počet "
             "nejnovějších časových snapshotů."
+        ),
+        "measurement_note": (
+            "Logická velikost a alokované bloky jsou popis kandidátů; skutečný výsledek "
+            "je změřený rozdílem volného místa filesystemu."
         ),
     }
 
@@ -123,8 +146,27 @@ def _cleanup_plan_dict(plan: Any) -> dict[str, Any]:
     plan_dict["delete_files_sample"] = delete_files[:12]
     plan_dict["delete_files_omitted"] = max(0, len(delete_files) - 12)
     plan_dict["delete_files"] = []
-    plan_dict["reclaim_gib"] = round(int(plan_dict.get("reclaim_bytes", 0)) / 1024 / 1024 / 1024, 2)
+    plan_dict["logical_gib"] = _bytes_to_gib(plan_dict.get("logical_bytes"))
+    plan_dict["allocated_gib"] = _bytes_to_gib(plan_dict.get("allocated_bytes"))
     return plan_dict
+
+
+def _disk_measurement_dict(*, before: int | None = None, after: int | None = None) -> dict[str, Any]:
+    change = after - before if before is not None and after is not None else None
+    return {
+        "free_before_bytes": before,
+        "free_after_bytes": after,
+        "free_change_bytes": change,
+        "free_before_gib": _bytes_to_gib(before),
+        "free_after_gib": _bytes_to_gib(after),
+        "free_change_gib": _bytes_to_gib(change),
+    }
+
+
+def _bytes_to_gib(value: Any) -> float | None:
+    if value is None:
+        return None
+    return round(int(value) / 1024 / 1024 / 1024, 3)
 
 
 def _empty_metadata(path: Path, message: str) -> dict[str, Any]:

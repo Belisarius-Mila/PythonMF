@@ -3425,6 +3425,10 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("/api/session-autosave/cleanup", COCKPIT_HTML)
         self.assertIn("previewAutosaveCleanup", COCKPIT_HTML)
         self.assertIn("applyAutosaveCleanup", COCKPIT_HTML)
+        self.assertIn("Logická velikost kandidátů", COCKPIT_HTML)
+        self.assertIn("Fyzicky alokované bloky kandidátů", COCKPIT_HTML)
+        self.assertIn("Skutečná změna volného místa", COCKPIT_HTML)
+        self.assertNotIn("Odhad uvolnění", COCKPIT_HTML)
         self.assertIn("dashboardDiagnosticsBtn", COCKPIT_HTML)
         self.assertIn("diagnosticsModal", COCKPIT_HTML)
         self.assertIn("diagnosticsStatusSignals", COCKPIT_HTML)
@@ -4690,6 +4694,14 @@ Dalsi krok:
             self.assertTrue(preview["ok"])
             self.assertEqual(preview["status"], "dry_run")
             self.assertEqual(preview["plan"]["delete_count"], 1)
+            self.assertEqual(preview["plan"]["logical_bytes"], old_snapshot.stat().st_size)
+            self.assertEqual(
+                preview["plan"]["allocated_bytes"],
+                old_snapshot.stat().st_blocks * 512,
+            )
+            self.assertIsNone(preview["disk_measurement"]["free_change_bytes"])
+            self.assertIn("Skutečná změna volného místa se změří", preview["message"])
+            self.assertNotIn("odhad uvolnění", preview["message"].lower())
             self.assertEqual(preview["runtime"]["watcher_count"], 2)
             self.assertIn("očekáván je právě jeden", preview["message"])
             self.assertEqual(preview["plan"]["delete_files"], [])
@@ -4706,6 +4718,7 @@ Dalsi krok:
             latest = root / "latest_session.jsonl"
             old_snapshot.write_text("old", encoding="utf-8")
             latest.write_text("latest", encoding="utf-8")
+            disk_free_values = iter((10 * 1024**3, 10 * 1024**3 + 512 * 1024**2))
 
             result = session_autosave_cleanup_action(
                 {
@@ -4715,11 +4728,15 @@ Dalsi krok:
                     "confirmation_text": "SMAZAT STARE AUTOSAVE",
                 },
                 autosave_dir=root,
+                disk_free_getter=lambda _path: next(disk_free_values),
             )
 
             self.assertTrue(result["ok"])
             self.assertEqual(result["status"], "applied")
             self.assertEqual(result["removed"], 1)
+            self.assertEqual(result["plan"]["logical_bytes"], 3)
+            self.assertEqual(result["disk_measurement"]["free_change_bytes"], 512 * 1024**2)
+            self.assertEqual(result["disk_measurement"]["free_change_gib"], 0.5)
             self.assertFalse(old_snapshot.exists())
             self.assertTrue(latest.exists())
 

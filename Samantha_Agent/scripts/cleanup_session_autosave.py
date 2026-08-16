@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import shutil
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -27,6 +28,7 @@ DEFAULT_KEEP_LATEST_SNAPSHOTS = 12
 class CleanupFile:
     path: str
     size_bytes: int
+    allocated_bytes: int
     timestamp: str
 
 
@@ -38,7 +40,8 @@ class CleanupPlan:
     scanned_timestamped_files: int
     protected_timestamped_files: int
     delete_count: int
-    reclaim_bytes: int
+    logical_bytes: int
+    allocated_bytes: int
     delete_files: tuple[CleanupFile, ...]
 
 
@@ -66,7 +69,7 @@ def build_cleanup_plan(
 
     now = now or datetime.now()
     cutoff = now - timedelta(days=retention_days)
-    snapshots: list[tuple[Path, datetime, int]] = []
+    snapshots: list[tuple[Path, datetime, int, int]] = []
 
     if autosave_dir.exists():
         for path in autosave_dir.iterdir():
@@ -75,18 +78,21 @@ def build_cleanup_plan(
             timestamp = parse_snapshot_timestamp(path)
             if timestamp is None:
                 continue
-            snapshots.append((path, timestamp, path.stat().st_size))
+            stat = path.stat()
+            snapshots.append((path, timestamp, stat.st_size, allocated_size_bytes(stat)))
 
     newest_stamps = {
         stamp
-        for stamp in sorted({timestamp for _path, timestamp, _size in snapshots}, reverse=True)[
+        for stamp in sorted(
+            {timestamp for _path, timestamp, _size, _allocated in snapshots}, reverse=True
+        )[
             :keep_latest_snapshots
         ]
     }
 
     protected = 0
     delete_files: list[CleanupFile] = []
-    for path, timestamp, size in sorted(snapshots, key=lambda item: item[1]):
+    for path, timestamp, size, allocated in sorted(snapshots, key=lambda item: item[1]):
         if timestamp >= cutoff or timestamp in newest_stamps:
             protected += 1
             continue
@@ -94,6 +100,7 @@ def build_cleanup_plan(
             CleanupFile(
                 path=display_path(path),
                 size_bytes=size,
+                allocated_bytes=allocated,
                 timestamp=timestamp.isoformat(sep=" "),
             )
         )
@@ -105,9 +112,26 @@ def build_cleanup_plan(
         scanned_timestamped_files=len(snapshots),
         protected_timestamped_files=protected,
         delete_count=len(delete_files),
-        reclaim_bytes=sum(item.size_bytes for item in delete_files),
+        logical_bytes=sum(item.size_bytes for item in delete_files),
+        allocated_bytes=sum(item.allocated_bytes for item in delete_files),
         delete_files=tuple(delete_files),
     )
+
+
+def allocated_size_bytes(stat: object) -> int:
+    """Return filesystem-allocated bytes without treating them as reclaimable bytes."""
+    blocks = getattr(stat, "st_blocks", None)
+    if blocks is None:
+        return int(getattr(stat, "st_size", 0) or 0)
+    return max(0, int(blocks)) * 512
+
+
+def filesystem_free_bytes(path: Path) -> int:
+    """Measure free bytes on the filesystem containing path (or its nearest parent)."""
+    candidate = path
+    while not candidate.exists() and candidate != candidate.parent:
+        candidate = candidate.parent
+    return int(shutil.disk_usage(candidate).free)
 
 
 def apply_cleanup(plan: CleanupPlan, *, project_root: Path = PROJECT_ROOT) -> int:
@@ -138,7 +162,14 @@ def format_bytes(size: int) -> str:
     return f"{mib:.1f} MiB"
 
 
-def format_plan(plan: CleanupPlan, *, applied: bool = False, removed: int = 0) -> str:
+def format_plan(
+    plan: CleanupPlan,
+    *,
+    applied: bool = False,
+    removed: int = 0,
+    disk_free_before_bytes: int | None = None,
+    disk_free_after_bytes: int | None = None,
+) -> str:
     lines = ["Samantha session autosave cleanup:"]
     lines.append(f"- adresar: {plan.autosave_dir}")
     if plan.retention_days:
@@ -149,13 +180,28 @@ def format_plan(plan: CleanupPlan, *, applied: bool = False, removed: int = 0) -
     lines.append(f"- timestampovane soubory: {plan.scanned_timestamped_files}")
     lines.append(f"- chranene timestampovane soubory: {plan.protected_timestamped_files}")
     lines.append(f"- kandidati ke smazani: {plan.delete_count}")
-    lines.append(f"- odhad uvolneni: {format_bytes(plan.reclaim_bytes)}")
+    lines.append(f"- logicka velikost kandidatu: {format_bytes(plan.logical_bytes)}")
+    lines.append(f"- fyzicky alokovane bloky kandidatu: {format_bytes(plan.allocated_bytes)}")
     if applied:
         lines.append(f"- provedeno: smazano {removed} souboru")
+        if disk_free_before_bytes is not None and disk_free_after_bytes is not None:
+            lines.append(f"- volne misto pred: {format_bytes(disk_free_before_bytes)}")
+            lines.append(f"- volne misto po: {format_bytes(disk_free_after_bytes)}")
+            lines.append(
+                f"- skutecna zmena volneho mista: "
+                f"{format_signed_bytes(disk_free_after_bytes - disk_free_before_bytes)}"
+            )
     else:
         lines.append("- dry-run: nic nebylo smazano")
+        lines.append("- skutecna zmena volneho mista: zmeri se az po potvrzenem uklidu")
         lines.append(f"- pro provedeni: --apply --confirm '{CONFIRM_TEXT}'")
+    lines.append("- poznamka: alokovane bloky mohou byt na APFS sdilene; nejsou prislibem zisku")
     return "\n".join(lines)
+
+
+def format_signed_bytes(size: int) -> str:
+    sign = "+" if size > 0 else "-" if size < 0 else ""
+    return f"{sign}{format_bytes(abs(size))}"
 
 
 def main() -> int:
@@ -177,6 +223,8 @@ def main() -> int:
     )
 
     removed = 0
+    disk_free_before_bytes = None
+    disk_free_after_bytes = None
     if args.apply:
         if args.confirm != CONFIRM_TEXT:
             if args.json:
@@ -185,12 +233,41 @@ def main() -> int:
                 print(format_plan(plan))
                 print(f"\nChybi presne potvrzeni: --confirm '{CONFIRM_TEXT}'")
             return 2
+        disk_free_before_bytes = filesystem_free_bytes(args.autosave_dir)
         removed = apply_cleanup(plan)
+        disk_free_after_bytes = filesystem_free_bytes(args.autosave_dir)
 
     if args.json:
-        print(json.dumps({"ok": True, "applied": args.apply, "removed": removed, "plan": asdict(plan)}, indent=2))
+        print(
+            json.dumps(
+                {
+                    "ok": True,
+                    "applied": args.apply,
+                    "removed": removed,
+                    "plan": asdict(plan),
+                    "disk_measurement": {
+                        "free_before_bytes": disk_free_before_bytes,
+                        "free_after_bytes": disk_free_after_bytes,
+                        "free_change_bytes": (
+                            disk_free_after_bytes - disk_free_before_bytes
+                            if disk_free_before_bytes is not None and disk_free_after_bytes is not None
+                            else None
+                        ),
+                    },
+                },
+                indent=2,
+            )
+        )
     else:
-        print(format_plan(plan, applied=args.apply, removed=removed))
+        print(
+            format_plan(
+                plan,
+                applied=args.apply,
+                removed=removed,
+                disk_free_before_bytes=disk_free_before_bytes,
+                disk_free_after_bytes=disk_free_after_bytes,
+            )
+        )
     return 0
 
 
