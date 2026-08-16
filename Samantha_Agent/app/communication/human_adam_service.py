@@ -10,6 +10,11 @@ from pathlib import Path
 from typing import Any, Callable
 
 from app.codex_appserver import AppServerError, CodexAppServerClient, UnixSocketAppServerTransport
+from app.communication.codex_delivery_recovery import (
+    CodexDeliveryRecoveryError,
+    default_codex_sessions_root,
+    read_completed_delivery_evidence,
+)
 from app.communication.local_runtime import LocalAppServerProcessController
 from app.communication.session_hub import (
     CanonicalSessionHub,
@@ -77,6 +82,9 @@ SAFE_GIT_HEAD_RE = re.compile(r"[0-9a-fA-F]{7,64}")
 SAFE_WORKSPACE_RELATIONS = frozenset({"aligned", "local_ahead", "source_ahead", "diverged", "unknown"})
 MAX_WORKSPACE_SNAPSHOT_COUNT = 1_000_000
 THREAD_ROTATION_CONFIRMATION_TEXT = "POTVRZUJI ROTACI PROFILOVEHO VLAKNA"
+DELIVERY_RECOVERY_CONFIRMATION_TEXT = (
+    "POTVRZUJI OBNOVU DOKONCENEHO TAHU BEZ OPAKOVANEHO ODESLANI"
+)
 
 
 def _safe_git_head(value: object) -> str:
@@ -141,6 +149,7 @@ class HumanAdamService:
         private_capability_backend: object | None = None,
         tvbcp_relative_path: Path = CANONICAL_TVBCP_RELATIVE_PATH,
         tvbcp_title: str = "Architektura komunikace Samantha",
+        codex_sessions_root: Path | None = None,
     ):
         self.runtime = runtime or LocalAppServerProcessController(codex_binary=codex_binary)
         self.workspace = workspace or HumanAdamWorkspaceManager()
@@ -157,6 +166,9 @@ class HumanAdamService:
         self.private_capability_backend = private_capability_backend
         self.tvbcp_relative_path = Path(tvbcp_relative_path)
         self.tvbcp_title = str(tvbcp_title).strip() or "Projektový TVBCP"
+        self.codex_sessions_root = Path(
+            codex_sessions_root or default_codex_sessions_root()
+        ).expanduser()
         self._profile: dict[str, Any] = {}
         self.state_path = Path(state_path)
         self.work_profile_id = str(work_profile_id or "").strip().lower()
@@ -344,6 +356,89 @@ class HumanAdamService:
             "archives_previous_thread": False,
         }
 
+    def delivery_recovery_status(self) -> dict[str, Any]:
+        session = self.hub.snapshot()
+        messages = session.get("messages")
+        latest = messages[-1] if isinstance(messages, list) and messages else None
+        blockers: list[str] = []
+        if session.get("turn_busy") or session.get("active_turn"):
+            blockers.append("Dokončení nelze obnovit během aktivního tahu.")
+        if not isinstance(latest, dict) or (
+            latest.get("status") != "delivery_unknown"
+            or latest.get("recovery_required") is not True
+        ):
+            blockers.append("Poslední zpráva nečeká na obnovu nejistého doručení.")
+            latest = {}
+        client_message_id = str(latest.get("client_message_id") or "")
+        thread_id = str(latest.get("thread_id") or "")
+        answer_chars = 0
+        if not blockers:
+            try:
+                evidence = read_completed_delivery_evidence(
+                    sessions_root=self.codex_sessions_root,
+                    thread_id=thread_id,
+                    client_message_id=client_message_id,
+                )
+                answer_chars = len(evidence.answer)
+            except CodexDeliveryRecoveryError as exc:
+                blockers.append(str(exc))
+        return {
+            "ok": True,
+            "ready": not blockers,
+            "expected_client_message_id": client_message_id,
+            "expected_thread_id": thread_id,
+            "answer_chars": answer_chars,
+            "blockers": blockers,
+            "confirmation_text": DELIVERY_RECOVERY_CONFIRMATION_TEXT,
+            "resends_original_message": False,
+        }
+
+    def recover_completed_delivery(
+        self,
+        *,
+        confirmation: str,
+        expected_client_message_id: str,
+        expected_thread_id: str,
+    ) -> dict[str, Any]:
+        if str(confirmation or "").strip() != DELIVERY_RECOVERY_CONFIRMATION_TEXT:
+            raise SessionHubError(
+                f"Chybí přesná potvrzovací věta: {DELIVERY_RECOVERY_CONFIRMATION_TEXT}"
+            )
+        audit = self.delivery_recovery_status()
+        if not audit.get("ready"):
+            detail = " ".join(str(item) for item in audit.get("blockers") or [])
+            raise SessionHubError(detail or "Dokončení nyní nelze bezpečně obnovit.")
+        client_message_id = str(expected_client_message_id or "").strip()
+        thread_id = str(expected_thread_id or "").strip()
+        if (
+            client_message_id != audit.get("expected_client_message_id")
+            or thread_id != audit.get("expected_thread_id")
+        ):
+            raise SessionHubError("Nejisté doručení se mezitím změnilo; obnovu zopakuj.")
+        evidence = read_completed_delivery_evidence(
+            sessions_root=self.codex_sessions_root,
+            thread_id=thread_id,
+            client_message_id=client_message_id,
+        )
+        entry = self.hub.reconcile_completed_delivery(
+            client_message_id=evidence.client_message_id,
+            thread_id=evidence.thread_id,
+            turn_id=evidence.turn_id,
+            completed_at=evidence.completed_at,
+            answer=evidence.answer,
+        )
+        return {
+            "ok": True,
+            "recovered": True,
+            "client_message_id": str(entry.get("client_message_id") or ""),
+            "thread_id": str(entry.get("thread_id") or ""),
+            "turn_id": str(entry.get("turn_id") or ""),
+            "status": str(entry.get("status") or ""),
+            "delivery_confirmed": entry.get("delivery_confirmed") is True,
+            "recovery_required": entry.get("recovery_required") is True,
+            "resends_original_message": False,
+        }
+
     def rotate_thread(self, *, confirmation: str, expected_thread_id: str) -> dict[str, Any]:
         if str(confirmation or "").strip() != THREAD_ROTATION_CONFIRMATION_TEXT:
             raise SessionHubError(
@@ -451,6 +546,30 @@ def human_adam_thread_rotation_status_action(*, service: HumanAdamService) -> di
         return service.thread_rotation_status()
     except (AppServerError, SessionHubError, OSError, ValueError) as exc:
         return {"ok": False, "status": "human_adam_thread_rotation_failed", "message": str(exc)}
+
+
+def human_adam_delivery_recovery_status_action(*, service: HumanAdamService) -> dict[str, Any]:
+    try:
+        return service.delivery_recovery_status()
+    except (AppServerError, SessionHubError, OSError, ValueError) as exc:
+        return {"ok": False, "status": "human_adam_delivery_recovery_failed", "message": str(exc)}
+
+
+def human_adam_delivery_recovery_action(
+    payload: dict[str, Any],
+    *,
+    service: HumanAdamService,
+) -> dict[str, Any]:
+    try:
+        return service.recover_completed_delivery(
+            confirmation=str(payload.get("confirmation") or ""),
+            expected_client_message_id=str(payload.get("expected_client_message_id") or ""),
+            expected_thread_id=str(payload.get("expected_thread_id") or ""),
+        )
+    except SessionBusyError as exc:
+        return {"ok": False, "status": "human_adam_busy", "message": str(exc)}
+    except (AppServerError, CodexDeliveryRecoveryError, SessionHubError, OSError, ValueError) as exc:
+        return {"ok": False, "status": "human_adam_delivery_recovery_failed", "message": str(exc)}
 
 
 def human_adam_thread_rotation_action(

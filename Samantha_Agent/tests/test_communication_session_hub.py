@@ -178,6 +178,60 @@ class CanonicalSessionHubTests(unittest.TestCase):
                     answer="",
                 )
 
+    def test_reconciles_only_latest_exact_delivery_unknown_without_resend(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            hub = self.make_hub(root)
+            with hub._state_lock:
+                hub._state["thread_id"] = "thread-0001"
+                hub._state["messages"].append(
+                    {
+                        "client_message_id": "message-0001",
+                        "thread_id": "thread-0001",
+                        "status": "delivery_unknown",
+                        "recovery_required": True,
+                    }
+                )
+            recovered = hub.reconcile_completed_delivery(
+                client_message_id="message-0001",
+                thread_id="thread-0001",
+                turn_id="turn-0001",
+                completed_at="done",
+                answer="Hotovo",
+            )
+            persisted = json.loads((root / "session.json").read_text(encoding="utf-8"))
+
+        self.assertEqual(recovered["status"], "completed")
+        self.assertTrue(recovered["delivery_confirmed"])
+        self.assertFalse(recovered["recovery_required"])
+        self.assertEqual(persisted["messages"][-1]["answer"], "Hotovo")
+        self.assertEqual(FakeClient.instances, [])
+
+    def test_reconciliation_rejects_wrong_thread_or_nonlatest_entry(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            hub = self.make_hub(Path(temp_dir))
+            with hub._state_lock:
+                hub._state["thread_id"] = "thread-0001"
+                hub._state["messages"].extend(
+                    [
+                        {
+                            "client_message_id": "message-0001",
+                            "thread_id": "thread-0001",
+                            "status": "delivery_unknown",
+                            "recovery_required": True,
+                        },
+                        {"client_message_id": "message-0002", "status": "completed"},
+                    ]
+                )
+            with self.assertRaises(SessionHubError):
+                hub.reconcile_completed_delivery(
+                    client_message_id="message-0001",
+                    thread_id="thread-0001",
+                    turn_id="turn-0001",
+                    completed_at="done",
+                    answer="Hotovo",
+                )
+
     def test_model_input_is_sent_but_never_persisted_in_user_history(self) -> None:
         model_input = (
             "[WORKSPACE SNAPSHOT]\nsource_head=abcdef12\n\n"

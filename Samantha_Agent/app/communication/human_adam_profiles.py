@@ -3133,6 +3133,14 @@ class HumanAdamProfileManager:
         with self.profile_operation() as service:
             return service.rotate_thread(**kwargs)
 
+    def delivery_recovery_status(self) -> dict[str, Any]:
+        with self.profile_operation() as service:
+            return service.delivery_recovery_status()
+
+    def recover_completed_delivery(self, **kwargs: Any) -> dict[str, Any]:
+        with self.profile_operation() as service:
+            return service.recover_completed_delivery(**kwargs)
+
     def workstream_live_status(
         self,
         *,

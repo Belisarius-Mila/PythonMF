@@ -334,6 +334,22 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("/api/human-adam/thread-rotation", self.cockpit_do_get_routes())
         self.assertIn("/api/human-adam/thread-rotation", self.cockpit_do_post_routes())
 
+    def test_human_adam_delivery_recovery_has_private_exact_registry_card_and_routes(self) -> None:
+        card = next(
+            item
+            for item in COCKPIT_POST_ACTIONS
+            if item["path"] == "/api/human-adam/delivery-recovery"
+        )
+
+        self.assertEqual(card["risk"], "private_write")
+        self.assertEqual(
+            card["confirmation"],
+            "exact_delivery_recovery_phrase_and_message_ids",
+        )
+        self.assertEqual(card["handler_name"], "human_adam_delivery_recovery_action")
+        self.assertIn("/api/human-adam/delivery-recovery", self.cockpit_do_get_routes())
+        self.assertIn("/api/human-adam/delivery-recovery", self.cockpit_do_post_routes())
+
     def test_human_adam_development_semaphore_has_private_explicit_registry_card_and_routes(self) -> None:
         card = next(
             item

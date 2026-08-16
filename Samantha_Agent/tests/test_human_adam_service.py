@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from inspect import signature
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -10,11 +11,14 @@ from app.communication import human_adam_service as human_adam_service_module
 from app.communication.human_adam_service import (
     CANONICAL_PRIVATE_DEVELOPER_INSTRUCTIONS,
     CANONICAL_TVBCP_RELATIVE_PATH,
+    DELIVERY_RECOVERY_CONFIRMATION_TEXT,
     HUMAN_ADAM_DEVELOPER_INSTRUCTIONS,
     THREAD_ROTATION_CONFIRMATION_TEXT,
     HumanAdamService,
     human_adam_checkpoint_action,
     human_adam_connect_action,
+    human_adam_delivery_recovery_action,
+    human_adam_delivery_recovery_status_action,
     human_adam_send_action,
     human_adam_thread_rotation_action,
     human_adam_thread_rotation_status_action,
@@ -125,6 +129,7 @@ class FakeHub:
         self.active_turn: dict[str, object] | None = None
         self.thread_id = "canonical-thread"
         self.rotation_count = 0
+        self.messages: list[dict[str, object]] = []
 
     def snapshot(self) -> dict[str, object]:
         return {
@@ -133,7 +138,7 @@ class FakeHub:
             "connection_state": "connected" if self.connected else "disconnected",
             "turn_busy": self.turn_busy,
             "active_turn": self.active_turn,
-            "messages": [],
+            "messages": list(self.messages),
         }
 
     def rotation_status(self) -> dict[str, object]:
@@ -162,6 +167,19 @@ class FakeHub:
             "thread_id": self.thread_id,
             "rotation_count": self.rotation_count,
         }
+
+    def reconcile_completed_delivery(self, **kwargs: object) -> dict[str, object]:
+        entry = self.messages[-1]
+        entry.update(
+            {
+                "status": "completed",
+                "answer": str(kwargs.get("answer") or ""),
+                "turn_id": str(kwargs.get("turn_id") or ""),
+                "delivery_confirmed": True,
+                "recovery_required": False,
+            }
+        )
+        return dict(entry)
 
     def connect(self) -> dict[str, object]:
         self.connected = True
@@ -566,6 +584,79 @@ class HumanAdamServiceTests(unittest.TestCase):
         self.assertEqual(rotated["previous_thread_id"], "canonical-thread")
         self.assertTrue(rotated["previous_thread_preserved"])
         self.assertNotIn("context_anchor_revision", rotated)
+
+    def test_delivery_recovery_requires_local_completion_evidence_and_never_resends(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            service, _runtime, _workspace, hub = self.make_service(root)
+            service.codex_sessions_root = root / "sessions"
+            hub.thread_id = "thread-0001"
+            hub.messages.append(
+                {
+                    "client_message_id": "message-0001",
+                    "thread_id": "thread-0001",
+                    "status": "delivery_unknown",
+                    "recovery_required": True,
+                }
+            )
+            rollout = service.codex_sessions_root / "rollout-test-thread-0001.jsonl"
+            rollout.parent.mkdir(parents=True)
+            events = [
+                {
+                    "type": "event_msg",
+                    "payload": {
+                        "type": "user_message",
+                        "client_id": "message-0001",
+                        "message": "private",
+                    },
+                },
+                {
+                    "type": "event_msg",
+                    "payload": {
+                        "type": "agent_message",
+                        "phase": "final_answer",
+                        "message": "Hotovo",
+                    },
+                },
+                {
+                    "type": "event_msg",
+                    "payload": {
+                        "type": "task_complete",
+                        "turn_id": "turn-0001",
+                        "completed_at": "done",
+                        "last_agent_message": "Hotovo",
+                    },
+                },
+            ]
+            rollout.write_text(
+                "".join(json.dumps(item) + "\n" for item in events),
+                encoding="utf-8",
+            )
+            audit = human_adam_delivery_recovery_status_action(service=service)
+            rejected = human_adam_delivery_recovery_action(
+                {
+                    "confirmation": "ano",
+                    "expected_client_message_id": "message-0001",
+                    "expected_thread_id": "thread-0001",
+                },
+                service=service,
+            )
+            recovered = human_adam_delivery_recovery_action(
+                {
+                    "confirmation": DELIVERY_RECOVERY_CONFIRMATION_TEXT,
+                    "expected_client_message_id": "message-0001",
+                    "expected_thread_id": "thread-0001",
+                },
+                service=service,
+            )
+
+        self.assertTrue(audit["ready"])
+        self.assertFalse(audit["resends_original_message"])
+        self.assertFalse(rejected["ok"])
+        self.assertTrue(recovered["recovered"])
+        self.assertTrue(recovered["delivery_confirmed"])
+        self.assertFalse(recovered["recovery_required"])
+        self.assertEqual(hub.sent, [])
 
     def test_send_adds_only_allowlisted_workspace_snapshot_to_model_input(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

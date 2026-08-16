@@ -324,6 +324,67 @@ class CanonicalSessionHub:
             self._save_locked()
             return copy.deepcopy(entry)
 
+    def reconcile_completed_delivery(
+        self,
+        *,
+        client_message_id: str,
+        thread_id: str,
+        turn_id: str,
+        completed_at: str,
+        answer: str,
+    ) -> dict[str, Any]:
+        """Persist externally proven completion without sending the turn again."""
+
+        clean_client_id = str(client_message_id or "").strip()
+        clean_thread_id = str(thread_id or "").strip()
+        clean_turn_id = str(turn_id or "").strip()
+        clean_completed_at = str(completed_at or "").strip()
+        clean_answer = str(answer or "").strip()
+        if not CLIENT_MESSAGE_ID_RE.fullmatch(clean_client_id):
+            raise SessionHubError("Obnova dokončení nemá platné client_message_id.")
+        if not CLIENT_MESSAGE_ID_RE.fullmatch(clean_thread_id):
+            raise SessionHubError("Obnova dokončení nemá platné ID vlákna.")
+        if not CLIENT_MESSAGE_ID_RE.fullmatch(clean_turn_id):
+            raise SessionHubError("Obnova dokončení nemá platné ID tahu.")
+        if not clean_completed_at or not clean_answer:
+            raise SessionHubError("Obnova dokončení nemá úplný doklad.")
+        if not self._turn_lock.acquire(blocking=False):
+            raise SessionBusyError("Dokončení nelze obnovit během aktivního tahu.")
+        try:
+            with self._state_lock:
+                if self._state.get("active_turn"):
+                    raise SessionBusyError("Dokončení nelze obnovit během aktivního tahu.")
+                if str(self._state.get("thread_id") or "") != clean_thread_id:
+                    raise SessionHubError("Aktivní vlákno se od nalezeného důkazu liší.")
+                entry = self._message_locked(clean_client_id)
+                if entry is None:
+                    raise SessionHubError("K obnově není dostupný záznam zprávy.")
+                if entry is not self._state["messages"][-1]:
+                    raise SessionHubError("Obnovit lze jen poslední nejisté doručení.")
+                if (
+                    entry.get("status") != "delivery_unknown"
+                    or entry.get("recovery_required") is not True
+                    or str(entry.get("thread_id") or "") != clean_thread_id
+                ):
+                    raise SessionHubError("Záznam už není v očekávaném stavu nejistého doručení.")
+                entry.update(
+                    {
+                        "completed_at": clean_completed_at,
+                        "status": "completed",
+                        "answer": clean_answer,
+                        "turn_id": clean_turn_id,
+                        "delivery_confirmed": True,
+                        "recovery_required": False,
+                    }
+                )
+                self._state["active_turn"] = None
+                if not self._client or not self._client.running:
+                    self._state["connection_state"] = "disconnected"
+                self._save_locked()
+                return copy.deepcopy(entry)
+        finally:
+            self._turn_lock.release()
+
     def send(
         self,
         *,

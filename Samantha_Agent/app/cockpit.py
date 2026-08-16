@@ -93,6 +93,8 @@ from app.command_cheatsheet import load_command_cheatsheet
 from app.communication.human_adam_service import (
     human_adam_checkpoint_action,
     human_adam_connect_action,
+    human_adam_delivery_recovery_action,
+    human_adam_delivery_recovery_status_action,
     human_adam_send_action,
     human_adam_status_action,
     human_adam_thread_rotation_action,
@@ -8852,6 +8854,14 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "direct",
     },
     {
+        "path": "/api/human-adam/delivery-recovery",
+        "label": "Obnovit dolozene dokonceni bez opakovaneho odeslani",
+        "risk": "private_write",
+        "confirmation": "exact_delivery_recovery_phrase_and_message_ids",
+        "handler_name": "human_adam_delivery_recovery_action",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/human-adam/thread-rotation",
         "label": "Potvrzena rotace profiloveho vlakna Human-Adam",
         "risk": "private_write",
@@ -9607,6 +9617,9 @@ class CockpitServer:
                 if parsed.path == "/api/human-adam/project-continuity":
                     self.respond_json(human_adam_project_continuity_action(service=HUMAN_ADAM))
                     return
+                if parsed.path == "/api/human-adam/delivery-recovery":
+                    self.respond_json(human_adam_delivery_recovery_status_action(service=HUMAN_ADAM))
+                    return
                 if parsed.path == "/api/human-adam/thread-rotation":
                     self.respond_json(human_adam_thread_rotation_status_action(service=HUMAN_ADAM))
                     return
@@ -9928,6 +9941,10 @@ class CockpitServer:
                 if parsed.path == "/api/human-adam/owned-wip-recovery":
                     payload = self.read_json()
                     self.respond_json(human_adam_owned_wip_recovery_action(payload, service=HUMAN_ADAM))
+                    return
+                if parsed.path == "/api/human-adam/delivery-recovery":
+                    payload = self.read_json()
+                    self.respond_json(human_adam_delivery_recovery_action(payload, service=HUMAN_ADAM))
                     return
                 if parsed.path == "/api/human-adam/thread-rotation":
                     payload = self.read_json()
