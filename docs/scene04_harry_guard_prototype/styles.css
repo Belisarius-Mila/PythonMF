@@ -77,6 +77,7 @@ button {
 .speech-bubble,
 .task-prompt,
 .answer-panel,
+.next-button,
 .complete-banner,
 .dictionary-panel,
 .audio-gate {
@@ -275,6 +276,37 @@ button {
 .answer-button.no {
   border-color: #9a493f;
   background: #cf685b;
+}
+
+.next-button {
+  position: absolute;
+  z-index: 11;
+  left: 50%;
+  bottom: 4%;
+  min-width: clamp(130px, 18vw, 210px);
+  min-height: clamp(54px, 7vw, 76px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 10px 22px;
+  border-color: #327341;
+  border-radius: 22px;
+  color: #fff;
+  background: #4d9c5e;
+  font-size: clamp(1.1rem, 2.2vw, 1.85rem);
+  font-weight: 900;
+  cursor: pointer;
+  transform: translateX(-50%);
+}
+
+.next-button:active {
+  transform: translateX(-50%) scale(0.97);
+}
+
+.next-button:disabled {
+  cursor: default;
+  opacity: 0.5;
 }
 
 .complete-banner {
@@ -504,9 +536,17 @@ button {
 
   .task-prompt,
   .answer-panel,
+  .next-button,
   .complete-banner {
     bottom: 2%;
     border-width: 2px;
+  }
+
+  .next-button {
+    min-width: 104px;
+    min-height: 44px;
+    padding: 6px 14px;
+    border-radius: 16px;
   }
 
   .answer-button {

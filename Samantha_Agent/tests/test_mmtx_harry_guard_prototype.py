@@ -55,6 +55,7 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
         styles = (PROTOTYPE_ROOT / "styles.css").read_text(encoding="utf-8")
         self.assertIn('id="languageButton"', html)
         self.assertIn('id="repeatButton"', html)
+        self.assertIn('id="nextButton"', html)
         self.assertIn('id="dictionaryButton"', html)
         self.assertIn('id="dictionaryPanel"', html)
         self.assertIn('id="dictionaryList"', html)
@@ -62,8 +63,8 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
         self.assertIn('id="yesButton"', html)
         self.assertIn('id="noButton"', html)
         self.assertIn('src="harry_benji_prototype_01.png"', html)
-        self.assertIn('styles.css?v=20260815a', html)
-        self.assertIn('script.js?v=20260815a', html)
+        self.assertIn('styles.css?v=20260816a', html)
+        self.assertIn('script.js?v=20260816a', html)
         self.assertIn("Five interviews complete", html)
         self.assertIn("Pět výslechů je dokončených.", html)
         target_style = styles.split(".hotspot.target {", 1)[1].split("}", 1)[0]
@@ -71,6 +72,7 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
         self.assertIn(".dictionary-panel {", styles)
         self.assertIn(".dictionary-list {", styles)
         self.assertIn(".dictionary-item {", styles)
+        self.assertIn(".next-button {", styles)
 
         production_script = (
             PROJECT_ROOT / "docs" / "scene03_journey_to_the_lake" / "script.js"
@@ -132,6 +134,7 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
             'english: "en"',
             'bilingual: "en-cz"',
             '"mmtx-language-mode"',
+            '"My name is Harry, and I guard this gate!"',
             '"Stop! Do not come closer!"',
             '"Who has the map?"',
             '"I have a map."',
@@ -166,6 +169,10 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
             '"No. I do not dig under fences."',
             '"Good answer, Bruno. I believe you."',
             "async function repeatLast()",
+            "function waitForNext(flowId)",
+            "function advanceDialogue()",
+            "async function playSequence(entries, flowId)",
+            "async function advanceToScene(sceneId, entries, flowId)",
             'choosingBruno ? "bruno" : "benji"',
             "STAGES.chooseFionaYesNo",
             "STAGES.chooseBrunoYesNo",
@@ -197,6 +204,7 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
             "function toggleDictionary()",
             "function updateDictionaryAvailability()",
             'dictionaryButton.addEventListener("click", toggleDictionary)',
+            'nextButton.addEventListener("click", advanceDialogue)',
             "...VOCABULARY.map((item) => item.audio)",
         ):
             self.assertIn(expected, script)
@@ -325,46 +333,35 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
             "async function repeatLast()", 1
         )[0]
         self.assertIn("[lines.noChase, lines.helper, lines.trust]", choose_no_body)
-        self.assertIn("setSceneImage(\"bunny\")", choose_no_body)
-        self.assertIn("[lines.rabbitIntro, lines.rabbitPrompt]", choose_no_body)
-        self.assertLess(
-            choose_no_body.index('setSceneImage("bunny")'),
-            choose_no_body.index("[lines.rabbitIntro, lines.rabbitPrompt]"),
-        )
         self.assertIn(
-            "[lines.ownCarrots, lines.lakeOnly, lines.bunnyAccepted]",
+            'advanceToScene("bunny", [lines.rabbitIntro, lines.rabbitPrompt], flowId)',
             choose_no_body,
         )
-        self.assertIn('setSceneImage("sunny")', choose_no_body)
-        self.assertIn("[lines.squirrelIntro, lines.squirrelPrompt]", choose_no_body)
-        self.assertLess(
-            choose_no_body.index('setSceneImage("sunny")'),
-            choose_no_body.index("[lines.squirrelIntro, lines.squirrelPrompt]"),
-        )
+        self.assertIn("lines.ownCarrots", choose_no_body)
+        self.assertIn("lines.lakeOnly", choose_no_body)
+        self.assertIn("lines.bunnyAccepted", choose_no_body)
         self.assertIn(
-            "[lines.ownNuts, lines.lakeWithFriends, lines.sunnyAccepted]",
+            'advanceToScene("sunny", [lines.squirrelIntro, lines.squirrelPrompt], flowId)',
             choose_no_body,
         )
-        self.assertIn('setSceneImage("fiona")', choose_no_body)
-        self.assertIn("[lines.foxIntro, lines.foxPrompt]", choose_no_body)
-        self.assertLess(
-            choose_no_body.index('setSceneImage("fiona")'),
-            choose_no_body.index("[lines.foxIntro, lines.foxPrompt]"),
-        )
+        self.assertIn("lines.ownNuts", choose_no_body)
+        self.assertIn("lines.lakeWithFriends", choose_no_body)
+        self.assertIn("lines.sunnyAccepted", choose_no_body)
         self.assertIn(
-            "[lines.noChickens, lines.fionaLakeWithFriends, lines.fionaAccepted]",
+            'advanceToScene("fiona", [lines.foxIntro, lines.foxPrompt], flowId)',
             choose_no_body,
         )
-        self.assertIn('setSceneImage("bruno")', choose_no_body)
-        self.assertIn("[lines.badgerIntro, lines.badgerPrompt]", choose_no_body)
-        self.assertLess(
-            choose_no_body.index('setSceneImage("bruno")'),
-            choose_no_body.index("[lines.badgerIntro, lines.badgerPrompt]"),
-        )
+        self.assertIn("lines.noChickens", choose_no_body)
+        self.assertIn("lines.fionaLakeWithFriends", choose_no_body)
+        self.assertIn("lines.fionaAccepted", choose_no_body)
         self.assertIn(
-            "[lines.noDigging, lines.brunoLakeWithFriends, lines.brunoAccepted]",
+            'advanceToScene("bruno", [lines.badgerIntro, lines.badgerPrompt], flowId)',
             choose_no_body,
         )
+        self.assertIn("lines.noDigging", choose_no_body)
+        self.assertIn("lines.brunoLakeWithFriends", choose_no_body)
+        self.assertIn("lines.brunoAccepted", choose_no_body)
+        self.assertGreaterEqual(choose_no_body.count("await playSequence("), 5)
         self.assertIn("setStage(STAGES.chooseBunny)", choose_no_body)
         self.assertIn("if (questioningBunny)", choose_no_body)
         self.assertIn("if (questioningSunny)", choose_no_body)

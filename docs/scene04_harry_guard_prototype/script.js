@@ -17,6 +17,7 @@ const taskCzech = document.getElementById("taskCzech");
 const answerPanel = document.getElementById("answerPanel");
 const yesButton = document.getElementById("yesButton");
 const noButton = document.getElementById("noButton");
+const nextButton = document.getElementById("nextButton");
 const completeBanner = document.getElementById("completeBanner");
 const audioGate = document.getElementById("audioGate");
 const languageButton = document.getElementById("languageButton");
@@ -248,6 +249,11 @@ function prompt(textEn, textCz) {
 }
 
 const lines = {
+  introduction: dialogue(
+    "harry",
+    "My name is Harry, and I guard this gate!",
+    "Jmenuji se Harry a hlídám tuto branku!",
+  ),
   stop: dialogue("harry", "Stop! Do not come closer!", "Stůjte! Nepřibližujte se!"),
   friendly: dialogue("benji", "Hello. We are friendly.", "Ahoj. Jsme přátelé."),
   strangers: dialogue("harry", "Friendly? I do not know you.", "Přátelé? Já vás neznám."),
@@ -352,6 +358,7 @@ let speechResolve = null;
 let activeAudio = null;
 let audioTimeout = 0;
 let audioResolve = null;
+let nextResolve = null;
 const fixedAudioCache = new Map();
 
 function setSceneImage(sceneId) {
@@ -634,6 +641,41 @@ async function playEntry(entry, flowId, { remember = true } = {}) {
   return flowId === state.flowId;
 }
 
+function waitForNext(flowId) {
+  if (flowId !== state.flowId) return Promise.resolve(false);
+  nextButton.disabled = false;
+  nextButton.classList.remove("hidden");
+  return new Promise((resolve) => {
+    nextResolve = () => {
+      nextResolve = null;
+      nextButton.disabled = true;
+      nextButton.classList.add("hidden");
+      resolve(flowId === state.flowId);
+    };
+  });
+}
+
+function advanceDialogue() {
+  if (!nextResolve || nextButton.disabled) return;
+  const resolve = nextResolve;
+  resolve();
+}
+
+async function playSequence(entries, flowId) {
+  for (let index = 0; index < entries.length; index += 1) {
+    if (!(await playEntry(entries[index], flowId))) return false;
+    const hasAnotherEntry = index < entries.length - 1;
+    if (hasAnotherEntry && !(await waitForNext(flowId))) return false;
+  }
+  return true;
+}
+
+async function advanceToScene(sceneId, entries, flowId) {
+  if (!(await waitForNext(flowId))) return false;
+  setSceneImage(sceneId);
+  return playSequence(entries, flowId);
+}
+
 function showTask(entry) {
   taskEnglish.textContent = entry.textEn;
   taskCzech.textContent = entry.textCz;
@@ -780,9 +822,13 @@ async function runIntro() {
   setStage(STAGES.intro);
   hideTask();
   answerPanel.classList.add("hidden");
-  for (const entry of [lines.stop, lines.friendly, lines.strangers, lines.mapQuestion]) {
-    if (!(await playEntry(entry, flowId))) return;
-  }
+  if (!(await playSequence([
+    lines.introduction,
+    lines.stop,
+    lines.friendly,
+    lines.strangers,
+    lines.mapQuestion,
+  ], flowId))) return;
   hideSpeech();
   showTask(lines.mapQuestion);
   setStage(STAGES.chooseBenji);
@@ -803,8 +849,7 @@ async function chooseCharacter(characterId) {
     cancelSpeech();
     setStage(answerStage);
     const wrongLine = { ...lines.notMe, characterId };
-    if (!(await playEntry(wrongLine, flowId))) return;
-    if (!(await playEntry(question, flowId))) return;
+    if (!(await playSequence([wrongLine, question], flowId))) return;
     hideSpeech();
     showTask(question);
     setStage(chooseStage);
@@ -817,8 +862,7 @@ async function chooseCharacter(characterId) {
   setStage(answerStage);
   const answer = choosingBunny ? lines.bunnyAnswer : choosingSunny ? lines.sunnyAnswer : choosingFiona ? lines.fionaAnswer : choosingBruno ? lines.brunoAnswer : lines.mapAnswer;
   const yesNoQuestion = choosingBunny ? lines.carrotQuestion : choosingSunny ? lines.nutQuestion : choosingFiona ? lines.chickenQuestion : choosingBruno ? lines.fenceQuestion : lines.sheepQuestion;
-  if (!(await playEntry(answer, flowId))) return;
-  if (!(await playEntry(yesNoQuestion, flowId))) return;
+  if (!(await playSequence([answer, yesNoQuestion], flowId))) return;
   hideSpeech();
   showTask(yesNoQuestion);
   answerPanel.classList.remove("hidden");
@@ -837,8 +881,7 @@ async function chooseYes() {
   answerPanel.classList.add("hidden");
   hideTask();
   setStage(questioningBunny ? STAGES.wrongBunnyYes : questioningSunny ? STAGES.wrongSunnyYes : questioningFiona ? STAGES.wrongFionaYes : questioningBruno ? STAGES.wrongBrunoYes : STAGES.wrongYes);
-  if (!(await playEntry(lines.listenAgain, flowId))) return;
-  if (!(await playEntry(question, flowId))) return;
+  if (!(await playSequence([lines.listenAgain, question], flowId))) return;
   hideSpeech();
   showTask(question);
   answerPanel.classList.remove("hidden");
@@ -857,9 +900,11 @@ async function chooseNo() {
   hideTask();
   setStage(STAGES.finishing);
   if (questioningBruno) {
-    for (const entry of [lines.noDigging, lines.brunoLakeWithFriends, lines.brunoAccepted]) {
-      if (!(await playEntry(entry, flowId))) return;
-    }
+    if (!(await playSequence([
+      lines.noDigging,
+      lines.brunoLakeWithFriends,
+      lines.brunoAccepted,
+    ], flowId))) return;
     hideSpeech();
     completeBanner.classList.remove("hidden");
     setStage(STAGES.complete);
@@ -867,13 +912,12 @@ async function chooseNo() {
   }
 
   if (questioningFiona) {
-    for (const entry of [lines.noChickens, lines.fionaLakeWithFriends, lines.fionaAccepted]) {
-      if (!(await playEntry(entry, flowId))) return;
-    }
-    setSceneImage("bruno");
-    for (const entry of [lines.badgerIntro, lines.badgerPrompt]) {
-      if (!(await playEntry(entry, flowId))) return;
-    }
+    if (!(await playSequence([
+      lines.noChickens,
+      lines.fionaLakeWithFriends,
+      lines.fionaAccepted,
+    ], flowId))) return;
+    if (!(await advanceToScene("bruno", [lines.badgerIntro, lines.badgerPrompt], flowId))) return;
     hideSpeech();
     showTask(lines.badgerPrompt);
     setStage(STAGES.chooseBruno);
@@ -881,13 +925,12 @@ async function chooseNo() {
   }
 
   if (questioningSunny) {
-    for (const entry of [lines.ownNuts, lines.lakeWithFriends, lines.sunnyAccepted]) {
-      if (!(await playEntry(entry, flowId))) return;
-    }
-    setSceneImage("fiona");
-    for (const entry of [lines.foxIntro, lines.foxPrompt]) {
-      if (!(await playEntry(entry, flowId))) return;
-    }
+    if (!(await playSequence([
+      lines.ownNuts,
+      lines.lakeWithFriends,
+      lines.sunnyAccepted,
+    ], flowId))) return;
+    if (!(await advanceToScene("fiona", [lines.foxIntro, lines.foxPrompt], flowId))) return;
     hideSpeech();
     showTask(lines.foxPrompt);
     setStage(STAGES.chooseFiona);
@@ -895,26 +938,20 @@ async function chooseNo() {
   }
 
   if (questioningBunny) {
-    for (const entry of [lines.ownCarrots, lines.lakeOnly, lines.bunnyAccepted]) {
-      if (!(await playEntry(entry, flowId))) return;
-    }
-    setSceneImage("sunny");
-    for (const entry of [lines.squirrelIntro, lines.squirrelPrompt]) {
-      if (!(await playEntry(entry, flowId))) return;
-    }
+    if (!(await playSequence([
+      lines.ownCarrots,
+      lines.lakeOnly,
+      lines.bunnyAccepted,
+    ], flowId))) return;
+    if (!(await advanceToScene("sunny", [lines.squirrelIntro, lines.squirrelPrompt], flowId))) return;
     hideSpeech();
     showTask(lines.squirrelPrompt);
     setStage(STAGES.chooseSunny);
     return;
   }
 
-  for (const entry of [lines.noChase, lines.helper, lines.trust]) {
-    if (!(await playEntry(entry, flowId))) return;
-  }
-  setSceneImage("bunny");
-  for (const entry of [lines.rabbitIntro, lines.rabbitPrompt]) {
-    if (!(await playEntry(entry, flowId))) return;
-  }
+  if (!(await playSequence([lines.noChase, lines.helper, lines.trust], flowId))) return;
+  if (!(await advanceToScene("bunny", [lines.rabbitIntro, lines.rabbitPrompt], flowId))) return;
   hideSpeech();
   showTask(lines.rabbitPrompt);
   setStage(STAGES.chooseBunny);
@@ -965,6 +1002,7 @@ async function startPrototype() {
 audioGate.addEventListener("click", startPrototype);
 languageButton.addEventListener("click", toggleLanguage);
 repeatButton.addEventListener("click", repeatLast);
+nextButton.addEventListener("click", advanceDialogue);
 dictionaryButton.addEventListener("click", toggleDictionary);
 yesButton.addEventListener("click", chooseYes);
 noButton.addEventListener("click", chooseNo);

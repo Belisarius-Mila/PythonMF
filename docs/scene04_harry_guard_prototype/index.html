@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>MMTX prototyp — Harry a pět výslechů</title>
-    <link rel="stylesheet" href="styles.css?v=20260815a">
+    <link rel="stylesheet" href="styles.css?v=20260816a">
   </head>
   <body>
     <main class="app-shell">
@@ -55,6 +55,11 @@
             <button class="answer-button no" id="noButton" type="button">NO</button>
           </div>
 
+          <button class="next-button hidden" id="nextButton" type="button" aria-label="Přehrát další větu" disabled>
+            <span>Next</span>
+            <span aria-hidden="true">▶</span>
+          </button>
+
           <div class="complete-banner hidden" id="completeBanner" aria-live="polite">
             <span aria-hidden="true">🍃</span>
             <span>
@@ -79,6 +84,6 @@
       </section>
     </main>
 
-    <script src="script.js?v=20260815a"></script>
+    <script src="script.js?v=20260816a"></script>
   </body>
 </html>

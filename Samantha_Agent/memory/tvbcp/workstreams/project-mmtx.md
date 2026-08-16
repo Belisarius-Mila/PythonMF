@@ -1,32 +1,33 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-15 11:11 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-16 17:58 CEST
 
 ### Hotovo
-- Závěr prototypu nabízí slovníček 22 nových slov s anglickou výslovností a volitelnou češtinou
+- Harry se představí před prvním výslechem a další repliky se přehrávají jednotlivě až po stisknutí Next
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
 - Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
 
 ### Rizika
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Ručně ověřit slovníček, jeho rozložení a výslovnost na iPhonu
+- Ručně ověřit tempo a rozložení tlačítka Next na iPhonu nebo Macu
 
 ### Rozhodnutí
-- Slovníček se zpřístupní až po pátém výslechu a český překlad se řídí režimem EN nebo EN + CZ
+- Každá další věta ve výslechu se aktivuje tlačítkem Next
 
 ### Navrhované další kroky
-- Navázat závěrečným počítáním pěti ovcí a otevřením branky
+- Po živém ověření pokračovat počítáním pěti ovcí a otevřením branky
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `9d84c5f8f650`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `9d84c5f8f650` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-14T15:15:10+00:00.
-- Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
+- Git před checkpointem: lokální `main` na `4fcaddfd6710`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `4fcaddfd6710` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-16T14:57:47+00:00.
+- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -430,3 +431,30 @@ Technický důkaz:
 - rychlá Cockpit brána syntaxe a whitespace: 6.0 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `project-mmtx`.
 - Read-only živý stav při checkpointu: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
+
+### 2026-08-16 17:58 CEST – Harry se představí před prvním výslechem a další repliky se přehrávají jednotlivě až po stisknutí Next
+
+Hotovo:
+- Harry se představí před prvním výslechem a další repliky se přehrávají jednotlivě až po stisknutí Next
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+
+Otevřeno:
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
+
+Rizika:
+- Žádné další doložené provozní riziko.
+
+Rozhodnutí:
+- Každá další věta ve výslechu se aktivuje tlačítkem Next
+
+Další krok:
+- Ručně ověřit tempo a rozložení tlačítka Next na iPhonu nebo Macu
+
+Navrhované další kroky:
+- Po živém ověření pokračovat počítáním pěti ovcí a otevřením branky
+
+Technický důkaz:
+- rychlá Cockpit brána syntaxe a whitespace: 6.3 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
+- Pracovní proud: `project-mmtx`.
+- Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
