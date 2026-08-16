@@ -248,6 +248,17 @@ class HumanAdamServiceTests(unittest.TestCase):
         self.assertNotIn("deployment_confirmation", status)
         self.assertNotIn("deployment_diagnostic", status)
 
+    def test_detached_hub_has_local_delivery_recovery_reader(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            service, _runtime, _workspace, _hub = self.make_service(root)
+            detached = service.detached_session_hub(
+                state_path=root / "detached.json",
+                developer_instructions="Test",
+            )
+
+        self.assertIsNotNone(detached.delivery_recovery_reader)
+
     def test_status_exposes_preserved_checkpoint_without_claiming_it_is_auditable(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             service, _runtime, workspace, _hub = self.make_service(Path(temp_dir))

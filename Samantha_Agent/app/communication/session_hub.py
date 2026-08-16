@@ -59,6 +59,7 @@ class CanonicalSessionHub:
         approval_policy: str,
         reasoning_effort: str,
         model: str | None = None,
+        delivery_recovery_reader: Callable[[str, str], TurnReceipt | None] | None = None,
     ):
         self.state_path = Path(state_path)
         self.workspace = Path(workspace).resolve()
@@ -69,6 +70,7 @@ class CanonicalSessionHub:
         self.approval_policy = str(approval_policy).strip()
         self.reasoning_effort = str(reasoning_effort).strip()
         self.model = str(model).strip() if model else None
+        self.delivery_recovery_reader = delivery_recovery_reader
         self._state_lock = threading.RLock()
         self._turn_lock = threading.Lock()
         self._client: CodexAppServerClient | None = None
@@ -305,6 +307,28 @@ class CanonicalSessionHub:
                 return item
         return None
 
+    def _recovery_receipt_after_failure(
+        self,
+        *,
+        thread_id: str,
+        client_message_id: str,
+    ) -> TurnReceipt | None:
+        reader = self.delivery_recovery_reader
+        if reader is None:
+            return None
+        try:
+            receipt = reader(thread_id, client_message_id)
+        except Exception:
+            return None
+        if (
+            not isinstance(receipt, TurnReceipt)
+            or receipt.thread_id != thread_id
+            or receipt.client_message_id != client_message_id
+            or not receipt.delivered
+        ):
+            return None
+        return receipt
+
     def replace_completed_answer(self, *, client_message_id: str, answer: str) -> dict[str, Any]:
         """Persist a post-processed answer without changing turn delivery facts."""
 
@@ -445,6 +469,7 @@ class CanonicalSessionHub:
                 }
                 self._save_locked()
 
+            recovered_after_transport_failure = False
             try:
                 receipt: TurnReceipt = client.send_text(
                     thread_id=str(self._state["thread_id"]),
@@ -456,18 +481,28 @@ class CanonicalSessionHub:
                     model=self.model,
                 )
             except Exception as exc:
-                with self._state_lock:
-                    entry = self._message_locked(clean_id)
-                    if entry is not None:
-                        entry["status"] = "delivery_unknown"
-                        entry["recovery_required"] = True
-                    self._state["active_turn"] = None
-                    self._state["connection_state"] = "error"
-                    self._close_client_locked()
-                    self._save_locked()
-                if isinstance(exc, AppServerError):
-                    raise
-                raise SessionHubError("Tah kanonické relace selhal bez jistoty doručení.") from exc
+                recovered_receipt = self._recovery_receipt_after_failure(
+                    thread_id=str(self._state["thread_id"]),
+                    client_message_id=clean_id,
+                )
+                if recovered_receipt is not None:
+                    receipt = recovered_receipt
+                    recovered_after_transport_failure = True
+                    with self._state_lock:
+                        self._close_client_locked()
+                else:
+                    with self._state_lock:
+                        entry = self._message_locked(clean_id)
+                        if entry is not None:
+                            entry["status"] = "delivery_unknown"
+                            entry["recovery_required"] = True
+                        self._state["active_turn"] = None
+                        self._state["connection_state"] = "error"
+                        self._close_client_locked()
+                        self._save_locked()
+                    if isinstance(exc, AppServerError):
+                        raise
+                    raise SessionHubError("Tah kanonické relace selhal bez jistoty doručení.") from exc
 
             with self._state_lock:
                 entry = self._message_locked(clean_id)
@@ -485,11 +520,14 @@ class CanonicalSessionHub:
                     }
                 )
                 self._state["active_turn"] = None
-                self._state["connection_state"] = "connected"
+                self._state["connection_state"] = (
+                    "disconnected" if recovered_after_transport_failure else "connected"
+                )
                 self._save_locked()
                 return {
                     "ok": True,
                     "duplicate_prevented": False,
+                    "recovered_after_transport_failure": recovered_after_transport_failure,
                     "entry": copy.deepcopy(entry),
                     "_generated_images": [
                         dict(image) for image in receipt.generated_images

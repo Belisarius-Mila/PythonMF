@@ -5,6 +5,7 @@ import tempfile
 import threading
 import unittest
 from pathlib import Path
+from typing import Callable
 
 from app.codex_appserver import AppServerError, TurnReceipt
 from app.communication.session_hub import (
@@ -90,7 +91,12 @@ class CanonicalSessionHubTests(unittest.TestCase):
         FakeClient.next_thread_ids = []
         FakeClient.generated_images = ()
 
-    def make_hub(self, root: Path) -> CanonicalSessionHub:
+    def make_hub(
+        self,
+        root: Path,
+        *,
+        delivery_recovery_reader: Callable[[str, str], TurnReceipt | None] | None = None,
+    ) -> CanonicalSessionHub:
         return CanonicalSessionHub(
             state_path=root / "session.json",
             workspace=root,
@@ -100,6 +106,7 @@ class CanonicalSessionHubTests(unittest.TestCase):
             sandbox_policy={"type": "readOnly"},
             approval_policy="never",
             reasoning_effort="high",
+            delivery_recovery_reader=delivery_recovery_reader,
         )
 
     def test_persists_one_thread_and_resumes_it_after_reconnect(self) -> None:
@@ -380,6 +387,42 @@ class CanonicalSessionHubTests(unittest.TestCase):
         self.assertEqual(state["messages"][0]["status"], "delivery_unknown")
         self.assertTrue(state["messages"][0]["recovery_required"])
         self.assertEqual(len(FakeClient.instances), 1)
+
+    def test_transport_failure_uses_exact_local_completion_without_resend(self) -> None:
+        FakeClient.fail_send = True
+
+        def recovered(thread_id: str, client_message_id: str) -> TurnReceipt:
+            return TurnReceipt(
+                client_message_id=client_message_id,
+                thread_id=thread_id,
+                turn_id="turn-recovered",
+                requested_at="",
+                accepted_at="",
+                started_at="",
+                completed_at="done",
+                status="completed",
+                answer="Hotovo z přesného lokálního důkazu",
+                turn_started_confirmed=True,
+                user_item_count=1,
+                duration_ms=0,
+            )
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            hub = self.make_hub(
+                Path(temp_dir),
+                delivery_recovery_reader=recovered,
+            )
+            result = hub.send(text="Nejisté", client_message_id="message-0001")
+            state = hub.snapshot()
+
+        self.assertTrue(result["recovered_after_transport_failure"])
+        self.assertEqual(result["entry"]["status"], "completed")
+        self.assertTrue(result["entry"]["delivery_confirmed"])
+        self.assertFalse(result["entry"]["recovery_required"])
+        self.assertEqual(state["connection_state"], "disconnected")
+        self.assertFalse(state["connected"])
+        self.assertEqual(len(FakeClient.instances), 1)
+        self.assertEqual(FakeClient.instances[0].sent, 1)
 
     def test_crash_left_pending_message_becomes_delivery_unknown(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

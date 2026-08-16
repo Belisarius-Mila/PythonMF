@@ -9,7 +9,12 @@ from functools import partial
 from pathlib import Path
 from typing import Any, Callable
 
-from app.codex_appserver import AppServerError, CodexAppServerClient, UnixSocketAppServerTransport
+from app.codex_appserver import (
+    AppServerError,
+    CodexAppServerClient,
+    TurnReceipt,
+    UnixSocketAppServerTransport,
+)
 from app.communication.codex_delivery_recovery import (
     CodexDeliveryRecoveryError,
     default_codex_sessions_root,
@@ -207,6 +212,32 @@ class HumanAdamService:
             ),
             approval_policy=HUMAN_ADAM_APPROVAL_POLICY,
             reasoning_effort=HUMAN_ADAM_REASONING_EFFORT,
+            delivery_recovery_reader=self._local_delivery_receipt,
+        )
+
+    def _local_delivery_receipt(
+        self,
+        thread_id: str,
+        client_message_id: str,
+    ) -> TurnReceipt:
+        evidence = read_completed_delivery_evidence(
+            sessions_root=self.codex_sessions_root,
+            thread_id=thread_id,
+            client_message_id=client_message_id,
+        )
+        return TurnReceipt(
+            client_message_id=evidence.client_message_id,
+            thread_id=evidence.thread_id,
+            turn_id=evidence.turn_id,
+            requested_at="",
+            accepted_at="",
+            started_at="",
+            completed_at=evidence.completed_at,
+            status="completed",
+            answer=evidence.answer,
+            turn_started_confirmed=True,
+            user_item_count=1,
+            duration_ms=0,
         )
 
     def _ensure_hub(self) -> CanonicalSessionHub:
