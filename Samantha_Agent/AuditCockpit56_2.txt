@@ -1,0 +1,448 @@
+AUDIT COCKPITU 5.6 SOL – DRUHÝ PRŮCHOD
+========================================
+
+Verze: 1.0
+Datum auditu: 2026-08-16
+Autor posouzení: Adam / Codex 5.6 Sol
+Účel: posoudit Cockpit jako celek a navrhnout další vývoj podle skutečných
+slabin, ne podle historického seznamu přání.
+
+
+1. MANAŽERSKÝ VERDIKT
+---------------------
+
+Cockpit už není prototyp. Je to rozsáhlé osobní provozní prostředí s dobrou
+bezpečnostní disciplínou, silným testovacím zázemím, obnovou po pádu,
+potvrzovacími branami a oddělenými soukromými pracovními prostory.
+
+Audit nenašel důvod k přepisu Cockpitu, změně frameworku ani k nové obecné AI
+vrstvě. Největší slabina se přesunula jinam: systém umí mnoho bezpečných věcí,
+ale hůře než dříve pomáhá člověku rychle poznat, co je dnes opravdu důležité.
+
+Hlavní závěr:
+
+1. Bezpečnostní a capability vrstva je silná a má se zachovat.
+2. Další etapa má zmenšit rozhodovací a vizuální zátěž, ne přidávat další
+   tlačítka do hlavní stránky.
+3. Frontend a HTTP routing je třeba postupně rozdělit podle domén, ale bez
+   velkého přepisu a bez změny veřejných kontraktů.
+4. Systémový audit musí lépe řadit skutečné další kroky; dlouhý inventář není
+   sám o sobě rozhodovací nástroj.
+5. Nové funkcionality mají přijít až po těchto úpravách a musí využívat
+   existující data, registry a bezpečnostní brány.
+
+Aktuálně není doložený P0 architektonický nebo bezpečnostní blokátor. Provozní
+varování P1 je stáří poslední úspěšné zálohy; při auditu byla z 2026-08-12,
+tedy starší než tři dny.
+
+
+2. ROZSAH A DŮKAZY
+------------------
+
+Posouzení vychází z:
+
+- původního AuditCockpit56.txt;
+- aktuální projektové paměti, aktivních projektů, Lessons Learned;
+- relevantních handoffů a TVBCP pro Cockpit, Human–Adam, RAG/R2, dokumenty,
+  e-mail, rodinný kalendář, MMTX a autosave recovery;
+- současného zdrojového kódu, frontendových souborů a testů;
+- capability auditu, POST action registry a posledního systémového auditu;
+- živých read-only API kontrol a Cockpit smoke testu.
+
+Omezení důkazů:
+
+- Interaktivní prohlížeč nebyl v této relaci dostupný. Audit proto neposuzuje
+  skutečnou čitelnost a ergonomii na Macu a iPhonu očima uživatele.
+- Počty tlačítek, modalů a identifikátorů jsou indikátory hustoty, ne důkaz
+  špatného UX samy o sobě.
+- Audit neotevíral soukromý obsah dokumentů, e-mailů ani autosave relací.
+- Stav služeb a projektů je časově proměnlivý. Za aktuální se považují pouze
+  položky ověřené živým auditem nebo novějším specifickým handoffem.
+
+
+3. OVĚŘENÝ SNAPSHOT PŘI AUDITU
+------------------------------
+
+Git a nasazení na začátku auditu:
+
+- main byl čistý a o dva lokální commity napřed před origin/main;
+- předchozí oprava autosave matematiky byla v main a měla plnou bránu
+  1414/1414, ale ještě nebyla v běžícím procesu;
+- běžící code stamp byl 78a8f396027ad740;
+- code stamp aktuálního main byl 2360eef3753bca5a;
+- rozdíl byl očekávaný WIP určený k nasazení v rámci tohoto úkolu.
+
+Živý smoke test:
+
+- domovská stránka: OK;
+- server health: OK;
+- live status: OK;
+- plný status: OK;
+- recovery status: OK;
+- celkem 5/5.
+
+Orientační odezvy tří po sobě jdoucích lokálních čtení:
+
+- /api/server/health: průměr 4,5 ms;
+- /api/live-status: průměr 0,9 ms;
+- /api/status: průměr 411,7 ms;
+- /api/recovery/status: průměr 141,7 ms.
+
+Nejde o výkonový benchmark. Je to důkaz, že rychlé liveness endpointy plní
+svůj účel a agregovaný status je řádově těžší.
+
+Registry a bezpečnostní pokrytí:
+
+- agent tools: 83;
+- capability-mapped tools: 83/83;
+- capability registry: 90 záznamů;
+- evidované high-risk capability: 16;
+- POST action registry: 88 akcí;
+- přímá testovací úroveň v registru: 73;
+- nepřímá: 4;
+- pouze UI presence: 11.
+
+Read-only audit pravdivosti paměti:
+
+- project-cockpit: registry_consistent;
+- prokázané formální rozpory napříč workstreamy: 1;
+- rozpor: VocabularyFR má v kanonickém registru očekávaný režim paused, ale v
+  ACTIVE_PROJECTS je uvedený jako active;
+- 21 položek je unmaterialized, tedy bez úplné kanonické dvojice handoff +
+  TVBCP. Tento stav je podle lazy kontraktu možný a není automaticky chyba.
+
+Statická velikost hlavních celků:
+
+- app/cockpit.py: přibližně 10 771 řádků;
+- app/frontend/cockpit/app.js: přibližně 7 525 řádků;
+- app/frontend/cockpit/page.html: přibližně 1 161 řádků;
+- app/frontend/cockpit/styles.css: přibližně 380 řádků;
+- tests/test_cockpit.py: přibližně 8 341 řádků;
+- hlavní stránka obsahuje přibližně 138 button prvků a 355 id atributů.
+
+Největší koncentrace v backendu:
+
+- make_handler: přibližně 1 308 řádků;
+- lekarna_admin_page_html: přibližně 621 řádků;
+- do_POST: přibližně 579 řádků;
+- do_GET: přibližně 305 řádků.
+
+
+4. CO SE OD PŮVODNÍHO AUDITU ZMĚNILO
+------------------------------------
+
+Původní AuditCockpit56.txt zůstává cennou historickou roadmapou, ale některé
+jeho priority už byly dokončeny nebo překryty novějšími důkazy.
+
+Doloženě posunuté nebo uzavřené oblasti:
+
+- Cockpit Dieta D0–D3 a pravdivější navigace byly dokončeny;
+- P7 RAG cesta byla zavedena do skutečného Cockpit runtime;
+- private R2 a email -> vault -> TXT workflow jsou implementované;
+- capability routing a oddělení kandidátů podle workstreamu jsou podstatně
+  silnější;
+- autosave má omezenou retenci a hlídání volného místa;
+- oprava autosave reportu odděluje logickou velikost souborů, fyzicky
+  alokované bloky a skutečnou změnu volného místa;
+- systémový audit už umí zachytit část driftu mezi agregovanou pamětí a
+  specifičtějšími zdroji.
+
+Otevřené nejsou stejné problémy jako v červenci. Dnešní Cockpit nepotřebuje
+další plošné „uklízení“. Potřebuje přesnější rozhodovací vrstvu a postupné
+odlehčení největších technických uzlů.
+
+
+5. SILNÉ STRÁNKY, KTERÉ SE NESMÍ ROZBÍT
+---------------------------------------
+
+5.1 Bezpečnostní kontrakty
+
+- Rizikové akce mají explicitní registry a potvrzovací věty.
+- Backend znovu validuje capability a workstream, nespoléhá jen na UI.
+- Soukromé kandidáty a pracovní prostory nelze volně míchat.
+- Destruktivní operace mají úzký rozsah a auditní stopu.
+
+5.2 Obnova a provoz
+
+- Recovery, server health, smoke kontrola a řízené nasazení tvoří reálný
+  provozní základ.
+- Rychlé health endpointy jsou oddělené od dražších agregovaných statusů.
+- Autosave slouží jako omezená nouzová obnova, ne nekonečný archiv.
+
+5.3 Testovací základ
+
+- Cockpit má rozsáhlé backendové i frontendové testy.
+- Plná release brána chrání behaviorální kontrakty.
+- Capability audit nehlásí nepokryté agent tools.
+
+5.4 Evoluční způsob vývoje
+
+- Projekt opakovaně dokázal přidávat funkce bez velkého přepisu.
+- Novější TVBCP a handoffy opravují historický drift místo slepé důvěry v jeden
+  starý souhrn.
+
+
+6. SLABINY A RIZIKA PODLE PRIORITY
+---------------------------------
+
+P0 – okamžitý blokátor
+
+Nebyl doložen. Tento závěr neznamená absolutní bezpečnost; znamená, že audit
+nenašel současný důkaz pro odstavení Cockpitu nebo nouzový přepis.
+
+P1-A – rozhodovací přetížení
+
+Cockpit umí mnoho oblastí současně: Dnes, stav, dokumenty, servis, autosave,
+vývoj, e-mail, Janičku, rodinu, připomenutí, aplikace, knihovnu, kalendář,
+projekty, Quick Notes, recovery, diagnostiku a systémový audit. Technicky je to
+úspěch. Lidsky však hrozí, že hlavní stránka funguje jako katalog systému místo
+jasné odpovědi na otázku „Co mám teď udělat?“.
+
+Navíc generátor rychlých doporučení stále mechanicky vezme první položku
+priority 1. To není dostatečný model naléhavosti, závislostí, stáří důkazu ani
+skutečného dalšího kroku.
+
+Riziko:
+- správná informace existuje, ale je příliš hluboko nebo soupeří s historií;
+- starý P1 záznam může přebít čerstvý konkrétní handoff;
+- přidání další funkce dále zhorší rozhodovací poměr signál/šum.
+
+P1-B – frontendový monolit
+
+Oddělení HTML, CSS a JavaScriptu bylo správné, ale app.js mezitím narostl na
+více než 7 500 řádků. Jeden soubor nyní soustřeďuje mnoho nezávislých domén,
+refresh cyklů, modalů, formulářů a chybových stavů.
+
+Riziko:
+- změna jedné oblasti obtížněji prokazuje, že neovlivnila jinou;
+- roste cena orientace, review a cíleného testování;
+- globální stav a selektory mohou vytvářet skryté vazby.
+
+P1-C – koncentrace HTTP routingu
+
+make_handler, do_GET a do_POST zůstávají velkými rozhodovacími uzly. Registry
+akcí zvyšují bezpečnost, ale samotné směrování je stále koncentrované.
+
+Riziko:
+- bezpečnostní kontrakt je správný, ale implementační změny mají široký dosah;
+- route, validace, doménová logika a HTTP odpověď se mohou míchat;
+- review obtížněji vidí úplný tok jedné domény.
+
+P1-D – provozní záloha
+
+Poslední doložená úspěšná záloha byla při auditu starší než tři dny. Nejde o
+chybu Cockpit architektury, ale o reálné provozní riziko. Audit ani nasazení
+nesmí toto varování zakrýt.
+
+P2-A – nestejná testovací dohledatelnost POST akcí
+
+Patnáct akcí nemá v POST registru úroveň direct. To samo o sobě nedokazuje, že
+jsou netestované, ale zhoršuje rychlou auditovatelnost. Nejvyšší prioritu mají
+akce s external_send nebo private_write dopadem, například odeslání exportu,
+rozhodnutí při zpracování e-mailu a změny připomenutí.
+
+Samostatný test capability auditu navíc stále očekává 86 registry záznamů,
+zatímco aktuální audit jich pravdivě hlásí 90. Tento test není součástí
+kanonické Cockpit Quality Gate, takže její předchozí výsledek 1414/1414 zůstal
+zelený. Je to konkrétní testovací drift a současně důkaz, že full gate dnes
+neobsahuje úplně všechny auditní kontrakty.
+
+P2-B – release brána je silná, ale drahá
+
+Plná brána přes 1 400 testů trvá několik minut. Přesný hash celé stránky chrání
+proti nechtěnému driftu, ale legitimní UI změna vyžaduje vědomou aktualizaci
+velkého kontraktu.
+
+Riziko není v existenci brány. Rizikem by bylo, kdyby vysoká cena vedla k jejímu
+obcházení nebo k mechanickému přepisování očekávání bez review.
+
+P2-C – vizuální přijetí není automatický důkaz
+
+Testy dokazují přítomnost a kontrakty, ne skutečnou čitelnost na malém iPhonu,
+správnou hierarchii ani to, zda Míla nebo Jana rychle najdou další krok.
+
+P2-D – dlouhé systémové reporty
+
+Úplný auditní katalog je užitečný jako důkazní příloha, ale není vhodný jako
+výchozí denní čtení. Systémový audit musí oddělit:
+
+- tři nejdůležitější aktuální kroky;
+- varování s čerstvým důkazem;
+- úplný inventář pro pozdější rozbalení.
+
+
+7. DOPORUČENÝ DALŠÍ VÝVOJ
+-------------------------
+
+Fáze 0 – dokončit již ověřený WIP
+
+- Nasadit opravu autosave matematiky řízeným deploymentem.
+- Po restartu ověřit smoke 5/5 a shodu code stampu.
+- V UI spustit pouze dry-run bez mazání a zkontrolovat tři oddělené metriky.
+
+Fáze 1 – Decision Cockpit D4
+
+Cíl: hlavní obrazovka má nejdřív odpovědět „Co teď?“ a teprve potom ukázat
+úplný systém.
+
+Nejmenší užitečný řez:
+
+- zobrazit nejvýše tři aktuální další kroky;
+- u každého uvést zdroj, stáří důkazu a důvod priority;
+- preferovat živý audit a nejnovější specifický handoff před starým agregátem;
+- oddělit „blokuje nyní“, „udělat brzy“ a „čeká na lidské rozhodnutí“;
+- úplný katalog ponechat dostupný po rozbalení.
+
+Akceptace:
+
+- generátor nevybírá mechanicky první P1;
+- stejný projekt se nezobrazuje duplicitně z více paměťových vrstev;
+- prokázaný formální rozpor režimu se zobrazí před běžným historickým P1;
+- starý snapshot je viditelně označený jako starý;
+- nová vrstva neprovádí žádnou akci, pouze vysvětluje a naviguje.
+
+Fáze 2 – modulární frontend bez redesignu
+
+Rozdělit app.js po jedné doméně. Zachovat HTML id, endpointy, texty potvrzení a
+stávající testy. Doporučené pořadí:
+
+1. společné API/error/refresh utility;
+2. health, recovery, diagnostika a autosave;
+3. dokumenty a čtečka;
+4. e-mail a trezor;
+5. knihovna a export;
+6. připomenutí, kalendář a ostatní domény.
+
+Každý řez musí být samostatně reverzibilní. Žádný framework switch.
+
+Fáze 3 – tenčí HTTP dispatch
+
+Začít nízkorizikovou read-only doménou health/recovery/status. Vytvořit malý
+doménový route dispatch, který oddělí:
+
+- registraci cesty;
+- parsování a validaci vstupu;
+- zavolání doménové funkce;
+- serializaci odpovědi.
+
+Bezpečnostní action registry zůstane autoritou. Cílem není nový router pro nový
+router, ale zmenšení změnového dosahu do_GET, do_POST a make_handler.
+
+Fáze 4 – přímý důkaz pro rizikové POST akce
+
+- Zmapovat patnáct non-direct položek na skutečné testy.
+- Opravit stale očekávání počtu capability záznamů a zařadit příslušný test do
+  kanonické gate, pokud má být počet release kontraktem.
+- Nejprve doplnit direct contract testy pro external_send a private_write.
+- UI presence ponechat jen tam, kde je skutečně jediným smysluplným kontraktem.
+- Neměnit potvrzovací věty ani rizikové klasifikace bez samostatného auditu.
+
+Fáze 5 – ergonomie release brány
+
+- Zachovat plnou gate pro release a deployment.
+- Umožnit rychlé doménové sady pro vývoj.
+- Aktualizaci celo-stránkového hashe dělat explicitním kontrolovaným krokem se
+  zobrazeným rozdílem, ne ručním slepým přepisem.
+- Měřit dobu běhu a dlouhodobě hledat nejdražší testovací skupiny.
+
+Fáze 6 – ruční vizuální přejímka
+
+Na Macu a iPhonu projít pět reálných scénářů:
+
+1. co dnes vyžaduje pozornost;
+2. obnova po pádu;
+3. dokument -> náhled -> bezpečná akce;
+4. připomenutí -> potvrzení -> historie;
+5. autosave dry-run se třemi metrikami.
+
+Zapisovat pouze konkrétní tření: co nebylo vidět, co bylo dvojznačné a kolik
+kroků bylo potřeba. Teprve z těchto důkazů dělat další informační přesuny.
+
+
+8. NOVÉ FUNKCIONALITY – AŽ PO OPRAVĚ SLABIN
+------------------------------------------
+
+8.1 „Další tři kroky“
+
+Nejde o nový projektový systém. Je to read-only pohled nad existujícími živými
+audity, handoffy a TVBCP s vysvětlením priority a stáří.
+
+8.2 Stáří důkazu jako první třída
+
+Každá důležitá stavová karta může rozlišit:
+
+- živě ověřeno nyní;
+- dnešní snapshot;
+- historická paměť;
+- nezjištěno.
+
+Tím se omezí falešně jisté formulace „běží“ nebo „je připraveno“.
+
+8.3 Sjednocená historie citlivých operací
+
+Pokud ji lze sestavit z existujících záznamů bez kopírování soukromého obsahu,
+má smysl jednotný read-only přehled posledních deploy, send, delete/purge,
+backup a restart operací. Nemá vzniknout druhý logovací systém.
+
+8.4 Výkonové rozpočty pro status endpointy
+
+Zavést lehké měření p50/p95 a čas jednotlivých providerů zejména pro
+/api/status. Neoptimalizovat naslepo; nejdřív zjistit, která část agregace je
+skutečně pomalá.
+
+
+9. CO NEDĚLAT
+-------------
+
+- Nepřepisovat Cockpit do nového frameworku.
+- Nevytvářet druhý capability, memory, document ani audit systém.
+- Nepřidávat další velkou sekci na hlavní stránku bez odstranění stejné nebo
+  větší rozhodovací zátěže.
+- Neodstraňovat legacy kompatibilitu jen podle názvu; nejdřív audit call-sites.
+- Nezeslabovat backendové validace, confirmation phrases ani full release gate.
+- Nezaměňovat logickou velikost souborů, alokované bloky a skutečný rozdíl
+  volného místa.
+- Neoznačovat historický snapshot za živý stav.
+- Nezapisovat do auditu soukromý obsah, tokeny nebo celé texty dokumentů a
+  e-mailů.
+
+
+10. DOPORUČENÉ POŘADÍ NA NEJBLIŽŠÍ OBDOBÍ
+----------------------------------------
+
+1. Nasadit hotovou opravu autosave reportu a živě ověřit dry-run.
+2. Udělat krátkou ruční Mac/iPhone vizuální přejímku pěti scénářů.
+3. Navrhnout a otestovat read-only Decision Cockpit D4 s nejvýše třemi kroky.
+4. Vyjmout health/recovery/autosave frontend do prvního samostatného modulu.
+5. Vyjmout read-only health/recovery/status routing z největšího handleru.
+6. Doplnit přímou testovací dohledatelnost nejrizikovějších non-direct POST akcí.
+7. Teprve potom rozhodovat o dalších funkcionalitách.
+
+
+11. DEFINICE ÚSPĚCHU DALŠÍ ETAPY
+--------------------------------
+
+Další etapa je úspěšná, když:
+
+- Míla na první obrazovce během několika sekund pozná nejvýše tři skutečné
+  další kroky a původ jejich priority;
+- starý stav se nemůže tvářit jako čerstvý;
+- jedna doména frontendu se dá změnit a otestovat bez pročítání celého app.js;
+- jedna read-only doména se dá sledovat od route po odpověď bez průchodu
+  tisíci řádky handleru;
+- high-risk POST akce mají přímo dohledatelný kontraktní test;
+- plná release brána, confirmation phrases, private boundaries a smoke 5/5
+  zůstávají zachované;
+- nové funkce nepřidávají další paralelní registry ani skryté automatické akce.
+
+
+12. KONEČNÉ DOPORUČENÍ
+----------------------
+
+Cockpit má pokračovat evolučně. Jeho mozek dnes nepotřebuje více nástrojů;
+potřebuje lépe vybrat, vysvětlit a zobrazit správný další krok. Technické jádro
+se má rozdělovat po malých doménových řezech, přičemž bezpečnostní registry,
+potvrzení, testy a recovery kontrakty zůstanou beze změny.
+
+První nový vývojový milník doporučený tímto auditem je Decision Cockpit D4.
+První provozní krok je řízené nasazení již hotové opravy autosave matematiky.

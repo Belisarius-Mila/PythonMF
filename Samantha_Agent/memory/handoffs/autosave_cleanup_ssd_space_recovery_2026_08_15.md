@@ -42,19 +42,15 @@ Co je hotove:
 Co neni hotove:
 - Opravena matematika zatim neni nasazena do beziciho Cockpitu; nasazeni,
   restart a zivy UI retest zustavaji samostatnou potvrzovanou akci.
-- Mila chce po restartu Samanthy pripomenout aktualizaci
-  `AuditCockpit56_Mila.txt`. V aktualnim checkoutu existuje pouze
-  `AuditCockpit56.txt`; pred zmenou je nutne vyjasnit, zda ma vzniknout novy
-  soubor s `_Mila`, nebo jde o stavajici roadmapu. Nic neprejmenovavat naslepo.
+- Rucni kontrola citelnosti tri metrik na Macu a iPhonu zustava otevrena.
 
 Dalsi krok:
 - Samostatne potvrdit nasazeni opraveneho reportu do Cockpitu a po restartu
   zive overit dry-run text bez skutecneho mazani.
-- Mílovi pripomenout `Aktualizovat AuditCockpit56_Mila.txt`, ale pred zmenou
-  vyjasnit, zda ma vzniknout novy soubor, nebo se ma upravit `AuditCockpit56.txt`.
 
 Navrhovane dalsi kroky:
-- Vyjasnit cilovy nazev auditniho souboru a doplnit do nej potvrzeny vysledek.
+- Novy celkovy audit je samostatny `AuditCockpit56_2.txt`; Mílova drive
+  uvazovana pracovni verze s `_Mila` neni relevantni.
 - Po nasazeni rucne zkontrolovat citelnost tri oddelenych metrik na Macu i iPhonu.
 - CloudKit cache nemazat automaticky ani naslepo. Pripadny zasah resit jako
   samostatne rizikove rozhodnuti az podle noveho mereni.
@@ -69,6 +65,7 @@ Zmenene nebo relevantni soubory:
 - `tests/test_cockpit_frontend.py`
 - `tests/test_safety_quick_checks.py`
 - `AuditCockpit56.txt`
+- `AuditCockpit56_2.txt`
 - `memory/technical/session_recovery_rules.md`
 
 Bezpecnost / neukladat:

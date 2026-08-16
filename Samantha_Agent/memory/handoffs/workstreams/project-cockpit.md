@@ -1,35 +1,42 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Stav znovu ověřen: 2026-08-07 13:59 CEST
+- Stav znovu ověřen: 2026-08-16 08:17 CEST
 
 ### Hotovo
-- Přímé Tailscale doručení důležitých připomenutí i Quick Notes funguje a iCloud
-  zůstává fallbackem.
-- VocabularyFR, VocabularyIT a MultiLO mají funkční lokální vstupy z Cockpitu.
-- Servisní souhrn dokumentového trezoru ukazuje aktuální stav před historií.
+- Nový nezávislý audit `AuditCockpit56_2.txt` vyhodnotil současný Cockpit jako
+  provozně zralý se silnou bezpečnostní a capability vrstvou.
+- Capability audit eviduje 83/83 mapovaných agent tools a POST registry 88 akcí.
+- Živý přednasazovací smoke prošel 5/5.
 
 ### Otevřeno
-- Lokální `main` obsahuje jeden novější knihovní commit než běžící Cockpit;
-  nejde o blokátor Cockpit architektury.
+- Oprava autosave matematiky je v lokálním main, ale při auditu ještě nebyla v
+  běžícím code stampu; její řízené nasazení je následující krok tohoto úkolu.
+- Interaktivní vizuální audit nebyl v této relaci dostupný; ruční Mac/iPhone
+  přejímka zůstává otevřená.
 
 ### Rizika
-- Žádné další doložené provozní riziko.
+- Největší architektonické riziko je rozhodovací přetížení hlavní stránky a
+  koncentrace frontendu i HTTP routingu do velkých souborů.
+- Poslední úspěšná záloha byla při auditu starší než tři dny.
 
 ### Další krok
-- Bez okamžité architektonické změny; pokračovat podle konkrétní uživatelské
-  zkušenosti nebo provozní chyby.
+- Řízeně nasadit autosave WIP, ověřit code stamp a smoke 5/5; potom provést
+  pouze dry-run bez mazání.
 
 ### Rozhodnutí
-- Přímé Tailscale doručení je primární cesta a iCloud soubory zůstávají
-  bezpečným fallbackem; servisní historie nemá přebíjet aktuální pracovní stav.
+- Cockpit se nebude plošně přepisovat. Další vývoj má nejdřív zlepšit výběr a
+  vysvětlení nejvýše tří skutečných dalších kroků a potom po malých doménách
+  rozdělovat frontend a routing při zachování bezpečnostních kontraktů.
 
 ### Navrhované další kroky
-- Při dalším UI auditu oddělit aktuální úkol od historických technických detailů.
+- Decision Cockpit D4 jako read-only vrstva nad živými audity a pamětí.
+- První modulární řez vést přes health/recovery/autosave.
 
 ### Technický stav checkpointu
-- Běžící Cockpit je serverově ověřený na `91dc700`; smoke prošel 5/5.
-- Oba profilové workspaces byly při posledním nasazení čisté a zarovnané.
+- Před nasazením běžel code stamp `78a8f396027ad740`, aktuální main měl
+  `2360eef3753bca5a`; rozdíl odpovídal čekajícímu WIP.
+- Oprava autosave reportu má doloženou plnou bránu 1414/1414.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: Cockpit / hlavní architektura

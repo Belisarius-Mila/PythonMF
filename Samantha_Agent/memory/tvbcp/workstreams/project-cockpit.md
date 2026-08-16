@@ -183,3 +183,31 @@ Navrhované další kroky:
 Technický důkaz:
 - Cílených šest testů prošlo.
 - Plná Cockpit Quality Gate prošla 1414/1414 testy.
+
+### 2026-08-16 08:17 CEST – Druhý audit 5.6 Sol určil další vývoj
+
+Hotovo:
+- Vznikl samostatný `AuditCockpit56_2.txt` nad aktuálním kódem, projektovou
+  pamětí, handoffy, TVBCP, registry a živými read-only kontrolami.
+- Audit oddělil historicky dokončené priority od současných slabin.
+
+Rozhodnutí:
+- Bezpečnostní a capability základ zůstává zachovaný; plošný přepis ani změna
+  frameworku nejsou doporučené.
+- První nový milník je read-only Decision Cockpit D4 s nejvýše třemi aktuálními
+  kroky, zdrojem priority a stářím důkazu.
+- Frontend a HTTP routing se mají dělit pouze po malých doménových řezech.
+
+Další krok:
+- V rámci stejného úkolu řízeně nasadit již ověřenou opravu autosave matematiky
+  a ověřit nový proces, code stamp a smoke 5/5.
+
+Navrhované další kroky:
+- Ručně projít pět reálných scénářů na Macu a iPhonu.
+- Potom připravit malý návrh Decision Cockpit D4 bez provádění akcí.
+
+Technický důkaz:
+- Živý přednasazovací smoke prošel 5/5.
+- Capability audit evidoval 83/83 mapovaných agent tools a 88 POST akcí.
+- Audit výslovně zachoval otevřenou vizuální přejímku, protože interaktivní
+  prohlížeč nebyl v relaci dostupný.
