@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-12 13:54 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-16 16:47 CEST
 
 ### Hotovo
-- Generování obrázků je dostupné ve všech současných proudech a řídí je výhradně deklarativní capability konfigurace
+- Checkpoint a informace o nasazení jsou na mobilu schované pod horními Podrobnostmi, takže chat má více prostoru
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
@@ -15,19 +15,19 @@
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Samostatně potvrdit nasazení a živě ověřit generování ve dvou různých pracovních proudech
+- Samostatně potvrdit nasazení a vizuálně ověřit výšku chatu na iPhonu
 
 ### Rozhodnutí
-- Obrazová schopnost se přiřazuje pracovním proudům deklarativně; kandidáti zůstávají private a izolovaní podle proudu
+- Dlouhé technické stavové řádky budou na mobilu součástí sbalovacích Podrobností; desktop je nadále zobrazuje přímo
 
 ### Navrhované další kroky
 - Žádné další návrhy nad rámec bezprostředního kroku.
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `fd7a0860b011`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `fd7a0860b011` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-12T10:00:32+00:00.
-- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+- Git před checkpointem: lokální `main` na `bbcde88e8619`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `bbcde88e8619` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-16T13:04:26+00:00.
+- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`disconnected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -2722,3 +2722,15 @@ Technický důkaz:
   1409/1409 za 442,1 s.
 - Další krok: Vytvořit checkpoint a samostatně potvrzené nasazení; potom živě
   ověřit galerii čtyř obrázků.
+
+### Automatický checkpoint 2026-08-16 16:47 CEST
+
+- Pracovní proud: `layer-human-adam-development`
+- Hotovo: Checkpoint a informace o nasazení jsou na mobilu schované pod horními Podrobnostmi, takže chat má více prostoru; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.; Lokální commity čekají na samostatný denní GitHub balíček.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: rychlá Cockpit brána syntaxe a whitespace: 6.0 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu
+- Změněné cesty před paměťovým zápisem (2): `Samantha_Agent/app/communication/human_adam_ui.py`, `Samantha_Agent/tests/test_human_adam_ui.py`
+- Commit: `Collapse technical receipts on mobile`
+- Další krok: Samostatně potvrdit nasazení a vizuálně ověřit výšku chatu na iPhonu

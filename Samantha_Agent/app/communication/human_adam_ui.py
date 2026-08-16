@@ -203,9 +203,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <audio id="completionMediaAudio" preload="auto" playsinline hidden></audio>
       </div>
       <div id="turnActivity" role="status" aria-live="polite" hidden></div>
+      <div id="stepCompletionReceipt" role="status" aria-live="polite" hidden></div>
+      <div id="deploymentReceipt" role="status" aria-live="polite" hidden></div>
     </div>
-    <div id="stepCompletionReceipt" role="status" aria-live="polite" hidden></div>
-    <div id="deploymentReceipt" role="status" aria-live="polite" hidden></div>
   </header>
   <div id="notice" role="status" aria-live="polite"></div>
   <section id="chat" aria-label="Konverzace Human–Adam"></section>

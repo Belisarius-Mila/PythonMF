@@ -353,18 +353,22 @@ class HumanAdamUiTests(unittest.TestCase):
             HUMAN_ADAM_HTML,
         )
 
-    def test_mobile_summary_collapses_core_details_without_hiding_deployment_evidence(self) -> None:
+    def test_mobile_summary_collapses_receipts_inside_status_details(self) -> None:
         header = HUMAN_ADAM_HTML.index("<header>")
         summary = HUMAN_ADAM_HTML.index('id="mobileStatusSummary"', header)
         details = HUMAN_ADAM_HTML.index('id="statusDetails"', summary)
         badges = HUMAN_ADAM_HTML.index('<div class="statusline">', details)
         turn = HUMAN_ADAM_HTML.index('id="turnActivity"', badges)
-        receipt = HUMAN_ADAM_HTML.index('id="deploymentReceipt"', turn)
+        step_receipt = HUMAN_ADAM_HTML.index('id="stepCompletionReceipt"', turn)
+        deployment_receipt = HUMAN_ADAM_HTML.index('id="deploymentReceipt"', step_receipt)
+        details_end = HUMAN_ADAM_HTML.index("    </div>\n  </header>", deployment_receipt)
 
         self.assertLess(summary, details)
         self.assertLess(details, badges)
         self.assertLess(badges, turn)
-        self.assertLess(turn, receipt)
+        self.assertLess(turn, step_receipt)
+        self.assertLess(step_receipt, deployment_receipt)
+        self.assertLess(deployment_receipt, details_end)
         self.assertIn('aria-expanded="false" aria-controls="statusDetails"', HUMAN_ADAM_HTML)
         self.assertIn("#mobileStatusSummary { display:none;", HUMAN_ADAM_HTML)
         self.assertIn("#mobileStatusSummary { display:flex; }", HUMAN_ADAM_HTML)
