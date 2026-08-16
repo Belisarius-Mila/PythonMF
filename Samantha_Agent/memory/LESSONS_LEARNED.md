@@ -235,3 +235,15 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   alokované bloky a `df`. Uživatelům nikdy neslibovat logický součet jako
   skutečně uvolnitelné GiB. Proměnlivé cache a VM ověřit znovu po restartu;
   CloudKit ani jiné systémové cache nemazat automaticky.
+
+### LL-018 — Dokončený app-server tah může ztratit transportní účtenku
+
+- Problém: Codex lokálně dokončil tah a uložil finální odpověď i `task_complete`,
+  ale Human–Adam neobdržel povinné `turn/completed` a správně ponechal doručení
+  jako nejisté. Opakované odeslání by mohlo zdvojit už provedenou práci.
+- Typ: opakující se
+- Řešení nalezeno: 16082026
+- Řešení: Zprávu nikdy automaticky neposílat znovu. Po transportní chybě přijmout
+  dokončení jen z právě jednoho lokálního záznamu se shodným vláknem a client
+  ID, shodnou finální odpovědí a následným `task_complete`; při jakékoli
+  nejednoznačnosti zachovat `delivery_unknown` a vyžádat ruční recovery audit.
