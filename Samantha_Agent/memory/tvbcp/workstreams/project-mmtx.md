@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-16 17:58 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-16 22:15 CEST
 
 ### Hotovo
-- Harry se představí před prvním výslechem a další repliky se přehrávají jednotlivě až po stisknutí Next
+- Harry po posledním výslechu dovolí přátelům pokračovat otevřenou brankou
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
@@ -15,18 +15,18 @@
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Ručně ověřit tempo a rozložení tlačítka Next na iPhonu nebo Macu
+- Ověřit závěrečnou repliku, hlas a přechod do dokončené scény na iPhonu
 
 ### Rozhodnutí
-- Každá další věta ve výslechu se aktivuje tlačítkem Next
+- Závěrečná replika používá přirozenou angličtinu „The gate is open for you, friends!“ a zůstává samostatným krokem Next
 
 ### Navrhované další kroky
-- Po živém ověření pokračovat počítáním pěti ovcí a otevřením branky
+- Po ověření navázat počítáním pěti ovcí a skutečným otevřením branky
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `4fcaddfd6710`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `4fcaddfd6710` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-16T14:57:47+00:00.
+- Git před checkpointem: lokální `main` na `08a4b9b30872`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `08a4b9b30872` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-16T19:59:44+00:00.
 - Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -456,5 +456,32 @@ Navrhované další kroky:
 
 Technický důkaz:
 - rychlá Cockpit brána syntaxe a whitespace: 6.3 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
+- Pracovní proud: `project-mmtx`.
+- Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+
+### 2026-08-16 22:15 CEST – Harry po posledním výslechu dovolí přátelům pokračovat otevřenou brankou
+
+Hotovo:
+- Harry po posledním výslechu dovolí přátelům pokračovat otevřenou brankou
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+
+Otevřeno:
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
+
+Rizika:
+- Žádné další doložené provozní riziko.
+
+Rozhodnutí:
+- Závěrečná replika používá přirozenou angličtinu „The gate is open for you, friends!“ a zůstává samostatným krokem Next
+
+Další krok:
+- Ověřit závěrečnou repliku, hlas a přechod do dokončené scény na iPhonu
+
+Navrhované další kroky:
+- Po ověření navázat počítáním pěti ovcí a skutečným otevřením branky
+
+Technický důkaz:
+- rychlá Cockpit brána syntaxe a whitespace: 7.4 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `project-mmtx`.
 - Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.

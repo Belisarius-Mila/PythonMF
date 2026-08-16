@@ -64,7 +64,7 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
         self.assertIn('id="noButton"', html)
         self.assertIn('src="harry_benji_prototype_01.png"', html)
         self.assertIn('styles.css?v=20260816a', html)
-        self.assertIn('script.js?v=20260816a', html)
+        self.assertIn('script.js?v=20260816b', html)
         self.assertIn("Five interviews complete", html)
         self.assertIn("Pět výslechů je dokončených.", html)
         target_style = styles.split(".hotspot.target {", 1)[1].split("}", 1)[0]
@@ -168,6 +168,7 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
             '"Do you want to dig under my fence?"',
             '"No. I do not dig under fences."',
             '"Good answer, Bruno. I believe you."',
+            '"OK, now you can continue. The gate is open for you, friends!"',
             "async function repeatLast()",
             "function waitForNext(flowId)",
             "function advanceDialogue()",
@@ -361,6 +362,11 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
         self.assertIn("lines.noDigging", choose_no_body)
         self.assertIn("lines.brunoLakeWithFriends", choose_no_body)
         self.assertIn("lines.brunoAccepted", choose_no_body)
+        self.assertIn("lines.gateOpened", choose_no_body)
+        self.assertLess(
+            choose_no_body.index("lines.brunoAccepted"),
+            choose_no_body.index("lines.gateOpened"),
+        )
         self.assertGreaterEqual(choose_no_body.count("await playSequence("), 5)
         self.assertIn("setStage(STAGES.chooseBunny)", choose_no_body)
         self.assertIn("if (questioningBunny)", choose_no_body)

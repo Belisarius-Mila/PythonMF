@@ -341,6 +341,11 @@ const lines = {
     "Good answer, Bruno. I believe you.",
     "Dobrá odpověď, Bruno. Věřím ti.",
   ),
+  gateOpened: dialogue(
+    "harry",
+    "OK, now you can continue. The gate is open for you, friends!",
+    "Dobře, teď můžete pokračovat. Branka je pro vás otevřená, kamarádi!",
+  ),
 };
 
 const state = {
@@ -904,6 +909,7 @@ async function chooseNo() {
       lines.noDigging,
       lines.brunoLakeWithFriends,
       lines.brunoAccepted,
+      lines.gateOpened,
     ], flowId))) return;
     hideSpeech();
     completeBanner.classList.remove("hidden");
