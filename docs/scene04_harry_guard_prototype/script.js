@@ -355,6 +355,9 @@ const state = {
   lastRepeatable: null,
   flowId: 0,
   currentEntry: null,
+  entryPlaybackId: 0,
+  isSpeakingEntry: false,
+  isRepeating: false,
 };
 
 let voices = [];
@@ -632,6 +635,7 @@ function showSpeech(entry) {
 function hideSpeech() {
   speechBubble.classList.add("hidden");
   state.currentEntry = null;
+  updateRepeatAvailability();
 }
 
 async function playEntry(entry, flowId, { remember = true } = {}) {
@@ -639,11 +643,21 @@ async function playEntry(entry, flowId, { remember = true } = {}) {
   if (remember) {
     state.lastRepeatable = entry;
   }
+  const playbackId = ++state.entryPlaybackId;
+  state.isSpeakingEntry = true;
   showSpeech(entry);
-  await speakText(entry.textEn, "en", entry.characterId);
-  if (flowId !== state.flowId) return false;
-  if (isBilingual()) await speakText(entry.textCz, "cs", entry.characterId);
-  return flowId === state.flowId;
+  updateRepeatAvailability();
+  try {
+    await speakText(entry.textEn, "en", entry.characterId);
+    if (flowId !== state.flowId) return false;
+    if (isBilingual()) await speakText(entry.textCz, "cs", entry.characterId);
+    return flowId === state.flowId;
+  } finally {
+    if (playbackId === state.entryPlaybackId) {
+      state.isSpeakingEntry = false;
+      updateRepeatAvailability();
+    }
+  }
 }
 
 function waitForNext(flowId) {
@@ -706,7 +720,13 @@ function updateRepeatAvailability() {
     STAGES.chooseBrunoYesNo,
     STAGES.complete,
   ]);
-  repeatButton.disabled = !state.lastRepeatable || !repeatableStages.has(state.stage);
+  const visibleEntry = state.currentEntry;
+  const fallbackEntry = repeatableStages.has(state.stage) ? state.lastRepeatable : null;
+  repeatButton.disabled = (
+    state.isSpeakingEntry
+    || state.isRepeating
+    || !(visibleEntry || fallbackEntry)
+  );
 }
 
 function closeDictionary() {
@@ -964,27 +984,38 @@ async function chooseNo() {
 }
 
 async function repeatLast() {
-  if (!state.lastRepeatable || repeatButton.disabled) return;
+  const entry = state.currentEntry || state.lastRepeatable;
+  if (!entry || repeatButton.disabled || state.isSpeakingEntry || state.isRepeating) return;
   const resumeStage = state.stage;
-  const flowId = ++state.flowId;
+  const resumeEntry = state.currentEntry;
+  const flowId = state.flowId;
+  const nextWasAvailable = Boolean(nextResolve && !nextButton.disabled);
   cancelSpeech();
   closeDictionary();
-  repeatButton.disabled = true;
+  state.isRepeating = true;
+  if (nextWasAvailable) nextButton.disabled = true;
+  updateRepeatAvailability();
   try {
-    await playEntry(state.lastRepeatable, flowId, { remember: false });
+    await playEntry(entry, flowId, { remember: false });
     if (flowId !== state.flowId) return;
-    hideSpeech();
-    if (resumeStage === STAGES.chooseBenji) showTask(lines.mapQuestion);
-    if (resumeStage === STAGES.chooseYesNo) showTask(lines.sheepQuestion);
-    if (resumeStage === STAGES.chooseBunny) showTask(lines.rabbitPrompt);
-    if (resumeStage === STAGES.chooseBunnyYesNo) showTask(lines.carrotQuestion);
-    if (resumeStage === STAGES.chooseSunny) showTask(lines.squirrelPrompt);
-    if (resumeStage === STAGES.chooseSunnyYesNo) showTask(lines.nutQuestion);
-    if (resumeStage === STAGES.chooseFiona) showTask(lines.foxPrompt);
-    if (resumeStage === STAGES.chooseFionaYesNo) showTask(lines.chickenQuestion);
-    if (resumeStage === STAGES.chooseBruno) showTask(lines.badgerPrompt);
-    if (resumeStage === STAGES.chooseBrunoYesNo) showTask(lines.fenceQuestion);
+    if (!resumeEntry) {
+      hideSpeech();
+      if (resumeStage === STAGES.chooseBenji) showTask(lines.mapQuestion);
+      if (resumeStage === STAGES.chooseYesNo) showTask(lines.sheepQuestion);
+      if (resumeStage === STAGES.chooseBunny) showTask(lines.rabbitPrompt);
+      if (resumeStage === STAGES.chooseBunnyYesNo) showTask(lines.carrotQuestion);
+      if (resumeStage === STAGES.chooseSunny) showTask(lines.squirrelPrompt);
+      if (resumeStage === STAGES.chooseSunnyYesNo) showTask(lines.nutQuestion);
+      if (resumeStage === STAGES.chooseFiona) showTask(lines.foxPrompt);
+      if (resumeStage === STAGES.chooseFionaYesNo) showTask(lines.chickenQuestion);
+      if (resumeStage === STAGES.chooseBruno) showTask(lines.badgerPrompt);
+      if (resumeStage === STAGES.chooseBrunoYesNo) showTask(lines.fenceQuestion);
+    }
   } finally {
+    state.isRepeating = false;
+    if (nextWasAvailable && nextResolve && flowId === state.flowId) {
+      nextButton.disabled = false;
+    }
     updateRepeatAvailability();
   }
 }

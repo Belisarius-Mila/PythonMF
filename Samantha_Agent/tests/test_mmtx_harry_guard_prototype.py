@@ -64,7 +64,7 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
         self.assertIn('id="noButton"', html)
         self.assertIn('src="harry_benji_prototype_01.png"', html)
         self.assertIn('styles.css?v=20260816a', html)
-        self.assertIn('script.js?v=20260816b', html)
+        self.assertIn('script.js?v=20260817a', html)
         self.assertIn("Five interviews complete", html)
         self.assertIn("Pět výslechů je dokončených.", html)
         target_style = styles.split(".hotspot.target {", 1)[1].split("}", 1)[0]
@@ -378,7 +378,30 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
         )[0]
         self.assertNotIn("chooseYes()", repeat_body)
         self.assertNotIn("chooseNo()", repeat_body)
-        self.assertIn("if (!state.lastRepeatable || repeatButton.disabled) return", repeat_body)
+        self.assertIn("const entry = state.currentEntry || state.lastRepeatable", repeat_body)
+        self.assertIn("const flowId = state.flowId", repeat_body)
+        self.assertNotIn("++state.flowId", repeat_body)
+        self.assertIn(
+            "const nextWasAvailable = Boolean(nextResolve && !nextButton.disabled)",
+            repeat_body,
+        )
+        self.assertIn("if (nextWasAvailable) nextButton.disabled = true", repeat_body)
+        self.assertIn("if (!resumeEntry)", repeat_body)
+        self.assertIn("nextButton.disabled = false", repeat_body)
+
+        repeat_availability = script.split(
+            "function updateRepeatAvailability()", 1
+        )[1].split("function closeDictionary()", 1)[0]
+        self.assertIn("const visibleEntry = state.currentEntry", repeat_availability)
+        self.assertIn("state.isSpeakingEntry", repeat_availability)
+        self.assertIn("state.isRepeating", repeat_availability)
+
+        play_entry = script.split("async function playEntry(", 1)[1].split(
+            "function waitForNext(flowId)", 1
+        )[0]
+        self.assertIn("state.isSpeakingEntry = true", play_entry)
+        self.assertIn("state.isSpeakingEntry = false", play_entry)
+        self.assertGreaterEqual(play_entry.count("updateRepeatAvailability()"), 2)
 
 
 if __name__ == "__main__":

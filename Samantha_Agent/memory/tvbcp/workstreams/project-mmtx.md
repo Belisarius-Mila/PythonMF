@@ -1,33 +1,32 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-16 22:15 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-17 22:23 CEST
 
 ### Hotovo
-- Harry po posledním výslechu dovolí přátelům pokračovat otevřenou brankou
+- Repeat nyní zopakuje každou právě zobrazenou větu bez posunutí nebo přerušení dialogu
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
 - Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
-- Lokální commity čekají na samostatný denní GitHub balíček.
 
 ### Rizika
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Ověřit závěrečnou repliku, hlas a přechod do dokončené scény na iPhonu
+- Ručně ověřit Repeat a Next v celém výslechu na iPhonu nebo Macu
 
 ### Rozhodnutí
-- Závěrečná replika používá přirozenou angličtinu „The gate is open for you, friends!“ a zůstává samostatným krokem Next
+- Repeat je replay-only ovládání aktuální věty a nesmí měnit tok tlačítka Next
 
 ### Navrhované další kroky
-- Po ověření navázat počítáním pěti ovcí a skutečným otevřením branky
+- Po živém ověření pokračovat počítáním pěti ovcí a skutečným otevřením branky
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `08a4b9b30872`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `08a4b9b30872` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-16T19:59:44+00:00.
-- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+- Git před checkpointem: lokální `main` na `e99fc7225b71`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `e99fc7225b71` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-16T20:21:15+00:00.
+- Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -485,3 +484,29 @@ Technický důkaz:
 - rychlá Cockpit brána syntaxe a whitespace: 7.4 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `project-mmtx`.
 - Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+
+### 2026-08-17 22:23 CEST – Repeat nyní zopakuje každou právě zobrazenou větu bez posunutí nebo přerušení dialogu
+
+Hotovo:
+- Repeat nyní zopakuje každou právě zobrazenou větu bez posunutí nebo přerušení dialogu
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+
+Otevřeno:
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+
+Rizika:
+- Žádné další doložené provozní riziko.
+
+Rozhodnutí:
+- Repeat je replay-only ovládání aktuální věty a nesmí měnit tok tlačítka Next
+
+Další krok:
+- Ručně ověřit Repeat a Next v celém výslechu na iPhonu nebo Macu
+
+Navrhované další kroky:
+- Po živém ověření pokračovat počítáním pěti ovcí a skutečným otevřením branky
+
+Technický důkaz:
+- rychlá Cockpit brána syntaxe a whitespace: 5.4 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
+- Pracovní proud: `project-mmtx`.
+- Read-only živý stav při checkpointu: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
