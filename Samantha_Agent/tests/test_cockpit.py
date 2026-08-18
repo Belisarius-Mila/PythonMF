@@ -3422,6 +3422,7 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(queue["items"][1]["kind"], "document_problem")
         self.assertIn("open_reminders", [item["action"] for item in queue["items"]])
         self.assertIn("open_scandocu", [item["action"] for item in queue["items"]])
+        self.assertIn("open_document_review", [item["action"] for item in queue["items"]])
         self.assertEqual(queue["counts"]["priority_1"], 3)
 
     def test_decision_cockpit_status_combines_live_queue_and_memory_truth_read_only(self) -> None:
@@ -8125,7 +8126,7 @@ Dalsi krok:
         self.assertIn('id="documentsPanel"', COCKPIT_HTML)
         self.assertIn('id="scanDocuBtn">Otevřít ScanDocu</button>', COCKPIT_HTML)
         self.assertIn(
-            'id="scanDocuReviewBtn">Revidovat v ScanDocu</button>',
+            'id="scanDocuReviewBtn">Revidovat v Cockpitu</button>',
             COCKPIT_HTML,
         )
         self.assertGreater(

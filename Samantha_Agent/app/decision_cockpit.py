@@ -20,8 +20,8 @@ ALLOWED_NAVIGATION_ACTIONS = {
     "open_projects",
     "open_recovery",
     "open_reminders",
+    "open_document_review",
     "open_scandocu",
-    "open_scandocu_review",
     "open_urgent_reminders",
 }
 

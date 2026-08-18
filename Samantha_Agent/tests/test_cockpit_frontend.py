@@ -35,9 +35,9 @@ EXPECTED_PAGES = {
     ),
     "cockpit": (
         COCKPIT_HTML,
-        457601,
-        9253,
-        "b47b20dacbc6c5a89005f36948d2619a1d05814471ea7e5a97d676c022b11ebf",
+        457861,
+        9266,
+        "55582c6b581c83ef1c847ba2cbb35ebdcadae87bd56bf10ff5bf7ff469a7e7a0",
     ),
 }
 
@@ -96,6 +96,16 @@ class CockpitFrontendContractTests(unittest.TestCase):
         ):
             with self.subTest(expected=expected):
                 self.assertIn(expected, COCKPIT_HTML)
+
+    def test_document_review_stays_inside_cockpit(self) -> None:
+        source = (FRONTEND_ROOT / "cockpit" / "app.js").read_text(encoding="utf-8")
+
+        self.assertIn('action === "open_document_review"', source)
+        self.assertIn('showMessage("Revize dokumentů je otevřená přímo v Cockpitu.")', source)
+        self.assertIn('dashboardReviewBtn.addEventListener("click", openDocumentReviewPanel)', source)
+        self.assertIn('scanDocuReviewBtn.addEventListener("click", openDocumentReviewPanel)', source)
+        self.assertIn('reviewNextBtn.addEventListener("click", openDocumentReviewPanel)', source)
+        self.assertNotIn('`${data.url}/?mode=review`', source)
 
     def test_health_recovery_autosave_is_an_extracted_frontend_module(self) -> None:
         page_dir = FRONTEND_ROOT / "cockpit"

@@ -5054,7 +5054,7 @@ def action_queue_status(
                 "priority": 2,
                 "title": title or "Uložený dokument k revizi",
                 "detail": f"{domain} / {document_type}",
-                "action": "open_scandocu_review",
+                "action": "open_document_review",
                 "action_label": "Revidovat",
             }
         )

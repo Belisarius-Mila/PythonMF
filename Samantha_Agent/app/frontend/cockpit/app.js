@@ -1027,7 +1027,7 @@
             button.className = "secondary";
             button.type = "button";
             button.textContent = item.action_label || "ScanDocu";
-            button.addEventListener("click", () => openScanDocu(false));
+            button.addEventListener("click", openScanDocu);
             row.appendChild(button);
           } else if (item.action_kind === "open_email_processing") {
             const button = document.createElement("button");
@@ -1619,15 +1619,28 @@
       reviewReportBtn.disabled = true;
       reviewReportStatus.textContent = "Načítám report dokumentů k revizi...";
       reviewReportList.innerHTML = "";
+      let loaded = false;
       try {
         const res = await fetch("/api/documents/review-report");
         const data = await res.json();
         renderDocumentReviewReport(data);
+        loaded = true;
       } catch (err) {
         recordFrontendError(err);
         reviewReportStatus.textContent = `Chyba reportu: ${err}`;
       } finally {
         reviewReportBtn.disabled = false;
+      }
+      return loaded;
+    }
+
+    async function openDocumentReviewPanel() {
+      documentsPanel.open = true;
+      showMessage("Otevírám bezpečnou revizi přímo v Cockpitu...");
+      const loaded = await loadDocumentReviewReport();
+      reviewReportList.scrollIntoView({behavior: "smooth", block: "start"});
+      if (loaded) {
+        showMessage("Revize dokumentů je otevřená přímo v Cockpitu.");
       }
     }
 
@@ -1987,9 +2000,9 @@
 	      button.textContent = item.action_label || "Otevřít";
 	      button.addEventListener("click", () => {
 	        if (action === "open_scandocu") {
-	          openScanDocu(false);
-	        } else if (action === "open_scandocu_review") {
-	          openScanDocu(true);
+	          openScanDocu();
+	        } else if (action === "open_document_review" || action === "open_scandocu_review") {
+	          openDocumentReviewPanel();
 	        } else if (action === "open_reminders") {
 	          openRemindersModal();
         } else if (action === "open_urgent_reminders") {
@@ -3441,21 +3454,21 @@ Soubor nebude trvale smazán.`);
       }
     }
 
-    async function openScanDocu(reviewMode = false) {
+    async function openScanDocu() {
       const scanDocuWindow = window.open(
         "about:blank",
-        reviewMode ? "SamanthaScanDocuReview" : "SamanthaScanDocu",
+        "SamanthaScanDocu",
         "popup=yes,width=1380,height=920,left=80,top=60"
       );
-      const activeButton = reviewMode ? scanDocuReviewBtn : scanDocuBtn;
+      const activeButton = scanDocuBtn;
       activeButton.disabled = true;
-      showMessage(reviewMode ? "Spouštím ScanDocu Review..." : "Spouštím ScanDocu...");
+      showMessage("Spouštím ScanDocu...");
       try {
         const res = await fetch("/api/scandocu/open", {method: "POST"});
         const data = await res.json();
         showMessage(data.message || data.error || "Hotovo.");
         if (data.ok && data.url) {
-          const targetUrl = reviewMode ? `${data.url}/?mode=review` : data.url;
+          const targetUrl = data.url;
           if (scanDocuWindow) {
             scanDocuWindow.location.href = targetUrl;
             scanDocuWindow.focus();
@@ -6768,7 +6781,7 @@ ${item.context || ""}`);
       }
       if (!app.url) return;
       if (app.id === "scandocu") {
-        openScanDocu(false);
+          openScanDocu();
         return;
       }
       const target = new URL(app.url, window.location.href);
@@ -6893,8 +6906,8 @@ ${item.context || ""}`);
     });
     documentsBtn.addEventListener("click", openDocumentsPanel);
     dashboardRefreshBtn.addEventListener("click", refresh);
-    dashboardProcessBtn.addEventListener("click", () => openScanDocu(false));
-    dashboardReviewBtn.addEventListener("click", () => openScanDocu(true));
+    dashboardProcessBtn.addEventListener("click", openScanDocu);
+    dashboardReviewBtn.addEventListener("click", openDocumentReviewPanel);
 	    dashboardTerminalBtn.addEventListener("click", () => postAction("/api/terminal/open", dashboardTerminalBtn));
 		    dashboardQuantitativeBtn.addEventListener("click", openQuantitativeModal);
     dashboardProjectAuditBtn.addEventListener("click", openProjectAuditModal);
@@ -7190,10 +7203,10 @@ ${item.context || ""}`);
 		        closeJanickaFamilyModal();
       }
     });
-    scanDocuBtn.addEventListener("click", () => openScanDocu(false));
-    scanDocuReviewBtn.addEventListener("click", () => openScanDocu(true));
-    processNextBtn.addEventListener("click", () => openScanDocu(false));
-    reviewNextBtn.addEventListener("click", () => openScanDocu(true));
+    scanDocuBtn.addEventListener("click", openScanDocu);
+    scanDocuReviewBtn.addEventListener("click", openDocumentReviewPanel);
+    processNextBtn.addEventListener("click", openScanDocu);
+    reviewNextBtn.addEventListener("click", openDocumentReviewPanel);
     documentSearchBtn.addEventListener("click", searchDocuments);
 	    documentSearchInput.addEventListener("keydown", (event) => {
 	      if (event.key === "Enter") {

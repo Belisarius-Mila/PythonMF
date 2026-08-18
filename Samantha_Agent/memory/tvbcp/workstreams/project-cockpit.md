@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-18 13:06 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-18 17:05 CEST
 
 ### Hotovo
-- Všechny zapisovací a odesílací POST akce mají nyní přímo dohledatelný testovací kontrakt.
+- Revize dokumentů se nyní otevírá přímo v Cockpitu a funguje i přes Tailscale na iPhonu
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
@@ -15,18 +15,18 @@
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Vytvořit checkpoint, nasadit Cockpit a ověřit běžný smoke test.
+- Po automatickém převzetí ověřit na iPhonu tlačítko Revidovat
 
 ### Rozhodnutí
-- Akce typu private_write a external_send musí mít v POST registru doloženou úroveň direct.
+- V tomto kroku nebylo přijato nové kanonické rozhodnutí.
 
 ### Navrhované další kroky
-- Osm zbývajících nízkorizikových non-direct položek řešit pouze při jejich konkrétní změně nebo samostatném auditu.
+- Žádné další návrhy nad rámec bezprostředního kroku.
 
 ### Technický stav checkpointu
-- Změna je otestovaná (1444 testů).
-- Git před checkpointem: lokální `main` na `b7caf4dd1c28`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `b7caf4dd1c28` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-18T10:40:39+00:00.
+- Změna je otestovaná (1445 testů).
+- Git před checkpointem: lokální `main` na `0f039bd925d0`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `0f039bd925d0` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-18T14:22:47+00:00.
 - Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -315,5 +315,32 @@ Navrhované další kroky:
 
 Technický důkaz:
 - plná Cockpit brána: 1444 testů, 302.1 s, výsledek OK.
+- Pracovní proud: `project-cockpit`.
+- Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+
+### 2026-08-18 17:05 CEST – Revize dokumentů se nyní otevírá přímo v Cockpitu a funguje i přes Tailscale na iPhonu
+
+Hotovo:
+- Revize dokumentů se nyní otevírá přímo v Cockpitu a funguje i přes Tailscale na iPhonu
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+
+Otevřeno:
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
+
+Rizika:
+- Žádné další doložené provozní riziko.
+
+Rozhodnutí:
+- V tomto kroku nebylo přijato nové kanonické rozhodnutí.
+
+Další krok:
+- Po automatickém převzetí ověřit na iPhonu tlačítko Revidovat
+
+Navrhované další kroky:
+- Nebyly zachyceny další návrhy nad rámec bezprostředního kroku.
+
+Technický důkaz:
+- plná Cockpit brána: 1445 testů, 305.6 s, výsledek OK.
 - Pracovní proud: `project-cockpit`.
 - Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
