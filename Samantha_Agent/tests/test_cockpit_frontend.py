@@ -31,9 +31,9 @@ EXPECTED_PAGES = {
     ),
     "cockpit": (
         COCKPIT_HTML,
-        449434,
-        9066,
-        "93eeab2a6948e37a93696c011ec43362da9609f7e4dc5912aec642bfc5b47de1",
+        454733,
+        9161,
+        "dafedef13b972c32bcf228e1a272555f00c9bb3d4229faecd279121f139ef100",
     ),
 }
 
@@ -72,6 +72,19 @@ class CockpitFrontendContractTests(unittest.TestCase):
         self.assertNotIn('EMAIL_ARCHIVE_HTML = """', source)
         self.assertNotIn('EMAIL_PROCESSING_HTML = """', source)
         self.assertNotIn('COCKPIT_HTML = """', source)
+
+    def test_cockpit_frontend_has_read_only_three_step_decision_view(self) -> None:
+        for expected in (
+            "Co teď?",
+            "decisionCockpitStatus",
+            "decisionCockpitList",
+            "/api/decision-status",
+            "items.slice(0, 3)",
+            "Zdroj:",
+            "Úplný katalog provozních položek",
+        ):
+            with self.subTest(expected=expected):
+                self.assertIn(expected, COCKPIT_HTML)
 
     def test_email_archive_frontend_is_a_human_readable_mailbox(self) -> None:
         for expected in (

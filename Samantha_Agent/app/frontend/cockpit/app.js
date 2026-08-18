@@ -334,6 +334,8 @@
     const frontendHealthError = document.getElementById("frontendHealthError");
     const actionQueueStatus = document.getElementById("actionQueueStatus");
     const actionQueueList = document.getElementById("actionQueueList");
+    const decisionCockpitStatus = document.getElementById("decisionCockpitStatus");
+    const decisionCockpitList = document.getElementById("decisionCockpitList");
     const readingStatusOptions = [
       ["ok", "OK"],
       ["needs_review", "k revizi"],
@@ -393,6 +395,7 @@
     const diagnosticsEndpoints = [
       ["Server health", "/api/server/health"],
       ["Hlavní status", "/api/status"],
+      ["Co teď?", "/api/decision-status"],
       ["Recovery", "/api/recovery/status"],
       ["Webové aplikace", "/api/web-apps"],
       ["Knihovna", "/api/library/list?category=other&limit=1"],
@@ -864,6 +867,7 @@
     let liveStatusRefreshInFlight = false;
     let quickNotesRefreshInFlight = false;
     let urgentRemindersRefreshInFlight = false;
+    let decisionCockpitRefreshInFlight = false;
     let emailIntakeMonitorInFlight = false;
     let lastMainRefreshStartedAt = 0;
     let lastCodexApprovalActive = false;
@@ -952,11 +956,26 @@
     }
 
     function refreshSecondaryStatus() {
+      refreshDecisionCockpit();
       refreshProjectsSummary();
       refreshQuantitativeSummary();
       refreshConsistencySummary();
       refreshQuickNotesSummary();
       refreshUrgentRemindersSummary();
+    }
+
+    async function refreshDecisionCockpit() {
+      if (decisionCockpitRefreshInFlight) return;
+      decisionCockpitRefreshInFlight = true;
+      try {
+        const data = await fetchJsonWithTimeout("/api/decision-status", 15000);
+        renderDecisionCockpit(data || {});
+      } catch (err) {
+        recordFrontendError(err);
+        decisionCockpitStatus.textContent = `Přehled „Co teď?“ se nepodařilo načíst: ${err}`;
+      } finally {
+        decisionCockpitRefreshInFlight = false;
+      }
     }
 
     async function refreshUrgentRemindersSummary() {
@@ -2023,6 +2042,59 @@
         : `Ranní stav: Samantha je vzhůru; ${stable.join(", ")}.`;
     }
 
+	    function renderDecisionCockpit(decision) {
+	      const items = Array.isArray(decision.items) ? decision.items.slice(0, 3) : [];
+	      const warning = decision.source_warning ? ` ${decision.source_warning}` : "";
+	      decisionCockpitStatus.textContent = `${decision.message || "Žádný aktuální krok."}${warning}`;
+	      decisionCockpitList.innerHTML = "";
+	      if (!items.length) {
+	        const empty = document.createElement("div");
+	        empty.className = "status-line";
+	        empty.textContent = "Nic akutního. Historický seznam je dostupný níže po rozbalení.";
+	        decisionCockpitList.appendChild(empty);
+	        return;
+	      }
+	      items.forEach((item) => {
+	        const card = document.createElement("article");
+	        const categoryClass = item.category === "blocks_now"
+	          ? "blocks-now"
+	          : item.category === "needs_decision" ? "needs-decision" : "do-soon";
+	        card.className = `decision-card ${categoryClass}`;
+
+	        const head = document.createElement("div");
+	        head.className = "decision-card-head";
+	        const category = document.createElement("span");
+	        category.className = "decision-category";
+	        category.textContent = item.category_label || "Další krok";
+	        const priority = document.createElement("span");
+	        priority.className = "project-priority";
+	        priority.textContent = `P${item.priority || "?"}`;
+	        head.appendChild(category);
+	        head.appendChild(priority);
+
+	        const title = document.createElement("div");
+	        title.className = "decision-title";
+	        title.textContent = item.title || "Doporučená kontrola";
+	        const reason = document.createElement("div");
+	        reason.className = "decision-reason";
+	        reason.textContent = item.reason || "";
+	        const evidence = document.createElement("div");
+	        evidence.className = `decision-evidence ${item.freshness || "unknown"}`;
+	        evidence.textContent = `Zdroj: ${item.source || "nezjištěno"} · ${item.freshness_label || "stáří nezjištěno"}`;
+
+	        card.appendChild(head);
+	        card.appendChild(title);
+	        card.appendChild(reason);
+	        card.appendChild(evidence);
+	        const button = actionQueueButton({
+	          action: item.navigation || "",
+	          action_label: item.navigation_label || "Otevřít přehled"
+	        });
+	        if (button) card.appendChild(button);
+	        decisionCockpitList.appendChild(card);
+	      });
+	    }
+
 	    function renderActionQueue(queue) {
 	      const items = queue.items || [];
 	      const counts = queue.counts || {};
@@ -2085,6 +2157,8 @@
           openUrgentRemindersModal();
 	        } else if (action === "open_recovery") {
 	          openRecoveryModal();
+	        } else if (action === "open_projects") {
+	          openProjectsModal();
 	        }
 	      });
 	      return button;

@@ -3289,10 +3289,32 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("open_scandocu", [item["action"] for item in queue["items"]])
         self.assertEqual(queue["counts"]["priority_1"], 3)
 
+    def test_decision_cockpit_status_combines_live_queue_and_memory_truth_read_only(self) -> None:
+        truth = SimpleNamespace(rows=(), generated_at="2026-08-18T12:00:00+02:00")
+        expected = {"ok": True, "read_only": True, "items": []}
+        with (
+            patch("app.cockpit.action_queue_status", return_value={"items": []}) as queue_mock,
+            patch("app.cockpit.run_memory_truth_audit", return_value=truth) as audit_mock,
+            patch("app.cockpit.load_handoff_next_steps", return_value={}) as handoff_mock,
+            patch("app.cockpit.build_decision_cockpit", return_value=expected) as build_mock,
+        ):
+            result = cockpit_module.decision_cockpit_status()
+
+        self.assertEqual(result, expected)
+        queue_mock.assert_called_once_with(limit=12)
+        audit_mock.assert_called_once_with(project_root=cockpit_module.PROJECT_ROOT)
+        handoff_mock.assert_called_once_with(truth, project_root=cockpit_module.PROJECT_ROOT)
+        self.assertEqual(build_mock.call_args.kwargs["action_queue"], {"items": []})
+        self.assertIs(build_mock.call_args.kwargs["memory_truth"], truth)
+
     def test_cockpit_html_contains_document_work_controls(self) -> None:
         self.assertIn("Dnes", COCKPIT_HTML)
         self.assertIn("Stav", COCKPIT_HTML)
         self.assertIn("Rychlé akce", COCKPIT_HTML)
+        self.assertIn("Co teď?", COCKPIT_HTML)
+        self.assertIn("decisionCockpitList", COCKPIT_HTML)
+        self.assertIn("/api/decision-status", COCKPIT_HTML)
+        self.assertIn("Úplný katalog provozních položek", COCKPIT_HTML)
         self.assertIn("janickaBtn", COCKPIT_HTML)
         self.assertIn("Janička", COCKPIT_HTML)
         self.assertIn("janickaModal", COCKPIT_HTML)
@@ -3696,7 +3718,7 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("frontendHealthPanel", COCKPIT_HTML)
         self.assertIn("frontendHealthJs", COCKPIT_HTML)
         self.assertIn("JS se zatím nespustil", COCKPIT_HTML)
-        self.assertIn("Co teď dělat", COCKPIT_HTML)
+        self.assertIn("Co teď?", COCKPIT_HTML)
         self.assertIn("actionQueueStatus", COCKPIT_HTML)
         self.assertIn("actionQueueList", COCKPIT_HTML)
         self.assertIn("renderActionQueue", COCKPIT_HTML)

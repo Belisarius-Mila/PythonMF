@@ -83,10 +83,15 @@
 		      <div id="urgentReminderAlertList" class="urgent-alert-list"></div>
 		    </section>
 		    <section>
-		      <h2>Co teď dělat</h2>
-		      <div class="body">
-		        <div id="actionQueueStatus" class="status-line">Načítám doporučené akce...</div>
-		        <div id="actionQueueList" class="action-queue"></div>
+		      <h2>Co teď?</h2>
+		      <div class="body decision-cockpit">
+		        <div id="decisionCockpitStatus" class="status-line">Načítám tři nejdůležitější kroky...</div>
+		        <div id="decisionCockpitList" class="decision-list" aria-live="polite"></div>
+		        <details class="decision-catalog">
+		          <summary>Úplný katalog provozních položek</summary>
+		          <div id="actionQueueStatus" class="status-line">Načítám doporučené akce...</div>
+		          <div id="actionQueueList" class="action-queue"></div>
+		        </details>
 		      </div>
 		    </section>
         <section id="codexApprovalCard" class="voice-card warn hidden" aria-live="assertive">

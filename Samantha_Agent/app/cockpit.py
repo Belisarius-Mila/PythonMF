@@ -300,6 +300,8 @@ from app.cockpit_status_service import (
     build_cockpit_status,
     build_server_health_status,
 )
+from app.decision_cockpit import build_decision_cockpit, load_handoff_next_steps
+from app.memory_truth_audit import run_memory_truth_audit
 from app.reminders.query_tools import mark_reminder_done_text
 from app.reminders.store import (
     DEFAULT_REMINDERS_PATH,
@@ -5097,6 +5099,31 @@ def action_queue_status(
     return {"ok": True, "items": limited_items, "counts": counts, "message": message}
 
 
+def decision_cockpit_status() -> dict[str, Any]:
+    """Return three read-only next steps with source and evidence age."""
+
+    generated_at = datetime.now().astimezone().isoformat(timespec="seconds")
+    action_queue = action_queue_status(limit=12)
+    memory_truth = None
+    handoff_next_steps: dict[str, str] = {}
+    memory_truth_error = ""
+    try:
+        memory_truth = run_memory_truth_audit(project_root=PROJECT_ROOT)
+        handoff_next_steps = load_handoff_next_steps(
+            memory_truth,
+            project_root=PROJECT_ROOT,
+        )
+    except (OSError, RuntimeError, ValueError):
+        memory_truth_error = "Audit projektové paměti se nepodařilo načíst."
+    return build_decision_cockpit(
+        action_queue=action_queue,
+        memory_truth=memory_truth,
+        handoff_next_steps=handoff_next_steps,
+        generated_at=generated_at,
+        memory_truth_error=memory_truth_error,
+    )
+
+
 def kind_rank(kind: str) -> int:
     ranks = {
         "urgent_reminder": 0,
@@ -9576,6 +9603,9 @@ class CockpitServer:
                     return
                 if parsed.path == "/api/live-status":
                     self.respond_json(cockpit_live_status())
+                    return
+                if parsed.path == "/api/decision-status":
+                    self.respond_json(decision_cockpit_status())
                     return
                 if parsed.path == "/api/r2-adam/status":
                     self.respond_json(

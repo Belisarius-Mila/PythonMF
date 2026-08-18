@@ -1,42 +1,34 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Stav znovu ověřen: 2026-08-16 08:17 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-18 08:18 CEST
 
 ### Hotovo
-- Nový nezávislý audit `AuditCockpit56_2.txt` vyhodnotil současný Cockpit jako
-  provozně zralý se silnou bezpečnostní a capability vrstvou.
-- Capability audit eviduje 83/83 mapovaných agent tools a POST registry 88 akcí.
-- Živý přednasazovací smoke prošel 5/5.
+- Cockpit nyní vybírá nejvýše tři aktuální kroky, vysvětluje jejich prioritu a ukazuje zdroj i stáří důkazu
 
 ### Otevřeno
-- Oprava autosave matematiky je v lokálním main, ale při auditu ještě nebyla v
-  běžícím code stampu; její řízené nasazení je následující krok tohoto úkolu.
-- Interaktivní vizuální audit nebyl v této relaci dostupný; ruční Mac/iPhone
-  přejímka zůstává otevřená.
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
 
 ### Rizika
-- Největší architektonické riziko je rozhodovací přetížení hlavní stránky a
-  koncentrace frontendu i HTTP routingu do velkých souborů.
-- Poslední úspěšná záloha byla při auditu starší než tři dny.
+- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
 
 ### Další krok
-- Řízeně nasadit autosave WIP, ověřit code stamp a smoke 5/5; potom provést
-  pouze dry-run bez mazání.
+- Převzít checkpoint, nasadit Cockpit a vizuálně ověřit přehled na Macu a iPhonu
 
 ### Rozhodnutí
-- Cockpit se nebude plošně přepisovat. Další vývoj má nejdřív zlepšit výběr a
-  vysvětlení nejvýše tří skutečných dalších kroků a potom po malých doménách
-  rozdělovat frontend a routing při zachování bezpečnostních kontraktů.
+- Decision Cockpit D4 zůstává read-only a povoluje pouze navigaci do existujících přehledů
 
 ### Navrhované další kroky
-- Decision Cockpit D4 jako read-only vrstva nad živými audity a pamětí.
-- První modulární řez vést přes health/recovery/autosave.
+- Vyjmout health, recovery a autosave frontend do prvního samostatného modulu
+- Doplnit přímé kontraktní testy nejrizikovějších POST akcí
 
 ### Technický stav checkpointu
-- Před nasazením běžel code stamp `78a8f396027ad740`, aktuální main měl
-  `2360eef3753bca5a`; rozdíl odpovídal čekajícímu WIP.
-- Oprava autosave reportu má doloženou plnou bránu 1414/1414.
+- Změna je otestovaná (1432 testů).
+- Git před checkpointem: lokální `main` na `95e0070c814f`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `68394506d1b2` · je starší než ověřený main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-17T20:37:56+00:00.
+- Read-only živý stav: main=`aligned`, deployment=`verified_other_main`, runtime=`connected`.
+- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
+- Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: Cockpit / hlavní architektura
@@ -122,3 +114,15 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Běžící Cockpit je serverově ověřený na `91dc700`; smoke 5/5.
+
+### Automatický checkpoint 2026-08-18 08:18 CEST
+
+- Pracovní proud: `project-cockpit`
+- Hotovo: Cockpit nyní vybírá nejvýše tři aktuální kroky, vysvětluje jejich prioritu a ukazuje zdroj i stáří důkazu
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Rizika: Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: plná Cockpit brána: 1432 testů, 304.9 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (11): `Samantha_Agent/app/cockpit.py`, `Samantha_Agent/app/frontend/cockpit/app.js`, `Samantha_Agent/app/frontend/cockpit/page.html`, `Samantha_Agent/app/frontend/cockpit/styles.css`, `Samantha_Agent/scripts/cockpit_quality_gate.py`, `Samantha_Agent/tests/test_capability_audit.py`, `Samantha_Agent/tests/test_cockpit.py`, `Samantha_Agent/tests/test_cockpit_frontend.py`, `Samantha_Agent/tests/test_cockpit_quality_gate.py`, `Samantha_Agent/app/decision_cockpit.py`, `Samantha_Agent/tests/test_decision_cockpit.py`
+- Commit: `Add read-only Decision Cockpit D4`
+- Další krok: Převzít checkpoint, nasadit Cockpit a vizuálně ověřit přehled na Macu a iPhonu

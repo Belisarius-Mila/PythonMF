@@ -1,35 +1,34 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Stav znovu ověřen: 2026-08-07 13:59 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-18 08:18 CEST
 
 ### Hotovo
-- Přímé Tailscale doručení důležitých připomenutí i Quick Notes funguje a iCloud
-  zůstává fallbackem.
-- VocabularyFR, VocabularyIT a MultiLO mají funkční lokální vstupy z Cockpitu.
-- Servisní souhrn dokumentového trezoru ukazuje aktuální stav před historií.
+- Cockpit nyní vybírá nejvýše tři aktuální kroky, vysvětluje jejich prioritu a ukazuje zdroj i stáří důkazu
 
 ### Otevřeno
-- Lokální `main` obsahuje jeden novější knihovní commit než běžící Cockpit;
-  nejde o blokátor Cockpit architektury.
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
 
 ### Rizika
-- Žádné další doložené provozní riziko.
+- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
 
 ### Další krok
-- Bez okamžité architektonické změny; pokračovat podle konkrétní uživatelské
-  zkušenosti nebo provozní chyby.
+- Převzít checkpoint, nasadit Cockpit a vizuálně ověřit přehled na Macu a iPhonu
 
 ### Rozhodnutí
-- Přímé Tailscale doručení je primární cesta a iCloud soubory zůstávají
-  bezpečným fallbackem; servisní historie nemá přebíjet aktuální pracovní stav.
+- Decision Cockpit D4 zůstává read-only a povoluje pouze navigaci do existujících přehledů
 
 ### Navrhované další kroky
-- Při dalším UI auditu oddělit aktuální úkol od historických technických detailů.
+- Vyjmout health, recovery a autosave frontend do prvního samostatného modulu
+- Doplnit přímé kontraktní testy nejrizikovějších POST akcí
 
 ### Technický stav checkpointu
-- Běžící Cockpit je serverově ověřený na `91dc700`; smoke prošel 5/5.
-- Oba profilové workspaces byly při posledním nasazení čisté a zarovnané.
+- Změna je otestovaná (1432 testů).
+- Git před checkpointem: lokální `main` na `95e0070c814f`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `68394506d1b2` · je starší než ověřený main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-17T20:37:56+00:00.
+- Read-only živý stav: main=`aligned`, deployment=`verified_other_main`, runtime=`connected`.
+- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
+- Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Cockpit / hlavní architektura
@@ -211,3 +210,29 @@ Technický důkaz:
 - Capability audit evidoval 83/83 mapovaných agent tools a 88 POST akcí.
 - Audit výslovně zachoval otevřenou vizuální přejímku, protože interaktivní
   prohlížeč nebyl v relaci dostupný.
+
+### 2026-08-18 08:18 CEST – Cockpit nyní vybírá nejvýše tři aktuální kroky, vysvětluje jejich prioritu a ukazuje zdroj i stáří důkazu
+
+Hotovo:
+- Cockpit nyní vybírá nejvýše tři aktuální kroky, vysvětluje jejich prioritu a ukazuje zdroj i stáří důkazu
+
+Otevřeno:
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+
+Rizika:
+- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
+
+Rozhodnutí:
+- Decision Cockpit D4 zůstává read-only a povoluje pouze navigaci do existujících přehledů
+
+Další krok:
+- Převzít checkpoint, nasadit Cockpit a vizuálně ověřit přehled na Macu a iPhonu
+
+Navrhované další kroky:
+- Vyjmout health, recovery a autosave frontend do prvního samostatného modulu
+- Doplnit přímé kontraktní testy nejrizikovějších POST akcí
+
+Technický důkaz:
+- plná Cockpit brána: 1432 testů, 304.9 s, výsledek OK.
+- Pracovní proud: `project-cockpit`.
+- Read-only živý stav při checkpointu: main=`aligned`, deployment=`verified_other_main`, runtime=`connected`.

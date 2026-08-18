@@ -112,12 +112,15 @@ async def second():
         self.assertIn("tests.test_human_adam_profiles", TEST_MODULES)
         self.assertIn("tests.test_janicka_r2_documents", TEST_MODULES)
         self.assertIn("tests.test_cockpit_quality_gate", TEST_MODULES)
+        self.assertIn("tests.test_capability_audit", TEST_MODULES)
+        self.assertIn("tests.test_decision_cockpit", TEST_MODULES)
         self.assertIn("tests.test_command_cheatsheet", TEST_MODULES)
         self.assertNotIn("app/adam_service.py", COMPILE_PATHS)
         self.assertNotIn("tests.test_adam_service", TEST_MODULES)
         self.assertFalse((PROJECT_ROOT / "app" / "adam_service.py").exists())
         self.assertFalse((PROJECT_ROOT / "tests" / "test_adam_service.py").exists())
         self.assertIn("app/codex_approval_state.py", COMPILE_PATHS)
+        self.assertIn("app/decision_cockpit.py", COMPILE_PATHS)
         self.assertIn("app/communication/human_adam_profiles.py", COMPILE_PATHS)
         self.assertIn(
             "app/communication/janicka_r2_cockpit.py",

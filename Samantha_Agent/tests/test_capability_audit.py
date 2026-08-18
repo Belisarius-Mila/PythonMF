@@ -3,6 +3,7 @@ from __future__ import annotations
 import unittest
 
 from app.capability_audit import format_samantha_capability_audit
+from app.capabilities import all_capabilities
 
 
 class CapabilityAuditTests(unittest.TestCase):
@@ -15,7 +16,10 @@ class CapabilityAuditTests(unittest.TestCase):
         self.assertIn("Memory and system reports", text)
         self.assertIn("Document vault", text)
         self.assertIn("No unmapped agent tools.", text)
-        self.assertIn("Capability registry records: 86", text)
+        self.assertIn(
+            f"Capability registry records: {len(all_capabilities())}",
+            text,
+        )
         self.assertIn("High-risk capability records: 16", text)
         self.assertIn("Registry-covered agent tools: 83/", text)
         self.assertIn("Capability registry: OK", text)
