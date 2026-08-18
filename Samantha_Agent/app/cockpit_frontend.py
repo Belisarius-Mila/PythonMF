@@ -11,6 +11,9 @@ FRONTEND_PAGE_IDS = (
     "email_processing",
     "cockpit",
 )
+FRONTEND_JAVASCRIPT_MODULES = {
+    "cockpit": ("health_recovery_autosave.js",),
+}
 
 
 class CockpitFrontendError(RuntimeError):
@@ -29,7 +32,12 @@ def load_frontend_page(
     page_root = frontend_root / clean_id
     template = _read_asset(page_root / "page.html")
     styles = _read_asset(page_root / "styles.css")
-    javascript = _read_asset(page_root / "app.js")
+    javascript_assets = [
+        _read_asset(page_root / module_name)
+        for module_name in FRONTEND_JAVASCRIPT_MODULES.get(clean_id, ())
+    ]
+    javascript_assets.append(_read_asset(page_root / "app.js"))
+    javascript = "\n".join(javascript_assets)
 
     if template.count(CSS_MARKER) != 1 or template.count(JAVASCRIPT_MARKER) != 1:
         raise CockpitFrontendError(

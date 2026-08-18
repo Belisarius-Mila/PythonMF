@@ -3480,7 +3480,7 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("Čekám na kontroly", COCKPIT_HTML)
         self.assertIn("openDiagnosticsModal", COCKPIT_HTML)
         self.assertIn("renderDiagnosticsEndpointRows", COCKPIT_HTML)
-        self.assertIn("diagnosticsEndpoints", COCKPIT_HTML)
+        self.assertIn("DIAGNOSTICS_ENDPOINTS", COCKPIT_HTML)
         self.assertIn("/api/server/health", COCKPIT_HTML)
         self.assertIn("/api/web-apps", COCKPIT_HTML)
         self.assertIn("dashboardRestartBtn", COCKPIT_HTML)

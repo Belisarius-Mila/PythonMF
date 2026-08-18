@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import hashlib
+import json
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -10,10 +12,12 @@ from app.cockpit_frontend import (
     COCKPIT_HTML,
     EMAIL_ARCHIVE_HTML,
     EMAIL_PROCESSING_HTML,
+    FRONTEND_JAVASCRIPT_MODULES,
     FRONTEND_ROOT,
     CockpitFrontendError,
     load_frontend_page,
 )
+from scripts.cockpit_quality_gate import node_binary
 
 
 EXPECTED_PAGES = {
@@ -31,9 +35,9 @@ EXPECTED_PAGES = {
     ),
     "cockpit": (
         COCKPIT_HTML,
-        454733,
-        9161,
-        "dafedef13b972c32bcf228e1a272555f00c9bb3d4229faecd279121f139ef100",
+        457601,
+        9253,
+        "b47b20dacbc6c5a89005f36948d2619a1d05814471ea7e5a97d676c022b11ebf",
     ),
 }
 
@@ -56,6 +60,10 @@ class CockpitFrontendContractTests(unittest.TestCase):
                 template = (page_dir / "page.html").read_text(encoding="utf-8")
                 styles = (page_dir / "styles.css").read_text(encoding="utf-8")
                 javascript = (page_dir / "app.js").read_text(encoding="utf-8")
+                modules = [
+                    (page_dir / module_name).read_text(encoding="utf-8")
+                    for module_name in FRONTEND_JAVASCRIPT_MODULES.get(page_id, ())
+                ]
 
                 self.assertEqual(template.count("{{SAMANTHA_CSS}}"), 1)
                 self.assertEqual(template.count("{{SAMANTHA_JAVASCRIPT}}"), 1)
@@ -63,6 +71,9 @@ class CockpitFrontendContractTests(unittest.TestCase):
                 self.assertNotIn("{{SAMANTHA_JAVASCRIPT}}", styles)
                 self.assertNotIn("{{SAMANTHA_CSS}}", javascript)
                 self.assertNotIn("{{SAMANTHA_JAVASCRIPT}}", javascript)
+                for module in modules:
+                    self.assertNotIn("{{SAMANTHA_CSS}}", module)
+                    self.assertNotIn("{{SAMANTHA_JAVASCRIPT}}", module)
                 self.assertEqual(load_frontend_page(page_id), rendered)
 
     def test_cockpit_uses_frontend_loader_instead_of_embedded_pages(self) -> None:
@@ -85,6 +96,92 @@ class CockpitFrontendContractTests(unittest.TestCase):
         ):
             with self.subTest(expected=expected):
                 self.assertIn(expected, COCKPIT_HTML)
+
+    def test_health_recovery_autosave_is_an_extracted_frontend_module(self) -> None:
+        page_dir = FRONTEND_ROOT / "cockpit"
+        app_source = (page_dir / "app.js").read_text(encoding="utf-8")
+        module_source = (page_dir / "health_recovery_autosave.js").read_text(encoding="utf-8")
+
+        self.assertEqual(
+            FRONTEND_JAVASCRIPT_MODULES["cockpit"],
+            ("health_recovery_autosave.js",),
+        )
+        self.assertIn("createHealthRecoveryAutosaveFrontend", module_source)
+        self.assertIn("async function runFrontendHealthCheck()", module_source)
+        self.assertIn("async function openRecoveryModal()", module_source)
+        self.assertIn("async function previewAutosaveCleanup(button)", module_source)
+        self.assertIn("async function applyAutosaveCleanup()", module_source)
+        self.assertIn('confirmation_text: "SMAZAT STARE AUTOSAVE"', module_source)
+        self.assertNotIn("async function runFrontendHealthCheck()", app_source)
+        self.assertNotIn("async function openRecoveryModal()", app_source)
+        self.assertNotIn("function formatAutosaveCleanupPlan(data)", app_source)
+        self.assertIn("window.SamanthaHealthRecoveryAutosave.create", app_source)
+        self.assertLess(
+            COCKPIT_HTML.index("createHealthRecoveryAutosaveFrontend"),
+            COCKPIT_HTML.index("window.SamanthaHealthRecoveryAutosave.create"),
+        )
+
+    def test_health_recovery_autosave_module_runs_preview_through_injected_api(self) -> None:
+        module_path = FRONTEND_ROOT / "cockpit" / "health_recovery_autosave.js"
+        script = f"""
+global.window = {{setTimeout, clearTimeout, confirm: () => false}};
+global.document = {{createElement: () => ({{}})}};
+global.performance = {{now: () => 0}};
+require({json.dumps(str(module_path))});
+
+const previewButton = {{disabled: false}};
+const applyButton = {{disabled: true}};
+const status = {{textContent: ""}};
+const output = {{textContent: ""}};
+const servicePanel = {{open: false}};
+const calls = [];
+const messages = [];
+const errors = [];
+const api = window.SamanthaHealthRecoveryAutosave.create({{
+  elements: {{
+    autosaveCleanupApplyBtn: applyButton,
+    autosaveCleanupOutput: output,
+    autosaveCleanupPreviewBtn: previewButton,
+    autosaveCleanupStatus: status,
+    dashboardAutosaveCleanupBtn: previewButton,
+    servicePanel,
+  }},
+  postJson: async (url, payload) => {{
+    calls.push({{url, payload}});
+    return {{
+      message: "Dry-run hotov.",
+      plan: {{delete_count: 2, logical_gib: 1.25, allocated_gib: 0.75, keep_latest_snapshots: 12}},
+      runtime: {{watcher_count: 1, disk_free_gib: 40, disk_state: "ok"}},
+      disk_measurement: {{free_change_gib: null}},
+    }};
+  }},
+  recordFrontendError: (error) => errors.push(String(error)),
+  showMessage: (message) => messages.push(message),
+}});
+
+(async () => {{
+  await api.previewAutosaveCleanup(previewButton);
+  if (calls.length !== 1 || calls[0].url !== "/api/session-autosave/cleanup") throw new Error("wrong endpoint");
+  if (calls[0].payload.apply !== false || calls[0].payload.keep_latest_snapshots !== 12) throw new Error("wrong preview payload");
+  if (previewButton.disabled || applyButton.disabled) throw new Error("wrong button state");
+  if (!servicePanel.open || status.textContent !== "Dry-run hotov.") throw new Error("wrong panel state");
+  if (!output.textContent.includes("Logická velikost kandidátů: 1.250 GiB")) throw new Error("missing logical metric");
+  if (!output.textContent.includes("Fyzicky alokované bloky kandidátů: 0.750 GiB")) throw new Error("missing allocated metric");
+  if (!output.textContent.includes("Skutečná změna volného místa: změří se až po potvrzeném úklidu")) throw new Error("missing measured delta");
+  if (errors.length || messages[0] !== "Dry-run hotov.") throw new Error("unexpected result");
+  process.stdout.write("OK");
+}})().catch((error) => {{ console.error(error); process.exitCode = 1; }});
+"""
+        completed = subprocess.run(
+            [node_binary(), "-"],
+            input=script,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        self.assertEqual(completed.stdout, "OK")
 
     def test_email_archive_frontend_is_a_human_readable_mailbox(self) -> None:
         for expected in (
@@ -138,6 +235,7 @@ class CockpitFrontendFailureTests(unittest.TestCase):
                 encoding="utf-8",
             )
             (page_dir / "styles.css").write_text("", encoding="utf-8")
+            (page_dir / "health_recovery_autosave.js").write_text("", encoding="utf-8")
             (page_dir / "app.js").write_text("", encoding="utf-8")
 
             with self.assertRaises(CockpitFrontendError):
