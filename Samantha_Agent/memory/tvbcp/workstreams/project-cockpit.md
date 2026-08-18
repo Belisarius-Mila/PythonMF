@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-18 11:03 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-18 13:06 CEST
 
 ### Hotovo
-- Health, Recovery a hlavní statusové GET cesty mají samostatný backendový dispatch bez změny veřejných kontraktů.
+- Všechny zapisovací a odesílací POST akce mají nyní přímo dohledatelný testovací kontrakt.
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
@@ -15,18 +15,18 @@
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Vytvořit checkpoint, nasadit Cockpit a ověřit pět vyčleněných endpointů.
+- Vytvořit checkpoint, nasadit Cockpit a ověřit běžný smoke test.
 
 ### Rozhodnutí
-- Health, Recovery a status tvoří první samostatnou read-only routing doménu Cockpitu.
+- Akce typu private_write a external_send musí mít v POST registru doloženou úroveň direct.
 
 ### Navrhované další kroky
-- Po živém ověření pokračovat bodem 6 auditu a doplnit přímé testy nejrizikovějších non-direct POST akcí.
+- Osm zbývajících nízkorizikových non-direct položek řešit pouze při jejich konkrétní změně nebo samostatném auditu.
 
 ### Technický stav checkpointu
-- Změna je otestovaná (1440 testů).
-- Git před checkpointem: lokální `main` na `1d946b7d5596`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `1d946b7d5596` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-18T08:39:12+00:00.
+- Změna je otestovaná (1444 testů).
+- Git před checkpointem: lokální `main` na `b7caf4dd1c28`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `b7caf4dd1c28` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-18T10:40:39+00:00.
 - Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -288,5 +288,32 @@ Navrhované další kroky:
 
 Technický důkaz:
 - plná Cockpit brána: 1440 testů, 312.7 s, výsledek OK.
+- Pracovní proud: `project-cockpit`.
+- Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+
+### 2026-08-18 13:06 CEST – Všechny zapisovací a odesílací POST akce mají nyní přímo dohledatelný testovací kontrakt.
+
+Hotovo:
+- Všechny zapisovací a odesílací POST akce mají nyní přímo dohledatelný testovací kontrakt.
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+
+Otevřeno:
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
+
+Rizika:
+- Žádné další doložené provozní riziko.
+
+Rozhodnutí:
+- Akce typu private_write a external_send musí mít v POST registru doloženou úroveň direct.
+
+Další krok:
+- Vytvořit checkpoint, nasadit Cockpit a ověřit běžný smoke test.
+
+Navrhované další kroky:
+- Osm zbývajících nízkorizikových non-direct položek řešit pouze při jejich konkrétní změně nebo samostatném auditu.
+
+Technický důkaz:
+- plná Cockpit brána: 1444 testů, 302.1 s, výsledek OK.
 - Pracovní proud: `project-cockpit`.
 - Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.

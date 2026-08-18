@@ -9018,7 +9018,7 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "risk": "private_write",
         "confirmation": "helper_exact_phrase",
         "handler_name": "mark_reminder_done_action",
-        "test_level": "ui_presence",
+        "test_level": "direct",
     },
     {
         "path": "/api/reminders/cancel-payment",
@@ -9026,7 +9026,7 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "risk": "private_write",
         "confirmation": "none_backend",
         "handler_name": "cancel_payment_reminder_action",
-        "test_level": "indirect",
+        "test_level": "direct",
     },
     {
         "path": "/api/quick-notes/deliver",
@@ -9050,7 +9050,7 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "risk": "private_write",
         "confirmation": "none_backend",
         "handler_name": "urgent_reminder_done_action",
-        "test_level": "ui_presence",
+        "test_level": "direct",
     },
     {
         "path": "/api/consistency/resolve-finding",
@@ -9106,7 +9106,7 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "risk": "private_write",
         "confirmation": "none_backend",
         "handler_name": "set_document_reading_status_action",
-        "test_level": "ui_presence",
+        "test_level": "direct",
     },
     {
         "path": "/api/library/archive",
@@ -9338,7 +9338,7 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "risk": "private_write",
         "confirmation": "prepare_only",
         "handler_name": "library_prepare_pdf_export_action",
-        "test_level": "ui_presence",
+        "test_level": "direct",
     },
     {
         "path": "/api/library/export/send",
@@ -9346,7 +9346,7 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "risk": "external_send",
         "confirmation": "exact_phrase",
         "handler_name": "library_send_pdf_export_action",
-        "test_level": "ui_presence",
+        "test_level": "direct",
     },
     {
         "path": "/api/documents/classification-metadata",
@@ -9394,7 +9394,7 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "risk": "private_write",
         "confirmation": "none_backend",
         "handler_name": "save_email_processing_decision",
-        "test_level": "ui_presence",
+        "test_level": "direct",
     },
     {
         "path": "/api/email-processing/read-message",

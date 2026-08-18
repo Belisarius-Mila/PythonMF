@@ -40,7 +40,9 @@ from app.cockpit import (
     library_book_isbn_photo_action,
     library_attach_image_action,
     library_delete_article_action,
+    library_prepare_pdf_export_action,
     library_remove_attachment_action,
+    library_send_pdf_export_action,
     library_update_article_action,
     library_update_attachment_action,
     lekarna_admin_page_html,
@@ -211,6 +213,41 @@ class CockpitTests(unittest.TestCase):
             self.assertTrue(item["confirmation"].strip())
             self.assertTrue(item["handler_name"].strip())
             self.assertTrue(hasattr(cockpit_module, item["handler_name"]), item["handler_name"])
+
+    def test_audited_high_risk_post_actions_have_discoverable_direct_tests(self) -> None:
+        audited_contracts = {
+            "/api/reminders/done": "test_mark_reminder_done_action_changes_selected_reminder_only",
+            "/api/reminders/cancel-payment": (
+                "test_cancel_payment_reminder_action_attaches_email_evidence_and_clears_conflict"
+            ),
+            "/api/urgent-reminders/done": (
+                "test_urgent_reminder_done_action_hides_open_item_without_deleting_record"
+            ),
+            "/api/documents/reading-status": (
+                "test_set_document_reading_status_updates_index_manifest_and_audit_log"
+            ),
+            "/api/library/export/prepare": (
+                "test_library_prepare_pdf_export_action_passes_exact_payload"
+            ),
+            "/api/library/export/send": (
+                "test_library_send_pdf_export_action_preserves_exact_confirmation"
+            ),
+            "/api/email-processing/decision": (
+                "test_email_processing_decision_is_saved_privately"
+            ),
+        }
+        cards = {item["path"]: item for item in COCKPIT_POST_ACTIONS}
+        non_direct_high_risk = [
+            item["path"]
+            for item in COCKPIT_POST_ACTIONS
+            if item["risk"] in {"external_send", "private_write"}
+            and item["test_level"] != "direct"
+        ]
+
+        self.assertEqual([], non_direct_high_risk)
+        for path, test_name in audited_contracts.items():
+            self.assertEqual(cards[path]["test_level"], "direct")
+            self.assertTrue(callable(getattr(type(self), test_name, None)), test_name)
 
     def test_library_reextract_preview_action_returns_only_redacted_metrics(self) -> None:
         safe_result = {
@@ -1045,6 +1082,78 @@ class CockpitTests(unittest.TestCase):
             article_id="article-1",
             read_state="to_read",
             note="Vrátit se k tomu.",
+        )
+
+    def test_library_prepare_pdf_export_action_passes_exact_payload(self) -> None:
+        expected = {
+            "ok": True,
+            "status": "prepared",
+            "export_id": "export-1",
+        }
+        with patch(
+            "app.cockpit.prepare_article_pdf_export",
+            return_value=expected,
+        ) as prepare_mock:
+            result = library_prepare_pdf_export_action(
+                {
+                    "article_id": "article-1",
+                    "recipient_email": "reader@example.test",
+                    "ignored": "not-forwarded",
+                }
+            )
+
+        self.assertEqual(result, expected)
+        prepare_mock.assert_called_once_with(
+            article_id="article-1",
+            recipient_email="reader@example.test",
+        )
+
+    def test_library_send_pdf_export_action_preserves_exact_confirmation(self) -> None:
+        expected = {
+            "ok": True,
+            "status": "sent",
+            "export_id": "export-1",
+        }
+        with patch(
+            "app.cockpit.send_article_pdf_export",
+            return_value=expected,
+        ) as send_mock:
+            result = library_send_pdf_export_action(
+                {
+                    "export_id": "export-1",
+                    "user_confirmed": True,
+                    "confirmation_text": "Potvrzuji odeslání exportu export-1",
+                    "ignored": "not-forwarded",
+                }
+            )
+
+        self.assertEqual(result, expected)
+        send_mock.assert_called_once_with(
+            export_id="export-1",
+            user_confirmed=True,
+            confirmation_text="Potvrzuji odeslání exportu export-1",
+        )
+
+    def test_library_send_pdf_export_action_keeps_validation_fail_closed(self) -> None:
+        with patch(
+            "app.cockpit.send_article_pdf_export",
+            side_effect=ValueError("Přesné potvrzení nesouhlasí."),
+        ) as send_mock:
+            result = library_send_pdf_export_action(
+                {
+                    "export_id": "export-1",
+                    "user_confirmed": False,
+                    "confirmation_text": "ano",
+                }
+            )
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["error"], "invalid_send")
+        self.assertIn("Přesné potvrzení", result["message"])
+        send_mock.assert_called_once_with(
+            export_id="export-1",
+            user_confirmed=False,
+            confirmation_text="ano",
         )
 
     def test_lekarna_retire_preview_action_returns_confirmation_phrase(self) -> None:
