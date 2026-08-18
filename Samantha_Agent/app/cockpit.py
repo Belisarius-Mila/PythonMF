@@ -38,6 +38,10 @@ from app.cockpit_frontend import (
     EMAIL_ARCHIVE_HTML,
     EMAIL_PROCESSING_HTML,
 )
+from app.cockpit_readonly_routes import (
+    HEALTH_RECOVERY_STATUS_GET_PATHS,
+    build_health_recovery_status_dispatch,
+)
 from app.article_archive import (
     ATTACHMENT_CONFIRMATION_PHRASE,
     ATTACHMENT_REMOVE_CONFIRMATION_PHRASE,
@@ -9468,6 +9472,16 @@ class CockpitServer:
     def make_handler(self):
         cockpit_host = self.host
         cockpit_port = self.port
+        health_recovery_status_dispatch = build_health_recovery_status_dispatch(
+            status_loader=lambda: cockpit_status(),
+            live_status_loader=lambda: cockpit_live_status(),
+            decision_status_loader=lambda: decision_cockpit_status(),
+            server_health_loader=lambda: server_health_status(
+                host=cockpit_host,
+                port=cockpit_port,
+            ),
+            recovery_status_loader=lambda: recovery_center_status(),
+        )
 
         class Handler(BaseHTTPRequestHandler):
             server_version = "SamanthaCockpit/0.2"
@@ -9550,6 +9564,11 @@ class CockpitServer:
 
             def do_GET(self) -> None:  # noqa: N802
                 self.validate_request_access(require_origin=False)
+                if health_recovery_status_dispatch.dispatch(
+                    request_target=self.path,
+                    respond_json=self.respond_json,
+                ):
+                    return
                 parsed = urlparse(self.path)
                 if parsed.path == "/":
                     self.respond_html(COCKPIT_HTML)
@@ -9597,15 +9616,6 @@ class CockpitServer:
                     params = parse_qs(parsed.query)
                     purchase_id = params.get("purchase_id", [""])[0]
                     self.respond_purchase_pdf(purchase_id)
-                    return
-                if parsed.path == "/api/status":
-                    self.respond_json(cockpit_status())
-                    return
-                if parsed.path == "/api/live-status":
-                    self.respond_json(cockpit_live_status())
-                    return
-                if parsed.path == "/api/decision-status":
-                    self.respond_json(decision_cockpit_status())
                     return
                 if parsed.path == "/api/r2-adam/status":
                     self.respond_json(
@@ -9679,9 +9689,6 @@ class CockpitServer:
                         human_adam_github_batch_audit_action(service=HUMAN_ADAM)
                     )
                     return
-                if parsed.path == "/api/server/health":
-                    self.respond_json(server_health_status(host=cockpit_host, port=cockpit_port))
-                    return
                 if parsed.path == "/api/reminders":
                     self.respond_json(reminders_status())
                     return
@@ -9695,9 +9702,6 @@ class CockpitServer:
                     except (TypeError, ValueError):
                         limit = 12
                     self.respond_json(lekarna_import_photos_status(limit=limit))
-                    return
-                if parsed.path == "/api/recovery/status":
-                    self.respond_json(recovery_center_status())
                     return
                 if parsed.path == "/api/command-cheatsheet":
                     self.respond_json(load_command_cheatsheet())

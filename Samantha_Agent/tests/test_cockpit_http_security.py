@@ -62,6 +62,31 @@ class CockpitHttpSecurityTests(unittest.TestCase):
             self.assertEqual(headers.get(name), value)
         self.assertNotIn("Python", headers.get("Server", ""))
 
+    def test_health_recovery_status_dispatch_preserves_http_json_contracts(self) -> None:
+        routes = (
+            ("/api/status", "cockpit_status"),
+            ("/api/live-status", "cockpit_live_status"),
+            ("/api/decision-status", "decision_cockpit_status"),
+            ("/api/server/health", "server_health_status"),
+            ("/api/recovery/status", "recovery_center_status"),
+        )
+
+        with running_cockpit_server() as (host, port, _logger):
+            for path, provider_name in routes:
+                expected = {"ok": True, "routed_path": path}
+                with self.subTest(path=path), patch(
+                    f"app.cockpit.{provider_name}",
+                    return_value=expected,
+                ) as provider:
+                    status, payload, headers = request_json(host, port, "GET", path)
+                    self.assertEqual(status, 200)
+                    self.assertEqual(payload, expected)
+                    self.assertEqual(
+                        headers.get("Content-Type"),
+                        "application/json; charset=utf-8",
+                    )
+                    provider.assert_called_once()
+
     def test_command_cheatsheet_endpoint_is_read_only_text_data(self) -> None:
         with running_cockpit_server() as (host, port, _logger):
             status, payload, headers = request_json(host, port, "GET", "/api/command-cheatsheet")

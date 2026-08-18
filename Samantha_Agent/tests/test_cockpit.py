@@ -144,7 +144,8 @@ class CockpitTests(unittest.TestCase):
         start = source.index("def do_GET(self) -> None:")
         end = source.index("def do_POST(self) -> None:", start)
         do_get_source = source[start:end]
-        return re.findall(r'if parsed\.path == "([^"]+)":', do_get_source)
+        inline_routes = re.findall(r'if parsed\.path == "([^"]+)":', do_get_source)
+        return inline_routes + list(cockpit_module.HEALTH_RECOVERY_STATUS_GET_PATHS)
 
     def cockpit_do_get_prefix_routes(self) -> list[str]:
         source = Path(cockpit_module.__file__).read_text(encoding="utf-8")
@@ -495,6 +496,31 @@ class CockpitTests(unittest.TestCase):
         ]
 
         self.assertEqual([], missing)
+
+    def test_health_recovery_status_get_routes_use_small_readonly_dispatch(self) -> None:
+        source = Path(cockpit_module.__file__).read_text(encoding="utf-8")
+        start = source.index("def do_GET(self) -> None:")
+        end = source.index("def do_POST(self) -> None:", start)
+        do_get_source = source[start:end]
+
+        self.assertEqual(
+            set(cockpit_module.HEALTH_RECOVERY_STATUS_GET_PATHS),
+            {
+                "/api/status",
+                "/api/live-status",
+                "/api/decision-status",
+                "/api/server/health",
+                "/api/recovery/status",
+            },
+        )
+        self.assertTrue(
+            set(cockpit_module.HEALTH_RECOVERY_STATUS_GET_PATHS).issubset(
+                self.cockpit_do_get_routes()
+            )
+        )
+        self.assertIn("health_recovery_status_dispatch.dispatch(", do_get_source)
+        for path in cockpit_module.HEALTH_RECOVERY_STATUS_GET_PATHS:
+            self.assertNotIn(f'if parsed.path == "{path}":', do_get_source)
 
     def test_retired_appserver_panels_and_routes_are_absent(self) -> None:
         source = Path(cockpit_module.__file__).read_text(encoding="utf-8")

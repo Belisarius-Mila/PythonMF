@@ -58,6 +58,7 @@ class CockpitQualityGateTests(unittest.TestCase):
         required = {
             ".github/workflows/cockpit-quality-gate.yml",
             "Samantha_Agent/app/cockpit_frontend.py",
+            "Samantha_Agent/app/cockpit_readonly_routes.py",
             "Samantha_Agent/app/frontend/**",
             "Samantha_Agent/app/communication/**",
             "Samantha_Agent/tests/test_communication*.py",
@@ -99,8 +100,10 @@ async def second():
         self.assertIn("tests.test_cockpit", TEST_MODULES)
         self.assertIn("tests.test_cockpit_fast_feedback", TEST_MODULES)
         self.assertIn("tests.test_cockpit_frontend", TEST_MODULES)
+        self.assertIn("tests.test_cockpit_readonly_routes", TEST_MODULES)
         self.assertIn("scripts/cockpit_fast_feedback.py", COMPILE_PATHS)
         self.assertIn("app/cockpit_frontend.py", COMPILE_PATHS)
+        self.assertIn("app/cockpit_readonly_routes.py", COMPILE_PATHS)
         self.assertIn("app/email/archive_browser.py", COMPILE_PATHS)
         self.assertIn("tests.test_email_archive_browser", TEST_MODULES)
         self.assertIn("app/documents/archive_browser.py", COMPILE_PATHS)

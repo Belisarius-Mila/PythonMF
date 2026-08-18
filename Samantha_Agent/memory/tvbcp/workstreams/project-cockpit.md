@@ -1,32 +1,33 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-18 10:16 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-18 11:03 CEST
 
 ### Hotovo
-- Health, diagnostika, Recovery a autosave jsou oddělené od hlavního frontendového souboru bez změny jejich chování.
+- Health, Recovery a hlavní statusové GET cesty mají samostatný backendový dispatch bez změny veřejných kontraktů.
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
 - Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
 
 ### Rizika
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Vytvořit checkpoint, nasadit Cockpit a živě ověřit diagnostiku, Recovery a autosave.
+- Vytvořit checkpoint, nasadit Cockpit a ověřit pět vyčleněných endpointů.
 
 ### Rozhodnutí
-- Health, Recovery a autosave tvoří první samostatný frontendový modul Cockpitu.
+- Health, Recovery a status tvoří první samostatnou read-only routing doménu Cockpitu.
 
 ### Navrhované další kroky
-- Po živém ověření pokračovat bodem 5 auditu.
+- Po živém ověření pokračovat bodem 6 auditu a doplnit přímé testy nejrizikovějších non-direct POST akcí.
 
 ### Technický stav checkpointu
-- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `f8fbfe0eb83b`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `f8fbfe0eb83b` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-18T07:24:33+00:00.
-- Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
+- Změna je otestovaná (1440 testů).
+- Git před checkpointem: lokální `main` na `1d946b7d5596`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `1d946b7d5596` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-18T08:39:12+00:00.
+- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -262,3 +263,30 @@ Technický důkaz:
 - rychlá Cockpit brána syntaxe a whitespace: 4.5 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `project-cockpit`.
 - Read-only živý stav při checkpointu: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
+
+### 2026-08-18 11:03 CEST – Health, Recovery a hlavní statusové GET cesty mají samostatný backendový dispatch bez změny veřejných kontraktů.
+
+Hotovo:
+- Health, Recovery a hlavní statusové GET cesty mají samostatný backendový dispatch bez změny veřejných kontraktů.
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+
+Otevřeno:
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
+
+Rizika:
+- Žádné další doložené provozní riziko.
+
+Rozhodnutí:
+- Health, Recovery a status tvoří první samostatnou read-only routing doménu Cockpitu.
+
+Další krok:
+- Vytvořit checkpoint, nasadit Cockpit a ověřit pět vyčleněných endpointů.
+
+Navrhované další kroky:
+- Po živém ověření pokračovat bodem 6 auditu a doplnit přímé testy nejrizikovějších non-direct POST akcí.
+
+Technický důkaz:
+- plná Cockpit brána: 1440 testů, 312.7 s, výsledek OK.
+- Pracovní proud: `project-cockpit`.
+- Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
