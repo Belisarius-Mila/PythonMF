@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-18 17:05 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-19 22:05 CEST
 
 ### Hotovo
-- Revize dokumentů se nyní otevírá přímo v Cockpitu a funguje i přes Tailscale na iPhonu
+- Dokumentová práce v Cockpitu je sjednocená do jediné fronty; každý dokument se zobrazuje jen jednou a nabízí přímo potřebné akce pro čtení i metadata.
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
@@ -12,22 +12,21 @@
 - Lokální commity čekají na samostatný denní GitHub balíček.
 
 ### Rizika
-- Žádné další doložené provozní riziko.
+- Dotykový a vizuální test sjednocené fronty na skutečném iPhonu zatím neproběhl.
 
 ### Další krok
-- Po automatickém převzetí ověřit na iPhonu tlačítko Revidovat
+- Samostatně potvrdit nasazení do Cockpitu a potom na iPhonu ověřit jednu položku se čtením a jednu s doplněním metadat.
 
 ### Rozhodnutí
-- V tomto kroku nebylo přijato nové kanonické rozhodnutí.
+- Revize a klasifikace dokumentu jsou jeden uživatelský úkol; klasifikace už není samostatný duplicitní pracovní oddíl.
 
 ### Navrhované další kroky
-- Žádné další návrhy nad rámec bezprostředního kroku.
+- Podle živého iPhonového testu upravit jen konkrétní nejasnost, nevracet další paralelní seznam.
 
 ### Technický stav checkpointu
-- Změna je otestovaná (1445 testů).
-- Git před checkpointem: lokální `main` na `0f039bd925d0`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `0f039bd925d0` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-18T14:22:47+00:00.
-- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+- Změna je otestovaná (1446 testů).
+- Git před checkpointem: lokální `main` na `c74cc57b4872`; GitHub je o 4 commity pozadu a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `c74cc57b4872` · smoke 5/5 · 2026-08-18T15:07:32+00:00.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -175,3 +174,23 @@ Technický důkaz:
 - Změněné cesty před paměťovým zápisem (6): `Samantha_Agent/app/cockpit.py`, `Samantha_Agent/app/decision_cockpit.py`, `Samantha_Agent/app/frontend/cockpit/app.js`, `Samantha_Agent/app/frontend/cockpit/page.html`, `Samantha_Agent/tests/test_cockpit.py`, `Samantha_Agent/tests/test_cockpit_frontend.py`
 - Commit: `Fix iPhone document review navigation`
 - Další krok: Po automatickém převzetí ověřit na iPhonu tlačítko Revidovat
+
+### 2026-08-19 22:05 CEST – Dokumenty mají jednu funkční frontu
+
+Hotovo:
+- Dokumentová práce v Cockpitu je sjednocená do jediné fronty.
+- Každý dokument se zobrazuje jen jednou a přímo u něj jsou relevantní akce pro čtení i metadata.
+- Na iPhonu se ručně zadávají pouze skutečně chybějící pole.
+
+Rozhodnutí:
+- Revize a klasifikace dokumentu jsou jeden uživatelský úkol; klasifikace už není samostatný duplicitní pracovní oddíl.
+
+Další krok:
+- Samostatně potvrdit nasazení do Cockpitu a potom na iPhonu ověřit jednu položku se čtením a jednu s doplněním metadat.
+
+Navrhované další kroky:
+- Podle živého iPhonového testu upravit jen konkrétní nejasnost, nevracet další paralelní seznam.
+
+Technický důkaz:
+- Cílená sada 279 testů a plná Cockpit Quality Gate 1446/1446 prošly.
+- JavaScript, Python syntaxe, `git diff --check` a Git safety check jsou zelené.

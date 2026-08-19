@@ -3350,6 +3350,8 @@ class CockpitTests(unittest.TestCase):
             self.assertIn("oblast", by_id["short-doc"]["weak_metadata_labels"])
             self.assertIn("doplnit:", by_id["short-doc"]["review_summary"])
             self.assertIn("Čtení:", by_id["short-doc"]["reading_summary"])
+            self.assertIn("metadata_suggestion", by_id["short-doc"])
+            self.assertIn("case_id", by_id["short-doc"])
             self.assertIn("protistrana", json.dumps(report, ensure_ascii=False))
 
     def test_document_review_report_treats_email_attachment_type_as_weak_metadata(self) -> None:
@@ -3385,6 +3387,44 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(item["decision_group"], "weak_metadata")
         self.assertEqual(item["weak_metadata_fields"], ["document_type"])
         self.assertIn("typ dokumentu", item["weak_metadata_labels"])
+
+    def test_document_review_report_includes_safe_metadata_action_data(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            vault = Path(temp_dir) / "documents"
+            index = vault / "index"
+            index.mkdir(parents=True)
+            self.write_jsonl(
+                index / "documents_index.jsonl",
+                [
+                    {
+                        "document_id": "tmobile-review",
+                        "title": "E-mail příloha Vyuctovani.pdf",
+                        "domain": "other",
+                        "document_type": "email-attachment-pdf",
+                        "counterparty": "T-Mobile",
+                        "related_asset": "",
+                        "case_id": "mobilni-sluzby",
+                        "reading_status": "ok",
+                    },
+                ],
+            )
+            self.write_jsonl(
+                index / "text_index.jsonl",
+                [
+                    {
+                        "document_id": "tmobile-review",
+                        "text": "T-Mobile Elektronické vyúčtování za telefon a mobilní služby." + " x" * 300,
+                    }
+                ],
+            )
+
+            report = document_review_report_status(vault_dir=vault)
+
+        item = report["items"][0]
+        self.assertEqual(item["case_id"], "mobilni-sluzby")
+        self.assertTrue(item["metadata_suggestion"]["can_accept"])
+        self.assertEqual(item["metadata_suggestion"]["metadata"]["domain"], "telecom")
+        self.assertIn("related_asset", item["metadata_suggestion"]["metadata"])
 
     def test_action_queue_prioritizes_conflicts_and_nearest_work(self) -> None:
         document_work = {
@@ -3894,7 +3934,7 @@ class CockpitTests(unittest.TestCase):
         self.assertNotIn('id="terminalBtn"', COCKPIT_HTML)
         self.assertIn("Práce s dokumenty", COCKPIT_HTML)
         self.assertIn("Nová PDF ve Downloads", COCKPIT_HTML)
-        self.assertIn("Uložené dokumenty k revizi", COCKPIT_HTML)
+        self.assertNotIn("Uložené dokumenty k revizi", COCKPIT_HTML)
         self.assertIn("Problémy", COCKPIT_HTML)
         self.assertIn("Dokumentový intake", COCKPIT_HTML)
         self.assertIn("documentIntakeCount", COCKPIT_HTML)
@@ -3916,12 +3956,13 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("Proč tento stav", COCKPIT_HTML)
         self.assertIn("Termíny case", COCKPIT_HTML)
         self.assertIn("/api/documents/case-detail", COCKPIT_HTML)
-        self.assertIn("Klasifikace", COCKPIT_HTML)
-        self.assertIn("documentClassificationCount", COCKPIT_HTML)
-        self.assertIn("documentClassificationList", COCKPIT_HTML)
-        self.assertIn("renderDocumentClassification", COCKPIT_HTML)
+        self.assertNotIn("<h3>Klasifikace</h3>", COCKPIT_HTML)
+        self.assertNotIn("documentClassificationCount", COCKPIT_HTML)
+        self.assertNotIn("documentClassificationList", COCKPIT_HTML)
+        self.assertNotIn("renderDocumentClassification", COCKPIT_HTML)
         self.assertIn("Doplnit metadata", COCKPIT_HTML)
-        self.assertIn("updateDocumentClassificationMetadata", COCKPIT_HTML)
+        self.assertIn("updateDocumentReviewMetadata", COCKPIT_HTML)
+        self.assertIn("acceptDocumentReviewMetadataSuggestion", COCKPIT_HTML)
         self.assertIn("/api/documents/classification-metadata", COCKPIT_HTML)
         self.assertIn("Termíny v dokumentech", COCKPIT_HTML)
         self.assertIn("documentDueCount", COCKPIT_HTML)
@@ -3929,10 +3970,10 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("renderDocumentDueCandidates", COCKPIT_HTML)
         self.assertIn("Vytvořit připomínku", COCKPIT_HTML)
         self.assertIn("/api/documents/due-reminder", COCKPIT_HTML)
-        self.assertIn("Dokumenty k revizi", COCKPIT_HTML)
+        self.assertEqual(COCKPIT_HTML.count("<h3>Dokumenty k vyřešení</h3>"), 1)
         self.assertIn("reviewReportBtn", COCKPIT_HTML)
         self.assertIn('<div id="reviewReportCount" class="work-count">?</div>', COCKPIT_HTML)
-        self.assertIn('<button class="secondary" id="reviewReportBtn">Načti report</button>', COCKPIT_HTML)
+        self.assertIn('<button class="secondary" id="reviewReportBtn">Obnovit seznam</button>', COCKPIT_HTML)
         self.assertIn("/api/documents/review-report", COCKPIT_HTML)
         self.assertIn("loadDocumentReviewReport", COCKPIT_HTML)
         self.assertIn("renderDocumentReviewReportItem", COCKPIT_HTML)
@@ -3942,10 +3983,8 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("openDocumentForReading(documentRef", COCKPIT_HTML)
         self.assertIn("Stav čtení", COCKPIT_HTML)
         self.assertIn("afterSave: loadDocumentReviewReport", COCKPIT_HTML)
-        self.assertIn("Bez textu / OCR", COCKPIT_HTML)
-        self.assertIn("Krátký text", COCKPIT_HTML)
-        self.assertIn("Doplnit údaje", COCKPIT_HTML)
-        self.assertIn("V pořádku", COCKPIT_HTML)
+        self.assertIn("group.label || group.id", COCKPIT_HTML)
+        self.assertIn("group.recommended_action", COCKPIT_HTML)
         self.assertIn("Zpracovat další dokument", COCKPIT_HTML)
         self.assertIn("Připomenutí", COCKPIT_HTML)
         self.assertIn("remindersModal", COCKPIT_HTML)
@@ -3986,11 +4025,9 @@ class CockpitTests(unittest.TestCase):
     def test_document_work_cards_are_ordered_by_daily_workflow_columns(self) -> None:
         headings = [
             "Nová PDF ve Downloads za 7 dní",
-            "Uložené dokumenty k revizi",
+            "Dokumenty k vyřešení",
             "Problémy",
             "Dokumentový intake",
-            "Dokumenty k revizi",
-            "Klasifikace",
             "Termíny v dokumentech",
             "Související dokumenty",
         ]
@@ -8126,7 +8163,7 @@ Dalsi krok:
         self.assertIn('id="documentsPanel"', COCKPIT_HTML)
         self.assertIn('id="scanDocuBtn">Otevřít ScanDocu</button>', COCKPIT_HTML)
         self.assertIn(
-            'id="scanDocuReviewBtn">Revidovat v Cockpitu</button>',
+            'id="scanDocuReviewBtn">Vyřešit dokumenty</button>',
             COCKPIT_HTML,
         )
         self.assertGreater(

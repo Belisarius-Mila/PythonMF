@@ -31,7 +31,7 @@
         <div class="dashboard-body">
           <div class="dashboard-metrics">
             <div class="metric"><span id="todayNewPdfCount" class="metric-value">0</span><span class="metric-label">nová PDF</span></div>
-            <div class="metric"><span id="todayReviewCount" class="metric-value">0</span><span class="metric-label">k revizi</span></div>
+            <div class="metric"><span id="todayReviewCount" class="metric-value">0</span><span class="metric-label">k vyřešení</span></div>
             <div class="metric"><span id="todayProblemCount" class="metric-value">0</span><span class="metric-label">problémy</span></div>
           </div>
           <div id="todayHint" class="status-line"></div>
@@ -66,7 +66,7 @@
         <div class="dashboard-body">
           <div class="quick-actions">
             <button class="primary" id="dashboardProcessBtn">Zpracovat další</button>
-            <button class="secondary" id="dashboardReviewBtn">Revidovat další</button>
+            <button class="secondary" id="dashboardReviewBtn">Vyřešit dokumenty</button>
 		        <button class="secondary" id="dashboardUrgentRemindersBtn">Důležitá připomenutí</button>
 		        <button class="secondary" id="dashboardRefreshBtn">Obnovit stav</button>
 	          </div>
@@ -130,7 +130,7 @@
       <div class="body">
         <div class="quick-actions">
           <button class="primary" id="scanDocuBtn">Otevřít ScanDocu</button>
-          <button class="secondary" id="scanDocuReviewBtn">Revidovat v Cockpitu</button>
+          <button class="secondary" id="scanDocuReviewBtn">Vyřešit dokumenty</button>
         </div>
         <div class="work-grid">
           <div class="work-card">
@@ -142,12 +142,13 @@
             <div id="newPdfList" class="work-list"></div>
           </div>
           <div class="work-card">
-            <h3>Uložené dokumenty k revizi</h3>
-            <div id="reviewCount" class="work-count">0</div>
+            <h3>Dokumenty k vyřešení</h3>
+            <div id="reviewReportCount" class="work-count">?</div>
             <div class="actions">
-              <button class="secondary" id="reviewNextBtn">Revidovat další uložený</button>
+              <button class="secondary" id="reviewReportBtn">Obnovit seznam</button>
             </div>
-            <div id="reviewList" class="work-list"></div>
+            <div id="reviewReportStatus" class="status-line">Každý dokument je zde pouze jednou, včetně všech potřebných kroků.</div>
+            <div id="reviewReportList" class="work-list review-report-list"></div>
           </div>
           <div class="work-card">
             <h3>Problémy</h3>
@@ -160,21 +161,6 @@
             <div id="documentIntakeCount" class="work-count">0</div>
             <div id="documentIntakeSummary" class="status-line">Downloads / e-mail / mobilní sken / lokální inbox</div>
             <div id="documentIntakeList" class="work-list"></div>
-          </div>
-          <div class="work-card">
-            <h3>Dokumenty k revizi</h3>
-            <div id="reviewReportCount" class="work-count">?</div>
-            <div class="actions">
-              <button class="secondary" id="reviewReportBtn">Načti report</button>
-            </div>
-            <div id="reviewReportStatus" class="status-line">Report zatím není načtený. Skupiny: Bez textu / OCR, Krátký text, Doplnit údaje, K revizi, V pořádku.</div>
-            <div id="reviewReportList" class="work-list review-report-list"></div>
-          </div>
-          <div class="work-card">
-            <h3>Klasifikace</h3>
-            <div id="documentClassificationCount" class="work-count">0</div>
-            <div id="documentClassificationStatus" class="status-line">Kvalita metadat dokumentů.</div>
-            <div id="documentClassificationList" class="work-list"></div>
           </div>
           <div class="work-card">
             <h3>Termíny v dokumentech</h3>

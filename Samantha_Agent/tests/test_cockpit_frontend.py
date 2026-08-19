@@ -35,9 +35,9 @@ EXPECTED_PAGES = {
     ),
     "cockpit": (
         COCKPIT_HTML,
-        457861,
-        9266,
-        "55582c6b581c83ef1c847ba2cbb35ebdcadae87bd56bf10ff5bf7ff469a7e7a0",
+        454048,
+        9180,
+        "32a6904f482c7c673b1f70e1f91ee17972835d42fa2b8bc18cf465a37d6311a4",
     ),
 }
 
@@ -99,12 +99,21 @@ class CockpitFrontendContractTests(unittest.TestCase):
 
     def test_document_review_stays_inside_cockpit(self) -> None:
         source = (FRONTEND_ROOT / "cockpit" / "app.js").read_text(encoding="utf-8")
+        page = (FRONTEND_ROOT / "cockpit" / "page.html").read_text(encoding="utf-8")
 
         self.assertIn('action === "open_document_review"', source)
-        self.assertIn('showMessage("Revize dokumentů je otevřená přímo v Cockpitu.")', source)
+        self.assertIn('showMessage("Dokumenty k vyřešení jsou otevřené přímo v Cockpitu.")', source)
         self.assertIn('dashboardReviewBtn.addEventListener("click", openDocumentReviewPanel)', source)
         self.assertIn('scanDocuReviewBtn.addEventListener("click", openDocumentReviewPanel)', source)
-        self.assertIn('reviewNextBtn.addEventListener("click", openDocumentReviewPanel)', source)
+        self.assertIn("await loadDocumentReviewReport()", source)
+        self.assertIn("acceptDocumentReviewMetadataSuggestion", source)
+        self.assertIn("updateDocumentReviewMetadata", source)
+        self.assertIn("const missingFields = new Set(item.weak_metadata_fields || [])", source)
+        self.assertIn("if (!missingFields.has(field)) continue", source)
+        self.assertEqual(page.count("<h3>Dokumenty k vyřešení</h3>"), 1)
+        self.assertNotIn("Uložené dokumenty k revizi", page)
+        self.assertNotIn("<h3>Dokumenty k revizi</h3>", page)
+        self.assertNotIn("<h3>Klasifikace</h3>", page)
         self.assertNotIn('`${data.url}/?mode=review`', source)
 
     def test_health_recovery_autosave_is_an_extracted_frontend_module(self) -> None:

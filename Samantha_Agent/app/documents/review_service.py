@@ -460,6 +460,14 @@ def document_review_report_status(
             review_summary = "Zkontrolovat čtení dokumentu."
         decision_group = document_review_decision_group(reasons)
         recommended_action = document_review_recommended_action(decision_group, weak_labels)
+        metadata_suggestion = (
+            document_classification_metadata_suggestion(
+                row=row,
+                text=text_by_id.get(document_id, ""),
+            )
+            if weak_fields
+            else {"can_accept": False, "changes": [], "metadata": {}, "summary": ""}
+        )
 
         item = {
             "document_id": document_id,
@@ -469,6 +477,8 @@ def document_review_report_status(
             "document_type": safe_text(str(row.get("document_type", "")))[:80],
             "counterparty": safe_text(str(row.get("counterparty", "")))[:120],
             "related_asset": safe_text(str(row.get("related_asset", "")))[:120],
+            "case_id": safe_text(str(row.get("case_id", "")))[:120],
+            "metadata_suggestion": metadata_suggestion,
             "reading_status": reading_status,
             "reading_status_label": READING_STATUS_LABELS.get(reading_status, reading_status),
             "text_chars": text_chars,
@@ -619,6 +629,5 @@ def document_review_report_groups(
             }
         )
     return groups
-
 
 

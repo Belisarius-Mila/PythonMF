@@ -9,7 +9,6 @@
     const scanDocuBtn = document.getElementById("scanDocuBtn");
     const scanDocuReviewBtn = document.getElementById("scanDocuReviewBtn");
     const processNextBtn = document.getElementById("processNextBtn");
-    const reviewNextBtn = document.getElementById("reviewNextBtn");
     const webAppsBtn = document.getElementById("webAppsBtn");
     const libraryBtn = document.getElementById("libraryBtn");
     const familyCalendarBtn = document.getElementById("familyCalendarBtn");
@@ -303,10 +302,8 @@
     const urgentReminderAlertList = document.getElementById("urgentReminderAlertList");
     const urgentReminderAlertBtn = document.getElementById("urgentReminderAlertBtn");
     const newPdfCount = document.getElementById("newPdfCount");
-    const reviewCount = document.getElementById("reviewCount");
     const problemCount = document.getElementById("problemCount");
     const newPdfList = document.getElementById("newPdfList");
-    const reviewList = document.getElementById("reviewList");
     const problemList = document.getElementById("problemList");
     const documentIntakeCount = document.getElementById("documentIntakeCount");
     const documentIntakeSummary = document.getElementById("documentIntakeSummary");
@@ -314,9 +311,6 @@
     const documentCasesCount = document.getElementById("documentCasesCount");
     const documentCasesStatus = document.getElementById("documentCasesStatus");
     const documentCasesList = document.getElementById("documentCasesList");
-    const documentClassificationCount = document.getElementById("documentClassificationCount");
-    const documentClassificationStatus = document.getElementById("documentClassificationStatus");
-    const documentClassificationList = document.getElementById("documentClassificationList");
     const documentDueCount = document.getElementById("documentDueCount");
     const documentDueStatus = document.getElementById("documentDueStatus");
     const documentDueList = document.getElementById("documentDueList");
@@ -621,8 +615,7 @@
         "urgentReminderAlertBtn",
         "reviewReportBtn",
         "documentSearchBtn",
-        "processNextBtn",
-        "reviewNextBtn"
+        "processNextBtn"
       ];
       const missing = requiredIds.filter((id) => !document.getElementById(id));
       if (missing.length) {
@@ -748,7 +741,6 @@
         latestDocumentIntakeData = data.document_intake || {};
         renderDocumentIntake(latestDocumentIntakeData);
         renderDocumentCases(data.document_cases || {});
-        renderDocumentClassification(data.document_classification || {});
         renderDocumentDueCandidates(data.document_due_candidates || {});
         renderDownloads(data.downloads || {});
         if (includeSecondary) {
@@ -953,25 +945,16 @@
 
     function renderDocumentWork(work) {
       const summary = work.summary || {};
-      const review = work.review || {};
       const newItems = work.new_pdfs || [];
-      const reviewItems = review.next_items || [];
       const problemItems = work.problems || [];
       newPdfCount.textContent = String(summary.new_pdf_count || 0);
-      reviewCount.textContent = String(summary.review_pending_count || review.pending_count || 0);
       problemCount.textContent = String(summary.problem_count || 0);
       processNextBtn.disabled = newItems.length === 0;
-      reviewNextBtn.disabled = reviewItems.length === 0;
       dashboardProcessBtn.disabled = newItems.length === 0;
-      dashboardReviewBtn.disabled = reviewItems.length === 0;
       renderWorkList(newPdfList, newItems, (item) => ({
         title: item.name || "",
         meta: `${item.status || ""} | ${item.modified_at || ""}`
       }), "Žádné nové PDF.");
-      renderWorkList(reviewList, reviewItems, (item) => ({
-        title: item.title || item.document_id || "",
-        meta: `${item.domain || "other"} / ${item.document_type || "document"}`
-      }), "Žádný uložený dokument nečeká na revizi.");
       renderWorkList(problemList, problemItems, (item) => ({
         title: item.name || "",
         meta: `${item.problem_label || item.status || ""} | ${item.modified_at || ""}`
@@ -1345,68 +1328,7 @@
       openDocumentReaderWindow(documentRef, documentCasesStatus, button);
     }
 
-    function renderDocumentClassification(data) {
-      const items = data.items || [];
-      documentClassificationCount.textContent = String(data.issue_count || 0);
-      documentClassificationStatus.textContent = data.message || "Klasifikace není načtená.";
-      documentClassificationList.innerHTML = "";
-      if (!items.length) {
-        const empty = document.createElement("div");
-        empty.className = "status-line";
-        empty.textContent = data.active_documents ? "Základní metadata jsou kompletní." : "Žádné dokumenty ke klasifikaci.";
-        documentClassificationList.appendChild(empty);
-        return;
-      }
-      items.slice(0, 6).forEach((item) => {
-        const row = document.createElement("div");
-        row.className = "work-item";
-        const title = document.createElement("div");
-        title.textContent = item.title || "Dokument";
-        const action = document.createElement("div");
-        action.className = "work-meta";
-        action.textContent = item.recommended_action || "";
-        const meta = document.createElement("div");
-        meta.className = "work-meta";
-        meta.textContent = item.classification_summary || "";
-        const suggestion = item.metadata_suggestion || {};
-        let suggestionNode = null;
-        if (suggestion.can_accept && suggestion.summary) {
-          suggestionNode = document.createElement("div");
-          suggestionNode.className = "work-meta";
-          suggestionNode.textContent = `Návrh: ${suggestion.summary}`;
-        }
-        const actions = document.createElement("div");
-        actions.className = "actions";
-        if (suggestion.can_accept) {
-          const acceptBtn = document.createElement("button");
-          acceptBtn.className = "primary";
-          acceptBtn.type = "button";
-          acceptBtn.textContent = "Přijmout návrh";
-          acceptBtn.addEventListener("click", () => acceptDocumentClassificationSuggestion(item, acceptBtn));
-          actions.appendChild(acceptBtn);
-        }
-        const editBtn = document.createElement("button");
-        editBtn.className = "secondary";
-        editBtn.type = "button";
-        editBtn.textContent = "Doplnit metadata";
-        editBtn.addEventListener("click", () => updateDocumentClassificationMetadata(item, editBtn));
-        actions.appendChild(editBtn);
-        row.appendChild(title);
-        row.appendChild(action);
-        row.appendChild(meta);
-        if (suggestionNode) row.appendChild(suggestionNode);
-        row.appendChild(actions);
-        documentClassificationList.appendChild(row);
-      });
-      if (data.truncated) {
-        const note = document.createElement("div");
-        note.className = "status-line";
-        note.textContent = "Seznam klasifikace je zkrácený.";
-        documentClassificationList.appendChild(note);
-      }
-    }
-
-    async function acceptDocumentClassificationSuggestion(item, button) {
+    async function acceptDocumentReviewMetadataSuggestion(item, button) {
       const documentRef = item.document_ref || item.document_id || "";
       const suggestion = item.metadata_suggestion || {};
       if (!documentRef || !suggestion.can_accept) return;
@@ -1415,22 +1337,20 @@
       const originalText = button.textContent;
       button.disabled = true;
       button.textContent = "Ukládám...";
-      documentClassificationStatus.textContent = "Ukládám potvrzený návrh metadat...";
+      reviewReportStatus.textContent = "Ukládám potvrzený návrh metadat...";
       try {
         const result = await postJson("/api/documents/classification-suggestion/accept", {
           document_id: documentRef,
           confirmed: true
         });
-        documentClassificationStatus.textContent = result.message || "Návrh uložen.";
+        reviewReportStatus.textContent = result.message || "Návrh uložen.";
         if (result.ok) {
-          if (result.document_classification) {
-            renderDocumentClassification(result.document_classification);
-          }
+          await loadDocumentReviewReport();
           await refresh({silent: true});
         }
       } catch (err) {
         recordFrontendError(err);
-        documentClassificationStatus.textContent = `Chyba přijetí návrhu: ${err}`;
+        reviewReportStatus.textContent = `Chyba přijetí návrhu: ${err}`;
       } finally {
         button.disabled = false;
         button.textContent = originalText || "Přijmout návrh";
@@ -1443,65 +1363,46 @@
       return value.trim();
     }
 
-    async function updateDocumentClassificationMetadata(item, button) {
+    async function updateDocumentReviewMetadata(item, button) {
       const documentRef = item.document_ref || item.document_id || "";
       if (!documentRef) return;
-      const domain = promptClassificationValue(
-        "Oblast dokumentu",
-        item.domain || "",
-        "Např. insurance, car, home, tax, energy, telecom, employment, health, warranty. Můžeš napsat i novou oblast, uloží se jako bezpečný slug."
-      );
-      if (domain === null) return;
-      const documentType = promptClassificationValue(
-        "Typ dokumentu",
-        item.document_type || "",
-        "Např. insurance_policy, insurance_payment_notice, employment_contract, invoice, lease, green_card, email-attachment-pdf, tax-penzijni-generali, document."
-      );
-      if (documentType === null) return;
-      const counterparty = promptClassificationValue("Protistrana", item.counterparty || "", "Kdo dokument vystavil nebo koho se smluvně týká.");
-      if (counterparty === null) return;
-      const relatedAsset = promptClassificationValue("Vazba na auto/projekt/věc", item.related_asset || "", "Např. auto, Volvo V40, byt, penze, energie.");
-      if (relatedAsset === null) return;
-      const caseId = promptClassificationValue(
-        "Case / souvislost",
-        item.case_id || "",
-        "Volitelné. Např. cez-smlouva-energie-2026 nebo ponech prázdné. Nový case vznikne tímto názvem."
-      );
-      if (caseId === null) return;
-      const summary = [
-        `Oblast: ${domain || "(prázdné)"}`,
-        `Typ: ${documentType || "(prázdné)"}`,
-        `Protistrana: ${counterparty || "(prázdné)"}`,
-        `Vazba: ${relatedAsset || "(prázdné)"}`,
-        `Case: ${caseId || "(prázdné)"}`
-      ].join("\n");
+      const missingFields = new Set(item.weak_metadata_fields || []);
+      const fieldPrompts = [
+        ["domain", "Oblast dokumentu", item.domain || "", "Např. insurance, car, home, tax, energy, telecom, employment, health nebo warranty."],
+        ["document_type", "Typ dokumentu", item.document_type || "", "Např. invoice, lease, green_card, insurance_policy nebo warranty."],
+        ["counterparty", "Protistrana", item.counterparty || "", "Kdo dokument vystavil nebo koho se smluvně týká."],
+        ["related_asset", "Vazba na auto/projekt/věc", item.related_asset || "", "Např. Volvo V40, byt, penze, energie nebo mobilní služby."]
+      ];
+      const metadata = {};
+      const summaryLines = [];
+      for (const [field, label, currentValue, helpText] of fieldPrompts) {
+        if (!missingFields.has(field)) continue;
+        const value = promptClassificationValue(label, currentValue, helpText);
+        if (value === null) return;
+        metadata[field] = value;
+        summaryLines.push(`${label}: ${value || "(prázdné)"}`);
+      }
+      if (!summaryLines.length) return;
+      const summary = summaryLines.join("\n");
       const ok = window.confirm(`Uložit metadata dokumentu?\n\n${item.title || "Dokument"}\n\n${summary}`);
       if (!ok) return;
       const originalText = button.textContent;
       button.disabled = true;
       button.textContent = "Ukládám...";
-      documentClassificationStatus.textContent = "Ukládám metadata dokumentu...";
+      reviewReportStatus.textContent = "Ukládám metadata dokumentu...";
       try {
         const result = await postJson("/api/documents/classification-metadata", {
           document_id: documentRef,
-          metadata: {
-            domain,
-            document_type: documentType,
-            counterparty,
-            related_asset: relatedAsset,
-            case_id: caseId
-          }
+          metadata
         });
-        documentClassificationStatus.textContent = result.message || "Metadata uložena.";
+        reviewReportStatus.textContent = result.message || "Metadata uložena.";
         if (result.ok) {
-          if (result.document_classification) {
-            renderDocumentClassification(result.document_classification);
-          }
+          await loadDocumentReviewReport();
           await refresh({silent: true});
         }
       } catch (err) {
         recordFrontendError(err);
-        documentClassificationStatus.textContent = `Chyba uložení metadat: ${err}`;
+        reviewReportStatus.textContent = `Chyba uložení metadat: ${err}`;
       } finally {
         button.disabled = false;
         button.textContent = originalText || "Doplnit metadata";
@@ -1617,7 +1518,7 @@
 
     async function loadDocumentReviewReport() {
       reviewReportBtn.disabled = true;
-      reviewReportStatus.textContent = "Načítám report dokumentů k revizi...";
+      reviewReportStatus.textContent = "Načítám dokumenty k vyřešení...";
       reviewReportList.innerHTML = "";
       let loaded = false;
       try {
@@ -1636,11 +1537,11 @@
 
     async function openDocumentReviewPanel() {
       documentsPanel.open = true;
-      showMessage("Otevírám bezpečnou revizi přímo v Cockpitu...");
+      showMessage("Otevírám dokumenty k vyřešení...");
       const loaded = await loadDocumentReviewReport();
       reviewReportList.scrollIntoView({behavior: "smooth", block: "start"});
       if (loaded) {
-        showMessage("Revize dokumentů je otevřená přímo v Cockpitu.");
+        showMessage("Dokumenty k vyřešení jsou otevřené přímo v Cockpitu.");
       }
     }
 
@@ -1653,7 +1554,7 @@
       if (!groups.length) {
         const empty = document.createElement("div");
         empty.className = "work-item empty";
-        empty.textContent = "Žádný dokument nevyžaduje revizi podle aktuálních pravidel.";
+        empty.textContent = "Žádný dokument nyní nevyžaduje zásah.";
         reviewReportList.appendChild(empty);
         return;
       }
@@ -1719,6 +1620,13 @@
         const reasons = document.createElement("div");
         reasons.className = "work-meta";
         reasons.textContent = (item.reasons || []).map((reason) => reason.label || reason.id || "").filter(Boolean).join(", ");
+        const reasonIds = (item.reasons || []).map((reason) => String(reason.id || ""));
+        const needsReadingAction = reasonIds.some((reason) => ["needs_review", "zero_text", "short_text", "ocr_needed"].includes(reason));
+        const needsMetadataAction = reasonIds.includes("weak_metadata") || (item.weak_metadata_fields || []).length > 0;
+        const suggestion = item.metadata_suggestion || {};
+        const suggestionNode = document.createElement("div");
+        suggestionNode.className = "work-meta";
+        suggestionNode.textContent = suggestion.can_accept && suggestion.summary ? `Návrh: ${suggestion.summary}` : "";
         const id = document.createElement("div");
         id.className = "work-meta";
         id.textContent = `ID: ${item.document_id || ""}`;
@@ -1729,6 +1637,23 @@
         openBtn.type = "button";
         openBtn.textContent = "Otevřít / číst";
         openBtn.addEventListener("click", () => openDocumentForReading(documentRef, openBtn, reviewReportStatus));
+        actions.appendChild(openBtn);
+        if (needsMetadataAction && suggestion.can_accept) {
+          const acceptBtn = document.createElement("button");
+          acceptBtn.className = "primary";
+          acceptBtn.type = "button";
+          acceptBtn.textContent = "Přijmout návrh metadat";
+          acceptBtn.addEventListener("click", () => acceptDocumentReviewMetadataSuggestion(item, acceptBtn));
+          actions.appendChild(acceptBtn);
+        }
+        if (needsMetadataAction) {
+          const editBtn = document.createElement("button");
+          editBtn.className = "secondary";
+          editBtn.type = "button";
+          editBtn.textContent = "Doplnit metadata";
+          editBtn.addEventListener("click", () => updateDocumentReviewMetadata(item, editBtn));
+          actions.appendChild(editBtn);
+        }
         const statusRow = document.createElement("div");
         statusRow.className = "status-select-row";
         const statusLabel = document.createElement("label");
@@ -1749,14 +1674,14 @@
         });
         statusRow.appendChild(statusLabel);
         statusRow.appendChild(statusSelect);
-        actions.appendChild(openBtn);
         row.appendChild(title);
         row.appendChild(recommendation);
         row.appendChild(meta);
         if (reasons.textContent) row.appendChild(reasons);
+        if (suggestionNode.textContent) row.appendChild(suggestionNode);
         row.appendChild(id);
         row.appendChild(actions);
-        row.appendChild(statusRow);
+        if (needsReadingAction) row.appendChild(statusRow);
         return row;
     }
 
@@ -1765,19 +1690,22 @@
       const work = data.document_work || {};
       const summary = work.summary || {};
       const review = work.review || {};
+      const classification = data.document_classification || {};
       const newCount = summary.new_pdf_count || 0;
       const reviewPending = summary.review_pending_count || review.pending_count || 0;
+      const unresolvedCount = Math.max(reviewPending, Number(classification.issue_count || 0));
       const problemTotal = summary.problem_count || 0;
       todayNewPdfCount.textContent = String(newCount);
-      todayReviewCount.textContent = String(reviewPending);
+      todayReviewCount.textContent = String(unresolvedCount);
       todayProblemCount.textContent = String(problemTotal);
-      todayHint.textContent = dashboardTodayHint(newCount, reviewPending, problemTotal);
+      todayHint.textContent = dashboardTodayHint(newCount, unresolvedCount, problemTotal);
+      dashboardReviewBtn.disabled = unresolvedCount === 0;
       const documentSignal = problemTotal > 0
         ? {level: "warn", reason: `Dokumenty: ${problemTotal} problémů k ruční kontrole`}
         : newCount > 0
           ? {level: "warn", reason: `Dokumenty: ${newCount} nových PDF čeká na zpracování`}
-          : reviewPending > 0
-            ? {level: "warn", reason: `Dokumenty: ${reviewPending} uložených dokumentů čeká na revizi`}
+          : unresolvedCount > 0
+            ? {level: "warn", reason: `Dokumenty: ${unresolvedCount} uložených dokumentů čeká na vyřešení`}
             : {level: "ok", reason: "Dokumentová fronta je klidná"};
       if (dashboardDocuments) {
         const documentClass = documentSignal.level === "ok" ? "ok" : "warn";
@@ -1786,8 +1714,8 @@
       setDashboardStatusSignal("documents", documentSignal.level, documentSignal.reason);
       dashboardActionHint.textContent = newCount > 0
         ? "Nejbližší akce: zpracovat další PDF přes ScanDocu."
-        : reviewPending > 0
-          ? "Nejbližší akce: revidovat uložený dokument."
+        : unresolvedCount > 0
+          ? "Nejbližší akce: vyřešit uložený dokument."
           : "Fronta nevypadá akutně.";
 
       const scandocu = data.scandocu || {};
@@ -2558,7 +2486,7 @@
 
     function dashboardTodayHint(newCount, reviewPending, problemTotal) {
       if (newCount > 0) return `Ve frontě je ${newCount} nových PDF.`;
-      if (reviewPending > 0) return `Nová PDF nejsou, ale ${reviewPending} uložených dokumentů čeká na revizi.`;
+      if (reviewPending > 0) return `Nová PDF nejsou, ale ${reviewPending} uložených dokumentů čeká na vyřešení.`;
       if (problemTotal > 0) return `Fronta nemá nové PDF, ale má ${problemTotal} položek k ruční kontrole.`;
       return "Dokumentová fronta je klidná.";
     }
@@ -2627,14 +2555,14 @@
       metrics.className = "dashboard-metrics vault-metrics";
       appendVaultMetric(metrics, "Uloženo v trezoru", documentCount);
       appendVaultMetric(metrics, "Čeká v inboxu", inboxCount, inboxCount > 0 ? "warn" : "ok");
-      appendVaultMetric(metrics, "K revizi", reviewCount, reviewCount > 0 ? "warn" : "ok");
+      appendVaultMetric(metrics, "K vyřešení", reviewCount, reviewCount > 0 ? "warn" : "ok");
       appendVaultMetric(metrics, "Problémy", problemCount, problemCount > 0 ? "bad" : "ok");
       const hint = document.createElement("div");
       hint.className = "status-line";
       hint.textContent = inboxCount > 0
         ? `V inboxu čeká ${inboxCount} souborů na zpracování.`
         : reviewCount > 0
-          ? `Inbox je prázdný; ${reviewCount} uložených dokumentů čeká na revizi.`
+          ? `Inbox je prázdný; ${reviewCount} uložených dokumentů čeká na vyřešení.`
           : problemCount > 0
             ? `Inbox je prázdný; ${problemCount} položek vyžaduje ruční kontrolu.`
             : "Dokumentový trezor nyní nevyžaduje žádnou akci.";
@@ -6833,9 +6761,10 @@ ${item.context || ""}`);
       openEmailPage("/email-archive/", "SamanthaEmailArchive");
     }
 
-    function openDocumentsPanel() {
+    async function openDocumentsPanel() {
       documentsPanel.open = true;
       documentsPanel.scrollIntoView({behavior: "smooth", block: "start"});
+      await loadDocumentReviewReport();
     }
 
     janickaBtn.addEventListener("click", openJanickaModal);
@@ -7206,7 +7135,6 @@ ${item.context || ""}`);
     scanDocuBtn.addEventListener("click", openScanDocu);
     scanDocuReviewBtn.addEventListener("click", openDocumentReviewPanel);
     processNextBtn.addEventListener("click", openScanDocu);
-    reviewNextBtn.addEventListener("click", openDocumentReviewPanel);
     documentSearchBtn.addEventListener("click", searchDocuments);
 	    documentSearchInput.addEventListener("keydown", (event) => {
 	      if (event.key === "Enter") {
