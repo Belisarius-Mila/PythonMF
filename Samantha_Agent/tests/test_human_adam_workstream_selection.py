@@ -67,16 +67,16 @@ class GroupedWorkstreamSelectionTests(unittest.TestCase):
 
         self.assertTrue(status["ok"])
         self.assertEqual(status["workstream_count"], 31)
-        self.assertEqual(status["active_count"], 28)
-        self.assertEqual(status["paused_count"], 3)
+        self.assertEqual(status["active_count"], 29)
+        self.assertEqual(status["paused_count"], 2)
         self.assertEqual(status["archived_count"], 0)
-        self.assertEqual(groups["projects"]["count"], 22)
+        self.assertEqual(groups["projects"]["count"], 23)
         self.assertEqual(groups["tools"]["count"], 4)
         self.assertEqual(groups["layers"]["count"], 0)
         self.assertEqual(groups["other"]["count"], 2)
         self.assertEqual(
             {row["id"] for row in status["paused"]},
-            {"project-mobile-input", "project-vocabulary-fr", "project-vocabulary-it"},
+            {"project-mobile-input", "project-vocabulary-it"},
         )
 
     def test_one_active_workstream_identity_selects_lazy_backend(self) -> None:

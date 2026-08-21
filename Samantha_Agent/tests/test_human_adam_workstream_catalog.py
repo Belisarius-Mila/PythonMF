@@ -105,7 +105,7 @@ class WorkstreamCatalogTests(unittest.TestCase):
         )
         self.assertEqual(
             Counter(record.mode for record in WORKSTREAM_CATALOG),
-            {"active": 28, "paused": 3},
+            {"active": 29, "paused": 2},
         )
 
     def test_to_be_to_have_is_an_active_project_with_legacy_name_aliases(self) -> None:
@@ -345,7 +345,7 @@ class WorkstreamCatalogTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     validate_workstream_catalog((record,))
 
-    def test_paused_vocabulary_projects_come_from_confirmed_capability_map(self) -> None:
+    def test_vocabulary_projects_come_from_confirmed_capability_map_and_paused_set_is_exact(self) -> None:
         capability_map = (PROJECT_ROOT / "memory/technical/project_capability_map.md").read_text(
             encoding="utf-8"
         )
@@ -357,7 +357,7 @@ class WorkstreamCatalogTests(unittest.TestCase):
 
         self.assertEqual(
             paused_ids,
-            {"project-mobile-input", "project-vocabulary-fr", "project-vocabulary-it"},
+            {"project-mobile-input", "project-vocabulary-it"},
         )
         self.assertIn("| Vocabulary FR |", capability_map)
         self.assertIn("| Vocabulary IT |", capability_map)

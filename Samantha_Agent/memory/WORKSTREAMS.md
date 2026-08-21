@@ -10,10 +10,10 @@ prace je `Project`, konkretni opakovatelny vykonavatel je `Tool`, sdilena
 infrastrukturni schopnost muze byt `Layer` a `Misc` je jen skutecne nezarazena
 prace.
 
-Katalog slucuje vsech 30 zivych oblasti z `ACTIVE_PROJECTS.md`, pridava
-pozastavene projekty Vocabulary FR a Vocabulary IT a dva dohodnute vychozi
+Katalog slucuje vsech 30 zivych oblasti z `ACTIVE_PROJECTS.md`, zachovava
+samostatne projekty Vocabulary FR a Vocabulary IT a dva dohodnute vychozi
 proudy `Misc`. Vysledkem je 31 proudu: 25 projektu, 4 tooly a 2 `Misc`.
-Rezimy `paused` a `archived` jsou validni; tri projekty jsou nyni `paused`.
+Rezimy `paused` a `archived` jsou validni; dva projekty jsou nyni `paused`.
 
 Markdown se za behu neparsuje a neni zdrojem UI, vlaken, workspace, semaforu
 ani nasazovaci logiky. Faze 4.1 sama nic soukromeho nezaklada.
@@ -65,7 +65,7 @@ nesmi smesovat s Knihovnou clanku.
 | `project-mobile-input` | `Project` | iPhone Shortcuts / Mobile Input | paused | 2 | iPhone Shortcuts / Mobile Input Layer |
 | `project-colors-and-numbers` | `Project` | ColorsAndNumbers / automatické úkoly | active | 1 | Automaticke opakujici se ukoly / ColorsAndNumbers |
 | `project-to-be-to-have` | `Project` | ToBeToHave | active | 2 | ToBeToHave; navazuje na původní názvy To Be Training a ToBeTraining. |
-| `project-vocabulary-fr` | `Project` | Vocabulary FR | paused | 2 | Potvrzeny kanonicky projekt v `project_capability_map.md`; lokalni a webova varianta patri dohromady. |
+| `project-vocabulary-fr` | `Project` | Vocabulary FR | active | 2 | Potvrzeny kanonicky projekt v `project_capability_map.md`; lokalni a webova varianta patri dohromady. |
 | `project-vocabulary-it` | `Project` | Vocabulary IT | paused | 2 | Potvrzeny kanonicky projekt v `project_capability_map.md`; lokalni a webova varianta patri dohromady. |
 | `tool-backup-restore` | `Tool` | Záloha a obnova | active | 1 | Samantha external backup |
 | `tool-media-image-resize` | `Tool` | Zmenšování obrázků | active | 1 | Media image resize utility |
