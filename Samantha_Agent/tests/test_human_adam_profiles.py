@@ -526,7 +526,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             self.assertNotIn("active_profile_id", payload)
             self.assertNotIn("active_profile_label", payload)
         self.assertTrue(status["workstream_selection"]["ok"])
-        self.assertEqual(status["workstream_selection"]["workstream_count"], 31)
+        self.assertEqual(status["workstream_selection"]["workstream_count"], 32)
         self.assertEqual(
             [group["label"] for group in status["workstream_selection"]["groups"]],
             ["Projekty", "Tooly", "Vrstvy", "Ostatní"],
@@ -1093,7 +1093,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             status = manager.lazy_workstream_memory_status()
 
             self.assertTrue(status["available"])
-            self.assertEqual(status["workstream_count"], 31)
+            self.assertEqual(status["workstream_count"], 32)
             self.assertEqual(status["ready_count"], 0)
             self.assertFalse(Path(human_workspace.project_root).exists())
 

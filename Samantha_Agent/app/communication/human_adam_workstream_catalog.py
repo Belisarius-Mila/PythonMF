@@ -436,6 +436,15 @@ WORKSTREAM_CATALOG = validate_workstream_catalog(
             query_aliases=("To Be Training", "ToBeTraining"),
         ),
         _record(
+            "project-linux-workstation",
+            "Project",
+            "Linux / instalace a konfigurace",
+            "active",
+            "2",
+            "Linux / instalace a konfigurace",
+            query_aliases=("Linux", "Linuxový počítač"),
+        ),
+        _record(
             "project-vocabulary-fr",
             "Project",
             "Vocabulary FR",

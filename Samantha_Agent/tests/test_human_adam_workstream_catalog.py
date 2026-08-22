@@ -96,16 +96,16 @@ class WorkstreamCatalogTests(unittest.TestCase):
             misc_ids,
             {"misc-brainstorm", "misc-unclassified-development"},
         )
-        self.assertEqual(len(WORKSTREAM_CATALOG), 31)
+        self.assertEqual(len(WORKSTREAM_CATALOG), 32)
 
     def test_catalog_has_expected_type_distribution(self) -> None:
         self.assertEqual(
             Counter(record.workstream_type for record in WORKSTREAM_CATALOG),
-            {"Project": 25, "Tool": 4, "Misc": 2},
+            {"Project": 26, "Tool": 4, "Misc": 2},
         )
         self.assertEqual(
             Counter(record.mode for record in WORKSTREAM_CATALOG),
-            {"active": 29, "paused": 2},
+            {"active": 30, "paused": 2},
         )
 
     def test_to_be_to_have_is_an_active_project_with_legacy_name_aliases(self) -> None:
@@ -121,6 +121,23 @@ class WorkstreamCatalogTests(unittest.TestCase):
         self.assertEqual(project.priority, "2")
         self.assertEqual(project.source_names, ("ToBeToHave",))
         self.assertEqual(project.query_aliases, ("To Be Training", "ToBeTraining"))
+
+    def test_linux_workstation_is_a_distinct_active_project(self) -> None:
+        project = next(
+            record
+            for record in WORKSTREAM_CATALOG
+            if record.workstream_id == "project-linux-workstation"
+        )
+
+        self.assertEqual(project.name, "Linux / instalace a konfigurace")
+        self.assertEqual(project.workstream_type, "Project")
+        self.assertEqual(project.mode, "active")
+        self.assertEqual(project.priority, "2")
+        self.assertEqual(
+            project.source_names,
+            ("Linux / instalace a konfigurace",),
+        )
+        self.assertEqual(project.query_aliases, ("Linux", "Linuxový počítač"))
 
     def test_family_calendar_is_a_distinct_active_project(self) -> None:
         calendar = next(
