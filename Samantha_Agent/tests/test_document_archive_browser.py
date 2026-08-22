@@ -17,6 +17,7 @@ from app.documents.scandocu import (
     SCANDOCU_ARCHIVE_HTML,
     SCANDOCU_HTML,
     ScanDocuServer,
+    prepare_stored_document_review,
 )
 from app.documents.search_service import document_reference
 
@@ -180,8 +181,59 @@ class DocumentArchiveBrowserTests(unittest.TestCase):
         self.assertEqual(content_type, "application/pdf")
         self.assertEqual(payload, b"%PDF-1.4\nsynthetic\n")
 
+    def test_scandocu_review_url_prepares_the_exact_selected_document(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            vault = root / "documents"
+            downloads = root / "Downloads"
+            downloads.mkdir()
+            first = self._document(
+                vault,
+                document_id="first-review-document",
+                title="První dokument",
+                domain="home",
+                imported_at="2026-07-01T10:00:00+00:00",
+                text="První syntetický text.",
+                reading_status="needs_review",
+            )
+            selected = self._document(
+                vault,
+                document_id="selected-review-document",
+                title="Vybraný dokument",
+                domain="insurance",
+                imported_at="2026-07-02T10:00:00+00:00",
+                text="Druhý syntetický text.",
+                reading_status="needs_review",
+            )
+            self._write_indexes(vault, [first, selected])
+            reference = document_reference("selected-review-document")
+
+            direct = prepare_stored_document_review(reference, vault_dir=vault)
+            handler = ScanDocuServer(downloads_dir=downloads, vault_dir=vault).make_handler()
+            server = ThreadingHTTPServer(("127.0.0.1", 0), handler)
+            thread = threading.Thread(target=server.serve_forever, daemon=True)
+            thread.start()
+            base_url = f"http://127.0.0.1:{server.server_address[1]}"
+            try:
+                with urlopen(
+                    f"{base_url}/api/next?mode=review&document_ref={reference}",
+                    timeout=5,
+                ) as response:
+                    api_candidate = json.loads(response.read().decode("utf-8"))
+            finally:
+                server.shutdown()
+                server.server_close()
+                thread.join(timeout=5)
+
+        self.assertEqual(direct.review_document_id, "selected-review-document")
+        self.assertEqual(api_candidate["review_document_id"], "selected-review-document")
+        self.assertEqual(api_candidate["source_mode"], "vault_review")
+
     def test_scandocu_frontends_keep_browser_discoverable_and_read_only(self) -> None:
         self.assertIn('id="archiveBtn">Uložené dokumenty', SCANDOCU_HTML)
+        self.assertIn('window.location.pathname.startsWith("/scandocu")', SCANDOCU_HTML)
+        self.assertIn('queryParams.get("document_ref")', SCANDOCU_HTML)
+        self.assertIn('appApiUrl(`/api/next?', SCANDOCU_HTML)
         for expected in (
             "Všechny dokumenty",
             "Dokumenty k revizi",
@@ -193,6 +245,7 @@ class DocumentArchiveBrowserTests(unittest.TestCase):
         ):
             with self.subTest(expected=expected):
                 self.assertIn(expected, SCANDOCU_ARCHIVE_HTML)
+        self.assertIn('window.location.pathname.startsWith("/scandocu")', SCANDOCU_ARCHIVE_HTML)
         self.assertNotIn("/api/save", SCANDOCU_ARCHIVE_HTML)
         self.assertNotIn("/api/skip", SCANDOCU_ARCHIVE_HTML)
 

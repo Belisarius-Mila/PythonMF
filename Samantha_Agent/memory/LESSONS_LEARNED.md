@@ -259,3 +259,15 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   `clientId` a jen pokud finální tah neobsahuje žádnou uživatelskou položku.
   Pokud finále uživatelskou položku obsahuje, použít ji autoritativně a při
   neshodě dál selhat uzavřeně.
+
+### LL-020 — Lokální pomocná aplikace se z iPhonu otevírá pod původem Cockpitu
+
+- Problém: Cockpit mohl na Macu otevřít ScanDocu přes `127.0.0.1:8766`, ale na
+  iPhonu stejná adresa ukazuje na telefon. Omezená náhradní revize přímo v kartě
+  Cockpitu zároveň neukázala celý dokument a všechny nástroje ScanDocu.
+- Typ: opakující se
+- Řešení nalezeno: 22082026
+- Řešení: Plné rozhraní lokální pomocné aplikace vést přes úzce allowlistovaný
+  same-origin průchod pod Cockpitem. Konkrétní položku předávat jen neprůhledným
+  bezpečným odkazem a na backendu jej znovu vyhodnotit proti kanonickému indexu;
+  do klienta neposílat interní cestu ani skutečný identifikátor dokumentu.

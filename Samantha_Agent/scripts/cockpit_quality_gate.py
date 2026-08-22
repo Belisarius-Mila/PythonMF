@@ -252,6 +252,7 @@ TEST_MODULES = (
     "tests.test_codex_approval_state",
     "tests.test_cockpit_voice_frontend_retirement",
     "tests.test_cockpit_http_security",
+    "tests.test_cockpit_scandocu_proxy",
     "tests.test_safety_quick_checks",
     "tests.test_speech_transcribe",
     "tests.test_email_outbound_tools",

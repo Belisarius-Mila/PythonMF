@@ -35,9 +35,9 @@ EXPECTED_PAGES = {
     ),
     "cockpit": (
         COCKPIT_HTML,
-        454048,
-        9180,
-        "32a6904f482c7c673b1f70e1f91ee17972835d42fa2b8bc18cf465a37d6311a4",
+        448757,
+        9071,
+        "78646415babac692173e7de030ddf60117072e7ac5445ff9d021373dfbc5a09b",
     ),
 }
 
@@ -97,19 +97,22 @@ class CockpitFrontendContractTests(unittest.TestCase):
             with self.subTest(expected=expected):
                 self.assertIn(expected, COCKPIT_HTML)
 
-    def test_document_review_stays_inside_cockpit(self) -> None:
+    def test_document_review_opens_exact_item_in_same_origin_scandocu(self) -> None:
         source = (FRONTEND_ROOT / "cockpit" / "app.js").read_text(encoding="utf-8")
         page = (FRONTEND_ROOT / "cockpit" / "page.html").read_text(encoding="utf-8")
 
         self.assertIn('action === "open_document_review"', source)
-        self.assertIn('showMessage("Dokumenty k vyřešení jsou otevřené přímo v Cockpitu.")', source)
+        self.assertIn('showMessage("Vyber dokument; celý se otevře se všemi možnostmi ve ScanDocu.")', source)
         self.assertIn('dashboardReviewBtn.addEventListener("click", openDocumentReviewPanel)', source)
-        self.assertIn('scanDocuReviewBtn.addEventListener("click", openDocumentReviewPanel)', source)
+        self.assertIn('scanDocuReviewBtn.addEventListener("click", () => openScanDocu({mode: "review", button: scanDocuReviewBtn}))', source)
         self.assertIn("await loadDocumentReviewReport()", source)
-        self.assertIn("acceptDocumentReviewMetadataSuggestion", source)
-        self.assertIn("updateDocumentReviewMetadata", source)
-        self.assertIn("const missingFields = new Set(item.weak_metadata_fields || [])", source)
-        self.assertIn("if (!missingFields.has(field)) continue", source)
+        self.assertIn("openScanDocuReview", source)
+        self.assertIn('openBtn.textContent = "Vyřešit ve ScanDocu"', source)
+        self.assertIn('body: JSON.stringify({mode, document_ref: documentRef})', source)
+        self.assertNotIn("acceptDocumentReviewMetadataSuggestion", source)
+        self.assertNotIn("updateDocumentReviewMetadata", source)
+        self.assertNotIn('openBtn.textContent = "Doplnit metadata"', source)
+        self.assertNotIn('openBtn.textContent = "Otevřít / číst"', source)
         self.assertEqual(page.count("<h3>Dokumenty k vyřešení</h3>"), 1)
         self.assertNotIn("Uložené dokumenty k revizi", page)
         self.assertNotIn("<h3>Dokumenty k revizi</h3>", page)

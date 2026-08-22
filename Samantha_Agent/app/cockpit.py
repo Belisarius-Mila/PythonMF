@@ -17,6 +17,7 @@ import tempfile
 import threading
 import time
 import urllib.error
+import urllib.request
 from collections.abc import Callable, Collection
 from datetime import date, datetime, timezone
 from email import message_from_bytes
@@ -331,6 +332,7 @@ COCKPIT_PORT = 8770
 COCKPIT_URL = f"http://127.0.0.1:{COCKPIT_PORT}"
 DEFAULT_PURCHASES_DIR = PROJECT_ROOT / "data" / "private" / "purchases"
 SCANDOCU_URL = "http://127.0.0.1:8766"
+SCANDOCU_COCKPIT_PREFIX = "/scandocu"
 SCANDOCU_PORT = 8766
 SCANDOCU_LOG_DIR = PROJECT_ROOT / "data" / "private" / "documents" / "scandocu"
 SCANDOCU_LOG_FILE = SCANDOCU_LOG_DIR / "server.log"
@@ -8042,7 +8044,7 @@ def move_document_to_archive_or_trash(
 def probe_scandocu() -> dict[str, Any]:
     try:
         completed = subprocess.run(
-            ["/usr/bin/curl", "-fsS", f"{SCANDOCU_URL}/api/list"],
+            ["/usr/bin/curl", "-fsS", f"{SCANDOCU_URL}/api/domains"],
             capture_output=True,
             text=True,
             timeout=3,
@@ -8057,9 +8059,27 @@ def probe_scandocu() -> dict[str, Any]:
     }
 
 
-def start_scandocu() -> dict[str, Any]:
+def scandocu_cockpit_url(*, mode: str = "", document_ref: str = "") -> str:
+    safe_mode = "review" if mode == "review" else ""
+    safe_reference = str(document_ref or "").strip()
+    if safe_reference and not re.fullmatch(r"docref-[a-f0-9]{16}", safe_reference):
+        raise ValueError("Dokument nebyl nalezen.")
+    params: list[str] = []
+    if safe_mode:
+        params.append(f"mode={quote(safe_mode)}")
+    if safe_reference:
+        params.append(f"document_ref={quote(safe_reference)}")
+    query = f"?{'&'.join(params)}" if params else ""
+    return f"{SCANDOCU_COCKPIT_PREFIX}/{query}"
+
+
+def start_scandocu(*, mode: str = "", document_ref: str = "") -> dict[str, Any]:
+    try:
+        public_url = scandocu_cockpit_url(mode=mode, document_ref=document_ref)
+    except ValueError as exc:
+        return {"ok": False, "message": str(exc)}
     if probe_scandocu().get("running"):
-        return {"ok": True, "message": "ScanDocu už běží.", "url": SCANDOCU_URL}
+        return {"ok": True, "message": "ScanDocu už běží.", "url": public_url}
     if not SCANDOCU_SERVER_SCRIPT.exists():
         return {"ok": False, "message": f"ScanDocu server neexistuje: {SCANDOCU_SERVER_SCRIPT}"}
     try:
@@ -8081,9 +8101,45 @@ def start_scandocu() -> dict[str, Any]:
         return {"ok": False, "message": f"ScanDocu se nepodařilo spustit: {exc}"}
     for _ in range(10):
         if probe_scandocu().get("running"):
-            return {"ok": True, "message": "ScanDocu spuštěno.", "url": SCANDOCU_URL}
+            return {"ok": True, "message": "ScanDocu spuštěno.", "url": public_url}
         time.sleep(0.2)
     return {"ok": False, "message": f"ScanDocu se spustilo, ale zatím neodpovídá. Log: {SCANDOCU_LOG_FILE}"}
+
+
+def scandocu_proxy_path(method: str, cockpit_path: str) -> str | None:
+    if cockpit_path.startswith(f"{SCANDOCU_COCKPIT_PREFIX}/"):
+        upstream_path = cockpit_path[len(SCANDOCU_COCKPIT_PREFIX):] or "/"
+    elif cockpit_path.startswith("/api/scandocu/"):
+        upstream_path = f"/api/{cockpit_path.removeprefix('/api/scandocu/')}"
+    else:
+        return None
+    exact_paths = {
+        "GET": {
+            "/",
+            "/api/next",
+            "/api/list",
+            "/api/domains",
+            "/api/documents",
+            "/api/document",
+            "/api/search-downloads",
+            "/vault/document",
+        },
+        "POST": {
+            "/api/save",
+            "/api/ai-metadata",
+            "/api/skip",
+            "/api/select-download",
+        },
+    }
+    normalized_method = method.upper()
+    if upstream_path in exact_paths.get(normalized_method, set()):
+        return upstream_path
+    if normalized_method == "GET" and re.fullmatch(
+        r"/(?:pdf|preview|file)/[A-Za-z0-9._-]{1,160}",
+        upstream_path,
+    ):
+        return upstream_path
+    return None
 
 
 def open_project_terminal() -> dict[str, Any]:
@@ -8747,6 +8803,38 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "confirmation": "allowlist_only",
         "handler_name": "start_scandocu",
         "test_level": "ui_presence",
+    },
+    {
+        "path": "/api/scandocu/save",
+        "label": "Ulozit nebo aktualizovat dokument ve ScanDocu",
+        "risk": "private_write",
+        "confirmation": "explicit_scandocu_save_button",
+        "handler_name": "start_scandocu",
+        "test_level": "direct",
+    },
+    {
+        "path": "/api/scandocu/ai-metadata",
+        "label": "Navrhnout metadata dokumentu pomoci AI",
+        "risk": "external_ai",
+        "confirmation": "explicit_scandocu_ai_button",
+        "handler_name": "start_scandocu",
+        "test_level": "direct",
+    },
+    {
+        "path": "/api/scandocu/skip",
+        "label": "Preskocit dokument ve ScanDocu",
+        "risk": "private_write",
+        "confirmation": "explicit_scandocu_skip_button",
+        "handler_name": "start_scandocu",
+        "test_level": "direct",
+    },
+    {
+        "path": "/api/scandocu/select-download",
+        "label": "Vybrat konkretni soubor z Downloads ve ScanDocu",
+        "risk": "local_service",
+        "confirmation": "explicit_scandocu_selection",
+        "handler_name": "start_scandocu",
+        "test_level": "direct",
     },
     {
         "path": "/api/terminal/open",
@@ -9570,6 +9658,12 @@ class CockpitServer:
                 ):
                     return
                 parsed = urlparse(self.path)
+                if parsed.path.startswith("/api/scandocu/"):
+                    self.respond_scandocu_proxy(parsed, method="GET")
+                    return
+                if parsed.path.startswith(f"{SCANDOCU_COCKPIT_PREFIX}/"):
+                    self.respond_scandocu_proxy(parsed, method="GET")
+                    return
                 if parsed.path == "/":
                     self.respond_html(COCKPIT_HTML)
                     return
@@ -9868,7 +9962,29 @@ class CockpitServer:
                 self.validate_request_access(require_origin=True)
                 parsed = urlparse(self.path)
                 if parsed.path == "/api/scandocu/open":
-                    self.respond_json(start_scandocu())
+                    payload = self.read_json()
+                    self.respond_json(
+                        start_scandocu(
+                            mode=str(payload.get("mode", "")),
+                            document_ref=str(payload.get("document_ref", "")),
+                        )
+                    )
+                    return
+                if parsed.path == "/api/scandocu/save":
+                    self.respond_scandocu_proxy(parsed, method="POST", payload=self.read_json())
+                    return
+                if parsed.path == "/api/scandocu/ai-metadata":
+                    self.respond_scandocu_proxy(parsed, method="POST", payload=self.read_json())
+                    return
+                if parsed.path == "/api/scandocu/skip":
+                    self.respond_scandocu_proxy(parsed, method="POST", payload=self.read_json())
+                    return
+                if parsed.path == "/api/scandocu/select-download":
+                    self.respond_scandocu_proxy(
+                        parsed,
+                        method="POST",
+                        payload=self.read_json(),
+                    )
                     return
                 if parsed.path == "/api/terminal/open":
                     self.respond_json(open_project_terminal())
@@ -10549,6 +10665,65 @@ class CockpitServer:
                 self.send_response(status)
                 self.send_header("Content-Type", "application/json; charset=utf-8")
                 self.send_header("Cache-Control", "no-store, max-age=0")
+                self.send_header("Content-Length", str(len(data)))
+                self.end_headers()
+                self.wfile.write(data)
+
+            def respond_scandocu_proxy(
+                self,
+                parsed: Any,
+                *,
+                method: str,
+                payload: dict[str, Any] | None = None,
+            ) -> None:
+                upstream_path = scandocu_proxy_path(method, parsed.path)
+                if upstream_path is None:
+                    self.respond_json(
+                        {"ok": False, "error": "not_found", "message": "Tato cesta ScanDocu není povolená."},
+                        status=HTTPStatus.NOT_FOUND,
+                    )
+                    return
+                started = start_scandocu()
+                if not started.get("ok"):
+                    self.respond_json(
+                        {"ok": False, "error": "scandocu_unavailable", "message": started.get("message", "ScanDocu není dostupné.")},
+                        status=HTTPStatus.SERVICE_UNAVAILABLE,
+                    )
+                    return
+                query = f"?{parsed.query}" if parsed.query else ""
+                body = None
+                headers: dict[str, str] = {}
+                if method == "POST":
+                    body = json.dumps(payload or {}, ensure_ascii=False).encode("utf-8")
+                    headers["Content-Type"] = "application/json; charset=utf-8"
+                request = urllib.request.Request(
+                    f"{SCANDOCU_URL}{upstream_path}{query}",
+                    data=body,
+                    headers=headers,
+                    method=method,
+                )
+                try:
+                    with urllib.request.urlopen(request, timeout=120) as response:
+                        data = response.read()
+                        status = response.status
+                        content_type = response.headers.get("Content-Type") or "application/octet-stream"
+                        content_disposition = response.headers.get("Content-Disposition")
+                except urllib.error.HTTPError as exc:
+                    data = exc.read()
+                    status = exc.code
+                    content_type = exc.headers.get("Content-Type") or "application/json; charset=utf-8"
+                    content_disposition = exc.headers.get("Content-Disposition")
+                except (urllib.error.URLError, TimeoutError, OSError):
+                    self.respond_json(
+                        {"ok": False, "error": "scandocu_unavailable", "message": "ScanDocu momentálně neodpovídá."},
+                        status=HTTPStatus.SERVICE_UNAVAILABLE,
+                    )
+                    return
+                self.send_response(status)
+                self.send_header("Content-Type", content_type)
+                self.send_header("Cache-Control", "no-store, max-age=0")
+                if content_disposition:
+                    self.send_header("Content-Disposition", content_disposition)
                 self.send_header("Content-Length", str(len(data)))
                 self.end_headers()
                 self.wfile.write(data)

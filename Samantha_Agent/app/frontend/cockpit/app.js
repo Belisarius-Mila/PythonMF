@@ -1328,87 +1328,6 @@
       openDocumentReaderWindow(documentRef, documentCasesStatus, button);
     }
 
-    async function acceptDocumentReviewMetadataSuggestion(item, button) {
-      const documentRef = item.document_ref || item.document_id || "";
-      const suggestion = item.metadata_suggestion || {};
-      if (!documentRef || !suggestion.can_accept) return;
-      const ok = window.confirm(`Přijmout návrh metadat?\n\n${item.title || "Dokument"}\n\n${suggestion.summary || ""}`);
-      if (!ok) return;
-      const originalText = button.textContent;
-      button.disabled = true;
-      button.textContent = "Ukládám...";
-      reviewReportStatus.textContent = "Ukládám potvrzený návrh metadat...";
-      try {
-        const result = await postJson("/api/documents/classification-suggestion/accept", {
-          document_id: documentRef,
-          confirmed: true
-        });
-        reviewReportStatus.textContent = result.message || "Návrh uložen.";
-        if (result.ok) {
-          await loadDocumentReviewReport();
-          await refresh({silent: true});
-        }
-      } catch (err) {
-        recordFrontendError(err);
-        reviewReportStatus.textContent = `Chyba přijetí návrhu: ${err}`;
-      } finally {
-        button.disabled = false;
-        button.textContent = originalText || "Přijmout návrh";
-      }
-    }
-
-    function promptClassificationValue(label, currentValue, helpText) {
-      const value = window.prompt(`${label}\n${helpText}`, currentValue || "");
-      if (value === null) return null;
-      return value.trim();
-    }
-
-    async function updateDocumentReviewMetadata(item, button) {
-      const documentRef = item.document_ref || item.document_id || "";
-      if (!documentRef) return;
-      const missingFields = new Set(item.weak_metadata_fields || []);
-      const fieldPrompts = [
-        ["domain", "Oblast dokumentu", item.domain || "", "Např. insurance, car, home, tax, energy, telecom, employment, health nebo warranty."],
-        ["document_type", "Typ dokumentu", item.document_type || "", "Např. invoice, lease, green_card, insurance_policy nebo warranty."],
-        ["counterparty", "Protistrana", item.counterparty || "", "Kdo dokument vystavil nebo koho se smluvně týká."],
-        ["related_asset", "Vazba na auto/projekt/věc", item.related_asset || "", "Např. Volvo V40, byt, penze, energie nebo mobilní služby."]
-      ];
-      const metadata = {};
-      const summaryLines = [];
-      for (const [field, label, currentValue, helpText] of fieldPrompts) {
-        if (!missingFields.has(field)) continue;
-        const value = promptClassificationValue(label, currentValue, helpText);
-        if (value === null) return;
-        metadata[field] = value;
-        summaryLines.push(`${label}: ${value || "(prázdné)"}`);
-      }
-      if (!summaryLines.length) return;
-      const summary = summaryLines.join("\n");
-      const ok = window.confirm(`Uložit metadata dokumentu?\n\n${item.title || "Dokument"}\n\n${summary}`);
-      if (!ok) return;
-      const originalText = button.textContent;
-      button.disabled = true;
-      button.textContent = "Ukládám...";
-      reviewReportStatus.textContent = "Ukládám metadata dokumentu...";
-      try {
-        const result = await postJson("/api/documents/classification-metadata", {
-          document_id: documentRef,
-          metadata
-        });
-        reviewReportStatus.textContent = result.message || "Metadata uložena.";
-        if (result.ok) {
-          await loadDocumentReviewReport();
-          await refresh({silent: true});
-        }
-      } catch (err) {
-        recordFrontendError(err);
-        reviewReportStatus.textContent = `Chyba uložení metadat: ${err}`;
-      } finally {
-        button.disabled = false;
-        button.textContent = originalText || "Doplnit metadata";
-      }
-    }
-
     function renderDocumentDueCandidates(data) {
       const items = data.items || [];
       documentDueCount.textContent = String(data.actionable_count || 0);
@@ -1541,7 +1460,7 @@
       const loaded = await loadDocumentReviewReport();
       reviewReportList.scrollIntoView({behavior: "smooth", block: "start"});
       if (loaded) {
-        showMessage("Dokumenty k vyřešení jsou otevřené přímo v Cockpitu.");
+        showMessage("Vyber dokument; celý se otevře se všemi možnostmi ve ScanDocu.");
       }
     }
 
@@ -1607,7 +1526,7 @@
     function renderDocumentReviewReportItem(item) {
         const row = document.createElement("div");
         row.className = "work-item";
-        const documentRef = item.document_ref || item.document_id || "";
+        const documentRef = item.document_ref || "";
         const title = document.createElement("div");
         title.className = "work-title";
         title.textContent = item.title || item.document_id || "Dokument bez názvu";
@@ -1620,9 +1539,6 @@
         const reasons = document.createElement("div");
         reasons.className = "work-meta";
         reasons.textContent = (item.reasons || []).map((reason) => reason.label || reason.id || "").filter(Boolean).join(", ");
-        const reasonIds = (item.reasons || []).map((reason) => String(reason.id || ""));
-        const needsReadingAction = reasonIds.some((reason) => ["needs_review", "zero_text", "short_text", "ocr_needed"].includes(reason));
-        const needsMetadataAction = reasonIds.includes("weak_metadata") || (item.weak_metadata_fields || []).length > 0;
         const suggestion = item.metadata_suggestion || {};
         const suggestionNode = document.createElement("div");
         suggestionNode.className = "work-meta";
@@ -1635,45 +1551,9 @@
         const openBtn = document.createElement("button");
         openBtn.className = "primary";
         openBtn.type = "button";
-        openBtn.textContent = "Otevřít / číst";
-        openBtn.addEventListener("click", () => openDocumentForReading(documentRef, openBtn, reviewReportStatus));
+        openBtn.textContent = "Vyřešit ve ScanDocu";
+        openBtn.addEventListener("click", () => openScanDocuReview(item, openBtn));
         actions.appendChild(openBtn);
-        if (needsMetadataAction && suggestion.can_accept) {
-          const acceptBtn = document.createElement("button");
-          acceptBtn.className = "primary";
-          acceptBtn.type = "button";
-          acceptBtn.textContent = "Přijmout návrh metadat";
-          acceptBtn.addEventListener("click", () => acceptDocumentReviewMetadataSuggestion(item, acceptBtn));
-          actions.appendChild(acceptBtn);
-        }
-        if (needsMetadataAction) {
-          const editBtn = document.createElement("button");
-          editBtn.className = "secondary";
-          editBtn.type = "button";
-          editBtn.textContent = "Doplnit metadata";
-          editBtn.addEventListener("click", () => updateDocumentReviewMetadata(item, editBtn));
-          actions.appendChild(editBtn);
-        }
-        const statusRow = document.createElement("div");
-        statusRow.className = "status-select-row";
-        const statusLabel = document.createElement("label");
-        statusLabel.textContent = "Stav čtení";
-        const statusSelect = document.createElement("select");
-        readingStatusOptions.forEach(([value, label]) => {
-          const option = document.createElement("option");
-          option.value = value;
-          option.textContent = label;
-          option.selected = value === (item.reading_status || "needs_review");
-          statusSelect.appendChild(option);
-        });
-        statusSelect.addEventListener("change", async () => {
-          await setDocumentReadingStatus(documentRef, statusSelect.value, {
-            statusNode: reviewReportStatus,
-            afterSave: loadDocumentReviewReport
-          });
-        });
-        statusRow.appendChild(statusLabel);
-        statusRow.appendChild(statusSelect);
         row.appendChild(title);
         row.appendChild(recommendation);
         row.appendChild(meta);
@@ -1681,7 +1561,6 @@
         if (suggestionNode.textContent) row.appendChild(suggestionNode);
         row.appendChild(id);
         row.appendChild(actions);
-        if (needsReadingAction) row.appendChild(statusRow);
         return row;
     }
 
@@ -3382,17 +3261,23 @@ Soubor nebude trvale smazán.`);
       }
     }
 
-    async function openScanDocu() {
+    async function openScanDocu(options = {}) {
+      const mode = options.mode === "review" ? "review" : "";
+      const documentRef = String(options.documentRef || "");
       const scanDocuWindow = window.open(
         "about:blank",
         "SamanthaScanDocu",
         "popup=yes,width=1380,height=920,left=80,top=60"
       );
-      const activeButton = scanDocuBtn;
+      const activeButton = options.button || scanDocuBtn;
       activeButton.disabled = true;
-      showMessage("Spouštím ScanDocu...");
+      showMessage(documentRef ? "Otevírám dokument ve ScanDocu..." : "Spouštím ScanDocu...");
       try {
-        const res = await fetch("/api/scandocu/open", {method: "POST"});
+        const res = await fetch("/api/scandocu/open", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({mode, document_ref: documentRef})
+        });
         const data = await res.json();
         showMessage(data.message || data.error || "Hotovo.");
         if (data.ok && data.url) {
@@ -3416,6 +3301,12 @@ Soubor nebude trvale smazán.`);
       } finally {
         activeButton.disabled = false;
       }
+    }
+
+    function openScanDocuReview(item, button) {
+      const documentRef = item.document_ref || "";
+      if (!documentRef) return;
+      return openScanDocu({mode: "review", documentRef, button});
     }
 
     async function openWebAppsModal() {
@@ -7133,7 +7024,7 @@ ${item.context || ""}`);
       }
     });
     scanDocuBtn.addEventListener("click", openScanDocu);
-    scanDocuReviewBtn.addEventListener("click", openDocumentReviewPanel);
+    scanDocuReviewBtn.addEventListener("click", () => openScanDocu({mode: "review", button: scanDocuReviewBtn}));
     processNextBtn.addEventListener("click", openScanDocu);
     documentSearchBtn.addEventListener("click", searchDocuments);
 	    documentSearchInput.addEventListener("keydown", (event) => {

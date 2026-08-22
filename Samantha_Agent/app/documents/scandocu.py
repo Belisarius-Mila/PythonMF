@@ -395,6 +395,25 @@ def prepare_next_stored_document_review(
     return None
 
 
+def prepare_stored_document_review(
+    document_ref: str,
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+) -> ScanDocuCandidate:
+    """Prepare the exact stored document selected through its opaque reference."""
+
+    resolved = resolve_stored_document_file(
+        document_ref=document_ref,
+        vault_dir=vault_dir,
+    )
+    if not resolved.get("ok"):
+        raise ValueError(str(resolved.get("message") or "Dokument nebyl nalezen."))
+    return prepare_stored_document_review_candidate(
+        document_record=resolved["record"],
+        stored_path=resolved["path"],
+        vault_dir=vault_dir,
+    )
+
+
 def scandocu_document_needs_review(record: dict[str, Any], text_chars: int | None = None) -> bool:
     explicit = safe_slug(str(record.get("reading_status", "") or record.get("document_reading_status", "")), default="", limit=80)
     if explicit in {"ok", "unreadable", "superseded"}:
@@ -1385,9 +1404,18 @@ class ScanDocuServer:
                         )
                         return
                     if parsed.path == "/api/next":
-                        mode = parse_qs(parsed.query).get("mode", ["downloads"])[0]
+                        params = parse_qs(parsed.query)
+                        mode = params.get("mode", ["downloads"])[0]
                         if mode == "review":
-                            candidate = prepare_next_stored_document_review(vault_dir=app.vault_dir)
+                            document_ref = params.get("document_ref", [""])[0]
+                            candidate = (
+                                prepare_stored_document_review(
+                                    document_ref=document_ref,
+                                    vault_dir=app.vault_dir,
+                                )
+                                if document_ref
+                                else prepare_next_stored_document_review(vault_dir=app.vault_dir)
+                            )
                             not_found = "Ve vaultu neni dalsi ulozeny dokument k revizi."
                         else:
                             candidate = prepare_next_scandocu_pdf(
@@ -1890,7 +1918,15 @@ SCANDOCU_HTML = """<!doctype html>
     let current = null;
     let saving = false;
     let aiSuggestion = null;
-    const appMode = new URLSearchParams(window.location.search).get("mode") === "review" ? "review" : "downloads";
+    const appBasePath = window.location.pathname.startsWith("/scandocu") ? "/scandocu" : "";
+    const appUrl = (path) => `${appBasePath}${path}`;
+    const appApiUrl = (path) => appBasePath ? `/api/scandocu${path.slice(4)}` : path;
+    const appResourceUrl = (value) => appBasePath && String(value || "").startsWith("/")
+      ? `${appBasePath}${value}`
+      : value;
+    const queryParams = new URLSearchParams(window.location.search);
+    const appMode = queryParams.get("mode") === "review" ? "review" : "downloads";
+    let requestedReviewDocumentRef = appMode === "review" ? (queryParams.get("document_ref") || "") : "";
     const isReviewMode = appMode === "review";
     document.querySelector("h1").textContent = isReviewMode ? "ScanDocu Review" : "ScanDocu";
     document.getElementById("nextBtn").textContent = isReviewMode ? "Další uložený dokument" : "Další PDF";
@@ -1904,13 +1940,16 @@ SCANDOCU_HTML = """<!doctype html>
       fields.imagePreview.removeAttribute("src");
       fields.imagePreviewWrap.classList.add("hidden");
       fields.previewFallback.classList.add("hidden");
-      const res = await fetch(`/api/next?mode=${appMode}`);
+      const params = new URLSearchParams({mode: appMode});
+      if (requestedReviewDocumentRef) params.set("document_ref", requestedReviewDocumentRef);
+      const res = await fetch(appApiUrl(`/api/next?${params.toString()}`));
       const data = await res.json();
       if (!data.found) {
         current = null;
         fields.status.textContent = data.message || "Nenalezeno.";
         return;
       }
+      requestedReviewDocumentRef = "";
       loadCandidate(data);
     }
 
@@ -1951,13 +1990,13 @@ SCANDOCU_HTML = """<!doctype html>
         fields.imagePreview.removeAttribute("src");
         fields.imagePreviewWrap.classList.add("hidden");
         fields.pdfFrame.classList.remove("hidden");
-        fields.pdfFrame.src = data.preview_url || data.pdf_url;
+        fields.pdfFrame.src = appResourceUrl(data.preview_url || data.pdf_url);
       } else if (previewKind === "image") {
         fields.previewFallback.classList.add("hidden");
         fields.pdfFrame.removeAttribute("src");
         fields.pdfFrame.classList.add("hidden");
         fields.imagePreviewWrap.classList.remove("hidden");
-        fields.imagePreview.src = data.preview_url || data.file_url;
+        fields.imagePreview.src = appResourceUrl(data.preview_url || data.file_url);
       } else {
         fields.pdfFrame.removeAttribute("src");
         fields.pdfFrame.classList.add("hidden");
@@ -1966,7 +2005,7 @@ SCANDOCU_HTML = """<!doctype html>
         fields.previewFallback.classList.remove("hidden");
         const extension = data.file_extension || "soubor";
         fields.previewFallbackText.textContent = `Soubor ${data.source_name || ""} má typ ${extension}. Prohlížeč ho neumí bezpečně zobrazit v PDF náhledu. Stáhni ho a otevři lokálně, metadata pak potvrď vlevo.`;
-        fields.previewDownload.href = data.file_url || "#";
+        fields.previewDownload.href = appResourceUrl(data.file_url) || "#";
         fields.previewDownload.download = data.source_name || "";
       }
     }
@@ -1996,7 +2035,7 @@ SCANDOCU_HTML = """<!doctype html>
 
     async function loadDomainOptions() {
       try {
-        const res = await fetch("/api/domains");
+        const res = await fetch(appApiUrl("/api/domains"));
         const data = await res.json();
         (data.domains || []).forEach((item) => upsertDomainOption(item.value, item.label));
       } catch (err) {
@@ -2046,7 +2085,7 @@ SCANDOCU_HTML = """<!doctype html>
       fields.aiSuggestBtn.textContent = "AI čte dokument...";
       fields.status.textContent = "Codex připravuje jen read-only návrh metadat. U většího dokumentu to může chvíli trvat.";
       try {
-        const res = await fetch("/api/ai-metadata", {
+        const res = await fetch(appApiUrl("/api/ai-metadata"), {
           method: "POST",
           headers: {"Content-Type": "application/json"},
           body: JSON.stringify({token: current.token})
@@ -2133,7 +2172,7 @@ SCANDOCU_HTML = """<!doctype html>
       fields.downloadSearchStatus.textContent = "Hledám PDF v Downloads...";
       fields.downloadSearchBtn.disabled = true;
       try {
-        const res = await fetch(`/api/search-downloads?q=${encodeURIComponent(query)}&date=${encodeURIComponent(date)}`);
+        const res = await fetch(appApiUrl(`/api/search-downloads?q=${encodeURIComponent(query)}&date=${encodeURIComponent(date)}`));
         const data = await res.json();
         renderDownloadSearchResults(data.items || []);
         fields.downloadSearchStatus.textContent = data.items && data.items.length
@@ -2175,7 +2214,7 @@ SCANDOCU_HTML = """<!doctype html>
     async function selectDownload(sourcePath) {
       if (!sourcePath) return;
       fields.status.textContent = "Připravuji vybraný dokument...";
-      const res = await fetch("/api/select-download", {
+      const res = await fetch(appApiUrl("/api/select-download"), {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({source_path: sourcePath})
@@ -2208,7 +2247,7 @@ SCANDOCU_HTML = """<!doctype html>
       fields.saveBtn.textContent = "Ukládám...";
       fields.status.textContent = "Ukládám dokument do vaultu. U větších PDF může krok trvat desítky sekund kvůli kopii, textové extrakci a indexu.";
       try {
-        const res = await fetch("/api/save", {
+        const res = await fetch(appApiUrl("/api/save"), {
           method: "POST",
           headers: {"Content-Type": "application/json"},
           body: JSON.stringify({
@@ -2295,7 +2334,7 @@ SCANDOCU_HTML = """<!doctype html>
 
     async function skipCurrent() {
       if (!current) return;
-      await fetch("/api/skip", {
+      await fetch(appApiUrl("/api/skip"), {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({token: current.token})
@@ -2304,7 +2343,7 @@ SCANDOCU_HTML = """<!doctype html>
     }
 
     function returnToCockpit() {
-      const cockpitUrl = "http://127.0.0.1:8770";
+      const cockpitUrl = appBasePath ? window.location.origin : "http://127.0.0.1:8770";
       if (window.opener && !window.opener.closed) {
         try {
           window.opener.focus();
@@ -2326,7 +2365,7 @@ SCANDOCU_HTML = """<!doctype html>
     document.getElementById("nextBtn").addEventListener("click", loadNext);
     document.getElementById("cockpitBtn").addEventListener("click", returnToCockpit);
     document.getElementById("archiveBtn").addEventListener("click", () => {
-      window.location.href = "/?mode=browse";
+      window.location.href = appUrl("/?mode=browse");
     });
     fields.aiSuggestBtn.addEventListener("click", requestAiSuggestion);
     fields.applyAiBtn.addEventListener("click", applyAiSuggestionToForm);
@@ -2778,6 +2817,12 @@ SCANDOCU_ARCHIVE_HTML = """<!doctype html>
   </main>
 
   <script>
+    const archiveBasePath = window.location.pathname.startsWith("/scandocu") ? "/scandocu" : "";
+    const archiveUrl = (path) => `${archiveBasePath}${path}`;
+    const archiveApiUrl = (path) => archiveBasePath ? `/api/scandocu${path.slice(4)}` : path;
+    const archiveResourceUrl = (value) => archiveBasePath && String(value || "").startsWith("/")
+      ? `${archiveBasePath}${value}`
+      : value;
     const listNode = document.getElementById("documentList");
     const detailPane = document.getElementById("detailPane");
     const statusNode = document.getElementById("status");
@@ -2903,7 +2948,7 @@ SCANDOCU_ARCHIVE_HTML = """<!doctype html>
       if (activeDomain) params.set("domain", activeDomain);
       if (activeReadingStatus) params.set("reading_status", activeReadingStatus);
       try {
-        const response = await fetch(`/api/documents?${params.toString()}`);
+        const response = await fetch(archiveApiUrl(`/api/documents?${params.toString()}`));
         const data = await response.json();
         if (currentRequest !== requestNumber) return;
         if (!response.ok || !data.ok) throw new Error(data.message || data.error || "Seznam není dostupný.");
@@ -2955,7 +3000,7 @@ SCANDOCU_ARCHIVE_HTML = """<!doctype html>
         `;
         return;
       }
-      const fileUrl = escapeHtml(data.file_url || "#");
+      const fileUrl = escapeHtml(archiveResourceUrl(data.file_url) || "#");
       let viewer = "";
       if (data.viewer_kind === "pdf") {
         viewer = `<iframe class="document-viewer" src="${fileUrl}" title="Celý dokument"></iframe>`;
@@ -3018,7 +3063,7 @@ SCANDOCU_ARCHIVE_HTML = """<!doctype html>
       `;
       document.body.classList.add("reader-open");
       try {
-        const response = await fetch(`/api/document?document_ref=${encodeURIComponent(documentRef)}`);
+        const response = await fetch(archiveApiUrl(`/api/document?document_ref=${encodeURIComponent(documentRef)}`));
         const data = await response.json();
         if (!response.ok || !data.ok) throw new Error(data.message || data.error || "Dokument není dostupný.");
         renderDetail(data);
@@ -3028,7 +3073,7 @@ SCANDOCU_ARCHIVE_HTML = """<!doctype html>
     }
 
     function returnToCockpit() {
-      const cockpitUrl = "http://127.0.0.1:8770";
+      const cockpitUrl = archiveBasePath ? window.location.origin : "http://127.0.0.1:8770";
       if (window.opener && !window.opener.closed) {
         try { window.opener.focus(); } catch (error) {}
         window.close();
@@ -3054,10 +3099,10 @@ SCANDOCU_ARCHIVE_HTML = """<!doctype html>
     document.getElementById("refreshBtn").addEventListener("click", loadDocuments);
     document.getElementById("cockpitBtn").addEventListener("click", returnToCockpit);
     document.getElementById("newDocumentBtn").addEventListener("click", () => {
-      window.location.href = "/";
+      window.location.href = archiveUrl("/");
     });
     document.getElementById("reviewBtn").addEventListener("click", () => {
-      window.location.href = "/?mode=review";
+      window.location.href = archiveUrl("/?mode=review");
     });
     document.getElementById("documentBackBtn").addEventListener("click", () => {
       document.body.classList.remove("reader-open");

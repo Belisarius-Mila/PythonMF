@@ -108,6 +108,7 @@ async def second():
         self.assertIn("tests.test_email_archive_browser", TEST_MODULES)
         self.assertIn("app/documents/archive_browser.py", COMPILE_PATHS)
         self.assertIn("tests.test_document_archive_browser", TEST_MODULES)
+        self.assertIn("tests.test_cockpit_scandocu_proxy", TEST_MODULES)
         self.assertNotIn("tests.test_adam_voice_mode", TEST_MODULES)
         self.assertIn("tests.test_codex_approval_cockpit_contract", TEST_MODULES)
         self.assertIn("tests.test_codex_approval_state", TEST_MODULES)
