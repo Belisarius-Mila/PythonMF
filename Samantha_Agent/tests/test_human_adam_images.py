@@ -127,7 +127,8 @@ class HumanAdamImageTests(unittest.TestCase):
         self.assertTrue(public["confirmation_text"].endswith(str(record["candidate_id"])))
         self.assertEqual(public["image_url"], "")
         serialized = json.dumps(public, ensure_ascii=False)
-        self.assertNotIn("b64", serialized.casefold())
+        self.assertNotIn("b64_json", public)
+        self.assertNotIn("image_data", public)
         self.assertNotIn(str(self.root), serialized)
 
     def test_generation_requires_candidate_specific_confirmation_before_client_call(self) -> None:

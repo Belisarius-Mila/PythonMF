@@ -271,6 +271,7 @@ class SystemQuickCheckTests(unittest.TestCase):
             env = os.environ.copy()
             env.update(
                 {
+                    "SAMANTHA_PROJECT_DIR": str(script.parents[1]),
                     "SAMANTHA_AUTOSAVE_OUT_DIR": str(out_dir),
                     "SAMANTHA_CODEX_SESSIONS_DIR": str(sessions_dir),
                     "SAMANTHA_AUTOSAVE_SECONDS": "60",
