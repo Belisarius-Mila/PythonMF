@@ -6,6 +6,7 @@ import unittest
 import os
 import signal
 import subprocess
+import sys
 from datetime import datetime
 from pathlib import Path
 from types import SimpleNamespace
@@ -335,6 +336,7 @@ class SystemQuickCheckTests(unittest.TestCase):
             env.update(
                 {
                     "SAMANTHA_PROJECT_DIR": str(script.parents[1]),
+                    "SAMANTHA_AUTOSAVE_PYTHON_BIN": sys.executable,
                     "SAMANTHA_AUTOSAVE_OUT_DIR": str(out_dir),
                     "SAMANTHA_CODEX_SESSIONS_DIR": str(sessions_dir),
                     "SAMANTHA_AUTOSAVE_HISTORY_SECONDS": "3600",
