@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-08-24",
+  "status": "mapping_applied_web_sync_pending",
+  "mapping_path": "Pict/mapping.json",
+  "backup_path": "PictNew/backups/mapping_before_mmtx_20260824_c762c4086bf4.json",
+  "before_sha256": "c762c4086bf446ec49d0febd916f1f239c5a271fd14095f1131a26b00dcfeee7",
+  "after_sha256": "42418f2298dbaf53218c4746fa689fc8fea521296fbb917f0115fd84b8440569",
+  "entry_count_before": 969,
+  "addition_count": 86,
+  "entry_count_after": 1055,
+  "existing_values_preserved": true
+}

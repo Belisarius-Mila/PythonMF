@@ -1,0 +1,92 @@
+[
+  {
+    "status": "generated_built_in_imagegen",
+    "request_index": 1,
+    "output_path": "PictNew/generated/20260824_en_mmtx_batch005/gate.webp",
+    "output_file": "gate.webp",
+    "original_bytes": 0,
+    "output_bytes": 261930,
+    "request": {
+      "image_name": "gate",
+      "words": [
+        "gate"
+      ],
+      "czech_meanings": [
+        "branka"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a closed wooden farm gate between two fence posts, clearly distinct from the fence.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    }
+  },
+  {
+    "status": "generated_built_in_imagegen",
+    "request_index": 2,
+    "output_path": "PictNew/generated/20260824_en_mmtx_batch005/get.webp",
+    "output_file": "get.webp",
+    "original_bytes": 0,
+    "output_bytes": 196594,
+    "request": {
+      "image_name": "get",
+      "words": [
+        "get"
+      ],
+      "czech_meanings": [
+        "dostat"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a child receiving a wrapped present from a smiling adult, with the handover clearly visible.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    }
+  },
+  {
+    "status": "generated_built_in_imagegen",
+    "request_index": 3,
+    "output_path": "PictNew/generated/20260824_en_mmtx_batch005/handle.webp",
+    "output_file": "handle.webp",
+    "original_bytes": 0,
+    "output_bytes": 183010,
+    "request": {
+      "image_name": "handle",
+      "words": [
+        "handle"
+      ],
+      "czech_meanings": [
+        "páka"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a close view of a hand pressing down the long handle of an old water pump.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    }
+  },
+  {
+    "status": "generated_built_in_imagegen",
+    "request_index": 4,
+    "output_path": "PictNew/generated/20260824_en_mmtx_batch005/idonthave.webp",
+    "output_file": "idonthave.webp",
+    "original_bytes": 0,
+    "output_bytes": 161484,
+    "request": {
+      "image_name": "idonthave",
+      "words": [
+        "I don't have"
+      ],
+      "czech_meanings": [
+        "nemám"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a child opening an empty backpack and shrugging with empty hands.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    }
+  },
+  {
+    "status": "generated_built_in_imagegen",
+    "request_index": 5,
+    "output_path": "PictNew/generated/20260824_en_mmtx_batch005/lookinside.webp",
+    "output_file": "lookinside.webp",
+    "original_bytes": 0,
+    "output_bytes": 141394,
+    "request": {
+      "image_name": "lookinside",
+      "words": [
+        "Look inside"
+      ],
+      "czech_meanings": [
+        "podívej se dovnitř"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a curious child leaning over and looking inside an open cardboard box.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    }
+  }
+]

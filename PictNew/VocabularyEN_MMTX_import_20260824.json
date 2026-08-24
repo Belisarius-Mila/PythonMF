@@ -1,0 +1,2973 @@
+{
+  "source_unique_count": 155,
+  "already_present_count": 33,
+  "planned_addition_count": 120,
+  "excluded_count": 2,
+  "planned_rows": [
+    {
+      "EN": "one",
+      "CZ": "jedna",
+      "Order": "187",
+      "Sentence": "One bird is sitting on the roof.",
+      "SentenceT": "Na střeše sedí jeden pták.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "two",
+      "CZ": "dva",
+      "Order": "188",
+      "Sentence": "Two paths meet near the lake.",
+      "SentenceT": "U jezera se setkávají dvě cesty.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "three",
+      "CZ": "tři",
+      "Order": "189",
+      "Sentence": "Three rabbits sit near the tree.",
+      "SentenceT": "U stromu sedí tři králíci.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "four",
+      "CZ": "čtyři",
+      "Order": "190",
+      "Sentence": "Four children are playing in the garden.",
+      "SentenceT": "Na zahradě si hrají čtyři děti.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "five",
+      "CZ": "pět",
+      "Order": "191",
+      "Sentence": "Five stars shine in the dark sky.",
+      "SentenceT": "Na tmavé obloze svítí pět hvězd.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "six",
+      "CZ": "šest",
+      "Order": "192",
+      "Sentence": "Six oranges are in the basket.",
+      "SentenceT": "V košíku je šest pomerančů.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "seven",
+      "CZ": "sedm",
+      "Order": "193",
+      "Sentence": "Seven sheep are standing in the field.",
+      "SentenceT": "Na poli stojí sedm ovcí.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "eight",
+      "CZ": "osm",
+      "Order": "194",
+      "Sentence": "Eight ducks are swimming on the pond.",
+      "SentenceT": "Na rybníku plave osm kachen.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "apples",
+      "CZ": "jablka",
+      "Order": "195",
+      "Sentence": "The apples are red and sweet.",
+      "SentenceT": "Jablka jsou červená a sladká.",
+      "WS": "Food",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "sunflowers",
+      "CZ": "slunečnice",
+      "Order": "196",
+      "Sentence": "The tall sunflowers turn toward the sun.",
+      "SentenceT": "Vysoké slunečnice se otáčejí ke slunci.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "pigs",
+      "CZ": "prasátka",
+      "Order": "197",
+      "Sentence": "The pigs are sleeping in the warm straw.",
+      "SentenceT": "Prasátka spí v teplé slámě.",
+      "WS": "Animals",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "count",
+      "CZ": "počítej",
+      "Order": "198",
+      "Sentence": "Count the apples in the basket.",
+      "SentenceT": "Spočítej jablka v košíku.",
+      "WS": "Actions",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "we can",
+      "CZ": "my můžeme",
+      "Order": "199",
+      "Sentence": "We can help the little animal.",
+      "SentenceT": "Můžeme pomoci malému zvířeti.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "friends",
+      "CZ": "kamarádi",
+      "Order": "200",
+      "Sentence": "We are good friends and help each other.",
+      "SentenceT": "Jsme dobří kamarádi a pomáháme si.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "OK",
+      "CZ": "dobře",
+      "Order": "201",
+      "Sentence": "OK, I will wait by the gate.",
+      "SentenceT": "Dobře, počkám u branky.",
+      "WS": "Greetings",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "let's go",
+      "CZ": "pojďme",
+      "Order": "202",
+      "Sentence": "Let's go to the park now.",
+      "SentenceT": "Pojďme teď do parku.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "we are",
+      "CZ": "my jsme",
+      "Order": "203",
+      "Sentence": "We are ready to start the lesson.",
+      "SentenceT": "Jsme připraveni začít lekci.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "too",
+      "CZ": "také",
+      "Order": "204",
+      "Sentence": "I want to go to the lake too.",
+      "SentenceT": "Také chci jít k jezeru.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "going",
+      "CZ": "jdeme",
+      "Order": "205",
+      "Sentence": "We are going to the lake together.",
+      "SentenceT": "Jdeme společně k jezeru.",
+      "WS": "Actions",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "ball",
+      "CZ": "míč",
+      "Order": "206",
+      "Sentence": "The child throws the ball to a friend.",
+      "SentenceT": "Dítě hází míč kamarádovi.",
+      "WS": "Things",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "car",
+      "CZ": "auto",
+      "Order": "207",
+      "Sentence": "Our car is parked in front of the house.",
+      "SentenceT": "Naše auto stojí před domem.",
+      "WS": "Things",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "train",
+      "CZ": "vlak",
+      "Order": "208",
+      "Sentence": "The train arrives at the station on time.",
+      "SentenceT": "Vlak přijíždí na nádraží včas.",
+      "WS": "Things",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "cup",
+      "CZ": "hrnek",
+      "Order": "209",
+      "Sentence": "My blue cup is on the table.",
+      "SentenceT": "Můj modrý hrnek je na stole.",
+      "WS": "Things",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "shoe",
+      "CZ": "bota",
+      "Order": "210",
+      "Sentence": "I tie my shoe before we leave.",
+      "SentenceT": "Než odejdeme, zavážu si botu.",
+      "WS": "Things",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "tree",
+      "CZ": "strom",
+      "Order": "211",
+      "Sentence": "A bird is building a nest in the tree.",
+      "SentenceT": "Pták si staví hnízdo na stromě.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "banana",
+      "CZ": "banán",
+      "Order": "212",
+      "Sentence": "I peel a banana for my snack.",
+      "SentenceT": "Oloupu si banán ke svačině.",
+      "WS": "Food",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "boat",
+      "CZ": "loď",
+      "Order": "213",
+      "Sentence": "A small boat sails across the lake.",
+      "SentenceT": "Malá loď pluje přes jezero.",
+      "WS": "Things",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "plate",
+      "CZ": "talíř",
+      "Order": "214",
+      "Sentence": "Please put the bread on the plate.",
+      "SentenceT": "Prosím polož chleba na talíř.",
+      "WS": "Things",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "sock",
+      "CZ": "ponožka",
+      "Order": "215",
+      "Sentence": "I found one sock under the bed.",
+      "SentenceT": "Našel jsem jednu ponožku pod postelí.",
+      "WS": "Things",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "flower",
+      "CZ": "kytka",
+      "Order": "216",
+      "Sentence": "A yellow flower grows by the path.",
+      "SentenceT": "U cesty roste žlutá kytka.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "bus",
+      "CZ": "autobus",
+      "Order": "217",
+      "Sentence": "The yellow bus stops near the school.",
+      "SentenceT": "Žlutý autobus zastavuje u školy.",
+      "WS": "Things",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "spoon",
+      "CZ": "lžička",
+      "Order": "218",
+      "Sentence": "She eats her soup with a spoon.",
+      "SentenceT": "Jí polévku lžičkou.",
+      "WS": "Things",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "hat",
+      "CZ": "čepice",
+      "Order": "219",
+      "Sentence": "Her warm hat is on the chair.",
+      "SentenceT": "Její teplá čepice je na židli.",
+      "WS": "Things",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "sun",
+      "CZ": "slunce",
+      "Order": "220",
+      "Sentence": "The sun warms the garden in the morning.",
+      "SentenceT": "Slunce ráno zahřívá zahradu.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "carrot",
+      "CZ": "mrkev",
+      "Order": "221",
+      "Sentence": "The rabbit eats a fresh carrot.",
+      "SentenceT": "Králík jí čerstvou mrkev.",
+      "WS": "Food",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School",
+        "MMTX scene 02"
+      ]
+    },
+    {
+      "EN": "chair",
+      "CZ": "židle",
+      "Order": "222",
+      "Sentence": "The wooden chair stands beside the table.",
+      "SentenceT": "Dřevěná židle stojí vedle stolu.",
+      "WS": "Things",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "moon",
+      "CZ": "měsíc",
+      "Order": "223",
+      "Sentence": "The moon is bright above the forest.",
+      "SentenceT": "Měsíc jasně svítí nad lesem.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "bread",
+      "CZ": "chleba",
+      "Order": "224",
+      "Sentence": "We buy fresh bread in the morning.",
+      "SentenceT": "Ráno kupujeme čerstvý chleba.",
+      "WS": "Food",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "truck",
+      "CZ": "náklaďák",
+      "Order": "225",
+      "Sentence": "The truck carries boxes to the shop.",
+      "SentenceT": "Náklaďák veze krabice do obchodu.",
+      "WS": "Things",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "bed",
+      "CZ": "postel",
+      "Order": "226",
+      "Sentence": "The cat is sleeping under the bed.",
+      "SentenceT": "Kočka spí pod postelí.",
+      "WS": "Things",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "star",
+      "CZ": "hvězda",
+      "Order": "227",
+      "Sentence": "The first star appears in the evening sky.",
+      "SentenceT": "Na večerní obloze se objeví první hvězda.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "cake",
+      "CZ": "dort",
+      "Order": "228",
+      "Sentence": "There is a birthday cake on the table.",
+      "SentenceT": "Na stole je narozeninový dort.",
+      "WS": "Food",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "plane",
+      "CZ": "letadlo",
+      "Order": "229",
+      "Sentence": "The plane flies above the clouds.",
+      "SentenceT": "Letadlo letí nad mraky.",
+      "WS": "Things",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "door",
+      "CZ": "dveře",
+      "Order": "230",
+      "Sentence": "Please close the door behind you.",
+      "SentenceT": "Prosím zavři za sebou dveře.",
+      "WS": "Things",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School",
+        "MMTX scene 03"
+      ]
+    },
+    {
+      "EN": "cloud",
+      "CZ": "mrak",
+      "Order": "231",
+      "Sentence": "A dark cloud moves across the sky.",
+      "SentenceT": "Po obloze se pohybuje tmavý mrak.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "rocket",
+      "CZ": "raketa",
+      "Order": "232",
+      "Sentence": "The rocket rises into the sky.",
+      "SentenceT": "Raketa stoupá k obloze.",
+      "WS": "Things",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "window",
+      "CZ": "okno",
+      "Order": "233",
+      "Sentence": "Open the window and let in fresh air.",
+      "SentenceT": "Otevři okno a pusť dovnitř čerstvý vzduch.",
+      "WS": "Things",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "key",
+      "CZ": "klíč",
+      "Order": "234",
+      "Sentence": "This small key opens the front door.",
+      "SentenceT": "Tento malý klíč otevírá přední dveře.",
+      "WS": "Things",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "stone",
+      "CZ": "kámen",
+      "Order": "235",
+      "Sentence": "A smooth stone lies beside the water.",
+      "SentenceT": "U vody leží hladký kámen.",
+      "WS": "Things",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "robot",
+      "CZ": "robot",
+      "Order": "236",
+      "Sentence": "The little robot waves its hand.",
+      "SentenceT": "Malý robot mává rukou.",
+      "WS": "Things",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "fork",
+      "CZ": "vidlička",
+      "Order": "237",
+      "Sentence": "I eat the salad with a fork.",
+      "SentenceT": "Jím salát vidličkou.",
+      "WS": "Things",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "cap",
+      "CZ": "čepice",
+      "Order": "238",
+      "Sentence": "He wears a red cap in the sun.",
+      "SentenceT": "Na slunci nosí červenou čepici.",
+      "WS": "Things",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "leaf",
+      "CZ": "list",
+      "Order": "239",
+      "Sentence": "A red leaf falls from the tree.",
+      "SentenceT": "Ze stromu padá červený list.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "cookie",
+      "CZ": "sušenka",
+      "Order": "240",
+      "Sentence": "She puts one cookie on the plate.",
+      "SentenceT": "Položí jednu sušenku na talíř.",
+      "WS": "Food",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "block",
+      "CZ": "kostka",
+      "Order": "241",
+      "Sentence": "The child builds a tower with a blue block.",
+      "SentenceT": "Dítě staví věž z modré kostky.",
+      "WS": "Things",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "pencil",
+      "CZ": "tužka",
+      "Order": "242",
+      "Sentence": "I write my name with a pencil.",
+      "SentenceT": "Píšu své jméno tužkou.",
+      "WS": "Things",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "pants",
+      "CZ": "kalhoty",
+      "Order": "243",
+      "Sentence": "These blue pants are too long.",
+      "SentenceT": "Tyto modré kalhoty jsou příliš dlouhé.",
+      "WS": "Things",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "stick",
+      "CZ": "klacek",
+      "Order": "244",
+      "Sentence": "The dog carries a stick in its mouth.",
+      "SentenceT": "Pes nese v tlamě klacek.",
+      "WS": "Things",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "corn",
+      "CZ": "kukuřice",
+      "Order": "245",
+      "Sentence": "The farmer grows corn in this field.",
+      "SentenceT": "Farmář pěstuje na tomto poli kukuřici.",
+      "WS": "Food",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "doll",
+      "CZ": "panenka",
+      "Order": "246",
+      "Sentence": "The little girl puts her doll to bed.",
+      "SentenceT": "Holčička ukládá panenku do postele.",
+      "WS": "Things",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "map",
+      "CZ": "mapa",
+      "Order": "247",
+      "Sentence": "The map shows the way to the lake.",
+      "SentenceT": "Mapa ukazuje cestu k jezeru.",
+      "WS": "Things",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School",
+        "MMTX scene 02"
+      ]
+    },
+    {
+      "EN": "soap",
+      "CZ": "mýdlo",
+      "Order": "248",
+      "Sentence": "Wash your hands with soap and water.",
+      "SentenceT": "Umyj si ruce mýdlem a vodou.",
+      "WS": "Things",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "pillow",
+      "CZ": "polštář",
+      "Order": "249",
+      "Sentence": "My head rests on a soft pillow.",
+      "SentenceT": "Hlavu mám položenou na měkkém polštáři.",
+      "WS": "Things",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "grape",
+      "CZ": "hroznové víno",
+      "Order": "250",
+      "Sentence": "One purple grape falls from the bunch.",
+      "SentenceT": "Z hroznu spadne jedna fialová kulička vína.",
+      "WS": "Food",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "toy",
+      "CZ": "hračka",
+      "Order": "251",
+      "Sentence": "The child puts the toy into the box.",
+      "SentenceT": "Dítě dává hračku do krabice.",
+      "WS": "Things",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "kite",
+      "CZ": "drak",
+      "Order": "252",
+      "Sentence": "The colorful kite flies high in the wind.",
+      "SentenceT": "Barevný drak létá vysoko ve větru.",
+      "WS": "Things",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "lamp",
+      "CZ": "lampa",
+      "Order": "253",
+      "Sentence": "The lamp gives us light in the evening.",
+      "SentenceT": "Lampa nám večer svítí.",
+      "WS": "Things",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "boots",
+      "CZ": "holinky",
+      "Order": "254",
+      "Sentence": "I wear my boots when it rains.",
+      "SentenceT": "Když prší, nosím holinky.",
+      "WS": "Things",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "pea",
+      "CZ": "hrášek",
+      "Order": "255",
+      "Sentence": "A small green pea is on the plate.",
+      "SentenceT": "Na talíři je malý zelený hrášek.",
+      "WS": "Food",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ]
+    },
+    {
+      "EN": "nuts",
+      "CZ": "oříšky",
+      "Order": "256",
+      "Sentence": "The squirrel keeps its nuts in a bag.",
+      "SentenceT": "Veverka má oříšky v brašně.",
+      "WS": "Food",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 02"
+      ]
+    },
+    {
+      "EN": "I have",
+      "CZ": "mám",
+      "Order": "257",
+      "Sentence": "I have a map in my bag.",
+      "SentenceT": "Mám v tašce mapu.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 02"
+      ]
+    },
+    {
+      "EN": "I don't have",
+      "CZ": "nemám",
+      "Order": "258",
+      "Sentence": "I don't have my bag with me.",
+      "SentenceT": "Nemám u sebe svou tašku.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 02"
+      ]
+    },
+    {
+      "EN": "Do you have?",
+      "CZ": "máš?",
+      "Order": "259",
+      "Sentence": "Do you have a pencil?",
+      "SentenceT": "Máš tužku?",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 02"
+      ]
+    },
+    {
+      "EN": "Does he have?",
+      "CZ": "má on?",
+      "Order": "260",
+      "Sentence": "Does he have the key?",
+      "SentenceT": "Má on ten klíč?",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 02"
+      ]
+    },
+    {
+      "EN": "Look inside",
+      "CZ": "podívej se dovnitř",
+      "Order": "261",
+      "Sentence": "Look inside the box for the missing toy.",
+      "SentenceT": "Podívej se dovnitř krabice po ztracené hračce.",
+      "WS": "Actions",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 02"
+      ]
+    },
+    {
+      "EN": "wait",
+      "CZ": "počkat",
+      "Order": "262",
+      "Sentence": "Please wait for me by the door.",
+      "SentenceT": "Prosím počkej na mě u dveří.",
+      "WS": "Actions",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 02"
+      ]
+    },
+    {
+      "EN": "look",
+      "CZ": "podívej, dívat se",
+      "Order": "263",
+      "Sentence": "Look at the bird in the tree.",
+      "SentenceT": "Podívej se na ptáka na stromě.",
+      "WS": "Actions",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 03"
+      ]
+    },
+    {
+      "EN": "way",
+      "CZ": "cesta",
+      "Order": "264",
+      "Sentence": "This is the way to the farm.",
+      "SentenceT": "Tudy se jde k farmě.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 03"
+      ]
+    },
+    {
+      "EN": "path",
+      "CZ": "cesta",
+      "Order": "265",
+      "Sentence": "This path leads through the forest.",
+      "SentenceT": "Tato cesta vede lesem.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 03"
+      ]
+    },
+    {
+      "EN": "crow",
+      "CZ": "havran",
+      "Order": "266",
+      "Sentence": "A black crow sits on the fence.",
+      "SentenceT": "Na plotě sedí černý havran.",
+      "WS": "Animals",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 03"
+      ]
+    },
+    {
+      "EN": "bad",
+      "CZ": "špatný",
+      "Order": "267",
+      "Sentence": "This road is bad after the rain.",
+      "SentenceT": "Tato cesta je po dešti špatná.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 03"
+      ]
+    },
+    {
+      "EN": "deep",
+      "CZ": "hluboký",
+      "Order": "268",
+      "Sentence": "The water is deep near the bridge.",
+      "SentenceT": "Voda je u mostu hluboká.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 03"
+      ]
+    },
+    {
+      "EN": "valley",
+      "CZ": "údolí",
+      "Order": "269",
+      "Sentence": "A river runs through the deep valley.",
+      "SentenceT": "Hlubokým údolím protéká řeka.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 03"
+      ]
+    },
+    {
+      "EN": "maybe",
+      "CZ": "možná",
+      "Order": "270",
+      "Sentence": "Maybe we can go there tomorrow.",
+      "SentenceT": "Možná tam můžeme jít zítra.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 03"
+      ]
+    },
+    {
+      "EN": "bears",
+      "CZ": "medvědi",
+      "Order": "271",
+      "Sentence": "The bears walk slowly through the forest.",
+      "SentenceT": "Medvědi pomalu kráčejí lesem.",
+      "WS": "Animals",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 03"
+      ]
+    },
+    {
+      "EN": "but",
+      "CZ": "ale",
+      "Order": "272",
+      "Sentence": "I am tired, but I am happy.",
+      "SentenceT": "Jsem unavený, ale jsem šťastný.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 03"
+      ]
+    },
+    {
+      "EN": "scared",
+      "CZ": "vystrašený",
+      "Order": "273",
+      "Sentence": "The horse is scared of the loud noise.",
+      "SentenceT": "Kůň se bojí hlasitého zvuku.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 03"
+      ]
+    },
+    {
+      "EN": "me too",
+      "CZ": "já také",
+      "Order": "274",
+      "Sentence": "I like apples, and my friend says, ‘Me too.’",
+      "SentenceT": "Mám rád jablka a kamarád říká: „Já také.“",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 03"
+      ]
+    },
+    {
+      "EN": "friendly",
+      "CZ": "přátelský",
+      "Order": "275",
+      "Sentence": "The horse is calm and friendly.",
+      "SentenceT": "Kůň je klidný a přátelský.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 03"
+      ]
+    },
+    {
+      "EN": "careful",
+      "CZ": "opatrný, opatrně",
+      "Order": "276",
+      "Sentence": "Be careful when you cross the road.",
+      "SentenceT": "Buď opatrný, když přecházíš silnici.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 03"
+      ]
+    },
+    {
+      "EN": "warning",
+      "CZ": "varování",
+      "Order": "277",
+      "Sentence": "The warning tells us to stop.",
+      "SentenceT": "Varování nám říká, abychom zastavili.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 03"
+      ]
+    },
+    {
+      "EN": "farm",
+      "CZ": "farma",
+      "Order": "278",
+      "Sentence": "There are cows and chickens on the farm.",
+      "SentenceT": "Na farmě jsou krávy a slepice.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 03"
+      ]
+    },
+    {
+      "EN": "stranger",
+      "CZ": "cizinec",
+      "Order": "279",
+      "Sentence": "Do not open the gate for a stranger.",
+      "SentenceT": "Neotvírej branku cizinci.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 03"
+      ]
+    },
+    {
+      "EN": "come",
+      "CZ": "jít, přijít",
+      "Order": "280",
+      "Sentence": "Please come to the table.",
+      "SentenceT": "Prosím přijď ke stolu.",
+      "WS": "Actions",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 03"
+      ]
+    },
+    {
+      "EN": "pump",
+      "CZ": "pumpa",
+      "Order": "281",
+      "Sentence": "The old pump brings water from the ground.",
+      "SentenceT": "Stará pumpa čerpá vodu ze země.",
+      "WS": "Things",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 03"
+      ]
+    },
+    {
+      "EN": "get",
+      "CZ": "dostat",
+      "Order": "282",
+      "Sentence": "I get a present on my birthday.",
+      "SentenceT": "K narozeninám dostanu dárek.",
+      "WS": "Actions",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 03"
+      ]
+    },
+    {
+      "EN": "bucket",
+      "CZ": "vědro, kbelík",
+      "Order": "283",
+      "Sentence": "The bucket is full of clean water.",
+      "SentenceT": "Kbelík je plný čisté vody.",
+      "WS": "Things",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 03"
+      ]
+    },
+    {
+      "EN": "empty",
+      "CZ": "prázdný",
+      "Order": "284",
+      "Sentence": "The glass is empty now.",
+      "SentenceT": "Sklenice je teď prázdná.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 03"
+      ]
+    },
+    {
+      "EN": "I don't know",
+      "CZ": "nevím",
+      "Order": "285",
+      "Sentence": "I don't know the answer yet.",
+      "SentenceT": "Ještě nevím odpověď.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 03"
+      ]
+    },
+    {
+      "EN": "forest",
+      "CZ": "les",
+      "Order": "286",
+      "Sentence": "We walk quietly through the green forest.",
+      "SentenceT": "Tiše procházíme zeleným lesem.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 03"
+      ]
+    },
+    {
+      "EN": "handle",
+      "CZ": "páka",
+      "Order": "287",
+      "Sentence": "Push the handle down to pump the water.",
+      "SentenceT": "Stlač páku dolů, abys napumpoval vodu.",
+      "WS": "Things",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 03"
+      ]
+    },
+    {
+      "EN": "push",
+      "CZ": "tlačit",
+      "Order": "288",
+      "Sentence": "Push the heavy door slowly.",
+      "SentenceT": "Pomalu zatlač na těžké dveře.",
+      "WS": "Actions",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 03"
+      ]
+    },
+    {
+      "EN": "come closer",
+      "CZ": "přijít blíž",
+      "Order": "289",
+      "Sentence": "Come closer so you can see the map.",
+      "SentenceT": "Přijď blíž, abys viděl mapu.",
+      "WS": "Actions",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 04 prototype"
+      ]
+    },
+    {
+      "EN": "chase",
+      "CZ": "honit",
+      "Order": "290",
+      "Sentence": "The dog does not chase the sheep.",
+      "SentenceT": "Pes nehoní ovce.",
+      "WS": "Actions",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 04 prototype"
+      ]
+    },
+    {
+      "EN": "little animals",
+      "CZ": "malá zvířátka",
+      "Order": "291",
+      "Sentence": "The little animals hide under the tree.",
+      "SentenceT": "Malá zvířátka se schovávají pod stromem.",
+      "WS": "Animals",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 04 prototype"
+      ]
+    },
+    {
+      "EN": "trust",
+      "CZ": "důvěřovat",
+      "Order": "292",
+      "Sentence": "The little animals trust their friend.",
+      "SentenceT": "Malá zvířátka důvěřují svému kamarádovi.",
+      "WS": "Actions",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 04 prototype"
+      ]
+    },
+    {
+      "EN": "eat",
+      "CZ": "jíst",
+      "Order": "293",
+      "Sentence": "We eat lunch together at noon.",
+      "SentenceT": "V poledne spolu jíme oběd.",
+      "WS": "Actions",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 04 prototype"
+      ]
+    },
+    {
+      "EN": "own",
+      "CZ": "vlastní",
+      "Order": "294",
+      "Sentence": "The rabbit has its own carrots.",
+      "SentenceT": "Králík má vlastní mrkev.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 04 prototype"
+      ]
+    },
+    {
+      "EN": "gate",
+      "CZ": "branka",
+      "Order": "295",
+      "Sentence": "The farmer opens the gate for us.",
+      "SentenceT": "Farmář nám otevírá branku.",
+      "WS": "Things",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 04 prototype"
+      ]
+    },
+    {
+      "EN": "closed",
+      "CZ": "zavřený",
+      "Order": "296",
+      "Sentence": "The shop is closed today.",
+      "SentenceT": "Obchod je dnes zavřený.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 04 prototype"
+      ]
+    },
+    {
+      "EN": "squirrel",
+      "CZ": "veverka",
+      "Order": "297",
+      "Sentence": "A squirrel jumps from tree to tree.",
+      "SentenceT": "Veverka skáče ze stromu na strom.",
+      "WS": "Animals",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 04 prototype"
+      ]
+    },
+    {
+      "EN": "question",
+      "CZ": "otázka",
+      "Order": "298",
+      "Sentence": "The teacher asks a simple question.",
+      "SentenceT": "Učitel pokládá jednoduchou otázku.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 04 prototype"
+      ]
+    },
+    {
+      "EN": "answer",
+      "CZ": "odpověď",
+      "Order": "299",
+      "Sentence": "I know the answer to this question.",
+      "SentenceT": "Znám odpověď na tuto otázku.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 04 prototype"
+      ]
+    },
+    {
+      "EN": "catch",
+      "CZ": "chytit",
+      "Order": "300",
+      "Sentence": "Can you catch the red ball?",
+      "SentenceT": "Dokážeš chytit červený míč?",
+      "WS": "Actions",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 04 prototype"
+      ]
+    },
+    {
+      "EN": "yard",
+      "CZ": "dvorek",
+      "Order": "301",
+      "Sentence": "The chickens walk around the farm yard.",
+      "SentenceT": "Slepice chodí po dvorku farmy.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 04 prototype"
+      ]
+    },
+    {
+      "EN": "badger",
+      "CZ": "jezevec",
+      "Order": "302",
+      "Sentence": "A badger comes out of its den at night.",
+      "SentenceT": "Jezevec vychází v noci ze svého doupěte.",
+      "WS": "Animals",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 04 prototype"
+      ]
+    },
+    {
+      "EN": "dig",
+      "CZ": "hrabat",
+      "Order": "303",
+      "Sentence": "The badger can dig under the fence.",
+      "SentenceT": "Jezevec umí hrabat pod plotem.",
+      "WS": "Actions",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 04 prototype"
+      ]
+    },
+    {
+      "EN": "under",
+      "CZ": "pod",
+      "Order": "304",
+      "Sentence": "The key is under the book.",
+      "SentenceT": "Klíč je pod knihou.",
+      "WS": "",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 04 prototype"
+      ]
+    },
+    {
+      "EN": "fence",
+      "CZ": "plot",
+      "Order": "305",
+      "Sentence": "The sheep stand behind the wooden fence.",
+      "SentenceT": "Ovce stojí za dřevěným plotem.",
+      "WS": "Things",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 04 prototype"
+      ]
+    },
+    {
+      "EN": "believe",
+      "CZ": "věřit",
+      "Order": "306",
+      "Sentence": "I believe you because you tell the truth.",
+      "SentenceT": "Věřím ti, protože říkáš pravdu.",
+      "WS": "Actions",
+      "L": "ne",
+      "HT": "ne",
+      "sources": [
+        "MMTX scene 04 prototype"
+      ]
+    }
+  ],
+  "source_items": [
+    {
+      "normalized": "one",
+      "en": "one",
+      "cz": "jedna",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "two",
+      "en": "two",
+      "cz": "dva",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "three",
+      "en": "three",
+      "cz": "tři",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "four",
+      "en": "four",
+      "cz": "čtyři",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "five",
+      "en": "five",
+      "cz": "pět",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "six",
+      "en": "six",
+      "cz": "šest",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "seven",
+      "en": "seven",
+      "cz": "sedm",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "eight",
+      "en": "eight",
+      "cz": "osm",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "purple",
+      "en": "purple",
+      "cz": "fialová",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "already_present"
+    },
+    {
+      "normalized": "yellow",
+      "en": "yellow",
+      "cz": "žlutá",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "already_present"
+    },
+    {
+      "normalized": "pink",
+      "en": "pink",
+      "cz": "růžová",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "already_present"
+    },
+    {
+      "normalized": "apples",
+      "en": "apples",
+      "cz": "jablka",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "sunflowers",
+      "en": "sunflowers",
+      "cz": "slunečnice",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "pigs",
+      "en": "pigs",
+      "cz": "prasátka",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "count",
+      "en": "count",
+      "cz": "počítej",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "garden",
+      "en": "garden",
+      "cz": "zahrada",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "already_present"
+    },
+    {
+      "normalized": "hello",
+      "en": "Hello",
+      "cz": "ahoj",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "already_present"
+    },
+    {
+      "normalized": "iam",
+      "en": "I am",
+      "cz": "já jsem",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "already_present"
+    },
+    {
+      "normalized": "benji",
+      "en": "Benji",
+      "cz": "Benji",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "excluded_character_name"
+    },
+    {
+      "normalized": "bunny",
+      "en": "Bunny",
+      "cz": "Bunny",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "excluded_character_name"
+    },
+    {
+      "normalized": "wecan",
+      "en": "we can",
+      "cz": "my můžeme",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "friends",
+      "en": "friends",
+      "cz": "kamarádi",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "where",
+      "en": "where",
+      "cz": "kam",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "already_present"
+    },
+    {
+      "normalized": "go",
+      "en": "go",
+      "cz": "jít",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "already_present"
+    },
+    {
+      "normalized": "house",
+      "en": "house",
+      "cz": "dům",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "already_present"
+    },
+    {
+      "normalized": "ok",
+      "en": "OK",
+      "cz": "dobře",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "letsgo",
+      "en": "let's go",
+      "cz": "pojďme",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "weare",
+      "en": "we are",
+      "cz": "my jsme",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "too",
+      "en": "too",
+      "cz": "také",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "going",
+      "en": "going",
+      "cz": "jdeme",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "lake",
+      "en": "lake",
+      "cz": "jezero",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "already_present"
+    },
+    {
+      "normalized": "together",
+      "en": "together",
+      "cz": "společně",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "already_present"
+    },
+    {
+      "normalized": "ball",
+      "en": "ball",
+      "cz": "míč",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "car",
+      "en": "car",
+      "cz": "auto",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "book",
+      "en": "book",
+      "cz": "kniha",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "already_present"
+    },
+    {
+      "normalized": "apple",
+      "en": "apple",
+      "cz": "jablko",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "already_present"
+    },
+    {
+      "normalized": "train",
+      "en": "train",
+      "cz": "vlak",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "cup",
+      "en": "cup",
+      "cz": "hrnek",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "shoe",
+      "en": "shoe",
+      "cz": "bota",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "tree",
+      "en": "tree",
+      "cz": "strom",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "banana",
+      "en": "banana",
+      "cz": "banán",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "boat",
+      "en": "boat",
+      "cz": "loď",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "plate",
+      "en": "plate",
+      "cz": "talíř",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "sock",
+      "en": "sock",
+      "cz": "ponožka",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "flower",
+      "en": "flower",
+      "cz": "kytka",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "orange",
+      "en": "orange",
+      "cz": "pomeranč",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "already_present"
+    },
+    {
+      "normalized": "bus",
+      "en": "bus",
+      "cz": "autobus",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "spoon",
+      "en": "spoon",
+      "cz": "lžička",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "hat",
+      "en": "hat",
+      "cz": "čepice",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "sun",
+      "en": "sun",
+      "cz": "slunce",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "carrot",
+      "en": "carrot",
+      "cz": "mrkev",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School",
+        "MMTX scene 02"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "bike",
+      "en": "bike",
+      "cz": "kolo",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "already_present"
+    },
+    {
+      "normalized": "chair",
+      "en": "chair",
+      "cz": "židle",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "bag",
+      "en": "bag",
+      "cz": "batoh",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School",
+        "MMTX scene 02"
+      ],
+      "status": "already_present"
+    },
+    {
+      "normalized": "moon",
+      "en": "moon",
+      "cz": "měsíc",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "bread",
+      "en": "bread",
+      "cz": "chleba",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "truck",
+      "en": "truck",
+      "cz": "náklaďák",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "table",
+      "en": "table",
+      "cz": "stůl",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "already_present"
+    },
+    {
+      "normalized": "bed",
+      "en": "bed",
+      "cz": "postel",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "star",
+      "en": "star",
+      "cz": "hvězda",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "cake",
+      "en": "cake",
+      "cz": "dort",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "plane",
+      "en": "plane",
+      "cz": "letadlo",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "door",
+      "en": "door",
+      "cz": "dveře",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School",
+        "MMTX scene 03"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "box",
+      "en": "box",
+      "cz": "krabice",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "already_present"
+    },
+    {
+      "normalized": "cloud",
+      "en": "cloud",
+      "cz": "mrak",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "milk",
+      "en": "milk",
+      "cz": "mléko",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "already_present"
+    },
+    {
+      "normalized": "rocket",
+      "en": "rocket",
+      "cz": "raketa",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "window",
+      "en": "window",
+      "cz": "okno",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "key",
+      "en": "key",
+      "cz": "klíč",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "stone",
+      "en": "stone",
+      "cz": "kámen",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "water",
+      "en": "water",
+      "cz": "voda",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School",
+        "MMTX scene 03"
+      ],
+      "status": "already_present"
+    },
+    {
+      "normalized": "robot",
+      "en": "robot",
+      "cz": "robot",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "fork",
+      "en": "fork",
+      "cz": "vidlička",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "cap",
+      "en": "cap",
+      "cz": "čepice",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "leaf",
+      "en": "leaf",
+      "cz": "list",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "cookie",
+      "en": "cookie",
+      "cz": "sušenka",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "block",
+      "en": "block",
+      "cz": "kostka",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "pencil",
+      "en": "pencil",
+      "cz": "tužka",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "pants",
+      "en": "pants",
+      "cz": "kalhoty",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "stick",
+      "en": "stick",
+      "cz": "klacek",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "corn",
+      "en": "corn",
+      "cz": "kukuřice",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "doll",
+      "en": "doll",
+      "cz": "panenka",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "map",
+      "en": "map",
+      "cz": "mapa",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School",
+        "MMTX scene 02"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "soap",
+      "en": "soap",
+      "cz": "mýdlo",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "pillow",
+      "en": "pillow",
+      "cz": "polštář",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "grape",
+      "en": "grape",
+      "cz": "hroznové víno",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "toy",
+      "en": "toy",
+      "cz": "hračka",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "kite",
+      "en": "kite",
+      "cz": "drak",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "lamp",
+      "en": "lamp",
+      "cz": "lampa",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "boots",
+      "en": "boots",
+      "cz": "holinky",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "pea",
+      "en": "pea",
+      "cz": "hrášek",
+      "sources": [
+        "MMTX intro, Owl Garden and Forest School"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "nuts",
+      "en": "nuts",
+      "cz": "oříšky",
+      "sources": [
+        "MMTX scene 02"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "ihave",
+      "en": "I have",
+      "cz": "mám",
+      "sources": [
+        "MMTX scene 02"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "idonthave",
+      "en": "I don't have",
+      "cz": "nemám",
+      "sources": [
+        "MMTX scene 02"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "doyouhave",
+      "en": "Do you have?",
+      "cz": "máš?",
+      "sources": [
+        "MMTX scene 02"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "doeshehave",
+      "en": "Does he have?",
+      "cz": "má on?",
+      "sources": [
+        "MMTX scene 02"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "lookinside",
+      "en": "Look inside",
+      "cz": "podívej se dovnitř",
+      "sources": [
+        "MMTX scene 02"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "ready",
+      "en": "ready",
+      "cz": "připravený",
+      "sources": [
+        "MMTX scene 02"
+      ],
+      "status": "already_present"
+    },
+    {
+      "normalized": "wait",
+      "en": "wait",
+      "cz": "počkat",
+      "sources": [
+        "MMTX scene 02"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "happy",
+      "en": "happy",
+      "cz": "šťastný",
+      "sources": [
+        "MMTX scene 02"
+      ],
+      "status": "already_present"
+    },
+    {
+      "normalized": "look",
+      "en": "look",
+      "cz": "podívej, dívat se",
+      "sources": [
+        "MMTX scene 03"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "left",
+      "en": "left",
+      "cz": "vlevo",
+      "sources": [
+        "MMTX scene 03"
+      ],
+      "status": "already_present"
+    },
+    {
+      "normalized": "right",
+      "en": "right",
+      "cz": "vpravo",
+      "sources": [
+        "MMTX scene 03"
+      ],
+      "status": "already_present"
+    },
+    {
+      "normalized": "way",
+      "en": "way",
+      "cz": "cesta",
+      "sources": [
+        "MMTX scene 03"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "path",
+      "en": "path",
+      "cz": "cesta",
+      "sources": [
+        "MMTX scene 03"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "crow",
+      "en": "crow",
+      "cz": "havran",
+      "sources": [
+        "MMTX scene 03"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "bad",
+      "en": "bad",
+      "cz": "špatný",
+      "sources": [
+        "MMTX scene 03"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "deep",
+      "en": "deep",
+      "cz": "hluboký",
+      "sources": [
+        "MMTX scene 03"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "valley",
+      "en": "valley",
+      "cz": "údolí",
+      "sources": [
+        "MMTX scene 03"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "maybe",
+      "en": "maybe",
+      "cz": "možná",
+      "sources": [
+        "MMTX scene 03"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "bears",
+      "en": "bears",
+      "cz": "medvědi",
+      "sources": [
+        "MMTX scene 03"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "but",
+      "en": "but",
+      "cz": "ale",
+      "sources": [
+        "MMTX scene 03"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "horse",
+      "en": "horse",
+      "cz": "kůň",
+      "sources": [
+        "MMTX scene 03"
+      ],
+      "status": "already_present"
+    },
+    {
+      "normalized": "scared",
+      "en": "scared",
+      "cz": "vystrašený",
+      "sources": [
+        "MMTX scene 03"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "metoo",
+      "en": "me too",
+      "cz": "já také",
+      "sources": [
+        "MMTX scene 03"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "friendly",
+      "en": "friendly",
+      "cz": "přátelský",
+      "sources": [
+        "MMTX scene 03"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "careful",
+      "en": "careful",
+      "cz": "opatrný, opatrně",
+      "sources": [
+        "MMTX scene 03"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "dog",
+      "en": "dog",
+      "cz": "pes",
+      "sources": [
+        "MMTX scene 03"
+      ],
+      "status": "already_present"
+    },
+    {
+      "normalized": "live",
+      "en": "live",
+      "cz": "žít, bydlet",
+      "sources": [
+        "MMTX scene 03"
+      ],
+      "status": "already_present"
+    },
+    {
+      "normalized": "warning",
+      "en": "warning",
+      "cz": "varování",
+      "sources": [
+        "MMTX scene 03"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "farm",
+      "en": "farm",
+      "cz": "farma",
+      "sources": [
+        "MMTX scene 03"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "stranger",
+      "en": "stranger",
+      "cz": "cizinec",
+      "sources": [
+        "MMTX scene 03"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "come",
+      "en": "come",
+      "cz": "jít, přijít",
+      "sources": [
+        "MMTX scene 03"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "drink",
+      "en": "drink",
+      "cz": "pít",
+      "sources": [
+        "MMTX scene 03"
+      ],
+      "status": "already_present"
+    },
+    {
+      "normalized": "pump",
+      "en": "pump",
+      "cz": "pumpa",
+      "sources": [
+        "MMTX scene 03"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "get",
+      "en": "get",
+      "cz": "dostat",
+      "sources": [
+        "MMTX scene 03"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "bucket",
+      "en": "bucket",
+      "cz": "vědro, kbelík",
+      "sources": [
+        "MMTX scene 03"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "empty",
+      "en": "empty",
+      "cz": "prázdný",
+      "sources": [
+        "MMTX scene 03"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "idontknow",
+      "en": "I don't know",
+      "cz": "nevím",
+      "sources": [
+        "MMTX scene 03"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "forest",
+      "en": "forest",
+      "cz": "les",
+      "sources": [
+        "MMTX scene 03"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "handle",
+      "en": "handle",
+      "cz": "páka",
+      "sources": [
+        "MMTX scene 03"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "jump",
+      "en": "jump",
+      "cz": "skočit",
+      "sources": [
+        "MMTX scene 03"
+      ],
+      "status": "already_present"
+    },
+    {
+      "normalized": "push",
+      "en": "push",
+      "cz": "tlačit",
+      "sources": [
+        "MMTX scene 03"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "comecloser",
+      "en": "come closer",
+      "cz": "přijít blíž",
+      "sources": [
+        "MMTX scene 04 prototype"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "chase",
+      "en": "chase",
+      "cz": "honit",
+      "sources": [
+        "MMTX scene 04 prototype"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "sheep",
+      "en": "sheep",
+      "cz": "ovce",
+      "sources": [
+        "MMTX scene 04 prototype"
+      ],
+      "status": "already_present"
+    },
+    {
+      "normalized": "littleanimals",
+      "en": "little animals",
+      "cz": "malá zvířátka",
+      "sources": [
+        "MMTX scene 04 prototype"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "trust",
+      "en": "trust",
+      "cz": "důvěřovat",
+      "sources": [
+        "MMTX scene 04 prototype"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "rabbit",
+      "en": "rabbit",
+      "cz": "králík",
+      "sources": [
+        "MMTX scene 04 prototype"
+      ],
+      "status": "already_present"
+    },
+    {
+      "normalized": "eat",
+      "en": "eat",
+      "cz": "jíst",
+      "sources": [
+        "MMTX scene 04 prototype"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "own",
+      "en": "own",
+      "cz": "vlastní",
+      "sources": [
+        "MMTX scene 04 prototype"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "gate",
+      "en": "gate",
+      "cz": "branka",
+      "sources": [
+        "MMTX scene 04 prototype"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "closed",
+      "en": "closed",
+      "cz": "zavřený",
+      "sources": [
+        "MMTX scene 04 prototype"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "squirrel",
+      "en": "squirrel",
+      "cz": "veverka",
+      "sources": [
+        "MMTX scene 04 prototype"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "question",
+      "en": "question",
+      "cz": "otázka",
+      "sources": [
+        "MMTX scene 04 prototype"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "answer",
+      "en": "answer",
+      "cz": "odpověď",
+      "sources": [
+        "MMTX scene 04 prototype"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "fox",
+      "en": "fox",
+      "cz": "liška",
+      "sources": [
+        "MMTX scene 04 prototype"
+      ],
+      "status": "already_present"
+    },
+    {
+      "normalized": "catch",
+      "en": "catch",
+      "cz": "chytit",
+      "sources": [
+        "MMTX scene 04 prototype"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "chicken",
+      "en": "chicken",
+      "cz": "slepice",
+      "sources": [
+        "MMTX scene 04 prototype"
+      ],
+      "status": "already_present"
+    },
+    {
+      "normalized": "yard",
+      "en": "yard",
+      "cz": "dvorek",
+      "sources": [
+        "MMTX scene 04 prototype"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "badger",
+      "en": "badger",
+      "cz": "jezevec",
+      "sources": [
+        "MMTX scene 04 prototype"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "dig",
+      "en": "dig",
+      "cz": "hrabat",
+      "sources": [
+        "MMTX scene 04 prototype"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "under",
+      "en": "under",
+      "cz": "pod",
+      "sources": [
+        "MMTX scene 04 prototype"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "fence",
+      "en": "fence",
+      "cz": "plot",
+      "sources": [
+        "MMTX scene 04 prototype"
+      ],
+      "status": "planned_addition"
+    },
+    {
+      "normalized": "believe",
+      "en": "believe",
+      "cz": "věřit",
+      "sources": [
+        "MMTX scene 04 prototype"
+      ],
+      "status": "planned_addition"
+    }
+  ]
+}

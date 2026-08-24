@@ -47,8 +47,9 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   ideálně diagnostikou přímo na cílovém zařízení včetně cest, počtů a
   kontrolních součtů. Mapping před změnou zálohovat, na zařízení nahrát do všech
   skutečně používaných míst a aplikaci restartovat. Chybějící obrázky doplňovat
-  podle výsledku úplného auditu. Lokální či iCloudové servisní obrázky držet mimo
-  Git pomocí přesného lokálního exclude.
+  podle výsledku úplného auditu. Před webovým syncem navíc vypsat nepoužívané
+  assety; bez samostatně potvrzeného mazání je zachovat. Lokální či iCloudové
+  servisní obrázky držet mimo Git pomocí přesného lokálního exclude.
 
 ### LL-003 — Proměnlivý provozní stav neověřovat jen z projektové paměti
 

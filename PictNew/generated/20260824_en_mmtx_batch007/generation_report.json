@@ -1,0 +1,98 @@
+[
+  {
+    "status": "generated_built_in_imagegen",
+    "request_index": 1,
+    "output_path": "PictNew/generated/20260824_en_mmtx_batch007/scared.webp",
+    "output_file": "scared.webp",
+    "original_bytes": 0,
+    "output_bytes": 249806,
+    "request": {
+      "image_name": "scared",
+      "words": [
+        "scared"
+      ],
+      "czech_meanings": [
+        "vystrašený"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a horse looking startled by a sudden harmless noise, with a caring child nearby.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    }
+  },
+  {
+    "status": "generated_built_in_imagegen",
+    "request_index": 2,
+    "output_path": "PictNew/generated/20260824_en_mmtx_batch007/squirrel.webp",
+    "output_file": "squirrel.webp",
+    "original_bytes": 0,
+    "output_bytes": 265400,
+    "request": {
+      "image_name": "squirrel",
+      "words": [
+        "squirrel"
+      ],
+      "czech_meanings": [
+        "veverka"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a red squirrel holding a nut on a tree branch.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    }
+  },
+  {
+    "status": "generated_built_in_imagegen",
+    "request_index": 3,
+    "output_path": "PictNew/generated/20260824_en_mmtx_batch007/trust.webp",
+    "output_file": "trust.webp",
+    "original_bytes": 0,
+    "output_bytes": 289054,
+    "request": {
+      "image_name": "trust",
+      "words": [
+        "trust",
+        "believe"
+      ],
+      "czech_meanings": [
+        "důvěřovat",
+        "věřit"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: one child safely helping another child cross a shallow stream by holding hands.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    }
+  },
+  {
+    "status": "generated_built_in_imagegen",
+    "request_index": 4,
+    "output_path": "PictNew/generated/20260824_en_mmtx_batch007/valley.webp",
+    "output_file": "valley.webp",
+    "original_bytes": 0,
+    "output_bytes": 298004,
+    "request": {
+      "image_name": "valley",
+      "words": [
+        "deep",
+        "valley"
+      ],
+      "czech_meanings": [
+        "hluboký",
+        "údolí"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a clearly deep green valley between high hills with a river at the bottom.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    }
+  },
+  {
+    "status": "generated_built_in_imagegen",
+    "request_index": 5,
+    "output_path": "PictNew/generated/20260824_en_mmtx_batch007/warning.webp",
+    "output_file": "warning.webp",
+    "original_bytes": 0,
+    "output_bytes": 194806,
+    "request": {
+      "image_name": "warning",
+      "words": [
+        "careful",
+        "warning"
+      ],
+      "czech_meanings": [
+        "opatrný, opatrně",
+        "varování"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a careful child stopping safely before a pedestrian crossing while a red traffic light is visible.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    }
+  }
+]

@@ -1,0 +1,218 @@
+from __future__ import annotations
+
+import csv
+import importlib.util
+import json
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[2]
+MODULE_PATH = ROOT / "VocabularyEN" / "import_mmtx_vocabulary.py"
+SYNC_MODULE_PATH = ROOT / "VocabularyEN" / "sync_vocabulary_en_to_docs.py"
+PICTURE_PLAN_MODULE_PATH = ROOT / "VocabularyEN" / "prepare_mmtx_picture_plan.py"
+PUBLISH_MODULE_PATH = ROOT / "VocabularyEN" / "publish_mmtx_picture_candidates.py"
+
+
+def load_module():
+    spec = importlib.util.spec_from_file_location("import_mmtx_vocabulary", MODULE_PATH)
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def load_sync_module():
+    spec = importlib.util.spec_from_file_location("sync_vocabulary_en_to_docs", SYNC_MODULE_PATH)
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def load_picture_plan_module():
+    spec = importlib.util.spec_from_file_location("prepare_mmtx_picture_plan", PICTURE_PLAN_MODULE_PATH)
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def load_publish_module():
+    spec = importlib.util.spec_from_file_location(
+        "publish_mmtx_picture_candidates", PUBLISH_MODULE_PATH
+    )
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_current_mmtx_inventory_has_complete_curated_plan():
+    module = load_module()
+    entries, current_rows, planned = module.build_plan()
+
+    assert len(entries) == 155
+    assert len(current_rows) == 306
+    assert planned == []
+    imported = current_rows[186:]
+    assert len(imported) == 120
+    assert imported[0]["Order"] == "187"
+    assert imported[-1]["Order"] == "306"
+    assert {module.normalize_word(str(row["EN"])) for row in imported}.isdisjoint(
+        module.EXCLUDED_NORMALIZED
+    )
+    assert all(str(row["Sentence"]).strip() for row in imported)
+    assert all(str(row["SentenceT"]).strip() for row in imported)
+
+
+def test_append_preserves_existing_csv_prefix_and_crlf(tmp_path):
+    module = load_module()
+    original = module.CSV_PATH.read_bytes()
+    lines = original.split(b"\r\n")
+    assert len(lines) == 308
+    pre_import = b"\r\n".join(lines[:187]) + b"\r\n"
+    target = tmp_path / "VocabularyEN.csv"
+    target.write_bytes(pre_import)
+    module.CSV_PATH = target
+    entries, current_rows, planned = module.build_plan()
+    assert len(entries) == 155
+    assert len(current_rows) == 186
+    assert len(planned) == 120
+    module.append_rows(planned)
+
+    updated = target.read_bytes()
+    assert updated.startswith(pre_import)
+    assert updated == original
+    assert updated.count(b"\r\n") == 307
+    assert b"\n" not in updated.replace(b"\r\n", b"")
+
+    with target.open("r", encoding="utf-8", newline="") as handle:
+        rows = list(csv.DictReader(handle))
+    assert len(rows) == 306
+    assert rows[-1]["EN"] == "believe"
+    assert rows[-1]["SentenceT"] == "Věřím ti, protože říkáš pravdu."
+
+
+def test_czech_tokenization_keeps_letters_with_diacritics_together():
+    module = load_sync_module()
+
+    assert module.tokenize_words("věřit, důvěřovat") == ["verit", "duverovat"]
+    assert module.tokenize_words("oříšky") == ["orisky"]
+
+
+def test_exact_mapping_beats_accent_stripped_czech_filename_collision():
+    module = load_sync_module()
+
+    stem, source = module.choose_picture_stem(
+        {"EN": "too", "CZ": "také"},
+        picture_stems={"take", "also"},
+        synonym_image_map={"take": "also"},
+    )
+
+    assert (stem, source) == ("also", "mapping")
+
+
+def test_exact_english_filename_stays_authoritative():
+    module = load_sync_module()
+
+    stem, source = module.choose_picture_stem(
+        {"EN": "take", "CZ": "brát"},
+        picture_stems={"take", "other"},
+        synonym_image_map={"take": "other"},
+    )
+
+    assert (stem, source) == ("take", "direct")
+
+
+def test_czech_meaning_beats_short_english_function_word():
+    module = load_sync_module()
+
+    stem, source = module.choose_picture_stem(
+        {"EN": "a glass (of water)", "CZ": "sklenice (vody)"},
+        picture_stems={"a", "and", "glass"},
+        synonym_image_map={"a": "and", "sklenice": "glass"},
+    )
+
+    assert (stem, source) == ("glass", "mapping")
+
+
+def test_web_asset_sync_can_preserve_unreferenced_files(tmp_path):
+    module = load_sync_module()
+    extra = tmp_path / "legacy.webp"
+    extra.write_bytes(b"legacy")
+
+    module.ensure_clean_assets_dir(
+        tmp_path,
+        expected_names=set(),
+        preserve_extra_assets=True,
+    )
+
+    assert extra.read_bytes() == b"legacy"
+
+
+def test_mapping_byte_append_preserves_existing_values():
+    module = load_publish_module()
+    original = '{\n  "starý": "old"\n}\n'.encode("utf-8")
+
+    updated = module.append_mapping_bytes(
+        original,
+        {"nový": "new", "běhat": "race"},
+    )
+
+    assert updated.startswith('{\n  "starý": "old",\n'.encode("utf-8"))
+    assert json.loads(updated.decode("utf-8")) == {
+        "starý": "old",
+        "nový": "new",
+        "běhat": "race",
+    }
+
+
+def test_applied_mapping_matches_approved_preview_and_backup():
+    preview = json.loads(
+        (ROOT / "PictNew" / "VocabularyEN_MMTX_mapping_preview_20260824.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    receipt = json.loads(
+        (ROOT / "PictNew" / "VocabularyEN_MMTX_mapping_apply_receipt_20260824.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    web_receipt = json.loads(
+        (ROOT / "PictNew" / "VocabularyEN_MMTX_web_sync_receipt_20260824.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    current = json.loads((ROOT / "Pict" / "mapping.json").read_text(encoding="utf-8"))
+    backup = json.loads((ROOT / receipt["backup_path"]).read_text(encoding="utf-8"))
+
+    assert receipt["entry_count_before"] == len(backup) == 969
+    assert receipt["addition_count"] == len(preview["additions"]) == 86
+    assert receipt["entry_count_after"] == len(current) == 1055
+    assert all(current[key] == value for key, value in backup.items())
+    assert all(current[key] == value for key, value in preview["additions"].items())
+    assert web_receipt["status"] == "mapping_and_web_sync_completed"
+    assert web_receipt["mapping_entry_count"] == 1055
+    assert web_receipt["web_row_count"] == 306
+    assert web_receipt["web_missing_image_count"] == 0
+    assert web_receipt["asset_deletions"] == 0
+
+
+def test_picture_plan_covers_every_imported_row_without_overwrite():
+    plan = json.loads(
+        (ROOT / "PictNew" / "VocabularyEN_MMTX_picture_plan_20260824.json").read_text(
+            encoding="utf-8"
+        )
+    )
+
+    assert plan["imported_row_count"] == 120
+    assert sum(plan["assignment_counts"].values()) == 120
+    assert plan["assignment_counts"] == {
+        "reuse_pict_exact": 27,
+        "reuse_mmtx_forest_asset": 33,
+        "reuse_pict_mapped": 21,
+        "generate": 39,
+    }
+    assert plan["total_unique_target_images"] == 35
+    assert len({request["image_name"] for request in plan["requests"]}) == 35
+    assert all(conflict["decision"] == "preserve_current" for conflict in plan["preserved_mapping_conflicts"])

@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-08-24",
+  "status": "mapping_and_web_sync_completed",
+  "mapping_entry_count": 1055,
+  "mapping_sha256": "42418f2298dbaf53218c4746fa689fc8fea521296fbb917f0115fd84b8440569",
+  "web_data_path": "docs/data/vocabulary-en.json",
+  "web_data_sha256": "191874466f2ebf2cccedb126ce53bf4df7bb10dd3ab44b6ad42d66b65478f2ce",
+  "web_row_count": 306,
+  "web_sentence_count": 306,
+  "web_sentence_translation_count": 306,
+  "web_unique_referenced_image_count": 277,
+  "web_missing_image_count": 0,
+  "approved_imported_rows_verified": 120,
+  "preserved_unreferenced_assets": [
+    "a.webp",
+    "others.png",
+    "zahrada.jpg"
+  ],
+  "asset_deletions": 0
+}

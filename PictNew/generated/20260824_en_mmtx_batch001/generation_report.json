@@ -1,0 +1,92 @@
+[
+  {
+    "status": "generated_built_in_imagegen",
+    "request_index": 1,
+    "output_path": "PictNew/generated/20260824_en_mmtx_batch001/four.webp",
+    "output_file": "four.webp",
+    "original_bytes": 0,
+    "output_bytes": 127990,
+    "request": {
+      "image_name": "four",
+      "words": [
+        "four"
+      ],
+      "czech_meanings": [
+        "čtyři"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: exactly four colorful kites flying in the sky; no other kites.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    }
+  },
+  {
+    "status": "generated_built_in_imagegen",
+    "request_index": 2,
+    "output_path": "PictNew/generated/20260824_en_mmtx_batch001/one.webp",
+    "output_file": "one.webp",
+    "original_bytes": 0,
+    "output_bytes": 115572,
+    "request": {
+      "image_name": "one",
+      "words": [
+        "one"
+      ],
+      "czech_meanings": [
+        "jedna"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: exactly one bright red apple on a small plate; no other countable objects.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    }
+  },
+  {
+    "status": "generated_built_in_imagegen",
+    "request_index": 3,
+    "output_path": "PictNew/generated/20260824_en_mmtx_batch001/six.webp",
+    "output_file": "six.webp",
+    "original_bytes": 0,
+    "output_bytes": 209214,
+    "request": {
+      "image_name": "six",
+      "words": [
+        "six"
+      ],
+      "czech_meanings": [
+        "šest"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: exactly six oranges arranged clearly in one basket; no other fruit.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    }
+  },
+  {
+    "status": "generated_built_in_imagegen",
+    "request_index": 4,
+    "output_path": "PictNew/generated/20260824_en_mmtx_batch001/three.webp",
+    "output_file": "three.webp",
+    "original_bytes": 0,
+    "output_bytes": 180560,
+    "request": {
+      "image_name": "three",
+      "words": [
+        "three"
+      ],
+      "czech_meanings": [
+        "tři"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: exactly three friendly rabbits sitting in a row; no other animals.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    }
+  },
+  {
+    "status": "generated_built_in_imagegen",
+    "request_index": 5,
+    "output_path": "PictNew/generated/20260824_en_mmtx_batch001/two.webp",
+    "output_file": "two.webp",
+    "original_bytes": 0,
+    "output_bytes": 107104,
+    "request": {
+      "image_name": "two",
+      "words": [
+        "two"
+      ],
+      "czech_meanings": [
+        "dva"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: exactly two blue toy balls side by side; no other countable objects.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    }
+  }
+]

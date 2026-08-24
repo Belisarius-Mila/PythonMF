@@ -1,0 +1,1582 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-08-24",
+  "language": "en_mmtx",
+  "source_csv": "VocabularyEN/VocabularyEN.csv",
+  "imported_row_count": 120,
+  "assignment_counts": {
+    "reuse_pict_exact": 27,
+    "reuse_mmtx_forest_asset": 33,
+    "reuse_pict_mapped": 21,
+    "generate": 39
+  },
+  "total_unique_target_images": 35,
+  "batch_size": 5,
+  "assignments": [
+    {
+      "order": 187,
+      "en": "one",
+      "cz": "jedna",
+      "normalized_en": "one",
+      "action": "generate",
+      "image_stem": "one",
+      "source": ""
+    },
+    {
+      "order": 188,
+      "en": "two",
+      "cz": "dva",
+      "normalized_en": "two",
+      "action": "generate",
+      "image_stem": "two",
+      "source": ""
+    },
+    {
+      "order": 189,
+      "en": "three",
+      "cz": "tři",
+      "normalized_en": "three",
+      "action": "generate",
+      "image_stem": "three",
+      "source": ""
+    },
+    {
+      "order": 190,
+      "en": "four",
+      "cz": "čtyři",
+      "normalized_en": "four",
+      "action": "generate",
+      "image_stem": "four",
+      "source": ""
+    },
+    {
+      "order": 191,
+      "en": "five",
+      "cz": "pět",
+      "normalized_en": "five",
+      "action": "reuse_pict_exact",
+      "image_stem": "five",
+      "source": "Pict/five.png"
+    },
+    {
+      "order": 192,
+      "en": "six",
+      "cz": "šest",
+      "normalized_en": "six",
+      "action": "generate",
+      "image_stem": "six",
+      "source": ""
+    },
+    {
+      "order": 193,
+      "en": "seven",
+      "cz": "sedm",
+      "normalized_en": "seven",
+      "action": "generate",
+      "image_stem": "seven",
+      "source": ""
+    },
+    {
+      "order": 194,
+      "en": "eight",
+      "cz": "osm",
+      "normalized_en": "eight",
+      "action": "reuse_pict_mapped",
+      "image_stem": "otto",
+      "source": "Pict/otto.webp"
+    },
+    {
+      "order": 195,
+      "en": "apples",
+      "cz": "jablka",
+      "normalized_en": "apples",
+      "action": "reuse_pict_mapped",
+      "image_stem": "apple",
+      "source": "Pict/apple.png"
+    },
+    {
+      "order": 196,
+      "en": "sunflowers",
+      "cz": "slunečnice",
+      "normalized_en": "sunflowers",
+      "action": "generate",
+      "image_stem": "sunflowers",
+      "source": ""
+    },
+    {
+      "order": 197,
+      "en": "pigs",
+      "cz": "prasátka",
+      "normalized_en": "pigs",
+      "action": "reuse_pict_mapped",
+      "image_stem": "pig",
+      "source": "Pict/pig.webp"
+    },
+    {
+      "order": 198,
+      "en": "count",
+      "cz": "počítej",
+      "normalized_en": "count",
+      "action": "generate",
+      "image_stem": "count",
+      "source": ""
+    },
+    {
+      "order": 199,
+      "en": "we can",
+      "cz": "my můžeme",
+      "normalized_en": "wecan",
+      "action": "reuse_pict_mapped",
+      "image_stem": "can",
+      "source": "Pict/can.webp"
+    },
+    {
+      "order": 200,
+      "en": "friends",
+      "cz": "kamarádi",
+      "normalized_en": "friends",
+      "action": "reuse_pict_mapped",
+      "image_stem": "friend",
+      "source": "Pict/friend.webp"
+    },
+    {
+      "order": 201,
+      "en": "OK",
+      "cz": "dobře",
+      "normalized_en": "ok",
+      "action": "reuse_pict_mapped",
+      "image_stem": "good",
+      "source": "Pict/good.png"
+    },
+    {
+      "order": 202,
+      "en": "let's go",
+      "cz": "pojďme",
+      "normalized_en": "letsgo",
+      "action": "reuse_pict_exact",
+      "image_stem": "letsgo",
+      "source": "Pict/letsgo.PNG"
+    },
+    {
+      "order": 203,
+      "en": "we are",
+      "cz": "my jsme",
+      "normalized_en": "weare",
+      "action": "reuse_pict_mapped",
+      "image_stem": "people",
+      "source": "Pict/people.png"
+    },
+    {
+      "order": 204,
+      "en": "too",
+      "cz": "také",
+      "normalized_en": "too",
+      "action": "reuse_pict_mapped",
+      "image_stem": "also",
+      "source": "Pict/also.png"
+    },
+    {
+      "order": 205,
+      "en": "going",
+      "cz": "jdeme",
+      "normalized_en": "going",
+      "action": "reuse_pict_mapped",
+      "image_stem": "go",
+      "source": "Pict/go.webp"
+    },
+    {
+      "order": 206,
+      "en": "ball",
+      "cz": "míč",
+      "normalized_en": "ball",
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "ball",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_ball.png"
+    },
+    {
+      "order": 207,
+      "en": "car",
+      "cz": "auto",
+      "normalized_en": "car",
+      "action": "reuse_pict_exact",
+      "image_stem": "car",
+      "source": "Pict/car.PNG"
+    },
+    {
+      "order": 208,
+      "en": "train",
+      "cz": "vlak",
+      "normalized_en": "train",
+      "action": "reuse_pict_exact",
+      "image_stem": "train",
+      "source": "Pict/train.png"
+    },
+    {
+      "order": 209,
+      "en": "cup",
+      "cz": "hrnek",
+      "normalized_en": "cup",
+      "action": "reuse_pict_exact",
+      "image_stem": "cup",
+      "source": "Pict/cup.png"
+    },
+    {
+      "order": 210,
+      "en": "shoe",
+      "cz": "bota",
+      "normalized_en": "shoe",
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "shoe",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_shoe.png"
+    },
+    {
+      "order": 211,
+      "en": "tree",
+      "cz": "strom",
+      "normalized_en": "tree",
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "tree",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_tree.png"
+    },
+    {
+      "order": 212,
+      "en": "banana",
+      "cz": "banán",
+      "normalized_en": "banana",
+      "action": "reuse_pict_exact",
+      "image_stem": "banana",
+      "source": "Pict/banana.PNG"
+    },
+    {
+      "order": 213,
+      "en": "boat",
+      "cz": "loď",
+      "normalized_en": "boat",
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "boat",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_boat.png"
+    },
+    {
+      "order": 214,
+      "en": "plate",
+      "cz": "talíř",
+      "normalized_en": "plate",
+      "action": "reuse_pict_exact",
+      "image_stem": "plate",
+      "source": "Pict/plate.png"
+    },
+    {
+      "order": 215,
+      "en": "sock",
+      "cz": "ponožka",
+      "normalized_en": "sock",
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "sock",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_sock.png"
+    },
+    {
+      "order": 216,
+      "en": "flower",
+      "cz": "kytka",
+      "normalized_en": "flower",
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "flower",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_flower.png"
+    },
+    {
+      "order": 217,
+      "en": "bus",
+      "cz": "autobus",
+      "normalized_en": "bus",
+      "action": "reuse_pict_exact",
+      "image_stem": "bus",
+      "source": "Pict/bus.webp"
+    },
+    {
+      "order": 218,
+      "en": "spoon",
+      "cz": "lžička",
+      "normalized_en": "spoon",
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "spoon",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_spoon.png"
+    },
+    {
+      "order": 219,
+      "en": "hat",
+      "cz": "čepice",
+      "normalized_en": "hat",
+      "action": "reuse_pict_exact",
+      "image_stem": "hat",
+      "source": "Pict/hat.png"
+    },
+    {
+      "order": 220,
+      "en": "sun",
+      "cz": "slunce",
+      "normalized_en": "sun",
+      "action": "reuse_pict_exact",
+      "image_stem": "sun",
+      "source": "Pict/sun.webp"
+    },
+    {
+      "order": 221,
+      "en": "carrot",
+      "cz": "mrkev",
+      "normalized_en": "carrot",
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "carrot",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_carrot.png"
+    },
+    {
+      "order": 222,
+      "en": "chair",
+      "cz": "židle",
+      "normalized_en": "chair",
+      "action": "reuse_pict_exact",
+      "image_stem": "chair",
+      "source": "Pict/chair.png"
+    },
+    {
+      "order": 223,
+      "en": "moon",
+      "cz": "měsíc",
+      "normalized_en": "moon",
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "moon",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_moon.png"
+    },
+    {
+      "order": 224,
+      "en": "bread",
+      "cz": "chleba",
+      "normalized_en": "bread",
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "bread",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_bread.png"
+    },
+    {
+      "order": 225,
+      "en": "truck",
+      "cz": "náklaďák",
+      "normalized_en": "truck",
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "truck",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_truck.png"
+    },
+    {
+      "order": 226,
+      "en": "bed",
+      "cz": "postel",
+      "normalized_en": "bed",
+      "action": "reuse_pict_exact",
+      "image_stem": "bed",
+      "source": "Pict/bed.webp"
+    },
+    {
+      "order": 227,
+      "en": "star",
+      "cz": "hvězda",
+      "normalized_en": "star",
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "star",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_star.png"
+    },
+    {
+      "order": 228,
+      "en": "cake",
+      "cz": "dort",
+      "normalized_en": "cake",
+      "action": "reuse_pict_exact",
+      "image_stem": "cake",
+      "source": "Pict/cake.png"
+    },
+    {
+      "order": 229,
+      "en": "plane",
+      "cz": "letadlo",
+      "normalized_en": "plane",
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "plane",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_plane.png"
+    },
+    {
+      "order": 230,
+      "en": "door",
+      "cz": "dveře",
+      "normalized_en": "door",
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "door",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_door.png"
+    },
+    {
+      "order": 231,
+      "en": "cloud",
+      "cz": "mrak",
+      "normalized_en": "cloud",
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "cloud",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_cloud.png"
+    },
+    {
+      "order": 232,
+      "en": "rocket",
+      "cz": "raketa",
+      "normalized_en": "rocket",
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "rocket",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_rocket.png"
+    },
+    {
+      "order": 233,
+      "en": "window",
+      "cz": "okno",
+      "normalized_en": "window",
+      "action": "reuse_pict_exact",
+      "image_stem": "window",
+      "source": "Pict/window.webp"
+    },
+    {
+      "order": 234,
+      "en": "key",
+      "cz": "klíč",
+      "normalized_en": "key",
+      "action": "reuse_pict_exact",
+      "image_stem": "key",
+      "source": "Pict/key.png"
+    },
+    {
+      "order": 235,
+      "en": "stone",
+      "cz": "kámen",
+      "normalized_en": "stone",
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "stone",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_stone.png"
+    },
+    {
+      "order": 236,
+      "en": "robot",
+      "cz": "robot",
+      "normalized_en": "robot",
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "robot",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_robot.png"
+    },
+    {
+      "order": 237,
+      "en": "fork",
+      "cz": "vidlička",
+      "normalized_en": "fork",
+      "action": "reuse_pict_exact",
+      "image_stem": "fork",
+      "source": "Pict/fork.png"
+    },
+    {
+      "order": 238,
+      "en": "cap",
+      "cz": "čepice",
+      "normalized_en": "cap",
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "cap",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_cap.png"
+    },
+    {
+      "order": 239,
+      "en": "leaf",
+      "cz": "list",
+      "normalized_en": "leaf",
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "leaf",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_leaf.png"
+    },
+    {
+      "order": 240,
+      "en": "cookie",
+      "cz": "sušenka",
+      "normalized_en": "cookie",
+      "action": "reuse_pict_exact",
+      "image_stem": "cookie",
+      "source": "Pict/cookie.jpg"
+    },
+    {
+      "order": 241,
+      "en": "block",
+      "cz": "kostka",
+      "normalized_en": "block",
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "block",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_block.png"
+    },
+    {
+      "order": 242,
+      "en": "pencil",
+      "cz": "tužka",
+      "normalized_en": "pencil",
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "pencil",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_pencil.png"
+    },
+    {
+      "order": 243,
+      "en": "pants",
+      "cz": "kalhoty",
+      "normalized_en": "pants",
+      "action": "reuse_pict_exact",
+      "image_stem": "pants",
+      "source": "Pict/pants.webp"
+    },
+    {
+      "order": 244,
+      "en": "stick",
+      "cz": "klacek",
+      "normalized_en": "stick",
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "stick",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_stick.png"
+    },
+    {
+      "order": 245,
+      "en": "corn",
+      "cz": "kukuřice",
+      "normalized_en": "corn",
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "corn",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_corn.png"
+    },
+    {
+      "order": 246,
+      "en": "doll",
+      "cz": "panenka",
+      "normalized_en": "doll",
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "doll",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_doll.png"
+    },
+    {
+      "order": 247,
+      "en": "map",
+      "cz": "mapa",
+      "normalized_en": "map",
+      "action": "reuse_pict_exact",
+      "image_stem": "map",
+      "source": "Pict/map.webp"
+    },
+    {
+      "order": 248,
+      "en": "soap",
+      "cz": "mýdlo",
+      "normalized_en": "soap",
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "soap",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_soap.png"
+    },
+    {
+      "order": 249,
+      "en": "pillow",
+      "cz": "polštář",
+      "normalized_en": "pillow",
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "pillow",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_pillow.png"
+    },
+    {
+      "order": 250,
+      "en": "grape",
+      "cz": "hroznové víno",
+      "normalized_en": "grape",
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "grape",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_grape.png"
+    },
+    {
+      "order": 251,
+      "en": "toy",
+      "cz": "hračka",
+      "normalized_en": "toy",
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "toy",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_toy.png"
+    },
+    {
+      "order": 252,
+      "en": "kite",
+      "cz": "drak",
+      "normalized_en": "kite",
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "kite",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_kite.png"
+    },
+    {
+      "order": 253,
+      "en": "lamp",
+      "cz": "lampa",
+      "normalized_en": "lamp",
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "lamp",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_lamp.png"
+    },
+    {
+      "order": 254,
+      "en": "boots",
+      "cz": "holinky",
+      "normalized_en": "boots",
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "boots",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_boots.png"
+    },
+    {
+      "order": 255,
+      "en": "pea",
+      "cz": "hrášek",
+      "normalized_en": "pea",
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "pea",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_pea.png"
+    },
+    {
+      "order": 256,
+      "en": "nuts",
+      "cz": "oříšky",
+      "normalized_en": "nuts",
+      "action": "generate",
+      "image_stem": "nuts",
+      "source": ""
+    },
+    {
+      "order": 257,
+      "en": "I have",
+      "cz": "mám",
+      "normalized_en": "ihave",
+      "action": "reuse_pict_exact",
+      "image_stem": "ihave",
+      "source": "Pict/Ihave.png"
+    },
+    {
+      "order": 258,
+      "en": "I don't have",
+      "cz": "nemám",
+      "normalized_en": "idonthave",
+      "action": "generate",
+      "image_stem": "idonthave",
+      "source": ""
+    },
+    {
+      "order": 259,
+      "en": "Do you have?",
+      "cz": "máš?",
+      "normalized_en": "doyouhave",
+      "action": "reuse_pict_mapped",
+      "image_stem": "have",
+      "source": "Pict/have.png"
+    },
+    {
+      "order": 260,
+      "en": "Does he have?",
+      "cz": "má on?",
+      "normalized_en": "doeshehave",
+      "action": "reuse_pict_mapped",
+      "image_stem": "have",
+      "source": "Pict/have.png"
+    },
+    {
+      "order": 261,
+      "en": "Look inside",
+      "cz": "podívej se dovnitř",
+      "normalized_en": "lookinside",
+      "action": "generate",
+      "image_stem": "lookinside",
+      "source": ""
+    },
+    {
+      "order": 262,
+      "en": "wait",
+      "cz": "počkat",
+      "normalized_en": "wait",
+      "action": "reuse_pict_exact",
+      "image_stem": "wait",
+      "source": "Pict/wait.PNG"
+    },
+    {
+      "order": 263,
+      "en": "look",
+      "cz": "podívej, dívat se",
+      "normalized_en": "look",
+      "action": "reuse_pict_mapped",
+      "image_stem": "see",
+      "source": "Pict/see.webp"
+    },
+    {
+      "order": 264,
+      "en": "way",
+      "cz": "cesta",
+      "normalized_en": "way",
+      "action": "reuse_pict_mapped",
+      "image_stem": "travel",
+      "source": "Pict/travel.png"
+    },
+    {
+      "order": 265,
+      "en": "path",
+      "cz": "cesta",
+      "normalized_en": "path",
+      "action": "reuse_pict_mapped",
+      "image_stem": "travel",
+      "source": "Pict/travel.png"
+    },
+    {
+      "order": 266,
+      "en": "crow",
+      "cz": "havran",
+      "normalized_en": "crow",
+      "action": "generate",
+      "image_stem": "crow",
+      "source": ""
+    },
+    {
+      "order": 267,
+      "en": "bad",
+      "cz": "špatný",
+      "normalized_en": "bad",
+      "action": "generate",
+      "image_stem": "bad",
+      "source": ""
+    },
+    {
+      "order": 268,
+      "en": "deep",
+      "cz": "hluboký",
+      "normalized_en": "deep",
+      "action": "generate",
+      "image_stem": "valley",
+      "source": ""
+    },
+    {
+      "order": 269,
+      "en": "valley",
+      "cz": "údolí",
+      "normalized_en": "valley",
+      "action": "generate",
+      "image_stem": "valley",
+      "source": ""
+    },
+    {
+      "order": 270,
+      "en": "maybe",
+      "cz": "možná",
+      "normalized_en": "maybe",
+      "action": "reuse_pict_exact",
+      "image_stem": "maybe",
+      "source": "Pict/maybe.png"
+    },
+    {
+      "order": 271,
+      "en": "bears",
+      "cz": "medvědi",
+      "normalized_en": "bears",
+      "action": "reuse_pict_mapped",
+      "image_stem": "bear",
+      "source": "Pict/bear.png"
+    },
+    {
+      "order": 272,
+      "en": "but",
+      "cz": "ale",
+      "normalized_en": "but",
+      "action": "reuse_pict_exact",
+      "image_stem": "but",
+      "source": "Pict/but.png"
+    },
+    {
+      "order": 273,
+      "en": "scared",
+      "cz": "vystrašený",
+      "normalized_en": "scared",
+      "action": "generate",
+      "image_stem": "scared",
+      "source": ""
+    },
+    {
+      "order": 274,
+      "en": "me too",
+      "cz": "já také",
+      "normalized_en": "metoo",
+      "action": "reuse_pict_mapped",
+      "image_stem": "also",
+      "source": "Pict/also.png"
+    },
+    {
+      "order": 275,
+      "en": "friendly",
+      "cz": "přátelský",
+      "normalized_en": "friendly",
+      "action": "reuse_pict_mapped",
+      "image_stem": "friend",
+      "source": "Pict/friend.webp"
+    },
+    {
+      "order": 276,
+      "en": "careful",
+      "cz": "opatrný, opatrně",
+      "normalized_en": "careful",
+      "action": "generate",
+      "image_stem": "warning",
+      "source": ""
+    },
+    {
+      "order": 277,
+      "en": "warning",
+      "cz": "varování",
+      "normalized_en": "warning",
+      "action": "generate",
+      "image_stem": "warning",
+      "source": ""
+    },
+    {
+      "order": 278,
+      "en": "farm",
+      "cz": "farma",
+      "normalized_en": "farm",
+      "action": "generate",
+      "image_stem": "farm",
+      "source": ""
+    },
+    {
+      "order": 279,
+      "en": "stranger",
+      "cz": "cizinec",
+      "normalized_en": "stranger",
+      "action": "reuse_pict_mapped",
+      "image_stem": "foreigner",
+      "source": "Pict/foreigner.PNG"
+    },
+    {
+      "order": 280,
+      "en": "come",
+      "cz": "jít, přijít",
+      "normalized_en": "come",
+      "action": "generate",
+      "image_stem": "comecloser",
+      "source": ""
+    },
+    {
+      "order": 281,
+      "en": "pump",
+      "cz": "pumpa",
+      "normalized_en": "pump",
+      "action": "generate",
+      "image_stem": "pump",
+      "source": ""
+    },
+    {
+      "order": 282,
+      "en": "get",
+      "cz": "dostat",
+      "normalized_en": "get",
+      "action": "generate",
+      "image_stem": "get",
+      "source": ""
+    },
+    {
+      "order": 283,
+      "en": "bucket",
+      "cz": "vědro, kbelík",
+      "normalized_en": "bucket",
+      "action": "generate",
+      "image_stem": "bucket",
+      "source": ""
+    },
+    {
+      "order": 284,
+      "en": "empty",
+      "cz": "prázdný",
+      "normalized_en": "empty",
+      "action": "generate",
+      "image_stem": "empty",
+      "source": ""
+    },
+    {
+      "order": 285,
+      "en": "I don't know",
+      "cz": "nevím",
+      "normalized_en": "idontknow",
+      "action": "reuse_pict_exact",
+      "image_stem": "idontknow",
+      "source": "Pict/idontknow.png"
+    },
+    {
+      "order": 286,
+      "en": "forest",
+      "cz": "les",
+      "normalized_en": "forest",
+      "action": "generate",
+      "image_stem": "forest",
+      "source": ""
+    },
+    {
+      "order": 287,
+      "en": "handle",
+      "cz": "páka",
+      "normalized_en": "handle",
+      "action": "generate",
+      "image_stem": "handle",
+      "source": ""
+    },
+    {
+      "order": 288,
+      "en": "push",
+      "cz": "tlačit",
+      "normalized_en": "push",
+      "action": "generate",
+      "image_stem": "push",
+      "source": ""
+    },
+    {
+      "order": 289,
+      "en": "come closer",
+      "cz": "přijít blíž",
+      "normalized_en": "comecloser",
+      "action": "generate",
+      "image_stem": "comecloser",
+      "source": ""
+    },
+    {
+      "order": 290,
+      "en": "chase",
+      "cz": "honit",
+      "normalized_en": "chase",
+      "action": "generate",
+      "image_stem": "chase",
+      "source": ""
+    },
+    {
+      "order": 291,
+      "en": "little animals",
+      "cz": "malá zvířátka",
+      "normalized_en": "littleanimals",
+      "action": "reuse_pict_mapped",
+      "image_stem": "animal",
+      "source": "Pict/animal.webp"
+    },
+    {
+      "order": 292,
+      "en": "trust",
+      "cz": "důvěřovat",
+      "normalized_en": "trust",
+      "action": "generate",
+      "image_stem": "trust",
+      "source": ""
+    },
+    {
+      "order": 293,
+      "en": "eat",
+      "cz": "jíst",
+      "normalized_en": "eat",
+      "action": "reuse_pict_mapped",
+      "image_stem": "meal",
+      "source": "Pict/meal.png"
+    },
+    {
+      "order": 294,
+      "en": "own",
+      "cz": "vlastní",
+      "normalized_en": "own",
+      "action": "generate",
+      "image_stem": "own",
+      "source": ""
+    },
+    {
+      "order": 295,
+      "en": "gate",
+      "cz": "branka",
+      "normalized_en": "gate",
+      "action": "generate",
+      "image_stem": "gate",
+      "source": ""
+    },
+    {
+      "order": 296,
+      "en": "closed",
+      "cz": "zavřený",
+      "normalized_en": "closed",
+      "action": "reuse_pict_exact",
+      "image_stem": "closed",
+      "source": "Pict/closed.webp"
+    },
+    {
+      "order": 297,
+      "en": "squirrel",
+      "cz": "veverka",
+      "normalized_en": "squirrel",
+      "action": "generate",
+      "image_stem": "squirrel",
+      "source": ""
+    },
+    {
+      "order": 298,
+      "en": "question",
+      "cz": "otázka",
+      "normalized_en": "question",
+      "action": "generate",
+      "image_stem": "question",
+      "source": ""
+    },
+    {
+      "order": 299,
+      "en": "answer",
+      "cz": "odpověď",
+      "normalized_en": "answer",
+      "action": "reuse_pict_exact",
+      "image_stem": "answer",
+      "source": "Pict/answer.PNG"
+    },
+    {
+      "order": 300,
+      "en": "catch",
+      "cz": "chytit",
+      "normalized_en": "catch",
+      "action": "generate",
+      "image_stem": "catch",
+      "source": ""
+    },
+    {
+      "order": 301,
+      "en": "yard",
+      "cz": "dvorek",
+      "normalized_en": "yard",
+      "action": "reuse_pict_mapped",
+      "image_stem": "courtyard",
+      "source": "Pict/courtyard.webp"
+    },
+    {
+      "order": 302,
+      "en": "badger",
+      "cz": "jezevec",
+      "normalized_en": "badger",
+      "action": "generate",
+      "image_stem": "badger",
+      "source": ""
+    },
+    {
+      "order": 303,
+      "en": "dig",
+      "cz": "hrabat",
+      "normalized_en": "dig",
+      "action": "generate",
+      "image_stem": "dig",
+      "source": ""
+    },
+    {
+      "order": 304,
+      "en": "under",
+      "cz": "pod",
+      "normalized_en": "under",
+      "action": "reuse_pict_exact",
+      "image_stem": "under",
+      "source": "Pict/under.PNG"
+    },
+    {
+      "order": 305,
+      "en": "fence",
+      "cz": "plot",
+      "normalized_en": "fence",
+      "action": "generate",
+      "image_stem": "fence",
+      "source": ""
+    },
+    {
+      "order": 306,
+      "en": "believe",
+      "cz": "věřit",
+      "normalized_en": "believe",
+      "action": "generate",
+      "image_stem": "trust",
+      "source": ""
+    }
+  ],
+  "requests": [
+    {
+      "image_name": "bad",
+      "words": [
+        "bad"
+      ],
+      "czech_meanings": [
+        "špatný"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a muddy damaged path after heavy rain, clearly unsafe and unpleasant, with a child stopping before it.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    },
+    {
+      "image_name": "badger",
+      "words": [
+        "badger"
+      ],
+      "czech_meanings": [
+        "jezevec"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a friendly European badger standing outside its woodland burrow at dusk.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    },
+    {
+      "image_name": "bucket",
+      "words": [
+        "bucket"
+      ],
+      "czech_meanings": [
+        "vědro, kbelík"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a simple metal bucket filled with clean water beside a garden pump.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    },
+    {
+      "image_name": "catch",
+      "words": [
+        "catch"
+      ],
+      "czech_meanings": [
+        "chytit"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a child successfully catching a bright red ball with both hands.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    },
+    {
+      "image_name": "chase",
+      "words": [
+        "chase"
+      ],
+      "czech_meanings": [
+        "honit"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a playful dog chasing a rolling red ball across grass.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    },
+    {
+      "image_name": "comecloser",
+      "words": [
+        "come",
+        "come closer"
+      ],
+      "czech_meanings": [
+        "jít, přijít",
+        "přijít blíž"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: one child warmly beckoning a friend to come closer with an open hand gesture.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    },
+    {
+      "image_name": "count",
+      "words": [
+        "count"
+      ],
+      "czech_meanings": [
+        "počítej"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a child pointing carefully at five apples in a row and counting them; no written numerals.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    },
+    {
+      "image_name": "crow",
+      "words": [
+        "crow"
+      ],
+      "czech_meanings": [
+        "havran"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a black crow perched clearly on a wooden fence in daylight.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    },
+    {
+      "image_name": "dig",
+      "words": [
+        "dig"
+      ],
+      "czech_meanings": [
+        "hrabat"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a badger actively digging soft earth beside a wooden fence.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    },
+    {
+      "image_name": "empty",
+      "words": [
+        "empty"
+      ],
+      "czech_meanings": [
+        "prázdný"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: one clearly empty drinking glass on a simple table, viewed close enough to see that it contains nothing.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    },
+    {
+      "image_name": "farm",
+      "words": [
+        "farm"
+      ],
+      "czech_meanings": [
+        "farma"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a cheerful small farm with a red barn, field, cow and chickens.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    },
+    {
+      "image_name": "fence",
+      "words": [
+        "fence"
+      ],
+      "czech_meanings": [
+        "plot"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a clear wooden fence running across a green meadow.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    },
+    {
+      "image_name": "forest",
+      "words": [
+        "forest"
+      ],
+      "czech_meanings": [
+        "les"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a welcoming green forest path with tall trees and soft daylight.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    },
+    {
+      "image_name": "four",
+      "words": [
+        "four"
+      ],
+      "czech_meanings": [
+        "čtyři"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: exactly four colorful kites flying in the sky; no other kites.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    },
+    {
+      "image_name": "gate",
+      "words": [
+        "gate"
+      ],
+      "czech_meanings": [
+        "branka"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a closed wooden farm gate between two fence posts, clearly distinct from the fence.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    },
+    {
+      "image_name": "get",
+      "words": [
+        "get"
+      ],
+      "czech_meanings": [
+        "dostat"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a child receiving a wrapped present from a smiling adult, with the handover clearly visible.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    },
+    {
+      "image_name": "handle",
+      "words": [
+        "handle"
+      ],
+      "czech_meanings": [
+        "páka"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a close view of a hand pressing down the long handle of an old water pump.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    },
+    {
+      "image_name": "idonthave",
+      "words": [
+        "I don't have"
+      ],
+      "czech_meanings": [
+        "nemám"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a child opening an empty backpack and shrugging with empty hands.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    },
+    {
+      "image_name": "lookinside",
+      "words": [
+        "Look inside"
+      ],
+      "czech_meanings": [
+        "podívej se dovnitř"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a curious child leaning over and looking inside an open cardboard box.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    },
+    {
+      "image_name": "nuts",
+      "words": [
+        "nuts"
+      ],
+      "czech_meanings": [
+        "oříšky"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a small wooden bowl filled with clearly visible hazelnuts and walnuts.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    },
+    {
+      "image_name": "one",
+      "words": [
+        "one"
+      ],
+      "czech_meanings": [
+        "jedna"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: exactly one bright red apple on a small plate; no other countable objects.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    },
+    {
+      "image_name": "own",
+      "words": [
+        "own"
+      ],
+      "czech_meanings": [
+        "vlastní"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: two children each holding their own different backpack close to themselves, clear personal possession.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    },
+    {
+      "image_name": "pump",
+      "words": [
+        "pump"
+      ],
+      "czech_meanings": [
+        "pumpa"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: an old hand water pump pouring fresh water into a bucket.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    },
+    {
+      "image_name": "push",
+      "words": [
+        "push"
+      ],
+      "czech_meanings": [
+        "tlačit"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a child pushing a heavy wooden door open with both hands.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    },
+    {
+      "image_name": "question",
+      "words": [
+        "question"
+      ],
+      "czech_meanings": [
+        "otázka"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a student raising one hand with a curious questioning expression in a classroom.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    },
+    {
+      "image_name": "scared",
+      "words": [
+        "scared"
+      ],
+      "czech_meanings": [
+        "vystrašený"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a horse looking startled by a sudden harmless noise, with a caring child nearby.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    },
+    {
+      "image_name": "seven",
+      "words": [
+        "seven"
+      ],
+      "czech_meanings": [
+        "sedm"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: exactly seven sheep standing clearly separated in a green field; no other sheep.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    },
+    {
+      "image_name": "six",
+      "words": [
+        "six"
+      ],
+      "czech_meanings": [
+        "šest"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: exactly six oranges arranged clearly in one basket; no other fruit.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    },
+    {
+      "image_name": "squirrel",
+      "words": [
+        "squirrel"
+      ],
+      "czech_meanings": [
+        "veverka"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a red squirrel holding a nut on a tree branch.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    },
+    {
+      "image_name": "sunflowers",
+      "words": [
+        "sunflowers"
+      ],
+      "czech_meanings": [
+        "slunečnice"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a small group of tall yellow sunflowers turning toward the warm sun.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    },
+    {
+      "image_name": "three",
+      "words": [
+        "three"
+      ],
+      "czech_meanings": [
+        "tři"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: exactly three friendly rabbits sitting in a row; no other animals.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    },
+    {
+      "image_name": "trust",
+      "words": [
+        "trust",
+        "believe"
+      ],
+      "czech_meanings": [
+        "důvěřovat",
+        "věřit"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: one child safely helping another child cross a shallow stream by holding hands.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    },
+    {
+      "image_name": "two",
+      "words": [
+        "two"
+      ],
+      "czech_meanings": [
+        "dva"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: exactly two blue toy balls side by side; no other countable objects.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    },
+    {
+      "image_name": "valley",
+      "words": [
+        "deep",
+        "valley"
+      ],
+      "czech_meanings": [
+        "hluboký",
+        "údolí"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a clearly deep green valley between high hills with a river at the bottom.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    },
+    {
+      "image_name": "warning",
+      "words": [
+        "careful",
+        "warning"
+      ],
+      "czech_meanings": [
+        "opatrný, opatrně",
+        "varování"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a careful child stopping safely before a pedestrian crossing while a red traffic light is visible.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    }
+  ],
+  "mapping_preview": {
+    "bota": "shoe",
+    "branka": "gate",
+    "chleba": "bread",
+    "chytit": "catch",
+    "dostat": "get",
+    "drak": "kite",
+    "dva": "two",
+    "dvorek": "courtyard",
+    "důvěřovat": "trust",
+    "farma": "farm",
+    "havran": "crow",
+    "hluboký": "valley",
+    "holinky": "boots",
+    "honit": "chase",
+    "hrabat": "dig",
+    "hračka": "toy",
+    "hroznové víno": "grape",
+    "hrášek": "pea",
+    "hvězda": "star",
+    "jablka": "apple",
+    "jdeme": "go",
+    "jedna": "one",
+    "jezevec": "badger",
+    "já také": "also",
+    "jít, přijít": "comecloser",
+    "kamarádi": "friend",
+    "klacek": "stick",
+    "kostka": "block",
+    "kukuřice": "corn",
+    "kytka": "flower",
+    "kámen": "stone",
+    "lampa": "lamp",
+    "les": "forest",
+    "list": "leaf",
+    "lžička": "spoon",
+    "malá zvířátka": "animal",
+    "mapa": "map",
+    "medvědi": "bear",
+    "mrak": "cloud",
+    "mrkev": "carrot",
+    "my jsme": "people",
+    "my můžeme": "can",
+    "má on?": "have",
+    "máš?": "have",
+    "míč": "ball",
+    "mýdlo": "soap",
+    "nemám": "idonthave",
+    "náklaďák": "truck",
+    "odpověď": "answer",
+    "opatrný, opatrně": "warning",
+    "otázka": "question",
+    "oříšky": "nuts",
+    "panenka": "doll",
+    "plot": "fence",
+    "podívej se dovnitř": "lookinside",
+    "podívej, dívat se": "see",
+    "pojďme": "letsgo",
+    "polštář": "pillow",
+    "ponožka": "sock",
+    "počkat": "wait",
+    "počítej": "count",
+    "prasátka": "pig",
+    "prázdný": "empty",
+    "pumpa": "pump",
+    "páka": "handle",
+    "přijít blíž": "comecloser",
+    "přátelský": "friend",
+    "raketa": "rocket",
+    "robot": "robot",
+    "sedm": "seven",
+    "slunečnice": "sunflowers",
+    "tlačit": "push",
+    "tužka": "pencil",
+    "tři": "three",
+    "varování": "warning",
+    "veverka": "squirrel",
+    "vlastní": "own",
+    "vystrašený": "scared",
+    "vědro, kbelík": "bucket",
+    "věřit": "trust",
+    "údolí": "valley",
+    "čepice": "hat",
+    "čtyři": "four",
+    "šest": "six",
+    "špatný": "bad"
+  },
+  "preserved_mapping_conflicts": [
+    {
+      "cz": "strom",
+      "current": "albero",
+      "proposed": "tree",
+      "decision": "preserve_current"
+    },
+    {
+      "cz": "loď",
+      "current": "ship",
+      "proposed": "boat",
+      "decision": "preserve_current"
+    },
+    {
+      "cz": "měsíc",
+      "current": "month",
+      "proposed": "moon",
+      "decision": "preserve_current"
+    },
+    {
+      "cz": "letadlo",
+      "current": "airplane",
+      "proposed": "plane",
+      "decision": "preserve_current"
+    },
+    {
+      "cz": "dveře",
+      "current": "entrance",
+      "proposed": "door",
+      "decision": "preserve_current"
+    },
+    {
+      "cz": "mám",
+      "current": "Ihave",
+      "proposed": "ihave",
+      "decision": "preserve_current"
+    }
+  ]
+}

@@ -1,0 +1,92 @@
+[
+  {
+    "status": "generated_built_in_imagegen",
+    "request_index": 1,
+    "output_path": "PictNew/generated/20260824_en_mmtx_batch004/dig.webp",
+    "output_file": "dig.webp",
+    "original_bytes": 0,
+    "output_bytes": 291012,
+    "request": {
+      "image_name": "dig",
+      "words": [
+        "dig"
+      ],
+      "czech_meanings": [
+        "hrabat"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a badger actively digging soft earth beside a wooden fence.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    }
+  },
+  {
+    "status": "generated_built_in_imagegen",
+    "request_index": 2,
+    "output_path": "PictNew/generated/20260824_en_mmtx_batch004/empty.webp",
+    "output_file": "empty.webp",
+    "original_bytes": 0,
+    "output_bytes": 122918,
+    "request": {
+      "image_name": "empty",
+      "words": [
+        "empty"
+      ],
+      "czech_meanings": [
+        "prázdný"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: one clearly empty drinking glass on a simple table, viewed close enough to see that it contains nothing.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    }
+  },
+  {
+    "status": "generated_built_in_imagegen",
+    "request_index": 3,
+    "output_path": "PictNew/generated/20260824_en_mmtx_batch004/farm.webp",
+    "output_file": "farm.webp",
+    "original_bytes": 0,
+    "output_bytes": 301536,
+    "request": {
+      "image_name": "farm",
+      "words": [
+        "farm"
+      ],
+      "czech_meanings": [
+        "farma"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a cheerful small farm with a red barn, field, cow and chickens.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    }
+  },
+  {
+    "status": "generated_built_in_imagegen",
+    "request_index": 4,
+    "output_path": "PictNew/generated/20260824_en_mmtx_batch004/fence.webp",
+    "output_file": "fence.webp",
+    "original_bytes": 0,
+    "output_bytes": 293582,
+    "request": {
+      "image_name": "fence",
+      "words": [
+        "fence"
+      ],
+      "czech_meanings": [
+        "plot"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a clear wooden fence running across a green meadow.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    }
+  },
+  {
+    "status": "generated_built_in_imagegen",
+    "request_index": 5,
+    "output_path": "PictNew/generated/20260824_en_mmtx_batch004/forest.webp",
+    "output_file": "forest.webp",
+    "original_bytes": 0,
+    "output_bytes": 289346,
+    "request": {
+      "image_name": "forest",
+      "words": [
+        "forest"
+      ],
+      "czech_meanings": [
+        "les"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a welcoming green forest path with tall trees and soft daylight.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    }
+  }
+]

@@ -1,0 +1,92 @@
+[
+  {
+    "status": "generated_built_in_imagegen",
+    "request_index": 1,
+    "output_path": "PictNew/generated/20260824_en_mmtx_batch006/nuts.webp",
+    "output_file": "nuts.webp",
+    "original_bytes": 0,
+    "output_bytes": 211162,
+    "request": {
+      "image_name": "nuts",
+      "words": [
+        "nuts"
+      ],
+      "czech_meanings": [
+        "oříšky"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a small wooden bowl filled with clearly visible hazelnuts and walnuts.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    }
+  },
+  {
+    "status": "generated_built_in_imagegen",
+    "request_index": 2,
+    "output_path": "PictNew/generated/20260824_en_mmtx_batch006/own.webp",
+    "output_file": "own.webp",
+    "original_bytes": 0,
+    "output_bytes": 166680,
+    "request": {
+      "image_name": "own",
+      "words": [
+        "own"
+      ],
+      "czech_meanings": [
+        "vlastní"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: two children each holding their own different backpack close to themselves, clear personal possession.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    }
+  },
+  {
+    "status": "generated_built_in_imagegen",
+    "request_index": 3,
+    "output_path": "PictNew/generated/20260824_en_mmtx_batch006/pump.webp",
+    "output_file": "pump.webp",
+    "original_bytes": 0,
+    "output_bytes": 266920,
+    "request": {
+      "image_name": "pump",
+      "words": [
+        "pump"
+      ],
+      "czech_meanings": [
+        "pumpa"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: an old hand water pump pouring fresh water into a bucket.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    }
+  },
+  {
+    "status": "generated_built_in_imagegen",
+    "request_index": 4,
+    "output_path": "PictNew/generated/20260824_en_mmtx_batch006/push.webp",
+    "output_file": "push.webp",
+    "original_bytes": 0,
+    "output_bytes": 128124,
+    "request": {
+      "image_name": "push",
+      "words": [
+        "push"
+      ],
+      "czech_meanings": [
+        "tlačit"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a child pushing a heavy wooden door open with both hands.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    }
+  },
+  {
+    "status": "generated_built_in_imagegen",
+    "request_index": 5,
+    "output_path": "PictNew/generated/20260824_en_mmtx_batch006/question.webp",
+    "output_file": "question.webp",
+    "original_bytes": 0,
+    "output_bytes": 152128,
+    "request": {
+      "image_name": "question",
+      "words": [
+        "question"
+      ],
+      "czech_meanings": [
+        "otázka"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a student raising one hand with a curious questioning expression in a classroom.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    }
+  }
+]

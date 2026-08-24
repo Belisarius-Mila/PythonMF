@@ -1,0 +1,94 @@
+[
+  {
+    "status": "generated_built_in_imagegen",
+    "request_index": 1,
+    "output_path": "PictNew/generated/20260824_en_mmtx_batch003/bucket.webp",
+    "output_file": "bucket.webp",
+    "original_bytes": 0,
+    "output_bytes": 210050,
+    "request": {
+      "image_name": "bucket",
+      "words": [
+        "bucket"
+      ],
+      "czech_meanings": [
+        "vědro, kbelík"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a simple metal bucket filled with clean water beside a garden pump.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    }
+  },
+  {
+    "status": "generated_built_in_imagegen",
+    "request_index": 2,
+    "output_path": "PictNew/generated/20260824_en_mmtx_batch003/catch.webp",
+    "output_file": "catch.webp",
+    "original_bytes": 0,
+    "output_bytes": 212198,
+    "request": {
+      "image_name": "catch",
+      "words": [
+        "catch"
+      ],
+      "czech_meanings": [
+        "chytit"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a child successfully catching a bright red ball with both hands.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    }
+  },
+  {
+    "status": "generated_built_in_imagegen",
+    "request_index": 3,
+    "output_path": "PictNew/generated/20260824_en_mmtx_batch003/chase.webp",
+    "output_file": "chase.webp",
+    "original_bytes": 0,
+    "output_bytes": 196844,
+    "request": {
+      "image_name": "chase",
+      "words": [
+        "chase"
+      ],
+      "czech_meanings": [
+        "honit"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a playful dog chasing a rolling red ball across grass.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    }
+  },
+  {
+    "status": "generated_built_in_imagegen",
+    "request_index": 4,
+    "output_path": "PictNew/generated/20260824_en_mmtx_batch003/comecloser.webp",
+    "output_file": "comecloser.webp",
+    "original_bytes": 0,
+    "output_bytes": 165666,
+    "request": {
+      "image_name": "comecloser",
+      "words": [
+        "come",
+        "come closer"
+      ],
+      "czech_meanings": [
+        "jít, přijít",
+        "přijít blíž"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: one child warmly beckoning a friend to come closer with an open hand gesture.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    }
+  },
+  {
+    "status": "generated_built_in_imagegen",
+    "request_index": 5,
+    "output_path": "PictNew/generated/20260824_en_mmtx_batch003/crow.webp",
+    "output_file": "crow.webp",
+    "original_bytes": 0,
+    "output_bytes": 175328,
+    "request": {
+      "image_name": "crow",
+      "words": [
+        "crow"
+      ],
+      "czech_meanings": [
+        "havran"
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: square English vocabulary card\nPrimary request: a black crow perched clearly on a wooden fence in daylight.\nStyle/medium: polished warm educational illustration, realistic enough to be unambiguous\nComposition/framing: centered main idea, square composition, generous padding\nConstraints: Warm square vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple uncluttered background, natural details, soft shadows and the main concept instantly readable. No text, letters, labels, watermark, signature or decorative border."
+    }
+  }
+]

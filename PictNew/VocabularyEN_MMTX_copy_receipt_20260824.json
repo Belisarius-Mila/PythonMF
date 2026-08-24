@@ -1,0 +1,620 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-08-24",
+  "status": "copy_completed_mapping_not_modified",
+  "copied_count": 68,
+  "items": [
+    {
+      "action": "generate",
+      "image_stem": "bad",
+      "source": "PictNew/generated/20260824_en_mmtx_batch002/bad.webp",
+      "target": "Pict/bad.webp",
+      "bytes": 280610,
+      "sha256": "d6432898d36310432d9615e2fb43e152d1372814ca601b5e68dd80a6097a3f27",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "generate",
+      "image_stem": "badger",
+      "source": "PictNew/generated/20260824_en_mmtx_batch002/badger.webp",
+      "target": "Pict/badger.webp",
+      "bytes": 201518,
+      "sha256": "42fe82a82c3a2f0293e59d3fc0114370de47d3e1cd7f34cb279694d38f988401",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "ball",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_ball.png",
+      "target": "Pict/ball.png",
+      "bytes": 153265,
+      "sha256": "d8b38af3c029c7c8ea7678181af5595e51a35a762206c17489800b59467a9fbf",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "block",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_block.png",
+      "target": "Pict/block.png",
+      "bytes": 106621,
+      "sha256": "19863643762b5e01f512467a8b47c3e5a599651424c036f4a8e830f00f985076",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "boat",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_boat.png",
+      "target": "Pict/boat.png",
+      "bytes": 94313,
+      "sha256": "d3a10039b389137d10e2f7aad9959c5bccb95e3c0c0607141acb7c24fea8bfa6",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "boots",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_boots.png",
+      "target": "Pict/boots.png",
+      "bytes": 178157,
+      "sha256": "3305dcd20579e470863951d3b0b7fbf516c13db7e5b5b1bf6b42c3d666a1ed65",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "bread",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_bread.png",
+      "target": "Pict/bread.png",
+      "bytes": 132673,
+      "sha256": "0af45729ca7620532ef68f82db509f23063053f6cb9a13ea7e95730399df21bd",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "generate",
+      "image_stem": "bucket",
+      "source": "PictNew/generated/20260824_en_mmtx_batch003/bucket.webp",
+      "target": "Pict/bucket.webp",
+      "bytes": 210050,
+      "sha256": "8e882ff947fd1ce11b80d2827e43ec929aab38b2df111e69087e0640dfae4985",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "cap",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_cap.png",
+      "target": "Pict/cap.png",
+      "bytes": 111650,
+      "sha256": "dcfc8588a2d78e879a3ae6d15b3144602323176cb11fc730a8455c2ea831579e",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "carrot",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_carrot.png",
+      "target": "Pict/carrot.png",
+      "bytes": 92294,
+      "sha256": "fc0891f3f69d6a168c339732e9163503c8faaee09dcdaca4894ec7ed18acc681",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "generate",
+      "image_stem": "catch",
+      "source": "PictNew/generated/20260824_en_mmtx_batch003/catch.webp",
+      "target": "Pict/catch.webp",
+      "bytes": 212198,
+      "sha256": "00c06e681e954a52055b62dcf7b021478a9a19e0498f5c73feac1c82f8956d16",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "generate",
+      "image_stem": "chase",
+      "source": "PictNew/generated/20260824_en_mmtx_batch003/chase.webp",
+      "target": "Pict/chase.webp",
+      "bytes": 196844,
+      "sha256": "05c0b1efac2f423f0736e93a69bcf898a6525c5da0d07c1699429ede44375f28",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "cloud",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_cloud.png",
+      "target": "Pict/cloud.png",
+      "bytes": 67952,
+      "sha256": "dcba7ccb2d44c09a21bb4443d4a0b8fd137537dc8ddc1b1c4c92c306da0a5a19",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "generate",
+      "image_stem": "comecloser",
+      "source": "PictNew/generated/20260824_en_mmtx_batch003/comecloser.webp",
+      "target": "Pict/comecloser.webp",
+      "bytes": 165666,
+      "sha256": "ee0126351c734982cb5ce4ab6b250a495f1b83c580ef7ff9f270a4c015af01e5",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "corn",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_corn.png",
+      "target": "Pict/corn.png",
+      "bytes": 146206,
+      "sha256": "18400a2aeb4bdbdea4285216ac33cb74498540d19ea776cc16c137a40f906e53",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "generate",
+      "image_stem": "count",
+      "source": "PictNew/generated/20260824_en_mmtx_batch002/count.webp",
+      "target": "Pict/count.webp",
+      "bytes": 106290,
+      "sha256": "3c43f4fa73b1705ea557884389a3066bb7a2012d4dfdd8205fe225bcbaaa4a14",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "generate",
+      "image_stem": "crow",
+      "source": "PictNew/generated/20260824_en_mmtx_batch003/crow.webp",
+      "target": "Pict/crow.webp",
+      "bytes": 175328,
+      "sha256": "0871359274f6c7dc9ec4b552613c31f812ec32c9eb0ffa4ea498507d13f65b45",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "generate",
+      "image_stem": "dig",
+      "source": "PictNew/generated/20260824_en_mmtx_batch004/dig.webp",
+      "target": "Pict/dig.webp",
+      "bytes": 291012,
+      "sha256": "f6789d4c7a0f275d88dd730e44dad5d1118a9c8124a66d3422bef5d4d4129f6f",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "doll",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_doll.png",
+      "target": "Pict/doll.png",
+      "bytes": 144608,
+      "sha256": "46bcd48d01103d8f7e756623661d45950ca7f0134b1a23dc8861fe04be687f98",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "door",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_door.png",
+      "target": "Pict/door.png",
+      "bytes": 123165,
+      "sha256": "31b18ba699fce4ab8a4e9eb0a769f27d36a9349f7a4d5bde796aa457930746b6",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "generate",
+      "image_stem": "empty",
+      "source": "PictNew/generated/20260824_en_mmtx_batch004/empty.webp",
+      "target": "Pict/empty.webp",
+      "bytes": 122918,
+      "sha256": "2b31ee7d1bcc1cdb883ce390fbbafdf30331656a20bb6ca76b241ad73b05a097",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "generate",
+      "image_stem": "farm",
+      "source": "PictNew/generated/20260824_en_mmtx_batch004/farm.webp",
+      "target": "Pict/farm.webp",
+      "bytes": 301536,
+      "sha256": "cf12c26e8cc7f25dca456a1adaf7e0b3df9da0874733c64a78c194baab015505",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "generate",
+      "image_stem": "fence",
+      "source": "PictNew/generated/20260824_en_mmtx_batch004/fence.webp",
+      "target": "Pict/fence.webp",
+      "bytes": 293582,
+      "sha256": "0a1455ed802848e611ea3be985a21413de19fde59526dd40fe481e94d7931f12",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "flower",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_flower.png",
+      "target": "Pict/flower.png",
+      "bytes": 111422,
+      "sha256": "00fb210b68a82ea01ff841825f3c1531393096c1380cfc38788f3b86e8e91446",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "generate",
+      "image_stem": "forest",
+      "source": "PictNew/generated/20260824_en_mmtx_batch004/forest.webp",
+      "target": "Pict/forest.webp",
+      "bytes": 289346,
+      "sha256": "f29e2bfcfee6c042ae0a6ea86b4c28e146d1c76abe54a2e7cc4d3e2df9fc5378",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "generate",
+      "image_stem": "four",
+      "source": "PictNew/generated/20260824_en_mmtx_batch001/four.webp",
+      "target": "Pict/four.webp",
+      "bytes": 127990,
+      "sha256": "8175fcd497a39d945c9d07252d5e9800f858db018d7bbc8eec587f14039937ce",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "generate",
+      "image_stem": "gate",
+      "source": "PictNew/generated/20260824_en_mmtx_batch005/gate.webp",
+      "target": "Pict/gate.webp",
+      "bytes": 261930,
+      "sha256": "0ec8e36bc7b699ce9c274bff18b6540353a06a35b13da07f0df7d68b8ee21e24",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "generate",
+      "image_stem": "get",
+      "source": "PictNew/generated/20260824_en_mmtx_batch005/get.webp",
+      "target": "Pict/get.webp",
+      "bytes": 196594,
+      "sha256": "81faaada735029401d6ad3ea1f1fa2879ea8604a80b73350ab8439786b25975d",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "grape",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_grape.png",
+      "target": "Pict/grape.png",
+      "bytes": 113702,
+      "sha256": "b26a171f38252b38658ba41007b368a16d743167fa33dd957abf437717d0a707",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "generate",
+      "image_stem": "handle",
+      "source": "PictNew/generated/20260824_en_mmtx_batch005/handle.webp",
+      "target": "Pict/handle.webp",
+      "bytes": 183010,
+      "sha256": "494d931cd003e095f773a773b687b5b9eaab4f3a22e00cf2c1a93af6b41a61a4",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "generate",
+      "image_stem": "idonthave",
+      "source": "PictNew/generated/20260824_en_mmtx_batch005/idonthave.webp",
+      "target": "Pict/idonthave.webp",
+      "bytes": 161484,
+      "sha256": "fda4e1f3b5fd37839a0ef6da4853f35227ebcea137bbe3a98ebaf2f450399959",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "kite",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_kite.png",
+      "target": "Pict/kite.png",
+      "bytes": 174185,
+      "sha256": "cf02932288f7ac0ff736fc829cc0b75ae969cb5aebbd4455aa93a4a43af06f83",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "lamp",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_lamp.png",
+      "target": "Pict/lamp.png",
+      "bytes": 79975,
+      "sha256": "8a99133b1040a739de78b43d21dfe279a4cb341c3aa92947bdfc11d563226c8e",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "leaf",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_leaf.png",
+      "target": "Pict/leaf.png",
+      "bytes": 135330,
+      "sha256": "3ae07d1d7f89edc8c63ddab1667cd3a6d76bcd56d2332ec91945eaa4e5d04417",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "generate",
+      "image_stem": "lookinside",
+      "source": "PictNew/generated/20260824_en_mmtx_batch005/lookinside.webp",
+      "target": "Pict/lookinside.webp",
+      "bytes": 141394,
+      "sha256": "be10e2a4214ab5c08847c4fbff8d802698de9a484ed45f0ffdafd482fe8290dc",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "moon",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_moon.png",
+      "target": "Pict/moon.png",
+      "bytes": 74668,
+      "sha256": "9069c1b1ecb369097ffa4aa09639f24448a798a9c73f431c24b1cd7a8501a01b",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "generate",
+      "image_stem": "nuts",
+      "source": "PictNew/generated/20260824_en_mmtx_batch006/nuts.webp",
+      "target": "Pict/nuts.webp",
+      "bytes": 211162,
+      "sha256": "bd8362ccf985d735f3264f6575f42bed123e863c4f0b0c984093c0ddb11ff45c",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "generate",
+      "image_stem": "one",
+      "source": "PictNew/generated/20260824_en_mmtx_batch001/one.webp",
+      "target": "Pict/one.webp",
+      "bytes": 115572,
+      "sha256": "9d693afeab9de6d1edfd54c5e9f4f1185c07c3165833ceaf636bd076deb74783",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "generate",
+      "image_stem": "own",
+      "source": "PictNew/generated/20260824_en_mmtx_batch006/own.webp",
+      "target": "Pict/own.webp",
+      "bytes": 166680,
+      "sha256": "58f1afff586328b19d322df67493f4b535138552c8c0eb9e450a34a2f33494e7",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "pea",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_pea.png",
+      "target": "Pict/pea.png",
+      "bytes": 254673,
+      "sha256": "c411a9e055573a7c434a22e6441b4f12a16ff3181cc846a2962c3e9030807c32",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "pencil",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_pencil.png",
+      "target": "Pict/pencil.png",
+      "bytes": 59265,
+      "sha256": "7d61d55c5ecfe033342f48366a7f991cbc54024e9a8a480661fd593f2fd51bea",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "pillow",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_pillow.png",
+      "target": "Pict/pillow.png",
+      "bytes": 132583,
+      "sha256": "f1adf5f38e91a057a5a0224ee5400d7432c482382495ee1407427adfcecbbd32",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "plane",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_plane.png",
+      "target": "Pict/plane.png",
+      "bytes": 94602,
+      "sha256": "94cdd7323cc06c2f97f0add31038dbfa0d8a7c58437c9263a12dbe38af753655",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "generate",
+      "image_stem": "pump",
+      "source": "PictNew/generated/20260824_en_mmtx_batch006/pump.webp",
+      "target": "Pict/pump.webp",
+      "bytes": 266920,
+      "sha256": "f50ff1fcb2377ee0ebb3067597a57df2b0238ed91c068757abdf54025a2a1784",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "generate",
+      "image_stem": "push",
+      "source": "PictNew/generated/20260824_en_mmtx_batch006/push.webp",
+      "target": "Pict/push.webp",
+      "bytes": 128124,
+      "sha256": "fa24925109d5631d7fc917b768e3ce6ba122f0b37061eef22bc1b04281ad39cf",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "generate",
+      "image_stem": "question",
+      "source": "PictNew/generated/20260824_en_mmtx_batch006/question.webp",
+      "target": "Pict/question.webp",
+      "bytes": 152128,
+      "sha256": "14f537f48e34d4b4753c7999ad70e6117d864349e3a777b5089d7620f6d6485f",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "robot",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_robot.png",
+      "target": "Pict/robot.png",
+      "bytes": 108499,
+      "sha256": "e43f66272287b3dbeed003c877221e7a137ad4ea662ed732ffac55ca8e994d01",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "rocket",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_rocket.png",
+      "target": "Pict/rocket.png",
+      "bytes": 89104,
+      "sha256": "c3454b6abd00cab3670dab15cb5f6995859e07b901ae9f90729398f998caabcd",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "generate",
+      "image_stem": "scared",
+      "source": "PictNew/generated/20260824_en_mmtx_batch007/scared.webp",
+      "target": "Pict/scared.webp",
+      "bytes": 249806,
+      "sha256": "536a400772ce02e7c5ddc76f7fa019f5bbd861e445bb4d8f035baa1670228bef",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "generate",
+      "image_stem": "seven",
+      "source": "PictNew/generated/20260824_en_mmtx_batch002/seven.webp",
+      "target": "Pict/seven.webp",
+      "bytes": 298642,
+      "sha256": "fc217be6fa736e8d95f84e6a42fcda632e2df64fc011c0beea6036a377708c6f",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "shoe",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_shoe.png",
+      "target": "Pict/shoe.png",
+      "bytes": 132575,
+      "sha256": "4af6c842cf3957df978ecb242fbec26851ef4effe257e107706748402522d616",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "generate",
+      "image_stem": "six",
+      "source": "PictNew/generated/20260824_en_mmtx_batch001/six.webp",
+      "target": "Pict/six.webp",
+      "bytes": 209214,
+      "sha256": "42f2a45c88c5765b49cd2e815bfdd2c28623053aab9e0917f630d0774078e74e",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "soap",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_soap.png",
+      "target": "Pict/soap.png",
+      "bytes": 101249,
+      "sha256": "f67e53bf84f414379e7822bfc39929952eeab2c1c1967bc1cea66ad47db7ca1f",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "sock",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_sock.png",
+      "target": "Pict/sock.png",
+      "bytes": 111577,
+      "sha256": "1e193c4d6261aa3895f9df1d5d854dbac5a3d0bbf37a99f54de13ab02e66264e",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "spoon",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_spoon.png",
+      "target": "Pict/spoon.png",
+      "bytes": 55293,
+      "sha256": "65f547f664471237bebf0eb1a61a651dc9dd86462f267a122fd0bdb5efb9d958",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "generate",
+      "image_stem": "squirrel",
+      "source": "PictNew/generated/20260824_en_mmtx_batch007/squirrel.webp",
+      "target": "Pict/squirrel.webp",
+      "bytes": 265400,
+      "sha256": "db959269da6c8e16bbe1b80bddb42f8f450ee8573185ac35cd58200791a64061",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "star",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_star.png",
+      "target": "Pict/star.png",
+      "bytes": 85671,
+      "sha256": "79881dbd3a89f8b9456a6a0ea0fc30796c0c1388b1aff37c39c9346db93ad3b1",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "stick",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_stick.png",
+      "target": "Pict/stick.png",
+      "bytes": 66315,
+      "sha256": "4ce7387ff8fb0890fb37c9446cd9115f8c8affd6375159a9faa7a1170d2d387f",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "stone",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_stone.png",
+      "target": "Pict/stone.png",
+      "bytes": 140437,
+      "sha256": "40f42d627deaa65e93aa9b0202a4ab8138eac0364b3efded9945efd80fc45db1",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "generate",
+      "image_stem": "sunflowers",
+      "source": "PictNew/generated/20260824_en_mmtx_batch002/sunflowers.webp",
+      "target": "Pict/sunflowers.webp",
+      "bytes": 197250,
+      "sha256": "bf59de6ae4215c7506fc8178f45e1b40eaf91a5a52d47362a36267595bd68880",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "generate",
+      "image_stem": "three",
+      "source": "PictNew/generated/20260824_en_mmtx_batch001/three.webp",
+      "target": "Pict/three.webp",
+      "bytes": 180560,
+      "sha256": "d65fe3d926957facf086e80f4cbf50d933af0846c3329c6d3cf474103b797ec3",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "toy",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_toy.png",
+      "target": "Pict/toy.png",
+      "bytes": 140495,
+      "sha256": "6f15a6d939ebd13e7931a904cf1f5037685f8a542a630c2e0271a86a804ab848",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "tree",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_tree.png",
+      "target": "Pict/tree.png",
+      "bytes": 174988,
+      "sha256": "52f2e5bd1e7e325afcbd5f1d7bd26ffb56d8df61da42be5ae027aeb0c64f0618",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "reuse_mmtx_forest_asset",
+      "image_stem": "truck",
+      "source": "MatysekANJ/web_mmtx/assets/forest_school_truck.png",
+      "target": "Pict/truck.png",
+      "bytes": 108893,
+      "sha256": "599e13c9bffd295a1da66893e03c80730aa8140ccc9fe909618904dd95a20c00",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "generate",
+      "image_stem": "trust",
+      "source": "PictNew/generated/20260824_en_mmtx_batch007/trust.webp",
+      "target": "Pict/trust.webp",
+      "bytes": 289054,
+      "sha256": "bb7131880a0dccf49cff646c704a80b53eec1641c7844522d7ba5c3ebefc3c3d",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "generate",
+      "image_stem": "two",
+      "source": "PictNew/generated/20260824_en_mmtx_batch001/two.webp",
+      "target": "Pict/two.webp",
+      "bytes": 107104,
+      "sha256": "1298558de6b1ad4f2bc06f699b08f516fbdc18046636ae58aa201f0fd9bbddfa",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "generate",
+      "image_stem": "valley",
+      "source": "PictNew/generated/20260824_en_mmtx_batch007/valley.webp",
+      "target": "Pict/valley.webp",
+      "bytes": 298004,
+      "sha256": "62f25cdaaf1726d2629bfb3a853b781638e73719d296c2f23cfbda914b7f69ab",
+      "status": "created_without_overwrite"
+    },
+    {
+      "action": "generate",
+      "image_stem": "warning",
+      "source": "PictNew/generated/20260824_en_mmtx_batch007/warning.webp",
+      "target": "Pict/warning.webp",
+      "bytes": 194806,
+      "sha256": "c71e238ad9cc697eece9a1dea24a39b3cfedc05abfa2f8728ef8f2ec9e3dfbe4",
+      "status": "created_without_overwrite"
+    }
+  ]
+}

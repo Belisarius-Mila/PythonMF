@@ -58,7 +58,14 @@ def normalize_word(text: str) -> str:
 
 
 def tokenize_words(text: str) -> list[str]:
-    raw = re.findall(r"[A-Za-zÀ-ÖØ-öø-ÿ'-]+", (text or "").casefold())
+    # ``[^\W\d_]`` is a Unicode letter.  The previous Latin-1 range split
+    # Czech words such as ``věřit`` into misleading fragments (``v``/``it``),
+    # which could select an unrelated mapped picture.
+    raw = re.findall(
+        r"[^\W\d_]+(?:[-'’][^\W\d_]+)*",
+        (text or "").casefold(),
+        flags=re.UNICODE,
+    )
     return [normalize_word(token) for token in raw if normalize_word(token)]
 
 
@@ -201,18 +208,45 @@ def choose_picture_stem(
     cz = (row.get("CZ") or "").strip()
     en_norm = normalize_word(en)
     cz_norm = normalize_word(cz)
-    tokens = tokenize_words(en) + tokenize_words(cz)
+    en_tokens = tokenize_words(en)
+    cz_tokens = tokenize_words(cz)
 
-    for key in [en_norm, cz_norm] + tokens:
-        if key and key in picture_stems:
-            return key, "direct"
+    # An exact English filename is authoritative.  Next prefer an explicit
+    # full-word mapping, especially for Czech meanings whose accent-stripped
+    # spelling can collide with a different English filename (také -> take).
+    if en_norm and en_norm in picture_stems:
+        return en_norm, "direct"
 
-    for key in [en_norm, cz_norm] + tokens:
+    for key in (en_norm, cz_norm):
         mapped = synonym_image_map.get(key)
         if mapped:
             return mapped, "mapping"
 
-    token_set = set(tokens)
+    if cz_norm and cz_norm in picture_stems:
+        return cz_norm, "direct"
+
+    # Czech mapping tokens carry the intended meaning more reliably than
+    # short English function words (for example ``a glass`` must resolve via
+    # Czech ``sklenice`` before the article ``a``).
+    for key in cz_tokens:
+        mapped = synonym_image_map.get(key)
+        if mapped:
+            return mapped, "mapping"
+
+    for key in en_tokens:
+        if key and key in picture_stems:
+            return key, "direct"
+
+    for key in en_tokens:
+        mapped = synonym_image_map.get(key)
+        if mapped:
+            return mapped, "mapping"
+
+    for key in cz_tokens:
+        if key and key in picture_stems:
+            return key, "direct"
+
+    token_set = set(en_tokens + cz_tokens)
     if token_set & FEMALE_PRONOUNS:
         return "woman", "fallback"
     if token_set & MALE_PRONOUNS:
@@ -249,8 +283,14 @@ def relative_posix_path(path: Path, base: Path) -> str:
     return path.relative_to(base).as_posix()
 
 
-def ensure_clean_assets_dir(target_dir: Path, expected_names: set[str]) -> None:
+def ensure_clean_assets_dir(
+    target_dir: Path,
+    expected_names: set[str],
+    preserve_extra_assets: bool = False,
+) -> None:
     target_dir.mkdir(parents=True, exist_ok=True)
+    if preserve_extra_assets:
+        return
     for child in target_dir.iterdir():
         if child.is_file() and child.name not in expected_names:
             child.unlink()
@@ -338,11 +378,16 @@ def write_output(
     asset_map: dict[Path, str],
     json_name: str,
     asset_dir_name: str,
+    preserve_extra_assets: bool = False,
 ) -> None:
     data_dir = output_root / "data"
     asset_dir = output_root / "assets" / asset_dir_name
     data_dir.mkdir(parents=True, exist_ok=True)
-    ensure_clean_assets_dir(asset_dir, set(asset_map.values()))
+    ensure_clean_assets_dir(
+        asset_dir,
+        set(asset_map.values()),
+        preserve_extra_assets=preserve_extra_assets,
+    )
 
     for source_path, dest_name in sorted(asset_map.items(), key=lambda item: item[1]):
         shutil.copy2(source_path, asset_dir / dest_name)
@@ -385,6 +430,11 @@ def parse_args() -> argparse.Namespace:
         default=[],
         help="Optional extra web output root. Can be passed multiple times.",
     )
+    parser.add_argument(
+        "--preserve-extra-assets",
+        action="store_true",
+        help="Keep currently unreferenced web assets instead of deleting them.",
+    )
     return parser.parse_args()
 
 
@@ -423,7 +473,14 @@ def main() -> int:
             image_path = item.get("image")
             if image_path:
                 item["image"] = f"assets/{args.asset_dir_name}/{Path(image_path).name}"
-        write_output(output_root, local_payload, asset_map, args.json_name, args.asset_dir_name)
+        write_output(
+            output_root,
+            local_payload,
+            asset_map,
+            args.json_name,
+            args.asset_dir_name,
+            preserve_extra_assets=args.preserve_extra_assets,
+        )
         print(f"OK  {output_root / 'data' / args.json_name}")
         print(f"OK  {output_root / 'assets' / args.asset_dir_name}")
 
