@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-17 22:23 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-25 13:17 CEST
 
 ### Hotovo
-- Repeat nyní zopakuje každou právě zobrazenou větu bez posunutí nebo přerušení dialogu
+- MMTX má samostatné přání Jane s pozměněnými texty, anglickou výslovností jména a vlastními zvukovými stopami.
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
@@ -14,18 +14,18 @@
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Ručně ověřit Repeat a Next v celém výslechu na iPhonu nebo Macu
+- Ručně ověřit hlasy a výslovnost Jane na iPhonu nebo Macu a poté použít ovládací prvky Cockpitu pro checkpoint a nasazení.
 
 ### Rozhodnutí
-- Repeat je replay-only ovládání aktuální věty a nesmí měnit tok tlačítka Next
+- Jméno Jane se v anglickém i českém audia vyslovuje anglicky jako džejn; původní Kate birthday zůstává beze změny.
 
 ### Navrhované další kroky
-- Po živém ověření pokračovat počítáním pěti ovcí a skutečným otevřením branky
+- Žádné další návrhy nad rámec bezprostředního kroku.
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `e99fc7225b71`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `e99fc7225b71` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-16T20:21:15+00:00.
+- Git před checkpointem: lokální `main` na `3e4729b7ecf1`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `3e4729b7ecf1` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-25T10:56:19+00:00.
 - Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -508,5 +508,31 @@ Navrhované další kroky:
 
 Technický důkaz:
 - rychlá Cockpit brána syntaxe a whitespace: 5.4 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
+- Pracovní proud: `project-mmtx`.
+- Read-only živý stav při checkpointu: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
+
+### 2026-08-25 13:17 CEST – MMTX má samostatné přání Jane s pozměněnými texty, anglickou výslovností jména a vlastními zvukovými stopami.
+
+Hotovo:
+- MMTX má samostatné přání Jane s pozměněnými texty, anglickou výslovností jména a vlastními zvukovými stopami.
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+
+Otevřeno:
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+
+Rizika:
+- Žádné další doložené provozní riziko.
+
+Rozhodnutí:
+- Jméno Jane se v anglickém i českém audia vyslovuje anglicky jako džejn; původní Kate birthday zůstává beze změny.
+
+Další krok:
+- Ručně ověřit hlasy a výslovnost Jane na iPhonu nebo Macu a poté použít ovládací prvky Cockpitu pro checkpoint a nasazení.
+
+Navrhované další kroky:
+- Nebyly zachyceny další návrhy nad rámec bezprostředního kroku.
+
+Technický důkaz:
+- rychlá Cockpit brána syntaxe a whitespace: 6.8 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `project-mmtx`.
 - Read-only živý stav při checkpointu: main=`aligned`, deployment=`verified_current`, runtime=`connected`.

@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1672 941" role="img" aria-labelledby="title desc">
+  <title id="title">Jane birthday forest clearing</title>
+  <desc id="desc">Benji, Bunny, Bruno, Fiona and Sunny standing on a forest clearing and looking at the screen.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#bfe6ff"/>
+      <stop offset="0.64" stop-color="#e9f7d4"/>
+      <stop offset="1" stop-color="#9dcf72"/>
+    </linearGradient>
+    <linearGradient id="grass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#84bd57"/>
+      <stop offset="1" stop-color="#4f8d3f"/>
+    </linearGradient>
+    <filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="16" stdDeviation="12" flood-color="#22401e" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+  <rect width="1672" height="941" fill="url(#sky)"/>
+  <circle cx="1420" cy="126" r="74" fill="#fff0a5" opacity="0.95"/>
+  <g opacity="0.95">
+    <path d="M0 456 C210 330 408 350 620 428 C820 500 958 392 1138 358 C1352 318 1518 382 1672 316 L1672 941 L0 941 Z" fill="#6aa94f"/>
+    <path d="M0 594 C210 505 414 520 610 582 C826 652 1044 512 1265 508 C1422 506 1545 568 1672 532 L1672 941 L0 941 Z" fill="url(#grass)"/>
+  </g>
+  <g opacity="0.92">
+    <g transform="translate(0 0)">
+      <rect x="72" y="200" width="38" height="420" rx="18" fill="#6c4b32"/>
+      <path d="M92 90 L10 258 L174 258 Z" fill="#2e7841"/>
+      <path d="M92 152 L24 330 L160 330 Z" fill="#256b36"/>
+      <path d="M92 240 L34 416 L150 416 Z" fill="#1d5d31"/>
+    </g>
+    <g transform="translate(250 -12)">
+      <rect x="72" y="220" width="42" height="430" rx="18" fill="#68482f"/>
+      <path d="M94 92 L4 282 L184 282 Z" fill="#2b7840"/>
+      <path d="M94 168 L22 362 L166 362 Z" fill="#236936"/>
+      <path d="M94 262 L38 438 L150 438 Z" fill="#1c5b31"/>
+    </g>
+    <g transform="translate(1380 -8)">
+      <rect x="72" y="218" width="44" height="430" rx="18" fill="#6a4a32"/>
+      <path d="M95 82 L4 280 L188 280 Z" fill="#2e7b43"/>
+      <path d="M95 164 L20 358 L172 358 Z" fill="#246c38"/>
+      <path d="M95 260 L38 438 L152 438 Z" fill="#1c5e32"/>
+    </g>
+    <g transform="translate(1120 18)">
+      <rect x="76" y="230" width="38" height="390" rx="18" fill="#68472f"/>
+      <path d="M95 110 L20 282 L170 282 Z" fill="#2f7e42"/>
+      <path d="M95 184 L35 354 L155 354 Z" fill="#236b36"/>
+      <path d="M95 270 L48 420 L142 420 Z" fill="#1d5c31"/>
+    </g>
+  </g>
+  <ellipse cx="836" cy="742" rx="650" ry="156" fill="#79b95a"/>
+  <ellipse cx="836" cy="796" rx="520" ry="90" fill="#5f9f46" opacity="0.72"/>
+  <g transform="translate(633 122)" filter="url(#softShadow)">
+    <path d="M180 42 C245 0 320 0 384 42 C448 84 481 155 464 225 C447 296 382 342 282 342 C182 342 116 296 100 225 C84 155 116 84 180 42 Z" fill="#fff4c2" stroke="#d3a83b" stroke-width="8"/>
+    <text x="282" y="146" text-anchor="middle" font-family="Trebuchet MS, Arial, sans-serif" font-size="64" font-weight="900" fill="#376542">Jane</text>
+    <text x="282" y="222" text-anchor="middle" font-family="Trebuchet MS, Arial, sans-serif" font-size="50" font-weight="900" fill="#9d5a2d">birthday</text>
+    <path d="M176 270 C226 302 336 302 386 270" fill="none" stroke="#d3a83b" stroke-width="12" stroke-linecap="round"/>
+  </g>
+  <g id="characters" filter="url(#softShadow)">
+    <g transform="translate(220 507)">
+      <ellipse cx="88" cy="262" rx="82" ry="28" fill="#2f6335" opacity="0.28"/>
+      <ellipse cx="88" cy="122" rx="72" ry="92" fill="#d4a071"/>
+      <circle cx="88" cy="54" r="55" fill="#dfb181"/>
+      <ellipse cx="55" cy="18" rx="22" ry="42" fill="#c98655"/>
+      <ellipse cx="124" cy="18" rx="22" ry="42" fill="#c98655"/>
+      <circle cx="70" cy="48" r="7" fill="#2b2119"/>
+      <circle cx="106" cy="48" r="7" fill="#2b2119"/>
+      <path d="M74 76 C86 87 100 87 112 76" fill="none" stroke="#2b2119" stroke-width="6" stroke-linecap="round"/>
+      <rect x="36" y="182" width="104" height="84" rx="26" fill="#5f8bff"/>
+      <text x="88" y="318" text-anchor="middle" font-family="Trebuchet MS, Arial, sans-serif" font-size="34" font-weight="900" fill="#24432b">Benji</text>
+    </g>
+    <g transform="translate(470 512)">
+      <ellipse cx="76" cy="254" rx="68" ry="24" fill="#2f6335" opacity="0.25"/>
+      <ellipse cx="76" cy="128" rx="58" ry="88" fill="#f4d2c9"/>
+      <circle cx="76" cy="54" r="47" fill="#ffe1d9"/>
+      <ellipse cx="43" cy="8" rx="17" ry="58" fill="#ffe1d9"/>
+      <ellipse cx="108" cy="8" rx="17" ry="58" fill="#ffe1d9"/>
+      <circle cx="60" cy="50" r="6" fill="#2b2119"/>
+      <circle cx="93" cy="50" r="6" fill="#2b2119"/>
+      <path d="M63 76 C74 84 88 84 99 76" fill="none" stroke="#2b2119" stroke-width="5" stroke-linecap="round"/>
+      <rect x="26" y="184" width="100" height="78" rx="24" fill="#ff9ec8"/>
+      <text x="76" y="312" text-anchor="middle" font-family="Trebuchet MS, Arial, sans-serif" font-size="34" font-weight="900" fill="#24432b">Bunny</text>
+    </g>
+    <g transform="translate(735 474)">
+      <ellipse cx="94" cy="292" rx="92" ry="30" fill="#2f6335" opacity="0.26"/>
+      <ellipse cx="94" cy="156" rx="78" ry="108" fill="#9c7a60"/>
+      <circle cx="94" cy="72" r="58" fill="#aa876d"/>
+      <path d="M40 40 C22 20 26 -14 62 8" fill="#7e604d"/>
+      <path d="M148 40 C166 20 162 -14 126 8" fill="#7e604d"/>
+      <path d="M62 46 C76 32 112 32 126 46 L116 88 C104 104 84 104 72 88 Z" fill="#f3ead9"/>
+      <circle cx="75" cy="58" r="7" fill="#2b2119"/>
+      <circle cx="113" cy="58" r="7" fill="#2b2119"/>
+      <path d="M78 92 C90 102 104 102 116 92" fill="none" stroke="#2b2119" stroke-width="6" stroke-linecap="round"/>
+      <rect x="34" y="224" width="120" height="88" rx="28" fill="#b8895f"/>
+      <text x="94" y="365" text-anchor="middle" font-family="Trebuchet MS, Arial, sans-serif" font-size="34" font-weight="900" fill="#24432b">Bruno</text>
+    </g>
+    <g transform="translate(1018 504)">
+      <ellipse cx="78" cy="260" rx="74" ry="26" fill="#2f6335" opacity="0.25"/>
+      <ellipse cx="78" cy="136" rx="62" ry="92" fill="#d88343"/>
+      <circle cx="78" cy="58" r="50" fill="#e99655"/>
+      <path d="M36 24 L12 -26 L66 6 Z" fill="#c76d36"/>
+      <path d="M120 24 L144 -26 L90 6 Z" fill="#c76d36"/>
+      <path d="M54 72 C66 96 90 96 102 72 L92 100 L64 100 Z" fill="#fff1df"/>
+      <circle cx="62" cy="54" r="6" fill="#2b2119"/>
+      <circle cx="94" cy="54" r="6" fill="#2b2119"/>
+      <path d="M63 82 C74 90 86 90 97 82" fill="none" stroke="#2b2119" stroke-width="5" stroke-linecap="round"/>
+      <rect x="28" y="194" width="100" height="82" rx="26" fill="#d4a574"/>
+      <text x="78" y="320" text-anchor="middle" font-family="Trebuchet MS, Arial, sans-serif" font-size="34" font-weight="900" fill="#24432b">Fiona</text>
+    </g>
+    <g transform="translate(1290 548)">
+      <ellipse cx="70" cy="220" rx="70" ry="24" fill="#2f6335" opacity="0.25"/>
+      <ellipse cx="70" cy="110" rx="54" ry="78" fill="#d79b35"/>
+      <circle cx="70" cy="44" r="42" fill="#e9b34a"/>
+      <path d="M116 124 C168 98 164 36 118 16 C142 76 100 82 96 120 Z" fill="#c77f26"/>
+      <circle cx="56" cy="42" r="5" fill="#2b2119"/>
+      <circle cx="84" cy="42" r="5" fill="#2b2119"/>
+      <path d="M58 66 C67 74 79 74 88 66" fill="none" stroke="#2b2119" stroke-width="5" stroke-linecap="round"/>
+      <rect x="24" y="160" width="92" height="72" rx="24" fill="#f4c542"/>
+      <text x="70" y="282" text-anchor="middle" font-family="Trebuchet MS, Arial, sans-serif" font-size="34" font-weight="900" fill="#24432b">Sunny</text>
+    </g>
+  </g>
+  <g opacity="0.9">
+    <circle cx="442" cy="738" r="10" fill="#fff4c2"/>
+    <circle cx="456" cy="706" r="8" fill="#fff4c2"/>
+    <circle cx="1174" cy="718" r="9" fill="#fff4c2"/>
+    <circle cx="1202" cy="752" r="7" fill="#fff4c2"/>
+    <path d="M602 824 C664 792 740 790 808 824" fill="none" stroke="#e7d780" stroke-width="9" stroke-linecap="round"/>
+    <path d="M894 824 C958 792 1034 790 1098 824" fill="none" stroke="#e7d780" stroke-width="9" stroke-linecap="round"/>
+  </g>
+</svg>

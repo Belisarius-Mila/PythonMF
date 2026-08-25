@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-17 22:23 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-25 13:17 CEST
 
 ### Hotovo
-- Repeat nyní zopakuje každou právě zobrazenou větu bez posunutí nebo přerušení dialogu
+- MMTX má samostatné přání Jane s pozměněnými texty, anglickou výslovností jména a vlastními zvukovými stopami.
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
@@ -14,18 +14,18 @@
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Ručně ověřit Repeat a Next v celém výslechu na iPhonu nebo Macu
+- Ručně ověřit hlasy a výslovnost Jane na iPhonu nebo Macu a poté použít ovládací prvky Cockpitu pro checkpoint a nasazení.
 
 ### Rozhodnutí
-- Repeat je replay-only ovládání aktuální věty a nesmí měnit tok tlačítka Next
+- Jméno Jane se v anglickém i českém audia vyslovuje anglicky jako džejn; původní Kate birthday zůstává beze změny.
 
 ### Navrhované další kroky
-- Po živém ověření pokračovat počítáním pěti ovcí a skutečným otevřením branky
+- Žádné další návrhy nad rámec bezprostředního kroku.
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `e99fc7225b71`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `e99fc7225b71` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-16T20:21:15+00:00.
+- Git před checkpointem: lokální `main` na `3e4729b7ecf1`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `3e4729b7ecf1` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-25T10:56:19+00:00.
 - Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -272,3 +272,15 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (3): `Samantha_Agent/tests/test_mmtx_harry_guard_prototype.py`, `docs/scene04_harry_guard_prototype/index.html`, `docs/scene04_harry_guard_prototype/script.js`
 - Commit: `Povolit Repeat u každé věty výslechu`
 - Další krok: Ručně ověřit Repeat a Next v celém výslechu na iPhonu nebo Macu
+
+### Automatický checkpoint 2026-08-25 13:17 CEST
+
+- Pracovní proud: `project-mmtx`
+- Hotovo: MMTX má samostatné přání Jane s pozměněnými texty, anglickou výslovností jména a vlastními zvukovými stopami.; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: rychlá Cockpit brána syntaxe a whitespace: 6.8 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu
+- Změněné cesty před paměťovým zápisem (61): `MatysekANJ/web_mmtx/index.html`, `MatysekANJ/web_mmtx/script_intro_v2.js`, `MatysekANJ/web_mmtx/styles_intro_v2.css`, `docs/index.html`, `docs/script_intro_v2.js`, `docs/styles_intro_v2.css`, `MatysekANJ/web_mmtx/scene_jane_birthday/README.md`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/czech/jane_birthday_01_benji_hello_cz.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/czech/jane_birthday_02_benji_wish_cz.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/czech/jane_birthday_03_bunny_hello_cz.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/czech/jane_birthday_04_bunny_wish_cz.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/czech/jane_birthday_05_bruno_hello_cz.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/czech/jane_birthday_06_bruno_wish_cz.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/czech/jane_birthday_07_fiona_hello_cz.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/czech/jane_birthday_08_fiona_wish_cz.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/czech/jane_birthday_09_sunny_hello_cz.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/czech/jane_birthday_10_sunny_wish_cz.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/english/jane_birthday_01_benji_hello_en.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/english/jane_birthday_02_benji_wish_en.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/english/jane_birthday_03_bunny_hello_en.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/english/jane_birthday_04_bunny_wish_en.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/english/jane_birthday_05_bruno_hello_en.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/english/jane_birthday_06_bruno_wish_en.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/english/jane_birthday_07_fiona_hello_en.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/english/jane_birthday_08_fiona_wish_en.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/english/jane_birthday_09_sunny_hello_en.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/english/jane_birthday_10_sunny_wish_en.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/english/jane_birthday_11_song_en.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/index.html`, `MatysekANJ/web_mmtx/scene_jane_birthday/jane_birthday_clearing.png`, `MatysekANJ/web_mmtx/scene_jane_birthday/jane_birthday_clearing.svg`, `MatysekANJ/web_mmtx/scene_jane_birthday/script.js`, `MatysekANJ/web_mmtx/scene_jane_birthday/styles.css`, `Samantha_Agent/tests/test_mmtx_jane_birthday.py`, `docs/scene_jane_birthday/README.md`, `docs/scene_jane_birthday/audio/czech/jane_birthday_01_benji_hello_cz.mp3`, `docs/scene_jane_birthday/audio/czech/jane_birthday_02_benji_wish_cz.mp3`, `docs/scene_jane_birthday/audio/czech/jane_birthday_03_bunny_hello_cz.mp3`, `docs/scene_jane_birthday/audio/czech/jane_birthday_04_bunny_wish_cz.mp3`, `docs/scene_jane_birthday/audio/czech/jane_birthday_05_bruno_hello_cz.mp3`, … a dalších 21
+- Commit: `Přidat narozeninovou scénu Jane`
+- Další krok: Ručně ověřit hlasy a výslovnost Jane na iPhonu nebo Macu a poté použít ovládací prvky Cockpitu pro checkpoint a nasazení.
