@@ -178,6 +178,18 @@ def normalize_word(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", "", value)
 
 
+def merge_word_sets(value: str, *required: str) -> str:
+    labels: list[str] = []
+    seen: set[str] = set()
+    for candidate in re.split(r"[|,;]+", value or "") + list(required):
+        label = re.sub(r"\s+", " ", str(candidate).strip())
+        key = label.casefold()
+        if label and key not in seen:
+            seen.add(key)
+            labels.append(label)
+    return "|".join(labels)
+
+
 def decode_js_string(value: str) -> str:
     return json.loads(f'"{value}"')
 
@@ -235,7 +247,7 @@ def build_plan() -> tuple[OrderedDict[str, dict[str, object]], list[dict[str, st
                 "Order": str(next_order + offset),
                 "Sentence": sentence,
                 "SentenceT": sentence_t,
-                "WS": word_set,
+                "WS": merge_word_sets(word_set, "Benji"),
                 "L": "ne",
                 "HT": "ne",
                 "sources": list(source["sources"]),

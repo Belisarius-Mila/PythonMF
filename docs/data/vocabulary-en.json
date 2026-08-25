@@ -1,11 +1,12 @@
 {
   "app": "VocabularyEN",
-  "generatedAt": "2026-08-24T11:58:19.868195+00:00",
+  "generatedAt": "2026-08-25T08:09:26.205746+00:00",
   "sourceCsv": "VocabularyEN/VocabularyEN.csv",
   "itemCount": 306,
   "wordSets": [
     "Actions",
     "Animals",
+    "Benji",
     "Colors",
     "Family",
     "Food",
@@ -15,7 +16,7 @@
   "stats": {
     "selected": 107,
     "hardTraining": 70,
-    "wordSetCount": 7,
+    "wordSetCount": 8,
     "withSentence": 306,
     "withSentenceTranslation": 306,
     "imageSources": {
@@ -3222,7 +3223,9 @@
       "cz": "jedna",
       "sentenceEn": "One bird is sitting on the roof.",
       "sentenceCz": "Na střeše sedí jeden pták.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/one.webp",
@@ -3238,7 +3241,9 @@
       "cz": "dva",
       "sentenceEn": "Two paths meet near the lake.",
       "sentenceCz": "U jezera se setkávají dvě cesty.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/two.webp",
@@ -3254,7 +3259,9 @@
       "cz": "tři",
       "sentenceEn": "Three rabbits sit near the tree.",
       "sentenceCz": "U stromu sedí tři králíci.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/three.webp",
@@ -3270,7 +3277,9 @@
       "cz": "čtyři",
       "sentenceEn": "Four children are playing in the garden.",
       "sentenceCz": "Na zahradě si hrají čtyři děti.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/four.webp",
@@ -3286,7 +3295,9 @@
       "cz": "pět",
       "sentenceEn": "Five stars shine in the dark sky.",
       "sentenceCz": "Na tmavé obloze svítí pět hvězd.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/five.png",
@@ -3302,7 +3313,9 @@
       "cz": "šest",
       "sentenceEn": "Six oranges are in the basket.",
       "sentenceCz": "V košíku je šest pomerančů.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/six.webp",
@@ -3318,7 +3331,9 @@
       "cz": "sedm",
       "sentenceEn": "Seven sheep are standing in the field.",
       "sentenceCz": "Na poli stojí sedm ovcí.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/seven.webp",
@@ -3334,7 +3349,9 @@
       "cz": "osm",
       "sentenceEn": "Eight ducks are swimming on the pond.",
       "sentenceCz": "Na rybníku plave osm kachen.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/otto.webp",
@@ -3351,7 +3368,8 @@
       "sentenceEn": "The apples are red and sweet.",
       "sentenceCz": "Jablka jsou červená a sladká.",
       "wordSets": [
-        "Food"
+        "Food",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -3368,7 +3386,9 @@
       "cz": "slunečnice",
       "sentenceEn": "The tall sunflowers turn toward the sun.",
       "sentenceCz": "Vysoké slunečnice se otáčejí ke slunci.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/sunflowers.webp",
@@ -3385,7 +3405,8 @@
       "sentenceEn": "The pigs are sleeping in the warm straw.",
       "sentenceCz": "Prasátka spí v teplé slámě.",
       "wordSets": [
-        "Animals"
+        "Animals",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -3403,7 +3424,8 @@
       "sentenceEn": "Count the apples in the basket.",
       "sentenceCz": "Spočítej jablka v košíku.",
       "wordSets": [
-        "Actions"
+        "Actions",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -3420,7 +3442,9 @@
       "cz": "my můžeme",
       "sentenceEn": "We can help the little animal.",
       "sentenceCz": "Můžeme pomoci malému zvířeti.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/can.webp",
@@ -3436,7 +3460,9 @@
       "cz": "kamarádi",
       "sentenceEn": "We are good friends and help each other.",
       "sentenceCz": "Jsme dobří kamarádi a pomáháme si.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/friend.webp",
@@ -3453,7 +3479,8 @@
       "sentenceEn": "OK, I will wait by the gate.",
       "sentenceCz": "Dobře, počkám u branky.",
       "wordSets": [
-        "Greetings"
+        "Greetings",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -3470,7 +3497,9 @@
       "cz": "pojďme",
       "sentenceEn": "Let's go to the park now.",
       "sentenceCz": "Pojďme teď do parku.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/letsgo.png",
@@ -3486,7 +3515,9 @@
       "cz": "my jsme",
       "sentenceEn": "We are ready to start the lesson.",
       "sentenceCz": "Jsme připraveni začít lekci.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/people.png",
@@ -3502,7 +3533,9 @@
       "cz": "také",
       "sentenceEn": "I want to go to the lake too.",
       "sentenceCz": "Také chci jít k jezeru.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/also.png",
@@ -3519,7 +3552,8 @@
       "sentenceEn": "We are going to the lake together.",
       "sentenceCz": "Jdeme společně k jezeru.",
       "wordSets": [
-        "Actions"
+        "Actions",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -3537,7 +3571,8 @@
       "sentenceEn": "The child throws the ball to a friend.",
       "sentenceCz": "Dítě hází míč kamarádovi.",
       "wordSets": [
-        "Things"
+        "Things",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -3555,7 +3590,8 @@
       "sentenceEn": "Our car is parked in front of the house.",
       "sentenceCz": "Naše auto stojí před domem.",
       "wordSets": [
-        "Things"
+        "Things",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -3573,7 +3609,8 @@
       "sentenceEn": "The train arrives at the station on time.",
       "sentenceCz": "Vlak přijíždí na nádraží včas.",
       "wordSets": [
-        "Things"
+        "Things",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -3591,7 +3628,8 @@
       "sentenceEn": "My blue cup is on the table.",
       "sentenceCz": "Můj modrý hrnek je na stole.",
       "wordSets": [
-        "Things"
+        "Things",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -3609,7 +3647,8 @@
       "sentenceEn": "I tie my shoe before we leave.",
       "sentenceCz": "Než odejdeme, zavážu si botu.",
       "wordSets": [
-        "Things"
+        "Things",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -3626,7 +3665,9 @@
       "cz": "strom",
       "sentenceEn": "A bird is building a nest in the tree.",
       "sentenceCz": "Pták si staví hnízdo na stromě.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/tree.png",
@@ -3643,7 +3684,8 @@
       "sentenceEn": "I peel a banana for my snack.",
       "sentenceCz": "Oloupu si banán ke svačině.",
       "wordSets": [
-        "Food"
+        "Food",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -3661,7 +3703,8 @@
       "sentenceEn": "A small boat sails across the lake.",
       "sentenceCz": "Malá loď pluje přes jezero.",
       "wordSets": [
-        "Things"
+        "Things",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -3679,7 +3722,8 @@
       "sentenceEn": "Please put the bread on the plate.",
       "sentenceCz": "Prosím polož chleba na talíř.",
       "wordSets": [
-        "Things"
+        "Things",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -3697,7 +3741,8 @@
       "sentenceEn": "I found one sock under the bed.",
       "sentenceCz": "Našel jsem jednu ponožku pod postelí.",
       "wordSets": [
-        "Things"
+        "Things",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -3714,7 +3759,9 @@
       "cz": "kytka",
       "sentenceEn": "A yellow flower grows by the path.",
       "sentenceCz": "U cesty roste žlutá kytka.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/flower.png",
@@ -3731,7 +3778,8 @@
       "sentenceEn": "The yellow bus stops near the school.",
       "sentenceCz": "Žlutý autobus zastavuje u školy.",
       "wordSets": [
-        "Things"
+        "Things",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -3749,7 +3797,8 @@
       "sentenceEn": "She eats her soup with a spoon.",
       "sentenceCz": "Jí polévku lžičkou.",
       "wordSets": [
-        "Things"
+        "Things",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -3767,7 +3816,8 @@
       "sentenceEn": "Her warm hat is on the chair.",
       "sentenceCz": "Její teplá čepice je na židli.",
       "wordSets": [
-        "Things"
+        "Things",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -3784,7 +3834,9 @@
       "cz": "slunce",
       "sentenceEn": "The sun warms the garden in the morning.",
       "sentenceCz": "Slunce ráno zahřívá zahradu.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/sun.webp",
@@ -3801,7 +3853,8 @@
       "sentenceEn": "The rabbit eats a fresh carrot.",
       "sentenceCz": "Králík jí čerstvou mrkev.",
       "wordSets": [
-        "Food"
+        "Food",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -3819,7 +3872,8 @@
       "sentenceEn": "The wooden chair stands beside the table.",
       "sentenceCz": "Dřevěná židle stojí vedle stolu.",
       "wordSets": [
-        "Things"
+        "Things",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -3836,7 +3890,9 @@
       "cz": "měsíc",
       "sentenceEn": "The moon is bright above the forest.",
       "sentenceCz": "Měsíc jasně svítí nad lesem.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/moon.png",
@@ -3853,7 +3909,8 @@
       "sentenceEn": "We buy fresh bread in the morning.",
       "sentenceCz": "Ráno kupujeme čerstvý chleba.",
       "wordSets": [
-        "Food"
+        "Food",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -3871,7 +3928,8 @@
       "sentenceEn": "The truck carries boxes to the shop.",
       "sentenceCz": "Náklaďák veze krabice do obchodu.",
       "wordSets": [
-        "Things"
+        "Things",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -3889,7 +3947,8 @@
       "sentenceEn": "The cat is sleeping under the bed.",
       "sentenceCz": "Kočka spí pod postelí.",
       "wordSets": [
-        "Things"
+        "Things",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -3906,7 +3965,9 @@
       "cz": "hvězda",
       "sentenceEn": "The first star appears in the evening sky.",
       "sentenceCz": "Na večerní obloze se objeví první hvězda.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/star.png",
@@ -3923,7 +3984,8 @@
       "sentenceEn": "There is a birthday cake on the table.",
       "sentenceCz": "Na stole je narozeninový dort.",
       "wordSets": [
-        "Food"
+        "Food",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -3941,7 +4003,8 @@
       "sentenceEn": "The plane flies above the clouds.",
       "sentenceCz": "Letadlo letí nad mraky.",
       "wordSets": [
-        "Things"
+        "Things",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -3959,7 +4022,8 @@
       "sentenceEn": "Please close the door behind you.",
       "sentenceCz": "Prosím zavři za sebou dveře.",
       "wordSets": [
-        "Things"
+        "Things",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -3976,7 +4040,9 @@
       "cz": "mrak",
       "sentenceEn": "A dark cloud moves across the sky.",
       "sentenceCz": "Po obloze se pohybuje tmavý mrak.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/cloud.png",
@@ -3993,7 +4059,8 @@
       "sentenceEn": "The rocket rises into the sky.",
       "sentenceCz": "Raketa stoupá k obloze.",
       "wordSets": [
-        "Things"
+        "Things",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -4011,7 +4078,8 @@
       "sentenceEn": "Open the window and let in fresh air.",
       "sentenceCz": "Otevři okno a pusť dovnitř čerstvý vzduch.",
       "wordSets": [
-        "Things"
+        "Things",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -4029,7 +4097,8 @@
       "sentenceEn": "This small key opens the front door.",
       "sentenceCz": "Tento malý klíč otevírá přední dveře.",
       "wordSets": [
-        "Things"
+        "Things",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -4047,7 +4116,8 @@
       "sentenceEn": "A smooth stone lies beside the water.",
       "sentenceCz": "U vody leží hladký kámen.",
       "wordSets": [
-        "Things"
+        "Things",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -4065,7 +4135,8 @@
       "sentenceEn": "The little robot waves its hand.",
       "sentenceCz": "Malý robot mává rukou.",
       "wordSets": [
-        "Things"
+        "Things",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -4083,7 +4154,8 @@
       "sentenceEn": "I eat the salad with a fork.",
       "sentenceCz": "Jím salát vidličkou.",
       "wordSets": [
-        "Things"
+        "Things",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -4101,7 +4173,8 @@
       "sentenceEn": "He wears a red cap in the sun.",
       "sentenceCz": "Na slunci nosí červenou čepici.",
       "wordSets": [
-        "Things"
+        "Things",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -4118,7 +4191,9 @@
       "cz": "list",
       "sentenceEn": "A red leaf falls from the tree.",
       "sentenceCz": "Ze stromu padá červený list.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/leaf.png",
@@ -4135,7 +4210,8 @@
       "sentenceEn": "She puts one cookie on the plate.",
       "sentenceCz": "Položí jednu sušenku na talíř.",
       "wordSets": [
-        "Food"
+        "Food",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -4153,7 +4229,8 @@
       "sentenceEn": "The child builds a tower with a blue block.",
       "sentenceCz": "Dítě staví věž z modré kostky.",
       "wordSets": [
-        "Things"
+        "Things",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -4171,7 +4248,8 @@
       "sentenceEn": "I write my name with a pencil.",
       "sentenceCz": "Píšu své jméno tužkou.",
       "wordSets": [
-        "Things"
+        "Things",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -4189,7 +4267,8 @@
       "sentenceEn": "These blue pants are too long.",
       "sentenceCz": "Tyto modré kalhoty jsou příliš dlouhé.",
       "wordSets": [
-        "Things"
+        "Things",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -4207,7 +4286,8 @@
       "sentenceEn": "The dog carries a stick in its mouth.",
       "sentenceCz": "Pes nese v tlamě klacek.",
       "wordSets": [
-        "Things"
+        "Things",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -4225,7 +4305,8 @@
       "sentenceEn": "The farmer grows corn in this field.",
       "sentenceCz": "Farmář pěstuje na tomto poli kukuřici.",
       "wordSets": [
-        "Food"
+        "Food",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -4243,7 +4324,8 @@
       "sentenceEn": "The little girl puts her doll to bed.",
       "sentenceCz": "Holčička ukládá panenku do postele.",
       "wordSets": [
-        "Things"
+        "Things",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -4261,7 +4343,8 @@
       "sentenceEn": "The map shows the way to the lake.",
       "sentenceCz": "Mapa ukazuje cestu k jezeru.",
       "wordSets": [
-        "Things"
+        "Things",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -4279,7 +4362,8 @@
       "sentenceEn": "Wash your hands with soap and water.",
       "sentenceCz": "Umyj si ruce mýdlem a vodou.",
       "wordSets": [
-        "Things"
+        "Things",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -4297,7 +4381,8 @@
       "sentenceEn": "My head rests on a soft pillow.",
       "sentenceCz": "Hlavu mám položenou na měkkém polštáři.",
       "wordSets": [
-        "Things"
+        "Things",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -4315,7 +4400,8 @@
       "sentenceEn": "One purple grape falls from the bunch.",
       "sentenceCz": "Z hroznu spadne jedna fialová kulička vína.",
       "wordSets": [
-        "Food"
+        "Food",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -4333,7 +4419,8 @@
       "sentenceEn": "The child puts the toy into the box.",
       "sentenceCz": "Dítě dává hračku do krabice.",
       "wordSets": [
-        "Things"
+        "Things",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -4351,7 +4438,8 @@
       "sentenceEn": "The colorful kite flies high in the wind.",
       "sentenceCz": "Barevný drak létá vysoko ve větru.",
       "wordSets": [
-        "Things"
+        "Things",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -4369,7 +4457,8 @@
       "sentenceEn": "The lamp gives us light in the evening.",
       "sentenceCz": "Lampa nám večer svítí.",
       "wordSets": [
-        "Things"
+        "Things",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -4387,7 +4476,8 @@
       "sentenceEn": "I wear my boots when it rains.",
       "sentenceCz": "Když prší, nosím holinky.",
       "wordSets": [
-        "Things"
+        "Things",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -4405,7 +4495,8 @@
       "sentenceEn": "A small green pea is on the plate.",
       "sentenceCz": "Na talíři je malý zelený hrášek.",
       "wordSets": [
-        "Food"
+        "Food",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -4423,7 +4514,8 @@
       "sentenceEn": "The squirrel keeps its nuts in a bag.",
       "sentenceCz": "Veverka má oříšky v brašně.",
       "wordSets": [
-        "Food"
+        "Food",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -4440,7 +4532,9 @@
       "cz": "mám",
       "sentenceEn": "I have a map in my bag.",
       "sentenceCz": "Mám v tašce mapu.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/ihave.png",
@@ -4456,7 +4550,9 @@
       "cz": "nemám",
       "sentenceEn": "I don't have my bag with me.",
       "sentenceCz": "Nemám u sebe svou tašku.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/idonthave.webp",
@@ -4472,7 +4568,9 @@
       "cz": "máš?",
       "sentenceEn": "Do you have a pencil?",
       "sentenceCz": "Máš tužku?",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/have.png",
@@ -4488,7 +4586,9 @@
       "cz": "má on?",
       "sentenceEn": "Does he have the key?",
       "sentenceCz": "Má on ten klíč?",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/have.png",
@@ -4505,7 +4605,8 @@
       "sentenceEn": "Look inside the box for the missing toy.",
       "sentenceCz": "Podívej se dovnitř krabice po ztracené hračce.",
       "wordSets": [
-        "Actions"
+        "Actions",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -4523,7 +4624,8 @@
       "sentenceEn": "Please wait for me by the door.",
       "sentenceCz": "Prosím počkej na mě u dveří.",
       "wordSets": [
-        "Actions"
+        "Actions",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -4541,7 +4643,8 @@
       "sentenceEn": "Look at the bird in the tree.",
       "sentenceCz": "Podívej se na ptáka na stromě.",
       "wordSets": [
-        "Actions"
+        "Actions",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -4558,7 +4661,9 @@
       "cz": "cesta",
       "sentenceEn": "This is the way to the farm.",
       "sentenceCz": "Tudy se jde k farmě.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/travel.png",
@@ -4574,7 +4679,9 @@
       "cz": "cesta",
       "sentenceEn": "This path leads through the forest.",
       "sentenceCz": "Tato cesta vede lesem.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/travel.png",
@@ -4591,7 +4698,8 @@
       "sentenceEn": "A black crow sits on the fence.",
       "sentenceCz": "Na plotě sedí černý havran.",
       "wordSets": [
-        "Animals"
+        "Animals",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -4608,7 +4716,9 @@
       "cz": "špatný",
       "sentenceEn": "This road is bad after the rain.",
       "sentenceCz": "Tato cesta je po dešti špatná.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/bad.webp",
@@ -4624,7 +4734,9 @@
       "cz": "hluboký",
       "sentenceEn": "The water is deep near the bridge.",
       "sentenceCz": "Voda je u mostu hluboká.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/valley.webp",
@@ -4640,7 +4752,9 @@
       "cz": "údolí",
       "sentenceEn": "A river runs through the deep valley.",
       "sentenceCz": "Hlubokým údolím protéká řeka.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/valley.webp",
@@ -4656,7 +4770,9 @@
       "cz": "možná",
       "sentenceEn": "Maybe we can go there tomorrow.",
       "sentenceCz": "Možná tam můžeme jít zítra.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/maybe.png",
@@ -4673,7 +4789,8 @@
       "sentenceEn": "The bears walk slowly through the forest.",
       "sentenceCz": "Medvědi pomalu kráčejí lesem.",
       "wordSets": [
-        "Animals"
+        "Animals",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -4690,7 +4807,9 @@
       "cz": "ale",
       "sentenceEn": "I am tired, but I am happy.",
       "sentenceCz": "Jsem unavený, ale jsem šťastný.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/but.png",
@@ -4706,7 +4825,9 @@
       "cz": "vystrašený",
       "sentenceEn": "The horse is scared of the loud noise.",
       "sentenceCz": "Kůň se bojí hlasitého zvuku.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/scared.webp",
@@ -4722,7 +4843,9 @@
       "cz": "já také",
       "sentenceEn": "I like apples, and my friend says, ‘Me too.’",
       "sentenceCz": "Mám rád jablka a kamarád říká: „Já také.“",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/also.png",
@@ -4738,7 +4861,9 @@
       "cz": "přátelský",
       "sentenceEn": "The horse is calm and friendly.",
       "sentenceCz": "Kůň je klidný a přátelský.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/friend.webp",
@@ -4754,7 +4879,9 @@
       "cz": "opatrný, opatrně",
       "sentenceEn": "Be careful when you cross the road.",
       "sentenceCz": "Buď opatrný, když přecházíš silnici.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/warning.webp",
@@ -4770,7 +4897,9 @@
       "cz": "varování",
       "sentenceEn": "The warning tells us to stop.",
       "sentenceCz": "Varování nám říká, abychom zastavili.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/warning.webp",
@@ -4786,7 +4915,9 @@
       "cz": "farma",
       "sentenceEn": "There are cows and chickens on the farm.",
       "sentenceCz": "Na farmě jsou krávy a slepice.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/farm.webp",
@@ -4802,7 +4933,9 @@
       "cz": "cizinec",
       "sentenceEn": "Do not open the gate for a stranger.",
       "sentenceCz": "Neotvírej branku cizinci.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/foreigner.png",
@@ -4819,7 +4952,8 @@
       "sentenceEn": "Please come to the table.",
       "sentenceCz": "Prosím přijď ke stolu.",
       "wordSets": [
-        "Actions"
+        "Actions",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -4837,7 +4971,8 @@
       "sentenceEn": "The old pump brings water from the ground.",
       "sentenceCz": "Stará pumpa čerpá vodu ze země.",
       "wordSets": [
-        "Things"
+        "Things",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -4855,7 +4990,8 @@
       "sentenceEn": "I get a present on my birthday.",
       "sentenceCz": "K narozeninám dostanu dárek.",
       "wordSets": [
-        "Actions"
+        "Actions",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -4873,7 +5009,8 @@
       "sentenceEn": "The bucket is full of clean water.",
       "sentenceCz": "Kbelík je plný čisté vody.",
       "wordSets": [
-        "Things"
+        "Things",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -4890,7 +5027,9 @@
       "cz": "prázdný",
       "sentenceEn": "The glass is empty now.",
       "sentenceCz": "Sklenice je teď prázdná.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/empty.webp",
@@ -4906,7 +5045,9 @@
       "cz": "nevím",
       "sentenceEn": "I don't know the answer yet.",
       "sentenceCz": "Ještě nevím odpověď.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/idontknow.png",
@@ -4922,7 +5063,9 @@
       "cz": "les",
       "sentenceEn": "We walk quietly through the green forest.",
       "sentenceCz": "Tiše procházíme zeleným lesem.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/forest.webp",
@@ -4939,7 +5082,8 @@
       "sentenceEn": "Push the handle down to pump the water.",
       "sentenceCz": "Stlač páku dolů, abys napumpoval vodu.",
       "wordSets": [
-        "Things"
+        "Things",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -4957,7 +5101,8 @@
       "sentenceEn": "Push the heavy door slowly.",
       "sentenceCz": "Pomalu zatlač na těžké dveře.",
       "wordSets": [
-        "Actions"
+        "Actions",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -4975,7 +5120,8 @@
       "sentenceEn": "Come closer so you can see the map.",
       "sentenceCz": "Přijď blíž, abys viděl mapu.",
       "wordSets": [
-        "Actions"
+        "Actions",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -4993,7 +5139,8 @@
       "sentenceEn": "The dog does not chase the sheep.",
       "sentenceCz": "Pes nehoní ovce.",
       "wordSets": [
-        "Actions"
+        "Actions",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -5011,7 +5158,8 @@
       "sentenceEn": "The little animals hide under the tree.",
       "sentenceCz": "Malá zvířátka se schovávají pod stromem.",
       "wordSets": [
-        "Animals"
+        "Animals",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -5029,7 +5177,8 @@
       "sentenceEn": "The little animals trust their friend.",
       "sentenceCz": "Malá zvířátka důvěřují svému kamarádovi.",
       "wordSets": [
-        "Actions"
+        "Actions",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -5047,7 +5196,8 @@
       "sentenceEn": "We eat lunch together at noon.",
       "sentenceCz": "V poledne spolu jíme oběd.",
       "wordSets": [
-        "Actions"
+        "Actions",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -5064,7 +5214,9 @@
       "cz": "vlastní",
       "sentenceEn": "The rabbit has its own carrots.",
       "sentenceCz": "Králík má vlastní mrkev.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/own.webp",
@@ -5081,7 +5233,8 @@
       "sentenceEn": "The farmer opens the gate for us.",
       "sentenceCz": "Farmář nám otevírá branku.",
       "wordSets": [
-        "Things"
+        "Things",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -5098,7 +5251,9 @@
       "cz": "zavřený",
       "sentenceEn": "The shop is closed today.",
       "sentenceCz": "Obchod je dnes zavřený.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/closed.webp",
@@ -5115,7 +5270,8 @@
       "sentenceEn": "A squirrel jumps from tree to tree.",
       "sentenceCz": "Veverka skáče ze stromu na strom.",
       "wordSets": [
-        "Animals"
+        "Animals",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -5132,7 +5288,9 @@
       "cz": "otázka",
       "sentenceEn": "The teacher asks a simple question.",
       "sentenceCz": "Učitel pokládá jednoduchou otázku.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/question.webp",
@@ -5148,7 +5306,9 @@
       "cz": "odpověď",
       "sentenceEn": "I know the answer to this question.",
       "sentenceCz": "Znám odpověď na tuto otázku.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/answer.png",
@@ -5165,7 +5325,8 @@
       "sentenceEn": "Can you catch the red ball?",
       "sentenceCz": "Dokážeš chytit červený míč?",
       "wordSets": [
-        "Actions"
+        "Actions",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -5182,7 +5343,9 @@
       "cz": "dvorek",
       "sentenceEn": "The chickens walk around the farm yard.",
       "sentenceCz": "Slepice chodí po dvorku farmy.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/courtyard.webp",
@@ -5199,7 +5362,8 @@
       "sentenceEn": "A badger comes out of its den at night.",
       "sentenceCz": "Jezevec vychází v noci ze svého doupěte.",
       "wordSets": [
-        "Animals"
+        "Animals",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -5217,7 +5381,8 @@
       "sentenceEn": "The badger can dig under the fence.",
       "sentenceCz": "Jezevec umí hrabat pod plotem.",
       "wordSets": [
-        "Actions"
+        "Actions",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -5234,7 +5399,9 @@
       "cz": "pod",
       "sentenceEn": "The key is under the book.",
       "sentenceCz": "Klíč je pod knihou.",
-      "wordSets": [],
+      "wordSets": [
+        "Benji"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/under.png",
@@ -5251,7 +5418,8 @@
       "sentenceEn": "The sheep stand behind the wooden fence.",
       "sentenceCz": "Ovce stojí za dřevěným plotem.",
       "wordSets": [
-        "Things"
+        "Things",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,
@@ -5269,7 +5437,8 @@
       "sentenceEn": "I believe you because you tell the truth.",
       "sentenceCz": "Věřím ti, protože říkáš pravdu.",
       "wordSets": [
-        "Actions"
+        "Actions",
+        "Benji"
       ],
       "selected": false,
       "hardTraining": false,

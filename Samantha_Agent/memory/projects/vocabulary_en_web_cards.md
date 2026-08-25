@@ -250,7 +250,24 @@ Pravidla:
 - Při změně webu testovat přes lokální HTTP server nad `docs/`.
 - Při git operacích nepoužívat slepě `git add .`, protože v repozitáři bývá hodně rozpracovaných souborů.
 
+## Okruh Benji z MMTX - 2026-08-25
+
+- Všech 120 položek importovaných z MMTX, tedy pořadí 187 až 306, má v poli
+  `WS` přidanou hodnotu `Benji`.
+- Původní okruhy zůstávají zachované. Více okruhů se v CSV odděluje znakem `|`,
+  například `Actions|Benji`.
+- Web vytváří seznam okruhů dynamicky z manifestu, proto nebyla potřebná změna
+  HTML ani JavaScriptu. Po synchronizaci nabízí checkbox `Benji` a jeho filtr
+  obsahuje právě 120 nových položek.
+- Budoucí import přes `import_mmtx_vocabulary.py` přidá `Benji` automaticky.
+- Pro bezpečné doplnění existujících importovaných řádků slouží
+  `tag_mmtx_benji_word_set.py`; bez `--apply` pouze audituje.
+- Webový export se obnovuje příkazem:
+
+```bash
+python3 VocabularyEN/sync_vocabulary_en_to_docs.py --preserve-extra-assets
+```
+
 ## Zdroj
 
 Souhrn ChatGPT/Codex konverzace k převodu části `vocab_trainer_en.py` do jednoduché webové learner aplikace pro mentálně postižené studenty, vytvoření sync skriptu `VocabularyEN -> docs`, prvního webového MVP, zmenšení hlavičky a přípravě seznamu chybějících obrázků v `Pict/`.
-

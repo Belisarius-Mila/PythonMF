@@ -11,6 +11,7 @@ MODULE_PATH = ROOT / "VocabularyEN" / "import_mmtx_vocabulary.py"
 SYNC_MODULE_PATH = ROOT / "VocabularyEN" / "sync_vocabulary_en_to_docs.py"
 PICTURE_PLAN_MODULE_PATH = ROOT / "VocabularyEN" / "prepare_mmtx_picture_plan.py"
 PUBLISH_MODULE_PATH = ROOT / "VocabularyEN" / "publish_mmtx_picture_candidates.py"
+BENJI_MODULE_PATH = ROOT / "VocabularyEN" / "tag_mmtx_benji_word_set.py"
 
 
 def load_module():
@@ -47,6 +48,16 @@ def load_publish_module():
     return module
 
 
+def load_benji_module():
+    spec = importlib.util.spec_from_file_location(
+        "tag_mmtx_benji_word_set", BENJI_MODULE_PATH
+    )
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 def test_current_mmtx_inventory_has_complete_curated_plan():
     module = load_module()
     entries, current_rows, planned = module.build_plan()
@@ -63,6 +74,7 @@ def test_current_mmtx_inventory_has_complete_curated_plan():
     )
     assert all(str(row["Sentence"]).strip() for row in imported)
     assert all(str(row["SentenceT"]).strip() for row in imported)
+    assert all("Benji" in module.merge_word_sets(str(row["WS"])).split("|") for row in imported)
 
 
 def test_append_preserves_existing_csv_prefix_and_crlf(tmp_path):
@@ -98,6 +110,51 @@ def test_czech_tokenization_keeps_letters_with_diacritics_together():
 
     assert module.tokenize_words("věřit, důvěřovat") == ["verit", "duverovat"]
     assert module.tokenize_words("oříšky") == ["orisky"]
+
+
+def test_benji_tag_transform_changes_only_selected_crlf_rows():
+    module = load_benji_module()
+    import_module = load_module()
+    original = (
+        "EN,CZ,Order,Sentence,SentenceT,WS,L,HT\r\n"
+        "old,starý,1,Old sentence.,Stará věta.,Things,ne,ne\r\n"
+        "one,jedna,187,One bird.,Jeden pták.,,ne,ne\r\n"
+        "catch,chytit,300,Catch it.,Chyť to.,Actions,ne,ne\r\n"
+    ).encode("utf-8")
+
+    updated, changed = module.build_updated_bytes(
+        original,
+        {"one", "catch"},
+        import_module=import_module,
+    )
+
+    assert changed == ["one", "catch"]
+    assert b"old,star\xc3\xbd,1,Old sentence.,Star\xc3\xa1 v\xc4\x9bta.,Things,ne,ne\r\n" in updated
+    assert b"one,jedna,187,One bird.,Jeden pt\xc3\xa1k.,Benji,ne,ne\r\n" in updated
+    assert b"catch,chytit,300,Catch it.,Chy\xc5\xa5 to.,Actions|Benji,ne,ne\r\n" in updated
+    assert updated.replace(b"\r\n", b"").count(b"\n") == 0
+
+
+def test_current_mmtx_rows_are_all_in_benji_word_set():
+    module = load_benji_module()
+
+    targets, pending = module.audit()
+
+    assert len(targets) == 120
+    assert pending == []
+
+
+def test_web_export_offers_exactly_the_mmtx_rows_in_benji_word_set():
+    manifest = json.loads(
+        (ROOT / "docs" / "data" / "vocabulary-en.json").read_text(encoding="utf-8")
+    )
+    benji_items = [item for item in manifest["items"] if "Benji" in item["wordSets"]]
+
+    assert "Benji" in manifest["wordSets"]
+    assert len(benji_items) == 120
+    assert [item["order"] for item in benji_items] == list(range(187, 307))
+    assert all(item["sentenceEn"] and item["sentenceCz"] for item in benji_items)
+    assert all(item["image"] for item in benji_items)
 
 
 def test_exact_mapping_beats_accent_stripped_czech_filename_collision():
