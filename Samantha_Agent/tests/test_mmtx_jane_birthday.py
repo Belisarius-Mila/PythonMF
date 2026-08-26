@@ -83,7 +83,7 @@ class MmtxJaneBirthdayTests(unittest.TestCase):
             self.assertNotIn("Kate", text)
         self.assertIn("Jane - birthday", html)
         self.assertIn("Happy birthday, Jane!", html)
-        self.assertIn('src="jane_birthday_clearing.png?v=20260825a"', html)
+        self.assertIn('src="jane_birthday_clearing.png?v=20260826art1"', html)
         self.assertIn("`džejn`", readme)
         self.assertIn("Jane birthday forest clearing", svg)
         self.assertIn(">Jane</text>", svg)
@@ -157,6 +157,11 @@ class MmtxJaneBirthdayTests(unittest.TestCase):
             width, height = struct.unpack(">II", handle.read(8))
         self.assertEqual(chunk_length, 13)
         self.assertEqual((width, height), (1672, 941))
+        self.assertGreater(image.stat().st_size, 1_000_000)
+        self.assertNotEqual(
+            hashlib.sha256(image.read_bytes()).digest(),
+            hashlib.sha256((KATE_SCENE / "kate_birthday_clearing.png").read_bytes()).digest(),
+        )
 
 
 if __name__ == "__main__":
