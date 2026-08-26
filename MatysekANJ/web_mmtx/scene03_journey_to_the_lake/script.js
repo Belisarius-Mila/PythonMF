@@ -726,7 +726,7 @@ function createQuickSkipButton() {
   button.className = "scene-quick-skip";
   button.setAttribute(
     "aria-label",
-    state.sceneState === SCENE_STATES.complete
+    isDirectScene04Shortcut()
       ? "Pokračovat k Harrymu"
       : "Rychlý posun scény",
   );
@@ -983,12 +983,12 @@ function replayCurrentImage() {
 }
 
 function quickAdvanceScene() {
-  if (state.sceneState === SCENE_STATES.waitingAudio) {
-    startGame();
+  if (isDirectScene04Shortcut()) {
+    goToNextScene();
     return;
   }
-  if (state.sceneState === SCENE_STATES.complete) {
-    goToNextScene();
+  if (state.sceneState === SCENE_STATES.waitingAudio) {
+    startGame();
     return;
   }
 
@@ -1037,6 +1037,10 @@ function goBack() {
 
 function goToNextScene() {
   window.location.href = "../scene04_harry_guard_prototype/index.html";
+}
+
+function isDirectScene04Shortcut() {
+  return state.phase === "3a" || state.sceneState === SCENE_STATES.complete;
 }
 
 function handleRepeat() {

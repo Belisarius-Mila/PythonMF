@@ -82,13 +82,23 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
         production_script = (
             PROJECT_ROOT / "docs" / "scene03_journey_to_the_lake" / "script.js"
         ).read_text(encoding="utf-8")
+        production_html = (
+            PROJECT_ROOT / "docs" / "scene03_journey_to_the_lake" / "index.html"
+        ).read_text(encoding="utf-8")
+        self.assertIn("script.js?v=20260826scene04link2", production_html)
         quick_advance = production_script.split(
             "function quickAdvanceScene()", 1
         )[1].split("function isQuickSkipCornerClick", 1)[0]
-        complete_branch = quick_advance.split(
-            "if (state.sceneState === SCENE_STATES.complete) {", 1
-        )[1].split("}", 1)[0]
-        self.assertIn("goToNextScene();", complete_branch)
+        self.assertIn("if (isDirectScene04Shortcut())", quick_advance)
+        self.assertLess(
+            quick_advance.index("if (isDirectScene04Shortcut())"),
+            quick_advance.index("if (state.sceneState === SCENE_STATES.waitingAudio)"),
+        )
+        shortcut = production_script.split(
+            "function isDirectScene04Shortcut()", 1
+        )[1].split("function handleRepeat", 1)[0]
+        self.assertIn('state.phase === "3a"', shortcut)
+        self.assertIn("state.sceneState === SCENE_STATES.complete", shortcut)
         self.assertIn('"Pokračovat k Harrymu"', production_script)
         self.assertIn(
             'window.location.href = "../scene04_harry_guard_prototype/index.html";',
