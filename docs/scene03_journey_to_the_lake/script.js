@@ -724,7 +724,12 @@ function createQuickSkipButton() {
   const button = document.createElement("button");
   button.type = "button";
   button.className = "scene-quick-skip";
-  button.setAttribute("aria-label", "Rychlý posun scény");
+  button.setAttribute(
+    "aria-label",
+    state.sceneState === SCENE_STATES.complete
+      ? "Pokračovat k Harrymu"
+      : "Rychlý posun scény",
+  );
   button.addEventListener("click", (event) => {
     event.stopPropagation();
     quickAdvanceScene();
@@ -983,6 +988,7 @@ function quickAdvanceScene() {
     return;
   }
   if (state.sceneState === SCENE_STATES.complete) {
+    goToNextScene();
     return;
   }
 
@@ -1027,6 +1033,10 @@ async function startGame() {
 
 function goBack() {
   window.location.href = "../scene02_sunnys_lost_nuts/index.html";
+}
+
+function goToNextScene() {
+  window.location.href = "../scene04_harry_guard_prototype/index.html";
 }
 
 function handleRepeat() {

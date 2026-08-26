@@ -7,6 +7,7 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 PROTOTYPE_ROOT = PROJECT_ROOT / "docs" / "scene04_harry_guard_prototype"
+MIRROR_ROOT = PROJECT_ROOT / "MatysekANJ" / "web_mmtx" / "scene04_harry_guard_prototype"
 GLOSSARY_SLUGS = {
     "answer",
     "badger",
@@ -35,7 +36,7 @@ GLOSSARY_AUDIO_FILES = {f"scene04_vocab_{slug}_en.mp3" for slug in GLOSSARY_SLUG
 
 
 class MmtxHarryGuardPrototypeTests(unittest.TestCase):
-    def test_prototype_is_standalone_and_has_all_assets(self) -> None:
+    def test_scene_is_integrated_and_has_all_assets(self) -> None:
         expected = {
             "index.html",
             "styles.css",
@@ -54,6 +55,7 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
         html = (PROTOTYPE_ROOT / "index.html").read_text(encoding="utf-8")
         styles = (PROTOTYPE_ROOT / "styles.css").read_text(encoding="utf-8")
         self.assertIn('id="languageButton"', html)
+        self.assertIn('id="backButton"', html)
         self.assertIn('id="repeatButton"', html)
         self.assertIn('id="nextButton"', html)
         self.assertIn('id="dictionaryButton"', html)
@@ -63,8 +65,10 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
         self.assertIn('id="yesButton"', html)
         self.assertIn('id="noButton"', html)
         self.assertIn('src="harry_benji_prototype_01.png"', html)
-        self.assertIn('styles.css?v=20260816a', html)
-        self.assertIn('script.js?v=20260817a', html)
+        self.assertIn('styles.css?v=20260826integrated1', html)
+        self.assertIn('script.js?v=20260826integrated1', html)
+        self.assertNotIn("PROTOTYP", html)
+        self.assertNotIn("MMTX prototyp", html)
         self.assertIn("Five interviews complete", html)
         self.assertIn("Pět výslechů je dokončených.", html)
         target_style = styles.split(".hotspot.target {", 1)[1].split("}", 1)[0]
@@ -73,11 +77,50 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
         self.assertIn(".dictionary-list {", styles)
         self.assertIn(".dictionary-item {", styles)
         self.assertIn(".next-button {", styles)
+        self.assertIn(".back-button {", styles)
 
         production_script = (
             PROJECT_ROOT / "docs" / "scene03_journey_to_the_lake" / "script.js"
         ).read_text(encoding="utf-8")
-        self.assertNotIn("scene04_harry_guard_prototype", production_script)
+        quick_advance = production_script.split(
+            "function quickAdvanceScene()", 1
+        )[1].split("function isQuickSkipCornerClick", 1)[0]
+        complete_branch = quick_advance.split(
+            "if (state.sceneState === SCENE_STATES.complete) {", 1
+        )[1].split("}", 1)[0]
+        self.assertIn("goToNextScene();", complete_branch)
+        self.assertIn('"Pokračovat k Harrymu"', production_script)
+        self.assertIn(
+            'window.location.href = "../scene04_harry_guard_prototype/index.html";',
+            production_script,
+        )
+
+        scene_script = (PROTOTYPE_ROOT / "script.js").read_text(encoding="utf-8")
+        self.assertIn('const backButton = document.getElementById("backButton")', scene_script)
+        self.assertIn(
+            'window.location.href = "../scene03_journey_to_the_lake/index.html";',
+            scene_script,
+        )
+        self.assertIn('backButton.addEventListener("click", goBack)', scene_script)
+
+    def test_production_scene_mirror_is_byte_identical(self) -> None:
+        docs_files = {
+            path.relative_to(PROTOTYPE_ROOT)
+            for path in PROTOTYPE_ROOT.rglob("*")
+            if path.is_file()
+        }
+        mirror_files = {
+            path.relative_to(MIRROR_ROOT)
+            for path in MIRROR_ROOT.rglob("*")
+            if path.is_file()
+        }
+        self.assertEqual(mirror_files, docs_files)
+        for relative_path in sorted(docs_files):
+            with self.subTest(path=str(relative_path)):
+                self.assertEqual(
+                    (MIRROR_ROOT / relative_path).read_bytes(),
+                    (PROTOTYPE_ROOT / relative_path).read_bytes(),
+                )
 
     def test_interviewed_friends_have_fixed_voice_mp3_assets(self) -> None:
         audio_root = PROTOTYPE_ROOT / "audio" / "english"
