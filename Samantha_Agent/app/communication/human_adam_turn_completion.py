@@ -70,6 +70,7 @@ def automatic_completion_instruction(
             "rule=Write summary as a short user-visible outcome, not as a commit or test report.",
             "rule=Put only a genuinely agreed canonical decision into decision; otherwise use an empty string.",
             "rule=Preserve useful future plans from the conversation in proposed_next_steps; use an empty list when none exist.",
+            "rule=proposed_next_steps must contain at most four items. If more plans exist, select or combine the four most useful; never emit five or more items.",
             f"receipt_start={COMPLETION_MARKER_START}",
             f"receipt_json_example={example}",
             f"receipt_end={COMPLETION_MARKER_END}",

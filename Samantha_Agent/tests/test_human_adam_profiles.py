@@ -314,6 +314,7 @@ class FakeLazyThreads:
             "project-family-calendar": FakeHub("family-calendar-thread"),
             "project-r2-adam-janicka": FakeHub("r2-adam-thread"),
             "project-lekarna": FakeHub("lekarna-thread"),
+            "project-linux-workstation": FakeHub("linux-workstation-thread"),
         }
 
     def status(self) -> dict[str, object]:
@@ -322,6 +323,7 @@ class FakeLazyThreads:
             "project-family-calendar",
             "project-r2-adam-janicka",
             "project-lekarna",
+            "project-linux-workstation",
         )
         return {
             "ok": True,
@@ -2068,6 +2070,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
                     client_message_id="mmtx-pilot-001",
                     write_intent=True,
                 )
+            ownership_marker_exists = manager.deferred_integration_store.path.exists()
 
         request = checkpoint.call_args.kwargs["request"]
         model_input = str(lazy.hubs["project-mmtx"].last_send["model_input_text"])
@@ -2088,6 +2091,112 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             "memory/tvbcp/workstreams/project-mmtx.md",
         )
         self.assertEqual(result["automatic_completion"]["state"], "completed")
+        self.assertFalse(ownership_marker_exists)
+
+    def test_lazy_invalid_receipt_keeps_verified_recoverable_marker(self) -> None:
+        receipt = (
+            "Linux změna je připravená.\n\n"
+            "[HUMAN_ADAM_STEP_COMPLETION]\n"
+            '{"commit_message":"Complete Linux note","summary":"Linux krok",'
+            '"decision":"","next_step":"Dokončit checkpoint",'
+            '"proposed_next_steps":["1","2","3","4","5"]}\n'
+            "[/HUMAN_ADAM_STEP_COMPLETION]"
+        )
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, *_rest = self.make_manager(Path(temp_dir))
+            lazy = FakeLazyThreads(Path(temp_dir) / "lazy")
+            manager.workstream_threads = lazy  # type: ignore[assignment]
+            manager.activate_grouped_workstream(
+                workstream_id="project-linux-workstation",
+                confirmed=True,
+            )
+            lazy.hubs["project-linux-workstation"].on_send = lambda: setattr(
+                human_workspace,
+                "dirty",
+                True,
+            )
+            lazy.hubs["project-linux-workstation"].next_answer = receipt
+
+            result = manager.send(
+                text="Aktualizuj Linux pracovní stanici",
+                client_message_id="linux-invalid-receipt-001",
+                write_intent=True,
+            )
+            marker = manager.deferred_integration_store.load()
+            audit = manager.pending_integration_status()
+
+        self.assertIsNotNone(marker)
+        assert marker is not None
+        self.assertEqual(marker.workstream_id, "project-linux-workstation")
+        self.assertEqual(marker.state, OWNED_WIP_MISSING_METADATA)
+        self.assertEqual(result["automatic_completion"]["state"], "metadata_invalid")
+        self.assertTrue(result["automatic_completion"]["ownership_marker"])
+        self.assertTrue(result["automatic_completion"]["metadata_recovery_required"])
+        self.assertEqual(audit["state"], OWNED_WIP_MISSING_METADATA)
+        self.assertTrue(audit["ownership_marker_verified"])
+        self.assertTrue(audit["can_recover"])
+
+    def test_confirmed_lazy_owned_wip_recovery_uses_canonical_checkpoint(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, library_workspace, *_rest = self.make_manager(
+                Path(temp_dir)
+            )
+            lazy = FakeLazyThreads(Path(temp_dir) / "lazy")
+            manager.workstream_threads = lazy  # type: ignore[assignment]
+            manager.activate_grouped_workstream(
+                workstream_id="project-linux-workstation",
+                confirmed=True,
+            )
+            lazy.hubs["project-linux-workstation"].on_send = lambda: setattr(
+                human_workspace,
+                "dirty",
+                True,
+            )
+            lazy.hubs["project-linux-workstation"].next_answer = (
+                "Hotovo bez strukturované účtenky."
+            )
+            manager.send(
+                text="Proveď Linux krok bez účtenky",
+                client_message_id="linux-owned-recovery-001",
+                write_intent=True,
+            )
+
+            with patch(
+                "app.communication.human_adam_profiles.complete_simple_main_checkpoint",
+                return_value={
+                    "ok": True,
+                    "checkpoint_short": "e" * 12,
+                    "all_workspaces_aligned": True,
+                },
+            ) as checkpoint:
+                result = manager.recover_owned_changes(
+                    confirmation=OWNED_WIP_RECOVERY_CONFIRMATION,
+                    commit_message="Recover Linux workstation step",
+                    summary="Linux krok je bezpečně dokončený",
+                    next_step="Pokračovat konfigurací Linuxu",
+                )
+
+            ownership_marker_exists = manager.deferred_integration_store.path.exists()
+
+        checkpoint.assert_called_once()
+        request = checkpoint.call_args.kwargs["request"]
+        self.assertIs(checkpoint.call_args.kwargs["workspace"], human_workspace)
+        self.assertEqual(
+            checkpoint.call_args.kwargs["peer_workspaces"],
+            (library_workspace,),
+        )
+        self.assertEqual(request.workstream_id, "project-linux-workstation")
+        self.assertEqual(
+            request.handoff_relative_path,
+            "memory/handoffs/workstreams/project-linux-workstation.md",
+        )
+        self.assertEqual(
+            request.tvbcp_relative_path,
+            "memory/tvbcp/workstreams/project-linux-workstation.md",
+        )
+        self.assertEqual(result["operation"], "confirmed_owned_wip_recovery")
+        self.assertTrue(result["ownership_marker_cleared"])
+        self.assertFalse(ownership_marker_exists)
 
     def test_every_selectable_lazy_stream_supports_one_turn_write(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

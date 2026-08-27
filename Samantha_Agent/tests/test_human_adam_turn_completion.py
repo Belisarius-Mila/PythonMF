@@ -20,6 +20,8 @@ class HumanAdamTurnCompletionTests(unittest.TestCase):
         )
         self.assertIn("final required tests still fail", instruction)
         self.assertIn("If no files changed", instruction)
+        self.assertIn("at most four items", instruction)
+        self.assertIn("never emit five or more items", instruction)
 
     def test_valid_final_receipt_is_parsed_and_hidden(self) -> None:
         parsed = parse_turn_completion(

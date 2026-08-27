@@ -1709,8 +1709,10 @@ class HumanAdamProfileManager:
                 )
             ownership_started = bool(
                 write_intent
-                and active_id == "human_adam"
-                and not lazy_id
+                and (
+                    active_id == "human_adam"
+                    or (bool(lazy_id) and active_id == lazy_id)
+                )
             )
             if ownership_started:
                 self.deferred_integration_store.begin(
@@ -2367,7 +2369,10 @@ class HumanAdamProfileManager:
             failure_code="",
         )
         marker_cleared = True
-        if job.profile_id == "human_adam":
+        if (
+            job.profile_id == "human_adam"
+            or job.profile_id == job.workstream_id
+        ):
             try:
                 self.deferred_integration_store.clear(
                     client_message_id=job.client_message_id
@@ -2998,10 +3003,15 @@ class HumanAdamProfileManager:
 
         if parsed.state != "valid" or parsed.metadata is None:
             detail = parsed.error or "Chybí platná dokončovací účtenka."
+            recovery_note = (
+                "jejich původ je doložený private markerem a panel Práce "
+                "nabídne potvrzenou recovery."
+                if ownership_record is not None
+                else "private marker není dostupný; změny zůstávají servisně blokované."
+            )
             note = (
                 f"Automatický checkpoint byl bezpečně zastaven: {detail} "
-                "Změny zůstaly viditelné, jejich původ je doložený private "
-                "markerem a panel Práce nabídne potvrzenou recovery."
+                f"Změny zůstaly viditelné, {recovery_note}"
             )
             answer = self._completion_answer(parsed.visible_answer, note)
             answer_persisted = self._store_completed_answer(
@@ -3030,7 +3040,7 @@ class HumanAdamProfileManager:
                     "attempted": False,
                     "message": detail,
                     "ownership_marker": bool(ownership_record),
-                    "metadata_recovery_required": True,
+                    "metadata_recovery_required": bool(ownership_record),
                     "answer_persisted": answer_persisted,
                     "completion_status_persisted": completion_status_persisted,
                 },
@@ -3265,7 +3275,7 @@ class HumanAdamProfileManager:
 
         try:
             active_id = self.active_profile_id
-            if self.active_lazy_workstream_id or active_id != "human_adam":
+            if active_id != "human_adam":
                 return {
                     "ok": True,
                     "read_only": True,
@@ -3499,62 +3509,10 @@ class HumanAdamProfileManager:
             raise AppServerError(
                 "Ownership marker nemá platné dokončovací údaje."
             )
-        profile = self.profiles["human_adam"]
-        binding = profile.get("workstream_binding")
-        if not isinstance(binding, CanonicalWorkstreamBinding):
-            raise AppServerError(
-                "Human–Adam nemá kanonickou paměťovou vazbu pro integraci."
-            )
-        memory_binding = (
-            self.workstream_memory.binding(binding.workstream_id)
-            if self.workstream_memory is not None
-            else None
-        )
-        peers = tuple(
-            candidate["service"].workspace
-            for profile_id, candidate in self.profiles.items()
-            if profile_id != "human_adam"
-        )
-        result = complete_simple_main_checkpoint(
-            workspace=service.workspace,
-            request=SimpleMainCheckpointRequest(
-                workstream_id=binding.workstream_id,
-                commit_message=completion.commit_message,
-                summary=completion.summary,
-                next_step=completion.next_step,
-                handoff_relative_path=(
-                    memory_binding.handoff_relative_path
-                    if memory_binding is not None
-                    else binding.handoff_relative_path
-                ),
-                tvbcp_relative_path=(
-                    memory_binding.tvbcp_relative_path
-                    if memory_binding is not None
-                    else binding.tvbcp_relative_path
-                ),
-                handoff_initial_content=(
-                    self.workstream_memory.initial_handoff(memory_binding)
-                    if self.workstream_memory is not None
-                    and memory_binding is not None
-                    else ""
-                ),
-                tvbcp_initial_content=(
-                    self.workstream_memory.initial_tvbcp(memory_binding)
-                    if self.workstream_memory is not None
-                    and memory_binding is not None
-                    else ""
-                ),
-                decision=completion.decision,
-                proposed_next_steps=completion.proposed_next_steps,
-                **self._checkpoint_operational_snapshot(
-                    binding.workstream_id,
-                    service=service,
-                ),
-            ),
-            confirmed=True,
-            peer_workspaces=peers,
-            defer_remote_push=self.github_batch_mode,
-            allow_quick_gate=self.github_batch_mode,
+        result = self._completion_checkpoint(
+            service=service,
+            active_id=self.work_profile_id,
+            metadata=completion,
         )
         marker_cleared = True
         try:
@@ -3577,20 +3535,19 @@ class HumanAdamProfileManager:
         *,
         confirmation: str,
     ) -> dict[str, Any]:
-        """Integrate one exact deferred Human–Adam turn on an unchanged base."""
+        """Integrate one exact deferred Human–Adam or lazy turn on an unchanged base."""
 
         if str(confirmation or "").strip() != DEFERRED_INTEGRATION_CONFIRMATION:
             raise AppServerError(
                 "Integrace odloženého WIP vyžaduje přesnou potvrzovací větu."
             )
         with self.profile_operation() as service:
-            if (
-                self.active_lazy_workstream_id
-                or self.active_profile_id != "human_adam"
-                or self.active_workstream_id != HUMAN_ADAM_WORKSTREAM_ID
+            if self.active_profile_id != "human_adam" or (
+                not self.active_lazy_workstream_id
+                and self.active_workstream_id != HUMAN_ADAM_WORKSTREAM_ID
             ):
                 raise AppServerError(
-                    "Odloženou integraci lze použít jen v kanonickém Human–Adam proudu."
+                    "Odloženou integraci lze použít jen v Human–Adam nebo lazy proudu."
                 )
             review = service.work_review()
             audit = self.pending_integration_status(work_review=review)
@@ -3609,7 +3566,7 @@ class HumanAdamProfileManager:
                 )
             workspace_status = service.workspace.status()
             record = self.deferred_integration_store.verify(
-                workstream_id=HUMAN_ADAM_WORKSTREAM_ID,
+                workstream_id=self.active_workstream_id,
                 workspace_status=workspace_status,
             )
             return self._integrate_deferred_record(
@@ -3626,7 +3583,7 @@ class HumanAdamProfileManager:
         summary: str,
         next_step: str,
     ) -> dict[str, Any]:
-        """Complete one exact owned WIP whose model receipt was missing."""
+        """Complete one exact Human–Adam or lazy WIP with missing model receipt."""
 
         if str(confirmation or "").strip() != OWNED_WIP_RECOVERY_CONFIRMATION:
             raise AppServerError(
@@ -3638,13 +3595,12 @@ class HumanAdamProfileManager:
             next_step=next_step,
         )
         with self.profile_operation() as service:
-            if (
-                self.active_lazy_workstream_id
-                or self.active_profile_id != "human_adam"
-                or self.active_workstream_id != HUMAN_ADAM_WORKSTREAM_ID
+            if self.active_profile_id != "human_adam" or (
+                not self.active_lazy_workstream_id
+                and self.active_workstream_id != HUMAN_ADAM_WORKSTREAM_ID
             ):
                 raise AppServerError(
-                    "Recovery vlastněného WIP lze použít jen v kanonickém Human–Adam proudu."
+                    "Recovery vlastněného WIP lze použít jen v Human–Adam nebo lazy proudu."
                 )
             review = service.work_review()
             audit = self.pending_integration_status(work_review=review)
@@ -3663,7 +3619,7 @@ class HumanAdamProfileManager:
                 )
             workspace_status = service.workspace.status()
             record = self.deferred_integration_store.attach_completion(
-                workstream_id=HUMAN_ADAM_WORKSTREAM_ID,
+                workstream_id=self.active_workstream_id,
                 workspace_status=workspace_status,
                 completion=metadata,
             )
