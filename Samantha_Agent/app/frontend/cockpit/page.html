@@ -210,6 +210,23 @@
         </div>
       </section>
       <section>
+        <h2>Vzdálený Cockpit na baterii</h2>
+        <div class="body">
+          <div id="awakeModeCard" class="voice-card awake-mode-card">
+            <div class="voice-card-title">Dočasně ponechat Mac vzhůru</div>
+            <div id="awakeModeStatus" class="status-line" aria-live="polite">Načítám stav…</div>
+            <div id="awakeModeCountdown" class="awake-mode-countdown">Režim není aktivní.</div>
+            <div id="awakeModeActions" class="voice-card-actions">
+              <button class="secondary" type="button" data-awake-mode-hours="1">Zapnout na 1 hodinu</button>
+              <button class="secondary" type="button" data-awake-mode-hours="2">Zapnout na 2 hodiny</button>
+              <button class="secondary" type="button" data-awake-mode-hours="4">Zapnout na 4 hodiny</button>
+              <button class="secondary danger" id="awakeModeStopBtn" type="button" disabled>Ukončit</button>
+            </div>
+            <div class="status-line awake-mode-warning">MacBook musí zůstat otevřený. Aktivní režim zvyšuje spotřebu baterie a po vypršení se automaticky ukončí.</div>
+          </div>
+        </div>
+      </section>
+      <section>
         <h2>Autosave úklid</h2>
         <div class="body">
           <div class="voice-card">

@@ -280,6 +280,12 @@
     const autosaveCleanupOutput = document.getElementById("autosaveCleanupOutput");
     const dashboardDiagnosticsBtn = document.getElementById("dashboardDiagnosticsBtn");
     const dashboardRestartBtn = document.getElementById("dashboardRestartBtn");
+			const awakeModeCard = document.getElementById("awakeModeCard");
+			const awakeModeStatus = document.getElementById("awakeModeStatus");
+			const awakeModeCountdown = document.getElementById("awakeModeCountdown");
+			const awakeModeActions = document.getElementById("awakeModeActions");
+			const awakeModeStopBtn = document.getElementById("awakeModeStopBtn");
+			const awakeModeDurationButtons = Array.from(document.querySelectorAll("[data-awake-mode-hours]"));
 			    const dashboardSpeakBtn = document.getElementById("dashboardSpeakBtn");
 			    const dashboardSpeakSelectionBtn = document.getElementById("dashboardSpeakSelectionBtn");
 			    const dashboardRefreshBtn = document.getElementById("dashboardRefreshBtn");
@@ -601,6 +607,11 @@
         "autosaveCleanupStatus",
         "autosaveCleanupOutput",
         "dashboardRestartBtn",
+        "awakeModeCard",
+        "awakeModeStatus",
+        "awakeModeCountdown",
+        "awakeModeActions",
+        "awakeModeStopBtn",
         "dashboardSpeakBtn",
         "dashboardSpeakSelectionBtn",
         "dashboardRefreshBtn",
@@ -695,6 +706,7 @@
     const INTAKE_EMAIL_MONITOR_MS = 30 * 60 * 1000;
     const QUICK_NOTES_MONITOR_MS = 30 * 1000;
     const URGENT_REMINDERS_MONITOR_MS = 30 * 1000;
+    const AWAKE_MODE_MONITOR_MS = 60 * 1000;
     let refreshInFlight = false;
     let liveStatusRefreshInFlight = false;
     let quickNotesRefreshInFlight = false;
@@ -703,6 +715,10 @@
     let emailIntakeMonitorInFlight = false;
     let lastMainRefreshStartedAt = 0;
     let lastCodexApprovalActive = false;
+    let awakeModeRefreshInFlight = false;
+    let awakeModeBusy = false;
+    let awakeModeRemainingSeconds = 0;
+    let awakeModeActive = false;
     let latestMainStatusData = null;
     let latestDocumentIntakeData = null;
     let lastEmailIntakeMonitor = {
@@ -2617,6 +2633,131 @@
 	        await waitForCockpitAndReload();
 	      }
 	    }
+
+			function formatAwakeModeRemaining(totalSeconds) {
+			  const seconds = Math.max(0, Number(totalSeconds) || 0);
+			  const hours = Math.floor(seconds / 3600);
+			  const minutes = Math.ceil((seconds % 3600) / 60);
+			  if (hours && minutes) return `${hours} h ${minutes} min`;
+			  if (hours) return `${hours} h`;
+			  if (minutes) return `${minutes} min`;
+			  return "méně než minuta";
+			}
+
+			function setAwakeModeControls() {
+			  awakeModeDurationButtons.forEach((button) => {
+			    button.disabled = awakeModeBusy || awakeModeActive;
+			  });
+			  awakeModeStopBtn.disabled = awakeModeBusy || !awakeModeActive;
+			}
+
+			function renderAwakeMode(data) {
+			  const safe = data || {};
+			  awakeModeActive = Boolean(safe.ok && safe.active);
+			  awakeModeRemainingSeconds = awakeModeActive
+			    ? Math.max(0, Number(safe.remaining_seconds) || 0)
+			    : 0;
+			  awakeModeCard.classList.toggle("active", awakeModeActive);
+			  awakeModeStatus.textContent = safe.message || (awakeModeActive
+			    ? "Mac zůstává vzhůru pro vzdálený Cockpit."
+			    : "Časově omezený režim není aktivní.");
+			  if (!safe.ok) {
+			    awakeModeCountdown.textContent = "Stav nelze bezpečně ověřit.";
+			  } else if (awakeModeActive) {
+			    awakeModeCountdown.textContent = `Zbývá ${formatAwakeModeRemaining(awakeModeRemainingSeconds)}`;
+			  } else {
+			    awakeModeCountdown.textContent = "Režim není aktivní.";
+			  }
+			  setAwakeModeControls();
+			}
+
+			async function refreshAwakeMode() {
+			  if (awakeModeRefreshInFlight || awakeModeBusy) return;
+			  awakeModeRefreshInFlight = true;
+			  try {
+			    const data = await fetchJson("/api/cockpit/awake-mode");
+			    renderAwakeMode(data);
+			  } catch (err) {
+			    recordFrontendError(err);
+			    renderAwakeMode({
+			      ok: false,
+			      active: false,
+			      message: `Stav režimu se nepodařilo načíst: ${err}`,
+			    });
+			  } finally {
+			    awakeModeRefreshInFlight = false;
+			  }
+			}
+
+			async function startAwakeMode(hours) {
+			  const duration = Number(hours);
+			  if (![1, 2, 4].includes(duration) || awakeModeBusy || awakeModeActive) return;
+			  const confirmed = window.confirm(
+			    `Ponechat otevřený MacBook vzhůru ${duration} ${duration === 1 ? "hodinu" : "hodiny"}?\n\n` +
+			    "Režim zvýší spotřebu baterie a po vypršení se automaticky ukončí. Zavření víka Mac uspí."
+			  );
+			  if (!confirmed) return;
+			  awakeModeBusy = true;
+			  setAwakeModeControls();
+			  awakeModeStatus.textContent = "Spouštím časově omezený režim…";
+			  try {
+			    const data = await postJson("/api/cockpit/awake-mode", {
+			      action: "start",
+			      hours: duration,
+			    });
+			    if (!data.ok) {
+			      awakeModeStatus.textContent = data.message || "Režim se nepodařilo spustit.";
+			      showMessage(awakeModeStatus.textContent);
+			      awakeModeBusy = false;
+			      await refreshAwakeMode();
+			      return;
+			    }
+			    renderAwakeMode(data);
+			    showMessage(data.message || "Časově omezený režim byl spuštěn.");
+			  } catch (err) {
+			    recordFrontendError(err);
+			    awakeModeStatus.textContent = `Režim se nepodařilo spustit: ${err}`;
+			    showMessage(awakeModeStatus.textContent);
+			  } finally {
+			    awakeModeBusy = false;
+			    setAwakeModeControls();
+			  }
+			}
+
+			async function stopAwakeMode() {
+			  if (awakeModeBusy || !awakeModeActive) return;
+			  awakeModeBusy = true;
+			  setAwakeModeControls();
+			  awakeModeStatus.textContent = "Ukončuji časově omezený režim…";
+			  try {
+			    const data = await postJson("/api/cockpit/awake-mode", {action: "stop"});
+			    if (!data.ok) {
+			      awakeModeStatus.textContent = data.message || "Režim se nepodařilo ukončit.";
+			      showMessage(awakeModeStatus.textContent);
+			      awakeModeBusy = false;
+			      await refreshAwakeMode();
+			      return;
+			    }
+			    renderAwakeMode(data);
+			    showMessage(data.message || "Časově omezený režim byl ukončen.");
+			  } catch (err) {
+			    recordFrontendError(err);
+			    awakeModeStatus.textContent = `Režim se nepodařilo ukončit: ${err}`;
+			    showMessage(awakeModeStatus.textContent);
+			  } finally {
+			    awakeModeBusy = false;
+			    setAwakeModeControls();
+			  }
+			}
+
+			function tickAwakeModeCountdown() {
+			  if (!awakeModeActive || awakeModeRemainingSeconds <= 0) return;
+			  awakeModeRemainingSeconds = Math.max(0, awakeModeRemainingSeconds - 1);
+			  awakeModeCountdown.textContent = `Zbývá ${formatAwakeModeRemaining(awakeModeRemainingSeconds)}`;
+			  if (awakeModeRemainingSeconds === 0) {
+			    refreshAwakeMode();
+			  }
+			}
 
 	    function formatDevRunnerResult(data) {
 	      const parts = [data.message || "Vývojová akce dokončena."];
@@ -6723,6 +6864,7 @@ ${item.context || ""}`);
     serviceBtn.addEventListener("click", () => {
       servicePanel.open = true;
       servicePanel.scrollIntoView({behavior: "smooth", block: "start"});
+      refreshAwakeMode();
     });
     documentsBtn.addEventListener("click", openDocumentsPanel);
     dashboardRefreshBtn.addEventListener("click", refresh);
@@ -6751,6 +6893,12 @@ ${item.context || ""}`);
       }
     });
     dashboardRestartBtn.addEventListener("click", restartCockpit);
+    awakeModeActions.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-awake-mode-hours]");
+      if (!button) return;
+      startAwakeMode(button.dataset.awakeModeHours);
+    });
+    awakeModeStopBtn.addEventListener("click", stopAwakeMode);
     autosaveCleanupPreviewBtn.addEventListener("click", () => previewAutosaveCleanup(autosaveCleanupPreviewBtn));
     autosaveCleanupApplyBtn.addEventListener("click", applyAutosaveCleanup);
     devRunnerPanel.addEventListener("click", (event) => {
@@ -7036,27 +7184,33 @@ ${item.context || ""}`);
 	    runFrontendHealthCheck();
 	    window.setInterval(runFrontendHealthCheck, 60000);
 	    window.setInterval(() => refresh({silent: true, includeSecondary: false}), FULL_STATUS_MONITOR_MS);
+      window.setInterval(refreshAwakeMode, AWAKE_MODE_MONITOR_MS);
+      window.setInterval(tickAwakeModeCountdown, 1000);
       window.setInterval(refreshQuickNotesSummary, QUICK_NOTES_MONITOR_MS);
       window.setInterval(refreshUrgentRemindersSummary, URGENT_REMINDERS_MONITOR_MS);
       window.setInterval(runEmailIntakeMonitor, INTAKE_EMAIL_MONITOR_MS);
       window.addEventListener("focus", () => {
         refreshLiveStatus();
         refreshMainStatusOnReturn();
+        refreshAwakeMode();
         refreshQuickNotesSummary();
       });
       window.addEventListener("pageshow", () => {
         refreshLiveStatus();
         refreshMainStatusOnReturn();
+        refreshAwakeMode();
         refreshQuickNotesSummary();
       });
       document.addEventListener("visibilitychange", () => {
         if (!document.hidden) {
           refreshLiveStatus();
           refreshMainStatusOnReturn();
+          refreshAwakeMode();
           refreshQuickNotesSummary();
         }
       });
 	    refresh();
+      refreshAwakeMode();
       window.setTimeout(refreshQuickNotesSummary, 3000);
       window.setTimeout(refreshUrgentRemindersSummary, 3000);
       window.setTimeout(runEmailIntakeMonitor, 5000);

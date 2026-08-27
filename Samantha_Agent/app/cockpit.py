@@ -39,6 +39,10 @@ from app.cockpit_frontend import (
     EMAIL_ARCHIVE_HTML,
     EMAIL_PROCESSING_HTML,
 )
+from app.cockpit_awake_mode import (
+    cockpit_awake_mode_action,
+    cockpit_awake_mode_status_action,
+)
 from app.cockpit_readonly_routes import (
     HEALTH_RECOVERY_STATUS_GET_PATHS,
     build_health_recovery_status_dispatch,
@@ -9061,6 +9065,14 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "direct",
     },
     {
+        "path": "/api/cockpit/awake-mode",
+        "label": "Casove omezit automaticke uspani MacBooku pro vzdaleny Cockpit",
+        "risk": "local_service",
+        "confirmation": "explicit_duration_button_with_battery_warning",
+        "handler_name": "cockpit_awake_mode_action",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/cockpit/restart",
         "label": "Restartovat Cockpit",
         "risk": "local_service",
@@ -9716,6 +9728,9 @@ class CockpitServer:
                         janicka_r2_chat_status_action(adapter=JANICKA_R2_CHAT)
                     )
                     return
+                if parsed.path == "/api/cockpit/awake-mode":
+                    self.respond_json(cockpit_awake_mode_status_action())
+                    return
                 if parsed.path == "/api/r2-adam/documents":
                     self.respond_json(
                         janicka_r2_chat_documents_action(adapter=JANICKA_R2_CHAT)
@@ -10163,6 +10178,10 @@ class CockpitServer:
                 if parsed.path == "/api/desktop-apps/open":
                     payload = self.read_json()
                     self.respond_json(open_desktop_app_action(payload))
+                    return
+                if parsed.path == "/api/cockpit/awake-mode":
+                    payload = self.read_json()
+                    self.respond_json(cockpit_awake_mode_action(payload))
                     return
                 if parsed.path == "/api/cockpit/restart":
                     payload = self.read_json()

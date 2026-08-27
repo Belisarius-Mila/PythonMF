@@ -98,11 +98,13 @@ async def second():
         for relative_path in COMPILE_PATHS:
             self.assertTrue((PROJECT_ROOT / relative_path).is_file(), relative_path)
         self.assertIn("tests.test_cockpit", TEST_MODULES)
+        self.assertIn("tests.test_cockpit_awake_mode", TEST_MODULES)
         self.assertIn("tests.test_cockpit_fast_feedback", TEST_MODULES)
         self.assertIn("tests.test_cockpit_frontend", TEST_MODULES)
         self.assertIn("tests.test_cockpit_readonly_routes", TEST_MODULES)
         self.assertIn("scripts/cockpit_fast_feedback.py", COMPILE_PATHS)
         self.assertIn("app/cockpit_frontend.py", COMPILE_PATHS)
+        self.assertIn("app/cockpit_awake_mode.py", COMPILE_PATHS)
         self.assertIn("app/cockpit_readonly_routes.py", COMPILE_PATHS)
         self.assertIn("app/email/archive_browser.py", COMPILE_PATHS)
         self.assertIn("tests.test_email_archive_browser", TEST_MODULES)

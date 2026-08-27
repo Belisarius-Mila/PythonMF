@@ -146,6 +146,9 @@
     .voice-card-label { color: var(--muted); font-size: 12px; font-weight: 700; }
     .voice-card-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
     .voice-card.hidden { display: none; }
+    .awake-mode-card.active { border-color: #22c55e; background: #f0fdf4; }
+    .awake-mode-countdown { color: var(--ink); font-size: 18px; font-weight: 700; }
+    .awake-mode-warning { border-left: 3px solid #f59e0b; padding-left: 8px; }
     .pills { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 12px; }
     .pill { border: 1px solid var(--line); border-radius: 999px; padding: 5px 8px; font-size: 12px; background: #f8fafc; color: #344054; }
     .ok { color: var(--green); }

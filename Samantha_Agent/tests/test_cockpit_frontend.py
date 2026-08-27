@@ -35,9 +35,9 @@ EXPECTED_PAGES = {
     ),
     "cockpit": (
         COCKPIT_HTML,
-        448757,
-        9071,
-        "78646415babac692173e7de030ddf60117072e7ac5445ff9d021373dfbc5a09b",
+        456091,
+        9245,
+        "3028405c0d064da0f1ce279d85665e49878551a298483f1bf2356be9357c06be",
     ),
 }
 

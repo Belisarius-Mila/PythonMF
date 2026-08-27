@@ -3738,6 +3738,31 @@ class CockpitTests(unittest.TestCase):
         self.assertFalse(result["ok"])
         self.assertEqual(result["status"], "confirmation_required")
 
+    def test_cockpit_awake_mode_has_bounded_service_card_and_routes(self) -> None:
+        card = next(
+            item
+            for item in COCKPIT_POST_ACTIONS
+            if item["path"] == "/api/cockpit/awake-mode"
+        )
+
+        self.assertEqual(card["risk"], "local_service")
+        self.assertEqual(
+            card["confirmation"],
+            "explicit_duration_button_with_battery_warning",
+        )
+        self.assertEqual(card["handler_name"], "cockpit_awake_mode_action")
+        self.assertEqual(card["test_level"], "direct")
+        self.assertIn("/api/cockpit/awake-mode", self.cockpit_do_get_routes())
+        self.assertIn("/api/cockpit/awake-mode", self.cockpit_do_post_routes())
+        self.assertIn("Vzdálený Cockpit na baterii", COCKPIT_HTML)
+        self.assertIn('data-awake-mode-hours="1"', COCKPIT_HTML)
+        self.assertIn('data-awake-mode-hours="2"', COCKPIT_HTML)
+        self.assertIn('data-awake-mode-hours="4"', COCKPIT_HTML)
+        self.assertIn("awakeModeStopBtn", COCKPIT_HTML)
+        self.assertIn("MacBook musí zůstat otevřený", COCKPIT_HTML)
+        self.assertIn("refreshAwakeMode", COCKPIT_HTML)
+        self.assertIn("tickAwakeModeCountdown", COCKPIT_HTML)
+
     def test_generic_codex_approval_remains_and_legacy_tvbcp_routes_are_absent(self) -> None:
         registered_paths = {item["path"] for item in COCKPIT_POST_ACTIONS}
         post_routes = set(self.cockpit_do_post_routes())
