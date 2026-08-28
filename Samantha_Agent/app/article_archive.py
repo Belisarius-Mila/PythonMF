@@ -68,6 +68,8 @@ DEFAULT_BOOK_CATEGORIES = (
     "paleontologie",
     "knihy pro děti",
     "knihy pro mládež",
+    "učebnice",
+    "cizojazyčná literatura",
     "detektivky",
 )
 

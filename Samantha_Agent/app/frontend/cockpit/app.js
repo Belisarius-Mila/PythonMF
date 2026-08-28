@@ -162,6 +162,9 @@
     const libraryEditBookCatalogKeepBtn = document.getElementById("libraryEditBookCatalogKeepBtn");
     const libraryEditBookCatalogReplaceBtn = document.getElementById("libraryEditBookCatalogReplaceBtn");
     const libraryEditBookCategoryChoices = document.getElementById("libraryEditBookCategoryChoices");
+    const libraryEditBookNewCategoryInput = document.getElementById("libraryEditBookNewCategoryInput");
+    const libraryEditBookAddCategoryBtn = document.getElementById("libraryEditBookAddCategoryBtn");
+    const libraryEditBookOptionsStatus = document.getElementById("libraryEditBookOptionsStatus");
     const libraryEditTagsInput = document.getElementById("libraryEditTagsInput");
     const libraryEditSourceInput = document.getElementById("libraryEditSourceInput");
     const libraryEditSourceNoteInput = document.getElementById("libraryEditSourceNoteInput");
@@ -365,7 +368,7 @@
     let pendingLibraryEditBookCatalogComparison = null;
     let libraryBookOptions = {
       locations: ["obývák", "jídelna", "půda"],
-      categories: ["román", "fantasy", "sci-fi", "vesmír", "biologie", "matematika", "paleontologie", "knihy pro děti", "knihy pro mládež", "detektivky"],
+      categories: ["román", "fantasy", "sci-fi", "vesmír", "biologie", "matematika", "paleontologie", "knihy pro děti", "knihy pro mládež", "učebnice", "cizojazyčná literatura", "detektivky"],
     };
     let currentQuantitative = null;
     let frontendLastError = "";
@@ -562,6 +565,9 @@
         "libraryEditBookIsbnLookupStatus",
         "libraryEditBookIsbnSourceLink",
         "libraryEditBookCategoryChoices",
+        "libraryEditBookNewCategoryInput",
+        "libraryEditBookAddCategoryBtn",
+        "libraryEditBookOptionsStatus",
         "libraryEditTagsInput",
         "libraryEditSourceInput",
         "libraryEditSourceNoteInput",
@@ -3883,36 +3889,45 @@ Soubor nebude trvale smazán.`);
         const data = await fetchJson("/api/library/book/options");
         if (!data.ok || !data.options) {
           libraryBookOptionsStatus.textContent = data.message || "Používám základní seznam umístění a kategorií.";
+          libraryEditBookOptionsStatus.textContent = data.message || "Používám základní seznam kategorií.";
           renderLibraryBookOptions(libraryBookOptions);
           return false;
         }
         renderLibraryBookOptions(data.options);
         libraryBookOptionsStatus.textContent = "Vyber umístění a jednu nebo více kategorií. Seznam můžeš rozšířit níže.";
+        libraryEditBookOptionsStatus.textContent = "Novou kategorii můžeš přidat a rovnou ji vybrat pro tuto knihu.";
         return true;
       } catch (err) {
         recordFrontendError(err);
         renderLibraryBookOptions(libraryBookOptions);
         libraryBookOptionsStatus.textContent = "Seznam se nepodařilo načíst; můžeš použít základní možnosti.";
+        libraryEditBookOptionsStatus.textContent = "Seznam se nepodařilo načíst; můžeš použít základní kategorie.";
         return false;
       }
     }
 
-    async function addLibraryBookOption(kind) {
+    async function addLibraryBookOption(kind, target = "create") {
       const isLocation = kind === "location";
-      const input = isLocation ? libraryBookNewLocationInput : libraryBookNewCategoryInput;
-      const button = isLocation ? libraryBookAddLocationBtn : libraryBookAddCategoryBtn;
+      const isEdit = target === "edit";
+      const input = isEdit
+        ? libraryEditBookNewCategoryInput
+        : (isLocation ? libraryBookNewLocationInput : libraryBookNewCategoryInput);
+      const button = isEdit
+        ? libraryEditBookAddCategoryBtn
+        : (isLocation ? libraryBookAddLocationBtn : libraryBookAddCategoryBtn);
+      const status = isEdit ? libraryEditBookOptionsStatus : libraryBookOptionsStatus;
       const value = input.value.trim();
       if (!value) {
-        libraryBookOptionsStatus.textContent = isLocation ? "Napiš nové umístění." : "Napiš novou kategorii.";
+        status.textContent = isLocation ? "Napiš nové umístění." : "Napiš novou kategorii.";
         input.focus();
         return;
       }
       button.disabled = true;
-      libraryBookOptionsStatus.textContent = "Přidávám položku do soukromého seznamu...";
+      status.textContent = "Přidávám položku do soukromého seznamu...";
       try {
         const data = await postJson("/api/library/book/options", {kind, value});
         if (!data.ok || !data.options) {
-          libraryBookOptionsStatus.textContent = data.message || "Položku se nepodařilo přidat.";
+          status.textContent = data.message || "Položku se nepodařilo přidat.";
           return;
         }
         renderLibraryBookOptions(data.options);
@@ -3920,14 +3935,18 @@ Soubor nebude trvale smazán.`);
         if (isLocation) {
           libraryBookLocationInput.value = data.value || value;
         } else {
-          const selected = selectedLibraryBookCategories(libraryBookCategoryChoices);
+          const categoryChoices = isEdit ? libraryEditBookCategoryChoices : libraryBookCategoryChoices;
+          const selected = selectedLibraryBookCategories(categoryChoices);
           selected.push(data.value || value);
-          setLibraryBookSelectedCategories(libraryBookCategoryChoices, selected);
+          setLibraryBookSelectedCategories(categoryChoices, selected);
+          if (isEdit) markLibraryEditorDirty();
         }
-        libraryBookOptionsStatus.textContent = data.message || "Položka byla přidána do seznamu.";
+        status.textContent = isEdit
+          ? `${data.message || "Položka byla přidána do seznamu."} Kategorie je vybraná; kartu potvrď tlačítkem Uložit úpravy.`
+          : (data.message || "Položka byla přidána do seznamu.");
       } catch (err) {
         recordFrontendError(err);
-        libraryBookOptionsStatus.textContent = `Položku se nepodařilo přidat: ${err}`;
+        status.textContent = `Položku se nepodařilo přidat: ${err}`;
       } finally {
         button.disabled = false;
       }
@@ -3995,6 +4014,8 @@ Soubor nebude trvale smazán.`);
         libraryEditBookIsbnLookupBtn,
         libraryEditBookCatalogKeepBtn,
         libraryEditBookCatalogReplaceBtn,
+        libraryEditBookNewCategoryInput,
+        libraryEditBookAddCategoryBtn,
         libraryEditTagsInput,
         libraryEditSourceInput,
         libraryEditSourceNoteInput,
@@ -7002,6 +7023,7 @@ ${item.context || ""}`);
     libraryEditBookIsbnPhotoReadBtn.addEventListener("click", readLibraryEditBookIsbnFromPhoto);
     libraryBookAddLocationBtn.addEventListener("click", () => addLibraryBookOption("location"));
     libraryBookAddCategoryBtn.addEventListener("click", () => addLibraryBookOption("category"));
+    libraryEditBookAddCategoryBtn.addEventListener("click", () => addLibraryBookOption("category", "edit"));
     libraryBookSummaryDraftBtn.addEventListener("click", generateLibraryBookSummary);
     libraryBookSaveBtn.addEventListener("click", saveLibraryBook);
     libraryEditBtn.addEventListener("click", openLibraryEditor);

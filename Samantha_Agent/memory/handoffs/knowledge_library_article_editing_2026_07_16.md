@@ -1,33 +1,32 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-07 09:27 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-28 09:21 CEST
 
 ### Hotovo
-- ISBN dohledání nyní porovnává údaje z obálky a bezpečně doplňuje rok vydání
+- Knihy mají nové kategorie učebnice a cizojazyčná literatura a vlastní kategorii lze přidat i při editaci
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
 - Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
-- Lokální commity čekají na samostatný denní GitHub balíček.
 
 ### Rizika
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Nasadit změnu a na iPhonu ověřit shodu, neshodu i obě volby porovnání
+- Nasadit změnu a ověřit přidání i výběr kategorie na iPhonu
 
 ### Rozhodnutí
-- Knihovny.cz je primární katalog, Open Library záložní zdroj; neshody se řeší volbou ve formuláři bez automatického uložení
+- V tomto kroku nebylo přijato nové kanonické rozhodnutí.
 
 ### Navrhované další kroky
 - Žádné další návrhy nad rámec bezprostředního kroku.
 
 ### Technický stav checkpointu
-- Změna je otestovaná (1325 testů).
-- Git před checkpointem: lokální `main` na `91dc7008cda4`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `91dc7008cda4` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-07T06:58:08+00:00.
-- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
+- Git před checkpointem: lokální `main` na `8707c22ad8fc`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `8707c22ad8fc` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-27T20:57:16+00:00.
+- Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -405,3 +404,15 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (8): `Samantha_Agent/app/book_isbn_lookup.py`, `Samantha_Agent/app/cockpit.py`, `Samantha_Agent/app/frontend/cockpit/app.js`, `Samantha_Agent/app/frontend/cockpit/page.html`, `Samantha_Agent/app/frontend/cockpit/styles.css`, `Samantha_Agent/tests/test_book_isbn_lookup.py`, `Samantha_Agent/tests/test_cockpit.py`, `Samantha_Agent/tests/test_cockpit_frontend.py`
 - Commit: `Add Czech ISBN catalog comparison`
 - Další krok: Nasadit změnu a na iPhonu ověřit shodu, neshodu i obě volby porovnání
+
+### Automatický checkpoint 2026-08-28 09:21 CEST
+
+- Pracovní proud: `project-knowledge-library`
+- Hotovo: Knihy mají nové kategorie učebnice a cizojazyčná literatura a vlastní kategorii lze přidat i při editaci; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: rychlá Cockpit brána syntaxe a whitespace: 12.2 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu
+- Změněné cesty před paměťovým zápisem (7): `Samantha_Agent/app/article_archive.py`, `Samantha_Agent/app/frontend/cockpit/app.js`, `Samantha_Agent/app/frontend/cockpit/page.html`, `Samantha_Agent/app/frontend/cockpit/styles.css`, `Samantha_Agent/tests/test_article_archive.py`, `Samantha_Agent/tests/test_cockpit.py`, `Samantha_Agent/tests/test_cockpit_frontend.py`
+- Commit: `Add custom book categories in Cockpit`
+- Další krok: Nasadit změnu a ověřit přidání i výběr kategorie na iPhonu

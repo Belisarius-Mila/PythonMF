@@ -662,6 +662,8 @@ class ArticleArchiveTests(unittest.TestCase):
         self.assertEqual(defaults["locations"], ["obývák", "jídelna", "půda"])
         self.assertIn("román", defaults["categories"])
         self.assertIn("knihy pro mládež", defaults["categories"])
+        self.assertIn("učebnice", defaults["categories"])
+        self.assertIn("cizojazyčná literatura", defaults["categories"])
         self.assertTrue(added_location["added"])
         self.assertTrue(added_category["added"])
         self.assertFalse(duplicate["added"])
