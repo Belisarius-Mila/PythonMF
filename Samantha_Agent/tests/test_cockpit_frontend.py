@@ -35,9 +35,9 @@ EXPECTED_PAGES = {
     ),
     "cockpit": (
         COCKPIT_HTML,
-        458351,
-        9277,
-        "bdbe0ef9193d8a90733e93096805d6edfbdfc871b64b48b5e23860982578191d",
+        459852,
+        9306,
+        "d12902d758641bfc78855761fb58da44bee68607124aa7c8d0dc3a777334ed9c",
     ),
 }
 
@@ -84,13 +84,17 @@ class CockpitFrontendContractTests(unittest.TestCase):
         self.assertNotIn('EMAIL_PROCESSING_HTML = """', source)
         self.assertNotIn('COCKPIT_HTML = """', source)
 
-    def test_cockpit_frontend_has_read_only_three_step_decision_view(self) -> None:
+    def test_cockpit_frontend_separates_live_todos_from_memory_suggestions(self) -> None:
         for expected in (
             "Co teď?",
             "decisionCockpitStatus",
             "decisionCockpitList",
+            "Návrhy z projektové paměti",
+            "decisionCockpitSuggestionStatus",
+            "decisionCockpitSuggestionList",
             "/api/decision-status",
             "items.slice(0, 3)",
+            "decision.memory_suggestions",
             "Zdroj:",
             "Úplný katalog provozních položek",
         ):

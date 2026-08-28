@@ -3798,6 +3798,10 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
                 manager,
                 "_checkpoint_reachable_from_main",
                 return_value=True,
+            ), patch.object(
+                manager,
+                "_known_remote_pending_commit_count",
+                return_value=0,
             ):
                 status = manager.last_step_completion_status()
                 manager.send(
@@ -3811,6 +3815,8 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         )
         self.assertEqual(status["state"], "checkpoint_completed")
         self.assertEqual(status["checkpoint_short"], "c" * 12)
+        self.assertFalse(status["remote_push_deferred"])
+        self.assertEqual(status["pending_remote_commit_count"], 0)
         self.assertIn("[LAST_STEP_COMPLETION]", model_input)
         self.assertIn("state=checkpoint_completed", model_input)
         self.assertIn(f"checkpoint={'c' * 12}", model_input)

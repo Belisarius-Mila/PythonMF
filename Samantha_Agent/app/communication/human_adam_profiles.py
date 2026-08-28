@@ -1413,6 +1413,38 @@ class HumanAdamProfileManager:
             return False
         return None
 
+    @staticmethod
+    def _known_remote_pending_commit_count(source_repo: Path) -> int | None:
+        """Return local-ahead count only when tracked main is not divergent/behind."""
+
+        try:
+            completed = subprocess.run(
+                [
+                    "/usr/bin/git",
+                    "-C",
+                    str(source_repo),
+                    "rev-list",
+                    "--left-right",
+                    "--count",
+                    "origin/main...main",
+                ],
+                capture_output=True,
+                text=True,
+                timeout=10,
+                check=False,
+            )
+        except (OSError, subprocess.TimeoutExpired):
+            return None
+        if completed.returncode != 0:
+            return None
+        try:
+            behind, ahead = (int(value) for value in completed.stdout.split())
+        except (TypeError, ValueError):
+            return None
+        if behind != 0 or ahead < 0:
+            return None
+        return ahead
+
     def last_step_completion_status(self) -> dict[str, Any]:
         """Return the latest server result, rechecked against Git and workspace."""
 
@@ -1442,7 +1474,7 @@ class HumanAdamProfileManager:
                 and completion_job.workstream_id == workstream_id
                 and completion_job.state in ACTIVE_COMPLETION_JOB_STATES
             )
-            return public_completion_status(
+            status = public_completion_status(
                 record=record,
                 observed_at=observed_at,
                 source_snapshot=source_snapshot,
@@ -1452,6 +1484,15 @@ class HumanAdamProfileManager:
                     self._operation_lock.locked() or job_active
                 ),
             )
+            pending_count = (
+                self._known_remote_pending_commit_count(service.workspace.source_repo)
+                if status.get("git_verified") is True
+                else None
+            )
+            if pending_count is not None:
+                status["pending_remote_commit_count"] = pending_count
+                status["remote_push_deferred"] = pending_count > 0
+            return status
         except (
             AppServerError,
             HumanAdamCompletionJobError,

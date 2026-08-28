@@ -85,8 +85,13 @@
 		    <section>
 		      <h2>Co teď?</h2>
 		      <div class="body decision-cockpit">
-		        <div id="decisionCockpitStatus" class="status-line">Načítám tři nejdůležitější kroky...</div>
+		        <div id="decisionCockpitStatus" class="status-line">Načítám aktuální úkoly...</div>
 		        <div id="decisionCockpitList" class="decision-list" aria-live="polite"></div>
+		        <details class="decision-catalog decision-memory">
+		          <summary>Návrhy z projektové paměti <span id="decisionCockpitSuggestionCount"></span></summary>
+		          <div id="decisionCockpitSuggestionStatus" class="status-line"></div>
+		          <div id="decisionCockpitSuggestionList" class="decision-list" aria-live="polite"></div>
+		        </details>
 		        <details class="decision-catalog">
 		          <summary>Úplný katalog provozních položek</summary>
 		          <div id="actionQueueStatus" class="status-line">Načítám doporučené akce...</div>

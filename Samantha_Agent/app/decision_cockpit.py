@@ -59,34 +59,37 @@ def build_decision_cockpit(
     """Choose at most three explained next steps without performing an action."""
 
     created_at = generated_at or datetime.now().astimezone().isoformat(timespec="seconds")
-    candidates = _action_candidates(action_queue or {}, created_at)
+    current_candidates = _action_candidates(action_queue or {}, created_at)
+    memory_suggestion_candidates: list[_Candidate] = []
     if memory_truth is not None:
-        candidates.extend(
-            _memory_candidates(
-                memory_truth,
-                handoff_next_steps or {},
-            )
+        current_candidates.extend(_memory_conflict_candidates(memory_truth))
+        memory_suggestion_candidates.extend(
+            _handoff_suggestion_candidates(memory_truth, handoff_next_steps or {})
         )
 
-    selected: list[_Candidate] = []
-    seen: set[str] = set()
     safe_limit = min(MAX_DECISION_ITEMS, max(0, int(limit)))
-    for candidate in sorted(candidates, key=_candidate_sort_key):
-        if candidate.dedupe_key in seen:
-            continue
-        seen.add(candidate.dedupe_key)
-        selected.append(candidate)
-        if len(selected) >= safe_limit:
-            break
-
-    items = [_candidate_payload(candidate, created_at) for candidate in selected]
+    current_selected = _select_candidates(current_candidates, safe_limit)
+    suggestion_selected = _select_candidates(memory_suggestion_candidates, safe_limit)
+    items = [_candidate_payload(candidate, created_at) for candidate in current_selected]
+    memory_suggestions = [
+        _candidate_payload(candidate, created_at) for candidate in suggestion_selected
+    ]
     source_status = "ok" if memory_truth is not None else "partial"
     if not items:
-        message = "Nic akutního. Další krok nyní neurčuje čerstvý důkaz."
+        message = "Nic aktuálního. Žádný živý důkaz nyní neurčuje ToDo."
     elif len(items) == 1:
-        message = "Jeden aktuální další krok podle nejsilnějšího dostupného důkazu."
+        message = "1 aktuální ToDo podle živého důkazu."
     else:
-        message = f"{len(items)} aktuální další kroky podle síly a stáří důkazu."
+        message = f"{len(items)} aktuální ToDo podle živého důkazu."
+    if not memory_suggestions:
+        memory_message = "Projektová paměť nyní nenabízí žádný další krok."
+    elif len(memory_suggestions) == 1:
+        memory_message = "1 návrh z projektové paměti; před provedením ověř aktuálnost."
+    else:
+        memory_message = (
+            f"{len(memory_suggestions)} návrhy z projektové paměti; "
+            "před provedením ověř aktuálnost."
+        )
     return {
         "ok": True,
         "read_only": True,
@@ -94,7 +97,10 @@ def build_decision_cockpit(
         "message": message,
         "max_items": MAX_DECISION_ITEMS,
         "items": items,
-        "catalog_count": len(candidates),
+        "memory_suggestions": memory_suggestions,
+        "memory_message": memory_message,
+        "memory_suggestion_count": len(memory_suggestions),
+        "catalog_count": len(current_candidates) + len(memory_suggestion_candidates),
         "source_status": source_status,
         "source_warning": _one_line(memory_truth_error, 240),
     }
@@ -179,47 +185,55 @@ def _action_candidates(action_queue: Mapping[str, Any], generated_at: str) -> li
     return candidates
 
 
-def _memory_candidates(
+def _memory_conflict_candidates(memory_truth: MemoryTruthAuditResult) -> list[_Candidate]:
+    candidates: list[_Candidate] = []
+    for row in memory_truth.rows:
+        if row.status != STATUS_PROVEN_CONTRADICTION:
+            continue
+        candidates.append(
+            _Candidate(
+                candidate_id=f"memory-conflict:{row.workstream_id}",
+                dedupe_key=f"project:{row.workstream_id}",
+                category="needs_decision",
+                title=f"Srovnat stav projektu {_one_line(row.name, 120)}",
+                reason=_contradiction_reason(row.contradictions),
+                source="Živý audit pravdivosti paměti",
+                evidence_at=memory_truth.generated_at,
+                priority=1,
+                sort_rank=1,
+                navigation="open_projects",
+                navigation_label="Otevřít projekty",
+            )
+        )
+    return candidates
+
+
+def _handoff_suggestion_candidates(
     memory_truth: MemoryTruthAuditResult,
     handoff_next_steps: Mapping[str, str],
 ) -> list[_Candidate]:
     candidates: list[_Candidate] = []
     for row in memory_truth.rows:
-        project_key = f"project:{row.workstream_id}"
-        priority = _priority(row.expected_priority)
         if row.status == STATUS_PROVEN_CONTRADICTION:
-            candidates.append(
-                _Candidate(
-                    candidate_id=f"memory-conflict:{row.workstream_id}",
-                    dedupe_key=project_key,
-                    category="needs_decision",
-                    title=f"Srovnat stav projektu {_one_line(row.name, 120)}",
-                    reason=_contradiction_reason(row.contradictions),
-                    source="Živý audit pravdivosti paměti",
-                    evidence_at=memory_truth.generated_at,
-                    priority=1,
-                    sort_rank=1,
-                    navigation="open_projects",
-                    navigation_label="Otevřít projekty",
-                )
-            )
             continue
 
         next_step = _one_line(handoff_next_steps.get(row.workstream_id, ""), 260)
         if row.expected_mode != "active" or not next_step:
             continue
+        priority = _priority(row.expected_priority)
         is_drift = row.status == STATUS_CANDIDATE_DRIFT
         candidates.append(
             _Candidate(
                 candidate_id=f"handoff:{row.workstream_id}",
-                dedupe_key=project_key,
+                dedupe_key=f"project:{row.workstream_id}",
                 category="needs_decision" if is_drift else "do_soon",
                 title=next_step,
                 reason=(
                     f"{_one_line(row.name, 120)}: kanonická paměť je novější než souhrnný registr; "
-                    "přednost má tento konkrétní handoff."
+                    "jde o návrh k ověření, ne živé ToDo."
                     if is_drift
-                    else f"{_one_line(row.name, 120)}: aktivní projekt P{priority}; krok pochází z kanonického handoffu."
+                    else f"{_one_line(row.name, 120)}: návrh z kanonického handoffu P{priority}; "
+                    "před provedením ověř aktuálnost."
                 ),
                 source="Kanonický handoff workstreamu",
                 evidence_at=row.canonical_latest_committed_at,
@@ -230,6 +244,21 @@ def _memory_candidates(
             )
         )
     return candidates
+
+
+def _select_candidates(candidates: list[_Candidate], limit: int) -> list[_Candidate]:
+    if limit <= 0:
+        return []
+    selected: list[_Candidate] = []
+    seen: set[str] = set()
+    for candidate in sorted(candidates, key=_candidate_sort_key):
+        if candidate.dedupe_key in seen:
+            continue
+        seen.add(candidate.dedupe_key)
+        selected.append(candidate)
+        if len(selected) >= limit:
+            break
+    return selected
 
 
 def _candidate_sort_key(candidate: _Candidate) -> tuple[int, int, float, str]:

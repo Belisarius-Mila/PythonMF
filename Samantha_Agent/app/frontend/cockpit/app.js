@@ -339,6 +339,9 @@
     const actionQueueList = document.getElementById("actionQueueList");
     const decisionCockpitStatus = document.getElementById("decisionCockpitStatus");
     const decisionCockpitList = document.getElementById("decisionCockpitList");
+    const decisionCockpitSuggestionCount = document.getElementById("decisionCockpitSuggestionCount");
+    const decisionCockpitSuggestionStatus = document.getElementById("decisionCockpitSuggestionStatus");
+    const decisionCockpitSuggestionList = document.getElementById("decisionCockpitSuggestionList");
     const readingStatusOptions = [
       ["ok", "OK"],
       ["needs_review", "k revizi"],
@@ -826,6 +829,7 @@
       } catch (err) {
         recordFrontendError(err);
         decisionCockpitStatus.textContent = `Přehled „Co teď?“ se nepodařilo načíst: ${err}`;
+        decisionCockpitSuggestionStatus.textContent = "Návrhy z paměti nyní nejsou ověřené.";
       } finally {
         decisionCockpitRefreshInFlight = false;
       }
@@ -1723,16 +1727,13 @@
         : `Ranní stav: Samantha je vzhůru; ${stable.join(", ")}.`;
     }
 
-	    function renderDecisionCockpit(decision) {
-	      const items = Array.isArray(decision.items) ? decision.items.slice(0, 3) : [];
-	      const warning = decision.source_warning ? ` ${decision.source_warning}` : "";
-	      decisionCockpitStatus.textContent = `${decision.message || "Žádný aktuální krok."}${warning}`;
-	      decisionCockpitList.innerHTML = "";
+	    function renderDecisionCards(target, items, emptyMessage) {
+	      target.innerHTML = "";
 	      if (!items.length) {
 	        const empty = document.createElement("div");
 	        empty.className = "status-line";
-	        empty.textContent = "Nic akutního. Historický seznam je dostupný níže po rozbalení.";
-	        decisionCockpitList.appendChild(empty);
+	        empty.textContent = emptyMessage;
+	        target.appendChild(empty);
 	        return;
 	      }
 	      items.forEach((item) => {
@@ -1772,8 +1773,30 @@
 	          action_label: item.navigation_label || "Otevřít přehled"
 	        });
 	        if (button) card.appendChild(button);
-	        decisionCockpitList.appendChild(card);
+	        target.appendChild(card);
 	      });
+	    }
+
+	    function renderDecisionCockpit(decision) {
+	      const items = Array.isArray(decision.items) ? decision.items.slice(0, 3) : [];
+	      const suggestions = Array.isArray(decision.memory_suggestions)
+	        ? decision.memory_suggestions.slice(0, 3)
+	        : [];
+	      const warning = decision.source_warning ? ` ${decision.source_warning}` : "";
+	      decisionCockpitStatus.textContent = `${decision.message || "Žádné aktuální ToDo."}${warning}`;
+	      renderDecisionCards(
+	        decisionCockpitList,
+	        items,
+	        "Nic aktuálního. Žádný živý důkaz nyní neurčuje ToDo."
+	      );
+	      decisionCockpitSuggestionCount.textContent = suggestions.length ? `(${suggestions.length})` : "";
+	      decisionCockpitSuggestionStatus.textContent = decision.memory_message
+	        || "Projektová paměť nyní nenabízí žádný další krok.";
+	      renderDecisionCards(
+	        decisionCockpitSuggestionList,
+	        suggestions,
+	        "Žádný návrh z projektové paměti."
+	      );
 	    }
 
 	    function renderActionQueue(queue) {

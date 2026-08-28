@@ -272,3 +272,15 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   same-origin průchod pod Cockpitem. Konkrétní položku předávat jen neprůhledným
   bezpečným odkazem a na backendu jej znovu vyhodnotit proti kanonickému indexu;
   do klienta neposílat interní cestu ani skutečný identifikátor dokumentu.
+
+### LL-021 — Historický handoff není aktuální ToDo
+
+- Problém: Přehled „Co teď?“ doplňoval volná místa do pevného počtu tří kroků
+  také z historických handoffů. Dokončené nebo neověřené návrhy tak vypadaly
+  stejně závazně jako položky ze živé provozní fronty.
+- Typ: opakující se
+- Řešení nalezeno: 28082026
+- Řešení: Aktuální ToDo sestavovat pouze z živé fronty a živě prokázaných
+  rozporů. Handoffové kroky zobrazit odděleně jako návrhy z projektové paměti,
+  vždy se zdrojem a stářím důkazu; počet aktuálních úkolů nikdy nedoplňovat na
+  předem dané číslo.

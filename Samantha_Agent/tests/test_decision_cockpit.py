@@ -104,8 +104,12 @@ class DecisionCockpitTests(unittest.TestCase):
         )
         self.assertEqual(result["items"][0]["freshness"], "live")
         self.assertTrue(all(item["navigation"] in {"open_reminders", "open_scandocu", "open_projects"} for item in result["items"]))
+        self.assertEqual(
+            [item["id"] for item in result["memory_suggestions"]],
+            ["handoff:project-alpha"],
+        )
 
-    def test_live_audit_conflict_precedes_historical_project_priority(self) -> None:
+    def test_only_live_evidence_is_current_and_handoffs_are_suggestions(self) -> None:
         truth = memory_truth(
             memory_row(
                 "project-conflict",
@@ -133,11 +137,47 @@ class DecisionCockpitTests(unittest.TestCase):
             generated_at=GENERATED_AT,
         )
 
-        self.assertEqual(result["items"][0]["id"], "memory-conflict:project-conflict")
-        self.assertEqual(result["items"][1]["id"], "handoff:project-drift")
-        self.assertEqual(result["items"][1]["freshness"], "today")
-        self.assertEqual(result["items"][2]["freshness"], "historical")
-        self.assertIn("8 d.", result["items"][2]["freshness_label"])
+        self.assertEqual(
+            [item["id"] for item in result["items"]],
+            ["memory-conflict:project-conflict"],
+        )
+        self.assertEqual(result["message"], "1 aktuální ToDo podle živého důkazu.")
+        self.assertEqual(
+            [item["id"] for item in result["memory_suggestions"]],
+            ["handoff:project-drift", "handoff:project-old"],
+        )
+        self.assertEqual(result["memory_suggestions"][0]["freshness"], "today")
+        self.assertEqual(result["memory_suggestions"][1]["freshness"], "historical")
+        self.assertIn("8 d.", result["memory_suggestions"][1]["freshness_label"])
+        self.assertIn("2 návrhy", result["memory_message"])
+
+    def test_historical_handoffs_never_fill_missing_current_slots(self) -> None:
+        result = build_decision_cockpit(
+            action_queue={
+                "items": [
+                    {
+                        "kind": "document_review",
+                        "priority": 2,
+                        "title": "Zkontrolovat dokument",
+                        "detail": "Živá fronta dokumentů",
+                        "action": "open_document_review",
+                    }
+                ]
+            },
+            memory_truth=memory_truth(
+                memory_row("project-one", name="První projekt"),
+                memory_row("project-two", name="Druhý projekt", priority="2"),
+            ),
+            handoff_next_steps={
+                "project-one": "Starý první krok.",
+                "project-two": "Starý druhý krok.",
+            },
+            generated_at=GENERATED_AT,
+        )
+
+        self.assertEqual([item["title"] for item in result["items"]], ["Zkontrolovat dokument"])
+        self.assertEqual(len(result["memory_suggestions"]), 2)
+        self.assertEqual(result["message"], "1 aktuální ToDo podle živého důkazu.")
 
     def test_partial_result_keeps_live_items_and_rejects_unknown_navigation(self) -> None:
         result = build_decision_cockpit(
@@ -160,6 +200,7 @@ class DecisionCockpitTests(unittest.TestCase):
         self.assertEqual(result["source_status"], "partial")
         self.assertEqual(result["source_warning"], "Audit není dostupný.")
         self.assertEqual(result["items"][0]["navigation"], "")
+        self.assertEqual(result["memory_suggestions"], [])
 
     def test_extracts_only_first_canonical_next_step(self) -> None:
         text = """## Aktuální stav
