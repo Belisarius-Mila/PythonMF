@@ -62,6 +62,7 @@ from app.cockpit import (
     cockpit_dev_runner_actions,
     cockpit_dev_runner_run_action,
     cockpit_speak_action,
+    cockpit_local_tts_audio_action,
     human_adam_transcribe_action,
     human_adam_github_batch_action,
     human_adam_github_batch_audit_action,
@@ -4572,6 +4573,28 @@ class CockpitTests(unittest.TestCase):
         self.assertFalse(result["ok"])
         self.assertEqual(result["status"], "speech_failed")
         self.assertIn("AudioQueueStart failed", result["message"])
+
+    def test_cockpit_local_tts_audio_action_returns_local_audio_base64(self) -> None:
+        result = cockpit_local_tts_audio_action(
+            "Test",
+            synthesizer=lambda *args, **kwargs: b"M4A",
+        )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["status"], "local_tts_ready")
+        self.assertEqual(result["voice"], "Zuzana")
+        self.assertEqual(result["mime_type"], "audio/mp4")
+        self.assertEqual(result["audio_base64"], "TTRB")
+
+    def test_cockpit_local_tts_audio_action_reports_error(self) -> None:
+        def fail(*args, **kwargs):
+            raise cockpit_module.SpeechError("say není dostupné")
+
+        result = cockpit_local_tts_audio_action("Test", synthesizer=fail)
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["status"], "local_tts_failed")
+        self.assertIn("say není dostupné", result["message"])
 
     def test_cockpit_edge_tts_action_returns_audio_base64(self) -> None:
         result = cockpit_edge_tts_action("Test", synthesizer=lambda *args, **kwargs: b"MP3")

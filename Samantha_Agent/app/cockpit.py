@@ -319,7 +319,7 @@ from app.reminders.store import (
     load_reminders_store,
     save_reminder_draft,
 )
-from app.speech import SpeechError, TranscriptionError, speak_text
+from app.speech import SpeechError, TranscriptionError, speak_text, synthesize_local_tts_m4a
 from app.speech.transcribe import MIME_EXTENSIONS, decode_audio_base64, normalize_mime_type
 from app.speech.edge_tts_mp3 import (
     DEFAULT_EDGE_TTS_RATE,
@@ -8670,6 +8670,32 @@ def cockpit_speak_action(text: str, *, voice: str = DEFAULT_VOICE) -> dict[str, 
         }
 
 
+def cockpit_local_tts_audio_action(
+    text: str,
+    *,
+    voice: str = DEFAULT_VOICE,
+    synthesizer: Callable[..., bytes] = synthesize_local_tts_m4a,
+) -> dict[str, Any]:
+    try:
+        audio = synthesizer(text, voice=voice)
+    except SpeechError as exc:
+        return {
+            "ok": False,
+            "message": f"Místní hlasové audio selhalo: {exc}",
+            "status": "local_tts_failed",
+            "voice": voice,
+        }
+    return {
+        "ok": True,
+        "message": "Odpověď byla namluvena místním hlasem Macu.",
+        "status": "local_tts_ready",
+        "voice": voice,
+        "mime_type": "audio/mp4",
+        "audio_base64": base64.b64encode(audio).decode("ascii"),
+        "audio_bytes": len(audio),
+    }
+
+
 def cockpit_edge_tts_action(
     text: str,
     *,
@@ -8855,6 +8881,14 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "confirmation": "none_local_audio",
         "handler_name": "cockpit_speak_action",
         "test_level": "ui_presence",
+    },
+    {
+        "path": "/api/speech/local-audio",
+        "label": "Místní Mac TTS audio pro vzdálený prohlížeč",
+        "risk": "local_open",
+        "confirmation": "none_local_audio",
+        "handler_name": "cockpit_local_tts_audio_action",
+        "test_level": "direct",
     },
     {
         "path": "/api/speech/edge-tts",
@@ -10007,6 +10041,10 @@ class CockpitServer:
                 if parsed.path == "/api/speech/speak":
                     payload = self.read_json()
                     self.respond_json(cockpit_speak_action(text=str(payload.get("text", ""))))
+                    return
+                if parsed.path == "/api/speech/local-audio":
+                    payload = self.read_json()
+                    self.respond_json(cockpit_local_tts_audio_action(text=str(payload.get("text", ""))))
                     return
                 if parsed.path == "/api/speech/edge-tts":
                     payload = self.read_json()

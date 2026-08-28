@@ -201,6 +201,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <span class="badge warn legacy-work-control" id="developmentBadge">Vývoj: neověřen</span>
         <button class="badge sound-badge warn" id="mediaSoundTestBtn" type="button">Zvuk odpovědi: vyzkoušet</button>
         <audio id="completionMediaAudio" preload="auto" playsinline hidden></audio>
+        <audio id="answerSpeechAudio" preload="none" playsinline hidden></audio>
       </div>
       <div id="turnActivity" role="status" aria-live="polite" hidden></div>
       <div id="stepCompletionReceipt" role="status" aria-live="polite" hidden></div>
@@ -419,6 +420,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const developmentBadge = document.getElementById("developmentBadge");
   const mediaSoundTestBtn = document.getElementById("mediaSoundTestBtn");
   const completionMediaAudio = document.getElementById("completionMediaAudio");
+  const answerSpeechAudio = document.getElementById("answerSpeechAudio");
   const turnActivity = document.getElementById("turnActivity");
   const connectBtn = document.getElementById("connectBtn");
   const profileSelect = document.getElementById("profileSelect");
@@ -552,6 +554,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   let completionMediaUrl = "";
   let activeSpeechButton = null;
   let activeSpeechUtterance = null;
+  let activeSpeechRequest = null;
+  let activeSpeechGeneration = 0;
   let threadRotationAudit = null;
   let imageCandidatesByMessage = new Map();
   let imageCandidatesLoading = false;
@@ -1030,36 +1034,67 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     button.setAttribute("aria-pressed", "false");
   }
 
+  function stopAnswerSpeechAudio() {
+    answerSpeechAudio.pause();
+    try { answerSpeechAudio.currentTime = 0; } catch (_error) {}
+    answerSpeechAudio.removeAttribute("src");
+    answerSpeechAudio.load();
+  }
+
   function stopAnswerSpeech(showNotice=false) {
     const previousButton = activeSpeechButton;
+    activeSpeechGeneration += 1;
     activeSpeechButton = null;
     activeSpeechUtterance = null;
+    if (activeSpeechRequest) activeSpeechRequest.abort();
+    activeSpeechRequest = null;
+    stopAnswerSpeechAudio();
     resetSpeechButton(previousButton);
     if (window.speechSynthesis) window.speechSynthesis.cancel();
     if (showNotice) notice.textContent = "Čtení odpovědi zastaveno.";
   }
 
-  function finishAnswerSpeech(utterance, message) {
-    if (activeSpeechUtterance !== utterance) return;
+  function finishAnswerSpeech(generation, message) {
+    if (activeSpeechGeneration !== generation) return;
     const previousButton = activeSpeechButton;
+    activeSpeechGeneration += 1;
     activeSpeechButton = null;
     activeSpeechUtterance = null;
+    activeSpeechRequest = null;
+    stopAnswerSpeechAudio();
     resetSpeechButton(previousButton);
     notice.textContent = message;
   }
 
-  function speakAnswer(text, button) {
+  async function primeAnswerSpeechAudio() {
+    const source = completionMediaWavUrl();
+    if (!source) return false;
+    stopAnswerSpeechAudio();
+    answerSpeechAudio.src = source;
+    answerSpeechAudio.load();
+    answerSpeechAudio.muted = true;
+    try {
+      const playback = answerSpeechAudio.play();
+      const started = playback && typeof playback.then === "function"
+        ? await Promise.race([
+          playback.then(() => true).catch(() => false),
+          new Promise((resolve) => window.setTimeout(() => resolve(false), 500)),
+        ])
+        : true;
+      return Boolean(started);
+    } finally {
+      answerSpeechAudio.pause();
+      try { answerSpeechAudio.currentTime = 0; } catch (_error) {}
+      answerSpeechAudio.muted = false;
+    }
+  }
+
+  function speakAnswerWithSystemVoice(text, button, generation, reason="") {
+    if (activeSpeechGeneration !== generation || activeSpeechButton !== button) return;
     if (!speechPlaybackSupported()) {
-      button.textContent = "Čtení nepodporováno";
-      button.disabled = true;
-      notice.textContent = "Tento prohlížeč nepodporuje systémové čtení odpovědi.";
+      finishAnswerSpeech(generation, "Místní audio se nepodařilo přehrát a systémové čtení není dostupné.");
       return;
     }
-    if (activeSpeechButton === button) {
-      stopAnswerSpeech(true);
-      return;
-    }
-    stopAnswerSpeech(false);
     const utterance = new window.SpeechSynthesisUtterance(String(text || ""));
     utterance.lang = "cs-CZ";
     const czechVoice = window.speechSynthesis.getVoices().find(
@@ -1067,17 +1102,86 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     );
     if (czechVoice) utterance.voice = czechVoice;
     utterance.addEventListener("end", () => {
-      finishAnswerSpeech(utterance, "Čtení odpovědi dokončeno.");
+      finishAnswerSpeech(generation, "Čtení odpovědi dokončeno.");
     }, {once:true});
     utterance.addEventListener("error", () => {
-      finishAnswerSpeech(utterance, "Čtení odpovědi se nepodařilo dokončit.");
+      finishAnswerSpeech(generation, "Čtení odpovědi se nepodařilo dokončit.");
     }, {once:true});
-    activeSpeechButton = button;
     activeSpeechUtterance = utterance;
     button.textContent = "Zastavit";
     button.setAttribute("aria-pressed", "true");
-    notice.textContent = "Přehrávám Adamovu odpověď systémovým hlasem.";
+    notice.textContent = reason || "Přehrávám Adamovu odpověď systémovým hlasem zařízení.";
     window.speechSynthesis.speak(utterance);
+  }
+
+  async function speakAnswer(text, button) {
+    if (activeSpeechButton === button) {
+      stopAnswerSpeech(true);
+      return;
+    }
+    stopAnswerSpeech(false);
+    const generation = activeSpeechGeneration;
+    activeSpeechButton = button;
+    button.textContent = "Zastavit";
+    button.setAttribute("aria-pressed", "true");
+
+    if (isIOSDevice()) {
+      speakAnswerWithSystemVoice(text, button, generation);
+      return;
+    }
+
+    const controller = new AbortController();
+    activeSpeechRequest = controller;
+    notice.textContent = "Připravuji odpověď místním hlasem Macu…";
+    const audioPrime = primeAnswerSpeechAudio().catch(() => false);
+    let systemFallbackStarted = false;
+    const useSystemFallback = (reason) => {
+      if (
+        systemFallbackStarted
+        || controller.signal.aborted
+        || activeSpeechGeneration !== generation
+        || activeSpeechButton !== button
+      ) return;
+      systemFallbackStarted = true;
+      activeSpeechRequest = null;
+      stopAnswerSpeechAudio();
+      speakAnswerWithSystemVoice(
+        text,
+        button,
+        generation,
+        `Místní hlas Macu není dostupný; používám systémový hlas zařízení. ${reason || ""}`.trim(),
+      );
+    };
+    try {
+      const payload = await api("/api/speech/local-audio", {
+        method:"POST",
+        signal:controller.signal,
+        body:JSON.stringify({text:String(text || "")}),
+      });
+      if (!payload.ok || !payload.audio_base64) {
+        throw new Error(payload.message || "Místní hlasové audio není dostupné.");
+      }
+      await audioPrime;
+      if (controller.signal.aborted || activeSpeechGeneration !== generation || activeSpeechButton !== button) return;
+      activeSpeechRequest = null;
+      stopAnswerSpeechAudio();
+      answerSpeechAudio.src = `data:${payload.mime_type || "audio/mp4"};base64,${payload.audio_base64}`;
+      answerSpeechAudio.load();
+      answerSpeechAudio.addEventListener("ended", () => {
+        finishAnswerSpeech(generation, "Čtení odpovědi dokončeno místním hlasem Macu.");
+      }, {once:true});
+      answerSpeechAudio.addEventListener("error", () => {
+        useSystemFallback("Místní hlasové audio se nepodařilo přehrát.");
+      }, {once:true});
+      const playback = answerSpeechAudio.play();
+      if (playback && typeof playback.then === "function") await playback;
+      if (activeSpeechGeneration === generation) {
+        notice.textContent = "Přehrávám Adamovu odpověď místním hlasem Macu.";
+      }
+    } catch (error) {
+      await audioPrime;
+      useSystemFallback(error.message || "");
+    }
   }
 
   function copyAnswerFallback(text) {

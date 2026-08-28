@@ -1221,42 +1221,55 @@ class HumanAdamUiTests(unittest.TestCase):
         render_source = HUMAN_ADAM_HTML[render_start:render_end]
 
         self.assertIn('button.addEventListener("click", () => speakAnswer(text, button));', control_source)
-        self.assertIn("window.speechSynthesis.speak(utterance);", speak_source)
+        self.assertIn('api("/api/speech/local-audio"', speak_source)
+        self.assertIn("body:JSON.stringify({text:String(text || \"\")})", speak_source)
         self.assertNotIn("speechSynthesis.speak", render_source)
         self.assertNotIn("speakAnswer(", render_source)
-        self.assertNotIn("/api/", speak_source)
+        self.assertNotIn("/api/speech/edge-tts", speak_source)
 
-    def test_answer_speech_uses_czech_system_voice_and_same_button_stops_it(self) -> None:
+    def test_answer_speech_uses_local_mac_audio_and_same_button_stops_it(self) -> None:
         stop_start = HUMAN_ADAM_HTML.index("function stopAnswerSpeech(showNotice=false)")
         stop_end = HUMAN_ADAM_HTML.index("function finishAnswerSpeech", stop_start)
         stop_source = HUMAN_ADAM_HTML[stop_start:stop_end]
+        local_start = HUMAN_ADAM_HTML.index("async function primeAnswerSpeechAudio()")
         speak_start = HUMAN_ADAM_HTML.index("function speakAnswer(text, button)")
         speak_end = HUMAN_ADAM_HTML.index("function answerSpeechControl(text)", speak_start)
         speak_source = HUMAN_ADAM_HTML[speak_start:speak_end]
+        local_source = HUMAN_ADAM_HTML[local_start:speak_end]
 
         self.assertIn("window.speechSynthesis.cancel();", stop_source)
+        self.assertIn("activeSpeechRequest.abort();", stop_source)
+        self.assertIn("stopAnswerSpeechAudio();", stop_source)
         self.assertIn("if (activeSpeechButton === button)", speak_source)
         self.assertIn("stopAnswerSpeech(true);", speak_source)
-        self.assertIn('utterance.lang = "cs-CZ";', speak_source)
-        self.assertIn("/^cs(?:-|$)/i", speak_source)
+        self.assertIn("const audioPrime = primeAnswerSpeechAudio()", speak_source)
+        self.assertIn("let systemFallbackStarted = false;", speak_source)
+        self.assertIn('answerSpeechAudio.src = `data:${payload.mime_type || "audio/mp4"};base64,${payload.audio_base64}`;', speak_source)
+        self.assertIn("answerSpeechAudio.play();", speak_source)
+        self.assertIn('useSystemFallback("Místní hlasové audio se nepodařilo přehrát.");', speak_source)
+        self.assertIn('useSystemFallback(error.message || "");', speak_source)
         self.assertIn('button.textContent = "Zastavit";', speak_source)
+        self.assertIn('utterance.lang = "cs-CZ";', local_source)
+        self.assertIn("/^cs(?:-|$)/i", local_source)
+        self.assertIn("window.speechSynthesis.speak(utterance);", local_source)
+        self.assertIn("if (isIOSDevice())", speak_source)
         self.assertIn('window.addEventListener("pagehide", () => {', HUMAN_ADAM_HTML)
         self.assertIn("stopAnswerSpeech(false);", HUMAN_ADAM_HTML)
         self.assertIn("stopCompletionMediaSound();", HUMAN_ADAM_HTML)
 
-    def test_unsupported_answer_speech_is_fail_closed_and_understandable(self) -> None:
+    def test_answer_speech_system_fallback_is_fail_closed_and_understandable(self) -> None:
         support_start = HUMAN_ADAM_HTML.index("function speechPlaybackSupported()")
         support_end = HUMAN_ADAM_HTML.index("function resetSpeechButton", support_start)
         support_source = HUMAN_ADAM_HTML[support_start:support_end]
-        speak_start = HUMAN_ADAM_HTML.index("function speakAnswer(text, button)")
-        speak_end = HUMAN_ADAM_HTML.index("function answerSpeechControl(text)", speak_start)
-        speak_source = HUMAN_ADAM_HTML[speak_start:speak_end]
+        fallback_start = HUMAN_ADAM_HTML.index("function speakAnswerWithSystemVoice(")
+        fallback_end = HUMAN_ADAM_HTML.index("async function speakAnswer(", fallback_start)
+        fallback_source = HUMAN_ADAM_HTML[fallback_start:fallback_end]
 
         self.assertIn("window.speechSynthesis", support_source)
         self.assertIn("window.SpeechSynthesisUtterance", support_source)
-        self.assertIn('button.textContent = "Čtení nepodporováno";', speak_source)
-        self.assertIn("button.disabled = true;", speak_source)
-        self.assertIn("Tento prohlížeč nepodporuje systémové čtení odpovědi.", speak_source)
+        self.assertIn("Místní audio se nepodařilo přehrát", fallback_source)
+        self.assertIn("window.speechSynthesis.speak(utterance);", fallback_source)
+        self.assertNotIn("button.disabled = true;", fallback_source)
 
     def test_voice_transcription_failure_preserves_existing_draft(self) -> None:
         transcribe_start = HUMAN_ADAM_HTML.index("async function transcribeVoiceRecording()")
