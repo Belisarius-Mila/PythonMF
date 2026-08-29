@@ -1,0 +1,2473 @@
+{
+  "schemaVersion": 1,
+  "source": "VocabularyEN/VocabularyEN.csv",
+  "sourceDigest": "08577854fab34a7fd708e3bdcd976bc589c5a4363a7292738c439616063fa60e",
+  "rate": "-10%",
+  "voices": {
+    "en": {
+      "id": "en-US-AriaNeural",
+      "slug": "en-us-aria-neural",
+      "label": "Aria"
+    },
+    "cz": {
+      "id": "cs-CZ-VlastaNeural",
+      "slug": "cs-cz-vlasta-neural",
+      "label": "Vlasta"
+    }
+  },
+  "stats": {
+    "itemCount": 306,
+    "audioReferences": 612,
+    "uniqueAssets": 608
+  },
+  "items": {
+    "1": {
+      "sourceEn": "a glass (of water)",
+      "sourceCz": "sklenice (vody)",
+      "spokenEn": "a glass of water",
+      "spokenCz": "sklenice vody",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/86f00b031c43652b7c6c.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/fba1f6123b029a2f6e6c.mp3"
+    },
+    "2": {
+      "sourceEn": "airport",
+      "sourceCz": "letiště",
+      "spokenEn": "airport",
+      "spokenCz": "letiště",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/0f6b44b3037e11da290b.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/df378ac7118c4f86b662.mp3"
+    },
+    "3": {
+      "sourceEn": "animal",
+      "sourceCz": "zvíře",
+      "spokenEn": "animal",
+      "spokenCz": "zvíře",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/8d18d6c40e4de84751fe.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/669415f5b0c3c6f90c88.mp3"
+    },
+    "4": {
+      "sourceEn": "baby elephant",
+      "sourceCz": "slůně",
+      "spokenEn": "baby elephant",
+      "spokenCz": "slůně",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/493379ffb7e47efb04d0.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/4f27af8748540e62ff1b.mp3"
+    },
+    "5": {
+      "sourceEn": "bag",
+      "sourceCz": "taška",
+      "spokenEn": "bag",
+      "spokenCz": "taška",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/577d13125eb624294577.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/4a89f7cc911810071bf5.mp3"
+    },
+    "6": {
+      "sourceEn": "big",
+      "sourceCz": "velký",
+      "spokenEn": "big",
+      "spokenCz": "velký",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/f1e05d6236c6f951d002.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/ae0c242e5f6a9522e8b2.mp3"
+    },
+    "7": {
+      "sourceEn": "bike",
+      "sourceCz": "kolo",
+      "spokenEn": "bike",
+      "spokenCz": "kolo",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/f8d317afabb1509b0599.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/e9d230a18484a9b50c36.mp3"
+    },
+    "8": {
+      "sourceEn": "bird",
+      "sourceCz": "pták",
+      "spokenEn": "bird",
+      "spokenCz": "pták",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/326587761dad44a55ccc.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/d83ff6e079e4bfb28bb5.mp3"
+    },
+    "9": {
+      "sourceEn": "black",
+      "sourceCz": "černý",
+      "spokenEn": "black",
+      "spokenCz": "černý",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/aa876a5f80404aac8ae9.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/6cfa749c3c0b55e1f9a2.mp3"
+    },
+    "10": {
+      "sourceEn": "blue",
+      "sourceCz": "modrý",
+      "spokenEn": "blue",
+      "spokenCz": "modrý",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/7ded1b5b439332300c53.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/fbe07f366118aa8e21b0.mp3"
+    },
+    "11": {
+      "sourceEn": "book",
+      "sourceCz": "kniha",
+      "spokenEn": "book",
+      "spokenCz": "kniha",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/b965b321ee5d08a68496.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/6b72be63117f6cdd9238.mp3"
+    },
+    "12": {
+      "sourceEn": "box",
+      "sourceCz": "krabice",
+      "spokenEn": "box",
+      "spokenCz": "krabice",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/040664476432c4c1fc8e.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/71ab5abe9d649a770de9.mp3"
+    },
+    "13": {
+      "sourceEn": "breakfast",
+      "sourceCz": "snídaně",
+      "spokenEn": "breakfast",
+      "spokenCz": "snídaně",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/97521d08ee7a035bef36.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/eaa28ce0c893b518369e.mp3"
+    },
+    "14": {
+      "sourceEn": "British",
+      "sourceCz": "britský",
+      "spokenEn": "British",
+      "spokenCz": "britský",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/df7163521af59964cfe7.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/67102c946c7779f3140d.mp3"
+    },
+    "15": {
+      "sourceEn": "brother",
+      "sourceCz": "bratr",
+      "spokenEn": "brother",
+      "spokenCz": "bratr",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/388fd2b05624948e6c69.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/64862678095f3a9c01fc.mp3"
+    },
+    "16": {
+      "sourceEn": "burger",
+      "sourceCz": "hamburger",
+      "spokenEn": "burger",
+      "spokenCz": "hamburger",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/2b6d5ae8542be230c7f7.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/5893a06189f9e5fe2ace.mp3"
+    },
+    "17": {
+      "sourceEn": "bus station",
+      "sourceCz": "autobusové nádraží",
+      "spokenEn": "bus station",
+      "spokenCz": "autobusové nádraží",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/1bf36e1955b29dec2467.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/1b2e952658f3186f6913.mp3"
+    },
+    "18": {
+      "sourceEn": "bye",
+      "sourceCz": "ahoj (na rozloučenou)",
+      "spokenEn": "bye",
+      "spokenCz": "ahoj na rozloučenou",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/e30dff835b389e8877e5.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/01c372c9e18360fd3a72.mp3"
+    },
+    "19": {
+      "sourceEn": "can",
+      "sourceCz": "mohu",
+      "spokenEn": "can",
+      "spokenCz": "mohu",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/558e36925ce182f25051.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/514b654d579efcda1cee.mp3"
+    },
+    "20": {
+      "sourceEn": "cat",
+      "sourceCz": "kočka",
+      "spokenEn": "cat",
+      "spokenCz": "kočka",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/04c2bfefd89543554c60.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/40159413b6f38ddca7ad.mp3"
+    },
+    "21": {
+      "sourceEn": "cinema",
+      "sourceCz": "kino",
+      "spokenEn": "cinema",
+      "spokenCz": "kino",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/38d24742de2a8767e265.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/43f5576a0dc8c0c8f614.mp3"
+    },
+    "22": {
+      "sourceEn": "coffee",
+      "sourceCz": "káva",
+      "spokenEn": "coffee",
+      "spokenCz": "káva",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/a2ffc17122637a142222.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/e77a743b8f66eda5c178.mp3"
+    },
+    "23": {
+      "sourceEn": "cook",
+      "sourceCz": "vařit",
+      "spokenEn": "cook",
+      "spokenCz": "vařit",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/0ab870d81d6de3f872b3.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/12cfd70e3fa500f17e71.mp3"
+    },
+    "24": {
+      "sourceEn": "cow",
+      "sourceCz": "kráva",
+      "spokenEn": "cow",
+      "spokenCz": "kráva",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/17268d15c1729d5d5fe2.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/46482c9a2be1d4b62893.mp3"
+    },
+    "25": {
+      "sourceEn": "crocodile",
+      "sourceCz": "krokodýl",
+      "spokenEn": "crocodile",
+      "spokenCz": "krokodýl",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/a94d121a477712f894a7.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/a4e3ba1f93e475c8caa5.mp3"
+    },
+    "26": {
+      "sourceEn": "dark",
+      "sourceCz": "tmavý",
+      "spokenEn": "dark",
+      "spokenCz": "tmavý",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/1a854283ce1d5e28da98.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/658094382836cee06b04.mp3"
+    },
+    "27": {
+      "sourceEn": "dog",
+      "sourceCz": "pes",
+      "spokenEn": "dog",
+      "spokenCz": "pes",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/8529fa7140facccaab33.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/9278802ccf5aee22842b.mp3"
+    },
+    "28": {
+      "sourceEn": "doctor",
+      "sourceCz": "lékař",
+      "spokenEn": "doctor",
+      "spokenCz": "lékař",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/344dfcba7a5ec786c2c1.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/1b6b87c6bbd9277f9330.mp3"
+    },
+    "29": {
+      "sourceEn": "document",
+      "sourceCz": "dokument",
+      "spokenEn": "document",
+      "spokenCz": "dokument",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/3f5cb7c6a8e02635b668.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/35fe9e0e9550f5e5f17c.mp3"
+    },
+    "30": {
+      "sourceEn": "drink",
+      "sourceCz": "nápoj, pít",
+      "spokenEn": "drink",
+      "spokenCz": "nápoj. pít",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/2ca5be7dd2d20267a5ef.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/1cff4e9ea216956e6f5c.mp3"
+    },
+    "31": {
+      "sourceEn": "drawing",
+      "sourceCz": "kreslení",
+      "spokenEn": "drawing",
+      "spokenCz": "kreslení",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/2a93ef03cad3c1d9e4b8.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/2d93168ece0eb3a5369f.mp3"
+    },
+    "32": {
+      "sourceEn": "duck",
+      "sourceCz": "kachna",
+      "spokenEn": "duck",
+      "spokenCz": "kachna",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/9d7a4b0efb87445222aa.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/d7c652b284b16183e172.mp3"
+    },
+    "33": {
+      "sourceEn": "elephant",
+      "sourceCz": "slon",
+      "spokenEn": "elephant",
+      "spokenCz": "slon",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/b7ca4cee3c2a8ac177c5.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/ec01aba6eb24a95b5f17.mp3"
+    },
+    "34": {
+      "sourceEn": "English",
+      "sourceCz": "angličtina",
+      "spokenEn": "English",
+      "spokenCz": "angličtina",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/9f8eb75b5adc05d0dbd3.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/6b1d03fe698ab886f5f9.mp3"
+    },
+    "35": {
+      "sourceEn": "excuse me",
+      "sourceCz": "promiňte",
+      "spokenEn": "excuse me",
+      "spokenCz": "promiňte",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/2b880951e081bd051822.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/ac37c6ff265b69d7cd2c.mp3"
+    },
+    "36": {
+      "sourceEn": "eyes",
+      "sourceCz": "oči",
+      "spokenEn": "eyes",
+      "spokenCz": "oči",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/05c99b0fcfd34bb5210a.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/70699b68fd19de1e11dd.mp3"
+    },
+    "37": {
+      "sourceEn": "fair",
+      "sourceCz": "světlý (o vlasech)",
+      "spokenEn": "fair",
+      "spokenCz": "světlý o vlasech",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/4f4c44ab231dd4d58cec.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/6561c39e4872e12a3425.mp3"
+    },
+    "38": {
+      "sourceEn": "family",
+      "sourceCz": "rodina",
+      "spokenEn": "family",
+      "spokenCz": "rodina",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/1f7fd91a70a923f92873.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/cd702dc4ab143efa3393.mp3"
+    },
+    "39": {
+      "sourceEn": "father",
+      "sourceCz": "otec",
+      "spokenEn": "father",
+      "spokenCz": "otec",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/c8d616a0ce3043ec758e.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/a51493deca1e763539be.mp3"
+    },
+    "40": {
+      "sourceEn": "field",
+      "sourceCz": "pole",
+      "spokenEn": "field",
+      "spokenCz": "pole",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/bd10f53f45d4daa025a7.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/8f6cfb4309dbf041d749.mp3"
+    },
+    "41": {
+      "sourceEn": "film",
+      "sourceCz": "film",
+      "spokenEn": "film",
+      "spokenCz": "film",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/e371d5147e851540c222.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/f55169d93e244f910c6d.mp3"
+    },
+    "42": {
+      "sourceEn": "fish",
+      "sourceCz": "ryba",
+      "spokenEn": "fish",
+      "spokenCz": "ryba",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/453480d8d45038dcf4ae.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/55bad61075d045dce3e0.mp3"
+    },
+    "43": {
+      "sourceEn": "food",
+      "sourceCz": "jídlo",
+      "spokenEn": "food",
+      "spokenCz": "jídlo",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/afbdcf4fa8213be79f0e.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/1dff99bc4f345cac45eb.mp3"
+    },
+    "44": {
+      "sourceEn": "free",
+      "sourceCz": "volný; zdarma",
+      "spokenEn": "free",
+      "spokenCz": "volný. zdarma",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/57a4827fd68671675a7a.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/cbda90d2d73922858add.mp3"
+    },
+    "45": {
+      "sourceEn": "friend",
+      "sourceCz": "kamarád",
+      "spokenEn": "friend",
+      "spokenCz": "kamarád",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/45cf3a6444c4c6759170.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/b693e134900fe30a6be8.mp3"
+    },
+    "46": {
+      "sourceEn": "garden",
+      "sourceCz": "zahrada",
+      "spokenEn": "garden",
+      "spokenCz": "zahrada",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/f78d5011cbfd01d72ee4.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/3d544167e1a19e9353ad.mp3"
+    },
+    "47": {
+      "sourceEn": "giraffe",
+      "sourceCz": "žirafa",
+      "spokenEn": "giraffe",
+      "spokenCz": "žirafa",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/9aba9f7190cc7d872063.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/11d33724807bac0b2714.mp3"
+    },
+    "48": {
+      "sourceEn": "goat",
+      "sourceCz": "koza",
+      "spokenEn": "goat",
+      "spokenCz": "koza",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/5c25c447d5dd56292b02.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/3a4fd77269bbce704049.mp3"
+    },
+    "49": {
+      "sourceEn": "go",
+      "sourceCz": "jít",
+      "spokenEn": "go",
+      "spokenCz": "jít",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/4eaf05fd645d1a4b85b9.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/66d040de18e37ab8bdac.mp3"
+    },
+    "50": {
+      "sourceEn": "good",
+      "sourceCz": "dobrý",
+      "spokenEn": "good",
+      "spokenCz": "dobrý",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/bdfe775d3c5f3ac92c51.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/88c56d8ac7c72f4a7427.mp3"
+    },
+    "51": {
+      "sourceEn": "goodbye",
+      "sourceCz": "nashledanou",
+      "spokenEn": "goodbye",
+      "spokenCz": "nashledanou",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/f9ccd62bbd0d8376274c.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/4cfd04100a04313a948a.mp3"
+    },
+    "52": {
+      "sourceEn": "green",
+      "sourceCz": "zelený",
+      "spokenEn": "green",
+      "spokenCz": "zelený",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/a8d4442ffc1d6c160d87.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/adde215e7aa8089860d7.mp3"
+    },
+    "53": {
+      "sourceEn": "grey",
+      "sourceCz": "šedý",
+      "spokenEn": "grey",
+      "spokenCz": "šedý",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/c29c5d21b7afbe052b77.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/f15fb8c0de3bfc4f3036.mp3"
+    },
+    "54": {
+      "sourceEn": "hair",
+      "sourceCz": "vlasy",
+      "spokenEn": "hair",
+      "spokenCz": "vlasy",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/353991bd7434bac727fd.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/bf7d0c59c0291bd35027.mp3"
+    },
+    "55": {
+      "sourceEn": "happy",
+      "sourceCz": "šťastný",
+      "spokenEn": "happy",
+      "spokenCz": "šťastný",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/ae42e2f440058cf9ad1b.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/0f9d451e00dab0b60b33.mp3"
+    },
+    "56": {
+      "sourceEn": "hear",
+      "sourceCz": "slyšet",
+      "spokenEn": "hear",
+      "spokenCz": "slyšet",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/39d4ef242d28ef8b2cbe.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/3d01db950eb7fbe64de8.mp3"
+    },
+    "57": {
+      "sourceEn": "hello",
+      "sourceCz": "ahoj, dobrý den",
+      "spokenEn": "hello",
+      "spokenCz": "ahoj. dobrý den",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/5a184ff78f79c221dbea.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/9d35b326ce977fb01bf6.mp3"
+    },
+    "58": {
+      "sourceEn": "help",
+      "sourceCz": "pomoc",
+      "spokenEn": "help",
+      "spokenCz": "pomoc",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/fde71af19b68a71af25c.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/4a59b1086116bc5ad644.mp3"
+    },
+    "59": {
+      "sourceEn": "home",
+      "sourceCz": "domov",
+      "spokenEn": "home",
+      "spokenCz": "domov",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/71c6bcc59ac986a839b7.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/11e36c599db4caed5ca0.mp3"
+    },
+    "60": {
+      "sourceEn": "horse",
+      "sourceCz": "kůň",
+      "spokenEn": "horse",
+      "spokenCz": "kůň",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/c63e08b75e41e52e15b6.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/5e783a20fcd619889f4f.mp3"
+    },
+    "61": {
+      "sourceEn": "house",
+      "sourceCz": "dům",
+      "spokenEn": "house",
+      "spokenCz": "dům",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/e8731cc4b6433f72013a.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/2079a7f4544f486a088c.mp3"
+    },
+    "62": {
+      "sourceEn": "I (am)",
+      "sourceCz": "já (jsem)",
+      "spokenEn": "I am",
+      "spokenCz": "já jsem",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/6dd7b52a399ca1c16a14.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/35d01e8d1c0de6004cfd.mp3"
+    },
+    "63": {
+      "sourceEn": "in",
+      "sourceCz": "v",
+      "spokenEn": "in",
+      "spokenCz": "v",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/d5a60e2d644a0592caf4.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/1cb7c3c365c67cc7560c.mp3"
+    },
+    "64": {
+      "sourceEn": "jump",
+      "sourceCz": "skákat",
+      "spokenEn": "jump",
+      "spokenCz": "skákat",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/7f1ebfd0189b964ebbc9.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/7e218a0e8de5ae0ac4e2.mp3"
+    },
+    "65": {
+      "sourceEn": "lake",
+      "sourceCz": "jezero",
+      "spokenEn": "lake",
+      "spokenCz": "jezero",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/3993b54fc757755e055c.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/ee725b9c74ff71186d18.mp3"
+    },
+    "66": {
+      "sourceEn": "left",
+      "sourceCz": "levý, vlevo",
+      "spokenEn": "left",
+      "spokenCz": "levý. vlevo",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/21bc3d7891df66a9ea1d.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/8fc3fd2d04f648728ee8.mp3"
+    },
+    "67": {
+      "sourceEn": "like",
+      "sourceCz": "mít rád",
+      "spokenEn": "like",
+      "spokenCz": "mít rád",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/26f27282a0775b22c641.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/51e8a6cfb95c1888e4cb.mp3"
+    },
+    "68": {
+      "sourceEn": "lion",
+      "sourceCz": "lev",
+      "spokenEn": "lion",
+      "spokenCz": "lev",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/045c4bdf2e76a1fd576b.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/3dc7659d4a8916d47693.mp3"
+    },
+    "69": {
+      "sourceEn": "live",
+      "sourceCz": "žít; bydlet",
+      "spokenEn": "live",
+      "spokenCz": "žít. bydlet",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/44bbc9ae39ab5cdc0379.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/c57f6be790b3b4ebf6c2.mp3"
+    },
+    "70": {
+      "sourceEn": "love",
+      "sourceCz": "milovat",
+      "spokenEn": "love",
+      "spokenCz": "milovat",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/1be0607c8cf80d268755.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/d5328626976e6958a2b0.mp3"
+    },
+    "71": {
+      "sourceEn": "milk",
+      "sourceCz": "mléko",
+      "spokenEn": "milk",
+      "spokenCz": "mléko",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/41f92acba2e71915d594.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/b44457d0f160d917a362.mp3"
+    },
+    "72": {
+      "sourceEn": "mom",
+      "sourceCz": "máma",
+      "spokenEn": "mom",
+      "spokenCz": "máma",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/e86b1afc6ea5c2817ddf.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/30fec4f8076a36dfd041.mp3"
+    },
+    "73": {
+      "sourceEn": "monkey",
+      "sourceCz": "opice",
+      "spokenEn": "monkey",
+      "spokenCz": "opice",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/ebfde00a81a65632fdf6.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/9828609dc57dabf97223.mp3"
+    },
+    "74": {
+      "sourceEn": "mother",
+      "sourceCz": "matka",
+      "spokenEn": "mother",
+      "spokenCz": "matka",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/a7590272730a90e998c6.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/13f639e9a80354493fc9.mp3"
+    },
+    "75": {
+      "sourceEn": "name",
+      "sourceCz": "jméno",
+      "spokenEn": "name",
+      "spokenCz": "jméno",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/550ed07a83904bb11781.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/036de19ecddc180da87f.mp3"
+    },
+    "76": {
+      "sourceEn": "new",
+      "sourceCz": "nový",
+      "spokenEn": "new",
+      "spokenCz": "nový",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/bf173a73bcdc3a1e908c.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/829a6ca2b6cc39326c9e.mp3"
+    },
+    "77": {
+      "sourceEn": "nurse",
+      "sourceCz": "zdravotní sestra",
+      "spokenEn": "nurse",
+      "spokenCz": "zdravotní sestra",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/7f0446083c766a7a953e.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/618aa76589201390cfb7.mp3"
+    },
+    "78": {
+      "sourceEn": "office",
+      "sourceCz": "kancelář",
+      "spokenEn": "office",
+      "spokenCz": "kancelář",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/acd4d466f65220ab49f6.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/2f85313192810f2f297c.mp3"
+    },
+    "79": {
+      "sourceEn": "old",
+      "sourceCz": "starý",
+      "spokenEn": "old",
+      "spokenCz": "starý",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/df34e6c9ac6b17d9a960.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/b733d9a8628ffe0e7b7b.mp3"
+    },
+    "80": {
+      "sourceEn": "parents",
+      "sourceCz": "rodiče",
+      "spokenEn": "parents",
+      "spokenCz": "rodiče",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/990c01eb77ea38306e0d.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/b54d0b248a2cd3ba47db.mp3"
+    },
+    "81": {
+      "sourceEn": "park",
+      "sourceCz": "park",
+      "spokenEn": "park",
+      "spokenCz": "park",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/bdabecf8cfb711c4b5db.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/2abd8f0ca0b40520a90f.mp3"
+    },
+    "82": {
+      "sourceEn": "popcorn",
+      "sourceCz": "popcorn",
+      "spokenEn": "popcorn",
+      "spokenCz": "popcorn",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/ceab58b0855282a551cf.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/5a7d44fb27adb0933922.mp3"
+    },
+    "83": {
+      "sourceEn": "rabbit",
+      "sourceCz": "králík",
+      "spokenEn": "rabbit",
+      "spokenCz": "králík",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/94377a86578335898ad1.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/3e5ca6185e275e1710f8.mp3"
+    },
+    "84": {
+      "sourceEn": "red",
+      "sourceCz": "červený",
+      "spokenEn": "red",
+      "spokenCz": "červený",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/fbe0b6120e3c894f2f1d.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/8f9cd4fcb4d50274a49d.mp3"
+    },
+    "85": {
+      "sourceEn": "rhino",
+      "sourceCz": "nosorožec",
+      "spokenEn": "rhino",
+      "spokenCz": "nosorožec",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/69ab05c0b6867ac32fc3.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/e0f6d80eaf077b877b51.mp3"
+    },
+    "86": {
+      "sourceEn": "run",
+      "sourceCz": "běhat",
+      "spokenEn": "run",
+      "spokenCz": "běhat",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/eee63125ed166ba7c4af.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/ec335b1618993c87a838.mp3"
+    },
+    "87": {
+      "sourceEn": "sheep",
+      "sourceCz": "ovce",
+      "spokenEn": "sheep",
+      "spokenCz": "ovce",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/8fba40a909223a0759aa.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/c984756d11c52b72f758.mp3"
+    },
+    "88": {
+      "sourceEn": "sing",
+      "sourceCz": "zpívat",
+      "spokenEn": "sing",
+      "spokenCz": "zpívat",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/63540e6450d897b17489.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/5cf152cfaa2e6d4cc130.mp3"
+    },
+    "89": {
+      "sourceEn": "sister",
+      "sourceCz": "sestra",
+      "spokenEn": "sister",
+      "spokenCz": "sestra",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/e8ec4776ab9287245ae5.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/6d14ed9982a2b190f1ff.mp3"
+    },
+    "90": {
+      "sourceEn": "small",
+      "sourceCz": "malý",
+      "spokenEn": "small",
+      "spokenCz": "malý",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/46603518554dbaeb6a6c.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/74b2327da3c0c62d8009.mp3"
+    },
+    "91": {
+      "sourceEn": "smart",
+      "sourceCz": "chytrý",
+      "spokenEn": "smart",
+      "spokenCz": "chytrý",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/af800c0fbf29841e26fa.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/727211f4ba891609035f.mp3"
+    },
+    "92": {
+      "sourceEn": "slow",
+      "sourceCz": "pomalý",
+      "spokenEn": "slow",
+      "spokenCz": "pomalý",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/bd6df1087257163c6129.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/939975d24e0c8c9cd26d.mp3"
+    },
+    "93": {
+      "sourceEn": "speak",
+      "sourceCz": "mluvit",
+      "spokenEn": "speak",
+      "spokenCz": "mluvit",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/ea15fe93b3bb34ae16f3.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/24d024a936a5ebebd7a0.mp3"
+    },
+    "94": {
+      "sourceEn": "tall",
+      "sourceCz": "vysoký",
+      "spokenEn": "tall",
+      "spokenCz": "vysoký",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/be1d0695e0fb39be1601.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/b194e1566f034bf45c6b.mp3"
+    },
+    "95": {
+      "sourceEn": "teacher",
+      "sourceCz": "učitel",
+      "spokenEn": "teacher",
+      "spokenCz": "učitel",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/85370d0fcfd67e595581.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/6891dfac8c381877ce29.mp3"
+    },
+    "96": {
+      "sourceEn": "ticket",
+      "sourceCz": "lístek",
+      "spokenEn": "ticket",
+      "spokenCz": "lístek",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/734bf35825e56631d43a.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/f75429d2b1fca57c8740.mp3"
+    },
+    "97": {
+      "sourceEn": "walk",
+      "sourceCz": "chodit",
+      "spokenEn": "walk",
+      "spokenCz": "chodit",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/75bff9a81221808352e4.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/2cf76555cc28d61afb40.mp3"
+    },
+    "98": {
+      "sourceEn": "water",
+      "sourceCz": "voda",
+      "spokenEn": "water",
+      "spokenCz": "voda",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/cfa1ff641d6927ebbf2d.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/7ae3c307ec0751b7d63f.mp3"
+    },
+    "99": {
+      "sourceEn": "white",
+      "sourceCz": "bílý",
+      "spokenEn": "white",
+      "spokenCz": "bílý",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/a436b8a98e2cc89765db.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/db9793041a4800fd804d.mp3"
+    },
+    "100": {
+      "sourceEn": "yellow",
+      "sourceCz": "žlutý",
+      "spokenEn": "yellow",
+      "spokenCz": "žlutý",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/cfc3ce68527a8ccf1e1f.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/93e3d26429e3ec4b9428.mp3"
+    },
+    "101": {
+      "sourceEn": "zoo",
+      "sourceCz": "zoologická zahrada",
+      "spokenEn": "zoo",
+      "spokenCz": "zoologická zahrada",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/af522f0882dd57086490.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/1520ea7e28dc59b8b01b.mp3"
+    },
+    "102": {
+      "sourceEn": "zebra",
+      "sourceCz": "zebra",
+      "spokenEn": "zebra",
+      "spokenCz": "zebra",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/d028dc4d140bcb6bc1cf.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/1481394c4ae520a8fb48.mp3"
+    },
+    "103": {
+      "sourceEn": "restaurant",
+      "sourceCz": "restaurace",
+      "spokenEn": "restaurant",
+      "spokenCz": "restaurace",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/37eaa033ef8432175e47.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/01e4810718647f555107.mp3"
+    },
+    "104": {
+      "sourceEn": "near",
+      "sourceCz": "blízko",
+      "spokenEn": "near",
+      "spokenCz": "blízko",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/2891a9b8c51658e506eb.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/871c7465c502336a7c84.mp3"
+    },
+    "105": {
+      "sourceEn": "far",
+      "sourceCz": "daleko",
+      "spokenEn": "far",
+      "spokenCz": "daleko",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/03ed2789b1af4b0fc196.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/cf120a44653cb4166490.mp3"
+    },
+    "106": {
+      "sourceEn": "straight",
+      "sourceCz": "rovně",
+      "spokenEn": "straight",
+      "spokenCz": "rovně",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/8986f8af463ca80bb84f.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/b42713016b2e894fc1d1.mp3"
+    },
+    "107": {
+      "sourceEn": "turn",
+      "sourceCz": "zahnout / odbočit",
+      "spokenEn": "turn",
+      "spokenCz": "zahnout. odbočit",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/07d037c32a57de2740c1.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/fc2f3fd695c42616edb6.mp3"
+    },
+    "108": {
+      "sourceEn": "hungry",
+      "sourceCz": "hladový",
+      "spokenEn": "hungry",
+      "spokenCz": "hladový",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/a9984f6ffaa4eec7e038.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/2cb26cbf6ab21b88e1fc.mp3"
+    },
+    "109": {
+      "sourceEn": "warm",
+      "sourceCz": "teplý",
+      "spokenEn": "warm",
+      "spokenCz": "teplý",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/bb3d9d64976cf07af949.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/51662e9141bab6d49e1d.mp3"
+    },
+    "110": {
+      "sourceEn": "welcome",
+      "sourceCz": "vítejte",
+      "spokenEn": "welcome",
+      "spokenCz": "vítejte",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/f7901a52d13af4a3dd82.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/5af2196e12a7a707a4e8.mp3"
+    },
+    "111": {
+      "sourceEn": "table",
+      "sourceCz": "stůl",
+      "spokenEn": "table",
+      "spokenCz": "stůl",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/bc18a5926c06b3dfbcca.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/814471a977b0e74b2a4e.mp3"
+    },
+    "112": {
+      "sourceEn": "follow",
+      "sourceCz": "následovat",
+      "spokenEn": "follow",
+      "spokenCz": "následovat",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/b613ca11a71d7c6db448.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/a526e5976e44cccbdc5b.mp3"
+    },
+    "113": {
+      "sourceEn": "menu",
+      "sourceCz": "jídelní lístek",
+      "spokenEn": "menu",
+      "spokenCz": "jídelní lístek",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/2c9e03cd811545d1d5b9.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/98c00f60e193e61e97b3.mp3"
+    },
+    "114": {
+      "sourceEn": "ready",
+      "sourceCz": "připravený",
+      "spokenEn": "ready",
+      "spokenCz": "připravený",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/f745b71f58ed074c1c41.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/5d712bbf1624de30c209.mp3"
+    },
+    "115": {
+      "sourceEn": "order",
+      "sourceCz": "objednat (si)",
+      "spokenEn": "order",
+      "spokenCz": "objednat si",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/b245aea1b297c4f291c0.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/614a7f80756544ffeff2.mp3"
+    },
+    "116": {
+      "sourceEn": "juice",
+      "sourceCz": "džus",
+      "spokenEn": "juice",
+      "spokenCz": "džus",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/ee69e96c4971da0dc8b4.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/925cee3f02cbd2628520.mp3"
+    },
+    "117": {
+      "sourceEn": "apple",
+      "sourceCz": "jablko",
+      "spokenEn": "apple",
+      "spokenCz": "jablko",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/c99e4ed7fe3e0c58c51e.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/8d780fa046254c106a56.mp3"
+    },
+    "118": {
+      "sourceEn": "orange",
+      "sourceCz": "pomeranč",
+      "spokenEn": "orange",
+      "spokenCz": "pomeranč",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/22cbdb49292e854f5f75.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/e46b28546a1ffc907882.mp3"
+    },
+    "119": {
+      "sourceEn": "chicken",
+      "sourceCz": "kuře",
+      "spokenEn": "chicken",
+      "spokenCz": "kuře",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/73d8dfce5693f9c43448.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/716f5d3bf2a68dc50c88.mp3"
+    },
+    "120": {
+      "sourceEn": "rice",
+      "sourceCz": "rýže",
+      "spokenEn": "rice",
+      "spokenCz": "rýže",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/bd89255e85902c68a77a.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/75a38747368556b5ec3f.mp3"
+    },
+    "121": {
+      "sourceEn": "pasta",
+      "sourceCz": "těstoviny",
+      "spokenEn": "pasta",
+      "spokenCz": "těstoviny",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/c9c47df909a0dafdb47a.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/a30b7bef3ec717f3f9bd.mp3"
+    },
+    "122": {
+      "sourceEn": "cheese",
+      "sourceCz": "sýr",
+      "spokenEn": "cheese",
+      "spokenCz": "sýr",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/db5075b9bf2ef82b1dfc.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/ba80fc4e6a72a5b71605.mp3"
+    },
+    "123": {
+      "sourceEn": "fries",
+      "sourceCz": "hranolky",
+      "spokenEn": "fries",
+      "spokenCz": "hranolky",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/6af224f9b662488efc94.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/2f3a2e0fef02bad67def.mp3"
+    },
+    "124": {
+      "sourceEn": "potatoes",
+      "sourceCz": "brambory",
+      "spokenEn": "potatoes",
+      "spokenCz": "brambory",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/e8fa9123efe7951d6e28.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/197b969c4a63f088a01e.mp3"
+    },
+    "125": {
+      "sourceEn": "ketchup",
+      "sourceCz": "kečup",
+      "spokenEn": "ketchup",
+      "spokenCz": "kečup",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/634fb726718e414d6b50.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/db67dc9033d401248b5a.mp3"
+    },
+    "126": {
+      "sourceEn": "salad",
+      "sourceCz": "salát",
+      "spokenEn": "salad",
+      "spokenCz": "salát",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/618c891074bc536fae06.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/038ea33e5403360626ce.mp3"
+    },
+    "127": {
+      "sourceEn": "meal",
+      "sourceCz": "jídlo",
+      "spokenEn": "meal",
+      "spokenCz": "jídlo",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/46b13b6f9a42e73c2a0c.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/1dff99bc4f345cac45eb.mp3"
+    },
+    "128": {
+      "sourceEn": "hot",
+      "sourceCz": "horký",
+      "spokenEn": "hot",
+      "spokenCz": "horký",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/35248e712c821b4662a6.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/76e8593b301d536aaf0a.mp3"
+    },
+    "129": {
+      "sourceEn": "sauce",
+      "sourceCz": "omáčka",
+      "spokenEn": "sauce",
+      "spokenCz": "omáčka",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/21cca0ec91368f26ec84.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/d0c107ee3b7970b61e12.mp3"
+    },
+    "130": {
+      "sourceEn": "dessert",
+      "sourceCz": "dezert",
+      "spokenEn": "dessert",
+      "spokenCz": "dezert",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/2f76f890cd98e019ee68.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/d19d94c6ef2c3867b576.mp3"
+    },
+    "131": {
+      "sourceEn": "ice cream",
+      "sourceCz": "zmrzlina",
+      "spokenEn": "ice cream",
+      "spokenCz": "zmrzlina",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/b8abbe945da70ddc6e00.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/897412a0935a5709d6b7.mp3"
+    },
+    "132": {
+      "sourceEn": "bill",
+      "sourceCz": "účet",
+      "spokenEn": "bill",
+      "spokenCz": "účet",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/a78a92f881984fb10db6.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/6e117745e8fe2a0ee04a.mp3"
+    },
+    "133": {
+      "sourceEn": "pound",
+      "sourceCz": "libra (měna)",
+      "spokenEn": "pound",
+      "spokenCz": "libra měna",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/3451cae139a7ce692572.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/58f91b2571db8cc5749b.mp3"
+    },
+    "134": {
+      "sourceEn": "card",
+      "sourceCz": "karta",
+      "spokenEn": "card",
+      "spokenCz": "karta",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/d6bcde90feff1ebd618d.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/a72a89b2ab43ebdaae6c.mp3"
+    },
+    "135": {
+      "sourceEn": "pay",
+      "sourceCz": "zaplatit",
+      "spokenEn": "pay",
+      "spokenCz": "zaplatit",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/70236583aff293c4ca01.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/2a995a29d0a304cbb179.mp3"
+    },
+    "136": {
+      "sourceEn": "next time",
+      "sourceCz": "příště",
+      "spokenEn": "next time",
+      "spokenCz": "příště",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/a95ec48437c8ee82e0d5.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/9ffd0a2bae08e86c0847.mp3"
+    },
+    "137": {
+      "sourceEn": "try",
+      "sourceCz": "zkusit",
+      "spokenEn": "try",
+      "spokenCz": "zkusit",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/a4b2df73016b1c3d10c1.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/0edd9002eb6bbcf57957.mp3"
+    },
+    "138": {
+      "sourceEn": "again",
+      "sourceCz": "znovu",
+      "spokenEn": "again",
+      "spokenCz": "znovu",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/1b145f6ba314eeb11e93.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/c7c379ab76dbdbfd9d76.mp3"
+    },
+    "139": {
+      "sourceEn": "please",
+      "sourceCz": "prosím",
+      "spokenEn": "please",
+      "spokenCz": "prosím",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/9974514f249bcd1d655a.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/a66cbd25cfc962006bd1.mp3"
+    },
+    "140": {
+      "sourceEn": "thank you",
+      "sourceCz": "děkuji",
+      "spokenEn": "thank you",
+      "spokenCz": "děkuji",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/75749aa7f2f13de93ed5.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/df35a5639cdfa8cbeda3.mp3"
+    },
+    "141": {
+      "sourceEn": "you're welcome",
+      "sourceCz": "není zač",
+      "spokenEn": "you're welcome",
+      "spokenCz": "není zač",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/82af85fa71bddf062af5.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/e760a5041d7c9b970719.mp3"
+    },
+    "142": {
+      "sourceEn": "anything else",
+      "sourceCz": "ještě něco",
+      "spokenEn": "anything else",
+      "spokenCz": "ještě něco",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/d368c825c71ff2e26624.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/0c025b10cbc59376ab93.mp3"
+    },
+    "143": {
+      "sourceEn": "where",
+      "sourceCz": "kde, kam",
+      "spokenEn": "where",
+      "spokenCz": "kde. kam",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/04f2169bc994b3837bb0.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/618adf90bda85662cb45.mp3"
+    },
+    "144": {
+      "sourceEn": "right",
+      "sourceCz": "pravý, správný, doprava",
+      "spokenEn": "right",
+      "spokenCz": "pravý. správný. doprava",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/f45c4591e71a5662f959.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/408fc99a2ca9cb462a09.mp3"
+    },
+    "145": {
+      "sourceEn": "would like",
+      "sourceCz": "chtěl bych, rád bych",
+      "spokenEn": "would like",
+      "spokenCz": "chtěl bych. rád bych",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/def35d3849cefabd5efc.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/2639961db3182ceea4ca.mp3"
+    },
+    "146": {
+      "sourceEn": "enjoy",
+      "sourceCz": "užít si",
+      "spokenEn": "enjoy",
+      "spokenCz": "užít si",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/da9ff99430eaeb3c0a4a.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/fb4e295301b6e0e9d60f.mp3"
+    },
+    "147": {
+      "sourceEn": "of course",
+      "sourceCz": "samozřejmě",
+      "spokenEn": "of course",
+      "spokenCz": "samozřejmě",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/1ddf2518358487f9168f.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/bb1c99f436e13bb60e99.mp3"
+    },
+    "148": {
+      "sourceEn": "sure",
+      "sourceCz": "jistě",
+      "spokenEn": "sure",
+      "spokenCz": "jistě",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/0fc1ad762547a2f6b4af.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/7a5c76b02032527acf10.mp3"
+    },
+    "149": {
+      "sourceEn": "lunch",
+      "sourceCz": "oběd",
+      "spokenEn": "lunch",
+      "spokenCz": "oběd",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/5373c662aa718d6fea7f.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/e1336f06061ac2a526cb.mp3"
+    },
+    "150": {
+      "sourceEn": "how much",
+      "sourceCz": "kolik",
+      "spokenEn": "how much",
+      "spokenCz": "kolik",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/bb981b9ff1a79b5f6434.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/aa3acf163802c1cf5450.mp3"
+    },
+    "151": {
+      "sourceEn": "something",
+      "sourceCz": "něco",
+      "spokenEn": "something",
+      "spokenCz": "něco",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/8828a0a0b9af352a1855.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/7400fca70a0cde00aa40.mp3"
+    },
+    "152": {
+      "sourceEn": "how",
+      "sourceCz": "jak",
+      "spokenEn": "how",
+      "spokenCz": "jak",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/825bc4887972235c4a46.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/1cf2d019e617a9c28098.mp3"
+    },
+    "153": {
+      "sourceEn": "next",
+      "sourceCz": "příští",
+      "spokenEn": "next",
+      "spokenCz": "příští",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/0ba7337d2bf4735f1871.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/d7a8478d4df27dd66966.mp3"
+    },
+    "154": {
+      "sourceEn": "crossing",
+      "sourceCz": "křižovatka",
+      "spokenEn": "crossing",
+      "spokenCz": "křižovatka",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/fa13afe1473d70059f95.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/ac0e03d40456b354572c.mp3"
+    },
+    "155": {
+      "sourceEn": "call",
+      "sourceCz": "volat, telefonovat",
+      "spokenEn": "call",
+      "spokenCz": "volat. telefonovat",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/4683c2eedf8cc48f8577.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/3d4404bec895355b6426.mp3"
+    },
+    "156": {
+      "sourceEn": "river",
+      "sourceCz": "řeka",
+      "spokenEn": "river",
+      "spokenCz": "řeka",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/275dbeadfa5ec4ff97a1.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/0e9ea43a2d328473e736.mp3"
+    },
+    "157": {
+      "sourceEn": "skating",
+      "sourceCz": "bruslení",
+      "spokenEn": "skating",
+      "spokenCz": "bruslení",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/2212af47c95c2c97f4d7.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/c2a757ac28cb464c872c.mp3"
+    },
+    "158": {
+      "sourceEn": "together",
+      "sourceCz": "dohromady, spolu",
+      "spokenEn": "together",
+      "spokenCz": "dohromady. spolu",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/0dac27cec954d1ae6475.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/2dc9ad3785f16a889dce.mp3"
+    },
+    "159": {
+      "sourceEn": "play",
+      "sourceCz": "hrát si, hra",
+      "spokenEn": "play",
+      "spokenCz": "hrát si. hra",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/402bd402e588498f9949.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/a37d3dbe7a0e013e9efd.mp3"
+    },
+    "160": {
+      "sourceEn": "time",
+      "sourceCz": "čas",
+      "spokenEn": "time",
+      "spokenCz": "čas",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/e56638fcb01b7278b0cc.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/9ec8adc3db03a358fc40.mp3"
+    },
+    "161": {
+      "sourceEn": "o'clock",
+      "sourceCz": "hodin",
+      "spokenEn": "o'clock",
+      "spokenCz": "hodin",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/d4751aeb159a7e519284.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/561ca6b762cde896950d.mp3"
+    },
+    "162": {
+      "sourceEn": "week",
+      "sourceCz": "týden",
+      "spokenEn": "week",
+      "spokenCz": "týden",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/ca67005901a8c13865e3.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/8df49fe54783af328a6e.mp3"
+    },
+    "163": {
+      "sourceEn": "Monday",
+      "sourceCz": "pondělí",
+      "spokenEn": "Monday",
+      "spokenCz": "pondělí",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/25709da4a251453b3c8a.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/c2877b48a01f46643b60.mp3"
+    },
+    "164": {
+      "sourceEn": "agreed",
+      "sourceCz": "domluveno",
+      "spokenEn": "agreed",
+      "spokenCz": "domluveno",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/59d02f6389a0f574c200.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/f8d599ceec5ae1777265.mp3"
+    },
+    "165": {
+      "sourceEn": "daughter",
+      "sourceCz": "dcera",
+      "spokenEn": "daughter",
+      "spokenCz": "dcera",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/9979dd74a81dc65d9479.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/40f1c1355a06a2f1f9bf.mp3"
+    },
+    "166": {
+      "sourceEn": "son",
+      "sourceCz": "syn",
+      "spokenEn": "son",
+      "spokenCz": "syn",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/ed83c59a4c702298b7a9.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/35dd5e1d9b81ec77993e.mp3"
+    },
+    "167": {
+      "sourceEn": "aunt",
+      "sourceCz": "teta",
+      "spokenEn": "aunt",
+      "spokenCz": "teta",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/a99b10f7c818f12094cf.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/a111c38a589f861e6915.mp3"
+    },
+    "168": {
+      "sourceEn": "uncle",
+      "sourceCz": "strýc",
+      "spokenEn": "uncle",
+      "spokenCz": "strýc",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/6f163bd42cee7e258bab.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/3d0c6aa0aa8702f05dca.mp3"
+    },
+    "169": {
+      "sourceEn": "cousin",
+      "sourceCz": "bratranec, sestřenice",
+      "spokenEn": "cousin",
+      "spokenCz": "bratranec. sestřenice",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/b636db1160f463d2bcfa.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/b30a734a94e01d1ebc7f.mp3"
+    },
+    "170": {
+      "sourceEn": "orange",
+      "sourceCz": "oranžový",
+      "spokenEn": "orange",
+      "spokenCz": "oranžový",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/22cbdb49292e854f5f75.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/cf2f191507990d136d16.mp3"
+    },
+    "171": {
+      "sourceEn": "purple",
+      "sourceCz": "fialový",
+      "spokenEn": "purple",
+      "spokenCz": "fialový",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/882e0e53b2f76dd072ed.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/a407673ceb64fcf06522.mp3"
+    },
+    "172": {
+      "sourceEn": "pink",
+      "sourceCz": "růžový",
+      "spokenEn": "pink",
+      "spokenCz": "růžový",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/82925c5086260238521c.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/9f8fe643cd7f859cba54.mp3"
+    },
+    "173": {
+      "sourceEn": "bear",
+      "sourceCz": "medvěd",
+      "spokenEn": "bear",
+      "spokenCz": "medvěd",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/c21ed9a57d1c57f10d86.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/882cb24cedd5ae048ab4.mp3"
+    },
+    "174": {
+      "sourceEn": "camel",
+      "sourceCz": "velbloud",
+      "spokenEn": "camel",
+      "spokenCz": "velbloud",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/222ce6262de1a1d79b3f.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/5a618166dd9167760e6a.mp3"
+    },
+    "175": {
+      "sourceEn": "deer",
+      "sourceCz": "jelen",
+      "spokenEn": "deer",
+      "spokenCz": "jelen",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/6e23881153e45c3c8355.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/e03ee1ab026ee3fbc302.mp3"
+    },
+    "176": {
+      "sourceEn": "eagle",
+      "sourceCz": "orel",
+      "spokenEn": "eagle",
+      "spokenCz": "orel",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/ee6e7eca725052dd1062.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/16f90bc807da103f89b0.mp3"
+    },
+    "177": {
+      "sourceEn": "fox",
+      "sourceCz": "liška",
+      "spokenEn": "fox",
+      "spokenCz": "liška",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/4d50430bb3021c417a46.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/1c0a03a2d61d18c70e8c.mp3"
+    },
+    "178": {
+      "sourceEn": "goose",
+      "sourceCz": "husa",
+      "spokenEn": "goose",
+      "spokenCz": "husa",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/15b9093040e12e4cc2c5.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/a2e75c4beaa33a8bdba4.mp3"
+    },
+    "179": {
+      "sourceEn": "hippo",
+      "sourceCz": "hroch",
+      "spokenEn": "hippo",
+      "spokenCz": "hroch",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/82041e3fe16f463f5af4.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/9d89b49235091d38cc46.mp3"
+    },
+    "180": {
+      "sourceEn": "mouse",
+      "sourceCz": "myš",
+      "spokenEn": "mouse",
+      "spokenCz": "myš",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/a1d96fa9e6e49692e71a.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/e8a0f524a730b8fcaabd.mp3"
+    },
+    "181": {
+      "sourceEn": "parrot",
+      "sourceCz": "papoušek",
+      "spokenEn": "parrot",
+      "spokenCz": "papoušek",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/242eafd39be3724e7b97.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/c18d6e8642e8839f685b.mp3"
+    },
+    "182": {
+      "sourceEn": "pig",
+      "sourceCz": "prase",
+      "spokenEn": "pig",
+      "spokenCz": "prase",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/54e3741ac5fd32976be4.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/00cc4ffe2e1325586465.mp3"
+    },
+    "183": {
+      "sourceEn": "snake",
+      "sourceCz": "had",
+      "spokenEn": "snake",
+      "spokenCz": "had",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/6ea614e233ccd0ddfd0e.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/ca5f4c6a456b0fc4f389.mp3"
+    },
+    "184": {
+      "sourceEn": "tortoise",
+      "sourceCz": "želva",
+      "spokenEn": "tortoise",
+      "spokenCz": "želva",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/dc5bc92a127e20dd439f.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/85b7f72f93dc91f175b5.mp3"
+    },
+    "185": {
+      "sourceEn": "turkey",
+      "sourceCz": "krocan",
+      "spokenEn": "turkey",
+      "spokenCz": "krocan",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/30ef66078e957b801a77.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/52f72d6d7f6d57709360.mp3"
+    },
+    "186": {
+      "sourceEn": "wolf",
+      "sourceCz": "vlk",
+      "spokenEn": "wolf",
+      "spokenCz": "vlk",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/2e64fa7d4ad78a83c650.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/a5da9bdf763d3555ce20.mp3"
+    },
+    "187": {
+      "sourceEn": "one",
+      "sourceCz": "jedna",
+      "spokenEn": "one",
+      "spokenCz": "jedna",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/6762bcf47435688874c4.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/8f33c1c30e7da6bad217.mp3"
+    },
+    "188": {
+      "sourceEn": "two",
+      "sourceCz": "dva",
+      "spokenEn": "two",
+      "spokenCz": "dva",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/8b9b8c341b3abf13acbb.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/7dda53e547afc72343e6.mp3"
+    },
+    "189": {
+      "sourceEn": "three",
+      "sourceCz": "tři",
+      "spokenEn": "three",
+      "spokenCz": "tři",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/34b33fefdfaa4fbaf132.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/42e7626a2f2de3272070.mp3"
+    },
+    "190": {
+      "sourceEn": "four",
+      "sourceCz": "čtyři",
+      "spokenEn": "four",
+      "spokenCz": "čtyři",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/a5e762d46f33950360f0.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/c023bacde4075ef51fac.mp3"
+    },
+    "191": {
+      "sourceEn": "five",
+      "sourceCz": "pět",
+      "spokenEn": "five",
+      "spokenCz": "pět",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/aea79c122e8d740af65f.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/2d3c8f12de3ab425bac0.mp3"
+    },
+    "192": {
+      "sourceEn": "six",
+      "sourceCz": "šest",
+      "spokenEn": "six",
+      "spokenCz": "šest",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/a46bb0210086f9ac141d.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/19afcad94affcd54d915.mp3"
+    },
+    "193": {
+      "sourceEn": "seven",
+      "sourceCz": "sedm",
+      "spokenEn": "seven",
+      "spokenCz": "sedm",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/a856831d4250caa7f533.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/04def391499947cd1236.mp3"
+    },
+    "194": {
+      "sourceEn": "eight",
+      "sourceCz": "osm",
+      "spokenEn": "eight",
+      "spokenCz": "osm",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/a118afea8827aa45550c.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/b7f85d9ff79580a7e16e.mp3"
+    },
+    "195": {
+      "sourceEn": "apples",
+      "sourceCz": "jablka",
+      "spokenEn": "apples",
+      "spokenCz": "jablka",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/07ca9bee1d55a085c447.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/161ed9ab4a51427f33a5.mp3"
+    },
+    "196": {
+      "sourceEn": "sunflowers",
+      "sourceCz": "slunečnice",
+      "spokenEn": "sunflowers",
+      "spokenCz": "slunečnice",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/7d2256457b28ae9f511c.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/9d506a05d40c5872049b.mp3"
+    },
+    "197": {
+      "sourceEn": "pigs",
+      "sourceCz": "prasátka",
+      "spokenEn": "pigs",
+      "spokenCz": "prasátka",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/ac350cdd54f690d95ce4.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/f7fa0615d28083fc3eb9.mp3"
+    },
+    "198": {
+      "sourceEn": "count",
+      "sourceCz": "počítej",
+      "spokenEn": "count",
+      "spokenCz": "počítej",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/e69cebce15916d67f2b4.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/ad818829a760aca873d4.mp3"
+    },
+    "199": {
+      "sourceEn": "we can",
+      "sourceCz": "my můžeme",
+      "spokenEn": "we can",
+      "spokenCz": "my můžeme",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/4aed57cd99bac98a8cf7.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/f36e40e8515cd26552cd.mp3"
+    },
+    "200": {
+      "sourceEn": "friends",
+      "sourceCz": "kamarádi",
+      "spokenEn": "friends",
+      "spokenCz": "kamarádi",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/49719111cf04bd13cc9d.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/5a8a1cf720df554a1a01.mp3"
+    },
+    "201": {
+      "sourceEn": "OK",
+      "sourceCz": "dobře",
+      "spokenEn": "OK",
+      "spokenCz": "dobře",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/6bb27e2f778ab424350a.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/7e74a57ffb71c5aa3dea.mp3"
+    },
+    "202": {
+      "sourceEn": "let's go",
+      "sourceCz": "pojďme",
+      "spokenEn": "let's go",
+      "spokenCz": "pojďme",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/3b5444c71d4ded829594.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/7750a60f08866205a205.mp3"
+    },
+    "203": {
+      "sourceEn": "we are",
+      "sourceCz": "my jsme",
+      "spokenEn": "we are",
+      "spokenCz": "my jsme",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/ad7b7c05e44cd8f2bbde.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/9dfe9f36246a70667d3c.mp3"
+    },
+    "204": {
+      "sourceEn": "too",
+      "sourceCz": "také",
+      "spokenEn": "too",
+      "spokenCz": "také",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/9701abb43610c598c430.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/7a73a35445b9163981f4.mp3"
+    },
+    "205": {
+      "sourceEn": "going",
+      "sourceCz": "jdeme",
+      "spokenEn": "going",
+      "spokenCz": "jdeme",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/2059f819b74900721224.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/7b3591f9a1b42e8593f1.mp3"
+    },
+    "206": {
+      "sourceEn": "ball",
+      "sourceCz": "míč",
+      "spokenEn": "ball",
+      "spokenCz": "míč",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/3d14753cf180cd1c5d22.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/ee488eba8d6099b1463b.mp3"
+    },
+    "207": {
+      "sourceEn": "car",
+      "sourceCz": "auto",
+      "spokenEn": "car",
+      "spokenCz": "auto",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/3d5c5509dabf3f251fda.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/ca2efea2bdf7c975803a.mp3"
+    },
+    "208": {
+      "sourceEn": "train",
+      "sourceCz": "vlak",
+      "spokenEn": "train",
+      "spokenCz": "vlak",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/e3567ac22de27d912288.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/5eac5841e59bdc8676a0.mp3"
+    },
+    "209": {
+      "sourceEn": "cup",
+      "sourceCz": "hrnek",
+      "spokenEn": "cup",
+      "spokenCz": "hrnek",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/2573026ace6be45d4978.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/ab9e7f5b4cdd8b921b97.mp3"
+    },
+    "210": {
+      "sourceEn": "shoe",
+      "sourceCz": "bota",
+      "spokenEn": "shoe",
+      "spokenCz": "bota",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/e15ca5bc4112c832ab4a.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/e044142a2f654b704a0a.mp3"
+    },
+    "211": {
+      "sourceEn": "tree",
+      "sourceCz": "strom",
+      "spokenEn": "tree",
+      "spokenCz": "strom",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/b8c91f3f5b2c2b81bcc6.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/5ff70ed17ff5a627c1f5.mp3"
+    },
+    "212": {
+      "sourceEn": "banana",
+      "sourceCz": "banán",
+      "spokenEn": "banana",
+      "spokenCz": "banán",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/aaf09c2b59014d5ac011.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/bceab857da24526848ef.mp3"
+    },
+    "213": {
+      "sourceEn": "boat",
+      "sourceCz": "loď",
+      "spokenEn": "boat",
+      "spokenCz": "loď",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/324f156bd9c6c29c9507.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/1498a0307280d133be14.mp3"
+    },
+    "214": {
+      "sourceEn": "plate",
+      "sourceCz": "talíř",
+      "spokenEn": "plate",
+      "spokenCz": "talíř",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/fca6d434496b711e2e4a.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/1191bcad39d107d76a05.mp3"
+    },
+    "215": {
+      "sourceEn": "sock",
+      "sourceCz": "ponožka",
+      "spokenEn": "sock",
+      "spokenCz": "ponožka",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/05980c7c02308e77748b.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/545a3f99e41f014d5af0.mp3"
+    },
+    "216": {
+      "sourceEn": "flower",
+      "sourceCz": "kytka",
+      "spokenEn": "flower",
+      "spokenCz": "kytka",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/ce1a697f181014232cea.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/6ea95d291252c93cc26f.mp3"
+    },
+    "217": {
+      "sourceEn": "bus",
+      "sourceCz": "autobus",
+      "spokenEn": "bus",
+      "spokenCz": "autobus",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/410615f6907503a50eb6.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/3d9d1e27b09b21ee0504.mp3"
+    },
+    "218": {
+      "sourceEn": "spoon",
+      "sourceCz": "lžička",
+      "spokenEn": "spoon",
+      "spokenCz": "lžička",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/36aefeef05a546deab10.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/db070b7daed08f6fe0a0.mp3"
+    },
+    "219": {
+      "sourceEn": "hat",
+      "sourceCz": "čepice",
+      "spokenEn": "hat",
+      "spokenCz": "čepice",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/12848bf763f0653d3556.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/eb9ce52ca5507aa96c98.mp3"
+    },
+    "220": {
+      "sourceEn": "sun",
+      "sourceCz": "slunce",
+      "spokenEn": "sun",
+      "spokenCz": "slunce",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/9d2d26bf603b1dccf7b9.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/db8005f7b2f274f79d6d.mp3"
+    },
+    "221": {
+      "sourceEn": "carrot",
+      "sourceCz": "mrkev",
+      "spokenEn": "carrot",
+      "spokenCz": "mrkev",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/1a892c22185ee82b8c89.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/8f7e3d4be181a63c9a80.mp3"
+    },
+    "222": {
+      "sourceEn": "chair",
+      "sourceCz": "židle",
+      "spokenEn": "chair",
+      "spokenCz": "židle",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/5e3afa1aab7795100a37.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/485e9f87d9c0e41c3252.mp3"
+    },
+    "223": {
+      "sourceEn": "moon",
+      "sourceCz": "měsíc",
+      "spokenEn": "moon",
+      "spokenCz": "měsíc",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/f9102c9abce3ec1f9983.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/3d42decbf3c607422c0f.mp3"
+    },
+    "224": {
+      "sourceEn": "bread",
+      "sourceCz": "chleba",
+      "spokenEn": "bread",
+      "spokenCz": "chleba",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/e32efa81dee6a412a462.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/8455f7e2859b7f3c5c6f.mp3"
+    },
+    "225": {
+      "sourceEn": "truck",
+      "sourceCz": "náklaďák",
+      "spokenEn": "truck",
+      "spokenCz": "náklaďák",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/9695ba062954768dbaed.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/3a5f71401230301680ba.mp3"
+    },
+    "226": {
+      "sourceEn": "bed",
+      "sourceCz": "postel",
+      "spokenEn": "bed",
+      "spokenCz": "postel",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/748324b7e0835e4525ce.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/2a684b796c2e46a27a77.mp3"
+    },
+    "227": {
+      "sourceEn": "star",
+      "sourceCz": "hvězda",
+      "spokenEn": "star",
+      "spokenCz": "hvězda",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/211bc2685fc6a5d0c852.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/4c671d5fcc3c05e4bf33.mp3"
+    },
+    "228": {
+      "sourceEn": "cake",
+      "sourceCz": "dort",
+      "spokenEn": "cake",
+      "spokenCz": "dort",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/80bed164083f85e1900b.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/4bdebbc734831f2428fa.mp3"
+    },
+    "229": {
+      "sourceEn": "plane",
+      "sourceCz": "letadlo",
+      "spokenEn": "plane",
+      "spokenCz": "letadlo",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/fd71e015664558f085f4.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/3d968c5e6130efdb58db.mp3"
+    },
+    "230": {
+      "sourceEn": "door",
+      "sourceCz": "dveře",
+      "spokenEn": "door",
+      "spokenCz": "dveře",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/b5c7f756ddf42769f3e1.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/187bde871fbdc4b2b3bc.mp3"
+    },
+    "231": {
+      "sourceEn": "cloud",
+      "sourceCz": "mrak",
+      "spokenEn": "cloud",
+      "spokenCz": "mrak",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/74da2d51297f72ad360e.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/d9016bc2d614f53b9ee5.mp3"
+    },
+    "232": {
+      "sourceEn": "rocket",
+      "sourceCz": "raketa",
+      "spokenEn": "rocket",
+      "spokenCz": "raketa",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/5926e3edc6e5dbc8db11.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/693d726af830a91ae856.mp3"
+    },
+    "233": {
+      "sourceEn": "window",
+      "sourceCz": "okno",
+      "spokenEn": "window",
+      "spokenCz": "okno",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/082202f38e21a8f3b147.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/6d76a069abbaf0755f50.mp3"
+    },
+    "234": {
+      "sourceEn": "key",
+      "sourceCz": "klíč",
+      "spokenEn": "key",
+      "spokenCz": "klíč",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/ba973b506003bce1c68c.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/f8accbfea2f95ba81e84.mp3"
+    },
+    "235": {
+      "sourceEn": "stone",
+      "sourceCz": "kámen",
+      "spokenEn": "stone",
+      "spokenCz": "kámen",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/729a8cac36037279a3d2.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/c956a7b59342978e00ad.mp3"
+    },
+    "236": {
+      "sourceEn": "robot",
+      "sourceCz": "robot",
+      "spokenEn": "robot",
+      "spokenCz": "robot",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/8b1c2fae13de24833834.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/d6f1f7f894fea9483196.mp3"
+    },
+    "237": {
+      "sourceEn": "fork",
+      "sourceCz": "vidlička",
+      "spokenEn": "fork",
+      "spokenCz": "vidlička",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/7a06597aecbdafd98847.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/15ee4326554ada0cb75f.mp3"
+    },
+    "238": {
+      "sourceEn": "cap",
+      "sourceCz": "čepice",
+      "spokenEn": "cap",
+      "spokenCz": "čepice",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/e3e03aa303b4d89f26d7.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/eb9ce52ca5507aa96c98.mp3"
+    },
+    "239": {
+      "sourceEn": "leaf",
+      "sourceCz": "list",
+      "spokenEn": "leaf",
+      "spokenCz": "list",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/d6e68c2d86f15fb05d1e.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/2a155599c208e58b7f7a.mp3"
+    },
+    "240": {
+      "sourceEn": "cookie",
+      "sourceCz": "sušenka",
+      "spokenEn": "cookie",
+      "spokenCz": "sušenka",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/fd1f8af7401830883cf3.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/93ef1ee9f99cf59df08f.mp3"
+    },
+    "241": {
+      "sourceEn": "block",
+      "sourceCz": "kostka",
+      "spokenEn": "block",
+      "spokenCz": "kostka",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/ae21b8344fb4a8978131.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/ef1c607e3f56ee120f2b.mp3"
+    },
+    "242": {
+      "sourceEn": "pencil",
+      "sourceCz": "tužka",
+      "spokenEn": "pencil",
+      "spokenCz": "tužka",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/4725018e98053b770fc4.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/11c5639d04a96f7fd1f9.mp3"
+    },
+    "243": {
+      "sourceEn": "pants",
+      "sourceCz": "kalhoty",
+      "spokenEn": "pants",
+      "spokenCz": "kalhoty",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/49ac74cb5544d30f6b59.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/3f38e76c2895a322a71b.mp3"
+    },
+    "244": {
+      "sourceEn": "stick",
+      "sourceCz": "klacek",
+      "spokenEn": "stick",
+      "spokenCz": "klacek",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/f07085c9d173629fa70b.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/7cb123d526ca20af8b13.mp3"
+    },
+    "245": {
+      "sourceEn": "corn",
+      "sourceCz": "kukuřice",
+      "spokenEn": "corn",
+      "spokenCz": "kukuřice",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/71b68ba48edba36f6e9e.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/37ec2ce771c4a6e502d9.mp3"
+    },
+    "246": {
+      "sourceEn": "doll",
+      "sourceCz": "panenka",
+      "spokenEn": "doll",
+      "spokenCz": "panenka",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/1139496e8c4d274db7dc.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/caa6d15c9e01f517241d.mp3"
+    },
+    "247": {
+      "sourceEn": "map",
+      "sourceCz": "mapa",
+      "spokenEn": "map",
+      "spokenCz": "mapa",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/b29a02bd728a773410fa.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/256a4dd786f2eb3186f2.mp3"
+    },
+    "248": {
+      "sourceEn": "soap",
+      "sourceCz": "mýdlo",
+      "spokenEn": "soap",
+      "spokenCz": "mýdlo",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/34c8f4bdfd6ce7bc5036.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/d504535f7d9ed7df00ee.mp3"
+    },
+    "249": {
+      "sourceEn": "pillow",
+      "sourceCz": "polštář",
+      "spokenEn": "pillow",
+      "spokenCz": "polštář",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/6b9acf7186c6bd9dbda9.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/a074d87f92eec9717a6b.mp3"
+    },
+    "250": {
+      "sourceEn": "grape",
+      "sourceCz": "hroznové víno",
+      "spokenEn": "grape",
+      "spokenCz": "hroznové víno",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/69b6b0dc826a905101f0.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/77edc204152eabfa24d9.mp3"
+    },
+    "251": {
+      "sourceEn": "toy",
+      "sourceCz": "hračka",
+      "spokenEn": "toy",
+      "spokenCz": "hračka",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/9ecbb204d579dd48559b.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/0b2907884d5f08c5344a.mp3"
+    },
+    "252": {
+      "sourceEn": "kite",
+      "sourceCz": "drak",
+      "spokenEn": "kite",
+      "spokenCz": "drak",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/5505d768c20ac8109c9b.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/fbb74e2ba1972e0b1ce9.mp3"
+    },
+    "253": {
+      "sourceEn": "lamp",
+      "sourceCz": "lampa",
+      "spokenEn": "lamp",
+      "spokenCz": "lampa",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/ee6796da7a080ae2e6ce.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/7ff6c70c3b355b8eda86.mp3"
+    },
+    "254": {
+      "sourceEn": "boots",
+      "sourceCz": "holinky",
+      "spokenEn": "boots",
+      "spokenCz": "holinky",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/dfea8130e3fbee9c661c.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/a5e6cc03e3f4fb5bf8aa.mp3"
+    },
+    "255": {
+      "sourceEn": "pea",
+      "sourceCz": "hrášek",
+      "spokenEn": "pea",
+      "spokenCz": "hrášek",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/ff88538edfabf101f533.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/9a153e797050db13a01a.mp3"
+    },
+    "256": {
+      "sourceEn": "nuts",
+      "sourceCz": "oříšky",
+      "spokenEn": "nuts",
+      "spokenCz": "oříšky",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/73f7520ec111effd2493.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/647ae3ab7bab286e31ec.mp3"
+    },
+    "257": {
+      "sourceEn": "I have",
+      "sourceCz": "mám",
+      "spokenEn": "I have",
+      "spokenCz": "mám",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/503ec8d0ad7b243c9df9.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/9eaf8e82b708f9621530.mp3"
+    },
+    "258": {
+      "sourceEn": "I don't have",
+      "sourceCz": "nemám",
+      "spokenEn": "I don't have",
+      "spokenCz": "nemám",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/1a93fae79f6f5d351cff.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/5fedd06bae9bae9ec684.mp3"
+    },
+    "259": {
+      "sourceEn": "Do you have?",
+      "sourceCz": "máš?",
+      "spokenEn": "Do you have?",
+      "spokenCz": "máš?",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/0202a2440c22c5f7bb6e.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/86b2126a11a25a477a45.mp3"
+    },
+    "260": {
+      "sourceEn": "Does he have?",
+      "sourceCz": "má on?",
+      "spokenEn": "Does he have?",
+      "spokenCz": "má on?",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/f49c79518e0f14751f17.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/5be49996898b88f1eb39.mp3"
+    },
+    "261": {
+      "sourceEn": "Look inside",
+      "sourceCz": "podívej se dovnitř",
+      "spokenEn": "Look inside",
+      "spokenCz": "podívej se dovnitř",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/21373157bdc4eda9cf33.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/f0784fbdb07c37458306.mp3"
+    },
+    "262": {
+      "sourceEn": "wait",
+      "sourceCz": "počkat",
+      "spokenEn": "wait",
+      "spokenCz": "počkat",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/8ae9ea2cd97b8117b275.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/54a881943b94d357ecec.mp3"
+    },
+    "263": {
+      "sourceEn": "look",
+      "sourceCz": "podívej, dívat se",
+      "spokenEn": "look",
+      "spokenCz": "podívej. dívat se",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/69e537e633f8142c6a71.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/9c8526388c119bea8629.mp3"
+    },
+    "264": {
+      "sourceEn": "way",
+      "sourceCz": "cesta",
+      "spokenEn": "way",
+      "spokenCz": "cesta",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/907e2a08e42723b03bc4.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/05f195d97e1c1e6cf146.mp3"
+    },
+    "265": {
+      "sourceEn": "path",
+      "sourceCz": "cesta",
+      "spokenEn": "path",
+      "spokenCz": "cesta",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/69b12736c01b3342b2d7.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/05f195d97e1c1e6cf146.mp3"
+    },
+    "266": {
+      "sourceEn": "crow",
+      "sourceCz": "havran",
+      "spokenEn": "crow",
+      "spokenCz": "havran",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/c77df8020fcfc05f5f70.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/53dc7ab890a23f7d8cf3.mp3"
+    },
+    "267": {
+      "sourceEn": "bad",
+      "sourceCz": "špatný",
+      "spokenEn": "bad",
+      "spokenCz": "špatný",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/c7b4d53fe58b27a95fca.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/3fea9feb5e18b538bdd6.mp3"
+    },
+    "268": {
+      "sourceEn": "deep",
+      "sourceCz": "hluboký",
+      "spokenEn": "deep",
+      "spokenCz": "hluboký",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/a5594d50d172bf50a6c5.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/f602e49e040482cb068b.mp3"
+    },
+    "269": {
+      "sourceEn": "valley",
+      "sourceCz": "údolí",
+      "spokenEn": "valley",
+      "spokenCz": "údolí",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/154359172fce1aa9c8fe.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/da6133583cdc9c4e71dc.mp3"
+    },
+    "270": {
+      "sourceEn": "maybe",
+      "sourceCz": "možná",
+      "spokenEn": "maybe",
+      "spokenCz": "možná",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/ac08533aca7aab2b8caf.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/cb3bb18cb9e8a9e85467.mp3"
+    },
+    "271": {
+      "sourceEn": "bears",
+      "sourceCz": "medvědi",
+      "spokenEn": "bears",
+      "spokenCz": "medvědi",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/20805125b6e12b79bff2.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/26a931d7c75f687796de.mp3"
+    },
+    "272": {
+      "sourceEn": "but",
+      "sourceCz": "ale",
+      "spokenEn": "but",
+      "spokenCz": "ale",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/3a6b10faf0c1d9d50868.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/d93c7b79479297371ca4.mp3"
+    },
+    "273": {
+      "sourceEn": "scared",
+      "sourceCz": "vystrašený",
+      "spokenEn": "scared",
+      "spokenCz": "vystrašený",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/27c13e5b64d4527fb603.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/f1335d7f074ddb3d4723.mp3"
+    },
+    "274": {
+      "sourceEn": "me too",
+      "sourceCz": "já také",
+      "spokenEn": "me too",
+      "spokenCz": "já také",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/0cc2865af5071014264f.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/bdc9f3806c8b5bd0f01d.mp3"
+    },
+    "275": {
+      "sourceEn": "friendly",
+      "sourceCz": "přátelský",
+      "spokenEn": "friendly",
+      "spokenCz": "přátelský",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/3afe9d615a20f6b773fe.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/f4b385a5e6ed7ee846f7.mp3"
+    },
+    "276": {
+      "sourceEn": "careful",
+      "sourceCz": "opatrný, opatrně",
+      "spokenEn": "careful",
+      "spokenCz": "opatrný. opatrně",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/637cc698ff5bd8238e52.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/a31afbc97a584451b39d.mp3"
+    },
+    "277": {
+      "sourceEn": "warning",
+      "sourceCz": "varování",
+      "spokenEn": "warning",
+      "spokenCz": "varování",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/b88e2f783d94855129e4.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/f99271acb783ec30109e.mp3"
+    },
+    "278": {
+      "sourceEn": "farm",
+      "sourceCz": "farma",
+      "spokenEn": "farm",
+      "spokenCz": "farma",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/3cbc491675889cd72a51.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/ecebdb7fe822f8295f5a.mp3"
+    },
+    "279": {
+      "sourceEn": "stranger",
+      "sourceCz": "cizinec",
+      "spokenEn": "stranger",
+      "spokenCz": "cizinec",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/05185b470f7dc00d3575.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/5c9618b1ed1b7ea4a594.mp3"
+    },
+    "280": {
+      "sourceEn": "come",
+      "sourceCz": "jít, přijít",
+      "spokenEn": "come",
+      "spokenCz": "jít. přijít",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/5f336365fe714af8e2d9.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/dc422396c0c029994336.mp3"
+    },
+    "281": {
+      "sourceEn": "pump",
+      "sourceCz": "pumpa",
+      "spokenEn": "pump",
+      "spokenCz": "pumpa",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/58eb03241064db50d12d.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/25c021b2bb9598ff9ec5.mp3"
+    },
+    "282": {
+      "sourceEn": "get",
+      "sourceCz": "dostat",
+      "spokenEn": "get",
+      "spokenCz": "dostat",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/e24d72fc4a3f191c0485.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/df92a72a20a5fdb2a16b.mp3"
+    },
+    "283": {
+      "sourceEn": "bucket",
+      "sourceCz": "vědro, kbelík",
+      "spokenEn": "bucket",
+      "spokenCz": "vědro. kbelík",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/645ffbfce9196b072654.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/f028d45cb12778be9f22.mp3"
+    },
+    "284": {
+      "sourceEn": "empty",
+      "sourceCz": "prázdný",
+      "spokenEn": "empty",
+      "spokenCz": "prázdný",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/946c5471c38ac729259f.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/3c38f2ec7e6f3708ea22.mp3"
+    },
+    "285": {
+      "sourceEn": "I don't know",
+      "sourceCz": "nevím",
+      "spokenEn": "I don't know",
+      "spokenCz": "nevím",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/e8a62280eb64b2d993cf.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/fdc1ed4817fff473a445.mp3"
+    },
+    "286": {
+      "sourceEn": "forest",
+      "sourceCz": "les",
+      "spokenEn": "forest",
+      "spokenCz": "les",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/25737ed4ecb37a21f758.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/70fa2382889067f138ea.mp3"
+    },
+    "287": {
+      "sourceEn": "handle",
+      "sourceCz": "páka",
+      "spokenEn": "handle",
+      "spokenCz": "páka",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/77dff176449da13c841a.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/f0b363273782b585be32.mp3"
+    },
+    "288": {
+      "sourceEn": "push",
+      "sourceCz": "tlačit",
+      "spokenEn": "push",
+      "spokenCz": "tlačit",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/166032e00a0afbbca4aa.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/a503b2f727d80057155b.mp3"
+    },
+    "289": {
+      "sourceEn": "come closer",
+      "sourceCz": "přijít blíž",
+      "spokenEn": "come closer",
+      "spokenCz": "přijít blíž",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/8a5033d1fa96f82b1de8.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/8b09b9326acd1048b18e.mp3"
+    },
+    "290": {
+      "sourceEn": "chase",
+      "sourceCz": "honit",
+      "spokenEn": "chase",
+      "spokenCz": "honit",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/88a765efb61106b29435.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/25e173987a2edd5f5b2a.mp3"
+    },
+    "291": {
+      "sourceEn": "little animals",
+      "sourceCz": "malá zvířátka",
+      "spokenEn": "little animals",
+      "spokenCz": "malá zvířátka",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/e295c95b5ab2c9f443d5.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/a8bdd52e94f1506f90f6.mp3"
+    },
+    "292": {
+      "sourceEn": "trust",
+      "sourceCz": "důvěřovat",
+      "spokenEn": "trust",
+      "spokenCz": "důvěřovat",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/395c58c23285355846e2.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/bd9ce6ae5be0da629298.mp3"
+    },
+    "293": {
+      "sourceEn": "eat",
+      "sourceCz": "jíst",
+      "spokenEn": "eat",
+      "spokenCz": "jíst",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/c64fb64d05efa99f420b.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/6726dd161f4d3d3d4941.mp3"
+    },
+    "294": {
+      "sourceEn": "own",
+      "sourceCz": "vlastní",
+      "spokenEn": "own",
+      "spokenCz": "vlastní",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/3bd947a71832f10c9381.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/105dcc7925f4ac0f9879.mp3"
+    },
+    "295": {
+      "sourceEn": "gate",
+      "sourceCz": "branka",
+      "spokenEn": "gate",
+      "spokenCz": "branka",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/2bb16be64a9f637c69fd.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/f84e3c0cf9f71723a14d.mp3"
+    },
+    "296": {
+      "sourceEn": "closed",
+      "sourceCz": "zavřený",
+      "spokenEn": "closed",
+      "spokenCz": "zavřený",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/e0c7ea4be355519a63e3.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/224a6b8f161631b75965.mp3"
+    },
+    "297": {
+      "sourceEn": "squirrel",
+      "sourceCz": "veverka",
+      "spokenEn": "squirrel",
+      "spokenCz": "veverka",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/b3a584f264cf2ee5cd2b.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/2f1115affaaa8cd5c149.mp3"
+    },
+    "298": {
+      "sourceEn": "question",
+      "sourceCz": "otázka",
+      "spokenEn": "question",
+      "spokenCz": "otázka",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/becb63972d9cdce56f45.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/f606bcc5e5108bfd1cee.mp3"
+    },
+    "299": {
+      "sourceEn": "answer",
+      "sourceCz": "odpověď",
+      "spokenEn": "answer",
+      "spokenCz": "odpověď",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/bd1f75d9ae153fddef2e.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/dc193660b891972b19fa.mp3"
+    },
+    "300": {
+      "sourceEn": "catch",
+      "sourceCz": "chytit",
+      "spokenEn": "catch",
+      "spokenCz": "chytit",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/4edf75b7c23447db6ba2.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/6690b8305832f2a03cc1.mp3"
+    },
+    "301": {
+      "sourceEn": "yard",
+      "sourceCz": "dvorek",
+      "spokenEn": "yard",
+      "spokenCz": "dvorek",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/c1b8b290bf7287f8e24d.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/f36f029e3bc230f55fad.mp3"
+    },
+    "302": {
+      "sourceEn": "badger",
+      "sourceCz": "jezevec",
+      "spokenEn": "badger",
+      "spokenCz": "jezevec",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/d17bb56505a19ff22fad.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/8a26b9f0afe6dfe6ba47.mp3"
+    },
+    "303": {
+      "sourceEn": "dig",
+      "sourceCz": "hrabat",
+      "spokenEn": "dig",
+      "spokenCz": "hrabat",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/4078252342a445a23400.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/e912f0a76313be3e21c2.mp3"
+    },
+    "304": {
+      "sourceEn": "under",
+      "sourceCz": "pod",
+      "spokenEn": "under",
+      "spokenCz": "pod",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/bfb0168713bcd787122e.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/8e0bd98370f161d52aba.mp3"
+    },
+    "305": {
+      "sourceEn": "fence",
+      "sourceCz": "plot",
+      "spokenEn": "fence",
+      "spokenCz": "plot",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/f2775155ac6ab9f74148.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/ca3271079df87e8b4fd2.mp3"
+    },
+    "306": {
+      "sourceEn": "believe",
+      "sourceCz": "věřit",
+      "spokenEn": "believe",
+      "spokenCz": "věřit",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/775b626dd6b166cbf002.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/6f6a16d9110c40a0866b.mp3"
+    }
+  }
+}

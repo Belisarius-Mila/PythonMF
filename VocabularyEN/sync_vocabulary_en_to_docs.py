@@ -489,6 +489,9 @@ def main() -> int:
     print(f"Rows: {payload['itemCount']}")
     print(f"Unique copied images: {stats['uniqueImageFiles']}")
     print(f"Image source stats: {stats['imageSources']}")
+    print("")
+    print("NEXT  python3 VocabularyEN/build_vocabulary_en_audio.py --apply")
+    print("CHECK python3 VocabularyEN/build_vocabulary_en_audio.py")
     return 0
 
 

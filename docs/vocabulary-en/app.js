@@ -1,5 +1,6 @@
 const appRoot = document.querySelector("[data-json-url]");
 const DATA_URL = appRoot?.dataset.jsonUrl || "../data/vocabulary-en.json";
+const AUDIO_DATA_URL = appRoot?.dataset.audioUrl || "../data/vocabulary-en-audio.json";
 
 const ui = {
   totalCount: document.getElementById("totalCount"),
@@ -32,6 +33,7 @@ const ui = {
 
 const state = {
   data: null,
+  audioManifest: null,
   items: [],
   currentItem: null,
   revealed: false,
@@ -42,6 +44,11 @@ const state = {
   shownIds: new Set(),
   selectionSignature: "",
 };
+
+const audioCache = new Map();
+let currentAudio = null;
+let currentPlaybackCancel = null;
+let playbackToken = 0;
 
 function normalizeWordSetKey(value) {
   return String(value || "").trim().toLocaleLowerCase();
@@ -290,6 +297,8 @@ function renderCurrentItem() {
   ui.messageStrip.textContent = state.revealed
     ? "Odpoved je odhalena. Muzes prehrat odpoved nebo jit na dalsi kartu."
     : "Nejdriv si odpoved rekni nahlas. Pak klikni na 'Ukaz odpoved'.";
+
+  primeCurrentAudio(item);
 }
 
 function revealCurrentItem() {
@@ -300,83 +309,128 @@ function revealCurrentItem() {
   renderCurrentItem();
 }
 
-function pickVoice(langPrefix) {
-  if (!("speechSynthesis" in window)) {
+function audioRecord(item) {
+  return state.audioManifest?.items?.[String(item?.id)] || null;
+}
+
+function audioUrl(relativePath) {
+  return new URL(`../${relativePath}`, window.location.href).toString();
+}
+
+function cachedAudio(relativePath) {
+  if (!relativePath) {
     return null;
   }
-  const voices = window.speechSynthesis.getVoices();
-  return voices.find((voice) => voice.lang && voice.lang.toLowerCase().startsWith(langPrefix)) || null;
+  const url = audioUrl(relativePath);
+  if (!audioCache.has(url)) {
+    const audio = new Audio(url);
+    audio.preload = "auto";
+    audioCache.set(url, audio);
+  }
+  return audioCache.get(url);
 }
 
-function speak(text, langPrefix) {
-  const value = (text || "").trim();
-  if (!value || !("speechSynthesis" in window)) {
+function primeCurrentAudio(item) {
+  const record = audioRecord(item);
+  if (!record) {
     return;
   }
-  window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(value);
-  utterance.rate = 0.86;
-  utterance.pitch = 1;
-  utterance.lang = langPrefix === "cs" ? "cs-CZ" : "en-US";
-  const voice = pickVoice(langPrefix);
-  if (voice) {
-    utterance.voice = voice;
-  }
-  window.speechSynthesis.speak(utterance);
+  [record.en, record.cz].forEach((relativePath) => cachedAudio(relativePath));
 }
 
-function speakSequence(sequence) {
-  const parts = sequence.filter((part) => part && String(part.text || "").trim());
-  if (!parts.length || !("speechSynthesis" in window)) {
-    return;
+function stopAudioPlayback() {
+  playbackToken += 1;
+  if (currentPlaybackCancel) {
+    const cancel = currentPlaybackCancel;
+    currentPlaybackCancel = null;
+    cancel();
   }
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+    currentAudio = null;
+  }
+}
 
-  window.speechSynthesis.cancel();
-
-  let index = 0;
-  const playNext = () => {
-    const part = parts[index];
-    if (!part) {
+function playOneAudio(relativePath, token) {
+  return new Promise((resolve, reject) => {
+    const audio = cachedAudio(relativePath);
+    if (!audio || token !== playbackToken) {
+      resolve(false);
       return;
     }
-    const utterance = new SpeechSynthesisUtterance(part.text.trim());
-    utterance.rate = 0.86;
-    utterance.pitch = 1;
-    utterance.lang = part.langPrefix === "cs" ? "cs-CZ" : "en-US";
-    const voice = pickVoice(part.langPrefix);
-    if (voice) {
-      utterance.voice = voice;
-    }
-    utterance.onend = () => {
-      index += 1;
-      playNext();
-    };
-    window.speechSynthesis.speak(utterance);
-  };
 
-  playNext();
+    currentAudio = audio;
+    audio.currentTime = 0;
+    let settled = false;
+    const finish = (completed, error = null) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      audio.removeEventListener("ended", onEnded);
+      audio.removeEventListener("error", onError);
+      if (currentAudio === audio) {
+        currentAudio = null;
+        currentPlaybackCancel = null;
+      }
+      if (error) {
+        reject(error);
+      } else {
+        resolve(completed);
+      }
+    };
+    const onEnded = () => finish(true);
+    const onError = () => finish(false, new Error("Zvuk se nepodařilo přehrát."));
+    currentPlaybackCancel = () => {
+      audio.pause();
+      audio.currentTime = 0;
+      finish(false);
+    };
+    audio.addEventListener("ended", onEnded, { once: true });
+    audio.addEventListener("error", onError, { once: true });
+    audio.play().catch(() => onError());
+  });
+}
+
+async function playAudioSequence(relativePaths) {
+  const paths = relativePaths.filter(Boolean);
+  if (!paths.length) {
+    ui.messageStrip.textContent = "Zvuk pro toto slovicko zatim neni pripraveny.";
+    return;
+  }
+  stopAudioPlayback();
+  const token = playbackToken;
+  try {
+    for (const relativePath of paths) {
+      if (token !== playbackToken) {
+        return;
+      }
+      const completed = await playOneAudio(relativePath, token);
+      if (!completed) {
+        return;
+      }
+    }
+  } catch (error) {
+    ui.messageStrip.textContent = error.message;
+  }
 }
 
 function speakPrompt() {
   if (!state.currentItem) {
     return;
   }
-  if (state.direction === "czToEn") {
-    speak(state.currentItem.cz, "cs");
-  } else {
-    speak(state.currentItem.en, "en");
-  }
+  const record = audioRecord(state.currentItem);
+  const relativePath = state.direction === "czToEn" ? record?.cz : record?.en;
+  playAudioSequence([relativePath]);
 }
 
 function speakAnswer() {
   if (!state.currentItem) {
     return;
   }
-  const item = state.currentItem;
-  speakSequence([
-    { text: item.en, langPrefix: "en" },
-    { text: item.cz, langPrefix: "cs" },
-  ]);
+  const record = audioRecord(state.currentItem);
+  playAudioSequence([record?.en, record?.cz]);
 }
 
 function bindEvents() {
@@ -423,12 +477,20 @@ async function loadData() {
   return response.json();
 }
 
+async function loadAudioManifest() {
+  const response = await fetch(AUDIO_DATA_URL, { cache: "no-store" });
+  if (!response.ok) {
+    throw new Error(`Failed to load ${AUDIO_DATA_URL}: ${response.status}`);
+  }
+  return response.json();
+}
+
 async function init() {
   bindEvents();
   updateControlButtons();
 
   try {
-    state.data = await loadData();
+    [state.data, state.audioManifest] = await Promise.all([loadData(), loadAudioManifest()]);
     state.items = Array.isArray(state.data.items) ? state.data.items : [];
     state.wordSetOptions = getAvailableWordSets();
     renderWordSetControls();
@@ -437,12 +499,6 @@ async function init() {
     renderEmptyState("Nepodarilo se nacist vocabulary-en.json.");
     ui.messageStrip.textContent = `Chyba nacitani dat: ${error.message}`;
   }
-}
-
-if ("speechSynthesis" in window) {
-  window.speechSynthesis.onvoiceschanged = () => {
-    window.speechSynthesis.getVoices();
-  };
 }
 
 init();

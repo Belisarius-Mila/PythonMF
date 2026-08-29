@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-29 08:52 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-29 09:53 CEST
 
 ### Hotovo
-- Lokální casting porovnává čtyři kvalitní hlasy na deseti skutečných výrazech VocabularyEN pomocí 40 hotových MP3 bez prodlevy
+- VocabularyEN nyní používá úplnou knihovnu kvalitních předgenerovaných MP3 hlasů Aria a Vlasta bez systémového hlasu a bez prodlevy generování
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
@@ -14,21 +14,21 @@
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Poslechnout casting a vybrat vítězný anglický a český hlas
+- Po zveřejnění prakticky ověřit přehrávání VocabularyEN na Linuxu
 
 ### Rozhodnutí
-- Před nasazením předgenerovaných Microsoft Neural MP3 do VocabularyEN se vybere jeden anglický a jeden český hlas v odděleném lokálním castingu
+- Kanonické hlasy jsou en-US-AriaNeural a cs-CZ-VlastaNeural při rychlosti -10 %; po změně CSV se vždy provede synchronizace, doplnění MP3 a read-only kontrola úplnosti
 
 ### Navrhované další kroky
-- Vybrat anglický hlas Ana nebo Aria
-- Vybrat český hlas Vlasta nebo Antonín
-- Po výběru připravit kompletní MP3 knihovnu VocabularyEN
-- Teprve potom zapojit MP3 do ostré webové aplikace
+- Vyzkoušet oba směry kartiček na Linuxu
+- Ověřit okamžitý začátek přehrávání zadání
+- Ověřit pořadí angličtina a čeština u odpovědi
+- Při nových slovíčkách používat tříkrokový audio postup
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `c46450e3e019`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `c46450e3e019` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-28T19:25:37+00:00.
+- Git před checkpointem: lokální `main` na `9f8a9c376c20`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `9f8a9c376c20` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-29T06:57:59+00:00.
 - Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -191,5 +191,65 @@ Navrhované další kroky:
 
 Technický důkaz:
 - rychlá Cockpit brána syntaxe a whitespace: 9.1 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
+- Pracovní proud: `project-linux-workstation`.
+- Read-only živý stav při checkpointu: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
+
+### 2026-08-29 09:50 CEST – VocabularyEN používá úplnou předgenerovanou MP3 knihovnu
+
+Hotovo:
+- Casting byl uzavřen výběrem hlasů Aria pro angličtinu a Vlasta pro češtinu, oba rychlostí `-10 %`.
+- Pro všech 306 karet vznikla produkční knihovna 608 unikátních MP3 pokrývající 612 anglických a českých odkazů.
+- Web přehrává hotové MP3 a už nepoužívá nekvalitní systémový hlas prohlížeče ani jej nemá jako fallback.
+- Vznikl opakovatelný generátor, povinná kontrola úplnosti a samostatný návod pro doplňování nových slovíček.
+
+Rozhodnutí:
+- Kanonické produkční hlasy VocabularyEN jsou `en-US-AriaNeural` a `cs-CZ-VlastaNeural` s rychlostí `-10 %`.
+- `VocabularyEN.csv` zůstává jediným zdrojem slovíček. Po jeho změně se vždy provede synchronizace webových dat, doplnění chybějících MP3 a závěrečná read-only audio kontrola.
+- Zvukové soubory jsou pojmenované podle hlasu, rychlosti a čteného textu; přečíslování řádků je nevyrábí znovu a shodný text sdílí jedno MP3.
+- Nepoužívané staré MP3 se automaticky nemažou.
+
+Rizika:
+- Pokud by se po přidání slovíčka obešel povinný kontrolní příkaz, nové slovíčko může zůstat bez zvuku.
+- Generování s `--apply` externě předává Microsoft Speech pouze veřejný text slovíček; bez `--apply` je kontrola čistě lokální.
+- Vývojový stav ještě vyžaduje potvrzený checkpoint a následný praktický poslech zveřejněné aplikace na Linuxu.
+
+Další krok:
+- Po checkpointu a zveřejnění na Linuxu prakticky ověřit oba směry kartiček, okamžitý začátek přehrávání a pořadí angličtina–čeština u odpovědi.
+
+Navrhované další kroky:
+- Při každém novém slovíčku použít tříkrokový postup popsaný v `AUDIO_WORKFLOW.md`.
+- Případný úklid osiřelých MP3 řešit až samostatně a nikdy ne automatickým mazáním.
+
+Technický důkaz:
+- Read-only kontrola potvrdila 306 karet, 612 odkazů a 608 unikátních MP3; všech 608 souborů prošlo `ffprobe`, celkem 6 875 856 bajtů a přibližně 696 sekund audia.
+- Cílená sada 32 testů prošla; syntaxe Pythonu a JavaScriptu i `git diff --check` jsou bez chyby.
+- Lokální HTTP smoke vrátil stav 200 pro aplikaci, oba manifesty a ukázková MP3 z obou jazyků.
+
+### 2026-08-29 09:53 CEST – VocabularyEN nyní používá úplnou knihovnu kvalitních předgenerovaných MP3 hlasů Aria a Vlasta bez systémového hlasu a bez prodlevy generování
+
+Hotovo:
+- VocabularyEN nyní používá úplnou knihovnu kvalitních předgenerovaných MP3 hlasů Aria a Vlasta bez systémového hlasu a bez prodlevy generování
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+
+Otevřeno:
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+
+Rizika:
+- Žádné další doložené provozní riziko.
+
+Rozhodnutí:
+- Kanonické hlasy jsou en-US-AriaNeural a cs-CZ-VlastaNeural při rychlosti -10 %; po změně CSV se vždy provede synchronizace, doplnění MP3 a read-only kontrola úplnosti
+
+Další krok:
+- Po zveřejnění prakticky ověřit přehrávání VocabularyEN na Linuxu
+
+Navrhované další kroky:
+- Vyzkoušet oba směry kartiček na Linuxu
+- Ověřit okamžitý začátek přehrávání zadání
+- Ověřit pořadí angličtina a čeština u odpovědi
+- Při nových slovíčkách používat tříkrokový audio postup
+
+Technický důkaz:
+- rychlá Cockpit brána syntaxe a whitespace: 7.4 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `project-linux-workstation`.
 - Read-only živý stav při checkpointu: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
