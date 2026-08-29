@@ -1,28 +1,33 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obsahově a provozně dorovnáno: 2026-08-29 17:05 CEST
+- Obsahově a provozně dorovnáno: 2026-08-29 17:30 CEST
 - Poslední věcný MMTX checkpoint: commit `f1499b1`
 
 ### Hotovo
 - Produkční webová scéna 3 pokračuje přímo do Harryho scény 4.
 - Harryho scéna přehrává všech 136 anglických a českých dialogových a slovníkových stop z pevných MP3 řízených manifestem a nepoužívá `speechSynthesis`.
+- Reprodukovatelný generátor `build_scene04_audio.py` udržuje zvukovou knihovnu shodnou v produkčním webu a zrcadle MMTX.
 - GitHub `main`, Cockpit a veřejná Pages publikace byly ověřeny na `f1499b1`.
+- Míla 2026-08-29 prakticky ověřil přizpůsobení na Linux PC a potvrdil, že funguje dobře.
 
 ### Otevřeno
-- Ruční poslech celého průchodu scéna 3 → Harry na Linuxu a Macu.
+- Linuxové přizpůsobení nemá známý otevřený blokátor; pokračuje další vývoj MMTX.
+- Samostatný retest na Macu je volitelný, pokud bude potřeba ověřit konkrétní rozdíl platformy.
 
 ### Rizika
 - Automatický checkpoint 16:22 vznikl pod aktivním proudem Linux; historický záznam zůstává auditní stopou, ale aktuální věcná autorita je tento MMTX handoff a TVBCP.
+- Změna textu dialogu vyžaduje znovu vytvořit odpovídající MP3 a manifest a zopakovat kontrolu produkčního zrcadla.
 
 ### Další krok
-- Ověřit `Next`, `Repeat`, pořadí jazyků, přirozenost hlasů a tempo; případně vyměnit jen konkrétní problematické stopy.
+- Pokračovat dalším vývojovým krokem v aktivním Human–Adam proudu `project-mmtx`.
 
 ### Rozhodnutí
 - Pevná MP3 knihovna Harryho scény patří do pracovního proudu MMTX, nikoli Linux.
+- Pevné MP3 jsou kanonické multiplatformní chování; Harryho scéna nemá používat systémový ani prohlížečový hlas jako náhradní cestu.
 
 ### Navrhované další kroky
-- Po ručním poslechu pokračovat dalším příběhovým krokem pouze z MMTX workstreamu.
+- Další příběhový vývoj vést pouze z MMTX workstreamu a při dokončení znovu aktualizovat tento handoff i TVBCP.
 
 ### Technický stav checkpointu
 - Cílené testy 5/5, vzdálená Cockpit Quality Gate 1468/1468 a Pages run `33259207533` prošly.
@@ -555,3 +560,23 @@ Navrhované další kroky:
 Technický důkaz:
 - Cílené testy 5/5; vzdálená Cockpit Quality Gate 1468/1468; smoke 5/5.
 - Pages run `33259207533` uspěl a veřejný HTML, JavaScript, manifest i vzorky obou jazykových MP3 odpovídají `f1499b1`.
+
+### 2026-08-29 17:30 CEST – Linuxové přizpůsobení MMTX prakticky potvrzeno
+
+Hotovo:
+- Míla prakticky vyzkoušel aktuální MMTX na Linux PC a potvrdil, že pevné MP3 fungují dobře.
+- Linuxový retest Harryho scény je uzavřený bez známého blokátoru.
+
+Rozhodnutí:
+- Pevné MP3 řízené manifestem zůstávají kanonickým multiplatformním řešením bez systémového nebo prohlížečového `speechSynthesis`.
+- Další vývoj bude pokračovat v Human–Adam proudu `project-mmtx`.
+
+Další krok:
+- Pokračovat dalším vývojovým krokem MMTX; při jeho dokončení aktualizovat tento TVBCP i příslušný handoff.
+
+Navrhované další kroky:
+- Retest na Macu provést jen tehdy, pokud bude potřeba ověřit konkrétní rozdíl platformy.
+- Při změně dialogového textu společně regenerovat MP3, aktualizovat manifest a ověřit shodu produkční kopie se zrcadlem MMTX.
+
+Technický důkaz:
+- Praktické potvrzení Míly na Linux PC doplňuje cílené testy 5/5, vzdálenou Cockpit Quality Gate 1468/1468, smoke 5/5 a úspěšný Pages run `33259207533` s hashovou shodou zveřejněných souborů.
