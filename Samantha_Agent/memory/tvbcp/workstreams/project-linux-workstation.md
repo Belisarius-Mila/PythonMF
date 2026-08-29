@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-29 15:45 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-29 16:22 CEST
 
 ### Hotovo
-- Dokumentace MMTX nyní správně zachycuje napojení scény 3 na Harryho a nový guard brání tichému převzetí zastaralého stavu
+- Harryho scéna nyní přehrává všech 136 anglických a českých dialogových a slovníkových stop z předem připravených MP3 bez systémového hlasu.
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
@@ -15,19 +15,19 @@
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Inventarizovat systémové čtení Harryho scény a připravit jeho náhradu pevnými MP3
+- Ručně poslechnout celý průchod Harryho scénou na Linuxu a ověřit přirozenost hlasů i tempo.
 
 ### Rozhodnutí
-- Forest Journey pokračuje ze scény 3 do Harryho scény 4; historický samostatný prototyp už není aktuální stav
+- Harryho scéna nebude používat speechSynthesis; všechny dialogy a slovníček přehrává z pevných MP3 řízených manifestem.
 
 ### Navrhované další kroky
-- Doplnit kvalitní česká a chybějící anglická MP3
-- Ručně ověřit celý průchod scéna 3 až Harry na Linuxu i Macu
+- Podle poslechu případně vyměnit pouze konkrétní problematické stopy
+- Po schválení poslechu provést samostatně push a nasazení
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `574521e9ce7b`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `574521e9ce7b` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-29T13:30:19+00:00.
+- Git před checkpointem: lokální `main` na `f9e86437561e`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `f9e86437561e` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-29T13:53:55+00:00.
 - Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -278,5 +278,33 @@ Navrhované další kroky:
 
 Technický důkaz:
 - rychlá Cockpit brána syntaxe a whitespace: 4.9 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
+- Pracovní proud: `project-linux-workstation`.
+- Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+
+### 2026-08-29 16:22 CEST – Harryho scéna nyní přehrává všech 136 anglických a českých dialogových a slovníkových stop z předem připravených MP3 bez systémového hlasu.
+
+Hotovo:
+- Harryho scéna nyní přehrává všech 136 anglických a českých dialogových a slovníkových stop z předem připravených MP3 bez systémového hlasu.
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+
+Otevřeno:
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
+
+Rizika:
+- Žádné další doložené provozní riziko.
+
+Rozhodnutí:
+- Harryho scéna nebude používat speechSynthesis; všechny dialogy a slovníček přehrává z pevných MP3 řízených manifestem.
+
+Další krok:
+- Ručně poslechnout celý průchod Harryho scénou na Linuxu a ověřit přirozenost hlasů i tempo.
+
+Navrhované další kroky:
+- Podle poslechu případně vyměnit pouze konkrétní problematické stopy
+- Po schválení poslechu provést samostatně push a nasazení
+
+Technický důkaz:
+- rychlá Cockpit brána syntaxe a whitespace: 5.1 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `project-linux-workstation`.
 - Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.

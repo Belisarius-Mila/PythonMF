@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-29 15:45 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-29 16:22 CEST
 
 ### Hotovo
-- Dokumentace MMTX nyní správně zachycuje napojení scény 3 na Harryho a nový guard brání tichému převzetí zastaralého stavu
+- Harryho scéna nyní přehrává všech 136 anglických a českých dialogových a slovníkových stop z předem připravených MP3 bez systémového hlasu.
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
@@ -15,19 +15,19 @@
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Inventarizovat systémové čtení Harryho scény a připravit jeho náhradu pevnými MP3
+- Ručně poslechnout celý průchod Harryho scénou na Linuxu a ověřit přirozenost hlasů i tempo.
 
 ### Rozhodnutí
-- Forest Journey pokračuje ze scény 3 do Harryho scény 4; historický samostatný prototyp už není aktuální stav
+- Harryho scéna nebude používat speechSynthesis; všechny dialogy a slovníček přehrává z pevných MP3 řízených manifestem.
 
 ### Navrhované další kroky
-- Doplnit kvalitní česká a chybějící anglická MP3
-- Ručně ověřit celý průchod scéna 3 až Harry na Linuxu i Macu
+- Podle poslechu případně vyměnit pouze konkrétní problematické stopy
+- Po schválení poslechu provést samostatně push a nasazení
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `574521e9ce7b`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `574521e9ce7b` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-29T13:30:19+00:00.
+- Git před checkpointem: lokální `main` na `f9e86437561e`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `f9e86437561e` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-29T13:53:55+00:00.
 - Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -149,3 +149,15 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (6): `Samantha_Agent/memory/ACTIVE_PROJECTS.md`, `Samantha_Agent/memory/MEMORY_INDEX.md`, `Samantha_Agent/memory/handoffs/workstreams/project-mmtx.md`, `Samantha_Agent/memory/projects/mmtx_story_hotspot_app.md`, `Samantha_Agent/memory/technical/project_tvbcp_rules.md`, `Samantha_Agent/memory/tvbcp/workstreams/project-mmtx.md`
 - Commit: `Dorovnat dokumentaci MMTX po napojení Harryho`
 - Další krok: Inventarizovat systémové čtení Harryho scény a připravit jeho náhradu pevnými MP3
+
+### Automatický checkpoint 2026-08-29 16:22 CEST
+
+- Pracovní proud: `project-linux-workstation`
+- Hotovo: Harryho scéna nyní přehrává všech 136 anglických a českých dialogových a slovníkových stop z předem připravených MP3 bez systémového hlasu.; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.; Lokální commity čekají na samostatný denní GitHub balíček.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: rychlá Cockpit brána syntaxe a whitespace: 5.1 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu
+- Změněné cesty před paměťovým zápisem (80): `MatysekANJ/web_mmtx/scene04_harry_guard_prototype/index.html`, `MatysekANJ/web_mmtx/scene04_harry_guard_prototype/script.js`, `Samantha_Agent/tests/test_mmtx_harry_guard_prototype.py`, `docs/scene04_harry_guard_prototype/index.html`, `docs/scene04_harry_guard_prototype/script.js`, `MatysekANJ/build_scene04_audio.py`, `MatysekANJ/web_mmtx/scene04_harry_guard_prototype/audio/czech/scene04_benji_friendly_cz.mp3`, `MatysekANJ/web_mmtx/scene04_harry_guard_prototype/audio/czech/scene04_benji_helper_cz.mp3`, `MatysekANJ/web_mmtx/scene04_harry_guard_prototype/audio/czech/scene04_benji_map_answer_cz.mp3`, `MatysekANJ/web_mmtx/scene04_harry_guard_prototype/audio/czech/scene04_benji_no_chase_cz.mp3`, `MatysekANJ/web_mmtx/scene04_harry_guard_prototype/audio/czech/scene04_benji_not_me_cz.mp3`, `MatysekANJ/web_mmtx/scene04_harry_guard_prototype/audio/czech/scene04_bruno_bruno_answer_cz.mp3`, `MatysekANJ/web_mmtx/scene04_harry_guard_prototype/audio/czech/scene04_bruno_bruno_lake_with_friends_cz.mp3`, `MatysekANJ/web_mmtx/scene04_harry_guard_prototype/audio/czech/scene04_bruno_no_digging_cz.mp3`, `MatysekANJ/web_mmtx/scene04_harry_guard_prototype/audio/czech/scene04_bruno_not_me_cz.mp3`, `MatysekANJ/web_mmtx/scene04_harry_guard_prototype/audio/czech/scene04_bunny_bunny_answer_cz.mp3`, `MatysekANJ/web_mmtx/scene04_harry_guard_prototype/audio/czech/scene04_bunny_lake_only_cz.mp3`, `MatysekANJ/web_mmtx/scene04_harry_guard_prototype/audio/czech/scene04_bunny_not_me_cz.mp3`, `MatysekANJ/web_mmtx/scene04_harry_guard_prototype/audio/czech/scene04_bunny_own_carrots_cz.mp3`, `MatysekANJ/web_mmtx/scene04_harry_guard_prototype/audio/czech/scene04_fiona_fiona_answer_cz.mp3`, `MatysekANJ/web_mmtx/scene04_harry_guard_prototype/audio/czech/scene04_fiona_fiona_lake_with_friends_cz.mp3`, `MatysekANJ/web_mmtx/scene04_harry_guard_prototype/audio/czech/scene04_fiona_no_chickens_cz.mp3`, `MatysekANJ/web_mmtx/scene04_harry_guard_prototype/audio/czech/scene04_fiona_not_me_cz.mp3`, `MatysekANJ/web_mmtx/scene04_harry_guard_prototype/audio/czech/scene04_harry_badger_intro_cz.mp3`, `MatysekANJ/web_mmtx/scene04_harry_guard_prototype/audio/czech/scene04_harry_badger_prompt_cz.mp3`, `MatysekANJ/web_mmtx/scene04_harry_guard_prototype/audio/czech/scene04_harry_bruno_accepted_cz.mp3`, `MatysekANJ/web_mmtx/scene04_harry_guard_prototype/audio/czech/scene04_harry_bunny_accepted_cz.mp3`, `MatysekANJ/web_mmtx/scene04_harry_guard_prototype/audio/czech/scene04_harry_carrot_question_cz.mp3`, `MatysekANJ/web_mmtx/scene04_harry_guard_prototype/audio/czech/scene04_harry_chicken_question_cz.mp3`, `MatysekANJ/web_mmtx/scene04_harry_guard_prototype/audio/czech/scene04_harry_fence_question_cz.mp3`, `MatysekANJ/web_mmtx/scene04_harry_guard_prototype/audio/czech/scene04_harry_fiona_accepted_cz.mp3`, `MatysekANJ/web_mmtx/scene04_harry_guard_prototype/audio/czech/scene04_harry_fox_intro_cz.mp3`, `MatysekANJ/web_mmtx/scene04_harry_guard_prototype/audio/czech/scene04_harry_fox_prompt_cz.mp3`, `MatysekANJ/web_mmtx/scene04_harry_guard_prototype/audio/czech/scene04_harry_gate_opened_cz.mp3`, `MatysekANJ/web_mmtx/scene04_harry_guard_prototype/audio/czech/scene04_harry_introduction_cz.mp3`, `MatysekANJ/web_mmtx/scene04_harry_guard_prototype/audio/czech/scene04_harry_listen_again_cz.mp3`, `MatysekANJ/web_mmtx/scene04_harry_guard_prototype/audio/czech/scene04_harry_map_question_cz.mp3`, `MatysekANJ/web_mmtx/scene04_harry_guard_prototype/audio/czech/scene04_harry_not_me_cz.mp3`, `MatysekANJ/web_mmtx/scene04_harry_guard_prototype/audio/czech/scene04_harry_nut_question_cz.mp3`, `MatysekANJ/web_mmtx/scene04_harry_guard_prototype/audio/czech/scene04_harry_rabbit_intro_cz.mp3`, … a dalších 40
+- Commit: `Nahradit systémové čtení Harryho scény pevnými MP3`
+- Další krok: Ručně poslechnout celý průchod Harryho scénou na Linuxu a ověřit přirozenost hlasů i tempo.

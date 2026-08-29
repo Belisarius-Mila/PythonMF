@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import struct
 import unittest
 from pathlib import Path
@@ -32,7 +33,14 @@ GLOSSARY_SLUGS = {
     "under",
     "yard",
 }
-GLOSSARY_AUDIO_FILES = {f"scene04_vocab_{slug}_en.mp3" for slug in GLOSSARY_SLUGS}
+
+
+def load_audio_manifest() -> dict[str, object]:
+    source = (PROTOTYPE_ROOT / "audio_manifest.js").read_text(encoding="utf-8")
+    prefix = "window.SCENE04_AUDIO_MANIFEST = "
+    if not source.startswith(prefix) or not source.endswith(";\n"):
+        raise AssertionError("audio_manifest.js nemá očekávaný formát")
+    return json.loads(source[len(prefix):-2])
 
 
 class MmtxHarryGuardPrototypeTests(unittest.TestCase):
@@ -41,6 +49,7 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
             "index.html",
             "styles.css",
             "script.js",
+            "audio_manifest.js",
             "harry_benji_prototype_01.png",
             "harry_interrogation_benji_01.png",
             "harry_interrogation_bruno_01.png",
@@ -66,7 +75,8 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
         self.assertIn('id="noButton"', html)
         self.assertIn('src="harry_benji_prototype_01.png"', html)
         self.assertIn('styles.css?v=20260826integrated1', html)
-        self.assertIn('script.js?v=20260826integrated1', html)
+        self.assertIn('audio_manifest.js?v=20260829fixed1', html)
+        self.assertIn('script.js?v=20260829fixed1', html)
         self.assertNotIn("PROTOTYP", html)
         self.assertNotIn("MMTX prototyp", html)
         self.assertIn("Five interviews complete", html)
@@ -132,34 +142,40 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
                     (PROTOTYPE_ROOT / relative_path).read_bytes(),
                 )
 
-    def test_interviewed_friends_have_fixed_voice_mp3_assets(self) -> None:
-        audio_root = PROTOTYPE_ROOT / "audio" / "english"
-        expected = {
+    def test_every_spoken_line_has_a_fixed_mp3_asset(self) -> None:
+        manifest = load_audio_manifest()
+        self.assertEqual(manifest["schemaVersion"], 1)
+        self.assertEqual(manifest["version"], "20260829fixed1")
+        self.assertEqual(
+            manifest["stats"],
+            {"dialogueCombinations": 46, "vocabularyItems": 22, "audioReferences": 136},
+        )
+
+        dialogue = manifest["dialogue"]
+        self.assertEqual(len(dialogue["en"]), 68)
+        self.assertEqual(len(dialogue["cs"]), 68)
+        for character_id in ("harry", "benji", "bunny", "sunny", "fiona", "bruno"):
+            self.assertIn(f"{character_id}::Not me.", dialogue["en"])
+            self.assertIn(f"{character_id}::Já ne.", dialogue["cs"])
+
+        referenced = set(dialogue["en"].values()) | set(dialogue["cs"].values())
+        self.assertEqual(len(referenced), 136)
+        expected_extras = {
             "scene04_benji_f5_candidate_hello_we_are_friendly_en.mp3",
             "scene04_benji_f5_candidate_no_i_do_not_chase_sheep_en.mp3",
-            "scene04_benji_hello_we_are_friendly_en.mp3",
-            "scene04_benji_i_have_a_map_en.mp3",
-            "scene04_benji_no_i_do_not_chase_sheep_en.mp3",
-            "scene04_benji_i_help_little_animals_en.mp3",
-            "scene04_bunny_not_me_en.mp3",
-            "scene04_bunny_i_am_bunny_en.mp3",
-            "scene04_bunny_no_i_have_my_own_carrots_en.mp3",
-            "scene04_bunny_i_only_want_to_go_to_the_lake_en.mp3",
-            "scene04_sunny_hello_i_am_sunny_en.mp3",
-            "scene04_sunny_no_i_have_my_own_nuts_en.mp3",
-            "scene04_sunny_i_want_to_go_to_the_lake_with_my_friends_en.mp3",
-            "scene04_fiona_hi_i_am_fiona_en.mp3",
-            "scene04_fiona_no_i_do_not_catch_chickens_en.mp3",
-            "scene04_fiona_i_want_to_go_to_the_lake_with_my_friends_en.mp3",
-            "scene04_bruno_hello_i_am_bruno_en.mp3",
-            "scene04_bruno_no_i_do_not_dig_under_fences_en.mp3",
-            "scene04_bruno_i_want_to_go_to_the_lake_with_my_friends_en.mp3",
-        } | GLOSSARY_AUDIO_FILES
-        self.assertEqual({path.name for path in audio_root.iterdir()}, expected)
-        for filename in expected:
-            audio = (audio_root / filename).read_bytes()
-            self.assertGreater(len(audio), 8000)
-            self.assertEqual(audio[:2], b"\xff\xf3")
+        }
+        actual = {
+            path.relative_to(PROTOTYPE_ROOT).as_posix()
+            for path in (PROTOTYPE_ROOT / "audio").rglob("*.mp3")
+        }
+        self.assertEqual(
+            actual,
+            referenced | {f"audio/english/{filename}" for filename in expected_extras},
+        )
+        for relative_path in referenced:
+            audio = (PROTOTYPE_ROOT / relative_path).read_bytes()
+            self.assertGreaterEqual(len(audio), 1000)
+            self.assertIn(audio[:2], {b"\xff\xf3", b"\xff\xfb", b"ID"})
 
     def test_image_has_canonical_scene_dimensions(self) -> None:
         expected_images = {
@@ -233,12 +249,9 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
             "STAGES.chooseSunnyYesNo",
             "function updateRepeatAvailability()",
             "STAGES.complete",
-            'const BENJI_AUDIO_VERSION = "20260813a"',
-            'const BUNNY_AUDIO_VERSION = "20260813a"',
-            'const SUNNY_AUDIO_VERSION = "20260814a"',
-            'const FIONA_AUDIO_VERSION = "20260814a"',
-            'const BRUNO_AUDIO_VERSION = "20260814a"',
-            'const DICTIONARY_AUDIO_VERSION = "20260815a"',
+            "const AUDIO_MANIFEST = window.SCENE04_AUDIO_MANIFEST",
+            "function audioKey(characterId, text)",
+            "function fixedAudioFor(text, lang, characterId)",
             "const VOCABULARY = Object.freeze([",
             'src: "harry_interrogation_bunny_01.png"',
             'src: "harry_interrogation_sunny_01.png"',
@@ -248,7 +261,7 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
             "function setSceneImage(sceneId)",
             "function primeSceneImages()",
             "async function speakText(text, lang, characterId)",
-            "await playFixedAudio(fixedAudio, text.length)",
+            "return playFixedAudio(fixedAudio, text.length)",
             "function primeFixedAudio()",
             "primeFixedAudio();",
             "primeSceneImages();",
@@ -259,30 +272,10 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
             "function updateDictionaryAvailability()",
             'dictionaryButton.addEventListener("click", toggleDictionary)',
             'nextButton.addEventListener("click", advanceDialogue)',
-            "...VOCABULARY.map((item) => item.audio)",
+            "...Object.values(AUDIO_MANIFEST.dialogue?.en || {})",
+            "...Object.values(AUDIO_MANIFEST.dialogue?.cs || {})",
         ):
             self.assertIn(expected, script)
-
-        for audio_file in (
-            "scene04_benji_hello_we_are_friendly_en.mp3",
-            "scene04_benji_i_have_a_map_en.mp3",
-            "scene04_benji_no_i_do_not_chase_sheep_en.mp3",
-            "scene04_benji_i_help_little_animals_en.mp3",
-            "scene04_bunny_not_me_en.mp3",
-            "scene04_bunny_i_am_bunny_en.mp3",
-            "scene04_bunny_no_i_have_my_own_carrots_en.mp3",
-            "scene04_bunny_i_only_want_to_go_to_the_lake_en.mp3",
-            "scene04_sunny_hello_i_am_sunny_en.mp3",
-            "scene04_sunny_no_i_have_my_own_nuts_en.mp3",
-            "scene04_sunny_i_want_to_go_to_the_lake_with_my_friends_en.mp3",
-            "scene04_fiona_hi_i_am_fiona_en.mp3",
-            "scene04_fiona_no_i_do_not_catch_chickens_en.mp3",
-            "scene04_fiona_i_want_to_go_to_the_lake_with_my_friends_en.mp3",
-            "scene04_bruno_hello_i_am_bruno_en.mp3",
-            "scene04_bruno_no_i_do_not_dig_under_fences_en.mp3",
-            "scene04_bruno_i_want_to_go_to_the_lake_with_my_friends_en.mp3",
-        ):
-            self.assertIn(audio_file, script)
 
         vocabulary_block = script.split(
             "const VOCABULARY = Object.freeze([", 1
@@ -332,7 +325,6 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
         dictionary_playback = script.split(
             "async function playVocabularyItem(item)", 1
         )[1].split("function toggleDictionary()", 1)[0]
-        self.assertIn("await playFixedAudio(item.audio, item.en.length)", dictionary_playback)
         self.assertIn('await speakText(item.en, "en", "dictionary")', dictionary_playback)
         self.assertIn('if (isBilingual()) await speakText(item.cz, "cs", "dictionary")', dictionary_playback)
         dictionary_availability = script.split(
@@ -343,46 +335,9 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
 
         self.assertIn('await speakText(entry.textEn, "en", entry.characterId)', script)
         self.assertIn('if (isBilingual()) await speakText(entry.textCz, "cs", entry.characterId)', script)
-        benji_voice_profile = script.split(
-            "const BENJI_ENGLISH_VOICE_ORDER = [", 1
-        )[1].split("];", 1)[0]
-        expected_order = ["andrew", "evan", "alex", "aaron", "daniel"]
-        positions = [benji_voice_profile.index(f'"{name}"') for name in expected_order]
-        self.assertEqual(positions, sorted(positions))
-        for female_fallback in ("samantha", "ava", "fable"):
-            self.assertNotIn(female_fallback, benji_voice_profile)
-        self.assertIn(
-            'if (lang === "en" && characterId === "benji" && !voice)',
-            script,
-        )
-        bunny_voice_profile = script.split(
-            "const BUNNY_ENGLISH_VOICE_ORDER = [", 1
-        )[1].split("];", 1)[0]
-        self.assertLess(
-            bunny_voice_profile.index('"ana"'),
-            bunny_voice_profile.index('"samantha"'),
-        )
-        sunny_voice_profile = script.split(
-            "const SUNNY_ENGLISH_VOICE_ORDER = [", 1
-        )[1].split("];", 1)[0]
-        self.assertLess(
-            sunny_voice_profile.index('"michelle"'),
-            sunny_voice_profile.index('"nova"'),
-        )
-        fiona_voice_profile = script.split(
-            "const FIONA_ENGLISH_VOICE_ORDER = [", 1
-        )[1].split("];", 1)[0]
-        self.assertLess(
-            fiona_voice_profile.index('"jenny"'),
-            fiona_voice_profile.index('"shimmer"'),
-        )
-        bruno_voice_profile = script.split(
-            "const BRUNO_ENGLISH_VOICE_ORDER = [", 1
-        )[1].split("];", 1)[0]
-        self.assertLess(
-            bruno_voice_profile.index('"daniel"'),
-            bruno_voice_profile.index('"guy"'),
-        )
+        self.assertNotIn("speechSynthesis", script)
+        self.assertNotIn("SpeechSynthesisUtterance", script)
+        self.assertNotIn("item.audio", script)
         choose_no_body = script.split("async function chooseNo()", 1)[1].split(
             "async function repeatLast()", 1
         )[0]

@@ -31,44 +31,21 @@ const LANGUAGE_MODES = {
   bilingual: "en-cz",
 };
 
-const BENJI_AUDIO_VERSION = "20260813a";
-const BENJI_ENGLISH_AUDIO = new Map([
-  ["Hello. We are friendly.", `audio/english/scene04_benji_hello_we_are_friendly_en.mp3?v=${BENJI_AUDIO_VERSION}`],
-  ["I have a map.", `audio/english/scene04_benji_i_have_a_map_en.mp3?v=${BENJI_AUDIO_VERSION}`],
-  ["No. I do not chase sheep.", `audio/english/scene04_benji_no_i_do_not_chase_sheep_en.mp3?v=${BENJI_AUDIO_VERSION}`],
-  ["I help little animals.", `audio/english/scene04_benji_i_help_little_animals_en.mp3?v=${BENJI_AUDIO_VERSION}`],
-]);
+const AUDIO_MANIFEST = window.SCENE04_AUDIO_MANIFEST || {
+  version: "missing",
+  dialogue: { en: {}, cs: {} },
+};
 
-const BUNNY_AUDIO_VERSION = "20260813a";
-const BUNNY_ENGLISH_AUDIO = new Map([
-  ["Not me.", `audio/english/scene04_bunny_not_me_en.mp3?v=${BUNNY_AUDIO_VERSION}`],
-  ["I am Bunny.", `audio/english/scene04_bunny_i_am_bunny_en.mp3?v=${BUNNY_AUDIO_VERSION}`],
-  ["No. I have my own carrots.", `audio/english/scene04_bunny_no_i_have_my_own_carrots_en.mp3?v=${BUNNY_AUDIO_VERSION}`],
-  ["I only want to go to the lake.", `audio/english/scene04_bunny_i_only_want_to_go_to_the_lake_en.mp3?v=${BUNNY_AUDIO_VERSION}`],
-]);
+function audioKey(characterId, text) {
+  return `${characterId}::${text}`;
+}
 
-const SUNNY_AUDIO_VERSION = "20260814a";
-const SUNNY_ENGLISH_AUDIO = new Map([
-  ["Hello! I am Sunny.", `audio/english/scene04_sunny_hello_i_am_sunny_en.mp3?v=${SUNNY_AUDIO_VERSION}`],
-  ["No. I have my own nuts.", `audio/english/scene04_sunny_no_i_have_my_own_nuts_en.mp3?v=${SUNNY_AUDIO_VERSION}`],
-  ["I want to go to the lake with my friends.", `audio/english/scene04_sunny_i_want_to_go_to_the_lake_with_my_friends_en.mp3?v=${SUNNY_AUDIO_VERSION}`],
-]);
+function fixedAudioFor(text, lang, characterId) {
+  const language = lang === "cs" ? "cs" : "en";
+  const path = AUDIO_MANIFEST.dialogue?.[language]?.[audioKey(characterId, text)];
+  return path ? `${path}?v=${AUDIO_MANIFEST.version}` : "";
+}
 
-const FIONA_AUDIO_VERSION = "20260814a";
-const FIONA_ENGLISH_AUDIO = new Map([
-  ["Hi. I am Fiona.", `audio/english/scene04_fiona_hi_i_am_fiona_en.mp3?v=${FIONA_AUDIO_VERSION}`],
-  ["No. I do not catch chickens.", `audio/english/scene04_fiona_no_i_do_not_catch_chickens_en.mp3?v=${FIONA_AUDIO_VERSION}`],
-  ["I want to go to the lake with my friends.", `audio/english/scene04_fiona_i_want_to_go_to_the_lake_with_my_friends_en.mp3?v=${FIONA_AUDIO_VERSION}`],
-]);
-
-const BRUNO_AUDIO_VERSION = "20260814a";
-const BRUNO_ENGLISH_AUDIO = new Map([
-  ["Hello. I am Bruno.", `audio/english/scene04_bruno_hello_i_am_bruno_en.mp3?v=${BRUNO_AUDIO_VERSION}`],
-  ["No. I do not dig under fences.", `audio/english/scene04_bruno_no_i_do_not_dig_under_fences_en.mp3?v=${BRUNO_AUDIO_VERSION}`],
-  ["I want to go to the lake with my friends.", `audio/english/scene04_bruno_i_want_to_go_to_the_lake_with_my_friends_en.mp3?v=${BRUNO_AUDIO_VERSION}`],
-]);
-
-const DICTIONARY_AUDIO_VERSION = "20260815a";
 const VOCABULARY = Object.freeze([
   { en: "come closer", cz: "přijít blíž", emoji: "👣", file: "come_closer" },
   { en: "chase", cz: "honit", emoji: "🐾", file: "chase" },
@@ -92,56 +69,7 @@ const VOCABULARY = Object.freeze([
   { en: "under", cz: "pod", emoji: "⬇️", file: "under" },
   { en: "fence", cz: "plot", emoji: "🪵", file: "fence" },
   { en: "believe", cz: "věřit", emoji: "💚", file: "believe" },
-].map((item) => Object.freeze({
-  ...item,
-  audio: `audio/english/scene04_vocab_${item.file}_en.mp3?v=${DICTIONARY_AUDIO_VERSION}`,
-})));
-
-// Keep Benji on a male voice even when the browser exposes voices in a
-// different order. Andrew matches the approved Scene 3 voice when available.
-const BENJI_ENGLISH_VOICE_ORDER = [
-  "andrew",
-  "evan",
-  "alex",
-  "aaron",
-  "daniel",
-  "reed",
-  "eddy",
-  "fred",
-];
-
-const BUNNY_ENGLISH_VOICE_ORDER = [
-  "ana",
-  "samantha",
-  "ava",
-  "fable",
-];
-
-const SUNNY_ENGLISH_VOICE_ORDER = [
-  "michelle",
-  "nova",
-  "samantha",
-  "ava",
-  "victoria",
-  "karen",
-];
-
-const FIONA_ENGLISH_VOICE_ORDER = [
-  "jenny",
-  "shimmer",
-  "samantha",
-  "ava",
-  "victoria",
-  "karen",
-];
-
-const BRUNO_ENGLISH_VOICE_ORDER = [
-  "daniel",
-  "onyx",
-  "aaron",
-  "roger",
-  "guy",
-];
+].map((item) => Object.freeze(item)));
 
 const STAGES = {
   waitingStart: "waitingStart",
@@ -359,9 +287,6 @@ const state = {
   isRepeating: false,
 };
 
-let voices = [];
-let speechTimeout = 0;
-let speechResolve = null;
 let activeAudio = null;
 let audioTimeout = 0;
 let audioResolve = null;
@@ -420,60 +345,6 @@ function updateLanguageUi() {
   taskCzech.classList.toggle("hidden", !isBilingual() || !taskCzech.textContent);
 }
 
-function loadVoices() {
-  voices = window.speechSynthesis?.getVoices?.() || [];
-}
-
-function voiceFor(lang, characterId) {
-  const languagePrefix = lang === "cs" ? "cs" : "en";
-  const matching = voices.filter((voice) => String(voice.lang || "").toLowerCase().startsWith(languagePrefix));
-  if (!matching.length) return null;
-  if (lang === "en" && characterId === "benji") {
-    for (const preferredName of BENJI_ENGLISH_VOICE_ORDER) {
-      const selectedVoice = matching.find((voice) => voice.name.toLowerCase().includes(preferredName));
-      if (selectedVoice) return selectedVoice;
-    }
-    return null;
-  }
-  if (lang === "en" && characterId === "bunny") {
-    for (const preferredName of BUNNY_ENGLISH_VOICE_ORDER) {
-      const selectedVoice = matching.find((voice) => voice.name.toLowerCase().includes(preferredName));
-      if (selectedVoice) return selectedVoice;
-    }
-  }
-  if (lang === "en" && characterId === "sunny") {
-    for (const preferredName of SUNNY_ENGLISH_VOICE_ORDER) {
-      const selectedVoice = matching.find((voice) => voice.name.toLowerCase().includes(preferredName));
-      if (selectedVoice) return selectedVoice;
-    }
-  }
-  if (lang === "en" && characterId === "fiona") {
-    for (const preferredName of FIONA_ENGLISH_VOICE_ORDER) {
-      const selectedVoice = matching.find((voice) => voice.name.toLowerCase().includes(preferredName));
-      if (selectedVoice) return selectedVoice;
-    }
-  }
-  if (lang === "en" && characterId === "dictionary") {
-    for (const preferredName of FIONA_ENGLISH_VOICE_ORDER) {
-      const selectedVoice = matching.find((voice) => voice.name.toLowerCase().includes(preferredName));
-      if (selectedVoice) return selectedVoice;
-    }
-  }
-  if (lang === "en" && characterId === "bruno") {
-    for (const preferredName of BRUNO_ENGLISH_VOICE_ORDER) {
-      const selectedVoice = matching.find((voice) => voice.name.toLowerCase().includes(preferredName));
-      if (selectedVoice) return selectedVoice;
-    }
-  }
-  if (lang === "en") {
-    const preferred = characterId === "harry"
-      ? /daniel|roger|guy|alex|aaron/i
-      : /samantha|ava|fable/i;
-    return matching.find((voice) => preferred.test(voice.name)) || matching[0];
-  }
-  return matching[0];
-}
-
 function cancelSpeech() {
   window.clearTimeout(audioTimeout);
   audioTimeout = 0;
@@ -485,14 +356,6 @@ function cancelSpeech() {
     const resolve = audioResolve;
     audioResolve = null;
     resolve(false);
-  }
-  window.clearTimeout(speechTimeout);
-  speechTimeout = 0;
-  window.speechSynthesis?.cancel?.();
-  if (speechResolve) {
-    const resolve = speechResolve;
-    speechResolve = null;
-    resolve();
   }
 }
 
@@ -540,14 +403,10 @@ function playFixedAudio(src, textLength) {
 }
 
 function primeFixedAudio() {
-  const sources = [
-    ...BENJI_ENGLISH_AUDIO.values(),
-    ...BUNNY_ENGLISH_AUDIO.values(),
-    ...SUNNY_ENGLISH_AUDIO.values(),
-    ...FIONA_ENGLISH_AUDIO.values(),
-    ...BRUNO_ENGLISH_AUDIO.values(),
-    ...VOCABULARY.map((item) => item.audio),
-  ];
+  const sources = [...new Set([
+    ...Object.values(AUDIO_MANIFEST.dialogue?.en || {}),
+    ...Object.values(AUDIO_MANIFEST.dialogue?.cs || {}),
+  ])].map((path) => `${path}?v=${AUDIO_MANIFEST.version}`);
   sources.forEach((src) => {
     const audio = fixedAudioCache.get(src) || new Audio(src);
     fixedAudioCache.set(src, audio);
@@ -581,45 +440,10 @@ function primeFixedAudio() {
 }
 
 async function speakText(text, lang, characterId) {
-  if (lang === "en" && ["benji", "bunny", "sunny", "fiona", "bruno"].includes(characterId)) {
-    const fixedAudio = characterId === "benji"
-      ? BENJI_ENGLISH_AUDIO.get(text)
-      : characterId === "bunny"
-        ? BUNNY_ENGLISH_AUDIO.get(text)
-        : characterId === "sunny"
-          ? SUNNY_ENGLISH_AUDIO.get(text)
-          : characterId === "fiona"
-            ? FIONA_ENGLISH_AUDIO.get(text)
-            : BRUNO_ENGLISH_AUDIO.get(text);
-    if (fixedAudio && await playFixedAudio(fixedAudio, text.length)) return;
-  }
-  if (!text || !("speechSynthesis" in window)) return Promise.resolve();
-  return new Promise((resolve) => {
-    let finished = false;
-    const finish = () => {
-      if (finished) return;
-      finished = true;
-      window.clearTimeout(speechTimeout);
-      speechTimeout = 0;
-      if (speechResolve === finish) speechResolve = null;
-      resolve();
-    };
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = lang === "cs" ? "cs-CZ" : "en-US";
-    utterance.rate = lang === "cs" ? 0.9 : 0.94;
-    utterance.volume = lang === "cs" ? 0.68 : 0.9;
-    const voice = voiceFor(lang, characterId);
-    if (lang === "en" && characterId === "benji" && !voice) {
-      finish();
-      return;
-    }
-    if (voice) utterance.voice = voice;
-    utterance.onend = finish;
-    utterance.onerror = finish;
-    speechResolve = finish;
-    window.speechSynthesis.speak(utterance);
-    speechTimeout = window.setTimeout(finish, Math.max(1800, text.length * 95));
-  });
+  if (!text) return false;
+  const fixedAudio = fixedAudioFor(text, lang, characterId);
+  if (!fixedAudio) return false;
+  return playFixedAudio(fixedAudio, text.length);
 }
 
 function showSpeech(entry) {
@@ -779,9 +603,7 @@ async function playVocabularyItem(item) {
   if (state.stage !== STAGES.complete) return;
   const flowId = ++state.flowId;
   cancelSpeech();
-  const played = await playFixedAudio(item.audio, item.en.length);
-  if (flowId !== state.flowId) return;
-  if (!played) await speakText(item.en, "en", "dictionary");
+  await speakText(item.en, "en", "dictionary");
   if (flowId !== state.flowId) return;
   if (isBilingual()) await speakText(item.cz, "cs", "dictionary");
 }
@@ -1029,7 +851,6 @@ function toggleLanguage() {
 async function startScene() {
   if (state.stage !== STAGES.waitingStart) return;
   audioGate.classList.add("hidden");
-  loadVoices();
   primeSceneImages();
   primeFixedAudio();
   await runIntro();
@@ -1047,8 +868,6 @@ nextButton.addEventListener("click", advanceDialogue);
 dictionaryButton.addEventListener("click", toggleDictionary);
 yesButton.addEventListener("click", chooseYes);
 noButton.addEventListener("click", chooseNo);
-window.speechSynthesis?.addEventListener?.("voiceschanged", loadVoices);
-
 updateLanguageUi();
 renderDictionary();
 updateDictionaryAvailability();
