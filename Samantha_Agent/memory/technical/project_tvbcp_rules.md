@@ -71,6 +71,13 @@ Tyto vrstvy se navzájem nenahrazují.
 
 ## Synchronizace při automatickém checkpointu
 
+- Každé dokončení nebo oprava vývoje prováděného přes Human–Adam musí ve stejném
+  tematickém kroku aktualizovat kanonický handoff i TVBCP právě příslušného
+  pracovního proudu. Zápis zachytí nový stav, podstatný důkaz, rizika a další
+  krok; nesmí být zapsán do obecného ani jiného pracovního proudu.
+- Chybějící nebo nejednoznačná vazba na handoff či TVBCP je blokátor uzavření:
+  práci nelze označit jako hotovou, dokud se správná vazba nevyřeší nebo není
+  viditelně označena jako blokátor.
 - Potvrzený Human–Adam checkpoint aktualizuje v jednom checkpointovém commitu
   kanonický handoff, TVBCP a primární řádek pracovního proudu v
   `ACTIVE_PROJECTS.md`.

@@ -114,6 +114,13 @@ pri dalsim navazani videl, kam se da rozumne pokracovat.
   casem a casovou zonou ve formatu `YYYY-MM-DD HH:MM TZ`, aby byl nejnovejsi
   zapis vzdy dohledatelny dole. Souhrnne sekce lze prubezne aktualizovat.
 - Citlive nebo private texty do gitoveho TVBCP nepatri.
+- Pri kazdem dokonceni nebo oprave vyvoje provadeneho pres Human-Adam vzdy ve
+  stejnem tematickem kroku aktualizuj kanonicky handoff i TVBCP prave
+  prislusneho pracovniho proudu. Zapis musi zachytit novy stav, podstatny dukaz,
+  rizika a dalsi krok; nesmi skoncit v obecnem ani jinem pracovnim proudu.
+  Pokud vazba na spravny handoff nebo TVBCP chybi ci je nejednoznacna, neoznacuj
+  praci jako hotovou, dokud se vazba nevyresi nebo viditelne neoznaci jako
+  blokator.
 - Podrobny kontrakt je v `memory/technical/project_tvbcp_rules.md`.
 
 ## Bezpecnost a soubory
