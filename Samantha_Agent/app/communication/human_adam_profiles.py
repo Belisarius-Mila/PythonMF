@@ -2793,14 +2793,13 @@ class HumanAdamProfileManager:
         operation: ParsedHumanAdamOperation = parse_human_adam_operation(
             entry.get("answer")
         )
-        if (
-            operation.state == "absent"
-            and publication_authorized
-            and production_deployment_target == "github_pages"
-        ):
+        if publication_authorized and production_deployment_target == "github_pages":
             operation = ParsedHumanAdamOperation(
                 state="valid",
-                visible_answer=str(entry.get("answer") or "").strip(),
+                visible_answer=(
+                    operation.visible_answer
+                    or str(entry.get("answer") or "").strip()
+                ),
                 request=HumanAdamOperationRequest(operation_id=MMTX_PAGES_DEPLOY),
             )
         workspace = service.workspace.status()

@@ -1,7 +1,7 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Živě dokončeno: 2026-08-29 20:44 CEST
+- Dorovnáno terminálovým vývojem: 2026-08-29 20:49 CEST
 
 ### Hotovo
 - MMTX má deklarativní produkční cíl GitHub Pages.
@@ -13,16 +13,17 @@
 - Druhý živý `p+n` publikoval přes run `33268409643` a deployment `6158799240` přesný commit `d0fb736`; další falešně zápornou účtenku způsobil chybějící certifikační řetězec lokálního Pythonu při závěrečném HTTPS smoke.
 - Smoke nyní používá systémový `/usr/bin/curl`, tedy stejné systémové TLS úložiště, kterým byl veřejný HTTP 200 nezávisle potvrzen.
 - Finální živé `p+n` v MMTX skončilo účtenkou `completed`: run `33269031345`, deployment `6158917594`, commit `72aedbf`, HTTP 200.
+- Následný úklidový retest odhalil, že vadná modelová provozní obálka mohla přesný serverově autorizovaný `p+n` zablokovat ještě před backendem. Server nyní pro autorizovaný MMTX pokyn vždy vynutí jedinou kanonickou Pages operaci bez ohledu na modelovou obálku.
 
 ### Otevřeno
-- Žádný známý otevřený krok samoobslužného MMTX nasazení.
+- Serverové vynucení kanonické operace prošlo úplnou branou a čeká na commit, nasazení Cockpitu a poslední živý retest.
 
 ### Rizika
 - Produkční operace je záměrně dostupná jen pro přesný přímý pokyn a pracovní proud s deklarovaným cílem `github_pages`.
 - Divergence, špinavý main, neshoda `origin/main`, neúspěšný workflow, chybějící deployment nebo HTTP smoke operaci uzavřeně zastaví.
 
 ### Další krok
-- Při příštím dokončeném vývoji MMTX zadat Human–Adamovi přesný pokyn `p+n`; k terminálovému Adamovi přejít jen při pravdivé fail-closed účtence.
+- Projít úplnou branou a živě ověřit, že přesný `p+n` uspěje i po vadné modelové obálce.
 
 ### Rozhodnutí
 - Push a produkční nasazení zůstávají oddělené důkazy, ale přímý příkaz `p+n` je může bezpečně zřetězit bez přepnutí k terminálovému Adamovi.
@@ -38,6 +39,8 @@
 - Druhý samoobslužný run `33268409643` a deployment `6158799240` úspěšně publikovaly `d0fb736`; systémový `curl` vrací HTTP 200, zatímco původní `urllib` skončil na `CERTIFICATE_VERIFY_FAILED`.
 - Oprava systémového HTTPS smoke prošla úplnou Cockpit Quality Gate 1477/1477 za 445,1 s.
 - Cockpit běží na `72aedbf`, nasazovací smoke prošel 5/5 a finální Human–Adam operace vrátila `deployed` pro tentýž commit.
+- Regresní test serverového přepsání vadné modelové obálky je součástí cílené sady 16/16.
+- Úplná Cockpit Quality Gate prošla 1478/1478 za 446,9 s.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -2776,3 +2779,11 @@ Technický důkaz:
 - Rozhodnutí: Samoobslužné nasazení MMTX je provozně dokončené. Přesný `p+n` zůstává jediným zkráceným pokynem, který může serverově zřetězit bezpečný push a ověřené Pages nasazení.
 - Další krok: Při dalším hotovém vývoji MMTX použít `p+n`; při fail-closed výsledku příkaz automaticky neopakovat a nejprve auditovat přesné workflow/deployment ID.
 - Ověření: cíleně 37/37, úplná brána 1477/1477 za 445,1 s, Cockpit quick gate 7,7 s a smoke 5/5; produkční účtenka obsahuje commit `72aedbfffc3f`, run `33269031345`, deployment `6158917594` a HTTP 200.
+
+### Regresní oprava 2026-08-29 20:49 CEST – Přesný p+n nepodléhá modelové obálce
+
+- Pracovní proud: `layer-human-adam-development`
+- Hotovo: Úklidový retest vrátil `invalid`, aniž spustil backend nebo workflow, protože model přidal vadnou provozní obálku. Server nyní při přesném autorizovaném MMTX `p+n` vždy vytvoří jediný kanonický požadavek `mmtx_pages_publish_current_main` a modelovou obálku nepoužije k autorizaci ani volbě operace.
+- Rozhodnutí: Autorizaci dává výhradně přesný uživatelský text a deklarativní produkční cíl pracovního proudu; model smí dodat pouze viditelný doprovodný text.
+- Další krok: Commit, push, nasazení Cockpitu a poslední živý `p+n`.
+- Ověření: cíleně 16/16 včetně vadné modelové obálky a úplná Cockpit Quality Gate 1478/1478 za 446,9 s; neúspěšný retest měl `attempted=false` a nevytvořil žádný GitHub workflow.

@@ -48,7 +48,7 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
-- 2026-08-29 20:44 CEST: Priorita 1, Human–Adam / samoobslužné MMTX `p+n` dokončeno.
+- 2026-08-29 20:49 CEST: Priorita 1, Human–Adam / samoobslužné MMTX `p+n`.
   MMTX dostává deklarativní produkční cíl GitHub Pages a přímý pokyn `p+n`
   serverově zřetězí případný bezpečný GitHub balíček, Pages workflow, ověření
   deploymentu a HTTP smoke. První živý test publikoval `a0ab509`, ale odhalil
@@ -56,7 +56,9 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
   ale odhalil chybějící certifikační řetězec Pythonu při HTTPS smoke; oprava přes
   systémový curl prošla cíleně 37/37 a úplnou branou 1477/1477. Finální živé
   `p+n` dokončilo run `33269031345`, deployment `6158917594`, commit `72aedbf`
-  a HTTP 200; Cockpit běží na témže commitu se smoke 5/5. Handoff:
+  a HTTP 200. Úklidový retest pak odhalil vadnou modelovou obálku před backendem;
+  serverové vynucení jediné kanonické operace prošlo cíleně 16/16 a úplnou
+  branou 1478/1478; čeká na commit, nasazení Cockpitu a poslední živý retest. Handoff:
   `handoffs/human_adam_layer_workstream_start_2026_07_20.md`.
 
 - 2026-07-27 12:05 CEST: Priorita 1, Human–Adam / uzavření dávkového UI.

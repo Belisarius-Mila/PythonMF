@@ -1896,6 +1896,39 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertIn("publication_authorized=true", model_input)
         self.assertIn("mmtx_pages_publish_current_main", model_input)
 
+    def test_mmtx_p_plus_n_overrides_invalid_model_operation_receipt(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, _human_workspace, *_rest = self.make_manager(Path(temp_dir))
+            lazy = FakeLazyThreads(Path(temp_dir) / "lazy")
+            manager.workstream_threads = lazy  # type: ignore[assignment]
+            manager.activate_grouped_workstream(
+                workstream_id="project-mmtx",
+                confirmed=True,
+            )
+            lazy.hubs["project-mmtx"].next_answer = "\n".join(
+                (
+                    "Nasazuji MMTX.",
+                    "[HUMAN_ADAM_OPERATION_REQUEST]",
+                    "neplatná obálka",
+                    "[/HUMAN_ADAM_OPERATION_REQUEST]",
+                )
+            )
+            with patch(
+                "app.communication.human_adam_profiles.execute_human_adam_operation",
+                return_value={"status": "deployed", "redacted": True},
+            ) as operation:
+                result = manager.send(
+                    text="p+n",
+                    client_message_id="mmtx-publish-invalid-model-receipt",
+                )
+
+        self.assertEqual(result["automatic_operation"]["state"], "completed")
+        self.assertEqual(
+            operation.call_args.args[0].operation_id,
+            "mmtx_pages_publish_current_main",
+        )
+        self.assertEqual(result["entry"]["answer"].splitlines()[0], "Nasazuji MMTX.")
+
     def test_r2_adam_allows_one_turn_development_but_keeps_source_data_read_only(
         self,
     ) -> None:
