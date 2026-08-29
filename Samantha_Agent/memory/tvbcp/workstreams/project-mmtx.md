@@ -1,38 +1,33 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obsahově a provozně dorovnáno: 2026-08-29 17:30 CEST
-- Poslední věcný MMTX checkpoint: commit `f1499b1`
+- Obnoveno potvrzeným checkpointem: 2026-08-29 18:13 CEST
 
 ### Hotovo
-- Produkční webová scéna 3 pokračuje přímo do Harryho scény 4.
-- Harryho scéna přehrává všech 136 anglických a českých dialogových a slovníkových stop z pevných MP3 řízených manifestem a nepoužívá `speechSynthesis`.
-- Reprodukovatelný generátor `build_scene04_audio.py` udržuje zvukovou knihovnu shodnou v produkčním webu a zrcadle MMTX.
-- GitHub `main`, Cockpit a veřejná Pages publikace byly ověřeny na `f1499b1`.
-- Míla 2026-08-29 prakticky ověřil přizpůsobení na Linux PC a potvrdil, že funguje dobře.
+- Scéna 2 používá 55 pevných anglických a českých stop řízených manifestem a funguje bez systémového hlasu.
 
 ### Otevřeno
-- Linuxové přizpůsobení nemá známý otevřený blokátor; pokračuje další vývoj MMTX.
-- Samostatný retest na Macu je volitelný, pokud bude potřeba ověřit konkrétní rozdíl platformy.
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
 
 ### Rizika
-- Automatický checkpoint 16:22 vznikl pod aktivním proudem Linux; historický záznam zůstává auditní stopou, ale aktuální věcná autorita je tento MMTX handoff a TVBCP.
-- Změna textu dialogu vyžaduje znovu vytvořit odpovídající MP3 a manifest a zopakovat kontrolu produkčního zrcadla.
+- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
 
 ### Další krok
-- Pokračovat dalším vývojovým krokem v aktivním Human–Adam proudu `project-mmtx`.
+- Prakticky projít a poslechnout celou scénu 2 na Linuxu.
 
 ### Rozhodnutí
-- Pevná MP3 knihovna Harryho scény patří do pracovního proudu MMTX, nikoli Linux.
-- Pevné MP3 jsou kanonické multiplatformní chování; Harryho scéna nemá používat systémový ani prohlížečový hlas jako náhradní cestu.
+- Existující kvalitní MP3 zůstávají zachované; nové české stopy používají Vlastu a scéna nemá speechSynthesis fallback.
 
 ### Navrhované další kroky
-- Další příběhový vývoj vést pouze z MMTX workstreamu a při dokončení znovu aktualizovat tento handoff i TVBCP.
+- Po poslechovém ověření pokračovat stejným způsobem scénou 3.
 
 ### Technický stav checkpointu
-- Cílené testy 5/5, vzdálená Cockpit Quality Gate 1468/1468 a Pages run `33259207533` prošly.
-- Veřejný HTML, JavaScript, audio manifest a reprezentativní anglické i české MP3 jsou hashově shodné s `f1499b1`.
-- Chronologické bloky níže zůstávají historickými snapshoty a nepřepisují tento aktuální souhrn.
+- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
+- Git před checkpointem: lokální `main` na `b0d6ddfb2937`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `fc8cd2b90dc4` · je starší než ověřený main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-29T15:12:16+00:00.
+- Read-only živý stav: main=`aligned`, deployment=`verified_other_main`, runtime=`connected`.
+- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
+- Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: MMTX
@@ -580,3 +575,28 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Praktické potvrzení Míly na Linux PC doplňuje cílené testy 5/5, vzdálenou Cockpit Quality Gate 1468/1468, smoke 5/5 a úspěšný Pages run `33259207533` s hashovou shodou zveřejněných souborů.
+
+### 2026-08-29 18:13 CEST – Scéna 2 používá 55 pevných anglických a českých stop řízených manifestem a funguje bez systémového hlasu.
+
+Hotovo:
+- Scéna 2 používá 55 pevných anglických a českých stop řízených manifestem a funguje bez systémového hlasu.
+
+Otevřeno:
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+
+Rizika:
+- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
+
+Rozhodnutí:
+- Existující kvalitní MP3 zůstávají zachované; nové české stopy používají Vlastu a scéna nemá speechSynthesis fallback.
+
+Další krok:
+- Prakticky projít a poslechnout celou scénu 2 na Linuxu.
+
+Navrhované další kroky:
+- Po poslechovém ověření pokračovat stejným způsobem scénou 3.
+
+Technický důkaz:
+- rychlá Cockpit brána syntaxe a whitespace: 5.3 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
+- Pracovní proud: `project-mmtx`.
+- Read-only živý stav při checkpointu: main=`aligned`, deployment=`verified_other_main`, runtime=`connected`.

@@ -37,11 +37,20 @@ Otevři v prohlížeči: `http://localhost:8877/`
 | `scene_02_sunnys_lost_nuts_before.png` | **Aktivní** produkční scéna (1672×941) |
 | `scene_placeholder.svg` | Nouzový fallback při chybě načtení PNG |
 
-## Audio — soubory k doplnění
+## Pevné audio
 
-MP3 zatím nejsou v repozitáři. Kód je na ně připravený; pokud soubor chybí, použije se fallback přes `speechSynthesis`.
+Scéna používá 55 pevných MP3 řízených souborem `audio_manifest.js`:
 
-Viz `audio/README.md` pro kompletní manifest včetně instrukčních vět a slovníčku.
+- 28 anglických stop pro dialogy, pokyny a slovníček,
+- 27 českých stop pro překlady, nápovědy a slovníček,
+- žádný systémový ani prohlížečový hlas a žádný `speechSynthesis` fallback.
+
+Existující kvalitní MP3 zůstaly zachované. Chybějící české stopy jsou vytvořené
+hlasem Vlasta a tři doplněná anglická slovíčka hlasem Jenny. Reprodukovatelný
+generátor `build_scene02_audio.py` doplňuje pouze chybějící soubory a kontroluje
+shodu produkční scény se zrcadlem.
+
+Viz `audio/README.md` pro strukturu manifestu a ověřovací příkazy.
 
 ## Slovníček
 
@@ -106,4 +115,5 @@ Oříšky po nálezu: overlay na pozici **53 % / 52 %** (emoji, později nahradi
 - [ ] Skrytý levý dolní roh otevře Scene 3
 - [ ] ↺ a 🎤 fungují během úkolu
 - [ ] 📖 otevře slovníček a položky se dají přehrát
-- [ ] Chybějící MP3 nerozbije scénu (TTS fallback)
+- [ ] Všechny anglické i české věty se přehrají z pevných MP3
+- [ ] V konzoli nevznikne hlášení o chybějící položce audio manifestu

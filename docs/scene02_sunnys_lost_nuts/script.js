@@ -1,9 +1,9 @@
 /**
- * Scene 2 — Sunny's Lost Nuts (standalone prototype)
+ * Scene 2 — Sunny's Lost Nuts (production web module)
  *
  * Image: scene_02_sunnys_lost_nuts_before.png (1672 x 941)
  *
- * Future MMTX integration:
+ * MMTX integration:
  *   scene id: sunnysLostNuts
  *   query: ?scene=sunnysLostNuts
  */
@@ -31,6 +31,11 @@ const dictionaryPanel = document.getElementById("dictionaryPanel");
 const dictionaryList = document.getElementById("dictionaryList");
 const helpButton = document.getElementById("helpButton");
 const completeBanner = document.getElementById("completeBanner");
+const audioManifest = window.SCENE02_AUDIO_MANIFEST;
+
+if (!audioManifest || audioManifest.schemaVersion !== 1) {
+  throw new Error("Scene 2 audio manifest is missing or invalid.");
+}
 
 const SCENE_STATES = {
   idle: "idle",
@@ -55,9 +60,6 @@ const scene02Config = {
       bubble: { x: 10.0, y: 32.0 },
       color: "#5f8bff",
       emoji: "🐶",
-      preferredVoice: "fable|brian|andrew|roger|guy|daniel|alex|aaron|evan|junior",
-      pitch: 1.0,
-      rate: 0.86,
     },
     {
       id: "bunny",
@@ -66,9 +68,6 @@ const scene02Config = {
       bubble: { x: 31.0, y: 18.0 },
       color: "#ff9ec8",
       emoji: "🐰",
-      preferredVoice: "echo|junior|samantha|ava|victoria|karen",
-      pitch: 1.12,
-      rate: 0.9,
     },
     {
       id: "bruno",
@@ -77,9 +76,6 @@ const scene02Config = {
       bubble: { x: 49.0, y: 18.0 },
       color: "#b8895f",
       emoji: "🦡",
-      preferredVoice: "onyx|aaron|roger|daniel|guy",
-      pitch: 0.88,
-      rate: 0.84,
     },
     {
       id: "fiona",
@@ -88,9 +84,6 @@ const scene02Config = {
       bubble: { x: 68.0, y: 18.0 },
       color: "#d4a574",
       emoji: "🦊",
-      preferredVoice: "shimmer|samantha|ava|victoria|karen",
-      pitch: 1.08,
-      rate: 0.9,
     },
     {
       id: "sunny",
@@ -99,9 +92,6 @@ const scene02Config = {
       bubble: { x: 86.0, y: 36.0 },
       color: "#f4c542",
       emoji: "🐿️",
-      preferredVoice: "nova|samantha|ava|victoria|karen|junior",
-      pitch: 1.18,
-      rate: 0.95,
     },
   ],
   mainHelp: {
@@ -132,18 +122,18 @@ const scene02Config = {
     fallbackEmoji: ["🥜", "🥜", "🥜"],
   },
   vocabulary: [
-    { en: "nuts", cz: "oříšky", emoji: "🥜", audio: "audio/english/scene02_vocab_nuts_en.mp3" },
-    { en: "map", cz: "mapa", emoji: "🗺️", audio: "audio/english/scene02_vocab_map_en.mp3" },
-    { en: "carrot", cz: "mrkev", emoji: "🥕", audio: "audio/english/scene02_vocab_carrot_en.mp3" },
-    { en: "bag", cz: "brašna", emoji: "🎒", audio: "audio/english/scene02_vocab_bag_en.mp3" },
-    { en: "I have", cz: "mám", emoji: "✅", audio: "audio/english/scene02_vocab_i_have_en.mp3" },
-    { en: "I don't have", cz: "nemám", emoji: "❌", audio: "audio/english/scene02_vocab_i_dont_have_en.mp3" },
-    { en: "Do you have?", cz: "máš?", emoji: "❓", audio: "audio/english/scene02_vocab_do_you_have_en.mp3" },
-    { en: "Does he have?", cz: "má on?", emoji: "❓", audio: "audio/english/scene02_vocab_does_he_have_en.mp3" },
-    { en: "Look inside", cz: "podívej se dovnitř", emoji: "👀", audio: "audio/english/scene02_vocab_look_inside_en.mp3" },
-    { en: "ready", cz: "připravený", emoji: "✅", audio: "audio/english/scene02_vocab_ready_en.mp3" },
-    { en: "wait", cz: "počkat", emoji: "✋", audio: "audio/english/scene02_vocab_wait_en.mp3" },
-    { en: "happy", cz: "šťastný", emoji: "😊", audio: "audio/english/scene02_vocab_happy_en.mp3" },
+    { en: "nuts", cz: "oříšky", emoji: "🥜" },
+    { en: "map", cz: "mapa", emoji: "🗺️" },
+    { en: "carrot", cz: "mrkev", emoji: "🥕" },
+    { en: "bag", cz: "brašna", emoji: "🎒" },
+    { en: "I have", cz: "mám", emoji: "✅" },
+    { en: "I don't have", cz: "nemám", emoji: "❌" },
+    { en: "Do you have?", cz: "máš?", emoji: "❓" },
+    { en: "Does he have?", cz: "má on?", emoji: "❓" },
+    { en: "Look inside", cz: "podívej se dovnitř", emoji: "👀" },
+    { en: "ready", cz: "připravený", emoji: "✅" },
+    { en: "wait", cz: "počkat", emoji: "✋" },
+    { en: "happy", cz: "šťastný", emoji: "😊" },
   ],
   steps: [
     {
@@ -153,7 +143,6 @@ const scene02Config = {
         textEn: "Oh no! I don't have my nuts!",
         textCz: "Ach ne! Nemám svoje oříšky!",
         emoji: "😢",
-        audio: "audio/english/scene02_01_sunny_no_nuts_en.mp3",
       },
     },
     {
@@ -163,7 +152,6 @@ const scene02Config = {
         textEn: "Benji, do you have nuts?",
         textCz: "Benji, máš oříšky?",
         emoji: "❓",
-        audio: "audio/english/scene02_02_fiona_benji_nuts_en.mp3",
       },
     },
     {
@@ -172,18 +160,14 @@ const scene02Config = {
       promptEmoji: "🐶",
       promptEn: "Tap Benji. Does he have nuts?",
       promptCz: "Klepni na Benjiho. Má oříšky?",
-      promptAudio: "audio/english/scene02_prompt_tap_benji_en.mp3",
       helpCz: "Klepni na Benjiho. Má oříšky?",
-      helpAudioCz: "audio/czech/scene02_help_tap_benji_cz.mp3",
       helpEn: "Tap Benji. Does he have nuts?",
       wrongHintEn: "Not yet. Tap Benji.",
-      wrongHintAudio: "audio/english/scene02_not_yet_tap_benji_en.mp3",
       response: {
         characterId: "benji",
         textEn: "No. I have a map.",
         textCz: "Ne. Mám mapu.",
         emoji: "🗺️",
-        audio: "audio/english/scene02_03_benji_map_en.mp3",
       },
     },
     {
@@ -193,7 +177,6 @@ const scene02Config = {
         textEn: "Bunny, do you have nuts?",
         textCz: "Bunny, máš oříšky?",
         emoji: "❓",
-        audio: "audio/english/scene02_04_fiona_bunny_nuts_en.mp3",
       },
     },
     {
@@ -202,18 +185,14 @@ const scene02Config = {
       promptEmoji: "🐰",
       promptEn: "Tap Bunny. Does he have nuts?",
       promptCz: "Klepni na Bunnyho. Má oříšky?",
-      promptAudio: "audio/english/scene02_prompt_tap_bunny_en.mp3",
       helpCz: "Klepni na Bunny. Má oříšky?",
-      helpAudioCz: "audio/czech/scene02_help_tap_bunny_cz.mp3",
       helpEn: "Tap Bunny. Does he have nuts?",
       wrongHintEn: "Not yet. Tap Bunny.",
-      wrongHintAudio: "audio/english/scene02_not_yet_tap_bunny_en.mp3",
       response: {
         characterId: "bunny",
         textEn: "No. I have a carrot.",
         textCz: "Ne. Mám mrkev.",
         emoji: "🥕",
-        audio: "audio/english/scene02_05_bunny_carrot_en.mp3",
       },
     },
     {
@@ -223,7 +202,6 @@ const scene02Config = {
         textEn: "Wait a second. I have a bag.",
         textCz: "Počkejte chvilku. Mám brašnu.",
         emoji: "🎒",
-        audio: "audio/english/scene02_06_bruno_bag_wait_second_en_fix1.mp3",
       },
     },
     {
@@ -233,7 +211,6 @@ const scene02Config = {
         textEn: "It is big. Look inside, friends!",
         textCz: "Je velká. Podívejte se dovnitř, kamarádi!",
         emoji: "👀",
-        audio: "audio/english/scene02_07_bruno_look_inside_friends_en_fix3_balanced.mp3",
       },
     },
     {
@@ -243,12 +220,9 @@ const scene02Config = {
       promptEmoji: "🎒",
       promptEn: "Tap the bag.",
       promptCz: "Klepni na brašnu.",
-      promptAudio: "audio/english/scene02_prompt_tap_bag_en.mp3",
       helpCz: "Klepni na brašnu.",
-      helpAudioCz: "audio/czech/scene02_help_tap_bag_cz.mp3",
       helpEn: "Tap the bag.",
       wrongHintEn: "Look at the bag.",
-      wrongHintAudio: "audio/english/scene02_look_at_bag_en.mp3",
       revealNuts: true,
     },
     {
@@ -258,7 +232,6 @@ const scene02Config = {
         textEn: "My nuts! I am so happy!",
         textCz: "Moje oříšky! Mám takovou radost!",
         emoji: "🎉",
-        audio: "audio/english/scene02_08_sunny_my_nuts_en_fix1_balanced.mp3",
         bounceSunny: true,
       },
     },
@@ -269,16 +242,12 @@ const scene02Config = {
         textEn: "Good. Now we are ready.",
         textCz: "Dobře. Teď jsme připraveni.",
         emoji: "✅",
-        audio: "audio/english/scene02_09_fiona_ready_en.mp3",
         revealMap: true,
       },
     },
   ],
   audio: {
     volume: 0.78,
-    tryAgain: "audio/english/scene02_try_again_en.mp3",
-    lookAtBag: "audio/english/scene02_look_at_bag_en.mp3",
-    dictionaryHelpCz: "audio/czech/scene02_dictionary_help_cz.mp3",
   },
 };
 
@@ -290,7 +259,6 @@ const state = {
   sequenceId: 0,
   audioUnlocked: false,
   currentAudio: null,
-  currentUtterance: null,
   speechQueue: Promise.resolve(),
   audioCache: new Map(),
   nutsRevealed: false,
@@ -371,42 +339,11 @@ function setupNutsReveal() {
   }
 }
 
-function loadVoices() {
-  if ("speechSynthesis" in window) {
-    window.speechSynthesis.getVoices();
-  }
-}
-
 function cancelSpeech() {
   if (state.currentAudio) {
     state.currentAudio.pause();
     state.currentAudio = null;
   }
-  if ("speechSynthesis" in window) {
-    window.speechSynthesis.cancel();
-  }
-  state.currentUtterance = null;
-}
-
-function pickVoice(preferredPattern, langPrefix) {
-  if (!("speechSynthesis" in window)) {
-    return null;
-  }
-
-  const voices = window.speechSynthesis.getVoices();
-  const patterns = String(preferredPattern || "")
-    .split("|")
-    .map((part) => part.trim().toLowerCase())
-    .filter(Boolean);
-
-  for (const pattern of patterns) {
-    const match = voices.find((voice) => voice.name.toLowerCase().includes(pattern));
-    if (match) {
-      return match;
-    }
-  }
-
-  return voices.find((voice) => voice.lang.toLowerCase().startsWith(langPrefix)) || null;
 }
 
 function goBackToForestSignpost() {
@@ -487,92 +424,29 @@ async function playAudioIfExists(src) {
   return true;
 }
 
-function estimateSpeechMs(text) {
-  return Math.min(9000, Math.max(1400, text.length * 72));
-}
-
-function normalizeCzechSpeech(text) {
-  return String(text || "")
-    .replaceAll("Benjiho", "Benžiho")
-    .replaceAll("Benji", "Benži")
-    .replaceAll("Bunnyho", "Bannyho")
-    .replaceAll("Bunny", "Banny");
-}
-
-function speakLine({ text, lang, character, rate, pitch, volume }) {
-  return new Promise((resolve) => {
-    if (!text) {
-      resolve();
-      return;
-    }
-
-    const estimatedMs = estimateSpeechMs(text);
-    let settled = false;
-    let timeoutId = null;
-
-    const finish = () => {
-      if (settled) {
-        return;
-      }
-      settled = true;
-      if (timeoutId) {
-        window.clearTimeout(timeoutId);
-      }
-      state.currentUtterance = null;
-      resolve();
-    };
-
-    if (!state.audioUnlocked || !("speechSynthesis" in window)) {
-      window.setTimeout(finish, estimatedMs);
-      return;
-    }
-
-    window.speechSynthesis.cancel();
-
-    window.setTimeout(() => {
-      if (settled) {
-        return;
-      }
-
-      const utterance = new SpeechSynthesisUtterance(text);
-      const isCzech = lang === "cs";
-      utterance.lang = isCzech ? "cs-CZ" : "en-US";
-      utterance.rate = rate ?? (isCzech ? 0.92 : character?.rate ?? 0.88);
-      utterance.pitch = pitch ?? character?.pitch ?? 1.0;
-      utterance.volume = volume ?? (isCzech ? 0.62 : 1.0);
-
-      const voice = pickVoice(
-        isCzech ? "zuzana|iveta|jana|cs" : character?.preferredVoice,
-        isCzech ? "cs" : "en",
-      );
-      if (voice) {
-        utterance.voice = voice;
-      }
-
-      state.currentUtterance = utterance;
-      utterance.onend = finish;
-      utterance.onerror = finish;
-
-      window.speechSynthesis.resume();
-      window.speechSynthesis.speak(utterance);
-      timeoutId = window.setTimeout(finish, estimatedMs + 1200);
-    }, 60);
-  });
-}
-
-async function playVoice({ src, text, lang = "en", character, rate, pitch }) {
-  const played = await playAudioIfExists(src);
-  if (played) {
-    return;
+function fixedAudioPath(text, lang, speakerId) {
+  const key = `${speakerId}::${text}`;
+  const path = audioManifest.dialogue?.[lang]?.[key];
+  if (!path) {
+    throw new Error(`Missing Scene 2 audio manifest entry: ${lang} ${key}`);
   }
-  await speakLine({ text, lang, character, rate, pitch });
+  return `${path}?v=${audioManifest.version}`;
 }
 
-async function speakCzechTranslation(text) {
+async function playVoice({ text, lang = "en", character, speakerId = "ui" }) {
   if (!text) {
     return;
   }
-  await speakLine({ text: normalizeCzechSpeech(text), lang: "cs", rate: 0.9, volume: 0.62 });
+  const resolvedSpeakerId = character?.id || speakerId;
+  const src = fixedAudioPath(text, lang, resolvedSpeakerId);
+  const played = await playAudioIfExists(src);
+  if (!played) {
+    console.error(`Scene 2 fixed audio could not be played: ${src}`);
+  }
+}
+
+async function speakCzechTranslation(text, speakerId = "ui") {
+  await playVoice({ text, lang: "cs", speakerId });
 }
 
 function queueSpeech(job) {
@@ -662,15 +536,14 @@ function renderDictionary() {
     button.addEventListener("click", () => {
       queueSpeech(async () => {
         await playVoice({
-          src: item.audio,
           text: item.en,
           lang: "en",
-          rate: 0.82,
+          speakerId: "dictionary",
         });
-        await speakLine({
+        await playVoice({
           text: item.cz,
           lang: "cs",
-          rate: 0.9,
+          speakerId: "dictionary",
         });
       });
     });
@@ -819,20 +692,6 @@ async function primeAudio() {
     return;
   }
   state.audioUnlocked = true;
-  loadVoices();
-
-  if (!("speechSynthesis" in window)) {
-    return;
-  }
-
-  await new Promise((resolve) => {
-    if (window.speechSynthesis.getVoices().length > 0) {
-      resolve();
-      return;
-    }
-    window.speechSynthesis.addEventListener("voiceschanged", resolve, { once: true });
-    window.setTimeout(resolve, 300);
-  });
 }
 
 async function playDialogueLine(line, runId) {
@@ -852,12 +711,11 @@ async function playDialogueLine(line, runId) {
   }
 
   await playVoice({
-    src: line.audio,
     text: line.textEn,
     lang: "en",
     character,
   });
-  await speakCzechTranslation(line.textCz);
+  await speakCzechTranslation(line.textCz, line.characterId);
 
   if (line.revealMap) {
     revealMapEffect();
@@ -896,10 +754,8 @@ async function beginTapStep(step, runId) {
   setBottomHint("Nejdřív poslouchej nápovědu. Potom klepni.", true);
   renderHud();
   await playVoice({
-    src: step.promptAudio,
     text: step.promptEn,
     lang: "en",
-    rate: 0.84,
   });
   await speakCzechTranslation(step.promptCz || step.helpCz);
 
@@ -1000,12 +856,11 @@ async function handleTap(targetId) {
     const character = characterById(step.response.characterId);
     showBubble(character, { emoji: step.response.emoji, textEn: step.response.textEn, textCz: step.response.textCz });
     await playVoice({
-      src: step.response.audio,
       text: step.response.textEn,
       lang: "en",
       character,
     });
-    await speakCzechTranslation(step.response.textCz);
+    await speakCzechTranslation(step.response.textCz, step.response.characterId);
   }
 
   hideBubble();
@@ -1018,10 +873,8 @@ async function handleWrongTap(step) {
   hideBubble();
 
   await playVoice({
-    src: step.wrongHintAudio || scene02Config.audio.tryAgain,
     text: step.wrongHintEn || "Try again.",
     lang: "en",
-    rate: 0.86,
   });
 
   renderHud();
@@ -1044,15 +897,10 @@ function playHelp() {
       await speakCzechTranslation(scene02Config.mainHelp.textCz);
       return;
     }
-    const playedCz = await playAudioIfExists(step.helpAudioCz);
-    if (!playedCz && step.helpCz) {
-      await speakCzechTranslation(step.helpCz);
-    }
+    await speakCzechTranslation(step.helpCz);
     await playVoice({
-      src: step.promptAudio,
       text: step.helpEn || step.promptEn,
       lang: "en",
-      rate: 0.84,
     });
   });
 }
@@ -1108,10 +956,8 @@ function handleRepeat() {
     if (step?.type === "tap") {
       queueSpeech(async () => {
         await playVoice({
-          src: step.promptAudio,
           text: step.promptEn,
           lang: "en",
-          rate: 0.84,
         });
         await speakCzechTranslation(step.promptCz || step.helpCz);
       });
@@ -1140,14 +986,10 @@ dictionaryButton.addEventListener("click", () => {
   dictionaryButton.classList.toggle("active-panel", willShow);
   if (willShow) {
     queueSpeech(async () => {
-      const played = await playAudioIfExists(scene02Config.audio.dictionaryHelpCz);
-      if (!played) {
-        await speakLine({
-          text: "Slovníček. Klepni na slovo a uslyšíš ho anglicky.",
-          lang: "cs",
-          rate: 0.88,
-        });
-      }
+      await playVoice({
+        text: "Slovníček. Klepni na slovo a uslyšíš ho anglicky.",
+        lang: "cs",
+      });
     });
   }
 });
@@ -1178,12 +1020,9 @@ scene.addEventListener("pointerdown", handleQuickSkipCorner, true);
 scene.addEventListener("touchstart", handleQuickSkipCorner, { capture: true, passive: false });
 scene.addEventListener("click", handleQuickSkipCorner, true);
 
-window.speechSynthesis?.addEventListener?.("voiceschanged", loadVoices);
-
 setupSceneImage();
 setupNutsReveal();
 renderDictionary();
-loadVoices();
 state.sceneState = SCENE_STATES.waitingAudio;
 setBottomHint("Klepni do scény a poslouchej.", true);
 renderHud();

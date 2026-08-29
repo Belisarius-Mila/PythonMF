@@ -1,12 +1,15 @@
-# Scene 02 — Audio manifest (Sunny's Lost Nuts)
+# Scene 02 — pevná audio knihovna
 
-Tato složka je připravená pro finální MP3 z lokálního TTS workflow.
+Scéna přehrává pouze předem připravená MP3 uvedená v `../audio_manifest.js`.
+Systémový ani prohlížečový hlas se nepoužívá.
 
-## Pravidla přehrávání v prototypu
+## Pravidla
 
-1. Pokud MP3 existuje → přehraje se soubor.
-2. Pokud MP3 chybí → dočasný fallback přes `speechSynthesis`.
-3. Žádné API klíče v prototypu.
+1. `audio_manifest.js` mapuje každý skutečně mluvený text na jedno MP3.
+2. Existující kvalitní MP3 se při opakovaném buildu nepřepisují.
+3. Chybějící české stopy používají hlas `cs-CZ-VlastaNeural`.
+4. Chybějící anglické slovníkové stopy používají hlas `en-US-JennyNeural`.
+5. Žádné API klíče ani citlivá data nejsou součástí scény.
 
 ## Struktura
 
@@ -16,7 +19,14 @@ audio/
   czech/     — nápovědy pro rodiče (CZ)
 ```
 
-## English — dialog
+## Rozsah
+
+- 9 dvojjazyčných dialogových vět,
+- 12 dvojjazyčných položek slovníčku,
+- anglické i české pokyny a nápovědy,
+- celkem 55 pevných zvukových referencí.
+
+## English — zachované dialogy
 
 | Soubor | Text |
 |--------|------|
@@ -68,4 +78,15 @@ audio/
 | `scene02_help_tap_bag_cz.mp3` | Klepni na brašnu. |
 | `scene02_dictionary_help_cz.mp3` | Slovníček. Klepni na slovo a uslyšíš ho anglicky. |
 
-Po doplnění MP3 stačí soubory vložit do příslušných podsložek — kód je načte automaticky.
+## Reprodukovatelný build a kontrola
+
+Z kořene repozitáře:
+
+```bash
+python3 MatysekANJ/build_scene02_audio.py
+python3 MatysekANJ/build_scene02_audio.py --check
+```
+
+První příkaz je bezpečný dry-run. Přepínač `--apply` používá schválenou
+projektovou audio capability a vytvoří pouze chybějící MP3; běžný vývojový krok
+jej používá jen v povoleném zapisovacím režimu.
