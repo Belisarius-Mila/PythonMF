@@ -1,7 +1,7 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Dorovnáno terminálovým vývojem: 2026-08-29 20:32 CEST
+- Živě dokončeno: 2026-08-29 20:44 CEST
 
 ### Hotovo
 - MMTX má deklarativní produkční cíl GitHub Pages.
@@ -12,16 +12,17 @@
 - Publisher nyní po dokončení workflow omezeně čeká až 30 sekund na odpovídající úspěšný deployment stejného commitu.
 - Druhý živý `p+n` publikoval přes run `33268409643` a deployment `6158799240` přesný commit `d0fb736`; další falešně zápornou účtenku způsobil chybějící certifikační řetězec lokálního Pythonu při závěrečném HTTPS smoke.
 - Smoke nyní používá systémový `/usr/bin/curl`, tedy stejné systémové TLS úložiště, kterým byl veřejný HTTP 200 nezávisle potvrzen.
+- Finální živé `p+n` v MMTX skončilo účtenkou `completed`: run `33269031345`, deployment `6158917594`, commit `72aedbf`, HTTP 200.
 
 ### Otevřeno
-- Oprava HTTPS smoke prošla úplnou branou a čeká na commit, GitHub push, nasazení Cockpitu a poslední živé ověření bez nového Pages runu.
+- Žádný známý otevřený krok samoobslužného MMTX nasazení.
 
 ### Rizika
 - Produkční operace je záměrně dostupná jen pro přesný přímý pokyn a pracovní proud s deklarovaným cílem `github_pages`.
 - Divergence, špinavý main, neshoda `origin/main`, neúspěšný workflow, chybějící deployment nebo HTTP smoke operaci uzavřeně zastaví.
 
 ### Další krok
-- Projít úplnou branou, commitnout a pushnout opravu, nasadit nový Cockpit a živě ověřit již publikovaný commit bez spuštění duplicitního Pages runu.
+- Při příštím dokončeném vývoji MMTX zadat Human–Adamovi přesný pokyn `p+n`; k terminálovému Adamovi přejít jen při pravdivé fail-closed účtence.
 
 ### Rozhodnutí
 - Push a produkční nasazení zůstávají oddělené důkazy, ale přímý příkaz `p+n` je může bezpečně zřetězit bez přepnutí k terminálovému Adamovi.
@@ -36,6 +37,7 @@
 - První samoobslužný run `33267653174` publikoval `a0ab509`; pozdější deployment `6158651157` potvrdil přesnou shodu commitu a HTTP 200, přesto původní jednorázová kontrola skončila před jeho zveřejněním v GitHub API.
 - Druhý samoobslužný run `33268409643` a deployment `6158799240` úspěšně publikovaly `d0fb736`; systémový `curl` vrací HTTP 200, zatímco původní `urllib` skončil na `CERTIFICATE_VERIFY_FAILED`.
 - Oprava systémového HTTPS smoke prošla úplnou Cockpit Quality Gate 1477/1477 za 445,1 s.
+- Cockpit běží na `72aedbf`, nasazovací smoke prošel 5/5 a finální Human–Adam operace vrátila `deployed` pro tentýž commit.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -2766,3 +2768,11 @@ Technický důkaz:
 - Rozhodnutí: Produkční důkaz nadále vyžaduje HTTP 200, ale používá systémové TLS úložiště Macu. Selhání HTTPS, nečíselný stav i stav odlišný od 200 dál zastaví operaci.
 - Další krok: Commit, push, řízené nasazení Cockpitu a živé ověření již publikovaného commitu bez nového workflow.
 - Ověření: cílená sada publisheru a provozní vrstvy 37/37; úplná Cockpit Quality Gate 1477/1477 za 445,1 s; GitHub run `33268409643` i deployment `6158799240` jsou success pro `d0fb736`; veřejná URL vrací přes systémový curl HTTP 200.
+
+### Praktické dokončení 2026-08-29 20:44 CEST – Human–Adam nasadil MMTX s pravdivou účtenkou
+
+- Pracovní proud: `layer-human-adam-development`
+- Hotovo: Oprava `72aedbf` je na GitHubu i v běžícím Cockpitu. Finální živý pokyn `p+n` v aktivním MMTX sám spustil Pages run `33269031345`, koreloval deployment `6158917594` se stejným commitem a vrátil `completed`, `deployed` a HTTP 200.
+- Rozhodnutí: Samoobslužné nasazení MMTX je provozně dokončené. Přesný `p+n` zůstává jediným zkráceným pokynem, který může serverově zřetězit bezpečný push a ověřené Pages nasazení.
+- Další krok: Při dalším hotovém vývoji MMTX použít `p+n`; při fail-closed výsledku příkaz automaticky neopakovat a nejprve auditovat přesné workflow/deployment ID.
+- Ověření: cíleně 37/37, úplná brána 1477/1477 za 445,1 s, Cockpit quick gate 7,7 s a smoke 5/5; produkční účtenka obsahuje commit `72aedbfffc3f`, run `33269031345`, deployment `6158917594` a HTTP 200.

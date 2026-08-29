@@ -296,3 +296,16 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   workflow s cílovým commitem. Při neshodě spustit ruční Pages workflow a po
   jeho úspěchu nezávisle ověřit veřejný HTTP stav i shodu hashů manifestu,
   aplikačního JavaScriptu a reprezentativních assetů.
+
+### LL-023 — Pages workflow může uspět dříve než úplná produkční účtenka
+
+- Problém: GitHub workflow správně publikoval cílový commit, ale deployment se
+  v API objevil o několik sekund později a lokální Python `urllib` navíc neměl
+  použitelný certifikační řetězec. Produkce běžela, zatímco serverová účtenka
+  dvakrát správně zůstala fail-closed.
+- Typ: opakující se
+- Řešení nalezeno: 29082026
+- Řešení: Po dokončení přesného workflow omezeně čekat na success deployment
+  stejného commitu a závěrečný HTTPS smoke provést přes systémový curl. Nejasný
+  výsledek nikdy automaticky neopakovat; nejprve korelovat workflow ID,
+  deployment ID, commit a veřejný HTTP stav.

@@ -1,17 +1,18 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Produkční stav ověřen: 2026-08-29 19:52 CEST
+- Produkční stav ověřen: 2026-08-29 20:44 CEST
 
 ### Hotovo
 - Scéna 3 nyní používá úplnou pevnou anglickou a českou audio knihovnu řízenou manifestem bez systémového hlasu.
-- Scény 2 a 3 jsou publikované na GitHub Pages z commitu `933834f`.
+- Scény 2 a 3 jsou publikované na GitHub Pages; poslední ověřený produkční commit je `72aedbf`.
+- Human–Adam umí dokončený MMTX bezpečně publikovat přímým pokynem `p+n` bez terminálového mezikroku.
 
 ### Otevřeno
 - Praktický poslech scén 2 a 3 na Linuxu.
 
 ### Rizika
-- Samotný GitHub push Pages nepublikuje; je nutné spustit a ověřit samostatný Pages workflow.
+- Samotný GitHub push Pages nepublikuje; `p+n` proto ověřuje samostatný Pages workflow, deployment stejného commitu a HTTP 200.
 
 ### Další krok
 - Prakticky projít a poslechnout celou scénu 3 na Linuxu.
@@ -23,7 +24,7 @@
 - Po poslechovém ověření pokračovat auditem pevného audia hlavního portálu.
 
 ### Technický stav checkpointu
-- Pages run `33266361424` úspěšně nasadil přesný commit `933834f`.
+- Pages run `33269031345` úspěšně nasadil přesný commit `72aedbf`; deployment `6158917594` je success a veřejný smoke vrací HTTP 200.
 - Veřejné manifesty a reprezentativní české MP3 scén 2 a 3 jsou hashově shodné s lokální produkční kopií.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -332,3 +333,11 @@ Bezpecnost / neukladat:
 - Rizika: Bez výslovného spuštění Pages workflow může GitHub obsahovat novější MMTX než produkce.
 - Další krok: Prakticky projít a poslechnout scény 2 a 3 na Linuxu.
 - Ověření: run `33266361424` uspěl; veřejné manifesty a reprezentativní české MP3 obou scén jsou hashově shodné s lokální produkční kopií.
+
+### Samoobslužné nasazení 2026-08-29 20:44 CEST – MMTX p+n živě dokončeno
+
+- Pracovní proud: `project-mmtx`
+- Hotovo: Human–Adam přímým `p+n` publikoval aktuální čistý GitHub main `72aedbf` a vrátil pravdivou dokončovací účtenku.
+- Rozhodnutí: Další dokončený MMTX vývoj končit v tomto proudu pokynem `p+n`; samotný push není produkční důkaz.
+- Další krok: Prakticky projít a poslechnout scény 2 a 3 na Linuxu.
+- Ověření: run `33269031345`, deployment `6158917594`, přesná shoda commitu a veřejný HTTP 200.
