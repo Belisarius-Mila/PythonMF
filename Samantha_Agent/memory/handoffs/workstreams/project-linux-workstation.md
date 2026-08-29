@@ -1,35 +1,34 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-29 09:53 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-29 15:45 CEST
 
 ### Hotovo
-- VocabularyEN nyní používá úplnou knihovnu kvalitních předgenerovaných MP3 hlasů Aria a Vlasta bez systémového hlasu a bez prodlevy generování
+- Dokumentace MMTX nyní správně zachycuje napojení scény 3 na Harryho a nový guard brání tichému převzetí zastaralého stavu
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
 - Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
 
 ### Rizika
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Po zveřejnění prakticky ověřit přehrávání VocabularyEN na Linuxu
+- Inventarizovat systémové čtení Harryho scény a připravit jeho náhradu pevnými MP3
 
 ### Rozhodnutí
-- Kanonické hlasy jsou en-US-AriaNeural a cs-CZ-VlastaNeural při rychlosti -10 %; po změně CSV se vždy provede synchronizace, doplnění MP3 a read-only kontrola úplnosti
+- Forest Journey pokračuje ze scény 3 do Harryho scény 4; historický samostatný prototyp už není aktuální stav
 
 ### Navrhované další kroky
-- Vyzkoušet oba směry kartiček na Linuxu
-- Ověřit okamžitý začátek přehrávání zadání
-- Ověřit pořadí angličtina a čeština u odpovědi
-- Při nových slovíčkách používat tříkrokový audio postup
+- Doplnit kvalitní česká a chybějící anglická MP3
+- Ručně ověřit celý průchod scéna 3 až Harry na Linuxu i Macu
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `9f8a9c376c20`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `9f8a9c376c20` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-29T06:57:59+00:00.
-- Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
+- Git před checkpointem: lokální `main` na `574521e9ce7b`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `574521e9ce7b` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-29T13:30:19+00:00.
+- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -138,3 +137,15 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (80): `Samantha_Agent/memory/handoffs/workstreams/project-linux-workstation.md`, `Samantha_Agent/memory/tvbcp/workstreams/project-linux-workstation.md`, `VocabularyEN/sync_vocabulary_en_to_docs.py`, `docs/vocabulary-en/app.js`, `docs/vocabulary-en/index.html`, `Samantha_Agent/tests/test_vocabularyen_audio_library.py`, `VocabularyEN/AUDIO_WORKFLOW.md`, `VocabularyEN/build_vocabulary_en_audio.py`, `docs/assets/vocabulary-en-audio/cs-cz-vlasta-neural/00cc4ffe2e1325586465.mp3`, `docs/assets/vocabulary-en-audio/cs-cz-vlasta-neural/01c372c9e18360fd3a72.mp3`, `docs/assets/vocabulary-en-audio/cs-cz-vlasta-neural/01e4810718647f555107.mp3`, `docs/assets/vocabulary-en-audio/cs-cz-vlasta-neural/036de19ecddc180da87f.mp3`, `docs/assets/vocabulary-en-audio/cs-cz-vlasta-neural/038ea33e5403360626ce.mp3`, `docs/assets/vocabulary-en-audio/cs-cz-vlasta-neural/04def391499947cd1236.mp3`, `docs/assets/vocabulary-en-audio/cs-cz-vlasta-neural/05f195d97e1c1e6cf146.mp3`, `docs/assets/vocabulary-en-audio/cs-cz-vlasta-neural/0b2907884d5f08c5344a.mp3`, `docs/assets/vocabulary-en-audio/cs-cz-vlasta-neural/0c025b10cbc59376ab93.mp3`, `docs/assets/vocabulary-en-audio/cs-cz-vlasta-neural/0e9ea43a2d328473e736.mp3`, `docs/assets/vocabulary-en-audio/cs-cz-vlasta-neural/0edd9002eb6bbcf57957.mp3`, `docs/assets/vocabulary-en-audio/cs-cz-vlasta-neural/0f9d451e00dab0b60b33.mp3`, `docs/assets/vocabulary-en-audio/cs-cz-vlasta-neural/105dcc7925f4ac0f9879.mp3`, `docs/assets/vocabulary-en-audio/cs-cz-vlasta-neural/1191bcad39d107d76a05.mp3`, `docs/assets/vocabulary-en-audio/cs-cz-vlasta-neural/11c5639d04a96f7fd1f9.mp3`, `docs/assets/vocabulary-en-audio/cs-cz-vlasta-neural/11d33724807bac0b2714.mp3`, `docs/assets/vocabulary-en-audio/cs-cz-vlasta-neural/11e36c599db4caed5ca0.mp3`, `docs/assets/vocabulary-en-audio/cs-cz-vlasta-neural/12cfd70e3fa500f17e71.mp3`, `docs/assets/vocabulary-en-audio/cs-cz-vlasta-neural/13f639e9a80354493fc9.mp3`, `docs/assets/vocabulary-en-audio/cs-cz-vlasta-neural/1481394c4ae520a8fb48.mp3`, `docs/assets/vocabulary-en-audio/cs-cz-vlasta-neural/1498a0307280d133be14.mp3`, `docs/assets/vocabulary-en-audio/cs-cz-vlasta-neural/1520ea7e28dc59b8b01b.mp3`, `docs/assets/vocabulary-en-audio/cs-cz-vlasta-neural/15ee4326554ada0cb75f.mp3`, `docs/assets/vocabulary-en-audio/cs-cz-vlasta-neural/161ed9ab4a51427f33a5.mp3`, `docs/assets/vocabulary-en-audio/cs-cz-vlasta-neural/16f90bc807da103f89b0.mp3`, `docs/assets/vocabulary-en-audio/cs-cz-vlasta-neural/187bde871fbdc4b2b3bc.mp3`, `docs/assets/vocabulary-en-audio/cs-cz-vlasta-neural/197b969c4a63f088a01e.mp3`, `docs/assets/vocabulary-en-audio/cs-cz-vlasta-neural/19afcad94affcd54d915.mp3`, `docs/assets/vocabulary-en-audio/cs-cz-vlasta-neural/1b2e952658f3186f6913.mp3`, `docs/assets/vocabulary-en-audio/cs-cz-vlasta-neural/1b6b87c6bbd9277f9330.mp3`, `docs/assets/vocabulary-en-audio/cs-cz-vlasta-neural/1c0a03a2d61d18c70e8c.mp3`, `docs/assets/vocabulary-en-audio/cs-cz-vlasta-neural/1cb7c3c365c67cc7560c.mp3`, … a dalších 40
 - Commit: `Use pre-generated MP3 in VocabularyEN`
 - Další krok: Po zveřejnění prakticky ověřit přehrávání VocabularyEN na Linuxu
+
+### Automatický checkpoint 2026-08-29 15:45 CEST
+
+- Pracovní proud: `project-linux-workstation`
+- Hotovo: Dokumentace MMTX nyní správně zachycuje napojení scény 3 na Harryho a nový guard brání tichému převzetí zastaralého stavu; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.; Lokální commity čekají na samostatný denní GitHub balíček.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: rychlá Cockpit brána syntaxe a whitespace: 4.9 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu
+- Změněné cesty před paměťovým zápisem (6): `Samantha_Agent/memory/ACTIVE_PROJECTS.md`, `Samantha_Agent/memory/MEMORY_INDEX.md`, `Samantha_Agent/memory/handoffs/workstreams/project-mmtx.md`, `Samantha_Agent/memory/projects/mmtx_story_hotspot_app.md`, `Samantha_Agent/memory/technical/project_tvbcp_rules.md`, `Samantha_Agent/memory/tvbcp/workstreams/project-mmtx.md`
+- Commit: `Dorovnat dokumentaci MMTX po napojení Harryho`
+- Další krok: Inventarizovat systémové čtení Harryho scény a připravit jeho náhradu pevnými MP3

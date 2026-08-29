@@ -1,34 +1,34 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-25 13:17 CEST
+- Obsahově dorovnáno podle kódu a Git historie: 2026-08-29 15:43 CEST
+- Poslední potvrzený MMTX checkpoint: 2026-08-25 13:17 CEST
 
 ### Hotovo
-- MMTX má samostatné přání Jane s pozměněnými texty, anglickou výslovností jména a vlastními zvukovými stopami.
-- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Produkční webová scéna 3 pokračuje přímo do Harryho scény 4.
+- Skrytý rychlý přechod ve scéně 3 vede rovněž k Harrymu.
+- Harryho scéna i narozeninová scéna Jane jsou součástí aktuálního nasazeného main.
 
 ### Otevřeno
-- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Harryho české a další nepokryté systémové čtení není na Linuxu dostatečně kvalitní; je potřeba ho nahradit předem připravenými MP3.
 
 ### Rizika
-- Žádné další doložené provozní riziko.
+- Historický zápis z 2026-08-12 správně popisuje tehdejší samostatný prototyp, ale nesmí se používat jako současný stav po integraci z 2026-08-26.
 
 ### Další krok
-- Ručně ověřit hlasy a výslovnost Jane na iPhonu nebo Macu a poté použít ovládací prvky Cockpitu pro checkpoint a nasazení.
+- Udělat úplnou inventuru mluvených řetězců Harryho scény a nahradit systémové čtení pevnými MP3 s okamžitým přehráním.
 
 ### Rozhodnutí
-- Jméno Jane se v anglickém i českém audia vyslovuje anglicky jako džejn; původní Kate birthday zůstává beze změny.
+- Webový Forest Journey pokračuje ze scény 3 do Harryho scény 4; Harry už není samostatný nenapojený prototyp.
 
 ### Navrhované další kroky
-- Žádné další návrhy nad rámec bezprostředního kroku.
+- Po doplnění MP3 ručně ověřit celý průchod scéna 3 → Harry na Linuxu i Macu.
 
 ### Technický stav checkpointu
-- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `3e4729b7ecf1`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `3e4729b7ecf1` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-25T10:56:19+00:00.
-- Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
-- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
-- Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
+- Integraci provedl commit `6418137`; opravu skrytého přechodu commit `3b97df3`.
+- `goToNextScene()` ve scéně 3 otevírá `scene04_harry_guard_prototype/index.html` v produkčním `docs/` i mirroru.
+- Živý stav při dorovnání: deployment=`verified_current`, runtime=`connected`; main je pouze napřed před GitHubem.
+- Chronologické bloky níže zůstávají historickými snapshoty a nepřepisují tento aktuální souhrn.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: MMTX

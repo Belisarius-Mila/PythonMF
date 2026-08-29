@@ -87,6 +87,22 @@ Tyto vrstvy se navzájem nenahrazují.
   Pokud takový commit mění věcný stav projektu, projektová paměť se dorovná
   ručně v témže tematickém kroku.
 
+## Kontrola čerstvosti před odpovědí
+
+- Aktivní pracovní proud určuje kontext a zapisovací oprávnění, ale sám o sobě
+  nedokládá aktuální stav jiného projektu zmíněného v dotazu.
+- Před důležitým tvrzením o současném stavu projektu se má při levném a
+  jednoznačném ověření porovnat datum kanonického souhrnu s novějšími změnami
+  jeho skutečných produkčních souborů. Novější kód je signál k auditu, ne
+  automatický důkaz významu změny.
+- Pokud je produkční změna novější než kanonický souhrn, odpověď nesmí bez
+  ověření opakovat starší rozhodnutí jako dnešní stav. Nejprve se ověří kód a
+  Git historie; prokázaný obsahový drift se dorovná v příslušném pracovním
+  proudu nebo se výslovně označí jako čekající na dorovnání.
+- Při běžném terminálovém commitu mimo Human–Adam checkpoint je povinností
+  stejného tematického kroku buď dorovnat projektovou paměť, nebo viditelně
+  zanechat informaci, že dokumentační writeback ještě chybí.
+
 ## Ukončení nebo archivace
 
 Při dokončení projektu se do TVBCP doplní konečný výsledek, důkazy testů,

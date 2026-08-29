@@ -1,35 +1,34 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-29 09:53 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-29 15:45 CEST
 
 ### Hotovo
-- VocabularyEN nyní používá úplnou knihovnu kvalitních předgenerovaných MP3 hlasů Aria a Vlasta bez systémového hlasu a bez prodlevy generování
+- Dokumentace MMTX nyní správně zachycuje napojení scény 3 na Harryho a nový guard brání tichému převzetí zastaralého stavu
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
 - Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
 
 ### Rizika
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Po zveřejnění prakticky ověřit přehrávání VocabularyEN na Linuxu
+- Inventarizovat systémové čtení Harryho scény a připravit jeho náhradu pevnými MP3
 
 ### Rozhodnutí
-- Kanonické hlasy jsou en-US-AriaNeural a cs-CZ-VlastaNeural při rychlosti -10 %; po změně CSV se vždy provede synchronizace, doplnění MP3 a read-only kontrola úplnosti
+- Forest Journey pokračuje ze scény 3 do Harryho scény 4; historický samostatný prototyp už není aktuální stav
 
 ### Navrhované další kroky
-- Vyzkoušet oba směry kartiček na Linuxu
-- Ověřit okamžitý začátek přehrávání zadání
-- Ověřit pořadí angličtina a čeština u odpovědi
-- Při nových slovíčkách používat tříkrokový audio postup
+- Doplnit kvalitní česká a chybějící anglická MP3
+- Ručně ověřit celý průchod scéna 3 až Harry na Linuxu i Macu
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `9f8a9c376c20`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `9f8a9c376c20` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-29T06:57:59+00:00.
-- Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
+- Git před checkpointem: lokální `main` na `574521e9ce7b`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `574521e9ce7b` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-29T13:30:19+00:00.
+- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -253,3 +252,31 @@ Technický důkaz:
 - rychlá Cockpit brána syntaxe a whitespace: 7.4 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `project-linux-workstation`.
 - Read-only živý stav při checkpointu: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
+
+### 2026-08-29 15:45 CEST – Dokumentace MMTX nyní správně zachycuje napojení scény 3 na Harryho a nový guard brání tichému převzetí zastaralého stavu
+
+Hotovo:
+- Dokumentace MMTX nyní správně zachycuje napojení scény 3 na Harryho a nový guard brání tichému převzetí zastaralého stavu
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+
+Otevřeno:
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
+
+Rizika:
+- Žádné další doložené provozní riziko.
+
+Rozhodnutí:
+- Forest Journey pokračuje ze scény 3 do Harryho scény 4; historický samostatný prototyp už není aktuální stav
+
+Další krok:
+- Inventarizovat systémové čtení Harryho scény a připravit jeho náhradu pevnými MP3
+
+Navrhované další kroky:
+- Doplnit kvalitní česká a chybějící anglická MP3
+- Ručně ověřit celý průchod scéna 3 až Harry na Linuxu i Macu
+
+Technický důkaz:
+- rychlá Cockpit brána syntaxe a whitespace: 4.9 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
+- Pracovní proud: `project-linux-workstation`.
+- Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.

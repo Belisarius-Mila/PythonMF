@@ -324,3 +324,26 @@ Rucni webovy retest 2026-07-01:
   mluvi Brunem".
 - Pri dalsi male MMTX davce lze udelat Benji-only poslechovy recast, ale nema
   se z toho automaticky delat podminka pro dalsi Forest Journey scenu.
+
+## Web MMTX - Harry napojen za scénu 3 (2026-08-26)
+
+Aktuální produkční průchod už nepoužívá Harryho scénu pouze jako samostatný
+prototyp:
+
+- commit `6418137` napojil dokončení scény 3 na
+  `scene04_harry_guard_prototype/index.html`,
+- commit `3b97df3` opravil také skrytý rychlý přechod ve scéně 3,
+- stejné napojení je v produkčním `docs/` i v mirroru
+  `MatysekANJ/web_mmtx/`,
+- historické rozhodnutí z 2026-08-12 o samostatném prototypu popisuje jen
+  tehdejší stav a po této integraci už není současnou autoritou.
+
+Otevřený krok pro Linux:
+
+- udělat úplnou inventuru všech mluvených řetězců Harryho scény,
+- české a další nepokryté systémové čtení nahradit předem připravenými MP3,
+- zachovat okamžité lokální přehrávání bez čekání na TTS build,
+- po změně ručně projít celý přechod scéna 3 → Harry na Linuxu i Macu.
+
+Obsah projektové paměti byl podle kódu a Git historie dorovnán 2026-08-29;
+poslední automatický MMTX checkpoint před tímto dorovnáním byl z 2026-08-25.
