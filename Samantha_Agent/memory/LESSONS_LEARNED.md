@@ -284,3 +284,15 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   rozporů. Handoffové kroky zobrazit odděleně jako návrhy z projektové paměti,
   vždy se zdrojem a stářím důkazu; počet aktuálních úkolů nikdy nedoplňovat na
   předem dané číslo.
+
+### LL-022 — Push webových souborů není důkaz GitHub Pages publikace
+
+- Problém: Nový VocabularyEN commit byl čistě na `main` i `origin/main`, ale
+  poslední Pages workflow běželo nad starším commitem. Veřejná aplikace proto
+  nový audio manifest a MP3 ještě neobsahovala.
+- Typ: opakující se
+- Řešení nalezeno: 29082026
+- Řešení: Před tvrzením o produkci porovnat commit posledního úspěšného Pages
+  workflow s cílovým commitem. Při neshodě spustit ruční Pages workflow a po
+  jeho úspěchu nezávisle ověřit veřejný HTTP stav i shodu hashů manifestu,
+  aplikačního JavaScriptu a reprezentativních assetů.
