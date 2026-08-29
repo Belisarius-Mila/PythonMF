@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-28 20:54 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-29 08:52 CEST
 
 ### Hotovo
-- TVBCP nyní zachycuje nevyhovující praktický test a zmrazení dalšího vývoje čtení Human–Adam na Linuxu.
+- Lokální casting porovnává čtyři kvalitní hlasy na deseti skutečných výrazech VocabularyEN pomocí 40 hotových MP3 bez prodlevy
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
@@ -14,19 +14,21 @@
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Pokračovat jiným tématem Linux PC; ke čtení Human–Adam se vrátit pouze na nový výslovný pokyn.
+- Poslechnout casting a vybrat vítězný anglický a český hlas
 
 ### Rozhodnutí
-- Další vývoj dynamického čtení Human–Adam na Linuxu je zmrazen; odpovědi se budou číst jako text a Edge TTS zůstává pouze budoucím návrhem vyžadujícím nový výslovný souhlas.
+- Před nasazením předgenerovaných Microsoft Neural MP3 do VocabularyEN se vybere jeden anglický a jeden český hlas v odděleném lokálním castingu
 
 ### Navrhované další kroky
-- Případný budoucí návrat zahájit jednou veřejnou testovací větou
-- Pevná výuková hlášení řešit samostatně pomocí předem vytvořených MP3
+- Vybrat anglický hlas Ana nebo Aria
+- Vybrat český hlas Vlasta nebo Antonín
+- Po výběru připravit kompletní MP3 knihovnu VocabularyEN
+- Teprve potom zapojit MP3 do ostré webové aplikace
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `7219effd7f2e`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `7219effd7f2e` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-28T12:57:13+00:00.
+- Git před checkpointem: lokální `main` na `c46450e3e019`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `c46450e3e019` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-28T19:25:37+00:00.
 - Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -160,5 +162,34 @@ Navrhované další kroky:
 
 Technický důkaz:
 - rychlá Cockpit brána syntaxe a whitespace: 4.6 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
+- Pracovní proud: `project-linux-workstation`.
+- Read-only živý stav při checkpointu: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
+
+### 2026-08-29 08:52 CEST – Lokální casting porovnává čtyři kvalitní hlasy na deseti skutečných výrazech VocabularyEN pomocí 40 hotových MP3 bez prodlevy
+
+Hotovo:
+- Lokální casting porovnává čtyři kvalitní hlasy na deseti skutečných výrazech VocabularyEN pomocí 40 hotových MP3 bez prodlevy
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+
+Otevřeno:
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+
+Rizika:
+- Žádné další doložené provozní riziko.
+
+Rozhodnutí:
+- Před nasazením předgenerovaných Microsoft Neural MP3 do VocabularyEN se vybere jeden anglický a jeden český hlas v odděleném lokálním castingu
+
+Další krok:
+- Poslechnout casting a vybrat vítězný anglický a český hlas
+
+Navrhované další kroky:
+- Vybrat anglický hlas Ana nebo Aria
+- Vybrat český hlas Vlasta nebo Antonín
+- Po výběru připravit kompletní MP3 knihovnu VocabularyEN
+- Teprve potom zapojit MP3 do ostré webové aplikace
+
+Technický důkaz:
+- rychlá Cockpit brána syntaxe a whitespace: 9.1 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `project-linux-workstation`.
 - Read-only živý stav při checkpointu: main=`aligned`, deployment=`verified_current`, runtime=`connected`.

@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "purpose": "local VocabularyEN voice casting; not production audio",
+  "rate": "-10%",
+  "voices": [
+    {
+      "id": "en-US-AnaNeural",
+      "slug": "en-us-ana-neural",
+      "language": "en",
+      "label": "Ana",
+      "description": "mladší americký ženský hlas"
+    },
+    {
+      "id": "en-US-AriaNeural",
+      "slug": "en-us-aria-neural",
+      "language": "en",
+      "label": "Aria",
+      "description": "dospělý americký ženský hlas"
+    },
+    {
+      "id": "cs-CZ-VlastaNeural",
+      "slug": "cs-cz-vlasta-neural",
+      "language": "cz",
+      "label": "Vlasta",
+      "description": "český ženský hlas"
+    },
+    {
+      "id": "cs-CZ-AntoninNeural",
+      "slug": "cs-cz-antonin-neural",
+      "language": "cz",
+      "label": "Antonín",
+      "description": "český mužský hlas"
+    }
+  ],
+  "items": [
+    {
+      "id": "glass-water",
+      "order": 1,
+      "displayEn": "a glass (of water)",
+      "displayCz": "sklenice (vody)",
+      "speakEn": "a glass of water",
+      "speakCz": "sklenice vody"
+    },
+    {
+      "id": "drink",
+      "order": 30,
+      "displayEn": "drink",
+      "displayCz": "nápoj, pít",
+      "speakEn": "drink",
+      "speakCz": "nápoj. Pít."
+    },
+    {
+      "id": "free",
+      "order": 44,
+      "displayEn": "free",
+      "displayCz": "volný; zdarma",
+      "speakEn": "free",
+      "speakCz": "volný. Zdarma."
+    },
+    {
+      "id": "live",
+      "order": 69,
+      "displayEn": "live",
+      "displayCz": "žít; bydlet",
+      "speakEn": "live",
+      "speakCz": "žít. Bydlet."
+    },
+    {
+      "id": "welcome",
+      "order": 141,
+      "displayEn": "you're welcome",
+      "displayCz": "není zač",
+      "speakEn": "you're welcome",
+      "speakCz": "není zač"
+    },
+    {
+      "id": "right",
+      "order": 144,
+      "displayEn": "right",
+      "displayCz": "pravý, správný, doprava",
+      "speakEn": "right",
+      "speakCz": "pravý. Správný. Doprava."
+    },
+    {
+      "id": "three",
+      "order": 189,
+      "displayEn": "three",
+      "displayCz": "tři",
+      "speakEn": "three",
+      "speakCz": "tři"
+    },
+    {
+      "id": "do-you-have",
+      "order": 259,
+      "displayEn": "Do you have?",
+      "displayCz": "máš?",
+      "speakEn": "Do you have?",
+      "speakCz": "Máš?"
+    },
+    {
+      "id": "dont-know",
+      "order": 285,
+      "displayEn": "I don't know",
+      "displayCz": "nevím",
+      "speakEn": "I don't know",
+      "speakCz": "Nevím"
+    },
+    {
+      "id": "squirrel",
+      "order": 297,
+      "displayEn": "squirrel",
+      "displayCz": "veverka",
+      "speakEn": "squirrel",
+      "speakCz": "veverka"
+    }
+  ],
+  "audio": {
+    "en-US-AnaNeural": {
+      "glass-water": "audio/en-us-ana-neural/glass-water.mp3",
+      "drink": "audio/en-us-ana-neural/drink.mp3",
+      "free": "audio/en-us-ana-neural/free.mp3",
+      "live": "audio/en-us-ana-neural/live.mp3",
+      "welcome": "audio/en-us-ana-neural/welcome.mp3",
+      "right": "audio/en-us-ana-neural/right.mp3",
+      "three": "audio/en-us-ana-neural/three.mp3",
+      "do-you-have": "audio/en-us-ana-neural/do-you-have.mp3",
+      "dont-know": "audio/en-us-ana-neural/dont-know.mp3",
+      "squirrel": "audio/en-us-ana-neural/squirrel.mp3"
+    },
+    "en-US-AriaNeural": {
+      "glass-water": "audio/en-us-aria-neural/glass-water.mp3",
+      "drink": "audio/en-us-aria-neural/drink.mp3",
+      "free": "audio/en-us-aria-neural/free.mp3",
+      "live": "audio/en-us-aria-neural/live.mp3",
+      "welcome": "audio/en-us-aria-neural/welcome.mp3",
+      "right": "audio/en-us-aria-neural/right.mp3",
+      "three": "audio/en-us-aria-neural/three.mp3",
+      "do-you-have": "audio/en-us-aria-neural/do-you-have.mp3",
+      "dont-know": "audio/en-us-aria-neural/dont-know.mp3",
+      "squirrel": "audio/en-us-aria-neural/squirrel.mp3"
+    },
+    "cs-CZ-VlastaNeural": {
+      "glass-water": "audio/cs-cz-vlasta-neural/glass-water.mp3",
+      "drink": "audio/cs-cz-vlasta-neural/drink.mp3",
+      "free": "audio/cs-cz-vlasta-neural/free.mp3",
+      "live": "audio/cs-cz-vlasta-neural/live.mp3",
+      "welcome": "audio/cs-cz-vlasta-neural/welcome.mp3",
+      "right": "audio/cs-cz-vlasta-neural/right.mp3",
+      "three": "audio/cs-cz-vlasta-neural/three.mp3",
+      "do-you-have": "audio/cs-cz-vlasta-neural/do-you-have.mp3",
+      "dont-know": "audio/cs-cz-vlasta-neural/dont-know.mp3",
+      "squirrel": "audio/cs-cz-vlasta-neural/squirrel.mp3"
+    },
+    "cs-CZ-AntoninNeural": {
+      "glass-water": "audio/cs-cz-antonin-neural/glass-water.mp3",
+      "drink": "audio/cs-cz-antonin-neural/drink.mp3",
+      "free": "audio/cs-cz-antonin-neural/free.mp3",
+      "live": "audio/cs-cz-antonin-neural/live.mp3",
+      "welcome": "audio/cs-cz-antonin-neural/welcome.mp3",
+      "right": "audio/cs-cz-antonin-neural/right.mp3",
+      "three": "audio/cs-cz-antonin-neural/three.mp3",
+      "do-you-have": "audio/cs-cz-antonin-neural/do-you-have.mp3",
+      "dont-know": "audio/cs-cz-antonin-neural/dont-know.mp3",
+      "squirrel": "audio/cs-cz-antonin-neural/squirrel.mp3"
+    }
+  }
+}

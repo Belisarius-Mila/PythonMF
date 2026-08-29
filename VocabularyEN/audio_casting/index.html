@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VocabularyEN – casting hlasů</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main>
+    <header class="hero">
+      <p class="eyebrow">LOKÁLNÍ POSLECHOVÁ ZKOUŠKA</p>
+      <h1>Casting hlasů pro VocabularyEN</h1>
+      <p>Porovnej stejné výrazy a vyber jeden anglický a jeden český hlas. Tato stránka nic nemění v ostré aplikaci a nikam výsledek neodesílá.</p>
+    </header>
+
+    <p id="status" class="status" role="status">Načítám casting…</p>
+    <div id="casting" class="casting" hidden></div>
+
+    <section class="result" aria-labelledby="result-title">
+      <h2 id="result-title">Průběžný výběr</h2>
+      <p id="selection-summary">Zatím není vybrán žádný hlas.</p>
+      <label for="notes">Poznámka z poslechu</label>
+      <textarea id="notes" rows="4" placeholder="Např. Ana je příjemnější, Vlasta lépe vyslovuje více významů…"></textarea>
+      <p class="local-note">Výběr a poznámka se ukládají jen v tomto prohlížeči.</p>
+    </section>
+  </main>
+  <script src="app.js" defer></script>
+</body>
+</html>
