@@ -1,7 +1,7 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Dorovnáno terminálovým vývojem: 2026-08-29 20:25 CEST
+- Dorovnáno terminálovým vývojem: 2026-08-29 20:32 CEST
 
 ### Hotovo
 - MMTX má deklarativní produkční cíl GitHub Pages.
@@ -10,16 +10,18 @@
 - Aktuální MMTX byl ručně publikován na produkci z commitu `933834f` během opravy chybějícího workflow kroku.
 - První živé `p+n` spustilo run `33267653174` a skutečně publikovalo commit `a0ab509`; odhalilo však falešně zápornou účtenku kvůli opožděné viditelnosti Pages deploymentu.
 - Publisher nyní po dokončení workflow omezeně čeká až 30 sekund na odpovídající úspěšný deployment stejného commitu.
+- Druhý živý `p+n` publikoval přes run `33268409643` a deployment `6158799240` přesný commit `d0fb736`; další falešně zápornou účtenku způsobil chybějící certifikační řetězec lokálního Pythonu při závěrečném HTTPS smoke.
+- Smoke nyní používá systémový `/usr/bin/curl`, tedy stejné systémové TLS úložiště, kterým byl veřejný HTTP 200 nezávisle potvrzen.
 
 ### Otevřeno
-- Oprava opožděné Pages účtenky čeká na commit, GitHub push, nasazení Cockpitu a opakovaný živý test `p+n`.
+- Oprava HTTPS smoke prošla úplnou branou a čeká na commit, GitHub push, nasazení Cockpitu a poslední živé ověření bez nového Pages runu.
 
 ### Rizika
 - Produkční operace je záměrně dostupná jen pro přesný přímý pokyn a pracovní proud s deklarovaným cílem `github_pages`.
 - Divergence, špinavý main, neshoda `origin/main`, neúspěšný workflow, chybějící deployment nebo HTTP smoke operaci uzavřeně zastaví.
 
 ### Další krok
-- Commitnout a pushnout opravu, nasadit nový Cockpit a živě ověřit pravdivou dokončovací účtenku `p+n` v proudu MMTX.
+- Projít úplnou branou, commitnout a pushnout opravu, nasadit nový Cockpit a živě ověřit již publikovaný commit bez spuštění duplicitního Pages runu.
 
 ### Rozhodnutí
 - Push a produkční nasazení zůstávají oddělené důkazy, ale přímý příkaz `p+n` je může bezpečně zřetězit bez přepnutí k terminálovému Adamovi.
@@ -32,6 +34,8 @@
 - Cílená sada opravy opožděného deploymentu prošla 14/14; úplná Cockpit Quality Gate prošla 1476/1476 za 442,2 s.
 - Pages run `33266361424` publikoval `933834f`; veřejné manifesty a vzorky MP3 scén 2 a 3 jsou hashově shodné s lokální produkční kopií.
 - První samoobslužný run `33267653174` publikoval `a0ab509`; pozdější deployment `6158651157` potvrdil přesnou shodu commitu a HTTP 200, přesto původní jednorázová kontrola skončila před jeho zveřejněním v GitHub API.
+- Druhý samoobslužný run `33268409643` a deployment `6158799240` úspěšně publikovaly `d0fb736`; systémový `curl` vrací HTTP 200, zatímco původní `urllib` skončil na `CERTIFICATE_VERIFY_FAILED`.
+- Oprava systémového HTTPS smoke prošla úplnou Cockpit Quality Gate 1477/1477 za 445,1 s.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -2754,3 +2758,11 @@ Technický důkaz:
 - Rozhodnutí: Falešně záporný výsledek se nikdy neřeší slepým opakováním; nejprve se koreluje přesné workflow a deployment. Čekání je konečné a při chybě nebo cizím commitu dál selže uzavřeně.
 - Další krok: Commit, push, řízené nasazení Cockpitu a jediný opakovaný živý test `p+n`.
 - Ověření: cíleně 14/14; úplná Cockpit Quality Gate 1476/1476 za 442,2 s; GitHub Pages deployment `6158651157` má stav success pro `a0ab509` a veřejný kořen odpovídá HTTP 200.
+
+### Živý retest a oprava 2026-08-29 20:32 CEST – HTTPS smoke používá systémové TLS
+
+- Pracovní proud: `layer-human-adam-development`
+- Hotovo: Druhý živý `p+n` spustil run `33268409643` a deployment `6158799240` pro přesný commit `d0fb736`. GitHub část uspěla; falešně zápornou účtenku způsobilo až `CERTIFICATE_VERIFY_FAILED` v lokálním Python `urllib`. Smoke nyní volá pevný systémový `/usr/bin/curl` bez shellu.
+- Rozhodnutí: Produkční důkaz nadále vyžaduje HTTP 200, ale používá systémové TLS úložiště Macu. Selhání HTTPS, nečíselný stav i stav odlišný od 200 dál zastaví operaci.
+- Další krok: Commit, push, řízené nasazení Cockpitu a živé ověření již publikovaného commitu bez nového workflow.
+- Ověření: cílená sada publisheru a provozní vrstvy 37/37; úplná Cockpit Quality Gate 1477/1477 za 445,1 s; GitHub run `33268409643` i deployment `6158799240` jsou success pro `d0fb736`; veřejná URL vrací přes systémový curl HTTP 200.

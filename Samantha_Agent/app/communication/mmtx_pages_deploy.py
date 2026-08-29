@@ -7,7 +7,6 @@ import re
 import subprocess
 import threading
 import time
-import urllib.request
 from pathlib import Path
 from typing import Any, Callable, Sequence
 
@@ -192,12 +191,33 @@ def _wait_for_successful_deployment(
 
 
 def _default_smoke_fetcher(url: str) -> int:
-    request = urllib.request.Request(
-        url,
-        headers={"User-Agent": "Samantha-Human-Adam-Pages-Verification/1"},
+    completed = subprocess.run(
+        [
+            "/usr/bin/curl",
+            "--silent",
+            "--show-error",
+            "--location",
+            "--max-time",
+            "30",
+            "--output",
+            "/dev/null",
+            "--write-out",
+            "%{http_code}",
+            url,
+        ],
+        capture_output=True,
+        text=True,
+        timeout=35,
+        check=False,
     )
-    with urllib.request.urlopen(request, timeout=30) as response:  # noqa: S310 - fixed public URL
-        return int(response.status)
+    if completed.returncode != 0:
+        raise MmtxPagesDeployError("Publikovaná MMTX stránka neodpověděla přes HTTPS.")
+    try:
+        return int(completed.stdout.strip())
+    except ValueError as exc:
+        raise MmtxPagesDeployError(
+            "Publikovaná MMTX stránka nevrátila platný HTTP stav."
+        ) from exc
 
 
 def publish_mmtx_pages_current_main(

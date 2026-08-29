@@ -5,10 +5,12 @@ import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from app.communication.mmtx_pages_deploy import (
     GITHUB_REPOSITORY,
     MmtxPagesDeployError,
+    _default_smoke_fetcher,
     publish_mmtx_pages_current_main,
 )
 
@@ -140,6 +142,23 @@ class MmtxPagesDeployTests(unittest.TestCase):
 
         self.assertEqual(result["status"], "deployed")
         self.assertEqual(runner.deployment_queries, 4)
+
+    def test_default_smoke_uses_system_curl_tls(self) -> None:
+        completed = subprocess.CompletedProcess(
+            args=[],
+            returncode=0,
+            stdout="200",
+            stderr="",
+        )
+        with patch(
+            "app.communication.mmtx_pages_deploy.subprocess.run",
+            return_value=completed,
+        ) as run:
+            status = _default_smoke_fetcher("https://example.test/?verify=abc")
+
+        self.assertEqual(status, 200)
+        self.assertEqual(run.call_args.args[0][0], "/usr/bin/curl")
+        self.assertIn("--location", run.call_args.args[0])
 
 
 if __name__ == "__main__":

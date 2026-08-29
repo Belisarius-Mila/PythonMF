@@ -48,13 +48,14 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
-- 2026-08-29 20:25 CEST: Priorita 1, Human–Adam / samoobslužné MMTX `p+n`.
+- 2026-08-29 20:32 CEST: Priorita 1, Human–Adam / samoobslužné MMTX `p+n`.
   MMTX dostává deklarativní produkční cíl GitHub Pages a přímý pokyn `p+n`
   serverově zřetězí případný bezpečný GitHub balíček, Pages workflow, ověření
   deploymentu a HTTP smoke. První živý test publikoval `a0ab509`, ale odhalil
-  opožděnou viditelnost Pages deploymentu; bounded-polling oprava prošla cíleně
-  14/14 a úplnou branou 1476/1476. Zbývá commit, push, nasazení Cockpitu a jeden
-  opakovaný živý test pravdivé účtenky. Handoff:
+  opožděnou viditelnost Pages deploymentu. Druhý živý test publikoval `d0fb736`,
+  ale odhalil chybějící certifikační řetězec Pythonu při HTTPS smoke; oprava přes
+  systémový curl prošla cíleně 37/37 a úplnou branou 1477/1477. Zbývá commit,
+  push, nasazení Cockpitu a ověření již publikovaného commitu bez duplicitního workflow. Handoff:
   `handoffs/human_adam_layer_workstream_start_2026_07_20.md`.
 
 - 2026-07-27 12:05 CEST: Priorita 1, Human–Adam / uzavření dávkového UI.
