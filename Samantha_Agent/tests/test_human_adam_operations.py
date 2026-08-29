@@ -9,12 +9,16 @@ from app.communication.human_adam_operations import (
     FAMILY_CALENDAR_DRY_RUN_TODAY,
     FAMILY_CALENDAR_TEST_EMAIL_PREVIEW,
     FAMILY_CALENDAR_WORKSTREAM_ID,
+    GITHUB_PAGES_TARGET,
+    MMTX_PAGES_DEPLOY,
+    MMTX_WORKSTREAM_ID,
     OPERATION_MARKER_END,
     OPERATION_MARKER_START,
     HumanAdamOperationError,
     HumanAdamOperationRequest,
     automatic_operation_instruction,
     execute_human_adam_operation,
+    explicit_publish_and_deploy_command,
     parse_human_adam_operation,
 )
 
@@ -45,6 +49,64 @@ class HumanAdamOperationsTests(unittest.TestCase):
         self.assertIn(FAMILY_CALENDAR_DRY_RUN_CANDIDATE, instruction)
         self.assertIn(FAMILY_CALENDAR_TEST_EMAIL_PREVIEW, instruction)
         self.assertIn("Never use this protocol for SMTP send", instruction)
+
+    def test_mmtx_instruction_requires_server_verified_direct_publication_command(self) -> None:
+        unauthorized = automatic_operation_instruction(
+            workstream_id=MMTX_WORKSTREAM_ID,
+            production_deployment_target=GITHUB_PAGES_TARGET,
+            publication_authorized=False,
+        )
+        authorized = automatic_operation_instruction(
+            workstream_id=MMTX_WORKSTREAM_ID,
+            production_deployment_target=GITHUB_PAGES_TARGET,
+            publication_authorized=True,
+        )
+
+        self.assertIn(MMTX_PAGES_DEPLOY, unauthorized)
+        self.assertIn("publication_authorized=false", unauthorized)
+        self.assertIn("publication_authorized=true", authorized)
+        self.assertTrue(explicit_publish_and_deploy_command("Prosím p+n"))
+        self.assertTrue(explicit_publish_and_deploy_command("Nasaď na produkci"))
+        self.assertFalse(
+            explicit_publish_and_deploy_command("Proč se to nenasadilo na produkci?")
+        )
+
+    def test_mmtx_publication_executes_only_with_direct_authorization(self) -> None:
+        document = {
+            "status": "deployed",
+            "main_short": "a" * 12,
+            "pushed": True,
+            "commit_count": 2,
+            "workflow_run_id": 123,
+            "deployment_id": 456,
+            "production_url": "https://belisarius-mila.github.io/PythonMF/",
+            "smoke_http_status": 200,
+            "redacted": True,
+        }
+        calls = 0
+
+        def publisher() -> dict[str, object]:
+            nonlocal calls
+            calls += 1
+            return document
+
+        result = execute_human_adam_operation(
+            HumanAdamOperationRequest(MMTX_PAGES_DEPLOY),
+            workstream_id=MMTX_WORKSTREAM_ID,
+            publication_authorized=True,
+            production_publisher=publisher,
+        )
+        self.assertEqual(result, document)
+        self.assertEqual(calls, 1)
+
+        with self.assertRaises(HumanAdamOperationError):
+            execute_human_adam_operation(
+                HumanAdamOperationRequest(MMTX_PAGES_DEPLOY),
+                workstream_id=MMTX_WORKSTREAM_ID,
+                publication_authorized=False,
+                production_publisher=publisher,
+            )
+        self.assertEqual(calls, 1)
 
     def test_valid_final_receipt_is_parsed_and_hidden(self) -> None:
         parsed = parse_human_adam_operation(

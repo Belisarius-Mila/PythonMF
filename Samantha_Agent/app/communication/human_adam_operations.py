@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import re
+import unicodedata
 from dataclasses import dataclass
 from datetime import date, timedelta
 from typing import Any, Callable
@@ -29,6 +30,9 @@ FAMILY_CALENDAR_OPERATION_IDS = (
     FAMILY_CALENDAR_DRY_RUN_CANDIDATE,
     FAMILY_CALENDAR_TEST_EMAIL_PREVIEW,
 )
+MMTX_WORKSTREAM_ID = "project-mmtx"
+MMTX_PAGES_DEPLOY = "mmtx_pages_publish_current_main"
+GITHUB_PAGES_TARGET = "github_pages"
 _OPERATION_ID_RE = re.compile(r"[a-z][a-z0-9_]{2,95}")
 _DRY_RUN_KEYS = frozenset(
     {
@@ -73,12 +77,66 @@ class ParsedHumanAdamOperation:
 
 DryRunRunner = Callable[..., FamilyCalendarOperationalDryRunResult]
 TestEmailPlanner = Callable[..., FamilyCalendarTestEmailPlan]
+ProductionPublisher = Callable[[], dict[str, object]]
 
 
-def automatic_operation_instruction(*, workstream_id: str) -> str:
+def explicit_publish_and_deploy_command(value: object) -> bool:
+    """Recognize only a complete, direct publication command from Míla."""
+
+    normalized = unicodedata.normalize("NFKC", str(value or "")).casefold().strip()
+    normalized = " ".join(normalized.split())
+    return normalized in {
+        "p+n",
+        "prosím p+n",
+        "prosim p+n",
+        "proveď p+n",
+        "proved p+n",
+        "push a nasaď",
+        "push a nasad",
+        "push a nasaď na produkci",
+        "push a nasad na produkci",
+        "push + nasazení",
+        "push + nasazeni",
+        "nasaď na produkci",
+        "nasad na produkci",
+    }
+
+
+def automatic_operation_instruction(
+    *,
+    workstream_id: str,
+    production_deployment_target: str = "",
+    publication_authorized: bool = False,
+) -> str:
     """Return the private receipt protocol only for an allowed workstream."""
 
-    if str(workstream_id or "").strip() != FAMILY_CALENDAR_WORKSTREAM_ID:
+    clean_workstream = str(workstream_id or "").strip()
+    clean_target = str(production_deployment_target or "").strip()
+    if clean_workstream == MMTX_WORKSTREAM_ID and clean_target == GITHUB_PAGES_TARGET:
+        example = json.dumps(
+            {"operation_id": MMTX_PAGES_DEPLOY},
+            ensure_ascii=False,
+            separators=(",", ":"),
+        )
+        return "\n".join(
+            (
+                "[AUTOMATIC_OPERATION_REQUEST]",
+                "enabled=true",
+                "scope=server_owned_mmtx_github_push_and_pages_deployment",
+                f"allowed_operation_ids={MMTX_PAGES_DEPLOY}",
+                f"publication_authorized={'true' if publication_authorized else 'false'}",
+                "rule=Use the receipt only when publication_authorized=true.",
+                "rule=The server, not the model, performs the exact GitHub push, Pages workflow and verification.",
+                "rule=Never improvise shell, gh, Git commands, workflow IDs, paths or credentials.",
+                "rule=Use the operation receipt only on a clean read-only turn and never with a step-completion receipt.",
+                f"receipt_start={OPERATION_MARKER_START}",
+                f"receipt_json_example={example}",
+                f"receipt_end={OPERATION_MARKER_END}",
+                "rule=The receipt must be the final block and contain exactly one operation_id.",
+                "[/AUTOMATIC_OPERATION_REQUEST]",
+            )
+        )
+    if clean_workstream != FAMILY_CALENDAR_WORKSTREAM_ID:
         return ""
     example = json.dumps(
         {"operation_id": FAMILY_CALENDAR_DRY_RUN_TODAY},
@@ -171,15 +229,34 @@ def execute_human_adam_operation(
     today_factory: Callable[[], date] = date.today,
     dry_run_runner: DryRunRunner = run_family_calendar_operational_dry_run,
     test_email_planner: TestEmailPlanner = plan_family_calendar_test_email,
+    publication_authorized: bool = False,
+    production_publisher: ProductionPublisher | None = None,
 ) -> dict[str, object]:
     """Execute one fixed read-only operation and return a validated safe document."""
 
-    if str(workstream_id or "").strip() != FAMILY_CALENDAR_WORKSTREAM_ID:
-        raise HumanAdamOperationError("Pracovní proud nemá povolenou provozní operaci.")
+    clean_workstream = str(workstream_id or "").strip()
     if not isinstance(request, HumanAdamOperationRequest):
         raise HumanAdamOperationError("Chybí ověřený požadavek provozní operace.")
 
     operation_id = request.operation_id
+    if operation_id == MMTX_PAGES_DEPLOY:
+        if clean_workstream != MMTX_WORKSTREAM_ID:
+            raise HumanAdamOperationError("Pracovní proud nemá povolené MMTX nasazení.")
+        if publication_authorized is not True:
+            raise HumanAdamOperationError("Chybí přímý pokyn p+n nebo nasazení na produkci.")
+        if production_publisher is None or not callable(production_publisher):
+            raise HumanAdamOperationError("Produkční publisher není dostupný.")
+        try:
+            document = production_publisher()
+        except Exception as exc:  # noqa: BLE001 - backend details stay private.
+            raise HumanAdamOperationError(
+                "MMTX publikace selhala bezpečně a bez zveřejnění detailu."
+            ) from exc
+        _validate_mmtx_pages_document(document)
+        _assert_redacted_document(document)
+        return dict(document)
+    if clean_workstream != FAMILY_CALENDAR_WORKSTREAM_ID:
+        raise HumanAdamOperationError("Pracovní proud nemá povolenou provozní operaci.")
     try:
         if operation_id == FAMILY_CALENDAR_DRY_RUN_TODAY:
             document = dry_run_runner(today=today_factory()).safe_document()
@@ -205,6 +282,35 @@ def execute_human_adam_operation(
 
     _assert_redacted_document(document)
     return dict(document)
+
+
+def _validate_mmtx_pages_document(document: dict[str, object]) -> None:
+    expected_keys = {
+        "status",
+        "main_short",
+        "pushed",
+        "commit_count",
+        "workflow_run_id",
+        "deployment_id",
+        "production_url",
+        "smoke_http_status",
+        "redacted",
+    }
+    if not isinstance(document, dict) or set(document) != expected_keys:
+        raise HumanAdamOperationError("MMTX publisher vrátil neplatný doklad.")
+    if document.get("status") not in {"deployed", "already_deployed"}:
+        raise HumanAdamOperationError("MMTX publisher nepotvrdil produkční stav.")
+    if not re.fullmatch(r"[0-9a-f]{12}", str(document.get("main_short") or "")):
+        raise HumanAdamOperationError("MMTX publisher nepotvrdil commit.")
+    if type(document.get("pushed")) is not bool:
+        raise HumanAdamOperationError("MMTX publisher vrátil neplatný stav pushnutí.")
+    for key in ("commit_count", "workflow_run_id", "deployment_id"):
+        if not _non_negative_int(document.get(key)):
+            raise HumanAdamOperationError("MMTX publisher vrátil neplatné ID nebo počet.")
+    if document.get("smoke_http_status") != 200 or document.get("redacted") is not True:
+        raise HumanAdamOperationError("MMTX publisher neprošel produkčním smoke.")
+    if str(document.get("production_url") or "") != "https://belisarius-mila.github.io/PythonMF/":
+        raise HumanAdamOperationError("MMTX publisher vrátil neznámý produkční cíl.")
 
 
 def _candidate_dry_run_document(

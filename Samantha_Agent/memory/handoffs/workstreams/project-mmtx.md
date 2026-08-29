@@ -1,18 +1,17 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-29 19:03 CEST
+- Produkční stav ověřen: 2026-08-29 19:52 CEST
 
 ### Hotovo
 - Scéna 3 nyní používá úplnou pevnou anglickou a českou audio knihovnu řízenou manifestem bez systémového hlasu.
-- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Scény 2 a 3 jsou publikované na GitHub Pages z commitu `933834f`.
 
 ### Otevřeno
-- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
-- Lokální commity čekají na samostatný denní GitHub balíček.
+- Praktický poslech scén 2 a 3 na Linuxu.
 
 ### Rizika
-- Žádné další doložené provozní riziko.
+- Samotný GitHub push Pages nepublikuje; je nutné spustit a ověřit samostatný Pages workflow.
 
 ### Další krok
 - Prakticky projít a poslechnout celou scénu 3 na Linuxu.
@@ -24,11 +23,8 @@
 - Po poslechovém ověření pokračovat auditem pevného audia hlavního portálu.
 
 ### Technický stav checkpointu
-- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `59e34ac6ea78`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `59e34ac6ea78` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-29T16:35:45+00:00.
-- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
-- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
+- Pages run `33266361424` úspěšně nasadil přesný commit `933834f`.
+- Veřejné manifesty a reprezentativní české MP3 scén 2 a 3 jsou hashově shodné s lokální produkční kopií.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -327,3 +323,12 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (80): `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/README.md`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/index.html`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/script.js`, `Samantha_Agent/tests/test_mmtx_harry_guard_prototype.py`, `docs/scene03_journey_to_the_lake/README.md`, `docs/scene03_journey_to_the_lake/index.html`, `docs/scene03_journey_to_the_lake/script.js`, `MatysekANJ/build_scene03_audio.py`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_all_lets_go_left_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_all_thank_you_fiona_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_benji_hello_i_am_benji_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_benji_i_am_not_scared_i_will_go_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_benji_i_dont_know_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_benji_look_two_paths_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_benji_thank_you_crow_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_benji_thank_you_for_the_warning_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_bruno_i_am_pushing_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_bruno_let_us_drink_in_the_forest_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_bruno_no_this_way_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_bunny_bears_no_thank_you_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_bunny_how_do_we_get_water_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_bunny_i_am_scared_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_bunny_i_dont_know_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_bunny_this_way_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_bunny_water_we_have_water_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_crow_caw_bye_bye_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_crow_caw_go_left_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_crow_caw_no_no_go_left_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_crow_it_is_a_deep_valley_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_crow_left_is_good_right_is_bad_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_crow_maybe_bears_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_fiona_bruno_push_it_up_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_fiona_i_know_sunny_jump_on_the_handle_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_fiona_look_a_pump_but_the_bucket_is_empty_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_fiona_me_too_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_fiona_okay_left_it_is_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_fiona_the_pump_needs_help_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_fiona_wait_wait_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_horse_careful_a_dog_lives_there_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_horse_come_drink_some_water_cz.mp3`, … a dalších 40
 - Commit: `Nahradit systémové čtení scény 3 pevnými MP3`
 - Další krok: Prakticky projít a poslechnout celou scénu 3 na Linuxu.
+
+### Produkční dorovnání 2026-08-29 19:52 CEST – Scény 2 a 3 nasazeny na Pages
+
+- Pracovní proud: `project-mmtx`
+- Hotovo: Pages workflow publikoval commit `933834f`; scény 2 a 3 s pevnými MP3 jsou veřejně dostupné.
+- Rozhodnutí: Push a Pages nasazení jsou dva samostatné kroky a produkční stav se potvrzuje až deploymentem a veřejnou kontrolou.
+- Rizika: Bez výslovného spuštění Pages workflow může GitHub obsahovat novější MMTX než produkce.
+- Další krok: Prakticky projít a poslechnout scény 2 a 3 na Linuxu.
+- Ověření: run `33266361424` uspěl; veřejné manifesty a reprezentativní české MP3 obou scén jsou hashově shodné s lokální produkční kopií.

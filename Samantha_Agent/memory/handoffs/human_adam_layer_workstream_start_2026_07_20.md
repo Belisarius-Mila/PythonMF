@@ -1,34 +1,34 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-16 16:47 CEST
+- Dorovnáno terminálovým vývojem: 2026-08-29 19:52 CEST
 
 ### Hotovo
-- Checkpoint a informace o nasazení jsou na mobilu schované pod horními Podrobnostmi, takže chat má více prostoru
-- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- MMTX má deklarativní produkční cíl GitHub Pages.
+- Přesný pokyn `p+n` nebo přímý pokyn k nasazení na produkci je serverově autorizovaný samoobslužný tok: případný bezpečný GitHub balíček, Pages workflow, ověření deploymentu a HTTP smoke.
+- Operaci provádí registrovaný serverový backend; model sám nespouští shell, Git ani `gh`.
+- Aktuální MMTX byl ručně publikován na produkci z commitu `933834f` během opravy chybějícího workflow kroku.
 
 ### Otevřeno
-- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
-- Lokální commity čekají na samostatný denní GitHub balíček.
+- Nová samoobslužná capability ještě čeká na úplnou bránu, commit, GitHub push, nasazení Cockpitu a jeden živý test `p+n`.
 
 ### Rizika
-- Žádné další doložené provozní riziko.
+- Produkční operace je záměrně dostupná jen pro přesný přímý pokyn a pracovní proud s deklarovaným cílem `github_pages`.
+- Divergence, špinavý main, neshoda `origin/main`, neúspěšný workflow, chybějící deployment nebo HTTP smoke operaci uzavřeně zastaví.
 
 ### Další krok
-- Samostatně potvrdit nasazení a vizuálně ověřit výšku chatu na iPhonu
+- Dokončit úplnou bránu, nasadit nový Cockpit a živě ověřit `p+n` v proudu MMTX.
 
 ### Rozhodnutí
-- Dlouhé technické stavové řádky budou na mobilu součástí sbalovacích Podrobností; desktop je nadále zobrazuje přímo
+- Push a produkční nasazení zůstávají oddělené důkazy, ale přímý příkaz `p+n` je může bezpečně zřetězit bez přepnutí k terminálovému Adamovi.
+- Cíl produkce je capability pracovního proudu, nikoli odhad z názvu projektu.
 
 ### Navrhované další kroky
-- Žádné další návrhy nad rámec bezprostředního kroku.
+- Po živém ověření použít stejný deklarativní kontrakt pro další veřejné Pages projekty jen po jejich samostatném přiřazení.
 
 ### Technický stav checkpointu
-- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `bbcde88e8619`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `bbcde88e8619` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-16T13:04:26+00:00.
-- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`disconnected`.
-- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
+- Cílená sada nového publisheru, provozních účtenek, katalogu a profilového manageru prošla 156/156; úplná Cockpit Quality Gate prošla 1475/1475.
+- Pages run `33266361424` publikoval `933834f`; veřejné manifesty a vzorky MP3 scén 2 a 3 jsou hashově shodné s lokální produkční kopií.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -2734,3 +2734,12 @@ Technický důkaz:
 - Změněné cesty před paměťovým zápisem (2): `Samantha_Agent/app/communication/human_adam_ui.py`, `Samantha_Agent/tests/test_human_adam_ui.py`
 - Commit: `Collapse technical receipts on mobile`
 - Další krok: Samostatně potvrdit nasazení a vizuálně ověřit výšku chatu na iPhonu
+
+### Terminálový vývoj 2026-08-29 19:52 CEST – Human–Adam získává samoobslužné MMTX p+n
+
+- Pracovní proud: `layer-human-adam-development`
+- Hotovo: MMTX má deklarovaný produkční cíl GitHub Pages. Přesný příkaz `p+n` nebo přímé „nasaď na produkci“ serverově zřetězí případný bezpečný GitHub balíček, Pages workflow, kontrolu deploymentu a HTTP smoke.
+- Rozhodnutí: Model pouze předává záměr; Git, GitHub workflow a ověření vykonává registrovaný backend. Samotný push nadále není důkazem produkce.
+- Rizika: Operace selže uzavřeně při nečistém nebo divergentním main, neshodě GitHubu, chybě workflow, chybějícím deploymentu nebo neúspěšném smoke; opakované nasazení stejného commitu se nespustí.
+- Další krok: Úplná brána, commit, push, nasazení Cockpitu a živý test `p+n` v MMTX.
+- Ověření: cílená sada 156/156 a úplná brána 1475/1475; současný MMTX commit `933834f` byl ručně publikován runem `33266361424` a veřejné vzorky scén 2 a 3 jsou hashově shodné.

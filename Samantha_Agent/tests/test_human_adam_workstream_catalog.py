@@ -42,6 +42,20 @@ def _all_registry_names() -> list[str]:
 
 
 class WorkstreamCatalogTests(unittest.TestCase):
+    def test_mmtx_declares_github_pages_production_target(self) -> None:
+        record = next(
+            item for item in WORKSTREAM_CATALOG if item.workstream_id == "project-mmtx"
+        )
+
+        self.assertEqual(
+            record.capabilities.production_deployment_target,
+            "github_pages",
+        )
+        self.assertEqual(
+            record.capabilities.status_fields()["production_deployment_target"],
+            "github_pages",
+        )
+
     def test_every_workstream_has_one_primary_aggregate_row(self) -> None:
         registry_names = _all_registry_names()
 
@@ -259,10 +273,12 @@ class WorkstreamCatalogTests(unittest.TestCase):
         self.assertTrue(other_records)
         self.assertTrue(
             all(
-                record.capabilities
-                == CanonicalWorkstreamCapabilities(image_generation=True)
+                not record.capabilities.private_archive_direct
+                and not record.capabilities.private_archive_read
+                and not record.capabilities.private_archive_single_edit
+                and not record.capabilities.private_archive_confirmation_required
+                and not record.capabilities.private_archive_root
                 for record in other_records
-                if record.workstream_id != "project-r2-adam-janicka"
             )
         )
 

@@ -100,16 +100,21 @@ from app.communication.human_adam_turn_completion import (
     parse_turn_completion,
 )
 from app.communication.human_adam_operations import (
+    MMTX_PAGES_DEPLOY,
     HumanAdamOperationError,
+    HumanAdamOperationRequest,
     ParsedHumanAdamOperation,
     automatic_operation_instruction,
     execute_human_adam_operation,
+    explicit_publish_and_deploy_command,
     parse_human_adam_operation,
 )
 from app.communication.github_batch import (
+    GITHUB_BATCH_CONFIRMATION,
     audit_github_batch as audit_daily_github_batch,
     push_github_batch as push_daily_github_batch,
 )
+from app.communication.mmtx_pages_deploy import publish_mmtx_pages_current_main
 from app.communication.local_runtime import LocalAppServerProcessController
 from app.communication.main_remote_sync import (
     apply_main_remote_sync as apply_clean_main_remote_sync,
@@ -1165,6 +1170,40 @@ class HumanAdamProfileManager:
                 confirmation=confirmation,
             )
 
+    def _publish_active_pages_production(
+        self,
+        *,
+        service: HumanAdamService,
+    ) -> dict[str, object]:
+        """Push a pending clean batch and publish the registered Pages target."""
+
+        self._assert_all_profile_sessions_idle(operation="MMTX p+n")
+        self._main_remote_sync_workspaces()
+        audit = audit_daily_github_batch(source_repo=service.workspace.source_repo)
+        pushed = False
+        commit_count = 0
+        if audit.get("state") == "ready" and audit.get("ready") is True:
+            commit_count = int(audit.get("commit_count") or 0)
+            push_daily_github_batch(
+                workspace=service.workspace,
+                expected_origin_head=str(audit.get("origin_head") or ""),
+                expected_local_head=str(audit.get("local_head") or ""),
+                confirmation=GITHUB_BATCH_CONFIRMATION,
+            )
+            pushed = True
+        elif audit.get("state") != "aligned":
+            raise AppServerError(
+                "GitHub balíček není v bezpečném fast-forward stavu; p+n se zastavilo."
+            )
+        publication = publish_mmtx_pages_current_main(
+            source_repo=service.workspace.source_repo,
+        )
+        return {
+            **publication,
+            "pushed": pushed,
+            "commit_count": commit_count,
+        }
+
     def apply_main_remote_sync(
         self,
         *,
@@ -1733,8 +1772,14 @@ class HumanAdamProfileManager:
                 development_control_block = (
                     development_control_block + "\n\n" + completion_instruction
                 )
+            user_text = str(kwargs.get("text") or "")
+            publication_authorized = explicit_publish_and_deploy_command(user_text)
             operation_instruction = automatic_operation_instruction(
                 workstream_id=self.active_workstream_id,
+                production_deployment_target=(
+                    capability_metadata.production_deployment_target
+                ),
+                publication_authorized=publication_authorized,
             )
             if operation_instruction:
                 development_control_block = (
@@ -1828,6 +1873,10 @@ class HumanAdamProfileManager:
                 integration_deferred=integration_deferred,
                 ownership_started=ownership_started,
                 client_message_id=client_message_id,
+                publication_authorized=publication_authorized,
+                production_deployment_target=(
+                    capability_metadata.production_deployment_target
+                ),
                 result=result,
             )
             return {
@@ -2654,6 +2703,8 @@ class HumanAdamProfileManager:
         integration_deferred: bool = False,
         ownership_started: bool = False,
         client_message_id: str = "",
+        publication_authorized: bool = False,
+        production_deployment_target: str = "",
         result: dict[str, Any],
     ) -> dict[str, Any]:
         """Finish a delivered writable turn, or leave its work visibly recoverable."""
@@ -2742,6 +2793,16 @@ class HumanAdamProfileManager:
         operation: ParsedHumanAdamOperation = parse_human_adam_operation(
             entry.get("answer")
         )
+        if (
+            operation.state == "absent"
+            and publication_authorized
+            and production_deployment_target == "github_pages"
+        ):
+            operation = ParsedHumanAdamOperation(
+                state="valid",
+                visible_answer=str(entry.get("answer") or "").strip(),
+                request=HumanAdamOperationRequest(operation_id=MMTX_PAGES_DEPLOY),
+            )
         workspace = service.workspace.status()
         dirty = bool(workspace.get("dirty"))
         parsed: ParsedTurnCompletion = parse_turn_completion(entry.get("answer"))
@@ -2857,6 +2918,12 @@ class HumanAdamProfileManager:
                 operation_document = execute_human_adam_operation(
                     operation.request,
                     workstream_id=self.active_workstream_id,
+                    publication_authorized=publication_authorized,
+                    production_publisher=(
+                        lambda: self._publish_active_pages_production(service=service)
+                        if production_deployment_target == "github_pages"
+                        else None
+                    ),
                 )
                 operation_state = "completed"
             except (HumanAdamOperationError, OSError, TypeError, ValueError):

@@ -1,18 +1,17 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-29 19:03 CEST
+- Produkční stav ověřen: 2026-08-29 19:52 CEST
 
 ### Hotovo
 - Scéna 3 nyní používá úplnou pevnou anglickou a českou audio knihovnu řízenou manifestem bez systémového hlasu.
-- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Scény 2 a 3 jsou publikované na GitHub Pages z commitu `933834f`.
 
 ### Otevřeno
-- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
-- Lokální commity čekají na samostatný denní GitHub balíček.
+- Praktický poslech scén 2 a 3 na Linuxu.
 
 ### Rizika
-- Žádné další doložené provozní riziko.
+- Samotný GitHub push Pages nepublikuje; je nutné spustit a ověřit samostatný Pages workflow.
 
 ### Další krok
 - Prakticky projít a poslechnout celou scénu 3 na Linuxu.
@@ -24,11 +23,8 @@
 - Po poslechovém ověření pokračovat auditem pevného audia hlavního portálu.
 
 ### Technický stav checkpointu
-- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `59e34ac6ea78`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `59e34ac6ea78` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-29T16:35:45+00:00.
-- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
-- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
+- Pages run `33266361424` úspěšně nasadil přesný commit `933834f`.
+- Veřejné manifesty a reprezentativní české MP3 scén 2 a 3 jsou hashově shodné s lokální produkční kopií.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -629,3 +625,21 @@ Technický důkaz:
 - rychlá Cockpit brána syntaxe a whitespace: 5.2 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `project-mmtx`.
 - Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+
+### 2026-08-29 19:52 CEST – Scény 2 a 3 nasazeny na GitHub Pages
+
+Hotovo:
+- Pages workflow publikoval commit `933834f`; scény 2 a 3 s pevnými MP3 jsou veřejně dostupné.
+
+Rozhodnutí:
+- Push a Pages nasazení jsou dva samostatné kroky a produkční stav se potvrzuje až deploymentem a veřejnou kontrolou.
+
+Další krok:
+- Prakticky projít a poslechnout scény 2 a 3 na Linuxu.
+
+Navrhované další kroky:
+- Další MMTX dokončení ukončit příkazem `p+n`, jakmile bude samoobslužná capability Human–Adam živě ověřená.
+
+Technický důkaz:
+- Run `33266361424` uspěl a GitHub deployment ukazuje přesný commit `933834f`.
+- Veřejné manifesty a reprezentativní české MP3 scén 2 a 3 jsou hashově shodné s lokální produkční kopií.

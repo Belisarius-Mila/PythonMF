@@ -22,6 +22,7 @@ PRIVATE_ARCHIVE_CONFIRMATION_CATEGORIES = (
     "external_send",
     "system_change",
 )
+PRODUCTION_DEPLOYMENT_TARGETS = frozenset({"", "github_pages"})
 
 
 @dataclass(frozen=True)
@@ -37,6 +38,7 @@ class CanonicalWorkstreamCapabilities:
     private_archive_confirmation_required: tuple[str, ...] = ()
     private_archive_root: str = ""
     owned_private_root: str = ""
+    production_deployment_target: str = ""
 
     def validate(self) -> None:
         flags = (
@@ -49,6 +51,8 @@ class CanonicalWorkstreamCapabilities:
         )
         if any(type(flag) is not bool for flag in flags):
             raise ValueError("Pracovní proud má neplatná capability metadata.")
+        if self.production_deployment_target not in PRODUCTION_DEPLOYMENT_TARGETS:
+            raise ValueError("Pracovní proud má neplatný produkční cíl.")
         archive_flags = (
             self.private_archive_direct,
             self.private_archive_read,
@@ -120,6 +124,7 @@ class CanonicalWorkstreamCapabilities:
             "private_archive_single_edit": self.private_archive_single_edit,
             "source_data_read_only": self.source_data_read_only,
             "owned_private_write": bool(self.owned_private_root),
+            "production_deployment_target": self.production_deployment_target,
             "private_archive_confirmation_required": list(
                 self.private_archive_confirmation_required
             ),
@@ -253,7 +258,17 @@ def _record(
 WORKSTREAM_CATALOG = validate_workstream_catalog(
     (
         # Projects: long-lived goals and areas of work.
-        _record("project-mmtx", "Project", "MMTX", "active", "1", "MMTX"),
+        _record(
+            "project-mmtx",
+            "Project",
+            "MMTX",
+            "active",
+            "1",
+            "MMTX",
+            capabilities=CanonicalWorkstreamCapabilities(
+                production_deployment_target="github_pages",
+            ),
+        ),
         _record(
             "project-janicka-cockpit",
             "Project",

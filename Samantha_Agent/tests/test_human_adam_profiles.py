@@ -1851,6 +1851,51 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             str(lazy.hubs["project-family-calendar"].last_send["model_input_text"]),
         )
 
+    def test_mmtx_p_plus_n_authorizes_server_owned_pages_publication(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, _library_workspace, _human_hub, _library_hub = (
+                self.make_manager(Path(temp_dir))
+            )
+            lazy = FakeLazyThreads(Path(temp_dir) / "lazy")
+            manager.workstream_threads = lazy  # type: ignore[assignment]
+            manager.activate_grouped_workstream(
+                workstream_id="project-mmtx",
+                confirmed=True,
+            )
+            lazy.hubs["project-mmtx"].next_answer = (
+                "Odesílám čistý balíček a ověřím produkční MMTX."
+            )
+            with patch(
+                "app.communication.human_adam_profiles.execute_human_adam_operation",
+                return_value={
+                    "status": "deployed",
+                    "main_short": "a" * 12,
+                    "pushed": False,
+                    "commit_count": 0,
+                    "workflow_run_id": 123,
+                    "deployment_id": 456,
+                    "production_url": "https://belisarius-mila.github.io/PythonMF/",
+                    "smoke_http_status": 200,
+                    "redacted": True,
+                },
+            ) as operation:
+                result = manager.send(
+                    text="p+n",
+                    client_message_id="mmtx-publish-001",
+                )
+
+        self.assertFalse(human_workspace.dirty)
+        self.assertEqual(result["automatic_operation"]["state"], "completed")
+        self.assertTrue(operation.call_args.kwargs["publication_authorized"])
+        self.assertTrue(callable(operation.call_args.kwargs["production_publisher"]))
+        self.assertEqual(
+            operation.call_args.args[0].operation_id,
+            "mmtx_pages_publish_current_main",
+        )
+        model_input = str(lazy.hubs["project-mmtx"].last_send["model_input_text"])
+        self.assertIn("publication_authorized=true", model_input)
+        self.assertIn("mmtx_pages_publish_current_main", model_input)
+
     def test_r2_adam_allows_one_turn_development_but_keeps_source_data_read_only(
         self,
     ) -> None:

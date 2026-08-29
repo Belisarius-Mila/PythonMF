@@ -116,6 +116,8 @@ async def second():
         self.assertIn("tests.test_codex_approval_state", TEST_MODULES)
         self.assertIn("tests.test_cockpit_voice_frontend_retirement", TEST_MODULES)
         self.assertIn("tests.test_human_adam_profiles", TEST_MODULES)
+        self.assertIn("app/communication/mmtx_pages_deploy.py", COMPILE_PATHS)
+        self.assertIn("tests.test_mmtx_pages_deploy", TEST_MODULES)
         self.assertIn("tests.test_janicka_r2_documents", TEST_MODULES)
         self.assertIn("tests.test_cockpit_quality_gate", TEST_MODULES)
         self.assertIn("tests.test_capability_audit", TEST_MODULES)
