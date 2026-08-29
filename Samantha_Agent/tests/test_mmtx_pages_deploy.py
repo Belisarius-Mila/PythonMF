@@ -17,9 +17,16 @@ HEAD = "a" * 40
 
 
 class FakeRunner:
-    def __init__(self, *, already_deployed: bool = False, origin_head: str = HEAD):
+    def __init__(
+        self,
+        *,
+        already_deployed: bool = False,
+        origin_head: str = HEAD,
+        deployment_ready_after_queries: int = 2,
+    ):
         self.already_deployed = already_deployed
         self.origin_head = origin_head
+        self.deployment_ready_after_queries = deployment_ready_after_queries
         self.calls: list[tuple[str, ...]] = []
         self.deployment_queries = 0
 
@@ -36,7 +43,10 @@ class FakeRunner:
             output = self.origin_head + "\n"
         elif command[:3] == ("/usr/local/bin/gh", "api", f"repos/{GITHUB_REPOSITORY}/deployments?environment=github-pages&per_page=20"):
             self.deployment_queries += 1
-            deployed = self.already_deployed or self.deployment_queries > 1
+            deployed = (
+                self.already_deployed
+                or self.deployment_queries >= self.deployment_ready_after_queries
+            )
             output = json.dumps([{"id": 55, "sha": HEAD}] if deployed else [])
         elif command[:3] == (
             "/usr/local/bin/gh",
@@ -78,6 +88,7 @@ class MmtxPagesDeployTests(unittest.TestCase):
                 source_repo=Path(temp_dir),
                 runner=runner,
                 smoke_fetcher=lambda _url: 200,
+                sleeper=lambda _seconds: None,
             )
 
         self.assertEqual(result["status"], "deployed")
@@ -96,6 +107,7 @@ class MmtxPagesDeployTests(unittest.TestCase):
                 source_repo=Path(temp_dir),
                 runner=runner,
                 smoke_fetcher=lambda _url: 200,
+                sleeper=lambda _seconds: None,
             )
 
         self.assertEqual(result["status"], "already_deployed")
@@ -110,9 +122,24 @@ class MmtxPagesDeployTests(unittest.TestCase):
                     source_repo=Path(temp_dir),
                     runner=runner,
                     smoke_fetcher=lambda _url: 200,
+                    sleeper=lambda _seconds: None,
                 )
 
         self.assertFalse(any("workflow" in call for call in runner.calls))
+
+    def test_success_status_may_arrive_after_workflow_completion(self) -> None:
+        runner = FakeRunner(deployment_ready_after_queries=4)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            result = publish_mmtx_pages_current_main(
+                source_repo=Path(temp_dir),
+                runner=runner,
+                smoke_fetcher=lambda _url: 200,
+                deployment_attempts=5,
+                sleeper=lambda _seconds: None,
+            )
+
+        self.assertEqual(result["status"], "deployed")
+        self.assertEqual(runner.deployment_queries, 4)
 
 
 if __name__ == "__main__":

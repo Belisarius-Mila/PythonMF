@@ -6,6 +6,7 @@ import json
 import re
 import subprocess
 import threading
+import time
 import urllib.request
 from pathlib import Path
 from typing import Any, Callable, Sequence
@@ -28,6 +29,7 @@ class MmtxPagesDeployError(AppServerError):
 
 CommandRunner = Callable[..., subprocess.CompletedProcess[str]]
 SmokeFetcher = Callable[[str], int]
+Sleeper = Callable[[float], None]
 
 
 def _run(
@@ -168,6 +170,27 @@ def _successful_deployment(
     return None
 
 
+def _wait_for_successful_deployment(
+    runner: CommandRunner,
+    *,
+    source_repo: Path,
+    target_head: str,
+    attempts: int,
+    sleeper: Sleeper,
+) -> dict[str, Any] | None:
+    for attempt in range(max(1, attempts)):
+        deployment = _successful_deployment(
+            runner,
+            source_repo=source_repo,
+            target_head=target_head,
+        )
+        if deployment is not None:
+            return deployment
+        if attempt + 1 < max(1, attempts):
+            sleeper(1.0)
+    return None
+
+
 def _default_smoke_fetcher(url: str) -> int:
     request = urllib.request.Request(
         url,
@@ -182,6 +205,8 @@ def publish_mmtx_pages_current_main(
     source_repo: Path,
     runner: CommandRunner = subprocess.run,
     smoke_fetcher: SmokeFetcher = _default_smoke_fetcher,
+    deployment_attempts: int = 30,
+    sleeper: Sleeper = time.sleep,
 ) -> dict[str, object]:
     """Publish one clean GitHub-aligned main and prove the Pages deployment."""
 
@@ -268,10 +293,12 @@ def publish_mmtx_pages_current_main(
             raise MmtxPagesDeployError(
                 "Pages workflow nedoložil úspěšné nasazení auditovaného main."
             )
-        deployment = _successful_deployment(
+        deployment = _wait_for_successful_deployment(
             runner,
             source_repo=repo,
             target_head=target_head,
+            attempts=deployment_attempts,
+            sleeper=sleeper,
         )
         if deployment is None:
             raise MmtxPagesDeployError(

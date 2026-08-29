@@ -1,23 +1,25 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Dorovnáno terminálovým vývojem: 2026-08-29 19:52 CEST
+- Dorovnáno terminálovým vývojem: 2026-08-29 20:25 CEST
 
 ### Hotovo
 - MMTX má deklarativní produkční cíl GitHub Pages.
 - Přesný pokyn `p+n` nebo přímý pokyn k nasazení na produkci je serverově autorizovaný samoobslužný tok: případný bezpečný GitHub balíček, Pages workflow, ověření deploymentu a HTTP smoke.
 - Operaci provádí registrovaný serverový backend; model sám nespouští shell, Git ani `gh`.
 - Aktuální MMTX byl ručně publikován na produkci z commitu `933834f` během opravy chybějícího workflow kroku.
+- První živé `p+n` spustilo run `33267653174` a skutečně publikovalo commit `a0ab509`; odhalilo však falešně zápornou účtenku kvůli opožděné viditelnosti Pages deploymentu.
+- Publisher nyní po dokončení workflow omezeně čeká až 30 sekund na odpovídající úspěšný deployment stejného commitu.
 
 ### Otevřeno
-- Nová samoobslužná capability ještě čeká na úplnou bránu, commit, GitHub push, nasazení Cockpitu a jeden živý test `p+n`.
+- Oprava opožděné Pages účtenky čeká na commit, GitHub push, nasazení Cockpitu a opakovaný živý test `p+n`.
 
 ### Rizika
 - Produkční operace je záměrně dostupná jen pro přesný přímý pokyn a pracovní proud s deklarovaným cílem `github_pages`.
 - Divergence, špinavý main, neshoda `origin/main`, neúspěšný workflow, chybějící deployment nebo HTTP smoke operaci uzavřeně zastaví.
 
 ### Další krok
-- Dokončit úplnou bránu, nasadit nový Cockpit a živě ověřit `p+n` v proudu MMTX.
+- Commitnout a pushnout opravu, nasadit nový Cockpit a živě ověřit pravdivou dokončovací účtenku `p+n` v proudu MMTX.
 
 ### Rozhodnutí
 - Push a produkční nasazení zůstávají oddělené důkazy, ale přímý příkaz `p+n` je může bezpečně zřetězit bez přepnutí k terminálovému Adamovi.
@@ -27,8 +29,9 @@
 - Po živém ověření použít stejný deklarativní kontrakt pro další veřejné Pages projekty jen po jejich samostatném přiřazení.
 
 ### Technický stav checkpointu
-- Cílená sada nového publisheru, provozních účtenek, katalogu a profilového manageru prošla 156/156; úplná Cockpit Quality Gate prošla 1475/1475.
+- Cílená sada opravy opožděného deploymentu prošla 14/14; úplná Cockpit Quality Gate prošla 1476/1476 za 442,2 s.
 - Pages run `33266361424` publikoval `933834f`; veřejné manifesty a vzorky MP3 scén 2 a 3 jsou hashově shodné s lokální produkční kopií.
+- První samoobslužný run `33267653174` publikoval `a0ab509`; pozdější deployment `6158651157` potvrdil přesnou shodu commitu a HTTP 200, přesto původní jednorázová kontrola skončila před jeho zveřejněním v GitHub API.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -2743,3 +2746,11 @@ Technický důkaz:
 - Rizika: Operace selže uzavřeně při nečistém nebo divergentním main, neshodě GitHubu, chybě workflow, chybějícím deploymentu nebo neúspěšném smoke; opakované nasazení stejného commitu se nespustí.
 - Další krok: Úplná brána, commit, push, nasazení Cockpitu a živý test `p+n` v MMTX.
 - Ověření: cílená sada 156/156 a úplná brána 1475/1475; současný MMTX commit `933834f` byl ručně publikován runem `33266361424` a veřejné vzorky scén 2 a 3 jsou hashově shodné.
+
+### Živý retest a oprava 2026-08-29 20:25 CEST – Pages účtenka čeká na finální deployment
+
+- Pracovní proud: `layer-human-adam-development`
+- Hotovo: První živé `p+n` spustilo run `33267653174` a publikovalo přesný commit `a0ab509`. Serverová účtenka ale selhala, protože GitHub zobrazil úspěšný deployment `6158651157` až několik sekund po dokončení workflow. Publisher nyní čeká omezeně 30×1 s na úspěšný deployment stejného commitu.
+- Rozhodnutí: Falešně záporný výsledek se nikdy neřeší slepým opakováním; nejprve se koreluje přesné workflow a deployment. Čekání je konečné a při chybě nebo cizím commitu dál selže uzavřeně.
+- Další krok: Commit, push, řízené nasazení Cockpitu a jediný opakovaný živý test `p+n`.
+- Ověření: cíleně 14/14; úplná Cockpit Quality Gate 1476/1476 za 442,2 s; GitHub Pages deployment `6158651157` má stav success pro `a0ab509` a veřejný kořen odpovídá HTTP 200.
