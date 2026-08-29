@@ -1,31 +1,35 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Produkční stav ověřen: 2026-08-29 21:01 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-29 21:27 CEST
 
 ### Hotovo
-- Scéna 3 nyní používá úplnou pevnou anglickou a českou audio knihovnu řízenou manifestem bez systémového hlasu.
-- Scény 2 a 3 jsou publikované na GitHub Pages; poslední ověřený produkční commit je `0230cf5`.
-- Human–Adam umí dokončený MMTX bezpečně publikovat přímým pokynem `p+n` bez terminálového mezikroku.
+- První scéna Cesty k jezeru nyní používá 49 pevných anglických a českých MP3 řízených manifestem bez systémového hlasu.
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
-- Praktický poslech scén 2 a 3 na Linuxu.
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
 
 ### Rizika
-- Samotný GitHub push Pages nepublikuje; `p+n` proto ověřuje samostatný Pages workflow, deployment stejného commitu a HTTP 200.
+- Žádné další doložené provozní riziko.
 
 ### Další krok
-- Prakticky projít a poslechnout celou scénu 3 na Linuxu.
+- Po potvrzeném checkpointu publikovat aktuální MMTX pomocí p+n a scénu poslechnout na Linuxu.
 
 ### Rozhodnutí
-- Existující kvalitní anglické MP3 zůstávají zachované; nové české stopy používají Vlastu a scéna nemá speechSynthesis fallback.
+- Existující kvalitní anglické nahrávky zůstávají zachované; nové české stopy používají Vlastu a změna je omezena na clearingMeeting.
 
 ### Navrhované další kroky
-- Po poslechovém ověření pokračovat auditem pevného audia hlavního portálu.
+- Publikovat potvrzený checkpoint na GitHub Pages pomocí p+n.
+- Prakticky projít první scénu na Linuxu a ověřit tempo, hlasitost a výslovnost.
+- Potom pokračovat další dosud systémově namluvenou částí hlavního portálu.
 
 ### Technický stav checkpointu
-- Pages run `33269734786` úspěšně nasadil přesný commit `0230cf5`; deployment `6159053676` je success a veřejný smoke vrací HTTP 200.
-- Veřejné manifesty a reprezentativní české MP3 scén 2 a 3 jsou hashově shodné s lokální produkční kopií.
+- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
+- Git před checkpointem: lokální `main` na `74d40b7880e7`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `74d40b7880e7` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-29T19:04:15+00:00.
+- Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
+- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -678,3 +682,31 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Run `33269734786`, deployment `6159053676`, přesná shoda commitu `0230cf5` a veřejný HTTP 200.
+
+### 2026-08-29 21:27 CEST – První scéna Cesty k jezeru nyní používá 49 pevných anglických a českých MP3 řízených manifestem bez systémového hlasu.
+
+Hotovo:
+- První scéna Cesty k jezeru nyní používá 49 pevných anglických a českých MP3 řízených manifestem bez systémového hlasu.
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+
+Otevřeno:
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+
+Rizika:
+- Žádné další doložené provozní riziko.
+
+Rozhodnutí:
+- Existující kvalitní anglické nahrávky zůstávají zachované; nové české stopy používají Vlastu a změna je omezena na clearingMeeting.
+
+Další krok:
+- Po potvrzeném checkpointu publikovat aktuální MMTX pomocí p+n a scénu poslechnout na Linuxu.
+
+Navrhované další kroky:
+- Publikovat potvrzený checkpoint na GitHub Pages pomocí p+n.
+- Prakticky projít první scénu na Linuxu a ověřit tempo, hlasitost a výslovnost.
+- Potom pokračovat další dosud systémově namluvenou částí hlavního portálu.
+
+Technický důkaz:
+- rychlá Cockpit brána syntaxe a whitespace: 7.4 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
+- Pracovní proud: `project-mmtx`.
+- Read-only živý stav při checkpointu: main=`aligned`, deployment=`verified_current`, runtime=`connected`.

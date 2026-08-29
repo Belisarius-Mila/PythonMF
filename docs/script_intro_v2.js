@@ -29,6 +29,11 @@ const owlGardenOverlay = document.getElementById("owlGardenOverlay");
 const owlGardenPrompt = document.getElementById("owlGardenPrompt");
 const owlGardenThumbButton = document.getElementById("owlGardenThumbButton");
 const owlGardenDoneBadge = document.getElementById("owlGardenDoneBadge");
+const clearingAudioManifest = window.SCENE01_AUDIO_MANIFEST;
+
+if (!clearingAudioManifest || clearingAudioManifest.schemaVersion !== 1) {
+  throw new Error("Scene 1 audio manifest is missing or invalid.");
+}
 
 const scenes = {
   intro1: {
@@ -493,13 +498,7 @@ const clearingDialogue = [
     speaker: "Benji",
     cue: "Tap Benji.",
     textEn: "Hello. I am Benji.",
-    audioEn: [
-      "audio/english/benji_bunny_01_benji_hello_en.mp3?v=20260527benji",
-      "audio/english/benji_bunny_03_benji_i_am_benji_en.mp3?v=20260527benji",
-    ],
     textCz: "Ahoj! Já jsem Benji.",
-    textCzSpeech: "Ahoj! Já jsem Benži.",
-    preferredVoiceName: "fable|brian|andrew|roger|guy|daniel|alex|aaron|evan|junior",
   },
   {
     id: 2,
@@ -507,13 +506,7 @@ const clearingDialogue = [
     speaker: "Bunny",
     cue: "Tap Bunny.",
     textEn: "Hello. I am Bunny.",
-    audioEn: [
-      "audio/english/benji_bunny_02_bunny_hello_en.mp3?v=20260527voice",
-      "audio/english/benji_bunny_04_bunny_i_am_bunny_en.mp3?v=20260527voice",
-    ],
     textCz: "Ahoj. Já jsem Bunny.",
-    textCzSpeech: "Ahoj. Já jsem Bany.",
-    preferredVoiceName: "junior|samantha|ava|victoria|karen",
   },
   {
     id: 3,
@@ -521,10 +514,8 @@ const clearingDialogue = [
     speaker: "Benji",
     cue: "Tap Benji.",
     textEn: "We are friends!",
-    audioEn: "audio/english/benji_fable_we_are_friends_01_plain.mp3?v=20260602benjifriends2",
     textCz: "Jsme kamarádi!",
     autoAdvance: true,
-    preferredVoiceName: "fable|brian|andrew|roger|guy|daniel|alex|aaron|evan|junior",
   },
   {
     id: 4,
@@ -532,9 +523,7 @@ const clearingDialogue = [
     speaker: "Bruno",
     cue: "Tap Bruno.",
     textEn: "Hello. I am Bruno.",
-    audioEn: "audio/english/scene01_03_bruno_hello_i_am_bruno_en.mp3?v=20260601voices",
     textCz: "Ahoj. Já jsem Bruno.",
-    preferredVoiceName: "onyx|aaron|roger|daniel|guy",
   },
   {
     id: 5,
@@ -542,9 +531,7 @@ const clearingDialogue = [
     speaker: "Fiona",
     cue: "Tap Fiona.",
     textEn: "Hi. I am Fiona.",
-    audioEn: "audio/english/scene01_04_fiona_hi_i_am_fiona_en.mp3?v=20260601voices",
     textCz: "Ahoj. Já jsem Fiona.",
-    preferredVoiceName: "shimmer|samantha|ava|victoria|karen",
   },
   {
     id: 6,
@@ -552,10 +539,7 @@ const clearingDialogue = [
     speaker: "Sunny",
     cue: "Tap Sunny.",
     textEn: "Hello! I am Sunny.",
-    audioEn: "audio/english/scene01_05_sunny_hello_i_am_sunny_en.mp3?v=20260603sunny-nova",
     textCz: "Ahoj! Já jsem Sunny.",
-    textCzSpeech: "Ahoj! Já jsem Sany.",
-    preferredVoiceName: "nova|samantha|ava|victoria|karen|junior",
   },
   {
     id: 7,
@@ -563,9 +547,7 @@ const clearingDialogue = [
     speaker: "Fiona",
     cue: "Tap Fiona.",
     textEn: "We are friends too.",
-    audioEn: "audio/english/scene01_06_fiona_we_are_friends_too_en.mp3?v=20260601voices",
     textCz: "My jsme také kamarádi.",
-    preferredVoiceName: "shimmer|samantha|ava|victoria|karen",
   },
   {
     id: 8,
@@ -573,9 +555,7 @@ const clearingDialogue = [
     speaker: "Bruno",
     cue: "Tap Bruno.",
     textEn: "We are going to the lake.",
-    audioEn: "audio/english/scene01_07_bruno_we_are_going_to_the_lake_en.mp3?v=20260601voices",
     textCz: "Jdeme k jezeru.",
-    preferredVoiceName: "onyx|aaron|roger|daniel|guy",
   },
   {
     id: 9,
@@ -583,9 +563,7 @@ const clearingDialogue = [
     speaker: "Benji",
     cue: "Tap Benji.",
     textEn: "We are going to the lake too.",
-    audioEn: "audio/english/scene01_08_benji_we_are_going_to_the_lake_too_en.mp3?v=20260601voices",
     textCz: "My jdeme k jezeru také.",
-    preferredVoiceName: "fable|brian|andrew|roger|guy|daniel|alex|aaron|evan|junior",
   },
   {
     id: 10,
@@ -593,9 +571,7 @@ const clearingDialogue = [
     speaker: "Sunny",
     cue: "Tap Sunny.",
     textEn: "We can go together.",
-    audioEn: "audio/english/scene01_09_sunny_we_can_go_together_en.mp3?v=20260603sunny-nova",
     textCz: "Můžeme jít společně.",
-    preferredVoiceName: "nova|samantha|ava|victoria|karen|junior",
   },
   {
     id: 11,
@@ -603,9 +579,7 @@ const clearingDialogue = [
     speaker: "Fiona",
     cue: "Tap Fiona.",
     textEn: "Now we are all friends!",
-    audioEn: "audio/english/scene01_10_fiona_now_we_are_all_friends_en.mp3?v=20260601voices",
     textCz: "Teď jsme všichni kamarádi!",
-    preferredVoiceName: "shimmer|samantha|ava|victoria|karen",
   },
 ];
 
@@ -725,6 +699,28 @@ async function playAudioFileIfAvailable(src) {
   const audio = new Audio(src);
   audio.preload = "auto";
   await playAudioElement(audio);
+  return true;
+}
+
+function clearingAudioSources(text, lang, speakerId) {
+  const key = `${speakerId}::${text}`;
+  const manifestValue = clearingAudioManifest.dialogue?.[lang]?.[key];
+  if (!manifestValue) {
+    throw new Error(`Missing Scene 1 audio manifest entry: ${lang} ${key}`);
+  }
+  const paths = Array.isArray(manifestValue) ? manifestValue : [manifestValue];
+  return paths.map((path) => `${path}?v=${clearingAudioManifest.version}`);
+}
+
+async function playClearingFixedAudio(text, lang, speakerId) {
+  const sources = clearingAudioSources(text, lang, speakerId);
+  for (const src of sources) {
+    const played = await playAudioFileIfAvailable(src);
+    if (!played) {
+      console.error(`Scene 1 fixed audio could not be played: ${src}`);
+      return false;
+    }
+  }
   return true;
 }
 
@@ -1549,8 +1545,9 @@ function createClearingDictionaryPanel() {
     button.addEventListener("click", async (event) => {
       event.stopPropagation();
       await primeAudio();
-      await speakEnglishLine(entry.en, { rate: 0.82 });
-      await speakCzechLine(entry.cz, { rate: 0.9 });
+      const speakerId = `dictionary-${entry.en}`;
+      await playClearingFixedAudio(entry.en, "en", speakerId);
+      await playClearingFixedAudio(entry.cz, "cs", speakerId);
     });
     panel.appendChild(button);
   });
@@ -1562,28 +1559,11 @@ async function playClearingIntroHelp() {
   if (state.currentScene !== "clearingMeeting") {
     return;
   }
-  await speakCzechLine(clearingIntroHelpText, { rate: 0.88 });
+  await playClearingFixedAudio(clearingIntroHelpText, "cs", "ui");
 }
 
 async function playClearingEnglishLine(item) {
-  if (item.audioEn) {
-    const audioSources = Array.isArray(item.audioEn) ? item.audioEn : [item.audioEn];
-    let playedAll = audioSources.length > 0;
-    for (const audioSrc of audioSources) {
-      const played = await playAudioFile(audioSrc);
-      if (!played) {
-        playedAll = false;
-        break;
-      }
-    }
-    if (playedAll) {
-      return;
-    }
-  }
-  await speakEnglishLine(item.textEn, {
-    preferredVoiceName: item.preferredVoiceName,
-    rate: 0.84,
-  });
+  await playClearingFixedAudio(item.textEn, "en", item.characterId);
 }
 
 async function restartClearingMeetingSequence() {
@@ -1620,7 +1600,7 @@ async function playClearingCharacterReview(characterId) {
   if (!isSceneActive("clearingMeeting", sequenceId)) {
     return;
   }
-  await speakCzechLine(item.textCzSpeech ?? item.textCz, { rate: 0.9 });
+  await playClearingFixedAudio(item.textCz, "cs", item.characterId);
   if (!isSceneActive("clearingMeeting", sequenceId)) {
     return;
   }
@@ -1637,7 +1617,7 @@ async function playClearingHelp() {
   state.clearingDictionaryOpen = false;
   state.clearingHelpVisible = true;
   renderScene();
-  await speakCzechLine(clearingHelpText, { rate: 0.88 });
+  await playClearingFixedAudio(clearingHelpText, "cs", "ui");
   if (state.currentScene !== "clearingMeeting") {
     return;
   }
@@ -1653,8 +1633,8 @@ async function completeClearingMeeting() {
   state.clearingBubbleIndex = -1;
   state.clearingPhase = "complete";
   renderScene();
-  await speakEnglishLine("Great. Open the door or run again.", { rate: 0.82 });
-  await speakCzechLine(clearingCompleteCzechText, { rate: 0.88 });
+  await playClearingFixedAudio("Great. Open the door or run again.", "en", "ui");
+  await playClearingFixedAudio(clearingCompleteCzechText, "cs", "ui");
 }
 
 async function playClearingDialogueItem(index, phase = "speaking") {
@@ -1673,7 +1653,7 @@ async function playClearingDialogueItem(index, phase = "speaking") {
   if (state.currentScene !== "clearingMeeting") {
     return false;
   }
-  await speakCzechLine(item.textCzSpeech ?? item.textCz, { rate: 0.9 });
+  await playClearingFixedAudio(item.textCz, "cs", item.characterId);
   if (state.currentScene !== "clearingMeeting") {
     return false;
   }
@@ -1719,7 +1699,7 @@ async function activateClearingStep(index) {
   state.clearingActiveIndex = index;
   state.clearingBubbleIndex = -1;
   renderScene();
-  await speakEnglishLine(clearingDialogue[index].cue, { rate: 0.82 });
+  await playClearingFixedAudio(clearingDialogue[index].cue, "en", "ui");
 }
 
 async function handleClearingCharacterClick(characterId) {
@@ -1735,7 +1715,7 @@ async function handleClearingCharacterClick(characterId) {
   }
   const item = currentClearingItem();
   if (item.characterId !== characterId) {
-    await speakEnglishLine(item.cue, { rate: 0.82 });
+    await playClearingFixedAudio(item.cue, "en", "ui");
     return;
   }
   const currentIndex = state.clearingActiveIndex;

@@ -1,31 +1,35 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Produkční stav ověřen: 2026-08-29 21:01 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-29 21:27 CEST
 
 ### Hotovo
-- Scéna 3 nyní používá úplnou pevnou anglickou a českou audio knihovnu řízenou manifestem bez systémového hlasu.
-- Scény 2 a 3 jsou publikované na GitHub Pages; poslední ověřený produkční commit je `0230cf5`.
-- Human–Adam umí dokončený MMTX bezpečně publikovat přímým pokynem `p+n` bez terminálového mezikroku.
+- První scéna Cesty k jezeru nyní používá 49 pevných anglických a českých MP3 řízených manifestem bez systémového hlasu.
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
-- Praktický poslech scén 2 a 3 na Linuxu.
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
 
 ### Rizika
-- Samotný GitHub push Pages nepublikuje; `p+n` proto ověřuje samostatný Pages workflow, deployment stejného commitu a HTTP 200.
+- Žádné další doložené provozní riziko.
 
 ### Další krok
-- Prakticky projít a poslechnout celou scénu 3 na Linuxu.
+- Po potvrzeném checkpointu publikovat aktuální MMTX pomocí p+n a scénu poslechnout na Linuxu.
 
 ### Rozhodnutí
-- Existující kvalitní anglické MP3 zůstávají zachované; nové české stopy používají Vlastu a scéna nemá speechSynthesis fallback.
+- Existující kvalitní anglické nahrávky zůstávají zachované; nové české stopy používají Vlastu a změna je omezena na clearingMeeting.
 
 ### Navrhované další kroky
-- Po poslechovém ověření pokračovat auditem pevného audia hlavního portálu.
+- Publikovat potvrzený checkpoint na GitHub Pages pomocí p+n.
+- Prakticky projít první scénu na Linuxu a ověřit tempo, hlasitost a výslovnost.
+- Potom pokračovat další dosud systémově namluvenou částí hlavního portálu.
 
 ### Technický stav checkpointu
-- Pages run `33269734786` úspěšně nasadil přesný commit `0230cf5`; deployment `6159053676` je success a veřejný smoke vrací HTTP 200.
-- Veřejné manifesty a reprezentativní české MP3 scén 2 a 3 jsou hashově shodné s lokální produkční kopií.
+- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
+- Git před checkpointem: lokální `main` na `74d40b7880e7`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `74d40b7880e7` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-29T19:04:15+00:00.
+- Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
+- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -349,3 +353,15 @@ Bezpecnost / neukladat:
 - Rozhodnutí: Modelová obálka neautorizuje ani nevolí produkční operaci; rozhoduje přesný pokyn Míly a deklarovaný Pages cíl MMTX.
 - Další krok: Prakticky projít a poslechnout scény 2 a 3 na Linuxu.
 - Ověření: run `33269734786`, deployment `6159053676`, přesná shoda commitu a veřejný HTTP 200.
+
+### Automatický checkpoint 2026-08-29 21:27 CEST
+
+- Pracovní proud: `project-mmtx`
+- Hotovo: První scéna Cesty k jezeru nyní používá 49 pevných anglických a českých MP3 řízených manifestem bez systémového hlasu.; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: rychlá Cockpit brána syntaxe a whitespace: 7.4 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu
+- Změněné cesty před paměťovým zápisem (80): `MatysekANJ/web_mmtx/index.html`, `MatysekANJ/web_mmtx/script_intro_v2.js`, `Samantha_Agent/tests/test_mmtx_jane_birthday.py`, `docs/index.html`, `docs/script_intro_v2.js`, `MatysekANJ/build_scene01_audio.py`, `MatysekANJ/web_mmtx/audio/czech/scene01_01_benji_dialogue_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_02_bunny_dialogue_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_03_benji_dialogue_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_04_bruno_dialogue_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_05_fiona_dialogue_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_06_sunny_dialogue_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_07_fiona_dialogue_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_08_bruno_dialogue_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_09_benji_dialogue_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_10_sunny_dialogue_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_11_fiona_dialogue_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_ui_complete_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_ui_help_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_ui_intro_help_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_vocab_friends_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_vocab_going_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_vocab_hello_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_vocab_i_am_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_vocab_lake_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_vocab_together_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_vocab_too_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_vocab_we_are_cz.mp3`, `MatysekANJ/web_mmtx/audio/english/scene01_ui_great_open_the_door_or_run_again_en.mp3`, `MatysekANJ/web_mmtx/audio/english/scene01_ui_tap_benji_en.mp3`, `MatysekANJ/web_mmtx/audio/english/scene01_ui_tap_bruno_en.mp3`, `MatysekANJ/web_mmtx/audio/english/scene01_ui_tap_bunny_en.mp3`, `MatysekANJ/web_mmtx/audio/english/scene01_ui_tap_fiona_en.mp3`, `MatysekANJ/web_mmtx/audio/english/scene01_ui_tap_sunny_en.mp3`, `MatysekANJ/web_mmtx/audio/english/scene01_vocab_friends_en.mp3`, `MatysekANJ/web_mmtx/audio/english/scene01_vocab_going_en.mp3`, `MatysekANJ/web_mmtx/audio/english/scene01_vocab_hello_en.mp3`, `MatysekANJ/web_mmtx/audio/english/scene01_vocab_i_am_en.mp3`, `MatysekANJ/web_mmtx/audio/english/scene01_vocab_lake_en.mp3`, `MatysekANJ/web_mmtx/audio/english/scene01_vocab_together_en.mp3`, … a dalších 40
+- Commit: `Nahradit systémový hlas první scény pevnými MP3`
+- Další krok: Po potvrzeném checkpointu publikovat aktuální MMTX pomocí p+n a scénu poslechnout na Linuxu.
