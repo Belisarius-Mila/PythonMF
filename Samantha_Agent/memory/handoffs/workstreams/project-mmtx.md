@@ -1,33 +1,32 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obsahově dorovnáno podle kódu a Git historie: 2026-08-29 15:43 CEST
-- Poslední potvrzený MMTX checkpoint: 2026-08-25 13:17 CEST
+- Obsahově a provozně dorovnáno: 2026-08-29 17:05 CEST
+- Poslední věcný MMTX checkpoint: commit `f1499b1`
 
 ### Hotovo
 - Produkční webová scéna 3 pokračuje přímo do Harryho scény 4.
-- Skrytý rychlý přechod ve scéně 3 vede rovněž k Harrymu.
-- Harryho scéna i narozeninová scéna Jane jsou součástí aktuálního nasazeného main.
+- Harryho scéna přehrává všech 136 anglických a českých dialogových a slovníkových stop z pevných MP3 řízených manifestem a nepoužívá `speechSynthesis`.
+- GitHub `main`, Cockpit a veřejná Pages publikace byly ověřeny na `f1499b1`.
 
 ### Otevřeno
-- Harryho české a další nepokryté systémové čtení není na Linuxu dostatečně kvalitní; je potřeba ho nahradit předem připravenými MP3.
+- Ruční poslech celého průchodu scéna 3 → Harry na Linuxu a Macu.
 
 ### Rizika
-- Historický zápis z 2026-08-12 správně popisuje tehdejší samostatný prototyp, ale nesmí se používat jako současný stav po integraci z 2026-08-26.
+- Automatický checkpoint 16:22 vznikl pod aktivním proudem Linux; historický záznam zůstává auditní stopou, ale aktuální věcná autorita je tento MMTX handoff a TVBCP.
 
 ### Další krok
-- Udělat úplnou inventuru mluvených řetězců Harryho scény a nahradit systémové čtení pevnými MP3 s okamžitým přehráním.
+- Ověřit `Next`, `Repeat`, pořadí jazyků, přirozenost hlasů a tempo; případně vyměnit jen konkrétní problematické stopy.
 
 ### Rozhodnutí
-- Webový Forest Journey pokračuje ze scény 3 do Harryho scény 4; Harry už není samostatný nenapojený prototyp.
+- Pevná MP3 knihovna Harryho scény patří do pracovního proudu MMTX, nikoli Linux.
 
 ### Navrhované další kroky
-- Po doplnění MP3 ručně ověřit celý průchod scéna 3 → Harry na Linuxu i Macu.
+- Po ručním poslechu pokračovat dalším příběhovým krokem pouze z MMTX workstreamu.
 
 ### Technický stav checkpointu
-- Integraci provedl commit `6418137`; opravu skrytého přechodu commit `3b97df3`.
-- `goToNextScene()` ve scéně 3 otevírá `scene04_harry_guard_prototype/index.html` v produkčním `docs/` i mirroru.
-- Živý stav při dorovnání: deployment=`verified_current`, runtime=`connected`; main je pouze napřed před GitHubem.
+- Cílené testy 5/5, vzdálená Cockpit Quality Gate 1468/1468 a Pages run `33259207533` prošly.
+- Veřejný HTML, JavaScript, audio manifest a reprezentativní anglické i české MP3 jsou hashově shodné s `f1499b1`.
 - Chronologické bloky níže zůstávají historickými snapshoty a nepřepisují tento aktuální souhrn.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -284,3 +283,12 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (61): `MatysekANJ/web_mmtx/index.html`, `MatysekANJ/web_mmtx/script_intro_v2.js`, `MatysekANJ/web_mmtx/styles_intro_v2.css`, `docs/index.html`, `docs/script_intro_v2.js`, `docs/styles_intro_v2.css`, `MatysekANJ/web_mmtx/scene_jane_birthday/README.md`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/czech/jane_birthday_01_benji_hello_cz.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/czech/jane_birthday_02_benji_wish_cz.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/czech/jane_birthday_03_bunny_hello_cz.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/czech/jane_birthday_04_bunny_wish_cz.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/czech/jane_birthday_05_bruno_hello_cz.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/czech/jane_birthday_06_bruno_wish_cz.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/czech/jane_birthday_07_fiona_hello_cz.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/czech/jane_birthday_08_fiona_wish_cz.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/czech/jane_birthday_09_sunny_hello_cz.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/czech/jane_birthday_10_sunny_wish_cz.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/english/jane_birthday_01_benji_hello_en.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/english/jane_birthday_02_benji_wish_en.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/english/jane_birthday_03_bunny_hello_en.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/english/jane_birthday_04_bunny_wish_en.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/english/jane_birthday_05_bruno_hello_en.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/english/jane_birthday_06_bruno_wish_en.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/english/jane_birthday_07_fiona_hello_en.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/english/jane_birthday_08_fiona_wish_en.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/english/jane_birthday_09_sunny_hello_en.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/english/jane_birthday_10_sunny_wish_en.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/audio/english/jane_birthday_11_song_en.mp3`, `MatysekANJ/web_mmtx/scene_jane_birthday/index.html`, `MatysekANJ/web_mmtx/scene_jane_birthday/jane_birthday_clearing.png`, `MatysekANJ/web_mmtx/scene_jane_birthday/jane_birthday_clearing.svg`, `MatysekANJ/web_mmtx/scene_jane_birthday/script.js`, `MatysekANJ/web_mmtx/scene_jane_birthday/styles.css`, `Samantha_Agent/tests/test_mmtx_jane_birthday.py`, `docs/scene_jane_birthday/README.md`, `docs/scene_jane_birthday/audio/czech/jane_birthday_01_benji_hello_cz.mp3`, `docs/scene_jane_birthday/audio/czech/jane_birthday_02_benji_wish_cz.mp3`, `docs/scene_jane_birthday/audio/czech/jane_birthday_03_bunny_hello_cz.mp3`, `docs/scene_jane_birthday/audio/czech/jane_birthday_04_bunny_wish_cz.mp3`, `docs/scene_jane_birthday/audio/czech/jane_birthday_05_bruno_hello_cz.mp3`, … a dalších 21
 - Commit: `Přidat narozeninovou scénu Jane`
 - Další krok: Ručně ověřit hlasy a výslovnost Jane na iPhonu nebo Macu a poté použít ovládací prvky Cockpitu pro checkpoint a nasazení.
+
+### Terminálové dorovnání 2026-08-29 17:05 CEST – Pevná MP3 knihovna Harryho scény
+
+- Pracovní proud: `project-mmtx`
+- Hotovo: Harryho scéna používá 136 pevných anglických a českých stop bez systémového hlasu; commit `f1499b1` je pushnutý, Cockpit jej potvrzuje jako nasazený a Pages publikace je hashově ověřená.
+- Rozhodnutí: Věcný milník patří do MMTX. Automatický zápis 16:22 pod proudem Linux zůstává pouze historickou auditní stopou.
+- Rizika: Automatické směrování podle právě aktivního proudu nepoznalo změnu tématu; při dalším vývoji je nutné nejprve otevřít MMTX.
+- Další krok: Ručně poslechnout celý průchod na Linuxu a Macu.
+- Ověření: cílené testy 5/5, vzdálená brána 1468/1468, smoke 5/5 a veřejné hash shody HTML, JavaScriptu, manifestu i obou jazykových MP3.

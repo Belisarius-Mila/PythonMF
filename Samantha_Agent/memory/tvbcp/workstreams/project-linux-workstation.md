@@ -1,36 +1,30 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-29 16:22 CEST
+- Obsahově dorovnáno: 2026-08-29 17:05 CEST
 
 ### Hotovo
-- Harryho scéna nyní přehrává všech 136 anglických a českých dialogových a slovníkových stop z předem připravených MP3 bez systémového hlasu.
-- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Linux zůstává soukromým klientem Samanthy a výukových aplikací; VocabularyEN s hlasy Aria a Vlasta je zveřejněné.
+- MMTX Harryho MP3 jsou dorovnané do příslušného MMTX handoffu a TVBCP.
 
 ### Otevřeno
-- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
-- Lokální commity čekají na samostatný denní GitHub balíček.
+- Prakticky ověřit VocabularyEN a celý MMTX průchod na Linuxu.
 
 ### Rizika
-- Žádné další doložené provozní riziko.
+- Historické checkpointy 15:45 a 16:22 vznikly pod aktivním proudem Linux, přestože obsah patřil MMTX; nesmí být používány jako aktuální stav Linux workstreamu.
 
 ### Další krok
-- Ručně poslechnout celý průchod Harryho scénou na Linuxu a ověřit přirozenost hlasů i tempo.
+- Na Linuxu provést ruční uživatelský test; případný další vývoj nejprve otevřít ve věcně správném workstreamu.
 
 ### Rozhodnutí
-- Harryho scéna nebude používat speechSynthesis; všechny dialogy a slovníček přehrává z pevných MP3 řízených manifestem.
+- Linux je testovací zařízení, nikoli vlastník vývoje MMTX nebo VocabularyEN.
 
 ### Navrhované další kroky
-- Podle poslechu případně vyměnit pouze konkrétní problematické stopy
-- Po schválení poslechu provést samostatně push a nasazení
+- Pokračovat v konfiguraci Linuxu odděleně od vývoje konkrétních aplikací.
 
 ### Technický stav checkpointu
-- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `f9e86437561e`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `f9e86437561e` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-29T13:53:55+00:00.
-- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
-- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
-- Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
+- GitHub a Cockpit jsou na `f1499b1`; veřejné VocabularyEN i Harryho scéna byly nezávisle ověřeny.
+- Chronologické chybně směrované bloky zůstávají auditní historií a jsou korigovány novým záznamem níže.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Linux / instalace a konfigurace
@@ -308,3 +302,20 @@ Technický důkaz:
 - rychlá Cockpit brána syntaxe a whitespace: 5.1 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `project-linux-workstation`.
 - Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+
+### 2026-08-29 17:05 CEST – Korekce MMTX milníků chybně zapsaných pod Linux
+
+Hotovo:
+- Milníky integrace Harryho scény a pevné MP3 knihovny byly dorovnány do kanonického MMTX handoffu a TVBCP.
+
+Rozhodnutí:
+- Historické bloky 15:45 a 16:22 se nemažou, ale nejsou aktuální věcnou autoritou Linux workstreamu.
+
+Další krok:
+- Na Linuxu ručně ověřit VocabularyEN a průchod MMTX; jakoukoli obsahovou opravu zahájit až v příslušném aplikačním workstreamu.
+
+Navrhované další kroky:
+- Pokračovat samostatně v konfiguraci Linuxu podle jeho vlastního projektu.
+
+Technický důkaz:
+- GitHub `main`, Cockpit a Pages byly ověřeny na `f1499b1`; MMTX handoff, TVBCP a primární řádek nyní obsahují správný aktuální stav.

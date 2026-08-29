@@ -1,33 +1,32 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obsahově dorovnáno podle kódu a Git historie: 2026-08-29 15:43 CEST
-- Poslední potvrzený MMTX checkpoint: 2026-08-25 13:17 CEST
+- Obsahově a provozně dorovnáno: 2026-08-29 17:05 CEST
+- Poslední věcný MMTX checkpoint: commit `f1499b1`
 
 ### Hotovo
 - Produkční webová scéna 3 pokračuje přímo do Harryho scény 4.
-- Skrytý rychlý přechod ve scéně 3 vede rovněž k Harrymu.
-- Harryho scéna i narozeninová scéna Jane jsou součástí aktuálního nasazeného main.
+- Harryho scéna přehrává všech 136 anglických a českých dialogových a slovníkových stop z pevných MP3 řízených manifestem a nepoužívá `speechSynthesis`.
+- GitHub `main`, Cockpit a veřejná Pages publikace byly ověřeny na `f1499b1`.
 
 ### Otevřeno
-- Harryho české a další nepokryté systémové čtení není na Linuxu dostatečně kvalitní; je potřeba ho nahradit předem připravenými MP3.
+- Ruční poslech celého průchodu scéna 3 → Harry na Linuxu a Macu.
 
 ### Rizika
-- Historický zápis z 2026-08-12 správně popisuje tehdejší samostatný prototyp, ale nesmí se používat jako současný stav po integraci z 2026-08-26.
+- Automatický checkpoint 16:22 vznikl pod aktivním proudem Linux; historický záznam zůstává auditní stopou, ale aktuální věcná autorita je tento MMTX handoff a TVBCP.
 
 ### Další krok
-- Udělat úplnou inventuru mluvených řetězců Harryho scény a nahradit systémové čtení pevnými MP3 s okamžitým přehráním.
+- Ověřit `Next`, `Repeat`, pořadí jazyků, přirozenost hlasů a tempo; případně vyměnit jen konkrétní problematické stopy.
 
 ### Rozhodnutí
-- Webový Forest Journey pokračuje ze scény 3 do Harryho scény 4; Harry už není samostatný nenapojený prototyp.
+- Pevná MP3 knihovna Harryho scény patří do pracovního proudu MMTX, nikoli Linux.
 
 ### Navrhované další kroky
-- Po doplnění MP3 ručně ověřit celý průchod scéna 3 → Harry na Linuxu i Macu.
+- Po ručním poslechu pokračovat dalším příběhovým krokem pouze z MMTX workstreamu.
 
 ### Technický stav checkpointu
-- Integraci provedl commit `6418137`; opravu skrytého přechodu commit `3b97df3`.
-- `goToNextScene()` ve scéně 3 otevírá `scene04_harry_guard_prototype/index.html` v produkčním `docs/` i mirroru.
-- Živý stav při dorovnání: deployment=`verified_current`, runtime=`connected`; main je pouze napřed před GitHubem.
+- Cílené testy 5/5, vzdálená Cockpit Quality Gate 1468/1468 a Pages run `33259207533` prošly.
+- Veřejný HTML, JavaScript, audio manifest a reprezentativní anglické i české MP3 jsou hashově shodné s `f1499b1`.
 - Chronologické bloky níže zůstávají historickými snapshoty a nepřepisují tento aktuální souhrn.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -536,3 +535,23 @@ Technický důkaz:
 - rychlá Cockpit brána syntaxe a whitespace: 6.8 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `project-mmtx`.
 - Read-only živý stav při checkpointu: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
+
+### 2026-08-29 17:05 CEST – Pevná MP3 knihovna Harryho scény dorovnána do MMTX
+
+Hotovo:
+- Harryho scéna přehrává 136 pevných anglických a českých dialogových a slovníkových stop bez `speechSynthesis`.
+- Commit `f1499b1` je na GitHubu, Cockpit jej potvrzuje jako nasazený a veřejná Pages publikace je hashově shodná.
+
+Rozhodnutí:
+- Tento milník je součástí MMTX. Automatický checkpoint vytvořený pod aktivním proudem Linux zůstává historickou auditní stopou, nikoli aktuální věcnou autoritou.
+
+Další krok:
+- Ručně projít scénu 3 → Harry na Linuxu a Macu a ověřit `Next`, `Repeat`, pořadí jazyků, přirozenost hlasů a tempo.
+
+Navrhované další kroky:
+- Případně vyměnit pouze konkrétní problematické stopy.
+- Další příběhový vývoj zahájit až po otevření workstreamu MMTX.
+
+Technický důkaz:
+- Cílené testy 5/5; vzdálená Cockpit Quality Gate 1468/1468; smoke 5/5.
+- Pages run `33259207533` uspěl a veřejný HTML, JavaScript, manifest i vzorky obou jazykových MP3 odpovídají `f1499b1`.
