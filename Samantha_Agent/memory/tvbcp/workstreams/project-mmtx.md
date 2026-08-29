@@ -1,11 +1,11 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Produkční stav ověřen: 2026-08-29 20:44 CEST
+- Produkční stav ověřen: 2026-08-29 21:01 CEST
 
 ### Hotovo
 - Scéna 3 nyní používá úplnou pevnou anglickou a českou audio knihovnu řízenou manifestem bez systémového hlasu.
-- Scény 2 a 3 jsou publikované na GitHub Pages; poslední ověřený produkční commit je `72aedbf`.
+- Scény 2 a 3 jsou publikované na GitHub Pages; poslední ověřený produkční commit je `0230cf5`.
 - Human–Adam umí dokončený MMTX bezpečně publikovat přímým pokynem `p+n` bez terminálového mezikroku.
 
 ### Otevřeno
@@ -24,7 +24,7 @@
 - Po poslechovém ověření pokračovat auditem pevného audia hlavního portálu.
 
 ### Technický stav checkpointu
-- Pages run `33269031345` úspěšně nasadil přesný commit `72aedbf`; deployment `6158917594` je success a veřejný smoke vrací HTTP 200.
+- Pages run `33269734786` úspěšně nasadil přesný commit `0230cf5`; deployment `6159053676` je success a veřejný smoke vrací HTTP 200.
 - Veřejné manifesty a reprezentativní české MP3 scén 2 a 3 jsou hashově shodné s lokální produkční kopií.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -661,3 +661,20 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Run `33269031345`, deployment `6158917594`, přesná shoda commitu `72aedbf` a veřejný HTTP 200.
+
+### 2026-08-29 21:01 CEST – MMTX p+n nezávislé na modelové obálce
+
+Hotovo:
+- Opravený Human–Adam přímým `p+n` publikoval aktuální čistý main `0230cf5` a vrátil úplnou serverovou účtenku.
+
+Rozhodnutí:
+- Modelová obálka neautorizuje ani nevolí produkční operaci; rozhoduje přesný pokyn Míly a deklarovaný Pages cíl MMTX.
+
+Další krok:
+- Prakticky projít a poslechnout scény 2 a 3 na Linuxu.
+
+Navrhované další kroky:
+- Po poslechovém ověření pokračovat auditem pevného audia hlavního portálu.
+
+Technický důkaz:
+- Run `33269734786`, deployment `6159053676`, přesná shoda commitu `0230cf5` a veřejný HTTP 200.

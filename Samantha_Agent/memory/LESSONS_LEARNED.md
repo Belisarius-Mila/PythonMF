@@ -309,3 +309,14 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   stejného commitu a závěrečný HTTPS smoke provést přes systémový curl. Nejasný
   výsledek nikdy automaticky neopakovat; nejprve korelovat workflow ID,
   deployment ID, commit a veřejný HTTP stav.
+
+### LL-024 — Server-owned operaci nesmí autorizovat ani blokovat modelová obálka
+
+- Problém: Přesný uživatelský `p+n` byl správně autorizovaný, ale vadná
+  modelová provozní obálka jej zablokovala ještě před serverovým backendem.
+- Typ: opakující se
+- Řešení nalezeno: 29082026
+- Řešení: Pro přesný příkaz a deklarovaný produkční cíl vytvořit kanonický
+  serverový požadavek bez ohledu na chybějící, platnou nebo vadnou modelovou
+  obálku. Model smí dodat pouze viditelný text; autorizaci, volbu operace a
+  produkční účtenku vlastní server.
