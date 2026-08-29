@@ -25,6 +25,11 @@ const dictionaryPanel = document.getElementById("dictionaryPanel");
 const dictionaryList = document.getElementById("dictionaryList");
 const helpButton = document.getElementById("helpButton");
 const completeBanner = document.getElementById("completeBanner");
+const audioManifest = window.SCENE03_AUDIO_MANIFEST;
+
+if (!audioManifest || audioManifest.schemaVersion !== 1) {
+  throw new Error("Scene 3 audio manifest is missing or invalid.");
+}
 
 const SCENE_STATES = {
   waitingAudio: "waitingAudio",
@@ -35,19 +40,7 @@ const SCENE_STATES = {
   complete: "complete",
 };
 
-const sharedVoices = {
-  benji: "andrew|evan|alex|samantha|ava|fable",
-  bunny: "ana|samantha|ava|victoria|karen|echo",
-  bruno: "daniel|onyx|aaron|roger|guy",
-  fiona: "shimmer|samantha|ava|victoria|karen",
-  sunny: "nova|samantha|ava|victoria|karen|junior",
-  crow: "onyx|roger|daniel|guy",
-  horse: "daniel|roger|guy|alex|aaron",
-};
-
-const edgeAudioCharacters = new Set(["benji", "bunny", "bruno", "crow", "fiona", "horse", "sunny", "all"]);
 const sceneAssetVersion = "20260701fix8";
-const sceneAudioVersion = "20260701voice5";
 
 const phases = {
   "3a": {
@@ -263,7 +256,6 @@ const state = {
   audioUnlocked: false,
   audioCache: new Map(),
   currentAudio: null,
-  currentUtterance: null,
   speechQueue: Promise.resolve(),
   wrongTapCount: 0,
   htmlAudioPrimed: false,
@@ -279,7 +271,6 @@ function lineData(characterId, textEn, textCz, emoji, options = {}) {
     textEn,
     textCz,
     emoji,
-    audio: audioForLine(characterId, textEn),
     ...options,
   };
 }
@@ -341,26 +332,19 @@ function setPhase(phaseId) {
   hideBubble();
 }
 
-function loadVoices() {
-  if ("speechSynthesis" in window) {
-    window.speechSynthesis.getVoices();
-  }
-}
-
 function cancelSpeech() {
   if (state.currentAudio) {
     state.currentAudio.pause();
     state.currentAudio = null;
   }
-  if ("speechSynthesis" in window) {
-    window.speechSynthesis.cancel();
-  }
-  state.currentUtterance = null;
 }
 
 function firstDialogueAudio() {
-  const firstDialogue = scene03Config.steps.find((step) => step.type === "dialogue" && step.line?.audio);
-  return firstDialogue?.line.audio || "";
+  const firstDialogue = scene03Config.steps.find((step) => step.type === "dialogue" && step.line);
+  if (!firstDialogue) {
+    return "";
+  }
+  return fixedAudioPath(firstDialogue.line.textEn, "en", firstDialogue.line.characterId);
 }
 
 function primeHtmlAudio() {
@@ -396,40 +380,22 @@ function primeHtmlAudio() {
 
 function preloadOpeningAudio() {
   scene03Config.steps
-    .filter((step) => step.type === "dialogue" && step.line?.audio)
+    .filter((step) => step.type === "dialogue" && step.line)
     .slice(0, 4)
     .forEach((step) => {
-      const audio = new Audio(step.line.audio);
+      const audio = new Audio(fixedAudioPath(step.line.textEn, "en", step.line.characterId));
       audio.preload = "auto";
       audio.load();
     });
 }
 
-function audioSlug(text) {
-  return String(text || "")
-    .toLowerCase()
-    .replaceAll("'", "")
-    .replace(/[^a-z0-9]+/g, "_")
-    .replace(/^_+|_+$/g, "")
-    .slice(0, 64);
-}
-
-function audioForLine(characterId, textEn) {
-  if (!edgeAudioCharacters.has(characterId)) {
-    return "";
+function fixedAudioPath(text, lang, speakerId) {
+  const key = `${speakerId}::${text}`;
+  const path = audioManifest.dialogue?.[lang]?.[key];
+  if (!path) {
+    throw new Error(`Missing Scene 3 audio manifest entry: ${lang} ${key}`);
   }
-  return `audio/english/scene03_${characterId}_${audioSlug(textEn)}_en.mp3?v=${sceneAudioVersion}`;
-}
-
-function audioForEnglishText(characterId, textEn) {
-  if (!textEn) {
-    return "";
-  }
-  const characterAudio = audioForLine(characterId, textEn);
-  if (characterAudio) {
-    return characterAudio;
-  }
-  return `audio/english/scene03_ui_${audioSlug(textEn)}_en.mp3?v=${sceneAudioVersion}`;
+  return `${path}?v=${audioManifest.version}`;
 }
 
 async function audioFileExists(src) {
@@ -510,119 +476,23 @@ async function playAudioIfExists(src) {
   return playAudioElement(audio);
 }
 
-async function playVoice({ src, text, characterId, rate }) {
+async function playVoice({ text, lang = "en", speakerId = "ui" }) {
+  if (!text) {
+    return;
+  }
+  const src = fixedAudioPath(text, lang, speakerId || "ui");
   const played = await playAudioIfExists(src);
-  if (played) {
-    return;
+  if (!played) {
+    console.error(`Scene 3 fixed audio could not be played: ${src}`);
   }
-  await speakEnglish(text, characterId, { rate });
 }
 
-function pickVoice(preferredPattern, langPrefix) {
-  if (!("speechSynthesis" in window)) {
-    return null;
-  }
-
-  const voices = window.speechSynthesis.getVoices();
-  const patterns = String(preferredPattern || "")
-    .split("|")
-    .map((part) => part.trim().toLowerCase())
-    .filter(Boolean);
-
-  for (const pattern of patterns) {
-    const match = voices.find((voice) => voice.name.toLowerCase().includes(pattern));
-    if (match) {
-      return match;
-    }
-  }
-
-  return voices.find((voice) => voice.lang.toLowerCase().startsWith(langPrefix)) || null;
+async function speakEnglish(text, speakerId = "ui") {
+  await playVoice({ text, lang: "en", speakerId: speakerId || "ui" });
 }
 
-function estimateSpeechMs(text) {
-  return Math.min(9000, Math.max(1200, String(text || "").length * 70));
-}
-
-function normalizeCzechSpeech(text) {
-  return String(text || "")
-    .replaceAll("Benjiho", "Benžiho")
-    .replaceAll("Benji", "Benži")
-    .replaceAll("Bunnyho", "Bannyho")
-    .replaceAll("Bunny", "Banny")
-    .replaceAll("Fiono", "Fijono")
-    .replaceAll("Fiona", "Fijona");
-}
-
-function speakLine({ text, lang = "en", characterId = "", rate, pitch, volume }) {
-  return new Promise((resolve) => {
-    if (!text) {
-      resolve();
-      return;
-    }
-
-    const estimatedMs = estimateSpeechMs(text);
-    let settled = false;
-    let timeoutId = null;
-
-    const finish = () => {
-      if (settled) {
-        return;
-      }
-      settled = true;
-      if (timeoutId) {
-        window.clearTimeout(timeoutId);
-      }
-      state.currentUtterance = null;
-      resolve();
-    };
-
-    if (!state.audioUnlocked || !("speechSynthesis" in window)) {
-      window.setTimeout(finish, estimatedMs);
-      return;
-    }
-
-    window.speechSynthesis.cancel();
-
-    window.setTimeout(() => {
-      if (settled) {
-        return;
-      }
-
-      const isCzech = lang === "cs";
-      const utterance = new SpeechSynthesisUtterance(isCzech ? normalizeCzechSpeech(text) : text);
-      utterance.lang = isCzech ? "cs-CZ" : "en-US";
-      utterance.rate = rate ?? (isCzech ? 0.9 : 0.86);
-      utterance.pitch = pitch ?? (characterId === "sunny" ? 1.14 : characterId === "bruno" ? 0.9 : 1.0);
-      utterance.volume = volume ?? (isCzech ? 0.62 : 1.0);
-
-      const voice = pickVoice(
-        isCzech ? "zuzana|iveta|jana|cs" : sharedVoices[characterId],
-        isCzech ? "cs" : "en",
-      );
-      if (voice) {
-        utterance.voice = voice;
-      }
-
-      state.currentUtterance = utterance;
-      utterance.onend = finish;
-      utterance.onerror = finish;
-      window.speechSynthesis.resume();
-      window.speechSynthesis.speak(utterance);
-      timeoutId = window.setTimeout(finish, estimatedMs + 1200);
-    }, 60);
-  });
-}
-
-async function speakEnglish(text, characterId = "", options = {}) {
-  const played = await playAudioIfExists(options.audio || audioForEnglishText(characterId, text));
-  if (played) {
-    return;
-  }
-  await speakLine({ text, lang: "en", characterId, rate: options.rate });
-}
-
-async function speakCzech(text) {
-  await speakLine({ text, lang: "cs", rate: 0.9, volume: 0.62 });
+async function speakCzech(text, speakerId = "ui") {
+  await playVoice({ text, lang: "cs", speakerId: speakerId || "ui" });
 }
 
 function queueSpeech(job) {
@@ -682,8 +552,9 @@ function renderDictionary() {
     `;
     button.addEventListener("click", () => {
       queueSpeech(async () => {
-        await speakEnglish(item.en, "", { rate: 0.82 });
-        await speakCzech(item.cz);
+        const speakerId = `dictionary-${item.en}`;
+        await speakEnglish(item.en, speakerId);
+        await speakCzech(item.cz, speakerId);
       });
     });
     dictionaryList.appendChild(button);
@@ -779,20 +650,6 @@ async function primeAudio() {
   state.audioUnlocked = true;
   primeHtmlAudio();
   preloadOpeningAudio();
-  loadVoices();
-
-  if (!("speechSynthesis" in window)) {
-    return;
-  }
-
-  await new Promise((resolve) => {
-    if (window.speechSynthesis.getVoices().length > 0) {
-      resolve();
-      return;
-    }
-    window.speechSynthesis.addEventListener("voiceschanged", resolve, { once: true });
-    window.setTimeout(resolve, 300);
-  });
 }
 
 async function playLine(line, runId) {
@@ -805,12 +662,8 @@ async function playLine(line, runId) {
   renderHud();
   showBubble(target, { emoji: line.emoji, textEn: line.textEn, textCz: line.textCz });
 
-  await playVoice({
-    src: line.audio,
-    text: line.textEn,
-    characterId: line.characterId,
-  });
-  await speakCzech(line.textCz);
+  await speakEnglish(line.textEn, line.characterId);
+  await speakCzech(line.textCz, line.characterId);
 
   if (line.revealMap) {
     mapFragment.classList.remove("hidden");
@@ -1085,9 +938,6 @@ scene.addEventListener("click", (event) => {
   quickAdvanceScene();
 }, true);
 
-window.speechSynthesis?.addEventListener?.("voiceschanged", loadVoices);
-
 setupSceneImage();
 renderDictionary();
-loadVoices();
 renderHud();

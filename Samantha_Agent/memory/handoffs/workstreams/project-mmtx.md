@@ -1,31 +1,33 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-29 18:13 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-29 19:03 CEST
 
 ### Hotovo
-- Scéna 2 používá 55 pevných anglických a českých stop řízených manifestem a funguje bez systémového hlasu.
+- Scéna 3 nyní používá úplnou pevnou anglickou a českou audio knihovnu řízenou manifestem bez systémového hlasu.
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
 - Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
 
 ### Rizika
-- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
+- Žádné další doložené provozní riziko.
 
 ### Další krok
-- Prakticky projít a poslechnout celou scénu 2 na Linuxu.
+- Prakticky projít a poslechnout celou scénu 3 na Linuxu.
 
 ### Rozhodnutí
-- Existující kvalitní MP3 zůstávají zachované; nové české stopy používají Vlastu a scéna nemá speechSynthesis fallback.
+- Existující kvalitní anglické MP3 zůstávají zachované; nové české stopy používají Vlastu a scéna nemá speechSynthesis fallback.
 
 ### Navrhované další kroky
-- Po poslechovém ověření pokračovat stejným způsobem scénou 3.
+- Po poslechovém ověření pokračovat auditem pevného audia hlavního portálu.
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `b0d6ddfb2937`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `fc8cd2b90dc4` · je starší než ověřený main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-29T15:12:16+00:00.
-- Read-only živý stav: main=`aligned`, deployment=`verified_other_main`, runtime=`connected`.
+- Git před checkpointem: lokální `main` na `59e34ac6ea78`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `59e34ac6ea78` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-29T16:35:45+00:00.
+- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -313,3 +315,15 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (64): `MatysekANJ/web_mmtx/scene02_sunnys_lost_nuts/README.md`, `MatysekANJ/web_mmtx/scene02_sunnys_lost_nuts/audio/README.md`, `MatysekANJ/web_mmtx/scene02_sunnys_lost_nuts/index.html`, `MatysekANJ/web_mmtx/scene02_sunnys_lost_nuts/script.js`, `docs/scene02_sunnys_lost_nuts/README.md`, `docs/scene02_sunnys_lost_nuts/audio/README.md`, `docs/scene02_sunnys_lost_nuts/index.html`, `docs/scene02_sunnys_lost_nuts/script.js`, `MatysekANJ/build_scene02_audio.py`, `MatysekANJ/web_mmtx/scene02_sunnys_lost_nuts/audio/czech/scene02_01_sunny_no_nuts_cz.mp3`, `MatysekANJ/web_mmtx/scene02_sunnys_lost_nuts/audio/czech/scene02_02_fiona_benji_nuts_cz.mp3`, `MatysekANJ/web_mmtx/scene02_sunnys_lost_nuts/audio/czech/scene02_03_benji_map_cz.mp3`, `MatysekANJ/web_mmtx/scene02_sunnys_lost_nuts/audio/czech/scene02_04_fiona_bunny_nuts_cz.mp3`, `MatysekANJ/web_mmtx/scene02_sunnys_lost_nuts/audio/czech/scene02_05_bunny_carrot_cz.mp3`, `MatysekANJ/web_mmtx/scene02_sunnys_lost_nuts/audio/czech/scene02_06_bruno_bag_wait_second_cz.mp3`, `MatysekANJ/web_mmtx/scene02_sunnys_lost_nuts/audio/czech/scene02_07_bruno_look_inside_friends_cz.mp3`, `MatysekANJ/web_mmtx/scene02_sunnys_lost_nuts/audio/czech/scene02_08_sunny_my_nuts_cz.mp3`, `MatysekANJ/web_mmtx/scene02_sunnys_lost_nuts/audio/czech/scene02_09_fiona_ready_cz.mp3`, `MatysekANJ/web_mmtx/scene02_sunnys_lost_nuts/audio/czech/scene02_main_help_cz.mp3`, `MatysekANJ/web_mmtx/scene02_sunnys_lost_nuts/audio/czech/scene02_prompt_tap_bunny_cz.mp3`, `MatysekANJ/web_mmtx/scene02_sunnys_lost_nuts/audio/czech/scene02_vocab_bag_cz.mp3`, `MatysekANJ/web_mmtx/scene02_sunnys_lost_nuts/audio/czech/scene02_vocab_carrot_cz.mp3`, `MatysekANJ/web_mmtx/scene02_sunnys_lost_nuts/audio/czech/scene02_vocab_do_you_have_cz.mp3`, `MatysekANJ/web_mmtx/scene02_sunnys_lost_nuts/audio/czech/scene02_vocab_does_he_have_cz.mp3`, `MatysekANJ/web_mmtx/scene02_sunnys_lost_nuts/audio/czech/scene02_vocab_happy_cz.mp3`, `MatysekANJ/web_mmtx/scene02_sunnys_lost_nuts/audio/czech/scene02_vocab_i_dont_have_cz.mp3`, `MatysekANJ/web_mmtx/scene02_sunnys_lost_nuts/audio/czech/scene02_vocab_i_have_cz.mp3`, `MatysekANJ/web_mmtx/scene02_sunnys_lost_nuts/audio/czech/scene02_vocab_look_inside_cz.mp3`, `MatysekANJ/web_mmtx/scene02_sunnys_lost_nuts/audio/czech/scene02_vocab_map_cz.mp3`, `MatysekANJ/web_mmtx/scene02_sunnys_lost_nuts/audio/czech/scene02_vocab_nuts_cz.mp3`, `MatysekANJ/web_mmtx/scene02_sunnys_lost_nuts/audio/czech/scene02_vocab_ready_cz.mp3`, `MatysekANJ/web_mmtx/scene02_sunnys_lost_nuts/audio/czech/scene02_vocab_wait_cz.mp3`, `MatysekANJ/web_mmtx/scene02_sunnys_lost_nuts/audio/english/scene02_vocab_happy_en.mp3`, `MatysekANJ/web_mmtx/scene02_sunnys_lost_nuts/audio/english/scene02_vocab_ready_en.mp3`, `MatysekANJ/web_mmtx/scene02_sunnys_lost_nuts/audio/english/scene02_vocab_wait_en.mp3`, `MatysekANJ/web_mmtx/scene02_sunnys_lost_nuts/audio_manifest.js`, `Samantha_Agent/tests/test_mmtx_scene02_audio.py`, `docs/scene02_sunnys_lost_nuts/audio/czech/scene02_01_sunny_no_nuts_cz.mp3`, `docs/scene02_sunnys_lost_nuts/audio/czech/scene02_02_fiona_benji_nuts_cz.mp3`, `docs/scene02_sunnys_lost_nuts/audio/czech/scene02_03_benji_map_cz.mp3`, … a dalších 24
 - Commit: `Nahradit systémové čtení scény 2 pevnými MP3`
 - Další krok: Prakticky projít a poslechnout celou scénu 2 na Linuxu.
+
+### Automatický checkpoint 2026-08-29 19:03 CEST
+
+- Pracovní proud: `project-mmtx`
+- Hotovo: Scéna 3 nyní používá úplnou pevnou anglickou a českou audio knihovnu řízenou manifestem bez systémového hlasu.; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.; Lokální commity čekají na samostatný denní GitHub balíček.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: rychlá Cockpit brána syntaxe a whitespace: 5.2 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu
+- Změněné cesty před paměťovým zápisem (80): `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/README.md`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/index.html`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/script.js`, `Samantha_Agent/tests/test_mmtx_harry_guard_prototype.py`, `docs/scene03_journey_to_the_lake/README.md`, `docs/scene03_journey_to_the_lake/index.html`, `docs/scene03_journey_to_the_lake/script.js`, `MatysekANJ/build_scene03_audio.py`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_all_lets_go_left_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_all_thank_you_fiona_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_benji_hello_i_am_benji_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_benji_i_am_not_scared_i_will_go_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_benji_i_dont_know_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_benji_look_two_paths_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_benji_thank_you_crow_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_benji_thank_you_for_the_warning_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_bruno_i_am_pushing_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_bruno_let_us_drink_in_the_forest_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_bruno_no_this_way_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_bunny_bears_no_thank_you_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_bunny_how_do_we_get_water_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_bunny_i_am_scared_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_bunny_i_dont_know_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_bunny_this_way_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_bunny_water_we_have_water_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_crow_caw_bye_bye_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_crow_caw_go_left_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_crow_caw_no_no_go_left_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_crow_it_is_a_deep_valley_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_crow_left_is_good_right_is_bad_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_crow_maybe_bears_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_fiona_bruno_push_it_up_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_fiona_i_know_sunny_jump_on_the_handle_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_fiona_look_a_pump_but_the_bucket_is_empty_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_fiona_me_too_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_fiona_okay_left_it_is_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_fiona_the_pump_needs_help_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_fiona_wait_wait_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_horse_careful_a_dog_lives_there_cz.mp3`, `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/audio/czech/scene03_horse_come_drink_some_water_cz.mp3`, … a dalších 40
+- Commit: `Nahradit systémové čtení scény 3 pevnými MP3`
+- Další krok: Prakticky projít a poslechnout celou scénu 3 na Linuxu.

@@ -95,7 +95,8 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
         production_html = (
             PROJECT_ROOT / "docs" / "scene03_journey_to_the_lake" / "index.html"
         ).read_text(encoding="utf-8")
-        self.assertIn("script.js?v=20260826scene04link2", production_html)
+        self.assertIn("audio_manifest.js?v=20260829fixed1", production_html)
+        self.assertIn("script.js?v=20260829fixed1", production_html)
         quick_advance = production_script.split(
             "function quickAdvanceScene()", 1
         )[1].split("function isQuickSkipCornerClick", 1)[0]

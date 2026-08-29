@@ -45,9 +45,11 @@ handle, jump, push.
 
 ## Audio
 
-Anglicke MP3 pro dialogy, instrukce, napovedy a slovnicek jsou v
-`audio/english/`. Scena je pouzije prednostne a pri chybejicim souboru spadne
-zpet na `speechSynthesis` fallback.
+Scena pouziva pouze pevne MP3 rizene souborem `audio_manifest.js` a nema
+systemovy ani prohlizecovy hlas jako fallback. Knihovna obsahuje 168 souboru:
+87 zachovanych anglickych MP3 (z toho jedna starsi Brunova varianta) a 81
+ceskych MP3 hlasem `cs-CZ-VlastaNeural`. Aktivni pribeh, napovedy a slovnicek
+odkazuji na 167 stop.
 
 Aktualni voice lock:
 
@@ -62,7 +64,8 @@ Aktualni voice lock:
 | Horse | `en-US-ChristopherNeural` |
 | UI / slovnicek / All | `en-US-JennyNeural` |
 
-Ceske napovedy a preklady zustavaji zatim pres fallback.
+Ceske dialogy, napovedy a slovnikove vyznamy pouzivaji pevny hlas
+`cs-CZ-VlastaNeural`.
 
 Poznamka 2026-07-01: Benjiho Edge MP3 byly preobsazene z `en-US-BrianNeural`
 na `en-US-AndrewNeural`, protoze Brian pusobil moc brucive / podobne Brunovi.
@@ -74,6 +77,13 @@ Poznamka 2026-07-01 vecer: havrani ceske citoslovce je upravene na `Krá krá`,
 hotspot havrana je mensi a slovnicek je rozsiren na 35 polozek vcetne novych
 MP3 pro vsechny klikatelne vyrazy. Audio pro `live` je vynucene na vyslovnost
 `liv`, aby neznel jako pridavne jmeno `live`.
+
+Reprodukovatelna kontrola a pripadne doplneni pouze chybejicich ceskych stop:
+
+```bash
+python3 MatysekANJ/build_scene03_audio.py --check
+python3 MatysekANJ/build_scene03_audio.py --apply
+```
 
 ## Spusteni lokalne
 

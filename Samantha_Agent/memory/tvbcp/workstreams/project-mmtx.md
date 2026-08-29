@@ -1,31 +1,33 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-29 18:13 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-29 19:03 CEST
 
 ### Hotovo
-- Scéna 2 používá 55 pevných anglických a českých stop řízených manifestem a funguje bez systémového hlasu.
+- Scéna 3 nyní používá úplnou pevnou anglickou a českou audio knihovnu řízenou manifestem bez systémového hlasu.
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
 - Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
 
 ### Rizika
-- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
+- Žádné další doložené provozní riziko.
 
 ### Další krok
-- Prakticky projít a poslechnout celou scénu 2 na Linuxu.
+- Prakticky projít a poslechnout celou scénu 3 na Linuxu.
 
 ### Rozhodnutí
-- Existující kvalitní MP3 zůstávají zachované; nové české stopy používají Vlastu a scéna nemá speechSynthesis fallback.
+- Existující kvalitní anglické MP3 zůstávají zachované; nové české stopy používají Vlastu a scéna nemá speechSynthesis fallback.
 
 ### Navrhované další kroky
-- Po poslechovém ověření pokračovat stejným způsobem scénou 3.
+- Po poslechovém ověření pokračovat auditem pevného audia hlavního portálu.
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `b0d6ddfb2937`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `fc8cd2b90dc4` · je starší než ověřený main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-29T15:12:16+00:00.
-- Read-only živý stav: main=`aligned`, deployment=`verified_other_main`, runtime=`connected`.
+- Git před checkpointem: lokální `main` na `59e34ac6ea78`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `59e34ac6ea78` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-29T16:35:45+00:00.
+- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -600,3 +602,30 @@ Technický důkaz:
 - rychlá Cockpit brána syntaxe a whitespace: 5.3 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `project-mmtx`.
 - Read-only živý stav při checkpointu: main=`aligned`, deployment=`verified_other_main`, runtime=`connected`.
+
+### 2026-08-29 19:03 CEST – Scéna 3 nyní používá úplnou pevnou anglickou a českou audio knihovnu řízenou manifestem bez systémového hlasu.
+
+Hotovo:
+- Scéna 3 nyní používá úplnou pevnou anglickou a českou audio knihovnu řízenou manifestem bez systémového hlasu.
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+
+Otevřeno:
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
+
+Rizika:
+- Žádné další doložené provozní riziko.
+
+Rozhodnutí:
+- Existující kvalitní anglické MP3 zůstávají zachované; nové české stopy používají Vlastu a scéna nemá speechSynthesis fallback.
+
+Další krok:
+- Prakticky projít a poslechnout celou scénu 3 na Linuxu.
+
+Navrhované další kroky:
+- Po poslechovém ověření pokračovat auditem pevného audia hlavního portálu.
+
+Technický důkaz:
+- rychlá Cockpit brána syntaxe a whitespace: 5.2 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
+- Pracovní proud: `project-mmtx`.
+- Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
