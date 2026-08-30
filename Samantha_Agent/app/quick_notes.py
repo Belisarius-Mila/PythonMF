@@ -20,6 +20,7 @@ DEFAULT_INDEX_PATH = DEFAULT_PRIVATE_DIR / "index.json"
 SUPPORTED_SUFFIXES = {".md", ".txt"}
 IGNORED_FILE_PREFIXES = ("samantha_reminder_",)
 DIRECT_SOURCE_KIND = "direct_tailscale"
+GITHUB_SOURCE_KIND = "github_fallback"
 MAX_DIRECT_QUICK_NOTE_CHARS = 8_000
 _DELIVERY_ID_PATTERN = re.compile(r"^[A-Za-z0-9._:-]{8,160}$")
 
@@ -37,6 +38,7 @@ class QuickNote:
     status: str
     source_kind: str = ""
     body_text: str = ""
+    delivery_id: str = ""
 
 
 @dataclass(frozen=True)
@@ -66,9 +68,10 @@ def deliver_quick_note(
     *,
     delivery_id: str = "",
     created_at: str = "",
+    source_kind: str = DIRECT_SOURCE_KIND,
     index_path: Path = DEFAULT_INDEX_PATH,
 ) -> tuple[QuickNote, bool]:
-    """Atomically store one direct Shortcut delivery and deduplicate retries."""
+    """Atomically store one Shortcut delivery and deduplicate retries."""
 
     if not isinstance(text, str):
         raise ValueError("Quick Note musí být text.")
@@ -77,8 +80,11 @@ def deliver_quick_note(
         raise ValueError("Quick Note nesmí být prázdná.")
     if len(body_text) > MAX_DIRECT_QUICK_NOTE_CHARS:
         raise ValueError(f"Quick Note smí mít nejvýše {MAX_DIRECT_QUICK_NOTE_CHARS} znaků.")
-    if not isinstance(created_at, str) or not isinstance(delivery_id, str):
+    if not isinstance(created_at, str) or not isinstance(delivery_id, str) or not isinstance(source_kind, str):
         raise ValueError("Metadata doručení musí být textová.")
+    safe_source_kind = source_kind.strip()
+    if safe_source_kind not in {DIRECT_SOURCE_KIND, GITHUB_SOURCE_KIND}:
+        raise ValueError("Zdroj doručení Quick Note není podporovaný.")
     safe_created_at = created_at.strip()[:80]
     safe_delivery_id = delivery_id.strip()
     if safe_delivery_id and not _DELIVERY_ID_PATTERN.fullmatch(safe_delivery_id):
@@ -89,7 +95,8 @@ def deliver_quick_note(
         safe_delivery_id = hashlib.sha256(digest_input).hexdigest()
 
     now = _now_iso()
-    source_path = f"direct://quick-note/{safe_delivery_id}"
+    source_scheme = "direct" if safe_source_kind == DIRECT_SOURCE_KIND else "github"
+    source_path = f"{source_scheme}://quick-note/{safe_delivery_id}"
     stored: dict[str, Any] | None = None
     created = False
 
@@ -97,16 +104,18 @@ def deliver_quick_note(
         nonlocal stored, created
         records = _index_records(current)
         for record in records:
-            if (
-                str(record.get("source_kind", "")) == DIRECT_SOURCE_KIND
-                and str(record.get("delivery_id", "")) == safe_delivery_id
-            ):
+            if str(record.get("delivery_id", "")) == safe_delivery_id:
+                existing_text = str(record.get("body_text", "") or "").strip()
+                if existing_text != body_text:
+                    raise ValueError(
+                        "delivery_id už existuje s jiným obsahem; doručení zůstává nejednoznačné."
+                    )
                 stored = dict(record)
                 return {"notes": records}
         record = {
             "note_number": _next_note_number(records),
             "source_path": source_path,
-            "source_kind": DIRECT_SOURCE_KIND,
+            "source_kind": safe_source_kind,
             "delivery_id": safe_delivery_id,
             "title": "Samantha Quick Note",
             "snippet": _one_line(body_text),
@@ -593,7 +602,7 @@ def _delivery_day(created_at: str) -> str:
 
 
 def _record_source_available(record: dict[str, Any]) -> bool:
-    if str(record.get("source_kind", "")) == DIRECT_SOURCE_KIND:
+    if str(record.get("source_kind", "")) in {DIRECT_SOURCE_KIND, GITHUB_SOURCE_KIND}:
         return True
     return Path(str(record.get("source_path", ""))).exists()
 
@@ -620,4 +629,5 @@ def _record_to_note(record: dict[str, Any]) -> QuickNote:
         status=str(record.get("status") or "inbox"),
         source_kind=str(record.get("source_kind") or ""),
         body_text=str(record.get("body_text") or ""),
+        delivery_id=str(record.get("delivery_id") or ""),
     )

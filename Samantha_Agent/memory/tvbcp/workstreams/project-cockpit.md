@@ -525,3 +525,34 @@ Navrhované další kroky:
 Technický důkaz:
 - Cílené testy 28/28, iOS 27 validace a podepsání varianty `5` prošly.
 - Po opravě testovací izolace prošla plná Cockpit Quality Gate 1491/1491.
+
+### 2026-08-30 21:35 CEST – Ověřený fallback připomínek zkopírovaný pro Quick Notes
+
+Hotovo:
+- Dvoucestné připomínky jsou provozně ověřené při bdícím i spícím Macu.
+- Quick Notes mají lokálně připravený samostatný GitHub write-ahead, přímý
+  Tailscale POST a fail-closed korelaci podle `delivery_id`.
+- Aktivní QN cesta nepoužívá iCloud a secret-free zkratka je validovaná i
+  podepsaná jako zástupná varianta mimo git.
+
+Rozhodnutí:
+- QN používají pouze GitHub a Tailscale, bez třetí cesty.
+- QN dostanou vlastní soukromý repozitář a vlastní fine-grained token pouze s
+  `Issues: Read and write`; token připomenutí zůstává beze změny.
+- GitHub Issue se zavře až po potvrzeném lokálním zápisu. Konflikt stejného ID
+  s jiným textem zůstane otevřený a nesmí se automaticky opakovat.
+
+Další krok:
+- Založit soukromý QN inbox, vytvořit omezený token a bez výpisu jej vložit do
+  ignorovaného `.env` a soukromé podepsané zkratky.
+
+Navrhované další kroky:
+- Po samostatném potvrzení nasadit QN backend a udělat nejprve jeden bdící,
+  potom jeden spánkový syntetický test s přesnou korelací.
+
+Technický důkaz:
+- Připomínky: záznam 46 / Issue `#6` bdící; záznam 47 / Issue `#7` vytvořená
+  při spánku a po probuzení právě jednou převzatá a uzavřená.
+- QN testy: cíleně 301/301, plná Cockpit Quality Gate 1506/1506.
+- iOS 27 validace a podpis zástupné zkratky prošly; soubor má 25 724 bajtů a
+  režim `0600`.

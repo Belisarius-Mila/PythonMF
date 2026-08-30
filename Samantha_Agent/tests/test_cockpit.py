@@ -135,6 +135,22 @@ from app.email.models import EmailAttachmentMeta, EmailHeader, EmailMessage
 
 
 class CockpitTests(unittest.TestCase):
+    @staticmethod
+    def github_sync_result(**overrides: Any) -> dict[str, Any]:
+        result: dict[str, Any] = {
+            "ok": True,
+            "configured": False,
+            "pending_count": 0,
+            "remaining_count": 0,
+            "created_count": 0,
+            "duplicate_count": 0,
+            "closed_count": 0,
+            "error_count": 0,
+            "errors": [],
+        }
+        result.update(overrides)
+        return result
+
     def cockpit_do_post_routes(self) -> list[str]:
         source = Path(cockpit_module.__file__).read_text(encoding="utf-8")
         start = source.index("def do_POST(self) -> None:")
@@ -5130,19 +5146,28 @@ Dalsi krok:
     def test_quick_notes_status_returns_numbered_overview(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             root = Path(temp_dir)
-            inbox = root / "Shortcuts"
-            inbox.mkdir()
             index_path = root / "private" / "quick_notes" / "index.json"
-            (inbox / "01_old.md").write_text(
-                "# Samantha inbox\n\nDatum: 2026-06-03 20:30:00\n\nPoznámka:\nZkontrolovat Cockpit.\n",
-                encoding="utf-8",
+            quick_note_deliver_action(
+                {
+                    "text": "Zkontrolovat Cockpit.",
+                    "created_at": "2026-06-03 20:30:00",
+                    "delivery_id": "test-quick-status-old-001",
+                },
+                index_path=index_path,
             )
-            (inbox / "02_new.md").write_text(
-                "# Samantha inbox\n\nDatum: 2026-06-03 20:45:00\n\nPoznámka:\nNovější QN.\n",
-                encoding="utf-8",
+            quick_note_deliver_action(
+                {
+                    "text": "Novější QN.",
+                    "created_at": "2026-06-03 20:45:00",
+                    "delivery_id": "test-quick-status-new-002",
+                },
+                index_path=index_path,
             )
-
-            result = quick_notes_status(inbox_dir=inbox, index_path=index_path)
+            with patch(
+                "app.cockpit.sync_configured_github_quick_notes",
+                return_value=self.github_sync_result(),
+            ):
+                result = quick_notes_status(index_path=index_path)
 
         self.assertTrue(result["ok"])
         self.assertEqual(result["counts"]["active"], 2)
@@ -5151,41 +5176,53 @@ Dalsi krok:
         self.assertEqual(result["notes"][0]["triage"]["classification"], "nápad")
         self.assertNotIn("source_path", result["notes"][0])
 
-    def test_urgent_reminders_status_is_separate_from_quick_notes(self) -> None:
+    def test_quick_notes_status_does_not_import_legacy_icloud_files(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             root = Path(temp_dir)
             inbox = root / "Shortcuts"
             inbox.mkdir()
-            quick_index = root / "private" / "quick_notes" / "index.json"
-            urgent_index = root / "private" / "urgent_reminders" / "index.json"
-            (inbox / "samantha_note_2026-06-04_08-00-00.md").write_text(
-                "# Samantha inbox\n\nDatum: 2026-06-04 08:00:00\n\nPoznámka:\nNápad do QN.\n",
-                encoding="utf-8",
-            )
-            (inbox / "samantha_reminder_2026-06-04_08-05-00.md").write_text(
-                "# Samantha důležité připomenutí\n\nDatum: 2026-06-04 08:05:00\nPriorita: urgent\n\nPřipomenutí:\nZavolat do servisu.\n",
+            index_path = root / "private" / "quick_notes" / "index.json"
+            (inbox / "legacy-note.md").write_text(
+                "# Samantha inbox\n\nDatum: 2026-06-03 20:30:00\n\n"
+                "Poznámka:\nTato stará iCloud cesta se nemá aktivně importovat.\n",
                 encoding="utf-8",
             )
 
-            quick = quick_notes_status(inbox_dir=inbox, index_path=quick_index)
+            with patch(
+                "app.cockpit.sync_configured_github_quick_notes",
+                return_value=self.github_sync_result(),
+            ):
+                result = quick_notes_status(inbox_dir=inbox, index_path=index_path)
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["counts"], {"active": 0, "total": 0})
+        self.assertEqual(result["notes"], [])
+        self.assertFalse(index_path.exists())
+
+    def test_urgent_reminders_status_is_separate_from_quick_notes(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            quick_index = root / "private" / "quick_notes" / "index.json"
+            urgent_index = root / "private" / "urgent_reminders" / "index.json"
+            quick_note_deliver_action(
+                {
+                    "text": "Nápad do QN.",
+                    "delivery_id": "test-separate-quick-note-001",
+                },
+                index_path=quick_index,
+            )
             urgent_reminder_deliver_action(
                 {"text": "Zavolat do servisu.", "delivery_id": "test-separate-urgent-001"},
                 index_path=urgent_index,
             )
             with patch(
+                "app.cockpit.sync_configured_github_quick_notes",
+                return_value=self.github_sync_result(),
+            ), patch(
                 "app.cockpit.sync_configured_github_urgent_reminders",
-                return_value={
-                    "ok": True,
-                    "configured": False,
-                    "pending_count": 0,
-                    "remaining_count": 0,
-                    "created_count": 0,
-                    "duplicate_count": 0,
-                    "closed_count": 0,
-                    "error_count": 0,
-                    "errors": [],
-                },
+                return_value=self.github_sync_result(),
             ):
+                quick = quick_notes_status(index_path=quick_index)
                 urgent = urgent_reminders_status(index_path=urgent_index)
 
         self.assertEqual(quick["counts"]["active"], 1)
@@ -5381,20 +5418,27 @@ Dalsi krok:
             payload = {
                 "text": "Soukromý obsah QN nesmí být v potvrzení.",
                 "created_at": "2026-08-06T09:15:00+02:00",
+                "delivery_id": "test-cockpit-qn-receipt-001",
             }
 
             first = quick_note_deliver_action(payload, index_path=index_path)
             duplicate = quick_note_deliver_action(payload, index_path=index_path)
-            detail = quick_note_detail_status(
-                note_number=int(first["note_number"]),
-                inbox_dir=inbox,
-                index_path=index_path,
-            )
+            with patch(
+                "app.cockpit.sync_configured_github_quick_notes",
+                return_value=self.github_sync_result(),
+            ):
+                detail = quick_note_detail_status(
+                    note_number=int(first["note_number"]),
+                    inbox_dir=inbox,
+                    index_path=index_path,
+                )
             stored = json.loads(index_path.read_text(encoding="utf-8"))["notes"]
 
         self.assertTrue(first["ok"])
         self.assertEqual(first["status"], "created")
         self.assertEqual(duplicate["status"], "duplicate")
+        self.assertEqual(first["delivery_id"], payload["delivery_id"])
+        self.assertEqual(duplicate["delivery_id"], payload["delivery_id"])
         self.assertEqual(first["note_number"], duplicate["note_number"])
         self.assertNotIn(payload["text"], json.dumps(first, ensure_ascii=False))
         self.assertEqual(len(stored), 1)
@@ -5453,7 +5497,7 @@ Dalsi krok:
         self.assertEqual(stored["reminders"][0]["status"], "done")
         self.assertIn("completed_at", stored["reminders"][0])
 
-    def test_quick_notes_status_falls_back_to_private_index_when_sync_fails(self) -> None:
+    def test_quick_notes_status_falls_back_to_private_index_when_github_sync_fails(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             root = Path(temp_dir)
             inbox = root / "Shortcuts"
@@ -5492,11 +5536,20 @@ Dalsi krok:
                 encoding="utf-8",
             )
 
-            with patch("app.cockpit.sync_quick_notes_index", side_effect=OSError("iCloud busy")):
+            with patch(
+                "app.cockpit.sync_configured_github_quick_notes",
+                return_value=self.github_sync_result(
+                    ok=False,
+                    configured=True,
+                    error_count=1,
+                    errors=["GitHub QN inbox teď není dostupný."],
+                ),
+            ):
                 result = quick_notes_status(inbox_dir=inbox, index_path=index_path)
 
-        self.assertTrue(result["ok"])
-        self.assertIn("lokálního indexu", result["message"])
+        self.assertFalse(result["ok"])
+        self.assertIn("GitHub fallback", result["message"])
+        self.assertIn("lokální index", result["message"])
         self.assertEqual(result["counts"]["active"], 2)
         self.assertEqual(result["notes"][0]["note_number"], 7)
         self.assertEqual(result["notes"][0]["snippet"], "Fallback poznámka.")
@@ -5505,16 +5558,20 @@ Dalsi krok:
     def test_quick_notes_status_adds_triage_hint_for_cockpit_project_note(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             root = Path(temp_dir)
-            inbox = root / "Shortcuts"
-            inbox.mkdir()
             index_path = root / "private" / "quick_notes" / "index.json"
-            (inbox / "project_note.md").write_text(
-                "# Samantha inbox\n\nDatum: 2026-06-05 05:14:45\n\nPoznámka:\nChybí tlačítko projekty v Cockpitu a seznam toolů.\n",
-                encoding="utf-8",
+            quick_note_deliver_action(
+                {
+                    "text": "Chybí tlačítko projekty v Cockpitu a seznam toolů.",
+                    "delivery_id": "test-qn-cockpit-triage-001",
+                },
+                index_path=index_path,
             )
-
-            result = quick_notes_status(inbox_dir=inbox, index_path=index_path)
-            detail = quick_note_detail_status(note_number=1, inbox_dir=inbox, index_path=index_path)
+            with patch(
+                "app.cockpit.sync_configured_github_quick_notes",
+                return_value=self.github_sync_result(),
+            ):
+                result = quick_notes_status(index_path=index_path)
+                detail = quick_note_detail_status(note_number=1, index_path=index_path)
 
         self.assertEqual(result["notes"][0]["triage"]["classification"], "Cockpit / správa projektů")
         self.assertIn("Cockpit", result["notes"][0]["triage"]["suggested_next_step"])
@@ -5524,16 +5581,23 @@ Dalsi krok:
     def test_quick_notes_status_falls_back_to_action_preclassification(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             root = Path(temp_dir)
-            inbox = root / "Shortcuts"
-            inbox.mkdir()
             index_path = root / "private" / "quick_notes" / "index.json"
-            (inbox / "library_url_note.md").write_text(
-                "# Samantha inbox\n\nDatum: 2026-06-22 19:44:26\n\nPoznámka:\nJe třeba opravit knihovnu, aby při načítání URL článku automaticky uložila článek.\n",
-                encoding="utf-8",
+            quick_note_deliver_action(
+                {
+                    "text": (
+                        "Je třeba opravit knihovnu, aby při načítání URL článku "
+                        "automaticky uložila článek."
+                    ),
+                    "delivery_id": "test-qn-library-triage-001",
+                },
+                index_path=index_path,
             )
-
-            result = quick_notes_status(inbox_dir=inbox, index_path=index_path)
-            detail = quick_note_detail_status(note_number=1, inbox_dir=inbox, index_path=index_path)
+            with patch(
+                "app.cockpit.sync_configured_github_quick_notes",
+                return_value=self.github_sync_result(),
+            ):
+                result = quick_notes_status(index_path=index_path)
+                detail = quick_note_detail_status(note_number=1, index_path=index_path)
 
         self.assertEqual(result["notes"][0]["triage"]["classification"], "archiv/znalostní databáze")
         self.assertEqual(result["notes"][0]["triage"]["confidence"], "medium")
@@ -5543,15 +5607,19 @@ Dalsi krok:
     def test_quick_note_detail_status_reads_full_body_without_source_path(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             root = Path(temp_dir)
-            inbox = root / "Shortcuts"
-            inbox.mkdir()
             index_path = root / "private" / "quick_notes" / "index.json"
-            (inbox / "note.md").write_text(
-                "# Samantha inbox\n\nDatum: 2026-06-03 20:30:00\n\nPoznámka:\nCelý obsah QN.\nDruhý řádek.\n",
-                encoding="utf-8",
+            quick_note_deliver_action(
+                {
+                    "text": "Celý obsah QN.\nDruhý řádek.",
+                    "delivery_id": "test-qn-full-detail-001",
+                },
+                index_path=index_path,
             )
-
-            result = quick_note_detail_status(note_number=1, inbox_dir=inbox, index_path=index_path)
+            with patch(
+                "app.cockpit.sync_configured_github_quick_notes",
+                return_value=self.github_sync_result(),
+            ):
+                result = quick_note_detail_status(note_number=1, index_path=index_path)
 
         self.assertTrue(result["ok"])
         self.assertEqual(result["note_number"], 1)
@@ -5560,7 +5628,7 @@ Dalsi krok:
         self.assertFalse(result["truncated"])
         self.assertNotIn("source_path", result)
 
-    def test_quick_note_detail_status_falls_back_to_private_index_when_sync_fails(self) -> None:
+    def test_quick_note_detail_status_falls_back_to_private_index_when_github_sync_fails(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             root = Path(temp_dir)
             inbox = root / "Shortcuts"
@@ -5593,7 +5661,15 @@ Dalsi krok:
                 encoding="utf-8",
             )
 
-            with patch("app.cockpit.sync_quick_notes_index", side_effect=OSError("iCloud busy")):
+            with patch(
+                "app.cockpit.sync_configured_github_quick_notes",
+                return_value=self.github_sync_result(
+                    ok=False,
+                    configured=True,
+                    error_count=1,
+                    errors=["GitHub QN inbox teď není dostupný."],
+                ),
+            ):
                 result = quick_note_detail_status(note_number=7, inbox_dir=inbox, index_path=index_path)
 
         self.assertTrue(result["ok"])

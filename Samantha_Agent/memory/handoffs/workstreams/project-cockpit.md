@@ -1,34 +1,38 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-19 22:05 CEST
+- Aktualizováno: 2026-08-30 21:35 CEST
 
 ### Hotovo
-- Dokumentová práce v Cockpitu je sjednocená do jediné fronty; každý dokument se zobrazuje jen jednou a nabízí přímo potřebné akce pro čtení i metadata.
-- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- GitHub fallback důležitých připomenutí je provozně doložený při bdícím i spícím Macu: Issue vznikla při spánku, po probuzení byla právě jednou převzata do Cockpitu a uzavřena.
+- Stejný dvoucestný model je lokálně připravený pro Quick Notes: nejdřív zápis do odděleného soukromého GitHub inboxu, potom přímý Tailscale POST s přesnou korelací `delivery_id`.
+- Aktivní cesta Quick Notes už nepoužívá iCloud. GitHub import zachovává správný zdroj `github_fallback`, konfliktní ID selže zavřeně a Issue se zavře až po lokální účtence.
+- Zdroj zkratky je validovaný pro iOS 27 a podepsaná zástupná varianta bez tokenu je uložená mimo git.
 
 ### Otevřeno
-- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Soukromý QN repozitář a jeho samostatný fine-grained token ještě nejsou vytvořené ani vložené do ignorovaného `.env` a soukromé zkratky.
+- QN změna není nasazená do běžícího Cockpitu a neproběhl živý bdící ani spánkový QN test.
 - Lokální commity čekají na samostatný denní GitHub balíček.
 
 ### Rizika
-- Dotykový a vizuální test sjednocené fronty na skutečném iPhonu zatím neproběhl.
+- Text QN bude po dobu čekání uložený čitelně v soukromé GitHub Issue; Míla tuto hranici pro technické poznámky výslovně přijal.
+- Po bezpečném GitHub zápisu může přímá Tailscale část při nedostupném Macu čekat na síťový timeout. Nejednoznačné doručení se automaticky neopakuje.
 
 ### Další krok
-- Samostatně potvrdit nasazení do Cockpitu a potom na iPhonu ověřit jednu položku se čtením a jednu s doplněním metadat.
+- Vytvořit soukromý QN inbox a nový token omezený pouze na tento repozitář s `Issues: Read and write`; potom token bez výpisu vložit do ignorovaného `.env` a soukromé podepsané zkratky.
 
 ### Rozhodnutí
-- Revize a klasifikace dokumentu jsou jeden uživatelský úkol; klasifikace už není samostatný duplicitní pracovní oddíl.
+- Quick Notes mají pouze dvě cesty: GitHub write-ahead a přímý Tailscale POST. Nepřidává se třetí iCloud cesta.
+- QN používají oddělený repozitář, token a proměnné prostředí; oprávnění existujícího inboxu připomenutí se nerozšiřuje.
 
 ### Navrhované další kroky
-- Podle živého iPhonového testu upravit jen konkrétní nejasnost, nevracet další paralelní seznam.
+- Po samostatně potvrzeném nasazení provést nejprve jeden syntetický bdící QN test a až po přesné korelaci jeden test se spícím Macem.
 
 ### Technický stav checkpointu
-- Změna je otestovaná (1446 testů).
-- Git před checkpointem: lokální `main` na `c74cc57b4872`; GitHub je o 4 commity pozadu a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `c74cc57b4872` · smoke 5/5 · 2026-08-18T15:07:32+00:00.
-- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
-- Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
+- Cílená sada prošla 301/301 a plná Cockpit Quality Gate 1506/1506.
+- Podepsaná zástupná zkratka bez tajemství má 25 724 bajtů a režim `0600`.
+- Poslední serverově potvrzené nasazení zůstává `04e776351a047f95563f2d97ae43fa69544e5c7a`; tento QN checkpoint zatím nasazený není.
+- Tento souhrn nenahrazuje historické chronologické bloky níže.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: Cockpit / hlavní architektura
@@ -419,3 +423,44 @@ Technický důkaz:
   prošla a podepsaný soubor má 25 698 bajtů s režimem `0600`.
 - První plná brána správně odhalila dva testy závislé na živém inboxu; po jejich
   izolaci finální Cockpit Quality Gate prošla 1491/1491.
+
+### 2026-08-30 21:35 CEST – Připomínky ověřené, QN fallback připravený
+
+Hotovo:
+- U připomenutí je doložený bdící záznam 46 s Issue `#6` i spánkový záznam 47
+  s Issue `#7`; spánková Issue vznikla při zavřeném Macu, po probuzení byla
+  právě jednou doručena do Cockpitu a uzavřena.
+- Quick Notes mají lokálně připravenou kopii stejného dvoucestného kontraktu:
+  oddělený GitHub write-ahead, přímý Tailscale POST a přesné `delivery_id`.
+- Aktivní QN cesta už neimportuje iCloud. GitHub záznam je označený
+  `github_fallback`, konflikt ID selže zavřeně a Issue se uzavírá až po lokální
+  účtence.
+- Secret-free zdroj QN zkratky je validovaný pro iOS 27 a podepsaná zástupná
+  varianta je bezpečně uložená mimo git.
+
+Rozhodnutí:
+- QN budou mít jen dvě cesty a vlastní soukromý repozitář, token a proměnné
+  prostředí. Token připomenutí se nerozšiřuje.
+- Do soukromé GitHub Issue mohou dočasně vstoupit pouze technické QN texty;
+  Míla tuto bezpečnostní hranici výslovně přijal.
+
+Co není hotové:
+- QN inbox a token ještě neexistují; skutečné tajemství není v kódu ani
+  podepsané zástupné zkratce.
+- QN změna není nasazená a neproběhl její živý bdící ani spánkový test.
+
+Další krok:
+- Vytvořit soukromý QN inbox a fine-grained token pouze pro něj s oprávněním
+  `Issues: Read and write`; potom jej bez výpisu vložit do ignorovaného `.env`
+  a soukromé zkratky.
+
+Navrhované další kroky:
+- Samostatně potvrdit nasazení Cockpitu, provést jeden bdící QN test a až po
+  přesné shodě ID jeden test se spícím Macem.
+
+Technický důkaz:
+- Cílená sada 301/301 a plná Cockpit Quality Gate 1506/1506 prošly.
+- iOS 27 validace i podpis zástupné zkratky prošly; výstup má 25 724 bajtů a
+  režim `0600`.
+- Poslední živé nasazení zůstává `04e776351a047f95563f2d97ae43fa69544e5c7a`;
+  tento checkpoint zatím nasazený není.

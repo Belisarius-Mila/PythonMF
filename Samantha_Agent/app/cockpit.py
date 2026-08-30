@@ -256,7 +256,7 @@ from app.project_audit_report import format_project_audit_result, run_samantha_p
 from app.quick_notes import DEFAULT_ICLOUD_SHORTCUTS_INBOX, DEFAULT_INDEX_PATH as QUICK_NOTES_INDEX_PATH
 from app.quick_notes import ACTION_KIND_LABELS, classify_quick_note_text
 from app.quick_notes import deliver_quick_note
-from app.quick_notes import sync_quick_notes_index
+from app.github_quick_notes import sync_configured_github_quick_notes
 from app.github_urgent_reminders import sync_configured_github_urgent_reminders
 from app.urgent_reminders import DEFAULT_INDEX_PATH as URGENT_REMINDERS_INDEX_PATH
 from app.urgent_reminders import deliver_urgent_reminder
@@ -2069,67 +2069,35 @@ def quick_notes_status(
     index_path: Path = QUICK_NOTES_INDEX_PATH,
     limit: int = 20,
 ) -> dict[str, Any]:
-    inbox_exists = inbox_dir.exists()
-    try:
-        notes = sync_quick_notes_index(inbox_dir=inbox_dir, index_path=index_path)
-    except (OSError, ValueError) as exc:
-        fallback = quick_notes_status_from_index(index_path=index_path, limit=limit)
-        if fallback["notes"]:
-            return {
-                **fallback,
-                "ok": True,
-                "message": f"Quick Notes z lokálního indexu; iCloud sync teď selhal: {exc}",
-                "inbox_exists": inbox_exists,
-                "inbox": str(inbox_dir),
-                "index": str(relative_to_project(index_path)),
-                "sync_error": safe_text(str(exc))[:300],
-            }
-        return {
-            **fallback,
-            "ok": False,
-            "message": f"Quick Notes se nepodařilo načíst: {exc}",
-            "inbox_exists": inbox_exists,
-            "inbox": str(inbox_dir),
-            "index": str(relative_to_project(index_path)),
-            "sync_error": safe_text(str(exc))[:300],
-        }
-
-    active_notes = sorted(
-        (note for note in notes if note.status == "inbox"),
-        key=lambda note: note.note_number,
-        reverse=True,
-    )
-    shown = active_notes[: max(1, limit)]
-    if not inbox_exists and not active_notes:
-        message = "Quick Notes inbox zatím není synchronizovaný na Mac."
-    elif not active_notes:
-        message = "Quick Notes inbox je prázdný."
+    _ = inbox_dir  # Legacy call compatibility; iCloud is no longer an active delivery path.
+    github_fallback = sync_configured_github_quick_notes(index_path=index_path)
+    status = quick_notes_status_from_index(index_path=index_path, limit=limit)
+    active_count = int(status["counts"]["active"])
+    if not github_fallback["ok"]:
+        status["ok"] = False
+        status["message"] = (
+            "GitHub fallback Quick Notes se nepodařilo synchronizovat. "
+            "Zobrazuji poslední platný lokální index."
+        )
+    elif github_fallback["created_count"]:
+        count = int(github_fallback["created_count"])
+        status["message"] = (
+            f"Z GitHub QN fallbacku přijato {count}; nyní je v inboxu poznámek: {active_count}."
+        )
+    elif active_count:
+        status["message"] = f"{active_count} poznámek v Quick Notes inboxu."
+    elif github_fallback["configured"]:
+        status["message"] = "Quick Notes inbox je prázdný. GitHub fallback je připojený."
     else:
-        message = f"{len(active_notes)} poznámek v Quick Notes inboxu."
-        if not inbox_exists:
-            message += " Přímé doručení přes Tailscale je dostupné; iCloud fallback není připojený."
-    return {
-        "ok": True,
-        "message": message,
-        "inbox_exists": inbox_exists,
-        "inbox": str(inbox_dir),
-        "index": str(relative_to_project(index_path)),
-        "counts": {"active": len(active_notes), "total": len(notes)},
-        "notes": [
-            {
-                "note_number": note.note_number,
-                "category": safe_text(note.category)[:80],
-                "status": safe_text(note.status)[:80],
-                "created_at": safe_text(note.created_at)[:80],
-                "modified_at": safe_text(note.modified_at)[:80],
-                "title": safe_text(note.title)[:180],
-                "snippet": safe_text(note.snippet)[:300],
-                "size_bytes": note.size_bytes,
-                "triage": quick_note_triage_hint(note.snippet),
-            }
-            for note in shown
-        ],
-    }
+        status["message"] = (
+            "Quick Notes inbox je prázdný. Přímé doručení přes Tailscale je dostupné; "
+            "GitHub fallback zatím není nakonfigurovaný."
+        )
+    status["github_fallback"] = github_fallback
+    status["inbox_exists"] = False
+    status["inbox"] = ""
+    status["sync_pending"] = bool(github_fallback["remaining_count"])
+    return status
 
 
 def quick_notes_status_from_index(*, index_path: Path, limit: int = 20) -> dict[str, Any]:
@@ -2183,38 +2151,16 @@ def quick_note_detail_status(
             "truncated": False,
         }
 
-    try:
-        notes = sync_quick_notes_index(inbox_dir=inbox_dir, index_path=index_path)
-    except (OSError, ValueError) as exc:
-        return quick_note_detail_from_index(
-            note_number=note_number,
-            index_path=index_path,
-            max_chars=max_chars,
-            sync_error=exc,
-        )
-
-    note = next((item for item in notes if item.note_number == note_number and item.status == "inbox"), None)
-    if note is None:
-        return {
-            "ok": False,
-            "message": f"Quick Note #{note_number} není v aktivním inboxu.",
-            "note_number": note_number,
-            "body_text": "",
-            "truncated": False,
-        }
-
-    return quick_note_detail_payload(
-        note_number=note.note_number,
-        category=note.category,
-        status=note.status,
-        created_at=note.created_at,
-        modified_at=note.modified_at,
-        title=note.title,
-        snippet=note.snippet,
-        size_bytes=note.size_bytes,
-        source_path=note.source_path,
-        stored_body_text=note.body_text,
+    _ = inbox_dir  # Legacy call compatibility; detail is authoritative from the private index.
+    github_fallback = sync_configured_github_quick_notes(index_path=index_path)
+    sync_error = None
+    if not github_fallback["ok"]:
+        sync_error = RuntimeError("GitHub QN fallback se nepodařilo synchronizovat.")
+    return quick_note_detail_from_index(
+        note_number=note_number,
+        index_path=index_path,
         max_chars=max_chars,
+        sync_error=sync_error,
     )
 
 
@@ -2230,7 +2176,7 @@ def quick_note_detail_from_index(
     except (OSError, json.JSONDecodeError) as exc:
         message = f"Quick Note #{note_number} se nepodařilo najít v lokálním indexu."
         if sync_error is not None:
-            message += f" iCloud sync teď selhal: {sync_error}"
+            message += f" GitHub fallback teď selhal: {sync_error}"
         return {
             "ok": False,
             "message": message,
@@ -2275,7 +2221,10 @@ def quick_note_detail_from_index(
         max_chars=max_chars,
     )
     if sync_error is not None:
-        payload["message"] = f"{payload['message']} Detail je z lokálního indexu; iCloud sync teď selhal: {sync_error}"
+        payload["message"] = (
+            f"{payload['message']} Detail je z lokálního indexu; "
+            f"GitHub fallback teď selhal: {sync_error}"
+        )
         payload["sync_error"] = safe_text(str(sync_error))[:300]
     return payload
 
@@ -2565,6 +2514,7 @@ def quick_note_deliver_action(
     return {
         "ok": True,
         "status": "created" if created else "duplicate",
+        "delivery_id": note.delivery_id,
         "note_number": note.note_number,
         "message": (
             f"Quick Note #{note.note_number} doručena."

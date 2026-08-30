@@ -60,6 +60,30 @@ class QuickNotesTests(unittest.TestCase):
                 deliver_quick_note(None, index_path=index_path)  # type: ignore[arg-type]
             with self.assertRaises(ValueError):
                 deliver_quick_note("Text", delivery_id="bad id", index_path=index_path)
+            with self.assertRaises(ValueError):
+                deliver_quick_note("Text", source_kind="unknown", index_path=index_path)
+
+    def test_reused_delivery_id_with_different_text_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            index_path = Path(temp_dir) / "private" / "index.json"
+            delivery_id = "samantha-qn-20260830213000123"
+            deliver_quick_note(
+                "Původní technický návrh.",
+                delivery_id=delivery_id,
+                index_path=index_path,
+            )
+
+            with self.assertRaisesRegex(ValueError, "nejednoznačné"):
+                deliver_quick_note(
+                    "Jiný technický návrh.",
+                    delivery_id=delivery_id,
+                    index_path=index_path,
+                )
+
+            stored = json.loads(index_path.read_text(encoding="utf-8"))["notes"]
+
+        self.assertEqual(len(stored), 1)
+        self.assertEqual(stored[0]["body_text"], "Původní technický návrh.")
 
     def test_list_assigns_stable_numbers_and_safe_snippets(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
