@@ -48,7 +48,7 @@ class MmtxScene01AudioTests(unittest.TestCase):
         script = (DOCS_ROOT / "script_intro_v2.js").read_text(encoding="utf-8")
 
         self.assertIn('scene01_audio_manifest.js?v=20260829fixed1', html)
-        self.assertIn('script_intro_v2.js?v=20260829fixed1', html)
+        self.assertIn('script_intro_v2.js?v=20260830fixed1', html)
         self.assertLess(html.index("scene01_audio_manifest.js"), html.index("script_intro_v2.js"))
         self.assertIn("window.SCENE01_AUDIO_MANIFEST", script)
         self.assertIn("function clearingAudioSources", script)

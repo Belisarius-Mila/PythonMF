@@ -30,9 +30,13 @@ const owlGardenPrompt = document.getElementById("owlGardenPrompt");
 const owlGardenThumbButton = document.getElementById("owlGardenThumbButton");
 const owlGardenDoneBadge = document.getElementById("owlGardenDoneBadge");
 const clearingAudioManifest = window.SCENE01_AUDIO_MANIFEST;
+const forestSchoolAudioManifest = window.FOREST_SCHOOL_AUDIO_MANIFEST;
 
 if (!clearingAudioManifest || clearingAudioManifest.schemaVersion !== 1) {
   throw new Error("Scene 1 audio manifest is missing or invalid.");
+}
+if (!forestSchoolAudioManifest || forestSchoolAudioManifest.schemaVersion !== 1) {
+  throw new Error("Forest School audio manifest is missing or invalid.");
 }
 
 const scenes = {
@@ -325,14 +329,9 @@ const forestSchoolObjects = forestSchoolLessons.flatMap((lesson) => lesson.objec
 const forestSchoolQuestionWords = forestSchoolObjects.map((item) => item.word);
 const forestSchoolHelpDisplayText = "Je to správně? Pokud ano klikni jes, pokud ne klikni no.";
 const forestSchoolHelpSpokenText = "Je to správně? Pokud ano, klikňi na jes. Pokud ne, klikňi na nou.";
-const forestSchoolHelpAudio = "audio/czech/forest_school_help_cz.mp3?v=20260527czvoice";
 const forestSchoolLessonPreviewSpokenText = "Nejprve si ukážeme slovíčka z této lekce. Poslechněte si anglické slovíčko a opakujte si výslovnost.";
 const forestSchoolLessonChoiceText = "Chceš pokračovat další lekcí? Stiskni Ano. Pokud chceš opakovat, stiskni Ne.";
 const forestSchoolLessonChoiceSpokenText = "Chceš pokračovat další lekcí? Stiskňi ano. Pokud chceš opakovat, stiskňi ne.";
-const forestSchoolDemoAudio = {
-  bunnyYes: "audio/english/forest_school_bunny_yes_it_is.mp3?v=20260527voice",
-  benjiNo: "audio/english/forest_school_benji_no_it_isnt.mp3?v=20260527benji",
-};
 
 const benjiBunnyDebugSkipRect = { x: 0, y: 76, w: 16, h: 24 };
 const owlGardenDebugSkipRect = { x: 0, y: 76, w: 16, h: 24 };
@@ -722,6 +721,24 @@ async function playClearingFixedAudio(text, lang, speakerId) {
     }
   }
   return true;
+}
+
+function forestSchoolAudioSource(text, lang, speakerId) {
+  const key = `${speakerId}::${text}`;
+  const path = forestSchoolAudioManifest.dialogue?.[lang]?.[key];
+  if (!path) {
+    throw new Error(`Missing Forest School audio manifest entry: ${lang} ${key}`);
+  }
+  return `${path}?v=${forestSchoolAudioManifest.version}`;
+}
+
+async function playForestSchoolFixedAudio(text, lang, speakerId) {
+  const src = forestSchoolAudioSource(text, lang, speakerId);
+  const played = await playAudioFileIfAvailable(src);
+  if (!played) {
+    console.error(`Forest School fixed audio could not be played: ${src}`);
+  }
+  return played;
 }
 
 async function speakCue(cueKey) {
@@ -1923,21 +1940,15 @@ async function runHouseBunny(sequenceId) {
 }
 
 async function speakForestSchoolOwlLine(text) {
-  await speakEnglishLine(text, { preferredVoiceName: "ash", rate: 0.84, pitch: 0.94 });
+  await playForestSchoolFixedAudio(text, "en", "owl");
 }
 
 async function speakForestSchoolBunnyLine(text) {
-  const played = text === "Yes, it is." ? await playAudioFileIfAvailable(forestSchoolDemoAudio.bunnyYes) : false;
-  if (!played) {
-    await speakEnglishLine(text, { preferredVoiceName: "samantha|ava|karen|victoria", rate: 0.9, pitch: 1.12 });
-  }
+  await playForestSchoolFixedAudio(text, "en", "bunny");
 }
 
 async function speakForestSchoolBenjiLine(text) {
-  const played = text === "No, it isn't." ? await playAudioFileIfAvailable(forestSchoolDemoAudio.benjiNo) : false;
-  if (!played) {
-    await speakEnglishLine(text, { preferredVoiceName: "brian|andrew|roger|guy|daniel|alex|aaron|evan|junior", rate: 0.9, pitch: 1.04 });
-  }
+  await playForestSchoolFixedAudio(text, "en", "benji");
 }
 
 function currentForestSchoolLesson() {
@@ -2027,7 +2038,7 @@ async function runForestSchoolLessonPreview(sequenceId) {
   state.forestSchoolQuestionWord = "";
   state.forestSchoolReviewIndex = 0;
   renderScene();
-  await speakCzechLine(forestSchoolLessonPreviewSpokenText, { rate: 0.86 });
+  await playForestSchoolFixedAudio(forestSchoolLessonPreviewSpokenText, "cs", "ui");
   if (!isSceneActive("forestSchool", sequenceId)) {
     return false;
   }
@@ -2042,16 +2053,16 @@ async function runForestSchoolLessonPreview(sequenceId) {
     if (!isSceneActive("forestSchool", sequenceId)) {
       return false;
     }
-    await speakEnglishLine(object.word, { preferredVoiceName: "ash", rate: 0.8, pitch: 0.94 });
+    await playForestSchoolFixedAudio(object.word, "en", `word-${object.word}`);
     if (!isSceneActive("forestSchool", sequenceId)) {
       return false;
     }
     await pauseMs(180);
-    await speakEnglishLine(object.word, { preferredVoiceName: "ash", rate: 0.8, pitch: 0.94 });
+    await playForestSchoolFixedAudio(object.word, "en", `word-${object.word}`);
     if (!isSceneActive("forestSchool", sequenceId)) {
       return false;
     }
-    await speakCzechLine(object.translation, { rate: 0.86 });
+    await playForestSchoolFixedAudio(object.translation, "cs", `word-${object.word}`);
     if (!isSceneActive("forestSchool", sequenceId)) {
       return false;
     }
@@ -2099,18 +2110,18 @@ async function runForestSchoolDemo(sequenceId) {
     return false;
   }
 
-  setForestSchoolQuestion(benjiObject, benjiObject.word);
+  setForestSchoolQuestion(benjiObject, wrongForestSchoolQuestionWord(benjiObject.word));
   state.forestSchoolPhase = "demoBenji";
   renderScene();
   await speakForestSchoolOwlLine(`Is this a ${state.forestSchoolQuestionWord}?`);
   if (!isSceneActive("forestSchool", sequenceId)) {
     return false;
   }
-  await speakForestSchoolBenjiLine("Yes, it is.");
+  await speakForestSchoolBenjiLine("No, it isn't.");
   if (!isSceneActive("forestSchool", sequenceId)) {
     return false;
   }
-  const benjiFlashFinished = await flashForestSchoolDemoAnswer(true, sequenceId);
+  const benjiFlashFinished = await flashForestSchoolDemoAnswer(false, sequenceId);
   if (!benjiFlashFinished) {
     return false;
   }
@@ -2204,11 +2215,11 @@ async function runForestSchoolReview(sequenceId) {
     if (!isSceneActive("forestSchool", sequenceId)) {
       return;
     }
-    await speakEnglishLine(object.word, { preferredVoiceName: "ash", rate: 0.84, pitch: 0.94 });
+    await playForestSchoolFixedAudio(object.word, "en", `word-${object.word}`);
     if (!isSceneActive("forestSchool", sequenceId)) {
       return;
     }
-    await speakCzechLine(object.translation, { rate: 0.86 });
+    await playForestSchoolFixedAudio(object.translation, "cs", `word-${object.word}`);
     await pauseMs(430);
   }
 
@@ -2228,7 +2239,7 @@ async function runForestSchoolReview(sequenceId) {
 
   state.forestSchoolPhase = "lessonChoice";
   renderScene();
-  await speakCzechLine(forestSchoolLessonChoiceSpokenText, { rate: 0.86 });
+  await playForestSchoolFixedAudio(forestSchoolLessonChoiceSpokenText, "cs", "ui");
 }
 
 async function playBenjiBunnyHelp() {
@@ -2283,10 +2294,7 @@ async function playForestSchoolHelp() {
   }
   state.forestSchoolHelpVisible = true;
   renderScene();
-  const playedHelpAudio = await playAudioFileIfAvailable(forestSchoolHelpAudio);
-  if (!playedHelpAudio) {
-    await speakCzechLine(forestSchoolHelpSpokenText, { rate: 0.86 });
-  }
+  await playForestSchoolFixedAudio(forestSchoolHelpSpokenText, "cs", "ui");
 }
 
 function detectHouseBunnyColor(localX, localY, width, height) {
@@ -3286,7 +3294,7 @@ async function handleForestSchoolAnswer(answerYes) {
   const sequenceId = state.sequenceId;
   state.forestSchoolPhase = "checking";
   renderScene();
-  await speakEnglishLine(answerYes ? "yes" : "no", { preferredVoiceName: "samantha|ava|victoria|karen", rate: 0.9, pitch: 1.02 });
+  await playForestSchoolFixedAudio(answerYes ? "yes" : "no", "en", "answer");
   if (!isSceneActive("forestSchool", sequenceId)) {
     return;
   }

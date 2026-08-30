@@ -1,34 +1,33 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-29 21:27 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-30 12:17 CEST
 
 ### Hotovo
-- První scéna Cesty k jezeru nyní používá 49 pevných anglických a českých MP3 řízených manifestem bez systémového hlasu.
-- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Forest School nyní používá kompletní knihovnu 203 pevných anglických a českých stop bez systémového hlasu a Benjiho ukázka správně odpovídá No, it isn’t.
 
 ### Otevřeno
 - Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
 
 ### Rizika
-- Žádné další doložené provozní riziko.
+- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
 
 ### Další krok
-- Po potvrzeném checkpointu publikovat aktuální MMTX pomocí p+n a scénu poslechnout na Linuxu.
+- Po potvrzeném checkpointu scénu poslechnout a samostatně spustit p+n.
 
 ### Rozhodnutí
-- Existující kvalitní anglické nahrávky zůstávají zachované; nové české stopy používají Vlastu a změna je omezena na clearingMeeting.
+- Forest School používá pevná MP3 řízená manifestem a Benji v ukázce odpovídá No, it isn’t.
 
 ### Navrhované další kroky
-- Publikovat potvrzený checkpoint na GitHub Pages pomocí p+n.
-- Prakticky projít první scénu na Linuxu a ověřit tempo, hlasitost a výslovnost.
-- Potom pokračovat další dosud systémově namluvenou částí hlavního portálu.
+- Prakticky projít Forest School na Linuxu nebo Macu
+- Potom samostatně publikovat aktuální MMTX pomocí p+n
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `74d40b7880e7`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `74d40b7880e7` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-29T19:04:15+00:00.
-- Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
+- Git před checkpointem: lokální `main` na `14d58b6a39d4`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `7b5e0985889e` · je starší než ověřený main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-29T19:57:50+00:00.
+- Read-only živý stav: main=`local_ahead`, deployment=`verified_other_main`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -365,3 +364,15 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (80): `MatysekANJ/web_mmtx/index.html`, `MatysekANJ/web_mmtx/script_intro_v2.js`, `Samantha_Agent/tests/test_mmtx_jane_birthday.py`, `docs/index.html`, `docs/script_intro_v2.js`, `MatysekANJ/build_scene01_audio.py`, `MatysekANJ/web_mmtx/audio/czech/scene01_01_benji_dialogue_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_02_bunny_dialogue_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_03_benji_dialogue_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_04_bruno_dialogue_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_05_fiona_dialogue_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_06_sunny_dialogue_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_07_fiona_dialogue_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_08_bruno_dialogue_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_09_benji_dialogue_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_10_sunny_dialogue_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_11_fiona_dialogue_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_ui_complete_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_ui_help_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_ui_intro_help_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_vocab_friends_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_vocab_going_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_vocab_hello_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_vocab_i_am_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_vocab_lake_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_vocab_together_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_vocab_too_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/scene01_vocab_we_are_cz.mp3`, `MatysekANJ/web_mmtx/audio/english/scene01_ui_great_open_the_door_or_run_again_en.mp3`, `MatysekANJ/web_mmtx/audio/english/scene01_ui_tap_benji_en.mp3`, `MatysekANJ/web_mmtx/audio/english/scene01_ui_tap_bruno_en.mp3`, `MatysekANJ/web_mmtx/audio/english/scene01_ui_tap_bunny_en.mp3`, `MatysekANJ/web_mmtx/audio/english/scene01_ui_tap_fiona_en.mp3`, `MatysekANJ/web_mmtx/audio/english/scene01_ui_tap_sunny_en.mp3`, `MatysekANJ/web_mmtx/audio/english/scene01_vocab_friends_en.mp3`, `MatysekANJ/web_mmtx/audio/english/scene01_vocab_going_en.mp3`, `MatysekANJ/web_mmtx/audio/english/scene01_vocab_hello_en.mp3`, `MatysekANJ/web_mmtx/audio/english/scene01_vocab_i_am_en.mp3`, `MatysekANJ/web_mmtx/audio/english/scene01_vocab_lake_en.mp3`, `MatysekANJ/web_mmtx/audio/english/scene01_vocab_together_en.mp3`, … a dalších 40
 - Commit: `Nahradit systémový hlas první scény pevnými MP3`
 - Další krok: Po potvrzeném checkpointu publikovat aktuální MMTX pomocí p+n a scénu poslechnout na Linuxu.
+
+### Automatický checkpoint 2026-08-30 12:17 CEST
+
+- Pracovní proud: `project-mmtx`
+- Hotovo: Forest School nyní používá kompletní knihovnu 203 pevných anglických a českých stop bez systémového hlasu a Benjiho ukázka správně odpovídá No, it isn’t.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.; Lokální commity čekají na samostatný denní GitHub balíček.
+- Rizika: Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: rychlá Cockpit brána syntaxe a whitespace: 4.4 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu
+- Změněné cesty před paměťovým zápisem (80): `MatysekANJ/web_mmtx/index.html`, `MatysekANJ/web_mmtx/script_intro_v2.js`, `Samantha_Agent/tests/test_mmtx_jane_birthday.py`, `Samantha_Agent/tests/test_mmtx_scene01_audio.py`, `docs/index.html`, `docs/script_intro_v2.js`, `MatysekANJ/build_forest_school_audio.py`, `MatysekANJ/web_mmtx/audio/czech/forest_school_lesson_choice_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/forest_school_lesson_preview_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/forest_school_word_apple_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/forest_school_word_bag_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/forest_school_word_ball_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/forest_school_word_banana_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/forest_school_word_bed_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/forest_school_word_bike_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/forest_school_word_block_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/forest_school_word_boat_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/forest_school_word_book_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/forest_school_word_boots_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/forest_school_word_box_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/forest_school_word_bread_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/forest_school_word_bus_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/forest_school_word_cake_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/forest_school_word_car_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/forest_school_word_chair_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/forest_school_word_cloud_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/forest_school_word_cookie_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/forest_school_word_corn_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/forest_school_word_cup_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/forest_school_word_doll_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/forest_school_word_flower_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/forest_school_word_fork_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/forest_school_word_grape_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/forest_school_word_hat_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/forest_school_word_house_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/forest_school_word_key_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/forest_school_word_kite_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/forest_school_word_lamp_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/forest_school_word_leaf_cz.mp3`, `MatysekANJ/web_mmtx/audio/czech/forest_school_word_milk_cz.mp3`, … a dalších 40
+- Commit: `Doplnit pevná MP3 pro Forest School`
+- Další krok: Po potvrzeném checkpointu scénu poslechnout a samostatně spustit p+n.

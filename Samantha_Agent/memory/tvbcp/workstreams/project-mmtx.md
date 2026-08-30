@@ -1,34 +1,33 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-29 21:27 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-30 12:17 CEST
 
 ### Hotovo
-- První scéna Cesty k jezeru nyní používá 49 pevných anglických a českých MP3 řízených manifestem bez systémového hlasu.
-- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Forest School nyní používá kompletní knihovnu 203 pevných anglických a českých stop bez systémového hlasu a Benjiho ukázka správně odpovídá No, it isn’t.
 
 ### Otevřeno
 - Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
 
 ### Rizika
-- Žádné další doložené provozní riziko.
+- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
 
 ### Další krok
-- Po potvrzeném checkpointu publikovat aktuální MMTX pomocí p+n a scénu poslechnout na Linuxu.
+- Po potvrzeném checkpointu scénu poslechnout a samostatně spustit p+n.
 
 ### Rozhodnutí
-- Existující kvalitní anglické nahrávky zůstávají zachované; nové české stopy používají Vlastu a změna je omezena na clearingMeeting.
+- Forest School používá pevná MP3 řízená manifestem a Benji v ukázce odpovídá No, it isn’t.
 
 ### Navrhované další kroky
-- Publikovat potvrzený checkpoint na GitHub Pages pomocí p+n.
-- Prakticky projít první scénu na Linuxu a ověřit tempo, hlasitost a výslovnost.
-- Potom pokračovat další dosud systémově namluvenou částí hlavního portálu.
+- Prakticky projít Forest School na Linuxu nebo Macu
+- Potom samostatně publikovat aktuální MMTX pomocí p+n
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `74d40b7880e7`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `74d40b7880e7` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-29T19:04:15+00:00.
-- Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
+- Git před checkpointem: lokální `main` na `14d58b6a39d4`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `7b5e0985889e` · je starší než ověřený main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-29T19:57:50+00:00.
+- Read-only živý stav: main=`local_ahead`, deployment=`verified_other_main`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -710,3 +709,30 @@ Technický důkaz:
 - rychlá Cockpit brána syntaxe a whitespace: 7.4 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `project-mmtx`.
 - Read-only živý stav při checkpointu: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
+
+### 2026-08-30 12:17 CEST – Forest School nyní používá kompletní knihovnu 203 pevných anglických a českých stop bez systémového hlasu a Benjiho ukázka správně odpovídá No, it isn’t.
+
+Hotovo:
+- Forest School nyní používá kompletní knihovnu 203 pevných anglických a českých stop bez systémového hlasu a Benjiho ukázka správně odpovídá No, it isn’t.
+
+Otevřeno:
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
+
+Rizika:
+- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
+
+Rozhodnutí:
+- Forest School používá pevná MP3 řízená manifestem a Benji v ukázce odpovídá No, it isn’t.
+
+Další krok:
+- Po potvrzeném checkpointu scénu poslechnout a samostatně spustit p+n.
+
+Navrhované další kroky:
+- Prakticky projít Forest School na Linuxu nebo Macu
+- Potom samostatně publikovat aktuální MMTX pomocí p+n
+
+Technický důkaz:
+- rychlá Cockpit brána syntaxe a whitespace: 4.4 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
+- Pracovní proud: `project-mmtx`.
+- Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_other_main`, runtime=`connected`.
