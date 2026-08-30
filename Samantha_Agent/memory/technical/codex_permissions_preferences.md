@@ -113,3 +113,23 @@ fatal: could not read Username for 'https://github.com': Device not configured
 ```
 
 nejde o chybejici Codex povoleni, ale o problem s GitHub prihlasenim v lokalnim credential helperu. Prakticky dalsi krok je spustit push z normalniho Terminalu nebo opravit GitHub prihlaseni.
+
+## Codex CLI 0.151.0 – bezpečnostní update 2026-08-30
+
+- Globální npm instalace byla aktualizována z `0.148.0` na `0.151.0` přes
+  oficiální balíček `@openai/codex`; `codex --version`, npm registrace balíčku
+  a základní `codex --help` smoke po aktualizaci prošly.
+- Pro Samanthu jsou podstatné opravy zachování permission profilu při obnově
+  relace a po `/cd`, zneplatnění staré Guardian klasifikace po změně oprávnění
+  a přesnější vzdálené sandboxování podle skutečného OS, domovského adresáře a
+  pravidel cest.
+- Nová možnost extension vrstvy kontrolovat nebo nahradit MCP tool result před
+  předáním modelu je zatím pouze kandidát budoucí bezpečnostní vrstvy, nikoli
+  aktivní schopnost Samanthy.
+- Před případnou implementací nejdřív inventarizovat konkrétní pluginy a MCP
+  servery Samanthy a provést read-only syntetický pilot bez soukromých dat.
+  Samostatně navrhnout pravidla redakce, blokování podezřelého obsahu,
+  zachování strukturovaných chyb a fail-closed účtenky. Bez tohoto ověření
+  filtr nezapínat a netvrdit, že chrání současný provoz.
+- Nově spuštěné Codex CLI relace použijí `0.151.0`; již běžící relace může až
+  do ukončení dál používat proces načtený před aktualizací.
