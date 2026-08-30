@@ -257,11 +257,10 @@ from app.quick_notes import DEFAULT_ICLOUD_SHORTCUTS_INBOX, DEFAULT_INDEX_PATH a
 from app.quick_notes import ACTION_KIND_LABELS, classify_quick_note_text
 from app.quick_notes import deliver_quick_note
 from app.quick_notes import sync_quick_notes_index
+from app.github_urgent_reminders import sync_configured_github_urgent_reminders
 from app.urgent_reminders import DEFAULT_INDEX_PATH as URGENT_REMINDERS_INDEX_PATH
-from app.urgent_reminders import ICLOUD_DOWNLOAD_STUCK_AFTER_SECONDS
 from app.urgent_reminders import deliver_urgent_reminder
 from app.urgent_reminders import mark_urgent_reminder_done
-from app.urgent_reminders import sync_urgent_reminders_index
 from app.email.activity_state import DEFAULT_EMAIL_ACTIVITY_STATE_PATH, record_email_archive_completed
 from app.email.archive_browser import (
     email_archive_ai_metadata_suggestion,
@@ -2409,116 +2408,40 @@ def quick_note_triage_hint(text: str) -> dict[str, Any]:
 
 def urgent_reminders_status(
     *,
-    inbox_dir: Path = DEFAULT_ICLOUD_SHORTCUTS_INBOX,
     index_path: Path = URGENT_REMINDERS_INDEX_PATH,
     limit: int = 12,
 ) -> dict[str, Any]:
-    inbox_exists = inbox_dir.exists()
-    sync_error: OSError | ValueError | None = None
-    sync_diagnostics: dict[str, int] = {}
-    try:
-        for attempt in range(5):
-            try:
-                reminders = sync_urgent_reminders_index(
-                    inbox_dir=inbox_dir,
-                    index_path=index_path,
-                    sync_diagnostics=sync_diagnostics,
-                )
-                break
-            except OSError as exc:
-                sync_error = exc
-                if getattr(exc, "errno", None) == errno.EDEADLK and attempt < 4:
-                    time.sleep(0.25 * (attempt + 1))
-                    continue
-                raise
-        else:
-            raise sync_error or OSError("iCloud sync selhal.")
-    except (OSError, ValueError) as exc:
-        fallback = urgent_reminders_status_from_index(index_path=index_path, limit=limit)
-        if fallback["items"]:
-            return {
-                **fallback,
-                "ok": True,
-                "message": f"Důležitá připomenutí z lokálního indexu; iCloud sync teď selhal: {exc}",
-                "inbox_exists": inbox_exists,
-                "inbox": str(inbox_dir),
-                "index": str(relative_to_project(index_path)),
-                "sync_error": safe_text(str(exc))[:300],
-            }
-        return {
-            **fallback,
-            "ok": False,
-            "message": f"Důležitá připomenutí se nepodařilo načíst: {exc}",
-            "inbox_exists": inbox_exists,
-            "inbox": str(inbox_dir),
-            "index": str(relative_to_project(index_path)),
-            "sync_error": safe_text(str(exc))[:300],
-        }
-
-    open_items = sorted(
-        (item for item in reminders if item.status == "open"),
-        key=lambda item: item.reminder_number,
-        reverse=True,
-    )
-    shown = open_items[: max(1, limit)]
-    pending_download_count = max(
-        0,
-        int(sync_diagnostics.get("pending_download_count", 0) or 0),
-    )
-    pending_oldest_age_seconds = max(
-        0,
-        int(sync_diagnostics.get("pending_oldest_age_seconds", 0) or 0),
-    )
-    sync_stuck = (
-        pending_download_count > 0
-        and pending_oldest_age_seconds >= ICLOUD_DOWNLOAD_STUCK_AFTER_SECONDS
-    )
-    if sync_stuck:
-        message = (
-            "iCloud stažení je zaseknuté. Zobrazuji poslední platný index; "
-            "v iCloud Drive otevři složku Shortcuts a zvol Stáhnout nyní."
+    github_fallback = sync_configured_github_urgent_reminders(index_path=index_path)
+    status = urgent_reminders_status_from_index(index_path=index_path, limit=limit)
+    open_count = int(status["counts"]["open"])
+    if not github_fallback["ok"]:
+        status["ok"] = False
+        status["message"] = (
+            "GitHub fallback důležitých připomenutí se nepodařilo synchronizovat. "
+            "Zobrazuji poslední platný lokální index."
         )
-    elif pending_download_count:
-        if pending_download_count == 1:
-            pending_message = "1 nový iCloud soubor čeká na stažení."
-        else:
-            pending_message = f"{pending_download_count} nové iCloud soubory čekají na stažení."
-        message = (
-            f"{pending_message} Zobrazuji poslední platný index; "
-            "kontrola se automaticky zopakuje."
+    elif github_fallback["created_count"]:
+        count = int(github_fallback["created_count"])
+        status["message"] = (
+            f"Z GitHub fallbacku přijato {count}; nyní je otevřených připomenutí: {open_count}."
         )
-    elif not open_items:
-        message = "Žádná otevřená důležitá připomenutí."
-        if not inbox_exists:
-            message += " Přímé doručení přes Tailscale je dostupné; iCloud fallback není připojený."
+    elif open_count:
+        status["message"] = f"{open_count} otevřených důležitých připomenutí."
+    elif github_fallback["configured"]:
+        status["message"] = "Žádná otevřená důležitá připomenutí. GitHub fallback je připojený."
     else:
-        message = f"{len(open_items)} otevřených důležitých připomenutí."
-    return {
-        "ok": True,
-        "message": message,
-        "inbox_exists": inbox_exists,
-        "inbox": str(inbox_dir),
-        "index": str(relative_to_project(index_path)),
-        "sync_pending": pending_download_count > 0,
-        "sync_stuck": sync_stuck,
-        "pending_download_count": pending_download_count,
-        "pending_oldest_age_seconds": pending_oldest_age_seconds,
-        "counts": {"open": len(open_items), "total": len(reminders)},
-        "items": [
-            {
-                "reminder_number": item.reminder_number,
-                "priority": safe_text(item.priority)[:80],
-                "status": safe_text(item.status)[:80],
-                "created_at": safe_text(item.created_at)[:80],
-                "modified_at": safe_text(item.modified_at)[:80],
-                "title": safe_text(item.title)[:180],
-                "summary": safe_text(item.summary)[:300],
-                "body_text": safe_multiline_text(str(getattr(item, "body_text", item.summary)), limit=8000),
-                "size_bytes": item.size_bytes,
-            }
-            for item in shown
-        ],
-    }
+        status["message"] = (
+            "Žádná otevřená důležitá připomenutí. Přímé doručení přes Tailscale je dostupné; "
+            "GitHub fallback zatím není nakonfigurovaný."
+        )
+    status["github_fallback"] = github_fallback
+    status["inbox_exists"] = False
+    status["inbox"] = ""
+    status["sync_pending"] = bool(github_fallback["remaining_count"])
+    status["sync_stuck"] = False
+    status["pending_download_count"] = 0
+    status["pending_oldest_age_seconds"] = 0
+    return status
 
 
 def urgent_reminders_status_from_index(*, index_path: Path, limit: int = 12) -> dict[str, Any]:
@@ -2611,6 +2534,7 @@ def urgent_reminder_deliver_action(
     return {
         "ok": True,
         "status": "created" if created else "duplicate",
+        "delivery_id": reminder.delivery_id,
         "reminder_number": reminder.reminder_number,
         "message": (
             f"Důležité připomenutí #{reminder.reminder_number} doručeno."

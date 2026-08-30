@@ -365,3 +365,33 @@ Technický důkaz:
 - Cílená sada 279 testů prošla.
 - Plná Cockpit Quality Gate prošla 1446 testy.
 - JavaScript, Python syntaxe, `git diff --check` a Git safety check jsou zelené.
+
+### 2026-08-30 11:19 CEST – Důležitá připomenutí mají GitHub-only fallback
+
+Hotovo:
+- Samostatný soukromý GitHub Issues inbox je vytvořený a synteticky ověřený.
+- Cockpit umí přes přesné `delivery_id` převzít otevřenou Issue do private
+  indexu, bezpečně deduplikovat opakování a uzavřít Issue až po lokálním zápisu.
+- iCloud sync důležitých připomenutí byl z aktivní Cockpit cesty odstraněn.
+- Nová zkratka je validovaná a podepsaná; její verzovaný zdroj obsahuje pouze
+  bezpečné placeholdery.
+
+Rozhodnutí:
+- Kanonické pořadí je GitHub write-ahead -> přímý Tailscale pokus -> přesná
+  účtenka `delivery_id`; nejednoznačný stav nesmí zavřít GitHub fallback.
+- GitHub inbox je oddělený soukromý repozitář a neznečišťuje `PythonMF` historií
+  připomenutí, submodulem ani pracovními soubory.
+
+Další krok:
+- Míla vytvoří fine-grained token omezený na inbox; potom se token doplní pouze
+  lokálně, zkratka se importuje a nasazení Cockpitu se potvrdí samostatně.
+
+Navrhované další kroky:
+- Provozně ověřit právě dva scénáře: bdící Mac a spící Mac s následným
+  probuzením. Teprve potom označit mobilní fallback za hotový.
+
+Technický důkaz:
+- Syntetický pilot: právě jeden lokální záznam a uzavřená GitHub Issue.
+- Shortcuts validace prošla a podepsaný výstup má 25 822 bajtů.
+- Plná Cockpit Quality Gate: 1485/1485 testů, 317,8 s, OK.
+- Změna zatím není nasazená ani pushnutá.

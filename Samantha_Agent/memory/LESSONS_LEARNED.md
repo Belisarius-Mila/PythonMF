@@ -320,3 +320,14 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   serverový požadavek bez ohledu na chybějící, platnou nebo vadnou modelovou
   obálku. Model smí dodat pouze viditelný text; autorizaci, volbu operace a
   produkční účtenku vlastní server.
+
+### LL-025 — Python HTTPS klient na tomto Macu potřebuje projektový CA bundle
+
+- Problém: Nový GitHub API klient přes `urllib` selhal na
+  `CERTIFICATE_VERIFY_FAILED`, i když systémový `curl` stejné HTTPS API ověřil.
+- Typ: opakující se
+- Řešení nalezeno: 30082026
+- Řešení: U dlouhodobého Python klienta vytvořit explicitní TLS context přes
+  `ssl.create_default_context(cafile=certifi.where())`; chybu dál hlásit
+  redigovaně a fail-closed. Systémový `curl` ponechat pro omezené diagnostické
+  ověření, ne jako skrytý runtime fallback zapisovacího workflow.

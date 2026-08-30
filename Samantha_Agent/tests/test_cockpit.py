@@ -5168,7 +5168,11 @@ Dalsi krok:
             )
 
             quick = quick_notes_status(inbox_dir=inbox, index_path=quick_index)
-            urgent = urgent_reminders_status(inbox_dir=inbox, index_path=urgent_index)
+            urgent_reminder_deliver_action(
+                {"text": "Zavolat do servisu.", "delivery_id": "test-separate-urgent-001"},
+                index_path=urgent_index,
+            )
+            urgent = urgent_reminders_status(index_path=urgent_index)
 
         self.assertEqual(quick["counts"]["active"], 1)
         self.assertEqual(quick["notes"][0]["snippet"], "Nápad do QN.")
@@ -5192,7 +5196,11 @@ Dalsi krok:
                 encoding="utf-8",
             )
 
-            urgent = urgent_reminders_status(inbox_dir=inbox, index_path=urgent_index)
+            urgent_reminder_deliver_action(
+                {"text": long_body, "delivery_id": "test-long-urgent-reminder-001"},
+                index_path=urgent_index,
+            )
+            urgent = urgent_reminders_status(index_path=urgent_index)
 
         self.assertEqual(urgent["counts"]["open"], 1)
         self.assertIn("První řádek", urgent["items"][0]["summary"])
@@ -5256,157 +5264,64 @@ Dalsi krok:
                 encoding="utf-8",
             )
 
-            with patch("app.cockpit.sync_urgent_reminders_index", side_effect=OSError("iCloud busy")):
-                result = urgent_reminders_status(inbox_dir=inbox, index_path=index_path)
+            with patch(
+                "app.cockpit.sync_configured_github_urgent_reminders",
+                return_value={
+                    "ok": False,
+                    "configured": True,
+                    "pending_count": 0,
+                    "remaining_count": 0,
+                    "created_count": 0,
+                    "duplicate_count": 0,
+                    "closed_count": 0,
+                    "error_count": 1,
+                    "errors": ["GitHub inbox teď není dostupný."],
+                },
+            ):
+                result = urgent_reminders_status(index_path=index_path)
 
-        self.assertTrue(result["ok"])
-        self.assertIn("lokálního indexu", result["message"])
+        self.assertFalse(result["ok"])
+        self.assertIn("GitHub fallback", result["message"])
+        self.assertIn("lokální index", result["message"])
         self.assertEqual(result["counts"]["open"], 2)
         self.assertEqual(result["items"][0]["reminder_number"], 2)
         self.assertEqual(result["items"][0]["summary"], "Fallback připomenutí.")
         self.assertNotIn("source_path", result["items"][0])
 
-    def test_urgent_reminders_status_retries_transient_icloud_deadlock(self) -> None:
+    def test_urgent_reminders_status_reports_successful_github_import(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             root = Path(temp_dir)
-            inbox = root / "Shortcuts"
-            inbox.mkdir()
             index_path = root / "private" / "urgent_reminders" / "index.json"
-            reminder = SimpleNamespace(
-                reminder_number=3,
-                priority="urgent",
-                status="open",
-                created_at="2026-06-05 09:19:42",
-                modified_at="2026-06-05 09:19:42",
-                title="Samantha důležité připomenutí",
-                summary="Nová iPhone připomínka.",
-                size_bytes=278,
+            urgent_reminder_deliver_action(
+                {
+                    "text": "Nová iPhone připomínka.",
+                    "delivery_id": "github-import-status-001",
+                },
+                index_path=index_path,
             )
-
-            with (
-                patch(
-                    "app.cockpit.sync_urgent_reminders_index",
-                    side_effect=[OSError(11, "Resource deadlock avoided"), [reminder]],
-                ),
-                patch("app.cockpit.time.sleep", return_value=None),
-            ):
-                result = urgent_reminders_status(inbox_dir=inbox, index_path=index_path)
-
-        self.assertTrue(result["ok"])
-        self.assertEqual(result["counts"]["open"], 1)
-        self.assertEqual(result["items"][0]["reminder_number"], 3)
-        self.assertEqual(result["items"][0]["summary"], "Nová iPhone připomínka.")
-
-    def test_urgent_reminders_status_retries_multiple_icloud_deadlocks(self) -> None:
-        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-            root = Path(temp_dir)
-            inbox = root / "Shortcuts"
-            inbox.mkdir()
-            index_path = root / "private" / "urgent_reminders" / "index.json"
-            reminder = SimpleNamespace(
-                reminder_number=4,
-                priority="urgent",
-                status="open",
-                created_at="2026-06-05 11:45:00",
-                modified_at="2026-06-05 11:45:00",
-                title="Samantha důležité připomenutí",
-                summary="Po několika deadlocích načteno.",
-                body_text="Po několika deadlocích načteno celé.",
-                size_bytes=312,
-            )
-
-            with (
-                patch(
-                    "app.cockpit.sync_urgent_reminders_index",
-                    side_effect=[
-                        OSError(11, "Resource deadlock avoided"),
-                        OSError(11, "Resource deadlock avoided"),
-                        OSError(11, "Resource deadlock avoided"),
-                        [reminder],
-                    ],
-                ),
-                patch("app.cockpit.time.sleep", return_value=None) as sleep_mock,
-            ):
-                result = urgent_reminders_status(inbox_dir=inbox, index_path=index_path)
-
-        self.assertTrue(result["ok"])
-        self.assertEqual(sleep_mock.call_count, 3)
-        self.assertEqual(result["counts"]["open"], 1)
-        self.assertEqual(result["items"][0]["body_text"], "Po několika deadlocích načteno celé.")
-
-    def test_urgent_reminders_status_reports_pending_icloud_download(self) -> None:
-        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-            root = Path(temp_dir)
-            inbox = root / "Shortcuts"
-            inbox.mkdir()
-            index_path = root / "private" / "urgent_reminders" / "index.json"
-            reminder = SimpleNamespace(
-                reminder_number=21,
-                priority="urgent",
-                status="open",
-                created_at="2026-07-26 10:09:26",
-                modified_at="2026-07-26 10:09:26",
-                title="Samantha důležité připomenutí",
-                summary="Poslední platný index.",
-                body_text="Poslední platný index.",
-                size_bytes=135,
-            )
-
-            def pending_sync(**kwargs: object) -> list[SimpleNamespace]:
-                diagnostics = kwargs["sync_diagnostics"]
-                assert isinstance(diagnostics, dict)
-                diagnostics.update(
-                    {
-                        "checked_file_count": 22,
-                        "readable_file_count": 21,
-                        "pending_download_count": 1,
-                    }
-                )
-                return [reminder]
 
             with patch(
-                "app.cockpit.sync_urgent_reminders_index",
-                side_effect=pending_sync,
+                "app.cockpit.sync_configured_github_urgent_reminders",
+                return_value={
+                    "ok": True,
+                    "configured": True,
+                    "pending_count": 1,
+                    "remaining_count": 0,
+                    "created_count": 1,
+                    "duplicate_count": 0,
+                    "closed_count": 1,
+                    "error_count": 0,
+                    "errors": [],
+                },
             ):
-                result = urgent_reminders_status(inbox_dir=inbox, index_path=index_path)
+                result = urgent_reminders_status(index_path=index_path)
 
         self.assertTrue(result["ok"])
-        self.assertTrue(result["sync_pending"])
-        self.assertEqual(result["pending_download_count"], 1)
-        self.assertIn("čeká na stažení", result["message"])
         self.assertEqual(result["counts"]["open"], 1)
-        self.assertEqual(result["items"][0]["reminder_number"], 21)
-        self.assertNotIn("source_path", result["items"][0])
-
-    def test_urgent_reminders_status_reports_stuck_icloud_download_after_five_minutes(self) -> None:
-        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-            root = Path(temp_dir)
-            inbox = root / "Shortcuts"
-            inbox.mkdir()
-            index_path = root / "private" / "urgent_reminders" / "index.json"
-
-            def stuck_sync(**kwargs: object) -> list[SimpleNamespace]:
-                diagnostics = kwargs["sync_diagnostics"]
-                assert isinstance(diagnostics, dict)
-                diagnostics.update(
-                    {
-                        "checked_file_count": 1,
-                        "readable_file_count": 0,
-                        "pending_download_count": 1,
-                        "pending_oldest_age_seconds": 301,
-                    }
-                )
-                return []
-
-            with patch("app.cockpit.sync_urgent_reminders_index", side_effect=stuck_sync):
-                result = urgent_reminders_status(inbox_dir=inbox, index_path=index_path)
-
-        self.assertTrue(result["ok"])
-        self.assertTrue(result["sync_pending"])
-        self.assertTrue(result["sync_stuck"])
-        self.assertEqual(result["pending_oldest_age_seconds"], 301)
-        self.assertIn("iCloud stažení je zaseknuté", result["message"])
-        self.assertNotIn("kontrola se automaticky zopakuje", result["message"])
+        self.assertEqual(result["items"][0]["summary"], "Nová iPhone připomínka.")
+        self.assertFalse(result["sync_pending"])
+        self.assertEqual(result["github_fallback"]["closed_count"], 1)
+        self.assertIn("GitHub fallbacku", result["message"])
 
     def test_urgent_reminder_deliver_action_returns_redacted_idempotent_receipt(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
@@ -5414,6 +5329,7 @@ Dalsi krok:
             payload = {
                 "text": "Soukromý obsah nesmí být v potvrzení.",
                 "created_at": "2026-08-02T15:20:00+02:00",
+                "delivery_id": "test-cockpit-receipt-001",
             }
 
             first = urgent_reminder_deliver_action(payload, index_path=index_path)
@@ -5423,6 +5339,8 @@ Dalsi krok:
         self.assertTrue(first["ok"])
         self.assertEqual(first["status"], "created")
         self.assertEqual(duplicate["status"], "duplicate")
+        self.assertEqual(first["delivery_id"], payload["delivery_id"])
+        self.assertEqual(duplicate["delivery_id"], payload["delivery_id"])
         self.assertEqual(first["reminder_number"], duplicate["reminder_number"])
         self.assertNotIn(payload["text"], json.dumps(first, ensure_ascii=False))
         self.assertEqual(len(stored), 1)

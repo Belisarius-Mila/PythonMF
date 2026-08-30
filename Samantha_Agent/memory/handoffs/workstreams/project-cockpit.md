@@ -194,3 +194,48 @@ Navrhované další kroky:
 Technický důkaz:
 - Cílená sada 279 testů a plná Cockpit Quality Gate 1446/1446 prošly.
 - JavaScript, Python syntaxe, `git diff --check` a Git safety check jsou zelené.
+
+### 2026-08-30 11:19 CEST – GitHub je jediný fallback důležitých připomenutí
+
+Hotovo:
+- Vznikl samostatný soukromý GitHub Issues inbox bez klonu, submodulu nebo
+  pracovních souborů v `PythonMF`.
+- Nový klient přebírá pouze Issues s přesným protokolem a `delivery_id`, uloží je
+  atomicky do private indexu a Issue zavře až po lokálním převzetí.
+- Opakování po selhání uzavření je idempotentní: lokální připomenutí se
+  nezdvojí a otevřená Issue se může bezpečně zpracovat znovu.
+- Cockpit už pro důležitá připomenutí nečte iCloud; aktivní architektura má jen
+  přímý Tailscale a GitHub fallback.
+- Podepsaná zkratka `Samantha – důležité připomenutí.shortcut` je připravená
+  mimo git a při importu vyžádá token, GitHub Issues URL a Tailscale URL.
+- Syntetický GitHub pilot bez soukromého obsahu vytvořil jeden lokální záznam a
+  uzavřel tutéž Issue.
+
+Rozhodnutí:
+- GitHub zápis je write-ahead: zkratka nejprve založí Issue a až potom zkusí
+  Cockpit. Mac Issue uzavře po převzetí; zkratka ji sama nezavírá.
+- Do gitu ani do unsigned zdroje zkratky nepatří skutečný token ani název
+  soukromého repozitáře.
+
+Co není hotové:
+- Fine-grained produkční token zatím není vytvořený ani uložený v lokálním
+  `.env` a zkratka ještě nebyla importovaná a ručně otestovaná na iPhonu.
+- Kód není nasazený do běžícího Cockpitu a commit není pushnutý.
+
+Další krok:
+- Vytvořit token omezený jen na soukromý inbox s oprávněním Issues read/write,
+  doplnit lokální konfiguraci a importní otázky zkratky; nasazení potvrdit
+  samostatně.
+
+Navrhované další kroky:
+- Po nasazení provést jeden skutečný test s bdícím Macem a jeden se spícím Macem
+  a ověřit, že Issue zůstane otevřená pouze ve druhém případě a po probuzení se
+  přesune právě jednou do Cockpitu.
+
+Technický důkaz:
+- Shortcuts validátor po jedné opravě prošel pro iOS; podepsaný soubor má
+  25 822 bajtů.
+- Cílená sada 286 testů prošla.
+- Plná Cockpit Quality Gate prošla 1485/1485 testy za 317,8 s.
+- Syntetický pilot: `created_count=1`, `closed_count=1`, lokální záznam 1,
+  výsledný stav Issue `closed`.

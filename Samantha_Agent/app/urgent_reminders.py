@@ -37,6 +37,7 @@ class UrgentReminder:
     size_bytes: int
     priority: str
     status: str
+    delivery_id: str = ""
 
 
 class _UrgentReminderNotFound(RuntimeError):
@@ -454,4 +455,5 @@ def _record_to_reminder(record: dict[str, Any]) -> UrgentReminder:
         size_bytes=int(record.get("size_bytes") or 0),
         priority=str(record.get("priority") or "urgent"),
         status=str(record.get("status") or "open"),
+        delivery_id=str(record.get("delivery_id") or ""),
     )

@@ -171,3 +171,17 @@ Nazev zkratky
 4. U zkratky `Rychlá poznámka pro Samanthu` pouzivat dotazy:
    `zobraz rychle poznamky`, `ukaž detail poznámky č. 7` nebo navazne
    `z té poznámky č. 7 uděláme tool`.
+
+## Aktualizace 2026-08-30 – důležitá připomenutí
+
+- Důležitá připomenutí už nemají aktivní iCloud fallback. Primární cesta je
+  Tailscale Cockpit a jediný fallback je oddělený soukromý GitHub Issues inbox.
+- Zkratka používá write-ahead pořadí: nejprve vytvoří Issue, potom zkusí přímý
+  POST do Cockpitu se stejným `delivery_id`.
+- Issue zavírá Mac až po úspěšném atomickém převzetí do private indexu. Když
+  zavření selže, další sync stejné `delivery_id` neduplikuje.
+- Podepsaný soubor `Samantha – důležité připomenutí.shortcut` je v běžné
+  výstupní složce Shortcuts Playground; unsigned zdroj a reprodukovatelný
+  builder jsou v repozitáři bez skutečného tokenu a bez private repo slugu.
+- Produkční import a živý iPhone test čekají na fine-grained token omezený jen
+  na inbox s oprávněním Issues read/write a na samostatně potvrzené nasazení.

@@ -1,0 +1,62 @@
+from __future__ import annotations
+
+import json
+import unittest
+
+from scripts.build_urgent_reminder_shortcut import build_workflow
+
+
+class UrgentReminderShortcutTests(unittest.TestCase):
+    def test_shortcut_is_write_ahead_and_contains_no_real_credentials(self) -> None:
+        workflow = build_workflow()
+        actions = workflow["WFWorkflowActions"]
+        identifiers = [action["WFWorkflowActionIdentifier"] for action in actions]
+        serialized = json.dumps(workflow, ensure_ascii=False)
+
+        github_request_index = identifiers.index("is.workflow.actions.downloadurl")
+        cockpit_request_index = identifiers.index(
+            "is.workflow.actions.downloadurl",
+            github_request_index + 1,
+        )
+
+        self.assertLess(github_request_index, cockpit_request_index)
+        self.assertIn("github_pat_REPLACE_ME", serialized)
+        self.assertIn("OWNER/REPOSITORY", serialized)
+        self.assertNotIn("iCloud", serialized)
+        self.assertNotIn("ghp_", serialized)
+
+    def test_import_questions_target_token_github_and_cockpit_parameters(self) -> None:
+        workflow = build_workflow()
+        actions = workflow["WFWorkflowActions"]
+        questions = workflow["WFWorkflowImportQuestions"]
+
+        targets = [
+            (
+                question["ActionIndex"],
+                actions[question["ActionIndex"]]["WFWorkflowActionIdentifier"],
+                question["ParameterKey"],
+            )
+            for question in questions
+        ]
+
+        self.assertEqual(
+            targets,
+            [
+                (7, "is.workflow.actions.gettext", "WFTextActionText"),
+                (8, "is.workflow.actions.url", "WFURLActionURL"),
+                (16, "is.workflow.actions.url", "WFURLActionURL"),
+            ],
+        )
+
+    def test_shortcut_requires_exact_delivery_id_receipt(self) -> None:
+        workflow = build_workflow()
+        serialized = json.dumps(workflow, ensure_ascii=False)
+
+        self.assertIn("Potvrzené delivery_id jako text", serialized)
+        self.assertIn("WFConditionalActionString", serialized)
+        self.assertIn("Doručení je nejisté", serialized)
+        self.assertIn("zůstává otevřená", serialized)
+
+
+if __name__ == "__main__":
+    unittest.main()

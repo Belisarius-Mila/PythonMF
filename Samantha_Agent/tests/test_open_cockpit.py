@@ -42,6 +42,7 @@ class OpenCockpitTests(unittest.TestCase):
         self.assertIn("app/cockpit.py", relative_paths)
         self.assertIn("app/quick_notes.py", relative_paths)
         self.assertIn("app/reminders/store.py", relative_paths)
+        self.assertIn("app/github_urgent_reminders.py", relative_paths)
         self.assertIn("app/urgent_reminders.py", relative_paths)
         self.assertIn("scripts/cockpit_server.py", relative_paths)
 

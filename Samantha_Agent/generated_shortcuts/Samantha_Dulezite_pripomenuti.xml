@@ -10,9 +10,9 @@
 			<key>WFWorkflowActionParameters</key>
 			<dict>
 				<key>WFCommentActionText</key>
-				<string>Samantha – připomenutí přes Cockpit.
+				<string>Samantha – důležité připomenutí.
 
-Pošle zadaný text přímo do soukromého Cockpitu přes Tailscale HTTPS. Nepoužívá iCloud Drive a po doručení ukáže potvrzení. Stejnou zkratku může použít Míla i Jana.</string>
+Nejprve uloží text do soukromého GitHub Issues inboxu. Potom zkusí přímé doručení do Cockpitu přes Tailscale. Mac uzavře GitHub Issue až po lokálním převzetí stejného delivery_id.</string>
 			</dict>
 		</dict>
 		<dict>
@@ -25,7 +25,7 @@ Pošle zadaný text přímo do soukromého Cockpitu přes Tailscale HTTPS. Nepou
 
 This shortcut was created via the following user prompt:
 
-&gt; Opravit chybu „Nebylo zadáno URL“ tak, aby akce Načíst obsah URL skutečně převzala adresu z předchozí akce URL.</string>
+&gt; Vytvoř iPhone zkratku pro důležité připomenutí: nejprve bezpečně založ Issue v soukromém GitHub fallback inboxu, potom zkus přímé doručení do Cockpitu přes Tailscale a považuj doručení za jisté jen při přesné shodě delivery_id.</string>
 			</dict>
 		</dict>
 		<dict>
@@ -34,7 +34,7 @@ This shortcut was created via the following user prompt:
 			<key>WFWorkflowActionParameters</key>
 			<dict>
 				<key>WFCommentActionText</key>
-				<string>1. Zadej připomenutí.</string>
+				<string>1. Zeptej se na text a vytvoř jedinečné delivery_id.</string>
 			</dict>
 		</dict>
 		<dict>
@@ -45,7 +45,7 @@ This shortcut was created via the following user prompt:
 				<key>CustomOutputName</key>
 				<string>Připomenutí</string>
 				<key>UUID</key>
-				<string>37D1C18C-2B1B-49FF-AC72-F5838BE332E0</string>
+				<string>376EC8A8-8689-578C-B789-CCB792F2E53E</string>
 				<key>WFAskActionPrompt</key>
 				<string>Co je důležité připomenout?</string>
 				<key>WFInputType</key>
@@ -54,11 +54,453 @@ This shortcut was created via the following user prompt:
 		</dict>
 		<dict>
 			<key>WFWorkflowActionIdentifier</key>
+			<string>is.workflow.actions.number.random</string>
+			<key>WFWorkflowActionParameters</key>
+			<dict>
+				<key>CustomOutputName</key>
+				<string>Náhodné číslo</string>
+				<key>UUID</key>
+				<string>E6B45760-94C5-5617-9B74-35821964E06A</string>
+				<key>WFRandomNumberMinimum</key>
+				<integer>100000000000000</integer>
+				<key>WFRandomNumberMaximum</key>
+				<integer>999999999999999</integer>
+			</dict>
+		</dict>
+		<dict>
+			<key>WFWorkflowActionIdentifier</key>
+			<string>is.workflow.actions.gettext</string>
+			<key>WFWorkflowActionParameters</key>
+			<dict>
+				<key>CustomOutputName</key>
+				<string>Delivery ID</string>
+				<key>UUID</key>
+				<string>E6BC7A0A-4B73-5530-B75D-D0E563C3D499</string>
+				<key>WFTextActionText</key>
+				<dict>
+					<key>Value</key>
+					<dict>
+						<key>string</key>
+						<string>samantha-￼</string>
+						<key>attachmentsByRange</key>
+						<dict>
+							<key>{9, 1}</key>
+							<dict>
+								<key>OutputName</key>
+								<string>Náhodné číslo</string>
+								<key>OutputUUID</key>
+								<string>E6B45760-94C5-5617-9B74-35821964E06A</string>
+								<key>Type</key>
+								<string>ActionOutput</string>
+							</dict>
+						</dict>
+					</dict>
+					<key>WFSerializationType</key>
+					<string>WFTextTokenString</string>
+				</dict>
+			</dict>
+		</dict>
+		<dict>
+			<key>WFWorkflowActionIdentifier</key>
 			<string>is.workflow.actions.comment</string>
 			<key>WFWorkflowActionParameters</key>
 			<dict>
 				<key>WFCommentActionText</key>
-				<string>2. Doruč přímo přes soukromé Tailscale HTTPS.</string>
+				<string>2. GitHub token musí být fine-grained a omezený jen na tento soukromý repozitář s oprávněním Issues: Read and write. Vytvoření tokenu: https://github.com/settings/personal-access-tokens/new</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>WFWorkflowActionIdentifier</key>
+			<string>is.workflow.actions.gettext</string>
+			<key>WFWorkflowActionParameters</key>
+			<dict>
+				<key>CustomOutputName</key>
+				<string>GitHub token</string>
+				<key>UUID</key>
+				<string>DA1CACC4-70E2-51E2-812C-971A017503C1</string>
+				<key>WFTextActionText</key>
+				<string>github_pat_REPLACE_ME</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>WFWorkflowActionIdentifier</key>
+			<string>is.workflow.actions.url</string>
+			<key>WFWorkflowActionParameters</key>
+			<dict>
+				<key>CustomOutputName</key>
+				<string>GitHub Issues URL</string>
+				<key>UUID</key>
+				<string>5D181458-A454-5D4F-8FF3-7C762A0FC618</string>
+				<key>WFURLActionURL</key>
+				<string>https://api.github.com/repos/OWNER/REPOSITORY/issues</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>WFWorkflowActionIdentifier</key>
+			<string>is.workflow.actions.gettext</string>
+			<key>WFWorkflowActionParameters</key>
+			<dict>
+				<key>CustomOutputName</key>
+				<string>GitHub Issue body</string>
+				<key>UUID</key>
+				<string>40B07729-7F3F-55F6-991A-451F861413BA</string>
+				<key>WFTextActionText</key>
+				<dict>
+					<key>Value</key>
+					<dict>
+						<key>string</key>
+						<string>Samantha urgent reminder v1
+delivery_id: ￼
+created_at:
+priority: urgent
+
+￼</string>
+						<key>attachmentsByRange</key>
+						<dict>
+							<key>{41, 1}</key>
+							<dict>
+								<key>OutputName</key>
+								<string>Delivery ID</string>
+								<key>OutputUUID</key>
+								<string>E6BC7A0A-4B73-5530-B75D-D0E563C3D499</string>
+								<key>Type</key>
+								<string>ActionOutput</string>
+							</dict>
+							<key>{73, 1}</key>
+							<dict>
+								<key>OutputName</key>
+								<string>Připomenutí</string>
+								<key>OutputUUID</key>
+								<string>376EC8A8-8689-578C-B789-CCB792F2E53E</string>
+								<key>Type</key>
+								<string>ActionOutput</string>
+							</dict>
+						</dict>
+					</dict>
+					<key>WFSerializationType</key>
+					<string>WFTextTokenString</string>
+				</dict>
+			</dict>
+		</dict>
+		<dict>
+			<key>WFWorkflowActionIdentifier</key>
+			<string>is.workflow.actions.gettext</string>
+			<key>WFWorkflowActionParameters</key>
+			<dict>
+				<key>CustomOutputName</key>
+				<string>GitHub Issue title</string>
+				<key>UUID</key>
+				<string>D3A49E20-394B-57D4-B306-C97C925C5FEB</string>
+				<key>WFTextActionText</key>
+				<dict>
+					<key>Value</key>
+					<dict>
+						<key>string</key>
+						<string>[Samantha Inbox] ￼</string>
+						<key>attachmentsByRange</key>
+						<dict>
+							<key>{17, 1}</key>
+							<dict>
+								<key>OutputName</key>
+								<string>Delivery ID</string>
+								<key>OutputUUID</key>
+								<string>E6BC7A0A-4B73-5530-B75D-D0E563C3D499</string>
+								<key>Type</key>
+								<string>ActionOutput</string>
+							</dict>
+						</dict>
+					</dict>
+					<key>WFSerializationType</key>
+					<string>WFTextTokenString</string>
+				</dict>
+			</dict>
+		</dict>
+		<dict>
+			<key>WFWorkflowActionIdentifier</key>
+			<string>is.workflow.actions.downloadurl</string>
+			<key>WFWorkflowActionParameters</key>
+			<dict>
+				<key>CustomOutputName</key>
+				<string>GitHub Issue response</string>
+				<key>UUID</key>
+				<string>5039938A-BA5E-50BB-A457-91E48650045A</string>
+				<key>WFHTTPBodyType</key>
+				<string>JSON</string>
+				<key>WFHTTPHeaders</key>
+				<dict>
+					<key>Value</key>
+					<dict>
+						<key>WFDictionaryFieldValueItems</key>
+						<array>
+							<dict>
+								<key>WFItemType</key>
+								<integer>0</integer>
+								<key>WFKey</key>
+								<dict>
+									<key>Value</key>
+									<dict>
+										<key>string</key>
+										<string>Accept</string>
+									</dict>
+									<key>WFSerializationType</key>
+									<string>WFTextTokenString</string>
+								</dict>
+								<key>WFValue</key>
+								<dict>
+									<key>Value</key>
+									<dict>
+										<key>string</key>
+										<string>application/vnd.github+json</string>
+									</dict>
+									<key>WFSerializationType</key>
+									<string>WFTextTokenString</string>
+								</dict>
+							</dict>
+							<dict>
+								<key>WFItemType</key>
+								<integer>0</integer>
+								<key>WFKey</key>
+								<dict>
+									<key>Value</key>
+									<dict>
+										<key>string</key>
+										<string>Authorization</string>
+									</dict>
+									<key>WFSerializationType</key>
+									<string>WFTextTokenString</string>
+								</dict>
+								<key>WFValue</key>
+								<dict>
+									<key>Value</key>
+									<dict>
+										<key>string</key>
+										<string>Bearer ￼</string>
+										<key>attachmentsByRange</key>
+										<dict>
+											<key>{7, 1}</key>
+											<dict>
+												<key>OutputName</key>
+												<string>GitHub token</string>
+												<key>OutputUUID</key>
+												<string>DA1CACC4-70E2-51E2-812C-971A017503C1</string>
+												<key>Type</key>
+												<string>ActionOutput</string>
+											</dict>
+										</dict>
+									</dict>
+									<key>WFSerializationType</key>
+									<string>WFTextTokenString</string>
+								</dict>
+							</dict>
+							<dict>
+								<key>WFItemType</key>
+								<integer>0</integer>
+								<key>WFKey</key>
+								<dict>
+									<key>Value</key>
+									<dict>
+										<key>string</key>
+										<string>X-GitHub-Api-Version</string>
+									</dict>
+									<key>WFSerializationType</key>
+									<string>WFTextTokenString</string>
+								</dict>
+								<key>WFValue</key>
+								<dict>
+									<key>Value</key>
+									<dict>
+										<key>string</key>
+										<string>2026-03-10</string>
+									</dict>
+									<key>WFSerializationType</key>
+									<string>WFTextTokenString</string>
+								</dict>
+							</dict>
+						</array>
+					</dict>
+					<key>WFSerializationType</key>
+					<string>WFDictionaryFieldValue</string>
+				</dict>
+				<key>WFHTTPMethod</key>
+				<string>POST</string>
+				<key>WFJSONValues</key>
+				<dict>
+					<key>Value</key>
+					<dict>
+						<key>WFDictionaryFieldValueItems</key>
+						<array>
+							<dict>
+								<key>WFItemType</key>
+								<integer>0</integer>
+								<key>WFKey</key>
+								<dict>
+									<key>Value</key>
+									<dict>
+										<key>string</key>
+										<string>title</string>
+									</dict>
+									<key>WFSerializationType</key>
+									<string>WFTextTokenString</string>
+								</dict>
+								<key>WFValue</key>
+								<dict>
+									<key>Value</key>
+									<dict>
+										<key>string</key>
+										<string>￼</string>
+										<key>attachmentsByRange</key>
+										<dict>
+											<key>{0, 1}</key>
+											<dict>
+												<key>OutputName</key>
+												<string>GitHub Issue title</string>
+												<key>OutputUUID</key>
+												<string>D3A49E20-394B-57D4-B306-C97C925C5FEB</string>
+												<key>Type</key>
+												<string>ActionOutput</string>
+											</dict>
+										</dict>
+									</dict>
+									<key>WFSerializationType</key>
+									<string>WFTextTokenString</string>
+								</dict>
+							</dict>
+							<dict>
+								<key>WFItemType</key>
+								<integer>0</integer>
+								<key>WFKey</key>
+								<dict>
+									<key>Value</key>
+									<dict>
+										<key>string</key>
+										<string>body</string>
+									</dict>
+									<key>WFSerializationType</key>
+									<string>WFTextTokenString</string>
+								</dict>
+								<key>WFValue</key>
+								<dict>
+									<key>Value</key>
+									<dict>
+										<key>string</key>
+										<string>￼</string>
+										<key>attachmentsByRange</key>
+										<dict>
+											<key>{0, 1}</key>
+											<dict>
+												<key>OutputName</key>
+												<string>GitHub Issue body</string>
+												<key>OutputUUID</key>
+												<string>40B07729-7F3F-55F6-991A-451F861413BA</string>
+												<key>Type</key>
+												<string>ActionOutput</string>
+											</dict>
+										</dict>
+									</dict>
+									<key>WFSerializationType</key>
+									<string>WFTextTokenString</string>
+								</dict>
+							</dict>
+						</array>
+					</dict>
+					<key>WFSerializationType</key>
+					<string>WFDictionaryFieldValue</string>
+				</dict>
+				<key>WFURL</key>
+				<dict>
+					<key>Value</key>
+					<dict>
+						<key>OutputName</key>
+						<string>GitHub Issues URL</string>
+						<key>OutputUUID</key>
+						<string>5D181458-A454-5D4F-8FF3-7C762A0FC618</string>
+						<key>Type</key>
+						<string>ActionOutput</string>
+					</dict>
+					<key>WFSerializationType</key>
+					<string>WFTextTokenAttachment</string>
+				</dict>
+			</dict>
+		</dict>
+		<dict>
+			<key>WFWorkflowActionIdentifier</key>
+			<string>is.workflow.actions.getvalueforkey</string>
+			<key>WFWorkflowActionParameters</key>
+			<dict>
+				<key>CustomOutputName</key>
+				<string>GitHub Issue number</string>
+				<key>UUID</key>
+				<string>0FCE773B-6BEB-5E4A-AADF-56FD24442140</string>
+				<key>WFDictionaryKey</key>
+				<string>number</string>
+				<key>WFGetDictionaryValueType</key>
+				<string>Value</string>
+				<key>WFInput</key>
+				<dict>
+					<key>Value</key>
+					<dict>
+						<key>OutputName</key>
+						<string>GitHub Issue response</string>
+						<key>OutputUUID</key>
+						<string>5039938A-BA5E-50BB-A457-91E48650045A</string>
+						<key>Type</key>
+						<string>ActionOutput</string>
+					</dict>
+					<key>WFSerializationType</key>
+					<string>WFTextTokenAttachment</string>
+				</dict>
+			</dict>
+		</dict>
+		<dict>
+			<key>WFWorkflowActionIdentifier</key>
+			<string>is.workflow.actions.comment</string>
+			<key>WFWorkflowActionParameters</key>
+			<dict>
+				<key>WFCommentActionText</key>
+				<string>3. Pokračuj k přímému doručení jen tehdy, když GitHub vrátil číslo vytvořené Issue.
+• Když Mac spí, síťová akce Cockpitu skončí chybou a Issue zůstane otevřená.
+• Nic se automaticky neposílá třetí cestou.</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>WFWorkflowActionIdentifier</key>
+			<string>is.workflow.actions.conditional</string>
+			<key>WFWorkflowActionParameters</key>
+			<dict>
+				<key>GroupingIdentifier</key>
+				<string>DE19AE22-8895-59C4-8BFA-6507361A0F3C</string>
+				<key>WFCondition</key>
+				<integer>100</integer>
+				<key>WFControlFlowMode</key>
+				<integer>0</integer>
+				<key>WFInput</key>
+				<dict>
+					<key>Type</key>
+					<string>Variable</string>
+					<key>Variable</key>
+					<dict>
+						<key>Value</key>
+						<dict>
+							<key>OutputName</key>
+							<string>GitHub Issue number</string>
+							<key>OutputUUID</key>
+							<string>0FCE773B-6BEB-5E4A-AADF-56FD24442140</string>
+							<key>Type</key>
+							<string>ActionOutput</string>
+						</dict>
+						<key>WFSerializationType</key>
+						<string>WFTextTokenAttachment</string>
+					</dict>
+				</dict>
+			</dict>
+		</dict>
+		<dict>
+			<key>WFWorkflowActionIdentifier</key>
+			<string>is.workflow.actions.comment</string>
+			<key>WFWorkflowActionParameters</key>
+			<dict>
+				<key>WFCommentActionText</key>
+				<string>4. Zkus přímé doručení stejného textu a stejného delivery_id přes Tailscale.</string>
 			</dict>
 		</dict>
 		<dict>
@@ -69,7 +511,7 @@ This shortcut was created via the following user prompt:
 				<key>CustomOutputName</key>
 				<string>Cockpit delivery URL</string>
 				<key>UUID</key>
-				<string>366ADA55-FCFC-4990-A7EA-621C75A776B3</string>
+				<string>38025A95-20BA-5A55-9BEB-5979BD31DA10</string>
 				<key>WFURLActionURL</key>
 				<string>https://cockpit-host.tailnet-name.ts.net/api/urgent-reminders/deliver</string>
 			</dict>
@@ -82,7 +524,7 @@ This shortcut was created via the following user prompt:
 				<key>CustomOutputName</key>
 				<string>Odpověď Cockpitu</string>
 				<key>UUID</key>
-				<string>92DCB3EE-C9F5-4BC1-AC98-140CF1777953</string>
+				<string>BE850D1C-18FA-55F2-90B6-5027FE5D4921</string>
 				<key>WFHTTPBodyType</key>
 				<string>JSON</string>
 				<key>WFHTTPMethod</key>
@@ -110,6 +552,8 @@ This shortcut was created via the following user prompt:
 								<dict>
 									<key>Value</key>
 									<dict>
+										<key>string</key>
+										<string>￼</string>
 										<key>attachmentsByRange</key>
 										<dict>
 											<key>{0, 1}</key>
@@ -117,13 +561,11 @@ This shortcut was created via the following user prompt:
 												<key>OutputName</key>
 												<string>Připomenutí</string>
 												<key>OutputUUID</key>
-												<string>37D1C18C-2B1B-49FF-AC72-F5838BE332E0</string>
+												<string>376EC8A8-8689-578C-B789-CCB792F2E53E</string>
 												<key>Type</key>
 												<string>ActionOutput</string>
 											</dict>
 										</dict>
-										<key>string</key>
-										<string>￼</string>
 									</dict>
 									<key>WFSerializationType</key>
 									<string>WFTextTokenString</string>
@@ -153,6 +595,42 @@ This shortcut was created via the following user prompt:
 									<string>WFTextTokenString</string>
 								</dict>
 							</dict>
+							<dict>
+								<key>WFItemType</key>
+								<integer>0</integer>
+								<key>WFKey</key>
+								<dict>
+									<key>Value</key>
+									<dict>
+										<key>string</key>
+										<string>delivery_id</string>
+									</dict>
+									<key>WFSerializationType</key>
+									<string>WFTextTokenString</string>
+								</dict>
+								<key>WFValue</key>
+								<dict>
+									<key>Value</key>
+									<dict>
+										<key>string</key>
+										<string>￼</string>
+										<key>attachmentsByRange</key>
+										<dict>
+											<key>{0, 1}</key>
+											<dict>
+												<key>OutputName</key>
+												<string>Delivery ID</string>
+												<key>OutputUUID</key>
+												<string>E6BC7A0A-4B73-5530-B75D-D0E563C3D499</string>
+												<key>Type</key>
+												<string>ActionOutput</string>
+											</dict>
+										</dict>
+									</dict>
+									<key>WFSerializationType</key>
+									<string>WFTextTokenString</string>
+								</dict>
+							</dict>
 						</array>
 					</dict>
 					<key>WFSerializationType</key>
@@ -162,47 +640,10 @@ This shortcut was created via the following user prompt:
 				<dict>
 					<key>Value</key>
 					<dict>
-						<key>attachmentsByRange</key>
-						<dict>
-							<key>{0, 1}</key>
-							<dict>
-								<key>OutputName</key>
-								<string>Cockpit delivery URL</string>
-								<key>OutputUUID</key>
-								<string>366ADA55-FCFC-4990-A7EA-621C75A776B3</string>
-								<key>Type</key>
-								<string>ActionOutput</string>
-							</dict>
-						</dict>
-						<key>string</key>
-						<string>￼</string>
-					</dict>
-					<key>WFSerializationType</key>
-					<string>WFTextTokenString</string>
-				</dict>
-			</dict>
-		</dict>
-		<dict>
-			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.getvalueforkey</string>
-			<key>WFWorkflowActionParameters</key>
-			<dict>
-				<key>CustomOutputName</key>
-				<string>Potvrzení</string>
-				<key>UUID</key>
-				<string>D411BFB9-C531-4763-8B69-C37A01D939CA</string>
-				<key>WFDictionaryKey</key>
-				<string>message</string>
-				<key>WFGetDictionaryValueType</key>
-				<string>Value</string>
-				<key>WFInput</key>
-				<dict>
-					<key>Value</key>
-					<dict>
 						<key>OutputName</key>
-						<string>Odpověď Cockpitu</string>
+						<string>Cockpit delivery URL</string>
 						<key>OutputUUID</key>
-						<string>92DCB3EE-C9F5-4BC1-AC98-140CF1777953</string>
+						<string>38025A95-20BA-5A55-9BEB-5979BD31DA10</string>
 						<key>Type</key>
 						<string>ActionOutput</string>
 					</dict>
@@ -213,11 +654,129 @@ This shortcut was created via the following user prompt:
 		</dict>
 		<dict>
 			<key>WFWorkflowActionIdentifier</key>
+			<string>is.workflow.actions.getvalueforkey</string>
+			<key>WFWorkflowActionParameters</key>
+			<dict>
+				<key>CustomOutputName</key>
+				<string>Potvrzené delivery_id</string>
+				<key>UUID</key>
+				<string>32049FF5-7716-5079-B24D-9A8A781F2E6A</string>
+				<key>WFDictionaryKey</key>
+				<string>delivery_id</string>
+				<key>WFGetDictionaryValueType</key>
+				<string>Value</string>
+				<key>WFInput</key>
+				<dict>
+					<key>Value</key>
+					<dict>
+						<key>OutputName</key>
+						<string>Odpověď Cockpitu</string>
+						<key>OutputUUID</key>
+						<string>BE850D1C-18FA-55F2-90B6-5027FE5D4921</string>
+						<key>Type</key>
+						<string>ActionOutput</string>
+					</dict>
+					<key>WFSerializationType</key>
+					<string>WFTextTokenAttachment</string>
+				</dict>
+			</dict>
+		</dict>
+		<dict>
+			<key>WFWorkflowActionIdentifier</key>
+			<string>is.workflow.actions.gettext</string>
+			<key>WFWorkflowActionParameters</key>
+			<dict>
+				<key>CustomOutputName</key>
+				<string>Potvrzené delivery_id jako text</string>
+				<key>UUID</key>
+				<string>FD950A05-DDA2-5F9E-AAB5-02FB576B6CAA</string>
+				<key>WFTextActionText</key>
+				<dict>
+					<key>Value</key>
+					<dict>
+						<key>string</key>
+						<string>￼</string>
+						<key>attachmentsByRange</key>
+						<dict>
+							<key>{0, 1}</key>
+							<dict>
+								<key>OutputName</key>
+								<string>Potvrzené delivery_id</string>
+								<key>OutputUUID</key>
+								<string>32049FF5-7716-5079-B24D-9A8A781F2E6A</string>
+								<key>Type</key>
+								<string>ActionOutput</string>
+							</dict>
+						</dict>
+					</dict>
+					<key>WFSerializationType</key>
+					<string>WFTextTokenString</string>
+				</dict>
+			</dict>
+		</dict>
+		<dict>
+			<key>WFWorkflowActionIdentifier</key>
 			<string>is.workflow.actions.comment</string>
 			<key>WFWorkflowActionParameters</key>
 			<dict>
 				<key>WFCommentActionText</key>
-				<string>3. Zobraz potvrzení Cockpitu.</string>
+				<string>5. Přímé doručení potvrď jen při přesné shodě delivery_id.
+• Shoda: Cockpit připomenutí převzal.
+• Neshoda: stav je nejistý a GitHub Issue zůstává bezpečně otevřená.</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>WFWorkflowActionIdentifier</key>
+			<string>is.workflow.actions.conditional</string>
+			<key>WFWorkflowActionParameters</key>
+			<dict>
+				<key>GroupingIdentifier</key>
+				<string>3C05AAE8-702D-5782-9C00-E2349D5F17B1</string>
+				<key>WFCondition</key>
+				<integer>4</integer>
+				<key>WFConditionalActionString</key>
+				<dict>
+					<key>Value</key>
+					<dict>
+						<key>string</key>
+						<string>￼</string>
+						<key>attachmentsByRange</key>
+						<dict>
+							<key>{0, 1}</key>
+							<dict>
+								<key>OutputName</key>
+								<string>Delivery ID</string>
+								<key>OutputUUID</key>
+								<string>E6BC7A0A-4B73-5530-B75D-D0E563C3D499</string>
+								<key>Type</key>
+								<string>ActionOutput</string>
+							</dict>
+						</dict>
+					</dict>
+					<key>WFSerializationType</key>
+					<string>WFTextTokenString</string>
+				</dict>
+				<key>WFControlFlowMode</key>
+				<integer>0</integer>
+				<key>WFInput</key>
+				<dict>
+					<key>Type</key>
+					<string>Variable</string>
+					<key>Variable</key>
+					<dict>
+						<key>Value</key>
+						<dict>
+							<key>OutputName</key>
+							<string>Potvrzené delivery_id jako text</string>
+							<key>OutputUUID</key>
+							<string>FD950A05-DDA2-5F9E-AAB5-02FB576B6CAA</string>
+							<key>Type</key>
+							<string>ActionOutput</string>
+						</dict>
+						<key>WFSerializationType</key>
+						<string>WFTextTokenAttachment</string>
+					</dict>
+				</dict>
 			</dict>
 		</dict>
 		<dict>
@@ -226,29 +785,123 @@ This shortcut was created via the following user prompt:
 			<key>WFWorkflowActionParameters</key>
 			<dict>
 				<key>UUID</key>
-				<string>DC6C3FB3-260C-4857-94C1-4A14DDF1FD23</string>
+				<string>23D04571-D1D2-5426-A4E0-1182826339BD</string>
 				<key>Text</key>
 				<dict>
 					<key>Value</key>
 					<dict>
+						<key>string</key>
+						<string>Doručeno přímo do Cockpitu. GitHub záloha #￼ se po převzetí na Macu automaticky uzavře.</string>
 						<key>attachmentsByRange</key>
 						<dict>
-							<key>{0, 1}</key>
+							<key>{43, 1}</key>
 							<dict>
 								<key>OutputName</key>
-								<string>Potvrzení</string>
+								<string>GitHub Issue number</string>
 								<key>OutputUUID</key>
-								<string>D411BFB9-C531-4763-8B69-C37A01D939CA</string>
+								<string>0FCE773B-6BEB-5E4A-AADF-56FD24442140</string>
 								<key>Type</key>
 								<string>ActionOutput</string>
 							</dict>
 						</dict>
-						<key>string</key>
-						<string>￼</string>
 					</dict>
 					<key>WFSerializationType</key>
 					<string>WFTextTokenString</string>
 				</dict>
+			</dict>
+		</dict>
+		<dict>
+			<key>WFWorkflowActionIdentifier</key>
+			<string>is.workflow.actions.conditional</string>
+			<key>WFWorkflowActionParameters</key>
+			<dict>
+				<key>GroupingIdentifier</key>
+				<string>3C05AAE8-702D-5782-9C00-E2349D5F17B1</string>
+				<key>WFControlFlowMode</key>
+				<integer>1</integer>
+			</dict>
+		</dict>
+		<dict>
+			<key>WFWorkflowActionIdentifier</key>
+			<string>is.workflow.actions.showresult</string>
+			<key>WFWorkflowActionParameters</key>
+			<dict>
+				<key>UUID</key>
+				<string>FCCC10F2-2D52-5092-A57D-810DDC0CAAC8</string>
+				<key>Text</key>
+				<dict>
+					<key>Value</key>
+					<dict>
+						<key>string</key>
+						<string>Doručení je nejisté. GitHub záloha #￼ zůstává otevřená.</string>
+						<key>attachmentsByRange</key>
+						<dict>
+							<key>{36, 1}</key>
+							<dict>
+								<key>OutputName</key>
+								<string>GitHub Issue number</string>
+								<key>OutputUUID</key>
+								<string>0FCE773B-6BEB-5E4A-AADF-56FD24442140</string>
+								<key>Type</key>
+								<string>ActionOutput</string>
+							</dict>
+						</dict>
+					</dict>
+					<key>WFSerializationType</key>
+					<string>WFTextTokenString</string>
+				</dict>
+			</dict>
+		</dict>
+		<dict>
+			<key>WFWorkflowActionIdentifier</key>
+			<string>is.workflow.actions.conditional</string>
+			<key>WFWorkflowActionParameters</key>
+			<dict>
+				<key>GroupingIdentifier</key>
+				<string>3C05AAE8-702D-5782-9C00-E2349D5F17B1</string>
+				<key>WFControlFlowMode</key>
+				<integer>2</integer>
+			</dict>
+		</dict>
+		<dict>
+			<key>WFWorkflowActionIdentifier</key>
+			<string>is.workflow.actions.conditional</string>
+			<key>WFWorkflowActionParameters</key>
+			<dict>
+				<key>GroupingIdentifier</key>
+				<string>DE19AE22-8895-59C4-8BFA-6507361A0F3C</string>
+				<key>WFControlFlowMode</key>
+				<integer>1</integer>
+			</dict>
+		</dict>
+		<dict>
+			<key>WFWorkflowActionIdentifier</key>
+			<string>is.workflow.actions.showresult</string>
+			<key>WFWorkflowActionParameters</key>
+			<dict>
+				<key>UUID</key>
+				<string>C2A1DE15-9089-539B-BCDA-6925AEE2E0B6</string>
+				<key>Text</key>
+				<dict>
+					<key>Value</key>
+					<dict>
+						<key>string</key>
+						<string>GitHub nepotvrdil vytvoření zálohy. Připomenutí neposílám dál; spusť zkratku znovu.</string>
+					</dict>
+					<key>WFSerializationType</key>
+					<string>WFTextTokenString</string>
+				</dict>
+			</dict>
+		</dict>
+		<dict>
+			<key>WFWorkflowActionIdentifier</key>
+			<string>is.workflow.actions.conditional</string>
+			<key>WFWorkflowActionParameters</key>
+			<dict>
+				<key>GroupingIdentifier</key>
+				<string>DE19AE22-8895-59C4-8BFA-6507361A0F3C</string>
+				<key>WFControlFlowMode</key>
+				<integer>2</integer>
 			</dict>
 		</dict>
 	</array>
@@ -259,15 +912,39 @@ This shortcut was created via the following user prompt:
 	<key>WFWorkflowIcon</key>
 	<dict>
 		<key>WFWorkflowIconGlyphNumber</key>
-		<integer>61487</integer>
+		<integer>61486</integer>
 		<key>WFWorkflowIconStartColor</key>
-		<integer>4282601983</integer>
+		<integer>431817727</integer>
 	</dict>
 	<key>WFWorkflowImportQuestions</key>
 	<array>
 		<dict>
 			<key>ActionIndex</key>
-			<integer>5</integer>
+			<integer>7</integer>
+			<key>Category</key>
+			<string>Parameter</string>
+			<key>DefaultValue</key>
+			<string>github_pat_REPLACE_ME</string>
+			<key>ParameterKey</key>
+			<string>WFTextActionText</string>
+			<key>Text</key>
+			<string>Vlož fine-grained GitHub token omezený jen na soukromý inbox s oprávněním Issues: Read and write</string>
+		</dict>
+		<dict>
+			<key>ActionIndex</key>
+			<integer>8</integer>
+			<key>Category</key>
+			<string>Parameter</string>
+			<key>DefaultValue</key>
+			<string>https://api.github.com/repos/OWNER/REPOSITORY/issues</string>
+			<key>ParameterKey</key>
+			<string>WFURLActionURL</string>
+			<key>Text</key>
+			<string>Vlož GitHub API URL soukromého inboxu zakončenou /issues</string>
+		</dict>
+		<dict>
+			<key>ActionIndex</key>
+			<integer>16</integer>
 			<key>Category</key>
 			<string>Parameter</string>
 			<key>DefaultValue</key>
@@ -285,7 +962,7 @@ This shortcut was created via the following user prompt:
 	<key>WFWorkflowMinimumClientVersionString</key>
 	<string>900</string>
 	<key>WFWorkflowName</key>
-	<string>Samantha – připomenutí přes Cockpit 2</string>
+	<string>Samantha – důležité připomenutí</string>
 	<key>WFWorkflowOutputContentItemClasses</key>
 	<array/>
 	<key>WFWorkflowTypes</key>
