@@ -239,3 +239,41 @@ Technický důkaz:
 - Plná Cockpit Quality Gate prošla 1485/1485 testy za 317,8 s.
 - Syntetický pilot: `created_count=1`, `closed_count=1`, lokální záznam 1,
   výsledný stav Issue `closed`.
+
+### 2026-08-30 14:13 CEST – GitHub fallback je nasazený a načítá lokální konfiguraci
+
+Hotovo:
+- Fine-grained token je uložený pouze v ignorovaném lokálním `.env`; živý
+  Cockpit hlásí GitHub fallback jako nakonfigurovaný a synchronizace je bez
+  chyby.
+- Podepsaná soukromá kopie zkratky má předvyplněný GitHub inbox i Tailscale
+  endpoint a neobsahuje další importní otázky.
+- První nasazení odhalilo, že launchd proces `.env` nenačítal. Start serveru byl
+  opraven tak, aby lokální `.env` načetl bez přepisování hodnot dodaných
+  procesním prostředím; hotfix `20742e9` je nasazený.
+
+Rozhodnutí:
+- Token zůstává omezený na jediný soukromý inbox s oprávněním Issues read/write.
+  Pokud se přes fallback začne posílat citlivější obsah, token se vymění.
+- Provozní uzavření ještě vyžaduje dva skutečné iPhone testy; syntetický test
+  nesmí být vydáván za uživatelské ověření.
+
+Co není hotové:
+- Chybí skutečný test zkratky s bdícím Macem a následně test se spícím Macem a
+  převzetím po probuzení.
+
+Další krok:
+- Spustit z iPhonu jedno neškodné připomenutí s bdícím Macem a ověřit právě
+  jednu lokální položku a uzavřenou GitHub Issue.
+
+Navrhované další kroky:
+- Potom zopakovat test se spícím Macem: Issue musí během spánku zůstat otevřená
+  a po probuzení se převzít právě jednou.
+
+Technický důkaz:
+- Cílené testy hotfixu: 21/21 OK; plná Cockpit Quality Gate: 1487/1487 OK.
+- Serverová deployment účtenka pro `project-cockpit`: nový proces, smoke 5/5 a
+  přesný hotfix commit `20742e9`.
+- Živý stav po restartu: `configured=true`, GitHub synchronizace OK, nula chyb
+  a nula čekajících inboxových Issues; Tailscale health i nemutující kontrola
+  doručovacího endpointu prošly.

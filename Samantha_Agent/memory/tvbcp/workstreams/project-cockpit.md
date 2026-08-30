@@ -395,3 +395,31 @@ Technický důkaz:
 - Shortcuts validace prošla a podepsaný výstup má 25 822 bajtů.
 - Plná Cockpit Quality Gate: 1485/1485 testů, 317,8 s, OK.
 - Změna zatím není nasazená ani pushnutá.
+
+### 2026-08-30 14:13 CEST – GitHub fallback je živý v Cockpitu
+
+Hotovo:
+- Produkční token je pouze v ignorovaném `.env` a má ověřený přístup právě k
+  jednomu soukromému inboxu s Issues read/write.
+- Soukromá podepsaná zkratka má nakonfigurovaný GitHub inbox i Tailscale
+  endpoint bez ručního vkládání tokenu při importu.
+- Cockpit hotfix `20742e9` načítá lokální `.env` při startu bez přepsání hodnot
+  z launchd a je serverově nasazený.
+
+Rozhodnutí:
+- Token se nyní ponechá; při budoucím citlivějším obsahu se vymění.
+- Architektura zůstává dvoucestná: GitHub write-ahead a přímý Tailscale pokus.
+
+Další krok:
+- Míla provede jeden neškodný iPhone test s bdícím Macem; potom samostatně test
+  se spícím Macem a převzetím po probuzení.
+
+Navrhované další kroky:
+- Po obou testech uzavřít provozní milník jen tehdy, pokud nevznikne duplicita a
+  GitHub Issue zůstane otevřená pouze po dobu nedostupnosti Macu.
+
+Technický důkaz:
+- Cílené testy hotfixu 21/21 a plná Cockpit Quality Gate 1487/1487 prošly.
+- Deployment účtenka potvrdila nový proces, workstream `project-cockpit` a smoke
+  5/5; živá GitHub synchronizace hlásí `configured=true`, nula chyb a nula
+  čekajících Issues.
