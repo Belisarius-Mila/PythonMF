@@ -312,3 +312,42 @@ Technický důkaz:
   verzovaný zdroj i soukromou nakonfigurovanou kopii.
 - Plná Cockpit Quality Gate prošla 1488/1488 testy.
 - Podepsaný soubor opravené varianty má 26 706 bajtů a oprávnění `0600`.
+
+### 2026-08-30 16:04 CEST – Opakované delivery_id odhalené při testu spánku
+
+Hotovo:
+- Test s bdícím Macem přes Issue `#2` byl přesně korelovaný: jedna lokální
+  položka, zdroj `direct_tailscale`, Issue uzavřená bez duplicity.
+- Při následujícím testu Mac skutečně spal a krátce poté proběhl síťový
+  DarkWake. Issue `#3` však měla jiný text a stejné `delivery_id` jako předchozí
+  běh, takže starý backend ji chybně uzavřel jako duplicitu a nový text lokálně
+  neuložil. Text zůstal zachovaný jen v uzavřené testovací Issue.
+- Builder nyní vytváří čerstvé časové ID s milisekundami místo nespolehlivě se
+  opakující hodnoty. Nakonfigurovaná varianta `3` je validovaná a podepsaná mimo
+  git.
+- Backend nově při stejném `delivery_id` a jiném textu selže zavřeně: původní
+  záznam nepřepíše a GitHub Issue nesmí uzavřít.
+
+Rozhodnutí:
+- Test `#3` není úspěšný fallback důkaz a nesmí se tak vykazovat.
+- Zpráva s konfliktním ID se nikdy nesmí automaticky znovu poslat ani tiše
+  zahodit jako běžná duplicita.
+
+Co není hotové:
+- Backendová pojistka ještě není nasazená, varianta `3` není importovaná a oba
+  provozní scénáře je nutné znovu ověřit.
+
+Další krok:
+- Dokončit plnou bránu a lokální checkpoint, poté samostatně potvrdit nasazení
+  Cockpitu a import varianty `3` před novým syntetickým testem.
+
+Navrhované další kroky:
+- Nejprve dvě spuštění s bdícím Macem pro důkaz dvou odlišných ID; až potom
+  opakovat test skutečné nedostupnosti Macu.
+
+Technický důkaz:
+- Issues `#2` a `#3` měly stejné ID a rozdílný text; lokální index měl pro ně
+  jediný starší záznam a počet položek se při druhém běhu nezvýšil.
+- Cílená sada builderu, úložiště a GitHub synchronizace: 26/26 OK; iOS 27
+  Shortcuts validátor prošel pro zdroj i soukromou variantu `3`.
+- Plná Cockpit Quality Gate prošla 1491/1491 testy.

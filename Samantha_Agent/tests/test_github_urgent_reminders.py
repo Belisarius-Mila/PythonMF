@@ -18,6 +18,7 @@ from app.github_urgent_reminders import (
     sync_configured_github_urgent_reminders,
     sync_github_urgent_reminders,
 )
+from app.urgent_reminders import deliver_urgent_reminder
 
 
 VALID_BODY = """Samantha urgent reminder v1
@@ -153,6 +154,32 @@ class GitHubUrgentRemindersTests(unittest.TestCase):
         self.assertEqual(closed, [17])
         self.assertEqual(len(stored), 1)
 
+    def test_conflicting_delivery_id_stays_open_and_does_not_overwrite(self) -> None:
+        closed: list[int] = []
+        conflicting_body = VALID_BODY.replace(
+            "Zavolat zítra do servisu.",
+            "Jiný text se stejným identifikátorem.",
+        )
+        client = _FakeClient(closed=closed, body=conflicting_body)
+
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            index_path = Path(temp_dir) / "urgent_reminders" / "index.json"
+            deliver_urgent_reminder(
+                "Původní text.",
+                delivery_id="12345678-abcd-4321-abcd-123456789abc",
+                index_path=index_path,
+            )
+            result = sync_github_urgent_reminders(client, index_path=index_path)
+            stored = json.loads(index_path.read_text(encoding="utf-8"))["reminders"]
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["error_count"], 1)
+        self.assertEqual(result["closed_count"], 0)
+        self.assertEqual(result["remaining_count"], 1)
+        self.assertEqual(closed, [])
+        self.assertEqual(len(stored), 1)
+        self.assertEqual(stored[0]["body_text"], "Původní text.")
+
     def test_unconfigured_sync_is_a_noop(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             index_path = Path(temp_dir) / "urgent_reminders" / "index.json"
@@ -196,12 +223,19 @@ class GitHubUrgentRemindersTests(unittest.TestCase):
 
 
 class _FakeClient:
-    def __init__(self, *, closed: list[int], fail_close: bool = False) -> None:
+    def __init__(
+        self,
+        *,
+        closed: list[int],
+        fail_close: bool = False,
+        body: str = VALID_BODY,
+    ) -> None:
         self.closed = closed
         self.fail_close = fail_close
+        self.body = body
 
     def list_open_issues(self):  # type: ignore[no-untyped-def]
-        return [parse_github_inbox_issue(number=17, body=VALID_BODY)]
+        return [parse_github_inbox_issue(number=17, body=self.body)]
 
     def close_issue(self, issue_number: int) -> None:
         if self.fail_close:

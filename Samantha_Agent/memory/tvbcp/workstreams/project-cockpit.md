@@ -448,3 +448,31 @@ Technický důkaz:
   synchronizační chyby 0.
 - Builder testy 4/4, validátor zdroje i soukromé kopie OK a plná Cockpit Quality
   Gate 1488/1488; podepsaný výstup 26 706 bajtů, režim `0600`.
+
+### 2026-08-30 16:04 CEST – Fail-closed ochrana proti opakovanému delivery_id
+
+Hotovo:
+- Bdící test přes Issue `#2` prošel přesně jednou přímou cestou.
+- Spánkový test odhalil, že varianta `2` při novém textu znovu použila staré
+  `delivery_id`; nový text proto nebyl lokálně uložen a zůstal jen v uzavřené
+  testovací Issue `#3`.
+- Varianta `3` používá časové ID s milisekundami a je validovaná a podepsaná.
+- Backend při kolizi stejného ID s jiným textem nově ponechá stav nejednoznačný
+  a Issue otevřenou místo tichého uzavření jako duplicity.
+
+Rozhodnutí:
+- Issue `#3` se nepočítá jako úspěšný fallback test.
+- Automatické opakování nebo obnovení jejího textu se neprovádí.
+
+Další krok:
+- Po zelené plné bráně vytvořit checkpoint; nasazení backendu a import varianty
+  `3` zůstávají samostatnými kroky před retestem.
+
+Navrhované další kroky:
+- Ověřit nejprve dvě různá ID při dvou bdících bězích a potom skutečný fallback
+  při nedostupném Macu.
+
+Technický důkaz:
+- Issues `#2` a `#3`: stejné ID, rozdílný text; přesná lokální shoda pouze jedna.
+- Cílené testy 26/26 a iOS 27 validace zdroje i soukromé varianty `3` prošly.
+- Plná Cockpit Quality Gate prošla 1491/1491 testy.

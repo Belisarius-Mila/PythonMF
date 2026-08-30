@@ -42,11 +42,33 @@ class UrgentReminderShortcutTests(unittest.TestCase):
         self.assertEqual(
             targets,
             [
-                (7, "is.workflow.actions.gettext", "WFTextActionText"),
-                (8, "is.workflow.actions.url", "WFURLActionURL"),
-                (16, "is.workflow.actions.url", "WFURLActionURL"),
+                (8, "is.workflow.actions.gettext", "WFTextActionText"),
+                (9, "is.workflow.actions.url", "WFURLActionURL"),
+                (17, "is.workflow.actions.url", "WFURLActionURL"),
             ],
         )
+
+    def test_delivery_id_uses_fresh_millisecond_timestamp(self) -> None:
+        workflow = build_workflow()
+        actions = workflow["WFWorkflowActions"]
+        identifiers = [action["WFWorkflowActionIdentifier"] for action in actions]
+
+        self.assertNotIn("is.workflow.actions.number.random", identifiers)
+        date_index = identifiers.index("is.workflow.actions.date")
+        format_index = identifiers.index("is.workflow.actions.format.date")
+        self.assertLess(date_index, format_index)
+        self.assertEqual(
+            actions[date_index]["WFWorkflowActionParameters"]["WFDateActionMode"],
+            "Current Date",
+        )
+        format_parameters = actions[format_index]["WFWorkflowActionParameters"]
+        self.assertEqual(format_parameters["WFDateFormatStyle"], "Custom")
+        self.assertEqual(format_parameters["WFDateFormat"], "Custom")
+        self.assertEqual(format_parameters["WFDateFormatString"], "yyyyMMddHHmmssSSS")
+
+        serialized = json.dumps(workflow, ensure_ascii=False)
+        self.assertIn("samantha-", serialized)
+        self.assertIn("Časové ID", serialized)
 
     def test_shortcut_requires_exact_delivery_id_receipt(self) -> None:
         workflow = build_workflow()

@@ -90,6 +90,12 @@ def deliver_urgent_reminder(
                 str(record.get("source_kind", "")) == DIRECT_SOURCE_KIND
                 and str(record.get("delivery_id", "")) == safe_delivery_id
             ):
+                existing_text = str(record.get("body_text", "") or "").strip()
+                existing_priority = str(record.get("priority", "urgent") or "urgent").casefold()
+                if existing_text != body_text or existing_priority != safe_priority:
+                    raise ValueError(
+                        "delivery_id už existuje s jiným obsahem; doručení zůstává nejednoznačné."
+                    )
                 stored = dict(record)
                 return {"reminders": records}
         record = {

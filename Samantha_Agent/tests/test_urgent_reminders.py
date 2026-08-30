@@ -68,6 +68,28 @@ class UrgentRemindersTests(unittest.TestCase):
 
         self.assertFalse(index_path.exists())
 
+    def test_reused_delivery_id_with_different_text_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            index_path = Path(temp_dir) / "index.json"
+            delivery_id = "samantha-20260830160000000"
+            deliver_urgent_reminder(
+                "První text.",
+                delivery_id=delivery_id,
+                index_path=index_path,
+            )
+
+            with self.assertRaisesRegex(ValueError, "jiným obsahem"):
+                deliver_urgent_reminder(
+                    "Druhý odlišný text.",
+                    delivery_id=delivery_id,
+                    index_path=index_path,
+                )
+
+            stored = json.loads(index_path.read_text(encoding="utf-8"))["reminders"]
+
+        self.assertEqual(len(stored), 1)
+        self.assertEqual(stored[0]["body_text"], "První text.")
+
     def test_sync_and_done_use_lock_and_preserve_done_status(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             root = Path(temp_dir)
