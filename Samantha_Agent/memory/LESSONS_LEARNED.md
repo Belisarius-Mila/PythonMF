@@ -331,3 +331,13 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   `ssl.create_default_context(cafile=certifi.where())`; chybu dál hlásit
   redigovaně a fail-closed. Systémový `curl` ponechat pro omezené diagnostické
   ověření, ne jako skrytý runtime fallback zapisovacího workflow.
+
+### LL-026 — Unit test lokálního indexu nesmí dědit živý GitHub inbox
+
+- Problém: Dva testy lokálního přehledu připomenutí zavolaly produkční GitHub
+  synchronizaci z `.env`; otevřená skutečná Issue změnila jejich dočasné počty.
+- Typ: opakující se
+- Řešení nalezeno: 30082026
+- Řešení: V každém unit testu lokálního indexu výslovně nahradit externí GitHub
+  synchronizaci deterministickým neaktivním výsledkem. Živý inbox patří jen do
+  samostatného integračního testu s přesnou korelací a bezpečnostními hranami.

@@ -5172,7 +5172,21 @@ Dalsi krok:
                 {"text": "Zavolat do servisu.", "delivery_id": "test-separate-urgent-001"},
                 index_path=urgent_index,
             )
-            urgent = urgent_reminders_status(index_path=urgent_index)
+            with patch(
+                "app.cockpit.sync_configured_github_urgent_reminders",
+                return_value={
+                    "ok": True,
+                    "configured": False,
+                    "pending_count": 0,
+                    "remaining_count": 0,
+                    "created_count": 0,
+                    "duplicate_count": 0,
+                    "closed_count": 0,
+                    "error_count": 0,
+                    "errors": [],
+                },
+            ):
+                urgent = urgent_reminders_status(index_path=urgent_index)
 
         self.assertEqual(quick["counts"]["active"], 1)
         self.assertEqual(quick["notes"][0]["snippet"], "Nápad do QN.")
@@ -5200,7 +5214,21 @@ Dalsi krok:
                 {"text": long_body, "delivery_id": "test-long-urgent-reminder-001"},
                 index_path=urgent_index,
             )
-            urgent = urgent_reminders_status(index_path=urgent_index)
+            with patch(
+                "app.cockpit.sync_configured_github_urgent_reminders",
+                return_value={
+                    "ok": True,
+                    "configured": False,
+                    "pending_count": 0,
+                    "remaining_count": 0,
+                    "created_count": 0,
+                    "duplicate_count": 0,
+                    "closed_count": 0,
+                    "error_count": 0,
+                    "errors": [],
+                },
+            ):
+                urgent = urgent_reminders_status(index_path=urgent_index)
 
         self.assertEqual(urgent["counts"]["open"], 1)
         self.assertIn("První řádek", urgent["items"][0]["summary"])

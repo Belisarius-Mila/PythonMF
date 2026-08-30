@@ -502,3 +502,26 @@ Navrhované další kroky:
 Technický důkaz:
 - Cílené testy 26/26, iOS 27 validace zdroje i private varianty `4` a plná
   Cockpit Quality Gate 1491/1491 prošly; podepsaný soubor má režim `0600`.
+
+### 2026-08-30 18:00 CEST – Přímá CurrentDate magic variable ve variantě 5
+
+Hotovo:
+- Varianta `4` při bdícím běhu znovu vytvořila jen ID `samantha-`; Issue `#5`
+  zůstala díky fail-closed backendu otevřená a lokální index se nezměnil.
+- Varianta `5` odstranila akce Date a Format Date a vkládá formátovanou
+  `CurrentDate` přímo do textu ID.
+- Jednotkové testy stavu připomenutí jsou izolované od živé GitHub konfigurace.
+
+Rozhodnutí:
+- Issue `#5` se bez samostatného rozhodnutí nemění ani neopakuje. Varianty `3`
+  a `4` se dále netestují.
+
+Další krok:
+- Importovat variantu `5` a při bdícím Macu ověřit právě jedno celé nové ID.
+
+Navrhované další kroky:
+- Spánkový test povolit až po přesné korelaci bdícího běhu varianty `5`.
+
+Technický důkaz:
+- Cílené testy 28/28, iOS 27 validace a podepsání varianty `5` prošly.
+- Po opravě testovací izolace prošla plná Cockpit Quality Gate 1491/1491.

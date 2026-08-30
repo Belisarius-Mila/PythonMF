@@ -385,3 +385,37 @@ Technický důkaz:
 - iOS 27 Shortcuts validátor prošel pro secret-free zdroj i soukromou variantu
   `4`; podepsaný soubor má 25 868 bajtů.
 - Plná Cockpit Quality Gate prošla 1491/1491 testy.
+
+### 2026-08-30 18:00 CEST – Varianta 5 obchází prázdný iOS datumový výstup
+
+Hotovo:
+- Bdící běh varianty `4` založil GitHub Issue `#5`, ale její `delivery_id` bylo
+  znovu pouze `samantha-`. Backend ji bezpečně odmítl jako konflikt, lokální
+  index nezměnil a Issue ponechal otevřenou.
+- Varianta `5` odstranila mezikroky Date a Format Date. Časové ID vkládá přímo
+  ze systémové magic variable `CurrentDate` s vlastním formátem na milisekundy.
+- Dva testy stavu Cockpitu už mají GitHub synchronizaci výslovně izolovanou;
+  otevřený produkční inbox proto nemůže měnit jejich dočasné počty.
+
+Rozhodnutí:
+- Issue `#5` se automaticky nezavírá, nemění ani znovu nedoručuje; její obsah
+  zůstává zachovaný v soukromém inboxu jako nejednoznačný pokus.
+- Varianty `3` a `4` se pro další test nepoužijí. Spánkový test dál čeká na
+  jednoznačný bdící důkaz varianty `5`.
+
+Co není hotové:
+- Varianta `5` ještě není importovaná ani provozně spuštěná na iPhonu.
+
+Další krok:
+- Importovat variantu `5`, provést jeden nový bdící test a ověřit celé nové
+  `delivery_id`; teprve při přesné shodě povolit spánkový test.
+
+Navrhované další kroky:
+- Po úspěšném bdícím běhu provést jeden test se spícím Macem a po probuzení
+  ověřit právě jedno převzetí otevřené GitHub Issue.
+
+Technický důkaz:
+- Cílená sada prošla 28/28; iOS 27 validace secret-free i soukromé varianty `5`
+  prošla a podepsaný soubor má 25 698 bajtů s režimem `0600`.
+- První plná brána správně odhalila dva testy závislé na živém inboxu; po jejich
+  izolaci finální Cockpit Quality Gate prošla 1491/1491.

@@ -42,33 +42,20 @@ class UrgentReminderShortcutTests(unittest.TestCase):
         self.assertEqual(
             targets,
             [
-                (8, "is.workflow.actions.gettext", "WFTextActionText"),
-                (9, "is.workflow.actions.url", "WFURLActionURL"),
-                (17, "is.workflow.actions.url", "WFURLActionURL"),
+                (6, "is.workflow.actions.gettext", "WFTextActionText"),
+                (7, "is.workflow.actions.url", "WFURLActionURL"),
+                (15, "is.workflow.actions.url", "WFURLActionURL"),
             ],
         )
 
-    def test_delivery_id_uses_fresh_millisecond_timestamp(self) -> None:
+    def test_delivery_id_uses_current_date_magic_variable(self) -> None:
         workflow = build_workflow()
         actions = workflow["WFWorkflowActions"]
         identifiers = [action["WFWorkflowActionIdentifier"] for action in actions]
 
         self.assertNotIn("is.workflow.actions.number.random", identifiers)
-        date_index = identifiers.index("is.workflow.actions.date")
-        format_index = identifiers.index("is.workflow.actions.format.date")
-        self.assertLess(date_index, format_index)
-        self.assertEqual(
-            actions[date_index]["WFWorkflowActionParameters"]["WFDateActionMode"],
-            "Current Date",
-        )
-        format_parameters = actions[format_index]["WFWorkflowActionParameters"]
-        self.assertEqual(format_parameters["WFDateFormatStyle"], "Custom")
-        self.assertEqual(format_parameters["WFDateFormat"], "Custom")
-        self.assertEqual(format_parameters["WFDateFormatString"], "yyyyMMddHHmmssSSS")
-        date_attachment = format_parameters["WFDate"]["Value"][
-            "attachmentsByRange"
-        ]["{0, 1}"]
-        self.assertEqual(date_attachment["OutputName"], "Date")
+        self.assertNotIn("is.workflow.actions.date", identifiers)
+        self.assertNotIn("is.workflow.actions.format.date", identifiers)
 
         delivery_index = next(
             index
@@ -80,11 +67,23 @@ class UrgentReminderShortcutTests(unittest.TestCase):
         delivery_attachment = actions[delivery_index]["WFWorkflowActionParameters"][
             "WFTextActionText"
         ]["Value"]["attachmentsByRange"]["{9, 1}"]
-        self.assertEqual(delivery_attachment["OutputName"], "Formatted Date")
+        self.assertEqual(delivery_attachment["Type"], "CurrentDate")
+        self.assertNotIn("OutputUUID", delivery_attachment)
+        self.assertEqual(
+            delivery_attachment["Aggrandizements"],
+            [
+                {
+                    "Type": "WFDateFormatVariableAggrandizement",
+                    "WFDateFormat": "yyyyMMddHHmmssSSS",
+                    "WFDateFormatStyle": "Custom",
+                    "WFISO8601IncludeTime": False,
+                }
+            ],
+        )
 
         serialized = json.dumps(workflow, ensure_ascii=False)
         self.assertIn("samantha-", serialized)
-        self.assertIn("Časové ID", serialized)
+        self.assertNotIn("Časové ID", serialized)
 
     def test_shortcut_requires_exact_delivery_id_receipt(self) -> None:
         workflow = build_workflow()

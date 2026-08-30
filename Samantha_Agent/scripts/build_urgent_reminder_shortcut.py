@@ -61,6 +61,28 @@ def token_string(*parts: str | tuple[str, str]) -> dict[str, Any]:
     return {"Value": value, "WFSerializationType": "WFTextTokenString"}
 
 
+def current_date_token_string(prefix: str, *, date_format: str) -> dict[str, Any]:
+    return {
+        "Value": {
+            "string": f"{prefix}{PLACEHOLDER}",
+            "attachmentsByRange": {
+                f"{{{len(prefix)}, 1}}": {
+                    "Aggrandizements": [
+                        {
+                            "Type": "WFDateFormatVariableAggrandizement",
+                            "WFDateFormat": date_format,
+                            "WFDateFormatStyle": "Custom",
+                            "WFISO8601IncludeTime": False,
+                        }
+                    ],
+                    "Type": "CurrentDate",
+                }
+            },
+        },
+        "WFSerializationType": "WFTextTokenString",
+    }
+
+
 def dictionary_items(entries: list[tuple[str, dict[str, Any]]]) -> dict[str, Any]:
     items = []
     for key, value in entries:
@@ -100,8 +122,6 @@ def show_result(label: str, *parts: str | tuple[str, str]) -> dict[str, Any]:
 
 def build_actions() -> list[dict[str, Any]]:
     ask_id = stable_uuid("ask-reminder")
-    current_date_id = "408C208B-53A8-4102-94B1-1957C555C5CA"
-    timestamp_id = "447FC414-759E-4E1B-9933-4A01BC99AE14"
     delivery_id = stable_uuid("delivery-id")
     token_id = stable_uuid("github-token")
     github_url_id = stable_uuid("github-url")
@@ -142,32 +162,12 @@ def build_actions() -> list[dict[str, Any]]:
             },
         ),
         action(
-            "is.workflow.actions.date",
-            {
-                "CustomOutputName": "Aktuální čas",
-                "UUID": current_date_id,
-                "WFDateActionMode": "Current Date",
-            },
-        ),
-        action(
-            "is.workflow.actions.format.date",
-            {
-                "CustomOutputName": "Časové ID",
-                "UUID": timestamp_id,
-                "WFDate": token_string((current_date_id, "Date")),
-                "WFDateFormat": "Custom",
-                "WFDateFormatStyle": "Custom",
-                "WFDateFormatString": "yyyyMMddHHmmssSSS",
-                "WFTimeFormatStyle": "None",
-            },
-        ),
-        action(
             "is.workflow.actions.gettext",
             {
                 "CustomOutputName": "Delivery ID",
                 "UUID": delivery_id,
-                "WFTextActionText": token_string(
-                    "samantha-", (timestamp_id, "Formatted Date")
+                "WFTextActionText": current_date_token_string(
+                    "samantha-", date_format="yyyyMMddHHmmssSSS"
                 ),
             },
         ),
@@ -380,7 +380,7 @@ def build_workflow() -> dict[str, Any]:
         },
         "WFWorkflowImportQuestions": [
             {
-                "ActionIndex": 8,
+                "ActionIndex": 6,
                 "Category": "Parameter",
                 "DefaultValue": "github_pat_REPLACE_ME",
                 "ParameterKey": "WFTextActionText",
@@ -390,14 +390,14 @@ def build_workflow() -> dict[str, Any]:
                 ),
             },
             {
-                "ActionIndex": 9,
+                "ActionIndex": 7,
                 "Category": "Parameter",
                 "DefaultValue": "https://api.github.com/repos/OWNER/REPOSITORY/issues",
                 "ParameterKey": "WFURLActionURL",
                 "Text": "Vlož GitHub API URL soukromého inboxu zakončenou /issues",
             },
             {
-                "ActionIndex": 17,
+                "ActionIndex": 15,
                 "Category": "Parameter",
                 "DefaultValue": (
                     "https://cockpit-host.tailnet-name.ts.net/api/urgent-reminders/deliver"
