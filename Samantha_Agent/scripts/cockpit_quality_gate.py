@@ -169,6 +169,7 @@ TEST_MODULES = (
     "tests.test_cockpit_fast_feedback",
     "tests.test_cockpit_frontend",
     "tests.test_cockpit_readonly_routes",
+    "tests.test_cockpit_server",
     "tests.test_cockpit_status_service",
     "tests.test_decision_cockpit",
     "tests.test_capability_audit",
