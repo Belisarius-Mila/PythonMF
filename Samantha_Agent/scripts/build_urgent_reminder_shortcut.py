@@ -225,7 +225,9 @@ def build_actions() -> list[dict[str, Any]]:
                         ("body", token_string((issue_body_id, "GitHub Issue body"))),
                     ]
                 ),
-                "WFURL": token_attachment(github_url_id, "GitHub Issues URL"),
+                # iOS renders the URL field only when a magic variable is
+                # serialized as a token string, even when it is the sole value.
+                "WFURL": token_string((github_url_id, "GitHub Issues URL")),
             },
         ),
         action(
@@ -277,7 +279,7 @@ def build_actions() -> list[dict[str, Any]]:
                         ("delivery_id", token_string((delivery_id, "Delivery ID"))),
                     ]
                 ),
-                "WFURL": token_attachment(cockpit_url_id, "Cockpit delivery URL"),
+                "WFURL": token_string((cockpit_url_id, "Cockpit delivery URL")),
             },
         ),
         action(

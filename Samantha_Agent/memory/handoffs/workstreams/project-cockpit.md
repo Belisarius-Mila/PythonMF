@@ -277,3 +277,38 @@ Technický důkaz:
 - Živý stav po restartu: `configured=true`, GitHub synchronizace OK, nula chyb
   a nula čekajících inboxových Issues; Tailscale health i nemutující kontrola
   doručovacího endpointu prošly.
+
+### 2026-08-30 14:28 CEST – První iPhone test bezpečně odhalil prázdný vstup URL
+
+Hotovo:
+- První skutečné spuštění zkratky skončilo ještě před síťovým zápisem hláškou,
+  že akce Načíst obsah URL nedostala platnou URL.
+- Živá read-only kontrola potvrdila beze změny 4 otevřená lokální připomenutí,
+  nula čekajících GitHub Issues a nula synchronizačních chyb; nevznikla
+  duplicita ani nejednoznačné doručení.
+- Obě síťové akce nyní dostávají URL jako viditelnou magic variable ve formátu,
+  který iOS zachová. Nová soukromá varianta s názvem zakončeným `2` je
+  validovaná a podepsaná mimo git, aby import nekolidoval se starou kopií.
+
+Rozhodnutí:
+- Původní zkratku nepoužívat pro další test; nová varianta má odlišný název jen
+  kvůli spolehlivému importu vedle již nainstalované kopie.
+
+Co není hotové:
+- Opravená zkratka ještě nemá skutečný iPhone retest. Nelze proto potvrdit
+  provozní doručení s bdícím ani spícím Macem.
+
+Další krok:
+- Importovat variantu `Samantha – důležité připomenutí 2` a provést jeden nový
+  neškodný test s bdícím Macem; nic neopakovat, pokud výsledek nebude přesně
+  korelovatelný.
+
+Navrhované další kroky:
+- Teprve po úspěšném bdícím testu provést test se spícím Macem a převzetím po
+  probuzení právě jednou.
+
+Technický důkaz:
+- Cílené testy builderu: 4/4 OK; Shortcuts Playground validátor prošel pro
+  verzovaný zdroj i soukromou nakonfigurovanou kopii.
+- Plná Cockpit Quality Gate prošla 1488/1488 testy.
+- Podepsaný soubor opravené varianty má 26 706 bajtů a oprávnění `0600`.

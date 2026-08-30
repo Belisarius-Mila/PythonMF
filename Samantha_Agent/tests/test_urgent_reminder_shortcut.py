@@ -57,6 +57,22 @@ class UrgentReminderShortcutTests(unittest.TestCase):
         self.assertIn("Doručení je nejisté", serialized)
         self.assertIn("zůstává otevřená", serialized)
 
+    def test_request_urls_render_as_visible_magic_variables_on_ios(self) -> None:
+        workflow = build_workflow()
+        requests = [
+            action
+            for action in workflow["WFWorkflowActions"]
+            if action["WFWorkflowActionIdentifier"]
+            == "is.workflow.actions.downloadurl"
+        ]
+
+        self.assertEqual(len(requests), 2)
+        for request in requests:
+            url = request["WFWorkflowActionParameters"]["WFURL"]
+            self.assertEqual(url["WFSerializationType"], "WFTextTokenString")
+            self.assertEqual(url["Value"]["string"], "\ufffc")
+            self.assertEqual(set(url["Value"]["attachmentsByRange"]), {"{0, 1}"})
+
 
 if __name__ == "__main__":
     unittest.main()

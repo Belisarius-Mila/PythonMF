@@ -423,3 +423,28 @@ Technický důkaz:
 - Deployment účtenka potvrdila nový proces, workstream `project-cockpit` a smoke
   5/5; živá GitHub synchronizace hlásí `configured=true`, nula chyb a nula
   čekajících Issues.
+
+### 2026-08-30 14:28 CEST – Oprava URL vstupů po prvním iPhone testu
+
+Hotovo:
+- První iPhone test bezpečně skončil před zápisem, protože akce Načíst obsah URL
+  viděla prázdný vstup.
+- Obě URL proměnné jsou opravené na iOS-kompatibilní tokenizovaný textový vstup.
+- Opravená soukromá varianta je validovaná a podepsaná pod nekolidujícím názvem
+  `Samantha – důležité připomenutí 2`.
+
+Rozhodnutí:
+- Chybný pokus se neopakuje automaticky. Stav zůstal jednoznačný: žádná nová
+  lokální položka ani čekající GitHub Issue.
+
+Další krok:
+- Importovat opravenou variantu a provést nový neškodný test s bdícím Macem.
+
+Navrhované další kroky:
+- Po přesně korelovaném úspěchu samostatně ověřit fallback se spícím Macem.
+
+Technický důkaz:
+- Živý stav po chybě: 4 otevřená lokální připomenutí, GitHub pending 0,
+  synchronizační chyby 0.
+- Builder testy 4/4, validátor zdroje i soukromé kopie OK a plná Cockpit Quality
+  Gate 1488/1488; podepsaný výstup 26 706 bajtů, režim `0600`.
