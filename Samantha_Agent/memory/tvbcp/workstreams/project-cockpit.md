@@ -476,3 +476,29 @@ Technický důkaz:
 - Issues `#2` a `#3`: stejné ID, rozdílný text; přesná lokální shoda pouze jedna.
 - Cílené testy 26/26 a iOS 27 validace zdroje i soukromé varianty `3` prošly.
 - Plná Cockpit Quality Gate prošla 1491/1491 testy.
+
+### 2026-08-30 16:52 CEST – Kanonické datumové výstupy pro variantu 4
+
+Hotovo:
+- Fail-closed backend je nasazený na `04e7763` a živý serverový smoke prošel
+  5/5 lokálně i přes tailnet.
+- Bdící běh varianty `3` vytvořil nový přímý záznam 45, ale odeslal jen
+  `delivery_id` `samantha-`; nelze jej použít jako důkaz jedinečného ID.
+- Zkratka nyní odkazuje na kanonické Apple výstupy `Date` a `Formatted Date`.
+  Nakonfigurovaná varianta `4` je validovaná a podepsaná mimo git.
+
+Rozhodnutí:
+- Spánkový test zůstává pozastavený, dokud varianta `4` při bdícím Macu
+  neprokáže celé nové časové ID. Záznam 45 se automaticky neopakuje ani nemaže.
+
+Další krok:
+- Importovat variantu `4`, provést jeden bdící test a přesně ověřit nový
+  lokální záznam a jeho celé `delivery_id`.
+
+Navrhované další kroky:
+- Až potom udělat jeden test se spícím Macem a ověřit převzetí GitHub Issue
+  právě jednou po probuzení.
+
+Technický důkaz:
+- Cílené testy 26/26, iOS 27 validace zdroje i private varianty `4` a plná
+  Cockpit Quality Gate 1491/1491 prošly; podepsaný soubor má režim `0600`.

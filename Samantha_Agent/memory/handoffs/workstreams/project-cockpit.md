@@ -351,3 +351,37 @@ Technický důkaz:
 - Cílená sada builderu, úložiště a GitHub synchronizace: 26/26 OK; iOS 27
   Shortcuts validátor prošel pro zdroj i soukromou variantu `3`.
 - Plná Cockpit Quality Gate prošla 1491/1491 testy.
+
+### 2026-08-30 16:52 CEST – Bdící retest odhalil prázdnou časovou část ID
+
+Hotovo:
+- Backendová fail-closed pojistka je nasazená na přesném commitu `04e7763`;
+  restart, shodný lokální a tailnet code stamp a serverový smoke 5/5 prošly.
+- První bdící běh varianty `3` vytvořil právě jeden nový přímý lokální záznam
+  číslo 45, ale jeho `delivery_id` bylo pouze `samantha-`. Běh proto dokládá
+  přímé doručení, ne jedinečnost časového ID.
+- Builder nyní používá kanonické Apple názvy výstupů `Date` a `Formatted Date`.
+  Soukromá varianta `4` je validovaná a podepsaná mimo git s oprávněním `0600`.
+
+Rozhodnutí:
+- Se spícím Macem se zatím netestuje. Varianta `3` není způsobilá pro další
+  korelační test a záznam 45 se automaticky nemaže ani neopakuje.
+- Další test musí nejprve prokázat celé nové `delivery_id` při bdícím Macu.
+
+Co není hotové:
+- Varianta `4` ještě není importovaná ani skutečně spuštěná na iPhonu.
+- Fallback se spícím Macem nad opravenou variantou proto zůstává neověřený.
+
+Další krok:
+- Importovat variantu `4`, provést jeden nový neškodný bdící test a ověřit
+  právě jeden nový záznam s celým časovým `delivery_id`; teprve potom uspat Mac.
+
+Navrhované další kroky:
+- Po úspěšném bdícím důkazu provést jeden spánkový test a po probuzení ověřit
+  převzetí otevřené GitHub Issue právě jednou.
+
+Technický důkaz:
+- Cílené testy builderu, úložiště a GitHub synchronizace: 26/26 OK.
+- iOS 27 Shortcuts validátor prošel pro secret-free zdroj i soukromou variantu
+  `4`; podepsaný soubor má 25 868 bajtů.
+- Plná Cockpit Quality Gate prošla 1491/1491 testy.

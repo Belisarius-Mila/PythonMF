@@ -154,7 +154,7 @@ def build_actions() -> list[dict[str, Any]]:
             {
                 "CustomOutputName": "Časové ID",
                 "UUID": timestamp_id,
-                "WFDate": token_string((current_date_id, "Aktuální čas")),
+                "WFDate": token_string((current_date_id, "Date")),
                 "WFDateFormat": "Custom",
                 "WFDateFormatStyle": "Custom",
                 "WFDateFormatString": "yyyyMMddHHmmssSSS",
@@ -166,7 +166,9 @@ def build_actions() -> list[dict[str, Any]]:
             {
                 "CustomOutputName": "Delivery ID",
                 "UUID": delivery_id,
-                "WFTextActionText": token_string("samantha-", (timestamp_id, "Časové ID")),
+                "WFTextActionText": token_string(
+                    "samantha-", (timestamp_id, "Formatted Date")
+                ),
             },
         ),
         comment(

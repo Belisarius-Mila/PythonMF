@@ -65,6 +65,22 @@ class UrgentReminderShortcutTests(unittest.TestCase):
         self.assertEqual(format_parameters["WFDateFormatStyle"], "Custom")
         self.assertEqual(format_parameters["WFDateFormat"], "Custom")
         self.assertEqual(format_parameters["WFDateFormatString"], "yyyyMMddHHmmssSSS")
+        date_attachment = format_parameters["WFDate"]["Value"][
+            "attachmentsByRange"
+        ]["{0, 1}"]
+        self.assertEqual(date_attachment["OutputName"], "Date")
+
+        delivery_index = next(
+            index
+            for index, action in enumerate(actions)
+            if action["WFWorkflowActionIdentifier"] == "is.workflow.actions.gettext"
+            and action["WFWorkflowActionParameters"].get("CustomOutputName")
+            == "Delivery ID"
+        )
+        delivery_attachment = actions[delivery_index]["WFWorkflowActionParameters"][
+            "WFTextActionText"
+        ]["Value"]["attachmentsByRange"]["{9, 1}"]
+        self.assertEqual(delivery_attachment["OutputName"], "Formatted Date")
 
         serialized = json.dumps(workflow, ensure_ascii=False)
         self.assertIn("samantha-", serialized)

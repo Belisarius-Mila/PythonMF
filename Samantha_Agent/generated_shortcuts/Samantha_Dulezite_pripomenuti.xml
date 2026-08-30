@@ -85,7 +85,7 @@ This shortcut was created via the following user prompt:
 							<key>{0, 1}</key>
 							<dict>
 								<key>OutputName</key>
-								<string>Aktuální čas</string>
+								<string>Date</string>
 								<key>OutputUUID</key>
 								<string>408C208B-53A8-4102-94B1-1957C555C5CA</string>
 								<key>Type</key>
@@ -126,7 +126,7 @@ This shortcut was created via the following user prompt:
 							<key>{9, 1}</key>
 							<dict>
 								<key>OutputName</key>
-								<string>Časové ID</string>
+								<string>Formatted Date</string>
 								<key>OutputUUID</key>
 								<string>447FC414-759E-4E1B-9933-4A01BC99AE14</string>
 								<key>Type</key>
