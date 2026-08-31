@@ -1,34 +1,34 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-31 11:24 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-31 15:21 CEST
 
 ### Hotovo
-- Vznikly dvě výrazně lehčí WebP varianty potoka a stránka pro přímé porovnání na velké obrazovce
+- Scéna 5 má samostatně otevřitelný responzivní základ s WebP q90 a PNG fallbackem
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
 - Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
-- Lokální commity čekají na samostatný denní GitHub balíček.
 
 ### Rizika
-- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
+- Žádné další doložené provozní riziko.
 
 ### Další krok
-- Porovnat q90 a q85 na 22palcové obrazovce a vybrat produkční kvalitu
+- Ručně zkontrolovat vzhled a potom připravit první dějový obraz se skupinou zvířátek
 
 ### Rozhodnutí
-- Originální PNG zůstává nedotčené a pilot porovnává plné rozlišení WebP q90 a q85
+- V tomto kroku nebylo přijato nové kanonické rozhodnutí.
 
 ### Navrhované další kroky
-- Po výběru zapojit zvolenou WebP variantu do scény 5
-- Stejným nastavením připravovat další obrazy scény 5
-- Později samostatně optimalizovat starší obrazy MMTX
+- Doplnit první dějový obraz a následně interakci se třemi kládami
+- Dialogy a pevná MP3 přidat až s potvrzeným dějovým stavem
+- Do hlavního příběhu scénu napojit až po dokončení prvního hratelného úseku
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `af30301b30d0`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `901d5fef9be3` · je starší než ověřený main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-30T20:20:14+00:00.
-- Read-only živý stav: main=`local_ahead`, deployment=`verified_other_main`, runtime=`connected`.
+- Git před checkpointem: lokální `main` na `2a10d8383135`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `2a10d8383135` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-31T12:17:39+00:00.
+- Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -415,3 +415,15 @@ Bezpecnost / neukladat:
 - Ověření: Cílená regrese prošla 5/5, q90 má původní rozlišení 1672 × 941, je menší než PNG a produkční i zdrojová kopie stránky jsou shodné.
 - Riziko: Volba kvality sama ještě nezapojuje obraz do funkční scény 5.
 - Další krok: Zapojit `scene05_stream_base_q90.webp` jako obrazový základ scény 5 bez přepsání zdrojového PNG.
+
+### Automatický checkpoint 2026-08-31 15:21 CEST
+
+- Pracovní proud: `project-mmtx`
+- Hotovo: Scéna 5 má samostatně otevřitelný responzivní základ s WebP q90 a PNG fallbackem; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: rychlá Cockpit brána syntaxe a whitespace: 6.0 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu
+- Změněné cesty před paměťovým zápisem (5): `Samantha_Agent/tests/test_mmtx_scene05_webp_pilot.py`, `MatysekANJ/web_mmtx/scene05_log_bridge/index.html`, `MatysekANJ/web_mmtx/scene05_log_bridge/styles.css`, `docs/scene05_log_bridge/index.html`, `docs/scene05_log_bridge/styles.css`
+- Commit: `Zapojit q90 základ scény 5`
+- Další krok: Ručně zkontrolovat vzhled a potom připravit první dějový obraz se skupinou zvířátek

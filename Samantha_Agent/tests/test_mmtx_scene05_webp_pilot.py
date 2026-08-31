@@ -60,6 +60,40 @@ class MmtxScene05WebpPilotTests(unittest.TestCase):
         )
         self.assertIn("let selected = 1;", page)
 
+    def test_scene_page_uses_q90_with_png_fallback(self) -> None:
+        page = (DOCS_SCENE / "index.html").read_text(encoding="utf-8")
+
+        self.assertIn(
+            '<source srcset="scene05_stream_base_q90.webp" type="image/webp">',
+            page,
+        )
+        self.assertIn('src="scene05_stream_base.png"', page)
+        self.assertIn('width="1672"', page)
+        self.assertIn('height="941"', page)
+        self.assertNotIn("scene05_stream_base_q85.webp", page)
+
+    def test_scene_page_is_standalone_and_keeps_story_flow_unwired(self) -> None:
+        page = (DOCS_SCENE / "index.html").read_text(encoding="utf-8")
+
+        self.assertIn("Scene 5 · The Log Bridge", page)
+        self.assertIn("Scéna 5 · Most z klád", page)
+        self.assertIn('../scene04_harry_guard_prototype/index.html', page)
+
+        scene_four_script = (
+            REPOSITORY_ROOT
+            / "docs"
+            / "scene04_harry_guard_prototype"
+            / "script.js"
+        ).read_text(encoding="utf-8")
+        self.assertNotIn("scene05_log_bridge", scene_four_script)
+
+    def test_scene_page_and_styles_match_source_mirror(self) -> None:
+        for filename in ("index.html", "styles.css"):
+            self.assertEqual(
+                (DOCS_SCENE / filename).read_bytes(),
+                (MIRROR_SCENE / filename).read_bytes(),
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
