@@ -164,6 +164,7 @@ class CapabilityRegistryTests(unittest.TestCase):
             "scan_mobile_document_inbox",
             "document_vault_status",
             "search_private_documents",
+            "prepare_restricted_bank_document_import",
         ):
             with self.subTest(capability_id=capability_id):
                 record = get_capability(capability_id)

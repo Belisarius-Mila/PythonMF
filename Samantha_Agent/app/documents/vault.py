@@ -1077,6 +1077,9 @@ def apply_document_import_file(
     case_id: str = "",
     document_title: str = "",
     reading_status: str = "",
+    index_text_override: str | None = None,
+    restricted_metadata: dict[str, Any] | None = None,
+    restricted_metadata_kind: str = "",
     vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
     now: datetime | None = None,
 ) -> DocumentImportResult:
@@ -1132,7 +1135,8 @@ def apply_document_import_file(
         destination = document_dir / f"{destination.stem}-{counter}{destination.suffix}"
     shutil.copy2(source, destination)
 
-    due_dates = find_due_date_candidates(extraction.text)
+    indexed_text = extraction.text if index_text_override is None else index_text_override
+    due_dates = find_due_date_candidates(indexed_text)
     explicit_tags = parse_tags(tags)
     suggested_tags = metadata.get("tags", [])
     if not isinstance(suggested_tags, list):
@@ -1156,7 +1160,8 @@ def apply_document_import_file(
             "method": extraction.method,
             "ocr_needed": extraction.ocr_needed,
             "warning": extraction.warning,
-            "indexed_chars": min(len(extraction.text), MAX_INDEX_TEXT_CHARS),
+            "indexed_chars": min(len(indexed_text), MAX_INDEX_TEXT_CHARS),
+            "raw_text_indexed": index_text_override is None,
         },
         "safety_flags": {
             "local_sensitive_archive": True,
@@ -1164,10 +1169,37 @@ def apply_document_import_file(
             "private_text_index": True,
         },
     }
+    if restricted_metadata is not None:
+        metadata_kind = safe_slug(restricted_metadata_kind, default="restricted", limit=50)
+        restricted_metadata_path = document_dir / "restricted_metadata.json"
+        write_json(
+            restricted_metadata_path,
+            {
+                **restricted_metadata,
+                "schema_version": "1",
+                "kind": metadata_kind,
+            },
+        )
+        os.chmod(document_dir, 0o700)
+        os.chmod(destination, 0o600)
+        os.chmod(restricted_metadata_path, 0o600)
+        record["restricted_metadata"] = {
+            "kind": metadata_kind,
+            "stored_path": str(relative_to_project(restricted_metadata_path)),
+            "field_names": sorted(str(field) for field in restricted_metadata),
+        }
+        record["safety_flags"].update(
+            {
+                "restricted_metadata": True,
+                "raw_text_indexed": False,
+            }
+        )
     if safe_reading_status:
         record["reading_status"] = safe_reading_status
     manifest_path = document_dir / "manifest.json"
     write_json(manifest_path, record)
+    if restricted_metadata is not None:
+        os.chmod(manifest_path, 0o600)
 
     index_dir = vault_dir / "index"
     append_jsonl(index_dir / "documents_index.jsonl", record)
@@ -1176,8 +1208,8 @@ def apply_document_import_file(
         {
             "document_id": safe_document_id,
             "stored_path": str(relative_to_project(destination)),
-            "text": extraction.text[:MAX_INDEX_TEXT_CHARS],
-            "text_truncated": len(extraction.text) > MAX_INDEX_TEXT_CHARS,
+            "text": indexed_text[:MAX_INDEX_TEXT_CHARS],
+            "text_truncated": len(indexed_text) > MAX_INDEX_TEXT_CHARS,
         },
     )
     for candidate in due_dates:

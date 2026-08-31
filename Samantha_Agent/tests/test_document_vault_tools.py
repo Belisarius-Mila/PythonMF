@@ -13,11 +13,13 @@ from unittest.mock import patch
 
 from app.documents.tools import (
     apply_document_import_text,
+    apply_restricted_bank_document_import_text,
     apply_mobile_document_final_import_text,
     document_vault_status_text,
     inspect_document_text_text,
     apply_document_reindex_text,
     prepare_document_import_text,
+    prepare_restricted_bank_document_import_text,
     prepare_mobile_document_final_import_text,
     prepare_mobile_document_batch_text,
     process_mobile_document_inbox_text,
@@ -57,6 +59,7 @@ from app.documents.vault import TableExtractionResult
 from app.documents.vault import TextExtractionResult
 from app.documents.vault import enrich_pdf_text_with_tables
 from app.documents.vault import extract_text
+from app.documents.banking import extract_bank_document_metadata
 
 try:
     from PIL import Image
@@ -69,6 +72,119 @@ class SimulatedScanDocuCrash(BaseException):
 
 
 class DocumentVaultToolsTests(unittest.TestCase):
+    RESTRICTED_BANK_TEXT = (
+        "MONETA Money Bank, a.s. Parametry sjednanych produktu v ramci uctu "
+        "Bezny ucet v EUR pres Smart Banku dne: 29.08.2026\n"
+        "Cislo uctu: 123456789/0600\n"
+        "IBAN uctu: CZ65 0800 0000 1920 0014 5399\n"
+        "Mena uctu: EUR\n"
+        "SWIFT (BIC): AGBACZPP\n"
+        "Datum zalozeni uctu: 29.08.2026\n"
+        "Rodne cislo: 800101/1234\n"
+        "Heslo pro aktivaci PK: TEST-SECRET-7788\n"
+    )
+
+    def test_restricted_bank_parser_keeps_only_allowed_metadata_fields(self) -> None:
+        metadata = extract_bank_document_metadata(self.RESTRICTED_BANK_TEXT)
+
+        self.assertTrue(metadata.complete)
+        self.assertEqual(metadata.account_number, "123456789/0600")
+        self.assertEqual(metadata.iban, "CZ6508000000192000145399")
+        self.assertEqual(metadata.bic_swift, "AGBACZPP")
+        self.assertEqual(metadata.document_date, "2026-08-29")
+        serialized = json.dumps(metadata.restricted_record(), ensure_ascii=False)
+        self.assertNotIn("800101", serialized)
+        self.assertNotIn("TEST-SECRET", serialized)
+
+    def test_restricted_bank_preview_is_read_only_and_masks_identifiers(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            source = root / "bankovni-dokument.png"
+            source.write_bytes(b"fake-png")
+            vault = root / "documents"
+            extraction = TextExtractionResult(
+                text=self.RESTRICTED_BANK_TEXT,
+                method="test-ocr",
+                ocr_needed=False,
+            )
+
+            with patch("app.documents.banking.extract_text", return_value=extraction):
+                result = prepare_restricted_bank_document_import_text(
+                    source_path=str(source),
+                    vault_dir=vault,
+                )
+
+            self.assertIn("restricted importu", result)
+            self.assertIn("****6789/0600", result)
+            self.assertIn("****5399", result)
+            self.assertNotIn("123456789/0600", result)
+            self.assertNotIn("CZ6508000000192000145399", result)
+            self.assertNotIn("800101", result)
+            self.assertNotIn("TEST-SECRET", result)
+            self.assertFalse(vault.exists())
+
+    def test_restricted_bank_import_requires_confirmation(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            source = root / "bankovni-dokument.png"
+            source.write_bytes(b"fake-png")
+            vault = root / "documents"
+
+            result = apply_restricted_bank_document_import_text(
+                source_path=str(source),
+                vault_dir=vault,
+            )
+
+            self.assertIn("samostatne potvrzeni", result)
+            self.assertFalse(vault.exists())
+
+    def test_confirmed_restricted_bank_import_separates_full_and_search_metadata(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            source = root / "bankovni-dokument.png"
+            source.write_bytes(b"fake-png")
+            vault = root / "documents"
+            extraction = TextExtractionResult(
+                text=self.RESTRICTED_BANK_TEXT,
+                method="test-ocr",
+                ocr_needed=False,
+            )
+
+            with patch("app.documents.banking.extract_text", return_value=extraction), patch(
+                "app.documents.vault.extract_text",
+                return_value=extraction,
+            ):
+                result = apply_restricted_bank_document_import_text(
+                    source_path=str(source),
+                    document_id="moneta-eur-test",
+                    user_confirmed=True,
+                    confirmation_text=(
+                        "Potvrzuji, uloz bankovni dokument bankovni-dokument.png "
+                        "do oblasti banking v restricted rezimu."
+                    ),
+                    vault_dir=vault,
+                )
+
+            self.assertIn("Stav: ulozeno", result)
+            document_dir = vault / "vault" / "banking" / "moneta-eur-test"
+            restricted = json.loads(
+                (document_dir / "restricted_metadata.json").read_text(encoding="utf-8")
+            )
+            manifest = json.loads((document_dir / "manifest.json").read_text(encoding="utf-8"))
+            text_index = (vault / "index" / "text_index.jsonl").read_text(encoding="utf-8")
+            self.assertEqual(restricted["account_number"], "123456789/0600")
+            self.assertEqual(restricted["iban"], "CZ6508000000192000145399")
+            self.assertNotIn("800101", json.dumps(restricted))
+            self.assertNotIn("TEST-SECRET", json.dumps(restricted))
+            self.assertFalse(manifest["text_extraction"]["raw_text_indexed"])
+            self.assertTrue(manifest["safety_flags"]["restricted_metadata"])
+            self.assertNotIn("123456789/0600", text_index)
+            self.assertNotIn("CZ6508000000192000145399", text_index)
+            self.assertNotIn("800101", text_index)
+            self.assertNotIn("TEST-SECRET", text_index)
+            self.assertIn("ucet konci 6789", text_index)
+            self.assertIn("IBAN konci 5399", text_index)
+
     def test_normalize_domain_preserves_custom_manual_domain(self) -> None:
         self.assertEqual(normalize_domain("ČEZ smlouvy"), "cez-smlouvy")
         self.assertEqual(normalize_domain("energie"), "energy")

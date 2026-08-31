@@ -21,7 +21,7 @@ class CapabilityAuditTests(unittest.TestCase):
             text,
         )
         self.assertIn("High-risk capability records: 16", text)
-        self.assertIn("Registry-covered agent tools: 83/", text)
+        self.assertIn("Registry-covered agent tools: 85/85", text)
         self.assertIn("Capability registry: OK", text)
         self.assertIn("Critical/action-write missing records: 0", text)
         self.assertIn("Action/review missing records: 0", text)

@@ -96,11 +96,13 @@ from app.media import apply_zmenseni_obrazku, preview_zmenseni_obrazku
 from app.documents import (
     apply_document_import,
     apply_document_reindex,
+    apply_restricted_bank_document_import,
     apply_mobile_document_final_import,
     document_vault_status,
     format_document_inbox_reminder,
     inspect_document_text,
     prepare_document_import,
+    prepare_restricted_bank_document_import,
     prepare_mobile_document_final_import,
     prepare_mobile_document_batch,
     prepare_next_scandocu_document,
@@ -627,6 +629,11 @@ obsahovat nazev PDF, cilovou oblast a jasny souhlas s ulozenim.
 jen po samostatnem potvrzeni v aktualni Milove zprave; potvrzeni musi obsahovat
 nazev souboru, cilovou oblast a jasny souhlas s ulozenim dokumentu. Dokumenty,
 extrahovany text a indexy nikdy neukladej do memory ani do gitu.
+Pro bankovni smlouvy s cislem uctu, IBANem nebo jinym citlivym udajem pouzij
+nejdrive read-only `prepare_restricted_bank_document_import`. Finalni
+`apply_restricted_bank_document_import` vyzaduje presnou potvrzovaci vetu z
+nahledu; plne bankovni udaje ulozi jen do restricted metadat a do vyhledavani
+vlozi pouze maskovany souhrn bez raw OCR.
 `search_private_documents` pouzij pro hledani v lokalnim private indexu; vraci
 jen metadata a kratke snippety, ne cele dokumenty. `save_document_due_reminder`
 pouzij az jako samostatny potvrzeny krok z jednoho overeneho due date kandidata.
@@ -910,6 +917,7 @@ LOKALNI PAMET:
             scan_mobile_document_inbox,
             document_vault_status,
             prepare_document_import,
+            prepare_restricted_bank_document_import,
             apply_document_reindex,
             prepare_mobile_document_batch,
             prepare_next_scandocu_document,
@@ -918,6 +926,7 @@ LOKALNI PAMET:
             apply_mobile_document_final_import,
             inspect_document_text,
             apply_document_import,
+            apply_restricted_bank_document_import,
             search_private_documents,
             save_document_due_reminder,
             prepare_document_print_job,

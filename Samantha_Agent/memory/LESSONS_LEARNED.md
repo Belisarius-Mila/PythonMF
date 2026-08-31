@@ -354,3 +354,16 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   `keywords[]`. Ověřit obě cesty unit testy a jediným syntetickým API smoke bez
   soukromého audia; u klíčových slov následně hlídat i možné vložení
   nevysloveného termínu.
+
+### LL-028 — Citlivý dokument nesmí automaticky zdědit plný OCR index
+
+- Problém: Standardní import dokumentu ukládá extrahovaný text do soukromého
+  fulltextového indexu. U bankovní smlouvy by tím zbytečně duplikoval rodné
+  číslo, adresu a aktivační údaj, přestože pro hledání stačí bezpečný souhrn.
+- Typ: opakující se
+- Řešení nalezeno: 31082026
+- Řešení: Pro citlivé bankovní dokumenty použít restricted import. Originál
+  zachovat v private vaultu, úplné účetní identifikátory uložit jen do
+  samostatných restricted metadat a do běžného indexu zapsat pouze maskovaný
+  text. Surový OCR text, rodné číslo, adresu a aktivační údaje neindexovat ani
+  neduplikovat do metadat.

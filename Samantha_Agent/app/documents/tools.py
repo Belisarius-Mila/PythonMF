@@ -4,6 +4,10 @@ from pathlib import Path
 
 from agents import function_tool
 
+from .banking import (
+    apply_restricted_bank_document_import_summary,
+    prepare_restricted_bank_document_import_summary,
+)
 from .scandocu import (
     DEFAULT_DOWNLOADS_DIR,
     prepare_next_scandocu_pdf,
@@ -180,6 +184,28 @@ def apply_document_import(
         document_id=document_id,
         case_id=case_id,
         document_title=document_title,
+        user_confirmed=user_confirmed,
+        confirmation_text=confirmation_text,
+    )
+
+
+@function_tool
+def prepare_restricted_bank_document_import(source_path: str) -> str:
+    """Preview a bank document import without exposing full identifiers or writing files."""
+    return prepare_restricted_bank_document_import_text(source_path=source_path)
+
+
+@function_tool
+def apply_restricted_bank_document_import(
+    source_path: str,
+    document_id: str = "",
+    user_confirmed: bool = False,
+    confirmation_text: str = "",
+) -> str:
+    """Import a confirmed bank document with restricted metadata and redacted search text."""
+    return apply_restricted_bank_document_import_text(
+        source_path=source_path,
+        document_id=document_id,
         user_confirmed=user_confirmed,
         confirmation_text=confirmation_text,
     )
@@ -579,6 +605,32 @@ def apply_document_import_text(
         f"Stav: {status}. Document ID: {result.document_id}. "
         f"Dokument: {result.destination}. Manifest: {result.manifest}. "
         f"{result.message}"
+    )
+
+
+def prepare_restricted_bank_document_import_text(
+    source_path: str,
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+) -> str:
+    return prepare_restricted_bank_document_import_summary(
+        source_path=source_path,
+        vault_dir=vault_dir,
+    )
+
+
+def apply_restricted_bank_document_import_text(
+    source_path: str,
+    document_id: str = "",
+    user_confirmed: bool = False,
+    confirmation_text: str = "",
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+) -> str:
+    return apply_restricted_bank_document_import_summary(
+        source_path=source_path,
+        document_id=document_id,
+        user_confirmed=user_confirmed,
+        confirmation_text=confirmation_text,
+        vault_dir=vault_dir,
     )
 
 

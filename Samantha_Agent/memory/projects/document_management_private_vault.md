@@ -598,3 +598,29 @@ Dalsi krok:
 - Az bude prostor pro terminalovy test, projit jeden skutecny e-mail s PDF a
   JPEG prilohou: nahled, ulozeni do vaultu a doplneni metadat ve ScanDocu
   Review.
+
+## Restricted bankovni dokumenty 2026-08-31
+
+Pro bankovni smlouvy a parametry uctu je pripraven samostatny potvrzovany rezim:
+
+- `prepare_restricted_bank_document_import` provede read-only OCR a ukaze pouze
+  maskovany nahled banky, produktu, meny, uctu, IBANu, BIC a data dokumentu;
+- `apply_restricted_bank_document_import` vyzaduje presnou potvrzovaci vetu a
+  ulozi original do `data/private/documents/vault/banking/`;
+- plne cislo uctu a IBAN patri jen do `restricted_metadata.json` s omezenymi
+  pristupovymi pravy;
+- obecny index obsahuje jen maskovany souhrn a raw OCR se do
+  `text_index.jsonl` neuklada;
+- rodne cislo, adresa ani aktivacni udaje se do metadat neduplikuji;
+- zdrojovy soubor zustava zachovany a nema se automaticky mazat ani presouvat.
+
+Prvni realny obrazkovy dokument MONETA prosel read-only OCR nahledem. Povinna
+bankovni pole byla nalezena a maskovana; datum zalozeni uctu zustalo poctive
+`nezjisteno`. Finalni private import ceka na samostatne potvrzeni Mily.
+
+Technicky dukaz:
+
+- cilene dokumentove a capability testy: 102/102;
+- plna Cockpit quality gate: 1511/1511;
+- skutecne bankovni hodnoty ani OCR obsah nejsou soucasti gitu nebo projektove
+  pameti.
