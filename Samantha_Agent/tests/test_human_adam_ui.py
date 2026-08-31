@@ -26,6 +26,7 @@ class HumanAdamUiTests(unittest.TestCase):
             "threadRotationAuditBtn",
             "threadRotationBtn",
             "chat",
+            "chatEnd",
             "messageInput",
             "writeIntentBtn",
             "sendBtn",
@@ -864,10 +865,30 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("threadRotationPanel.hidden = true;", source)
         self.assertIn("resetThreadRotationState();", source)
         self.assertIn("showProfileSwitchFailure", source)
+        self.assertIn("renderStatus(payload, {forceChatEnd:true});", source)
         self.assertIn('<label for="profileSelect">Pracovní proud</label>', HUMAN_ADAM_HTML)
         self.assertIn('notice.scrollIntoView({block:"nearest",behavior:"smooth"});', HUMAN_ADAM_HTML)
         self.assertIn('profileSelect.addEventListener("change", syncControls);', HUMAN_ADAM_HTML)
         self.assertIn('profileSwitchBtn.addEventListener("click", switchProfile);', HUMAN_ADAM_HTML)
+
+    def test_profile_switch_scrolls_to_stable_chat_end_without_hijacking_reading(self) -> None:
+        render_start = HUMAN_ADAM_HTML.index("function isChatNearEnd()")
+        render_end = HUMAN_ADAM_HTML.index("function workspaceRequiresWorkDetail", render_start)
+        render_source = HUMAN_ADAM_HTML[render_start:render_end]
+        status_start = HUMAN_ADAM_HTML.index("function renderStatus(payload)")
+        status_end = HUMAN_ADAM_HTML.index("function renderDevelopmentBadge", status_start)
+        status_source = HUMAN_ADAM_HTML[status_start:status_end]
+
+        self.assertIn('id="chatEnd" aria-hidden="true"', HUMAN_ADAM_HTML)
+        self.assertIn('const chatEnd = document.getElementById("chatEnd");', HUMAN_ADAM_HTML)
+        self.assertIn("distance <= 180", render_source)
+        self.assertIn("Boolean(options.forceScrollToEnd) || isChatNearEnd()", render_source)
+        self.assertIn('chatEnd.scrollIntoView({block:"end",inline:"nearest",behavior:"auto"});', render_source)
+        self.assertGreaterEqual(render_source.count("requestAnimationFrame"), 2)
+        self.assertIn("window.setTimeout(applyEndPosition, 120);", render_source)
+        self.assertIn('image.addEventListener("load", scrollChatToEnd, {once:true});', render_source)
+        self.assertIn("renderSession(session, {forceScrollToEnd:forceChatEnd});", status_source)
+        self.assertIn("void loadImageCandidates({forceChatEnd});", status_source)
 
     def test_uninitialized_lazy_tvbcp_is_marked_read_only(self) -> None:
         load_start = HUMAN_ADAM_HTML.index("async function loadTvbcp()")
@@ -1433,7 +1454,9 @@ class HumanAdamUiTests(unittest.TestCase):
         send_end = HUMAN_ADAM_HTML.index('connectBtn.addEventListener("click", connect);', send_start)
         send_source = HUMAN_ADAM_HTML[send_start:send_end]
         success = send_source.index("stopResultWatch();")
-        render = send_source.index("renderSession(payload.session);")
+        render = send_source.index(
+            "renderSession(payload.session, {forceScrollToEnd:true});"
+        )
 
         self.assertLess(success, render)
         self.assertIn('notice.textContent = "Výsledek byl načten bez opakovaného odeslání pokynu.";', HUMAN_ADAM_HTML)
@@ -1458,7 +1481,9 @@ class HumanAdamUiTests(unittest.TestCase):
             render_source,
         )
         self.assertLess(
-            send_source.index("renderSession(payload.session);"),
+            send_source.index(
+                "renderSession(payload.session, {forceScrollToEnd:true});"
+            ),
             send_source.index("renderTurnState(payload.session);"),
         )
         self.assertNotIn("api(", timer_source)
@@ -1566,7 +1591,10 @@ class HumanAdamUiTests(unittest.TestCase):
             clear,
         )
         self.assertIn("runSendUiBestEffort(syncControls);", send_source)
-        self.assertIn("renderSession(optimistic);", send_source)
+        self.assertIn(
+            "renderSession(optimistic, {forceScrollToEnd:true});",
+            send_source,
+        )
         self.assertNotIn("input.value = text", send_source)
         self.assertNotIn('input.value = ""', send_source)
         self.assertIn('function clearMessageInput() {\n    input.value = "";\n    input.defaultValue = "";', HUMAN_ADAM_HTML)

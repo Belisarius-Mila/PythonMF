@@ -210,6 +210,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   </header>
   <div id="notice" role="status" aria-live="polite"></div>
   <section id="chat" aria-label="Konverzace Human–Adam"></section>
+  <div id="chatEnd" aria-hidden="true"></div>
   <form class="composer" id="composer" autocomplete="off">
     <textarea id="messageInput" maxlength="12000" autocomplete="off" placeholder="Napiš Adamovi…" aria-label="Zpráva pro Adama"></textarea>
     <div class="compose-actions">
@@ -406,6 +407,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
 </main>
 <script>
   const chat = document.getElementById("chat");
+  const chatEnd = document.getElementById("chatEnd");
   const notice = document.getElementById("notice");
   const stepCompletionReceipt = document.getElementById("stepCompletionReceipt");
   const deploymentReceipt = document.getElementById("deploymentReceipt");
@@ -1268,9 +1270,11 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   }
 
   async function loadImageCandidates() {
+    const options = arguments.length > 0 && arguments[0] ? arguments[0] : {};
+    const forceChatEnd = Boolean(options.forceChatEnd);
     if (!imageGenerationEnabled) {
       imageCandidatesByMessage = new Map();
-      if (lastSession) renderSession(lastSession);
+      if (lastSession) renderSession(lastSession, {forceScrollToEnd:forceChatEnd});
       return;
     }
     if (imageCandidatesLoading) return;
@@ -1289,7 +1293,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         next.set(messageId, candidates);
       }
       imageCandidatesByMessage = next;
-      if (lastSession) renderSession(lastSession);
+      if (lastSession) renderSession(lastSession, {forceScrollToEnd:forceChatEnd});
     } catch (error) {
       notice.textContent = `Obrázkové karty nelze načíst: ${error.message}`;
     } finally {
@@ -1453,7 +1457,25 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     return node;
   }
 
+  function isChatNearEnd() {
+    const root = document.documentElement;
+    const distance = root.scrollHeight - (window.scrollY + window.innerHeight);
+    return distance <= 180;
+  }
+
+  function scrollChatToEnd() {
+    const applyEndPosition = () => {
+      chatEnd.scrollIntoView({block:"end",inline:"nearest",behavior:"auto"});
+    };
+    requestAnimationFrame(() => {
+      requestAnimationFrame(applyEndPosition);
+    });
+    window.setTimeout(applyEndPosition, 120);
+  }
+
   function renderSession(session) {
+    const options = arguments.length > 1 && arguments[1] ? arguments[1] : {};
+    const keepAtEnd = Boolean(options.forceScrollToEnd) || isChatNearEnd();
     stopAnswerSpeech(false);
     lastSession = session || null;
     chat.replaceChildren();
@@ -1473,7 +1495,12 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       empty.style.color = "var(--muted)";
       chat.appendChild(empty);
     }
-    window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});
+    if (keepAtEnd) {
+      scrollChatToEnd();
+      for (const image of chat.querySelectorAll("img")) {
+        if (!image.complete) image.addEventListener("load", scrollChatToEnd, {once:true});
+      }
+    }
   }
 
   function workspaceRequiresWorkDetail(workspace) {
@@ -1589,6 +1616,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   }
 
   function renderStatus(payload) {
+    const options = arguments.length > 1 && arguments[1] ? arguments[1] : {};
+    const forceChatEnd = Boolean(options.forceChatEnd);
     renderWorkstreams(payload);
     const session = payload && payload.session ? payload.session : null;
     const connected = Boolean(session && session.connected && payload.runtime && payload.runtime.reachable);
@@ -1642,8 +1671,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     deploymentReceipt.classList.toggle("stale", Boolean(deployment && !deploymentCurrent));
     deploymentReceipt.hidden = !deployment;
     renderTurnState(session);
-    renderSession(session);
-    void loadImageCandidates();
+    renderSession(session, {forceScrollToEnd:forceChatEnd});
+    void loadImageCandidates({forceChatEnd});
   }
 
   function renderDevelopmentBadge(semaphore) {
@@ -1802,7 +1831,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       });
       if (!payload.ok) throw new Error(payload.message || "Přepnutí profilu selhalo.");
       resetThreadRotationState();
-      renderStatus(payload);
+      renderStatus(payload, {forceChatEnd:true});
       notice.textContent = `Aktivní pracovní proud: ${activeWorkstreamLabel}.`;
     } catch (error) {
       showProfileSwitchFailure(`Pracovní proud nebyl přepnut: ${error.message}`);
@@ -1933,7 +1962,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     try {
       const payload = await api("/api/human-adam/connect", {method:"POST", body:"{}"});
       if (!payload.ok) throw new Error(payload.message || "Připojení selhalo.");
-      renderStatus(payload);
+      renderStatus(payload, {forceChatEnd:true});
       notice.textContent = payload.workspace_synced
         ? "Workspace byl bezpečně aktualizovaný z main a kanonická relace je připravená."
         : "Kanonická relace je připravená.";
@@ -3210,7 +3239,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       ? {...lastSession, turn_busy:true, active_turn:{client_message_id:clientId,started_at:sentAt}, messages:[...(lastSession.messages || []), pendingMessage]}
       : {turn_busy:true, active_turn:{client_message_id:clientId,started_at:sentAt}, messages:[pendingMessage]};
     runSendUiBestEffort(() => {
-      renderSession(optimistic);
+      renderSession(optimistic, {forceScrollToEnd:true});
       renderTurnState(optimistic);
       notice.textContent = `Odesláno ${formatTime(sentAt)} · Adam pracuje…`;
     });
@@ -3238,7 +3267,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     if (payload && payload.ok) {
       runSendUiBestEffort(() => {
         stopResultWatch();
-        renderSession(payload.session);
+        renderSession(payload.session, {forceScrollToEnd:true});
         renderTurnState(payload.session);
         notice.textContent = "Odpověď doručena a potvrzena.";
         playCompletionMediaSound();

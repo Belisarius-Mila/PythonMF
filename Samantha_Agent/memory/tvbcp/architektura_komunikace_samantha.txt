@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-31 12:25 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-31 14:01 CEST
 
 ### Hotovo
-- Scéna 5 má zvolenou lehčí produkční kvalitu q90 a obecné pravidlo optimalizace obrazů je kanonicky zaznamenané
+- Nově otevřený pracovní proud se spolehlivě zobrazí u poslední zprávy, aniž běžné obnovení rušilo čtení historie
 
 ### Otevřeno
 - Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
@@ -14,19 +14,18 @@
 - Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
 
 ### Další krok
-- Zapojit WebP q90 jako obrazový základ funkční scény 5
+- Samostatně nasadit změnu a ověřit přepnutí dlouhého proudu na Linux PC
 
 ### Rozhodnutí
-- Všechny obrazy scén MMTX se před produkcí zmenšují; pro základ potoka scény 5 je vybrán WebP q90
+- V tomto kroku nebylo přijato nové kanonické rozhodnutí.
 
 ### Navrhované další kroky
-- Používat stejné nastavení pro další obrazy scény 5
-- Starší scény optimalizovat po samostatných ověřených dávkách
+- Po nasazení krátce zopakovat stejné ověření na iPhonu
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `f16ec476ca30`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `bee5ad5c4c74` · je starší než ověřený main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-31T10:02:01+00:00.
+- Git před checkpointem: lokální `main` na `f2f529e82080`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `64f8a68a9cab` · je starší než ověřený main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-31T10:38:56+00:00.
 - Read-only živý stav: main=`local_ahead`, deployment=`verified_other_main`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -4297,5 +4296,31 @@ Navrhované další kroky:
 
 Technický důkaz:
 - rychlá Cockpit brána syntaxe a whitespace: 7.4 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
+- Pracovní proud: `layer-human-adam-development`.
+- Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_other_main`, runtime=`connected`.
+
+### 2026-08-31 14:01 CEST – Nově otevřený pracovní proud se spolehlivě zobrazí u poslední zprávy, aniž běžné obnovení rušilo čtení historie
+
+Hotovo:
+- Nově otevřený pracovní proud se spolehlivě zobrazí u poslední zprávy, aniž běžné obnovení rušilo čtení historie
+
+Otevřeno:
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
+
+Rizika:
+- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
+
+Rozhodnutí:
+- V tomto kroku nebylo přijato nové kanonické rozhodnutí.
+
+Další krok:
+- Samostatně nasadit změnu a ověřit přepnutí dlouhého proudu na Linux PC
+
+Navrhované další kroky:
+- Po nasazení krátce zopakovat stejné ověření na iPhonu
+
+Technický důkaz:
+- rychlá Cockpit brána syntaxe a whitespace: 6.9 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `layer-human-adam-development`.
 - Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_other_main`, runtime=`connected`.

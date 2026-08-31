@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-31 12:25 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-31 14:01 CEST
 
 ### Hotovo
-- Scéna 5 má zvolenou lehčí produkční kvalitu q90 a obecné pravidlo optimalizace obrazů je kanonicky zaznamenané
+- Nově otevřený pracovní proud se spolehlivě zobrazí u poslední zprávy, aniž běžné obnovení rušilo čtení historie
 
 ### Otevřeno
 - Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
@@ -14,19 +14,18 @@
 - Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
 
 ### Další krok
-- Zapojit WebP q90 jako obrazový základ funkční scény 5
+- Samostatně nasadit změnu a ověřit přepnutí dlouhého proudu na Linux PC
 
 ### Rozhodnutí
-- Všechny obrazy scén MMTX se před produkcí zmenšují; pro základ potoka scény 5 je vybrán WebP q90
+- V tomto kroku nebylo přijato nové kanonické rozhodnutí.
 
 ### Navrhované další kroky
-- Používat stejné nastavení pro další obrazy scény 5
-- Starší scény optimalizovat po samostatných ověřených dávkách
+- Po nasazení krátce zopakovat stejné ověření na iPhonu
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `f16ec476ca30`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `bee5ad5c4c74` · je starší než ověřený main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-31T10:02:01+00:00.
+- Git před checkpointem: lokální `main` na `f2f529e82080`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `64f8a68a9cab` · je starší než ověřený main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-31T10:38:56+00:00.
 - Read-only živý stav: main=`local_ahead`, deployment=`verified_other_main`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -2817,3 +2816,15 @@ Technický důkaz:
 - Změněné cesty před paměťovým zápisem (5): `MatysekANJ/web_mmtx/scene05_log_bridge/webp_quality_pilot.html`, `Samantha_Agent/memory/handoffs/workstreams/project-mmtx.md`, `Samantha_Agent/memory/tvbcp/workstreams/project-mmtx.md`, `Samantha_Agent/tests/test_mmtx_scene05_webp_pilot.py`, `docs/scene05_log_bridge/webp_quality_pilot.html`
 - Commit: `Vybrat WebP q90 pro scénu 5`
 - Další krok: Zapojit WebP q90 jako obrazový základ funkční scény 5
+
+### Automatický checkpoint 2026-08-31 14:01 CEST
+
+- Pracovní proud: `layer-human-adam-development`
+- Hotovo: Nově otevřený pracovní proud se spolehlivě zobrazí u poslední zprávy, aniž běžné obnovení rušilo čtení historie
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.; Lokální commity čekají na samostatný denní GitHub balíček.
+- Rizika: Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: rychlá Cockpit brána syntaxe a whitespace: 6.9 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu
+- Změněné cesty před paměťovým zápisem (2): `Samantha_Agent/app/communication/human_adam_ui.py`, `Samantha_Agent/tests/test_human_adam_ui.py`
+- Commit: `Opravit posun chatu po přepnutí proudu`
+- Další krok: Samostatně nasadit změnu a ověřit přepnutí dlouhého proudu na Linux PC
