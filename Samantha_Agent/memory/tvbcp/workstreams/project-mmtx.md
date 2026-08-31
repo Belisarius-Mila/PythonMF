@@ -1,34 +1,35 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-31 15:21 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-31 15:54 CEST
 
 ### Hotovo
-- Scéna 5 má samostatně otevřitelný responzivní základ s WebP q90 a PNG fallbackem
+- První obraz ukazuje pět kamarádů u rozvodněného potoka a Logana ve vodě; připravena je lehká q90 varianta
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
 - Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
 
 ### Rizika
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Ručně zkontrolovat vzhled a potom připravit první dějový obraz se skupinou zvířátek
+- Potvrdit obraz a zapojit jej jako první dějový stav scény 5
 
 ### Rozhodnutí
 - V tomto kroku nebylo přijato nové kanonické rozhodnutí.
 
 ### Navrhované další kroky
-- Doplnit první dějový obraz a následně interakci se třemi kládami
-- Dialogy a pevná MP3 přidat až s potvrzeným dějovým stavem
-- Do hlavního příběhu scénu napojit až po dokončení prvního hratelného úseku
+- Doplnit úvodní dialog po jednotlivých větách
+- Připravit pevná anglická a česká MP3
+- Potom vytvořit interakci se třemi kládami
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `2a10d8383135`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `2a10d8383135` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-31T12:17:39+00:00.
-- Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
+- Git před checkpointem: lokální `main` na `3ea812df99e5`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `3ea812df99e5` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-31T13:42:14+00:00.
+- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -858,3 +859,32 @@ Technický důkaz:
 - rychlá Cockpit brána syntaxe a whitespace: 6.0 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `project-mmtx`.
 - Read-only živý stav při checkpointu: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
+
+### 2026-08-31 15:54 CEST – První obraz ukazuje pět kamarádů u rozvodněného potoka a Logana ve vodě; připravena je lehká q90 varianta
+
+Hotovo:
+- První obraz ukazuje pět kamarádů u rozvodněného potoka a Logana ve vodě; připravena je lehká q90 varianta
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+
+Otevřeno:
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
+
+Rizika:
+- Žádné další doložené provozní riziko.
+
+Rozhodnutí:
+- V tomto kroku nebylo přijato nové kanonické rozhodnutí.
+
+Další krok:
+- Potvrdit obraz a zapojit jej jako první dějový stav scény 5
+
+Navrhované další kroky:
+- Doplnit úvodní dialog po jednotlivých větách
+- Připravit pevná anglická a česká MP3
+- Potom vytvořit interakci se třemi kládami
+
+Technický důkaz:
+- rychlá Cockpit brána syntaxe a whitespace: 5.3 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
+- Pracovní proud: `project-mmtx`.
+- Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.

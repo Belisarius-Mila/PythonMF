@@ -94,6 +94,36 @@ class MmtxScene05WebpPilotTests(unittest.TestCase):
                 (MIRROR_SCENE / filename).read_bytes(),
             )
 
+    def test_first_story_image_preserves_source_and_production_dimensions(self) -> None:
+        source = DOCS_SCENE / "assets" / "scene05_arrival_logan_01_source.png"
+        production_png = DOCS_SCENE / "scene05_arrival_logan_01.png"
+        production_webp = DOCS_SCENE / "scene05_arrival_logan_01_q90.webp"
+
+        with Image.open(source) as image:
+            self.assertEqual(image.size, (1671, 941))
+            self.assertEqual(image.format, "PNG")
+
+        for path, expected_format in (
+            (production_png, "PNG"),
+            (production_webp, "WEBP"),
+        ):
+            with Image.open(path) as image:
+                self.assertEqual(image.size, EXPECTED_SIZE)
+                self.assertEqual(image.format, expected_format)
+
+        self.assertLess(production_webp.stat().st_size, production_png.stat().st_size)
+
+    def test_first_story_image_matches_source_mirror(self) -> None:
+        for filename in (
+            "assets/scene05_arrival_logan_01_source.png",
+            "scene05_arrival_logan_01.png",
+            "scene05_arrival_logan_01_q90.webp",
+        ):
+            self.assertEqual(
+                (DOCS_SCENE / filename).read_bytes(),
+                (MIRROR_SCENE / filename).read_bytes(),
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

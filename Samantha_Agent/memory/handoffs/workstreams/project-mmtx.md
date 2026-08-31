@@ -1,34 +1,35 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-31 15:21 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-31 15:54 CEST
 
 ### Hotovo
-- Scéna 5 má samostatně otevřitelný responzivní základ s WebP q90 a PNG fallbackem
+- První obraz ukazuje pět kamarádů u rozvodněného potoka a Logana ve vodě; připravena je lehká q90 varianta
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
 - Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
 
 ### Rizika
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Ručně zkontrolovat vzhled a potom připravit první dějový obraz se skupinou zvířátek
+- Potvrdit obraz a zapojit jej jako první dějový stav scény 5
 
 ### Rozhodnutí
 - V tomto kroku nebylo přijato nové kanonické rozhodnutí.
 
 ### Navrhované další kroky
-- Doplnit první dějový obraz a následně interakci se třemi kládami
-- Dialogy a pevná MP3 přidat až s potvrzeným dějovým stavem
-- Do hlavního příběhu scénu napojit až po dokončení prvního hratelného úseku
+- Doplnit úvodní dialog po jednotlivých větách
+- Připravit pevná anglická a česká MP3
+- Potom vytvořit interakci se třemi kládami
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `2a10d8383135`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `2a10d8383135` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-31T12:17:39+00:00.
-- Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
+- Git před checkpointem: lokální `main` na `3ea812df99e5`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `3ea812df99e5` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-31T13:42:14+00:00.
+- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -427,3 +428,15 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (5): `Samantha_Agent/tests/test_mmtx_scene05_webp_pilot.py`, `MatysekANJ/web_mmtx/scene05_log_bridge/index.html`, `MatysekANJ/web_mmtx/scene05_log_bridge/styles.css`, `docs/scene05_log_bridge/index.html`, `docs/scene05_log_bridge/styles.css`
 - Commit: `Zapojit q90 základ scény 5`
 - Další krok: Ručně zkontrolovat vzhled a potom připravit první dějový obraz se skupinou zvířátek
+
+### Automatický checkpoint 2026-08-31 15:54 CEST
+
+- Pracovní proud: `project-mmtx`
+- Hotovo: První obraz ukazuje pět kamarádů u rozvodněného potoka a Logana ve vodě; připravena je lehká q90 varianta; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.; Lokální commity čekají na samostatný denní GitHub balíček.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: rychlá Cockpit brána syntaxe a whitespace: 5.3 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu
+- Změněné cesty před paměťovým zápisem (7): `Samantha_Agent/tests/test_mmtx_scene05_webp_pilot.py`, `MatysekANJ/web_mmtx/scene05_log_bridge/assets/scene05_arrival_logan_01_source.png`, `MatysekANJ/web_mmtx/scene05_log_bridge/scene05_arrival_logan_01.png`, `MatysekANJ/web_mmtx/scene05_log_bridge/scene05_arrival_logan_01_q90.webp`, `docs/scene05_log_bridge/assets/scene05_arrival_logan_01_source.png`, `docs/scene05_log_bridge/scene05_arrival_logan_01.png`, `docs/scene05_log_bridge/scene05_arrival_logan_01_q90.webp`
+- Commit: `Přidat první dějový obraz scény 5`
+- Další krok: Potvrdit obraz a zapojit jej jako první dějový stav scény 5
