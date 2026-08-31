@@ -2808,3 +2808,14 @@ Technický důkaz:
 - Navrhované další kroky: `gpt-live-transcribe` nepřidávat, dokud nebude samostatně požadovaný průběžný živý přepis; současný tok vždy nejprve dokončí nahrávku.
 - Ověření: 23/23 cílených testů; syntetický český API smoke vrátil přesný text modelem `gpt-transcribe` za 2,6 s; úplná Cockpit Quality Gate prošla 1507/1507 za 458,4 s; `git diff --check` je čistý.
 - Bezpečnost / neukládat: API smoke obsahoval jen syntetickou větu bez soukromých údajů. Audio vzniklo pouze v dočasném adresáři a po testu bylo odstraněno. Token ani API klíč se nevypsal a nepatří do Gitu.
+
+### Nasazení 2026-08-31 12:04 CEST – gpt-transcribe-migration běží v Cockpitu
+
+- Pracovní proud: `layer-human-adam-development`
+- Hotovo: Commit `bee5ad5` byl řízeně nasazen bez GitHub pushnutí. Před restartem prošla rychlá nasazovací brána, nový Cockpit nahradil PID 7920 procesem 36363 a běží s očekávaným kódovým otiskem `a254773e73d02854`. Serverová verifikace potvrdila nový proces, oba zarovnané workspaces a smoke 5/5.
+- Rozhodnutí: Nasazovací účtenka patří kanonickému proudu Human–Adam; před nasazením byl proto čistý a nečinný Cockpit přepnut z MMTX na `layer-human-adam-development`. Tři tehdejší lokální commity zůstaly nepushnuté v denním GitHub balíčku.
+- Rizika: Skutečný Mílův hlas zatím po migraci ověřen nebyl. `keywords` mohou ovlivnit přepis, proto je při ručním retestu třeba hlídat i nevyslovené termíny.
+- Další krok: V Human–Adam jednou nahrát krátký český pokyn, zkontrolovat přepis v editoru a odeslat jej až ručně.
+- Navrhované další kroky: Pokud bude přepis přesný, migraci provozně uzavřít bez zavádění `gpt-live-transcribe`.
+- Ověření: Post-deploy syntetická věta prošla přes skutečný `/api/human-adam/transcribe` se stavem `transcribed_for_review` a přesným textem. Následný health potvrzuje PID 36363 a otisk `a254773e73d02854`.
+- Bezpečnost / neukládat: Post-deploy test používal pouze syntetickou větu; dočasné audio bylo odstraněno a žádný klíč ani soukromý text se nezapsal do Gitu.

@@ -4264,3 +4264,25 @@ Technický důkaz:
 - Cíleně 23/23; syntetický český API smoke vrátil přesný očekávaný text modelem `gpt-transcribe` za 2,6 s.
 - Úplná Cockpit Quality Gate prošla 1507/1507 za 458,4 s; Python kompilace a `git diff --check` jsou zelené.
 - Běžící Cockpit nebyl restartován ani nasazen. API smoke obsahoval pouze syntetickou větu bez soukromých údajů a dočasné audio bylo po testu odstraněno.
+
+### 2026-08-31 12:04 CEST – gpt-transcribe-migration je nasazená a serverově ověřená
+
+Hotovo:
+- Commit `bee5ad5` byl řízeně nasazen do Cockpitu bez GitHub pushnutí.
+- Nový proces nahradil PID 7920 procesem 36363, má očekávaný kódový otisk `a254773e73d02854` a serverová verifikace potvrdila smoke 5/5 i oba čisté zarovnané workspaces.
+- Post-deploy syntetická česká věta prošla skutečným endpointem `/api/human-adam/transcribe` se stavem `transcribed_for_review` a přesným očekávaným textem.
+
+Rozhodnutí:
+- Nasazovací důkaz patří proudu Human–Adam; před operací byl proto nečinný a čistý Cockpit přepnut z MMTX na `layer-human-adam-development`.
+- GitHub push zůstává oddělený a nebyl součástí nasazení.
+
+Další krok:
+- Jednou ručně nahrát krátký skutečný český pokyn, zkontrolovat přepis v editoru a odeslat jej až výslovným tlačítkem.
+
+Navrhované další kroky:
+- Při přesném živém přepisu migraci provozně uzavřít. `gpt-live-transcribe` nepřidávat bez samostatného požadavku na průběžné titulky.
+
+Technický důkaz:
+- Předrestartová quick gate prošla za 8,4 s; deployment receipt je `deployed` pro `bee5ad5c4c74` a workstream `layer-human-adam-development`.
+- Verifikace potvrdila nový proces, kódový otisk `a254773e73d02854`, smoke 5/5 a zdravý následný `/api/server/health`.
+- Post-deploy audio bylo syntetické, dočasné a po testu odstraněné; žádný klíč ani soukromý obsah nebyl uložen do Gitu.
