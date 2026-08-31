@@ -1,35 +1,33 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-31 15:54 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-31 17:15 CEST
 
 ### Hotovo
-- První obraz ukazuje pět kamarádů u rozvodněného potoka a Logana ve vodě; připravena je lehká q90 varianta
-- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Scéna 5 má první dějový průchod s Loganem, dialogem po větách, pevnými EN/CZ MP3 a stavbou mostu ze tří klád
 
 ### Otevřeno
 - Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
 - Lokální commity čekají na samostatný denní GitHub balíček.
 
 ### Rizika
-- Žádné další doložené provozní riziko.
+- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
+- Aktivní relace má neuzavřenou nejistotu doručení.
 
 ### Další krok
-- Potvrdit obraz a zapojit jej jako první dějový stav scény 5
+- Ručně ověřit vzhled, ovládání a zvuk scény 5 na Macu a iPhonu; potom rozhodnout o napojení ze scény 4
 
 ### Rozhodnutí
 - V tomto kroku nebylo přijato nové kanonické rozhodnutí.
 
 ### Navrhované další kroky
-- Doplnit úvodní dialog po jednotlivých větách
-- Připravit pevná anglická a česká MP3
-- Potom vytvořit interakci se třemi kládami
+- Žádné další návrhy nad rámec bezprostředního kroku.
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `3ea812df99e5`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `3ea812df99e5` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-31T13:42:14+00:00.
-- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+- Git před checkpointem: lokální `main` na `ab345a18c676`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `3ea812df99e5` · je starší než ověřený main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-31T13:42:14+00:00.
+- Read-only živý stav: main=`local_ahead`, deployment=`verified_other_main`, runtime=`delivery_uncertain`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -440,3 +438,15 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (7): `Samantha_Agent/tests/test_mmtx_scene05_webp_pilot.py`, `MatysekANJ/web_mmtx/scene05_log_bridge/assets/scene05_arrival_logan_01_source.png`, `MatysekANJ/web_mmtx/scene05_log_bridge/scene05_arrival_logan_01.png`, `MatysekANJ/web_mmtx/scene05_log_bridge/scene05_arrival_logan_01_q90.webp`, `docs/scene05_log_bridge/assets/scene05_arrival_logan_01_source.png`, `docs/scene05_log_bridge/scene05_arrival_logan_01.png`, `docs/scene05_log_bridge/scene05_arrival_logan_01_q90.webp`
 - Commit: `Přidat první dějový obraz scény 5`
 - Další krok: Potvrdit obraz a zapojit jej jako první dějový stav scény 5
+
+### Automatický checkpoint 2026-08-31 17:15 CEST
+
+- Pracovní proud: `project-mmtx`
+- Hotovo: Scéna 5 má první dějový průchod s Loganem, dialogem po větách, pevnými EN/CZ MP3 a stavbou mostu ze tří klád
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.; Lokální commity čekají na samostatný denní GitHub balíček.
+- Rizika: Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.; Aktivní relace má neuzavřenou nejistotu doručení.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: rychlá Cockpit brána syntaxe a whitespace: 6.8 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu
+- Změněné cesty před paměťovým zápisem (55): `MatysekANJ/web_mmtx/scene05_log_bridge/index.html`, `Samantha_Agent/tests/test_mmtx_scene05_webp_pilot.py`, `docs/scene05_log_bridge/index.html`, `MatysekANJ/build_scene05_audio.py`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_benji_bridge_gone_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_bunny_stream_wide_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_fiona_get_across_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_logan_bridge_ready_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_logan_can_help_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_logan_hello_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_logan_one_log_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_logan_strong_logs_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_logan_tap_logs_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_logan_three_logs_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_logan_two_logs_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_benji_bridge_gone_en.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_bunny_stream_wide_en.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_fiona_get_across_en.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_logan_bridge_ready_en.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_logan_can_help_en.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_logan_hello_en.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_logan_one_log_en.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_logan_strong_logs_en.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_logan_tap_logs_en.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_logan_three_logs_en.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_logan_two_logs_en.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio_manifest.js`, `MatysekANJ/web_mmtx/scene05_log_bridge/interaction.css`, `MatysekANJ/web_mmtx/scene05_log_bridge/script.js`, `Samantha_Agent/tests/test_mmtx_scene05_first_interaction.py`, `docs/scene05_log_bridge/audio/czech/scene05_benji_bridge_gone_cz.mp3`, `docs/scene05_log_bridge/audio/czech/scene05_bunny_stream_wide_cz.mp3`, `docs/scene05_log_bridge/audio/czech/scene05_fiona_get_across_cz.mp3`, `docs/scene05_log_bridge/audio/czech/scene05_logan_bridge_ready_cz.mp3`, `docs/scene05_log_bridge/audio/czech/scene05_logan_can_help_cz.mp3`, `docs/scene05_log_bridge/audio/czech/scene05_logan_hello_cz.mp3`, `docs/scene05_log_bridge/audio/czech/scene05_logan_one_log_cz.mp3`, `docs/scene05_log_bridge/audio/czech/scene05_logan_strong_logs_cz.mp3`, `docs/scene05_log_bridge/audio/czech/scene05_logan_tap_logs_cz.mp3`, `docs/scene05_log_bridge/audio/czech/scene05_logan_three_logs_cz.mp3`, … a dalších 15
+- Commit: `Complete scene 5 opening interaction`
+- Další krok: Ručně ověřit vzhled, ovládání a zvuk scény 5 na Macu a iPhonu; potom rozhodnout o napojení ze scény 4

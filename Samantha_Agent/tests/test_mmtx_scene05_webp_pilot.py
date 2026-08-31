@@ -60,16 +60,20 @@ class MmtxScene05WebpPilotTests(unittest.TestCase):
         )
         self.assertIn("let selected = 1;", page)
 
-    def test_scene_page_uses_q90_with_png_fallback(self) -> None:
+    def test_scene_page_uses_first_story_image_with_q90_and_png_fallback(self) -> None:
         page = (DOCS_SCENE / "index.html").read_text(encoding="utf-8")
 
         self.assertIn(
-            '<source srcset="scene05_stream_base_q90.webp" type="image/webp">',
+            '<source srcset="scene05_arrival_logan_01_q90.webp" type="image/webp">',
             page,
         )
-        self.assertIn('src="scene05_stream_base.png"', page)
+        self.assertIn('href="scene05_arrival_logan_01_q90.webp"', page)
+        self.assertIn('src="scene05_arrival_logan_01.png"', page)
+        self.assertIn('data-scene-state="arrival-logan-01"', page)
         self.assertIn('width="1672"', page)
         self.assertIn('height="941"', page)
+        self.assertNotIn("scene05_stream_base_q90.webp", page)
+        self.assertNotIn('src="scene05_stream_base.png"', page)
         self.assertNotIn("scene05_stream_base_q85.webp", page)
 
     def test_scene_page_is_standalone_and_keeps_story_flow_unwired(self) -> None:

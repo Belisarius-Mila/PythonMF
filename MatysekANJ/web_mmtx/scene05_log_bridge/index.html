@@ -5,51 +5,61 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#27483c">
     <title>Scene 5 — The Log Bridge</title>
-    <link
-      rel="preload"
-      href="scene05_stream_base_q90.webp"
-      as="image"
-      type="image/webp"
-      fetchpriority="high"
-    >
+    <link rel="preload" href="scene05_arrival_logan_01_q90.webp" as="image" type="image/webp" fetchpriority="high">
     <link rel="stylesheet" href="styles.css?v=20260831scene05base1">
+    <link rel="stylesheet" href="interaction.css?v=20260831intro1">
   </head>
   <body>
     <main class="app-shell">
-      <section class="scene-card" aria-label="Scéna 5: zvířátka přicházejí k rozvodněnému potoku">
-        <div class="scene" id="scene">
+      <section class="scene-card" aria-label="Scéna 5: zvířátka a Logan staví most z klád">
+        <div class="scene" id="scene" data-scene-state="arrival-logan-01">
           <picture class="scene-picture">
-            <source srcset="scene05_stream_base_q90.webp" type="image/webp">
-            <img
-              class="scene-image"
-              id="sceneImage"
-              src="scene05_stream_base.png"
-              width="1672"
-              height="941"
-              alt="Rozvodněný lesní potok se širokými břehy, zbytky starého mostu a bobří hrází v dálce"
-              fetchpriority="high"
-              draggable="false"
-            >
+            <source srcset="scene05_arrival_logan_01_q90.webp" type="image/webp">
+            <img class="scene-image" id="sceneImage" src="scene05_arrival_logan_01.png" width="1672" height="941" alt="Pět kamarádů stojí u rozvodněného potoka a bobr Logan je zdraví z vody" fetchpriority="high" draggable="false">
           </picture>
 
           <div class="scene-hud">
-            <a
-              class="ui-button back-button"
-              href="../scene04_harry_guard_prototype/index.html"
-              aria-label="Zpět ke scéně s Harrym"
-            >
-              <span aria-hidden="true">↩</span>
-            </a>
-
+            <a class="ui-button back-button" href="../scene04_harry_guard_prototype/index.html" aria-label="Zpět ke scéně s Harrym"><span aria-hidden="true">↩</span></a>
             <div class="scene-title" aria-label="Scene 5: The Log Bridge. Scéna 5: Most z klád.">
               <strong>Scene 5 · The Log Bridge</strong>
               <small>Scéna 5 · Most z klád</small>
             </div>
+            <div class="scene-actions">
+              <button class="ui-button language-button" id="languageButton" type="button" aria-label="Změnit jazykový režim">EN + CZ</button>
+              <button class="ui-button repeat-button" id="repeatButton" type="button" aria-label="Zopakovat právě zobrazenou větu" disabled><span aria-hidden="true">🔁</span><span>Repeat</span></button>
+            </div>
           </div>
 
-          <div class="scene-overlay" id="sceneOverlay" aria-hidden="true"></div>
+          <div class="speech-bubble hidden" id="speechBubble" aria-live="polite">
+            <span class="speaker-name" id="speakerName"></span>
+            <span class="speech-english" id="speechEnglish"></span>
+            <span class="speech-czech" id="speechCzech"></span>
+          </div>
+
+          <div class="task-prompt hidden" id="taskPrompt" aria-live="polite">
+            <span class="task-icon" aria-hidden="true">🪵</span>
+            <span><strong id="taskEnglish"></strong><small id="taskCzech"></small></span>
+          </div>
+
+          <div class="logs-layer hidden" id="logsLayer" aria-label="Tři klády pro nový most">
+            <button class="log-piece log-one" type="button" data-log="1" aria-label="První kláda"></button>
+            <button class="log-piece log-two" type="button" data-log="2" aria-label="Druhá kláda"></button>
+            <button class="log-piece log-three" type="button" data-log="3" aria-label="Třetí kláda"></button>
+          </div>
+
+          <button class="next-button hidden" id="nextButton" type="button" aria-label="Přehrát další větu" disabled><span>Next</span><span aria-hidden="true">▶</span></button>
+
+          <div class="complete-banner hidden" id="completeBanner" aria-live="polite">
+            <span aria-hidden="true">🪵</span>
+            <span><strong>The bridge is ready!</strong><small>Most je hotový!</small></span>
+          </div>
+
+          <button class="audio-gate" id="audioGate" type="button"><strong>Klepni a poslouchej</strong><span>Tap and listen</span></button>
         </div>
       </section>
     </main>
+
+    <script src="audio_manifest.js?v=20260831intro1"></script>
+    <script src="script.js?v=20260831intro1"></script>
   </body>
 </html>

@@ -1,35 +1,33 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-31 15:54 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-31 17:15 CEST
 
 ### Hotovo
-- První obraz ukazuje pět kamarádů u rozvodněného potoka a Logana ve vodě; připravena je lehká q90 varianta
-- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Scéna 5 má první dějový průchod s Loganem, dialogem po větách, pevnými EN/CZ MP3 a stavbou mostu ze tří klád
 
 ### Otevřeno
 - Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
 - Lokální commity čekají na samostatný denní GitHub balíček.
 
 ### Rizika
-- Žádné další doložené provozní riziko.
+- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
+- Aktivní relace má neuzavřenou nejistotu doručení.
 
 ### Další krok
-- Potvrdit obraz a zapojit jej jako první dějový stav scény 5
+- Ručně ověřit vzhled, ovládání a zvuk scény 5 na Macu a iPhonu; potom rozhodnout o napojení ze scény 4
 
 ### Rozhodnutí
 - V tomto kroku nebylo přijato nové kanonické rozhodnutí.
 
 ### Navrhované další kroky
-- Doplnit úvodní dialog po jednotlivých větách
-- Připravit pevná anglická a česká MP3
-- Potom vytvořit interakci se třemi kládami
+- Žádné další návrhy nad rámec bezprostředního kroku.
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `3ea812df99e5`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `3ea812df99e5` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-31T13:42:14+00:00.
-- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+- Git před checkpointem: lokální `main` na `ab345a18c676`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `3ea812df99e5` · je starší než ověřený main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-31T13:42:14+00:00.
+- Read-only živý stav: main=`local_ahead`, deployment=`verified_other_main`, runtime=`delivery_uncertain`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -888,3 +886,30 @@ Technický důkaz:
 - rychlá Cockpit brána syntaxe a whitespace: 5.3 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `project-mmtx`.
 - Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+
+### 2026-08-31 17:15 CEST – Scéna 5 má první dějový průchod s Loganem, dialogem po větách, pevnými EN/CZ MP3 a stavbou mostu ze tří klád
+
+Hotovo:
+- Scéna 5 má první dějový průchod s Loganem, dialogem po větách, pevnými EN/CZ MP3 a stavbou mostu ze tří klád
+
+Otevřeno:
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
+
+Rizika:
+- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
+- Aktivní relace má neuzavřenou nejistotu doručení.
+
+Rozhodnutí:
+- V tomto kroku nebylo přijato nové kanonické rozhodnutí.
+
+Další krok:
+- Ručně ověřit vzhled, ovládání a zvuk scény 5 na Macu a iPhonu; potom rozhodnout o napojení ze scény 4
+
+Navrhované další kroky:
+- Nebyly zachyceny další návrhy nad rámec bezprostředního kroku.
+
+Technický důkaz:
+- rychlá Cockpit brána syntaxe a whitespace: 6.8 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
+- Pracovní proud: `project-mmtx`.
+- Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_other_main`, runtime=`delivery_uncertain`.
