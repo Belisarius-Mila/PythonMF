@@ -17,6 +17,7 @@ from app.speech.transcribe import (
     decode_audio_base64,
     normalize_mime_type,
     openai_api_key_available,
+    transcription_context_fields,
     transcribe_audio_base64,
     transcribe_audio_bytes,
     transcribe_audio_file,
@@ -59,6 +60,17 @@ class SpeechTranscribeTests(unittest.TestCase):
         with self.assertRaises(TranscriptionError):
             normalize_mime_type("text/plain")
 
+    def test_transcription_context_uses_structured_czech_hints(self) -> None:
+        context = transcription_context_fields("CS")
+
+        self.assertEqual(context["languages"], ["cs"])
+        self.assertEqual(
+            context["keywords"],
+            ["Samantha", "Adam", "Míla", "Cockpit", "Human–Adam"],
+        )
+        with self.assertRaises(TranscriptionError):
+            transcription_context_fields("czech")
+
     def test_openai_api_key_available_reloads_empty_env_from_dotenv(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             env_path = Path(temp_dir) / ".env"
@@ -82,8 +94,16 @@ class SpeechTranscribeTests(unittest.TestCase):
         self.assertEqual(result["text"], "Najdi dnešní dokumenty.")
         self.assertEqual(result["audio_bytes"], 10)
         self.assertEqual(leftovers, [])
-        self.assertEqual(client.transcriptions.calls[0]["model"], "gpt-4o-mini-transcribe")
-        self.assertEqual(client.transcriptions.calls[0]["language"], "cs")
+        self.assertEqual(client.transcriptions.calls[0]["model"], "gpt-transcribe")
+        self.assertEqual(client.transcriptions.calls[0]["response_format"], "json")
+        self.assertEqual(
+            client.transcriptions.calls[0]["extra_body"],
+            {
+                "languages": ["cs"],
+                "keywords": ["Samantha", "Adam", "Míla", "Cockpit", "Human–Adam"],
+            },
+        )
+        self.assertNotIn("language", client.transcriptions.calls[0])
 
     def test_transcribe_audio_base64_passes_decoded_audio_to_client(self) -> None:
         client = FakeOpenAIClient()
@@ -114,8 +134,12 @@ class SpeechTranscribeTests(unittest.TestCase):
             seen["input"] = kwargs["input"]
             self.assertNotIn("test-secret-key", " ".join(args))
             self.assertIn("Authorization: Bearer test-secret-key", kwargs["input"])
-            self.assertIn("form = \"model=gpt-4o-mini-transcribe\"", kwargs["input"])
-            self.assertIn("form = \"language=cs\"", kwargs["input"])
+            self.assertIn("form = \"model=gpt-transcribe\"", kwargs["input"])
+            self.assertIn("form = \"response_format=json\"", kwargs["input"])
+            self.assertIn("form = \"languages[]=cs\"", kwargs["input"])
+            self.assertIn("form = \"keywords[]=Samantha\"", kwargs["input"])
+            self.assertIn("form = \"keywords[]=Míla\"", kwargs["input"])
+            self.assertNotIn("form = \"language=", kwargs["input"])
             self.assertIn(";type=audio/webm", kwargs["input"])
             return subprocess.CompletedProcess(
                 args,

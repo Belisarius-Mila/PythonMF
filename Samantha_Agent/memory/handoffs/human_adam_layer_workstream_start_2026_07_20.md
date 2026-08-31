@@ -2797,3 +2797,14 @@ Technický důkaz:
 - Rozhodnutí: Přesný uživatelský `p+n` a deklarovaný cíl `github_pages` jsou jedinou autoritou; modelová obálka nemůže operaci změnit ani zablokovat.
 - Další krok: Při dalším dokončeném MMTX vývoji použít `p+n`; při fail-closed výsledku nejprve auditovat přesná ID bez automatického opakování.
 - Ověření: cíleně 16/16, úplná brána 1478/1478 za 446,9 s, Cockpit quick gate 7,8 s a smoke 5/5; produkční účtenka obsahuje commit `0230cf543ef4`, run `33269734786`, deployment `6159053676` a HTTP 200.
+
+### Vývojový krok 2026-08-31 11:48 CEST – gpt-transcribe-migration
+
+- Pracovní proud: `layer-human-adam-development`
+- Hotovo: Dokončené hlasové nahrávky Human–Adam nově používají `gpt-transcribe` na stávajícím `/v1/audio/transcriptions`. SDK i izolovaná systémová `curl` cesta posílají `response_format=json`, `languages=["cs"]` a úzkou sadu českých/doménových `keywords`; staré pole `language` ani ukončovaný výchozí model už aktivní kód a testy neobsahují. Editovatelný přepis, dočasné audio, limity velikosti a výslovné ruční odeslání zůstaly beze změny.
+- Co není hotovo: Běžící Cockpit nebyl řízeně restartován ani nasazen. Skutečný uživatelský hlasový pokyn po migraci zatím nebyl ověřen.
+- Rizika: `keywords` jsou nápověda, nikoli vynucený slovník; při živém retestu je třeba ověřit přesnost a nepřítomnost nevyslovených klíčových slov. Lokální OpenAI SDK 2.36.0 přijímá nová pole kompatibilně přes `extra_body`, protože je ještě nemá v běžném podpisu metody.
+- Další krok: Samostatně potvrdit řízené nasazení Cockpitu a potom jednou nahrát krátký český pokyn, zkontrolovat přepis v editoru a teprve ručně odeslat.
+- Navrhované další kroky: `gpt-live-transcribe` nepřidávat, dokud nebude samostatně požadovaný průběžný živý přepis; současný tok vždy nejprve dokončí nahrávku.
+- Ověření: 23/23 cílených testů; syntetický český API smoke vrátil přesný text modelem `gpt-transcribe` za 2,6 s; úplná Cockpit Quality Gate prošla 1507/1507 za 458,4 s; `git diff --check` je čistý.
+- Bezpečnost / neukládat: API smoke obsahoval jen syntetickou větu bez soukromých údajů. Audio vzniklo pouze v dočasném adresáři a po testu bylo odstraněno. Token ani API klíč se nevypsal a nepatří do Gitu.

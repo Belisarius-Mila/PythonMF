@@ -16,7 +16,14 @@ from openai import OpenAI
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_TRANSCRIBE_MODEL = "gpt-4o-mini-transcribe"
+DEFAULT_TRANSCRIBE_MODEL = "gpt-transcribe"
+DEFAULT_TRANSCRIBE_KEYWORDS = (
+    "Samantha",
+    "Adam",
+    "Míla",
+    "Cockpit",
+    "Human–Adam",
+)
 OPENAI_TRANSCRIPTIONS_URL = "https://api.openai.com/v1/audio/transcriptions"
 MAX_AUDIO_BYTES = 6 * 1024 * 1024
 MIME_EXTENSIONS = {
@@ -33,6 +40,20 @@ MIME_EXTENSIONS = {
 
 class TranscriptionError(RuntimeError):
     """Raised when a local voice command cannot be transcribed safely."""
+
+
+def transcription_context_fields(language: str) -> dict[str, list[str]]:
+    clean_language = str(language or "").strip().casefold()
+    if len(clean_language) != 2 or not clean_language.isascii() or not clean_language.isalpha():
+        raise TranscriptionError("Jazyk přepisu musí být dvoupísmenný ISO-639-1 kód.")
+
+    keywords: list[str] = []
+    for value in DEFAULT_TRANSCRIBE_KEYWORDS:
+        keyword = str(value).strip()
+        if not keyword or any(character in keyword for character in "<>\r\n"):
+            raise TranscriptionError("Klíčová slova pro přepis obsahují neplatnou hodnotu.")
+        keywords.append(keyword)
+    return {"languages": [clean_language], "keywords": keywords}
 
 
 def normalize_mime_type(value: str) -> str:
@@ -101,17 +122,29 @@ def transcribe_audio_file_with_curl(
         raise TranscriptionError("Audio nahrávka je příliš velká; zkus kratší pokyn.")
 
     api_key = load_openai_api_key()
-    config = "\n".join(
+    context_fields = transcription_context_fields(language)
+    config_lines = [
+        f'url = "{OPENAI_TRANSCRIPTIONS_URL}"',
+        'request = "POST"',
+        f'header = "Authorization: Bearer {curl_config_quote(api_key)}"',
+        f'form = "model={curl_config_quote(model)}"',
+        'form = "response_format=json"',
+    ]
+    config_lines.extend(
+        f'form = "languages[]={curl_config_quote(value)}"'
+        for value in context_fields["languages"]
+    )
+    config_lines.extend(
+        f'form = "keywords[]={curl_config_quote(value)}"'
+        for value in context_fields["keywords"]
+    )
+    config_lines.extend(
         [
-            f'url = "{OPENAI_TRANSCRIPTIONS_URL}"',
-            'request = "POST"',
-            f'header = "Authorization: Bearer {curl_config_quote(api_key)}"',
-            f'form = "model={curl_config_quote(model)}"',
-            f'form = "language={curl_config_quote(language)}"',
             f'form = "file=@{curl_config_quote(str(path))};type={curl_config_quote(safe_mime_type)}"',
             "",
         ]
     )
+    config = "\n".join(config_lines)
     curl_started = time.monotonic()
     try:
         completed = runner(
@@ -200,11 +233,13 @@ def transcribe_audio_bytes(
     try:
         openai_client = client or OpenAI()
         openai_started = time.monotonic()
+        context_fields = transcription_context_fields(language)
         with temp_path.open("rb") as audio_file:
             transcription = openai_client.audio.transcriptions.create(
                 model=model,
                 file=audio_file,
-                language=language,
+                response_format="json",
+                extra_body=context_fields,
             )
         openai_ms = int((time.monotonic() - openai_started) * 1000)
     except Exception as exc:

@@ -4242,3 +4242,25 @@ Navrhované další kroky:
 Technický důkaz:
 - Cíleně 16/16, úplná brána 1478/1478 za 446,9 s, Cockpit quick gate 7,8 s a smoke 5/5.
 - Produkční účtenka obsahuje commit `0230cf543ef4`, run `33269734786`, deployment `6159053676` a HTTP 200.
+
+### 2026-08-31 11:48 CEST – Hlasový vstup Human–Adam přešel na gpt-transcribe
+
+Hotovo:
+- Dokončené nahrávky z mikrofonu Human–Adam nově používají `gpt-transcribe` přes stávající Audio Transcriptions endpoint.
+- SDK i izolovaná systémová `curl` cesta posílají `response_format=json`, `languages=["cs"]` a úzkou sadu doménových `keywords`; aktivní kód už neposílá staré pole `language` ani ukončovaný výchozí model.
+- Zachovaný zůstává bezpečnostní kontrakt: audio je dočasné, výstup se vloží do editovatelného pole a bez výslovného tlačítka `Odeslat` se nic nedoručuje.
+
+Rozhodnutí:
+- Pro dokončené soubory je kanonická náhrada `gpt-transcribe`. `gpt-live-transcribe` se nepřidává, protože současný prohlížeč nejprve ukončí záznam a teprve potom jej odešle.
+- Lokální OpenAI SDK 2.36.0 dostává nová pole přes `extra_body`; `curl` používá odpovídající opakovaná multipartová pole `languages[]` a `keywords[]`.
+
+Další krok:
+- Samostatně potvrdit řízené nasazení Cockpitu a poté jednou ověřit krátký skutečný český hlasový pokyn v editoru před ručním odesláním.
+
+Navrhované další kroky:
+- Při živém retestu zkontrolovat přesnost názvů i to, že model nevložil žádné nevyslovené klíčové slovo. Průběžný živý přepis řešit pouze jako nový samostatný požadavek.
+
+Technický důkaz:
+- Cíleně 23/23; syntetický český API smoke vrátil přesný očekávaný text modelem `gpt-transcribe` za 2,6 s.
+- Úplná Cockpit Quality Gate prošla 1507/1507 za 458,4 s; Python kompilace a `git diff --check` jsou zelené.
+- Běžící Cockpit nebyl restartován ani nasazen. API smoke obsahoval pouze syntetickou větu bez soukromých údajů a dočasné audio bylo po testu odstraněno.

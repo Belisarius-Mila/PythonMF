@@ -341,3 +341,16 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Řešení: V každém unit testu lokálního indexu výslovně nahradit externí GitHub
   synchronizaci deterministickým neaktivním výsledkem. Živý inbox patří jen do
   samostatného integračního testu s přesnou korelací a bezpečnostními hranami.
+
+### LL-027 — Migrace transkripce není jen výměna názvu modelu
+
+- Problém: Nový `gpt-transcribe` používá místo jednoho `language` strukturovaná
+  pole `languages` a `keywords`; lokální SDK je ještě nemusí mít v běžném
+  podpisu a záložní multipartová `curl` cesta potřebuje správné názvy polí.
+- Typ: opakující se
+- Řešení nalezeno: 31082026
+- Řešení: Zachovat endpoint i výstupní kontrakt, nová pole v SDK poslat přes
+  `extra_body` a v multipart formuláři jako opakovaná `languages[]` a
+  `keywords[]`. Ověřit obě cesty unit testy a jediným syntetickým API smoke bez
+  soukromého audia; u klíčových slov následně hlídat i možné vložení
+  nevysloveného termínu.
