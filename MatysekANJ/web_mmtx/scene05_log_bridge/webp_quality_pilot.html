@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MMTX – porovnání kvality obrazu</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: #111712;
+        color: #f7f3e8;
+      }
+      header {
+        padding: 16px 20px 12px;
+        background: #1d2a20;
+        border-bottom: 1px solid #425747;
+      }
+      h1 { margin: 0 0 6px; font-size: clamp(20px, 2.4vw, 30px); }
+      p { margin: 0; color: #d1decf; }
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        padding: 14px 20px;
+      }
+      button {
+        min-height: 46px;
+        padding: 9px 15px;
+        border: 2px solid #78947d;
+        border-radius: 12px;
+        background: #26362a;
+        color: inherit;
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      button[aria-pressed="true"] {
+        border-color: #ffd166;
+        background: #405744;
+      }
+      label {
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
+        margin-left: auto;
+        min-height: 46px;
+      }
+      input { width: 20px; height: 20px; }
+      .viewer {
+        display: flex;
+        justify-content: center;
+        overflow: auto;
+        padding: 0 20px 24px;
+      }
+      .viewer img {
+        display: block;
+        width: min(100%, 1672px);
+        height: auto;
+        border: 1px solid #617866;
+        box-shadow: 0 10px 34px rgb(0 0 0 / 45%);
+      }
+      .viewer.actual { justify-content: flex-start; }
+      .viewer.actual img { width: 1672px; max-width: none; }
+      .status {
+        padding: 0 20px 14px;
+        color: #ffd166;
+        font-weight: 700;
+      }
+      @media (max-width: 760px) {
+        label { width: 100%; margin-left: 0; }
+        .viewer { padding-inline: 8px; }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>MMTX – porovnání WebP kvality</h1>
+      <p>Přepínej mezi stejným obrazem. Rozlišení všech variant je 1672 × 941.</p>
+    </header>
+    <div class="controls" aria-label="Varianty obrazu">
+      <button type="button" data-index="0" aria-pressed="true">PNG · 3,02 MiB</button>
+      <button type="button" data-index="1" aria-pressed="false">WebP q90 · 592 KiB</button>
+      <button type="button" data-index="2" aria-pressed="false">WebP q85 · 462 KiB</button>
+      <label><input id="actualSize" type="checkbox"> Zobrazit 1:1 pixely</label>
+    </div>
+    <div class="status" id="status" aria-live="polite">Původní PNG</div>
+    <main class="viewer" id="viewer">
+      <img id="scene" src="scene05_stream_base.png" alt="Rozvodněný lesní potok se zbytky starého mostu">
+    </main>
+    <script>
+      const variants = [
+        { src: "scene05_stream_base.png", label: "Původní PNG · 3,02 MiB" },
+        { src: "scene05_stream_base_q90.webp", label: "WebP q90 · 592 KiB" },
+        { src: "scene05_stream_base_q85.webp", label: "WebP q85 · 462 KiB" },
+      ];
+      const buttons = [...document.querySelectorAll("button[data-index]")];
+      const image = document.querySelector("#scene");
+      const status = document.querySelector("#status");
+      const viewer = document.querySelector("#viewer");
+      let selected = 0;
+
+      for (const variant of variants) {
+        const preload = new Image();
+        preload.src = variant.src;
+      }
+
+      function show(index) {
+        selected = (index + variants.length) % variants.length;
+        image.src = variants[selected].src;
+        status.textContent = variants[selected].label;
+        buttons.forEach((button, buttonIndex) => {
+          button.setAttribute("aria-pressed", String(buttonIndex === selected));
+        });
+      }
+
+      buttons.forEach((button) => {
+        button.addEventListener("click", () => show(Number(button.dataset.index)));
+      });
+      document.querySelector("#actualSize").addEventListener("change", (event) => {
+        viewer.classList.toggle("actual", event.target.checked);
+      });
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowLeft") show(selected - 1);
+        if (event.key === "ArrowRight") show(selected + 1);
+      });
+    </script>
+  </body>
+</html>

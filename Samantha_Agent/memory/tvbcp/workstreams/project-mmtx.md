@@ -1,33 +1,34 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-31 10:24 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-31 11:24 CEST
 
 ### Hotovo
-- Schválený Logan v neoprenu a základ rozvodněného potoka jsou bezpečně uložené v obou projektových kopiích
-- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Vznikly dvě výrazně lehčí WebP varianty potoka a stránka pro přímé porovnání na velké obrazovce
 
 ### Otevřeno
 - Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
 
 ### Rizika
-- Žádné další doložené provozní riziko.
+- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
 
 ### Další krok
-- Vytvořit první dějový obraz se skupinou zvířátek před rozvodněným potokem
+- Porovnat q90 a q85 na 22palcové obrazovce a vybrat produkční kvalitu
 
 ### Rozhodnutí
-- Logan používá lehký neopren bez potápěčské výstroje a prostředí má široké břehy s bobří hrází v dálce
+- Originální PNG zůstává nedotčené a pilot porovnává plné rozlišení WebP q90 a q85
 
 ### Navrhované další kroky
-- Přidat Logana, který si skupiny všimne
-- Potom připravit interakci se třemi kládami
+- Po výběru zapojit zvolenou WebP variantu do scény 5
+- Stejným nastavením připravovat další obrazy scény 5
+- Později samostatně optimalizovat starší obrazy MMTX
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `901d5fef9be3`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `901d5fef9be3` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-30T20:20:14+00:00.
-- Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
+- Git před checkpointem: lokální `main` na `af30301b30d0`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `901d5fef9be3` · je starší než ověřený main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-30T20:20:14+00:00.
+- Read-only živý stav: main=`local_ahead`, deployment=`verified_other_main`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -763,3 +764,31 @@ Technický důkaz:
 - rychlá Cockpit brána syntaxe a whitespace: 7.2 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `project-mmtx`.
 - Read-only živý stav při checkpointu: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
+
+### 2026-08-31 11:24 CEST – Vznikly dvě výrazně lehčí WebP varianty potoka a stránka pro přímé porovnání na velké obrazovce
+
+Hotovo:
+- Vznikly dvě výrazně lehčí WebP varianty potoka a stránka pro přímé porovnání na velké obrazovce
+
+Otevřeno:
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
+
+Rizika:
+- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
+
+Rozhodnutí:
+- Originální PNG zůstává nedotčené a pilot porovnává plné rozlišení WebP q90 a q85
+
+Další krok:
+- Porovnat q90 a q85 na 22palcové obrazovce a vybrat produkční kvalitu
+
+Navrhované další kroky:
+- Po výběru zapojit zvolenou WebP variantu do scény 5
+- Stejným nastavením připravovat další obrazy scény 5
+- Později samostatně optimalizovat starší obrazy MMTX
+
+Technický důkaz:
+- rychlá Cockpit brána syntaxe a whitespace: 9.1 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
+- Pracovní proud: `project-mmtx`.
+- Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_other_main`, runtime=`connected`.
