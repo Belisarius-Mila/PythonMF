@@ -1,33 +1,33 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-30 12:17 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-31 10:24 CEST
 
 ### Hotovo
-- Forest School nyní používá kompletní knihovnu 203 pevných anglických a českých stop bez systémového hlasu a Benjiho ukázka správně odpovídá No, it isn’t.
+- Schválený Logan v neoprenu a základ rozvodněného potoka jsou bezpečně uložené v obou projektových kopiích
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
 - Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
-- Lokální commity čekají na samostatný denní GitHub balíček.
 
 ### Rizika
-- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
+- Žádné další doložené provozní riziko.
 
 ### Další krok
-- Po potvrzeném checkpointu scénu poslechnout a samostatně spustit p+n.
+- Vytvořit první dějový obraz se skupinou zvířátek před rozvodněným potokem
 
 ### Rozhodnutí
-- Forest School používá pevná MP3 řízená manifestem a Benji v ukázce odpovídá No, it isn’t.
+- Logan používá lehký neopren bez potápěčské výstroje a prostředí má široké břehy s bobří hrází v dálce
 
 ### Navrhované další kroky
-- Prakticky projít Forest School na Linuxu nebo Macu
-- Potom samostatně publikovat aktuální MMTX pomocí p+n
+- Přidat Logana, který si skupiny všimne
+- Potom připravit interakci se třemi kládami
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `14d58b6a39d4`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `7b5e0985889e` · je starší než ověřený main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-29T19:57:50+00:00.
-- Read-only živý stav: main=`local_ahead`, deployment=`verified_other_main`, runtime=`connected`.
+- Git před checkpointem: lokální `main` na `901d5fef9be3`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `901d5fef9be3` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-30T20:20:14+00:00.
+- Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -736,3 +736,30 @@ Technický důkaz:
 - rychlá Cockpit brána syntaxe a whitespace: 4.4 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `project-mmtx`.
 - Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_other_main`, runtime=`connected`.
+
+### 2026-08-31 10:24 CEST – Schválený Logan v neoprenu a základ rozvodněného potoka jsou bezpečně uložené v obou projektových kopiích
+
+Hotovo:
+- Schválený Logan v neoprenu a základ rozvodněného potoka jsou bezpečně uložené v obou projektových kopiích
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+
+Otevřeno:
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+
+Rizika:
+- Žádné další doložené provozní riziko.
+
+Rozhodnutí:
+- Logan používá lehký neopren bez potápěčské výstroje a prostředí má široké břehy s bobří hrází v dálce
+
+Další krok:
+- Vytvořit první dějový obraz se skupinou zvířátek před rozvodněným potokem
+
+Navrhované další kroky:
+- Přidat Logana, který si skupiny všimne
+- Potom připravit interakci se třemi kládami
+
+Technický důkaz:
+- rychlá Cockpit brána syntaxe a whitespace: 7.2 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
+- Pracovní proud: `project-mmtx`.
+- Read-only živý stav při checkpointu: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
