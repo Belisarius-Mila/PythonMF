@@ -792,3 +792,41 @@ Technický důkaz:
 - rychlá Cockpit brána syntaxe a whitespace: 9.1 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `project-mmtx`.
 - Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_other_main`, runtime=`connected`.
+
+### 2026-08-31 12:15 CEST – Produkční obrazy scén MMTX budou vždy optimalizované
+
+Hotovo:
+- Do kanonického handoffu a TVBCP je zapsané společné pravidlo pro obrazové podklady všech scén MMTX.
+
+Rozhodnutí:
+- Každý obrázek scény MMTX se před produkčním nasazením zmenší a nasazuje se až jeho vizuálně ověřená lehčí produkční varianta.
+- Zdrojový originál zůstává zachovaný a optimalizace jej nesmí tiše přepsat.
+
+Další krok:
+- Dokončit bod 1: porovnat WebP q90 a q85 scény 5 a vybrat produkční kvalitu.
+
+Navrhované další kroky:
+- Zvolenou variantu zapojit do scény 5.
+- Stejný postup použít pro další nové obrazy a starší scény optimalizovat samostatně.
+
+Technický důkaz:
+- Pravidlo vychází z Mílova výslovného rozhodnutí a navazuje na existující create-only WebP pilot q90/q85.
+
+### 2026-08-31 12:22 CEST – Pro scénu 5 je vybraná produkční kvalita WebP q90
+
+Hotovo:
+- První WebP varianta q90 je na porovnávací stránce označená a zobrazovaná jako vybraná produkční kvalita.
+
+Rozhodnutí:
+- Pro základ rozvodněného potoka ve scéně 5 použít WebP q90.
+- PNG originál i q85 zůstávají zachované; tento krok nic nepublikuje ani nenasazuje.
+
+Další krok:
+- Zapojit q90 jako obrazový základ funkční scény 5 bez přepsání zdrojového PNG.
+
+Navrhované další kroky:
+- Stejné nastavení použít při přípravě dalších obrazů scény 5.
+- Starší scény optimalizovat po samostatných ověřených dávkách.
+
+Technický důkaz:
+- Cílený test `tests.test_mmtx_scene05_webp_pilot` prošel 5/5, obě projektové kopie stránky jsou shodné a `git diff --check` je čistý.

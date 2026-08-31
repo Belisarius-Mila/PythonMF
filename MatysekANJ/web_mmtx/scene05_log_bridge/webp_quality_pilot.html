@@ -82,29 +82,29 @@
   <body>
     <header>
       <h1>MMTX – porovnání WebP kvality</h1>
-      <p>Přepínej mezi stejným obrazem. Rozlišení všech variant je 1672 × 941.</p>
+      <p>Vybraná produkční kvalita je WebP q90. Přepínej mezi stejným obrazem; rozlišení všech variant je 1672 × 941.</p>
     </header>
     <div class="controls" aria-label="Varianty obrazu">
-      <button type="button" data-index="0" aria-pressed="true">PNG · 3,02 MiB</button>
-      <button type="button" data-index="1" aria-pressed="false">WebP q90 · 592 KiB</button>
+      <button type="button" data-index="0" aria-pressed="false">PNG · 3,02 MiB</button>
+      <button type="button" data-index="1" aria-pressed="true">WebP q90 · 592 KiB · vybráno</button>
       <button type="button" data-index="2" aria-pressed="false">WebP q85 · 462 KiB</button>
       <label><input id="actualSize" type="checkbox"> Zobrazit 1:1 pixely</label>
     </div>
-    <div class="status" id="status" aria-live="polite">Původní PNG</div>
+    <div class="status" id="status" aria-live="polite">WebP q90 · 592 KiB · vybraná produkční kvalita</div>
     <main class="viewer" id="viewer">
-      <img id="scene" src="scene05_stream_base.png" alt="Rozvodněný lesní potok se zbytky starého mostu">
+      <img id="scene" src="scene05_stream_base_q90.webp" alt="Rozvodněný lesní potok se zbytky starého mostu">
     </main>
     <script>
       const variants = [
         { src: "scene05_stream_base.png", label: "Původní PNG · 3,02 MiB" },
-        { src: "scene05_stream_base_q90.webp", label: "WebP q90 · 592 KiB" },
+        { src: "scene05_stream_base_q90.webp", label: "WebP q90 · 592 KiB · vybraná produkční kvalita" },
         { src: "scene05_stream_base_q85.webp", label: "WebP q85 · 462 KiB" },
       ];
       const buttons = [...document.querySelectorAll("button[data-index]")];
       const image = document.querySelector("#scene");
       const status = document.querySelector("#status");
       const viewer = document.querySelector("#viewer");
-      let selected = 0;
+      let selected = 1;
 
       for (const variant of variants) {
         const preload = new Image();

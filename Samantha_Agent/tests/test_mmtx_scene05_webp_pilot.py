@@ -46,6 +46,20 @@ class MmtxScene05WebpPilotTests(unittest.TestCase):
         self.assertIn("scene05_stream_base_q85.webp", page)
         self.assertIn("1672 × 941", page)
 
+    def test_q90_is_recorded_as_the_selected_production_quality(self) -> None:
+        page = (DOCS_SCENE / "webp_quality_pilot.html").read_text(encoding="utf-8")
+
+        self.assertIn("Vybraná produkční kvalita je WebP q90", page)
+        self.assertIn(
+            '<button type="button" data-index="1" aria-pressed="true">',
+            page,
+        )
+        self.assertIn(
+            '<img id="scene" src="scene05_stream_base_q90.webp"',
+            page,
+        )
+        self.assertIn("let selected = 1;", page)
+
 
 if __name__ == "__main__":
     unittest.main()

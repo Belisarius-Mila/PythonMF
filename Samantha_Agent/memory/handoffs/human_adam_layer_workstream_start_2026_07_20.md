@@ -1,48 +1,34 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Živě dokončeno: 2026-08-29 21:01 CEST
+- Obnoveno potvrzeným checkpointem: 2026-08-31 12:25 CEST
 
 ### Hotovo
-- MMTX má deklarativní produkční cíl GitHub Pages.
-- Přesný pokyn `p+n` nebo přímý pokyn k nasazení na produkci je serverově autorizovaný samoobslužný tok: případný bezpečný GitHub balíček, Pages workflow, ověření deploymentu a HTTP smoke.
-- Operaci provádí registrovaný serverový backend; model sám nespouští shell, Git ani `gh`.
-- Aktuální MMTX byl ručně publikován na produkci z commitu `933834f` během opravy chybějícího workflow kroku.
-- První živé `p+n` spustilo run `33267653174` a skutečně publikovalo commit `a0ab509`; odhalilo však falešně zápornou účtenku kvůli opožděné viditelnosti Pages deploymentu.
-- Publisher nyní po dokončení workflow omezeně čeká až 30 sekund na odpovídající úspěšný deployment stejného commitu.
-- Druhý živý `p+n` publikoval přes run `33268409643` a deployment `6158799240` přesný commit `d0fb736`; další falešně zápornou účtenku způsobil chybějící certifikační řetězec lokálního Pythonu při závěrečném HTTPS smoke.
-- Smoke nyní používá systémový `/usr/bin/curl`, tedy stejné systémové TLS úložiště, kterým byl veřejný HTTP 200 nezávisle potvrzen.
-- Finální živé `p+n` v MMTX skončilo účtenkou `completed`: run `33269031345`, deployment `6158917594`, commit `72aedbf`, HTTP 200.
-- Následný úklidový retest odhalil, že vadná modelová provozní obálka mohla přesný serverově autorizovaný `p+n` zablokovat ještě před backendem. Server nyní pro autorizovaný MMTX pokyn vždy vynutí jedinou kanonickou Pages operaci bez ohledu na modelovou obálku.
-- Regresní živé `p+n` na opraveném Cockpitu skončilo `completed`: run `33269734786`, deployment `6159053676`, commit `0230cf5`, HTTP 200.
+- Scéna 5 má zvolenou lehčí produkční kvalitu q90 a obecné pravidlo optimalizace obrazů je kanonicky zaznamenané
 
 ### Otevřeno
-- Žádný známý otevřený krok samoobslužného MMTX nasazení.
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
 
 ### Rizika
-- Produkční operace je záměrně dostupná jen pro přesný přímý pokyn a pracovní proud s deklarovaným cílem `github_pages`.
-- Divergence, špinavý main, neshoda `origin/main`, neúspěšný workflow, chybějící deployment nebo HTTP smoke operaci uzavřeně zastaví.
+- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
 
 ### Další krok
-- Při příštím dokončeném vývoji MMTX zadat Human–Adamovi přesný pokyn `p+n`; při fail-closed účtence příkaz automaticky neopakovat.
+- Zapojit WebP q90 jako obrazový základ funkční scény 5
 
 ### Rozhodnutí
-- Push a produkční nasazení zůstávají oddělené důkazy, ale přímý příkaz `p+n` je může bezpečně zřetězit bez přepnutí k terminálovému Adamovi.
-- Cíl produkce je capability pracovního proudu, nikoli odhad z názvu projektu.
+- Všechny obrazy scén MMTX se před produkcí zmenšují; pro základ potoka scény 5 je vybrán WebP q90
 
 ### Navrhované další kroky
-- Po živém ověření použít stejný deklarativní kontrakt pro další veřejné Pages projekty jen po jejich samostatném přiřazení.
+- Používat stejné nastavení pro další obrazy scény 5
+- Starší scény optimalizovat po samostatných ověřených dávkách
 
 ### Technický stav checkpointu
-- Cílená sada opravy opožděného deploymentu prošla 14/14; úplná Cockpit Quality Gate prošla 1476/1476 za 442,2 s.
-- Pages run `33266361424` publikoval `933834f`; veřejné manifesty a vzorky MP3 scén 2 a 3 jsou hashově shodné s lokální produkční kopií.
-- První samoobslužný run `33267653174` publikoval `a0ab509`; pozdější deployment `6158651157` potvrdil přesnou shodu commitu a HTTP 200, přesto původní jednorázová kontrola skončila před jeho zveřejněním v GitHub API.
-- Druhý samoobslužný run `33268409643` a deployment `6158799240` úspěšně publikovaly `d0fb736`; systémový `curl` vrací HTTP 200, zatímco původní `urllib` skončil na `CERTIFICATE_VERIFY_FAILED`.
-- Oprava systémového HTTPS smoke prošla úplnou Cockpit Quality Gate 1477/1477 za 445,1 s.
-- Cockpit běží na `72aedbf`, nasazovací smoke prošel 5/5 a finální Human–Adam operace vrátila `deployed` pro tentýž commit.
-- Regresní test serverového přepsání vadné modelové obálky je součástí cílené sady 16/16.
-- Úplná Cockpit Quality Gate prošla 1478/1478 za 446,9 s.
-- Opravený Cockpit běží na `0230cf5`, quick gate prošla za 7,8 s, smoke 5/5 a živá produkční účtenka je kompletní.
+- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
+- Git před checkpointem: lokální `main` na `f16ec476ca30`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `bee5ad5c4c74` · je starší než ověřený main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-31T10:02:01+00:00.
+- Read-only živý stav: main=`local_ahead`, deployment=`verified_other_main`, runtime=`connected`.
+- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -2819,3 +2805,15 @@ Technický důkaz:
 - Navrhované další kroky: Pokud bude přepis přesný, migraci provozně uzavřít bez zavádění `gpt-live-transcribe`.
 - Ověření: Post-deploy syntetická věta prošla přes skutečný `/api/human-adam/transcribe` se stavem `transcribed_for_review` a přesným textem. Následný health potvrzuje PID 36363 a otisk `a254773e73d02854`.
 - Bezpečnost / neukládat: Post-deploy test používal pouze syntetickou větu; dočasné audio bylo odstraněno a žádný klíč ani soukromý text se nezapsal do Gitu.
+
+### Automatický checkpoint 2026-08-31 12:25 CEST
+
+- Pracovní proud: `layer-human-adam-development`
+- Hotovo: Scéna 5 má zvolenou lehčí produkční kvalitu q90 a obecné pravidlo optimalizace obrazů je kanonicky zaznamenané
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.; Lokální commity čekají na samostatný denní GitHub balíček.
+- Rizika: Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: rychlá Cockpit brána syntaxe a whitespace: 7.4 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu
+- Změněné cesty před paměťovým zápisem (5): `MatysekANJ/web_mmtx/scene05_log_bridge/webp_quality_pilot.html`, `Samantha_Agent/memory/handoffs/workstreams/project-mmtx.md`, `Samantha_Agent/memory/tvbcp/workstreams/project-mmtx.md`, `Samantha_Agent/tests/test_mmtx_scene05_webp_pilot.py`, `docs/scene05_log_bridge/webp_quality_pilot.html`
+- Commit: `Vybrat WebP q90 pro scénu 5`
+- Další krok: Zapojit WebP q90 jako obrazový základ funkční scény 5

@@ -401,3 +401,17 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (7): `MatysekANJ/web_mmtx/scene05_log_bridge/scene05_stream_base_q85.webp`, `MatysekANJ/web_mmtx/scene05_log_bridge/scene05_stream_base_q90.webp`, `MatysekANJ/web_mmtx/scene05_log_bridge/webp_quality_pilot.html`, `Samantha_Agent/tests/test_mmtx_scene05_webp_pilot.py`, `docs/scene05_log_bridge/scene05_stream_base_q85.webp`, `docs/scene05_log_bridge/scene05_stream_base_q90.webp`, `docs/scene05_log_bridge/webp_quality_pilot.html`
 - Commit: `Přidat WebP pilot scény 5`
 - Další krok: Porovnat q90 a q85 na 22palcové obrazovce a vybrat produkční kvalitu
+
+### Kanonické produkční pravidlo 2026-08-31 12:15 CEST
+
+- Rozhodnutí: Všechny obrázky scén MMTX se před nasazením na produkci zmenší a použije se jejich ověřená lehčí produkční varianta.
+- Bezpečnost: Zdrojové originály zůstávají zachované; optimalizace je nesmí tiše přepsat a produkční formát nebo kvalita se nejprve vizuálně ověří.
+- Další krok: Dokončit bod 1 — porovnat WebP q90 a q85 scény 5 a vybrat produkční kvalitu, která se následně zapojí do scény.
+
+### Volba produkční kvality 2026-08-31 12:22 CEST
+
+- Hotovo: Míla zvolil první WebP variantu, q90; porovnávací stránka ji nyní otevírá a označuje jako vybranou produkční kvalitu.
+- Rozhodnutí: Pro obraz potoka ve scéně 5 je produkční volbou WebP q90. Původní PNG i q85 zůstávají zachované pro audit a nic se zatím nenasazuje.
+- Ověření: Cílená regrese prošla 5/5, q90 má původní rozlišení 1672 × 941, je menší než PNG a produkční i zdrojová kopie stránky jsou shodné.
+- Riziko: Volba kvality sama ještě nezapojuje obraz do funkční scény 5.
+- Další krok: Zapojit `scene05_stream_base_q90.webp` jako obrazový základ scény 5 bez přepsání zdrojového PNG.
