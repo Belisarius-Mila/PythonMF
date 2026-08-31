@@ -614,9 +614,12 @@ Pro bankovni smlouvy a parametry uctu je pripraven samostatny potvrzovany rezim:
 - rodne cislo, adresa ani aktivacni udaje se do metadat neduplikuji;
 - zdrojovy soubor zustava zachovany a nema se automaticky mazat ani presouvat.
 
-Prvni realny obrazkovy dokument MONETA prosel read-only OCR nahledem. Povinna
-bankovni pole byla nalezena a maskovana; datum zalozeni uctu zustalo poctive
-`nezjisteno`. Finalni private import ceka na samostatne potvrzeni Mily.
+Prvni realny obrazkovy dokument MONETA prosel read-only OCR nahledem a po
+samostatnem potvrzeni byl ulozen do private vaultu. Povinna bankovni pole byla
+nalezena; datum zalozeni uctu zustalo poctive `nezjisteno`. Nasledny audit
+potvrdil shodny hash zdroje a ulozeneho originalu, zachovany zdroj v LocalSend,
+omezena souborova prava a absenci plnych identifikatoru i zakazanych osobnich
+udaju v beznem indexu.
 
 Technicky dukaz:
 
