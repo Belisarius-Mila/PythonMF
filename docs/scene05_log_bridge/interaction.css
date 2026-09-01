@@ -112,6 +112,41 @@ button { font: inherit; }
   transition: opacity 480ms ease;
 }
 .final-scene.visible { opacity: 1; }
+.story-state {
+  position: absolute;
+  z-index: 9;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 520ms ease;
+}
+.story-state.visible { opacity: 1; }
+.character-targets { position: absolute; z-index: 11; inset: 0; pointer-events: none; }
+.character-target {
+  position: absolute;
+  display: grid;
+  place-items: end center;
+  padding: 0 0 8px;
+  border: 4px solid #ffe27a;
+  border-radius: 48% 48% 44% 44%;
+  color: #2c4d3f;
+  background: rgba(255, 235, 141, 0.12);
+  box-shadow: 0 0 0 5px rgba(255, 241, 173, 0.32), 0 0 22px rgba(255, 216, 75, 0.88);
+  pointer-events: auto;
+  cursor: pointer;
+  animation: character-pulse 1.15s ease-in-out infinite;
+}
+.character-target span {
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(255, 252, 237, 0.94);
+  font-size: clamp(0.72rem, 1.25vw, 1rem);
+  font-weight: 900;
+  box-shadow: 0 3px 8px rgba(28, 45, 34, 0.2);
+}
+.character-target:disabled { pointer-events: none; }
+.benji-target { left: 5.1%; top: 27%; width: 15%; height: 26%; }
+.sunny-target { left: 39.1%; top: 35%; width: 12%; height: 21%; }
 .next-button {
   position: absolute;
   z-index: 13;
@@ -171,14 +206,21 @@ button { font: inherit; }
   0%, 100% { filter: drop-shadow(0 7px 5px rgba(36, 24, 10, 0.34)) drop-shadow(0 0 0 rgba(255, 216, 107, 0)); }
   50% { filter: drop-shadow(0 7px 5px rgba(36, 24, 10, 0.34)) drop-shadow(0 0 8px rgba(255, 216, 107, 0.8)); }
 }
+@keyframes character-pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 5px rgba(255, 241, 173, 0.32), 0 0 18px rgba(255, 216, 75, 0.7); }
+  50% { transform: scale(1.035); box-shadow: 0 0 0 8px rgba(255, 241, 173, 0.22), 0 0 28px rgba(255, 216, 75, 0.95); }
+}
 @media (max-width: 760px) {
   .language-button, .repeat-button { min-height: 44px; padding: 6px 9px; font-size: 0.78rem; }
   .language-button { min-width: 68px; }
   .speech-bubble { top: 10%; width: 58%; min-height: 78px; padding: 8px 11px; border-width: 2px; }
   .task-prompt, .complete-banner { bottom: 2.5%; padding: 6px 10px; border-width: 2px; }
   .next-button { right: 2.5%; bottom: 2.5%; min-width: 86px; min-height: 44px; padding: 7px 11px; border-width: 2px; }
+  .character-target { border-width: 2px; padding-bottom: 3px; }
+  .character-target span { padding: 3px 6px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .log-piece:not(:disabled):not(.placed) { animation: none; }
-  .final-scene { transition-duration: 1ms; }
+  .final-scene, .story-state { transition-duration: 1ms; }
+  .character-target { animation: none; }
 }

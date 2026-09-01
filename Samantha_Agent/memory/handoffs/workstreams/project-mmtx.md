@@ -1,33 +1,35 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-31 17:15 CEST
+- Obnoveno potvrzeným checkpointem: 2026-09-01 21:47 CEST
 
 ### Hotovo
-- Scéna 5 má první dějový průchod s Loganem, dialogem po větách, pevnými EN/CZ MP3 a stavbou mostu ze tří klád
+- Scéna 5 pokračuje interaktivním přechodem Benjiho a Sunny a končí Bunnym, který se bojí přejít.
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
 - Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
 - Lokální commity čekají na samostatný denní GitHub balíček.
 
 ### Rizika
-- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
-- Aktivní relace má neuzavřenou nejistotu doručení.
+- Žádné další doložené provozní riziko.
 
 ### Další krok
-- Ručně ověřit vzhled, ovládání a zvuk scény 5 na Macu a iPhonu; potom rozhodnout o napojení ze scény 4
+- Ručně ověřit přechody obrazů, klikací oblasti a zvuk na Macu nebo iPhonu.
 
 ### Rozhodnutí
 - V tomto kroku nebylo přijato nové kanonické rozhodnutí.
 
 ### Navrhované další kroky
-- Žádné další návrhy nad rámec bezprostředního kroku.
+- Doplnit přemlouvání Bunnyho
+- Nechat Bruna převzít Bunnyho batoh a vést ho přes most
+- Navázat pádem Brunovy lampy do vody
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `ab345a18c676`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `3ea812df99e5` · je starší než ověřený main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-31T13:42:14+00:00.
-- Read-only živý stav: main=`local_ahead`, deployment=`verified_other_main`, runtime=`delivery_uncertain`.
+- Git před checkpointem: lokální `main` na `8a18dc4c061a`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `8a18dc4c061a` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-09-01T19:15:55+00:00.
+- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -460,3 +462,15 @@ Bezpecnost / neukladat:
 - Rizika: Tento zápis ani lokální commit nepotvrzují push, Pages publikaci nebo veřejný produkční stav.
 - Další krok: Ručně projít tři klepnutí a finální obraz; po schválení samostatně autorizovat MMTX `p+n`.
 - Ověření: JavaScript syntaxe OK, audio kontrola 22/22, cílené testy 18/18, obě kopie scény jsou byte-identické a `git diff --check` je čistý.
+
+### Automatický checkpoint 2026-09-01 21:47 CEST
+
+- Pracovní proud: `project-mmtx`
+- Hotovo: Scéna 5 pokračuje interaktivním přechodem Benjiho a Sunny a končí Bunnym, který se bojí přejít.; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.; Lokální commity čekají na samostatný denní GitHub balíček.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: rychlá Cockpit brána syntaxe a whitespace: 7.9 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu
+- Změněné cesty před paměťovým zápisem (50): `MatysekANJ/build_scene05_audio.py`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio_manifest.js`, `MatysekANJ/web_mmtx/scene05_log_bridge/index.html`, `MatysekANJ/web_mmtx/scene05_log_bridge/interaction.css`, `MatysekANJ/web_mmtx/scene05_log_bridge/script.js`, `Samantha_Agent/tests/test_mmtx_scene05_first_interaction.py`, `docs/scene05_log_bridge/audio_manifest.js`, `docs/scene05_log_bridge/index.html`, `docs/scene05_log_bridge/interaction.css`, `docs/scene05_log_bridge/script.js`, `MatysekANJ/web_mmtx/scene05_log_bridge/assets/scene05_benji_across_source.png`, `MatysekANJ/web_mmtx/scene05_log_bridge/assets/scene05_benji_sunny_across_source.png`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_benji_bridge_safe_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_benji_go_first_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_benji_tap_benji_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_bunny_bunny_scared_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_logan_who_first_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_sunny_my_turn_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_sunny_tap_sunny_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_sunny_three_jumps_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_benji_bridge_safe_en.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_benji_go_first_en.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_benji_tap_benji_en.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_bunny_bunny_scared_en.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_logan_who_first_en.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_sunny_my_turn_en.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_sunny_tap_sunny_en.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_sunny_three_jumps_en.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/scene05_benji_across_q90.webp`, `MatysekANJ/web_mmtx/scene05_log_bridge/scene05_benji_sunny_across_q90.webp`, `docs/scene05_log_bridge/assets/scene05_benji_across_source.png`, `docs/scene05_log_bridge/assets/scene05_benji_sunny_across_source.png`, `docs/scene05_log_bridge/audio/czech/scene05_benji_bridge_safe_cz.mp3`, `docs/scene05_log_bridge/audio/czech/scene05_benji_go_first_cz.mp3`, `docs/scene05_log_bridge/audio/czech/scene05_benji_tap_benji_cz.mp3`, `docs/scene05_log_bridge/audio/czech/scene05_bunny_bunny_scared_cz.mp3`, `docs/scene05_log_bridge/audio/czech/scene05_logan_who_first_cz.mp3`, `docs/scene05_log_bridge/audio/czech/scene05_sunny_my_turn_cz.mp3`, `docs/scene05_log_bridge/audio/czech/scene05_sunny_tap_sunny_cz.mp3`, `docs/scene05_log_bridge/audio/czech/scene05_sunny_three_jumps_cz.mp3`, … a dalších 10
+- Commit: `Extend Scene 5 with Benji and Sunny crossing`
+- Další krok: Ručně ověřit přechody obrazů, klikací oblasti a zvuk na Macu nebo iPhonu.

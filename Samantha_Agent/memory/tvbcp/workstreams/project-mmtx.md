@@ -1,33 +1,35 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-31 17:15 CEST
+- Obnoveno potvrzeným checkpointem: 2026-09-01 21:47 CEST
 
 ### Hotovo
-- Scéna 5 má první dějový průchod s Loganem, dialogem po větách, pevnými EN/CZ MP3 a stavbou mostu ze tří klád
+- Scéna 5 pokračuje interaktivním přechodem Benjiho a Sunny a končí Bunnym, který se bojí přejít.
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
 - Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
 - Lokální commity čekají na samostatný denní GitHub balíček.
 
 ### Rizika
-- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
-- Aktivní relace má neuzavřenou nejistotu doručení.
+- Žádné další doložené provozní riziko.
 
 ### Další krok
-- Ručně ověřit vzhled, ovládání a zvuk scény 5 na Macu a iPhonu; potom rozhodnout o napojení ze scény 4
+- Ručně ověřit přechody obrazů, klikací oblasti a zvuk na Macu nebo iPhonu.
 
 ### Rozhodnutí
 - V tomto kroku nebylo přijato nové kanonické rozhodnutí.
 
 ### Navrhované další kroky
-- Žádné další návrhy nad rámec bezprostředního kroku.
+- Doplnit přemlouvání Bunnyho
+- Nechat Bruna převzít Bunnyho batoh a vést ho přes most
+- Navázat pádem Brunovy lampy do vody
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `ab345a18c676`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `3ea812df99e5` · je starší než ověřený main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-31T13:42:14+00:00.
-- Read-only živý stav: main=`local_ahead`, deployment=`verified_other_main`, runtime=`delivery_uncertain`.
+- Git před checkpointem: lokální `main` na `8a18dc4c061a`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `8a18dc4c061a` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-09-01T19:15:55+00:00.
+- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -936,3 +938,32 @@ Navrhované další kroky:
 Technický důkaz:
 - `node --check` prošel, generátor audia potvrdil 22 pevných stop, cílené testy prošly 18/18 a `git diff --check` je čistý.
 - Automatizovaný browser nebyl v této relaci dostupný, proto vizuální retest zůstává otevřený a nesmí být vydáván za provedený.
+
+### 2026-09-01 21:47 CEST – Scéna 5 pokračuje interaktivním přechodem Benjiho a Sunny a končí Bunnym, který se bojí přejít.
+
+Hotovo:
+- Scéna 5 pokračuje interaktivním přechodem Benjiho a Sunny a končí Bunnym, který se bojí přejít.
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+
+Otevřeno:
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
+
+Rizika:
+- Žádné další doložené provozní riziko.
+
+Rozhodnutí:
+- V tomto kroku nebylo přijato nové kanonické rozhodnutí.
+
+Další krok:
+- Ručně ověřit přechody obrazů, klikací oblasti a zvuk na Macu nebo iPhonu.
+
+Navrhované další kroky:
+- Doplnit přemlouvání Bunnyho
+- Nechat Bruna převzít Bunnyho batoh a vést ho přes most
+- Navázat pádem Brunovy lampy do vody
+
+Technický důkaz:
+- rychlá Cockpit brána syntaxe a whitespace: 7.9 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
+- Pracovní proud: `project-mmtx`.
+- Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.

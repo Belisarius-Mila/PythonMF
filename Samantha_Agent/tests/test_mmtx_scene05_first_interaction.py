@@ -27,7 +27,12 @@ class MmtxScene05FirstInteractionTests(unittest.TestCase):
         self.assertIn('data-scene-state="bridge-supports"', html)
 
     def test_bridge_images_and_log_sprites_keep_production_contract(self) -> None:
-        for filename in ("scene05_log_bridge_supports.webp", "scene05_log_bridge_crooked_trees.webp"):
+        for filename in (
+            "scene05_log_bridge_supports.webp",
+            "scene05_log_bridge_crooked_trees.webp",
+            "scene05_benji_across_q90.webp",
+            "scene05_benji_sunny_across_q90.webp",
+        ):
             with Image.open(DOCS_SCENE / filename) as image:
                 self.assertEqual(image.size, (1672, 941))
                 self.assertEqual(image.format, "WEBP")
@@ -38,12 +43,15 @@ class MmtxScene05FirstInteractionTests(unittest.TestCase):
 
     def test_controls_and_three_log_interaction_are_present(self) -> None:
         html = (DOCS_SCENE / "index.html").read_text(encoding="utf-8")
-        for element_id in ("languageButton", "repeatButton", "nextButton", "audioGate", "speechBubble", "taskPrompt", "logsLayer", "completeBanner"):
+        for element_id in (
+            "languageButton", "repeatButton", "nextButton", "audioGate", "speechBubble",
+            "taskPrompt", "logsLayer", "benjiTarget", "sunnyTarget", "completeBanner",
+        ):
             self.assertIn(f'id="{element_id}"', html)
         self.assertEqual(html.count('data-log="'), 3)
         self.assertEqual(html.count('class="log-sprite"'), 3)
-        self.assertIn("The bridge is ready!", html)
-        self.assertIn("Most je hotový!", html)
+        self.assertIn("Bunny needs help!", html)
+        self.assertIn("Bunny potřebuje pomoc!", html)
 
     def test_dialogue_contract_steps_one_sentence_at_a_time(self) -> None:
         script = (DOCS_SCENE / "script.js").read_text(encoding="utf-8")
@@ -51,6 +59,9 @@ class MmtxScene05FirstInteractionTests(unittest.TestCase):
             "Oh no! The old bridge is gone.", "The stream is too wide.", "How can we get across?",
             "Hello, friends! My name is Logan.", "I can help you.", "I have three strong logs.",
             "Help Logan. Tap the three logs.", "One log.", "Two logs.", "Three logs!", "Great! The bridge is ready.",
+            "Who wants to go first?", "I will go first.", "Tap Benji and help him cross.",
+            "I did it! The bridge is safe.", "My turn! I can jump.",
+            "Tap Sunny. Help her jump across.", "One, two, three!", "Oh no... I am scared.",
         ):
             self.assertIn(f'"{text}"', script)
         self.assertIn("state.lineIndex += 1", script)
@@ -59,9 +70,25 @@ class MmtxScene05FirstInteractionTests(unittest.TestCase):
         self.assertIn("button.animate(flightFrames(button, index)", script)
         self.assertIn('finalScene.classList.add("visible")', script)
         self.assertIn('scene.dataset.sceneState = "bridge-complete"', script)
+        self.assertIn('revealStoryState(benjiAcrossScene, "benji-across")', script)
+        self.assertIn('revealStoryState(sunnyAcrossScene, "benji-sunny-across")', script)
+        self.assertIn("crossWithBenji", script)
+        self.assertIn("crossWithSunny", script)
         self.assertIn('matchMedia("(prefers-reduced-motion: reduce)")', script)
         self.assertNotIn("speechSynthesis", script)
         self.assertNotIn("SpeechSynthesisUtterance", script)
+
+    def test_crossing_images_preserve_png_sources_and_q90_webp_outputs(self) -> None:
+        for stem in ("scene05_benji_across", "scene05_benji_sunny_across"):
+            source = DOCS_SCENE / "assets" / f"{stem}_source.png"
+            production = DOCS_SCENE / f"{stem}_q90.webp"
+            with Image.open(source) as image:
+                self.assertEqual(image.size, (1672, 941))
+                self.assertEqual(image.format, "PNG")
+            with Image.open(production) as image:
+                self.assertEqual(image.size, (1672, 941))
+                self.assertEqual(image.format, "WEBP")
+            self.assertLess(production.stat().st_size, source.stat().st_size)
 
     def test_logs_use_real_alpha_sprites_instead_of_css_cylinders(self) -> None:
         css = (DOCS_SCENE / "interaction.css").read_text(encoding="utf-8")
@@ -73,13 +100,13 @@ class MmtxScene05FirstInteractionTests(unittest.TestCase):
     def test_manifest_covers_every_spoken_line_with_fixed_mp3(self) -> None:
         manifest = load_manifest()
         self.assertEqual(manifest["schemaVersion"], 1)
-        self.assertEqual(manifest["version"], "20260831intro1")
-        self.assertEqual(manifest["stats"], {"dialogueLines": 11, "audioReferences": 22})
+        self.assertEqual(manifest["version"], "20260901crossing1")
+        self.assertEqual(manifest["stats"], {"dialogueLines": 19, "audioReferences": 38})
         dialogue = manifest["dialogue"]
-        self.assertEqual(len(dialogue["en"]), 11)
-        self.assertEqual(len(dialogue["cs"]), 11)
+        self.assertEqual(len(dialogue["en"]), 19)
+        self.assertEqual(len(dialogue["cs"]), 19)
         referenced = set(dialogue["en"].values()) | set(dialogue["cs"].values())
-        self.assertEqual(len(referenced), 22)
+        self.assertEqual(len(referenced), 38)
         for relative_path in referenced:
             audio = (DOCS_SCENE / relative_path).read_bytes()
             self.assertGreaterEqual(len(audio), 1000)

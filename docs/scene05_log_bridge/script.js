@@ -15,6 +15,10 @@ const scene = document.getElementById("scene");
 const logsLayer = document.getElementById("logsLayer");
 const logButtons = [...document.querySelectorAll("[data-log]")];
 const finalScene = document.getElementById("finalScene");
+const benjiAcrossScene = document.getElementById("benjiAcrossScene");
+const sunnyAcrossScene = document.getElementById("sunnyAcrossScene");
+const benjiTarget = document.getElementById("benjiTarget");
+const sunnyTarget = document.getElementById("sunnyTarget");
 const completeBanner = document.getElementById("completeBanner");
 
 const LANGUAGE_MODES = Object.freeze({ english: "en", bilingual: "en-cz" });
@@ -35,15 +39,26 @@ const lines = {
   twoLogs: dialogue("logan", "Two logs.", "Dvě klády."),
   threeLogs: dialogue("logan", "Three logs!", "Tři klády!"),
   bridgeReady: dialogue("logan", "Great! The bridge is ready.", "Skvěle! Most je hotový."),
+  whoFirst: dialogue("logan", "Who wants to go first?", "Kdo chce jít první?"),
+  benjiFirst: dialogue("benji", "I will go first.", "Já půjdu první."),
+  tapBenji: prompt("benji", "Tap Benji and help him cross.", "Klepni na Benjiho a pomoz mu přejít."),
+  benjiSafe: dialogue("benji", "I did it! The bridge is safe.", "Zvládl jsem to! Most je bezpečný."),
+  sunnyTurn: dialogue("sunny", "My turn! I can jump.", "Teď já! Umím skákat."),
+  tapSunny: prompt("sunny", "Tap Sunny. Help her jump across.", "Klepni na Sunny. Pomoz jí přeskákat."),
+  threeJumps: dialogue("sunny", "One, two, three!", "Raz, dva, tři!"),
+  bunnyScared: dialogue("bunny", "Oh no... I am scared.", "Ach ne... Já se bojím."),
 };
 
 const introLines = [lines.bridgeGone, lines.streamWide, lines.getAcross, lines.loganHello, lines.loganHelp, lines.strongLogs, lines.tapLogs];
 const countLines = [lines.oneLog, lines.twoLogs, lines.threeLogs];
+const benjiLines = [lines.bridgeReady, lines.whoFirst, lines.benjiFirst, lines.tapBenji];
+const sunnyLines = [lines.sunnyTurn, lines.tapSunny];
 
 const state = {
   stage: "waiting",
   languageMode: loadLanguageMode(),
   lineIndex: -1,
+  crossingIndex: -1,
   placedLogs: 0,
   currentEntry: null,
   isPlaying: false,
@@ -120,7 +135,10 @@ function showEntry(entry) {
 function shouldShowNext() {
   if (state.isPlaying || state.isAnimating) return false;
   if (state.stage === "intro") return state.lineIndex < introLines.length - 1;
-  return state.stage === "bridge-ready";
+  if (state.stage === "bridge-ready") return true;
+  if (state.stage === "benji-dialogue") return state.crossingIndex < benjiLines.length - 1;
+  if (state.stage === "sunny-dialogue") return state.crossingIndex < sunnyLines.length - 1;
+  return state.stage === "bunny-ready";
 }
 
 function updateControls() {
@@ -132,6 +150,8 @@ function updateControls() {
   for (const button of logButtons) {
     button.disabled = state.stage !== "logs" || state.isPlaying || state.isAnimating || button.classList.contains("placed");
   }
+  benjiTarget.disabled = state.stage !== "wait-benji" || state.isPlaying || state.isAnimating;
+  sunnyTarget.disabled = state.stage !== "wait-sunny" || state.isPlaying || state.isAnimating;
 }
 
 async function playEntry(entry, { remember = true } = {}) {
@@ -169,9 +189,38 @@ async function advanceDialogue() {
     return;
   }
   if (state.stage === "bridge-ready") {
-    state.stage = "complete";
+    state.stage = "benji-dialogue";
+    state.crossingIndex = 0;
     taskPrompt.classList.add("hidden");
-    await playEntry(lines.bridgeReady);
+    await playEntry(benjiLines[state.crossingIndex]);
+    updateControls();
+    return;
+  }
+  if (state.stage === "benji-dialogue") {
+    state.crossingIndex += 1;
+    const entry = benjiLines[state.crossingIndex];
+    await playEntry(entry);
+    if (entry === lines.tapBenji) {
+      state.stage = "wait-benji";
+      benjiTarget.classList.remove("hidden");
+      updateControls();
+    }
+    return;
+  }
+  if (state.stage === "sunny-dialogue") {
+    state.crossingIndex += 1;
+    const entry = sunnyLines[state.crossingIndex];
+    await playEntry(entry);
+    if (entry === lines.tapSunny) {
+      state.stage = "wait-sunny";
+      sunnyTarget.classList.remove("hidden");
+      updateControls();
+    }
+    return;
+  }
+  if (state.stage === "bunny-ready") {
+    state.stage = "complete";
+    await playEntry(lines.bunnyScared);
     completeBanner.classList.remove("hidden");
     updateControls();
   }
@@ -225,6 +274,13 @@ async function revealFinalScene() {
   scene.dataset.sceneState = "bridge-complete";
 }
 
+async function revealStoryState(element, sceneState) {
+  element.classList.add("visible");
+  scene.dataset.sceneState = sceneState;
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  await wait(reducedMotion ? 1 : 540);
+}
+
 async function placeLog(button) {
   if (state.stage !== "logs" || state.isPlaying || state.isAnimating || button.classList.contains("placed")) return;
   state.isAnimating = true;
@@ -236,6 +292,35 @@ async function placeLog(button) {
     await revealFinalScene();
     state.stage = "bridge-ready";
   }
+  state.isAnimating = false;
+  updateControls();
+}
+
+async function crossWithBenji() {
+  if (state.stage !== "wait-benji" || state.isPlaying || state.isAnimating) return;
+  state.isAnimating = true;
+  benjiTarget.classList.add("hidden");
+  taskPrompt.classList.add("hidden");
+  updateControls();
+  await revealStoryState(benjiAcrossScene, "benji-across");
+  await playEntry(lines.benjiSafe);
+  state.stage = "sunny-dialogue";
+  state.crossingIndex = -1;
+  state.isAnimating = false;
+  updateControls();
+}
+
+async function crossWithSunny() {
+  if (state.stage !== "wait-sunny" || state.isPlaying || state.isAnimating) return;
+  state.isAnimating = true;
+  sunnyTarget.classList.add("hidden");
+  taskPrompt.classList.add("hidden");
+  updateControls();
+  await Promise.all([
+    revealStoryState(sunnyAcrossScene, "benji-sunny-across"),
+    playEntry(lines.threeJumps),
+  ]);
+  state.stage = "bunny-ready";
   state.isAnimating = false;
   updateControls();
 }
@@ -257,5 +342,7 @@ nextButton.addEventListener("click", advanceDialogue);
 repeatButton.addEventListener("click", repeatCurrent);
 languageButton.addEventListener("click", toggleLanguage);
 for (const button of logButtons) button.addEventListener("click", () => placeLog(button));
+benjiTarget.addEventListener("click", crossWithBenji);
+sunnyTarget.addEventListener("click", crossWithSunny);
 updateLanguageUi();
 updateControls();

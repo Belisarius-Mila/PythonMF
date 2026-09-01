@@ -21,7 +21,7 @@ MANIFEST_NAME = "audio_manifest.js"
 CAPABILITY_ID = "generate_project_audio_asset"
 CAPABILITY_TOOL = "app.speech.edge_tts_mp3.synthesize_edge_tts_mp3_sync"
 RATE = "-10%"
-VERSION = "20260831intro1"
+VERSION = "20260901crossing1"
 MIN_AUDIO_BYTES = 1000
 
 @dataclass(frozen=True)
@@ -49,6 +49,7 @@ ENGLISH_VOICES = {
     "bunny": Voice("en-US-AnaNeural", "Ana"),
     "fiona": Voice("en-US-JennyNeural", "Jenny"),
     "logan": Voice("en-US-ChristopherNeural", "Christopher"),
+    "sunny": Voice("en-US-MichelleNeural", "Michelle"),
 }
 CZECH_VOICE = Voice("cs-CZ-VlastaNeural", "Vlasta")
 
@@ -64,6 +65,14 @@ DIALOGUE_LINES = (
     DialogueLine("two_logs", "logan", "Two logs.", "Dvě klády."),
     DialogueLine("three_logs", "logan", "Three logs!", "Tři klády!"),
     DialogueLine("bridge_ready", "logan", "Great! The bridge is ready.", "Skvěle! Most je hotový."),
+    DialogueLine("who_first", "logan", "Who wants to go first?", "Kdo chce jít první?"),
+    DialogueLine("go_first", "benji", "I will go first.", "Já půjdu první."),
+    DialogueLine("tap_benji", "benji", "Tap Benji and help him cross.", "Klepni na Benjiho a pomoz mu přejít."),
+    DialogueLine("bridge_safe", "benji", "I did it! The bridge is safe.", "Zvládl jsem to! Most je bezpečný."),
+    DialogueLine("my_turn", "sunny", "My turn! I can jump.", "Teď já! Umím skákat."),
+    DialogueLine("tap_sunny", "sunny", "Tap Sunny. Help her jump across.", "Klepni na Sunny. Pomoz jí přeskákat."),
+    DialogueLine("three_jumps", "sunny", "One, two, three!", "Raz, dva, tři!"),
+    DialogueLine("bunny_scared", "bunny", "Oh no... I am scared.", "Ach ne... Já se bojím."),
 )
 
 def _asset_path(line: DialogueLine, language: str) -> Path:

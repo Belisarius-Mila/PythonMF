@@ -7,8 +7,10 @@
     <title>Scene 5 — The Log Bridge</title>
     <link rel="preload" href="scene05_log_bridge_supports.webp" as="image" type="image/webp" fetchpriority="high">
     <link rel="preload" href="scene05_log_bridge_crooked_trees.webp" as="image" type="image/webp">
-    <link rel="stylesheet" href="styles.css?v=20260901bridge1">
-    <link rel="stylesheet" href="interaction.css?v=20260901bridge1">
+    <link rel="preload" href="scene05_benji_across_q90.webp" as="image" type="image/webp">
+    <link rel="preload" href="scene05_benji_sunny_across_q90.webp" as="image" type="image/webp">
+    <link rel="stylesheet" href="styles.css?v=20260901crossing1">
+    <link rel="stylesheet" href="interaction.css?v=20260901crossing1">
   </head>
   <body>
     <main class="app-shell">
@@ -20,6 +22,8 @@
           </picture>
 
           <img class="scene-image final-scene" id="finalScene" src="scene05_log_bridge_crooked_trees.webp" width="1672" height="941" alt="Hotový most ze tří bobrem ohlodaných kmenů" draggable="false">
+          <img class="scene-image story-state" id="benjiAcrossScene" src="scene05_benji_across_q90.webp" width="1672" height="941" alt="Benji bezpečně stojí na pravém břehu za hotovým mostem" draggable="false">
+          <img class="scene-image story-state" id="sunnyAcrossScene" src="scene05_benji_sunny_across_q90.webp" width="1672" height="941" alt="Benji a Sunny jsou na pravém břehu a Bunny se vlevo bojí" draggable="false">
 
           <div class="scene-hud">
             <a class="ui-button back-button" href="../scene04_harry_guard_prototype/index.html" aria-label="Zpět ke scéně s Harrym"><span aria-hidden="true">↩</span></a>
@@ -50,11 +54,16 @@
             <button class="log-piece log-three" type="button" data-log="3" aria-label="Třetí kláda"><img class="log-sprite" src="scene05_log_sprite_a.webp" alt="" draggable="false"></button>
           </div>
 
+          <div class="character-targets" aria-label="Postavy, kterým můžeš pomoci přejít most">
+            <button class="character-target benji-target hidden" id="benjiTarget" type="button" aria-label="Pomoz Benjimu přejít most"><span>Benji</span></button>
+            <button class="character-target sunny-target hidden" id="sunnyTarget" type="button" aria-label="Pomoz Sunny přeskákat most"><span>Sunny</span></button>
+          </div>
+
           <button class="next-button hidden" id="nextButton" type="button" aria-label="Přehrát další větu" disabled><span>Next</span><span aria-hidden="true">▶</span></button>
 
           <div class="complete-banner hidden" id="completeBanner" aria-live="polite">
-            <span aria-hidden="true">🪵</span>
-            <span><strong>The bridge is ready!</strong><small>Most je hotový!</small></span>
+            <span aria-hidden="true">🐰</span>
+            <span><strong>Bunny needs help!</strong><small>Bunny potřebuje pomoc!</small></span>
           </div>
 
           <button class="audio-gate" id="audioGate" type="button"><strong>Klepni a poslouchej</strong><span>Tap and listen</span></button>
@@ -62,7 +71,7 @@
       </section>
     </main>
 
-    <script src="audio_manifest.js?v=20260831intro1"></script>
-    <script src="script.js?v=20260901bridge1"></script>
+    <script src="audio_manifest.js?v=20260901crossing1"></script>
+    <script src="script.js?v=20260901crossing1"></script>
   </body>
 </html>
