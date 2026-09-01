@@ -1,35 +1,33 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-09-01 21:47 CEST
+- Obnoveno potvrzeným checkpointem: 2026-09-01 22:31 CEST
 
 ### Hotovo
-- Scéna 5 pokračuje interaktivním přechodem Benjiho a Sunny a končí Bunnym, který se bojí přejít.
+- Benjiho přechod nyní používá hladkou 3D grafiku odpovídající původnímu MMTX při zachování plného rozlišení a lehkého WebP q90.
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
 - Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
-- Lokální commity čekají na samostatný denní GitHub balíček.
 
 ### Rizika
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Ručně ověřit přechody obrazů, klikací oblasti a zvuk na Macu nebo iPhonu.
+- Ověřit pilot na velké obrazovce a po schválení stejným stylem opravit ostatní situační obrazy scény 5.
 
 ### Rozhodnutí
-- V tomto kroku nebylo přijato nové kanonické rozhodnutí.
+- Scéna 5 bude používat hladký 3D standard původního MMTX; WebP q90 zůstává produkční formát.
 
 ### Navrhované další kroky
-- Doplnit přemlouvání Bunnyho
-- Nechat Bruna převzít Bunnyho batoh a vést ho přes most
-- Navázat pádem Brunovy lampy do vody
+- Opravit navazující obraz s Benjim a Sunnym
+- Sjednotit úvodní a mostové obrazy scény 5
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `8a18dc4c061a`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `8a18dc4c061a` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-09-01T19:15:55+00:00.
-- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+- Git před checkpointem: lokální `main` na `706fcfdb6060`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `706fcfdb6060` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-09-01T20:09:40+00:00.
+- Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -474,3 +472,15 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (50): `MatysekANJ/build_scene05_audio.py`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio_manifest.js`, `MatysekANJ/web_mmtx/scene05_log_bridge/index.html`, `MatysekANJ/web_mmtx/scene05_log_bridge/interaction.css`, `MatysekANJ/web_mmtx/scene05_log_bridge/script.js`, `Samantha_Agent/tests/test_mmtx_scene05_first_interaction.py`, `docs/scene05_log_bridge/audio_manifest.js`, `docs/scene05_log_bridge/index.html`, `docs/scene05_log_bridge/interaction.css`, `docs/scene05_log_bridge/script.js`, `MatysekANJ/web_mmtx/scene05_log_bridge/assets/scene05_benji_across_source.png`, `MatysekANJ/web_mmtx/scene05_log_bridge/assets/scene05_benji_sunny_across_source.png`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_benji_bridge_safe_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_benji_go_first_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_benji_tap_benji_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_bunny_bunny_scared_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_logan_who_first_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_sunny_my_turn_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_sunny_tap_sunny_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_sunny_three_jumps_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_benji_bridge_safe_en.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_benji_go_first_en.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_benji_tap_benji_en.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_bunny_bunny_scared_en.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_logan_who_first_en.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_sunny_my_turn_en.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_sunny_tap_sunny_en.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_sunny_three_jumps_en.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/scene05_benji_across_q90.webp`, `MatysekANJ/web_mmtx/scene05_log_bridge/scene05_benji_sunny_across_q90.webp`, `docs/scene05_log_bridge/assets/scene05_benji_across_source.png`, `docs/scene05_log_bridge/assets/scene05_benji_sunny_across_source.png`, `docs/scene05_log_bridge/audio/czech/scene05_benji_bridge_safe_cz.mp3`, `docs/scene05_log_bridge/audio/czech/scene05_benji_go_first_cz.mp3`, `docs/scene05_log_bridge/audio/czech/scene05_benji_tap_benji_cz.mp3`, `docs/scene05_log_bridge/audio/czech/scene05_bunny_bunny_scared_cz.mp3`, `docs/scene05_log_bridge/audio/czech/scene05_logan_who_first_cz.mp3`, `docs/scene05_log_bridge/audio/czech/scene05_sunny_my_turn_cz.mp3`, `docs/scene05_log_bridge/audio/czech/scene05_sunny_tap_sunny_cz.mp3`, `docs/scene05_log_bridge/audio/czech/scene05_sunny_three_jumps_cz.mp3`, … a dalších 10
 - Commit: `Extend Scene 5 with Benji and Sunny crossing`
 - Další krok: Ručně ověřit přechody obrazů, klikací oblasti a zvuk na Macu nebo iPhonu.
+
+### Automatický checkpoint 2026-09-01 22:31 CEST
+
+- Pracovní proud: `project-mmtx`
+- Hotovo: Benjiho přechod nyní používá hladkou 3D grafiku odpovídající původnímu MMTX při zachování plného rozlišení a lehkého WebP q90.; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: rychlá Cockpit brána syntaxe a whitespace: 8.0 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu
+- Změněné cesty před paměťovým zápisem (7): `MatysekANJ/web_mmtx/scene05_log_bridge/index.html`, `Samantha_Agent/tests/test_mmtx_scene05_first_interaction.py`, `docs/scene05_log_bridge/index.html`, `MatysekANJ/web_mmtx/scene05_log_bridge/assets/scene05_benji_across_smooth_source.png`, `MatysekANJ/web_mmtx/scene05_log_bridge/scene05_benji_across_smooth_q90.webp`, `docs/scene05_log_bridge/assets/scene05_benji_across_smooth_source.png`, `docs/scene05_log_bridge/scene05_benji_across_smooth_q90.webp`
+- Commit: `Smooth Benji crossing artwork in scene 5`
+- Další krok: Ověřit pilot na velké obrazovce a po schválení stejným stylem opravit ostatní situační obrazy scény 5.
