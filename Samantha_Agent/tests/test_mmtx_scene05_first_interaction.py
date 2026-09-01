@@ -20,19 +20,27 @@ def load_manifest() -> dict[str, object]:
 class MmtxScene05FirstInteractionTests(unittest.TestCase):
     def test_opening_and_completed_bridge_use_approved_images(self) -> None:
         html = (DOCS_SCENE / "index.html").read_text(encoding="utf-8")
-        self.assertIn('srcset="scene05_log_bridge_supports.webp"', html)
-        self.assertIn('src="scene05_log_bridge_supports.webp"', html)
+        self.assertIn('srcset="scene05_log_bridge_supports_smooth_q90.webp"', html)
+        self.assertIn('src="scene05_log_bridge_supports_smooth_q90.webp"', html)
         self.assertIn('id="finalScene"', html)
-        self.assertIn('src="scene05_log_bridge_crooked_trees.webp"', html)
+        self.assertIn('src="scene05_log_bridge_complete_smooth_q90.webp"', html)
         self.assertIn('src="scene05_benji_across_smooth_q90.webp"', html)
+        self.assertIn('src="scene05_benji_sunny_across_smooth_q90.webp"', html)
         self.assertIn('data-scene-state="bridge-supports"', html)
+        for legacy_filename in (
+            "scene05_log_bridge_supports.webp",
+            "scene05_log_bridge_crooked_trees.webp",
+            "scene05_benji_across_q90.webp",
+            "scene05_benji_sunny_across_q90.webp",
+        ):
+            self.assertNotIn(legacy_filename, html)
 
     def test_bridge_images_and_log_sprites_keep_production_contract(self) -> None:
         for filename in (
-            "scene05_log_bridge_supports.webp",
-            "scene05_log_bridge_crooked_trees.webp",
+            "scene05_log_bridge_supports_smooth_q90.webp",
+            "scene05_log_bridge_complete_smooth_q90.webp",
             "scene05_benji_across_smooth_q90.webp",
-            "scene05_benji_sunny_across_q90.webp",
+            "scene05_benji_sunny_across_smooth_q90.webp",
         ):
             with Image.open(DOCS_SCENE / filename) as image:
                 self.assertEqual(image.size, (1672, 941))
@@ -79,8 +87,13 @@ class MmtxScene05FirstInteractionTests(unittest.TestCase):
         self.assertNotIn("speechSynthesis", script)
         self.assertNotIn("SpeechSynthesisUtterance", script)
 
-    def test_crossing_images_preserve_png_sources_and_q90_webp_outputs(self) -> None:
-        for stem in ("scene05_benji_across_smooth", "scene05_benji_sunny_across"):
+    def test_smooth_scene_images_preserve_png_sources_and_q90_webp_outputs(self) -> None:
+        for stem in (
+            "scene05_log_bridge_supports_smooth",
+            "scene05_log_bridge_complete_smooth",
+            "scene05_benji_across_smooth",
+            "scene05_benji_sunny_across_smooth",
+        ):
             source = DOCS_SCENE / "assets" / f"{stem}_source.png"
             production = DOCS_SCENE / f"{stem}_q90.webp"
             with Image.open(source) as image:

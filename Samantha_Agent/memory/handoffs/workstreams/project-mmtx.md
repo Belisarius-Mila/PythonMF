@@ -1,33 +1,33 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-09-01 22:31 CEST
+- Obnoveno potvrzeným checkpointem: 2026-09-01 22:44 CEST
 
 ### Hotovo
-- Benjiho přechod nyní používá hladkou 3D grafiku odpovídající původnímu MMTX při zachování plného rozlišení a lehkého WebP q90.
-- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Úvod, hotový most i přechod Benjiho se Sunny nyní používají jednotnou hladkou 3D grafiku a jsou zapojené v lokální scéně 5.
 
 ### Otevřeno
 - Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
 
 ### Rizika
-- Žádné další doložené provozní riziko.
+- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
 
 ### Další krok
-- Ověřit pilot na velké obrazovce a po schválení stejným stylem opravit ostatní situační obrazy scény 5.
+- Vizuálně ověřit všechny přechody scény 5 na 22palcové obrazovce.
 
 ### Rozhodnutí
-- Scéna 5 bude používat hladký 3D standard původního MMTX; WebP q90 zůstává produkční formát.
+- Aktivní situační obrazy scény 5 používají hladký 3D standard původního MMTX a produkční WebP q90.
 
 ### Navrhované další kroky
-- Opravit navazující obraz s Benjim a Sunnym
-- Sjednotit úvodní a mostové obrazy scény 5
+- Po schválení provést p+n jako samostatný krok
+- Pokračovat Bunnyho a Brunovou částí příběhu
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `706fcfdb6060`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `706fcfdb6060` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-09-01T20:09:40+00:00.
-- Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
+- Git před checkpointem: lokální `main` na `db26ce376565`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `706fcfdb6060` · je starší než ověřený main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-09-01T20:09:40+00:00.
+- Read-only živý stav: main=`local_ahead`, deployment=`verified_other_main`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -484,3 +484,15 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (7): `MatysekANJ/web_mmtx/scene05_log_bridge/index.html`, `Samantha_Agent/tests/test_mmtx_scene05_first_interaction.py`, `docs/scene05_log_bridge/index.html`, `MatysekANJ/web_mmtx/scene05_log_bridge/assets/scene05_benji_across_smooth_source.png`, `MatysekANJ/web_mmtx/scene05_log_bridge/scene05_benji_across_smooth_q90.webp`, `docs/scene05_log_bridge/assets/scene05_benji_across_smooth_source.png`, `docs/scene05_log_bridge/scene05_benji_across_smooth_q90.webp`
 - Commit: `Smooth Benji crossing artwork in scene 5`
 - Další krok: Ověřit pilot na velké obrazovce a po schválení stejným stylem opravit ostatní situační obrazy scény 5.
+
+### Automatický checkpoint 2026-09-01 22:44 CEST
+
+- Pracovní proud: `project-mmtx`
+- Hotovo: Úvod, hotový most i přechod Benjiho se Sunny nyní používají jednotnou hladkou 3D grafiku a jsou zapojené v lokální scéně 5.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.; Lokální commity čekají na samostatný denní GitHub balíček.
+- Rizika: Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: rychlá Cockpit brána syntaxe a whitespace: 7.1 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu
+- Změněné cesty před paměťovým zápisem (16): `MatysekANJ/web_mmtx/scene05_log_bridge/index.html`, `Samantha_Agent/tests/test_mmtx_scene05_first_interaction.py`, `Samantha_Agent/tests/test_mmtx_scene05_webp_pilot.py`, `docs/scene05_log_bridge/index.html`, `MatysekANJ/web_mmtx/scene05_log_bridge/assets/scene05_benji_sunny_across_smooth_source.png`, `MatysekANJ/web_mmtx/scene05_log_bridge/assets/scene05_log_bridge_complete_smooth_source.png`, `MatysekANJ/web_mmtx/scene05_log_bridge/assets/scene05_log_bridge_supports_smooth_source.png`, `MatysekANJ/web_mmtx/scene05_log_bridge/scene05_benji_sunny_across_smooth_q90.webp`, `MatysekANJ/web_mmtx/scene05_log_bridge/scene05_log_bridge_complete_smooth_q90.webp`, `MatysekANJ/web_mmtx/scene05_log_bridge/scene05_log_bridge_supports_smooth_q90.webp`, `docs/scene05_log_bridge/assets/scene05_benji_sunny_across_smooth_source.png`, `docs/scene05_log_bridge/assets/scene05_log_bridge_complete_smooth_source.png`, `docs/scene05_log_bridge/assets/scene05_log_bridge_supports_smooth_source.png`, `docs/scene05_log_bridge/scene05_benji_sunny_across_smooth_q90.webp`, `docs/scene05_log_bridge/scene05_log_bridge_complete_smooth_q90.webp`, `docs/scene05_log_bridge/scene05_log_bridge_supports_smooth_q90.webp`
+- Commit: `Unify Scene 5 artwork with smooth MMTX style`
+- Další krok: Vizuálně ověřit všechny přechody scény 5 na 22palcové obrazovce.
