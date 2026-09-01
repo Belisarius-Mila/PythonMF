@@ -4,6 +4,8 @@ import json
 import unittest
 from pathlib import Path
 
+from PIL import Image
+
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DOCS_SCENE = PROJECT_ROOT / "docs" / "scene05_log_bridge"
 MIRROR_SCENE = PROJECT_ROOT / "MatysekANJ" / "web_mmtx" / "scene05_log_bridge"
@@ -16,17 +18,30 @@ def load_manifest() -> dict[str, object]:
     return json.loads(source[len(prefix):-2])
 
 class MmtxScene05FirstInteractionTests(unittest.TestCase):
-    def test_opening_uses_approved_q90_story_image(self) -> None:
+    def test_opening_and_completed_bridge_use_approved_images(self) -> None:
         html = (DOCS_SCENE / "index.html").read_text(encoding="utf-8")
-        self.assertIn('srcset="scene05_arrival_logan_01_q90.webp"', html)
-        self.assertIn('src="scene05_arrival_logan_01.png"', html)
-        self.assertNotIn("scene05_stream_base_q85.webp", html)
+        self.assertIn('srcset="scene05_log_bridge_supports.webp"', html)
+        self.assertIn('src="scene05_log_bridge_supports.webp"', html)
+        self.assertIn('id="finalScene"', html)
+        self.assertIn('src="scene05_log_bridge_crooked_trees.webp"', html)
+        self.assertIn('data-scene-state="bridge-supports"', html)
+
+    def test_bridge_images_and_log_sprites_keep_production_contract(self) -> None:
+        for filename in ("scene05_log_bridge_supports.webp", "scene05_log_bridge_crooked_trees.webp"):
+            with Image.open(DOCS_SCENE / filename) as image:
+                self.assertEqual(image.size, (1672, 941))
+                self.assertEqual(image.format, "WEBP")
+        for filename in ("scene05_log_sprite_a.webp", "scene05_log_sprite_b.webp"):
+            with Image.open(DOCS_SCENE / filename) as image:
+                self.assertEqual(image.format, "WEBP")
+                self.assertIn("A", image.getbands())
 
     def test_controls_and_three_log_interaction_are_present(self) -> None:
         html = (DOCS_SCENE / "index.html").read_text(encoding="utf-8")
         for element_id in ("languageButton", "repeatButton", "nextButton", "audioGate", "speechBubble", "taskPrompt", "logsLayer", "completeBanner"):
             self.assertIn(f'id="{element_id}"', html)
         self.assertEqual(html.count('data-log="'), 3)
+        self.assertEqual(html.count('class="log-sprite"'), 3)
         self.assertIn("The bridge is ready!", html)
         self.assertIn("Most je hotový!", html)
 
@@ -41,8 +56,19 @@ class MmtxScene05FirstInteractionTests(unittest.TestCase):
         self.assertIn("state.lineIndex += 1", script)
         self.assertIn("repeatCurrent", script)
         self.assertIn("state.placedLogs += 1", script)
+        self.assertIn("button.animate(flightFrames(button, index)", script)
+        self.assertIn('finalScene.classList.add("visible")', script)
+        self.assertIn('scene.dataset.sceneState = "bridge-complete"', script)
+        self.assertIn('matchMedia("(prefers-reduced-motion: reduce)")', script)
         self.assertNotIn("speechSynthesis", script)
         self.assertNotIn("SpeechSynthesisUtterance", script)
+
+    def test_logs_use_real_alpha_sprites_instead_of_css_cylinders(self) -> None:
+        css = (DOCS_SCENE / "interaction.css").read_text(encoding="utf-8")
+        self.assertIn(".log-sprite", css)
+        self.assertIn("drop-shadow", css)
+        self.assertNotIn("repeating-linear-gradient", css)
+        self.assertNotIn("repeating-radial-gradient", css)
 
     def test_manifest_covers_every_spoken_line_with_fixed_mp3(self) -> None:
         manifest = load_manifest()

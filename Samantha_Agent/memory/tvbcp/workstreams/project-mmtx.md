@@ -913,3 +913,26 @@ Technický důkaz:
 - rychlá Cockpit brána syntaxe a whitespace: 6.8 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `project-mmtx`.
 - Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_other_main`, runtime=`delivery_uncertain`.
+
+### 2026-09-01 12:03 CEST – Schválený most je zapojený do produkčního modelu úvodu scény 5
+
+Hotovo:
+- Úvodní obraz nyní ukazuje zachované čtyři kůly a příčné nosníky bez starých podélných klád.
+- Tři skutečné alfa sprity pokroucených, suchých a bobrem ohlodaných kmenů postupně létají na základy po jednotlivých klepnutích.
+- Po třetím dosednutí se zobrazí přesný schválený finální obraz se třemi novými kmeny.
+- Dialog po jedné větě, `Next`, `Repeat`, jazykový režim a 22 pevných EN/CZ MP3 zůstaly beze změny.
+
+Rozhodnutí:
+- Schválené obrazy z lokálního layout prototypu jsou nyní produkčními WebP aktivy scény 5; samostatný prototyp zůstává mimo Git.
+- Produkční zdroj v `docs` a MMTX mirror zůstávají byte-identické.
+- Lokální implementace a commit nejsou důkazem pushnutí ani Pages nasazení.
+
+Další krok:
+- Ručně ověřit tři lety, dosednutí a finální překrytí na Macu a iPhonu; teprve potom samostatně potvrdit MMTX `p+n`.
+
+Navrhované další kroky:
+- Po vizuálním schválení rozhodnout o napojení scény 5 ze scény 4.
+
+Technický důkaz:
+- `node --check` prošel, generátor audia potvrdil 22 pevných stop, cílené testy prošly 18/18 a `git diff --check` je čistý.
+- Automatizovaný browser nebyl v této relaci dostupný, proto vizuální retest zůstává otevřený a nesmí být vydáván za provedený.

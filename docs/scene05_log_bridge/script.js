@@ -11,8 +11,10 @@ const speechCzech = document.getElementById("speechCzech");
 const taskPrompt = document.getElementById("taskPrompt");
 const taskEnglish = document.getElementById("taskEnglish");
 const taskCzech = document.getElementById("taskCzech");
+const scene = document.getElementById("scene");
 const logsLayer = document.getElementById("logsLayer");
 const logButtons = [...document.querySelectorAll("[data-log]")];
+const finalScene = document.getElementById("finalScene");
 const completeBanner = document.getElementById("completeBanner");
 
 const LANGUAGE_MODES = Object.freeze({ english: "en", bilingual: "en-cz" });
@@ -45,8 +47,11 @@ const state = {
   placedLogs: 0,
   currentEntry: null,
   isPlaying: false,
+  isAnimating: false,
   activeAudio: null,
 };
+
+const wait = (milliseconds) => new Promise((resolve) => window.setTimeout(resolve, milliseconds));
 
 function loadLanguageMode() {
   try {
@@ -113,19 +118,19 @@ function showEntry(entry) {
 }
 
 function shouldShowNext() {
-  if (state.isPlaying) return false;
+  if (state.isPlaying || state.isAnimating) return false;
   if (state.stage === "intro") return state.lineIndex < introLines.length - 1;
   return state.stage === "bridge-ready";
 }
 
 function updateControls() {
-  languageButton.disabled = state.isPlaying;
-  repeatButton.disabled = !state.currentEntry || state.isPlaying;
+  languageButton.disabled = state.isPlaying || state.isAnimating;
+  repeatButton.disabled = !state.currentEntry || state.isPlaying || state.isAnimating;
   const showNext = shouldShowNext();
   nextButton.classList.toggle("hidden", !showNext);
   nextButton.disabled = !showNext;
   for (const button of logButtons) {
-    button.disabled = state.stage !== "logs" || state.isPlaying || button.classList.contains("placed");
+    button.disabled = state.stage !== "logs" || state.isPlaying || state.isAnimating || button.classList.contains("placed");
   }
 }
 
@@ -172,15 +177,67 @@ async function advanceDialogue() {
   }
 }
 
-async function placeLog(button) {
-  if (state.stage !== "logs" || state.isPlaying || button.classList.contains("placed")) return;
-  button.classList.add("placed");
-  state.placedLogs += 1;
-  await playEntry(countLines[state.placedLogs - 1]);
-  if (state.placedLogs === logButtons.length) {
-    state.stage = "bridge-ready";
-    updateControls();
+function flightFrames(button, index) {
+  const rect = scene.getBoundingClientRect();
+  const restTransform = getComputedStyle(button).getPropertyValue("--rest-transform").trim();
+  const startX = rect.width * (0.47 + index * 0.025);
+  const startY = rect.height * (0.28 - index * 0.025);
+  const arcX = rect.width * (0.2 + index * 0.018);
+  const arcY = -rect.height * (0.13 + index * 0.012);
+  const startRotation = 25 - index * 7;
+  const mirrored = index === 2 ? "scaleX(-1) " : "";
+  return [
+    { opacity: 1, transform: `translate(${startX}px, ${startY}px) ${mirrored}rotate(${startRotation}deg) scale(0.36)`, offset: 0 },
+    { opacity: 1, transform: `translate(${startX * 0.92}px, ${startY * 0.82}px) ${mirrored}rotate(${startRotation - 4}deg) scale(0.44)`, offset: 0.12 },
+    { opacity: 1, transform: `translate(${arcX}px, ${arcY}px) ${mirrored}rotate(${7 - index * 3}deg) scale(0.78)`, offset: 0.58 },
+    { opacity: 1, transform: `translate(0, -${Math.round(rect.height * 0.018)}px) ${restTransform} scale(1.025)`, offset: 0.9 },
+    { opacity: 1, transform: `translate(0, 0) ${restTransform}`, offset: 1 },
+  ];
+}
+
+async function flyLog(button, index) {
+  button.classList.add("placing");
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reducedMotion || typeof button.animate !== "function") {
+    button.classList.remove("placing");
+    button.classList.add("placed");
+    return;
   }
+  const animation = button.animate(flightFrames(button, index), {
+    duration: 1180,
+    easing: "cubic-bezier(0.2, 0.78, 0.22, 1)",
+    fill: "forwards",
+  });
+  try {
+    await animation.finished;
+  } catch (_error) {
+    // A cancelled animation still lands safely in its final state.
+  }
+  button.classList.remove("placing");
+  button.classList.add("placed");
+  button.style.transform = getComputedStyle(button).getPropertyValue("--rest-transform").trim();
+  animation.cancel();
+}
+
+async function revealFinalScene() {
+  await wait(260);
+  finalScene.classList.add("visible");
+  scene.dataset.sceneState = "bridge-complete";
+}
+
+async function placeLog(button) {
+  if (state.stage !== "logs" || state.isPlaying || state.isAnimating || button.classList.contains("placed")) return;
+  state.isAnimating = true;
+  updateControls();
+  const logIndex = state.placedLogs;
+  state.placedLogs += 1;
+  await Promise.all([flyLog(button, logIndex), playEntry(countLines[logIndex])]);
+  if (state.placedLogs === logButtons.length) {
+    await revealFinalScene();
+    state.stage = "bridge-ready";
+  }
+  state.isAnimating = false;
+  updateControls();
 }
 
 async function repeatCurrent() {

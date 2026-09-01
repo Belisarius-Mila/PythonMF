@@ -5,18 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#27483c">
     <title>Scene 5 — The Log Bridge</title>
-    <link rel="preload" href="scene05_arrival_logan_01_q90.webp" as="image" type="image/webp" fetchpriority="high">
-    <link rel="stylesheet" href="styles.css?v=20260831scene05base1">
-    <link rel="stylesheet" href="interaction.css?v=20260831intro1">
+    <link rel="preload" href="scene05_log_bridge_supports.webp" as="image" type="image/webp" fetchpriority="high">
+    <link rel="preload" href="scene05_log_bridge_crooked_trees.webp" as="image" type="image/webp">
+    <link rel="stylesheet" href="styles.css?v=20260901bridge1">
+    <link rel="stylesheet" href="interaction.css?v=20260901bridge1">
   </head>
   <body>
     <main class="app-shell">
       <section class="scene-card" aria-label="Scéna 5: zvířátka a Logan staví most z klád">
-        <div class="scene" id="scene" data-scene-state="arrival-logan-01">
+        <div class="scene" id="scene" data-scene-state="bridge-supports">
           <picture class="scene-picture">
-            <source srcset="scene05_arrival_logan_01_q90.webp" type="image/webp">
-            <img class="scene-image" id="sceneImage" src="scene05_arrival_logan_01.png" width="1672" height="941" alt="Pět kamarádů stojí u rozvodněného potoka a bobr Logan je zdraví z vody" fetchpriority="high" draggable="false">
+            <source srcset="scene05_log_bridge_supports.webp" type="image/webp">
+            <img class="scene-image" id="sceneImage" src="scene05_log_bridge_supports.webp" width="1672" height="941" alt="Pět kamarádů a bobr Logan stojí u potoka, kde zůstaly základy starého mostu" fetchpriority="high" draggable="false">
           </picture>
+
+          <img class="scene-image final-scene" id="finalScene" src="scene05_log_bridge_crooked_trees.webp" width="1672" height="941" alt="Hotový most ze tří bobrem ohlodaných kmenů" draggable="false">
 
           <div class="scene-hud">
             <a class="ui-button back-button" href="../scene04_harry_guard_prototype/index.html" aria-label="Zpět ke scéně s Harrym"><span aria-hidden="true">↩</span></a>
@@ -42,9 +45,9 @@
           </div>
 
           <div class="logs-layer hidden" id="logsLayer" aria-label="Tři klády pro nový most">
-            <button class="log-piece log-one" type="button" data-log="1" aria-label="První kláda"></button>
-            <button class="log-piece log-two" type="button" data-log="2" aria-label="Druhá kláda"></button>
-            <button class="log-piece log-three" type="button" data-log="3" aria-label="Třetí kláda"></button>
+            <button class="log-piece log-one" type="button" data-log="1" aria-label="První kláda"><img class="log-sprite" src="scene05_log_sprite_a.webp" alt="" draggable="false"></button>
+            <button class="log-piece log-two" type="button" data-log="2" aria-label="Druhá kláda"><img class="log-sprite" src="scene05_log_sprite_b.webp" alt="" draggable="false"></button>
+            <button class="log-piece log-three" type="button" data-log="3" aria-label="Třetí kláda"><img class="log-sprite" src="scene05_log_sprite_a.webp" alt="" draggable="false"></button>
           </div>
 
           <button class="next-button hidden" id="nextButton" type="button" aria-label="Přehrát další větu" disabled><span>Next</span><span aria-hidden="true">▶</span></button>
@@ -60,6 +63,6 @@
     </main>
 
     <script src="audio_manifest.js?v=20260831intro1"></script>
-    <script src="script.js?v=20260831intro1"></script>
+    <script src="script.js?v=20260901bridge1"></script>
   </body>
 </html>

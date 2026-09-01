@@ -60,16 +60,17 @@ class MmtxScene05WebpPilotTests(unittest.TestCase):
         )
         self.assertIn("let selected = 1;", page)
 
-    def test_scene_page_uses_first_story_image_with_q90_and_png_fallback(self) -> None:
+    def test_scene_page_uses_approved_bridge_supports_and_final_webp(self) -> None:
         page = (DOCS_SCENE / "index.html").read_text(encoding="utf-8")
 
         self.assertIn(
-            '<source srcset="scene05_arrival_logan_01_q90.webp" type="image/webp">',
+            '<source srcset="scene05_log_bridge_supports.webp" type="image/webp">',
             page,
         )
-        self.assertIn('href="scene05_arrival_logan_01_q90.webp"', page)
-        self.assertIn('src="scene05_arrival_logan_01.png"', page)
-        self.assertIn('data-scene-state="arrival-logan-01"', page)
+        self.assertIn('href="scene05_log_bridge_supports.webp"', page)
+        self.assertIn('src="scene05_log_bridge_supports.webp"', page)
+        self.assertIn('src="scene05_log_bridge_crooked_trees.webp"', page)
+        self.assertIn('data-scene-state="bridge-supports"', page)
         self.assertIn('width="1672"', page)
         self.assertIn('height="941"', page)
         self.assertNotIn("scene05_stream_base_q90.webp", page)

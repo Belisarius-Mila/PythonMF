@@ -56,6 +56,12 @@ body {
   height: 100%;
 }
 
+.scene-picture {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+}
+
 .scene-image {
   object-fit: cover;
   user-select: none;
