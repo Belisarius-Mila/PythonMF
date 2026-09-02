@@ -1,34 +1,36 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-09-01 22:44 CEST
+- Obnoveno terminálovým checkpointem: 2026-09-02 21:04 CEST
 
 ### Hotovo
-- Úvod, hotový most i přechod Benjiho se Sunny nyní používají jednotnou hladkou 3D grafiku a jsou zapojené v lokální scéně 5.
+- Pátá scéna je obsahově i technicky dokončená: Fiona přejde, Bruno převezme Bunnyho těžký batoh a vede ho přes most, Brunova lampa spadne do vody a Logan ji zachrání.
+- Čtyři nové situační obrazy používají hladký 3D standard, rozměr 1672 x 941 a produkční WebP q90; zdrojová PNG zůstávají zachovaná.
+- Scéna má 36 vět a 72 pevných EN/CZ MP3, tři nové klikací úkoly a závěr `To the lake!`.
+- Dokončená Harryho scéna 4 nyní nabízí přímé pokračování do scény 5.
 
 ### Otevřeno
-- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
-- Lokální commity čekají na samostatný denní GitHub balíček.
+- Tento vývojový krok zatím nebyl pushnutý ani nasazený na GitHub Pages.
+- Ruční vizuální a zvukový smoke celé scény na Macu a iPhonu zůstává otevřený.
 
 ### Rizika
-- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
+- Browserový backend nebyl v této relaci dostupný; interaktivní průchod proto není vydáván za provedený.
 
 ### Další krok
-- Vizuálně ověřit všechny přechody scény 5 na 22palcové obrazovce.
+- Po Milově samostatném potvrzení provést MMTX `p+n` a potom projít celou scénu 5 na Macu a iPhonu.
 
 ### Rozhodnutí
-- Aktivní situační obrazy scény 5 používají hladký 3D standard původního MMTX a produkční WebP q90.
+- Logan zachrání Brunovu lampu ještě v páté scéně; tím se uzavírá pomoc kamarádům i význam nové postavy.
+- Každá další věta se zpřístupní přes `Next`, `Repeat` opakuje pouze právě zobrazenou větu a klikací úkoly zůstávají bez trestu.
 
 ### Navrhované další kroky
-- Po schválení provést p+n jako samostatný krok
-- Pokračovat Bunnyho a Brunovou částí příběhu
+- Po produkčním retestu případně upravit pouze potvrzené umístění hotspotů nebo hlasitost konkrétní stopy.
+- Teprve po schválení závěru navrhnout obsah scény 6.
 
 ### Technický stav checkpointu
-- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `db26ce376565`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `706fcfdb6060` · je starší než ověřený main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-09-01T20:09:40+00:00.
-- Read-only živý stav: main=`local_ahead`, deployment=`verified_other_main`, runtime=`connected`.
-- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
+- Celý MMTX balík prošel 61/61 testy, generátor ověřil 72/72 MP3, oba JavaScripty prošly `node --check` a `git diff --check` je čistý.
+- `docs` a `MatysekANJ/web_mmtx` jsou pro scény 4 a 5 byte-identické.
+- Vývoj začal z čistého a s GitHubem zarovnaného `main` na `291a789`; push a nasazení jsou oddělené a nebyly provedeny.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -496,3 +498,12 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (16): `MatysekANJ/web_mmtx/scene05_log_bridge/index.html`, `Samantha_Agent/tests/test_mmtx_scene05_first_interaction.py`, `Samantha_Agent/tests/test_mmtx_scene05_webp_pilot.py`, `docs/scene05_log_bridge/index.html`, `MatysekANJ/web_mmtx/scene05_log_bridge/assets/scene05_benji_sunny_across_smooth_source.png`, `MatysekANJ/web_mmtx/scene05_log_bridge/assets/scene05_log_bridge_complete_smooth_source.png`, `MatysekANJ/web_mmtx/scene05_log_bridge/assets/scene05_log_bridge_supports_smooth_source.png`, `MatysekANJ/web_mmtx/scene05_log_bridge/scene05_benji_sunny_across_smooth_q90.webp`, `MatysekANJ/web_mmtx/scene05_log_bridge/scene05_log_bridge_complete_smooth_q90.webp`, `MatysekANJ/web_mmtx/scene05_log_bridge/scene05_log_bridge_supports_smooth_q90.webp`, `docs/scene05_log_bridge/assets/scene05_benji_sunny_across_smooth_source.png`, `docs/scene05_log_bridge/assets/scene05_log_bridge_complete_smooth_source.png`, `docs/scene05_log_bridge/assets/scene05_log_bridge_supports_smooth_source.png`, `docs/scene05_log_bridge/scene05_benji_sunny_across_smooth_q90.webp`, `docs/scene05_log_bridge/scene05_log_bridge_complete_smooth_q90.webp`, `docs/scene05_log_bridge/scene05_log_bridge_supports_smooth_q90.webp`
 - Commit: `Unify Scene 5 artwork with smooth MMTX style`
 - Další krok: Vizuálně ověřit všechny přechody scény 5 na 22palcové obrazovce.
+
+### Terminálový checkpoint 2026-09-02 21:04 CEST
+
+- Pracovní proud: `project-mmtx`
+- Hotovo: Pátá scéna pokračuje přes Fionin přechod, Brunovu pomoc Bunnymu a pád lampy až k potvrzené Loganově záchraně; scéna 4 nyní vede do dokončené scény 5.
+- Rozhodnutí: Logan zachrání Brunovu lampu ještě v páté scéně; další věty zůstávají krokované přes `Next` a `Repeat` opakuje jen aktuální větu.
+- Ověření: 61/61 MMTX testů, 72/72 pevných EN/CZ MP3, JavaScript syntaxe, byte-identické produkční kopie a čistý `git diff --check`.
+- Riziko: Browserový backend nebyl dostupný, proto zůstává otevřený reálný vizuální a zvukový smoke na Macu a iPhonu.
+- Další krok: Po samostatném Milově potvrzení provést MMTX `p+n` a následný ruční smoke.

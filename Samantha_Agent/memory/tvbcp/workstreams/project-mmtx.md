@@ -1,34 +1,34 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-09-01 22:44 CEST
+- Obnoveno terminálovým checkpointem: 2026-09-02 21:04 CEST
 
 ### Hotovo
-- Úvod, hotový most i přechod Benjiho se Sunny nyní používají jednotnou hladkou 3D grafiku a jsou zapojené v lokální scéně 5.
+- Pátá scéna je obsahově i technicky dokončená: Fiona přejde, Bruno pomůže Bunnymu s batohem a Logan zachrání Brunovu lampu.
+- Scéna 4 je nově propojená se scénou 5; obě produkční kopie zůstávají byte-identické.
 
 ### Otevřeno
-- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
-- Lokální commity čekají na samostatný denní GitHub balíček.
+- Tento vývojový krok zatím nebyl pushnutý ani nasazený.
+- Ruční vizuální a zvukový smoke celé scény na Macu a iPhonu zůstává otevřený.
 
 ### Rizika
-- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
+- Browserový backend nebyl v této relaci dostupný; interaktivní průchod proto není vydáván za provedený.
 
 ### Další krok
-- Vizuálně ověřit všechny přechody scény 5 na 22palcové obrazovce.
+- Po Milově samostatném potvrzení provést MMTX `p+n` a následný reálný smoke na Macu a iPhonu.
 
 ### Rozhodnutí
-- Aktivní situační obrazy scény 5 používají hladký 3D standard původního MMTX a produkční WebP q90.
+- Logan zachrání Brunovu lampu ještě v páté scéně.
+- Nové obrazy dodržují hladký 3D standard, plné rozlišení 1672 x 941 a WebP q90 se zachovanými zdrojovými PNG.
 
 ### Navrhované další kroky
-- Po schválení provést p+n jako samostatný krok
-- Pokračovat Bunnyho a Brunovou částí příběhu
+- Po produkčním retestu případně opravit jen potvrzené hotspoty nebo konkrétní audio.
+- Po schválení závěru navrhnout obsah scény 6.
 
 ### Technický stav checkpointu
-- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `db26ce376565`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `706fcfdb6060` · je starší než ověřený main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-09-01T20:09:40+00:00.
-- Read-only živý stav: main=`local_ahead`, deployment=`verified_other_main`, runtime=`connected`.
-- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
+- Celý MMTX balík prošel 61/61 testy, audio kontrola 72/72, oba JavaScripty prošly `node --check` a `git diff --check` je čistý.
+- `docs` a MMTX mirror jsou pro scény 4 a 5 byte-identické.
+- Vývoj začal z čistého a s GitHubem zarovnaného `main` na `291a789`; push ani nasazení v tomto kroku neproběhly.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -1019,3 +1019,29 @@ Technický důkaz:
 - rychlá Cockpit brána syntaxe a whitespace: 7.1 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `project-mmtx`.
 - Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_other_main`, runtime=`connected`.
+
+### 2026-09-02 21:04 CEST – Pátá scéna je dokončená Loganovou záchranou Brunovy lampy
+
+Hotovo:
+- Fiona předvede bezpečný přechod, Bruno převezme Bunnyho těžký batoh a vede ho přes most.
+- Brunova lampa spadne do vody, Logan ji po klepnutí zachrání a závěr uzavírá cesta k jezeru.
+- Čtyři nové obrazy zachovávají hladký 3D styl, rozměr 1672 x 941, zdrojová PNG a produkční WebP q90.
+- Scéna má 36 krokovaných vět, 72 pevných EN/CZ MP3 a tři nové klikací úkoly pro Fionu, Bruna a Logana.
+- Dokončená scéna 4 nyní nabízí přímé pokračování do scény 5.
+
+Rozhodnutí:
+- Logan zachrání Brunovu lampu ještě v páté scéně; jeho pomoc uzavírá význam nové postavy v této kapitole.
+- `Next` zpřístupní právě jednu další větu, `Repeat` opakuje jen aktuální větu a neúspěšné klepnutí nemá trest.
+
+Další krok:
+- Po samostatném Milově potvrzení provést serverově řízené MMTX `p+n` a potom celou scénu projít na Macu a iPhonu.
+
+Navrhované další kroky:
+- Po produkčním retestu opravit jen konkrétně potvrzené hotspoty nebo audio.
+- Teprve po schválení závěru navrhnout obsah scény 6.
+
+Technický důkaz:
+- Celý MMTX balík prošel 61/61 testy; generátor ověřil 72/72 pevných MP3.
+- Oba JavaScripty prošly `node --check`, `git diff --check` je čistý a `docs` s MMTX mirrorem jsou pro scény 4 a 5 byte-identické.
+- Browserový backend nebyl dostupný, proto interaktivní vizuální smoke není vydáván za provedený.
+- Push ani nasazení v tomto vývojovém kroku neproběhly.

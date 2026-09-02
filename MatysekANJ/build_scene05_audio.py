@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build and verify fixed MP3 assets for the opening of MMTX Scene 5."""
+"""Build and verify fixed MP3 assets for the complete MMTX Scene 5."""
 
 from __future__ import annotations
 
@@ -21,7 +21,7 @@ MANIFEST_NAME = "audio_manifest.js"
 CAPABILITY_ID = "generate_project_audio_asset"
 CAPABILITY_TOOL = "app.speech.edge_tts_mp3.synthesize_edge_tts_mp3_sync"
 RATE = "-10%"
-VERSION = "20260901crossing1"
+VERSION = "20260902complete1"
 MIN_AUDIO_BYTES = 1000
 
 @dataclass(frozen=True)
@@ -46,6 +46,7 @@ class AudioAsset:
 
 ENGLISH_VOICES = {
     "benji": Voice("en-US-AndrewNeural", "Andrew"),
+    "bruno": Voice("en-US-GuyNeural", "Guy"),
     "bunny": Voice("en-US-AnaNeural", "Ana"),
     "fiona": Voice("en-US-JennyNeural", "Jenny"),
     "logan": Voice("en-US-ChristopherNeural", "Christopher"),
@@ -73,6 +74,23 @@ DIALOGUE_LINES = (
     DialogueLine("tap_sunny", "sunny", "Tap Sunny. Help her jump across.", "Klepni na Sunny. Pomoz jí přeskákat."),
     DialogueLine("three_jumps", "sunny", "One, two, three!", "Raz, dva, tři!"),
     DialogueLine("bunny_scared", "bunny", "Oh no... I am scared.", "Ach ne... Já se bojím."),
+    DialogueLine("bridge_safe_bunny", "benji", "The bridge is safe, Bunny!", "Most je bezpečný, Bunny!"),
+    DialogueLine("watch_me", "fiona", "Watch me, Bunny.", "Dívej se, Bunny."),
+    DialogueLine("tap_fiona", "fiona", "Tap Fiona and help her cross.", "Klepni na Fionu a pomoz jí přejít."),
+    DialogueLine("fiona_safe", "fiona", "I crossed the bridge safely!", "Bezpečně jsem přešla most!"),
+    DialogueLine("bag_heavy", "bunny", "My bag is too heavy.", "Můj batoh je příliš těžký."),
+    DialogueLine("can_help_bunny", "bruno", "I can help you.", "Mohu ti pomoci."),
+    DialogueLine("give_bag", "bruno", "Give me your bag.", "Dej mi svůj batoh."),
+    DialogueLine("thank_bruno", "bunny", "Thank you, Bruno.", "Děkuji, Bruno."),
+    DialogueLine("tap_bruno", "bruno", "Tap Bruno. Help Bunny cross.", "Klepni na Bruna. Pomoz Bunnymu přejít."),
+    DialogueLine("one_step", "bruno", "One step at a time, Bunny.", "Krok za krokem, Bunny."),
+    DialogueLine("lamp_dropped", "bruno", "Oh no, my lamp!", "Ach ne, moje lampa!"),
+    DialogueLine("get_lamp", "logan", "Do not worry. I can get it.", "Neboj se. Já ji vytáhnu."),
+    DialogueLine("tap_logan", "logan", "Tap Logan and save the lamp.", "Klepni na Logana a zachraň lampu."),
+    DialogueLine("lamp_returned", "logan", "Here is your lamp, Bruno.", "Tady je tvoje lampa, Bruno."),
+    DialogueLine("thank_logan", "bruno", "Thank you, Logan!", "Děkuji, Logane!"),
+    DialogueLine("you_are_welcome", "logan", "You are welcome, friends.", "Není zač, kamarádi."),
+    DialogueLine("to_the_lake", "benji", "To the lake!", "K jezeru!"),
 )
 
 def _asset_path(line: DialogueLine, language: str) -> Path:

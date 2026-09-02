@@ -147,6 +147,9 @@ button { font: inherit; }
 .character-target:disabled { pointer-events: none; }
 .benji-target { left: 5.1%; top: 27%; width: 15%; height: 26%; }
 .sunny-target { left: 39.1%; top: 35%; width: 12%; height: 21%; }
+.fiona-target { left: 31.4%; top: 29%; width: 11.5%; height: 27%; }
+.bruno-target { left: 22.4%; top: 23%; width: 12.8%; height: 32%; }
+.logan-target { left: 78.2%; top: 57%; width: 17.5%; height: 39%; }
 .next-button {
   position: absolute;
   z-index: 13;

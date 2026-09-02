@@ -11,14 +11,22 @@ const speechCzech = document.getElementById("speechCzech");
 const taskPrompt = document.getElementById("taskPrompt");
 const taskEnglish = document.getElementById("taskEnglish");
 const taskCzech = document.getElementById("taskCzech");
+const taskIcon = document.getElementById("taskIcon");
 const scene = document.getElementById("scene");
 const logsLayer = document.getElementById("logsLayer");
 const logButtons = [...document.querySelectorAll("[data-log]")];
 const finalScene = document.getElementById("finalScene");
 const benjiAcrossScene = document.getElementById("benjiAcrossScene");
 const sunnyAcrossScene = document.getElementById("sunnyAcrossScene");
+const fionaAcrossScene = document.getElementById("fionaAcrossScene");
+const brunoBunnyCrossingScene = document.getElementById("brunoBunnyCrossingScene");
+const lampFallingScene = document.getElementById("lampFallingScene");
+const lampRescuedScene = document.getElementById("lampRescuedScene");
 const benjiTarget = document.getElementById("benjiTarget");
 const sunnyTarget = document.getElementById("sunnyTarget");
+const fionaTarget = document.getElementById("fionaTarget");
+const brunoTarget = document.getElementById("brunoTarget");
+const loganTarget = document.getElementById("loganTarget");
 const completeBanner = document.getElementById("completeBanner");
 
 const LANGUAGE_MODES = Object.freeze({ english: "en", bilingual: "en-cz" });
@@ -47,12 +55,33 @@ const lines = {
   tapSunny: prompt("sunny", "Tap Sunny. Help her jump across.", "Klepni na Sunny. Pomoz jí přeskákat."),
   threeJumps: dialogue("sunny", "One, two, three!", "Raz, dva, tři!"),
   bunnyScared: dialogue("bunny", "Oh no... I am scared.", "Ach ne... Já se bojím."),
+  bridgeSafeBunny: dialogue("benji", "The bridge is safe, Bunny!", "Most je bezpečný, Bunny!"),
+  fionaShows: dialogue("fiona", "Watch me, Bunny.", "Dívej se, Bunny."),
+  tapFiona: prompt("fiona", "Tap Fiona and help her cross.", "Klepni na Fionu a pomoz jí přejít."),
+  fionaSafe: dialogue("fiona", "I crossed the bridge safely!", "Bezpečně jsem přešla most!"),
+  bagHeavy: dialogue("bunny", "My bag is too heavy.", "Můj batoh je příliš těžký."),
+  brunoHelps: dialogue("bruno", "I can help you.", "Mohu ti pomoci."),
+  giveBag: dialogue("bruno", "Give me your bag.", "Dej mi svůj batoh."),
+  bunnyThanks: dialogue("bunny", "Thank you, Bruno.", "Děkuji, Bruno."),
+  tapBruno: prompt("bruno", "Tap Bruno. Help Bunny cross.", "Klepni na Bruna. Pomoz Bunnymu přejít."),
+  oneStep: dialogue("bruno", "One step at a time, Bunny.", "Krok za krokem, Bunny."),
+  lampDropped: dialogue("bruno", "Oh no, my lamp!", "Ach ne, moje lampa!"),
+  loganGetsLamp: dialogue("logan", "Do not worry. I can get it.", "Neboj se. Já ji vytáhnu."),
+  tapLogan: prompt("logan", "Tap Logan and save the lamp.", "Klepni na Logana a zachraň lampu."),
+  lampReturned: dialogue("logan", "Here is your lamp, Bruno.", "Tady je tvoje lampa, Bruno."),
+  brunoThanks: dialogue("bruno", "Thank you, Logan!", "Děkuji, Logane!"),
+  loganWelcome: dialogue("logan", "You are welcome, friends.", "Není zač, kamarádi."),
+  toTheLake: dialogue("benji", "To the lake!", "K jezeru!"),
 };
 
 const introLines = [lines.bridgeGone, lines.streamWide, lines.getAcross, lines.loganHello, lines.loganHelp, lines.strongLogs, lines.tapLogs];
 const countLines = [lines.oneLog, lines.twoLogs, lines.threeLogs];
 const benjiLines = [lines.bridgeReady, lines.whoFirst, lines.benjiFirst, lines.tapBenji];
 const sunnyLines = [lines.sunnyTurn, lines.tapSunny];
+const bunnyLines = [lines.bunnyScared, lines.bridgeSafeBunny, lines.fionaShows, lines.tapFiona];
+const helpLines = [lines.bagHeavy, lines.brunoHelps, lines.giveBag, lines.bunnyThanks, lines.tapBruno];
+const lampLines = [lines.lampDropped, lines.loganGetsLamp, lines.tapLogan];
+const finishLines = [lines.brunoThanks, lines.loganWelcome, lines.toTheLake];
 
 const state = {
   stage: "waiting",
@@ -120,6 +149,7 @@ function playFixedAudio(path) {
 function showEntry(entry) {
   if (entry.kind === "prompt") {
     speechBubble.classList.add("hidden");
+    taskIcon.textContent = entry === lines.tapLogs ? "🪵" : ({ benji: "🐶", sunny: "🐿️", fiona: "🦊", bruno: "🦡", logan: "🦫" })[entry.speaker] || "👆";
     taskEnglish.textContent = entry.en;
     taskCzech.textContent = entry.cz;
     taskPrompt.classList.remove("hidden");
@@ -138,7 +168,11 @@ function shouldShowNext() {
   if (state.stage === "bridge-ready") return true;
   if (state.stage === "benji-dialogue") return state.crossingIndex < benjiLines.length - 1;
   if (state.stage === "sunny-dialogue") return state.crossingIndex < sunnyLines.length - 1;
-  return state.stage === "bunny-ready";
+  if (state.stage === "bunny-dialogue") return state.crossingIndex < bunnyLines.length - 1;
+  if (state.stage === "help-dialogue") return state.crossingIndex < helpLines.length - 1;
+  if (state.stage === "lamp-dialogue") return state.crossingIndex < lampLines.length - 1;
+  if (state.stage === "finish-dialogue") return state.crossingIndex < finishLines.length - 1;
+  return state.stage === "bunny-ready" || state.stage === "help-ready" || state.stage === "lamp-ready" || state.stage === "finish-ready";
 }
 
 function updateControls() {
@@ -152,6 +186,9 @@ function updateControls() {
   }
   benjiTarget.disabled = state.stage !== "wait-benji" || state.isPlaying || state.isAnimating;
   sunnyTarget.disabled = state.stage !== "wait-sunny" || state.isPlaying || state.isAnimating;
+  fionaTarget.disabled = state.stage !== "wait-fiona" || state.isPlaying || state.isAnimating;
+  brunoTarget.disabled = state.stage !== "wait-bruno" || state.isPlaying || state.isAnimating;
+  loganTarget.disabled = state.stage !== "wait-logan" || state.isPlaying || state.isAnimating;
 }
 
 async function playEntry(entry, { remember = true } = {}) {
@@ -219,10 +256,79 @@ async function advanceDialogue() {
     return;
   }
   if (state.stage === "bunny-ready") {
-    state.stage = "complete";
-    await playEntry(lines.bunnyScared);
-    completeBanner.classList.remove("hidden");
+    state.stage = "bunny-dialogue";
+    state.crossingIndex = 0;
+    await playEntry(bunnyLines[state.crossingIndex]);
     updateControls();
+    return;
+  }
+  if (state.stage === "bunny-dialogue") {
+    state.crossingIndex += 1;
+    const entry = bunnyLines[state.crossingIndex];
+    await playEntry(entry);
+    if (entry === lines.tapFiona) {
+      state.stage = "wait-fiona";
+      fionaTarget.classList.remove("hidden");
+      updateControls();
+    }
+    return;
+  }
+  if (state.stage === "help-ready") {
+    state.stage = "help-dialogue";
+    state.crossingIndex = 0;
+    await playEntry(helpLines[state.crossingIndex]);
+    updateControls();
+    return;
+  }
+  if (state.stage === "help-dialogue") {
+    state.crossingIndex += 1;
+    const entry = helpLines[state.crossingIndex];
+    await playEntry(entry);
+    if (entry === lines.tapBruno) {
+      state.stage = "wait-bruno";
+      brunoTarget.classList.remove("hidden");
+      updateControls();
+    }
+    return;
+  }
+  if (state.stage === "lamp-ready") {
+    state.stage = "lamp-dialogue";
+    state.crossingIndex = 0;
+    await Promise.all([
+      revealStoryState(lampFallingScene, "lamp-falling"),
+      playEntry(lampLines[state.crossingIndex]),
+    ]);
+    updateControls();
+    return;
+  }
+  if (state.stage === "lamp-dialogue") {
+    state.crossingIndex += 1;
+    const entry = lampLines[state.crossingIndex];
+    await playEntry(entry);
+    if (entry === lines.tapLogan) {
+      state.stage = "wait-logan";
+      loganTarget.classList.remove("hidden");
+      updateControls();
+    }
+    return;
+  }
+  if (state.stage === "finish-ready") {
+    state.stage = "finish-dialogue";
+    state.crossingIndex = 0;
+    await playEntry(finishLines[state.crossingIndex]);
+    updateControls();
+    return;
+  }
+  if (state.stage === "finish-dialogue") {
+    state.crossingIndex += 1;
+    const entry = finishLines[state.crossingIndex];
+    await playEntry(entry);
+    if (entry === lines.toTheLake) {
+      state.stage = "complete";
+      completeBanner.classList.remove("hidden");
+    }
+    updateControls();
+    return;
   }
 }
 
@@ -325,6 +431,45 @@ async function crossWithSunny() {
   updateControls();
 }
 
+async function crossWithFiona() {
+  if (state.stage !== "wait-fiona" || state.isPlaying || state.isAnimating) return;
+  state.isAnimating = true;
+  fionaTarget.classList.add("hidden");
+  taskPrompt.classList.add("hidden");
+  updateControls();
+  await revealStoryState(fionaAcrossScene, "fiona-across");
+  await playEntry(lines.fionaSafe);
+  state.stage = "help-ready";
+  state.isAnimating = false;
+  updateControls();
+}
+
+async function crossWithBruno() {
+  if (state.stage !== "wait-bruno" || state.isPlaying || state.isAnimating) return;
+  state.isAnimating = true;
+  brunoTarget.classList.add("hidden");
+  taskPrompt.classList.add("hidden");
+  updateControls();
+  await revealStoryState(brunoBunnyCrossingScene, "bruno-bunny-crossing");
+  await playEntry(lines.oneStep);
+  state.stage = "lamp-ready";
+  state.isAnimating = false;
+  updateControls();
+}
+
+async function rescueLampWithLogan() {
+  if (state.stage !== "wait-logan" || state.isPlaying || state.isAnimating) return;
+  state.isAnimating = true;
+  loganTarget.classList.add("hidden");
+  taskPrompt.classList.add("hidden");
+  updateControls();
+  await revealStoryState(lampRescuedScene, "lamp-rescued");
+  await playEntry(lines.lampReturned);
+  state.stage = "finish-ready";
+  state.isAnimating = false;
+  updateControls();
+}
+
 async function repeatCurrent() {
   if (!state.currentEntry || state.isPlaying || repeatButton.disabled) return;
   await playEntry(state.currentEntry, { remember: false });
@@ -344,5 +489,8 @@ languageButton.addEventListener("click", toggleLanguage);
 for (const button of logButtons) button.addEventListener("click", () => placeLog(button));
 benjiTarget.addEventListener("click", crossWithBenji);
 sunnyTarget.addEventListener("click", crossWithSunny);
+fionaTarget.addEventListener("click", crossWithFiona);
+brunoTarget.addEventListener("click", crossWithBruno);
+loganTarget.addEventListener("click", rescueLampWithLogan);
 updateLanguageUi();
 updateControls();

@@ -26,6 +26,10 @@ class MmtxScene05FirstInteractionTests(unittest.TestCase):
         self.assertIn('src="scene05_log_bridge_complete_smooth_q90.webp"', html)
         self.assertIn('src="scene05_benji_across_smooth_q90.webp"', html)
         self.assertIn('src="scene05_benji_sunny_across_smooth_q90.webp"', html)
+        self.assertIn('src="scene05_fiona_across_smooth_q90.webp"', html)
+        self.assertIn('src="scene05_bruno_bunny_crossing_smooth_q90.webp"', html)
+        self.assertIn('src="scene05_lamp_falling_smooth_q90.webp"', html)
+        self.assertIn('src="scene05_lamp_rescued_smooth_q90.webp"', html)
         self.assertIn('data-scene-state="bridge-supports"', html)
         for legacy_filename in (
             "scene05_log_bridge_supports.webp",
@@ -41,6 +45,10 @@ class MmtxScene05FirstInteractionTests(unittest.TestCase):
             "scene05_log_bridge_complete_smooth_q90.webp",
             "scene05_benji_across_smooth_q90.webp",
             "scene05_benji_sunny_across_smooth_q90.webp",
+            "scene05_fiona_across_smooth_q90.webp",
+            "scene05_bruno_bunny_crossing_smooth_q90.webp",
+            "scene05_lamp_falling_smooth_q90.webp",
+            "scene05_lamp_rescued_smooth_q90.webp",
         ):
             with Image.open(DOCS_SCENE / filename) as image:
                 self.assertEqual(image.size, (1672, 941))
@@ -54,13 +62,14 @@ class MmtxScene05FirstInteractionTests(unittest.TestCase):
         html = (DOCS_SCENE / "index.html").read_text(encoding="utf-8")
         for element_id in (
             "languageButton", "repeatButton", "nextButton", "audioGate", "speechBubble",
-            "taskPrompt", "logsLayer", "benjiTarget", "sunnyTarget", "completeBanner",
+            "taskPrompt", "taskIcon", "logsLayer", "benjiTarget", "sunnyTarget", "fionaTarget",
+            "brunoTarget", "loganTarget", "completeBanner",
         ):
             self.assertIn(f'id="{element_id}"', html)
         self.assertEqual(html.count('data-log="'), 3)
         self.assertEqual(html.count('class="log-sprite"'), 3)
-        self.assertIn("Bunny needs help!", html)
-        self.assertIn("Bunny potřebuje pomoc!", html)
+        self.assertIn("Bridge crossing complete!", html)
+        self.assertIn("Přechod přes most je dokončený!", html)
 
     def test_dialogue_contract_steps_one_sentence_at_a_time(self) -> None:
         script = (DOCS_SCENE / "script.js").read_text(encoding="utf-8")
@@ -71,6 +80,12 @@ class MmtxScene05FirstInteractionTests(unittest.TestCase):
             "Who wants to go first?", "I will go first.", "Tap Benji and help him cross.",
             "I did it! The bridge is safe.", "My turn! I can jump.",
             "Tap Sunny. Help her jump across.", "One, two, three!", "Oh no... I am scared.",
+            "The bridge is safe, Bunny!", "Watch me, Bunny.", "Tap Fiona and help her cross.",
+            "I crossed the bridge safely!", "My bag is too heavy.", "I can help you.",
+            "Give me your bag.", "Thank you, Bruno.", "Tap Bruno. Help Bunny cross.",
+            "One step at a time, Bunny.", "Oh no, my lamp!", "Do not worry. I can get it.",
+            "Tap Logan and save the lamp.", "Here is your lamp, Bruno.", "Thank you, Logan!",
+            "You are welcome, friends.", "To the lake!",
         ):
             self.assertIn(f'"{text}"', script)
         self.assertIn("state.lineIndex += 1", script)
@@ -83,6 +98,13 @@ class MmtxScene05FirstInteractionTests(unittest.TestCase):
         self.assertIn('revealStoryState(sunnyAcrossScene, "benji-sunny-across")', script)
         self.assertIn("crossWithBenji", script)
         self.assertIn("crossWithSunny", script)
+        self.assertIn('revealStoryState(fionaAcrossScene, "fiona-across")', script)
+        self.assertIn('revealStoryState(brunoBunnyCrossingScene, "bruno-bunny-crossing")', script)
+        self.assertIn('revealStoryState(lampFallingScene, "lamp-falling")', script)
+        self.assertIn('revealStoryState(lampRescuedScene, "lamp-rescued")', script)
+        self.assertIn("crossWithFiona", script)
+        self.assertIn("crossWithBruno", script)
+        self.assertIn("rescueLampWithLogan", script)
         self.assertIn('matchMedia("(prefers-reduced-motion: reduce)")', script)
         self.assertNotIn("speechSynthesis", script)
         self.assertNotIn("SpeechSynthesisUtterance", script)
@@ -93,6 +115,10 @@ class MmtxScene05FirstInteractionTests(unittest.TestCase):
             "scene05_log_bridge_complete_smooth",
             "scene05_benji_across_smooth",
             "scene05_benji_sunny_across_smooth",
+            "scene05_fiona_across_smooth",
+            "scene05_bruno_bunny_crossing_smooth",
+            "scene05_lamp_falling_smooth",
+            "scene05_lamp_rescued_smooth",
         ):
             source = DOCS_SCENE / "assets" / f"{stem}_source.png"
             production = DOCS_SCENE / f"{stem}_q90.webp"
@@ -114,13 +140,13 @@ class MmtxScene05FirstInteractionTests(unittest.TestCase):
     def test_manifest_covers_every_spoken_line_with_fixed_mp3(self) -> None:
         manifest = load_manifest()
         self.assertEqual(manifest["schemaVersion"], 1)
-        self.assertEqual(manifest["version"], "20260901crossing1")
-        self.assertEqual(manifest["stats"], {"dialogueLines": 19, "audioReferences": 38})
+        self.assertEqual(manifest["version"], "20260902complete1")
+        self.assertEqual(manifest["stats"], {"dialogueLines": 36, "audioReferences": 72})
         dialogue = manifest["dialogue"]
-        self.assertEqual(len(dialogue["en"]), 19)
-        self.assertEqual(len(dialogue["cs"]), 19)
+        self.assertEqual(len(dialogue["en"]), 36)
+        self.assertEqual(len(dialogue["cs"]), 36)
         referenced = set(dialogue["en"].values()) | set(dialogue["cs"].values())
-        self.assertEqual(len(referenced), 38)
+        self.assertEqual(len(referenced), 72)
         for relative_path in referenced:
             audio = (DOCS_SCENE / relative_path).read_bytes()
             self.assertGreaterEqual(len(audio), 1000)
@@ -134,9 +160,10 @@ class MmtxScene05FirstInteractionTests(unittest.TestCase):
             with self.subTest(path=str(relative_path)):
                 self.assertEqual((DOCS_SCENE / relative_path).read_bytes(), (MIRROR_SCENE / relative_path).read_bytes())
 
-    def test_scene_four_is_not_connected_to_incomplete_scene_five(self) -> None:
-        scene_four_script = (PROJECT_ROOT / "docs" / "scene04_harry_guard_prototype" / "script.js").read_text(encoding="utf-8")
-        self.assertNotIn("scene05_log_bridge", scene_four_script)
+    def test_scene_four_connects_to_completed_scene_five(self) -> None:
+        scene_four_html = (PROJECT_ROOT / "docs" / "scene04_harry_guard_prototype" / "index.html").read_text(encoding="utf-8")
+        self.assertIn('href="../scene05_log_bridge/index.html"', scene_four_html)
+        self.assertIn("Pokračuj k mostu z klád.", scene_four_html)
 
 if __name__ == "__main__":
     unittest.main()
