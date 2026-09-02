@@ -1,21 +1,21 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno terminálovým checkpointem: 2026-09-02 21:04 CEST
+- Obnoveno produkčním dorovnáním: 2026-09-02 21:49 CEST
 
 ### Hotovo
 - Pátá scéna je obsahově i technicky dokončená: Fiona přejde, Bruno pomůže Bunnymu s batohem a Logan zachrání Brunovu lampu.
 - Scéna 4 je nově propojená se scénou 5; obě produkční kopie zůstávají byte-identické.
+- Commit `d0fd66c3c581` je pushnutý a úspěšně publikovaný na GitHub Pages.
 
 ### Otevřeno
-- Tento vývojový krok zatím nebyl pushnutý ani nasazený.
 - Ruční vizuální a zvukový smoke celé scény na Macu a iPhonu zůstává otevřený.
 
 ### Rizika
 - Browserový backend nebyl v této relaci dostupný; interaktivní průchod proto není vydáván za provedený.
 
 ### Další krok
-- Po Milově samostatném potvrzení provést MMTX `p+n` a následný reálný smoke na Macu a iPhonu.
+- Provést reálný vizuální a zvukový smoke celé scény 5 na Macu a iPhonu.
 
 ### Rozhodnutí
 - Logan zachrání Brunovu lampu ještě v páté scéně.
@@ -28,7 +28,8 @@
 ### Technický stav checkpointu
 - Celý MMTX balík prošel 61/61 testy, audio kontrola 72/72, oba JavaScripty prošly `node --check` a `git diff --check` je čistý.
 - `docs` a MMTX mirror jsou pro scény 4 a 5 byte-identické.
-- Vývoj začal z čistého a s GitHubem zarovnaného `main` na `291a789`; push ani nasazení v tomto kroku neproběhly.
+- Serverová operace `mmtx_pages_publish_current_main` pushnula 1 commit; workflow `33674738263`, deployment `6230419264`, commit `d0fd66c3c581` a veřejný HTTP 200 jsou přesně korelované.
+- Pět reprezentativních veřejných souborů včetně závěrečného obrazu a Loganova MP3 je SHA-256 shodných s lokální produkcí.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -1045,3 +1046,26 @@ Technický důkaz:
 - Oba JavaScripty prošly `node --check`, `git diff --check` je čistý a `docs` s MMTX mirrorem jsou pro scény 4 a 5 byte-identické.
 - Browserový backend nebyl dostupný, proto interaktivní vizuální smoke není vydáván za provedený.
 - Push ani nasazení v tomto vývojovém kroku neproběhly.
+
+### 2026-09-02 21:49 CEST – Dokončená pátá scéna je publikovaná na GitHub Pages
+
+Hotovo:
+- Přesný serverový požadavek `mmtx_pages_publish_current_main` pushnul jediný čekající commit `d0fd66c3c581`.
+- GitHub Pages workflow a deployment doběhly úspěšně a veřejná produkce vrací HTTP 200.
+- Veřejné HTML, JavaScript, audio manifest, závěrečný obraz a reprezentativní Loganovo MP3 jsou SHA-256 shodné s lokální produkční kopií.
+
+Rozhodnutí:
+- MMTX `p+n` je dokončené jen při korelaci přesného commitu, workflow, deploymentu a veřejného smoke; modelová odpověď ani samotný push nejsou autoritou.
+
+Další krok:
+- Projít celou scénu 5 na Macu a iPhonu, zejména umístění tří nových hotspotů, přechody obrazů a všech 72 stop.
+
+Navrhované další kroky:
+- Případnou opravu dělat pouze podle konkrétního výsledku ručního retestu.
+- Po schválení závěru navrhnout obsah scény 6 jako nový vývojový krok.
+
+Technický důkaz:
+- Workflow run `33674738263` má stav `completed/success` a `headSha=d0fd66c3c581c92081a2d3a4febda6a811f552a3`.
+- GitHub Pages deployment `6230419264` má stav `success` a stejný commit.
+- Server i nezávislý systémový `curl` potvrdily HTTP 200; pět reprezentativních souborů má shodný SHA-256.
+- Funkční commit je na `origin/main`; následný git-safe paměťový zápis je samostatný lokální checkpoint a znovu nespouští push ani deployment.

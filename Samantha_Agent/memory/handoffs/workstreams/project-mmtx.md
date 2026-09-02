@@ -1,23 +1,23 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno terminálovým checkpointem: 2026-09-02 21:04 CEST
+- Obnoveno produkčním dorovnáním: 2026-09-02 21:49 CEST
 
 ### Hotovo
 - Pátá scéna je obsahově i technicky dokončená: Fiona přejde, Bruno převezme Bunnyho těžký batoh a vede ho přes most, Brunova lampa spadne do vody a Logan ji zachrání.
 - Čtyři nové situační obrazy používají hladký 3D standard, rozměr 1672 x 941 a produkční WebP q90; zdrojová PNG zůstávají zachovaná.
 - Scéna má 36 vět a 72 pevných EN/CZ MP3, tři nové klikací úkoly a závěr `To the lake!`.
 - Dokončená Harryho scéna 4 nyní nabízí přímé pokračování do scény 5.
+- Commit `d0fd66c3c581` je pushnutý a úspěšně publikovaný na GitHub Pages.
 
 ### Otevřeno
-- Tento vývojový krok zatím nebyl pushnutý ani nasazený na GitHub Pages.
 - Ruční vizuální a zvukový smoke celé scény na Macu a iPhonu zůstává otevřený.
 
 ### Rizika
 - Browserový backend nebyl v této relaci dostupný; interaktivní průchod proto není vydáván za provedený.
 
 ### Další krok
-- Po Milově samostatném potvrzení provést MMTX `p+n` a potom projít celou scénu 5 na Macu a iPhonu.
+- Projít celou scénu 5 na Macu a iPhonu, zejména nové hotspoty Fiony, Bruna a Logana a všech 72 stop.
 
 ### Rozhodnutí
 - Logan zachrání Brunovu lampu ještě v páté scéně; tím se uzavírá pomoc kamarádům i význam nové postavy.
@@ -30,7 +30,8 @@
 ### Technický stav checkpointu
 - Celý MMTX balík prošel 61/61 testy, generátor ověřil 72/72 MP3, oba JavaScripty prošly `node --check` a `git diff --check` je čistý.
 - `docs` a `MatysekANJ/web_mmtx` jsou pro scény 4 a 5 byte-identické.
-- Vývoj začal z čistého a s GitHubem zarovnaného `main` na `291a789`; push a nasazení jsou oddělené a nebyly provedeny.
+- Serverová operace `mmtx_pages_publish_current_main` pushnula 1 commit; workflow `33674738263` a deployment `6230419264` odpovídají přesně commitu `d0fd66c3c581` a veřejný smoke vrátil HTTP 200.
+- Veřejné `index.html`, `script.js`, `audio_manifest.js`, závěrečný obraz a reprezentativní Loganovo MP3 jsou SHA-256 shodné s lokální produkční kopií.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -507,3 +508,12 @@ Bezpecnost / neukladat:
 - Ověření: 61/61 MMTX testů, 72/72 pevných EN/CZ MP3, JavaScript syntaxe, byte-identické produkční kopie a čistý `git diff --check`.
 - Riziko: Browserový backend nebyl dostupný, proto zůstává otevřený reálný vizuální a zvukový smoke na Macu a iPhonu.
 - Další krok: Po samostatném Milově potvrzení provést MMTX `p+n` a následný ruční smoke.
+
+### Produkční dorovnání 2026-09-02 21:49 CEST – MMTX p+n dokončeno
+
+- Pracovní proud: `project-mmtx`
+- Hotovo: Serverová operace `mmtx_pages_publish_current_main` pushnula jediný čekající commit `d0fd66c3c581` a publikovala dokončenou scénu 5 na GitHub Pages.
+- Rozhodnutí: Produkční důkaz tvoří až shoda commitu, úspěšný workflow, deployment a veřejný HTTP smoke; samotný push nestačí.
+- Ověření: workflow `33674738263`, deployment `6230419264`, přesný commit `d0fd66c3c581`, veřejný HTTP 200 a SHA-256 shoda pěti reprezentativních souborů.
+- Riziko: Automatizovaný browser nebyl dostupný, proto zůstává otevřený ruční vizuální a zvukový smoke.
+- Další krok: Projít celou scénu 5 na Macu a iPhonu, zejména nové hotspoty Fiony, Bruna a Logana a nové audio.
