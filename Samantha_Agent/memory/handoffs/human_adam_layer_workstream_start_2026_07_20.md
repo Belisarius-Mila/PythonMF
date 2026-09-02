@@ -2828,3 +2828,12 @@ Technický důkaz:
 - Změněné cesty před paměťovým zápisem (2): `Samantha_Agent/app/communication/human_adam_ui.py`, `Samantha_Agent/tests/test_human_adam_ui.py`
 - Commit: `Opravit posun chatu po přepnutí proudu`
 - Další krok: Samostatně nasadit změnu a ověřit přepnutí dlouhého proudu na Linux PC
+
+### Servisní oprava 2026-09-02 07:40 CEST – obnovení dlouhého obrazového vlákna
+
+- Pracovní proud: `layer-human-adam-development`
+- Hotovo: Privátní Unix-socket klient přijme při `thread/resume` rámec až 64 MiB, takže současné dlouhé MMTX vlákno s obrazovými výstupy už neblokuje vzdálené navázání. Limit zůstává konečný a týká se pouze lokálního socketu.
+- Otevřeno: Opravu je třeba commitnout, pushnout, řízeně nasadit do Cockpitu a živě ověřit na témže vlákně.
+- Rizika: Vlákno s rámcem nad 64 MiB zůstane správně odmítnuté. Další růst historie je signál k zachované rotaci vlákna, ne k neomezenému transportu.
+- Další krok: Spustit úplnou bránu, vytvořit jeden lokální commit, uzavřít GitHub balíček, nasadit Cockpit a ověřit reconnect plus read-only tah.
+- Ověření: Skutečná vnitřní příčina byla WebSocket `1009` pro rámec 46 323 050 B proti limitu 32 MiB; cílená sada prošla 176/176 a `git diff --check` je čistý.

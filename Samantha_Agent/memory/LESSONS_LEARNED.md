@@ -193,11 +193,13 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   WebSocket rámec o velikosti přibližně 18 MiB a klient jej odmítl původním
   limitem 8 MiB jako `MESSAGE_TOO_BIG`.
 - Typ: opakující se
-- Řešení nalezeno: 13082026
-- Řešení: U privátního Unix-socket transportu zachovat konečný limit, ale zvýšit
-  jej na 32 MiB. Při podobné chybě ověřit nejdřív vnitřní příčinu WebSocket
-  uzavření; samotná existence socketu a úspěšný `initialize` ještě nedokládají,
-  že se vejde odpověď `thread/resume` s nahromaděnými médii.
+- Řešení nalezeno: 13082026; rozšířeno 02092026
+- Řešení: U privátního Unix-socket transportu zachovat konečný limit. Původních
+  32 MiB stačilo pro rámec kolem 18 MiB, ale dlouhá MMTX relace se čtyřmi dalšími
+  obrazovými sadami dosáhla 46 323 050 B; ověřený limit je proto 64 MiB. Při
+  podobné chybě nejdřív ověřit vnitřní příčinu WebSocket uzavření; samotná
+  existence socketu a úspěšný `initialize` ještě nedokládají, že se vejde
+  odpověď `thread/resume` s nahromaděnými médii.
 
 ### LL-015 — Obrazový výstup modelového tahu není automaticky kandidát chatu
 

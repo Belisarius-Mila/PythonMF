@@ -4324,3 +4324,22 @@ Technický důkaz:
 - rychlá Cockpit brána syntaxe a whitespace: 6.9 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `layer-human-adam-development`.
 - Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_other_main`, runtime=`connected`.
+
+### 2026-09-02 07:40 CEST – Dlouhé MMTX vlákno se znovu vejde do privátního transportu
+
+Hotovo:
+- Diagnostika oddělila zdravý App Server a socket od chyby obnovy: `thread/resume` uzavřel WebSocket kódem 1009, protože jediný rámec měl 46 323 050 B a překročil dosavadních 32 MiB.
+- Konečný limit privátního Unix transportu je zvýšen na 64 MiB; veřejné HTTP rozhraní, počet importovaných kandidátů i zákaz persistování base64 a lokálních cest zůstávají beze změny.
+
+Rozhodnutí:
+- Zachovat konečný limit s přiměřenou rezervou nad skutečně pozorovaným rámcem. Neomezené zprávy ani automatické mazání či rotace historie se nezavádějí.
+
+Další krok:
+- Commitnout, pushnout a řízeně nasadit opravu; potom obnovit stejné MMTX vlákno a provést malý read-only tah bez změn.
+
+Navrhované další kroky:
+- Pokud se historie později přiblíží 64 MiB, použít zachovanou explicitní rotaci vlákna místo dalšího automatického navyšování.
+
+Technický důkaz:
+- Reálná příčina: WebSocket `1009`, rámec 46 323 050 B, předchozí maximum 33 554 432 B.
+- Cílená sada 176/176; Python kompilace a `git diff --check` jsou zelené. Úplná brána a živý post-deploy reconnect jsou v tomto okamžiku otevřené.

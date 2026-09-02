@@ -152,7 +152,8 @@ class CodexContractTests(unittest.TestCase):
             )
 
         self.assertEqual(received["result"]["thread"]["id"], "thread-large-resume")
-        self.assertEqual(UNIX_APP_SERVER_MAX_MESSAGE_BYTES, 32 * 1024 * 1024)
+        self.assertEqual(UNIX_APP_SERVER_MAX_MESSAGE_BYTES, 64 * 1024 * 1024)
+        self.assertGreater(UNIX_APP_SERVER_MAX_MESSAGE_BYTES, 46_323_050)
         self.assertEqual(
             unix_connect.call_args.kwargs["max_size"],
             UNIX_APP_SERVER_MAX_MESSAGE_BYTES,

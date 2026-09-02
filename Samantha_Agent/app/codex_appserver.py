@@ -33,8 +33,8 @@ CODEX_PATH_PREFIXES = (
 )
 # Resuming a persistent thread may return its accumulated media items in one
 # local WebSocket frame.  Keep a finite limit, but leave enough headroom for a
-# conversation containing a generated image (observed frame: about 18 MiB).
-UNIX_APP_SERVER_MAX_MESSAGE_BYTES = 32 * 1024 * 1024
+# conversation containing generated images (observed resume frame: about 44.2 MiB).
+UNIX_APP_SERVER_MAX_MESSAGE_BYTES = 64 * 1024 * 1024
 
 
 def utc_now() -> str:
