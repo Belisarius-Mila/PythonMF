@@ -7,16 +7,19 @@ import os
 import subprocess
 import tempfile
 import unittest
+from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import patch
 from types import SimpleNamespace
 
 from app.speech.transcribe import (
+    CURL_HTTP_META_MARKER,
     MAX_AUDIO_BYTES,
     TranscriptionError,
     decode_audio_base64,
     normalize_mime_type,
     openai_api_key_available,
+    parse_retry_after_seconds,
     transcription_context_fields,
     transcribe_audio_base64,
     transcribe_audio_bytes,
@@ -42,6 +45,25 @@ class FakeOpenAIClient:
 
 
 class SpeechTranscribeTests(unittest.TestCase):
+    @staticmethod
+    def curl_response(
+        *,
+        status: int,
+        returncode: int,
+        payload: dict,
+        retry_after: str = "",
+    ) -> subprocess.CompletedProcess[str]:
+        stdout = (
+            json.dumps(payload)
+            + f"\n{CURL_HTTP_META_MARKER}:{status}\t{retry_after}\n"
+        )
+        return subprocess.CompletedProcess(
+            ["/usr/bin/curl"],
+            returncode,
+            stdout=stdout,
+            stderr="",
+        )
+
     def test_decode_audio_base64_accepts_plain_and_data_url(self) -> None:
         encoded = base64.b64encode(b"audio").decode("ascii")
 
@@ -177,6 +199,181 @@ class SpeechTranscribeTests(unittest.TestCase):
                     transcribe_audio_file_with_curl(audio_path, mime_type="audio/webm", runner=fake_runner)
 
         self.assertIn("bad request", str(cm.exception))
+
+    def test_transcribe_audio_file_with_curl_retries_slow_down_after_header_delay(self) -> None:
+        responses = [
+            self.curl_response(
+                status=429,
+                returncode=22,
+                payload={"error": {"code": "slow_down", "message": "private detail"}},
+                retry_after="2",
+            ),
+            self.curl_response(
+                status=200,
+                returncode=0,
+                payload={"text": "Retry uspěl."},
+            ),
+        ]
+        sleeps = []
+
+        def fake_runner(args, **kwargs):
+            self.assertNotIn("test-secret-key", " ".join(args))
+            return responses.pop(0)
+
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            audio_path = Path(temp_dir) / "voice.webm"
+            audio_path.write_bytes(b"fake audio")
+            with (
+                patch.dict(os.environ, {"OPENAI_API_KEY": "test-secret-key"}, clear=False),
+                self.assertLogs("app.speech.transcribe", level="WARNING") as logs,
+            ):
+                result = transcribe_audio_file_with_curl(
+                    audio_path,
+                    mime_type="audio/webm",
+                    runner=fake_runner,
+                    sleep_fn=sleeps.append,
+                )
+
+        self.assertEqual(result["text"], "Retry uspěl.")
+        self.assertEqual(result["timing"]["curl_attempts"], 2)
+        self.assertEqual(result["timing"]["curl_retries"], 1)
+        self.assertEqual(sleeps, [2.0])
+        safe_log = " ".join(logs.output)
+        self.assertIn("status=429", safe_log)
+        self.assertIn("code=slow_down", safe_log)
+        self.assertNotIn("test-secret-key", safe_log)
+        self.assertNotIn("private detail", safe_log)
+
+    def test_transcribe_audio_file_with_curl_retries_overload_with_backoff_and_jitter(self) -> None:
+        responses = [
+            self.curl_response(
+                status=503,
+                returncode=22,
+                payload={"error": {"code": "server_is_overloaded", "message": "busy"}},
+            ),
+            self.curl_response(
+                status=200,
+                returncode=0,
+                payload={"text": "Hotovo."},
+            ),
+        ]
+        sleeps = []
+
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            audio_path = Path(temp_dir) / "voice.webm"
+            audio_path.write_bytes(b"fake audio")
+            with (
+                patch.dict(os.environ, {"OPENAI_API_KEY": "test-secret-key"}, clear=False),
+                self.assertLogs("app.speech.transcribe", level="WARNING"),
+            ):
+                result = transcribe_audio_file_with_curl(
+                    audio_path,
+                    mime_type="audio/webm",
+                    runner=lambda *_args, **_kwargs: responses.pop(0),
+                    sleep_fn=sleeps.append,
+                    jitter_fn=lambda _low, _high: 0.125,
+                )
+
+        self.assertEqual(result["text"], "Hotovo.")
+        self.assertEqual(sleeps, [1.125])
+
+    def test_transcribe_audio_file_with_curl_does_not_retry_other_429(self) -> None:
+        calls = []
+
+        def fake_runner(*args, **kwargs):
+            calls.append((args, kwargs))
+            return self.curl_response(
+                status=429,
+                returncode=22,
+                payload={
+                    "error": {
+                        "code": "project_spend_limit_exceeded",
+                        "message": "limit",
+                    }
+                },
+                retry_after="1",
+            )
+
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            audio_path = Path(temp_dir) / "voice.webm"
+            audio_path.write_bytes(b"fake audio")
+            with patch.dict(os.environ, {"OPENAI_API_KEY": "test-secret-key"}, clear=False):
+                with self.assertRaises(TranscriptionError):
+                    transcribe_audio_file_with_curl(
+                        audio_path,
+                        mime_type="audio/webm",
+                        runner=fake_runner,
+                        sleep_fn=lambda _delay: self.fail("retry must not sleep"),
+                    )
+
+        self.assertEqual(len(calls), 1)
+
+    def test_transcribe_audio_file_with_curl_stops_after_three_overload_attempts(self) -> None:
+        calls = []
+        sleeps = []
+
+        def fake_runner(*args, **kwargs):
+            calls.append((args, kwargs))
+            return self.curl_response(
+                status=503,
+                returncode=22,
+                payload={"error": {"code": "server_is_overloaded", "message": "busy"}},
+            )
+
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            audio_path = Path(temp_dir) / "voice.webm"
+            audio_path.write_bytes(b"fake audio")
+            with (
+                patch.dict(os.environ, {"OPENAI_API_KEY": "test-secret-key"}, clear=False),
+                self.assertLogs("app.speech.transcribe", level="WARNING"),
+            ):
+                with self.assertRaises(TranscriptionError):
+                    transcribe_audio_file_with_curl(
+                        audio_path,
+                        mime_type="audio/webm",
+                        runner=fake_runner,
+                        sleep_fn=sleeps.append,
+                        jitter_fn=lambda _low, _high: 0.0,
+                    )
+
+        self.assertEqual(len(calls), 3)
+        self.assertEqual(sleeps, [1.0, 2.0])
+
+    def test_transcribe_audio_file_with_curl_rejects_excessive_retry_after(self) -> None:
+        calls = []
+
+        def fake_runner(*args, **kwargs):
+            calls.append((args, kwargs))
+            return self.curl_response(
+                status=503,
+                returncode=22,
+                payload={"error": {"code": "server_is_overloaded", "message": "busy"}},
+                retry_after="31",
+            )
+
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            audio_path = Path(temp_dir) / "voice.webm"
+            audio_path.write_bytes(b"fake audio")
+            with patch.dict(os.environ, {"OPENAI_API_KEY": "test-secret-key"}, clear=False):
+                with self.assertRaises(TranscriptionError):
+                    transcribe_audio_file_with_curl(
+                        audio_path,
+                        mime_type="audio/webm",
+                        runner=fake_runner,
+                        sleep_fn=lambda _delay: self.fail("retry must remain bounded"),
+                    )
+
+        self.assertEqual(len(calls), 1)
+
+    def test_parse_retry_after_seconds_accepts_seconds_and_http_date(self) -> None:
+        now = datetime(2026, 9, 3, 12, 0, tzinfo=timezone.utc)
+
+        self.assertEqual(parse_retry_after_seconds("1.5", now=now), 1.5)
+        self.assertEqual(
+            parse_retry_after_seconds("Thu, 03 Sep 2026 12:00:07 GMT", now=now),
+            7.0,
+        )
+        self.assertIsNone(parse_retry_after_seconds("invalid", now=now))
 
     def test_transcribe_cli_main_outputs_json(self) -> None:
         fake_result = {

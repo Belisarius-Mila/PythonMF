@@ -4,12 +4,17 @@ import base64
 import binascii
 import argparse
 import json
+import logging
+import math
 import os
+import random
 import subprocess
 import tempfile
 import time
+from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -26,6 +31,13 @@ DEFAULT_TRANSCRIBE_KEYWORDS = (
 )
 OPENAI_TRANSCRIPTIONS_URL = "https://api.openai.com/v1/audio/transcriptions"
 MAX_AUDIO_BYTES = 6 * 1024 * 1024
+DEFAULT_CURL_MAX_ATTEMPTS = 3
+MAX_CURL_RETRY_WAIT_SECONDS = 30.0
+CURL_RETRY_BASE_SECONDS = 1.0
+CURL_RETRY_JITTER_SECONDS = 0.25
+CURL_ATTEMPT_MAX_SECONDS = 60.0
+CURL_TOTAL_HEADROOM_SECONDS = 5.0
+CURL_HTTP_META_MARKER = "__SAMANTHA_OPENAI_HTTP__"
 MIME_EXTENSIONS = {
     "audio/webm": ".webm",
     "audio/mp4": ".mp4",
@@ -36,6 +48,9 @@ MIME_EXTENSIONS = {
     "audio/aac": ".aac",
     "audio/ogg": ".ogg",
 }
+
+
+LOGGER = logging.getLogger(__name__)
 
 
 class TranscriptionError(RuntimeError):
@@ -100,6 +115,79 @@ def curl_config_quote(value: str) -> str:
     return text.replace("\\", "\\\\").replace('"', '\\"')
 
 
+def split_curl_http_output(
+    stdout: str,
+    *,
+    returncode: int,
+) -> tuple[str, int, str]:
+    """Separate the response body from curl's safe HTTP metadata trailer."""
+    raw = str(stdout or "")
+    marker = f"\n{CURL_HTTP_META_MARKER}:"
+    if marker not in raw:
+        return raw.strip(), 200 if returncode == 0 else 0, ""
+    body, trailer = raw.rsplit(marker, 1)
+    metadata = trailer.strip("\r\n")
+    if "\t" not in metadata:
+        return body.strip(), 200 if returncode == 0 else 0, ""
+    status_raw, retry_after = metadata.split("\t", 1)
+    try:
+        status = int(status_raw.strip())
+    except ValueError:
+        status = 200 if returncode == 0 else 0
+    return body.strip(), status, retry_after.strip()
+
+
+def parse_retry_after_seconds(
+    value: str,
+    *,
+    now: datetime | None = None,
+) -> float | None:
+    """Parse Retry-After seconds or an HTTP date without exceeding policy bounds."""
+    raw = str(value or "").strip()
+    if not raw:
+        return None
+    try:
+        seconds = float(raw)
+    except ValueError:
+        try:
+            retry_at = parsedate_to_datetime(raw)
+        except (TypeError, ValueError, OverflowError):
+            return None
+        if retry_at.tzinfo is None:
+            retry_at = retry_at.replace(tzinfo=timezone.utc)
+        reference = now or datetime.now(timezone.utc)
+        if reference.tzinfo is None:
+            reference = reference.replace(tzinfo=timezone.utc)
+        seconds = max(0.0, (retry_at - reference).total_seconds())
+    if not math.isfinite(seconds) or seconds < 0:
+        return None
+    return seconds
+
+
+def curl_transcription_retry_delay(
+    *,
+    status: int,
+    error_code: str,
+    retry_after: str,
+    attempt: int,
+    jitter_fn: Callable[[float, float], float] = random.uniform,
+) -> float | None:
+    retryable = (status, error_code) in {
+        (429, "slow_down"),
+        (503, "server_is_overloaded"),
+    }
+    if not retryable:
+        return None
+    header_delay = parse_retry_after_seconds(retry_after)
+    if header_delay is not None:
+        if header_delay > MAX_CURL_RETRY_WAIT_SECONDS:
+            return None
+        return header_delay
+    backoff = CURL_RETRY_BASE_SECONDS * (2 ** max(0, attempt - 1))
+    jitter = max(0.0, float(jitter_fn(0.0, CURL_RETRY_JITTER_SECONDS)))
+    return min(MAX_CURL_RETRY_WAIT_SECONDS, backoff + jitter)
+
+
 def transcribe_audio_file_with_curl(
     audio_file: Path | str,
     *,
@@ -108,8 +196,13 @@ def transcribe_audio_file_with_curl(
     model: str = DEFAULT_TRANSCRIBE_MODEL,
     runner: Any = subprocess.run,
     timeout_seconds: int = 90,
+    max_attempts: int = DEFAULT_CURL_MAX_ATTEMPTS,
+    sleep_fn: Callable[[float], None] = time.sleep,
+    jitter_fn: Callable[[float, float], float] = random.uniform,
 ) -> dict[str, Any]:
     started = time.monotonic()
+    deadline = started + max(1.0, float(timeout_seconds))
+    attempts_limit = max(1, min(int(max_attempts), DEFAULT_CURL_MAX_ATTEMPTS))
     safe_mime_type = normalize_mime_type(mime_type)
     path = Path(audio_file)
     try:
@@ -146,40 +239,82 @@ def transcribe_audio_file_with_curl(
     )
     config = "\n".join(config_lines)
     curl_started = time.monotonic()
-    try:
-        completed = runner(
-            [
-                "/usr/bin/curl",
-                "--silent",
-                "--show-error",
-                "--fail-with-body",
-                "--max-time",
-                str(timeout_seconds),
-                "--config",
-                "-",
-            ],
-            input=config,
-            capture_output=True,
-            text=True,
-            timeout=timeout_seconds + 5,
-            check=False,
+    attempt = 0
+    data: dict[str, Any] = {}
+    while attempt < attempts_limit:
+        attempt += 1
+        remaining = deadline - time.monotonic()
+        if remaining <= CURL_TOTAL_HEADROOM_SECONDS:
+            raise TranscriptionError("OpenAI přepis přes curl překročil časový limit.")
+        attempt_timeout = min(
+            CURL_ATTEMPT_MAX_SECONDS,
+            max(1.0, remaining - CURL_TOTAL_HEADROOM_SECONDS),
         )
-    except subprocess.TimeoutExpired as exc:
-        raise TranscriptionError("OpenAI přepis přes curl překročil časový limit.") from exc
-    except OSError as exc:
-        raise TranscriptionError(f"OpenAI přepis přes curl se nepodařilo spustit: {exc}") from exc
-    curl_ms = int((time.monotonic() - curl_started) * 1000)
+        try:
+            completed = runner(
+                [
+                    "/usr/bin/curl",
+                    "--silent",
+                    "--show-error",
+                    "--fail-with-body",
+                    "--max-time",
+                    f"{attempt_timeout:.3f}",
+                    "--write-out",
+                    f"\n{CURL_HTTP_META_MARKER}:%{{http_code}}\t%header{{retry-after}}\n",
+                    "--config",
+                    "-",
+                ],
+                input=config,
+                capture_output=True,
+                text=True,
+                timeout=attempt_timeout + 1.0,
+                check=False,
+            )
+        except subprocess.TimeoutExpired as exc:
+            raise TranscriptionError("OpenAI přepis přes curl překročil časový limit.") from exc
+        except OSError as exc:
+            raise TranscriptionError(f"OpenAI přepis přes curl se nepodařilo spustit: {exc}") from exc
 
-    stdout = (completed.stdout or "").strip()
-    stderr = (completed.stderr or "").strip()
-    try:
-        data = json.loads(stdout) if stdout else {}
-    except json.JSONDecodeError as exc:
-        detail = stderr or stdout[:500] or f"exit {completed.returncode}"
-        raise TranscriptionError(f"OpenAI přepis přes curl vrátil nečitelný výsledek: {detail}") from exc
-    if completed.returncode != 0:
-        message = str(data.get("error", {}).get("message") or stderr or f"exit {completed.returncode}")
-        raise TranscriptionError(f"OpenAI přepis přes curl selhal: {message}")
+        stdout, http_status, retry_after = split_curl_http_output(
+            completed.stdout or "",
+            returncode=completed.returncode,
+        )
+        stderr = (completed.stderr or "").strip()
+        try:
+            parsed = json.loads(stdout) if stdout else {}
+        except json.JSONDecodeError as exc:
+            detail = stderr or stdout[:500] or f"exit {completed.returncode}"
+            raise TranscriptionError(f"OpenAI přepis přes curl vrátil nečitelný výsledek: {detail}") from exc
+        data = parsed if isinstance(parsed, dict) else {}
+        if completed.returncode == 0:
+            break
+
+        error = data.get("error") if isinstance(data.get("error"), dict) else {}
+        error_code = str(error.get("code") or "").strip()
+        delay = curl_transcription_retry_delay(
+            status=http_status,
+            error_code=error_code,
+            retry_after=retry_after,
+            attempt=attempt,
+            jitter_fn=jitter_fn,
+        )
+        if delay is None or attempt >= attempts_limit:
+            message = str(error.get("message") or stderr or f"exit {completed.returncode}")
+            raise TranscriptionError(f"OpenAI přepis přes curl selhal: {message}")
+        remaining = deadline - time.monotonic()
+        if delay + CURL_TOTAL_HEADROOM_SECONDS >= remaining:
+            raise TranscriptionError("OpenAI přepis přes curl překročil časový limit.")
+        LOGGER.warning(
+            "OpenAI transcription retry status=%s code=%s attempt=%s/%s wait_seconds=%.3f",
+            http_status,
+            error_code,
+            attempt,
+            attempts_limit,
+            delay,
+        )
+        sleep_fn(delay)
+
+    curl_ms = int((time.monotonic() - curl_started) * 1000)
 
     text = str(data.get("text") or "").strip()
     if not text:
@@ -196,6 +331,8 @@ def transcribe_audio_file_with_curl(
         "timing": {
             "curl_ms": curl_ms,
             "openai_ms": curl_ms,
+            "curl_attempts": attempt,
+            "curl_retries": max(0, attempt - 1),
         },
     }
 

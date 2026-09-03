@@ -369,3 +369,16 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   samostatných restricted metadat a do běžného indexu zapsat pouze maskovaný
   text. Surový OCR text, rodné číslo, adresu a aktivační údaje neindexovat ani
   neduplikovat do metadat.
+
+### LL-029 — Přímý curl klient nesmí opakovat každou chybu 429 nebo 503
+
+- Problém: Přímá multipartová cesta hlasového přepisu přes systémový `curl`
+  neznala HTTP stav ani `Retry-After`; obecné opakování všech chyb by navíc
+  zbytečně opakovalo kvótové a platební chyby.
+- Typ: opakující se
+- Řešení nalezeno: 03092026
+- Řešení: Z odpovědi odděleně načíst pouze HTTP stav a `Retry-After`, opakovat
+  nejvýše třikrát jen přesné dvojice `429/slow_down` a
+  `503/server_is_overloaded`, bez hlavičky použít krátký exponenciální backoff
+  s jitterem a celý běh držet v jednom časovém rozpočtu. Do logu propustit jen
+  stav, kód, číslo pokusu a čekání; nikdy klíč, audio ani celé tělo chyby.
