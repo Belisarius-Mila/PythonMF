@@ -137,6 +137,25 @@ button {
   pointer-events: none;
 }
 
+.scene-quick-skip {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 16%;
+  height: 24%;
+  z-index: 12;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  cursor: pointer;
+}
+
+.scene-quick-skip:focus-visible {
+  outline: 3px solid rgba(255, 216, 107, 0.82);
+  outline-offset: -6px;
+}
+
 .hotspot {
   position: absolute;
   border: 0;

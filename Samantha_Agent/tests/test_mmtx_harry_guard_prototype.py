@@ -74,8 +74,10 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
         self.assertIn('id="yesButton"', html)
         self.assertIn('id="noButton"', html)
         self.assertIn('src="harry_benji_prototype_01.png"', html)
-        self.assertIn('styles.css?v=20260902scene05link1', html)
+        self.assertIn('styles.css?v=20260903scene05shortcut1', html)
         self.assertIn('href="../scene05_log_bridge/index.html"', html)
+        self.assertIn('class="scene-quick-skip"', html)
+        self.assertIn('aria-label="Rychle přejít ke scéně 5"', html)
         self.assertIn('audio_manifest.js?v=20260829fixed1', html)
         self.assertIn('script.js?v=20260829fixed1', html)
         self.assertNotIn("PROTOTYP", html)
@@ -89,6 +91,12 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
         self.assertIn(".dictionary-item {", styles)
         self.assertIn(".next-button {", styles)
         self.assertIn(".back-button {", styles)
+        quick_skip_style = styles.split(".scene-quick-skip {", 1)[1].split("}", 1)[0]
+        self.assertIn("left: 0;", quick_skip_style)
+        self.assertIn("bottom: 0;", quick_skip_style)
+        self.assertIn("width: 16%;", quick_skip_style)
+        self.assertIn("height: 24%;", quick_skip_style)
+        self.assertIn("background: transparent;", quick_skip_style)
 
         production_script = (
             PROJECT_ROOT / "docs" / "scene03_journey_to_the_lake" / "script.js"
