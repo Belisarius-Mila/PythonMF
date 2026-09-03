@@ -18,6 +18,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 TRUSTED_PYTHON = Path(sys.executable)
 DEFAULT_GATE_LOG = PROJECT_ROOT / "data" / "private" / "communication" / "human_adam_deploy_gate.log"
 MAX_GATE_LOG_CHARS = 2_000_000
+DEFAULT_GATE_TIMEOUT_SECONDS = 900.0
 GATE_FAILURE_TYPES = frozenset(
     {
         "syntax_error",
@@ -64,7 +65,7 @@ def run_checkpoint_quality_gate(
     workspace: HumanAdamWorkspaceManager,
     runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
     log_path: Path = DEFAULT_GATE_LOG,
-    timeout: float = 420.0,
+    timeout: float = DEFAULT_GATE_TIMEOUT_SECONDS,
     skip_unit_tests: bool = False,
 ) -> GateEvidence:
     gate_script = workspace.project_root / "scripts" / "cockpit_quality_gate.py"

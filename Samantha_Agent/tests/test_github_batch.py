@@ -11,11 +11,14 @@ from app.communication.github_batch import (
     audit_github_batch,
     push_github_batch,
 )
+from app.communication.checkpoint_quality_gate import DEFAULT_GATE_TIMEOUT_SECONDS
 from tests.test_human_adam_takeover import prepare_with_origin
 from tests.test_human_adam_workspace import git
 
 
-def successful_gate(command, **_kwargs):
+def successful_gate(command, **kwargs):
+    if kwargs.get("timeout") != DEFAULT_GATE_TIMEOUT_SECONDS:
+        raise AssertionError("GitHub batch must keep the full-gate timeout reserve")
     return subprocess.CompletedProcess(
         command,
         0,
