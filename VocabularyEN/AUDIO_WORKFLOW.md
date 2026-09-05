@@ -39,6 +39,19 @@ Bez `--apply` generátor nic nevytváří ani neposílá externí službě. Rež
 odesílá Microsoft Speech pouze veřejný text slovíčka. Audio se ukládá do
 projektu; příkaz nic sám nepublikuje, necommitne ani nenasadí.
 
+## Audit slovní zásoby MMTX
+
+`import_mmtx_vocabulary.py` kontroluje vedle původních slovníčků také
+anglické texty z audio manifestů scén, barev, školy a narozeninových dialogů.
+Základní tvary mají explicitní mapování (například `logs` → `log`), jména
+postav se vynechávají a `me too` zůstává vyloučené. Doplňující překlady
+a příkladové věty jsou v `mmtx_dialogue_supplement.csv`.
+
+Bez `--apply` probíhá pouze audit. S `--apply` import doplní jen chybějící
+řádky s okruhem Benji; původní CSV prefix zachová. Potom spusť synchronizaci
+s `--preserve-extra-assets` a sestavení audia podle postupu výše. Nový
+nezkontrolovaný výraz v dialogu audit označí místo falešného hlášení úplnosti.
+
 ## Kontrola webu před zveřejněním
 
 ```bash

@@ -23,6 +23,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 CSV_PATH = REPO_ROOT / "VocabularyEN" / "VocabularyEN.csv"
+DIALOGUE_SUPPLEMENT_PATH = Path(__file__).with_name("mmtx_dialogue_supplement.csv")
 SOURCE_FILES = (
     ("MMTX intro, Owl Garden and Forest School", REPO_ROOT / "MatysekANJ" / "web_mmtx" / "script_intro_v2.js"),
     ("MMTX scene 02", REPO_ROOT / "MatysekANJ" / "web_mmtx" / "scene02_sunnys_lost_nuts" / "script.js"),
@@ -35,6 +36,19 @@ EXCLUDED_REASONS = {
     "metoo": "use_too_only",  # Mila: keep the standalone vocabulary entry "too".
 }
 EXCLUDED_NORMALIZED = set(EXCLUDED_REASONS)
+IGNORED_DIALOGUE_TOKENS = set("benji bunny bruno fiona sunny harry logan kate jane caw hmm oh".split())
+DIALOGUE_ALIASES = {
+    "adventures": "adventure", "animals": "animal", "am": "I (am)", "are": "be",
+    "carrots": "carrot", "cheering": "cheer", "chickens": "chicken",
+    "closer": "come closer", "colors": "color", "crossed": "cross",
+    "did": "do", "does": "do", "don't": "not", "dreams": "dream",
+    "fences": "fence", "finished": "finish", "has": "have", "i": "I (am)",
+    "is": "be", "isn't": "not", "jumping": "jump", "knows": "know",
+    "let's": "let's go", "lives": "live", "logs": "log", "lots": "lots of",
+    "needs": "need", "okay": "OK", "paths": "path", "pushing": "push",
+    "questions": "question", "reasons": "reason", "stays": "stay",
+    "strangers": "stranger", "thank": "thank you", "wants": "want",
+}
 FIELDS = ("EN", "CZ", "Order", "Sentence", "SentenceT", "WS", "L", "HT")
 
 PAIR_RE = re.compile(
@@ -199,6 +213,63 @@ def decode_js_string(value: str) -> str:
     return json.loads(f'"{value}"')
 
 
+def load_dialogue_supplement() -> list[dict[str, str]]:
+    with DIALOGUE_SUPPLEMENT_PATH.open(encoding="utf-8", newline="") as handle:
+        reader = csv.DictReader(handle)
+        if reader.fieldnames != ["EN", "CZ", "Sentence", "SentenceT"]:
+            raise ValueError("Unexpected MMTX dialogue supplement header")
+        rows = list(reader)
+    keys = [normalize_word(row["EN"]) for row in rows]
+    if len(set(keys)) != len(keys) or any(not all(row.values()) for row in rows):
+        raise ValueError("Duplicate or incomplete MMTX dialogue supplement row")
+    return rows
+
+
+def extract_dialogue_tokens() -> dict[str, list[str]]:
+    """Audit spoken English, including scenes without a dictionary widget.
+
+    Read data only: no JavaScript evaluation. Manifests hold the actual fixed
+    speech keys; intro colors and birthday dialogue are declared in scripts.
+    """
+    docs = REPO_ROOT / "docs"
+    texts: list[tuple[Path, str]] = []
+    manifests = [docs / "scene01_audio_manifest.js", docs / "forest_school_audio_manifest.js"]
+    manifests.extend(sorted(docs.glob("scene0*/audio_manifest.js")))
+    for path in manifests:
+        source = path.read_text(encoding="utf-8")
+        payload = json.loads(source[source.index("{"):].rstrip().removesuffix(";"))
+        for key in payload["dialogue"]["en"]:
+            texts.append((path, key.split("::", 1)[-1]))
+    scripts = [docs / "script_intro_v2.js", *sorted(docs.glob("scene_*birthday/script.js"))]
+    for path in scripts:
+        source = path.read_text(encoding="utf-8")
+        for raw in re.findall(r'\b(?:en|textEn|word):\s*"((?:\\.|[^"\\])*)"', source):
+            texts.append((path, decode_js_string(raw)))
+    tokens: dict[str, list[str]] = {}
+    for path, text in texts:
+        for word in re.findall(r"[A-Za-z]+(?:['’][A-Za-z]+)?", text):
+            key = word.lower().replace("’", "'")
+            source = path.relative_to(REPO_ROOT).as_posix()
+            sources = tokens.setdefault(key, [])
+            if source not in sources:
+                sources.append(source)
+    return dict(sorted(tokens.items()))
+
+
+def dialogue_coverage(rows: list[dict[str, str]]) -> dict[str, object]:
+    known = {normalize_word(row["EN"]) for row in rows}
+    tokens = extract_dialogue_tokens()
+    missing = sorted({DIALOGUE_ALIASES.get(token, token) for token in tokens
+                      if token not in IGNORED_DIALOGUE_TOKENS
+                      and normalize_word(DIALOGUE_ALIASES.get(token, token)) not in known})
+    return {
+        "unique_tokens": len(tokens), "missing_lemmas": missing,
+        "ignored_tokens": sorted(set(tokens) & IGNORED_DIALOGUE_TOKENS),
+        "aliases": {token: lemma for token, lemma in DIALOGUE_ALIASES.items() if token in tokens},
+        "sources": sorted({source for sources in tokens.values() for source in sources}),
+    }
+
+
 def extract_source_entries() -> OrderedDict[str, dict[str, object]]:
     entries: OrderedDict[str, dict[str, object]] = OrderedDict()
     for source_label, source_path in SOURCE_FILES:
@@ -217,6 +288,15 @@ def extract_source_entries() -> OrderedDict[str, dict[str, object]]:
             assert isinstance(sources, list)
             if source_label not in sources:
                 sources.append(source_label)
+    tokens = extract_dialogue_tokens()
+    for row in load_dialogue_supplement():
+        key = normalize_word(row["EN"])
+        sources = sorted({source for token, paths in tokens.items()
+                          if normalize_word(DIALOGUE_ALIASES.get(token, token)) == key
+                          for source in paths})
+        if not sources:
+            raise ValueError(f"Supplement entry is absent from MMTX speech: {row['EN']}")
+        entries.setdefault(key, {"en": row["EN"], "cz": row["CZ"], "sources": sources})
     return entries
 
 
@@ -236,7 +316,14 @@ def build_plan() -> tuple[OrderedDict[str, dict[str, object]], list[dict[str, st
         key for key in entries
         if key not in current_keys and key not in EXCLUDED_NORMALIZED
     ]
-    uncovered = sorted(set(missing_keys) - set(CURATED))
+    curated = dict(CURATED)
+    for row in load_dialogue_supplement():
+        curated[normalize_word(row["EN"])] = _row(row["Sentence"], row["SentenceT"])
+    speech_missing = dialogue_coverage(current_rows)["missing_lemmas"]
+    unreviewed = [word for word in speech_missing if normalize_word(word) not in entries]
+    if unreviewed:
+        raise SystemExit("Unreviewed MMTX dialogue words: " + ", ".join(unreviewed))
+    uncovered = sorted(set(missing_keys) - set(curated))
     if uncovered:
         raise SystemExit("Missing curated sentences for: " + ", ".join(uncovered))
 
@@ -244,7 +331,7 @@ def build_plan() -> tuple[OrderedDict[str, dict[str, object]], list[dict[str, st
     planned: list[dict[str, object]] = []
     for offset, key in enumerate(missing_keys):
         source = entries[key]
-        sentence, sentence_t, word_set = CURATED[key]
+        sentence, sentence_t, word_set = curated[key]
         planned.append(
             {
                 "EN": str(source["en"]),
@@ -308,6 +395,7 @@ def write_report(path: Path, entries: OrderedDict[str, dict[str, object]], curre
         "excluded_count": sum(item["normalized"] in EXCLUDED_NORMALIZED for item in items),
         "planned_rows": planned,
         "source_items": items,
+        "dialogue_coverage": dialogue_coverage(current_rows),
     }
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

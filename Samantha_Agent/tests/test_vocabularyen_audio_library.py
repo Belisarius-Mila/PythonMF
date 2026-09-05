@@ -126,7 +126,7 @@ class VocabularyEnAudioLibraryTests(unittest.TestCase):
             )
         )
 
-        self.assertEqual(verified, {"items": 305, "references": 610, "assets": 606})
+        self.assertEqual(verified, {"items": 425, "references": 850, "assets": 845})
         self.assertEqual(manifest["voices"]["en"]["label"], "Aria")
         self.assertEqual(manifest["voices"]["cz"]["label"], "Vlasta")
 

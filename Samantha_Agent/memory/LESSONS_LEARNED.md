@@ -429,3 +429,17 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   bezprostřednímu opakování při přechodu mezi koly. Reprodukční testy ověřily
   opravu i tři celá kola se změnami směru. Shodný text u různých významů
   není opakování stejné karty.
+
+### LL-033 — Audit MMTX musí zahrnout i dialogy bez slovníčku
+
+- Problém: Import kontrolující jen čtyři historické slovníčky hlásil úplnost,
+  přestože v mluvených textech dalších scén, školních pokynech a narozeninách
+  chybělo ve VocabularyEN 120 základních hesel.
+- Typ: opakující se
+- Řešení nalezeno: 05092026
+- Řešení: porovnat i anglické klíče audio manifestů a deklarované texty
+  úvodu/narozenin; ověřit shodu zdrojů s veřejným MMTX. Tvary slov mapovat
+  explicitně, jména a domluvené výjimky zachovat. Nové heslo musí mít
+  kurátorský CZ, Sentence, SentenceT, Benji a audio; neznámé budoucí slovo
+  blokuje falešné hlášení úplnosti. Po doplnění prošel audit bez mezer,
+  30 cílených testů a dekódování všech 239 nových MP3.

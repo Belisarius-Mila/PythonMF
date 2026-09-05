@@ -42,7 +42,10 @@ def load_rows(path: Path = CSV_PATH) -> list[dict[str, str]]:
 
 
 def imported_keys(import_module) -> set[str]:
-    keys = set(import_module.CURATED) - import_module.EXCLUDED_NORMALIZED
+    keys = (set(import_module.CURATED) | {
+        import_module.normalize_word(row["EN"])
+        for row in import_module.load_dialogue_supplement()
+    }) - import_module.EXCLUDED_NORMALIZED
     return keys
 
 

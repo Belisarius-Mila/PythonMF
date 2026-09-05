@@ -4,6 +4,7 @@ import csv
 import importlib.util
 import json
 from pathlib import Path
+from unittest.mock import patch
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -62,15 +63,15 @@ def test_current_mmtx_inventory_has_complete_curated_plan():
     module = load_module()
     entries, current_rows, planned = module.build_plan()
 
-    assert len(entries) == 155
-    assert len(current_rows) == 305
+    assert len(entries) == 275
+    assert len(current_rows) == 425
     assert planned == []
     assert not any(row["EN"] == "me too" for row in current_rows)
     assert sum(row["EN"] == "too" for row in current_rows) == 1
     imported = current_rows[186:]
-    assert len(imported) == 119
+    assert len(imported) == 239
     assert imported[0]["Order"] == "187"
-    assert imported[-1]["Order"] == "305"
+    assert imported[-1]["Order"] == "425"
     assert {module.normalize_word(str(row["EN"])) for row in imported}.isdisjoint(
         module.EXCLUDED_NORMALIZED
     )
@@ -79,32 +80,70 @@ def test_current_mmtx_inventory_has_complete_curated_plan():
     assert all("Benji" in module.merge_word_sets(str(row["WS"])).split("|") for row in imported)
 
 
+def test_dialogue_audit_covers_all_current_scenes_and_supplement():
+    module = load_module()
+    rows = module.load_csv_rows()
+    coverage = module.dialogue_coverage(rows)
+    assert coverage["missing_lemmas"] == []
+    assert any("scene05_log_bridge" in source for source in coverage["sources"])
+    assert any("scene_jane_birthday" in source for source in coverage["sources"])
+    assert any("scene_kate_birthday" in source for source in coverage["sources"])
+    assert any("forest_school" in source for source in coverage["sources"])
+    assert coverage["aliases"]["logs"] == "log"
+    assert coverage["aliases"]["crossed"] == "cross"
+    supplement = module.load_dialogue_supplement()
+    assert len(supplement) == 120
+    by_en = {row["EN"]: row for row in rows}
+    for addition in supplement:
+        actual = by_en[addition["EN"]]
+        assert all(actual[field] == addition[field] for field in addition)
+        assert "Benji" in actual["WS"].split("|")
+
+
+def test_dialogue_audit_distinguishes_inflections_names_and_unreviewed_words():
+    module = load_module()
+    tokens = {word: ["test.js"] for word in ["logs", "crossed", "am", "kate", "unicorn"]}
+    with patch.object(module, "extract_dialogue_tokens", return_value=tokens):
+        coverage = module.dialogue_coverage([{"EN": en} for en in ["log", "cross", "I (am)"]])
+    assert coverage["missing_lemmas"] == ["unicorn"]
+    assert coverage["ignored_tokens"] == ["kate"]
+    real_tokens = module.extract_dialogue_tokens()
+    with patch.object(module, "extract_dialogue_tokens", return_value={**real_tokens, "unicorn": ["new_scene.js"]}):
+        try:
+            module.build_plan()
+        except SystemExit as error:
+            assert "Unreviewed MMTX dialogue words: unicorn" in str(error)
+        else:
+            raise AssertionError("A new unreviewed dialogue word must block a falsely complete audit")
+
+
 def test_append_preserves_existing_csv_prefix_and_crlf(tmp_path):
     module = load_module()
     original = module.CSV_PATH.read_bytes()
     lines = original.split(b"\r\n")
-    assert len(lines) == 307
+    assert len(lines) == 427
     pre_import = b"\r\n".join(lines[:187]) + b"\r\n"
     target = tmp_path / "VocabularyEN.csv"
     target.write_bytes(pre_import)
     module.CSV_PATH = target
     entries, current_rows, planned = module.build_plan()
-    assert len(entries) == 155
+    assert len(entries) == 275
     assert len(current_rows) == 186
-    assert len(planned) == 119
+    assert len(planned) == 239
     module.append_rows(planned)
 
     updated = target.read_bytes()
     assert updated.startswith(pre_import)
     assert updated == original
-    assert updated.count(b"\r\n") == 306
+    assert updated.count(b"\r\n") == 426
     assert b"\n" not in updated.replace(b"\r\n", b"")
 
     with target.open("r", encoding="utf-8", newline="") as handle:
         rows = list(csv.DictReader(handle))
-    assert len(rows) == 305
-    assert rows[-1]["EN"] == "believe"
-    assert rows[-1]["SentenceT"] == "Věřím ti, protože říkáš pravdu."
+    assert len(rows) == 425
+    assert rows[304]["EN"] == "believe"
+    assert rows[304]["SentenceT"] == "Věřím ti, protože říkáš pravdu."
+    assert rows[-1]["EN"] == "your"
 
 
 def test_czech_tokenization_keeps_letters_with_diacritics_together():
@@ -142,7 +181,7 @@ def test_current_mmtx_rows_are_all_in_benji_word_set():
 
     targets, pending = module.audit()
 
-    assert len(targets) == 119
+    assert len(targets) == 239
     assert pending == []
 
 
@@ -153,8 +192,8 @@ def test_web_export_offers_exactly_the_mmtx_rows_in_benji_word_set():
     benji_items = [item for item in manifest["items"] if "Benji" in item["wordSets"]]
 
     assert "Benji" in manifest["wordSets"]
-    assert len(benji_items) == 119
-    assert [item["order"] for item in benji_items] == list(range(187, 306))
+    assert len(benji_items) == 239
+    assert [item["order"] for item in benji_items] == list(range(187, 426))
     assert all(item["sentenceEn"] and item["sentenceCz"] for item in benji_items)
     assert all(item["image"] for item in benji_items)
 

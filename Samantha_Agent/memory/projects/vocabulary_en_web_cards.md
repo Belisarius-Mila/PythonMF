@@ -308,6 +308,26 @@ python3 VocabularyEN/sync_vocabulary_en_to_docs.py --preserve-extra-assets
   oprava `cat` byla zveřejněna z commitu `cc0b2b6`, ověřena veřejným
   manifestem a shodou MP3; aktuální změny zatím veřejně ověřené nejsou.
 
+## Audit MMTX a doplnění dialogů — 2026-09-05 22:42 CEST
+
+- Hotovo: porovnané historické slovníčky i anglické dialogy všech dostupných
+  scén, školy, barev a obou narozenin. Devět zdrojů je shodných s veřejným
+  MMTX. Doplněno 120 základních hesel s CZ, Sentence, SentenceT a Benji.
+- Stav: 425 karet, 239 Benji, 845 aktivních MP3. Všech původních 305 řádků
+  zůstalo bajtově zachováno; me too ani jména postav se nevrátily.
+- Rozhodnutí: slovní tvary převádět explicitně na základní hesla; nové
+  překlady a věty jsou v mmtx_dialogue_supplement.csv. Import nyní rozpozná
+  i chybějící slovní zásobu v dialogu bez vlastního slovníčkového panelu.
+- Rizika: 49 nových hesel používá obecné ilustrace. Audit není kontrolou
+  všech významů každého slova; původní překlady se nepřepisovaly.
+- Technický důkaz: následný import 0 chybějících hesel; 15 importních,
+  11 audio a 4 JavaScript testy OK; statická brána OK. Všech 239 nových MP3
+  se dekóduje bez chyby. Přepis vzorků bridge, brown, birthday a stream
+  odpovídá heslům. Výslovnost všech nahrávek lidským poslechem ověřená není.
+- Další krok: push a publikace Pages, pak ruční zkouška. Přehled v
+  reports/vocabulary_en_mmtx_audit_2026_09_05.md. Předchozí úprava too a
+  losování byla už zveřejněna z commitu 10f7e6a; toto doplnění zatím není.
+
 ## Zdroj
 
 Souhrn ChatGPT/Codex konverzace k převodu části `vocab_trainer_en.py` do jednoduché webové learner aplikace pro mentálně postižené studenty, vytvoření sync skriptu `VocabularyEN -> docs`, prvního webového MVP, zmenšení hlavičky a přípravě seznamu chybějících obrázků v `Pict/`.

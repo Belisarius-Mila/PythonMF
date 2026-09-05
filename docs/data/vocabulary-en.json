@@ -1,8 +1,8 @@
 {
   "app": "VocabularyEN",
-  "generatedAt": "2026-09-05T19:59:47.504001+00:00",
+  "generatedAt": "2026-09-05T20:37:01.515790+00:00",
   "sourceCsv": "VocabularyEN/VocabularyEN.csv",
-  "itemCount": 305,
+  "itemCount": 425,
   "wordSets": [
     "Actions",
     "Animals",
@@ -17,13 +17,14 @@
     "selected": 107,
     "hardTraining": 70,
     "wordSetCount": 8,
-    "withSentence": 305,
-    "withSentenceTranslation": 305,
+    "withSentence": 425,
+    "withSentenceTranslation": 425,
     "imageSources": {
-      "direct": 265,
-      "mapping": 40
+      "direct": 312,
+      "fallback": 49,
+      "mapping": 64
     },
-    "uniqueImageFiles": 277
+    "uniqueImageFiles": 341
   },
   "items": [
     {
@@ -5427,6 +5428,2166 @@
       "image": "assets/vocabulary-en/trust.webp",
       "imageStem": "trust",
       "imageRequestedStem": "trust",
+      "imageSource": "mapping",
+      "imageMissing": false
+    },
+    {
+      "id": 306,
+      "order": 306,
+      "en": "a",
+      "cz": "neurčitý člen",
+      "sentenceEn": "I can see a cat.",
+      "sentenceCz": "Vidím kočku.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/a.webp",
+      "imageStem": "a",
+      "imageRequestedStem": "a",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 307,
+      "order": 307,
+      "en": "about",
+      "cz": "o",
+      "sentenceEn": "Tell me about your dog.",
+      "sentenceCz": "Pověz mi o svém psovi.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/about.png",
+      "imageStem": "about",
+      "imageRequestedStem": "about",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 308,
+      "order": 308,
+      "en": "across",
+      "cz": "přes; na druhou stranu",
+      "sentenceEn": "We walk across the bridge.",
+      "sentenceCz": "Jdeme přes most.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/on.png",
+      "imageStem": "on",
+      "imageRequestedStem": "on",
+      "imageSource": "mapping",
+      "imageMissing": false
+    },
+    {
+      "id": 309,
+      "order": 309,
+      "en": "adventure",
+      "cz": "dobrodružství",
+      "sentenceEn": "Our adventure starts in the forest.",
+      "sentenceCz": "Naše dobrodružství začíná v lese.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/proverbs.png",
+      "imageStem": "proverbs",
+      "imageRequestedStem": "proverbs",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 310,
+      "order": 310,
+      "en": "all",
+      "cz": "všichni; všechno",
+      "sentenceEn": "All my friends are here.",
+      "sentenceCz": "Všichni moji kamarádi jsou tady.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/all.png",
+      "imageStem": "all",
+      "imageRequestedStem": "all",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 311,
+      "order": 311,
+      "en": "and",
+      "cz": "a",
+      "sentenceEn": "I have a book and a pencil.",
+      "sentenceCz": "Mám knihu a tužku.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/and.png",
+      "imageStem": "and",
+      "imageRequestedStem": "and",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 312,
+      "order": 312,
+      "en": "at",
+      "cz": "u; v",
+      "sentenceEn": "We meet at the gate.",
+      "sentenceCz": "Sejdeme se u branky.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/visit.webp",
+      "imageStem": "visit",
+      "imageRequestedStem": "visit",
+      "imageSource": "mapping",
+      "imageMissing": false
+    },
+    {
+      "id": 313,
+      "order": 313,
+      "en": "be",
+      "cz": "být",
+      "sentenceEn": "I want to be your friend.",
+      "sentenceCz": "Chci být tvůj kamarád.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/tobe.png",
+      "imageStem": "tobe",
+      "imageRequestedStem": "tobe",
+      "imageSource": "mapping",
+      "imageMissing": false
+    },
+    {
+      "id": 314,
+      "order": 314,
+      "en": "beautiful",
+      "cz": "krásný",
+      "sentenceEn": "The garden is beautiful.",
+      "sentenceCz": "Zahrada je krásná.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/beautiful.png",
+      "imageStem": "beautiful",
+      "imageRequestedStem": "beautiful",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 315,
+      "order": 315,
+      "en": "birthday",
+      "cz": "narozeniny",
+      "sentenceEn": "Today is my birthday.",
+      "sentenceCz": "Dnes mám narozeniny.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/cake2.jpg",
+      "imageStem": "cake2",
+      "imageRequestedStem": "cake2",
+      "imageSource": "mapping",
+      "imageMissing": false
+    },
+    {
+      "id": 316,
+      "order": 316,
+      "en": "brave",
+      "cz": "statečný",
+      "sentenceEn": "The brave dog helps his friends.",
+      "sentenceCz": "Statečný pes pomáhá svým kamarádům.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/proverbs.png",
+      "imageStem": "proverbs",
+      "imageRequestedStem": "proverbs",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 317,
+      "order": 317,
+      "en": "bridge",
+      "cz": "most",
+      "sentenceEn": "The bridge goes across the river.",
+      "sentenceCz": "Most vede přes řeku.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/bridge.png",
+      "imageStem": "bridge",
+      "imageRequestedStem": "bridge",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 318,
+      "order": 318,
+      "en": "brown",
+      "cz": "hnědý",
+      "sentenceEn": "The bear is brown.",
+      "sentenceCz": "Medvěd je hnědý.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/brown.webp",
+      "imageStem": "brown",
+      "imageRequestedStem": "brown",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 319,
+      "order": 319,
+      "en": "cheer",
+      "cz": "povzbuzovat; jásat",
+      "sentenceEn": "We cheer for our friend.",
+      "sentenceCz": "Povzbuzujeme našeho kamaráda.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/others.png",
+      "imageStem": "others",
+      "imageRequestedStem": "others",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 320,
+      "order": 320,
+      "en": "color",
+      "cz": "barva",
+      "sentenceEn": "What color is your bag?",
+      "sentenceCz": "Jakou barvu má tvoje taška?",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/color.webp",
+      "imageStem": "color",
+      "imageRequestedStem": "color",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 321,
+      "order": 321,
+      "en": "continue",
+      "cz": "pokračovat",
+      "sentenceEn": "We can continue our journey.",
+      "sentenceCz": "Můžeme pokračovat v cestě.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/others.png",
+      "imageStem": "others",
+      "imageRequestedStem": "others",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 322,
+      "order": 322,
+      "en": "cross",
+      "cz": "přejít; překročit",
+      "sentenceEn": "We cross the bridge together.",
+      "sentenceCz": "Společně přejdeme most.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/others.png",
+      "imageStem": "others",
+      "imageRequestedStem": "others",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 323,
+      "order": 323,
+      "en": "dance",
+      "cz": "tancovat",
+      "sentenceEn": "We dance at the party.",
+      "sentenceCz": "Tancujeme na oslavě.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/dance.png",
+      "imageStem": "dance",
+      "imageRequestedStem": "dance",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 324,
+      "order": 324,
+      "en": "day",
+      "cz": "den",
+      "sentenceEn": "Today is a happy day.",
+      "sentenceCz": "Dnes je šťastný den.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/day.png",
+      "imageStem": "day",
+      "imageRequestedStem": "day",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 325,
+      "order": 325,
+      "en": "do",
+      "cz": "dělat",
+      "sentenceEn": "What do you want to do?",
+      "sentenceCz": "Co chceš dělat?",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/do.webp",
+      "imageStem": "do",
+      "imageRequestedStem": "do",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 326,
+      "order": 326,
+      "en": "dream",
+      "cz": "sen",
+      "sentenceEn": "I had a dream about a rabbit.",
+      "sentenceCz": "Zdál se mi sen o králíkovi.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/others.png",
+      "imageStem": "others",
+      "imageRequestedStem": "others",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 327,
+      "order": 327,
+      "en": "eleven",
+      "cz": "jedenáct",
+      "sentenceEn": "There are eleven pencils in the box.",
+      "sentenceCz": "V krabici je jedenáct tužek.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/verb.png",
+      "imageStem": "verb",
+      "imageRequestedStem": "verb",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 328,
+      "order": 328,
+      "en": "else",
+      "cz": "jiný; další",
+      "sentenceEn": "Ask someone else for help.",
+      "sentenceCz": "Požádej o pomoc někoho jiného.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/other.png",
+      "imageStem": "other",
+      "imageRequestedStem": "other",
+      "imageSource": "mapping",
+      "imageMissing": false
+    },
+    {
+      "id": 329,
+      "order": 329,
+      "en": "energy",
+      "cz": "energie",
+      "sentenceEn": "I have lots of energy today.",
+      "sentenceCz": "Dnes mám hodně energie.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/proverbs.png",
+      "imageStem": "proverbs",
+      "imageRequestedStem": "proverbs",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 330,
+      "order": 330,
+      "en": "excellent",
+      "cz": "výborný",
+      "sentenceEn": "That is an excellent answer.",
+      "sentenceCz": "To je výborná odpověď.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/proverbs.png",
+      "imageStem": "proverbs",
+      "imageRequestedStem": "proverbs",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 331,
+      "order": 331,
+      "en": "finish",
+      "cz": "dokončit",
+      "sentenceEn": "We finish the lesson together.",
+      "sentenceCz": "Společně dokončíme lekci.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/proverbs.png",
+      "imageStem": "proverbs",
+      "imageRequestedStem": "proverbs",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 332,
+      "order": 332,
+      "en": "first",
+      "cz": "první; nejdříve",
+      "sentenceEn": "I will go first.",
+      "sentenceCz": "Půjdu první.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/proverbs.png",
+      "imageStem": "proverbs",
+      "imageRequestedStem": "proverbs",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 333,
+      "order": 333,
+      "en": "for",
+      "cz": "pro",
+      "sentenceEn": "This apple is for you.",
+      "sentenceCz": "Tohle jablko je pro tebe.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/perjulia.webp",
+      "imageStem": "perjulia",
+      "imageRequestedStem": "perjulia",
+      "imageSource": "mapping",
+      "imageMissing": false
+    },
+    {
+      "id": 334,
+      "order": 334,
+      "en": "from",
+      "cz": "z; od",
+      "sentenceEn": "The rabbit comes from the forest.",
+      "sentenceCz": "Králík přichází z lesa.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/preposition.png",
+      "imageStem": "preposition",
+      "imageRequestedStem": "preposition",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 335,
+      "order": 335,
+      "en": "full",
+      "cz": "plný",
+      "sentenceEn": "The basket is full of apples.",
+      "sentenceCz": "Košík je plný jablek.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/proverbs.png",
+      "imageStem": "proverbs",
+      "imageRequestedStem": "proverbs",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 336,
+      "order": 336,
+      "en": "give",
+      "cz": "dát",
+      "sentenceEn": "Please give me the book.",
+      "sentenceCz": "Prosím dej mi tu knihu.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/proverbs.png",
+      "imageStem": "proverbs",
+      "imageRequestedStem": "proverbs",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 337,
+      "order": 337,
+      "en": "gone",
+      "cz": "pryč",
+      "sentenceEn": "The old bridge is gone.",
+      "sentenceCz": "Starý most je pryč.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/others.png",
+      "imageStem": "others",
+      "imageRequestedStem": "others",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 338,
+      "order": 338,
+      "en": "great",
+      "cz": "skvělý",
+      "sentenceEn": "You have a great idea.",
+      "sentenceCz": "Máš skvělý nápad.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/good.png",
+      "imageStem": "good",
+      "imageRequestedStem": "good",
+      "imageSource": "mapping",
+      "imageMissing": false
+    },
+    {
+      "id": 339,
+      "order": 339,
+      "en": "guard",
+      "cz": "hlídat; strážce",
+      "sentenceEn": "The dog can guard the gate.",
+      "sentenceCz": "Pes může hlídat branku.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/proverbs.png",
+      "imageStem": "proverbs",
+      "imageRequestedStem": "proverbs",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 340,
+      "order": 340,
+      "en": "happiness",
+      "cz": "štěstí; radost",
+      "sentenceEn": "I wish you happiness.",
+      "sentenceCz": "Přeji ti štěstí.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/others.png",
+      "imageStem": "others",
+      "imageRequestedStem": "others",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 341,
+      "order": 341,
+      "en": "have",
+      "cz": "mít",
+      "sentenceEn": "I have a small bag.",
+      "sentenceCz": "Mám malou tašku.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/have.png",
+      "imageStem": "have",
+      "imageRequestedStem": "have",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 342,
+      "order": 342,
+      "en": "he",
+      "cz": "on",
+      "sentenceEn": "He is my friend.",
+      "sentenceCz": "On je můj kamarád.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/man.png",
+      "imageStem": "man",
+      "imageRequestedStem": "man",
+      "imageSource": "mapping",
+      "imageMissing": false
+    },
+    {
+      "id": 343,
+      "order": 343,
+      "en": "health",
+      "cz": "zdraví",
+      "sentenceEn": "I wish you good health.",
+      "sentenceCz": "Přeji ti hodně zdraví.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/proverbs.png",
+      "imageStem": "proverbs",
+      "imageRequestedStem": "proverbs",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 344,
+      "order": 344,
+      "en": "heavy",
+      "cz": "těžký",
+      "sentenceEn": "My bag is too heavy.",
+      "sentenceCz": "Moje taška je příliš těžká.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/heavy.webp",
+      "imageStem": "heavy",
+      "imageRequestedStem": "heavy",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 345,
+      "order": 345,
+      "en": "her",
+      "cz": "ji; jí; její",
+      "sentenceEn": "I can help her.",
+      "sentenceCz": "Mohu jí pomoci.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/woman.png",
+      "imageStem": "woman",
+      "imageRequestedStem": "woman",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 346,
+      "order": 346,
+      "en": "here",
+      "cz": "tady; sem",
+      "sentenceEn": "Your book is here.",
+      "sentenceCz": "Tvoje kniha je tady.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/here.png",
+      "imageStem": "here",
+      "imageRequestedStem": "here",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 347,
+      "order": 347,
+      "en": "hi",
+      "cz": "ahoj",
+      "sentenceEn": "Hi, I am your new friend.",
+      "sentenceCz": "Ahoj, jsem tvůj nový kamarád.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/hello.png",
+      "imageStem": "hello",
+      "imageRequestedStem": "hello",
+      "imageSource": "mapping",
+      "imageMissing": false
+    },
+    {
+      "id": 348,
+      "order": 348,
+      "en": "him",
+      "cz": "ho; mu",
+      "sentenceEn": "Give him the map.",
+      "sentenceCz": "Dej mu tu mapu.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/man.png",
+      "imageStem": "man",
+      "imageRequestedStem": "man",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 349,
+      "order": 349,
+      "en": "inside",
+      "cz": "uvnitř; dovnitř",
+      "sentenceEn": "Look inside the box.",
+      "sentenceCz": "Podívej se dovnitř krabice.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/others.png",
+      "imageStem": "others",
+      "imageRequestedStem": "others",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 350,
+      "order": 350,
+      "en": "it",
+      "cz": "ono; to",
+      "sentenceEn": "It is a small rabbit.",
+      "sentenceCz": "Je to malý králík.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/man.png",
+      "imageStem": "man",
+      "imageRequestedStem": "man",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 351,
+      "order": 351,
+      "en": "job",
+      "cz": "práce; úkol",
+      "sentenceEn": "You did a good job.",
+      "sentenceCz": "Odvedl jsi dobrou práci.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/labour.png",
+      "imageStem": "labour",
+      "imageRequestedStem": "labour",
+      "imageSource": "mapping",
+      "imageMissing": false
+    },
+    {
+      "id": 352,
+      "order": 352,
+      "en": "joy",
+      "cz": "radost",
+      "sentenceEn": "Your smile brings me joy.",
+      "sentenceCz": "Tvůj úsměv mi přináší radost.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/others.png",
+      "imageStem": "others",
+      "imageRequestedStem": "others",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 353,
+      "order": 353,
+      "en": "know",
+      "cz": "vědět; znát",
+      "sentenceEn": "I know the way to the lake.",
+      "sentenceCz": "Znám cestu k jezeru.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/know.png",
+      "imageStem": "know",
+      "imageRequestedStem": "know",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 354,
+      "order": 354,
+      "en": "laugh",
+      "cz": "smát se",
+      "sentenceEn": "We laugh at the funny story.",
+      "sentenceCz": "Smějeme se legračnímu příběhu.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/proverbs.png",
+      "imageStem": "proverbs",
+      "imageRequestedStem": "proverbs",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 355,
+      "order": 355,
+      "en": "laughter",
+      "cz": "smích",
+      "sentenceEn": "The room is full of laughter.",
+      "sentenceCz": "Místnost je plná smíchu.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/proverbs.png",
+      "imageStem": "proverbs",
+      "imageRequestedStem": "proverbs",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 356,
+      "order": 356,
+      "en": "lesson",
+      "cz": "lekce; vyučovací hodina",
+      "sentenceEn": "Our English lesson starts now.",
+      "sentenceCz": "Naše hodina angličtiny začíná právě teď.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/lesson.png",
+      "imageStem": "lesson",
+      "imageRequestedStem": "lesson",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 357,
+      "order": 357,
+      "en": "let",
+      "cz": "nechat; dovolit",
+      "sentenceEn": "Please let me help you.",
+      "sentenceCz": "Prosím dovol mi, abych ti pomohl.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/flight.webp",
+      "imageStem": "flight",
+      "imageRequestedStem": "flight",
+      "imageSource": "mapping",
+      "imageMissing": false
+    },
+    {
+      "id": 358,
+      "order": 358,
+      "en": "listen",
+      "cz": "poslouchat",
+      "sentenceEn": "Listen to the bird.",
+      "sentenceCz": "Poslouchej ptáka.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/listen.webp",
+      "imageStem": "listen",
+      "imageRequestedStem": "listen",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 359,
+      "order": 359,
+      "en": "little",
+      "cz": "malý",
+      "sentenceEn": "A little rabbit sits under the tree.",
+      "sentenceCz": "Malý králík sedí pod stromem.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/small.webp",
+      "imageStem": "small",
+      "imageRequestedStem": "small",
+      "imageSource": "mapping",
+      "imageMissing": false
+    },
+    {
+      "id": 360,
+      "order": 360,
+      "en": "log",
+      "cz": "kláda",
+      "sentenceEn": "We put a log across the stream.",
+      "sentenceCz": "Položíme kládu přes potok.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/proverbs.png",
+      "imageStem": "proverbs",
+      "imageRequestedStem": "proverbs",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 361,
+      "order": 361,
+      "en": "lots of",
+      "cz": "hodně",
+      "sentenceEn": "There are lots of flowers here.",
+      "sentenceCz": "Je tady hodně květin.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/very.png",
+      "imageStem": "very",
+      "imageRequestedStem": "very",
+      "imageSource": "mapping",
+      "imageMissing": false
+    },
+    {
+      "id": 362,
+      "order": 362,
+      "en": "lovely",
+      "cz": "půvabný; krásný",
+      "sentenceEn": "We have a lovely garden.",
+      "sentenceCz": "Máme krásnou zahradu.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/proverbs.png",
+      "imageStem": "proverbs",
+      "imageRequestedStem": "proverbs",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 363,
+      "order": 363,
+      "en": "many",
+      "cz": "mnoho",
+      "sentenceEn": "There are many birds in the tree.",
+      "sentenceCz": "Na stromě je mnoho ptáků.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/others.png",
+      "imageStem": "others",
+      "imageRequestedStem": "others",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 364,
+      "order": 364,
+      "en": "me",
+      "cz": "mě; mně",
+      "sentenceEn": "Please help me.",
+      "sentenceCz": "Prosím pomoz mi.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/me.png",
+      "imageStem": "me",
+      "imageRequestedStem": "me",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 365,
+      "order": 365,
+      "en": "more",
+      "cz": "více; další",
+      "sentenceEn": "I have one more question.",
+      "sentenceCz": "Mám ještě jednu otázku.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/also.png",
+      "imageStem": "also",
+      "imageRequestedStem": "also",
+      "imageSource": "mapping",
+      "imageMissing": false
+    },
+    {
+      "id": 366,
+      "order": 366,
+      "en": "my",
+      "cz": "můj",
+      "sentenceEn": "This is my book.",
+      "sentenceCz": "Tohle je moje kniha.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/people.png",
+      "imageStem": "people",
+      "imageRequestedStem": "people",
+      "imageSource": "mapping",
+      "imageMissing": false
+    },
+    {
+      "id": 367,
+      "order": 367,
+      "en": "need",
+      "cz": "potřebovat",
+      "sentenceEn": "We need some water.",
+      "sentenceCz": "Potřebujeme trochu vody.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/need.webp",
+      "imageStem": "need",
+      "imageRequestedStem": "need",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 368,
+      "order": 368,
+      "en": "nice",
+      "cz": "hezký; milý",
+      "sentenceEn": "Have a nice day.",
+      "sentenceCz": "Přeji ti hezký den.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/kind.png",
+      "imageStem": "kind",
+      "imageRequestedStem": "kind",
+      "imageSource": "mapping",
+      "imageMissing": false
+    },
+    {
+      "id": 369,
+      "order": 369,
+      "en": "nine",
+      "cz": "devět",
+      "sentenceEn": "I can see nine stars.",
+      "sentenceCz": "Vidím devět hvězd.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/nove.webp",
+      "imageStem": "nove",
+      "imageRequestedStem": "nove",
+      "imageSource": "mapping",
+      "imageMissing": false
+    },
+    {
+      "id": 370,
+      "order": 370,
+      "en": "no",
+      "cz": "ne",
+      "sentenceEn": "No, I do not want any milk.",
+      "sentenceCz": "Ne, nechci žádné mléko.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/proverbs.png",
+      "imageStem": "proverbs",
+      "imageRequestedStem": "proverbs",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 371,
+      "order": 371,
+      "en": "not",
+      "cz": "ne; zápor",
+      "sentenceEn": "The bag is not heavy.",
+      "sentenceCz": "Taška není těžká.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/others.png",
+      "imageStem": "others",
+      "imageRequestedStem": "others",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 372,
+      "order": 372,
+      "en": "now",
+      "cz": "teď",
+      "sentenceEn": "We can go now.",
+      "sentenceCz": "Teď můžeme jít.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/now.png",
+      "imageStem": "now",
+      "imageRequestedStem": "now",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 373,
+      "order": 373,
+      "en": "of",
+      "cz": "z",
+      "sentenceEn": "One of the apples is green.",
+      "sentenceCz": "Jedno z jablek je zelené.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/preposition.png",
+      "imageStem": "preposition",
+      "imageRequestedStem": "preposition",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 374,
+      "order": 374,
+      "en": "on",
+      "cz": "na",
+      "sentenceEn": "The book is on the table.",
+      "sentenceCz": "Kniha je na stole.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/on.png",
+      "imageStem": "on",
+      "imageRequestedStem": "on",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 375,
+      "order": 375,
+      "en": "only",
+      "cz": "jen; pouze",
+      "sentenceEn": "I have only one pencil.",
+      "sentenceCz": "Mám jen jednu tužku.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/proverbs.png",
+      "imageStem": "proverbs",
+      "imageRequestedStem": "proverbs",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 376,
+      "order": 376,
+      "en": "open",
+      "cz": "otevřený; otevřít",
+      "sentenceEn": "Please open the door.",
+      "sentenceCz": "Prosím otevři dveře.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/open.png",
+      "imageStem": "open",
+      "imageRequestedStem": "open",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 377,
+      "order": 377,
+      "en": "or",
+      "cz": "nebo",
+      "sentenceEn": "Do you want an apple or a banana?",
+      "sentenceCz": "Chceš jablko, nebo banán?",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/or.png",
+      "imageStem": "or",
+      "imageRequestedStem": "or",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 378,
+      "order": 378,
+      "en": "party",
+      "cz": "oslava; večírek",
+      "sentenceEn": "We have a birthday party today.",
+      "sentenceCz": "Dnes máme narozeninovou oslavu.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/party.png",
+      "imageStem": "party",
+      "imageRequestedStem": "party",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 379,
+      "order": 379,
+      "en": "reason",
+      "cz": "důvod",
+      "sentenceEn": "Tell me the reason.",
+      "sentenceCz": "Řekni mi důvod.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/reason.png",
+      "imageStem": "reason",
+      "imageRequestedStem": "reason",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 380,
+      "order": 380,
+      "en": "remember",
+      "cz": "pamatovat si",
+      "sentenceEn": "Do you remember my name?",
+      "sentenceCz": "Pamatuješ si moje jméno?",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/remember.webp",
+      "imageStem": "remember",
+      "imageRequestedStem": "remember",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 381,
+      "order": 381,
+      "en": "safe",
+      "cz": "bezpečný",
+      "sentenceEn": "The bridge is safe.",
+      "sentenceCz": "Most je bezpečný.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/proverbs.png",
+      "imageStem": "proverbs",
+      "imageRequestedStem": "proverbs",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 382,
+      "order": 382,
+      "en": "safely",
+      "cz": "bezpečně",
+      "sentenceEn": "We cross the road safely.",
+      "sentenceCz": "Bezpečně přejdeme silnici.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/proverbs.png",
+      "imageStem": "proverbs",
+      "imageRequestedStem": "proverbs",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 383,
+      "order": 383,
+      "en": "save",
+      "cz": "zachránit",
+      "sentenceEn": "We can save the little bird.",
+      "sentenceCz": "Můžeme zachránit malého ptáčka.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/others.png",
+      "imageStem": "others",
+      "imageRequestedStem": "others",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 384,
+      "order": 384,
+      "en": "school",
+      "cz": "škola",
+      "sentenceEn": "I walk to school with my friend.",
+      "sentenceCz": "Chodím do školy s kamarádem.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/school.png",
+      "imageStem": "school",
+      "imageRequestedStem": "school",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 385,
+      "order": 385,
+      "en": "second",
+      "cz": "sekunda; druhý",
+      "sentenceEn": "Wait a second, please.",
+      "sentenceCz": "Počkej prosím chvilku.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/proverbs.png",
+      "imageStem": "proverbs",
+      "imageRequestedStem": "proverbs",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 386,
+      "order": 386,
+      "en": "smile",
+      "cz": "usmívat se; úsměv",
+      "sentenceEn": "I smile when I see my friends.",
+      "sentenceCz": "Usmívám se, když vidím své kamarády.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/others.png",
+      "imageStem": "others",
+      "imageRequestedStem": "others",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 387,
+      "order": 387,
+      "en": "so",
+      "cz": "tak; tak moc",
+      "sentenceEn": "I am so happy today.",
+      "sentenceCz": "Dnes jsem tak šťastný.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/conjuction.png",
+      "imageStem": "conjuction",
+      "imageRequestedStem": "conjuction",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 388,
+      "order": 388,
+      "en": "some",
+      "cz": "nějaký; trochu",
+      "sentenceEn": "Please give me some water.",
+      "sentenceCz": "Prosím dej mi trochu vody.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/some.png",
+      "imageStem": "some",
+      "imageRequestedStem": "some",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 389,
+      "order": 389,
+      "en": "someone",
+      "cz": "někdo",
+      "sentenceEn": "Someone is at the door.",
+      "sentenceCz": "Někdo je u dveří.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/someone.png",
+      "imageStem": "someone",
+      "imageRequestedStem": "someone",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 390,
+      "order": 390,
+      "en": "special",
+      "cz": "zvláštní; výjimečný",
+      "sentenceEn": "Today is a special day.",
+      "sentenceCz": "Dnes je výjimečný den.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/proverbs.png",
+      "imageStem": "proverbs",
+      "imageRequestedStem": "proverbs",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 391,
+      "order": 391,
+      "en": "stay",
+      "cz": "zůstat",
+      "sentenceEn": "Please stay here with me.",
+      "sentenceCz": "Prosím zůstaň tady se mnou.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/stay.png",
+      "imageStem": "stay",
+      "imageRequestedStem": "stay",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 392,
+      "order": 392,
+      "en": "step",
+      "cz": "krok",
+      "sentenceEn": "Take one small step.",
+      "sentenceCz": "Udělej jeden malý krok.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/step.webp",
+      "imageStem": "step",
+      "imageRequestedStem": "step",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 393,
+      "order": 393,
+      "en": "stop",
+      "cz": "zastavit; přestat",
+      "sentenceEn": "Stop at the gate.",
+      "sentenceCz": "Zastav se u branky.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/stop.webp",
+      "imageStem": "stop",
+      "imageRequestedStem": "stop",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 394,
+      "order": 394,
+      "en": "stream",
+      "cz": "potok",
+      "sentenceEn": "A small stream flows through the forest.",
+      "sentenceCz": "Lesem protéká malý potok.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/others.png",
+      "imageStem": "others",
+      "imageRequestedStem": "others",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 395,
+      "order": 395,
+      "en": "strong",
+      "cz": "silný; pevný",
+      "sentenceEn": "The bridge is strong.",
+      "sentenceCz": "Most je pevný.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/strong.png",
+      "imageStem": "strong",
+      "imageRequestedStem": "strong",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 396,
+      "order": 396,
+      "en": "tap",
+      "cz": "klepnout",
+      "sentenceEn": "Tap the picture of the rabbit.",
+      "sentenceCz": "Klepni na obrázek králíka.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/others.png",
+      "imageStem": "others",
+      "imageRequestedStem": "others",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 397,
+      "order": 397,
+      "en": "ten",
+      "cz": "deset",
+      "sentenceEn": "There are ten apples in the basket.",
+      "sentenceCz": "V košíku je deset jablek.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/verb.png",
+      "imageStem": "verb",
+      "imageRequestedStem": "verb",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 398,
+      "order": 398,
+      "en": "that",
+      "cz": "tamten; že",
+      "sentenceEn": "That house is big.",
+      "sentenceCz": "Tamten dům je velký.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/that.png",
+      "imageStem": "that",
+      "imageRequestedStem": "that",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 399,
+      "order": 399,
+      "en": "the",
+      "cz": "určitý člen",
+      "sentenceEn": "The cat is under the table.",
+      "sentenceCz": "Ta kočka je pod stolem.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/others.png",
+      "imageStem": "others",
+      "imageRequestedStem": "others",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 400,
+      "order": 400,
+      "en": "there",
+      "cz": "tam",
+      "sentenceEn": "My friend is over there.",
+      "sentenceCz": "Můj kamarád je tamhle.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/there.png",
+      "imageStem": "there",
+      "imageRequestedStem": "there",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 401,
+      "order": 401,
+      "en": "this",
+      "cz": "tento; tohle",
+      "sentenceEn": "This is my new bag.",
+      "sentenceCz": "Tohle je moje nová taška.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/this.webp",
+      "imageStem": "this",
+      "imageRequestedStem": "this",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 402,
+      "order": 402,
+      "en": "through",
+      "cz": "skrz; přes",
+      "sentenceEn": "We walk through the forest.",
+      "sentenceCz": "Jdeme lesem.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/through.png",
+      "imageStem": "through",
+      "imageRequestedStem": "through",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 403,
+      "order": 403,
+      "en": "to",
+      "cz": "do; k",
+      "sentenceEn": "We go to the lake.",
+      "sentenceCz": "Jdeme k jezeru.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/visit.webp",
+      "imageStem": "visit",
+      "imageRequestedStem": "visit",
+      "imageSource": "mapping",
+      "imageMissing": false
+    },
+    {
+      "id": 404,
+      "order": 404,
+      "en": "today",
+      "cz": "dnes",
+      "sentenceEn": "Today we visit our friends.",
+      "sentenceCz": "Dnes navštívíme své kamarády.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/today.png",
+      "imageStem": "today",
+      "imageRequestedStem": "today",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 405,
+      "order": 405,
+      "en": "true",
+      "cz": "pravdivý; skutečný",
+      "sentenceEn": "Your dream can come true.",
+      "sentenceCz": "Tvůj sen se může splnit.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/true.webp",
+      "imageStem": "true",
+      "imageRequestedStem": "true",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 406,
+      "order": 406,
+      "en": "twelve",
+      "cz": "dvanáct",
+      "sentenceEn": "There are twelve months in a year.",
+      "sentenceCz": "V roce je dvanáct měsíců.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/others.png",
+      "imageStem": "others",
+      "imageRequestedStem": "others",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 407,
+      "order": 407,
+      "en": "up",
+      "cz": "nahoru",
+      "sentenceEn": "Look up at the sky.",
+      "sentenceCz": "Podívej se nahoru na oblohu.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/others.png",
+      "imageStem": "others",
+      "imageRequestedStem": "others",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 408,
+      "order": 408,
+      "en": "us",
+      "cz": "nás; nám",
+      "sentenceEn": "Please come with us.",
+      "sentenceCz": "Prosím pojď s námi.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/people.png",
+      "imageStem": "people",
+      "imageRequestedStem": "people",
+      "imageSource": "mapping",
+      "imageMissing": false
+    },
+    {
+      "id": 409,
+      "order": 409,
+      "en": "want",
+      "cz": "chtít",
+      "sentenceEn": "I want to help my friend.",
+      "sentenceCz": "Chci pomoci svému kamarádovi.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/want.png",
+      "imageStem": "want",
+      "imageRequestedStem": "want",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 410,
+      "order": 410,
+      "en": "watch",
+      "cz": "sledovat; dívat se",
+      "sentenceEn": "Watch me cross the bridge.",
+      "sentenceCz": "Dívej se, jak přecházím most.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/proverbs.png",
+      "imageStem": "proverbs",
+      "imageRequestedStem": "proverbs",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 411,
+      "order": 411,
+      "en": "we",
+      "cz": "my",
+      "sentenceEn": "We are good friends.",
+      "sentenceCz": "Jsme dobří kamarádi.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/people.png",
+      "imageStem": "people",
+      "imageRequestedStem": "people",
+      "imageSource": "mapping",
+      "imageMissing": false
+    },
+    {
+      "id": 412,
+      "order": 412,
+      "en": "what",
+      "cz": "co; jaký",
+      "sentenceEn": "What is in your bag?",
+      "sentenceCz": "Co je ve tvé tašce?",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/what.png",
+      "imageStem": "what",
+      "imageRequestedStem": "what",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 413,
+      "order": 413,
+      "en": "who",
+      "cz": "kdo",
+      "sentenceEn": "Who wants to go first?",
+      "sentenceCz": "Kdo chce jít první?",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/who.webp",
+      "imageStem": "who",
+      "imageRequestedStem": "who",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 414,
+      "order": 414,
+      "en": "whole",
+      "cz": "celý",
+      "sentenceEn": "We spend the whole day together.",
+      "sentenceCz": "Trávíme spolu celý den.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/proverbs.png",
+      "imageStem": "proverbs",
+      "imageRequestedStem": "proverbs",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 415,
+      "order": 415,
+      "en": "why",
+      "cz": "proč",
+      "sentenceEn": "Why is the door closed?",
+      "sentenceCz": "Proč jsou dveře zavřené?",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/why.png",
+      "imageStem": "why",
+      "imageRequestedStem": "why",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 416,
+      "order": 416,
+      "en": "wide",
+      "cz": "široký",
+      "sentenceEn": "The river is very wide.",
+      "sentenceCz": "Řeka je velmi široká.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/proverbs.png",
+      "imageStem": "proverbs",
+      "imageRequestedStem": "proverbs",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 417,
+      "order": 417,
+      "en": "will",
+      "cz": "budu; bude; budoucí čas",
+      "sentenceEn": "I will help you tomorrow.",
+      "sentenceCz": "Zítra ti pomohu.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/time.png",
+      "imageStem": "time",
+      "imageRequestedStem": "time",
+      "imageSource": "mapping",
+      "imageMissing": false
+    },
+    {
+      "id": 418,
+      "order": 418,
+      "en": "wish",
+      "cz": "přát si; přát",
+      "sentenceEn": "I wish you a happy birthday.",
+      "sentenceCz": "Přeji ti všechno nejlepší k narozeninám.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/proverbs.png",
+      "imageStem": "proverbs",
+      "imageRequestedStem": "proverbs",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 419,
+      "order": 419,
+      "en": "with",
+      "cz": "s",
+      "sentenceEn": "Come with me.",
+      "sentenceCz": "Pojď se mnou.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/with.png",
+      "imageStem": "with",
+      "imageRequestedStem": "with",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 420,
+      "order": 420,
+      "en": "worry",
+      "cz": "dělat si starosti",
+      "sentenceEn": "Do not worry about the rain.",
+      "sentenceCz": "Nedělej si starosti s deštěm.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/do.webp",
+      "imageStem": "do",
+      "imageRequestedStem": "do",
+      "imageSource": "mapping",
+      "imageMissing": false
+    },
+    {
+      "id": 421,
+      "order": 421,
+      "en": "year",
+      "cz": "rok",
+      "sentenceEn": "A year has twelve months.",
+      "sentenceCz": "Rok má dvanáct měsíců.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/year.png",
+      "imageStem": "year",
+      "imageRequestedStem": "year",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 422,
+      "order": 422,
+      "en": "yes",
+      "cz": "ano",
+      "sentenceEn": "Yes, I can help you.",
+      "sentenceCz": "Ano, mohu ti pomoci.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/yes.png",
+      "imageStem": "yes",
+      "imageRequestedStem": "yes",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 423,
+      "order": 423,
+      "en": "yet",
+      "cz": "ještě; zatím",
+      "sentenceEn": "We are not ready yet.",
+      "sentenceCz": "Ještě nejsme připraveni.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/still.webp",
+      "imageStem": "still",
+      "imageRequestedStem": "still",
+      "imageSource": "mapping",
+      "imageMissing": false
+    },
+    {
+      "id": 424,
+      "order": 424,
+      "en": "you",
+      "cz": "ty; vy",
+      "sentenceEn": "You are my friend.",
+      "sentenceCz": "Ty jsi můj kamarád.",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/you.png",
+      "imageStem": "you",
+      "imageRequestedStem": "you",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 425,
+      "order": 425,
+      "en": "your",
+      "cz": "tvůj; váš",
+      "sentenceEn": "Is this your book?",
+      "sentenceCz": "Je to tvoje kniha?",
+      "wordSets": [
+        "Benji"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/yourm.png",
+      "imageStem": "yourm",
+      "imageRequestedStem": "yourm",
       "imageSource": "mapping",
       "imageMissing": false
     }
