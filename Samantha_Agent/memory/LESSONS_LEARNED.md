@@ -161,6 +161,12 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   TVBCP i primární řádek `ACTIVE_PROJECTS.md` v jediném commitu a při chybě
   trojici obnoví. Terminálové commity mimo tento workflow se dál dorovnávají
   ručně.
+- Doplnění 05092026: Práce na zkratce v projektu Cockpit sama neobnovuje
+  samostatný pozastavený proud Mobile Input. Jeho řádek se při práci na
+  připomínkách 30082026 změnil na `active`, katalog zůstal `paused`, P2.
+  Návrat pouze tohoto pole na `paused` odstranil rozpor i živou P1 kartu.
+  Režim a prioritu souvisejícího proudu nepřebírat z právě vyvíjeného projektu;
+  při skutečné změně režimu musí souhlasit katalog i souhrnný registr.
 
 ### LL-012 — IMAP složka s mezerou musí být při SELECT správně zakódovaná
 
