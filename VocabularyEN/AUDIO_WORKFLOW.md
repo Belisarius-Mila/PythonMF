@@ -10,6 +10,12 @@ Kanonické hlasy:
 - čeština: `cs-CZ-VlastaNeural` (Vlasta),
 - rychlost: `-10 %`.
 
+Výjimka pro samostatné `cat`: anglickou MP3 čte `en-US-JennyNeural`.
+Aria ho opakovaně vyslovovala jako jméno Kate. Výjimka je v generátoru
+`VOICE_OVERRIDES`, manifest ji označuje `enVoice`; text `cat` ani česká
+nahrávka se nemění. Hlas je součástí názvu MP3, takže oprava používá novou
+adresu a nespoléhá na vypršení cache staré nahrávky.
+
 ## Po každé změně VocabularyEN.csv
 
 Z kořene projektu spusť v tomto pořadí:

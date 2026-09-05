@@ -178,8 +178,9 @@
       "sourceCz": "kočka",
       "spokenEn": "cat",
       "spokenCz": "kočka",
-      "en": "assets/vocabulary-en-audio/en-us-aria-neural/04c2bfefd89543554c60.mp3",
-      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/40159413b6f38ddca7ad.mp3"
+      "en": "assets/vocabulary-en-audio/en-us-jenny-neural/f25fbff69f680c7f0596.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/40159413b6f38ddca7ad.mp3",
+      "enVoice": "en-US-JennyNeural"
     },
     "21": {
       "sourceEn": "cinema",

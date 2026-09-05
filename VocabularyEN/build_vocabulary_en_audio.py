@@ -35,6 +35,14 @@ VOICES = {
     },
 }
 
+# Aria pronounces the isolated word "cat" as "Kate". Keep the displayed and
+# spoken text intact; use the verified voice for this pronunciation only.
+VOICE_OVERRIDES = {("en", "cat"): "en-US-JennyNeural"}
+
+
+def asset_voice(language: str, spoken_text: str) -> str:
+    return VOICE_OVERRIDES.get((language, spoken_text), str(VOICES[language]["id"]))
+
 
 def normalize_spoken_text(text: str) -> str:
     """Turn compact vocabulary notation into clear TTS text."""
@@ -85,10 +93,11 @@ def load_and_validate_web_items(
 
 
 def asset_relative_path(language: str, spoken_text: str) -> Path:
-    voice = VOICES[language]
-    identity = f"{voice['id']}\n{RATE}\n{spoken_text}".encode("utf-8")
+    voice_id = asset_voice(language, spoken_text)
+    identity = f"{voice_id}\n{RATE}\n{spoken_text}".encode("utf-8")
     digest = hashlib.sha256(identity).hexdigest()[:20]
-    return AUDIO_RELATIVE_ROOT / str(voice["slug"]) / f"{digest}.mp3"
+    voice_slug = re.sub(r"([a-z])([A-Z])", r"\1-\2", voice_id).lower()
+    return AUDIO_RELATIVE_ROOT / voice_slug / f"{digest}.mp3"
 
 
 def _source_digest(items: list[dict[str, object]]) -> str:
@@ -113,6 +122,9 @@ def build_manifest(items: list[dict[str, object]]) -> dict[str, object]:
             "en": asset_relative_path("en", spoken_en).as_posix(),
             "cz": asset_relative_path("cz", spoken_cz).as_posix(),
         }
+        for language, spoken in (("en", spoken_en), ("cz", spoken_cz)):
+            if (language, spoken) in VOICE_OVERRIDES:
+                records[str(item["id"])][f"{language}Voice"] = asset_voice(language, spoken)
 
     all_paths = {
         record[language]
@@ -197,8 +209,7 @@ def build_library(
         if target.is_file() and target.stat().st_size >= MIN_AUDIO_BYTES and not force:
             skipped += 1
             continue
-        voice = VOICES[language]
-        audio = synthesize(text, voice=str(voice["id"]), rate=RATE)
+        audio = synthesize(text, voice=asset_voice(language, text), rate=RATE)
         if not isinstance(audio, bytes) or len(audio) < MIN_AUDIO_BYTES:
             size = len(audio) if isinstance(audio, bytes) else "není bytes"
             raise RuntimeError(f"Neplatné audio pro {relative}: {size} bajtů.")

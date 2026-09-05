@@ -402,3 +402,16 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   Music sestavit seznam podle persistent ID, zachovat audio a ověřit ostatní
   záznamy i playlisty před/po; chybějící místní soubor neznamená chybějící
   záznam knihovny. Podrobnosti jsou v handoffu z 2026-09-05.
+
+### LL-031 — Chybná výslovnost jedné hotové slovníkové MP3
+
+- Problém: Aria četla samostatné `cat` jako jméno Kate; správný text v CSV
+  ani opakované generování s interpunkcí chybu neodstranily.
+- Typ: opakující se
+- Řešení nalezeno: 05092026
+- Řešení: pro anglické `cat` použít cílenou výjimku hlasu Jenny v generátoru
+  a manifestu. Strojový přepis se změnil z `Kate.` na `Cat.`; poslech na
+  cílovém zařízení zůstává závěrečnou kontrolou. Výjimku udržet při rebuild,
+  zachovat učební text a změnit adresu MP3 kvůli cache. Testy ověřily úzký
+  rozsah a opakované sestavení bez dalších generování. Publikaci Pages
+  prokazovat zvlášť podle LL-022.

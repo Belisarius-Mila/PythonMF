@@ -268,6 +268,20 @@ Pravidla:
 python3 VocabularyEN/sync_vocabulary_en_to_docs.py --preserve-extra-assets
 ```
 
+## Oprava výslovnosti cat — 2026-09-05 21:40 CEST
+
+- Hotovo: pro `cat` (Order 20) je připravená MP3 hlasu Jenny. Text kartičky,
+  české audio i ostatních 305 položek zůstaly stejné.
+- Rozhodnutí: generátor má úzkou hlasovou výjimku pro anglické `cat`, takže
+  další sestavení opravu zachová. Nový hlas mění adresu MP3 a obchází cache
+  původní nahrávky. Staré soubory se nemažou.
+- Další krok: push a samostatná publikace GitHub Pages, potom poslech na
+  cílovém zařízení. Oprava zatím není doložená na veřejném webu.
+- Technický důkaz: veřejná původní MP3 byla bajtově shodná s lokální;
+  automatický anglický přepis původního Aria audia vrátil `Kate.`, nového
+  Jenny audia `Cat.`. Jde o strojovou kontrolu, nikoli lidský poslech.
+  Cílené audio testy prošly 11/11, knihovna má 608 aktivních MP3 pro 306 slov.
+
 ## Zdroj
 
 Souhrn ChatGPT/Codex konverzace k převodu části `vocab_trainer_en.py` do jednoduché webové learner aplikace pro mentálně postižené studenty, vytvoření sync skriptu `VocabularyEN -> docs`, prvního webového MVP, zmenšení hlavičky a přípravě seznamu chybějících obrázků v `Pict/`.

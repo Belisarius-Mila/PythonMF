@@ -79,6 +79,35 @@ class VocabularyEnAudioLibraryTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "Nejprve spusť"):
                 builder.build_library(root, synthesize=lambda *_args, **_kwargs: b"", csv_path=csv_path)
 
+    def test_cat_voice_correction_is_scoped_and_survives_rebuild(self) -> None:
+        items = [{"id": 20, "en": "cat", "cz": "kočka"},
+                 {"id": 21, "en": "catch", "cz": "chytit"}]
+        calls = []
+
+        def synthesize(text, *, voice, rate):
+            calls.append((text, voice))
+            return b"ID3" + b"x" * 1500
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            (root / "data").mkdir()
+            (root / "data/vocabulary-en.json").write_text(json.dumps({"items": items}))
+            csv_path = root / "VocabularyEN.csv"
+            csv_path.write_text("EN,CZ,Order\ncat,kočka,20\ncatch,chytit,21\n", encoding="utf-8")
+            builder.build_library(root, synthesize=synthesize, csv_path=csv_path)
+            result = builder.build_library(root, synthesize=synthesize, csv_path=csv_path)
+            manifest = json.loads((root / builder.MANIFEST_RELATIVE_PATH).read_text())
+            cat = manifest["items"]["20"]
+            self.assertIn(("cat", "en-US-JennyNeural"), calls)
+            self.assertIn(("catch", "en-US-AriaNeural"), calls)
+            self.assertIn(("kočka", "cs-CZ-VlastaNeural"), calls)
+            self.assertEqual(cat["sourceEn"], "cat")
+            self.assertEqual(cat["spokenEn"], "cat")
+            self.assertEqual(cat["enVoice"], "en-US-JennyNeural")
+            self.assertIn("en-us-jenny-neural/", cat["en"])
+            self.assertEqual(result["generated"], 0)
+            self.assertEqual(len(calls), 4)
+
     def test_production_web_uses_mp3_manifest_without_system_speech_fallback(self) -> None:
         html = (REPO_ROOT / "docs" / "vocabulary-en" / "index.html").read_text(encoding="utf-8")
         javascript = (REPO_ROOT / "docs" / "vocabulary-en" / "app.js").read_text(encoding="utf-8")
