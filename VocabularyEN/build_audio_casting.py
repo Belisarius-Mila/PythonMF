@@ -83,8 +83,8 @@ CASTING_SOURCE = (
     ("right", 144, "right", "pravý, správný, doprava", "right", "pravý. Správný. Doprava."),
     ("three", 189, "three", "tři", "three", "tři"),
     ("do-you-have", 259, "Do you have?", "máš?", "Do you have?", "Máš?"),
-    ("dont-know", 285, "I don't know", "nevím", "I don't know", "Nevím"),
-    ("squirrel", 297, "squirrel", "veverka", "squirrel", "veverka"),
+    ("dont-know", 284, "I don't know", "nevím", "I don't know", "Nevím"),
+    ("squirrel", 296, "squirrel", "veverka", "squirrel", "veverka"),
 )
 
 

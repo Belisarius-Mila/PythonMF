@@ -282,6 +282,32 @@ python3 VocabularyEN/sync_vocabulary_en_to_docs.py --preserve-extra-assets
   Jenny audia `Cat.`. Jde o strojovou kontrolu, nikoli lidský poslech.
   Cílené audio testy prošly 11/11, knihovna má 608 aktivních MP3 pro 306 slov.
 
+## Too a opakování karet — 2026-09-05 22:03 CEST
+
+- Hotovo: odstraněná položka `me too` / `já také`, zachované samostatné
+  `too` / `také`. Aktuálně 305 položek, z toho 119 Benji, a 606 aktivních
+  MP3. Import z MMTX má výslovnou výjimku, aby frázi znovu nepřidal.
+- Rozhodnutí: respektovat stávající průběžné číslování CSV a exportu;
+  po odstraněném pořadí 274 se další položky posunuly o jedna. Všechen
+  ostatní obsah včetně L/HT, obrázků a zvuků je zachován. Dvě pořadí v
+  lokálním hlasovém castingu jsou tomu přizpůsobená.
+- Hotovo: přepnutí CZ→EN / EN→CZ už nemaže historii karet. Počítadlo
+  ukazuje skutečně dosud nezobrazené karty a na konci nulu; zpráva oznamuje
+  dokončení sady. První karta dalšího kola není poslední kartou minulého
+  kola, pokud sada obsahuje více než jednu položku.
+- Logika: losuje se rovnoměrně mezi dosud nezobrazenými ID. Změna filtru
+  nebo okruhů zahajuje novou sadu; obnovení stránky zahajuje novou relaci.
+  Různá ID mohou mít shodný text kvůli jinému významu, například
+  `orange` = pomeranč / oranžový; tyto legitimní karty zůstávají oddělené.
+- Technický důkaz: chyba resetu směrem reprodukována před opravou. Po
+  opravě 4 JavaScript testy včetně tří celých kol nad 305 kartami a změn
+  směru, 11 audio testů a 13 importních/mapovacích testů OK. Statická
+  brána a místní HTTP kontrola OK; Browser bridge nebyl dostupný, proto
+  ruční proklik není doložen. Žádná MP3 ani obrázek se nemazaly.
+- Další krok: push a publikace Pages, potom ruční zkouška. Předchozí
+  oprava `cat` byla zveřejněna z commitu `cc0b2b6`, ověřena veřejným
+  manifestem a shodou MP3; aktuální změny zatím veřejně ověřené nejsou.
+
 ## Zdroj
 
 Souhrn ChatGPT/Codex konverzace k převodu části `vocab_trainer_en.py` do jednoduché webové learner aplikace pro mentálně postižené studenty, vytvoření sync skriptu `VocabularyEN -> docs`, prvního webového MVP, zmenšení hlavičky a přípravě seznamu chybějících obrázků v `Pict/`.

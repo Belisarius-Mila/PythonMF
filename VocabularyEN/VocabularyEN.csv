@@ -272,36 +272,35 @@ maybe,možná,270,Maybe we can go there tomorrow.,Možná tam můžeme jít zít
 bears,medvědi,271,The bears walk slowly through the forest.,Medvědi pomalu kráčejí lesem.,Animals|Benji,ne,ne
 but,ale,272,"I am tired, but I am happy.","Jsem unavený, ale jsem šťastný.",Benji,ne,ne
 scared,vystrašený,273,The horse is scared of the loud noise.,Kůň se bojí hlasitého zvuku.,Benji,ne,ne
-me too,já také,274,"I like apples, and my friend says, ‘Me too.’",Mám rád jablka a kamarád říká: „Já také.“,Benji,ne,ne
-friendly,přátelský,275,The horse is calm and friendly.,Kůň je klidný a přátelský.,Benji,ne,ne
-careful,"opatrný, opatrně",276,Be careful when you cross the road.,"Buď opatrný, když přecházíš silnici.",Benji,ne,ne
-warning,varování,277,The warning tells us to stop.,"Varování nám říká, abychom zastavili.",Benji,ne,ne
-farm,farma,278,There are cows and chickens on the farm.,Na farmě jsou krávy a slepice.,Benji,ne,ne
-stranger,cizinec,279,Do not open the gate for a stranger.,Neotvírej branku cizinci.,Benji,ne,ne
-come,"jít, přijít",280,Please come to the table.,Prosím přijď ke stolu.,Actions|Benji,ne,ne
-pump,pumpa,281,The old pump brings water from the ground.,Stará pumpa čerpá vodu ze země.,Things|Benji,ne,ne
-get,dostat,282,I get a present on my birthday.,K narozeninám dostanu dárek.,Actions|Benji,ne,ne
-bucket,"vědro, kbelík",283,The bucket is full of clean water.,Kbelík je plný čisté vody.,Things|Benji,ne,ne
-empty,prázdný,284,The glass is empty now.,Sklenice je teď prázdná.,Benji,ne,ne
-I don't know,nevím,285,I don't know the answer yet.,Ještě nevím odpověď.,Benji,ne,ne
-forest,les,286,We walk quietly through the green forest.,Tiše procházíme zeleným lesem.,Benji,ne,ne
-handle,páka,287,Push the handle down to pump the water.,"Stlač páku dolů, abys napumpoval vodu.",Things|Benji,ne,ne
-push,tlačit,288,Push the heavy door slowly.,Pomalu zatlač na těžké dveře.,Actions|Benji,ne,ne
-come closer,přijít blíž,289,Come closer so you can see the map.,"Přijď blíž, abys viděl mapu.",Actions|Benji,ne,ne
-chase,honit,290,The dog does not chase the sheep.,Pes nehoní ovce.,Actions|Benji,ne,ne
-little animals,malá zvířátka,291,The little animals hide under the tree.,Malá zvířátka se schovávají pod stromem.,Animals|Benji,ne,ne
-trust,důvěřovat,292,The little animals trust their friend.,Malá zvířátka důvěřují svému kamarádovi.,Actions|Benji,ne,ne
-eat,jíst,293,We eat lunch together at noon.,V poledne spolu jíme oběd.,Actions|Benji,ne,ne
-own,vlastní,294,The rabbit has its own carrots.,Králík má vlastní mrkev.,Benji,ne,ne
-gate,branka,295,The farmer opens the gate for us.,Farmář nám otevírá branku.,Things|Benji,ne,ne
-closed,zavřený,296,The shop is closed today.,Obchod je dnes zavřený.,Benji,ne,ne
-squirrel,veverka,297,A squirrel jumps from tree to tree.,Veverka skáče ze stromu na strom.,Animals|Benji,ne,ne
-question,otázka,298,The teacher asks a simple question.,Učitel pokládá jednoduchou otázku.,Benji,ne,ne
-answer,odpověď,299,I know the answer to this question.,Znám odpověď na tuto otázku.,Benji,ne,ne
-catch,chytit,300,Can you catch the red ball?,Dokážeš chytit červený míč?,Actions|Benji,ne,ne
-yard,dvorek,301,The chickens walk around the farm yard.,Slepice chodí po dvorku farmy.,Benji,ne,ne
-badger,jezevec,302,A badger comes out of its den at night.,Jezevec vychází v noci ze svého doupěte.,Animals|Benji,ne,ne
-dig,hrabat,303,The badger can dig under the fence.,Jezevec umí hrabat pod plotem.,Actions|Benji,ne,ne
-under,pod,304,The key is under the book.,Klíč je pod knihou.,Benji,ne,ne
-fence,plot,305,The sheep stand behind the wooden fence.,Ovce stojí za dřevěným plotem.,Things|Benji,ne,ne
-believe,věřit,306,I believe you because you tell the truth.,"Věřím ti, protože říkáš pravdu.",Actions|Benji,ne,ne
+friendly,přátelský,274,The horse is calm and friendly.,Kůň je klidný a přátelský.,Benji,ne,ne
+careful,"opatrný, opatrně",275,Be careful when you cross the road.,"Buď opatrný, když přecházíš silnici.",Benji,ne,ne
+warning,varování,276,The warning tells us to stop.,"Varování nám říká, abychom zastavili.",Benji,ne,ne
+farm,farma,277,There are cows and chickens on the farm.,Na farmě jsou krávy a slepice.,Benji,ne,ne
+stranger,cizinec,278,Do not open the gate for a stranger.,Neotvírej branku cizinci.,Benji,ne,ne
+come,"jít, přijít",279,Please come to the table.,Prosím přijď ke stolu.,Actions|Benji,ne,ne
+pump,pumpa,280,The old pump brings water from the ground.,Stará pumpa čerpá vodu ze země.,Things|Benji,ne,ne
+get,dostat,281,I get a present on my birthday.,K narozeninám dostanu dárek.,Actions|Benji,ne,ne
+bucket,"vědro, kbelík",282,The bucket is full of clean water.,Kbelík je plný čisté vody.,Things|Benji,ne,ne
+empty,prázdný,283,The glass is empty now.,Sklenice je teď prázdná.,Benji,ne,ne
+I don't know,nevím,284,I don't know the answer yet.,Ještě nevím odpověď.,Benji,ne,ne
+forest,les,285,We walk quietly through the green forest.,Tiše procházíme zeleným lesem.,Benji,ne,ne
+handle,páka,286,Push the handle down to pump the water.,"Stlač páku dolů, abys napumpoval vodu.",Things|Benji,ne,ne
+push,tlačit,287,Push the heavy door slowly.,Pomalu zatlač na těžké dveře.,Actions|Benji,ne,ne
+come closer,přijít blíž,288,Come closer so you can see the map.,"Přijď blíž, abys viděl mapu.",Actions|Benji,ne,ne
+chase,honit,289,The dog does not chase the sheep.,Pes nehoní ovce.,Actions|Benji,ne,ne
+little animals,malá zvířátka,290,The little animals hide under the tree.,Malá zvířátka se schovávají pod stromem.,Animals|Benji,ne,ne
+trust,důvěřovat,291,The little animals trust their friend.,Malá zvířátka důvěřují svému kamarádovi.,Actions|Benji,ne,ne
+eat,jíst,292,We eat lunch together at noon.,V poledne spolu jíme oběd.,Actions|Benji,ne,ne
+own,vlastní,293,The rabbit has its own carrots.,Králík má vlastní mrkev.,Benji,ne,ne
+gate,branka,294,The farmer opens the gate for us.,Farmář nám otevírá branku.,Things|Benji,ne,ne
+closed,zavřený,295,The shop is closed today.,Obchod je dnes zavřený.,Benji,ne,ne
+squirrel,veverka,296,A squirrel jumps from tree to tree.,Veverka skáče ze stromu na strom.,Animals|Benji,ne,ne
+question,otázka,297,The teacher asks a simple question.,Učitel pokládá jednoduchou otázku.,Benji,ne,ne
+answer,odpověď,298,I know the answer to this question.,Znám odpověď na tuto otázku.,Benji,ne,ne
+catch,chytit,299,Can you catch the red ball?,Dokážeš chytit červený míč?,Actions|Benji,ne,ne
+yard,dvorek,300,The chickens walk around the farm yard.,Slepice chodí po dvorku farmy.,Benji,ne,ne
+badger,jezevec,301,A badger comes out of its den at night.,Jezevec vychází v noci ze svého doupěte.,Animals|Benji,ne,ne
+dig,hrabat,302,The badger can dig under the fence.,Jezevec umí hrabat pod plotem.,Actions|Benji,ne,ne
+under,pod,303,The key is under the book.,Klíč je pod knihou.,Benji,ne,ne
+fence,plot,304,The sheep stand behind the wooden fence.,Ovce stojí za dřevěným plotem.,Things|Benji,ne,ne
+believe,věřit,305,I believe you because you tell the truth.,"Věřím ti, protože říkáš pravdu.",Actions|Benji,ne,ne

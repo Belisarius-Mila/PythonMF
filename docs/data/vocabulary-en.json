@@ -1,8 +1,8 @@
 {
   "app": "VocabularyEN",
-  "generatedAt": "2026-08-25T08:09:26.205746+00:00",
+  "generatedAt": "2026-09-05T19:59:47.504001+00:00",
   "sourceCsv": "VocabularyEN/VocabularyEN.csv",
-  "itemCount": 306,
+  "itemCount": 305,
   "wordSets": [
     "Actions",
     "Animals",
@@ -17,11 +17,11 @@
     "selected": 107,
     "hardTraining": 70,
     "wordSetCount": 8,
-    "withSentence": 306,
-    "withSentenceTranslation": 306,
+    "withSentence": 305,
+    "withSentenceTranslation": 305,
     "imageSources": {
       "direct": 265,
-      "mapping": 41
+      "mapping": 40
     },
     "uniqueImageFiles": 277
   },
@@ -4839,24 +4839,6 @@
     {
       "id": 274,
       "order": 274,
-      "en": "me too",
-      "cz": "já také",
-      "sentenceEn": "I like apples, and my friend says, ‘Me too.’",
-      "sentenceCz": "Mám rád jablka a kamarád říká: „Já také.“",
-      "wordSets": [
-        "Benji"
-      ],
-      "selected": false,
-      "hardTraining": false,
-      "image": "assets/vocabulary-en/also.png",
-      "imageStem": "also",
-      "imageRequestedStem": "also",
-      "imageSource": "mapping",
-      "imageMissing": false
-    },
-    {
-      "id": 275,
-      "order": 275,
       "en": "friendly",
       "cz": "přátelský",
       "sentenceEn": "The horse is calm and friendly.",
@@ -4873,8 +4855,8 @@
       "imageMissing": false
     },
     {
-      "id": 276,
-      "order": 276,
+      "id": 275,
+      "order": 275,
       "en": "careful",
       "cz": "opatrný, opatrně",
       "sentenceEn": "Be careful when you cross the road.",
@@ -4891,8 +4873,8 @@
       "imageMissing": false
     },
     {
-      "id": 277,
-      "order": 277,
+      "id": 276,
+      "order": 276,
       "en": "warning",
       "cz": "varování",
       "sentenceEn": "The warning tells us to stop.",
@@ -4909,8 +4891,8 @@
       "imageMissing": false
     },
     {
-      "id": 278,
-      "order": 278,
+      "id": 277,
+      "order": 277,
       "en": "farm",
       "cz": "farma",
       "sentenceEn": "There are cows and chickens on the farm.",
@@ -4927,8 +4909,8 @@
       "imageMissing": false
     },
     {
-      "id": 279,
-      "order": 279,
+      "id": 278,
+      "order": 278,
       "en": "stranger",
       "cz": "cizinec",
       "sentenceEn": "Do not open the gate for a stranger.",
@@ -4945,8 +4927,8 @@
       "imageMissing": false
     },
     {
-      "id": 280,
-      "order": 280,
+      "id": 279,
+      "order": 279,
       "en": "come",
       "cz": "jít, přijít",
       "sentenceEn": "Please come to the table.",
@@ -4964,8 +4946,8 @@
       "imageMissing": false
     },
     {
-      "id": 281,
-      "order": 281,
+      "id": 280,
+      "order": 280,
       "en": "pump",
       "cz": "pumpa",
       "sentenceEn": "The old pump brings water from the ground.",
@@ -4983,8 +4965,8 @@
       "imageMissing": false
     },
     {
-      "id": 282,
-      "order": 282,
+      "id": 281,
+      "order": 281,
       "en": "get",
       "cz": "dostat",
       "sentenceEn": "I get a present on my birthday.",
@@ -5002,8 +4984,8 @@
       "imageMissing": false
     },
     {
-      "id": 283,
-      "order": 283,
+      "id": 282,
+      "order": 282,
       "en": "bucket",
       "cz": "vědro, kbelík",
       "sentenceEn": "The bucket is full of clean water.",
@@ -5021,8 +5003,8 @@
       "imageMissing": false
     },
     {
-      "id": 284,
-      "order": 284,
+      "id": 283,
+      "order": 283,
       "en": "empty",
       "cz": "prázdný",
       "sentenceEn": "The glass is empty now.",
@@ -5039,8 +5021,8 @@
       "imageMissing": false
     },
     {
-      "id": 285,
-      "order": 285,
+      "id": 284,
+      "order": 284,
       "en": "I don't know",
       "cz": "nevím",
       "sentenceEn": "I don't know the answer yet.",
@@ -5057,8 +5039,8 @@
       "imageMissing": false
     },
     {
-      "id": 286,
-      "order": 286,
+      "id": 285,
+      "order": 285,
       "en": "forest",
       "cz": "les",
       "sentenceEn": "We walk quietly through the green forest.",
@@ -5075,8 +5057,8 @@
       "imageMissing": false
     },
     {
-      "id": 287,
-      "order": 287,
+      "id": 286,
+      "order": 286,
       "en": "handle",
       "cz": "páka",
       "sentenceEn": "Push the handle down to pump the water.",
@@ -5094,8 +5076,8 @@
       "imageMissing": false
     },
     {
-      "id": 288,
-      "order": 288,
+      "id": 287,
+      "order": 287,
       "en": "push",
       "cz": "tlačit",
       "sentenceEn": "Push the heavy door slowly.",
@@ -5113,8 +5095,8 @@
       "imageMissing": false
     },
     {
-      "id": 289,
-      "order": 289,
+      "id": 288,
+      "order": 288,
       "en": "come closer",
       "cz": "přijít blíž",
       "sentenceEn": "Come closer so you can see the map.",
@@ -5132,8 +5114,8 @@
       "imageMissing": false
     },
     {
-      "id": 290,
-      "order": 290,
+      "id": 289,
+      "order": 289,
       "en": "chase",
       "cz": "honit",
       "sentenceEn": "The dog does not chase the sheep.",
@@ -5151,8 +5133,8 @@
       "imageMissing": false
     },
     {
-      "id": 291,
-      "order": 291,
+      "id": 290,
+      "order": 290,
       "en": "little animals",
       "cz": "malá zvířátka",
       "sentenceEn": "The little animals hide under the tree.",
@@ -5170,8 +5152,8 @@
       "imageMissing": false
     },
     {
-      "id": 292,
-      "order": 292,
+      "id": 291,
+      "order": 291,
       "en": "trust",
       "cz": "důvěřovat",
       "sentenceEn": "The little animals trust their friend.",
@@ -5189,8 +5171,8 @@
       "imageMissing": false
     },
     {
-      "id": 293,
-      "order": 293,
+      "id": 292,
+      "order": 292,
       "en": "eat",
       "cz": "jíst",
       "sentenceEn": "We eat lunch together at noon.",
@@ -5208,8 +5190,8 @@
       "imageMissing": false
     },
     {
-      "id": 294,
-      "order": 294,
+      "id": 293,
+      "order": 293,
       "en": "own",
       "cz": "vlastní",
       "sentenceEn": "The rabbit has its own carrots.",
@@ -5226,8 +5208,8 @@
       "imageMissing": false
     },
     {
-      "id": 295,
-      "order": 295,
+      "id": 294,
+      "order": 294,
       "en": "gate",
       "cz": "branka",
       "sentenceEn": "The farmer opens the gate for us.",
@@ -5245,8 +5227,8 @@
       "imageMissing": false
     },
     {
-      "id": 296,
-      "order": 296,
+      "id": 295,
+      "order": 295,
       "en": "closed",
       "cz": "zavřený",
       "sentenceEn": "The shop is closed today.",
@@ -5263,8 +5245,8 @@
       "imageMissing": false
     },
     {
-      "id": 297,
-      "order": 297,
+      "id": 296,
+      "order": 296,
       "en": "squirrel",
       "cz": "veverka",
       "sentenceEn": "A squirrel jumps from tree to tree.",
@@ -5282,8 +5264,8 @@
       "imageMissing": false
     },
     {
-      "id": 298,
-      "order": 298,
+      "id": 297,
+      "order": 297,
       "en": "question",
       "cz": "otázka",
       "sentenceEn": "The teacher asks a simple question.",
@@ -5300,8 +5282,8 @@
       "imageMissing": false
     },
     {
-      "id": 299,
-      "order": 299,
+      "id": 298,
+      "order": 298,
       "en": "answer",
       "cz": "odpověď",
       "sentenceEn": "I know the answer to this question.",
@@ -5318,8 +5300,8 @@
       "imageMissing": false
     },
     {
-      "id": 300,
-      "order": 300,
+      "id": 299,
+      "order": 299,
       "en": "catch",
       "cz": "chytit",
       "sentenceEn": "Can you catch the red ball?",
@@ -5337,8 +5319,8 @@
       "imageMissing": false
     },
     {
-      "id": 301,
-      "order": 301,
+      "id": 300,
+      "order": 300,
       "en": "yard",
       "cz": "dvorek",
       "sentenceEn": "The chickens walk around the farm yard.",
@@ -5355,8 +5337,8 @@
       "imageMissing": false
     },
     {
-      "id": 302,
-      "order": 302,
+      "id": 301,
+      "order": 301,
       "en": "badger",
       "cz": "jezevec",
       "sentenceEn": "A badger comes out of its den at night.",
@@ -5374,8 +5356,8 @@
       "imageMissing": false
     },
     {
-      "id": 303,
-      "order": 303,
+      "id": 302,
+      "order": 302,
       "en": "dig",
       "cz": "hrabat",
       "sentenceEn": "The badger can dig under the fence.",
@@ -5393,8 +5375,8 @@
       "imageMissing": false
     },
     {
-      "id": 304,
-      "order": 304,
+      "id": 303,
+      "order": 303,
       "en": "under",
       "cz": "pod",
       "sentenceEn": "The key is under the book.",
@@ -5411,8 +5393,8 @@
       "imageMissing": false
     },
     {
-      "id": 305,
-      "order": 305,
+      "id": 304,
+      "order": 304,
       "en": "fence",
       "cz": "plot",
       "sentenceEn": "The sheep stand behind the wooden fence.",
@@ -5430,8 +5412,8 @@
       "imageMissing": false
     },
     {
-      "id": 306,
-      "order": 306,
+      "id": 305,
+      "order": 305,
       "en": "believe",
       "cz": "věřit",
       "sentenceEn": "I believe you because you tell the truth.",

@@ -194,7 +194,6 @@ function buildSelection() {
 function currentSignature(selection) {
   return JSON.stringify({
     filter: state.filter,
-    direction: state.direction,
     wordSets: Array.from(state.selectedWordSetKeys).sort(),
     ids: selection.map((item) => item.id),
   });
@@ -205,7 +204,7 @@ function updateCounts(selection) {
   ui.selectionLabel.textContent = getSelectionLabel();
 
   const seen = selection.filter((item) => state.shownIds.has(item.id)).length;
-  const remaining = selection.length === 0 ? 0 : Math.max(1, selection.length - seen + 1);
+  const remaining = selection.length - seen;
   ui.remainingCount.textContent = String(remaining);
 }
 
@@ -227,7 +226,9 @@ function chooseNextItem() {
   let available = selection.filter((item) => !state.shownIds.has(item.id));
   if (available.length === 0) {
     state.shownIds.clear();
-    available = [...selection];
+    available = selection.length > 1
+      ? selection.filter((item) => item.id !== state.currentItem?.id)
+      : [...selection];
     updateCounts(selection);
   }
 
@@ -297,6 +298,10 @@ function renderCurrentItem() {
   ui.messageStrip.textContent = state.revealed
     ? "Odpoved je odhalena. Muzes prehrat odpoved nebo jit na dalsi kartu."
     : "Nejdriv si odpoved rekni nahlas. Pak klikni na 'Ukaz odpoved'.";
+
+  if (buildSelection().every((entry) => state.shownIds.has(entry.id))) {
+    ui.messageStrip.textContent += " Sada je hotova. Dalsi nove slovo zacne nove kolo.";
+  }
 
   primeCurrentAudio(item);
 }

@@ -415,3 +415,17 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   zachovat učební text a změnit adresu MP3 kvůli cache. Testy ověřily úzký
   rozsah a opakované sestavení bez dalších generování. Publikaci Pages
   prokazovat zvlášť podle LL-022.
+
+### LL-032 — Směr překladu nesmí resetovat historii losovaných karet
+
+- Problém: VocabularyEN zahrnoval směr překladu do identity vybrané sady.
+  Přepnutí směru proto při dalším losování vymazalo historii a mohlo vrátit
+  již zobrazenou kartu před vyčerpáním sady. Počítadlo navíc nikdy neukázalo
+  nulu a přechod do dalšího kola nebyl viditelný.
+- Typ: opakující se
+- Řešení nalezeno: 05092026
+- Řešení: identitu sady odvozovat z filtru, okruhů a ID karet; směr mění jen
+  zobrazení. Počítat dosud nezobrazená ID, oznámit konec kola a zamezit
+  bezprostřednímu opakování při přechodu mezi koly. Reprodukční testy ověřily
+  opravu i tři celá kola se změnami směru. Shodný text u různých významů
+  není opakování stejné karty.

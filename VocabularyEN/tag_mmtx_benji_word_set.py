@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Add the Benji word-set label to the 120 rows imported from MMTX.
+"""Add the Benji word-set label to the retained rows imported from MMTX.
 
 The default mode is read-only. ``--apply`` atomically updates only physical CSV
 rows whose normalized English word belongs to the curated MMTX import. Existing
@@ -42,9 +42,7 @@ def load_rows(path: Path = CSV_PATH) -> list[dict[str, str]]:
 
 
 def imported_keys(import_module) -> set[str]:
-    keys = set(import_module.CURATED)
-    if len(keys) != 120:
-        raise SystemExit(f"Expected 120 curated MMTX keys, found {len(keys)}")
+    keys = set(import_module.CURATED) - import_module.EXCLUDED_NORMALIZED
     return keys
 
 
@@ -53,10 +51,10 @@ def audit(path: Path = CSV_PATH) -> tuple[list[dict[str, str]], list[dict[str, s
     keys = imported_keys(import_module)
     rows = load_rows(path)
     targets = [row for row in rows if import_module.normalize_word(row["EN"]) in keys]
-    if len(targets) != 120:
-        raise SystemExit(f"Expected 120 imported MMTX rows, found {len(targets)}")
-    if [int(row["Order"]) for row in targets] != list(range(187, 307)):
-        raise SystemExit("Imported MMTX rows are not the expected orders 187-306")
+    if len(targets) != len(keys):
+        raise SystemExit(f"Expected {len(keys)} imported MMTX rows, found {len(targets)}")
+    if [int(row["Order"]) for row in targets] != list(range(187, 187 + len(keys))):
+        raise SystemExit("Imported MMTX rows are not the expected consecutive orders from 187")
     pending = [
         row
         for row in targets

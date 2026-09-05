@@ -63,12 +63,14 @@ def test_current_mmtx_inventory_has_complete_curated_plan():
     entries, current_rows, planned = module.build_plan()
 
     assert len(entries) == 155
-    assert len(current_rows) == 306
+    assert len(current_rows) == 305
     assert planned == []
+    assert not any(row["EN"] == "me too" for row in current_rows)
+    assert sum(row["EN"] == "too" for row in current_rows) == 1
     imported = current_rows[186:]
-    assert len(imported) == 120
+    assert len(imported) == 119
     assert imported[0]["Order"] == "187"
-    assert imported[-1]["Order"] == "306"
+    assert imported[-1]["Order"] == "305"
     assert {module.normalize_word(str(row["EN"])) for row in imported}.isdisjoint(
         module.EXCLUDED_NORMALIZED
     )
@@ -81,7 +83,7 @@ def test_append_preserves_existing_csv_prefix_and_crlf(tmp_path):
     module = load_module()
     original = module.CSV_PATH.read_bytes()
     lines = original.split(b"\r\n")
-    assert len(lines) == 308
+    assert len(lines) == 307
     pre_import = b"\r\n".join(lines[:187]) + b"\r\n"
     target = tmp_path / "VocabularyEN.csv"
     target.write_bytes(pre_import)
@@ -89,18 +91,18 @@ def test_append_preserves_existing_csv_prefix_and_crlf(tmp_path):
     entries, current_rows, planned = module.build_plan()
     assert len(entries) == 155
     assert len(current_rows) == 186
-    assert len(planned) == 120
+    assert len(planned) == 119
     module.append_rows(planned)
 
     updated = target.read_bytes()
     assert updated.startswith(pre_import)
     assert updated == original
-    assert updated.count(b"\r\n") == 307
+    assert updated.count(b"\r\n") == 306
     assert b"\n" not in updated.replace(b"\r\n", b"")
 
     with target.open("r", encoding="utf-8", newline="") as handle:
         rows = list(csv.DictReader(handle))
-    assert len(rows) == 306
+    assert len(rows) == 305
     assert rows[-1]["EN"] == "believe"
     assert rows[-1]["SentenceT"] == "Věřím ti, protože říkáš pravdu."
 
@@ -140,7 +142,7 @@ def test_current_mmtx_rows_are_all_in_benji_word_set():
 
     targets, pending = module.audit()
 
-    assert len(targets) == 120
+    assert len(targets) == 119
     assert pending == []
 
 
@@ -151,8 +153,8 @@ def test_web_export_offers_exactly_the_mmtx_rows_in_benji_word_set():
     benji_items = [item for item in manifest["items"] if "Benji" in item["wordSets"]]
 
     assert "Benji" in manifest["wordSets"]
-    assert len(benji_items) == 120
-    assert [item["order"] for item in benji_items] == list(range(187, 307))
+    assert len(benji_items) == 119
+    assert [item["order"] for item in benji_items] == list(range(187, 306))
     assert all(item["sentenceEn"] and item["sentenceCz"] for item in benji_items)
     assert all(item["image"] for item in benji_items)
 

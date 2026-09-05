@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "source": "VocabularyEN/VocabularyEN.csv",
-  "sourceDigest": "08577854fab34a7fd708e3bdcd976bc589c5a4363a7292738c439616063fa60e",
+  "sourceDigest": "632b784bcfd99c1dd83e6aa568dc2ff8076b5d2b6df7a0456a0411c3b9e2c390",
   "rate": "-10%",
   "voices": {
     "en": {
@@ -16,9 +16,9 @@
     }
   },
   "stats": {
-    "itemCount": 306,
-    "audioReferences": 612,
-    "uniqueAssets": 608
+    "itemCount": 305,
+    "audioReferences": 610,
+    "uniqueAssets": 606
   },
   "items": {
     "1": {
@@ -2207,14 +2207,6 @@
       "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/f1335d7f074ddb3d4723.mp3"
     },
     "274": {
-      "sourceEn": "me too",
-      "sourceCz": "já také",
-      "spokenEn": "me too",
-      "spokenCz": "já také",
-      "en": "assets/vocabulary-en-audio/en-us-aria-neural/0cc2865af5071014264f.mp3",
-      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/bdc9f3806c8b5bd0f01d.mp3"
-    },
-    "275": {
       "sourceEn": "friendly",
       "sourceCz": "přátelský",
       "spokenEn": "friendly",
@@ -2222,7 +2214,7 @@
       "en": "assets/vocabulary-en-audio/en-us-aria-neural/3afe9d615a20f6b773fe.mp3",
       "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/f4b385a5e6ed7ee846f7.mp3"
     },
-    "276": {
+    "275": {
       "sourceEn": "careful",
       "sourceCz": "opatrný, opatrně",
       "spokenEn": "careful",
@@ -2230,7 +2222,7 @@
       "en": "assets/vocabulary-en-audio/en-us-aria-neural/637cc698ff5bd8238e52.mp3",
       "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/a31afbc97a584451b39d.mp3"
     },
-    "277": {
+    "276": {
       "sourceEn": "warning",
       "sourceCz": "varování",
       "spokenEn": "warning",
@@ -2238,7 +2230,7 @@
       "en": "assets/vocabulary-en-audio/en-us-aria-neural/b88e2f783d94855129e4.mp3",
       "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/f99271acb783ec30109e.mp3"
     },
-    "278": {
+    "277": {
       "sourceEn": "farm",
       "sourceCz": "farma",
       "spokenEn": "farm",
@@ -2246,7 +2238,7 @@
       "en": "assets/vocabulary-en-audio/en-us-aria-neural/3cbc491675889cd72a51.mp3",
       "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/ecebdb7fe822f8295f5a.mp3"
     },
-    "279": {
+    "278": {
       "sourceEn": "stranger",
       "sourceCz": "cizinec",
       "spokenEn": "stranger",
@@ -2254,7 +2246,7 @@
       "en": "assets/vocabulary-en-audio/en-us-aria-neural/05185b470f7dc00d3575.mp3",
       "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/5c9618b1ed1b7ea4a594.mp3"
     },
-    "280": {
+    "279": {
       "sourceEn": "come",
       "sourceCz": "jít, přijít",
       "spokenEn": "come",
@@ -2262,7 +2254,7 @@
       "en": "assets/vocabulary-en-audio/en-us-aria-neural/5f336365fe714af8e2d9.mp3",
       "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/dc422396c0c029994336.mp3"
     },
-    "281": {
+    "280": {
       "sourceEn": "pump",
       "sourceCz": "pumpa",
       "spokenEn": "pump",
@@ -2270,7 +2262,7 @@
       "en": "assets/vocabulary-en-audio/en-us-aria-neural/58eb03241064db50d12d.mp3",
       "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/25c021b2bb9598ff9ec5.mp3"
     },
-    "282": {
+    "281": {
       "sourceEn": "get",
       "sourceCz": "dostat",
       "spokenEn": "get",
@@ -2278,7 +2270,7 @@
       "en": "assets/vocabulary-en-audio/en-us-aria-neural/e24d72fc4a3f191c0485.mp3",
       "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/df92a72a20a5fdb2a16b.mp3"
     },
-    "283": {
+    "282": {
       "sourceEn": "bucket",
       "sourceCz": "vědro, kbelík",
       "spokenEn": "bucket",
@@ -2286,7 +2278,7 @@
       "en": "assets/vocabulary-en-audio/en-us-aria-neural/645ffbfce9196b072654.mp3",
       "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/f028d45cb12778be9f22.mp3"
     },
-    "284": {
+    "283": {
       "sourceEn": "empty",
       "sourceCz": "prázdný",
       "spokenEn": "empty",
@@ -2294,7 +2286,7 @@
       "en": "assets/vocabulary-en-audio/en-us-aria-neural/946c5471c38ac729259f.mp3",
       "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/3c38f2ec7e6f3708ea22.mp3"
     },
-    "285": {
+    "284": {
       "sourceEn": "I don't know",
       "sourceCz": "nevím",
       "spokenEn": "I don't know",
@@ -2302,7 +2294,7 @@
       "en": "assets/vocabulary-en-audio/en-us-aria-neural/e8a62280eb64b2d993cf.mp3",
       "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/fdc1ed4817fff473a445.mp3"
     },
-    "286": {
+    "285": {
       "sourceEn": "forest",
       "sourceCz": "les",
       "spokenEn": "forest",
@@ -2310,7 +2302,7 @@
       "en": "assets/vocabulary-en-audio/en-us-aria-neural/25737ed4ecb37a21f758.mp3",
       "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/70fa2382889067f138ea.mp3"
     },
-    "287": {
+    "286": {
       "sourceEn": "handle",
       "sourceCz": "páka",
       "spokenEn": "handle",
@@ -2318,7 +2310,7 @@
       "en": "assets/vocabulary-en-audio/en-us-aria-neural/77dff176449da13c841a.mp3",
       "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/f0b363273782b585be32.mp3"
     },
-    "288": {
+    "287": {
       "sourceEn": "push",
       "sourceCz": "tlačit",
       "spokenEn": "push",
@@ -2326,7 +2318,7 @@
       "en": "assets/vocabulary-en-audio/en-us-aria-neural/166032e00a0afbbca4aa.mp3",
       "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/a503b2f727d80057155b.mp3"
     },
-    "289": {
+    "288": {
       "sourceEn": "come closer",
       "sourceCz": "přijít blíž",
       "spokenEn": "come closer",
@@ -2334,7 +2326,7 @@
       "en": "assets/vocabulary-en-audio/en-us-aria-neural/8a5033d1fa96f82b1de8.mp3",
       "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/8b09b9326acd1048b18e.mp3"
     },
-    "290": {
+    "289": {
       "sourceEn": "chase",
       "sourceCz": "honit",
       "spokenEn": "chase",
@@ -2342,7 +2334,7 @@
       "en": "assets/vocabulary-en-audio/en-us-aria-neural/88a765efb61106b29435.mp3",
       "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/25e173987a2edd5f5b2a.mp3"
     },
-    "291": {
+    "290": {
       "sourceEn": "little animals",
       "sourceCz": "malá zvířátka",
       "spokenEn": "little animals",
@@ -2350,7 +2342,7 @@
       "en": "assets/vocabulary-en-audio/en-us-aria-neural/e295c95b5ab2c9f443d5.mp3",
       "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/a8bdd52e94f1506f90f6.mp3"
     },
-    "292": {
+    "291": {
       "sourceEn": "trust",
       "sourceCz": "důvěřovat",
       "spokenEn": "trust",
@@ -2358,7 +2350,7 @@
       "en": "assets/vocabulary-en-audio/en-us-aria-neural/395c58c23285355846e2.mp3",
       "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/bd9ce6ae5be0da629298.mp3"
     },
-    "293": {
+    "292": {
       "sourceEn": "eat",
       "sourceCz": "jíst",
       "spokenEn": "eat",
@@ -2366,7 +2358,7 @@
       "en": "assets/vocabulary-en-audio/en-us-aria-neural/c64fb64d05efa99f420b.mp3",
       "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/6726dd161f4d3d3d4941.mp3"
     },
-    "294": {
+    "293": {
       "sourceEn": "own",
       "sourceCz": "vlastní",
       "spokenEn": "own",
@@ -2374,7 +2366,7 @@
       "en": "assets/vocabulary-en-audio/en-us-aria-neural/3bd947a71832f10c9381.mp3",
       "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/105dcc7925f4ac0f9879.mp3"
     },
-    "295": {
+    "294": {
       "sourceEn": "gate",
       "sourceCz": "branka",
       "spokenEn": "gate",
@@ -2382,7 +2374,7 @@
       "en": "assets/vocabulary-en-audio/en-us-aria-neural/2bb16be64a9f637c69fd.mp3",
       "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/f84e3c0cf9f71723a14d.mp3"
     },
-    "296": {
+    "295": {
       "sourceEn": "closed",
       "sourceCz": "zavřený",
       "spokenEn": "closed",
@@ -2390,7 +2382,7 @@
       "en": "assets/vocabulary-en-audio/en-us-aria-neural/e0c7ea4be355519a63e3.mp3",
       "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/224a6b8f161631b75965.mp3"
     },
-    "297": {
+    "296": {
       "sourceEn": "squirrel",
       "sourceCz": "veverka",
       "spokenEn": "squirrel",
@@ -2398,7 +2390,7 @@
       "en": "assets/vocabulary-en-audio/en-us-aria-neural/b3a584f264cf2ee5cd2b.mp3",
       "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/2f1115affaaa8cd5c149.mp3"
     },
-    "298": {
+    "297": {
       "sourceEn": "question",
       "sourceCz": "otázka",
       "spokenEn": "question",
@@ -2406,7 +2398,7 @@
       "en": "assets/vocabulary-en-audio/en-us-aria-neural/becb63972d9cdce56f45.mp3",
       "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/f606bcc5e5108bfd1cee.mp3"
     },
-    "299": {
+    "298": {
       "sourceEn": "answer",
       "sourceCz": "odpověď",
       "spokenEn": "answer",
@@ -2414,7 +2406,7 @@
       "en": "assets/vocabulary-en-audio/en-us-aria-neural/bd1f75d9ae153fddef2e.mp3",
       "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/dc193660b891972b19fa.mp3"
     },
-    "300": {
+    "299": {
       "sourceEn": "catch",
       "sourceCz": "chytit",
       "spokenEn": "catch",
@@ -2422,7 +2414,7 @@
       "en": "assets/vocabulary-en-audio/en-us-aria-neural/4edf75b7c23447db6ba2.mp3",
       "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/6690b8305832f2a03cc1.mp3"
     },
-    "301": {
+    "300": {
       "sourceEn": "yard",
       "sourceCz": "dvorek",
       "spokenEn": "yard",
@@ -2430,7 +2422,7 @@
       "en": "assets/vocabulary-en-audio/en-us-aria-neural/c1b8b290bf7287f8e24d.mp3",
       "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/f36f029e3bc230f55fad.mp3"
     },
-    "302": {
+    "301": {
       "sourceEn": "badger",
       "sourceCz": "jezevec",
       "spokenEn": "badger",
@@ -2438,7 +2430,7 @@
       "en": "assets/vocabulary-en-audio/en-us-aria-neural/d17bb56505a19ff22fad.mp3",
       "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/8a26b9f0afe6dfe6ba47.mp3"
     },
-    "303": {
+    "302": {
       "sourceEn": "dig",
       "sourceCz": "hrabat",
       "spokenEn": "dig",
@@ -2446,7 +2438,7 @@
       "en": "assets/vocabulary-en-audio/en-us-aria-neural/4078252342a445a23400.mp3",
       "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/e912f0a76313be3e21c2.mp3"
     },
-    "304": {
+    "303": {
       "sourceEn": "under",
       "sourceCz": "pod",
       "spokenEn": "under",
@@ -2454,7 +2446,7 @@
       "en": "assets/vocabulary-en-audio/en-us-aria-neural/bfb0168713bcd787122e.mp3",
       "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/8e0bd98370f161d52aba.mp3"
     },
-    "305": {
+    "304": {
       "sourceEn": "fence",
       "sourceCz": "plot",
       "spokenEn": "fence",
@@ -2462,7 +2454,7 @@
       "en": "assets/vocabulary-en-audio/en-us-aria-neural/f2775155ac6ab9f74148.mp3",
       "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/ca3271079df87e8b4fd2.mp3"
     },
-    "306": {
+    "305": {
       "sourceEn": "believe",
       "sourceCz": "věřit",
       "spokenEn": "believe",

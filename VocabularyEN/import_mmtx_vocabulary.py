@@ -29,7 +29,12 @@ SOURCE_FILES = (
     ("MMTX scene 03", REPO_ROOT / "MatysekANJ" / "web_mmtx" / "scene03_journey_to_the_lake" / "script.js"),
     ("MMTX scene 04 prototype", REPO_ROOT / "docs" / "scene04_harry_guard_prototype" / "script.js"),
 )
-EXCLUDED_NORMALIZED = {"benji", "bunny"}
+EXCLUDED_REASONS = {
+    "benji": "character_name",
+    "bunny": "character_name",
+    "metoo": "use_too_only",  # Mila: keep the standalone vocabulary entry "too".
+}
+EXCLUDED_NORMALIZED = set(EXCLUDED_REASONS)
 FIELDS = ("EN", "CZ", "Order", "Sentence", "SentenceT", "WS", "L", "HT")
 
 PAIR_RE = re.compile(
@@ -288,7 +293,7 @@ def write_report(path: Path, entries: OrderedDict[str, dict[str, object]], curre
     items = []
     for key, entry in entries.items():
         if key in EXCLUDED_NORMALIZED:
-            status = "excluded_character_name"
+            status = f"excluded_{EXCLUDED_REASONS[key]}"
         elif key in current_keys:
             status = "already_present"
         elif key in planned_keys:
@@ -300,7 +305,7 @@ def write_report(path: Path, entries: OrderedDict[str, dict[str, object]], curre
         "source_unique_count": len(entries),
         "already_present_count": sum(item["status"] == "already_present" for item in items),
         "planned_addition_count": len(planned),
-        "excluded_count": sum(item["status"] == "excluded_character_name" for item in items),
+        "excluded_count": sum(item["normalized"] in EXCLUDED_NORMALIZED for item in items),
         "planned_rows": planned,
         "source_items": items,
     }
@@ -321,7 +326,7 @@ def main() -> int:
     print(f"MMTX unique entries: {len(entries)}")
     print(f"VocabularyEN rows before: {len(current_rows)}")
     print(f"Already present: {len(entries) - len(planned) - len(EXCLUDED_NORMALIZED)}")
-    print(f"Excluded character names: {len(EXCLUDED_NORMALIZED)}")
+    print(f"Excluded entries: {len(EXCLUDED_NORMALIZED)}")
     print(f"Rows to append: {len(planned)}")
     for row in planned:
         print(f"- {row['Order']}: {row['EN']} | {row['CZ']}")

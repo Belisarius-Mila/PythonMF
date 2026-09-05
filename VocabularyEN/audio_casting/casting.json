@@ -99,7 +99,7 @@
     },
     {
       "id": "dont-know",
-      "order": 285,
+      "order": 284,
       "displayEn": "I don't know",
       "displayCz": "nevím",
       "speakEn": "I don't know",
@@ -107,7 +107,7 @@
     },
     {
       "id": "squirrel",
-      "order": 297,
+      "order": 296,
       "displayEn": "squirrel",
       "displayCz": "veverka",
       "speakEn": "squirrel",
