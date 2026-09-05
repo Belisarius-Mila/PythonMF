@@ -169,3 +169,13 @@ Neznámý výraz z budoucího dialogu nyní zablokuje hlášku o úplnosti a vy�
 - Testována tři celá kola nad 425 kartami včetně přepínání směru.
 - Rychlá statická brána prošla.
 - Soukromé provozní doklady jsou v data/private/vocabulary_en_mmtx_audit_20260905/.
+
+## Navazující publikace — 2026-09-06 00:24 CEST
+
+Původní lokální výsledek výše je nyní zveřejněný včetně 49 nových,
+Mílou schválených ilustrací. Úplná brána prošla 1518 testy. Pages run
+33995717491 z d22f25a4 a deployment 6286494824 uspěly. Veřejný manifest
+425 karet, app.js a audio manifest jsou bajtově shodné s lokálními;
+všech 49 nových obrázků odpovídá schváleným SHA-256. Důkaz je v
+vocabulary_en_images_publish_2026_09_06.json. Starší tři vazby na společný
+obrázek man pro brother, son a he jsou zachované.

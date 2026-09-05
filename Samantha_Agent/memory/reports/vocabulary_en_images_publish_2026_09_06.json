@@ -1,0 +1,313 @@
+{
+  "target_sha": "d22f25a40751b110a61b32013a7f3fa72a5e5ef0",
+  "run_id": 33995717491,
+  "run_url": "https://github.com/Belisarius-Mila/PythonMF/actions/runs/33995717491",
+  "public_url": "https://belisarius-mila.github.io/PythonMF/vocabulary-en/",
+  "manifest_matches": true,
+  "cards": 425,
+  "verified_image_count": 49,
+  "images": [
+    {
+      "word": "adventure",
+      "bytes": 285554,
+      "sha256": "15b9c18767e922feefc2f893f6fd4039767df4781a856cbf78449b065e634e36",
+      "http_ok": true
+    },
+    {
+      "word": "brave",
+      "bytes": 190952,
+      "sha256": "53968ece32a98e8e5784ad895c5c03cc93201f909907144dc7ac76dfdf195f45",
+      "http_ok": true
+    },
+    {
+      "word": "cheer",
+      "bytes": 234308,
+      "sha256": "5a78534a608e59b0a108335e691dc699398b8ffbac44e55717ed1a6964ede423",
+      "http_ok": true
+    },
+    {
+      "word": "continue",
+      "bytes": 264820,
+      "sha256": "68384079320cdd8e7d52472e63ccdd0894dae22b8da885f363a568a51c8acc9b",
+      "http_ok": true
+    },
+    {
+      "word": "cross",
+      "bytes": 283930,
+      "sha256": "a7c5172eab1c2c84d7c5fcbfa3505d85f476de98cb0e4e3ca7df2d4b6b534b1b",
+      "http_ok": true
+    },
+    {
+      "word": "dream",
+      "bytes": 219246,
+      "sha256": "e464694d179b2a177676ea1f0820c69dc1961e001c8460a4ee215ac1a2493aa7",
+      "http_ok": true
+    },
+    {
+      "word": "eleven",
+      "bytes": 148428,
+      "sha256": "14a5e243b32bbeb40949460b0a97df9c0a5965fa64ef4789d3c7ac9b35836304",
+      "http_ok": true
+    },
+    {
+      "word": "energy",
+      "bytes": 277830,
+      "sha256": "77979ac74096c746d52667860e862319a2b8fc61c4d882610cfb6d6f58561b34",
+      "http_ok": true
+    },
+    {
+      "word": "excellent",
+      "bytes": 208618,
+      "sha256": "5127b6828fb0d042682b8759d73542b96c50c52bc5461f3ab6fbb457201596b2",
+      "http_ok": true
+    },
+    {
+      "word": "finish",
+      "bytes": 286010,
+      "sha256": "441ac47bc5605caebf33454d43a356648ad2da3eafe60bc6ca240369fea301b1",
+      "http_ok": true
+    },
+    {
+      "word": "first",
+      "bytes": 291002,
+      "sha256": "155689b8176fb256f1a11570d9a0da7e1f6775b6406c01bb7d6c0fc56cc47746",
+      "http_ok": true
+    },
+    {
+      "word": "from",
+      "bytes": 289628,
+      "sha256": "f1acc45986deb652aebdfba8b7603740a8c560babf11745c1c169f965e7967c5",
+      "http_ok": true
+    },
+    {
+      "word": "full",
+      "bytes": 183618,
+      "sha256": "1bdb3edf5f3c96bdf39a1835886756c084b53d893b7c67e24d67ea5a0b30c2b8",
+      "http_ok": true
+    },
+    {
+      "word": "give",
+      "bytes": 144932,
+      "sha256": "6a64a6947f88da3c3d04f20da56aee8ebe53a8ab9343783a211f4facf626f5ee",
+      "http_ok": true
+    },
+    {
+      "word": "gone",
+      "bytes": 168800,
+      "sha256": "29d53a5db2b771aa764f471c6cefd44fdb53aa44ddf3e0c8ccba4990598708c6",
+      "http_ok": true
+    },
+    {
+      "word": "guard",
+      "bytes": 258094,
+      "sha256": "449e34816afba8c5c4b8c03580405c9c26b1359a94a5915c7f09d4786889b123",
+      "http_ok": true
+    },
+    {
+      "word": "happiness",
+      "bytes": 226364,
+      "sha256": "caf9d664a909889f205eb2d8734ecddc2f9a4a947ab6d008bf6f4a4d3ebc53a1",
+      "http_ok": true
+    },
+    {
+      "word": "health",
+      "bytes": 297090,
+      "sha256": "327b112f970a0195c820452759bee1dc80bfe7da23ce65110a1804fbb5f4afb0",
+      "http_ok": true
+    },
+    {
+      "word": "her",
+      "bytes": 218770,
+      "sha256": "0c5e444e0ca5f32295cdb0363df1ec26da9d50daceed9c10c555a9c99604b68a",
+      "http_ok": true
+    },
+    {
+      "word": "him",
+      "bytes": 213484,
+      "sha256": "aab8654e0393bb5d420809078d5dab8090c9d5b8b713a5bff39702fe09b77d1f",
+      "http_ok": true
+    },
+    {
+      "word": "inside",
+      "bytes": 151738,
+      "sha256": "142f7272b746904376e4358f33b52cc9530136c173f04582d584c304e2b1e986",
+      "http_ok": true
+    },
+    {
+      "word": "it",
+      "bytes": 232734,
+      "sha256": "1ad36f0f6044afeec4a075cdb381a809bb279e78df8129f779f2756e10cf0ce6",
+      "http_ok": true
+    },
+    {
+      "word": "joy",
+      "bytes": 254118,
+      "sha256": "cc71a89bf5610a8f3454ac1b5885e8de25ca59831baa695a25e3dd0050b871ce",
+      "http_ok": true
+    },
+    {
+      "word": "laugh",
+      "bytes": 187774,
+      "sha256": "36a331ca249ae494bd3fcdf80f86cc33992be0aa8a0913f94f3c2d41692cb768",
+      "http_ok": true
+    },
+    {
+      "word": "laughter",
+      "bytes": 208522,
+      "sha256": "e1c01c336756dea01584262cae9a19940d50663e06a7db254f8cf3c2b627592a",
+      "http_ok": true
+    },
+    {
+      "word": "log",
+      "bytes": 268142,
+      "sha256": "20f96118bb4a5ffc4467c43ee5f9968432d813f34189782d3681cabd69569e58",
+      "http_ok": true
+    },
+    {
+      "word": "lovely",
+      "bytes": 276060,
+      "sha256": "40845eeff0cfb1c515525c164bb85beeb6b7e25de0850872c561cf6feeef9f21",
+      "http_ok": true
+    },
+    {
+      "word": "many",
+      "bytes": 276342,
+      "sha256": "bf06a2d01208ab20c140446f51f500228c69d5013d8a4438db504416612ff112",
+      "http_ok": true
+    },
+    {
+      "word": "no",
+      "bytes": 192214,
+      "sha256": "074f27aa7b3a6945e586e314f5e8e48f19cfbb8ba89b3921e294a5a876172644",
+      "http_ok": true
+    },
+    {
+      "word": "not",
+      "bytes": 158392,
+      "sha256": "fd0a4bd0841948fb451aa07f510b783054e24ed4aaee1368fc61e11f682d180e",
+      "http_ok": true
+    },
+    {
+      "word": "of",
+      "bytes": 166500,
+      "sha256": "a316a1df45cc0b85479df90a3e60f54cd6ce0a3947698c857816cea0a613cc13",
+      "http_ok": true
+    },
+    {
+      "word": "only",
+      "bytes": 151340,
+      "sha256": "8c10260df50d56f16b561dad9608945f6ee2bfe37dd4b6beff56a9baf8ec06ca",
+      "http_ok": true
+    },
+    {
+      "word": "safe",
+      "bytes": 285238,
+      "sha256": "86f05fa12df5318558fbfc781caecfc4be47b56bb1d3ec7c71197fd575363815",
+      "http_ok": true
+    },
+    {
+      "word": "safely",
+      "bytes": 263400,
+      "sha256": "6308d0021c93de7c46e1ceda849dfb9e44fed156cdec113406a436993860bbc7",
+      "http_ok": true
+    },
+    {
+      "word": "save",
+      "bytes": 244566,
+      "sha256": "af786adff5108a4fd34033528e33bbd40eeee3c1c6e1254f56c829c69a967ce3",
+      "http_ok": true
+    },
+    {
+      "word": "second",
+      "bytes": 135234,
+      "sha256": "88e69cb9826b4ed46d4bbbfa32a17a196ead14d067700a374b7845b526d86672",
+      "http_ok": true
+    },
+    {
+      "word": "smile",
+      "bytes": 222974,
+      "sha256": "3605c89a6049334aaf46fbe77568bc0b8bdac6e70e78440e2bd4cc577a536e74",
+      "http_ok": true
+    },
+    {
+      "word": "so",
+      "bytes": 205236,
+      "sha256": "31f1315e89432831eed1066d184a4e0be990964dbb8ba09c9f5106e49a5335f6",
+      "http_ok": true
+    },
+    {
+      "word": "special",
+      "bytes": 186904,
+      "sha256": "31269259edc2bce9e722a1e3513c73f1f2091c9e056a7abe14430a5cb58d3aa5",
+      "http_ok": true
+    },
+    {
+      "word": "stream",
+      "bytes": 278484,
+      "sha256": "82dea70781dcf4164d3b0ac3ce2f2aaa058bcacbd87a21d673e0dd80e712b870",
+      "http_ok": true
+    },
+    {
+      "word": "tap",
+      "bytes": 183826,
+      "sha256": "990a7d05d3fc0c8eb6db511e0040216595b3056eff03ae7743084c7ed11890be",
+      "http_ok": true
+    },
+    {
+      "word": "ten",
+      "bytes": 249704,
+      "sha256": "6442466791a83f14a0a3d3e3daa8ba9fcafbdd6b3db2d2aa77235ea13a1ab4cb",
+      "http_ok": true
+    },
+    {
+      "word": "the",
+      "bytes": 240990,
+      "sha256": "51f9ab0a56645281054a1a623848893238592d9af68fe1f246927ba4143dca6a",
+      "http_ok": true
+    },
+    {
+      "word": "twelve",
+      "bytes": 169280,
+      "sha256": "69020897ddd3e2d668f55fd5d95436af76757676e2909deb0e2f9b39279b112a",
+      "http_ok": true
+    },
+    {
+      "word": "up",
+      "bytes": 142812,
+      "sha256": "c91b49f78f6f26e97a41aabafc2628a88aef27991030d1336e71acf33b64f822",
+      "http_ok": true
+    },
+    {
+      "word": "watch",
+      "bytes": 232402,
+      "sha256": "f3f76192d937cf3f59c77d7565d2f9b8683f3e9a124ea26de8db17d8a81fd1bd",
+      "http_ok": true
+    },
+    {
+      "word": "whole",
+      "bytes": 204204,
+      "sha256": "a7998301dffa6116a3b0e654020d311783437f36d451f77b10dc6ddd9236c687",
+      "http_ok": true
+    },
+    {
+      "word": "wide",
+      "bytes": 160500,
+      "sha256": "c399e26f1d174ab4b5d98efdc7887ae10b726bf5581b8ee2678d4e59b2eabd0a",
+      "http_ok": true
+    },
+    {
+      "word": "wish",
+      "bytes": 117348,
+      "sha256": "0a6a7879feafedfdcb97c333be5dc651f9304f302d6876c959e79cca2056b452",
+      "http_ok": true
+    }
+  ],
+  "app_js_matches": true,
+  "audio_manifest_matches": true,
+  "deployment_id": 6286494824,
+  "deployment_state": "success",
+  "full_gate_tests": 1518,
+  "targeted_import_tests": 15,
+  "targeted_js_tests": 4,
+  "verified_at": "2026-09-06 00:24 CEST"
+}

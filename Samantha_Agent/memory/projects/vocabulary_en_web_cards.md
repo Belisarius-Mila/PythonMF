@@ -348,13 +348,17 @@ python3 VocabularyEN/sync_vocabulary_en_to_docs.py --preserve-extra-assets
 - Míla schválil 49 ilustrací a zadal p+n. Sada je zkopírována do Pict
   a docs; přesné názvy umožňují přímé přiřazení bez změny mappingu.
 - Změnilo se pouze 49 očekávaných obrázkových vazeb. Všech 425 karet
-  má konkrétní obrázek: 361 přímých přiřazení a 64 přes mapping.
+  má platnou obrázkovou vazbu: 361 přímých přiřazení a 64 přes mapping.
 - Kontrolní součty 49 exportovaných obrázků odpovídají schválené sadě.
   Věty, překlady, Benji a ostatní data karet zůstaly stejné; audio audit
   845 MP3 / 850 odkazů je v pořádku. Prošlo 15 importních/mapovacích
   a čtyři JavaScript testy.
-- Probíhá úplná brána a publikace. Závěrečný důkaz bude v handoffu
-  vocabulary_en_49_images_review_2026_09_06.md.
+- Dokončeno 2026-09-06 00:24 CEST: úplná brána 1518/1518, push a Pages
+  z d22f25a4; run 33995717491 a deployment 6286494824 jsou success.
+  Veřejný manifest, app.js, audio manifest a všech 49 WebP jsou ověřeny
+  kontrolními součty. Původní sdílený obrázek man pro brother/son/he zůstává.
+  Důkaz: reports/vocabulary_en_images_publish_2026_09_06.json a handoff
+  vocabulary_en_49_images_review_2026_09_06.md. Další krok je běžné používání.
 
 ## Zdroj
 

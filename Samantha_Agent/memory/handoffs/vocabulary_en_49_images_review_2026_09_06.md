@@ -1,8 +1,8 @@
 Nazev: VocabularyEN — 49 schválených obrázků, publikace
 Priorita: 2
-Stav: ceka na retest
-Pripomenout pri startu: ano
-Datum: 2026-09-06 00:07 CEST
+Stav: hotovo
+Pripomenout pri startu: ne
+Datum: 2026-09-06 00:24 CEST
 
 ## Co se resilo
 
@@ -27,11 +27,12 @@ vývoj v jiném Human–Adam pracovním proudu.
 
 ## Co neni hotove
 
-- Push a publikace Pages, následná kontrola veřejného webu.
+- Žádný otevřený krok schváleného p+n. Volitelná je běžná ruční zkouška
+  na Mílově zařízení.
 
 ## Dalsi krok
 
-Dokončit schválené p+n a ověřit všech 49 veřejných obrázků podle SHA-256.
+Používat publikovanou webovou angličtinu; při otevřené starší kartě obnovit stránku.
 
 ## Navrhovane dalsi kroky
 
@@ -62,3 +63,21 @@ publikace ani nasazení nebyly součástí dokončení této kandidátní sady.
   Prošlo 15 importních/mapovacích testů a čtyři testy losování karet.
 - Úplná brána prošla: 1518 testů, syntax i whitespace OK.
 - Další krok: push, Pages a veřejný HTTP audit.
+
+## 2026-09-06 00:24 CEST — publikace ověřena
+
+- Hotovo: 49 schválených ilustrací i předchozí doplnění 120 hesel jsou
+  veřejně dostupné; web má 425 karet. Publikováno z d22f25a4.
+- Rozhodnutí: existující vazby ostatních kartiček zůstaly zachované,
+  včetně společné ilustrace man pro brother, son a he. Statistiky
+  361 direct / 64 mapping znamenají nulový automatický fallback,
+  nikoli jedinečný vlastní obrázek pro každé starší heslo.
+- Další krok: běžná ruční zkouška na cílovém zařízení; p+n je dokončeno.
+- Technický důkaz: úplná brána 1518/1518, cíleně 15 importních/mapovacích
+  testů a čtyři JavaScript testy. Pages run 33995717491 má success a
+  headSha d22f25a40751b110a61b32013a7f3fa72a5e5ef0; deployment
+  6286494824 má success. Veřejný manifest 425 karet, app.js a audio
+  manifest jsou bajtově shodné s lokálními soubory. Všech 49 veřejných
+  WebP prošlo HTTP a SHA-256 porovnáním se schválenou sadou.
+- Důkaz: reports/vocabulary_en_images_publish_2026_09_06.json.
+- Web: https://belisarius-mila.github.io/PythonMF/vocabulary-en/

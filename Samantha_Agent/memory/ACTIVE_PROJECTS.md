@@ -48,10 +48,10 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
-- 2026-09-06 00:07 CEST: VocabularyEN, priorita 2 — dokončeno 49/49
-  ilustrací k dialogům MMTX; Míla je následně schválil a zadal p+n.
-  Všech 49 je začleněno do Pict/docs bez změny mappingu; probíhá publikace.
-  Technická kontrola a rychlá statická brána prošly. Handoff:
+- 2026-09-06 00:24 CEST: VocabularyEN, priorita 2 — hotovo 49/49
+  schválených ilustrací k dialogům MMTX, začlenění a p+n. Pages run
+  33995717491 z d22f25a4 uspěl; veřejných 425 karet a SHA-256 všech 49
+  obrázků jsou ověřeny. Úplná brána 1518/1518. Další krok: běžné používání. Handoff:
   `handoffs/vocabulary_en_49_images_review_2026_09_06.md`.
 
 - 2026-08-29 21:01 CEST: Priorita 1, Human–Adam / samoobslužné MMTX `p+n` dokončeno.
