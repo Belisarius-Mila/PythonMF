@@ -1,6 +1,6 @@
-Nazev: VocabularyEN — 49 nových obrázků připraveno ke kontrole
+Nazev: VocabularyEN — 49 schválených obrázků, publikace
 Priorita: 2
-Stav: ceka na rozhodnuti
+Stav: ceka na retest
 Pripomenout pri startu: ano
 Datum: 2026-09-06 00:07 CEST
 
@@ -27,15 +27,11 @@ vývoj v jiném Human–Adam pracovním proudu.
 
 ## Co neni hotove
 
-- Mílovo vizuální schválení, kopie do Pict a případná změna mappingu.
-- Synchronizace těchto ilustrací do webu, push a publikace Pages.
-- Kandidátní obrázky nejsou dosud součástí produkční knihovny.
+- Push a publikace Pages, následná kontrola veřejného webu.
 
 ## Dalsi krok
 
-Míla projde review.html. Po schválení konkrétní sady ověřit kolize názvů
-v Pict a připravit kopii a náhled vazeb; mapping měnit až podle samostatné
-autorizace z vocabulary_image_generation_workflow.md.
+Dokončit schválené p+n a ověřit všech 49 veřejných obrázků podle SHA-256.
 
 ## Navrhovane dalsi kroky
 
@@ -52,3 +48,17 @@ Po začlenění ověřit CSV -> obrázky -> docs a poté na pokyn publikovat.
 
 Autosave ani plnou historii relace necommitovat. Žádné mazání, push,
 publikace ani nasazení nebyly součástí dokončení této kandidátní sady.
+
+## 2026-09-06 00:15 CEST — schválení a začlenění
+
+- Hotovo: Míla schválil obrázky a zadal p+n. Všech 49 bylo bez kolizí
+  zkopírováno do Pict a synchronizováno do docs s preserve-extra-assets.
+- Rozhodnutí: přesný anglický název souboru má přednost, proto nebylo
+  potřeba měnit mapping. Změnilo se právě 49 očekávaných přiřazení;
+  ostatní pole všech 425 karet zůstala zachována.
+- Technický důkaz: všech 49 hashů v docs odpovídá schválené sadě;
+  slovník má 361 přímých přiřazení a 64 přes mapping, žádný fallback.
+  Audio audit potvrdil 845 MP3 a 850 odkazů pro 425 slovíček.
+  Prošlo 15 importních/mapovacích testů a čtyři testy losování karet.
+- Úplná brána prošla: 1518 testů, syntax i whitespace OK.
+- Další krok: push, Pages a veřejný HTTP audit.

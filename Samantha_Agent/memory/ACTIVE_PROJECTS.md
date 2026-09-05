@@ -49,8 +49,8 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 ## Aktualni navazani
 
 - 2026-09-06 00:07 CEST: VocabularyEN, priorita 2 — dokončeno 49/49
-  kandidátních ilustrací k dialogům MMTX. [PRIPOMENOUT] Míla má projít
-  review.html; před začleněním do Pict a mappingu platí vizuální schválení.
+  ilustrací k dialogům MMTX; Míla je následně schválil a zadal p+n.
+  Všech 49 je začleněno do Pict/docs bez změny mappingu; probíhá publikace.
   Technická kontrola a rychlá statická brána prošly. Handoff:
   `handoffs/vocabulary_en_49_images_review_2026_09_06.md`.
 

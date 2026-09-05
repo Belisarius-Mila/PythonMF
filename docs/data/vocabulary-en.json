@@ -1,6 +1,6 @@
 {
   "app": "VocabularyEN",
-  "generatedAt": "2026-09-05T20:37:01.515790+00:00",
+  "generatedAt": "2026-09-05T22:14:52.933072+00:00",
   "sourceCsv": "VocabularyEN/VocabularyEN.csv",
   "itemCount": 425,
   "wordSets": [
@@ -20,11 +20,10 @@
     "withSentence": 425,
     "withSentenceTranslation": 425,
     "imageSources": {
-      "direct": 312,
-      "fallback": 49,
+      "direct": 361,
       "mapping": 64
     },
-    "uniqueImageFiles": 341
+    "uniqueImageFiles": 384
   },
   "items": [
     {
@@ -5497,10 +5496,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/proverbs.png",
-      "imageStem": "proverbs",
-      "imageRequestedStem": "proverbs",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/adventure.webp",
+      "imageStem": "adventure",
+      "imageRequestedStem": "adventure",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -5623,10 +5622,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/proverbs.png",
-      "imageStem": "proverbs",
-      "imageRequestedStem": "proverbs",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/brave.webp",
+      "imageStem": "brave",
+      "imageRequestedStem": "brave",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -5677,10 +5676,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/others.png",
-      "imageStem": "others",
-      "imageRequestedStem": "others",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/cheer.webp",
+      "imageStem": "cheer",
+      "imageRequestedStem": "cheer",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -5713,10 +5712,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/others.png",
-      "imageStem": "others",
-      "imageRequestedStem": "others",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/continue.webp",
+      "imageStem": "continue",
+      "imageRequestedStem": "continue",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -5731,10 +5730,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/others.png",
-      "imageStem": "others",
-      "imageRequestedStem": "others",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/cross.webp",
+      "imageStem": "cross",
+      "imageRequestedStem": "cross",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -5803,10 +5802,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/others.png",
-      "imageStem": "others",
-      "imageRequestedStem": "others",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/dream.webp",
+      "imageStem": "dream",
+      "imageRequestedStem": "dream",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -5821,10 +5820,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/verb.png",
-      "imageStem": "verb",
-      "imageRequestedStem": "verb",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/eleven.webp",
+      "imageStem": "eleven",
+      "imageRequestedStem": "eleven",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -5857,10 +5856,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/proverbs.png",
-      "imageStem": "proverbs",
-      "imageRequestedStem": "proverbs",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/energy.webp",
+      "imageStem": "energy",
+      "imageRequestedStem": "energy",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -5875,10 +5874,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/proverbs.png",
-      "imageStem": "proverbs",
-      "imageRequestedStem": "proverbs",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/excellent.webp",
+      "imageStem": "excellent",
+      "imageRequestedStem": "excellent",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -5893,10 +5892,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/proverbs.png",
-      "imageStem": "proverbs",
-      "imageRequestedStem": "proverbs",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/finish.webp",
+      "imageStem": "finish",
+      "imageRequestedStem": "finish",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -5911,10 +5910,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/proverbs.png",
-      "imageStem": "proverbs",
-      "imageRequestedStem": "proverbs",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/first.webp",
+      "imageStem": "first",
+      "imageRequestedStem": "first",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -5947,10 +5946,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/preposition.png",
-      "imageStem": "preposition",
-      "imageRequestedStem": "preposition",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/from.webp",
+      "imageStem": "from",
+      "imageRequestedStem": "from",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -5965,10 +5964,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/proverbs.png",
-      "imageStem": "proverbs",
-      "imageRequestedStem": "proverbs",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/full.webp",
+      "imageStem": "full",
+      "imageRequestedStem": "full",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -5983,10 +5982,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/proverbs.png",
-      "imageStem": "proverbs",
-      "imageRequestedStem": "proverbs",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/give.webp",
+      "imageStem": "give",
+      "imageRequestedStem": "give",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -6001,10 +6000,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/others.png",
-      "imageStem": "others",
-      "imageRequestedStem": "others",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/gone.webp",
+      "imageStem": "gone",
+      "imageRequestedStem": "gone",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -6037,10 +6036,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/proverbs.png",
-      "imageStem": "proverbs",
-      "imageRequestedStem": "proverbs",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/guard.webp",
+      "imageStem": "guard",
+      "imageRequestedStem": "guard",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -6055,10 +6054,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/others.png",
-      "imageStem": "others",
-      "imageRequestedStem": "others",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/happiness.webp",
+      "imageStem": "happiness",
+      "imageRequestedStem": "happiness",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -6109,10 +6108,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/proverbs.png",
-      "imageStem": "proverbs",
-      "imageRequestedStem": "proverbs",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/health.webp",
+      "imageStem": "health",
+      "imageRequestedStem": "health",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -6145,10 +6144,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/woman.png",
-      "imageStem": "woman",
-      "imageRequestedStem": "woman",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/her.webp",
+      "imageStem": "her",
+      "imageRequestedStem": "her",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -6199,10 +6198,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/man.png",
-      "imageStem": "man",
-      "imageRequestedStem": "man",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/him.webp",
+      "imageStem": "him",
+      "imageRequestedStem": "him",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -6217,10 +6216,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/others.png",
-      "imageStem": "others",
-      "imageRequestedStem": "others",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/inside.webp",
+      "imageStem": "inside",
+      "imageRequestedStem": "inside",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -6235,10 +6234,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/man.png",
-      "imageStem": "man",
-      "imageRequestedStem": "man",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/it.webp",
+      "imageStem": "it",
+      "imageRequestedStem": "it",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -6271,10 +6270,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/others.png",
-      "imageStem": "others",
-      "imageRequestedStem": "others",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/joy.webp",
+      "imageStem": "joy",
+      "imageRequestedStem": "joy",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -6307,10 +6306,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/proverbs.png",
-      "imageStem": "proverbs",
-      "imageRequestedStem": "proverbs",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/laugh.webp",
+      "imageStem": "laugh",
+      "imageRequestedStem": "laugh",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -6325,10 +6324,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/proverbs.png",
-      "imageStem": "proverbs",
-      "imageRequestedStem": "proverbs",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/laughter.webp",
+      "imageStem": "laughter",
+      "imageRequestedStem": "laughter",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -6415,10 +6414,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/proverbs.png",
-      "imageStem": "proverbs",
-      "imageRequestedStem": "proverbs",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/log.webp",
+      "imageStem": "log",
+      "imageRequestedStem": "log",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -6451,10 +6450,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/proverbs.png",
-      "imageStem": "proverbs",
-      "imageRequestedStem": "proverbs",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/lovely.webp",
+      "imageStem": "lovely",
+      "imageRequestedStem": "lovely",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -6469,10 +6468,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/others.png",
-      "imageStem": "others",
-      "imageRequestedStem": "others",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/many.webp",
+      "imageStem": "many",
+      "imageRequestedStem": "many",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -6595,10 +6594,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/proverbs.png",
-      "imageStem": "proverbs",
-      "imageRequestedStem": "proverbs",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/no.webp",
+      "imageStem": "no",
+      "imageRequestedStem": "no",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -6613,10 +6612,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/others.png",
-      "imageStem": "others",
-      "imageRequestedStem": "others",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/not.webp",
+      "imageStem": "not",
+      "imageRequestedStem": "not",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -6649,10 +6648,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/preposition.png",
-      "imageStem": "preposition",
-      "imageRequestedStem": "preposition",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/of.webp",
+      "imageStem": "of",
+      "imageRequestedStem": "of",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -6685,10 +6684,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/proverbs.png",
-      "imageStem": "proverbs",
-      "imageRequestedStem": "proverbs",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/only.webp",
+      "imageStem": "only",
+      "imageRequestedStem": "only",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -6793,10 +6792,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/proverbs.png",
-      "imageStem": "proverbs",
-      "imageRequestedStem": "proverbs",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/safe.webp",
+      "imageStem": "safe",
+      "imageRequestedStem": "safe",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -6811,10 +6810,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/proverbs.png",
-      "imageStem": "proverbs",
-      "imageRequestedStem": "proverbs",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/safely.webp",
+      "imageStem": "safely",
+      "imageRequestedStem": "safely",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -6829,10 +6828,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/others.png",
-      "imageStem": "others",
-      "imageRequestedStem": "others",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/save.webp",
+      "imageStem": "save",
+      "imageRequestedStem": "save",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -6865,10 +6864,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/proverbs.png",
-      "imageStem": "proverbs",
-      "imageRequestedStem": "proverbs",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/second.webp",
+      "imageStem": "second",
+      "imageRequestedStem": "second",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -6883,10 +6882,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/others.png",
-      "imageStem": "others",
-      "imageRequestedStem": "others",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/smile.webp",
+      "imageStem": "smile",
+      "imageRequestedStem": "smile",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -6901,10 +6900,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/conjuction.png",
-      "imageStem": "conjuction",
-      "imageRequestedStem": "conjuction",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/so.webp",
+      "imageStem": "so",
+      "imageRequestedStem": "so",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -6955,10 +6954,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/proverbs.png",
-      "imageStem": "proverbs",
-      "imageRequestedStem": "proverbs",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/special.webp",
+      "imageStem": "special",
+      "imageRequestedStem": "special",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -7027,10 +7026,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/others.png",
-      "imageStem": "others",
-      "imageRequestedStem": "others",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/stream.webp",
+      "imageStem": "stream",
+      "imageRequestedStem": "stream",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -7063,10 +7062,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/others.png",
-      "imageStem": "others",
-      "imageRequestedStem": "others",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/tap.webp",
+      "imageStem": "tap",
+      "imageRequestedStem": "tap",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -7081,10 +7080,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/verb.png",
-      "imageStem": "verb",
-      "imageRequestedStem": "verb",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/ten.webp",
+      "imageStem": "ten",
+      "imageRequestedStem": "ten",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -7117,10 +7116,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/others.png",
-      "imageStem": "others",
-      "imageRequestedStem": "others",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/the.webp",
+      "imageStem": "the",
+      "imageRequestedStem": "the",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -7243,10 +7242,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/others.png",
-      "imageStem": "others",
-      "imageRequestedStem": "others",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/twelve.webp",
+      "imageStem": "twelve",
+      "imageRequestedStem": "twelve",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -7261,10 +7260,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/others.png",
-      "imageStem": "others",
-      "imageRequestedStem": "others",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/up.webp",
+      "imageStem": "up",
+      "imageRequestedStem": "up",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -7315,10 +7314,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/proverbs.png",
-      "imageStem": "proverbs",
-      "imageRequestedStem": "proverbs",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/watch.webp",
+      "imageStem": "watch",
+      "imageRequestedStem": "watch",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -7387,10 +7386,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/proverbs.png",
-      "imageStem": "proverbs",
-      "imageRequestedStem": "proverbs",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/whole.webp",
+      "imageStem": "whole",
+      "imageRequestedStem": "whole",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -7423,10 +7422,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/proverbs.png",
-      "imageStem": "proverbs",
-      "imageRequestedStem": "proverbs",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/wide.webp",
+      "imageStem": "wide",
+      "imageRequestedStem": "wide",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -7459,10 +7458,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/proverbs.png",
-      "imageStem": "proverbs",
-      "imageRequestedStem": "proverbs",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/wish.webp",
+      "imageStem": "wish",
+      "imageRequestedStem": "wish",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {

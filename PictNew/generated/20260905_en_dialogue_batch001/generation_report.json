@@ -5,8 +5,8 @@
   "generated": 49,
   "max_size_bytes": 300000,
   "largest_image_bytes": 297090,
-  "review_status": "awaiting_user_review",
-  "production_applied": false,
+  "review_status": "approved",
+  "production_applied": true,
   "results": [
     {
       "word": "adventure",
@@ -694,5 +694,7 @@
       "sentence": "I wish you a happy birthday.",
       "sentence_cz": "Přeji ti všechno nejlepší k narozeninám."
     }
-  ]
+  ],
+  "approved_at": "2026-09-06T00:16:58.027938+02:00",
+  "approval": "Mila approved all images and requested p+n"
 }

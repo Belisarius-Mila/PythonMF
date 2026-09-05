@@ -343,6 +343,19 @@ python3 VocabularyEN/sync_vocabulary_en_to_docs.py --preserve-extra-assets
   vocabulary_image_generation_workflow.md. Handoff:
   vocabulary_en_49_images_review_2026_09_06.md.
 
+## Schválené obrázky v aplikaci — 2026-09-06 00:15 CEST
+
+- Míla schválil 49 ilustrací a zadal p+n. Sada je zkopírována do Pict
+  a docs; přesné názvy umožňují přímé přiřazení bez změny mappingu.
+- Změnilo se pouze 49 očekávaných obrázkových vazeb. Všech 425 karet
+  má konkrétní obrázek: 361 přímých přiřazení a 64 přes mapping.
+- Kontrolní součty 49 exportovaných obrázků odpovídají schválené sadě.
+  Věty, překlady, Benji a ostatní data karet zůstaly stejné; audio audit
+  845 MP3 / 850 odkazů je v pořádku. Prošlo 15 importních/mapovacích
+  a čtyři JavaScript testy.
+- Probíhá úplná brána a publikace. Závěrečný důkaz bude v handoffu
+  vocabulary_en_49_images_review_2026_09_06.md.
+
 ## Zdroj
 
 Souhrn ChatGPT/Codex konverzace k převodu části `vocab_trainer_en.py` do jednoduché webové learner aplikace pro mentálně postižené studenty, vytvoření sync skriptu `VocabularyEN -> docs`, prvního webového MVP, zmenšení hlavičky a přípravě seznamu chybějících obrázků v `Pict/`.
