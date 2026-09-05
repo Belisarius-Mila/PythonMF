@@ -328,6 +328,21 @@ python3 VocabularyEN/sync_vocabulary_en_to_docs.py --preserve-extra-assets
   reports/vocabulary_en_mmtx_audit_2026_09_05.md. Předchozí úprava too a
   losování byla už zveřejněna z commitu 10f7e6a; toto doplnění zatím není.
 
+## Ilustrace k dialogům — 2026-09-06 00:07 CEST
+
+- Hotovo: dokončeno 49/49 nových ilustrací v pracovní dávce
+  PictNew/generated/20260905_en_dialogue_batch001/. Obnova našla 47 hotových
+  souborů; generovaly se pouze wide a wish přes vestavěný image_gen.
+- Ověření: dekódování 49 WebP, SHA-256, 49 odkazů a úplné české významy
+  i oba jazyky vět v review.html. Největší finální obrázek má 297 090 B.
+  Pět větších původních WebP je zachováno v originals; finální kopie
+  splňují limit 300 kB. Číslovky 10/11/12 vizuálně souhlasí.
+- Rozhodnutí: jde o kandidátní sadu ke schválení. Pict, mapping a produkční
+  web se tímto krokem nemění. Členy a zájmena vyžadují kontext věty.
+- Další krok: Mílova kontrola review.html, poté potvrzené začlenění podle
+  vocabulary_image_generation_workflow.md. Handoff:
+  vocabulary_en_49_images_review_2026_09_06.md.
+
 ## Zdroj
 
 Souhrn ChatGPT/Codex konverzace k převodu části `vocab_trainer_en.py` do jednoduché webové learner aplikace pro mentálně postižené studenty, vytvoření sync skriptu `VocabularyEN -> docs`, prvního webového MVP, zmenšení hlavičky a přípravě seznamu chybějících obrázků v `Pict/`.

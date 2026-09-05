@@ -443,3 +443,15 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   kurátorský CZ, Sentence, SentenceT, Benji a audio; neznámé budoucí slovo
   blokuje falešné hlášení úplnosti. Po doplnění prošel audit bez mezer,
   30 cílených testů a dekódování všech 239 nových MP3.
+
+### LL-034 — Prázdný autosave TXT neznamená chybějící historii
+
+- Problém: latest_session.txt obsahoval pouze hlavičku, přestože JSONL
+  obsahoval přerušené zadání a důkazy uložených obrázků.
+- Typ: opakující se
+- Řešení nalezeno: 06092026
+- Řešení: při povolené obnově číst zprávy response_item/message z JSONL,
+  nikoli spoléhat jen na TXT export. Nevypisovat obrazové base64 ani celé
+  interní obálky. Stav následně ověřit podle manifestu, receipts a souborů;
+  poslední lidská zpráva hlásila 45 obrázků, na disku již bylo 47. Díky
+  této kontrole se dogenerovaly pouze dvě zbývající položky z 49.

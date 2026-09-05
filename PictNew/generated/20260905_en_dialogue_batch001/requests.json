@@ -1,0 +1,345 @@
+[
+  {
+    "index": 1,
+    "word": "adventure",
+    "output_file": "adventure.webp",
+    "prompt": "Create ONE square 1024x1024 educational vocabulary illustration, use case illustration-story. Target concept: adventure (Czech dobrodružství). Scene: a friendly small rabbit and brown puppy with tiny hiking backpacks study an unfolded blank map at the start of a winding forest trail, with a distant sunny hill promising exploration. Warm hand-painted children's storybook illustration, softly textured digital gouache, expressive natural animal faces, lush but uncluttered forest, clear central subjects, high readability on a small vocabulary card. No letters, no words, no watermark, no border, no collage. This is a standalone picture for one English vocabulary card; do not write the vocabulary word in the image.",
+    "status": "pending"
+  },
+  {
+    "index": 2,
+    "word": "brave",
+    "output_file": "brave.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: brave. Scene: A small brown puppy looks nervous but determined, standing protectively in front of a timid rabbit at a shadowy forest entrance. Brave willingness to help, no actual threat, no fighting.",
+    "status": "pending"
+  },
+  {
+    "index": 3,
+    "word": "cheer",
+    "output_file": "cheer.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: cheer. Scene: Two happy children on the sidelines clap and raise their arms encouraging their friend who is running toward a finish ribbon in a sunny park. Focus on the cheering supporters.",
+    "status": "pending"
+  },
+  {
+    "index": 4,
+    "word": "continue",
+    "output_file": "continue.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: continue. Scene: A rabbit hiker rises from a rest beside a bench, shoulders its backpack and resumes walking along the same winding woodland path. Clear forward movement, no written signs.",
+    "status": "pending"
+  },
+  {
+    "index": 5,
+    "word": "cross",
+    "output_file": "cross.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: cross. Scene: A rabbit and a puppy are midway WALKING ACROSS a small sturdy wooden footbridge from the left river bank to the right. Full bridge and both banks visible, clear crossing action.",
+    "status": "pending"
+  },
+  {
+    "index": 6,
+    "word": "dream",
+    "output_file": "dream.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: dream. Scene: A child sleeping peacefully in a cozy bed, with one large soft-edged dream bubble showing a friendly rabbit hopping among meadow flowers. Dream bubble visually connected to sleeping child's head.",
+    "status": "pending"
+  },
+  {
+    "index": 7,
+    "word": "eleven",
+    "output_file": "eleven.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: eleven. Scene: EXACTLY ELEVEN individual colored pencils, viewed straight from above, all completely visible in an open shallow rectangular pencil box on a pale wooden table. Two neatly spaced rows: FIVE pencils in the upper row and SIX pencils in the lower row. No extra pencils anywhere, no reflections, no digits or writing. Count accuracy is the main requirement.",
+    "status": "pending"
+  },
+  {
+    "index": 8,
+    "word": "energy",
+    "output_file": "energy.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: energy. Scene: An energetic child jumping high in a sunny park, joyful active pose with bent legs and outstretched arms, small motion strokes, puppy looking up. Vibrant vitality, no batteries or electricity symbols.",
+    "status": "pending"
+  },
+  {
+    "index": 9,
+    "word": "excellent",
+    "output_file": "excellent.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: excellent. Scene: A delighted child proudly presents a neatly completed colorful geometric puzzle to a teacher who gives a clear thumbs-up. A small gold star reward beside the puzzle. Excellent achievement, no text.",
+    "status": "pending"
+  },
+  {
+    "index": 10,
+    "word": "finish",
+    "output_file": "finish.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: finish. Scene: A child placing the very last puzzle piece into an otherwise completed picture puzzle; piece fits the single remaining gap. Completion is unmistakable. Close three-quarter view of hands and happy face.",
+    "status": "pending"
+  },
+  {
+    "index": 11,
+    "word": "first",
+    "output_file": "first.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: first. Scene: Three young rabbits moving in a queue toward a small garden gate on the right; the leading rabbit nearest the gate is in vivid warm colors, the other two softly muted. A small unobtrusive pointer highlights the leader. No numbers or words.",
+    "status": "pending"
+  },
+  {
+    "index": 12,
+    "word": "from",
+    "output_file": "from.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: from. Scene: A rabbit emerges OUT OF a dense green forest onto a sunny meadow path. A short curved arrow on the ground begins at the forest edge and points toward the rabbit on the meadow. Emphasize origin from the forest.",
+    "status": "pending"
+  },
+  {
+    "index": 13,
+    "word": "full",
+    "output_file": "full.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: full. Scene: A wicker basket filled completely to the brim with red apples, rounded heap rising above the rim. Whole basket visible against a simple pale kitchen background, no apples scattered outside.",
+    "status": "pending"
+  },
+  {
+    "index": 14,
+    "word": "give",
+    "output_file": "give.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: give. Scene: One child handing a closed plain blue book to another child who reaches out to receive it. Clear transfer between their hands at the center. Friendly faces and simple classroom backdrop.",
+    "status": "pending"
+  },
+  {
+    "index": 15,
+    "word": "gone",
+    "output_file": "gone.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: gone. Scene: A single educational before-and-after illustration in two equal panels: left, a small toy rabbit sits clearly on a round stool; right, the identical stool is empty, with a faint dashed outline where the toy used to be. Simple central arrow from left to right. No writing. Concept: now gone, absence.",
+    "status": "pending"
+  },
+  {
+    "index": 16,
+    "word": "guard",
+    "output_file": "guard.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: guard. Scene: A calm alert brown dog sitting upright beside a closed wooden garden gate, looking attentively toward the path outside. Friendly protective watchfulness, no aggressive teeth, no police gear.",
+    "status": "pending"
+  },
+  {
+    "index": 17,
+    "word": "happiness",
+    "output_file": "happiness.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: happiness. Scene: A peaceful happy child enjoying a warm family hug from two parents in a sunny garden, relaxed contented smiles, warm connection and happiness. Simple close grouping with uncluttered background.",
+    "status": "pending"
+  },
+  {
+    "index": 18,
+    "word": "health",
+    "output_file": "health.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: health. Scene: A cheerful healthy child walking outdoors with a small basket of fresh fruit, rosy cheeks and lively posture, subtle friendly heart-shaped motif on plain shirt. Clean fresh park setting, no medical claims or medical text.",
+    "status": "pending"
+  },
+  {
+    "index": 19,
+    "word": "her",
+    "output_file": "her.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: her. Scene: Two children in a park: a boy gently helps a girl stand up by holding her hand. A clear small curved pointer highlights the GIRL receiving help, she wears a yellow jacket. This depicts helping HER, not her possessions. No text.",
+    "status": "pending"
+  },
+  {
+    "index": 20,
+    "word": "him",
+    "output_file": "him.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: him. Scene: A girl handing an unfolded blank map to a boy in a blue shirt. A clear small curved pointer highlights the BOY receiving the map. This depicts giving HIM the map. No text.",
+    "status": "pending"
+  },
+  {
+    "index": 21,
+    "word": "inside",
+    "output_file": "inside.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: inside. Scene: An open cardboard box seen at an angle from above, with one small rabbit sitting completely INSIDE it, enclosed by the four walls. Clear view into the box, plain surroundings.",
+    "status": "pending"
+  },
+  {
+    "index": 22,
+    "word": "it",
+    "output_file": "it.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: it. Scene: A child points toward one small rabbit sitting on a plain grassy patch. A clear small curved pointer also identifies the rabbit as the object being referred to. Not a pronoun label: no writing. This is a contextual cue for IT.",
+    "status": "pending"
+  },
+  {
+    "index": 23,
+    "word": "joy",
+    "output_file": "joy.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: joy. Scene: A child and a rabbit reunite in a sunny meadow: the child gives a spontaneous joyful little leap with radiant smile and raised arms, rabbit hops happily nearby. Focus on sudden delight.",
+    "status": "pending"
+  },
+  {
+    "index": 24,
+    "word": "laugh",
+    "output_file": "laugh.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: laugh. Scene: Close medium view of a child actively laughing at a playful puppy with a leaf balanced on its nose; eyes crinkled, open laughing smile, one hand lightly on belly. Warm friendly humor.",
+    "status": "pending"
+  },
+  {
+    "index": 25,
+    "word": "laughter",
+    "output_file": "laughter.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: laughter. Scene: A group of three friends sitting together in a cozy reading corner sharing a funny picture book, all visibly laughing with open happy mouths and relaxed amused gestures. Shared laughter filling the room, no letters in book.",
+    "status": "pending"
+  },
+  {
+    "index": 26,
+    "word": "log",
+    "output_file": "log.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: log. Scene: One large fallen tree log lying horizontally on grass beside a narrow woodland stream, rough brown bark and a clearly visible circular cut end with growth rings. Entire log visible, primary subject.",
+    "status": "pending"
+  },
+  {
+    "index": 27,
+    "word": "lovely",
+    "output_file": "lovely.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: lovely. Scene: A charming small cottage garden full of softly colorful flowers with an inviting curved path and a simple wooden bench. Gentle, beautiful, inviting scene, sunny children's storybook mood, no people needed.",
+    "status": "pending"
+  },
+  {
+    "index": 28,
+    "word": "many",
+    "output_file": "many.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: many. Scene: A leafy tree with MANY small birds perched on its branches, more than twenty separated visible colorful birds spread across the tree. Abundance is obvious, clear silhouettes, no required exact count.",
+    "status": "pending"
+  },
+  {
+    "index": 29,
+    "word": "no",
+    "output_file": "no.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: no. Scene: A child gently declining an offered glass of milk, closed mouth and polite firm expression, one open palm raised toward the glass in a clear 'no thank you' gesture. No crossed arms, no written words.",
+    "status": "pending"
+  },
+  {
+    "index": 30,
+    "word": "not",
+    "output_file": "not.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: not. Scene: A child effortlessly lifts a large schoolbag with one little finger. Beside the bag is a small pictorial thought bubble containing a heavy iron weight with a red diagonal cancellation slash. Visually emphasize the bag is NOT heavy, not a prohibition sign over the bag itself. No lettering.",
+    "status": "pending"
+  },
+  {
+    "index": 31,
+    "word": "of",
+    "output_file": "of.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: of. Scene: Five apples sit together in a shallow bowl: four red apples and ONE green apple. A small pointer singles out the green apple while a delicate enclosing oval visually groups all five apples. Concept ONE OF the group; no words or numbers.",
+    "status": "pending"
+  },
+  {
+    "index": 32,
+    "word": "only",
+    "output_file": "only.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: only. Scene: An open pencil case lies on a plain desk, holding ONLY ONE pencil in an otherwise conspicuously empty interior. Entire case visible, no other stationery anywhere. The single pencil is central and unmistakable.",
+    "status": "pending"
+  },
+  {
+    "index": 33,
+    "word": "safe",
+    "output_file": "safe.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: safe. Scene: A friendly rabbit standing peacefully in the middle of a sturdy well-maintained wooden footbridge with solid tall railings and secure planks over a small calm stream. A small pictorial green shield with a check mark emphasizes safety. No words.",
+    "status": "pending"
+  },
+  {
+    "index": 34,
+    "word": "safely",
+    "output_file": "safely.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: safely. Scene: A child and an adult carefully crossing on a zebra crossing together while holding hands, looking toward the road, cars visibly stopped well behind the crossing. Clear pedestrian green WALKING PERSON symbol without text. Emphasize careful safe crossing behavior.",
+    "status": "pending"
+  },
+  {
+    "index": 35,
+    "word": "save",
+    "output_file": "save.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: save. Scene: A caring child gently lifts a small unhurt fledgling from the ground toward its low nest in a bush, supported carefully in both cupped hands. Parent bird visible on a nearby branch. Kind animal rescue, no injury.",
+    "status": "pending"
+  },
+  {
+    "index": 36,
+    "word": "second",
+    "output_file": "second.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: second. Scene: Close-up of a simple round stopwatch representing ONE SECOND: blank cream dial with 60 small tick marks but NO numerals, two very closely spaced hand positions at the top showing a single tick interval, and that narrow interval highlighted gold. A patient child's hand holds the stopwatch. No ordinal podium because here the example is 'Wait a second'.",
+    "status": "pending"
+  },
+  {
+    "index": 37,
+    "word": "smile",
+    "output_file": "smile.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: smile. Scene: Friendly close-up portrait of a child smiling gently with lips closed and warm bright eyes, soft sunny garden background. Focus on a clear relaxed SMILE rather than open-mouthed laughter.",
+    "status": "pending"
+  },
+  {
+    "index": 38,
+    "word": "so",
+    "output_file": "so.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: so. Scene: A very happy child beams and stretches both arms wide while a big warm heart-shaped glow radiates behind them and several smaller hearts float nearby. Exaggerated intensity of being SO happy, wholesome storybook image, no writing.",
+    "status": "pending"
+  },
+  {
+    "index": 39,
+    "word": "special",
+    "output_file": "special.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: special. Scene: A child receives one beautifully wrapped gold gift with a large unique red bow on a birthday table; a few plain everyday boxes sit farther away, softly muted. The gold gift is clearly exceptional and cherished, no labels or text.",
+    "status": "pending"
+  },
+  {
+    "index": 40,
+    "word": "stream",
+    "output_file": "stream.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: stream. Scene: A SMALL NARROW shallow woodland stream, sparkling clear water winding among smooth stones and ferns. Both banks visible close together, easily stepped across, trees behind. No bridge, no wide river.",
+    "status": "pending"
+  },
+  {
+    "index": 41,
+    "word": "tap",
+    "output_file": "tap.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: tap. Scene: Close-up of a child's hand with index finger gently tapping a picture of a friendly rabbit on a tablet screen. One subtle circular touch ripple at fingertip, plain device with no app text or logos. Clearly a screen tap, not a faucet.",
+    "status": "pending"
+  },
+  {
+    "index": 42,
+    "word": "ten",
+    "output_file": "ten.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: ten. Scene: EXACTLY TEN red apples completely visible from above in a shallow rectangular basket. TWO straight rows of FIVE apples each, generous spacing between apples, no overlap, no hidden apples, no extra apples anywhere, no reflections. Pale tabletop, no words or digits. Count accuracy is essential.",
+    "status": "pending"
+  },
+  {
+    "index": 43,
+    "word": "the",
+    "output_file": "the.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: the. Scene: One orange cat resting under one simple wooden table while a child points specifically toward THAT cat. Cat clearly visible, not obscured by table legs. Single definite known subject, no other cats, no writing. A contextual illustration of 'The cat is under the table'.",
+    "status": "pending"
+  },
+  {
+    "index": 44,
+    "word": "twelve",
+    "output_file": "twelve.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: twelve. Scene: EXACTLY TWELVE identical golden five-pointed stars, arranged neatly as THREE straight rows of FOUR well-separated stars each on a simple soft blue background. No additional decorative stars, no reflections, no numerals, no text. Count accuracy is the main requirement. Painterly tactile storybook finish.",
+    "status": "pending"
+  },
+  {
+    "index": 45,
+    "word": "up",
+    "output_file": "up.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: up. Scene: A child tilts their head and eyes UP toward a small bird high in the sky, one arm pointing upward. A simple broad curved arrow points vertically upward beside them. Clear bottom-to-top direction.",
+    "status": "pending"
+  },
+  {
+    "index": 46,
+    "word": "watch",
+    "output_file": "watch.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: watch. Scene: A rabbit standing on the near bank attentively WATCHES a puppy walking across a small wooden bridge. Show the rabbit's profile with eyes directed clearly at the puppy; a subtle pair of short gaze lines helps communicate watching. No wristwatch or clock.",
+    "status": "pending"
+  },
+  {
+    "index": 47,
+    "word": "whole",
+    "output_file": "whole.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: whole. Scene: A complete round uncut apple pie on a simple plate, seen from above, intact pastry all the way around and no missing slices. One faint complete circle surrounds it to emphasize the WHOLE object. No cut lines, no utensils, no text.",
+    "status": "pending"
+  },
+  {
+    "index": 48,
+    "word": "wide",
+    "output_file": "wide.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: wide. Scene: A VERY WIDE calm river filling most of the landscape from foreground bank to distant opposite bank, with a long subtle double-headed horizontal arrow spanning its width from one bank to the other. Wide panorama composed inside a square image, no writing.",
+    "status": "pending"
+  },
+  {
+    "index": 49,
+    "word": "wish",
+    "output_file": "wish.webp",
+    "prompt": "Create ONE standalone square educational vocabulary illustration. Use case illustration-story. Warm hand-painted children's storybook art, softly textured digital gouache, expressive friendly faces, natural anatomy, clear central subjects, warm light, uncluttered composition legible on a small card. Full-bleed square, no border, no watermark, no letters, no words, no written vocabulary answer. Target English concept: wish. Scene: A smiling child with hands gently clasped makes a birthday wish in front of a small cake with softly glowing candles, eyes closed in hopeful anticipation. A pale thought bubble with a tiny heart and friendly rabbit hints at a kind wish. No text or numerals.",
+    "status": "pending"
+  }
+]

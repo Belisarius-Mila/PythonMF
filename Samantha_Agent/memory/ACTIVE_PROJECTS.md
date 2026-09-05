@@ -48,6 +48,12 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
+- 2026-09-06 00:07 CEST: VocabularyEN, priorita 2 — dokončeno 49/49
+  kandidátních ilustrací k dialogům MMTX. [PRIPOMENOUT] Míla má projít
+  review.html; před začleněním do Pict a mappingu platí vizuální schválení.
+  Technická kontrola a rychlá statická brána prošly. Handoff:
+  `handoffs/vocabulary_en_49_images_review_2026_09_06.md`.
+
 - 2026-08-29 21:01 CEST: Priorita 1, Human–Adam / samoobslužné MMTX `p+n` dokončeno.
   MMTX dostává deklarativní produkční cíl GitHub Pages a přímý pokyn `p+n`
   serverově zřetězí případný bezpečný GitHub balíček, Pages workflow, ověření
