@@ -227,6 +227,19 @@ Později byl `generate_tts.py` upraven tak, že pokud nenajde `data/tts_phrases.
 - Nepřidávat API klíče ani citlivé údaje.
 - Při přidávání TTS do dalších aplikací preferovat sdílenou funkci nebo sdílený skript, ne kopírování stejného kódu do více projektů.
 
-## Zdroj
+## Ověřený úklid Apple Music 2026-09-05
+
+- Po přesném potvrzení globální brzdy odstraněno 144 projektových záznamů.
+  Ostatní záznamy, vlastní playlisty, místní audio a projektové zdroje zůstaly
+  zachovány; soukromý manifest a obnovovací kopie jsou mimo Git.
+- MP3, M4A, AIFF a WAV nyní otevírá QuickTime Player; ověřeno pro konkrétní
+  soubory přes NSWorkspace. U M4A je skutečný typ `com.apple.m4a-audio`.
+- Generátory dál ukládají do projektových složek. `afplay` a browser audio
+  zůstávají doporučenými náhledy; obecné macOS `open` nad audiem nepoužívat.
+- Osm existujících testů bezpečného přehrávání prošlo. Kontrola na iPhonu
+  nebyla součástí ověření na Macu.
+- Přesný rozsah a limity obnovy: `memory/handoffs/apple_music_project_audio_cleanup_2026_09_05.md`.
+
+## Zdroj původního souhrnu
 
 Souhrn ChatGPT/Codex konverzace z 28. 4. a 1. 5. k vytvoření nástroje `generate_tts.py`, GUI aplikace `tts_gui.py`, instalaci `edge-tts` a vysvětlení rozdílu mezi dávkovým CSV režimem a ručním GUI režimem.

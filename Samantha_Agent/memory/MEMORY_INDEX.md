@@ -46,6 +46,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `projects/tax_priznani_2025.md` - daňové přiznání 2025, výpočty, checklist formuláře a pravidlo neukládat citlivé údaje.
 - `projects/pictnew_vocabulary_image_pipeline.md` - [PRIPOMENOUT] povinný společný audit při každé změně `FR - Míla`, `FR - Jana` nebo `IT - Míla`; jeden český abecední `Pict/mapping.json`, shodná distribuce a kontrola všech CSV i obrázků.
 - `projects/tts_edge_audio_tools.md` - české TTS/MP3 nástroje přes edge-tts, dávkový CSV režim a ruční GUI.
+- `handoffs/apple_music_project_audio_cleanup_2026_09_05.md` - potvrzený úklid 144 projektových audio záznamů z Music; zachované soubory a vlastní playlisty, QuickTime pro MP3/M4A/AIFF/WAV. Soukromý obnovovací manifest zůstává mimo Git.
 - `projects/vocabulary_en_web_cards.md` - webové obrazové kartičky EN z `VocabularyEN.csv`, sync do `docs/`, learner MVP a workflow pro chybějící obrázky.
 - `projects/vocabularyfr_web_trainer.md` - historický webový MVP prototyp pro Janu. Aktuální používaný stav FR aplikací je v kanonických proudech `project-vocabulary-fr`; Last 20/50 i lokální Tk spuštění z Cockpitu Míla potvrdil jako funkční.
 - `handoffs/workstreams/project-vocabulary-fr.md`; `tvbcp/workstreams/project-vocabulary-fr.md` - kanonický aktuální stav Vocabulary FR: dvě zdrojové bezpečnostní vrstvy přidaly atomický zápis, hash konfliktu a jediný datový adresář bez tiché obousměrné synchronizace. Starší přenosná data se bez ověření nemigrují; build ani nasazení k Janě zatím neproběhly.

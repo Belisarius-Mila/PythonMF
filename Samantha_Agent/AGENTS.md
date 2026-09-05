@@ -135,6 +135,11 @@ pri dalsim navazani videl, kam se da rozumne pokracovat.
 
 ## Technicke preference
 
+- Projektove audio ukladej do prislusne projektove slozky, nikdy do Apple Music
+  ani jeji automaticke importni slozky. Pro poslech pouzij `afplay`, browser
+  audio nebo explicitne QuickTime Player; nepouzivej obecne macOS `open` nad
+  audio souborem. Vychozi asociace se mohou zmenit a znovu importovat audio
+  do hudebni knihovny.
 - Preferuj Python jako hlavni implementacni jazyk.
 - Agents SDK bude zaklad budoucicho Samantha agenta.
 - Strukturu projektu drz jednoduse a citelne:

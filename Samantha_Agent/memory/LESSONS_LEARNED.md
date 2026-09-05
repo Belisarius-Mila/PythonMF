@@ -382,3 +382,17 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   `503/server_is_overloaded`, bez hlavičky použít krátký exponenciální backoff
   s jitterem a celý běh držet v jednom časovém rozpočtu. Do logu propustit jen
   stav, kód, číslo pokusu a čekání; nikdy klíč, audio ani celé tělo chyby.
+
+### LL-030 — Projektové audio a skutečné asociace Apple Music
+
+- Problém: Opravený generátor s `afplay` nezabránil dalším importům pracovního
+  audia při obecném otevření nebo dvojkliku; Music byla výchozí aplikací.
+- Typ: opakující se
+- Řešení nalezeno: 05092026
+- Řešení: Projektové audio přehrávat explicitně přes `afplay`, browser nebo
+  QuickTime. Po schválené změně asociací ověřit skutečnou aplikaci pro konkrétní
+  soubor přes NSWorkspace, nestačí návratový kód nastavení. M4A na tomto Macu
+  používá `com.apple.m4a-audio`, ne pouze `public.mpeg-4-audio`. Před úklidem
+  Music sestavit seznam podle persistent ID, zachovat audio a ověřit ostatní
+  záznamy i playlisty před/po; chybějící místní soubor neznamená chybějící
+  záznam knihovny. Podrobnosti jsou v handoffu z 2026-09-05.
