@@ -1,0 +1,61 @@
+{
+  "id": "python-prakticke-ulohy.nakupni-rozpocet",
+  "title": "Můj nákupní rozpočet",
+  "short": "Můj nákupní rozpočet",
+  "time": "25–35 minut",
+  "predict": "Kolik stojí všechny položky dohromady? Má být nákup přesně za rozpočet ještě v limitu?",
+  "task": "Doplň funkci v_limitu: nákup je v limitu, pokud celkem <= rozpocet. V cyklu přičítej cenu každé položky do celkem. Vstupy i ostatní řádky ponech. Nákup stojí 85 Kč, zbývá 15 Kč; kontrolní nákup přesně za 100 Kč je také v limitu. Kontrolní nákup za 101 Kč už do rozpočtu 100 Kč nepatří.",
+  "hint": "Použij return celkem <= rozpocet a v cyklu celkem = celkem + polozka[\"cena\"]. Částka 100 při rozpočtu 100 musí projít.",
+  "success": "Spojil jsi seznam, slovníky, funkci, součet a podmínku do vlastního malého programu.",
+  "feedback": "Očekávám celkem = 85, zbyva = 15 a zprávy o limitu. Zkontroluj sčítání i rovnost v podmínce funkce.",
+  "explanation_file": "vyklad.md",
+  "starter_file": "ukazka.py",
+  "solution_file": "reseni.py",
+  "checks": [
+    {
+      "kind": "ast_kind",
+      "value": "FunctionDef"
+    },
+    {
+      "kind": "ast_kind",
+      "value": "Return"
+    },
+    {
+      "kind": "ast_kind",
+      "value": "For"
+    },
+    {
+      "kind": "ast_kind",
+      "value": "If"
+    },
+    {
+      "kind": "ast_kind",
+      "value": "Add"
+    },
+    {
+      "kind": "uses_name",
+      "value": "v_limitu"
+    },
+    {
+      "kind": "variables_equal",
+      "value": {
+        "celkem": 85,
+        "zbyva": 15,
+        "rozpocet": 100
+      }
+    },
+    {
+      "kind": "output_lines",
+      "value": [
+        "chléb",
+        "čaj",
+        "citron",
+        "Celkem: 85 Kč",
+        "Zbývá: 15 Kč",
+        "Nákup je v limitu.",
+        "Přesná hranice je v limitu.",
+        "Překročení není v limitu."
+      ]
+    }
+  ]
+}

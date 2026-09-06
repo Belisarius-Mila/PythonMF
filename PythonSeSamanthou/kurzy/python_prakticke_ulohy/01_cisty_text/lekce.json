@@ -1,0 +1,44 @@
+{
+  "id": "python-prakticke-ulohy.cisty-text",
+  "title": "Čistý text",
+  "short": "Čistý text",
+  "time": "15–20 minut",
+  "predict": "Započítá len() i mezery? Změní strip() původní proměnnou samo od sebe?",
+  "task": "Ve funkci vycisti uprav návratový řádek: nejprve odstraň mezery na obou koncích pomocí strip(), potom převeď text na malá písmena pomocí lower(). Zbytek ponech. Výpis má být čaj, 3 a zelený čaj.",
+  "hint": "Použij return hodnota.strip().lower(). Každé volání vrací nový text; mezi zelený a čaj zůstane mezera.",
+  "success": "Umíš sjednotit text, aniž bys ztratil původní vstup.",
+  "feedback": "Zkontroluj strip() i lower(). Funkce má vrátit čaj a zelený čaj, delka má být 3; původní vstup ponech.",
+  "explanation_file": "vyklad.md",
+  "starter_file": "ukazka.py",
+  "solution_file": "reseni.py",
+  "checks": [
+    {
+      "kind": "ast_kind",
+      "value": "FunctionDef"
+    },
+    {
+      "kind": "ast_kind",
+      "value": "Return"
+    },
+    {
+      "kind": "uses_name",
+      "value": "vycisti"
+    },
+    {
+      "kind": "variables_equal",
+      "value": {
+        "puvodni": "  ČAJ  ",
+        "nazev": "čaj",
+        "delka": 3
+      }
+    },
+    {
+      "kind": "output_lines",
+      "value": [
+        "čaj",
+        "3",
+        "zelený čaj"
+      ]
+    }
+  ]
+}

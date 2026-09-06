@@ -1,0 +1,43 @@
+{
+  "id": "python-prakticke-ulohy.prubezny-soucet",
+  "title": "Průběžný součet",
+  "short": "Průběžný součet",
+  "time": "15–20 minut",
+  "predict": "Jakou hodnotu bude mít celkem po první, druhé a třetí ceně? Co udělá přiřazení celkem = cena?",
+  "task": "V cyklu změň přiřazení tak, aby se nová cena přičetla k dosavadnímu celkem. Ponech seznam cen, počáteční nulu i oba výpisy. Výpis má být 30, 50, 65 a Celkem: 65 Kč.",
+  "hint": "Použij celkem = celkem + cena. Pravá strana se vypočítá ze starého součtu, potom se výsledek uloží.",
+  "success": "Umíš postupně sesbírat více hodnot do jednoho součtu.",
+  "feedback": "Očekávám sčítání v cyklu: mezisoučty 30, 50, 65 a celkem = 65.",
+  "explanation_file": "vyklad.md",
+  "starter_file": "ukazka.py",
+  "solution_file": "reseni.py",
+  "checks": [
+    {
+      "kind": "ast_kind",
+      "value": "For"
+    },
+    {
+      "kind": "ast_kind",
+      "value": "Add"
+    },
+    {
+      "kind": "uses_name",
+      "value": "ceny"
+    },
+    {
+      "kind": "variables_equal",
+      "value": {
+        "celkem": 65
+      }
+    },
+    {
+      "kind": "output_lines",
+      "value": [
+        "30",
+        "50",
+        "65",
+        "Celkem: 65 Kč"
+      ]
+    }
+  ]
+}

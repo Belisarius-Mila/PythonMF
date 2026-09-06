@@ -468,6 +468,10 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Ověření: PythonSeSamanthou, 27 testů a skutečné Tk GUI; znovuotevření
   s obráceným pořadím zachovalo výběr, sedm pokusů i dokončení. Testy pouze
   nad dočasnými daty, žádný zásah do Mílova skutečného postupu.
+- Další ověření 2026-09-06: třetí balíček byl přidán pouze do kurzy původního
+  vydaného ZIPu 1.5. GUI dokončilo všech sedm lekcí a obnovilo postup; kontrolní
+  porovnání zachovalo všech 79 původních distribuovaných souborů. Kompatibilitu
+  nového obsahu dokazovat i proti skutečně vydané aplikaci, nejen aktuálním zdrojům.
 
 
 ## 2026-09-06 — Samostatný projekt versus pracovní proud Cockpitu

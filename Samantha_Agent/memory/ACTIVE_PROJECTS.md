@@ -4,7 +4,7 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 Samostatný terminálový projekt bez pracovního proudu v Cockpitu:
 
-- **Python se Samanthou** — priorita 2, aktivní; 1.5 nahrazuje API přihlášeným Codexem, vysvětlení/doptání přímo v dílně. 56 testů, čtyři Mac GUI smoke a živý Codex prošly. Paměť: `projects/python_se_samanthou.md`; handoff: `handoffs/python_se_samanthou_course_package_2026_09_06.md`. Další krok: Linux instalace/přihlášení Codexu a retest. Samostatný terminálový projekt, dosud bez integrace do Cockpitu.
+- **Python se Samanthou** — priorita 2, aktivní; 1.5/Codex na Linuxu Míla potvrdil. Nový třetí balíček Praktické úlohy: 7 lekcí, celkem 21. 62 testů a GUI s nezměněnou 1.5 prošly. Paměť: `projects/python_se_samanthou.md`; handoff: `handoffs/python_se_samanthou_course_package_2026_09_06.md`. Další krok: přikopírovat samostatný balíček do kurzy a restartovat. Samostatný terminálový projekt, dosud bez integrace do Cockpitu.
 
 | Oblast | Priorita | Rezim | Stav | Memory soubor | Handoff | Dalsi krok |
 | --- | --- | --- | --- | --- | --- | --- |

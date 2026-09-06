@@ -1,0 +1,42 @@
+{
+  "id": "python-prakticke-ulohy.osetri-chybu",
+  "title": "Ošetři chybu",
+  "short": "Ošetři chybu",
+  "time": "20–25 minut",
+  "predict": "Které texty lze převést na celé číslo? Zastaví špatný text celý cyklus?",
+  "task": "V bloku try nahraď cislo = 0 převodem int(hodnota). Ponech except ValueError i testovací vstupy. Výpis má být Číslo: 12, Neplatné číslo: ahoj a Číslo: 5.",
+  "hint": "Použij cislo = int(hodnota). Pro text \"ahoj\" vznikne ValueError a provede se odpovídající except.",
+  "success": "Umíš očekávanou chybu převodu zachytit a pokračovat dalším vstupem.",
+  "feedback": "Očekávám správné převody 12 a 5 a zprávu pro ahoj. Ponech všechny tři vstupy a zachycení ValueError.",
+  "explanation_file": "vyklad.md",
+  "starter_file": "ukazka.py",
+  "solution_file": "reseni.py",
+  "checks": [
+    {
+      "kind": "ast_kind",
+      "value": "For"
+    },
+    {
+      "kind": "uses_name",
+      "value": "int"
+    },
+    {
+      "kind": "uses_name",
+      "value": "ValueError"
+    },
+    {
+      "kind": "variables_equal",
+      "value": {
+        "cislo": 5
+      }
+    },
+    {
+      "kind": "output_lines",
+      "value": [
+        "Číslo: 12",
+        "Neplatné číslo: ahoj",
+        "Číslo: 5"
+      ]
+    }
+  ]
+}

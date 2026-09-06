@@ -1,45 +1,42 @@
-Nazev: Python se Samanthou — Codex s účtem ChatGPT v dílně 1.5
+Nazev: Python se Samanthou — samostatný balíček Praktické úlohy
 Priorita: 2
 Stav: ceka na retest
 Pripomenout pri startu: ne
-Datum: 2026-09-06 15:37 CEST
+Datum: 2026-09-06 18:18 CEST
 
 Co se resilo:
-Míla zadal nahradit placené API přihlášeným Codexem, aby nemusel přepínat okna.
+Míla potvrdil, že Codex přihlášení a dílna 1.5 na Linuxu fungují. Zadal další
+balíček lekcí s přenosem pouze obsahu.
 
 Co je hotove:
-- AI vysvětlení, malý další krok a doptání přes Codex na pozadí přímo v dílně.
-- Připojení AI: instalační návod, browser přihlášení přes ChatGPT, kontrola.
-- Povinné ChatGPT přihlášení před dotazem, API backend/fallback odstraněn.
-- Zastavení požadavku, časový limit, přehledné chyby; zachování rozepsané otázky.
-- Oddělené rozhovory pokusů, rozlišení upraveného kódu a pozdních odpovědí.
-- 56 testů a čtyři Mac Tk GUI smoke; skutečné Codex vysvětlení i doptání,
-  včetně odpovědi přímo v Tk panelu. Vše nad syntetickými/dočasnými daty.
-- Jeden kompletní ZIP 1.5 v LocalSendu, oba kurzy i persistence zachovány.
+- Třetí kurz Python — praktické úlohy, sedm nových lekcí: textové metody,
+  append, součty, filtrování, enumerate, ošetření převodu a nákupní rozpočet.
+- Výklad, ukázka, úkol, nápověda, vzor a vlastní rozšíření do dílny u každé lekce.
+- Samostatný obsahový ZIP s jedinou složkou python_prakticke_ulohy, 30 souborů.
+- Všech 62 testů; GUI sedmi nových lekcí, zachování starých pokusů/dokončení
+  a obnovení. Ověřeno přikopírování do původní distribuce 1.5 bez změny runtime.
+- Existující 1.5 a oba původní kurzy zachované. Celkem jsou tři kurzy a 21 lekcí.
 
 Co neni hotove:
-- Instalace Codexu a přihlášení na Mílově Linuxu, retest kompletního toku.
-- Potvrzení původního problému read-only na Linuxu; na Macu psaní funguje.
-- Trvalé rozhovory, input(), skutečné krokování a přenos postupu mezi stroji.
+- Přikopírování a uživatelské vyzkoušení nového balíčku na Mílově Linuxu.
+- Přenos postupu mezi stroji, input(), skutečné krokování a trvalé AI rozhovory.
 
 Dalsi krok:
-Rozbalit PythonSeSamanthou_1_5_20260906.zip, spustit aplikaci z nové složky
-PythonSeSamanthou_1_5. Moje dílna → AI průvodce → Připojení AI.
-Nainstalovat aktuální Codex (nejméně 0.153.0), přihlásit se přes ChatGPT a ověřit
-připojení. Potom otázky i odpovědi zůstávají v dílně. Zachovat .python_se_samanthou.
+Rozbalit PythonPraktickeUlohy_7lekci_20260906.zip. Zkopírovat pouze složku
+python_prakticke_ulohy do kurzy běžně používané aplikace 1.5. Restartovat učebnu
+a zvolit Python — praktické úlohy. Ověřit kurzy/python_prakticke_ulohy/kurz.json.
+Aplikaci ani Codex není potřeba přeinstalovat; .python_se_samanthou zachovat.
 
 Navrhovane dalsi kroky:
-Po retestu přenos pokusů nebo krokování dle Mílova výběru. TVBCP po dohodě.
+Podle průchodu lekcemi další balíček, přenos pokusů nebo krokování. TVBCP po dohodě.
 
 Zmenene nebo relevantni soubory:
-PythonSeSamanthou/, projects/python_se_samanthou.md, ACTIVE_PROJECTS.md, MEMORY_INDEX.md.
-Podrobný důkaz a kontrolní součet ZIPu jsou v projektové paměti.
+PythonSeSamanthou/kurzy/python_prakticke_ulohy/, scripts/build_course_package.py,
+testy balíčku, README, vývojový build_release.py, projektová paměť a registr.
+Důkazy a kontrolní součet jsou v projects/python_se_samanthou.md.
 
 Bezpecnost / neukladat:
-Autentizaci spravuje Codex, aplikace tokeny nečte a neexportuje. Přihlášení sdílí
-s místním Codexem. Odeslání pouze tlačítkem; kód/poznámky/výpis a omezená historie
-jdou přes Codex do OpenAI. Čerpají se oprávnění a limity účtu, žádný API fallback.
-Běh má read-only, vypnuté shellové nástroje, pluginy, hooks a paměť. Učební kód
-sám uživatel dál spouští běžným workerem, který není bezpečnostní sandbox.
-1.3 byla pushnuta jako 6fb2c215; 1.4 00c16689 a nová 1.5 pouze místní checkpointy.
-Nový push ani deploy nyní není autorizovaný.
+ZIP neobsahuje program učebny, přihlášení, osobní pokusy ani postup. Lekce běží
+offline; AI v dílně je volitelná a dál používá účet ChatGPT. Nová ID oddělují
+postup kurzů. Vývoj/testy pracovaly jen s dočasnými daty. Nový push není zadán;
+1.4 00c16689 a 1.5 e4a550b9 dosud čekají v místním balíčku spolu s tímto krokem.

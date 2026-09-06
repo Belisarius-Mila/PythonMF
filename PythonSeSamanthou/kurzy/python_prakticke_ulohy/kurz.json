@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "id": "python-prakticke-ulohy",
+  "title": "Python — praktické úlohy",
+  "lessons": [
+    "01_cisty_text/lekce.json",
+    "02_dopln_seznam/lekce.json",
+    "03_prubezny_soucet/lekce.json",
+    "04_vyber_hodnot/lekce.json",
+    "05_cislovany_vypis/lekce.json",
+    "06_osetri_chybu/lekce.json",
+    "07_nakupni_rozpocet/lekce.json"
+  ]
+}

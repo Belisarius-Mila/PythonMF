@@ -45,8 +45,9 @@ Vadný formát a konflikt současných aplikací zastaví zápis. Zápis je atom
 
 Míla potvrdil fungování 1.2 po vyřešení záměny při spuštění na Linuxu a zadal
 vývoj Mojí dílny. Verzi 1.3 otevřel, ale hlásil nemožnost upravovat text.
-Verze 1.5 zachovává aktivaci editoru a nahrazuje API přihlášeným Codexem;
-čeká na Linux retest a instalaci/přihlášení Codexu.
+Míla následně potvrdil, že se na Linuxu přihlásil do Codexu a vše funguje.
+Nový třetí balíček Python — praktické úlohy přidává sedm lekcí bez výměny aplikace;
+čeká pouze na přikopírování a uživatelské vyzkoušení nového obsahu.
 Přenos postupu mezi počítači zatím není hotový. Původní a nová aplikace používají oddělené postupy.
 Hodnocení záměrně zachovává omezené kontroly původní učebny. Spuštěný kód má
 přístup k počítači; časový limit není bezpečnostní sandbox.
@@ -262,3 +263,59 @@ Technicky dukaz:
   s místním Codexem; závěrečná kontrola všech 79 ZIP souborů porovnává aktuální zdroje.
 - Po finálních úpravách prošla rychlá statická brána i všech 28 testů katalogu
   a registru. SHA-256 finálního ZIPu i shoda všech distribuovaných souborů ověřeny.
+
+
+## 2026-09-06 18:18 CEST — Třetí samostatný balíček, Python — praktické úlohy
+
+Hotovo:
+- Míla potvrdil fungující přihlášení Codexu a celé dílny na Linuxu. Poté zadal
+  další lekce s podmínkou přenášet ideálně jen balíček, nikoli aplikaci.
+- Sedm lekcí navazujících na předchozích 14: čistý text (strip/lower), append,
+  průběžný součet, filtrování přes >=, enumerate, int/try/except ValueError,
+  závěrečný nákupní rozpočet se seznamem slovníků a kontrolou hranice.
+- Každá lekce má odhad výsledku, vysvětlení pojmů, spustitelnou nedokončenou
+  ukázku, malou úpravu, nápovědu, řešení a rozšíření do dílny s volitelnou AI.
+- Nové ID python-prakticke-ulohy; 21 unikátních ID lekcí ve třech balíčcích.
+- Jediný obsahový ZIP obsahuje složku python_prakticke_ulohy s 30 soubory.
+  Uživatelský návod výslovně ukazuje vložení do kurzy a vylučuje dvojí zanoření.
+- Obecný vývojový build_course_package.py balí jen soubory odkazované z manifestu
+  a README; balíček validuje i po rozbalení, kód nespouští a jiný existující
+  výstup nepřepíše. Není součástí přenášeného obsahového ZIPu.
+
+Rozhodnuti:
+Aplikace zůstává 1.5. Nemění se její worker, kontroly, loader, persistence ani
+Codex připojení. Nové lekce používají jen dosavadní deklarativní kontroly.
+Automatické hodnocení není obecným hodnotitelem všech řešení; přesné použití
+strip/lower/append/try není samostatnou novou kontrolou. Omezení je popsané
+v README. Není potřeba AI, internet, další klíč ani nové přihlašování pro lekce.
+Změna build_release.py pouze přidává nový vývojový balicí skript do případné
+budoucí kompletní distribuce, aby v ní fungovaly nové testy. Nový plný ZIP se
+Milovi nedistribuuje; existující vydané aplikace v LocalSendu zůstaly zachované.
+
+Dalsi krok:
+Míla rozbalí PythonPraktickeUlohy_7lekci_20260906.zip a vloží jen složku
+python_prakticke_ulohy do kurzy své používané aplikace 1.5. Po úplném restartu
+vybere Python — praktické úlohy. Cílová cesta: kurzy/python_prakticke_ulohy/kurz.json.
+
+Navrhovane dalsi kroky:
+Podle zkušeností Míly upravit náročnost dalších balíčků, navázat procvičením
+funkcí a datových struktur nebo skutečným krokováním. Bez nového TVBCP/Cockpit proudu.
+Nový obsah se ukládá lokálně; push nyní není autorizovaný.
+
+Technicky dukaz:
+- Všech 62 automatických testů prošlo. Sedm vzorů prochází, sedm ukázek potřebuje
+  úpravu. Typické chyby a hraniční varianty včetně konstantní odpovědi rozpočtu
+  jsou odmítnuté; ověřeny i příklady rozšíření pro dílnu z výkladu.
+- Skutečný Tk GUI test: tři kurzy, sedm běhů a kontrol, dokončení 7/7, zachování
+  rozepsaných původních dvou kurzů a jejich dokončení, zavření a obnovení.
+- Stejný test prošel nad původním vydaným ZIPem 1.5 po přidání jediné nové složky
+  do kurzy. Všech 79 původních distribuovaných souborů zůstalo byte-for-byte shodných.
+  Testovací GUI skript byl přidán pouze jako testovací pomůcka, runtime se neměnil.
+- Všech 62 testů prošlo i v dočasné budoucí kompletní distribuci s novým balíčkem;
+  uživateli se předává pouze obsah. Python 3.9 gramatika ověřena.
+- LocalSend: PythonPraktickeUlohy_7lekci_20260906.zip, 30 souborů, 18 635 B,
+  SHA-256 e0f0ff0d93d710dfcff8a5e4384c454ca0e37b07d4ed533c6674d55cb18098c9.
+- Rychlá statická brána prošla. Plná brána se u tohoto obsahového kroku bez
+  změny runtime/persistence neopakovala; poslední plná brána 1.5 byla zelená.
+- Po zápisu projektového stavu prošlo všech 28 testů katalogu/registru a finální
+  rychlá statická brána. Osobní data ani uložené přihlášení se při testech nečetly.

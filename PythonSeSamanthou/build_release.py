@@ -13,7 +13,7 @@ def build(output_dir, course_only=False):
     files = [ROOT / name for name in ('README.md', 'python_se_samanthou.py',
              'assessment.py', 'course_loader.py', 'progress_store.py', 'build_release.py',
              'drawing.py', 'workshop.py', 'workshop_store.py', 'ai_tutor.py', 'tutor_panel.py',
-             'reference/python_se_samanthou_v1.py')]
+             'reference/python_se_samanthou_v1.py', 'scripts/build_course_package.py')]
     files.extend(p for p in (ROOT / 'tests').glob('*.py'))
     files.extend(p for p in (ROOT / 'kurzy').rglob('*') if p.is_file()
                  and p.suffix in {'.json', '.md', '.py'} and '__pycache__' not in p.parts)

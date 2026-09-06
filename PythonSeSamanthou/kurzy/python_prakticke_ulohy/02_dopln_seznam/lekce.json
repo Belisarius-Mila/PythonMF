@@ -1,0 +1,44 @@
+{
+  "id": "python-prakticke-ulohy.dopln-seznam",
+  "title": "Doplň seznam",
+  "short": "Doplň seznam",
+  "time": "15–20 minut",
+  "predict": "Kolik položek má seznam před doplněním? Objeví se nová položka na začátku, nebo na konci?",
+  "task": "Za první řádek přidej dvě volání append(): nejprve připoj \"čaj\", potom \"med\". Ponech výpočet délky a cyklus. Výpis má být Počet: 4 a pod ním chléb, mléko, čaj, med.",
+  "hint": "Na dva samostatné řádky napiš polozky.append(\"čaj\") a polozky.append(\"med\"). Seznam nepřiřazuj zpět z výsledku append().",
+  "success": "Umíš seznam rozšířit a projít jeho aktuální obsah.",
+  "feedback": "Očekávám čtyři položky v daném pořadí, pocet = 4 a výpis pomocí cyklu.",
+  "explanation_file": "vyklad.md",
+  "starter_file": "ukazka.py",
+  "solution_file": "reseni.py",
+  "checks": [
+    {
+      "kind": "uses_name",
+      "value": "polozky"
+    },
+    {
+      "kind": "uses_name",
+      "value": "len"
+    },
+    {
+      "kind": "ast_kind",
+      "value": "For"
+    },
+    {
+      "kind": "variables_equal",
+      "value": {
+        "pocet": 4
+      }
+    },
+    {
+      "kind": "output_lines",
+      "value": [
+        "Počet: 4",
+        "chléb",
+        "mléko",
+        "čaj",
+        "med"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "id": "python-prakticke-ulohy.cislovany-vypis",
+  "title": "Číslovaný výpis",
+  "short": "Číslovaný výpis",
+  "time": "15–20 minut",
+  "predict": "Jaké číslo dostane první položka, když enumerate začíná od nuly?",
+  "task": "Uprav volání enumerate tak, aby číslování začínalo od 1. Seznam i f-string ponech. Očekáváme 1. čaj, 2. med a 3. citron.",
+  "hint": "Použij enumerate(polozky, start=1). Číslo ani položku nemusíš zvyšovat ručně.",
+  "success": "Umíš získat při průchodu seznamem současně číslo i položku.",
+  "feedback": "Použij enumerate a cyklus. Výpis musí mít čísla 1, 2, 3; poslední cislo má být 3.",
+  "explanation_file": "vyklad.md",
+  "starter_file": "ukazka.py",
+  "solution_file": "reseni.py",
+  "checks": [
+    {
+      "kind": "ast_kind",
+      "value": "For"
+    },
+    {
+      "kind": "uses_name",
+      "value": "enumerate"
+    },
+    {
+      "kind": "variables_equal",
+      "value": {
+        "cislo": 3
+      }
+    },
+    {
+      "kind": "output_lines",
+      "value": [
+        "1. čaj",
+        "2. med",
+        "3. citron"
+      ]
+    }
+  ]
+}

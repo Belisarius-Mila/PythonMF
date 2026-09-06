@@ -156,6 +156,12 @@ vadné a duplicitní balíčky učebna ohlásí. Kompletní ZIP verze 1.5 obsahu
 Samotný přídavný balíček funguje i ve verzi 1.1 přes argument `--course`;
 přesný příkaz je v jeho README. Původní balíček se při připojení nemění.
 
+Volitelný třetí balíček **Python — praktické úlohy** přidává dalších sedm lekcí
+(čištění textu, seznamy, součty, filtrování, číslování, chyby a nákupní rozpočet).
+Z jeho samostatného ZIPu stačí přikopírovat složku `python_prakticke_ulohy`
+do `kurzy` a učebnu restartovat. Aplikaci 1.5 ani Codex znovu neinstaluješ.
+Podrobný návod je přímo v balíčku; po přidání budeš mít tři kurzy a 21 lekcí.
+
 ## Balíček lekcí
 
 `kurzy/python_zaklady/kurz.json` určuje název, ID kurzu a pořadí lekcí.

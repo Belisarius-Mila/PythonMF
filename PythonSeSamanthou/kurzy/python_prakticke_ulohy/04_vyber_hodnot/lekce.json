@@ -1,0 +1,42 @@
+{
+  "id": "python-prakticke-ulohy.vyber-hodnot",
+  "title": "Vyber hodnoty",
+  "short": "Vyber hodnoty",
+  "time": "15–20 minut",
+  "predict": "Které hodnoty projdou podmínkou? Má projít i teplota přesně 20?",
+  "task": "Uprav jedinou podmínku: do seznamu vybrane patří teploty alespoň 20. Ponech pořadí i ostatní řádky. Výpis má být 20, 24 a Počet: 2.",
+  "hint": "Alespoň 20 znamená teplota >= 20. Samotné > hodnotu 20 vynechá.",
+  "success": "Umíš vybrat položky podle podmínky a spočítat výsledek.",
+  "feedback": "Očekávám hodnoty 20 a 24 v původním pořadí a pocet = 2. Nezapomeň na rovnost.",
+  "explanation_file": "vyklad.md",
+  "starter_file": "ukazka.py",
+  "solution_file": "reseni.py",
+  "checks": [
+    {
+      "kind": "ast_kind",
+      "value": "For"
+    },
+    {
+      "kind": "ast_kind",
+      "value": "If"
+    },
+    {
+      "kind": "uses_name",
+      "value": "vybrane"
+    },
+    {
+      "kind": "variables_equal",
+      "value": {
+        "pocet": 2
+      }
+    },
+    {
+      "kind": "output_lines",
+      "value": [
+        "20",
+        "24",
+        "Počet: 2"
+      ]
+    }
+  ]
+}
