@@ -1,46 +1,45 @@
-Nazev: Python se Samanthou — AI průvodce a upravitelná dílna 1.4
+Nazev: Python se Samanthou — Codex s účtem ChatGPT v dílně 1.5
 Priorita: 2
 Stav: ceka na retest
 Pripomenout pri startu: ne
-Datum: 2026-09-06 15:17 CEST
+Datum: 2026-09-06 15:37 CEST
 
 Co se resilo:
-Míla hlásil read-only dílnu 1.3 a zadal AI vysvětlování a vedení. Nemá na Linuxu
-API klíč ani přihlášený Codex. Zvolen jednoduchý API klient s nastavením v okně.
+Míla zadal nahradit placené API přihlášeným Codexem, aby nemusel přepínat okna.
 
 Co je hotove:
-- Zřetelně označený editor, Upravit kód, zaměření vstupu a nabídka pro vložení.
-- AI vysvětlení, pomoc s chybou, další malý krok a navazující otázky.
-- Rozhovory oddělené podle pokusu, pozdní odpovědi a změněný kód rozlišeny.
-- API klíč z UI jen pro otevřenou dílnu; bez klíče vše ostatní funguje offline.
-- 51 automatických testů a čtyři Tk GUI smoke na Macu, skutečné klávesy,
-  oddělené API rozhovory, chyby a zachování osobní práce v testovacích datech.
-- Živé API vysvětlení syntetického příkladu i doptání prošlo.
-- Jediný kompletní ZIP 1.4 v LocalSendu. Kurzy a formát soukromých dat zachovány.
+- AI vysvětlení, malý další krok a doptání přes Codex na pozadí přímo v dílně.
+- Připojení AI: instalační návod, browser přihlášení přes ChatGPT, kontrola.
+- Povinné ChatGPT přihlášení před dotazem, API backend/fallback odstraněn.
+- Zastavení požadavku, časový limit, přehledné chyby; zachování rozepsané otázky.
+- Oddělené rozhovory pokusů, rozlišení upraveného kódu a pozdních odpovědí.
+- 56 testů a čtyři Mac Tk GUI smoke; skutečné Codex vysvětlení i doptání,
+  včetně odpovědi přímo v Tk panelu. Vše nad syntetickými/dočasnými daty.
+- Jeden kompletní ZIP 1.5 v LocalSendu, oba kurzy i persistence zachovány.
 
 Co neni hotove:
-- Potvrzení konkrétního read-only problému na Linux PC. Na Macu se nereprodukoval.
-- Mílův vlastní API účet/klíč na Linuxu a uživatelský retest AI připojení.
-- Trvalé ukládání AI rozhovorů, input(), skutečné krokování, přenos postupu.
+- Instalace Codexu a přihlášení na Mílově Linuxu, retest kompletního toku.
+- Potvrzení původního problému read-only na Linuxu; na Macu psaní funguje.
+- Trvalé rozhovory, input(), skutečné krokování a přenos postupu mezi stroji.
 
 Dalsi krok:
-Na Linuxu rozbalit PythonSeSamanthou_1_4_20260906.zip, ve složce
-PythonSeSamanthou_1_4 spustit python3 python_se_samanthou.py. Zkusit psaní
-v MŮJ KÓD a poznámkách. AI průvodce → Nastavení AI otevře návod/stránku
-pro klíč; vytvořený klíč vložit pouze do zakrytého pole aplikace.
-Ponechat skrytou datovou složku .python_se_samanthou.
+Rozbalit PythonSeSamanthou_1_5_20260906.zip, spustit aplikaci z nové složky
+PythonSeSamanthou_1_5. Moje dílna → AI průvodce → Připojení AI.
+Nainstalovat aktuální Codex (nejméně 0.153.0), přihlásit se přes ChatGPT a ověřit
+připojení. Potom otázky i odpovědi zůstávají v dílně. Zachovat .python_se_samanthou.
 
 Navrhovane dalsi kroky:
-Po Linux retestu pokračovat dle Mílovy volby: pohodlnější přihlášení,
-přenos pokusů nebo krokování. TVBCP pouze po výslovné dohodě.
+Po retestu přenos pokusů nebo krokování dle Mílova výběru. TVBCP po dohodě.
 
 Zmenene nebo relevantni soubory:
 PythonSeSamanthou/, projects/python_se_samanthou.md, ACTIVE_PROJECTS.md, MEMORY_INDEX.md.
 Podrobný důkaz a kontrolní součet ZIPu jsou v projektové paměti.
 
 Bezpecnost / neukladat:
-Klíče, pokusy, poznámky a postup nepatří do Gitu/ZIPu. AI tlačítko posílá
-zobrazený kód, poznámky, odpovídající výpis a omezenou historii do OpenAI;
-AI kód nemění ani nespouští. Klíč i rozhovory z UI platí do zavření dílny.
-Předchozí 1.3 autorizovaně pushnuta jako 6fb2c215. Nová 1.4 jen lokální
-checkpoint; nový push/deploy zatím není autorizovaný.
+Autentizaci spravuje Codex, aplikace tokeny nečte a neexportuje. Přihlášení sdílí
+s místním Codexem. Odeslání pouze tlačítkem; kód/poznámky/výpis a omezená historie
+jdou přes Codex do OpenAI. Čerpají se oprávnění a limity účtu, žádný API fallback.
+Běh má read-only, vypnuté shellové nástroje, pluginy, hooks a paměť. Učební kód
+sám uživatel dál spouští běžným workerem, který není bezpečnostní sandbox.
+1.3 byla pushnuta jako 6fb2c215; 1.4 00c16689 a nová 1.5 pouze místní checkpointy.
+Nový push ani deploy nyní není autorizovaný.

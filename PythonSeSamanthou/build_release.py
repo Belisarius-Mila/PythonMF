@@ -6,7 +6,7 @@ from pathlib import Path
 import zipfile
 
 ROOT = Path(__file__).resolve().parent
-RELEASE_NAME = 'PythonSeSamanthou_1_4_20260906.zip'
+RELEASE_NAME = 'PythonSeSamanthou_1_5_20260906.zip'
 
 
 def build(output_dir, course_only=False):
@@ -23,7 +23,7 @@ def build(output_dir, course_only=False):
     with zipfile.ZipFile(stream, 'w', compression=zipfile.ZIP_DEFLATED) as archive:
         for path in sorted(files):
             relative = path.relative_to(ROOT)
-            archive_path = relative if course_only else Path('PythonSeSamanthou_1_4') / relative
+            archive_path = relative if course_only else Path('PythonSeSamanthou_1_5') / relative
             entry = zipfile.ZipInfo(str(archive_path),
                                    date_time=(2026, 9, 6, 0, 0, 0))
             entry.compress_type = zipfile.ZIP_DEFLATED

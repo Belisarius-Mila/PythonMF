@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Python se Samanthou — offline učebna, verze 1.4.
+"""Python se Samanthou — offline učebna, verze 1.5.
 
 Spuštění: python3 python_se_samanthou.py
 Linux Mint: pokud chybí tkinter, nainstaluj balíček python3-tk
@@ -266,7 +266,7 @@ def launch(state_dir=None, on_ready=None):
 
             header = ttk.Frame(root, padding=(18, 10))
             header.pack(fill="x")
-            ttk.Label(header, text="Python se Samanthou · 1.4", font=(self.font.actual("family"), 22, "bold")).pack(side="left")
+            ttk.Label(header, text="Python se Samanthou · 1.5", font=(self.font.actual("family"), 22, "bold")).pack(side="left")
             ttk.Button(header, text="Moje dílna", command=self.open_workshop).pack(side="left", padx=16)
             ttk.Button(header, text="A+", width=3, command=lambda: self.resize_font(1)).pack(side="right")
             ttk.Button(header, text="A−", width=3, command=lambda: self.resize_font(-1)).pack(side="right", padx=5)

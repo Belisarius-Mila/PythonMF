@@ -495,3 +495,14 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   standardní CA; nevypínat ověřování certifikátů a neměnit systémovou instalaci.
 - Ověření: PythonSeSamanthou 1.4, skutečný HTTPS požadavek do OpenAI i navazující
   otázka prošly po této změně. Klíč ani osobní data se při ověření nevypisovaly.
+
+## 2026-09-06 — Codex tutor přes ChatGPT nesmí tiše použít API přihlášení
+
+- Typ: opakujici se.
+- Problém: automatický Codex může dědit jiný způsob autentizace a API proměnné.
+  Samotné forced_login_method může podle dokumentace odhlásit neslučitelný login.
+- Řešení: před dotazem nejprve codex login status bez vynucení; API/unknown login
+  odmítnout bez spuštění a bez logoutu. Až pro ověřené ChatGPT použít explicitní
+  forced_login_method, čisté prostředí bez API proměnných a --ignore-user-config.
+- Ověření: PythonSeSamanthou 1.5, testy odmítnutí API bez mutace přihlášení,
+  skutečné ChatGPT Codex vysvětlení/doptání i odpověď v Tk okně na Macu.

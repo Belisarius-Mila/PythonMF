@@ -11,7 +11,7 @@ a pokynem „OK, jdeme na to! Začni.“ autorizoval první krok.
 
 Pořadí: oddělit sedm lekcí → přenos kurzů a postupu → Moje dílna → vysvětlení
 kódu a doplňující otázky → kontextové nápovědy → skutečné krokování → více lekcí.
-Míla následně upřednostnil připojení dalšího balíčku sedmi lekcí. AI připojení je nyní součástí verze 1.4; viz nejnovější záznam dole.
+Míla následně upřednostnil připojení dalšího balíčku sedmi lekcí. AI připojení přes Codex/ChatGPT je nyní součástí verze 1.5; viz nejnovější záznam dole.
 
 ## První krok
 
@@ -45,7 +45,8 @@ Vadný formát a konflikt současných aplikací zastaví zápis. Zápis je atom
 
 Míla potvrdil fungování 1.2 po vyřešení záměny při spuštění na Linuxu a zadal
 vývoj Mojí dílny. Verzi 1.3 otevřel, ale hlásil nemožnost upravovat text.
-Verze 1.4 přidává aktivaci editoru a AI průvodce; čeká na Linux retest a vlastní API klíč.
+Verze 1.5 zachovává aktivaci editoru a nahrazuje API přihlášeným Codexem;
+čeká na Linux retest a instalaci/přihlášení Codexu.
 Přenos postupu mezi počítači zatím není hotový. Původní a nová aplikace používají oddělené postupy.
 Hodnocení záměrně zachovává omezené kontroly původní učebny. Spuštěný kód má
 přístup k počítači; časový limit není bezpečnostní sandbox.
@@ -200,3 +201,64 @@ Technicky dukaz:
   kurzů jsou byte-for-byte shodné s předchozím commitem.
 - Po finální úpravě registru prošlo dalších 28 testů katalogu/registru a rychlá
   statická brána. Kontrola ZIPu nepotvrdila přítomnost používaného API klíče.
+
+
+## 2026-09-06 15:37 CEST — Codex přes účet ChatGPT, verze 1.5
+
+Hotovo:
+- Míla odmítl potřebu samostatného účtování AI otázek přes API a výslovně zadal
+  změnu na automatizované použití Codexu přihlášeného přes ChatGPT.
+- Dílna volá codex exec na pozadí; vysvětlení, vedení i doptání zůstávají v okně.
+  Původní HTTP API backend a pole pro klíč/model byly nahrazeny, žádný API fallback.
+- Připojení AI má oficiální instalační návod, tlačítko Přihlásit přes ChatGPT
+  (otevře browser flow) a Ověřit připojení. Přihlašování/kontrola neblokují editor.
+- Vyžaduje Codex 0.153.0+ a ověřený ChatGPT login před každou otázkou. API/unknown
+  login odmítne ještě před vynucením metody, takže kontrola neodhlásí API relaci.
+  Proměnné API klíčů/provider override a rodičovské identity procesu nepřebírá.
+- Tlačítko Zastavit a zavření dílny ukončí vlastní čekající procesovou skupinu.
+  Chyba nezapíše částečnou odpověď jako úspěch, zachová otázku. Limity/přihlášení
+  hlásí česky bez surových diagnostik, klíčů a tokenů.
+- Historie je nadále samostatná pro každý pokus, omezená a do zavření dílny.
+  Kód lze upravovat během čekání, pozdní odpověď je přiřazena původnímu pokusu.
+
+Rozhodnuti:
+Codex používá vlastní uložené přihlášení, dílna auth.json nečte ani nekopíruje.
+Přihlášení je společné s Codexem na daném počítači. Využití podléhá limitům a
+oprávnění účtu ChatGPT, není to slib neomezeného provozu zdarma.
+Každá otázka startuje izolovaný dočasný pracovní adresář a předává zadání přes
+stdin. Režim read-only; vypnuté shell/unified exec/code mode, multi-agent,
+pluginy/apps/hooks, paměti a web. Bez osobní konfigurace modelu a historie
+uživatele. --ephemeral a history.persistence=none; interní logy Codexu a
+retence služby nejsou tímto prohlášeny za nulové. Výstup zpracovávají dočasné
+soubory. Dílna neopakuje celé dotazy, Codex může interně obnovovat spojení.
+Zastavení nevrací již spotřebovaný limit. Běžný dotaz nemění globální nastavení.
+
+Dalsi krok:
+Na Linuxu rozbalit jediný PythonSeSamanthou_1_5_20260906.zip. Nainstalovat
+Codex podle Připojení AI a přihlásit se přes ChatGPT; poté ověřit připojení,
+vysvětlení a doptání přímo v dílně. Nadále ověřit místní problém s editací,
+který se na Macu nereprodukoval. Skrytou složku osobních dat zachovat.
+
+Navrhovane dalsi kroky:
+Po Linux retestu podle Míly přenos pokusů nebo skutečné krokování. Žádný nový
+TVBCP, Cockpit proud či nasazení. Commit 1.4 00c16689 zůstal pouze lokální;
+1.5 rovněž místní checkpoint, push vyžaduje nový pokyn.
+
+Technicky dukaz:
+- 56 cílených testů: transport přes stdin, absence API/provider proměnných,
+  kontrola verze/loginu, odmítnutí API bez logoutu/spuštění, parsování JSONL,
+  neúplný výsledek, limit/auth chyby, skutečné procesy a zastavení potomků.
+- Čtyři Mac Tk GUI smoke; nový průvodce ověřuje připojení, psaní, doptání,
+  oddělení historie, pozdní odpověď, chybu, zastavení a zachování otázky.
+- Živé ChatGPT přihlášení na Macu: Codex vysvětlil syntetický příklad s výsledkem
+  5 a doptání na výsledek 10. Skutečný Tk panel následně získal vysvětlení 4×2=8,
+  kód se nezměnil. Bez osobních pokusů nebo přenosu autentizačních souborů.
+- Python 3.9 gramatika ověřena, běh na 3.12; Linux zde přímo nespouštěn.
+- LocalSend: PythonSeSamanthou_1_5_20260906.zip, 79 souborů, 98 949 B,
+  SHA-256 d0a7d2b39d58e3fc97d5ccabbb4cf43146f308f28869ae60739519f08ee04f41.
+- Plná projektová brána: všech 1518 testů prošlo (308,715 s). Rozbalená
+  distribuce: 56 testů a GUI dílny/průvodce prošly; persistence a oba kurzy
+  jsou byte-for-byte zachované. Finální README doplnilo sdílené přihlášení
+  s místním Codexem; závěrečná kontrola všech 79 ZIP souborů porovnává aktuální zdroje.
+- Po finálních úpravách prošla rychlá statická brána i všech 28 testů katalogu
+  a registru. SHA-256 finálního ZIPu i shoda všech distribuovaných souborů ověřeny.

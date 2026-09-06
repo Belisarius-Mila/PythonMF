@@ -29,7 +29,7 @@ class WorkshopWindow:
         self.drawing = []
         self.last_results = {}
         self.window = tk.Toplevel(parent)
-        self.window.title('Moje dílna · Python se Samanthou 1.4')
+        self.window.title('Moje dílna · Python se Samanthou 1.5')
         self.window.geometry(f'{min(1100, parent.winfo_screenwidth()-60)}x{min(780, parent.winfo_screenheight()-100)}')
         self.window.minsize(900, 640)
         self.window.protocol('WM_DELETE_WINDOW', self.close)

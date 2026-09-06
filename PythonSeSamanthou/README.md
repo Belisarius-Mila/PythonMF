@@ -1,4 +1,4 @@
-# Python se Samanthou 1.4
+# Python se Samanthou 1.5
 
 Offline učebna Pythonu pro Mílu se dvěma balíčky po sedmi lekcích a Mojí dílnou pro vlastní pokusy. Původní lekce mají stejný výklad,
 zadání, ukázky, řešení i hodnocení. Obsah je nyní samostatný balíček:
@@ -7,14 +7,14 @@ další lekce se přidává soubory, nikoli rozšiřováním seznamu v programu.
 ## Spuštění na Linuxu nebo Macu
 
 1. Rozbal **celý ZIP**. Složky `kurzy` a ostatní soubory ponech vedle programu.
-2. Otevři terminál v nově rozbalené složce `PythonSeSamanthou_1_4`.
+2. Otevři terminál v nově rozbalené složce `PythonSeSamanthou_1_5`.
 3. Spusť `python3 python_se_samanthou.py`.
 4. Vlevo v **Balíček lekcí** vyber **Python — první kroky** nebo **Python — další kroky**.
-5. Tlačítko **Moje dílna** nahoře otevře prostor pro vlastní pokusy. V záhlaví učebny uvidíš číslo **1.4**.
+5. Tlačítko **Moje dílna** nahoře otevře prostor pro vlastní pokusy. V záhlaví učebny uvidíš číslo **1.5**.
 
 Potřebuješ Python 3.9 nebo novější a Tkinter. Nejsou potřeba žádné balíčky
 z pipu. Offline lekce a běh vlastního kódu nepotřebují účet ani internet;
-volitelný AI průvodce potřebuje připojení a vlastní OpenAI API klíč. Pokud na Linux Mintu chybí Tkinter, nainstaluj
+volitelný AI průvodce potřebuje internet a Codex přihlášený přes ChatGPT. Pokud na Linux Mintu chybí Tkinter, nainstaluj
 `python3-tk` ve Správci softwaru. Program pracuje také při spuštění z jiné
 složky; soubory kurzu hledá vedle svého zdrojového souboru.
 
@@ -60,43 +60,69 @@ Při použití `--state-dir` se i dílna uloží do této zvolené datové slož
 Pokusy, poznámky ani osobní postup nejsou součástí distribučního ZIPu nebo Gitu.
 Při aktualizaci aplikace ponech tuto datovou složku zachovanou.
 
-## AI průvodce: vysvětlení a doptávání
+## AI průvodce přes ChatGPT: vše přímo v dílně
 
-Otevři **Moje dílna → AI průvodce → Nastavení AI…**. Pokud zatím nemáš API:
+Verze 1.5 používá **Codex přihlášený přes tvůj účet ChatGPT**. API klíč se
+nezadává a aplikace nemá přepnutí na placené API. Využití se řídí dostupností
+Codexu a limity tvého tarifu; není to slib neomezených odpovědí zdarma.
+[Oficiální vysvětlení přihlášení](https://learn.chatgpt.com/docs/auth).
 
-1. Tlačítko v nastavení otevře oficiální stránku OpenAI pro vytvoření klíče.
-   Přihlas se nebo si založ účet a nastav kredit/účtování pro API.
-2. Vytvořený klíč vlož do zakrytého pole **API klíč** přímo v aplikaci.
-   Nepiš ho do kódu, poznámek ani rozhovoru. Model může zůstat `gpt-5.4-mini`.
-3. Zvol **Použít pro tuto dílnu**. Tím se ještě nic neposílá.
-4. Vyber **Vysvětli krok za krokem**, **Pomoz mi s chybou** nebo
-   **Veď mě dalším krokem** a stiskni **Zeptat se AI**.
-5. Pro doptání napiš vlastní otázku do pole pod rozhovorem a stiskni stejné
-   tlačítko nebo Ctrl+Enter. Vlastní otázka má přednost před vybraným režimem.
+### Jednorázové připojení na Linuxu nebo Macu
 
-[Oficiální návod pro první API klíč](https://developers.openai.com/api/docs/quickstart).
-Volání API se účtují na tvém API účtu. Bez klíče dál funguje celá offline učebna.
-Klíč zadaný v okně se neukládá na disk: po zavření dílny jej zadáš znovu.
-Pokročilejší možností je proměnná prostředí `OPENAI_API_KEY`, kterou aplikace
-načte při otevření dílny. Žádný klíč není v distribučním ZIPu.
+1. Otevři **Moje dílna → AI průvodce → Připojení AI…**.
+2. Pokud Codex nemáš, tlačítko **Návod k instalaci Codexu (Linux / Mac)**
+   otevře [oficiální instalační návod](https://learn.chatgpt.com/docs/cli).
+   Nainstaluj aktuální Codex CLI, nejméně 0.153.0. Je to samostatný pomocný
+   program; samotná učebna dál nevyžaduje balíčky z pipu.
+3. Zvol **Přihlásit přes ChatGPT** a dokonči přihlášení v prohlížeči.
+   Pokud se prohlížeč neotevře, spusť v terminálu `codex login` a vyber ChatGPT.
+   Po instalaci může být potřeba zavřít a znovu otevřít učebnu, aby našla Codex.
+4. Zvol **Ověřit připojení**. Musí se zobrazit potvrzení přihlášení přes ChatGPT.
+   Pokud máš v Codexu API přihlášení, dílna ho pro otázku odmítne; přihlas se
+   výslovně přes ChatGPT. Dílna při pouhé kontrole přihlášení neodhlašuje.
+5. Vrať se do dílny. Další otázky i odpovědi už vyřídíš přímo v ní.
 
-**Zeptat se AI** odešle název pokusu, aktuální kód, poznámky, otázku a nejvýše
-pět předchozích dvojic otázek/odpovědí tohoto pokusu do OpenAI. Výpis a chybu
-přiloží jen tehdy, když odpovídají nynějšímu kódu. Žádné další soubory se nečtou.
-Rozhovor se uchovává pouze v paměti otevřené dílny, nejvýše šest dvojic na pokus.
+Přihlášení spravuje a uchovává Codex; běžně přetrvá zavření učebny. Dílna nečte
+ani nekopíruje soubor s přihlašovacími tokeny. Při vypršení přihlášení tě vyzve
+k jeho obnovení. Bez přihlášení fungují všechny offline lekce a vlastní kód.
+
+### Vysvětlení, vedení a další otázky
+
+Vyber **Vysvětli krok za krokem**, **Pomoz mi s chybou** nebo **Veď mě dalším
+krokem** a stiskni **Zeptat se AI**. Můžeš také napsat vlastní otázku do pole pod
+rozhovorem; ta má přednost před vybraným režimem. Doptání odešli stejným tlačítkem
+nebo Ctrl+Enter. Codex odpovídá na pozadí, neotevírá se nové pracovní okno.
+
+Tlačítko **Zastavit** ukončí čekající místní požadavek nebo přihlašování.
+Již zpracovaná část může čerpat limit účtu; zastavení spotřebu nevrací.
+Při vyčerpaném limitu, nedostupném internetu nebo chybě přihlášení uvidíš zprávu.
+Dílna se nikdy automaticky nepřepne na API a sama neopakuje celý dotaz.
+Codex může v rámci jednoho požadavku použít své interní opakování spojení.
+
+### Kontext a uložení
+
+**Zeptat se AI** předá Codexu název pokusu, aktuální kód, poznámky, otázku a
+nejvýše pět předchozích dvojic otázek/odpovědí tohoto pokusu. Výpis a chybu
+přiloží jen pro přesně shodný kód. Codex posílá toto zadání do služby OpenAI.
+Dílna udržuje nejvýše šest dvojic rozhovoru na pokus a po zavření je neuchovává.
 **Nový rozhovor** začne u aktuálního pokusu znovu. Důležité vysvětlení si můžeš
 ručně zkopírovat do poznámek; ty se uloží běžným způsobem.
 
 Každý pokus má vlastní rozhovor. Během čekání můžeš psát i přepínat pokusy;
 pozdní odpověď patří původnímu pokusu. Pokud kód během čekání změníš, objeví se
-upozornění, že odpověď vychází ze staršího kódu. AI kód sama nemění ani nespouští.
-Vedení navrhuje vždy malý další krok. AI může chybovat — kód ověř tlačítkem Spustit.
+upozornění, že odpověď vychází ze staršího kódu. Vedení navrhuje malý další krok.
+AI může chybovat — návrh sám ověř tlačítkem Spustit.
 
-Aplikace používá HTTPS a Responses API s `store: false`; to není tvrzení o nulové
-retenci služby. Při chybě se požadavek automaticky neopakuje. Pokud selže internet,
-klíč nebo kredit, objeví se zpráva a offline editor zůstane použitelný.
-Spouštěný Python nedědí `OPENAI_API_KEY` ani `CODEX_API_KEY` z prostředí učebny;
-stále však má běžný přístup k počítači, není izolovaným bezpečnostním sandboxem.
+Technicky dílna spouští `codex exec` z dočasné pracovní složky, bez osobní
+konfigurace modelu, pluginů, hooků, pamětí, webového hledání a shellových nástrojů.
+Používá read-only režim a vynucené přihlášení `chatgpt`; přihlašovací stav
+ověřuje před každou otázkou. Kód předává přes standardní vstup, nikoli jako
+součást příkazového řádku. Pomocný proces nepřebírá API klíče z prostředí.
+Během požadavku se výstup zpracovává přes dočasné soubory.
+Codex běží s `--ephemeral` a vypnutým ukládáním historie; to není tvrzení o nulové
+retenci služby ani o neexistenci provozních logů Codexu. Uživatelovy ostatní
+rozhovory a nastavení Codexu se běžným dotazem nemění. Přihlášení je společné
+s Codexem na tomto počítači. [Automatický režim Codexu](https://learn.chatgpt.com/docs/non-interactive-mode).
 
 ## Uložený postup
 
@@ -126,7 +152,7 @@ Po běžném spuštění aplikace se nabídne základní balíček.
 
 Přídavný ZIP obsahuje složku `kurzy/python_dalsi_kroky`. Zkopíruj ji do `kurzy`
 své učebny a aplikaci znovu spusť. Nové balíčky se vyhledávají při startu;
-vadné a duplicitní balíčky učebna ohlásí. Kompletní ZIP verze 1.4 obsahuje oba balíčky i dílnu.
+vadné a duplicitní balíčky učebna ohlásí. Kompletní ZIP verze 1.5 obsahuje oba balíčky i dílnu.
 Samotný přídavný balíček funguje i ve verzi 1.1 přes argument `--course`;
 přesný příkaz je v jeho README. Původní balíček se při připojení nemění.
 
@@ -187,18 +213,20 @@ GUI příkazy potřebují grafickou plochu. Původní GUI test ve zkušebních d
 okno, převede starý postup, projde sedm řešení, ověří kreslení, uložení a
 znovuotevření se změněným pořadím lekcí. Testovací složku po sobě odstraní.
 
-Na Macu prošlo 51 automatických testů a čtyři GUI smoke. Nový test ověřuje
-skutečné stisky kláves, rozměr 900 × 640, nastavení bez klíče, doptání,
-oddělení rozhovorů, změnu kódu během čekání a chybu připojení. Používá náhradního
-API klienta bez sítě. Samostatně prošlo živé API vysvětlení syntetického kódu
-s navazující otázkou, bez osobních dat. Pro Linux PC zbývá ověřit:
+Na Macu prošlo 56 automatických testů a čtyři GUI smoke. Nový test ověřuje
+skutečné stisky kláves, rozměr 900 × 640, připojení přes ChatGPT, doptání,
+oddělení rozhovorů, změnu kódu během čekání, chybu a zastavení požadavku.
+Testovací klient nepoužívá živý účet. Samostatně prošlo skutečné Codex vysvětlení
+syntetického kódu s navazující otázkou přes přihlášení ChatGPT, bez osobních dat.
 
-1. Číslo **1.4** v záhlaví, psaní a vložení do kódu i poznámek v dílně.
+Pro Linux PC zbývá ověřit:
+
+1. Číslo **1.5** v záhlaví, psaní a vložení do kódu i poznámek v dílně.
 2. Běh pokusu a zachování rozepsané práce po zavření.
-3. Nastavení vlastního API klíče, vysvětlení a doplňující otázku.
+3. Instalaci/přihlášení Codexu, vysvětlení a doplňující otázku přímo v dílně.
 
 Původní hlášení „read only“ z Linuxu se na Macu nepodařilo zopakovat.
-Verze 1.4 doplňuje označení editoru, aktivaci vstupu a kontextovou nabídku;
+Dílna má označení editoru, aktivaci vstupu a kontextovou nabídku;
 vyřešení konkrétního linuxového problému musí potvrdit zkouška na Linuxu.
 
 ## Původ a další kroky
@@ -210,5 +238,6 @@ SHA-256 původního souboru:
 `94583742b6b192e9610c63fd9dca67f735a818ee47235d51fd63a6486f6c6013`.
 
 Verze 1.2 přidala druhý balíček a přepínání, 1.3 Moji dílnu a 1.4 AI průvodce
-s doptáváním a přehlednější zadávání textu. Otevřené další směry: přenos pokusů
+s doptáváním a přehlednější zadávání textu. Verze 1.5 nahrazuje API připojení
+Codexem s přihlášením přes ChatGPT. Otevřené další směry: přenos pokusů
 a postupu mezi Macem a Linuxem a skutečné krokování.
