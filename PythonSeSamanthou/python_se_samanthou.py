@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Python se Samanthou — první učebna, verze 1.1.
+"""Python se Samanthou — offline učebna, verze 1.2.
 
 Spuštění: python3 python_se_samanthou.py
 Linux Mint: pokud chybí tkinter, nainstaluj balíček python3-tk
@@ -15,7 +15,8 @@ F5 nebo Ctrl+Enter spouští kód, Tab vloží čtyři mezery.
 Rozepsané lekce a dokončení se ukládají místně do
 ~/.python_se_samanthou/prubeh_v2.json; aplikace nic neodesílá.
 Původní prubeh.json se při prvním spuštění převede a zůstane zachovaný.
-Sedm lekcí se načítá ze samostatného balíčku ve složce kurzy.
+Balíček vyber vlevo nahoře. Každý má vlastní lekce a uložený postup.
+Další balíček přidej jako složku do kurzy a učebnu znovu otevři.
 
 Kód v editoru je skutečný Python, spouštěný na tvém počítači.
 Kreslicí funkce kruh(), obdelnik(), cara(), napis() a pozadi()
@@ -50,7 +51,7 @@ import traceback
 # The isolated Python worker (-I) also needs these bundled modules.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from assessment import assess_lesson
-from course_loader import DEFAULT_COURSE, CourseError, load_course
+from course_loader import DEFAULT_COURSE, CourseError, discover_courses, load_course
 from progress_store import ProgressError, ProgressStore
 
 COURSE = None
@@ -215,7 +216,10 @@ def launch(state_dir=None, on_ready=None):
     class Classroom:
         def __init__(self, root):
             self.root = root
-            self.root.title("Python se Samanthou · první kroky")
+            self.root.title(f"Python se Samanthou · {COURSE['title']}")
+            installed, package_warnings = discover_courses()
+            self.courses = [COURSE] + [c for c in installed if c['id'] != COURSE['id']]
+            self.course_index = 0
             width = min(1220, max(900, root.winfo_screenwidth() - 60))
             height = min(870, max(640, root.winfo_screenheight() - 100))
             root.geometry(f"{width}x{height}")
@@ -266,6 +270,12 @@ def launch(state_dir=None, on_ready=None):
             body.pack(fill="both", expand=True)
             sidebar = ttk.Frame(body, width=200)
             sidebar.pack(side="left", fill="y", padx=(0, 12))
+            ttk.Label(sidebar, text="BALÍČEK LEKCÍ", font=self.bold).pack(anchor="w", pady=(6, 4))
+            self.course_picker = ttk.Combobox(sidebar, state="readonly", width=23,
+                                               values=[c['title'] for c in self.courses])
+            self.course_picker.current(0)
+            self.course_picker.pack(fill="x", pady=(0, 8))
+            self.course_picker.bind("<<ComboboxSelected>>", self.select_course)
             ttk.Label(sidebar, text="TVÉ LEKCE", font=self.bold).pack(anchor="w", pady=(6, 8))
             self.listbox = tk.Listbox(sidebar, font=self.font, width=21, height=9, bd=0, highlightthickness=0,
                                       activestyle="none", exportselection=False, bg="#f8fafc", fg="#25334b",
@@ -347,8 +357,32 @@ def launch(state_dir=None, on_ready=None):
             self.load(selected if type(selected) is int and 0 <= selected < len(LESSONS) else 0)
             if warning:
                 self.saved.configure(text=warning)
+            if package_warnings:
+                root.after(0, lambda: messagebox.showwarning("Některé balíčky nelze otevřít", "\n\n".join(package_warnings)))
             root.protocol("WM_DELETE_WINDOW", self.close)
             root.after(100, self.poll)
+
+        def select_course(self, event=None):
+            global COURSE, LESSONS
+            selected = self.course_picker.current()
+            if selected < 0 or selected == self.course_index:
+                return
+            if self.busy or not self.save():
+                self.course_picker.current(self.course_index)
+                return
+            if self.highlight_after is not None:
+                self.root.after_cancel(self.highlight_after)
+                self.highlight_after = None
+            self.course_index = selected
+            COURSE = self.courses[selected]
+            LESSONS = COURSE['lessons']
+            state = self.state['courses'].get(COURSE['id'], {})
+            self.drafts = dict(state.get('drafts', {}))
+            self.completed = set(state.get('completed', []))
+            self.current = -1
+            self.root.title(f"Python se Samanthou · {COURSE['title']}")
+            index = next((i for i, lesson in enumerate(LESSONS) if lesson['id'] == state.get('current')), 0)
+            self.load(index)
 
         def resize_font(self, delta):
             self.base_size = min(18, max(10, self.base_size + delta))
@@ -362,6 +396,7 @@ def launch(state_dir=None, on_ready=None):
                 self.listbox.insert("end", ("✓ " if lesson["id"] in self.completed else "  ") + f"{i + 1}  {lesson['short']}")
             if self.current >= 0:
                 self.listbox.selection_set(self.current)
+                self.listbox.see(self.current)
             done = sum(lesson["id"] in self.completed for lesson in LESSONS)
             self.progress.configure(text=f"Dokončeno {done} / {len(LESSONS)}")
 

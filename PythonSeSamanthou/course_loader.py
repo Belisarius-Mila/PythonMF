@@ -85,3 +85,17 @@ def load_course(manifest_path=DEFAULT_COURSE):
             raise CourseError(f'Chyba lekce {lesson_id}: {exc}') from exc
         lessons.append(lesson)
     return {'id': course['id'], 'title': course['title'], 'lessons': lessons}
+
+
+def discover_courses(directory=DEFAULT_COURSE.parent.parent):
+    """Find installed course folders, reporting broken or ambiguous packages."""
+    courses, warnings = [], []
+    for manifest in sorted(Path(directory).glob('*/kurz.json')):
+        try:
+            courses.append(load_course(manifest))
+        except CourseError as exc:
+            warnings.append(f'{manifest.parent.name}: {exc}')
+    duplicate_ids = {c['id'] for c in courses if sum(x['id'] == c['id'] for x in courses) > 1}
+    for course_id in sorted(duplicate_ids):
+        warnings.append(f'Více balíčků používá ID {course_id}; duplicitní balíčky nejsou ve výběru.')
+    return [c for c in courses if c['id'] not in duplicate_ids], warnings

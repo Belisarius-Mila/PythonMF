@@ -1,0 +1,36 @@
+{
+  "id": "python-dalsi-kroky.pruchod-seznamem",
+  "title": "Cyklus se seznamem",
+  "short": "Cyklus se seznamem",
+  "time": "10–15 minut",
+  "predict": "Kolikrát se provede print() a v jakém pořadí se objeví pozdravy?",
+  "task": "Na konec seznamu přidej \"Samantha\". Zachovej jeden print() uvnitř cyklu. Vypiš Ahoj, Míla!, Ahoj, Jana! a Ahoj, Samantha!, každý na samostatném řádku.",
+  "hint": "Doplň třetí text do hranatých závorek. Nepřidávej další print() pod cyklus.",
+  "success": "Jeden cyklus zpracoval celý seznam. Počet opakování se řídí počtem jeho položek.",
+  "feedback": "Očekávám for nad jmena a tři pozdravy v pořadí Míla, Jana, Samantha, přesně podle zadání.",
+  "explanation_file": "vyklad.md",
+  "starter_file": "ukazka.py",
+  "solution_file": "reseni.py",
+  "checks": [
+    {
+      "kind": "ast_kind",
+      "value": "For"
+    },
+    {
+      "kind": "uses_name",
+      "value": "jmena"
+    },
+    {
+      "kind": "uses_name",
+      "value": "jmeno"
+    },
+    {
+      "kind": "output_lines",
+      "value": [
+        "Ahoj, Míla!",
+        "Ahoj, Jana!",
+        "Ahoj, Samantha!"
+      ]
+    }
+  ]
+}

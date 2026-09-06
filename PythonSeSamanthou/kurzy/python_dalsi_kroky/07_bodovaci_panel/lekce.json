@@ -1,0 +1,66 @@
+{
+  "id": "python-dalsi-kroky.bodovaci-panel",
+  "title": "Bodovací panel",
+  "short": "Bodovací panel",
+  "time": "10–15 minut",
+  "predict": "Jaké barvy budou mít pokusy za 6 a 12 bodů? Co se stane při přesně 10 bodech?",
+  "task": "Přidej na konec seznamu třetí pokus za 15 bodů. Zachovej cyklus a podmínku. Mají vzniknout tři kruhy (oranžový, zelený, zelený) a výpis Splněno: 2.",
+  "hint": "Přidej 15 do seznamu body. O zbytek se postará cyklus; další kruh ani print ručně nepřidávej.",
+  "success": "Spojil jsi data, opakování, rozhodování a obrázek do malého programu. Zkus předpovědět výsledek pro jiné body.",
+  "feedback": "Očekávám for a if, tři kruhy na x = 100, 250, 400 v oranžové, zelené a zelené barvě a Splněno: 2.",
+  "explanation_file": "vyklad.md",
+  "starter_file": "ukazka.py",
+  "solution_file": "reseni.py",
+  "checks": [
+    {
+      "kind": "ast_kind",
+      "value": "For"
+    },
+    {
+      "kind": "ast_kind",
+      "value": "If"
+    },
+    {
+      "kind": "uses_name",
+      "value": "body"
+    },
+    {
+      "kind": "variables_equal",
+      "value": {
+        "splneno": 2
+      }
+    },
+    {
+      "kind": "output_lines",
+      "value": [
+        "Splněno: 2"
+      ]
+    },
+    {
+      "kind": "drawing_equals",
+      "value": [
+        [
+          "circle",
+          100,
+          180,
+          35,
+          "#f69a48"
+        ],
+        [
+          "circle",
+          250,
+          180,
+          35,
+          "#2cb67d"
+        ],
+        [
+          "circle",
+          400,
+          180,
+          35,
+          "#2cb67d"
+        ]
+      ]
+    }
+  ]
+}

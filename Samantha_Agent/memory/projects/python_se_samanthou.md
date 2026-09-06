@@ -11,7 +11,8 @@ a pokynem „OK, jdeme na to! Začni.“ autorizoval první krok.
 
 Pořadí: oddělit sedm lekcí → přenos kurzů a postupu → Moje dílna → vysvětlení
 kódu a doplňující otázky → kontextové nápovědy → skutečné krokování → více lekcí.
-Další fáze nyní nejsou implementované. AI připojení se bude řešit až v příslušné fázi.
+Míla následně upřednostnil připojení dalšího balíčku sedmi lekcí. AI připojení se
+bude řešit až v příslušné fázi.
 
 ## První krok
 
@@ -43,8 +44,9 @@ Vadný formát a konflikt současných aplikací zastaví zápis. Zápis je atom
 
 ## Otevřené a omezení
 
-Skutečný Linux GUI retest je otevřený; přístup přes SSH nebyl dodaný. Míla má
-v ZIPu README se spuštěním a krátkým kontrolním postupem. Přenos postupu mezi
+Míla potvrdil, že rozbalená verze 1.1 se chová stejně jako původní aplikace;
+v této zprávě výslovně neurčil platformu. Nová 1.2 čeká na uživatelský retest
+přepínání balíčků na Linuxu. Přenos postupu mezi
 počítači zatím není hotový. Původní a nová aplikace používají oddělené postupy.
 Hodnocení záměrně zachovává omezené kontroly původní učebny. Spuštěný kód má
 přístup k počítači; časový limit není bezpečnostní sandbox.
@@ -52,3 +54,47 @@ přístup k počítači; časový limit není bezpečnostní sandbox.
 Jde o samostatný terminálový projekt. Není založen Human–Adam proud ani TVBCP;
 nový TVBCP se případně založí až po výslovné dohodě. Cockpit ani Pages se nenasazují.
 Kanonický handoff: `handoffs/python_se_samanthou_course_package_2026_09_06.md`.
+
+
+## 2026-09-06 12:40 CEST — Druhý balíček a verze 1.2
+
+Hotovo:
+- Původní commit fa329883 byl na Mílův pokyn pushnut; vzdálený main byl ověřen.
+- Balíček python-dalsi-kroky obsahuje sedm navazujících lekcí: text/f-string,
+  seznam/index, for nad seznamem, return, while, slovník a bodovací panel.
+- Verze 1.2 má výběr balíčku v GUI. Kurzy se načítají ze složky kurzy;
+  přepnutí zachovává vlastní pokusy, dokončení i poslední lekci každého kurzu.
+  Během spuštěného programu nebo při selhání uložení zůstane původní výběr.
+- Původní balíček a formát prubeh_v2.json zůstaly beze změny.
+- 31 automatických testů, původní i nové Tk GUI smoke na Macu prošly.
+  Ověřena rozbalená distribuce i samotný přídavný balíček nad nezměněnou 1.1:
+  všech sedm nových řešení prošlo i původním hodnoticím modulem.
+
+Rozhodnuti:
+Nový obsah používá stávající formát i typy kontrol. Připojení samo o sobě
+nevyžaduje aktualizaci aplikace: 1.1 ho otevře přes --course; 1.2 přidává pohodlí
+výběru v okně. Při běžném startu se otevře základní balíček. Původní datum a
+historický důkaz první etapy výše popisují verzi 1.1, nikoli dnešní 1.2.
+
+Dalsi krok:
+Míla rozbalí kompletní 1.2 a vlevo zvolí Python — další kroky. Na Linuxu ověřit
+přepínání, poslední lekci a původní pokusy; novou verzi tam Adam přímo nespouštěl.
+
+Navrhovane dalsi kroky:
+Po uživatelském retestu Moje dílna nebo samostatný přenos postupu mezi počítači.
+AI ani synchronizace nejsou součástí této etapy. Nový push zatím nebyl autorizován.
+
+Technicky dukaz:
+- LocalSend: PythonSeSamanthou_1_2_20260906.zip, 70 souborů, 71 076 B,
+  SHA-256 d8900676fb9c246c857114bb4b812696cac909ae2d69383340ad108fa5323f3d.
+- LocalSend: PythonDalsiKroky_7lekci_20260906.zip, 30 souborů, 14 264 B,
+  SHA-256 570a1e246ad24d66f866a1a951f858295cf6f6d952e4cb223d52c7d9acfb7766.
+- Testy pracují výhradně s dočasnými daty; osobní postup se nečetl ani neměnil.
+- Plná projektová brána: 1518 testů za 442,615 s, jediná chyba byla vazba nového
+  řádku ACTIVE_PROJECTS na katalog Cockpitu. Opravena přesunutím samostatného
+  terminálového projektu do výslovné textové části registru; bez zakládání
+  neobjednaného pracovního proudu/TVBCP. Všech 28 testů katalogu a registru po
+  opravě prošlo. Ostatních 1517 testů prošlo v plném běhu; celý běh se po této
+  čistě dokumentační opravě neopakoval. Rychlá statická brána prošla.
+- GUI při rozměru 900 × 640: přepínač a všechna tlačítka postranního panelu
+  jsou zobrazená a vejdou se do panelu na Macu.

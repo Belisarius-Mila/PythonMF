@@ -1,0 +1,44 @@
+{
+  "id": "python-dalsi-kroky.navratova-hodnota",
+  "title": "Funkce a return",
+  "short": "Funkce a return",
+  "time": "10–15 minut",
+  "predict": "Kdy se provede násobení? Vypíše už samotné volání dvojnasobek(4) něco?",
+  "task": "Zachovej funkci s return. Změň její volání, aby do vysledek uložila dvojnásobek čísla 7. Výsledek vypiš.",
+  "hint": "Změň argument 4 na 7 v řádku s voláním funkce. return uvnitř funkce ponech.",
+  "success": "Rozlišuješ vrácení hodnoty pomocí return a její vypsání pomocí print().",
+  "feedback": "Očekávám funkci s return a násobením, volání dvojnasobek a uložený i vypsaný výsledek 14.",
+  "explanation_file": "vyklad.md",
+  "starter_file": "ukazka.py",
+  "solution_file": "reseni.py",
+  "checks": [
+    {
+      "kind": "ast_kind",
+      "value": "FunctionDef"
+    },
+    {
+      "kind": "ast_kind",
+      "value": "Return"
+    },
+    {
+      "kind": "ast_kind",
+      "value": "Mult"
+    },
+    {
+      "kind": "uses_name",
+      "value": "dvojnasobek"
+    },
+    {
+      "kind": "variables_equal",
+      "value": {
+        "vysledek": 14
+      }
+    },
+    {
+      "kind": "output_lines",
+      "value": [
+        "14"
+      ]
+    }
+  ]
+}

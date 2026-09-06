@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "id": "python-dalsi-kroky",
+  "title": "Python — další kroky",
+  "lessons": [
+    "01_text/lekce.json",
+    "02_seznam/lekce.json",
+    "03_pruchod_seznamem/lekce.json",
+    "04_navratova_hodnota/lekce.json",
+    "05_while/lekce.json",
+    "06_slovnik/lekce.json",
+    "07_bodovaci_panel/lekce.json"
+  ]
+}

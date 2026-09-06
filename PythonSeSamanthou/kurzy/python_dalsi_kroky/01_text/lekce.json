@@ -1,0 +1,39 @@
+{
+  "id": "python-dalsi-kroky.text",
+  "title": "Text a f-string",
+  "short": "Text a f-string",
+  "time": "10–15 minut",
+  "predict": "Jaká zpráva vznikne pro Mílu a kolik znaků má jeho jméno?",
+  "task": "Změň jmeno na Samantha. Zachovej výpočet pomocí len() i f-string. Vypiš Ahoj, Samantha! a na dalším řádku 8.",
+  "hint": "Změň pouze jméno v prvním řádku. Délku nepočítej ručně, len(jmeno) to udělá za tebe.",
+  "success": "Umíš sestavit text z proměnné a zjistit počet znaků.",
+  "feedback": "Očekávám jmeno Samantha, delka 8 z len(jmeno) a výpis Ahoj, Samantha! a 8.",
+  "explanation_file": "vyklad.md",
+  "starter_file": "ukazka.py",
+  "solution_file": "reseni.py",
+  "checks": [
+    {
+      "kind": "variables_equal",
+      "value": {
+        "jmeno": "Samantha",
+        "delka": 8,
+        "zprava": "Ahoj, Samantha!"
+      }
+    },
+    {
+      "kind": "uses_name",
+      "value": "jmeno"
+    },
+    {
+      "kind": "uses_name",
+      "value": "len"
+    },
+    {
+      "kind": "output_lines",
+      "value": [
+        "Ahoj, Samantha!",
+        "8"
+      ]
+    }
+  ]
+}

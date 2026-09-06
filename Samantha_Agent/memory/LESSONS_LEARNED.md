@@ -468,3 +468,18 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Ověření: PythonSeSamanthou, 27 testů a skutečné Tk GUI; znovuotevření
   s obráceným pořadím zachovalo výběr, sedm pokusů i dokončení. Testy pouze
   nad dočasnými daty, žádný zásah do Mílova skutečného postupu.
+
+
+## 2026-09-06 — Samostatný projekt versus pracovní proud Cockpitu
+
+- Typ: opakujici se.
+- Problém: nový aktivní tabulkový řádek v ACTIVE_PROJECTS automaticky podléhá
+  invariantě úplnosti katalogu pracovních proudů. U samostatné učebny bez
+  Cockpit integrace tak test katalogu odhalil chybějící vazbu.
+- Řešení: samostatný terminálový projekt vést explicitně v textové části
+  registru a přes index, projektovou paměť a handoff. Do tabulky pracovních
+  proudů ho zařadit až spolu se skutečně dohodnutou integrací; nezakládat
+  implicitně TVBCP jen kvůli registraci aplikace.
+- Ověření: po přesunutí záznamu Python se Samanthou prošlo všech 28 testů
+  test_human_adam_workstream_catalog a test_project_audit_report. Při příštím
+  přidávání projektu spustit tyto testy až po finální úpravě registru.

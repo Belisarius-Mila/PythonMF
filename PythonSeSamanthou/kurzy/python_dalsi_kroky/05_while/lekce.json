@@ -1,0 +1,43 @@
+{
+  "id": "python-dalsi-kroky.while",
+  "title": "Odpočítávání while",
+  "short": "Odpočítávání while",
+  "time": "10–15 minut",
+  "predict": "Jaké číslo se vypíše jako první? Vypíše cyklus také nulu?",
+  "task": "Změň začátek odpočítávání na 3. Zachovej while i odečítání. Očekávaný výpis je 3, 2, 1 a Start!, každý na samostatném řádku.",
+  "hint": "Na prvním řádku změň 2 na 3. Odečítání ponech uvnitř cyklu.",
+  "success": "Umíš cyklus řízený podmínkou a víš, která změna zajistí jeho ukončení.",
+  "feedback": "Očekávám while s odečítáním, konečné zbyva = 0 a výpis 3, 2, 1, Start!.",
+  "explanation_file": "vyklad.md",
+  "starter_file": "ukazka.py",
+  "solution_file": "reseni.py",
+  "checks": [
+    {
+      "kind": "ast_kind",
+      "value": "While"
+    },
+    {
+      "kind": "ast_kind",
+      "value": "Sub"
+    },
+    {
+      "kind": "uses_name",
+      "value": "zbyva"
+    },
+    {
+      "kind": "variables_equal",
+      "value": {
+        "zbyva": 0
+      }
+    },
+    {
+      "kind": "output_lines",
+      "value": [
+        "3",
+        "2",
+        "1",
+        "Start!"
+      ]
+    }
+  ]
+}

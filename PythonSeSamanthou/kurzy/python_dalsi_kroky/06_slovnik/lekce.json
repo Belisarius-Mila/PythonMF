@@ -1,0 +1,33 @@
+{
+  "id": "python-dalsi-kroky.slovnik",
+  "title": "Slovník a klíče",
+  "short": "Slovník a klíče",
+  "time": "10–15 minut",
+  "predict": "Co se vypíše po přiřazení do kontakt[\"mesto\"]? Změní se také jméno?",
+  "task": "Na druhém řádku změň město v kontaktu na Brno. Čtení ze slovníku ponech. Výpis má být Míla a Brno.",
+  "hint": "Změň \"Olomouc\" na \"Brno\". Klíč \"mesto\" v hranatých závorkách zůstává stejný.",
+  "success": "Umíš vybrat i změnit hodnotu podle jejího klíče ve slovníku.",
+  "feedback": "Očekávám čtení z kontaktu, mesto = Brno a výpis Míla a Brno.",
+  "explanation_file": "vyklad.md",
+  "starter_file": "ukazka.py",
+  "solution_file": "reseni.py",
+  "checks": [
+    {
+      "kind": "uses_name",
+      "value": "kontakt"
+    },
+    {
+      "kind": "variables_equal",
+      "value": {
+        "mesto": "Brno"
+      }
+    },
+    {
+      "kind": "output_lines",
+      "value": [
+        "Míla",
+        "Brno"
+      ]
+    }
+  ]
+}

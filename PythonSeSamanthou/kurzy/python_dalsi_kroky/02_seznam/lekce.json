@@ -1,0 +1,38 @@
+{
+  "id": "python-dalsi-kroky.seznam",
+  "title": "Seznam a index",
+  "short": "Seznam a index",
+  "time": "10–15 minut",
+  "predict": "Co vypíše len(barvy) a co barvy[2]? Proč to není druhá barva?",
+  "task": "Přidej na konec seznamu \"zluta\". Změň index u posledni tak, aby vybral tuto čtvrtou položku. Výpis má být 4 a zluta.",
+  "hint": "Za \"modra\" přidej čárku a \"zluta\". Čtvrtou položku vybereš jako barvy[3].",
+  "success": "Umíš vytvořit seznam, zjistit jeho délku a vybrat položku podle indexu.",
+  "feedback": "Očekávám čtyři barvy, posledni = zluta vybranou ze seznamu a výpis 4 a zluta.",
+  "explanation_file": "vyklad.md",
+  "starter_file": "ukazka.py",
+  "solution_file": "reseni.py",
+  "checks": [
+    {
+      "kind": "variables_equal",
+      "value": {
+        "pocet": 4,
+        "posledni": "zluta"
+      }
+    },
+    {
+      "kind": "uses_name",
+      "value": "barvy"
+    },
+    {
+      "kind": "uses_name",
+      "value": "len"
+    },
+    {
+      "kind": "output_lines",
+      "value": [
+        "4",
+        "zluta"
+      ]
+    }
+  ]
+}
