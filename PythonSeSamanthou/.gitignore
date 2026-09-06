@@ -4,3 +4,6 @@ __pycache__/
 .venv/
 prubeh*.json
 prubeh*.lock
+dilna.json
+dilna.lock
+.dilna-*.tmp

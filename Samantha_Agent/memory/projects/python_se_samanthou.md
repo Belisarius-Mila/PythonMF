@@ -44,10 +44,9 @@ Vadný formát a konflikt současných aplikací zastaví zápis. Zápis je atom
 
 ## Otevřené a omezení
 
-Míla potvrdil, že rozbalená verze 1.1 se chová stejně jako původní aplikace;
-v této zprávě výslovně neurčil platformu. Nová 1.2 čeká na uživatelský retest
-přepínání balíčků na Linuxu. Přenos postupu mezi
-počítači zatím není hotový. Původní a nová aplikace používají oddělené postupy.
+Míla potvrdil fungování 1.2 po vyřešení záměny při spuštění na Linuxu a zadal
+vývoj Mojí dílny. Verze 1.3 je ověřená na Macu a čeká na jeho Linux retest.
+Přenos postupu mezi počítači zatím není hotový. Původní a nová aplikace používají oddělené postupy.
 Hodnocení záměrně zachovává omezené kontroly původní učebny. Spuštěný kód má
 přístup k počítači; časový limit není bezpečnostní sandbox.
 
@@ -98,3 +97,49 @@ Technicky dukaz:
   čistě dokumentační opravě neopakoval. Rychlá statická brána prošla.
 - GUI při rozměru 900 × 640: přepínač a všechna tlačítka postranního panelu
   jsou zobrazená a vejdou se do panelu na Macu.
+
+
+## 2026-09-06 14:08 CEST — Moje dílna, verze 1.3
+
+Hotovo:
+- Míla potvrdil, že 1.2 funguje; předchozí problém se zobrazením vyřešil sám.
+  Následně výslovně zadal vývoj dílny podle dohodnutého pořadí.
+- Samostatné okno Moje dílna: pojmenované pokusy, nový pokus, přejmenování,
+  kopie, poznámky, automatické i ruční uložení, obnovení posledního pokusu.
+- Tlačítko Do dílny kopíruje aktuální kód lekce; originál i dokončení zůstávají.
+- Stejný worker a sdílené kreslení, výpis, konečné jednoduché proměnné,
+  vysvětlení chyb a třísekundový limit. Dílna nemá školní hodnocení.
+- Import UTF-8 .py vytvoří kopii bez spuštění či přepsání zdroje; export kódu
+  vytváří výhradně nový soubor. Poznámky se ukládají jen v dílně.
+- Soukromý dilna.json je oddělený od prubeh_v2.json ve stejné datové složce;
+  platí i vlastní --state-dir. Atomický zápis, ochrana konfliktu, vadný formát
+  se nepřepíše. Když nelze uložit, přechod na jiný pokus se zastaví a zavření
+  se musí v UI výslovně potvrdit. Osobní data Míly se při vývoji nečetla.
+
+Rozhodnuti:
+První dílna funguje offline. AI vysvětlování a doplňující otázky jsou příští
+samostatný krok; nyní se nic externě neodesílá. Seznamy a slovníky se zatím
+prohlížejí přes print(), ne v přehledu jednoduchých konečných proměnných.
+Aplikace i titul dílny zobrazují 1.3. ZIP má vlastní kořenovou složku
+PythonSeSamanthou_1_3, aby se omezila záměna s dříve rozbalenou učebnou.
+
+Dalsi krok:
+Míla na Linuxu rozbalí jediný kompletní ZIP 1.3, spustí program z nové složky,
+zkusí Moji dílnu, kopii z lekce, běh a obnovení kódu/poznámek po zavření.
+
+Navrhovane dalsi kroky:
+Po retestu vybrat AI vysvětlování s doptáváním nebo přenos pokusů mezi počítači.
+Žádný nový push/deploy zatím nebyl autorizovaný.
+
+Technicky dukaz:
+- 42 automatických testů prošlo. Tři skutečné Tk GUI smoke na Macu prošly:
+  původní sedm lekcí, oba balíčky a dílna. Dílna ověřuje kopii z lekce, pojmenování,
+  poznámky, kresbu, SyntaxError, timeout, import/export, konflikt, close/reopen
+  a nezměněný soubor postupu lekcí. Ověřeno také okno 900 × 640.
+- Stejné testy a dílna prošly z rozbalené distribuce. Python 3.9 gramatika
+  ověřena; běh na Pythonu 3.12. Oba balíčky lekcí jsou byte-for-byte zachované.
+- LocalSend: PythonSeSamanthou_1_3_20260906.zip, 75 souborů, 84 039 B,
+  SHA-256 7f33b4894fed9b593f5998f958116780cb9e368b4a06f271c036225f78953aad.
+- Plná brána 1.3: všech 1518 testů prošlo (284,622 s), rychlá statická brána
+  a všech 28 testů katalogu/registru po finální úpravě paměti prošly. Finální
+  ZIP je porovnán se všemi 75 distribuovanými soubory.

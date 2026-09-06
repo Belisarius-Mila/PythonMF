@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Python se Samanthou — offline učebna, verze 1.2.
+"""Python se Samanthou — offline učebna, verze 1.3.
 
 Spuštění: python3 python_se_samanthou.py
 Linux Mint: pokud chybí tkinter, nainstaluj balíček python3-tk
@@ -17,6 +17,8 @@ Rozepsané lekce a dokončení se ukládají místně do
 Původní prubeh.json se při prvním spuštění převede a zůstane zachovaný.
 Balíček vyber vlevo nahoře. Každý má vlastní lekce a uložený postup.
 Další balíček přidej jako složku do kurzy a učebnu znovu otevři.
+Moje dílna nahoře otevírá vlastní pojmenované pokusy; ukládají se do
+~/.python_se_samanthou/dilna.json. Kopii kódu z lekce přeneseš tlačítkem Do dílny.
 
 Kód v editoru je skutečný Python, spouštěný na tvém počítači.
 Kreslicí funkce kruh(), obdelnik(), cara(), napis() a pozadi()
@@ -53,6 +55,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from assessment import assess_lesson
 from course_loader import DEFAULT_COURSE, CourseError, discover_courses, load_course
 from progress_store import ProgressError, ProgressStore
+from drawing import draw_commands
 
 COURSE = None
 LESSONS = []
@@ -220,6 +223,7 @@ def launch(state_dir=None, on_ready=None):
             installed, package_warnings = discover_courses()
             self.courses = [COURSE] + [c for c in installed if c['id'] != COURSE['id']]
             self.course_index = 0
+            self.workshop = None
             width = min(1220, max(900, root.winfo_screenwidth() - 60))
             height = min(870, max(640, root.winfo_screenheight() - 100))
             root.geometry(f"{width}x{height}")
@@ -261,7 +265,8 @@ def launch(state_dir=None, on_ready=None):
 
             header = ttk.Frame(root, padding=(18, 10))
             header.pack(fill="x")
-            ttk.Label(header, text="Python se Samanthou", font=(self.font.actual("family"), 22, "bold")).pack(side="left")
+            ttk.Label(header, text="Python se Samanthou · 1.3", font=(self.font.actual("family"), 22, "bold")).pack(side="left")
+            ttk.Button(header, text="Moje dílna", command=self.open_workshop).pack(side="left", padx=16)
             ttk.Button(header, text="A+", width=3, command=lambda: self.resize_font(1)).pack(side="right")
             ttk.Button(header, text="A−", width=3, command=lambda: self.resize_font(-1)).pack(side="right", padx=5)
             ttk.Label(root, text="Odhadni výsledek → spusť ukázku → uprav kód → ověř úkol", padding=(20, 0, 20, 10)).pack(anchor="w")
@@ -309,6 +314,7 @@ def launch(state_dir=None, on_ready=None):
             self.run_button.pack(side="left")
             self.check_button = ttk.Button(actions, text="Ověřit úkol", style="Accent.TButton", command=lambda: self.run(True))
             self.check_button.pack(side="left", padx=8)
+            ttk.Button(actions, text="Do dílny", command=lambda: self.open_workshop(copy_lesson=True)).pack(side="left", padx=(0, 8))
             self.running_label = ttk.Label(actions, text="")
             self.running_label.pack(side="left")
 
@@ -361,6 +367,24 @@ def launch(state_dir=None, on_ready=None):
                 root.after(0, lambda: messagebox.showwarning("Některé balíčky nelze otevřít", "\n\n".join(package_warnings)))
             root.protocol("WM_DELETE_WINDOW", self.close)
             root.after(100, self.poll)
+
+        def open_workshop(self, copy_lesson=False):
+            from workshop import WorkshopWindow
+            if copy_lesson and (self.busy or not self.save()):
+                return
+            if self.workshop is None or not self.workshop.window.winfo_exists():
+                try:
+                    self.workshop = WorkshopWindow(self.root, self.store.directory, run_code)
+                except (OSError, ValueError) as exc:
+                    messagebox.showerror("Dílnu nelze otevřít", str(exc))
+                    return
+            self.workshop.window.deiconify()
+            self.workshop.window.lift()
+            if copy_lesson:
+                self.workshop.create_experiment(
+                    (LESSONS[self.current]['title'] + ' — můj pokus')[:80],
+                    self.editor.get('1.0', 'end-1c'),
+                    'Kopie z lekce: ' + LESSONS[self.current]['title'])
 
         def select_course(self, event=None):
             global COURSE, LESSONS
@@ -582,36 +606,7 @@ def launch(state_dir=None, on_ready=None):
                 self.feedback.configure(text="Program doběhl. Porovnej výsledek se svým odhadem, uprav kód podle úkolu a klikni na Ověřit úkol.", bg="#e0ece9", fg="#1f4c47")
 
         def draw(self):
-            canvas = self.canvas
-            canvas.delete("all")
-            w, h = max(canvas.winfo_width(), 10), max(canvas.winfo_height(), 10)
-            scale = max(0.01, min((w - 24) / 500, (h - 24) / 360))
-            ox, oy = (w - 500 * scale) / 2, (h - 360 * scale) / 2
-            point = lambda x, y: (ox + x * scale, oy + y * scale)
-            canvas.create_rectangle(*point(0, 0), *point(500, 360), fill="white", outline="#cdd7e2", tags="page")
-            for x in range(0, 501, 50):
-                canvas.create_line(*point(x, 0), *point(x, 360), fill="#edf1f5", tags="grid")
-            for y in range(0, 361, 50):
-                canvas.create_line(*point(0, y), *point(500, y), fill="#edf1f5", tags="grid")
-            canvas.create_text(*point(8, 8), text="(0, 0)", anchor="nw", fill="#7b8ba2", font=(self.font.actual("family"), 9), tags="grid")
-            canvas.create_text(*point(492, 352), text="(500, 360)", anchor="se", fill="#7b8ba2", font=(self.font.actual("family"), 9), tags="grid")
-            for item in self.drawing:
-                kind, *a = item
-                if kind == "background":
-                    canvas.itemconfigure("page", fill=a[0])
-                    canvas.delete("grid")
-                elif kind == "circle":
-                    x, y, radius, color = a
-                    canvas.create_oval(*point(x - radius, y - radius), *point(x + radius, y + radius), fill=color, outline="")
-                elif kind == "rect":
-                    x1, y1, x2, y2, color = a
-                    canvas.create_rectangle(*point(x1, y1), *point(x2, y2), fill=color, outline="")
-                elif kind == "line":
-                    x1, y1, x2, y2, color = a
-                    canvas.create_line(*point(x1, y1), *point(x2, y2), fill=color, width=max(1, 3 * scale))
-                elif kind == "text":
-                    x, y, text, color = a
-                    canvas.create_text(*point(x, y), text=text, fill=color, font=(self.font.actual("family"), max(8, int(16 * scale))))
+            draw_commands(self.canvas, self.drawing, self.font.actual("family"))
 
         def next_lesson(self):
             if not self.busy and self.current < len(LESSONS) - 1:
@@ -656,6 +651,9 @@ def launch(state_dir=None, on_ready=None):
                           'Kontrola úkolu ověřuje vybrané výsledky a konstrukce. Další správné varianty mimo přesné zadání nemusí rozpoznat. Učení pokračuje i experimentováním mimo zadání.\n')
 
         def close(self):
+            if self.workshop is not None and self.workshop.window.winfo_exists():
+                if not self.workshop.close():
+                    return
             if not self.save() and not messagebox.askyesno(
                     "Postup není uložen", "Zavřít bez uložení? Nejdřív si zkopíruj rozepsaný kód."):
                 return

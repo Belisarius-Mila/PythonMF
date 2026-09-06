@@ -1,40 +1,41 @@
-Nazev: Python se Samanthou — dva balíčky po sedmi lekcích
+Nazev: Python se Samanthou — Moje dílna a dva balíčky lekcí
 Priorita: 2
 Stav: ceka na retest
 Pripomenout pri startu: ne
-Datum: 2026-09-06 12:40 CEST
+Datum: 2026-09-06 14:08 CEST
 
 Co se resilo:
-Po oddělení původních sedmi lekcí Míla potvrdil stejné chování rozbalené verze
-a požádal o připojení dalšího balíčku sedmi lekcí. Mac a Linux jsou cílové platformy.
+Míla potvrdil fungování verze 1.2 a zadal vývoj Mojí dílny. Nynější verze 1.3
+má offline prostor pro vlastní pokusy; AI vysvětlování přijde jako další etapa.
 
 Co je hotove:
-- Projekt PythonSeSamanthou 1.2, dva balíčky po sedmi lekcích, přepínač v GUI.
-- Trvalá ID, nedestruktivní migrace v1, atomické ukládání a detekce konfliktu.
-- 31 cílených testů a oba skutečné GUI smoke na Macu prošly; i z rozbaleného ZIPu.
-- Přídavný balíček ověřen také nad nezměněnou 1.1: sedm řešení prošlo.
-- Kompletní ZIP 1.2 i samostatný přídavný ZIP v LocalSendu; původní kurz nezměněn.
-- Plný běh: 1517/1518 prošlo; chybná katalogová vazba záznamu učebny v registru
-  opravena. Následně všech 28 testů katalogu a registru i rychlá statika prošly.
-  Celý běh se po čistě dokumentační opravě neopakoval; důkaz je v projektové paměti.
-- Podrobné důkazy a kontrolní součty v projects/python_se_samanthou.md.
+- Pojmenované pokusy, poznámky, kopie, automatické ukládání a znovuotevření.
+- Kopie z lekce, import .py bez spuštění a export do nového .py souboru.
+- Stejný běh kódu, kreslení a chyby jako v učebně. Dílna má vlastní dilna.json;
+  kurzy a prubeh_v2.json zůstávají zachované. Konflikty a vadná data se nepřepíší.
+- 42 testů a tři skutečné GUI smoke na Macu prošly; ověřena i rozbalená distribuce.
+- Jeden kompletní ZIP 1.3 v LocalSendu; číslo verze je vidět v obou oknech.
+- Plná brána 1518 testů, rychlá statika i všech 28 testů katalogu/registru prošly.
 
 Co neni hotove:
-- Ruční retest na skutečném Linux PC.
-- Přenos postupu Mac–Linux, Moje dílna ani AI vysvětlování nejsou součástí této verze.
+- Uživatelský retest dílny na Linux PC.
+- AI vysvětlování, doptávání, krokování, input() a automatický přenos postupu.
 
 Dalsi krok:
-Na Linuxu rozbalit celý PythonSeSamanthou_1_2_20260906.zip, zavřít starou učebnu,
-spustit python3 python_se_samanthou.py a vlevo vybrat Python — další kroky.
-Ověřit přepínání, nové úlohy, původní pokusy a znovuotevření. Návod je v README.md.
+Na Linuxu rozbalit jediný PythonSeSamanthou_1_3_20260906.zip, otevřít novou
+složku PythonSeSamanthou_1_3 a spustit python3 python_se_samanthou.py.
+Nahoře otevřít Moji dílnu, zkusit pokus a poznámky, kopii z lekce a obnovení
+po zavření. Ponechat skrytou datovou složku .python_se_samanthou.
 
 Navrhovane dalsi kroky:
-Po potvrzení nové verze zvolit přenos postupu mezi počítači nebo Moji dílnu. Nový TVBCP zakládat pouze po výslovné dohodě.
+Po potvrzení nové verze navázat AI vysvětlením kódu s možností doptání nebo
+přenosem pokusů mezi Macem a Linuxem. TVBCP pouze po výslovné dohodě.
 
 Zmenene nebo relevantni soubory:
 PythonSeSamanthou/, projects/python_se_samanthou.md, ACTIVE_PROJECTS.md, MEMORY_INDEX.md.
+Podrobné důkazy a kontrolní součet ZIPu jsou v projektové paměti.
 
 Bezpecnost / neukladat:
-Neukládat osobní rozepsaný kód do Gitu ani distribučního ZIPu. Původní program
-i původní prubeh.json zachovat. První commit fa329883 byl autorizovaně pushnut. Pro etapu 1.2 zatím push/deploy
-autorizace není.
+Osobní pokusy, poznámky ani postup nesmí do Gitu nebo distribučního ZIPu.
+Původní programy a datové soubory zachovat. Commit fa329883 byl dříve autorizovaně
+pushnut; pro 1.2 ani 1.3 zatím další push/deploy autorizace není.

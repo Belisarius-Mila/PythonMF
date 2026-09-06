@@ -1,15 +1,16 @@
-# Python se Samanthou 1.2
+# Python se Samanthou 1.3
 
-Offline učebna Pythonu pro Mílu se dvěma balíčky po sedmi lekcích. Původní lekce mají stejný výklad,
+Offline učebna Pythonu pro Mílu se dvěma balíčky po sedmi lekcích a Mojí dílnou pro vlastní pokusy. Původní lekce mají stejný výklad,
 zadání, ukázky, řešení i hodnocení. Obsah je nyní samostatný balíček:
 další lekce se přidává soubory, nikoli rozšiřováním seznamu v programu.
 
 ## Spuštění na Linuxu nebo Macu
 
 1. Rozbal **celý ZIP**. Složky `kurzy` a ostatní soubory ponech vedle programu.
-2. Otevři terminál ve složce `PythonSeSamanthou`.
+2. Otevři terminál v nově rozbalené složce `PythonSeSamanthou_1_3`.
 3. Spusť `python3 python_se_samanthou.py`.
 4. Vlevo v **Balíček lekcí** vyber **Python — první kroky** nebo **Python — další kroky**.
+5. Tlačítko **Moje dílna** nahoře otevře prostor pro vlastní pokusy. V záhlaví učebny uvidíš číslo **1.3**.
 
 Potřebuješ Python 3.9 nebo novější a Tkinter. Nejsou potřeba žádné balíčky
 z pipu, účet ani internet. Pokud na Linux Mintu chybí Tkinter, nainstaluj
@@ -19,6 +20,41 @@ složky; soubory kurzu hledá vedle svého zdrojového souboru.
 Kód v editoru je skutečný Python s přístupem k tvému počítači. Třísekundový
 limit pomáhá s nekonečnou smyčkou, není bezpečnostním sandboxem.
 Ukázky ani řešení se při pouhém načtení kurzu nespouštějí.
+
+## Moje dílna
+
+Dílna je samostatné okno pro vlastní kód, bez školního hodnocení. Otevřeš ji
+z horního tlačítka **Moje dílna**. Můžeš přepínat mezi oknem učebny a dílny.
+
+- **Nový pokus** vytvoří prázdný pojmenovaný pokus.
+- **Přejmenovat** změní název; **Vytvořit kopii** založí samostatnou variantu.
+- **Do dílny** v učebně zkopíruje právě rozepsaný kód lekce do nového pokusu.
+  Změny v této kopii neovlivní lekci ani její dokončení.
+- **Moje poznámky** uchovávají tvůj záměr, otázky a zjištění u konkrétního pokusu.
+- **Spustit**, F5 nebo Ctrl+Enter spustí kód. Výpis, obrázek a konečné jednoduché
+  proměnné fungují stejně jako v lekcích, včetně vysvětlení chyb a limitu tří sekund.
+- **Otevřít .py…** načte kopii souboru v UTF-8 jako nový pokus. Soubor se tím
+  nespustí ani nezmění; rozpracovaný kód může obsahovat i chyby.
+- **Exportovat .py…** uloží kód do nového souboru. Existující soubor se nepřepíše.
+  Poznámky zůstanou v dílně. Kód s kruh(), pozadi() a dalšími kreslicími pomocníky
+  je potřeba spouštět v učebně; tyto funkce nejsou součástí běžného Pythonu.
+
+Pokus i poznámky se automaticky ukládají po úpravě, před spuštěním, při změně
+pokusu a zavření. Ručně lze uložit tlačítkem **Uložit** nebo Ctrl+S.
+Dílna obnoví poslední pokus. Při neúspěšném uložení zobrazí zprávu a před zavřením
+se zeptá; kód lze stále zkopírovat nebo exportovat. Při souběhu dvou aplikací
+se novější uložená data nepřepisují. Během běhu nelze přepnout na jiný pokus.
+
+Limity první verze: 50 000 znaků kódu, 10 000 znaků poznámek a název do 80 znaků.
+Dílna zatím nemá AI vysvětlování, interaktivní input(), krokování ani automatický
+přenos mezi počítači. Záložka Proměnné zobrazuje konečné jednoduché hodnoty,
+ne obsah celých seznamů a slovníků. Uložení chybného Pythonu je v pořádku —
+chybu zjistíš při spuštění.
+
+Soukromé pokusy jsou v `~/.python_se_samanthou/dilna.json`, odděleně od lekcí.
+Při použití `--state-dir` se i dílna uloží do této zvolené datové složky.
+Pokusy, poznámky ani osobní postup nejsou součástí distribučního ZIPu nebo Gitu.
+Při aktualizaci aplikace ponech tuto datovou složku zachovanou.
 
 ## Uložený postup
 
@@ -48,7 +84,7 @@ Po běžném spuštění aplikace se nabídne základní balíček.
 
 Přídavný ZIP obsahuje složku `kurzy/python_dalsi_kroky`. Zkopíruj ji do `kurzy`
 své učebny a aplikaci znovu spusť. Nové balíčky se vyhledávají při startu;
-vadné a duplicitní balíčky učebna ohlásí. Kompletní ZIP verze 1.2 už obsahuje oba.
+vadné a duplicitní balíčky učebna ohlásí. Kompletní ZIP verze 1.3 obsahuje oba balíčky i dílnu.
 Samotný přídavný balíček funguje i ve verzi 1.1 přes argument `--course`;
 přesný příkaz je v jeho README. Původní balíček se při připojení nemění.
 
@@ -101,21 +137,22 @@ Automatické testy nepracují s tvým skutečným postupem:
 python3 -m unittest discover -s tests -v
 python3 tests/gui_smoke.py
 python3 tests/gui_courses_smoke.py
+python3 tests/gui_workshop_smoke.py
 ```
 
-Oba GUI příkazy potřebují grafickou plochu. Původní GUI test ve zkušebních datech otevře skutečné
+GUI příkazy potřebují grafickou plochu. Původní GUI test ve zkušebních datech otevře skutečné
 okno, převede starý postup, projde sedm řešení, ověří kreslení, uložení a
 znovuotevření se změněným pořadím lekcí. Testovací složku po sobě odstraní.
 
-Na Macu prošlo 31 automatických testů i oba GUI testy. Test přepínání ověřuje také
-samostatné pokusy obou balíčků a odmítnutí přepnutí při neuloženém postupu.
-Míla potvrdil stejné chování rozbalené verze 1.1 jako původní aplikace.
-Pro novou verzi na Linux PC zbývá ověřit:
+Na Macu prošlo 42 automatických testů a tři GUI smoke. Test dílny ověřuje kopii
+z lekce, názvy a poznámky, kreslení, chyby, časový limit, import/export, konflikt
+uložení i znovuotevření bez změny postupu lekcí. Míla potvrdil fungování verze 1.2.
+Pro novou verzi 1.3 na Linux PC zbývá ověřit:
 
-1. Výběr obou balíčků a čitelnost jejich názvů.
-2. Spuštění a ověření úlohy; kruhy v lekci 4 a semafory v lekci 7.
-3. Zachování rozepsaného pokusu a dokončení po zavření a znovuotevření.
-4. Návrat do původního balíčku bez ztráty předchozího postupu.
+1. Číslo 1.3 v záhlaví a otevření Mojí dílny.
+2. Nový pokus, jeho spuštění a kreslení.
+3. Zachování názvu, kódu a poznámek po zavření a znovuotevření.
+4. Kopii z lekce, import/export .py a zachování původního postupu obou balíčků.
 
 ## Původ a další kroky
 
@@ -125,7 +162,6 @@ Základem je soubor `python_se_samanthou.py` přijatý přes LocalSend od Samant
 SHA-256 původního souboru:
 `94583742b6b192e9610c63fd9dca67f735a818ee47235d51fd63a6486f6c6013`.
 
-Míla po první etapě požádal o připojení dalších sedmi lekcí; tato verze přidává
-jejich samostatný balíček a přepínání. Otevřené další směry: přenos postupu mezi
-Macem a Linuxem, Moje dílna, vysvětlení kódu s doplňujícími otázkami, kontextové
-nápovědy a skutečné krokování.
+Verze 1.2 přidala druhý balíček a přepínání. Verze 1.3 přidává Moji dílnu.
+Otevřené další směry: vysvětlení kódu s doplňujícími otázkami, přenos pokusů
+a postupu mezi Macem a Linuxem, kontextové nápovědy a skutečné krokování.
