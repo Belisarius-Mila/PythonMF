@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Python se Samanthou — offline učebna, verze 1.3.
+"""Python se Samanthou — offline učebna, verze 1.4.
 
 Spuštění: python3 python_se_samanthou.py
 Linux Mint: pokud chybí tkinter, nainstaluj balíček python3-tk
@@ -174,6 +174,7 @@ def run_code(source, timeout=3):
             input=json.dumps({"source": source}, ensure_ascii=False),
             stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8",
             timeout=timeout, check=False,
+            env={k: v for k, v in os.environ.items() if k not in {"OPENAI_API_KEY", "CODEX_API_KEY"}},
         )
         if result.returncode != 0:
             raise RuntimeError("Proces skončil před dokončením výsledku.")
@@ -265,7 +266,7 @@ def launch(state_dir=None, on_ready=None):
 
             header = ttk.Frame(root, padding=(18, 10))
             header.pack(fill="x")
-            ttk.Label(header, text="Python se Samanthou · 1.3", font=(self.font.actual("family"), 22, "bold")).pack(side="left")
+            ttk.Label(header, text="Python se Samanthou · 1.4", font=(self.font.actual("family"), 22, "bold")).pack(side="left")
             ttk.Button(header, text="Moje dílna", command=self.open_workshop).pack(side="left", padx=16)
             ttk.Button(header, text="A+", width=3, command=lambda: self.resize_font(1)).pack(side="right")
             ttk.Button(header, text="A−", width=3, command=lambda: self.resize_font(-1)).pack(side="right", padx=5)
@@ -380,6 +381,7 @@ def launch(state_dir=None, on_ready=None):
                     return
             self.workshop.window.deiconify()
             self.workshop.window.lift()
+            self.workshop.window.after_idle(self.workshop.edit_code)
             if copy_lesson:
                 self.workshop.create_experiment(
                     (LESSONS[self.current]['title'] + ' — můj pokus')[:80],

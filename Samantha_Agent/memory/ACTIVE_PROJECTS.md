@@ -4,7 +4,7 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 Samostatný terminálový projekt bez pracovního proudu v Cockpitu:
 
-- **Python se Samanthou** — priorita 2, aktivní; verze 1.3 přidává Moji dílnu s vlastními pokusy, poznámkami, kopií z lekce a importem/exportem .py. 42 testů a tři Mac GUI smoke prošly; 1.2 Míla potvrdil jako funkční. Paměť: `projects/python_se_samanthou.md`; handoff: `handoffs/python_se_samanthou_course_package_2026_09_06.md`. Další krok: retest dílny na Linuxu, potom AI vysvětlování nebo přenos pokusů. Samostatný terminálový projekt, dosud bez integrace do Cockpitu.
+- **Python se Samanthou** — priorita 2, aktivní; verze 1.4 přidává AI průvodce s doptáváním a aktivaci editoru dílny. 51 testů, čtyři Mac GUI smoke a živé API prošly. Paměť: `projects/python_se_samanthou.md`; handoff: `handoffs/python_se_samanthou_course_package_2026_09_06.md`. Další krok: retest psaní na Linuxu a vlastní API klíč v Nastavení AI. Samostatný terminálový projekt, dosud bez integrace do Cockpitu.
 
 | Oblast | Priorita | Rezim | Stav | Memory soubor | Handoff | Dalsi krok |
 | --- | --- | --- | --- | --- | --- | --- |

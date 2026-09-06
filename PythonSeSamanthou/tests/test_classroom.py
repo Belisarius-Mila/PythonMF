@@ -50,7 +50,7 @@ class CourseTests(unittest.TestCase):
     def test_runner_implementation_preserved(self):
         trees = [ast.parse(p.read_text()) for p in
                  (ROOT / 'reference/python_se_samanthou_v1.py', ROOT / 'python_se_samanthou.py')]
-        for name in ('execute_code', 'run_code'):
+        for name in ('execute_code',):
             self.assertEqual(*[ast.dump(next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == name)) for tree in trees])
 
     def test_assessment_parity_solutions_starters_and_errors(self):

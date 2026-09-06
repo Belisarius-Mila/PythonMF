@@ -1,4 +1,4 @@
-# Python se Samanthou 1.3
+# Python se Samanthou 1.4
 
 Offline učebna Pythonu pro Mílu se dvěma balíčky po sedmi lekcích a Mojí dílnou pro vlastní pokusy. Původní lekce mají stejný výklad,
 zadání, ukázky, řešení i hodnocení. Obsah je nyní samostatný balíček:
@@ -7,13 +7,14 @@ další lekce se přidává soubory, nikoli rozšiřováním seznamu v programu.
 ## Spuštění na Linuxu nebo Macu
 
 1. Rozbal **celý ZIP**. Složky `kurzy` a ostatní soubory ponech vedle programu.
-2. Otevři terminál v nově rozbalené složce `PythonSeSamanthou_1_3`.
+2. Otevři terminál v nově rozbalené složce `PythonSeSamanthou_1_4`.
 3. Spusť `python3 python_se_samanthou.py`.
 4. Vlevo v **Balíček lekcí** vyber **Python — první kroky** nebo **Python — další kroky**.
-5. Tlačítko **Moje dílna** nahoře otevře prostor pro vlastní pokusy. V záhlaví učebny uvidíš číslo **1.3**.
+5. Tlačítko **Moje dílna** nahoře otevře prostor pro vlastní pokusy. V záhlaví učebny uvidíš číslo **1.4**.
 
 Potřebuješ Python 3.9 nebo novější a Tkinter. Nejsou potřeba žádné balíčky
-z pipu, účet ani internet. Pokud na Linux Mintu chybí Tkinter, nainstaluj
+z pipu. Offline lekce a běh vlastního kódu nepotřebují účet ani internet;
+volitelný AI průvodce potřebuje připojení a vlastní OpenAI API klíč. Pokud na Linux Mintu chybí Tkinter, nainstaluj
 `python3-tk` ve Správci softwaru. Program pracuje také při spuštění z jiné
 složky; soubory kurzu hledá vedle svého zdrojového souboru.
 
@@ -26,6 +27,9 @@ Ukázky ani řešení se při pouhém načtení kurzu nespouštějí.
 Dílna je samostatné okno pro vlastní kód, bez školního hodnocení. Otevřeš ji
 z horního tlačítka **Moje dílna**. Můžeš přepínat mezi oknem učebny a dílny.
 
+- **Můj kód** vlevo je editor: klikni do něj a piš. Tlačítko **Upravit kód**
+  ho aktivuje; pravé tlačítko myši nabídne vložení a výběr textu. Ctrl+A vybere vše.
+  **Moje poznámky** dole jsou také upravitelné; Výpis a Proměnné zobrazují výsledky.
 - **Nový pokus** vytvoří prázdný pojmenovaný pokus.
 - **Přejmenovat** změní název; **Vytvořit kopii** založí samostatnou variantu.
 - **Do dílny** v učebně zkopíruje právě rozepsaný kód lekce do nového pokusu.
@@ -46,7 +50,7 @@ se zeptá; kód lze stále zkopírovat nebo exportovat. Při souběhu dvou aplik
 se novější uložená data nepřepisují. Během běhu nelze přepnout na jiný pokus.
 
 Limity první verze: 50 000 znaků kódu, 10 000 znaků poznámek a název do 80 znaků.
-Dílna zatím nemá AI vysvětlování, interaktivní input(), krokování ani automatický
+Dílna zatím nemá interaktivní input(), skutečné krokování ani automatický
 přenos mezi počítači. Záložka Proměnné zobrazuje konečné jednoduché hodnoty,
 ne obsah celých seznamů a slovníků. Uložení chybného Pythonu je v pořádku —
 chybu zjistíš při spuštění.
@@ -55,6 +59,44 @@ Soukromé pokusy jsou v `~/.python_se_samanthou/dilna.json`, odděleně od lekc�
 Při použití `--state-dir` se i dílna uloží do této zvolené datové složky.
 Pokusy, poznámky ani osobní postup nejsou součástí distribučního ZIPu nebo Gitu.
 Při aktualizaci aplikace ponech tuto datovou složku zachovanou.
+
+## AI průvodce: vysvětlení a doptávání
+
+Otevři **Moje dílna → AI průvodce → Nastavení AI…**. Pokud zatím nemáš API:
+
+1. Tlačítko v nastavení otevře oficiální stránku OpenAI pro vytvoření klíče.
+   Přihlas se nebo si založ účet a nastav kredit/účtování pro API.
+2. Vytvořený klíč vlož do zakrytého pole **API klíč** přímo v aplikaci.
+   Nepiš ho do kódu, poznámek ani rozhovoru. Model může zůstat `gpt-5.4-mini`.
+3. Zvol **Použít pro tuto dílnu**. Tím se ještě nic neposílá.
+4. Vyber **Vysvětli krok za krokem**, **Pomoz mi s chybou** nebo
+   **Veď mě dalším krokem** a stiskni **Zeptat se AI**.
+5. Pro doptání napiš vlastní otázku do pole pod rozhovorem a stiskni stejné
+   tlačítko nebo Ctrl+Enter. Vlastní otázka má přednost před vybraným režimem.
+
+[Oficiální návod pro první API klíč](https://developers.openai.com/api/docs/quickstart).
+Volání API se účtují na tvém API účtu. Bez klíče dál funguje celá offline učebna.
+Klíč zadaný v okně se neukládá na disk: po zavření dílny jej zadáš znovu.
+Pokročilejší možností je proměnná prostředí `OPENAI_API_KEY`, kterou aplikace
+načte při otevření dílny. Žádný klíč není v distribučním ZIPu.
+
+**Zeptat se AI** odešle název pokusu, aktuální kód, poznámky, otázku a nejvýše
+pět předchozích dvojic otázek/odpovědí tohoto pokusu do OpenAI. Výpis a chybu
+přiloží jen tehdy, když odpovídají nynějšímu kódu. Žádné další soubory se nečtou.
+Rozhovor se uchovává pouze v paměti otevřené dílny, nejvýše šest dvojic na pokus.
+**Nový rozhovor** začne u aktuálního pokusu znovu. Důležité vysvětlení si můžeš
+ručně zkopírovat do poznámek; ty se uloží běžným způsobem.
+
+Každý pokus má vlastní rozhovor. Během čekání můžeš psát i přepínat pokusy;
+pozdní odpověď patří původnímu pokusu. Pokud kód během čekání změníš, objeví se
+upozornění, že odpověď vychází ze staršího kódu. AI kód sama nemění ani nespouští.
+Vedení navrhuje vždy malý další krok. AI může chybovat — kód ověř tlačítkem Spustit.
+
+Aplikace používá HTTPS a Responses API s `store: false`; to není tvrzení o nulové
+retenci služby. Při chybě se požadavek automaticky neopakuje. Pokud selže internet,
+klíč nebo kredit, objeví se zpráva a offline editor zůstane použitelný.
+Spouštěný Python nedědí `OPENAI_API_KEY` ani `CODEX_API_KEY` z prostředí učebny;
+stále však má běžný přístup k počítači, není izolovaným bezpečnostním sandboxem.
 
 ## Uložený postup
 
@@ -84,7 +126,7 @@ Po běžném spuštění aplikace se nabídne základní balíček.
 
 Přídavný ZIP obsahuje složku `kurzy/python_dalsi_kroky`. Zkopíruj ji do `kurzy`
 své učebny a aplikaci znovu spusť. Nové balíčky se vyhledávají při startu;
-vadné a duplicitní balíčky učebna ohlásí. Kompletní ZIP verze 1.3 obsahuje oba balíčky i dílnu.
+vadné a duplicitní balíčky učebna ohlásí. Kompletní ZIP verze 1.4 obsahuje oba balíčky i dílnu.
 Samotný přídavný balíček funguje i ve verzi 1.1 přes argument `--course`;
 přesný příkaz je v jeho README. Původní balíček se při připojení nemění.
 
@@ -138,21 +180,26 @@ python3 -m unittest discover -s tests -v
 python3 tests/gui_smoke.py
 python3 tests/gui_courses_smoke.py
 python3 tests/gui_workshop_smoke.py
+python3 tests/gui_tutor_smoke.py
 ```
 
 GUI příkazy potřebují grafickou plochu. Původní GUI test ve zkušebních datech otevře skutečné
 okno, převede starý postup, projde sedm řešení, ověří kreslení, uložení a
 znovuotevření se změněným pořadím lekcí. Testovací složku po sobě odstraní.
 
-Na Macu prošlo 42 automatických testů a tři GUI smoke. Test dílny ověřuje kopii
-z lekce, názvy a poznámky, kreslení, chyby, časový limit, import/export, konflikt
-uložení i znovuotevření bez změny postupu lekcí. Míla potvrdil fungování verze 1.2.
-Pro novou verzi 1.3 na Linux PC zbývá ověřit:
+Na Macu prošlo 51 automatických testů a čtyři GUI smoke. Nový test ověřuje
+skutečné stisky kláves, rozměr 900 × 640, nastavení bez klíče, doptání,
+oddělení rozhovorů, změnu kódu během čekání a chybu připojení. Používá náhradního
+API klienta bez sítě. Samostatně prošlo živé API vysvětlení syntetického kódu
+s navazující otázkou, bez osobních dat. Pro Linux PC zbývá ověřit:
 
-1. Číslo 1.3 v záhlaví a otevření Mojí dílny.
-2. Nový pokus, jeho spuštění a kreslení.
-3. Zachování názvu, kódu a poznámek po zavření a znovuotevření.
-4. Kopii z lekce, import/export .py a zachování původního postupu obou balíčků.
+1. Číslo **1.4** v záhlaví, psaní a vložení do kódu i poznámek v dílně.
+2. Běh pokusu a zachování rozepsané práce po zavření.
+3. Nastavení vlastního API klíče, vysvětlení a doplňující otázku.
+
+Původní hlášení „read only“ z Linuxu se na Macu nepodařilo zopakovat.
+Verze 1.4 doplňuje označení editoru, aktivaci vstupu a kontextovou nabídku;
+vyřešení konkrétního linuxového problému musí potvrdit zkouška na Linuxu.
 
 ## Původ a další kroky
 
@@ -162,6 +209,6 @@ Základem je soubor `python_se_samanthou.py` přijatý přes LocalSend od Samant
 SHA-256 původního souboru:
 `94583742b6b192e9610c63fd9dca67f735a818ee47235d51fd63a6486f6c6013`.
 
-Verze 1.2 přidala druhý balíček a přepínání. Verze 1.3 přidává Moji dílnu.
-Otevřené další směry: vysvětlení kódu s doplňujícími otázkami, přenos pokusů
-a postupu mezi Macem a Linuxem, kontextové nápovědy a skutečné krokování.
+Verze 1.2 přidala druhý balíček a přepínání, 1.3 Moji dílnu a 1.4 AI průvodce
+s doptáváním a přehlednější zadávání textu. Otevřené další směry: přenos pokusů
+a postupu mezi Macem a Linuxem a skutečné krokování.

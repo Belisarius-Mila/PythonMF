@@ -6,13 +6,13 @@ from pathlib import Path
 import zipfile
 
 ROOT = Path(__file__).resolve().parent
-RELEASE_NAME = 'PythonSeSamanthou_1_3_20260906.zip'
+RELEASE_NAME = 'PythonSeSamanthou_1_4_20260906.zip'
 
 
 def build(output_dir, course_only=False):
     files = [ROOT / name for name in ('README.md', 'python_se_samanthou.py',
              'assessment.py', 'course_loader.py', 'progress_store.py', 'build_release.py',
-             'drawing.py', 'workshop.py', 'workshop_store.py',
+             'drawing.py', 'workshop.py', 'workshop_store.py', 'ai_tutor.py', 'tutor_panel.py',
              'reference/python_se_samanthou_v1.py')]
     files.extend(p for p in (ROOT / 'tests').glob('*.py'))
     files.extend(p for p in (ROOT / 'kurzy').rglob('*') if p.is_file()
@@ -23,7 +23,7 @@ def build(output_dir, course_only=False):
     with zipfile.ZipFile(stream, 'w', compression=zipfile.ZIP_DEFLATED) as archive:
         for path in sorted(files):
             relative = path.relative_to(ROOT)
-            archive_path = relative if course_only else Path('PythonSeSamanthou_1_3') / relative
+            archive_path = relative if course_only else Path('PythonSeSamanthou_1_4') / relative
             entry = zipfile.ZipInfo(str(archive_path),
                                    date_time=(2026, 9, 6, 0, 0, 0))
             entry.compress_type = zipfile.ZIP_DEFLATED

@@ -483,3 +483,15 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Ověření: po přesunutí záznamu Python se Samanthou prošlo všech 28 testů
   test_human_adam_workstream_catalog a test_project_audit_report. Při příštím
   přidávání projektu spustit tyto testy až po finální úpravě registru.
+
+## 2026-09-06 — Přenosný Python HTTPS klient bez pip závislostí na macOS
+
+- Typ: opakujici se.
+- Problém: Python.org instalace neměla CA bundle; urllib skončil na
+  CERTIFICATE_VERIFY_FAILED. Souvisí s LL-025, zde však aplikace nesmí
+  vyžadovat instalaci certifi na uživatelském Linuxu.
+- Řešení: zachovat ssl.create_default_context() a na macOS přidat existující
+  systémový /etc/ssl/cert.pem přes load_verify_locations. Na Linuxu ponechat
+  standardní CA; nevypínat ověřování certifikátů a neměnit systémovou instalaci.
+- Ověření: PythonSeSamanthou 1.4, skutečný HTTPS požadavek do OpenAI i navazující
+  otázka prošly po této změně. Klíč ani osobní data se při ověření nevypisovaly.

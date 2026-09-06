@@ -11,6 +11,7 @@ from tkinter import filedialog, messagebox, simpledialog, ttk
 from tkinter.scrolledtext import ScrolledText
 
 from drawing import draw_commands
+from tutor_panel import TutorPanel
 from workshop_store import WorkshopError, WorkshopStore, add_experiment, export_python, import_python
 
 
@@ -26,8 +27,9 @@ class WorkshopWindow:
         self.poll_after = None
         self.queue = queue.Queue()
         self.drawing = []
+        self.last_results = {}
         self.window = tk.Toplevel(parent)
-        self.window.title('Moje dílna · Python se Samanthou 1.3')
+        self.window.title('Moje dílna · Python se Samanthou 1.4')
         self.window.geometry(f'{min(1100, parent.winfo_screenwidth()-60)}x{min(780, parent.winfo_screenheight()-100)}')
         self.window.minsize(900, 640)
         self.window.protocol('WM_DELETE_WINDOW', self.close)
@@ -64,12 +66,18 @@ class WorkshopWindow:
         self.run_button = ttk.Button(actions, text='Spustit (F5)', command=self.run)
         self.run_button.pack(side='left')
         ttk.Button(actions, text='Uložit', command=self.save).pack(side='left', padx=6)
+        ttk.Button(actions, text='Upravit kód', command=self.edit_code).pack(side='left')
+        ttk.Button(actions, text='AI průvodce', command=self.open_tutor).pack(side='left', padx=6)
         self.feedback = ttk.Label(main, text='Napiš vlastní kód nebo otevři soubor .py.', wraplength=640)
         self.feedback.pack(fill='x', pady=(0, 8))
         split = ttk.Panedwindow(main, orient='horizontal')
         split.pack(fill='both', expand=True)
-        self.editor = ScrolledText(split, wrap='none', undo=True, width=32, height=13,
+        code_frame = ttk.Frame(split)
+        ttk.Label(code_frame, text='MŮJ KÓD — sem piš nebo vlož Python').pack(anchor='w', pady=(0, 4))
+        self.editor = ScrolledText(code_frame, wrap='none', undo=True, state='normal', takefocus=True, width=32, height=13,
                                    font=('Courier', 13), bg='#152238', fg='#e4edf7', insertbackground='white')
+        self.editor.pack(fill='both', expand=True)
+        self.enable_editing(self.editor)
         for name, color in [('keyword', '#c7abff'), ('string', '#90d6ac'), ('number', '#f8ce75'), ('comment', '#9cacc4')]:
             self.editor.tag_configure(name, foreground=color)
         self.editor.tag_configure('error', background='#733744')
@@ -79,7 +87,7 @@ class WorkshopWindow:
         self.editor.bind('<Control-Return>', self.run_key)
         self.window.bind('<F5>', self.run_key)
         self.window.bind('<Control-s>', self.save_key)
-        split.add(self.editor, weight=1)
+        split.add(code_frame, weight=1)
         self.tabs = ttk.Notebook(split)
         self.console = ScrolledText(self.tabs, width=30, wrap='word', state='disabled', font=('Courier', 12))
         self.canvas = tk.Canvas(self.tabs, width=320, height=240, highlightthickness=0)
@@ -87,11 +95,15 @@ class WorkshopWindow:
         self.tabs.add(self.console, text='Výpis')
         self.tabs.add(self.canvas, text='Obrázek')
         self.tabs.add(self.variables, text='Proměnné')
+        self.tutor = TutorPanel(self.tabs, self.tutor_context)
+        self.tabs.add(self.tutor, text='AI průvodce')
         self.canvas.bind('<Configure>', lambda event: self.draw())
         split.add(self.tabs, weight=1)
         ttk.Label(main, text='MOJE POZNÁMKY — co chci zkusit, co jsem zjistil').pack(anchor='w', pady=(8, 4))
         self.notes = ScrolledText(main, height=3, wrap='word', font=('Arial', 12))
         self.notes.pack(fill='x')
+        self.enable_editing(self.notes)
+        self.enable_editing(self.tutor.question)
         self.notes.bind('<<Modified>>', self.modified)
         self.saved = ttk.Label(self.window, text='', padding=(12, 5), wraplength=850)
         self.saved.pack(fill='x')
@@ -100,7 +112,48 @@ class WorkshopWindow:
             add_experiment(self.state, 'První pokus', 'print("Moje dílna!")\n')
         selected = self.state.get('current') or next(iter(self.state['experiments']))
         self.load(selected)
+        self.window.after_idle(self.edit_code)
         self.poll_after = self.window.after(100, self.poll)
+
+    @staticmethod
+    def enable_editing(widget):
+        widget.configure(state='normal', takefocus=True)
+        widget.bind('<Button-1>', lambda event: widget.focus_set(), add='+')
+        menu = tk.Menu(widget, tearoff=False)
+        for label, action in [('Vyjmout', '<<Cut>>'), ('Kopírovat', '<<Copy>>'), ('Vložit', '<<Paste>>')]:
+            menu.add_command(label=label, command=lambda action=action: widget.event_generate(action))
+        def select_all(event=None):
+            widget.tag_add('sel', '1.0', 'end-1c')
+            return 'break'
+        menu.add_command(label='Vybrat vše', command=select_all)
+        widget.bind('<Control-a>', select_all)
+        def popup(event):
+            widget.focus_set()
+            try:
+                menu.tk_popup(event.x_root, event.y_root)
+            finally:
+                menu.grab_release()
+            return 'break'
+        widget.bind('<Button-3>', popup)
+        if widget.tk.call('tk', 'windowingsystem') == 'aqua':
+            widget.bind('<Button-2>', popup)
+
+    def edit_code(self):
+        self.editor.configure(state='normal')
+        self.editor.focus_set()
+
+    def open_tutor(self):
+        self.tutor.refresh()
+        self.tabs.select(self.tutor)
+        self.tutor.question.focus_set()
+
+    def tutor_context(self):
+        item = self.state['experiments'].get(self.current, {})
+        source = self.editor.get('1.0', 'end-1c')
+        previous = self.last_results.get(self.current)
+        return {'key': self.current, 'title': item.get('title', ''), 'source': source,
+                'notes': self.notes.get('1.0', 'end-1c') if hasattr(self, 'notes') else '',
+                'result': previous[1] if previous and previous[0] == source else None}
 
     @staticmethod
     def set_text(widget, text):
@@ -128,6 +181,7 @@ class WorkshopWindow:
         item = self.state['experiments'][key]
         self.loading = True
         for widget, text in [(self.editor, item['source']), (self.notes, item['notes'])]:
+            widget.configure(state='normal')
             widget.delete('1.0', 'end')
             widget.insert('1.0', text)
             widget.edit_modified(False)
@@ -142,6 +196,7 @@ class WorkshopWindow:
         self.tabs.select(0)
         self.highlight()
         self.refresh_list()
+        self.tutor.refresh()
         return self.save()
 
     def select(self, event=None):
@@ -292,6 +347,7 @@ class WorkshopWindow:
         threading.Thread(target=work, daemon=True).start()
 
     def poll(self):
+        self.tutor.poll()
         try:
             key, source, result = self.queue.get_nowait()
         except queue.Empty:
@@ -303,6 +359,7 @@ class WorkshopWindow:
         self.poll_after = self.window.after(100, self.poll)
 
     def show_result(self, key, source, result):
+        self.last_results[key] = (source, result)
         error = result['error']
         unchanged = key == self.current and source == self.editor.get('1.0', 'end-1c')
         output = result['output'] or 'Program nic nevypsal. Výpis vzniká příkazem print().'
@@ -332,5 +389,6 @@ class WorkshopWindow:
             return False
         if self.poll_after is not None:
             self.window.after_cancel(self.poll_after)
+        self.tutor.clear_session()
         self.window.destroy()
         return True

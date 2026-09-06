@@ -11,8 +11,7 @@ a pokynem „OK, jdeme na to! Začni.“ autorizoval první krok.
 
 Pořadí: oddělit sedm lekcí → přenos kurzů a postupu → Moje dílna → vysvětlení
 kódu a doplňující otázky → kontextové nápovědy → skutečné krokování → více lekcí.
-Míla následně upřednostnil připojení dalšího balíčku sedmi lekcí. AI připojení se
-bude řešit až v příslušné fázi.
+Míla následně upřednostnil připojení dalšího balíčku sedmi lekcí. AI připojení je nyní součástí verze 1.4; viz nejnovější záznam dole.
 
 ## První krok
 
@@ -45,7 +44,8 @@ Vadný formát a konflikt současných aplikací zastaví zápis. Zápis je atom
 ## Otevřené a omezení
 
 Míla potvrdil fungování 1.2 po vyřešení záměny při spuštění na Linuxu a zadal
-vývoj Mojí dílny. Verze 1.3 je ověřená na Macu a čeká na jeho Linux retest.
+vývoj Mojí dílny. Verzi 1.3 otevřel, ale hlásil nemožnost upravovat text.
+Verze 1.4 přidává aktivaci editoru a AI průvodce; čeká na Linux retest a vlastní API klíč.
 Přenos postupu mezi počítači zatím není hotový. Původní a nová aplikace používají oddělené postupy.
 Hodnocení záměrně zachovává omezené kontroly původní učebny. Spuštěný kód má
 přístup k počítači; časový limit není bezpečnostní sandbox.
@@ -143,3 +143,60 @@ Technicky dukaz:
 - Plná brána 1.3: všech 1518 testů prošlo (284,622 s), rychlá statická brána
   a všech 28 testů katalogu/registru po finální úpravě paměti prošly. Finální
   ZIP je porovnán se všemi 75 distribuovanými soubory.
+
+
+## 2026-09-06 15:17 CEST — AI průvodce a zadávání textu, verze 1.4
+
+Hotovo:
+- Míla zadal opravu údajně read-only dílny a připojení AI vysvětlování/vedení.
+  Na Linuxu nemá API klíč ani přihlášený Codex („Ani jedno“).
+- Editor a poznámky už v 1.3 měly state=normal; skutečné stisky kláves na Macu
+  fungovaly. Příčina konkrétního linuxového hlášení není potvrzená. Verze 1.4
+  výslovně aktivuje editor, označuje pole MŮJ KÓD, přidává Upravit kód,
+  zaměření při kliknutí/otevření, nabídku Vložit/Vybrat vše a Ctrl+A.
+- AI průvodce: vysvětlení po krocích, pomoc s chybou, malý další úkol a doptávání.
+  Vlastní otázka má přednost před zvoleným režimem. Kód AI nemění ani nespouští.
+- Oddělené rozhovory podle identity pokusu, asynchronní odpovědi, upozornění na
+  změněný kód během čekání. Přikládá výpis/chybu jen pro přesně shodný kód.
+- Nastavení zakrytého API klíče a modelu; bez klíče dílna dál funguje offline.
+  Klíč z UI pouze v paměti otevřené dílny, případně načtení OPENAI_API_KEY.
+  Žádný klíč se nekopíroval na Linux ani do souborů/ZIPu. Worker nedědí dvě
+  jmenované API proměnné; stále není bezpečnostním sandboxem.
+- Běh učebního kódu, oba balíčky, postup a formát dilna.json zachovány.
+
+Rozhodnuti:
+OpenAI Responses API, výchozí gpt-5.4-mini, HTTPS přes standardní knihovnu,
+bez pip závislostí, bez automatických retry a bez spouštění AI návrhů.
+Explicitní tlačítko odesílá kód/poznámky/výpis a rozhovor; store=false není
+slib nulové retence služby. Historie jen v paměti, šest dvojic na pokus,
+při dotazu pět předchozích dvojic. Důležité odpovědi lze kopírovat do poznámek.
+Na tomto Macu chybí Python CA bundle; TLS context přidává systémový cert.pem
+výhradně na macOS, ověřování certifikátů zůstává zapnuté. Linux používá default CA.
+
+Dalsi krok:
+Míla rozbalí jediný PythonSeSamanthou_1_4_20260906.zip a spustí aplikaci
+z nové složky. Ověřit skutečné psaní/vložení na Linuxu. Pro AI si vytvoří
+vlastní OpenAI API klíč, nastaví API účet a klíč vloží do Nastavení AI.
+
+Navrhovane dalsi kroky:
+Po retestu případně trvalé lokální nastavení přihlášení podle Mílova přání,
+přenos pokusů mezi stroji nebo skutečné krokování. Bez nového TVBCP/Cockpit proudu.
+Předchozí 1.3 byla na Mílův pokyn pushnuta jako 6fb2c215; nový krok 1.4 se nyní
+ukládá pouze lokálně a potřebuje nový výslovný pokyn pro push.
+
+Technicky dukaz:
+- 51 cílených testů; čtyři skutečné Tk GUI smoke na Macu. Nový GUI test zadává
+  klávesy, BackSpace, Return, Ctrl+A a náhradu výběru; ověřuje 900 × 640,
+  bezklíčový režim, historii, odloženou odpověď jinému pokusu, změnu kódu a
+  chybu API bez ztráty otázky. Testy používají pouze dočasná data.
+- Živé OpenAI API na syntetickém kódu cislo=3/print(cislo+2) vysvětlilo výsledek
+  5 a v navazující otázce změnu cislo=8 na výsledek 10. Žádná osobní data.
+- Python 3.9 gramatika ověřena pro všech 47 Python souborů; běh na Pythonu 3.12.
+- LocalSend: PythonSeSamanthou_1_4_20260906.zip, 79 souborů, 95 608 B,
+  SHA-256 6e3c509d67377de4b43a9a2b7cec61f4310056283301c89639149654bd787fac.
+- Plná projektová brána 1.4: všech 1518 testů prošlo (319,288 s).
+- Rozbalený finální ZIP: všech 79 souborů přesně odpovídá zdrojům; všech
+  51 testů, nové GUI AI a původní GUI dílny z distribuce prošly. Oba balíčky
+  kurzů jsou byte-for-byte shodné s předchozím commitem.
+- Po finální úpravě registru prošlo dalších 28 testů katalogu/registru a rychlá
+  statická brána. Kontrola ZIPu nepotvrdila přítomnost používaného API klíče.
