@@ -455,3 +455,16 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   interní obálky. Stav následně ověřit podle manifestu, receipts a souborů;
   poslední lidská zpráva hlásila 45 obrázků, na disku již bylo 47. Díky
   této kontrole se dogenerovaly pouze dvě zbývající položky z 49.
+
+
+## 2026-09-06 — Oddělení offline lekcí bez ztráty postupu
+
+- Typ: opakujici se.
+- Problém: postup ukládaný podle číselné pozice by po přeuspořádání lekcí
+  přiřadil rozepsaný kód jinému tématu.
+- Řešení: trvalá ID v balíčku i postupu; migraci odvozovat z pevné původní
+  mapy sedmi lekcí, nikoli z nového pořadí. Původní data zachovat, nový formát
+  ukládat samostatně s byte-for-byte zálohou a detekcí konfliktu.
+- Ověření: PythonSeSamanthou, 27 testů a skutečné Tk GUI; znovuotevření
+  s obráceným pořadím zachovalo výběr, sedm pokusů i dokončení. Testy pouze
+  nad dočasnými daty, žádný zásah do Mílova skutečného postupu.

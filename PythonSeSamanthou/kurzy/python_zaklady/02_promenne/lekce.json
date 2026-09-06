@@ -1,0 +1,32 @@
+{
+  "title": "Proměnná má jméno",
+  "short": "Proměnné",
+  "time": "5–10 minut",
+  "predict": "Co vypíše ukázka? Co by se změnilo, kdybys v print() napsal místo jmeno výraz \"jmeno\"?",
+  "task": "Změň hodnotu proměnné jmeno na \"Samantha\". Příkaz print ponech tak, aby používal proměnnou.",
+  "hint": "Uprav text napravo od =. Druhý řádek už proměnnou správně používá.",
+  "success": "Změna uložené hodnoty změnila výpis. Podívej se také na záložku Proměnné.",
+  "id": "python-zaklady.promenne",
+  "explanation_file": "vyklad.md",
+  "starter_file": "ukazka.py",
+  "solution_file": "reseni.py",
+  "checks": [
+    {
+      "kind": "variables_equal",
+      "value": {
+        "jmeno": "Samantha"
+      }
+    },
+    {
+      "kind": "uses_name",
+      "value": "jmeno"
+    },
+    {
+      "kind": "output_lines",
+      "value": [
+        "Ahoj, Samantha"
+      ]
+    }
+  ],
+  "feedback": "Proměnná jmeno má obsahovat \"Samantha\" a výpis má být Ahoj, Samantha. Použij jmeno v příkazu print()."
+}

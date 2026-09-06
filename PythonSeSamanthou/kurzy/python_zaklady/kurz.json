@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "id": "python-zaklady",
+  "title": "Python — první kroky",
+  "lessons": [
+    "01_prvni_prikaz/lekce.json",
+    "02_promenne/lekce.json",
+    "03_pocitani/lekce.json",
+    "04_prvni_obrazek/lekce.json",
+    "05_cykly/lekce.json",
+    "06_podminky/lekce.json",
+    "07_funkce/lekce.json"
+  ]
+}

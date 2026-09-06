@@ -1,0 +1,23 @@
+{
+  "title": "První příkaz",
+  "short": "První příkaz",
+  "time": "5–10 minut",
+  "predict": "Co se objeví po spuštění? Budou ve výpisu i uvozovky?",
+  "task": "Ponech první řádek a přidej druhý příkaz, který vypíše přesně: Učím se Python.",
+  "hint": "Na nový řádek napiš další print(). Do závorek vlož text v uvozovkách. Nezapomeň tečku za slovem Python.",
+  "success": "Umíš napsat a spustit první program! Každý ze dvou příkazů vypsal jeden řádek.",
+  "id": "python-zaklady.prvni-prikaz",
+  "explanation_file": "vyklad.md",
+  "starter_file": "ukazka.py",
+  "solution_file": "reseni.py",
+  "checks": [
+    {
+      "kind": "output_lines",
+      "value": [
+        "Ahoj, Mílo!",
+        "Učím se Python."
+      ]
+    }
+  ],
+  "feedback": "Očekávám dva řádky: Ahoj, Mílo! a Učím se Python. Zkontroluj i tečku a diakritiku."
+}

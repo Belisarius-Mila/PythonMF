@@ -1,0 +1,44 @@
+{
+  "title": "Podmínka: rozhodování",
+  "short": "Podmínky",
+  "time": "10–15 minut",
+  "predict": "Která barva se objeví při teplotě 25? A která přesně při 20?",
+  "task": "Nastav teplotu na 10 a ponech rozhodování pomocí if a else. Program má nakreslit modrý kruh a vypsat: Vezmi si bundu.",
+  "hint": "Uprav pouze hodnotu proměnné teplota. Při 10 není podmínka >= 20 splněna, provede se tedy else.",
+  "success": "Podmínka zvolila druhou větev. Vyzkoušej také hodnoty 19 a 20 a porovnej výsledky.",
+  "id": "python-zaklady.podminky",
+  "explanation_file": "vyklad.md",
+  "starter_file": "ukazka.py",
+  "solution_file": "reseni.py",
+  "checks": [
+    {
+      "kind": "variables_equal",
+      "value": {
+        "teplota": 10
+      }
+    },
+    {
+      "kind": "ast_kind",
+      "value": "If"
+    },
+    {
+      "kind": "output_lines",
+      "value": [
+        "Vezmi si bundu."
+      ]
+    },
+    {
+      "kind": "drawing_equals",
+      "value": [
+        [
+          "circle",
+          250,
+          180,
+          65,
+          "#3287db"
+        ]
+      ]
+    }
+  ],
+  "feedback": "Nastav teplota = 10 a ponech if/else. Očekávám modrý kruh a výpis Vezmi si bundu."
+}

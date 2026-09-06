@@ -1,0 +1,42 @@
+{
+  "title": "Python počítá",
+  "short": "Počítání",
+  "time": "5–10 minut",
+  "predict": "Ukázka počítá tři vstupenky po 20 korunách. Jaký výsledek čekáš?",
+  "task": "Změň počet vstupenek na 5, cenu ponech 20. Nech Python vypočítat a vypsat celkovou cenu.",
+  "hint": "Stačí změnit hodnotu na prvním řádku. Výpočet ve třetím řádku použije nový počet.",
+  "success": "Python vypočítal 5 × 20 = 100. Číslo celkem vzniklo výpočtem z proměnných.",
+  "id": "python-zaklady.pocitani",
+  "explanation_file": "vyklad.md",
+  "starter_file": "ukazka.py",
+  "solution_file": "reseni.py",
+  "checks": [
+    {
+      "kind": "variables_equal",
+      "value": {
+        "pocet": 5,
+        "cena": 20,
+        "celkem": 100
+      }
+    },
+    {
+      "kind": "ast_kind",
+      "value": "Mult"
+    },
+    {
+      "kind": "uses_name",
+      "value": "pocet"
+    },
+    {
+      "kind": "uses_name",
+      "value": "cena"
+    },
+    {
+      "kind": "output_lines",
+      "value": [
+        "100"
+      ]
+    }
+  ],
+  "feedback": "Zkontroluj pocet = 5, cena = 20 a výpočet celkem pomocí násobení proměnných. Výpis má být 100."
+}

@@ -1,0 +1,83 @@
+{
+  "title": "Vlastní funkce: semafory",
+  "short": "Vlastní funkce",
+  "time": "10–15 minut",
+  "predict": "Kolik semaforů vznikne při jediném volání semafor(150)? Co určuje číslo 150?",
+  "task": "Zachovej funkci i první volání. Na konec přidej volání, které nakreslí druhý semafor se středem x = 350.",
+  "hint": "Na poslední řádek, bez odsazení, napiš semafor(350). Tím zavoláš stejný postup s jiným vstupem.",
+  "success": "Máš vlastní funkci a použil jsi ji dvakrát! Příště můžeme přidat seznamy, tlačítka nebo malou hru. Zkus nejdřív vlastními slovy vysvětlit, co dělá parametr x.",
+  "id": "python-zaklady.funkce",
+  "explanation_file": "vyklad.md",
+  "starter_file": "ukazka.py",
+  "solution_file": "reseni.py",
+  "checks": [
+    {
+      "kind": "ast_kind",
+      "value": "FunctionDef"
+    },
+    {
+      "kind": "drawing_equals",
+      "value": [
+        [
+          "rect",
+          110,
+          50,
+          190,
+          305,
+          "#202b3c"
+        ],
+        [
+          "circle",
+          150,
+          100,
+          27,
+          "#ef5b64"
+        ],
+        [
+          "circle",
+          150,
+          180,
+          27,
+          "#f5c84c"
+        ],
+        [
+          "circle",
+          150,
+          260,
+          27,
+          "#2cb67d"
+        ],
+        [
+          "rect",
+          310,
+          50,
+          390,
+          305,
+          "#202b3c"
+        ],
+        [
+          "circle",
+          350,
+          100,
+          27,
+          "#ef5b64"
+        ],
+        [
+          "circle",
+          350,
+          180,
+          27,
+          "#f5c84c"
+        ],
+        [
+          "circle",
+          350,
+          260,
+          27,
+          "#2cb67d"
+        ]
+      ]
+    }
+  ],
+  "feedback": "Očekávám původní funkci a dva semafory: semafor(150) a semafor(350). Volání piš bez odsazení."
+}

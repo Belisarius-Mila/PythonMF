@@ -1,0 +1,28 @@
+{
+  "title": "Kód se mění v obrázek",
+  "short": "První obrázek",
+  "time": "10 minut",
+  "predict": "Kde bude střed kruhu? Co by se stalo při zvětšení x?",
+  "task": "Zvětši poloměr na 70 a změň barvu na \"modra\". Střed ponech na x = 250, y = 180.",
+  "hint": "Změň 40 na 70. Pak změň text \"oranzova\" na \"modra\". Názvy barev v kódu jsou bez diakritiky.",
+  "success": "Dvě drobné změny kódu změnily velikost a barvu obrázku. Zkus pak posunout jeho střed.",
+  "id": "python-zaklady.prvni-obrazek",
+  "explanation_file": "vyklad.md",
+  "starter_file": "ukazka.py",
+  "solution_file": "reseni.py",
+  "checks": [
+    {
+      "kind": "drawing_equals",
+      "value": [
+        [
+          "circle",
+          250,
+          180,
+          70,
+          "#3287db"
+        ]
+      ]
+    }
+  ],
+  "feedback": "Očekávám jeden kruh se středem (250, 180), poloměrem 70 a barvou \"modra\"."
+}

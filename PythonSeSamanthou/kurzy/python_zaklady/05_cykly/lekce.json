@@ -1,0 +1,60 @@
+{
+  "title": "Cyklus: opakování",
+  "short": "Cykly",
+  "time": "10–15 minut",
+  "predict": "Kolik kruhů ukázka nakreslí? Jaká bude poslední hodnota i?",
+  "task": "Uprav cyklus, aby nakreslil pět zelených kruhů místo tří. Ostatní hodnoty ponech.",
+  "hint": "Změň číslo uvnitř range(). range(5) poskytne pět hodnot: 0, 1, 2, 3, 4.",
+  "success": "Jeden cyklus nakreslil pět kruhů. Stejný postup využiješ při práci s mnoha soubory nebo záznamy.",
+  "id": "python-zaklady.cykly",
+  "explanation_file": "vyklad.md",
+  "starter_file": "ukazka.py",
+  "solution_file": "reseni.py",
+  "checks": [
+    {
+      "kind": "ast_kind",
+      "value": "For"
+    },
+    {
+      "kind": "drawing_equals",
+      "value": [
+        [
+          "circle",
+          50,
+          180,
+          20,
+          "#2cb67d"
+        ],
+        [
+          "circle",
+          135,
+          180,
+          20,
+          "#2cb67d"
+        ],
+        [
+          "circle",
+          220,
+          180,
+          20,
+          "#2cb67d"
+        ],
+        [
+          "circle",
+          305,
+          180,
+          20,
+          "#2cb67d"
+        ],
+        [
+          "circle",
+          390,
+          180,
+          20,
+          "#2cb67d"
+        ]
+      ]
+    }
+  ],
+  "feedback": "Použij cyklus for pro pět zelených kruhů. Ponech x = 50 + i * 85, y = 180 a poloměr 20."
+}
