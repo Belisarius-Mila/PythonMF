@@ -2,6 +2,9 @@
 
 const languageButton = document.getElementById("languageButton");
 const repeatButton = document.getElementById("repeatButton");
+const dictionaryButton = document.getElementById("dictionaryButton");
+const dictionaryPanel = document.getElementById("dictionaryPanel");
+const dictionaryList = document.getElementById("dictionaryList");
 const nextButton = document.getElementById("nextButton");
 const audioGate = document.getElementById("audioGate");
 const speechBubble = document.getElementById("speechBubble");
@@ -31,6 +34,25 @@ const completeBanner = document.getElementById("completeBanner");
 
 const LANGUAGE_MODES = Object.freeze({ english: "en", bilingual: "en-cz" });
 const LANGUAGE_STORAGE_KEY = "mmtx-language-mode";
+
+const VOCABULARY = Object.freeze([
+  { en: "bridge", cz: "most", emoji: "🌉" },
+  { en: "stream", cz: "potok", emoji: "💧" },
+  { en: "wide", cz: "široký", emoji: "↔️" },
+  { en: "get across", cz: "dostat se na druhou stranu", emoji: "➡️" },
+  { en: "log", cz: "kláda", emoji: "🪵" },
+  { en: "strong", cz: "pevný", emoji: "💪" },
+  { en: "ready", cz: "hotový", emoji: "✅" },
+  { en: "safe", cz: "bezpečný", emoji: "🛡️" },
+  { en: "jump", cz: "skákat", emoji: "🐿️" },
+  { en: "scared", cz: "bát se", emoji: "😟" },
+  { en: "heavy", cz: "těžký", emoji: "🎒" },
+  { en: "one step at a time", cz: "krok za krokem", emoji: "👣" },
+  { en: "lamp", cz: "lampa", emoji: "🏮" },
+  { en: "do not worry", cz: "neboj se", emoji: "🙂" },
+  { en: "save", cz: "zachránit", emoji: "🛟" },
+  { en: "you are welcome", cz: "není zač", emoji: "🤝" },
+].map((item) => Object.freeze(item)));
 
 function dialogue(speaker, en, cz) { return Object.freeze({ kind: "dialogue", speaker, en, cz }); }
 function prompt(speaker, en, cz) { return Object.freeze({ kind: "prompt", speaker, en, cz }); }
@@ -115,6 +137,9 @@ function updateLanguageUi() {
   languageButton.setAttribute("aria-pressed", String(isBilingual()));
   speechCzech.classList.toggle("hidden", !isBilingual());
   taskCzech.classList.toggle("hidden", !isBilingual());
+  dictionaryList.querySelectorAll(".dictionary-translation").forEach((translation) => {
+    translation.classList.toggle("hidden", !isBilingual());
+  });
 }
 
 function audioPath(entry, language) {
@@ -122,6 +147,13 @@ function audioPath(entry, language) {
   if (!manifest || !manifest.dialogue || !manifest.dialogue[language]) return "";
   const text = language === "en" ? entry.en : entry.cz;
   return manifest.dialogue[language][`${entry.speaker}::${text}`] || "";
+}
+
+function vocabularyAudioPath(item, language) {
+  const manifest = window.SCENE05_AUDIO_MANIFEST;
+  if (!manifest || !manifest.dialogue || !manifest.dialogue[language]) return "";
+  const text = language === "en" ? item.en : item.cz;
+  return manifest.dialogue[language][`dictionary::${text}`] || "";
 }
 
 function stopAudio() {
@@ -178,6 +210,13 @@ function shouldShowNext() {
 function updateControls() {
   languageButton.disabled = state.isPlaying || state.isAnimating;
   repeatButton.disabled = !state.currentEntry || state.isPlaying || state.isAnimating;
+  const dictionaryAvailable = state.stage === "complete";
+  dictionaryButton.classList.toggle("hidden", !dictionaryAvailable);
+  dictionaryButton.disabled = !dictionaryAvailable || state.isPlaying || state.isAnimating;
+  if (!dictionaryAvailable) closeDictionary();
+  dictionaryList.querySelectorAll(".dictionary-item").forEach((button) => {
+    button.disabled = state.isPlaying || state.isAnimating;
+  });
   const showNext = shouldShowNext();
   nextButton.classList.toggle("hidden", !showNext);
   nextButton.disabled = !showNext;
@@ -189,6 +228,58 @@ function updateControls() {
   fionaTarget.disabled = state.stage !== "wait-fiona" || state.isPlaying || state.isAnimating;
   brunoTarget.disabled = state.stage !== "wait-bruno" || state.isPlaying || state.isAnimating;
   loganTarget.disabled = state.stage !== "wait-logan" || state.isPlaying || state.isAnimating;
+}
+
+function closeDictionary() {
+  dictionaryPanel.classList.add("hidden");
+  dictionaryButton.classList.remove("active-panel");
+  dictionaryButton.setAttribute("aria-expanded", "false");
+}
+
+function toggleDictionary() {
+  if (state.stage !== "complete" || dictionaryButton.disabled) return;
+  const willOpen = dictionaryPanel.classList.contains("hidden");
+  dictionaryPanel.classList.toggle("hidden", !willOpen);
+  dictionaryButton.classList.toggle("active-panel", willOpen);
+  dictionaryButton.setAttribute("aria-expanded", willOpen ? "true" : "false");
+}
+
+function renderDictionary() {
+  dictionaryList.replaceChildren();
+  VOCABULARY.forEach((item) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "dictionary-item";
+    button.setAttribute("aria-label", `${item.en} — ${item.cz}`);
+
+    const emoji = document.createElement("span");
+    emoji.className = "dictionary-emoji";
+    emoji.setAttribute("aria-hidden", "true");
+    emoji.textContent = item.emoji;
+
+    const word = document.createElement("span");
+    word.className = "dictionary-word";
+    word.textContent = item.en;
+
+    const translation = document.createElement("span");
+    translation.className = "dictionary-translation";
+    translation.textContent = item.cz;
+
+    button.append(emoji, word, translation);
+    button.addEventListener("click", () => playVocabularyItem(item));
+    dictionaryList.appendChild(button);
+  });
+  updateLanguageUi();
+}
+
+async function playVocabularyItem(item) {
+  if (state.stage !== "complete" || state.isPlaying || state.isAnimating) return;
+  state.isPlaying = true;
+  updateControls();
+  await playFixedAudio(vocabularyAudioPath(item, "en"));
+  if (isBilingual()) await playFixedAudio(vocabularyAudioPath(item, "cs"));
+  state.isPlaying = false;
+  updateControls();
 }
 
 async function playEntry(entry, { remember = true } = {}) {
@@ -486,6 +577,7 @@ audioGate.addEventListener("click", startScene);
 nextButton.addEventListener("click", advanceDialogue);
 repeatButton.addEventListener("click", repeatCurrent);
 languageButton.addEventListener("click", toggleLanguage);
+dictionaryButton.addEventListener("click", toggleDictionary);
 for (const button of logButtons) button.addEventListener("click", () => placeLog(button));
 benjiTarget.addEventListener("click", crossWithBenji);
 sunnyTarget.addEventListener("click", crossWithSunny);
@@ -493,4 +585,5 @@ fionaTarget.addEventListener("click", crossWithFiona);
 brunoTarget.addEventListener("click", crossWithBruno);
 loganTarget.addEventListener("click", rescueLampWithLogan);
 updateLanguageUi();
+renderDictionary();
 updateControls();

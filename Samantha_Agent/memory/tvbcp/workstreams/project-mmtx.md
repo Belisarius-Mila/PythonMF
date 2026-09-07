@@ -1,35 +1,33 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno produkčním dorovnáním: 2026-09-02 21:49 CEST
+- Obnoveno potvrzeným checkpointem: 2026-09-07 10:52 CEST
 
 ### Hotovo
-- Pátá scéna je obsahově i technicky dokončená: Fiona přejde, Bruno pomůže Bunnymu s batohem a Logan zachrání Brunovu lampu.
-- Scéna 4 je nově propojená se scénou 5; obě produkční kopie zůstávají byte-identické.
-- Commit `d0fd66c3c581` je pushnutý a úspěšně publikovaný na GitHub Pages.
+- Pátá scéna má slovník 16 výrazů s místním anglickým a českým audiem v obou synchronizovaných kopiích
 
 ### Otevřeno
-- Ruční vizuální a zvukový smoke celé scény na Macu a iPhonu zůstává otevřený.
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
 
 ### Rizika
-- Browserový backend nebyl v této relaci dostupný; interaktivní průchod proto není vydáván za provedený.
+- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
 
 ### Další krok
-- Provést reálný vizuální a zvukový smoke celé scény 5 na Macu a iPhonu.
+- Po potvrzeném checkpointu samostatně spustit řízené p+n a potom ověřit slovník na Macu a iPhonu
 
 ### Rozhodnutí
-- Logan zachrání Brunovu lampu ještě v páté scéně.
-- Nové obrazy dodržují hladký 3D standard, plné rozlišení 1672 x 941 a WebP q90 se zachovanými zdrojovými PNG.
+- V tomto kroku nebylo přijato nové kanonické rozhodnutí.
 
 ### Navrhované další kroky
-- Po produkčním retestu případně opravit jen potvrzené hotspoty nebo konkrétní audio.
-- Po schválení závěru navrhnout obsah scény 6.
+- Projít otevření slovníku a všech 16 položek v režimech EN a EN + CZ
+- Po nasazení ověřit veřejnou kopii a reprezentativní MP3
 
 ### Technický stav checkpointu
-- Celý MMTX balík prošel 61/61 testy, audio kontrola 72/72, oba JavaScripty prošly `node --check` a `git diff --check` je čistý.
-- `docs` a MMTX mirror jsou pro scény 4 a 5 byte-identické.
-- Serverová operace `mmtx_pages_publish_current_main` pushnula 1 commit; workflow `33674738263`, deployment `6230419264`, commit `d0fd66c3c581` a veřejný HTTP 200 jsou přesně korelované.
-- Pět reprezentativních veřejných souborů včetně závěrečného obrazu a Loganova MP3 je SHA-256 shodných s lokální produkcí.
+- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
+- Git před checkpointem: lokální `main` na `7011366f66ae`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `7bfafd4b2b67` · je starší než ověřený main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-09-05T14:30:30+00:00.
+- Read-only živý stav: main=`aligned`, deployment=`verified_other_main`, runtime=`connected`.
+- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -1069,3 +1067,29 @@ Technický důkaz:
 - GitHub Pages deployment `6230419264` má stav `success` a stejný commit.
 - Server i nezávislý systémový `curl` potvrdily HTTP 200; pět reprezentativních souborů má shodný SHA-256.
 - Funkční commit je na `origin/main`; následný git-safe paměťový zápis je samostatný lokální checkpoint a znovu nespouští push ani deployment.
+
+### 2026-09-07 10:52 CEST – Pátá scéna má slovník 16 výrazů s místním anglickým a českým audiem v obou synchronizovaných kopiích
+
+Hotovo:
+- Pátá scéna má slovník 16 výrazů s místním anglickým a českým audiem v obou synchronizovaných kopiích
+
+Otevřeno:
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+
+Rizika:
+- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
+
+Rozhodnutí:
+- V tomto kroku nebylo přijato nové kanonické rozhodnutí.
+
+Další krok:
+- Po potvrzeném checkpointu samostatně spustit řízené p+n a potom ověřit slovník na Macu a iPhonu
+
+Navrhované další kroky:
+- Projít otevření slovníku a všech 16 položek v režimech EN a EN + CZ
+- Po nasazení ověřit veřejnou kopii a reprezentativní MP3
+
+Technický důkaz:
+- rychlá Cockpit brána syntaxe a whitespace: 5.3 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
+- Pracovní proud: `project-mmtx`.
+- Read-only živý stav při checkpointu: main=`aligned`, deployment=`verified_other_main`, runtime=`connected`.

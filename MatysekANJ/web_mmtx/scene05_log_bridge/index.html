@@ -13,8 +13,8 @@
     <link rel="preload" href="scene05_bruno_bunny_crossing_smooth_q90.webp" as="image" type="image/webp">
     <link rel="preload" href="scene05_lamp_falling_smooth_q90.webp" as="image" type="image/webp">
     <link rel="preload" href="scene05_lamp_rescued_smooth_q90.webp" as="image" type="image/webp">
-    <link rel="stylesheet" href="styles.css?v=20260902complete1">
-    <link rel="stylesheet" href="interaction.css?v=20260902complete1">
+    <link rel="stylesheet" href="styles.css?v=20260907dictionary1">
+    <link rel="stylesheet" href="interaction.css?v=20260907dictionary1">
   </head>
   <body>
     <main class="app-shell">
@@ -42,6 +42,7 @@
             <div class="scene-actions">
               <button class="ui-button language-button" id="languageButton" type="button" aria-label="Změnit jazykový režim">EN + CZ</button>
               <button class="ui-button repeat-button" id="repeatButton" type="button" aria-label="Zopakovat právě zobrazenou větu" disabled><span aria-hidden="true">🔁</span><span>Repeat</span></button>
+              <button class="ui-button dictionary-button hidden" id="dictionaryButton" type="button" aria-label="Slovníček nových slov" aria-expanded="false" disabled><span aria-hidden="true">📖</span></button>
             </div>
           </div>
 
@@ -77,12 +78,20 @@
             <span><strong>Bridge crossing complete!</strong><small>Přechod přes most je dokončený!</small></span>
           </div>
 
+          <section class="dictionary-panel hidden" id="dictionaryPanel" aria-label="Slovníček nových slov">
+            <div class="dictionary-title">
+              <strong>New words</strong>
+              <small>Nová slovíčka</small>
+            </div>
+            <div class="dictionary-list" id="dictionaryList"></div>
+          </section>
+
           <button class="audio-gate" id="audioGate" type="button"><strong>Klepni a poslouchej</strong><span>Tap and listen</span></button>
         </div>
       </section>
     </main>
 
-    <script src="audio_manifest.js?v=20260902complete1"></script>
-    <script src="script.js?v=20260902complete1"></script>
+    <script src="audio_manifest.js?v=20260907dictionary1"></script>
+    <script src="script.js?v=20260907dictionary1"></script>
   </body>
 </html>

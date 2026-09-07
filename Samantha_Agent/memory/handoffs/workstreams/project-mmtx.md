@@ -1,37 +1,33 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno produkčním dorovnáním: 2026-09-02 21:49 CEST
+- Obnoveno potvrzeným checkpointem: 2026-09-07 10:52 CEST
 
 ### Hotovo
-- Pátá scéna je obsahově i technicky dokončená: Fiona přejde, Bruno převezme Bunnyho těžký batoh a vede ho přes most, Brunova lampa spadne do vody a Logan ji zachrání.
-- Čtyři nové situační obrazy používají hladký 3D standard, rozměr 1672 x 941 a produkční WebP q90; zdrojová PNG zůstávají zachovaná.
-- Scéna má 36 vět a 72 pevných EN/CZ MP3, tři nové klikací úkoly a závěr `To the lake!`.
-- Dokončená Harryho scéna 4 nyní nabízí přímé pokračování do scény 5.
-- Commit `d0fd66c3c581` je pushnutý a úspěšně publikovaný na GitHub Pages.
+- Pátá scéna má slovník 16 výrazů s místním anglickým a českým audiem v obou synchronizovaných kopiích
 
 ### Otevřeno
-- Ruční vizuální a zvukový smoke celé scény na Macu a iPhonu zůstává otevřený.
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
 
 ### Rizika
-- Browserový backend nebyl v této relaci dostupný; interaktivní průchod proto není vydáván za provedený.
+- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
 
 ### Další krok
-- Projít celou scénu 5 na Macu a iPhonu, zejména nové hotspoty Fiony, Bruna a Logana a všech 72 stop.
+- Po potvrzeném checkpointu samostatně spustit řízené p+n a potom ověřit slovník na Macu a iPhonu
 
 ### Rozhodnutí
-- Logan zachrání Brunovu lampu ještě v páté scéně; tím se uzavírá pomoc kamarádům i význam nové postavy.
-- Každá další věta se zpřístupní přes `Next`, `Repeat` opakuje pouze právě zobrazenou větu a klikací úkoly zůstávají bez trestu.
+- V tomto kroku nebylo přijato nové kanonické rozhodnutí.
 
 ### Navrhované další kroky
-- Po produkčním retestu případně upravit pouze potvrzené umístění hotspotů nebo hlasitost konkrétní stopy.
-- Teprve po schválení závěru navrhnout obsah scény 6.
+- Projít otevření slovníku a všech 16 položek v režimech EN a EN + CZ
+- Po nasazení ověřit veřejnou kopii a reprezentativní MP3
 
 ### Technický stav checkpointu
-- Celý MMTX balík prošel 61/61 testy, generátor ověřil 72/72 MP3, oba JavaScripty prošly `node --check` a `git diff --check` je čistý.
-- `docs` a `MatysekANJ/web_mmtx` jsou pro scény 4 a 5 byte-identické.
-- Serverová operace `mmtx_pages_publish_current_main` pushnula 1 commit; workflow `33674738263` a deployment `6230419264` odpovídají přesně commitu `d0fd66c3c581` a veřejný smoke vrátil HTTP 200.
-- Veřejné `index.html`, `script.js`, `audio_manifest.js`, závěrečný obraz a reprezentativní Loganovo MP3 jsou SHA-256 shodné s lokální produkční kopií.
+- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
+- Git před checkpointem: lokální `main` na `7011366f66ae`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `7bfafd4b2b67` · je starší než ověřený main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-09-05T14:30:30+00:00.
+- Read-only živý stav: main=`aligned`, deployment=`verified_other_main`, runtime=`connected`.
+- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -517,3 +513,15 @@ Bezpecnost / neukladat:
 - Ověření: workflow `33674738263`, deployment `6230419264`, přesný commit `d0fd66c3c581`, veřejný HTTP 200 a SHA-256 shoda pěti reprezentativních souborů.
 - Riziko: Automatizovaný browser nebyl dostupný, proto zůstává otevřený ruční vizuální a zvukový smoke.
 - Další krok: Projít celou scénu 5 na Macu a iPhonu, zejména nové hotspoty Fiony, Bruna a Logana a nové audio.
+
+### Automatický checkpoint 2026-09-07 10:52 CEST
+
+- Pracovní proud: `project-mmtx`
+- Hotovo: Pátá scéna má slovník 16 výrazů s místním anglickým a českým audiem v obou synchronizovaných kopiích
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Rizika: Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: rychlá Cockpit brána syntaxe a whitespace: 5.3 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu
+- Změněné cesty před paměťovým zápisem (74): `MatysekANJ/build_scene05_audio.py`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio_manifest.js`, `MatysekANJ/web_mmtx/scene05_log_bridge/index.html`, `MatysekANJ/web_mmtx/scene05_log_bridge/interaction.css`, `MatysekANJ/web_mmtx/scene05_log_bridge/script.js`, `Samantha_Agent/tests/test_mmtx_scene05_first_interaction.py`, `docs/scene05_log_bridge/audio_manifest.js`, `docs/scene05_log_bridge/index.html`, `docs/scene05_log_bridge/interaction.css`, `docs/scene05_log_bridge/script.js`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_vocab_bridge_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_vocab_do_not_worry_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_vocab_get_across_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_vocab_heavy_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_vocab_jump_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_vocab_lamp_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_vocab_log_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_vocab_one_step_at_a_time_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_vocab_ready_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_vocab_safe_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_vocab_save_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_vocab_scared_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_vocab_stream_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_vocab_strong_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_vocab_wide_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/czech/scene05_vocab_you_are_welcome_cz.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_vocab_bridge_en.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_vocab_do_not_worry_en.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_vocab_get_across_en.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_vocab_heavy_en.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_vocab_jump_en.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_vocab_lamp_en.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_vocab_log_en.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_vocab_one_step_at_a_time_en.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_vocab_ready_en.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_vocab_safe_en.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_vocab_save_en.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_vocab_scared_en.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_vocab_stream_en.mp3`, `MatysekANJ/web_mmtx/scene05_log_bridge/audio/english/scene05_vocab_strong_en.mp3`, … a dalších 34
+- Commit: `Add bilingual Scene 5 dictionary`
+- Další krok: Po potvrzeném checkpointu samostatně spustit řízené p+n a potom ověřit slovník na Macu a iPhonu

@@ -21,7 +21,7 @@ MANIFEST_NAME = "audio_manifest.js"
 CAPABILITY_ID = "generate_project_audio_asset"
 CAPABILITY_TOOL = "app.speech.edge_tts_mp3.synthesize_edge_tts_mp3_sync"
 RATE = "-10%"
-VERSION = "20260902complete1"
+VERSION = "20260907dictionary1"
 MIN_AUDIO_BYTES = 1000
 
 @dataclass(frozen=True)
@@ -33,6 +33,12 @@ class Voice:
 class DialogueLine:
     line_id: str
     character_id: str
+    text_en: str
+    text_cz: str
+
+@dataclass(frozen=True)
+class VocabularyItem:
+    slug: str
     text_en: str
     text_cz: str
 
@@ -51,6 +57,7 @@ ENGLISH_VOICES = {
     "fiona": Voice("en-US-JennyNeural", "Jenny"),
     "logan": Voice("en-US-ChristopherNeural", "Christopher"),
     "sunny": Voice("en-US-MichelleNeural", "Michelle"),
+    "dictionary": Voice("en-US-JennyNeural", "Jenny"),
 }
 CZECH_VOICE = Voice("cs-CZ-VlastaNeural", "Vlasta")
 
@@ -93,6 +100,25 @@ DIALOGUE_LINES = (
     DialogueLine("to_the_lake", "benji", "To the lake!", "K jezeru!"),
 )
 
+VOCABULARY = (
+    VocabularyItem("bridge", "bridge", "most"),
+    VocabularyItem("stream", "stream", "potok"),
+    VocabularyItem("wide", "wide", "široký"),
+    VocabularyItem("get_across", "get across", "dostat se na druhou stranu"),
+    VocabularyItem("log", "log", "kláda"),
+    VocabularyItem("strong", "strong", "pevný"),
+    VocabularyItem("ready", "ready", "hotový"),
+    VocabularyItem("safe", "safe", "bezpečný"),
+    VocabularyItem("jump", "jump", "skákat"),
+    VocabularyItem("scared", "scared", "bát se"),
+    VocabularyItem("heavy", "heavy", "těžký"),
+    VocabularyItem("one_step_at_a_time", "one step at a time", "krok za krokem"),
+    VocabularyItem("lamp", "lamp", "lampa"),
+    VocabularyItem("do_not_worry", "do not worry", "neboj se"),
+    VocabularyItem("save", "save", "zachránit"),
+    VocabularyItem("you_are_welcome", "you are welcome", "není zač"),
+)
+
 def _asset_path(line: DialogueLine, language: str) -> Path:
     suffix = "en" if language == "en" else "cz"
     folder = "english" if language == "en" else "czech"
@@ -103,6 +129,9 @@ def audio_assets() -> tuple[AudioAsset, ...]:
     for line in DIALOGUE_LINES:
         assets.append(AudioAsset(f"{line.character_id}::{line.text_en}", "en", line.text_en, ENGLISH_VOICES[line.character_id], _asset_path(line, "en")))
         assets.append(AudioAsset(f"{line.character_id}::{line.text_cz}", "cs", line.text_cz, CZECH_VOICE, _asset_path(line, "cs")))
+    for item in VOCABULARY:
+        assets.append(AudioAsset(f"dictionary::{item.text_en}", "en", item.text_en, ENGLISH_VOICES["dictionary"], Path("audio/english") / f"scene05_vocab_{item.slug}_en.mp3"))
+        assets.append(AudioAsset(f"dictionary::{item.text_cz}", "cs", item.text_cz, CZECH_VOICE, Path("audio/czech") / f"scene05_vocab_{item.slug}_cz.mp3"))
     return tuple(assets)
 
 def build_manifest() -> dict[str, object]:
@@ -116,7 +145,7 @@ def build_manifest() -> dict[str, object]:
         "version": VERSION,
         "rate": RATE,
         "voices": voices,
-        "stats": {"dialogueLines": len(DIALOGUE_LINES), "audioReferences": len(audio_assets())},
+        "stats": {"dialogueLines": len(DIALOGUE_LINES), "vocabularyItems": len(VOCABULARY), "audioReferences": len(audio_assets())},
         "dialogue": dialogue,
     }
 
@@ -159,6 +188,9 @@ def _source_is_complete() -> None:
     for line in DIALOGUE_LINES:
         if f'"{line.text_en}"' not in lines_block or f'"{line.text_cz}"' not in lines_block:
             raise RuntimeError(f"Audio manifest neodpovídá dialogu {line.line_id}.")
+    for item in VOCABULARY:
+        if f'en: "{item.text_en}"' not in source or f'cz: "{item.text_cz}"' not in source:
+            raise RuntimeError(f"Audio manifest neodpovídá slovníčku {item.slug}.")
 
 def build(*, apply: bool) -> dict[str, int]:
     _source_is_complete()

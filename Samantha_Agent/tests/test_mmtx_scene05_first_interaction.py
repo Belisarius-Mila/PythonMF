@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import subprocess
+import sys
 import unittest
 from pathlib import Path
 
@@ -9,6 +11,24 @@ from PIL import Image
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DOCS_SCENE = PROJECT_ROOT / "docs" / "scene05_log_bridge"
 MIRROR_SCENE = PROJECT_ROOT / "MatysekANJ" / "web_mmtx" / "scene05_log_bridge"
+GLOSSARY = {
+    "bridge": "most",
+    "stream": "potok",
+    "wide": "široký",
+    "get across": "dostat se na druhou stranu",
+    "log": "kláda",
+    "strong": "pevný",
+    "ready": "hotový",
+    "safe": "bezpečný",
+    "jump": "skákat",
+    "scared": "bát se",
+    "heavy": "těžký",
+    "one step at a time": "krok za krokem",
+    "lamp": "lampa",
+    "do not worry": "neboj se",
+    "save": "zachránit",
+    "you are welcome": "není zač",
+}
 
 def load_manifest() -> dict[str, object]:
     source = (DOCS_SCENE / "audio_manifest.js").read_text(encoding="utf-8")
@@ -64,12 +84,16 @@ class MmtxScene05FirstInteractionTests(unittest.TestCase):
             "languageButton", "repeatButton", "nextButton", "audioGate", "speechBubble",
             "taskPrompt", "taskIcon", "logsLayer", "benjiTarget", "sunnyTarget", "fionaTarget",
             "brunoTarget", "loganTarget", "completeBanner",
+            "dictionaryButton", "dictionaryPanel", "dictionaryList",
         ):
             self.assertIn(f'id="{element_id}"', html)
         self.assertEqual(html.count('data-log="'), 3)
         self.assertEqual(html.count('class="log-sprite"'), 3)
         self.assertIn("Bridge crossing complete!", html)
         self.assertIn("Přechod přes most je dokončený!", html)
+        self.assertIn("📖", html)
+        self.assertIn("New words", html)
+        self.assertIn("Nová slovíčka", html)
 
     def test_dialogue_contract_steps_one_sentence_at_a_time(self) -> None:
         script = (DOCS_SCENE / "script.js").read_text(encoding="utf-8")
@@ -109,6 +133,21 @@ class MmtxScene05FirstInteractionTests(unittest.TestCase):
         self.assertNotIn("speechSynthesis", script)
         self.assertNotIn("SpeechSynthesisUtterance", script)
 
+    def test_dictionary_opens_only_after_completion_and_uses_local_audio(self) -> None:
+        script = (DOCS_SCENE / "script.js").read_text(encoding="utf-8")
+        css = (DOCS_SCENE / "interaction.css").read_text(encoding="utf-8")
+        for text_en, text_cz in GLOSSARY.items():
+            self.assertIn(f'en: "{text_en}"', script)
+            self.assertIn(f'cz: "{text_cz}"', script)
+        self.assertIn('const dictionaryAvailable = state.stage === "complete";', script)
+        self.assertIn("renderDictionary", script)
+        self.assertIn("playVocabularyItem", script)
+        self.assertIn('vocabularyAudioPath(item, "en")', script)
+        self.assertIn('vocabularyAudioPath(item, "cs")', script)
+        self.assertIn(".dictionary-panel", css)
+        self.assertIn(".dictionary-list", css)
+        self.assertIn(".dictionary-item", css)
+
     def test_smooth_scene_images_preserve_png_sources_and_q90_webp_outputs(self) -> None:
         for stem in (
             "scene05_log_bridge_supports_smooth",
@@ -140,17 +179,34 @@ class MmtxScene05FirstInteractionTests(unittest.TestCase):
     def test_manifest_covers_every_spoken_line_with_fixed_mp3(self) -> None:
         manifest = load_manifest()
         self.assertEqual(manifest["schemaVersion"], 1)
-        self.assertEqual(manifest["version"], "20260902complete1")
-        self.assertEqual(manifest["stats"], {"dialogueLines": 36, "audioReferences": 72})
+        self.assertEqual(manifest["version"], "20260907dictionary1")
+        self.assertEqual(
+            manifest["stats"],
+            {"dialogueLines": 36, "vocabularyItems": 16, "audioReferences": 104},
+        )
         dialogue = manifest["dialogue"]
-        self.assertEqual(len(dialogue["en"]), 36)
-        self.assertEqual(len(dialogue["cs"]), 36)
+        self.assertEqual(len(dialogue["en"]), 52)
+        self.assertEqual(len(dialogue["cs"]), 52)
+        for text_en, text_cz in GLOSSARY.items():
+            self.assertIn(f"dictionary::{text_en}", dialogue["en"])
+            self.assertIn(f"dictionary::{text_cz}", dialogue["cs"])
         referenced = set(dialogue["en"].values()) | set(dialogue["cs"].values())
-        self.assertEqual(len(referenced), 72)
+        self.assertEqual(len(referenced), 104)
         for relative_path in referenced:
             audio = (DOCS_SCENE / relative_path).read_bytes()
             self.assertGreaterEqual(len(audio), 1000)
             self.assertIn(audio[:2], {b"\xff\xf3", b"\xff\xfb", b"ID"})
+
+    def test_audio_builder_verifies_dialogue_and_dictionary_assets(self) -> None:
+        result = subprocess.run(
+            [sys.executable, str(PROJECT_ROOT / "MatysekANJ" / "build_scene05_audio.py"), "--check"],
+            cwd=PROJECT_ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("104 pevných stop", result.stdout)
 
     def test_docs_and_source_mirror_are_byte_identical(self) -> None:
         docs_files = {path.relative_to(DOCS_SCENE) for path in DOCS_SCENE.rglob("*") if path.is_file()}
