@@ -1,6 +1,39 @@
 # VocabularyFR - build a prenos na druhy Mac
 
-Tento postup pouzivej po kazde uprave aplikace.
+## Aktuální distribuce pro Janu (2026-09-08)
+
+Pro sdílený PythonMF používej registrované workflow `vocabularyfr_jana_bundle`
+a `Samantha_Agent/scripts/build_jana_vocabularyfr_bundle.py`. Starší postup
+níže patří k předchozímu obecnému balíčku; pro tuto aktualizaci se nepoužívá.
+
+- Nejprve ověřená záloha živého Janina CSV i původní aplikace. Soukromá data
+  a balíčky nepatří do Gitu.
+- V odděleném vstupním adresáři jsou Janiny `VocabularyFR.csv`, `VerbeFR.csv`
+  a potřebný `FR_Pict.csv`. Chybějící věty se doplňují pouze v této kopii.
+- Soukromý `vocabularyfr_jana_release/request.json` má klíče `input_dir`,
+  `output_dir`, `python`; poslední ukazuje na Python izolovaného build venv
+  s PyInstaller 6 a Pillow. Výstup musí být nový adresář, ideálně v `/private/tmp`.
+- Builder kopíruje aktuální zdrojový kód a úplná tréninková data. Nic nemění
+  v Mílově slovníku ani v živé Janině instalaci. Build je macOS x86_64,
+  stejně jako původní Janina aplikace; Python, Tk a Pillow jsou přibalené.
+- `jana_launcher.py` určí při dvojkliku jediný zapisovatelný adresář vedle
+  `.app` a předá ho jako explicitní `--data-dir`. Chybějící CSV odmítne,
+  nevybere tiše jiný slovník z Application Support.
+- Sestavení ověří podpis a spustí skutečnou `.app` s `--check-bundle REPORT`.
+  Tento kontrolní režim používá jen čerstvou dočasnou kopii přibalených dat,
+  načte všechny tréninkové obrázky a ověří psanou odpověď přes Tk.
+- Výstup `VocabularyFR_Jana.zip` obsahuje složku `VocabularyFR` s aplikací,
+  daty a návodem. Obrázky jsou také uvnitř aplikace. Manifest obsahuje SHA-256.
+- Před výměnou znovu porovnej živé CSV s původní zálohou. Přenes novou `.app`
+  do přípravné složky a ověř obsah i odkazy. Původní `.app` přejmenuj do
+  datované záložní složky; nemaž ji. Teprve pak dej nové `.app` původní název.
+- Při budoucí aktualizaci nepřepisuj novější uživatelské CSV seedem ze ZIPu.
+  Ověření místní iCloud složky nedokazuje dokončení synchronizace na Janině Macu.
+
+Vydání 2026-09-08: 406 slovíček, 15 doplněných párů vět, dva pravopisné
+opravy, trénink 107 sloves / 1 926 vět. `JANA_CTI_ME.txt` obsahuje krátký návod.
+
+## Historický postup pro původní obecný balíček
 
 ## 1) Build na tvem hlavnim Macu
 

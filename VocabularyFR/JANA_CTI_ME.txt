@@ -1,0 +1,22 @@
+VocabularyFR pro Janu – nová verze s Tréninkem sloves
+
+Ve sdíleném iCloud Drive otevři PythonMF → VocabularyFR → VocabularyFR.app.
+Python se neinstaluje, je už součástí aplikace.
+
+V hlavním okně je tlačítko Trénink sloves: 107 sloves a 1 926 vět.
+Vzpomínání ukáže zájmeno a počká na napsaný tvar. Správný tvar pokračuje
+sám; tlačítko Dál pokračuje i bez odpovědi. Písmena se odhalují pomaleji.
+
+Aplikaci nech ve složce VocabularyFR vedle VocabularyFR.csv, VerbeFR.csv
+a FR_Pict.csv. Pracuje přímo s těmito daty. Zástupce v Docku je v pořádku.
+Slovník během procvičování neupravuj současně v jiné aplikaci či na jiném
+zařízení. Před přechodem na jiné zařízení počkej na dokončení iCloudu.
+
+ZIP je záložní distribuční balíček. Obsahuje snímek slovníku z přípravy;
+při pozdější aktualizaci jím nepřepisuj novější VocabularyFR.csv.
+Původní aplikace je při výměně zachována v datované záložní složce.
+
+Pokud macOS aplikaci zablokuje, použij Nastavení systému → Soukromí
+a zabezpečení → Přesto otevřít pro tuto aplikaci. Nevypínej zabezpečení Macu.
+Při potížích se zvukem lze trénink používat bez zvuku; francouzský hlas
+Thomas je hlas systému macOS.

@@ -46,6 +46,17 @@ class WorkflowCommand:
 
 WORKFLOW_COMMANDS: tuple[WorkflowCommand, ...] = (
     WorkflowCommand(
+        command_id="vocabularyfr_jana_bundle",
+        title="Sestavit VocabularyFR pro Janu",
+        purpose="Vytvori novy privatni Mac balicek z overene pracovni kopie Janinych dat.",
+        aliases=("sestav vocabularyfr pro janu", "zabal vocabularyfr pro janu"),
+        argv=(str(PYTHON_BIN), str(SAMANTHA_DIR / "scripts/build_jana_vocabularyfr_bundle.py"), "--execute"),
+        cwd=SAMANTHA_DIR,
+        risk="local_build_write",
+        writes="Novy adresar urceny privatnim vocabularyfr_jana_release/request.json; zadna ziva instalace.",
+        requires_confirmation=True,
+    ),
+    WorkflowCommand(
         command_id="backup_project_recovery",
         title="Ostra recovery zaloha PythonMF/Samantha",
         purpose="Vytvori novy recovery snapshot projektu do sifrovaneho externiho kontejneru.",

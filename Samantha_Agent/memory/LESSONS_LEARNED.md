@@ -522,3 +522,17 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   znovu přehraje přerušenou výpověď. Žádné globální ukončování přehrávačů.
 - Ověření: testy čekání na audio, pauzy, pozdního callbacku, chyby hlasu a
   skutečný Tk průchod v Tréninku sloves; macOS Thomas dokončil ukázku.
+
+
+## 2026-09-08 — Ověření samostatné VocabularyFR.app pro sdílený iCloud
+
+- Typ: opakujici se.
+- Problém: úspěšný zdrojový Tk běh nedokazuje správně zabalená data; PyInstaller
+  onedir používá odkazy Frameworks → Resources. Finder může pod Desktopem
+  přidávat metadata odmítaná strict codesign i po očištění.
+- Řešení: nový izolovaný build ideálně v /private/tmp, kontrolovat skutečnou
+  .app na dočasné kopii seedů, respektovat resource odkazy a ověřit podpis.
+  Janina edice výslovně předává --data-dir vedle .app; nepřepíná na jiný CSV.
+- Ověření: aktuální bundle prošel strict podpisem; z místní sdílené kopie
+  fungovalo 406 řádků, 107 ilustrací a psaný recall. Data a stará .app nejprve
+  zálohované, přenos porovnaný včetně odkazů a SHA-256.
