@@ -11,8 +11,9 @@
   zájmeno a postupné odhalení tvaru po písmenech → přečtení celého tvaru.
 - Vpravo kontextový obrázek. České věty pouze na vyžádání pod obrázkem,
   bez automatického zobrazení a čtení.
-- Pauza a zopakování; volitelný režim „Zkus si vzpomenout“ skryje předchozí
-  ukázky a před závěrečným odhalením nechá čas na vlastní odpověď.
+- Pauza a zopakování; volitelný režim „Zkus si vzpomenout“ nejprve ukáže
+  pouze zájmeno a pole pro tvar slovesa. Bez časového limitu čeká na správnou
+  odpověď nebo tlačítko Dál, teprve poté následuje ukázka tvaru a tři věty.
 - Bez smyčky se po sekvenci čeká. Změna slovesa zastaví zvuk i animace.
 - `falloir` má pouze `il faut`: dostupná je jen S/3; smyčka opakuje tento
   tvar s novým výběrem vět, nevytváří neexistující osoby.
@@ -60,8 +61,13 @@ přejde na další osobu zvoleného čísla. Změna S/P nebo osoby začne novou 
 Interval 1–15 s určuje pauzu po větě i mezi osobami. Pauza zastaví zvuk;
 pokračování znovu přečte přerušenou výpověď od začátku.
 
-Při vzpomínání se skryjí francouzské ukázky i české překlady. Na vlastní
-odpověď zbývají nejméně tři sekundy, poté se tvar postupně odhalí.
+Při vzpomínání se před první ukázkou zobrazí pouze zájmeno. Do políčka
+napiš samotný tvar slovesa (například `vais`). Správný tvar pokračuje
+automaticky, tlačítko **Dál** nebo Enter pokračuje i s prázdnou nebo chybnou
+odpovědí. Čekání nemá časový limit. Velikost písmen a okolní mezery se ignorují,
+francouzská diakritika se kontroluje. Pauza ani Zopakovat řešení neprozradí.
+Změna slovesa nebo osoby vymaže rozepsanou odpověď. Závěrečné odhalování
+tvaru po písmenech má prodlevu **0,44 s** mezi písmeny (dříve 0,22 s).
 Výběr osoby může použít také `elle` / `elles` podle vybraných dodaných vět.
 
 Tréninková data se načítají pouze ke čtení z adresáře aplikace, v balíčku
@@ -80,7 +86,10 @@ PyInstaller specifikace zahrnuje všechny tréninkové prostředky.
 - Nové ilustrace: devenir, sembler, mourir, jeter, montrer, tomber,
   paraître, cacher, tirer, ajouter, tuer a changer. Vznikly přes imagegen
   z veřejných ilustračních zadání; neobsahují soukromé podklady.
-- 31 cílených testů prošlo; plná Cockpit brána 1 518/1 518 prošla.
+- Základní verze prošla 31 cílenými testy a plnou Cockpit branou 1 518/1 518.
+  Úprava čekání na napsanou odpověď prošla 18 testy tréninku/dat a rychlou
+  statickou branou. Skutečné Tk ověřilo automatické pokračování, Dál s prázdnou
+  i chybnou odpovědí, diakritiku, přepnutí slovesa a pauzu během čekání.
 - Skutečný Tk průchod ověřil aller, falloir, acheter, vzpomínání,
   pauzu mezi osobami a zrušení při zavření. Thomas dokončil zkušební řeč.
 - Obrázky 107/107 se dekódují. Širší společný obrázkový audit má známé

@@ -98,11 +98,64 @@ class TrainingTests(unittest.TestCase):
         self.assertEqual(phrase("j'", "achète"), "j'achète")
         events = self.lesson("acheter", recall=True)
         recall = next(i for i, e in enumerate(events) if e["kind"] == "recall")
+        self.assertEqual(recall, 0)
         self.assertEqual(events[recall]["text"], "J'")
         self.assertEqual([e["text"] for e in events if e["kind"] == "reveal"],
                          ["J'", "J'A", "J'AC", "J'ACH", "J'ACHÈ", "J'ACHÈT", "J'ACHÈTE"])
         self.assertEqual(events[-1]["speech"], "j'achète")
         self.assertFalse(any(e["speech"] for e in events if e["kind"] == "reveal"))
+        self.assertTrue(all(e["delay"] == 0.44 for e in events if e["kind"] == "reveal" and e["text"] != "J'"))
+
+    def test_recall_waits_without_revealing_or_speaking_answer(self):
+        self.player.start(self.lesson(recall=True, introduction=True))
+        self.scheduler.drain()
+        self.assertTrue(self.player.waiting_for_answer)
+        self.assertEqual(self.shown[-1]["text"], "JE")
+        self.assertEqual([e["kind"] for e in self.shown], ["intro", "recall"])
+        self.assertEqual(self.speech.spoken, ["aller"])
+        self.assertIsNone(self.player.job)
+        self.finished.assert_not_called()
+
+    def test_correct_typed_form_continues_once_and_keeps_french_accents(self):
+        self.player.start(self.lesson("acheter", recall=True))
+        self.assertFalse(self.player.submit_answer("achete"))
+        self.assertFalse(self.player.submit_answer("achèt"))
+        self.assertTrue(self.player.submit_answer("  ACHE\u0300TE  "))
+        self.assertEqual(self.shown[-1]["kind"], "form")
+        self.assertFalse(self.player.submit_answer("achète"))
+        self.scheduler.drain()
+        self.finished.assert_called_once()
+
+    def test_blank_or_wrong_answer_can_be_skipped_manually(self):
+        for value in ("", "va", "nevím"):
+            self.player.start(self.lesson(recall=True))
+            self.assertFalse(self.player.submit_answer(value))
+            self.scheduler.drain()
+            self.assertTrue(self.player.waiting_for_answer)
+            self.assertTrue(self.player.submit_answer(skip=True))
+            index = self.player.index
+            self.assertFalse(self.player.submit_answer(skip=True))
+            self.assertEqual(self.player.index, index)
+
+    def test_pause_resume_and_repeat_do_not_bypass_recall(self):
+        self.player.start(self.lesson(recall=True))
+        self.player.repeat()
+        self.player.pause()
+        self.player.resume()
+        self.scheduler.drain()
+        self.assertTrue(self.player.waiting_for_answer)
+        self.assertEqual(self.speech.spoken, [])
+        self.assertTrue(all(e["kind"] == "recall" for e in self.shown))
+
+    def test_switching_recall_discards_old_expected_form_and_stop_rejects_answers(self):
+        self.player.start(self.lesson(recall=True))
+        self.player.start(self.lesson("acheter", recall=True))
+        self.assertFalse(self.player.submit_answer("vais"))
+        self.assertTrue(self.player.waiting_for_answer)
+        self.player.stop()
+        self.assertFalse(self.player.submit_answer("achète"))
+        self.scheduler.drain()
+        self.finished.assert_not_called()
 
     def test_audio_finishes_before_next_sentence_and_no_czech_speech(self):
         self.speech.code = None

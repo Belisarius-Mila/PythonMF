@@ -32,6 +32,7 @@ class VerbTrainingScreen:
         self.interval = tk.StringVar(self.win, "2")
         self.search = tk.StringVar(self.win)
         self.translation = tk.StringVar(self.win)
+        self.typed_form = tk.StringVar(self.win)
         self.status = tk.StringVar(self.win, "Vyber sloveso ze seznamu.")
         self.translations = ["", "", ""]
         self.loop_job = None
@@ -39,6 +40,7 @@ class VerbTrainingScreen:
         self.photo = None
         self._build()
         self.player = LessonPlayer(self.win, self.speech, self.show_event, self.finished, self.audio_error)
+        self.typed_form.trace_add("write", self.check_answer)
         self.search.trace_add("write", lambda *_: self.populate())
         self.populate()
 
@@ -125,7 +127,16 @@ class VerbTrainingScreen:
         side.bind("<Configure>", lambda e: self.translation_label.configure(wraplength=max(180, e.width - 8)))
         self.answer = self._label(self.main, "", 40, height=2, anchor="w")
         self.answer.pack(fill="x", pady=(8, 0))
+        self.answer_controls = tk.Frame(self.main, bg="#f5f3ee")
+        self._label(self.answer_controls, "Tvar slovesa:", 14).pack(side="left", padx=(0, 10))
+        self.answer_entry = ttk.Entry(self.answer_controls, textvariable=self.typed_form,
+                                      font=("Helvetica", 20), width=18)
+        self.answer_entry.pack(side="left", padx=(0, 10))
+        self.continue_button = ttk.Button(self.answer_controls, text="Dál →", command=self.continue_answer)
+        self.continue_button.pack(side="left")
+        self.answer_entry.bind("<Return>", self.continue_answer)
         footer = tk.Frame(self.main, bg="#f5f3ee")
+        self.footer = footer
         footer.pack(fill="x")
         ttk.Button(footer, text="▶ Přehrát", command=self.start).pack(side="left", padx=(0, 8))
         self.pause_button = ttk.Button(footer, text="Pauza", command=self.toggle_pause)
@@ -216,6 +227,8 @@ class VerbTrainingScreen:
             self.loop_job = None
         self.between_paused = False
         self.player.stop()
+        self.answer_controls.pack_forget()
+        self.typed_form.set("")
         self.pause_button.configure(text="Pauza")
 
     def start(self, introduction=False):
@@ -233,8 +246,13 @@ class VerbTrainingScreen:
 
     def show_event(self, event):
         kind = event["kind"]
+        if kind != "recall":
+            self.answer_controls.pack_forget()
         if kind in ("intro", "form"):
             self.form_label.configure(text=event["text"])
+            self.answer.configure(text="")
+            self.recall_label.configure(text="")
+            self.status.set("Poslouchej a sleduj tvar slovesa." if self.sound.get() else "Sleduj tvar slovesa · bez zvuku.")
         elif kind == "sentence":
             slot = event["slot"]
             self.sentence_labels[slot].configure(text=event["text"])
@@ -247,6 +265,9 @@ class VerbTrainingScreen:
             self.translations = ["", "", ""]
             self.recall_label.configure(text="Jaký tvar patří k tomuto zájmenu?")
             self.answer.configure(text=event["text"])
+            self.answer_controls.pack(fill="x", pady=(0, 12), before=self.footer)
+            self.answer_entry.focus_set()
+            self.status.set("Napiš tvar slovesa. Správná odpověď pokračuje automaticky; Dál můžeš použít kdykoliv.")
         elif kind in ("reveal", "answer"):
             self.recall_label.configure(text="")
             self.answer.configure(text=event["text"])
@@ -254,6 +275,15 @@ class VerbTrainingScreen:
     def show_translation(self):
         text = "\n\n".join(f"{i + 1}. {t}" for i, t in enumerate(self.translations) if t)
         self.translation.set(text or "Česká věta bude dostupná po francouzské ukázce.")
+
+    def check_answer(self, *_):
+        if self.player.submit_answer(self.typed_form.get()):
+            self.pause_button.configure(text="Pauza")
+
+    def continue_answer(self, event=None):
+        if self.player.submit_answer(skip=True):
+            self.pause_button.configure(text="Pauza")
+        return "break"
 
     def toggle_pause(self):
         if self.loop_job is not None:
@@ -267,7 +297,8 @@ class VerbTrainingScreen:
         elif self.player.paused:
             self.player.resume()
             self.pause_button.configure(text="Pauza")
-            self.status.set("Pokračujeme od začátku přerušené věty.")
+            if not self.player.waiting_for_answer:
+                self.status.set("Pokračujeme od začátku přerušené věty.")
         elif self.player.active:
             self.player.pause()
             self.pause_button.configure(text="Pokračovat")

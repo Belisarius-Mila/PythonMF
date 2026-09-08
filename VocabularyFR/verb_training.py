@@ -5,6 +5,7 @@ import random
 import shutil
 import subprocess
 import sys
+import unicodedata
 from pathlib import Path
 
 
@@ -60,15 +61,15 @@ class TrainingCorpus:
             events.append(dict(kind=kind, text=text, speech=speech, delay=delay, **extra))
         if introduction:
             event("intro", speech=verb)
+        if recall:
+            event("recall", pronoun.upper(), expected_form=form)
         event("form", text, text, interval)
         for index, row in enumerate(rows):
             event("sentence", row["Sentence"], row["Sentence"], interval,
                   translation=row["SentenceT"], slot=index)
-        if recall:
-            event("recall", pronoun.upper(), delay=max(3, interval))
         event("reveal", phrase(pronoun.upper(), ""), delay=0.3)
         for length in range(1, len(form) + 1):
-            event("reveal", phrase(pronoun.upper(), form[:length].upper()), delay=0.22)
+            event("reveal", phrase(pronoun.upper(), form[:length].upper()), delay=0.44)
         event("answer", text.upper(), text)
         return events
 
@@ -158,6 +159,9 @@ class LessonPlayer:
     def repeat(self):
         if not self.events:
             return
+        if self.waiting_for_answer:
+            # Repeating must not reveal the solution or jump back into the introduction.
+            return
         self._cancel()
         # Repeat the currently visible utterance; at the end repeat the answer.
         self.index = min(self.index, len(self.events) - 1)
@@ -166,6 +170,23 @@ class LessonPlayer:
         self.active, self.paused = True, False
         self._play()
 
+    @property
+    def waiting_for_answer(self):
+        return (self.active and self.index < len(self.events)
+                and self.events[self.index]["kind"] == "recall")
+
+    def submit_answer(self, value="", *, skip=False):
+        if not self.waiting_for_answer:
+            return False
+        normalize = lambda text: unicodedata.normalize("NFC", text.strip()).casefold()
+        expected = self.events[self.index]["expected_form"]
+        if not skip and normalize(value) != normalize(expected):
+            return False
+        self._cancel()
+        self.paused = False
+        self._advance()
+        return True
+
     def _play(self):
         if self.index >= len(self.events):
             self.active = False
@@ -173,6 +194,9 @@ class LessonPlayer:
             return
         event = self.events[self.index]
         self.show(event)
+        if event["kind"] == "recall":
+            # Deliberately no timer: only a correct answer or explicit Next can continue.
+            return
         if event["speech"] and self.sound:
             try:
                 self.speech.start(event["speech"])

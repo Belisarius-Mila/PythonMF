@@ -1,7 +1,7 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-08 10:43 CEST
+- Aktualizováno: 2026-09-08 12:06 CEST
 
 ### Hotovo
 - Desktopový vocab_trainer_fr.py má samostatný Trénink sloves pro přítomný čas.
@@ -9,12 +9,16 @@
   původních sloves (tři na každou osobu). Původních 1 800 vět je byteově zachovaných.
 - Zasunutí seznamu, S/P, osoby 1/2/3, smyčka a interval; řízený poslech,
   tři věty, velký tvar po písmenech, pauza, zopakování a volitelné vzpomínání.
+- Vzpomínání čeká před první ukázkou na napsaný tvar nebo Dál/Enter; správná
+  odpověď pokračuje automaticky. Odhalování písmen je zpomaleno na 0,44 s.
 - České věty pouze na vyžádání pod obrázkem. Falloir nabízí výhradně il faut.
 - 107 kontextových obrázků: 95 stávajících, 12 nových projektových ilustrací.
 - Místní řeč nové obrazovky: Thomas na Macu, francouzský eSpeak na Linuxu.
   Chybějící hlas je přiznaný a trénink lze používat bez zvuku.
 
 ### Rozhodnutí
+- Míla upřesnil vzpomínání: jen zájmeno, neomezený čas na psaní, Dál dovolí
+  i prázdnou či chybnou odpověď. Písmena se mají odhalovat dvakrát pomaleji.
 - Míla rozšířil trénink i o sedm původních sloves a požádal o tři věty na osobu.
 - První verze zůstává u présent, S/P smyčky a překladu na vyžádání.
 - Tréninková data jsou přibalený obsah pouze ke čtení; živé uživatelské CSV
@@ -30,8 +34,8 @@
 - Starší samostatný dluh bezpečného znovunačtení po konfliktu CSV zůstává otevřený.
 
 ### Další krok
-- Míla otevře Trénink sloves a projde aller, falloir a acheter, včetně S/P,
-  smyčky, vzpomínání a českých překladů; po retestu připravit distribuci.
+- Míla znovu otevře Trénink sloves a ověří nové psaní, tlačítko Dál
+  a pomalejší odhalování; následně pokračovat Linux retestem a distribucí.
 
 ### Navrhované další kroky
 - Potvrdit vzhled a poslech na Macu i Linuxu.
@@ -39,7 +43,9 @@
 - Předem nahrané kvalitnější audio zůstává možný samostatný navazující krok.
 
 ### Technický důkaz
-- 31 cílených testů a plná Cockpit brána 1 518/1 518 prošly.
+- Aktuální oprava: 18/18 testů tréninku/dat, rychlá statická brána a skutečné
+  Tk ověření vstupu i tlačítka Dál. Předchozí základ: 31 testů a plná brána
+  1 518/1 518; plná brána se při této úzké opravě neopakovala.
 - Skutečné Tk callbacky: aller, falloir, acheter, vzpomínání, pause/resume
   mezi osobami a zavření; místní Thomas exit 0.
 - 107/107 obrázků se dekóduje; 12 nových ilustrací vizuálně ověřeno.
@@ -179,3 +185,33 @@ Technický důkaz:
 - Rizika: Linuxový poslech ještě neověřen, distribuce neprovedena; známý
   nesouvisející test řazení mapping.json selhává (společný audit 5/6).
 - Push, nasazení Cockpitu a zásah do živých Janiných dat neproběhly.
+
+
+### 2026-09-08 12:06 CEST – Vzpomínání čeká na odpověď a písmena nabíhají pomaleji
+
+Hotovo:
+- Režim Zkus si vzpomenout ukáže před první ukázkou pouze zájmeno a pole
+  pro samotný tvar slovesa. Čeká bez časového limitu.
+- Správný tvar pokračuje automaticky. Dál nebo Enter pokračuje i s prázdnou
+  či chybnou odpovědí; teprve potom se ukáže a přečte tvar a příkladové věty.
+- Závěrečné odhalování zpomalilo z 0,22 na 0,44 sekundy mezi písmeny.
+
+Rozhodnutí:
+- Míla požaduje aktivní vybavení tvaru před jeho zobrazením a volitelné psaní.
+- Dál nesmí vyžadovat správnou ani vyplněnou odpověď. Francouzská diakritika
+  se kontroluje, velikost písmen a mezery na okrajích se ignorují.
+
+Další krok:
+- Míla znovu otevře trénink a ověří čekání u JE, automatické pokračování po
+  vais a možnost přeskočení tlačítkem Dál; ručně posoudí pomalejší odhalování.
+
+Navrhované další kroky:
+- Po retestu pokračovat dříve domluveným ověřením na Linuxu a distribucí.
+
+Technický důkaz:
+- 18/18 testů tréninku a dat, rychlá statická brána a syntaxe modulů prošly.
+- Skutečné Tk políčko a tlačítko ověřily prázdnou/chybnou odpověď, automatický
+  přechod při správném tvaru, diakritiku, vymazání po přepnutí, pauzu a zavření.
+- Předešlá plná brána měla 1 518 testů; v této úzké UI opravě nebyla opakována.
+- Rizika: zbývá ruční vizuální retest; CSV, obrázky a hlasový backend se neměnily.
+- Push ani nasazení neproběhly.
