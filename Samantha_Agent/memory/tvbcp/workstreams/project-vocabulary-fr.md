@@ -1,36 +1,48 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-09 22:51 CEST
+- Aktualizováno: 2026-09-08 09:59 CEST
 
 ### Hotovo
-- Před vývojem vznikla ověřená privátní záloha aktuální Janiny aplikace, původního distribučního ZIPu a pracovních CSV.
-- VocabularyFR ukládá hlavní CSV přes samostatnou atomickou vrstvu s kontrolou hashe, zálohou před prvním zápisem relace a zachováním neznámých sloupců.
-- Uložení prázdného seznamu nyní vytvoří platné CSV pouze s hlavičkou.
-
-### Otevřeno
-- Nová datová vrstva zatím není zabalená ani nasazená do Janiny používané aplikace.
-- Zůstává odstranit obousměrné kopírování mezi přenosným umístěním a Application Support a doplnit bezpečné znovunačtení po konfliktu.
-
-### Rizika
-- Reálný balíček ještě neprošel ručním testem na Janině Macu; současná funkční aplikace proto zůstala beze změny.
-
-### Další krok
-- V další oddělené iteraci určit jediný kanonický datový soubor a odstranit tiché obousměrné synchronizační kopie bez migrace živých dat.
+- Převzato 100 dodaných sloves s českými významy a 1 800 nezměněných FR/CZ vět.
+- VerbeTraining.csv určuje tréninkovou stovku; VerbeFR.csv má celkem 107 sloves,
+  protože sedm původních mimo nový seznam zůstalo zachovaných. Původní časování
+  všech časů i výběrové značky jsou zachované; nové významy odpovídají zadání.
+- VerbeSentences.csv má explicitní vazby na sloveso, présent, číslo a osobu.
+  Všech 18 vět falloir je přiřazeno jen k S/3 (il faut).
+- Dosavadní hlavní CSV dál chrání atomický zápis a konfliktní hash. Aplikace
+  používá jeden datový adresář, bez tichého obousměrného kopírování.
 
 ### Rozhodnutí
-- První bezpečnostní iterace mění jen ukládání hlavního VocabularyFR.csv; živá Janina aplikace se nenasazuje bez samostatného potvrzení a testu balíčku.
+- Nový screen začne pouze přítomným časem. Smyčka prochází osoby v rámci S/P.
+- České věty budou na vyžádání pod obrázkem, bez automatického čtení.
+- Pauza a zopakování jsou součástí návrhu; Zkus si vzpomenout je přepínatelný režim.
+- Detailní chování a datový kontrakt: VocabularyFR/VERB_TRAINING.md.
+
+### Otevřeno
+- Nový screen, zvuková sekvence, obrázky a sestavení aplikace ještě nejsou hotové.
+- Nadále zbývá bezpečné znovunačtení při konfliktu CSV a izolovaný test balíčku.
+
+### Rizika
+- Dosavadní desktopový zvuk používá macOS say; Linux vyžaduje jiné přehrávání.
+- Nová slovesa mají jen dodané přítomné tvary. Jazyková redakce vět neproběhla.
+- Obrázkový audit našel existující neabecední mapping.json už v HEAD před importem.
+- Živá Janina aplikace a soukromé CSV se v tomto kroku neměnily.
+
+### Další krok
+- Implementovat dohodnutý tréninkový screen nad převzatými daty; nejdřív ověřit
+  jednu kompletní sekvenci aller a neosobní falloir.
 
 ### Navrhované další kroky
-- Doplnit uživatelsky bezpečné znovunačtení při souběžné změně CSV.
-- Potom opravit český palec, jednopoložkový interval a detekci víceslovných sloves.
-- Až následně připravit reprodukovatelný Janin build a ruční test zápisu i zvuku.
+- Audit dostupných kontextových obrázků a společné přehrávání pro Mac/Linux.
+- Potom izolovaný build a ruční test; rozšíření časů až v další iteraci.
 
-### Technický stav checkpointu
-- Cílená sada prošla 19/19, plná Cockpit brána 1330/1330 a společný slovníkový audit 6/6.
-- Janin živý CSV byl pouze read-only ověřen: 391 řádků a 0 plánovaných oprav Sentence/SentenceT.
-- Předvývojová záloha je v privátní necommitované oblasti a má kontrolní součty i manifest obnovy.
-- Nasazení nové verze nebylo součástí tohoto kroku.
+### Technický důkaz
+- 21/21 cílených testů dat, ukládání a instalátoru prošlo.
+- Přímé porovnání: 100/100 položek a 1 800/1 800 dvojic shodných se zdroji.
+- Všech 50 původních sloves zachovalo časování a M; změněno jen pořadí a dodané významy.
+- Širší obrázková sada: 5/6 prošlo; chyba řazení mapping.json reprodukována v původním HEAD.
+- Nový screen zatím není implementovaný; žádný push ani nasazení v tomto kroku.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Vocabulary FR
@@ -178,3 +190,28 @@ Technický důkaz:
 - Cílené testy 18/18, plná Cockpit brána 1330/1330 a společný slovníkový audit 6/6.
 - Janin CSV prošel pouze read-only auditem: 391 řádků a 0 plánovaných oprav Sentence/SentenceT.
 - Nebyl vytvořen build ani spuštěn instalační apply.
+
+
+### 2026-09-08 09:59 CEST – Data a dohodnuté chování tréninku sloves
+
+Hotovo:
+- Import 100 sloves a 1 800 přesných FR/CZ dvojic do samostatných datových souborů.
+- Společné VerbeFR má 107 sloves se zachováním všech původních tvarů a značek.
+- Věty mají přiřazený présent, S/P, osobu, konkrétní zájmeno a tvar; falloir pouze S/3.
+
+Rozhodnutí:
+- Přítomný čas, smyčka pouze v rámci zvoleného čísla, překlady na vyžádání pod obrázkem.
+- Pauza, zopakování a volitelný režim Zkus si vzpomenout. Specifikace v VERB_TRAINING.md.
+- U běžné osoby tři věty dovolují zatím jen náhodné pořadí; falloir má výběr tří z 18.
+
+Další krok:
+- Implementovat screen a ověřit kompletní průchod aller i falloir.
+
+Navrhované další kroky:
+- Audit obrázků, přehrávání na Mac/Linux a izolovaný build; další časy později.
+
+Technický důkaz:
+- 21/21 cílených testů prošlo; přesná shoda se 100 položkami a 1 800 větami zdroje.
+- Všechna původní časování a výběrové značky zachované.
+- Širší obrázkový audit 5/6: existující chyba řazení mapping.json potvrzena i v původním HEAD.
+- UI ani živá data se neměnila; bez push a nasazení.

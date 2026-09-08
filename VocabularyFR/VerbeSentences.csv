@@ -1,0 +1,1801 @@
+Id,InfFR,Tense,Number,Person,Pronoun,Form,Sentence,SentenceT
+v001-01,être,present,S,1,je,suis,Je suis à la maison.,Já jsem doma.
+v001-02,être,present,S,1,je,suis,Je suis dans le jardin.,Já jsem na zahradě.
+v001-03,être,present,S,1,je,suis,Je suis à l'école.,Já jsem ve škole.
+v001-04,être,present,S,2,tu,es,Tu es au parc.,Ty jsi v parku.
+v001-05,être,present,S,2,tu,es,Tu es à la gare.,Ty jsi na nádraží.
+v001-06,être,present,S,2,tu,es,Tu es au café.,Ty jsi v kavárně.
+v001-07,être,present,S,3,il,est,Il est au travail.,On je v práci.
+v001-08,être,present,S,3,elle,est,Elle est à la banque.,Ona je v bance.
+v001-09,être,present,S,3,il,est,Il est à la plage.,On je na pláži.
+v001-10,être,present,P,1,nous,sommes,Nous sommes au cinéma.,My jsme v kině.
+v001-11,être,present,P,1,nous,sommes,Nous sommes au marché.,My jsme na trhu.
+v001-12,être,present,P,1,nous,sommes,Nous sommes à la piscine.,My jsme na bazénu.
+v001-13,être,present,P,2,vous,êtes,Vous êtes à la poste.,Vy jste na poště.
+v001-14,être,present,P,2,vous,êtes,Vous êtes au musée.,Vy jste v muzeu.
+v001-15,être,present,P,2,vous,êtes,Vous êtes au restaurant.,Vy jste v restauraci.
+v001-16,être,present,P,3,ils,sont,Ils sont à l'hôpital.,Oni jsou v nemocnici.
+v001-17,être,present,P,3,elles,sont,Elles sont à la boulangerie.,Ony jsou v pekárně.
+v001-18,être,present,P,3,ils,sont,Ils sont au zoo.,Oni jsou v zoo.
+v002-01,avoir,present,S,1,j',ai,J'ai un chien.,Já mám psa.
+v002-02,avoir,present,S,1,j',ai,J'ai un chat.,Já mám kočku.
+v002-03,avoir,present,S,1,j',ai,J'ai un vélo.,Já mám kolo.
+v002-04,avoir,present,S,2,tu,as,Tu as un livre.,Ty máš knihu.
+v002-05,avoir,present,S,2,tu,as,Tu as une voiture.,Ty máš auto.
+v002-06,avoir,present,S,2,tu,as,Tu as une maison.,Ty máš dům.
+v002-07,avoir,present,S,3,il,a,Il a un frère.,On má bratra.
+v002-08,avoir,present,S,3,elle,a,Elle a une sœur.,Ona má sestru.
+v002-09,avoir,present,S,3,il,a,Il a un enfant.,On má dítě.
+v002-10,avoir,present,P,1,nous,avons,Nous avons du pain.,My máme chleba.
+v002-11,avoir,present,P,1,nous,avons,Nous avons de l'eau.,My máme vodu.
+v002-12,avoir,present,P,1,nous,avons,Nous avons du lait.,My máme mléko.
+v002-13,avoir,present,P,2,vous,avez,Vous avez du temps.,Vy máte čas.
+v002-14,avoir,present,P,2,vous,avez,Vous avez une question.,Vy máte otázku.
+v002-15,avoir,present,P,2,vous,avez,Vous avez une idée.,Vy máte nápad.
+v002-16,avoir,present,P,3,ils,ont,Ils ont faim.,Oni mají hlad.
+v002-17,avoir,present,P,3,elles,ont,Elles ont soif.,Ony mají žízeň.
+v002-18,avoir,present,P,3,ils,ont,Ils ont peur.,Oni mají strach.
+v003-01,faire,present,S,1,je,fais,Je fais un gâteau.,Já dělám dort.
+v003-02,faire,present,S,1,je,fais,Je fais du pain.,Já dělám chleba.
+v003-03,faire,present,S,1,je,fais,Je fais une soupe.,Já dělám polévku.
+v003-04,faire,present,S,2,tu,fais,Tu fais le ménage.,Ty děláš úklid.
+v003-05,faire,present,S,2,tu,fais,Tu fais un dessin.,Ty děláš kresbu.
+v003-06,faire,present,S,2,tu,fais,Tu fais une liste.,Ty děláš seznam.
+v003-07,faire,present,S,3,il,fait,Il fait du café.,On dělá kávu.
+v003-08,faire,present,S,3,elle,fait,Elle fait une salade.,Ona dělá salát.
+v003-09,faire,present,S,3,il,fait,Il fait une omelette.,On dělá omeletu.
+v003-10,faire,present,P,1,nous,faisons,Nous faisons une pause.,My děláme přestávku.
+v003-11,faire,present,P,1,nous,faisons,Nous faisons un exercice.,My děláme cvičení.
+v003-12,faire,present,P,1,nous,faisons,Nous faisons un sandwich.,My děláme sendvič.
+v003-13,faire,present,P,2,vous,faites,Vous faites un repas.,Vy děláte jídlo.
+v003-14,faire,present,P,2,vous,faites,Vous faites une tarte.,Vy děláte koláč.
+v003-15,faire,present,P,2,vous,faites,Vous faites des crêpes.,Vy děláte palačinky.
+v003-16,faire,present,P,3,ils,font,Ils font du thé.,Oni dělají čaj.
+v003-17,faire,present,P,3,elles,font,Elles font une affiche.,Ony dělají plakát.
+v003-18,faire,present,P,3,ils,font,Ils font une erreur.,Oni dělají chybu.
+v004-01,dire,present,S,1,je,dis,Je dis bonjour.,Já říkám dobrý den.
+v004-02,dire,present,S,1,je,dis,Je dis merci.,Já říkám děkuji.
+v004-03,dire,present,S,1,je,dis,Je dis au revoir.,Já říkám na shledanou.
+v004-04,dire,present,S,2,tu,dis,Tu dis oui.,Ty říkáš ano.
+v004-05,dire,present,S,2,tu,dis,Tu dis non.,Ty říkáš ne.
+v004-06,dire,present,S,2,tu,dis,Tu dis la vérité.,Ty říkáš pravdu.
+v004-07,dire,present,S,3,il,dit,Il dit quelques mots.,On říká několik slov.
+v004-08,dire,present,S,3,elle,dit,Elle dit une phrase.,Ona říká větu.
+v004-09,dire,present,S,3,il,dit,Il dit un mot gentil.,On říká milé slovo.
+v004-10,dire,present,P,1,nous,disons,Nous disons bonjour.,My říkáme dobrý den.
+v004-11,dire,present,P,1,nous,disons,Nous disons merci.,My říkáme děkuji.
+v004-12,dire,present,P,1,nous,disons,Nous disons au revoir.,My říkáme na shledanou.
+v004-13,dire,present,P,2,vous,dites,Vous dites oui.,Vy říkáte ano.
+v004-14,dire,present,P,2,vous,dites,Vous dites non.,Vy říkáte ne.
+v004-15,dire,present,P,2,vous,dites,Vous dites la vérité.,Vy říkáte pravdu.
+v004-16,dire,present,P,3,ils,disent,Ils disent quelques mots.,Oni říkají několik slov.
+v004-17,dire,present,P,3,elles,disent,Elles disent une phrase.,Ony říkají větu.
+v004-18,dire,present,P,3,ils,disent,Ils disent un mot gentil.,Oni říkají milé slovo.
+v005-01,pouvoir,present,S,1,je,peux,Je peux venir ce soir.,Já můžu přijít dnes večer.
+v005-02,pouvoir,present,S,1,je,peux,Je peux ouvrir la porte.,Já můžu otevřít dveře.
+v005-03,pouvoir,present,S,1,je,peux,Je peux fermer la fenêtre.,Já můžu zavřít okno.
+v005-04,pouvoir,present,S,2,tu,peux,Tu peux attendre ici.,Ty můžeš počkat tady.
+v005-05,pouvoir,present,S,2,tu,peux,Tu peux rester à la maison.,Ty můžeš zůstat doma.
+v005-06,pouvoir,present,S,2,tu,peux,Tu peux prendre le bus.,Ty můžeš jet autobusem.
+v005-07,pouvoir,present,S,3,il,peut,Il peut lire ce livre.,On může číst tuto knihu.
+v005-08,pouvoir,present,S,3,elle,peut,Elle peut parler français.,Ona může mluvit francouzsky.
+v005-09,pouvoir,present,S,3,il,peut,Il peut écrire une lettre.,On může napsat dopis.
+v005-10,pouvoir,present,P,1,nous,pouvons,Nous pouvons aider un ami.,My můžeme pomoci kamarádovi.
+v005-11,pouvoir,present,P,1,nous,pouvons,Nous pouvons jouer dehors.,My můžeme hrát si venku.
+v005-12,pouvoir,present,P,1,nous,pouvons,Nous pouvons entrer maintenant.,My můžeme vstoupit teď.
+v005-13,pouvoir,present,P,2,vous,pouvez,Vous pouvez acheter du pain.,Vy můžete koupit chleba.
+v005-14,pouvoir,present,P,2,vous,pouvez,Vous pouvez marcher un peu.,Vy můžete trochu se projít.
+v005-15,pouvoir,present,P,2,vous,pouvez,Vous pouvez boire de l'eau.,Vy můžete napít se vody.
+v005-16,pouvoir,present,P,3,ils,peuvent,Ils peuvent écouter la radio.,Oni můžou poslouchat rádio.
+v005-17,pouvoir,present,P,3,elles,peuvent,Elles peuvent travailler ici.,Ony můžou pracovat tady.
+v005-18,pouvoir,present,P,3,ils,peuvent,Ils peuvent partir ensemble.,Oni můžou odejít společně.
+v006-01,aller,present,S,1,je,vais,Je vais à l'école.,Já jdu do školy.
+v006-02,aller,present,S,1,je,vais,Je vais au parc.,Já jdu do parku.
+v006-03,aller,present,S,1,je,vais,Je vais à la gare.,Já jdu na nádraží.
+v006-04,aller,present,S,2,tu,vas,Tu vas au magasin.,Ty jdeš do obchodu.
+v006-05,aller,present,S,2,tu,vas,Tu vas au café.,Ty jdeš do kavárny.
+v006-06,aller,present,S,2,tu,vas,Tu vas à la plage.,Ty jdeš na pláž.
+v006-07,aller,present,S,3,il,va,Il va chez lui.,On jde k sobě domů.
+v006-08,aller,present,S,3,elle,va,Elle va au travail.,Ona jde do práce.
+v006-09,aller,present,S,3,il,va,Il va au restaurant.,On jde do restaurace.
+v006-10,aller,present,P,1,nous,allons,Nous allons au cinéma.,My jdeme do kina.
+v006-11,aller,present,P,1,nous,allons,Nous allons au marché.,My jdeme na trh.
+v006-12,aller,present,P,1,nous,allons,Nous allons à la piscine.,My jdeme na bazén.
+v006-13,aller,present,P,2,vous,allez,Vous allez à la banque.,Vy jdete do banky.
+v006-14,aller,present,P,2,vous,allez,Vous allez à la poste.,Vy jdete na poštu.
+v006-15,aller,present,P,2,vous,allez,Vous allez au musée.,Vy jdete do muzea.
+v006-16,aller,present,P,3,ils,vont,Ils vont à l'hôpital.,Oni jdou do nemocnice.
+v006-17,aller,present,P,3,elles,vont,Elles vont à la boulangerie.,Ony jdou do pekárny.
+v006-18,aller,present,P,3,ils,vont,Ils vont au zoo.,Oni jdou do zoo.
+v007-01,voir,present,S,1,je,vois,Je vois un chat.,Já vidím kočku.
+v007-02,voir,present,S,1,je,vois,Je vois un chien.,Já vidím psa.
+v007-03,voir,present,S,1,je,vois,Je vois un oiseau.,Já vidím ptáka.
+v007-04,voir,present,S,2,tu,vois,Tu vois la mer.,Ty vidíš moře.
+v007-05,voir,present,S,2,tu,vois,Tu vois une montagne.,Ty vidíš horu.
+v007-06,voir,present,S,2,tu,vois,Tu vois un bateau.,Ty vidíš loď.
+v007-07,voir,present,S,3,il,voit,Il voit une voiture rouge.,On vidí červené auto.
+v007-08,voir,present,S,3,elle,voit,Elle voit un vélo bleu.,Ona vidí modré kolo.
+v007-09,voir,present,S,3,il,voit,Il voit un grand arbre.,On vidí velký strom.
+v007-10,voir,present,P,1,nous,voyons,Nous voyons le soleil.,My vidíme slunce.
+v007-11,voir,present,P,1,nous,voyons,Nous voyons la lune.,My vidíme měsíc.
+v007-12,voir,present,P,1,nous,voyons,Nous voyons les étoiles.,My vidíme hvězdy.
+v007-13,voir,present,P,2,vous,voyez,Vous voyez un pont.,Vy vidíte most.
+v007-14,voir,present,P,2,vous,voyez,Vous voyez une rivière.,Vy vidíte řeku.
+v007-15,voir,present,P,2,vous,voyez,Vous voyez une petite maison.,Vy vidíte malý dům.
+v007-16,voir,present,P,3,ils,voient,Ils voient un train.,Oni vidí vlak.
+v007-17,voir,present,P,3,elles,voient,Elles voient un avion.,Ony vidí letadlo.
+v007-18,voir,present,P,3,ils,voient,Ils voient des fleurs.,Oni vidí květiny.
+v008-01,vouloir,present,S,1,je,veux,Je veux un café.,Já chci kávu.
+v008-02,vouloir,present,S,1,je,veux,Je veux un thé.,Já chci čaj.
+v008-03,vouloir,present,S,1,je,veux,Je veux un verre d'eau.,Já chci sklenici vody.
+v008-04,vouloir,present,S,2,tu,veux,Tu veux du pain.,Ty chceš chleba.
+v008-05,vouloir,present,S,2,tu,veux,Tu veux une pomme.,Ty chceš jablko.
+v008-06,vouloir,present,S,2,tu,veux,Tu veux une soupe.,Ty chceš polévku.
+v008-07,vouloir,present,S,3,il,veut,Il veut un billet.,On chce lístek.
+v008-08,vouloir,present,S,3,elle,veut,Elle veut une chambre.,Ona chce pokoj.
+v008-09,vouloir,present,S,3,il,veut,Il veut une table.,On chce stůl.
+v008-10,vouloir,present,P,1,nous,voulons,Nous voulons lire un livre.,My chceme číst knihu.
+v008-11,vouloir,present,P,1,nous,voulons,Nous voulons voir la mer.,My chceme vidět moře.
+v008-12,vouloir,present,P,1,nous,voulons,Nous voulons apprendre le français.,My chceme učit se francouzsky.
+v008-13,vouloir,present,P,2,vous,voulez,Vous voulez jouer au tennis.,Vy chcete hrát tenis.
+v008-14,vouloir,present,P,2,vous,voulez,Vous voulez rester ici.,Vy chcete zůstat tady.
+v008-15,vouloir,present,P,2,vous,voulez,Vous voulez partir maintenant.,Vy chcete odejít teď.
+v008-16,vouloir,present,P,3,ils,veulent,Ils veulent acheter une voiture.,Oni chtějí koupit auto.
+v008-17,vouloir,present,P,3,elles,veulent,Elles veulent manger une pizza.,Ony chtějí jíst pizzu.
+v008-18,vouloir,present,P,3,ils,veulent,Ils veulent faire une pause.,Oni chtějí udělat si přestávku.
+v009-01,venir,present,S,1,je,viens,Je viens de l'école.,Já přicházím ze školy.
+v009-02,venir,present,S,1,je,viens,Je viens du travail.,Já přicházím z práce.
+v009-03,venir,present,S,1,je,viens,Je viens du jardin.,Já přicházím ze zahrady.
+v009-04,venir,present,S,2,tu,viens,Tu viens du parc.,Ty přicházíš z parku.
+v009-05,venir,present,S,2,tu,viens,Tu viens de la gare.,Ty přicházíš z nádraží.
+v009-06,venir,present,S,2,tu,viens,Tu viens du magasin.,Ty přicházíš z obchodu.
+v009-07,venir,present,S,3,il,vient,Il vient du marché.,On přichází z trhu.
+v009-08,venir,present,S,3,elle,vient,Elle vient de la plage.,Ona přichází z pláže.
+v009-09,venir,present,S,3,il,vient,Il vient du restaurant.,On přichází z restaurace.
+v009-10,venir,present,P,1,nous,venons,Nous venons du cinéma.,My přicházíme z kina.
+v009-11,venir,present,P,1,nous,venons,Nous venons du musée.,My přicházíme z muzea.
+v009-12,venir,present,P,1,nous,venons,Nous venons de la poste.,My přicházíme z pošty.
+v009-13,venir,present,P,2,vous,venez,Vous venez à pied.,Vy přicházíte pěšky.
+v009-14,venir,present,P,2,vous,venez,Vous venez à midi.,Vy přicházíte v poledne.
+v009-15,venir,present,P,2,vous,venez,Vous venez à huit heures.,Vy přicházíte v osm hodin.
+v009-16,venir,present,P,3,ils,viennent,Ils viennent avec un ami.,Oni přicházejí s kamarádem.
+v009-17,venir,present,P,3,elles,viennent,Elles viennent avec les enfants.,Ony přicházejí s dětmi.
+v009-18,venir,present,P,3,ils,viennent,Ils viennent en avance.,Oni přicházejí s předstihem.
+v010-01,devoir,present,S,1,je,dois,Je dois partir.,Já musím odejít.
+v010-02,devoir,present,S,1,je,dois,Je dois travailler.,Já musím pracovat.
+v010-03,devoir,present,S,1,je,dois,Je dois attendre.,Já musím čekat.
+v010-04,devoir,present,S,2,tu,dois,Tu dois ouvrir la porte.,Ty musíš otevřít dveře.
+v010-05,devoir,present,S,2,tu,dois,Tu dois fermer la fenêtre.,Ty musíš zavřít okno.
+v010-06,devoir,present,S,2,tu,dois,Tu dois acheter du pain.,Ty musíš koupit chleba.
+v010-07,devoir,present,S,3,il,doit,Il doit écrire une lettre.,On musí napsat dopis.
+v010-08,devoir,present,S,3,elle,doit,Elle doit lire ce livre.,Ona musí přečíst tuto knihu.
+v010-09,devoir,present,S,3,il,doit,Il doit faire le ménage.,On musí uklidit.
+v010-10,devoir,present,P,1,nous,devons,Nous devons prendre le train.,My musíme jet vlakem.
+v010-11,devoir,present,P,1,nous,devons,Nous devons appeler le médecin.,My musíme zavolat lékaři.
+v010-12,devoir,present,P,1,nous,devons,Nous devons boire de l'eau.,My musíme pít vodu.
+v010-13,devoir,present,P,2,vous,devez,Vous devez écouter le professeur.,Vy musíte poslouchat učitele.
+v010-14,devoir,present,P,2,vous,devez,Vous devez rester ici.,Vy musíte zůstat tady.
+v010-15,devoir,present,P,2,vous,devez,Vous devez finir ce travail.,Vy musíte dokončit tuto práci.
+v010-16,devoir,present,P,3,ils,doivent,Ils doivent préparer le repas.,Oni musí připravit jídlo.
+v010-17,devoir,present,P,3,elles,doivent,Elles doivent aider les enfants.,Ony musí pomoci dětem.
+v010-18,devoir,present,P,3,ils,doivent,Ils doivent parler doucement.,Oni musí mluvit tiše.
+v011-01,prendre,present,S,1,je,prends,Je prends un livre.,Já beru knihu.
+v011-02,prendre,present,S,1,je,prends,Je prends un stylo.,Já beru pero.
+v011-03,prendre,present,S,1,je,prends,Je prends une feuille.,Já beru list papíru.
+v011-04,prendre,present,S,2,tu,prends,Tu prends une tasse.,Ty bereš šálek.
+v011-05,prendre,present,S,2,tu,prends,Tu prends un verre.,Ty bereš sklenici.
+v011-06,prendre,present,S,2,tu,prends,Tu prends une assiette.,Ty bereš talíř.
+v011-07,prendre,present,S,3,il,prend,Il prend une pomme.,On bere jablko.
+v011-08,prendre,present,S,3,elle,prend,Elle prend une banane.,Ona bere banán.
+v011-09,prendre,present,S,3,il,prend,Il prend un morceau de pain.,On bere kousek chleba.
+v011-10,prendre,present,P,1,nous,prenons,Nous prenons un sac.,My bereme tašku.
+v011-11,prendre,present,P,1,nous,prenons,Nous prenons une valise.,My bereme kufr.
+v011-12,prendre,present,P,1,nous,prenons,Nous prenons un parapluie.,My bereme deštník.
+v011-13,prendre,present,P,2,vous,prenez,Vous prenez une chaise.,Vy berete židli.
+v011-14,prendre,present,P,2,vous,prenez,Vous prenez une couverture.,Vy berete deku.
+v011-15,prendre,present,P,2,vous,prenez,Vous prenez un pull.,Vy berete svetr.
+v011-16,prendre,present,P,3,ils,prennent,Ils prennent une clé.,Oni berou klíč.
+v011-17,prendre,present,P,3,elles,prennent,Elles prennent une carte.,Ony berou mapu.
+v011-18,prendre,present,P,3,ils,prennent,Ils prennent un billet.,Oni berou lístek.
+v012-01,trouver,present,S,1,je,trouve,Je trouve une clé.,Já nacházím klíč.
+v012-02,trouver,present,S,1,je,trouve,Je trouve un livre.,Já nacházím knihu.
+v012-03,trouver,present,S,1,je,trouve,Je trouve une pièce.,Já nacházím minci.
+v012-04,trouver,present,S,2,tu,trouves,Tu trouves un sac.,Ty nacházíš tašku.
+v012-05,trouver,present,S,2,tu,trouves,Tu trouves un stylo.,Ty nacházíš pero.
+v012-06,trouver,present,S,2,tu,trouves,Tu trouves un téléphone.,Ty nacházíš telefon.
+v012-07,trouver,present,S,3,il,trouve,Il trouve une place.,On nachází místo.
+v012-08,trouver,present,S,3,elle,trouve,Elle trouve une chambre.,Ona nachází pokoj.
+v012-09,trouver,present,S,3,il,trouve,Il trouve un hôtel.,On nachází hotel.
+v012-10,trouver,present,P,1,nous,trouvons,Nous trouvons une solution.,My nacházíme řešení.
+v012-11,trouver,present,P,1,nous,trouvons,Nous trouvons une réponse.,My nacházíme odpověď.
+v012-12,trouver,present,P,1,nous,trouvons,Nous trouvons une idée.,My nacházíme nápad.
+v012-13,trouver,present,P,2,vous,trouvez,Vous trouvez un chemin.,Vy nacházíte cestu.
+v012-14,trouver,present,P,2,vous,trouvez,Vous trouvez une petite rue.,Vy nacházíte malou ulici.
+v012-15,trouver,present,P,2,vous,trouvez,Vous trouvez un café.,Vy nacházíte kavárnu.
+v012-16,trouver,present,P,3,ils,trouvent,Ils trouvent un travail.,Oni nacházejí práci.
+v012-17,trouver,present,P,3,elles,trouvent,Elles trouvent une photo.,Ony nacházejí fotografii.
+v012-18,trouver,present,P,3,ils,trouvent,Ils trouvent une lettre.,Oni nacházejí dopis.
+v013-01,donner,present,S,1,je,donne,Je donne du pain aux oiseaux.,Já dávám chleba ptákům.
+v013-02,donner,present,S,1,je,donne,Je donne de l'eau au chien.,Já dávám vodu psovi.
+v013-03,donner,present,S,1,je,donne,Je donne du lait au chat.,Já dávám mléko kočce.
+v013-04,donner,present,S,2,tu,donnes,Tu donnes un livre à Paul.,Ty dáváš knihu Paulovi.
+v013-05,donner,present,S,2,tu,donnes,Tu donnes une fleur à Marie.,Ty dáváš květinu Marii.
+v013-06,donner,present,S,2,tu,donnes,Tu donnes une pomme à Luc.,Ty dáváš jablko Lucovi.
+v013-07,donner,present,S,3,il,donne,Il donne un cadeau à un ami.,On dává dárek kamarádovi.
+v013-08,donner,present,S,3,elle,donne,Elle donne un jouet au bébé.,Ona dává hračku miminku.
+v013-09,donner,present,S,3,il,donne,Il donne un crayon à une fille.,On dává pastelku holčičce.
+v013-10,donner,present,P,1,nous,donnons,Nous donnons du pain aux oiseaux.,My dáváme chleba ptákům.
+v013-11,donner,present,P,1,nous,donnons,Nous donnons de l'eau au chien.,My dáváme vodu psovi.
+v013-12,donner,present,P,1,nous,donnons,Nous donnons du lait au chat.,My dáváme mléko kočce.
+v013-13,donner,present,P,2,vous,donnez,Vous donnez un livre à Paul.,Vy dáváte knihu Paulovi.
+v013-14,donner,present,P,2,vous,donnez,Vous donnez une fleur à Marie.,Vy dáváte květinu Marii.
+v013-15,donner,present,P,2,vous,donnez,Vous donnez une pomme à Luc.,Vy dáváte jablko Lucovi.
+v013-16,donner,present,P,3,ils,donnent,Ils donnent un cadeau à un ami.,Oni dávají dárek kamarádovi.
+v013-17,donner,present,P,3,elles,donnent,Elles donnent un jouet au bébé.,Ony dávají hračku miminku.
+v013-18,donner,present,P,3,ils,donnent,Ils donnent un crayon à une fille.,Oni dávají pastelku holčičce.
+v014-01,falloir,present,S,3,il,faut,Il faut du pain.,Je potřeba chleba.
+v014-02,falloir,present,S,3,il,faut,Il faut de l'eau.,Je potřeba voda.
+v014-03,falloir,present,S,3,il,faut,Il faut du lait.,Je potřeba mléko.
+v014-04,falloir,present,S,3,il,faut,Il faut une clé.,Je potřeba klíč.
+v014-05,falloir,present,S,3,il,faut,Il faut un stylo.,Je potřeba pero.
+v014-06,falloir,present,S,3,il,faut,Il faut une chaise.,Je potřeba židle.
+v014-07,falloir,present,S,3,il,faut,Il faut du temps.,Je potřeba čas.
+v014-08,falloir,present,S,3,il,faut,Il faut une table.,Je potřeba stůl.
+v014-09,falloir,present,S,3,il,faut,Il faut un billet.,Je potřeba lístek.
+v014-10,falloir,present,S,3,il,faut,Il faut attendre.,Je třeba počkat.
+v014-11,falloir,present,S,3,il,faut,Il faut partir.,Je třeba odejít.
+v014-12,falloir,present,S,3,il,faut,Il faut écouter.,Je třeba poslouchat.
+v014-13,falloir,present,S,3,il,faut,Il faut ouvrir la porte.,Je třeba otevřít dveře.
+v014-14,falloir,present,S,3,il,faut,Il faut fermer la fenêtre.,Je třeba zavřít okno.
+v014-15,falloir,present,S,3,il,faut,Il faut acheter du pain.,Je třeba koupit chleba.
+v014-16,falloir,present,S,3,il,faut,Il faut boire de l'eau.,Je třeba pít vodu.
+v014-17,falloir,present,S,3,il,faut,Il faut lire la lettre.,Je třeba přečíst dopis.
+v014-18,falloir,present,S,3,il,faut,Il faut aider les enfants.,Je třeba pomoci dětem.
+v015-01,parler,present,S,1,je,parle,Je parle français.,Já mluvím francouzsky.
+v015-02,parler,present,S,1,je,parle,Je parle italien.,Já mluvím italsky.
+v015-03,parler,present,S,1,je,parle,Je parle anglais.,Já mluvím anglicky.
+v015-04,parler,present,S,2,tu,parles,Tu parles allemand.,Ty mluvíš německy.
+v015-05,parler,present,S,2,tu,parles,Tu parles espagnol.,Ty mluvíš španělsky.
+v015-06,parler,present,S,2,tu,parles,Tu parles tchèque.,Ty mluvíš česky.
+v015-07,parler,present,S,3,il,parle,Il parle avec Paul.,On mluví s Paulem.
+v015-08,parler,present,S,3,elle,parle,Elle parle avec Marie.,Ona mluví s Marií.
+v015-09,parler,present,S,3,il,parle,Il parle avec le médecin.,On mluví s lékařem.
+v015-10,parler,present,P,1,nous,parlons,Nous parlons avec un ami.,My mluvíme s kamarádem.
+v015-11,parler,present,P,1,nous,parlons,Nous parlons avec une voisine.,My mluvíme se sousedkou.
+v015-12,parler,present,P,1,nous,parlons,Nous parlons avec les enfants.,My mluvíme s dětmi.
+v015-13,parler,present,P,2,vous,parlez,Vous parlez de la famille.,Vy mluvíte o rodině.
+v015-14,parler,present,P,2,vous,parlez,Vous parlez du travail.,Vy mluvíte o práci.
+v015-15,parler,present,P,2,vous,parlez,Vous parlez des vacances.,Vy mluvíte o dovolené.
+v015-16,parler,present,P,3,ils,parlent,Ils parlent lentement.,Oni mluví pomalu.
+v015-17,parler,present,P,3,elles,parlent,Elles parlent doucement.,Ony mluví tiše.
+v015-18,parler,present,P,3,ils,parlent,Ils parlent au téléphone.,Oni mluví po telefonu.
+v016-01,mettre,present,S,1,je,mets,Je mets le livre sur la table.,Já dávám knihu na stůl.
+v016-02,mettre,present,S,1,je,mets,Je mets la clé dans le sac.,Já dávám klíč do tašky.
+v016-03,mettre,present,S,1,je,mets,Je mets le lait au frigo.,Já dávám mléko do lednice.
+v016-04,mettre,present,S,2,tu,mets,Tu mets le pain sur une assiette.,Ty dáváš chleba na talíř.
+v016-05,mettre,present,S,2,tu,mets,Tu mets les fleurs dans un vase.,Ty dáváš květiny do vázy.
+v016-06,mettre,present,S,2,tu,mets,Tu mets le stylo dans la boîte.,Ty dáváš pero do krabice.
+v016-07,mettre,present,S,3,il,met,Il met le sac sous la chaise.,On dává tašku pod židli.
+v016-08,mettre,present,S,3,elle,met,Elle met la tasse sur la table.,Ona dává šálek na stůl.
+v016-09,mettre,present,S,3,il,met,Il met la lettre dans une enveloppe.,On dává dopis do obálky.
+v016-10,mettre,present,P,1,nous,mettons,Nous mettons le livre sur la table.,My dáváme knihu na stůl.
+v016-11,mettre,present,P,1,nous,mettons,Nous mettons la clé dans le sac.,My dáváme klíč do tašky.
+v016-12,mettre,present,P,1,nous,mettons,Nous mettons le lait au frigo.,My dáváme mléko do lednice.
+v016-13,mettre,present,P,2,vous,mettez,Vous mettez le pain sur une assiette.,Vy dáváte chleba na talíř.
+v016-14,mettre,present,P,2,vous,mettez,Vous mettez les fleurs dans un vase.,Vy dáváte květiny do vázy.
+v016-15,mettre,present,P,2,vous,mettez,Vous mettez le stylo dans la boîte.,Vy dáváte pero do krabice.
+v016-16,mettre,present,P,3,ils,mettent,Ils mettent le sac sous la chaise.,Oni dávají tašku pod židli.
+v016-17,mettre,present,P,3,elles,mettent,Elles mettent la tasse sur la table.,Ony dávají šálek na stůl.
+v016-18,mettre,present,P,3,ils,mettent,Ils mettent la lettre dans une enveloppe.,Oni dávají dopis do obálky.
+v017-01,savoir,present,S,1,je,sais,Je sais nager.,Já umím plavat.
+v017-02,savoir,present,S,1,je,sais,Je sais lire.,Já umím číst.
+v017-03,savoir,present,S,1,je,sais,Je sais écrire.,Já umím psát.
+v017-04,savoir,present,S,2,tu,sais,Tu sais cuisiner.,Ty umíš vařit.
+v017-05,savoir,present,S,2,tu,sais,Tu sais chanter.,Ty umíš zpívat.
+v017-06,savoir,present,S,2,tu,sais,Tu sais danser.,Ty umíš tančit.
+v017-07,savoir,present,S,3,il,sait,Il sait conduire.,On umí řídit.
+v017-08,savoir,present,S,3,elle,sait,Elle sait compter.,Ona umí počítat.
+v017-09,savoir,present,S,3,il,sait,Il sait dessiner.,On umí kreslit.
+v017-10,savoir,present,P,1,nous,savons,Nous savons parler français.,My umíme mluvit francouzsky.
+v017-11,savoir,present,P,1,nous,savons,Nous savons parler italien.,My umíme mluvit italsky.
+v017-12,savoir,present,P,1,nous,savons,Nous savons parler anglais.,My umíme mluvit anglicky.
+v017-13,savoir,present,P,2,vous,savez,Vous savez faire du vélo.,Vy umíte jezdit na kole.
+v017-14,savoir,present,P,2,vous,savez,Vous savez jouer du piano.,Vy umíte hrát na klavír.
+v017-15,savoir,present,P,2,vous,savez,Vous savez jouer de la guitare.,Vy umíte hrát na kytaru.
+v017-16,savoir,present,P,3,ils,savent,Ils savent faire du pain.,Oni umějí péct chleba.
+v017-17,savoir,present,P,3,elles,savent,Elles savent faire une omelette.,Ony umějí udělat omeletu.
+v017-18,savoir,present,P,3,ils,savent,Ils savent ouvrir cette boîte.,Oni umějí otevřít tuto krabici.
+v018-01,passer,present,S,1,je,passe,Je passe devant l'école.,Já procházím před školou.
+v018-02,passer,present,S,1,je,passe,Je passe devant la gare.,Já procházím před nádražím.
+v018-03,passer,present,S,1,je,passe,Je passe devant le magasin.,Já procházím před obchodem.
+v018-04,passer,present,S,2,tu,passes,Tu passes devant la banque.,Ty procházíš před bankou.
+v018-05,passer,present,S,2,tu,passes,Tu passes devant la poste.,Ty procházíš před poštou.
+v018-06,passer,present,S,2,tu,passes,Tu passes devant le café.,Ty procházíš před kavárnou.
+v018-07,passer,present,S,3,il,passe,Il passe par le parc.,On prochází parkem.
+v018-08,passer,present,S,3,elle,passe,Elle passe par le jardin.,Ona prochází zahradou.
+v018-09,passer,present,S,3,il,passe,Il passe par cette rue.,On prochází touto ulicí.
+v018-10,passer,present,P,1,nous,passons,Nous passons devant l'école.,My procházíme před školou.
+v018-11,passer,present,P,1,nous,passons,Nous passons devant la gare.,My procházíme před nádražím.
+v018-12,passer,present,P,1,nous,passons,Nous passons devant le magasin.,My procházíme před obchodem.
+v018-13,passer,present,P,2,vous,passez,Vous passez devant la banque.,Vy procházíte před bankou.
+v018-14,passer,present,P,2,vous,passez,Vous passez devant la poste.,Vy procházíte před poštou.
+v018-15,passer,present,P,2,vous,passez,Vous passez devant le café.,Vy procházíte před kavárnou.
+v018-16,passer,present,P,3,ils,passent,Ils passent par le parc.,Oni procházejí parkem.
+v018-17,passer,present,P,3,elles,passent,Elles passent par le jardin.,Ony procházejí zahradou.
+v018-18,passer,present,P,3,ils,passent,Ils passent par cette rue.,Oni procházejí touto ulicí.
+v019-01,regarder,present,S,1,je,regarde,Je regarde un film.,Já sleduji film.
+v019-02,regarder,present,S,1,je,regarde,Je regarde la télévision.,Já sleduji televizi.
+v019-03,regarder,present,S,1,je,regarde,Je regarde un match.,Já sleduji zápas.
+v019-04,regarder,present,S,2,tu,regardes,Tu regardes les oiseaux.,Ty sleduješ ptáky.
+v019-05,regarder,present,S,2,tu,regardes,Tu regardes les enfants.,Ty sleduješ děti.
+v019-06,regarder,present,S,2,tu,regardes,Tu regardes les bateaux.,Ty sleduješ lodě.
+v019-07,regarder,present,S,3,il,regarde,Il regarde un chat.,On sleduje kočku.
+v019-08,regarder,present,S,3,elle,regarde,Elle regarde un chien.,Ona sleduje psa.
+v019-09,regarder,present,S,3,il,regarde,Il regarde un cheval.,On sleduje koně.
+v019-10,regarder,present,P,1,nous,regardons,Nous regardons un film.,My sledujeme film.
+v019-11,regarder,present,P,1,nous,regardons,Nous regardons la télévision.,My sledujeme televizi.
+v019-12,regarder,present,P,1,nous,regardons,Nous regardons un match.,My sledujeme zápas.
+v019-13,regarder,present,P,2,vous,regardez,Vous regardez les oiseaux.,Vy sledujete ptáky.
+v019-14,regarder,present,P,2,vous,regardez,Vous regardez les enfants.,Vy sledujete děti.
+v019-15,regarder,present,P,2,vous,regardez,Vous regardez les bateaux.,Vy sledujete lodě.
+v019-16,regarder,present,P,3,ils,regardent,Ils regardent un chat.,Oni sledují kočku.
+v019-17,regarder,present,P,3,elles,regardent,Elles regardent un chien.,Ony sledují psa.
+v019-18,regarder,present,P,3,ils,regardent,Ils regardent un cheval.,Oni sledují koně.
+v020-01,aimer,present,S,1,j',aime,J'aime le chocolat.,Já mám rád čokoládu.
+v020-02,aimer,present,S,1,j',aime,J'aime le fromage.,Já mám rád sýr.
+v020-03,aimer,present,S,1,j',aime,J'aime le pain.,Já mám rád chleba.
+v020-04,aimer,present,S,2,tu,aimes,Tu aimes le café.,Ty máš rád kávu.
+v020-05,aimer,present,S,2,tu,aimes,Tu aimes le thé.,Ty máš rád čaj.
+v020-06,aimer,present,S,2,tu,aimes,Tu aimes le lait.,Ty máš rád mléko.
+v020-07,aimer,present,S,3,il,aime,Il aime les livres.,On má rád knihy.
+v020-08,aimer,present,S,3,elle,aime,Elle aime la musique.,Ona má ráda hudbu.
+v020-09,aimer,present,S,3,il,aime,Il aime le cinéma.,On má rád kino.
+v020-10,aimer,present,P,1,nous,aimons,Nous aimons la mer.,My máme rádi moře.
+v020-11,aimer,present,P,1,nous,aimons,Nous aimons la montagne.,My máme rádi hory.
+v020-12,aimer,present,P,1,nous,aimons,Nous aimons la nature.,My máme rádi přírodu.
+v020-13,aimer,present,P,2,vous,aimez,Vous aimez les chiens.,Vy máte rádi psy.
+v020-14,aimer,present,P,2,vous,aimez,Vous aimez les chats.,Vy máte rádi kočky.
+v020-15,aimer,present,P,2,vous,aimez,Vous aimez les oiseaux.,Vy máte rádi ptáky.
+v020-16,aimer,present,P,3,ils,aiment,Ils aiment les pommes.,Oni mají rádi jablka.
+v020-17,aimer,present,P,3,elles,aiment,Elles aiment les fraises.,Ony mají rády jahody.
+v020-18,aimer,present,P,3,ils,aiment,Ils aiment les fleurs.,Oni mají rádi květiny.
+v021-01,croire,present,S,1,je,crois,Je crois Paul.,Já věřím Paulovi.
+v021-02,croire,present,S,1,je,crois,Je crois Marie.,Já věřím Marii.
+v021-03,croire,present,S,1,je,crois,Je crois le médecin.,Já věřím lékaři.
+v021-04,croire,present,S,2,tu,crois,Tu crois le professeur.,Ty věříš učiteli.
+v021-05,croire,present,S,2,tu,crois,Tu crois les enfants.,Ty věříš dětem.
+v021-06,croire,present,S,2,tu,crois,Tu crois ce garçon.,Ty věříš tomuto chlapci.
+v021-07,croire,present,S,3,il,croit,Il croit en l'amour.,On věří v lásku.
+v021-08,croire,present,S,3,elle,croit,Elle croit en l'avenir.,Ona věří v budoucnost.
+v021-09,croire,present,S,3,il,croit,Il croit en cette idée.,On věří v tuto myšlenku.
+v021-10,croire,present,P,1,nous,croyons,Nous croyons Paul.,My věříme Paulovi.
+v021-11,croire,present,P,1,nous,croyons,Nous croyons Marie.,My věříme Marii.
+v021-12,croire,present,P,1,nous,croyons,Nous croyons le médecin.,My věříme lékaři.
+v021-13,croire,present,P,2,vous,croyez,Vous croyez le professeur.,Vy věříte učiteli.
+v021-14,croire,present,P,2,vous,croyez,Vous croyez les enfants.,Vy věříte dětem.
+v021-15,croire,present,P,2,vous,croyez,Vous croyez ce garçon.,Vy věříte tomuto chlapci.
+v021-16,croire,present,P,3,ils,croient,Ils croient en l'amour.,Oni věří v lásku.
+v021-17,croire,present,P,3,elles,croient,Elles croient en l'avenir.,Ony věří v budoucnost.
+v021-18,croire,present,P,3,ils,croient,Ils croient en cette idée.,Oni věří v tuto myšlenku.
+v022-01,demander,present,S,1,je,demande,Je demande un café.,Já žádám o kávu.
+v022-02,demander,present,S,1,je,demande,Je demande un thé.,Já žádám o čaj.
+v022-03,demander,present,S,1,je,demande,Je demande un verre d'eau.,Já žádám o sklenici vody.
+v022-04,demander,present,S,2,tu,demandes,Tu demandes une chambre.,Ty žádáš o pokoj.
+v022-05,demander,present,S,2,tu,demandes,Tu demandes une table.,Ty žádáš o stůl.
+v022-06,demander,present,S,2,tu,demandes,Tu demandes un billet.,Ty žádáš o lístek.
+v022-07,demander,present,S,3,il,demande,Il demande de l'aide.,On žádá o pomoc.
+v022-08,demander,present,S,3,elle,demande,Elle demande un conseil.,Ona žádá o radu.
+v022-09,demander,present,S,3,il,demande,Il demande une explication.,On žádá o vysvětlení.
+v022-10,demander,present,P,1,nous,demandons,Nous demandons un café.,My žádáme o kávu.
+v022-11,demander,present,P,1,nous,demandons,Nous demandons un thé.,My žádáme o čaj.
+v022-12,demander,present,P,1,nous,demandons,Nous demandons un verre d'eau.,My žádáme o sklenici vody.
+v022-13,demander,present,P,2,vous,demandez,Vous demandez une chambre.,Vy žádáte o pokoj.
+v022-14,demander,present,P,2,vous,demandez,Vous demandez une table.,Vy žádáte o stůl.
+v022-15,demander,present,P,2,vous,demandez,Vous demandez un billet.,Vy žádáte o lístek.
+v022-16,demander,present,P,3,ils,demandent,Ils demandent de l'aide.,Oni žádají o pomoc.
+v022-17,demander,present,P,3,elles,demandent,Elles demandent un conseil.,Ony žádají o radu.
+v022-18,demander,present,P,3,ils,demandent,Ils demandent une explication.,Oni žádají o vysvětlení.
+v023-01,rester,present,S,1,je,reste,Je reste à la maison.,Já zůstávám doma.
+v023-02,rester,present,S,1,je,reste,Je reste à l'école.,Já zůstávám ve škole.
+v023-03,rester,present,S,1,je,reste,Je reste au travail.,Já zůstávám v práci.
+v023-04,rester,present,S,2,tu,restes,Tu restes dans la chambre.,Ty zůstáváš v pokoji.
+v023-05,rester,present,S,2,tu,restes,Tu restes dans le jardin.,Ty zůstáváš na zahradě.
+v023-06,rester,present,S,2,tu,restes,Tu restes dans la cuisine.,Ty zůstáváš v kuchyni.
+v023-07,rester,present,S,3,il,reste,Il reste au parc.,On zůstává v parku.
+v023-08,rester,present,S,3,elle,reste,Elle reste à la plage.,Ona zůstává na pláži.
+v023-09,rester,present,S,3,il,reste,Il reste à l'hôtel.,On zůstává v hotelu.
+v023-10,rester,present,P,1,nous,restons,Nous restons avec les enfants.,My zůstáváme s dětmi.
+v023-11,rester,present,P,1,nous,restons,Nous restons avec Paul.,My zůstáváme s Paulem.
+v023-12,rester,present,P,1,nous,restons,Nous restons avec Marie.,My zůstáváme s Marií.
+v023-13,rester,present,P,2,vous,restez,Vous restez ici ce soir.,Vy zůstáváte tady dnes večer.
+v023-14,rester,present,P,2,vous,restez,Vous restez dehors.,Vy zůstáváte venku.
+v023-15,rester,present,P,2,vous,restez,Vous restez à l'intérieur.,Vy zůstáváte uvnitř.
+v023-16,rester,present,P,3,ils,restent,Ils restent près de la porte.,Oni zůstávají blízko dveří.
+v023-17,rester,present,P,3,elles,restent,Elles restent encore une heure.,Ony zůstávají ještě hodinu.
+v023-18,rester,present,P,3,ils,restent,Ils restent jusqu'à midi.,Oni zůstávají až do poledne.
+v024-01,répondre,present,S,1,je,réponds,Je réponds à Paul.,Já odpovídám Paulovi.
+v024-02,répondre,present,S,1,je,réponds,Je réponds à Marie.,Já odpovídám Marii.
+v024-03,répondre,present,S,1,je,réponds,Je réponds au médecin.,Já odpovídám lékaři.
+v024-04,répondre,present,S,2,tu,réponds,Tu réponds au professeur.,Ty odpovídáš učiteli.
+v024-05,répondre,present,S,2,tu,réponds,Tu réponds aux enfants.,Ty odpovídáš dětem.
+v024-06,répondre,present,S,2,tu,réponds,Tu réponds à un ami.,Ty odpovídáš kamarádovi.
+v024-07,répondre,present,S,3,il,répond,Il répond à une question.,On odpovídá na otázku.
+v024-08,répondre,present,S,3,elle,répond,Elle répond à une lettre.,Ona odpovídá na dopis.
+v024-09,répondre,present,S,3,il,répond,Il répond à un message.,On odpovídá na zprávu.
+v024-10,répondre,present,P,1,nous,répondons,Nous répondons à Paul.,My odpovídáme Paulovi.
+v024-11,répondre,present,P,1,nous,répondons,Nous répondons à Marie.,My odpovídáme Marii.
+v024-12,répondre,present,P,1,nous,répondons,Nous répondons au médecin.,My odpovídáme lékaři.
+v024-13,répondre,present,P,2,vous,répondez,Vous répondez au professeur.,Vy odpovídáte učiteli.
+v024-14,répondre,present,P,2,vous,répondez,Vous répondez aux enfants.,Vy odpovídáte dětem.
+v024-15,répondre,present,P,2,vous,répondez,Vous répondez à un ami.,Vy odpovídáte kamarádovi.
+v024-16,répondre,present,P,3,ils,répondent,Ils répondent à une question.,Oni odpovídají na otázku.
+v024-17,répondre,present,P,3,elles,répondent,Elles répondent à une lettre.,Ony odpovídají na dopis.
+v024-18,répondre,present,P,3,ils,répondent,Ils répondent à un message.,Oni odpovídají na zprávu.
+v025-01,entendre,present,S,1,j',entends,J'entends un chien.,Já slyším psa.
+v025-02,entendre,present,S,1,j',entends,J'entends un chat.,Já slyším kočku.
+v025-03,entendre,present,S,1,j',entends,J'entends un oiseau.,Já slyším ptáka.
+v025-04,entendre,present,S,2,tu,entends,Tu entends la pluie.,Ty slyšíš déšť.
+v025-05,entendre,present,S,2,tu,entends,Tu entends le vent.,Ty slyšíš vítr.
+v025-06,entendre,present,S,2,tu,entends,Tu entends la mer.,Ty slyšíš moře.
+v025-07,entendre,present,S,3,il,entend,Il entend une voiture.,On slyší auto.
+v025-08,entendre,present,S,3,elle,entend,Elle entend un train.,Ona slyší vlak.
+v025-09,entendre,present,S,3,il,entend,Il entend un avion.,On slyší letadlo.
+v025-10,entendre,present,P,1,nous,entendons,Nous entendons de la musique.,My slyšíme hudbu.
+v025-11,entendre,present,P,1,nous,entendons,Nous entendons une chanson.,My slyšíme písničku.
+v025-12,entendre,present,P,1,nous,entendons,Nous entendons la radio.,My slyšíme rádio.
+v025-13,entendre,present,P,2,vous,entendez,Vous entendez une voix.,Vy slyšíte hlas.
+v025-14,entendre,present,P,2,vous,entendez,Vous entendez un rire.,Vy slyšíte smích.
+v025-15,entendre,present,P,2,vous,entendez,Vous entendez un cri.,Vy slyšíte výkřik.
+v025-16,entendre,present,P,3,ils,entendent,Ils entendent le téléphone.,Oni slyší telefon.
+v025-17,entendre,present,P,3,elles,entendent,Elles entendent les enfants.,Ony slyší děti.
+v025-18,entendre,present,P,3,ils,entendent,Ils entendent une cloche.,Oni slyší zvon.
+v026-01,penser,present,S,1,je,pense,Je pense à Paul.,Já myslím na Paula.
+v026-02,penser,present,S,1,je,pense,Je pense à Marie.,Já myslím na Marii.
+v026-03,penser,present,S,1,je,pense,Je pense aux enfants.,Já myslím na děti.
+v026-04,penser,present,S,2,tu,penses,Tu penses au travail.,Ty myslíš na práci.
+v026-05,penser,present,S,2,tu,penses,Tu penses aux vacances.,Ty myslíš na dovolenou.
+v026-06,penser,present,S,2,tu,penses,Tu penses au repas.,Ty myslíš na jídlo.
+v026-07,penser,present,S,3,il,pense,Il pense à la maison.,On myslí na dům.
+v026-08,penser,present,S,3,elle,pense,Elle pense à ce voyage.,Ona myslí na tuto cestu.
+v026-09,penser,present,S,3,il,pense,Il pense à cette question.,On myslí na tuto otázku.
+v026-10,penser,present,P,1,nous,pensons,Nous pensons à Paul.,My myslíme na Paula.
+v026-11,penser,present,P,1,nous,pensons,Nous pensons à Marie.,My myslíme na Marii.
+v026-12,penser,present,P,1,nous,pensons,Nous pensons aux enfants.,My myslíme na děti.
+v026-13,penser,present,P,2,vous,pensez,Vous pensez au travail.,Vy myslíte na práci.
+v026-14,penser,present,P,2,vous,pensez,Vous pensez aux vacances.,Vy myslíte na dovolenou.
+v026-15,penser,present,P,2,vous,pensez,Vous pensez au repas.,Vy myslíte na jídlo.
+v026-16,penser,present,P,3,ils,pensent,Ils pensent à la maison.,Oni myslí na dům.
+v026-17,penser,present,P,3,elles,pensent,Elles pensent à ce voyage.,Ony myslí na tuto cestu.
+v026-18,penser,present,P,3,ils,pensent,Ils pensent à cette question.,Oni myslí na tuto otázku.
+v027-01,arriver,present,S,1,j',arrive,J'arrive à l'école.,Já přicházím do školy.
+v027-02,arriver,present,S,1,j',arrive,J'arrive au travail.,Já přicházím do práce.
+v027-03,arriver,present,S,1,j',arrive,J'arrive à la gare.,Já přicházím na nádraží.
+v027-04,arriver,present,S,2,tu,arrives,Tu arrives à la maison.,Ty přicházíš domů.
+v027-05,arriver,present,S,2,tu,arrives,Tu arrives au restaurant.,Ty přicházíš do restaurace.
+v027-06,arriver,present,S,2,tu,arrives,Tu arrives au parc.,Ty přicházíš do parku.
+v027-07,arriver,present,S,3,il,arrive,Il arrive à huit heures.,On přichází v osm hodin.
+v027-08,arriver,present,S,3,elle,arrive,Elle arrive à midi.,Ona přichází v poledne.
+v027-09,arriver,present,S,3,il,arrive,Il arrive le soir.,On přichází večer.
+v027-10,arriver,present,P,1,nous,arrivons,Nous arrivons à pied.,My přicházíme pěšky.
+v027-11,arriver,present,P,1,nous,arrivons,Nous arrivons avec Paul.,My přicházíme s Paulem.
+v027-12,arriver,present,P,1,nous,arrivons,Nous arrivons avec Marie.,My přicházíme s Marií.
+v027-13,arriver,present,P,2,vous,arrivez,Vous arrivez en avance.,Vy přicházíte s předstihem.
+v027-14,arriver,present,P,2,vous,arrivez,Vous arrivez à l'heure.,Vy přicházíte včas.
+v027-15,arriver,present,P,2,vous,arrivez,Vous arrivez en retard.,Vy přicházíte pozdě.
+v027-16,arriver,present,P,3,ils,arrivent,Ils arrivent par la petite rue.,Oni přicházejí malou ulicí.
+v027-17,arriver,present,P,3,elles,arrivent,Elles arrivent avec un sac.,Ony přicházejí s taškou.
+v027-18,arriver,present,P,3,ils,arrivent,Ils arrivent avec les enfants.,Oni přicházejí s dětmi.
+v028-01,connaître,present,S,1,je,connais,Je connais Paul.,Já znám Paula.
+v028-02,connaître,present,S,1,je,connais,Je connais Marie.,Já znám Marii.
+v028-03,connaître,present,S,1,je,connais,Je connais le médecin.,Já znám lékaře.
+v028-04,connaître,present,S,2,tu,connais,Tu connais ce professeur.,Ty znáš tohoto učitele.
+v028-05,connaître,present,S,2,tu,connais,Tu connais ce voisin.,Ty znáš tohoto souseda.
+v028-06,connaître,present,S,2,tu,connais,Tu connais cette famille.,Ty znáš tuto rodinu.
+v028-07,connaître,present,S,3,il,connaît,Il connaît Paris.,On zná Paříž.
+v028-08,connaître,present,S,3,elle,connaît,Elle connaît Prague.,Ona zná Prahu.
+v028-09,connaître,present,S,3,il,connaît,Il connaît Rome.,On zná Řím.
+v028-10,connaître,present,P,1,nous,connaissons,Nous connaissons ce quartier.,My známe tuto čtvrť.
+v028-11,connaître,present,P,1,nous,connaissons,Nous connaissons cette rue.,My známe tuto ulici.
+v028-12,connaître,present,P,1,nous,connaissons,Nous connaissons ce chemin.,My známe tuto cestu.
+v028-13,connaître,present,P,2,vous,connaissez,Vous connaissez ce restaurant.,Vy znáte tuto restauraci.
+v028-14,connaître,present,P,2,vous,connaissez,Vous connaissez ce magasin.,Vy znáte tento obchod.
+v028-15,connaître,present,P,2,vous,connaissez,Vous connaissez cet hôtel.,Vy znáte tento hotel.
+v028-16,connaître,present,P,3,ils,connaissent,Ils connaissent cette chanson.,Oni znají tuto písničku.
+v028-17,connaître,present,P,3,elles,connaissent,Elles connaissent cette histoire.,Ony znají tento příběh.
+v028-18,connaître,present,P,3,ils,connaissent,Ils connaissent ce jeu.,Oni znají tuto hru.
+v029-01,devenir,present,S,1,je,deviens,Je deviens calme.,Já se stávám klidným.
+v029-02,devenir,present,S,1,je,deviens,Je deviens fort.,Já se stávám silným.
+v029-03,devenir,present,S,1,je,deviens,Je deviens patient.,Já se stávám trpělivým.
+v029-04,devenir,present,S,2,tu,deviens,Tu deviens célèbre.,Ty se stáváš slavným.
+v029-05,devenir,present,S,2,tu,deviens,Tu deviens riche.,Ty se stáváš bohatým.
+v029-06,devenir,present,S,2,tu,deviens,Tu deviens plus rapide.,Ty se stáváš rychlejším.
+v029-07,devenir,present,S,3,il,devient,Il devient médecin.,On se stává lékařem.
+v029-08,devenir,present,S,3,elle,devient,Elle devient professeur.,Ona se stává učitelkou.
+v029-09,devenir,present,S,3,il,devient,Il devient père.,On se stává otcem.
+v029-10,devenir,present,P,1,nous,devenons,Nous devenons amis.,My se stáváme přáteli.
+v029-11,devenir,present,P,1,nous,devenons,Nous devenons voisins.,My se stáváme sousedy.
+v029-12,devenir,present,P,1,nous,devenons,Nous devenons collègues.,My se stáváme kolegy.
+v029-13,devenir,present,P,2,vous,devenez,Vous devenez plus forts.,Vy se stáváte silnějšími.
+v029-14,devenir,present,P,2,vous,devenez,Vous devenez plus calmes.,Vy se stáváte klidnějšími.
+v029-15,devenir,present,P,2,vous,devenez,Vous devenez plus patients.,Vy se stáváte trpělivějšími.
+v029-16,devenir,present,P,3,ils,deviennent,Ils deviennent adultes.,Oni se stávají dospělými.
+v029-17,devenir,present,P,3,elles,deviennent,Elles deviennent célèbres.,Ony se stávají slavnými.
+v029-18,devenir,present,P,3,ils,deviennent,Ils deviennent riches.,Oni se stávají bohatými.
+v030-01,sentir,present,S,1,je,sens,Je sens le froid.,Já cítím chlad.
+v030-02,sentir,present,S,1,je,sens,Je sens la chaleur.,Já cítím teplo.
+v030-03,sentir,present,S,1,je,sens,Je sens le vent.,Já cítím vítr.
+v030-04,sentir,present,S,2,tu,sens,Tu sens une odeur de café.,Ty cítíš vůni kávy.
+v030-05,sentir,present,S,2,tu,sens,Tu sens une odeur de pain.,Ty cítíš vůni chleba.
+v030-06,sentir,present,S,2,tu,sens,Tu sens une odeur de fleurs.,Ty cítíš vůni květin.
+v030-07,sentir,present,S,3,il,sent,Il sent la fatigue.,On cítí únavu.
+v030-08,sentir,present,S,3,elle,sent,Elle sent la faim.,Ona cítí hlad.
+v030-09,sentir,present,S,3,il,sent,Il sent la soif.,On cítí žízeň.
+v030-10,sentir,present,P,1,nous,sentons,Nous sentons le froid.,My cítíme chlad.
+v030-11,sentir,present,P,1,nous,sentons,Nous sentons la chaleur.,My cítíme teplo.
+v030-12,sentir,present,P,1,nous,sentons,Nous sentons le vent.,My cítíme vítr.
+v030-13,sentir,present,P,2,vous,sentez,Vous sentez une odeur de café.,Vy cítíte vůni kávy.
+v030-14,sentir,present,P,2,vous,sentez,Vous sentez une odeur de pain.,Vy cítíte vůni chleba.
+v030-15,sentir,present,P,2,vous,sentez,Vous sentez une odeur de fleurs.,Vy cítíte vůni květin.
+v030-16,sentir,present,P,3,ils,sentent,Ils sentent la fatigue.,Oni cítí únavu.
+v030-17,sentir,present,P,3,elles,sentent,Elles sentent la faim.,Ony cítí hlad.
+v030-18,sentir,present,P,3,ils,sentent,Ils sentent la soif.,Oni cítí žízeň.
+v031-01,sembler,present,S,1,je,semble,Je semble calme.,Já vypadám klidně.
+v031-02,sembler,present,S,1,je,semble,Je semble fatigué.,Já vypadám unaveně.
+v031-03,sembler,present,S,1,je,semble,Je semble heureux.,Já vypadám šťastně.
+v031-04,sembler,present,S,2,tu,sembles,Tu sembles triste.,Ty vypadáš smutně.
+v031-05,sembler,present,S,2,tu,sembles,Tu sembles malade.,Ty vypadáš nemocně.
+v031-06,sembler,present,S,2,tu,sembles,Tu sembles surpris.,Ty vypadáš překvapeně.
+v031-07,sembler,present,S,3,il,semble,Il semble content.,On vypadá spokojeně.
+v031-08,sembler,present,S,3,elle,semble,Elle semble inquiète.,Ona vypadá ustaraně.
+v031-09,sembler,present,S,3,il,semble,Il semble jeune.,On vypadá mladě.
+v031-10,sembler,present,P,1,nous,semblons,Nous semblons calmes.,My vypadáme klidně.
+v031-11,sembler,present,P,1,nous,semblons,Nous semblons fatigués.,My vypadáme unaveně.
+v031-12,sembler,present,P,1,nous,semblons,Nous semblons heureux.,My vypadáme šťastně.
+v031-13,sembler,present,P,2,vous,semblez,Vous semblez tristes.,Vy vypadáte smutně.
+v031-14,sembler,present,P,2,vous,semblez,Vous semblez malades.,Vy vypadáte nemocně.
+v031-15,sembler,present,P,2,vous,semblez,Vous semblez surpris.,Vy vypadáte překvapeně.
+v031-16,sembler,present,P,3,ils,semblent,Ils semblent contents.,Oni vypadají spokojeně.
+v031-17,sembler,present,P,3,elles,semblent,Elles semblent inquiètes.,Ony vypadají ustaraně.
+v031-18,sembler,present,P,3,ils,semblent,Ils semblent jeunes.,Oni vypadají mladě.
+v032-01,tenir,present,S,1,je,tiens,Je tiens un livre.,Já držím knihu.
+v032-02,tenir,present,S,1,je,tiens,Je tiens un stylo.,Já držím pero.
+v032-03,tenir,present,S,1,je,tiens,Je tiens une feuille.,Já držím list papíru.
+v032-04,tenir,present,S,2,tu,tiens,Tu tiens une tasse.,Ty držíš šálek.
+v032-05,tenir,present,S,2,tu,tiens,Tu tiens un verre.,Ty držíš sklenici.
+v032-06,tenir,present,S,2,tu,tiens,Tu tiens une assiette.,Ty držíš talíř.
+v032-07,tenir,present,S,3,il,tient,Il tient un sac.,On drží tašku.
+v032-08,tenir,present,S,3,elle,tient,Elle tient une valise.,Ona drží kufr.
+v032-09,tenir,present,S,3,il,tient,Il tient un parapluie.,On drží deštník.
+v032-10,tenir,present,P,1,nous,tenons,Nous tenons une clé.,My držíme klíč.
+v032-11,tenir,present,P,1,nous,tenons,Nous tenons une corde.,My držíme lano.
+v032-12,tenir,present,P,1,nous,tenons,Nous tenons une branche.,My držíme větev.
+v032-13,tenir,present,P,2,vous,tenez,Vous tenez la main du bébé.,Vy držíte ruku miminka.
+v032-14,tenir,present,P,2,vous,tenez,Vous tenez la porte.,Vy držíte dveře.
+v032-15,tenir,present,P,2,vous,tenez,Vous tenez une lampe.,Vy držíte lampu.
+v032-16,tenir,present,P,3,ils,tiennent,Ils tiennent une fleur.,Oni drží květinu.
+v032-17,tenir,present,P,3,elles,tiennent,Elles tiennent une photo.,Ony drží fotografii.
+v032-18,tenir,present,P,3,ils,tiennent,Ils tiennent un téléphone.,Oni drží telefon.
+v033-01,comprendre,present,S,1,je,comprends,Je comprends le français.,Já rozumím francouzštině.
+v033-02,comprendre,present,S,1,je,comprends,Je comprends l'italien.,Já rozumím italštině.
+v033-03,comprendre,present,S,1,je,comprends,Je comprends l'anglais.,Já rozumím angličtině.
+v033-04,comprendre,present,S,2,tu,comprends,Tu comprends la question.,Ty rozumíš otázce.
+v033-05,comprendre,present,S,2,tu,comprends,Tu comprends la réponse.,Ty rozumíš odpovědi.
+v033-06,comprendre,present,S,2,tu,comprends,Tu comprends la phrase.,Ty rozumíš větě.
+v033-07,comprendre,present,S,3,il,comprend,Il comprend ce mot.,On rozumí tomuto slovu.
+v033-08,comprendre,present,S,3,elle,comprend,Elle comprend ce texte.,Ona rozumí tomuto textu.
+v033-09,comprendre,present,S,3,il,comprend,Il comprend cette lettre.,On rozumí tomuto dopisu.
+v033-10,comprendre,present,P,1,nous,comprenons,Nous comprenons le professeur.,My rozumíme učiteli.
+v033-11,comprendre,present,P,1,nous,comprenons,Nous comprenons le médecin.,My rozumíme lékaři.
+v033-12,comprendre,present,P,1,nous,comprenons,Nous comprenons les enfants.,My rozumíme dětem.
+v033-13,comprendre,present,P,2,vous,comprenez,Vous comprenez ce problème.,Vy rozumíte tomuto problému.
+v033-14,comprendre,present,P,2,vous,comprenez,Vous comprenez les règles.,Vy rozumíte pravidlům.
+v033-15,comprendre,present,P,2,vous,comprenez,Vous comprenez la leçon.,Vy rozumíte lekci.
+v033-16,comprendre,present,P,3,ils,comprennent,Ils comprennent Paul.,Oni rozumějí Paulovi.
+v033-17,comprendre,present,P,3,elles,comprennent,Elles comprennent Marie.,Ony rozumějí Marii.
+v033-18,comprendre,present,P,3,ils,comprennent,Ils comprennent ce message.,Oni rozumějí této zprávě.
+v034-01,rendre,present,S,1,je,rends,Je rends le livre à Paul.,Já vracím knihu Paulovi.
+v034-02,rendre,present,S,1,je,rends,Je rends la clé à Marie.,Já vracím klíč Marii.
+v034-03,rendre,present,S,1,je,rends,Je rends le stylo au professeur.,Já vracím pero učiteli.
+v034-04,rendre,present,S,2,tu,rends,Tu rends le sac à Luc.,Ty vracíš tašku Lucovi.
+v034-05,rendre,present,S,2,tu,rends,Tu rends le jouet au bébé.,Ty vracíš hračku miminku.
+v034-06,rendre,present,S,2,tu,rends,Tu rends la tasse à une amie.,Ty vracíš šálek kamarádce.
+v034-07,rendre,present,S,3,il,rend,Il rend le vélo à un voisin.,On vrací kolo sousedovi.
+v034-08,rendre,present,S,3,elle,rend,Elle rend la carte à un ami.,Ona vrací mapu kamarádovi.
+v034-09,rendre,present,S,3,il,rend,Il rend le téléphone à Julie.,On vrací telefon Julii.
+v034-10,rendre,present,P,1,nous,rendons,Nous rendons le livre à Paul.,My vracíme knihu Paulovi.
+v034-11,rendre,present,P,1,nous,rendons,Nous rendons la clé à Marie.,My vracíme klíč Marii.
+v034-12,rendre,present,P,1,nous,rendons,Nous rendons le stylo au professeur.,My vracíme pero učiteli.
+v034-13,rendre,present,P,2,vous,rendez,Vous rendez le sac à Luc.,Vy vracíte tašku Lucovi.
+v034-14,rendre,present,P,2,vous,rendez,Vous rendez le jouet au bébé.,Vy vracíte hračku miminku.
+v034-15,rendre,present,P,2,vous,rendez,Vous rendez la tasse à une amie.,Vy vracíte šálek kamarádce.
+v034-16,rendre,present,P,3,ils,rendent,Ils rendent le vélo à un voisin.,Oni vracejí kolo sousedovi.
+v034-17,rendre,present,P,3,elles,rendent,Elles rendent la carte à un ami.,Ony vracejí mapu kamarádovi.
+v034-18,rendre,present,P,3,ils,rendent,Ils rendent le téléphone à Julie.,Oni vracejí telefon Julii.
+v035-01,attendre,present,S,1,j',attends,J'attends le bus.,Já čekám na autobus.
+v035-02,attendre,present,S,1,j',attends,J'attends le train.,Já čekám na vlak.
+v035-03,attendre,present,S,1,j',attends,J'attends le taxi.,Já čekám na taxi.
+v035-04,attendre,present,S,2,tu,attends,Tu attends Paul.,Ty čekáš na Paula.
+v035-05,attendre,present,S,2,tu,attends,Tu attends Marie.,Ty čekáš na Marii.
+v035-06,attendre,present,S,2,tu,attends,Tu attends le médecin.,Ty čekáš na lékaře.
+v035-07,attendre,present,S,3,il,attend,Il attend les enfants.,On čeká na děti.
+v035-08,attendre,present,S,3,elle,attend,Elle attend le professeur.,Ona čeká na učitele.
+v035-09,attendre,present,S,3,il,attend,Il attend un ami.,On čeká na kamaráda.
+v035-10,attendre,present,P,1,nous,attendons,Nous attendons une réponse.,My čekáme na odpověď.
+v035-11,attendre,present,P,1,nous,attendons,Nous attendons une lettre.,My čekáme na dopis.
+v035-12,attendre,present,P,1,nous,attendons,Nous attendons un message.,My čekáme na zprávu.
+v035-13,attendre,present,P,2,vous,attendez,Vous attendez le repas.,Vy čekáte na jídlo.
+v035-14,attendre,present,P,2,vous,attendez,Vous attendez le café.,Vy čekáte na kávu.
+v035-15,attendre,present,P,2,vous,attendez,Vous attendez le dessert.,Vy čekáte na dezert.
+v035-16,attendre,present,P,3,ils,attendent,Ils attendent les vacances.,Oni čekají na dovolenou.
+v035-17,attendre,present,P,3,elles,attendent,Elles attendent la fin du film.,Ony čekají na konec filmu.
+v035-18,attendre,present,P,3,ils,attendent,Ils attendent le soleil.,Oni čekají na slunce.
+v036-01,sortir,present,S,1,je,sors,Je sors de la maison.,Já vycházím z domu.
+v036-02,sortir,present,S,1,je,sors,Je sors de l'école.,Já vycházím ze školy.
+v036-03,sortir,present,S,1,je,sors,Je sors du magasin.,Já vycházím z obchodu.
+v036-04,sortir,present,S,2,tu,sors,Tu sors du jardin.,Ty vycházíš ze zahrady.
+v036-05,sortir,present,S,2,tu,sors,Tu sors du parc.,Ty vycházíš z parku.
+v036-06,sortir,present,S,2,tu,sors,Tu sors de la gare.,Ty vycházíš z nádraží.
+v036-07,sortir,present,S,3,il,sort,Il sort du café.,On vychází z kavárny.
+v036-08,sortir,present,S,3,elle,sort,Elle sort du restaurant.,Ona vychází z restaurace.
+v036-09,sortir,present,S,3,il,sort,Il sort du cinéma.,On vychází z kina.
+v036-10,sortir,present,P,1,nous,sortons,Nous sortons de la chambre.,My vycházíme z pokoje.
+v036-11,sortir,present,P,1,nous,sortons,Nous sortons de la cuisine.,My vycházíme z kuchyně.
+v036-12,sortir,present,P,1,nous,sortons,Nous sortons de la salle de bains.,My vycházíme z koupelny.
+v036-13,sortir,present,P,2,vous,sortez,Vous sortez du musée.,Vy vycházíte z muzea.
+v036-14,sortir,present,P,2,vous,sortez,Vous sortez de la banque.,Vy vycházíte z banky.
+v036-15,sortir,present,P,2,vous,sortez,Vous sortez de la poste.,Vy vycházíte z pošty.
+v036-16,sortir,present,P,3,ils,sortent,Ils sortent du bureau.,Oni vycházejí z kanceláře.
+v036-17,sortir,present,P,3,elles,sortent,Elles sortent de l'hôtel.,Ony vycházejí z hotelu.
+v036-18,sortir,present,P,3,ils,sortent,Ils sortent de la bibliothèque.,Oni vycházejí z knihovny.
+v037-01,vivre,present,S,1,je,vis,Je vis à Paris.,Já žiji v Paříži.
+v037-02,vivre,present,S,1,je,vis,Je vis à Prague.,Já žiji v Praze.
+v037-03,vivre,present,S,1,je,vis,Je vis à Rome.,Já žiji v Římě.
+v037-04,vivre,present,S,2,tu,vis,Tu vis en France.,Ty žiješ ve Francii.
+v037-05,vivre,present,S,2,tu,vis,Tu vis en Italie.,Ty žiješ v Itálii.
+v037-06,vivre,present,S,2,tu,vis,Tu vis en Espagne.,Ty žiješ ve Španělsku.
+v037-07,vivre,present,S,3,il,vit,Il vit en ville.,On žije ve městě.
+v037-08,vivre,present,S,3,elle,vit,Elle vit à la campagne.,Ona žije na venkově.
+v037-09,vivre,present,S,3,il,vit,Il vit près de la mer.,On žije blízko moře.
+v037-10,vivre,present,P,1,nous,vivons,Nous vivons dans une maison.,My žijeme v domě.
+v037-11,vivre,present,P,1,nous,vivons,Nous vivons dans un appartement.,My žijeme v bytě.
+v037-12,vivre,present,P,1,nous,vivons,Nous vivons près d'un parc.,My žijeme blízko parku.
+v037-13,vivre,present,P,2,vous,vivez,Vous vivez avec un ami.,Vy žijete s kamarádem.
+v037-14,vivre,present,P,2,vous,vivez,Vous vivez avec les enfants.,Vy žijete s dětmi.
+v037-15,vivre,present,P,2,vous,vivez,Vous vivez avec un chien.,Vy žijete se psem.
+v037-16,vivre,present,P,3,ils,vivent,Ils vivent ici depuis un an.,Oni žijí tady už rok.
+v037-17,vivre,present,P,3,elles,vivent,Elles vivent loin de la ville.,Ony žijí daleko od města.
+v037-18,vivre,present,P,3,ils,vivent,Ils vivent près d'une rivière.,Oni žijí blízko řeky.
+v038-01,entrer,present,S,1,j',entre,J'entre dans la maison.,Já vstupuji do domu.
+v038-02,entrer,present,S,1,j',entre,J'entre dans l'école.,Já vstupuji do školy.
+v038-03,entrer,present,S,1,j',entre,J'entre dans le magasin.,Já vstupuji do obchodu.
+v038-04,entrer,present,S,2,tu,entres,Tu entres dans le jardin.,Ty vstupuješ do zahrady.
+v038-05,entrer,present,S,2,tu,entres,Tu entres dans le parc.,Ty vstupuješ do parku.
+v038-06,entrer,present,S,2,tu,entres,Tu entres dans la gare.,Ty vstupuješ do nádražní budovy.
+v038-07,entrer,present,S,3,il,entre,Il entre dans le café.,On vstupuje do kavárny.
+v038-08,entrer,present,S,3,elle,entre,Elle entre dans le restaurant.,Ona vstupuje do restaurace.
+v038-09,entrer,present,S,3,il,entre,Il entre dans le cinéma.,On vstupuje do kina.
+v038-10,entrer,present,P,1,nous,entrons,Nous entrons dans la chambre.,My vstupujeme do pokoje.
+v038-11,entrer,present,P,1,nous,entrons,Nous entrons dans la cuisine.,My vstupujeme do kuchyně.
+v038-12,entrer,present,P,1,nous,entrons,Nous entrons dans la salle de bains.,My vstupujeme do koupelny.
+v038-13,entrer,present,P,2,vous,entrez,Vous entrez dans le musée.,Vy vstupujete do muzea.
+v038-14,entrer,present,P,2,vous,entrez,Vous entrez dans la banque.,Vy vstupujete do banky.
+v038-15,entrer,present,P,2,vous,entrez,Vous entrez dans la poste.,Vy vstupujete na poštu.
+v038-16,entrer,present,P,3,ils,entrent,Ils entrent dans le bureau.,Oni vstupují do kanceláře.
+v038-17,entrer,present,P,3,elles,entrent,Elles entrent dans l'hôtel.,Ony vstupují do hotelu.
+v038-18,entrer,present,P,3,ils,entrent,Ils entrent dans la bibliothèque.,Oni vstupují do knihovny.
+v039-01,reprendre,present,S,1,je,reprends,Je reprends du pain.,Já si znovu beru chleba.
+v039-02,reprendre,present,S,1,je,reprends,Je reprends du fromage.,Já si znovu beru sýr.
+v039-03,reprendre,present,S,1,je,reprends,Je reprends de la soupe.,Já si znovu beru polévku.
+v039-04,reprendre,present,S,2,tu,reprends,Tu reprends du riz.,Ty si znovu bereš rýži.
+v039-05,reprendre,present,S,2,tu,reprends,Tu reprends de la salade.,Ty si znovu bereš salát.
+v039-06,reprendre,present,S,2,tu,reprends,Tu reprends du gâteau.,Ty si znovu bereš dort.
+v039-07,reprendre,present,S,3,il,reprend,Il reprend un peu de café.,On si znovu bere trochu kávy.
+v039-08,reprendre,present,S,3,elle,reprend,Elle reprend un peu de thé.,Ona si znovu bere trochu čaje.
+v039-09,reprendre,present,S,3,il,reprend,Il reprend un peu d'eau.,On si znovu bere trochu vody.
+v039-10,reprendre,present,P,1,nous,reprenons,Nous reprenons du pain.,My si znovu bereme chleba.
+v039-11,reprendre,present,P,1,nous,reprenons,Nous reprenons du fromage.,My si znovu bereme sýr.
+v039-12,reprendre,present,P,1,nous,reprenons,Nous reprenons de la soupe.,My si znovu bereme polévku.
+v039-13,reprendre,present,P,2,vous,reprenez,Vous reprenez du riz.,Vy si znovu berete rýži.
+v039-14,reprendre,present,P,2,vous,reprenez,Vous reprenez de la salade.,Vy si znovu berete salát.
+v039-15,reprendre,present,P,2,vous,reprenez,Vous reprenez du gâteau.,Vy si znovu berete dort.
+v039-16,reprendre,present,P,3,ils,reprennent,Ils reprennent un peu de café.,Oni si znovu berou trochu kávy.
+v039-17,reprendre,present,P,3,elles,reprennent,Elles reprennent un peu de thé.,Ony si znovu berou trochu čaje.
+v039-18,reprendre,present,P,3,ils,reprennent,Ils reprennent un peu d'eau.,Oni si znovu berou trochu vody.
+v040-01,porter,present,S,1,je,porte,Je porte un sac.,Já nesu tašku.
+v040-02,porter,present,S,1,je,porte,Je porte une valise.,Já nesu kufr.
+v040-03,porter,present,S,1,je,porte,Je porte une boîte.,Já nesu krabici.
+v040-04,porter,present,S,2,tu,portes,Tu portes un livre.,Ty neseš knihu.
+v040-05,porter,present,S,2,tu,portes,Tu portes une chaise.,Ty neseš židli.
+v040-06,porter,present,S,2,tu,portes,Tu portes une table.,Ty neseš stůl.
+v040-07,porter,present,S,3,il,porte,Il porte une tasse.,On nese šálek.
+v040-08,porter,present,S,3,elle,porte,Elle porte une assiette.,Ona nese talíř.
+v040-09,porter,present,S,3,il,porte,Il porte une bouteille.,On nese láhev.
+v040-10,porter,present,P,1,nous,portons,Nous portons un panier.,My neseme košík.
+v040-11,porter,present,P,1,nous,portons,Nous portons un bébé.,My neseme miminko.
+v040-12,porter,present,P,1,nous,portons,Nous portons un petit chien.,My neseme malého psa.
+v040-13,porter,present,P,2,vous,portez,Vous portez des fleurs.,Vy nesete květiny.
+v040-14,porter,present,P,2,vous,portez,Vous portez des fruits.,Vy nesete ovoce.
+v040-15,porter,present,P,2,vous,portez,Vous portez des légumes.,Vy nesete zeleninu.
+v040-16,porter,present,P,3,ils,portent,Ils portent du bois.,Oni nesou dřevo.
+v040-17,porter,present,P,3,elles,portent,Elles portent une lampe.,Ony nesou lampu.
+v040-18,porter,present,P,3,ils,portent,Ils portent une couverture.,Oni nesou deku.
+v041-01,chercher,present,S,1,je,cherche,Je cherche une clé.,Já hledám klíč.
+v041-02,chercher,present,S,1,je,cherche,Je cherche un livre.,Já hledám knihu.
+v041-03,chercher,present,S,1,je,cherche,Je cherche un stylo.,Já hledám pero.
+v041-04,chercher,present,S,2,tu,cherches,Tu cherches un sac.,Ty hledáš tašku.
+v041-05,chercher,present,S,2,tu,cherches,Tu cherches un téléphone.,Ty hledáš telefon.
+v041-06,chercher,present,S,2,tu,cherches,Tu cherches une carte.,Ty hledáš mapu.
+v041-07,chercher,present,S,3,il,cherche,Il cherche la gare.,On hledá nádraží.
+v041-08,chercher,present,S,3,elle,cherche,Elle cherche la poste.,Ona hledá poštu.
+v041-09,chercher,present,S,3,il,cherche,Il cherche un hôtel.,On hledá hotel.
+v041-10,chercher,present,P,1,nous,cherchons,Nous cherchons un restaurant.,My hledáme restauraci.
+v041-11,chercher,present,P,1,nous,cherchons,Nous cherchons un café.,My hledáme kavárnu.
+v041-12,chercher,present,P,1,nous,cherchons,Nous cherchons un magasin.,My hledáme obchod.
+v041-13,chercher,present,P,2,vous,cherchez,Vous cherchez une chambre.,Vy hledáte pokoj.
+v041-14,chercher,present,P,2,vous,cherchez,Vous cherchez une place.,Vy hledáte místo.
+v041-15,chercher,present,P,2,vous,cherchez,Vous cherchez un travail.,Vy hledáte práci.
+v041-16,chercher,present,P,3,ils,cherchent,Ils cherchent une réponse.,Oni hledají odpověď.
+v041-17,chercher,present,P,3,elles,cherchent,Elles cherchent une solution.,Ony hledají řešení.
+v041-18,chercher,present,P,3,ils,cherchent,Ils cherchent une idée.,Oni hledají nápad.
+v042-01,revenir,present,S,1,je,reviens,Je reviens de l'école.,Já se vracím ze školy.
+v042-02,revenir,present,S,1,je,reviens,Je reviens du travail.,Já se vracím z práce.
+v042-03,revenir,present,S,1,je,reviens,Je reviens du magasin.,Já se vracím z obchodu.
+v042-04,revenir,present,S,2,tu,reviens,Tu reviens du parc.,Ty se vracíš z parku.
+v042-05,revenir,present,S,2,tu,reviens,Tu reviens de la gare.,Ty se vracíš z nádraží.
+v042-06,revenir,present,S,2,tu,reviens,Tu reviens du marché.,Ty se vracíš z trhu.
+v042-07,revenir,present,S,3,il,revient,Il revient de la plage.,On se vrací z pláže.
+v042-08,revenir,present,S,3,elle,revient,Elle revient du cinéma.,Ona se vrací z kina.
+v042-09,revenir,present,S,3,il,revient,Il revient du restaurant.,On se vrací z restaurace.
+v042-10,revenir,present,P,1,nous,revenons,Nous revenons à pied.,My se vracíme pěšky.
+v042-11,revenir,present,P,1,nous,revenons,Nous revenons en bus.,My se vracíme autobusem.
+v042-12,revenir,present,P,1,nous,revenons,Nous revenons en train.,My se vracíme vlakem.
+v042-13,revenir,present,P,2,vous,revenez,Vous revenez à midi.,Vy se vracíte v poledne.
+v042-14,revenir,present,P,2,vous,revenez,Vous revenez le soir.,Vy se vracíte večer.
+v042-15,revenir,present,P,2,vous,revenez,Vous revenez à six heures.,Vy se vracíte v šest hodin.
+v042-16,revenir,present,P,3,ils,reviennent,Ils reviennent avec Paul.,Oni se vracejí s Paulem.
+v042-17,revenir,present,P,3,elles,reviennent,Elles reviennent avec Marie.,Ony se vracejí s Marií.
+v042-18,revenir,present,P,3,ils,reviennent,Ils reviennent avec les enfants.,Oni se vracejí s dětmi.
+v043-01,appeler,present,S,1,j',appelle,J'appelle le médecin.,Já volám lékaři.
+v043-02,appeler,present,S,1,j',appelle,J'appelle le professeur.,Já volám učiteli.
+v043-03,appeler,present,S,1,j',appelle,J'appelle un ami.,Já volám kamarádovi.
+v043-04,appeler,present,S,2,tu,appelles,Tu appelles Paul.,Ty voláš Paulovi.
+v043-05,appeler,present,S,2,tu,appelles,Tu appelles Marie.,Ty voláš Marii.
+v043-06,appeler,present,S,2,tu,appelles,Tu appelles Luc.,Ty voláš Lucovi.
+v043-07,appeler,present,S,3,il,appelle,Il appelle un voisin.,On volá sousedovi.
+v043-08,appeler,present,S,3,elle,appelle,Elle appelle une voisine.,Ona volá sousedce.
+v043-09,appeler,present,S,3,il,appelle,Il appelle la police.,On volá policii.
+v043-10,appeler,present,P,1,nous,appelons,Nous appelons le médecin.,My voláme lékaři.
+v043-11,appeler,present,P,1,nous,appelons,Nous appelons le professeur.,My voláme učiteli.
+v043-12,appeler,present,P,1,nous,appelons,Nous appelons un ami.,My voláme kamarádovi.
+v043-13,appeler,present,P,2,vous,appelez,Vous appelez Paul.,Vy voláte Paulovi.
+v043-14,appeler,present,P,2,vous,appelez,Vous appelez Marie.,Vy voláte Marii.
+v043-15,appeler,present,P,2,vous,appelez,Vous appelez Luc.,Vy voláte Lucovi.
+v043-16,appeler,present,P,3,ils,appellent,Ils appellent un voisin.,Oni volají sousedovi.
+v043-17,appeler,present,P,3,elles,appellent,Elles appellent une voisine.,Ony volají sousedce.
+v043-18,appeler,present,P,3,ils,appellent,Ils appellent la police.,Oni volají policii.
+v044-01,mourir,present,S,1,je,meurs,Je meurs de faim.,Já umírám hlady.
+v044-02,mourir,present,S,1,je,meurs,Je meurs de soif.,Já umírám žízní.
+v044-03,mourir,present,S,1,je,meurs,Je meurs de froid.,Já umírám zimou.
+v044-04,mourir,present,S,2,tu,meurs,Tu meurs de faim.,Ty umíráš hlady.
+v044-05,mourir,present,S,2,tu,meurs,Tu meurs de soif.,Ty umíráš žízní.
+v044-06,mourir,present,S,2,tu,meurs,Tu meurs de froid.,Ty umíráš zimou.
+v044-07,mourir,present,S,3,il,meurt,Il meurt de faim.,On umírá hlady.
+v044-08,mourir,present,S,3,elle,meurt,Elle meurt de soif.,Ona umírá žízní.
+v044-09,mourir,present,S,3,il,meurt,Il meurt de froid.,On umírá zimou.
+v044-10,mourir,present,P,1,nous,mourons,Nous mourons de faim.,My umíráme hlady.
+v044-11,mourir,present,P,1,nous,mourons,Nous mourons de soif.,My umíráme žízní.
+v044-12,mourir,present,P,1,nous,mourons,Nous mourons de froid.,My umíráme zimou.
+v044-13,mourir,present,P,2,vous,mourez,Vous mourez de faim.,Vy umíráte hlady.
+v044-14,mourir,present,P,2,vous,mourez,Vous mourez de soif.,Vy umíráte žízní.
+v044-15,mourir,present,P,2,vous,mourez,Vous mourez de froid.,Vy umíráte zimou.
+v044-16,mourir,present,P,3,ils,meurent,Ils meurent de faim.,Oni umírají hlady.
+v044-17,mourir,present,P,3,elles,meurent,Elles meurent de soif.,Ony umírají žízní.
+v044-18,mourir,present,P,3,ils,meurent,Ils meurent de froid.,Oni umírají zimou.
+v045-01,partir,present,S,1,je,pars,Je pars de la maison.,Já odcházím z domu.
+v045-02,partir,present,S,1,je,pars,Je pars de l'école.,Já odcházím ze školy.
+v045-03,partir,present,S,1,je,pars,Je pars du travail.,Já odcházím z práce.
+v045-04,partir,present,S,2,tu,pars,Tu pars du jardin.,Ty odcházíš ze zahrady.
+v045-05,partir,present,S,2,tu,pars,Tu pars du parc.,Ty odcházíš z parku.
+v045-06,partir,present,S,2,tu,pars,Tu pars du magasin.,Ty odcházíš z obchodu.
+v045-07,partir,present,S,3,il,part,Il part du café.,On odchází z kavárny.
+v045-08,partir,present,S,3,elle,part,Elle part du restaurant.,Ona odchází z restaurace.
+v045-09,partir,present,S,3,il,part,Il part du cinéma.,On odchází z kina.
+v045-10,partir,present,P,1,nous,partons,Nous partons à huit heures.,My odcházíme v osm hodin.
+v045-11,partir,present,P,1,nous,partons,Nous partons à midi.,My odcházíme v poledne.
+v045-12,partir,present,P,1,nous,partons,Nous partons le soir.,My odcházíme večer.
+v045-13,partir,present,P,2,vous,partez,Vous partez avec Paul.,Vy odcházíte s Paulem.
+v045-14,partir,present,P,2,vous,partez,Vous partez avec Marie.,Vy odcházíte s Marií.
+v045-15,partir,present,P,2,vous,partez,Vous partez avec les enfants.,Vy odcházíte s dětmi.
+v045-16,partir,present,P,3,ils,partent,Ils partent en avance.,Oni odcházejí s předstihem.
+v045-17,partir,present,P,3,elles,partent,Elles partent après le repas.,Ony odcházejí po jídle.
+v045-18,partir,present,P,3,ils,partent,Ils partent sans bruit.,Oni odcházejí bez hluku.
+v046-01,jeter,present,S,1,je,jette,Je jette une balle.,Já házím míč.
+v046-02,jeter,present,S,1,je,jette,Je jette une pierre dans l'eau.,Já házím kámen do vody.
+v046-03,jeter,present,S,1,je,jette,Je jette du pain aux oiseaux.,Já házím chleba ptákům.
+v046-04,jeter,present,S,2,tu,jettes,Tu jettes un papier à la poubelle.,Ty házíš papír do koše.
+v046-05,jeter,present,S,2,tu,jettes,Tu jettes une vieille boîte à la poubelle.,Ty házíš starou krabici do koše.
+v046-06,jeter,present,S,2,tu,jettes,Tu jettes une pomme pourrie à la poubelle.,Ty házíš shnilé jablko do koše.
+v046-07,jeter,present,S,3,il,jette,Il jette un bâton au chien.,On hází klacek psovi.
+v046-08,jeter,present,S,3,elle,jette,Elle jette une boule de neige.,Ona hází sněhovou kouli.
+v046-09,jeter,present,S,3,il,jette,Il jette une branche au feu.,On hází větev do ohně.
+v046-10,jeter,present,P,1,nous,jetons,Nous jetons une balle.,My házíme míč.
+v046-11,jeter,present,P,1,nous,jetons,Nous jetons une pierre dans l'eau.,My házíme kámen do vody.
+v046-12,jeter,present,P,1,nous,jetons,Nous jetons du pain aux oiseaux.,My házíme chleba ptákům.
+v046-13,jeter,present,P,2,vous,jetez,Vous jetez un papier à la poubelle.,Vy házíte papír do koše.
+v046-14,jeter,present,P,2,vous,jetez,Vous jetez une vieille boîte à la poubelle.,Vy házíte starou krabici do koše.
+v046-15,jeter,present,P,2,vous,jetez,Vous jetez une pomme pourrie à la poubelle.,Vy házíte shnilé jablko do koše.
+v046-16,jeter,present,P,3,ils,jettent,Ils jettent un bâton au chien.,Oni házejí klacek psovi.
+v046-17,jeter,present,P,3,elles,jettent,Elles jettent une boule de neige.,Ony házejí sněhovou kouli.
+v046-18,jeter,present,P,3,ils,jettent,Ils jettent une branche au feu.,Oni házejí větev do ohně.
+v047-01,suivre,present,S,1,je,suis,Je suis le guide.,Já sleduji průvodce.
+v047-02,suivre,present,S,1,je,suis,Je suis Paul.,Já sleduji Paula.
+v047-03,suivre,present,S,1,je,suis,Je suis Marie.,Já sleduji Marii.
+v047-04,suivre,present,S,2,tu,suis,Tu suis le chemin.,Ty sleduješ cestu.
+v047-05,suivre,present,S,2,tu,suis,Tu suis les flèches.,Ty sleduješ šipky.
+v047-06,suivre,present,S,2,tu,suis,Tu suis les traces dans la neige.,Ty sleduješ stopy ve sněhu.
+v047-07,suivre,present,S,3,il,suit,Il suit un match.,On sleduje zápas.
+v047-08,suivre,present,S,3,elle,suit,Elle suit une émission.,Ona sleduje pořad.
+v047-09,suivre,present,S,3,il,suit,Il suit une série.,On sleduje seriál.
+v047-10,suivre,present,P,1,nous,suivons,Nous suivons le guide.,My sledujeme průvodce.
+v047-11,suivre,present,P,1,nous,suivons,Nous suivons Paul.,My sledujeme Paula.
+v047-12,suivre,present,P,1,nous,suivons,Nous suivons Marie.,My sledujeme Marii.
+v047-13,suivre,present,P,2,vous,suivez,Vous suivez le chemin.,Vy sledujete cestu.
+v047-14,suivre,present,P,2,vous,suivez,Vous suivez les flèches.,Vy sledujete šipky.
+v047-15,suivre,present,P,2,vous,suivez,Vous suivez les traces dans la neige.,Vy sledujete stopy ve sněhu.
+v047-16,suivre,present,P,3,ils,suivent,Ils suivent un match.,Oni sledují zápas.
+v047-17,suivre,present,P,3,elles,suivent,Elles suivent une émission.,Ony sledují pořad.
+v047-18,suivre,present,P,3,ils,suivent,Ils suivent une série.,Oni sledují seriál.
+v048-01,écrire,present,S,1,j',écris,J'écris une lettre.,Já píšu dopis.
+v048-02,écrire,present,S,1,j',écris,J'écris un message.,Já píšu zprávu.
+v048-03,écrire,present,S,1,j',écris,J'écris une carte.,Já píšu pohlednici.
+v048-04,écrire,present,S,2,tu,écris,Tu écris une phrase.,Ty píšeš větu.
+v048-05,écrire,present,S,2,tu,écris,Tu écris un mot.,Ty píšeš slovo.
+v048-06,écrire,present,S,2,tu,écris,Tu écris une question.,Ty píšeš otázku.
+v048-07,écrire,present,S,3,il,écrit,Il écrit une réponse.,On píše odpověď.
+v048-08,écrire,present,S,3,elle,écrit,Elle écrit une liste.,Ona píše seznam.
+v048-09,écrire,present,S,3,il,écrit,Il écrit une recette.,On píše recept.
+v048-10,écrire,present,P,1,nous,écrivons,Nous écrivons une histoire.,My píšeme příběh.
+v048-11,écrire,present,P,1,nous,écrivons,Nous écrivons un livre.,My píšeme knihu.
+v048-12,écrire,present,P,1,nous,écrivons,Nous écrivons un poème.,My píšeme báseň.
+v048-13,écrire,present,P,2,vous,écrivez,Vous écrivez sur une feuille.,Vy píšete na list papíru.
+v048-14,écrire,present,P,2,vous,écrivez,Vous écrivez dans un cahier.,Vy píšete do sešitu.
+v048-15,écrire,present,P,2,vous,écrivez,Vous écrivez au tableau.,Vy píšete na tabuli.
+v048-16,écrire,present,P,3,ils,écrivent,Ils écrivent avec un stylo.,Oni píšou perem.
+v048-17,écrire,present,P,3,elles,écrivent,Elles écrivent avec un crayon.,Ony píšou tužkou.
+v048-18,écrire,present,P,3,ils,écrivent,Ils écrivent en français.,Oni píšou francouzsky.
+v049-01,montrer,present,S,1,je,montre,Je montre une photo.,Já ukazuji fotografii.
+v049-02,montrer,present,S,1,je,montre,Je montre un dessin.,Já ukazuji kresbu.
+v049-03,montrer,present,S,1,je,montre,Je montre une carte.,Já ukazuji mapu.
+v049-04,montrer,present,S,2,tu,montres,Tu montres un livre.,Ty ukazuješ knihu.
+v049-05,montrer,present,S,2,tu,montres,Tu montres une lettre.,Ty ukazuješ dopis.
+v049-06,montrer,present,S,2,tu,montres,Tu montres un message.,Ty ukazuješ zprávu.
+v049-07,montrer,present,S,3,il,montre,Il montre le chemin.,On ukazuje cestu.
+v049-08,montrer,present,S,3,elle,montre,Elle montre la maison.,Ona ukazuje dům.
+v049-09,montrer,present,S,3,il,montre,Il montre le jardin.,On ukazuje zahradu.
+v049-10,montrer,present,P,1,nous,montrons,Nous montrons un jouet.,My ukazujeme hračku.
+v049-11,montrer,present,P,1,nous,montrons,Nous montrons une fleur.,My ukazujeme květinu.
+v049-12,montrer,present,P,1,nous,montrons,Nous montrons un oiseau.,My ukazujeme ptáka.
+v049-13,montrer,present,P,2,vous,montrez,Vous montrez une nouvelle robe.,Vy ukazujete nové šaty.
+v049-14,montrer,present,P,2,vous,montrez,Vous montrez un nouveau vélo.,Vy ukazujete nové kolo.
+v049-15,montrer,present,P,2,vous,montrez,Vous montrez une belle pierre.,Vy ukazujete hezký kámen.
+v049-16,montrer,present,P,3,ils,montrent,Ils montrent une page.,Oni ukazují stránku.
+v049-17,montrer,present,P,3,elles,montrent,Elles montrent un mot.,Ony ukazují slovo.
+v049-18,montrer,present,P,3,ils,montrent,Ils montrent un exemple.,Oni ukazují příklad.
+v050-01,tomber,present,S,1,je,tombe,Je tombe dans l'eau.,Já padám do vody.
+v050-02,tomber,present,S,1,je,tombe,Je tombe dans la neige.,Já padám do sněhu.
+v050-03,tomber,present,S,1,je,tombe,Je tombe dans l'herbe.,Já padám do trávy.
+v050-04,tomber,present,S,2,tu,tombes,Tu tombes sur le sol.,Ty padáš na zem.
+v050-05,tomber,present,S,2,tu,tombes,Tu tombes sur le tapis.,Ty padáš na koberec.
+v050-06,tomber,present,S,2,tu,tombes,Tu tombes sur le sable.,Ty padáš do písku.
+v050-07,tomber,present,S,3,il,tombe,Il tombe du vélo.,On padá z kola.
+v050-08,tomber,present,S,3,elle,tombe,Elle tombe de la chaise.,Ona padá ze židle.
+v050-09,tomber,present,S,3,il,tombe,Il tombe sur les genoux.,On padá na kolena.
+v050-10,tomber,present,P,1,nous,tombons,Nous tombons dans l'eau.,My padáme do vody.
+v050-11,tomber,present,P,1,nous,tombons,Nous tombons dans la neige.,My padáme do sněhu.
+v050-12,tomber,present,P,1,nous,tombons,Nous tombons dans l'herbe.,My padáme do trávy.
+v050-13,tomber,present,P,2,vous,tombez,Vous tombez sur le sol.,Vy padáte na zem.
+v050-14,tomber,present,P,2,vous,tombez,Vous tombez sur le tapis.,Vy padáte na koberec.
+v050-15,tomber,present,P,2,vous,tombez,Vous tombez sur le sable.,Vy padáte do písku.
+v050-16,tomber,present,P,3,ils,tombent,Ils tombent du vélo.,Oni padají z kola.
+v050-17,tomber,present,P,3,elles,tombent,Elles tombent de la chaise.,Ony padají ze židle.
+v050-18,tomber,present,P,3,ils,tombent,Ils tombent sur les genoux.,Oni padají na kolena.
+v051-01,ouvrir,present,S,1,j',ouvre,J'ouvre la porte.,Já otvírám dveře.
+v051-02,ouvrir,present,S,1,j',ouvre,J'ouvre la fenêtre.,Já otvírám okno.
+v051-03,ouvrir,present,S,1,j',ouvre,J'ouvre le livre.,Já otvírám knihu.
+v051-04,ouvrir,present,S,2,tu,ouvres,Tu ouvres le sac.,Ty otvíráš tašku.
+v051-05,ouvrir,present,S,2,tu,ouvres,Tu ouvres la valise.,Ty otvíráš kufr.
+v051-06,ouvrir,present,S,2,tu,ouvres,Tu ouvres la boîte.,Ty otvíráš krabici.
+v051-07,ouvrir,present,S,3,il,ouvre,Il ouvre la bouteille.,On otvírá láhev.
+v051-08,ouvrir,present,S,3,elle,ouvre,Elle ouvre le paquet.,Ona otvírá balíček.
+v051-09,ouvrir,present,S,3,il,ouvre,Il ouvre la lettre.,On otvírá dopis.
+v051-10,ouvrir,present,P,1,nous,ouvrons,Nous ouvrons le magasin.,My otvíráme obchod.
+v051-11,ouvrir,present,P,1,nous,ouvrons,Nous ouvrons le café.,My otvíráme kavárnu.
+v051-12,ouvrir,present,P,1,nous,ouvrons,Nous ouvrons le restaurant.,My otvíráme restauraci.
+v051-13,ouvrir,present,P,2,vous,ouvrez,Vous ouvrez le tiroir.,Vy otvíráte zásuvku.
+v051-14,ouvrir,present,P,2,vous,ouvrez,Vous ouvrez le placard.,Vy otvíráte skříň.
+v051-15,ouvrir,present,P,2,vous,ouvrez,Vous ouvrez le frigo.,Vy otvíráte lednici.
+v051-16,ouvrir,present,P,3,ils,ouvrent,Ils ouvrent le parapluie.,Oni otvírají deštník.
+v051-17,ouvrir,present,P,3,elles,ouvrent,Elles ouvrent le journal.,Ony otvírají noviny.
+v051-18,ouvrir,present,P,3,ils,ouvrent,Ils ouvrent le cahier.,Oni otvírají sešit.
+v052-01,arrêter,present,S,1,j',arrête,J'arrête la voiture.,Já zastavuji auto.
+v052-02,arrêter,present,S,1,j',arrête,J'arrête le vélo.,Já zastavuji kolo.
+v052-03,arrêter,present,S,1,j',arrête,J'arrête le bus.,Já zastavuji autobus.
+v052-04,arrêter,present,S,2,tu,arrêtes,Tu arrêtes le jeu.,Ty zastavuješ hru.
+v052-05,arrêter,present,S,2,tu,arrêtes,Tu arrêtes le travail.,Ty zastavuješ práci.
+v052-06,arrêter,present,S,2,tu,arrêtes,Tu arrêtes la machine.,Ty zastavuješ stroj.
+v052-07,arrêter,present,S,3,il,arrête,Il arrête le moteur.,On zastavuje motor.
+v052-08,arrêter,present,S,3,elle,arrête,Elle arrête la musique.,Ona zastavuje hudbu.
+v052-09,arrêter,present,S,3,il,arrête,Il arrête la vidéo.,On zastavuje video.
+v052-10,arrêter,present,P,1,nous,arrêtons,Nous arrêtons la voiture.,My zastavujeme auto.
+v052-11,arrêter,present,P,1,nous,arrêtons,Nous arrêtons le vélo.,My zastavujeme kolo.
+v052-12,arrêter,present,P,1,nous,arrêtons,Nous arrêtons le bus.,My zastavujeme autobus.
+v052-13,arrêter,present,P,2,vous,arrêtez,Vous arrêtez le jeu.,Vy zastavujete hru.
+v052-14,arrêter,present,P,2,vous,arrêtez,Vous arrêtez le travail.,Vy zastavujete práci.
+v052-15,arrêter,present,P,2,vous,arrêtez,Vous arrêtez la machine.,Vy zastavujete stroj.
+v052-16,arrêter,present,P,3,ils,arrêtent,Ils arrêtent le moteur.,Oni zastavují motor.
+v052-17,arrêter,present,P,3,elles,arrêtent,Elles arrêtent la musique.,Ony zastavují hudbu.
+v052-18,arrêter,present,P,3,ils,arrêtent,Ils arrêtent la vidéo.,Oni zastavují video.
+v053-01,perdre,present,S,1,je,perds,Je perds une clé.,Já ztrácím klíč.
+v053-02,perdre,present,S,1,je,perds,Je perds un livre.,Já ztrácím knihu.
+v053-03,perdre,present,S,1,je,perds,Je perds un stylo.,Já ztrácím pero.
+v053-04,perdre,present,S,2,tu,perds,Tu perds un sac.,Ty ztrácíš tašku.
+v053-05,perdre,present,S,2,tu,perds,Tu perds un téléphone.,Ty ztrácíš telefon.
+v053-06,perdre,present,S,2,tu,perds,Tu perds un billet.,Ty ztrácíš lístek.
+v053-07,perdre,present,S,3,il,perd,Il perd une carte.,On ztrácí mapu.
+v053-08,perdre,present,S,3,elle,perd,Elle perd une lettre.,Ona ztrácí dopis.
+v053-09,perdre,present,S,3,il,perd,Il perd une photo.,On ztrácí fotografii.
+v053-10,perdre,present,P,1,nous,perdons,Nous perdons du temps.,My ztrácíme čas.
+v053-11,perdre,present,P,1,nous,perdons,Nous perdons de l'argent.,My ztrácíme peníze.
+v053-12,perdre,present,P,1,nous,perdons,Nous perdons patience.,My ztrácíme trpělivost.
+v053-13,perdre,present,P,2,vous,perdez,Vous perdez un gant.,Vy ztrácíte rukavici.
+v053-14,perdre,present,P,2,vous,perdez,Vous perdez une chaussure.,Vy ztrácíte botu.
+v053-15,perdre,present,P,2,vous,perdez,Vous perdez un chapeau.,Vy ztrácíte klobouk.
+v053-16,perdre,present,P,3,ils,perdent,Ils perdent le sourire.,Oni ztrácejí úsměv.
+v053-17,perdre,present,P,3,elles,perdent,Elles perdent un ami.,Ony ztrácejí kamaráda.
+v053-18,perdre,present,P,3,ils,perdent,Ils perdent un jouet.,Oni ztrácejí hračku.
+v054-01,commencer,present,S,1,je,commence,Je commence le travail.,Já začínám práci.
+v054-02,commencer,present,S,1,je,commence,Je commence la leçon.,Já začínám lekci.
+v054-03,commencer,present,S,1,je,commence,Je commence un exercice.,Já začínám cvičení.
+v054-04,commencer,present,S,2,tu,commences,Tu commences un jeu.,Ty začínáš hru.
+v054-05,commencer,present,S,2,tu,commences,Tu commences un dessin.,Ty začínáš kresbu.
+v054-06,commencer,present,S,2,tu,commences,Tu commences une lettre.,Ty začínáš dopis.
+v054-07,commencer,present,S,3,il,commence,Il commence à lire.,On začíná číst.
+v054-08,commencer,present,S,3,elle,commence,Elle commence à écrire.,Ona začíná psát.
+v054-09,commencer,present,S,3,il,commence,Il commence à parler.,On začíná mluvit.
+v054-10,commencer,present,P,1,nous,commençons,Nous commençons à marcher.,My začínáme chodit.
+v054-11,commencer,present,P,1,nous,commençons,Nous commençons à courir.,My začínáme běhat.
+v054-12,commencer,present,P,1,nous,commençons,Nous commençons à chanter.,My začínáme zpívat.
+v054-13,commencer,present,P,2,vous,commencez,Vous commencez à huit heures.,Vy začínáte v osm hodin.
+v054-14,commencer,present,P,2,vous,commencez,Vous commencez à midi.,Vy začínáte v poledne.
+v054-15,commencer,present,P,2,vous,commencez,Vous commencez après le repas.,Vy začínáte po jídle.
+v054-16,commencer,present,P,3,ils,commencent,Ils commencent une nouvelle histoire.,Oni začínají nový příběh.
+v054-17,commencer,present,P,3,elles,commencent,Elles commencent un nouveau livre.,Ony začínají novou knihu.
+v054-18,commencer,present,P,3,ils,commencent,Ils commencent une nouvelle liste.,Oni začínají nový seznam.
+v055-01,paraître,present,S,1,je,parais,Je parais calme.,Já vypadám klidně.
+v055-02,paraître,present,S,1,je,parais,Je parais jeune.,Já vypadám mladě.
+v055-03,paraître,present,S,1,je,parais,Je parais fatigué.,Já vypadám unaveně.
+v055-04,paraître,present,S,2,tu,parais,Tu parais triste.,Ty vypadáš smutně.
+v055-05,paraître,present,S,2,tu,parais,Tu parais content.,Ty vypadáš spokojeně.
+v055-06,paraître,present,S,2,tu,parais,Tu parais malade.,Ty vypadáš nemocně.
+v055-07,paraître,present,S,3,il,paraît,Il paraît heureux.,On vypadá šťastně.
+v055-08,paraître,present,S,3,elle,paraît,Elle paraît surprise.,Ona vypadá překvapeně.
+v055-09,paraître,present,S,3,il,paraît,Il paraît inquiet.,On vypadá ustaraně.
+v055-10,paraître,present,P,1,nous,paraissons,Nous paraissons calmes.,My vypadáme klidně.
+v055-11,paraître,present,P,1,nous,paraissons,Nous paraissons jeunes.,My vypadáme mladě.
+v055-12,paraître,present,P,1,nous,paraissons,Nous paraissons fatigués.,My vypadáme unaveně.
+v055-13,paraître,present,P,2,vous,paraissez,Vous paraissez tristes.,Vy vypadáte smutně.
+v055-14,paraître,present,P,2,vous,paraissez,Vous paraissez contents.,Vy vypadáte spokojeně.
+v055-15,paraître,present,P,2,vous,paraissez,Vous paraissez malades.,Vy vypadáte nemocně.
+v055-16,paraître,present,P,3,ils,paraissent,Ils paraissent heureux.,Oni vypadají šťastně.
+v055-17,paraître,present,P,3,elles,paraissent,Elles paraissent surprises.,Ony vypadají překvapeně.
+v055-18,paraître,present,P,3,ils,paraissent,Ils paraissent inquiets.,Oni vypadají ustaraně.
+v056-01,marcher,present,S,1,je,marche,Je marche dans le parc.,Já jdu parkem.
+v056-02,marcher,present,S,1,je,marche,Je marche dans le jardin.,Já jdu zahradou.
+v056-03,marcher,present,S,1,je,marche,Je marche dans la forêt.,Já jdu lesem.
+v056-04,marcher,present,S,2,tu,marches,Tu marches sur la plage.,Ty jdeš po pláži.
+v056-05,marcher,present,S,2,tu,marches,Tu marches sur le sable.,Ty jdeš po písku.
+v056-06,marcher,present,S,2,tu,marches,Tu marches sur le chemin.,Ty jdeš po cestě.
+v056-07,marcher,present,S,3,il,marche,Il marche vers la gare.,On jde směrem k nádraží.
+v056-08,marcher,present,S,3,elle,marche,Elle marche vers l'école.,Ona jde směrem ke škole.
+v056-09,marcher,present,S,3,il,marche,Il marche vers la maison.,On jde směrem k domu.
+v056-10,marcher,present,P,1,nous,marchons,Nous marchons lentement.,My jdeme pomalu.
+v056-11,marcher,present,P,1,nous,marchons,Nous marchons vite.,My jdeme rychle.
+v056-12,marcher,present,P,1,nous,marchons,Nous marchons sans bruit.,My jdeme bez hluku.
+v056-13,marcher,present,P,2,vous,marchez,Vous marchez avec Paul.,Vy jdete s Paulem.
+v056-14,marcher,present,P,2,vous,marchez,Vous marchez avec Marie.,Vy jdete s Marií.
+v056-15,marcher,present,P,2,vous,marchez,Vous marchez avec les enfants.,Vy jdete s dětmi.
+v056-16,marcher,present,P,3,ils,marchent,Ils marchent sous la pluie.,Oni jdou v dešti.
+v056-17,marcher,present,P,3,elles,marchent,Elles marchent dans la neige.,Ony jdou ve sněhu.
+v056-18,marcher,present,P,3,ils,marchent,Ils marchent le long de la rivière.,Oni jdou podél řeky.
+v057-01,lever,present,S,1,je,lève,Je lève la main.,Já zvedám ruku.
+v057-02,lever,present,S,1,je,lève,Je lève le bras droit.,Já zvedám pravou paži.
+v057-03,lever,present,S,1,je,lève,Je lève le bras gauche.,Já zvedám levou paži.
+v057-04,lever,present,S,2,tu,lèves,Tu lèves la tête.,Ty zvedáš hlavu.
+v057-05,lever,present,S,2,tu,lèves,Tu lèves le pied droit.,Ty zvedáš pravou nohu.
+v057-06,lever,present,S,2,tu,lèves,Tu lèves le pied gauche.,Ty zvedáš levou nohu.
+v057-07,lever,present,S,3,il,lève,Il lève les yeux.,On zvedá oči.
+v057-08,lever,present,S,3,elle,lève,Elle lève un verre.,Ona zvedá sklenici.
+v057-09,lever,present,S,3,il,lève,Il lève un drapeau.,On zvedá vlajku.
+v057-10,lever,present,P,1,nous,levons,Nous levons la main.,My zvedáme ruku.
+v057-11,lever,present,P,1,nous,levons,Nous levons le bras droit.,My zvedáme pravou paži.
+v057-12,lever,present,P,1,nous,levons,Nous levons le bras gauche.,My zvedáme levou paži.
+v057-13,lever,present,P,2,vous,levez,Vous levez la tête.,Vy zvedáte hlavu.
+v057-14,lever,present,P,2,vous,levez,Vous levez le pied droit.,Vy zvedáte pravou nohu.
+v057-15,lever,present,P,2,vous,levez,Vous levez le pied gauche.,Vy zvedáte levou nohu.
+v057-16,lever,present,P,3,ils,lèvent,Ils lèvent les yeux.,Oni zvedají oči.
+v057-17,lever,present,P,3,elles,lèvent,Elles lèvent un verre.,Ony zvedají sklenici.
+v057-18,lever,present,P,3,ils,lèvent,Ils lèvent un drapeau.,Oni zvedají vlajku.
+v058-01,permettre,present,S,1,je,permets,Je permets à Paul de rester.,Já dovoluji Paulovi zůstat.
+v058-02,permettre,present,S,1,je,permets,Je permets à Marie de partir.,Já dovoluji Marii odejít.
+v058-03,permettre,present,S,1,je,permets,Je permets aux enfants de jouer.,Já dovoluji dětem hrát si.
+v058-04,permettre,present,S,2,tu,permets,Tu permets à Luc d'entrer.,Ty dovoluješ Lucovi vstoupit.
+v058-05,permettre,present,S,2,tu,permets,Tu permets à Julie de lire.,Ty dovoluješ Julii číst.
+v058-06,permettre,present,S,2,tu,permets,Tu permets au chien de sortir.,Ty dovoluješ psovi jít ven.
+v058-07,permettre,present,S,3,il,permet,Il permet à un ami de venir.,On dovoluje kamarádovi přijít.
+v058-08,permettre,present,S,3,elle,permet,Elle permet aux élèves de parler.,Ona dovoluje žákům mluvit.
+v058-09,permettre,present,S,3,il,permet,Il permet aux enfants de dessiner.,On dovoluje dětem kreslit.
+v058-10,permettre,present,P,1,nous,permettons,Nous permettons à Paul de rester.,My dovolujeme Paulovi zůstat.
+v058-11,permettre,present,P,1,nous,permettons,Nous permettons à Marie de partir.,My dovolujeme Marii odejít.
+v058-12,permettre,present,P,1,nous,permettons,Nous permettons aux enfants de jouer.,My dovolujeme dětem hrát si.
+v058-13,permettre,present,P,2,vous,permettez,Vous permettez à Luc d'entrer.,Vy dovolujete Lucovi vstoupit.
+v058-14,permettre,present,P,2,vous,permettez,Vous permettez à Julie de lire.,Vy dovolujete Julii číst.
+v058-15,permettre,present,P,2,vous,permettez,Vous permettez au chien de sortir.,Vy dovolujete psovi jít ven.
+v058-16,permettre,present,P,3,ils,permettent,Ils permettent à un ami de venir.,Oni dovolují kamarádovi přijít.
+v058-17,permettre,present,P,3,elles,permettent,Elles permettent aux élèves de parler.,Ony dovolují žákům mluvit.
+v058-18,permettre,present,P,3,ils,permettent,Ils permettent aux enfants de dessiner.,Oni dovolují dětem kreslit.
+v059-01,asseoir,present,S,1,j',assieds,J'assieds le bébé sur une chaise.,Já posazuji miminko na židli.
+v059-02,asseoir,present,S,1,j',assieds,J'assieds l'enfant sur le banc.,Já posazuji dítě na lavičku.
+v059-03,asseoir,present,S,1,j',assieds,J'assieds la poupée sur le lit.,Já posazuji panenku na postel.
+v059-04,asseoir,present,S,2,tu,assieds,Tu assieds le petit garçon sur le canapé.,Ty posazuješ malého chlapce na pohovku.
+v059-05,asseoir,present,S,2,tu,assieds,Tu assieds la petite fille près de la table.,Ty posazuješ malou holčičku blízko stolu.
+v059-06,asseoir,present,S,2,tu,assieds,Tu assieds le bébé sur le tapis.,Ty posazuješ miminko na koberec.
+v059-07,asseoir,present,S,3,il,assied,Il assied la poupée près de la fenêtre.,On posazuje panenku blízko okna.
+v059-08,asseoir,present,S,3,elle,assied,Elle assied l'enfant à côté de Paul.,Ona posazuje dítě vedle Paula.
+v059-09,asseoir,present,S,3,il,assied,Il assied le bébé sur un coussin.,On posazuje miminko na polštář.
+v059-10,asseoir,present,P,1,nous,asseyons,Nous asseyons le bébé sur une chaise.,My posazujeme miminko na židli.
+v059-11,asseoir,present,P,1,nous,asseyons,Nous asseyons l'enfant sur le banc.,My posazujeme dítě na lavičku.
+v059-12,asseoir,present,P,1,nous,asseyons,Nous asseyons la poupée sur le lit.,My posazujeme panenku na postel.
+v059-13,asseoir,present,P,2,vous,asseyez,Vous asseyez le petit garçon sur le canapé.,Vy posazujete malého chlapce na pohovku.
+v059-14,asseoir,present,P,2,vous,asseyez,Vous asseyez la petite fille près de la table.,Vy posazujete malou holčičku blízko stolu.
+v059-15,asseoir,present,P,2,vous,asseyez,Vous asseyez le bébé sur le tapis.,Vy posazujete miminko na koberec.
+v059-16,asseoir,present,P,3,ils,asseyent,Ils asseyent la poupée près de la fenêtre.,Oni posazují panenku blízko okna.
+v059-17,asseoir,present,P,3,elles,asseyent,Elles asseyent l'enfant à côté de Paul.,Ony posazují dítě vedle Paula.
+v059-18,asseoir,present,P,3,ils,asseyent,Ils asseyent le bébé sur un coussin.,Oni posazují miminko na polštář.
+v060-01,écouter,present,S,1,j',écoute,J'écoute la radio.,Já poslouchám rádio.
+v060-02,écouter,present,S,1,j',écoute,J'écoute de la musique.,Já poslouchám hudbu.
+v060-03,écouter,present,S,1,j',écoute,J'écoute une chanson.,Já poslouchám písničku.
+v060-04,écouter,present,S,2,tu,écoutes,Tu écoutes le professeur.,Ty posloucháš učitele.
+v060-05,écouter,present,S,2,tu,écoutes,Tu écoutes le médecin.,Ty posloucháš lékaře.
+v060-06,écouter,present,S,2,tu,écoutes,Tu écoutes les enfants.,Ty posloucháš děti.
+v060-07,écouter,present,S,3,il,écoute,Il écoute Paul.,On poslouchá Paula.
+v060-08,écouter,present,S,3,elle,écoute,Elle écoute Marie.,Ona poslouchá Marii.
+v060-09,écouter,present,S,3,il,écoute,Il écoute un ami.,On poslouchá kamaráda.
+v060-10,écouter,present,P,1,nous,écoutons,Nous écoutons les oiseaux.,My posloucháme ptáky.
+v060-11,écouter,present,P,1,nous,écoutons,Nous écoutons la pluie.,My posloucháme déšť.
+v060-12,écouter,present,P,1,nous,écoutons,Nous écoutons le vent.,My posloucháme vítr.
+v060-13,écouter,present,P,2,vous,écoutez,Vous écoutez une histoire.,Vy posloucháte příběh.
+v060-14,écouter,present,P,2,vous,écoutez,Vous écoutez une émission.,Vy posloucháte pořad.
+v060-15,écouter,present,P,2,vous,écoutez,Vous écoutez un message.,Vy posloucháte zprávu.
+v060-16,écouter,present,P,3,ils,écoutent,Ils écoutent la mer.,Oni poslouchají moře.
+v060-17,écouter,present,P,3,elles,écoutent,Elles écoutent un chanteur.,Ony poslouchají zpěváka.
+v060-18,écouter,present,P,3,ils,écoutent,Ils écoutent une chanteuse.,Oni poslouchají zpěvačku.
+v061-01,monter,present,S,1,je,monte,Je monte au premier étage.,Já stoupám do prvního patra.
+v061-02,monter,present,S,1,je,monte,Je monte au deuxième étage.,Já stoupám do druhého patra.
+v061-03,monter,present,S,1,je,monte,Je monte au troisième étage.,Já stoupám do třetího patra.
+v061-04,monter,present,S,2,tu,montes,Tu montes sur la colline.,Ty stoupáš na kopec.
+v061-05,monter,present,S,2,tu,montes,Tu montes vers le sommet.,Ty stoupáš směrem k vrcholu.
+v061-06,monter,present,S,2,tu,montes,Tu montes par le petit chemin.,Ty stoupáš po malé cestě.
+v061-07,monter,present,S,3,il,monte,Il monte lentement.,On stoupá pomalu.
+v061-08,monter,present,S,3,elle,monte,Elle monte à pied.,Ona stoupá pěšky.
+v061-09,monter,present,S,3,il,monte,Il monte avec le guide.,On stoupá s průvodcem.
+v061-10,monter,present,P,1,nous,montons,Nous montons au premier étage.,My stoupáme do prvního patra.
+v061-11,monter,present,P,1,nous,montons,Nous montons au deuxième étage.,My stoupáme do druhého patra.
+v061-12,monter,present,P,1,nous,montons,Nous montons au troisième étage.,My stoupáme do třetího patra.
+v061-13,monter,present,P,2,vous,montez,Vous montez sur la colline.,Vy stoupáte na kopec.
+v061-14,monter,present,P,2,vous,montez,Vous montez vers le sommet.,Vy stoupáte směrem k vrcholu.
+v061-15,monter,present,P,2,vous,montez,Vous montez par le petit chemin.,Vy stoupáte po malé cestě.
+v061-16,monter,present,P,3,ils,montent,Ils montent lentement.,Oni stoupají pomalu.
+v061-17,monter,present,P,3,elles,montent,Elles montent à pied.,Ony stoupají pěšky.
+v061-18,monter,present,P,3,ils,montent,Ils montent avec le guide.,Oni stoupají s průvodcem.
+v062-01,apercevoir,present,S,1,j',aperçois,J'aperçois un chat.,Já zahlédám kočku.
+v062-02,apercevoir,present,S,1,j',aperçois,J'aperçois un chien.,Já zahlédám psa.
+v062-03,apercevoir,present,S,1,j',aperçois,J'aperçois un oiseau.,Já zahlédám ptáka.
+v062-04,apercevoir,present,S,2,tu,aperçois,Tu aperçois un bateau.,Ty zahlédáš loď.
+v062-05,apercevoir,present,S,2,tu,aperçois,Tu aperçois un avion.,Ty zahlédáš letadlo.
+v062-06,apercevoir,present,S,2,tu,aperçois,Tu aperçois un train.,Ty zahlédáš vlak.
+v062-07,apercevoir,present,S,3,il,aperçoit,Il aperçoit une maison.,On zahlédá dům.
+v062-08,apercevoir,present,S,3,elle,aperçoit,Elle aperçoit un pont.,Ona zahlédá most.
+v062-09,apercevoir,present,S,3,il,aperçoit,Il aperçoit une rivière.,On zahlédá řeku.
+v062-10,apercevoir,present,P,1,nous,apercevons,Nous apercevons Paul dans la rue.,My zahlédáme Paula na ulici.
+v062-11,apercevoir,present,P,1,nous,apercevons,Nous apercevons Marie dans le parc.,My zahlédáme Marii v parku.
+v062-12,apercevoir,present,P,1,nous,apercevons,Nous apercevons Luc à la gare.,My zahlédáme Luca na nádraží.
+v062-13,apercevoir,present,P,2,vous,apercevez,Vous apercevez la mer au loin.,Vy zahlédáte moře v dálce.
+v062-14,apercevoir,present,P,2,vous,apercevez,Vous apercevez une lumière.,Vy zahlédáte světlo.
+v062-15,apercevoir,present,P,2,vous,apercevez,Vous apercevez une étoile.,Vy zahlédáte hvězdu.
+v062-16,apercevoir,present,P,3,ils,aperçoivent,Ils aperçoivent un cheval.,Oni zahlédají koně.
+v062-17,apercevoir,present,P,3,elles,aperçoivent,Elles aperçoivent un lapin.,Ony zahlédají králíka.
+v062-18,apercevoir,present,P,3,ils,aperçoivent,Ils aperçoivent un renard.,Oni zahlédají lišku.
+v063-01,recevoir,present,S,1,je,reçois,Je reçois une lettre.,Já dostávám dopis.
+v063-02,recevoir,present,S,1,je,reçois,Je reçois un message.,Já dostávám zprávu.
+v063-03,recevoir,present,S,1,je,reçois,Je reçois une carte.,Já dostávám pohlednici.
+v063-04,recevoir,present,S,2,tu,reçois,Tu reçois un cadeau.,Ty dostáváš dárek.
+v063-05,recevoir,present,S,2,tu,reçois,Tu reçois un colis.,Ty dostáváš balík.
+v063-06,recevoir,present,S,2,tu,reçois,Tu reçois des fleurs.,Ty dostáváš květiny.
+v063-07,recevoir,present,S,3,il,reçoit,Il reçoit un livre.,On dostává knihu.
+v063-08,recevoir,present,S,3,elle,reçoit,Elle reçoit un billet.,Ona dostává lístek.
+v063-09,recevoir,present,S,3,il,reçoit,Il reçoit une photo.,On dostává fotografii.
+v063-10,recevoir,present,P,1,nous,recevons,Nous recevons une réponse.,My dostáváme odpověď.
+v063-11,recevoir,present,P,1,nous,recevons,Nous recevons une invitation.,My dostáváme pozvánku.
+v063-12,recevoir,present,P,1,nous,recevons,Nous recevons un conseil.,My dostáváme radu.
+v063-13,recevoir,present,P,2,vous,recevez,Vous recevez de l'argent.,Vy dostáváte peníze.
+v063-14,recevoir,present,P,2,vous,recevez,Vous recevez une bonne nouvelle.,Vy dostáváte dobrou zprávu.
+v063-15,recevoir,present,P,2,vous,recevez,Vous recevez une mauvaise nouvelle.,Vy dostáváte špatnou zprávu.
+v063-16,recevoir,present,P,3,ils,reçoivent,Ils reçoivent une facture.,Oni dostávají fakturu.
+v063-17,recevoir,present,P,3,elles,reçoivent,Elles reçoivent une liste.,Ony dostávají seznam.
+v063-18,recevoir,present,P,3,ils,reçoivent,Ils reçoivent un dessin.,Oni dostávají kresbu.
+v064-01,servir,present,S,1,je,sers,Je sers le café.,Já podávám kávu.
+v064-02,servir,present,S,1,je,sers,Je sers le thé.,Já podávám čaj.
+v064-03,servir,present,S,1,je,sers,Je sers de l'eau.,Já podávám vodu.
+v064-04,servir,present,S,2,tu,sers,Tu sers la soupe.,Ty podáváš polévku.
+v064-05,servir,present,S,2,tu,sers,Tu sers la salade.,Ty podáváš salát.
+v064-06,servir,present,S,2,tu,sers,Tu sers le pain.,Ty podáváš chleba.
+v064-07,servir,present,S,3,il,sert,Il sert le fromage.,On podává sýr.
+v064-08,servir,present,S,3,elle,sert,Elle sert le gâteau.,Ona podává dort.
+v064-09,servir,present,S,3,il,sert,Il sert le dessert.,On podává dezert.
+v064-10,servir,present,P,1,nous,servons,Nous servons le repas.,My podáváme jídlo.
+v064-11,servir,present,P,1,nous,servons,Nous servons le déjeuner.,My podáváme oběd.
+v064-12,servir,present,P,1,nous,servons,Nous servons le dîner.,My podáváme večeři.
+v064-13,servir,present,P,2,vous,servez,Vous servez du riz.,Vy podáváte rýži.
+v064-14,servir,present,P,2,vous,servez,Vous servez du poisson.,Vy podáváte rybu.
+v064-15,servir,present,P,2,vous,servez,Vous servez du poulet.,Vy podáváte kuře.
+v064-16,servir,present,P,3,ils,servent,Ils servent des légumes.,Oni podávají zeleninu.
+v064-17,servir,present,P,3,elles,servent,Elles servent des fruits.,Ony podávají ovoce.
+v064-18,servir,present,P,3,ils,servent,Ils servent du lait.,Oni podávají mléko.
+v065-01,finir,present,S,1,je,finis,Je finis le travail.,Já dokončuji práci.
+v065-02,finir,present,S,1,je,finis,Je finis l'exercice.,Já dokončuji cvičení.
+v065-03,finir,present,S,1,je,finis,Je finis la lettre.,Já dokončuji dopis.
+v065-04,finir,present,S,2,tu,finis,Tu finis le dessin.,Ty dokončuješ kresbu.
+v065-05,finir,present,S,2,tu,finis,Tu finis la liste.,Ty dokončuješ seznam.
+v065-06,finir,present,S,2,tu,finis,Tu finis le texte.,Ty dokončuješ text.
+v065-07,finir,present,S,3,il,finit,Il finit la leçon.,On dokončuje lekci.
+v065-08,finir,present,S,3,elle,finit,Elle finit le jeu.,Ona dokončuje hru.
+v065-09,finir,present,S,3,il,finit,Il finit le livre.,On dokončuje knihu.
+v065-10,finir,present,P,1,nous,finissons,Nous finissons le travail.,My dokončujeme práci.
+v065-11,finir,present,P,1,nous,finissons,Nous finissons l'exercice.,My dokončujeme cvičení.
+v065-12,finir,present,P,1,nous,finissons,Nous finissons la lettre.,My dokončujeme dopis.
+v065-13,finir,present,P,2,vous,finissez,Vous finissez le dessin.,Vy dokončujete kresbu.
+v065-14,finir,present,P,2,vous,finissez,Vous finissez la liste.,Vy dokončujete seznam.
+v065-15,finir,present,P,2,vous,finissez,Vous finissez le texte.,Vy dokončujete text.
+v065-16,finir,present,P,3,ils,finissent,Ils finissent la leçon.,Oni dokončují lekci.
+v065-17,finir,present,P,3,elles,finissent,Elles finissent le jeu.,Ony dokončují hru.
+v065-18,finir,present,P,3,ils,finissent,Ils finissent le livre.,Oni dokončují knihu.
+v066-01,rire,present,S,1,je,ris,Je ris avec Paul.,Já se směji s Paulem.
+v066-02,rire,present,S,1,je,ris,Je ris avec Marie.,Já se směji s Marií.
+v066-03,rire,present,S,1,je,ris,Je ris avec les enfants.,Já se směji s dětmi.
+v066-04,rire,present,S,2,tu,ris,Tu ris devant un film.,Ty se směješ u filmu.
+v066-05,rire,present,S,2,tu,ris,Tu ris dans le jardin.,Ty se směješ na zahradě.
+v066-06,rire,present,S,2,tu,ris,Tu ris à table.,Ty se směješ u stolu.
+v066-07,rire,present,S,3,il,rit,Il rit de cette blague.,On se směje tomuto vtipu.
+v066-08,rire,present,S,3,elle,rit,Elle rit de cette histoire.,Ona se směje tomuto příběhu.
+v066-09,rire,present,S,3,il,rit,Il rit de cette image.,On se směje tomuto obrázku.
+v066-10,rire,present,P,1,nous,rions,Nous rions avec Paul.,My se smějeme s Paulem.
+v066-11,rire,present,P,1,nous,rions,Nous rions avec Marie.,My se smějeme s Marií.
+v066-12,rire,present,P,1,nous,rions,Nous rions avec les enfants.,My se smějeme s dětmi.
+v066-13,rire,present,P,2,vous,riez,Vous riez devant un film.,Vy se smějete u filmu.
+v066-14,rire,present,P,2,vous,riez,Vous riez dans le jardin.,Vy se smějete na zahradě.
+v066-15,rire,present,P,2,vous,riez,Vous riez à table.,Vy se smějete u stolu.
+v066-16,rire,present,P,3,ils,rient,Ils rient de cette blague.,Oni se smějí tomuto vtipu.
+v066-17,rire,present,P,3,elles,rient,Elles rient de cette histoire.,Ony se smějí tomuto příběhu.
+v066-18,rire,present,P,3,ils,rient,Ils rient de cette image.,Oni se smějí tomuto obrázku.
+v067-01,crier,present,S,1,je,crie,Je crie de joie.,Já křičím radostí.
+v067-02,crier,present,S,1,je,crie,Je crie de peur.,Já křičím strachem.
+v067-03,crier,present,S,1,je,crie,Je crie de douleur.,Já křičím bolestí.
+v067-04,crier,present,S,2,tu,cries,Tu cries dans la rue.,Ty křičíš na ulici.
+v067-05,crier,present,S,2,tu,cries,Tu cries dans le jardin.,Ty křičíš na zahradě.
+v067-06,crier,present,S,2,tu,cries,Tu cries sur la plage.,Ty křičíš na pláži.
+v067-07,crier,present,S,3,il,crie,Il crie très fort.,On křičí velmi hlasitě.
+v067-08,crier,present,S,3,elle,crie,Elle crie le nom de Paul.,Ona křičí Paulovo jméno.
+v067-09,crier,present,S,3,il,crie,Il crie le nom de Marie.,On křičí Mariino jméno.
+v067-10,crier,present,P,1,nous,crions,Nous crions de joie.,My křičíme radostí.
+v067-11,crier,present,P,1,nous,crions,Nous crions de peur.,My křičíme strachem.
+v067-12,crier,present,P,1,nous,crions,Nous crions de douleur.,My křičíme bolestí.
+v067-13,crier,present,P,2,vous,criez,Vous criez dans la rue.,Vy křičíte na ulici.
+v067-14,crier,present,P,2,vous,criez,Vous criez dans le jardin.,Vy křičíte na zahradě.
+v067-15,crier,present,P,2,vous,criez,Vous criez sur la plage.,Vy křičíte na pláži.
+v067-16,crier,present,P,3,ils,crient,Ils crient très fort.,Oni křičí velmi hlasitě.
+v067-17,crier,present,P,3,elles,crient,Elles crient le nom de Paul.,Ony křičí Paulovo jméno.
+v067-18,crier,present,P,3,ils,crient,Ils crient le nom de Marie.,Oni křičí Mariino jméno.
+v068-01,jouer,present,S,1,je,joue,Je joue au tennis.,Já hraji tenis.
+v068-02,jouer,present,S,1,je,joue,Je joue au football.,Já hraji fotbal.
+v068-03,jouer,present,S,1,je,joue,Je joue au basket.,Já hraji basketbal.
+v068-04,jouer,present,S,2,tu,joues,Tu joues aux cartes.,Ty hraješ karty.
+v068-05,jouer,present,S,2,tu,joues,Tu joues aux échecs.,Ty hraješ šachy.
+v068-06,jouer,present,S,2,tu,joues,Tu joues au volley.,Ty hraješ volejbal.
+v068-07,jouer,present,S,3,il,joue,Il joue du piano.,On hraje na klavír.
+v068-08,jouer,present,S,3,elle,joue,Elle joue de la guitare.,Ona hraje na kytaru.
+v068-09,jouer,present,S,3,il,joue,Il joue du violon.,On hraje na housle.
+v068-10,jouer,present,P,1,nous,jouons,Nous jouons avec Paul.,My hrajeme s Paulem.
+v068-11,jouer,present,P,1,nous,jouons,Nous jouons avec Marie.,My hrajeme s Marií.
+v068-12,jouer,present,P,1,nous,jouons,Nous jouons avec les enfants.,My hrajeme s dětmi.
+v068-13,jouer,present,P,2,vous,jouez,Vous jouez dans le jardin.,Vy hrajete na zahradě.
+v068-14,jouer,present,P,2,vous,jouez,Vous jouez dans le parc.,Vy hrajete v parku.
+v068-15,jouer,present,P,2,vous,jouez,Vous jouez à la maison.,Vy hrajete doma.
+v068-16,jouer,present,P,3,ils,jouent,Ils jouent à un jeu simple.,Oni hrají jednoduchou hru.
+v068-17,jouer,present,P,3,elles,jouent,Elles jouent un air connu.,Ony hrají známou melodii.
+v068-18,jouer,present,P,3,ils,jouent,Ils jouent une chanson.,Oni hrají písničku.
+v069-01,tourner,present,S,1,je,tourne,Je tourne à droite.,Já zatáčím doprava.
+v069-02,tourner,present,S,1,je,tourne,Je tourne à gauche.,Já zatáčím doleva.
+v069-03,tourner,present,S,1,je,tourne,Je tourne après le pont.,Já zatáčím za mostem.
+v069-04,tourner,present,S,2,tu,tournes,Tu tournes avant la gare.,Ty zatáčíš před nádražím.
+v069-05,tourner,present,S,2,tu,tournes,Tu tournes près de l'école.,Ty zatáčíš blízko školy.
+v069-06,tourner,present,S,2,tu,tournes,Tu tournes au coin de la rue.,Ty zatáčíš na rohu ulice.
+v069-07,tourner,present,S,3,il,tourne,Il tourne vers le parc.,On zatáčí směrem k parku.
+v069-08,tourner,present,S,3,elle,tourne,Elle tourne vers la plage.,Ona zatáčí směrem k pláži.
+v069-09,tourner,present,S,3,il,tourne,Il tourne vers le centre.,On zatáčí směrem k centru.
+v069-10,tourner,present,P,1,nous,tournons,Nous tournons à droite.,My zatáčíme doprava.
+v069-11,tourner,present,P,1,nous,tournons,Nous tournons à gauche.,My zatáčíme doleva.
+v069-12,tourner,present,P,1,nous,tournons,Nous tournons après le pont.,My zatáčíme za mostem.
+v069-13,tourner,present,P,2,vous,tournez,Vous tournez avant la gare.,Vy zatáčíte před nádražím.
+v069-14,tourner,present,P,2,vous,tournez,Vous tournez près de l'école.,Vy zatáčíte blízko školy.
+v069-15,tourner,present,P,2,vous,tournez,Vous tournez au coin de la rue.,Vy zatáčíte na rohu ulice.
+v069-16,tourner,present,P,3,ils,tournent,Ils tournent vers le parc.,Oni zatáčejí směrem k parku.
+v069-17,tourner,present,P,3,elles,tournent,Elles tournent vers la plage.,Ony zatáčejí směrem k pláži.
+v069-18,tourner,present,P,3,ils,tournent,Ils tournent vers le centre.,Oni zatáčejí směrem k centru.
+v070-01,garder,present,S,1,je,garde,Je garde le bébé.,Já hlídám miminko.
+v070-02,garder,present,S,1,je,garde,Je garde les enfants.,Já hlídám děti.
+v070-03,garder,present,S,1,je,garde,Je garde le petit garçon.,Já hlídám malého chlapce.
+v070-04,garder,present,S,2,tu,gardes,Tu gardes la petite fille.,Ty hlídáš malou holčičku.
+v070-05,garder,present,S,2,tu,gardes,Tu gardes le chien.,Ty hlídáš psa.
+v070-06,garder,present,S,2,tu,gardes,Tu gardes le chat.,Ty hlídáš kočku.
+v070-07,garder,present,S,3,il,garde,Il garde la maison.,On hlídá dům.
+v070-08,garder,present,S,3,elle,garde,Elle garde le magasin.,Ona hlídá obchod.
+v070-09,garder,present,S,3,il,garde,Il garde les valises.,On hlídá kufry.
+v070-10,garder,present,P,1,nous,gardons,Nous gardons le bébé.,My hlídáme miminko.
+v070-11,garder,present,P,1,nous,gardons,Nous gardons les enfants.,My hlídáme děti.
+v070-12,garder,present,P,1,nous,gardons,Nous gardons le petit garçon.,My hlídáme malého chlapce.
+v070-13,garder,present,P,2,vous,gardez,Vous gardez la petite fille.,Vy hlídáte malou holčičku.
+v070-14,garder,present,P,2,vous,gardez,Vous gardez le chien.,Vy hlídáte psa.
+v070-15,garder,present,P,2,vous,gardez,Vous gardez le chat.,Vy hlídáte kočku.
+v070-16,garder,present,P,3,ils,gardent,Ils gardent la maison.,Oni hlídají dům.
+v070-17,garder,present,P,3,elles,gardent,Elles gardent le magasin.,Ony hlídají obchod.
+v070-18,garder,present,P,3,ils,gardent,Ils gardent les valises.,Oni hlídají kufry.
+v071-01,reconnaître,present,S,1,je,reconnais,Je reconnais Paul.,Já poznávám Paula.
+v071-02,reconnaître,present,S,1,je,reconnais,Je reconnais Marie.,Já poznávám Marii.
+v071-03,reconnaître,present,S,1,je,reconnais,Je reconnais le professeur.,Já poznávám učitele.
+v071-04,reconnaître,present,S,2,tu,reconnais,Tu reconnais le médecin.,Ty poznáváš lékaře.
+v071-05,reconnaître,present,S,2,tu,reconnais,Tu reconnais ce voisin.,Ty poznáváš tohoto souseda.
+v071-06,reconnaître,present,S,2,tu,reconnais,Tu reconnais cette actrice.,Ty poznáváš tuto herečku.
+v071-07,reconnaître,present,S,3,il,reconnaît,Il reconnaît la voix de Paul.,On poznává Paulův hlas.
+v071-08,reconnaître,present,S,3,elle,reconnaît,Elle reconnaît la voix de Marie.,Ona poznává Mariin hlas.
+v071-09,reconnaître,present,S,3,il,reconnaît,Il reconnaît ce visage.,On poznává tento obličej.
+v071-10,reconnaître,present,P,1,nous,reconnaissons,Nous reconnaissons cette chanson.,My poznáváme tuto písničku.
+v071-11,reconnaître,present,P,1,nous,reconnaissons,Nous reconnaissons cette musique.,My poznáváme tuto hudbu.
+v071-12,reconnaître,present,P,1,nous,reconnaissons,Nous reconnaissons ce bruit.,My poznáváme tento zvuk.
+v071-13,reconnaître,present,P,2,vous,reconnaissez,Vous reconnaissez la maison.,Vy poznáváte dům.
+v071-14,reconnaître,present,P,2,vous,reconnaissez,Vous reconnaissez la rue.,Vy poznáváte ulici.
+v071-15,reconnaître,present,P,2,vous,reconnaissez,Vous reconnaissez le chemin.,Vy poznáváte cestu.
+v071-16,reconnaître,present,P,3,ils,reconnaissent,Ils reconnaissent ce chat.,Oni poznávají tuto kočku.
+v071-17,reconnaître,present,P,3,elles,reconnaissent,Elles reconnaissent ce chien.,Ony poznávají tohoto psa.
+v071-18,reconnaître,present,P,3,ils,reconnaissent,Ils reconnaissent cet oiseau.,Oni poznávají tohoto ptáka.
+v072-01,quitter,present,S,1,je,quitte,Je quitte la maison.,Já opouštím dům.
+v072-02,quitter,present,S,1,je,quitte,Je quitte l'école.,Já opouštím školu.
+v072-03,quitter,present,S,1,je,quitte,Je quitte le bureau.,Já opouštím kancelář.
+v072-04,quitter,present,S,2,tu,quittes,Tu quittes la chambre.,Ty opouštíš pokoj.
+v072-05,quitter,present,S,2,tu,quittes,Tu quittes la cuisine.,Ty opouštíš kuchyň.
+v072-06,quitter,present,S,2,tu,quittes,Tu quittes le jardin.,Ty opouštíš zahradu.
+v072-07,quitter,present,S,3,il,quitte,Il quitte le parc.,On opouští park.
+v072-08,quitter,present,S,3,elle,quitte,Elle quitte la plage.,Ona opouští pláž.
+v072-09,quitter,present,S,3,il,quitte,Il quitte la forêt.,On opouští les.
+v072-10,quitter,present,P,1,nous,quittons,Nous quittons la ville.,My opouštíme město.
+v072-11,quitter,present,P,1,nous,quittons,Nous quittons le village.,My opouštíme vesnici.
+v072-12,quitter,present,P,1,nous,quittons,Nous quittons le pays.,My opouštíme zemi.
+v072-13,quitter,present,P,2,vous,quittez,Vous quittez le restaurant.,Vy opouštíte restauraci.
+v072-14,quitter,present,P,2,vous,quittez,Vous quittez le café.,Vy opouštíte kavárnu.
+v072-15,quitter,present,P,2,vous,quittez,Vous quittez l'hôtel.,Vy opouštíte hotel.
+v072-16,quitter,present,P,3,ils,quittent,Ils quittent le musée.,Oni opouštějí muzeum.
+v072-17,quitter,present,P,3,elles,quittent,Elles quittent le magasin.,Ony opouštějí obchod.
+v072-18,quitter,present,P,3,ils,quittent,Ils quittent la gare.,Oni opouštějí nádraží.
+v073-01,manger,present,S,1,je,mange,Je mange du pain.,Já jím chleba.
+v073-02,manger,present,S,1,je,mange,Je mange du fromage.,Já jím sýr.
+v073-03,manger,present,S,1,je,mange,Je mange une pomme.,Já jím jablko.
+v073-04,manger,present,S,2,tu,manges,Tu manges une banane.,Ty jíš banán.
+v073-05,manger,present,S,2,tu,manges,Tu manges une orange.,Ty jíš pomeranč.
+v073-06,manger,present,S,2,tu,manges,Tu manges une poire.,Ty jíš hrušku.
+v073-07,manger,present,S,3,il,mange,Il mange une soupe.,On jí polévku.
+v073-08,manger,present,S,3,elle,mange,Elle mange une salade.,Ona jí salát.
+v073-09,manger,present,S,3,il,mange,Il mange une pizza.,On jí pizzu.
+v073-10,manger,present,P,1,nous,mangeons,Nous mangeons du riz.,My jíme rýži.
+v073-11,manger,present,P,1,nous,mangeons,Nous mangeons des pâtes.,My jíme těstoviny.
+v073-12,manger,present,P,1,nous,mangeons,Nous mangeons des pommes de terre.,My jíme brambory.
+v073-13,manger,present,P,2,vous,mangez,Vous mangez du poisson.,Vy jíte rybu.
+v073-14,manger,present,P,2,vous,mangez,Vous mangez du poulet.,Vy jíte kuře.
+v073-15,manger,present,P,2,vous,mangez,Vous mangez des légumes.,Vy jíte zeleninu.
+v073-16,manger,present,P,3,ils,mangent,Ils mangent un gâteau.,Oni jedí dort.
+v073-17,manger,present,P,3,elles,mangent,Elles mangent du chocolat.,Ony jedí čokoládu.
+v073-18,manger,present,P,3,ils,mangent,Ils mangent une glace.,Oni jedí zmrzlinu.
+v074-01,courir,present,S,1,je,cours,Je cours dans le parc.,Já běžím parkem.
+v074-02,courir,present,S,1,je,cours,Je cours dans le jardin.,Já běžím zahradou.
+v074-03,courir,present,S,1,je,cours,Je cours dans la forêt.,Já běžím lesem.
+v074-04,courir,present,S,2,tu,cours,Tu cours sur la plage.,Ty běžíš po pláži.
+v074-05,courir,present,S,2,tu,cours,Tu cours sur le sable.,Ty běžíš po písku.
+v074-06,courir,present,S,2,tu,cours,Tu cours sur le chemin.,Ty běžíš po cestě.
+v074-07,courir,present,S,3,il,court,Il court vers la gare.,On běží směrem k nádraží.
+v074-08,courir,present,S,3,elle,court,Elle court vers l'école.,Ona běží směrem ke škole.
+v074-09,courir,present,S,3,il,court,Il court vers la maison.,On běží směrem k domu.
+v074-10,courir,present,P,1,nous,courons,Nous courons lentement.,My běžíme pomalu.
+v074-11,courir,present,P,1,nous,courons,Nous courons vite.,My běžíme rychle.
+v074-12,courir,present,P,1,nous,courons,Nous courons sans bruit.,My běžíme bez hluku.
+v074-13,courir,present,P,2,vous,courez,Vous courez avec Paul.,Vy běžíte s Paulem.
+v074-14,courir,present,P,2,vous,courez,Vous courez avec Marie.,Vy běžíte s Marií.
+v074-15,courir,present,P,2,vous,courez,Vous courez avec un chien.,Vy běžíte se psem.
+v074-16,courir,present,P,3,ils,courent,Ils courent sous la pluie.,Oni běží v dešti.
+v074-17,courir,present,P,3,elles,courent,Elles courent dans la neige.,Ony běží ve sněhu.
+v074-18,courir,present,P,3,ils,courent,Ils courent le long de la rivière.,Oni běží podél řeky.
+v075-01,continuer,present,S,1,je,continue,Je continue le travail.,Já pokračuji v práci.
+v075-02,continuer,present,S,1,je,continue,Je continue l'exercice.,Já pokračuji ve cvičení.
+v075-03,continuer,present,S,1,je,continue,Je continue le jeu.,Já pokračuji ve hře.
+v075-04,continuer,present,S,2,tu,continues,Tu continues la lecture.,Ty pokračuješ ve čtení.
+v075-05,continuer,present,S,2,tu,continues,Tu continues la conversation.,Ty pokračuješ v rozhovoru.
+v075-06,continuer,present,S,2,tu,continues,Tu continues le voyage.,Ty pokračuješ v cestě.
+v075-07,continuer,present,S,3,il,continue,Il continue la leçon.,On pokračuje v lekci.
+v075-08,continuer,present,S,3,elle,continue,Elle continue le dessin.,Ona pokračuje v kreslení.
+v075-09,continuer,present,S,3,il,continue,Il continue la promenade.,On pokračuje v procházce.
+v075-10,continuer,present,P,1,nous,continuons,Nous continuons le travail.,My pokračujeme v práci.
+v075-11,continuer,present,P,1,nous,continuons,Nous continuons l'exercice.,My pokračujeme ve cvičení.
+v075-12,continuer,present,P,1,nous,continuons,Nous continuons le jeu.,My pokračujeme ve hře.
+v075-13,continuer,present,P,2,vous,continuez,Vous continuez la lecture.,Vy pokračujete ve čtení.
+v075-14,continuer,present,P,2,vous,continuez,Vous continuez la conversation.,Vy pokračujete v rozhovoru.
+v075-15,continuer,present,P,2,vous,continuez,Vous continuez le voyage.,Vy pokračujete v cestě.
+v075-16,continuer,present,P,3,ils,continuent,Ils continuent la leçon.,Oni pokračují v lekci.
+v075-17,continuer,present,P,3,elles,continuent,Elles continuent le dessin.,Ony pokračují v kreslení.
+v075-18,continuer,present,P,3,ils,continuent,Ils continuent la promenade.,Oni pokračují v procházce.
+v076-01,oublier,present,S,1,j',oublie,J'oublie la clé.,Já zapomínám klíč.
+v076-02,oublier,present,S,1,j',oublie,J'oublie le livre.,Já zapomínám knihu.
+v076-03,oublier,present,S,1,j',oublie,J'oublie le sac.,Já zapomínám tašku.
+v076-04,oublier,present,S,2,tu,oublies,Tu oublies le téléphone.,Ty zapomínáš telefon.
+v076-05,oublier,present,S,2,tu,oublies,Tu oublies le billet.,Ty zapomínáš lístek.
+v076-06,oublier,present,S,2,tu,oublies,Tu oublies le parapluie.,Ty zapomínáš deštník.
+v076-07,oublier,present,S,3,il,oublie,Il oublie le nom de Paul.,On zapomíná Paulovo jméno.
+v076-08,oublier,present,S,3,elle,oublie,Elle oublie le nom de Marie.,Ona zapomíná Mariino jméno.
+v076-09,oublier,present,S,3,il,oublie,Il oublie ce mot.,On zapomíná toto slovo.
+v076-10,oublier,present,P,1,nous,oublions,Nous oublions la date.,My zapomínáme datum.
+v076-11,oublier,present,P,1,nous,oublions,Nous oublions l'adresse.,My zapomínáme adresu.
+v076-12,oublier,present,P,1,nous,oublions,Nous oublions le numéro.,My zapomínáme číslo.
+v076-13,oublier,present,P,2,vous,oubliez,Vous oubliez la question.,Vy zapomínáte otázku.
+v076-14,oublier,present,P,2,vous,oubliez,Vous oubliez la réponse.,Vy zapomínáte odpověď.
+v076-15,oublier,present,P,2,vous,oubliez,Vous oubliez la leçon.,Vy zapomínáte lekci.
+v076-16,oublier,present,P,3,ils,oublient,Ils oublient le pain.,Oni zapomínají chleba.
+v076-17,oublier,present,P,3,elles,oublient,Elles oublient le lait.,Ony zapomínají mléko.
+v076-18,oublier,present,P,3,ils,oublient,Ils oublient la liste.,Oni zapomínají seznam.
+v077-01,descendre,present,S,1,je,descends,Je descends de la colline.,Já sestupuji z kopce.
+v077-02,descendre,present,S,1,je,descends,Je descends de la montagne.,Já sestupuji z hory.
+v077-03,descendre,present,S,1,je,descends,Je descends du sommet.,Já sestupuji z vrcholu.
+v077-04,descendre,present,S,2,tu,descends,Tu descends par l'escalier.,Ty sestupuješ po schodech.
+v077-05,descendre,present,S,2,tu,descends,Tu descends par le petit chemin.,Ty sestupuješ po malé cestě.
+v077-06,descendre,present,S,2,tu,descends,Tu descends vers le village.,Ty sestupuješ směrem k vesnici.
+v077-07,descendre,present,S,3,il,descend,Il descend lentement.,On sestupuje pomalu.
+v077-08,descendre,present,S,3,elle,descend,Elle descend à pied.,Ona sestupuje pěšky.
+v077-09,descendre,present,S,3,il,descend,Il descend avec le guide.,On sestupuje s průvodcem.
+v077-10,descendre,present,P,1,nous,descendons,Nous descendons de la colline.,My sestupujeme z kopce.
+v077-11,descendre,present,P,1,nous,descendons,Nous descendons de la montagne.,My sestupujeme z hory.
+v077-12,descendre,present,P,1,nous,descendons,Nous descendons du sommet.,My sestupujeme z vrcholu.
+v077-13,descendre,present,P,2,vous,descendez,Vous descendez par l'escalier.,Vy sestupujete po schodech.
+v077-14,descendre,present,P,2,vous,descendez,Vous descendez par le petit chemin.,Vy sestupujete po malé cestě.
+v077-15,descendre,present,P,2,vous,descendez,Vous descendez vers le village.,Vy sestupujete směrem k vesnici.
+v077-16,descendre,present,P,3,ils,descendent,Ils descendent lentement.,Oni sestupují pomalu.
+v077-17,descendre,present,P,3,elles,descendent,Elles descendent à pied.,Ony sestupují pěšky.
+v077-18,descendre,present,P,3,ils,descendent,Ils descendent avec le guide.,Oni sestupují s průvodcem.
+v078-01,cacher,present,S,1,je,cache,Je cache la clé dans le sac.,Já schovávám klíč do tašky.
+v078-02,cacher,present,S,1,je,cache,Je cache le livre sous le lit.,Já schovávám knihu pod postel.
+v078-03,cacher,present,S,1,je,cache,Je cache le cadeau dans la boîte.,Já schovávám dárek do krabice.
+v078-04,cacher,present,S,2,tu,caches,Tu caches le jouet derrière la porte.,Ty schováváš hračku za dveře.
+v078-05,cacher,present,S,2,tu,caches,Tu caches la lettre dans le tiroir.,Ty schováváš dopis do zásuvky.
+v078-06,cacher,present,S,2,tu,caches,Tu caches le téléphone sous le coussin.,Ty schováváš telefon pod polštář.
+v078-07,cacher,present,S,3,il,cache,Il cache la photo dans le livre.,On schovává fotografii do knihy.
+v078-08,cacher,present,S,3,elle,cache,Elle cache la pièce dans la main.,Ona schovává minci do ruky.
+v078-09,cacher,present,S,3,il,cache,Il cache la balle derrière le canapé.,On schovává míč za pohovku.
+v078-10,cacher,present,P,1,nous,cachons,Nous cachons la clé dans le sac.,My schováváme klíč do tašky.
+v078-11,cacher,present,P,1,nous,cachons,Nous cachons le livre sous le lit.,My schováváme knihu pod postel.
+v078-12,cacher,present,P,1,nous,cachons,Nous cachons le cadeau dans la boîte.,My schováváme dárek do krabice.
+v078-13,cacher,present,P,2,vous,cachez,Vous cachez le jouet derrière la porte.,Vy schováváte hračku za dveře.
+v078-14,cacher,present,P,2,vous,cachez,Vous cachez la lettre dans le tiroir.,Vy schováváte dopis do zásuvky.
+v078-15,cacher,present,P,2,vous,cachez,Vous cachez le téléphone sous le coussin.,Vy schováváte telefon pod polštář.
+v078-16,cacher,present,P,3,ils,cachent,Ils cachent la photo dans le livre.,Oni schovávají fotografii do knihy.
+v078-17,cacher,present,P,3,elles,cachent,Elles cachent la pièce dans la main.,Ony schovávají minci do ruky.
+v078-18,cacher,present,P,3,ils,cachent,Ils cachent la balle derrière le canapé.,Oni schovávají míč za pohovku.
+v079-01,poser,present,S,1,je,pose,Je pose le livre sur la table.,Já pokládám knihu na stůl.
+v079-02,poser,present,S,1,je,pose,Je pose le sac sur la chaise.,Já pokládám tašku na židli.
+v079-03,poser,present,S,1,je,pose,Je pose la tasse sur le bureau.,Já pokládám šálek na psací stůl.
+v079-04,poser,present,S,2,tu,poses,Tu poses la clé près de la porte.,Ty pokládáš klíč blízko dveří.
+v079-05,poser,present,S,2,tu,poses,Tu poses la lettre sur le lit.,Ty pokládáš dopis na postel.
+v079-06,poser,present,S,2,tu,poses,Tu poses le téléphone sur le canapé.,Ty pokládáš telefon na pohovku.
+v079-07,poser,present,S,3,il,pose,Il pose une question au professeur.,On pokládá otázku učiteli.
+v079-08,poser,present,S,3,elle,pose,Elle pose une question au médecin.,Ona pokládá otázku lékaři.
+v079-09,poser,present,S,3,il,pose,Il pose une question à Paul.,On pokládá otázku Paulovi.
+v079-10,poser,present,P,1,nous,posons,Nous posons le livre sur la table.,My pokládáme knihu na stůl.
+v079-11,poser,present,P,1,nous,posons,Nous posons le sac sur la chaise.,My pokládáme tašku na židli.
+v079-12,poser,present,P,1,nous,posons,Nous posons la tasse sur le bureau.,My pokládáme šálek na psací stůl.
+v079-13,poser,present,P,2,vous,posez,Vous posez la clé près de la porte.,Vy pokládáte klíč blízko dveří.
+v079-14,poser,present,P,2,vous,posez,Vous posez la lettre sur le lit.,Vy pokládáte dopis na postel.
+v079-15,poser,present,P,2,vous,posez,Vous posez le téléphone sur le canapé.,Vy pokládáte telefon na pohovku.
+v079-16,poser,present,P,3,ils,posent,Ils posent une question au professeur.,Oni pokládají otázku učiteli.
+v079-17,poser,present,P,3,elles,posent,Elles posent une question au médecin.,Ony pokládají otázku lékaři.
+v079-18,poser,present,P,3,ils,posent,Ils posent une question à Paul.,Oni pokládají otázku Paulovi.
+v080-01,tirer,present,S,1,je,tire,Je tire une corde.,Já tahám lano.
+v080-02,tirer,present,S,1,je,tire,Je tire une valise.,Já tahám kufr.
+v080-03,tirer,present,S,1,je,tire,Je tire un chariot.,Já tahám vozík.
+v080-04,tirer,present,S,2,tu,tires,Tu tires un petit bateau.,Ty taháš malou loď.
+v080-05,tirer,present,S,2,tu,tires,Tu tires une luge.,Ty taháš sáňky.
+v080-06,tirer,present,S,2,tu,tires,Tu tires une branche.,Ty taháš větev.
+v080-07,tirer,present,S,3,il,tire,Il tire un sac lourd.,On tahá těžkou tašku.
+v080-08,tirer,present,S,3,elle,tire,Elle tire un jouet à roulettes.,Ona tahá hračku na kolečkách.
+v080-09,tirer,present,S,3,il,tire,Il tire une boîte avec une corde.,On tahá krabici pomocí lana.
+v080-10,tirer,present,P,1,nous,tirons,Nous tirons une corde.,My taháme lano.
+v080-11,tirer,present,P,1,nous,tirons,Nous tirons une valise.,My taháme kufr.
+v080-12,tirer,present,P,1,nous,tirons,Nous tirons un chariot.,My taháme vozík.
+v080-13,tirer,present,P,2,vous,tirez,Vous tirez un petit bateau.,Vy taháte malou loď.
+v080-14,tirer,present,P,2,vous,tirez,Vous tirez une luge.,Vy taháte sáňky.
+v080-15,tirer,present,P,2,vous,tirez,Vous tirez une branche.,Vy taháte větev.
+v080-16,tirer,present,P,3,ils,tirent,Ils tirent un sac lourd.,Oni tahají těžkou tašku.
+v080-17,tirer,present,P,3,elles,tirent,Elles tirent un jouet à roulettes.,Ony tahají hračku na kolečkách.
+v080-18,tirer,present,P,3,ils,tirent,Ils tirent une boîte avec une corde.,Oni tahají krabici pomocí lana.
+v081-01,présenter,present,S,1,je,présente,Je présente Paul à Marie.,Já představuji Paula Marii.
+v081-02,présenter,present,S,1,je,présente,Je présente Marie à Luc.,Já představuji Marii Lucovi.
+v081-03,présenter,present,S,1,je,présente,Je présente Luc à Julie.,Já představuji Luca Julii.
+v081-04,présenter,present,S,2,tu,présentes,Tu présentes un ami à Paul.,Ty představuješ kamaráda Paulovi.
+v081-05,présenter,present,S,2,tu,présentes,Tu présentes une amie à Marie.,Ty představuješ kamarádku Marii.
+v081-06,présenter,present,S,2,tu,présentes,Tu présentes le professeur aux enfants.,Ty představuješ učitele dětem.
+v081-07,présenter,present,S,3,il,présente,Il présente un nouveau livre.,On představuje novou knihu.
+v081-08,présenter,present,S,3,elle,présente,Elle présente un nouveau jeu.,Ona představuje novou hru.
+v081-09,présenter,present,S,3,il,présente,Il présente une nouvelle idée.,On představuje nový nápad.
+v081-10,présenter,present,P,1,nous,présentons,Nous présentons Paul à Marie.,My představujeme Paula Marii.
+v081-11,présenter,present,P,1,nous,présentons,Nous présentons Marie à Luc.,My představujeme Marii Lucovi.
+v081-12,présenter,present,P,1,nous,présentons,Nous présentons Luc à Julie.,My představujeme Luca Julii.
+v081-13,présenter,present,P,2,vous,présentez,Vous présentez un ami à Paul.,Vy představujete kamaráda Paulovi.
+v081-14,présenter,present,P,2,vous,présentez,Vous présentez une amie à Marie.,Vy představujete kamarádku Marii.
+v081-15,présenter,present,P,2,vous,présentez,Vous présentez le professeur aux enfants.,Vy představujete učitele dětem.
+v081-16,présenter,present,P,3,ils,présentent,Ils présentent un nouveau livre.,Oni představují novou knihu.
+v081-17,présenter,present,P,3,elles,présentent,Elles présentent un nouveau jeu.,Ony představují novou hru.
+v081-18,présenter,present,P,3,ils,présentent,Ils présentent une nouvelle idée.,Oni představují nový nápad.
+v082-01,ajouter,present,S,1,j',ajoute,J'ajoute du sel.,Já přidávám sůl.
+v082-02,ajouter,present,S,1,j',ajoute,J'ajoute du sucre.,Já přidávám cukr.
+v082-03,ajouter,present,S,1,j',ajoute,J'ajoute du lait.,Já přidávám mléko.
+v082-04,ajouter,present,S,2,tu,ajoutes,Tu ajoutes de l'eau.,Ty přidáváš vodu.
+v082-05,ajouter,present,S,2,tu,ajoutes,Tu ajoutes du beurre.,Ty přidáváš máslo.
+v082-06,ajouter,present,S,2,tu,ajoutes,Tu ajoutes de la farine.,Ty přidáváš mouku.
+v082-07,ajouter,present,S,3,il,ajoute,Il ajoute une tomate.,On přidává rajče.
+v082-08,ajouter,present,S,3,elle,ajoute,Elle ajoute un œuf.,Ona přidává vejce.
+v082-09,ajouter,present,S,3,il,ajoute,Il ajoute du fromage.,On přidává sýr.
+v082-10,ajouter,present,P,1,nous,ajoutons,Nous ajoutons un mot.,My přidáváme slovo.
+v082-11,ajouter,present,P,1,nous,ajoutons,Nous ajoutons une phrase.,My přidáváme větu.
+v082-12,ajouter,present,P,1,nous,ajoutons,Nous ajoutons un exemple.,My přidáváme příklad.
+v082-13,ajouter,present,P,2,vous,ajoutez,Vous ajoutez une photo.,Vy přidáváte fotografii.
+v082-14,ajouter,present,P,2,vous,ajoutez,Vous ajoutez un dessin.,Vy přidáváte kresbu.
+v082-15,ajouter,present,P,2,vous,ajoutez,Vous ajoutez une page.,Vy přidáváte stránku.
+v082-16,ajouter,present,P,3,ils,ajoutent,Ils ajoutent une chaise.,Oni přidávají židli.
+v082-17,ajouter,present,P,3,elles,ajoutent,Elles ajoutent une table.,Ony přidávají stůl.
+v082-18,ajouter,present,P,3,ils,ajoutent,Ils ajoutent une lampe.,Oni přidávají lampu.
+v083-01,agir,present,S,1,j',agis,J'agis vite.,Já jednám rychle.
+v083-02,agir,present,S,1,j',agis,J'agis lentement.,Já jednám pomalu.
+v083-03,agir,present,S,1,j',agis,J'agis avec calme.,Já jednám klidně.
+v083-04,agir,present,S,2,tu,agis,Tu agis avec prudence.,Ty jednáš opatrně.
+v083-05,agir,present,S,2,tu,agis,Tu agis avec courage.,Ty jednáš odvážně.
+v083-06,agir,present,S,2,tu,agis,Tu agis avec patience.,Ty jednáš trpělivě.
+v083-07,agir,present,S,3,il,agit,Il agit sans peur.,On jedná beze strachu.
+v083-08,agir,present,S,3,elle,agit,Elle agit sans réfléchir.,Ona jedná bez přemýšlení.
+v083-09,agir,present,S,3,il,agit,Il agit pour les enfants.,On jedná v zájmu dětí.
+v083-10,agir,present,P,1,nous,agissons,Nous agissons vite.,My jednáme rychle.
+v083-11,agir,present,P,1,nous,agissons,Nous agissons lentement.,My jednáme pomalu.
+v083-12,agir,present,P,1,nous,agissons,Nous agissons avec calme.,My jednáme klidně.
+v083-13,agir,present,P,2,vous,agissez,Vous agissez avec prudence.,Vy jednáte opatrně.
+v083-14,agir,present,P,2,vous,agissez,Vous agissez avec courage.,Vy jednáte odvážně.
+v083-15,agir,present,P,2,vous,agissez,Vous agissez avec patience.,Vy jednáte trpělivě.
+v083-16,agir,present,P,3,ils,agissent,Ils agissent sans peur.,Oni jednají beze strachu.
+v083-17,agir,present,P,3,elles,agissent,Elles agissent sans réfléchir.,Ony jednají bez přemýšlení.
+v083-18,agir,present,P,3,ils,agissent,Ils agissent pour les enfants.,Oni jednají v zájmu dětí.
+v084-01,retrouver,present,S,1,je,retrouve,Je retrouve la clé.,Já znovu nacházím klíč.
+v084-02,retrouver,present,S,1,je,retrouve,Je retrouve le livre.,Já znovu nacházím knihu.
+v084-03,retrouver,present,S,1,je,retrouve,Je retrouve le stylo.,Já znovu nacházím pero.
+v084-04,retrouver,present,S,2,tu,retrouves,Tu retrouves le sac.,Ty znovu nacházíš tašku.
+v084-05,retrouver,present,S,2,tu,retrouves,Tu retrouves le téléphone.,Ty znovu nacházíš telefon.
+v084-06,retrouver,present,S,2,tu,retrouves,Tu retrouves la carte.,Ty znovu nacházíš mapu.
+v084-07,retrouver,present,S,3,il,retrouve,Il retrouve la lettre.,On znovu nachází dopis.
+v084-08,retrouver,present,S,3,elle,retrouve,Elle retrouve la photo.,Ona znovu nachází fotografii.
+v084-09,retrouver,present,S,3,il,retrouve,Il retrouve le billet.,On znovu nachází lístek.
+v084-10,retrouver,present,P,1,nous,retrouvons,Nous retrouvons le chemin.,My znovu nacházíme cestu.
+v084-11,retrouver,present,P,1,nous,retrouvons,Nous retrouvons la maison.,My znovu nacházíme dům.
+v084-12,retrouver,present,P,1,nous,retrouvons,Nous retrouvons le magasin.,My znovu nacházíme obchod.
+v084-13,retrouver,present,P,2,vous,retrouvez,Vous retrouvez le jouet.,Vy znovu nacházíte hračku.
+v084-14,retrouver,present,P,2,vous,retrouvez,Vous retrouvez la balle.,Vy znovu nacházíte míč.
+v084-15,retrouver,present,P,2,vous,retrouvez,Vous retrouvez le chat.,Vy znovu nacházíte kočku.
+v084-16,retrouver,present,P,3,ils,retrouvent,Ils retrouvent le gant.,Oni znovu nacházejí rukavici.
+v084-17,retrouver,present,P,3,elles,retrouvent,Elles retrouvent le chapeau.,Ony znovu nacházejí klobouk.
+v084-18,retrouver,present,P,3,ils,retrouvent,Ils retrouvent le parapluie.,Oni znovu nacházejí deštník.
+v085-01,offrir,present,S,1,j',offre,J'offre un livre à Paul.,Já daruji knihu Paulovi.
+v085-02,offrir,present,S,1,j',offre,J'offre des fleurs à Marie.,Já daruji květiny Marii.
+v085-03,offrir,present,S,1,j',offre,J'offre un jouet au bébé.,Já daruji hračku miminku.
+v085-04,offrir,present,S,2,tu,offres,Tu offres une montre à Luc.,Ty daruješ hodinky Lucovi.
+v085-05,offrir,present,S,2,tu,offres,Tu offres une écharpe à Julie.,Ty daruješ šálu Julii.
+v085-06,offrir,present,S,2,tu,offres,Tu offres un vélo à un enfant.,Ty daruješ kolo dítěti.
+v085-07,offrir,present,S,3,il,offre,Il offre du chocolat à un ami.,On daruje čokoládu kamarádovi.
+v085-08,offrir,present,S,3,elle,offre,Elle offre un dessin au professeur.,Ona daruje kresbu učiteli.
+v085-09,offrir,present,S,3,il,offre,Il offre une plante à une voisine.,On daruje rostlinu sousedce.
+v085-10,offrir,present,P,1,nous,offrons,Nous offrons un livre à Paul.,My darujeme knihu Paulovi.
+v085-11,offrir,present,P,1,nous,offrons,Nous offrons des fleurs à Marie.,My darujeme květiny Marii.
+v085-12,offrir,present,P,1,nous,offrons,Nous offrons un jouet au bébé.,My darujeme hračku miminku.
+v085-13,offrir,present,P,2,vous,offrez,Vous offrez une montre à Luc.,Vy darujete hodinky Lucovi.
+v085-14,offrir,present,P,2,vous,offrez,Vous offrez une écharpe à Julie.,Vy darujete šálu Julii.
+v085-15,offrir,present,P,2,vous,offrez,Vous offrez un vélo à un enfant.,Vy darujete kolo dítěti.
+v085-16,offrir,present,P,3,ils,offrent,Ils offrent du chocolat à un ami.,Oni darují čokoládu kamarádovi.
+v085-17,offrir,present,P,3,elles,offrent,Elles offrent un dessin au professeur.,Ony darují kresbu učiteli.
+v085-18,offrir,present,P,3,ils,offrent,Ils offrent une plante à une voisine.,Oni darují rostlinu sousedce.
+v086-01,apprendre,present,S,1,j',apprends,J'apprends le français.,Já se učím francouzsky.
+v086-02,apprendre,present,S,1,j',apprends,J'apprends l'italien.,Já se učím italsky.
+v086-03,apprendre,present,S,1,j',apprends,J'apprends l'anglais.,Já se učím anglicky.
+v086-04,apprendre,present,S,2,tu,apprends,Tu apprends l'allemand.,Ty se učíš německy.
+v086-05,apprendre,present,S,2,tu,apprends,Tu apprends l'espagnol.,Ty se učíš španělsky.
+v086-06,apprendre,present,S,2,tu,apprends,Tu apprends le tchèque.,Ty se učíš česky.
+v086-07,apprendre,present,S,3,il,apprend,Il apprend à lire.,On se učí číst.
+v086-08,apprendre,present,S,3,elle,apprend,Elle apprend à écrire.,Ona se učí psát.
+v086-09,apprendre,present,S,3,il,apprend,Il apprend à compter.,On se učí počítat.
+v086-10,apprendre,present,P,1,nous,apprenons,Nous apprenons à nager.,My se učíme plavat.
+v086-11,apprendre,present,P,1,nous,apprenons,Nous apprenons à cuisiner.,My se učíme vařit.
+v086-12,apprendre,present,P,1,nous,apprenons,Nous apprenons à conduire.,My se učíme řídit.
+v086-13,apprendre,present,P,2,vous,apprenez,Vous apprenez à chanter.,Vy se učíte zpívat.
+v086-14,apprendre,present,P,2,vous,apprenez,Vous apprenez à danser.,Vy se učíte tančit.
+v086-15,apprendre,present,P,2,vous,apprenez,Vous apprenez à dessiner.,Vy se učíte kreslit.
+v086-16,apprendre,present,P,3,ils,apprennent,Ils apprennent une chanson.,Oni se učí písničku.
+v086-17,apprendre,present,P,3,elles,apprennent,Elles apprennent un poème.,Ony se učí báseň.
+v086-18,apprendre,present,P,3,ils,apprennent,Ils apprennent un nouveau mot.,Oni se učí nové slovo.
+v087-01,tuer,present,S,1,je,tue,Je tue un moustique.,Já zabíjím komára.
+v087-02,tuer,present,S,1,je,tue,Je tue une mouche.,Já zabíjím mouchu.
+v087-03,tuer,present,S,1,je,tue,Je tue le temps avec un jeu.,Já zabíjím čas hrou.
+v087-04,tuer,present,S,2,tu,tues,Tu tues un moustique.,Ty zabíjíš komára.
+v087-05,tuer,present,S,2,tu,tues,Tu tues une mouche.,Ty zabíjíš mouchu.
+v087-06,tuer,present,S,2,tu,tues,Tu tues le temps avec un jeu.,Ty zabíjíš čas hrou.
+v087-07,tuer,present,S,3,il,tue,Il tue un moustique.,On zabíjí komára.
+v087-08,tuer,present,S,3,elle,tue,Elle tue une mouche.,Ona zabíjí mouchu.
+v087-09,tuer,present,S,3,il,tue,Il tue le temps avec un jeu.,On zabíjí čas hrou.
+v087-10,tuer,present,P,1,nous,tuons,Nous tuons un moustique.,My zabíjíme komára.
+v087-11,tuer,present,P,1,nous,tuons,Nous tuons une mouche.,My zabíjíme mouchu.
+v087-12,tuer,present,P,1,nous,tuons,Nous tuons le temps avec un jeu.,My zabíjíme čas hrou.
+v087-13,tuer,present,P,2,vous,tuez,Vous tuez un moustique.,Vy zabíjíte komára.
+v087-14,tuer,present,P,2,vous,tuez,Vous tuez une mouche.,Vy zabíjíte mouchu.
+v087-15,tuer,present,P,2,vous,tuez,Vous tuez le temps avec un jeu.,Vy zabíjíte čas hrou.
+v087-16,tuer,present,P,3,ils,tuent,Ils tuent un moustique.,Oni zabíjejí komára.
+v087-17,tuer,present,P,3,elles,tuent,Elles tuent une mouche.,Ony zabíjejí mouchu.
+v087-18,tuer,present,P,3,ils,tuent,Ils tuent le temps avec un jeu.,Oni zabíjejí čas hrou.
+v088-01,retourner,present,S,1,je,retourne,Je retourne à l'école.,Já se vracím do školy.
+v088-02,retourner,present,S,1,je,retourne,Je retourne au travail.,Já se vracím do práce.
+v088-03,retourner,present,S,1,je,retourne,Je retourne à la maison.,Já se vracím domů.
+v088-04,retourner,present,S,2,tu,retournes,Tu retournes au parc.,Ty se vracíš do parku.
+v088-05,retourner,present,S,2,tu,retournes,Tu retournes au jardin.,Ty se vracíš do zahrady.
+v088-06,retourner,present,S,2,tu,retournes,Tu retournes à la gare.,Ty se vracíš na nádraží.
+v088-07,retourner,present,S,3,il,retourne,Il retourne au magasin.,On se vrací do obchodu.
+v088-08,retourner,present,S,3,elle,retourne,Elle retourne au marché.,Ona se vrací na trh.
+v088-09,retourner,present,S,3,il,retourne,Il retourne au café.,On se vrací do kavárny.
+v088-10,retourner,present,P,1,nous,retournons,Nous retournons à la plage.,My se vracíme na pláž.
+v088-11,retourner,present,P,1,nous,retournons,Nous retournons au restaurant.,My se vracíme do restaurace.
+v088-12,retourner,present,P,1,nous,retournons,Nous retournons au cinéma.,My se vracíme do kina.
+v088-13,retourner,present,P,2,vous,retournez,Vous retournez dans la chambre.,Vy se vracíte do pokoje.
+v088-14,retourner,present,P,2,vous,retournez,Vous retournez dans la cuisine.,Vy se vracíte do kuchyně.
+v088-15,retourner,present,P,2,vous,retournez,Vous retournez au bureau.,Vy se vracíte do kanceláře.
+v088-16,retourner,present,P,3,ils,retournent,Ils retournent à Paris.,Oni se vracejí do Paříže.
+v088-17,retourner,present,P,3,elles,retournent,Elles retournent à Prague.,Ony se vracejí do Prahy.
+v088-18,retourner,present,P,3,ils,retournent,Ils retournent à Rome.,Oni se vracejí do Říma.
+v089-01,rencontrer,present,S,1,je,rencontre,Je rencontre Paul.,Já potkávám Paula.
+v089-02,rencontrer,present,S,1,je,rencontre,Je rencontre Marie.,Já potkávám Marii.
+v089-03,rencontrer,present,S,1,je,rencontre,Je rencontre Luc.,Já potkávám Luca.
+v089-04,rencontrer,present,S,2,tu,rencontres,Tu rencontres un ami.,Ty potkáváš kamaráda.
+v089-05,rencontrer,present,S,2,tu,rencontres,Tu rencontres une amie.,Ty potkáváš kamarádku.
+v089-06,rencontrer,present,S,2,tu,rencontres,Tu rencontres un voisin.,Ty potkáváš souseda.
+v089-07,rencontrer,present,S,3,il,rencontre,Il rencontre une voisine.,On potkává sousedku.
+v089-08,rencontrer,present,S,3,elle,rencontre,Elle rencontre le professeur.,Ona potkává učitele.
+v089-09,rencontrer,present,S,3,il,rencontre,Il rencontre le médecin.,On potkává lékaře.
+v089-10,rencontrer,present,P,1,nous,rencontrons,Nous rencontrons un guide.,My potkáváme průvodce.
+v089-11,rencontrer,present,P,1,nous,rencontrons,Nous rencontrons un musicien.,My potkáváme hudebníka.
+v089-12,rencontrer,present,P,1,nous,rencontrons,Nous rencontrons une chanteuse.,My potkáváme zpěvačku.
+v089-13,rencontrer,present,P,2,vous,rencontrez,Vous rencontrez un collègue.,Vy potkáváte kolegu.
+v089-14,rencontrer,present,P,2,vous,rencontrez,Vous rencontrez une collègue.,Vy potkáváte kolegyni.
+v089-15,rencontrer,present,P,2,vous,rencontrez,Vous rencontrez un ancien ami.,Vy potkáváte starého kamaráda.
+v089-16,rencontrer,present,P,3,ils,rencontrent,Ils rencontrent des touristes.,Oni potkávají turisty.
+v089-17,rencontrer,present,P,3,elles,rencontrent,Elles rencontrent des étudiants.,Ony potkávají studenty.
+v089-18,rencontrer,present,P,3,ils,rencontrent,Ils rencontrent des enfants.,Oni potkávají děti.
+v090-01,envoyer,present,S,1,j',envoie,J'envoie une lettre.,Já posílám dopis.
+v090-02,envoyer,present,S,1,j',envoie,J'envoie un message.,Já posílám zprávu.
+v090-03,envoyer,present,S,1,j',envoie,J'envoie une carte.,Já posílám pohlednici.
+v090-04,envoyer,present,S,2,tu,envoies,Tu envoies un colis.,Ty posíláš balík.
+v090-05,envoyer,present,S,2,tu,envoies,Tu envoies un cadeau.,Ty posíláš dárek.
+v090-06,envoyer,present,S,2,tu,envoies,Tu envoies des fleurs.,Ty posíláš květiny.
+v090-07,envoyer,present,S,3,il,envoie,Il envoie une photo.,On posílá fotografii.
+v090-08,envoyer,present,S,3,elle,envoie,Elle envoie un dessin.,Ona posílá kresbu.
+v090-09,envoyer,present,S,3,il,envoie,Il envoie un livre.,On posílá knihu.
+v090-10,envoyer,present,P,1,nous,envoyons,Nous envoyons une réponse.,My posíláme odpověď.
+v090-11,envoyer,present,P,1,nous,envoyons,Nous envoyons une invitation.,My posíláme pozvánku.
+v090-12,envoyer,present,P,1,nous,envoyons,Nous envoyons une liste.,My posíláme seznam.
+v090-13,envoyer,present,P,2,vous,envoyez,Vous envoyez de l'argent.,Vy posíláte peníze.
+v090-14,envoyer,present,P,2,vous,envoyez,Vous envoyez un billet.,Vy posíláte lístek.
+v090-15,envoyer,present,P,2,vous,envoyez,Vous envoyez une recette.,Vy posíláte recept.
+v090-16,envoyer,present,P,3,ils,envoient,Ils envoient un document.,Oni posílají dokument.
+v090-17,envoyer,present,P,3,elles,envoient,Elles envoient une facture.,Ony posílají fakturu.
+v090-18,envoyer,present,P,3,ils,envoient,Ils envoient un petit mot.,Oni posílají krátký vzkaz.
+v091-01,dormir,present,S,1,je,dors,Je dors à la maison.,Já spím doma.
+v091-02,dormir,present,S,1,je,dors,Je dors à l'hôtel.,Já spím v hotelu.
+v091-03,dormir,present,S,1,je,dors,Je dors dans une tente.,Já spím ve stanu.
+v091-04,dormir,present,S,2,tu,dors,Tu dors dans un lit.,Ty spíš v posteli.
+v091-05,dormir,present,S,2,tu,dors,Tu dors sur le canapé.,Ty spíš na pohovce.
+v091-06,dormir,present,S,2,tu,dors,Tu dors dans la chambre.,Ty spíš v pokoji.
+v091-07,dormir,present,S,3,il,dort,Il dort près de la fenêtre.,On spí blízko okna.
+v091-08,dormir,present,S,3,elle,dort,Elle dort dans le train.,Ona spí ve vlaku.
+v091-09,dormir,present,S,3,il,dort,Il dort dans le bus.,On spí v autobuse.
+v091-10,dormir,present,P,1,nous,dormons,Nous dormons bien.,My spíme dobře.
+v091-11,dormir,present,P,1,nous,dormons,Nous dormons mal.,My spíme špatně.
+v091-12,dormir,present,P,1,nous,dormons,Nous dormons profondément.,My spíme hluboce.
+v091-13,dormir,present,P,2,vous,dormez,Vous dormez huit heures.,Vy spíte osm hodin.
+v091-14,dormir,present,P,2,vous,dormez,Vous dormez six heures.,Vy spíte šest hodin.
+v091-15,dormir,present,P,2,vous,dormez,Vous dormez une heure.,Vy spíte hodinu.
+v091-16,dormir,present,P,3,ils,dorment,Ils dorment avec une couverture.,Oni spí s dekou.
+v091-17,dormir,present,P,3,elles,dorment,Elles dorment la nuit.,Ony spí v noci.
+v091-18,dormir,present,P,3,ils,dorment,Ils dorment après le repas.,Oni spí po jídle.
+v092-01,pousser,present,S,1,je,pousse,Je pousse la porte.,Já tlačím dveře.
+v092-02,pousser,present,S,1,je,pousse,Je pousse la voiture.,Já tlačím auto.
+v092-03,pousser,present,S,1,je,pousse,Je pousse le vélo.,Já tlačím kolo.
+v092-04,pousser,present,S,2,tu,pousses,Tu pousses un chariot.,Ty tlačíš vozík.
+v092-05,pousser,present,S,2,tu,pousses,Tu pousses une poussette.,Ty tlačíš kočárek.
+v092-06,pousser,present,S,2,tu,pousses,Tu pousses une chaise.,Ty tlačíš židli.
+v092-07,pousser,present,S,3,il,pousse,Il pousse une table.,On tlačí stůl.
+v092-08,pousser,present,S,3,elle,pousse,Elle pousse une boîte.,Ona tlačí krabici.
+v092-09,pousser,present,S,3,il,pousse,Il pousse un petit bateau.,On tlačí malou loď.
+v092-10,pousser,present,P,1,nous,poussons,Nous poussons la porte.,My tlačíme dveře.
+v092-11,pousser,present,P,1,nous,poussons,Nous poussons la voiture.,My tlačíme auto.
+v092-12,pousser,present,P,1,nous,poussons,Nous poussons le vélo.,My tlačíme kolo.
+v092-13,pousser,present,P,2,vous,poussez,Vous poussez un chariot.,Vy tlačíte vozík.
+v092-14,pousser,present,P,2,vous,poussez,Vous poussez une poussette.,Vy tlačíte kočárek.
+v092-15,pousser,present,P,2,vous,poussez,Vous poussez une chaise.,Vy tlačíte židli.
+v092-16,pousser,present,P,3,ils,poussent,Ils poussent une table.,Oni tlačí stůl.
+v092-17,pousser,present,P,3,elles,poussent,Elles poussent une boîte.,Ony tlačí krabici.
+v092-18,pousser,present,P,3,ils,poussent,Ils poussent un petit bateau.,Oni tlačí malou loď.
+v093-01,rappeler,present,S,1,je,rappelle,Je rappelle Paul.,Já znovu volám Paulovi.
+v093-02,rappeler,present,S,1,je,rappelle,Je rappelle Marie.,Já znovu volám Marii.
+v093-03,rappeler,present,S,1,je,rappelle,Je rappelle Luc.,Já znovu volám Lucovi.
+v093-04,rappeler,present,S,2,tu,rappelles,Tu rappelles le médecin.,Ty znovu voláš lékaři.
+v093-05,rappeler,present,S,2,tu,rappelles,Tu rappelles le professeur.,Ty znovu voláš učiteli.
+v093-06,rappeler,present,S,2,tu,rappelles,Tu rappelles un ami.,Ty znovu voláš kamarádovi.
+v093-07,rappeler,present,S,3,il,rappelle,Il rappelle une amie.,On znovu volá kamarádce.
+v093-08,rappeler,present,S,3,elle,rappelle,Elle rappelle un voisin.,Ona znovu volá sousedovi.
+v093-09,rappeler,present,S,3,il,rappelle,Il rappelle une voisine.,On znovu volá sousedce.
+v093-10,rappeler,present,P,1,nous,rappelons,Nous rappelons Paul.,My znovu voláme Paulovi.
+v093-11,rappeler,present,P,1,nous,rappelons,Nous rappelons Marie.,My znovu voláme Marii.
+v093-12,rappeler,present,P,1,nous,rappelons,Nous rappelons Luc.,My znovu voláme Lucovi.
+v093-13,rappeler,present,P,2,vous,rappelez,Vous rappelez le médecin.,Vy znovu voláte lékaři.
+v093-14,rappeler,present,P,2,vous,rappelez,Vous rappelez le professeur.,Vy znovu voláte učiteli.
+v093-15,rappeler,present,P,2,vous,rappelez,Vous rappelez un ami.,Vy znovu voláte kamarádovi.
+v093-16,rappeler,present,P,3,ils,rappellent,Ils rappellent une amie.,Oni znovu volají kamarádce.
+v093-17,rappeler,present,P,3,elles,rappellent,Elles rappellent un voisin.,Ony znovu volají sousedovi.
+v093-18,rappeler,present,P,3,ils,rappellent,Ils rappellent une voisine.,Oni znovu volají sousedce.
+v094-01,lire,present,S,1,je,lis,Je lis un livre.,Já čtu knihu.
+v094-02,lire,present,S,1,je,lis,Je lis un journal.,Já čtu noviny.
+v094-03,lire,present,S,1,je,lis,Je lis un magazine.,Já čtu časopis.
+v094-04,lire,present,S,2,tu,lis,Tu lis une lettre.,Ty čteš dopis.
+v094-05,lire,present,S,2,tu,lis,Tu lis un message.,Ty čteš zprávu.
+v094-06,lire,present,S,2,tu,lis,Tu lis une carte.,Ty čteš pohlednici.
+v094-07,lire,present,S,3,il,lit,Il lit une histoire.,On čte příběh.
+v094-08,lire,present,S,3,elle,lit,Elle lit un poème.,Ona čte báseň.
+v094-09,lire,present,S,3,il,lit,Il lit un conte.,On čte pohádku.
+v094-10,lire,present,P,1,nous,lisons,Nous lisons une phrase.,My čteme větu.
+v094-11,lire,present,P,1,nous,lisons,Nous lisons un mot.,My čteme slovo.
+v094-12,lire,present,P,1,nous,lisons,Nous lisons une question.,My čteme otázku.
+v094-13,lire,present,P,2,vous,lisez,Vous lisez une réponse.,Vy čtete odpověď.
+v094-14,lire,present,P,2,vous,lisez,Vous lisez une liste.,Vy čtete seznam.
+v094-15,lire,present,P,2,vous,lisez,Vous lisez une recette.,Vy čtete recept.
+v094-16,lire,present,P,3,ils,lisent,Ils lisent le menu.,Oni čtou jídelní lístek.
+v094-17,lire,present,P,3,elles,lisent,Elles lisent un article.,Ony čtou článek.
+v094-18,lire,present,P,3,ils,lisent,Ils lisent un texte court.,Oni čtou krátký text.
+v095-01,changer,present,S,1,je,change,Je change de place.,Já měním místo.
+v095-02,changer,present,S,1,je,change,Je change de travail.,Já měním práci.
+v095-03,changer,present,S,1,je,change,Je change de voiture.,Já měním auto.
+v095-04,changer,present,S,2,tu,changes,Tu changes de train.,Ty měníš vlak.
+v095-05,changer,present,S,2,tu,changes,Tu changes de chambre.,Ty měníš pokoj.
+v095-06,changer,present,S,2,tu,changes,Tu changes de vêtements.,Ty měníš oblečení.
+v095-07,changer,present,S,3,il,change,Il change de chaussures.,On mění boty.
+v095-08,changer,present,S,3,elle,change,Elle change de chemise.,Ona mění košili.
+v095-09,changer,present,S,3,il,change,Il change de téléphone.,On mění telefon.
+v095-10,changer,present,P,1,nous,changeons,Nous changeons la date.,My měníme datum.
+v095-11,changer,present,P,1,nous,changeons,Nous changeons l'heure.,My měníme čas.
+v095-12,changer,present,P,1,nous,changeons,Nous changeons le programme.,My měníme program.
+v095-13,changer,present,P,2,vous,changez,Vous changez la couleur.,Vy měníte barvu.
+v095-14,changer,present,P,2,vous,changez,Vous changez le prix.,Vy měníte cenu.
+v095-15,changer,present,P,2,vous,changez,Vous changez le nom.,Vy měníte jméno.
+v095-16,changer,present,P,3,ils,changent,Ils changent d'avis.,Oni mění názor.
+v095-17,changer,present,P,3,elles,changent,Elles changent de sujet.,Ony mění téma.
+v095-18,changer,present,P,3,ils,changent,Ils changent de direction.,Oni mění směr.
+v096-01,essayer,present,S,1,j',essaie,J'essaie une chemise.,Já zkouším košili.
+v096-02,essayer,present,S,1,j',essaie,J'essaie un pantalon.,Já zkouším kalhoty.
+v096-03,essayer,present,S,1,j',essaie,J'essaie un pull.,Já zkouším svetr.
+v096-04,essayer,present,S,2,tu,essaies,Tu essaies une veste.,Ty zkoušíš bundu.
+v096-05,essayer,present,S,2,tu,essaies,Tu essaies un manteau.,Ty zkoušíš kabát.
+v096-06,essayer,present,S,2,tu,essaies,Tu essaies un chapeau.,Ty zkoušíš klobouk.
+v096-07,essayer,present,S,3,il,essaie,Il essaie des chaussures.,On zkouší boty.
+v096-08,essayer,present,S,3,elle,essaie,Elle essaie des lunettes.,Ona zkouší brýle.
+v096-09,essayer,present,S,3,il,essaie,Il essaie des gants.,On zkouší rukavice.
+v096-10,essayer,present,P,1,nous,essayons,Nous essayons une nouvelle recette.,My zkoušíme nový recept.
+v096-11,essayer,present,P,1,nous,essayons,Nous essayons un nouveau jeu.,My zkoušíme novou hru.
+v096-12,essayer,present,P,1,nous,essayons,Nous essayons un nouveau vélo.,My zkoušíme nové kolo.
+v096-13,essayer,present,P,2,vous,essayez,Vous essayez de lire en français.,Vy zkoušíte číst francouzsky.
+v096-14,essayer,present,P,2,vous,essayez,Vous essayez de parler italien.,Vy zkoušíte mluvit italsky.
+v096-15,essayer,present,P,2,vous,essayez,Vous essayez de chanter.,Vy zkoušíte zpívat.
+v096-16,essayer,present,P,3,ils,essaient,Ils essaient de cuisiner.,Oni zkoušejí vařit.
+v096-17,essayer,present,P,3,elles,essaient,Elles essaient d'ouvrir la boîte.,Ony zkoušejí otevřít krabici.
+v096-18,essayer,present,P,3,ils,essaient,Ils essaient de comprendre.,Oni zkoušejí porozumět.
+v097-01,compter,present,S,1,je,compte,Je compte les enfants.,Já počítám děti.
+v097-02,compter,present,S,1,je,compte,Je compte les élèves.,Já počítám žáky.
+v097-03,compter,present,S,1,je,compte,Je compte les invités.,Já počítám hosty.
+v097-04,compter,present,S,2,tu,comptes,Tu comptes les livres.,Ty počítáš knihy.
+v097-05,compter,present,S,2,tu,comptes,Tu comptes les pages.,Ty počítáš stránky.
+v097-06,compter,present,S,2,tu,comptes,Tu comptes les mots.,Ty počítáš slova.
+v097-07,compter,present,S,3,il,compte,Il compte les pommes.,On počítá jablka.
+v097-08,compter,present,S,3,elle,compte,Elle compte les œufs.,Ona počítá vejce.
+v097-09,compter,present,S,3,il,compte,Il compte les assiettes.,On počítá talíře.
+v097-10,compter,present,P,1,nous,comptons,Nous comptons les chaises.,My počítáme židle.
+v097-11,compter,present,P,1,nous,comptons,Nous comptons les tables.,My počítáme stoly.
+v097-12,compter,present,P,1,nous,comptons,Nous comptons les fenêtres.,My počítáme okna.
+v097-13,compter,present,P,2,vous,comptez,Vous comptez les pièces.,Vy počítáte mince.
+v097-14,compter,present,P,2,vous,comptez,Vous comptez les billets.,Vy počítáte bankovky.
+v097-15,compter,present,P,2,vous,comptez,Vous comptez les points.,Vy počítáte body.
+v097-16,compter,present,P,3,ils,comptent,Ils comptent les jours.,Oni počítají dny.
+v097-17,compter,present,P,3,elles,comptent,Elles comptent les heures.,Ony počítají hodiny.
+v097-18,compter,present,P,3,ils,comptent,Ils comptent les minutes.,Oni počítají minuty.
+v098-01,occuper,present,S,1,j',occupe,J'occupe une chambre.,Já zabírám pokoj.
+v098-02,occuper,present,S,1,j',occupe,J'occupe un appartement.,Já zabírám byt.
+v098-03,occuper,present,S,1,j',occupe,J'occupe une maison.,Já zabírám dům.
+v098-04,occuper,present,S,2,tu,occupes,Tu occupes une place.,Ty zabíráš místo.
+v098-05,occuper,present,S,2,tu,occupes,Tu occupes une chaise.,Ty zabíráš židli.
+v098-06,occuper,present,S,2,tu,occupes,Tu occupes un banc.,Ty zabíráš lavičku.
+v098-07,occuper,present,S,3,il,occupe,Il occupe une table.,On zabírá stůl.
+v098-08,occuper,present,S,3,elle,occupe,Elle occupe un bureau.,Ona zabírá kancelář.
+v098-09,occuper,present,S,3,il,occupe,Il occupe un étage.,On zabírá patro.
+v098-10,occuper,present,P,1,nous,occupons,Nous occupons une chambre.,My zabíráme pokoj.
+v098-11,occuper,present,P,1,nous,occupons,Nous occupons un appartement.,My zabíráme byt.
+v098-12,occuper,present,P,1,nous,occupons,Nous occupons une maison.,My zabíráme dům.
+v098-13,occuper,present,P,2,vous,occupez,Vous occupez une place.,Vy zabíráte místo.
+v098-14,occuper,present,P,2,vous,occupez,Vous occupez une chaise.,Vy zabíráte židli.
+v098-15,occuper,present,P,2,vous,occupez,Vous occupez un banc.,Vy zabíráte lavičku.
+v098-16,occuper,present,P,3,ils,occupent,Ils occupent une table.,Oni zabírají stůl.
+v098-17,occuper,present,P,3,elles,occupent,Elles occupent un bureau.,Ony zabírají kancelář.
+v098-18,occuper,present,P,3,ils,occupent,Ils occupent un étage.,Oni zabírají patro.
+v099-01,expliquer,present,S,1,j',explique,J'explique la règle.,Já vysvětluji pravidlo.
+v099-02,expliquer,present,S,1,j',explique,J'explique le jeu.,Já vysvětluji hru.
+v099-03,expliquer,present,S,1,j',explique,J'explique l'exercice.,Já vysvětluji cvičení.
+v099-04,expliquer,present,S,2,tu,expliques,Tu expliques la leçon.,Ty vysvětluješ lekci.
+v099-05,expliquer,present,S,2,tu,expliques,Tu expliques la question.,Ty vysvětluješ otázku.
+v099-06,expliquer,present,S,2,tu,expliques,Tu expliques la réponse.,Ty vysvětluješ odpověď.
+v099-07,expliquer,present,S,3,il,explique,Il explique ce mot.,On vysvětluje toto slovo.
+v099-08,expliquer,present,S,3,elle,explique,Elle explique cette phrase.,Ona vysvětluje tuto větu.
+v099-09,expliquer,present,S,3,il,explique,Il explique ce texte.,On vysvětluje tento text.
+v099-10,expliquer,present,P,1,nous,expliquons,Nous expliquons le problème.,My vysvětlujeme problém.
+v099-11,expliquer,present,P,1,nous,expliquons,Nous expliquons la solution.,My vysvětlujeme řešení.
+v099-12,expliquer,present,P,1,nous,expliquons,Nous expliquons la situation.,My vysvětlujeme situaci.
+v099-13,expliquer,present,P,2,vous,expliquez,Vous expliquez la recette.,Vy vysvětlujete recept.
+v099-14,expliquer,present,P,2,vous,expliquez,Vous expliquez le programme.,Vy vysvětlujete program.
+v099-15,expliquer,present,P,2,vous,expliquez,Vous expliquez le plan.,Vy vysvětlujete plán.
+v099-16,expliquer,present,P,3,ils,expliquent,Ils expliquent le chemin.,Oni vysvětlují cestu.
+v099-17,expliquer,present,P,3,elles,expliquent,Elles expliquent une idée.,Ony vysvětlují myšlenku.
+v099-18,expliquer,present,P,3,ils,expliquent,Ils expliquent une erreur.,Oni vysvětlují chybu.
+v100-01,frapper,present,S,1,je,frappe,Je frappe à la porte.,Já klepu na dveře.
+v100-02,frapper,present,S,1,je,frappe,Je frappe à la fenêtre.,Já klepu na okno.
+v100-03,frapper,present,S,1,je,frappe,Je frappe sur la table.,Já klepu na stůl.
+v100-04,frapper,present,S,2,tu,frappes,Tu frappes à la porte du bureau.,Ty klepeš na dveře kanceláře.
+v100-05,frapper,present,S,2,tu,frappes,Tu frappes à la porte de la chambre.,Ty klepeš na dveře pokoje.
+v100-06,frapper,present,S,2,tu,frappes,Tu frappes à la porte de la cuisine.,Ty klepeš na dveře kuchyně.
+v100-07,frapper,present,S,3,il,frappe,Il frappe à la porte de Paul.,On klepe na Paulovy dveře.
+v100-08,frapper,present,S,3,elle,frappe,Elle frappe à la porte de Marie.,Ona klepe na Mariiny dveře.
+v100-09,frapper,present,S,3,il,frappe,Il frappe à la porte du voisin.,On klepe na sousedovy dveře.
+v100-10,frapper,present,P,1,nous,frappons,Nous frappons à la porte.,My klepeme na dveře.
+v100-11,frapper,present,P,1,nous,frappons,Nous frappons à la fenêtre.,My klepeme na okno.
+v100-12,frapper,present,P,1,nous,frappons,Nous frappons sur la table.,My klepeme na stůl.
+v100-13,frapper,present,P,2,vous,frappez,Vous frappez à la porte du bureau.,Vy klepete na dveře kanceláře.
+v100-14,frapper,present,P,2,vous,frappez,Vous frappez à la porte de la chambre.,Vy klepete na dveře pokoje.
+v100-15,frapper,present,P,2,vous,frappez,Vous frappez à la porte de la cuisine.,Vy klepete na dveře kuchyně.
+v100-16,frapper,present,P,3,ils,frappent,Ils frappent à la porte de Paul.,Oni klepou na Paulovy dveře.
+v100-17,frapper,present,P,3,elles,frappent,Elles frappent à la porte de Marie.,Ony klepou na Mariiny dveře.
+v100-18,frapper,present,P,3,ils,frappent,Ils frappent à la porte du voisin.,Oni klepou na sousedovy dveře.
