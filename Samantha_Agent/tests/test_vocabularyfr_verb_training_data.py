@@ -19,8 +19,8 @@ class VerbTrainingDataTests(unittest.TestCase):
     def test_training_catalog_and_preserved_library(self):
         training = read_rows("VerbeTraining.csv")
         library = read_rows("VerbeFR.csv")
-        self.assertEqual(len(training), 100)
-        self.assertEqual(len({r["InfFR"] for r in training}), 100)
+        self.assertEqual(len(training), 107)
+        self.assertEqual(len({r["InfFR"] for r in training}), 107)
         self.assertEqual(len(library), 107)
         self.assertEqual(len({r["InfFR"] for r in library}), 107)
         for order, (selected, entry) in enumerate(zip(training, library), 1):
@@ -36,9 +36,9 @@ class VerbTrainingDataTests(unittest.TestCase):
         rows = read_rows("VerbeSentences.csv")
         library = {r["InfFR"]: r for r in read_rows("VerbeFR.csv")}
         selected = {r["InfFR"] for r in read_rows("VerbeTraining.csv")}
-        self.assertEqual(len(rows), 1800)
-        self.assertEqual(len({r["Id"] for r in rows}), 1800)
-        self.assertEqual(len({(r["Sentence"], r["SentenceT"]) for r in rows}), 1800)
+        self.assertEqual(len(rows), 1926)
+        self.assertEqual(len({r["Id"] for r in rows}), 1926)
+        self.assertEqual(len({(r["Sentence"], r["SentenceT"]) for r in rows}), 1926)
         person_map = {
             "je": ("S", "1"), "j'": ("S", "1"), "tu": ("S", "2"),
             "il": ("S", "3"), "elle": ("S", "3"), "nous": ("P", "1"),

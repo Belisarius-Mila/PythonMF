@@ -8,6 +8,10 @@ a = Analysis(
     datas=[
         ('VocabularyFR.csv', '.'),
         ('VerbeFR.csv', '.'),
+        ('VerbeTraining.csv', '.'),
+        ('VerbeSentences.csv', '.'),
+        ('verb_training_pictures.json', '.'),
+        ('training_images', 'training_images'),
         ('FR_Pict.csv', '.'),
         ('../Pict', 'Pict'),
     ],

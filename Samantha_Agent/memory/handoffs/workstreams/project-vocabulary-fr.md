@@ -1,48 +1,50 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-08 09:59 CEST
+- Aktualizováno: 2026-09-08 10:43 CEST
 
 ### Hotovo
-- Převzato 100 dodaných sloves s českými významy a 1 800 nezměněných FR/CZ vět.
-- VerbeTraining.csv určuje tréninkovou stovku; VerbeFR.csv má celkem 107 sloves,
-  protože sedm původních mimo nový seznam zůstalo zachovaných. Původní časování
-  všech časů i výběrové značky jsou zachované; nové významy odpovídají zadání.
-- VerbeSentences.csv má explicitní vazby na sloveso, présent, číslo a osobu.
-  Všech 18 vět falloir je přiřazeno jen k S/3 (il faut).
-- Dosavadní hlavní CSV dál chrání atomický zápis a konfliktní hash. Aplikace
-  používá jeden datový adresář, bez tichého obousměrného kopírování.
+- Desktopový vocab_trainer_fr.py má samostatný Trénink sloves pro přítomný čas.
+- Vybírá všech 107 sloves; 1 926 FR/CZ vět zahrnuje 126 nových vět pro sedm
+  původních sloves (tři na každou osobu). Původních 1 800 vět je byteově zachovaných.
+- Zasunutí seznamu, S/P, osoby 1/2/3, smyčka a interval; řízený poslech,
+  tři věty, velký tvar po písmenech, pauza, zopakování a volitelné vzpomínání.
+- České věty pouze na vyžádání pod obrázkem. Falloir nabízí výhradně il faut.
+- 107 kontextových obrázků: 95 stávajících, 12 nových projektových ilustrací.
+- Místní řeč nové obrazovky: Thomas na Macu, francouzský eSpeak na Linuxu.
+  Chybějící hlas je přiznaný a trénink lze používat bez zvuku.
 
 ### Rozhodnutí
-- Nový screen začne pouze přítomným časem. Smyčka prochází osoby v rámci S/P.
-- České věty budou na vyžádání pod obrázkem, bez automatického čtení.
-- Pauza a zopakování jsou součástí návrhu; Zkus si vzpomenout je přepínatelný režim.
-- Detailní chování a datový kontrakt: VocabularyFR/VERB_TRAINING.md.
+- Míla rozšířil trénink i o sedm původních sloves a požádal o tři věty na osobu.
+- První verze zůstává u présent, S/P smyčky a překladu na vyžádání.
+- Tréninková data jsou přibalený obsah pouze ke čtení; živé uživatelské CSV
+  a jejich jediný datový adresář se nemění. Specifikace: VERB_TRAINING.md.
 
-### Otevřeno
-- Nový screen, zvuková sekvence, obrázky a sestavení aplikace ještě nejsou hotové.
-- Nadále zbývá bezpečné znovunačtení při konfliktu CSV a izolovaný test balíčku.
-
-### Rizika
-- Dosavadní desktopový zvuk používá macOS say; Linux vyžaduje jiné přehrávání.
-- Nová slovesa mají jen dodané přítomné tvary. Jazyková redakce vět neproběhla.
-- Obrázkový audit našel existující neabecední mapping.json už v HEAD před importem.
-- Živá Janina aplikace a soukromé CSV se v tomto kroku neměnily.
+### Otevřeno a rizika
+- Ruční vizuální a poslechový retest na Macu a Linuxu; v této relaci macOS
+  nepovoluje snímání obrazovky. Linuxový přehrávač má ověřený kontrakt,
+  nikoli skutečný poslech na Linux PC.
+- Distribuční build a výměna aplikace u Jany zatím neproběhly.
+- Známé řazení společného mapping.json nadále selhává v jednom širším testu;
+  nový screen používá vlastní výslovné vazby a společný mapping nemění.
+- Starší samostatný dluh bezpečného znovunačtení po konfliktu CSV zůstává otevřený.
 
 ### Další krok
-- Implementovat dohodnutý tréninkový screen nad převzatými daty; nejdřív ověřit
-  jednu kompletní sekvenci aller a neosobní falloir.
+- Míla otevře Trénink sloves a projde aller, falloir a acheter, včetně S/P,
+  smyčky, vzpomínání a českých překladů; po retestu připravit distribuci.
 
 ### Navrhované další kroky
-- Audit dostupných kontextových obrázků a společné přehrávání pro Mac/Linux.
-- Potom izolovaný build a ruční test; rozšíření časů až v další iteraci.
+- Potvrdit vzhled a poslech na Macu i Linuxu.
+- Potom izolovaný distribuční balíček bez zásahu do živých Janiných dat.
+- Předem nahrané kvalitnější audio zůstává možný samostatný navazující krok.
 
 ### Technický důkaz
-- 21/21 cílených testů dat, ukládání a instalátoru prošlo.
-- Přímé porovnání: 100/100 položek a 1 800/1 800 dvojic shodných se zdroji.
-- Všech 50 původních sloves zachovalo časování a M; změněno jen pořadí a dodané významy.
-- Širší obrázková sada: 5/6 prošlo; chyba řazení mapping.json reprodukována v původním HEAD.
-- Nový screen zatím není implementovaný; žádný push ani nasazení v tomto kroku.
+- 31 cílených testů a plná Cockpit brána 1 518/1 518 prošly.
+- Skutečné Tk callbacky: aller, falloir, acheter, vzpomínání, pause/resume
+  mezi osobami a zavření; místní Thomas exit 0.
+- 107/107 obrázků se dekóduje; 12 nových ilustrací vizuálně ověřeno.
+- VerbeFR.csv beze změny; původní prefixy obou tréninkových CSV byteově zachované.
+- Společný obrázkový audit 5/6, selhává dříve doložené řazení mapping.json.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: Vocabulary FR
@@ -147,3 +149,33 @@ Technický důkaz:
 - Všechna původní časování a výběrové značky zachované.
 - Širší obrázkový audit 5/6: existující chyba řazení mapping.json potvrzena i v původním HEAD.
 - UI ani živá data se neměnila; bez push a nasazení.
+
+
+### 2026-09-08 10:43 CEST – Trénink sloves a věty pro sedm původních sloves
+
+Hotovo:
+- Nová obrazovka vede trénink od infinitivu přes tři věty k odhalení tvaru.
+- Všech 107 sloves má obrázek; data obsahují 1 926 vět, z toho 126 nových
+  pro vendre, laisser, rentrer, travailler, boire, payer a acheter.
+- Pauza, opakování, smyčka v rámci S/P, volitelné vzpomínání a české věty
+  na vyžádání pod obrázkem. Falloir zůstává pouze il faut.
+
+Rozhodnutí:
+- Míla schválil pokračování vývoje a zahrnutí sedmi původních sloves do tréninku.
+- Původní dodané věty a knihovna časování zůstaly zachované.
+
+Další krok:
+- Ručně projít nový Trénink sloves na Macu a Linuxu; vizuální retest není
+  v této relaci doložen, protože macOS nepovoluje snímání obrazovky.
+
+Navrhované další kroky:
+- Po retestu připravit izolovanou distribuci.
+- Případně navázat předem nahraným audiem.
+
+Technický důkaz:
+- 31 cílených testů; plná Cockpit brána 1 518/1 518; skutečné Tk callbacky
+  pro aller/falloir/acheter, pauzu, vzpomínání a zavření; Thomas exit 0.
+- 107/107 dekódovaných obrázků, 12 nových ilustrací zkontrolováno.
+- Rizika: Linuxový poslech ještě neověřen, distribuce neprovedena; známý
+  nesouvisející test řazení mapping.json selhává (společný audit 5/6).
+- Push, nasazení Cockpitu a zásah do živých Janiných dat neproběhly.

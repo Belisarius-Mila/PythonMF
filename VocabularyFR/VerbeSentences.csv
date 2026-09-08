@@ -1799,3 +1799,129 @@ v100-15,frapper,present,P,2,vous,frappez,Vous frappez à la porte de la cuisine.
 v100-16,frapper,present,P,3,ils,frappent,Ils frappent à la porte de Paul.,Oni klepou na Paulovy dveře.
 v100-17,frapper,present,P,3,elles,frappent,Elles frappent à la porte de Marie.,Ony klepou na Mariiny dveře.
 v100-18,frapper,present,P,3,ils,frappent,Ils frappent à la porte du voisin.,Oni klepou na sousedovy dveře.
+v101-01,vendre,present,S,1,je,vends,Je vends du pain.,Já prodávám chléb.
+v101-02,vendre,present,S,1,je,vends,Je vends des pommes.,Já prodávám jablka.
+v101-03,vendre,present,S,1,je,vends,Je vends un vélo.,Já prodávám kolo.
+v101-04,vendre,present,S,2,tu,vends,Tu vends du pain.,Ty prodáváš chléb.
+v101-05,vendre,present,S,2,tu,vends,Tu vends des pommes.,Ty prodáváš jablka.
+v101-06,vendre,present,S,2,tu,vends,Tu vends un vélo.,Ty prodáváš kolo.
+v101-07,vendre,present,S,3,il,vend,Il vend du pain.,On prodává chléb.
+v101-08,vendre,present,S,3,il,vend,Il vend des pommes.,On prodává jablka.
+v101-09,vendre,present,S,3,il,vend,Il vend un vélo.,On prodává kolo.
+v101-10,vendre,present,P,1,nous,vendons,Nous vendons du pain.,My prodáváme chléb.
+v101-11,vendre,present,P,1,nous,vendons,Nous vendons des pommes.,My prodáváme jablka.
+v101-12,vendre,present,P,1,nous,vendons,Nous vendons un vélo.,My prodáváme kolo.
+v101-13,vendre,present,P,2,vous,vendez,Vous vendez du pain.,Vy prodáváte chléb.
+v101-14,vendre,present,P,2,vous,vendez,Vous vendez des pommes.,Vy prodáváte jablka.
+v101-15,vendre,present,P,2,vous,vendez,Vous vendez un vélo.,Vy prodáváte kolo.
+v101-16,vendre,present,P,3,ils,vendent,Ils vendent du pain.,Oni prodávají chléb.
+v101-17,vendre,present,P,3,ils,vendent,Ils vendent des pommes.,Oni prodávají jablka.
+v101-18,vendre,present,P,3,ils,vendent,Ils vendent un vélo.,Oni prodávají kolo.
+v102-01,laisser,present,S,1,je,laisse,Je laisse la porte ouverte.,Já nechávám dveře otevřené.
+v102-02,laisser,present,S,1,je,laisse,Je laisse le sac ici.,Já nechávám tašku tady.
+v102-03,laisser,present,S,1,je,laisse,Je laisse le livre sur la table.,Já nechávám knihu na stole.
+v102-04,laisser,present,S,2,tu,laisses,Tu laisses la porte ouverte.,Ty necháváš dveře otevřené.
+v102-05,laisser,present,S,2,tu,laisses,Tu laisses le sac ici.,Ty necháváš tašku tady.
+v102-06,laisser,present,S,2,tu,laisses,Tu laisses le livre sur la table.,Ty necháváš knihu na stole.
+v102-07,laisser,present,S,3,il,laisse,Il laisse la porte ouverte.,On nechává dveře otevřené.
+v102-08,laisser,present,S,3,il,laisse,Il laisse le sac ici.,On nechává tašku tady.
+v102-09,laisser,present,S,3,il,laisse,Il laisse le livre sur la table.,On nechává knihu na stole.
+v102-10,laisser,present,P,1,nous,laissons,Nous laissons la porte ouverte.,My necháváme dveře otevřené.
+v102-11,laisser,present,P,1,nous,laissons,Nous laissons le sac ici.,My necháváme tašku tady.
+v102-12,laisser,present,P,1,nous,laissons,Nous laissons le livre sur la table.,My necháváme knihu na stole.
+v102-13,laisser,present,P,2,vous,laissez,Vous laissez la porte ouverte.,Vy necháváte dveře otevřené.
+v102-14,laisser,present,P,2,vous,laissez,Vous laissez le sac ici.,Vy necháváte tašku tady.
+v102-15,laisser,present,P,2,vous,laissez,Vous laissez le livre sur la table.,Vy necháváte knihu na stole.
+v102-16,laisser,present,P,3,ils,laissent,Ils laissent la porte ouverte.,Oni nechávají dveře otevřené.
+v102-17,laisser,present,P,3,ils,laissent,Ils laissent le sac ici.,Oni nechávají tašku tady.
+v102-18,laisser,present,P,3,ils,laissent,Ils laissent le livre sur la table.,Oni nechávají knihu na stole.
+v103-01,rentrer,present,S,1,je,rentre,Je rentre à la maison.,Já se vracím domů.
+v103-02,rentrer,present,S,1,je,rentre,Je rentre à huit heures.,Já se vracím v osm hodin.
+v103-03,rentrer,present,S,1,je,rentre,Je rentre après le travail.,Já se vracím po práci.
+v103-04,rentrer,present,S,2,tu,rentres,Tu rentres à la maison.,Ty se vracíš domů.
+v103-05,rentrer,present,S,2,tu,rentres,Tu rentres à huit heures.,Ty se vracíš v osm hodin.
+v103-06,rentrer,present,S,2,tu,rentres,Tu rentres après le travail.,Ty se vracíš po práci.
+v103-07,rentrer,present,S,3,il,rentre,Il rentre à la maison.,On se vrací domů.
+v103-08,rentrer,present,S,3,il,rentre,Il rentre à huit heures.,On se vrací v osm hodin.
+v103-09,rentrer,present,S,3,il,rentre,Il rentre après le travail.,On se vrací po práci.
+v103-10,rentrer,present,P,1,nous,rentrons,Nous rentrons à la maison.,My se vracíme domů.
+v103-11,rentrer,present,P,1,nous,rentrons,Nous rentrons à huit heures.,My se vracíme v osm hodin.
+v103-12,rentrer,present,P,1,nous,rentrons,Nous rentrons après le travail.,My se vracíme po práci.
+v103-13,rentrer,present,P,2,vous,rentrez,Vous rentrez à la maison.,Vy se vracíte domů.
+v103-14,rentrer,present,P,2,vous,rentrez,Vous rentrez à huit heures.,Vy se vracíte v osm hodin.
+v103-15,rentrer,present,P,2,vous,rentrez,Vous rentrez après le travail.,Vy se vracíte po práci.
+v103-16,rentrer,present,P,3,ils,rentrent,Ils rentrent à la maison.,Oni se vracejí domů.
+v103-17,rentrer,present,P,3,ils,rentrent,Ils rentrent à huit heures.,Oni se vracejí v osm hodin.
+v103-18,rentrer,present,P,3,ils,rentrent,Ils rentrent après le travail.,Oni se vracejí po práci.
+v104-01,travailler,present,S,1,je,travaille,Je travaille à la maison.,Já pracuji doma.
+v104-02,travailler,present,S,1,je,travaille,Je travaille dans un magasin.,Já pracuji v obchodě.
+v104-03,travailler,present,S,1,je,travaille,Je travaille le matin.,Já pracuji ráno.
+v104-04,travailler,present,S,2,tu,travailles,Tu travailles à la maison.,Ty pracuješ doma.
+v104-05,travailler,present,S,2,tu,travailles,Tu travailles dans un magasin.,Ty pracuješ v obchodě.
+v104-06,travailler,present,S,2,tu,travailles,Tu travailles le matin.,Ty pracuješ ráno.
+v104-07,travailler,present,S,3,il,travaille,Il travaille à la maison.,On pracuje doma.
+v104-08,travailler,present,S,3,il,travaille,Il travaille dans un magasin.,On pracuje v obchodě.
+v104-09,travailler,present,S,3,il,travaille,Il travaille le matin.,On pracuje ráno.
+v104-10,travailler,present,P,1,nous,travaillons,Nous travaillons à la maison.,My pracujeme doma.
+v104-11,travailler,present,P,1,nous,travaillons,Nous travaillons dans un magasin.,My pracujeme v obchodě.
+v104-12,travailler,present,P,1,nous,travaillons,Nous travaillons le matin.,My pracujeme ráno.
+v104-13,travailler,present,P,2,vous,travaillez,Vous travaillez à la maison.,Vy pracujete doma.
+v104-14,travailler,present,P,2,vous,travaillez,Vous travaillez dans un magasin.,Vy pracujete v obchodě.
+v104-15,travailler,present,P,2,vous,travaillez,Vous travaillez le matin.,Vy pracujete ráno.
+v104-16,travailler,present,P,3,ils,travaillent,Ils travaillent à la maison.,Oni pracují doma.
+v104-17,travailler,present,P,3,ils,travaillent,Ils travaillent dans un magasin.,Oni pracují v obchodě.
+v104-18,travailler,present,P,3,ils,travaillent,Ils travaillent le matin.,Oni pracují ráno.
+v105-01,boire,present,S,1,je,bois,Je bois de l’eau.,Já piji vodu.
+v105-02,boire,present,S,1,je,bois,Je bois du thé.,Já piji čaj.
+v105-03,boire,present,S,1,je,bois,Je bois du lait.,Já piji mléko.
+v105-04,boire,present,S,2,tu,bois,Tu bois de l’eau.,Ty piješ vodu.
+v105-05,boire,present,S,2,tu,bois,Tu bois du thé.,Ty piješ čaj.
+v105-06,boire,present,S,2,tu,bois,Tu bois du lait.,Ty piješ mléko.
+v105-07,boire,present,S,3,il,boit,Il boit de l’eau.,On pije vodu.
+v105-08,boire,present,S,3,il,boit,Il boit du thé.,On pije čaj.
+v105-09,boire,present,S,3,il,boit,Il boit du lait.,On pije mléko.
+v105-10,boire,present,P,1,nous,buvons,Nous buvons de l’eau.,My pijeme vodu.
+v105-11,boire,present,P,1,nous,buvons,Nous buvons du thé.,My pijeme čaj.
+v105-12,boire,present,P,1,nous,buvons,Nous buvons du lait.,My pijeme mléko.
+v105-13,boire,present,P,2,vous,buvez,Vous buvez de l’eau.,Vy pijete vodu.
+v105-14,boire,present,P,2,vous,buvez,Vous buvez du thé.,Vy pijete čaj.
+v105-15,boire,present,P,2,vous,buvez,Vous buvez du lait.,Vy pijete mléko.
+v105-16,boire,present,P,3,ils,boivent,Ils boivent de l’eau.,Oni pijí vodu.
+v105-17,boire,present,P,3,ils,boivent,Ils boivent du thé.,Oni pijí čaj.
+v105-18,boire,present,P,3,ils,boivent,Ils boivent du lait.,Oni pijí mléko.
+v106-01,payer,present,S,1,je,paie,Je paie le pain.,Já platím za chléb.
+v106-02,payer,present,S,1,je,paie,Je paie par carte.,Já platím kartou.
+v106-03,payer,present,S,1,je,paie,Je paie le billet.,Já platím za jízdenku.
+v106-04,payer,present,S,2,tu,paies,Tu paies le pain.,Ty platíš za chléb.
+v106-05,payer,present,S,2,tu,paies,Tu paies par carte.,Ty platíš kartou.
+v106-06,payer,present,S,2,tu,paies,Tu paies le billet.,Ty platíš za jízdenku.
+v106-07,payer,present,S,3,il,paie,Il paie le pain.,On platí za chléb.
+v106-08,payer,present,S,3,il,paie,Il paie par carte.,On platí kartou.
+v106-09,payer,present,S,3,il,paie,Il paie le billet.,On platí za jízdenku.
+v106-10,payer,present,P,1,nous,payons,Nous payons le pain.,My platíme za chléb.
+v106-11,payer,present,P,1,nous,payons,Nous payons par carte.,My platíme kartou.
+v106-12,payer,present,P,1,nous,payons,Nous payons le billet.,My platíme za jízdenku.
+v106-13,payer,present,P,2,vous,payez,Vous payez le pain.,Vy platíte za chléb.
+v106-14,payer,present,P,2,vous,payez,Vous payez par carte.,Vy platíte kartou.
+v106-15,payer,present,P,2,vous,payez,Vous payez le billet.,Vy platíte za jízdenku.
+v106-16,payer,present,P,3,ils,paient,Ils paient le pain.,Oni platí za chléb.
+v106-17,payer,present,P,3,ils,paient,Ils paient par carte.,Oni platí kartou.
+v106-18,payer,present,P,3,ils,paient,Ils paient le billet.,Oni platí za jízdenku.
+v107-01,acheter,present,S,1,j',achète,J'achète du pain.,Já kupuji chléb.
+v107-02,acheter,present,S,1,j',achète,J'achète des pommes.,Já kupuji jablka.
+v107-03,acheter,present,S,1,j',achète,J'achète un livre.,Já kupuji knihu.
+v107-04,acheter,present,S,2,tu,achètes,Tu achètes du pain.,Ty kupuješ chléb.
+v107-05,acheter,present,S,2,tu,achètes,Tu achètes des pommes.,Ty kupuješ jablka.
+v107-06,acheter,present,S,2,tu,achètes,Tu achètes un livre.,Ty kupuješ knihu.
+v107-07,acheter,present,S,3,il,achète,Il achète du pain.,On kupuje chléb.
+v107-08,acheter,present,S,3,il,achète,Il achète des pommes.,On kupuje jablka.
+v107-09,acheter,present,S,3,il,achète,Il achète un livre.,On kupuje knihu.
+v107-10,acheter,present,P,1,nous,achetons,Nous achetons du pain.,My kupujeme chléb.
+v107-11,acheter,present,P,1,nous,achetons,Nous achetons des pommes.,My kupujeme jablka.
+v107-12,acheter,present,P,1,nous,achetons,Nous achetons un livre.,My kupujeme knihu.
+v107-13,acheter,present,P,2,vous,achetez,Vous achetez du pain.,Vy kupujete chléb.
+v107-14,acheter,present,P,2,vous,achetez,Vous achetez des pommes.,Vy kupujete jablka.
+v107-15,acheter,present,P,2,vous,achetez,Vous achetez un livre.,Vy kupujete knihu.
+v107-16,acheter,present,P,3,ils,achètent,Ils achètent du pain.,Oni kupují chléb.
+v107-17,acheter,present,P,3,ils,achètent,Ils achètent des pommes.,Oni kupují jablka.
+v107-18,acheter,present,P,3,ils,achètent,Ils achètent un livre.,Oni kupují knihu.

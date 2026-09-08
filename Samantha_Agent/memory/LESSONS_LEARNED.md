@@ -510,3 +510,15 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   forced_login_method, čisté prostředí bez API proměnných a --ignore-user-config.
 - Ověření: PythonSeSamanthou 1.5, testy odmítnutí API bez mutace přihlášení,
   skutečné ChatGPT Codex vysvětlení/doptání i odpověď v Tk okně na Macu.
+
+
+## 2026-09-08 — Přerušitelná zvuková sekvence v Tk
+
+- Typ: opakujici se.
+- Problém: trénink musí čekat na dočtení věty a při změně výběru zabránit
+  starým timerům pokračovat v nové sekvenci.
+- Řešení: jeden vlastněný audio proces, jeden Tk timer a generační identita
+  callbacku; při pauze nebo přepnutí zrušit timer i vlastní proces. Pokračování
+  znovu přehraje přerušenou výpověď. Žádné globální ukončování přehrávačů.
+- Ověření: testy čekání na audio, pauzy, pozdního callbacku, chyby hlasu a
+  skutečný Tk průchod v Tréninku sloves; macOS Thomas dokončil ukázku.

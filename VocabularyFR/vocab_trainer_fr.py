@@ -291,6 +291,7 @@ class VocabularyTrainerApp:
         self.edit_entry = None
         self.gender_popup_menu = None
         self.verbes_window = None
+        self.verb_training_window = None
         self.verbes_tree = None
         self.verbe_rows = []
         self.verbe_csv_path = resolve_verbe_csv_path(self.csv_path)
@@ -307,6 +308,8 @@ class VocabularyTrainerApp:
         self.new_gender_fr_var = tk.StringVar(value="")
 
     def _on_main_window_close(self):
+        if getattr(self, "verb_training_window", None):
+            self.verb_training_window.close()
         try:
             self.stop_turbo()
         except Exception:
@@ -697,6 +700,9 @@ class VocabularyTrainerApp:
 
         controls = tk.Frame(bottom_content, bg="white")
         controls.pack(side="right", anchor="se", padx=(20, 10), pady=(10, 12))
+        tk.Button(controls, text="Trénink sloves", command=self.open_verb_training_window).pack(
+            side="right", padx=(0, 8)
+        )
         tk.Button(controls, text="Verbes", command=self.open_verbes_window, width=10).pack(
             side="right", padx=(0, 8)
         )
@@ -1933,6 +1939,20 @@ class VocabularyTrainerApp:
         tk.Button(buttons_left, text="Training", command=_on_input_window_close).pack(
             side="left", padx=(8, 0)
         )
+
+    def open_verb_training_window(self):
+        if self.verb_training_window and self.verb_training_window.win.winfo_exists():
+            self.verb_training_window.win.lift()
+            return
+        self.stop_turbo()
+        try:
+            from verb_training_screen import VerbTrainingScreen
+            seed = _bundled_seed_path("VerbeTraining.csv")
+            if not seed:
+                raise FileNotFoundError("Chybí VerbeTraining.csv u aplikace.")
+            self.verb_training_window = VerbTrainingScreen(self, os.path.dirname(seed))
+        except (OSError, ValueError, KeyError, csv.Error) as exc:
+            messagebox.showerror("Trénink sloves", f"Tréninková data nelze načíst: {exc}")
 
     def _load_verbe_rows(self):
         if not os.path.exists(self.verbe_csv_path):
