@@ -16,6 +16,16 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
 class CodexSessionReportTests(unittest.TestCase):
+    def test_report_does_not_call_screen_shell_or_code_host_a_codex_session(self):
+        rows = parse_process_rows(
+            "1 0 ttys001 01:00 screen -r samantha_codex\n"
+            "2 0 ttys002 01:00 /bin/zsh scripts/samantha_codex.sh\n"
+            "3 0 ttys003 01:00 /vendor/codex-code-mode-host\n"
+            "4 0 ttys004 01:00 /vendor/codex mcp-server\n"
+            "5 0 ttys005 01:00 /vendor/codex -C /repo\n"
+        )
+        self.assertEqual([s.tty for s in discover_sessions(rows)], ["ttys005"])
+
     def test_parse_etime_supports_days_hours_and_minutes(self) -> None:
         self.assertEqual(parse_etime("2-09:05:05"), 2 * 86400 + 9 * 3600 + 5 * 60 + 5)
         self.assertEqual(parse_etime("01:09:32"), 3600 + 9 * 60 + 32)

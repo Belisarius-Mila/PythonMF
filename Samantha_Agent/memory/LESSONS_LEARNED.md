@@ -536,3 +536,9 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Ověření: aktuální bundle prošel strict podpisem; z místní sdílené kopie
   fungovalo 406 řádků, 107 ilustrací a psaný recall. Data a stará .app nejprve
   zálohované, přenos porovnaný včetně odkazů a SHA-256.
+
+
+### 2026-09-10 – Přehled terminálových relací Codexu
+- Typ: opakující se.
+- Problém: hledání podřetězce `codex` označovalo screen/shell a podpůrné procesy za konverzace; OS cwd skutečného Codexu navíc nemusí odpovídat projektu.
+- Ověřené řešení: rozlišit nativní spustitelný soubor a argumenty služby, ověřit TTY a vlastnictví, projekt odvodit i z `-C` / `--cd`. Před potvrzeným signálem obnovit identitu včetně času startu; předky správce chránit. Prohlížečový test ukončení používal jen vlastní syntetické procesy.

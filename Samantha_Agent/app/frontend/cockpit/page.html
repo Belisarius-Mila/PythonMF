@@ -205,6 +205,7 @@
             <button class="secondary" id="dashboardProjectAuditBtn">Systémový audit</button>
             <button class="secondary" id="dashboardQuickNotesBtn">Rychlé poznámky</button>
             <button class="secondary" id="dashboardRecoveryBtn">Recovery centrum</button>
+            <button class="secondary" id="dashboardSessionsBtn">Běžící relace</button>
             <button class="secondary" id="dashboardCommandCheatsheetBtn">Pamatováček</button>
             <button class="secondary" id="dashboardAutosaveCleanupBtn">Autosave úklid</button>
             <button class="secondary" id="dashboardDiagnosticsBtn">Diagnostika</button>
@@ -212,6 +213,20 @@
             <button class="secondary" id="dashboardSpeakBtn">Přečíst stav</button>
             <button class="secondary" id="dashboardSpeakSelectionBtn">Přečíst výběr</button>
           </div>
+        </div>
+      </section>
+      <section>
+        <h2>Běžící terminálové relace</h2>
+        <div class="body">
+          <details id="codexSessionsPanel">
+            <summary>Codex – přehled a ukončení relace</summary>
+            <p>Běžící proces nemusí právě odpovídat ani být zaseknutý. Před ukončením zkontroluj terminál a čas spuštění.</p>
+            <button class="secondary" id="codexSessionsRefreshBtn" type="button">Obnovit přehled</button>
+            <div id="codexSessionsStatus" class="status-line" aria-live="polite">Přehled se načte po otevření.</div>
+            <div id="codexSessionsList" class="recovery-list"></div>
+            <p class="status-line">Ukončuje se pouze vybraný Codex. Screen, Cockpit a služby Human–Adam zůstávají spuštěné. Rozpracované soubory se nemažou; probíhající odpověď může zůstat nedokončená.</p>
+            <p class="status-line">Pokud startovací guard hlásí rozpracované změny v Gitu, nejprve je ulož. Ukončení relace tuto kontrolu neobchází.</p>
+          </details>
         </div>
       </section>
       <section>

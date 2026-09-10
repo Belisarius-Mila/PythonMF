@@ -1,38 +1,13 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-08-30 21:35 CEST
-
-### Hotovo
-- GitHub fallback důležitých připomenutí je provozně doložený při bdícím i spícím Macu: Issue vznikla při spánku, po probuzení byla právě jednou převzata do Cockpitu a uzavřena.
-- Stejný dvoucestný model je lokálně připravený pro Quick Notes: nejdřív zápis do odděleného soukromého GitHub inboxu, potom přímý Tailscale POST s přesnou korelací `delivery_id`.
-- Aktivní cesta Quick Notes už nepoužívá iCloud. GitHub import zachovává správný zdroj `github_fallback`, konfliktní ID selže zavřeně a Issue se zavře až po lokální účtence.
-- Zdroj zkratky je validovaný pro iOS 27 a podepsaná zástupná varianta bez tokenu je uložená mimo git.
-
-### Otevřeno
-- Soukromý QN repozitář a jeho samostatný fine-grained token ještě nejsou vytvořené ani vložené do ignorovaného `.env` a soukromé zkratky.
-- QN změna není nasazená do běžícího Cockpitu a neproběhl živý bdící ani spánkový QN test.
-- Lokální commity čekají na samostatný denní GitHub balíček.
-
-### Rizika
-- Text QN bude po dobu čekání uložený čitelně v soukromé GitHub Issue; Míla tuto hranici pro technické poznámky výslovně přijal.
-- Po bezpečném GitHub zápisu může přímá Tailscale část při nedostupném Macu čekat na síťový timeout. Nejednoznačné doručení se automaticky neopakuje.
-
-### Další krok
-- Vytvořit soukromý QN inbox a nový token omezený pouze na tento repozitář s `Issues: Read and write`; potom token bez výpisu vložit do ignorovaného `.env` a soukromé podepsané zkratky.
-
-### Rozhodnutí
-- Quick Notes mají pouze dvě cesty: GitHub write-ahead a přímý Tailscale POST. Nepřidává se třetí iCloud cesta.
-- QN používají oddělený repozitář, token a proměnné prostředí; oprávnění existujícího inboxu připomenutí se nerozšiřuje.
-
-### Navrhované další kroky
-- Po samostatně potvrzeném nasazení provést nejprve jeden syntetický bdící QN test a až po přesné korelaci jeden test se spícím Macem.
-
-### Technický stav checkpointu
-- Cílená sada prošla 301/301 a plná Cockpit Quality Gate 1506/1506.
-- Podepsaná zástupná zkratka bez tajemství má 25 724 bajtů a režim `0600`.
-- Poslední serverově potvrzené nasazení zůstává `04e776351a047f95563f2d97ae43fa69544e5c7a`; tento QN checkpoint zatím nasazený není.
-- Tento souhrn nenahrazuje historické chronologické bloky níže.
+- Aktualizováno: 2026-09-10 08:47 CEST
+- Hotovo lokálně: Cockpit má v Servisu přehled běžících terminálových relací a potvrzované ukončení vybraného Codexu. Nereagující proces lze po běžném pokusu ukončit druhým potvrzením.
+- Ověření: plná brána 1540/1540; prohlížečový test zrušení potvrzení, SIGTERM a následného SIGKILL na vlastních syntetických relacích; žádná chyba JavaScriptu.
+- Otevřeno tohoto kroku: commit, push, řízené nasazení a závěrečná kontrola čistých profilů Human–Adam/Knihovna.
+- Riziko: ukončení přeruší odpověď. Samotné stáří není důkaz zaseknutí; změny souborů mohou dál oprávněně blokovat startovací guard.
+- Dřívější otevřený kontext Quick Notes: konfigurace soukromého inboxu/tokenu a bdící/spánkový test nebyly v tomto kroku prověřovány. Historický stav a rozhodnutí zůstávají v chronologii.
+- Další krok: dokončit nasazení a živý důkaz připravenosti; nesouvisející obsah ani relace nemažeme.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: Cockpit / hlavní architektura
@@ -464,3 +439,27 @@ Technický důkaz:
   režim `0600`.
 - Poslední živé nasazení zůstává `04e776351a047f95563f2d97ae43fa69544e5c7a`;
   tento checkpoint zatím nasazený není.
+
+
+### 2026-09-10 08:47 CEST – Přehled a ukončení terminálových relací
+
+Hotovo:
+- Servis obsahuje přehled skutečných terminálových procesů Codexu: TTY, PID, začátek a délka běhu, ochrana a ověřený projekt.
+- Běžné ukončení vyžaduje potvrzení konkrétní identity. Vynucené ukončení je dostupné až po předchozím pokusu a dalším potvrzení.
+- Startovací report už nezaměňuje screen, shell ani podpůrný code-mode proces za samostatnou konverzaci.
+
+Rozhodnutí:
+- Před signálem se znovu ověřuje proces, čas startu, vlastník, spustitelný soubor, projekt a ochrana. Služby a předci správce jsou chránění; plné argumenty procesu se do UI neposílají.
+- Projekt z příkazu `-C` / `--cd` se zohledňuje, protože OS cwd může zůstat domovským adresářem.
+- Ukončuje se pouze zvolený Codex; stáří neznamená zaseknutí. Guard rozpracovaných souborů se neobchází.
+
+Další krok:
+- Commit a uživatelem požadovaný push, řízený restart Cockpitu a živá kontrola Human–Adam.
+
+Navrhované další kroky:
+- Při příštím skutečném zaseknutí použít Servis → Běžící relace a potvrdit konkrétní TTY/PID.
+
+Technický důkaz:
+- Plná Cockpit Quality Gate 1540/1540, cílená sada 45/45, rychlá statická brána a diff kontrola prošly.
+- Edge test přes skutečné HTTP cesty: zrušení potvrzení zachovalo proces, SIGTERM ukončil běžnou testovací relaci a až další potvrzení SIGKILL ukončilo nereagující testovací relaci; 0 JS chyb.
+- Testovací důkazy jsou mimo git v `data/private/codex_sessions_smoke_20260910/`. Reálná aktuální relace a služby zůstaly běžet.

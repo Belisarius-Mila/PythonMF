@@ -12,7 +12,7 @@ FRONTEND_PAGE_IDS = (
     "cockpit",
 )
 FRONTEND_JAVASCRIPT_MODULES = {
-    "cockpit": ("health_recovery_autosave.js",),
+    "cockpit": ("health_recovery_autosave.js", "codex_sessions.js"),
 }
 
 

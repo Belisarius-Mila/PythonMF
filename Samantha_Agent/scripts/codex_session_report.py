@@ -4,6 +4,7 @@ import argparse
 import json
 import os
 import re
+import shlex
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
@@ -183,8 +184,16 @@ def discover_sessions(
     ssh = ssh_ttys(rows)
     grouped: dict[str, list[ProcessRow]] = {}
     for row in rows:
-        folded = row.command.casefold()
-        if "codex" not in folded or "app-server" in folded:
+        try:
+            argv = shlex.split(row.command)
+        except ValueError:
+            continue
+        if not argv:
+            continue
+        command_index = 1 if Path(argv[0]).name == "node" else 0
+        if len(argv) <= command_index or Path(argv[command_index]).name != "codex":
+            continue
+        if {"app-server", "mcp-server", "exec", "review"}.intersection(argv[command_index + 1:]):
             continue
         if not row.tty or row.tty == "??":
             continue
@@ -263,10 +272,21 @@ def main() -> int:
     parser.add_argument("--include-current", action="store_true")
     args = parser.parse_args()
 
+    rows = run_ps()
     current = current_tty()
+    if not current:
+        by_pid = {row.pid: row for row in rows}
+        pid, seen = os.getpid(), set()
+        while pid in by_pid and pid not in seen:
+            seen.add(pid)
+            row = by_pid[pid]
+            if row.tty not in ("", "??", "?", "-"):
+                current = row.tty
+                break
+            pid = row.ppid
     labels = load_labels()
     sessions = discover_sessions(
-        run_ps(),
+        rows,
         current_tty_value=current,
         labels=labels,
         stale_after_hours=args.stale_hours,

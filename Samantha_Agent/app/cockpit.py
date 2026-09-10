@@ -43,6 +43,7 @@ from app.cockpit_awake_mode import (
     cockpit_awake_mode_action,
     cockpit_awake_mode_status_action,
 )
+from app.codex_sessions import CodexSessionController
 from app.cockpit_readonly_routes import (
     HEALTH_RECOVERY_STATUS_GET_PATHS,
     build_health_recovery_status_dispatch,
@@ -8525,6 +8526,13 @@ def open_terminal_command(
     return {"ok": completed.returncode == 0, "message": message, "returncode": completed.returncode}
 
 
+CODEX_SESSIONS = CodexSessionController()
+
+
+def codex_session_stop_action(payload: dict[str, Any]) -> dict[str, Any]:
+    return CODEX_SESSIONS.stop(payload)
+
+
 def open_samantha_chat() -> dict[str, Any]:
     return open_terminal_command("source ~/.zshrc; samantha", "Samantha chat")
 
@@ -8700,6 +8708,14 @@ def shell_quote_for_applescript(value: str) -> str:
 
 
 COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
+    {
+        "path": "/api/codex/sessions/stop",
+        "label": "Ukončit vybranou terminálovou relaci Codexu",
+        "risk": "local_service",
+        "confirmation": "explicit_ui_confirmation_and_fresh_process_identity",
+        "handler_name": "codex_session_stop_action",
+        "test_level": "direct",
+    },
     {
         "path": "/api/scandocu/open",
         "label": "Otevrit ScanDocu",
@@ -9572,6 +9588,10 @@ class CockpitServer:
 
             def do_GET(self) -> None:  # noqa: N802
                 self.validate_request_access(require_origin=False)
+                parsed = urlparse(self.path)
+                if parsed.path == "/api/codex/sessions":
+                    self.respond_json(CODEX_SESSIONS.status())
+                    return
                 if health_recovery_status_dispatch.dispatch(
                     request_target=self.path,
                     respond_json=self.respond_json,
@@ -9884,6 +9904,9 @@ class CockpitServer:
             def do_POST(self) -> None:  # noqa: N802
                 self.validate_request_access(require_origin=True)
                 parsed = urlparse(self.path)
+                if parsed.path == "/api/codex/sessions/stop":
+                    self.respond_json(codex_session_stop_action(self.read_json()))
+                    return
                 if parsed.path == "/api/scandocu/open":
                     payload = self.read_json()
                     self.respond_json(

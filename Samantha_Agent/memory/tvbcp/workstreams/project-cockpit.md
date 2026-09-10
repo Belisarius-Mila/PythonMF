@@ -556,3 +556,27 @@ Technický důkaz:
 - QN testy: cíleně 301/301, plná Cockpit Quality Gate 1506/1506.
 - iOS 27 validace a podpis zástupné zkratky prošly; soubor má 25 724 bajtů a
   režim `0600`.
+
+
+### 2026-09-10 08:47 CEST – Přehled a ukončení terminálových relací
+
+Hotovo:
+- Servis obsahuje přehled skutečných terminálových procesů Codexu: TTY, PID, začátek a délka běhu, ochrana a ověřený projekt.
+- Běžné ukončení vyžaduje potvrzení konkrétní identity. Vynucené ukončení je dostupné až po předchozím pokusu a dalším potvrzení.
+- Startovací report už nezaměňuje screen, shell ani podpůrný code-mode proces za samostatnou konverzaci.
+
+Rozhodnutí:
+- Před signálem se znovu ověřuje proces, čas startu, vlastník, spustitelný soubor, projekt a ochrana. Služby a předci správce jsou chránění; plné argumenty procesu se do UI neposílají.
+- Projekt z příkazu `-C` / `--cd` se zohledňuje, protože OS cwd může zůstat domovským adresářem.
+- Ukončuje se pouze zvolený Codex; stáří neznamená zaseknutí. Guard rozpracovaných souborů se neobchází.
+
+Další krok:
+- Commit a uživatelem požadovaný push, řízený restart Cockpitu a živá kontrola Human–Adam.
+
+Navrhované další kroky:
+- Při příštím skutečném zaseknutí použít Servis → Běžící relace a potvrdit konkrétní TTY/PID.
+
+Technický důkaz:
+- Plná Cockpit Quality Gate 1540/1540, cílená sada 45/45, rychlá statická brána a diff kontrola prošly.
+- Edge test přes skutečné HTTP cesty: zrušení potvrzení zachovalo proces, SIGTERM ukončil běžnou testovací relaci a až další potvrzení SIGKILL ukončilo nereagující testovací relaci; 0 JS chyb.
+- Testovací důkazy jsou mimo git v `data/private/codex_sessions_smoke_20260910/`. Reálná aktuální relace a služby zůstaly běžet.
