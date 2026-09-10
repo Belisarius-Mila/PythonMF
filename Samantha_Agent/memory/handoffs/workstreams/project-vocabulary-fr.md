@@ -1,7 +1,7 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-08 16:47 CEST
+- Aktualizováno: 2026-09-10 08:22 CEST
 
 ### Hotovo
 - Míla potvrdil novou aplikaci i vzpomínání jako funkční.
@@ -25,8 +25,8 @@
 - Balíček x86_64 navazuje na architekturu původní Janiny .app. Bez Git push.
 
 ### Otevřeno a rizika
-- Přenos a běh ověřený v místní sdílené iCloud složce; dokončení synchronizace
-  a spuštění na fyzickém Janině Macu zatím nejsou doložené.
+- Míla 10. 9. potvrdil, že aktualizace u Jany fungovala na první pokus;
+  distribuční retest je splněný.
 - Na sdíleném CSV má pracovat vždy jedna aplikace / zařízení. ZIP obsahuje
   datový snímek; nesmí později nahradit novější Janin slovník.
 - Obrázkový audit pokryl FR Míla 227, FR Jana 406 a IT Míla 463 řádků,
@@ -36,11 +36,10 @@
 - Linuxový poslech dosud neověřený na skutečném Linux PC.
 
 ### Další krok
-- Jana po dokončení iCloudu otevře VocabularyFR.app ve sdíleném PythonMF
-  a potvrdí slovník, nový Trénink sloves a poslech na svém Macu.
+- Distribuční krok je uzavřený. Další změna až podle nového požadavku.
 
 ### Navrhované další kroky
-- Po potvrzení retestu lze tento distribuční krok uzavřít.
+- Nové nasazení teď není potřeba.
 - Samostatně Linux poslech a případné přesnější obrázky nových slovíček.
 
 ### Technický důkaz
@@ -249,3 +248,23 @@ Technický důkaz:
 - Soukromá záloha: vocabularyfr_backups/20260908_162815_jana_upgrade.
 - Soukromá pracovní složka: vocabularyfr_jana_release/20260908_1635;
   TRANSFER_RECEIPT.json uchovává přesné součty a obnovovací umístění.
+
+
+### 2026-09-10 08:22 CEST – Potvrzení Janiny aktualizace
+
+Hotovo:
+- Míla potvrdil, že se aktualizace povedla na první pokus. Retest Janiny
+  samostatné aplikace je splněný a distribuční krok uzavřený.
+
+Rozhodnutí:
+- Bez další změny aplikace nebo dat.
+
+Další krok:
+- Navázat až při novém věcném požadavku.
+
+Navrhované další kroky:
+- Dříve otevřené samostatné náměty (Linux poslech, ilustrace) se tím nemění.
+
+Technický důkaz:
+- Výslovné potvrzení Míly v konverzaci 10. 9. 2026; návaznost na distribuci
+  připravenou 8. 9. z commitu 581eb3db.

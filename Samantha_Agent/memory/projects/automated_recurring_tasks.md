@@ -248,3 +248,31 @@ Další krok:
 
 - Bez okamžité změny. Sledovat příští přirozený plánovaný běh; zasahovat jen
   při chybě audia, Pages deploymentu nebo neočekávané změně `main`.
+
+
+## 2026-09-10 08:23 CEST – Dnešní soví promluva zveřejněná
+
+Hotovo:
+- Na Mílův výslovný pokyn přidán jediný záznam pro 2026-09-10. Text přesně
+  zachovaný bez stylistických oprav; v tomto protokolu se neopakuje.
+- Dnešní owl_100926.mp3 je veřejně dostupná a app.js na ni odkazuje.
+
+Rozhodnutí:
+- Použit kanonický CSV / Pages workflow; lokální audio jen jako ignorovaný
+  náhled. Publikace vyžadovala odeslání pěti navazujících commitů, včetně
+  čtyř dříve dokončených kroků VocabularyFR. Cockpit se nenasazoval.
+
+Další krok:
+- Bez dalšího zásahu; nový text až na další Mílův pokyn.
+
+Navrhované další kroky:
+- Žádné nové.
+
+Technický důkaz:
+- 25 cílených testů, rychlá statická brána a plná brána 1 518/1 518 (318,3 s).
+- Cílový commit 08366489bced8ac9f54c3cee5060942cd604e4ac.
+- Workflow 34444797851 uspělo nad tímto commitem včetně Pages deploymentu.
+- Veřejná MP3: HTTP 200, audio/mp3, 109 440 B; veřejný app.js vybírá
+  owl_100926.mp3?v=20260910a. Lokální náhled má stejnou velikost, nikoli
+  shodný binární hash; produkční soubor vytvořil TTS z téhož commitu v Actions.
+- Podrobná účtenka: data/daily_3am/receipts/20260910_publication.json (mimo Git).
