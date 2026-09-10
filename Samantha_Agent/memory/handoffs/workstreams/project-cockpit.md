@@ -1,13 +1,13 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-10 08:47 CEST
-- Hotovo lokálně: Cockpit má v Servisu přehled běžících terminálových relací a potvrzované ukončení vybraného Codexu. Nereagující proces lze po běžném pokusu ukončit druhým potvrzením.
+- Aktualizováno: 2026-09-10 08:51 CEST
+- Hotovo a živě ověřeno: Cockpit má v Servisu přehled běžících terminálových relací a potvrzované ukončení vybraného Codexu. Nereagující proces lze po běžném pokusu ukončit druhým potvrzením.
 - Ověření: plná brána 1540/1540; prohlížečový test zrušení potvrzení, SIGTERM a následného SIGKILL na vlastních syntetických relacích; žádná chyba JavaScriptu.
-- Otevřeno tohoto kroku: commit, push, řízené nasazení a závěrečná kontrola čistých profilů Human–Adam/Knihovna.
+- Nasazení: funkční commit `6907de35e4ce` byl odeslaný na GitHub a běžící Cockpit jej potvrdil novým PID, shodným otiskem a smoke 5/5. Oba pracovní profily jsou čisté a zarovnané; vývojový semafor je volný.
 - Riziko: ukončení přeruší odpověď. Samotné stáří není důkaz zaseknutí; změny souborů mohou dál oprávněně blokovat startovací guard.
 - Dřívější otevřený kontext Quick Notes: konfigurace soukromého inboxu/tokenu a bdící/spánkový test nebyly v tomto kroku prověřovány. Historický stav a rozhodnutí zůstávají v chronologii.
-- Další krok: dokončit nasazení a živý důkaz připravenosti; nesouvisející obsah ani relace nemažeme.
+- Další krok: pokračovat vývojem Human–Adam. Funkci najde Míla v Servis → Běžící relace; vybraný rozhovor zůstal zachovaný.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: Cockpit / hlavní architektura
@@ -463,3 +463,27 @@ Technický důkaz:
 - Plná Cockpit Quality Gate 1540/1540, cílená sada 45/45, rychlá statická brána a diff kontrola prošly.
 - Edge test přes skutečné HTTP cesty: zrušení potvrzení zachovalo proces, SIGTERM ukončil běžnou testovací relaci a až další potvrzení SIGKILL ukončilo nereagující testovací relaci; 0 JS chyb.
 - Testovací důkazy jsou mimo git v `data/private/codex_sessions_smoke_20260910/`. Reálná aktuální relace a služby zůstaly běžet.
+
+
+### 2026-09-10 08:51 CEST – Živé nasazení a čistý stav pro Human–Adam
+
+Hotovo:
+- Funkční commit `6907de35e4ce` i předchozí připravený commit byly odeslané na GitHub. Přehled relací a tlačítka jsou dostupné v živém Cockpitu.
+- Human–Adam i Knihovna jsou čisté a zarovnané; runtime odpovídá, žádný tah neběží a semafor je volný. Startovací guard povoluje další téma.
+- Původní `attention_required` zmizelo po uložení změn; šlo o průběžný nečistý zdroj, nikoliv zaseknutou relaci. Vybraný Linux rozhovor je zachovaný.
+
+Rozhodnutí:
+- Uklízelo se uložením práce a bezpečným zarovnáním čistých profilů. Žádná reálná terminálová relace ani soukromá data se nemazala; zůstává pouze naše aktuální CLI relace.
+- Tento závěrečný zápis je pouze dokumentace; aplikační kód se od úspěšné plné brány nemění.
+
+Další krok:
+- Po závěrečném uložení tohoto zápisu lze pokračovat vývojem Human–Adam; při problému použít Servis → Běžící relace.
+
+Navrhované další kroky:
+- Dřívější otevřenou konfiguraci Quick Notes řešit samostatně; nebyla součástí této opravy.
+
+Technický důkaz:
+- Plná brána 1540/1540; při nasazení samostatná rychlá brána a serverové smoke 5/5.
+- První ověřený restart: PID 24557 → 63335, otisk `e0541dcc9782856d`; serverová účtenka `state=deployed`, `workstream_id=project-cockpit`.
+- Živé GET potvrdilo panel, jeho HTTP ovládání a jediný CLI proces; žádný cizí proces nebyl ukončován. Soukromý redigovaný důkaz je v `data/private/codex_sessions_smoke_20260910/live_receipt.json`.
+- Obecný health check nemá kritické varování; dříve připomenutá starší záloha se tímto krokem nemění.
