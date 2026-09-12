@@ -1,11 +1,12 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-12 09:40 CEST
-- Hotovo: Scéna 5 má odstraněný horní nadpis, dialog posunutý nahoru a nový obraz loučení všech pěti přátel s Loganem na druhém břehu. Poslední věta To the lake! se přehraje až na novém obrazu.
-- Ověření: 63 MMTX testů, 104 pevných stop, rychlá brána; celý browserový průchod a 5 velikostí obrazovky bez kolize dialogu s tlačítky.
-- Další krok: dokončit řízený push a přesně ověřenou Pages publikaci.
-- Riziko: tento zápis není produkční účtenkou.
+- Aktualizováno: 2026-09-12 09:50 CEST
+- Hotovo: Scéna 5 je veřejně publikovaná: horní nadpis je odstraněný, dialog je výše a To the lake! zazní na novém obrazu loučení všech pěti přátel s Loganem na druhém břehu.
+- Produkce: commit `84c2809fb334`, Pages run `34681649893`, deployment `6407386976`, HTTP 200 a byte-shoda osmi veřejných souborů.
+- Ověření: 63 cílených MMTX testů, 1 554 testů plné brány, 104 pevných stop, celý browserový průchod a 5 velikostí obrazovky bez kolize dialogu s tlačítky.
+- Další krok: Mílův běžný poslech a vizuální kontrola na skutečném iPhonu; další vývoj jen podle konkrétní připomínky.
+- Riziko / mez ověření: automatický průchod simuloval konce audia; veřejné MP3 jsou ověřené obsahem, fyzický poslech na iPhonu proveden nebyl.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: MMTX
@@ -1092,3 +1093,27 @@ Technický důkaz:
 - 63/63 cílených MMTX testů, 104/104 pevných MP3, JavaScript syntaxe a rychlá statická brána prošly.
 - Browserový průchod ověřil 36 kroků, poslední audio na novém obrazu, Repeat v EN/EN+CZ a 16 položek slovníku. Zvukové konce byly při automatickém průchodu simulované; skutečný poslech není vydáván za provedený.
 - Riziko při zápisu: push a veřejná publikace teprve následují; tento vývojový zápis sám nepotvrzuje produkci.
+
+### 2026-09-12 09:50 CEST – Loučení ve scéně 5 je na produkci
+
+Hotovo:
+- Scéna 5 je veřejně publikovaná: horní nadpis je odstraněný, dialog je výše a To the lake! zazní na novém obrazu loučení všech pěti přátel s Loganem na druhém břehu.
+- Řízená operace `mmtx_pages_publish_current_main` dokončila push jednoho funkčního commitu a ověřenou Pages publikaci.
+
+Rozhodnutí:
+- Při užším obrazu jsou ovládací prvky závěru vlevo, aby nezakrývaly loučící se postavy vpravo.
+- Tento následný zápis zachycuje skutečnou publikaci funkčního commitu; sám nemění veřejnou aplikaci.
+
+Další krok:
+- Otevřít veřejnou scénu 5 a běžně poslechnout závěr na skutečném zařízení.
+
+Navrhované další kroky:
+- Případné další úpravy odvodit až z konkrétního Mílova retestu.
+
+Technický důkaz:
+- Commit `84c2809fb334`, workflow `34681649893` completed/success a deployment `6407386976` success mají shodné SHA.
+- Veřejné HTML, oba styly, skript, audio manifest, nový WebP a EN/CZ MP3 poslední věty: 8/8 byte-identických souborů, HTTP 200.
+- Plná brána 1 554/1 554 testů; cílený MMTX balík 63/63; audio kontrola 104/104.
+- Browser: 36 kroků, finální obraz před poslední větou, Repeat EN/EN+CZ, slovník 16 položek, pět rozměrů (1440×1000 až 390×844), bez JS výjimek a kolize dialogu s tlačítky.
+- Obraz: `assets/scene05_friends_farewell_smooth_source.png`; produkční `scene05_friends_farewell_smooth_q90.webp`, 1672×941, 504 810 B, obě kopie shodné. Zadání generátoru: stejné postavy a hladký 3D styl, všech pět přátel na pravém břehu mává Loganovi, Bruno drží zachráněnou lampu, prázdný most a levý břeh, bez textu.
+- Mez ověření: browserový test simuloval události konce audia; fyzický poslech na iPhonu zbývá pro uživatelský retest.

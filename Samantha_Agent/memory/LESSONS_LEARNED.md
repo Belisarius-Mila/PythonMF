@@ -550,3 +550,11 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Typ: opakující se
 - Řešení nalezeno: 2026-09-12 08:31 CEST
 - Řešení: Ověřit vlastního správce screenu a úzce rozpoznat přímého potomka login s přesnými argumenty pro stejného uživatele a ověřeným spustitelným souborem. Ostatní cizí procesy, Codex a služby zůstanou chráněné; před uzavřením znovu ověřit identitu i členství. Prohlížečový test se skutečným testovacím screenem prošel.
+
+
+### 2026-09-12 – Ovládání MMTX musí sledovat skutečnou velikost obrazu
+
+- Typ: opakující se.
+- Problém: scéna s pevným poměrem stran může být kvůli výšce okna výrazně užší než viewport; samotný mobilní media query pak nechá příliš velký dialog a tlačítka zakryjí postavy.
+- Řešení: rozložení odvodit od šířky kontejneru scény, zkrátit dialogovou kartu a v závěrečném obrazu umístit ovládání do volné části. Kontrolovat skutečné obdélníky prvků i screenshot, nejen průchod JavaScriptu.
+- Ověření: scéna 5 prošla celým příběhem a pěti rozměry 1440×1000 až 390×844; dialog se nekříží s tlačítky a všech šest postav závěru je viditelných.
