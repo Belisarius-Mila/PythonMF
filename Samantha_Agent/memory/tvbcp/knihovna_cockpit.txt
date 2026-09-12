@@ -1,7 +1,7 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-12 22:44 CEST; pracovní proud `project-knowledge-library`.
+- Aktualizováno: 2026-09-12 23:09 CEST; pracovní proud `project-knowledge-library`.
 
 ### Hotovo
 - Vývoj je pushnutý a nasazený: funkční commit `2f5cf1f9`, plná brána 1622 testů a smoke 5/5 prošly; Knihovna je připojená, oba profily čisté a zarovnané.
@@ -13,21 +13,22 @@
 ### Rozhodnutí
 - Míla schválil nový rozpočet i c+p+n. U ilustrací se neuchovává druhá velká obrazová kopie.
 - Míla potvrdil přesnou větu globální brzdy pro připravených 22 obrázků; registrovaný převod byl proveden a ověřen.
-- Jednorázová ověřená záloha starých příloh a metadat zůstává mimo aktivní archiv. Míla výslovně nařídil její pozdější smazání; pokyn platí pouze pro backup tohoto převodu, po uživatelské kontrole výsledku. Není to souhlas k mazání jiných záloh a není zaveden časovaný úklid.
+- Míla navazujícím výslovným pokynem nařídil smazání konkrétní zálohy 59,35 MiB. Operace je dokončená; jiné zálohy ani aktivní knihovnu nemění a není zaveden časovaný úklid.
 
 ### Otevřeno a rizika
-- Převod 22 obrázků v 11 kartách je dokončený: 66 původních souborů → 44 kompaktních, 59,117 → 5,962 MiB. Ověřená záloha 59,350 MiB je zachovaná do pozdějšího odstranění; její prostor zatím není uvolněný.
-- Případná obnova ze zálohy nesmí přepsat další uživatelskou práci; používá ověřené otisky a potvrzovanou registrovanou operaci.
+- Převod 22 obrázků v 11 kartách je dokončený: 66 původních souborů → 44 kompaktních, 59,117 → 5,962 MiB. Jednorázová záloha 59,350 MiB byla na výslovný pokyn odstraněna.
+- Návrat k původním velkým obrázkům z této odstraněné zálohy už není dostupný. Kompaktní obrázky i doklady převodu zůstaly zachované.
 - Rozpracovaný přenos nadále vyžaduje otevřenou stránku. Skutečné Safari na iPhonu má být ověřeno při běžném použití.
 
 ### Další krok
-- Míla při běžném použití zkontroluje zmenšené obrázky; potom provést už nařízené odstranění konkrétní jednorázové zálohy a doložit výsledek.
+- Převod i požadované odstranění zálohy jsou uzavřené; pokračovat běžným používáním Knihovny.
 
 ### Navrhované další kroky
 - Automatický úklid nezavádět; žádný další vývoj není pro tento převod potřeba.
 
 ### Technický důkaz
-- Reálný převod: 61 988 739 → 6 251 688 B; největší fotografie s náhledem 310 875 B, všechny v limitu 305 KiB. 299 ostatních souborů beze změny podle SHA-256; mimo plánovaná obrazová pole nezměněná metadata a registr 121/121 konzistentní. Všech 44 JPEGů dekódováno, bez EXIF a v rozměrových limitech; záloha 62 233 053 B ověřena po souborech. Soukromý doklad `post_apply_verification.json` je u plánu odkazovaného přes `latest_prepared.json`.
+- Odstraněna pouze záloha tohoto převodu: 188 souborů / 62 233 053 B; adresář backup neexistuje. Všech 357 současných souborů aktivního archivu a 50 ostatních souborů přípravy/dokladů má shodné SHA-256 před/po. Soukromý doklad: `data/private/library_compact_20260912/backup_cleanup_verified.json`. Jde o odstraněný logický objem souborů, nikoli měření volných bloků APFS.
+- Reálný převod: 61 988 739 → 6 251 688 B; největší fotografie s náhledem 310 875 B, všechny v limitu 305 KiB. 299 ostatních souborů beze změny podle SHA-256; mimo plánovaná obrazová pole nezměněná metadata a registr 121/121 konzistentní. Všech 44 JPEGů dekódováno, bez EXIF a v rozměrových limitech; záloha byla před pozdějším potvrzeným smazáním ověřena po souborech. Soukromý doklad `post_apply_verification.json` je u plánu odkazovaného přes `latest_prepared.json`.
 - Nasazení funkční změny ověřeno 2026-09-12 22:33 CEST; code stamp `f57dfb8454ac938f`, smoke 5/5, přesná serverová stránka/worker a HTTP příprava obou rozpočtů. Navazující commit pouze uchovává tento doklad.
 - 388 cílených testů prošlo; po doplnění konzistence registru a HTTP účelu přípravy prošlo dalších 26 testů. Plná Cockpit brána prošla: 1622 testů bez chyb, unit testy 491,112 s; syntaxe a whitespace OK.
 - Browser na syntetickém archivu: PNG 12 980 174 B, HEIC, dvě karty, retry po ztrátě odpovědi, editor, kniha s obálkou; vše OK, 0 JS chyb. Uložení textu při pozastavené přípravě 0,153 s; každý skutečně uložený snímek má jen dva soubory a nejvýše 305 KiB.
@@ -948,3 +949,26 @@ Technický důkaz:
 - Registrované apply: applied, 22 obrázků, 61 988 739 → 6 251 688 B; největší obrázek včetně náhledu 310 875 B.
 - 299 ostatních souborů má shodný SHA-256, všechna neobrazová pole metadat zachována, registr a metadata 121/121 konzistentní; přesně 66 starých obrazových souborů odstraněno z aktivního archivu.
 - Backup 62 233 053 B ověřen proti původním otiskům. Diskový prostor této zálohy není uvolněný. Účtenka, autorizace a následné ověření jsou pouze v soukromém adresáři plánu přes `data/private/library_photo_compaction/latest_prepared.json`.
+
+
+### 2026-09-12 23:09 CEST – Jednorázová záloha převodu smazaná na výslovný pokyn
+
+Hotovo:
+- Odstraněno přesně 188 záložních souborů / 62 233 053 B (59,350 MiB) a prázdné adresáře této jediné zálohy. Aktivní kompaktní knihovna a doklady převodu zůstaly beze změny.
+- Registrovaná operace `delete_library_photo_compaction_backup` ověřuje dokončený převod, příslušné aktivní karty/obrázky a úplný seznam i otisky záložních souborů; odmítá cizí soubory a symbolické odkazy. Přerušené mazání lze dokončit bezpečným opakováním.
+
+Rozhodnutí:
+- Míla už poskytl globální potvrzovací větu, nařídil pozdější smazání a nyní výslovně zadal smazání právě zálohy 59,35 MiB. Souhlas se nevyžadoval znovu.
+- Změna jiné karty nebo přidání nové karty po převodu není důvod blokovat tento úklid. Kontrolují se převáděné karty a jejich položky v registru; další práce zůstává zachovaná.
+- Z této zálohy již nelze vrátit původní velké obrázky. Samostatné připravené kompaktní JPEGy a účtenky se podle tohoto pokynu nemažou.
+
+Další krok:
+- Žádný další úklid tohoto backupu nezbývá; pokračovat běžným používáním Knihovny.
+
+Navrhované další kroky:
+- Běžné používání Knihovny; bez automatického mazání a bez dalšího vývoje.
+
+Technický důkaz:
+- Následný audit: backup neexistuje, 357 souborů aktivního archivu a 50 ostatních souborů přípravy/dokladů beze změny podle SHA-256. Odstraněný logický objem 62 233 053 B neudává změnu volných bloků APFS.
+- 39 cílených testů prošlo včetně odmítnutí cizích souborů/odkazů, zachování pozdější jiné karty, kontroly převáděných karet a pokračování po přerušení. Plná sada dokončila 1629 testů (441,205 s); 1628 prošlo, jediná chyba byl zastaralý očekávaný počet rizikových registrací 18 místo 19. Upraven pouze tento testový údaj; následný retest všech dotčených modulů prošel: 40 testů / 6,584 s. Produkční kód se po plné sadě nezměnil; plná sada nebyla znovu opakována.
+- Soukromé účtenky: `data/private/library_compact_20260912/backup_cleanup_before.json`, `backup_cleanup_verified.json`; dokončení je i v původním `receipt.json`.

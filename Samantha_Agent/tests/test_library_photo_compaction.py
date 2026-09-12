@@ -215,11 +215,119 @@ class LibraryPhotoCompactionTests(unittest.TestCase):
 
     def test_registered_operations_have_separate_prepare_and_confirmed_apply(self):
         self.assertFalse(get_capability("prepare_library_photo_compaction").requires_confirmation)
-        for name in ("apply_library_photo_compaction", "restore_library_photo_compaction"):
+        for name in ("apply_library_photo_compaction", "restore_library_photo_compaction", "delete_library_photo_compaction_backup"):
             capability = get_capability(name)
             self.assertTrue(capability.requires_confirmation)
             self.assertEqual(str(capability.risk), "destructive")
             self.assertEqual(str(capability.confirmation_policy), "exact_phrase")
+
+    def delete_backup(self, directory):
+        return compact.delete_library_photo_compaction_backup(
+            plan_dir=directory, archive_root=self.root, user_confirmed=True,
+            confirmation_text=compact.COMPACTION_CONFIRMATION)
+
+    def test_backup_deletion_preserves_archive_previews_receipts_and_other_backup(self):
+        directory, _ = self.prepare()
+        applied = self.apply(directory)
+        before = self.snapshot()
+        retained = {p: p.read_bytes() for p in (directory / "prepared").iterdir()}
+        other = self.review / "other-backup"
+        other.mkdir()
+        (other / "keep").write_bytes(b"keep this backup")
+        result = self.delete_backup(directory)
+        self.assertEqual(result["deleted_logical_bytes"], applied["backup_bytes"])
+        self.assertFalse((directory / "backup").exists())
+        self.assertEqual(before, self.snapshot())
+        self.assertTrue(all(p.read_bytes() == raw for p, raw in retained.items()))
+        self.assertEqual((other / "keep").read_bytes(), b"keep this backup")
+        self.assertTrue(self.delete_backup(directory)["replayed"])
+        self.assertFalse(self.apply(directory)["backup_retained"])
+        with self.assertRaisesRegex(ValueError, "obnova není dostupná"):
+            compact.restore_library_photo_compaction(plan_dir=directory, archive_root=self.root,
+                user_confirmed=True, confirmation_text=compact.COMPACTION_CONFIRMATION)
+
+    def test_backup_deletion_rejects_missing_confirmation_and_unapplied_plan(self):
+        directory, _ = self.prepare()
+        with self.assertRaises(ValueError):
+            self.delete_backup(directory)
+        self.apply(directory)
+        for confirmed, phrase in ((False, compact.COMPACTION_CONFIRMATION), (True, "ano")):
+            with self.assertRaises(ValueError):
+                compact.delete_library_photo_compaction_backup(plan_dir=directory, archive_root=self.root,
+                    user_confirmed=confirmed, confirmation_text=phrase)
+        self.assertTrue((directory / "backup").is_dir())
+
+    def test_backup_deletion_rejects_changed_archive_before_any_deletion(self):
+        directory, _ = self.prepare()
+        self.apply(directory)
+        self.metadata_path.write_bytes(self.metadata_path.read_bytes() + b" ")
+        backup = {p: p.read_bytes() for p in (directory / "backup").rglob("*") if p.is_file()}
+        with self.assertRaisesRegex(ValueError, "Knihovna se"):
+            self.delete_backup(directory)
+        self.assertTrue(all(p.read_bytes() == raw for p, raw in backup.items()))
+
+    def test_backup_deletion_preserves_later_unrelated_card(self):
+        directory, _ = self.prepare()
+        self.apply(directory)
+        archive.archive_text_entry(title="Later unrelated card", text="Keep later work", archive_root=self.root)
+        before = self.snapshot()
+        self.assertTrue(self.delete_backup(directory)["ok"])
+        self.assertEqual(before, self.snapshot())
+
+    def test_backup_deletion_rejects_drift_in_converted_card_registry(self):
+        directory, _ = self.prepare()
+        self.apply(directory)
+        registry = self.root / "registry.jsonl"
+        row = json.loads(registry.read_text())
+        row["title"] = "Registry-only change"
+        registry.write_text(json.dumps(row) + "\n")
+        with self.assertRaisesRegex(ValueError, "Registr převedených"):
+            self.delete_backup(directory)
+        self.assertTrue((directory / "backup").is_dir())
+
+    def test_backup_deletion_rejects_unexpected_modified_and_symlinked_files(self):
+        directory, _ = self.prepare()
+        self.apply(directory)
+        backup = directory / "backup"
+        registry = backup / "registry.jsonl"
+        raw = registry.read_bytes()
+        extra = backup / "unrelated"
+        extra.write_bytes(b"do not delete")
+        with self.assertRaisesRegex(ValueError, "nečekaný"):
+            self.delete_backup(directory)
+        extra.unlink()
+        registry.write_bytes(b"changed")
+        with self.assertRaisesRegex(ValueError, "nesouhlasí"):
+            self.delete_backup(directory)
+        registry.unlink()
+        registry.symlink_to(self.root / "registry.jsonl")
+        with self.assertRaisesRegex(ValueError, "nečekaný"):
+            self.delete_backup(directory)
+        registry.unlink()
+        registry.write_bytes(raw)
+        backup.rename(directory / "original-backup")
+        backup.symlink_to(directory / "original-backup", target_is_directory=True)
+        with self.assertRaisesRegex(ValueError, "symbolický"):
+            self.delete_backup(directory)
+        self.assertEqual((directory / "original-backup" / "registry.jsonl").read_bytes(), raw)
+
+    def test_backup_deletion_resumes_after_interrupted_file_removal(self):
+        directory, _ = self.prepare()
+        self.apply(directory)
+        before = self.snapshot()
+        original = Path.unlink
+        count = 0
+        def interrupt(path, *args, **kwargs):
+            nonlocal count
+            if directory / "backup" in path.parents:
+                count += 1
+                if count == 2:
+                    raise OSError("synthetic interruption")
+            return original(path, *args, **kwargs)
+        with patch.object(Path, "unlink", interrupt), self.assertRaises(OSError):
+            self.delete_backup(directory)
+        self.assertEqual(self.delete_backup(directory)["state"], "backup_deleted")
+        self.assertEqual(before, self.snapshot())
 
 
 if __name__ == "__main__":

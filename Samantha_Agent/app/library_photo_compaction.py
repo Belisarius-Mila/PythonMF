@@ -239,6 +239,8 @@ def restore_library_photo_compaction(
     directory, root, plan = _load_plan(plan_dir, archive_root)
     with exclusive_file_lock(root / ".archive-write", timeout=30):
         receipt = _json(directory / "receipt.json")
+        if receipt.get("backup_cleanup_started"):
+            raise ValueError("Záloha byla odstraněna nebo její odstranění začalo; obnova není dostupná.")
         if receipt.get("state") not in {"applied", "applying"}:
             raise ValueError("Účtenka neobsahuje zmenšení k obnově.")
         interrupted = receipt["state"] == "applying"
@@ -283,3 +285,61 @@ def restore_library_photo_compaction(
         _restore_backup(directory, root, plan)
         atomic_write_json(directory / "receipt.json", {"state": "restored", "backup_retained": True})
         return {"ok": True, "state": "restored", "image_count": len(plan["items"])}
+
+
+def delete_library_photo_compaction_backup(
+    *, plan_dir: Path, archive_root: Path = DEFAULT_ARCHIVE_ROOT,
+    user_confirmed: bool = False, confirmation_text: str = "",
+) -> dict[str, Any]:
+    """Delete only a verified migration backup; retain the archive and receipts."""
+    _confirmed(user_confirmed, confirmation_text)
+    directory, root, plan = _load_plan(plan_dir, archive_root)
+    with exclusive_file_lock(root / ".archive-write", timeout=30):
+        receipt_path = directory / "receipt.json"
+        if not receipt_path.is_file():
+            raise ValueError("Zálohu lze odstranit jen po dokončeném převodu.")
+        receipt = _json(receipt_path)
+        backup = directory / "backup"
+        if backup.is_symlink():
+            raise ValueError("Záloha nesmí být symbolický odkaz.")
+        if receipt.get("state") != "applied":
+            raise ValueError("Zálohu lze odstranit jen po dokončeném převodu.")
+        if receipt.get("backup_deleted_at"):
+            if backup.exists():
+                raise ValueError("Po odstranění vznikla jiná záloha; nic nemažu.")
+            return {**receipt["backup_cleanup"], "replayed": True}
+        # Refuse cleanup if the converted archive no longer matches its receipt.
+        expected_active = dict(receipt["written_metadata"])
+        expected_active.update({p["target"]: p["sha256"] for i in plan["items"] for p in i["prepared"]})
+        if any(_sha(_path(root, name).read_bytes()) != digest for name, digest in expected_active.items()):
+            raise ValueError("Knihovna se po převodu změnila; záloha zůstává zachovaná.")
+        rows = [_json(_path(root, name)) for name in receipt["written_metadata"]]
+        registry = [json.loads(line) for line in (root / "registry.jsonl").read_text().splitlines() if line.strip()]
+        if any([row for row in registry if row.get("id") == metadata["id"]] != [metadata] for metadata in rows):
+            raise ValueError("Registr převedených karet nesouhlasí; záloha zůstává zachovaná.")
+        expected = set(plan["sources"])
+        directories = {str(parent) for name in expected for parent in Path(name).parents if str(parent) != "."}
+        entries = list(backup.rglob("*")) if backup.exists() else []
+        if any(p.is_symlink() or (str(p.relative_to(backup)) not in (directories if p.is_dir() else expected)) for p in entries):
+            raise ValueError("Záloha obsahuje nečekaný soubor nebo odkaz; nic nemažu.")
+        files = {str(p.relative_to(backup)): p for p in entries if p.is_file()}
+        if not receipt.get("backup_cleanup_started") and set(files) != expected:
+            raise ValueError("Záloha není úplná; nic nemažu.")
+        if any(_sha(p.read_bytes()) != plan["sources"][name]["sha256"] for name, p in files.items()):
+            raise ValueError("Obsah zálohy nesouhlasí s plánem; nic nemažu.")
+        receipt["backup_cleanup_started"] = True
+        atomic_write_json(receipt_path, receipt)
+        for name, path in sorted(files.items()):
+            if path.is_symlink() or _sha(path.read_bytes()) != plan["sources"][name]["sha256"]:
+                raise ValueError("Záloha se při odstraňování změnila; úklid zastaven.")
+            path.unlink()
+        for path in sorted((p for p in entries if p.is_dir()), key=lambda p: len(p.parts), reverse=True):
+            path.rmdir()
+        if backup.exists():
+            backup.rmdir()
+        result = {"ok": True, "state": "backup_deleted", "archive_writes": False,
+                  "deleted_file_count": len(expected), "deleted_logical_bytes": sum(s["bytes"] for s in plan["sources"].values()),
+                  "backup_retained": False, "restore_available": False}
+        receipt.update(backup_retained=False, backup_deleted_at=datetime.now(timezone.utc).isoformat(), backup_cleanup=result)
+        atomic_write_json(receipt_path, receipt)
+        return result

@@ -299,3 +299,17 @@ její pozdější smazání; provést pouze pro backup tohoto převodu po jeho k
 výsledku, bez mazání jiných záloh a bez zavádění automatického úklidu.
 Soukromé účtenky a autorizace jsou u plánu přes `latest_prepared.json`;
 aktuální další krok je také v kanonickém handoffu a TVBCP.
+
+
+## Dokončené odstranění zálohy 2026-09-12 23:09 CEST
+
+Na navazující výslovný pokyn byla odstraněna pouze jednorázová záloha převodu:
+188 souborů / 62 233 053 B. Kontrolní součty potvrdily zachování všech 357
+současných souborů aktivní knihovny a 50 ostatních souborů přípravy/dokladů.
+Původní velké obrázky už z tohoto backupu obnovit nelze; kompaktní archiv zůstává.
+Registrovaný `delete_library_photo_compaction_backup` v `app/library_photo_compaction.py`
+vyžaduje potvrzení, kontroluje přesný plán a otisky, odmítá nečekané soubory a
+symlinky, uchovává účtenku a dovoluje bezpečně dokončit přerušené mazání.
+Kontrola registru se vztahuje na převáděné karty, aby následné změny jiných karet
+neblokovaly úklid. Automatický úklid není zaveden. Důkazy a aktuální stav patří
+do kanonického handoffu a TVBCP.
