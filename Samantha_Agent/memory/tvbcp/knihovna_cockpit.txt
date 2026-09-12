@@ -4,6 +4,7 @@
 - Aktualizováno: 2026-09-12 21:35 CEST; pracovní proud `project-knowledge-library`.
 
 ### Hotovo
+- Funkční commit `832c3360` je na GitHubu a nasazený; ověřen nový proces, smoke 5/5, přesná serverová stránka i worker a HTTP převod. Živá Knihovna je připojená, oba profily čisté a zarovnané.
 - Fotografie se připravují hned po výběru, běžně v samostatném browserovém workeru, na JPEG nejvýše 1 MiB. HEIC/HEIF nebo nepodporovaný prohlížeč využije lokální převod na Macu.
 - Textová/URL karta i nová kniha se ukládají bez čekání na fotografie; více příloh se potom připojí ke konkrétní uložené kartě. Chybu lze opakovat jednotlivě nebo připojování ukončit.
 - Obnovený přenos nevytvoří duplicitní přílohu; souběžná editace zachová fotografie i rozepsaný editor.
@@ -18,12 +19,13 @@
 - Browserový test použil syntetická data v Edge včetně mobilního rozložení. Skutečné Safari na iPhonu a čitelnost Mílových fotografií se mají ověřit při prvním běžném použití.
 
 ### Další krok
-- Dokončit commit, push a řízené nasazení; potom obnovit Cockpit na iPhonu a vložit jednu běžnou fotografii.
+- Obnovit Cockpit na iPhonu a vložit jednu běžnou fotografii; před zavřením počkat na stav Připojeno.
 
 ### Navrhované další kroky
 - Až podle reálné zkušenosti případně upravit kompresi; další mechanismus přenosu zatím nezavádět.
 
 ### Technický důkaz
+- Nasazení 2026-09-12 21:40 CEST; `verified_current`, code stamp `e1e1b0f2b9e7e865`. Následující commit uchovává pouze tento doklad dokončení.
 - 363 cílených testů prošlo; po poslední úpravě ukončení fronty prošlo dalších 20 cílených testů. Plná Cockpit brána prošla: 1607 testů, bez chyb (330,648 s unit testů); syntaxe a whitespace OK.
 - Browser: PNG 12 980 174 B, HEIC, dvě nezávislé karty, přerušená odpověď po skutečném uložení, souběžná editace, rozbitý obrázek, nová kniha s obálkou na pozadí; vše OK, 0 JS chyb. Text uložen při pozastavené přípravě za 0,162 s.
 - Soukromý technický doklad: `data/private/library_photos_20260912/latest_receipt.json`. Testy nevkládaly data do skutečné knihovny.
@@ -848,3 +850,26 @@ Technický důkaz:
 - 363 cílených testů + 20 po poslední úpravě prošlo. Plná Cockpit brána prošla: 1607 testů, bez chyb (330,648 s unit testů); syntaxe a whitespace OK.
 - Browserové ověření syntetických dat: velké PNG a HEIC, uložení textu při pozastaveném workeru 0,162 s, správné cíle dvou karet, retry po ztrátě odpovědi bez duplicit, zachovaný editor, nová kniha s obálkou, chybná fotka neblokuje text, desktop/mobilní viditelnost polí; 0 JS chyb.
 - Rizika: čekající fronta se neobnovuje po zavření stránky; skutečný iPhone ještě nebyl otestován. Soukromý archiv ani originály na zařízení se testem neměnily.
+
+
+### 2026-09-12 21:42 CEST – Dokončené c+p+n a ověřený provoz fotografií
+
+Hotovo:
+- Funkční commit `832c3360` je na GitHubu a nasazený v Cockpitu. Fotografie se připravují na pozadí a knižní pole se zobrazují pouze u knih.
+- Knihovna je připojená, oba profilové workspaces jsou čisté a zarovnané; živý audit potvrdil `current` / `verified_current`.
+
+Rozhodnutí:
+- Schválené c+p+n je dokončené; tento navazující záznam pouze uchovává doklad nasazení.
+
+Další krok:
+- Na iPhonu obnovit Cockpit, vybrat fotografii a během přípravy pokračovat v psaní. Před zavřením počkat na stav Připojeno.
+
+Navrhované další kroky:
+- Při prvním běžném použití posoudit čitelnost vlastní fotografie; skutečné Safari na iPhonu zůstává uživatelským retestem.
+
+Technický důkaz:
+- Plná brána: 1607 testů bez chyb, unit testy 330,648 s; kontrola syntaxe a whitespace OK. Browserové syntetické scénáře prošly bez JS chyb.
+- Řízené nasazení: 2026-09-12 21:40 CEST, funkční commit `832c33609f02`, nový proces a code stamp `e1e1b0f2b9e7e865`, rychlá nasazovací brána 18,2 s, smoke 5/5.
+- Serverová stránka i worker přesně odpovídají zdroji, syntetický PNG byl přes HTTP úspěšně převeden na JPEG bez zápisu do archivu.
+- Soukromé technické doklady: `data/private/library_photos_20260912/`; žádné skutečné fotografie ani texty knihovny nebyly použity jako testovací data.
+- Riziko zůstává pouze praktické: čekající přenos vyžaduje otevřenou stránku, fronta se neobnovuje po zavření.
