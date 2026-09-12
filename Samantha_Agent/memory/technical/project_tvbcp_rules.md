@@ -3,6 +3,13 @@
 TVBCP je průběžný human–machine rozhodovací dokument většího projektu nebo
 ucelené vývojové úlohy. Drží zhuštěné pracovní vlákno po celou dobu vývoje.
 
+Tento dokument je kanonický návod pro TVBCP a povinný projektový zápis.
+Načti jej při zakládání, aktualizaci nebo uzavírání TVBCP a při dokončování
+vývojového kroku; ve stejném úkolu použij již načtená nezměněná pravidla.
+Ruční handoff, jeho šablonu, prioritu a připomenutí řeší sekce
+`Ruční handoff a předání práce` v `session_recovery_rules.md`.
+Samotný požadavek na handoff nepovoluje založení nového TVBCP.
+
 ## Kdy TVBCP založit
 
 - Pouze po výslovné dohodě Míly a Adama.
@@ -70,6 +77,11 @@ opakování a textovou omáčku.
 Tyto vrstvy se navzájem nenahrazují.
 
 ## Synchronizace při automatickém checkpointu
+
+Následující povinnost projektového zápisu nerozšiřuje aktuální
+`DEVELOPMENT_CONTROL` ani právo modelu provést checkpoint, commit, push nebo
+nasazení. V Cockpitu se použijí jeho určené ovládací mechanismy; automatický
+lokální commit terminálového Adama se na izolovaný modelový tah nevztahuje.
 
 - Každé dokončení nebo oprava vývoje prováděného přes Human–Adam musí ve stejném
   tematickém kroku aktualizovat kanonický handoff i TVBCP právě příslušného

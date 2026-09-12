@@ -3,6 +3,10 @@
 Tento soubor popisuje, jak navazovat po vypadku spojeni, aby Mila neztratil kontext
 prace se Samantha Agent.
 
+Načítej část odpovídající situaci: start nové relace, obnova SSH/Codexu,
+dlouhá práce, autosave nebo ruční handoff. Běžné pokračování stejného úkolu
+nevyžaduje opakované čtení celého návodu ani opakování startovací diagnostiky.
+
 ## Dve vrstvy navazani
 
 1. `screen` chrani bezici terminalovou relaci pri vypadku SSH z iPhonu nebo jineho
@@ -54,12 +58,12 @@ Skript:
   `scripts/codex_session_report.py`, vcetne aktualniho TTY, stari
   relaci a kandidatu na rucni ukonceni,
 - spusti Codex v `~/Desktop/PythonMF/Samantha_Agent`,
-- spusti automaticky autosave posledni Codex session kazdych 10 minut do
-  `data/session_autosave/`,
+- spusti autosave do `data/session_autosave/`: poslední záznam obnovuje
+  standardně každých 10 minut, historické kopie vytváří nejvýše jednou za hodinu,
 - pred pripojenim ke `screen` relaci spusti lehky `scripts/network_preflight.sh`,
 - diky tomu ma Codex nacist `AGENTS.md` a `memory/MEMORY_INDEX.md`.
 
-Pri startu nebo navazani ma Codex/Samantha take zkontrolovat stav recovery zalohy:
+Při skutečném startu nové relace zkontroluj stav recovery zálohy:
 
 ```bash
 .venv/bin/python scripts/backup_status.py
@@ -69,6 +73,13 @@ Pokud vystup hlasi, ze posledni uspesna zaloha chybi nebo je starsi nez 3 dny,
 ma to byt receno v prvni odpovedi kazdy den, dokud nova uspesna zaloha neaktualizuje
 `data/backup/activity_state.json`. Pripominka sama nic nekopiruje, nemaze ani
 necte tajemstvi.
+
+Při pouhém pokračování stejné relace neopakuj startovací diagnostiku bez
+známek problému; denní upozornění na starou nebo chybějící zálohu zůstává.
+Při startu Codex CLI podle možnosti spusť nebo otevři Cockpit přes
+`scripts/start_cockpit.sh`. Pokud už běží na `http://127.0.0.1:8770`, otevři
+existující adresu a neukončuj běžící relaci. Stav autosave ověř přes
+`.venv/bin/python scripts/autosave_status.py`; samotná kontrola nic neuklízí.
 
 Preflight je diagnosticky: ve vychozim rezimu nic nevypina, jen vypise stav
 VPN/Tailscale procesu, `utun` rozhrani, IP adresu a ping test. Pro pokus o
@@ -278,11 +289,16 @@ Pri spusteni pres `samantha` bezi na pozadi:
 scripts/autosave_codex_session.sh --watch
 ```
 
-Interval je vychozi 600 sekund. Zmenit se da promennou:
+Interval obnovy `latest_session.jsonl` a `latest_session.txt` je výchozí
+600 sekund. Změnit se dá proměnnou:
 
 ```bash
 SAMANTHA_AUTOSAVE_SECONDS=300 samantha
 ```
+
+Historické soubory `session_YYYYMMDD_HHMMSS.jsonl/txt` mají samostatný interval
+`SAMANTHA_AUTOSAVE_HISTORY_SECONDS`, standardně 3600 sekund. Retence níže
+se vztahuje na tyto historické dvojice, nikoli na každý desetiminutový zápis.
 
 Autosave uklada technicke kopie posledniho Codex session logu a citelny textovy
 snapshot do:
@@ -335,83 +351,58 @@ Pokud Mila zada uklid autosave obecne, nejdrive spustit dry-run a ukazat pocet
 souboru a odhad uvolneneho mista. Ostry `--apply` spustit az po jasnem souhlasu,
 protoze jde o mazani lokalnich nouzovych logu.
 
-## Povinnost pri dulezite praci
+## Ruční handoff a předání práce
 
-Po dulezitem ukolu nebo pred ukoncenim dlouhe prace ulozit kratky handoff do:
+Tato sekce je kanonický postup a šablona pro `ulož handoff`, `ulož rozpracováno`,
+`přeruš práci`, `ulož to jako prioritu 1`, `ulož handoff a připomeň mi to` i
+obdobný pokyn. Po důležitém úkolu nebo před ukončením dlouhé práce také zachovej
+obnovitelný projektový stav. Povinnou dvojici handoff + TVBCP při vývoji řídí
+`project_tvbcp_rules.md`; ruční handoff ji nenahrazuje a nepovoluje nový TVBCP.
 
-```text
-memory/handoffs/
-```
+1. Z aktuálního kontextu a relevantních podkladů sestav stručný stav.
+2. Najdi vazbu projektu/pracovního proudu v registru a jeho existující
+   kanonický handoff. Aktualizuj jej; nezakládej paralelní aktuální handoff.
+   Pokud vhodný handoff neexistuje a vazba není sporná, vytvoř soubor v
+   `memory/handoffs/` pojmenovaný podle tématu a data, např.
+   `email_prace_rozdelano_2026_09_12.md`, a zaregistruj jej. Chybějící či
+   nejednoznačnou vazbu v Human–Adam vyřeš nebo viditelně označ jako blokátor.
+3. Použij prioritu `1`, `2` nebo `3` z pokynu či platného projektového kontextu.
+   Pokud téma, priorita, stav nebo další krok zůstávají nejasné, zeptej se jen
+   na chybějící údaje, nejvýše třemi krátkými otázkami. Prioritu bez podkladu
+   nevymýšlej. Slovní priority ze starších handoffů zpětně nepřepisuj; nové
+   zápisy používají výhradně číselné hodnoty.
+4. Při požadavku na brzký návrat nastav `Pripomenout pri startu: ano`.
+5. Aktualizuj příslušný řádek `memory/ACTIVE_PROJECTS.md`: oblast, prioritu,
+   stav, memory soubor, handoff a další praktický krok. Případný TVBCP
+   propojuj podle `project_tvbcp_rules.md`.
+6. V `memory/MEMORY_INDEX.md` zajisti dohledatelnost nového či změněného odkazu
+   a požadované připomenutí. Existující platný odkaz není nutné znovu přepisovat.
+   Pro připomenutí přidej do popisu `[PRIPOMENOUT]` a krátké téma.
+7. Při navazování připomeň relevantní označené položky; při dotazu na další
+   práci zohledni připomenutí z indexu. Historické zápisy zachovej.
 
-Staci napsat kratky prikaz:
-
-```text
-uloz handoff
-```
-
-nebo napr.:
-
-```text
-uloz to jako prioritu 1 a pripomen mi to
-```
-
-Codex ma podle pravidel v `AGENTS.md` vytvorit handoff z aktualniho kontextu,
-zeptat se jen na nejasne udaje a aktualizovat `ACTIVE_PROJECTS.md`.
-
-Aktualizovat take registr aktivnich projektu:
-
-```text
-memory/ACTIVE_PROJECTS.md
-```
-
-V registru upravit prioritu, stav, odkaz na memory soubor, odkaz na pripadny
-handoff a dalsi prakticky krok.
-
-a pridat odkaz do:
-
-```text
-memory/MEMORY_INDEX.md
-```
-
-Handoff ma obsahovat:
-
-- dobry nazev, ze ktereho je poznat projekt i stav,
-- metadata `Priorita`, `Pripomenout pri startu` a `Stav`,
-- co se resilo,
-- jaky je aktualni stav,
-- jake soubory byly zmeneny,
-- co je dalsi prakticky krok,
-- co se nesmi zapsat do pameti nebo gitu.
-- navrhovane dalsi kroky, pokud je projekt hotovy nebo pozastaveny a je uzitecne
-  oddelit povinny dalsi krok od volitelnych zlepseni.
-
-Doporuceny zacatek handoffu:
+Minimální struktura (při aktualizaci existujícího handoffu zachovej jeho
+kompatibilní strukturu a doplň odpovídající údaje):
 
 ```text
-Nazev: Emailova komunikace - projekt rozdelany k dokonceni
-Priorita: dulezite
-Pripomenout pri startu: ano
-Stav: rozdelane
-Datum: YYYY-MM-DD
+Nazev:
+Priorita: 1|2|3
+Stav: rozpracovane|ceka na rozhodnuti|ceka na retest|hotovo
+Pripomenout pri startu: ano|ne
+Datum:
+
+Co se resilo:
+Co je hotove:
+Co neni hotove:
+Dalsi krok:
+Navrhovane dalsi kroky:
+Zmenene nebo relevantni soubory:
+Bezpecnost / neukladat:
 ```
 
-Hodnoty `Priorita` pouzivat stridme:
-
-- `kriticke` - je potreba pripomenout hned pri dalsim startu, hrozi ztrata navaznosti.
-- `dulezite` - rozdelany projekt nebo ukol, ktery ma byt videt v dalsim navazani.
-- `normalni` - bezny handoff pro dohledani.
-- `archiv` - hotovo, jen historicky zaznam.
-
-Pokud je `Pripomenout pri startu: ano`, pridat i jasnou vetu do popisu v
-`memory/MEMORY_INDEX.md`, napriklad:
-
-```text
-[PRIPOMENOUT] emailova komunikace - rozdelany projekt k dokonceni
-```
-
-Pri startu nove relace po precteni `MEMORY_INDEX.md` aktivne upozornit Milu na
-polozky oznacene `[PRIPOMENOUT]`, pokud jsou relevantni k aktualnimu dotazu nebo
-pokud se pta, na cem se ma pokracovat.
+`Navrhovane dalsi kroky` oddělují u hotového či pozastaveného projektu volitelné
+navazující zlepšení od bezprostředního dalšího kroku. Ukládej jen podstatný,
+bezpečný stav; chat ani nouzové autosave logy do handoffu nekopíruj.
 
 ## Bezpecnost
 

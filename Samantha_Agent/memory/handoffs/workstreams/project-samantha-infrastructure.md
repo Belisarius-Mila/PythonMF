@@ -1,35 +1,41 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-26 09:35 CEST
+- Aktualizováno: 2026-09-12 20:12 CEST
 
 ### Hotovo
-- Samantha Infrastructure má stručný kanonický handoff a TVBCP se současnou architekturou, bezpečnostními hranicemi a otevřenými kroky
-
-### Otevřeno
-- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
-- Lokální commity čekají na samostatný denní GitHub balíček.
-
-### Rizika
-- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
-
-### Další krok
-- Potvrdit checkpoint, který dvojici transakčně doplní o první časovaný stav
+- První balíček instrukcí: stručné oba AGENTS.md, návody načítané podle situace,
+  jednotný ruční handoff a výslovně oddělená oprávnění terminálu a Cockpitu.
+- Zachována ochrana soukromých dat, neautorizovaného mazání, povinný projektový
+  zápis, bezpečnostní/testovací brány a samostatné oprávnění k publikování.
+- Dřívější servisní krok 2026-09-12 ověřil CLI i App Server 0.154.0,
+  obnovení původního vlákna, 40 cílených testů a Cockpit smoke 5/5.
 
 ### Rozhodnutí
-- Samantha Infrastructure bude mít vlastní stručný handoff a TVBCP; podrobná historie komunikace zůstává v existujícím TVBCP architektury komunikace
+- Podrobnosti handoffu žijí v session_recovery_rules.md; pravidla TVBCP
+  v project_tvbcp_rules.md. Ve stejném úkolu se nezměněné podklady nečtou znovu.
+- Historický plán „Agents SDK bude základ budoucího agenta“ není příkaz
+  k migraci současné komunikace Human–Adam z App Serveru.
+
+### Další krok
+- Po načtení nových instrukcí při další práci posoudit jejich praktičnost.
 
 ### Navrhované další kroky
-- Po vyřešení rozdílu mezi main a deploymentem zvážit necitlivý read-only WebMCP pilot
-- Upgrade Codex CLI provést samostatně s regresním testem app-server transportů
+- Samostatně sladit odpovídající instrukce vložené v kódu Human–Adam.
+- Případný hlasový pilot a Agents API zůstávají samostatná rozhodnutí.
 
-### Technický stav checkpointu
-- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `36bfcb473ec1`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `3e4729b7ecf1` · je starší než ověřený main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-25T10:56:19+00:00.
-- Read-only živý stav: main=`local_ahead`, deployment=`verified_other_main`, runtime=`connected`.
-- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
-- Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
+### Rizika / otevřeno
+- Instrukce v kódu Cockpitu ani dodávané skills tento balíček nemění.
+  Existující vlákno může dál obsahovat dříve načtená pravidla; samotná změna
+  Markdownu nedokládá změnu serverového promptu nebo chování modelu.
+- Push a nasazení nejsou součástí tohoto balíčku; provozní stav se ověřuje živě.
+
+### Technický důkaz
+- 41 cílených testů prošlo; rychlá statická brána a kontrola odkazů prošly.
+- Oba AGENTS.md mají celkem 125 řádků místo 262. Bezpečnostní návody,
+  původní chronologické záznamy a aplikační kód zůstaly beze změn.
+- Ověření dokládá konzistenci dokumentů; přínos pro chování modelu se posoudí
+  při další práci, není odvozen jen ze zkrácení textu.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovniho proudu: Samantha Infrastructure
@@ -40,12 +46,11 @@ Typ: Project
 Priorita: 1
 Stav: rozpracovane
 Pripomenout pri startu: ne
-Datum: 2026-08-26
+Datum: 2026-09-12
 
 Co se resilo:
-- Zalozeni kanonicke dvojice handoff + TVBCP pro infrastrukturu Samanthy.
-- Strucny popis soucasne komunikacni, bezpecnostni, pametove a provozni
-  architektury bez kopirovani historie z TVBCP Human-Adam.
+- Zjednodušení vstupních instrukcí a sjednocení handoff/TVBCP návodů.
+- Oprava popisu autosave intervalů a historické formulace o Agents SDK.
 
 Co je hotove:
 - Hlavnim uzivatelskym rozhranim je Cockpit bezici na Macu; z iPhonu je
@@ -60,35 +65,30 @@ Co je hotove:
   doruceneho pokynu.
 - `DEVELOPMENT_CONTROL` uděluje zapis pouze pro jeden vymezeny tah. Capability
   registry urcuje dostupne operace a jejich bezpecnostni rozsah.
-- Adam provadi jen autorizovanou zmenu a testy. Checkpoint, lokalni commit,
-  GitHub balik a nasazeni jsou oddelene kroky ovladane potvrzenymi prvky
-  Cockpitu.
+- Human–Adam používá potvrzené mechanismy Cockpitu pro checkpoint a další
+  operace. Terminálový Adam na main používá samostatný dávkový režim podle
+  AGENTS.md; oprávnění jednoho prostředí se nepřenášejí do druhého.
 - Projektova pamet rozlisuje TVBCP, handoff, autosave a redigovany live status.
   Promenlivy provozni stav se overuje zive; historicky snapshot jej nenahrazuje.
 - Pri selhani Cockpitu nebo app-serveru zustava plnohodnotna terminalova
   recovery cesta pres `samantha`, Git, autosave a projektovou pamet.
 
 Co neni hotove:
-- Pred timto dokumentacnim krokem byl lokalni `main` napred pred GitHubem a
-  bezici Cockpit pouzival starsi overeny commit. Push ani nasazeni nejsou
-  soucasti tohoto kroku.
-- Code stamp soucasneho deploymentu nebyl v dodanem live statusu overeny.
-- WebMCP neni soucasti architektury Cockpitu. Pripadny read-only pilot zatim
-  nebyl navrzen ani implementovan.
-- Upgrade instalovaneho Codex CLI a regresni overeni app-server protokolu jsou
-  samostatny budouci provozni krok, nikoli blokator soucasne architektury.
+- Sladění instrukcí vložených v kódu Human–Adam je samostatný navazující krok.
+- WebMCP ani hlasový pilot nejsou tímto dokumentačním balíčkem implementovány.
+- Balíček není pushnutý ani nasazený; dřívější provozní snapshoty níže jsou historické.
 
 Dalsi krok:
-- Potvrzenym checkpointem overit novou kanonickou dvojici a zachytit jeji prvni
-  casovany stav; GitHub balik a nasazeni ponechat oddelene.
+- Posoudit praktičnost nových instrukcí při další práci po jejich načtení.
 
 Navrhovane dalsi kroky:
-- Az po vyreseni soucasneho rozdilu mezi `main` a deploymentem zvazit jeden
-  necitlivy read-only WebMCP pilot nad existujicim stavem pracovniho proudu.
-- Upgrade Codex CLI provest samostatne s cilenym testem stdio i Unix-socket
-  app-server transportu.
+- Samostatně sladit serverové instrukce Human–Adam při zachování jeho oprávnění.
+- Případný hlasový pilot posoudit samostatně; žádná automatická migrace architektury.
 
 Zmenene nebo relevantni soubory:
+- `../AGENTS.md` a `AGENTS.md`
+- `memory/technical/session_recovery_rules.md`
+- `memory/technical/project_tvbcp_rules.md`
 - `memory/tvbcp/workstreams/project-samantha-infrastructure.md`
 - `memory/tvbcp/architektura_komunikace_samantha.txt`
 - `memory/infrastructure/operating_model.md`
@@ -119,3 +119,36 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (2): `Samantha_Agent/memory/handoffs/workstreams/project-samantha-infrastructure.md`, `Samantha_Agent/memory/tvbcp/workstreams/project-samantha-infrastructure.md`
 - Commit: `Založit kanonickou paměť Samantha Infrastructure`
 - Další krok: Potvrdit checkpoint, který dvojici transakčně doplní o první časovaný stav
+
+### 2026-09-12 20:14 CEST — První balíček zjednodušení instrukcí
+
+Hotovo:
+- Oba AGENTS.md tvoří stručný vstup do práce. Nezměněný kontext se při
+  pokračování znovu nečte; cílené ověření se bez důvodu neopakuje.
+- Recovery návod obsahuje jediný postup/šablonu ručního handoffu s prioritou
+  1–3, předností kanonického souboru a vazbou na povinný zápis do TVBCP.
+- Popsány oddělené intervaly latest autosave (600 s) a historie (3600 s).
+
+Rozhodnutí:
+- Zachovat ochranu soukromých dat, zákaz neautorizovaného mazání, povinný
+  projektový zápis i samostatné oprávnění k publikování a nasazení.
+- Automatický terminálový commit neopravňuje model Human–Adam k vlastnímu
+  commitu. Vždy platí aktuální DEVELOPMENT_CONTROL a mechanismy Cockpitu.
+- Dřívější věta „Agents SDK bude základ budoucího agenta“ je historický plán;
+  současná komunikace Human–Adam používá App Server. Existující SDK komponenty
+  se tímto dokumentačním krokem nemění ani neruší.
+
+Další krok:
+- Po načtení nových instrukcí posoudit jejich praktičnost při další práci.
+
+Navrhované další kroky:
+- Samostatně sladit odpovídající serverové prompty Human–Adam; tento balíček
+  je neupravuje ani nedokládá jejich změnu v již otevřeném vlákně.
+
+Technický důkaz:
+- 41 cílených testů prošlo; rychlá statická brána a kontrola odkazů prošly.
+- Oba AGENTS.md mají celkem 125 řádků místo 262. Bezpečnostní návody,
+  původní chronologické záznamy a aplikační kód zůstaly beze změn.
+- Ověření dokládá konzistenci dokumentů; přínos pro chování modelu se posoudí
+  při další práci, není odvozen jen ze zkrácení textu.
+- Změněny jen Markdown dokumenty. Push a nasazení nejsou součástí zadání.

@@ -566,3 +566,18 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Problém: tři správně animované klády překryl obraz hotového mostu jen se dvěma kládami; třetí se vizuálně objevila až v dalším obrazu. Samotný počet DOM prvků chybu neodhalil.
 - Řešení: opravovat konkrétní překrývající ilustraci a při vizuálním retestu kontrolovat okamžik po animaci před následujícím krokem. Při výměně pod stejným názvem změnit verzi URL v preloadu i src.
 - Ověření: browserový screenshot po třetím klepnutí před Benjiho přechodem ukazuje tři klády; veřejný WebP po publikaci přesně odpovídá opravenému souboru.
+
+
+### LL-035 — Zkrácení instrukcí při zachování projektového kontraktu
+
+- Problém: vstupní instrukce duplikovaly handoff návody; recovery navíc
+  používalo slovní priority, zatímco AGENTS.md vyžadovalo 1–3.
+- Typ: opakující se
+- Řešení nalezeno: 12092026
+- Řešení: jediný postup handoffu v session_recovery_rules.md, kontrakt TVBCP
+  v project_tvbcp_rules.md a krátké situační odkazy z AGENTS.md. Při přesunu
+  ověřit zachování povinností, platnost odkazů a původních historických zápisů.
+  Rozlišovat terminálový commit od oprávnění modelu v Cockpitu. Změna Markdownu
+  sama nedokazuje změnu serverových promptů ani zrychlení modelu.
+- Ověření: 41 cílených testů, rychlá brána a kontrola odkazů prošly;
+  bezpečnostní návody i historické záznamy zůstaly beze změn.

@@ -82,6 +82,8 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Infrastructure Recovery
 
+- `handoffs/workstreams/project-samantha-infrastructure.md`; `tvbcp/workstreams/project-samantha-infrastructure.md` — 2026-09-12: zjednodušené vstupní instrukce, jednotný handoff a oddělená oprávnění terminálu/Cockpitu. CLI i App Server 0.154.0 ověřeny; serverové prompty zůstávají samostatným krokem.
+
 - `handoffs/autosave_cleanup_ssd_space_recovery_2026_08_15.md` - [PRIPOMENOUT]
   priorita 1 po potvrzenem autosave cleanupu: restart a read-only mereni jsou
   dolozene a Cockpit matematika je lokalne opravena s plnou branou 1414/1414,
