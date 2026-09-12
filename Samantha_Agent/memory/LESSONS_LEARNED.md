@@ -542,3 +542,11 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Typ: opakující se.
 - Problém: hledání podřetězce `codex` označovalo screen/shell a podpůrné procesy za konverzace; OS cwd skutečného Codexu navíc nemusí odpovídat projektu.
 - Ověřené řešení: rozlišit nativní spustitelný soubor a argumenty služby, ověřit TTY a vlastnictví, projekt odvodit i z `-C` / `--cd`. Před potvrzeným signálem obnovit identitu včetně času startu; předky správce chránit. Prohlížečový test ukončení používal jen vlastní syntetické procesy.
+
+
+### Screen na macOS obsahuje systémový login obal
+
+- Problém: Kontrola vlastníka všech potomků odmítala běžný vlastní screen, protože macOS mezi něj a uživatelský program vkládá root proces login.
+- Typ: opakující se
+- Řešení nalezeno: 2026-09-12 08:31 CEST
+- Řešení: Ověřit vlastního správce screenu a úzce rozpoznat přímého potomka login s přesnými argumenty pro stejného uživatele a ověřeným spustitelným souborem. Ostatní cizí procesy, Codex a služby zůstanou chráněné; před uzavřením znovu ověřit identitu i členství. Prohlížečový test se skutečným testovacím screenem prošel.

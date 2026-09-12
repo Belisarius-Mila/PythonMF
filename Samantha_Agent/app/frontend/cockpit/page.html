@@ -216,15 +216,20 @@
         </div>
       </section>
       <section>
-        <h2>Běžící terminálové relace</h2>
+        <h2>Běžící relace a screeny</h2>
         <div class="body">
           <details id="codexSessionsPanel">
-            <summary>Codex – přehled a ukončení relace</summary>
+            <summary>Codex a screen – přehled a ukončení</summary>
             <p>Běžící proces nemusí právě odpovídat ani být zaseknutý. Před ukončením zkontroluj terminál a čas spuštění.</p>
             <button class="secondary" id="codexSessionsRefreshBtn" type="button">Obnovit přehled</button>
+            <h3>Relace Codexu</h3>
             <div id="codexSessionsStatus" class="status-line" aria-live="polite">Přehled se načte po otevření.</div>
             <div id="codexSessionsList" class="recovery-list"></div>
             <p class="status-line">Ukončuje se pouze vybraný Codex. Screen, Cockpit a služby Human–Adam zůstávají spuštěné. Rozpracované soubory se nemažou; probíhající odpověď může zůstat nedokončená.</p>
+            <h3>Screeny</h3>
+            <div id="screenSessionsStatus" class="status-line" aria-live="polite">Přehled se načte po otevření.</div>
+            <div id="screenSessionsList" class="recovery-list"></div>
+            <p class="status-line">Uzavření screenu ukončí jeho terminálová okna a může přerušit práci uvnitř. Soubory se nemažou. Screen s běžícím Codexem nebo chráněnou službou nejprve vyžaduje ukončení příslušné relace.</p>
             <p class="status-line">Pokud startovací guard hlásí rozpracované změny v Gitu, nejprve je ulož. Ukončení relace tuto kontrolu neobchází.</p>
           </details>
         </div>

@@ -1,34 +1,13 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-19 22:05 CEST
-
-### Hotovo
-- Dokumentová práce v Cockpitu je sjednocená do jediné fronty; každý dokument se zobrazuje jen jednou a nabízí přímo potřebné akce pro čtení i metadata.
-- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
-
-### Otevřeno
-- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
-- Lokální commity čekají na samostatný denní GitHub balíček.
-
-### Rizika
-- Dotykový a vizuální test sjednocené fronty na skutečném iPhonu zatím neproběhl.
-
-### Další krok
-- Samostatně potvrdit nasazení do Cockpitu a potom na iPhonu ověřit jednu položku se čtením a jednu s doplněním metadat.
-
-### Rozhodnutí
-- Revize a klasifikace dokumentu jsou jeden uživatelský úkol; klasifikace už není samostatný duplicitní pracovní oddíl.
-
-### Navrhované další kroky
-- Podle živého iPhonového testu upravit jen konkrétní nejasnost, nevracet další paralelní seznam.
-
-### Technický stav checkpointu
-- Změna je otestovaná (1446 testů).
-- Git před checkpointem: lokální `main` na `c74cc57b4872`; GitHub je o 4 commity pozadu a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `c74cc57b4872` · smoke 5/5 · 2026-08-18T15:07:32+00:00.
-- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
-- Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
+- Aktualizováno: 2026-09-12 08:32 CEST
+- Hotovo lokálně: Servis → Běžící relace zobrazuje Codex i screeny se stavem připojení, stářím a počtem vnitřních procesů. Screen lze po potvrzení uzavřít; vynucení má samostatné potvrzení až po běžném pokusu.
+- Ochrana: Screen s běžícím Codexem, službou nebo správcem se neuzavírá. Kontroluje se vlastník, projekt, spustitelný soubor a čerstvé složení procesů. macOS login obal je povolený jen pro ověřeného uživatele.
+- Ověření: cílené testy 28/28; prohlížečový test zrušení potvrzení a skutečného uzavření vlastního screenu, ochrany aktuální relace, desktopu a mobilní šířky bez přetékání; 0 JS chyb. Plná brána první verze 1553/1553; následná macOS oprava má cílenou sadu 28/28 a rychlou statickou bránu. Finální plná brána proběhne při potvrzeném odeslání balíčku.
+- Riziko: Uzavření přeruší terminálová okna; po vynucení mohou procesy uvnitř zůstat běžet. Soubory se nemažou. Stáří samo není důkaz zaseknutí.
+- Další krok: dokončit plnou bránu, požadovaný push, řízené nasazení a živé ověření v proudu project-cockpit.
+- Dřívější Quick Notes: konfigurace soukromého inboxu a bdící/spánkový test zůstávají samostatným otevřeným tématem.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Cockpit / hlavní architektura
@@ -604,3 +583,24 @@ Technický důkaz:
 - První ověřený restart: PID 24557 → 63335, otisk `e0541dcc9782856d`; serverová účtenka `state=deployed`, `workstream_id=project-cockpit`.
 - Živé GET potvrdilo panel, jeho HTTP ovládání a jediný CLI proces; žádný cizí proces nebyl ukončován. Soukromý redigovaný důkaz je v `data/private/codex_sessions_smoke_20260910/live_receipt.json`.
 - Obecný health check nemá kritické varování; dříve připomenutá starší záloha se tímto krokem nemění.
+
+
+### 2026-09-12 08:28 CEST – Přehled screenů a potvrzované uzavření
+
+Hotovo:
+- Servis → Běžící relace nově zobrazuje také screeny, jejich stav připojení, stáří a počet procesů uvnitř.
+- Běžné uzavření používá přesnou identitu screenu; při neúspěchu lze po dalším potvrzení vynutit ukončení samotného procesu screenu.
+
+Rozhodnutí:
+- Screen s běžícím Codexem, chráněným procesem nebo správcem je chráněný. Nejprve se ukončí příslušný Codex.
+- Ověřuje se vlastník, spustitelný soubor, projektový adresář i aktuální složení procesů uvnitř. Změna od náhledu požadavek odmítne.
+- Riziko: uzavření může přerušit práci v terminálových oknech; po vynucení mohou vnitřní procesy zůstat běžet. UI oba dopady výslovně uvádí.
+
+Další krok:
+- Dokončit plnou testovací bránu nad finální verzí, potom provést požadovaný push, řízené nasazení a živé ověření.
+
+Navrhované další kroky:
+- Při příštím zaseknutí použít přehled a konkrétní potvrzení; samotné stáří není důkaz zaseknutí.
+
+Technický důkaz:
+- Cílené testy screenů a Codex relací 28/28. Skutečný prohlížečový test ověřil zrušení potvrzení, uzavření vlastního testovacího screenu, ochranu aktuálního screenu, mobilní šířku bez přetékání a 0 JS chyb. Plná brána první verze prošla 1553/1553; finální kontrola je součástí odeslání balíčku. Systémový macOS login obal je povolený jen pro ověřeného vlastníka screenu; jiné root procesy zůstávají chráněné.
