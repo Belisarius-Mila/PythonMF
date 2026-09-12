@@ -1,7 +1,7 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-12 22:25 CEST; pracovní proud `project-knowledge-library`.
+- Aktualizováno: 2026-09-12 22:44 CEST; pracovní proud `project-knowledge-library`.
 
 ### Hotovo
 - Vývoj je pushnutý a nasazený: funkční commit `2f5cf1f9`, plná brána 1622 testů a smoke 5/5 prošly; Knihovna je připojená, oba profily čisté a zarovnané.
@@ -12,21 +12,22 @@
 
 ### Rozhodnutí
 - Míla schválil nový rozpočet i c+p+n. U ilustrací se neuchovává druhá velká obrazová kopie.
-- Hromadné použití na starý soukromý archiv vyžaduje přesnou větu z global_safety_brake.md. Běžné schválení c+p+n dovoluje vývoj a nasazení, ale tuto bránu nenahrazuje.
-- Převod ponechá jednu ověřenou zálohu starých příloh a metadat mimo aktivní archiv. Její prostor se nesmí vydávat za uvolněné místo na disku; pozdější odstranění vyžaduje vlastní autorizovaný rozsah.
+- Míla potvrdil přesnou větu globální brzdy pro připravených 22 obrázků; registrovaný převod byl proveden a ověřen.
+- Jednorázová ověřená záloha starých příloh a metadat zůstává mimo aktivní archiv. Míla výslovně nařídil její pozdější smazání; pokyn platí pouze pro backup tohoto převodu, po uživatelské kontrole výsledku. Není to souhlas k mazání jiných záloh a není zaveden časovaný úklid.
 
 ### Otevřeno a rizika
-- Původních 22 obrázků dosud nebylo přepsáno. Připravený převod: 66 původních souborů → 44 kompaktních souborů, 11 karet, 59,117 → 5,962 MiB. Záloha bude přibližně 59,35 MiB; zatím není vytvořená.
-- Příprava je svázaná s otisky souborů a metadat. Jakákoli změna archivu vyžaduje novou přípravu; obnova nesmí přepsat další práci.
+- Převod 22 obrázků v 11 kartách je dokončený: 66 původních souborů → 44 kompaktních, 59,117 → 5,962 MiB. Ověřená záloha 59,350 MiB je zachovaná do pozdějšího odstranění; její prostor zatím není uvolněný.
+- Případná obnova ze zálohy nesmí přepsat další uživatelskou práci; používá ověřené otisky a potvrzovanou registrovanou operaci.
 - Rozpracovaný přenos nadále vyžaduje otevřenou stránku. Skutečné Safari na iPhonu má být ověřeno při běžném použití.
 
 ### Další krok
-- Po přesném potvrzení globální brzdy použít připravený převod 22 starých obrázků a doložit skutečné velikosti i stav zálohy.
+- Míla při běžném použití zkontroluje zmenšené obrázky; potom provést už nařízené odstranění konkrétní jednorázové zálohy a doložit výsledek.
 
 ### Navrhované další kroky
-- Po ověření výsledku uživatelem případně rozhodnout o odstranění jednorázové zálohy; automatický úklid nezavádět.
+- Automatický úklid nezavádět; žádný další vývoj není pro tento převod potřeba.
 
 ### Technický důkaz
+- Reálný převod: 61 988 739 → 6 251 688 B; největší fotografie s náhledem 310 875 B, všechny v limitu 305 KiB. 299 ostatních souborů beze změny podle SHA-256; mimo plánovaná obrazová pole nezměněná metadata a registr 121/121 konzistentní. Všech 44 JPEGů dekódováno, bez EXIF a v rozměrových limitech; záloha 62 233 053 B ověřena po souborech. Soukromý doklad `post_apply_verification.json` je u plánu odkazovaného přes `latest_prepared.json`.
 - Nasazení funkční změny ověřeno 2026-09-12 22:33 CEST; code stamp `f57dfb8454ac938f`, smoke 5/5, přesná serverová stránka/worker a HTTP příprava obou rozpočtů. Navazující commit pouze uchovává tento doklad.
 - 388 cílených testů prošlo; po doplnění konzistence registru a HTTP účelu přípravy prošlo dalších 26 testů. Plná Cockpit brána prošla: 1622 testů bez chyb, unit testy 491,112 s; syntaxe a whitespace OK.
 - Browser na syntetickém archivu: PNG 12 980 174 B, HEIC, dvě karty, retry po ztrátě odpovědi, editor, kniha s obálkou; vše OK, 0 JS chyb. Uložení textu při pozastavené přípravě 0,153 s; každý skutečně uložený snímek má jen dva soubory a nejvýše 305 KiB.
@@ -925,3 +926,25 @@ Technický důkaz:
 - Nasazení 2026-09-12 22:33 CEST: `2f5cf1f968ce`, code stamp `f57dfb8454ac938f`, nový proces ověřen, rychlá brána 8,3 s, smoke 5/5.
 - Živá stránka a worker odpovídají přesně zdroji; HTTP příprava zachovala oddělené rozpočty a rozměry (ilustrace 1600 × 1200, dočasné rozpoznávání 2400 × 1800) bez zápisu do archivu.
 - Soukromé účtenky: `data/private/library_compact_20260912/`. Připravený převod 59,117 → 5,962 MiB zůstává pouze plánem; staré fotografie dosud zabírají původní prostor. Záloha přibližně 59,35 MiB se vytvoří až při použití.
+
+
+### 2026-09-12 22:44 CEST – Potvrzený převod všech 22 existujících ilustrací
+
+Hotovo:
+- Připravený plán byl po opětovné kontrole otisků použit na 22 obrázků v 11 kartách: 66 starých aktivních souborů nahradilo 44 JPEGů, 59,117 → 5,962 MiB (přibližně o 90 % méně).
+- Všechny obrázky i náhledy splňují rozpočet a dekódují se; ostatní soubory, text, PDF, identifikátory, popisky a poznámky jsou zachované.
+
+Rozhodnutí:
+- Míla poskytl přesnou potvrzovací větu globální brzdy a výslovný pokyn „Zálohu později smazat“. Pokyn se váže pouze na backup tohoto převodu; záloha nyní zůstává pro kontrolu výsledku, automatický úklid se nezavádí.
+- Funkční kód zůstává beze změny; platí již úspěšná plná brána 1622 testů a nasazení 6139b35d.
+
+Další krok:
+- Po uživatelské kontrole zmenšených obrázků provést již nařízené pozdější odstranění konkrétní zálohy a ověřit rozsah. Žádné jiné zálohy se nemažou.
+
+Navrhované další kroky:
+- Bez dalšího vývoje; při běžném používání ověřit fotografie na iPhonu.
+
+Technický důkaz:
+- Registrované apply: applied, 22 obrázků, 61 988 739 → 6 251 688 B; největší obrázek včetně náhledu 310 875 B.
+- 299 ostatních souborů má shodný SHA-256, všechna neobrazová pole metadat zachována, registr a metadata 121/121 konzistentní; přesně 66 starých obrazových souborů odstraněno z aktivního archivu.
+- Backup 62 233 053 B ověřen proti původním otiskům. Diskový prostor této zálohy není uvolněný. Účtenka, autorizace a následné ověření jsou pouze v soukromém adresáři plánu přes `data/private/library_photo_compaction/latest_prepared.json`.

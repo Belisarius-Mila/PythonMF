@@ -285,3 +285,17 @@ Aktuální připravený plán je dohledatelný přes
 musí znovu ověřit stav; změna knihovny vyžaduje novou přípravu. Záloha zůstává
 mimo aktivní archiv a její velikost se nesmí vydávat za již uvolněné místo.
 Dokončení a případný blokátor se vždy zapisují do kanonického handoffu i TVBCP.
+
+
+## Převod skutečného archivu 2026-09-12 22:44 CEST
+
+Míla potvrdil globální brzdu a převod byl proveden: všech 22 existujících
+ilustrací v 11 kartách nyní zabírá 6 251 688 B místo 61 988 739 B. Aktivní
+archiv má 44 nových JPEGů místo 66 starých souborů. Kontrola SHA-256 potvrdila
+zachování 299 ostatních souborů, neobrazových polí metadat a shodu 121 karet
+s registrem. Všechny výstupy splňují 285 + 20 KiB, rozměry i dekódování.
+Jednorázová záloha 62 233 053 B je ověřená a zachovaná. Míla výslovně nařídil
+její pozdější smazání; provést pouze pro backup tohoto převodu po jeho kontrole
+výsledku, bez mazání jiných záloh a bez zavádění automatického úklidu.
+Soukromé účtenky a autorizace jsou u plánu přes `latest_prepared.json`;
+aktuální další krok je také v kanonickém handoffu a TVBCP.
