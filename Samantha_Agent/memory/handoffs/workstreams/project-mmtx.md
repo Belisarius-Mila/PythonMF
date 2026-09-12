@@ -1,11 +1,13 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-12 10:17 CEST
-- Hotovo lokálně: Logan při závěrečném loučení stojí zády k divákovi a mává přímo přátelům. Obraz hotového mostu ukazuje tři samostatné klády hned po jejich usazení, ještě před Benjiho přechodem.
-- Ověření: 63/63 MMTX testů, 104 pevných stop, rychlá brána a celý browserový průchod včetně obrazu po třetí kládě a závěru.
-- Další krok: autorizované p+n, veřejné ověření a zarovnání čistých pracovních profilů pro večerní vývoj.
-- Riziko: publikace této obrazové opravy zatím není doložená; fyzický poslech na iPhonu nebyl součástí automatického testu.
+- Aktualizováno: 2026-09-12 10:27 CEST
+- Hotovo: Obrazové opravy scény 5 jsou na produkci: Logan je při loučení vidět zezadu a mává přátelům; tři klády jsou viditelné ihned po sestavení mostu před Benjiho přechodem.
+- Produkce: commit `49401df07e43`, Pages run `34683204037`, deployment `6407668406`, HTTP 200 a byte-shoda devíti veřejných souborů.
+- Ověření: 63 cílených MMTX testů, 1 554 testů plné brány, 104 pevných stop; browserový průchod se screenshotem tří klád před Benjim i opraveného loučení.
+- Další krok: večer navázat z Human–Adam v `project-mmtx`; před novou prací obnovit standardní read-only audit.
+- Předání: main a oba profily byly při dokončení ověřené čisté a zarovnané, runtime připojený a nečinný, žádná čekající integrace.
+- Mez ověření: fyzický poslech na iPhonu nebyl součástí automatického testu; pevné audio se v této opravě neměnilo.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: MMTX
@@ -570,3 +572,28 @@ Technický důkaz:
 - Screenshot po třetím polenu potvrzuje tři klády před Benjiho přechodem; závěr byl ověřen i v úzkém mobilním obrazu.
 - Výstupy a přesná zadání generátoru: `reports/mmtx_scene05_artfix_2026_09_12.md`.
 - Riziko při zápisu: p+n teprve následuje. Automatický test simuluje konce audia, nikoli fyzický poslech.
+
+### 2026-09-12 10:27 CEST – Opravené obrazy publikované, čisté předání pro Human–Adam
+
+Hotovo:
+- Obrazové opravy scény 5 jsou na produkci: Logan je při loučení vidět zezadu a mává přátelům; tři klády jsou viditelné ihned po sestavení mostu před Benjiho přechodem.
+- MMTX `p+n` dokončilo push a přesně ověřenou Pages publikaci.
+
+Rozhodnutí:
+- Oprava zůstává u dvou obrazů a jejich cache verze; dialogy, audio, animace i ovládání se nemění.
+- Dvě dodatečně vzniklé kopie předchozích zdrojových PNG byly obsahově ověřeny proti Gitu a zachovány mimo publikovanou scénu v soukromém pracovním adresáři; nic nebylo smazáno.
+
+Další krok:
+- Večer pokračovat v čistém pracovním proudu MMTX podle Mílova dalšího zadání.
+
+Navrhované další kroky:
+- Při běžném použití ověřit nové obrázky i na skutečném iPhonu.
+
+Technický důkaz:
+- Commit `49401df07e43`, workflow `34683204037` completed/success, deployment `6407668406` success; všechna ID korelují se stejným SHA.
+- Veřejná kontrola: HTTP 200 a 9/9 byte-identických souborů včetně obou opravených WebP a EN/CZ poslední věty.
+- Testy: 1 554/1 554 plné brány, 63/63 MMTX, 104/104 pevných stop; oba mirrory shodné.
+- Browser prošel 36 kroky, stavem po třetí kládě, závěrem, Repeat EN/EN+CZ a slovníkem; pět velikostí obrazu bez kolize dialogu s tlačítky.
+- Read-only audit před závěrečným dokumentačním commitem: main aligned, workspaces aligned_clean (2/2), runtime connected bez busy či nejistého doručení, pending integration not_pending.
+- Souhrnný live-status deployment stále odkazuje na starší nasazení samotného Cockpitu `d1e0b5bca0bc` (verified_other_main); tento údaj není důkazem neúspěchu Pages a není zaměňován s výše ověřenou MMTX publikací. Cockpitový kód se touto opravou nemění.
+- Výstupy a přesná zadání vestavěného ImageGen: `reports/mmtx_scene05_artfix_2026_09_12.md`.

@@ -558,3 +558,11 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Problém: scéna s pevným poměrem stran může být kvůli výšce okna výrazně užší než viewport; samotný mobilní media query pak nechá příliš velký dialog a tlačítka zakryjí postavy.
 - Řešení: rozložení odvodit od šířky kontejneru scény, zkrátit dialogovou kartu a v závěrečném obrazu umístit ovládání do volné části. Kontrolovat skutečné obdélníky prvků i screenshot, nejen průchod JavaScriptu.
 - Ověření: scéna 5 prošla celým příběhem a pěti rozměry 1440×1000 až 390×844; dialog se nekříží s tlačítky a všech šest postav závěru je viditelných.
+
+
+### 2026-09-12 – Počet objektů musí souhlasit i v přechodovém obrázku
+
+- Typ: opakující se.
+- Problém: tři správně animované klády překryl obraz hotového mostu jen se dvěma kládami; třetí se vizuálně objevila až v dalším obrazu. Samotný počet DOM prvků chybu neodhalil.
+- Řešení: opravovat konkrétní překrývající ilustraci a při vizuálním retestu kontrolovat okamžik po animaci před následujícím krokem. Při výměně pod stejným názvem změnit verzi URL v preloadu i src.
+- Ověření: browserový screenshot po třetím klepnutí před Benjiho přechodem ukazuje tři klády; veřejný WebP po publikaci přesně odpovídá opravenému souboru.
