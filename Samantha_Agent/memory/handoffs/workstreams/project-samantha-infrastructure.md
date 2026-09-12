@@ -1,45 +1,39 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-12 20:34 CEST
+- Aktualizováno: 2026-09-12 20:50 CEST
 
 ### Hotovo
-- Markdown balíček instrukcí je lokálně uložen v 02ec19e5.
-- Serverové instrukce Human–Adam, Knihovny i lazy proudů jsou ve zdrojovém
-  kódu sladěny: kontext podle potřeby, dokončení autorizovaného tahu a cílené
-  ověřování bez bezdůvodného opakování.
-- Odstraněn starý zákaz průběžného TVBCP zápisu. V povoleném vývojovém tahu
-  se aktualizuje přesná kanonická dvojice; nejasná vazba blokuje uzavření.
-- Soukromý historický kontext se načítá podle potřeby; nesmí nahrazovat
-  instrukce ani být domýšlen při absenci.
+- Zjednodušené Markdown instrukce i sladěné serverové prompty jsou pushnuté
+  a nasazené do Cockpitu. Funkční commit: `2570a14715fe`.
+- Human–Adam, Knihovna i lazy proudy používají společná pravidla pro potřebný
+  kontext, dokončení autorizované práce, cílené ověření a kanonický zápis.
+- Řízený restart a smoke 5/5 prošly; pracovní vlákno infrastruktury bylo
+  úspěšně připojeno. Živý audit potvrdil `current` a čisté kopie 2/2.
 
 ### Rozhodnutí
-- Zápis projektového stavu nerozšiřuje DEVELOPMENT_CONTROL ani oprávnění
-  ke commitu, checkpointu, pushi či nasazení. Při writable=false se projektové
-  dokumenty nemění; výjimka pro private data nepovoluje zápis projektové paměti.
-- Síťové, private a destruktivní hranice zůstávají zachovány.
+- Mílův pokyn „Prosím dokonči p+n.“ autorizoval push a nasazení tohoto balíčku.
+- DEVELOPMENT_CONTROL, private hranice a potvrzované Git/deploy operace
+  zůstávají zachované. Při writable=false se projektové dokumenty nemění.
 
 ### Další krok
-- Samostatně potvrdit nasazení do Cockpitu a ověřit nové instrukce při
-  obnovení vlákna. Do té doby jde o připravenou lokální změnu.
+- Pokračovat v běžné práci v Cockpitu a posoudit praktičnost nových instrukcí.
 
 ### Navrhované další kroky
-- Při následné práci posoudit praktičnost instrukcí; testy samy neměří kvalitu
-  chování modelu ani úsporu času.
-- Případný hlasový pilot a Agents API zůstávají samostatná rozhodnutí.
+- Případný hlasový pilot a Agents API posoudit samostatně podle konkrétního přínosu.
 
 ### Rizika / otevřeno
-- Běžící Cockpit ještě používá dříve načtené instrukce. Změna na disku nebo
-  synchronizace profilového workspace sama neaktualizuje serverový prompt.
-- Push a nasazení nebyly tímto krokem zadány. Starší provozní důkazy níže
-  jsou historické snapshoty, ne dnešní živý audit.
+- Testy a obnovené spojení dokládají nasazení a technickou kontinuitu;
+  samy neměří kvalitu rozhodování modelu ani časovou úsporu.
+- Provozní údaje jsou snapshot; při dalším dotazu na aktuální stav použít živý audit.
 
 ### Technický důkaz
-- 198 cílených testů prošlo. Plný běh: 1 555 testů, 1 554 prošlo; jediná
-  chyba byla citlivost textového testu na velké písmeno. Po opravě pouze testu
-  prošla dotčená sada 7/7 a závěrečná statická brána. Celý běh se neopakoval.
-- Nový test ověřuje skutečnou lazy factory a předání profilových instrukcí
-  při založení i obnovení téhož vlákna přes falešný transport bez změny oprávnění.
+- Registrovaný GitHub balíček odeslal oba commity. Plná brána: OK,
+  1 555 testů (1 přeskočený), 556,7 s. Předchozí chyba velikosti písmene se neopakovala.
+- Nasazení `2570a14715fe` ověřeno 2026-09-12 20:48 CEST; nový proces,
+  otisk `d12a6e19e855247f`, rychlá brána 9,4 s, smoke 5/5.
+- Živý audit 20:49 CEST: `verified_current`, main=origin, kopie 2/2 čisté,
+  runtime připojený a nečinný, bez nejistého doručení a bez blokátorů.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovniho proudu: Samantha Infrastructure
@@ -78,12 +72,12 @@ Co je hotove:
   recovery cesta pres `samantha`, Git, autosave a projektovou pamet.
 
 Co neni hotove:
-- Serverové instrukce jsou připravené v kódu, jejich aktivace čeká na samostatně potvrzené nasazení.
+- Vyhodnocení praktičnosti instrukcí při následné běžné práci.
 - WebMCP ani hlasový pilot nejsou tímto dokumentačním balíčkem implementovány.
-- Balíček není pushnutý ani nasazený; dřívější provozní snapshoty níže jsou historické.
+- Dřívější provozní snapshoty níže jsou historické; aktuální dokončení je uvedeno nahoře.
 
 Dalsi krok:
-- Po potvrzeném nasazení ověřit nové instrukce při obnovení vlákna.
+- Pokračovat v běžné práci; push, nasazení a obnovení spojení jsou ověřené.
 
 Navrhovane dalsi kroky:
 - Po aktivaci posoudit praktičnost instrukcí při běžné práci.
@@ -198,3 +192,28 @@ Technický důkaz:
 - Porovnání AST potvrdilo nezměněné DEVELOPMENT_CONTROL/private instrukce,
   síťovou a archivní capability i konstrukci sandbox oprávnění.
 - Změna je lokální; běžící Cockpit zatím nedostal nový serverový prompt.
+
+### 2026-09-12 20:50 CEST — Push a nasazení sjednocených instrukcí
+
+Hotovo:
+- Oba implementační commity jsou na GitHubu. Cockpit má nasazený funkční
+  commit `2570a14715fe`; obnovené pracovní vlákno je připojené.
+
+Rozhodnutí:
+- Mílův přímý pokyn p+n pokrývá publikování i řízené nasazení tohoto balíčku.
+- Bezpečnostní a zápisové hranice zůstávají zachované.
+
+Další krok:
+- Pokračovat v běžné práci a posoudit chování nových instrukcí.
+
+Navrhované další kroky:
+- Hlasový pilot nebo Agents API řešit pouze jako samostatné věcné rozhodnutí.
+
+Technický důkaz:
+- Plná publikační brána OK: 1 555 testů (1 přeskočený), 556,7 s.
+- Registrované nasazení: nový proces, kódový otisk `d12a6e19e855247f`,
+  rychlá brána 9,4 s a smoke 5/5; následný live audit `current`.
+- Main i origin shodné; obě kopie čisté, runtime připojený a nečinný,
+  bez nejistého doručení. Toto je časovaný důkaz, ne trvalá provozní záruka.
+- Závěrečný paměťový zápis nemění aplikační kód; jeho commit bude zahrnut
+  do téhož autorizovaného publikování a ověření aktuálního main.

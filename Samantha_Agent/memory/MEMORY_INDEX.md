@@ -82,7 +82,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Infrastructure Recovery
 
-- `handoffs/workstreams/project-samantha-infrastructure.md`; `tvbcp/workstreams/project-samantha-infrastructure.md` — 2026-09-12: zjednodušené vstupní instrukce a připravené sladění serverových promptů Human–Adam/Knihovny/lazy proudů. Zachované oprávnění a povinný kanonický zápis; aktivace serverových změn čeká na potvrzené nasazení.
+- `handoffs/workstreams/project-samantha-infrastructure.md`; `tvbcp/workstreams/project-samantha-infrastructure.md` — 2026-09-12: zjednodušené vstupní instrukce i sladěné serverové prompty Human–Adam/Knihovny/lazy proudů jsou pushnuté a nasazené. Plná brána OK (1 555 testů, 1 přeskočený), smoke 5/5, obnovené spojení a čisté kopie 2/2; zachované oprávnění a kanonický zápis.
 
 - `handoffs/autosave_cleanup_ssd_space_recovery_2026_08_15.md` - [PRIPOMENOUT]
   priorita 1 po potvrzenem autosave cleanupu: restart a read-only mereni jsou
