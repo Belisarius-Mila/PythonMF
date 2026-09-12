@@ -260,3 +260,28 @@ Fronta potřebuje otevřenou stránku; neúspěšný přenos lze opakovat jednot
 duplicit. Editor mimo Knihy správně skrývá ISBN, rok, autora a umístění.
 Důkazy, rizika a nasazení patří do kanonické dvojice
 `handoffs/knowledge_library_article_editing_2026_07_16.md` a `tvbcp/knihovna_cockpit.txt`.
+
+
+## Rozpočet ilustračních fotografií 2026-09-12 22:25 CEST
+
+Míla schválil přibližně 0,3 MiB za celý uložený obrázek. Nová reprezentace:
+jeden hlavní JPEG do 285 KiB / 1600 px a náhled do 20 KiB / 320 px. Pole
+original_file a readable_file odkazují na stejný fyzický soubor; při měření se
+cesty musí deduplikovat. Tři fotografie mají nejvýše 0,894 MiB. PDF se nemění.
+Dočasné OCR/ISBN/rozpoznávání obálky používá samostatnou přípravu do 1 MiB /
+2400 px a nevytváří trvalou velkou obrazovou kopii.
+
+Registrované Python operace jsou v `app/library_photo_compaction.py`:
+- `prepare_library_photo_compaction`: výstupy a otisky do odděleného private
+  pracovního adresáře, žádný přepis aktivního archivu;
+- `apply_library_photo_compaction`: přesná věta globální brzdy, ověření
+  nezměněných podkladů, ověřená záloha, aktualizace příloh a registru, odstranění
+  starých aktivních kopií až po kontrole nových;
+- `restore_library_photo_compaction`: potvrzený návrat z ověřené zálohy,
+  včetně přerušeného procesu; odmítne přepsat následnou uživatelskou změnu.
+
+Aktuální připravený plán je dohledatelný přes
+`data/private/library_photo_compaction/latest_prepared.json`. Před použitím se
+musí znovu ověřit stav; změna knihovny vyžaduje novou přípravu. Záloha zůstává
+mimo aktivní archiv a její velikost se nesmí vydávat za již uvolněné místo.
+Dokončení a případný blokátor se vždy zapisují do kanonického handoffu i TVBCP.

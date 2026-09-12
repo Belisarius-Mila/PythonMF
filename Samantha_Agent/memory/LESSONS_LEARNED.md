@@ -603,3 +603,11 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Ověření: velké PNG/HEIC, ztracená odpověď po uložení bez duplicit, dvě karty,
   souběžná editace, neblokující obálka nové knihy a computed display desktop/mobil
   prošly na syntetických datech; 0 chyb JavaScriptu.
+
+- Doplnění 2026-09-12 k LL-036: limit uploadu neomezuje celkové úložiště,
+  pokud backend ještě ukládá originál, čitelnou kopii a náhled. Pro ilustrace
+  použít jeden JPEG do 285 KiB a náhled do 20 KiB, při měření deduplikovat
+  skutečné cesty. Zachovat zvláštní vyšší kvalitu dočasného OCR a podporovat
+  také camera JPEG/MPO. Převod starých dat musí kontrolovat otisky i shodu
+  metadat s registrem a mít ověřenou obnovu; úspora aktivního archivu není
+  úsporou disku, pokud zůstává jednorázová záloha. Ověřeno testy a browserem.

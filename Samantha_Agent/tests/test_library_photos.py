@@ -14,7 +14,7 @@ from PIL import Image
 
 from app import article_archive as archive
 from app.cockpit import library_image_prepare_action
-from app.library_images import MAX_LIBRARY_PHOTO_BYTES, MAX_LIBRARY_PHOTO_INPUT_BYTES, prepare_library_photo
+from app.library_images import MAX_LIBRARY_PHOTO_BYTES, MAX_LIBRARY_PHOTO_INPUT_BYTES, MAX_LIBRARY_STORED_PHOTO_BYTES, MAX_LIBRARY_THUMB_BYTES, prepare_library_photo, prepare_library_recognition_photo
 from scripts.cockpit_quality_gate import node_binary
 
 
@@ -25,7 +25,29 @@ def image_bytes(size=(80, 40), color="blue", *, format="JPEG", exif=None):
 
 
 class LibraryPhotoPreparationTests(unittest.TestCase):
-    def test_large_photo_is_actually_below_one_mib(self):
+    def test_camera_jpeg_with_auxiliary_mpo_frame_uses_main_image(self):
+        buffer = BytesIO()
+        Image.new("RGB", (240, 160), "blue").save(buffer, format="MPO", save_all=True,
+                                                  append_images=[Image.new("RGB", (240, 160), "red")])
+        with Image.open(BytesIO(prepare_library_photo(buffer.getvalue()))) as result:
+            self.assertEqual(result.format, "JPEG")
+            self.assertEqual(result.size, (240, 160))
+            self.assertGreater(result.getpixel((0, 0))[2], 200)
+
+    def test_recognition_keeps_larger_temporary_resolution_and_normalized_jpeg_is_stable(self):
+        original = image_bytes(size=(2400, 1800))
+        compact = prepare_library_photo(original)
+        recognition = prepare_library_recognition_photo(original)
+        with Image.open(BytesIO(compact)) as image:
+            self.assertEqual(image.size, (1600, 1200))
+        with Image.open(BytesIO(recognition)) as image:
+            self.assertEqual(image.size, (2400, 1800))
+        self.assertEqual(compact, prepare_library_photo(compact))
+        self.assertEqual(recognition, library_image_prepare_action(original, purpose="recognition"))
+        with self.assertRaisesRegex(ValueError, "účel"):
+            library_image_prepare_action(original, purpose="unrecognized")
+
+    def test_large_photo_is_actually_below_compact_budget(self):
         source = BytesIO()
         Image.frombytes("RGB", (2400, 1800), random.Random(42).randbytes(2400 * 1800 * 3)).save(source, format="PNG")
         original = source.getvalue()
@@ -34,7 +56,7 @@ class LibraryPhotoPreparationTests(unittest.TestCase):
         self.assertLessEqual(len(prepared), MAX_LIBRARY_PHOTO_BYTES)
         with Image.open(BytesIO(prepared)) as result:
             self.assertEqual(result.format, "JPEG")
-            self.assertLessEqual(max(result.size), 2400)
+            self.assertLessEqual(max(result.size), 1600)
         self.assertEqual(original, source.getvalue())
 
     def test_orientation_and_private_metadata_are_normalized(self):
@@ -89,6 +111,22 @@ class LibraryPhotoAttachmentTests(unittest.TestCase):
             archive.attach_article_image(**{**self.arguments, "image_bytes": image_bytes(color="red")})
         self.assertEqual(before, {p: p.read_bytes() for p in self.root.rglob("*.jpg")})
 
+    def test_three_photos_store_only_main_and_thumbnail_under_one_mib(self):
+        total = 0
+        for index in range(3):
+            archive.attach_article_image(**{**self.arguments, "request_id": f"{index:032x}",
+                                             "image_bytes": image_bytes(size=(2400, 1800))})
+        item = archive.find_article(self.item["id"], archive_root=self.root)
+        for attachment in item.attachments:
+            self.assertEqual(attachment.original_file, attachment.readable_file)
+            files = {self.root / attachment.original_file, self.root / attachment.readable_file, self.root / attachment.thumb_file}
+            self.assertEqual(len(files), 2)
+            size = sum(p.stat().st_size for p in files)
+            self.assertLessEqual(size, MAX_LIBRARY_STORED_PHOTO_BYTES)
+            self.assertLessEqual((self.root / attachment.thumb_file).stat().st_size, MAX_LIBRARY_THUMB_BYTES)
+            total += size
+        self.assertLess(total, 1024 * 1024)
+
     def test_retry_repairs_interrupted_registry_write_without_duplicate(self):
         with patch("app.article_archive.update_registry", side_effect=OSError("synthetic disk failure")):
             with self.assertRaises(OSError):
@@ -96,7 +134,7 @@ class LibraryPhotoAttachmentTests(unittest.TestCase):
         result = archive.attach_article_image(**self.arguments)
         self.assertTrue(result["replayed"])
         self.assertEqual(archive.find_article(self.item["id"], archive_root=self.root).attachments[0].id, result["attachment"]["id"])
-        self.assertEqual(len(list(self.root.rglob("*.jpg"))), 3)
+        self.assertEqual(len(list(self.root.rglob("*.jpg"))), 2)
 
     def test_concurrent_uploads_and_text_edit_preserve_both(self):
         def upload(index):

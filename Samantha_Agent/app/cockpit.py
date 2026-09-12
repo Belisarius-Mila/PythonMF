@@ -299,7 +299,7 @@ from app.email.work_models import (
     normalize_email_work_item,
 )
 from app.file_persistence import FilePersistenceError, append_jsonl_locked
-from app.library_images import MAX_LIBRARY_PHOTO_INPUT_BYTES, prepare_library_photo
+from app.library_images import MAX_LIBRARY_PHOTO_INPUT_BYTES, prepare_library_photo, prepare_library_recognition_photo
 from app.codex_approval_state import (
     clear_codex_approval_request,
     load_codex_approval_request,
@@ -932,8 +932,12 @@ def library_book_cover_prepare_action(payload: dict[str, Any]) -> dict[str, Any]
     }
 
 
-def library_image_prepare_action(image_bytes: bytes) -> bytes:
+def library_image_prepare_action(image_bytes: bytes, *, purpose: str = "illustration") -> bytes:
     """Prepare a browser-unsupported image locally without archive writes or AI."""
+    if purpose == "recognition":
+        return prepare_library_recognition_photo(image_bytes)
+    if purpose != "illustration":
+        raise ValueError("Neplatný účel přípravy fotografie.")
     return prepare_library_photo(image_bytes)
 
 
@@ -10304,7 +10308,7 @@ class CockpitServer:
                 if parsed.path == "/api/library/image-prepare":
                     raw = self.read_library_image()
                     try:
-                        image = library_image_prepare_action(raw)
+                        image = library_image_prepare_action(raw, purpose=str(self.headers.get("X-Samantha-Image-Purpose", "illustration")))
                     except ValueError as exc:
                         self.respond_json({"ok": False, "error": "invalid_image", "message": str(exc)}, status=HTTPStatus.BAD_REQUEST)
                         return

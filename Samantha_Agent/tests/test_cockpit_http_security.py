@@ -70,6 +70,17 @@ class CockpitHttpSecurityTests(unittest.TestCase):
                     self.assertEqual(photo.size, (40, 20))
             finally:
                 connection.close()
+            with patch("app.cockpit.library_image_prepare_action", return_value=image.getvalue()) as prepare:
+                connection = http.client.HTTPConnection(host, port, timeout=5)
+                try:
+                    connection.request("POST", "/api/library/image-prepare", body=image.getvalue(), headers={
+                        "Content-Type": "image/png", "Origin": f"http://{host}:{port}", "X-Samantha-Image-Purpose": "recognition"})
+                    response = connection.getresponse()
+                    self.assertEqual(response.status, 200)
+                    response.read()
+                    prepare.assert_called_once_with(image.getvalue(), purpose="recognition")
+                finally:
+                    connection.close()
             with patch("app.cockpit.library_image_prepare_action") as prepare:
                 status, payload, _headers = request_json(host, port, "POST", "/api/library/image-prepare", body=b"", headers={"Content-Type": "image/heic", "Content-Length": str(MAX_LIBRARY_PHOTO_INPUT_BYTES + 1)})
                 self.assertEqual(status, 413)

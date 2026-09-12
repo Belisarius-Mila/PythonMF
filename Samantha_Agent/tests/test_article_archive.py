@@ -15,6 +15,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from app.article_archive import (
+    update_registry,
     ATTACHMENT_CONFIRMATION_PHRASE,
     ATTACHMENT_REMOVE_CONFIRMATION_PHRASE,
     CLEANUP_CONFIRMATION_PHRASE,
@@ -1316,8 +1317,14 @@ class ArticleArchiveTests(unittest.TestCase):
             )
             metadata_path = archive_root / "articles" / article_id / "metadata.json"
             metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+            # Legacy archives may still have a separate, damaged original.
             for attachment in metadata["attachments"]:
-                (archive_root / attachment["original_file"]).write_bytes(b"unusable original")
+                legacy = archive_root / "articles" / article_id / "attachments" / "original" / (attachment["id"] + ".png")
+                legacy.parent.mkdir(parents=True, exist_ok=True)
+                legacy.write_bytes(b"unusable original")
+                attachment["original_file"] = str(legacy.relative_to(archive_root))
+            metadata_path.write_text(json.dumps(metadata), encoding="utf-8")
+            update_registry(archive_root / "registry.jsonl", metadata)
 
             prepared = prepare_article_pdf_export(
                 article_id=article_id,
@@ -1356,7 +1363,7 @@ class ArticleArchiveTests(unittest.TestCase):
             metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
             attachment = metadata["attachments"][0]
             for field in ("readable_file", "original_file"):
-                (archive_root / attachment[field]).unlink()
+                (archive_root / attachment[field]).unlink(missing_ok=True)
 
             prepared = prepare_article_pdf_export(
                 article_id=article_id,

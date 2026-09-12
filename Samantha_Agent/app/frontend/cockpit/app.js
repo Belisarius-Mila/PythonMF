@@ -464,7 +464,7 @@
     }
 
     async function preparedLibraryPhotoDataUrl(file) {
-      const prepared = await LibraryPhotos.prepare(file);
+      const prepared = await LibraryPhotos.prepare(file, "recognition");
       return blobToDataUrl(prepared.blob);
     }
 
@@ -4671,7 +4671,7 @@ Soubor nebude trvale smazán.`);
       }
       const task = libraryPhotos.add(file, "cover");
       libraryBookCoverTask = task;
-      libraryBookCoverStatus.textContent = "Připravuji obálku do 1 MiB. Můžeš pokračovat ve vyplňování knihy.";
+      libraryBookCoverStatus.textContent = "Připravuji obálku do 0,3 MiB. Můžeš pokračovat ve vyplňování knihy.";
       await task.preparation;
       if (libraryBookCoverTask !== task) return;
       if (!task.prepared) {
@@ -4681,7 +4681,7 @@ Soubor nebude trvale smazán.`);
       libraryBookCoverObjectUrl = URL.createObjectURL(task.prepared.blob);
       libraryBookCoverPreview.src = libraryBookCoverObjectUrl;
       libraryBookCoverPreviewWrap.classList.remove("hidden");
-      libraryBookCoverStatus.textContent = "Obálka je připravená do 1 MiB. Zmenšená obálka se uloží až s knihou; rozpoznání vyžaduje stisk tlačítka.";
+      libraryBookCoverStatus.textContent = "Obálka je připravená do 0,3 MiB. Zmenšená obálka se uloží až s knihou; rozpoznání vyžaduje stisk tlačítka.";
     }
 
     async function recognizeLibraryBookCover() {
@@ -4750,7 +4750,7 @@ Soubor nebude trvale smazán.`);
         return;
       }
       libraryBookOcrFiles.push(checked.file);
-      LibraryPhotos.prepare(checked.file).catch(() => {});
+      LibraryPhotos.prepare(checked.file, "recognition").catch(() => {});
       libraryBookOcrReadBtn.disabled = false;
       const count = libraryBookOcrFiles.length;
       libraryBookOcrStatus.textContent = `Vybráno ${count}/3 fotografií. ${count < 3 ? "Můžeš přidat další snímek." : "Nyní spusť OCR."}`;
@@ -5743,7 +5743,7 @@ ${phrase}`, "");
           original.href = libraryAttachmentUrl(articleId, attachmentId, "original");
           original.setAttribute("target", "_blank");
           original.rel = "noopener";
-          original.textContent = "Originál";
+          original.textContent = isImage ? "Uložený obrázek" : "Originál";
           actions.appendChild(original);
         }
         if (articleId && attachmentId) {
@@ -7118,7 +7118,7 @@ ${item.context || ""}`);
     [libraryBookIsbnPhotoInput, libraryEditBookIsbnPhotoInput].forEach((input) => {
       input.addEventListener("change", () => {
         const file = input.files && input.files[0];
-        if (file) LibraryPhotos.prepare(file).catch(() => {});
+        if (file) LibraryPhotos.prepare(file, "recognition").catch(() => {});
       });
     });
     window.addEventListener("beforeunload", (event) => {

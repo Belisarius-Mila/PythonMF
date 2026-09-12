@@ -2,7 +2,7 @@
 
 const LibraryPhotos = (() => {
   const MAX_INPUT = 32 * 1024 * 1024;
-  const MAX_OUTPUT = 1024 * 1024;
+  const MAX_OUTPUT = 285 * 1024;
   const cache = new WeakMap();
   let preparationTail = Promise.resolve();
 
@@ -14,7 +14,7 @@ const LibraryPhotos = (() => {
     }
   }
 
-  function inWorker(file) {
+  function inWorker(file, purpose) {
     return new Promise((resolve) => {
       let worker;
       let timer;
@@ -28,23 +28,25 @@ const LibraryPhotos = (() => {
         worker.onmessage = (event) => finish(event.data);
         worker.onerror = () => finish({fallback: true});
         timer = setTimeout(() => finish({fallback: true}), 45000);
-        worker.postMessage(file);
+        worker.postMessage({file, purpose});
       } catch (_error) {
         finish({fallback: true});
       }
     });
   }
 
-  function prepare(file) {
-    if (cache.has(file)) return cache.get(file);
+  function prepare(file, purpose = "illustration") {
+    const jobs = cache.get(file) || new Map();
+    if (jobs.has(purpose)) return jobs.get(purpose);
+    const maxBytes = purpose === "recognition" ? 1024 * 1024 : MAX_OUTPUT;
     const job = preparationTail.then(async () => {
       validate(file);
-      const result = await inWorker(file);
+      const result = await inWorker(file, purpose);
       if (result.error) throw new Error(result.error);
       let blob = result.blob;
       if (result.fallback) {
         const response = await fetch("/api/library/image-prepare", {
-          method: "POST", headers: {"Content-Type": file.type || "application/octet-stream"}, body: file,
+          method: "POST", headers: {"Content-Type": file.type || "application/octet-stream", "X-Samantha-Image-Purpose": purpose}, body: file,
         });
         if (!response.ok || !String(response.headers.get("Content-Type")).startsWith("image/jpeg")) {
           const data = await response.json().catch(() => ({}));
@@ -52,14 +54,15 @@ const LibraryPhotos = (() => {
         }
         blob = await response.blob();
       }
-      if (!blob || blob.type !== "image/jpeg" || !blob.size || blob.size > MAX_OUTPUT) {
-        throw new Error("Připravená fotografie nesplňuje limit 1 MiB.");
+      if (!blob || blob.type !== "image/jpeg" || !blob.size || blob.size > maxBytes) {
+        throw new Error("Připravená fotografie nesplňuje velikostní limit.");
       }
       return {blob, filename: (file.name || "fotografie").replace(/\.[^.]*$/, "") + ".jpg"};
     });
     preparationTail = job.catch(() => {});
-    cache.set(file, job);
-    job.catch(() => cache.delete(file));
+    jobs.set(purpose, job);
+    cache.set(file, jobs);
+    job.catch(() => jobs.delete(purpose));
     return job;
   }
 

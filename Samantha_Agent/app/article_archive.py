@@ -25,6 +25,7 @@ from urllib.parse import urlparse, urlunparse
 from xml.sax.saxutils import escape
 
 from app.file_persistence import atomic_write_text, exclusive_file_lock
+from app.library_images import LIBRARY_PHOTO_STORAGE_POLICY, prepare_library_photo, prepare_library_thumbnail
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -716,7 +717,6 @@ def attach_article_image(
     if item is None:
         raise ValueError("Článek nebyl nalezen.")
     raw_bytes, source_name = read_attachment_input(image_path=image_path, image_bytes=image_bytes, filename=filename)
-    extension = normalized_image_extension(source_name, mime_type=mime_type)
     request_key = str(request_id or "").strip()
     if request_key and not re.fullmatch(r"[0-9a-f]{32}", request_key):
         raise ValueError("Neplatný identifikátor připojení fotografie.")
@@ -738,20 +738,18 @@ def attach_article_image(
     now = datetime.now(timezone.utc).replace(microsecond=0)
     attachment_id = f"upload-{request_key}" if request_key else unique_attachment_id(item, label or Path(source_name).stem or "obrazek", now)
     # Decode before writing any image; invalid inputs must not leave orphan files.
-    readable_bytes, thumb_bytes = build_readable_image_versions(raw_bytes)
+    readable_bytes = prepare_library_photo(raw_bytes)
+    thumb_bytes = prepare_library_thumbnail(readable_bytes)
     item_dir = archive_root / "articles" / item.id
-    original_dir = item_dir / "attachments" / "original"
     readable_dir = item_dir / "attachments" / "readable"
     thumb_dir = item_dir / "attachments" / "thumbs"
-    original_dir.mkdir(parents=True, exist_ok=True)
     readable_dir.mkdir(parents=True, exist_ok=True)
     thumb_dir.mkdir(parents=True, exist_ok=True)
-    original_path = original_dir / f"{attachment_id}{extension}"
     readable_path = readable_dir / f"{attachment_id}.jpg"
+    original_path = readable_path
     thumb_path = thumb_dir / f"{attachment_id}.jpg"
-    if request_key and original_path.exists() and original_path.read_bytes() != raw_bytes:
+    if request_key and original_path.exists() and original_path.read_bytes() != readable_bytes:
         raise ValueError("Rozpracovaný přenos má jiný obrázek. Původní soubor zůstává zachovaný.")
-    original_path.write_bytes(raw_bytes)
     readable_path.write_bytes(readable_bytes)
     thumb_path.write_bytes(thumb_bytes)
     attachment = {
@@ -759,13 +757,15 @@ def attach_article_image(
         "label": str(label or "Doprovodný obrázek").strip()[:160] or "Doprovodný obrázek",
         "kind": "image",
         "role": str(role or "supporting_image").strip()[:80] or "supporting_image",
-        "mime_type": mime_type_for_extension(extension),
+        "mime_type": "image/jpeg",
         "original_file": str(original_path.relative_to(archive_root)),
         "readable_file": str(readable_path.relative_to(archive_root)),
         "thumb_file": str(thumb_path.relative_to(archive_root)),
-        "size_bytes": len(raw_bytes),
+        "size_bytes": len(readable_bytes),
         "readable_size_bytes": len(readable_bytes),
         "thumb_size_bytes": len(thumb_bytes),
+        "storage_policy": LIBRARY_PHOTO_STORAGE_POLICY,
+        "stored_size_bytes": len(readable_bytes) + len(thumb_bytes),
         "note": str(note or "").strip()[:1000],
         "created_at": now.isoformat(),
         **({"upload_request_id": request_key, "upload_fingerprint": fingerprint} if request_key else {}),

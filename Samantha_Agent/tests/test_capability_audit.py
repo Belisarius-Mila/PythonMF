@@ -20,7 +20,7 @@ class CapabilityAuditTests(unittest.TestCase):
             f"Capability registry records: {len(all_capabilities())}",
             text,
         )
-        self.assertIn("High-risk capability records: 16", text)
+        self.assertIn("High-risk capability records: 18", text)
         self.assertIn("Registry-covered agent tools: 85/85", text)
         self.assertIn("Capability registry: OK", text)
         self.assertIn("Critical/action-write missing records: 0", text)
