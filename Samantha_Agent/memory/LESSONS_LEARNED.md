@@ -581,3 +581,9 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   sama nedokazuje změnu serverových promptů ani zrychlení modelu.
 - Ověření: 41 cílených testů, rychlá brána a kontrola odkazů prošly;
   bezpečnostní návody i historické záznamy zůstaly beze změn.
+- Doplnění 2026-09-12: serverové prompty je nutné ověřit na skutečné cestě
+  přes profilovou/lazy factory a start/resume vlákna. Starý zákaz TVBCP zápisu
+  při milníku odporoval povinnému projektovému zápisu; nahrazen zápisem pouze
+  při writable=true do správné kanonické dvojice, bez oprávnění ke commitu.
+  Cílená sada 198 testů prošla. Aktivaci dokládá až samostatné nasazení a
+  načtení nových instrukcí, nikoli samotný commit nebo zarovnání workspace.

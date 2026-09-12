@@ -66,13 +66,11 @@ HUMAN_ADAM_DEVELOPER_INSTRUCTIONS = (
     + DEVELOPMENT_CONTROL_DEVELOPER_INSTRUCTIONS
     + CANONICAL_PRIVATE_DEVELOPER_INSTRUCTIONS
     + (
-        " Pro projekt komunikacni architektury pred vetsi praci precti "
+        " Pouze pro aktivni proud layer-human-adam-development je kanonicka dvojice "
+        "Samantha_Agent/memory/handoffs/human_adam_layer_workstream_start_2026_07_20.md a "
         "Samantha_Agent/memory/tvbcp/architektura_komunikace_samantha.txt. "
-        "Tento TVBCP aktualizuj vyhradne na Miluv vyslovny pokyn; nikdy do nej nezapisuj "
-        "samostatne ani pri milniku. Pri vyslovne vyzadanem zapisu zachyt "
-        "rozhodnuti, dukazy, rizika a dalsi krok, nikdy ne plny chat ani citlive texty. "
-        "Kazdy novy chronologicky zaznam pridej na konec souboru a oznac ho lokalnim "
-        "datem, casem a casovou zonou ve formatu YYYY-MM-DD HH:MM TZ."
+        "Ostatni pracovni proudy pouzivaji vlastni kanonickou dvojici z aktualni vazby; "
+        "zapis do obecne komunikacni architektury ji nenahrazuje."
         " Private backup metadata v izolovane kopii zamerne nejsou; z jejich absence "
         "nikdy nevyvozuj, ze hlavni projekt nema zalohu. V bezne odpovedi Milovi "
         "uvadej u souboru jen samotny nazev bez cele cesty. Nejkratsi nutnou relativni "

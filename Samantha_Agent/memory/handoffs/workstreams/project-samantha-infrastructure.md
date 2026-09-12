@@ -1,41 +1,45 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-12 20:12 CEST
+- Aktualizováno: 2026-09-12 20:34 CEST
 
 ### Hotovo
-- První balíček instrukcí: stručné oba AGENTS.md, návody načítané podle situace,
-  jednotný ruční handoff a výslovně oddělená oprávnění terminálu a Cockpitu.
-- Zachována ochrana soukromých dat, neautorizovaného mazání, povinný projektový
-  zápis, bezpečnostní/testovací brány a samostatné oprávnění k publikování.
-- Dřívější servisní krok 2026-09-12 ověřil CLI i App Server 0.154.0,
-  obnovení původního vlákna, 40 cílených testů a Cockpit smoke 5/5.
+- Markdown balíček instrukcí je lokálně uložen v 02ec19e5.
+- Serverové instrukce Human–Adam, Knihovny i lazy proudů jsou ve zdrojovém
+  kódu sladěny: kontext podle potřeby, dokončení autorizovaného tahu a cílené
+  ověřování bez bezdůvodného opakování.
+- Odstraněn starý zákaz průběžného TVBCP zápisu. V povoleném vývojovém tahu
+  se aktualizuje přesná kanonická dvojice; nejasná vazba blokuje uzavření.
+- Soukromý historický kontext se načítá podle potřeby; nesmí nahrazovat
+  instrukce ani být domýšlen při absenci.
 
 ### Rozhodnutí
-- Podrobnosti handoffu žijí v session_recovery_rules.md; pravidla TVBCP
-  v project_tvbcp_rules.md. Ve stejném úkolu se nezměněné podklady nečtou znovu.
-- Historický plán „Agents SDK bude základ budoucího agenta“ není příkaz
-  k migraci současné komunikace Human–Adam z App Serveru.
+- Zápis projektového stavu nerozšiřuje DEVELOPMENT_CONTROL ani oprávnění
+  ke commitu, checkpointu, pushi či nasazení. Při writable=false se projektové
+  dokumenty nemění; výjimka pro private data nepovoluje zápis projektové paměti.
+- Síťové, private a destruktivní hranice zůstávají zachovány.
 
 ### Další krok
-- Po načtení nových instrukcí při další práci posoudit jejich praktičnost.
+- Samostatně potvrdit nasazení do Cockpitu a ověřit nové instrukce při
+  obnovení vlákna. Do té doby jde o připravenou lokální změnu.
 
 ### Navrhované další kroky
-- Samostatně sladit odpovídající instrukce vložené v kódu Human–Adam.
+- Při následné práci posoudit praktičnost instrukcí; testy samy neměří kvalitu
+  chování modelu ani úsporu času.
 - Případný hlasový pilot a Agents API zůstávají samostatná rozhodnutí.
 
 ### Rizika / otevřeno
-- Instrukce v kódu Cockpitu ani dodávané skills tento balíček nemění.
-  Existující vlákno může dál obsahovat dříve načtená pravidla; samotná změna
-  Markdownu nedokládá změnu serverového promptu nebo chování modelu.
-- Push a nasazení nejsou součástí tohoto balíčku; provozní stav se ověřuje živě.
+- Běžící Cockpit ještě používá dříve načtené instrukce. Změna na disku nebo
+  synchronizace profilového workspace sama neaktualizuje serverový prompt.
+- Push a nasazení nebyly tímto krokem zadány. Starší provozní důkazy níže
+  jsou historické snapshoty, ne dnešní živý audit.
 
 ### Technický důkaz
-- 41 cílených testů prošlo; rychlá statická brána a kontrola odkazů prošly.
-- Oba AGENTS.md mají celkem 125 řádků místo 262. Bezpečnostní návody,
-  původní chronologické záznamy a aplikační kód zůstaly beze změn.
-- Ověření dokládá konzistenci dokumentů; přínos pro chování modelu se posoudí
-  při další práci, není odvozen jen ze zkrácení textu.
+- 198 cílených testů prošlo. Plný běh: 1 555 testů, 1 554 prošlo; jediná
+  chyba byla citlivost textového testu na velké písmeno. Po opravě pouze testu
+  prošla dotčená sada 7/7 a závěrečná statická brána. Celý běh se neopakoval.
+- Nový test ověřuje skutečnou lazy factory a předání profilových instrukcí
+  při založení i obnovení téhož vlákna přes falešný transport bez změny oprávnění.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovniho proudu: Samantha Infrastructure
@@ -49,8 +53,8 @@ Pripomenout pri startu: ne
 Datum: 2026-09-12
 
 Co se resilo:
-- Zjednodušení vstupních instrukcí a sjednocení handoff/TVBCP návodů.
-- Oprava popisu autosave intervalů a historické formulace o Agents SDK.
+- Sladění serverových instrukcí Cockpitu s dokončeným Markdown balíčkem.
+- Odstranění rozporu mezi starým TVBCP zákazem a povinným projektovým zápisem.
 
 Co je hotove:
 - Hlavnim uzivatelskym rozhranim je Cockpit bezici na Macu; z iPhonu je
@@ -74,18 +78,24 @@ Co je hotove:
   recovery cesta pres `samantha`, Git, autosave a projektovou pamet.
 
 Co neni hotove:
-- Sladění instrukcí vložených v kódu Human–Adam je samostatný navazující krok.
+- Serverové instrukce jsou připravené v kódu, jejich aktivace čeká na samostatně potvrzené nasazení.
 - WebMCP ani hlasový pilot nejsou tímto dokumentačním balíčkem implementovány.
 - Balíček není pushnutý ani nasazený; dřívější provozní snapshoty níže jsou historické.
 
 Dalsi krok:
-- Posoudit praktičnost nových instrukcí při další práci po jejich načtení.
+- Po potvrzeném nasazení ověřit nové instrukce při obnovení vlákna.
 
 Navrhovane dalsi kroky:
-- Samostatně sladit serverové instrukce Human–Adam při zachování jeho oprávnění.
+- Po aktivaci posoudit praktičnost instrukcí při běžné práci.
 - Případný hlasový pilot posoudit samostatně; žádná automatická migrace architektury.
 
 Zmenene nebo relevantni soubory:
+- `app/communication/human_adam_workspace.py`
+- `app/communication/human_adam_service.py`
+- `app/communication/human_adam_profiles.py`
+- `app/communication/legacy_tvbcp_migration.py` (jen instrukce pro čtení kontextu)
+- `tests/test_communication_session_hub.py`
+- `tests/test_human_adam_service.py`
 - `../AGENTS.md` a `AGENTS.md`
 - `memory/technical/session_recovery_rules.md`
 - `memory/technical/project_tvbcp_rules.md`
@@ -152,3 +162,39 @@ Technický důkaz:
 - Ověření dokládá konzistenci dokumentů; přínos pro chování modelu se posoudí
   při další práci, není odvozen jen ze zkrácení textu.
 - Změněny jen Markdown dokumenty. Push a nasazení nejsou součástí zadání.
+
+### 2026-09-12 20:28 CEST — Sladění serverových instrukcí Cockpitu
+
+Hotovo:
+- Společná pravidla se předávají Human–Adam, Knihovně i lazy pracovním proudům.
+  Kontext se načítá podle potřeby; autorizovaný úkol zahrnuje ověření a povinný
+  projektový zápis. Úspěšné ověření se bez nového důvodu neopakuje.
+- Odstraněn starý zákaz samostatného TVBCP zápisu při milníku, který odporoval
+  schválenému povinnému zápisu při dokončení vývoje.
+- Soukromý historický kontext se znovu načítá jen při potřebě, změně či rozporu;
+  jeho absence se nesmí nahrazovat domněnkou.
+
+Rozhodnutí:
+- Zápis pouze v povoleném vývojovém tahu do přesné kanonické dvojice aktivního
+  proudu. Nejasná vazba blokuje uzavření; nový TVBCP vyžaduje výslovnou dohodu.
+- Writable=false nepovoluje zápis projektových dokumentů. Private výjimka jej
+  nerozšiřuje. Commit, checkpoint, push a nasazení zůstávají na mechanismu Cockpitu.
+- Síťové, private a destruktivní hranice se nemění.
+
+Další krok:
+- Samostatně potvrdit nasazení do Cockpitu a ověřit instrukce při obnovení vlákna.
+
+Navrhované další kroky:
+- Při následné skutečné práci vyhodnotit praktičnost instrukcí. Neodvozovat
+  z automatických testů zlepšení chování modelu nebo časovou úsporu.
+
+Technický důkaz:
+- 198 cílených testů prošlo. Plný běh: 1 555 testů, 1 554 prošlo; jediná
+  chyba byla citlivost textového testu na velké písmeno. Po opravě pouze testu
+  prošla dotčená sada 7/7 a závěrečná statická brána. Celý běh se neopakoval.
+- Regresní test použil produkční lazy factory pro MMTX i infrastrukturu a
+  skutečné prompty obou profilů; přes fake transport ověřil start i resume
+  stejného vlákna se zachováním read-only sandboxu a approval_policy=never.
+- Porovnání AST potvrdilo nezměněné DEVELOPMENT_CONTROL/private instrukce,
+  síťovou a archivní capability i konstrukci sandbox oprávnění.
+- Změna je lokální; běžící Cockpit zatím nedostal nový serverový prompt.

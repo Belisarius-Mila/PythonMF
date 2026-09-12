@@ -31,6 +31,7 @@ class FakeClient:
         self.sent_texts: list[str] = []
         self.started_kwargs: dict[str, object] = {}
         self.resumed_thread_id = ""
+        self.resumed_kwargs: dict[str, object] = {}
         self.__class__.instances.append(self)
 
     def start_thread(self, **kwargs: object) -> str:
@@ -39,10 +40,11 @@ class FakeClient:
             return self.__class__.next_thread_ids.pop(0)
         return "canonical-thread"
 
-    def resume_thread(self, thread_id: str, **_kwargs: object) -> str:
+    def resume_thread(self, thread_id: str, **kwargs: object) -> str:
         if self.__class__.fail_resume:
             raise AppServerError("missing thread")
         self.resumed_thread_id = thread_id
+        self.resumed_kwargs = kwargs
         return thread_id
 
     def send_text(
@@ -132,6 +134,54 @@ class CanonicalSessionHubTests(unittest.TestCase):
         self.assertTrue(first["entry"]["delivery_confirmed"])
         self.assertTrue(duplicate["duplicate_prevented"])
         self.assertEqual(FakeClient.instances[0].sent, 1)
+
+    def test_cockpit_profile_instructions_reach_start_and_resume_without_permission_changes(self) -> None:
+        from app.communication.human_adam_profiles import (
+            HUMAN_ADAM,
+            HUMAN_ADAM_PROFILE_DEVELOPER_INSTRUCTIONS,
+            KNIHOVNA_DEVELOPER_INSTRUCTIONS,
+        )
+        from app.communication.human_adam_workstream_catalog import WORKSTREAM_CATALOG_BY_ID
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            prompts = {
+                "human_adam": HUMAN_ADAM_PROFILE_DEVELOPER_INSTRUCTIONS,
+                "knihovna": KNIHOVNA_DEVELOPER_INSTRUCTIONS,
+            }
+            # Exercise the actual production factory, but never connect its runtime.
+            for workstream_id in ("project-mmtx", "project-samantha-infrastructure"):
+                prototype = HUMAN_ADAM.workstream_threads.hub_factory(
+                    WORKSTREAM_CATALOG_BY_ID[workstream_id],
+                    root / workstream_id / "prototype.json",
+                )
+                prompts[workstream_id] = prototype.developer_instructions
+                self.assertIn(f"memory/handoffs/workstreams/{workstream_id}.md", prompts[workstream_id])
+                self.assertIn(f"memory/tvbcp/workstreams/{workstream_id}.md", prompts[workstream_id])
+
+            for profile, instructions in prompts.items():
+                with self.subTest(profile=profile):
+                    self.assertIn("Pri pokracovani stejneho ukolu pouzij nacteny kontext", instructions)
+                    self.assertIn("aktualizuj kanonicky handoff i TVBCP prave aktivniho pracovniho proudu", instructions)
+                    self.assertIn("Pri writable=false projektove dokumenty nemen", instructions)
+                    self.assertIn("nejasna vazba blokuje uzavreni", instructions)
+                    self.assertIn("git commit, checkpoint, prevzeti do main, push ani nasazeni", instructions)
+                    self.assertIn("povinne plne, publikacni a bezpecnostni brany", instructions)
+                    self.assertNotIn("nikdy do nej nezapisuj samostatne ani pri milniku", instructions)
+                    self.assertNotIn("Tyto dokumenty primo nemen bez Milova vyslovneho pokynu", instructions)
+                    first = self.make_hub(root / profile)
+                    first.developer_instructions = instructions
+                    started = first.connect()
+                    first.close()
+                    second = self.make_hub(root / profile)
+                    second.developer_instructions = instructions
+                    resumed = second.connect()
+                    second.close()
+                    self.assertEqual(started["thread_id"], resumed["thread_id"])
+                    for sent in (FakeClient.instances[-2].started_kwargs, FakeClient.instances[-1].resumed_kwargs):
+                        self.assertEqual(sent["developer_instructions"], instructions)
+                        self.assertEqual(sent["sandbox"], "read-only")
+                        self.assertEqual(sent["approval_policy"], "never")
 
     def test_generated_images_are_returned_transiently_but_not_persisted(self) -> None:
         FakeClient.generated_images = (

@@ -346,15 +346,12 @@ KNIHOVNA_DEVELOPER_INSTRUCTIONS = (
     HUMAN_ADAM_WORKSPACE_DEVELOPER_INSTRUCTIONS
     + DEVELOPMENT_CONTROL_DEVELOPER_INSTRUCTIONS
     + (
-        " Aktivni pracovni profil je Knihovna v Samantha Cockpitu. Pred vetsi praci precti "
-        "Samantha_Agent/memory/projects/vedecke_clanky.md, "
-        "Samantha_Agent/memory/handoffs/knowledge_library_article_editing_2026_07_16.md a "
-        "Samantha_Agent/memory/tvbcp/knihovna_cockpit.txt. Tento TVBCP aktualizuj vyhradne "
-        "na Miluv vyslovny pokyn; nikdy do nej nezapisuj samostatne ani pri milniku. Pri "
-        "vyslovne vyzadanem zapisu zachyt rozhodnuti, dukazy, rizika a dalsi krok, nikdy "
-        "plny chat ani citlive texty. Kazdy novy chronologicky zaznam pridej na konec "
-        "souboru a oznac ho lokalnim datem, casem a casovou zonou ve formatu "
-        "YYYY-MM-DD HH:MM TZ. Soukrome texty clanku, prilohy a metadata konkretnich osob "
+        " Aktivni pracovni profil je Knihovna v Samantha Cockpitu. Projektovy kontext "
+        "hledej podle potreby v Samantha_Agent/memory/projects/vedecke_clanky.md. "
+        "Kanonicky handoff je Samantha_Agent/memory/handoffs/"
+        "knowledge_library_article_editing_2026_07_16.md a TVBCP je "
+        "Samantha_Agent/memory/tvbcp/knihovna_cockpit.txt; plati spolecna pravidla "
+        "povinneho zapisu a aktualni opravneni. Soukrome texty clanku, prilohy a metadata konkretnich osob "
         "nikdy automaticky nevypisuj do Gitu, logu, TVBCP ani odpovedi; zobraz jen "
         "nejmensi rozsah, ktery si Mila vyslovne vyzada. "
         "V bezne odpovedi uvadej jen samotny nazev souboru, pripadne nejkratsi nutnou "
@@ -4724,8 +4721,9 @@ def build_human_adam_profiles() -> HumanAdamProfileManager:
                 + handoff_path
                 + ". Kanonicky TVBCP: "
                 + tvbcp_path
-                + ". Tyto dokumenty primo nemen bez Milova vyslovneho pokynu; bezny "
-                + "potvrzeny checkpoint je aktualizuje transakcne."
+                + ". Pro tuto dvojici plati spolecna pravidla povinneho projektoveho "
+                + "zapisu v povolenem vyvojovem tahu; zapis nespousti checkpoint. "
+                + "Potvrzeny checkpoint Cockpitu je aktualizuje transakcne."
                 + capability_instructions
                 + private_context_instructions
             ),
