@@ -101,6 +101,8 @@ async def second():
         self.assertIn("tests.test_cockpit_awake_mode", TEST_MODULES)
         self.assertIn("tests.test_cockpit_fast_feedback", TEST_MODULES)
         self.assertIn("tests.test_cockpit_frontend", TEST_MODULES)
+        self.assertIn("tests.test_library_photos", TEST_MODULES)
+        self.assertIn("tests.test_article_archive", TEST_MODULES)
         self.assertIn("tests.test_cockpit_readonly_routes", TEST_MODULES)
         self.assertIn("scripts/cockpit_fast_feedback.py", COMPILE_PATHS)
         self.assertIn("app/cockpit_frontend.py", COMPILE_PATHS)

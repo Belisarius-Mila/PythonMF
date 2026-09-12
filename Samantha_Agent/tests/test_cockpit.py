@@ -1760,8 +1760,8 @@ class CockpitTests(unittest.TestCase):
         self.assertIn('category === "travel_places" && (!label || label === "Ručně psaný recept")', COCKPIT_HTML)
         self.assertIn('return "Ilustrační foto";', COCKPIT_HTML)
         self.assertIn('currentLibrarySelectedItem && currentLibrarySelectedItem.category', COCKPIT_HTML)
-        self.assertIn('itemCategory === "travel_places" ? "Ilustrační foto"', COCKPIT_HTML)
-        self.assertIn('itemCategory === "recipes" ? "Ručně psaný recept" : "Doprovodná fotografie"', COCKPIT_HTML)
+        self.assertIn('category === "travel_places" ? "Ilustrační foto"', COCKPIT_HTML)
+        self.assertIn('category === "recipes" ? "Ručně psaný recept" : "Doprovodná fotografie"', COCKPIT_HTML)
         self.assertIn("item.category || currentLibraryCategory", COCKPIT_HTML)
         self.assertIn('value="ai_tools"', COCKPIT_HTML)
         self.assertIn('data-library-category="ai_tools"', COCKPIT_HTML)
@@ -1869,14 +1869,14 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("libraryBookCoverPreview", COCKPIT_HTML)
         self.assertIn("libraryBookCoverDraftBtn", COCKPIT_HTML)
         self.assertIn("/api/library/book/cover-draft", COCKPIT_HTML)
-        self.assertIn("/api/library/book/cover-prepare", COCKPIT_HTML)
+        self.assertIn("/api/library/image-prepare", COCKPIT_HTML)
         self.assertIn("function recognizeLibraryBookCover()", COCKPIT_HTML)
         self.assertIn("Zmenšená obálka se uloží až s knihou", COCKPIT_HTML)
-        self.assertIn('image_data_url: preparedCover.image_data_url', COCKPIT_HTML)
-        self.assertIn('filename: preparedCover.filename || "obalka-knihy.jpg"', COCKPIT_HTML)
+        self.assertIn('image_data_url: imageDataUrl', COCKPIT_HTML)
+        self.assertIn('filename: task.prepared.filename', COCKPIT_HTML)
         self.assertNotIn("const imageDataUrl = await blobToDataUrl(cover.file);", COCKPIT_HTML)
         self.assertIn('role: "book_cover"', COCKPIT_HTML)
-        self.assertIn("Přidej ji v části Přílohy", COCKPIT_HTML)
+        self.assertIn("Obálka se připojí na pozadí", COCKPIT_HTML)
         self.assertIn('libraryBookOcrPhotoInput" type="file" accept="image/*" capture="environment"', COCKPIT_HTML)
         self.assertIn("libraryBookOcrReadBtn", COCKPIT_HTML)
         self.assertIn("libraryBookOcrTextPreview", COCKPIT_HTML)
@@ -1942,7 +1942,7 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("function refreshLibraryItemAfterAttachment(item, articleId)", COCKPIT_HTML)
         self.assertEqual(
             COCKPIT_HTML.count("refreshLibraryItemAfterAttachment(data.item || {}, articleId);"),
-            3,
+            2,
         )
         self.assertNotIn("await loadLibraryCategory(item.category || currentLibraryCategory", COCKPIT_HTML)
         self.assertNotIn("await loadLibraryCategory(currentLibraryCategory);\n        await loadLibraryItem(articleId);", COCKPIT_HTML)

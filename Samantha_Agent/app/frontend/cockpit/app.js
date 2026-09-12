@@ -73,6 +73,11 @@
     const libraryTextTagsInput = document.getElementById("libraryTextTagsInput");
     const libraryTextBodyInput = document.getElementById("libraryTextBodyInput");
     const libraryTextStatus = document.getElementById("libraryTextStatus");
+    const libraryTextPhotosInput = document.getElementById("libraryTextPhotosInput");
+    const libraryArchivePhotosInput = document.getElementById("libraryArchivePhotosInput");
+    const libraryPhotoQueue = document.getElementById("libraryPhotoQueue");
+    const libraryPhotoQueueList = document.getElementById("libraryPhotoQueueList");
+    const libraryPhotoQueueStatus = document.getElementById("libraryPhotoQueueStatus");
     const libraryBookTitleInput = document.getElementById("libraryBookTitleInput");
     const libraryBookAuthorInput = document.getElementById("libraryBookAuthorInput");
     const libraryBookPublicationYearInput = document.getElementById("libraryBookPublicationYearInput");
@@ -377,7 +382,91 @@
     let frontendLastError = "";
     let frontendErrorHistory = [];
     let dashboardStatusSignals = {};
-    const maxLibraryImageBytes = 7 * 1024 * 1024;
+    const maxLibraryImageBytes = LibraryPhotos.MAX_INPUT;
+    let libraryBookCoverTask = null;
+    const libraryPhotos = new LibraryPhotos.Queue({
+      upload: async (task) => {
+        const target = task.target;
+        const imageDataUrl = await blobToDataUrl(task.prepared.blob);
+        return postJson("/api/library/attachment/add", {
+          article_id: target.id, request_id: task.id, image_data_url: imageDataUrl,
+          filename: task.prepared.filename, category: target.category,
+          label: target.label || defaultLibraryPhotoLabel(target.category),
+          role: target.role || (target.category === "recipes" ? "handwritten_recipe_scan" : "supporting_image"),
+          tags: target.tags || "", note: target.note || "",
+        });
+      },
+      changed: renderLibraryPhotoQueue,
+      attached: (data, target) => refreshLibraryItemAfterAttachment(data.item || {}, target.id),
+    });
+
+    function defaultLibraryPhotoLabel(category) {
+      return category === "travel_places" ? "Ilustrační foto" : (category === "recipes" ? "Ručně psaný recept" : "Doprovodná fotografie");
+    }
+
+    function renderLibraryPhotoQueue() {
+      libraryPhotoQueue.classList.toggle("hidden", libraryPhotos.tasks.length === 0);
+      const unfinished = libraryPhotos.tasks.filter((task) => task.state !== "attached").length;
+      document.getElementById("libraryPhotosClearDoneBtn").disabled = !libraryPhotos.tasks.some((task) => task.state === "attached");
+      libraryPhotoQueueStatus.textContent = unfinished
+        ? `Zbývá ${unfinished} fotografií. Můžeš dál psát; tuto stránku nech otevřenou do dokončení přenosu.`
+        : "Všechny fotografie byly připojené.";
+      libraryPhotoQueueList.replaceChildren();
+      for (const task of libraryPhotos.tasks) {
+        const row = document.createElement("div");
+        row.className = "library-photo-row";
+        row.dataset.photoId = task.id;
+        if (task.preview) {
+          const preview = document.createElement("img");
+          preview.src = task.preview;
+          preview.alt = "Náhled připravené fotografie";
+          row.appendChild(preview);
+        }
+        const text = document.createElement("div");
+        text.className = "library-photo-row-text";
+        text.textContent = task.name;
+        const detail = document.createElement("small");
+        const destination = task.target || task.hint;
+        const targetName = destination ? destination.title || "Vybraná karta" : ({text: "Nový text", url: "Nový příspěvek z webu", cover: "Nová kniha"}[task.group] || "Vybraná karta");
+        const states = {preparing: "Připravuji", ready: "Připraveno", queued: "Čeká na přenos", uploading: "Připojuji", attached: "Připojeno", error: "Nepodařilo se"};
+        const size = task.prepared ? ` · ${Math.ceil(task.prepared.blob.size / 1024)} KiB` : "";
+        detail.textContent = `${targetName} · ${states[task.state] || task.state}${size}${task.error ? ": " + task.error : ""}${!task.target && task.state === "ready" ? " · čeká na potvrzení uložení" : ""}`;
+        text.appendChild(detail);
+        row.appendChild(text);
+        const button = (label, action) => {
+          const node = document.createElement("button");
+          node.type = "button"; node.className = "secondary"; node.textContent = label;
+          node.addEventListener("click", action); row.appendChild(node);
+        };
+        if (task.state === "error") button("Zkusit znovu", () => libraryPhotos.retry(task));
+        if (task.hint && !task.target && task.hint.id !== currentLibrarySelectedId) {
+          button("Zobrazit kartu", () => loadLibraryItem(task.hint.id));
+        }
+        if (!task.sending) button(task.state === "attached" ? "Skrýt" : (task.target ? "Ukončit připojování" : "Odebrat z výběru"), () => {
+          if (task === libraryBookCoverTask) clearLibraryBookCover();
+          else libraryPhotos.remove(task);
+        });
+        libraryPhotoQueueList.appendChild(row);
+      }
+    }
+
+    function selectLibraryPhotos(input, group) {
+      const hint = group === "attachment" && currentLibrarySelectedItem
+        ? {id: currentLibrarySelectedId, title: currentLibrarySelectedItem.title, category: currentLibrarySelectedItem.category}
+        : null;
+      if (group === "attachment" && !hint) return;
+      for (const file of Array.from(input.files || [])) libraryPhotos.add(file, group, hint);
+      input.value = "";
+    }
+
+    function bindLibraryPhotos(tasks, item, extra = {}) {
+      libraryPhotos.bind(tasks, {id: item.id, title: item.title, category: item.category || "other", ...extra});
+    }
+
+    async function preparedLibraryPhotoDataUrl(file) {
+      const prepared = await LibraryPhotos.prepare(file);
+      return blobToDataUrl(prepared.blob);
+    }
 
     function escapeHtml(value) {
       return String(value || "")
@@ -4446,6 +4535,7 @@ Soubor nebude trvale smazán.`);
       closeLibraryEditor(true);
       const category = libraryArchiveCategory.value || currentLibraryCategory || "other";
       const tags = libraryArchiveTagsInput.value.trim();
+      const photos = libraryPhotos.pending("url");
       libraryArchiveBtn.disabled = true;
       libraryArchiveStatus.textContent = "Stahuji a ukládám článek do soukromé knihovny...";
       try {
@@ -4455,6 +4545,7 @@ Soubor nebude trvale smazán.`);
           return;
         }
         const item = data.item || {};
+        if (item.id) bindLibraryPhotos(photos, item);
         const savedTitle = item.one_line_title || item.title || "uložený článek";
         const savedMessage = `${data.message || "Článek uložen."} Otevřeno: ${savedTitle}`;
         libraryArchiveStatus.textContent = savedMessage;
@@ -4494,6 +4585,7 @@ Soubor nebude trvale smazán.`);
       const tags = libraryTextTagsInput.value.trim();
       const sourceLabel = libraryTextSourceInput.value.trim() || "Vložený text";
       const sourceNote = libraryTextSourceNoteInput.value.trim();
+      const photos = libraryPhotos.pending("text");
       libraryTextSaveBtn.disabled = true;
       libraryTextStatus.textContent = "Ukládám text do znalostní databáze...";
       try {
@@ -4510,7 +4602,8 @@ Soubor nebude trvale smazán.`);
           return;
         }
         const item = data.item || {};
-        libraryTextStatus.textContent = data.message || "Text uložen.";
+        if (item.id) bindLibraryPhotos(photos, item);
+        libraryTextStatus.textContent = (data.message || "Text uložen.") + (photos.length ? " Fotografie se připojují na pozadí." : "");
         libraryTextTitleInput.value = "";
         libraryTextSourceInput.value = "";
         libraryTextSourceNoteInput.value = "";
@@ -4550,6 +4643,8 @@ Soubor nebude trvale smazán.`);
     }
 
     function clearLibraryBookCover() {
+      if (libraryBookCoverTask && !libraryBookCoverTask.target) libraryPhotos.remove(libraryBookCoverTask);
+      libraryBookCoverTask = null;
       libraryBookCoverInput.value = "";
       if (libraryBookCoverObjectUrl) {
         URL.revokeObjectURL(libraryBookCoverObjectUrl);
@@ -4560,26 +4655,33 @@ Soubor nebude trvale smazán.`);
       libraryBookCoverStatus.textContent = "Rozpoznání odešle OpenAI pouze vybranou fotografii. Zmenšená obálka se uloží až s knihou.";
     }
 
-    function previewSelectedLibraryBookCover() {
+    async function previewSelectedLibraryBookCover() {
       if (libraryBookCoverObjectUrl) {
         URL.revokeObjectURL(libraryBookCoverObjectUrl);
         libraryBookCoverObjectUrl = "";
       }
-      const checked = validateSelectedLibraryBookCover(maxLibraryImageBytes);
-      if (checked.error) {
-        libraryBookCoverPreview.removeAttribute("src");
-        libraryBookCoverPreviewWrap.classList.add("hidden");
-        libraryBookCoverStatus.textContent = checked.error;
-        return;
-      }
-      if (!checked.file) {
+      if (libraryBookCoverTask && !libraryBookCoverTask.target) libraryPhotos.remove(libraryBookCoverTask);
+      libraryBookCoverTask = null;
+      libraryBookCoverPreview.removeAttribute("src");
+      libraryBookCoverPreviewWrap.classList.add("hidden");
+      const file = libraryBookCoverInput.files && libraryBookCoverInput.files[0];
+      if (!file) {
         clearLibraryBookCover();
         return;
       }
-      libraryBookCoverObjectUrl = URL.createObjectURL(checked.file);
+      const task = libraryPhotos.add(file, "cover");
+      libraryBookCoverTask = task;
+      libraryBookCoverStatus.textContent = "Připravuji obálku do 1 MiB. Můžeš pokračovat ve vyplňování knihy.";
+      await task.preparation;
+      if (libraryBookCoverTask !== task) return;
+      if (!task.prepared) {
+        libraryBookCoverStatus.textContent = task.error;
+        return;
+      }
+      libraryBookCoverObjectUrl = URL.createObjectURL(task.prepared.blob);
       libraryBookCoverPreview.src = libraryBookCoverObjectUrl;
       libraryBookCoverPreviewWrap.classList.remove("hidden");
-      libraryBookCoverStatus.textContent = "Fotografie je vybraná, ale zatím nebyla odeslána ani uložena.";
+      libraryBookCoverStatus.textContent = "Obálka je připravená do 1 MiB. Zmenšená obálka se uloží až s knihou; rozpoznání vyžaduje stisk tlačítka.";
     }
 
     async function recognizeLibraryBookCover() {
@@ -4592,7 +4694,7 @@ Soubor nebude trvale smazán.`);
       libraryBookCoverDraftBtn.disabled = true;
       libraryBookCoverStatus.textContent = "Rozpoznávám viditelné údaje. Kniha ani fotografie se tím neukládají...";
       try {
-        const imageDataUrl = await blobToDataUrl(checked.file);
+        const imageDataUrl = await preparedLibraryPhotoDataUrl(checked.file);
         const data = await postJson("/api/library/book/cover-draft", {
           image_data_url: imageDataUrl,
         });
@@ -4648,6 +4750,7 @@ Soubor nebude trvale smazán.`);
         return;
       }
       libraryBookOcrFiles.push(checked.file);
+      LibraryPhotos.prepare(checked.file).catch(() => {});
       libraryBookOcrReadBtn.disabled = false;
       const count = libraryBookOcrFiles.length;
       libraryBookOcrStatus.textContent = `Vybráno ${count}/3 fotografií. ${count < 3 ? "Můžeš přidat další snímek." : "Nyní spusť OCR."}`;
@@ -4665,7 +4768,7 @@ Soubor nebude trvale smazán.`);
         const imageDataUrls = [];
         for (let index = 0; index < libraryBookOcrFiles.length; index += 1) {
           libraryBookOcrStatus.textContent = `Dočasně zmenšuji fotografii ${index + 1}/${libraryBookOcrFiles.length} pro OCR...`;
-          const originalImageDataUrl = await blobToDataUrl(libraryBookOcrFiles[index]);
+          const originalImageDataUrl = await preparedLibraryPhotoDataUrl(libraryBookOcrFiles[index]);
           const preparation = await postJson("/api/library/book/text-photo-prepare", {
             image_data_url: originalImageDataUrl,
           });
@@ -4877,7 +4980,7 @@ Soubor nebude trvale smazán.`);
       readButton.disabled = true;
       photoStatus.textContent = "Čtu ISBN. Fotografie se neukládá...";
       try {
-        const imageDataUrl = await blobToDataUrl(checked.file);
+        const imageDataUrl = await preparedLibraryPhotoDataUrl(checked.file);
         const data = await postJson("/api/library/book/isbn-photo", {image_data_url: imageDataUrl});
         if (!data.ok || !data.isbn) {
           photoStatus.textContent = data.message || "ISBN se z fotografie nepodařilo přečíst.";
@@ -5057,29 +5160,10 @@ Soubor nebude trvale smazán.`);
       }
       if (!confirmLibraryEditorDiscard()) return;
       closeLibraryEditor(true);
-      const cover = validateSelectedLibraryBookCover(maxLibraryImageBytes);
-      if (cover.error) {
-        libraryBookStatus.textContent = cover.error;
-        libraryBookCoverInput.focus();
-        return;
-      }
+      const coverTask = libraryBookCoverTask;
       libraryBookSaveBtn.disabled = true;
       libraryBookStatus.textContent = "Ukládám knihu do soukromé knihovny...";
       try {
-        let preparedCover = null;
-        if (cover.file) {
-          libraryBookStatus.textContent = "Zmenšuji obálku před uložením knihy...";
-          const originalCoverDataUrl = await blobToDataUrl(cover.file);
-          const preparation = await postJson("/api/library/book/cover-prepare", {
-            image_data_url: originalCoverDataUrl,
-          });
-          if (!preparation.ok || !preparation.image_data_url) {
-            libraryBookStatus.textContent = preparation.message || "Obálku se nepodařilo bezpečně zmenšit.";
-            return;
-          }
-          preparedCover = preparation;
-          libraryBookStatus.textContent = "Obálka je zmenšená. Ukládám knihu do soukromé knihovny...";
-        }
         const data = await postJson("/api/library/book", {
           title,
           author,
@@ -5095,27 +5179,11 @@ Soubor nebude trvale smazán.`);
         }
         const item = data.item || {};
         let finalMessage = data.message || "Kniha byla uložena.";
-        if (preparedCover && item.id) {
-          try {
-            const attachment = await postJson("/api/library/attachment/add", {
-              article_id: item.id,
-              image_data_url: preparedCover.image_data_url,
-              filename: preparedCover.filename || "obalka-knihy.jpg",
-              category: "books",
-              label: "Obálka knihy",
-              role: "book_cover",
-              tags: "obalka",
-              note: "",
-            });
-            finalMessage += attachment.ok
-              ? " Obálka byla připojena."
-              : ` Obálku se nepodařilo připojit: ${attachment.message || "neznámá chyba"}. Přidej ji v části Přílohy.`;
-          } catch (coverError) {
-            recordFrontendError(coverError);
-            finalMessage += ` Obálku se nepodařilo připojit: ${coverError}. Přidej ji v části Přílohy.`;
-          }
-        } else if (preparedCover) {
-          finalMessage += " Obálku se nepodařilo připojit, protože odpověď neobsahovala identifikátor nové karty. Přidej ji v části Přílohy.";
+        if (coverTask && item.id) {
+          bindLibraryPhotos([coverTask], item, {category: "books", label: "Obálka knihy", role: "book_cover", tags: "obalka"});
+          finalMessage += " Obálka se připojí na pozadí; stav uvidíš u fotografie.";
+        } else if (coverTask) {
+          finalMessage += " Obálka zůstává ve výběru; odpověď neobsahuje identifikátor karty.";
         }
         libraryBookStatus.textContent = finalMessage;
         libraryBookTitleInput.value = "";
@@ -5145,55 +5213,25 @@ Soubor nebude trvale smazán.`);
 
     async function attachLibraryImage() {
       const articleId = currentLibrarySelectedId;
-      if (!articleId) {
+      const item = currentLibrarySelectedItem;
+      if (!articleId || !item) {
         libraryAttachmentStatus.textContent = "Nejdřív vyber kartu v seznamu vlevo.";
         return;
       }
-      const file = libraryAttachmentFileInput.files && libraryAttachmentFileInput.files[0];
-      if (!file) {
-        libraryAttachmentStatus.textContent = "Vyber obrázek k připojení.";
+      const photos = libraryPhotos.pending("attachment").filter((task) => task.hint && task.hint.id === articleId);
+      if (!photos.length) {
+        libraryAttachmentStatus.textContent = "Vyber fotografie k této kartě.";
         libraryAttachmentFileInput.focus();
         return;
       }
-      if (!String(file.type || "").startsWith("image/")) {
-        libraryAttachmentStatus.textContent = "Soubor musí být obrázek.";
-        return;
-      }
-      if (file.size > maxLibraryImageBytes) {
-        libraryAttachmentStatus.textContent = "Obrázek je větší než 7 MB. Nejdřív ho zmenši nebo pošli menší kopii.";
-        return;
-      }
-      libraryAttachmentSaveBtn.disabled = true;
-      libraryAttachmentStatus.textContent = "Připojuji obrázek a vytvářím čitelnou kopii...";
-      try {
-        const imageDataUrl = await blobToDataUrl(file);
-        const itemCategory = ((currentLibrarySelectedItem && currentLibrarySelectedItem.category) || currentLibraryCategory || "other");
-        const data = await postJson("/api/library/attachment/add", {
-          article_id: articleId,
-          image_data_url: imageDataUrl,
-          filename: file.name || "attachment.jpg",
-          category: itemCategory,
-          label: libraryAttachmentLabelInput.value.trim() || (itemCategory === "travel_places" ? "Ilustrační foto" : (itemCategory === "recipes" ? "Ručně psaný recept" : "Doprovodná fotografie")),
-          tags: libraryAttachmentTagsInput.value.trim(),
-          note: libraryAttachmentNoteInput.value.trim()
-        });
-        if (!data.ok) {
-          libraryAttachmentStatus.textContent = data.message || "Obrázek se nepodařilo připojit.";
-          return;
-        }
-        libraryAttachmentFileInput.value = "";
-        libraryAttachmentLabelInput.value = "";
-        libraryAttachmentTagsInput.value = "";
-        libraryAttachmentNoteInput.value = "";
-        refreshLibraryItemAfterAttachment(data.item || {}, articleId);
-        const editReminder = libraryEditorDirty ? " Rozepsané úpravy článku zůstávají neuložené." : "";
-        libraryAttachmentStatus.textContent = `${data.message || "Obrázek připojen."}${editReminder}`;
-      } catch (err) {
-        recordFrontendError(err);
-        libraryAttachmentStatus.textContent = `Chyba připojení obrázku: ${err}`;
-      } finally {
-        libraryAttachmentSaveBtn.disabled = !currentLibrarySelectedId;
-      }
+      bindLibraryPhotos(photos, {id: articleId, title: item.title, category: item.category}, {
+        label: libraryAttachmentLabelInput.value.trim() || defaultLibraryPhotoLabel(item.category),
+        tags: libraryAttachmentTagsInput.value.trim(), note: libraryAttachmentNoteInput.value.trim(),
+      });
+      libraryAttachmentLabelInput.value = "";
+      libraryAttachmentTagsInput.value = "";
+      libraryAttachmentNoteInput.value = "";
+      libraryAttachmentStatus.textContent = "Fotografie se připojují na pozadí. Můžeš pokračovat v psaní nebo otevřít další kartu.";
     }
 
     async function deleteSelectedLibraryItem() {
@@ -7071,6 +7109,24 @@ ${item.context || ""}`);
     });
     libraryEditBookCategoryChoices.addEventListener("change", markLibraryEditorDirty);
     libraryAttachmentSaveBtn.addEventListener("click", attachLibraryImage);
+    document.getElementById("libraryPhotosClearDoneBtn").addEventListener("click", () => {
+      for (const task of [...libraryPhotos.tasks]) if (task.state === "attached") libraryPhotos.remove(task);
+    });
+    libraryAttachmentFileInput.addEventListener("change", () => selectLibraryPhotos(libraryAttachmentFileInput, "attachment"));
+    libraryTextPhotosInput.addEventListener("change", () => selectLibraryPhotos(libraryTextPhotosInput, "text"));
+    libraryArchivePhotosInput.addEventListener("change", () => selectLibraryPhotos(libraryArchivePhotosInput, "url"));
+    [libraryBookIsbnPhotoInput, libraryEditBookIsbnPhotoInput].forEach((input) => {
+      input.addEventListener("change", () => {
+        const file = input.files && input.files[0];
+        if (file) LibraryPhotos.prepare(file).catch(() => {});
+      });
+    });
+    window.addEventListener("beforeunload", (event) => {
+      if (libraryPhotos.unfinished()) {
+        event.preventDefault();
+        event.returnValue = "";
+      }
+    });
     libraryShowFullTextBtn.addEventListener("click", loadFullLibraryItemText);
     libraryOpenSourceBtn.addEventListener("click", openSelectedLibrarySource);
     libraryExportPrepareBtn.addEventListener("click", prepareSelectedLibraryPdfExport);

@@ -548,6 +548,12 @@
           </div>
         </section>
         <div id="libraryStatus" class="status-line">Načítám knihovnu...</div>
+        <section id="libraryPhotoQueue" class="library-photo-queue hidden" aria-label="Připravované fotografie">
+          <strong>Fotografie</strong>
+          <div id="libraryPhotoQueueStatus" class="status-line" role="status"></div>
+          <div id="libraryPhotoQueueList"></div>
+          <button class="secondary" id="libraryPhotosClearDoneBtn" type="button">Skrýt dokončené</button>
+        </section>
         <div class="library-add-toolbar" aria-label="Přidat obsah do knihovny">
           <button class="secondary" id="libraryAddUrlBtn" type="button" aria-expanded="false" aria-controls="libraryArchivePanel">Přidat z webu</button>
           <button class="secondary" id="libraryAddTextBtn" type="button" aria-expanded="false" aria-controls="libraryTextPanel">Přidat vlastní text</button>
@@ -578,10 +584,20 @@
             </label>
             <button class="primary library-field-button" id="libraryArchiveBtn" type="button">Uložit URL</button>
           </div>
+          <label class="library-field">
+            <span class="library-field-label">Fotografie k příspěvku (volitelné)</span>
+            <input id="libraryArchivePhotosInput" type="file" accept="image/*" multiple>
+            <span class="library-field-hint">Připraví se na pozadí do 1 MiB. Připojí se až po uložení příspěvku.</span>
+          </label>
           <div id="libraryArchiveStatus" class="status-line">Vlož URL, vyber kategorii a ulož ji do soukromé knihovny.</div>
         </div>
         <div id="libraryTextPanel" class="library-add-panel hidden">
           <h3 class="library-add-title">Přidat vlastní text</h3>
+          <label class="library-field">
+            <span class="library-field-label">Fotografie k příspěvku (volitelné)</span>
+            <input id="libraryTextPhotosInput" type="file" accept="image/*" multiple>
+            <span class="library-field-hint">Můžeš dál psát. Fotografie se připraví do 1 MiB a připojí po uložení textu.</span>
+          </label>
           <div class="library-text-grid">
             <label class="library-field">
               <span class="library-field-label">Název (volitelný)</span>
@@ -902,7 +918,7 @@
               <div class="library-attachment-grid">
                 <label class="library-field">
                   <span class="library-field-label">Fotografie</span>
-                  <input id="libraryAttachmentFileInput" type="file" accept="image/*">
+                  <input id="libraryAttachmentFileInput" type="file" accept="image/*" multiple>
                 </label>
                 <label class="library-field">
                   <span class="library-field-label">Popisek fotografie</span>
@@ -913,13 +929,13 @@
                   <input id="libraryAttachmentTagsInput" type="text" placeholder="např. scan, originál">
                   <span class="library-field-hint">Přidají se celé kartě, ne pouze této příloze.</span>
                 </label>
-                <button class="primary library-field-button" id="libraryAttachmentSaveBtn" type="button" disabled>Přidat fotografii</button>
+                <button class="primary library-field-button" id="libraryAttachmentSaveBtn" type="button" disabled>Přidat fotografie</button>
               </div>
               <label class="library-field">
                 <span class="library-field-label">Poznámka k fotografii (volitelná)</span>
                 <input id="libraryAttachmentNoteInput" type="text" placeholder="Doplňující informace k příloze">
               </label>
-              <div id="libraryAttachmentStatus" class="status-line">Vyber fotografii; přidá se až po stisknutí tlačítka.</div>
+              <div id="libraryAttachmentStatus" class="status-line">Vyber fotografie. Zmenší se na pozadí do 1 MiB; připojí se až po stisku Přidat fotografie.</div>
               <div id="libraryReaderAttachments" class="library-reader-attachments"></div>
             </section>
             <div id="libraryFullTextNotice" class="library-full-text-notice hidden">

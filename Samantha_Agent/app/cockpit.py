@@ -299,6 +299,7 @@ from app.email.work_models import (
     normalize_email_work_item,
 )
 from app.file_persistence import FilePersistenceError, append_jsonl_locked
+from app.library_images import MAX_LIBRARY_PHOTO_INPUT_BYTES, prepare_library_photo
 from app.codex_approval_state import (
     clear_codex_approval_request,
     load_codex_approval_request,
@@ -931,6 +932,11 @@ def library_book_cover_prepare_action(payload: dict[str, Any]) -> dict[str, Any]
     }
 
 
+def library_image_prepare_action(image_bytes: bytes) -> bytes:
+    """Prepare a browser-unsupported image locally without archive writes or AI."""
+    return prepare_library_photo(image_bytes)
+
+
 def library_book_text_ocr_action(payload: dict[str, Any]) -> dict[str, Any]:
     raw_images = payload.get("image_data_urls", [])
     image_data_urls = raw_images if isinstance(raw_images, list) else []
@@ -1050,6 +1056,7 @@ def library_attach_image_action(payload: dict[str, Any]) -> dict[str, Any]:
             article_id=str(payload.get("article_id", "")),
             image_bytes=image_bytes,
             filename=str(payload.get("filename", "")),
+            request_id=str(payload.get("request_id", "")),
             label=str(payload.get("label", "")) or ("Ručně psaný recept" if is_recipe else "Doprovodná fotografie"),
             role=str(payload.get("role", "")) or ("handwritten_recipe_scan" if is_recipe else "supporting_image"),
             note=str(payload.get("note", "")),
@@ -9203,6 +9210,14 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "direct",
     },
     {
+        "path": "/api/library/image-prepare",
+        "label": "Docasne zmensit fotografii knihovny na Macu",
+        "risk": "read_only_via_post",
+        "confirmation": "selected_photo_local_preparation_no_persistence",
+        "handler_name": "library_image_prepare_action",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/library/book/cover-prepare",
         "label": "Zmensit obalku knihy pred ulozenim",
         "risk": "read_only_via_post",
@@ -9615,6 +9630,15 @@ class CockpitServer:
                 ):
                     return
                 parsed = urlparse(self.path)
+                if parsed.path == "/api/library/image-worker.js":
+                    worker = (PROJECT_ROOT / "app" / "frontend" / "cockpit" / "library_image_worker.js").read_bytes()
+                    self.send_response(HTTPStatus.OK)
+                    self.send_header("Content-Type", "text/javascript; charset=utf-8")
+                    self.send_header("Cache-Control", "no-store")
+                    self.send_header("Content-Length", str(len(worker)))
+                    self.end_headers()
+                    self.wfile.write(worker)
+                    return
                 if parsed.path.startswith("/api/scandocu/"):
                     self.respond_scandocu_proxy(parsed, method="GET")
                     return
@@ -10277,6 +10301,20 @@ class CockpitServer:
                     payload = self.read_json()
                     self.respond_json(library_book_isbn_photo_action(payload))
                     return
+                if parsed.path == "/api/library/image-prepare":
+                    raw = self.read_library_image()
+                    try:
+                        image = library_image_prepare_action(raw)
+                    except ValueError as exc:
+                        self.respond_json({"ok": False, "error": "invalid_image", "message": str(exc)}, status=HTTPStatus.BAD_REQUEST)
+                        return
+                    self.send_response(HTTPStatus.OK)
+                    self.send_header("Content-Type", "image/jpeg")
+                    self.send_header("Cache-Control", "no-store")
+                    self.send_header("Content-Length", str(len(image)))
+                    self.end_headers()
+                    self.wfile.write(image)
+                    return
                 if parsed.path == "/api/library/book/cover-prepare":
                     payload = self.read_json()
                     self.respond_json(library_book_cover_prepare_action(payload))
@@ -10537,6 +10575,26 @@ class CockpitServer:
                     )
                     return
                 self.respond_json({"error": "not_found"}, status=HTTPStatus.NOT_FOUND)
+
+            def read_library_image(self) -> bytes:
+                """A bounded binary route; the general JSON limit stays unchanged."""
+                transfer = str(self.headers.get("Transfer-Encoding", "") or "").casefold()
+                lengths = self.headers.get_all("Content-Length") or []
+                if transfer not in {"", "identity"} or len(lengths) != 1:
+                    raise CockpitHttpError(status=HTTPStatus.BAD_REQUEST, error="invalid_image_transfer", message="Neplatný přenos fotografie.", close_connection=True)
+                try:
+                    length = int(lengths[0])
+                except ValueError as exc:
+                    raise CockpitHttpError(status=HTTPStatus.BAD_REQUEST, error="invalid_content_length", message="Neplatná délka fotografie.", close_connection=True) from exc
+                if length <= 0 or length > MAX_LIBRARY_PHOTO_INPUT_BYTES:
+                    raise CockpitHttpError(status=HTTPStatus.REQUEST_ENTITY_TOO_LARGE, error="image_too_large", message="Vyber neprázdnou fotografii nejvýše 32 MiB.", close_connection=True)
+                content_type = self.headers.get_content_type().casefold()
+                if content_type not in {"image/jpeg", "image/png", "image/webp", "image/heic", "image/heif", "application/octet-stream"}:
+                    raise CockpitHttpError(status=HTTPStatus.UNSUPPORTED_MEDIA_TYPE, error="invalid_image_type", message="Podporované fotografie jsou JPG, PNG, WEBP a HEIC/HEIF.", close_connection=True)
+                raw = self.rfile.read(length)
+                if len(raw) != length:
+                    raise CockpitHttpError(status=HTTPStatus.BAD_REQUEST, error="incomplete_request_body", message="Fotografie nebyla přijata celá.", close_connection=True)
+                return raw
 
             def read_json(self) -> dict[str, Any]:
                 transfer_encoding = str(self.headers.get("Transfer-Encoding", "") or "").strip()

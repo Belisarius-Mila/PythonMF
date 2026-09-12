@@ -1,34 +1,32 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-28 09:21 CEST
+- Aktualizováno: 2026-09-12 21:35 CEST; pracovní proud `project-knowledge-library`.
 
 ### Hotovo
-- Knihy mají nové kategorie učebnice a cizojazyčná literatura a vlastní kategorii lze přidat i při editaci
-- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
-
-### Otevřeno
-- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
-
-### Rizika
-- Žádné další doložené provozní riziko.
-
-### Další krok
-- Nasadit změnu a ověřit přidání i výběr kategorie na iPhonu
+- Fotografie se připravují hned po výběru, běžně v samostatném browserovém workeru, na JPEG nejvýše 1 MiB. HEIC/HEIF nebo nepodporovaný prohlížeč využije lokální převod na Macu.
+- Textová/URL karta i nová kniha se ukládají bez čekání na fotografie; více příloh se potom připojí ke konkrétní uložené kartě. Chybu lze opakovat jednotlivě nebo připojování ukončit.
+- Obnovený přenos nevytvoří duplicitní přílohu; souběžná editace zachová fotografie i rozepsaný editor.
+- Kategorie mimo Knihy včetně Cestování a míst už nezobrazují knižní pole.
 
 ### Rozhodnutí
-- V tomto kroku nebylo přijato nové kanonické rozhodnutí.
+- Míla schválil vývoj a c+p+n. Lokální příprava nepoužívá AI; OCR a rozpoznávání zůstávají samostatnou volbou.
+- Původní soubor v telefonu se nepřepisuje. Přijímaný zdroj má limit 32 MiB / 64 milionů bodů, připravená příloha nejvýše 1 MiB a delší hranu nejvýše 2400 bodů.
+
+### Otevřeno a rizika
+- Přenos běží v otevřené stránce; po zavření nebo uspání telefonu není garantováno dokončení. Rozpracovaná fronta se po znovunačtení neobnovuje; UI ukazuje stav a varuje před odchodem.
+- Browserový test použil syntetická data v Edge včetně mobilního rozložení. Skutečné Safari na iPhonu a čitelnost Mílových fotografií se mají ověřit při prvním běžném použití.
+
+### Další krok
+- Dokončit commit, push a řízené nasazení; potom obnovit Cockpit na iPhonu a vložit jednu běžnou fotografii.
 
 ### Navrhované další kroky
-- Žádné další návrhy nad rámec bezprostředního kroku.
+- Až podle reálné zkušenosti případně upravit kompresi; další mechanismus přenosu zatím nezavádět.
 
-### Technický stav checkpointu
-- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `8707c22ad8fc`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `8707c22ad8fc` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-27T20:57:16+00:00.
-- Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
-- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
-- Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
+### Technický důkaz
+- 363 cílených testů prošlo; po poslední úpravě ukončení fronty prošlo dalších 20 cílených testů. Plná Cockpit brána prošla: 1607 testů, bez chyb (330,648 s unit testů); syntaxe a whitespace OK.
+- Browser: PNG 12 980 174 B, HEIC, dvě nezávislé karty, přerušená odpověď po skutečném uložení, souběžná editace, rozbitý obrázek, nová kniha s obálkou na pozadí; vše OK, 0 JS chyb. Text uložen při pozastavené přípravě za 0,162 s.
+- Soukromý technický doklad: `data/private/library_photos_20260912/latest_receipt.json`. Testy nevkládaly data do skutečné knihovny.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 Nazev: Knihovna v Cockpitu – editace článku a příloh
@@ -416,3 +414,26 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (7): `Samantha_Agent/app/article_archive.py`, `Samantha_Agent/app/frontend/cockpit/app.js`, `Samantha_Agent/app/frontend/cockpit/page.html`, `Samantha_Agent/app/frontend/cockpit/styles.css`, `Samantha_Agent/tests/test_article_archive.py`, `Samantha_Agent/tests/test_cockpit.py`, `Samantha_Agent/tests/test_cockpit_frontend.py`
 - Commit: `Add custom book categories in Cockpit`
 - Další krok: Nasadit změnu a ověřit přidání i výběr kategorie na iPhonu
+
+
+### 2026-09-12 21:35 CEST – Fotografie bez čekání a správná pole podle kategorie
+
+Hotovo:
+- Automatické zmenšení fotografií na nejvýše 1 MiB; výběr více snímků k textu, URL i existující kartě; obálka nové knihy se také připojuje na pozadí.
+- Stav přípravy/přenosu s názvem cílové karty, opakování jednotlivé chyby bez duplicit a ukončení neúspěšného připojování. Úpravy karty se s fotografiemi nepřepisují.
+- Oprava CSS specificity skrývá knižní pole mimo kategorii Knihy.
+
+Rozhodnutí:
+- Schválený rozsah Míly: vývoj, commit, push a nasazení. Příprava je lokální bez AI, běžně mimo hlavní vlákno UI; HEIC může přenést původní soubor na Mac k převodu.
+- Fronta je navázaná na otevřenou stránku a neměnný identifikátor uložené karty. Limity: vstup 32 MiB / 64 Mpx, výstup JPEG 1 MiB / delší hrana 2400 px.
+
+Další krok:
+- Dokončit autorizované c+p+n; po nasazení ověřit běžný snímek na iPhonu.
+
+Navrhované další kroky:
+- Případné doladění čitelnosti pouze podle reálné fotografie.
+
+Technický důkaz:
+- 363 cílených testů + 20 po poslední úpravě prošlo. Plná Cockpit brána prošla: 1607 testů, bez chyb (330,648 s unit testů); syntaxe a whitespace OK.
+- Browserové ověření syntetických dat: velké PNG a HEIC, uložení textu při pozastaveném workeru 0,162 s, správné cíle dvou karet, retry po ztrátě odpovědi bez duplicit, zachovaný editor, nová kniha s obálkou, chybná fotka neblokuje text, desktop/mobilní viditelnost polí; 0 JS chyb.
+- Rizika: čekající fronta se neobnovuje po zavření stránky; skutečný iPhone ještě nebyl otestován. Soukromý archiv ani originály na zařízení se testem neměnily.

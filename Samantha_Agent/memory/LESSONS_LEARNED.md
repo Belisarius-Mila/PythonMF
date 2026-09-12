@@ -587,3 +587,19 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   při writable=true do správné kanonické dvojice, bez oprávnění ke commitu.
   Cílená sada 198 testů prošla. Aktivaci dokládá až samostatné nasazení a
   načtení nových instrukcí, nikoli samotný commit nebo zarovnání workspace.
+
+
+### LL-036 — Fotografie na pozadí potřebují pevný cíl a bezpečné opakování
+
+- Problém: limit původního snímku blokoval upload ještě před zmenšením; čekání
+  na foto brzdilo novou kartu. Souběžné připojení a editace mohou přepsat metadata.
+- Typ: opakující se
+- Řešení nalezeno: 12092026
+- Řešení: připravovat ihned po výběru mimo UI vlákno, kartu uložit samostatně
+  a fotografii navázat na její neměnné ID. Opakovaný request musí mít stejné ID
+  a kontrolu obsahu; archivní zápisy serializovat, registry zapisovat atomicky.
+  Přenos po zavření stránky neslibovat. Při skrytí formulářových polí ověřit
+  vypočtený display: pozdější display:grid může přebít obecné .hidden.
+- Ověření: velké PNG/HEIC, ztracená odpověď po uložení bez duplicit, dvě karty,
+  souběžná editace, neblokující obálka nové knihy a computed display desktop/mobil
+  prošly na syntetických datech; 0 chyb JavaScriptu.

@@ -247,3 +247,16 @@ vlastní potvrzené vlákno a čistý workspace bez Git remote; správný TVBCP 
 read-only tah prošly. Návrat obnovil původní Human–Adam vlákno a oba workspaces
 zůstaly čisté a zarovnané. Další knihovní práci lze zahájit přímo výběrem profilu
 `Knihovna`; žádný další technický krok není nutný.
+
+
+## Fotografie v Knihovně 2026-09-12 21:35 CEST
+
+Fotografie se hned po výběru lokálně zmenší na JPEG nejvýše 1 MiB. Kartu lze
+uložit a pokračovat v psaní během přípravy i přenosu více fotografií; cílová
+karta je pevně navázaná na uložení. Stejná příprava se používá pro obálku,
+fotografie ISBN a OCR (samotné AI rozpoznání se nespouští výběrem).
+HEIC nebo nepodporovaný worker využije Mac; původní snímek v telefonu se nemění.
+Fronta potřebuje otevřenou stránku; neúspěšný přenos lze opakovat jednotlivě bez
+duplicit. Editor mimo Knihy správně skrývá ISBN, rok, autora a umístění.
+Důkazy, rizika a nasazení patří do kanonické dvojice
+`handoffs/knowledge_library_article_editing_2026_07_16.md` a `tvbcp/knihovna_cockpit.txt`.

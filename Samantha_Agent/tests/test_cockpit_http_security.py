@@ -14,6 +14,7 @@ from unittest.mock import MagicMock, patch
 from app.cockpit import COCKPIT_SECURITY_HEADERS, MAX_JSON_BODY_BYTES, CockpitServer, log_cockpit_http_event
 from app.file_persistence import lock_path_for
 from app.speech.transcribe import MAX_AUDIO_BYTES
+from app.library_images import MAX_LIBRARY_PHOTO_INPUT_BYTES
 
 
 @contextmanager
@@ -52,6 +53,44 @@ def request_json(
 
 
 class CockpitHttpSecurityTests(unittest.TestCase):
+    def test_library_image_prepare_accepts_bounded_binary_without_changing_json_limit(self) -> None:
+        from io import BytesIO
+        from PIL import Image
+        image = BytesIO()
+        Image.new("RGB", (40, 20), "blue").save(image, format="PNG")
+        with running_cockpit_server() as (host, port, _logger):
+            connection = http.client.HTTPConnection(host, port, timeout=5)
+            try:
+                connection.request("POST", "/api/library/image-prepare", body=image.getvalue(), headers={"Content-Type": "image/png", "Origin": f"http://{host}:{port}"})
+                response = connection.getresponse()
+                self.assertEqual(response.status, 200)
+                self.assertEqual(response.getheader("Content-Type"), "image/jpeg")
+                self.assertEqual(response.getheader("Cache-Control"), "no-store")
+                with Image.open(BytesIO(response.read())) as photo:
+                    self.assertEqual(photo.size, (40, 20))
+            finally:
+                connection.close()
+            with patch("app.cockpit.library_image_prepare_action") as prepare:
+                status, payload, _headers = request_json(host, port, "POST", "/api/library/image-prepare", body=b"", headers={"Content-Type": "image/heic", "Content-Length": str(MAX_LIBRARY_PHOTO_INPUT_BYTES + 1)})
+                self.assertEqual(status, 413)
+                prepare.assert_not_called()
+                status, payload, _headers = request_json(host, port, "POST", "/api/library/image-prepare", body=b"bad", headers={"Content-Type": "image/png", "Origin": "https://foreign.example"})
+                self.assertEqual(status, 403)
+                prepare.assert_not_called()
+        self.assertEqual(MAX_JSON_BODY_BYTES, 10 * 1024 * 1024)
+
+    def test_library_image_worker_is_same_origin_javascript(self) -> None:
+        with running_cockpit_server() as (host, port, _logger):
+            connection = http.client.HTTPConnection(host, port, timeout=5)
+            try:
+                connection.request("GET", "/api/library/image-worker.js")
+                response = connection.getresponse()
+                self.assertEqual(response.status, 200)
+                self.assertEqual(response.getheader("Content-Type"), "text/javascript; charset=utf-8")
+                self.assertIn(b"OffscreenCanvas", response.read())
+            finally:
+                connection.close()
+
     def test_security_headers_are_present_on_normal_response(self) -> None:
         with running_cockpit_server() as (host, port, _logger):
             status, payload, headers = request_json(host, port, "GET", "/api/server/health")

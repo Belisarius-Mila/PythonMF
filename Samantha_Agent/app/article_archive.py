@@ -8,6 +8,7 @@ import re
 import shutil
 import ssl
 import subprocess
+import threading
 import urllib.error
 import urllib.request
 from dataclasses import dataclass
@@ -17,17 +18,47 @@ from email.message import EmailMessage
 from email.utils import formatdate
 from io import BytesIO
 from html.parser import HTMLParser
+from functools import wraps
 from pathlib import Path
 from typing import Any, Callable
 from urllib.parse import urlparse, urlunparse
 from xml.sax.saxutils import escape
 
-from app.file_persistence import atomic_write_text
+from app.file_persistence import atomic_write_text, exclusive_file_lock
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_ARCHIVE_ROOT = PROJECT_ROOT / "data" / "private" / "article_archive"
 DEFAULT_LIBRARY_EXPORT_DIR = DEFAULT_ARCHIVE_ROOT / "exports"
+
+_ARCHIVE_WRITE_CONTEXT = threading.local()
+
+
+def _serialized_archive_write(function: Callable[..., Any]) -> Callable[..., Any]:
+    """Serialize archive mutations while background uploads and edits overlap."""
+    @wraps(function)
+    def wrapped(*args: Any, **kwargs: Any) -> Any:
+        confirmations = {
+            "attach_article_image": ATTACHMENT_CONFIRMATION_PHRASE,
+            "remove_article_attachment": ATTACHMENT_REMOVE_CONFIRMATION_PHRASE,
+            "delete_article": DELETE_CONFIRMATION_PHRASE,
+            "cleanup_article_text": CLEANUP_CONFIRMATION_PHRASE,
+        }
+        phrase = confirmations.get(function.__name__)
+        if phrase and (not kwargs.get("user_confirmed") or phrase.casefold() not in str(kwargs.get("confirmation_text", "")).casefold()):
+            # Let the existing function reject before even creating a lock file.
+            return function(*args, **kwargs)
+        root = Path(kwargs.get("archive_root", DEFAULT_ARCHIVE_ROOT)).resolve()
+        held = getattr(_ARCHIVE_WRITE_CONTEXT, "roots", set())
+        if root in held:
+            return function(*args, **kwargs)
+        with exclusive_file_lock(root / ".archive-write", timeout=30):
+            _ARCHIVE_WRITE_CONTEXT.roots = held | {root}
+            try:
+                return function(*args, **kwargs)
+            finally:
+                _ARCHIVE_WRITE_CONTEXT.roots = held
+    return wrapped
 
 CATEGORY_LABELS = {
     "recipes": "Recepty",
@@ -662,12 +693,14 @@ def normalize_book_publication_year(value: str) -> str:
     return clean
 
 
+@_serialized_archive_write
 def attach_article_image(
     *,
     article_id: str,
     image_path: Path | str | None = None,
     image_bytes: bytes | None = None,
     filename: str = "",
+    request_id: str = "",
     label: str = "",
     role: str = "handwritten_recipe_scan",
     note: str = "",
@@ -684,8 +717,28 @@ def attach_article_image(
         raise ValueError("Článek nebyl nalezen.")
     raw_bytes, source_name = read_attachment_input(image_path=image_path, image_bytes=image_bytes, filename=filename)
     extension = normalized_image_extension(source_name, mime_type=mime_type)
+    request_key = str(request_id or "").strip()
+    if request_key and not re.fullmatch(r"[0-9a-f]{32}", request_key):
+        raise ValueError("Neplatný identifikátor připojení fotografie.")
+    fingerprint = hashlib.sha256(raw_bytes + json.dumps(
+        {"filename": source_name, "label": label, "role": role, "note": note, "mime_type": mime_type, "tags": tags or []},
+        ensure_ascii=False, sort_keys=True,
+    ).encode("utf-8")).hexdigest()
+    if request_key:
+        metadata = json.loads(article_metadata_path(item, archive_root=archive_root).read_text(encoding="utf-8"))
+        for previous in metadata.get("attachments", []):
+            if isinstance(previous, dict) and previous.get("upload_request_id") == request_key:
+                if previous.get("upload_fingerprint") != fingerprint:
+                    raise ValueError("Stejný přenos fotografie má jiný obsah. Původní příloha zůstává zachovaná.")
+                # Also repair an interrupted registry write without attaching again.
+                update_registry(archive_root / "registry.jsonl", metadata)
+                existing = article_item_from_raw(metadata)
+                attachment = next(entry for entry in existing.attachments if entry.id == previous["id"])
+                return {"ok": True, "message": "Fotografie už byla připojena.", "item": existing.to_summary(include_attachments=True), "attachment": attachment.to_summary(), "replayed": True}
     now = datetime.now(timezone.utc).replace(microsecond=0)
-    attachment_id = unique_attachment_id(item, label or Path(source_name).stem or "obrazek", now)
+    attachment_id = f"upload-{request_key}" if request_key else unique_attachment_id(item, label or Path(source_name).stem or "obrazek", now)
+    # Decode before writing any image; invalid inputs must not leave orphan files.
+    readable_bytes, thumb_bytes = build_readable_image_versions(raw_bytes)
     item_dir = archive_root / "articles" / item.id
     original_dir = item_dir / "attachments" / "original"
     readable_dir = item_dir / "attachments" / "readable"
@@ -696,8 +749,9 @@ def attach_article_image(
     original_path = original_dir / f"{attachment_id}{extension}"
     readable_path = readable_dir / f"{attachment_id}.jpg"
     thumb_path = thumb_dir / f"{attachment_id}.jpg"
+    if request_key and original_path.exists() and original_path.read_bytes() != raw_bytes:
+        raise ValueError("Rozpracovaný přenos má jiný obrázek. Původní soubor zůstává zachovaný.")
     original_path.write_bytes(raw_bytes)
-    readable_bytes, thumb_bytes = build_readable_image_versions(raw_bytes)
     readable_path.write_bytes(readable_bytes)
     thumb_path.write_bytes(thumb_bytes)
     attachment = {
@@ -714,6 +768,7 @@ def attach_article_image(
         "thumb_size_bytes": len(thumb_bytes),
         "note": str(note or "").strip()[:1000],
         "created_at": now.isoformat(),
+        **({"upload_request_id": request_key, "upload_fingerprint": fingerprint} if request_key else {}),
     }
     metadata = append_attachment_metadata(
         archive_root=archive_root,
@@ -741,6 +796,7 @@ def attach_article_image(
     }
 
 
+@_serialized_archive_write
 def update_article(
     *,
     article_id: str,
@@ -839,6 +895,7 @@ def update_article(
     }
 
 
+@_serialized_archive_write
 def update_article_attachment(
     *,
     article_id: str,
@@ -898,6 +955,7 @@ def update_article_attachment(
     }
 
 
+@_serialized_archive_write
 def remove_article_attachment(
     *,
     article_id: str,
@@ -1108,6 +1166,7 @@ def encode_jpeg(image: Any, *, quality: int) -> bytes:
     return buffer.getvalue()
 
 
+@_serialized_archive_write
 def append_attachment_metadata(
     *,
     archive_root: Path,
@@ -1134,7 +1193,7 @@ def append_attachment_metadata(
     if attachments and "ma-obrazek" not in existing_tags:
         existing_tags.append("ma-obrazek")
     metadata["tags"] = existing_tags
-    metadata_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    atomic_write_text(metadata_path, json.dumps(metadata, ensure_ascii=False, indent=2) + "\n")
     update_registry(archive_root / "registry.jsonl", metadata)
     return metadata
 
@@ -1654,6 +1713,7 @@ def text_entry_id(title: str, text: str, now: datetime) -> str:
     return f"{now.date().isoformat()}_{slugify(title)}_{digest}"
 
 
+@_serialized_archive_write
 def write_article_archive(
     *,
     source_url: str,
@@ -1694,6 +1754,7 @@ def write_article_archive(
     return metadata
 
 
+@_serialized_archive_write
 def write_text_archive(
     *,
     title: str,
@@ -1762,7 +1823,7 @@ def update_registry(path: Path, metadata: dict[str, Any]) -> None:
                 rows.append(item)
     if not replaced:
         rows.append(metadata)
-    path.write_text(
+    atomic_write_text(path,
         "".join(json.dumps(row, ensure_ascii=False) + "\n" for row in rows),
         encoding="utf-8",
     )
@@ -2081,6 +2142,7 @@ def get_article(
     }
 
 
+@_serialized_archive_write
 def set_article_read_state(
     *,
     article_id: str,
@@ -2599,6 +2661,7 @@ def find_article(article_id: str, archive_root: Path = DEFAULT_ARCHIVE_ROOT) -> 
     return None
 
 
+@_serialized_archive_write
 def delete_article(
     *,
     article_id: str,
@@ -2678,6 +2741,7 @@ def article_text_cleanup_report(
     }
 
 
+@_serialized_archive_write
 def cleanup_article_text(
     *,
     article_id: str,

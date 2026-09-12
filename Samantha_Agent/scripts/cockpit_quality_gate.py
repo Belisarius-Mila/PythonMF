@@ -30,6 +30,8 @@ COMPILE_PATHS = (
     "app/cockpit.py",
     "app/cockpit_awake_mode.py",
     "app/cockpit_frontend.py",
+    "app/library_images.py",
+    "app/article_archive.py",
     "app/cockpit_readonly_routes.py",
     "app/email/archive_browser.py",
     "app/command_cheatsheet.py",
@@ -175,6 +177,8 @@ TEST_MODULES = (
     "tests.test_cockpit_awake_mode",
     "tests.test_cockpit_fast_feedback",
     "tests.test_cockpit_frontend",
+    "tests.test_library_photos",
+    "tests.test_article_archive",
     "tests.test_cockpit_readonly_routes",
     "tests.test_cockpit_server",
     "tests.test_cockpit_status_service",
@@ -496,6 +500,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         "ScanDocu javascript syntax",
         [node_binary(), "--check", "-"],
         input_text=scandocu_javascript_source(),
+    )
+    run_checked(
+        "Library photo worker javascript syntax",
+        [node_binary(), "--check", "app/frontend/cockpit/library_image_worker.js"],
     )
     run_checked(
         "Human–Adam javascript syntax",
