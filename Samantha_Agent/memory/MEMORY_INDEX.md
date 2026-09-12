@@ -40,7 +40,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` - Cockpit: přehled Codexu i screenů a potvrzované uzavření, s ochranou aktuální práce. Lokální testy prošly; plná brána a požadovaný push/nasazení se dokončují.
+- `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` - Cockpit: nasazený přehled Codexu i screenů a potvrzované uzavření s ochranou aktuální práce. Plná brána 1554/1554, prohlížečový test a živý smoke 5/5 prošly.
 
 - `projects/python_se_samanthou.md`; `handoffs/python_se_samanthou_course_package_2026_09_06.md` - učebna Pythonu: Míla potvrdil 1.5/Codex na Linuxu. Nový samostatný balíček Praktické úlohy přidává 7 lekcí (celkem 21); kopíruje se jen do kurzy. 62 testů a GUI nad nezměněnou 1.5 prošly; obsahový ZIP v LocalSendu.
 - `projects/lekarna_domaci_leky.md` - projekt Lekarna: evidence domacich leku v `data/lekarna/`, vyhledavani podle potizi, audit lekarnicky a opakovatelny foto import workflow pres manifest.

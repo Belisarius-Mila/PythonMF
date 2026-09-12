@@ -1,13 +1,13 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-12 08:32 CEST
-- Hotovo lokálně: Servis → Běžící relace zobrazuje Codex i screeny se stavem připojení, stářím a počtem vnitřních procesů. Screen lze po potvrzení uzavřít; vynucení má samostatné potvrzení až po běžném pokusu.
-- Ochrana: Screen s běžícím Codexem, službou nebo správcem se neuzavírá. Kontroluje se vlastník, projekt, spustitelný soubor a čerstvé složení procesů. macOS login obal je povolený jen pro ověřeného uživatele.
-- Ověření: cílené testy 28/28; prohlížečový test zrušení potvrzení a skutečného uzavření vlastního screenu, ochrany aktuální relace, desktopu a mobilní šířky bez přetékání; 0 JS chyb. Plná brána první verze 1553/1553; následná macOS oprava má cílenou sadu 28/28 a rychlou statickou bránu. Finální plná brána proběhne při potvrzeném odeslání balíčku.
-- Riziko: Uzavření přeruší terminálová okna; po vynucení mohou procesy uvnitř zůstat běžet. Soubory se nemažou. Stáří samo není důkaz zaseknutí.
-- Další krok: dokončit plnou bránu, požadovaný push, řízené nasazení a živé ověření v proudu project-cockpit.
-- Dřívější Quick Notes: konfigurace soukromého inboxu a bdící/spánkový test zůstávají samostatným otevřeným tématem.
+- Aktualizováno: 2026-09-12 08:45 CEST
+- Hotovo a nasazeno: Servis → Běžící relace obsahuje samostatný přehled screenů se stavem připojení, stářím a počtem vnitřních procesů. Uzavření vyžaduje potvrzení konkrétního screenu; vynucení má další potvrzení až po běžném pokusu.
+- Ochrana: Screen s běžícím Codexem, chráněnou službou nebo správcem se neuzavírá. Před akcí se ověřuje vlastník, projekt, spustitelný soubor a čerstvé složení procesů. Úzká výjimka rozpoznává macOS login obal stejného uživatele.
+- Ověření: finální plná brána 1554/1554, cílené testy 28/28, skutečný prohlížečový test zrušení potvrzení a uzavření vlastního screenu, ochrany aktuální relace, desktopu i mobilní šířky; 0 JS chyb. Živé nasazení funkčního commitu 4aa85ca1 má shodný otisk kódu, nový proces a smoke 5/5.
+- Riziko: Uzavření přeruší terminálová okna; některé vnitřní procesy mohou zůstat běžet, zejména po vynucení. Soubory se nemažou. Stáří samo není důkaz zaseknutí.
+- Další krok: používat Servis → Běžící relace → Screeny; před uzavřením screenu s Codexem nejprve ukončit příslušnou relaci Codexu.
+- Dřívější Quick Notes zůstávají samostatným otevřeným tématem; jejich konfigurace ani bdící/spánkový test se tímto krokem neřešily.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: Cockpit / hlavní architektura
@@ -508,3 +508,25 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Cílené testy screenů a Codex relací 28/28. Skutečný prohlížečový test ověřil zrušení potvrzení, uzavření vlastního testovacího screenu, ochranu aktuálního screenu, mobilní šířku bez přetékání a 0 JS chyb. Plná brána první verze prošla 1553/1553; finální kontrola je součástí odeslání balíčku. Systémový macOS login obal je povolený jen pro ověřeného vlastníka screenu; jiné root procesy zůstávají chráněné.
+
+
+### 2026-09-12 08:45 CEST – Screeny nasazené a živě ověřené
+
+Hotovo:
+- Přehled a potvrzované uzavření screenů jsou dostupné v živém Cockpitu. Aktuální screen s Codexem je chráněný a UI vysvětluje další krok.
+- Historický auditní report je uložený; startovací guard již nehlásí nesledovaný soubor.
+
+Rozhodnutí:
+- Ověřený rozsah zůstává u konkrétního screenu. Soubory se nemažou a vnitřní procesy se hromadně neukončují.
+- Riziko přerušení práce a případného přežití vnitřních procesů zůstává uvedené v aktuálním souhrnu; běžné uzavření ani vynucení se automaticky neopakují.
+
+Další krok:
+- Používat Servis → Běžící relace → Screeny. Při obsazeném screenu nejprve ukončit jeho Codex.
+
+Navrhované další kroky:
+- Další změny až podle konkrétní zkušenosti při běžném použití.
+
+Technický důkaz:
+- Cíleně 28/28, finální plná brána 1554/1554. Prohlížeč: zrušení potvrzení zachovalo vlastní testovací screen, potvrzení ho uzavřelo; současný screen chráněný; mobil bez přetékání; 0 JS chyb.
+- Funkční commit 4aa85ca1 odeslaný na GitHub. První živé nasazení: nový PID 9574, otisk 6bc95209fbd6828c, stav deployed a smoke 5/5. Živé GET potvrdilo nový panel i chráněný screen.
+- Soukromé technické účtenky jsou v data/private/screen_sessions_smoke_20260912/; závěrečná dokumentace nemění aplikační kód.
