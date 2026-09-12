@@ -69,6 +69,7 @@ class MmtxScene05FirstInteractionTests(unittest.TestCase):
             "scene05_bruno_bunny_crossing_smooth_q90.webp",
             "scene05_lamp_falling_smooth_q90.webp",
             "scene05_lamp_rescued_smooth_q90.webp",
+            "scene05_friends_farewell_smooth_q90.webp",
         ):
             with Image.open(DOCS_SCENE / filename) as image:
                 self.assertEqual(image.size, (1672, 941))

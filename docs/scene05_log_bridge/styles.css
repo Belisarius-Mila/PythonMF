@@ -41,6 +41,7 @@ body {
 }
 
 .scene {
+  container-type: inline-size;
   position: relative;
   width: 100%;
   overflow: hidden;
@@ -81,8 +82,7 @@ body {
   pointer-events: none;
 }
 
-.ui-button,
-.scene-title {
+.ui-button {
   border: 3px solid var(--forest-soft);
   background: var(--cream);
   box-shadow: var(--shadow);
@@ -113,27 +113,6 @@ body {
 .ui-button:focus-visible {
   outline: 4px solid #ffd86b;
   outline-offset: 3px;
-}
-
-.scene-title {
-  display: flex;
-  max-width: min(62%, 520px);
-  flex-direction: column;
-  gap: 3px;
-  padding: 10px 16px;
-  border-radius: 18px;
-  text-align: right;
-}
-
-.scene-title strong {
-  font-size: clamp(0.95rem, 2vw, 1.45rem);
-  line-height: 1.1;
-}
-
-.scene-title small {
-  color: #506b5c;
-  font-size: clamp(0.72rem, 1.25vw, 0.95rem);
-  font-weight: 700;
 }
 
 .scene-overlay {
@@ -169,13 +148,6 @@ body {
     width: 44px;
     min-width: 44px;
     height: 44px;
-    border-width: 2px;
-    border-radius: 14px;
-  }
-
-  .scene-title {
-    max-width: 70%;
-    padding: 7px 10px;
     border-width: 2px;
     border-radius: 14px;
   }

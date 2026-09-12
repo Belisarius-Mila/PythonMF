@@ -13,7 +13,7 @@ button { font: inherit; }
 .speech-bubble {
   position: absolute;
   z-index: 10;
-  top: 12%;
+  top: 14px;
   left: 50%;
   width: min(47%, 590px);
   min-height: 108px;
@@ -257,7 +257,7 @@ button { font: inherit; }
 @media (max-width: 760px) {
   .language-button, .repeat-button { min-height: 44px; padding: 6px 9px; font-size: 0.78rem; }
   .language-button { min-width: 68px; }
-  .speech-bubble { top: 10%; width: 58%; min-height: 78px; padding: 8px 11px; border-width: 2px; }
+  .speech-bubble { top: 7px; width: 58%; min-height: 78px; padding: 8px 11px; border-width: 2px; }
   .task-prompt, .complete-banner { bottom: 2.5%; padding: 6px 10px; border-width: 2px; }
   .next-button { right: 2.5%; bottom: 2.5%; min-width: 86px; min-height: 44px; padding: 7px 11px; border-width: 2px; }
   .character-target { border-width: 2px; padding-bottom: 3px; }
@@ -267,6 +267,20 @@ button { font: inherit; }
   .dictionary-list { gap: 5px; }
   .dictionary-item { column-gap: 5px; padding: 5px 7px; border-width: 1px; border-radius: 10px; font-size: 0.72rem; }
   .dictionary-translation { font-size: 0.66rem; }
+}
+@container (max-width: 1100px) {
+  .scene-actions { flex-direction: column; align-items: flex-end; }
+  .speech-bubble { width: min(58%, calc(100% - 190px)); min-height: 0; padding: 8px 11px; }
+  .scene[data-scene-state="friends-farewell"] .speech-bubble { left: 40%; width: 36%; }
+  .scene[data-scene-state="friends-farewell"] .scene-actions { position: absolute; top: 64px; left: 0; align-items: flex-start; }
+}
+@container (max-width: 600px) {
+  .scene-actions { gap: 5px; }
+  .scene[data-scene-state="friends-farewell"] .scene-actions { top: 52px; }
+  .scene[data-scene-state="friends-farewell"] .speech-bubble { left: 40%; width: 36%; }
+  .language-button, .repeat-button { min-width: 68px; width: 68px; padding: 6px 4px; font-size: 0.78rem; }
+  .repeat-button span:last-child { display: none; }
+  .speech-bubble { top: 7px; width: calc(100% - 170px); min-height: 0; padding: 6px; gap: 3px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .log-piece:not(:disabled):not(.placed) { animation: none; }

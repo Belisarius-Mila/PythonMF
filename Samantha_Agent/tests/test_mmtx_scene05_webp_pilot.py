@@ -80,8 +80,8 @@ class MmtxScene05WebpPilotTests(unittest.TestCase):
     def test_scene_page_is_standalone_and_keeps_story_flow_unwired(self) -> None:
         page = (DOCS_SCENE / "index.html").read_text(encoding="utf-8")
 
-        self.assertIn("Scene 5 · The Log Bridge", page)
-        self.assertIn("Scéna 5 · Most z klád", page)
+        self.assertIn("<title>Scene 5 — The Log Bridge</title>", page)
+        self.assertNotIn('class="scene-title"', page)
         self.assertIn('../scene04_harry_guard_prototype/index.html', page)
 
         scene_four_script = (

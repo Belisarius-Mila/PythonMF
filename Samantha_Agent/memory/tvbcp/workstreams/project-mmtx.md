@@ -1,34 +1,11 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-09-07 10:52 CEST
-
-### Hotovo
-- Pátá scéna má slovník 16 výrazů s místním anglickým a českým audiem v obou synchronizovaných kopiích
-
-### Otevřeno
-- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
-
-### Rizika
-- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
-
-### Další krok
-- Po potvrzeném checkpointu samostatně spustit řízené p+n a potom ověřit slovník na Macu a iPhonu
-
-### Rozhodnutí
-- V tomto kroku nebylo přijato nové kanonické rozhodnutí.
-
-### Navrhované další kroky
-- Projít otevření slovníku a všech 16 položek v režimech EN a EN + CZ
-- Po nasazení ověřit veřejnou kopii a reprezentativní MP3
-
-### Technický stav checkpointu
-- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `7011366f66ae`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `7bfafd4b2b67` · je starší než ověřený main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-09-05T14:30:30+00:00.
-- Read-only živý stav: main=`aligned`, deployment=`verified_other_main`, runtime=`connected`.
-- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
-- Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
+- Aktualizováno: 2026-09-12 09:40 CEST
+- Hotovo: Scéna 5 má odstraněný horní nadpis, dialog posunutý nahoru a nový obraz loučení všech pěti přátel s Loganem na druhém břehu. Poslední věta To the lake! se přehraje až na novém obrazu.
+- Ověření: 63 MMTX testů, 104 pevných stop, rychlá brána; celý browserový průchod a 5 velikostí obrazovky bez kolize dialogu s tlačítky.
+- Další krok: dokončit řízený push a přesně ověřenou Pages publikaci.
+- Riziko: tento zápis není produkční účtenkou.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: MMTX
@@ -1093,3 +1070,25 @@ Technický důkaz:
 - rychlá Cockpit brána syntaxe a whitespace: 5.3 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `project-mmtx`.
 - Read-only živý stav při checkpointu: main=`aligned`, deployment=`verified_other_main`, runtime=`connected`.
+
+### 2026-09-12 09:40 CEST – Závěrečné loučení na druhém břehu
+
+Hotovo:
+- Scéna 5 má odstraněný horní nadpis, dialog posunutý nahoru a nový obraz loučení všech pěti přátel s Loganem na druhém břehu. Poslední věta To the lake! se přehraje až na novém obrazu.
+- Zdrojové PNG i produkční WebP q90 (1672 × 941; 504 810 B) jsou v obou byte-identických kopiích scény.
+
+Rozhodnutí:
+- Jeden nový obraz zachovává postavy a prostředí; Bruno drží zachráněnou lampu, Logan zůstává u potoka.
+- Pevné audio, jedna věta na Next, Repeat a slovník po dokončení zachovávají dosavadní chování.
+- Míla v tomto kroku výslovně zadal vývoj, push i produkční publikaci.
+
+Další krok:
+- Dokončit řízený push s plnou bránou a MMTX Pages publikaci; výsledek dopsat do tohoto handoffu i TVBCP.
+
+Navrhované další kroky:
+- Po veřejném ověření krátce poslechnout závěr na skutečném iPhonu.
+
+Technický důkaz:
+- 63/63 cílených MMTX testů, 104/104 pevných MP3, JavaScript syntaxe a rychlá statická brána prošly.
+- Browserový průchod ověřil 36 kroků, poslední audio na novém obrazu, Repeat v EN/EN+CZ a 16 položek slovníku. Zvukové konce byly při automatickém průchodu simulované; skutečný poslech není vydáván za provedený.
+- Riziko při zápisu: push a veřejná publikace teprve následují; tento vývojový zápis sám nepotvrzuje produkci.

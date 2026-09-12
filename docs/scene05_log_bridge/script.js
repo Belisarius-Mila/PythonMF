@@ -25,6 +25,7 @@ const fionaAcrossScene = document.getElementById("fionaAcrossScene");
 const brunoBunnyCrossingScene = document.getElementById("brunoBunnyCrossingScene");
 const lampFallingScene = document.getElementById("lampFallingScene");
 const lampRescuedScene = document.getElementById("lampRescuedScene");
+const friendsFarewellScene = document.getElementById("friendsFarewellScene");
 const benjiTarget = document.getElementById("benjiTarget");
 const sunnyTarget = document.getElementById("sunnyTarget");
 const fionaTarget = document.getElementById("fionaTarget");
@@ -413,6 +414,12 @@ async function advanceDialogue() {
   if (state.stage === "finish-dialogue") {
     state.crossingIndex += 1;
     const entry = finishLines[state.crossingIndex];
+    if (entry === lines.toTheLake) {
+      state.isAnimating = true;
+      updateControls();
+      await revealStoryState(friendsFarewellScene, "friends-farewell");
+      state.isAnimating = false;
+    }
     await playEntry(entry);
     if (entry === lines.toTheLake) {
       state.stage = "complete";
