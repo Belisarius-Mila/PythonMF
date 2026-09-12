@@ -1,12 +1,11 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-12 09:50 CEST
-- Hotovo: Scéna 5 je veřejně publikovaná: horní nadpis je odstraněný, dialog je výše a To the lake! zazní na novém obrazu loučení všech pěti přátel s Loganem na druhém břehu.
-- Produkce: commit `84c2809fb334`, Pages run `34681649893`, deployment `6407386976`, HTTP 200 a byte-shoda osmi veřejných souborů.
-- Ověření: 63 cílených MMTX testů, 1 554 testů plné brány, 104 pevných stop, celý browserový průchod a 5 velikostí obrazovky bez kolize dialogu s tlačítky.
-- Další krok: Mílův běžný poslech a vizuální kontrola na skutečném iPhonu; další vývoj jen podle konkrétní připomínky.
-- Riziko / mez ověření: automatický průchod simuloval konce audia; veřejné MP3 jsou ověřené obsahem, fyzický poslech na iPhonu proveden nebyl.
+- Aktualizováno: 2026-09-12 10:17 CEST
+- Hotovo lokálně: Logan při závěrečném loučení stojí zády k divákovi a mává přímo přátelům. Obraz hotového mostu ukazuje tři samostatné klády hned po jejich usazení, ještě před Benjiho přechodem.
+- Ověření: 63/63 MMTX testů, 104 pevných stop, rychlá brána a celý browserový průchod včetně obrazu po třetí kládě a závěru.
+- Další krok: autorizované p+n, veřejné ověření a zarovnání čistých pracovních profilů pro večerní vývoj.
+- Riziko: publikace této obrazové opravy zatím není doložená; fyzický poslech na iPhonu nebyl součástí automatického testu.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: MMTX
@@ -1117,3 +1116,25 @@ Technický důkaz:
 - Browser: 36 kroků, finální obraz před poslední větou, Repeat EN/EN+CZ, slovník 16 položek, pět rozměrů (1440×1000 až 390×844), bez JS výjimek a kolize dialogu s tlačítky.
 - Obraz: `assets/scene05_friends_farewell_smooth_source.png`; produkční `scene05_friends_farewell_smooth_q90.webp`, 1672×941, 504 810 B, obě kopie shodné. Zadání generátoru: stejné postavy a hladký 3D styl, všech pět přátel na pravém břehu mává Loganovi, Bruno drží zachráněnou lampu, prázdný most a levý břeh, bez textu.
 - Mez ověření: browserový test simuloval události konce audia; fyzický poslech na iPhonu zbývá pro uživatelský retest.
+
+### 2026-09-12 10:17 CEST – Oprava Loganova loučení a počtu klád
+
+Hotovo:
+- Logan při závěrečném loučení stojí zády k divákovi a mává přímo přátelům. Obraz hotového mostu ukazuje tři samostatné klády hned po jejich usazení, ještě před Benjiho přechodem.
+- Vyměněna dvě zdrojová PNG a dva WebP q90 v obou kopiích scény; URL verze `20260912artfix1` obnoví obrázky z cache.
+
+Rozhodnutí:
+- Chyba počtu klád byla v obrázku `finalScene`, který překryl správně usazené tři animované klády; oprava je proto pouze obrazová.
+- Míla autorizoval opravu, push a nasazení s čistým předáním do Human–Adam.
+
+Další krok:
+- Dokončit řízenou publikaci a dopsat její přesný veřejný důkaz.
+
+Navrhované další kroky:
+- Večer navázat na čistý `project-mmtx` podle Mílova dalšího zadání.
+
+Technický důkaz:
+- Cílené testy 63/63, audio 104/104, rychlá brána, byte-identické mirrory a browserový průchod 36 kroků prošly.
+- Screenshot po třetím polenu potvrzuje tři klády před Benjiho přechodem; závěr byl ověřen i v úzkém mobilním obrazu.
+- Výstupy a přesná zadání generátoru: `reports/mmtx_scene05_artfix_2026_09_12.md`.
+- Riziko při zápisu: p+n teprve následuje. Automatický test simuluje konce audia, nikoli fyzický poslech.

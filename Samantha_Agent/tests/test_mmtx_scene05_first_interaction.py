@@ -43,7 +43,7 @@ class MmtxScene05FirstInteractionTests(unittest.TestCase):
         self.assertIn('srcset="scene05_log_bridge_supports_smooth_q90.webp"', html)
         self.assertIn('src="scene05_log_bridge_supports_smooth_q90.webp"', html)
         self.assertIn('id="finalScene"', html)
-        self.assertIn('src="scene05_log_bridge_complete_smooth_q90.webp"', html)
+        self.assertIn('src="scene05_log_bridge_complete_smooth_q90.webp?v=20260912artfix1"', html)
         self.assertIn('src="scene05_benji_across_smooth_q90.webp"', html)
         self.assertIn('src="scene05_benji_sunny_across_smooth_q90.webp"', html)
         self.assertIn('src="scene05_fiona_across_smooth_q90.webp"', html)

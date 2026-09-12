@@ -69,7 +69,7 @@ class MmtxScene05WebpPilotTests(unittest.TestCase):
         )
         self.assertIn('href="scene05_log_bridge_supports_smooth_q90.webp"', page)
         self.assertIn('src="scene05_log_bridge_supports_smooth_q90.webp"', page)
-        self.assertIn('src="scene05_log_bridge_complete_smooth_q90.webp"', page)
+        self.assertIn('src="scene05_log_bridge_complete_smooth_q90.webp?v=20260912artfix1"', page)
         self.assertIn('data-scene-state="bridge-supports"', page)
         self.assertIn('width="1672"', page)
         self.assertIn('height="941"', page)
