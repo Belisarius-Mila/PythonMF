@@ -4,6 +4,7 @@
 - Aktualizováno: 2026-09-12 22:25 CEST; pracovní proud `project-knowledge-library`.
 
 ### Hotovo
+- Vývoj je pushnutý a nasazený: funkční commit `2f5cf1f9`, plná brána 1622 testů a smoke 5/5 prošly; Knihovna je připojená, oba profily čisté a zarovnané.
 - Nové ilustrace mají společný rozpočet 305 KiB: hlavní JPEG nejvýše 285 KiB a náhled nejvýše 20 KiB. Původní/readable varianta odkazují na tentýž soubor; tři fotografie mají nejvýše 0,894 MiB.
 - Limit vynucuje browser i backend, podporované jsou i starší camera JPEG/MPO. Text a fotografie se dál ukládají nezávisle na pozadí, retry zachovává identitu přílohy.
 - Dočasné OCR/ISBN/rozpoznávání obálky používá oddělenou přípravu do 1 MiB / 2400 px. Ukládané ilustrace používají nejvýše 1600 px.
@@ -15,18 +16,18 @@
 - Převod ponechá jednu ověřenou zálohu starých příloh a metadat mimo aktivní archiv. Její prostor se nesmí vydávat za uvolněné místo na disku; pozdější odstranění vyžaduje vlastní autorizovaný rozsah.
 
 ### Otevřeno a rizika
-- Plná brána prošla; commit, push a nasazení tohoto kroku ještě nejsou doložené.
 - Původních 22 obrázků dosud nebylo přepsáno. Připravený převod: 66 původních souborů → 44 kompaktních souborů, 11 karet, 59,117 → 5,962 MiB. Záloha bude přibližně 59,35 MiB; zatím není vytvořená.
 - Příprava je svázaná s otisky souborů a metadat. Jakákoli změna archivu vyžaduje novou přípravu; obnova nesmí přepsat další práci.
 - Rozpracovaný přenos nadále vyžaduje otevřenou stránku. Skutečné Safari na iPhonu má být ověřeno při běžném použití.
 
 ### Další krok
-- Dokončit autorizované c+p+n; pak po přesném potvrzení použít připravený převod a doložit skutečné velikosti i stav zálohy.
+- Po přesném potvrzení globální brzdy použít připravený převod 22 starých obrázků a doložit skutečné velikosti i stav zálohy.
 
 ### Navrhované další kroky
 - Po ověření výsledku uživatelem případně rozhodnout o odstranění jednorázové zálohy; automatický úklid nezavádět.
 
 ### Technický důkaz
+- Nasazení funkční změny ověřeno 2026-09-12 22:33 CEST; code stamp `f57dfb8454ac938f`, smoke 5/5, přesná serverová stránka/worker a HTTP příprava obou rozpočtů. Navazující commit pouze uchovává tento doklad.
 - 388 cílených testů prošlo; po doplnění konzistence registru a HTTP účelu přípravy prošlo dalších 26 testů. Plná Cockpit brána prošla: 1622 testů bez chyb, unit testy 491,112 s; syntaxe a whitespace OK.
 - Browser na syntetickém archivu: PNG 12 980 174 B, HEIC, dvě karty, retry po ztrátě odpovědi, editor, kniha s obálkou; vše OK, 0 JS chyb. Uložení textu při pozastavené přípravě 0,153 s; každý skutečně uložený snímek má jen dva soubory a nejvýše 305 KiB.
 - Oddělené rozpočty v browseru: stejný zkušební snímek ilustrace 279 826 B / rozpoznávání 994 293 B; bez spuštění AI.
@@ -490,3 +491,26 @@ Technický důkaz:
 - Browserové end-to-end scénáře prošly, 0 JS chyb, text při pozastavené přípravě uložen za 0,153 s; hlavní snímek + náhled na disku mají nejvýše 305 KiB.
 - Příprava existujících dat: 22 obrázků / 11 karet, 66 → 44 souborů, 61 988 739 → 6 251 688 B (59,117 → 5,962 MiB). Zdrojový archiv se nezměnil. Všechny výstupy dekódovány; textová receptová příloha zůstala při vizuální kontrole čitelná.
 - Riziko/otevřeno: skutečný archiv čeká na přesné potvrzení; záloha 62 233 053 B se vytvoří až při použití. Nesmí se tvrdit, že již byla uvolněna odpovídající kapacita disku.
+
+
+### 2026-09-12 22:35 CEST – Nové ukládání nasazeno; převod původních dat čeká na potvrzení
+
+Hotovo:
+- Funkční commit `2f5cf1f9` je na GitHubu a nasazený v Cockpitu. Nové ilustrace se ukládají celkem do 305 KiB a tři mají nejvýše 0,894 MiB.
+- Řízené nasazení a provozní testy prošly. Knihovna je připojená a oba pracovní profily jsou čisté a zarovnané.
+
+Rozhodnutí:
+- Autorizované c+p+n vývoje je dokončené. Převod stávajících soukromých dat zůstává samostatným potvrzovaným krokem.
+- Původní archiv ani fotografie nebyly při testech změněny; jednorázová záloha zatím nevznikla.
+
+Další krok:
+- Pro konkrétní převod 22 obrázků vyžádat přesnou větu globální brzdy. Potom znovu ověřit otisky plánu, použít registrovaný převod a dopsat skutečný výsledek do handoffu i TVBCP.
+
+Navrhované další kroky:
+- Po uživatelské kontrole převedených obrázků případně rozhodnout o retenci zálohy.
+
+Technický důkaz:
+- Plná Cockpit brána: 1622 testů, bez chyb, unit testy 491,112 s; cílené testy a browser prošly.
+- Nasazení 2026-09-12 22:33 CEST: `2f5cf1f968ce`, code stamp `f57dfb8454ac938f`, nový proces ověřen, rychlá brána 8,3 s, smoke 5/5.
+- Živá stránka a worker odpovídají přesně zdroji; HTTP příprava zachovala oddělené rozpočty a rozměry (ilustrace 1600 × 1200, dočasné rozpoznávání 2400 × 1800) bez zápisu do archivu.
+- Soukromé účtenky: `data/private/library_compact_20260912/`. Připravený převod 59,117 → 5,962 MiB zůstává pouze plánem; staré fotografie dosud zabírají původní prostor. Záloha přibližně 59,35 MiB se vytvoří až při použití.
