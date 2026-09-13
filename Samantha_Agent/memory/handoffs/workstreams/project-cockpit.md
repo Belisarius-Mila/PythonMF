@@ -1,15 +1,16 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-13 21:18 CEST.
-- Architektonická roadmapa `AuditCockpit56_2.txt` je ve verzi 1.1: hotové D0–D4 a první frontendové/routingové řezy jsou odlišené od dalšího plánu; původní srpnový audit zůstává označenou historií.
-- První navazující nasazený řez: `document_review.js` odděluje načtení a zobrazení „Dokumentů k vyřešení“. Původní čtyři funkce zachované doslova, HTML/CSS a ScanDocu endpoint/payload beze změny.
-- Hlavní `app.js` má 7 196 řádků místo 7 317. Nový modul má 142 řádků; přínos je oddělení odpovědnosti a explicitních závislostí.
-- Ověření: 29 cílených Python testů včetně 5 Node kontraktů; shodné DOM a ScanDocu požadavky před/po v prohlížeči pro 1440 i 390 px, bez JS chyb. Pouze syntetické dokumenty a nahrazené API. Plná brána 1641/1641 prošla.
-- Funkční commit `b565d5d6` a zkontrolovaný systémový audit `63c2a6d3` jsou na GitHubu. Řízené nasazení ověřené: nový proces, stamp `dca8e8f41f3480c0`, smoke 5/5 a shoda podávaného HTML se zdrojem.
-- Obnova screenu z předchozího kroku zůstává nasazená; Míla v této konverzaci potvrdil návrat po zavření terminálu. Quick Notes jsou samostatné otevřené téma.
-- Další krok: běžná uživatelská přejímka dokumentového panelu na Macu/iPhonu; skutečné dokumenty nebyly součástí automatického UI testu.
-- Následující kandidát: read-only hledání/čtečka dokumentů; nejprve mapa vazeb na lifecycle, metadata a tisk. Není součástí tohoto řezu.
+- Aktualizováno: 2026-09-13 22:00 CEST.
+- Roadmapa `AuditCockpit56_2.txt` je ve verzi 1.2. Dokončen read-only průzkum hledání/čtečky a schválený druhý frontendový řez.
+- Lokální `document_search.js` odděluje `searchDocuments` a vykreslování výsledků. Obě funkce zachované doslova; jediný export je hledání. Tisk, lifecycle, stav čtení a otevření čteček zůstávají původní předané obsluhy v `app.js`.
+- Hlavní `app.js` má 7 063 řádků místo 7 196; nový modul má 159 řádků. HTML/CSS, serverové služby a API beze změny.
+- Ověření: 49 cílených Python testů (32 + 17) prošlo, frontendová sada spouští i 8 nových Node kontraktů. Browser před/po 1440/390 px: shodné DOM, otevření dokumentu/nákupu, zrušení/potvrzení tisku, archive/trash, stav čtení a obnovení hledání; bez JS chyb. Jen syntetická data a nahrazené API, bez skutečného tisku/zápisů dokumentů.
+- Tento řez není pushnutý ani nasazený. Předchozí `document_review.js` a dokumentační main `97d608f7` byly samostatně pushnuté a nasazené; předchozí plná brána 1641/1641 není novým testem tohoto řezu. Pro tento běžný strukturální přesun cílené testy a statická brána.
+- Další krok: samostatně potvrdit push/nasazení nového řezu; následně běžná uživatelská přejímka.
+- Další strukturální kandidát: oddělit generování dokumentové/nákupní čtečky z `cockpit.py`; její tisk a sdílené vstupy posoudit jako vlastní rozsah.
+- Pro pozdější UI audit: hledání nemá pokračování za prvních 8 výsledků; Janiččina zkratka hledání sama nerozbaluje panel. Nálezy z kódu, bez živé přejímky a bez oprav v tomto řezu.
+- Míla odložil zálohu na 14. 9. kvůli nedostupnému disku. Navazující audit a úprava UI mají přijít po strukturální etapě; Santiago je zatím jen zvažované téma.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: Cockpit / hlavní architektura
@@ -618,3 +619,26 @@ Technický důkaz:
 - HTTP stránka je shodná s aktuálně sestaveným HTML a obsahuje nový dokumentový modul. Plná brána funkčního řezu 1641/1641; následná statická a nasazovací rychlá brána prošly.
 - První pokus zastavil souběžně vytvořený report v nečistém Gitu; po jeho schváleném uložení blokátor odstraněn. Závěrečný dokumentační commit podléhá stejnému řízenému nasazení; autoritou přesného headu je živý deployment receipt.
 - Omezení: uživatelská přejímka skutečného dokumentového toku na Macu/iPhonu zůstává otevřená. Report upozorňuje na zálohu z 5. 9.; záloha nebyla tímto krokem spouštěna.
+
+### 2026-09-13 22:00 CEST — Hledání dokumentů odděleno od hlavního frontendu
+
+Hotovo:
+- Hledání a výsledkové karty mají samostatný modul. Zachované ovládání i rozdíl mezi dokumentem a nákupním PDF.
+- Průzkum oddělil načítání/vykreslování od akcí a zmapoval čtečku sdílenou s případy, připomínkami a e-mailovým zpracováním.
+
+Rozhodnutí:
+- Míla schválil přesný návrh a lokální vývoj. Do modulu přesunout pouze dvě funkce, předat závislosti a vystavit pouze hledání. Zapisující obsluhy, serverovou čtečku, HTML/CSS a backend zachovat.
+
+Další krok:
+- Samostatně schválit push/nasazení tohoto řezu; pak běžná uživatelská přejímka.
+
+Navrhované další kroky:
+- Oddělení stránek čtečky připravit jako další samostatný strukturální krok.
+- Navazující audit a úpravu UI řešit po strukturální etapě; v UI prověřit chybějící stránkování a Janiččino otevření zavřeného panelu.
+- Záloha odložena Mílou na 14. 9. pro nedostupný disk; Santiago zatím bez založení projektu.
+
+Technický důkaz:
+- 49 cílených Python testů (32 frontend/gate/search + 17 stávajících testů čtečky, vyhledávání a navazujících akcí), včetně spuštění 8 nových Node kontraktů, vše OK.
+- Před/po browser 1440/390 px: shodné výsledkové DOM a přesné obsluhované reference/payloady, správné zrušení tisku i obnovení hledání po lifecycle/stavu; nulové JS chyby. Všechna API v testu nahrazená, včetně stávajícího startup intake monitoru; žádný reálný tisk ani práce se soukromými dokumenty.
+- Dvě původní funkce přenesené doslova (142 řádků); ostatní `app.js` po odečtení wiring bloku shodný, HTML/CSS shodné. App 7196 → 7063 řádků, nový modul 159. Hash celé složené stránky aktualizován až po této kontrole.
+- Push ani nasazení nového řezu neprovedeny. Neřeší stránkování, paralelní dotazy ani pozdější grafické změny; plná brána předchozího řezu se nevydává za současnou.

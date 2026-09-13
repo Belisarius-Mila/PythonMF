@@ -35,9 +35,9 @@ EXPECTED_PAGES = {
     ),
     "cockpit": (
         COCKPIT_HTML,
-        483638,
-        9792,
-        "7fe361c8371d3e9f33898adcd877cabf6a7e29c76b2efd53df52516f285674ee",
+        484567,
+        9819,
+        "6d320f49d1115ee8542c6651138332f1cae7ff7097b2b1082bda881dc0058f95",
     ),
 }
 
@@ -136,6 +136,20 @@ class CockpitFrontendContractTests(unittest.TestCase):
         )
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
+    def test_document_search_module_contracts(self) -> None:
+        source = (FRONTEND_ROOT / "cockpit" / "app.js").read_text(encoding="utf-8")
+        self.assertNotIn("function searchDocuments(", source)
+        self.assertNotIn("function renderDocumentSearchResults(", source)
+        self.assertLess(
+            COCKPIT_HTML.index("function createDocumentSearchFrontend"),
+            COCKPIT_HTML.index("window.SamanthaDocumentSearch.create"),
+        )
+        result = subprocess.run(
+            [node_binary(), "--test", str(Path(__file__).with_name("document_search_frontend.test.cjs"))],
+            capture_output=True, text=True, timeout=30, check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
     def test_health_recovery_autosave_is_an_extracted_frontend_module(self) -> None:
         page_dir = FRONTEND_ROOT / "cockpit"
         app_source = (page_dir / "app.js").read_text(encoding="utf-8")
@@ -143,7 +157,7 @@ class CockpitFrontendContractTests(unittest.TestCase):
 
         self.assertEqual(
             FRONTEND_JAVASCRIPT_MODULES["cockpit"],
-            ("health_recovery_autosave.js", "codex_sessions.js", "library_photos.js", "document_review.js"),
+            ("health_recovery_autosave.js", "codex_sessions.js", "library_photos.js", "document_review.js", "document_search.js"),
         )
         self.assertIn("createHealthRecoveryAutosaveFrontend", module_source)
         self.assertIn("async function runFrontendHealthCheck()", module_source)
