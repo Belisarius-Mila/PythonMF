@@ -1,5 +1,18 @@
 # PictNew: opakovatelné generování obrázků pro slovíčka
 
+## Ověřená aktualizace 2026-09-13 10:12 CEST
+
+- NewWords.txt: FR 234 (+7), IT 471 (+8), všechny nové položky s CZ a větami.
+- Jana 413/413 párů Sentence/SentenceT: doplněno 7, opraveny dva české překlepy.
+- Osm nových WebP, další vhodné ilustrace znovu použité. Mapping 1 082 položek
+  (+27), abecední, všechny původní vazby zachované, obě distribuční kopie shodné.
+- Všechny tři slovníky prošly skutečnými desktopovými/Pythonista resolvery,
+  kontrolou souborů a dekódování; šest testů kanonického mappingu prošlo.
+- Výslovné pověření Míly pro tuto dávku zahrnuje věty, generování, výběr,
+  mapování a c+p bez galerie; nejde o změnu výchozího kontraktu dalších dávek.
+- Podrobnosti a prompty: `reports/vocabulary_fr_it_refresh_2026_09_13.md`.
+- Místní sdílená data ověřená, vzdálený přenos a skutečný iPhone retest neověřené.
+
 ## Stav
 
 Míla řeší opakované doplňování obrázků pro slovníkové aplikace:

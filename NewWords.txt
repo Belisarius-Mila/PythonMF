@@ -1,100 +1,200 @@
-FRP	CZP	ENP
-un peu	trochu	abit
-sur	o (na téma)	about
-adorer	zbožňovat, milovat	adore
-déjà	už, již	already
-aussi	také	also
-toujours	pořád, stále, vždy	always
-et	a	and
-Et toi?	A ty?	andyou
-appartement	byt	apartment
-appétit	chuť	appetite
-arriver	přijít, přijet	arrive
-chez	u někoho, k někomu	atby
-avocat	avokádo	avocado
-garçon	chlapec	boy
-Brésil	Brazílie	brazil
-pause	přestávka	break
-cassée	rozbitý, vyřízený	broken
-mais	ale	but
-par	od, kým	by
-chaise	židle	chair
-collègue	kolega	colleague
-coûter	stát	cost
-coûter	stát	costmoney
-pays	země	country
-tasse	hrnek	cup
-placard	skříňka, kredenc	cupboard
-journée	den	day
-quartier	čtvrť	district
-docteur	doktor, lékař	doctor
-pendant	během, po dobu	during
-ingénieur	inženýr	engineer
-excuse	omluva	excuse
-cinq	pět	five
-fourchette	vidlička	fork
-d'où	odkud	fromwhere
-bonne journée	hezký den	goodday
-tu as	máš	have
-hôpital	nemocnice	hospital
-chaud	teplý, horký	hot
-hôtel	hotel	hotel
-glace	zmrzlina, led, sklo	iceglass
-je ne sais pas	nevím	idontknow
-j'ai	mám	Ihave
-en espèces	v hotovosti	incash
-pressé	spěchající, ve spěchu	inhurry
-inviter	pozvat	invite
-invité	pozvaný host	invite
-je voudrais	chtěl bych	Iwouldlike
-métier	povolání, řemeslo	jobtrade
-joyeux	veselý, radostný	joyful
-juste	jen, právě, správný	just
-clé	klíč	key
-couteau	nůž	knife
-travail	práce	labour
-avocat	advokát	lawyer
-perdu	ztracený	lost
-fort	hlasitě (nahlas)	loud
-magnifique	nádherný, úžasný	magnificent
-peut-être	možná	maybe
-je	já	me
-moi	mě	me
-viande	maso	meat
-ma	moje	myf
-mon	můj	mym
-bonne soirée	hezký večer	niceevening
-neuf, neuve	devět, nový	ninenew
-rien	nic	nothing
-maintenant	teď, nyní	now
-sur	na	on
-autre	jiný, další	other
-fête	oslava	party
-par	za jednotku	per
-préparer	připravit, připravovat	prepare
-vraiment	opravdu, skutečně	really
-content	spokojený	satisfied
-à plus tard	později, uvidíme se později	seeyoulater
-des	nějaké (neurčitý člen množného čísla)	some
-quelqu’un	někdo	someone
-parfois	někdy	sometimes
-sucre	cukr	sugar
-que	že	that
-mince	hubený, sakra	thindarn
-par	skrz, přes	through
-trop	příliš, moc	toomuch
-serviette	ubrousek, ručník	towelnapkin
-train	vlak	train
-voyager	cestovat	travel
-très	velmi	very
-marcher	chodit, kráčet	walk
-vouloir	chtít	want
-vouloir	chtít	want
-laver	mýt, prát	wash
-pourquoi	proč	why
-marcher	fungovat	workfunction
-oui	ano	yes
-tu	ty	you
-tu es	ty jsi	youare
-ta	tvá	yourf
-ton	tvůj	yourm
+pátek 22:17
+FR: faim, chut, sommeil, durer, tout le monde, vol. IT: piano, attore, usi, sito, attrice, domenica, vinti, viaggio, couverture,
+Mílo, u chut a couverture upozorním na jazyk: francouzsky je správně chute a couverture; couverture tedy není italské slovo.
+🇫🇷 FRANCOUZŠTINA
+1. faim = hlad
+la faim – ženský rod. Nejdůležitější spojení je avoir faim = mít hlad.
+J’ai faim.
+Mám hlad.
+Tu as faim ?
+Máš hlad?
+Après la promenade, nous avons très faim.
+Po procházce máme velký hlad.
+2. chute = pád, pokles
+Il a fait une chute dans l’escalier.
+Spadl na schodech.
+La chute des prix continue.
+Pokles cen pokračuje.
+Après sa chute, il avait mal au bras.
+Po pádu ho bolela ruka.
+3. sommeil = spánek; ospalost
+le sommeil – mužský rod.
+J’ai sommeil.
+Jsem ospalý / Chce se mi spát.
+Le bébé a besoin de beaucoup de sommeil.
+Miminko potřebuje hodně spánku.
+Je manque de sommeil.
+Mám nedostatek spánku.
+Důležité:
+J’ai sommeil. = Chce se mi spát.
+Je dors. = Spím.
+4. durer = trvat
+Le film dure deux heures.
+Film trvá dvě hodiny.
+Combien de temps dure le vol ?
+Jak dlouho trvá let?
+Le voyage va durer une semaine.
+Cesta bude trvat týden.
+5. tout le monde = všichni, každý
+Gramaticky se pojí se slovesem v jednotném čísle.
+Tout le monde est prêt.
+Všichni jsou připraveni.
+Tout le monde aime ce film.
+Všem se ten film líbí.
+Tout le monde est arrivé à l’heure.
+Všichni dorazili včas.
+6. vol = let; krádež
+un vol – mužský rod.
+Notre vol part à huit heures.
+Náš let odlétá v osm hodin.
+Le vol dure trois heures.
+Let trvá tři hodiny.
+Il a signalé le vol de son téléphone.
+Nahlásil krádež svého telefonu.
+🇮🇹 ITALŠTINA
+7. piano = pomalu; tiše; patro; klavír
+Hodně významové slovo.
+Parla piano, per favore.
+Mluv tiše, prosím.
+Cammina piano.
+Jde pomalu.
+Abito al secondo piano.
+Bydlím ve druhém patře.
+A pianoforte = klavír.
+8. attore = herec
+È un attore famoso.
+Je to slavný herec.
+Questo attore è italiano.
+Tento herec je Ital.
+Mio cugino vuole diventare attore.
+Můj bratranec se chce stát hercem.
+9. usi → usare = používat
+usi = používáš.
+Usi spesso il computer?
+Používáš často počítač?
+Che telefono usi?
+Jaký telefon používáš?
+Uso questa applicazione ogni giorno.
+Tuto aplikaci používám každý den.
+10. sito = stránka, web; místo/lokalita
+Nejčastěji sito web = webová stránka/web.
+Ho trovato questo sito su Internet.
+Našel jsem tento web na internetu.
+Questo sito è molto interessante.
+Tato stránka je velmi zajímavá.
+Visito spesso questo sito web.
+Často navštěvuji tento web.
+11. attrice = herečka
+È un’attrice famosa.
+Je to slavná herečka.
+Questa attrice vive a Roma.
+Tato herečka žije v Římě.
+Mia figlia vuole diventare attrice.
+Moje dcera se chce stát herečkou.
+12. domenica = neděle
+Oggi è domenica.
+Dnes je neděle.
+Domenica andiamo al mare.
+V neděli jedeme k moři.
+La domenica non lavoro.
+V neděli nepracuji.
+13. vinti → vincere = vyhrát, zvítězit
+vinto = vyhraný / vyhrál; vinti = vyhrané (mužský rod množného čísla).
+Abbiamo vinto la partita.
+Vyhráli jsme zápas.
+Ha vinto cento euro.
+Vyhrál sto eur.
+Voglio vincere questa gara.
+Chci vyhrát tento závod.
+14. viaggio = cesta, cestování
+il viaggio – mužský rod.
+Il viaggio è stato molto lungo.
+Cesta byla velmi dlouhá.
+Domani partiamo per un viaggio in Italia.
+Zítra vyrážíme na cestu do Itálie.
+Buon viaggio!
+Šťastnou cestu!
+🇫🇷 couverture = přikrývka, deka; obal, pokrytí
+Tohle je francouzsky, nikoli italsky.
+J’ai besoin d’une couverture.
+Potřebuji deku.
+Il fait froid, prends une couverture.
+Je zima, vezmi si deku.
+La couverture du livre est rouge.
+Obálka knihy je červená.
+Chut je psst!…
+Ano! 😄 Mílo, pak jsi myslel francouzské chut ! — a měl jsi to napsané správně.
+🇫🇷 Chut ! = Psst! / Ticho! / Tiše!
+Používá se, když chceš někoho utišit.
+Chut ! Le bébé dort.
+Psst! Miminko spí.
+Chut ! Écoute !
+Psst! Poslouchej!
+Chut, ne fais pas de bruit.
+Psst, nedělej hluk.
+Výslovnost přibližně „šyt“, s francouzským u.
+Takže moje předchozí oprava na chute = pád byla špatně. chut ! skutečně existuje a znamená „psst!, ticho!“.
+
+7. vecchio = starý
+Ho un vecchio libro di storia.
+Mám starou knihu dějepisu.
+Quel signore è molto vecchio.
+Ten pán je velmi starý.
+Vivono in una casa vecchia ma bella.
+Bydlí ve starém, ale hezkém domě.
+Pozor:
+vecchio = mužský rod
+vecchia = ženský rod
+8. già = už, již
+Ho già mangiato.
+Už jsem jedl.
+È già tardi.
+Už je pozdě.
+Abbiamo già visto questo film.
+Už jsme ten film viděli.
+9. perché = proč; protože
+a) proč
+Perché sei triste?
+Proč jsi smutný?
+Perché non vieni con noi?
+Proč nejdeš s námi?
+b) protože
+Non vengo perché sono stanco.
+Nepřijdu, protože jsem unavený.
+Studio perché voglio imparare.
+Učím se, protože se chci naučit.
+10. mai = nikdy; někdy v otázce „vůbec někdy“
+Non vado mai lì.
+Nikdy tam nechodím.
+Hai mai visitato Roma?
+Navštívil jsi někdy Řím?
+Non ho mai visto questo film.
+Nikdy jsem ten film neviděl.
+Pozor:
+v kladné otázce často znamená někdy
+se záporem znamená nikdy
+11. auguri = přání, blahopřání
+Tanti auguri di buon compleanno!
+Všechno nejlepší k narozeninám!
+Auguri per il tuo compleanno.
+Všechno nejlepší k tvým narozeninám.
+Ti mando i miei auguri.
+Posílám ti své blahopřání.
+12. quelle = ty / které / tamty
+Je to tvar ukazovacího zájmena quello.
+Nejčastěji:
+
+quelle = ty / tamty pro ženský rod množného čísla
+Quelle scarpe sono molto belle.
+Ty boty jsou velmi hezké.
+Mi piacciono quelle case.
+Líbí se mi tamty domy.
+Quelle ragazze sono italiane.
+Ty dívky jsou Italky.
+Pozor:
+tvary:
+quello = ten
+quella = ta
+quelli = ti / ty
+quelle = ty (ženský rod množné číslo)
+Jestli chceš, příště ti u zájmen jako quello / quella / quelli / quelle udělám malou přehlednou tabulku.

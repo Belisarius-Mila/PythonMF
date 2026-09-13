@@ -1,56 +1,39 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-10 08:22 CEST
+- Aktualizováno: 2026-09-13 10:12 CEST
 
 ### Hotovo
-- Míla potvrdil novou aplikaci i vzpomínání jako funkční.
-- Trénink présent: 107 sloves, 1 926 FR/CZ vět, 107 ilustrací. Správně napsaný
-  tvar pokračuje automaticky; Dál dovolí i prázdnou odpověď, písmena po 0,44 s.
-- Nová samostatná VocabularyFR.app je připravená ve sdíleném iCloud PythonMF.
-  Obsahuje vlastní Python/Tk/Pillow a čte výslovně Janiny CSV vedle aplikace.
-- Nejdřív ověřená záloha původního slovníku, sloves, aplikace a distribuce.
-  Janiných 406 řádků má všechna Sentence/SentenceT: doplněno 15 párů,
-  opraveny dva zjevné FR překlepy. Ostatní pole a již hotové věty zachované.
-- Janin VerbeFR.csv zachován. Doplněn FR_Pict.csv, 119 chybějících obrázků
-  a 86 novějších vazeb stávajícího kanonického mappingu; obě mapování shodná.
-- Původní aplikace i CSV jsou také ve sdílené Zaloha_pred_aktualizaci_20260908_164413.
-  Připraven distribuční ZIP a CTI_ME_nova_verze_20260908.txt.
+- Doplněno 7 FR položek z NewWords.txt; Míla má celkem 234 slovíček.
+- U Jany doplněno 7 chybějících párů vět a dva české překlepy;
+  nyní všech 413 řádků kompletních. Nová Mílova hesla se Janě nepřidávala.
+- Dříve potvrzená samostatná Janina aplikace a trénink 107 sloves /
+  1 926 vět zůstávají zachované; tato aktualizace mění jen slovníková data.
+- Společný audit: FR Míla 234 / FR Jana 413 / IT Míla 471 řádků,
+  žádné chybějící obrázky v desktopových ani Pythonista resolverech.
+- Doplněno také devět starších Janiných českých vazeb chybějících v Pythonistě.
+- Osm nových ilustrací WebP do 250 kB; kanonické české abecední mapování
+  1 082 položek (+27) je bajtově shodné s Janinou sdílenou kopií.
+- Šest testů kanonického mappingu i rychlá statická brána prošly; původní řádky Míly včetně L/HT
+  zachované. Všechny nové položky mají Sentence/SentenceT a L=ne, HT=ne.
+
 
 ### Rozhodnutí
-- Míla výslovně požádal o zálohu, doplnění vět, izolované sestavení a výměnu
-  Janiny aplikace ve sdíleném PythonMF. Přímý přenos byl tímto autorizovaný.
-- Janina přenosná edice používá jediný explicitní --data-dir vedle .app;
-  obecná politika zdrojové aplikace / Application Support se neměnila.
-- Balíček x86_64 navazuje na architekturu původní Janiny .app. Bez Git push.
-
-### Otevřeno a rizika
-- Míla 10. 9. potvrdil, že aktualizace u Jany fungovala na první pokus;
-  distribuční retest je splněný.
-- Na sdíleném CSV má pracovat vždy jedna aplikace / zařízení. ZIP obsahuje
-  datový snímek; nesmí později nahradit novější Janin slovník.
-- Obrázkový audit pokryl FR Míla 227, FR Jana 406 a IT Míla 463 řádků,
-  bez chybějících výsledných souborů. Jana má 16 obecných kategoriálních
-  fallbacků; výběr lepších ilustrací zůstává samostatné téma.
-- Historický dluh řazení mapping.json a reloadu po konfliktu CSV zůstává.
-- Linuxový poslech dosud neověřený na skutečném Linux PC.
+- Míla pověřil Adama doplněním dat, výběrem/generováním ilustrací i c+p
+  bez mezidotazů a bez schvalovací galerie. Výběr významů je v reportu.
 
 ### Další krok
-- Distribuční krok je uzavřený. Další změna až podle nového požadavku.
+- Načíst aktualizovaná data v používané aplikaci; vzdálenou iCloud synchronizaci
+  a skutečný iPhone běh tento místní audit nepotvrzuje.
 
 ### Navrhované další kroky
-- Nové nasazení teď není potřeba.
-- Samostatně Linux poslech a případné přesnější obrázky nových slovíček.
+- Další obsah doplňovat stejným společným auditem tří slovníků.
 
-### Technický důkaz
-- 50 cílených testů; plná Cockpit brána 1 518/1 518.
-- Skutečná zabalená aplikace z výstupu i sdílené složky: 406 řádků,
-  107 sloves, 107 načtených obrázků, správná psaná odpověď pokračuje; Tk 8.6.13.
-- Build mimo Desktop prošel i strict codesign; přenesená kopie deep codesign.
-- 1 203 položek obsahu / odkazů aplikace porovnáno po přenosu, ZIP SHA-256 shodné.
-- Mílovy slovníky i kanonický mapping beze změny. Obě distribuční mapování
-  mají 1 055 položek a žádný cíl bez fyzického obrázku.
-- Soukromý receipt: data/private/vocabularyfr_jana_release/20260908_1635/TRANSFER_RECEIPT.json.
+### Rizika a technický důkaz
+- Před zápisem soukromé zálohy a kontrola vstupních snímků. Janina data mimo Git.
+- Kód aplikací se neměnil. Dřívější otevřené náměty, např. Linux poslech
+  a reload CSV po konfliktu, nejsou tímto datovým krokem vyřešené.
+- Podrobnosti: `reports/vocabulary_fr_it_refresh_2026_09_13.md`.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: Vocabulary FR
@@ -268,3 +251,39 @@ Navrhované další kroky:
 Technický důkaz:
 - Výslovné potvrzení Míly v konverzaci 10. 9. 2026; návaznost na distribuci
   připravenou 8. 9. z commitu 581eb3db.
+
+### 2026-09-13 10:12 CEST – Slovíčka a ilustrace z NewWords.txt
+
+Hotovo:
+- Doplněno 7 FR položek z NewWords.txt; Míla má celkem 234 slovíček.
+- U Jany doplněno 7 chybějících párů vět a dva české překlepy;
+  nyní všech 413 řádků kompletních. Nová Mílova hesla se Janě nepřidávala.
+- Dříve potvrzená samostatná Janina aplikace a trénink 107 sloves /
+  1 926 vět zůstávají zachované; tato aktualizace mění jen slovníková data.
+- Společný audit: FR Míla 234 / FR Jana 413 / IT Míla 471 řádků,
+  žádné chybějící obrázky v desktopových ani Pythonista resolverech.
+- Doplněno také devět starších Janiných českých vazeb chybějících v Pythonistě.
+- Osm nových ilustrací WebP do 250 kB; kanonické české abecední mapování
+  1 082 položek (+27) je bajtově shodné s Janinou sdílenou kopií.
+- Šest testů kanonického mappingu i rychlá statická brána prošly; původní řádky Míly včetně L/HT
+  zachované. Všechny nové položky mají Sentence/SentenceT a L=ne, HT=ne.
+
+
+Rozhodnutí:
+- Realizován výslovný pokyn Míly od A do Z včetně generování, přiřazení
+  a c+p. Kontrola ilustrací delegovaná Adamovi; galerie se nevyžaduje.
+
+Další krok:
+- Načíst nová data v používaných aplikacích; vzdálený přenos a iPhone retest
+  se tímto místním ověřením nepotvrzují.
+
+Navrhované další kroky:
+- Další dávku opět ověřit napříč třemi slovníky.
+
+Technický důkaz:
+- Původní CSV hodnoty a mapovací vazby zachované, soukromé zálohy ověřené.
+- Skutečné desktopové/Pythonista resolvery, dekódování Pillow, SHA-256 obou
+  obrazových kopií, shoda mappingů a úplnost Janiných vět prošly.
+- Report `reports/vocabulary_fr_it_refresh_2026_09_13.md`; soukromé důkazy
+  `vocabulary_refresh_20260913/audit_result.json` a `apply_manifest.json`.
+- Riziko: stav na vzdáleném iPhonu/Macu závisí na následném přenosu dat.
