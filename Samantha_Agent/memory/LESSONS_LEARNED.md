@@ -619,3 +619,9 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Problém: Po zavření terminálu může screen s Codexem pokračovat, ale uživatel k němu nemá otevřené okno. Úspěšné předání URI editoru samo neprokazuje připojení.
 - Ověřené řešení: Rozlišit obnovu od ukončení a od `codex resume`; ověřený screen spustit přímo jako terminál VS Code přes `screen -d -r <socket>`. Připojený stav vyžaduje potvrzení převzetí. PID/start a ochrany ověřit znovu při jednorázovém převzetí.
 - Ověření: Vývojové okno skutečného VS Code připojilo vlastní testovací screen a zachovalo PID screenu i vnitřních procesů. UI test používá náhradní DOM; skutečný první klik z Cockpitu zůstává samostatným ověřením.
+
+### 2026-09-13 – Viditelná šipka může být zakrytá úvodním audio panelem
+
+- Problém: návrat ve scénách MMTX 4 a 5 byl vidět, ale úvodní audio překryv zachytával kliknutí. Samotná kontrola href ani viditelnosti chybu neodhalila.
+- Řešení: ovládací vrstvu umístit nad audio překryv a zachovat průhlednost ke kliknutí mimo tlačítka. Ověřit skutečný klik ještě před spuštěním příběhu.
+- Ověření: návraty 4 → 3 a 5 → 4 prošly bez spuštění audia v desktopovém i mobilním viewportu. Celá navigační sada prošla 18/18.

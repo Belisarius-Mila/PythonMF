@@ -74,7 +74,7 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
         self.assertIn('id="yesButton"', html)
         self.assertIn('id="noButton"', html)
         self.assertIn('src="harry_benji_prototype_01.png"', html)
-        self.assertIn('styles.css?v=20260903scene05shortcut1', html)
+        self.assertIn('styles.css?v=20260913nav1', html)
         self.assertIn('href="../scene05_log_bridge/index.html"', html)
         self.assertIn('class="scene-quick-skip"', html)
         self.assertIn('aria-label="Rychle přejít ke scéně 5"', html)
@@ -105,7 +105,7 @@ class MmtxHarryGuardPrototypeTests(unittest.TestCase):
             PROJECT_ROOT / "docs" / "scene03_journey_to_the_lake" / "index.html"
         ).read_text(encoding="utf-8")
         self.assertIn("audio_manifest.js?v=20260829fixed1", production_html)
-        self.assertIn("script.js?v=20260829fixed1", production_html)
+        self.assertIn("script.js?v=20260913nav1", production_html)
         quick_advance = production_script.split(
             "function quickAdvanceScene()", 1
         )[1].split("function isQuickSkipCornerClick", 1)[0]

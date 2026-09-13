@@ -367,6 +367,9 @@ body {
 }
 
 .complete-banner {
+  font: inherit;
+  color: inherit;
+  border: 2px solid #478353;
   position: absolute;
   left: 50%;
   bottom: 10%;
@@ -556,4 +559,9 @@ body {
   .dictionary-list {
     grid-template-columns: 1fr;
   }
+}
+
+.complete-banner:focus-visible {
+  outline: 4px solid #ffd86b;
+  outline-offset: 3px;
 }

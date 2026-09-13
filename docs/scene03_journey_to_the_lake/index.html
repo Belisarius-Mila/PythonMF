@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Scene 3 — Journey to the Lake</title>
-    <link rel="stylesheet" href="styles.css?v=20260701quickskip1">
+    <link rel="stylesheet" href="styles.css?v=20260913nav1">
   </head>
   <body>
     <main class="app-shell">
@@ -17,7 +17,7 @@
             alt="Zvířátka na cestě k jezeru řeší rozcestí, koně a pumpu"
           >
           <div class="scene-hud" id="sceneHud">
-            <button class="ui-button" id="backButton" type="button" aria-label="Zpět na rozcestí">
+            <button class="ui-button" id="backButton" type="button" aria-label="Zpět do scény 2">
               <span class="btn-icon" aria-hidden="true">↩</span>
             </button>
             <div class="scene-hud-actions">
@@ -52,10 +52,10 @@
           <div class="map-fragment hidden" id="mapFragment" aria-hidden="true">
             <span class="map-fragment-icon" aria-hidden="true">🗺️</span>
           </div>
-          <div class="complete-banner hidden" id="completeBanner" aria-live="polite">
-            <span class="complete-emoji" aria-hidden="true">🎉</span>
+          <button class="complete-banner hidden" id="completeBanner" type="button" aria-label="Pokračovat do scény 4">
+            <span class="complete-emoji" aria-hidden="true">🚪</span>
             <span class="complete-text"></span>
-          </div>
+          </button>
           <div class="dictionary-panel hidden" id="dictionaryPanel" aria-label="Slovníček">
             <div class="dictionary-title">Slovníček</div>
             <div class="dictionary-list" id="dictionaryList"></div>
@@ -66,6 +66,6 @@
     </main>
 
     <script src="audio_manifest.js?v=20260829fixed1"></script>
-    <script src="script.js?v=20260829fixed1"></script>
+    <script src="script.js?v=20260913nav1"></script>
   </body>
 </html>

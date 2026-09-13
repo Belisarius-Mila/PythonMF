@@ -1,5 +1,5 @@
 button { font: inherit; }
-.scene-hud { z-index: 12; }
+.scene-hud { z-index: 21; }
 .scene-actions { display: flex; gap: 9px; pointer-events: auto; }
 .language-button, .repeat-button { width: auto; padding: 8px 13px; font-size: 0.95rem; font-weight: 800; }
 .language-button { min-width: 92px; }

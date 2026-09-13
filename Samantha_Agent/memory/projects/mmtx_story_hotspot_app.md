@@ -347,3 +347,22 @@ Otevřený krok pro Linux:
 
 Obsah projektové paměti byl podle kódu a Git historie dorovnán 2026-08-29;
 poslední automatický MMTX checkpoint před tímto dorovnáním byl z 2026-08-25.
+
+### 2026-09-13 18:21 CEST — Jednotná navigace scén 1–5
+
+Hotovo:
+- Dveře pokračují do další scény, šipky vlevo nahoře vracejí do předchozí. Návrat ve scénách 4 a 5 funguje i před spuštěním vyprávění.
+- Opravený návrat ze scény 2 a nefunkční závěrečné pokračování scény 3; dveře ve scénách 2–4 lze aktivovat klávesnicí.
+
+Rozhodnutí:
+- Míla požaduje dveře vpřed a šipku vlevo nahoře zpět a schválil commit, push a nasazení. Zachovat dokončení scény jako podmínku zobrazení dveří.
+
+Další krok:
+- Dokončit publikaci a doložit veřejnou verzi.
+
+Navrhované další kroky:
+- Další scéna za mostem zůstává budoucím příběhovým rozšířením.
+
+Technický důkaz:
+- 63 cílených testů prošlo; 18 skutečných prokliků v Edge ve viewports 1440 × 900 a 390 × 844. Pět návratů a čtyři pokračování pro každou velikost, žádné JS chyby; vizuálně zkontrolované screenshoty dveří.
+- Dokončení bylo nastaveno testem kvůli izolaci navigace, nikoli přehráno novým průchodem všech dialogů. Změny v `docs/` a `MatysekANJ/web_mmtx/` jsou shodné.

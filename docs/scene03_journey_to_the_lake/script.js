@@ -901,6 +901,11 @@ function handleRepeat() {
 }
 
 backButton.addEventListener("click", goBack);
+completeBanner.addEventListener("click", () => {
+  if (state.sceneState === SCENE_STATES.complete) {
+    goToNextScene();
+  }
+});
 repeatButton.addEventListener("click", handleRepeat);
 dictionaryButton.addEventListener("click", () => {
   if (dictionaryButton.disabled) {

@@ -346,8 +346,8 @@ function cancelSpeech() {
   }
 }
 
-function goBackToForestSignpost() {
-  window.location.href = "../index.html?scene=intro4";
+function goBackToScene01() {
+  window.location.href = "../index.html?scene=clearingMeeting";
 }
 
 function goToScene03() {
@@ -886,7 +886,7 @@ function finishScene() {
   hideBubble();
   revealMapEffect();
   renderHud();
-  setBottomHint("Hotovo! Klepni na spodní bublinu a pokračuj k jezeru.", true);
+  setBottomHint("Hotovo! Klepni na dveře a pokračuj k jezeru.", true);
 }
 
 function playHelp() {
@@ -970,7 +970,7 @@ function handleRepeat() {
   }
 }
 
-backButton.addEventListener("click", goBackToForestSignpost);
+backButton.addEventListener("click", goBackToScene01);
 completeBanner.addEventListener("click", () => {
   if (state.sceneState === SCENE_STATES.complete) {
     goToScene03();

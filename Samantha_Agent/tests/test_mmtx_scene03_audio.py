@@ -38,7 +38,7 @@ class MmtxScene03AudioTests(unittest.TestCase):
         script = (SCENE_ROOT / "script.js").read_text(encoding="utf-8")
 
         self.assertIn('audio_manifest.js?v=20260829fixed1', html)
-        self.assertIn('script.js?v=20260829fixed1', html)
+        self.assertIn('script.js?v=20260913nav1', html)
         self.assertLess(html.index("audio_manifest.js"), html.index("script.js"))
         self.assertIn("window.SCENE03_AUDIO_MANIFEST", script)
         self.assertIn("function fixedAudioPath", script)

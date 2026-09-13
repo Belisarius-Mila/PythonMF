@@ -1,13 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-12 10:27 CEST
-- Hotovo: Obrazové opravy scény 5 jsou na produkci: Logan je při loučení vidět zezadu a mává přátelům; tři klády jsou viditelné ihned po sestavení mostu před Benjiho přechodem.
-- Produkce: commit `49401df07e43`, Pages run `34683204037`, deployment `6407668406`, HTTP 200 a byte-shoda devíti veřejných souborů.
-- Ověření: 63 cílených MMTX testů, 1 554 testů plné brány, 104 pevných stop; browserový průchod se screenshotem tří klád před Benjim i opraveného loučení.
-- Další krok: večer navázat z Human–Adam v `project-mmtx`; před novou prací obnovit standardní read-only audit.
-- Předání: main a oba profily byly při dokončení ověřené čisté a zarovnané, runtime připojený a nečinný, žádná čekající integrace.
-- Mez ověření: fyzický poslech na iPhonu nebyl součástí automatického testu; pevné audio se v této opravě neměnilo.
+- Aktualizováno: 2026-09-13 18:21 CEST.
+- Navigace Cesty k jezeru: dveře po dokončení vedou 1 → 2 → 3 → 4 → 5; šipky vlevo nahoře vracejí vždy o jednu scénu. Ze scény 1 se vrací na rozcestník.
+- Opraveno: návrat 2 → 1 místo rozcestníku, chybějící kliknutí 3 → 4 a překrytí návratových šipek úvodním audio panelem ve scénách 4 a 5. Pokračování 2–4 má ikonu dveří a přístupné ovládání.
+- Scéna 5 je poslední dostupná scéna; další dveře bez existujícího cíle se nepřidávají. Původní skryté zkratky pro dospělého zůstávají zachované.
+- Ověření: 63 cílených MMTX testů; 18 prokliků vpřed/zpět v desktopovém a mobilním viewportu, Enter pro dveře, skrytí před dokončením, poloha šipek a žádné JS chyby. Screenshoty zkontrolované. Produkce i mirror obsahují stejné změny.
+- Meze: test nastavoval dokončený stav pro izolovanou kontrolu navigace; není to nové přehrání celého příběhu ani fyzický test Safari/iPhonu. Audio a obrázky se neměnily.
+- Publikace tohoto kroku zatím čeká na dokončení plné brány, commit a Pages; předchozí obrazové opravy scény 5 zůstávají doložené historickým zápisem.
+- Další krok: dokončit schválené c+p+n a ověřit veřejné soubory.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: MMTX
@@ -1165,3 +1166,22 @@ Technický důkaz:
 - Read-only audit před závěrečným dokumentačním commitem: main aligned, workspaces aligned_clean (2/2), runtime connected bez busy či nejistého doručení, pending integration not_pending.
 - Souhrnný live-status deployment stále odkazuje na starší nasazení samotného Cockpitu `d1e0b5bca0bc` (verified_other_main); tento údaj není důkazem neúspěchu Pages a není zaměňován s výše ověřenou MMTX publikací. Cockpitový kód se touto opravou nemění.
 - Výstupy a přesná zadání vestavěného ImageGen: `reports/mmtx_scene05_artfix_2026_09_12.md`.
+
+### 2026-09-13 18:21 CEST — Jednotná navigace scén 1–5
+
+Hotovo:
+- Dveře pokračují do další scény, šipky vlevo nahoře vracejí do předchozí. Návrat ve scénách 4 a 5 funguje i před spuštěním vyprávění.
+- Opravený návrat ze scény 2 a nefunkční závěrečné pokračování scény 3; dveře ve scénách 2–4 lze aktivovat klávesnicí.
+
+Rozhodnutí:
+- Míla požaduje dveře vpřed a šipku vlevo nahoře zpět a schválil commit, push a nasazení. Zachovat dokončení scény jako podmínku zobrazení dveří.
+
+Další krok:
+- Dokončit publikaci a doložit veřejnou verzi.
+
+Navrhované další kroky:
+- Další scéna za mostem zůstává budoucím příběhovým rozšířením.
+
+Technický důkaz:
+- 63 cílených testů prošlo; 18 skutečných prokliků v Edge ve viewports 1440 × 900 a 390 × 844. Pět návratů a čtyři pokračování pro každou velikost, žádné JS chyby; vizuálně zkontrolované screenshoty dveří.
+- Dokončení bylo nastaveno testem kvůli izolaci navigace, nikoli přehráno novým průchodem všech dialogů. Změny v `docs/` a `MatysekANJ/web_mmtx/` jsou shodné.
