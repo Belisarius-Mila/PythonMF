@@ -1,14 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-13 18:21 CEST.
+- Aktualizováno: 2026-09-13 18:31 CEST.
 - Navigace Cesty k jezeru: dveře po dokončení vedou 1 → 2 → 3 → 4 → 5; šipky vlevo nahoře vracejí vždy o jednu scénu. Ze scény 1 se vrací na rozcestník.
 - Opraveno: návrat 2 → 1 místo rozcestníku, chybějící kliknutí 3 → 4 a překrytí návratových šipek úvodním audio panelem ve scénách 4 a 5. Pokračování 2–4 má ikonu dveří a přístupné ovládání.
 - Scéna 5 je poslední dostupná scéna; další dveře bez existujícího cíle se nepřidávají. Původní skryté zkratky pro dospělého zůstávají zachované.
 - Ověření: 63 cílených MMTX testů; 18 prokliků vpřed/zpět v desktopovém a mobilním viewportu, Enter pro dveře, skrytí před dokončením, poloha šipek a žádné JS chyby. Screenshoty zkontrolované. Produkce i mirror obsahují stejné změny.
 - Meze: test nastavoval dokončený stav pro izolovanou kontrolu navigace; není to nové přehrání celého příběhu ani fyzický test Safari/iPhonu. Audio a obrázky se neměnily.
-- Publikace tohoto kroku zatím čeká na dokončení plné brány, commit a Pages; předchozí obrazové opravy scény 5 zůstávají doložené historickým zápisem.
-- Další krok: dokončit schválené c+p+n a ověřit veřejné soubory.
+- Veřejně nasazeno: commit `0e1906b8578d`, Pages run `34768695626`, deployment `6423781674`; HTTP 200, shoda 10/10 změněných souborů, dalších 18 produkčních prokliků. Plná brána 1 640/1 640.
+- Další krok: běžně používat opravenou navigaci; starou kartu obnovit.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: MMTX
@@ -617,3 +617,22 @@ Navrhované další kroky:
 Technický důkaz:
 - 63 cílených testů prošlo; 18 skutečných prokliků v Edge ve viewports 1440 × 900 a 390 × 844. Pět návratů a čtyři pokračování pro každou velikost, žádné JS chyby; vizuálně zkontrolované screenshoty dveří.
 - Dokončení bylo nastaveno testem kvůli izolaci navigace, nikoli přehráno novým průchodem všech dialogů. Změny v `docs/` a `MatysekANJ/web_mmtx/` jsou shodné.
+
+### 2026-09-13 18:31 CEST — Veřejně ověřená navigace Cesty k jezeru
+
+Hotovo:
+- Opravené dveře vpřed a šipky zpět jsou dostupné na veřejném MMTX. Návraty fungují i před spuštěním vyprávění ve scénách 4 a 5.
+
+Rozhodnutí:
+- Dokončeno Mílou schválené c+p+n pro navigaci scén 1–5; žádné další příběhové scény nevznikly.
+
+Další krok:
+- Běžně používat opravenou navigaci; při ponechané staré kartě stránku obnovit.
+
+Navrhované další kroky:
+- Další příběh za scénou 5 zůstává samostatným rozšířením.
+
+Technický důkaz:
+- Publikace: commit `0e1906b8578d`, Pages run `34768695626`, deployment `6423781674`; HTTP 200 a byte-shoda všech 10 změněných veřejných souborů.
+- Plná brána 1 640/1 640, cílené MMTX testy 63/63; mirror 537/537 souborů shodný. Browser: 18 lokálních návratů/pokračování včetně Enter a dalších 18 skutečných kliknutí na veřejné produkci, vždy desktop 1440 × 900 a mobilní viewport 390 × 844, bez JS chyb.
+- Test se soustředil na navigaci a nastavoval dokončený stav; neověřoval znovu celý příběh a fyzický poslech na iPhonu. Následný dokumentační commit nemění nasazené webové soubory.
