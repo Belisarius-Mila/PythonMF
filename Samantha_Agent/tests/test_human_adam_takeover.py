@@ -4,6 +4,7 @@ import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from typing import Callable
 from unittest.mock import patch
 
 from app.communication.human_adam_workspace import HumanAdamWorkspaceManager
@@ -18,8 +19,12 @@ from scripts.human_adam_takeover import (
 from tests.test_human_adam_workspace import git, make_source
 
 
-def prepare_with_origin(root: Path) -> tuple[Path, HumanAdamWorkspaceManager]:
+def prepare_with_origin(
+    root: Path, *, configure_source: Callable[[Path], None] | None = None
+) -> tuple[Path, HumanAdamWorkspaceManager]:
     source = make_source(root)
+    if configure_source is not None:
+        configure_source(source)
     remote = root / "origin.git"
     subprocess.run(
         ["/usr/bin/git", "init", "--bare", str(remote)],

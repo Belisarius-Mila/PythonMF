@@ -1,0 +1,327 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-13",
+  "baseline_commit": "0d1b24f1",
+  "scope": "Two existing deployment tests, two measured executions per variant and test. Original unittest methods and real Git subprocesses; only fixture implementation differs. No argv, output, paths or private content retained. Git durations are included in phase wall times, not additional. Imports excluded.",
+  "runs": [
+    {
+      "variant": "before",
+      "sample": 1,
+      "test": "test_batch_mode_deploys_local_ahead_main_with_quick_gate",
+      "success": true,
+      "seconds": 11.39224,
+      "git_count": 285,
+      "git_seconds": 11.195539,
+      "phases": [
+        {
+          "phase": "fixture",
+          "seconds": 3.904231,
+          "git_count": 87,
+          "git_seconds": 3.860392
+        },
+        {
+          "phase": "audit",
+          "seconds": 1.369483,
+          "git_count": 38,
+          "git_seconds": 1.351293
+        },
+        {
+          "phase": "prepare",
+          "seconds": 3.495609,
+          "git_count": 93,
+          "git_seconds": 3.450648
+        },
+        {
+          "phase": "verify",
+          "seconds": 1.047537,
+          "git_count": 29,
+          "git_seconds": 1.03197
+        },
+        {
+          "phase": "scenario_setup_and_runner",
+          "seconds": 1.57538,
+          "git_count": 38,
+          "git_seconds": 1.501236
+        }
+      ]
+    },
+    {
+      "variant": "before",
+      "sample": 1,
+      "test": "test_audit_accepts_clean_peer_behind_and_prepare_synchronizes_it",
+      "success": true,
+      "seconds": 11.06529,
+      "git_count": 274,
+      "git_seconds": 10.867452,
+      "phases": [
+        {
+          "phase": "fixture",
+          "seconds": 3.665765,
+          "git_count": 87,
+          "git_seconds": 3.620724
+        },
+        {
+          "phase": "audit",
+          "seconds": 1.476586,
+          "git_count": 39,
+          "git_seconds": 1.458053
+        },
+        {
+          "phase": "prepare",
+          "seconds": 3.719162,
+          "git_count": 95,
+          "git_seconds": 3.668615
+        },
+        {
+          "phase": "scenario_setup_and_runner",
+          "seconds": 2.203777,
+          "git_count": 53,
+          "git_seconds": 2.12006
+        }
+      ]
+    },
+    {
+      "variant": "after",
+      "sample": 1,
+      "test": "test_batch_mode_deploys_local_ahead_main_with_quick_gate",
+      "success": true,
+      "seconds": 10.4755,
+      "git_count": 251,
+      "git_seconds": 10.290743,
+      "phases": [
+        {
+          "phase": "fixture",
+          "seconds": 2.489315,
+          "git_count": 53,
+          "git_seconds": 2.462401
+        },
+        {
+          "phase": "audit",
+          "seconds": 1.453579,
+          "git_count": 38,
+          "git_seconds": 1.437632
+        },
+        {
+          "phase": "prepare",
+          "seconds": 3.782173,
+          "git_count": 93,
+          "git_seconds": 3.735905
+        },
+        {
+          "phase": "verify",
+          "seconds": 1.104692,
+          "git_count": 29,
+          "git_seconds": 1.090003
+        },
+        {
+          "phase": "scenario_setup_and_runner",
+          "seconds": 1.645741,
+          "git_count": 38,
+          "git_seconds": 1.564804
+        }
+      ]
+    },
+    {
+      "variant": "after",
+      "sample": 1,
+      "test": "test_audit_accepts_clean_peer_behind_and_prepare_synchronizes_it",
+      "success": true,
+      "seconds": 9.814536,
+      "git_count": 240,
+      "git_seconds": 9.63725,
+      "phases": [
+        {
+          "phase": "fixture",
+          "seconds": 2.320389,
+          "git_count": 53,
+          "git_seconds": 2.291802
+        },
+        {
+          "phase": "audit",
+          "seconds": 1.525973,
+          "git_count": 39,
+          "git_seconds": 1.508334
+        },
+        {
+          "phase": "prepare",
+          "seconds": 3.667894,
+          "git_count": 95,
+          "git_seconds": 3.619433
+        },
+        {
+          "phase": "scenario_setup_and_runner",
+          "seconds": 2.300279,
+          "git_count": 53,
+          "git_seconds": 2.217682
+        }
+      ]
+    },
+    {
+      "variant": "after",
+      "sample": 2,
+      "test": "test_batch_mode_deploys_local_ahead_main_with_quick_gate",
+      "success": true,
+      "seconds": 10.056624,
+      "git_count": 251,
+      "git_seconds": 9.873275,
+      "phases": [
+        {
+          "phase": "fixture",
+          "seconds": 2.300048,
+          "git_count": 53,
+          "git_seconds": 2.270627
+        },
+        {
+          "phase": "audit",
+          "seconds": 1.387277,
+          "git_count": 38,
+          "git_seconds": 1.370836
+        },
+        {
+          "phase": "prepare",
+          "seconds": 3.623744,
+          "git_count": 93,
+          "git_seconds": 3.57853
+        },
+        {
+          "phase": "verify",
+          "seconds": 1.075893,
+          "git_count": 29,
+          "git_seconds": 1.061395
+        },
+        {
+          "phase": "scenario_setup_and_runner",
+          "seconds": 1.669662,
+          "git_count": 38,
+          "git_seconds": 1.591887
+        }
+      ]
+    },
+    {
+      "variant": "before",
+      "sample": 2,
+      "test": "test_batch_mode_deploys_local_ahead_main_with_quick_gate",
+      "success": true,
+      "seconds": 12.547252,
+      "git_count": 285,
+      "git_seconds": 12.304181,
+      "phases": [
+        {
+          "phase": "fixture",
+          "seconds": 3.678598,
+          "git_count": 87,
+          "git_seconds": 3.632298
+        },
+        {
+          "phase": "audit",
+          "seconds": 1.468616,
+          "git_count": 38,
+          "git_seconds": 1.449238
+        },
+        {
+          "phase": "prepare",
+          "seconds": 4.489183,
+          "git_count": 93,
+          "git_seconds": 4.434683
+        },
+        {
+          "phase": "verify",
+          "seconds": 1.313188,
+          "git_count": 29,
+          "git_seconds": 1.293085
+        },
+        {
+          "phase": "scenario_setup_and_runner",
+          "seconds": 1.597668,
+          "git_count": 38,
+          "git_seconds": 1.494878
+        }
+      ]
+    },
+    {
+      "variant": "before",
+      "sample": 2,
+      "test": "test_audit_accepts_clean_peer_behind_and_prepare_synchronizes_it",
+      "success": true,
+      "seconds": 13.548034,
+      "git_count": 274,
+      "git_seconds": 13.306168,
+      "phases": [
+        {
+          "phase": "fixture",
+          "seconds": 4.677932,
+          "git_count": 87,
+          "git_seconds": 4.619604
+        },
+        {
+          "phase": "audit",
+          "seconds": 1.791071,
+          "git_count": 39,
+          "git_seconds": 1.768925
+        },
+        {
+          "phase": "prepare",
+          "seconds": 4.426711,
+          "git_count": 95,
+          "git_seconds": 4.365067
+        },
+        {
+          "phase": "scenario_setup_and_runner",
+          "seconds": 2.65232,
+          "git_count": 53,
+          "git_seconds": 2.552572
+        }
+      ]
+    },
+    {
+      "variant": "after",
+      "sample": 2,
+      "test": "test_audit_accepts_clean_peer_behind_and_prepare_synchronizes_it",
+      "success": true,
+      "seconds": 11.01836,
+      "git_count": 240,
+      "git_seconds": 10.820123,
+      "phases": [
+        {
+          "phase": "fixture",
+          "seconds": 2.519959,
+          "git_count": 53,
+          "git_seconds": 2.489597
+        },
+        {
+          "phase": "audit",
+          "seconds": 1.685042,
+          "git_count": 39,
+          "git_seconds": 1.667914
+        },
+        {
+          "phase": "prepare",
+          "seconds": 4.25792,
+          "git_count": 95,
+          "git_seconds": 4.209813
+        },
+        {
+          "phase": "scenario_setup_and_runner",
+          "seconds": 2.555439,
+          "git_count": 53,
+          "git_seconds": 2.452799
+        }
+      ]
+    }
+  ],
+  "full_gate": {
+    "success": true,
+    "test_count": 1650,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "run_seconds": 455.3396253279643,
+    "load_seconds": 4.052091342979111,
+    "deployment_module": {
+      "module": "tests.test_simple_main_deploy",
+      "test_count": 18,
+      "seconds": 84.48717208078597
+    },
+    "subprocess_seconds": 460.0
+  }
+}

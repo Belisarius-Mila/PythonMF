@@ -1,19 +1,17 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-13 22:42 CEST.
-- Roadmapa `AuditCockpit56_2.txt` je ve verzi 1.4. Lokálně oddělené hledání i generování dokumentové/nákupní čtečky.
-- Lokální `document_search.js` odděluje `searchDocuments` a vykreslování výsledků. Obě funkce zachované doslova; jediný export je hledání. Tisk, lifecycle, stav čtení a otevření čteček zůstávají původní předané obsluhy v `app.js`.
-- Hlavní `app.js` má 7 063 řádků místo 7 196; nový modul má 159 řádků. HTML/CSS, serverové služby a API beze změny.
-- Ověření: 49 cílených Python testů (32 + 17) prošlo, frontendová sada spouští i 8 nových Node kontraktů. Browser před/po 1440/390 px: shodné DOM, otevření dokumentu/nákupu, zrušení/potvrzení tisku, archive/trash, stav čtení a obnovení hledání; bez JS chyb. Jen syntetická data a nahrazené API, bez skutečného tisku/zápisů dokumentů.
-- Hledání (`674dc194`) ani navazující čtečky nejsou pushnuté ani nasazené; společná dávka výslovně odložená. Předchozí `document_review.js` a dokumentační main `97d608f7` byly samostatně pushnuté a nasazené; předchozí plná brána 1641/1641 není novým testem tohoto řezu. Pro tento běžný strukturální přesun cílené testy a statická brána.
-- Třetí lokální krok přidává volitelné časování brány. Jedna aktuální plná brána 1649/1649 prošla; unit 426,38 s. Čtyři Git/workspace skupiny zabírají 73,5 % času. Bezpečný report a JSON v `memory/reports/cockpit_test_timings_2026_09_13.*`.
-- Další optimalizační pilot: dva nejpomalejší deploy testy, oddělit cenu přípravy od Git operací. Zatím návrh, bez změny testovacích prostředí nebo produkčních kontrol.
-- Společný push/nasazení všech tří lokálních kroků zůstává na samostatný pokyn; čistý main napřed neblokuje další téma.
-- Čtečky nyní generuje `cockpit_document_readers.py` (191 řádků); `cockpit.py` 11068 → 10892. Obě funkce přeneseny doslova, importovatelné názvy zachované; resolvery/HTTP/tiskové akce beze změny.
-- Ověření čteček: 40 cílených Python testů včetně 11 nových Node kontraktů návratů/tisku; šest variant HTML byte-shodných před/po. Pro tento přesun cílená a statická brána, nikoli nový běh plné brány.
-- Pro pozdější UI audit: hledání nemá pokračování za prvních 8 výsledků; Janiččina zkratka hledání sama nerozbaluje panel. Nákupní čtečka nemá náhradní návrat bez openeru. Nálezy z kódu, bez živé přejímky a bez oprav v těchto řezech.
-- Míla odložil zálohu na 14. 9. kvůli nedostupnému disku. Navazující audit a úprava UI mají přijít po strukturální etapě; Santiago je zatím jen zvažované téma.
+- Aktualizováno: 2026-09-13 23:05 CEST.
+- Roadmapa `AuditCockpit56_2.txt` je ve verzi 1.5. Čtvrtý čekající lokální krok zjednodušuje přípravu testů nasazení podle naměřených nákladů.
+- Předchozí lokální kroky: hledání `674dc194`, čtečky `f1b41dc5`, měření brány `0d1b24f1`. Hledání má vlastní modul, čtečky čistý renderer; obsluhy/API zůstaly zachované. `app.js` 7063 řádků, `cockpit.py` 10892.
+- Dva pilotní deploy testy: osm úspěšných měřených běhů před/po; příprava 87 → 53 Git procesů. Konfigurace testovací brány probíhá před vytvořením originu a profilů, takže odpadá druhý úvodní push/sync. Vlastní scénáře a produkční kontroly nezměněné.
+- Příprava v pilotu přibližně 3,7–4,7 → 2,3–2,5 s. Jde o malé měření na Macu, nikoli záruku výkonu celé brány. Report a osm vzorků: `memory/reports/cockpit_deploy_fixture_pilot_2026_09_13.*`.
+- Nový regresní test potvrdil čistý a zarovnaný výchozí stav i nezávislost dvou sad repozitářů při commitu do jednoho profilu. Plná brána po změně 1650/1650 prošla; unit 455,34 s, deploy skupina 18 testů / 84,49 s.
+- Starší výchozí měření `0d1b24f1`: 1649 testů / 426,38 s; čtyři Git/workspace skupiny 73,5 % času. Historický report zachovaný, není přepsán novými čísly.
+- Všechny čtyři lokální kroky čekají na společný push/nasazení na samostatný pokyn. Dříve bylo doložené nasazení `97d608f7`; tento krok nový živý audit runtime nedělal.
+- Další krok: vybrat následující strukturální řez podle konkrétní HTTP/doménové vazby; optimalizační pilot je dokončený. Produkční status/preflight případně analyzovat odděleně, bez vynechávání kontrol.
+- Otevřená uživatelská přejímka Mac/iPhone a pozdější audit/UI: hledání má jen prvních 8 výsledků, Janiččina zkratka sama nerozbaluje panel, nákupní čtečka nemá náhradní návrat bez openeru. Nálezy z kódu, zde bez oprav.
+- Záloha na výslovný pokyn odložená na 14. 9. kvůli nedostupnému disku. Navazující audit a změna UI po strukturální etapě; Santiago zatím jen zvažované téma.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Cockpit / hlavní architektura
@@ -785,3 +783,25 @@ Technický důkaz:
 - Měřený test zahrnuje vlastní setUp/tearDown; ostatní společná příprava a režie explicitně zvlášť (0,071 s). Stejný manifest/pořadí, výsledky i návratové kódy.
 - Staticky potvrzené skutečné lokální Git repozitáře v pomalých testech a nahrazená gate/smoke. Podíl přípravy versus jednotlivých Git operací zatím není změřený; zrychlení se ještě neslibuje.
 - Kód/plná brána ověřené nad lokálním základem f1b41dc5 plus tento krok; následně pouze projektový zápis a statická kontrola. Push/nasazení zůstávají odložené.
+
+
+### 2026-09-13 23:05 CEST — Jednodušší příprava testů nasazení
+
+Hotovo:
+- Příprava integračních testů nasazení potřebuje o 34 Git procesů méně; v pilotu klesla přibližně ze 3,7–4,7 na 2,3–2,5 sekundy.
+- Testy si nadále vytvářejí vlastní skutečné repozitáře. Nový regresní test ověřuje jejich čistý výchozí stav a vzájemnou nezávislost.
+
+Rozhodnutí:
+- Míla schválil další lokální krok. Podle měření přesunuta konfigurace syntetické brány před vytvoření kopií; produkční kontroly a vlastní testové scénáře zachované.
+
+Další krok:
+- Vybrat další strukturální řez podle konkrétní HTTP/doménové vazby v roadmapě.
+
+Navrhované další kroky:
+- Společný push/nasazení čtyř lokálních kroků na samostatný pokyn.
+- Dokončit společnou Mac/iPhone přejímku a navázat auditem/UI.
+
+Technický důkaz:
+- Osm úspěšných měřených běhů dvou původních testů; příprava 87 → 53 Git procesů, počty ve vlastních scénářích stejné. Report `cockpit_deploy_fixture_pilot_2026_09_13.md` a bezpečný JSON.
+- Samostatný regresní test izolace prošel. Plná brána po změně 1650/1650 prošla; unit 455,34 s, deploy skupina 18 testů / 84,49 s.
+- Dva vzorky každé varianty nejsou garantovaný benchmark; skutečná úspora celé brány závisí i na ostatních testech a zátěži. Produkční kód, manifest, timeouty a release brány beze změny; push/nasazení odložené.

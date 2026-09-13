@@ -53,16 +53,20 @@ def successful_smoke() -> list[SmokeResult]:
     ]
 
 
-def prepare_clean_main(root: Path):
-    source, primary = prepare_with_origin(root)
+def _configure_deployment_source(source: Path) -> None:
+    """Finish the synthetic source before publishing/cloning its initial state."""
     (source / "AuditCockpit56_M.txt").unlink()
     gate_script = source / "Samantha_Agent" / "scripts" / "cockpit_quality_gate.py"
     gate_script.parent.mkdir(parents=True, exist_ok=True)
     gate_script.write_text("raise SystemExit(0)\n", encoding="utf-8")
     git(source, "add", "Samantha_Agent/scripts/cockpit_quality_gate.py")
     git(source, "commit", "-m", "Add test gate")
-    git(source, "push", "origin", "main:main")
-    primary.sync_from_main(confirmed=True)
+
+
+def prepare_clean_main(root: Path):
+    source, primary = prepare_with_origin(
+        root, configure_source=_configure_deployment_source
+    )
     peer = HumanAdamWorkspaceManager(
         source_repo=source,
         workspace_root=root / "peer",
@@ -81,6 +85,42 @@ def request(head: str) -> SimpleMainDeploymentRequest:
 
 
 class SimpleMainDeploymentTests(unittest.TestCase):
+    def test_clean_main_fixtures_start_aligned_and_remain_independent(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            fixtures = []
+            for name in ("first", "second"):
+                root = Path(temp_dir) / name
+                root.mkdir()
+                source, primary, peer, head = prepare_clean_main(root)
+                fixtures.append((source, primary, peer, head))
+                self.assertEqual(git(source, "status", "--porcelain=v1"), "")
+                self.assertEqual(git(root / "origin.git", "rev-parse", "main"), head)
+                self.assertEqual(git(source, "rev-list", "--count", "HEAD"), "2")
+                for manager in (primary, peer):
+                    status = manager.status()
+                    self.assertEqual(status["workspace_relation"], "aligned")
+                    self.assertEqual(status["head"], head)
+                    self.assertEqual(status["base_head"], head)
+                    self.assertFalse(status["dirty"])
+                    self.assertFalse(status["remotes"])
+                    self.assertTrue((manager.project_root / "scripts/cockpit_quality_gate.py").is_file())
+
+            source, primary, peer, head = fixtures[0]
+            (primary.project_root / "tracked.py").write_text("VALUE = 92\n", encoding="utf-8")
+            git(primary.workspace_root, "add", "Samantha_Agent/tracked.py")
+            git(primary.workspace_root, "commit", "-m", "Independent fixture change")
+            self.assertNotEqual(git(primary.workspace_root, "rev-parse", "HEAD"), head)
+            for repo in (source, source.parent / "origin.git", peer.workspace_root):
+                self.assertEqual(git(repo, "rev-parse", "main"), head)
+            other_source, other_primary, other_peer, other_head = fixtures[1]
+            for repo in (
+                other_source, other_source.parent / "origin.git",
+                other_primary.workspace_root, other_peer.workspace_root,
+            ):
+                self.assertEqual(git(repo, "rev-parse", "main"), other_head)
+            self.assertFalse(other_primary.status()["dirty"])
+            self.assertFalse(other_peer.status()["dirty"])
+
     def test_default_smoke_runner_allows_heavy_status_endpoint_to_finish(self) -> None:
         with patch(
             "app.communication.simple_main_deploy.run_smoke_check",

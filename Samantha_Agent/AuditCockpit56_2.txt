@@ -1,7 +1,7 @@
 AUDIT COCKPITU 5.6 SOL – DRUHÝ PRŮCHOD
 ========================================
 
-Verze: 1.4
+Verze: 1.5
 Aktualizováno: 2026-09-13
 Datum auditu: 2026-08-16
 Autor posouzení: Adam / Codex 5.6 Sol
@@ -171,6 +171,22 @@ není nutné; cílené kontroly a povinné rizikové/release brány se zachováv
 Report a metodika: memory/reports/cockpit_test_timings_2026_09_13.md + JSON.
 Společný push/nasazení posledních tří lokálních kroků zůstává odložený.
 
+C5. PÁTÝ NAVAZUJÍCÍ KROK – LEVNĚJŠÍ PŘÍPRAVA DEPLOY TESTŮ
+
+Pilot C4 dokončen: osm úspěšných běhů dvou původních testů s rozlišením
+přípravy a vlastního audit/prepare/verify. Git zabral přibližně 98 % času,
+společná příprava asi třetinu. Testovací brána se nyní doplní před prvním
+push a vytvořením profilů. Odpadá druhý úvodní push/sync; příprava potřebuje
+53 místo 87 Git procesů. Každé volání má stále vlastní skutečné repozitáře.
+
+Příprava v pilotu 3,7–4,7 → 2,3–2,5 s; počty Git procesů ve vlastních
+scénářích stejné. Nový test potvrzuje zarovnání, obsah a izolaci dvou sad.
+Plná brána po změně 1650/1650 prošla; unit 455,34 s, deploy skupina 18 testů / 84,49 s.
+Dva vzorky každé varianty nejsou záruka výkonu celé brány. Produkční kód,
+manifest i bezpečnostní kontroly nezměněné. Tento čtvrtý čekající commit
+se připojí k odložené společné dávce, bez nového push/nasazení.
+Report: memory/reports/cockpit_deploy_fixture_pilot_2026_09_13.md + JSON.
+
 D. CO ZŮSTÁVÁ OTEVŘENÉ A V JAKÉM POŘADÍ
 
 1. Push a řízené nasazení dokumentového řezu jsou schválené a dokončené.
@@ -179,9 +195,9 @@ D. CO ZŮSTÁVÁ OTEVŘENÉ A V JAKÉM POŘADÍ
 2. Mapa, oddělení hledání (C2) i generování čteček (C3) lokálně hotové.
    Společný push/nasazení odložený na samostatný pokyn. Čistý main napřed
    neblokuje další téma; další řezy volit podle konkrétní vazby.
-3. Měření skupin a kontrola opakování dokončeny (C4). Případný další pilot:
-   dva nejpomalejší deploy testy, oddělit cenu přípravy a Git operací.
-   Zachovat plnou release bránu; optimalizace ani helper hashů zatím nevznikly.
+3. Měření skupin (C4) i malý optimalizační pilot (C5) dokončené.
+   Další zrychlení produkčních status/preflight kontrol vyžaduje samostatný
+   rozbor změn stavu; zde se žádná kontrola nevynechává.
 4. Dokončit společnou uživatelskou přejímku původních pěti scénářů na Macu
    a iPhonu. Jednotlivé dílčí testy nejsou důkaz celé přejímky.
 5. Další frontendové a HTTP řezy volit podle konkrétní změny a jejích vazeb.
