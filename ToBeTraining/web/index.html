@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f7f4ed">
+  <meta name="description" content="Hravé procvičování anglických vět: be, have a go.">
+  <title>ToBeToHave · Malá věta, velký objev</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="app.mjs"></script>
+</head>
+<body>
+  <div class="shell">
+    <header class="header">
+      <a class="brand" href="./" aria-label="ToBeToHave, úvod">
+        <span class="brand-blocks" aria-hidden="true"><i>b</i><i>h</i><i>g</i></span>
+        <span>ToBeToHave<small>angličtina po malých krocích</small></span>
+      </a>
+      <span class="header-note"><span class="sun-dot" aria-hidden="true">✳</span> Dnes je dobrý den na angličtinu.</span>
+    </header>
+
+    <main id="app" aria-busy="true">
+      <div class="intro">
+        <div><p class="eyebrow">POSLOUCHEJ · OBJEVUJ · ZKOUŠEJ</p><h1>Malá věta. <span>Velký objev.</span></h1></div>
+        <nav class="mode-switch" aria-label="Výukový režim">
+          <button type="button" data-mode="sentences" aria-pressed="true"><span aria-hidden="true">“ ”</span> Otázky a odpovědi</button>
+          <button type="button" data-mode="builder" aria-pressed="false"><span aria-hidden="true">▥</span> Hraj si se slovy</button>
+        </nav>
+      </div>
+
+      <div class="lesson-bar">
+        <div class="lessons" aria-label="Sloveso">
+          <button type="button" data-lesson="be" aria-pressed="true"><b>to be</b><span>být</span></button>
+          <button type="button" data-lesson="have" aria-pressed="false"><b>to have</b><span>mít</span></button>
+          <button type="button" data-lesson="go" aria-pressed="false"><b>to go</b><span>jít</span></button>
+        </div>
+        <label class="order-toggle"><input id="shuffle" type="checkbox"> Náhodné pořadí</label>
+      </div>
+
+      <section class="practice-card" aria-label="Procvičování">
+        <div class="picture-panel">
+          <div class="picture-top"><span id="topic-label" class="topic-label">TO BE · BÝT</span><span class="little-star" aria-hidden="true">✦</span></div>
+          <div class="image-wrap"><img id="scene-image" alt="" width="1000" height="800"><span id="age-badge" hidden></span></div>
+          <p class="picture-caption">Prohlédni si obrázek. Pak to zkus anglicky.</p>
+        </div>
+
+        <div class="exercise-panel">
+          <div class="exercise-top"><span id="exercise-label">OTÁZKA PRO TEBE</span><span id="progress">Načítám…</span></div>
+          <div id="sentence-view">
+            <h2 id="question" lang="en">Chvilku, připravujeme věty…</h2>
+            <button type="button" id="listen-question" class="listen"><span aria-hidden="true">▶</span> Poslechnout otázku</button>
+            <p class="hint">Odpověz si nahlas.<br>Potom si odkryj obě možnosti.</p>
+            <div class="answers">
+              <button type="button" id="positive" class="answer yes" aria-expanded="false"><span class="answer-icon" aria-hidden="true">+</span><span><small>Kladná odpověď</small><strong id="positive-text">Odkryj odpověď</strong></span><span class="answer-arrow" aria-hidden="true">↗</span></button>
+              <button type="button" id="negative" class="answer no" aria-expanded="false"><span class="answer-icon" aria-hidden="true">−</span><span><small>Záporná odpověď</small><strong id="negative-text">Odkryj odpověď</strong></span><span class="answer-arrow" aria-hidden="true">↗</span></button>
+            </div>
+          </div>
+
+          <div id="builder-view" hidden>
+            <h2 class="builder-heading">Ze slov vzniká věta.</h2>
+            <p class="builder-hint" id="grammar-hint">Každý barevný dílek má své místo.</p>
+            <div id="word-stage" class="word-stage" lang="en" aria-label="Skládání anglické věty"></div>
+            <div class="legend"><span><i class="pronoun-dot"></i> kdo</span><span><i class="verb-dot"></i> sloveso</span><span><i class="rest-dot"></i> zbytek věty</span><span><i class="aux-dot"></i> pomocník</span></div>
+            <div id="transform-note" class="transform-note" aria-live="polite"></div>
+            <div class="builder-actions">
+              <button type="button" id="build-play" class="secondary">▶ Přehrát skládání</button>
+              <button type="button" id="make-question" class="question-action">✦ Vytvořit otázku</button>
+              <button type="button" id="pause" class="secondary" disabled>Ⅱ Pauza</button>
+              <button type="button" id="repeat-builder" class="text-button">↻ Poslechnout znovu</button>
+            </div>
+            <div class="builder-options"><label><input id="auto-next" type="checkbox"> Pokračovat automaticky</label><button type="button" id="translation-toggle" class="text-button" aria-expanded="false">Český překlad</button></div>
+            <p id="translation" hidden></p>
+          </div>
+          <div id="status" role="status" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <div class="bottom-bar">
+        <div class="navigation"><button type="button" id="begin" class="text-button">↺ Od začátku</button><button type="button" id="previous" class="secondary" aria-label="Předchozí věta">←</button><button type="button" id="next" class="primary">Další věta <span aria-hidden="true">→</span></button></div>
+        <div class="settings"><label>Tempo <select id="speed"><option value="0.8">Pomaleji</option><option value="1" selected>Normálně</option><option value="1.15">Rychleji</option></select></label><label class="jump-label">Vybrat větu <select id="jump" aria-label="Vybrat větu"></select></label></div>
+      </div>
+      <footer class="footer"><span>Nemusíš spěchat. Každá věta se počítá.</span><span>be · have · go <span aria-hidden="true">✦</span></span></footer>
+    </main>
+    <noscript>Tato výuková aplikace potřebuje zapnutý JavaScript.</noscript>
+  </div>
+</body>
+</html>

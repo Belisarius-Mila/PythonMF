@@ -1,0 +1,50 @@
+{
+  "tool": "built-in image_gen",
+  "date": "2026-09-13",
+  "prompts": [
+    {
+      "id": "black-dog",
+      "prompt": "Use case: illustration-story. Asset type: contextual English-learning illustration for ToBeToHave. Primary request: One friendly small BLACK dog, its entire fur clearly black, full body with all four legs visible, standing on a sunlit garden lawn with a few daisies. No other animals. Style: polished colorful children's book illustration, gently rounded forms, soft gouache-like shading, clean readable silhouettes, cheerful natural colors, uncluttered environment. Composition: landscape 4:3, subject centered with generous margins, not cropped. No lettering, labels, watermark, frame, collage, or UI. This is one standalone teaching image."
+    },
+    {
+      "id": "white-cat",
+      "prompt": "Use case: illustration-story. Asset type: contextual English-learning illustration for ToBeToHave. Primary request: One friendly WHITE cat, its entire fur clearly white, full body, sitting in a sunlit flower garden. No other animals. Style: polished colorful children's book illustration, gently rounded forms, soft gouache-like shading, clean readable silhouettes, cheerful natural colors, uncluttered environment. Composition: landscape 4:3, subject centered with generous margins, not cropped. No lettering, labels, watermark, frame, collage, or UI. This is one standalone teaching image."
+    },
+    {
+      "id": "pink-dress",
+      "prompt": "Use case: illustration-story. Asset type: contextual English-learning illustration for ToBeToHave. Primary request: One clearly PINK dress on a simple wooden hanger, entire dress visible, a very simple warm cream bedroom backdrop. The dress is the only important subject. Style: polished colorful children's book illustration, gently rounded forms, soft gouache-like shading, clean readable silhouettes, cheerful natural colors, uncluttered environment. Composition: landscape 4:3, subject centered with generous margins, not cropped. No lettering, labels, watermark, frame, collage, or UI. This is one standalone teaching image."
+    },
+    {
+      "id": "black-bag",
+      "prompt": "Use case: illustration-story. Asset type: contextual English-learning illustration for ToBeToHave. Primary request: One clearly BLACK school backpack resting beside a little wooden bench in a simple warm school corridor. The whole backpack is visible. No text or logos. Style: polished colorful children's book illustration, gently rounded forms, soft gouache-like shading, clean readable silhouettes, cheerful natural colors, uncluttered environment. Composition: landscape 4:3, subject centered with generous margins, not cropped. No lettering, labels, watermark, frame, collage, or UI. This is one standalone teaching image."
+    },
+    {
+      "id": "green-eyes",
+      "prompt": "Use case: illustration-story. Asset type: contextual English-learning illustration for ToBeToHave. Primary request: Close portrait of a friendly fictional young person with two clearly GREEN irises, both eyes prominently visible, natural proportions. Neutral warm cream background, no accessories obstructing eyes. Style: polished colorful children's book illustration, gently rounded forms, soft gouache-like shading, clean readable silhouettes, cheerful natural colors, uncluttered environment. Composition: landscape 4:3, subject centered with generous margins, not cropped. No lettering, labels, watermark, frame, collage, or UI. This is one standalone teaching image."
+    },
+    {
+      "id": "siblings",
+      "prompt": "Use case: illustration-story. Asset type: contextual English-learning illustration for ToBeToHave. Primary request: A very tall older teenage brother and his small younger sister standing side by side, both full body visible with feet on the same ground line. Friendly family illustration in a sunny garden; emphasize height difference naturally. No measuring marks or text. Style: polished colorful children's book illustration, gently rounded forms, soft gouache-like shading, clean readable silhouettes, cheerful natural colors, uncluttered environment. Composition: landscape 4:3, subject centered with generous margins, not cropped. No lettering, labels, watermark, frame, collage, or UI. This is one standalone teaching image."
+    },
+    {
+      "id": "prague",
+      "prompt": "Use case: illustration-story. Asset type: contextual English-learning illustration for ToBeToHave. Primary request: A cheerful storybook view of PRAGUE: Charles Bridge and Vltava river in foreground, red rooftops, Prague Castle and St Vitus Cathedral on the hill, recognizable Czech city skyline. No people in foreground. Style: polished colorful children's book illustration, gently rounded forms, soft gouache-like shading, clean readable silhouettes, cheerful natural colors, uncluttered environment. Composition: landscape 4:3, subject centered with generous margins, not cropped. No lettering, labels, watermark, frame, collage, or UI. This is one standalone teaching image."
+    },
+    {
+      "id": "two-sisters",
+      "prompt": "Use case: illustration-story. Asset type: contextual teaching image for ToBeToHave. Exactly two sisters, two cheerful girls standing side by side, full bodies visible, warm sunny garden. Only two girls, no boys, no other people. Polished colorful children's book illustration, rounded forms and soft gouache shading. Landscape 4:3, centered subject with margins. No text, labels, watermark, frame or UI."
+    },
+    {
+      "id": "male-teacher",
+      "prompt": "Use case: illustration-story. Asset type: contextual teaching image for ToBeToHave. A friendly adult male teacher standing beside a green classroom chalkboard holding a book, full upper body visible, small simple classroom setting. No writing on board, no other people. Polished colorful children's book illustration, rounded forms and soft gouache shading. Landscape 4:3, centered subject with margins. No text, labels, watermark, frame or UI."
+    },
+    {
+      "id": "school-friends",
+      "prompt": "Use case: illustration-story. Asset type: contextual teaching image for ToBeToHave. Exactly four happy schoolchildren (two boys and two girls) with backpacks, standing together and smiling outside a colorful school building, friendly natural poses. All four full bodies visible. Polished colorful children's book illustration, rounded forms and soft gouache shading. Landscape 4:3, centered subjects with generous margins. No text, labels, watermark, frame or UI."
+    },
+    {
+      "id": "tall-men",
+      "prompt": "Use case: illustration-story. Asset type: contextual teaching image for ToBeToHave. Exactly two tall adult men standing side by side on a sunny park path, full bodies visible, emphasize tall slender human stature, friendly smiles. No women, no children, no height measuring marks. Polished colorful children's book illustration, rounded forms and soft gouache shading. Landscape 4:3, centered subjects with generous margins. No text, labels, watermark, frame or UI."
+    }
+  ]
+}

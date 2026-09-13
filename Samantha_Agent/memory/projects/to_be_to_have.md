@@ -49,5 +49,31 @@ Cockpit sestaví pouze pevný lokální příkaz a otevře aplikaci v Terminalu.
 
 ## Další krok
 
-Není nutná žádná okamžitá změna. Další úpravy aplikace nebo lekcí řešit jen
-podle konkrétního zadání Míly.
+Aktuálně probíhá převod do webové podoby podle schváleného zadání Míly.
+Lokální prototyp a otevřená ruční revize jsou popsané v navazujícím záznamu.
+
+
+## Lokální webový prototyp — 2026-09-13 10:35 CEST
+
+Míla schválil převod do samostatného statického webu. Dosavadní desktopový
+launcher zůstává historicky platný; web se v tomto kroku do Cockpitu nezapojil.
+
+- Umístění: `ToBeTraining/web/`, návod `ToBeTraining/README_WEB.md`.
+- Dva režimy: 107 otázek (91 be / 8 have / 8 go) a 24 skládání vět.
+- Zachované texty původních CSV, pouze read-only export do JSON. U konstruovaných
+  vět je doplněné úvodní velké písmeno a koncové znaménko. Hash zdrojů blokuje
+  nové sestavení při změně CSV do revize přiřazení obrázků.
+- 184 anglických MP3, hlas Jenny, sdílení shodných odpovědí. Přesně stejné texty
+  v UI a audio manifestu, žádná browser speech synthesis.
+- 47 WebP (36 z Pict, 11 nových), všechny do 0,25 MiB, explicitní vazby vět.
+  Zvlášť vytvořeny správné barvy psa/kočky/šatů/batohu/očí a skutečný kontext
+  Prahy, sourozenců, učitele, školáků a vysokých mužů. `IMAGE_PLAN.md`.
+- Barvy slov zůstávají při změně pořadí, příchod Do/Does a has/goes → have/go,
+  krátké konfety, pauza řeči/časovačů/animace, omezený pohyb podle systému.
+- Ověřeno: 14 JS testů, 184 MP3, 47 WebP, 236 HTTP souborů, rychlá statická brána.
+- Neověřeno: skutečné vykreslení a audio Mac/iPhone; Browser native bridge
+  v této relaci nebyl dostupný. Lokální náhled binduje jen loopback.
+- Kanonický handoff a TVBCP nyní popisují ToBeToHave. Dřívější omylem přiřazené
+  KPTL checkpointy zůstávají zachované a označené jako nesouvisející historie.
+- Další krok: Mílova revize prototypu, poté samostatně HTTPS hosting/Cockpit odkaz.
+  Push, publikování, nasazení a úpravy VocabularyFR/IT nebyly součástí kroku.

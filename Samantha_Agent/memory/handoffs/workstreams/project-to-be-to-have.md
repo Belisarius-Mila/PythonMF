@@ -1,35 +1,25 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-11 11:00 CEST
-
-### Hotovo
-- KPTL má nový hlasový kvíz o 32 vyvážených otázkách s historií, zpětnou vazbou a závěrečným skóre
-- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
-
-### Otevřeno
-- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
-- Lokální commity čekají na samostatný denní GitHub balíček.
-
-### Rizika
-- Žádné další doložené provozní riziko.
-
-### Další krok
-- V Cockpitu otevřít KPTL Introduction, projít krátký vizuální a zvukový test kvízu a ověřit závěrečné skóre
-
-### Rozhodnutí
-- Každá ze čtyř postav má 8 otázek, z toho 4 s odpovědí YES a 4 s odpovědí NO
-
-### Navrhované další kroky
-- Žádné další návrhy nad rámec bezprostředního kroku.
-
-### Technický stav checkpointu
-- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `292f3a467c8e`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `292f3a467c8e` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-11T08:09:50+00:00.
-- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
-- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
-- Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
+- Aktualizováno: 2026-09-13 10:35 CEST.
+- Kanonický proud: `project-to-be-to-have`; aplikace `ToBeTraining/`.
+- Hotovo: samostatný lokální web se 107 otázkami, 24 skládáními vět,
+  barevným animovaným převodem na otázku, pauzou a volitelným překladem.
+- Média: 184 hotových anglických MP3; 47 WebP, z toho 11 nových ilustrací.
+  Každý WebP je nejvýše 0,25 MiB; největší ověřený soubor 256 386 B.
+- Důkaz: 14 automatických JS testů (včetně UI modulu s náhradním DOM/audiem),
+  184 MP3 ověřených ffprobe, 47 dekódovaných obrázků a 236 místních HTTP
+  odpovědí; rychlá projektová statická brána OK.
+- Otevřeno: skutečná vizuální a zvuková revize Mac/iPhone. Browser se v této
+  relaci nepřipojil kvůli chybějícímu nativnímu propojení; simulovaný DOM
+  neověřuje layout ani přehrávání Safari.
+- Další krok: na Macu otevřít lokální prototyp a projít oba režimy; potom
+  domluvit dostupnost na iPhonu a samostatné umístění webu.
+- Publikování, push, nasazení a změna Cockpitu neprovedeny.
+- Zdrojový desktopový skript a obě CSV beze změny. Vývoj VocabularyFR/IT
+  zůstal mimo rozsah tohoto kroku.
+- Oprava vazby: starší checkpointy KPTL níže byly vedené pod chybným proudem.
+  Jsou zachované jako historie, ale nedokládají stav ToBeToHave.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: ToBeToHave
@@ -97,3 +87,36 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (2): `Samantha_Agent/tests/test_cockpit.py`, `kptl_viewer.py`
 - Commit: `Add KPTL character quiz`
 - Další krok: V Cockpitu otevřít KPTL Introduction, projít krátký vizuální a zvukový test kvízu a ověřit závěrečné skóre
+
+
+### 2026-09-13 10:35 CEST — Lokální web ToBeToHave s obrázky a MP3
+
+Hotovo:
+- Oba výukové režimy mají vlastní webovou podobu, kontextové obrázky,
+  anglické MP3, výběr lekce/věty, náhodné pořadí a ovládání tempa.
+- Barevné slovní dílky přeskakují do otázky; Do/Does a změna has/goes
+  jsou vizuálně zdůrazněné. Pauza zmrazí přehrávání i animaci.
+- Zdrojová CSV pouze čtena, Pict pouze použit jako zdroj samostatných kopií.
+- Nesouvisející historické checkpointy KPTL výslovně odděleny od aktuálního
+  stavu tohoto proudu, bez mazání původních záznamů.
+
+Rozhodnutí:
+- Míla schválil lokální prototyp, hravé barevné animace, kontextové obrázky
+  z Pict nebo nově vytvořené kolem 0,25 MiB a finální anglické věty jako MP3.
+- Samostatné HTML/CSS/JS, vlastní data a média ve `ToBeTraining/web/`.
+  Žádná databáze, účty, zápis pokroku nebo generování hlasu v prohlížeči.
+
+Další krok:
+- Mílova vizuální a zvuková revize obou režimů na Macu; přímý náhled je
+  lokální loopback a sám o sobě nezpřístupňuje aplikaci na iPhonu.
+
+Navrhované další kroky:
+- Ověřit iPhone Safari, první tap, pauzu a návrat z pozadí.
+- Po revizi samostatně rozhodnout o HTTPS hostingu a odkazu z Cockpitu.
+
+Technický důkaz:
+- 14/14 JS testů, 184/184 MP3 ověřených jako MP3 s rozumnou délkou,
+  47/47 obrázků dekódovatelných a do 262 144 B, 236/236 HTTP odpovědí.
+- Browser UI a reálný poslech zůstávají otevřené, neprohlašují se za ověřené.
+- Kanonické soubory: `README_WEB.md`, `IMAGE_PLAN.md`, `scripts/`, `web/`.
+- Lokální vývojový krok bez pushnutí, publikování nebo nasazení Cockpitu.
