@@ -6,6 +6,7 @@ import json
 import os
 import re
 import subprocess
+import sys
 import threading
 from datetime import datetime, timezone
 from pathlib import Path
@@ -107,6 +108,35 @@ def _now() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
 
 
+def _resolve_git_executable() -> str:
+    """Resolve Apple's selected Git once, avoiding its launcher on every call."""
+    fallback = "/usr/bin/git"
+    if sys.platform != "darwin":
+        return fallback
+    try:
+        result = subprocess.run(
+            ["/usr/bin/xcrun", "--find", "git"],
+            capture_output=True, text=True, check=False, timeout=5,
+        )
+        candidate = Path(result.stdout.strip())
+        if (
+            result.returncode == 0
+            and len(result.stdout.strip().splitlines()) == 1
+            and candidate.is_absolute()
+            and candidate.name == "git"
+            and candidate.is_file()
+            and os.access(candidate, os.X_OK)
+        ):
+            return str(candidate)
+    except (OSError, subprocess.TimeoutExpired):
+        pass
+    return fallback
+
+
+# Toolchain selection is fixed for this process; restart after changing Xcode.
+_GIT_EXECUTABLE = _resolve_git_executable()
+
+
 def _run_git(
     cwd: Path,
     args: list[str],
@@ -119,7 +149,7 @@ def _run_git(
         env = os.environ.copy()
         env["GIT_OPTIONAL_LOCKS"] = "0"
     return subprocess.run(
-        ["/usr/bin/git", "-C", str(cwd), *args],
+        [_GIT_EXECUTABLE, "-C", str(cwd), *args],
         capture_output=True,
         text=True,
         timeout=timeout,
@@ -482,7 +512,7 @@ class HumanAdamWorkspaceManager:
             self.workspace_root.parent.mkdir(parents=True, exist_ok=True)
             completed = subprocess.run(
                 [
-                    "/usr/bin/git",
+                    _GIT_EXECUTABLE,
                     "clone",
                     "--local",
                     "--no-hardlinks",

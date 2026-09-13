@@ -19,12 +19,13 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Reports
 
+- `reports/cockpit_git_launcher_2026_09_13.md`; `reports/cockpit_git_launcher_2026_09_13.json` - další zrychlení: přímé spouštění vybraného Apple Git; Stejných 1655/1655 testů prošlo před i po; unittest 453,73 → 340,30 s, úspora 113,43 s (25,0 %). Hranice cílených a plných testů, bez vyřazování kontrol.
 - `reports/cockpit_deploy_fixture_pilot_2026_09_13.md`; `reports/cockpit_deploy_fixture_pilot_2026_09_13.json` - dokončený pilot: příprava 87 → 53 Git procesů, osm měřených běhů a ověření izolace; produkční kontroly zachované.
 - `reports/cockpit_test_timings_2026_09_13.md`; `reports/cockpit_test_timings_2026_09_13.json` - výchozí plné měření, metodika a návrh později dokončeného pilotu. Historický základ 1649 testů / 426,38 s.
 
 - `reports/systemovy_audit_projekty_tooly_vrstvy_2026_09_13.txt` - zkontrolovaný historický snapshot systémového auditu spuštěného z Cockpitu; cesta zálohy redigovaná, novější kanonický handoff a živý audit mají přednost.
 
-- `../AuditCockpit56_2.txt` - aktuální architektonická roadmapa Cockpitu, verze 1.5 z 13. 9.: lokální hledání/čtečky, měření brány a dokončený pilot přípravy deploy testů (87 → 53 Git procesů). Čtyři lokální kroky čekají na společný push/nasazení. `../AuditCockpit56.txt` zůstává historickou červencovou roadmapou.
+- `../AuditCockpit56_2.txt` - aktuální architektonická roadmapa Cockpitu, verze 1.6 z 13. 9.: lokální hledání/čtečky, měření, levnější příprava a rychlejší spouštění Gitu. Pět lokálních kroků čeká na společný push/nasazení. `../AuditCockpit56.txt` zůstává historickou červencovou roadmapou.
   Cockpit Dieta D0-D3 i pravdiva pamet P0-P6 jsou uzavrene; prvni otevreny
   vecny smer je jeden uplny tok e-mail -> private vault -> R2 TXT.
 - `reports/cockpit_quality_gate_2026_07_10.md` - git-safe popis kanonicke lokalni a GitHub Actions pojistky; Faze 2.4, e-mailova navigace a docasny TVBCP VoiceBridge protokol maji 611 testu. Realny redigovany outbox pilot overil 22 auditu/delivered, budoucí purge identita prezije zavreni Work Queue a obe e-mailova okna maji explicitni navrat do Cockpitu.
@@ -45,7 +46,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` - Cockpit 13. 9.: roadmapa v1.5; lokální hledání, čtečky, měření a optimalizovaná příprava deploy testů. Plná brána po změně 1650/1650 prošla; unit 455,34 s, deploy skupina 18 testů / 84,49 s. Společný push/nasazení čtyř kroků odložený. Dřívější obnova screenu je nasazená a Mílou potvrzená.
+- `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` - Cockpit 13. 9.: roadmapa v1.6; lokální hledání, čtečky, měření a dvě zrychlení brány. Stejných 1655/1655 testů prošlo před i po; unittest 453,73 → 340,30 s, úspora 113,43 s (25,0 %). Společný push/nasazení pěti kroků odložený. Dřívější obnova screenu je nasazená a Mílou potvrzená.
 
 - `projects/python_se_samanthou.md`; `handoffs/python_se_samanthou_course_package_2026_09_06.md` - učebna Pythonu: Míla potvrdil 1.5/Codex na Linuxu. Nový samostatný balíček Praktické úlohy přidává 7 lekcí (celkem 21); kopíruje se jen do kurzy. 62 testů a GUI nad nezměněnou 1.5 prošly; obsahový ZIP v LocalSendu.
 - `projects/lekarna_domaci_leky.md` - projekt Lekarna: evidence domacich leku v `data/lekarna/`, vyhledavani podle potizi, audit lekarnicky a opakovatelny foto import workflow pres manifest.

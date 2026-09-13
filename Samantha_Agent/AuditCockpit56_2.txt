@@ -1,7 +1,7 @@
 AUDIT COCKPITU 5.6 SOL – DRUHÝ PRŮCHOD
 ========================================
 
-Verze: 1.5
+Verze: 1.6
 Aktualizováno: 2026-09-13
 Datum auditu: 2026-08-16
 Autor posouzení: Adam / Codex 5.6 Sol
@@ -187,6 +187,25 @@ manifest i bezpečnostní kontroly nezměněné. Tento čtvrtý čekající comm
 se připojí k odložené společné dávce, bez nového push/nasazení.
 Report: memory/reports/cockpit_deploy_fixture_pilot_2026_09_13.md + JSON.
 
+C6. ŠESTÝ NAVAZUJÍCÍ KROK – RYCHLEJŠÍ SPOUŠTĚNÍ STEJNÉHO GITU
+
+Na Macu stojí Git dotaz přes systémový launcher přibližně 33 ms, přímo přes
+vybraný Apple Git 12 ms. Správa pracovních kopií nyní jednou při importu
+zjistí přes xcrun absolutní cestu vybraného nástroje a použije ji pro své
+Git operace a clone. Stejná verze Gitu, žádná cache stavu ani vynechaná kontrola.
+Při chybě, timeoutu nebo mimo Mac zůstává /usr/bin/git. Volba nástroje platí
+po dobu procesu; po změně Xcode/toolchainu je třeba proces restartovat.
+
+Stejných 1655/1655 testů prošlo před i po; unittest 453,73 → 340,30 s, úspora 113,43 s (25,0 %).
+Sedm cílených testů prošlo; AST porovnání potvrzuje původní logiku i argumenty
+s výjimkou dvou pozic spouštěného programu. Manifest testů nezměněný.
+Žádný test se neodstraňuje. Rychlé cílené sady při běžných úpravách už existují;
+plná brána zůstává pro rizikové změny a GitHub batch. Statická kontrola
+94 metod nejdražších skupin nenašla doslova shodná těla, ale není úplným
+auditem sémantických duplicit. Další škrtání testů vyžaduje konkrétní důkaz.
+Report: memory/reports/cockpit_git_launcher_2026_09_13.md + JSON.
+Pátý lokální krok čeká se čtyřmi předchozími na společný push/nasazení.
+
 D. CO ZŮSTÁVÁ OTEVŘENÉ A V JAKÉM POŘADÍ
 
 1. Push a řízené nasazení dokumentového řezu jsou schválené a dokončené.
@@ -195,9 +214,9 @@ D. CO ZŮSTÁVÁ OTEVŘENÉ A V JAKÉM POŘADÍ
 2. Mapa, oddělení hledání (C2) i generování čteček (C3) lokálně hotové.
    Společný push/nasazení odložený na samostatný pokyn. Čistý main napřed
    neblokuje další téma; další řezy volit podle konkrétní vazby.
-3. Měření skupin (C4) i malý optimalizační pilot (C5) dokončené.
-   Další zrychlení produkčních status/preflight kontrol vyžaduje samostatný
-   rozbor změn stavu; zde se žádná kontrola nevynechává.
+3. Měření skupin (C4), přípravy (C5) i systémového spouštění Gitu (C6)
+   dokončené. Pro běžný vývoj používat cílené sady; rizikové/release brány
+   zachovat. Sémantické duplicity testů případně auditovat po konkrétní doméně.
 4. Dokončit společnou uživatelskou přejímku původních pěti scénářů na Macu
    a iPhonu. Jednotlivé dílčí testy nejsou důkaz celé přejímky.
 5. Další frontendové a HTTP řezy volit podle konkrétní změny a jejích vazeb.

@@ -633,3 +633,10 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Řešení: volitelné `--unit-test-timings PATH` nad kanonickou bránou zachová stejný manifest, pořadí a výsledky; report obsahuje jen názvy, počty a časy. Testový setUp/tearDown je v čase testu, importy a společná režie zvlášť. Běžné změny ověřovat cíleně; povinné rizikové/release brány zachovat.
 - Ověření: 1649/1649 v jediném plném běhu; 88 Git/workspace testů zabralo 73,5 % času. Gate/smoke uvnitř pomalých testů jsou nahrazené. Podíl tvorby repozitáře a samotných Git operací vyžaduje další dílčí měření, nelze jej vydávat za doloženou příčinu nebo hotovou úsporu.
 - Navazující ověření téhož dne: dva deploy testy mají přibližně třetinu času ve společné přípravě a 98 % v Git procesech celkem. Dokončit syntetický zdroj před klonováním ušetří druhý úvodní push/sync (87 → 53 procesů přípravy), bez cache či změn vlastních scénářů. Osm měřených běhů před/po a test nezávislosti dvou sad prošly; report `reports/cockpit_deploy_fixture_pilot_2026_09_13.md`. Plná brána 1650/1650 prošla. Nízký počet vzorků ani úspora jedné fixture nejsou záruka stejného zrychlení celé brány.
+
+### 2026-09-13 — U nákladných Git testů změřit i systémový spouštěč
+
+- Problém: Git integrační testy zabírají většinu brány; odstranění několika přípravných operací samo nezaručuje významné zrychlení celku.
+- Typ: opakující se.
+- Řešení: porovnat stejný dotaz přes `/usr/bin/git` a Git vybraný pomocí `xcrun --find git`. Na Macu lze jednou při startu zjistit platnou absolutní cestu a používat ji se stejnými parametry. Při nedostupnosti, chybě, timeoutu a mimo Mac zachovat původní cestu. Nejde o cache stavu ani o důvod škrtat testy; po změně vybraného toolchainu restart procesu.
+- Ověření: stejný Apple Git, medián 33 vs 12 ms ve 30 vzorcích na kombinaci; sedm cílených testů prošlo. Stejných 1655/1655 testů prošlo před i po; unittest 453,73 → 340,30 s, úspora 113,43 s (25,0 %). Report `reports/cockpit_git_launcher_2026_09_13.md`; jeden pár úplných běhů není záruka stejné úspory na jiném stroji.

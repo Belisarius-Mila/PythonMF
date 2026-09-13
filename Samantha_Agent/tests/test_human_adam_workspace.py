@@ -7,6 +7,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from app.codex_appserver import AppServerError
+from app.communication import human_adam_workspace as workspace_module
 from app.communication.human_adam_workspace import (
     CANONICAL_PRIVATE_ROOT,
     CHECKPOINT_MEDIA_SUFFIXES,
@@ -49,6 +50,72 @@ def make_source(root: Path) -> Path:
     (private_dir / "secret.txt").write_text("secret\n", encoding="utf-8")
     (source / "AuditCockpit56_M.txt").write_text("untracked\n", encoding="utf-8")
     return source
+
+
+class GitExecutableTests(unittest.TestCase):
+    def test_non_macos_keeps_system_git_without_discovery(self) -> None:
+        with patch.object(workspace_module.sys, "platform", "linux"), \
+                patch.object(workspace_module.subprocess, "run") as run:
+            self.assertEqual(workspace_module._resolve_git_executable(), "/usr/bin/git")
+        run.assert_not_called()
+
+    def test_macos_uses_executable_selected_by_xcrun(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            candidate = Path(temp_dir) / "Selected Toolchain" / "git"
+            candidate.parent.mkdir()
+            candidate.write_text("synthetic executable\n")
+            candidate.chmod(0o700)
+            result = subprocess.CompletedProcess([], 0, stdout=f"{candidate}\n")
+            with patch.object(workspace_module.sys, "platform", "darwin"), \
+                    patch.object(workspace_module.subprocess, "run", return_value=result) as run:
+                self.assertEqual(workspace_module._resolve_git_executable(), str(candidate))
+            run.assert_called_once_with(
+                ["/usr/bin/xcrun", "--find", "git"], capture_output=True,
+                text=True, check=False, timeout=5,
+            )
+
+    def test_invalid_or_unavailable_selection_falls_back(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            non_executable = Path(temp_dir) / "git"
+            non_executable.write_text("not executable\n")
+            non_executable.chmod(0o600)
+            candidates = ["", "relative/git", "/usr/bin/git\n/usr/bin/git",
+                          str(Path(temp_dir) / "missing/git"), str(non_executable)]
+            for candidate in candidates:
+                with self.subTest(candidate=candidate), \
+                        patch.object(workspace_module.sys, "platform", "darwin"), \
+                        patch.object(workspace_module.subprocess, "run", return_value=
+                                     subprocess.CompletedProcess([], 0, stdout=candidate)):
+                    self.assertEqual(workspace_module._resolve_git_executable(), "/usr/bin/git")
+            with patch.object(workspace_module.sys, "platform", "darwin"), \
+                    patch.object(workspace_module.subprocess, "run", return_value=
+                                 subprocess.CompletedProcess([], 1, stdout="/usr/bin/git")):
+                self.assertEqual(workspace_module._resolve_git_executable(), "/usr/bin/git")
+
+    def test_discovery_error_and_timeout_keep_system_git(self) -> None:
+        for error in (OSError("unavailable"), subprocess.TimeoutExpired("xcrun", 5)):
+            with self.subTest(error=type(error).__name__), \
+                    patch.object(workspace_module.sys, "platform", "darwin"), \
+                    patch.object(workspace_module.subprocess, "run", side_effect=error):
+                self.assertEqual(workspace_module._resolve_git_executable(), "/usr/bin/git")
+
+    def test_git_command_keeps_arguments_timeout_and_optional_locks(self) -> None:
+        result = subprocess.CompletedProcess([], 0, stdout="unchanged\n")
+        with patch.object(workspace_module, "_GIT_EXECUTABLE", "/selected/toolchain/git"), \
+                patch.object(workspace_module.subprocess, "run", return_value=result) as run:
+            returned = workspace_module._run_git(
+                Path("/synthetic/repo"), ["status", "--porcelain=v1"],
+                timeout=17, optional_locks=False,
+            )
+            self.assertIs(returned, result)
+            self.assertEqual(run.call_args.args[0],
+                             ["/selected/toolchain/git", "-C", "/synthetic/repo",
+                              "status", "--porcelain=v1"])
+            self.assertEqual(run.call_args.kwargs["timeout"], 17)
+            self.assertEqual(run.call_args.kwargs["env"]["GIT_OPTIONAL_LOCKS"], "0")
+            self.assertFalse(run.call_args.kwargs["check"])
+            self.assertTrue(run.call_args.kwargs["capture_output"])
+            self.assertTrue(run.call_args.kwargs["text"])
 
 
 class HumanAdamWorkspaceManagerTests(unittest.TestCase):

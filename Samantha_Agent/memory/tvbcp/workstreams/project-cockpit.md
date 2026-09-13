@@ -1,17 +1,18 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-13 23:05 CEST.
-- Roadmapa `AuditCockpit56_2.txt` je ve verzi 1.5. Čtvrtý čekající lokální krok zjednodušuje přípravu testů nasazení podle naměřených nákladů.
-- Předchozí lokální kroky: hledání `674dc194`, čtečky `f1b41dc5`, měření brány `0d1b24f1`. Hledání má vlastní modul, čtečky čistý renderer; obsluhy/API zůstaly zachované. `app.js` 7063 řádků, `cockpit.py` 10892.
-- Dva pilotní deploy testy: osm úspěšných měřených běhů před/po; příprava 87 → 53 Git procesů. Konfigurace testovací brány probíhá před vytvořením originu a profilů, takže odpadá druhý úvodní push/sync. Vlastní scénáře a produkční kontroly nezměněné.
-- Příprava v pilotu přibližně 3,7–4,7 → 2,3–2,5 s. Jde o malé měření na Macu, nikoli záruku výkonu celé brány. Report a osm vzorků: `memory/reports/cockpit_deploy_fixture_pilot_2026_09_13.*`.
-- Nový regresní test potvrdil čistý a zarovnaný výchozí stav i nezávislost dvou sad repozitářů při commitu do jednoho profilu. Plná brána po změně 1650/1650 prošla; unit 455,34 s, deploy skupina 18 testů / 84,49 s.
-- Starší výchozí měření `0d1b24f1`: 1649 testů / 426,38 s; čtyři Git/workspace skupiny 73,5 % času. Historický report zachovaný, není přepsán novými čísly.
-- Všechny čtyři lokální kroky čekají na společný push/nasazení na samostatný pokyn. Dříve bylo doložené nasazení `97d608f7`; tento krok nový živý audit runtime nedělal.
-- Další krok: vybrat následující strukturální řez podle konkrétní HTTP/doménové vazby; optimalizační pilot je dokončený. Produkční status/preflight případně analyzovat odděleně, bez vynechávání kontrol.
-- Otevřená uživatelská přejímka Mac/iPhone a pozdější audit/UI: hledání má jen prvních 8 výsledků, Janiččina zkratka sama nerozbaluje panel, nákupní čtečka nemá náhradní návrat bez openeru. Nálezy z kódu, zde bez oprav.
-- Záloha na výslovný pokyn odložená na 14. 9. kvůli nedostupnému disku. Navazující audit a změna UI po strukturální etapě; Santiago zatím jen zvažované téma.
+- Aktualizováno: 2026-09-13 23:50 CEST.
+- Roadmapa `AuditCockpit56_2.txt` v1.6: další optimalizace brány zrychluje spouštění Gitu ve správě pracovních kopií na Macu, při zachování všech Git kontrol.
+- Stejných 1655/1655 testů prošlo před i po; unittest 453,73 → 340,30 s, úspora 113,43 s (25,0 %).
+- Nová volba nástroje: při importu jednou `xcrun --find git`, použít platný absolutní executable. Při chybě, timeoutu nebo mimo Mac zachovat `/usr/bin/git`. Stejný Apple Git, bez zásahu do systémového nastavení. Po změně vybraného toolchainu restart procesu.
+- Sedm cílených testů prošlo. AST porovnání potvrzuje zachování celé původní workspace logiky a argumentů kromě dvou pozic executable. Nových pět rychlých kontrol resolveru; žádný starý test odstraněn, manifest beze změny.
+- Běžné změny mají cílené sady `cockpit_fast_feedback.py` a statickou bránu. Plná brána zůstává pro rizikové změny a GitHub batch. 94 metod čtyř nejdražších skupin nemá doslova shodná těla; úplný audit sémantických duplicit tím není proveden.
+- Důkaz a metodika: `memory/reports/cockpit_git_launcher_2026_09_13.*`. Jeden pár úplných měření platí pro tento Mac, ne jako záruka času na všech počítačích.
+- Předchozí lokální kroky: hledání `674dc194`, čtečky `f1b41dc5`, měření `0d1b24f1`, levnější příprava testů `4e498bc0` (87 → 53 Git procesů přípravy). Historická měření zachovaná ve vlastních reportech.
+- Pět lokálních kroků čeká na společný push/nasazení na samostatný pokyn. Poslední dříve doložené nasazení `97d608f7`; tento krok nový živý runtime audit ani restart neprovedl.
+- Další krok: pokračovat strukturálním řezem podle konkrétní HTTP/doménové vazby a při běžném vývoji volit odpovídající cílenou sadu. Případné další testové duplicity posuzovat po doménách.
+- Otevřená Mac/iPhone přejímka a navazující audit/UI: hledání jen prvních 8 výsledků, Janiččina zkratka nerozbaluje panel, nákupní čtečka nemá náhradní návrat bez openeru. Zde bez oprav.
+- Záloha na pokyn odložená na 14. 9. kvůli nedostupnému disku. Santiago zatím jen zvažované téma.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Cockpit / hlavní architektura
@@ -805,3 +806,27 @@ Technický důkaz:
 - Osm úspěšných měřených běhů dvou původních testů; příprava 87 → 53 Git procesů, počty ve vlastních scénářích stejné. Report `cockpit_deploy_fixture_pilot_2026_09_13.md` a bezpečný JSON.
 - Samostatný regresní test izolace prošel. Plná brána po změně 1650/1650 prošla; unit 455,34 s, deploy skupina 18 testů / 84,49 s.
 - Dva vzorky každé varianty nejsou garantovaný benchmark; skutečná úspora celé brány závisí i na ostatních testech a zátěži. Produkční kód, manifest, timeouty a release brány beze změny; push/nasazení odložené.
+
+
+### 2026-09-13 23:50 CEST — Rychlejší spouštění Gitu bez škrtání testů
+
+Hotovo:
+- Správa pracovních kopií na Macu používá přímo systémem vybraný Apple Git; při každém dotazu odpadá opakované spouštění přes systémový launcher.
+- Stejných 1655/1655 testů prošlo před i po; unittest 453,73 → 340,30 s, úspora 113,43 s (25,0 %).
+
+Rozhodnutí:
+- Míla požádal o další zrychlení a posouzení potřebnosti celé sady. Zachovat kontroly a skutečné Git operace; pro běžný vývoj používat existující cílené sady. Žádné vyřazení testů bez doložení nadbytečnosti.
+
+Další krok:
+- Pokračovat strukturálním řezem podle HTTP/doménové vazby s odpovídající cílenou sadou.
+
+Navrhované další kroky:
+- Společný push/nasazení pěti lokálních kroků na samostatný pokyn.
+- Dokončit společnou Mac/iPhone přejímku a navázat auditem/UI.
+- Případné sémantické duplicity testů auditovat po jednotlivých doménách.
+
+Technický důkaz:
+- Sedm cílených testů prošlo; fallback při chybě/nedostupné cestě/timeoutu a mimo Mac. AST potvrzuje zachování původní workspace logiky kromě dvou executable pozic.
+- Stejných 1655/1655 testů prošlo před i po; unittest 453,73 → 340,30 s, úspora 113,43 s (25,0 %).
+- Stejný manifest, testový kód i verze Gitu. Baseline v diagnostickém procesu použil původní launcher, nový běh kanonickou plnou bránu. Report `cockpit_git_launcher_2026_09_13.md` + bezpečný JSON.
+- Jeden pár měření není záruka jiného stroje; na Linuxu zůstává původní cesta. Po změně zvoleného Xcode je třeba restart. Nový kód není nasazený a živé zrychlení Cockpitu se netvrdí.

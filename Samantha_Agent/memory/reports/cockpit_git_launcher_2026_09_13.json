@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-13",
+  "based_on_commit": "4e498bc0",
+  "method": "Sequential full unittest suites, identical current code and canonical manifest. Baseline overrides only the workspace Git executable to the original system launcher; optimized run is the canonical full quality gate. Same Python and selected Apple Git. No tests removed, no parallelism, no timeout changes. Durations compare unittest execution, excluding loading and static checks.",
+  "git_version": "git version 2.50.1 (Apple Git-155)",
+  "manifest_sha256": "1eed38148f73c010fd993f7639a57c9a6f44f524c12d702a38d29e09482dc210",
+  "module_test_counts_equal": true,
+  "before": {
+    "test_count": 1655,
+    "success": true,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "expected_failures": 0,
+    "unexpected_successes": 0,
+    "run_seconds": 453.732411133009,
+    "load_seconds": 3.33065517002251
+  },
+  "after": {
+    "test_count": 1655,
+    "success": true,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "expected_failures": 0,
+    "unexpected_successes": 0,
+    "run_seconds": 340.3024828019552,
+    "load_seconds": 4.294118501944467
+  },
+  "seconds_saved": 113.42992833105382,
+  "percent_saved": 24.999300369089678,
+  "core_groups_before_seconds": 326.19917482265737,
+  "core_groups_after_seconds": 210.75547402328812,
+  "other_tests_and_runner_before_seconds": 127.53323631035164,
+  "other_tests_and_runner_after_seconds": 129.54700877866708,
+  "core_groups": [
+    {
+      "module": "tests.test_simple_main_checkpoint",
+      "test_count": 28,
+      "before_seconds": 121.40322015003767,
+      "after_seconds": 82.2693048613146
+    },
+    {
+      "module": "tests.test_simple_main_deploy",
+      "test_count": 18,
+      "before_seconds": 89.80429481097963,
+      "after_seconds": 52.25135171797592
+    },
+    {
+      "module": "tests.test_human_adam_takeover",
+      "test_count": 13,
+      "before_seconds": 63.38847209699452,
+      "after_seconds": 42.14522695506457
+    },
+    {
+      "module": "tests.test_human_adam_workspace",
+      "test_count": 35,
+      "before_seconds": 51.603187764645554,
+      "after_seconds": 34.08959048893303
+    }
+  ],
+  "microbenchmark": {
+    "samples_per_combination": 30,
+    "operation": "rev-parse --is-inside-work-tree",
+    "medians_seconds": [
+      {
+        "mode": "system_launcher",
+        "timeout_seconds": null,
+        "seconds": 0.033152461517602205
+      },
+      {
+        "mode": "selected_git",
+        "timeout_seconds": null,
+        "seconds": 0.012045680021401495
+      },
+      {
+        "mode": "system_launcher",
+        "timeout_seconds": 60,
+        "seconds": 0.03343323856825009
+      },
+      {
+        "mode": "selected_git",
+        "timeout_seconds": 60,
+        "seconds": 0.011675567948259413
+      }
+    ]
+  },
+  "limitations": "One full pair on this Mac, not a guaranteed saving elsewhere; non-macOS keeps the existing binary. Runtime Cockpit not deployed or benchmarked."
+}
