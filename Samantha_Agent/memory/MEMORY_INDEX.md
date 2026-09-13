@@ -25,7 +25,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 - `reports/systemovy_audit_projekty_tooly_vrstvy_2026_09_13.txt` - zkontrolovaný historický snapshot systémového auditu spuštěného z Cockpitu; cesta zálohy redigovaná, novější kanonický handoff a živý audit mají přednost.
 
-- `../AuditCockpit56_2.txt` - aktuální architektonická roadmapa Cockpitu, verze 1.6 z 13. 9.: lokální hledání/čtečky, měření, levnější příprava a rychlejší spouštění Gitu. Pět lokálních kroků čeká na společný push/nasazení. `../AuditCockpit56.txt` zůstává historickou červencovou roadmapou.
+- `../AuditCockpit56_2.txt` - aktuální architektonická roadmapa Cockpitu, verze 1.7 z 14. 9.: funkční balík 21b73cbf nasazený a smoke 5/5; závěrečná dávka schválená včetně souhrnného zápisu. [PRIPOMENOUT] Ráno 14. 9. pokračovat zrychlením brány, změřit zbylá samostatná Git volání. `../AuditCockpit56.txt` zůstává historickou červencovou roadmapou.
   Cockpit Dieta D0-D3 i pravdiva pamet P0-P6 jsou uzavrene; prvni otevreny
   vecny smer je jeden uplny tok e-mail -> private vault -> R2 TXT.
 - `reports/cockpit_quality_gate_2026_07_10.md` - git-safe popis kanonicke lokalni a GitHub Actions pojistky; Faze 2.4, e-mailova navigace a docasny TVBCP VoiceBridge protokol maji 611 testu. Realny redigovany outbox pilot overil 22 auditu/delivered, budoucí purge identita prezije zavreni Work Queue a obe e-mailova okna maji explicitni navrat do Cockpitu.
@@ -46,7 +46,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` - Cockpit 13. 9.: roadmapa v1.6; lokální hledání, čtečky, měření a dvě zrychlení brány. Stejných 1655/1655 testů prošlo před i po; unittest 453,73 → 340,30 s, úspora 113,43 s (25,0 %). Společný push/nasazení pěti kroků odložený. Dřívější obnova screenu je nasazená a Mílou potvrzená.
+- `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` - Cockpit 14. 9.: roadmapa v1.7; funkční balík 21b73cbf nasazený, smoke 5/5, oba profily čisté a Knihovna připojená. Stejná sada 1655 testů zrychlila o 25 %. Finální push/nasazení schválené; přesný konečný head ověřit živým auditem. [PRIPOMENOUT] Ráno 14. 9. změřit zbylá Git volání a pokračovat optimalizací. Dřívější obnova screenu je nasazená a Mílou potvrzená.
 
 - `projects/python_se_samanthou.md`; `handoffs/python_se_samanthou_course_package_2026_09_06.md` - učebna Pythonu: Míla potvrdil 1.5/Codex na Linuxu. Nový samostatný balíček Praktické úlohy přidává 7 lekcí (celkem 21); kopíruje se jen do kurzy. 62 testů a GUI nad nezměněnou 1.5 prošly; obsahový ZIP v LocalSendu.
 - `projects/lekarna_domaci_leky.md` - projekt Lekarna: evidence domacich leku v `data/lekarna/`, vyhledavani podle potizi, audit lekarnicky a opakovatelny foto import workflow pres manifest.

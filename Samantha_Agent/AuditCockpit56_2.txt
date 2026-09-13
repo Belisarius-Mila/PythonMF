@@ -1,8 +1,8 @@
 AUDIT COCKPITU 5.6 SOL – DRUHÝ PRŮCHOD
 ========================================
 
-Verze: 1.6
-Aktualizováno: 2026-09-13
+Verze: 1.7
+Aktualizováno: 2026-09-14
 Datum auditu: 2026-08-16
 Autor posouzení: Adam / Codex 5.6 Sol
 Účel: posoudit Cockpit jako celek a navrhnout další vývoj podle skutečných
@@ -206,17 +206,32 @@ auditem sémantických duplicit. Další škrtání testů vyžaduje konkrétní
 Report: memory/reports/cockpit_git_launcher_2026_09_13.md + JSON.
 Pátý lokální krok čeká se čtyřmi předchozími na společný push/nasazení.
 
+C7. VEČERNÍ UZAVŘENÍ A RÁNO 14. 9.
+
+Míla schválil push, nasazení a uzavření celé dávky. Funkční kód 21b73cbf
+je již ověřeně nasazený: nový proces, code stamp 16520ea0d29e3ad1,
+smoke 5/5; účtenka 2026-09-13T21:56:48+00:00. Oba profily jsou čisté
+a zarovnané, Knihovna znovu připojená bez aktivního tahu.
+Tento souhrn vzniká před finálním dávkovým pushem dokumentace; přesný
+konečný publikovaný a nasazený head ověřuje živý audit, nikoli tento snapshot.
+
+[PRIPOMENOUT] Ráno 14. 9. pokračovat zrychlením brány: změřit zbývající
+samostatná volání /usr/bin/git v simple_main_checkpoint, simple_main_deploy
+a human_adam_takeover. Zatím jen kandidáti, bez dalších dnešních změn.
+Zachovat celou sadu a kontroly; běžné úpravy ověřovat cíleně. Po této
+prioritě se vrátit ke strukturálním řezům a následnému auditu/UI.
+
 D. CO ZŮSTÁVÁ OTEVŘENÉ A V JAKÉM POŘADÍ
 
 1. Push a řízené nasazení dokumentového řezu jsou schválené a dokončené.
    Zbývá běžná uživatelská přejímka skutečného dokumentového panelu Mac/iPhone;
    syntetický UI test a provozní smoke ji nenahrazují.
-2. Mapa, oddělení hledání (C2) i generování čteček (C3) lokálně hotové.
-   Společný push/nasazení odložený na samostatný pokyn. Čistý main napřed
-   neblokuje další téma; další řezy volit podle konkrétní vazby.
-3. Měření skupin (C4), přípravy (C5) i systémového spouštění Gitu (C6)
-   dokončené. Pro běžný vývoj používat cílené sady; rizikové/release brány
-   zachovat. Sémantické duplicity testů případně auditovat po konkrétní doméně.
+2. Hledání (C2), čtečky (C3) i optimalizace (C4–C6) funkčně nasazené.
+   Míla schválil uzavření dávky včetně tohoto závěrečného zápisu.
+   Finální GitHub/runtime head doloží živý audit při dokončení operace.
+3. Ráno 14. 9. nejdřív navázat měřením zbylých samostatných Git volání
+   podle C7. Cílené vývojové sady používat, rizikové/release brány zachovat.
+   Sémantické duplicity případně auditovat po konkrétní doméně.
 4. Dokončit společnou uživatelskou přejímku původních pěti scénářů na Macu
    a iPhonu. Jednotlivé dílčí testy nejsou důkaz celé přejímky.
 5. Další frontendové a HTTP řezy volit podle konkrétní změny a jejích vazeb.
