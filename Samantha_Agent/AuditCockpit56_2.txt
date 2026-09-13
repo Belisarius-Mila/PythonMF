@@ -1,12 +1,122 @@
 AUDIT COCKPITU 5.6 SOL – DRUHÝ PRŮCHOD
 ========================================
 
-Verze: 1.0
+Verze: 1.1
+Aktualizováno: 2026-09-13
 Datum auditu: 2026-08-16
 Autor posouzení: Adam / Codex 5.6 Sol
 Účel: posoudit Cockpit jako celek a navrhnout další vývoj podle skutečných
 slabin, ne podle historického seznamu přání.
 
+
+AKTUÁLNÍ NAVÁZÁNÍ – 2026-09-13
+==============================
+
+Tato část je současnou roadmapou. Původní audit ze 16. 8. je zachovaný níže
+jako historický podklad; jeho slova „aktuální“, provozní varování a seznamy
+nedokončených kroků se nesmějí vydávat za dnešní stav.
+
+Rozsah aktualizace:
+- porovnání původního auditu, Git historie, kanonického Cockpit handoffu a
+  TVBCP se současným zdrojovým kódem;
+- nové statické měření a čerstvý redigovaný health/workspace audit;
+- jeden malý vývojový řez: frontend „Dokumenty k vyřešení“;
+- nejde o nový úplný bezpečnostní audit všech služeb ani o přejímku celé UI.
+  Soukromé dokumenty, e-maily a autosave obsah nebyly čteny.
+
+A. KAM JSME DOŠLI
+
+Hotovo před touto aktualizací:
+1. Původní Dieta D0–D3: mapa odpovědností, oddělení read-only e-mailového
+   archivu, přesun hlavního HTML/CSS/JS a rychlé vývojové kontroly.
+2. D4 „Co teď?“: nejvýše tři kroky se zdrojem a důvodem priority (18. 8.).
+   Pozdější oprava z 28. 8. omezila zastaralé ToDo návrhy.
+3. První frontendový modul health/recovery/autosave (18. 8.). Později přibyly
+   moduly relací a fotografií Knihovny a pracovní proces pro obrázky.
+4. První oddělený HTTP dispatch pěti read-only health/recovery/status cest
+   (18. 8.); zbytek routingu je stále koncentrovaný.
+5. Přímé kontrakty všech private_write a external_send POST akcí (18. 8.).
+   Dnešní registr má 100 akcí: 92 direct, 5 ui_presence, 3 indirect.
+   Všech 42 private_write/external_send položek je direct. Osm ostatních
+   není automatický bezpečnostní dluh: jde o local_open, local_service a
+   read_only_via_post; jejich změna potřebuje vlastní konkrétní důvod.
+6. Capability audit už je součástí kanonické plné brány; číselný rozpor
+   popsaný původním auditem se nemá znovu předkládat jako neopravený nález.
+
+V historii není doložený technický blokátor, který by 18. 8. zastavil celou
+modernizaci. Po tomto dni pokračoval vývoj konkrétních funkcí; auditní TXT
+nebyl průběžně dorovnáván. Novější handoff a kód proto mají přednost.
+
+B. DNEŠNÍ MĚŘENÍ A HRANICE DŮKAZU
+
+Fyzické řádky po tomto lokálním řezu:
+- app/cockpit.py: 11 068;
+- hlavní app.js: 7 196 (před řezem 7 317, pokles o 121);
+- nový document_review.js: 142;
+- page.html: 1 218; styles.css: 410;
+- cockpit_readonly_routes.py: 72;
+- make_handler: 1 481; do_GET: 326; do_POST: 642.
+
+Řez nesnižuje počet všech řádků projektu: přidává malou explicitní továrnu
+modulu. Přínosem je samostatně testovatelná odpovědnost a menší hlavní soubor,
+nikoli kosmetická soutěž v celkové délce kódu.
+
+Před začátkem byly main a origin/main na 17e0fc8b, strom čistý a oba profily
+zarovnané. Živý health odpověděl OK, runtime byl připojený a nečinný.
+Běžící Cockpit měl stamp e2ac789cc2a51926. Souhrnný live status byl
+attention_required, protože poslední Cockpit deployment receipt patří
+staršímu main před následným MMTX vývojem; tato aktualizace to neopravuje
+skrytým restartem. Úprava frontendu zatím není nasazená.
+
+Stáří zálohy zde nebylo znovu měřeno. Původní datum 12. 8. je historický údaj,
+nikoli dnešní výsledek. Před provozním rozhodnutím použít registrovaný audit.
+
+C. PRVNÍ NAVAZUJÍCÍ ŘEZ – DOKUMENTY K VYŘEŠENÍ
+
+Lokálně oddělený document_review.js vlastní právě:
+- načtení GET /api/documents/review-report a stav načítání;
+- otevření panelu a posun k výsledku;
+- vykreslení skupin, prázdných stavů a informace o zkrácení;
+- vykreslení položky a předání kliknutí existujícímu openScanDocuReview.
+
+Zachované hranice:
+- čtyři původní funkce jsou přenesené beze změny těl;
+- stejné HTML id, CSS, viditelné texty, endpointy a payloady;
+- DOM prvky, fetch, chybový report a navigace jsou předané závislosti;
+- startup a registrace událostí zůstávají v app.js;
+- otevření ScanDocu zůstává stávající cestou POST /api/scandocu/open;
+- žádný nový zápis dokumentových dat, přesun backendu ani nový framework.
+
+Ověření:
+- 29 cílených Python testů včetně pěti nových Node kontraktů;
+- stejné DOM a přesný ScanDocu požadavek před/po změně v prohlížeči pro
+  1440 px i 390 px; nulové JS chyby, pouze syntetická data a nahrazené API;
+- HTML a CSS stránky beze změny; nový hash složené stránky schválen až po
+  kontrole přesunu a doslovné shody čtyř původních funkcí;
+- plná brána: 1641/1641 prošlo; unit část 462.2 s.
+
+D. CO ZŮSTÁVÁ OTEVŘENÉ A V JAKÉM POŘADÍ
+
+1. Samostatně schválit push/nasazení tohoto lokálního řezu a po něm ověřit
+   dokumentový panel na skutečném Cockpitu. Vývojový souhlas nasazení nenahrazuje.
+2. Další kandidát: read-only hledání/čtečka dokumentů. Před implementací
+   zmapovat call-sites a oddělit čtení od změny metadat, lifecycle a tisku.
+   Zatím není schválený ani implementovaný další rozsah.
+3. U testovací brány změřit nejdražší skupiny a skutečné důvody opakování.
+   Zachovat plnou release bránu; rychlá kontrola již existuje.
+   Nástroj pro kontrolovanou aktualizaci hashů není tímto řezem implementován.
+4. Dokončit společnou uživatelskou přejímku původních pěti scénářů na Macu
+   a iPhonu. Jednotlivé dílčí testy nejsou důkaz celé přejímky.
+5. Další frontendové a HTTP řezy volit podle konkrétní změny a jejích vazeb.
+   Dokumenty, e-mail, export a ostatní domény nejsou hotové jen proto, že
+   jejich první modul byl vyjmutý.
+
+Zachovává se původní rozhodnutí: postupná modernizace bez plošného přepisu,
+bez nových paralelních registrů a bez oslabení bezpečnostních kontraktů.
+
+HISTORICKÝ AUDIT – 2026-08-16
+============================
+Následující text zachycuje tehdejší nálezy a plán, nikoli dnešní backlog.
 
 1. MANAŽERSKÝ VERDIKT
 ---------------------

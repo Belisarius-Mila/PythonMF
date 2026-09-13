@@ -1,16 +1,15 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-13 13:18 CEST.
-- Nasazeno a pushnuto: Servis → Běžící relace → Screeny nabízí „Obnovit ve VS Code na Macu“. Připojí existující screen včetně běžícího terminálového Codexu; nový Codex ani screen nevzniká.
-- Připojený screen vyžaduje potvrzení převzetí: původní terminál se odpojí, práce uvnitř pokračuje. Cílem je Mac s Cockpitem i při kliknutí z iPhonu.
-- Bezpečnost: aktuální vlastník, projekt, PID/start a stav připojení se ověřují před předáním i před převzetím; chráněné služby se nepřipojují. Jednorázový požadavek platí 90 s a neopakuje se automaticky.
-- Místní doplněk Samantha Screen Recovery 0.1.0 je nainstalovaný. Spouští pevný screen přímo, bez zápisu textu do shellu či rozpracovaného Codexu. Návod: `tools/vscode-screen-recovery/README.md`.
-- Ověření: 11 cílených Python testů a 5 JS testů; skutečný terminál vývojového okna VS Code připojil testovací screen se zachováním PID screenu i původních procesů. Plná Cockpit brána prošla 1 640/1 640 testy.
-- Otevřeno: první průchod z běžného Cockpitu přes systémové/VS Code potvrzení a skutečná vizuální revize tlačítka. Browser native bridge v této relaci nebyl dostupný; test UI použil náhradní DOM. Doručení požadavku samo nedokládá připojení.
-- Push obou čekajících commitů a řízené nasazení obnovy jsou doložené; živý kód `e2ac789cc2a51926`, smoke 5/5, publikační plná brána 1 640/1 640.
-- Dřívější Quick Notes zůstávají samostatným otevřeným tématem; jejich konfigurace ani bdící/spánkový test se tímto krokem neřešily.
-- Další krok: provést první uživatelský průchod obnovou v běžném okně VS Code. Terminály bez screenu a `codex resume` jsou mimo tento krok.
+- Aktualizováno: 2026-09-13 20:48 CEST.
+- Architektonická roadmapa `AuditCockpit56_2.txt` je ve verzi 1.1: hotové D0–D4 a první frontendové/routingové řezy jsou odlišené od dalšího plánu; původní srpnový audit zůstává označenou historií.
+- První navazující lokální řez: `document_review.js` odděluje načtení a zobrazení „Dokumentů k vyřešení“. Původní čtyři funkce zachované doslova, HTML/CSS a ScanDocu endpoint/payload beze změny.
+- Hlavní `app.js` má 7 196 řádků místo 7 317. Nový modul má 142 řádků; přínos je oddělení odpovědnosti a explicitních závislostí.
+- Ověření: 29 cílených Python testů včetně 5 Node kontraktů; shodné DOM a ScanDocu požadavky před/po v prohlížeči pro 1440 i 390 px, bez JS chyb. Pouze syntetické dokumenty a nahrazené API. Plná brána 1641/1641 prošla.
+- Push a nasazení tohoto řezu neprovedeny. Skutečný dokumentový panel na běžícím Cockpitu se tímto krokem nezměnil.
+- Obnova screenu z předchozího kroku zůstává nasazená; Míla v této konverzaci potvrdil návrat po zavření terminálu. Quick Notes jsou samostatné otevřené téma.
+- Další krok: samostatně schválit publikaci/nasazení dokumentového řezu a provést živou přejímku.
+- Následující kandidát: read-only hledání/čtečka dokumentů; nejprve mapa vazeb na lifecycle, metadata a tisk. Není součástí tohoto řezu.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: Cockpit / hlavní architektura
@@ -575,3 +574,25 @@ Technický důkaz:
 - Publikační plná brána: 1 640/1 640 testů. GitHub převzal oba připravené commity včetně `ea13d3d6`.
 - Řízené nasazení `ea13d3d6`: `state=deployed`, code stamp `e2ac789cc2a51926`, nový PID 45183; provozní smoke 5/5. Živá stránka obsahuje tlačítko i endpoint obnovy a API screenů vrací oprávnění k připojení.
 - První uživatelské potvrzení a skutečná vizuální kontrola zůstávají otevřené; úspěšné předání požadavku samo neprokazuje připojení. Předchozí skutečný test terminálu VS Code zachoval screen i jeho procesy.
+
+### 2026-09-13 20:48 CEST — Navázání na architektonický audit a dokumentový frontend
+
+Hotovo:
+- Aktualizovaná TXT roadmapa ukazuje, co z modernizace už vzniklo a kde pokračovat. Původní audit zůstal dohledatelný jako historie.
+- Přehled „Dokumenty k vyřešení“ má samostatný frontendový modul s předanými závislostmi; hlavní soubor zkrácen o 121 řádků.
+
+Rozhodnutí:
+- Míla schválil aktualizaci auditu a pokračování malým řezem. Zachovat chování, URL, potvrzování a soukromé hranice; nerozšiřovat změnu na celý dokumentový systém.
+
+Další krok:
+- Samostatně schválit push/nasazení lokálně ověřeného řezu a provést živou přejímku.
+
+Navrhované další kroky:
+- Při další etapě zmapovat read-only hledání/čtečku a její vazby.
+- Změřit nejdražší testovací skupiny; plnou release bránu zachovat.
+- Dokončit společnou Mac/iPhone přejímku pěti původních auditních scénářů.
+
+Technický důkaz:
+- Těla čtyř původních funkcí jsou byte-identická; HTML/CSS nezměněné. Hash celé sestavené stránky změněn po kontrole samotného přesunu a nových předaných závislostí.
+- 29 cílených Python testů, včetně 5 Node kontraktů. Browser před/po: stejný DOM a POST payload pro přesně vybraný syntetický dokument, desktop/mobilní viewport, žádné JS chyby.
+- Plná brána: 1641/1641 prošlo; unit část 462.2 s. Žádný push ani nasazení tohoto řezu.

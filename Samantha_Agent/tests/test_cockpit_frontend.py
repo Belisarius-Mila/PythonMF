@@ -35,9 +35,9 @@ EXPECTED_PAGES = {
     ),
     "cockpit": (
         COCKPIT_HTML,
-        482761,
-        9770,
-        "e0f2e9da0b643cba560ea7e8a7425ea55049077e1358032fc9b2f6b56e08098e",
+        483638,
+        9792,
+        "7fe361c8371d3e9f33898adcd877cabf6a7e29c76b2efd53df52516f285674ee",
     ),
 }
 
@@ -102,7 +102,7 @@ class CockpitFrontendContractTests(unittest.TestCase):
                 self.assertIn(expected, COCKPIT_HTML)
 
     def test_document_review_opens_exact_item_in_same_origin_scandocu(self) -> None:
-        source = (FRONTEND_ROOT / "cockpit" / "app.js").read_text(encoding="utf-8")
+        source = COCKPIT_HTML
         page = (FRONTEND_ROOT / "cockpit" / "page.html").read_text(encoding="utf-8")
 
         self.assertIn('action === "open_document_review"', source)
@@ -123,6 +123,19 @@ class CockpitFrontendContractTests(unittest.TestCase):
         self.assertNotIn("<h3>Klasifikace</h3>", page)
         self.assertNotIn('`${data.url}/?mode=review`', source)
 
+    def test_document_review_module_contracts(self) -> None:
+        source = (FRONTEND_ROOT / "cockpit" / "app.js").read_text(encoding="utf-8")
+        self.assertNotIn("function renderDocumentReviewReport(", source)
+        self.assertLess(
+            COCKPIT_HTML.index("function createDocumentReviewFrontend"),
+            COCKPIT_HTML.index("window.SamanthaDocumentReview.create"),
+        )
+        result = subprocess.run(
+            [node_binary(), "--test", str(Path(__file__).with_name("document_review_frontend.test.cjs"))],
+            capture_output=True, text=True, timeout=30, check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
     def test_health_recovery_autosave_is_an_extracted_frontend_module(self) -> None:
         page_dir = FRONTEND_ROOT / "cockpit"
         app_source = (page_dir / "app.js").read_text(encoding="utf-8")
@@ -130,7 +143,7 @@ class CockpitFrontendContractTests(unittest.TestCase):
 
         self.assertEqual(
             FRONTEND_JAVASCRIPT_MODULES["cockpit"],
-            ("health_recovery_autosave.js", "codex_sessions.js", "library_photos.js"),
+            ("health_recovery_autosave.js", "codex_sessions.js", "library_photos.js", "document_review.js"),
         )
         self.assertIn("createHealthRecoveryAutosaveFrontend", module_source)
         self.assertIn("async function runFrontendHealthCheck()", module_source)
