@@ -1,14 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-13 20:48 CEST.
+- Aktualizováno: 2026-09-13 21:18 CEST.
 - Architektonická roadmapa `AuditCockpit56_2.txt` je ve verzi 1.1: hotové D0–D4 a první frontendové/routingové řezy jsou odlišené od dalšího plánu; původní srpnový audit zůstává označenou historií.
-- První navazující lokální řez: `document_review.js` odděluje načtení a zobrazení „Dokumentů k vyřešení“. Původní čtyři funkce zachované doslova, HTML/CSS a ScanDocu endpoint/payload beze změny.
+- První navazující nasazený řez: `document_review.js` odděluje načtení a zobrazení „Dokumentů k vyřešení“. Původní čtyři funkce zachované doslova, HTML/CSS a ScanDocu endpoint/payload beze změny.
 - Hlavní `app.js` má 7 196 řádků místo 7 317. Nový modul má 142 řádků; přínos je oddělení odpovědnosti a explicitních závislostí.
 - Ověření: 29 cílených Python testů včetně 5 Node kontraktů; shodné DOM a ScanDocu požadavky před/po v prohlížeči pro 1440 i 390 px, bez JS chyb. Pouze syntetické dokumenty a nahrazené API. Plná brána 1641/1641 prošla.
-- Push a nasazení tohoto řezu neprovedeny. Skutečný dokumentový panel na běžícím Cockpitu se tímto krokem nezměnil.
+- Funkční commit `b565d5d6` a zkontrolovaný systémový audit `63c2a6d3` jsou na GitHubu. Řízené nasazení ověřené: nový proces, stamp `dca8e8f41f3480c0`, smoke 5/5 a shoda podávaného HTML se zdrojem.
 - Obnova screenu z předchozího kroku zůstává nasazená; Míla v této konverzaci potvrdil návrat po zavření terminálu. Quick Notes jsou samostatné otevřené téma.
-- Další krok: samostatně schválit publikaci/nasazení dokumentového řezu a provést živou přejímku.
+- Další krok: běžná uživatelská přejímka dokumentového panelu na Macu/iPhonu; skutečné dokumenty nebyly součástí automatického UI testu.
 - Následující kandidát: read-only hledání/čtečka dokumentů; nejprve mapa vazeb na lifecycle, metadata a tisk. Není součástí tohoto řezu.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -596,3 +596,25 @@ Technický důkaz:
 - Těla čtyř původních funkcí jsou byte-identická; HTML/CSS nezměněné. Hash celé sestavené stránky změněn po kontrole samotného přesunu a nových předaných závislostí.
 - 29 cílených Python testů, včetně 5 Node kontraktů. Browser před/po: stejný DOM a POST payload pro přesně vybraný syntetický dokument, desktop/mobilní viewport, žádné JS chyby.
 - Plná brána: 1641/1641 prošlo; unit část 462.2 s. Žádný push ani nasazení tohoto řezu.
+
+### 2026-09-13 21:18 CEST — Dokumentový modul nasazen a systémový audit uložen
+
+Hotovo:
+- Cockpit používá oddělený modul „Dokumenty k vyřešení“ se zachovaným ovládáním. Řízený restart a všech pět provozních kontrol prošly.
+- Dokončený systémový audit z Cockpitu je uložen jako historický snapshot; cesta k externí záloze je redigovaná.
+
+Rozhodnutí:
+- Míla výslovně schválil push, nasazení a zahrnutí dokončeného auditního reportu. Zápis neslibuje novou implementaci dalších architektonických řezů.
+
+Další krok:
+- Při běžném použití zkontrolovat dokumentový panel na Macu/iPhonu; skutečné soukromé dokumenty nebyly součástí automatického UI testu.
+
+Navrhované další kroky:
+- Zmapovat read-only hledání/čtečku a vazby na metadata, lifecycle a tisk.
+- Změřit nejdražší testovací skupiny a dokončit původní společnou přejímku pěti scénářů.
+
+Technický důkaz:
+- Funkční commit `b565d5d6` a auditní `63c2a6d3` pushnuté; řízené nasazení `63c2a6d37955` má `state=deployed`, nový proces potvrzen, stamp `dca8e8f41f3480c0`, smoke 5/5.
+- HTTP stránka je shodná s aktuálně sestaveným HTML a obsahuje nový dokumentový modul. Plná brána funkčního řezu 1641/1641; následná statická a nasazovací rychlá brána prošly.
+- První pokus zastavil souběžně vytvořený report v nečistém Gitu; po jeho schváleném uložení blokátor odstraněn. Závěrečný dokumentační commit podléhá stejnému řízenému nasazení; autoritou přesného headu je živý deployment receipt.
+- Omezení: uživatelská přejímka skutečného dokumentového toku na Macu/iPhonu zůstává otevřená. Report upozorňuje na zálohu z 5. 9.; záloha nebyla tímto krokem spouštěna.

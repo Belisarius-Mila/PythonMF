@@ -66,14 +66,19 @@ zarovnané. Živý health odpověděl OK, runtime byl připojený a nečinný.
 Běžící Cockpit měl stamp e2ac789cc2a51926. Souhrnný live status byl
 attention_required, protože poslední Cockpit deployment receipt patří
 staršímu main před následným MMTX vývojem; tato aktualizace to neopravuje
-skrytým restartem. Úprava frontendu zatím není nasazená.
+skrytým restartem. Toto je snapshot před následným schváleným nasazením.
+
+Doplnění po publikaci 13. 9.: funkční b565d5d6 a zkontrolovaný systémový
+audit 63c2a6d3 jsou na GitHubu. Řízené nasazení 63c2a6d37955 je ověřené:
+nový proces, stamp dca8e8f41f3480c0, smoke 5/5 a shodné podávané HTML.
+Přesný aktuální main a případný závěrečný paměťový commit dokládá živý receipt.
 
 Stáří zálohy zde nebylo znovu měřeno. Původní datum 12. 8. je historický údaj,
 nikoli dnešní výsledek. Před provozním rozhodnutím použít registrovaný audit.
 
 C. PRVNÍ NAVAZUJÍCÍ ŘEZ – DOKUMENTY K VYŘEŠENÍ
 
-Lokálně oddělený document_review.js vlastní právě:
+Oddělený a následně nasazený document_review.js vlastní právě:
 - načtení GET /api/documents/review-report a stav načítání;
 - otevření panelu a posun k výsledku;
 - vykreslení skupin, prázdných stavů a informace o zkrácení;
@@ -97,8 +102,9 @@ Ověření:
 
 D. CO ZŮSTÁVÁ OTEVŘENÉ A V JAKÉM POŘADÍ
 
-1. Samostatně schválit push/nasazení tohoto lokálního řezu a po něm ověřit
-   dokumentový panel na skutečném Cockpitu. Vývojový souhlas nasazení nenahrazuje.
+1. Push a řízené nasazení dokumentového řezu jsou schválené a dokončené.
+   Zbývá běžná uživatelská přejímka skutečného dokumentového panelu Mac/iPhone;
+   syntetický UI test a provozní smoke ji nenahrazují.
 2. Další kandidát: read-only hledání/čtečka dokumentů. Před implementací
    zmapovat call-sites a oddělit čtení od změny metadat, lifecycle a tisku.
    Zatím není schválený ani implementovaný další rozsah.

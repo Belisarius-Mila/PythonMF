@@ -19,7 +19,9 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Reports
 
-- `../AuditCockpit56_2.txt` - aktuální architektonická roadmapa Cockpitu, verze 1.1 z 13. 9.: dorovnané hotové fáze, lokálně oddělené Dokumenty k vyřešení a plán malých dalších řezů. `../AuditCockpit56.txt` zůstává historickou červencovou roadmapou.
+- `reports/systemovy_audit_projekty_tooly_vrstvy_2026_09_13.txt` - zkontrolovaný historický snapshot systémového auditu spuštěného z Cockpitu; cesta zálohy redigovaná, novější kanonický handoff a živý audit mají přednost.
+
+- `../AuditCockpit56_2.txt` - aktuální architektonická roadmapa Cockpitu, verze 1.1 z 13. 9.: dorovnané hotové fáze, nasazené oddělené Dokumenty k vyřešení a plán malých dalších řezů. `../AuditCockpit56.txt` zůstává historickou červencovou roadmapou.
   Cockpit Dieta D0-D3 i pravdiva pamet P0-P6 jsou uzavrene; prvni otevreny
   vecny smer je jeden uplny tok e-mail -> private vault -> R2 TXT.
 - `reports/cockpit_quality_gate_2026_07_10.md` - git-safe popis kanonicke lokalni a GitHub Actions pojistky; Faze 2.4, e-mailova navigace a docasny TVBCP VoiceBridge protokol maji 611 testu. Realny redigovany outbox pilot overil 22 auditu/delivered, budoucí purge identita prezije zavreni Work Queue a obe e-mailova okna maji explicitni navrat do Cockpitu.
@@ -40,7 +42,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` - Cockpit 13. 9.: aktualizovaný architektonický audit a lokální modul Dokumenty k vyřešení; chování beze změny, ověřeno na syntetických datech. Push/nasazení tohoto řezu neprovedeny. Dřívější obnova screenu je nasazená a Mílou potvrzená.
+- `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` - Cockpit 13. 9.: aktualizovaný architektonický audit a nasazený modul Dokumenty k vyřešení; chování beze změny, plná brána 1641/1641 a provozní smoke 5/5. Systémový report z Cockpitu zkontrolován a uložen. Dřívější obnova screenu je nasazená a Mílou potvrzená.
 
 - `projects/python_se_samanthou.md`; `handoffs/python_se_samanthou_course_package_2026_09_06.md` - učebna Pythonu: Míla potvrdil 1.5/Codex na Linuxu. Nový samostatný balíček Praktické úlohy přidává 7 lekcí (celkem 21); kopíruje se jen do kurzy. 62 testů a GUI nad nezměněnou 1.5 prošly; obsahový ZIP v LocalSendu.
 - `projects/lekarna_domaci_leky.md` - projekt Lekarna: evidence domacich leku v `data/lekarna/`, vyhledavani podle potizi, audit lekarnicky a opakovatelny foto import workflow pres manifest.
