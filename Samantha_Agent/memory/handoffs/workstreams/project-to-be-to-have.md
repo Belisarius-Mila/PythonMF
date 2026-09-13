@@ -15,7 +15,7 @@
   neověřuje layout ani přehrávání Safari.
 - Další krok: na Macu otevřít lokální prototyp a projít oba režimy; potom
   domluvit dostupnost na iPhonu a samostatné umístění webu.
-- Publikování, push, nasazení a změna Cockpitu neprovedeny.
+- Zdrojový prototyp byl 13. 9. odeslán na GitHub v denním balíčku. Samostatné hostování webu ani jeho integrace do Cockpitu nebyly provedeny.
 - Zdrojový desktopový skript a obě CSV beze změny. Vývoj VocabularyFR/IT
   zůstal mimo rozsah tohoto kroku.
 - Oprava vazby: starší checkpointy KPTL níže byly vedené pod chybným proudem.
@@ -120,3 +120,20 @@ Technický důkaz:
 - Browser UI a reálný poslech zůstávají otevřené, neprohlašují se za ověřené.
 - Kanonické soubory: `README_WEB.md`, `IMAGE_PLAN.md`, `scripts/`, `web/`.
 - Lokální vývojový krok bez pushnutí, publikování nebo nasazení Cockpitu.
+
+### 2026-09-13 13:18 CEST — Zdrojový prototyp uložený na GitHubu
+
+Hotovo:
+- Lokální webový prototyp s obrázky a MP3 je součástí odeslaného hlavního repozitáře.
+
+Rozhodnutí:
+- Míla schválil odeslání čekajícího balíčku; hostování prototypu tím nevzniká.
+
+Další krok:
+- Pokračovat uživatelskou revizí lokálního prototypu.
+
+Navrhované další kroky:
+- Případné hostování a integraci řešit samostatně.
+
+Technický důkaz:
+- Commit `0ce9c5bd` je předkem ověřeného GitHub headu `ea13d3d6`; publikační brána balíčku prošla 1 640/1 640 testy.

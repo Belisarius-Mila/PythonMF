@@ -1,16 +1,16 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-13 12:45 CEST.
-- Lokálně připraveno: Servis → Běžící relace → Screeny nabízí „Obnovit ve VS Code na Macu“. Připojí existující screen včetně běžícího terminálového Codexu; nový Codex ani screen nevzniká.
+- Aktualizováno: 2026-09-13 13:18 CEST.
+- Nasazeno a pushnuto: Servis → Běžící relace → Screeny nabízí „Obnovit ve VS Code na Macu“. Připojí existující screen včetně běžícího terminálového Codexu; nový Codex ani screen nevzniká.
 - Připojený screen vyžaduje potvrzení převzetí: původní terminál se odpojí, práce uvnitř pokračuje. Cílem je Mac s Cockpitem i při kliknutí z iPhonu.
 - Bezpečnost: aktuální vlastník, projekt, PID/start a stav připojení se ověřují před předáním i před převzetím; chráněné služby se nepřipojují. Jednorázový požadavek platí 90 s a neopakuje se automaticky.
 - Místní doplněk Samantha Screen Recovery 0.1.0 je nainstalovaný. Spouští pevný screen přímo, bez zápisu textu do shellu či rozpracovaného Codexu. Návod: `tools/vscode-screen-recovery/README.md`.
 - Ověření: 11 cílených Python testů a 5 JS testů; skutečný terminál vývojového okna VS Code připojil testovací screen se zachováním PID screenu i původních procesů. Plná Cockpit brána prošla 1 640/1 640 testy.
 - Otevřeno: první průchod z běžného Cockpitu přes systémové/VS Code potvrzení a skutečná vizuální revize tlačítka. Browser native bridge v této relaci nebyl dostupný; test UI použil náhradní DOM. Doručení požadavku samo nedokládá připojení.
-- Nasazení Cockpitu a push neprovedeny; dosavadní nasazený přehled a uzavírání screenů zůstávají samostatně doloženým stavem z 12. září.
+- Push obou čekajících commitů a řízené nasazení obnovy jsou doložené; živý kód `e2ac789cc2a51926`, smoke 5/5, publikační plná brána 1 640/1 640.
 - Dřívější Quick Notes zůstávají samostatným otevřeným tématem; jejich konfigurace ani bdící/spánkový test se tímto krokem neřešily.
-- Další krok: po samostatném potvrzení nasazení provést první uživatelský průchod obnovou. Terminály bez screenu a `codex resume` jsou mimo tento krok.
+- Další krok: provést první uživatelský průchod obnovou v běžném okně VS Code. Terminály bez screenu a `codex resume` jsou mimo tento krok.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Cockpit / hlavní architektura
@@ -652,3 +652,22 @@ Technický důkaz:
 - Nativní test přesných argumentů `screen -d -r` potvrdil převzetí připojení: původní testovací terminál oznámil `remote detached`, nový zůstal aktivní.
 - Plná Cockpit brána prošla 1 640/1 640 testy. Vizuální kontrola skutečné stránky a první systémové potvrzení zůstávají otevřené; Browser native bridge nebyl dostupný.
 - Žádný push ani nasazení Cockpitu. Běžící uživatelské relace nebyly při testech ukončeny; vlastní testovací screeny skončily časovým limitem.
+
+### 2026-09-13 13:18 CEST — Nasazená obnova screenu ve VS Code
+
+Hotovo:
+- Běžící Cockpit nabízí obnovu existujícího screenu do VS Code na Macu. Kód obnovy i předchozí lokální prototyp ToBeToHave jsou odeslané na GitHub.
+
+Rozhodnutí:
+- Míla výslovně schválil push a nasazení Cockpitu. Nasazení je svázané s kanonickým proudem `project-cockpit`.
+
+Další krok:
+- V Servisu projít první obnovu v běžném okně VS Code a případné systémové potvrzení.
+
+Navrhované další kroky:
+- Obnova terminálů bez screenu zůstává samostatným případným rozšířením.
+
+Technický důkaz:
+- Publikační plná brána: 1 640/1 640 testů. GitHub převzal oba připravené commity včetně `ea13d3d6`.
+- Řízené nasazení `ea13d3d6`: `state=deployed`, code stamp `e2ac789cc2a51926`, nový PID 45183; provozní smoke 5/5. Živá stránka obsahuje tlačítko i endpoint obnovy a API screenů vrací oprávnění k připojení.
+- První uživatelské potvrzení a skutečná vizuální kontrola zůstávají otevřené; úspěšné předání požadavku samo neprokazuje připojení. Předchozí skutečný test terminálu VS Code zachoval screen i jeho procesy.
