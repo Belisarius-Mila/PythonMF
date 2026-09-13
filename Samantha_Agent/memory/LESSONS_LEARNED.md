@@ -611,3 +611,11 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   také camera JPEG/MPO. Převod starých dat musí kontrolovat otisky i shodu
   metadat s registrem a mít ověřenou obnovu; úspora aktivního archivu není
   úsporou disku, pokud zůstává jednorázová záloha. Ověřeno testy a browserem.
+
+
+### 2026-09-13 12:45 CEST — Připojení screenu zachovává běžící Codex
+
+- Typ: opakující se.
+- Problém: Po zavření terminálu může screen s Codexem pokračovat, ale uživatel k němu nemá otevřené okno. Úspěšné předání URI editoru samo neprokazuje připojení.
+- Ověřené řešení: Rozlišit obnovu od ukončení a od `codex resume`; ověřený screen spustit přímo jako terminál VS Code přes `screen -d -r <socket>`. Připojený stav vyžaduje potvrzení převzetí. PID/start a ochrany ověřit znovu při jednorázovém převzetí.
+- Ověření: Vývojové okno skutečného VS Code připojilo vlastní testovací screen a zachovalo PID screenu i vnitřních procesů. UI test používá náhradní DOM; skutečný první klik z Cockpitu zůstává samostatným ověřením.

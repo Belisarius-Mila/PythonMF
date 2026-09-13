@@ -27,6 +27,18 @@
         const state = session.state === "Attached" ? "Připojený" : "Odpojený";
         details.textContent = `${state} · ${session.project} · běží ${session.age} · spuštěno ${session.started} · procesů uvnitř: ${session.process_count} · Codex: ${session.codex_count}`;
         card.append(title, details);
+        if (session.can_attach) {
+          const attach = document.createElement("button");
+          attach.type = "button";
+          attach.className = "secondary";
+          attach.textContent = "Obnovit ve VS Code na Macu";
+          attach.addEventListener("click", () => restoreScreen(session));
+          card.append(attach);
+        } else if (session.attach_reason) {
+          const reason = document.createElement("p");
+          reason.textContent = session.attach_reason;
+          card.append(reason);
+        }
         if (session.can_stop) {
           const stop = document.createElement("button");
           stop.type = "button";
@@ -134,6 +146,33 @@
       message = data.message || "Výsledek není známý; obnov přehled.";
     } catch (_) {
       message = "Spojení se přerušilo. Nejdřív ověř přehled; požadavek se automaticky neopakuje.";
+    } finally {
+      busy = false;
+    }
+    await refresh();
+    screenStatus.textContent = message;
+  }
+
+  async function restoreScreen(session) {
+    if (busy) return;
+    const takeover = session.state === "Attached";
+    const detail = takeover
+      ? "Původní terminál se odpojí a připojení převezme VS Code na Macu. Běžící práce pokračuje."
+      : "Screen se připojí do terminálu VS Code na Macu. Běžící práce pokračuje.";
+    if (!window.confirm(`Obnovit screen ${session.socket}?\n${detail}`)) return;
+    busy = true;
+    panel.querySelectorAll("button").forEach(button => { button.disabled = true; });
+    let message;
+    try {
+      const response = await fetch("/api/screen/sessions/attach", {
+        method: "POST", headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({pid: session.pid, identity: session.attach_identity,
+          confirmed: true, takeover})
+      });
+      const data = await response.json();
+      message = data.message || "Výsledek není známý; zkontroluj VS Code na Macu a obnov přehled.";
+    } catch (_) {
+      message = "Spojení se přerušilo. Zkontroluj VS Code na Macu; požadavek se automaticky neopakuje.";
     } finally {
       busy = false;
     }

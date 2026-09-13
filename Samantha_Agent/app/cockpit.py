@@ -45,6 +45,7 @@ from app.cockpit_awake_mode import (
 )
 from app.codex_sessions import CodexSessionController
 from app.screen_sessions import ScreenSessionController
+from app.screen_recovery import ScreenRecovery
 from app.cockpit_readonly_routes import (
     HEALTH_RECOVERY_STATUS_GET_PATHS,
     build_health_recovery_status_dispatch,
@@ -8540,6 +8541,7 @@ def open_terminal_command(
 
 CODEX_SESSIONS = CodexSessionController()
 SCREEN_SESSIONS = ScreenSessionController()
+SCREEN_RECOVERY = ScreenRecovery(SCREEN_SESSIONS)
 
 
 def codex_session_stop_action(payload: dict[str, Any]) -> dict[str, Any]:
@@ -8548,6 +8550,14 @@ def codex_session_stop_action(payload: dict[str, Any]) -> dict[str, Any]:
 
 def screen_session_stop_action(payload: dict[str, Any]) -> dict[str, Any]:
     return SCREEN_SESSIONS.stop(payload)
+
+
+def screen_session_attach_action(payload: dict[str, Any], port: int = 8770) -> dict[str, Any]:
+    return SCREEN_RECOVERY.request(payload, port)
+
+
+def screen_session_claim_action(payload: dict[str, Any]) -> dict[str, Any]:
+    return SCREEN_RECOVERY.claim(payload)
 
 
 def open_samantha_chat() -> dict[str, Any]:
@@ -8725,6 +8735,22 @@ def shell_quote_for_applescript(value: str) -> str:
 
 
 COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
+    {
+        "path": "/api/screen/sessions/attach",
+        "label": "Obnovit screen ve VS Code na Macu",
+        "risk": "local_service",
+        "confirmation": "explicit_ui_confirmation_and_fresh_process_identity",
+        "handler_name": "screen_session_attach_action",
+        "test_level": "direct",
+    },
+    {
+        "path": "/api/screen/sessions/claim",
+        "label": "Převzít jednorázový požadavek obnovy screenu",
+        "risk": "local_service",
+        "confirmation": "one_use_short_lived_ticket_and_fresh_process_identity",
+        "handler_name": "screen_session_claim_action",
+        "test_level": "direct",
+    },
     {
         "path": "/api/screen/sessions/stop",
         "label": "Uzavřít vybraný screen",
@@ -9949,6 +9975,15 @@ class CockpitServer:
             def do_POST(self) -> None:  # noqa: N802
                 self.validate_request_access(require_origin=True)
                 parsed = urlparse(self.path)
+                if parsed.path == "/api/screen/sessions/attach":
+                    self.respond_json(screen_session_attach_action(self.read_json(), int(self.server.server_address[1])))
+                    return
+                if parsed.path == "/api/screen/sessions/claim":
+                    if self.client_address[0] not in ("127.0.0.1", "::1"):
+                        self.respond_json({"ok": False, "message": "Obnovu může převzít pouze místní VS Code."}, status=HTTPStatus.FORBIDDEN)
+                        return
+                    self.respond_json(screen_session_claim_action(self.read_json()))
+                    return
                 if parsed.path == "/api/screen/sessions/stop":
                     self.respond_json(screen_session_stop_action(self.read_json()))
                     return

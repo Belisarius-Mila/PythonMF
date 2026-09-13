@@ -1,0 +1,13 @@
+{
+  "name": "screen-recovery",
+  "displayName": "Samantha Screen Recovery",
+  "description": "Připojí konkrétní běžící screen schválený v místním Cockpitu.",
+  "publisher": "samantha-local",
+  "version": "0.1.0",
+  "engines": {"vscode": "^1.85.0"},
+  "categories": ["Other"],
+  "activationEvents": ["onUri"],
+  "extensionKind": ["ui"],
+  "main": "./extension.cjs",
+  "capabilities": {"untrustedWorkspaces": {"supported": false}}
+}

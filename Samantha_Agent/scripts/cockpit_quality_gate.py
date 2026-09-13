@@ -26,6 +26,8 @@ NODE_FALLBACK_PATHS = (
 COMPILE_PATHS = (
     "app/codex_sessions.py",
     "app/screen_sessions.py",
+    "app/screen_recovery.py",
+    "scripts/build_screen_recovery_extension.py",
     "scripts/work_context_guard.py",
     "app/cockpit.py",
     "app/cockpit_awake_mode.py",
@@ -174,6 +176,7 @@ TEST_MODULES = (
     "tests.test_cockpit_quality_gate",
     "tests.test_codex_sessions",
     "tests.test_screen_sessions",
+    "tests.test_screen_recovery",
     "tests.test_codex_session_report",
     "tests.test_cockpit_awake_mode",
     "tests.test_cockpit_fast_feedback",

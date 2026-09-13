@@ -85,12 +85,42 @@ class ScreenSessionController(CodexSessionController):
         members = sorted((c.pid, c.ppid, c.uid, c.tty, c.started, c.command) for c in children)
         identity = repr((screen, p.pid, p.ppid, p.uid, p.tty, p.started, p.command, cwd, executable, members))
         token = hmac.new(self._key, identity.encode(), hashlib.sha256).hexdigest()
+        # Reconnecting a terminal must allow its live Codex. Service/ownership
+        # protections still apply; child jobs may legitimately change meanwhile.
+        attach_reason = ""
+        if (not p.argv or Path(p.argv[0]).name.lower() != "screen"
+                or Path(executable).name.lower() != "screen" or p.uid != self.uid
+                or not in_project or not re.fullmatch(r"[0-9]+\.[A-Za-z0-9_.-]+", screen["socket"])):
+            attach_reason = "Identitu nebo projekt screenu nelze bezpečně ověřit."
+        elif any((c.uid != self.uid and not self._owned_login_wrapper(c, p.pid))
+                 or (c.is_codex and not c.is_terminal)
+                 or labels.get(c.tty, {}).get("protected")
+                 or any(Path(a).name in ("cockpit_server.py", "cockpit_launchd_runner.py") for a in c.argv)
+                 for c in [p, *children]):
+            attach_reason = "Screen obsahuje chráněnou službu nebo terminál."
+        attach_identity = repr((screen, p.pid, p.ppid, p.uid, p.started, p.command, cwd, executable))
+        attach_token = hmac.new(self._key, attach_identity.encode(), hashlib.sha256).hexdigest()
         return {"pid": p.pid, "name": screen["name"], "socket": screen["socket"],
                 "state": screen["state"], "started": p.started, "age": format_age(p.age),
                 "process_count": len(children), "codex_count": sum(c.is_terminal for c in children),
                 "project": "PythonMF" if in_project else "Neověřený / jiný adresář",
                 "can_stop": not reason, "protected_reason": reason, "identity": token,
+                "can_attach": not attach_reason, "attach_reason": attach_reason,
+                "attach_identity": attach_token,
                 "force_available": token in self._stopping}
+
+    def verify_attach(self, pid, identity):
+        if type(pid) is not int or pid <= 1 or not isinstance(identity, str) or len(identity) != 64:
+            raise ValueError("Chybí platná identita screenu. Obnov přehled.")
+        processes = self.processes()
+        p = next((p for p in processes if p.pid == pid), None)
+        screen = next((s for s in self.screens() if s["pid"] == pid), None)
+        if p is None or screen is None:
+            raise ValueError("Vybraný screen už není dostupný. Obnov přehled.")
+        row = self._screen_row(screen, p, processes)
+        if not row["can_attach"] or not hmac.compare_digest(row["attach_identity"], identity):
+            raise ValueError("Screen se změnil nebo je chráněný. Obnov přehled.")
+        return row
 
     def status(self):
         try:
