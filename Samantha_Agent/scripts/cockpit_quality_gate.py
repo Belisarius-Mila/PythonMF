@@ -29,6 +29,7 @@ COMPILE_PATHS = (
     "app/screen_recovery.py",
     "scripts/build_screen_recovery_extension.py",
     "scripts/work_context_guard.py",
+    "scripts/cockpit_test_timing.py",
     "app/cockpit.py",
     "app/cockpit_awake_mode.py",
     "app/cockpit_frontend.py",
@@ -476,6 +477,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Run only whitespace, metrics and syntax checks.",
     )
     parser.add_argument(
+        "--unit-test-timings",
+        type=Path,
+        help="Optionally write aggregate module/test timings to JSON; preserves the full suite.",
+    )
+    parser.add_argument(
         "--skip-git-diff-check",
         action="store_true",
         help="Skip git diff --check (useful outside a Git worktree).",
@@ -484,7 +490,10 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    args = build_parser().parse_args(argv)
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    if args.skip_unit_tests and args.unit_test_timings is not None:
+        parser.error("--unit-test-timings requires unit tests")
     print("Samantha Cockpit quality gate")
     print("Architecture metrics (informational, never a hard failure):")
     for message in architecture_messages():
@@ -527,7 +536,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     run_checked("shell syntax", ["/bin/zsh", "-n", *SHELL_PATHS])
     if not args.skip_unit_tests:
-        run_checked("unit tests", [sys.executable, "-m", "unittest", *TEST_MODULES])
+        command = [sys.executable, "-m", "unittest", *TEST_MODULES]
+        if args.unit_test_timings is not None:
+            command = [sys.executable, "-m", "scripts.cockpit_test_timing",
+                       "--output", str(args.unit_test_timings), *TEST_MODULES]
+        run_checked("unit tests", command)
 
     print("\nCockpit quality gate: OK")
     return 0

@@ -1,7 +1,7 @@
 AUDIT COCKPITU 5.6 SOL – DRUHÝ PRŮCHOD
 ========================================
 
-Verze: 1.3
+Verze: 1.4
 Aktualizováno: 2026-09-13
 Datum auditu: 2026-08-16
 Autor posouzení: Adam / Codex 5.6 Sol
@@ -147,6 +147,30 @@ Hledání i čtečky zůstávají lokální, společný push/nasazení výslovn�
 Pro pozdější UI audit doplněn stávající návrat nákupní čtečky: bez openeru
 nemá fallback na hlavní stránku. Tento přesun chování neopravuje.
 
+C4. ČTVRTÝ NAVAZUJÍCÍ KROK – MĚŘENÍ BRÁNY (TŘETÍ ČEKAJÍCÍ COMMIT)
+
+Volitelné --unit-test-timings PATH měří stejnou plnou sadu a ukládá bezpečné
+součty modulů/nejpomalejší testy. Výchozí režim a výsledek brány beze změny.
+Jeden plný běh: 1649/1649, unit 426,384 s, podproces 429,7 s; importy 2,773 s.
+Čtyři nejdražší moduly mají jen 88 testů, ale 313,32 s (73,5 % času):
+- simple_main_checkpoint 113,15 s;
+- simple_main_deploy 97,49 s;
+- human_adam_takeover 61,99 s;
+- human_adam_workspace 40,69 s.
+Test_cockpit: 265 testů za 5,48 s. Frontendová sada: 15 testů za 1,19 s.
+
+Pomalé integrační testy používají skutečné dočasné Git repozitáře; gate/smoke
+jsou nahrazené. Nejde o rekurzivní spouštění plné brány. Podíl přípravy oproti
+jednotlivým Git operacím ještě není změřený: příští pilot omezit na dva
+nejpomalejší deploy testy, oddělit obě ceny a případnou optimalizaci ověřit
+při zachování izolace a stejných kontrol. Úspora zatím není doložená.
+
+GitHub batch nadále vyžaduje jednu vlastní plnou bránu, deploy v dávkovém
+režimu používá rychlou. Opakování nezměněných celých sad při běžném přesunu
+není nutné; cílené kontroly a povinné rizikové/release brány se zachovávají.
+Report a metodika: memory/reports/cockpit_test_timings_2026_09_13.md + JSON.
+Společný push/nasazení posledních tří lokálních kroků zůstává odložený.
+
 D. CO ZŮSTÁVÁ OTEVŘENÉ A V JAKÉM POŘADÍ
 
 1. Push a řízené nasazení dokumentového řezu jsou schválené a dokončené.
@@ -155,9 +179,9 @@ D. CO ZŮSTÁVÁ OTEVŘENÉ A V JAKÉM POŘADÍ
 2. Mapa, oddělení hledání (C2) i generování čteček (C3) lokálně hotové.
    Společný push/nasazení odložený na samostatný pokyn. Čistý main napřed
    neblokuje další téma; další řezy volit podle konkrétní vazby.
-3. U testovací brány změřit nejdražší skupiny a skutečné důvody opakování.
-   Zachovat plnou release bránu; rychlá kontrola již existuje.
-   Nástroj pro kontrolovanou aktualizaci hashů není tímto řezem implementován.
+3. Měření skupin a kontrola opakování dokončeny (C4). Případný další pilot:
+   dva nejpomalejší deploy testy, oddělit cenu přípravy a Git operací.
+   Zachovat plnou release bránu; optimalizace ani helper hashů zatím nevznikly.
 4. Dokončit společnou uživatelskou přejímku původních pěti scénářů na Macu
    a iPhonu. Jednotlivé dílčí testy nejsou důkaz celé přejímky.
 5. Další frontendové a HTTP řezy volit podle konkrétní změny a jejích vazeb.

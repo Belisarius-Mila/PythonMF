@@ -1,6 +1,10 @@
 from __future__ import annotations
 
 import re
+import io
+import json
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -20,10 +24,114 @@ from scripts.cockpit_quality_gate import (
     scandocu_javascript_source,
     source_metrics,
     run_checked,
+    main as gate_main,
 )
+from scripts.cockpit_test_timing import run_timed_suite
 
 
 class CockpitQualityGateTests(unittest.TestCase):
+    def test_timing_accounts_for_tests_and_separates_fixture_overhead(self) -> None:
+        suite = unittest.TestSuite([unittest.FunctionTestCase(lambda: None)])
+        ticks = iter([10.0, 11.0, 15.0, 18.0])
+        result, report = run_timed_suite(suite, load_seconds=2.0,
+                                       stream=io.StringIO(), clock=lambda: next(ticks))
+        self.assertTrue(result.wasSuccessful())
+        self.assertEqual(report["test_count"], 1)
+        self.assertEqual(report["load_seconds"], 2.0)
+        self.assertEqual(report["run_seconds"], 8.0)
+        self.assertEqual(report["measured_test_seconds"], 4.0)
+        self.assertEqual(report["unmeasured_run_seconds"], 4.0)
+        self.assertEqual(report["modules"][0]["seconds"], 4.0)
+
+    def test_timing_preserves_order_fixtures_outcomes_and_excludes_private_messages(self) -> None:
+        events = []
+
+        class Fixture(unittest.TestCase):
+            @classmethod
+            def setUpClass(cls):
+                events.append("class setup")
+
+            @classmethod
+            def tearDownClass(cls):
+                events.append("class teardown")
+
+            def setUp(self):
+                events.append(self._testMethodName)
+
+            def test_pass(self):
+                pass
+
+            def test_fail(self):
+                self.fail("PRIVATE_FIXTURE_MESSAGE")
+
+            def test_error(self):
+                raise ValueError("PRIVATE_FIXTURE_MESSAGE")
+
+            @unittest.skip("PRIVATE_FIXTURE_MESSAGE")
+            def test_skip(self):
+                pass
+
+            @unittest.expectedFailure
+            def test_expected_failure(self):
+                self.fail("PRIVATE_FIXTURE_MESSAGE")
+
+            @unittest.expectedFailure
+            def test_unexpected_success(self):
+                pass
+
+        names = ["test_pass", "test_skip", "test_fail", "test_error",
+                 "test_expected_failure", "test_unexpected_success"]
+        def suite():
+            return unittest.TestSuite([Fixture(name) for name in names])
+
+        baseline = unittest.TextTestRunner(stream=io.StringIO()).run(suite())
+        expected_events = list(events)
+        events.clear()
+        measured, report = run_timed_suite(suite(), stream=io.StringIO())
+        self.assertEqual(events, expected_events)
+        self.assertEqual(measured.testsRun, baseline.testsRun)
+        self.assertEqual(measured.wasSuccessful(), baseline.wasSuccessful())
+        for attribute in ("failures", "errors", "skipped", "expectedFailures", "unexpectedSuccesses"):
+            self.assertEqual(len(getattr(measured, attribute)), len(getattr(baseline, attribute)))
+        self.assertEqual(report["test_count"], 6)
+        self.assertFalse(report["success"])
+        self.assertNotIn("PRIVATE_FIXTURE_MESSAGE", json.dumps(report))
+
+    def test_timing_cli_preserves_success_failure_and_empty_exit_codes(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            fixture = root / "timing_fixture.py"
+            fixture.write_text("import unittest\nclass Example(unittest.TestCase):\n"
+                               " def test_pass(self): pass\n"
+                               " def test_fail(self): self.fail('synthetic failure')\n"
+                               "class Empty(unittest.TestCase): pass\n")
+            for target, expected in [("Example.test_pass", 0), ("Example.test_fail", 1), ("Empty", 5)]:
+                with self.subTest(target=target):
+                    command = [sys.executable, "-c", "import sys; sys.path.insert(0, sys.argv.pop(1)); "
+                               "from scripts.cockpit_test_timing import main; sys.exit(main())",
+                               str(root), "--output", str(root / "timing.json"), f"timing_fixture.{target}"]
+                    result = subprocess.run(command, cwd=PROJECT_ROOT, capture_output=True, text=True, timeout=20)
+                    self.assertEqual(result.returncode, expected, result.stderr)
+                    report = json.loads((root / "timing.json").read_text())
+                    self.assertEqual(report["success"], expected == 0)
+
+    def test_optional_timing_uses_exact_same_module_list_and_default_command(self) -> None:
+        for args, expected_prefix in [([], [sys.executable, "-m", "unittest"]),
+            (["--unit-test-timings", "/tmp/synthetic-timing.json"],
+             [sys.executable, "-m", "scripts.cockpit_test_timing", "--output", "/tmp/synthetic-timing.json"])]:
+            with self.subTest(args=args), patch("scripts.cockpit_quality_gate.run_checked") as run, \
+                    patch("builtins.print"):
+                self.assertEqual(gate_main(args), 0)
+                command = next(call.args[1] for call in run.call_args_list if call.args[0] == "unit tests")
+                self.assertEqual(command, [*expected_prefix, *TEST_MODULES])
+
+    def test_timing_cannot_be_requested_when_unit_tests_are_skipped(self) -> None:
+        with patch("scripts.cockpit_quality_gate.run_checked") as run, \
+                patch("sys.stderr", io.StringIO()), self.assertRaises(SystemExit) as stopped:
+            gate_main(["--skip-unit-tests", "--unit-test-timings", "/tmp/synthetic-timing.json"])
+        self.assertEqual(stopped.exception.code, 2)
+        run.assert_not_called()
+
     def test_scandocu_pages_javascript_is_included_in_syntax_gate(self) -> None:
         source = scandocu_javascript_source()
 

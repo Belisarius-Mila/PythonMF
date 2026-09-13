@@ -625,3 +625,10 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Problém: návrat ve scénách MMTX 4 a 5 byl vidět, ale úvodní audio překryv zachytával kliknutí. Samotná kontrola href ani viditelnosti chybu neodhalila.
 - Řešení: ovládací vrstvu umístit nad audio překryv a zachovat průhlednost ke kliknutí mimo tlačítka. Ověřit skutečný klik ještě před spuštěním příběhu.
 - Ověření: návraty 4 → 3 a 5 → 4 prošly bez spuštění audia v desktopovém i mobilním viewportu. Celá navigační sada prošla 18/18.
+
+### 2026-09-13 — Pomalou bránu zrychlovat podle měření skupin
+
+- Problém: celkový čas plné brány neukazuje, zda zdržuje frontend, Git integrace nebo společná příprava; vede k neúčelnému opakování či škrtání testů.
+- Typ: opakující se.
+- Řešení: volitelné `--unit-test-timings PATH` nad kanonickou bránou zachová stejný manifest, pořadí a výsledky; report obsahuje jen názvy, počty a časy. Testový setUp/tearDown je v čase testu, importy a společná režie zvlášť. Běžné změny ověřovat cíleně; povinné rizikové/release brány zachovat.
+- Ověření: 1649/1649 v jediném plném běhu; 88 Git/workspace testů zabralo 73,5 % času. Gate/smoke uvnitř pomalých testů jsou nahrazené. Podíl tvorby repozitáře a samotných Git operací vyžaduje další dílčí měření, nelze jej vydávat za doloženou příčinu nebo hotovou úsporu.

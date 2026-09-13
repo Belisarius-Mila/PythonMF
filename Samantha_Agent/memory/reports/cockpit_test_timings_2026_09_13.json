@@ -1,0 +1,804 @@
+{
+  "schema_version": 1,
+  "success": true,
+  "test_count": 1649,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "expected_failures": 0,
+  "unexpected_successes": 0,
+  "load_seconds": 2.773232665960677,
+  "run_seconds": 426.38440328801516,
+  "measured_test_seconds": 426.3129115307238,
+  "unmeasured_run_seconds": 0.07149175729136914,
+  "measurement_scope": "Test durations include per-test setup/teardown. Module/class fixtures and runner overhead are unmeasured_run_seconds; imports/loading are load_seconds.",
+  "modules": [
+    {
+      "module": "tests.test_simple_main_checkpoint",
+      "test_count": 28,
+      "seconds": 113.14518940681592
+    },
+    {
+      "module": "tests.test_simple_main_deploy",
+      "test_count": 17,
+      "seconds": 97.49436373799108
+    },
+    {
+      "module": "tests.test_human_adam_takeover",
+      "test_count": 13,
+      "seconds": 61.989130050176755
+    },
+    {
+      "module": "tests.test_human_adam_workspace",
+      "test_count": 30,
+      "seconds": 40.694869036087766
+    },
+    {
+      "module": "tests.test_document_vault_tools",
+      "test_count": 81,
+      "seconds": 19.73995778837707
+    },
+    {
+      "module": "tests.test_github_batch",
+      "test_count": 5,
+      "seconds": 11.329798028920777
+    },
+    {
+      "module": "tests.test_main_remote_sync",
+      "test_count": 6,
+      "seconds": 10.934180263779126
+    },
+    {
+      "module": "tests.test_document_transactions",
+      "test_count": 6,
+      "seconds": 7.647934467066079
+    },
+    {
+      "module": "tests.test_reminders_store",
+      "test_count": 7,
+      "seconds": 6.523372809984721
+    },
+    {
+      "module": "tests.test_cockpit",
+      "test_count": 265,
+      "seconds": 5.478388158371672
+    },
+    {
+      "module": "tests.test_cockpit_http_security",
+      "test_count": 14,
+      "seconds": 5.089839301072061
+    },
+    {
+      "module": "tests.test_library_photo_compaction",
+      "test_count": 19,
+      "seconds": 4.842406505718827
+    },
+    {
+      "module": "tests.test_human_adam_profiles",
+      "test_count": 122,
+      "seconds": 4.6583503225119784
+    },
+    {
+      "module": "tests.test_development_branch_lifecycle",
+      "test_count": 7,
+      "seconds": 3.9721492290263996
+    },
+    {
+      "module": "tests.test_document_persistence",
+      "test_count": 3,
+      "seconds": 3.347268152050674
+    },
+    {
+      "module": "tests.test_project_continuity",
+      "test_count": 12,
+      "seconds": 3.289132808102295
+    },
+    {
+      "module": "tests.test_library_photos",
+      "test_count": 12,
+      "seconds": 3.1204520008759573
+    },
+    {
+      "module": "tests.test_email_work_repository",
+      "test_count": 5,
+      "seconds": 3.1138020950602368
+    },
+    {
+      "module": "tests.test_cockpit_scandocu_proxy",
+      "test_count": 3,
+      "seconds": 2.5336985798785463
+    },
+    {
+      "module": "tests.test_document_archive_browser",
+      "test_count": 6,
+      "seconds": 2.4841693359194323
+    },
+    {
+      "module": "tests.test_codex_sessions",
+      "test_count": 14,
+      "seconds": 2.3170808231225237
+    },
+    {
+      "module": "tests.test_cockpit_frontend",
+      "test_count": 15,
+      "seconds": 1.1892537726089358
+    },
+    {
+      "module": "tests.test_safety_quick_checks",
+      "test_count": 30,
+      "seconds": 1.0891918427078053
+    },
+    {
+      "module": "tests.test_screen_recovery",
+      "test_count": 11,
+      "seconds": 0.9520454960875213
+    },
+    {
+      "module": "tests.test_cockpit_voice_frontend_retirement",
+      "test_count": 11,
+      "seconds": 0.8309662560932338
+    },
+    {
+      "module": "tests.test_cockpit_quality_gate",
+      "test_count": 18,
+      "seconds": 0.7988923569209874
+    },
+    {
+      "module": "tests.test_article_archive",
+      "test_count": 41,
+      "seconds": 0.7145706453593448
+    },
+    {
+      "module": "tests.test_family_calendar_delivery_coordinator",
+      "test_count": 8,
+      "seconds": 0.7033448150614277
+    },
+    {
+      "module": "tests.test_file_persistence",
+      "test_count": 7,
+      "seconds": 0.5977925639599562
+    },
+    {
+      "module": "tests.test_screen_sessions",
+      "test_count": 14,
+      "seconds": 0.527588385855779
+    },
+    {
+      "module": "tests.test_urgent_reminders",
+      "test_count": 13,
+      "seconds": 0.4282052490161732
+    },
+    {
+      "module": "tests.test_family_calendar_delivery_config_transition",
+      "test_count": 7,
+      "seconds": 0.3396053849719465
+    },
+    {
+      "module": "tests.test_human_adam_completion_job",
+      "test_count": 4,
+      "seconds": 0.3300482219783589
+    },
+    {
+      "module": "tests.test_family_calendar_delivery_automation_activation",
+      "test_count": 11,
+      "seconds": 0.27300214720889926
+    },
+    {
+      "module": "tests.test_work_repository",
+      "test_count": 10,
+      "seconds": 0.27151234284974635
+    },
+    {
+      "module": "tests.test_family_calendar_cockpit",
+      "test_count": 7,
+      "seconds": 0.24085087911225855
+    },
+    {
+      "module": "tests.test_quick_notes",
+      "test_count": 9,
+      "seconds": 0.22409475012682378
+    },
+    {
+      "module": "tests.test_family_calendar_delivery_store",
+      "test_count": 11,
+      "seconds": 0.21804233908187598
+    },
+    {
+      "module": "tests.test_restart_cockpit",
+      "test_count": 4,
+      "seconds": 0.20954037795308977
+    },
+    {
+      "module": "tests.test_email_archive_browser",
+      "test_count": 14,
+      "seconds": 0.1569043176714331
+    },
+    {
+      "module": "tests.test_human_adam_images",
+      "test_count": 19,
+      "seconds": 0.14149314095266163
+    },
+    {
+      "module": "tests.test_github_quick_notes",
+      "test_count": 8,
+      "seconds": 0.12495946499984711
+    },
+    {
+      "module": "tests.test_github_urgent_reminders",
+      "test_count": 8,
+      "seconds": 0.11398791312240064
+    },
+    {
+      "module": "tests.test_janicka_r2_documents",
+      "test_count": 24,
+      "seconds": 0.10763687593862414
+    },
+    {
+      "module": "tests.test_family_calendar_delivery_launchctl_load",
+      "test_count": 9,
+      "seconds": 0.10235710185952485
+    },
+    {
+      "module": "tests.test_human_adam_workstream_threads",
+      "test_count": 12,
+      "seconds": 0.09935078176204115
+    },
+    {
+      "module": "tests.test_communication_session_hub",
+      "test_count": 18,
+      "seconds": 0.09080586582422256
+    },
+    {
+      "module": "tests.test_family_calendar_delivery_automation_preview",
+      "test_count": 5,
+      "seconds": 0.08964366291183978
+    },
+    {
+      "module": "tests.test_family_calendar_delivery_automatic",
+      "test_count": 7,
+      "seconds": 0.08833453594706953
+    },
+    {
+      "module": "tests.test_project_audit_report",
+      "test_count": 5,
+      "seconds": 0.08467417198698968
+    },
+    {
+      "module": "tests.test_speech_transcribe",
+      "test_count": 18,
+      "seconds": 0.08315368299372494
+    },
+    {
+      "module": "tests.test_family_calendar_delivery_launchctl_preview",
+      "test_count": 4,
+      "seconds": 0.07699447404593229
+    },
+    {
+      "module": "tests.test_development_semaphore",
+      "test_count": 7,
+      "seconds": 0.07435890892520547
+    },
+    {
+      "module": "tests.test_family_calendar_delivery_planner_install",
+      "test_count": 6,
+      "seconds": 0.061532855965197086
+    },
+    {
+      "module": "tests.test_family_calendar_delivery_test_email",
+      "test_count": 11,
+      "seconds": 0.05616964597720653
+    },
+    {
+      "module": "tests.test_family_calendar_delivery_integration",
+      "test_count": 4,
+      "seconds": 0.052022278076037765
+    },
+    {
+      "module": "tests.test_family_calendar",
+      "test_count": 15,
+      "seconds": 0.05080893891863525
+    },
+    {
+      "module": "tests.test_open_cockpit",
+      "test_count": 14,
+      "seconds": 0.044841923052445054
+    },
+    {
+      "module": "tests.test_email_outbound_tools",
+      "test_count": 6,
+      "seconds": 0.04480755317490548
+    },
+    {
+      "module": "tests.test_family_calendar_icloud_smtp_client",
+      "test_count": 8,
+      "seconds": 0.04385893198195845
+    },
+    {
+      "module": "tests.test_human_adam_service",
+      "test_count": 28,
+      "seconds": 0.04317226307466626
+    },
+    {
+      "module": "tests.test_family_calendar_delivery_dry_run",
+      "test_count": 9,
+      "seconds": 0.04209813196212053
+    },
+    {
+      "module": "tests.test_family_calendar_delivery_config",
+      "test_count": 16,
+      "seconds": 0.041984956013038754
+    },
+    {
+      "module": "tests.test_family_calendar_delivery_config_initializer",
+      "test_count": 11,
+      "seconds": 0.036180986324325204
+    },
+    {
+      "module": "tests.test_codex_appserver",
+      "test_count": 9,
+      "seconds": 0.03550294297747314
+    },
+    {
+      "module": "tests.test_human_adam_completion_status",
+      "test_count": 10,
+      "seconds": 0.03040382103063166
+    },
+    {
+      "module": "tests.test_email_work_outbox",
+      "test_count": 4,
+      "seconds": 0.0301385170314461
+    },
+    {
+      "module": "tests.test_family_calendar_delivery_readiness",
+      "test_count": 8,
+      "seconds": 0.02990370790939778
+    },
+    {
+      "module": "tests.test_family_calendar_delivery_keychain_setup",
+      "test_count": 8,
+      "seconds": 0.0297487418865785
+    },
+    {
+      "module": "tests.test_janicka_r2_chat",
+      "test_count": 10,
+      "seconds": 0.028500564862042665
+    },
+    {
+      "module": "tests.test_family_calendar_delivery_config_migration",
+      "test_count": 7,
+      "seconds": 0.027701276005245745
+    },
+    {
+      "module": "tests.test_deferred_integration",
+      "test_count": 8,
+      "seconds": 0.026440539048053324
+    },
+    {
+      "module": "tests.test_backup_incremental",
+      "test_count": 2,
+      "seconds": 0.024854518938809633
+    },
+    {
+      "module": "tests.test_local_appserver_runtime",
+      "test_count": 7,
+      "seconds": 0.023013110971078277
+    },
+    {
+      "module": "tests.test_backup_activity_state",
+      "test_count": 9,
+      "seconds": 0.022834038943983614
+    },
+    {
+      "module": "tests.test_family_calendar_delivery_config_migration_runner",
+      "test_count": 6,
+      "seconds": 0.020607484970241785
+    },
+    {
+      "module": "tests.test_cockpit_awake_mode",
+      "test_count": 10,
+      "seconds": 0.019800668000243604
+    },
+    {
+      "module": "tests.test_family_calendar_delivery_smtp_diagnostic",
+      "test_count": 6,
+      "seconds": 0.018688275944441557
+    },
+    {
+      "module": "tests.test_family_calendar_delivery_runner",
+      "test_count": 8,
+      "seconds": 0.018367255106568336
+    },
+    {
+      "module": "tests.test_human_adam_ui",
+      "test_count": 66,
+      "seconds": 0.018162515480071306
+    },
+    {
+      "module": "tests.test_reminders_query_tools",
+      "test_count": 8,
+      "seconds": 0.017635332886129618
+    },
+    {
+      "module": "tests.test_document_consistency_audit",
+      "test_count": 5,
+      "seconds": 0.017609350034035742
+    },
+    {
+      "module": "tests.test_family_calendar_delivery_smtp_envelope_diagnostic",
+      "test_count": 8,
+      "seconds": 0.016582736861892045
+    },
+    {
+      "module": "tests.test_janicka_r2_complete_selection",
+      "test_count": 6,
+      "seconds": 0.01654929295182228
+    },
+    {
+      "module": "tests.test_family_calendar_smtp_adapter",
+      "test_count": 6,
+      "seconds": 0.01463094085920602
+    },
+    {
+      "module": "tests.test_document_search_service",
+      "test_count": 6,
+      "seconds": 0.013362054130993783
+    },
+    {
+      "module": "tests.test_family_calendar_delivery_planner_preview",
+      "test_count": 4,
+      "seconds": 0.0132886478677392
+    },
+    {
+      "module": "tests.test_document_due_date_service",
+      "test_count": 4,
+      "seconds": 0.013012652052566409
+    },
+    {
+      "module": "tests.test_human_adam_workstream_memory",
+      "test_count": 7,
+      "seconds": 0.012149855843745172
+    },
+    {
+      "module": "tests.test_legacy_tvbcp_migration",
+      "test_count": 7,
+      "seconds": 0.010360212065279484
+    },
+    {
+      "module": "tests.test_family_calendar_delivery_keychain",
+      "test_count": 4,
+      "seconds": 0.00999071216210723
+    },
+    {
+      "module": "tests.test_codex_delivery_recovery",
+      "test_count": 2,
+      "seconds": 0.008937027072533965
+    },
+    {
+      "module": "tests.test_document_ai_metadata",
+      "test_count": 6,
+      "seconds": 0.008912569028325379
+    },
+    {
+      "module": "tests.test_document_review_service",
+      "test_count": 4,
+      "seconds": 0.008484359132125974
+    },
+    {
+      "module": "tests.test_janicka_r2_cockpit",
+      "test_count": 4,
+      "seconds": 0.007622468983754516
+    },
+    {
+      "module": "tests.test_document_intake_service",
+      "test_count": 3,
+      "seconds": 0.006512071937322617
+    },
+    {
+      "module": "tests.test_human_adam_workstream_catalog",
+      "test_count": 23,
+      "seconds": 0.006417550961486995
+    },
+    {
+      "module": "tests.test_document_case_service",
+      "test_count": 3,
+      "seconds": 0.005875236936844885
+    },
+    {
+      "module": "tests.test_codex_approval_state",
+      "test_count": 4,
+      "seconds": 0.005086218006908894
+    },
+    {
+      "module": "tests.test_migrate_cockpit_single_instance",
+      "test_count": 8,
+      "seconds": 0.005038216128014028
+    },
+    {
+      "module": "tests.test_trusted_external_generation",
+      "test_count": 3,
+      "seconds": 0.004438386880792677
+    },
+    {
+      "module": "tests.test_capability_audit",
+      "test_count": 1,
+      "seconds": 0.0039911880157887936
+    },
+    {
+      "module": "tests.test_codex_approval_cockpit_contract",
+      "test_count": 3,
+      "seconds": 0.0037404400063678622
+    },
+    {
+      "module": "tests.test_codex_session_report",
+      "test_count": 8,
+      "seconds": 0.0035800219047814608
+    },
+    {
+      "module": "tests.test_decision_cockpit",
+      "test_count": 6,
+      "seconds": 0.00334306713193655
+    },
+    {
+      "module": "tests.test_command_cheatsheet",
+      "test_count": 3,
+      "seconds": 0.0029840648639947176
+    },
+    {
+      "module": "tests.test_cockpit_fast_feedback",
+      "test_count": 9,
+      "seconds": 0.0028952289139851928
+    },
+    {
+      "module": "tests.test_mmtx_pages_deploy",
+      "test_count": 5,
+      "seconds": 0.002779924892820418
+    },
+    {
+      "module": "tests.test_workstream_live_status",
+      "test_count": 12,
+      "seconds": 0.0027117086574435234
+    },
+    {
+      "module": "tests.test_cockpit_server",
+      "test_count": 2,
+      "seconds": 0.0026334989815950394
+    },
+    {
+      "module": "tests.test_human_adam_workstream_selection",
+      "test_count": 5,
+      "seconds": 0.0024148478405550122
+    },
+    {
+      "module": "tests.test_urgent_reminder_shortcut",
+      "test_count": 5,
+      "seconds": 0.0023074549390003085
+    },
+    {
+      "module": "tests.test_human_adam_workstream_backends",
+      "test_count": 5,
+      "seconds": 0.0021410149056464434
+    },
+    {
+      "module": "tests.test_cockpit_readonly_routes",
+      "test_count": 4,
+      "seconds": 0.0020601488649845123
+    },
+    {
+      "module": "tests.test_capability_registry",
+      "test_count": 20,
+      "seconds": 0.0018328670412302017
+    },
+    {
+      "module": "tests.test_family_calendar_delivery",
+      "test_count": 10,
+      "seconds": 0.0016722379950806499
+    },
+    {
+      "module": "tests.test_quick_note_github_shortcut",
+      "test_count": 5,
+      "seconds": 0.0014567520702257752
+    },
+    {
+      "module": "tests.test_cockpit_status_service",
+      "test_count": 5,
+      "seconds": 0.0013627720763906837
+    },
+    {
+      "module": "tests.test_capability_runtime_policy",
+      "test_count": 4,
+      "seconds": 0.001016041962429881
+    },
+    {
+      "module": "tests.test_family_calendar_delivery_message",
+      "test_count": 5,
+      "seconds": 0.0008279128232970834
+    },
+    {
+      "module": "tests.test_capability_models",
+      "test_count": 6,
+      "seconds": 0.0007183888228610158
+    },
+    {
+      "module": "tests.test_document_intake_models",
+      "test_count": 5,
+      "seconds": 0.0006290889577940106
+    },
+    {
+      "module": "tests.test_email_work_models",
+      "test_count": 5,
+      "seconds": 0.0006247438723221421
+    },
+    {
+      "module": "tests.test_human_adam_operations",
+      "test_count": 9,
+      "seconds": 0.0006024570902809501
+    },
+    {
+      "module": "tests.test_human_adam_workstream_binding",
+      "test_count": 4,
+      "seconds": 0.0005960069829598069
+    },
+    {
+      "module": "tests.test_human_adam_turn_completion",
+      "test_count": 6,
+      "seconds": 0.00043003284372389317
+    },
+    {
+      "module": "tests.test_codex_appserver_shared_thread_probe",
+      "test_count": 2,
+      "seconds": 0.00018165505025535822
+    }
+  ],
+  "slowest_tests": [
+    {
+      "module": "tests.test_simple_main_deploy",
+      "test": "SimpleMainDeploymentTests.test_batch_mode_deploys_local_ahead_main_with_quick_gate",
+      "seconds": 13.839994241017848
+    },
+    {
+      "module": "tests.test_simple_main_deploy",
+      "test": "SimpleMainDeploymentTests.test_audit_accepts_clean_peer_behind_and_prepare_synchronizes_it",
+      "seconds": 13.678096089977771
+    },
+    {
+      "module": "tests.test_simple_main_checkpoint",
+      "test": "SimpleMainCheckpointTests.test_clean_peer_may_wait_behind_main_without_blocking_active_profile",
+      "seconds": 11.708395774941891
+    },
+    {
+      "module": "tests.test_simple_main_deploy",
+      "test": "SimpleMainDeploymentTests.test_verify_reuses_completed_proof_for_the_same_running_process",
+      "seconds": 10.150869381963275
+    },
+    {
+      "module": "tests.test_human_adam_takeover",
+      "test": "HumanAdamTakeoverTests.test_deferred_push_fast_forwards_local_main_while_origin_stays_behind",
+      "seconds": 9.180629511014558
+    },
+    {
+      "module": "tests.test_simple_main_deploy",
+      "test": "SimpleMainDeploymentTests.test_verify_keeps_pending_receipt_when_restart_or_smoke_evidence_fails",
+      "seconds": 8.997446225956082
+    },
+    {
+      "module": "tests.test_simple_main_deploy",
+      "test": "SimpleMainDeploymentTests.test_batch_mode_local_deploy_audit_survives_remote_divergence",
+      "seconds": 8.645563337020576
+    },
+    {
+      "module": "tests.test_simple_main_deploy",
+      "test": "SimpleMainDeploymentTests.test_verify_promotes_only_new_process_matching_stamp_and_smoke_five_of_five",
+      "seconds": 8.618029361008666
+    },
+    {
+      "module": "tests.test_simple_main_checkpoint",
+      "test": "SimpleMainCheckpointTests.test_failed_remote_batch_audit_does_not_block_next_local_checkpoint",
+      "seconds": 8.204840029007755
+    },
+    {
+      "module": "tests.test_simple_main_checkpoint",
+      "test": "SimpleMainCheckpointTests.test_small_tracked_deletion_completes_checkpoint",
+      "seconds": 8.128427271964028
+    },
+    {
+      "module": "tests.test_simple_main_checkpoint",
+      "test": "SimpleMainCheckpointTests.test_idempotent_retry_recovers_same_commit_without_second_commit",
+      "seconds": 8.034619759069756
+    },
+    {
+      "module": "tests.test_human_adam_takeover",
+      "test": "HumanAdamTakeoverTests.test_remote_divergence_does_not_block_another_deferred_local_takeover",
+      "seconds": 7.925079086096957
+    },
+    {
+      "module": "tests.test_simple_main_checkpoint",
+      "test": "SimpleMainCheckpointTests.test_public_media_anywhere_completes_simple_main_checkpoint",
+      "seconds": 7.652199361938983
+    },
+    {
+      "module": "tests.test_simple_main_deploy",
+      "test": "SimpleMainDeploymentTests.test_prepare_accepts_only_exact_clean_main_and_records_pending_restart",
+      "seconds": 7.52471405104734
+    },
+    {
+      "module": "tests.test_simple_main_checkpoint",
+      "test": "SimpleMainCheckpointTests.test_high_risk_batch_checkpoint_keeps_full_gate",
+      "seconds": 7.364952488918789
+    },
+    {
+      "module": "tests.test_simple_main_deploy",
+      "test": "SimpleMainDeploymentTests.test_prepare_rejects_remote_race_after_gate_without_writing_receipt",
+      "seconds": 7.338108359021135
+    },
+    {
+      "module": "tests.test_simple_main_checkpoint",
+      "test": "SimpleMainCheckpointTests.test_bulk_deletion_and_unsafe_memory_request_fail_before_checkpoint",
+      "seconds": 7.27547010499984
+    },
+    {
+      "module": "tests.test_simple_main_checkpoint",
+      "test": "SimpleMainCheckpointTests.test_completes_one_commit_on_main_without_creating_branch",
+      "seconds": 6.77595173206646
+    },
+    {
+      "module": "tests.test_simple_main_deploy",
+      "test": "SimpleMainDeploymentTests.test_audit_reports_exact_clean_main_without_creating_receipt",
+      "seconds": 6.434627924929373
+    },
+    {
+      "module": "tests.test_simple_main_checkpoint",
+      "test": "SimpleMainCheckpointTests.test_current_status_uses_safe_previous_deployment_snapshot",
+      "seconds": 6.419375650933944
+    },
+    {
+      "module": "tests.test_simple_main_checkpoint",
+      "test": "SimpleMainCheckpointTests.test_checkpoint_projects_live_evidence_into_semantic_sections",
+      "seconds": 6.358780182083137
+    },
+    {
+      "module": "tests.test_simple_main_checkpoint",
+      "test": "SimpleMainCheckpointTests.test_first_checkpoint_materializes_missing_canonical_memory_pair",
+      "seconds": 6.356252363999374
+    },
+    {
+      "module": "tests.test_document_vault_tools",
+      "test": "DocumentVaultToolsTests.test_scandocu_review_and_cockpit_metadata_update_share_primary_index_lock",
+      "seconds": 6.3227797949220985
+    },
+    {
+      "module": "tests.test_simple_main_deploy",
+      "test": "SimpleMainDeploymentTests.test_prepare_rejects_dirty_source_and_dirty_peer_before_receipt",
+      "seconds": 6.293895990937017
+    },
+    {
+      "module": "tests.test_simple_main_checkpoint",
+      "test": "SimpleMainCheckpointTests.test_daily_batch_checkpoint_uses_quick_gate_and_keeps_origin_behind",
+      "seconds": 6.072950770962052
+    },
+    {
+      "module": "tests.test_human_adam_takeover",
+      "test": "HumanAdamTakeoverTests.test_apply_requires_exact_confirmation_then_fast_forwards_and_pushes",
+      "seconds": 5.96951436100062
+    },
+    {
+      "module": "tests.test_simple_main_deploy",
+      "test": "SimpleMainDeploymentTests.test_failed_gate_does_not_prepare_restart",
+      "seconds": 5.964342201943509
+    },
+    {
+      "module": "tests.test_human_adam_takeover",
+      "test": "HumanAdamTakeoverTests.test_apply_reports_fast_forward_push_and_alignment_boundaries",
+      "seconds": 5.505904439953156
+    },
+    {
+      "module": "tests.test_human_adam_takeover",
+      "test": "HumanAdamTakeoverTests.test_audit_rejects_bulk_checkpoint_deletion",
+      "seconds": 5.412849443033338
+    },
+    {
+      "module": "tests.test_human_adam_takeover",
+      "test": "HumanAdamTakeoverTests.test_push_failure_never_fast_forwards_local_main",
+      "seconds": 5.4093934930861
+    }
+  ]
+}

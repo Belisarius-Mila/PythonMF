@@ -1,13 +1,15 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-13 22:15 CEST.
-- Roadmapa `AuditCockpit56_2.txt` je ve verzi 1.3. Lokálně oddělené hledání i generování dokumentové/nákupní čtečky.
+- Aktualizováno: 2026-09-13 22:42 CEST.
+- Roadmapa `AuditCockpit56_2.txt` je ve verzi 1.4. Lokálně oddělené hledání i generování dokumentové/nákupní čtečky.
 - Lokální `document_search.js` odděluje `searchDocuments` a vykreslování výsledků. Obě funkce zachované doslova; jediný export je hledání. Tisk, lifecycle, stav čtení a otevření čteček zůstávají původní předané obsluhy v `app.js`.
 - Hlavní `app.js` má 7 063 řádků místo 7 196; nový modul má 159 řádků. HTML/CSS, serverové služby a API beze změny.
 - Ověření: 49 cílených Python testů (32 + 17) prošlo, frontendová sada spouští i 8 nových Node kontraktů. Browser před/po 1440/390 px: shodné DOM, otevření dokumentu/nákupu, zrušení/potvrzení tisku, archive/trash, stav čtení a obnovení hledání; bez JS chyb. Jen syntetická data a nahrazené API, bez skutečného tisku/zápisů dokumentů.
 - Hledání (`674dc194`) ani navazující čtečky nejsou pushnuté ani nasazené; společná dávka výslovně odložená. Předchozí `document_review.js` a dokumentační main `97d608f7` byly samostatně pushnuté a nasazené; předchozí plná brána 1641/1641 není novým testem tohoto řezu. Pro tento běžný strukturální přesun cílené testy a statická brána.
-- Další krok: na samostatný pokyn společný push/nasazení obou lokálních řezů; čistý main napřed neblokuje další téma.
+- Třetí lokální krok přidává volitelné časování brány. Jedna aktuální plná brána 1649/1649 prošla; unit 426,38 s. Čtyři Git/workspace skupiny zabírají 73,5 % času. Bezpečný report a JSON v `memory/reports/cockpit_test_timings_2026_09_13.*`.
+- Další optimalizační pilot: dva nejpomalejší deploy testy, oddělit cenu přípravy od Git operací. Zatím návrh, bez změny testovacích prostředí nebo produkčních kontrol.
+- Společný push/nasazení všech tří lokálních kroků zůstává na samostatný pokyn; čistý main napřed neblokuje další téma.
 - Čtečky nyní generuje `cockpit_document_readers.py` (191 řádků); `cockpit.py` 11068 → 10892. Obě funkce přeneseny doslova, importovatelné názvy zachované; resolvery/HTTP/tiskové akce beze změny.
 - Ověření čteček: 40 cílených Python testů včetně 11 nových Node kontraktů návratů/tisku; šest variant HTML byte-shodných před/po. Pro tento přesun cílená a statická brána, nikoli nový běh plné brány.
 - Pro pozdější UI audit: hledání nemá pokračování za prvních 8 výsledků; Janiččina zkratka hledání sama nerozbaluje panel. Nákupní čtečka nemá náhradní návrat bez openeru. Nálezy z kódu, bez živé přejímky a bez oprav v těchto řezech.
@@ -665,3 +667,25 @@ Technický důkaz:
 - Byte shoda šesti variant HTML před/po (PDF, obrázek, prázdné vstupy, escapovaný název/URL, nákup a prázdný nákup). Těla obou funkcí a ostatní cockpit.py po odečtení importu shodné; žádné změny frontendových fingerprintů.
 - `cockpit.py` 11068 → 10892 řádků, nový `cockpit_document_readers.py` 191. Čistý renderer s importy pouze ze standardní knihovny; serverový code stamp automaticky zahrnuje všechny app/*.py moduly.
 - Jde o běžný přesun bez změny tiskové/persistenční logiky: cílené testy a statická brána, bez nového běhu plné brány a bez reálného tisku. Starší plná brána se nevydává za aktuální. Nový push/nasazení neprovedeny.
+
+### 2026-09-13 22:42 CEST — Změřené náklady celé testovací brány
+
+Hotovo:
+- Volitelné měření ukazuje časy jednotlivých testů a součty podle modulů. Výchozí brána i všechny její kontroly zachované.
+- Jedna plná brána 1649/1649 prošla. Čtyři Git/workspace skupiny: 88 testů, 313,32 s (73,5 % času); běh celé unittest sady 426,38 s.
+
+Rozhodnutí:
+- Míla schválil třetí lokální commit s měřením, jedním plným během a návrhem zrychlení. Žádné vyřazení testů, paralelizace ani obcházení release brány.
+
+Další krok:
+- Pro případný optimalizační pilot rozdělit dva nejpomalejší deploy testy na cenu přípravy a Git operací; až podle toho upravit izolované testovací prostředí.
+
+Navrhované další kroky:
+- Společný push/nasazení tří lokálních kroků až na samostatný pokyn; čistý main napřed neblokuje další téma.
+- Podle roadmapy dokončit společnou Mac/iPhone přejímku a potom navazující audit/UI.
+
+Technický důkaz:
+- Přepínač `--unit-test-timings PATH`, bezpečný JSON a report `cockpit_test_timings_2026_09_13.md`. 18 cílených testů, poté jedna plná brána 1649/1649, unit 426,384 s, podproces 429,7 s, importy 2,773 s. Žádné selhání ani skip.
+- Měřený test zahrnuje vlastní setUp/tearDown; ostatní společná příprava a režie explicitně zvlášť (0,071 s). Stejný manifest/pořadí, výsledky i návratové kódy.
+- Staticky potvrzené skutečné lokální Git repozitáře v pomalých testech a nahrazená gate/smoke. Podíl přípravy versus jednotlivých Git operací zatím není změřený; zrychlení se ještě neslibuje.
+- Kód/plná brána ověřené nad lokálním základem f1b41dc5 plus tento krok; následně pouze projektový zápis a statická kontrola. Push/nasazení zůstávají odložené.
