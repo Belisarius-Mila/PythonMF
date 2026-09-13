@@ -8,6 +8,7 @@ import unittest
 from pathlib import Path
 
 from app import cockpit
+from app import cockpit_document_readers
 from app.cockpit_frontend import (
     COCKPIT_HTML,
     EMAIL_ARCHIVE_HTML,
@@ -43,6 +44,24 @@ EXPECTED_PAGES = {
 
 
 class CockpitFrontendContractTests(unittest.TestCase):
+    def test_document_reader_pages_use_the_extracted_renderers(self) -> None:
+        self.assertIs(cockpit.document_reader_page_html, cockpit_document_readers.document_reader_page_html)
+        self.assertIs(cockpit.purchase_reader_page_html, cockpit_document_readers.purchase_reader_page_html)
+        source = Path(cockpit.__file__).read_text(encoding="utf-8")
+        self.assertNotIn("def document_reader_page_html(", source)
+        self.assertNotIn("def purchase_reader_page_html(", source)
+
+    def test_document_reader_frontend_behavior(self) -> None:
+        pages = {
+            "document": cockpit_document_readers.document_reader_page_html("docref-fixture", "Fixture document"),
+            "purchase": cockpit_document_readers.purchase_reader_page_html("purref-fixture", "Fixture purchase"),
+        }
+        result = subprocess.run(
+            [node_binary(), str(Path(__file__).with_name("document_reader_frontend.test.cjs"))],
+            input=json.dumps(pages), capture_output=True, text=True, timeout=30, check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
     def test_rendered_pages_keep_exact_pre_extraction_contract(self) -> None:
         for page_id, (rendered, length, line_count, expected_sha256) in EXPECTED_PAGES.items():
             with self.subTest(page_id=page_id):

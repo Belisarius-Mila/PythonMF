@@ -1,15 +1,16 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-13 22:00 CEST.
-- Roadmapa `AuditCockpit56_2.txt` je ve verzi 1.2. Dokončen read-only průzkum hledání/čtečky a schválený druhý frontendový řez.
+- Aktualizováno: 2026-09-13 22:15 CEST.
+- Roadmapa `AuditCockpit56_2.txt` je ve verzi 1.3. Lokálně oddělené hledání i generování dokumentové/nákupní čtečky.
 - Lokální `document_search.js` odděluje `searchDocuments` a vykreslování výsledků. Obě funkce zachované doslova; jediný export je hledání. Tisk, lifecycle, stav čtení a otevření čteček zůstávají původní předané obsluhy v `app.js`.
 - Hlavní `app.js` má 7 063 řádků místo 7 196; nový modul má 159 řádků. HTML/CSS, serverové služby a API beze změny.
 - Ověření: 49 cílených Python testů (32 + 17) prošlo, frontendová sada spouští i 8 nových Node kontraktů. Browser před/po 1440/390 px: shodné DOM, otevření dokumentu/nákupu, zrušení/potvrzení tisku, archive/trash, stav čtení a obnovení hledání; bez JS chyb. Jen syntetická data a nahrazené API, bez skutečného tisku/zápisů dokumentů.
-- Tento řez není pushnutý ani nasazený. Předchozí `document_review.js` a dokumentační main `97d608f7` byly samostatně pushnuté a nasazené; předchozí plná brána 1641/1641 není novým testem tohoto řezu. Pro tento běžný strukturální přesun cílené testy a statická brána.
-- Další krok: samostatně potvrdit push/nasazení nového řezu; následně běžná uživatelská přejímka.
-- Další strukturální kandidát: oddělit generování dokumentové/nákupní čtečky z `cockpit.py`; její tisk a sdílené vstupy posoudit jako vlastní rozsah.
-- Pro pozdější UI audit: hledání nemá pokračování za prvních 8 výsledků; Janiččina zkratka hledání sama nerozbaluje panel. Nálezy z kódu, bez živé přejímky a bez oprav v tomto řezu.
+- Hledání (`674dc194`) ani navazující čtečky nejsou pushnuté ani nasazené; společná dávka výslovně odložená. Předchozí `document_review.js` a dokumentační main `97d608f7` byly samostatně pushnuté a nasazené; předchozí plná brána 1641/1641 není novým testem tohoto řezu. Pro tento běžný strukturální přesun cílené testy a statická brána.
+- Další krok: na samostatný pokyn společný push/nasazení obou lokálních řezů; čistý main napřed neblokuje další téma.
+- Čtečky nyní generuje `cockpit_document_readers.py` (191 řádků); `cockpit.py` 11068 → 10892. Obě funkce přeneseny doslova, importovatelné názvy zachované; resolvery/HTTP/tiskové akce beze změny.
+- Ověření čteček: 40 cílených Python testů včetně 11 nových Node kontraktů návratů/tisku; šest variant HTML byte-shodných před/po. Pro tento přesun cílená a statická brána, nikoli nový běh plné brány.
+- Pro pozdější UI audit: hledání nemá pokračování za prvních 8 výsledků; Janiččina zkratka hledání sama nerozbaluje panel. Nákupní čtečka nemá náhradní návrat bez openeru. Nálezy z kódu, bez živé přejímky a bez oprav v těchto řezech.
 - Míla odložil zálohu na 14. 9. kvůli nedostupnému disku. Navazující audit a úprava UI mají přijít po strukturální etapě; Santiago je zatím jen zvažované téma.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -642,3 +643,25 @@ Technický důkaz:
 - Před/po browser 1440/390 px: shodné výsledkové DOM a přesné obsluhované reference/payloady, správné zrušení tisku i obnovení hledání po lifecycle/stavu; nulové JS chyby. Všechna API v testu nahrazená, včetně stávajícího startup intake monitoru; žádný reálný tisk ani práce se soukromými dokumenty.
 - Dvě původní funkce přenesené doslova (142 řádků); ostatní `app.js` po odečtení wiring bloku shodný, HTML/CSS shodné. App 7196 → 7063 řádků, nový modul 159. Hash celé složené stránky aktualizován až po této kontrole.
 - Push ani nasazení nového řezu neprovedeny. Neřeší stránkování, paralelní dotazy ani pozdější grafické změny; plná brána předchozího řezu se nevydává za současnou.
+
+### 2026-09-13 22:15 CEST — Generování obou čteček odděleno ze serveru
+
+Hotovo:
+- Dokumentová i nákupní čtečka mají samostatný modul pro generování stránky. Jejich vzhled, otevření, návraty a tisk zůstávají zachované.
+- `cockpit.py` je kratší o 176 řádků; souborové resolvery, HTTP odpovědi a tiskové endpointy zůstávají na původním místě.
+
+Rozhodnutí:
+- Míla schválil další lokální commit a odložení společného push/nasazení. Přenést obě funkce doslova a zachovat jejich původní importovatelné názvy přes `cockpit.py`.
+
+Další krok:
+- Na samostatný pokyn společně pushnout a nasadit hledání i čtečky; do té doby čistý main napřed neblokuje další téma.
+
+Navrhované další kroky:
+- Podle roadmapy změřit nákladné testovací skupiny a dokončit společnou Mac/iPhone přejímku.
+- Navazující audit a UI řešit odděleně; k dřívějším dvěma UI nálezům přibývá stávající návrat nákupní čtečky bez fallbacku při chybějícím openeru. Zachované chování, zde bez opravy.
+
+Technický důkaz:
+- 40 cílených Python testů (28 frontend/gate + 12 čtečka/soubory/tisk/URL), včetně 11 nových Node testů nad JS skutečně vygenerované dokumentové a nákupní stránky, vše OK. Testy používají syntetické reference a nahrazené transporty.
+- Byte shoda šesti variant HTML před/po (PDF, obrázek, prázdné vstupy, escapovaný název/URL, nákup a prázdný nákup). Těla obou funkcí a ostatní cockpit.py po odečtení importu shodné; žádné změny frontendových fingerprintů.
+- `cockpit.py` 11068 → 10892 řádků, nový `cockpit_document_readers.py` 191. Čistý renderer s importy pouze ze standardní knihovny; serverový code stamp automaticky zahrnuje všechny app/*.py moduly.
+- Jde o běžný přesun bez změny tiskové/persistenční logiky: cílené testy a statická brána, bez nového běhu plné brány a bez reálného tisku. Starší plná brána se nevydává za aktuální. Nový push/nasazení neprovedeny.

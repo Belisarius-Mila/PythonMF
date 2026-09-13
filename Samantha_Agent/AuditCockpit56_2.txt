@@ -1,7 +1,7 @@
 AUDIT COCKPITU 5.6 SOL – DRUHÝ PRŮCHOD
 ========================================
 
-Verze: 1.2
+Verze: 1.3
 Aktualizováno: 2026-09-13
 Datum auditu: 2026-08-16
 Autor posouzení: Adam / Codex 5.6 Sol
@@ -122,19 +122,39 @@ Mapa zbylých vazeb:
 - Vyhledávací backend už je samostatný search_service.py a sdílí jej R2.
 - Otevírání čtečky sdílí hledání, dokumentové případy a připomínky; e-mailové
   zpracování otevírá stejnou URL vlastní obsluhou.
-- Stránky čteček generuje cockpit.py (dokument 135, nákup 41 řádků).
-  Dokumentová čtečka obsahuje vlastní tiskový tok; přesun je samostatný krok.
+- Při mapování generoval stránky cockpit.py (dokument 135, nákup 41 řádků).
+  Následný samostatný přesun generování je dokončen v C3; vlastní tiskový
+  tok dokumentové čtečky zůstal zachovaný.
 - Pro pozdější UI audit: limit 8 bez nabídky dalších výsledků a Janiččina
   zkratka bez rozbalení documentsPanel; zatím statické nálezy, bez opravy.
+
+C3. TŘETÍ NAVAZUJÍCÍ ŘEZ – STRÁNKY ČTEČEK (LOKÁLNĚ)
+
+Na Mílův pokyn je generování dokumentové i nákupní čtečky oddělené do
+cockpit_document_readers.py. Přeneseny obě funkce doslova, zachované původní
+názvy dostupné přes import z cockpit.py. Žádná změna resolverů souborů,
+HTTP cest/odpovědí, tiskového backendu nebo výsledného HTML/CSS/JS.
+
+Důkazy: 40 cílených Python testů (28 + 12), včetně 11 Node kontraktů
+nad JS skutečně vygenerovaných stránek. Pokryty návraty s/bez openeru,
+zavření a fallback, zrušený/potvrzený tisk, selhání přípravy, sítě, JSON
+či tiskového transportu. Jen syntetické reference, bez reálného tisku.
+Šest variant HTML je před/po byte-shodných a původní těla funkcí zachovaná.
+Cockpit.py 11 068 → 10 892 řádků; nový modul 191. Hlavní frontendový hash
+beze změny. Cílené testy a statická brána, bez nového běhu plné brány.
+
+Hledání i čtečky zůstávají lokální, společný push/nasazení výslovně odložený.
+Pro pozdější UI audit doplněn stávající návrat nákupní čtečky: bez openeru
+nemá fallback na hlavní stránku. Tento přesun chování neopravuje.
 
 D. CO ZŮSTÁVÁ OTEVŘENÉ A V JAKÉM POŘADÍ
 
 1. Push a řízené nasazení dokumentového řezu jsou schválené a dokončené.
    Zbývá běžná uživatelská přejímka skutečného dokumentového panelu Mac/iPhone;
    syntetický UI test a provozní smoke ji nenahrazují.
-2. Mapa hledání/čtečky hotová, frontend hledání lokálně oddělen (C2).
-   Nejprve samostatně schválit jeho push/nasazení. Další strukturální krok:
-   oddělení stránek čtečky se zachováním tisku a sdílených vstupů.
+2. Mapa, oddělení hledání (C2) i generování čteček (C3) lokálně hotové.
+   Společný push/nasazení odložený na samostatný pokyn. Čistý main napřed
+   neblokuje další téma; další řezy volit podle konkrétní vazby.
 3. U testovací brány změřit nejdražší skupiny a skutečné důvody opakování.
    Zachovat plnou release bránu; rychlá kontrola již existuje.
    Nástroj pro kontrolovanou aktualizaci hashů není tímto řezem implementován.
