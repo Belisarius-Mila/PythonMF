@@ -1,0 +1,1988 @@
+{
+  "audit_date": "2026-09-14 11:41 CEST",
+  "base_commit": "10ec08770e05fc1821e512250455a52d549e49b9",
+  "scope": "Read-only code and synthetic browser audit; only report and project documentation written. No production UI/data mutations.",
+  "browser": "Microsoft Edge Chromium headless on Mac; mobile viewport emulation; all requests intercepted. Built-in browser unavailable.",
+  "fixtures": {
+    "quiet": "Zero queues; four empty input sources; successful synthetic status providers.",
+    "busy": "12 new PDFs, 8 review items, 3 problems, 12 unified intake items.",
+    "search": "12 synthetic results intentionally supplied to verify client rendering is not capped at eight. Real endpoint defaults to eight via backend; pagination mismatch established separately from source."
+  },
+  "inventory": {
+    "elements": 941,
+    "ids": 375,
+    "static_buttons": 145,
+    "modals": [
+      "emailHubModal",
+      "janickaModal",
+      "janickaFamilyModal",
+      "remindersModal",
+      "webAppsModal",
+      "libraryModal",
+      "libraryAttachmentViewerModal",
+      "familyCalendarModal",
+      "projectsModal",
+      "quickNotesModal",
+      "urgentRemindersModal",
+      "recoveryModal",
+      "commandCheatsheetModal",
+      "diagnosticsModal",
+      "quantitativeModal",
+      "projectAuditModal"
+    ],
+    "button_ids_without_any_js_reference": [],
+    "all_functions_exercised": false,
+    "html_utf8_bytes": 489159,
+    "frontend_modules": [
+      "health_recovery_autosave.js",
+      "codex_sessions.js",
+      "library_photos.js",
+      "document_review.js",
+      "document_search.js"
+    ],
+    "post_actions": 100,
+    "post_test_levels": {
+      "direct": 92,
+      "ui_presence": 5,
+      "indirect": 3
+    }
+  },
+  "source_metrics": {
+    "app/cockpit.py": {
+      "physical_lines": 10705,
+      "sha256": "587091133411a11d2bba8dc6e1141e185e2924b85f83f64dbde3f3d08085db44"
+    },
+    "app/frontend/cockpit/app.js": {
+      "physical_lines": 7063,
+      "sha256": "8c7e800cf16524212c59401876fa0ae5dfe9a94f01e7be046e8d45e861f220b4"
+    },
+    "app/frontend/cockpit/styles.css": {
+      "physical_lines": 410,
+      "sha256": "f6072c27dc83fc58ff09fd544f9e9e127a3891bb97d8bfd6dd5000e7a77e059c"
+    },
+    "app/frontend/cockpit/page.html": {
+      "physical_lines": 1218,
+      "sha256": "dd5ae3a95a1e1e96609e93141340ae94c7ea8620ac2e109f4b6ff19486cbe322"
+    },
+    "app/frontend/cockpit/document_search.js": {
+      "physical_lines": 159,
+      "sha256": "8f59103df7d6f1b85110b3199bfcaf42e6672a324c953aa8a0713f4a402ebdde"
+    },
+    "app/frontend/cockpit/document_review.js": {
+      "physical_lines": 142,
+      "sha256": "e0d69af7993c2008f223a18c841a86fd622d1f46dae2042967722d9b34c3ad36"
+    },
+    "app/cockpit_document_routes.py": {
+      "physical_lines": 130,
+      "sha256": "8eb91b365f1aa6ec804d1cbb19bc3178ccb110701cef000deaa387934d8dae3d"
+    },
+    "app/documents/search_service.py": {
+      "physical_lines": 412,
+      "sha256": "7fed01d3f02ea3e424535f97a25a0878ac003ea37edb6b77d1bbf5bacadc2e9b"
+    },
+    "app/cockpit_document_readers.py": {
+      "physical_lines": 191,
+      "sha256": "737f00011970ac8b85b40a4a202c4ab8871552837b54fde6d32bcea8bfcceb1b"
+    },
+    "app/communication/human_adam_ui.py": {
+      "physical_lines": 3355,
+      "sha256": "e2be10cb1a9fe7f3c13e41e1901758110a02ac838bc019da44cd07f5dbf825b3"
+    },
+    "app/frontend/email_archive/app.js": {
+      "physical_lines": 501,
+      "sha256": "0872cb16c27b48d50150012582ac39f43e99836940db19aeb2a40af1453aa913"
+    },
+    "app/frontend/email_archive/styles.css": {
+      "physical_lines": 508,
+      "sha256": "f0ed09ffada7f77ca316e38ee4ed9f3387823f8a2a28d61903cd500517b4d04d"
+    }
+  },
+  "scenarios": [
+    {
+      "width": 1440,
+      "height": 900,
+      "busy": false,
+      "home": {
+        "pageHeight": 1042,
+        "pageWidth": 1440,
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "header": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 54,
+          "bottom": 54
+        },
+        "toolbar": {
+          "x": 180,
+          "y": -14,
+          "width": 1240,
+          "height": 82,
+          "bottom": 68
+        },
+        "dashboard": {
+          "x": 20,
+          "y": 72,
+          "width": 1400,
+          "height": 372,
+          "bottom": 444
+        },
+        "documents": {
+          "x": 20,
+          "y": 724,
+          "width": 1400,
+          "height": 43,
+          "bottom": 767
+        },
+        "cards": [
+          {
+            "title": "Nová PDF ve Downloads za 7 dní",
+            "height": 196
+          },
+          {
+            "title": "Dokumenty k vyřešení",
+            "height": 196
+          },
+          {
+            "title": "Problémy",
+            "height": 196
+          },
+          {
+            "title": "Dokumentový intake",
+            "height": 408
+          },
+          {
+            "title": "Termíny v dokumentech",
+            "height": 408
+          },
+          {
+            "title": "Související dokumenty",
+            "height": 408
+          }
+        ],
+        "searchTop": 857,
+        "service": {
+          "x": 20,
+          "y": 957,
+          "width": 1400,
+          "height": 43,
+          "bottom": 1000
+        },
+        "visibleButtons": 16
+      },
+      "documents": {
+        "pageHeight": 1764,
+        "pageWidth": 1440,
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "header": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 54,
+          "bottom": 54
+        },
+        "toolbar": {
+          "x": 180,
+          "y": -14,
+          "width": 1240,
+          "height": 82,
+          "bottom": 68
+        },
+        "dashboard": {
+          "x": 20,
+          "y": 72,
+          "width": 1400,
+          "height": 372,
+          "bottom": 444
+        },
+        "documents": {
+          "x": 20,
+          "y": 724,
+          "width": 1400,
+          "height": 765,
+          "bottom": 1489
+        },
+        "cards": [
+          {
+            "title": "Nová PDF ve Downloads za 7 dní",
+            "height": 196
+          },
+          {
+            "title": "Dokumenty k vyřešení",
+            "height": 196
+          },
+          {
+            "title": "Problémy",
+            "height": 196
+          },
+          {
+            "title": "Dokumentový intake",
+            "height": 408
+          },
+          {
+            "title": "Termíny v dokumentech",
+            "height": 408
+          },
+          {
+            "title": "Související dokumenty",
+            "height": 408
+          }
+        ],
+        "searchTop": 1579,
+        "service": {
+          "x": 20,
+          "y": 1679,
+          "width": 1400,
+          "height": 43,
+          "bottom": 1722
+        },
+        "visibleButtons": 20
+      },
+      "service": {
+        "pageHeight": 4202,
+        "pageWidth": 1440,
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "header": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 54,
+          "bottom": 54
+        },
+        "toolbar": {
+          "x": 180,
+          "y": -14,
+          "width": 1240,
+          "height": 82,
+          "bottom": 68
+        },
+        "dashboard": {
+          "x": 20,
+          "y": 72,
+          "width": 1400,
+          "height": 372,
+          "bottom": 444
+        },
+        "documents": {
+          "x": 20,
+          "y": 724,
+          "width": 1400,
+          "height": 765,
+          "bottom": 1489
+        },
+        "cards": [
+          {
+            "title": "Nová PDF ve Downloads za 7 dní",
+            "height": 196
+          },
+          {
+            "title": "Dokumenty k vyřešení",
+            "height": 196
+          },
+          {
+            "title": "Problémy",
+            "height": 196
+          },
+          {
+            "title": "Dokumentový intake",
+            "height": 408
+          },
+          {
+            "title": "Termíny v dokumentech",
+            "height": 408
+          },
+          {
+            "title": "Související dokumenty",
+            "height": 408
+          }
+        ],
+        "searchTop": 1579,
+        "service": {
+          "x": 20,
+          "y": 2474,
+          "width": 1400,
+          "height": 1685,
+          "bottom": 4160
+        },
+        "visibleButtons": 65
+      },
+      "feedback": {
+        "textPresent": true,
+        "visible": false,
+        "insideClosedService": true
+      },
+      "search": {
+        "returned": 12,
+        "rendered": 12,
+        "status": "",
+        "hasMoreControl": false
+      },
+      "modalFocusAtOpen": {
+        "id": "emailProcessingBtn",
+        "inModal": false
+      },
+      "modalFocusAfterTab": {
+        "id": "",
+        "inModal": false
+      },
+      "requests": [
+        {
+          "path": "/",
+          "method": "GET"
+        },
+        {
+          "path": "/api/server/health",
+          "method": "GET"
+        },
+        {
+          "path": "/api/recovery/status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/cockpit/awake-mode",
+          "method": "GET"
+        },
+        {
+          "path": "/api/live-status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/quick-notes/status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/decision-status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/projects/status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/quantitative-status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/consistency-status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/urgent-reminders/status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/intake-email-scan",
+          "method": "POST"
+        },
+        {
+          "path": "/api/documents/review-report",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "method": "GET"
+        },
+        {
+          "path": "/api/live-status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/cockpit/awake-mode",
+          "method": "GET"
+        },
+        {
+          "path": "/api/quick-notes/status",
+          "method": "GET"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "busy": false,
+      "home": {
+        "pageHeight": 1380,
+        "pageWidth": 1024,
+        "viewport": {
+          "width": 1024,
+          "height": 768
+        },
+        "header": {
+          "x": 0,
+          "y": 0,
+          "width": 1024,
+          "height": 54,
+          "bottom": 54
+        },
+        "toolbar": {
+          "x": 132,
+          "y": -14,
+          "width": 872,
+          "height": 82,
+          "bottom": 68
+        },
+        "dashboard": {
+          "x": 20,
+          "y": 72,
+          "width": 984,
+          "height": 710,
+          "bottom": 782
+        },
+        "documents": {
+          "x": 20,
+          "y": 1062,
+          "width": 984,
+          "height": 43,
+          "bottom": 1105
+        },
+        "cards": [
+          {
+            "title": "Nová PDF ve Downloads za 7 dní",
+            "height": 196
+          },
+          {
+            "title": "Dokumenty k vyřešení",
+            "height": 196
+          },
+          {
+            "title": "Problémy",
+            "height": 196
+          },
+          {
+            "title": "Dokumentový intake",
+            "height": 379
+          },
+          {
+            "title": "Termíny v dokumentech",
+            "height": 196
+          },
+          {
+            "title": "Související dokumenty",
+            "height": 196
+          }
+        ],
+        "searchTop": 1195,
+        "service": {
+          "x": 20,
+          "y": 1295,
+          "width": 984,
+          "height": 43,
+          "bottom": 1338
+        },
+        "visibleButtons": 16
+      },
+      "documents": {
+        "pageHeight": 2905,
+        "pageWidth": 1024,
+        "viewport": {
+          "width": 1024,
+          "height": 768
+        },
+        "header": {
+          "x": 0,
+          "y": 0,
+          "width": 1024,
+          "height": 54,
+          "bottom": 54
+        },
+        "toolbar": {
+          "x": 132,
+          "y": -14,
+          "width": 872,
+          "height": 82,
+          "bottom": 68
+        },
+        "dashboard": {
+          "x": 20,
+          "y": 72,
+          "width": 984,
+          "height": 710,
+          "bottom": 782
+        },
+        "documents": {
+          "x": 20,
+          "y": 1062,
+          "width": 984,
+          "height": 1568,
+          "bottom": 2630
+        },
+        "cards": [
+          {
+            "title": "Nová PDF ve Downloads za 7 dní",
+            "height": 196
+          },
+          {
+            "title": "Dokumenty k vyřešení",
+            "height": 196
+          },
+          {
+            "title": "Problémy",
+            "height": 196
+          },
+          {
+            "title": "Dokumentový intake",
+            "height": 379
+          },
+          {
+            "title": "Termíny v dokumentech",
+            "height": 196
+          },
+          {
+            "title": "Související dokumenty",
+            "height": 196
+          }
+        ],
+        "searchTop": 2720,
+        "service": {
+          "x": 20,
+          "y": 2820,
+          "width": 984,
+          "height": 43,
+          "bottom": 2863
+        },
+        "visibleButtons": 20
+      },
+      "service": {
+        "pageHeight": 5343,
+        "pageWidth": 1024,
+        "viewport": {
+          "width": 1024,
+          "height": 768
+        },
+        "header": {
+          "x": 0,
+          "y": 0,
+          "width": 1024,
+          "height": 54,
+          "bottom": 54
+        },
+        "toolbar": {
+          "x": 132,
+          "y": -14,
+          "width": 872,
+          "height": 82,
+          "bottom": 68
+        },
+        "dashboard": {
+          "x": 20,
+          "y": 72,
+          "width": 984,
+          "height": 710,
+          "bottom": 782
+        },
+        "documents": {
+          "x": 20,
+          "y": 1062,
+          "width": 984,
+          "height": 1568,
+          "bottom": 2630
+        },
+        "cards": [
+          {
+            "title": "Nová PDF ve Downloads za 7 dní",
+            "height": 196
+          },
+          {
+            "title": "Dokumenty k vyřešení",
+            "height": 196
+          },
+          {
+            "title": "Problémy",
+            "height": 196
+          },
+          {
+            "title": "Dokumentový intake",
+            "height": 379
+          },
+          {
+            "title": "Termíny v dokumentech",
+            "height": 196
+          },
+          {
+            "title": "Související dokumenty",
+            "height": 196
+          }
+        ],
+        "searchTop": 2720,
+        "service": {
+          "x": 20,
+          "y": 3615,
+          "width": 984,
+          "height": 1685,
+          "bottom": 5301
+        },
+        "visibleButtons": 65
+      },
+      "feedback": {
+        "textPresent": true,
+        "visible": false,
+        "insideClosedService": true
+      },
+      "search": {
+        "returned": 12,
+        "rendered": 12,
+        "status": "",
+        "hasMoreControl": false
+      },
+      "modalFocusAtOpen": {
+        "id": "emailProcessingBtn",
+        "inModal": false
+      },
+      "modalFocusAfterTab": {
+        "id": "",
+        "inModal": false
+      },
+      "requests": [
+        {
+          "path": "/",
+          "method": "GET"
+        },
+        {
+          "path": "/api/server/health",
+          "method": "GET"
+        },
+        {
+          "path": "/api/recovery/status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/cockpit/awake-mode",
+          "method": "GET"
+        },
+        {
+          "path": "/api/live-status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/quick-notes/status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/decision-status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/projects/status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/quantitative-status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/consistency-status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/urgent-reminders/status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/intake-email-scan",
+          "method": "POST"
+        },
+        {
+          "path": "/api/documents/review-report",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "method": "GET"
+        },
+        {
+          "path": "/api/live-status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/cockpit/awake-mode",
+          "method": "GET"
+        },
+        {
+          "path": "/api/quick-notes/status",
+          "method": "GET"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "busy": false,
+      "home": {
+        "pageHeight": 1915,
+        "pageWidth": 390,
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "header": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 276,
+          "bottom": 276
+        },
+        "toolbar": {
+          "x": 16,
+          "y": 44,
+          "width": 358,
+          "height": 220,
+          "bottom": 264
+        },
+        "dashboard": {
+          "x": 20,
+          "y": 294,
+          "width": 350,
+          "height": 961,
+          "bottom": 1255
+        },
+        "documents": {
+          "x": 20,
+          "y": 1551,
+          "width": 350,
+          "height": 43,
+          "bottom": 1594
+        },
+        "cards": [
+          {
+            "title": "Nová PDF ve Downloads za 7 dní",
+            "height": 196
+          },
+          {
+            "title": "Dokumenty k vyřešení",
+            "height": 196
+          },
+          {
+            "title": "Problémy",
+            "height": 196
+          },
+          {
+            "title": "Dokumentový intake",
+            "height": 424
+          },
+          {
+            "title": "Termíny v dokumentech",
+            "height": 196
+          },
+          {
+            "title": "Související dokumenty",
+            "height": 196
+          }
+        ],
+        "searchTop": 1684,
+        "service": {
+          "x": 20,
+          "y": 1830,
+          "width": 350,
+          "height": 43,
+          "bottom": 1873
+        },
+        "visibleButtons": 16
+      },
+      "documents": {
+        "pageHeight": 3529,
+        "pageWidth": 390,
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "header": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 276,
+          "bottom": 276
+        },
+        "toolbar": {
+          "x": 16,
+          "y": 44,
+          "width": 358,
+          "height": 220,
+          "bottom": 264
+        },
+        "dashboard": {
+          "x": 20,
+          "y": 294,
+          "width": 350,
+          "height": 961,
+          "bottom": 1255
+        },
+        "documents": {
+          "x": 20,
+          "y": 1551,
+          "width": 350,
+          "height": 1657,
+          "bottom": 3208
+        },
+        "cards": [
+          {
+            "title": "Nová PDF ve Downloads za 7 dní",
+            "height": 196
+          },
+          {
+            "title": "Dokumenty k vyřešení",
+            "height": 196
+          },
+          {
+            "title": "Problémy",
+            "height": 196
+          },
+          {
+            "title": "Dokumentový intake",
+            "height": 424
+          },
+          {
+            "title": "Termíny v dokumentech",
+            "height": 196
+          },
+          {
+            "title": "Související dokumenty",
+            "height": 196
+          }
+        ],
+        "searchTop": 3298,
+        "service": {
+          "x": 20,
+          "y": 3444,
+          "width": 350,
+          "height": 43,
+          "bottom": 3487
+        },
+        "visibleButtons": 20
+      },
+      "service": {
+        "pageHeight": 7515,
+        "pageWidth": 390,
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "header": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 276,
+          "bottom": 276
+        },
+        "toolbar": {
+          "x": 16,
+          "y": 44,
+          "width": 358,
+          "height": 220,
+          "bottom": 264
+        },
+        "dashboard": {
+          "x": 20,
+          "y": 294,
+          "width": 350,
+          "height": 961,
+          "bottom": 1255
+        },
+        "documents": {
+          "x": 20,
+          "y": 1551,
+          "width": 350,
+          "height": 1657,
+          "bottom": 3208
+        },
+        "cards": [
+          {
+            "title": "Nová PDF ve Downloads za 7 dní",
+            "height": 196
+          },
+          {
+            "title": "Dokumenty k vyřešení",
+            "height": 196
+          },
+          {
+            "title": "Problémy",
+            "height": 196
+          },
+          {
+            "title": "Dokumentový intake",
+            "height": 424
+          },
+          {
+            "title": "Termíny v dokumentech",
+            "height": 196
+          },
+          {
+            "title": "Související dokumenty",
+            "height": 196
+          }
+        ],
+        "searchTop": 3298,
+        "service": {
+          "x": 20,
+          "y": 4935,
+          "width": 350,
+          "height": 2538,
+          "bottom": 7473
+        },
+        "visibleButtons": 65
+      },
+      "feedback": {
+        "textPresent": true,
+        "visible": false,
+        "insideClosedService": true
+      },
+      "search": {
+        "returned": 12,
+        "rendered": 12,
+        "status": "",
+        "hasMoreControl": false
+      },
+      "modalFocusAtOpen": {
+        "id": "emailProcessingBtn",
+        "inModal": false
+      },
+      "modalFocusAfterTab": {
+        "id": "",
+        "inModal": false
+      },
+      "requests": [
+        {
+          "path": "/",
+          "method": "GET"
+        },
+        {
+          "path": "/api/server/health",
+          "method": "GET"
+        },
+        {
+          "path": "/api/recovery/status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/cockpit/awake-mode",
+          "method": "GET"
+        },
+        {
+          "path": "/api/live-status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/quick-notes/status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/decision-status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/projects/status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/quantitative-status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/consistency-status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/intake-email-scan",
+          "method": "POST"
+        },
+        {
+          "path": "/api/urgent-reminders/status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/review-report",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "method": "GET"
+        },
+        {
+          "path": "/api/live-status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/cockpit/awake-mode",
+          "method": "GET"
+        },
+        {
+          "path": "/api/quick-notes/status",
+          "method": "GET"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "width": 320,
+      "height": 780,
+      "busy": false,
+      "home": {
+        "pageHeight": 1963,
+        "pageWidth": 320,
+        "viewport": {
+          "width": 320,
+          "height": 780
+        },
+        "header": {
+          "x": 0,
+          "y": 0,
+          "width": 320,
+          "height": 276,
+          "bottom": 276
+        },
+        "toolbar": {
+          "x": 16,
+          "y": 44,
+          "width": 288,
+          "height": 220,
+          "bottom": 264
+        },
+        "dashboard": {
+          "x": 20,
+          "y": 294,
+          "width": 280,
+          "height": 1009,
+          "bottom": 1303
+        },
+        "documents": {
+          "x": 20,
+          "y": 1599,
+          "width": 280,
+          "height": 43,
+          "bottom": 1642
+        },
+        "cards": [
+          {
+            "title": "Nová PDF ve Downloads za 7 dní",
+            "height": 196
+          },
+          {
+            "title": "Dokumenty k vyřešení",
+            "height": 205
+          },
+          {
+            "title": "Problémy",
+            "height": 196
+          },
+          {
+            "title": "Dokumentový intake",
+            "height": 482
+          },
+          {
+            "title": "Termíny v dokumentech",
+            "height": 196
+          },
+          {
+            "title": "Související dokumenty",
+            "height": 196
+          }
+        ],
+        "searchTop": 1732,
+        "service": {
+          "x": 20,
+          "y": 1878,
+          "width": 280,
+          "height": 43,
+          "bottom": 1921
+        },
+        "visibleButtons": 16
+      },
+      "documents": {
+        "pageHeight": 3642,
+        "pageWidth": 320,
+        "viewport": {
+          "width": 320,
+          "height": 780
+        },
+        "header": {
+          "x": 0,
+          "y": 0,
+          "width": 320,
+          "height": 276,
+          "bottom": 276
+        },
+        "toolbar": {
+          "x": 16,
+          "y": 44,
+          "width": 288,
+          "height": 220,
+          "bottom": 264
+        },
+        "dashboard": {
+          "x": 20,
+          "y": 294,
+          "width": 280,
+          "height": 1009,
+          "bottom": 1303
+        },
+        "documents": {
+          "x": 20,
+          "y": 1599,
+          "width": 280,
+          "height": 1722,
+          "bottom": 3321
+        },
+        "cards": [
+          {
+            "title": "Nová PDF ve Downloads za 7 dní",
+            "height": 196
+          },
+          {
+            "title": "Dokumenty k vyřešení",
+            "height": 203
+          },
+          {
+            "title": "Problémy",
+            "height": 196
+          },
+          {
+            "title": "Dokumentový intake",
+            "height": 482
+          },
+          {
+            "title": "Termíny v dokumentech",
+            "height": 196
+          },
+          {
+            "title": "Související dokumenty",
+            "height": 196
+          }
+        ],
+        "searchTop": 3411,
+        "service": {
+          "x": 20,
+          "y": 3557,
+          "width": 280,
+          "height": 43,
+          "bottom": 3600
+        },
+        "visibleButtons": 20
+      },
+      "service": {
+        "pageHeight": 7766,
+        "pageWidth": 320,
+        "viewport": {
+          "width": 320,
+          "height": 780
+        },
+        "header": {
+          "x": 0,
+          "y": 0,
+          "width": 320,
+          "height": 276,
+          "bottom": 276
+        },
+        "toolbar": {
+          "x": 16,
+          "y": 44,
+          "width": 288,
+          "height": 220,
+          "bottom": 264
+        },
+        "dashboard": {
+          "x": 20,
+          "y": 294,
+          "width": 280,
+          "height": 1009,
+          "bottom": 1303
+        },
+        "documents": {
+          "x": 20,
+          "y": 1599,
+          "width": 280,
+          "height": 1722,
+          "bottom": 3321
+        },
+        "cards": [
+          {
+            "title": "Nová PDF ve Downloads za 7 dní",
+            "height": 196
+          },
+          {
+            "title": "Dokumenty k vyřešení",
+            "height": 203
+          },
+          {
+            "title": "Problémy",
+            "height": 196
+          },
+          {
+            "title": "Dokumentový intake",
+            "height": 482
+          },
+          {
+            "title": "Termíny v dokumentech",
+            "height": 196
+          },
+          {
+            "title": "Související dokumenty",
+            "height": 196
+          }
+        ],
+        "searchTop": 3411,
+        "service": {
+          "x": 20,
+          "y": 5048,
+          "width": 280,
+          "height": 2676,
+          "bottom": 7724
+        },
+        "visibleButtons": 65
+      },
+      "feedback": {
+        "textPresent": true,
+        "visible": false,
+        "insideClosedService": true
+      },
+      "search": {
+        "returned": 12,
+        "rendered": 12,
+        "status": "",
+        "hasMoreControl": false
+      },
+      "modalFocusAtOpen": {
+        "id": "emailProcessingBtn",
+        "inModal": false
+      },
+      "modalFocusAfterTab": {
+        "id": "",
+        "inModal": false
+      },
+      "requests": [
+        {
+          "path": "/",
+          "method": "GET"
+        },
+        {
+          "path": "/api/server/health",
+          "method": "GET"
+        },
+        {
+          "path": "/api/recovery/status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/cockpit/awake-mode",
+          "method": "GET"
+        },
+        {
+          "path": "/api/live-status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/quick-notes/status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/decision-status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/projects/status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/quantitative-status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/consistency-status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/urgent-reminders/status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/intake-email-scan",
+          "method": "POST"
+        },
+        {
+          "path": "/api/documents/review-report",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "method": "GET"
+        },
+        {
+          "path": "/api/live-status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/cockpit/awake-mode",
+          "method": "GET"
+        },
+        {
+          "path": "/api/quick-notes/status",
+          "method": "GET"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "busy": true,
+      "home": {
+        "pageHeight": 1168,
+        "pageWidth": 1440,
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "header": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 54,
+          "bottom": 54
+        },
+        "toolbar": {
+          "x": 180,
+          "y": -14,
+          "width": 1240,
+          "height": 82,
+          "bottom": 68
+        },
+        "dashboard": {
+          "x": 20,
+          "y": 72,
+          "width": 1400,
+          "height": 388,
+          "bottom": 460
+        },
+        "documents": {
+          "x": 20,
+          "y": 850,
+          "width": 1400,
+          "height": 43,
+          "bottom": 893
+        },
+        "cards": [
+          {
+            "title": "Nová PDF ve Downloads za 7 dní",
+            "height": 357
+          },
+          {
+            "title": "Dokumenty k vyřešení",
+            "height": 357
+          },
+          {
+            "title": "Problémy",
+            "height": 357
+          },
+          {
+            "title": "Dokumentový intake",
+            "height": 1501
+          },
+          {
+            "title": "Termíny v dokumentech",
+            "height": 1501
+          },
+          {
+            "title": "Související dokumenty",
+            "height": 1501
+          }
+        ],
+        "searchTop": 983,
+        "service": {
+          "x": 20,
+          "y": 1083,
+          "width": 1400,
+          "height": 43,
+          "bottom": 1126
+        },
+        "visibleButtons": 16
+      },
+      "documents": {
+        "pageHeight": 3320,
+        "pageWidth": 1440,
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "header": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 54,
+          "bottom": 54
+        },
+        "toolbar": {
+          "x": 180,
+          "y": -14,
+          "width": 1240,
+          "height": 82,
+          "bottom": 68
+        },
+        "dashboard": {
+          "x": 20,
+          "y": 72,
+          "width": 1400,
+          "height": 388,
+          "bottom": 460
+        },
+        "documents": {
+          "x": 20,
+          "y": 850,
+          "width": 1400,
+          "height": 2195,
+          "bottom": 3045
+        },
+        "cards": [
+          {
+            "title": "Nová PDF ve Downloads za 7 dní",
+            "height": 533
+          },
+          {
+            "title": "Dokumenty k vyřešení",
+            "height": 533
+          },
+          {
+            "title": "Problémy",
+            "height": 533
+          },
+          {
+            "title": "Dokumentový intake",
+            "height": 1501
+          },
+          {
+            "title": "Termíny v dokumentech",
+            "height": 1501
+          },
+          {
+            "title": "Související dokumenty",
+            "height": 1501
+          }
+        ],
+        "searchTop": 3135,
+        "service": {
+          "x": 20,
+          "y": 3235,
+          "width": 1400,
+          "height": 43,
+          "bottom": 3278
+        },
+        "visibleButtons": 40
+      },
+      "service": {
+        "pageHeight": 6061,
+        "pageWidth": 1440,
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "header": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 54,
+          "bottom": 54
+        },
+        "toolbar": {
+          "x": 180,
+          "y": -14,
+          "width": 1240,
+          "height": 82,
+          "bottom": 68
+        },
+        "dashboard": {
+          "x": 20,
+          "y": 72,
+          "width": 1400,
+          "height": 388,
+          "bottom": 460
+        },
+        "documents": {
+          "x": 20,
+          "y": 850,
+          "width": 1400,
+          "height": 2195,
+          "bottom": 3045
+        },
+        "cards": [
+          {
+            "title": "Nová PDF ve Downloads za 7 dní",
+            "height": 533
+          },
+          {
+            "title": "Dokumenty k vyřešení",
+            "height": 533
+          },
+          {
+            "title": "Problémy",
+            "height": 533
+          },
+          {
+            "title": "Dokumentový intake",
+            "height": 1501
+          },
+          {
+            "title": "Termíny v dokumentech",
+            "height": 1501
+          },
+          {
+            "title": "Související dokumenty",
+            "height": 1501
+          }
+        ],
+        "searchTop": 3135,
+        "service": {
+          "x": 20,
+          "y": 4030,
+          "width": 1400,
+          "height": 1989,
+          "bottom": 6019
+        },
+        "visibleButtons": 85
+      },
+      "feedback": {
+        "textPresent": true,
+        "visible": false,
+        "insideClosedService": true
+      },
+      "search": {
+        "returned": 12,
+        "rendered": 12,
+        "status": "",
+        "hasMoreControl": false
+      },
+      "modalFocusAtOpen": {
+        "id": "emailProcessingBtn",
+        "inModal": false
+      },
+      "modalFocusAfterTab": {
+        "id": "",
+        "inModal": false
+      },
+      "requests": [
+        {
+          "path": "/",
+          "method": "GET"
+        },
+        {
+          "path": "/api/server/health",
+          "method": "GET"
+        },
+        {
+          "path": "/api/recovery/status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/cockpit/awake-mode",
+          "method": "GET"
+        },
+        {
+          "path": "/api/live-status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/quick-notes/status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/decision-status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/projects/status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/quantitative-status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/consistency-status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/urgent-reminders/status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/intake-email-scan",
+          "method": "POST"
+        },
+        {
+          "path": "/api/documents/review-report",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "method": "GET"
+        },
+        {
+          "path": "/api/live-status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/cockpit/awake-mode",
+          "method": "GET"
+        },
+        {
+          "path": "/api/quick-notes/status",
+          "method": "GET"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "busy": true,
+      "home": {
+        "pageHeight": 2041,
+        "pageWidth": 390,
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "header": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 276,
+          "bottom": 276
+        },
+        "toolbar": {
+          "x": 16,
+          "y": 44,
+          "width": 358,
+          "height": 220,
+          "bottom": 264
+        },
+        "dashboard": {
+          "x": 20,
+          "y": 294,
+          "width": 350,
+          "height": 993,
+          "bottom": 1287
+        },
+        "documents": {
+          "x": 20,
+          "y": 1677,
+          "width": 350,
+          "height": 43,
+          "bottom": 1720
+        },
+        "cards": [
+          {
+            "title": "Nová PDF ve Downloads za 7 dní",
+            "height": 357
+          },
+          {
+            "title": "Dokumenty k vyřešení",
+            "height": 196
+          },
+          {
+            "title": "Problémy",
+            "height": 235
+          },
+          {
+            "title": "Dokumentový intake",
+            "height": 1517
+          },
+          {
+            "title": "Termíny v dokumentech",
+            "height": 196
+          },
+          {
+            "title": "Související dokumenty",
+            "height": 196
+          }
+        ],
+        "searchTop": 1810,
+        "service": {
+          "x": 20,
+          "y": 1956,
+          "width": 350,
+          "height": 43,
+          "bottom": 1999
+        },
+        "visibleButtons": 16
+      },
+      "documents": {
+        "pageHeight": 5285,
+        "pageWidth": 390,
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "header": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 276,
+          "bottom": 276
+        },
+        "toolbar": {
+          "x": 16,
+          "y": 44,
+          "width": 358,
+          "height": 220,
+          "bottom": 264
+        },
+        "dashboard": {
+          "x": 20,
+          "y": 294,
+          "width": 350,
+          "height": 993,
+          "bottom": 1287
+        },
+        "documents": {
+          "x": 20,
+          "y": 1677,
+          "width": 350,
+          "height": 3287,
+          "bottom": 4964
+        },
+        "cards": [
+          {
+            "title": "Nová PDF ve Downloads za 7 dní",
+            "height": 357
+          },
+          {
+            "title": "Dokumenty k vyřešení",
+            "height": 533
+          },
+          {
+            "title": "Problémy",
+            "height": 235
+          },
+          {
+            "title": "Dokumentový intake",
+            "height": 1517
+          },
+          {
+            "title": "Termíny v dokumentech",
+            "height": 196
+          },
+          {
+            "title": "Související dokumenty",
+            "height": 196
+          }
+        ],
+        "searchTop": 5054,
+        "service": {
+          "x": 20,
+          "y": 5200,
+          "width": 350,
+          "height": 43,
+          "bottom": 5243
+        },
+        "visibleButtons": 40
+      },
+      "service": {
+        "pageHeight": 9634,
+        "pageWidth": 390,
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "header": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 276,
+          "bottom": 276
+        },
+        "toolbar": {
+          "x": 16,
+          "y": 44,
+          "width": 358,
+          "height": 220,
+          "bottom": 264
+        },
+        "dashboard": {
+          "x": 20,
+          "y": 294,
+          "width": 350,
+          "height": 993,
+          "bottom": 1287
+        },
+        "documents": {
+          "x": 20,
+          "y": 1677,
+          "width": 350,
+          "height": 3287,
+          "bottom": 4964
+        },
+        "cards": [
+          {
+            "title": "Nová PDF ve Downloads za 7 dní",
+            "height": 357
+          },
+          {
+            "title": "Dokumenty k vyřešení",
+            "height": 533
+          },
+          {
+            "title": "Problémy",
+            "height": 235
+          },
+          {
+            "title": "Dokumentový intake",
+            "height": 1517
+          },
+          {
+            "title": "Termíny v dokumentech",
+            "height": 196
+          },
+          {
+            "title": "Související dokumenty",
+            "height": 196
+          }
+        ],
+        "searchTop": 5054,
+        "service": {
+          "x": 20,
+          "y": 6691,
+          "width": 350,
+          "height": 2901,
+          "bottom": 9592
+        },
+        "visibleButtons": 85
+      },
+      "feedback": {
+        "textPresent": true,
+        "visible": false,
+        "insideClosedService": true
+      },
+      "search": {
+        "returned": 12,
+        "rendered": 12,
+        "status": "",
+        "hasMoreControl": false
+      },
+      "modalFocusAtOpen": {
+        "id": "emailProcessingBtn",
+        "inModal": false
+      },
+      "modalFocusAfterTab": {
+        "id": "",
+        "inModal": false
+      },
+      "requests": [
+        {
+          "path": "/",
+          "method": "GET"
+        },
+        {
+          "path": "/api/server/health",
+          "method": "GET"
+        },
+        {
+          "path": "/api/recovery/status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/cockpit/awake-mode",
+          "method": "GET"
+        },
+        {
+          "path": "/api/live-status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/quick-notes/status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/decision-status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/projects/status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/quantitative-status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/consistency-status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/urgent-reminders/status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/intake-email-scan",
+          "method": "POST"
+        },
+        {
+          "path": "/api/documents/review-report",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "method": "GET"
+        },
+        {
+          "path": "/api/live-status",
+          "method": "GET"
+        },
+        {
+          "path": "/api/cockpit/awake-mode",
+          "method": "GET"
+        },
+        {
+          "path": "/api/quick-notes/status",
+          "method": "GET"
+        }
+      ],
+      "errors": []
+    }
+  ],
+  "targeted_contract_tests": {
+    "passed": 2,
+    "names": [
+      "test_frontend_literal_routes_exist_in_backend",
+      "test_cockpit_post_action_registry_matches_do_post_routes"
+    ]
+  },
+  "registered_live_audit": "[WORKSTREAM_LIVE_STATUS]\nschema_version=1\nread_only=true\nwrites_performed=false\nstate=current\nworkstream_id=project-knowledge-library\nmain_state=aligned\nmain_head=10ec08770e05\norigin_head=10ec08770e05\ndeployment_state=verified_current\ndeployment_main=10ec08770e05\ndeployment_test_count=0\ndeployment_smoke_count=5\ndeployment_code_stamp_verified=true\nworkspaces_state=aligned_clean\nworkspace_count=2\naligned_workspace_count=2\ndirty_workspace_count=0\nruntime_state=connected\nruntime_reachable=true\nruntime_connected=true\nturn_busy=false\ndelivery_uncertain=false\n[/WORKSTREAM_LIVE_STATUS]",
+  "limitations": [
+    "No private content or usage telemetry.",
+    "Viewport emulation is not a physical Safari acceptance test.",
+    "No formal WCAG conformance claim.",
+    "Route inventory and DOM presence are not proof of full action behavior."
+  ]
+}

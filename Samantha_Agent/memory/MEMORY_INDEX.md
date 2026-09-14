@@ -19,6 +19,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Reports
 
+- `reports/cockpit_ui_audit_2026_09_14.json` - evidence hlubokého UI auditu: šest syntetických browser scénářů, rozměry a navigační vady, inventura prvků, dva kontrakty a čerstvý redigovaný live audit. Hlavní text/plán na začátku AuditCockpit56_2.txt.
 - `reports/cockpit_email_archive_scroll_2026_09_14.md`; `reports/cockpit_email_archive_scroll_2026_09_14.json` - desktopový scroll před/po, 160 syntetických zpráv, mobil zachovaný, 24 cílených testů.
 - `reports/cockpit_http_routes_release_2026_09_14.md` - důkaz nasazení obou HTTP řezů a přesný ruční Mac/iPhone test; UI audit oddělený.
 - `reports/cockpit_email_archive_routes_2026_09_14.md`; `reports/cockpit_email_archive_routes_2026_09_14.json` - šest čtecích cest archivu a tři obsluhy oddělené; 53 shodných HTTP kontraktů, ochrana příloh, AST důkaz a plná brána 1675/1675. Lokální krok.
@@ -30,7 +31,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 - `reports/systemovy_audit_projekty_tooly_vrstvy_2026_09_13.txt` - zkontrolovaný historický snapshot systémového auditu spuštěného z Cockpitu; cesta zálohy redigovaná, novější kanonický handoff a živý audit mají přednost.
 
-- `../AuditCockpit56_2.txt` - roadmapa v1.12: po vydání HTTP modulů oprava desktopového scrollu archivu dvěma CSS deklaracemi; 24 cílených testů a browser před/po. Retest Macu, audit UI později.
+- `../AuditCockpit56_2.txt` - aktuální UI a strukturální audit v2.0 na začátku: 22 nálezů, 11 kroků U01–U11, kompaktní řídicí pult. Kód nezměněný; prvně viditelné výsledky akcí, hlavička/návraty a kompaktní dokumenty. Historický audit zachovaný níže.
   Cockpit Dieta D0-D3 i pravdiva pamet P0-P6 jsou uzavrene; prvni otevreny
   vecny smer je jeden uplny tok e-mail -> private vault -> R2 TXT.
 - `reports/cockpit_quality_gate_2026_07_10.md` - git-safe popis kanonicke lokalni a GitHub Actions pojistky; Faze 2.4, e-mailova navigace a docasny TVBCP VoiceBridge protokol maji 611 testu. Realny redigovany outbox pilot overil 22 auditu/delivered, budoucí purge identita prezije zavreni Work Queue a obe e-mailova okna maji explicitni navrat do Cockpitu.
@@ -51,7 +52,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` - Cockpit 14. 9.: 088f725c vydaný a CI zelené; navazující oprava posouvání archivu jen na Macu. Opravné vydání ověřit živě, ruční retest otevřený.
+- `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` - Cockpit 14. 9.: scroll 10ec0877 potvrzený Mílou. Hluboký UI audit dokončený a uložený v AuditCockpit56_2 v2.0; implementace U01–U11 zatím nezačala.
 
 - `projects/python_se_samanthou.md`; `handoffs/python_se_samanthou_course_package_2026_09_06.md` - učebna Pythonu: Míla potvrdil 1.5/Codex na Linuxu. Nový samostatný balíček Praktické úlohy přidává 7 lekcí (celkem 21); kopíruje se jen do kurzy. 62 testů a GUI nad nezměněnou 1.5 prošly; obsahový ZIP v LocalSendu.
 - `projects/lekarna_domaci_leky.md` - projekt Lekarna: evidence domacich leku v `data/lekarna/`, vyhledavani podle potizi, audit lekarnicky a opakovatelny foto import workflow pres manifest.

@@ -1,12 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-14 11:09 CEST. Předchozí vydání `088f725c` dokončené: GitHub CI 34825018596 success, nový proces a smoke 5/5. Míla při přejímce hlásí vše zdánlivě OK kromě posouvání archivu na Macu; iPhone posouvá správně.
-- Příčina reprodukovaná na syntetických datech. Oprava: dvě deklarace `min-height: 0` pro desktopové panely seznamu a čtečky. Mobilní styly již tuto hodnotu měly.
-- Browser před/po: desktop 1440×900 a 1024×768 nově dosáhne poslední ze 160 zpráv; otevření a dlouhý detail fungují. Mobilní 390×844 shodné rozměry/posun, návrat zachovává pozici. 24 cílených testů prošlo; report `cockpit_email_archive_scroll_2026_09_14.md` + JSON.
-- Opravný balíček navazuje na schválené p+n a přejímku; tento zápis předchází jeho push/nasazení. Finální Git, CI a deployment ověřit živým auditem.
-- Další krok: po vydání obnovit archiv na Macu a ověřit posun seznamu i dlouhé zprávy; iPhone krátký retest. Audit UI později samostatně.
-- Starší UI nálezy: prvních 8 výsledků dokumentového hledání, panel přes Janiččinu zkratku a náhradní návrat nákupní čtečky. Záloha odložená kvůli disku; Santiago pouze zvažované téma.
+- Aktualizováno: 2026-09-14 11:41 CEST. Míla potvrdil funkční posouvání archivu po opravě `10ec0877`; tato chyba je uzavřená. Nasazení, Git a oba profily byly před auditem živě ověřené jako shodné/čisté.
+- Hotový hluboký UI audit: na začátku `AuditCockpit56_2.txt` v2.0 je 22 nálezů, rozhodnutí o viditelnosti prvků, návrh kompaktního řídicího pultu a 11 budoucích kroků U01–U11. Aktualizovaný strukturální stav a původní audit zachovaný níže jako historie.
+- Hlavní nálezy: oříznutá zalomená horní lišta, výsledek akce skrytý v Servisu, natažené nulové dokumentové karty, nepřipojené stránkování hledání, nedostatečný fokus modalu E-maily. Většina funkcí existuje; přednost má přesun/kompaktní zobrazení, ne plošné mazání.
+- Důkaz: šest scénářů v místním browseru s výhradně syntetickými daty, 320/390/1024/1440 px, bez JS chyb. Dva route/registry kontrakty prošly. 941 elementů, 145 statických tlačítek, 16 modalů; samotná přítomnost ID není důkaz všech funkcí. `reports/cockpit_ui_audit_2026_09_14.json`.
+- Rozsah tohoto kroku: audit a projektové zápisy. Kód aplikace, soukromá data a provozní nastavení nezměněné, nový push/nasazení neprovedený.
+- Další krok: po výběru implementace U01 (viditelný výsledek akcí), U02 (hlavička a návraty), pak U03 (kompaktní dokumenty). U04 dokončí existující backendové stránkování přes HTTP/UI. Později sjednotit stav/navigaci/grafiku.
+- Cíl: ověřené stavy a aktuální úkoly nahoře, hledání na dosah, jedna pracovní plocha, detaily podle potřeby. Přesný barevný styl ověřit na jednom návrhu; žádný plošný přepis ani změna Codex App Serveru.
+- Otevřeno: fyzická přejímka budoucího UI na Macu/iPhonu; emulace ji nenahrazuje. Záloha odložená kvůli nedostupnému disku; Santiago pouze zvažované téma.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: Cockpit / hlavní architektura
@@ -19,19 +21,19 @@ Stav: rozpracovane
 Pripomenout pri startu: ne
 
 Co se resilo:
-Oprava neposouvatelného seznamu e-mailového archivu na Macu po přejímce.
+Hluboký audit UI Cockpitu a návrh kompaktního řídicího pultu.
 
 Co je hotove:
-- Reprodukce a dvě CSS deklarace; desktopový posun opravený, mobil zachovaný. 24 cílených testů.
+- AuditCockpit56_2.txt v2.0: 22 nálezů, 11 budoucích kroků, aktuální struktura, zachovaná historie. Šest syntetických browser scénářů; dvě kontroly adres/registru. Míla potvrdil funkční scroll archivu.
 
 Co neni hotove:
-- Tento zápis předchází opravnému vydání; živý stav ověřit auditem. Retest na Mílově Macu a pozdější samostatný audit UI.
+- Implementace nového UI; audit je plán. Fyzická přejímka budoucích změn.
 
 Dalsi krok:
-Dokončit opravné vydání a krátký retest posouvání.
+Vybrat U01/U02/U03 podle priorit v TXT a provést jeden konkrétní UI krok.
 
 Navrhovane dalsi kroky:
-- Po optimalizaci navázat přejímkou a auditem/UI podle AuditCockpit56_2.txt.
+- Postupovat po krocích U01–U11 v AuditCockpit56_2.txt; začít viditelnou odezvou akcí, hlavičkou a kompaktní dokumentovou částí.
 
 Zmenene nebo relevantni soubory:
 - Viz jednotlive checkpointy.
@@ -864,3 +866,21 @@ Navrhované další kroky:
 Technický důkaz:
 - 160 syntetických zpráv, desktop 1440×900/1024×768 před opravou posun 0, po opravě dosažitelná poslední zpráva a dlouhý detail. Mobil 390×844 před/po shodný. 24 cílených testů, žádné POST či živá soukromá data. Report `cockpit_email_archive_scroll_2026_09_14.md` + JSON.
 - Předchozí release 088f725c ověřený včetně CI; tento zápis předchází opravnému push/nasazení. Přímá přejímka opravy na Mílově Macu otevřená.
+
+### 2026-09-14 11:41 CEST — Hluboký UI audit a plán kompaktního řídicího pultu
+
+Hotovo:
+- Audit zapsaný na začátek AuditCockpit56_2.txt v2.0: 22 doložených nálezů, rozhodnutí co přesunout/sloučit/zachovat, 11 kroků s přejímkou a aktualizovaný audit struktury. Historie zachovaná.
+
+Rozhodnutí:
+- Míla chce přehledné řízení stavů a práce, méně velkých prázdných karet a nepodstatného scrollování. Tento krok je pouze audit a zápis, nikoli implementace. Opravu scrollu 10ec0877 výslovně potvrdil jako funkční.
+
+Další krok:
+- Vybrat implementaci U01 (viditelná odezva), U02 (hlavička/návraty), U03 (kompaktní dokumenty); podrobný postup a kritéria jsou v TXT.
+
+Navrhované další kroky:
+- U04 stránkování, potom oddělení provozního stavu od běžné práce, jednotná navigace a vizuální přejímka. Funkční rodinné/screen/recovery cesty zachovat.
+
+Technický důkaz:
+- Šest browser scénářů s nahrazeným API, žádná živá soukromá data nebo ostré akce. Dva kontrakty adres/registru prošly. Klidný desktop po otevření Dokumentů 1764 px, mobil 3529 px; při naplnění natažené prázdné sousední karty až na 1501 px. Emulace není Safari přejímka.
+- Evidence a source otisky: reports/cockpit_ui_audit_2026_09_14.json. Kód aplikace beze změny. Audit neoznačuje DOM existence check za důkaz funkčnosti; návrhy UI dosud neimplementované.

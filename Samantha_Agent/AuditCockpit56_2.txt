@@ -1,3 +1,530 @@
+HLUBOKÝ AUDIT UI COCKPITU A PLÁN ÚPRAV
+====================================
+Verze dokumentu: 2.0
+Datum: 2026-09-14
+Základ auditu: main 10ec08770e05 (nasazený, ověřený před auditem).
+Autor: Adam / Codex. Rozsah: audit a plán; žádná implementace nového UI.
+
+TOTO JE AKTUÁLNÍ ROZHODOVACÍ ČÁST DOKUMENTU.
+Architektonický průběh a původní audit zůstávají níže jako historie.
+Čísla, provozní stavy a priority historických oddílů nejsou dnešním stavem.
+
+0. ZÁVĚR PRO MÍLU
+----------------
+Cockpit má skutečné funkce, ale obrazovka jejich význam špatně rozlišuje.
+Převažuje skládání velkých karet, opakovaných souhrnů a servisních informací.
+Hlavní příčinou dlouhého scrollování není chybějící backend; je jí informační
+hierarchie, rozložení a nejednotné chování navigace.
+
+Doporučení: kompaktní řídicí pult. Nahoře ověřený provozní stav a nejvýše tři
+aktuální úkoly, trvale dostupné hledání dokumentu a Human–Adam. Pracovní obsah
+podle zvolené oblasti. Servis, zdroje, statistiky a diagnostika v detailu.
+Grafický charakter: přístrojový panel s jasnými stavy a klidnou pracovní plochou.
+
+Nejdůležitější konkrétní zjištění:
+- Horní lišta se při 1440 i 1024 px zalomí do 82 px, ale její rodič má jen 54 px.
+  Tlačítka přesahují nahoře mimo stránku a dole mimo hlavičku. [S1,S2,E1]
+- Výsledky některých akcí se zapisují do zprávy uvnitř zavřeného Servisu.
+  Akce může proběhnout, ale člověk její výsledek nevidí. [S1,S3,E1]
+- Dokumentový intake natahuje prázdné sousední karty: v naplněném syntetickém
+  scénáři mají i prázdné Termíny a Související dokumenty výšku 1501 px. [S2,E1]
+- Dokumentové hledání má backendové stránkování, ale HTTP ani UI je nenapojují.
+  Do Cockpitu se standardně dostane prvních osm výsledků bez další stránky.
+  To je nedokončená funkce, nikoli grafická drobnost. [S4,S5,S6]
+- Modal E-maily nepřebírá ani neudrží klávesnicový fokus. [S3,E1,S15]
+
+Statický průchod neprokázal viditelné hlavní tlačítko úplně bez implementace.
+Nedostupnost na jednom zařízení, prázdná data nebo deaktivované tlačítko samy
+neznamenají mrtvou funkci. Plošné mazání by poškodilo užitečné cesty.
+Silní kandidáti na odebrání Z HLAVNÍHO POHLEDU jsou naopak doložení: počty
+souborů/řádků, opakované věty o klidné frontě, opakované zdrojové souhrny,
+velké nulové karty a trvale nabízené neproveditelné rychlé akce.
+
+1. ROZSAH A SÍLA DŮKAZŮ
+----------------------
+Primární průchod: hlavní Cockpit, jeho dokumenty, dashboard, servis, navigace
+a modaly; související čtečky, archiv, Knihovna, kalendář a ovládání Human–Adam
+byly prověřeny v rozsahu vstupů, viditelnosti a napojení. Nejde o úplný audit
+vnitřního UI všech aplikací otevíraných z katalogu ani audit jejich soukromých dat.
+
+Důkazy:
+E1 = memory/reports/cockpit_ui_audit_2026_09_14.json: šest browser scénářů,
+     rozměry, návaznost akcí, fokus, viditelnost zprávy, agregované požadavky.
+E2 = čerstvý registrovaný workstream_live_status před auditem:
+     current, main/origin/deployment 10ec08770e05, workspace 2/2 aligned_clean,
+     runtime connected, turn_busy=false, delivery_uncertain=false, smoke 5/5.
+E3 = dva aktuálně spuštěné kontrakty: doslovné frontendové adresy existují
+     v backendu; registr POST odpovídá obsluze do_POST. Oba prošly.
+E4 = Mílova přejímka: ostatní funkce se jevily OK; scroll archivu na Macu
+     po opravě 10ec0877 výslovně potvrzen jako funkční. Tato chyba je UZAVŘENÁ.
+
+Browser: headless Microsoft Edge/Chromium na Macu. Šířky 1440, 1024, 390 a
+320 CSS px. Telefon je emulovaná velikost, nikoli nová fyzická Safari přejímka.
+Všechny požadavky byly nahrazené syntetickými odpověďmi, včetně automatických
+POST monitoru. Audit nečetl skutečné e-maily/dokumenty a nespustil ostré akce.
+Vestavěný Browser nebylo možné připojit; použit již dostupný místní testovací
+prohlížeč. Šest scénářů skončilo bez nezachycených JavaScript chyb.
+
+Hodnocení přínosu je návrh podle Mílova cíle a UI, nikoli statistika používání.
+Telemetrie četnosti klikání není podkladem. Funkce tedy nejsou označeny za
+nepoužívané jen proto, že je v auditním scénáři nikdo nepotřeboval.
+
+2. MĚŘENÍ SOUČASNÉ OBRAZOVKY
+---------------------------
+Scénář „klid“: nulové fronty, čtyři prázdné vstupní zdroje, úspěšné odpovědi.
+Scénář „práce“: 12 nových PDF, osm dokumentů k vyřešení, tři problémy a
+12 syntetických intake položek. Nejde o počty ze skutečného archivu.
+
+Šířka/výška | Scénář | Domovská stránka | Po otevření Dokumentů | Hledání od y
+1440×900    | klid   | 1042 px         | 1764 px               | 1579 px
+1024×768    | klid   | 1380 px         | 2905 px               | 2720 px
+390×844     | klid   | 1915 px         | 3529 px               | 3298 px
+320×780     | klid   | 1963 px         | 3642 px               | 3411 px
+1440×900    | práce  | 1168 px         | 3320 px               | 3135 px
+390×844     | práce  | 2041 px         | 5285 px               | 5054 px
+
+Jde o celkovou výšku dokumentu a pozici hledání, ne o měření času práce.
+Měření Dokumentů je před vložením výsledků hledání a se zavřeným Servisem.
+V uvedených základních scénářích nebylo zjištěno vodorovné přetečení stránky;
+všechny kombinace dlouhých reálných názvů, tabulek a zoomu tím ověřené nejsou.
+
+Další měření:
+- Desktopový klid: horní dashboard má tři stejně natažené karty. Dva stručné
+  bloky přebírají výšku textově bohatšího stavu. [S2,E1]
+- Desktopový klid: šest dokumentových karet má výšky 196/196/196/408/408/408 px.
+- Desktopová práce: 533/533/533/1501/1501/1501 px; nulové termíny a vztahy
+  se roztahují podle sousedního intake. Tohle není potřeba více informací.
+- Mobilní hlavička má 276 px, z toho lišta 220 px. Samotná navigace zabírá
+  téměř třetinu z 844 px výšky před první pracovní informací.
+- V hlavní šabloně je 941 elementů, 375 ID, 145 statických tlačítek a 16 modalů.
+  Tlačítka generovaná z dat v tomto počtu nejsou; 145 současně viditelných není.
+
+3. NÁLEZY A ROZHODNUTÍ O PRVCÍCH
+-------------------------------
+Značení: P0 = funkční překážka; P1 = vysoký přínos pro orientaci/prostor;
+P2 = navazující zjednodušení. Návrhy níže zatím NEJSOU implementované.
+
+N01 — P0 — Horní lišta přesahuje vlastní hlavičku.
+Důkaz: header height:54px, toolbar flex-wrap:wrap; browser ukázal toolbar
+od y=-14 do y=68 při 1440 i 1024 px. Na mobilu se mění až pod 900 px. [S1,S2,E1]
+Návrh: nejdřív zajistit přirozenou výšku bez překrytí, pak omezit navigační
+položky dle sekce 5. Zachovat Human–Adam a rodinný vstup na dosah.
+Přejímka: 1440/1280/1024/900/390/320 px, žádný oříznutý či zakrytý ovladač.
+
+N02 — P0 — Zpráva o akci může být neviditelná.
+showMessage() zapisuje pouze do actionMessage, který je uvnitř zavřeného
+servicePanel v kartě ScanDocu. Browser potvrdil text přítomný, visible=false.
+Týká se i otevření aplikace nebo selhání popupu z běžné navigace. [S1,S3,E1]
+Návrh: společná viditelná oblast výsledku poblíž aktivní práce; chybu ponechat,
+úspěch může být stručný. Důležité potvrzení nesmí automaticky zmizet.
+Přejímka: úspěch i chyba při zavřeném Servisu, otevřeném modalu a na mobilu;
+viditelné „běží / hotovo / chyba / výsledek neověřen“, bez opakování operace.
+
+N03 — P1 — Nulové karty plýtvají prostorem a přebírají cizí výšku.
+work-grid align-items:stretch a work-card min-height:170px; obsah/padding
+zvedá skutečné minimum. Intake roztáhne celý řádek. [S1,S2,E1]
+Návrh: místo šesti rovnocenných karet přehled stavů + jedna pracovní fronta.
+Ověřenou nulu zobrazit jako kompaktní řádek/číselný filtr. Chybu načtení nikdy
+neskrýt jako nulu. Žádné mazání položek ani omezení dostupných detailů.
+
+N04 — P1 — Intake ukazuje stejné zdroje několikrát.
+Součet nahoře, výčet počtů, monitorovací text, unified_items, e-mail kandidáti,
+monitorovací výsledek a znovu Souhrn zdrojů v jediné kartě. [S3:renderDocumentIntake]
+Návrh: „Čeká N“ a seznam s označením zdroje; technický stav zdrojů až do detailu.
+Při slučování rozlišit kandidáta od již zařazené položky. Nesčítat znovu tutéž
+věc z různých přehledů a neodstraňovat deduplikaci či ignorování e-mailu.
+
+N05 — P1 — Dnes, Stav a Rychlé akce převyprávějí jednu frontu.
+Počty a klid fronty se opakují v metrikách, todayHint, dashboardDocuments,
+dashboardActionHint a Co teď. I neproveditelné akce zůstávají velké. [S1,S3]
+Návrh: jedna souhrnná řádka fronty a relevantní akce. Nulovou rychlou akci
+nenabízet jako hlavní modré tlačítko; samotná funkce zůstane v Dokumentech.
+Úspěšně načtený klid vyjádřit jednou větou, ne několika prázdnými bloky.
+
+N06 — P1 — Systémový souhrn není provozní ukazatel.
+Počty souborů a řádků jsou skutečně počítané, ale samy neříkají, co udělat.
+V hlavním Stavu zabírají prostor a jejich načtení vstupuje do celkového signálu.
+[S3:refreshQuantitativeSummary; S1]
+Návrh: přesunout do Servis → Statistiky. Nezobrazovat jejich běžné načítání
+jako čekání celé řídicí konzole. Nezaměňovat tento objem s výkonem či zdravím.
+
+N07 — P1 — Běžná práce se barví jako provozní varování.
+Nové PDF, aktivní připomenutí a libovolná aktivní QN nastavují warn. Čistý Git
+napřed také vede k warn, přestože schválený denní balíček je normální stav.
+ScanDocu „neběží“ má lokálně warn barvu, ale v celkovém signálu správně ok,
+protože se spouští na vyžádání. [S3:renderDashboard,refreshQuickNotesSummary]
+Návrh: oddělit Provoz a Práci. Informační „čekají 3 úkoly“, žlutá „vyžaduje
+rozhodnutí / zastaralé“, červená „selhání / blokátor“, šedá „neověřeno“.
+Zálohu či nejasný výsledek nasazení zachovat viditelně, i když se práce odloží.
+
+N08 — P0 — Hledání končí u prvních osmi výsledků.
+search_document_index umí limit/offset/total_count/has_more/next_offset.
+HTTP dispatch předá pouze query; frontend načítá pouze q a další stránku
+nenabízí. Browser s 12 dodanými výsledky vykreslil všech 12: příčinou není
+frontendové slice(0,8), ale nenapojené HTTP stránkování. [S4,S5,S6,E1]
+Návrh: propojit existující backendové stránkování, zobrazit „1–8 z N“ a Další.
+Přejímka: 0/1/8/9/velký počet, změna dotazu resetuje offset, žádné duplicity,
+stejné neprůhledné reference a oprávnění. HTTP změna vyžaduje plnou bránu.
+
+N09 — P1 — Hledání je až pod dokumentovou administrativou.
+V naplněném desktopovém scénáři leží vstup na y=3135, na mobilu y=5054. [E1]
+Návrh: hledání trvale dostupné nahoře; v Dokumentech jako první ovladač.
+Pojmenovat „Najít dokument“, dokud backend hledá dokumenty/nákupy. Neslibovat
+globální hledání napříč všemi aplikacemi bez skutečné implementace.
+
+N10 — P1 — Tři podobné cesty do ScanDocu mají nejednotné názvy a význam.
+Zpracovat další, Zpracovat další dokument a Otevřít ScanDocu volají stejný
+openScanDocu bez vybraného dokumentu. „Vyřešit dokumenty“ jednou otevře
+cockpitovou frontu, jindy přímo ScanDocu review. Backendový start pouze spustí
+službu a vrátí URL. [S3:openScanDocu a bindings; S12]
+Návrh: jedna hlavní akce „Zpracovat dokumenty“ vede do fronty; jednoznačné
+„Otevřít ScanDocu“ pro aplikaci. U konkrétního dokumentu přesná reference.
+Neoznačovat otevření aplikace jako provedené zpracování dokumentu.
+
+N11 — P1 — Termíny a související dokumenty jsou funkční, ale mají chybnou váhu.
+Termíny mají skutečné vytvoření připomínky pro status ready; case detail má
+skutečný backend. Nulový termín nebo neexistující vztah však nepotřebuje velkou
+kartu. UI ukazuje nejvýše osm termínů a šest cases. [S3,S5]
+Návrh: termíny jako filtr/kompaktní fronta; vazby hlavně u vybraného dokumentu.
+Zkrácení vždy přiznat a nabídnout konkrétní další cestu, nejen text „existují“.
+
+N12 — P1 — Modal E-maily nemá úplné klávesnicové chování.
+Po otevření zůstává fokus na původním tlačítku mimo modal; Tab z poslední
+akce unikne mimo dialog. aria-modal=true samo ovládání nezajistí. [E1,S3,S15]
+Návrh: společné otevření/zavření modalů s předáním a vrácením fokusu,
+uzavřenou Tab sekvencí a neaktivním pozadím. Zachovat dirty-form potvrzení.
+Přejímka: Tab/Shift+Tab/Escape, návrat na původní ovladač, vnořený náhled,
+klávesnice na Macu a fyzický iPhone. Nelze tvrdit, že všech 16 modalů je stejně
+porušených; E-maily jsou přímo reprodukované, ostatní potřebují cílený průchod.
+
+N13 — P0 — Některé návraty/popup fallbacky končí bez použitelné akce.
+Nákupní čtečka má návrat pouze přes window.opener.focus(), zavření pouze
+window.close(). E-mailový hub a katalog při blokaci popupu vypíší zprávu přes
+skrytý showMessage. Dokumentová čtečka už má lepší návratový mechanismus.
+[S3:openWebApp,openEmailPage; S7]
+Návrh: dostupný návrat i v samostatné kartě a na mobilu, konkrétní otevřitelný
+odkaz při blokaci popupu. Zachovat formuláře a nepřepínat neuloženou práci bez
+jejího současného potvrzení. Otestovat popup povolený/blokovaný a přímý vstup.
+
+N14 — P1 — Servis je správně oddělený, uvnitř ale tvoří další dlouhou stránku.
+Dvanáct rychlých akcí, screeny, awake mode, úklid, health, runner, tabulka PDF,
+ScanDocu, záloha, trezor a audit se rozbalí jako jeden dlouhý sled. [S1]
+Návrh: podsekce Provoz / Relace / Obnova / Vývoj / Diagnostika. Spustitelnou
+akci ukazovat u jejího stavu; duplicitu tlačítko+vzdálená karta nahradit přímou
+navigací. Screen obnovu zachovat: přínos je čerstvě potvrzený Mílou.
+
+N15 — P2 — Některé servisní texty mají větší jistotu než jejich důkaz.
+„Tlačítka: napojeno“ kontroluje jen přítomnost seznamu DOM ID, nikoli listeners
+nebo úspěch operace. Intake text tvrdí 10 min, FULL_STATUS_MONITOR_MS je 5 min.
+Ranní věta se renderuje při každém refreshi, není omezena na ráno. [S3]
+Návrh: přesné názvy „Prvky UI přítomné“, interval odvozený z konstanty,
+„Aktuální souhrn“. Health existence ID ponechat jako dílčí kontrolu, nepoužívat
+ji jako důkaz funkčnosti celého UI nebo důvod k potlačení hlášené chyby.
+
+N16 — P2 — Trvale technický jazyk a prázdná metadata zhoršují čitelnost.
+„intake“, „work queue“, „case“, „toolů“, „vrstev“, other/document a opakované
+„protistrana nezjištěna / věc nezjištěna“ mají jiné publikum než běžné hledání.
+V rozbaleném výsledku je i ID a cesta. [S1,S3,S4]
+Návrh: české pracovní názvy, jen rozhodující známé údaje; chybějící důležitý
+údaj jedním štítkem. Identifikátory a cesty až technický detail. Ve zdrojovém
+reportu a backendu se metadata nezahazují ani nedomýšlejí.
+
+N17 — P2 — Knihovna je plnohodnotná aplikace vložená do modalu Cockpitu.
+Seznam/čtečka, fotografie, OCR, katalog, editace a export mají skutečné funkce.
+Velká část UI a logiky je ale součástí hlavní stránky i při zavřené Knihovně.
+[S1:libraryModal; S3:openLibraryModal až loadLibraryItem; S10]
+Návrh: výhledově samostatná pracovní plocha se stálou navigací, čtečkou a
+kontextovými akcemi. Dříve než extrakce zachytit dirty forms, návraty, fotografie
+ve frontě a exportní potvrzení. Neoznačovat deaktivované „Upravit/Odeslat“ bez
+vybrané položky za mrtvé funkce; umístit je ke konkrétní položce.
+
+N18 — P2 — Katalogy a rodinné zkratky mají různé úlohy.
+Webové aplikace je launcher; Projekty je projektová paměť + katalog schopností;
+Janička je zjednodušený rodinný vstup. Podobné cíle nejsou stejné publikum.
+[S1,S3:renderWebApps,renderProjects,janicka bindings]
+Návrh: z horní lišty sjednotit katalogové vstupy do Aplikací/sekční navigace,
+technické tooly a infrastrukturu dát do rozbaleného katalogu. Rodinný vstup
+zachovat. Odstranění aliasu až po ověření zkratek a návratu z cílové aplikace.
+
+N19 — P2 — Kalendář má neověřovaný text o provozu odesílání.
+Šablona natvrdo uvádí, že e-mailové odesílání není aktivní, zatímco projekt má
+samostatný implementovaný delivery/readiness subsystém. Aktuální aktivace
+nebyla v tomto UI auditu zjišťována. Nelze tvrdit ani „neexistuje“, ani „běží“.
+Náhled se dvěma adresami je reálný preview formulář, ne ostré odeslání. [S1,S11]
+Návrh: text odvodit z registrovaného redigovaného readiness, nebo jasně popsat
+jen schopnost tohoto okna. Preview schovat do detailu; běžně ukazovat události.
+
+N20 — P2 — Human–Adam má již správně skryté historické ovládání.
+legacy-work-control je display:none!important: starý semafor, checkpoint a
+návrhy handoffu nejsou běžně viditelné. Jde o kandidáta budoucí údržby kódu,
+ne o zdroj dlouhé hlavní stránky. Živý stav, integrace, push a nasazení jsou
+odlišné operace a jejich potvrzení se nesmějí slít do nejasného tlačítka. [S8]
+Návrh: držet běžný chat kompaktní; podrobnosti vývoje jen v Práci. Odstraňování
+legacy backendu není součást kosmetického UI kroku a vyžaduje vlastní audit.
+
+N21 — P2 — Archiv potřebuje přiznat hranici načteného seznamu.
+loadList žádá limit 160 a počítá lokální načtené položky. Scroll je opravený;
+nejde z toho dovodit, že tím uživatel vidí celý archiv bez ohledu na velikost.
+[S9] Návrh: pojmenovat počet načtených výsledků a později ověřit celkový počet
+či stránkování. Nevracet vyřešený desktopový scroll jako otevřený problém.
+
+N22 — P1 — Hustota, hierarchie a čitelnost potřebují společná pravidla.
+Velká tlačítka/karty se střídají s 11px metadaty a opakovanými časovými řádky.
+Zmenšování písma by sice ušetřilo plochu, ale zhoršilo rozhodování. [S2,S3]
+Návrh: prostor šetřit odstraňováním opakování a správným pořadím, řádkovým
+zobrazením a detaily na vyžádání. Běžný text přibližně 14–16 px, sekundární
+nejméně 12–13 px jako návrhový cíl; akce čitelné a dosažitelné dotykem.
+W3C minimum cíle 24×24 CSS px má výjimky; pro mobil navrhuji pohodlnější
+44px ovládací plochy. Kompaktnost nepovoluje skryté akce nebo dvouosé
+scrollování textu při úzké šířce. Nejde o formální certifikaci WCAG. [S16,S17]
+
+4. PRAKTICKÝ SEZNAM: CO Z HLAVNÍHO POHLEDU PRYČ, CO ZACHOVAT
+-----------------------------------------------------------
+Položka                       | Verdikt                         | Cílové místo
+Počty souborů/řádků            | odstranit z hlavního Stavu      | Servis/Statistiky
+Opakované „fronta je klidná“   | sloučit do jednoho sdělení      | Přehled
+Velká nulová dokumentová karta| nahradit stavem/číselným filtrem | Dokumenty
+Souhrn zdrojů a monitorovací text| skrýt běžné podrobnosti       | Detail zdrojů
+PDF tabulka i seznam nových   | sjednotit běžný vstup           | Fronta dokumentů
+Více různých „Obnovit“        | jedna globální + lokální při chybě| Kontext
+Prázdné/neaktivní rychlé akce  | skrýt z rychlých; funkci zachovat| Příslušná sekce
+Nulové termíny a vazby        | kompaktně, vztahy u dokumentu   | Filtr/detail
+Health/runner/raw auditní text| mimo každodenní přehled         | Servis
+Projekty/tooly/infrastruktura  | oddělit práci a technický katalog| Projekty/detail
+Kalendářový preview adres    | sbalit, neodstranit backend      | Detail kalendáře
+Knihovna editace/export       | kontextově po výběru položky     | Čtečka/detail
+Historický Human–Adam semafor | už skrytý; neobnovovat           | Údržba samostatně
+Human–Adam                    | zachovat rychle dostupný        | Stálá navigace
+Hledání dokumentů             | povýšit                         | Horní pracovní vstup
+Důležitá připomenutí           | zachovat při relevanci          | Prioritní fronta
+Záloha/nejistota/chyba načtení | zachovat, neskrývat jako nulu    | Stav/výjimky
+Screen obnova a recovery      | zachovat                        | Servis jedním vstupem
+Janička a rodinné zkratky      | zachovat; neplést s duplicitou   | Rodinný vstup
+Bezpečnostní potvrzení        | zachovat u konkrétní akce        | Aktivní práce
+
+Žádný řádek této tabulky nepovoluje mazání souborů, dat nebo backendových
+schopností. „Pryč“ zde znamená změnu viditelnosti či umístění v budoucím UI.
+
+5. CÍLOVÁ PODOBA ŘÍDICÍHO PULTU
+------------------------------
+Základní rozvržení desktopu:
++--------------------------------------------------------------------------+
+| Samantha | Provoz: ověřeno / problém | stáří stavu | Human–Adam | Janička  |
++-------------+------------------------------------------------------------+
+| Přehled     | Najít dokument [_____________________________] [Hledat]    |
+| Dokumenty   | Vyžaduje akci: nejvýše 3 konkrétní položky se zdrojem        |
+| Komunikace  | ---------------------------------------------------------  |
+| Knihovna    | Pracovní plocha vybrané oblasti                             |
+| Rodina      | fronta / seznam                 detail vybrané položky      |
+| Servis      |                                                            |
++-------------+------------------------------------------------------------+
+| Výsledek poslední akce / skutečný průběh / chyba                           |
++--------------------------------------------------------------------------+
+
+Schéma je návrh informačního uspořádání, ne hotový wireframe v aplikaci.
+Šest oblastí má vést na existující funkce; Human–Adam zůstává přímý vstup.
+Na mobilu má být hlavní obsah první, navigace kompaktní a detail samostatný
+s jednoznačným návratem. Nezmenšovat šest desktopových sloupců do telefonu.
+
+Grafický směr:
+- grafitový rám a navigace, klidná světlá pracovní plocha; výrazný akcent pro
+  hlavní akci, barevné stavy pro význam, tenké oddělení řádků;
+- žádné velké ozdobné ukazatele bez existujících dat a rozhodovacího významu;
+- normální stav vizuálně tichý; výjimka má důvod, stáří důkazu a další akci;
+- stav „běží“ jen ze skutečného běhu, ne z animace; informace „čeká“ se
+  odlišuje od chyby a neznámého výsledku;
+- v jedné oblasti jedna hlavní akce, doplňkové akce u vybrané položky;
+- dlouhé zprávy/čtečky mohou rolovat; hlavní orientace nesmí záviset na
+  průchodu prázdnými kartami. Nezavádět mnoho drobných vnořených scrollů.
+
+6. POŘADÍ BUDOUCÍCH VÝVOJOVÝCH KROKŮ
+-----------------------------------
+Každý krok má vlastní kontrolovatelný commit. Nasazení samostatně schválené.
+Odhad velikosti je relativní: S malý zásah, M střední, L více navazujících kroků.
+
+U01 / P0 / S — Viditelný výsledek akcí (N02, část N13).
+Rozsah: showMessage a společná oblast zpráv; vhodný aria-live, trvalá chyba,
+jasný neověřený výsledek. Neměnit payloady ani bezpečnostní potvrzení.
+Důkaz dokončení: zpráva viditelná při zavřeném Servisu i v aktivním modalu,
+jedna operace se nespouští znovu kvůli neviditelnému výsledku. Cílený browser.
+Závislosti: žádné. Doporučený první malý vývojový krok.
+
+U02 / P0 / S — Oprava rozměrů hlavičky a návratů (N01,N13).
+Zajistit neskrývanou lištu a nákupní návrat bez openeru; popup failure musí
+nabídnout dostupnou cestu. Neprovádět v tomto kroku kompletní nový design.
+Důkaz: 320–1440 px, samostatná karta, blokovaný popup, čtečky Mac/iPhone.
+Závislosti: U01 pro zobrazení chyb.
+
+U03 / P1 / M — Kompaktní dokumentová pracovní plocha (N03,N04,N09,N11).
+Hledání první; zdroje a nulové stavy kompaktně; pracovní fronta s detaily.
+Přestat natahovat karty podle jiné karty; zachovat review skupiny, reference,
+čtení, termínové akce, zkrácení a přesný ScanDocu vstup. Použít existující
+backendy, bez nového registru a bez změn datového formátu.
+Důkaz: klidný desktopový dokumentový pohled alespoň o 40 % nižší než 1764 px
+v této fixture; hledání a první akce dostupné bez průchodu servisním obsahem.
+Mobilní nuly nejvýše několik řádků, chyby zůstávají viditelné.
+Závislosti: U01/U02. Největší bezprostřední přínos pro Mílovu připomínku.
+
+U04 / P0 / M — Dokončit dokumentové hledání (N08).
+Napojit offset/limit přes HTTP na existující backend, total/has_more do UI.
+Přejímka 9+ výsledků, reset dotazu, návrat z čtečky, duplicitní/okrajové vstupy.
+HTTP kontrakty + plná brána. Závislosti: stabilní výsledkový prostor U03;
+backendovou část lze připravit dříve, ale nesmí se ztratit současné reference.
+
+U05 / P1 / M — Jedna prioritní fronta a oddělený provozní stav (N05–N07).
+Zúžit Dnes/Stav/Rychlé akce/Co teď. Využít existující decision backend;
+nesestavovat novou paralelní pravdu v DOM. Rozlišit práci, varování a neznámý
+stav; statistiky přesunout do Servisu. Zachovat důkaz a stáří každého signálu.
+Důkaz: klidný Přehled na 1440×900 v jedné obrazovce; důležitý problém a
+Human–Adam do jednoho kliknutí. Mobil: první smysluplná akce v prvním viewportu.
+Závislosti: U03; rozhodnutí o barvách a stavech potvrdit na syntetických stavech.
+
+U06 / P1 / M — Jednotná navigace a práce s dialogy (N12,N18).
+Zavést uspořádání oblastí, spolehlivý fokus/Tab/Escape, návrat do původního
+místa a zachování rozepsaných formulářů. Rodinné zkratky musejí dál fungovat.
+Důkaz: ovládání klávesnicí, vnořený náhled, reload/přímý odkaz, fyzický iPhone.
+Závislosti: U02/U05. Nejprve jeden reprezentativní modal, pak ostatní.
+
+U07 / P1 / M — Servis podle účelu (N14,N15).
+Sloučit navigační duplicity, detaily na vyžádání, přejmenovat zavádějící health
+štítek a odvodit intervaly z konfigurace. Přehled relací a obnova zůstávají.
+Důkaz: restart, screen obnova, audit a záloha mají jednoznačný dostupný vstup;
+nezměněné podmínky chráněných procesů a potvrzovací věty. Závislosti U01/U06.
+
+U08 / P2 / M — Kontextové akce a pravdivé texty sousedních aplikací (N16,N19,N21).
+Kalendářové preview do detailu, runtime text ze stavu; archiv přizná načtený
+rozsah; technická metadata jen tam, kde pomáhají. Před případným stránkováním
+archivu samostatně ověřit jeho backend. Závislosti: U06.
+
+U09 / P2 / L — Vyčlenění Knihovny a údržba velkých frontendových celků (N17,N20).
+Nejprve browser kontrakty fotografií, OCR, editace, exportu, dirty forms.
+Potom po jedné doméně oddělit markup/renderování; Human–Adam legacy až po
+vlastním ověření závislostí. Není důvod měnit Codex App Server ani framework.
+Důkaz: stejné datové operace, návraty, drafty, žádný automatický externí send.
+Závislosti: stabilní navigace U06. Neprovádět zároveň s prvním redesignem.
+
+U10 / P1 / M — Vizuální sjednocení a závěrečná přejímka (N22).
+Aplikovat společné barvy, mezery, typografii a ovladače na hotovou hierarchii.
+Ověřit kontrast, fokus, klávesnici, zvětšení textu, dotykové plochy a stavy
+loading/empty/error/stale/busy/uncertain. Neomezovat přejímku na screenshot.
+Závislosti: U03/U05/U06; sjednocení může postupně doprovázet jejich implementaci.
+
+U11 / Uzavření — Změřit stejnou fixture znovu a nechat Mílu projít skutečné toky.
+Srovnat výšky, počet potřebných kroků a zachování funkcí; nezaměnit snížení
+počtu karet se zrychlením backendu. Aktualizovat tento plán podle výsledků,
+teprve potom označit modernizaci UI za dokončenou.
+
+7. CO MUSÍ PŘEJÍMKA ZACHOVAT
+--------------------------
+- hledání → správný dokument/nákup → čtečka → návrat i bez původního okna;
+- review → přesný vybraný dokument ve ScanDocu, nikoli náhodný první;
+- termín → připomínka pouze po současném potvrzovaném postupu;
+- e-mail → archiv/příloha, seznam i dlouhý detail dosažitelné až dolů;
+- Human–Adam: spojení, stav tahu, nejisté doručení, integrace a oddělené p+n;
+- rodinné zkratky, Knihovna rozepsané formuláře/fotografie, potvrzení exportu;
+- screen obnova a chráněné relace; žádné ukončení procesu auditním kliknutím;
+- stavy nezjištěno/chyba/staré nesmějí být vydané za nulu nebo „v pořádku“;
+- skutečná chyba musí být viditelná i se sbaleným Servisem;
+- jednoduchý frontendový řez: cílené testy + rychlá brána; změna HTTP,
+  workflow, persistence či publikování: odpovídající plná brána.
+
+8. AKTUALIZOVANÝ AUDIT STRUKTURY COCKPITU
+---------------------------------------
+Stav k 10ec0877, znovu změřený v tomto auditu:
+- app/cockpit.py: 10 705 fyzických řádků;
+- make_handler: 1292; do_GET: 260; do_POST: 642;
+- hlavní frontend app.js: 7063 řádků; page.html: 1218; styles.css: 410;
+- složené hlavní HTML: 489 159 bajtů UTF-8 před případnou kompresí;
+- načítané moduly: health_recovery_autosave 460, codex_sessions 191,
+  library_photos 171, document_review 142, document_search 159 řádků;
+  library_image_worker má dalších 46 řádků, je samostatný worker;
+- 100 POST akcí: 92 direct, 5 ui_presence, 3 indirect;
+  41 private_write a 1 external_send. Z toho samotného nelze usuzovat,
+  že 100 akcí odpovídá 100 viditelným tlačítkům nebo že všechno má browser test.
+
+Závěr ke struktuře:
+1. Rozdělení dokumentového a archivačního HTTP rozhraní a předchozí frontendové
+   moduly jsou dokončené a vydané. Scroll oprava potvrzená Mílou; nepředkládat
+   tyto kroky znovu jako budoucí práci.
+2. Hlavní app.js stále mísí dashboard, status orchestrace, zdroje dokumentů,
+   modaly, katalogy, Knihovnu a rodinu. Oddělení backendu tedy není dokončením UI.
+3. První užitečná hranice pro další frontendový vývoj je společná viditelná
+   odezva akcí, následovaná dokumentovým pracovním prostorem. Existující
+   document_review/search použít jako stavební části, nevytvářet jejich kopie.
+4. Stavové signály a řídicí přehled jsou druhý logický celek. Seskupit jejich
+   načítání/renderování při úpravě významu stavů, nikoli jen přesouvat řádky.
+5. Lifecycle modalů je společná chybějící zodpovědnost; má zachovat výjimky
+   dirty forms a přílohového vieweru. Využít jeden mechanismus, ne nový registr
+   vedle stávajícího registru schopností nebo oprávnění.
+6. Knihovna je velký funkční celek vhodný k pozdějšímu oddělení. Samotné
+   rozdělení souborů nezmenší její UI ani nezaručí rychlejší první render.
+7. Hlavní status běží po 5 min, health a awake po 60 s, QN a urgentní položky
+   po 30 s, intake e-mail po 30 min; refresh/focus spouští další načítání.
+   I skryté oblasti se částečně renderují. Detailní zdroje načítat na vyžádání
+   až po určení, které signály musí stále hlídat výjimky. Nezavádět slepou cache.
+8. Nízké číslo řádků není cílová metrika. Prioritou jsou dosažitelné akce,
+   srozumitelné stavy, pravdivý výsledek a menší zbytečná plocha.
+
+9. OTEVŘENÉ OTÁZKY A HRANICE ROZHODNUTÍ
+-------------------------------------
+- Tmavý rám + světlá plocha je doporučení; přesný vizuální styl ověřit na jednom
+  prototypu, nikoli plošně měnit všechny aplikace.
+- Nejsou doložené statistiky používání. Méně důležité funkce přesouvat, ne
+  nenávratně odstraňovat. Žádné mazání souborů nebo soukromých dat tímto plánem.
+- U kalendáře není aktuální readiness součást tohoto auditu; při úpravě stavu
+  použít registrovaný redigovaný report. Žádné ostré zprávy v rámci UI přejímky.
+- Browser rozměry z fixture nejsou skutečné počty Mílových dokumentů ani
+  důkaz shody se všemi verzemi Safari. Fyzický Mac/iPhone test zůstává nutný.
+- Barevné/přístupnostní cíle nejsou výsledkem úplného WCAG auditu.
+- Rozhodnutí zde opravňuje k zapsání auditu. U01–U11 jsou návrhy k následnému
+  vývoji; tímto krokem nebyly upraveny app soubory, proveden push ani nasazení.
+
+10. ZDROJE A OPĚRNÉ BODY
+-----------------------
+Řádky odkazují na auditovaný kód 10ec0877. Pracovní kód je primární zdroj;
+externí zdroje podpírají pouze návrhová kritéria, ne tvrzení o funkcích Cockpitu.
+
+[S1] app/frontend/cockpit/page.html:12–194 hlavní přehled/dokumenty;
+     196–330 servis; 333–364 E-maily; 499–960 Knihovna; 962–1044 kalendář.
+[S2] app/frontend/cockpit/styles.css:15–40 header/dashboard; 108–130 dokumenty;
+     166–169 modaly; 407–410 breakpointy.
+[S3] app/frontend/cockpit/app.js:556–736 verifyButtonHealth; 798–925 zprávy,
+     refresh a časování; 1061–1515 dokumentové karty; 1561–1697 dashboard;
+     1930–2186 stáří a signály; 3269–3315 ScanDocu; 6478–6705 navigace;
+     6910–7063 události a monitoring.
+[S4] app/frontend/cockpit/document_search.js:11–69 HTTP, výsledky a metadata.
+[S5] app/cockpit_document_routes.py:45–55 předání dotazu; app/cockpit.py:9396
+     napojení search; dokumentové case/due služby napojené v app/cockpit.py.
+[S6] app/documents/search_service.py:97–115 rozhraní; 220–237 stránkování.
+[S7] app/cockpit_document_readers.py:69–110 dokumentový návrat; 171–185 nákupní.
+[S8] app/communication/human_adam_ui.py:139 legacy CSS; 175–230 hlavní UI;
+     314–405 pracovní panel, explicitní integrační a publikační ovládání.
+[S9] app/frontend/email_archive/app.js:412–479 načítání, limit, detail/návrat;
+     styles.css:140 a 232 minimální výšky opravené v 10ec0877.
+[S10] app/frontend/cockpit/document_review.js; codex_sessions.js;
+      library_photos.js; health_recovery_autosave.js:47–86 dílčí health důkaz.
+[S11] app/family_calendar_delivery_readiness.py a app/capabilities/registry.py:
+      registrovaný read-only readiness, oddělený od kalendářového preview UI.
+[S12] app/cockpit.py:7780–7825 URL a start ScanDocu; 8563 COCKPIT_POST_ACTIONS.
+[S13] tests/test_cockpit.py: test_frontend_literal_routes_exist_in_backend;
+      test_cockpit_post_action_registry_matches_do_post_routes (E3).
+[S14] memory/reports/cockpit_ui_audit_2026_09_14.json (E1 a strukturální metriky).
+[S15] W3C WAI, Dialog (Modal) Pattern, ověřeno 2026-09-14:
+      https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/
+      Fokus uvnitř dialogu, uzavřený Tab, Escape a návrat fokusu.
+[S16] W3C WAI, Understanding SC 1.4.10 Reflow, ověřeno 2026-09-14:
+      https://www.w3.org/WAI/WCAG22/Understanding/reflow.html
+      Dostupnost obsahu při šířce 320 CSS px, s definovanými výjimkami.
+[S17] W3C WAI, Understanding SC 2.5.8 Target Size (Minimum), ověřeno 2026-09-14:
+      https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html
+      Minimální ovládací cíle a výjimky; mobilní 44px cíl je návrh tohoto auditu.
+
+KONEC AKTUÁLNÍHO UI A STRUKTURÁLNÍHO AUDITU
+=========================================
+
+NÁSLEDUJE HISTORICKÝ PRŮBĚH ARCHITEKTURNÍCH ÚPRAV A PŮVODNÍ AUDIT
+==============================================================
+
 AUDIT COCKPITU 5.6 SOL – DRUHÝ PRŮCHOD
 ========================================
 
