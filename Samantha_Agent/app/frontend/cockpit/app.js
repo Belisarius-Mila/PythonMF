@@ -19,9 +19,6 @@
     const serviceBtn = document.getElementById("serviceBtn");
     const documentsPanel = document.getElementById("documentsPanel");
     const overviewPanel = document.getElementById("overviewPanel");
-    documentsPanel.addEventListener("toggle", () => {
-      overviewPanel.open = !documentsPanel.open;
-    });
     const emailHubModal = document.getElementById("emailHubModal");
     const emailHubCloseBtn = document.getElementById("emailHubCloseBtn");
     const emailWorkBtn = document.getElementById("emailWorkBtn");
@@ -3568,9 +3565,6 @@ Soubor nebude trvale smazán.`);
     }
 
     function closeFamilyCalendarModal() {
-      if (!confirmFamilyCalendarDiscard()) return false;
-      resetFamilyCalendarForm();
-      resetFamilyCalendarPreview();
       familyCalendarModal.classList.add("hidden");
       return true;
     }
@@ -3647,18 +3641,18 @@ Soubor nebude trvale smazán.`);
       }
     }
 
+    let libraryOpened = false;
     async function openLibraryModal() {
-      setLibraryAddMode("");
       libraryModal.classList.remove("hidden");
+      // Reopening the same tab must retain the selected item, editor, filters and attachments.
+      if (libraryOpened) return;
+      libraryOpened = true;
       await loadLibraryBookOptions();
       await loadLibraryCategory(currentLibraryCategory);
     }
 
     function closeLibraryModal() {
-      if (!confirmLibraryEditorDiscard()) return false;
-      closeLibraryEditor(true);
-      setLibraryAddMode("");
-      clearLibraryBookOcrPhotos();
+      closeLibraryAttachmentViewer();
       libraryModal.classList.add("hidden");
       return true;
     }
@@ -6547,6 +6541,7 @@ ${item.context || ""}`);
 
     function focusDocumentSearchForJanicka(message) {
       closeJanickaModal();
+      cockpitDialogs.sync();
       showJanickaReturnButton();
       documentSearchInput.scrollIntoView({behavior: "smooth", block: "center"});
       documentSearchInput.focus();
@@ -6642,6 +6637,7 @@ ${item.context || ""}`);
 
     function closeEmailHub() {
       emailHubModal.classList.add("hidden");
+      maybeReturnToJanicka("emailHub");
     }
 
     function openEmailPage(path, windowName) {
@@ -6667,8 +6663,7 @@ ${item.context || ""}`);
     }
 
     async function openDocumentsPanel() {
-      documentsPanel.open = true;
-      documentsPanel.scrollIntoView({behavior: "smooth", block: "start"});
+      selectCockpitMainArea("dokumenty");
       await loadDocumentReviewReport();
     }
 
@@ -6689,6 +6684,7 @@ ${item.context || ""}`);
     });
     janickaPrintDocumentBtn.addEventListener("click", () => focusDocumentSearchForJanicka("Najdi dokument k tisku a v jeho detailu použij tlačítko Tisknout."));
     janickaEmailBtn.addEventListener("click", () => {
+      armJanickaModalReturn("emailHub");
       closeJanickaModal();
       openEmailHub();
     });
@@ -6735,8 +6731,7 @@ ${item.context || ""}`);
     humanAdamOpenBtn.addEventListener("click", () => { window.location.href = "/human-adam/"; });
     refreshBtn.addEventListener("click", refresh);
     serviceBtn.addEventListener("click", () => {
-      servicePanel.open = true;
-      servicePanel.scrollIntoView({behavior: "smooth", block: "start"});
+      selectCockpitMainArea("servis");
       refreshAwakeMode();
     });
     documentsBtn.addEventListener("click", openDocumentsPanel);
@@ -6983,7 +6978,14 @@ ${item.context || ""}`);
     });
     window.addEventListener("beforeunload", (event) => {
       const libraryDirty = !libraryEditPanel.classList.contains("hidden") && libraryEditorDirty;
-      if (!libraryDirty && !familyCalendarEditorDirty) return;
+      const creationDraft = [
+        libraryArchiveUrlInput, libraryArchiveTagsInput,
+        libraryTextTitleInput, libraryTextBodyInput, libraryTextSourceInput, libraryTextSourceNoteInput, libraryTextTagsInput,
+        libraryBookTitleInput, libraryBookAuthorInput, libraryBookPublicationYearInput, libraryBookIsbnInput, libraryBookSummaryInput,
+        libraryBookSourceInput, libraryBookOcrTextPreview, familyCalendarRecipientOne, familyCalendarRecipientTwo,
+        libraryAttachmentLabelInput, libraryAttachmentTagsInput, libraryAttachmentNoteInput,
+      ].some(field => field.value.trim());
+      if (!libraryDirty && !familyCalendarEditorDirty && !creationDraft && !libraryBookOcrFiles.length) return;
       event.preventDefault();
       event.returnValue = "";
     });
@@ -7024,41 +7026,96 @@ ${item.context || ""}`);
         renderProjects(currentProjects, currentProjectFilter);
       });
     });
-    document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && !libraryAttachmentViewerModal.classList.contains("hidden")) {
-        closeLibraryAttachmentViewer();
-      } else if (event.key === "Escape" && !remindersModal.classList.contains("hidden")) {
-        closeRemindersModal();
-      } else if (event.key === "Escape" && !quantitativeModal.classList.contains("hidden")) {
-        closeQuantitativeModal();
-      } else if (event.key === "Escape" && !projectAuditModal.classList.contains("hidden")) {
-        closeProjectAuditModal();
-      } else if (event.key === "Escape" && !webAppsModal.classList.contains("hidden")) {
-        closeWebAppsModal();
-      } else if (event.key === "Escape" && !emailHubModal.classList.contains("hidden")) {
-        closeEmailHub();
-      } else if (event.key === "Escape" && !libraryModal.classList.contains("hidden")) {
-        closeLibraryModal();
-      } else if (event.key === "Escape" && !familyCalendarModal.classList.contains("hidden")) {
-        closeFamilyCalendarModal();
-      } else if (event.key === "Escape" && !projectsModal.classList.contains("hidden")) {
-        closeProjectsModal();
-	      } else if (event.key === "Escape" && !quickNotesModal.classList.contains("hidden")) {
-	        closeQuickNotesModal();
-      } else if (event.key === "Escape" && !urgentRemindersModal.classList.contains("hidden")) {
-        closeUrgentRemindersModal();
-		      } else if (event.key === "Escape" && !commandCheatsheetModal.classList.contains("hidden")) {
-		        closeCommandCheatsheetModal();
-		      } else if (event.key === "Escape" && !recoveryModal.classList.contains("hidden")) {
-		        closeRecoveryModal();
-      } else if (event.key === "Escape" && !diagnosticsModal.classList.contains("hidden")) {
-        closeDiagnosticsModal();
-		      } else if (event.key === "Escape" && !janickaModal.classList.contains("hidden")) {
-		        closeJanickaModal();
-		      } else if (event.key === "Escape" && !janickaFamilyModal.classList.contains("hidden")) {
-		        closeJanickaFamilyModal();
+    const cockpitDialogEntries = [
+      {element: emailHubModal, close: closeEmailHub},
+      {element: janickaModal, close: closeJanickaModal},
+      {element: janickaFamilyModal, close: closeJanickaFamilyModal},
+      {element: remindersModal, close: closeRemindersModal},
+      {element: webAppsModal, close: closeWebAppsModal},
+      {element: libraryModal, close: closeLibraryModal},
+      {element: libraryAttachmentViewerModal, close: closeLibraryAttachmentViewer},
+      {element: familyCalendarModal, close: closeFamilyCalendarModal},
+      {element: projectsModal, close: closeProjectsModal},
+      {element: quickNotesModal, close: closeQuickNotesModal},
+      {element: urgentRemindersModal, close: closeUrgentRemindersModal},
+      {element: recoveryModal, close: closeRecoveryModal},
+      {element: commandCheatsheetModal, close: closeCommandCheatsheetModal},
+      {element: diagnosticsModal, close: closeDiagnosticsModal},
+      {element: quantitativeModal, close: closeQuantitativeModal},
+      {element: projectAuditModal, close: closeProjectAuditModal},
+    ];
+    let cockpitNavigationReady = false;
+    let cockpitMainArea = "prehled";
+    const cockpitAreaButtons = {
+      prehled: document.getElementById("overviewBtn"), dokumenty: documentsBtn,
+      servis: serviceBtn, komunikace: emailProcessingBtn, knihovna: libraryBtn, rodina: janickaBtn,
+    };
+    const cockpitModalAreas = {
+      emailHubModal: "komunikace", remindersModal: "komunikace", urgentRemindersModal: "komunikace",
+      libraryModal: "knihovna", libraryAttachmentViewerModal: "knihovna",
+      janickaModal: "rodina", janickaFamilyModal: "rodina", familyCalendarModal: "rodina",
+      projectsModal: "servis", webAppsModal: "servis", quickNotesModal: "servis",
+      recoveryModal: "servis", commandCheatsheetModal: "servis", diagnosticsModal: "servis",
+      quantitativeModal: "servis", projectAuditModal: "servis",
+    };
+    function markCockpitArea(area) {
+      if (!cockpitNavigationReady || !Object.hasOwn(cockpitAreaButtons, area)) return;
+      for (const [key, button] of Object.entries(cockpitAreaButtons)) {
+        if (key === area) button.setAttribute("aria-current", "page");
+        else button.removeAttribute("aria-current");
       }
+      const hash = `#${area}`;
+      if (window.location.hash !== hash) window.history.replaceState(null, "", hash);
+    }
+    const cockpitDialogs = window.SamanthaNavigation.createDialogs({
+      dialogs: cockpitDialogEntries,
+      fallbackFocus: cockpitAreaButtons.prehled,
+      onChange: active => {
+        placeActionFeedback();
+        markCockpitArea(active ? cockpitModalAreas[active.id] : cockpitMainArea);
+      },
     });
+    function selectCockpitMainArea(area, focus = true) {
+      cockpitMainArea = area;
+      documentsPanel.open = area === "dokumenty";
+      servicePanel.open = area === "servis";
+      overviewPanel.open = area === "prehled";
+      markCockpitArea(area);
+      if (focus) {
+        const panel = area === "dokumenty" ? documentsPanel : area === "servis" ? servicePanel : overviewPanel;
+        panel.querySelector("summary").focus({preventScroll: true});
+        panel.scrollIntoView({block: "start"});
+      }
+    }
+    function openCockpitLink() {
+      const area = window.location.hash.slice(1);
+      if (!Object.hasOwn(cockpitAreaButtons, area)) return;
+      // Route changes leave drafts in their DOM; existing close callbacks keep cleanup semantics.
+      janickaReturnModal = "";
+      for (const entry of [...cockpitDialogEntries].reverse()) {
+        if (!entry.element.classList.contains("hidden")) entry.close();
+      }
+      cockpitDialogs.sync();
+      if (["prehled", "dokumenty", "servis"].includes(area)) {
+        selectCockpitMainArea(area);
+        if (area === "dokumenty") loadDocumentReviewReport();
+      } else if (area === "komunikace") openEmailHub();
+      else if (area === "knihovna") openLibraryModal();
+      else if (area === "rodina") openJanickaModal();
+    }
+    cockpitAreaButtons.prehled.addEventListener("click", () => selectCockpitMainArea("prehled"));
+    documentsPanel.addEventListener("toggle", () => {
+      if (documentsPanel.open) selectCockpitMainArea("dokumenty", false);
+      else if (cockpitMainArea === "dokumenty") selectCockpitMainArea("prehled", false);
+    });
+    servicePanel.addEventListener("toggle", () => {
+      if (servicePanel.open) selectCockpitMainArea("servis", false);
+      else if (cockpitMainArea === "servis") selectCockpitMainArea("prehled", false);
+    });
+    window.addEventListener("hashchange", openCockpitLink);
+    cockpitNavigationReady = true;
+    if (window.location.hash) openCockpitLink();
+    else markCockpitArea(cockpitMainArea);
     scanDocuBtn.addEventListener("click", openScanDocu);
     scanDocuReviewBtn.addEventListener("click", () => openScanDocu({mode: "review", button: scanDocuReviewBtn}));
     processNextBtn.addEventListener("click", openScanDocu);

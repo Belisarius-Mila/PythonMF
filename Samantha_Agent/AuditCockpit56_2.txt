@@ -1,6 +1,6 @@
 HLUBOKÝ AUDIT UI COCKPITU A PLÁN ÚPRAV
 ====================================
-Verze dokumentu: 2.5
+Verze dokumentu: 2.6
 Datum: 2026-09-14
 Základ auditu: main 10ec08770e05 (nasazený, ověřený před auditem).
 Autor: Adam / Codex. Původní audit zachycuje 10ec0877; vývojový stav je níže.
@@ -9,31 +9,34 @@ TOTO JE AKTUÁLNÍ ROZHODOVACÍ ČÁST DOKUMENTU.
 Architektonický průběh a původní audit zůstávají níže jako historie.
 Čísla, provozní stavy a priority historických oddílů nejsou dnešním stavem.
 
-VÝVOJOVÝ STAV — 2026-09-14 15:25 CEST
-U01–U05 jsou dokončené lokálně na Mílův pokyn; dosud bez push/nasazení.
-U01: odezva. U02: hlavička/návraty. U03: kompaktní Dokumenty. U04: stránkování.
-U05: hlavní Přehled používá jedinou prioritní frontu Co teď (nejvýše 3 položky)
-z existujícího decision backendu. Dnes/Stav/Rychlé akce a jejich opakované
-rady i obsluhy jsou odstraněné; základní akce zůstávají v hlavičce, Dokumentech
-a prioritních kartách. Návrhy z paměti zůstávají samostatně sbalené.
-Podrobnosti kontrol, počty souborů/řádků a úplný katalog jsou v Servisu.
-Statistika souborů už neurčuje provozní zdraví. Běžné PDF, metadata k doplnění,
-připomenutí, poznámky, projektové připomínky a čistý Git pouze napřed jsou práce,
-nikoli alarm. Dokumentové problémy, konflikty, rozcházející se Git, nečistý Git,
-čekající pull a varování záloh zůstávají zvýrazněné. Nedostupný zdroj je neověřený.
-Chyba prioritní fronty odstraní staré akční karty; další úspěšné načtení je obnoví.
-Karty zachovávají zdroj a přesný čas důkazu. Diagnostika ukazuje čas načtení
-každého signálu; čas načtení není zárukou čerstvosti jeho původního podkladu.
-Důkaz: 24 cílených testů (včetně 10 stavových JS scénářů), 10 syntetických browser scénářů a rychlá statická brána OK.
-1440×900: klid i jedna běžná priorita se vejdou do jedné obrazovky. Šířky
-320/390 px: první akce priority v prvním viewportu; celá stránka ještě scrolluje.
-Ověřený přímý vstup do úkolu, diagnostiky a Human–Adam; také 3 prioritní karty,
-výpadek/obnova fronty a stavy práce/varování/chyby/neověřeného zdroje.
-Report: memory/reports/cockpit_ui_u05_2026_09_14.json.
-Plná brána U04 (1677 testů) je předchozí důkaz; pro tento omezený frontendový
-krok proběhly cílené kontroly a statická brána. Fyzická přejímka Safari čeká.
-Další krok U06: sjednotit navigaci, fokus a návraty; nejprve reprezentativní modal.
-Níže jsou původní nálezy/měření 10ec0877; N05–N07 jsou tímto lokálně uzavřené.
+VÝVOJOVÝ STAV — 2026-09-14 18:36 CEST
+U01–U06 jsou dokončené lokálně na Mílův pokyn; dosud bez push/nasazení.
+U01: odezva. U02: hlavička/návraty. U03: Dokumenty. U04: stránkování. U05: přehled.
+U06: společný navigation.js spravuje všech 16 dialogů. Fokus vstoupí dovnitř,
+Tab/Shift+Tab zůstanou uvnitř a Escape zavře aktuální nejvyšší vrstvu. Pozadí
+je dočasně inertní, původní inertní stav se obnoví; chráněné close obsluhy
+zůstávají volané. Návrat obnoví původní ovládací prvek a pozici stránky.
+Navigace má Přehled, Dokumenty, Komunikaci, Knihovnu, rodinné vstupy a Servis.
+Komunikace obsahuje poštu a připomenutí; projekty a katalog aplikací jsou
+v Servisu. Aktivní oblast je označená. Šest povolených hashů obnoví hlavní
+oblast po přímém vstupu/reloadu; URL neobsahuje rozepsaný obsah ani reference.
+Zavření Knihovny už nečistí editor, vybranou položku, nové texty ani OCR podklady.
+Rodinný formulář a náhled zůstávají při zavření zachované. Záměrné přepnutí
+editované položky/reset dál používá původní ochranu zahození změn.
+Před opuštěním stránky se zohlední i neuložené nové texty a OCR fotografie.
+Nejde o trvalé uložení: potvrzený reload, zavření prohlížeče nebo ukončení OS
+mohou rozepsaná data ztratit; beforeunload závisí na podpoře prohlížeče.
+Pilot Komunikace prošel na dvou šířkách před rozšířením. 28 cílených testů včetně stavů dialogů a vazeb DOM; 3 browser scénáře na 320/390/1440 px, v každém 16 dialogů a 6 přímých odkazů/reloadů.
+Ověřeny i vnořené náhledy/Recovery, rozepsaná editace a nový text, rodinný
+formulář, návrat z rodinných projektů a hledání, původní scroll a odezva v modalu.
+Kolize plovoucího návratu k Janičce se zprávou opravena: návrat je u hledání.
+Report: memory/reports/cockpit_ui_u06_2026_09_14.json.
+Rychlá statická brána prošla; plná brána se u tohoto
+frontendového kroku neopakuje. Fyzický Safari/iPhone/VoiceOver čeká po nasazení.
+Odkaz obnovuje oblast, nikoli přesný vnořený dialog či rozepsaný formulář.
+Knihovna při návratu drží načtený kontext; aktuální data načte kategorie/hledání.
+Další krok U07: Servis podle účelu, dostupné detaily a pravdivé health štítky.
+Níže jsou původní nálezy/měření 10ec0877; U06 uzavírá N12 a navigační část N18.
 
 0. ZÁVĚR PRO MÍLU
 ----------------
@@ -411,6 +414,7 @@ Human–Adam do jednoho kliknutí. Mobil: první smysluplná akce v prvním view
 Závislosti: U03; rozhodnutí o barvách a stavech potvrdit na syntetických stavech.
 
 U06 / P1 / M — Jednotná navigace a práce s dialogy (N12,N18).
+Stav: HOTOVO LOKÁLNĚ 2026-09-14; automatizovaná přejímka prošla, fyzický iPhone čeká.
 Zavést uspořádání oblastí, spolehlivý fokus/Tab/Escape, návrat do původního
 místa a zachování rozepsaných formulářů. Rodinné zkratky musejí dál fungovat.
 Důkaz: ovládání klávesnicí, vnořený náhled, reload/přímý odkaz, fyzický iPhone.
@@ -507,8 +511,8 @@ Závěr ke struktuře:
 - Browser rozměry z fixture nejsou skutečné počty Mílových dokumentů ani
   důkaz shody se všemi verzemi Safari. Fyzický Mac/iPhone test zůstává nutný.
 - Barevné/přístupnostní cíle nejsou výsledkem úplného WCAG auditu.
-- Míla následně schválil zahájení vývoje; U01–U05 jsou lokálně implementované.
-  U06–U11 zůstávají plánem. Push a nasazení tohoto kroku dosud neproběhly.
+- Míla následně schválil zahájení vývoje; U01–U06 jsou lokálně implementované.
+  U07–U11 zůstávají plánem. Push a nasazení tohoto kroku dosud neproběhly.
 
 10. ZDROJE A OPĚRNÉ BODY
 -----------------------

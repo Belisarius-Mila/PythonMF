@@ -679,3 +679,8 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Projev: nové dokumenty, poznámky nebo čistý Git napřed drží hlavní přehled trvale ve varování; skutečná chyba zaniká.
 - Řešení: použít existující prioritní frontu, práci hodnotit odděleně od provozu a chybějící zdroj neproměňovat v prázdný zelený inbox. Při selhání obnovy priorit odstranit zastaralé akční karty, ukázat neověřený stav a umožnit nové načtení.
 - Ověření: syntetická práce, konflikt, divergence, chybějící záloha, výpadek/obnova API a zdroj/čas důkazu. Report: reports/cockpit_ui_u05_2026_09_14.json.
+
+### 2026-09-14 18:36 CEST — Zavření dialogu není zahození rozepsané práce
+- Projev: pevný seznam Escape zavře jinou vrstvu, Tab uteče za dialog a close/reopen vyčistí editor. Plovoucí návrat navíc může překrýt společná odezva.
+- Řešení: jeden správce viditelných vrstev, původního fokusu a inertního pozadí; volat existující close obsluhy, uchovat drafty v DOM a reset ponechat explicitní. Návrat navázaný na hledání umístit k hledání.
+- Ověření: skutečné Tab/Shift+Tab/Escape, vnořený náhled a Recovery, Janiččiny projekty/hledání se zobrazenou odezvou, draft nové i existující položky a hash/reload. Pouhý textContent neprokazuje dostupnost návratu. Report: reports/cockpit_ui_u06_2026_09_14.json.

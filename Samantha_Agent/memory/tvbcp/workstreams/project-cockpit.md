@@ -1,14 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-14 15:25 CEST. U01–U05 hotové lokálně; AuditCockpit56_2.txt v2.5.
-- U05: jedna prioritní fronta Co teď z existujícího backendu; opakované Dnes/Stav/Rychlé akce odstraněné. Podrobnosti a statistiky přesunuté do Servisu.
-- Provoz odlišuje běžnou práci od varování, chyby a neověřeného zdroje. Čistý Git pouze napřed není alarm; konflikty, problémy dokumentů, záloha a rozcházející se Git zůstávají viditelné.
-- Důkaz: 24 cílených testů (včetně 10 stavových JS scénářů), 10 syntetických browser scénářů a rychlá statická brána OK. `reports/cockpit_ui_u05_2026_09_14.json`. Klidný desktop 1440×900 v jednom viewportu, první mobilní úkol viditelný bez scrollu; přímé otevření úkolu, diagnostiky a Human–Adam ověřené.
-- Zdroj/čas důkazu na prioritách; čas načtení jednotlivých signálů v diagnostice. Výpadek fronty odstraní staré akční karty, obnova je znovu načte. Čas načtení není důkaz stáří původního podkladu.
-- Dodání: lokální vývoj, bez nového push/nasazení. Dřívější nasazení 10ec0877 a plná brána U04 jsou historické podklady, nikoli současný živý audit.
-- Další krok U06: sjednotit navigaci, fokus a návraty; nejprve reprezentativní modal.
-- Rizika/přejímka: fyzický Safari Mac/iPhone čeká. Na mobilu celá stránka stále scrolluje; další úprava navigace/grafiky podle plánu.
+- Aktualizováno: 2026-09-14 18:36 CEST. U01–U06 hotové lokálně; AuditCockpit56_2.txt v2.6.
+- U06: společná správa 16 dialogů; vstup/vracení fokusu, uzavřený Tab/Shift+Tab, Escape podle vrstvy, inertní pozadí a zachovaný scroll.
+- Šest hlavních oblastí má bezpečné přímé odkazy/hash a označení aktivního místa. Komunikace sdružuje poštu/připomenutí, projekty a katalog jsou v Servisu; rodinné zkratky zachované.
+- Zavření/obnova Knihovny drží vybranou položku, editor, nové texty a fotografie; rodinný formulář se nečistí. Záměrné přepnutí/reset dál chrání původní potvrzení. Návrat k Janičce je u hledání, kde ho nepřekrývá odezva.
+- Důkaz: 28 cílených testů včetně stavů dialogů a vazeb DOM; 3 browser scénáře na 320/390/1440 px, v každém 16 dialogů a 6 přímých odkazů/reloadů. Rychlá statická brána prošla. `reports/cockpit_ui_u06_2026_09_14.json`. Regrese návratů rodiny, Recovery, vnořeného náhledu, rozepsané editace i varování před opuštěním stránky.
+- Dodání: lokální vývoj bez nového push/nasazení. Plná brána U04 a nasazení 10ec0877 jsou historické podklady, nikoli současný živý audit.
+- Další krok U07: uspořádat Servis podle účelu a upravit zavádějící health štítky.
+- Rizika: fyzický Safari/iPhone/VoiceOver čeká; drafty žijí jen v aktuální kartě, potvrzený reload/ukončení je může ztratit. beforeunload není záruka proti ukončení OS. Odkaz obnoví hlavní oblast, ne přesný vnořený kontext.
 - Záloha odložená kvůli disku; Santiago pouze zvažované. Cizí nesledovaný adresář zachovaný mimo commit.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -1077,3 +1077,23 @@ Navrhované další kroky:
 Technický důkaz:
 - 24 cílených testů (včetně 10 stavových JS scénářů), 10 syntetických browser scénářů a rychlá statická brána OK. Report `reports/cockpit_ui_u05_2026_09_14.json`. Klidný desktop 1440×900 bez scrollu, první mobilní priorita v prvním viewportu; přímý vstup do úkolu/diagnostiky/Human–Adam, výpadek a obnova fronty.
 - Plná brána v tomto omezeném frontendovém kroku neopakována; U04 1677 testů je historický důkaz. Zbytková rizika: fyzický Safari netestovaný, čas načtení není záruka čerstvosti zdroje, mobilní stránka dále scrolluje. Cizí nesledovaný adresář zachovaný.
+
+### 2026-09-14 18:36 CEST — U06: navigace a zachování kontextu dialogů
+
+Hotovo:
+- Společná správa 16 dialogů; fokus/Tab/Escape podle skutečné vrstvy, pozadí inertní, návrat do původního místa. Pilot Komunikace nejprve ověřen na dvou šířkách.
+- Hlavní oblasti mají hash odkazy a označení; pošta/připomenutí patří do Komunikace, projekty/katalog do Servisu. Rodinné zkratky a přístup k Human–Adam zachované.
+- Zavření formuláře neznamená zahození: Knihovna a rodinný kalendář zachovávají rozepsanou práci v aktuální kartě. Kolize odezvy s rodinným návratem odstraněna přesunem návratu k hledání.
+
+Rozhodnutí:
+- Míla schválil U06. Bez persistence soukromých draftů, změny backendových oprávnění, odchozích akcí, push či nasazení. Původní potvrzení při resetu/editaci jiné položky zachovaná.
+
+Další krok:
+- U07: Servis podle účelu, detaily na vyžádání a pravdivé štítky health.
+
+Navrhované další kroky:
+- Grafika podle TXT a fyzická Safari/iPhone přejímka po samostatně schváleném nasazení.
+
+Technický důkaz:
+- 28 cílených testů včetně stavů dialogů a vazeb DOM; 3 browser scénáře na 320/390/1440 px, v každém 16 dialogů a 6 přímých odkazů/reloadů. Rychlá statická brána prošla. Report `reports/cockpit_ui_u06_2026_09_14.json`. Automatizovaná přejímka zahrnuje vnořený náhled, Recovery, rodinné projekty/hledání a rozepsanou existující editaci.
+- Omezení: fyzický Safari/iPhone/VoiceOver neověřený; draft nepřežije potvrzený reload/ukončení; hlavní hash není přesný vnořený stav. Plná brána se u omezené UI změny neopakuje. Cizí nesledovaný adresář zachovaný.

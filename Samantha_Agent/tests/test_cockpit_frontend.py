@@ -36,9 +36,9 @@ EXPECTED_PAGES = {
     ),
     "cockpit": (
         COCKPIT_HTML,
-        494734,
-        9959,
-        "d6ccf6edbb3262dc2751c90141f26ae3d2c85b0655cbda4341bc63ada160acf8",
+        504073,
+        10146,
+        "2527bd7fde45ee476b2bbe10e4127d5639e601859d2f81993390c543b0ab2d8e",
     ),
 }
 
@@ -50,6 +50,21 @@ class CockpitFrontendContractTests(unittest.TestCase):
             cwd=FRONTEND_ROOT.parent.parent, capture_output=True, text=True, timeout=30, check=False,
         )
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_dialog_navigation_behavior(self) -> None:
+        result = subprocess.run(
+            [node_binary(), str(Path(__file__).with_name("cockpit_navigation_frontend.test.cjs"))],
+            capture_output=True, text=True, timeout=30, check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_cockpit_static_element_bindings_have_elements(self) -> None:
+        import re
+        page = (FRONTEND_ROOT / "cockpit" / "page.html").read_text(encoding="utf-8")
+        source = (FRONTEND_ROOT / "cockpit" / "app.js").read_text(encoding="utf-8")
+        elements = set(re.findall(r'id="([^"]+)"', page))
+        bindings = set(re.findall(r'const \w+ = document.getElementById\("([^"]+)"\)', source))
+        self.assertFalse(bindings - elements, sorted(bindings - elements))
 
     def test_document_reader_pages_use_the_extracted_renderers(self) -> None:
         self.assertIs(cockpit.document_reader_page_html, cockpit_document_readers.document_reader_page_html)
@@ -184,7 +199,7 @@ class CockpitFrontendContractTests(unittest.TestCase):
 
         self.assertEqual(
             FRONTEND_JAVASCRIPT_MODULES["cockpit"],
-            ("health_recovery_autosave.js", "codex_sessions.js", "library_photos.js", "document_review.js", "document_search.js"),
+            ("navigation.js", "health_recovery_autosave.js", "codex_sessions.js", "library_photos.js", "document_review.js", "document_search.js"),
         )
         self.assertIn("createHealthRecoveryAutosaveFrontend", module_source)
         self.assertIn("async function runFrontendHealthCheck()", module_source)

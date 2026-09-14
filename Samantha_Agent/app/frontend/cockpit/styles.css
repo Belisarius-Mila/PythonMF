@@ -54,7 +54,7 @@
     .janicka-action button.secondary { background: #fce7f3; color: #831843; }
     .janicka-action button.emergency { background: #b91c1c; color: white; }
     .janicka-note { border: 1px solid #fed7aa; border-radius: 8px; background: #fffbeb; color: #5f370e; padding: 11px 12px; font-size: 13px; line-height: 1.45; }
-    .janicka-return { position: fixed; right: 18px; bottom: 18px; z-index: 14; box-shadow: 0 10px 28px rgba(88, 28, 53, .22); background: #be185d; color: white; }
+    .janicka-return { justify-self: start; min-height: 44px; margin-bottom: 8px; background: #be185d; color: white; }
     .compact-actions { gap: 8px; }
     .compact-actions button { min-height: 34px; padding: 6px 10px; }
     .janicka-family-modal { width: min(860px, 100%); background: #fff7fb; border-color: #fbcfe8; }
@@ -433,3 +433,12 @@
     .diagnostics-row.work { border-left: 4px solid var(--blue); padding-left: 8px; }
     #overviewPanel .decision-card button { min-height: 44px; }
     #overviewPanel > section { margin-top: 10px; }
+
+    body.cockpit-dialog-open { overflow: hidden; }
+    :focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+    .modal-backdrop h2:focus { outline: none; }
+
+    .toolbar-group { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .toolbar [aria-current="page"] { box-shadow: inset 0 -3px 0 #60a5fa; }
+    .toolbar button { min-height: 44px; }
+    @media (max-width: 900px) { .toolbar { gap: 12px; } }

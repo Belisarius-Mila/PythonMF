@@ -17,19 +17,23 @@
   </div>
   <header>
     <h1>Samantha Cockpit</h1>
-    <div class="toolbar">
-      <button class="janicka-button" id="janickaBtn">Janička</button>
-      <button class="primary" id="humanAdamOpenBtn">Human–Adam</button>
-      <button class="secondary" id="refreshBtn">Obnovit</button>
-      <button class="secondary" id="webAppsBtn">Webové aplikace</button>
-      <button class="secondary" id="libraryBtn">Knihovna</button>
-      <button class="secondary" id="familyCalendarBtn">Rodinný kalendář</button>
-      <button class="secondary" id="projectsBtn">Projekty</button>
-      <button class="secondary" id="remindersBtn">Připomenutí</button>
-      <button class="secondary" id="emailProcessingBtn">E-maily</button>
-      <button class="secondary" id="documentsBtn">Dokumenty</button>
-      <button class="secondary" id="serviceBtn">Servis</button>
-    </div>
+    <nav class="toolbar" aria-label="Oblasti Cockpitu">
+      <div class="toolbar-group" role="group" aria-label="Hlavní práce">
+        <button class="secondary" id="overviewBtn">Přehled</button>
+        <button class="primary" id="humanAdamOpenBtn">Human–Adam</button>
+        <button class="secondary" id="documentsBtn">Dokumenty</button>
+        <button class="secondary" id="emailProcessingBtn">Komunikace</button>
+        <button class="secondary" id="libraryBtn">Knihovna</button>
+      </div>
+      <div class="toolbar-group" role="group" aria-label="Rodina">
+        <button class="janicka-button" id="janickaBtn">Janička</button>
+        <button class="secondary" id="familyCalendarBtn">Rodinný kalendář</button>
+      </div>
+      <div class="toolbar-group" role="group" aria-label="Projekty a servis">
+        <button class="secondary" id="serviceBtn">Servis</button>
+        <button class="secondary" id="refreshBtn">Obnovit</button>
+      </div>
+    </nav>
   </header>
   <main>
           <div id="dashboardOverall" class="dashboard-overall dashboard-overall-loading" role="button" tabindex="0" title="Otevřít detail stavu">
@@ -92,6 +96,7 @@
     <section id="documentSearchPanel">
       <h2>Najít dokument</h2>
       <div class="body">
+      <button class="janicka-return hidden" id="janickaReturnBtn" type="button">Zpět k Janičce</button>
         <div class="search-controls">
           <input id="documentSearchInput" type="search" aria-label="Najít dokument" placeholder="Název, protistrana, tag nebo text">
           <button class="primary" id="documentSearchBtn">Hledat</button>
@@ -195,6 +200,8 @@
         <h2>Servisní akce</h2>
         <div class="body">
           <div class="quick-actions service-actions">
+            <button class="secondary" id="webAppsBtn">Webové aplikace</button>
+            <button class="secondary" id="projectsBtn">Projekty</button>
             <button class="secondary" id="dashboardTerminalBtn">Terminál v projektu</button>
             <button class="secondary" id="dashboardQuantitativeBtn">Systémový souhrn</button>
             <button class="secondary" id="dashboardProjectAuditBtn">Systémový audit</button>
@@ -326,12 +333,12 @@
   <div id="emailHubModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="emailHubTitle">
     <div class="modal">
       <div class="modal-header">
-        <h2 id="emailHubTitle">E-maily</h2>
+        <h2 id="emailHubTitle">Komunikace</h2>
         <button class="secondary" id="emailHubCloseBtn">Zavřít</button>
       </div>
       <div class="modal-body">
         <div class="janicka-intro">
-          <h3 class="janicka-title">Práce s e-maily</h3>
+          <h3 class="janicka-title">Pošta a připomenutí</h3>
           <p class="janicka-subtitle">Vyber běžné zpracování nových zpráv, nebo otevři místní archiv již uložených e-mailů.</p>
         </div>
         <div class="app-list">
@@ -350,6 +357,10 @@
               <div class="app-kind">E-maily · pouze čtení</div>
             </div>
             <button class="button-link" id="emailArchiveBtn" type="button">Otevřít</button>
+          </div>
+          <div class="app-card">
+            <div><div class="app-title">Připomenutí</div><div class="app-description">Otevřít přehled připomenutí a jejich detail.</div></div>
+            <button class="secondary" id="remindersBtn">Připomenutí</button>
           </div>
         </div>
         <div class="status-line">Archiv nic neodesílá, nemaže ani nepřesouvá ve schránce.</div>
@@ -433,7 +444,6 @@
       </div>
     </div>
   </div>
-  <button class="janicka-return hidden" id="janickaReturnBtn" type="button">Zpět k Janičce</button>
   <div id="janickaFamilyModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="janickaFamilyTitle">
     <div class="modal janicka-family-modal">
       <div class="modal-header">

@@ -1,0 +1,116 @@
+{
+  "date": "2026-09-14 18:36 CEST",
+  "base_commit": "3192e621",
+  "scope": "U06 navigation areas and shared dialog focus; local only",
+  "implementation": {
+    "dialogs": 16,
+    "module": "navigation.js",
+    "focus": "initial focus, Tab/Shift+Tab containment, topmost Escape, composing/default-prevented keys respected, origin focus and background inert restoration",
+    "navigation": "six allowlisted area hashes; primary nav grouped, communication includes mail/reminders, projects/catalog in Service",
+    "drafts": "Same-tab close/reopen retains library context, editor, creation forms/photos and family form. No localStorage/sessionStorage or draft URL persistence. beforeunload covers creation fields and OCR files as well as existing dirty editors/photo tasks.",
+    "return": "Native scroll remains on close; family search return is inline to avoid feedback overlay collision"
+  },
+  "verification": {
+    "targeted_tests": 28,
+    "node_navigation_behavior": "passed; stacking, focus/Tab, nested Escape, refused close, composing key, prior inert restoration",
+    "static_bindings": "all literal static getElementById bindings have elements",
+    "pilot": "Email dialog at 1440 and 390 px passed before expansion",
+    "additional_family_email_return": "Three final 320/390/1440 px checks passed after adding the two-line family email return hook; broad browser evidence precedes only this additive hook",
+    "browser": "Headless Edge, three synthetic viewport scenarios; every request intercepted, no real private data or live actions",
+    "full_gate": "not rerun for bounded frontend change; prior U04 1677-test run remains historical",
+    "static_gate": "passed"
+  },
+  "browser": [
+    {
+      "width": 1440,
+      "dialogs": 16,
+      "keyboard": true,
+      "nestedViewer": true,
+      "draftCloseReopen": true,
+      "existingEditorPreserved": true,
+      "feedbackInsideDialog": true,
+      "unloadGuard": true,
+      "familySearchReturn": true,
+      "familyProjectReturn": true,
+      "nestedRecoveryReturn": true,
+      "unknownLinkIgnored": true,
+      "directLinksAndReload": 6,
+      "measurements": {
+        "width": 1440,
+        "height": 900,
+        "headerHeight": 64,
+        "humanBottom": 54
+      },
+      "errors": [],
+      "requestCount": 162
+    },
+    {
+      "width": 390,
+      "dialogs": 16,
+      "keyboard": true,
+      "nestedViewer": true,
+      "draftCloseReopen": true,
+      "existingEditorPreserved": true,
+      "feedbackInsideDialog": true,
+      "unloadGuard": true,
+      "familySearchReturn": true,
+      "familyProjectReturn": true,
+      "nestedRecoveryReturn": true,
+      "unknownLinkIgnored": true,
+      "directLinksAndReload": 6,
+      "measurements": {
+        "width": 390,
+        "height": 974,
+        "headerHeight": 264,
+        "humanBottom": 88
+      },
+      "errors": [],
+      "requestCount": 162
+    },
+    {
+      "width": 320,
+      "dialogs": 16,
+      "keyboard": true,
+      "nestedViewer": true,
+      "draftCloseReopen": true,
+      "existingEditorPreserved": true,
+      "feedbackInsideDialog": true,
+      "unloadGuard": true,
+      "familySearchReturn": true,
+      "familyProjectReturn": true,
+      "nestedRecoveryReturn": true,
+      "unknownLinkIgnored": true,
+      "directLinksAndReload": 6,
+      "measurements": {
+        "width": 320,
+        "height": 1058,
+        "headerHeight": 316,
+        "humanBottom": 88
+      },
+      "errors": [],
+      "requestCount": 162
+    }
+  ],
+  "issues_found_and_fixed": [
+    "Missing moved reminders button caught by browser; now inside Communication with static binding regression check",
+    "Legacy test expected library drafts to be cleared on close; updated to preservation contract",
+    "Floating family return was covered by shared feedback; moved inline at document search and retested with feedback visible"
+  ],
+  "limitations": [
+    "Physical Safari Mac/iPhone and VoiceOver acceptance pending",
+    "Drafts live in the current tab only; confirmed reload, closing browser or OS termination can lose them; beforeunload support is browser dependent",
+    "Hashes restore the main area, not an exact selected article, nested dialog or draft; invalid hashes ignored",
+    "Library reopening deliberately preserves loaded state; category/search actions refresh data under existing discard guard",
+    "No push/deployment; unrelated untracked directory preserved"
+  ],
+  "sha256": {
+    "app/cockpit_frontend.py": "957c55c9ea0f8f0da3559f36a33b876042c1c595cd71375c0d77f8f30394692e",
+    "app/frontend/cockpit/app.js": "4428a75edddce8cf8371a8d301615b613233109bf413ae78da16c752fb39ac65",
+    "app/frontend/cockpit/navigation.js": "df75a5a2956177d4cc9b909b8cdf3ba03021306e2da1aa1248d952e8bd02b284",
+    "app/frontend/cockpit/page.html": "81c06d32fb301ccf00c343a72c004e17af3622ef5dd3f45d5044b32d3413c299",
+    "app/frontend/cockpit/styles.css": "522a5ce22a52c9668bb0f71a46a316dce607c2c7155972d6f02fa09c2ca5336a",
+    "tests/test_cockpit.py": "cbfea9d9354fe196f5b535edaf9dcc5d8140a741a1f0f1eefd4100e3e439cc13",
+    "tests/test_cockpit_frontend.py": "f176be2bce8d60cdd00923b1ee1772b410492aeae27c07c2e2ecc35dd675f36d",
+    "tests/cockpit_navigation_frontend.test.cjs": "22d2198c4526aee85f9830d847ec367bb882699b1f7e4fba0bcd79cef2b4ce5e"
+  }
+}
