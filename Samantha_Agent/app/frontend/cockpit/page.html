@@ -9,7 +9,10 @@
 </head>
 <body>
   <div id="actionFeedback" class="action-feedback hidden" aria-label="Odezva akce">
-    <div id="actionMessage" role="status" aria-live="polite" aria-atomic="true"></div>
+    <div class="action-feedback-content">
+      <div id="actionMessage" role="status" aria-live="polite" aria-atomic="true"></div>
+      <a id="actionMessageLink" class="hidden" target="_blank" rel="noopener">Otevřít v nové kartě</a>
+    </div>
     <button id="actionMessageCloseBtn" type="button" aria-label="Zavřít zprávu">Zavřít</button>
   </div>
   <header>

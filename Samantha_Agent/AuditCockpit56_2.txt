@@ -1,6 +1,6 @@
 HLUBOKÝ AUDIT UI COCKPITU A PLÁN ÚPRAV
 ====================================
-Verze dokumentu: 2.1
+Verze dokumentu: 2.2
 Datum: 2026-09-14
 Základ auditu: main 10ec08770e05 (nasazený, ověřený před auditem).
 Autor: Adam / Codex. Původní audit zachycuje 10ec0877; vývojový stav je níže.
@@ -9,23 +9,26 @@ TOTO JE AKTUÁLNÍ ROZHODOVACÍ ČÁST DOKUMENTU.
 Architektonický průběh a původní audit zůstávají níže jako historie.
 Čísla, provozní stavy a priority historických oddílů nejsou dnešním stavem.
 
-VÝVOJOVÝ STAV — 2026-09-14 11:53 CEST
-U01 je dokončený lokálně na výslovný pokyn Míly; dosud bez push/nasazení.
-Společná odezva je ve stálém zavíratelném panelu nad pracovní plochou.
-Zůstává viditelná při scrollování, zavřeném Servisu i otevřeném dialogu;
-aria-live je uvnitř aktivního dialogu, dlouhý text má vlastní posouvání.
-Zpráva sama nemizí, nová ji nahradí; zobrazení nekrade fokus.
-Společný postAction (nyní otevření terminálu) už nehlásí Hotovo při chybě
-nebo nepotvrzeném výsledku; síťový výpadek vyzývá nejprve obnovit stav.
-Payloady, potvrzení a backend se nezměnily. Ostatní specializované akce
-zachovávají vlastní texty; U01 není sjednocení všech stavových protokolů.
-Důkaz: reports/cockpit_ui_u01_2026_09_14.json; 4 browser scénáře,
-16 dialogových kontejnerů v každém, 5 variant odpovědi, bez JS chyb;
-15 frontendových testů a statická brána OK. Žádné ostré POST požadavky.
-Otevřeno: fyzická přejímka Mac/iPhone a čtečky obrazovky po nasazení.
-Další krok U02: hlavička a návraty. Poté U03: kompaktní Dokumenty.
-Níže uvedená měření a nálezy jsou výchozí audit 10ec0877; N02 je tímto
-lokálně opravený, část N13 (viditelnost chyb) též, návratové cesty čekají.
+VÝVOJOVÝ STAV — 2026-09-14 14:18 CEST
+U01 a U02 jsou dokončené lokálně na Mílův pokyn; dosud bez push/nasazení.
+U01: stálý zavíratelný panel odezvy nad pracovní plochou i aktivním dialogem.
+U02: hlavička má pružnou výšku a tlačítka se neořezávají. Nákupní čtečka
+umí návrat s původním oknem i bez něj; při odmítnutém zavření nabídne postup.
+Obě čtečky tolerují selhání zaměření původního okna. Tisk beze změny.
+Blokovaný popup u e-mailu, katalogu a ScanDocu nabídne odkaz do nové karty;
+Cockpit zůstává otevřený s rozepsanou prací. Odkaz přijímá pouze HTTP(S),
+nová zpráva ho odstraní a nová karta nemá přístup k openeru.
+Ověření U02: 5 syntetických browser scénářů 320/390/768/1024/1440 px,
+žádné oříznuté tlačítko hlavičky ani horizontální přetečení; obě čtečky,
+blokované popupy a zachovaný vstup. 15 frontendových testů včetně tisku.
+Důkaz: memory/reports/cockpit_ui_u02_2026_09_14.json.
+U01: memory/reports/cockpit_ui_u01_2026_09_14.json.
+Otevřeno: fyzická přejímka Mac/iPhone a čteček obrazovky po nasazení.
+Další krok U03: kompaktní Dokumenty, hledání nahoru a odstranění natažených
+prázdných karet. Mobilní navigace zůstává rozměrná; její redesign je později.
+Níže uvedená měření a nálezy jsou výchozí audit 10ec0877. N01/N02/N13 jsou
+lokálně řešené v rozsahu U01/U02; tisk, backend a bezpečnostní potvrzení
+zůstávají beze změny. Původní audit není nové měření upraveného UI.
 
 0. ZÁVĚR PRO MÍLU
 ----------------
@@ -369,6 +372,7 @@ jedna operace se nespouští znovu kvůli neviditelnému výsledku. Cílený bro
 Závislosti: žádné. Doporučený první malý vývojový krok.
 
 U02 / P0 / S — Oprava rozměrů hlavičky a návratů (N01,N13).
+Stav: HOTOVO LOKÁLNĚ 2026-09-14; fyzická přejímka po nasazení.
 Zajistit neskrývanou lištu a nákupní návrat bez openeru; popup failure musí
 nabídnout dostupnou cestu. Neprovádět v tomto kroku kompletní nový design.
 Důkaz: 320–1440 px, samostatná karta, blokovaný popup, čtečky Mac/iPhone.
@@ -495,8 +499,8 @@ Závěr ke struktuře:
 - Browser rozměry z fixture nejsou skutečné počty Mílových dokumentů ani
   důkaz shody se všemi verzemi Safari. Fyzický Mac/iPhone test zůstává nutný.
 - Barevné/přístupnostní cíle nejsou výsledkem úplného WCAG auditu.
-- Míla následně schválil zahájení vývoje; U01 je lokálně implementovaný.
-  U02–U11 zůstávají plánem. Push a nasazení tohoto kroku dosud neproběhly.
+- Míla následně schválil zahájení vývoje; U01/U02 jsou lokálně implementované.
+  U03–U11 zůstávají plánem. Push a nasazení tohoto kroku dosud neproběhly.
 
 10. ZDROJE A OPĚRNÉ BODY
 -----------------------

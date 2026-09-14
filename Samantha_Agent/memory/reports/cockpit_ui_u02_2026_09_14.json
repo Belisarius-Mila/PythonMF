@@ -1,0 +1,289 @@
+{
+  "date": "2026-09-14 14:18 CEST",
+  "scope": "U02 header and reader return navigation; popup links. All browser requests intercepted with synthetic data. No print/send/deployment actions.",
+  "base_commit": "2f6306bb",
+  "browser": "Headless Edge Chromium on Mac; mobile viewport emulation",
+  "limitations": [
+    "Physical Safari and screen reader acceptance pending",
+    "Blocked close simulated; actual popup return additionally exercised",
+    "Header remains tall on mobile; compact navigation is a later step",
+    "Existing unrelated untracked directory preserved outside this commit"
+  ],
+  "unit_tests": {
+    "module": "tests.test_cockpit_frontend",
+    "passed": 15,
+    "includes": "Both readers: opener/standalone/closed/inaccessible return, blocked-close guidance, original print confirmations and failure behavior"
+  },
+  "static_gate": "passed; initial trailing blank line corrected",
+  "browser_scenarios": [
+    {
+      "width": 1440,
+      "height": 900,
+      "header": {
+        "height": 90,
+        "overflow": false,
+        "clipped": []
+      },
+      "readers": [
+        {
+          "kind": "document",
+          "standaloneBack": true,
+          "blockedCloseGuidance": true
+        },
+        {
+          "kind": "purchase",
+          "standaloneBack": true,
+          "blockedCloseGuidance": true
+        }
+      ],
+      "popupFallbacks": [
+        "email",
+        "catalog",
+        "scandocu"
+      ],
+      "draftPreserved": true,
+      "unsafeSchemesRejected": true,
+      "realOpenerReturn": true,
+      "jsErrors": [],
+      "syntheticPosts": 4
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "header": {
+        "height": 136,
+        "overflow": false,
+        "clipped": []
+      },
+      "readers": [
+        {
+          "kind": "document",
+          "standaloneBack": true,
+          "blockedCloseGuidance": true
+        },
+        {
+          "kind": "purchase",
+          "standaloneBack": true,
+          "blockedCloseGuidance": true
+        }
+      ],
+      "popupFallbacks": [
+        "email",
+        "catalog",
+        "scandocu"
+      ],
+      "draftPreserved": true,
+      "unsafeSchemesRejected": true,
+      "realOpenerReturn": true,
+      "jsErrors": [],
+      "syntheticPosts": 4
+    },
+    {
+      "width": 768,
+      "height": 900,
+      "header": {
+        "height": 138,
+        "overflow": false,
+        "clipped": []
+      },
+      "readers": [
+        {
+          "kind": "document",
+          "standaloneBack": true,
+          "blockedCloseGuidance": true
+        },
+        {
+          "kind": "purchase",
+          "standaloneBack": true,
+          "blockedCloseGuidance": true
+        }
+      ],
+      "popupFallbacks": [
+        "email",
+        "catalog",
+        "scandocu"
+      ],
+      "draftPreserved": true,
+      "unsafeSchemesRejected": true,
+      "realOpenerReturn": true,
+      "jsErrors": [],
+      "syntheticPosts": 4
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "header": {
+        "height": 276,
+        "overflow": false,
+        "clipped": []
+      },
+      "readers": [
+        {
+          "kind": "document",
+          "standaloneBack": true,
+          "blockedCloseGuidance": true
+        },
+        {
+          "kind": "purchase",
+          "standaloneBack": true,
+          "blockedCloseGuidance": true
+        }
+      ],
+      "popupFallbacks": [
+        "email",
+        "catalog",
+        "scandocu"
+      ],
+      "draftPreserved": true,
+      "unsafeSchemesRejected": true,
+      "realOpenerReturn": true,
+      "jsErrors": [],
+      "syntheticPosts": 4
+    },
+    {
+      "width": 320,
+      "height": 780,
+      "header": {
+        "height": 276,
+        "overflow": false,
+        "clipped": []
+      },
+      "readers": [
+        {
+          "kind": "document",
+          "standaloneBack": true,
+          "blockedCloseGuidance": true
+        },
+        {
+          "kind": "purchase",
+          "standaloneBack": true,
+          "blockedCloseGuidance": true
+        }
+      ],
+      "popupFallbacks": [
+        "email",
+        "catalog",
+        "scandocu"
+      ],
+      "draftPreserved": true,
+      "unsafeSchemesRejected": true,
+      "realOpenerReturn": true,
+      "jsErrors": [],
+      "syntheticPosts": 4
+    }
+  ],
+  "u01_regression": [
+    {
+      "width": 1440,
+      "height": 900,
+      "closed": {
+        "visible": true,
+        "inViewport": true,
+        "uncovered": true,
+        "serviceClosed": true,
+        "host": "BODY"
+      },
+      "popup": {
+        "visible": true,
+        "inViewport": true,
+        "uncovered": true,
+        "serviceClosed": true,
+        "host": "BODY"
+      },
+      "dialogsChecked": 16,
+      "outcomes": {
+        "ok": "Hotovo.",
+        "failed": "Akce se nepodařila.",
+        "http": "Akce se nepodařila.",
+        "unknown": "Výsledek akce není potvrzený. Než ji zopakuješ, obnov stav.",
+        "network": "Výsledek akce se nepodařilo ověřit: TypeError: Failed to fetch. Než ji zopakuješ, obnov stav."
+      },
+      "posts": 5,
+      "jsErrors": []
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "closed": {
+        "visible": true,
+        "inViewport": true,
+        "uncovered": true,
+        "serviceClosed": true,
+        "host": "BODY"
+      },
+      "popup": {
+        "visible": true,
+        "inViewport": true,
+        "uncovered": true,
+        "serviceClosed": true,
+        "host": "BODY"
+      },
+      "dialogsChecked": 16,
+      "outcomes": {
+        "ok": "Hotovo.",
+        "failed": "Akce se nepodařila.",
+        "http": "Akce se nepodařila.",
+        "unknown": "Výsledek akce není potvrzený. Než ji zopakuješ, obnov stav.",
+        "network": "Výsledek akce se nepodařilo ověřit: TypeError: Failed to fetch. Než ji zopakuješ, obnov stav."
+      },
+      "posts": 5,
+      "jsErrors": []
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "closed": {
+        "visible": true,
+        "inViewport": true,
+        "uncovered": true,
+        "serviceClosed": true,
+        "host": "BODY"
+      },
+      "popup": {
+        "visible": true,
+        "inViewport": true,
+        "uncovered": true,
+        "serviceClosed": true,
+        "host": "BODY"
+      },
+      "dialogsChecked": 16,
+      "outcomes": {
+        "ok": "Hotovo.",
+        "failed": "Akce se nepodařila.",
+        "http": "Akce se nepodařila.",
+        "unknown": "Výsledek akce není potvrzený. Než ji zopakuješ, obnov stav.",
+        "network": "Výsledek akce se nepodařilo ověřit: TypeError: Failed to fetch. Než ji zopakuješ, obnov stav."
+      },
+      "posts": 5,
+      "jsErrors": []
+    },
+    {
+      "width": 320,
+      "height": 780,
+      "closed": {
+        "visible": true,
+        "inViewport": true,
+        "uncovered": true,
+        "serviceClosed": true,
+        "host": "BODY"
+      },
+      "popup": {
+        "visible": true,
+        "inViewport": true,
+        "uncovered": true,
+        "serviceClosed": true,
+        "host": "BODY"
+      },
+      "dialogsChecked": 16,
+      "outcomes": {
+        "ok": "Hotovo.",
+        "failed": "Akce se nepodařila.",
+        "http": "Akce se nepodařila.",
+        "unknown": "Výsledek akce není potvrzený. Než ji zopakuješ, obnov stav.",
+        "network": "Výsledek akce se nepodařilo ověřit: TypeError: Failed to fetch. Než ji zopakuješ, obnov stav."
+      },
+      "posts": 5,
+      "jsErrors": []
+    }
+  ]
+}

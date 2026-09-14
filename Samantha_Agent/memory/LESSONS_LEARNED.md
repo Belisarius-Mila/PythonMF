@@ -659,3 +659,8 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Projev: akce zapíše zprávu, ale člověk ji nevidí, protože předek je zavřený details nebo překrytý dialogem.
 - Řešení: společný panel nezávislý na scrollu a detailech; při modalu přesunout i live region do jeho přístupnostní oblasti. Zobrazení nesmí krást fokus, chyba nesmí sama zmizet.
 - Ověření: skutečná viditelnost a překrytí přes elementFromPoint, zavřený detail, aktivní dialog, dlouhý text, blokovaný popup a síťová chyba; samotný textContent ani z-index nestačí. Důkaz: reports/cockpit_ui_u01_2026_09_14.json.
+
+### 2026-09-14 14:18 CEST — Návrat a popup potřebují dostupnou náhradní cestu
+- Projev: nákupní čtečka pouze zaměřovala opener; samostatná karta neměla návrat. Zablokovaný popup ukázal jen textovou adresu.
+- Řešení: s openerem zaměřit původní okno a zavřít čtečku, bez něj navigovat na Cockpit; při odmítnutém zavření dát instrukci. Náhradní popup odkaz otevřít uživatelským kliknutím v nové kartě bez openeru, přijímat pouze HTTP(S).
+- Ověření: samostatná i skutečně otevřená popup karta, uzavřený/nedostupný opener, odmítnuté zavření, zachovaný rozepsaný vstup a odstranění starého odkazu při další zprávě. Důkaz: reports/cockpit_ui_u02_2026_09_14.json.

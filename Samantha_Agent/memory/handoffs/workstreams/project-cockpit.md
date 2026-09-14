@@ -1,14 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-14 11:53 CEST. U01 dokončený lokálně podle AuditCockpit56_2.txt v2.1.
-- Výsledek akce je viditelný při zavřeném Servisu, posunuté stránce i v dialogu. Zavíratelný panel bez automatického mizení; dlouhý text má vlastní scroll. Zobrazení nekrade fokus, zavření jej vrací k dostupnému původnímu prvku.
-- Společný postAction (otevření terminálu) rozlišuje potvrzený úspěch, chybu a neověřený výsledek. Backend, payloady a bezpečnostní potvrzení se nemění.
-- Důkaz: čtyři syntetické browser scénáře 320/390/1024/1440 px, každý 16 dialogů a pět variant odpovědi, právě jeden POST na kliknutí, bez JS chyb; 15 frontendových testů a statická brána prošly. `reports/cockpit_ui_u01_2026_09_14.json`.
-- Stav dodání: lokální vývoj, nový push ani nasazení neprovedeny. Poslední nasazení 10ec0877 je podklad z předchozího auditu, nikoli nový živý provozní důkaz. Míla před tímto krokem potvrdil scroll archivu.
-- Další krok: U02 — oprava rozměrů hlavičky a návratů; potom U03 — kompaktní dokumentová část. Celkem 22 výchozích nálezů a 11 kroků zůstává v TXT.
-- Rizika/přejímka: panel může do zavření překrýt spodní obsah; čtečky obrazovky a fyzický Mac/iPhone dosud neověřené. Zachovaný limit jedné poslední společné zprávy; historie/souběžné operace nejsou rozsahem U01.
-- Záloha je odložená kvůli nedostupnému disku; Santiago pouze zvažované téma.
+- Aktualizováno: 2026-09-14 14:18 CEST. U01/U02 hotové lokálně; AuditCockpit56_2.txt v2.2.
+- U02: neořezaná pružná hlavička, návrat nákupní čtečky s openerem i bez něj, srozumitelný postup při odmítnutém zavření. Obě čtečky pokračují v návratu i po selhání focus původního okna.
+- Blokovaný popup e-mailu, katalogu či ScanDocu nabízí HTTP(S) odkaz do nové karty bez openeru. Rozepsaný Cockpit zůstává otevřený; další zpráva odkaz odstraní.
+- Důkaz: 5 browser scénářů 320–1440 px; hlavička bez oříznutých tlačítek/přetečení, obě čtečky a tři popup cesty. 15 frontendových testů včetně nezměněných potvrzení tisku. `reports/cockpit_ui_u02_2026_09_14.json`.
+- Dodání: lokální vývoj, nový push/nasazení neprovedeny. Starší nasazení 10ec0877 je předchozí ověřený podklad, nikoli nový živý audit.
+- Další krok U03: kompaktní Dokumenty a hledání nahoře; potom U04 stránkování.
+- Rizika/přejímka: fyzický Safari Mac/iPhone a čtečky obrazovky dosud neověřené. Hlavička je nyní pravdivě vyšší podle obsahu, mobilní navigace čeká na pozdější redesign. U01 má jednu poslední zprávu.
+- Záloha odložená kvůli disku; Santiago jen zvažované téma. Nesledovaná složka jiného projektu v nadřazeném repozitáři zachovaná mimo tento commit.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: Cockpit / hlavní architektura
@@ -21,19 +21,19 @@ Stav: rozpracovane
 Pripomenout pri startu: ne
 
 Co se resilo:
-U01 z UI auditu: viditelná společná odezva akcí.
+U02: hlavička, návrat nákupní čtečky a náhradní odkazy při blokovaném popupu.
 
 Co je hotove:
-- U01 lokálně implementovaný, browser a cílené kontroly prošly; roadmapa v2.1.
+- U01/U02 lokálně implementované a cíleně ověřené; roadmapa v2.2.
 
 Co neni hotove:
-- Push/nasazení U01 a fyzická přejímka. Zbývající kroky U02–U11.
+- Push/nasazení a fyzická přejímka. Kroky U03–U11.
 
 Dalsi krok:
-U02: rozměry hlavičky a návraty.
+U03: kompaktní Dokumenty a hledání nahoře.
 
 Navrhovane dalsi kroky:
-- U03 kompaktní Dokumenty a U04 stránkování, potom další kroky TXT.
+- U04 stránkování, později sjednocení navigace a vzhledu.
 
 Zmenene nebo relevantni soubory:
 - Viz jednotlive checkpointy.
@@ -902,3 +902,23 @@ Navrhované další kroky:
 Technický důkaz:
 - 15 frontendových testů, statická brána OK. Čtyři izolované browser scénáře: 16 dialogových kontejnerů, pět variant odpovědi, jeden POST na kliknutí, žádné JS chyby. Všechny požadavky syntetické; report `reports/cockpit_ui_u01_2026_09_14.json`.
 - Fyzická přejímka Safari/čteček zůstává otevřená. Panel má jednu poslední zprávu, může do zavření překrývat spodní obsah; bez automatického opakování akcí.
+
+### 2026-09-14 14:18 CEST — U02: dostupná hlavička a návraty
+
+Hotovo:
+- Tlačítka hlavní lišty se ve zkoušených šířkách neořezávají. Nákupní čtečka se vrací i ze samostatné karty a vysvětlí odmítnuté zavření.
+- Blokovaný popup nabízí skutečný odkaz; otevření nové karty zachová práci v Cockpitu. Odkaz je pouze HTTP(S), bez openeru, nová zpráva jej odstraní.
+
+Rozhodnutí:
+- Míla schválil další krok U02. Jde o dostupnost navigace, grafický redesign a kompaktní Dokumenty následují samostatně. Bez změny tiskového workflow či backendu.
+
+Další krok:
+- U03: hledání nahoře a kompaktní dokumentové karty.
+
+Navrhované další kroky:
+- U04 stránkování, později jednotná navigace a grafika podle TXT.
+
+Technický důkaz:
+- 15 frontendových testů včetně návratů a tisku; pět izolovaných browser scénářů od 320 do 1440 px. Report `reports/cockpit_ui_u02_2026_09_14.json`.
+- Fyzická přejímka Safari po samostatně schváleném nasazení. Cizí nesledovaný adresář zachovaný, změna pouze v konkrétních souborech Cockpitu.
+- Doplněné ověření: statická brána prošla, U01 regrese ve čtyřech šířkách (16 dialogů a pět odpovědí v každé) také prošla.

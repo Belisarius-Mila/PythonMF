@@ -89,7 +89,7 @@ def document_reader_page_html(document_id: str, title: str, viewer_kind: str = "
 
     function focusCockpit() {{
       if (window.opener && !window.opener.closed) {{
-        window.opener.focus();
+        try {{ window.opener.focus(); }} catch (_) {{ /* Opener may be inaccessible. */ }}
         readerStatus.textContent = "Vracím zpět původní Cockpit.";
         window.close();
         window.setTimeout(() => {{
@@ -103,7 +103,7 @@ def document_reader_page_html(document_id: str, title: str, viewer_kind: str = "
 
     function closeReader() {{
       if (window.opener && !window.opener.closed) {{
-        window.opener.focus();
+        try {{ window.opener.focus(); }} catch (_) {{ /* Opener may be inaccessible. */ }}
       }}
       window.close();
       window.setTimeout(() => {{
@@ -161,14 +161,16 @@ def purchase_reader_page_html(purchase_id: str, title: str) -> str:
   <title>Nákup / záruka - {safe_title}</title>
   <style>
     :root {{ color-scheme: light; --blue: #2563eb; --ink: #172033; --muted: #667085; }}
-    body {{ margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: var(--ink); background: #f6f7fb; }}
-    header {{ display: flex; gap: 12px; align-items: center; justify-content: space-between; padding: 14px 18px; background: #fff; border-bottom: 1px solid #d8deea; }}
+    body {{ height: 100vh; display: flex; flex-direction: column; margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: var(--ink); background: #f6f7fb; }}
+    header {{ flex: none; flex-wrap: wrap; display: flex; gap: 12px; align-items: center; justify-content: space-between; padding: 14px 18px; background: #fff; border-bottom: 1px solid #d8deea; }}
+    header > div:first-child {{ min-width: 0; flex: 1 1 240px; overflow-wrap: anywhere; }}
     h1 {{ margin: 0; font-size: 18px; }}
     .meta {{ color: var(--muted); font-size: 13px; margin-top: 3px; }}
     .actions {{ display: flex; gap: 8px; flex-wrap: wrap; }}
     button, a.button {{ border: 1px solid #b9c4d6; background: #fff; color: var(--ink); border-radius: 7px; padding: 8px 11px; font-size: 14px; text-decoration: none; cursor: pointer; }}
     a.primary {{ background: var(--blue); color: #fff; border-color: var(--blue); }}
-    main {{ height: calc(100vh - 70px); }}
+    main {{ flex: 1; min-height: 0; }}
+    .status {{ flex-basis: 100%; color: var(--muted); font-size: 13px; }}
     iframe {{ width: 100%; height: 100%; border: 0; background: #fff; }}
   </style>
 </head>
@@ -180,12 +182,42 @@ def purchase_reader_page_html(purchase_id: str, title: str) -> str:
     </div>
     <div class="actions">
       <a class="button primary" href="{safe_pdf_url}" target="_blank" rel="noopener">Otevřít PDF</a>
-      <button type="button" onclick="window.opener && window.opener.focus ? window.opener.focus() : null">Zpět do Cockpitu</button>
-      <button type="button" onclick="window.close()">Zavřít okno</button>
+      <button type="button" id="readerBackBtn">Zpět do Cockpitu</button>
+      <button type="button" id="readerCloseBtn">Zavřít okno</button>
     </div>
+    <div class="status" id="readerStatus" role="status"></div>
   </header>
   <main>
     <iframe title="PDF nákupní faktury" src="{safe_pdf_url}"></iframe>
   </main>
+  <script>
+    const readerStatus = document.getElementById("readerStatus");
+    function focusCockpit() {{
+      if (window.opener && !window.opener.closed) {{
+        try {{ window.opener.focus(); }} catch (_) {{ /* Opener may be inaccessible. */ }}
+        readerStatus.textContent = "Vracím zpět původní Cockpit.";
+        window.close();
+        window.setTimeout(() => {{
+          window.location.href = "/";
+        }}, 350);
+        return true;
+      }}
+      window.location.href = "/";
+      return false;
+    }}
+
+    function closeReader() {{
+      if (window.opener && !window.opener.closed) {{
+        try {{ window.opener.focus(); }} catch (_) {{ /* Opener may be inaccessible. */ }}
+      }}
+      window.close();
+      window.setTimeout(() => {{
+        readerStatus.textContent = "Pokud se okno nezavřelo, použij Zpět do Cockpitu.";
+      }}, 300);
+    }}
+
+    document.getElementById("readerBackBtn").addEventListener("click", focusCockpit);
+    document.getElementById("readerCloseBtn").addEventListener("click", closeReader);
+  </script>
 </body>
 </html>"""

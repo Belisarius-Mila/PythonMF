@@ -797,6 +797,7 @@
 
     const actionFeedback = document.getElementById("actionFeedback");
     const actionMessageCloseBtn = document.getElementById("actionMessageCloseBtn");
+    const actionMessageLink = document.getElementById("actionMessageLink");
     let actionMessageReturnFocus = null;
 
     function placeActionFeedback() {
@@ -823,13 +824,24 @@
       }
     });
 
-    function showMessage(text) {
+    function showMessage(text, targetUrl = "") {
       if (text && !actionFeedback.contains(document.activeElement)) {
         actionMessageReturnFocus = document.activeElement;
       }
       placeActionFeedback();
       actionFeedback.classList.toggle("hidden", !text);
       actionMessage.textContent = text || "";
+      actionMessageLink.classList.add("hidden");
+      actionMessageLink.removeAttribute("href");
+      if (text && targetUrl) {
+        try {
+          const target = new URL(targetUrl, window.location.href);
+          if (["http:", "https:"].includes(target.protocol)) {
+            actionMessageLink.href = target.href;
+            actionMessageLink.classList.remove("hidden");
+          }
+        } catch (_) { /* Keep the message visible even when the URL is invalid. */ }
+      }
     }
 
     const FULL_STATUS_MONITOR_MS = 5 * 60 * 1000;
@@ -3327,7 +3339,7 @@ Soubor nebude trvale smazán.`);
             scanDocuWindow.location.href = targetUrl;
             scanDocuWindow.focus();
           } else {
-            showMessage(`${data.message || "ScanDocu běží."} Popup okno bylo blokováno, otevři ${targetUrl}`);
+            showMessage(`${data.message || "ScanDocu běží."} Prohlížeč zablokoval nové okno. Použij odkaz níže.`, targetUrl);
           }
         } else if (scanDocuWindow) {
           scanDocuWindow.close();
@@ -6623,7 +6635,7 @@ ${item.context || ""}`);
         appWindow.location.href = targetUrl;
         appWindow.focus();
       } else {
-        showMessage(`Popup okno bylo blokováno, otevři ${targetUrl}`);
+        showMessage("Prohlížeč zablokoval nové okno. Použij odkaz níže.", targetUrl);
       }
     }
 
@@ -6645,7 +6657,7 @@ ${item.context || ""}`);
       if (emailWindow) {
         emailWindow.focus();
       } else {
-        showMessage(`Popup okno bylo blokováno, otevři ${path}`);
+        showMessage("Prohlížeč zablokoval nové okno. Použij odkaz níže.", path);
       }
     }
 
