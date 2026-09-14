@@ -21,6 +21,7 @@ from app.communication.simple_main_checkpoint import (
     _update_active_project_row,
     _write_checkpoint_memory,
     _replace_current_status,
+    _requires_full_gate,
     complete_simple_main_checkpoint,
     _format_timestamp,
 )
@@ -349,6 +350,11 @@ class SimpleMainCheckpointTests(unittest.TestCase):
         self.assertEqual(workspace_head, source_head)
         self.assertIn("rychlou syntax/whitespace bránou", handoff)
         self.assertIn("čeká na denní balíček", handoff)
+
+    def test_shared_git_selection_requires_full_gate(self) -> None:
+        self.assertTrue(_requires_full_gate([
+            {"path": "Samantha_Agent/app/communication/git_runtime.py"},
+        ]))
 
     def test_high_risk_batch_checkpoint_keeps_full_gate(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

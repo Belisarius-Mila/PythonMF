@@ -16,6 +16,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from app.codex_appserver import AppServerError
+from app.communication.git_runtime import GIT_EXECUTABLE
 from app.communication.human_adam_workspace import (
     MAX_SAFE_DELETED_PATHS_PER_STEP,
     SAFE_CHECKPOINT_CHANGE_TYPES,
@@ -58,7 +59,7 @@ class TakeoverPlan:
 
 def _git(cwd: Path, args: Sequence[str], *, timeout: float = 120.0) -> str:
     completed = subprocess.run(
-        ["/usr/bin/git", "-C", str(cwd), *args],
+        [GIT_EXECUTABLE, "-C", str(cwd), *args],
         capture_output=True,
         text=True,
         timeout=timeout,

@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any, Sequence
 
 from app.codex_appserver import AppServerError
+from app.communication.git_runtime import GIT_EXECUTABLE
 
 
 _HEAD_RE = re.compile(r"[0-9a-f]{40}")
@@ -62,7 +63,7 @@ def _git(
     timeout: float = _SYNC_LOCK_TIMEOUT_SECONDS,
 ) -> str:
     completed = subprocess.run(
-        ["/usr/bin/git", "-C", str(repo), *args],
+        [GIT_EXECUTABLE, "-C", str(repo), *args],
         capture_output=True,
         text=True,
         timeout=timeout,
@@ -79,7 +80,7 @@ def _git(
 def _is_ancestor(repo: Path, ancestor: str, descendant: str) -> bool:
     completed = subprocess.run(
         [
-            "/usr/bin/git",
+            GIT_EXECUTABLE,
             "-C",
             str(repo),
             "merge-base",

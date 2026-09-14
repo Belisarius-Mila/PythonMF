@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any, Callable, Sequence
 
 from app.codex_appserver import AppServerError
+from app.communication.git_runtime import GIT_EXECUTABLE
 from app.communication.checkpoint_quality_gate import (
     DEFAULT_GATE_LOG,
     HumanAdamGateError,
@@ -74,7 +75,7 @@ class GitHubBatchPlan:
 
 def _git(repo: Path, args: Sequence[str], *, timeout: float = 120.0) -> str:
     completed = subprocess.run(
-        ["/usr/bin/git", "-C", str(repo), *args],
+        [GIT_EXECUTABLE, "-C", str(repo), *args],
         capture_output=True,
         text=True,
         timeout=timeout,
@@ -89,7 +90,7 @@ def _git(repo: Path, args: Sequence[str], *, timeout: float = 120.0) -> str:
 def _is_ancestor(repo: Path, ancestor: str, descendant: str) -> bool:
     completed = subprocess.run(
         [
-            "/usr/bin/git",
+            GIT_EXECUTABLE,
             "-C",
             str(repo),
             "merge-base",

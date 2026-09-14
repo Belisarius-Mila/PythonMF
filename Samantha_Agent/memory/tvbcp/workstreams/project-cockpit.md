@@ -1,17 +1,17 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-14 00:00 CEST. [PRIPOMENOUT] Ranní pokračování ve zrychlování brány.
-- Míla schválil push, nasazení a úplné večerní uzavření. Pět vývojových kroků tvoří jeden balík; tento souhrnný zápis uzavírá jeho dokumentaci.
-- Funkční balík `21b73cbf` je nasazený a ověřený: nový proces, code stamp `16520ea0d29e3ad1`, smoke 5/5, účtenka `2026-09-13T21:56:48+00:00`. Před zápisem oba profily čisté/zarovnané a Knihovna znovu připojená, bez běžícího tahu a nejistého doručení.
-- Tento zápis vzniká po ověření funkčního kódu a před finálním dávkovým pushem souhrnné dokumentace. Přesný konečný GitHub head a jeho nasazení dokládá aktuální `workstream_live_status` a řízená deployment účtenka; starý snapshot nemá nahrazovat živý audit.
-- Roadmapa `AuditCockpit56_2.txt` v1.7. Hotové hledání `674dc194`, čtečky `f1b41dc5`, měření `0d1b24f1`, levnější příprava `4e498bc0` a rychlejší spouštění Gitu `21b73cbf`.
-- Srovnání stejné celé sady: 1655/1655 před i po, 453,73 → 340,30 s; úspora 113,43 s / 25 %. Bez odstranění testů či kontrol. Běžné úpravy ověřovat cíleně; rizikové a vydávací brány zachovat.
-- Další krok: Ráno 14. 9. změřit zbývající volání systémového Git launcheru mimo společný workspace helper a vybrat další zrychlení při zachování celé sady.
-- Kandidáti k měření: samostatné Git operace v `simple_main_checkpoint.py`, `simple_main_deploy.py` a `human_adam_takeover.py`. Dnes bez dalších změn; žádný plošný přepis nebo cache Git stavu.
-- Omezení: časový výsledek je jeden pár měření na tomto Macu. Volba Git nástroje platí do restartu procesu; Linux používá původní cestu. Úplná sémantická revize duplicit testů nebyla provedena.
-- Po této prioritě zbývá společná Mac/iPhone přejímka, další strukturální řezy a navazující audit/UI. Známé UI nálezy: jen prvních 8 výsledků, nerozbalený panel přes Janiččinu zkratku, chybějící náhradní návrat nákupní čtečky.
-- Záloha odložená na 14. 9. kvůli nedostupnému disku; bez spuštění či mazání. Santiago zatím jen zvažované téma.
+- Aktualizováno: 2026-09-14 09:10 CEST. Ranní připomenutí splněné; další optimalizace dokončená lokálně.
+- Roadmapa `AuditCockpit56_2.txt` v1.8. Sdílený `git_runtime.py` vybírá stejný Apple Git pro workspace, checkpoint, deploy, batch, remote sync, takeover i společný test helper.
+- Stejných 1656/1656 testů prošlo před i po; 307,14 → 261,43 s, úspora 45,71 s (14,88 % proti dnešnímu výchozímu stavu).
+- Původních 1655 testů zachováno, jeden nový hlídá povinnou plnou bránu pro společný Git modul. Plná kanonická brána prošla; manifest testů a všechny Git příkazy/timeouty zachované. Žádná cache stavu repozitáře.
+- Report `cockpit_shared_git_2026_09_14.md` a bezpečný JSON. AST dokládá přesun původního resolveru a pouze záměnu executable v pěti navazujících produkčních modulech.
+- Poslední publikovaný/nasazený základ je `e7723c9a`, deployment účtenka `2026-09-13T22:07:19+00:00`, smoke 5/5; potvrzeno registrovaným read-only auditem `2026-09-14T07:02:01+00:00`. Dnešní krok nemá nový push ani nasazení.
+- Rozhodnutí: Míla požádal o další hledání úspor; využít již ověřený výběr Gitu společně, bez škrtání kontrol.
+- Další krok: Na samostatný pokyn zahrnout lokální krok do dávkového push/nasazení; další optimalizaci vybírat podle nového měření Git skupin.
+- Omezení: jeden pár měření na tomto Macu; dnešní procento se nesčítá se včerejšími 25 %. Po změně Xcode/toolchainu restart; při chybě a mimo Mac zůstává systémový Git. Živá odezva Cockpitu nebyla měřena.
+- Otevřeno: společná Mac/iPhone přejímka, další strukturální řezy a navazující audit/UI. Známé UI nálezy: jen prvních 8 výsledků, nerozbalený panel přes Janiččinu zkratku, chybějící náhradní návrat nákupní čtečky.
+- Záloha byla odložená kvůli nedostupnému disku; tento krok ji nespouští. Santiago zatím pouze zvažované téma.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Cockpit / hlavní architektura
@@ -852,3 +852,24 @@ Technický důkaz:
 - Funkční nasazení `21b73cbfd4f2`, code stamp `16520ea0d29e3ad1`, nový proces a smoke 5/5; účtenka `2026-09-13T21:56:48+00:00`.
 - Redigovaný live audit `2026-09-13T21:58:23+00:00`: deployment `verified_current`, workspaces `aligned_clean` 2/2, runtime `connected`, `turn_busy=false`, bez nejistého doručení. V tomto okamžiku ještě lokální dávka čekala na finální push.
 - Srovnávací plné sady 1655/1655, 453,73 → 340,30 s. Dávkový push nad finálním headem provede vlastní povinnou plnou bránu; následné zarovnání nasazení a finální čistotu dokládá živý audit. Tento zápis se nevydává za budoucí GitHub účtenku.
+
+### 2026-09-14 09:10 CEST — Další úspora díky společnému spouštění Gitu
+
+Hotovo:
+- Další lokální zrychlení celé testovací sady. Stejných 1656/1656 testů prošlo před i po; 307,14 → 261,43 s, úspora 45,71 s (14,88 % proti dnešnímu výchozímu stavu).
+- Testy používají skutečné oddělené repozitáře a zachované operace; přibyla ochrana společného Git modulu plnou bránou.
+
+Rozhodnutí:
+- Na Mílův pokyn pokračovat v hledání úspor; sdílet již ověřený výběr Apple Git mezi navazujícími operacemi a společnou testovou přípravou. Zachovat kontroly a původní testy.
+
+Další krok:
+- Na samostatný pokyn zahrnout lokální krok do dávkového push/nasazení; další optimalizaci vybírat podle nového měření Git skupin.
+
+Navrhované další kroky:
+- Případné další zrychlení nejdřív změřit v nejdražších Git scénářích; nesčítat procenta oddělených měření.
+- Pokračovat společnou přejímkou a strukturálními řezy/auditem/UI podle roadmapy.
+
+Technický důkaz:
+- Plná kanonická brána prošla, 1656/1656 před i po. Stejné počty po modulech, manifest i Git verze. Report `cockpit_shared_git_2026_09_14.md` + JSON.
+- AST: původní resolver a workspace logika zachované; v pěti dalších produkčních modulech jen executable/import a nový gate prefix. Fallback scénáře prošly v obou plných bězích.
+- Jeden pár měření na tomto Macu. Nový krok je pouze lokální; poslední nasazený základ `e7723c9a` potvrzen read-only auditem, účtenka a smoke 5/5. Nový push/nasazení se netvrdí.

@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-14",
+  "based_on_commit": "e7723c9a",
+  "method": "Sequential full unittest suites, same canonical manifest and 1656 scenarios (1655 retained plus shared-Git full-gate regression). Baseline restores only the five newly changed production modules and shared test helper to /usr/bin/git; existing direct workspace Git remains enabled. Optimized run is the canonical full gate. No repository-state caching, removed tests, parallel execution or changed command arguments/timeouts.",
+  "git_version": "git version 2.50.1 (Apple Git-155)",
+  "manifest_unchanged": true,
+  "manifest_sha256": "1eed38148f73c010fd993f7639a57c9a6f44f524c12d702a38d29e09482dc210",
+  "module_test_counts_equal": true,
+  "before": {
+    "test_count": 1656,
+    "success": true,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "expected_failures": 0,
+    "unexpected_successes": 0,
+    "run_seconds": 307.1354889309732,
+    "load_seconds": 3.5581563470186666
+  },
+  "after": {
+    "test_count": 1656,
+    "success": true,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "expected_failures": 0,
+    "unexpected_successes": 0,
+    "run_seconds": 261.42636365501676,
+    "load_seconds": 3.803847003960982
+  },
+  "seconds_saved": 45.70912527595647,
+  "percent_saved": 14.882397809205731,
+  "git_groups": [
+    {
+      "module": "tests.test_simple_main_checkpoint",
+      "test_count": 29,
+      "before_seconds": 73.7999138769228,
+      "after_seconds": 59.836016875109635
+    },
+    {
+      "module": "tests.test_simple_main_deploy",
+      "test_count": 18,
+      "before_seconds": 46.79074399720412,
+      "after_seconds": 41.034821501001716
+    },
+    {
+      "module": "tests.test_human_adam_takeover",
+      "test_count": 13,
+      "before_seconds": 36.98316473304294,
+      "after_seconds": 29.582682506064884
+    },
+    {
+      "module": "tests.test_human_adam_workspace",
+      "test_count": 35,
+      "before_seconds": 30.744499694672413,
+      "after_seconds": 26.02913182042539
+    },
+    {
+      "module": "tests.test_github_batch",
+      "test_count": 5,
+      "before_seconds": 10.600925573846325,
+      "after_seconds": 7.771170254913159
+    },
+    {
+      "module": "tests.test_main_remote_sync",
+      "test_count": 6,
+      "before_seconds": 12.417091188835911,
+      "after_seconds": 7.692578046000563
+    }
+  ],
+  "ast_checks": [
+    {
+      "module": "app/communication/github_batch.py",
+      "unchanged_except_git_executable_import_and_gate_path": true
+    },
+    {
+      "module": "app/communication/main_remote_sync.py",
+      "unchanged_except_git_executable_import_and_gate_path": true
+    },
+    {
+      "module": "app/communication/simple_main_checkpoint.py",
+      "unchanged_except_git_executable_import_and_gate_path": true
+    },
+    {
+      "module": "app/communication/simple_main_deploy.py",
+      "unchanged_except_git_executable_import_and_gate_path": true
+    },
+    {
+      "module": "scripts/human_adam_takeover.py",
+      "unchanged_except_git_executable_import_and_gate_path": true
+    },
+    {
+      "module": "human_adam_workspace",
+      "unchanged_except_resolver_extraction": true,
+      "resolver_body_unchanged": true
+    }
+  ],
+  "pilot_before": {
+    "success": true,
+    "tests": 2,
+    "seconds": 10.088408546056598,
+    "calls": [
+      {
+        "module": "app.communication.human_adam_workspace",
+        "executable": "direct",
+        "count": 450,
+        "seconds": 7.549375974806026
+      },
+      {
+        "module": "app.communication.simple_main_deploy",
+        "executable": "launcher",
+        "count": 4,
+        "seconds": 0.1397528121015057
+      },
+      {
+        "module": "scripts.human_adam_takeover",
+        "executable": "launcher",
+        "count": 6,
+        "seconds": 0.35796307923737913
+      },
+      {
+        "module": "tests.test_human_adam_takeover",
+        "executable": "launcher",
+        "count": 2,
+        "seconds": 0.09992952807806432
+      },
+      {
+        "module": "tests.test_human_adam_workspace",
+        "executable": "launcher",
+        "count": 29,
+        "seconds": 1.6343636059900746
+      }
+    ]
+  },
+  "limitations": "One full pair on this Mac; timings vary with machine load and are not additive to the previous 25 percent. Shared Git selection is fixed until process restart, fallback and non-macOS unchanged. New code not pushed/deployed, no runtime responsiveness benchmark."
+}

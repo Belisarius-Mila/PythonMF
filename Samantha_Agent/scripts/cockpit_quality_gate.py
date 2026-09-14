@@ -62,6 +62,7 @@ COMPILE_PATHS = (
     "app/communication/trusted_external_generation.py",
     "app/communication/human_adam_ui.py",
     "app/communication/human_adam_workspace.py",
+    "app/communication/git_runtime.py",
     "app/communication/human_adam_workstream_backends.py",
     "app/communication/human_adam_workstream_binding.py",
     "app/communication/human_adam_workstream_catalog.py",

@@ -20,6 +20,7 @@ from typing import Any, Callable, Sequence
 
 from app.codex_appserver import AppServerError, utc_now
 from app.cockpit_code_stamp import cockpit_code_stamp, default_cockpit_code_stamp_paths
+from app.communication.git_runtime import GIT_EXECUTABLE
 from app.communication.checkpoint_quality_gate import (
     DEFAULT_GATE_LOG,
     HumanAdamGateError,
@@ -213,7 +214,7 @@ def _expected_code_stamp(workspace: HumanAdamWorkspaceManager) -> str:
 
 def _git(repo: Path, args: Sequence[str]) -> str:
     completed = subprocess.run(
-        ["/usr/bin/git", "-C", str(repo), *args],
+        [GIT_EXECUTABLE, "-C", str(repo), *args],
         capture_output=True,
         text=True,
         timeout=120,

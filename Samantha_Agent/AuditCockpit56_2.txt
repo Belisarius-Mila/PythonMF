@@ -1,7 +1,7 @@
 AUDIT COCKPITU 5.6 SOL – DRUHÝ PRŮCHOD
 ========================================
 
-Verze: 1.7
+Verze: 1.8
 Aktualizováno: 2026-09-14
 Datum auditu: 2026-08-16
 Autor posouzení: Adam / Codex 5.6 Sol
@@ -215,22 +215,35 @@ a zarovnané, Knihovna znovu připojená bez aktivního tahu.
 Tento souhrn vzniká před finálním dávkovým pushem dokumentace; přesný
 konečný publikovaný a nasazený head ověřuje živý audit, nikoli tento snapshot.
 
-[PRIPOMENOUT] Ráno 14. 9. pokračovat zrychlením brány: změřit zbývající
-samostatná volání /usr/bin/git v simple_main_checkpoint, simple_main_deploy
-a human_adam_takeover. Zatím jen kandidáti, bez dalších dnešních změn.
-Zachovat celou sadu a kontroly; běžné úpravy ověřovat cíleně. Po této
-prioritě se vrátit ke strukturálním řezům a následnému auditu/UI.
+Ranní připomenutí splněno navazujícím krokem C8. Závěrečný e7723c9a je
+publikovaný a nasazený, účtenka 2026-09-13T22:07:19+00:00, smoke 5/5;
+potvrzeno read-only auditem 2026-09-14T07:02:01+00:00.
+
+C8. SPOLEČNÝ GIT PRO NAVAZUJÍCÍ OPERACE A TESTOVOU PŘÍPRAVU
+
+Původní resolver přesunut beze změny do git_runtime.py. Stejný vybraný Git
+nyní sdílí workspace, checkpoint, deploy, batch, remote sync, takeover
+a společný test helper. V navazujících modulech jen executable/import;
+Git příkazy, argumenty, timeouty, kontrola stavu a skutečné repozitáře zachované.
+Nový modul je součástí kompilace a rizikových cest vyžadujících plnou bránu.
+
+Stejných 1656/1656 testů prošlo před i po; 307,14 → 261,43 s, úspora 45,71 s (14,88 % proti dnešnímu výchozímu stavu).
+Původních 1655 testů zůstává; jeden nový hlídá plnou bránu pro společný modul.
+Předchozí workspace optimalizace zapnutá v obou variantách. Jeden dnešní pár
+nelze sčítat se včerejšími 25 %. Fallback a Linux beze změny; po změně Xcode
+restart procesu. Plná kanonická brána prošla, AST potvrzuje původní logiku.
+Report: memory/reports/cockpit_shared_git_2026_09_14.md + JSON.
+Nový krok je lokální, bez push/nasazení a bez benchmarku živé UI odezvy.
 
 D. CO ZŮSTÁVÁ OTEVŘENÉ A V JAKÉM POŘADÍ
 
 1. Push a řízené nasazení dokumentového řezu jsou schválené a dokončené.
    Zbývá běžná uživatelská přejímka skutečného dokumentového panelu Mac/iPhone;
    syntetický UI test a provozní smoke ji nenahrazují.
-2. Hledání (C2), čtečky (C3) i optimalizace (C4–C6) funkčně nasazené.
-   Míla schválil uzavření dávky včetně tohoto závěrečného zápisu.
-   Finální GitHub/runtime head doloží živý audit při dokončení operace.
-3. Ráno 14. 9. nejdřív navázat měřením zbylých samostatných Git volání
-   podle C7. Cílené vývojové sady používat, rizikové/release brány zachovat.
+2. Hledání (C2), čtečky (C3) i optimalizace C4–C6 publikované/nasazené
+   v e7723c9a. Nový C8 čeká na samostatný pokyn k push/nasazení.
+3. Případné další zrychlení vybírat podle nových časů Git skupin (C8).
+   Cílené vývojové sady používat, rizikové/release brány zachovat.
    Sémantické duplicity případně auditovat po konkrétní doméně.
 4. Dokončit společnou uživatelskou přejímku původních pěti scénářů na Macu
    a iPhonu. Jednotlivé dílčí testy nejsou důkaz celé přejímky.

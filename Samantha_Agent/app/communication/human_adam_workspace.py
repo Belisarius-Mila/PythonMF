@@ -6,13 +6,13 @@ import json
 import os
 import re
 import subprocess
-import sys
 import threading
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
 
 from app.codex_appserver import AppServerError, CodexAppServerClient, DEFAULT_CODEX_BIN
+from app.communication.git_runtime import GIT_EXECUTABLE as _GIT_EXECUTABLE
 from app.file_persistence import atomic_write_json
 
 
@@ -106,35 +106,6 @@ GIT_PACK_OBJECT_SUFFIXES = {".bitmap", ".idx", ".pack", ".rev"}
 
 def _now() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
-
-
-def _resolve_git_executable() -> str:
-    """Resolve Apple's selected Git once, avoiding its launcher on every call."""
-    fallback = "/usr/bin/git"
-    if sys.platform != "darwin":
-        return fallback
-    try:
-        result = subprocess.run(
-            ["/usr/bin/xcrun", "--find", "git"],
-            capture_output=True, text=True, check=False, timeout=5,
-        )
-        candidate = Path(result.stdout.strip())
-        if (
-            result.returncode == 0
-            and len(result.stdout.strip().splitlines()) == 1
-            and candidate.is_absolute()
-            and candidate.name == "git"
-            and candidate.is_file()
-            and os.access(candidate, os.X_OK)
-        ):
-            return str(candidate)
-    except (OSError, subprocess.TimeoutExpired):
-        pass
-    return fallback
-
-
-# Toolchain selection is fixed for this process; restart after changing Xcode.
-_GIT_EXECUTABLE = _resolve_git_executable()
 
 
 def _run_git(

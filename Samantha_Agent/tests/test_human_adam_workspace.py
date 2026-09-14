@@ -7,6 +7,8 @@ from pathlib import Path
 from unittest.mock import patch
 
 from app.codex_appserver import AppServerError
+from app.communication import git_runtime
+from app.communication.git_runtime import GIT_EXECUTABLE
 from app.communication import human_adam_workspace as workspace_module
 from app.communication.human_adam_workspace import (
     CANONICAL_PRIVATE_ROOT,
@@ -21,7 +23,7 @@ from app.communication.human_adam_workspace import (
 
 def git(cwd: Path, *args: str) -> str:
     completed = subprocess.run(
-        ["/usr/bin/git", "-C", str(cwd), *args],
+        [GIT_EXECUTABLE, "-C", str(cwd), *args],
         capture_output=True,
         text=True,
         check=False,
@@ -54,9 +56,9 @@ def make_source(root: Path) -> Path:
 
 class GitExecutableTests(unittest.TestCase):
     def test_non_macos_keeps_system_git_without_discovery(self) -> None:
-        with patch.object(workspace_module.sys, "platform", "linux"), \
-                patch.object(workspace_module.subprocess, "run") as run:
-            self.assertEqual(workspace_module._resolve_git_executable(), "/usr/bin/git")
+        with patch.object(git_runtime.sys, "platform", "linux"), \
+                patch.object(git_runtime.subprocess, "run") as run:
+            self.assertEqual(git_runtime.resolve_git_executable(), "/usr/bin/git")
         run.assert_not_called()
 
     def test_macos_uses_executable_selected_by_xcrun(self) -> None:
@@ -66,9 +68,9 @@ class GitExecutableTests(unittest.TestCase):
             candidate.write_text("synthetic executable\n")
             candidate.chmod(0o700)
             result = subprocess.CompletedProcess([], 0, stdout=f"{candidate}\n")
-            with patch.object(workspace_module.sys, "platform", "darwin"), \
-                    patch.object(workspace_module.subprocess, "run", return_value=result) as run:
-                self.assertEqual(workspace_module._resolve_git_executable(), str(candidate))
+            with patch.object(git_runtime.sys, "platform", "darwin"), \
+                    patch.object(git_runtime.subprocess, "run", return_value=result) as run:
+                self.assertEqual(git_runtime.resolve_git_executable(), str(candidate))
             run.assert_called_once_with(
                 ["/usr/bin/xcrun", "--find", "git"], capture_output=True,
                 text=True, check=False, timeout=5,
@@ -83,21 +85,21 @@ class GitExecutableTests(unittest.TestCase):
                           str(Path(temp_dir) / "missing/git"), str(non_executable)]
             for candidate in candidates:
                 with self.subTest(candidate=candidate), \
-                        patch.object(workspace_module.sys, "platform", "darwin"), \
-                        patch.object(workspace_module.subprocess, "run", return_value=
+                        patch.object(git_runtime.sys, "platform", "darwin"), \
+                        patch.object(git_runtime.subprocess, "run", return_value=
                                      subprocess.CompletedProcess([], 0, stdout=candidate)):
-                    self.assertEqual(workspace_module._resolve_git_executable(), "/usr/bin/git")
-            with patch.object(workspace_module.sys, "platform", "darwin"), \
-                    patch.object(workspace_module.subprocess, "run", return_value=
+                    self.assertEqual(git_runtime.resolve_git_executable(), "/usr/bin/git")
+            with patch.object(git_runtime.sys, "platform", "darwin"), \
+                    patch.object(git_runtime.subprocess, "run", return_value=
                                  subprocess.CompletedProcess([], 1, stdout="/usr/bin/git")):
-                self.assertEqual(workspace_module._resolve_git_executable(), "/usr/bin/git")
+                self.assertEqual(git_runtime.resolve_git_executable(), "/usr/bin/git")
 
     def test_discovery_error_and_timeout_keep_system_git(self) -> None:
         for error in (OSError("unavailable"), subprocess.TimeoutExpired("xcrun", 5)):
             with self.subTest(error=type(error).__name__), \
-                    patch.object(workspace_module.sys, "platform", "darwin"), \
-                    patch.object(workspace_module.subprocess, "run", side_effect=error):
-                self.assertEqual(workspace_module._resolve_git_executable(), "/usr/bin/git")
+                    patch.object(git_runtime.sys, "platform", "darwin"), \
+                    patch.object(git_runtime.subprocess, "run", side_effect=error):
+                self.assertEqual(git_runtime.resolve_git_executable(), "/usr/bin/git")
 
     def test_git_command_keeps_arguments_timeout_and_optional_locks(self) -> None:
         result = subprocess.CompletedProcess([], 0, stdout="unchanged\n")

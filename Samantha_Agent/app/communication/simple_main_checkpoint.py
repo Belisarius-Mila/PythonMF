@@ -18,6 +18,7 @@ from typing import Any, Callable, Sequence
 from zoneinfo import ZoneInfo
 
 from app.codex_appserver import AppServerError
+from app.communication.git_runtime import GIT_EXECUTABLE
 from app.communication.checkpoint_quality_gate import (
     DEFAULT_GATE_LOG,
     GateEvidence,
@@ -69,6 +70,7 @@ _FULL_GATE_PATH_PREFIXES = (
     "Samantha_Agent/app/family_calendar_delivery",
     "Samantha_Agent/app/communication/checkpoint_quality_gate.py",
     "Samantha_Agent/app/communication/github_batch.py",
+    "Samantha_Agent/app/communication/git_runtime.py",
     "Samantha_Agent/app/communication/main_remote_sync.py",
     "Samantha_Agent/app/communication/simple_main_checkpoint.py",
     "Samantha_Agent/app/communication/simple_main_deploy.py",
@@ -994,7 +996,7 @@ def _requires_full_gate(changes: Sequence[dict[str, str]]) -> bool:
 
 def _known_origin_main(source_repo: Path) -> str:
     completed = subprocess.run(
-        ["/usr/bin/git", "-C", str(source_repo), "rev-parse", "origin/main"],
+        [GIT_EXECUTABLE, "-C", str(source_repo), "rev-parse", "origin/main"],
         capture_output=True,
         text=True,
         timeout=30,
@@ -1011,7 +1013,7 @@ def _known_origin_main(source_repo: Path) -> str:
 def _is_ancestor(source_repo: Path, ancestor: str, descendant: str) -> bool:
     completed = subprocess.run(
         [
-            "/usr/bin/git",
+            GIT_EXECUTABLE,
             "-C",
             str(source_repo),
             "merge-base",
@@ -1032,7 +1034,7 @@ def _find_idempotent_commit(repo: Path, idempotency_key: str) -> str:
         return ""
     completed = subprocess.run(
         [
-            "/usr/bin/git",
+            GIT_EXECUTABLE,
             "-C",
             str(repo),
             "log",
@@ -1150,7 +1152,7 @@ def _recover_idempotent_checkpoint(
     pending_remote_commit_count = int(
         subprocess.run(
             [
-                "/usr/bin/git",
+                GIT_EXECUTABLE,
                 "-C",
                 str(workspace.source_repo),
                 "rev-list",
@@ -1515,7 +1517,7 @@ def complete_simple_main_checkpoint(
         pending_remote_commit_count = int(
             subprocess.run(
                 [
-                    "/usr/bin/git",
+                    GIT_EXECUTABLE,
                     "-C",
                     str(workspace.source_repo),
                     "rev-list",
