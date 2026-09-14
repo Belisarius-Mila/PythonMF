@@ -1,0 +1,161 @@
+# Camino — rozhodnutí z auditu C00
+
+Checkpoint 2026-09-14 23:26 CEST: kanonická projektová paměť, handoff a TVBCP byly
+dorovnány po recovery záloze. Starší výroky níže o nezapsané paměti a chybějící
+instalaci popisují průběh C00; aktuální instalaci dokládá XCODE_INSTALLATION.md.
+
+Navazující provedení: [instalační doklad Xcode 26.3](XCODE_INSTALLATION.md).
+Aplikace je již nainstalovaná, první nastavení dokončené a iPhone SDK 26.2 dostupné;
+níže uvedené návrhy C00 se nesmějí zaměnit za aktuální instalační stav.
+
+Datum: 14. září 2026. Autorita produktu: v0.4, U01–U11 beze změny.
+Místní důkazy a limity: [ENVIRONMENT_AUDIT.md](ENVIRONMENT_AUDIT.md).
+Tento dokument obsahuje technické návrhy, nikoli souhlas s instalací,
+nákupem, změnou účtů nebo zahájením další etapy.
+
+## ADR-C00-01 — nástroje na skutečném vývojovém Macu
+
+**Návrh:** zachovat současný macOS a použít Xcode 26.3 s dodávaným iOS SDK
+26.2. Doložená systémová kompatibilita je v auditu, skutečný build dosud ne.
+Nepřebírat Swift z CLT jako verzi budoucího Xcode: jde o odlišné toolchainy.
+
+Starší Xcode je dostupný přes oficiální Apple Developer Downloads po přihlášení
+k Apple Account; samotné stahování podle Apple nevyžaduje placené členství.
+Stažení konkrétního archivu v této relaci **NEPROVEDENO**.
+[Apple: Xcode Resources](https://developer.apple.com/xcode/resources/).
+
+Na tomto Intel Macu nepoužívat Xcode 27: jeho release notes uvádějí běh jen
+na Apple silicon. Nákup jiného Macu z C00 nevyplývá; nejprve ověřit vhodnost
+starší kompatibilní sady pro konkrétní iOS.
+[Apple: Xcode 27 release notes](https://developer.apple.com/documentation/xcode-release-notes/xcode-27-release-notes).
+
+Pro první fyzickou zkoušku stačí nezbytné iOS komponenty. Simulátor je volitelný;
+pokud později bude potřeba na Intelu, vybrat kompatibilní univerzální runtime,
+nikoli automaticky variantu pouze pro arm64.
+[Apple: dodatečné komponenty Xcode](https://developer.apple.com/documentation/xcode/downloading-and-installing-additional-xcode-components).
+
+**Podmínky realizace:** nové oprávnění k instalaci, přepočet místa pro archiv,
+rozbalenou aplikaci, komponenty a cache, ověření staženého Apple balíčku.
+Žádné mazání pro uvolnění místa, neoficiální patchování macOS nebo vypnutí
+ochran. Pokud je nutné volit toolchain pro jednotlivý příkaz, preferovat
+procesový `DEVELOPER_DIR` před nevyžádanou globální změnou `xcode-select`.
+První spuštění a případné licenční/komponentové kroky nejsou součástí auditu.
+
+Míla po auditu potvrdil cílový **iPhone 14 Plus s iOS 26.6.1**. Tento údaj
+je vstupem návrhu, nikoli důkazem úspěšné instalace. Xcode 26.3 zůstává
+kandidátem k přímému ověření build/install/run na tomto telefonu; shoda
+čísel SDK a iOS se nevyžaduje pouze pro jejich číselnou shodu. Minimální
+deployment target zafixovat podle potřebných API, nikoli automaticky na 26.6.1.
+Nežádat znovu model a verzi; při připojení doplnit technický build systému.
+
+## ADR-C00-02 — krátký prototyp a instalace na pouť mají jiné podmínky
+
+| Cesta | Zjištěná vlastnost | Rozhodnutí |
+|---|---|---|
+| Xcode → vlastní telefon, Personal Team | Bez členství lze místně testovat; provisioning vyprší po 7 dnech. | Vhodný kandidát pro krátké C01a, pokud není již vhodné členství. Není výchozí dlouhodobá instalace na pouť. [Apple: Personal Team](https://developer.apple.com/help/account/basics/about-your-developer-account). |
+| Apple Developer Program → Ad Hoc → registrovaný vlastní iPhone | Distribuce podepsané aplikace na určené zařízení bez veřejného App Store; vyžaduje App ID, distribuční certifikát a profil. | **Preferovaný kandidát pro soukromé P0**, podmíněný skutečnou expirací a offline zkouškami níže. [Apple: Ad Hoc](https://developer.apple.com/help/account/provisioning-profiles/create-an-ad-hoc-provisioning-profile). |
+| TestFlight | Build je použitelný nejvýše 90 dnů a prochází App Store Connect. | Záložní možnost, není povinná ani bezčasová. Nepřidává se kvůli jednomu telefonu automaticky. [Apple: TestFlight](https://developer.apple.com/help/app-store-connect/test-a-beta-version/testflight-overview/). |
+
+U10 již připouští roční poplatek. Tento souhlas není nákup; členství uživatele
+ani jeho expirace nebyly čteny. Žádný účet se nezakládal, nic se neplatilo.
+Cena se zde neodhaduje a rozpočet AI U11 není pro offline prototyp potřeba.
+
+### Pozdější konkrétní instalační postup — zatím nespouštět
+
+1. Ověřit nainstalovaný Xcode, iPhone SDK a skutečný model/verzi iOS; zaznamenat
+   přesné verze. Připojit vlastní telefon datovým kabelem a ověřit důvěru.
+2. Ve správném Apple týmu nastavit jednoznačné bundle ID a signing. Pro krátký
+   prototyp lze použít Personal Team; neexportovat identitu účtu nebo klíče do Git.
+3. Je-li potřeba Developer Mode, uživatel jej zapne na telefonu a potvrdí
+   restart/aktivaci. Jde o výslovnou bezpečnostní změnu mimo C00.
+   [Apple: Developer Mode](https://developer.apple.com/documentation/xcode/enabling-developer-mode-on-a-device).
+4. V C01a zvolit skutečný telefon jako run destination, sestavit, nainstalovat
+   a vědomě spustit prototyp. Uchovat redigovaný build/install/run výsledek.
+5. Pro pozdější P0 vytvořit Archive a export pro registrované zařízení
+   (Ad Hoc / odpovídající volba exportu dané verze Xcode). Soukromě uchovat IPA,
+   vazbu na commit a podpisové metadata. Instalovat místně přes Xcode nebo
+   Apple Configurator; veřejný instalační web není potřeba.
+   [Apple: distribuce na registrovaná zařízení](https://developer.apple.com/documentation/xcode/distributing-your-app-to-registered-devices).
+6. Před odjezdem splnit samostatnou bránu platnosti a upgradu níže. Samotné
+   vytvoření IPA, členství nebo zelený build tuto bránu neuzavírá.
+
+### Platnost instalace a offline režim — skutečná provozní podmínka
+
+Nelze nyní slíbit „vydrží rok“. Rozhoduje konkrétní vydaný profil, certifikát,
+stav členství a pravidla autorizace aplikace na telefonu. Do provozního
+reportu později patří **pouze expirace a výsledek ověření**, nikoli klíče,
+celé profily nebo UDID. Při obnovení profilu může být nutné nové podepsání
+a instalace; zachování dat musí prokázat T079.
+[Apple: obnova provisioning profilu](https://developer.apple.com/help/account/provisioning-profiles/edit-download-or-delete-profiles).
+
+Pro týmy vytvořené po 6. 6. 2021 Apple popisuje ověření vývojově a Ad Hoc
+podepsané aplikace službou PPQ při prvním spuštění s internetem. Zvláštní
+offline profil má jen sedmidenní platnost; Apple samostatně řeší potřebu běhu
+bez připojení déle než 30 dnů po prvním spuštění. **Ad Hoc tedy není automatický
+důkaz neomezeného offline spuštění.** Před cestou je nutné potvrdit pravidla
+pro skutečný tým a artefakt, ne zaměnit platnost certifikátu za offline garanci.
+[Apple: provisioning a PPQ](https://developer.apple.com/help/account/provisioning-profiles/provisioning-profile-updates).
+
+Projektová brána, nikoli tvrzení Apple:
+
+- Návrh rezervy je **14 kalendářních dnů po plánovaném návratu**. Jde o nový
+  technický návrh pro C09, ne odhad termínu nebo délky cesty. Při plánování vydání
+  může být upraven záznamem důvodu; povinná rezerva z F71 nesmí zmizet.
+- Nejbližší relevantní konec platnosti profilu/certifikátu/členství musí přesahovat
+  návrat i rezervu. Termíny zatím nejsou doloženy: výsledek **NEOVĚŘENO**.
+- Ověřit první autorizované spuštění online, potom opakované spuštění a lokální
+  záznam bez sítě, včetně skutečného restartu a odemknutí telefonu. Plán zkoušek
+  musí odpovídat zamýšlenému nejdelšímu offline intervalu, nejen minutovému testu.
+- Ověřit instalaci upgradu se stejnou identitou aplikace, zachování testovacích
+  souborů a návrat po neúspěšném upgradu. Kvůli podpisu aplikaci neodinstalovávat
+  bez ověřené kopie. Neměnit systémové hodiny kvůli simulaci expirace.
+- Nesplnění znamená **BLOKUJE připravenost na pouť**, nikoli důvod předstírat PASS
+  nebo ihned kupovat nový hardware. Distribuční cestu lze znovu technicky posoudit
+  podle doložené překážky; produktová rozhodnutí se tím neotevírají.
+
+## ADR-C00-03 — audio nejprve samostatně, bez serveru
+
+**Návrh:** nativní Swift/SwiftUI, AVFoundation/AVFAudio, žádné externí balíčky.
+Pro nejmenší C01a použít izolovaný adaptér `AVAudioRecorder` a lokální
+`AVAudioPlayer`. Recorder poskytuje zápis souboru a měření úrovně; skutečný
+vstup číst z aktivní audio session. Prototyp tím neprokazuje kontinuitu segmentů.
+[Apple: AVAudioRecorder](https://developer.apple.com/documentation/avfaudio/avaudiorecorder),
+[Apple: aktuální audio route](https://developer.apple.com/documentation/avfaudio/avaudiosession/currentroute).
+
+Pracovní formát krátkého experimentu: nekomprimované PCM v CAF, mono, cílově
+48 kHz / 16 bitů. Skutečný formát se zaznamená a ověří dekódováním; není to
+nezměnitelný P0 formát ani slib všech vstupů. Bezeztrátový krátký vzorek
+zjednoduší poslech a kontrolu. Dlouhá audia, kodek a bezešvé části se rozhodnou
+měřením v C01c; adaptér lze nahradit například AVAudioEngine bez změny významu
+uživatelských stavů. **Nedělat segmentaci opakovaným Stop/Start recorderu.**
+
+Veškerá logika stavu se oddělí od iOS adaptérů, aby šly chybové větve ověřit
+bez mikrofonu. V C01a žádné Core Data schéma celého produktu, API, upload,
+Tailscale, AI, galerie nebo rodinné výstupy. Jednoduchá prototypová evidence
+souboru není finální datový kontrakt C03. Podrobnosti a brána přijetí jsou v
+[C01a_AUDIO_PROTOTYPE.md](../tasks/C01a_AUDIO_PROTOTYPE.md).
+
+## ADR-C00-04 — jeden Mac, dvě odlišné role
+
+Míla po C00 potvrdil, že domácí server je tentýž místní Intel MacBook Pro 2020,
+macOS 15.7.9, 16 GiB RAM. Není vyžadován druhý Mac; vývoj a domácí server
+zůstávají odlišné role s vlastními provozními podmínkami.
+
+Preferovaný návrh v0.4 Swift/SwiftUI/Core Data → soukromé HTTPS →
+Python/FastAPI/SQLite a soubory se nemění. Verze serverových závislostí se
+zafixují v samostatném prostředí Camino na tomto stroji. Cizí prostředí Samanthy
+se nekopíruje; jeho Python 3.12.0rc3 není nová produkční volba pro Camino.
+
+Nepřipravené serverové služby Camino nebrání offline prototypu. Neprohlašovat
+místní Tailscale za hotové soukromé HTTPS ani dostupný disk za nezávislou zálohu.
+Instalace Xcode i budoucí vývoj spotřebovávají kapacitu stejného Macu; rezervu
+proto posuzovat společně s jeho dosavadním provozem. Postup doplnění serverových
+důkazů je v auditu. C02 a další serverové úkoly se tím nespouštějí.
+
+## Předání
+
+C00 provedl jen audit a vytvoření tří dokumentů. Nic výše není provedená
+instalace nebo hotová funkce aplikace. Jediný další krok je samostatně zadaná
+příprava a ověření cesty **Xcode 26.3 → cílový iPhone**. C01a se automaticky
+nespouští. Centrální paměť, historické podklady, Git HEAD a index zůstaly beze změny;
+ve workspace přibyly pouze tři dosud necommitnuté dokumenty C00.

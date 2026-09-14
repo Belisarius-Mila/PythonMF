@@ -2,6 +2,27 @@
 
 Projekt zalozen 2026-05-19.
 
+## Aktuální stav 2026-09-14 23:26 CEST
+
+Ostrá recovery záloha `20260914_231439` dokončena standardním registrovaným
+Pythonovým příkazem po výslovném zadání Míly a kontrole dry-runu.
+Cíl: připojený šifrovaný kontejner SamanthaSecureBackup; šifrování ověřeno
+přes `hdiutil isencrypted`. Po běhu přibližně 429,65 GiB volných.
+
+- 63 295 souborů: 28 892 kopírováno, 34 360 hardlinků, 43 symlinků; 0 přeskočeno.
+- Zkopírováno 11 792 778 198 bajtů, exit 0, manifest a recovery návod existují.
+- `auth.json` a nouzové `data/session_autosave/` ve snapshotu nejsou.
+- Čtyři dokumenty Camino a AGENTS.md mají shodné SHA-256 se zdrojem.
+- AGENTS.md obnoven pouze do nové dočasné složky; shodný SHA-256
+  `3ffa4338e1516433e732ac9a8c9715ee730e58ca520955a0a4919ef1b439a318`.
+- Stav poslední zálohy aktualizoval nástroj na 2026-09-14. Nic nebylo mazáno.
+- Snapshot zachycuje zdroje před následným dokumentačním checkpointem; nejde
+  o atomický obraz všech běžících služeb ani o zálohu instalace Xcode mimo PythonMF.
+- Zkouška malého souboru není úplný disaster-recovery test celého počítače.
+
+Další krok: pravidelná recovery záloha podle živého `backup_status.py`.
+Starší záznamy níže jsou historie, nikoli dnešní stav.
+
 ## Aktualni stav 2026-07-29
 
 Posledni uspesna ostra recovery zaloha je podle

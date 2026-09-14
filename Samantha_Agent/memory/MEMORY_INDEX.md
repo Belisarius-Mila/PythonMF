@@ -59,7 +59,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] Camino založené v Human–Adam, podklady v0.4; nejdřív meziúkol, potom C00 (read-only audit prostředí). Vývoj aplikace dosud nezahájen.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] C00 dokončeno v dostupném rozsahu, Xcode 26.3 / SDK 26.2 ověřeny; C01a nezahájeno. Po výslovném zadání připojit iPhone a ověřit vývojovou cestu.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` - Cockpit 14. 9.: scroll 10ec0877 potvrzený Mílou. [PRIPOMENOUT] U07 až při příštím pokračování. TXT v2.8 shrnuje U01–U06; plná brána 1680/1680 OK, funkční nasazení 980aed7a a smoke 5/5. Publikační překážka odstraněna; finální balíček/head ověřovat živým auditem.
 
@@ -87,7 +87,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `projects/linux_workstation.md` - aktivní konzultační projekt pro bezpečnou instalaci Linuxu na nový SATA SSD, postupnou konfiguraci a běžnou práci; původní HDD s Windows se při první instalaci zachovává jako návratová cesta.
 - `projects/email_readonly_oauth.md` - e-mailová integrace Samanthy: read-only hledání, triage a archivace; UX0+UX1, ladění archivu i UX2 pravdivé navigace jsou nasazené. E-maily mají vlastní rozcestník Zpracování / Archiv a nejsou v katalogu Webových aplikací.
 - `projects/document_management_private_vault.md` - hlavní soukromý dokumentový systém mimo Git; servisní obrazovka od 2026-08-07 ukazuje nahoře pracovní stav inboxu a historické agregace až v technických podrobnostech. Další věcný krok je pozdější reálný e-mailový PDF/JPEG test.
-- `projects/samantha_external_backup.md` - offline zálohování `PythonMF`/Samanthy na externí disk: poslední úspěšná recovery záloha je snapshot `20260802_153855`; k 2026-08-07 je starší než tři dny a vyžaduje nový pravidelný běh.
+- `projects/samantha_external_backup.md` — recovery záloha `20260914_231439` ověřena 2026-09-14, včetně zkušební obnovy; aktuální stáří zjišťovat přes `backup_status.py`.
 - `projects/janicka_cockpit_takeover.md` - Janička Cockpit je aktivní netechnický rozcestník k existujícím funkcím. Stará light komunikace a nouzové otevírání plného Adama jsou vyřazené; komunikace se vrátí až jako samostatný funkční Adam-R2.
 - `projects/janicka_r2_adam.md` - funkční samostatný R2-Adam pro Janičku: vlastní chat, soukromý kontext, TXT prostor, dokumentová lišta, čtečka a potvrzovaná práce s úplnými sadami read-only zdrojů. E2 živě ověřilo úplný tok e-mail -> vault -> create-only R2 TXT. E3 potvrdilo ruční revizi a backendovou dostupnost PDF; oprava lidského TXT je nasazená a čeká už jen na krátký vizuální retest.
 - `projects/janicka_cockpit_kucharka.md` - první git-safe kuchařka pro Janu k používání Janičky v Cockpitu: dokumenty, tisk, e-maily, Lékárna, rodinné projekty, Adam, připomenutí, nouzové převzetí a bezpečnostní hranice bez citlivých údajů.

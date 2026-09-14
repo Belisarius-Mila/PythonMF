@@ -1,18 +1,20 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-Aktualizováno: 2026-09-14 21:22 CEST
-- Projekt Camino je založený jako samostatný proud Human–Adam `project-camino`.
-- Podklady v0.4 a původní ZIP jsou zachované; žádná funkce aplikace není hotová.
-- Nejdřív meziúkol podle Míly, potom výslovný návrat ke Caminu a C00.
-- C00 znamená read-only audit vývojového Macu, iPhonu a samostatně domácího serveru.
-- Priorita 1 odpovídá Mílovu pořadí: Camino je další projekt hned po meziúkolu.
+Aktualizováno: 2026-09-14 23:26 CEST
+
+- C00 dokončeno v dostupném rozsahu; audit, rozhodnutí a zadání C01a jsou připravené.
+- Xcode 26.3 Universal / build 17C529 nainstalovaný po samostatném souhlasu; první nastavení dokončené, iPhone SDK 26.2 ověřené.
+- Místní Intel MacBook Pro 2020 / macOS 15.7.9 / 16 GiB RAM plní podle Míly vývojovou i domácí serverovou roli.
+- Cílový iPhone 14 Plus / iOS 26.6.1 potvrzen Mílou; párování, signing, build/install/run a audio přejímka NEPROVEDENO.
+- C01a NEZAHÁJENO. Další krok: po výslovném zadání připojit odemčený iPhone a ověřit vývojovou cestu pro malý audio prototyp.
 
 ### Rizika
-- Zařízení, instalace, mikrofon, přenosy a zálohy pro Camino dosud NEOVĚŘENO.
-- T001–T080 jsou zadání akceptace, nikoli provedené testy aplikace.
-- Reálná média, osobní texty, přesná GPS a klíče zůstávají mimo Git a logy.
-- Rozpočet AI dosud neurčen; vývoj se syntetickými daty a mock AI.
+
+- G0/G1 nejsou splněné; přítomnost SDK neprokazuje instalaci ani nahrávání na telefonu.
+- Služby, úložiště a obnova provozních dat Camino zůstávají NEOVĚŘENO; neblokují offline C01a.
+- Recovery záloha zdrojů Samanthy není přejímka budoucí zálohy médií Camino.
+- T001–T080 jsou zadání akceptace, nikoli provedené testy. Osobní média, texty, GPS a klíče nepatří do Gitu; placené AI nezadáno.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: Camino
@@ -23,19 +25,19 @@ Typ: Project
 Priorita: 1
 Stav: rozpracovane
 Pripomenout pri startu: ano
-Datum: 2026-09-14 21:22 CEST
+Datum: 2026-09-14 23:26 CEST
 
 Co se resilo:
-Založení samostatného projektu a předání před meziúkolem.
+Audit C00, následná instalace Xcode a checkpoint po ověřené recovery záloze.
 
 Co je hotove:
-Katalogová integrace a dohledatelné podklady v0.4, paměť a TVBCP.
+C00, Xcode 26.3 / SDK 26.2, příprava zadání C01a a dohledatelné podklady v0.4.
 
 Co neni hotove:
-C00 ani žádná implementace a hardwarová přejímka.
+C01a ani žádná implementace, signing a hardwarová přejímka. G0/G1 nesplněné.
 
 Dalsi krok:
-Nejdřív meziúkol, potom výslovný návrat ke Caminu a C00.
+Po výslovném zadání C01a připojit iPhone a ověřit vývojovou cestu.
 
 Navrhovane dalsi kroky:
 Po C00 malý audio prototyp C01a podle zjištěného prostředí.
@@ -70,3 +72,30 @@ Technický důkaz:
 Ověření založení: 56/56 testů integrace (54 + 2 profilové testy) a rychlá statická brána OK.
 Publikační plná brána a finální nasazení se ověřují registrovaným živým auditem;
 tento zápis předchází schválenému push a nasazení.
+
+### 2026-09-14 23:26 CEST — C00, Xcode a checkpoint po recovery záloze
+
+Hotovo:
+
+- C00 a samostatně schválená instalace Xcode dokončeny; projektové předání dorovnáno na skutečný stav.
+- Před úklidem vznikla ověřená recovery záloha `20260914_231439`; dokumenty Camina zachované a porovnané pomocí SHA-256.
+
+Rozhodnutí:
+
+- Míla zadal nejdřív ostrou zálohu, potom úklid repozitáře. Úklid tvoří lokální dokumentační checkpoint bez mazání; push ani nasazení nejsou součástí tohoto kroku.
+- U01–U11 beze změny. C01a se automaticky nezahajuje.
+
+Další krok:
+
+- Po výslovném zadání C01a připojit odemčený iPhone a ověřit rozpoznání, kompatibilitu a podpis pro malý audio prototyp.
+
+Navrhované další kroky:
+
+- Nahrát, bezpečně dokončit a přehrát krátký neutrální vzorek na skutečném telefonu; server není vstupní podmínka.
+
+Technický důkaz:
+
+- `camino/docs/ENVIRONMENT_AUDIT.md`, `DECISIONS.md`, `XCODE_INSTALLATION.md` a `camino/tasks/C01a_AUDIO_PROTOTYPE.md`.
+- Instalační kontroly Xcode/first launch/iPhone SDK prošly; build a fyzické audio testy NEPROVEDENO.
+- Recovery: 63 295 souborů, 28 892 kopírováno, 34 360 hardlinků, 43 symlinků, 0 přeskočeno; zkušební obnova AGENTS.md se shodným SHA-256.
+- Závěrečná plná kontrolní brána checkpointu: 1684/1684 testů OK; syntaxe a Git safety check OK. Nejde o testy aplikace Camino.
