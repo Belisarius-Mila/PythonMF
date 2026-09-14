@@ -48,6 +48,6 @@ Technický důkaz:
 - Testy integrace a stav publikace: viz `memory/reports/camino_registration_2026_09_14.md`.
 - Testy aplikace a manuální hardware zkoušky NEPROVEDENO.
 
-Ověření založení: 54/54 testů integrace a rychlá statická brána OK.
+Ověření založení: 56/56 testů integrace (54 + 2 profilové testy) a rychlá statická brána OK.
 Publikační plná brána a finální nasazení se ověřují registrovaným živým auditem;
 tento zápis předchází schválenému push a nasazení.

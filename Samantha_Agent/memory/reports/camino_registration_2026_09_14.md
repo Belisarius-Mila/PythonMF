@@ -16,7 +16,9 @@ Datum: 2026-09-14 21:22 CEST
 - Podklady obsahují specifikaci a syntetické příklady; kontrola nenašla vzory
   skutečných klíčů, e-mailových adres ani soukromých domovských cest.
 - Katalogový proud `project-camino`, jeho registry, paměť a instrukce založené.
-- Integrace: 54/54 cílených testů OK (katalog, paměť, lazy vlákna, výběr a projektový audit).
+- Integrace: 54/54 cílených testů OK (katalog, paměť, lazy vlákna, výběr a projektový audit),
+  navíc 2/2 profilové testy po dorovnání počtu proudů. Celkem 56/56.
+- Oba čisté profilové workspaces úspěšně převzaly projekt registrovaným synchronizátorem.
 - Rychlá Cockpit brána: syntaxe Python/JS/shell a whitespace OK.
 - Počet katalogových proudů je 33; testy unikátních paměťových vazeb pokrývají 66 cest.
 - Push a nasazení: autorizované, dosud nedokončené; finální stav ověřovat živým auditem.

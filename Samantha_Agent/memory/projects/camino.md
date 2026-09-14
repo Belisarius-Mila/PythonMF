@@ -45,6 +45,6 @@ a rodinné výstupy. Externí přepis není důkaz zálohy. Lidskou revizi AI ne
 Nejdřív meziúkol podle Míly. Potom C00 podle plánu v0.4; žádná instalace,
 platba ani implementace celé aplikace v auditním kroku.
 
-Ověření založení: 54/54 testů integrace a rychlá statická brána OK.
+Ověření založení: 56/56 testů integrace (54 + 2 profilové testy) a rychlá statická brána OK.
 Publikační plná brána a finální nasazení se ověřují registrovaným živým auditem;
 tento zápis předchází schválenému push a nasazení.
