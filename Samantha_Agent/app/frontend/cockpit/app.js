@@ -795,9 +795,41 @@
       return "";
     }
 
+    const actionFeedback = document.getElementById("actionFeedback");
+    const actionMessageCloseBtn = document.getElementById("actionMessageCloseBtn");
+    let actionMessageReturnFocus = null;
+
+    function placeActionFeedback() {
+      // Keep the live region inside the active dialog's accessibility scope.
+      const visibleDialogs = Array.from(document.querySelectorAll('.modal-backdrop:not(.hidden)'));
+      const topDialog = visibleDialogs.reduce((top, dialog) => (
+        !top || Number(getComputedStyle(dialog).zIndex) >= Number(getComputedStyle(top).zIndex)
+          ? dialog : top
+      ), null);
+      const host = topDialog || document.body;
+      if (actionFeedback.parentElement !== host) host.appendChild(actionFeedback);
+    }
+
+    const actionFeedbackObserver = new MutationObserver(placeActionFeedback);
+    document.querySelectorAll('.modal-backdrop').forEach(dialog => {
+      actionFeedbackObserver.observe(dialog, {attributes: true, attributeFilter: ["class"]});
+    });
+    actionMessageCloseBtn.addEventListener("click", () => {
+      const restoreFocus = actionFeedback.contains(document.activeElement);
+      showMessage("");
+      if (restoreFocus && actionMessageReturnFocus?.isConnected
+          && actionMessageReturnFocus.getClientRects().length && !actionMessageReturnFocus.disabled) {
+        actionMessageReturnFocus.focus({preventScroll: true});
+      }
+    });
+
     function showMessage(text) {
+      if (text && !actionFeedback.contains(document.activeElement)) {
+        actionMessageReturnFocus = document.activeElement;
+      }
+      placeActionFeedback();
+      actionFeedback.classList.toggle("hidden", !text);
       actionMessage.textContent = text || "";
-      actionMessage.classList.toggle("hidden", !text);
     }
 
     const FULL_STATUS_MONITOR_MS = 5 * 60 * 1000;
@@ -2573,11 +2605,15 @@
       try {
         const res = await fetch(url, {method: "POST"});
         const data = await res.json();
-        showMessage(data.message || data.error || "Hotovo.");
+        showMessage(data.message || data.error || (
+          !res.ok || data.ok === false ? "Akce se nepodařila."
+            : data.ok === true ? "Hotovo."
+              : "Výsledek akce není potvrzený. Než ji zopakuješ, obnov stav."
+        ));
         await refresh();
 	      } catch (err) {
 	        recordFrontendError(err);
-	        showMessage(`Chyba: ${err}`);
+	        showMessage(`Výsledek akce se nepodařilo ověřit: ${err}. Než ji zopakuješ, obnov stav.`);
 	      } finally {
         button.disabled = false;
 	      }

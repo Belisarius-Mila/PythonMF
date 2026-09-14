@@ -1,14 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-14 11:41 CEST. Míla potvrdil funkční posouvání archivu po opravě `10ec0877`; tato chyba je uzavřená. Nasazení, Git a oba profily byly před auditem živě ověřené jako shodné/čisté.
-- Hotový hluboký UI audit: na začátku `AuditCockpit56_2.txt` v2.0 je 22 nálezů, rozhodnutí o viditelnosti prvků, návrh kompaktního řídicího pultu a 11 budoucích kroků U01–U11. Aktualizovaný strukturální stav a původní audit zachovaný níže jako historie.
-- Hlavní nálezy: oříznutá zalomená horní lišta, výsledek akce skrytý v Servisu, natažené nulové dokumentové karty, nepřipojené stránkování hledání, nedostatečný fokus modalu E-maily. Většina funkcí existuje; přednost má přesun/kompaktní zobrazení, ne plošné mazání.
-- Důkaz: šest scénářů v místním browseru s výhradně syntetickými daty, 320/390/1024/1440 px, bez JS chyb. Dva route/registry kontrakty prošly. 941 elementů, 145 statických tlačítek, 16 modalů; samotná přítomnost ID není důkaz všech funkcí. `reports/cockpit_ui_audit_2026_09_14.json`.
-- Rozsah tohoto kroku: audit a projektové zápisy. Kód aplikace, soukromá data a provozní nastavení nezměněné, nový push/nasazení neprovedený.
-- Další krok: po výběru implementace U01 (viditelný výsledek akcí), U02 (hlavička a návraty), pak U03 (kompaktní dokumenty). U04 dokončí existující backendové stránkování přes HTTP/UI. Později sjednotit stav/navigaci/grafiku.
-- Cíl: ověřené stavy a aktuální úkoly nahoře, hledání na dosah, jedna pracovní plocha, detaily podle potřeby. Přesný barevný styl ověřit na jednom návrhu; žádný plošný přepis ani změna Codex App Serveru.
-- Otevřeno: fyzická přejímka budoucího UI na Macu/iPhonu; emulace ji nenahrazuje. Záloha odložená kvůli nedostupnému disku; Santiago pouze zvažované téma.
+- Aktualizováno: 2026-09-14 11:53 CEST. U01 dokončený lokálně podle AuditCockpit56_2.txt v2.1.
+- Výsledek akce je viditelný při zavřeném Servisu, posunuté stránce i v dialogu. Zavíratelný panel bez automatického mizení; dlouhý text má vlastní scroll. Zobrazení nekrade fokus, zavření jej vrací k dostupnému původnímu prvku.
+- Společný postAction (otevření terminálu) rozlišuje potvrzený úspěch, chybu a neověřený výsledek. Backend, payloady a bezpečnostní potvrzení se nemění.
+- Důkaz: čtyři syntetické browser scénáře 320/390/1024/1440 px, každý 16 dialogů a pět variant odpovědi, právě jeden POST na kliknutí, bez JS chyb; 15 frontendových testů a statická brána prošly. `reports/cockpit_ui_u01_2026_09_14.json`.
+- Stav dodání: lokální vývoj, nový push ani nasazení neprovedeny. Poslední nasazení 10ec0877 je podklad z předchozího auditu, nikoli nový živý provozní důkaz. Míla před tímto krokem potvrdil scroll archivu.
+- Další krok: U02 — oprava rozměrů hlavičky a návratů; potom U03 — kompaktní dokumentová část. Celkem 22 výchozích nálezů a 11 kroků zůstává v TXT.
+- Rizika/přejímka: panel může do zavření překrýt spodní obsah; čtečky obrazovky a fyzický Mac/iPhone dosud neověřené. Zachovaný limit jedné poslední společné zprávy; historie/souběžné operace nejsou rozsahem U01.
+- Záloha je odložená kvůli nedostupnému disku; Santiago pouze zvažované téma.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Cockpit / hlavní architektura
@@ -980,3 +980,21 @@ Navrhované další kroky:
 Technický důkaz:
 - Šest browser scénářů s nahrazeným API, žádná živá soukromá data nebo ostré akce. Dva kontrakty adres/registru prošly. Klidný desktop po otevření Dokumentů 1764 px, mobil 3529 px; při naplnění natažené prázdné sousední karty až na 1501 px. Emulace není Safari přejímka.
 - Evidence a source otisky: reports/cockpit_ui_audit_2026_09_14.json. Kód aplikace beze změny. Audit neoznačuje DOM existence check za důkaz funkčnosti; návrhy UI dosud neimplementované.
+
+### 2026-09-14 11:53 CEST — U01: viditelný výsledek akcí
+
+Hotovo:
+- Společné zprávy jsou dostupné i bez otevření Servisu a nad dialogy. Text zůstane do zavření nebo nové zprávy; chybová či neověřená odpověď společné akce už nemá výchozí „Hotovo“.
+
+Rozhodnutí:
+- Míla schválil první vývojový krok. U01 realizován jako malý společný panel; bez změny backendu, potvrzení či payloadů. Push/nasazení nejsou tímto krokem provedené.
+
+Další krok:
+- U02: opravit rozměry hlavičky a návraty podle TXT.
+
+Navrhované další kroky:
+- U03 kompaktní Dokumenty, U04 stránkování, později sjednocení navigace a vzhledu.
+
+Technický důkaz:
+- 15 frontendových testů, statická brána OK. Čtyři izolované browser scénáře: 16 dialogových kontejnerů, pět variant odpovědi, jeden POST na kliknutí, žádné JS chyby. Všechny požadavky syntetické; report `reports/cockpit_ui_u01_2026_09_14.json`.
+- Fyzická přejímka Safari/čteček zůstává otevřená. Panel má jednu poslední zprávu, může do zavření překrývat spodní obsah; bez automatického opakování akcí.

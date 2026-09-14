@@ -1,0 +1,134 @@
+{
+  "date": "2026-09-14 11:53 CEST",
+  "scope": "U01 shared action feedback; synthetic intercepted browser requests only; no live action or deployment",
+  "browser": "Headless Edge Chromium on Mac; emulated viewport sizes, no physical Safari or screen reader acceptance",
+  "checks": [
+    "feedback visible with closed Service and scrolled page",
+    "blocked email popup remains visible after hub closes",
+    "all 16 dialog containers host feedback and keep it unobscured",
+    "dismissal returns focus to visible enabled origin, no focus stealing on display",
+    "long text scrolls, literal HTML remains text",
+    "single POST per action, button disabled in flight",
+    "success, explicit failure, HTTP failure, ambiguous response, network failure",
+    "message persists after closing Service; no auto-dismiss timer in implementation"
+  ],
+  "unit_tests": {
+    "module": "tests.test_cockpit_frontend",
+    "passed": 15
+  },
+  "static_gate": "passed",
+  "scenarios": [
+    {
+      "width": 1440,
+      "height": 900,
+      "closed": {
+        "visible": true,
+        "inViewport": true,
+        "uncovered": true,
+        "serviceClosed": true,
+        "host": "BODY"
+      },
+      "popup": {
+        "visible": true,
+        "inViewport": true,
+        "uncovered": true,
+        "serviceClosed": true,
+        "host": "BODY"
+      },
+      "dialogsChecked": 16,
+      "outcomes": {
+        "ok": "Hotovo.",
+        "failed": "Akce se nepodařila.",
+        "http": "Akce se nepodařila.",
+        "unknown": "Výsledek akce není potvrzený. Než ji zopakuješ, obnov stav.",
+        "network": "Výsledek akce se nepodařilo ověřit: TypeError: Failed to fetch. Než ji zopakuješ, obnov stav."
+      },
+      "posts": 5,
+      "jsErrors": []
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "closed": {
+        "visible": true,
+        "inViewport": true,
+        "uncovered": true,
+        "serviceClosed": true,
+        "host": "BODY"
+      },
+      "popup": {
+        "visible": true,
+        "inViewport": true,
+        "uncovered": true,
+        "serviceClosed": true,
+        "host": "BODY"
+      },
+      "dialogsChecked": 16,
+      "outcomes": {
+        "ok": "Hotovo.",
+        "failed": "Akce se nepodařila.",
+        "http": "Akce se nepodařila.",
+        "unknown": "Výsledek akce není potvrzený. Než ji zopakuješ, obnov stav.",
+        "network": "Výsledek akce se nepodařilo ověřit: TypeError: Failed to fetch. Než ji zopakuješ, obnov stav."
+      },
+      "posts": 5,
+      "jsErrors": []
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "closed": {
+        "visible": true,
+        "inViewport": true,
+        "uncovered": true,
+        "serviceClosed": true,
+        "host": "BODY"
+      },
+      "popup": {
+        "visible": true,
+        "inViewport": true,
+        "uncovered": true,
+        "serviceClosed": true,
+        "host": "BODY"
+      },
+      "dialogsChecked": 16,
+      "outcomes": {
+        "ok": "Hotovo.",
+        "failed": "Akce se nepodařila.",
+        "http": "Akce se nepodařila.",
+        "unknown": "Výsledek akce není potvrzený. Než ji zopakuješ, obnov stav.",
+        "network": "Výsledek akce se nepodařilo ověřit: TypeError: Failed to fetch. Než ji zopakuješ, obnov stav."
+      },
+      "posts": 5,
+      "jsErrors": []
+    },
+    {
+      "width": 320,
+      "height": 780,
+      "closed": {
+        "visible": true,
+        "inViewport": true,
+        "uncovered": true,
+        "serviceClosed": true,
+        "host": "BODY"
+      },
+      "popup": {
+        "visible": true,
+        "inViewport": true,
+        "uncovered": true,
+        "serviceClosed": true,
+        "host": "BODY"
+      },
+      "dialogsChecked": 16,
+      "outcomes": {
+        "ok": "Hotovo.",
+        "failed": "Akce se nepodařila.",
+        "http": "Akce se nepodařila.",
+        "unknown": "Výsledek akce není potvrzený. Než ji zopakuješ, obnov stav.",
+        "network": "Výsledek akce se nepodařilo ověřit: TypeError: Failed to fetch. Než ji zopakuješ, obnov stav."
+      },
+      "posts": 5,
+      "jsErrors": []
+    }
+  ]
+}

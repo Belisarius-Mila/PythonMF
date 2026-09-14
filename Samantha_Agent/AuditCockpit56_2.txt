@@ -1,13 +1,31 @@
 HLUBOKÝ AUDIT UI COCKPITU A PLÁN ÚPRAV
 ====================================
-Verze dokumentu: 2.0
+Verze dokumentu: 2.1
 Datum: 2026-09-14
 Základ auditu: main 10ec08770e05 (nasazený, ověřený před auditem).
-Autor: Adam / Codex. Rozsah: audit a plán; žádná implementace nového UI.
+Autor: Adam / Codex. Původní audit zachycuje 10ec0877; vývojový stav je níže.
 
 TOTO JE AKTUÁLNÍ ROZHODOVACÍ ČÁST DOKUMENTU.
 Architektonický průběh a původní audit zůstávají níže jako historie.
 Čísla, provozní stavy a priority historických oddílů nejsou dnešním stavem.
+
+VÝVOJOVÝ STAV — 2026-09-14 11:53 CEST
+U01 je dokončený lokálně na výslovný pokyn Míly; dosud bez push/nasazení.
+Společná odezva je ve stálém zavíratelném panelu nad pracovní plochou.
+Zůstává viditelná při scrollování, zavřeném Servisu i otevřeném dialogu;
+aria-live je uvnitř aktivního dialogu, dlouhý text má vlastní posouvání.
+Zpráva sama nemizí, nová ji nahradí; zobrazení nekrade fokus.
+Společný postAction (nyní otevření terminálu) už nehlásí Hotovo při chybě
+nebo nepotvrzeném výsledku; síťový výpadek vyzývá nejprve obnovit stav.
+Payloady, potvrzení a backend se nezměnily. Ostatní specializované akce
+zachovávají vlastní texty; U01 není sjednocení všech stavových protokolů.
+Důkaz: reports/cockpit_ui_u01_2026_09_14.json; 4 browser scénáře,
+16 dialogových kontejnerů v každém, 5 variant odpovědi, bez JS chyb;
+15 frontendových testů a statická brána OK. Žádné ostré POST požadavky.
+Otevřeno: fyzická přejímka Mac/iPhone a čtečky obrazovky po nasazení.
+Další krok U02: hlavička a návraty. Poté U03: kompaktní Dokumenty.
+Níže uvedená měření a nálezy jsou výchozí audit 10ec0877; N02 je tímto
+lokálně opravený, část N13 (viditelnost chyb) též, návratové cesty čekají.
 
 0. ZÁVĚR PRO MÍLU
 ----------------
@@ -343,6 +361,7 @@ Každý krok má vlastní kontrolovatelný commit. Nasazení samostatně schvál
 Odhad velikosti je relativní: S malý zásah, M střední, L více navazujících kroků.
 
 U01 / P0 / S — Viditelný výsledek akcí (N02, část N13).
+Stav: HOTOVO LOKÁLNĚ 2026-09-14; ověření viz vývojový stav nahoře.
 Rozsah: showMessage a společná oblast zpráv; vhodný aria-live, trvalá chyba,
 jasný neověřený výsledek. Neměnit payloady ani bezpečnostní potvrzení.
 Důkaz dokončení: zpráva viditelná při zavřeném Servisu i v aktivním modalu,
@@ -476,8 +495,8 @@ Závěr ke struktuře:
 - Browser rozměry z fixture nejsou skutečné počty Mílových dokumentů ani
   důkaz shody se všemi verzemi Safari. Fyzický Mac/iPhone test zůstává nutný.
 - Barevné/přístupnostní cíle nejsou výsledkem úplného WCAG auditu.
-- Rozhodnutí zde opravňuje k zapsání auditu. U01–U11 jsou návrhy k následnému
-  vývoji; tímto krokem nebyly upraveny app soubory, proveden push ani nasazení.
+- Míla následně schválil zahájení vývoje; U01 je lokálně implementovaný.
+  U02–U11 zůstávají plánem. Push a nasazení tohoto kroku dosud neproběhly.
 
 10. ZDROJE A OPĚRNÉ BODY
 -----------------------

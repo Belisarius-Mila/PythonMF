@@ -8,6 +8,10 @@
 {{SAMANTHA_CSS}}  </style>
 </head>
 <body>
+  <div id="actionFeedback" class="action-feedback hidden" aria-label="Odezva akce">
+    <div id="actionMessage" role="status" aria-live="polite" aria-atomic="true"></div>
+    <button id="actionMessageCloseBtn" type="button" aria-label="Zavřít zprávu">Zavřít</button>
+  </div>
   <header>
     <h1>Samantha Cockpit</h1>
     <div class="toolbar">
@@ -310,7 +314,6 @@
           <h2>ScanDocu</h2>
           <div class="body">
             <div id="scanDocuState" class="status-line"></div>
-            <div id="actionMessage" class="message hidden"></div>
           </div>
         </section>
         <section>

@@ -654,3 +654,8 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Projev: desktopový archiv má overflow-y:auto, ale seznam se roztáhne na celý obsah a scrollTop zůstává 0; body overflow:hidden skryje dolní zprávy.
 - Příčina a řešení: automatické minimum nadřazených grid panelů; nastavit min-height:0 na panel seznamu i čtečky. Mobil již tuto hodnotu měl.
 - Ověření: browser s dlouhým syntetickým seznamem, skutečný wheel posun až na poslední položku, otevření/detail/návrat a mobilní regrese. Samotná přítomnost overflow v CSS nestačí. Důkaz: reports/cockpit_email_archive_scroll_2026_09_14.md.
+
+### 2026-09-14 11:53 CEST — Společná odezva nesmí záviset na otevřeném detailu
+- Projev: akce zapíše zprávu, ale člověk ji nevidí, protože předek je zavřený details nebo překrytý dialogem.
+- Řešení: společný panel nezávislý na scrollu a detailech; při modalu přesunout i live region do jeho přístupnostní oblasti. Zobrazení nesmí krást fokus, chyba nesmí sama zmizet.
+- Ověření: skutečná viditelnost a překrytí přes elementFromPoint, zavřený detail, aktivní dialog, dlouhý text, blokovaný popup a síťová chyba; samotný textContent ani z-index nestačí. Důkaz: reports/cockpit_ui_u01_2026_09_14.json.

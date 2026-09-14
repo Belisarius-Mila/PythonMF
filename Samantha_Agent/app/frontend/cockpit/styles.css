@@ -162,6 +162,9 @@
     pre { margin: 0; white-space: pre-wrap; font: 12px ui-monospace, SFMono-Regular, Menlo, monospace; line-height: 1.45; color: #263244; }
     .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
     .message { margin-top: 10px; padding: 9px 10px; border-radius: 6px; background: #eef4ff; color: #1d3b74; font-size: 13px; }
+    .action-feedback { position: fixed; z-index: 40; right: max(12px, env(safe-area-inset-right)); bottom: max(12px, env(safe-area-inset-bottom)); left: max(12px, env(safe-area-inset-left)); margin-left: auto; box-sizing: border-box; max-width: 640px; display: flex; gap: 12px; align-items: flex-start; padding: 12px; border: 1px solid #b8cbea; border-radius: 8px; background: #eef4ff; color: #1d3b74; box-shadow: 0 6px 24px rgba(15, 23, 42, .2); }
+    #actionMessage { flex: 1; min-width: 0; max-height: 30vh; overflow-y: auto; overflow-wrap: anywhere; white-space: pre-wrap; font-size: 14px; line-height: 1.45; }
+    #actionMessageCloseBtn { flex: none; min-height: 44px; }
     .hidden { display: none; }
     .modal-backdrop { position: fixed; inset: 0; z-index: 20; background: rgba(15, 23, 42, .42); display: flex; align-items: flex-start; justify-content: center; padding: 72px 18px 24px; }
     .modal-backdrop.hidden { display: none; }
