@@ -13,9 +13,9 @@ class Element {
     this.className = '';
     this.disabled = false;
     this.listeners = {};
-    this.classList = {toggle: name => {
+    this.classList = {toggle: (name, force) => {
       const classes = new Set(this.className.split(/\s+/).filter(Boolean));
-      const added = !classes.has(name);
+      const added = force === undefined ? !classes.has(name) : force;
       if (added) classes.add(name); else classes.delete(name);
       this.className = [...classes].join(' ');
       return added;
@@ -36,7 +36,8 @@ function setup(fetch) {
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,
     '../app/frontend/cockpit/document_search.js'), 'utf8'), context);
   const elements = Object.fromEntries(['documentSearchInput', 'documentSearchBtn',
-    'documentSearchStatus', 'documentSearchResults'].map(key => [key, new Element()]));
+    'documentSearchStatus', 'documentSearchResults', 'documentSearchPagination',
+    'documentSearchPreviousBtn', 'documentSearchNextBtn', 'documentSearchRange'].map(key => [key, new Element()]));
   elements.documentSearchInput.value = 'fixture';
   const requests = [], actions = [];
   const handlers = Object.fromEntries(['openDocumentForReading', 'openPurchaseForReading',
@@ -75,7 +76,7 @@ test('search encodes a trimmed query, only reads, and restores loading controls'
   fixture.elements.documentSearchInput.value = '  účet & doklad?  ';
   const pending = fixture.api.searchDocuments();
   assert.equal(fixture.elements.documentSearchBtn.disabled, true);
-  assert.deepEqual(fixture.requests, [[`/api/documents/search?q=${encodeURIComponent('účet & doklad?')}`]]);
+  assert.deepEqual(fixture.requests, [[`/api/documents/search?q=${encodeURIComponent('účet & doklad?')}&limit=8&offset=0`]]);
   resolve(response([]));
   await pending;
   assert.equal(fixture.elements.documentSearchBtn.disabled, false);
@@ -168,4 +169,82 @@ test('legacy document IDs still open and subsequent searches replace previous ca
   items = [];
   await fixture.api.searchDocuments();
   assert.equal(fixture.elements.documentSearchResults.children.length, 0);
+});
+
+const pagedResponse = (offset, total = 23) => ({ok: true, json: async () => ({
+  ok: true, offset, total_count: total, has_more: offset + 8 < total,
+  next_offset: offset + 8 < total ? offset + 8 : null,
+  results: Array.from({length: Math.max(0, Math.min(8, total - offset))}, (_, i) => ({document_ref: `ref-${offset + i}`, title: `Result ${offset + i}`})),
+})});
+
+test('three pages expose all 23 distinct references and return to the preceding page', async () => {
+  const fixture = setup(url => pagedResponse(Number(new URL(url, 'http://fixture.test').searchParams.get('offset'))));
+  await fixture.api.searchDocuments();
+  const ranges = [], refs = [];
+  for (let page = 0; page < 3; page++) {
+    if (page) await fixture.elements.documentSearchNextBtn.listeners.click();
+    ranges.push(fixture.elements.documentSearchRange.textContent);
+    for (const node of descendants(fixture.elements.documentSearchResults).filter(node => node.textContent === 'Otevřít / číst')) node.listeners.click();
+  }
+  refs.push(...fixture.actions.map(action => action.args[0]));
+  assert.equal(new Set(refs).size, 23);
+  assert.deepEqual(ranges, ['1–8 z 23', '9–16 z 23', '17–23 z 23']);
+  assert.equal(fixture.elements.documentSearchNextBtn.disabled, true);
+  await fixture.elements.documentSearchPreviousBtn.listeners.click();
+  assert.equal(fixture.elements.documentSearchRange.textContent, '9–16 z 23');
+});
+
+test('typing a different query clears pages and ignores an older response', async () => {
+  const pending = [];
+  const fixture = setup(() => new Promise(resolve => pending.push(resolve)));
+  const old = fixture.api.searchDocuments();
+  fixture.elements.documentSearchInput.value = 'changed';
+  fixture.elements.documentSearchInput.listeners.input();
+  assert.equal(fixture.elements.documentSearchNextBtn.disabled, true);
+  const fresh = fixture.api.searchDocuments();
+  pending[1](pagedResponse(0, 1));await fresh;
+  pending[0](pagedResponse(0, 23));await old;
+  assert.equal(fixture.elements.documentSearchRange.textContent, '1–1 z 1');
+  assert.equal(fixture.elements.documentSearchResults.children.length, 1);
+  assert.match(fixture.requests[1][0], /q=changed&limit=8&offset=0$/);
+});
+
+for (const failure of ['HTTP', 'provider', 'network']) {
+  test(`${failure} on the next page preserves results and allows retry`, async () => {
+    let fail = true;
+    const fixture = setup(url => {
+      const offset = Number(new URL(url, 'http://fixture.test').searchParams.get('offset'));
+      if (offset && fail) {
+        if (failure === 'network') throw new Error('offline');
+        return {ok: failure !== 'HTTP', json: async () => ({ok: failure !== 'provider', message: 'Fixture failed'})};
+      }
+      return pagedResponse(offset, 9);
+    });
+    await fixture.api.searchDocuments();
+    await fixture.elements.documentSearchNextBtn.listeners.click();
+    assert.equal(fixture.elements.documentSearchRange.textContent, '1–8 z 9');
+    assert.equal(fixture.elements.documentSearchResults.children.length, 8);
+    assert.equal(fixture.elements.documentSearchNextBtn.disabled, false);
+    assert.match(fixture.elements.documentSearchStatus.textContent, /Chyba/);
+    fail = false;await fixture.elements.documentSearchNextBtn.listeners.click();
+    assert.equal(fixture.elements.documentSearchRange.textContent, '9–9 z 9');
+  });
+}
+
+test('repeated submit while the same page loads makes only one request', async () => {
+  let resolve;
+  const fixture = setup(() => new Promise(done => {resolve = done;}));
+  const first = fixture.api.searchDocuments();
+  await fixture.api.searchDocuments();
+  assert.equal(fixture.requests.length, 1);
+  resolve(pagedResponse(0));await first;
+});
+
+test('a shrinking index has a reachable previous page and an explicit empty-page message', async () => {
+  const fixture = setup(url => pagedResponse(Number(new URL(url, 'http://fixture.test').searchParams.get('offset')), url.endsWith('offset=0') ? 9 : 0));
+  await fixture.api.searchDocuments();await fixture.elements.documentSearchNextBtn.listeners.click();
+  assert.equal(fixture.elements.documentSearchResults.children.length, 0);
+  assert.equal(fixture.elements.documentSearchPreviousBtn.disabled, false);
+  assert.equal(fixture.elements.documentSearchNextBtn.disabled, true);
+  assert.match(fixture.elements.documentSearchStatus.textContent, /předchozí/);
 });

@@ -3989,10 +3989,10 @@ class CockpitTests(unittest.TestCase):
         self.assertNotIn('id="codexCliBtn"', COCKPIT_HTML)
         self.assertNotIn('id="terminalBtn"', COCKPIT_HTML)
         self.assertIn("Práce s dokumenty", COCKPIT_HTML)
-        self.assertIn("Nová PDF ve Downloads", COCKPIT_HTML)
+        self.assertIn("Nová PDF (7 dní)", COCKPIT_HTML)
         self.assertNotIn("Uložené dokumenty k revizi", COCKPIT_HTML)
         self.assertIn("Problémy", COCKPIT_HTML)
-        self.assertIn("Dokumentový intake", COCKPIT_HTML)
+        self.assertIn("Vstupy dokumentů", COCKPIT_HTML)
         self.assertIn("documentIntakeCount", COCKPIT_HTML)
         self.assertIn("documentIntakeSummary", COCKPIT_HTML)
         self.assertIn("documentIntakeList", COCKPIT_HTML)
@@ -4000,7 +4000,7 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("unified_items", COCKPIT_HTML)
         self.assertIn("Souhrn zdrojů", COCKPIT_HTML)
         self.assertIn("E-mail kandidáti", COCKPIT_HTML)
-        self.assertIn("Downloads / e-mail / mobilní sken / lokální inbox", COCKPIT_HTML)
+        self.assertIn("Zdroje a stav kontrol", COCKPIT_HTML)
         self.assertIn("Související dokumenty", COCKPIT_HTML)
         self.assertIn("documentCasesCount", COCKPIT_HTML)
         self.assertIn("documentCasesList", COCKPIT_HTML)
@@ -4028,14 +4028,14 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("/api/documents/due-reminder", COCKPIT_HTML)
         self.assertEqual(COCKPIT_HTML.count("<h3>Dokumenty k vyřešení</h3>"), 1)
         self.assertIn("reviewReportBtn", COCKPIT_HTML)
-        self.assertIn('<div id="reviewReportCount" class="work-count">?</div>', COCKPIT_HTML)
+        self.assertIn('<span id="reviewReportCount" class="work-count">?</span>', COCKPIT_HTML)
         self.assertIn('<button class="secondary" id="reviewReportBtn">Obnovit seznam</button>', COCKPIT_HTML)
         self.assertIn("/api/documents/review-report", COCKPIT_HTML)
         self.assertIn("loadDocumentReviewReport", COCKPIT_HTML)
         self.assertIn("renderDocumentReviewReportItem", COCKPIT_HTML)
         self.assertIn("review-group", COCKPIT_HTML)
         self.assertIn("review-report-list", COCKPIT_HTML)
-        self.assertIn('id="reviewReportList" class="work-list review-report-list"', COCKPIT_HTML)
+        self.assertIn('id="reviewReportList" tabindex="0" aria-label="Dokumenty k vyřešení" class="work-list review-report-list"', COCKPIT_HTML)
         self.assertIn('body: JSON.stringify({mode, document_ref: documentRef})', COCKPIT_HTML)
         self.assertIn("group.label || group.id", COCKPIT_HTML)
         self.assertIn("group.recommended_action", COCKPIT_HTML)
@@ -4078,10 +4078,10 @@ class CockpitTests(unittest.TestCase):
 
     def test_document_work_cards_are_ordered_by_daily_workflow_columns(self) -> None:
         headings = [
-            "Nová PDF ve Downloads za 7 dní",
+            "Nová PDF (7 dní)",
             "Dokumenty k vyřešení",
             "Problémy",
-            "Dokumentový intake",
+            "Vstupy dokumentů",
             "Termíny v dokumentech",
             "Související dokumenty",
         ]

@@ -3194,7 +3194,11 @@
 		    }
 
     const {searchDocuments} = window.SamanthaDocumentSearch.create({
-      elements: {documentSearchInput, documentSearchBtn, documentSearchStatus, documentSearchResults},
+      elements: {documentSearchInput, documentSearchBtn, documentSearchStatus, documentSearchResults,
+        documentSearchPagination: document.getElementById("documentSearchPagination"),
+        documentSearchPreviousBtn: document.getElementById("documentSearchPreviousBtn"),
+        documentSearchNextBtn: document.getElementById("documentSearchNextBtn"),
+        documentSearchRange: document.getElementById("documentSearchRange")},
       fetch: (...args) => fetch(...args),
       readingStatusOptions,
       openDocumentForReading,
@@ -3233,7 +3237,8 @@
           reader.focus();
           if (statusNode) statusNode.textContent = "Dokument je otevřený ve čtecím okně Cockpitu.";
         } else {
-          window.location.href = url;
+          if (statusNode) statusNode.textContent = "Prohlížeč zablokoval čtečku. Použij odkaz ve zprávě.";
+          showMessage("Prohlížeč zablokoval čtečku. Odkaz otevře dokument v nové kartě a zachová hledání.", url);
         }
       } catch (err) {
         recordFrontendError(err);
@@ -3260,7 +3265,8 @@
           reader.focus();
           if (statusNode) statusNode.textContent = "Nákupní PDF je otevřené ve čtecím okně Cockpitu.";
         } else {
-          window.location.href = url;
+          if (statusNode) statusNode.textContent = "Prohlížeč zablokoval čtečku. Použij odkaz ve zprávě.";
+          showMessage("Prohlížeč zablokoval čtečku. Odkaz otevře nákupní PDF v nové kartě a zachová hledání.", url);
         }
       } catch (err) {
         recordFrontendError(err);

@@ -1,15 +1,15 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-14 14:44 CEST. U01–U03 hotové lokálně; AuditCockpit56_2.txt v2.3.
-- U03: hledání před dokumentovými kartami; obecný přehled při práci s Dokumenty sbalený. Hlavní provozní stav, čas kontroly, urgentní upozornění a potvrzení zůstávají viditelné mimo přehled.
-- Ověřené prázdné karty jsou krátké rozbalovací řádky. Práce/chyba se otevře, ruční rozbalení přežije obnovu stejného stavu. Zdroje jsou v detailu, chyba detail otevře; dlouhé seznamy lze posouvat včetně klávesnice.
-- Důkaz: proti shodným fixture původního auditu desktop klid 1764→900 px, práce 3320→1643 px; mobil práce 5285→2577 px. Šest měření a tři behaviorální browser scénáře, 15 frontendových testů včetně dvou nových chybových případů revizí; statická brána prošla. `reports/cockpit_ui_u03_2026_09_14.json`.
-- Zachováno: revizní reference a přesný ScanDocu vstup, čtení, termínové potvrzení, case detail, zkrácení a backendové deduplikace. Název monitoru odpovídá skutečným intervalům 5/30 minut.
+- Aktualizováno: 2026-09-14 15:11 CEST. U01–U04 hotové lokálně; AuditCockpit56_2.txt v2.4.
+- U04: Předchozí/Další a rozsah výsledků; HTTP limit/offset napojené na existující backend. Výchozí stránka 8, maximum 20; neplatné či opakované parametry vrací 400 před poskytovatelem.
+- Nový dotaz resetuje stránku; stará opožděná odpověď se ignoruje. Při chybě další stránky zůstávají dosavadní výsledky a lze opakovat. Návrat čtečky zachová původní stránku; blokovaný popup nabídne odkaz bez ztráty hledání.
+- Důkaz: 27 cílených testů; HTTP nad 23 dokumenty + duplicitním řádkem bez vynechání/duplicit, čtyři browser šířky 320–1440 px s 23/9/0 výsledky. Plná brána: 1677 testů / 299.260 s, OK. `reports/cockpit_ui_u04_2026_09_14.json`.
+- Zachováno: reference, oprávnění, hlavičky, potvrzení a backendová logika hledání. Žádné soukromé vyhledávání ani ostré akce v přejímce.
 - Dodání: lokální vývoj, bez nového push/nasazení. Dřívější nasazení 10ec0877 je historický ověřený podklad, nikoli aktuální živý audit.
-- Další krok U04: stránkování dokumentového hledání (dnes stále standardně prvních 8 výsledků).
-- Rizika/přejímka: fyzický Safari Mac/iPhone a čtečky obrazovky dosud neověřené; vnitřní posouvání seznamů ověřené v emulaci. Úplná navigace/grafika je pozdější krok.
-- Záloha odložená kvůli disku; Santiago pouze zvažované. Cizí nesledovaná složka mimo tento commit zachovaná.
+- Další krok U05: zúžit opakované přehledy do jedné prioritní fronty a rozlišit provozní stav od čekající práce.
+- Rizika/přejímka: fyzický Safari Mac/iPhone čeká; živý index se mezi stránkami může změnit. Reload původního Cockpitu hledání resetuje, dotazy nejsou persistované.
+- Záloha odložená kvůli disku; Santiago pouze zvažované. Cizí nesledovaný adresář zachovaný mimo commit.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: Cockpit / hlavní architektura
@@ -22,19 +22,19 @@ Stav: rozpracovane
 Pripomenout pri startu: ne
 
 Co se resilo:
-U03: kompaktní dokumentová plocha, hledání nahoře a zdroje v detailu.
+U04: stránkování dokumentového hledání přes HTTP a UI.
 
 Co je hotove:
-- U01–U03 lokálně implementované a ověřené; roadmapa v2.3. Výškový cíl U03 splněný.
+- U01–U04 lokálně implementované a ověřené; roadmapa v2.4. U04 prošel i plnou branou.
 
 Co neni hotove:
-- Push/nasazení a fyzická přejímka. Kroky U04–U11.
+- Push/nasazení a fyzická přejímka. Kroky U05–U11.
 
 Dalsi krok:
-U04: připojit stránkování dokumentového hledání.
+U05: jedna prioritní fronta a oddělený provozní stav.
 
 Navrhovane dalsi kroky:
-- Později stavy, navigace a grafika podle TXT.
+- Navigace, Servis a grafika podle TXT.
 
 Zmenene nebo relevantni soubory:
 - Viz jednotlive checkpointy.
@@ -942,3 +942,23 @@ Navrhované další kroky:
 Technický důkaz:
 - 15 frontendových testů, doplněné dva případy chyby revize; statická brána prošla. Šest syntetických měření a tři behaviorální scénáře: poslední položka klávesnicí, chybové karty, zdroje, revizní reference, zrušená připomínka bez zápisu, case detail, zkrácení, hledání a návrat přehledu.
 - `reports/cockpit_ui_u03_2026_09_14.json`. Fyzický Safari Mac/iPhone dosud neověřen; limity backendových seznamů nezměněné. Cizí nesledovaný adresář zachovaný.
+
+### 2026-09-14 15:11 CEST — U04: stránkování dokumentového hledání
+
+Hotovo:
+- Dostupné jsou i výsledky za prvními osmi položkami. Předchozí/Další ukazuje rozsah a celkový počet; chybná další stránka neshodí dosavadní výsledek.
+- Nový dotaz začíná od první stránky a stará odpověď ho nepřepíše. Návrat ze čtečky zachovává hledání v původním okně, blokovaná čtečka nabídne náhradní odkaz.
+
+Rozhodnutí:
+- Míla schválil U04. Napojený existující backend bez změny relevance či deduplikace; nepřidána persistence soukromých dotazů. Push/nasazení neprovedeny.
+
+Další krok:
+- U05: jedna prioritní fronta a oddělený provozní stav.
+
+Navrhované další kroky:
+- Později jednotná navigace, Servis a grafika podle TXT.
+
+Technický důkaz:
+- 27 cílených testů; skutečný HTTP test 23 dokumentů + duplicitní řádek, stránky 8/8/7 a neplatné parametry před poskytovatelem. Čtyři syntetické browser scénáře: více stránek, nulový výsledek, návraty, zablokovaná čtečka, chyba/opakování a opožděná odpověď.
+- Plná brána: 1677 testů / 299.260 s, OK. Report `reports/cockpit_ui_u04_2026_09_14.json`.
+- Safari přejímka čeká; živý index není zmrazený a reload původního okna hledání resetuje. Cizí nesledovaný adresář zachovaný.

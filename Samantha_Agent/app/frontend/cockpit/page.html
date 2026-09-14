@@ -146,6 +146,11 @@
           <button class="primary" id="documentSearchBtn">Hledat</button>
         </div>
         <div id="documentSearchStatus" class="status-line"></div>
+        <nav id="documentSearchPagination" class="search-pagination hidden" aria-label="Stránky výsledků dokumentů">
+          <button id="documentSearchPreviousBtn" type="button" class="secondary" disabled>Předchozí</button>
+          <span id="documentSearchRange" aria-live="polite"></span>
+          <button id="documentSearchNextBtn" type="button" class="secondary" disabled>Další</button>
+        </nav>
         <div id="documentSearchResults" class="search-results"></div>
       </div>
     </section>

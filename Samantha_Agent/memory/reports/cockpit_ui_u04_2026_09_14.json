@@ -1,0 +1,331 @@
+{
+  "date": "2026-09-14 15:11 CEST",
+  "base_commit": "05c9994f",
+  "scope": "U04 document search pagination over HTTP and UI; no production actions, push or deployment",
+  "http_contract": {
+    "default_limit": 8,
+    "maximum_limit": 20,
+    "default_offset": 0,
+    "invalid_pagination_status": 400,
+    "duplicate_page_parameters": "rejected before provider",
+    "query_duplicates": "existing first-value behavior preserved",
+    "real_index_fixture": "23 unique documents plus duplicate index row; pages 8/8/7, outside offset 24 empty, distinct references preserved; private headers checked"
+  },
+  "verification": {
+    "targeted_tests": 27,
+    "full_gate_tests": 1677,
+    "full_gate_seconds": 299.26,
+    "full_gate": "passed",
+    "browser": "Edge Chromium headless, mobile viewport emulation, all requests intercepted",
+    "browser_widths": [
+      1440,
+      1024,
+      390,
+      320
+    ]
+  },
+  "initial_full_gate": "Two outdated U03 text/markup contracts in test_cockpit.py failed; updated to current labels, span and accessible list markup. Both targeted checks then passed; full gate repeated.",
+  "limitations": [
+    "Physical Safari Mac/iPhone acceptance pending",
+    "Live index may change between pages; no frozen search snapshot",
+    "Closing/reloading original Cockpit clears search state; queries are not persisted",
+    "Unrelated untracked directory preserved outside commit"
+  ],
+  "source_sha256": {
+    "app/cockpit_document_routes.py": "f757ccd3ea669851951d5c1a2292073b8ea2f03d95699bb9acee615b588bd886",
+    "app/frontend/cockpit/app.js": "ce1ab7c46f22ee288f4b23d27ed062cfea2c7d0a882aa50c7aa286b45a189ef3",
+    "app/frontend/cockpit/document_search.js": "6334d54f8eaec71fdddc05a317bdaefd0632efd67d9772ad481535d42ced7a18",
+    "app/frontend/cockpit/page.html": "a6061cd48c9e8c7773bf71083a4f259a5c4bb10a34a60c310dfb83d6c835f33f",
+    "app/frontend/cockpit/styles.css": "a4cab5dd0104f6f7a2d7ec3d661730bc402b80da41da7d66c2c16c3fade41689"
+  },
+  "browser_scenarios": [
+    {
+      "width": 1440,
+      "height": 900,
+      "threePages": [
+        8,
+        8,
+        7
+      ],
+      "nineResults": [
+        8,
+        1
+      ],
+      "documentAndPurchaseReturnKeepsPage": true,
+      "blockedReaderKeepsPage": true,
+      "emptyQueryResultCleared": true,
+      "failedNextRetainsResultsAndRetries": true,
+      "staleResponseIgnored": true,
+      "paginationFitsViewport": true,
+      "searchRequests": [
+        {
+          "path": "/api/documents/search",
+          "query": "?q=fixture&limit=8&offset=0",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "query": "?q=fixture&limit=8&offset=8",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "query": "?q=fixture&limit=8&offset=16",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "query": "?q=fixture&limit=8&offset=8",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "query": "?q=none&limit=8&offset=0",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "query": "?q=nine&limit=8&offset=0",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "query": "?q=nine&limit=8&offset=8",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "query": "?q=nine&limit=8&offset=8",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "query": "?q=slow&limit=8&offset=0",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "query": "?q=one&limit=8&offset=0",
+          "method": "GET"
+        }
+      ],
+      "jsErrors": []
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "threePages": [
+        8,
+        8,
+        7
+      ],
+      "nineResults": [
+        8,
+        1
+      ],
+      "documentAndPurchaseReturnKeepsPage": true,
+      "blockedReaderKeepsPage": true,
+      "emptyQueryResultCleared": true,
+      "failedNextRetainsResultsAndRetries": true,
+      "staleResponseIgnored": true,
+      "paginationFitsViewport": true,
+      "searchRequests": [
+        {
+          "path": "/api/documents/search",
+          "query": "?q=fixture&limit=8&offset=0",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "query": "?q=fixture&limit=8&offset=8",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "query": "?q=fixture&limit=8&offset=16",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "query": "?q=fixture&limit=8&offset=8",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "query": "?q=none&limit=8&offset=0",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "query": "?q=nine&limit=8&offset=0",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "query": "?q=nine&limit=8&offset=8",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "query": "?q=nine&limit=8&offset=8",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "query": "?q=slow&limit=8&offset=0",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "query": "?q=one&limit=8&offset=0",
+          "method": "GET"
+        }
+      ],
+      "jsErrors": []
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "threePages": [
+        8,
+        8,
+        7
+      ],
+      "nineResults": [
+        8,
+        1
+      ],
+      "documentAndPurchaseReturnKeepsPage": true,
+      "blockedReaderKeepsPage": true,
+      "emptyQueryResultCleared": true,
+      "failedNextRetainsResultsAndRetries": true,
+      "staleResponseIgnored": true,
+      "paginationFitsViewport": true,
+      "searchRequests": [
+        {
+          "path": "/api/documents/search",
+          "query": "?q=fixture&limit=8&offset=0",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "query": "?q=fixture&limit=8&offset=8",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "query": "?q=fixture&limit=8&offset=16",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "query": "?q=fixture&limit=8&offset=8",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "query": "?q=none&limit=8&offset=0",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "query": "?q=nine&limit=8&offset=0",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "query": "?q=nine&limit=8&offset=8",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "query": "?q=nine&limit=8&offset=8",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "query": "?q=slow&limit=8&offset=0",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "query": "?q=one&limit=8&offset=0",
+          "method": "GET"
+        }
+      ],
+      "jsErrors": []
+    },
+    {
+      "width": 320,
+      "height": 780,
+      "threePages": [
+        8,
+        8,
+        7
+      ],
+      "nineResults": [
+        8,
+        1
+      ],
+      "documentAndPurchaseReturnKeepsPage": true,
+      "blockedReaderKeepsPage": true,
+      "emptyQueryResultCleared": true,
+      "failedNextRetainsResultsAndRetries": true,
+      "staleResponseIgnored": true,
+      "paginationFitsViewport": true,
+      "searchRequests": [
+        {
+          "path": "/api/documents/search",
+          "query": "?q=fixture&limit=8&offset=0",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "query": "?q=fixture&limit=8&offset=8",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "query": "?q=fixture&limit=8&offset=16",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "query": "?q=fixture&limit=8&offset=8",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "query": "?q=none&limit=8&offset=0",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "query": "?q=nine&limit=8&offset=0",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "query": "?q=nine&limit=8&offset=8",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "query": "?q=nine&limit=8&offset=8",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "query": "?q=slow&limit=8&offset=0",
+          "method": "GET"
+        },
+        {
+          "path": "/api/documents/search",
+          "query": "?q=one&limit=8&offset=0",
+          "method": "GET"
+        }
+      ],
+      "jsErrors": []
+    }
+  ]
+}

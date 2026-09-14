@@ -3,31 +3,101 @@
 
   function createDocumentSearchFrontend(dependencies) {
     const {documentSearchInput, documentSearchBtn, documentSearchStatus,
-      documentSearchResults} = dependencies.elements;
+      documentSearchResults, documentSearchPagination, documentSearchPreviousBtn,
+      documentSearchNextBtn, documentSearchRange} = dependencies.elements;
     const {fetch, readingStatusOptions, openDocumentForReading,
       openPurchaseForReading, printDocument, moveDocumentLifecycle,
       setDocumentReadingStatus} = dependencies;
 
-	    async function searchDocuments() {
-      const query = documentSearchInput.value.trim();
+    const PAGE_SIZE = 8;
+    let requestVersion = 0;
+    let pendingKey = "";
+    let activeQuery = "";
+    let pageOffset = 0;
+    let nextOffset = null;
+
+    function updatePageButtons(busy = false) {
+      documentSearchPreviousBtn.disabled = busy || pageOffset === 0;
+      documentSearchNextBtn.disabled = busy || nextOffset === null;
+    }
+
+    function resetSearch() {
+      requestVersion++;
+      pendingKey = "";
+      activeQuery = "";
+      pageOffset = 0;
+      nextOffset = null;
       documentSearchResults.innerHTML = "";
+      documentSearchStatus.textContent = "";
+      documentSearchRange.textContent = "";
+      documentSearchPagination.classList.toggle("hidden", true);
+      documentSearchBtn.disabled = false;
+      updatePageButtons();
+    }
+
+    async function loadSearchPage(query, offset) {
+      const key = `${query}\n${offset}`;
+      if (pendingKey === key) return;
+      const version = ++requestVersion;
+      pendingKey = key;
+      documentSearchBtn.disabled = true;
+      updatePageButtons(true);
+      documentSearchStatus.textContent = "Hledám v indexu dokumentů...";
+      try {
+        const res = await fetch(`/api/documents/search?q=${encodeURIComponent(query)}&limit=${PAGE_SIZE}&offset=${offset}`);
+        const data = await res.json();
+        if (version !== requestVersion) return;
+        if (res.ok === false || data.ok === false || !Array.isArray(data.results)) {
+          throw new Error(data.message || "Výsledky nejsou dostupné.");
+        }
+        const total = Number(data.total_count ?? data.results.length);
+        const receivedOffset = Number(data.offset ?? offset);
+        const following = data.has_more === true ? Number(data.next_offset) : null;
+        if (!Number.isSafeInteger(total) || total < 0 || receivedOffset !== offset
+            || data.results.length > PAGE_SIZE || (data.results.length > 0 && total < offset + data.results.length)
+            || (following !== null && (!Number.isSafeInteger(following) || following <= offset))) {
+          throw new Error("Neplatná odpověď stránkování.");
+        }
+        activeQuery = query;
+        pageOffset = offset;
+        nextOffset = following;
+        renderDocumentSearchResults(data.results);
+        documentSearchStatus.textContent = !data.results.length && offset > 0
+          ? "Tato stránka už nemá výsledky. Vrať se na předchozí stránku."
+          : data.message || "";
+        documentSearchRange.textContent = data.results.length
+          ? `${offset + 1}–${offset + data.results.length} z ${total}`
+          : `0 z ${total}`;
+        documentSearchPagination.classList.toggle("hidden", total === 0 && offset === 0);
+      } catch (err) {
+        if (version === requestVersion) documentSearchStatus.textContent = `Chyba hledání: ${err}`;
+      } finally {
+        if (version === requestVersion) {
+          pendingKey = "";
+          documentSearchBtn.disabled = false;
+          updatePageButtons();
+        }
+      }
+    }
+
+    async function searchDocuments() {
+      const query = documentSearchInput.value.trim();
+      if (pendingKey === `${query}\n0`) return;
+      resetSearch();
       if (query.length < 2) {
         documentSearchStatus.textContent = "Zadej aspoň dvě písmena nebo číslice.";
         return;
       }
-      documentSearchBtn.disabled = true;
-      documentSearchStatus.textContent = "Hledám v indexu dokumentů...";
-      try {
-        const res = await fetch(`/api/documents/search?q=${encodeURIComponent(query)}`);
-        const data = await res.json();
-        documentSearchStatus.textContent = data.message || "";
-        renderDocumentSearchResults(data.results || []);
-      } catch (err) {
-        documentSearchStatus.textContent = `Chyba hledání: ${err}`;
-      } finally {
-        documentSearchBtn.disabled = false;
-      }
+      await loadSearchPage(query, 0);
     }
+
+    documentSearchInput.addEventListener("input", resetSearch);
+    documentSearchPreviousBtn.addEventListener("click", () => {
+      if (!documentSearchPreviousBtn.disabled) return loadSearchPage(activeQuery, Math.max(0, pageOffset - PAGE_SIZE));
+    });
+    documentSearchNextBtn.addEventListener("click", () => {
+      if (!documentSearchNextBtn.disabled && nextOffset !== null) return loadSearchPage(activeQuery, nextOffset);
+    });
 
     function renderDocumentSearchResults(results) {
       documentSearchResults.innerHTML = "";

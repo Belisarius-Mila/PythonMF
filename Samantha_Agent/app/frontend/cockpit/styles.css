@@ -135,6 +135,9 @@
     .review-group-count { color: var(--muted); font-size: 11px; white-space: nowrap; }
     .review-action { color: #344054; font-size: 12px; font-weight: 650; }
     .search-controls { display: grid; grid-template-columns: minmax(220px, 1fr) auto; gap: 10px; align-items: center; }
+    .search-pagination { display: flex; gap: 12px; align-items: center; justify-content: space-between; margin-top: 10px; font-size: 14px; }
+    .search-pagination.hidden { display: none; }
+    .search-pagination button { min-height: 44px; }
     input[type="search"], select { box-sizing: border-box; width: 100%; border: 1px solid var(--line); border-radius: 6px; padding: 10px 11px; font: inherit; background: white; color: var(--ink); }
     textarea { box-sizing: border-box; width: 100%; border: 1px solid var(--line); border-radius: 6px; padding: 10px 11px; font: inherit; background: white; color: var(--ink); resize: vertical; min-height: 94px; }
     .search-results { display: grid; gap: 9px; margin-top: 12px; }

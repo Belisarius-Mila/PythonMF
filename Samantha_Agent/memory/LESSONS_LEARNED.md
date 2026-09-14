@@ -669,3 +669,8 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Projev: sbalení podle pouhého count=0 může skrýt selhání poskytovatele; grid se stretch zase natahuje nulové sousedy podle dlouhé fronty.
 - Řešení: rozlišit ověřené prázdno, práci a chybu. Nuly sbalit, chyby/práci otevřít při změně stavu; stejný stav respektuje ruční rozbalení. Použít align-items:start a u dlouhých seznamů ověřit skutečné posouvání včetně klávesnice.
 - Ověření: nedostupný zdroj a HTTP/provider chyba revize se zobrazí; poslední položka i původní akce zůstávají dosažitelné. Report: reports/cockpit_ui_u03_2026_09_14.json.
+
+### 2026-09-14 15:11 CEST — Stránkování potřebuje HTTP propojení i ochranu před starou odpovědí
+- Projev: backend umí offset, ale HTTP ho nepředá; uživatel zůstane na první stránce. Pomalá odpověď navíc může přepsat novější dotaz.
+- Řešení: validovat parametry před poskytovatelem, předat limit/offset a použít pořadí požadavků v UI. Při chybě další stránky zachovat předchozí data a retry; nový dotaz resetuje stránku.
+- Ověření: skutečné HTTP nad více než jednou stránkou včetně duplicitního indexového řádku, mimo rozsah, chyby a dotaz změněný během načítání. Návrat čtečky i blokovaný popup musí zachovat původní hledání. Důkaz: reports/cockpit_ui_u04_2026_09_14.json.

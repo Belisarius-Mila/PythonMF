@@ -41,9 +41,9 @@ class CockpitDocumentRouteTests(unittest.TestCase):
 
     def test_json_routes_preserve_parameters_defaults_and_response(self):
         cases = (
-            ("/api/documents/search?q=%C5%BElu%C5%A5ou%C4%8Dk%C3%BD+text&q=second", "search_document_index", {"query": "žluťoučký text"}),
-            ("/api/documents/search?q=", "search_document_index", {"query": ""}),
-            ("/api/documents/search", "search_document_index", {"query": ""}),
+            ("/api/documents/search?q=%C5%BElu%C5%A5ou%C4%8Dk%C3%BD+text&q=second", "search_document_index", {"query": "žluťoučký text", "limit": 8, "offset": 0}),
+            ("/api/documents/search?q=", "search_document_index", {"query": "", "limit": 8, "offset": 0}),
+            ("/api/documents/search", "search_document_index", {"query": "", "limit": 8, "offset": 0}),
             ("/api/documents/review-report?ignored=value", "document_review_report_status", {}),
             ("/api/documents/case-detail?case_ref=case%2Fone&case_ref=two", "document_case_detail_status", {"case_ref": "case/one"}),
             ("/api/documents/case-detail", "document_case_detail_status", {"case_ref": ""}),
@@ -57,6 +57,46 @@ class CockpitDocumentRouteTests(unittest.TestCase):
                     self.assertEqual(headers["Content-Type"], "application/json; charset=utf-8")
                     self.assert_private_headers(headers)
                     loader.assert_called_once_with(**kwargs)
+
+    def test_search_pagination_validates_before_provider_and_caps_page_size(self):
+        with running_cockpit_server() as (host, port, _):
+            for query in ("offset=-1", "offset=x", "offset=1.5", "offset=", "offset=0&offset=8", "limit=0", "limit=-1", "limit=", "limit=x", "limit=8&limit=9"):
+                with self.subTest(query=query), patch("app.cockpit.search_document_index") as loader:
+                    status, headers, body = request(host, port, "/api/documents/search?q=fixture&" + query)
+                    self.assertEqual(status, 400)
+                    self.assertEqual(json.loads(body)["error"], "invalid_pagination")
+                    self.assert_private_headers(headers)
+                    loader.assert_not_called()
+            for query, limit, offset in (("limit=8&offset=8", 8, 8), ("limit=999&offset=0", 20, 0), ("offset=99999", 8, 99999)):
+                with self.subTest(query=query), patch("app.cockpit.search_document_index", return_value={"ok": True}) as loader:
+                    self.assertEqual(request(host, port, "/api/documents/search?q=fixture&" + query)[0], 200)
+                    loader.assert_called_once_with(query="fixture", limit=limit, offset=offset)
+
+    def test_search_pages_over_http_use_real_index_without_duplicates_or_omissions(self):
+        search = cockpit.search_document_index
+        with tempfile.TemporaryDirectory() as temp, running_cockpit_server() as (host, port, _):
+            vault = Path(temp) / "documents"
+            index = vault / "index"
+            index.mkdir(parents=True)
+            rows = [{"document_id": f"fixture-{i:02}", "title": f"Fixture document {i:02}"} for i in range(23)]
+            (index / "documents_index.jsonl").write_text("\n".join(json.dumps(row) for row in [*rows, rows[0]]) + "\n")
+            with patch("app.cockpit.search_document_index", side_effect=lambda **kwargs: search(vault_dir=vault, **kwargs)):
+                pages = []
+                for offset in (0, 8, 16, 24):
+                    status, headers, body = request(host, port, f"/api/documents/search?q=fixture&limit=8&offset={offset}")
+                    self.assertEqual(status, 200)
+                    self.assert_private_headers(headers)
+                    data = json.loads(body)
+                    self.assertEqual(data["total_count"], 23)
+                    self.assertEqual(data["offset"], offset)
+                    pages.append(data)
+                self.assertEqual([p["count"] for p in pages], [8, 8, 7, 0])
+                self.assertEqual([p["next_offset"] for p in pages], [8, 16, None, None])
+                refs = [item["document_ref"] for page in pages for item in page["results"]]
+                self.assertEqual(len(refs), 23)
+                self.assertEqual(len(set(refs)), 23)
+                repeated = json.loads(request(host, port, "/api/documents/search?q=fixture&offset=8")[2])
+                self.assertEqual(repeated["results"], pages[1]["results"])
 
     def test_readers_preserve_rendered_html_and_viewer_kind(self):
         cases = (

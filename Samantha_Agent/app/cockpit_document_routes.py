@@ -13,6 +13,7 @@ from typing import Any
 from urllib.parse import ParseResult, parse_qs
 
 from app.cockpit_document_readers import document_reader_page_html, purchase_reader_page_html
+from app.documents.search_service import MAX_DOCUMENT_SEARCH_PAGE_SIZE
 from app.documents.vault import safe_filename, safe_text
 
 
@@ -48,7 +49,25 @@ class DocumentReadRoutes:
         if parsed.path == "/api/documents/search":
             params = parse_qs(parsed.query)
             query = params.get("q", [""])[0]
-            responder.respond_json(self.search_documents(query=query))
+            page_params = parse_qs(parsed.query, keep_blank_values=True)
+            try:
+                values = {}
+                for name, default, minimum in (("limit", "8", 1), ("offset", "0", 0)):
+                    raw = page_params.get(name, [default])
+                    if len(raw) != 1 or not raw[0].isascii() or not raw[0].isdecimal():
+                        raise ValueError(name)
+                    values[name] = int(raw[0])
+                    if values[name] < minimum:
+                        raise ValueError(name)
+            except ValueError:
+                responder.respond_json(
+                    {"ok": False, "error": "invalid_pagination", "message": "limit musí být kladné celé číslo a offset nezáporné celé číslo; každý parametr pouze jednou."},
+                    status=HTTPStatus.BAD_REQUEST,
+                )
+                return True
+            responder.respond_json(self.search_documents(
+                query=query, limit=min(values["limit"], MAX_DOCUMENT_SEARCH_PAGE_SIZE), offset=values["offset"],
+            ))
             return True
         if parsed.path == "/api/documents/review-report":
             responder.respond_json(self.review_report())
