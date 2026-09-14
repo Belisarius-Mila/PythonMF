@@ -64,6 +64,7 @@ _FULL_GATE_PATH_PREFIXES = (
     "Samantha_Agent/requirements.txt",
     "Samantha_Agent/app/cockpit.py",
     "Samantha_Agent/app/cockpit_document_routes.py",
+    "Samantha_Agent/app/cockpit_email_archive_routes.py",
     "Samantha_Agent/app/file_persistence.py",
     "Samantha_Agent/app/backup/",
     "Samantha_Agent/app/documents/transactions.py",

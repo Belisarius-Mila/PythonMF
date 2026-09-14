@@ -351,6 +351,11 @@ class SimpleMainCheckpointTests(unittest.TestCase):
         self.assertIn("rychlou syntax/whitespace bránou", handoff)
         self.assertIn("čeká na denní balíček", handoff)
 
+    def test_email_archive_http_routes_require_full_gate(self) -> None:
+        self.assertTrue(_requires_full_gate([
+            {"path": "Samantha_Agent/app/cockpit_email_archive_routes.py"},
+        ]))
+
     def test_document_http_routes_require_full_gate(self) -> None:
         self.assertTrue(_requires_full_gate([
             {"path": "Samantha_Agent/app/cockpit_document_routes.py"},

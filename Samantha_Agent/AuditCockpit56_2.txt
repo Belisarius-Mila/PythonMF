@@ -1,7 +1,7 @@
 AUDIT COCKPITU 5.6 SOL – DRUHÝ PRŮCHOD
 ========================================
 
-Verze: 1.9
+Verze: 1.10
 Aktualizováno: 2026-09-14
 Datum auditu: 2026-08-16
 Autor posouzení: Adam / Codex 5.6 Sol
@@ -255,13 +255,32 @@ vnějších cest/symlinků. AST dokládá zachování původní logiky.
 kompilaci a rizikových cestách povinné plné brány. Lokální krok bez vydání.
 Report: memory/reports/cockpit_document_routes_2026_09_14.md + JSON.
 
+C10. SAMOSTATNÉ ČTECÍ HTTP ROZHRANÍ E-MAILOVÉHO ARCHIVU
+
+Šest GET cest (stránka, seznam, detail, soubor, vložená příloha a incoming)
+a tři obsluhy přesunuty do cockpit_email_archive_routes.py (138 řádků).
+Modul dostává HTML provider a pět backendových funkcí. Přístupové kontroly,
+společné hlavičky/chyby a lokální souborový responder zůstávají v Handleru;
+resolvery a EML dekódování v archivačním backendu. MIME/disposition beze změny.
+
+cockpit.py: 10 801 → 10 705; make_handler: 1 389 → 1 292; do_GET: 295 → 260.
+do_POST zůstává 642. UI, zápisy a odchozí komunikace nezměněné.
+53 HTTP kontraktů shodných před/po (bez Date/Server); skutečná ochrana cest,
+symlinků, přílohových referencí a přesné bajty přílohy syntetického EML.
+49 cílených testů včetně dokumentových cest a plná brána 1675/1675 prošly.
+AST potvrzuje šest větví, tři obsluhy i zbytek hlavního souboru; nový modul
+v CI, kompilaci, povinné plné bráně i inventuře frontendových adres.
+Report: memory/reports/cockpit_email_archive_routes_2026_09_14.md + JSON.
+C9 i C10 jsou lokální, čekají na společné vydání a ruční Mac/iPhone přejímku.
+
 D. CO ZŮSTÁVÁ OTEVŘENÉ A V JAKÉM POŘADÍ
 
-1. Push a řízené nasazení dokumentového řezu jsou schválené a dokončené.
+1. Push a řízené nasazení původního dokumentového řezu (část C) jsou dokončené.
+   Nové HTTP řezy C9 a C10 zatím vydané nejsou.
    Zbývá běžná uživatelská přejímka skutečného dokumentového panelu Mac/iPhone;
    syntetický UI test a provozní smoke ji nenahrazují.
 2. Hledání (C2), čtečky (C3) i optimalizace C4–C6 publikované/nasazené
-   v e7723c9a. C8 dodaný v fc889ed5. Nový C9 čeká na samostatné vydání.
+   v e7723c9a. C8 dodaný v fc889ed5. C9 (8ce24999) a C10 čekají na společné vydání.
 3. Případné další zrychlení vybírat podle nových časů Git skupin (C8).
    Cílené vývojové sady používat, rizikové/release brány zachovat.
    Sémantické duplicity případně auditovat po konkrétní doméně.

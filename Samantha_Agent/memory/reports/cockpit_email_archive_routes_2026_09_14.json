@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-14",
+  "base_code_commit": "8ce24999",
+  "route_count": 6,
+  "response_method_count": 3,
+  "ast_and_metrics": {
+    "three_response_bodies_preserved": true,
+    "six_route_branches_preserved": true,
+    "remaining_cockpit_ast_unchanged": true,
+    "metrics": [
+      {
+        "variant": "before",
+        "physical_lines": 10801,
+        "make_handler": 1389,
+        "do_GET": 295,
+        "do_POST": 642
+      },
+      {
+        "variant": "after",
+        "physical_lines": 10705,
+        "make_handler": 1292,
+        "do_GET": 260,
+        "do_POST": 642
+      }
+    ],
+    "new_module_lines": 138
+  },
+  "http_contracts": {
+    "equal_before_after": true,
+    "count": 53,
+    "statuses": {
+      "200": 20,
+      "400": 6,
+      "404": 22,
+      "500": 5
+    },
+    "scope": "Status, body SHA256 and headers excluding Date/Server. Isolated HTTP server, synthetic files and EML only.",
+    "aggregate_sha256": "ef650a3e20ed6ce10572983c95b962f600fed99fa0706a1334e3272b0a4c6080"
+  },
+  "targeted_tests": 49,
+  "full_gate": {
+    "passed": true,
+    "test_count": 1675,
+    "unit_seconds": 231.324
+  },
+  "boundaries": "Access validation, central error handling, security headers, file resolvers, EML decoding and shared local-file responder preserved. Embedded attachment inline/download policy unchanged. No POST, UI, persistence or external send changes. Local commit only."
+}

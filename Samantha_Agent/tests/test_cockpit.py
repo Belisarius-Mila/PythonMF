@@ -167,7 +167,9 @@ class CockpitTests(unittest.TestCase):
         inline_routes = re.findall(r'if parsed\.path == "([^"]+)":', do_get_source)
         document_source = inspect.getsource(cockpit_module.DocumentReadRoutes.dispatch)
         document_routes = re.findall(r'if parsed\.path == "([^"]+)":', document_source)
-        return inline_routes + document_routes + list(cockpit_module.HEALTH_RECOVERY_STATUS_GET_PATHS)
+        archive_source = inspect.getsource(cockpit_module.EmailArchiveReadRoutes.dispatch)
+        archive_routes = re.findall(r'if parsed\.path == "([^"]+)":', archive_source)
+        return inline_routes + document_routes + archive_routes + list(cockpit_module.HEALTH_RECOVERY_STATUS_GET_PATHS)
 
     def cockpit_do_get_prefix_routes(self) -> list[str]:
         source = Path(cockpit_module.__file__).read_text(encoding="utf-8")

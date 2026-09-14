@@ -648,3 +648,4 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Typ: opakující se.
 - Řešení: před přesunem zachytit HTTP kontrakty na izolovaném serveru se syntetickými daty, po přesunu porovnat stav/hlavičky/otisk těla. Ověřit odmítnutí před voláním backendu a skutečné vnější cesty/symlinky. Zahrnout nový modul do CI, kompilace a stejné povinné brány jako původní soubor. Před plným během rozšířit také existující inventuru adres frontendu o skutečný dispatch nového modulu.
 - Ověření: dokumentový řez, 61/61 shodných HTTP kontraktů; 35 cílených testů a plná brána 1665/1665. Report `reports/cockpit_document_routes_2026_09_14.md`.
+- Navazující ověření: archivační HTTP řez zachoval 53/53 kontraktů včetně MIME/disposition vložených příloh a čtení syntetického EML přes neprůhlednou referenci. Inventura adres aktualizovaná již před plnou bránou; 49 cílených testů a 1675/1675 celé sady. Report `reports/cockpit_email_archive_routes_2026_09_14.md`.

@@ -51,6 +51,7 @@ from app.codex_sessions import CodexSessionController
 from app.screen_sessions import ScreenSessionController
 from app.screen_recovery import ScreenRecovery
 from app.cockpit_document_routes import DocumentReadRoutes
+from app.cockpit_email_archive_routes import EmailArchiveReadRoutes
 from app.cockpit_readonly_routes import (
     HEALTH_RECOVERY_STATUS_GET_PATHS,
     build_health_recovery_status_dispatch,
@@ -9399,6 +9400,15 @@ class CockpitServer:
             resolve_purchase=lambda reference: resolve_openable_purchase_pdf(reference),
         )
 
+        email_archive_read_routes = EmailArchiveReadRoutes(
+            page_html=lambda: EMAIL_ARCHIVE_HTML,
+            list_archives=lambda **kwargs: email_archive_list_status(**kwargs),
+            archive_detail=lambda **kwargs: email_archive_detail_status(**kwargs),
+            resolve_file=lambda **kwargs: resolve_email_archive_file(**kwargs),
+            resolve_incoming=lambda **kwargs: resolve_email_archive_incoming_file(**kwargs),
+            resolve_attachment=lambda **kwargs: resolve_email_archive_embedded_attachment(**kwargs),
+        )
+
         class Handler(BaseHTTPRequestHandler):
             server_version = "SamanthaCockpit/0.2"
             sys_version = ""
@@ -9523,8 +9533,7 @@ class CockpitServer:
                 if parsed.path == "/email-processing/":
                     self.respond_html(EMAIL_PROCESSING_HTML)
                     return
-                if parsed.path == "/email-archive/":
-                    self.respond_html(EMAIL_ARCHIVE_HTML)
+                if email_archive_read_routes.dispatch(parsed=parsed, responder=self):
                     return
                 if parsed.path == "/janicka-kucharka/":
                     self.respond_html(janicka_cookbook_page_html())
@@ -9731,40 +9740,6 @@ class CockpitServer:
                     return
                 if parsed.path == "/api/email-processing/pending-purge":
                     self.respond_json(email_processing_pending_purge_items())
-                    return
-                if parsed.path == "/api/email-archive/list":
-                    params = parse_qs(parsed.query)
-                    query = params.get("q", [""])[0]
-                    try:
-                        limit = int(params.get("limit", ["120"])[0])
-                    except (TypeError, ValueError):
-                        limit = 120
-                    self.respond_json(email_archive_list_status(query=query, limit=limit))
-                    return
-                if parsed.path == "/api/email-archive/detail":
-                    params = parse_qs(parsed.query)
-                    archive_id = params.get("archive_id", [""])[0]
-                    self.respond_json(email_archive_detail_status(archive_id=archive_id))
-                    return
-                if parsed.path == "/email-archive/file":
-                    params = parse_qs(parsed.query)
-                    archive_id = params.get("archive_id", [""])[0]
-                    file_key = params.get("file", [""])[0]
-                    self.respond_email_archive_file(archive_id=archive_id, file_key=file_key)
-                    return
-                if parsed.path == "/email-archive/attachment":
-                    params = parse_qs(parsed.query)
-                    archive_id = params.get("archive_id", [""])[0]
-                    attachment_ref = params.get("attachment", [""])[0]
-                    self.respond_email_archive_attachment(
-                        archive_id=archive_id,
-                        attachment_ref=attachment_ref,
-                    )
-                    return
-                if parsed.path == "/email-archive/incoming":
-                    params = parse_qs(parsed.query)
-                    name = params.get("name", [""])[0]
-                    self.respond_email_archive_incoming_file(name=name)
                     return
                 if parsed.path == "/api/dev-runner/actions":
                     self.respond_json(cockpit_dev_runner_actions())
@@ -10618,77 +10593,6 @@ class CockpitServer:
                 self.send_response(HTTPStatus.OK)
                 self.send_header("Content-Type", str(resolved["mime_type"]))
                 self.send_header("Content-Disposition", f'inline; filename="{safe_filename(str(resolved["filename"]))}"')
-                self.send_header("Cache-Control", "no-store, max-age=0")
-                self.send_header("Content-Length", str(len(data)))
-                self.end_headers()
-                self.wfile.write(data)
-
-            def respond_email_archive_file(self, archive_id: str, file_key: str) -> None:
-                resolved = resolve_email_archive_file(archive_id=archive_id, file_key=file_key)
-                if not resolved.get("ok"):
-                    self.respond_json(
-                        {"error": "not_found", "message": resolved.get("message", "")},
-                        status=HTTPStatus.NOT_FOUND,
-                    )
-                    return
-                self.respond_local_file_bytes(
-                    target=resolved["path"],
-                    content_type=str(resolved.get("content_type") or "application/octet-stream"),
-                    filename=str(resolved.get("filename") or "email-archive"),
-                )
-
-            def respond_email_archive_incoming_file(self, name: str) -> None:
-                resolved = resolve_email_archive_incoming_file(name=name)
-                if not resolved.get("ok"):
-                    self.respond_json(
-                        {"error": "not_found", "message": resolved.get("message", "")},
-                        status=HTTPStatus.NOT_FOUND,
-                    )
-                    return
-                self.respond_local_file_bytes(
-                    target=resolved["path"],
-                    content_type=str(resolved.get("content_type") or "application/octet-stream"),
-                    filename=str(resolved.get("filename") or "attachment"),
-                )
-
-            def respond_email_archive_attachment(
-                self,
-                archive_id: str,
-                attachment_ref: str,
-            ) -> None:
-                resolved = resolve_email_archive_embedded_attachment(
-                    archive_id=archive_id,
-                    attachment_ref=attachment_ref,
-                )
-                if not resolved.get("ok"):
-                    self.respond_json(
-                        {"error": "not_found", "message": resolved.get("message", "")},
-                        status=HTTPStatus.NOT_FOUND,
-                    )
-                    return
-                data = resolved["data"]
-                filename = safe_filename(
-                    str(resolved.get("filename") or "attachment")
-                )
-                content_type = str(
-                    resolved.get("content_type") or "application/octet-stream"
-                )
-                disposition = (
-                    "inline"
-                    if content_type == "application/pdf"
-                    or (
-                        content_type.startswith("image/")
-                        and content_type != "image/svg+xml"
-                    )
-                    or content_type.startswith("text/plain")
-                    else "attachment"
-                )
-                self.send_response(HTTPStatus.OK)
-                self.send_header("Content-Type", content_type)
-                self.send_header(
-                    "Content-Disposition",
-                    f'{disposition}; filename="{filename}"',
-                )
                 self.send_header("Cache-Control", "no-store, max-age=0")
                 self.send_header("Content-Length", str(len(data)))
                 self.end_headers()

@@ -1,14 +1,13 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-14 10:10 CEST. Míla schválil oddělení čtecího dokumentového HTTP rozhraní; krok dokončený lokálně, bez push/nasazení.
-- `AuditCockpit56_2.txt` v1.9: sedm GET cest a čtyři obsluhy v `cockpit_document_routes.py`; `cockpit.py` 10 892 → 10 801 řádků, `do_GET` 326 → 295. Backendové resolvery, UI a POST zachované.
-- 61/61 syntetických HTTP kontraktů shodných před/po. 35 cílených testů a plná brána 1665/1665 prošly; AST potvrzuje zachování přesunuté logiky i zbytku hlavního souboru. Report `cockpit_document_routes_2026_09_14.md` + JSON.
-- Nový modul má původní přístupovou ochranu, bezpečnostní hlavičky, kontrolu cest a redigované chyby; zahrnut do CI, kompilace a povinné plné brány. Živé soukromé dokumenty se nečetly.
-- Předchozí optimalizace Gitu je nasazená v `fc889ed5` (ověřeno před tímto krokem, smoke 5/5). Srovnání stejné sady zůstává 307,14 → 261,43 s; dnešní přesun neslibuje zrychlení UI.
-- Nesouvisející změna `OwlSpeech.csv` byla souběžně uložena samostatným commitem `8db5cd81`; tento krok ji neupravuje ani znovu nestaguje. Aktuální Git/profilový stav ověřit před dalším vydáním.
-- Další krok: Na samostatný pokyn vydat dokumentový řez a dokončit společnou Mac/iPhone přejímku čteček; potom navázat dalším strukturálním řezem a auditem/UI.
-- Otevřeno: prvních 8 výsledků hledání, nerozbalený panel přes Janiččinu zkratku a náhradní návrat nákupní čtečky. Záloha odložená kvůli nedostupnému disku; Santiago zatím pouze zvažované téma.
+- Aktualizováno: 2026-09-14 10:39 CEST. Míla schválil další lokální řez čtecího HTTP rozhraní e-mailového archivu.
+- `AuditCockpit56_2.txt` v1.10: šest GET cest a tři obsluhy v `cockpit_email_archive_routes.py`; `cockpit.py` 10 801 → 10 705 řádků, `do_GET` 295 → 260. Předchozí dokumentový řez `8ce24999` zůstává lokální.
+- 53/53 syntetických HTTP kontraktů shodných před/po, 49 cílených testů a plná brána 1675/1675 prošly. AST potvrzuje zachování přesunuté logiky a zbytku hlavního souboru. Report `cockpit_email_archive_routes_2026_09_14.md` + JSON.
+- Přístupová ochrana, resolvery, EML dekódování, společná obsluha souborů a MIME/disposition pravidla zachovaná. UI, POST, zápisy a odchozí komunikace beze změny. Nový modul v CI, kompilaci i povinné plné bráně; inventura adres frontendu zahrnuje oba nové moduly.
+- Předchozí dokumentové HTTP kontrakty prošly znovu v cílené sadě. Živé soukromé dokumenty ani e-maily se nečetly. Oba strukturální kroky jsou lokální, bez nového push/nasazení; nejde o měření zrychlení UI.
+- Další krok: Na samostatný pokyn vydat oba HTTP řezy a společně ověřit dokumentové čtečky, archiv a přílohy na Macu/iPhonu. Pak navázat auditem/UI.
+- Otevřeno: prvních 8 výsledků hledání, nerozbalený panel přes Janiččinu zkratku a náhradní návrat nákupní čtečky. Záloha odložená kvůli nedostupnému disku; Santiago pouze zvažované téma.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: Cockpit / hlavní architektura
@@ -21,16 +20,16 @@ Stav: rozpracovane
 Pripomenout pri startu: ne
 
 Co se resilo:
-Oddělení sedmi čtecích dokumentových HTTP cest a čtyř obsluh.
+Oddělení čtecího HTTP rozhraní e-mailového archivu po dokumentovém řezu.
 
 Co je hotove:
-- Samostatný modul, stejné HTTP odpovědi a bezpečnostní hranice. Plná brána 1665/1665.
+- Dva lokální HTTP moduly. Archiv: 53 shodných kontraktů, 49 cílených testů a plná brána 1675/1675.
 
 Co neni hotove:
-- Nový řez čeká na samostatné vydání; společná přejímka, navazující audit/UI.
+- Společné vydání obou kroků, Mac/iPhone přejímka, navazující audit/UI.
 
 Dalsi krok:
-Samostatně vydat řez a dokončit společnou Mac/iPhone přejímku čteček.
+Samostatně vydat oba HTTP řezy a ověřit čtečky, archiv a přílohy na Macu/iPhonu.
 
 Navrhovane dalsi kroky:
 - Po optimalizaci navázat přejímkou a auditem/UI podle AuditCockpit56_2.txt.
@@ -811,3 +810,22 @@ Technický důkaz:
 - 61/61 HTTP kontraktů shodných před/po (bez Date/Server); syntetická data, včetně symlinků a vnějších cest. 35 cílených testů; plná brána 1665/1665, unit 252.042 s.
 - AST: přesunutá logika a zbytek `cockpit.py` shodné po explicitním předání závislostí. Nový modul v kompilaci, CI filtrech a povinné plné bráně. Report `cockpit_document_routes_2026_09_14.md` + JSON.
 - Lokální krok bez nového push/nasazení. `OwlSpeech.csv` a souběžný `8db5cd81` zůstávají mimo tento řez. Ruční přejímka a známé UI nálezy zůstávají otevřené.
+
+### 2026-09-14 10:39 CEST — Samostatná čtecí část e-mailového archivu
+
+Hotovo:
+- Stránka archivu, seznam/detail a obsluha souborů i příloh mají vlastní HTTP modul. Šest cest a tři obsluhy přesunuté při zachování odpovědí a pravidel příloh.
+
+Rozhodnutí:
+- Míla schválil navržené pokračování stejným postupem jako dokumentový řez; dokončit dalším lokálním commitem pro pozdější společné vydání.
+
+Další krok:
+- Samostatně vydat oba HTTP řezy a dokončit společnou Mac/iPhone přejímku dokumentů, archivu a příloh.
+
+Navrhované další kroky:
+- Navázat auditem/UI a další strukturální řez volit podle konkrétní doménové vazby.
+
+Technický důkaz:
+- 53/53 HTTP kontraktů shodných (bez Date/Server), 49 cílených testů a plná brána 1675/1675, unit 231.324 s. Syntetické soubory/EML, ověřená ochrana před traversal/symlinkem a přesné bajty vybrané přílohy.
+- AST: šest větví, tři obsluhy a zbytek hlavního souboru zachované. MIME/disposition politika beze změny. CI, kompilace, rizikové gate cesty i inventura frontendových adres aktualizované.
+- Report `cockpit_email_archive_routes_2026_09_14.md` + JSON. Nový krok i dokumentový `8ce24999` pouze lokální, bez push/nasazení či ruční přejímky.
