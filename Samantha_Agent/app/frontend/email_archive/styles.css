@@ -139,6 +139,7 @@
     }
     .message-pane {
       min-width: 0;
+      min-height: 0;
       display: grid;
       grid-template-rows: auto auto minmax(0, 1fr);
       border-right: 1px solid var(--line);
@@ -230,6 +231,7 @@
     .message-archive-date { color: var(--muted); font-size: 11px; }
     .reader-pane {
       min-width: 0;
+      min-height: 0;
       display: grid;
       grid-template-rows: 45px minmax(0, 1fr);
       background: #fbfcfe;

@@ -24,9 +24,9 @@ from scripts.cockpit_quality_gate import node_binary
 EXPECTED_PAGES = {
     "email_archive": (
         EMAIL_ARCHIVE_HTML,
-        38462,
-        1084,
-        "159b198eeb662274f90d37328f0c846beac22129c9aabbdb5e609a01b9c418a1",
+        38504,
+        1086,
+        "6f6abca26870c6287dd4d5a4f7a32f8fa135afd25eef78dd797731ac6d17a116",
     ),
     "email_processing": (
         EMAIL_PROCESSING_HTML,

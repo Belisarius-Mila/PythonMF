@@ -1,13 +1,12 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-14 10:47 CEST. Míla schválil push a nasazení obou HTTP řezů; navazující audit UI výslovně odložil na samostatný krok.
-- Dokumenty `8ce24999` a archiv `da9d0bea`: funkční head nasazen a ověřen, nový proces potvrzen, smoke 5/5, otisk `0461867a886fdf42`, receipt `2026-09-14T08:45:07+00:00`.
-- Vývojová plná brána 1675/1675; dokumenty 61/61 a archiv 53/53 shodných HTTP kontraktů. Ochrana přístupu, souborů a příloh zachovaná.
-- Uzavírací zápis je součást schváleného GitHub balíčku; aktuální push, CI a finální nasazený head ověřovat živým auditem. Tento zápis sám není důkaz dokončeného push.
-- Postup ruční přejímky a důkaz: `reports/cockpit_http_routes_release_2026_09_14.md`. Mac/iPhone test zatím čeká na Mílu.
-- Další krok: ruční přejímka dokumentů, nákupní čtečky, e-mailového archivu a příloh; potom samostatný audit UI.
-- Otevřené starší UI nálezy: prvních 8 výsledků hledání, nerozbalený panel přes Janiččinu zkratku, náhradní návrat nákupní čtečky. Záloha odložená kvůli nedostupnému disku; Santiago pouze zvažované téma.
+- Aktualizováno: 2026-09-14 11:09 CEST. Předchozí vydání `088f725c` dokončené: GitHub CI 34825018596 success, nový proces a smoke 5/5. Míla při přejímce hlásí vše zdánlivě OK kromě posouvání archivu na Macu; iPhone posouvá správně.
+- Příčina reprodukovaná na syntetických datech. Oprava: dvě deklarace `min-height: 0` pro desktopové panely seznamu a čtečky. Mobilní styly již tuto hodnotu měly.
+- Browser před/po: desktop 1440×900 a 1024×768 nově dosáhne poslední ze 160 zpráv; otevření a dlouhý detail fungují. Mobilní 390×844 shodné rozměry/posun, návrat zachovává pozici. 24 cílených testů prošlo; report `cockpit_email_archive_scroll_2026_09_14.md` + JSON.
+- Opravný balíček navazuje na schválené p+n a přejímku; tento zápis předchází jeho push/nasazení. Finální Git, CI a deployment ověřit živým auditem.
+- Další krok: po vydání obnovit archiv na Macu a ověřit posun seznamu i dlouhé zprávy; iPhone krátký retest. Audit UI později samostatně.
+- Starší UI nálezy: prvních 8 výsledků dokumentového hledání, panel přes Janiččinu zkratku a náhradní návrat nákupní čtečky. Záloha odložená kvůli disku; Santiago pouze zvažované téma.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Cockpit / hlavní architektura
@@ -943,3 +942,21 @@ Navrhované další kroky:
 Technický důkaz:
 - Nasazený funkční head `da9d0bea`, nový proces potvrzen, smoke 5/5, otisk `0461867a886fdf42`, receipt `2026-09-14T08:45:07+00:00`. Vývojová plná brána 1675/1675; HTTP kontrakty 61/61 a 53/53.
 - Ruční přejímka otevřená. Push/CI a finální head se ověřují živými registrovanými audity po uzavření balíčku; nejsou předjímány tímto zápisem.
+
+### 2026-09-14 11:09 CEST — Oprava posouvání archivu na Macu
+
+Hotovo:
+- Chyba z Mílovy přejímky reprodukovaná a opravená dvěma CSS deklaracemi. Desktopový seznam i dlouhá zpráva se ve skutečném renderovacím enginu posouvají; mobilní rozložení zachované.
+
+Rozhodnutí:
+- Dokončit tuto opravu v návaznosti na schválené p+n. Širší audit UI zůstává samostatný.
+
+Další krok:
+- Opravný balíček a řízené nasazení; potom Mílův krátký retest Macu a iPhonu.
+
+Navrhované další kroky:
+- Po přejímce samostatný audit UI.
+
+Technický důkaz:
+- 160 syntetických zpráv, desktop 1440×900/1024×768 před opravou posun 0, po opravě dosažitelná poslední zpráva a dlouhý detail. Mobil 390×844 před/po shodný. 24 cílených testů, žádné POST či živá soukromá data. Report `cockpit_email_archive_scroll_2026_09_14.md` + JSON.
+- Předchozí release 088f725c ověřený včetně CI; tento zápis předchází opravnému push/nasazení. Přímá přejímka opravy na Mílově Macu otevřená.

@@ -1,7 +1,7 @@
 AUDIT COCKPITU 5.6 SOL – DRUHÝ PRŮCHOD
 ========================================
 
-Verze: 1.11
+Verze: 1.12
 Aktualizováno: 2026-09-14
 Datum auditu: 2026-08-16
 Autor posouzení: Adam / Codex 5.6 Sol
@@ -275,6 +275,16 @@ C9 i C10 nasazené ve funkčním headu da9d0bea, nový proces a smoke 5/5 ověř
 Společný GitHub balíček je schválen včetně uzavíracího zápisu; finální stav
 ověřit živým auditem. Ruční Mac/iPhone přejímka čeká na Mílu.
 Postup: memory/reports/cockpit_http_routes_release_2026_09_14.md.
+
+C11. OPRAVA DESKTOPOVÉHO POSOUVÁNÍ ARCHIVU Z PŘEJÍMKY
+
+Míla: ostatní přejímka zdánlivě OK, archiv nelze posouvat jen na Macu.
+Dvě CSS deklarace min-height: 0 omezí grid panely seznamu a čtečky; mobilní
+výsledný styl se nemění. Reprodukce před/po na 160 syntetických zprávách:
+desktop nyní dosáhne poslední položky, dlouhý detail se posouvá, mobil beze změny.
+24 cílených testů prošlo. Report cockpit_email_archive_scroll_2026_09_14.md + JSON.
+Opravné vydání navazuje na schválené p+n; finální stav ověřit živě.
+Retest Macu čeká na Mílu, širší audit UI zůstává samostatný.
 
 D. CO ZŮSTÁVÁ OTEVŘENÉ A V JAKÉM POŘADÍ
 

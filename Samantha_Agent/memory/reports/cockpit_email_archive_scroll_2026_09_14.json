@@ -1,0 +1,196 @@
+{
+  "fixture_messages": 160,
+  "engine": "Headless Microsoft Edge / Chromium on Mac; phone viewport emulation, not Safari device proof",
+  "before": [
+    {
+      "width": 1440,
+      "height": 900,
+      "before": {
+        "client": 15775,
+        "scroll": 15775,
+        "top": 0,
+        "listBottom": 15955.296875,
+        "paneHeight": 15883,
+        "viewport": 900,
+        "body": 15955
+      },
+      "after": {
+        "client": 15775,
+        "scroll": 15775,
+        "top": 0,
+        "listBottom": 15955.296875,
+        "paneHeight": 15883,
+        "viewport": 900,
+        "body": 15955
+      },
+      "lastVisible": false,
+      "detail": false,
+      "back": false,
+      "reader": null,
+      "errors": [],
+      "postCount": 0
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "before": {
+        "client": 15775,
+        "scroll": 15775,
+        "top": 0,
+        "listBottom": 15955.296875,
+        "paneHeight": 15883,
+        "viewport": 768,
+        "body": 15955
+      },
+      "after": {
+        "client": 15775,
+        "scroll": 15775,
+        "top": 0,
+        "listBottom": 15955.296875,
+        "paneHeight": 15883,
+        "viewport": 768,
+        "body": 15955
+      },
+      "lastVisible": false,
+      "detail": false,
+      "back": false,
+      "reader": null,
+      "errors": [],
+      "postCount": 0
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "before": {
+        "client": 626,
+        "scroll": 15775,
+        "top": 0,
+        "listBottom": 844,
+        "paneHeight": 726,
+        "viewport": 844,
+        "body": 844
+      },
+      "after": {
+        "client": 626,
+        "scroll": 15775,
+        "top": 15149,
+        "listBottom": 844,
+        "paneHeight": 726,
+        "viewport": 844,
+        "body": 844
+      },
+      "lastVisible": true,
+      "detail": true,
+      "back": true,
+      "reader": {
+        "top": 3992,
+        "client": 735,
+        "scroll": 4727,
+        "bottom": 844
+      },
+      "errors": [],
+      "postCount": 0
+    }
+  ],
+  "after": [
+    {
+      "width": 1440,
+      "height": 900,
+      "before": {
+        "client": 720,
+        "scroll": 15775,
+        "top": 0,
+        "listBottom": 900,
+        "paneHeight": 828,
+        "viewport": 900,
+        "body": 900
+      },
+      "after": {
+        "client": 720,
+        "scroll": 15775,
+        "top": 15055,
+        "listBottom": 900,
+        "paneHeight": 828,
+        "viewport": 900,
+        "body": 900
+      },
+      "lastVisible": true,
+      "detail": true,
+      "back": false,
+      "reader": {
+        "top": 3860,
+        "client": 783,
+        "scroll": 4643,
+        "bottom": 900
+      },
+      "errors": [],
+      "postCount": 0
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "before": {
+        "client": 588,
+        "scroll": 15775,
+        "top": 0,
+        "listBottom": 768,
+        "paneHeight": 696,
+        "viewport": 768,
+        "body": 768
+      },
+      "after": {
+        "client": 588,
+        "scroll": 15775,
+        "top": 15187,
+        "listBottom": 768,
+        "paneHeight": 696,
+        "viewport": 768,
+        "body": 768
+      },
+      "lastVisible": true,
+      "detail": true,
+      "back": false,
+      "reader": {
+        "top": 4051,
+        "client": 651,
+        "scroll": 4702,
+        "bottom": 768
+      },
+      "errors": [],
+      "postCount": 0
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "before": {
+        "client": 626,
+        "scroll": 15775,
+        "top": 0,
+        "listBottom": 844,
+        "paneHeight": 726,
+        "viewport": 844,
+        "body": 844
+      },
+      "after": {
+        "client": 626,
+        "scroll": 15775,
+        "top": 15149,
+        "listBottom": 844,
+        "paneHeight": 726,
+        "viewport": 844,
+        "body": 844
+      },
+      "lastVisible": true,
+      "detail": true,
+      "back": true,
+      "reader": {
+        "top": 3992,
+        "client": 735,
+        "scroll": 4727,
+        "bottom": 844
+      },
+      "errors": [],
+      "postCount": 0
+    }
+  ]
+}
