@@ -233,7 +233,10 @@ Předchozí workspace optimalizace zapnutá v obou variantách. Jeden dnešní p
 nelze sčítat se včerejšími 25 %. Fallback a Linux beze změny; po změně Xcode
 restart procesu. Plná kanonická brána prošla, AST potvrzuje původní logiku.
 Report: memory/reports/cockpit_shared_git_2026_09_14.md + JSON.
-Nový krok je lokální, bez push/nasazení a bez benchmarku živé UI odezvy.
+Následné dodání 14. 9.: Míla schválil c+p+n. Funkční 9b306b3d je nasazený,
+nový proces, stamp 06880920474429e4, smoke 5/5, účtenka 2026-09-14T07:25:27+00:00.
+Tento souhrnný zápis vzniká před finálním dávkovým pushem s vlastní plnou bránou;
+konečný GitHub/runtime head dokládá živý audit. Živá odezva UI nebyla benchmarkována.
 
 D. CO ZŮSTÁVÁ OTEVŘENÉ A V JAKÉM POŘADÍ
 
@@ -241,7 +244,7 @@ D. CO ZŮSTÁVÁ OTEVŘENÉ A V JAKÉM POŘADÍ
    Zbývá běžná uživatelská přejímka skutečného dokumentového panelu Mac/iPhone;
    syntetický UI test a provozní smoke ji nenahrazují.
 2. Hledání (C2), čtečky (C3) i optimalizace C4–C6 publikované/nasazené
-   v e7723c9a. Nový C8 čeká na samostatný pokyn k push/nasazení.
+   v e7723c9a. C8 funkčně nasazený v 9b306b3d; uzavření dávky schválené.
 3. Případné další zrychlení vybírat podle nových časů Git skupin (C8).
    Cílené vývojové sady používat, rizikové/release brány zachovat.
    Sémantické duplicity případně auditovat po konkrétní doméně.
