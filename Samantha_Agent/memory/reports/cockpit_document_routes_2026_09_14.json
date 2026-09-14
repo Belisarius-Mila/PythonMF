@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-14",
+  "base_code_commit": "fc889ed5",
+  "routes": 7,
+  "response_methods": 4,
+  "new_module_lines": 130,
+  "metrics": [
+    {
+      "variant": "before",
+      "physical_lines": 10892,
+      "make_handler": 1481,
+      "do_GET": 326,
+      "do_POST": 642
+    },
+    {
+      "variant": "after",
+      "physical_lines": 10801,
+      "make_handler": 1389,
+      "do_GET": 295,
+      "do_POST": 642
+    }
+  ],
+  "http_contracts": {
+    "count": 61,
+    "statuses": {
+      "200": 11,
+      "400": 7,
+      "404": 36,
+      "500": 7
+    },
+    "equal_before_after": true,
+    "compared": "Status, body SHA256 and response headers excluding Date/Server. All requests use synthetic data on an isolated local HTTP server.",
+    "aggregate_sha256": "9371decd9452e90c5affb5f308659a1613c088ea655c62c76a39aa8293362d7d"
+  },
+  "ast": {
+    "four_response_bodies_preserved": true,
+    "seven_route_branches_preserved": true,
+    "remaining_cockpit_ast_unchanged": true
+  },
+  "targeted_tests": 35,
+  "full_gate": {
+    "passed": true,
+    "test_count": 1665,
+    "unit_seconds": 252.042
+  },
+  "boundaries": "Shared access validation and exception handling stay in Handler; vault/purchase path resolvers unchanged. No POST, UI, persistence, push or deployment changes. CI triggers and full-gate path policy include extracted module."
+}

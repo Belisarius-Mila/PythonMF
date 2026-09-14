@@ -1,7 +1,7 @@
 AUDIT COCKPITU 5.6 SOL – DRUHÝ PRŮCHOD
 ========================================
 
-Verze: 1.8
+Verze: 1.9
 Aktualizováno: 2026-09-14
 Datum auditu: 2026-08-16
 Autor posouzení: Adam / Codex 5.6 Sol
@@ -238,13 +238,30 @@ nový proces, stamp 06880920474429e4, smoke 5/5, účtenka 2026-09-14T07:25:27+0
 Tento souhrnný zápis vzniká před finálním dávkovým pushem s vlastní plnou bránou;
 konečný GitHub/runtime head dokládá živý audit. Živá odezva UI nebyla benchmarkována.
 
+C9. SAMOSTATNÉ ČTECÍ DOKUMENTOVÉ HTTP ROZHRANÍ
+
+Sedm GET cest (hledání, review-report, case-detail a dvě čtečky/dva souborové
+vstupy) a čtyři obsluhy přesunuty do cockpit_document_routes.py (130 řádků).
+Modul dostává pět backendových funkcí; Handler zachovává přístupovou kontrolu,
+bezpečnostní hlavičky i centrální chyby. Původní resolvery chrání index/úložiště.
+Žádná změna UI, POST, persistence nebo skutečných dokumentů.
+
+cockpit.py: 10 892 → 10 801; make_handler: 1 481 → 1 389; do_GET: 326 → 295.
+Do_POST zůstává 642 řádků. Přínosem je ucelená odpovědnost, ne měřené zrychlení UI.
+61 HTTP kontraktů shodných před/po: stav, tělo a hlavičky kromě Date/Server.
+Ověřené chybné reference, neznámé cesty/POST, Host, chyby a skutečné odmítnutí
+vnějších cest/symlinků. AST dokládá zachování původní logiky.
+35 cílených testů a plná brána 1665/1665 prošly. Nový modul v CI filtrech,
+kompilaci a rizikových cestách povinné plné brány. Lokální krok bez vydání.
+Report: memory/reports/cockpit_document_routes_2026_09_14.md + JSON.
+
 D. CO ZŮSTÁVÁ OTEVŘENÉ A V JAKÉM POŘADÍ
 
 1. Push a řízené nasazení dokumentového řezu jsou schválené a dokončené.
    Zbývá běžná uživatelská přejímka skutečného dokumentového panelu Mac/iPhone;
    syntetický UI test a provozní smoke ji nenahrazují.
 2. Hledání (C2), čtečky (C3) i optimalizace C4–C6 publikované/nasazené
-   v e7723c9a. C8 funkčně nasazený v 9b306b3d; uzavření dávky schválené.
+   v e7723c9a. C8 dodaný v fc889ed5. Nový C9 čeká na samostatné vydání.
 3. Případné další zrychlení vybírat podle nových časů Git skupin (C8).
    Cílené vývojové sady používat, rizikové/release brány zachovat.
    Sémantické duplicity případně auditovat po konkrétní doméně.

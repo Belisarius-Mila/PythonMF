@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import base64
 import csv
+import inspect
 import json
 import re
 import runpy
@@ -164,7 +165,9 @@ class CockpitTests(unittest.TestCase):
         end = source.index("def do_POST(self) -> None:", start)
         do_get_source = source[start:end]
         inline_routes = re.findall(r'if parsed\.path == "([^"]+)":', do_get_source)
-        return inline_routes + list(cockpit_module.HEALTH_RECOVERY_STATUS_GET_PATHS)
+        document_source = inspect.getsource(cockpit_module.DocumentReadRoutes.dispatch)
+        document_routes = re.findall(r'if parsed\.path == "([^"]+)":', document_source)
+        return inline_routes + document_routes + list(cockpit_module.HEALTH_RECOVERY_STATUS_GET_PATHS)
 
     def cockpit_do_get_prefix_routes(self) -> list[str]:
         source = Path(cockpit_module.__file__).read_text(encoding="utf-8")

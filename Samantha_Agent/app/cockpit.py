@@ -50,6 +50,7 @@ from app.cockpit_awake_mode import (
 from app.codex_sessions import CodexSessionController
 from app.screen_sessions import ScreenSessionController
 from app.screen_recovery import ScreenRecovery
+from app.cockpit_document_routes import DocumentReadRoutes
 from app.cockpit_readonly_routes import (
     HEALTH_RECOVERY_STATUS_GET_PATHS,
     build_health_recovery_status_dispatch,
@@ -9390,6 +9391,14 @@ class CockpitServer:
             recovery_status_loader=lambda: recovery_center_status(),
         )
 
+        document_read_routes = DocumentReadRoutes(
+            search_documents=lambda **kwargs: search_document_index(**kwargs),
+            review_report=lambda: document_review_report_status(),
+            case_detail=lambda **kwargs: document_case_detail_status(**kwargs),
+            resolve_document=lambda reference: resolve_openable_document_file(reference),
+            resolve_purchase=lambda reference: resolve_openable_purchase_pdf(reference),
+        )
+
         class Handler(BaseHTTPRequestHandler):
             server_version = "SamanthaCockpit/0.2"
             sys_version = ""
@@ -9526,25 +9535,7 @@ class CockpitServer:
                 if parsed.path == "/lekarna-admin/":
                     self.respond_html(lekarna_admin_page_html())
                     return
-                if parsed.path == "/documents/read":
-                    params = parse_qs(parsed.query)
-                    document_id = params.get("document_id", [""])[0]
-                    self.respond_document_reader(document_id)
-                    return
-                if parsed.path == "/documents/pdf":
-                    params = parse_qs(parsed.query)
-                    document_id = params.get("document_id", [""])[0]
-                    self.respond_document_pdf(document_id)
-                    return
-                if parsed.path == "/purchases/read":
-                    params = parse_qs(parsed.query)
-                    purchase_id = params.get("purchase_id", [""])[0]
-                    self.respond_purchase_reader(purchase_id)
-                    return
-                if parsed.path == "/purchases/pdf":
-                    params = parse_qs(parsed.query)
-                    purchase_id = params.get("purchase_id", [""])[0]
-                    self.respond_purchase_pdf(purchase_id)
+                if document_read_routes.dispatch(parsed=parsed, responder=self):
                     return
                 if parsed.path == "/api/r2-adam/status":
                     self.respond_json(
@@ -9774,19 +9765,6 @@ class CockpitServer:
                     params = parse_qs(parsed.query)
                     name = params.get("name", [""])[0]
                     self.respond_email_archive_incoming_file(name=name)
-                    return
-                if parsed.path == "/api/documents/search":
-                    params = parse_qs(parsed.query)
-                    query = params.get("q", [""])[0]
-                    self.respond_json(search_document_index(query=query))
-                    return
-                if parsed.path == "/api/documents/review-report":
-                    self.respond_json(document_review_report_status())
-                    return
-                if parsed.path == "/api/documents/case-detail":
-                    params = parse_qs(parsed.query)
-                    case_ref = params.get("case_ref", [""])[0]
-                    self.respond_json(document_case_detail_status(case_ref=case_ref))
                     return
                 if parsed.path == "/api/dev-runner/actions":
                     self.respond_json(cockpit_dev_runner_actions())
@@ -10640,75 +10618,6 @@ class CockpitServer:
                 self.send_response(HTTPStatus.OK)
                 self.send_header("Content-Type", str(resolved["mime_type"]))
                 self.send_header("Content-Disposition", f'inline; filename="{safe_filename(str(resolved["filename"]))}"')
-                self.send_header("Cache-Control", "no-store, max-age=0")
-                self.send_header("Content-Length", str(len(data)))
-                self.end_headers()
-                self.wfile.write(data)
-
-            def respond_document_reader(self, document_id: str) -> None:
-                resolved = resolve_openable_document_file(document_id)
-                if not resolved.get("ok"):
-                    self.respond_html(
-                        document_reader_page_html(
-                            document_id=safe_text(document_id)[:180],
-                            title=str(resolved.get("message", "Dokument není dostupný.")),
-                        ),
-                        status=HTTPStatus.NOT_FOUND,
-                    )
-                    return
-                self.respond_html(
-                    document_reader_page_html(
-                        document_id=str(resolved["document_ref"]),
-                        title=str(resolved["title"]),
-                        viewer_kind=str(resolved.get("viewer_kind", "pdf")),
-                    )
-                )
-
-            def respond_document_pdf(self, document_id: str) -> None:
-                resolved = resolve_openable_document_file(document_id)
-                if not resolved.get("ok"):
-                    self.respond_json({"error": "not_found", "message": resolved.get("message", "")}, status=HTTPStatus.NOT_FOUND)
-                    return
-                target = resolved["path"]
-                data = target.read_bytes()
-                filename = safe_filename(str(target.name or "document.pdf"))
-                self.send_response(HTTPStatus.OK)
-                self.send_header("Content-Type", str(resolved.get("content_type") or "application/octet-stream"))
-                self.send_header("Content-Disposition", f'inline; filename="{filename}"')
-                self.send_header("Cache-Control", "no-store, max-age=0")
-                self.send_header("Content-Length", str(len(data)))
-                self.end_headers()
-                self.wfile.write(data)
-
-            def respond_purchase_reader(self, purchase_id: str) -> None:
-                resolved = resolve_openable_purchase_pdf(purchase_id)
-                if not resolved.get("ok"):
-                    self.respond_html(
-                        purchase_reader_page_html(
-                            purchase_id=safe_text(purchase_id)[:180],
-                            title=str(resolved.get("message", "Nákup není dostupný.")),
-                        ),
-                        status=HTTPStatus.NOT_FOUND,
-                    )
-                    return
-                self.respond_html(
-                    purchase_reader_page_html(
-                        purchase_id=str(resolved["purchase_ref"]),
-                        title=str(resolved["title"]),
-                    )
-                )
-
-            def respond_purchase_pdf(self, purchase_id: str) -> None:
-                resolved = resolve_openable_purchase_pdf(purchase_id)
-                if not resolved.get("ok"):
-                    self.respond_json({"error": "not_found", "message": resolved.get("message", "")}, status=HTTPStatus.NOT_FOUND)
-                    return
-                target = resolved["path"]
-                data = target.read_bytes()
-                filename = safe_filename(str(target.name or "purchase.pdf"))
-                self.send_response(HTTPStatus.OK)
-                self.send_header("Content-Type", "application/pdf")
-                self.send_header("Content-Disposition", f'inline; filename="{filename}"')
                 self.send_header("Cache-Control", "no-store, max-age=0")
                 self.send_header("Content-Length", str(len(data)))
                 self.end_headers()

@@ -641,3 +641,10 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Řešení: porovnat stejný dotaz přes `/usr/bin/git` a Git vybraný pomocí `xcrun --find git`. Na Macu lze jednou při startu zjistit platnou absolutní cestu a používat ji se stejnými parametry. Při nedostupnosti, chybě, timeoutu a mimo Mac zachovat původní cestu. Nejde o cache stavu ani o důvod škrtat testy; po změně vybraného toolchainu restart procesu.
 - Ověření: stejný Apple Git, medián 33 vs 12 ms ve 30 vzorcích na kombinaci; sedm cílených testů prošlo. Stejných 1655/1655 testů prošlo před i po; unittest 453,73 → 340,30 s, úspora 113,43 s (25,0 %). Report `reports/cockpit_git_launcher_2026_09_13.md`; jeden pár úplných běhů není záruka stejné úspory na jiném stroji.
 - Navazující ověření 14. 9.: sdílet jednou zjištěnou binárku také v checkpoint/deploy/batch/sync/takeover a společném Git test helperu; samostatné launchery jinak dál platí tutéž režii. Stejných 1656/1656 testů prošlo před i po; 307,14 → 261,43 s, úspora 45,71 s (14,88 % proti dnešnímu výchozímu stavu). Report `reports/cockpit_shared_git_2026_09_14.md`. Nový společný modul zařazen do povinné plné brány.
+
+### 2026-09-14 — Při přesunu HTTP obsluh zachovat i kontrolní hranice
+
+- Problém: přesun obsluhy z hlavního serveru může nechtěně změnit chybové odpovědi, hlavičky či pořadí autorizace; nový soubor také vypadne z původního CI/gate filtru.
+- Typ: opakující se.
+- Řešení: před přesunem zachytit HTTP kontrakty na izolovaném serveru se syntetickými daty, po přesunu porovnat stav/hlavičky/otisk těla. Ověřit odmítnutí před voláním backendu a skutečné vnější cesty/symlinky. Zahrnout nový modul do CI, kompilace a stejné povinné brány jako původní soubor. Před plným během rozšířit také existující inventuru adres frontendu o skutečný dispatch nového modulu.
+- Ověření: dokumentový řez, 61/61 shodných HTTP kontraktů; 35 cílených testů a plná brána 1665/1665. Report `reports/cockpit_document_routes_2026_09_14.md`.

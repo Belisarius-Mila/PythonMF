@@ -1,13 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-14 09:27 CEST. Míla schválil commit, push a nasazení další optimalizace.
-- Funkční `9b306b3d` je řízeně nasazený: nový proces, code stamp `06880920474429e4`, smoke 5/5, účtenka `2026-09-14T07:25:27+00:00`.
-- Tento zápis uzavírá dokumentaci po ověření funkčního kódu. Dávkový push provede vlastní povinnou plnou bránu; přesný konečný GitHub/runtime head a finální čistotu doloží živý audit při dokončení operace.
-- `AuditCockpit56_2.txt` v1.8: společný výběr Gitu pro navazující operace a testovou přípravu. Stejných 1656/1656 testů prošlo před i po; 307,14 → 261,43 s, úspora 45,71 s / 14,88 % proti dnešnímu výchozímu stavu. Původní testy a kontroly zachované, jeden nový hlídá plnou bránu pro společný modul.
-- Důkazy: `cockpit_shared_git_2026_09_14.md` a JSON, plná lokální brána, AST shoda původní logiky. Výsledek je jeden pár měření na tomto Macu; procenta se nesčítají se včerejšími 25 %. Živá odezva UI nebyla benchmarkována.
-- Další krok: Společná Mac/iPhone přejímka a výběr dalšího strukturálního řezu podle roadmapy; případné další zrychlení nejdřív měřit v nákladných Git skupinách.
-- Otevřeno: navazující audit/UI; známé nálezy prvních 8 výsledků, nerozbalený panel přes Janiččinu zkratku a náhradní návrat nákupní čtečky. Záloha zůstává odložená kvůli nedostupnému disku, Santiago pouze zvažované téma.
+- Aktualizováno: 2026-09-14 10:10 CEST. Míla schválil oddělení čtecího dokumentového HTTP rozhraní; krok dokončený lokálně, bez push/nasazení.
+- `AuditCockpit56_2.txt` v1.9: sedm GET cest a čtyři obsluhy v `cockpit_document_routes.py`; `cockpit.py` 10 892 → 10 801 řádků, `do_GET` 326 → 295. Backendové resolvery, UI a POST zachované.
+- 61/61 syntetických HTTP kontraktů shodných před/po. 35 cílených testů a plná brána 1665/1665 prošly; AST potvrzuje zachování přesunuté logiky i zbytku hlavního souboru. Report `cockpit_document_routes_2026_09_14.md` + JSON.
+- Nový modul má původní přístupovou ochranu, bezpečnostní hlavičky, kontrolu cest a redigované chyby; zahrnut do CI, kompilace a povinné plné brány. Živé soukromé dokumenty se nečetly.
+- Předchozí optimalizace Gitu je nasazená v `fc889ed5` (ověřeno před tímto krokem, smoke 5/5). Srovnání stejné sady zůstává 307,14 → 261,43 s; dnešní přesun neslibuje zrychlení UI.
+- Nesouvisející změna `OwlSpeech.csv` byla souběžně uložena samostatným commitem `8db5cd81`; tento krok ji neupravuje ani znovu nestaguje. Aktuální Git/profilový stav ověřit před dalším vydáním.
+- Další krok: Na samostatný pokyn vydat dokumentový řez a dokončit společnou Mac/iPhone přejímku čteček; potom navázat dalším strukturálním řezem a auditem/UI.
+- Otevřeno: prvních 8 výsledků hledání, nerozbalený panel přes Janiččinu zkratku a náhradní návrat nákupní čtečky. Záloha odložená kvůli nedostupnému disku; Santiago zatím pouze zvažované téma.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Cockpit / hlavní architektura
@@ -887,3 +888,22 @@ Navrhované další kroky:
 Technický důkaz:
 - Funkční `9b306b3d`, code stamp `06880920474429e4`, nový proces, smoke 5/5, účtenka `2026-09-14T07:25:27+00:00`.
 - Předchozí plná lokální brána 1656/1656; srovnání 307,14 → 261,43 s. Povinná publikační brána nad konečným commitem běží při dávkovém pushi; její výsledek a finální GitHub/runtime head nejsou předjímány tímto zápisem.
+
+### 2026-09-14 10:10 CEST — Samostatná obsluha čtení dokumentů
+
+Hotovo:
+- Dokumentové čtecí HTTP rozhraní má vlastní modul; hlavní server je menší a doména samostatně ověřitelná. Sedm cest a čtyři obsluhy přesunuté při zachování odpovědí.
+
+Rozhodnutí:
+- Míla schválil navržený malý strukturální řez. Přístupové kontroly, stávající resolvery a společné ošetření chyb zachovat; dokončit lokálním commitem.
+
+Další krok:
+- Samostatně vydat řez a dokončit společnou Mac/iPhone přejímku čteček.
+
+Navrhované další kroky:
+- Pokračovat navazujícím auditem/UI a dalším řezem podle konkrétní doménové vazby.
+
+Technický důkaz:
+- 61/61 HTTP kontraktů shodných před/po (bez Date/Server); syntetická data, včetně symlinků a vnějších cest. 35 cílených testů; plná brána 1665/1665, unit 252.042 s.
+- AST: přesunutá logika a zbytek `cockpit.py` shodné po explicitním předání závislostí. Nový modul v kompilaci, CI filtrech a povinné plné bráně. Report `cockpit_document_routes_2026_09_14.md` + JSON.
+- Lokální krok bez nového push/nasazení. `OwlSpeech.csv` a souběžný `8db5cd81` zůstávají mimo tento řez. Ruční přejímka a známé UI nálezy zůstávají otevřené.
