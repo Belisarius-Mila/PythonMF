@@ -259,10 +259,6 @@
     const projectAuditRecentList = document.getElementById("projectAuditRecentList");
     const projectAuditText = document.getElementById("projectAuditText");
     const humanAdamOpenBtn = document.getElementById("humanAdamOpenBtn");
-    const todayNewPdfCount = document.getElementById("todayNewPdfCount");
-    const todayReviewCount = document.getElementById("todayReviewCount");
-    const todayProblemCount = document.getElementById("todayProblemCount");
-    const todayHint = document.getElementById("todayHint");
     const dashboardDocuments = document.getElementById("dashboardDocuments");
     const dashboardScanDocu = document.getElementById("dashboardScanDocu");
     const dashboardReminders = document.getElementById("dashboardReminders");
@@ -275,14 +271,10 @@
     const dashboardOverall = document.getElementById("dashboardOverall");
     const dashboardOverallLabel = document.getElementById("dashboardOverallLabel");
     const dashboardOverallReason = document.getElementById("dashboardOverallReason");
-    const dashboardMorningSentence = document.getElementById("dashboardMorningSentence");
-    const dashboardProcessBtn = document.getElementById("dashboardProcessBtn");
-    const dashboardReviewBtn = document.getElementById("dashboardReviewBtn");
     const dashboardTerminalBtn = document.getElementById("dashboardTerminalBtn");
 		    const dashboardQuantitativeBtn = document.getElementById("dashboardQuantitativeBtn");
     const dashboardProjectAuditBtn = document.getElementById("dashboardProjectAuditBtn");
 		    const dashboardQuickNotesBtn = document.getElementById("dashboardQuickNotesBtn");
-    const dashboardUrgentRemindersBtn = document.getElementById("dashboardUrgentRemindersBtn");
     const dashboardRecoveryBtn = document.getElementById("dashboardRecoveryBtn");
     const dashboardCommandCheatsheetBtn = document.getElementById("dashboardCommandCheatsheetBtn");
     const dashboardAutosaveCleanupBtn = document.getElementById("dashboardAutosaveCleanupBtn");
@@ -300,10 +292,8 @@
 			const awakeModeDurationButtons = Array.from(document.querySelectorAll("[data-awake-mode-hours]"));
 			    const dashboardSpeakBtn = document.getElementById("dashboardSpeakBtn");
 			    const dashboardSpeakSelectionBtn = document.getElementById("dashboardSpeakSelectionBtn");
-			    const dashboardRefreshBtn = document.getElementById("dashboardRefreshBtn");
     const devRunnerPanel = document.getElementById("devRunnerPanel");
     const devRunnerOutput = document.getElementById("devRunnerOutput");
-    const dashboardActionHint = document.getElementById("dashboardActionHint");
     const codexApprovalCard = document.getElementById("codexApprovalCard");
     const codexApprovalReason = document.getElementById("codexApprovalReason");
     const codexApprovalCommand = document.getElementById("codexApprovalCommand");
@@ -691,13 +681,10 @@
         "emailArchiveBtn",
         "scanDocuBtn",
         "scanDocuReviewBtn",
-        "dashboardProcessBtn",
         "dashboardDocuments",
-        "dashboardReviewBtn",
         "dashboardTerminalBtn",
         "dashboardQuantitativeBtn",
         "dashboardQuickNotesBtn",
-        "dashboardUrgentRemindersBtn",
         "dashboardRecoveryBtn",
         "dashboardCommandCheatsheetBtn",
         "recoveryCommandCheatsheetBtn",
@@ -718,7 +705,6 @@
         "awakeModeStopBtn",
         "dashboardSpeakBtn",
         "dashboardSpeakSelectionBtn",
-        "dashboardRefreshBtn",
         "codexApprovalCard",
         "codexApprovalReason",
         "codexApprovalCommand",
@@ -891,6 +877,7 @@
       }
       try {
         const data = await fetchJsonWithTimeout("/api/status", 15000);
+        if (!data || data.ok === false) throw new Error("Hlavní stav není dostupný");
         latestMainStatusData = data;
         statusLine.textContent = `Aktualizováno: ${data.generated_at || ""}`;
         scanDocuState.innerHTML = data.scandocu && data.scandocu.running
@@ -962,11 +949,19 @@
     async function refreshDecisionCockpit() {
       if (decisionCockpitRefreshInFlight) return;
       decisionCockpitRefreshInFlight = true;
+      if (!dashboardStatusSignals.decision) setDashboardStatusSignal("decision", "loading", "Co teď: načítám priority");
       try {
         const data = await fetchJsonWithTimeout("/api/decision-status", 15000);
-        renderDecisionCockpit(data || {});
+        if (!data || data.ok !== true || !Array.isArray(data.items)) throw new Error("Neplatná odpověď přehledu");
+        renderDecisionCockpit(data);
+        setDashboardStatusSignal("decision", data.source_status === "partial" ? "unknown" : "ok",
+          data.source_status === "partial" ? "Co teď: část podkladů není dostupná" : "Co teď: prioritní fronta načtená");
       } catch (err) {
         recordFrontendError(err);
+        decisionCockpitList.innerHTML = "";
+        decisionCockpitSuggestionList.innerHTML = "";
+        decisionCockpitSuggestionCount.textContent = "";
+        setDashboardStatusSignal("decision", "unknown", "Co teď: prioritní frontu nelze ověřit");
         decisionCockpitStatus.textContent = `Přehled „Co teď?“ se nepodařilo načíst: ${err}`;
         decisionCockpitSuggestionStatus.textContent = "Návrhy z paměti nyní nejsou ověřené.";
       } finally {
@@ -1128,7 +1123,6 @@
       setDocumentCardState(newPdfCount, newItems.length > 0 || Number(summary.new_pdf_count) > 0, unavailable);
       setDocumentCardState(problemCount, problemItems.length > 0 || Number(summary.problem_count) > 0, unavailable);
       processNextBtn.disabled = newItems.length === 0;
-      dashboardProcessBtn.disabled = newItems.length === 0;
       renderWorkList(newPdfList, newItems, (item) => ({
         title: item.name || "",
         meta: `${item.status || ""} | ${item.modified_at || ""}`
@@ -1645,33 +1639,24 @@
       const reviewPending = summary.review_pending_count || review.pending_count || 0;
       const unresolvedCount = Math.max(reviewPending, Number(classification.issue_count || 0));
       const problemTotal = summary.problem_count || 0;
-      todayNewPdfCount.textContent = String(newCount);
-      todayReviewCount.textContent = String(unresolvedCount);
-      todayProblemCount.textContent = String(problemTotal);
-      todayHint.textContent = dashboardTodayHint(newCount, unresolvedCount, problemTotal);
-      dashboardReviewBtn.disabled = unresolvedCount === 0;
-      const documentSignal = problemTotal > 0
+      const documentSignal = work.ok === false || !work.summary
+        ? {level: "unknown", reason: "Dokumenty: frontu nelze ověřit"}
+        : problemTotal > 0
         ? {level: "warn", reason: `Dokumenty: ${problemTotal} problémů k ruční kontrole`}
         : newCount > 0
-          ? {level: "warn", reason: `Dokumenty: ${newCount} nových PDF čeká na zpracování`}
+          ? {level: "work", reason: `Dokumenty: ${newCount} nových PDF čeká na zpracování`}
           : unresolvedCount > 0
-            ? {level: "warn", reason: `Dokumenty: ${unresolvedCount} uložených dokumentů čeká na vyřešení`}
+            ? {level: "work", reason: `Dokumenty: ${unresolvedCount} uložených dokumentů čeká na vyřešení`}
             : {level: "ok", reason: "Dokumentová fronta je klidná"};
       if (dashboardDocuments) {
-        const documentClass = documentSignal.level === "ok" ? "ok" : "warn";
+        const documentClass = documentSignal.level;
         setDashboardValue(dashboardDocuments, `<span class="${documentClass}">${documentSignal.reason}</span>`);
       }
       setDashboardStatusSignal("documents", documentSignal.level, documentSignal.reason);
-      dashboardActionHint.textContent = newCount > 0
-        ? "Nejbližší akce: zpracovat další PDF přes ScanDocu."
-        : unresolvedCount > 0
-          ? "Nejbližší akce: vyřešit uložený dokument."
-          : "Fronta nevypadá akutně.";
-
       const scandocu = data.scandocu || {};
-      dashboardScanDocu.innerHTML = scandocu.running
-        ? `<span class="ok">běží</span> | ${scandocu.url || ""}`
-        : `<span class="warn">neběží</span> | ${scandocu.url || ""}`;
+      setDashboardValue(dashboardScanDocu, scandocu.running
+        ? `<span class="ok">běží</span>`
+        : `<span class="work">spustí se při práci s PDF</span>`);
       setDashboardStatusSignal(
         "scandocu",
         "ok",
@@ -1683,13 +1668,15 @@
       const activeReminders = reminderCounts.active || 0;
       const openReminders = reminderCounts.open || 0;
       const conflictReminders = reminderCounts.conflicts || 0;
-      const reminderClass = conflictReminders > 0 ? "bad" : activeReminders > 0 ? "warn" : openReminders > 0 ? "ok" : "ok";
+      const reminderClass = conflictReminders > 0 ? "bad" : activeReminders > 0 ? "work" : "ok";
       const conflictText = conflictReminders > 0 ? ` | <span class="bad">${conflictReminders} konflikt</span>` : "";
-      dashboardReminders.innerHTML = `<span class="${reminderClass}">${activeReminders} aktivní</span> | ${openReminders} otevřené${conflictText}`;
+      setDashboardValue(dashboardReminders, reminders.ok === false || !reminders.counts
+        ? `<span class="unknown">nelze ověřit</span>`
+        : `<span class="${reminderClass}">${activeReminders} aktivní</span> | ${openReminders} otevřené${conflictText}`);
       setDashboardStatusSignal(
         "reminders",
-        conflictReminders > 0 ? "bad" : activeReminders > 0 ? "warn" : "ok",
-        conflictReminders > 0
+        reminders.ok === false || !reminders.counts ? "unknown" : conflictReminders > 0 ? "bad" : activeReminders > 0 ? "work" : "ok",
+        reminders.ok === false || !reminders.counts ? "Připomenutí: stav nelze ověřit" : conflictReminders > 0
           ? `Připomenutí: ${conflictReminders} konflikt`
           : activeReminders > 0
             ? `Připomenutí: ${activeReminders} aktivní`
@@ -1704,9 +1691,6 @@
       setDashboardPendingIfEmpty(dashboardQuickNotes, "načítám samostatně");
       if (dashboardValueIsPending(dashboardProjects)) {
         setDashboardStatusSignal("projects", "loading", "Projekty se načítají samostatně");
-      }
-      if (dashboardValueIsPending(dashboardQuantitative)) {
-        setDashboardStatusSignal("quantitative", "loading", "Systémový souhrn se načítá samostatně");
       }
       if (dashboardValueIsPending(dashboardConsistency)) {
         setDashboardStatusSignal("consistency", "loading", "Audit se načítá samostatně");
@@ -1725,20 +1709,20 @@
 
       const git = data.git || {};
       if (!git.ok) {
-        dashboardGit.innerHTML = `<span class="warn">nelze zjistit</span>`;
-        setDashboardStatusSignal("git", "warn", "Git: nelze zjistit stav");
+        setDashboardValue(dashboardGit, `<span class="unknown">nelze zjistit</span>`);
+        setDashboardStatusSignal("git", "unknown", "Git: nelze zjistit stav");
       } else {
-        const gitClass = git.dirty_count ? "warn" : "ok";
-        const sync = git.ahead ? " | čeká push" : git.behind ? " | čeká pull" : "";
+        const gitClass = git.ahead && git.behind ? "bad" : git.dirty_count || git.behind ? "warn" : git.ahead ? "work" : "ok";
+        const sync = git.ahead && git.behind ? " | rozcházející se historie" : git.ahead ? " | čeká push" : git.behind ? " | čeká pull" : "";
         const reviewCount = Math.max(0, Number(git.dirty_count || 0) - Number(git.safe_commit_count || 0) - Number(git.excluded_private_count || 0));
         const gitBreakdown = git.dirty_count
           ? `<br>git-safe ${git.safe_commit_count || 0} | zkontrolovat ${reviewCount} | private/family mimo ${git.excluded_private_count || 0}`
           : "";
-        dashboardGit.innerHTML = `<span class="${gitClass}">${git.message || ""}</span>${sync}<br>${git.branch || ""}${gitBreakdown}`;
+        setDashboardValue(dashboardGit, `<span class="${gitClass}">${escapeDashboardHtml(git.message || "")}${sync}</span><br>${escapeDashboardHtml(git.branch || "")}${gitBreakdown}`);
         setDashboardStatusSignal(
           "git",
-          git.dirty_count || git.ahead || git.behind ? "warn" : "ok",
-          git.dirty_count
+          git.ahead && git.behind ? "bad" : git.dirty_count || git.behind ? "warn" : git.ahead ? "work" : "ok",
+          git.ahead && git.behind ? "Git: lokální a vzdálená historie se rozcházejí" : git.dirty_count
             ? `Git: ${git.message || `${git.dirty_count} změn v pracovní kopii`} | git-safe ${git.safe_commit_count || 0}, private/family mimo ${git.excluded_private_count || 0}`
             : git.ahead
               ? "Git: lokální změny čekají na push"
@@ -1747,36 +1731,14 @@
                 : "Git je synchronizovaný"
         );
 	      }
-	      renderDashboardMorningSentence(data);
 	    }
-
-	    function renderDashboardMorningSentence(data) {
-      if (!dashboardMorningSentence) return;
-      const stable = ["Cockpit odpovídá"];
-      const warnings = [];
-      const backup = data.backup_status || {};
-      const git = data.git || {};
-
-      if (backup.status === "ok") {
-        stable.push("záloha je v pořádku");
-      } else {
-        warnings.push("záloha");
-      }
-      if (git.ok && !git.dirty_count && !git.ahead && !git.behind) {
-        stable.push("git je čistý");
-      } else {
-        warnings.push("git");
-      }
-      dashboardMorningSentence.textContent = warnings.length
-        ? `Ranní stav: Samantha je vzhůru; ${stable.join(", ")}; zkontrolovat: ${warnings.join(", ")}.`
-        : `Ranní stav: Samantha je vzhůru; ${stable.join(", ")}.`;
-    }
 
 	    function renderDecisionCards(target, items, emptyMessage) {
 	      target.innerHTML = "";
 	      if (!items.length) {
 	        const empty = document.createElement("div");
 	        empty.className = "status-line";
+	        if (!emptyMessage) return;
 	        empty.textContent = emptyMessage;
 	        target.appendChild(empty);
 	        return;
@@ -1807,7 +1769,7 @@
 	        reason.textContent = item.reason || "";
 	        const evidence = document.createElement("div");
 	        evidence.className = `decision-evidence ${item.freshness || "unknown"}`;
-	        evidence.textContent = `Zdroj: ${item.source || "nezjištěno"} · ${item.freshness_label || "stáří nezjištěno"}`;
+	        evidence.textContent = `Zdroj: ${item.source || "nezjištěno"} · ${item.freshness_label || "stáří nezjištěno"} · ${item.evidence_at || "čas důkazu neznámý"}`;
 
 	        card.appendChild(head);
 	        card.appendChild(title);
@@ -1828,11 +1790,11 @@
 	        ? decision.memory_suggestions.slice(0, 3)
 	        : [];
 	      const warning = decision.source_warning ? ` ${decision.source_warning}` : "";
-	      decisionCockpitStatus.textContent = `${decision.message || "Žádné aktuální ToDo."}${warning}`;
+	      decisionCockpitStatus.textContent = `${decision.message || "Žádné aktuální ToDo."}${warning} · Podklad: ${decision.generated_at || "čas neznámý"}`;
 	      renderDecisionCards(
 	        decisionCockpitList,
 	        items,
-	        "Nic aktuálního. Žádný živý důkaz nyní neurčuje ToDo."
+	        ""
 	      );
 	      decisionCockpitSuggestionCount.textContent = suggestions.length ? `(${suggestions.length})` : "";
 	      decisionCockpitSuggestionStatus.textContent = decision.memory_message
@@ -2018,6 +1980,7 @@
     function dashboardStatusRank(level) {
       if (level === "bad") return 4;
       if (level === "warn") return 3;
+      if (level === "unknown") return 2.5;
       if (level === "loading") return 2;
       if (level === "ok") return 1;
       return 0;
@@ -2026,6 +1989,7 @@
     function dashboardStatusPriority(key) {
       const priorities = {
         main: 100,
+        decision: 95,
         consistency: 90,
         documents: 80,
         reminders: 70,
@@ -2043,7 +2007,7 @@
       if (!key) return;
       dashboardStatusSignals = {
         ...dashboardStatusSignals,
-        [key]: {key, level: level || "ok", reason: reason || ""}
+        [key]: {key, level: level || "unknown", reason: reason || "", observedAt: new Date().toISOString()}
       };
       updateDashboardOverallStatus();
     }
@@ -2066,16 +2030,20 @@
       const actionSignals = sorted.filter((item) => item.level === "bad" || item.level === "warn");
       const loadingSignals = sorted.filter((item) => item.level === "loading");
       let level = "ok";
-      let label = "V pořádku";
-      let reasons = ["Hlavní kontroly jsou bez zásahu."];
+      let label = "Provoz v pořádku";
+      let reasons = [{reason: "Kontroly bez varování; čekající práci najdeš v Co teď."}];
       if (worst.level === "bad") {
         level = "bad";
-        label = "Akce potřeba";
+        label = "Provoz: nutná kontrola";
         reasons = actionSignals;
       } else if (worst.level === "warn") {
         level = "warn";
-        label = "Pozor";
+        label = "Provoz: pozor";
         reasons = actionSignals;
+      } else if (worst.level === "unknown") {
+        level = "unknown";
+        label = "Provoz není plně ověřený";
+        reasons = sorted.filter((item) => item.level === "unknown" || item.level === "loading");
       } else if (worst.level === "loading") {
         level = "loading";
         label = "Čekám na kontroly";
@@ -2084,7 +2052,7 @@
       dashboardOverall.className = `dashboard-overall dashboard-overall-${level}`;
       dashboardOverallLabel.textContent = label;
       dashboardOverallReason.textContent = Array.isArray(reasons)
-        ? reasons.map((item) => item.reason || "").filter(Boolean).slice(0, 3).join(" | ")
+        ? reasons.map((item) => item.reason ? `${item.reason}${item.observedAt ? ` (načteno ${formatDashboardLoadedAt(item.observedAt)})` : ""}` : "").filter(Boolean).slice(0, 3).join(" | ")
         : String(reasons || "");
     }
 
@@ -2142,8 +2110,8 @@
     async function refreshProjectsSummary() {
       setDashboardPendingIfEmpty(dashboardProjects, "načítám...");
       try {
-        const res = await fetch("/api/projects/status");
-        const projects = await res.json();
+        const projects = await fetchJson("/api/projects/status");
+        if (!projects || projects.ok !== true || !projects.summary) throw new Error("Chybí projektový souhrn");
         const projectSummary = projects.summary || {};
         const catalogSummary = projects.catalog_summary || {};
         const priorityCounts = projectSummary.priority_counts || {};
@@ -2155,11 +2123,11 @@
           dashboardProjects,
           projects.ok === false
             ? `<span class="warn">nelze načíst</span>`
-            : `<span class="${priorityOne > 0 ? "warn" : "ok"}">${priorityOne} priorita 1</span> | ${activeProjects} aktivních projektů | ${catalogSummary.tools || 0} toolů | ${catalogSummary.infrastructure_capabilities || 0} vrstev${remindCount ? ` | ${remindCount} připomenout` : ""}`
+            : `<span class="${priorityOne > 0 ? "work" : "ok"}">${priorityOne} priorita 1</span> | ${activeProjects} aktivních projektů | ${catalogSummary.tools || 0} toolů | ${catalogSummary.infrastructure_capabilities || 0} vrstev${remindCount ? ` | ${remindCount} připomenout` : ""}`
         );
         setDashboardStatusSignal(
           "projects",
-          projects.ok === false ? "warn" : remindCount > 0 ? "warn" : "ok",
+          projects.ok === false ? "unknown" : remindCount > 0 ? "work" : "ok",
           projects.ok === false
             ? "Projekty: nelze načíst"
             : remindCount > 0
@@ -2169,7 +2137,7 @@
       } catch (err) {
         recordFrontendError(err);
         setDashboardValue(dashboardProjects, `<span class="warn">chyba načtení</span>`);
-        setDashboardStatusSignal("projects", "warn", `Projekty: chyba načtení (${err})`);
+        setDashboardStatusSignal("projects", "unknown", `Projekty: chyba načtení (${err})`);
       }
     }
 
@@ -2187,15 +2155,10 @@
             ? `<span class="warn">nelze zjistit</span>`
             : `<span class="ok">${quantitativeLocalTotals.files || 0} souborů</span> | ${quantitativeLocalTotals.lines || 0} lokálních řádků | git ${quantitativeGitTotals.lines || 0} řádků`
         );
-        setDashboardStatusSignal(
-          "quantitative",
-          quantitative.ok === false ? "warn" : "ok",
-          quantitative.ok === false ? "Systémový souhrn: nelze zjistit" : "Systémový souhrn načten"
-        );
+
       } catch (err) {
         recordFrontendError(err);
         setDashboardValue(dashboardQuantitative, `<span class="warn">chyba načtení</span>`);
-        setDashboardStatusSignal("quantitative", "warn", `Systémový souhrn: chyba načtení (${err})`);
       }
     }
 
@@ -2204,6 +2167,7 @@
       renderConsistencyAudit({summary_text: "Načítám consistency audit samostatně..."});
       try {
         const consistency = await fetchJson("/api/consistency-status");
+        if (!consistency || consistency.ok !== true || !consistency.severity_counts) throw new Error("Chybí výsledek auditu");
         const severityCounts = consistency.severity_counts || {};
         const criticalFindings = severityCounts.critical || 0;
         const warningFindings = severityCounts.warning || 0;
@@ -2217,7 +2181,7 @@
         );
         setDashboardStatusSignal(
           "consistency",
-          consistency.ok === false ? "warn" : criticalFindings > 0 ? "bad" : warningFindings > 0 ? "warn" : "ok",
+          consistency.ok === false ? "unknown" : criticalFindings > 0 ? "bad" : warningFindings > 0 ? "warn" : "ok",
           consistency.ok === false ? "Audit: nelze zjistit" : `Audit: ${consistencyDashboardSummary(consistency)}`
         );
         renderConsistencyAudit(consistency || {});
@@ -2225,7 +2189,7 @@
       } catch (err) {
         recordFrontendError(err);
         setDashboardValue(dashboardConsistency, `<span class="warn">chyba načtení</span>`);
-        setDashboardStatusSignal("consistency", "warn", `Audit: chyba načtení (${err})`);
+        setDashboardStatusSignal("consistency", "unknown", `Audit: chyba načtení (${err})`);
         renderConsistencyAudit({summary_text: `Chyba načtení consistency auditu: ${err}`});
       }
     }
@@ -2236,6 +2200,7 @@
       setDashboardPendingIfEmpty(dashboardQuickNotes, "načítám...");
       try {
         const quickNotes = await fetchJson("/api/quick-notes/status");
+        if (!quickNotes || quickNotes.ok !== true || !quickNotes.counts) throw new Error("Chybí stav poznámek");
         const counts = quickNotes.counts || {};
         const active = counts.active || 0;
         const first = (quickNotes.notes || [])[0] || {};
@@ -2244,17 +2209,17 @@
           dashboardQuickNotes,
           quickNotes.ok === false
             ? `<span class="warn">nelze načíst</span>`
-            : `<span class="${active > 0 ? "warn" : "ok"}">${active} aktivní</span>${firstClass}`
+            : `<span class="${active > 0 ? "work" : "ok"}">${active} aktivní</span>${firstClass}`
         );
         setDashboardStatusSignal(
           "quickNotes",
-          quickNotes.ok === false ? "warn" : active > 0 ? "warn" : "ok",
+          quickNotes.ok === false ? "unknown" : active > 0 ? "work" : "ok",
           quickNotes.ok === false ? "QN: nelze načíst" : active > 0 ? `QN: ${active} aktivních poznámek` : "QN inbox je prázdný"
         );
       } catch (err) {
         recordFrontendError(err);
         setDashboardValue(dashboardQuickNotes, `<span class="warn">chyba načtení</span>`);
-        setDashboardStatusSignal("quickNotes", "warn", `QN: chyba načtení (${err})`);
+        setDashboardStatusSignal("quickNotes", "unknown", `QN: chyba načtení (${err})`);
       } finally {
         quickNotesRefreshInFlight = false;
       }
@@ -2451,13 +2416,6 @@
     function formatDelta(value) {
       const prefix = value > 0 ? "+" : "";
       return `${prefix}${value}`;
-    }
-
-    function dashboardTodayHint(newCount, reviewPending, problemTotal) {
-      if (newCount > 0) return `Ve frontě je ${newCount} nových PDF.`;
-      if (reviewPending > 0) return `Nová PDF nejsou, ale ${reviewPending} uložených dokumentů čeká na vyřešení.`;
-      if (problemTotal > 0) return `Fronta nemá nové PDF, ale má ${problemTotal} položek k ruční kontrole.`;
-      return "Dokumentová fronta je klidná.";
     }
 
     function vaultSummaryCount(raw, label) {
@@ -3084,7 +3042,7 @@
 	        statusLine.textContent,
 	        dashboardOverallLabel.textContent,
 	        dashboardOverallReason.textContent,
-	        dashboardActionHint.textContent
+	        decisionCockpitStatus.textContent
 	      ].map((part) => (part || "").trim()).filter(Boolean);
 	      const text = parts.length
 	        ? parts.join(". ")
@@ -6782,14 +6740,10 @@ ${item.context || ""}`);
       refreshAwakeMode();
     });
     documentsBtn.addEventListener("click", openDocumentsPanel);
-    dashboardRefreshBtn.addEventListener("click", refresh);
-    dashboardProcessBtn.addEventListener("click", openScanDocu);
-    dashboardReviewBtn.addEventListener("click", openDocumentReviewPanel);
 	    dashboardTerminalBtn.addEventListener("click", () => postAction("/api/terminal/open", dashboardTerminalBtn));
 		    dashboardQuantitativeBtn.addEventListener("click", openQuantitativeModal);
     dashboardProjectAuditBtn.addEventListener("click", openProjectAuditModal);
 		    dashboardQuickNotesBtn.addEventListener("click", openQuickNotesModal);
-    dashboardUrgentRemindersBtn.addEventListener("click", openUrgentRemindersModal);
     urgentReminderAlertBtn.addEventListener("click", openUrgentRemindersModal);
 		    dashboardRecoveryBtn.addEventListener("click", openRecoveryModal);
     dashboardCommandCheatsheetBtn.addEventListener("click", openCommandCheatsheetModal);

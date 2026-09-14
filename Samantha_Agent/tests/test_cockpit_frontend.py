@@ -36,14 +36,21 @@ EXPECTED_PAGES = {
     ),
     "cockpit": (
         COCKPIT_HTML,
-        497675,
-        10028,
-        "077d62a4235aea0b1d91656b57ea67da176a156d609a64f8a9b09ea32b30a536",
+        494734,
+        9959,
+        "d6ccf6edbb3262dc2751c90141f26ae3d2c85b0655cbda4341bc63ada160acf8",
     ),
 }
 
 
 class CockpitFrontendContractTests(unittest.TestCase):
+    def test_dashboard_status_separates_work_from_operational_problems(self) -> None:
+        result = subprocess.run(
+            [node_binary(), str(Path(__file__).with_name("dashboard_status_frontend.test.cjs"))],
+            cwd=FRONTEND_ROOT.parent.parent, capture_output=True, text=True, timeout=30, check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
     def test_document_reader_pages_use_the_extracted_renderers(self) -> None:
         self.assertIs(cockpit.document_reader_page_html, cockpit_document_readers.document_reader_page_html)
         self.assertIs(cockpit.purchase_reader_page_html, cockpit_document_readers.purchase_reader_page_html)
@@ -126,7 +133,8 @@ class CockpitFrontendContractTests(unittest.TestCase):
 
         self.assertIn('action === "open_document_review"', source)
         self.assertIn('showMessage("Vyber dokument; celý se otevře se všemi možnostmi ve ScanDocu.")', source)
-        self.assertIn('dashboardReviewBtn.addEventListener("click", openDocumentReviewPanel)', source)
+        self.assertIn('action === "open_document_review"', source)
+        self.assertNotIn("dashboardReviewBtn", source)
         self.assertIn('scanDocuReviewBtn.addEventListener("click", () => openScanDocu({mode: "review", button: scanDocuReviewBtn}))', source)
         self.assertIn("await loadDocumentReviewReport()", source)
         self.assertIn("openScanDocuReview", source)

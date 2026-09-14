@@ -1,14 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-14 15:11 CEST. U01–U04 hotové lokálně; AuditCockpit56_2.txt v2.4.
-- U04: Předchozí/Další a rozsah výsledků; HTTP limit/offset napojené na existující backend. Výchozí stránka 8, maximum 20; neplatné či opakované parametry vrací 400 před poskytovatelem.
-- Nový dotaz resetuje stránku; stará opožděná odpověď se ignoruje. Při chybě další stránky zůstávají dosavadní výsledky a lze opakovat. Návrat čtečky zachová původní stránku; blokovaný popup nabídne odkaz bez ztráty hledání.
-- Důkaz: 27 cílených testů; HTTP nad 23 dokumenty + duplicitním řádkem bez vynechání/duplicit, čtyři browser šířky 320–1440 px s 23/9/0 výsledky. Plná brána: 1677 testů / 299.260 s, OK. `reports/cockpit_ui_u04_2026_09_14.json`.
-- Zachováno: reference, oprávnění, hlavičky, potvrzení a backendová logika hledání. Žádné soukromé vyhledávání ani ostré akce v přejímce.
-- Dodání: lokální vývoj, bez nového push/nasazení. Dřívější nasazení 10ec0877 je historický ověřený podklad, nikoli aktuální živý audit.
-- Další krok U05: zúžit opakované přehledy do jedné prioritní fronty a rozlišit provozní stav od čekající práce.
-- Rizika/přejímka: fyzický Safari Mac/iPhone čeká; živý index se mezi stránkami může změnit. Reload původního Cockpitu hledání resetuje, dotazy nejsou persistované.
+- Aktualizováno: 2026-09-14 15:25 CEST. U01–U05 hotové lokálně; AuditCockpit56_2.txt v2.5.
+- U05: jedna prioritní fronta Co teď z existujícího backendu; opakované Dnes/Stav/Rychlé akce odstraněné. Podrobnosti a statistiky přesunuté do Servisu.
+- Provoz odlišuje běžnou práci od varování, chyby a neověřeného zdroje. Čistý Git pouze napřed není alarm; konflikty, problémy dokumentů, záloha a rozcházející se Git zůstávají viditelné.
+- Důkaz: 24 cílených testů (včetně 10 stavových JS scénářů), 10 syntetických browser scénářů a rychlá statická brána OK. `reports/cockpit_ui_u05_2026_09_14.json`. Klidný desktop 1440×900 v jednom viewportu, první mobilní úkol viditelný bez scrollu; přímé otevření úkolu, diagnostiky a Human–Adam ověřené.
+- Zdroj/čas důkazu na prioritách; čas načtení jednotlivých signálů v diagnostice. Výpadek fronty odstraní staré akční karty, obnova je znovu načte. Čas načtení není důkaz stáří původního podkladu.
+- Dodání: lokální vývoj, bez nového push/nasazení. Dřívější nasazení 10ec0877 a plná brána U04 jsou historické podklady, nikoli současný živý audit.
+- Další krok U06: sjednotit navigaci, fokus a návraty; nejprve reprezentativní modal.
+- Rizika/přejímka: fyzický Safari Mac/iPhone čeká. Na mobilu celá stránka stále scrolluje; další úprava navigace/grafiky podle plánu.
 - Záloha odložená kvůli disku; Santiago pouze zvažované. Cizí nesledovaný adresář zachovaný mimo commit.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -22,19 +22,19 @@ Stav: rozpracovane
 Pripomenout pri startu: ne
 
 Co se resilo:
-U04: stránkování dokumentového hledání přes HTTP a UI.
-
-Co je hotove:
-- U01–U04 lokálně implementované a ověřené; roadmapa v2.4. U04 prošel i plnou branou.
-
-Co neni hotove:
-- Push/nasazení a fyzická přejímka. Kroky U05–U11.
-
-Dalsi krok:
 U05: jedna prioritní fronta a oddělený provozní stav.
 
+Co je hotove:
+- U01–U05 lokálně implementované a ověřené; roadmapa v2.5.
+
+Co neni hotove:
+- Push/nasazení a fyzická přejímka. Kroky U06–U11.
+
+Dalsi krok:
+U06: jednotná navigace, fokus a návraty; nejprve reprezentativní modal.
+
 Navrhovane dalsi kroky:
-- Navigace, Servis a grafika podle TXT.
+- Servis a grafika podle TXT.
 
 Zmenene nebo relevantni soubory:
 - Viz jednotlive checkpointy.
@@ -962,3 +962,22 @@ Technický důkaz:
 - 27 cílených testů; skutečný HTTP test 23 dokumentů + duplicitní řádek, stránky 8/8/7 a neplatné parametry před poskytovatelem. Čtyři syntetické browser scénáře: více stránek, nulový výsledek, návraty, zablokovaná čtečka, chyba/opakování a opožděná odpověď.
 - Plná brána: 1677 testů / 299.260 s, OK. Report `reports/cockpit_ui_u04_2026_09_14.json`.
 - Safari přejímka čeká; živý index není zmrazený a reload původního okna hledání resetuje. Cizí nesledovaný adresář zachovaný.
+
+### 2026-09-14 15:25 CEST — U05: jedna fronta a samostatný provozní stav
+
+Hotovo:
+- Odstraněné opakované bloky Dnes/Stav/Rychlé akce, zachovaný existující výběr nejvýše tří priorit. Podrobnosti a statistiky patří do Servisu.
+- Běžná práce nevyvolává provozní alarm, skutečné problémy i nedostupné zdroje jsou zřetelné. U signálů je čas načtení; úkoly mají zdroj a čas důkazu.
+
+Rozhodnutí:
+- Míla schválil U05. Bez nového backendu, persistence či provozních akcí; pouze lokální vývoj, push a nasazení neprovedeny.
+
+Další krok:
+- U06: navigace, fokus, návraty; začít jedním reprezentativním dialogem.
+
+Navrhované další kroky:
+- Servis a sjednocení grafiky podle TXT; fyzická Safari přejímka po samostatně schváleném nasazení.
+
+Technický důkaz:
+- 24 cílených testů (včetně 10 stavových JS scénářů), 10 syntetických browser scénářů a rychlá statická brána OK. Report `reports/cockpit_ui_u05_2026_09_14.json`. Klidný desktop 1440×900 bez scrollu, první mobilní priorita v prvním viewportu; přímý vstup do úkolu/diagnostiky/Human–Adam, výpadek a obnova fronty.
+- Plná brána v tomto omezeném frontendovém kroku neopakována; U04 1677 testů je historický důkaz. Zbytková rizika: fyzický Safari netestovaný, čas načtení není záruka čerstvosti zdroje, mobilní stránka dále scrolluje. Cizí nesledovaný adresář zachovaný.

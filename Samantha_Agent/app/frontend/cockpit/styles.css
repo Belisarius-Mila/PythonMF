@@ -22,11 +22,6 @@
     button.janicka-button { background: #f9a8d4; color: #581c35; }
     button:disabled { opacity: .6; cursor: wait; }
     .grid { display: grid; grid-template-columns: minmax(320px, 1.15fr) minmax(320px, .85fr); gap: 16px; align-items: start; }
-    .today-dashboard { display: grid; grid-template-columns: 1.05fr 1fr 1fr; gap: 12px; align-items: stretch; }
-    .dashboard-card { border: 1px solid var(--line); border-radius: 8px; background: var(--panel); overflow: hidden; display: grid; grid-template-rows: auto 1fr; min-height: 168px; }
-    .dashboard-card h2 { margin: 0; padding: 12px 14px; font-size: 14px; border-bottom: 1px solid var(--line); background: #f8fafc; }
-    .dashboard-body { padding: 13px 14px; display: grid; gap: 10px; align-content: start; }
-    .dashboard-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
     .metric { border: 1px solid #edf0f4; border-radius: 7px; padding: 9px; background: #fbfcfe; min-width: 0; }
     .metric-value { display: block; font-size: 24px; font-weight: 750; line-height: 1; }
     .metric-label { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; line-height: 1.25; }
@@ -118,7 +113,6 @@
     #documentIntakeSourceList { margin-top: 8px; }
     #overviewPanel { margin: 0; }
     #overviewPanel > summary { font-size: 14px; }
-    #overviewPanel[open] > .today-dashboard { margin-top: 12px; }
     #documentsPanel { margin: 0; }
     #documentSearchPanel .status-line:empty, #documentSearchResults:empty { display: none; }
     .work-card h3 { margin: 0; font-size: 13px; color: #253047; }
@@ -427,7 +421,15 @@
     .section-toggle > summary { font-size: 20px; }
     .service-panel { margin-top: 12px; border-top: 1px solid var(--line); }
     .service-actions { margin-top: 10px; }
-    @media (max-width: 1050px) { .today-dashboard { grid-template-columns: 1fr; } .work-grid { grid-template-columns: 1fr; } .decision-list { grid-template-columns: 1fr; } }
+    @media (max-width: 1050px) { .work-grid { grid-template-columns: 1fr; } .decision-list { grid-template-columns: 1fr; } }
 	    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .dashboard-metrics { grid-template-columns: 1fr; } .quick-actions { grid-template-columns: 1fr; } .health-grid { grid-template-columns: 1fr; } .search-controls { grid-template-columns: 1fr; } .search-result-head { grid-template-columns: 1fr; } .search-result-head-actions { justify-content: flex-start; } .recovery-grid { grid-template-columns: 1fr; } .janicka-grid { grid-template-columns: 1fr; } .janicka-action { grid-template-columns: 1fr; } .library-archive-grid { grid-template-columns: 1fr; } .library-text-grid { grid-template-columns: 1fr; } .library-book-basic-grid { grid-template-columns: 1fr; } .library-book-category-choices { grid-template-columns: 1fr; } .library-book-option-add-row { grid-template-columns: 1fr; } .library-book-isbn-photo-row { grid-template-columns: 1fr; } .library-book-filter-grid { grid-template-columns: 1fr; } .library-attachment-grid { grid-template-columns: 1fr; } .library-edit-grid { grid-template-columns: 1fr; } .library-edit-source-grid { grid-template-columns: 1fr; } .library-controls { grid-template-columns: 1fr; } .library-layout { grid-template-columns: 1fr; } .library-action-group { justify-content: flex-start; } .library-action-group-label { width: 100%; text-align: left; } .family-calendar-form-grid { grid-template-columns: 1fr; } .family-calendar-preview-grid { grid-template-columns: 1fr; } header { height: auto; padding: 12px 16px; align-items: flex-start; gap: 10px; flex-direction: column; } .app-card { grid-template-columns: 1fr; } }
     @media (max-width: 900px) { .vault-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
     @media (max-width: 520px) { .vault-metrics { grid-template-columns: 1fr; } }
+
+    .work { color: var(--blue); }
+    .unknown { color: #475467; }
+    .dashboard-overall-unknown { border-color: #98a2b3; background: #f2f4f7; }
+    .diagnostics-row.unknown { border-left: 4px solid #667085; padding-left: 8px; }
+    .diagnostics-row.work { border-left: 4px solid var(--blue); padding-left: 8px; }
+    #overviewPanel .decision-card button { min-height: 44px; }
+    #overviewPanel > section { margin-top: 10px; }

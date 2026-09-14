@@ -1,6 +1,6 @@
 HLUBOKÝ AUDIT UI COCKPITU A PLÁN ÚPRAV
 ====================================
-Verze dokumentu: 2.4
+Verze dokumentu: 2.5
 Datum: 2026-09-14
 Základ auditu: main 10ec08770e05 (nasazený, ověřený před auditem).
 Autor: Adam / Codex. Původní audit zachycuje 10ec0877; vývojový stav je níže.
@@ -9,31 +9,31 @@ TOTO JE AKTUÁLNÍ ROZHODOVACÍ ČÁST DOKUMENTU.
 Architektonický průběh a původní audit zůstávají níže jako historie.
 Čísla, provozní stavy a priority historických oddílů nejsou dnešním stavem.
 
-VÝVOJOVÝ STAV — 2026-09-14 15:11 CEST
-U01–U04 jsou dokončené lokálně na Mílův pokyn; dosud bez push/nasazení.
-U01: viditelná odezva. U02: hlavička a návraty. U03: kompaktní Dokumenty.
-U04: hledání už má Předchozí/Další a rozsah výsledků (např. 9–16 z 23).
-HTTP předává limit/offset existujícímu backendu; výchozí stránka má 8 položek,
-maximum je 20. Záporné/nečíselné/prázdné/opakované stránkovací parametry
-vracejí 400 před čtením indexu. Dosavadní chování q je zachované.
-Nový dotaz začíná na nule; změna textu zneplatní starou odpověď. Opakované
-odeslání stejného běžícího dotazu nevytváří další požadavek. Chyba další
-stránky zachová předchozí výsledky a dovolí opakování. Prázdná stránka po
-změně indexu má návrat zpět. Výsledky a jejich akce používají původní reference.
-Návrat z dokumentové i nákupní čtečky zachovává stránku původního Cockpitu.
-Blokovaná čtečka nabídne odkaz do nové karty, nepřepíše otevřené hledání.
-Hledání se neukládá; reload/uzavření původního Cockpitu jeho stav nezachová.
-Důkaz: skutečný HTTP test nad 23 syntetickými dokumenty + duplicitním řádkem
-prošel stránkami 8/8/7 bez duplicit/vynechání. Čtyři browser scénáře 320–1440 px
-ověřily 23/9/0 výsledků, návraty, výpadek/opakování a opožděnou odpověď.
-27 cílených testů prošlo. Plná brána: 1677 testů / 299.260 s, OK.
-První plný běh odhalil dvě staré U03 textové/HTML kontroly; očekávání jsou
-aktualizovaná podle schváleného UI, pořadí i přítomnost prvků dál ověřované.
-Report: memory/reports/cockpit_ui_u04_2026_09_14.json.
-Fyzická přejímka Safari Mac/iPhone čeká po samostatně schváleném nasazení.
-Živý index se mezi stránkami může změnit; nejde o neměnný snapshot výsledků.
-Další krok U05: jedna prioritní fronta a oddělený provozní stav.
-Níže jsou původní nálezy/měření 10ec0877; N08 je tímto lokálně uzavřený.
+VÝVOJOVÝ STAV — 2026-09-14 15:25 CEST
+U01–U05 jsou dokončené lokálně na Mílův pokyn; dosud bez push/nasazení.
+U01: odezva. U02: hlavička/návraty. U03: kompaktní Dokumenty. U04: stránkování.
+U05: hlavní Přehled používá jedinou prioritní frontu Co teď (nejvýše 3 položky)
+z existujícího decision backendu. Dnes/Stav/Rychlé akce a jejich opakované
+rady i obsluhy jsou odstraněné; základní akce zůstávají v hlavičce, Dokumentech
+a prioritních kartách. Návrhy z paměti zůstávají samostatně sbalené.
+Podrobnosti kontrol, počty souborů/řádků a úplný katalog jsou v Servisu.
+Statistika souborů už neurčuje provozní zdraví. Běžné PDF, metadata k doplnění,
+připomenutí, poznámky, projektové připomínky a čistý Git pouze napřed jsou práce,
+nikoli alarm. Dokumentové problémy, konflikty, rozcházející se Git, nečistý Git,
+čekající pull a varování záloh zůstávají zvýrazněné. Nedostupný zdroj je neověřený.
+Chyba prioritní fronty odstraní staré akční karty; další úspěšné načtení je obnoví.
+Karty zachovávají zdroj a přesný čas důkazu. Diagnostika ukazuje čas načtení
+každého signálu; čas načtení není zárukou čerstvosti jeho původního podkladu.
+Důkaz: 24 cílených testů (včetně 10 stavových JS scénářů), 10 syntetických browser scénářů a rychlá statická brána OK.
+1440×900: klid i jedna běžná priorita se vejdou do jedné obrazovky. Šířky
+320/390 px: první akce priority v prvním viewportu; celá stránka ještě scrolluje.
+Ověřený přímý vstup do úkolu, diagnostiky a Human–Adam; také 3 prioritní karty,
+výpadek/obnova fronty a stavy práce/varování/chyby/neověřeného zdroje.
+Report: memory/reports/cockpit_ui_u05_2026_09_14.json.
+Plná brána U04 (1677 testů) je předchozí důkaz; pro tento omezený frontendový
+krok proběhly cílené kontroly a statická brána. Fyzická přejímka Safari čeká.
+Další krok U06: sjednotit navigaci, fokus a návraty; nejprve reprezentativní modal.
+Níže jsou původní nálezy/měření 10ec0877; N05–N07 jsou tímto lokálně uzavřené.
 
 0. ZÁVĚR PRO MÍLU
 ----------------
@@ -402,6 +402,7 @@ HTTP kontrakty + plná brána. Závislosti: stabilní výsledkový prostor U03;
 backendovou část lze připravit dříve, ale nesmí se ztratit současné reference.
 
 U05 / P1 / M — Jedna prioritní fronta a oddělený provozní stav (N05–N07).
+Stav: HOTOVO LOKÁLNĚ 2026-09-14; syntetická přejímka, cílené testy a statická brána OK.
 Zúžit Dnes/Stav/Rychlé akce/Co teď. Využít existující decision backend;
 nesestavovat novou paralelní pravdu v DOM. Rozlišit práci, varování a neznámý
 stav; statistiky přesunout do Servisu. Zachovat důkaz a stáří každého signálu.
@@ -506,8 +507,8 @@ Závěr ke struktuře:
 - Browser rozměry z fixture nejsou skutečné počty Mílových dokumentů ani
   důkaz shody se všemi verzemi Safari. Fyzický Mac/iPhone test zůstává nutný.
 - Barevné/přístupnostní cíle nejsou výsledkem úplného WCAG auditu.
-- Míla následně schválil zahájení vývoje; U01–U04 jsou lokálně implementované.
-  U05–U11 zůstávají plánem. Push a nasazení tohoto kroku dosud neproběhly.
+- Míla následně schválil zahájení vývoje; U01–U05 jsou lokálně implementované.
+  U06–U11 zůstávají plánem. Push a nasazení tohoto kroku dosud neproběhly.
 
 10. ZDROJE A OPĚRNÉ BODY
 -----------------------

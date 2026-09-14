@@ -131,7 +131,7 @@
         title.textContent = `${dashboardSignalLabel(signal.key)}: ${dashboardSignalMeaning(signal.level)}`;
         const detail = document.createElement("div");
         detail.className = "project-meta";
-        detail.textContent = signal.reason || "";
+        detail.textContent = `${signal.reason || ""} · Načteno: ${signal.observedAt || "čas neznámý"}`;
         const action = document.createElement("div");
         action.className = "project-meta";
         action.textContent = `Co teď: ${dashboardSignalNextAction(signal)}`;
@@ -147,6 +147,8 @@
         bad: "chyba nebo nutná akce",
         warn: "varování / ruční kontrola",
         loading: "samostatné načítání",
+        unknown: "nelze ověřit",
+        work: "čekající práce",
         ok: "v pořádku"
       }[level] || "stav neznámý";
     }
@@ -154,6 +156,8 @@
     function dashboardSignalNextAction(signal) {
       const level = signal && signal.level || "ok";
       const reason = String(signal && signal.reason || "").toLocaleLowerCase("cs-CZ");
+      if (level === "work") return "běžná práce; není provozní závadou";
+      if (level === "unknown") return "obnovit stav a ověřit dostupnost zdroje";
       if (level === "loading") return "počkat na samostatné načtení nebo stisknout Obnovit stav";
       if (level === "bad") return "otevřít diagnostiku endpointů nebo příslušné okno a řešit chybu";
       if (level === "warn") {
@@ -170,6 +174,7 @@
     function dashboardSignalLabel(key) {
       return {
         main: "Hlavní status",
+        decision: "Co teď",
         consistency: "Audit",
         documents: "Dokumenty",
         reminders: "Připomenutí",

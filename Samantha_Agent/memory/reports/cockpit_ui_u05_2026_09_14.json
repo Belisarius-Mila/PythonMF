@@ -1,0 +1,246 @@
+{
+  "date": "2026-09-14 15:25 CEST",
+  "base_commit": "a180d6f6",
+  "scope": "U05 one priority queue and separate operational status; local only",
+  "changes": [
+    "Removed duplicate Dnes/Stav/Rychle akce blocks and obsolete bindings/styles",
+    "Existing decision backend retained, at most three items; suggestions remain separate and collapsed",
+    "Status details and full catalog moved to Service; file/line counts no longer decide operational health",
+    "Normal document/reminder/note/project work and clean ahead-only Git do not warn",
+    "Document problems, reminder conflicts, Git divergence, dirty/behind Git and backup warnings preserved",
+    "Provider/HTTP failures and missing summaries show unknown; failed decision refresh clears stale actionable cards",
+    "Source/evidence timestamp visible on decision cards; per-signal receipt timestamps visible in diagnostics; speech uses current priority summary"
+  ],
+  "verification": {
+    "targeted_tests": 24,
+    "node_behavior_scenarios": 10,
+    "browser_scenarios": 10,
+    "static_gate": "passed",
+    "full_gate": "not rerun for this bounded frontend change; last full U04 result 1677 tests remains historical",
+    "browser": "Headless Edge; all requests intercepted with synthetic fixtures, no live private content or actions"
+  },
+  "browser": [
+    {
+      "width": 1440,
+      "height": 900,
+      "scenario": "quiet",
+      "measurements": {
+        "height": 900,
+        "width": 1440,
+        "status": "Provoz v pořádku",
+        "reason": "Kontroly bez varování; čekající práci najdeš v Co teď.",
+        "searchBottom": 512.1875,
+        "statsHidden": true,
+        "queueHidden": true,
+        "humanVisible": true,
+        "cards": 0
+      },
+      "diagnosticsEvidence": true,
+      "humanAdamOneClick": true,
+      "errors": [],
+      "requests": 27
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "scenario": "quiet",
+      "measurements": {
+        "height": 768,
+        "width": 1024,
+        "status": "Provoz v pořádku",
+        "reason": "Kontroly bez varování; čekající práci najdeš v Co teď.",
+        "searchBottom": 558.1875,
+        "statsHidden": true,
+        "queueHidden": true,
+        "humanVisible": true,
+        "cards": 0
+      },
+      "diagnosticsEvidence": true,
+      "humanAdamOneClick": true,
+      "errors": [],
+      "requests": 27
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "scenario": "quiet",
+      "measurements": {
+        "height": 954,
+        "width": 390,
+        "status": "Provoz v pořádku",
+        "reason": "Kontroly bez varování; čekající práci najdeš v Co teď.",
+        "searchBottom": 762.1875,
+        "statsHidden": true,
+        "queueHidden": true,
+        "humanVisible": true,
+        "cards": 0
+      },
+      "diagnosticsEvidence": true,
+      "humanAdamOneClick": true,
+      "errors": [],
+      "requests": 27
+    },
+    {
+      "width": 320,
+      "height": 780,
+      "scenario": "quiet",
+      "measurements": {
+        "height": 970,
+        "width": 320,
+        "status": "Provoz v pořádku",
+        "reason": "Kontroly bez varování; čekající práci najdeš v Co teď.",
+        "searchBottom": 778.375,
+        "statsHidden": true,
+        "queueHidden": true,
+        "humanVisible": true,
+        "cards": 0
+      },
+      "diagnosticsEvidence": true,
+      "humanAdamOneClick": true,
+      "errors": [],
+      "requests": 27
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "scenario": "work",
+      "measurements": {
+        "height": 900,
+        "width": 1440,
+        "status": "Provoz v pořádku",
+        "reason": "Kontroly bez varování; čekající práci najdeš v Co teď.",
+        "searchBottom": 689.8125,
+        "firstActionBottom": 510.8125,
+        "statsHidden": true,
+        "queueHidden": true,
+        "humanVisible": true,
+        "cards": 1
+      },
+      "diagnosticsEvidence": true,
+      "humanAdamOneClick": true,
+      "errors": [],
+      "requests": 30
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "scenario": "work",
+      "measurements": {
+        "height": 1147,
+        "width": 390,
+        "status": "Provoz v pořádku",
+        "reason": "Kontroly bez varování; čekající práci najdeš v Co teď.",
+        "searchBottom": 954.65625,
+        "firstActionBottom": 727.65625,
+        "statsHidden": true,
+        "queueHidden": true,
+        "humanVisible": true,
+        "cards": 1
+      },
+      "diagnosticsEvidence": true,
+      "humanAdamOneClick": true,
+      "errors": [],
+      "requests": 30
+    },
+    {
+      "width": 320,
+      "height": 780,
+      "scenario": "work",
+      "measurements": {
+        "height": 1163,
+        "width": 320,
+        "status": "Provoz v pořádku",
+        "reason": "Kontroly bez varování; čekající práci najdeš v Co teď.",
+        "searchBottom": 970.84375,
+        "firstActionBottom": 743.84375,
+        "statsHidden": true,
+        "queueHidden": true,
+        "humanVisible": true,
+        "cards": 1
+      },
+      "diagnosticsEvidence": true,
+      "humanAdamOneClick": true,
+      "errors": [],
+      "requests": 30
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "scenario": "three",
+      "measurements": {
+        "height": 900,
+        "width": 1440,
+        "status": "Provoz v pořádku",
+        "reason": "Kontroly bez varování; čekající práci najdeš v Co teď.",
+        "searchBottom": 689.8125,
+        "firstActionBottom": 510.8125,
+        "statsHidden": true,
+        "queueHidden": true,
+        "humanVisible": true,
+        "cards": 3
+      },
+      "diagnosticsEvidence": true,
+      "humanAdamOneClick": true,
+      "errors": [],
+      "requests": 27
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "scenario": "critical",
+      "measurements": {
+        "height": 900,
+        "width": 1440,
+        "status": "Provoz: nutná kontrola",
+        "reason": "Připomenutí: 1 konflikt (načteno 15:24:03) | Git: lokální a vzdálená historie se rozcházejí (načteno 15:24:03)",
+        "searchBottom": 689.8125,
+        "firstActionBottom": 510.8125,
+        "statsHidden": true,
+        "queueHidden": true,
+        "humanVisible": true,
+        "cards": 1
+      },
+      "diagnosticsEvidence": true,
+      "humanAdamOneClick": true,
+      "errors": [],
+      "requests": 27
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "scenario": "unknown",
+      "measurements": {
+        "height": 1163,
+        "width": 390,
+        "status": "Provoz není plně ověřený",
+        "reason": "Co teď: část podkladů není dostupná (načteno 15:24:05) | Dokumenty: frontu nelze ověřit (načteno 15:24:05)",
+        "searchBottom": 970.84375,
+        "firstActionBottom": 743.84375,
+        "statsHidden": true,
+        "queueHidden": true,
+        "humanVisible": true,
+        "cards": 1
+      },
+      "diagnosticsEvidence": true,
+      "humanAdamOneClick": true,
+      "errors": [],
+      "requests": 27
+    }
+  ],
+  "limitations": [
+    "Physical Safari Mac/iPhone acceptance still pending",
+    "No push or deployment in this step",
+    "Receipt time is not an assertion of source freshness; decision evidence timestamp preserved",
+    "Mobile full page still scrolls, first priority action fits initial viewport; further navigation/header work belongs to U06/U10",
+    "Unrelated untracked directory preserved"
+  ],
+  "sha256": {
+    "app/frontend/cockpit/app.js": "8583326780d55ca230b35a22f3f253de126c5ea3ee60197de4dfa93fe1379533",
+    "app/frontend/cockpit/page.html": "14ce030e1f9907b3492fadcfc93f3b21b574c54cc2d6341e3f6a58d743462fb5",
+    "app/frontend/cockpit/styles.css": "75ddc6c10b3dce4e18854777f1e08e47102d23bacee86a094cc01b551f7acb55",
+    "app/frontend/cockpit/health_recovery_autosave.js": "61f793f1eb858b4f8257b9b16d4fb8224397e10f3c925a5fe5cf6456d0ada0a1",
+    "tests/test_cockpit.py": "1d79ad4733bbf163836e1ed3abc934ef79d3922d988144f439d2ac8b009e1ce5",
+    "tests/test_cockpit_frontend.py": "0cbbbc012069b468d8980ba713de5ca75cf569f49bad903e5dfb137aa4f89a8b",
+    "tests/dashboard_status_frontend.test.cjs": "ffd8bddf1fa31aeffd5fad3291a5b55d61fa1563f407b521c791c95955ff5c87"
+  }
+}

@@ -674,3 +674,8 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Projev: backend umí offset, ale HTTP ho nepředá; uživatel zůstane na první stránce. Pomalá odpověď navíc může přepsat novější dotaz.
 - Řešení: validovat parametry před poskytovatelem, předat limit/offset a použít pořadí požadavků v UI. Při chybě další stránky zachovat předchozí data a retry; nový dotaz resetuje stránku.
 - Ověření: skutečné HTTP nad více než jednou stránkou včetně duplicitního indexového řádku, mimo rozsah, chyby a dotaz změněný během načítání. Návrat čtečky i blokovaný popup musí zachovat původní hledání. Důkaz: reports/cockpit_ui_u04_2026_09_14.json.
+
+### 2026-09-14 15:25 CEST — Čekající práce není provozní porucha
+- Projev: nové dokumenty, poznámky nebo čistý Git napřed drží hlavní přehled trvale ve varování; skutečná chyba zaniká.
+- Řešení: použít existující prioritní frontu, práci hodnotit odděleně od provozu a chybějící zdroj neproměňovat v prázdný zelený inbox. Při selhání obnovy priorit odstranit zastaralé akční karty, ukázat neověřený stav a umožnit nové načtení.
+- Ověření: syntetická práce, konflikt, divergence, chybějící záloha, výpadek/obnova API a zdroj/čas důkazu. Report: reports/cockpit_ui_u05_2026_09_14.json.

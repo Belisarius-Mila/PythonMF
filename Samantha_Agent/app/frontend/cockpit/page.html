@@ -46,51 +46,6 @@
 		    </section>
     <details id="overviewPanel" class="section-toggle" open>
       <summary>Přehled Cockpitu</summary>
-    <div class="today-dashboard" aria-label="Dnešní přehled">
-      <section class="dashboard-card">
-        <h2>Dnes</h2>
-        <div class="dashboard-body">
-          <div class="dashboard-metrics">
-            <div class="metric"><span id="todayNewPdfCount" class="metric-value">0</span><span class="metric-label">nová PDF</span></div>
-            <div class="metric"><span id="todayReviewCount" class="metric-value">0</span><span class="metric-label">k vyřešení</span></div>
-            <div class="metric"><span id="todayProblemCount" class="metric-value">0</span><span class="metric-label">problémy</span></div>
-          </div>
-          <div id="todayHint" class="status-line"></div>
-        </div>
-      </section>
-      <section class="dashboard-card">
-        <h2>Stav</h2>
-        <div class="dashboard-body dashboard-list">
-          <div id="dashboardMorningSentence" class="status-line">Ranní stav se načte spolu s Cockpitem.</div>
-          <div class="dashboard-row"><span class="dashboard-label">Dokumenty</span><span id="dashboardDocuments" class="dashboard-value"></span></div>
-          <div class="dashboard-row"><span class="dashboard-label">Připomenutí</span><span id="dashboardReminders" class="dashboard-value"></span></div>
-          <div class="dashboard-row"><span class="dashboard-label">Záloha</span><span id="dashboardBackup" class="dashboard-value"></span></div>
-          <div class="dashboard-row"><span class="dashboard-label">Systém</span><span id="dashboardQuantitative" class="dashboard-value"></span></div>
-          <details class="service-panel">
-            <summary>Další stav</summary>
-            <div class="dashboard-list">
-              <div class="dashboard-row"><span class="dashboard-label">ScanDocu</span><span id="dashboardScanDocu" class="dashboard-value"></span></div>
-              <div class="dashboard-row"><span class="dashboard-label">Projekty</span><span id="dashboardProjects" class="dashboard-value"></span></div>
-              <div class="dashboard-row"><span class="dashboard-label">Kontrola</span><span id="dashboardConsistency" class="dashboard-value"></span></div>
-              <div class="dashboard-row"><span class="dashboard-label">Rychlé poznámky</span><span id="dashboardQuickNotes" class="dashboard-value"></span></div>
-              <div class="dashboard-row"><span class="dashboard-label">Git</span><span id="dashboardGit" class="dashboard-value"></span></div>
-            </div>
-          </details>
-        </div>
-      </section>
-      <section class="dashboard-card">
-        <h2>Rychlé akce</h2>
-        <div class="dashboard-body">
-          <div class="quick-actions">
-            <button class="primary" id="dashboardProcessBtn">Zpracovat další</button>
-            <button class="secondary" id="dashboardReviewBtn">Vyřešit dokumenty</button>
-		        <button class="secondary" id="dashboardUrgentRemindersBtn">Důležitá připomenutí</button>
-		        <button class="secondary" id="dashboardRefreshBtn">Obnovit stav</button>
-	          </div>
-          <div id="dashboardActionHint" class="status-line"></div>
-        </div>
-      </section>
-	    </div>
 		    <section>
 		      <h2>Co teď?</h2>
 		      <div class="body decision-cockpit">
@@ -101,11 +56,7 @@
 		          <div id="decisionCockpitSuggestionStatus" class="status-line"></div>
 		          <div id="decisionCockpitSuggestionList" class="decision-list" aria-live="polite"></div>
 		        </details>
-		        <details class="decision-catalog">
-		          <summary>Úplný katalog provozních položek</summary>
-		          <div id="actionQueueStatus" class="status-line">Načítám doporučené akce...</div>
-		          <div id="actionQueueList" class="action-queue"></div>
-		        </details>
+
 		      </div>
 		    </section>
     </details>
@@ -221,6 +172,25 @@
     </details>
     <details id="servicePanel" class="section-toggle">
       <summary>Servis</summary>
+      <section>
+        <h2>Podrobnosti kontrol a práce</h2>
+        <div class="body dashboard-list">
+          <div class="dashboard-row"><span class="dashboard-label">Dokumenty</span><span id="dashboardDocuments" class="dashboard-value"></span></div>
+          <div class="dashboard-row"><span class="dashboard-label">Připomenutí</span><span id="dashboardReminders" class="dashboard-value"></span></div>
+          <div class="dashboard-row"><span class="dashboard-label">Záloha</span><span id="dashboardBackup" class="dashboard-value"></span></div>
+          <div class="dashboard-row"><span class="dashboard-label">Statistika souborů</span><span id="dashboardQuantitative" class="dashboard-value"></span></div>
+          <div class="dashboard-row"><span class="dashboard-label">ScanDocu</span><span id="dashboardScanDocu" class="dashboard-value"></span></div>
+          <div class="dashboard-row"><span class="dashboard-label">Projekty</span><span id="dashboardProjects" class="dashboard-value"></span></div>
+          <div class="dashboard-row"><span class="dashboard-label">Kontrola</span><span id="dashboardConsistency" class="dashboard-value"></span></div>
+          <div class="dashboard-row"><span class="dashboard-label">Rychlé poznámky</span><span id="dashboardQuickNotes" class="dashboard-value"></span></div>
+          <div class="dashboard-row"><span class="dashboard-label">Git</span><span id="dashboardGit" class="dashboard-value"></span></div>
+        </div>
+      </section>
+      <details class="decision-catalog">
+		          <summary>Úplný katalog provozních položek</summary>
+		          <div id="actionQueueStatus" class="status-line">Načítám doporučené akce...</div>
+		          <div id="actionQueueList" class="action-queue"></div>
+		        </details>
       <section>
         <h2>Servisní akce</h2>
         <div class="body">
