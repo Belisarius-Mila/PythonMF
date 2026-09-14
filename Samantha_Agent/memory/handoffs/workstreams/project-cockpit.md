@@ -1,6 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-09-14 21:44 CEST: meziúkol ToBeToHave vrací Webové aplikace do horní lišty. Jejich přesun do Servisu v U06 způsobil ztrátu dohledatelnosti. Dlaždice ToBeToHave nyní míří na web; U07 zůstává odložený. 22 cílených testů OK; finální nasazení ověřovat živě.
+
 - Aktualizováno 2026-09-14 20:25 CEST: U01–U06 funkčně nasazené, head `980aed7a`, nový proces potvrzen, smoke 5/5 a shoda podávaného HTML; otisk `55373c8c1c4da728`.
 - Míla schválil přesun nesouvisejících podkladů mimo Git; provedeno, 35 souborů shodných podle SHA-256. Publikační překážka odstraněna.
 - Uzavírací zápis je součást schváleného GitHub balíčku. Aktuální odeslání a finální nasazený head poskytují živé audity; tento zápis předchází závěrečnému push.
@@ -1045,3 +1047,30 @@ Navrhované další kroky:
 Technický důkaz:
 - Receipt `2026-09-14T18:23:41+00:00`, otisk `55373c8c1c4da728`, smoke 5/5. Vývojová plná brána 1680/1680; nasazovací rychlá brána OK. Podrobnosti `reports/cockpit_ui_release_2026_09_14.md`.
 - Zápis předchází závěrečnému push; aktuální odeslání a finální head ověřovat živým auditem. Ruční přejímka neproběhla, drafty žijí pouze v aktuální kartě.
+
+
+### 2026-09-14 21:44 CEST — Web ToBeToHave a přímý vstup z Cockpitu
+
+Hotovo:
+- Schválený lokální prototyp má kompletní publikační kopii v `docs/to-be-to-have/`.
+- Dlaždice ToBeToHave otevírá web v samostatném okně; Webové aplikace jsou opět
+  přímo v horní liště, bez nutnosti hledat je v Servisu.
+
+Rozhodnutí:
+- Míla potvrdil, že lokální prototyp je dobrý, a zadal jeho zpřístupnění na webu
+  z Cockpitu. Používá se stávající GitHub Pages, cílová adresa https://belisarius-mila.github.io/PythonMF/to-be-to-have/
+- Původní aplikace, CSV a zdrojový web se nemění; nejde o vývoj C00 Camina ani U07 Cockpitu.
+
+Další krok:
+- Po zveřejnění otevřít Webové aplikace → ToBeToHave a používat oba režimy.
+
+Navrhované další kroky:
+- Na fyzickém iPhonu ověřit první tap se zvukem a návrat z pozadí; automatická
+  přejímka není důkaz systémové audio politiky Safari.
+
+Technický důkaz:
+- 14/14 JS testů trenažéru, 22/22 cílených testů Cockpitu.
+- 184/184 MP3, 47/47 WebP a 236/236 místních HTTP odpovědí shodných se zdrojem.
+- Regresní test hlídá vstup do aplikací přímo v hlavičce a webový cíl dlaždice.
+- Zdrojový checkpoint předchází publikaci; finální head, Pages a nasazení
+  ověřují živé GitHub a Cockpit účtenky. Podrobnosti v `reports/to_be_web_release_2026_09_14.md`.

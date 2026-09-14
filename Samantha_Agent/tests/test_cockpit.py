@@ -6545,6 +6545,11 @@ Dalsi krok:
         self.assertNotIn('target = "_blank"', COCKPIT_HTML)
         self.assertIn("Zavřít", COCKPIT_HTML)
 
+    def test_web_apps_are_available_directly_from_main_toolbar(self) -> None:
+        header = COCKPIT_HTML.split("<header>", 1)[1].split("</header>", 1)[0]
+        self.assertIn('id="webAppsBtn"', header)
+        self.assertEqual(COCKPIT_HTML.count('id="webAppsBtn"'), 1)
+
     def test_web_apps_catalog_contains_vocabulary_desktop_trainers(self) -> None:
         apps = {item["id"]: item for item in web_apps_catalog()["apps"]}
 
@@ -6559,11 +6564,32 @@ Dalsi krok:
         self.assertEqual(apps["multilo"]["launch_type"], "desktop")
         self.assertEqual(apps["multilo"]["title"], "MultiLO")
 
-    def test_web_apps_catalog_contains_to_be_to_have_desktop_app(self) -> None:
+    def test_web_apps_catalog_opens_to_be_to_have_as_public_web_app(self) -> None:
         apps = {item["id"]: item for item in web_apps_catalog()["apps"]}
 
-        self.assertEqual(apps["to-be-to-have"]["launch_type"], "desktop")
+        self.assertNotEqual(apps["to-be-to-have"].get("launch_type"), "desktop")
+        self.assertEqual(
+            apps["to-be-to-have"]["url"],
+            "https://belisarius-mila.github.io/PythonMF/to-be-to-have/",
+        )
         self.assertEqual(apps["to-be-to-have"]["title"], "ToBeToHave")
+
+    def test_to_be_to_have_pages_contains_only_the_complete_public_app(self) -> None:
+        repo = Path(__file__).resolve().parents[2]
+        source = repo / "ToBeTraining" / "web"
+        published = repo / "docs" / "to-be-to-have"
+        data = json.loads((source / "data.json").read_text(encoding="utf-8"))
+        paths = {"index.html", "styles.css", "app.mjs", "core.mjs", "data.json"}
+        paths.update(item["src"] for item in data["audio"].values())
+        paths.update(item["src"] for item in data["images"].values())
+        self.assertEqual(
+            {p.relative_to(published).as_posix() for p in published.rglob("*") if p.is_file()},
+            paths,
+        )
+        for relative in sorted(paths):
+            with self.subTest(relative=relative):
+                self.assertFalse((published / relative).is_symlink())
+                self.assertEqual((published / relative).read_bytes(), (source / relative).read_bytes())
 
     def test_web_apps_catalog_contains_kptl_desktop_app(self) -> None:
         apps = {item["id"]: item for item in web_apps_catalog()["apps"]}

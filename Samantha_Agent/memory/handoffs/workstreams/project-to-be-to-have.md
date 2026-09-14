@@ -1,25 +1,17 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-13 10:35 CEST.
-- Kanonický proud: `project-to-be-to-have`; aplikace `ToBeTraining/`.
-- Hotovo: samostatný lokální web se 107 otázkami, 24 skládáními vět,
-  barevným animovaným převodem na otázku, pauzou a volitelným překladem.
-- Média: 184 hotových anglických MP3; 47 WebP, z toho 11 nových ilustrací.
-  Každý WebP je nejvýše 0,25 MiB; největší ověřený soubor 256 386 B.
-- Důkaz: 14 automatických JS testů (včetně UI modulu s náhradním DOM/audiem),
-  184 MP3 ověřených ffprobe, 47 dekódovaných obrázků a 236 místních HTTP
-  odpovědí; rychlá projektová statická brána OK.
-- Otevřeno: skutečná vizuální a zvuková revize Mac/iPhone. Browser se v této
-  relaci nepřipojil kvůli chybějícímu nativnímu propojení; simulovaný DOM
-  neověřuje layout ani přehrávání Safari.
-- Další krok: na Macu otevřít lokální prototyp a projít oba režimy; potom
-  domluvit dostupnost na iPhonu a samostatné umístění webu.
-- Zdrojový prototyp byl 13. 9. odeslán na GitHub v denním balíčku. Samostatné hostování webu ani jeho integrace do Cockpitu nebyly provedeny.
-- Zdrojový desktopový skript a obě CSV beze změny. Vývoj VocabularyFR/IT
-  zůstal mimo rozsah tohoto kroku.
-- Oprava vazby: starší checkpointy KPTL níže byly vedené pod chybným proudem.
-  Jsou zachované jako historie, ale nedokládají stav ToBeToHave.
+- Aktualizováno: 2026-09-14 21:44 CEST.
+- Kanonický proud `project-to-be-to-have`; Míla schválil lokální prototyp a zadal web.
+- Publikační kopie `docs/to-be-to-have/` je totožná s `ToBeTraining/web/`.
+- Cílová adresa: https://belisarius-mila.github.io/PythonMF/to-be-to-have/
+- Cockpit: horní lišta → Webové aplikace → ToBeToHave; samostatné webové okno.
+- 107 otázek, 24 skládání vět, 184 MP3, 47 WebP; obsah ani původní CSV se nemění.
+- Ověření: 14 JS testů, 22 testů Cockpitu, 236 HTTP souborů, 184 MP3 a 47 obrázků.
+- Publikační checkpoint; finální veřejný stav a nasazení ověřovat živými účtenkami.
+- Lokální prototyp Míla hodnotí jako dobrý. Fyzický iPhone/audio po veřejném
+  zveřejnění zůstává samostatnou přejímkou; offline/PWA není součást zadání.
+- Historické KPTL checkpointy níže jsou nesouvisející historie, nikoli stav tohoto projektu.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: ToBeToHave
@@ -137,3 +129,30 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Commit `0ce9c5bd` je předkem ověřeného GitHub headu `ea13d3d6`; publikační brána balíčku prošla 1 640/1 640 testy.
+
+
+### 2026-09-14 21:44 CEST — Web ToBeToHave a přímý vstup z Cockpitu
+
+Hotovo:
+- Schválený lokální prototyp má kompletní publikační kopii v `docs/to-be-to-have/`.
+- Dlaždice ToBeToHave otevírá web v samostatném okně; Webové aplikace jsou opět
+  přímo v horní liště, bez nutnosti hledat je v Servisu.
+
+Rozhodnutí:
+- Míla potvrdil, že lokální prototyp je dobrý, a zadal jeho zpřístupnění na webu
+  z Cockpitu. Používá se stávající GitHub Pages, cílová adresa https://belisarius-mila.github.io/PythonMF/to-be-to-have/
+- Původní aplikace, CSV a zdrojový web se nemění; nejde o vývoj C00 Camina ani U07 Cockpitu.
+
+Další krok:
+- Po zveřejnění otevřít Webové aplikace → ToBeToHave a používat oba režimy.
+
+Navrhované další kroky:
+- Na fyzickém iPhonu ověřit první tap se zvukem a návrat z pozadí; automatická
+  přejímka není důkaz systémové audio politiky Safari.
+
+Technický důkaz:
+- 14/14 JS testů trenažéru, 22/22 cílených testů Cockpitu.
+- 184/184 MP3, 47/47 WebP a 236/236 místních HTTP odpovědí shodných se zdrojem.
+- Regresní test hlídá vstup do aplikací přímo v hlavičce a webový cíl dlaždice.
+- Zdrojový checkpoint předchází publikaci; finální head, Pages a nasazení
+  ověřují živé GitHub a Cockpit účtenky. Podrobnosti v `reports/to_be_web_release_2026_09_14.md`.

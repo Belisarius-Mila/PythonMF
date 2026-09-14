@@ -1,8 +1,16 @@
-# ToBeToHave — lokální webový prototyp
+# ToBeToHave — webová aplikace
 
-Stav 2026-09-13: připravený lokální prototyp, bez publikování a bez změny
-desktopové aplikace nebo Cockpitu. VocabularyFR, VocabularyIT a sdílený Pict
-se v tomto kroku neupravují.
+Míla 14. 9. 2026 schválil lokální prototyp. Cílový web:
+**https://belisarius-mila.github.io/PythonMF/to-be-to-have/**
+V Cockpitu jej otevřeš přímo z horní lišty přes **Webové aplikace → ToBeToHave**.
+
+Publikační kopie je `docs/to-be-to-have/` v kořeni PythonMF. Musí být bajtově
+shodná se zdrojovým `ToBeTraining/web/`; publikace používá stávající Pages workflow.
+Před budoucím vydáním porovnat obě kopie a po něm spustit níže uvedenou HTTP
+kontrolu s veřejnou adresou. Nepublikovat CSV, skripty, QA ani rodičovské dokumenty.
+Živý stav publikace ověřit přes GitHub a skutečnou HTTPS odpověď.
+
+Desktopová aplikace a obě CSV zůstávají beze změny. Offline/PWA není součást vydání.
 
 ## Spuštění
 

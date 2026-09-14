@@ -1,0 +1,2894 @@
+{
+  "version": 1,
+  "voice": "en-US-JennyNeural",
+  "rate": "-10%",
+  "sentences": [
+    {
+      "id": "be-001",
+      "lesson": "be",
+      "question": "Is he happy?",
+      "positive": "Yes, he is.",
+      "negative": "No, he isn't.",
+      "image": "happy",
+      "age": "",
+      "audio": {
+        "question": "416869ded4975621768c",
+        "positive": "431c529969f66e4ae3dd",
+        "negative": "18dad687199c0d53a77c"
+      }
+    },
+    {
+      "id": "be-002",
+      "lesson": "be",
+      "question": "Am I eight years old?",
+      "positive": "Yes, you are.",
+      "negative": "No, you're not.",
+      "image": "boy",
+      "age": "eight years old",
+      "audio": {
+        "question": "af9ab6bb3e9776470173",
+        "positive": "5cb0f0190e0448798f21",
+        "negative": "89df0eff36eba3ab38f5"
+      }
+    },
+    {
+      "id": "be-003",
+      "lesson": "be",
+      "question": "Are they friends?",
+      "positive": "Yes, they are.",
+      "negative": "No, they aren't.",
+      "image": "friends",
+      "age": "",
+      "audio": {
+        "question": "c5e2201316efd38a3912",
+        "positive": "0fd4eaeb27e3f2e62673",
+        "negative": "96e2528414c5c4f7d617"
+      }
+    },
+    {
+      "id": "be-004",
+      "lesson": "be",
+      "question": "Are they tired?",
+      "positive": "Yes, they are.",
+      "negative": "No, they aren't.",
+      "image": "tired",
+      "age": "",
+      "audio": {
+        "question": "a9f53ef6d7d617804f32",
+        "positive": "0fd4eaeb27e3f2e62673",
+        "negative": "96e2528414c5c4f7d617"
+      }
+    },
+    {
+      "id": "be-005",
+      "lesson": "be",
+      "question": "Are you at home now?",
+      "positive": "Yes, I am.",
+      "negative": "No, I'm not.",
+      "image": "home",
+      "age": "",
+      "audio": {
+        "question": "379b85a838ca23c724d9",
+        "positive": "a14e5bef1dd5b750da6a",
+        "negative": "0fc50d9d2b2e76fb1d38"
+      }
+    },
+    {
+      "id": "be-006",
+      "lesson": "be",
+      "question": "Are you at home?",
+      "positive": "Yes, I am.",
+      "negative": "No, I'm not.",
+      "image": "home",
+      "age": "",
+      "audio": {
+        "question": "51a1b2fb3e0c602623f5",
+        "positive": "a14e5bef1dd5b750da6a",
+        "negative": "0fc50d9d2b2e76fb1d38"
+      }
+    },
+    {
+      "id": "be-007",
+      "lesson": "be",
+      "question": "Is my mom nice?",
+      "positive": "Yes, she is.",
+      "negative": "No, she isn't.",
+      "image": "mother",
+      "age": "",
+      "audio": {
+        "question": "43bab18aab22794b53b3",
+        "positive": "6923b44d18ddb4ee2b56",
+        "negative": "df63de068dc42d8b7e8a"
+      }
+    },
+    {
+      "id": "be-008",
+      "lesson": "be",
+      "question": "Are we good students?",
+      "positive": "Yes, we are.",
+      "negative": "No, we aren't.",
+      "image": "school-friends",
+      "age": "",
+      "audio": {
+        "question": "976735700f463aa49bbe",
+        "positive": "499a255583a927ef29fb",
+        "negative": "f01da36613097bebe672"
+      }
+    },
+    {
+      "id": "be-009",
+      "lesson": "be",
+      "question": "Are you happy students?",
+      "positive": "Yes, we are.",
+      "negative": "No, we aren't.",
+      "image": "school-friends",
+      "age": "",
+      "audio": {
+        "question": "b86670f8ae6e9b0eac28",
+        "positive": "499a255583a927ef29fb",
+        "negative": "f01da36613097bebe672"
+      }
+    },
+    {
+      "id": "be-010",
+      "lesson": "be",
+      "question": "Is your brother tall?",
+      "positive": "Yes, he is.",
+      "negative": "No, he isn't.",
+      "image": "siblings",
+      "age": "",
+      "audio": {
+        "question": "6be6a92adb10db3146c2",
+        "positive": "431c529969f66e4ae3dd",
+        "negative": "18dad687199c0d53a77c"
+      }
+    },
+    {
+      "id": "be-011",
+      "lesson": "be",
+      "question": "Are they good students?",
+      "positive": "Yes, they are.",
+      "negative": "No, they aren't.",
+      "image": "school-friends",
+      "age": "",
+      "audio": {
+        "question": "ea5bb6cc2f48836726a3",
+        "positive": "0fd4eaeb27e3f2e62673",
+        "negative": "96e2528414c5c4f7d617"
+      }
+    },
+    {
+      "id": "be-012",
+      "lesson": "be",
+      "question": "Is your teacher nice?",
+      "positive": "Yes, he is.",
+      "negative": "No, he isn't.",
+      "image": "male-teacher",
+      "age": "",
+      "audio": {
+        "question": "523e5e161956b63a68c0",
+        "positive": "431c529969f66e4ae3dd",
+        "negative": "18dad687199c0d53a77c"
+      }
+    },
+    {
+      "id": "be-013",
+      "lesson": "be",
+      "question": "Are they at school?",
+      "positive": "Yes, they are.",
+      "negative": "No, they aren't.",
+      "image": "school",
+      "age": "",
+      "audio": {
+        "question": "eafd04f006902cd449b4",
+        "positive": "0fd4eaeb27e3f2e62673",
+        "negative": "96e2528414c5c4f7d617"
+      }
+    },
+    {
+      "id": "be-014",
+      "lesson": "be",
+      "question": "Are they in the city now?",
+      "positive": "Yes, they are.",
+      "negative": "No, they're not.",
+      "image": "city",
+      "age": "",
+      "audio": {
+        "question": "750bb896cf1c6bc41d2e",
+        "positive": "0fd4eaeb27e3f2e62673",
+        "negative": "5c1f6537803574a8bdbf"
+      }
+    },
+    {
+      "id": "be-015",
+      "lesson": "be",
+      "question": "Is he your brother?",
+      "positive": "Yes, he is.",
+      "negative": "No, he isn't.",
+      "image": "boy",
+      "age": "",
+      "audio": {
+        "question": "2bc67142811bc8c7c5fe",
+        "positive": "431c529969f66e4ae3dd",
+        "negative": "18dad687199c0d53a77c"
+      }
+    },
+    {
+      "id": "be-016",
+      "lesson": "be",
+      "question": "Is she your friend?",
+      "positive": "Yes, she is.",
+      "negative": "No, she isn't.",
+      "image": "school-friends",
+      "age": "",
+      "audio": {
+        "question": "f54f224f6e28f24d6654",
+        "positive": "6923b44d18ddb4ee2b56",
+        "negative": "df63de068dc42d8b7e8a"
+      }
+    },
+    {
+      "id": "be-017",
+      "lesson": "be",
+      "question": "Is the sky grey?",
+      "positive": "Yes, it is.",
+      "negative": "No, it isn't.",
+      "image": "grey-sky",
+      "age": "",
+      "audio": {
+        "question": "6f160acf36d9cfc51c5d",
+        "positive": "ea9de770a3bea6d39234",
+        "negative": "677302f2ac86fd8ff373"
+      }
+    },
+    {
+      "id": "be-018",
+      "lesson": "be",
+      "question": "Are they in Prague?",
+      "positive": "Yes, they are.",
+      "negative": "No, they aren't.",
+      "image": "prague",
+      "age": "",
+      "audio": {
+        "question": "eb09a0bab3ebafe84e38",
+        "positive": "0fd4eaeb27e3f2e62673",
+        "negative": "96e2528414c5c4f7d617"
+      }
+    },
+    {
+      "id": "be-019",
+      "lesson": "be",
+      "question": "Are you tired now?",
+      "positive": "Yes, I am.",
+      "negative": "No, I'm not.",
+      "image": "tired",
+      "age": "",
+      "audio": {
+        "question": "887333434557790eb6b0",
+        "positive": "a14e5bef1dd5b750da6a",
+        "negative": "0fc50d9d2b2e76fb1d38"
+      }
+    },
+    {
+      "id": "be-020",
+      "lesson": "be",
+      "question": "Is he at home?",
+      "positive": "Yes, he is.",
+      "negative": "No, he isn't.",
+      "image": "home",
+      "age": "",
+      "audio": {
+        "question": "44915b7b39771a6477a1",
+        "positive": "431c529969f66e4ae3dd",
+        "negative": "18dad687199c0d53a77c"
+      }
+    },
+    {
+      "id": "be-021",
+      "lesson": "be",
+      "question": "Is she at school?",
+      "positive": "Yes, she is.",
+      "negative": "No, she isn't.",
+      "image": "school",
+      "age": "",
+      "audio": {
+        "question": "ae69887b764762796906",
+        "positive": "6923b44d18ddb4ee2b56",
+        "negative": "df63de068dc42d8b7e8a"
+      }
+    },
+    {
+      "id": "be-022",
+      "lesson": "be",
+      "question": "Am I your friend?",
+      "positive": "Yes, you are.",
+      "negative": "No, you aren't.",
+      "image": "friends",
+      "age": "",
+      "audio": {
+        "question": "2c9f365454d7ad223265",
+        "positive": "5cb0f0190e0448798f21",
+        "negative": "eebd9dfbfa1115f30e8f"
+      }
+    },
+    {
+      "id": "be-023",
+      "lesson": "be",
+      "question": "Are we in Prague?",
+      "positive": "Yes, we are.",
+      "negative": "No, we aren't.",
+      "image": "prague",
+      "age": "",
+      "audio": {
+        "question": "39e6ce08ad31b74a0701",
+        "positive": "499a255583a927ef29fb",
+        "negative": "f01da36613097bebe672"
+      }
+    },
+    {
+      "id": "be-024",
+      "lesson": "be",
+      "question": "Is it black?",
+      "positive": "Yes, it is.",
+      "negative": "No, it isn't.",
+      "image": "black",
+      "age": "",
+      "audio": {
+        "question": "16a411ef6ef017be5f9f",
+        "positive": "ea9de770a3bea6d39234",
+        "negative": "677302f2ac86fd8ff373"
+      }
+    },
+    {
+      "id": "be-025",
+      "lesson": "be",
+      "question": "Are you at school now?",
+      "positive": "Yes, I am.",
+      "negative": "No, I'm not.",
+      "image": "school",
+      "age": "",
+      "audio": {
+        "question": "b07998a8631f4997f1e4",
+        "positive": "a14e5bef1dd5b750da6a",
+        "negative": "0fc50d9d2b2e76fb1d38"
+      }
+    },
+    {
+      "id": "be-026",
+      "lesson": "be",
+      "question": "Are they in the garden?",
+      "positive": "Yes, they are.",
+      "negative": "No, they aren't.",
+      "image": "garden",
+      "age": "",
+      "audio": {
+        "question": "31e2f5a2f70947b8d037",
+        "positive": "0fd4eaeb27e3f2e62673",
+        "negative": "96e2528414c5c4f7d617"
+      }
+    },
+    {
+      "id": "be-027",
+      "lesson": "be",
+      "question": "Is she at home?",
+      "positive": "Yes, she is.",
+      "negative": "No, she isn't.",
+      "image": "home",
+      "age": "",
+      "audio": {
+        "question": "137d4fe5a8765918e5b4",
+        "positive": "6923b44d18ddb4ee2b56",
+        "negative": "df63de068dc42d8b7e8a"
+      }
+    },
+    {
+      "id": "be-028",
+      "lesson": "be",
+      "question": "Are they in the garden now?",
+      "positive": "Yes, they are.",
+      "negative": "No, they aren't.",
+      "image": "garden",
+      "age": "",
+      "audio": {
+        "question": "7a78e7ed81d2a2fb28e0",
+        "positive": "0fd4eaeb27e3f2e62673",
+        "negative": "96e2528414c5c4f7d617"
+      }
+    },
+    {
+      "id": "be-029",
+      "lesson": "be",
+      "question": "Is he tired?",
+      "positive": "Yes, he is.",
+      "negative": "No, he isn't.",
+      "image": "tired",
+      "age": "",
+      "audio": {
+        "question": "d65cf3bd91d377ae6cbf",
+        "positive": "431c529969f66e4ae3dd",
+        "negative": "18dad687199c0d53a77c"
+      }
+    },
+    {
+      "id": "be-030",
+      "lesson": "be",
+      "question": "Is she your sister?",
+      "positive": "Yes, she is.",
+      "negative": "No, she isn't.",
+      "image": "sister",
+      "age": "",
+      "audio": {
+        "question": "4bb9ca28a79aae219f57",
+        "positive": "6923b44d18ddb4ee2b56",
+        "negative": "df63de068dc42d8b7e8a"
+      }
+    },
+    {
+      "id": "be-031",
+      "lesson": "be",
+      "question": "Is her bag black?",
+      "positive": "Yes, it is.",
+      "negative": "No, it isn't.",
+      "image": "black-bag",
+      "age": "",
+      "audio": {
+        "question": "293c3f31b394ede9a50d",
+        "positive": "ea9de770a3bea6d39234",
+        "negative": "677302f2ac86fd8ff373"
+      }
+    },
+    {
+      "id": "be-032",
+      "lesson": "be",
+      "question": "Are you in the garden today?",
+      "positive": "Yes, I am.",
+      "negative": "No, I'm not.",
+      "image": "garden",
+      "age": "",
+      "audio": {
+        "question": "363ef4a7ec725c0c7191",
+        "positive": "a14e5bef1dd5b750da6a",
+        "negative": "0fc50d9d2b2e76fb1d38"
+      }
+    },
+    {
+      "id": "be-033",
+      "lesson": "be",
+      "question": "Is it blue?",
+      "positive": "Yes, it is.",
+      "negative": "No, it's not.",
+      "image": "blue",
+      "age": "",
+      "audio": {
+        "question": "7f0deea590380d73a5c6",
+        "positive": "ea9de770a3bea6d39234",
+        "negative": "f624e258630124041e7d"
+      }
+    },
+    {
+      "id": "be-034",
+      "lesson": "be",
+      "question": "Is he in the garden?",
+      "positive": "Yes, he is.",
+      "negative": "No, he isn't.",
+      "image": "garden",
+      "age": "",
+      "audio": {
+        "question": "fac01feb7cafd36c5fbf",
+        "positive": "431c529969f66e4ae3dd",
+        "negative": "18dad687199c0d53a77c"
+      }
+    },
+    {
+      "id": "be-035",
+      "lesson": "be",
+      "question": "Are you a good student?",
+      "positive": "Yes, I am.",
+      "negative": "No, I'm not.",
+      "image": "student",
+      "age": "",
+      "audio": {
+        "question": "c1dafefbfcbbdc0c3f38",
+        "positive": "a14e5bef1dd5b750da6a",
+        "negative": "0fc50d9d2b2e76fb1d38"
+      }
+    },
+    {
+      "id": "be-036",
+      "lesson": "be",
+      "question": "Are we at school?",
+      "positive": "Yes, we are.",
+      "negative": "No, we aren't.",
+      "image": "school",
+      "age": "",
+      "audio": {
+        "question": "444f1d123dc259667e51",
+        "positive": "499a255583a927ef29fb",
+        "negative": "f01da36613097bebe672"
+      }
+    },
+    {
+      "id": "be-037",
+      "lesson": "be",
+      "question": "Is the cat white?",
+      "positive": "Yes, it is.",
+      "negative": "No, it isn't.",
+      "image": "white-cat",
+      "age": "",
+      "audio": {
+        "question": "b320c37f87c81a8c64cc",
+        "positive": "ea9de770a3bea6d39234",
+        "negative": "677302f2ac86fd8ff373"
+      }
+    },
+    {
+      "id": "be-038",
+      "lesson": "be",
+      "question": "Are they at school today?",
+      "positive": "Yes, they are.",
+      "negative": "No, they aren't.",
+      "image": "school",
+      "age": "",
+      "audio": {
+        "question": "04256a149dadcc271c5a",
+        "positive": "0fd4eaeb27e3f2e62673",
+        "negative": "96e2528414c5c4f7d617"
+      }
+    },
+    {
+      "id": "be-039",
+      "lesson": "be",
+      "question": "Are you in the city?",
+      "positive": "Yes, I am.",
+      "negative": "No, I'm not.",
+      "image": "city",
+      "age": "",
+      "audio": {
+        "question": "29979b872477eb99e44f",
+        "positive": "a14e5bef1dd5b750da6a",
+        "negative": "0fc50d9d2b2e76fb1d38"
+      }
+    },
+    {
+      "id": "be-040",
+      "lesson": "be",
+      "question": "Are we tired?",
+      "positive": "Yes, we are.",
+      "negative": "No, we aren't.",
+      "image": "tired",
+      "age": "",
+      "audio": {
+        "question": "1c765ac49d5a26ed9077",
+        "positive": "499a255583a927ef29fb",
+        "negative": "f01da36613097bebe672"
+      }
+    },
+    {
+      "id": "be-041",
+      "lesson": "be",
+      "question": "Are they in Prague today?",
+      "positive": "Yes, they are.",
+      "negative": "No, they aren't.",
+      "image": "prague",
+      "age": "",
+      "audio": {
+        "question": "36067399da1f29cc0538",
+        "positive": "0fd4eaeb27e3f2e62673",
+        "negative": "96e2528414c5c4f7d617"
+      }
+    },
+    {
+      "id": "be-042",
+      "lesson": "be",
+      "question": "Are my eyes green?",
+      "positive": "Yes, they are.",
+      "negative": "No, they aren't.",
+      "image": "green-eyes",
+      "age": "",
+      "audio": {
+        "question": "bdfb3aa9c9adc376b94e",
+        "positive": "0fd4eaeb27e3f2e62673",
+        "negative": "96e2528414c5c4f7d617"
+      }
+    },
+    {
+      "id": "be-043",
+      "lesson": "be",
+      "question": "Is she in the city?",
+      "positive": "Yes, she is.",
+      "negative": "No, she's not.",
+      "image": "city",
+      "age": "",
+      "audio": {
+        "question": "aaf5f04847bb64b0917c",
+        "positive": "6923b44d18ddb4ee2b56",
+        "negative": "7fd54a8a1362b7bff1e7"
+      }
+    },
+    {
+      "id": "be-044",
+      "lesson": "be",
+      "question": "Is it yellow?",
+      "positive": "Yes, it is.",
+      "negative": "No, it isn't.",
+      "image": "yellow",
+      "age": "",
+      "audio": {
+        "question": "9e893a1cac8ff3a8863b",
+        "positive": "ea9de770a3bea6d39234",
+        "negative": "677302f2ac86fd8ff373"
+      }
+    },
+    {
+      "id": "be-045",
+      "lesson": "be",
+      "question": "Is the sun yellow?",
+      "positive": "Yes, it is.",
+      "negative": "No, it isn't.",
+      "image": "sun",
+      "age": "",
+      "audio": {
+        "question": "261e3f22781a02a7a2bc",
+        "positive": "ea9de770a3bea6d39234",
+        "negative": "677302f2ac86fd8ff373"
+      }
+    },
+    {
+      "id": "be-046",
+      "lesson": "be",
+      "question": "Are the men tall?",
+      "positive": "Yes, they are.",
+      "negative": "No, they aren't.",
+      "image": "tall-men",
+      "age": "",
+      "audio": {
+        "question": "89b3cd339ef74e21b35f",
+        "positive": "0fd4eaeb27e3f2e62673",
+        "negative": "96e2528414c5c4f7d617"
+      }
+    },
+    {
+      "id": "be-047",
+      "lesson": "be",
+      "question": "Is your teacher in the class?",
+      "positive": "Yes, he is.",
+      "negative": "No, he's not.",
+      "image": "male-teacher",
+      "age": "",
+      "audio": {
+        "question": "e02010bb06b269fb833e",
+        "positive": "431c529969f66e4ae3dd",
+        "negative": "990d8607e0595100ec48"
+      }
+    },
+    {
+      "id": "be-048",
+      "lesson": "be",
+      "question": "Is it at home?",
+      "positive": "Yes, it is.",
+      "negative": "No, it isn't.",
+      "image": "home",
+      "age": "",
+      "audio": {
+        "question": "13bb26f8e5f00310408c",
+        "positive": "ea9de770a3bea6d39234",
+        "negative": "677302f2ac86fd8ff373"
+      }
+    },
+    {
+      "id": "be-049",
+      "lesson": "be",
+      "question": "Is your mom at home?",
+      "positive": "Yes, she is.",
+      "negative": "No, she isn't.",
+      "image": "mother",
+      "age": "",
+      "audio": {
+        "question": "1bad85284fda3b078ea9",
+        "positive": "6923b44d18ddb4ee2b56",
+        "negative": "df63de068dc42d8b7e8a"
+      }
+    },
+    {
+      "id": "be-050",
+      "lesson": "be",
+      "question": "Are you in Prague now?",
+      "positive": "Yes, I am.",
+      "negative": "No, I'm not.",
+      "image": "prague",
+      "age": "",
+      "audio": {
+        "question": "ffafa622ae4b6b78aeca",
+        "positive": "a14e5bef1dd5b750da6a",
+        "negative": "0fc50d9d2b2e76fb1d38"
+      }
+    },
+    {
+      "id": "be-051",
+      "lesson": "be",
+      "question": "Is she tired?",
+      "positive": "Yes, she is.",
+      "negative": "No, she's not.",
+      "image": "tired",
+      "age": "",
+      "audio": {
+        "question": "1b186e76eaededbc2335",
+        "positive": "6923b44d18ddb4ee2b56",
+        "negative": "7fd54a8a1362b7bff1e7"
+      }
+    },
+    {
+      "id": "be-052",
+      "lesson": "be",
+      "question": "Am I happy?",
+      "positive": "Yes, you are.",
+      "negative": "No, you aren't.",
+      "image": "happy",
+      "age": "",
+      "audio": {
+        "question": "269aaf3ce53e23145c6c",
+        "positive": "5cb0f0190e0448798f21",
+        "negative": "eebd9dfbfa1115f30e8f"
+      }
+    },
+    {
+      "id": "be-053",
+      "lesson": "be",
+      "question": "Is he at school?",
+      "positive": "Yes, he is.",
+      "negative": "No, he isn't.",
+      "image": "school",
+      "age": "",
+      "audio": {
+        "question": "24543e1b02245a480805",
+        "positive": "431c529969f66e4ae3dd",
+        "negative": "18dad687199c0d53a77c"
+      }
+    },
+    {
+      "id": "be-054",
+      "lesson": "be",
+      "question": "Are we at home?",
+      "positive": "Yes, we are.",
+      "negative": "No, we aren't.",
+      "image": "home",
+      "age": "",
+      "audio": {
+        "question": "975fed4c03e39d2a8b80",
+        "positive": "499a255583a927ef29fb",
+        "negative": "f01da36613097bebe672"
+      }
+    },
+    {
+      "id": "be-055",
+      "lesson": "be",
+      "question": "Are you in the garden?",
+      "positive": "Yes, I am.",
+      "negative": "No, I'm not.",
+      "image": "garden",
+      "age": "",
+      "audio": {
+        "question": "983dfbe9a2ce44254d47",
+        "positive": "a14e5bef1dd5b750da6a",
+        "negative": "0fc50d9d2b2e76fb1d38"
+      }
+    },
+    {
+      "id": "be-056",
+      "lesson": "be",
+      "question": "Is the sky blue?",
+      "positive": "Yes, it is.",
+      "negative": "No, it isn't.",
+      "image": "blue-sky",
+      "age": "",
+      "audio": {
+        "question": "0100ab359a8f2017d2fb",
+        "positive": "ea9de770a3bea6d39234",
+        "negative": "677302f2ac86fd8ff373"
+      }
+    },
+    {
+      "id": "be-057",
+      "lesson": "be",
+      "question": "Are they in the city?",
+      "positive": "Yes, they are.",
+      "negative": "No, they're not.",
+      "image": "city",
+      "age": "",
+      "audio": {
+        "question": "6349e10ee5c3e865b4bb",
+        "positive": "0fd4eaeb27e3f2e62673",
+        "negative": "5c1f6537803574a8bdbf"
+      }
+    },
+    {
+      "id": "be-058",
+      "lesson": "be",
+      "question": "Is the window open?",
+      "positive": "Yes, it is.",
+      "negative": "No, it isn't.",
+      "image": "window",
+      "age": "",
+      "audio": {
+        "question": "1e490df0e85b87cf4f3e",
+        "positive": "ea9de770a3bea6d39234",
+        "negative": "677302f2ac86fd8ff373"
+      }
+    },
+    {
+      "id": "be-059",
+      "lesson": "be",
+      "question": "Is he your friend?",
+      "positive": "Yes, he is.",
+      "negative": "No, he isn't.",
+      "image": "friends",
+      "age": "",
+      "audio": {
+        "question": "6f5d3cd957ba0374029c",
+        "positive": "431c529969f66e4ae3dd",
+        "negative": "18dad687199c0d53a77c"
+      }
+    },
+    {
+      "id": "be-060",
+      "lesson": "be",
+      "question": "Are we friends?",
+      "positive": "Yes, we are.",
+      "negative": "No, we aren't.",
+      "image": "friends",
+      "age": "",
+      "audio": {
+        "question": "1ec48e738f9c899e4c41",
+        "positive": "499a255583a927ef29fb",
+        "negative": "f01da36613097bebe672"
+      }
+    },
+    {
+      "id": "be-061",
+      "lesson": "be",
+      "question": "Are you at school?",
+      "positive": "Yes, I am.",
+      "negative": "No, I'm not.",
+      "image": "school",
+      "age": "",
+      "audio": {
+        "question": "d2363c343525e248c36c",
+        "positive": "a14e5bef1dd5b750da6a",
+        "negative": "0fc50d9d2b2e76fb1d38"
+      }
+    },
+    {
+      "id": "be-062",
+      "lesson": "be",
+      "question": "Is the dog black?",
+      "positive": "Yes, it is.",
+      "negative": "No, it's not.",
+      "image": "black-dog",
+      "age": "",
+      "audio": {
+        "question": "6e41eb8e4695b8e1de99",
+        "positive": "ea9de770a3bea6d39234",
+        "negative": "f624e258630124041e7d"
+      }
+    },
+    {
+      "id": "be-063",
+      "lesson": "be",
+      "question": "Is your sister small?",
+      "positive": "Yes, she is.",
+      "negative": "No, she isn't.",
+      "image": "siblings",
+      "age": "",
+      "audio": {
+        "question": "8b221ef2d480d60a4dff",
+        "positive": "6923b44d18ddb4ee2b56",
+        "negative": "df63de068dc42d8b7e8a"
+      }
+    },
+    {
+      "id": "be-064",
+      "lesson": "be",
+      "question": "Are they happy?",
+      "positive": "Yes, they are.",
+      "negative": "No, they aren't.",
+      "image": "school-friends",
+      "age": "",
+      "audio": {
+        "question": "9f5576e459d145bff48f",
+        "positive": "0fd4eaeb27e3f2e62673",
+        "negative": "96e2528414c5c4f7d617"
+      }
+    },
+    {
+      "id": "be-065",
+      "lesson": "be",
+      "question": "Is he in the city?",
+      "positive": "Yes, he is.",
+      "negative": "No, he isn't.",
+      "image": "city",
+      "age": "",
+      "audio": {
+        "question": "fd45990f6952f91a6d50",
+        "positive": "431c529969f66e4ae3dd",
+        "negative": "18dad687199c0d53a77c"
+      }
+    },
+    {
+      "id": "be-066",
+      "lesson": "be",
+      "question": "Am I in the garden?",
+      "positive": "Yes, you are.",
+      "negative": "No, you aren't.",
+      "image": "garden",
+      "age": "",
+      "audio": {
+        "question": "237e7c12f8086cb6abce",
+        "positive": "5cb0f0190e0448798f21",
+        "negative": "eebd9dfbfa1115f30e8f"
+      }
+    },
+    {
+      "id": "be-067",
+      "lesson": "be",
+      "question": "Is she small?",
+      "positive": "Yes, she is.",
+      "negative": "No, she isn't.",
+      "image": "siblings",
+      "age": "",
+      "audio": {
+        "question": "b2e8853fd91ab40487e2",
+        "positive": "6923b44d18ddb4ee2b56",
+        "negative": "df63de068dc42d8b7e8a"
+      }
+    },
+    {
+      "id": "be-068",
+      "lesson": "be",
+      "question": "Is she seven years old?",
+      "positive": "Yes, she is.",
+      "negative": "No, she's not.",
+      "image": "two-sisters",
+      "age": "seven years old",
+      "audio": {
+        "question": "98d06a6377d9ef9fe37e",
+        "positive": "6923b44d18ddb4ee2b56",
+        "negative": "7fd54a8a1362b7bff1e7"
+      }
+    },
+    {
+      "id": "be-069",
+      "lesson": "be",
+      "question": "Are you in the city today?",
+      "positive": "Yes, I am.",
+      "negative": "No, I'm not.",
+      "image": "city",
+      "age": "",
+      "audio": {
+        "question": "4e10ce9508080f1b501e",
+        "positive": "a14e5bef1dd5b750da6a",
+        "negative": "0fc50d9d2b2e76fb1d38"
+      }
+    },
+    {
+      "id": "be-070",
+      "lesson": "be",
+      "question": "Is it green?",
+      "positive": "Yes, it is.",
+      "negative": "No, it isn't.",
+      "image": "green",
+      "age": "",
+      "audio": {
+        "question": "1a392b162e166d3b91d6",
+        "positive": "ea9de770a3bea6d39234",
+        "negative": "677302f2ac86fd8ff373"
+      }
+    },
+    {
+      "id": "be-071",
+      "lesson": "be",
+      "question": "Is the cake good?",
+      "positive": "Yes, it is.",
+      "negative": "No, it's not.",
+      "image": "cake",
+      "age": "",
+      "audio": {
+        "question": "7304b80c23c04bb48e33",
+        "positive": "ea9de770a3bea6d39234",
+        "negative": "f624e258630124041e7d"
+      }
+    },
+    {
+      "id": "be-072",
+      "lesson": "be",
+      "question": "Are you tired?",
+      "positive": "Yes, I am.",
+      "negative": "No, I'm not.",
+      "image": "tired",
+      "age": "",
+      "audio": {
+        "question": "1d66f857607bce05a13e",
+        "positive": "a14e5bef1dd5b750da6a",
+        "negative": "0fc50d9d2b2e76fb1d38"
+      }
+    },
+    {
+      "id": "be-073",
+      "lesson": "be",
+      "question": "Is his father a teacher?",
+      "positive": "Yes, he is.",
+      "negative": "No, he's not.",
+      "image": "male-teacher",
+      "age": "",
+      "audio": {
+        "question": "f51054d95f7269c50162",
+        "positive": "431c529969f66e4ae3dd",
+        "negative": "990d8607e0595100ec48"
+      }
+    },
+    {
+      "id": "be-074",
+      "lesson": "be",
+      "question": "Are you my friend?",
+      "positive": "Yes, I am.",
+      "negative": "No, I'm not.",
+      "image": "friends",
+      "age": "",
+      "audio": {
+        "question": "402851461004147c3776",
+        "positive": "a14e5bef1dd5b750da6a",
+        "negative": "0fc50d9d2b2e76fb1d38"
+      }
+    },
+    {
+      "id": "be-075",
+      "lesson": "be",
+      "question": "Are we in the city now?",
+      "positive": "Yes, we are.",
+      "negative": "No, we aren't.",
+      "image": "city",
+      "age": "",
+      "audio": {
+        "question": "ccc6fd88db51032defaa",
+        "positive": "499a255583a927ef29fb",
+        "negative": "f01da36613097bebe672"
+      }
+    },
+    {
+      "id": "be-076",
+      "lesson": "be",
+      "question": "Is it red?",
+      "positive": "Yes, it is.",
+      "negative": "No, it isn't.",
+      "image": "red",
+      "age": "",
+      "audio": {
+        "question": "de7479584df8f82c8916",
+        "positive": "ea9de770a3bea6d39234",
+        "negative": "677302f2ac86fd8ff373"
+      }
+    },
+    {
+      "id": "be-077",
+      "lesson": "be",
+      "question": "Is the radio on?",
+      "positive": "Yes, it is.",
+      "negative": "No, it isn't.",
+      "image": "radio",
+      "age": "",
+      "audio": {
+        "question": "d7007edd7d2d52f78018",
+        "positive": "ea9de770a3bea6d39234",
+        "negative": "677302f2ac86fd8ff373"
+      }
+    },
+    {
+      "id": "be-078",
+      "lesson": "be",
+      "question": "Is the dog in the garden?",
+      "positive": "Yes, it is.",
+      "negative": "No, it isn't.",
+      "image": "black-dog",
+      "age": "",
+      "audio": {
+        "question": "f9afc39e3a69cdd4ea26",
+        "positive": "ea9de770a3bea6d39234",
+        "negative": "677302f2ac86fd8ff373"
+      }
+    },
+    {
+      "id": "be-079",
+      "lesson": "be",
+      "question": "Is her dress pink?",
+      "positive": "Yes, it is.",
+      "negative": "No, it isn't.",
+      "image": "pink-dress",
+      "age": "",
+      "audio": {
+        "question": "ba03c70a1a6deb790722",
+        "positive": "ea9de770a3bea6d39234",
+        "negative": "677302f2ac86fd8ff373"
+      }
+    },
+    {
+      "id": "be-080",
+      "lesson": "be",
+      "question": "Are we happy?",
+      "positive": "Yes, we are.",
+      "negative": "No, we aren't.",
+      "image": "school-friends",
+      "age": "",
+      "audio": {
+        "question": "461ab355fb455033dfaa",
+        "positive": "499a255583a927ef29fb",
+        "negative": "f01da36613097bebe672"
+      }
+    },
+    {
+      "id": "be-081",
+      "lesson": "be",
+      "question": "Am I at home?",
+      "positive": "Yes, you are.",
+      "negative": "No, you aren't.",
+      "image": "home",
+      "age": "",
+      "audio": {
+        "question": "67996197c5e3c0324c85",
+        "positive": "5cb0f0190e0448798f21",
+        "negative": "eebd9dfbfa1115f30e8f"
+      }
+    },
+    {
+      "id": "be-082",
+      "lesson": "be",
+      "question": "Is it pink?",
+      "positive": "Yes, it is.",
+      "negative": "No, it's not.",
+      "image": "pink",
+      "age": "",
+      "audio": {
+        "question": "12bdd2c01503f34a57b1",
+        "positive": "ea9de770a3bea6d39234",
+        "negative": "f624e258630124041e7d"
+      }
+    },
+    {
+      "id": "be-083",
+      "lesson": "be",
+      "question": "Are you good students?",
+      "positive": "Yes, we are.",
+      "negative": "No, we aren't.",
+      "image": "school-friends",
+      "age": "",
+      "audio": {
+        "question": "5bbd9bb1b3a3f4abdba7",
+        "positive": "499a255583a927ef29fb",
+        "negative": "f01da36613097bebe672"
+      }
+    },
+    {
+      "id": "be-084",
+      "lesson": "be",
+      "question": "Am I a good student?",
+      "positive": "Yes, you are.",
+      "negative": "No, you aren't.",
+      "image": "student",
+      "age": "",
+      "audio": {
+        "question": "8baf3d5eccacfe782751",
+        "positive": "5cb0f0190e0448798f21",
+        "negative": "eebd9dfbfa1115f30e8f"
+      }
+    },
+    {
+      "id": "be-085",
+      "lesson": "be",
+      "question": "Is the cat in the garden?",
+      "positive": "Yes, it is.",
+      "negative": "No, it isn't.",
+      "image": "white-cat",
+      "age": "",
+      "audio": {
+        "question": "62d7854c874e2beebd9e",
+        "positive": "ea9de770a3bea6d39234",
+        "negative": "677302f2ac86fd8ff373"
+      }
+    },
+    {
+      "id": "be-086",
+      "lesson": "be",
+      "question": "Are we ten years old?",
+      "positive": "Yes, we are.",
+      "negative": "No, we're not.",
+      "image": "school-friends",
+      "age": "ten years old",
+      "audio": {
+        "question": "305fa246dec7843960be",
+        "positive": "499a255583a927ef29fb",
+        "negative": "1d106bdbd66cf859ff20"
+      }
+    },
+    {
+      "id": "be-087",
+      "lesson": "be",
+      "question": "Are you ten years old?",
+      "positive": "Yes, I am.",
+      "negative": "No, I'm not.",
+      "image": "boy",
+      "age": "ten years old",
+      "audio": {
+        "question": "584428420802f243e68c",
+        "positive": "a14e5bef1dd5b750da6a",
+        "negative": "0fc50d9d2b2e76fb1d38"
+      }
+    },
+    {
+      "id": "be-088",
+      "lesson": "be",
+      "question": "Are they old?",
+      "positive": "Yes, they are.",
+      "negative": "No, they aren't.",
+      "image": "old",
+      "age": "",
+      "audio": {
+        "question": "5389e4d72f4814ab599f",
+        "positive": "0fd4eaeb27e3f2e62673",
+        "negative": "96e2528414c5c4f7d617"
+      }
+    },
+    {
+      "id": "be-089",
+      "lesson": "be",
+      "question": "Are you students?",
+      "positive": "Yes, we are.",
+      "negative": "No, we aren't.",
+      "image": "school-friends",
+      "age": "",
+      "audio": {
+        "question": "cf14890645d43d22c4b7",
+        "positive": "499a255583a927ef29fb",
+        "negative": "f01da36613097bebe672"
+      }
+    },
+    {
+      "id": "be-090",
+      "lesson": "be",
+      "question": "Is he five years old?",
+      "positive": "Yes, he is.",
+      "negative": "No, he isn't.",
+      "image": "boy",
+      "age": "five years old",
+      "audio": {
+        "question": "6beea6be6f6713296a64",
+        "positive": "431c529969f66e4ae3dd",
+        "negative": "18dad687199c0d53a77c"
+      }
+    },
+    {
+      "id": "be-091",
+      "lesson": "be",
+      "question": "Is Prague a big city?",
+      "positive": "Yes, it is.",
+      "negative": "No, it isn't.",
+      "image": "prague",
+      "age": "",
+      "audio": {
+        "question": "bf5e90e01f192c0d5acd",
+        "positive": "ea9de770a3bea6d39234",
+        "negative": "677302f2ac86fd8ff373"
+      }
+    },
+    {
+      "id": "have-001",
+      "lesson": "have",
+      "question": "Do I have a dog?",
+      "positive": "Yes, you do.",
+      "negative": "No, you don't.",
+      "image": "black-dog",
+      "age": "",
+      "audio": {
+        "question": "1db32373fb6580267d1e",
+        "positive": "714e008148c80daaee1a",
+        "negative": "dc08f28176c72b5019ad"
+      }
+    },
+    {
+      "id": "have-002",
+      "lesson": "have",
+      "question": "Do you have a book?",
+      "positive": "Yes, I do.",
+      "negative": "No, I don't.",
+      "image": "book",
+      "age": "",
+      "audio": {
+        "question": "5eef87692a76c2415d4d",
+        "positive": "7484064ce0bdbfbe9daa",
+        "negative": "f61b26314b6a90822765"
+      }
+    },
+    {
+      "id": "have-003",
+      "lesson": "have",
+      "question": "Does he have a bike?",
+      "positive": "Yes, he does.",
+      "negative": "No, he doesn't.",
+      "image": "bike",
+      "age": "",
+      "audio": {
+        "question": "c5826cf330072072b090",
+        "positive": "bbc5b0c65c22fb7083f9",
+        "negative": "12ac8339f59acdd7ed92"
+      }
+    },
+    {
+      "id": "have-004",
+      "lesson": "have",
+      "question": "Does she have a cat?",
+      "positive": "Yes, she does.",
+      "negative": "No, she doesn't.",
+      "image": "white-cat",
+      "age": "",
+      "audio": {
+        "question": "53e2db48b3e9934f03be",
+        "positive": "4aec17cd8808e951cb91",
+        "negative": "ad347ac84b16e72eead7"
+      }
+    },
+    {
+      "id": "have-005",
+      "lesson": "have",
+      "question": "Does it have four legs?",
+      "positive": "Yes, it does.",
+      "negative": "No, it doesn't.",
+      "image": "black-dog",
+      "age": "",
+      "audio": {
+        "question": "5ba1efeb68a769138485",
+        "positive": "a647290b4ae9face899e",
+        "negative": "38f4e7fc6059348a1b98"
+      }
+    },
+    {
+      "id": "have-006",
+      "lesson": "have",
+      "question": "Do we have a lesson now?",
+      "positive": "Yes, we do.",
+      "negative": "No, we don't.",
+      "image": "school-friends",
+      "age": "",
+      "audio": {
+        "question": "781fd3d46a84d118fb2b",
+        "positive": "6340c9801c328ae9ac2c",
+        "negative": "43f869899e40af4a2a5b"
+      }
+    },
+    {
+      "id": "have-007",
+      "lesson": "have",
+      "question": "Do you have a nice teacher?",
+      "positive": "Yes, we do.",
+      "negative": "No, we don't.",
+      "image": "male-teacher",
+      "age": "",
+      "audio": {
+        "question": "c84d582004ce2170bb50",
+        "positive": "6340c9801c328ae9ac2c",
+        "negative": "43f869899e40af4a2a5b"
+      }
+    },
+    {
+      "id": "have-008",
+      "lesson": "have",
+      "question": "Do they have a car?",
+      "positive": "Yes, they do.",
+      "negative": "No, they don't.",
+      "image": "car",
+      "age": "",
+      "audio": {
+        "question": "d01663fa4b86f88b19da",
+        "positive": "848d85d51d43dc89930a",
+        "negative": "55b234bf4cab337e93be"
+      }
+    },
+    {
+      "id": "go-001",
+      "lesson": "go",
+      "question": "Do I go to school?",
+      "positive": "Yes, you do.",
+      "negative": "No, you don't.",
+      "image": "school",
+      "age": "",
+      "audio": {
+        "question": "24b6ad69fa2bee01e094",
+        "positive": "714e008148c80daaee1a",
+        "negative": "dc08f28176c72b5019ad"
+      }
+    },
+    {
+      "id": "go-002",
+      "lesson": "go",
+      "question": "Do you go home now?",
+      "positive": "Yes, I do.",
+      "negative": "No, I don't.",
+      "image": "home",
+      "age": "",
+      "audio": {
+        "question": "607c5e0e31197f0f98af",
+        "positive": "7484064ce0bdbfbe9daa",
+        "negative": "f61b26314b6a90822765"
+      }
+    },
+    {
+      "id": "go-003",
+      "lesson": "go",
+      "question": "Does he go to work?",
+      "positive": "Yes, he does.",
+      "negative": "No, he doesn't.",
+      "image": "work",
+      "age": "",
+      "audio": {
+        "question": "d1464938d0529323e859",
+        "positive": "bbc5b0c65c22fb7083f9",
+        "negative": "12ac8339f59acdd7ed92"
+      }
+    },
+    {
+      "id": "go-004",
+      "lesson": "go",
+      "question": "Does she go to Prague today?",
+      "positive": "Yes, she does.",
+      "negative": "No, she doesn't.",
+      "image": "prague",
+      "age": "",
+      "audio": {
+        "question": "fa5a2d69441b623b33f3",
+        "positive": "4aec17cd8808e951cb91",
+        "negative": "ad347ac84b16e72eead7"
+      }
+    },
+    {
+      "id": "go-005",
+      "lesson": "go",
+      "question": "Does it go fast?",
+      "positive": "Yes, it does.",
+      "negative": "No, it doesn't.",
+      "image": "car",
+      "age": "",
+      "audio": {
+        "question": "e98f11acb4e387200a7b",
+        "positive": "a647290b4ae9face899e",
+        "negative": "38f4e7fc6059348a1b98"
+      }
+    },
+    {
+      "id": "go-006",
+      "lesson": "go",
+      "question": "Do we go to the city?",
+      "positive": "Yes, we do.",
+      "negative": "No, we don't.",
+      "image": "city",
+      "age": "",
+      "audio": {
+        "question": "318dd4e7e334f6cc41de",
+        "positive": "6340c9801c328ae9ac2c",
+        "negative": "43f869899e40af4a2a5b"
+      }
+    },
+    {
+      "id": "go-007",
+      "lesson": "go",
+      "question": "Do you go to the garden now?",
+      "positive": "Yes, we do.",
+      "negative": "No, we don't.",
+      "image": "garden",
+      "age": "",
+      "audio": {
+        "question": "f2bd0a95e8ca5fac0864",
+        "positive": "6340c9801c328ae9ac2c",
+        "negative": "43f869899e40af4a2a5b"
+      }
+    },
+    {
+      "id": "go-008",
+      "lesson": "go",
+      "question": "Do they go to school?",
+      "positive": "Yes, they do.",
+      "negative": "No, they don't.",
+      "image": "school",
+      "age": "",
+      "audio": {
+        "question": "f30a39ef0e1531e08359",
+        "positive": "848d85d51d43dc89930a",
+        "negative": "55b234bf4cab337e93be"
+      }
+    }
+  ],
+  "verbs": [
+    {
+      "id": "verb-001",
+      "lesson": "be",
+      "pronoun": "I",
+      "verb": "am",
+      "rest": "old",
+      "aux": "",
+      "base": "am",
+      "statement": "I am old.",
+      "question": "Am I old?",
+      "translation": "Jsem starý.",
+      "image": "old",
+      "audio": {
+        "statement": "311d4fa3a58fd47e54e5",
+        "question": "7f01a1747d08a9fe3ed3"
+      }
+    },
+    {
+      "id": "verb-002",
+      "lesson": "be",
+      "pronoun": "you",
+      "verb": "are",
+      "rest": "young",
+      "aux": "",
+      "base": "are",
+      "statement": "You are young.",
+      "question": "Are you young?",
+      "translation": "Jsi mladý.",
+      "image": "young",
+      "audio": {
+        "statement": "7694e9be280cb230bdce",
+        "question": "1e98b6936f5f2fd4af68"
+      }
+    },
+    {
+      "id": "verb-003",
+      "lesson": "be",
+      "pronoun": "he",
+      "verb": "is",
+      "rest": "tall",
+      "aux": "",
+      "base": "is",
+      "statement": "He is tall.",
+      "question": "Is he tall?",
+      "translation": "On je vysoký.",
+      "image": "siblings",
+      "audio": {
+        "statement": "3b90c80389f10792161d",
+        "question": "5d74799bfac95909b291"
+      }
+    },
+    {
+      "id": "verb-004",
+      "lesson": "be",
+      "pronoun": "she",
+      "verb": "is",
+      "rest": "small",
+      "aux": "",
+      "base": "is",
+      "statement": "She is small.",
+      "question": "Is she small?",
+      "translation": "Ona je malá.",
+      "image": "siblings",
+      "audio": {
+        "statement": "4b0cf3a6c8d9a7e3425b",
+        "question": "b2e8853fd91ab40487e2"
+      }
+    },
+    {
+      "id": "verb-005",
+      "lesson": "be",
+      "pronoun": "it",
+      "verb": "is",
+      "rest": "blue",
+      "aux": "",
+      "base": "is",
+      "statement": "It is blue.",
+      "question": "Is it blue?",
+      "translation": "To je modré.",
+      "image": "blue",
+      "audio": {
+        "statement": "d26b0ff49ed8b26601b7",
+        "question": "7f0deea590380d73a5c6"
+      }
+    },
+    {
+      "id": "verb-006",
+      "lesson": "be",
+      "pronoun": "we",
+      "verb": "are",
+      "rest": "friends",
+      "aux": "",
+      "base": "are",
+      "statement": "We are friends.",
+      "question": "Are we friends?",
+      "translation": "Jsme přátelé.",
+      "image": "friends",
+      "audio": {
+        "statement": "e61c3eb64d6ddcf7d6a2",
+        "question": "1ec48e738f9c899e4c41"
+      }
+    },
+    {
+      "id": "verb-007",
+      "lesson": "be",
+      "pronoun": "you",
+      "verb": "are",
+      "rest": "nice",
+      "aux": "",
+      "base": "are",
+      "statement": "You are nice.",
+      "question": "Are you nice?",
+      "translation": "Jste milí.",
+      "image": "mother",
+      "audio": {
+        "statement": "dad48af102201fe60f5d",
+        "question": "43b1d61a2420d82d810b"
+      }
+    },
+    {
+      "id": "verb-008",
+      "lesson": "be",
+      "pronoun": "they",
+      "verb": "are",
+      "rest": "at home",
+      "aux": "",
+      "base": "are",
+      "statement": "They are at home.",
+      "question": "Are they at home?",
+      "translation": "Oni jsou doma.",
+      "image": "home",
+      "audio": {
+        "statement": "db640de8e48354d249ea",
+        "question": "3590187ac2dfcee95d27"
+      }
+    },
+    {
+      "id": "verb-009",
+      "lesson": "have",
+      "pronoun": "I",
+      "verb": "have",
+      "rest": "a dog",
+      "aux": "Do",
+      "base": "have",
+      "statement": "I have a dog.",
+      "question": "Do I have a dog?",
+      "translation": "Mám psa.",
+      "image": "black-dog",
+      "audio": {
+        "statement": "1d8404949120c9742479",
+        "question": "1db32373fb6580267d1e"
+      }
+    },
+    {
+      "id": "verb-010",
+      "lesson": "have",
+      "pronoun": "you",
+      "verb": "have",
+      "rest": "green eyes",
+      "aux": "Do",
+      "base": "have",
+      "statement": "You have green eyes.",
+      "question": "Do you have green eyes?",
+      "translation": "Máš zelené oči.",
+      "image": "green-eyes",
+      "audio": {
+        "statement": "5b70d18726c0bab73f80",
+        "question": "ff42ca6a6db29fa841ed"
+      }
+    },
+    {
+      "id": "verb-011",
+      "lesson": "have",
+      "pronoun": "he",
+      "verb": "has",
+      "rest": "two sisters",
+      "aux": "Does",
+      "base": "have",
+      "statement": "He has two sisters.",
+      "question": "Does he have two sisters?",
+      "translation": "On má dvě sestry.",
+      "image": "two-sisters",
+      "audio": {
+        "statement": "2492928e992de828898b",
+        "question": "c99b7aa7ca08250753e2"
+      }
+    },
+    {
+      "id": "verb-012",
+      "lesson": "have",
+      "pronoun": "she",
+      "verb": "has",
+      "rest": "a cat",
+      "aux": "Does",
+      "base": "have",
+      "statement": "She has a cat.",
+      "question": "Does she have a cat?",
+      "translation": "Ona má kočku.",
+      "image": "white-cat",
+      "audio": {
+        "statement": "799aa343cd55fb4cb854",
+        "question": "53e2db48b3e9934f03be"
+      }
+    },
+    {
+      "id": "verb-013",
+      "lesson": "have",
+      "pronoun": "it",
+      "verb": "has",
+      "rest": "black color",
+      "aux": "Does",
+      "base": "have",
+      "statement": "It has black color.",
+      "question": "Does it have black color?",
+      "translation": "To má černou barvu.",
+      "image": "black",
+      "audio": {
+        "statement": "5e0c6a1be7b46f0a5f4e",
+        "question": "b172ffffea522dc167c8"
+      }
+    },
+    {
+      "id": "verb-014",
+      "lesson": "have",
+      "pronoun": "we",
+      "verb": "have",
+      "rest": "a big house",
+      "aux": "Do",
+      "base": "have",
+      "statement": "We have a big house.",
+      "question": "Do we have a big house?",
+      "translation": "Máme velký dům.",
+      "image": "house",
+      "audio": {
+        "statement": "9f036434fd740f3b97f2",
+        "question": "6335b2674b2738534946"
+      }
+    },
+    {
+      "id": "verb-015",
+      "lesson": "have",
+      "pronoun": "you",
+      "verb": "have",
+      "rest": "a nice garden",
+      "aux": "Do",
+      "base": "have",
+      "statement": "You have a nice garden.",
+      "question": "Do you have a nice garden?",
+      "translation": "Máte hezkou zahradu.",
+      "image": "garden",
+      "audio": {
+        "statement": "ccaeea3647ad538d73ff",
+        "question": "effa0b1f2393c647af34"
+      }
+    },
+    {
+      "id": "verb-016",
+      "lesson": "have",
+      "pronoun": "they",
+      "verb": "have",
+      "rest": "a red car",
+      "aux": "Do",
+      "base": "have",
+      "statement": "They have a red car.",
+      "question": "Do they have a red car?",
+      "translation": "Oni mají červené auto.",
+      "image": "car",
+      "audio": {
+        "statement": "9a61a6d743cb5e1619c9",
+        "question": "b3f66ef32df9651ef04b"
+      }
+    },
+    {
+      "id": "verb-017",
+      "lesson": "go",
+      "pronoun": "I",
+      "verb": "go",
+      "rest": "home",
+      "aux": "Do",
+      "base": "go",
+      "statement": "I go home.",
+      "question": "Do I go home?",
+      "translation": "Jdu domů.",
+      "image": "home",
+      "audio": {
+        "statement": "e078f5c9da5f90fa223e",
+        "question": "277e205b31516c7071f0"
+      }
+    },
+    {
+      "id": "verb-018",
+      "lesson": "go",
+      "pronoun": "you",
+      "verb": "go",
+      "rest": "to school",
+      "aux": "Do",
+      "base": "go",
+      "statement": "You go to school.",
+      "question": "Do you go to school?",
+      "translation": "Jdeš do školy.",
+      "image": "school",
+      "audio": {
+        "statement": "685de4d8183710c3741d",
+        "question": "9ff6eb28e4c3f01e4106"
+      }
+    },
+    {
+      "id": "verb-019",
+      "lesson": "go",
+      "pronoun": "he",
+      "verb": "goes",
+      "rest": "to the cinema",
+      "aux": "Does",
+      "base": "go",
+      "statement": "He goes to the cinema.",
+      "question": "Does he go to the cinema?",
+      "translation": "On jde do kina.",
+      "image": "cinema",
+      "audio": {
+        "statement": "cea162228d2087e4b7d7",
+        "question": "bed08ca2ffa4d55297be"
+      }
+    },
+    {
+      "id": "verb-020",
+      "lesson": "go",
+      "pronoun": "she",
+      "verb": "goes",
+      "rest": "to her friend",
+      "aux": "Does",
+      "base": "go",
+      "statement": "She goes to her friend.",
+      "question": "Does she go to her friend?",
+      "translation": "Ona jde za svou kamarádkou.",
+      "image": "school-friends",
+      "audio": {
+        "statement": "e8d93feb6b6be64f2ece",
+        "question": "45dacd6e60fc63583ecb"
+      }
+    },
+    {
+      "id": "verb-021",
+      "lesson": "go",
+      "pronoun": "it",
+      "verb": "goes",
+      "rest": "well",
+      "aux": "Does",
+      "base": "go",
+      "statement": "It goes well.",
+      "question": "Does it go well?",
+      "translation": "Jde to dobře.",
+      "image": "car",
+      "audio": {
+        "statement": "6e1f3e67559f4e29c73c",
+        "question": "fae2d8b74350b9d61655"
+      }
+    },
+    {
+      "id": "verb-022",
+      "lesson": "go",
+      "pronoun": "we",
+      "verb": "go",
+      "rest": "to you",
+      "aux": "Do",
+      "base": "go",
+      "statement": "We go to you.",
+      "question": "Do we go to you?",
+      "translation": "Jdeme k tobě.",
+      "image": "friends",
+      "audio": {
+        "statement": "9d2e7546d51b87c478e5",
+        "question": "9ea7b28f6bb8dfe1b90c"
+      }
+    },
+    {
+      "id": "verb-023",
+      "lesson": "go",
+      "pronoun": "you",
+      "verb": "go",
+      "rest": "to the restaurant",
+      "aux": "Do",
+      "base": "go",
+      "statement": "You go to the restaurant.",
+      "question": "Do you go to the restaurant?",
+      "translation": "Jdete do restaurace.",
+      "image": "restaurant",
+      "audio": {
+        "statement": "c610f84eede85c7feaeb",
+        "question": "5c3b94efaf808f641ebb"
+      }
+    },
+    {
+      "id": "verb-024",
+      "lesson": "go",
+      "pronoun": "they",
+      "verb": "go",
+      "rest": "to the shop",
+      "aux": "Do",
+      "base": "go",
+      "statement": "They go to the shop.",
+      "question": "Do they go to the shop?",
+      "translation": "Oni jdou do obchodu.",
+      "image": "shop",
+      "audio": {
+        "statement": "05e975691ff87de347ce",
+        "question": "565e8f1e999bd6056408"
+      }
+    }
+  ],
+  "images": {
+    "happy": {
+      "src": "assets/images/happy.webp",
+      "alt": "A happy smiling boy",
+      "origin": "Pict/happy.webp"
+    },
+    "tired": {
+      "src": "assets/images/tired.webp",
+      "alt": "Two tired children",
+      "origin": "Pict/tired.PNG"
+    },
+    "friends": {
+      "src": "assets/images/friends.webp",
+      "alt": "Two friends talking together",
+      "origin": "Pict/friend.webp"
+    },
+    "home": {
+      "src": "assets/images/home.webp",
+      "alt": "A welcoming home",
+      "origin": "Pict/home.jpg"
+    },
+    "house": {
+      "src": "assets/images/house.webp",
+      "alt": "A house with a garden",
+      "origin": "Pict/house.png"
+    },
+    "mother": {
+      "src": "assets/images/mother.webp",
+      "alt": "A friendly mother",
+      "origin": "Pict/mother.webp"
+    },
+    "student": {
+      "src": "assets/images/student.webp",
+      "alt": "A student studying at a desk",
+      "origin": "Pict/student.webp"
+    },
+    "school": {
+      "src": "assets/images/school.webp",
+      "alt": "A colorful school building",
+      "origin": "Pict/school.PNG"
+    },
+    "sister": {
+      "src": "assets/images/sister.webp",
+      "alt": "A smiling young woman",
+      "origin": "Pict/sister.png"
+    },
+    "teacher": {
+      "src": "assets/images/teacher.webp",
+      "alt": "A teacher beside a classroom board",
+      "origin": "Pict/teacher.webp"
+    },
+    "city": {
+      "src": "assets/images/city.webp",
+      "alt": "A busy city with tall buildings",
+      "origin": "Pict/city.PNG"
+    },
+    "grey-sky": {
+      "src": "assets/images/grey-sky.webp",
+      "alt": "Grey clouds in the sky",
+      "origin": "Pict/cloudy.webp"
+    },
+    "blue-sky": {
+      "src": "assets/images/blue-sky.webp",
+      "alt": "A bright blue sky above a meadow",
+      "origin": "Pict/sky.webp"
+    },
+    "sun": {
+      "src": "assets/images/sun.webp",
+      "alt": "The sun shining over a meadow",
+      "origin": "Pict/sun.webp"
+    },
+    "window": {
+      "src": "assets/images/window.webp",
+      "alt": "An open window overlooking a garden",
+      "origin": "Pict/window.webp"
+    },
+    "cake": {
+      "src": "assets/images/cake.webp",
+      "alt": "A slice of fruit cake",
+      "origin": "Pict/cake.png"
+    },
+    "father": {
+      "src": "assets/images/father.webp",
+      "alt": "A friendly father",
+      "origin": "Pict/father.PNG"
+    },
+    "radio": {
+      "src": "assets/images/radio.webp",
+      "alt": "A woman listening to a radio",
+      "origin": "Pict/radio.webp"
+    },
+    "old": {
+      "src": "assets/images/old.webp",
+      "alt": "An older woman",
+      "origin": "Pict/old.jpg"
+    },
+    "book": {
+      "src": "assets/images/book.webp",
+      "alt": "A book",
+      "origin": "Pict/book.jpg"
+    },
+    "bike": {
+      "src": "assets/images/bike.webp",
+      "alt": "A bicycle",
+      "origin": "Pict/bike.jpg"
+    },
+    "car": {
+      "src": "assets/images/car.webp",
+      "alt": "A red car",
+      "origin": "Pict/car.PNG"
+    },
+    "work": {
+      "src": "assets/images/work.webp",
+      "alt": "A person working at a desk",
+      "origin": "Pict/work.webp"
+    },
+    "fast": {
+      "src": "assets/images/fast.webp",
+      "alt": "A runner moving fast",
+      "origin": "Pict/fast.webp"
+    },
+    "garden": {
+      "src": "assets/images/garden.webp",
+      "alt": "A green garden",
+      "origin": "Pict/garden.jpg"
+    },
+    "blue": {
+      "src": "assets/images/blue.webp",
+      "alt": "A collection of blue objects",
+      "origin": "Pict/blue.jpg"
+    },
+    "black": {
+      "src": "assets/images/black.webp",
+      "alt": "A collection of black objects",
+      "origin": "Pict/black.jpg"
+    },
+    "green": {
+      "src": "assets/images/green.webp",
+      "alt": "A green toy brick",
+      "origin": "Pict/green.webp"
+    },
+    "yellow": {
+      "src": "assets/images/yellow.webp",
+      "alt": "A collection of yellow objects",
+      "origin": "Pict/yellow.jpg"
+    },
+    "pink": {
+      "src": "assets/images/pink.webp",
+      "alt": "A collection of pink objects",
+      "origin": "Pict/pink.png"
+    },
+    "red": {
+      "src": "assets/images/red.webp",
+      "alt": "A red toy brick",
+      "origin": "Pict/red.webp"
+    },
+    "young": {
+      "src": "assets/images/young.webp",
+      "alt": "A young person",
+      "origin": "Pict/young.PNG"
+    },
+    "cinema": {
+      "src": "assets/images/cinema.webp",
+      "alt": "The entrance to a cinema",
+      "origin": "Pict/cinema.png"
+    },
+    "restaurant": {
+      "src": "assets/images/restaurant.webp",
+      "alt": "The inside of a restaurant",
+      "origin": "Pict/restaurant.jpg"
+    },
+    "shop": {
+      "src": "assets/images/shop.webp",
+      "alt": "A book shop",
+      "origin": "Pict/bookstore.webp"
+    },
+    "boy": {
+      "src": "assets/images/boy.webp",
+      "alt": "A young boy",
+      "origin": "Pict/boy.png"
+    },
+    "black-dog": {
+      "src": "assets/images/black-dog.webp",
+      "alt": "A black dog with four legs in a garden",
+      "origin": "Generated for ToBeToHave"
+    },
+    "white-cat": {
+      "src": "assets/images/white-cat.webp",
+      "alt": "A white cat in a garden",
+      "origin": "Generated for ToBeToHave"
+    },
+    "pink-dress": {
+      "src": "assets/images/pink-dress.webp",
+      "alt": "A pink dress on a hanger",
+      "origin": "Generated for ToBeToHave"
+    },
+    "black-bag": {
+      "src": "assets/images/black-bag.webp",
+      "alt": "A black school backpack",
+      "origin": "Generated for ToBeToHave"
+    },
+    "green-eyes": {
+      "src": "assets/images/green-eyes.webp",
+      "alt": "A person with green eyes",
+      "origin": "Generated for ToBeToHave"
+    },
+    "siblings": {
+      "src": "assets/images/siblings.webp",
+      "alt": "A tall brother and his small younger sister",
+      "origin": "Generated for ToBeToHave"
+    },
+    "prague": {
+      "src": "assets/images/prague.webp",
+      "alt": "Prague, Charles Bridge and Prague Castle",
+      "origin": "Generated for ToBeToHave"
+    },
+    "two-sisters": {
+      "src": "assets/images/two-sisters.webp",
+      "alt": "Two sisters standing together in a garden",
+      "origin": "Generated for ToBeToHave"
+    },
+    "male-teacher": {
+      "src": "assets/images/male-teacher.webp",
+      "alt": "A male teacher beside a classroom board",
+      "origin": "Generated for ToBeToHave"
+    },
+    "school-friends": {
+      "src": "assets/images/school-friends.webp",
+      "alt": "Four happy school friends outside their school",
+      "origin": "Generated for ToBeToHave"
+    },
+    "tall-men": {
+      "src": "assets/images/tall-men.webp",
+      "alt": "Two tall men standing together in a park",
+      "origin": "Generated for ToBeToHave"
+    }
+  },
+  "audio": {
+    "416869ded4975621768c": {
+      "text": "Is he happy?",
+      "src": "assets/audio/416869ded4975621768c.mp3"
+    },
+    "431c529969f66e4ae3dd": {
+      "text": "Yes, he is.",
+      "src": "assets/audio/431c529969f66e4ae3dd.mp3"
+    },
+    "18dad687199c0d53a77c": {
+      "text": "No, he isn't.",
+      "src": "assets/audio/18dad687199c0d53a77c.mp3"
+    },
+    "af9ab6bb3e9776470173": {
+      "text": "Am I eight years old?",
+      "src": "assets/audio/af9ab6bb3e9776470173.mp3"
+    },
+    "5cb0f0190e0448798f21": {
+      "text": "Yes, you are.",
+      "src": "assets/audio/5cb0f0190e0448798f21.mp3"
+    },
+    "89df0eff36eba3ab38f5": {
+      "text": "No, you're not.",
+      "src": "assets/audio/89df0eff36eba3ab38f5.mp3"
+    },
+    "c5e2201316efd38a3912": {
+      "text": "Are they friends?",
+      "src": "assets/audio/c5e2201316efd38a3912.mp3"
+    },
+    "0fd4eaeb27e3f2e62673": {
+      "text": "Yes, they are.",
+      "src": "assets/audio/0fd4eaeb27e3f2e62673.mp3"
+    },
+    "96e2528414c5c4f7d617": {
+      "text": "No, they aren't.",
+      "src": "assets/audio/96e2528414c5c4f7d617.mp3"
+    },
+    "a9f53ef6d7d617804f32": {
+      "text": "Are they tired?",
+      "src": "assets/audio/a9f53ef6d7d617804f32.mp3"
+    },
+    "379b85a838ca23c724d9": {
+      "text": "Are you at home now?",
+      "src": "assets/audio/379b85a838ca23c724d9.mp3"
+    },
+    "a14e5bef1dd5b750da6a": {
+      "text": "Yes, I am.",
+      "src": "assets/audio/a14e5bef1dd5b750da6a.mp3"
+    },
+    "0fc50d9d2b2e76fb1d38": {
+      "text": "No, I'm not.",
+      "src": "assets/audio/0fc50d9d2b2e76fb1d38.mp3"
+    },
+    "51a1b2fb3e0c602623f5": {
+      "text": "Are you at home?",
+      "src": "assets/audio/51a1b2fb3e0c602623f5.mp3"
+    },
+    "43bab18aab22794b53b3": {
+      "text": "Is my mom nice?",
+      "src": "assets/audio/43bab18aab22794b53b3.mp3"
+    },
+    "6923b44d18ddb4ee2b56": {
+      "text": "Yes, she is.",
+      "src": "assets/audio/6923b44d18ddb4ee2b56.mp3"
+    },
+    "df63de068dc42d8b7e8a": {
+      "text": "No, she isn't.",
+      "src": "assets/audio/df63de068dc42d8b7e8a.mp3"
+    },
+    "976735700f463aa49bbe": {
+      "text": "Are we good students?",
+      "src": "assets/audio/976735700f463aa49bbe.mp3"
+    },
+    "499a255583a927ef29fb": {
+      "text": "Yes, we are.",
+      "src": "assets/audio/499a255583a927ef29fb.mp3"
+    },
+    "f01da36613097bebe672": {
+      "text": "No, we aren't.",
+      "src": "assets/audio/f01da36613097bebe672.mp3"
+    },
+    "b86670f8ae6e9b0eac28": {
+      "text": "Are you happy students?",
+      "src": "assets/audio/b86670f8ae6e9b0eac28.mp3"
+    },
+    "6be6a92adb10db3146c2": {
+      "text": "Is your brother tall?",
+      "src": "assets/audio/6be6a92adb10db3146c2.mp3"
+    },
+    "ea5bb6cc2f48836726a3": {
+      "text": "Are they good students?",
+      "src": "assets/audio/ea5bb6cc2f48836726a3.mp3"
+    },
+    "523e5e161956b63a68c0": {
+      "text": "Is your teacher nice?",
+      "src": "assets/audio/523e5e161956b63a68c0.mp3"
+    },
+    "eafd04f006902cd449b4": {
+      "text": "Are they at school?",
+      "src": "assets/audio/eafd04f006902cd449b4.mp3"
+    },
+    "750bb896cf1c6bc41d2e": {
+      "text": "Are they in the city now?",
+      "src": "assets/audio/750bb896cf1c6bc41d2e.mp3"
+    },
+    "5c1f6537803574a8bdbf": {
+      "text": "No, they're not.",
+      "src": "assets/audio/5c1f6537803574a8bdbf.mp3"
+    },
+    "2bc67142811bc8c7c5fe": {
+      "text": "Is he your brother?",
+      "src": "assets/audio/2bc67142811bc8c7c5fe.mp3"
+    },
+    "f54f224f6e28f24d6654": {
+      "text": "Is she your friend?",
+      "src": "assets/audio/f54f224f6e28f24d6654.mp3"
+    },
+    "6f160acf36d9cfc51c5d": {
+      "text": "Is the sky grey?",
+      "src": "assets/audio/6f160acf36d9cfc51c5d.mp3"
+    },
+    "ea9de770a3bea6d39234": {
+      "text": "Yes, it is.",
+      "src": "assets/audio/ea9de770a3bea6d39234.mp3"
+    },
+    "677302f2ac86fd8ff373": {
+      "text": "No, it isn't.",
+      "src": "assets/audio/677302f2ac86fd8ff373.mp3"
+    },
+    "eb09a0bab3ebafe84e38": {
+      "text": "Are they in Prague?",
+      "src": "assets/audio/eb09a0bab3ebafe84e38.mp3"
+    },
+    "887333434557790eb6b0": {
+      "text": "Are you tired now?",
+      "src": "assets/audio/887333434557790eb6b0.mp3"
+    },
+    "44915b7b39771a6477a1": {
+      "text": "Is he at home?",
+      "src": "assets/audio/44915b7b39771a6477a1.mp3"
+    },
+    "ae69887b764762796906": {
+      "text": "Is she at school?",
+      "src": "assets/audio/ae69887b764762796906.mp3"
+    },
+    "2c9f365454d7ad223265": {
+      "text": "Am I your friend?",
+      "src": "assets/audio/2c9f365454d7ad223265.mp3"
+    },
+    "eebd9dfbfa1115f30e8f": {
+      "text": "No, you aren't.",
+      "src": "assets/audio/eebd9dfbfa1115f30e8f.mp3"
+    },
+    "39e6ce08ad31b74a0701": {
+      "text": "Are we in Prague?",
+      "src": "assets/audio/39e6ce08ad31b74a0701.mp3"
+    },
+    "16a411ef6ef017be5f9f": {
+      "text": "Is it black?",
+      "src": "assets/audio/16a411ef6ef017be5f9f.mp3"
+    },
+    "b07998a8631f4997f1e4": {
+      "text": "Are you at school now?",
+      "src": "assets/audio/b07998a8631f4997f1e4.mp3"
+    },
+    "31e2f5a2f70947b8d037": {
+      "text": "Are they in the garden?",
+      "src": "assets/audio/31e2f5a2f70947b8d037.mp3"
+    },
+    "137d4fe5a8765918e5b4": {
+      "text": "Is she at home?",
+      "src": "assets/audio/137d4fe5a8765918e5b4.mp3"
+    },
+    "7a78e7ed81d2a2fb28e0": {
+      "text": "Are they in the garden now?",
+      "src": "assets/audio/7a78e7ed81d2a2fb28e0.mp3"
+    },
+    "d65cf3bd91d377ae6cbf": {
+      "text": "Is he tired?",
+      "src": "assets/audio/d65cf3bd91d377ae6cbf.mp3"
+    },
+    "4bb9ca28a79aae219f57": {
+      "text": "Is she your sister?",
+      "src": "assets/audio/4bb9ca28a79aae219f57.mp3"
+    },
+    "293c3f31b394ede9a50d": {
+      "text": "Is her bag black?",
+      "src": "assets/audio/293c3f31b394ede9a50d.mp3"
+    },
+    "363ef4a7ec725c0c7191": {
+      "text": "Are you in the garden today?",
+      "src": "assets/audio/363ef4a7ec725c0c7191.mp3"
+    },
+    "7f0deea590380d73a5c6": {
+      "text": "Is it blue?",
+      "src": "assets/audio/7f0deea590380d73a5c6.mp3"
+    },
+    "f624e258630124041e7d": {
+      "text": "No, it's not.",
+      "src": "assets/audio/f624e258630124041e7d.mp3"
+    },
+    "fac01feb7cafd36c5fbf": {
+      "text": "Is he in the garden?",
+      "src": "assets/audio/fac01feb7cafd36c5fbf.mp3"
+    },
+    "c1dafefbfcbbdc0c3f38": {
+      "text": "Are you a good student?",
+      "src": "assets/audio/c1dafefbfcbbdc0c3f38.mp3"
+    },
+    "444f1d123dc259667e51": {
+      "text": "Are we at school?",
+      "src": "assets/audio/444f1d123dc259667e51.mp3"
+    },
+    "b320c37f87c81a8c64cc": {
+      "text": "Is the cat white?",
+      "src": "assets/audio/b320c37f87c81a8c64cc.mp3"
+    },
+    "04256a149dadcc271c5a": {
+      "text": "Are they at school today?",
+      "src": "assets/audio/04256a149dadcc271c5a.mp3"
+    },
+    "29979b872477eb99e44f": {
+      "text": "Are you in the city?",
+      "src": "assets/audio/29979b872477eb99e44f.mp3"
+    },
+    "1c765ac49d5a26ed9077": {
+      "text": "Are we tired?",
+      "src": "assets/audio/1c765ac49d5a26ed9077.mp3"
+    },
+    "36067399da1f29cc0538": {
+      "text": "Are they in Prague today?",
+      "src": "assets/audio/36067399da1f29cc0538.mp3"
+    },
+    "bdfb3aa9c9adc376b94e": {
+      "text": "Are my eyes green?",
+      "src": "assets/audio/bdfb3aa9c9adc376b94e.mp3"
+    },
+    "aaf5f04847bb64b0917c": {
+      "text": "Is she in the city?",
+      "src": "assets/audio/aaf5f04847bb64b0917c.mp3"
+    },
+    "7fd54a8a1362b7bff1e7": {
+      "text": "No, she's not.",
+      "src": "assets/audio/7fd54a8a1362b7bff1e7.mp3"
+    },
+    "9e893a1cac8ff3a8863b": {
+      "text": "Is it yellow?",
+      "src": "assets/audio/9e893a1cac8ff3a8863b.mp3"
+    },
+    "261e3f22781a02a7a2bc": {
+      "text": "Is the sun yellow?",
+      "src": "assets/audio/261e3f22781a02a7a2bc.mp3"
+    },
+    "89b3cd339ef74e21b35f": {
+      "text": "Are the men tall?",
+      "src": "assets/audio/89b3cd339ef74e21b35f.mp3"
+    },
+    "e02010bb06b269fb833e": {
+      "text": "Is your teacher in the class?",
+      "src": "assets/audio/e02010bb06b269fb833e.mp3"
+    },
+    "990d8607e0595100ec48": {
+      "text": "No, he's not.",
+      "src": "assets/audio/990d8607e0595100ec48.mp3"
+    },
+    "13bb26f8e5f00310408c": {
+      "text": "Is it at home?",
+      "src": "assets/audio/13bb26f8e5f00310408c.mp3"
+    },
+    "1bad85284fda3b078ea9": {
+      "text": "Is your mom at home?",
+      "src": "assets/audio/1bad85284fda3b078ea9.mp3"
+    },
+    "ffafa622ae4b6b78aeca": {
+      "text": "Are you in Prague now?",
+      "src": "assets/audio/ffafa622ae4b6b78aeca.mp3"
+    },
+    "1b186e76eaededbc2335": {
+      "text": "Is she tired?",
+      "src": "assets/audio/1b186e76eaededbc2335.mp3"
+    },
+    "269aaf3ce53e23145c6c": {
+      "text": "Am I happy?",
+      "src": "assets/audio/269aaf3ce53e23145c6c.mp3"
+    },
+    "24543e1b02245a480805": {
+      "text": "Is he at school?",
+      "src": "assets/audio/24543e1b02245a480805.mp3"
+    },
+    "975fed4c03e39d2a8b80": {
+      "text": "Are we at home?",
+      "src": "assets/audio/975fed4c03e39d2a8b80.mp3"
+    },
+    "983dfbe9a2ce44254d47": {
+      "text": "Are you in the garden?",
+      "src": "assets/audio/983dfbe9a2ce44254d47.mp3"
+    },
+    "0100ab359a8f2017d2fb": {
+      "text": "Is the sky blue?",
+      "src": "assets/audio/0100ab359a8f2017d2fb.mp3"
+    },
+    "6349e10ee5c3e865b4bb": {
+      "text": "Are they in the city?",
+      "src": "assets/audio/6349e10ee5c3e865b4bb.mp3"
+    },
+    "1e490df0e85b87cf4f3e": {
+      "text": "Is the window open?",
+      "src": "assets/audio/1e490df0e85b87cf4f3e.mp3"
+    },
+    "6f5d3cd957ba0374029c": {
+      "text": "Is he your friend?",
+      "src": "assets/audio/6f5d3cd957ba0374029c.mp3"
+    },
+    "1ec48e738f9c899e4c41": {
+      "text": "Are we friends?",
+      "src": "assets/audio/1ec48e738f9c899e4c41.mp3"
+    },
+    "d2363c343525e248c36c": {
+      "text": "Are you at school?",
+      "src": "assets/audio/d2363c343525e248c36c.mp3"
+    },
+    "6e41eb8e4695b8e1de99": {
+      "text": "Is the dog black?",
+      "src": "assets/audio/6e41eb8e4695b8e1de99.mp3"
+    },
+    "8b221ef2d480d60a4dff": {
+      "text": "Is your sister small?",
+      "src": "assets/audio/8b221ef2d480d60a4dff.mp3"
+    },
+    "9f5576e459d145bff48f": {
+      "text": "Are they happy?",
+      "src": "assets/audio/9f5576e459d145bff48f.mp3"
+    },
+    "fd45990f6952f91a6d50": {
+      "text": "Is he in the city?",
+      "src": "assets/audio/fd45990f6952f91a6d50.mp3"
+    },
+    "237e7c12f8086cb6abce": {
+      "text": "Am I in the garden?",
+      "src": "assets/audio/237e7c12f8086cb6abce.mp3"
+    },
+    "b2e8853fd91ab40487e2": {
+      "text": "Is she small?",
+      "src": "assets/audio/b2e8853fd91ab40487e2.mp3"
+    },
+    "98d06a6377d9ef9fe37e": {
+      "text": "Is she seven years old?",
+      "src": "assets/audio/98d06a6377d9ef9fe37e.mp3"
+    },
+    "4e10ce9508080f1b501e": {
+      "text": "Are you in the city today?",
+      "src": "assets/audio/4e10ce9508080f1b501e.mp3"
+    },
+    "1a392b162e166d3b91d6": {
+      "text": "Is it green?",
+      "src": "assets/audio/1a392b162e166d3b91d6.mp3"
+    },
+    "7304b80c23c04bb48e33": {
+      "text": "Is the cake good?",
+      "src": "assets/audio/7304b80c23c04bb48e33.mp3"
+    },
+    "1d66f857607bce05a13e": {
+      "text": "Are you tired?",
+      "src": "assets/audio/1d66f857607bce05a13e.mp3"
+    },
+    "f51054d95f7269c50162": {
+      "text": "Is his father a teacher?",
+      "src": "assets/audio/f51054d95f7269c50162.mp3"
+    },
+    "402851461004147c3776": {
+      "text": "Are you my friend?",
+      "src": "assets/audio/402851461004147c3776.mp3"
+    },
+    "ccc6fd88db51032defaa": {
+      "text": "Are we in the city now?",
+      "src": "assets/audio/ccc6fd88db51032defaa.mp3"
+    },
+    "de7479584df8f82c8916": {
+      "text": "Is it red?",
+      "src": "assets/audio/de7479584df8f82c8916.mp3"
+    },
+    "d7007edd7d2d52f78018": {
+      "text": "Is the radio on?",
+      "src": "assets/audio/d7007edd7d2d52f78018.mp3"
+    },
+    "f9afc39e3a69cdd4ea26": {
+      "text": "Is the dog in the garden?",
+      "src": "assets/audio/f9afc39e3a69cdd4ea26.mp3"
+    },
+    "ba03c70a1a6deb790722": {
+      "text": "Is her dress pink?",
+      "src": "assets/audio/ba03c70a1a6deb790722.mp3"
+    },
+    "461ab355fb455033dfaa": {
+      "text": "Are we happy?",
+      "src": "assets/audio/461ab355fb455033dfaa.mp3"
+    },
+    "67996197c5e3c0324c85": {
+      "text": "Am I at home?",
+      "src": "assets/audio/67996197c5e3c0324c85.mp3"
+    },
+    "12bdd2c01503f34a57b1": {
+      "text": "Is it pink?",
+      "src": "assets/audio/12bdd2c01503f34a57b1.mp3"
+    },
+    "5bbd9bb1b3a3f4abdba7": {
+      "text": "Are you good students?",
+      "src": "assets/audio/5bbd9bb1b3a3f4abdba7.mp3"
+    },
+    "8baf3d5eccacfe782751": {
+      "text": "Am I a good student?",
+      "src": "assets/audio/8baf3d5eccacfe782751.mp3"
+    },
+    "62d7854c874e2beebd9e": {
+      "text": "Is the cat in the garden?",
+      "src": "assets/audio/62d7854c874e2beebd9e.mp3"
+    },
+    "305fa246dec7843960be": {
+      "text": "Are we ten years old?",
+      "src": "assets/audio/305fa246dec7843960be.mp3"
+    },
+    "1d106bdbd66cf859ff20": {
+      "text": "No, we're not.",
+      "src": "assets/audio/1d106bdbd66cf859ff20.mp3"
+    },
+    "584428420802f243e68c": {
+      "text": "Are you ten years old?",
+      "src": "assets/audio/584428420802f243e68c.mp3"
+    },
+    "5389e4d72f4814ab599f": {
+      "text": "Are they old?",
+      "src": "assets/audio/5389e4d72f4814ab599f.mp3"
+    },
+    "cf14890645d43d22c4b7": {
+      "text": "Are you students?",
+      "src": "assets/audio/cf14890645d43d22c4b7.mp3"
+    },
+    "6beea6be6f6713296a64": {
+      "text": "Is he five years old?",
+      "src": "assets/audio/6beea6be6f6713296a64.mp3"
+    },
+    "bf5e90e01f192c0d5acd": {
+      "text": "Is Prague a big city?",
+      "src": "assets/audio/bf5e90e01f192c0d5acd.mp3"
+    },
+    "1db32373fb6580267d1e": {
+      "text": "Do I have a dog?",
+      "src": "assets/audio/1db32373fb6580267d1e.mp3"
+    },
+    "714e008148c80daaee1a": {
+      "text": "Yes, you do.",
+      "src": "assets/audio/714e008148c80daaee1a.mp3"
+    },
+    "dc08f28176c72b5019ad": {
+      "text": "No, you don't.",
+      "src": "assets/audio/dc08f28176c72b5019ad.mp3"
+    },
+    "5eef87692a76c2415d4d": {
+      "text": "Do you have a book?",
+      "src": "assets/audio/5eef87692a76c2415d4d.mp3"
+    },
+    "7484064ce0bdbfbe9daa": {
+      "text": "Yes, I do.",
+      "src": "assets/audio/7484064ce0bdbfbe9daa.mp3"
+    },
+    "f61b26314b6a90822765": {
+      "text": "No, I don't.",
+      "src": "assets/audio/f61b26314b6a90822765.mp3"
+    },
+    "c5826cf330072072b090": {
+      "text": "Does he have a bike?",
+      "src": "assets/audio/c5826cf330072072b090.mp3"
+    },
+    "bbc5b0c65c22fb7083f9": {
+      "text": "Yes, he does.",
+      "src": "assets/audio/bbc5b0c65c22fb7083f9.mp3"
+    },
+    "12ac8339f59acdd7ed92": {
+      "text": "No, he doesn't.",
+      "src": "assets/audio/12ac8339f59acdd7ed92.mp3"
+    },
+    "53e2db48b3e9934f03be": {
+      "text": "Does she have a cat?",
+      "src": "assets/audio/53e2db48b3e9934f03be.mp3"
+    },
+    "4aec17cd8808e951cb91": {
+      "text": "Yes, she does.",
+      "src": "assets/audio/4aec17cd8808e951cb91.mp3"
+    },
+    "ad347ac84b16e72eead7": {
+      "text": "No, she doesn't.",
+      "src": "assets/audio/ad347ac84b16e72eead7.mp3"
+    },
+    "5ba1efeb68a769138485": {
+      "text": "Does it have four legs?",
+      "src": "assets/audio/5ba1efeb68a769138485.mp3"
+    },
+    "a647290b4ae9face899e": {
+      "text": "Yes, it does.",
+      "src": "assets/audio/a647290b4ae9face899e.mp3"
+    },
+    "38f4e7fc6059348a1b98": {
+      "text": "No, it doesn't.",
+      "src": "assets/audio/38f4e7fc6059348a1b98.mp3"
+    },
+    "781fd3d46a84d118fb2b": {
+      "text": "Do we have a lesson now?",
+      "src": "assets/audio/781fd3d46a84d118fb2b.mp3"
+    },
+    "6340c9801c328ae9ac2c": {
+      "text": "Yes, we do.",
+      "src": "assets/audio/6340c9801c328ae9ac2c.mp3"
+    },
+    "43f869899e40af4a2a5b": {
+      "text": "No, we don't.",
+      "src": "assets/audio/43f869899e40af4a2a5b.mp3"
+    },
+    "c84d582004ce2170bb50": {
+      "text": "Do you have a nice teacher?",
+      "src": "assets/audio/c84d582004ce2170bb50.mp3"
+    },
+    "d01663fa4b86f88b19da": {
+      "text": "Do they have a car?",
+      "src": "assets/audio/d01663fa4b86f88b19da.mp3"
+    },
+    "848d85d51d43dc89930a": {
+      "text": "Yes, they do.",
+      "src": "assets/audio/848d85d51d43dc89930a.mp3"
+    },
+    "55b234bf4cab337e93be": {
+      "text": "No, they don't.",
+      "src": "assets/audio/55b234bf4cab337e93be.mp3"
+    },
+    "24b6ad69fa2bee01e094": {
+      "text": "Do I go to school?",
+      "src": "assets/audio/24b6ad69fa2bee01e094.mp3"
+    },
+    "607c5e0e31197f0f98af": {
+      "text": "Do you go home now?",
+      "src": "assets/audio/607c5e0e31197f0f98af.mp3"
+    },
+    "d1464938d0529323e859": {
+      "text": "Does he go to work?",
+      "src": "assets/audio/d1464938d0529323e859.mp3"
+    },
+    "fa5a2d69441b623b33f3": {
+      "text": "Does she go to Prague today?",
+      "src": "assets/audio/fa5a2d69441b623b33f3.mp3"
+    },
+    "e98f11acb4e387200a7b": {
+      "text": "Does it go fast?",
+      "src": "assets/audio/e98f11acb4e387200a7b.mp3"
+    },
+    "318dd4e7e334f6cc41de": {
+      "text": "Do we go to the city?",
+      "src": "assets/audio/318dd4e7e334f6cc41de.mp3"
+    },
+    "f2bd0a95e8ca5fac0864": {
+      "text": "Do you go to the garden now?",
+      "src": "assets/audio/f2bd0a95e8ca5fac0864.mp3"
+    },
+    "f30a39ef0e1531e08359": {
+      "text": "Do they go to school?",
+      "src": "assets/audio/f30a39ef0e1531e08359.mp3"
+    },
+    "311d4fa3a58fd47e54e5": {
+      "text": "I am old.",
+      "src": "assets/audio/311d4fa3a58fd47e54e5.mp3"
+    },
+    "7f01a1747d08a9fe3ed3": {
+      "text": "Am I old?",
+      "src": "assets/audio/7f01a1747d08a9fe3ed3.mp3"
+    },
+    "7694e9be280cb230bdce": {
+      "text": "You are young.",
+      "src": "assets/audio/7694e9be280cb230bdce.mp3"
+    },
+    "1e98b6936f5f2fd4af68": {
+      "text": "Are you young?",
+      "src": "assets/audio/1e98b6936f5f2fd4af68.mp3"
+    },
+    "3b90c80389f10792161d": {
+      "text": "He is tall.",
+      "src": "assets/audio/3b90c80389f10792161d.mp3"
+    },
+    "5d74799bfac95909b291": {
+      "text": "Is he tall?",
+      "src": "assets/audio/5d74799bfac95909b291.mp3"
+    },
+    "4b0cf3a6c8d9a7e3425b": {
+      "text": "She is small.",
+      "src": "assets/audio/4b0cf3a6c8d9a7e3425b.mp3"
+    },
+    "d26b0ff49ed8b26601b7": {
+      "text": "It is blue.",
+      "src": "assets/audio/d26b0ff49ed8b26601b7.mp3"
+    },
+    "e61c3eb64d6ddcf7d6a2": {
+      "text": "We are friends.",
+      "src": "assets/audio/e61c3eb64d6ddcf7d6a2.mp3"
+    },
+    "dad48af102201fe60f5d": {
+      "text": "You are nice.",
+      "src": "assets/audio/dad48af102201fe60f5d.mp3"
+    },
+    "43b1d61a2420d82d810b": {
+      "text": "Are you nice?",
+      "src": "assets/audio/43b1d61a2420d82d810b.mp3"
+    },
+    "db640de8e48354d249ea": {
+      "text": "They are at home.",
+      "src": "assets/audio/db640de8e48354d249ea.mp3"
+    },
+    "3590187ac2dfcee95d27": {
+      "text": "Are they at home?",
+      "src": "assets/audio/3590187ac2dfcee95d27.mp3"
+    },
+    "1d8404949120c9742479": {
+      "text": "I have a dog.",
+      "src": "assets/audio/1d8404949120c9742479.mp3"
+    },
+    "5b70d18726c0bab73f80": {
+      "text": "You have green eyes.",
+      "src": "assets/audio/5b70d18726c0bab73f80.mp3"
+    },
+    "ff42ca6a6db29fa841ed": {
+      "text": "Do you have green eyes?",
+      "src": "assets/audio/ff42ca6a6db29fa841ed.mp3"
+    },
+    "2492928e992de828898b": {
+      "text": "He has two sisters.",
+      "src": "assets/audio/2492928e992de828898b.mp3"
+    },
+    "c99b7aa7ca08250753e2": {
+      "text": "Does he have two sisters?",
+      "src": "assets/audio/c99b7aa7ca08250753e2.mp3"
+    },
+    "799aa343cd55fb4cb854": {
+      "text": "She has a cat.",
+      "src": "assets/audio/799aa343cd55fb4cb854.mp3"
+    },
+    "5e0c6a1be7b46f0a5f4e": {
+      "text": "It has black color.",
+      "src": "assets/audio/5e0c6a1be7b46f0a5f4e.mp3"
+    },
+    "b172ffffea522dc167c8": {
+      "text": "Does it have black color?",
+      "src": "assets/audio/b172ffffea522dc167c8.mp3"
+    },
+    "9f036434fd740f3b97f2": {
+      "text": "We have a big house.",
+      "src": "assets/audio/9f036434fd740f3b97f2.mp3"
+    },
+    "6335b2674b2738534946": {
+      "text": "Do we have a big house?",
+      "src": "assets/audio/6335b2674b2738534946.mp3"
+    },
+    "ccaeea3647ad538d73ff": {
+      "text": "You have a nice garden.",
+      "src": "assets/audio/ccaeea3647ad538d73ff.mp3"
+    },
+    "effa0b1f2393c647af34": {
+      "text": "Do you have a nice garden?",
+      "src": "assets/audio/effa0b1f2393c647af34.mp3"
+    },
+    "9a61a6d743cb5e1619c9": {
+      "text": "They have a red car.",
+      "src": "assets/audio/9a61a6d743cb5e1619c9.mp3"
+    },
+    "b3f66ef32df9651ef04b": {
+      "text": "Do they have a red car?",
+      "src": "assets/audio/b3f66ef32df9651ef04b.mp3"
+    },
+    "e078f5c9da5f90fa223e": {
+      "text": "I go home.",
+      "src": "assets/audio/e078f5c9da5f90fa223e.mp3"
+    },
+    "277e205b31516c7071f0": {
+      "text": "Do I go home?",
+      "src": "assets/audio/277e205b31516c7071f0.mp3"
+    },
+    "685de4d8183710c3741d": {
+      "text": "You go to school.",
+      "src": "assets/audio/685de4d8183710c3741d.mp3"
+    },
+    "9ff6eb28e4c3f01e4106": {
+      "text": "Do you go to school?",
+      "src": "assets/audio/9ff6eb28e4c3f01e4106.mp3"
+    },
+    "cea162228d2087e4b7d7": {
+      "text": "He goes to the cinema.",
+      "src": "assets/audio/cea162228d2087e4b7d7.mp3"
+    },
+    "bed08ca2ffa4d55297be": {
+      "text": "Does he go to the cinema?",
+      "src": "assets/audio/bed08ca2ffa4d55297be.mp3"
+    },
+    "e8d93feb6b6be64f2ece": {
+      "text": "She goes to her friend.",
+      "src": "assets/audio/e8d93feb6b6be64f2ece.mp3"
+    },
+    "45dacd6e60fc63583ecb": {
+      "text": "Does she go to her friend?",
+      "src": "assets/audio/45dacd6e60fc63583ecb.mp3"
+    },
+    "6e1f3e67559f4e29c73c": {
+      "text": "It goes well.",
+      "src": "assets/audio/6e1f3e67559f4e29c73c.mp3"
+    },
+    "fae2d8b74350b9d61655": {
+      "text": "Does it go well?",
+      "src": "assets/audio/fae2d8b74350b9d61655.mp3"
+    },
+    "9d2e7546d51b87c478e5": {
+      "text": "We go to you.",
+      "src": "assets/audio/9d2e7546d51b87c478e5.mp3"
+    },
+    "9ea7b28f6bb8dfe1b90c": {
+      "text": "Do we go to you?",
+      "src": "assets/audio/9ea7b28f6bb8dfe1b90c.mp3"
+    },
+    "c610f84eede85c7feaeb": {
+      "text": "You go to the restaurant.",
+      "src": "assets/audio/c610f84eede85c7feaeb.mp3"
+    },
+    "5c3b94efaf808f641ebb": {
+      "text": "Do you go to the restaurant?",
+      "src": "assets/audio/5c3b94efaf808f641ebb.mp3"
+    },
+    "05e975691ff87de347ce": {
+      "text": "They go to the shop.",
+      "src": "assets/audio/05e975691ff87de347ce.mp3"
+    },
+    "565e8f1e999bd6056408": {
+      "text": "Do they go to the shop?",
+      "src": "assets/audio/565e8f1e999bd6056408.mp3"
+    }
+  },
+  "sourceHashes": {
+    "tobevety.csv": "81216d8f1347882b2c9e35b480191ed3c116badd01238f3154fc3eb2845213fe",
+    "verb_conjugation.csv": "fca7bdbafd844045d2bfec9a8812d903b82f13b6aa50cd27d330c1ec9b1bf9d6"
+  }
+}

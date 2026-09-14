@@ -1,6 +1,6 @@
 HLUBOKÝ AUDIT UI COCKPITU A PLÁN ÚPRAV
 ====================================
-Verze dokumentu: 2.8
+Verze dokumentu: 2.9
 Datum: 2026-09-14
 Základ auditu: main 10ec08770e05 (nasazený, ověřený před auditem).
 Autor: Adam / Codex. Původní audit zachycuje 10ec0877; vývojový stav je níže.
@@ -8,6 +8,17 @@ Autor: Adam / Codex. Původní audit zachycuje 10ec0877; vývojový stav je ní�
 TOTO JE AKTUÁLNÍ ROZHODOVACÍ ČÁST DOKUMENTU.
 Architektonický průběh a původní audit zůstávají níže jako historie.
 Čísla, provozní stavy a priority historických oddílů nejsou dnešním stavem.
+
+MEZIÚKOL TOBETOHAVE — 2026-09-14 21:45 CEST
+Míla potvrdil lokální prototyp a požádal o webový vstup. Přesun Webových
+aplikací do Servisu v U06 zhoršil dohledatelnost; jediné tlačítko je vrácené
+přímo do horní lišty. Dialog i návrat fokusu zůstávají původní.
+ToBeToHave otevírá vlastní GitHub Pages adresu, publikační kopie obsahuje
+236 souborů shodných s prototypem. 22 cílených Cockpit testů, 14 JS testů
+trenažéru a kontrola všech MP3/obrázků i HTTP souborů prošly.
+Report: memory/reports/to_be_web_release_2026_09_14.md.
+Tento zápis předchází finálnímu push/Pages/nasazení; ověřovat živým auditem.
+U07 zůstává na příště; tento krok neprovádí reorganizaci celého Servisu.
 
 PŘEDÁNÍ A VYDÁNÍ — 2026-09-14 20:25 CEST
 U01–U06 jsou dokončené a funkčně nasazené; U07 až příště, dnes nezahajovat.

@@ -512,10 +512,9 @@ WEB_APP_CATALOG: tuple[dict[str, str], ...] = (
     {
         "id": "to-be-to-have",
         "title": "ToBeToHave",
-        "description": "Desktopová anglická výuková aplikace pro procvičování to be, to have a to go z lokálních CSV lekcí.",
-        "url": "",
-        "kind": "desktopová aplikace",
-        "launch_type": "desktop",
+        "description": "Hravé procvičování to be, to have a to go s obrázky, anglickými MP3 a skládáním vět. Funguje na Macu i telefonu.",
+        "url": "https://belisarius-mila.github.io/PythonMF/to-be-to-have/",
+        "kind": "GitHub Pages",
     },
     {
         "id": "kptl-introduction",
