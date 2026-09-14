@@ -1,6 +1,6 @@
 HLUBOKÝ AUDIT UI COCKPITU A PLÁN ÚPRAV
 ====================================
-Verze dokumentu: 2.7
+Verze dokumentu: 2.8
 Datum: 2026-09-14
 Základ auditu: main 10ec08770e05 (nasazený, ověřený před auditem).
 Autor: Adam / Codex. Původní audit zachycuje 10ec0877; vývojový stav je níže.
@@ -9,23 +9,23 @@ TOTO JE AKTUÁLNÍ ROZHODOVACÍ ČÁST DOKUMENTU.
 Architektonický průběh a původní audit zůstávají níže jako historie.
 Čísla, provozní stavy a priority historických oddílů nejsou dnešním stavem.
 
-PŘEDÁNÍ PRÁCE — 2026-09-14 20:03 CEST
-Míla požádal o úplný zápis a p+n. U01–U06 jsou lokálně dokončené;
-U07 dnes nezahajovat, navázat jím při příští práci na Cockpitu.
+PŘEDÁNÍ A VYDÁNÍ — 2026-09-14 20:25 CEST
+U01–U06 jsou dokončené a funkčně nasazené; U07 až příště, dnes nezahajovat.
 Souhrn: U01 společná odezva; U02 hlavička a návraty čteček; U03 kompaktní
 Dokumenty; U04 stránkování hledání; U05 jedna prioritní fronta a oddělený
 provozní stav; U06 navigace, 16 dialogů, fokus a zachované rozepsané formuláře.
+Nasazený funkční head 980aed7a66426665b2e809b097522fba2910dc8c; nový proces potvrzen,
+smoke 5/5, otisk 55373c8c1c4da728, podávané HTML odpovídá lokálnímu UI.
+Ověřeno 2026-09-14T18:23:41+00:00. Plná vývojová brána 1680/1680 OK;
+zastaralé vymezení funkce v testu opraveno při předání, kontrola zachovaná.
+Míla schválil přesun nesouvisejících audio podkladů mimo Git; 35 souborů
+přesunuto beze změny obsahu (SHA-256 ověřeno). Publikační překážka odstraněna.
+Zápis vzniká před závěrečným schváleným GitHub balíčkem a následným ověřením
+finálního headu; aktuální push a finální nasazení ověřit registrovaným auditem.
+Souhrnný report: memory/reports/cockpit_ui_release_2026_09_14.md.
+Důkazy UI kroků: memory/reports/cockpit_ui_u01 až u06_2026_09_14.json.
 Příště U07: Servis podle účelu, sloučení duplicit, detaily na vyžádání a
 pravdivé health štítky. Zachovat obnovu screenu, audit, restart i ochranné brány.
-Publikování/nasazení je nyní schválené, ale zatím nepotvrzené. Publikační
-kontrola zjistila nesouvisející nesledovaný adresář s audio ukázkami mimo
-Samantha_Agent; obsah zůstal zachovaný a není zařazen do balíčku.
-Důkazy jednotlivých UI kroků: memory/reports/cockpit_ui_u01 až u06_2026_09_14.json.
-Souhrnný report: memory/reports/cockpit_ui_release_2026_09_14.md.
-Závěrečná plná brána: 1680/1680 OK (318,932 s), statické kontroly OK. První
-běh odhalil zastaralé vymezení funkce v testu; opraveno bez oslabení kontroly.
-P+n čeká na rozhodnutí o přesunu nesouvisejících podkladů mimo Git; přesun
-ani publikace nebyly provedeny. Schválení samotného p+n platí dál.
 Omezení: fyzická Safari/iPhone/VoiceOver přejímka čeká; rozepsaná data žijí
 jen v aktuální kartě. Záloha zůstává odložená kvůli nedostupnému disku.
 

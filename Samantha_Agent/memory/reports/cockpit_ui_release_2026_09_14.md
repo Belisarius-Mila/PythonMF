@@ -32,15 +32,21 @@ browser scénáře, nikoli fyzickou přejímku Mílova Safari/iPhonu.
 
 ## Publikace a otevřené kroky
 
-Push ani nové nasazení zatím nejsou potvrzené. Registrované publikační brány
-vyžadují čistý celý pracovní strom. Nesouvisející nesledovaná složka s audio
-podklady v kořeni Git repozitáře zůstává zachovaná a není součástí commitu.
-Míla dostal konkrétní návrh přesunu celé složky mimo Git bez změny obsahu;
-provedení čeká na jeho rozhodnutí. Samotný souhlas s p+n platí dál.
+Funkční balíček U01–U06 nasazen: `980aed7a66426665b2e809b097522fba2910dc8c`. Ověřeno
+`2026-09-14T18:23:41+00:00`: nový proces potvrzen, otisk `55373c8c1c4da728`,
+smoke **5/5** a shoda podávaného HTML s lokálním frontendem.
 
-Po vyřešení překážky: čistě zarovnat profilové workspaces, provést registrovaný
-GitHub batch s plnou branou a řízené nasazení. Ověřit nový proces, přesný head,
-smoke 5/5 a shodu skutečně servírovaného HTML s lokálním frontendem.
+Míla schválil přesun nesouvisejících audio podkladů. Celá složka byla
+přesunuta vedle repozitáře do `PythonMF_local_artifacts`; všech 35 souborů,
+521 757 bajtů, stejné SHA-256 a oprávnění. Podklady nejsou v Gitu.
+Publikační i nasazovací audit po přesunu prošly, oba profilové workspaces
+jsou čistě zarovnané s lokálním main.
+
+Tento uzavírací zápis vzniká po ověřeném funkčním nasazení a před společným
+GitHub balíčkem včetně zápisu. Ten provede povinnou plnou bránu; po push se
+řízeně nasadí a ověří finální head. Aktuální odeslání a finální head poskytují
+registrované `github-batch-audit`, `deploy-audit` a `deploy-verification`;
+tento zápis sám není důkaz dokončeného push.
 
 Příští vývoj: **U07 — Servis podle účelu**, sloučení duplicit, detaily na
 vyžádání, pravdivé health štítky a intervaly podle konfigurace. Zachovat
