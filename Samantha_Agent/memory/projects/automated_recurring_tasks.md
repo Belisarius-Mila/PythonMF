@@ -1,5 +1,22 @@
 # Obecna rutina pro automaticke opakujici se ukoly
 
+## 2026-09-14 – Dnešní promluva studentkám zveřejněná
+
+- Přidán jediný řádek pro 2026-09-14 do `OwlSpeech.csv`; dodaný text je
+  zachovaný přesně. „Zítra“ odkazuje na 15. září. Text se zde neopakuje.
+- Lokální náhled i veřejná MP3 mají 111 312 B, délka přibližně 18,6 s.
+- Prošlo 25 cílených testů a plná publikační brána 1 656 testů (325,938 s
+  samotné testy). Log: `logs/owl_20260914_quality_gate.log`.
+- Publikován pouze commit `8db5cd818d157171baaff7cb2dbfaf5303522c09`.
+  Během kontroly vznikly nesouvisející změny Cockpitu; zůstaly zachované.
+  Push proběhl z čistého odděleného checkoutu po auditu jediného CSV commitu.
+- Pages workflow `34820248317` nad tímto commitem uspělo. Dne 14. září
+  v 09:59 CEST veřejný `app.js` vybíral `owl_140926.mp3?v=20260914a`;
+  audio vrátilo HTTP 200, `audio/mp3`, 111 312 B.
+- Účtenka: `data/daily_3am/receipts/20260914_publication.json` (mimo Git).
+- Další krok: bez zásahu; další text až na Mílův pokyn. Ruční poslech
+  v prohlížeči nebyl součástí tohoto ověření.
+
 ## Stav
 
 Zalozeno 2026-05-20 jako obecna infrastruktura pro bezpecne automaticke

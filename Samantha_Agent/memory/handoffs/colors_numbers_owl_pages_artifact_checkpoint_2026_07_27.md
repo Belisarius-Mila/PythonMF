@@ -1,3 +1,39 @@
+Nazev: ColorsAndNumbers sova - aktuální publikace 2026-09-14
+Priorita: 1
+Stav: hotovo
+Pripomenout pri startu: ne
+Datum: 2026-09-14
+
+Co se resilo:
+- Nová denní promluva studentkám podle přesně dodaného textu.
+
+Co je hotove:
+- Jediný CSV řádek pro 2026-09-14, lokální MP3 náhled a veřejná publikace.
+- 25 cílených testů a plná brána 1 656 testů prošly.
+- Commit `8db5cd81`, Pages workflow `34820248317` nad stejným commitem.
+- Veřejný app.js a owl_140926.mp3 ověřené 14. září v 09:59 CEST:
+  HTTP 200, audio/mp3, 111 312 B, přibližně 18,6 s.
+- Pages artifact je publikační autorita; historický blok níže je uzavřený.
+
+Co neni hotove:
+- Žádný otevřený implementační krok; ruční poslech v prohlížeči neproběhl.
+
+Dalsi krok:
+- Bez dalšího zásahu; nový text až na Mílův pokyn.
+
+Navrhovane dalsi kroky:
+- Žádné nové.
+
+Zmenene nebo relevantni soubory:
+- OwlSpeech.csv, automated_recurring_tasks.md, ACTIVE_PROJECTS.md.
+- Technická účtenka mimo Git: data/daily_3am/receipts/20260914_publication.json.
+
+Bezpecnost / neukladat:
+- Soukromý obsah ani audio se do tohoto handoffu nekopírují.
+- Souběžné změny Cockpitu zachované; publikován jen ověřený soví commit.
+
+## Historický checkpoint 2026-07-27 (nasazení dokončeno 2026-07-30)
+
 Nazev: ColorsAndNumbers sova - publikace bez zapisu do main
 Priorita: 1
 Stav: ceka na nasazeni
