@@ -1,13 +1,16 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-14 18:36 CEST. U01–U06 hotové lokálně; AuditCockpit56_2.txt v2.6.
+- Předání 2026-09-14 20:03 CEST: Míla výslovně určil pokračování **U07 až příště**, dnes jej nezahajovat. Push a nasazení celého UI balíčku schválil; provedení blokuje nesouvisející nesledovaný adresář; návrh přesunu mimo Git čeká na Mílovo rozhodnutí.
+- Závěrečné ověření 2026-09-14 20:19 CEST: plná brána **1680/1680 OK**, testy 318,932 s a statické kontroly OK. Opraven jeden zastaralý test odstraněné funkce; původní kontrola zachovaná. Souhrnný report `reports/cockpit_ui_release_2026_09_14.md`.
+- Souhrn U01–U06: společná odezva, hlavička/návraty, kompaktní Dokumenty, stránkování, prioritní Přehled a jednotná navigace/dialogy. TXT v2.7 obsahuje aktuální bod návratu a odkazy na důkazy.
+- U01–U06 hotové lokálně; souhrnný AuditCockpit56_2.txt v2.7.
 - U06: společná správa 16 dialogů; vstup/vracení fokusu, uzavřený Tab/Shift+Tab, Escape podle vrstvy, inertní pozadí a zachovaný scroll.
 - Šest hlavních oblastí má bezpečné přímé odkazy/hash a označení aktivního místa. Komunikace sdružuje poštu/připomenutí, projekty a katalog jsou v Servisu; rodinné zkratky zachované.
 - Zavření/obnova Knihovny drží vybranou položku, editor, nové texty a fotografie; rodinný formulář se nečistí. Záměrné přepnutí/reset dál chrání původní potvrzení. Návrat k Janičce je u hledání, kde ho nepřekrývá odezva.
 - Důkaz: 28 cílených testů včetně stavů dialogů a vazeb DOM; 3 browser scénáře na 320/390/1440 px, v každém 16 dialogů a 6 přímých odkazů/reloadů. Rychlá statická brána prošla. `reports/cockpit_ui_u06_2026_09_14.json`. Regrese návratů rodiny, Recovery, vnořeného náhledu, rozepsané editace i varování před opuštěním stránky.
 - Dodání: lokální vývoj bez nového push/nasazení. Plná brána U04 a nasazení 10ec0877 jsou historické podklady, nikoli současný živý audit.
-- Další krok U07: uspořádat Servis podle účelu a upravit zavádějící health štítky.
+- Příští vývojový krok U07: uspořádat Servis podle účelu a upravit zavádějící health štítky; dnes nezahajovat.
 - Rizika: fyzický Safari/iPhone/VoiceOver čeká; drafty žijí jen v aktuální kartě, potvrzený reload/ukončení je může ztratit. beforeunload není záruka proti ukončení OS. Odkaz obnoví hlavní oblast, ne přesný vnořený kontext.
 - Záloha odložená kvůli disku; Santiago pouze zvažované. Cizí nesledovaný adresář zachovaný mimo commit.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -19,19 +22,19 @@ Pracovni proud: project-cockpit
 Typ: Project
 Priorita: 1
 Stav: rozpracovane
-Pripomenout pri startu: ne
+Pripomenout pri startu: ano
 
 Co se resilo:
-U06: jednotná navigace, fokus a zachování kontextu dialogů.
+Uzavření a předání U01–U06, příprava schváleného push/nasazení a odložení U07.
 
 Co je hotove:
-- U01–U06 lokálně implementované a ověřené; roadmapa v2.6.
+- U01–U06 lokálně implementované; důkazy jednotlivých kroků a souhrnná roadmapa v2.7.
 
 Co neni hotove:
 - Push/nasazení a fyzická přejímka. Kroky U07–U11.
 
 Dalsi krok:
-U07: Servis podle účelu a pravdivé provozní štítky.
+Při příští práci U07: Servis podle účelu a pravdivé provozní štítky. Dnes U07 nezahajovat.
 
 Navrhovane dalsi kroky:
 - Grafika a fyzická přejímka podle TXT.
@@ -1001,3 +1004,22 @@ Navrhované další kroky:
 Technický důkaz:
 - 28 cílených testů včetně stavů dialogů a vazeb DOM; 3 browser scénáře na 320/390/1440 px, v každém 16 dialogů a 6 přímých odkazů/reloadů. Rychlá statická brána prošla. Report `reports/cockpit_ui_u06_2026_09_14.json`. Automatizovaná přejímka zahrnuje vnořený náhled, Recovery, rodinné projekty/hledání a rozepsanou existující editaci.
 - Omezení: fyzický Safari/iPhone/VoiceOver neověřený; draft nepřežije potvrzený reload/ukončení; hlavní hash není přesný vnořený stav. Plná brána se u omezené UI změny neopakuje. Cizí nesledovaný adresář zachovaný.
+
+### 2026-09-14 20:03 CEST — Předání U01–U06, U07 až příště
+
+Hotovo:
+- Souhrn šesti dokončených UI kroků a jejich důkazů zapsán do AuditCockpit56_2.txt, handoffu a TVBCP.
+
+Rozhodnutí:
+- Míla schválil push a nasazení celého čekajícího UI balíčku. U07 výslovně odložený na příští pokračování.
+
+Další krok:
+- Po rozhodnutí o nesouvisejícím adresáři dokončit schválené p+n; při příštím vývoji začít U07 (Servis podle účelu).
+
+Navrhované další kroky:
+- Po nasazení fyzická Safari/iPhone/VoiceOver přejímka, dále roadmapa TXT. Záloha zůstává odložená.
+
+Technický důkaz:
+- Funkční commity končí 2bbdcfc7; poslední lokální U06 přejímka: 28 testů, 16 dialogů na třech šířkách, návraty rodiny a přímé odkazy. Publikace zatím nepotvrzená; nesouvisející nesledované audio podklady zachované mimo commit.
+
+- Závěrečné ověření: 1680/1680 OK (318,932 s), statická brána OK; opraveno zastaralé vymezení funkce v testu. Report `reports/cockpit_ui_release_2026_09_14.md`. Publikace a nasazení nadále čekají na vyřešení nesledovaných podkladů, které zůstaly beze změny.

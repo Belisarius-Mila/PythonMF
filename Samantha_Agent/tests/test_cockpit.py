@@ -3827,7 +3827,7 @@ class CockpitTests(unittest.TestCase):
         self.assertNotIn("renderVoiceStatus", COCKPIT_HTML)
 
         dashboard_start = COCKPIT_HTML.index("function renderDashboard(data)")
-        dashboard_end = COCKPIT_HTML.index("function renderDashboardMorningSentence", dashboard_start)
+        dashboard_end = COCKPIT_HTML.index("function renderDecisionCards", dashboard_start)
         self.assertNotIn("documentsPanelNode.open = true", COCKPIT_HTML[dashboard_start:dashboard_end])
 
     def test_expected_audio_autoplay_block_is_not_a_frontend_error(self) -> None:
