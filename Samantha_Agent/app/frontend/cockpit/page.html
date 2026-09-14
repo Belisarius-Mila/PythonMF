@@ -32,6 +32,20 @@
     </div>
   </header>
   <main>
+          <div id="dashboardOverall" class="dashboard-overall dashboard-overall-loading" role="button" tabindex="0" title="Otevřít detail stavu">
+            <span id="dashboardOverallLabel" class="dashboard-overall-label">Načítám</span>
+            <span id="dashboardOverallReason" class="dashboard-overall-reason">Skládám hlavní a samostatně načítané kontroly.</span>
+          </div>
+	    <div id="statusLine" class="status-line">Načítám stav...</div>
+		    <section id="urgentReminderAlert" class="urgent-alert hidden" aria-live="polite">
+		      <div class="urgent-alert-head">
+		        <div id="urgentReminderAlertTitle" class="urgent-alert-title">Důležitá připomenutí</div>
+		        <button class="secondary" id="urgentReminderAlertBtn">Otevřít</button>
+		      </div>
+		      <div id="urgentReminderAlertList" class="urgent-alert-list"></div>
+		    </section>
+    <details id="overviewPanel" class="section-toggle" open>
+      <summary>Přehled Cockpitu</summary>
     <div class="today-dashboard" aria-label="Dnešní přehled">
       <section class="dashboard-card">
         <h2>Dnes</h2>
@@ -47,10 +61,6 @@
       <section class="dashboard-card">
         <h2>Stav</h2>
         <div class="dashboard-body dashboard-list">
-          <div id="dashboardOverall" class="dashboard-overall dashboard-overall-loading" role="button" tabindex="0" title="Otevřít detail stavu">
-            <span id="dashboardOverallLabel" class="dashboard-overall-label">Načítám</span>
-            <span id="dashboardOverallReason" class="dashboard-overall-reason">Skládám hlavní a samostatně načítané kontroly.</span>
-          </div>
           <div id="dashboardMorningSentence" class="status-line">Ranní stav se načte spolu s Cockpitem.</div>
           <div class="dashboard-row"><span class="dashboard-label">Dokumenty</span><span id="dashboardDocuments" class="dashboard-value"></span></div>
           <div class="dashboard-row"><span class="dashboard-label">Připomenutí</span><span id="dashboardReminders" class="dashboard-value"></span></div>
@@ -81,14 +91,6 @@
         </div>
       </section>
 	    </div>
-	    <div id="statusLine" class="status-line">Načítám stav...</div>
-		    <section id="urgentReminderAlert" class="urgent-alert hidden" aria-live="polite">
-		      <div class="urgent-alert-head">
-		        <div id="urgentReminderAlertTitle" class="urgent-alert-title">Důležitá připomenutí</div>
-		        <button class="secondary" id="urgentReminderAlertBtn">Otevřít</button>
-		      </div>
-		      <div id="urgentReminderAlertList" class="urgent-alert-list"></div>
-		    </section>
 		    <section>
 		      <h2>Co teď?</h2>
 		      <div class="body decision-cockpit">
@@ -106,6 +108,7 @@
 		        </details>
 		      </div>
 		    </section>
+    </details>
         <section id="codexApprovalCard" class="voice-card warn hidden" aria-live="assertive">
           <div class="voice-card-title">Codex čeká na potvrzení</div>
           <div class="voice-card-field">
@@ -135,6 +138,17 @@
             <button class="secondary" id="codexApprovalClearBtn">Vyčistit kartu</button>
           </div>
         </section>
+    <section id="documentSearchPanel">
+      <h2>Najít dokument</h2>
+      <div class="body">
+        <div class="search-controls">
+          <input id="documentSearchInput" type="search" aria-label="Najít dokument" placeholder="Název, protistrana, tag nebo text">
+          <button class="primary" id="documentSearchBtn">Hledat</button>
+        </div>
+        <div id="documentSearchStatus" class="status-line"></div>
+        <div id="documentSearchResults" class="search-results"></div>
+      </div>
+    </section>
     <details id="documentsPanel" class="section-toggle">
       <summary>Dokumenty</summary>
 		    <section>
@@ -145,62 +159,61 @@
           <button class="secondary" id="scanDocuReviewBtn">Vyřešit dokumenty</button>
         </div>
         <div class="work-grid">
-          <div class="work-card">
-            <h3>Nová PDF ve Downloads za 7 dní</h3>
-            <div id="newPdfCount" class="work-count">0</div>
+          <details class="work-card" open>
+            <summary><h3>Nová PDF (7 dní)</h3><span id="newPdfCount" class="work-count">?</span></summary>
+            <div class="work-card-body">
             <div class="actions">
               <button class="primary" id="processNextBtn">Zpracovat další dokument</button>
             </div>
-            <div id="newPdfList" class="work-list"></div>
-          </div>
-          <div class="work-card">
-            <h3>Dokumenty k vyřešení</h3>
-            <div id="reviewReportCount" class="work-count">?</div>
+            <div id="newPdfList" tabindex="0" aria-label="Nová PDF" class="work-list"></div>
+            </div>
+          </details>
+          <details class="work-card" open>
+            <summary><h3>Dokumenty k vyřešení</h3><span id="reviewReportCount" class="work-count">?</span></summary>
+            <div class="work-card-body">
             <div class="actions">
               <button class="secondary" id="reviewReportBtn">Obnovit seznam</button>
             </div>
             <div id="reviewReportStatus" class="status-line">Vyber dokument; otevře se celý ve ScanDocu se všemi údaji, náhledem a možnostmi.</div>
-            <div id="reviewReportList" class="work-list review-report-list"></div>
-          </div>
-          <div class="work-card">
-            <h3>Problémy</h3>
-            <div id="problemCount" class="work-count">0</div>
+            <div id="reviewReportList" tabindex="0" aria-label="Dokumenty k vyřešení" class="work-list review-report-list"></div>
+            </div>
+          </details>
+          <details class="work-card" open>
+            <summary><h3>Problémy</h3><span id="problemCount" class="work-count">?</span></summary>
+            <div class="work-card-body">
             <div class="status-line">Akční chyby ve frontě</div>
-            <div id="problemList" class="work-list"></div>
-          </div>
-          <div class="work-card">
-            <h3>Dokumentový intake</h3>
-            <div id="documentIntakeCount" class="work-count">0</div>
-            <div id="documentIntakeSummary" class="status-line">Downloads / e-mail / mobilní sken / lokální inbox</div>
-            <div id="documentIntakeList" class="work-list"></div>
-          </div>
-          <div class="work-card">
-            <h3>Termíny v dokumentech</h3>
-            <div id="documentDueCount" class="work-count">0</div>
+            <div id="problemList" tabindex="0" aria-label="Problémy dokumentů" class="work-list"></div>
+            </div>
+          </details>
+          <details class="work-card" open>
+            <summary><h3>Vstupy dokumentů</h3><span id="documentIntakeCount" class="work-count">?</span></summary>
+            <div class="work-card-body">
+            <div id="documentIntakeList" tabindex="0" aria-label="Vstupy dokumentů" class="work-list"></div>
+            <details id="documentIntakeSources" class="document-source-details">
+              <summary>Zdroje a stav kontrol</summary>
+              <div id="documentIntakeSummary" class="status-line"></div>
+              <div id="documentIntakeSourceList" class="work-list"></div>
+            </details>
+            </div>
+          </details>
+          <details class="work-card" open>
+            <summary><h3>Termíny v dokumentech</h3><span id="documentDueCount" class="work-count">?</span></summary>
+            <div class="work-card-body">
             <div id="documentDueStatus" class="status-line">Kandidáti na připomínky z dokumentů.</div>
-            <div id="documentDueList" class="work-list"></div>
-          </div>
-          <div class="work-card">
-            <h3>Související dokumenty</h3>
-            <div id="documentCasesCount" class="work-count">0</div>
+            <div id="documentDueList" tabindex="0" aria-label="Termíny v dokumentech" class="work-list"></div>
+            </div>
+          </details>
+          <details class="work-card" open>
+            <summary><h3>Související dokumenty</h3><span id="documentCasesCount" class="work-count">?</span></summary>
+            <div class="work-card-body">
             <div id="documentCasesStatus" class="status-line">Seskupení podle věci nebo protistrany.</div>
-            <div id="documentCasesList" class="work-list"></div>
-          </div>
+            <div id="documentCasesList" tabindex="0" aria-label="Související dokumenty" class="work-list"></div>
+            </div>
+          </details>
         </div>
       </div>
     </section>
     </details>
-    <section>
-      <h2>Najít dokument</h2>
-      <div class="body">
-        <div class="search-controls">
-          <input id="documentSearchInput" type="search" placeholder="Hledat podle názvu, typu, protistrany, věci, tagu nebo textu">
-          <button class="primary" id="documentSearchBtn">Hledat</button>
-        </div>
-        <div id="documentSearchStatus" class="status-line"></div>
-        <div id="documentSearchResults" class="search-results"></div>
-      </div>
-    </section>
     <details id="servicePanel" class="section-toggle">
       <summary>Servis</summary>
       <section>

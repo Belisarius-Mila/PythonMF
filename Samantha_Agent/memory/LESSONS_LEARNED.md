@@ -664,3 +664,8 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Projev: nákupní čtečka pouze zaměřovala opener; samostatná karta neměla návrat. Zablokovaný popup ukázal jen textovou adresu.
 - Řešení: s openerem zaměřit původní okno a zavřít čtečku, bez něj navigovat na Cockpit; při odmítnutém zavření dát instrukci. Náhradní popup odkaz otevřít uživatelským kliknutím v nové kartě bez openeru, přijímat pouze HTTP(S).
 - Ověření: samostatná i skutečně otevřená popup karta, uzavřený/nedostupný opener, odmítnuté zavření, zachovaný rozepsaný vstup a odstranění starého odkazu při další zprávě. Důkaz: reports/cockpit_ui_u02_2026_09_14.json.
+
+### 2026-09-14 14:44 CEST — Kompaktní prázdný stav nesmí schovat chybu
+- Projev: sbalení podle pouhého count=0 může skrýt selhání poskytovatele; grid se stretch zase natahuje nulové sousedy podle dlouhé fronty.
+- Řešení: rozlišit ověřené prázdno, práci a chybu. Nuly sbalit, chyby/práci otevřít při změně stavu; stejný stav respektuje ruční rozbalení. Použít align-items:start a u dlouhých seznamů ověřit skutečné posouvání včetně klávesnice.
+- Ověření: nedostupný zdroj a HTTP/provider chyba revize se zobrazí; poslední položka i původní akce zůstávají dosažitelné. Report: reports/cockpit_ui_u03_2026_09_14.json.

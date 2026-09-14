@@ -27,15 +27,16 @@ function setup(fetch) {
     '../app/frontend/cockpit/document_review.js'), 'utf8'), context);
   const elements = Object.fromEntries(['documentsPanel', 'reviewReportBtn',
     'reviewReportStatus', 'reviewReportList', 'reviewReportCount'].map(key => [key, new Element()]));
-  const requests = [], errors = [], messages = [], opened = [];
+  const requests = [], errors = [], messages = [], opened = [], cardStates = [];
   const api = context.window.SamanthaDocumentReview.create({
     elements,
     fetch: async (...args) => { requests.push(args); return fetch(...args); },
     recordFrontendError: error => errors.push(error),
     showMessage: message => messages.push(message),
     openScanDocuReview: (...args) => opened.push(args),
+    setDocumentCardState: (_node, active, unavailable) => cardStates.push({active, unavailable}),
   });
-  return {api, elements, requests, errors, messages, opened};
+  return {api, elements, requests, errors, messages, opened, cardStates};
 }
 
 function descendants(node) {
@@ -108,3 +109,14 @@ test('refresh replaces previous items rather than duplicating the list', () => {
   assert.equal(fixture.elements.reviewReportList.children.length, 1);
   assert(!descendants(fixture.elements.reviewReportList).some(node => node.textContent === 'Old fixture'));
 });
+
+for (const failure of ['HTTP', 'provider']) {
+  test(`${failure} failure opens the error card instead of reporting an empty queue`, async () => {
+    const fixture = setup(async () => ({ok: failure !== 'HTTP', json: async () => ({ok: failure !== 'provider', message: 'Fixture nedostupné'})}));
+    assert.equal(await fixture.api.loadDocumentReviewReport(), false);
+    assert.deepEqual(fixture.cardStates.at(-1), {active: false, unavailable: true});
+    assert.match(fixture.elements.reviewReportStatus.textContent, /Fixture nedostupné/);
+    assert.equal(fixture.elements.reviewReportBtn.disabled, false);
+    assert.deepEqual(fixture.opened, []);
+  });
+}

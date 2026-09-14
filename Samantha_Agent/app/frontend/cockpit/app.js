@@ -18,6 +18,10 @@
     const documentsBtn = document.getElementById("documentsBtn");
     const serviceBtn = document.getElementById("serviceBtn");
     const documentsPanel = document.getElementById("documentsPanel");
+    const overviewPanel = document.getElementById("overviewPanel");
+    documentsPanel.addEventListener("toggle", () => {
+      overviewPanel.open = !documentsPanel.open;
+    });
     const emailHubModal = document.getElementById("emailHubModal");
     const emailHubCloseBtn = document.getElementById("emailHubCloseBtn");
     const emailWorkBtn = document.getElementById("emailWorkBtn");
@@ -322,6 +326,8 @@
     const documentIntakeCount = document.getElementById("documentIntakeCount");
     const documentIntakeSummary = document.getElementById("documentIntakeSummary");
     const documentIntakeList = document.getElementById("documentIntakeList");
+    const documentIntakeSourceList = document.getElementById("documentIntakeSourceList");
+    const documentIntakeSources = document.getElementById("documentIntakeSources");
     const documentCasesCount = document.getElementById("documentCasesCount");
     const documentCasesStatus = document.getElementById("documentCasesStatus");
     const documentCasesList = document.getElementById("documentCasesList");
@@ -1011,7 +1017,8 @@
           filtered_out_count: Number(data.filtered_out_count || 0),
           items: mergedItems,
           message: data.message || "E-mailové hlavičky zkontrolované read-only.",
-          unavailable: data.unavailable || []
+          unavailable: data.unavailable || [],
+          failed: data.ok === false
         };
         renderDocumentIntake(latestDocumentIntakeData || {});
       } catch (err) {
@@ -1019,6 +1026,7 @@
         lastEmailIntakeMonitor = {
           ...lastEmailIntakeMonitor,
           message: `Chyba e-mail intake monitoru: ${err}`,
+          failed: true,
           unavailable: []
         };
         renderDocumentIntake(latestDocumentIntakeData || {});
@@ -1102,22 +1110,33 @@
       }
     }
 
+    function setDocumentCardState(countNode, hasItems, unavailable = false) {
+      const card = countNode.closest(".work-card");
+      const state = unavailable ? "error" : hasItems ? "active" : "empty";
+      if (card.dataset.state !== state) card.open = state !== "empty";
+      card.dataset.state = state;
+      if (unavailable) countNode.textContent = "?";
+    }
+
     function renderDocumentWork(work) {
       const summary = work.summary || {};
+      const unavailable = !work.summary || work.ok === false;
       const newItems = work.new_pdfs || [];
       const problemItems = work.problems || [];
       newPdfCount.textContent = String(summary.new_pdf_count || 0);
       problemCount.textContent = String(summary.problem_count || 0);
+      setDocumentCardState(newPdfCount, newItems.length > 0 || Number(summary.new_pdf_count) > 0, unavailable);
+      setDocumentCardState(problemCount, problemItems.length > 0 || Number(summary.problem_count) > 0, unavailable);
       processNextBtn.disabled = newItems.length === 0;
       dashboardProcessBtn.disabled = newItems.length === 0;
       renderWorkList(newPdfList, newItems, (item) => ({
         title: item.name || "",
         meta: `${item.status || ""} | ${item.modified_at || ""}`
-      }), "Žádné nové PDF.");
+      }), unavailable ? "Seznam PDF nelze ověřit." : "Žádné nové PDF.");
       renderWorkList(problemList, problemItems, (item) => ({
         title: item.name || "",
         meta: `${item.problem_label || item.status || ""} | ${item.modified_at || ""}`
-      }), "Žádné zjevné problémy ve frontě.");
+      }), unavailable ? "Stav fronty nelze ověřit." : "Žádné zjevné problémy ve frontě.");
     }
 
     function renderDocumentIntake(data) {
@@ -1134,10 +1153,16 @@
       const emailCandidateCount = Number(lastEmailIntakeMonitor.count || 0);
       const filteredEmailCount = Number(lastEmailIntakeMonitor.filtered_out_count || 0);
       documentIntakeCount.textContent = String(Number(data.count || 0) + emailCandidateCount);
+      const unavailableSource = sources.some(source => ["unavailable", "missing", "problem"].includes(source.status) || source.ok === false);
+      const unavailableIntake = data.ok === false || !sources.length || unavailableSource
+        || lastEmailIntakeMonitor.failed || lastEmailIntakeMonitor.unavailable.length > 0;
+      setDocumentCardState(documentIntakeCount, unifiedItems.length > 0 || Number(data.count) > 0 || emailCandidateCount > 0, unavailableIntake);
+      if (unavailableIntake) documentIntakeSources.open = true;
       if (documentIntakeSummary) {
         documentIntakeSummary.textContent = `Downloads: ${downloadsCount} | E-mail kandidáti: ${emailCandidateCount} | E-mail work queue: ${queuedEmailCount} | Mobilní: ${mobileCount} | Lokální: ${localInboxCount} | Potlačeno e-mail filtrem: ${filteredEmailCount}`;
       }
       documentIntakeList.innerHTML = "";
+      documentIntakeSourceList.innerHTML = "";
       if (!sources.length && !unifiedItems.length) {
         const empty = document.createElement("div");
         empty.className = "status-line";
@@ -1147,8 +1172,8 @@
       }
       const monitor = document.createElement("div");
       monitor.className = "work-meta";
-      monitor.textContent = "Monitor: lokální zdroje každých 10 min; e-mailové hlavičky read-only každých 30 min.";
-      documentIntakeList.appendChild(monitor);
+      monitor.textContent = `Monitor: lokální zdroje každých ${FULL_STATUS_MONITOR_MS / 60000} min; e-mailové hlavičky read-only každých ${INTAKE_EMAIL_MONITOR_MS / 60000} min.`;
+      documentIntakeSourceList.appendChild(monitor);
       if (unifiedItems.length) {
         unifiedItems.forEach((item) => {
           const row = document.createElement("div");
@@ -1230,12 +1255,12 @@
         ? ` Potlačeno filtrem: ${lastEmailIntakeMonitor.filtered_out_count}.`
         : "";
       emailMonitor.textContent = `E-mail monitor: ${lastEmailIntakeMonitor.message}${filteredOut}${unavailable}`;
-      documentIntakeList.appendChild(emailMonitor);
+      documentIntakeSourceList.appendChild(emailMonitor);
       if (sources.length) {
         const summaryTitle = document.createElement("div");
         summaryTitle.className = "case-section-title";
         summaryTitle.textContent = "Souhrn zdrojů";
-        documentIntakeList.appendChild(summaryTitle);
+        documentIntakeSourceList.appendChild(summaryTitle);
       }
       sources.forEach((source) => {
         const row = document.createElement("div");
@@ -1253,19 +1278,22 @@
           detail.textContent = `${item.title || ""}${item.meta ? " | " + item.meta : ""}`;
           row.appendChild(detail);
         });
-        documentIntakeList.appendChild(row);
+        documentIntakeSourceList.appendChild(row);
       });
     }
 
     function renderDocumentCases(data) {
       const cases = data.cases || [];
       documentCasesCount.textContent = String(data.case_count || 0);
+      setDocumentCardState(documentCasesCount, cases.length > 0 || Number(data.case_count) > 0, data.ok === false || !Array.isArray(data.cases));
       documentCasesStatus.textContent = data.message || "Vazby dokumentů nejsou načtené.";
       documentCasesList.innerHTML = "";
       if (!cases.length) {
         const empty = document.createElement("div");
         empty.className = "status-line";
-        empty.textContent = "Žádné skutečné vazby se dvěma a více dokumenty nejsou zjištěné.";
+        empty.textContent = data.ok === false || !Array.isArray(data.cases)
+          ? "Vazby dokumentů nelze ověřit."
+          : "Žádné skutečné vazby se dvěma a více dokumenty nejsou zjištěné.";
         documentCasesList.appendChild(empty);
         return;
       }
@@ -1490,12 +1518,15 @@
     function renderDocumentDueCandidates(data) {
       const items = data.items || [];
       documentDueCount.textContent = String(data.actionable_count || 0);
+      setDocumentCardState(documentDueCount, items.length > 0 || Number(data.actionable_count) > 0, data.ok === false || !Array.isArray(data.items));
       documentDueStatus.textContent = data.message || "Termíny nejsou načtené.";
       documentDueList.innerHTML = "";
       if (!items.length) {
         const empty = document.createElement("div");
         empty.className = "status-line";
-        empty.textContent = "Žádné termínové kandidáty vhodné k připomínce nejsou v indexu.";
+        empty.textContent = data.ok === false || !Array.isArray(data.items)
+          ? "Termíny v dokumentech nelze ověřit."
+          : "Žádné termínové kandidáty vhodné k připomínce nejsou v indexu.";
         documentDueList.appendChild(empty);
         return;
       }
@@ -1600,6 +1631,8 @@
       recordFrontendError,
       showMessage,
       openScanDocuReview,
+      setDocumentCardState,
+      revealReviewCard: () => { reviewReportCount.closest(".work-card").open = true; },
     });
 
 	    function renderDashboard(data) {

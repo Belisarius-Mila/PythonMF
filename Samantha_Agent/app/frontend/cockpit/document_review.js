@@ -5,6 +5,7 @@
     const {documentsPanel, reviewReportBtn, reviewReportStatus,
       reviewReportList, reviewReportCount} = dependencies.elements;
     const {fetch, recordFrontendError, showMessage, openScanDocuReview} = dependencies;
+    const {setDocumentCardState = () => {}, revealReviewCard = () => {}} = dependencies;
 
     async function loadDocumentReviewReport() {
       reviewReportBtn.disabled = true;
@@ -14,11 +15,13 @@
       try {
         const res = await fetch("/api/documents/review-report");
         const data = await res.json();
+        if (res.ok === false || data.ok === false || !Array.isArray(data.groups)) throw new Error(data.message || "Report není dostupný.");
         renderDocumentReviewReport(data);
         loaded = true;
       } catch (err) {
         recordFrontendError(err);
         reviewReportStatus.textContent = `Chyba reportu: ${err}`;
+        setDocumentCardState(reviewReportCount, false, true);
       } finally {
         reviewReportBtn.disabled = false;
       }
@@ -29,6 +32,7 @@
       documentsPanel.open = true;
       showMessage("Otevírám dokumenty k vyřešení...");
       const loaded = await loadDocumentReviewReport();
+      revealReviewCard();
       reviewReportList.scrollIntoView({behavior: "smooth", block: "start"});
       if (loaded) {
         showMessage("Vyber dokument; celý se otevře se všemi možnostmi ve ScanDocu.");
@@ -39,6 +43,7 @@
       const summary = data.summary || {};
       const groups = data.groups || [];
       reviewReportCount.textContent = String(summary.candidate_count || 0);
+      setDocumentCardState(reviewReportCount, groups.length > 0 || Number(summary.candidate_count) > 0, data.ok === false || !Array.isArray(data.groups));
       reviewReportStatus.textContent = data.message || "Report načten.";
       reviewReportList.innerHTML = "";
       if (!groups.length) {

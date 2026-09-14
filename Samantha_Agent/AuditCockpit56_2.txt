@@ -1,6 +1,6 @@
 HLUBOKÝ AUDIT UI COCKPITU A PLÁN ÚPRAV
 ====================================
-Verze dokumentu: 2.2
+Verze dokumentu: 2.3
 Datum: 2026-09-14
 Základ auditu: main 10ec08770e05 (nasazený, ověřený před auditem).
 Autor: Adam / Codex. Původní audit zachycuje 10ec0877; vývojový stav je níže.
@@ -9,26 +9,32 @@ TOTO JE AKTUÁLNÍ ROZHODOVACÍ ČÁST DOKUMENTU.
 Architektonický průběh a původní audit zůstávají níže jako historie.
 Čísla, provozní stavy a priority historických oddílů nejsou dnešním stavem.
 
-VÝVOJOVÝ STAV — 2026-09-14 14:18 CEST
-U01 a U02 jsou dokončené lokálně na Mílův pokyn; dosud bez push/nasazení.
-U01: stálý zavíratelný panel odezvy nad pracovní plochou i aktivním dialogem.
-U02: hlavička má pružnou výšku a tlačítka se neořezávají. Nákupní čtečka
-umí návrat s původním oknem i bez něj; při odmítnutém zavření nabídne postup.
-Obě čtečky tolerují selhání zaměření původního okna. Tisk beze změny.
-Blokovaný popup u e-mailu, katalogu a ScanDocu nabídne odkaz do nové karty;
-Cockpit zůstává otevřený s rozepsanou prací. Odkaz přijímá pouze HTTP(S),
-nová zpráva ho odstraní a nová karta nemá přístup k openeru.
-Ověření U02: 5 syntetických browser scénářů 320/390/768/1024/1440 px,
-žádné oříznuté tlačítko hlavičky ani horizontální přetečení; obě čtečky,
-blokované popupy a zachovaný vstup. 15 frontendových testů včetně tisku.
-Důkaz: memory/reports/cockpit_ui_u02_2026_09_14.json.
-U01: memory/reports/cockpit_ui_u01_2026_09_14.json.
-Otevřeno: fyzická přejímka Mac/iPhone a čteček obrazovky po nasazení.
-Další krok U03: kompaktní Dokumenty, hledání nahoru a odstranění natažených
-prázdných karet. Mobilní navigace zůstává rozměrná; její redesign je později.
-Níže uvedená měření a nálezy jsou výchozí audit 10ec0877. N01/N02/N13 jsou
-lokálně řešené v rozsahu U01/U02; tisk, backend a bezpečnostní potvrzení
-zůstávají beze změny. Původní audit není nové měření upraveného UI.
+VÝVOJOVÝ STAV — 2026-09-14 14:44 CEST
+U01–U03 jsou dokončené lokálně na Mílův pokyn; dosud bez push/nasazení.
+U01: viditelná stálá odezva akcí. U02: pružná hlavička a funkční návraty,
+včetně náhradních odkazů při blokovaném popupu.
+U03: hledání je před dokumentovou prací. Při otevření Dokumentů se velký
+obecný přehled sbalí; provozní stav, čas kontroly, urgentní upozornění a
+čekající potvrzení zůstávají mimo něj. Přehled lze kdykoli rozbalit a po
+zavření Dokumentů se automaticky vrátí.
+Šest dokumentových oblastí používá rozbalovací karty s počty v záhlaví.
+Ověřená nula je 43px řádek; nová práce či chyba kartu otevře. Ruční stav
+rozbalení se při obnově stejného stavu zachová. Neznámé/chybové načtení se
+nesbalí jako prázdná fronta. Zdroje a zdravý monitor jsou v detailu;
+při chybě se detail otevře. Interval popisu odpovídá skutečnému 5/30 min.
+Dlouhé seznamy se posouvají ve vlastní ploše do 360 px, i klávesnicí.
+Revizní reference, čtení, termínové potvrzení, detaily vazeb a dosavadní
+poznámky o zkrácení zůstávají; deduplikace ani backend se neměnily.
+Proti původnímu auditu (shodné syntetické scénáře):
+- desktop klid 1764 -> 900 px (49 %), hledání y1579 -> y309;
+- desktop práce 3320 -> 1643 px (50,5 %);
+- mobil práce 5285 -> 2577 px (51,2 %), klid 3529 -> 1253 px (64,5 %).
+Jde o celkovou výšku stránky, nejméně výšku viewportu, ne časové zrychlení.
+Důkaz U03: memory/reports/cockpit_ui_u03_2026_09_14.json; 6 měření,
+3 behaviorální browser scénáře, 15 frontendových testů (doplněné 2 případy
+selhání revizí) a statická brána. Bez ostrých akcí; fyzický Safari test čeká.
+Další krok U04: připojit existující stránkování dokumentového hledání.
+Níže jsou výchozí měření/nálezy 10ec0877; U01–U03 jsou následný vývoj.
 
 0. ZÁVĚR PRO MÍLU
 ----------------
@@ -379,6 +385,7 @@ Důkaz: 320–1440 px, samostatná karta, blokovaný popup, čtečky Mac/iPhone.
 Závislosti: U01 pro zobrazení chyb.
 
 U03 / P1 / M — Kompaktní dokumentová pracovní plocha (N03,N04,N09,N11).
+Stav: HOTOVO LOKÁLNĚ 2026-09-14; cíl zmenšení splněný, Safari přejímka čeká.
 Hledání první; zdroje a nulové stavy kompaktně; pracovní fronta s detaily.
 Přestat natahovat karty podle jiné karty; zachovat review skupiny, reference,
 čtení, termínové akce, zkrácení a přesný ScanDocu vstup. Použít existující
@@ -499,8 +506,8 @@ Závěr ke struktuře:
 - Browser rozměry z fixture nejsou skutečné počty Mílových dokumentů ani
   důkaz shody se všemi verzemi Safari. Fyzický Mac/iPhone test zůstává nutný.
 - Barevné/přístupnostní cíle nejsou výsledkem úplného WCAG auditu.
-- Míla následně schválil zahájení vývoje; U01/U02 jsou lokálně implementované.
-  U03–U11 zůstávají plánem. Push a nasazení tohoto kroku dosud neproběhly.
+- Míla následně schválil zahájení vývoje; U01–U03 jsou lokálně implementované.
+  U04–U11 zůstávají plánem. Push a nasazení tohoto kroku dosud neproběhly.
 
 10. ZDROJE A OPĚRNÉ BODY
 -----------------------

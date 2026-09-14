@@ -1,14 +1,15 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-14 14:18 CEST. U01/U02 hotové lokálně; AuditCockpit56_2.txt v2.2.
-- U02: neořezaná pružná hlavička, návrat nákupní čtečky s openerem i bez něj, srozumitelný postup při odmítnutém zavření. Obě čtečky pokračují v návratu i po selhání focus původního okna.
-- Blokovaný popup e-mailu, katalogu či ScanDocu nabízí HTTP(S) odkaz do nové karty bez openeru. Rozepsaný Cockpit zůstává otevřený; další zpráva odkaz odstraní.
-- Důkaz: 5 browser scénářů 320–1440 px; hlavička bez oříznutých tlačítek/přetečení, obě čtečky a tři popup cesty. 15 frontendových testů včetně nezměněných potvrzení tisku. `reports/cockpit_ui_u02_2026_09_14.json`.
-- Dodání: lokální vývoj, nový push/nasazení neprovedeny. Starší nasazení 10ec0877 je předchozí ověřený podklad, nikoli nový živý audit.
-- Další krok U03: kompaktní Dokumenty a hledání nahoře; potom U04 stránkování.
-- Rizika/přejímka: fyzický Safari Mac/iPhone a čtečky obrazovky dosud neověřené. Hlavička je nyní pravdivě vyšší podle obsahu, mobilní navigace čeká na pozdější redesign. U01 má jednu poslední zprávu.
-- Záloha odložená kvůli disku; Santiago jen zvažované téma. Nesledovaná složka jiného projektu v nadřazeném repozitáři zachovaná mimo tento commit.
+- Aktualizováno: 2026-09-14 14:44 CEST. U01–U03 hotové lokálně; AuditCockpit56_2.txt v2.3.
+- U03: hledání před dokumentovými kartami; obecný přehled při práci s Dokumenty sbalený. Hlavní provozní stav, čas kontroly, urgentní upozornění a potvrzení zůstávají viditelné mimo přehled.
+- Ověřené prázdné karty jsou krátké rozbalovací řádky. Práce/chyba se otevře, ruční rozbalení přežije obnovu stejného stavu. Zdroje jsou v detailu, chyba detail otevře; dlouhé seznamy lze posouvat včetně klávesnice.
+- Důkaz: proti shodným fixture původního auditu desktop klid 1764→900 px, práce 3320→1643 px; mobil práce 5285→2577 px. Šest měření a tři behaviorální browser scénáře, 15 frontendových testů včetně dvou nových chybových případů revizí; statická brána prošla. `reports/cockpit_ui_u03_2026_09_14.json`.
+- Zachováno: revizní reference a přesný ScanDocu vstup, čtení, termínové potvrzení, case detail, zkrácení a backendové deduplikace. Název monitoru odpovídá skutečným intervalům 5/30 minut.
+- Dodání: lokální vývoj, bez nového push/nasazení. Dřívější nasazení 10ec0877 je historický ověřený podklad, nikoli aktuální živý audit.
+- Další krok U04: stránkování dokumentového hledání (dnes stále standardně prvních 8 výsledků).
+- Rizika/přejímka: fyzický Safari Mac/iPhone a čtečky obrazovky dosud neověřené; vnitřní posouvání seznamů ověřené v emulaci. Úplná navigace/grafika je pozdější krok.
+- Záloha odložená kvůli disku; Santiago pouze zvažované. Cizí nesledovaná složka mimo tento commit zachovaná.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Cockpit / hlavní architektura
@@ -1018,3 +1019,22 @@ Technický důkaz:
 - 15 frontendových testů včetně návratů a tisku; pět izolovaných browser scénářů od 320 do 1440 px. Report `reports/cockpit_ui_u02_2026_09_14.json`.
 - Fyzická přejímka Safari po samostatně schváleném nasazení. Cizí nesledovaný adresář zachovaný, změna pouze v konkrétních souborech Cockpitu.
 - Doplněné ověření: statická brána prošla, U01 regrese ve čtyřech šířkách (16 dialogů a pět odpovědí v každé) také prošla.
+
+### 2026-09-14 14:44 CEST — U03: kompaktní dokumentová plocha
+
+Hotovo:
+- Hledání je nahoře, ověřené nuly mají 43px rozbalovací řádek; skutečná práce a chyby se otevřou. Zdrojové souhrny jsou v detailu. Obecný přehled se při otevření Dokumentů sbalí, hlavní stav a naléhavé prvky zůstávají mimo něj.
+- Klidný desktop se ve fixture vejde do jedné obrazovky: 1764→900 px proti auditu. Naplněný desktop 3320→1643 px; mobil 5285→2577 px. Jde o výšku, nikoli čas běhu.
+
+Rozhodnutí:
+- Míla schválil U03. Zachované funkční reference, potvrzení, deduplikace i backend; menší zobrazení vzniklo sbalením a rozložením. Publikace/nasazení tímto krokem neprovedené.
+
+Další krok:
+- U04: napojit stránkování hledání přes HTTP a UI.
+
+Navrhované další kroky:
+- Později sjednocení stavů, navigace a grafiky podle TXT.
+
+Technický důkaz:
+- 15 frontendových testů, doplněné dva případy chyby revize; statická brána prošla. Šest syntetických měření a tři behaviorální scénáře: poslední položka klávesnicí, chybové karty, zdroje, revizní reference, zrušená připomínka bez zápisu, case detail, zkrácení, hledání a návrat přehledu.
+- `reports/cockpit_ui_u03_2026_09_14.json`. Fyzický Safari Mac/iPhone dosud neověřen; limity backendových seznamů nezměněné. Cizí nesledovaný adresář zachovaný.
