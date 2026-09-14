@@ -59,6 +59,8 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] Camino založené v Human–Adam, podklady v0.4; nejdřív meziúkol, potom C00 (read-only audit prostředí). Vývoj aplikace dosud nezahájen.
+
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` - Cockpit 14. 9.: scroll 10ec0877 potvrzený Mílou. [PRIPOMENOUT] U07 až při příštím pokračování. TXT v2.8 shrnuje U01–U06; plná brána 1680/1680 OK, funkční nasazení 980aed7a a smoke 5/5. Publikační překážka odstraněna; finální balíček/head ověřovat živým auditem.
 
 - `projects/python_se_samanthou.md`; `handoffs/python_se_samanthou_course_package_2026_09_06.md` - učebna Pythonu: Míla potvrdil 1.5/Codex na Linuxu. Nový samostatný balíček Praktické úlohy přidává 7 lekcí (celkem 21); kopíruje se jen do kurzy. 62 testů a GUI nad nezměněnou 1.5 prošly; obsahový ZIP v LocalSendu.

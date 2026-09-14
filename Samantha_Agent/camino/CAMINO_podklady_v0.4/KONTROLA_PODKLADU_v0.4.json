@@ -1,0 +1,33 @@
+{
+  "date": "2026-09-14",
+  "scope": "Kontrola dokumentace, nikoli provedení testů aplikace",
+  "screens": 15,
+  "functional_rules": 73,
+  "test_scenarios": 80,
+  "test_execution_status": "NEPROVEDENO",
+  "rule_identifiers_unique_and_contiguous": true,
+  "test_identifiers_unique_and_contiguous": true,
+  "each_rule_has_at_least_one_test_reference": true,
+  "html_local_links_and_fragments_valid": true,
+  "historical_files_unchanged_sha256": {
+    "CAMINO_pracovni_navrh_v0.2-DRAFT.md": "b6b3bfc93894684700a328588059c962ae20667411d50b648d06632485721911",
+    "v0.3/CAMINO_plan_Codex_v0.3.md": "a3ccc9f54eec3835a8e5d200bee3171ebcdbb64055e8a9e41a81b6db6eb7bcfe",
+    "v0.3/CAMINO_navrh_v0.3.md": "cb85de592c86ba65a0c2f4f6ee9caa6535905b12df7699ff3b8fc1c521d87867"
+  },
+  "application_created": false,
+  "device_tests_performed": false,
+  "visual_review": {
+    "format": "HTML reading copy only",
+    "desktop_viewport": [
+      1440,
+      1000
+    ],
+    "mobile_viewport": [
+      390,
+      844
+    ],
+    "desktop_and_mobile_screenshots_inspected": true,
+    "mobile_document_horizontal_overflow": false,
+    "application_UI_implemented_or_tested": false
+  }
+}

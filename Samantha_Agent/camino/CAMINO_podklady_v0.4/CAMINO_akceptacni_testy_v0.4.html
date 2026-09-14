@@ -1,0 +1,648 @@
+<!doctype html>
+<html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light"><title>Camino — akceptační scénáře v0.4</title><style>
+:root{color-scheme:light;--ink:#172b3a;--muted:#536775;--line:#dce6ea;--accent:#166c70;--paper:#fff;--bg:#f1f5f6;--soft:#edf6f5}
+*{box-sizing:border-box}body{overflow-wrap:anywhere}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:#155e71;text-decoration-thickness:1px;text-underline-offset:3px}a:hover{color:#073841}.top{padding:15px 26px;background:#153746;color:white;border-bottom:4px solid #4da6a0}.top strong{letter-spacing:.12em;font-size:13px}.top span{font-size:13px;margin-left:18px;color:#d5e8e8}.layout{max-width:1420px;display:grid;grid-template-columns:268px minmax(0,1fr);gap:28px;margin:28px auto;padding:0 24px}.toc{position:sticky;top:20px;align-self:start;max-height:calc(100vh - 40px);overflow:auto;padding:14px 14px 20px;background:var(--paper);border:1px solid var(--line);border-radius:12px;font-size:13px;line-height:1.5}.toc summary{font-size:14px;font-weight:700;padding:3px 0 12px;cursor:pointer}.toc a{display:block;margin:0 0 9px;text-decoration:none;color:var(--muted)}.toc a:hover{color:var(--accent)}main{min-width:0;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:42px 48px;box-shadow:0 8px 30px #16354506}h1{font-size:36px;line-height:1.2;letter-spacing:-.035em;margin:14px 0 24px;max-width:900px}h2{font-size:26px;line-height:1.3;letter-spacing:-.02em;margin:50px 0 18px;padding-top:20px;border-top:2px solid var(--line);scroll-margin-top:24px}h3{font-size:20px;line-height:1.4;margin-top:28px;scroll-margin-top:24px}p{margin:13px 0}strong{font-weight:680}blockquote{margin:24px 0;padding:16px 22px;background:var(--soft);border-left:4px solid var(--accent);border-radius:0 8px 8px 0}blockquote p{margin:0}code{font:14px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere;background:#f0f4f6;border-radius:4px;padding:2px 4px}pre{overflow:auto;padding:18px 20px;background:#f1f5f7;border:1px solid var(--line);border-radius:8px;font-size:14px;line-height:1.55}pre code{padding:0;background:transparent;white-space:pre;overflow-wrap:normal}.table-wrap{overflow-x:auto;margin:22px 0;border:1px solid var(--line);border-radius:8px}table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.55;min-width:580px}th{background:#eaf2f3;color:#234652;text-align:left;font-size:13px}th,td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}tr:last-child td{border-bottom:0}tbody tr:nth-child(even){background:#fafcfc}ul,ol{padding-left:24px}li{margin:6px 0}.docnav{display:flex;gap:10px 18px;flex-wrap:wrap;font-size:13px;margin-bottom:14px;padding-bottom:18px;border-bottom:1px solid var(--line)}.docnav a{text-decoration:none}.notice{font-size:13px;line-height:1.5;color:var(--muted);border:1px solid var(--line);background:#f8fafb;padding:10px 14px;border-radius:7px}.foot{margin-top:44px;padding-top:18px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}.source-ref{font-size:.83em;text-decoration:none;padding:0 2px}p:target,h2:target,h3:target{background:#f1f8f6}.toc::-webkit-scrollbar{width:5px}.toc::-webkit-scrollbar-thumb{background:#b8cdd0;border-radius:4px}
+@media(max-width:1000px){.layout{grid-template-columns:220px minmax(0,1fr);gap:18px;padding:0 14px}main{padding:30px}.toc{font-size:12px}}
+@media(max-width:760px){body{font-size:16px}.top{padding:14px 18px}.top span{display:block;margin:5px 0 0}.layout{display:block;margin:16px auto;padding:0 12px}.toc{position:static;max-height:230px;margin-bottom:16px}main{padding:25px 19px;border-radius:10px}h1{font-size:29px}h2{font-size:23px;margin-top:38px}h3{font-size:19px}.docnav{font-size:12px}pre{font-size:12px;padding:13px}table{font-size:13px}.notice{font-size:12px}}
+@media print{body{background:white;font-size:10pt}.top,.toc,.docnav,.notice{display:none}.layout{display:block;padding:0;margin:0;max-width:none}main{border:0;padding:0;box-shadow:none}.table-wrap{overflow:visible;border-radius:0}table{min-width:0;font-size:8pt}pre{white-space:pre-wrap}h1{font-size:24pt}h2{font-size:17pt;page-break-after:avoid}h3{page-break-after:avoid}a{color:inherit;text-decoration:none}tr{break-inside:avoid}}
+</style></head><body>
+<header class="top"><strong>CAMINO / v0.4</strong><span>Funkční specifikace · 14. září 2026</span></header>
+<div class="layout"><aside class="toc"><details open><summary>Obsah dokumentu</summary><a href="#section-1">Příprava a rychlé zachycení</a><a href="#section-2">Video, audio a skutečný mikrofon</a><a href="#section-3">Deník, čas, poloha a import</a><a href="#section-4">Přenos, úložiště a obnova</a><a href="#section-5">AI, rodinné výstupy a závěrečné brány</a><a href="#section-6">Jak testy použít při přejímce</a></details></aside><main><nav class="docnav" aria-label="Soubory balíčku"><a href="CAMINO_funkcni_specifikace_v0.4.html">Specifikace</a><a href="CAMINO_akceptacni_testy_v0.4.html">Testovací scénáře</a><a href="CAMINO_Codex_v0.4.html">Codex</a><a href="CAMINO_zmeny_v0.4.html">Změny</a><a href="README_v0.4.html">Soubory</a></nav><div class="notice">Čtecí kopie dokumentace. Aplikace není tímto podkladem prohlášena za implementovanou; všechny akceptační zkoušky mají stav NEPROVEDENO.</div><h1>Camino — akceptační scénáře v0.4</h1>
+<p><strong>Datum:</strong> 14. září 2026. <strong>Stav všech níže uvedených scénářů:</strong> NEPROVEDENO. Jde o zadání testů, nikoli zprávu o funkčnosti aplikace.</p>
+<p>Navazuje na <code>CAMINO_funkcni_specifikace_v0.4.md</code>. Značky F odkazují na její funkční pravidla. <strong>A</strong> = automatizovatelný test logiky, <strong>I</strong> = integrační test procesů a úložišť, <strong>D</strong> = skutečné zařízení / fyzická zkouška. Kombinace znamená, že softwarový test nenahrazuje zařízení.</p>
+<p>Pro každý provedený test zaznamenat verzi klienta/serveru, skutečné zařízení a systém, vstupní podmínky, provedené kroky, očekávání, skutečnost a důkaz. Výsledek je PASS / FAIL / BLOCKED / NEPROVEDENO; bez důkazu nepoužívat PASS. Testy pracují se syntetickými médii nebo výslovně určenými testovacími nahrávkami. Automatické běhy používají mock AI; skutečný placený pilot je samostatný schválený krok.</p>
+<h2 id="section-1">Příprava a rychlé zachycení</h2>
+<div aria-label="Tabulka, při malé šířce lze posouvat" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Rozsah / typ</th>
+<th>Pravidla</th>
+<th>Zkouška</th>
+<th>Požadovaný výsledek</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>T001</td>
+<td>P0 · A,D</td>
+<td>F07</td>
+<td>Bez sítě vytvořit zkušební cestu, pak skutečnou; změnit aktivní cestu.</td>
+<td>Obě mají různá ID; obsah se nemíchá; bez serveru lze zaznamenávat.</td>
+</tr>
+<tr>
+<td>T002</td>
+<td>P0 · D</td>
+<td>F08</td>
+<td>Postupně odmítnout kameru, mikrofon, polohu a oznámení; ostatní ponechat.</td>
+<td>Každé odmítnutí omezí jen nutnou funkci; není nucené opakování všech dialogů.</td>
+</tr>
+<tr>
+<td>T003</td>
+<td>P0 · A,I,D</td>
+<td>F09,F65</td>
+<td>Použít platný, prošlý a znovu použitý párovací údaj; odvolat zařízení.</td>
+<td>Platný funguje jednou; neplatný neudělí přístup; místní média zůstávají.</td>
+</tr>
+<tr>
+<td>T004</td>
+<td>P0 · A,D</td>
+<td>F10,F44</td>
+<td>Rychle dvakrát klepnout na Komentář při startu mikrofonu.</td>
+<td>Jedna session a jeden Moment; stav Připravuji není označen Nahrávám.</td>
+</tr>
+<tr>
+<td>T005</td>
+<td>P0 · A,D</td>
+<td>F02,F10</td>
+<td>Zapnout režim Jen pro mě, uložit, vrátit se a aplikaci restartovat.</td>
+<td>Nové záznamy zůstávají zamčené do ruční změny; staré Momenty se nemění.</td>
+</tr>
+<tr>
+<td>T006</td>
+<td>P0 · A,D</td>
+<td>F11</td>
+<td>Označit okamžik bez média, pak zvlášť označit hvězdičkou starší Moment.</td>
+<td>Dvě různé akce; značka má čas a režim, sama nezapne mikrofon.</td>
+</tr>
+<tr>
+<td>T007</td>
+<td>P0 · I,D</td>
+<td>F12,F42</td>
+<td>Pořídit fotografii a simulovat chybu dokončení zápisu.</td>
+<td>Hláška Uloženo až po zápisu; při chybě se předchozí média nemažou.</td>
+</tr>
+<tr>
+<td>T008</td>
+<td>P0 · A,D</td>
+<td>F01,F21,F38</td>
+<td>Uložit dva rychlé snímky, přidat komentář k prvnímu a další foto do jeho detailu.</td>
+<td>Dva samostatné Momenty; explicitní přílohy patří prvnímu; stabilní ID.</td>
+</tr>
+<tr>
+<td>T009</td>
+<td>P0 · D</td>
+<td>F08,F12</td>
+<td>Otevřít Foto bez povolené kamery.</td>
+<td>Jasné vysvětlení a návrat; audio a deník dále fungují.</td>
+</tr>
+<tr>
+<td>T010</td>
+<td>P0 · A,I</td>
+<td>F03,F24</td>
+<td>K nahrávce vytvořit korekturu a ruční revizi; zkontrolovat původní soubor.</td>
+<td>Hash originálu je stejný; původní text i další revize dohledatelné.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="section-2">Video, audio a skutečný mikrofon</h2>
+<div aria-label="Tabulka, při malé šířce lze posouvat" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Rozsah / typ</th>
+<th>Pravidla</th>
+<th>Zkouška</th>
+<th>Požadovaný výsledek</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>T011</td>
+<td>P0 · I,D</td>
+<td>F13,F44</td>
+<td>Natočit klip, Stop, ihned přejít na hlavní obrazovku a znovu otevřít.</td>
+<td>Dokončený klip přehratelný; čas a zvuk správné; nevzniknou duplicity.</td>
+</tr>
+<tr>
+<td>T012</td>
+<td>P0 · I,D</td>
+<td>F13</td>
+<td>Natočit nebo importovat video na výšku a na šířku.</td>
+<td>Obě orientace uložené správně bez nevratného ořezu; metadata zachována.</td>
+</tr>
+<tr>
+<td>T013</td>
+<td>P0 · D</td>
+<td>F14</td>
+<td>Zakázat mikrofon při povolené kameře a zvolit výslovně video bez zvuku.</td>
+<td>Před Start i při nahrávání viditelné Bez zvuku; žádný skrytý fallback.</td>
+</tr>
+<tr>
+<td>T014</td>
+<td>P0 · D</td>
+<td>F14</td>
+<td>Během videa zamknout telefon, opustit aplikaci a samostatně vyvolat přerušení.</td>
+<td>Pokus o dokončení, po návratu pravdivý úplný/částečný stav; žádný slib běžící kamery.</td>
+</tr>
+<tr>
+<td>T015</td>
+<td>P0 · I,D</td>
+<td>F15</td>
+<td>Nahrát krátký komentář i úvahu, ukončit a přehrát.</td>
+<td>Správný typ, skutečný čas, příslušný Moment; bez povinného názvu a schválení.</td>
+</tr>
+<tr>
+<td>T016</td>
+<td>P0 · D</td>
+<td>F16,F18</td>
+<td>Na skutečném telefonu nahrávat 30 minut, většinu se zamčenou obrazovkou.</td>
+<td>Celý skutečně zachycený průběh přehratelný, návaznost částí doložená poslechem a časem.</td>
+</tr>
+<tr>
+<td>T017</td>
+<td>P0 · D</td>
+<td>F16</td>
+<td>Nahrávat vestavěným mikrofonem, ověřit jeho označení a slyšitelnost řeči.</td>
+<td>UI ukazuje skutečný vstup; sluchátka nejsou nesprávně deklarována jako nutná.</td>
+</tr>
+<tr>
+<td>T018</td>
+<td>P0 · D</td>
+<td>F16</td>
+<td>Otestovat dostupná sluchátka při stání i chůzi se zamčeným telefonem.</td>
+<td>Slyšitelný hlas a skutečně vybraný vstup; zaznamenat omezení větru i připojení.</td>
+</tr>
+<tr>
+<td>T019</td>
+<td>P0 · D</td>
+<td>F17</td>
+<td>Vyvolat příchozí hovor, jednou ignorovat a jednou přijmout.</td>
+<td>Zachovaný dosavadní zvuk, jasné přerušení; žádný záznam hovoru a samovolné pokračování.</td>
+</tr>
+<tr>
+<td>T020</td>
+<td>P0 · D</td>
+<td>F17</td>
+<td>Odpojit a připojit aktivní mikrofon za běhu nahrávání.</td>
+<td>Nezůstane falešné Nahrávám; pokračování až po akci, nová část s označenou mezerou.</td>
+</tr>
+<tr>
+<td>T021</td>
+<td>P0 · A,D</td>
+<td>F15,F16</td>
+<td>Při úvaze chtít spustit video, přehrávání a jinou úvahu; přepnout jinam a zpět.</td>
+<td>Ne soupeřící dvě session; návrat k aktivnímu záznamu bez jeho nechtěného zrušení.</td>
+</tr>
+<tr>
+<td>T022</td>
+<td>P0 · I,D</td>
+<td>F18,F42</td>
+<td>Po několika uzavřených částech ukončit proces v různých fázích dalšího zápisu.</td>
+<td>Dříve uzavřené části se obnoví; chybějící konec je označen, ne domyšlen.</td>
+</tr>
+<tr>
+<td>T023</td>
+<td>P0 · I,D</td>
+<td>F18</td>
+<td>Zkontrolovat přechody segmentů pomocí souvislého testovacího zvuku a časových značek.</td>
+<td>Bez opakování či nevysvětlených děr; checkpoint cíl doložen, nikoli jen existence souborů.</td>
+</tr>
+<tr>
+<td>T024</td>
+<td>P0 · A,D</td>
+<td>F17,F18</td>
+<td>Otevřít aplikaci po pádu s rozpracovaným audiem.</td>
+<td>Obnova nesmí sama aktivovat mikrofon; nabídne přehratelný zachovaný rozsah.</td>
+</tr>
+<tr>
+<td>T025</td>
+<td>P0 · D</td>
+<td>F08,F15</td>
+<td>První žádost o mikrofon odmítnout a později povolit.</td>
+<td>Po změně oprávnění jasný vědomý Start; další běžný záznam je jednoduchý.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="section-3">Deník, čas, poloha a import</h2>
+<div aria-label="Tabulka, při malé šířce lze posouvat" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Rozsah / typ</th>
+<th>Pravidla</th>
+<th>Zkouška</th>
+<th>Požadovaný výsledek</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>T026</td>
+<td>P0 · A,D</td>
+<td>F05,F19</td>
+<td>Vypnout síť a otevřít den s místními záznamy a již staženým souhrnem.</td>
+<td>Galerie a stažený text jsou čitelné; neexistující souhrn se nepředstírá.</td>
+</tr>
+<tr>
+<td>T027</td>
+<td>P0 · A,I</td>
+<td>F40</td>
+<td>Stejné médium přijmout na serveru s jiným časovým pásmem a až za dva dny.</td>
+<td>Patří do původní místní kapitoly, nikoli do dne příjmu na Mac.</td>
+</tr>
+<tr>
+<td>T028</td>
+<td>P0 · A</td>
+<td>F40</td>
+<td>Změnit časové pásmo a zvlášť vyzkoušet opakující se hodinu změny času.</td>
+<td>Historické časy a offsety se zachovají; délka médií není chybné odečtení hodin.</td>
+</tr>
+<tr>
+<td>T029</td>
+<td>P0 · A,I</td>
+<td>F40</td>
+<td>Nahrávka začne před místní půlnocí a skončí po ní.</td>
+<td>Kapitola podle začátku, konec a délka skutečné, bez dvojité úvahy.</td>
+</tr>
+<tr>
+<td>T030</td>
+<td>P0 · A,D</td>
+<td>F22,F40</td>
+<td>Večer namluvit vzpomínku k dopolednímu Momentu a změnit její kapitolu.</td>
+<td>Zachován čas večerního audia i vazba; změna nepřepisuje originální metadata.</td>
+</tr>
+<tr>
+<td>T031</td>
+<td>P0 · D</td>
+<td>F41</td>
+<td>Zaznamenávat s odmítnutou nebo nedostupnou polohou.</td>
+<td>Foto/audio nečekají; poloha neznámá, bez domyšleného místa.</td>
+</tr>
+<tr>
+<td>T032</td>
+<td>P0 · A,D</td>
+<td>F41</td>
+<td>Nabídnout cache polohy starší než 120 s a zvlášť bod s nízkou přesností.</td>
+<td>Stará pozice není aktuální; nízká přesnost je viditelná; žádná falešná kilometráž.</td>
+</tr>
+<tr>
+<td>T033</td>
+<td>P0 · I,D</td>
+<td>F25</td>
+<td>Importovat plné médium, poté odstranit položku ze systémových Fotek.</td>
+<td>Dokončená kopie aplikace zůstane přehratelná a má svou provenienci.</td>
+</tr>
+<tr>
+<td>T034</td>
+<td>P0 · D</td>
+<td>F25</td>
+<td>Offline vybrat cloudovou položku dostupnou jen náhledem a později připojit síť.</td>
+<td>Čekání je odlišeno od hotového importu; po stažení ověřen celý soubor.</td>
+</tr>
+<tr>
+<td>T035</td>
+<td>P0 · A,I,D</td>
+<td>F26</td>
+<td>Importovat stejnou položku opakovaně a totéž médium pod jinou reprezentací.</td>
+<td>Pravá shoda nevytváří nechtěnou duplicitu; jiná data nejsou tajně nahrazena.</td>
+</tr>
+<tr>
+<td>T036</td>
+<td>P0 · A,I</td>
+<td>F26,F40</td>
+<td>Import s chybějícím datem nebo offsetem.</td>
+<td>Označená nejistota a přiřazení kapitoly; nevymyšlený údaj o pořízení.</td>
+</tr>
+<tr>
+<td>T037</td>
+<td>P0 · D</td>
+<td>F25</td>
+<td>Vybrat Live Photo a upravený snímek.</td>
+<td>P0 statický import je označen; skutečná přijatá reprezentace není vydána za úplný senzorový originál.</td>
+</tr>
+<tr>
+<td>T038</td>
+<td>P0 · A,I</td>
+<td>F24,F39</td>
+<td>Ručně opravit text během opožděné AI generace.</td>
+<td>Lidská revize zůstane aktuální; AI výsledek jen samostatná historie.</td>
+</tr>
+<tr>
+<td>T039</td>
+<td>P0 · A,D</td>
+<td>F24,F42</td>
+<td>Upravit koncept, přerušit aplikaci a vrátit se.</td>
+<td>Obnovitelný koncept bez nechtěného publikování nebo ztráty předchozí revize.</td>
+</tr>
+<tr>
+<td>T040</td>
+<td>P0 · A,I,D</td>
+<td>F23,F61</td>
+<td>Skrýt a obnovit běžný i zamčený Moment; sledovat souhrn.</td>
+<td>Originály zůstávají; původní zámek se obnoví; automatické odvozeniny nejsou vydány za aktuální.</td>
+</tr>
+<tr>
+<td>T041</td>
+<td>P0 · A,I,D</td>
+<td>F02,F21,F60</td>
+<td>K běžné fotografii přidat soukromý dovětek.</td>
+<td>Dvě správně propojené identity; běžná fotografie se nesloučí se zamčeným zdrojem.</td>
+</tr>
+<tr>
+<td>T042</td>
+<td>P0 · A,I</td>
+<td>F53,F58</td>
+<td>Předat zamčenou úvahu zkušebnímu AI adaptéru.</td>
+<td>Přepis povolen, uložen jen do osobního kontextu; zámek nezakazuje AI.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="section-4">Přenos, úložiště a obnova</h2>
+<div aria-label="Tabulka, při malé šířce lze posouvat" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Rozsah / typ</th>
+<th>Pravidla</th>
+<th>Zkouška</th>
+<th>Požadovaný výsledek</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>T043</td>
+<td>P0 · I,D</td>
+<td>F47,F48</td>
+<td>Uprostřed uploadu velkého videa přerušit síť a poté obnovit.</td>
+<td>Doplní se chybějící části, konečný hash shodný, jediný Asset.</td>
+</tr>
+<tr>
+<td>T044</td>
+<td>P0 · I</td>
+<td>F48</td>
+<td>Server finalizuje, ale potvrzení se k telefonu nedostane.</td>
+<td>Telefon dotazem zjistí hotový zdroj; nevytvoří duplicitu.</td>
+</tr>
+<tr>
+<td>T045</td>
+<td>P0 · A,I</td>
+<td>F48</td>
+<td>Poškodit jeden chunk, vynechat část a dodat chybný celkový hash.</td>
+<td>Žádná varianta není potvrzena jako ověřený originál.</td>
+</tr>
+<tr>
+<td>T046</td>
+<td>P0 · A,I</td>
+<td>F39,F47</td>
+<td>Opakovat shodnou operaci a potom tentýž identifikátor použít s jinými bajty.</td>
+<td>Shodná idempotentní; rozdílná konflikt bez tichého přepsání.</td>
+</tr>
+<tr>
+<td>T047</td>
+<td>P0 · D</td>
+<td>F46,F49</td>
+<td>Při přenosu zamknout telefon a samostatně aplikaci nuceně ukončit.</td>
+<td>Po dalším spuštění poctivé porovnání fronty; žádný falešný příslib doběhnutí.</td>
+</tr>
+<tr>
+<td>T048</td>
+<td>P0 · D</td>
+<td>F45,F46</td>
+<td>Cizí Wi-Fi, přihlašovací portál, přechod sítě a nedostupný tailnet.</td>
+<td>Jasné čekání, pokračování po vyřešení; žádný veřejný alternativní upload.</td>
+</tr>
+<tr>
+<td>T049</td>
+<td>P0 · A,D</td>
+<td>F28</td>
+<td>Povolit mobilní přenos jedné dávce a následně pořídit nové video.</td>
+<td>Povolení se nepřenese na nová média; respektuje pozastavení a typ sítě.</td>
+</tr>
+<tr>
+<td>T050</td>
+<td>P0 · A,I,D</td>
+<td>F27,F44</td>
+<td>Dosáhnout 100 % bytového přenosu, ale zadržet serverové ověření.</td>
+<td>UI říká Ověřuji, nikoli Ověřeno na Macu.</td>
+</tr>
+<tr>
+<td>T051</td>
+<td>P0 · I,D</td>
+<td>F05,F29</td>
+<td>Vypnout server a dále pořizovat všechny typy záznamů.</td>
+<td>Místní záznam a čtení fungují, příčina nedosažitelnosti není vymyšlená.</td>
+</tr>
+<tr>
+<td>T052</td>
+<td>P0 · I</td>
+<td>F29,F43,F48</td>
+<td>Zaplnit cílové úložiště Macu během příjmu.</td>
+<td>Nevrátí úspěšné dokončení; telefon drží originál; ostatní data nepoškodí.</td>
+</tr>
+<tr>
+<td>T053</td>
+<td>P0 · A,I</td>
+<td>F49,F50</td>
+<td>Změnit text, soukromí a kapitolu u již přeneseného videa.</td>
+<td>Jen metadata, žádné nové celé video; potvrzené pořadí bez přeskočení změn.</td>
+</tr>
+<tr>
+<td>T054</td>
+<td>P0 · A,I,D</td>
+<td>F04,F27,F63</td>
+<td>Dokončit AI bez zálohy a zálohu bez přepisu.</td>
+<td>Čtyři oddělené pravdivé stavy; žádná univerzální zelená kontrolka.</td>
+</tr>
+<tr>
+<td>T055</td>
+<td>P0 · A,I</td>
+<td>F63</td>
+<td>Po ověřené záloze změnit soukromí a text.</td>
+<td>Média mohou zůstat ověřená, ale nová metadatová revize čeká na další snapshot.</td>
+</tr>
+<tr>
+<td>T056</td>
+<td>P0 · I</td>
+<td>F62</td>
+<td>Odpojit záložní disk, na jeho místě ponechat složku se stejným názvem.</td>
+<td>Žádná náhradní kopie na chybný disk a falešné potvrzení.</td>
+</tr>
+<tr>
+<td>T057</td>
+<td>P0 · I,D</td>
+<td>F62,F63,F64</td>
+<td>Obnovit celý testovací den do čistého úložiště.</td>
+<td>Všechny hashe, texty, zámky a vazby sedí; vybraná média skutečně otevřít.</td>
+</tr>
+<tr>
+<td>T058</td>
+<td>P0 · A,I</td>
+<td>F39,F49,F64</td>
+<td>Obnovit server ze starší kopie než má telefon.</td>
+<td>Nová epocha, porovnání inventáře, ochrana nových dat; exporty do vyřešení blokované.</td>
+</tr>
+<tr>
+<td>T059</td>
+<td>P0 · D</td>
+<td>F16,F42,F65</td>
+<td>Porovnat zamčení po prvním odemknutí a restart před prvním odemknutím.</td>
+<td>Výsledek audia, souborů, tokenu a fronty zaznamenán; ochrana dat nevypnuta plošně.</td>
+</tr>
+<tr>
+<td>T060</td>
+<td>P0 · I,D</td>
+<td>F43</td>
+<td>Snižovat místo před a během audia, videa a textu.</td>
+<td>Včasná pravdivá hláška, bezpečné dokončení kde možné, nikdy automatický výmaz originálů.</td>
+</tr>
+<tr>
+<td>T061</td>
+<td>P0 · A,I</td>
+<td>F42</td>
+<td>Simulovat pád mezi zápisem média, přesunem a zápisem databáze.</td>
+<td>Journal opraví osiřelé i rozpracované záznamy; žádné dvojité ani ztracené dokončené médium.</td>
+</tr>
+<tr>
+<td>T062</td>
+<td>P0 · I,D</td>
+<td>F32,F33</td>
+<td>Bez serveru exportovat den včetně zamčené úvahy a bez hotového přepisu.</td>
+<td>Úplné dostupné zdroje s manifestem; zřetelné varování o soukromém obsahu.</td>
+</tr>
+<tr>
+<td>T063</td>
+<td>P0 · I,D</td>
+<td>F32,F43</td>
+<td>Exportovat velkou dávku při prostoru menším než velikost celé dávky; přerušit a obnovit.</td>
+<td>Streamový/po dávkách postup; neúplný manifest nepředstírá hotovou zálohu.</td>
+</tr>
+<tr>
+<td>T064</td>
+<td>P0 · I,D</td>
+<td>F33</td>
+<td>Otevřít přenositelný archiv bez databázového serveru a AI.</td>
+<td>Čitelné HTML/Markdown, relativní odkazy, původní média a bezpečně escapované texty.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="section-5">AI, rodinné výstupy a závěrečné brány</h2>
+<div aria-label="Tabulka, při malé šířce lze posouvat" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Rozsah / typ</th>
+<th>Pravidla</th>
+<th>Zkouška</th>
+<th>Požadovaný výsledek</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>T065</td>
+<td>P0 · A,I</td>
+<td>F52,F59</td>
+<td>Vynutit chybu, odmítnutí a timeout s neznámým výsledkem AI.</td>
+<td>Archiv a záloha pokračují; konečné retry; nejasné zpoplatnění se eviduje.</td>
+</tr>
+<tr>
+<td>T066</td>
+<td>P0 · A,I</td>
+<td>F59</td>
+<td>Chybějící limit, dosažený limit a opakované zpracování stejného vstupu.</td>
+<td>Bez limitu mock/off; po vyčerpání stojí jen AI; hotový recept se zbytečně nevolá.</td>
+</tr>
+<tr>
+<td>T067</td>
+<td>P0 · A,I</td>
+<td>F54,F55</td>
+<td>Česká sada se zápory, čísly, hovorovou řečí, nejistotou a vlastními jmény.</td>
+<td>Předem známé kritické významy zachované; odchylky řešeny konzervativně a zaznamenány.</td>
+</tr>
+<tr>
+<td>T068</td>
+<td>P0 · A,I,D</td>
+<td>F53,F55</td>
+<td>Ticho, šum, vítr, cizí citace a přerušený konec věty.</td>
+<td>Nejasnost přiznaná, nevymyšlená řeč; uživateli nevzniká povinná redakce.</td>
+</tr>
+<tr>
+<td>T069</td>
+<td>P0 · A,I</td>
+<td>F56,F65</td>
+<td>V přepisu příkaz k výmazu, změně soukromí a HTML/script text.</td>
+<td>Pouze inertní obsah; žádný nástrojový účinek, XSS ani změna politiky.</td>
+</tr>
+<tr>
+<td>T070</td>
+<td>P0 · A,I</td>
+<td>F20,F57</td>
+<td>S řízenými hodinami opakovat změny, příjem bez přestání, opožděnou generaci a pozdní upload.</td>
+<td>Dávkování bez hladovění, neaktuální výsledek není aktuální; správná kapitola.</td>
+</tr>
+<tr>
+<td>T071</td>
+<td>P0 · A,I</td>
+<td>F20,F53</td>
+<td>Den pouze s fotkami/videi a žádným vlastním textem.</td>
+<td>Galerie funguje; žádná vymyšlená vizuální analýza ani automatická placená transkripce všeho.</td>
+</tr>
+<tr>
+<td>T072</td>
+<td>P1 · A,I</td>
+<td>F34,F35,F60</td>
+<td>Vložit jednoznačnou tajnou větu do zamčené úvahy a osobního souhrnu.</td>
+<td>Není ve vstupu AI pro rodinu, v textu, názvu, metadatech, zvuku ani cache výběru.</td>
+</tr>
+<tr>
+<td>T073</td>
+<td>P1 · A,I,D</td>
+<td>F35,F61</td>
+<td>Po sestavení náhledu uzamknout jeden jeho zdroj.</td>
+<td>Výběr zneplatněn před předáním; odemčení samo nic neposílá.</td>
+</tr>
+<tr>
+<td>T074</td>
+<td>P1 · A,I,D</td>
+<td>F35,F61</td>
+<td>Offline změnit soukromí a zkusit odeslat dříve připravený výběr.</td>
+<td>Odeslání blokované do aktuální kontroly; žádné autonomní publikování na serveru.</td>
+</tr>
+<tr>
+<td>T075</td>
+<td>P1 · I,D</td>
+<td>F35</td>
+<td>Exportovat snímek s GPS, XMP a otočením; prozkoumat výsledné bajty.</td>
+<td>Správný obraz, metadata skutečně očištěna; originál byte-for-byte nezměněný.</td>
+</tr>
+<tr>
+<td>T076</td>
+<td>P1 · D</td>
+<td>F36</td>
+<td>Předat výběr do cílové aplikace, jednou zrušit a jednou dokončit její workflow.</td>
+<td>Žádný automatický retry; Camino neprohlašuje neověřené doručení; ověřit reálný layout.</td>
+</tr>
+<tr>
+<td>T077</td>
+<td>P2 · A,I,D</td>
+<td>F67,F68,F69,F70</td>
+<td>Import skutečné trasy s mezerou, návrh střihu s vertikálním/HDR klipem, zamčeným zdrojem a náhradním hlasem.</td>
+<td>Mezera není měřená stopa; soukromý zdroj vyloučen; respektované revize, orientace a skutečný hlas.</td>
+</tr>
+<tr>
+<td>T078</td>
+<td>P0 · A,I,D</td>
+<td>F09,F30,F37,F45,F65,F66</td>
+<td>Neautorizovaný API/web přístup, traversal vstup, kontrola logů a restart zabezpečeného serveru.</td>
+<td>Žádný únik, veřejný endpoint ani destruktivní obcházení; nastavení a provozní stav pravdivé.</td>
+</tr>
+<tr>
+<td>T079</td>
+<td>P0 · I,D</td>
+<td>F66,F71,F73</td>
+<td>Instalace přes zamýšlenou cestu, ověření její platnosti, migrace a neúspěšný upgrade.</td>
+<td>Doložené skutečné zařízení; původní data a návratový postup zachované; žádné smyšlené PASS.</td>
+</tr>
+<tr>
+<td>T080</td>
+<td>P0 · A,I,D</td>
+<td>F06,F19,F31,F51,F71,F72,F73</td>
+<td>Zátěžová sada a realistický venkovní den; velký text, reálné sítě, baterie a objem dat.</td>
+<td>Použitelné ovládání, poctivé stavy a změřené výsledky; bez povinného večerního střihu.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="section-6">Jak testy použít při přejímce</h2>
+<p>P0 musí mít doložené výsledky T001–T071 a T078–T080 v rozsahu relevantním skutečné implementaci; test může mít automatickou i manuální část. T072–T076 jsou další povinná brána před zpřístupněním P1. T077 je souhrnná brána P2 a před vlastní implementací filmu se rozpadne na podrobné samostatné scénáře.</p>
+<p>U dílčího prototypu nevyžadovat předstírání celé sady. Například C01 dokládá jen zvukové testy, nikoli hotovou galerii nebo rodinné sdílení. Nově zjištěný edge case se přidá jako další test s novým ID; nepřepisuje se zpětně význam již použitých výsledků.</p>
+<p><strong>Záznam výsledku:</strong> <code>ID — verze — zařízení — předpoklady — kroky — skutečnost — důkaz — PASS/FAIL/BLOCKED — datum</code>. Při BLOCKED uvést přesně chybějící podmínku, například nepřítomný iPhone, nikoli označit celý projekt za nemožný.</p>
+<footer class="foot">Samantha pro Mílu · Zdrojový dokument: <a href="CAMINO_akceptacni_testy_v0.4.md">CAMINO_akceptacni_testy_v0.4.md</a> · HTML neobsahuje vzdálená písma, skripty ani analytiku.</footer></main></div></body></html>

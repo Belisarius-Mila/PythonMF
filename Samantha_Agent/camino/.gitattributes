@@ -1,0 +1,7 @@
+# Original Markdown uses two trailing spaces for intentional hard line breaks.
+# Preserve the imported bytes and SHA-256 manifest; other whitespace checks stay on.
+CAMINO_podklady_v0.4/CAMINO_Codex_v0.4.md whitespace=-blank-at-eol
+CAMINO_podklady_v0.4/CAMINO_funkcni_specifikace_v0.4.md whitespace=-blank-at-eol
+CAMINO_podklady_v0.4/historie/CAMINO_pracovni_navrh_v0.2-DRAFT.md whitespace=-blank-at-eol
+CAMINO_podklady_v0.4/historie/v0.3/CAMINO_navrh_v0.3.md whitespace=-blank-at-eol
+CAMINO_podklady_v0.4/historie/v0.3/CAMINO_plan_Codex_v0.3.md whitespace=-blank-at-eol

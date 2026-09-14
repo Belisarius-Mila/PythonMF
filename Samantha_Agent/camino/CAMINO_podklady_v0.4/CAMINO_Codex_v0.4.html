@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light"><title>Camino — předání a postupná zadání pro Codex v0.4</title><style>
+:root{color-scheme:light;--ink:#172b3a;--muted:#536775;--line:#dce6ea;--accent:#166c70;--paper:#fff;--bg:#f1f5f6;--soft:#edf6f5}
+*{box-sizing:border-box}body{overflow-wrap:anywhere}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:#155e71;text-decoration-thickness:1px;text-underline-offset:3px}a:hover{color:#073841}.top{padding:15px 26px;background:#153746;color:white;border-bottom:4px solid #4da6a0}.top strong{letter-spacing:.12em;font-size:13px}.top span{font-size:13px;margin-left:18px;color:#d5e8e8}.layout{max-width:1420px;display:grid;grid-template-columns:268px minmax(0,1fr);gap:28px;margin:28px auto;padding:0 24px}.toc{position:sticky;top:20px;align-self:start;max-height:calc(100vh - 40px);overflow:auto;padding:14px 14px 20px;background:var(--paper);border:1px solid var(--line);border-radius:12px;font-size:13px;line-height:1.5}.toc summary{font-size:14px;font-weight:700;padding:3px 0 12px;cursor:pointer}.toc a{display:block;margin:0 0 9px;text-decoration:none;color:var(--muted)}.toc a:hover{color:var(--accent)}main{min-width:0;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:42px 48px;box-shadow:0 8px 30px #16354506}h1{font-size:36px;line-height:1.2;letter-spacing:-.035em;margin:14px 0 24px;max-width:900px}h2{font-size:26px;line-height:1.3;letter-spacing:-.02em;margin:50px 0 18px;padding-top:20px;border-top:2px solid var(--line);scroll-margin-top:24px}h3{font-size:20px;line-height:1.4;margin-top:28px;scroll-margin-top:24px}p{margin:13px 0}strong{font-weight:680}blockquote{margin:24px 0;padding:16px 22px;background:var(--soft);border-left:4px solid var(--accent);border-radius:0 8px 8px 0}blockquote p{margin:0}code{font:14px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere;background:#f0f4f6;border-radius:4px;padding:2px 4px}pre{overflow:auto;padding:18px 20px;background:#f1f5f7;border:1px solid var(--line);border-radius:8px;font-size:14px;line-height:1.55}pre code{padding:0;background:transparent;white-space:pre;overflow-wrap:normal}.table-wrap{overflow-x:auto;margin:22px 0;border:1px solid var(--line);border-radius:8px}table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.55;min-width:580px}th{background:#eaf2f3;color:#234652;text-align:left;font-size:13px}th,td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}tr:last-child td{border-bottom:0}tbody tr:nth-child(even){background:#fafcfc}ul,ol{padding-left:24px}li{margin:6px 0}.docnav{display:flex;gap:10px 18px;flex-wrap:wrap;font-size:13px;margin-bottom:14px;padding-bottom:18px;border-bottom:1px solid var(--line)}.docnav a{text-decoration:none}.notice{font-size:13px;line-height:1.5;color:var(--muted);border:1px solid var(--line);background:#f8fafb;padding:10px 14px;border-radius:7px}.foot{margin-top:44px;padding-top:18px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}.source-ref{font-size:.83em;text-decoration:none;padding:0 2px}p:target,h2:target,h3:target{background:#f1f8f6}.toc::-webkit-scrollbar{width:5px}.toc::-webkit-scrollbar-thumb{background:#b8cdd0;border-radius:4px}
+@media(max-width:1000px){.layout{grid-template-columns:220px minmax(0,1fr);gap:18px;padding:0 14px}main{padding:30px}.toc{font-size:12px}}
+@media(max-width:760px){body{font-size:16px}.top{padding:14px 18px}.top span{display:block;margin:5px 0 0}.layout{display:block;margin:16px auto;padding:0 12px}.toc{position:static;max-height:230px;margin-bottom:16px}main{padding:25px 19px;border-radius:10px}h1{font-size:29px}h2{font-size:23px;margin-top:38px}h3{font-size:19px}.docnav{font-size:12px}pre{font-size:12px;padding:13px}table{font-size:13px}.notice{font-size:12px}}
+@media print{body{background:white;font-size:10pt}.top,.toc,.docnav,.notice{display:none}.layout{display:block;padding:0;margin:0;max-width:none}main{border:0;padding:0;box-shadow:none}.table-wrap{overflow:visible;border-radius:0}table{min-width:0;font-size:8pt}pre{white-space:pre-wrap}h1{font-size:24pt}h2{font-size:17pt;page-break-after:avoid}h3{page-break-after:avoid}a{color:inherit;text-decoration:none}tr{break-inside:avoid}}
+</style></head><body>
+<header class="top"><strong>CAMINO / v0.4</strong><span>Funkční specifikace · 14. září 2026</span></header>
+<div class="layout"><aside class="toc"><details open><summary>Obsah dokumentu</summary><a href="#section-1">1. Způsob práce</a><a href="#section-2">2. Etapy a malé části</a><a href="#section-3">3. První zadání připravené k vložení do Codexu — C00</a><a href="#section-9">4. Pravidla každé další předávky</a></details></aside><main><nav class="docnav" aria-label="Soubory balíčku"><a href="CAMINO_funkcni_specifikace_v0.4.html">Specifikace</a><a href="CAMINO_akceptacni_testy_v0.4.html">Testovací scénáře</a><a href="CAMINO_Codex_v0.4.html">Codex</a><a href="CAMINO_zmeny_v0.4.html">Změny</a><a href="README_v0.4.html">Soubory</a></nav><div class="notice">Čtecí kopie dokumentace. Aplikace není tímto podkladem prohlášena za implementovanou; všechny akceptační zkoušky mají stav NEPROVEDENO.</div><h1>Camino — předání a postupná zadání pro Codex v0.4</h1>
+<p><strong>Aktuální funkční zdroj:</strong> <code>CAMINO_funkcni_specifikace_v0.4.md</code><br/>
+<strong>Akceptace:</strong> <code>CAMINO_akceptacni_testy_v0.4.md</code><br/>
+<strong>Stav:</strong> zadání, nikoli implementace. V tomto balíčku se neprovedl build, párování ani test telefonu.</p>
+<h2 id="section-1">1. Způsob práce</h2>
+<p>Pracuj vždy na jednom zadaném kroku. Nepřeváděj dlouhou specifikaci na pokyn vyrobit celou aplikaci najednou. Zachovej pravidla U01–U11 a funkční význam F01–F73. Návrhové hodnoty D a technické parametry lze změnit na základě důkazu, s krátkým ADR; nevracej technický výběr uživateli jako dotazník.</p>
+<p>Před začátkem si přečti <code>AGENTS.md</code>, hlavní specifikaci a konkrétní úkol. Soubor AGENTS je krátké projektové vedení; úplná specifikace zůstává zvlášť. Používání <code>AGENTS.md</code> dokumentuje OpenAI: <code><a href="https://developers.openai.com/codex/guides/agents-md/">https://developers.openai.com/codex/guides/agents-md/</a></code>.</p>
+<p>Testovací data jsou syntetická. Všechny běžné testy mají mock AI. Neodesílej skutečné audio poskytovateli ani nekupuj členství bez samostatného provozního kroku. Souhlas s AI obsahem není schválená částka.</p>
+<p>Hardware, k němuž nemáš přístup, označ NEOVĚŘENO. Nespouštěj linuxový audit a nepopisuj jeho výsledek jako stav Mílova Macu. Nedokládej zkoušku zámku, Bluetooth nebo hovoru úspěšným unit testem. Audit nesmí bez dovolení změnit bezpečnostní nastavení, veřejnou síť, účty ani data.</p>
+<h2 id="section-2">2. Etapy a malé části</h2>
+<p>Pořadí C00–C11 zachovává v0.3. Uvnitř etapy jde o několik samostatných předávek, nikoli jeden obří commit.</p>
+<div aria-label="Tabulka, při malé šířce lze posouvat" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>Úkol</th>
+<th>Konkrétní výsledek</th>
+<th>Hlavní vazba na testy</th>
+<th>Co v tomto kroku ještě nedělat</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>C00</td>
+<td>Read-only audit vývojového Macu, iPhonu, instalace a odděleně domácího serveru.</td>
+<td>Podklady pro T079, G0</td>
+<td>Žádné nákupy, migrace ani plná aplikace.</td>
+</tr>
+<tr>
+<td>C01a</td>
+<td>Malý offline audio prototyp: Start/Stop, skutečný vstup, soubor a přehrání.</td>
+<td>T015,T017,T025</td>
+<td>Bez AI, galerie a finálního datového modelu.</td>
+</tr>
+<tr>
+<td>C01b</td>
+<td>Pokračování audia se zámkem, přerušení a vědomé pokračování.</td>
+<td>T016,T018–T021,T024,T059</td>
+<td>Bez vzdáleného ovládání libovolnými sluchátky.</td>
+</tr>
+<tr>
+<td>C01c</td>
+<td>Obnovitelné části a journal; doložení kontinuity a rozsahu ztráty po chybě.</td>
+<td>T022,T023,T061</td>
+<td>Neoznačovat neuzavřený úsek za zachráněný.</td>
+</tr>
+<tr>
+<td>C02a</td>
+<td>Minimální přijímač syntetického souboru a porovnání hashe přes soukromé HTTPS.</td>
+<td>Základ T043,T048,T051</td>
+<td>Ještě ne plný produkční upload server.</td>
+</tr>
+<tr>
+<td>C02b</td>
+<td>Experiment velkého souboru, souborových částí a chování iOS na cizí síti.</td>
+<td>T043,T047–T050</td>
+<td>Žádný veřejný alternativní endpoint.</td>
+</tr>
+<tr>
+<td>C03a</td>
+<td>Datové objekty, revize, časové příklady a politika soukromí.</td>
+<td>T005,T008,T027–T032,T039,T041</td>
+<td>Nepřidávat více autorů nebo sdílenou editaci.</td>
+</tr>
+<tr>
+<td>C03b</td>
+<td>Verze kontraktu API a kontraktní testy včetně chyb, epochy a idempotence.</td>
+<td>T044–T046,T053,T058</td>
+<td>Kontrakt nevytváří falešný důkaz chování telefonu.</td>
+</tr>
+<tr>
+<td>C04a</td>
+<td>Místní úložiště, hlavní obrazovka, zachycení Momentu a integrace audio modulu.</td>
+<td>T001–T010,T015,T024–T026</td>
+<td>Bez placené AI a rodinného exportu.</td>
+</tr>
+<tr>
+<td>C04b</td>
+<td>Foto a video: ukládání, připojení, orientace, tiché video a přerušení.</td>
+<td>T007–T014,T060</td>
+<td>Bez komplexního fotoaparátu a editoru klipů.</td>
+</tr>
+<tr>
+<td>C04c</td>
+<td>Import, správná reprezentace, nejistý čas a deduplikace.</td>
+<td>T033–T037</td>
+<td>Žádné skryté smazání ve Fotkách.</td>
+</tr>
+<tr>
+<td>C04d</td>
+<td>Dnes, detail, textový koncept, zámek, skrytí a lokální čtení.</td>
+<td>T019–T021,T026,T030,T038–T041</td>
+<td>Web jako druhý editor není P0.</td>
+</tr>
+<tr>
+<td>C04e</td>
+<td>Nouzový export bez serveru a bez duplicitní kopie celé cesty.</td>
+<td>T062–T064</td>
+<td>Nesmí být zaměněn s rodinným výběrem.</td>
+</tr>
+<tr>
+<td>C05a</td>
+<td>Produkční příjem částí, manifest, ověřená finalizace a obnova journalu.</td>
+<td>T043–T046,T052,T061</td>
+<td>Bez tvrzení přesně-jednou síťového doručení.</td>
+</tr>
+<tr>
+<td>C05b</td>
+<td>iOS fronta, priority, pauza, jednorázová mobilní dávka a znovuporovnání.</td>
+<td>T047–T053,T058</td>
+<td>Žádné skryté povolení dat pro budoucí média.</td>
+</tr>
+<tr>
+<td>C05c</td>
+<td>Čtyři stavové osy a uživatelské texty chyb.</td>
+<td>T050,T051,T054,T055</td>
+<td>Přepis není záloha.</td>
+</tr>
+<tr>
+<td>C06a</td>
+<td>Spravovaný start serveru, autorizační režim, soukromý web a stav.</td>
+<td>T003,T048,T078</td>
+<td>Bez úprav soukromí/obsahu přes web v P0.</td>
+</tr>
+<tr>
+<td>C06b</td>
+<td>Snapshot záloh, identita cíle, hash doklady a skutečná obnova.</td>
+<td>T054–T058,T064</td>
+<td>Kopie do jiné složky stejného disku nestačí.</td>
+</tr>
+<tr>
+<td>C06c</td>
+<td>Zabezpečený restart, logy bez obsahu, upgrade/migrace/rollback.</td>
+<td>T059,T078,T079</td>
+<td>Žádné plošné vypnutí FileVault nebo ochrany dat.</td>
+</tr>
+<tr>
+<td>C07a</td>
+<td>Trvalý worker, mock adaptéry, cache klíče, náklady a chybové stavy.</td>
+<td>T065,T066,T069</td>
+<td>Žádná skutečná placená volání.</td>
+</tr>
+<tr>
+<td>C07b</td>
+<td>Česká sada přepisu a jemné korektury; skutečný pilot až po nastavení limitu.</td>
+<td>T042,T067,T068,T071</td>
+<td>Bez automatické transkripce všeho ve videích.</td>
+</tr>
+<tr>
+<td>C07c</td>
+<td>Ochrana lidských revizí, zdrojová provenience a data jako inertní text.</td>
+<td>T010,T038,T055,T069</td>
+<td>Bez nástrojových oprávnění jazykového modelu.</td>
+</tr>
+<tr>
+<td>C08a</td>
+<td>Denní šablona, místní cache a statické HTML/Markdown archivy.</td>
+<td>T026,T040,T064,T071</td>
+<td>Nepopisovat z fotek neznámé události.</td>
+</tr>
+<tr>
+<td>C08b</td>
+<td>Dávkové souhrny, maximální čekání, neaktuální výsledky a pozdní vstupy.</td>
+<td>T027–T030,T038,T057,T070</td>
+<td>Bez tlačítka Uzavřít den a bez povinného schvalování.</td>
+</tr>
+<tr>
+<td>C09</td>
+<td>Reálný den, vyhodnocení chyb, kapacity, instalace a zmrazení vydávaného rozsahu.</td>
+<td>Celé relevantní P0, zejména T079,T080</td>
+<td>Nezakrýt kritický FAIL grafickým vylepšením.</td>
+</tr>
+<tr>
+<td>C10a</td>
+<td>Povolený seznam zdrojů a nezávislý výběrový text.</td>
+<td>T072,T074</td>
+<td>Nikdy nepoužít celý osobní souhrn.</td>
+</tr>
+<tr>
+<td>C10b</td>
+<td>Očištěné kopie fotografií, náhled, finální kontrola a systémové sdílení.</td>
+<td>T073–T076</td>
+<td>Žádné autonomní odesílání nebo tvrzení doručení.</td>
+</tr>
+<tr>
+<td>C11a</td>
+<td>Ověřený import skutečného exportu hodinek.</td>
+<td>T077, F67</td>
+<td>Žádná domyšlená stopa mezi foto body.</td>
+</tr>
+<tr>
+<td>C11b</td>
+<td>Výběr a verzovaná časová osa s vlastním zvukem, titulky a kontrolou soukromí.</td>
+<td>T077, F68,F69</td>
+<td>Bez klonování hlasu, soukromých vstupů a vymyšlených záběrů.</td>
+</tr>
+<tr>
+<td>C11c</td>
+<td>Normalizace pracovních kopií, render, kontrola a export filmu.</td>
+<td>T012,T077, F70</td>
+<td>Originály neproměňovat nevratnou kompresí.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Testy T019–T021 u klientské integrace se znovu provedou po změnách zvukových funkcí, nejen jednou v izolovaném prototypu. Prototyp neprokazuje, že pozdější galerie či přehrávač nic nerozbily.</p>
+<h2 id="section-3">3. První zadání připravené k vložení do Codexu — C00</h2>
+<h3 id="section-4">Cíl</h3>
+<p>Prostuduj v0.4 a vytvoř doložený read-only audit, z něhož půjde vybrat funkční cestu k nativní iPhone aplikaci a soukromému Mac serveru. Zatím neimplementuj celou aplikaci a neměň uživatelův systém.</p>
+<h3 id="section-5">Vstupy</h3>
+<p><code>AGENTS.md</code>, <code>CAMINO_funkcni_specifikace_v0.4.md</code>, <code>CAMINO_akceptacni_testy_v0.4.md</code>, tento plán. Starší v0.3 slouží jen jako historie. Známe kontext iPhonu 14 a dříve zmiňovaného Intel MacBooku; aktuální systémy a domácí server nejsou doložené touto specifikací.</p>
+<h3 id="section-6">Povolené činnosti</h3>
+<p>Zjisti, v jakém skutečném prostředí běžíš. Na dostupném Macu lze použít read-only příkazy jako <code>sw_vers</code>, <code>uname -m</code>, <code>xcodebuild -version</code> a <code>xcrun --sdk iphoneos --show-sdk-version</code>. Nejsi-li na Macu, označ místní prostředí správně a stav Mílova zařízení NEOVĚŘENO. Nedostupné zařízení nenahrazuj odhadem.</p>
+<p>Z oficiálních aktuálních podkladů ověř kompatibilitu nástrojů, dostupných systémů a cílového telefonu. Zvol nejjednodušší legitimní instalaci s platností přes cestu a rezervu; nepředpokládej, že je povinný App Store, TestFlight nebo nejnovější macOS. Přijatelnost případného členství byla potvrzena, nákup nebyl zadán.</p>
+<p>Pokud je skutečně autorizovaný přístup na domácí Mac, zjisti jeho roli, systém, cílové úložiště, dostupnou zálohu, stávající Tailscale a chování po restartu/uspání. Bez přístupu pouze zapiš, jaký nedestruktivní test chybí. Nezakládej smyšlenou adresu serveru a nevyžaduj od uživatele výběr API frameworku.</p>
+<h3 id="section-7">Zakázané činnosti</h3>
+<p>Žádná aktualizace systému, instalace velkých nástrojů, platba, změna účtů, otevření veřejných portů, Funnel, změna FileVault, mazání souborů nebo přesun osobních dat. Žádné reálné API klíče ani uživatelské audio do testů. Neoznačuj auditní čtení tabulky kompatibility za úspěšný test iPhonu.</p>
+<h3 id="section-8">Předávka</h3>
+<p>Vytvoř <code>docs/ENVIRONMENT_AUDIT.md</code> s rolemi vývojový Mac / iPhone / domácí Mac, stavem OVĚŘENO / NEOVĚŘENO / BLOKUJE, důkazem a dopadem. Nepiš sériová čísla, tokeny nebo podrobný soukromý síťový profil do výstupu.</p>
+<p>Do <code>docs/DECISIONS.md</code> navrhni cestu nástrojů a instalace. Do <code>tasks/C01a_AUDIO_PROTOTYPE.md</code> připrav malý další úkol se Start/Stop, skutečným vstupem a lokálním přehráním, v rozsahu zjištěného prostředí. Při chybějícím telefonu odděl automatizovatelnou přípravu od neprovedených manuálních testů.</p>
+<p>Uživateli shrň, co je doložené, co chybí a jaký jediný následující malý krok navazuje. Nevracej produktový dotazník U01–U11.</p>
+<h2 id="section-9">4. Pravidla každé další předávky</h2>
+<p>Každý úkol obsahuje cíl, vstupní předpoklady, co změnit, co nezměnit, chyby a obnovu, soukromí, automatické testy, manuální testy a podmínku přijetí. Jeden krok nesmí potají implementovat další tři.</p>
+<p>Výstup uvádí skutečně změněné soubory, skutečně spuštěné testovací příkazy, jejich výsledky, nová omezení a neprovedené zkoušky. Přidej stručný důvod každé změny návrhového parametru; změna invariantu ochrany dat není běžné ladění.</p>
+<p>Před migrační či provozně rizikovou změnou je nutný zachovaný stav a návratový postup. Generátor testů ani automatický agent nesmí sám zrušit FAIL jen proto, aby build vypadal zelený. Důkazy testů patří do samostatného reportu, ne jako nepodložené tvrzení do funkční specifikace.</p>
+<footer class="foot">Samantha pro Mílu · Zdrojový dokument: <a href="CAMINO_Codex_v0.4.md">CAMINO_Codex_v0.4.md</a> · HTML neobsahuje vzdálená písma, skripty ani analytiku.</footer></main></div></body></html>

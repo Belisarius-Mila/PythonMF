@@ -10,9 +10,9 @@ prace je `Project`, konkretni opakovatelny vykonavatel je `Tool`, sdilena
 infrastrukturni schopnost muze byt `Layer` a `Misc` je jen skutecne nezarazena
 prace.
 
-Katalog slucuje vsech 31 zivych oblasti z `ACTIVE_PROJECTS.md`, zachovava
+Katalog slucuje vsech 32 zivych oblasti z `ACTIVE_PROJECTS.md`, zachovava
 samostatne projekty Vocabulary FR a Vocabulary IT a dva dohodnute vychozi
-proudy `Misc`. Vysledkem je 32 proudu: 26 projektu, 4 tooly a 2 `Misc`.
+proudy `Misc`. Vysledkem je 33 proudu: 27 projektu, 4 tooly a 2 `Misc`.
 Rezimy `paused` a `archived` jsou validni; dva projekty jsou nyni `paused`.
 
 Markdown se za behu neparsuje a neni zdrojem UI, vlaken, workspace, semaforu
@@ -65,6 +65,7 @@ nesmi smesovat s Knihovnou clanku.
 | `project-mobile-input` | `Project` | iPhone Shortcuts / Mobile Input | paused | 2 | iPhone Shortcuts / Mobile Input Layer |
 | `project-colors-and-numbers` | `Project` | ColorsAndNumbers / automatické úkoly | active | 1 | Automaticke opakujici se ukoly / ColorsAndNumbers |
 | `project-to-be-to-have` | `Project` | ToBeToHave | active | 2 | ToBeToHave; navazuje na původní názvy To Be Training a ToBeTraining. |
+| `project-camino` | `Project` | Camino | active | 1 | Camino; podklady v0.4, vývoj začne C00 až po meziúkolu. |
 | `project-linux-workstation` | `Project` | Linux / instalace a konfigurace | active | 2 | Linux / instalace a konfigurace; samostatná konzultace instalace, konfigurace a běžné práce na linuxovém počítači. |
 | `project-vocabulary-fr` | `Project` | Vocabulary FR | active | 2 | Potvrzeny kanonicky projekt v `project_capability_map.md`; lokalni a webova varianta patri dohromady. |
 | `project-vocabulary-it` | `Project` | Vocabulary IT | paused | 2 | Potvrzeny kanonicky projekt v `project_capability_map.md`; lokalni a webova varianta patri dohromady. |

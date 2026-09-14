@@ -451,6 +451,15 @@ WORKSTREAM_CATALOG = validate_workstream_catalog(
             query_aliases=("To Be Training", "ToBeTraining"),
         ),
         _record(
+            "project-camino",
+            "Project",
+            "Camino",
+            "active",
+            "1",
+            "Camino",
+            query_aliases=("Santiago", "Camino deník"),
+        ),
+        _record(
             "project-linux-workstation",
             "Project",
             "Linux / instalace a konfigurace",

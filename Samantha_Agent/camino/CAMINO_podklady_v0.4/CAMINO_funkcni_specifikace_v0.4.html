@@ -1,0 +1,874 @@
+<!doctype html>
+<html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light"><title>Camino — detailní funkční specifikace v0.4</title><style>
+:root{color-scheme:light;--ink:#172b3a;--muted:#536775;--line:#dce6ea;--accent:#166c70;--paper:#fff;--bg:#f1f5f6;--soft:#edf6f5}
+*{box-sizing:border-box}body{overflow-wrap:anywhere}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:#155e71;text-decoration-thickness:1px;text-underline-offset:3px}a:hover{color:#073841}.top{padding:15px 26px;background:#153746;color:white;border-bottom:4px solid #4da6a0}.top strong{letter-spacing:.12em;font-size:13px}.top span{font-size:13px;margin-left:18px;color:#d5e8e8}.layout{max-width:1420px;display:grid;grid-template-columns:268px minmax(0,1fr);gap:28px;margin:28px auto;padding:0 24px}.toc{position:sticky;top:20px;align-self:start;max-height:calc(100vh - 40px);overflow:auto;padding:14px 14px 20px;background:var(--paper);border:1px solid var(--line);border-radius:12px;font-size:13px;line-height:1.5}.toc summary{font-size:14px;font-weight:700;padding:3px 0 12px;cursor:pointer}.toc a{display:block;margin:0 0 9px;text-decoration:none;color:var(--muted)}.toc a:hover{color:var(--accent)}main{min-width:0;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:42px 48px;box-shadow:0 8px 30px #16354506}h1{font-size:36px;line-height:1.2;letter-spacing:-.035em;margin:14px 0 24px;max-width:900px}h2{font-size:26px;line-height:1.3;letter-spacing:-.02em;margin:50px 0 18px;padding-top:20px;border-top:2px solid var(--line);scroll-margin-top:24px}h3{font-size:20px;line-height:1.4;margin-top:28px;scroll-margin-top:24px}p{margin:13px 0}strong{font-weight:680}blockquote{margin:24px 0;padding:16px 22px;background:var(--soft);border-left:4px solid var(--accent);border-radius:0 8px 8px 0}blockquote p{margin:0}code{font:14px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere;background:#f0f4f6;border-radius:4px;padding:2px 4px}pre{overflow:auto;padding:18px 20px;background:#f1f5f7;border:1px solid var(--line);border-radius:8px;font-size:14px;line-height:1.55}pre code{padding:0;background:transparent;white-space:pre;overflow-wrap:normal}.table-wrap{overflow-x:auto;margin:22px 0;border:1px solid var(--line);border-radius:8px}table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.55;min-width:580px}th{background:#eaf2f3;color:#234652;text-align:left;font-size:13px}th,td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}tr:last-child td{border-bottom:0}tbody tr:nth-child(even){background:#fafcfc}ul,ol{padding-left:24px}li{margin:6px 0}.docnav{display:flex;gap:10px 18px;flex-wrap:wrap;font-size:13px;margin-bottom:14px;padding-bottom:18px;border-bottom:1px solid var(--line)}.docnav a{text-decoration:none}.notice{font-size:13px;line-height:1.5;color:var(--muted);border:1px solid var(--line);background:#f8fafb;padding:10px 14px;border-radius:7px}.foot{margin-top:44px;padding-top:18px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}.source-ref{font-size:.83em;text-decoration:none;padding:0 2px}p:target,h2:target,h3:target{background:#f1f8f6}.toc::-webkit-scrollbar{width:5px}.toc::-webkit-scrollbar-thumb{background:#b8cdd0;border-radius:4px}
+@media(max-width:1000px){.layout{grid-template-columns:220px minmax(0,1fr);gap:18px;padding:0 14px}main{padding:30px}.toc{font-size:12px}}
+@media(max-width:760px){body{font-size:16px}.top{padding:14px 18px}.top span{display:block;margin:5px 0 0}.layout{display:block;margin:16px auto;padding:0 12px}.toc{position:static;max-height:230px;margin-bottom:16px}main{padding:25px 19px;border-radius:10px}h1{font-size:29px}h2{font-size:23px;margin-top:38px}h3{font-size:19px}.docnav{font-size:12px}pre{font-size:12px;padding:13px}table{font-size:13px}.notice{font-size:12px}}
+@media print{body{background:white;font-size:10pt}.top,.toc,.docnav,.notice{display:none}.layout{display:block;padding:0;margin:0;max-width:none}main{border:0;padding:0;box-shadow:none}.table-wrap{overflow:visible;border-radius:0}table{min-width:0;font-size:8pt}pre{white-space:pre-wrap}h1{font-size:24pt}h2{font-size:17pt;page-break-after:avoid}h3{page-break-after:avoid}a{color:inherit;text-decoration:none}tr{break-inside:avoid}}
+</style></head><body>
+<header class="top"><strong>CAMINO / v0.4</strong><span>Funkční specifikace · 14. září 2026</span></header>
+<div class="layout"><aside class="toc"><details open><summary>Obsah dokumentu</summary><a href="#section-1">0. Platnost, čtení a předání</a><a href="#section-2">1. Cíl, rozsah a potvrzené volby</a><a href="#section-6">2. Základní pojmy a pevná pravidla</a><a href="#section-9">3. Mapa obrazovek a společné ovládání</a><a href="#section-10">4. UI00 — příprava, zkušební cesta a připojení</a><a href="#section-11">5. UI01 — hlavní obrazovka Zachytit</a><a href="#section-12">6. UI02 — fotografie a navazující komentář</a><a href="#section-13">7. UI03 — video</a><a href="#section-14">8. UI04 — komentáře a úvahy</a><a href="#section-18">9. UI05 — Dnes, jiné dny a soukromý deník</a><a href="#section-19">10. UI06 — detail Momentu a jednoduché opravy</a><a href="#section-20">11. UI07 — editor textu a jeho verze</a><a href="#section-21">12. UI08 — import ze systémových Fotek</a><a href="#section-22">13. UI09 — stav uložení, fronta a mobilní data</a><a href="#section-23">14. UI10 — nastavení, pomoc a upozornění</a><a href="#section-24">15. UI11 — nouzový export a přenositelný archiv</a><a href="#section-25">16. UI12 — volitelný výběr rodině</a><a href="#section-26">17. UI13 — soukromý web na Macu</a><a href="#section-27">18. Datový význam, čas a polohové údaje</a><a href="#section-31">19. Bezpečné místní uložení a stavové automaty</a><a href="#section-35">20. Přenos iPhone ↔ Mac</a><a href="#section-40">21. Práce Mac serveru, AI a denní šablona</a><a href="#section-45">22. Soukromí, zálohy, obnova a provoz</a><a href="#section-50">23. UI14 — film a trasa po návratu</a><a href="#section-51">24. Kdy je první verze připravená na pouť</a><a href="#section-52">25. Přehled nových parametrů a dosud neověřených bodů</a><a href="#section-53">26. Zdroje a hranice ověření</a></details></aside><main><nav class="docnav" aria-label="Soubory balíčku"><a href="CAMINO_funkcni_specifikace_v0.4.html">Specifikace</a><a href="CAMINO_akceptacni_testy_v0.4.html">Testovací scénáře</a><a href="CAMINO_Codex_v0.4.html">Codex</a><a href="CAMINO_zmeny_v0.4.html">Změny</a><a href="README_v0.4.html">Soubory</a></nav><div class="notice">Čtecí kopie dokumentace. Aplikace není tímto podkladem prohlášena za implementovanou; všechny akceptační zkoušky mají stav NEPROVEDENO.</div><h1>Camino — detailní funkční specifikace v0.4</h1>
+<p><strong>Datum:</strong> 14. září 2026<br/>
+<strong>Zadavatel a jediný autor deníku:</strong> Míla<br/>
+<strong>Zpracovala:</strong> Samantha<br/>
+<strong>Navazuje na:</strong> <code>CAMINO_navrh_v0.3.md</code> a <code>CAMINO_plan_Codex_v0.3.md</code><br/>
+<strong>Stav:</strong> funkční specifikace pro postupný vývoj. Žádná popsaná funkce ani zkouška na telefonu není tímto dokumentem prohlášena za implementovanou nebo ověřenou.</p>
+<blockquote>
+<p>Na pouti prožívat a zaznamenávat. Telefon bezpečně uchovává zdroje. Mac automaticky připravuje osobní deník. Film vzniká po návratu, nikoli jako každovečerní povinnost.</p>
+</blockquote>
+<h2 id="section-1">0. Platnost, čtení a předání</h2>
+<p>Tato v0.4 je aktuální pracovní specifikace. Zachovává potvrzená rozhodnutí U01–U11 z v0.3 a konkretizuje obrazovky, akce, výchozí hodnoty a chování při chybě. Starší soubory zůstávají beze změny. V případě rozporu má pro další vývoj přednost v0.4; historické varianty se nemají vracet do kódu.</p>
+<p><strong>U</strong> označuje rozhodnutí potvrzené Mílou. <strong>D</strong> je nové návrhové rozhodnutí Samanthy, které lze změnit záznamem důvodu, nikoli vydávat za dodatečně schválené uživatelem. <strong>F</strong> je funkční pravidlo; <strong>UI</strong> označuje obrazovku. Testy <strong>T001–T080</strong> jsou v samostatném souboru <code>CAMINO_akceptacni_testy_v0.4.md</code>. Etapy <strong>C00–C11</strong> jsou v <code>CAMINO_Codex_v0.4.md</code>.</p>
+<p>Slova „musí“ a „nesmí“ stanovují podmínky implementace, nikoli záruku současné funkčnosti. Rozměry, časové intervaly a výkonové cíle jsou návrhové hodnoty, pokud není výslovně uvedeno měření. Konkrétní verze knihoven, modelů AI a systémů se zafixují až po auditu; funkční význam stavů se přitom nesmí oslabit.</p>
+<p>Tato revize <strong>není pokyn vyvinout celou aplikaci jedním během Codexu</strong>. Plný OpenAPI kontrakt a databázové migrace vzniknou v C03 po prvních experimentech. Tento dokument už určuje jejich význam a bezpečnostní podmínky.</p>
+<h2 id="section-2">1. Cíl, rozsah a potvrzené volby</h2>
+<h3 id="section-3">1.1 Rozhodnutí uživatele</h3>
+<div aria-label="Tabulka, při malé šířce lze posouvat" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Potvrzená volba</th>
+<th>Závazný dopad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>U01</td>
+<td>Kombinace cestopisu a osobního příběhu; film přibližně 20–30 minut podle materiálu.</td>
+<td>Úplný deník vedle výběrového filmu; žádná povinná stopáž dne.</td>
+</tr>
+<tr>
+<td>U02</td>
+<td>Krátké komentáře i delší úvahy; žádoucí nahrávání se zamčeným telefonem.</td>
+<td>Společný audio základ, dva významy nahrávky, rané testy skutečného iPhonu.</td>
+</tr>
+<tr>
+<td>U03</td>
+<td>Jemná korektura úvah, automatická gramatika a překlepy; souhrn smí být uhlazenější.</td>
+<td>Neměnit autorův hlas ani smysl, zachovat originál a všechny revize.</td>
+</tr>
+<tr>
+<td>U04</td>
+<td>Žádná povinná večerní práce; jednoduchá oprava je nepovinná.</td>
+<td>Deník nečeká na schválení, nevzniká fronta povinné redakce.</td>
+</tr>
+<tr>
+<td>U05</td>
+<td>Jeden autor, soukromý archiv; jednoduché rodinné sdílení vítáno.</td>
+<td>Bez rodinných účtů a veřejného webu; sdílení až po výslovném kroku.</td>
+</tr>
+<tr>
+<td>U06</td>
+<td>„Jen pro mě“ vylučuje záznam ze sdíleného deníku a filmu.</td>
+<td>Platí i pro soukromý pracovní sestřih, citace, náhledy a parafráze.</td>
+</tr>
+<tr>
+<td>U07</td>
+<td>Jen GPS bod u záznamu; celou trasu měří hodinky.</td>
+<td>Bez průběžného GPS sledování aplikací a bez vlastní hodinkové aplikace.</td>
+</tr>
+<tr>
+<td>U08</td>
+<td>Autentický hlas, případně nové namluvení po návratu; žádný umělý hlas.</td>
+<td>Originální zvuk zachovat, nový komentář označit samostatně.</td>
+</tr>
+<tr>
+<td>U09</td>
+<td>Externí AI smí zpracovat všechny autorovy komentáře a úvahy.</td>
+<td>Také „Jen pro mě“; nejde však o souhlas se zveřejněním ani neomezeným výdajem.</td>
+</tr>
+<tr>
+<td>U10</td>
+<td>Případný roční poplatek Apple Developer je přijatelný; vysvětlení později.</td>
+<td>Ověřit instalaci a platnost, nic automaticky nekupovat.</td>
+</tr>
+<tr>
+<td>U11</td>
+<td>Číselný rozpočet AI zatím není určen.</td>
+<td>Vývoj bez placených volání; limit vyřešit před jejich zapnutím.</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="section-4">1.2 Vývojový rozsah</h3>
+<p><strong>P0 — jádro před poutí:</strong> offline fotografování, video, audio, textové doplnění, import, Moment a den, zámek, lokální přehled a přehrávání, nouzový export, soukromý upload, obnova přenosů, druhá záloha a zkouška obnovy, přepisy a automatický osobní deník, jednoduchá oprava textu, provozní stav a připravená instalace.</p>
+<p><strong>P1 — nepovinné rozšíření:</strong> vybraný text a fotografie rodině přes systémové sdílení. Nezařadit do vydání, dokud neprojde testy ochrany soukromí. Nesmí blokovat dokončení P0.</p>
+<p><strong>P2 — po návratu:</strong> import skutečné trasy, sestavení a kontrola střihové časové osy, titulky a render filmu, pozdější namluvení. Už v P0 se zachovávají použitelné zdroje a vazby; žádný předčasný komplexní editor.</p>
+<p><strong>Mimo rozsah:</strong> více autorů, veřejné odkazy na server, živé sledování polohy rodinou, automatické rozesílání, denní povinné filmy, generované záběry a hlas, automatická obrazová analýza všech médií, integrace sociálních sítí, vlastní VPN, navigace na trase.</p>
+<h3 id="section-5">1.3 Nová pracovní rozhodnutí této revize</h3>
+<div aria-label="Tabulka, při malé šířce lze posouvat" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Rozhodnutí Samanthy</th>
+<th>Důvod</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D01</td>
+<td>V P0 se obsah a soukromí upravují pouze v hlavním iPhonu; web je pro čtení a stav.</td>
+<td>Méně konfliktů a žádná druhá povinná pracovní plocha.</td>
+</tr>
+<tr>
+<td>D02</td>
+<td>Režim nových Momentů je vidět na hlavní obrazovce a pamatuje se do dalšího přepnutí. První hodnota je „Do deníku“.</td>
+<td>Po osobní úvaze se zámek nesmí nepozorovaně vypnout.</td>
+</tr>
+<tr>
+<td>D03</td>
+<td>Soukromý dodatek k běžnému Momentu vzniká samostatně s vazbou.</td>
+<td>Fotografie může zůstat použitelná, soukromý hlas se k ní nepřibalí.</td>
+</tr>
+<tr>
+<td>D04</td>
+<td>Hovor či změna aktivního mikrofonu přeruší nahrávání; automatický návrat mikrofonu nahrávání nespustí.</td>
+<td>Ochrana obsahu a předcházení tichému přepnutí na telefon v kapse.</td>
+</tr>
+<tr>
+<td>D05</td>
+<td>Automatický upload je zpočátku pouze přes Wi-Fi; mobilní data lze povolit jedné zobrazené dávce.</td>
+<td>Neurčený datový tarif; žádná skrytá velká spotřeba.</td>
+</tr>
+<tr>
+<td>D06</td>
+<td>Není automatická kopie vlastních záznamů do systémových Fotek. Je možný samostatný export.</td>
+<td>Srozumitelné vlastnictví kopie a žádné nepozorované zdvojení místa.</td>
+</tr>
+<tr>
+<td>D07</td>
+<td>„Skrýt z deníku“ je vratné a neuvolňuje prostor; fyzické mazání není v běžném P0 ovládání.</td>
+<td>Vyhnout se ztrátě originálů a domnělé záloze.</td>
+</tr>
+<tr>
+<td>D08</td>
+<td>P0 automaticky přepisuje samostatná hlasová audia, nikoli každý zvuk z videa.</td>
+<td>Neplatit za náhodné rozhovory a ruchy; video zvuk zůstane pro film.</td>
+</tr>
+<tr>
+<td>D09</td>
+<td>P1 sdílení vyžaduje kontrolu aktuálního soukromí proti serveru; offline neodešle starý připravený výběr.</td>
+<td>Jednoduchá a ověřitelná ochrana místo složité offline publikace.</td>
+</tr>
+<tr>
+<td>D10</td>
+<td>P0 nemá tlačítko střihu ani prázdnou sekci „Film“.</td>
+<td>Na cestě nezatěžovat uživatele nedokončenými funkcemi.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Žádné další produktové odpovědi nejsou pro tuto specifikaci nutné. Hardware serveru, hodinky a verze systémů nejsou domyšlené; řeší je audit. Rozpočet AI se řeší až před placeným pilotem.</p>
+<h2 id="section-6">2. Základní pojmy a pevná pravidla</h2>
+<h3 id="section-7">2.1 Co je Moment</h3>
+<p><strong>F01.</strong> Moment je jedna zachycená situace, nikoli automaticky jeden soubor. Obsahuje vlastní identifikátor, čas události, denní kapitolu, typ, příznak důležitosti a společné pravidlo soukromí. Může mít jednu fotografii, několik výslovně připojených médií, hlas a text, nebo jen časovou značku.</p>
+<p>Samostatné pořízení z hlavní obrazovky zakládá nový Moment. Připojení do existujícího je vždy výslovné: z detailu nebo z nabídky „Přidat komentář k tomuto záběru“. Blízké časy ani stejná poloha nejsou důvodem pro skryté slučování.</p>
+<p>Příklad: fotografie kostela + komentář u fotografie = jeden Moment. Večerní osobní dovětek „Jen pro mě“ = druhý Moment s vazbou na první. Pro rodinný export se tato vazba automaticky nenásleduje.</p>
+<h3 id="section-8">2.2 Nezaměnitelné významy</h3>
+<p><strong>F02.</strong> „Do deníku“ znamená <strong>stále soukromé</strong>, ale použitelné pro pozdější vědomý výběr. „Jen pro mě“ zakazuje film a rodinné výstupy; nezakazuje AI. Hvězdička znamená důležitost, nikoli souhlas s publikací. „Skrýt“ znamená vyřadit z běžného přehledu, nikoli smazat soubory.</p>
+<p><strong>F03.</strong> Každý originál je neměnný. Korektury, nové namluvení, náhledy a filmové kopie jsou jiné objekty. Původní hlas má přednost před tvrzením, že strojový přepis je určitě přesný.</p>
+<p><strong>F04.</strong> Čtyři oddělené skutečnosti: lokální uložení, ověřená kopie na Macu, ověřená další záloha a stav AI. Zelený přepis nesmí maskovat neodeslaný originál.</p>
+<p><strong>F05.</strong> Nahrávání a lokální čtení uložených dat nesmějí čekat na přihlášení k serveru, GPS, internet, rozpočet ani AI. Selhání jedné funkce zastaví nejmenší nutnou část systému.</p>
+<h2 id="section-9">3. Mapa obrazovek a společné ovládání</h2>
+<div aria-label="Tabulka, při malé šířce lze posouvat" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>Obrazovka</th>
+<th>Název</th>
+<th>Vstup</th>
+<th>Rozsah</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>UI00</td>
+<td>Příprava a připojení</td>
+<td>První spuštění / Nastavení</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>UI01</td>
+<td>Zachytit</td>
+<td>Výchozí hlavní obrazovka</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>UI02</td>
+<td>Foto</td>
+<td>Foto / Přidat fotografii</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>UI03</td>
+<td>Video</td>
+<td>Video / Přidat video</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>UI04</td>
+<td>Nahrávání</td>
+<td>Komentář / Úvaha</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>UI05</td>
+<td>Dnes a dny cesty</td>
+<td>Dnes / výběr data</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>UI06</td>
+<td>Detail Momentu</td>
+<td>Klepnutí na položku dne</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>UI07</td>
+<td>Oprava textu</td>
+<td>Upravit v detailu</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>UI08</td>
+<td>Import</td>
+<td>Nabídka hlavní obrazovky / detail</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>UI09</td>
+<td>Uložení a přenosy</td>
+<td>Stavový řádek</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>UI10</td>
+<td>Nastavení a pomoc</td>
+<td>Nabídka hlavní obrazovky</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>UI11</td>
+<td>Soukromý archiv a nouzový export</td>
+<td>Nastavení → Archiv</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>UI12</td>
+<td>Výběr rodině</td>
+<td>Dnes → Poslat výběr</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>UI13</td>
+<td>Soukromý web na Macu</td>
+<td>Autorizovaný přístup</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>UI14</td>
+<td>Film a trasa</td>
+<td>Samostatné pozdější rozhraní</td>
+<td>P2</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>F06.</strong> Rozhraní je česky, v telefonu tyká. Čas používá 24hodinový zápis. Stav nesděluje jen barvou: vždy text nebo srozumitelný symbol s popiskem. Hlavní záznamová tlačítka mají velké aktivní plochy; návrhové minimum běžného ovladače je 48 × 48 bodů. Text reaguje na systémové zvětšení. Důležité funkce nevyžadují dlouhý stisk, skryté gesto ani přesné míření. Jde o naše návrhové požadavky, nikoli tvrzení o již provedeném testu přístupnosti.</p>
+<p>Na hlavní obrazovku se vrací jedním zřetelným krokem. Záznam nemá povinný název, tagy, hodnocení, počasí ani formulář. Příběh nesmí vzniknout jen pro vyplnění prázdných polí.</p>
+<p>Při skutečném nahrávání je po návratu do aplikace přednostně vidět UI04, nikoli domovská obrazovka s dojmem, že mikrofon neběží. Při přechodu mimo aplikaci se osobní texty a fotografie zakryjí v jejím přepínacím náhledu. Není to příslib ochrany proti všem screenshotům nebo proti člověku s odemčeným telefonem.</p>
+<h2 id="section-10">4. UI00 — příprava, zkušební cesta a připojení</h2>
+<p><strong>F07.</strong> První spuštění umožní vytvořit místní cestu bez serveru. Předvyplněný název lze změnit; žádné skutečné datum odjezdu se nezakóduje do aplikace. Pro zkoušky je samostatná cesta „Zkouška“ se samostatným ID, aby se testovací řeč a fotky nemíchaly s poutí.</p>
+<p>Příprava má tři samostatné části: <strong>Cesta</strong>, <strong>Záznam</strong>, <strong>Domácí Mac</strong>. Není nutné je všechny dokončit, aby šlo lokálně něco uložit. Připravenost na pouť je však samostatná přísnější podmínka v kapitole 24.</p>
+<p>Cesta má název, jazyk čeština a volitelný začátek. Do nastavení začátku se zobrazují data, ne vymyšlené „Dny 1–10“. Nastavení nebo oprava začátku mění zobrazené číslování, nikoli původní časy médií. Jedna cesta je aktivní; přepnutí na jinou nic nemaže a není dovoleno uprostřed nahrávání.</p>
+<p><strong>F08.</strong> Oprávnění se žádají s vysvětlením příslušné funkce. Kamera a mikrofon se dají předem ověřit testovacím snímkem a krátkým záznamem s přehráním. Poloha je nepovinná a jen při používání. Oznámení jsou nepovinná. Odmítnutí jednoho oprávnění nezakáže ostatní funkce. Systémové Fotky se vybírají přes výběr položek; nežádáme plošný přístup jen pro procházení celé knihovny.</p>
+<p>Při první žádosti o mikrofon se po povolení ukáže jasné „Spustit nahrávání“; mikrofon se nespustí nepozorovaně návratem ze systémového dialogu. Při dalších běžných použitích hlavní tlačítko nahrávání přímo spouští.</p>
+<p><strong>F09.</strong> Propojení s Macem se provede v přípravě pomocí jednorázového párovacího údaje, například QR kódu z již připraveného serveru. Ruční vložení je záloha. Kód obsahuje identitu soukromého serveru a krátkodobé oprávnění; není to trvalý token sdílený s rodinou. Návrhová platnost je pět minut a jedno použití. Aplikace nepřijímá libovolný cizí server bez zobrazení identity a potvrzení. Žádné vypnutí kontroly HTTPS certifikátu.</p>
+<p>Po spárování se testovací soubor odešle a porovná jeho kontrolní součet. Výsledek oddělí <strong>Spojení funguje</strong> od <strong>Další záloha ověřena</strong>. Chyba zobrazí „Mac teď není dostupný. Můžeš zatím zaznamenávat do telefonu.“ Opakované párování nesmí založit novou kopii celé cesty nebo smazat místní data.</p>
+<h2 id="section-11">5. UI01 — hlavní obrazovka Zachytit</h2>
+<p><strong>F10.</strong> Horní část ukazuje název cesty a aktuální místní datum, případně číslo dne. Přímo pod tím je viditelný režim <strong>Do deníku / Jen pro mě</strong> pro nové samostatné Momenty. Zapnutý zámek zůstane zapnutý přes návrat na hlavní obrazovku i restart aplikace, dokud ho uživatel nezmění. Přepnutí zde nemění už existující záznamy. Zámek upravený v detailu naopak nemění režim nových záznamů.</p>
+<p>Střed tvoří čtyři velká tlačítka. Dole jsou <strong>Dnes</strong> a stavový řádek. V nabídce jsou Import, Označit okamžik a Nastavení. Žádné filmové přehrávače, reklamy ani redakční úkoly.</p>
+<p>Textové schéma, nikoli grafický prototyp:</p>
+<pre><code class="language-text">CAMINO                         Nabídka
+Den 4 · datum podle telefonu
+Nové záznamy: [Do deníku | Jen pro mě]
+
+          FOTO          VIDEO
+          KOMENTÁŘ      ÚVAHA
+
+Dnes: 12 momentů                    Otevřít
+V telefonu uloženo · 3 momenty čekají na Mac
+</code></pre>
+<p>Klepnutí na Foto/Video otevře náhled. Klepnutí na Komentář/Úvaha po připravených oprávněních zahájí příslušný hlasový záznam a zobrazí UI04. Dvojité klepnutí nesmí založit dvě nahrávky; tlačítko má stav zahajování a začne znovu reagovat až po jeho vyřešení.</p>
+<p><strong>F11.</strong> „Označit okamžik“ vytvoří Moment bez média, s časem a případně GPS. Potvrdí „Okamžik označen“ a nabídne nepovinné „Doplnit“. Neukládá fotografii ani neaktivuje mikrofon. Hvězdička v již existujícím Momentu pouze přepne důležitost; tyto funkce se nepletou.</p>
+<h2 id="section-12">6. UI02 — fotografie a navazující komentář</h2>
+<p><strong>F12.</strong> Obrazovka ukazuje náhled, spoušť, zadní/přední kameru a režim soukromí. Výchozí kamera je zadní; pokročilé foto režimy nejsou P0. Režim u připojování do existujícího Momentu zdědí jeho nastavení a je zřetelně uvedeno „Přidáváš do: [čas a náhled]“.</p>
+<p>Po stisku se zachytí zdrojový snímek, bezpečně uloží a zapíše. Až poté se objeví „Fotografie uložena v telefonu“. Náhled před dokončením zápisu není důkaz uložení. Vlastní snímek se ukládá v plné zvolené kvalitě capture pipeline, nikoli pouze jako zmenšenina pro deník. Konkrétní HEIC/JPEG volbu určí prototyp kompatibility; systém nesmí slibovat uchování dat senzoru, která vůbec nepořizuje.</p>
+<p>Po uložení se nabídne malý pás s náhledem a <strong>Přidat komentář</strong>. Není nutné ho potvrdit ani zavřít pro další snímek. Tlačítko komentáře má vazbu na konkrétní ID právě ukázaného záběru, nikoli na neurčité „něco z poslední minuty“. Další samostatný snímek z hlavní kamery zakládá další Moment; další fotografie do téže situace se přidává z jejího detailu.</p>
+<p>U nepovolené kamery se ukáže „Povol kameru v nastavení telefonu“ a Zpět; žádná prázdná černá obrazovka bez vysvětlení. Při chybě zápisu se nepoužije hláška Uloženo. Pokud část zdroje zůstala dostupná, nabídne se bezpečné opakování zápisu nebo nouzový export, nikdy smazání předchozích snímků.</p>
+<p>Vlastní fotografie není automaticky kopírována do systémových Fotek. Import z Fotek naopak vytváří nezávislou kopii v aplikaci; smazání položky v původní knihovně nesmí smazat již dokončený import.</p>
+<h2 id="section-13">7. UI03 — video</h2>
+<p><strong>F13.</strong> Otevření ukáže náhled a Start. Nahrávání začíná až stiskem Start a zřetelně ukazuje skutečně běžící čas, příjem zvuku a Stop. Během zahajování a dokončování se nedá založit další záznam.</p>
+<p>Výchozí vlastní video navrhujeme <strong>1080p / 30 snímků za sekundu / SDR</strong>. Obraz na šířku je užitečný pro zamýšlený film, ale video na výšku se přijme bez překážky. Aplikace nezobrazuje před každým klipem školení o orientaci. Původní orientace se uloží a později respektuje. Import vyšší kvality se nepřekóduje jen kvůli těmto výchozím hodnotám.</p>
+<p>Po Stop se uzavře soubor, zapíše evidence a teprve pak potvrdí uložení. Lze přidat komentář nebo pokračovat dál. Není povinné video přehrávat. Neexistuje záměrné krátké časové omezení klipu; skutečné hranice určují místo a stav zařízení a musí se zjistit testem.</p>
+<p><strong>F14.</strong> Pokračování se zamčeným telefonem je požadavek pro samostatné audio, nikoli video. Při opuštění video obrazovky, uzamčení, systémovém přerušení nebo ztrátě vstupu se aplikace pokusí klip řádně ukončit. U nepoužitelného konce přizná částečný záznam; neslibuje zachování každého posledního snímku při nuceném ukončení procesu.</p>
+<p>Nedostupný mikrofon se nesmí tajně nahradit tichým videem. Před Start je možné výslovně zvolit „Natočit bez zvuku“ s trvalým označením. Při ztrátě zvuku v běžícím klipu se tento klip ukončí; další bez zvuku začíná až vědomou volbou. Při tepelném varování nebo nedostatku místa se nesníží kvalita skrytě uprostřed klipu.</p>
+<h2 id="section-14">8. UI04 — komentáře a úvahy</h2>
+<h3 id="section-15">8.1 Průběh</h3>
+<p><strong>F15.</strong> Stejný technický záznamový základ slouží oběma typům. Komentář popisuje situaci; úvaha dostává přísnější profil zachování vyjadřování. Dlouhý komentář se automaticky nemění na úvahu a krátká úvaha na komentář.</p>
+<p>Obrazovka při nahrávání obsahuje: typ, případnou cílovou situaci, soukromí, skutečnou délku zachyceného audia, aktivní mikrofon, indikaci přijímaného signálu a velké <strong>Ukončit a uložit</strong>. Střídání animace nebo běžící hodiny bez nových audio vzorků se nepovažuje za důkaz nahrávání. Změna soukromí na této obrazovce platí pro celý právě nahrávaný Moment, ne jen pro slova po přepnutí, a nemění výchozí režim na hlavní obrazovce. Při připojování do existujícího Momentu platí jeho společné soukromí; oddělený soukromý dovětek se zakládá podle F21.</p>
+<pre><code class="language-text">ÚVAHA · Jen pro mě
+NAHRÁVÁM                 04:32
+Mikrofon: sluchátka
+[indikace vstupního signálu]
+
+        UKONČIT A ULOŽIT
+</code></pre>
+<p>Běžný konec nepotřebuje potvrzení. Po bezpečném zápisu se zobrazí „Úvaha uložena v telefonu“ a návrat do předchozího kontextu. Přepis se zobrazí později. Není živý cloudový diktát a není povinný poslech nahrávky. V P0 není uživatelská pauza samostatnou velkou funkcí; systémová přerušení jsou ošetřena explicitně.</p>
+<p>Je dovolena právě jedna aktivní záznamová session. Otevření dalšího audia či videa nebo přehrávače se nejprve vrátí k běžícímu záznamu. Telefon nepřepíná mikrofon mezi dvěma soupeřícími funkcemi a sám žádnou z nich bez oznámení neukončí.</p>
+<h3 id="section-16">8.2 Zámek, sluchátka a přerušení</h3>
+<p><strong>F16.</strong> Již spuštěné samostatné audio má pokračovat po uzamčení telefonu. Podporu vhodných audio režimů popisuje Apple; správná audio session, oprávnění a background režim se ověřují na zařízení. [<a class="source-ref" href="#S01">S01</a>] Na zamčeném telefonu se nahrávání v P0 nově nespouští. Ovládání tlačítkem libovolných sluchátek, Siri a hodinkami není součástí tohoto závazku.</p>
+<p>Vestavěný mikrofon je použitelný vstup; pro telefon v kapse se má otestovat mikrofon mimo kapsu. Z existence sluchátek se nevyvozuje, že obsahují mikrofon nebo že jej systém skutečně používá. Aplikace ukazuje aktivní vstup a umožní jeho ověření v přípravě. Není schválen žádný nákup vybavení.</p>
+<p><strong>F17.</strong> Při hovoru, deaktivaci audio session nebo změně skutečně používaného vstupu se uloží dosud dostupná část a záznam přejde do stavu <strong>Přerušeno</strong>. Apple poskytuje události přerušení a změny zvukové cesty; po přerušení nemusí vždy přijít odpovídající událost konce. [<a class="source-ref" href="#S02">S02</a>, <a class="source-ref" href="#S03">S03</a>]</p>
+<p>Výchozí aplikace sama neobnovuje nahrávání po hovoru, opětovném připojení sluchátek, návratu z jiné aplikace nebo restartu. Nabízí <strong>Pokračovat</strong> a <strong>Ukončit</strong>. Pokračování vytvoří další část téže session s evidovanou mezerou. Přijetí hovoru není zdroj audia do deníku. Obrazovka jasně říká například „Nahrávání přerušeno. Zachováno 4:32.“</p>
+<p>Při dostupném oprávnění se aplikace pokusí použít místní upozornění bez citlivého textu. Nelze slíbit slyšitelnou nebo okamžitou výstrahu za každého režimu telefonu. Při návratu do aplikace je stav vždy zřetelný.</p>
+<h3 id="section-17">8.3 Dlouhý záznam a zotavení</h3>
+<p><strong>F18.</strong> Dlouhé audio se nemá stát jedním zranitelným souborem, který existuje teprve po Stop. Návrhový cíl prototypu je uzavírat obnovitelné části nejvýše po 60 sekundách, bez restartování fyzického vstupu mezi částmi. Uživatel stále vidí jednu úvahu.</p>
+<p>Způsob zápisu a formát částí se vyberou v C01 podle zkoušky kontinuity, kvality a spotřeby. Uchová se pořadí, skutečná délka a mezery. Při havárii může být poslední neuzavřená část poškozená; dříve uzavřené části se mají obnovit. Limit 60 sekund je cíl ztráty neuzavřeného úseku při testovaných chybách, nikoli garance při poruše úložiště nebo celého zařízení.</p>
+<p>Po návratu aplikace nabídne zachovaný obsah jako <strong>Obnovená částečná nahrávka</strong> a ukáže, co je skutečně přehratelné. Nikdy se sama znovu nerozposlouchá. AI neobdrží domnělé chybějící věty; pracuje jen s potvrzenými částmi a s informací o přerušení. Serverový pohodlný spojený soubor je odvozenina; původní části zůstávají archivním zdrojem.</p>
+<h2 id="section-18">9. UI05 — Dnes, jiné dny a soukromý deník</h2>
+<p><strong>F19.</strong> Dnes se otevře okamžitě z místních dat. Server není nutný pro zobrazení vlastních uložených médií. Obrazovka obsahuje datum a číslo dne, případný vlastní název etapy, stručný stav přenosu, přehled Momentů a poslední dostupný souhrn. Výběrem data se přejde na jiný den. Po návratu z detailu se zachová místo v přehledu.</p>
+<p>Časová osa se řadí od rána k večeru. Nový záznam je dohledatelný bez čekání na náhled nebo AI; při výrobě náhledu má dočasnou neutrální kartu. Dlouhý den se nenačítá celý ve vysokém rozlišení. Každá karta ukazuje čas, typ, dostupný náhled nebo úryvek textu, hvězdičku a případný zámek. Skryté položky nejsou ve výchozím přehledu.</p>
+<p>Filtrování má v P0 pouze <strong>Vše</strong>, <strong>Důležité</strong> a <strong>Úvahy</strong>. Tím nevzniká katalog desítek tagů. Zamčený obsah je v soukromém přehledu viditelný vlastníkovi a označený; samotný zámek neznamená další šifrovaný trezor uvnitř aplikace.</p>
+<p><strong>F20.</strong> Denní souhrn má vedle textu nenápadný stav: „Z dostupných záznamů“, „Čeká na přepis“, „Nové záznamy ještě nejsou zahrnuté“ nebo „Ručně upraveno“. Zobrazený čas sestavení neznamená, že server zná vše, co je v telefonu. Telefon může doplnit přesný místní počet čekajících položek; web jen počet těch, o nichž ví.</p>
+<p>Nevzniká povinné schválení nebo „Uzavřít den“. Prázdný den ukáže „Zatím tu nejsou žádné záznamy“, nikoli vymyšlený text. Den s fotografiemi bez komentářů má galerii, ale AI si nesmí domýšlet jejich obsah. Krátký den může mít dvě věty; doporučení 100–200 slov se použije jen při dostatku textových podkladů.</p>
+<p>Kapitola deníku má tuto šablonu; prázdné bloky se vynechají:</p>
+<pre><code class="language-text">Den a datum — nepovinný potvrzený název etapy
+Titulní fotografie
+Krátký souhrn z dostupných textových záznamů
+Momenty v časovém pořadí s komentáři
+Samostatné úvahy v plném rozsahu
+Galerie a původní audio/video
+Stav úplnosti a datum posledního sestavení
+</code></pre>
+<p>Titulní snímek se určí bez placeného hodnocení: explicitně vybraný snímek, jinak první hvězdičkou označená fotografie, jinak první dostupná fotografie podle času. Pro osobní deník může být i ze zamčeného Momentu; jeho soukromí zdědí všechny odvozeniny. Rodinný výběr nepřebírá tuto obálku automaticky.</p>
+<p>Pokud je souhrn stažený, je čitelný i offline. Dosud nestáhnutý souhrn se offline nevygeneruje. Soukromá galerie a textové poznámky fungují i při vypnuté AI.</p>
+<h2 id="section-19">10. UI06 — detail Momentu a jednoduché opravy</h2>
+<p><strong>F21.</strong> Detail zobrazuje média v pořadí připojení, hlasový přehrávač, čtenářský text, čas situace, kapitolu, dostupnou polohu, stav kopií, hvězdičku a soukromí. U později namluvené vzpomínky rozlišuje „Patří k: [událost]“ a „Nahráno: [skutečný čas]“.</p>
+<p>Běžné akce: přehrát, prohlédnout, hvězdička, přepínač soukromí, <strong>Přidat komentář</strong>, <strong>Soukromý dovětek</strong>, <strong>Upravit text</strong>. Další méně časté akce jsou v nabídce: připojit médium, napsat doplnění, změnit den kapitoly, nastavit titulní fotografii dne, zobrazit původní přepis, skrýt Moment. Název lze doplnit, ale není povinný a AI jej nemusí sama vymýšlet.</p>
+<p>„Přidat komentář“ přidává audio do právě otevřeného Momentu a dědí jeho zámek. „Soukromý dovětek“ založí samostatnou úvahu <code>owner_only=true</code>, s viditelnou vazbou pro vlastníka. Nezmění původní fotografii ani globální režim nových záznamů. Soukromí celého Momentu nelze obejít odlišným příznakem jedné přílohy.</p>
+<p>Při přehrávání delšího audia jsou k dispozici Play/Pause a posun v čase. Více částí jedné session se přehrává v pořadí; v přerušení se ukáže značka mezery. Média se sama hlasitě nespouštějí při otevření detailu.</p>
+<p><strong>F22.</strong> Přesun do jiného dne mění jen kapitolu. V dialogu je datum a věta „Čas původní fotografie nebo nahrávky zůstane zachován.“ Pozdější upload použije nové přiřazení, ale zachová oba časové údaje. Opravovat časovou kapitolu nemusí uživatel každý večer.</p>
+<p><strong>F23.</strong> „Skrýt z deníku“ je vratná akce s možností Vrátit. Položka včetně originálů zůstane v archivu a záloze, ale zmizí z běžného přehledu i nových filmových a rodinných výběrů. Soukromý automatický souhrn se označí jako zastaralý a vytvoří se jeho nová verze bez skrytého zdroje. Ručně upravený text se nepřepíše; dostane upozornění, že může odkazovat na skrytou položku.</p>
+<p>Skryté položky jsou dostupné v Nastavení → Archiv → Skryté. Obnovení vrací jejich předchozí soukromí, ne automaticky „Do deníku“. Hláška u skrytí výslovně uvádí, že neuvolňuje místo. P0 nemá běžné tlačítko nevratného mazání originálů. Již odeslané kopie nemůže skrytí ani zámek vzít zpět.</p>
+<h2 id="section-20">11. UI07 — editor textu a jeho verze</h2>
+<p><strong>F24.</strong> Editor se otevírá jen na výslovnou akci. Zobrazuje aktuální čtenářský text, jednoduché textové pole, <strong>Uložit</strong> a <strong>Zrušit</strong>. Žádné nástroje pro sazbu, práci se stopami nebo formátování dokumentu. Přepis a původní audio zůstávají vedle editoru dohledatelné.</p>
+<p>Rozpracovaný text se průběžně ukládá lokálně jako koncept, například po sekundě klidu a při opouštění obrazovky. Koncept není hotová lidská revize ani nový vstup do AI. Po pádu je dostupný k obnovení. Zrušení ruší koncept po potvrzení pouze tehdy, když obsahuje změny.</p>
+<p>Uložit vytváří lidskou revizi a označí ji jako aktuální. Dokud ji uživatel sám nenahradí, pozdější AI výsledek ji nesmí přepsat. Nový AI návrh se může objevit v historii, nikoli jako změněný text bez vědomí autora. První verze nemá automatickou korekturu každého stisku klávesy.</p>
+<p>Ručně psané nové doplnění se nejprve uloží jako zdrojový text a následně může dostat automatickou jazykovou korekturu. Text, který už autor výslovně upravil v editoru, se automaticky dál nepřepisuje. Rozdíl mezi psaným vstupem a ruční opravou musí být v modelu rozlišen.</p>
+<h2 id="section-21">12. UI08 — import ze systémových Fotek</h2>
+<p><strong>F25.</strong> Z hlavní nabídky lze vybrat více fotografií a videí. Každá samostatně vybraná položka výchozím pravidlem vytvoří nový Moment. Import z detailu Momentu naopak výslovně připojí vybrané zdroje do něj a zdědí jeho soukromí.</p>
+<p>Import má seznam s počtem <strong>Zkopírováno / Čeká / Chyba</strong>. Skutečné uložení znamená, že aplikace vlastní celý vybraný soubor v trvalém úložišti, ne odkaz na dočasný náhled. U položky dostupné jen v iCloudu se zobrazí „Čeká na stažení z Fotek“. Získání takového souboru se může řídit také nastavením systémové knihovny, nikoli jen naší upload fronty; při požadavku sítě se musí uživatel dozvědět, že se data teprve stahují.</p>
+<p>Originálem importu se rozumí <strong>bajty skutečně předané systémovým výběrem</strong>. Může jít o upravenou nebo exportovanou reprezentaci. Aplikace zachová tuto reprezentaci a její dostupná metadata; neslibuje přístup k nezměněnému foto-originálu senzoru. Pokud zná variantu, uloží <code>original / edited / current / unknown</code>. Import neprovádí další skrytou ztrátovou kompresi.</p>
+<p>Vlastní Live Photos nevytváříme. V P0 je import Live Photo výslovně importem statické fotografie, nikoli zárukou zachování celé pohyblivé dvojice; uživatel to u takové položky uvidí. Zachování obou zdrojových částí lze doplnit později.</p>
+<p><strong>F26.</strong> Opakovaný výběr téhož dostupného identifikátoru z knihovny se rozpozná. Jako další kontrola slouží hash skutečných dat. Výchozí akce při shodě je „Už je v deníku — zobrazit“, nikoli duplikace či automatické sloučení soukromí dvou situací. Pokud uživatel výslovně potřebuje samostatný Moment se stejným souborem, vznikne nový Moment a vlastní Asset ID se stejnými zdrojovými bajty. Jeden Asset ID se nesdílí mezi Momenty s různým soukromím. Případná fyzická deduplikace je až vnitřní optimalizace, nikoli propojení oprávnění; v P0 není nutná.</p>
+<p>Import zachová známý čas pořízení. Chybějící časové pásmo se neodvodí s falešnou jistotou z aktuální polohy telefonu. Nejasné položky lze předvybrat do otevřeného dne s označením „Den přiřazen při importu“ a nepovinnou opravou. Den importu ani přijetí na Mac se nesmí vydávat za doložený čas fotografie.</p>
+<p>Přerušení importu ponechá dokončené kopie. Neúplná kopie zůstane označená a lze ji opakovat. Originál ve Fotkách se žádnou importní akcí nemaže.</p>
+<h2 id="section-22">13. UI09 — stav uložení, fronta a mobilní data</h2>
+<p><strong>F27.</strong> Obrazovka používá oddělené sekce:</p>
+<div aria-label="Tabulka, při malé šířce lze posouvat" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>Sekce</th>
+<th>Co přesně tvrdí</th>
+<th>Příklad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Telefon</td>
+<td>Dokončené zdroje jsou lokálně zapsané a evidované.</td>
+<td>38 momentů uložených</td>
+</tr>
+<tr>
+<td>Mac</td>
+<td>Všechny požadované zdroje mají potvrzený hash a metadata dané revize.</td>
+<td>33 úplných, 5 čeká</td>
+</tr>
+<tr>
+<td>Další záloha</td>
+<td>Existuje ověřená další kopie zahrnující zdroje a relevantní metadata.</td>
+<td>Ověřeno do 18:42</td>
+</tr>
+<tr>
+<td>AI</td>
+<td>Stav přepisů, korektur a souhrnů nezávisle na kopiích.</td>
+<td>2 audia čekají na přepis</td>
+</tr>
+</tbody>
+</table></div>
+<p>Počet Momentů se neplete s počtem souborů nebo vnitřních audio segmentů. Detail může říci „1 úvaha, 14 částí“, ale hlavní přehled z toho neudělá 14 úvah. Zobrazené bajty jsou skutečné čekající přenosy, nikoli velikost již ověřeného archivu.</p>
+<p><strong>F28.</strong> Jsou zde <strong>Synchronizovat nyní</strong>, <strong>Pozastavit přenosy</strong> a po otevření čekající dávky <strong>Odeslat i přes mobilní data</strong>. Pozastavení zastaví plánování nových úloh a podle možností bezpečně přeruší probíhající; neznamená, že už přenesené bajty vrátí. Záznam, lokální čtení a změny metadat fungují dál.</p>
+<p>Výchozí automatický režim je pouze Wi-Fi. Jednorázové mobilní povolení zobrazí konkrétní počet souborů a objem a platí jen pro výslovně vybranou dávku, nikoli pro další záznamy pořízené později. Retry stejného souboru může přenést další bajty; odhad proto není garance vyúčtování operátora. Hotspot telefonu připojeného přes Wi-Fi může být z hlediska tarifu placené připojení; aplikace nemůže vždy poznat způsob jeho účtování.</p>
+<p>Pokročilý trvalý mobilní režim s limitem není nutný pro P0. Datovou politiku lze po měření rozšířit bez zásahu do záznamového modelu. „Synchronizovat nyní“ neruší omezení sítě a nevypíná Tailscale; ukáže skutečnou překážku.</p>
+<p><strong>F29.</strong> Důvody čekání se nerozmazávají do jedné animace:</p>
+<div aria-label="Tabulka, při malé šířce lze posouvat" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>Stav</th>
+<th>Text pro uživatele</th>
+<th>Dovolená akce</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Není vhodná síť</td>
+<td>Čeká na Wi-Fi. V telefonu je uloženo.</td>
+<td>Mobilní dávka / později</td>
+</tr>
+<tr>
+<td>API nedosažitelné</td>
+<td>Domácí Mac teď není dostupný.</td>
+<td>Zkusit spojení / pomoc</td>
+</tr>
+<tr>
+<td>Autorizace neplatí</td>
+<td>Obnov připojení k domácímu Macu.</td>
+<td>Párování bez smazání dat</td>
+</tr>
+<tr>
+<td>Na Macu chybí místo</td>
+<td>Na Macu není místo pro další soubory.</td>
+<td>Nechat čekat / stav serveru</td>
+</tr>
+<tr>
+<td>Ověřování</td>
+<td>Soubor dorazil, kontroluji úplnost.</td>
+<td>Žádný falešný zelený stav</td>
+</tr>
+<tr>
+<td>Nesouhlasí data</td>
+<td>Přenos se nepodařilo ověřit; originál zůstává v telefonu.</td>
+<td>Bezpečné opakování</td>
+</tr>
+<tr>
+<td>Uživatel pozastavil</td>
+<td>Přenosy jsou pozastavené.</td>
+<td>Pokračovat</td>
+</tr>
+<tr>
+<td>AI stojí na limitu</td>
+<td>Přepis čeká na rozpočet. Ukládání pokračuje.</td>
+<td>Stav AI</td>
+</tr>
+</tbody>
+</table></div>
+<p>Z nedosažitelnosti API nelze bez důkazu určit, že je vypnutý Mac, rozbitý internet nebo Tailscale. Diagnostika nabízí možnosti, ale netvrdí jednu příčinu jako jistou.</p>
+<h2 id="section-23">14. UI10 — nastavení, pomoc a upozornění</h2>
+<p><strong>F30.</strong> Nastavení obsahuje pouze skupiny <strong>Cesta</strong>, <strong>Připojení</strong>, <strong>Přenosy</strong>, <strong>Záznam a mikrofon</strong>, <strong>Archiv</strong>, <strong>AI a spotřeba</strong>, <strong>Pomoc</strong>. V běžném rozhraní nejsou databázové názvy, modelová ID, porty nebo chunk velikost.</p>
+<p>Položka AI ukazuje zapnuto/pozastaveno/mock, odhad čerpání schváleného limitu a datum poslední známé synchronizace. Bez spojení se tato čísla neoznačí jako živá. Konkrétní technické nastavení klíče je na serveru, nikoli v telefonu.</p>
+<p><strong>F31.</strong> Upozornění mají tři úrovně. Kritické: nezapsaný záznam nebo úplná ztráta audio vstupu; viditelně ihned, a pokud lze, i místním oznámením. Důležité: nedostatek místa, dlouho neodeslané originály, dlouho neověřená záloha; stavový pruh a nejvýše jedno opakování stejného problému za den při příležitosti běhu aplikace. Běžné: hotový přepis, nová gramatická oprava či souhrn; bez push a bez přerušení uživatele.</p>
+<p>Návrhová hranice dlouhého čekání je 24 hodin od pořízení nezálohovaného dokončeného zdroje. Bez povolených oznámení se vše ukazuje uvnitř aplikace. Neexistuje záruka přesného času upozornění, pokud iOS aplikaci nespustí. V P0 nezřizujeme veřejnou push infrastrukturu, která by tuto nejistotu jen zakryla.</p>
+<p>Zprávy na zamčené obrazovce neobsahují přepisy, jména míst, úvahy ani citlivé náhledy. Podrobnosti se zobrazují až uvnitř aplikace. Pomoc obsahuje jasné „Neodinstalovávej aplikaci, dokud nemáš ověřenou kopii místních dat.“</p>
+<h2 id="section-24">15. UI11 — nouzový export a přenositelný archiv</h2>
+<p><strong>F32.</strong> Vlastník může bez domácího serveru vyexportovat den nebo celou dostupnou cestu z telefonu. Výstup obsahuje zdrojové soubory, lokální textové revize, přiřazení dnů, zámky, vazby, časy, manifest velikostí a hashů a jednoduchý čitelný přehled. Chybějící přepisy nejsou chyba exportu originálů.</p>
+<p>Úvodní obrazovka výslovně říká: <strong>„Soukromý archiv obsahuje i Jen pro mě a může obsahovat přesnou polohu. Není to zpráva pro rodinu.“</strong> Cíl se vybírá jako vlastní úložiště v Souborech, nikoli jako nabídka adresátů rodinné zprávy. Výchozí archiv není prezentován jako heslem šifrovaný trezor.</p>
+<p>Pro krizově málo místa se nesmí nejprve vyrobit druhá úplná kopie celé cesty v interní paměti. Preferuje se průběžný export do zvolené složky po souborech. Pokud konkrétní poskytovatel úložiště nedovolí bezpečný zápis tímto způsobem, aplikace nabídne menší dávku nebo jiný cíl; nevydává nedokončenou kopii za zálohu.</p>
+<p>Manifest začíná jako neúplný. Teprve po ověření všech zkopírovaných položek se export označí za dokončený. Při přerušení jsou rozpoznatelné hotové soubory a lze pokračovat. Již existující cílový soubor se přepíše jen tehdy, je-li doložena shoda a bezpečná operace; jiný obsah je konflikt, ne tiché nahrazení.</p>
+<p>„Export vytvořen v Souborech“ není automaticky „Nezávislá záloha ověřena“. Složka Na mém iPhonu zůstává na témž zařízení. U cloudového cíle může místní dokončení předcházet jeho vzdálenému nahrání. Pro skutečnou jistotu další kopie je nutné ověření na druhé straně.</p>
+<p><strong>F33.</strong> Na Macu vzniká úplný přenositelný archiv s HTML, Markdown, JSON manifestem a relativními cestami k médiím. Musí být čitelný bez databázového serveru a bez AI účtu. HTML je statické, s escapovanými uživatelskými texty a bez externích sledovacích prvků. Odkazy neobsahují přístupové tokeny. HEIC či zvláštní video může vyžadovat kompatibilní prohlížeč; k běžnému prohlížení proto existují odvozené JPEG/video náhledy, originály však zůstávají.</p>
+<h2 id="section-25">16. UI12 — volitelný výběr rodině</h2>
+<p><strong>F34. P1.</strong> Vstup je Dnes → Poslat výběr. Nejde o odeslání kompletní osobní kapitoly. Výběr obsahuje jen nezamčené a neskryté zdroje. Zamčené položky se nenabízejí a ve výsledku nesmí být ani sdělení, kolik jich bylo vynecháno.</p>
+<p>Výchozí nabídka může předvybrat až pět hvězdičkou označených fotografií; nejsou-li, nabídne ruční výběr. Cílem jsou zpravidla 3–5 fotografií, nikoli povinný počet. Lze odeslat i jedinou fotografii. Automatické připojení všech videí a původních nahrávek se v P1 nedělá.</p>
+<p>Průchod je <strong>Výběr → Náhled textu a fotografií → Sdílet</strong>. Text se vyrábí jen z vybraných povolených komentářů. Kompletní osobní souhrn, soukromé dodatky ani kontext dřívějších zamčených úvah se k tomu nepoužívají. Není-li text připraven nebo AI dostupná, je možný výběr bez souhrnu nebo s přímo převzatými povolenými popisky; žádné domyšlené vyprávění.</p>
+<p><strong>F35. P1.</strong> Před sestavením a znovu před předáním do systémového sdílení se zkontrolují identifikátory a aktuální revize soukromí, vybraných textů a skrytí. Lokální neodeslaná změna soukromí nebo nedostupný server export pozdrží. Na telefonu se ještě provede okamžitá lokální kontrola těsně před předáním. Tím se nevyžaduje večerní práce; pouze se nepublikuje zastaralý výběr bez vědomé akce.</p>
+<p>Rodinné fotografie se vytvoří jako samostatné kopie, návrhově JPEG s delší hranou 2048 bodů obrazu. Transformace orientaci skutečně zapracuje a z výstupu odstraní GPS i další nepotřebná EXIF/XMP metadata. Pouhé skrytí souřadnic v rozhraní nestačí. Názvy exportů jsou neutrální, nikoli převzaté z tajných poznámek. Originály se nemění.</p>
+<p><strong>F36. P1.</strong> Uživatel sám vybere cílovou aplikaci a adresáta. Camino nevytváří rodinné účty a samo neodesílá zprávy. Po předání smí říci „Předáno do sdílení“, nikoli bez důkazu „Rodině doručeno“. Zrušení nezpůsobí pozdější automatický pokus. Rozložení více fotografií a textu se musí vyzkoušet v konkrétní cílové aplikaci; není garantováno ve všech komunikačních aplikacích stejně.</p>
+<p>Změna soukromí před předáním výběr zneplatní. Po předání jiné aplikaci nebo po odeslání už nelze zaručit odvolání kopie. I ručně napsaný text v náhledu může obsahovat osobní informaci; zámek je ochrana označených zdrojů a jejich odvozenin, ne vševědoucí kontrola toho, co sám autor napíše.</p>
+<h2 id="section-26">17. UI13 — soukromý web na Macu</h2>
+<p><strong>F37.</strong> Web má v P0 dvě hlavní části: <strong>Deník</strong> a <strong>Stav systému</strong>. Deník zobrazuje cesty, dny, média, texty a zámky; je pouze pro vlastníka. Stav ukazuje poslední kontakt telefonu, počty známých nedokončených zdrojů, místo, frontu zpracování, poslední zálohu a výsledek poslední zkoušky obnovy.</p>
+<p>V P0 se přes web nepřepisují komentáře, nemění soukromí a nespouští rodinné publikace. Tím je jasný jediný uživatelský zapisovatel metadat: hlavní iPhone. Správce serveru může provozně pozastavit AI či worker; to není druhý editor deníku. Pozdější rozšíření na více editorů vyžaduje výslovný konfliktový model.</p>
+<p>Nedostupné médium se neotevře jako rozbitý prázdný přehrávač: je vidět, zda čeká na upload, nemá náhled, nebo je zdroj neúplný. Web nemůže tvrdit, že má všechno z telefonu, pokud nezná jeho aktuální inventář.</p>
+<p>Přístup je pouze autorizovaný uvnitř soukromé sítě. Webová session používá bezpečné cookies, žádné tokeny v URL, žádné veřejné náhledy zámků. Přesná provozní instalace je úkol C06.</p>
+<h2 id="section-27">18. Datový význam, čas a polohové údaje</h2>
+<h3 id="section-28">18.1 Minimální model</h3>
+<p><strong>F38.</strong> Identifikátory se vytvářejí offline a jsou stabilní po přenosu. Pořadí ve frontě ani název souboru nejsou identita. Před implementací se v C03 zafixuje přesný kontrakt; tato tabulka stanovuje význam polí, nikoli hotové databázové migrace.</p>
+<div aria-label="Tabulka, při malé šířce lze posouvat" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>Objekt</th>
+<th>Povinný význam</th>
+<th>Důležitá nepovinná data</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Trip</td>
+<td>ID, název, jazyk, aktivní stav, provozní politika</td>
+<td>Začátek a konec cesty; nikdy povinný pevný počet dnů</td>
+</tr>
+<tr>
+<td>JourneyDay</td>
+<td>ID, Trip, datum kapitoly</td>
+<td>Vlastní název etapy, titulní zdroj, revize souhrnu</td>
+</tr>
+<tr>
+<td>Moment</td>
+<td>ID, Trip, kapitola, typ, časová provenience, soukromí, revize, skrytí</td>
+<td>Hvězdička, vlastní název, vazba na jiný Moment, poloha</td>
+</tr>
+<tr>
+<td>Asset</td>
+<td>ID, Moment, mediální typ, původ, byte velikost, po dokončení SHA-256</td>
+<td>Délka, rozměry, orientace, kodek, importní reprezentace</td>
+</tr>
+<tr>
+<td>RecordingSession</td>
+<td>ID, Moment, typ audia, stav, pořadí částí</td>
+<td>Mikrofon, přerušení, zachycená délka, časové mezery</td>
+</tr>
+<tr>
+<td>TextRevision</td>
+<td>ID, role textu, obsah, seznam zdrojů, rodičovská revize, autor změny</td>
+<td>Model a recept, nejasná místa, časové úseky</td>
+</tr>
+<tr>
+<td>LocalOperation</td>
+<td>Jednoznačné ID, pořadí v zařízení, cílový objekt a očekávaná revize</td>
+<td>Důvod konfliktu, potvrzení serveru</td>
+</tr>
+<tr>
+<td>UploadSession</td>
+<td>ID, Asset, očekávaná velikost/hash, seznam potvrzených částí</td>
+<td>Poslední aktivita, pokusy, dokončovací stav</td>
+</tr>
+<tr>
+<td>ProcessingJob</td>
+<td>Jednoznačný klíč operace, vstupní verze, stav</td>
+<td>Retry, lease, náklady, chyba</td>
+</tr>
+<tr>
+<td>BackupReceipt</td>
+<td>Cílové úložiště, snapshot, ověřené soubory a metadatová revize</td>
+<td>Datum kontroly a zkoušky obnovy</td>
+</tr>
+<tr>
+<td>ExportRevision</td>
+<td>Publikum, seznam přesných zdrojových revizí, stav, soukromostní kontrola</td>
+<td>Předání jiné aplikaci; nikoli domnělé doručení</td>
+</tr>
+</tbody>
+</table></div>
+<p>Soukromí je vlastnost celého Momentu. Asset je pro publikaci vždy vyhodnocen přes svůj Moment; nulová nebo neznámá politika se považuje za nepovolenou. Odvozené texty uchovávají všechny zdroje, ne pouze poslední fotografii.</p>
+<p><strong>F39.</strong> Jeden hlavní telefon je jediný zapisovatel uživatelského obsahu v P0. Server vytváří AI revize a odvozeniny, nikoli nevyžádané úpravy uživatelských polí. Každá změna obsahuje ID operace a očekávanou revizi. Znovu odeslaná táž operace má stejný efekt a nezakládá další lidskou revizi.</p>
+<p>Po konfliktu se neztrácí žádná varianta. Lidská revize má přednost v zobrazování před později doručenou AI, ale obě zůstávají. Při rozporu o soukromí je účinná přísnější varianta. Server neřeší pořadí změn jen podle hodin telefonu; používá vlastní revize a potvrzené pořadí operací.</p>
+<p>Obnova staršího telefonu, výměna zařízení nebo serveru není obyčejné pokračování starého kurzoru. Spustí se řízené znovuporovnání inventáře a změnové historie. Z této situace nikdy nesmí vyplynout automatické mazání novějšího originálu.</p>
+<h3 id="section-29">18.2 Čas a kapitoly</h3>
+<p><strong>F40.</strong> Uchovávají se čas zachycení v UTC, známý místní čas a offset při zachycení, dostupné ID časového pásma, zdroj časového údaje a samostatný čas přijetí serverem. Trvání audia a videa se odvozuje z mediální časové základny, ne odečtením dvou nestabilních hodin telefonu.</p>
+<p>Výchozí kapitola je místní datum při začátku situace nebo nahrávky. Audio přes půlnoc zůstane v dni začátku. Po překročení hranice či změně pásma se již uložené kapitoly samy nepřesouvají. Denní souhrn se neřídí časem Macu v ČR. Nejasný import nese údaj o nejistotě; správný offset se nevymýšlí.</p>
+<p>Den má stabilní ID, jeho zobrazené pořadí se vypočte z nastaveného začátku cesty. Přípravné záznamy před začátkem mohou být označené „Před cestou“. Odpočinkový nebo prázdný den není chyba. Pozdější vzpomínka má vlastní čas audia a explicitní vazbu nebo uživatelem změněnou kapitolu původní situace.</p>
+<h3 id="section-30">18.3 Poloha</h3>
+<p><strong>F41.</strong> Poloha se pořídí jednorázově pro situaci, bez blokování fotoaparátu nebo mikrofonu. Návrhově se použije aktuální měření či cache stará nejvýše 120 sekund. U každého bodu se ukládá čas a horizontální přesnost; např. hodnota nad 100 metrů se označí jako přibližná. Tyto hranice jsou naše pracovní parametry, nikoli slib skutečné přesnosti GPS.</p>
+<p>Starší známá poloha se nevydává za aktuální; raději je bod neznámý. Odepřená poloha nebrání žádnému typu záznamu. Názvy míst a etap nejsou odhadované AI jako jistá fakta. V P0 stačí bod a případně uživatelský popisek. Zápis názvu místa zvenku musí mít známý původ.</p>
+<p>Mapa bodů se nazývá <strong>Místa záznamů</strong>, nikoli Prošlá trasa. Kilometráž se nepočítá jako součet spojnic fotografií. První verze nemá oprávnění pro průběžnou polohu na pozadí ani příjem biometrických údajů z hodinek.</p>
+<h2 id="section-31">19. Bezpečné místní uložení a stavové automaty</h2>
+<h3 id="section-32">19.1 Zápis a obnova</h3>
+<p><strong>F42.</strong> Média jsou v trvalém prostoru aplikace, nikoli ve vymazatelné cache. Při zápisu existuje journal rozpracované operace. Dokončený soubor se bezpečně přesune na své stabilní místo a propojí s databází. Protože databáze a souborový systém nejsou jediná společná transakce, při každém startu se musí opravit neuzavřené operace a osiřelé soubory.</p>
+<p>SHA-256 velkého videa se počítá proudově mimo hlavní vlákno. Hláška místního uložení může přijít po dokončeném bezpečném zápisu a evidenci před dokončením hashe; k ověřenému serverovému přenosu je ale konečný hash povinný. Uživatelské rozhraní nesmí čekat na načtení celého videa do paměti.</p>
+<p>Pracovní náhledy lze obnovit. Nedokončené soubory se zkoušejí rozpoznat a obnovit; neodstraňují se bez vyhodnocení jen proto, že nejsou v běžném seznamu. Vymazat cache není totéž jako vymazat originály.</p>
+<p>Ochrana souborů a tokenu musí být nastavena tak, aby fungovalo již spuštěné audio i souborové přenosy při zamčení po prvním odemknutí zařízení. Režim po úplném restartu před prvním odemknutím je oddělený test. Neobcházet problém plošným vypnutím ochrany dat. Přesné třídy ochrany a jejich dopady jsou výstup auditu/prototypu, ne volba pro Mílu. [<a class="source-ref" href="#S13">S13</a>]</p>
+<h3 id="section-33">19.2 Úložiště a priorita záznamu</h3>
+<p><strong>F43.</strong> Pracovní varování je při méně než 2 GiB volného místa. Hodnota není příslib, kolik hodin videa zbývá. Pro Start se vyhodnocuje prostor pro bezpečné dokončení, aktuální profil videa a pracovní rezervu. Předběžně se drží 512 MiB provozní rezerva; způsob jejího zachování se musí ověřit a upravit podle měření.</p>
+<p>Při nedostatku se nezamknou automaticky všechny funkce: krátký text může být stále možný, velké video ne. Aplikace řekne, která akce nejde a proč. Běžící záznam se snaží včas řádně ukončit. V krajní chybě přizná částečnost. Nikdy automaticky nesmaže nesynchronizovaná data kvůli novému klipu.</p>
+<p>Nahrávání má přednost před generováním náhledů, hashováním velkých importů a plánováním dalších velkých uploadů. Při nízké baterii se nejdříve omezí nepovinná práce; audio se nezastaví jen na základě libovolně zvoleného procenta, ale skutečné systémové ukončení nelze znemožnit.</p>
+<h3 id="section-34">19.3 Stavy médií</h3>
+<p><strong>F44.</strong> Záznamový automat:</p>
+<pre><code class="language-text">připraveno → zahajuji → nahrávám / zachycuji → dokončuji → uloženo
+                              ↘ přerušeno → pokračuji / dokončuji
+jakýkoli nedokončený stav → obnova po chybě → částečně obnoveno / nelze obnovit
+</code></pre>
+<p>„Uloženo“ se vztahuje ke konkrétně zachovanému rozsahu. Částečná úvaha zůstane označená i po úspěšném uploadu; serverová kopie nezmění historickou částečnost na úplný zážitek.</p>
+<p>Přenosový automat:</p>
+<pre><code class="language-text">čeká na dokončení zdroje → připraveno → čeká podle sítě → odesílá se
+                                      ↖ dočasná chyba      ↓
+                                                     ověřuje se → ověřeno na Macu
+</code></pre>
+<p>Neplatná autorizace, nesoulad obsahu a server bez místa jsou samostatné blokace. AI má vlastní stavy <code>čeká / běží / hotovo / nejasné / pozastaveno limitem / chyba</code>, nesdílí jediný příznak „hotovo“ s uploadem.</p>
+<h2 id="section-35">20. Přenos iPhone ↔ Mac</h2>
+<h3 id="section-36">20.1 Síť a dosažitelnost</h3>
+<p><strong>F45.</strong> Preferovaná architektura zůstává nativní iPhone aplikace, soukromé HTTPS přes Tailscale Serve a API naslouchající na localhostu Macu. Serve zpřístupňuje službu uvnitř tailnetu; pro veřejné služby existuje odlišná funkce Funnel, kterou zde nepoužijeme. Přístup se omezí síťovými pravidly a vlastním odvolatelným oprávněním aplikace. [<a class="source-ref" href="#S05">S05</a>]</p>
+<p>Tailscale je samostatná aplikace a nastavení, ne komponenta vlastní VPN v Caminu. VPN On Demand může pomoci s navázáním spojení, ale není zárukou okamžité synchronizace, obcházení přihlašovací hotelové stránky nebo probuzení domácího Macu. [<a class="source-ref" href="#S06">S06</a>]</p>
+<p><strong>F46.</strong> Přenosy používají souborové úlohy URLSession a trvalou lokální frontu. iOS plánuje práci na pozadí; nucené ukončení aplikace má jiné důsledky než prosté zamčení. Implementace musí přežít zrušené úlohy a po dalším otevření zjistit skutečný stav, nikoli předpokládat pokračování. [<a class="source-ref" href="#S04">S04</a>]</p>
+<p>V P0 neslibujeme neomezenou bezobslužnou synchronizaci za všech situací. Krátké otevření aplikace a „Synchronizovat nyní“ je provozní záloha automatizace, ne večerní redakce. Nedostupný internet několik dnů nevadí architektuře, pokud je dost místního prostoru; nesynchronizovaný obsah ovšem zůstává vystaven ztrátě telefonu.</p>
+<h3 id="section-37">20.2 Význam přenosového kontraktu</h3>
+<p><strong>F47.</strong> Telefon nejprve založí či aktualizuje manifest Momentu a Assetu. Server dostane identifikátory, očekávanou velikost, konečný hash a relevantní revize. Založení opakované se stejným ID a shodným obsahem nezaloží druhý soubor.</p>
+<p>Velké soubory se přenášejí po očíslovaných částech; výchozí experimentální velikost je 8 MiB. Klient má současně připravený jen omezený počet částí, například dvě, a soubory musí ponechat dostupné po dobu skutečně běžící přenosové úlohy. Nenakopíruje celé video do druhého dočasného adresáře. Část má délku a hash; opakovaná stejná část je bezpečná, jiné bajty pod stejnou identitou jsou konflikt.</p>
+<p>Server potvrzuje přijaté části až po jejich bezpečném zápisu. Klient po přerušení požádá o skutečný seznam přijatých částí a doplní zbytek. Byte progress může dosáhnout 100 %, ale UI stále ukazuje <strong>Ověřuji</strong>, dokud není potvrzena finalizace.</p>
+<p><strong>F48.</strong> Finalizace sestaví soubor, ověří celkovou velikost a hash, dokončí zápis a evidenci a vydá potvrzení vázané na konkrétní zdroj. Nelze ji nahradit jen důvěrou klientskému hashi bez jeho výpočtu na serveru. Při restartu mezi souborovým přesunem a databázovým potvrzením proběhne oprava journalu.</p>
+<p>Ztracená odpověď na dokončení nevyvolá bezhlavé nahrání všeho znovu: klient načte stav Assetu. Neznámý hash, jiná velikost, chybějící část nebo neověřený manifest nikdy nedávají stav „Ověřeno na Macu“. Opakované potvrzení může být doručeno vícekrát, funkční výsledek je jeden.</p>
+<p>Průběžné chunkování na iOS musí být ověřeno jako celek. Samotná existence souborových background uploadů neznamená, že systém dovolí kdykoli okamžitě připravit další část. Při nedostatečném výsledku C02/C05 lze přenosovou strategii upravit se zachováním ověření a obnovy; neobětovat bezpečnost jen pro zachování čísla 8 MiB.</p>
+<h3 id="section-38">20.3 Metadata, priority a stav zařízení</h3>
+<p><strong>F49.</strong> Změny soukromí, skrytí a malé manifesty mají prioritu před velkými médii. Potom přichází dokončené audio, fotografie a video. Dodatečná oprava textu nebo data kapitoly nikdy nepotřebuje znovu přenést video.</p>
+<p>Telefon uchovává trvalé pořadí změn a server potvrzuje zpracovaný souvislý úsek, nikoli libovolné nejvyšší číslo s dírami. Odezvy obsahují serverovou identitu/epochu a kurzor změn. Změna epochy po obnově serveru vyvolá nové porovnání inventáře, takže staré místní zelené potvrzení nepřekryje chybějící serverový soubor.</p>
+<p>Telefon si stáhne nové textové revize, potvrzení kopií a stav deníku. Přenosový stav je zastaralý, pokud nebyl aktuálně ověřen; vždy lze zobrazit datum posledního kontaktu. Pravidla opakování mají konečné počty a prodlužované intervaly. Síťová chyba nesmí vytvořit tisíce souběžných úloh.</p>
+<h3 id="section-39">20.4 Rozhraní, které má C03 přesně definovat</h3>
+<p><strong>F50.</strong> Kontrakt musí pokrýt níže uvedené operace. URL názvy a JSON schéma se teprve zafixují; jejich funkční význam je už závazný.</p>
+<div aria-label="Tabulka, při malé šířce lze posouvat" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>Operace</th>
+<th>Požadovaný efekt / ochrana</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Párování a odvolání zařízení</td>
+<td>Jednorázový vstup; odvolatelný token; nemazat média</td>
+</tr>
+<tr>
+<td>Registrace cesty a Momentu</td>
+<td>Stabilní offline ID; kontrola revize</td>
+</tr>
+<tr>
+<td>Revizní změna metadat</td>
+<td>ID operace, pořadí, žádný tichý přepis konfliktu</td>
+</tr>
+<tr>
+<td>Založení upload session</td>
+<td>Identita zdroje, délka/hash, idempotentní chování</td>
+</tr>
+<tr>
+<td>Zápis části a dotaz na části</td>
+<td>Ověření a bezpečné opakování</td>
+</tr>
+<tr>
+<td>Dokončení a stav Assetu</td>
+<td>Ověřený celý soubor, obnovitelné potvrzení</td>
+</tr>
+<tr>
+<td>Čtení změn od kurzoru</td>
+<td>Texty, stavy, tombstone/skrytí, nová epocha serveru</td>
+</tr>
+<tr>
+<td>Čtení deníku a autorizovaných médií</td>
+<td>Přístup vlastníka, rozsahové čtení pro velká média</td>
+</tr>
+<tr>
+<td>Stav serveru</td>
+<td>Přístup jen vlastníka; bez citlivých logů</td>
+</tr>
+<tr>
+<td>Kontrola exportu</td>
+<td>P1/P2 aktuální zdroje a soukromostní revize</td>
+</tr>
+</tbody>
+</table></div>
+<p>Neplatná revize je konflikt, ne tichý úspěch. Nepovolený přístup nevrací citlivý obsah. Chybová odpověď má stabilní strojový kód a srozumitelný text, ne interní stack trace. Klientské názvy souborů se nikdy nepoužívají přímo jako serverová cesta.</p>
+<h2 id="section-40">21. Práce Mac serveru, AI a denní šablona</h2>
+<h3 id="section-41">21.1 Provozní celek</h3>
+<p><strong>F51.</strong> Navržený technický základ: Swift/SwiftUI a Core Data v telefonu; Python/FastAPI, SQLite a běžné soubory na Macu; samostatný trvalý worker; FFmpeg pro mediální odvozeniny. Žádný Kubernetes, Redis ani veřejný cloudový aplikační backend. Konkrétní verze a vhodnost použitých API ověří C00–C03.</p>
+<p>HTTP příjem nevykonává dlouhý přepis nebo filmový render uvnitř upload požadavku. Po bezpečném přijetí zapíše práci do trvalé fronty. Samotný paměťový úkol FastAPI není náhradou obnovitelné fronty; dokumentace odlišuje malé background úlohy a náročnější zpracování. [<a class="source-ref" href="#S11">S11</a>]</p>
+<p>Každý job má typ, ID zdroje a vstupní revizi, verzi receptu, stav, počet pokusů, čas dalšího pokusu a dočasné přidělení workeru. Restart obnoví práci s vypršeným přidělením. Stejný už hotový recept nad stejnými zdroji se neopakuje bez důvodu.</p>
+<p><strong>F52.</strong> Oddělené větve po ověření zdroje:</p>
+<pre><code class="language-text">ověřený originál ──→ náhledy a mediální metadata ──→ galerie
+                ├─→ nezávislá záloha a ověření
+                └─→ dokončené hlasové audio → přepis → korektura → deník
+</code></pre>
+<p>Záloha nečeká na AI. Galerie nečeká na souhrn. AI nemusí čekat na připojení záložního disku, pokud už má ověřený zdroj na Macu; její úspěch ale nezmění záložní stav. Filmové rendery mají později nižší prioritu než příjem a hlasové záznamy.</p>
+<p>Neznámý video kodek nebo chyba náhledu nesmí způsobit výmaz doručeného originálu. Server zachová soubor a omezí jen nepodporované zpracování. Hlásí „Originál uložen; náhled není dostupný“.</p>
+<h3 id="section-42">21.2 Přepis a korektura</h3>
+<p><strong>F53.</strong> Automatický vstup tvoří dokončené samostatné hlasové session a původní psané poznámky. Samotné fotografie a všechna videa se neposílají do obrazové AI. Zvuk videa se v P0 nepřepisuje automaticky; pro film zůstává zachovaný.</p>
+<p>U dlouhé úvahy se čeká na dokončený nebo výslovně uzavřený částečný manifest všech dostupných částí. Nahrávka není průběžně zveřejňovaný stream. Server připraví pracovní audio pro přepis, ponechá originální části a rozdělí vstup podle ověřených limitů vybraného API. OpenAI dokumentuje limity velikosti a rozdíly modelových možností, proto není vhodné natvrdo slibovat libovolně velký jediný požadavek. [<a class="source-ref" href="#S07">S07</a>]</p>
+<p>Přepis je v původním jazyce řeči, s preferencí češtiny u autorova komentáře. Cizojazyčné citace se bez požadavku nepřekládají. Ticho nebo nesrozumitelný úsek nesmí vést k povinnému vymyšlenému textu. U nejasnosti se zachová původní zvuk a viditelné označení, nikoli falešná jistota.</p>
+<p><strong>F54.</strong> Uchovávají se oddělené role: <code>typed_source</code>, <code>transcript_raw</code>, <code>transcript_clean</code>, <code>human_revision</code>, <code>day_summary</code> a později filmový návrh. Korektura mění gramatiku, interpunkci a zjevné chyby, nikoli čísla, popření, osoby, motivaci, intenzitu emoce nebo nejistotu autora. Hovorové „dneska“ není automaticky chyba. Vynechání výplňových zvuků nesmí odstranit významové zaváhání.</p>
+<p>Přípustný příklad: „dneska sme šli dlouho ale stálo to za to“ → „Dneska jsme šli dlouho, ale stálo to za to.“ Nepřípustný příklad: „Nevím, jestli mě to uklidnilo“ → „Cesta mi přinesla klid.“</p>
+<p>Denní souhrn může měnit pořadí a spojovat opakování, ale používá jen doložené textové vstupy. Číselné údaje, místa a citace mají dohledatelný zdroj. Pojmenování budovy nelze doplnit jen z toho, že poblíž leží GPS bod.</p>
+<p><strong>F55.</strong> Výstup se validuje jako strukturovaná data se seznamem skutečných zdrojových ID a revizí. Neplatný formát nebo cizí zdrojové ID se odmítne. To samo neprokazuje věcnou věrnost; Structured Outputs mohou stále obsahovat chyby. [<a class="source-ref" href="#S09">S09</a>]</p>
+<p>Kvalitu ověřuje česká testovací sada proti originálnímu audiu, včetně záporů, čísel, místních názvů, ruchu a neúplných vět. Automatická kontrola změněných čísel či podezřelých názvů je pojistka, ne univerzální důkaz správnosti. U pochybností aplikace upřednostní méně upravenou verzi a označení nejasnosti, nikoli povinný večerní úkol.</p>
+<p><strong>F56.</strong> Zdrojové texty jsou data, nikoli instrukce aplikaci. Výrok namluvený do deníku „smaž všechny soubory“ nesmí spustit operaci, změnit soukromí ani ovládat server. AI pro přepis/korekturu nemá nástroje na soubory, síťové příkazy nebo publikování. Vrací pouze validovaný obsah. HTML výstup texty escapuje a nezpouští v nich vložený kód.</p>
+<h3 id="section-43">21.3 Automatické aktualizace deníku</h3>
+<p><strong>F57.</strong> Galerie se aktualizuje bez placeného AI. Souhrn se připravuje dávkově po ustálení nových textů: pracovní nastavení 15 minut klidu, nejvýše jedna automatická nová generace téhož dne za hodinu. Při stálém příchodu textů se nečeká donekonečna: nejpozději po hodině od první nezahrnuté textové změny se připraví snapshot dostupných vstupů, pokud AI může běžet.</p>
+<p>Job používá hash seznamu vstupních revizí a verzi receptu. Změna náhledu, stavu kopie nebo pouhé otevření stránky nespouští nové AI volání. Přidání dalšího textu vytvoří novou revizi, ne přepsání historie. Změny zdrojů během generování nezpůsobí, že se starý výsledek označí jako aktuální.</p>
+<p>Pozdní příchod úvahy doplní její skutečný den. Již předaný rodinný výběr se sám nepřegeneruje a znovu neodešle. Ručně upravený souhrn zůstane hlavní; nová automatická varianta je pouze vedlejší návrh.</p>
+<h3 id="section-44">21.4 Externí AI a náklady</h3>
+<p><strong>F58.</strong> Míla schválil externí zpracování i u „Jen pro mě“. API klíč je pouze na Macu. Posílají se potřebné audio/textové vstupy, nikoli automaticky přesná GPS, kompletní archiv nebo další zbytečné kontexty. Pro jednotlivé účely se používají oddělené bezstavové požadavky a cache. <code>store=false</code>, pokud jej endpoint podporuje, není tvrzení o nulovém uchování ve všech systémech poskytovatele. Režimy uchování se řídí aktuální dokumentací a konkrétní službou. [<a class="source-ref" href="#S08">S08</a>]</p>
+<p><strong>F59.</strong> Výchozí vývojový režim je mock se syntetickými daty. Placené volání se zapne až po nastavení klíče, aktuální cenové konfigurace a výslovně stanoveného limitu pilotu/cesty. Tento dokument částku neurčuje.</p>
+<p>Před voláním se rezervuje odhad nákladu, po něm zaznamená známá spotřeba. Po dosažení provozního limitu čeká jen AI. Stejná nahrávka se nepřepisuje znovu při každém otevření dne. Automatický náhradní dražší model bez limitu není povolený.</p>
+<p>Souběžnost placených volání je zpočátku jedna. Timeout s neznámým výsledkem se eviduje odlišně od jistého odmítnutí před zpracováním. Bez podpory poskytovatele nelze garantovat přesně jedno zpoplatněné volání; lokální limit a účetní odhad nejsou absolutní záruka konečné faktury. Retry se omezuje a při nejasné opakované chybě se AI pozastaví. Místní uložení, upload a záloha přitom pokračují.</p>
+<h2 id="section-45">22. Soukromí, zálohy, obnova a provoz</h2>
+<h3 id="section-46">22.1 Povolené zdroje a změna zámku</h3>
+<p><strong>F60.</strong> Úplný osobní deník může obsahovat „Jen pro mě“. Jeho souhrn je však vždy označen jako <strong>owner_diary_only</strong> pro další použití, i když v konkrétní verzi zdánlivě tajnou větu neobsahuje. Rodinný text ani film nikdy nevychází z celého osobního souhrnu.</p>
+<p>Povolené zdroje pro P1/P2 se vybírají před AI zpracováním a před skládáním médií. Kritéria: známé soukromí, <code>owner_only=false</code>, není skryté, známá aktuální revize a výslovný nebo pracovně dovolený filmový výběr. Každá odvozenina nese publikum a seznam vstupů. Jeden zakázaný zdroj činí smíšenou odvozeninu nepovolenou pro výstup; nezkouší se „očistit“ prostým promptem.</p>
+<p><strong>F61.</strong> Uzamčení již existujícího Momentu platí lokálně okamžitě, zařadí prioritu změny na server a zneplatní všechny ještě ovládané navázané sdílené exporty, návrhy filmů, náhledy a cache. Návrat na „Do deníku“ je vědomé odemčení s vysvětlením, že záznam tím pouze připouštíš k budoucímu výběru, nikoli rovnou publikuješ.</p>
+<p>Server nemůže vědět o změně, která je zatím jen v offline telefonu. Proto není žádné autonomní rodinné publikování a P1 potřebuje kontrolní kontakt z hlavního telefonu. P2 před renderem rovněž vyžaduje znovuporovnání aktuálních metadat. U dávky, která už byla předána mimo aplikaci, se výslovně uvádí neodvolatelnost cizích kopií.</p>
+<p>Utajená vazba na soukromý dovětek nesmí uniknout do popisku, počtu vynechaných položek nebo názvu souboru. Testovací „tajná věta“ se vyloučí už z požadavku na generování rodinného textu, ne jen z jeho konečného výsledku.</p>
+<h3 id="section-47">22.2 Zálohy a význam potvrzení</h3>
+<p><strong>F62.</strong> Cílem jsou telefon, pracovní kopie na Macu a nezávislá verzovaná kopie. Druhá složka na stejném disku není nezávislá. Odlišný disk v téže domácnosti nepokrývá ztrátu celé lokality; další geografickou kopii lze řešit podle skutečných možností, ale tento dokument ji nevydává za již existující.</p>
+<p>Záloha obsahuje originály, textové revize, manifesty a konzistentní stav databáze. Pro živou SQLite se použije konzistentní snapshot, například Online Backup API, ne nahodilá kopie jediného otevřeného souboru. [<a class="source-ref" href="#S10">S10</a>] Manifest určí konkrétní revizní hranici snapshotu a všechny neměnné zdroje, na něž odkazuje. Potvrzení se vydá až po zkopírování a ověření celé této množiny. Média či změny přijaté během zálohování za hranicí snapshotu nejsou zahrnuté jen proto, že už leží v pracovní složce.</p>
+<p>Předběžný plán je dávka po 15 minutách klidu od nových bezpečně přijatých dat, s maximální čekací dobou jedné hodiny při souvislém příjmu. Záložní worker není závislý na denním souhrnu. Cílový disk se ověřuje podle identity a dostupnosti; odpojený svazek nesmí být nahrazen stejně pojmenovanou prázdnou složkou na interním disku.</p>
+<p><strong>F63.</strong> „Záloha ověřena“ je potvrzení konkrétních hashů a snapshotu metadat s datem, nikoli obecná zelená kontrolka zálohovacího programu. Změna textu nebo zámku může způsobit stav „Média zálohována, novější změny ještě čekají“. Pravidelná zkouška obnovy je samostatný údaj, nikoli tvrzení, že všechny soubory byly právě ručně přehrány.</p>
+<p>Před cestou se obnoví alespoň celý testovací den do čistého cíle včetně databázových vazeb, originálů, zámků a textu; kontrolní součty se porovnají a několik médií se skutečně přehraje. Nevyhovující záloha se nepřikryje úspěšným přepisem AI.</p>
+<h3 id="section-48">22.3 Obnova a ztráta zařízení</h3>
+<p><strong>F64.</strong> Obnova serveru ze snapshotu vytvoří novou epochu a zastaví nové rodinné/filmové exporty do porovnání s posledním známým stavem hlavního telefonu a případnými novějšími zálohami. Starší odemčená revize nesmí automaticky převážit pozdější zámek.</p>
+<p>Telefon po obnově nejdříve porovná inventář, neodstraňuje „přebývající“ místní soubory. Nový telefon se páruje vědomě; klíče se nepřenášejí nechráněným manifestem archivu. Existuje postup odvolání ztraceného zařízení. Nesynchronizovaný obsah ze ztraceného nebo zničeného telefonu systém obnovit neumí; to je známá hranice, ne chyba deníkové šablony.</p>
+<h3 id="section-49">22.4 Provozní zabezpečení</h3>
+<p><strong>F65.</strong> Token telefonu je uložen v Keychain, server ukládá jeho ověřovací podobu a umí jej odvolat. AI klíč není v iOS balíčku, QR dlouhodobého sdílení, URL, repozitáři ani logu. Soukromý web má samostatnou autorizovanou session. Data cest a reálné nahrávky nejsou ve zdrojovém repozitáři.</p>
+<p>Vstupy se validují podle velikosti, typu a ID; soubory nemohou cestou obsahovat <code>../</code>. Mediální nástroje se volají argumenty, ne skládáním shellového příkazu z popisku. Textové HTML je escapované. Logy obsahují ID operací a chyby, nikoli přesné souřadnice, nahrávky, přepisy nebo přihlašovací tajemství.</p>
+<p><strong>F66.</strong> Mac služba a worker mají spravovaný start a čitelný stav. Audit ověří skutečné uspávání, napájení, oprávnění k médiím, záložní disk a restart se zapnutým zabezpečením. Nevypíná se FileVault ani nenastavuje automatické přihlášení jen proto, že by to bylo pohodlnější. Po restartu může být nutný místní úkon; musí být doložený provozním testem, ne zamlčený.</p>
+<p>V domácí konfiguraci se prověří dostupnost přes jinou síť, nejen vlastní Wi-Fi. Před instalací nové verze se připraví bezpečná kopie databáze a migrační test. Neúspěšná migrace nesmí smazat původní data. Bezpečná starší verze musí mít popsanou návratovou cestu; nepředpokládá se automatická kompatibilita všech databázových verzí.</p>
+<h2 id="section-50">23. UI14 — film a trasa po návratu</h2>
+<p><strong>F67. P2.</strong> Import trasy používá soubor, který skutečné hodinky opravdu umějí poskytnout. Model hodinek ani GPX se nepředpokládá jako hotová integrace. Uchovává se originální export, jeho časová provenience a případné mezery. Mapa neoznačuje interpolovaný úsek za měřený. Import hodinek není důvod žádat zdravotní data, která deník nepotřebuje.</p>
+<p><strong>F68. P2.</strong> Výchozí film je osobní cestopis z povolených zdrojů, přibližně 20–30 minut; konkrétní délka vychází z materiálu. Může obsahovat prolog, dny a závěr, ale žádnou část není třeba vyplnit vymyšlenou událostí.</p>
+<p>Návrh výběru používá hvězdičky, chronologii, komentáře a výslovné volby. Bez obrazové analýzy se nevydává za inteligentní rozpoznání obsahu klipu; může nabídnout časový úsek, jehož vhodnost se posoudí. Soukromé ani skryté zdroje nejsou vstupem už do návrhu, kontaktního přehledu nebo pracovního rough cutu.</p>
+<p><strong>F69. P2.</strong> Časová osa má stabilní ID položky, zdrojové ID a revizi, in/out čas zdroje, umístění ve filmu, úpravu orientace, zvukovou stopu a původ titulků. Ručně uzamčený střih se při přepočtu nemění. Změněná povolenost zdroje ale render zastaví, i kdyby byl střih ručně uzamčený.</p>
+<p>Používá se skutečný hlas a zvuk prostředí. Náhradní namluvení má vlastní datum a vazbu, nikoli přepsaný originál. Text čtenářské korektury se automaticky nepoužívá jako časově věrné titulky. Přesné titulky vyžadují skutečné časové zarovnání řeči; ne všechny přepisovací modely nabízejí stejné typy časových značek. [<a class="source-ref" href="#S07">S07</a>]</p>
+<p><strong>F70. P2.</strong> Pracovní profil výstupu je MP4, 1080p, 16:9. Vertikální video se výchozím pravidlem vloží bez ořezu do rámu, nikoli s useknutou hlavou. HDR a různá snímková frekvence se převádějí v pracovních kopiích, ne v originálech. Délky zvuku a obrazu se kontrolují; žádný useknutý závěr řeči kvůli pevnému šablonovému slotu.</p>
+<p>Renderer je oddělený od AI; pracuje nad validovanou časovou osou. Hudba v základní variantě není. Pozdější hudební podklady musí být výslovně dodané a s doloženým oprávněním k použití. Neintegrujeme automatické stahování komerčních skladeb.</p>
+<p>Před předáním filmu vznikne kontrola zdrojů a přehrání celého výsledku. Nejde o povinnost na pouti. P0 potřebuje jen prokázat, že zachované soubory a jejich vazby jsou použitelné pro tuto další práci.</p>
+<h2 id="section-51">24. Kdy je první verze připravená na pouť</h2>
+<p><strong>F71.</strong> Připravenost je doložená sada výsledků, nikoli „Codex úspěšně dokončil generování kódu“. Povinné brány:</p>
+<div aria-label="Tabulka, při malé šířce lze posouvat" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>Brána</th>
+<th>Požadovaný důkaz</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>G0 — prostředí</td>
+<td>Ověřená kombinace vývojového Macu, nástrojů, telefonu a legitimní instalace; zvlášť domácí server.</td>
+</tr>
+<tr>
+<td>G1 — audio</td>
+<td>Skutečný iPhone, 30 minut se zámkem, poslech, přerušení, mikrofon a zachované části po chybě.</td>
+</tr>
+<tr>
+<td>G2 — offline</td>
+<td>Všechny typy záznamů, restart aplikace, nepovinná poloha, málo místa, nouzový export.</td>
+</tr>
+<tr>
+<td>G3 — přenos</td>
+<td>Jiná síť, přerušení velkého videa, ztracené potvrzení, bezpečné opakování a shoda hashů.</td>
+</tr>
+<tr>
+<td>G4 — záloha</td>
+<td>Nezávislá kopie celého dne, konzistentní metadata, skutečná obnova a otevření médií.</td>
+</tr>
+<tr>
+<td>G5 — text</td>
+<td>Česká sada proti audiu, zachování významu, ruční revize nepřepsaná AI, limit a výpadek API.</td>
+</tr>
+<tr>
+<td>G6 — provoz</td>
+<td>Realistický den venku, přehrání záznamů, spotřeba a místo změřené, Mac restart otestovaný.</td>
+</tr>
+<tr>
+<td>G7 — soukromí</td>
+<td>Zámky a odvozeniny otestované; P1 nezpřístupnit bez všech exportních kontrol.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Před odjezdem se na skutečném telefonu prověří platnost instalace na celou cestu s rezervou. Nejnovější Xcode se automaticky nevnucuje staršímu Macu; Apple uvádí kombinace systémů a nástrojů a skutečná kompatibilita se musí potvrdit sestavením a spuštěním prototypu. [<a class="source-ref" href="#S14">S14</a>]</p>
+<p>Známý iPhone 14 a dříve zmíněný Intel MacBook jsou kontext k ověření, nikoli důkaz, že je notebook totožný s domácím serverem. Žádné místo na disku, přihlášení, verze iOS ani podporovaný mikrofon se nevymýšlí.</p>
+<p><strong>F72.</strong> Praktická zátěžová sada je návrhově 14 dnů, alespoň 500 Momentů s malými testovacími médii, jednotlivé velké video o velikosti alespoň 1 GiB a delší audio. Není to předpokládaný skutečný počet Mílových záběrů ani odhad potřebného místa. Kapacita se spočítá ze skutečně změřeného testovacího dne a plánované délky cesty s rezervou.</p>
+<p>Návrhové odezvy pro již otevřenou a připravenou aplikaci: viditelná reakce ovladače do 200 ms, aktivace audia do 1 s, náhled kamery do 2 s a první část lokálního dne do 1 s. Čísla jsou měřené cíle prototypu, ne současná záruka; opožděná aktivace musí mít poctivý stav „Připravuji mikrofon“, ne falešné „Nahrávám“.</p>
+<p><strong>F73.</strong> C00–C11 se implementují po malých úlohách. Automatické testy nevolají skutečné placené API a neobsahují osobní média. Každá předávka uvádí skutečně spuštěné testy, výsledek a NEOVĚŘENO pro testy bez zařízení. Během tohoto zpracování specifikace se neprovedl build iOS aplikace, terénní zkouška ani skutečný upload na Mílův Mac.</p>
+<p>Neprojde-li některá nutná brána, výsledek se označí konkrétním omezením. Neřeší se to přejmenováním částečného uložení na bezpečné ani skrytím chyby. Selhání P1 nebo P2 nesmí znehodnotit použitelné P0.</p>
+<h2 id="section-52">25. Přehled nových parametrů a dosud neověřených bodů</h2>
+<div aria-label="Tabulka, při malé šířce lze posouvat" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>Parametr</th>
+<th>Pracovní hodnota / rozhodnutí</th>
+<th>Ověření</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Přepínač nových Momentů</td>
+<td>První stav Do deníku, potom se pamatuje poslední volba</td>
+<td>UI a soukromostní test</td>
+</tr>
+<tr>
+<td>Vlastní video</td>
+<td>1080p / 30 fps / SDR</td>
+<td>C04 a reálný den</td>
+</tr>
+<tr>
+<td>Audio checkpoint</td>
+<td>Cíl nejvýše 60 s na uzavřenou obnovitelnou část</td>
+<td>C01; kontinuita a havárie</td>
+</tr>
+<tr>
+<td>První dlouhá audio zkouška</td>
+<td>30 minut se zamčeným telefonem</td>
+<td>Skutečné zařízení</td>
+</tr>
+<tr>
+<td>Aktuálnost cache GPS</td>
+<td>Nejvýše 120 s; měření s přesností nad 100 m označit přibližné</td>
+<td>C03/C04</td>
+</tr>
+<tr>
+<td>Část uploadu</td>
+<td>8 MiB, omezená pracovní zásoba</td>
+<td>C02/C05, lze změnit bez oslabení kontraktu</td>
+</tr>
+<tr>
+<td>Automatické uploady</td>
+<td>Jen Wi-Fi; mobilní povolení pro jednu konkrétní dávku</td>
+<td>Přechody sítí</td>
+</tr>
+<tr>
+<td>Varování místa</td>
+<td>2 GiB; předběžná provozní rezerva 512 MiB</td>
+<td>C04/C09</td>
+</tr>
+<tr>
+<td>Automatický souhrn</td>
+<td>15 min klidu, nejvýše jednou za hodinu na den; max. čekání hodina od změny</td>
+<td>C08 s řízenými hodinami</td>
+</tr>
+<tr>
+<td>Zálohovací dávka</td>
+<td>15 min klidu, nejvýše hodina čekání při souvislém příjmu</td>
+<td>C06</td>
+</tr>
+<tr>
+<td>Upozornění čekající kopie</td>
+<td>Návrhově po 24 h, bez spamu a bez slibu přesného probuzení</td>
+<td>C09</td>
+</tr>
+<tr>
+<td>Rodinná fotografie</td>
+<td>JPEG, návrhově 2048 px delší hrana, očištěná metadata</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>AI peněžní limit</td>
+<td>Neurčen; mock bez placeného zpracování</td>
+<td>Před prvním placeným pilotem</td>
+</tr>
+<tr>
+<td>Nástroje, SDK, modely</td>
+<td>Nezafixováno číslem v tomto dokumentu</td>
+<td>Read-only audit a prototyp</td>
+</tr>
+</tbody>
+</table></div>
+<p>Nejsou otevřené nové dotazy na obsah filmu, hlas, večerní práci, počet autorů, význam soukromí nebo souhlas s AI. Tyto věci jsou uzavřené. Technické parametry mění Samantha/Codex na základě měření s krátkým záznamem rozhodnutí; uživatel nemá vybírat databázi, audio kodek či přenosový protokol.</p>
+<h2 id="section-53">26. Zdroje a hranice ověření</h2>
+<p>Uživatelské požadavky U01–U11 vycházejí z Mílových odpovědí v této konverzaci a z uložené v0.3. Konkrétní ovládání, parametry, testy a architektura jsou vlastní návrh tohoto dokumentu, nikoli tvrzení převzaté z dokumentace výrobců. Níže jsou primární zdroje pro platformní možnosti a omezení, dohledané 14. září 2026. Archivní Apple texty vysvětlují mechanismy; nepředstavují ověření současného zařízení. U moderních stránek Apple [<a class="source-ref" href="#S04">S04</a>] a [<a class="source-ref" href="#S13">S13</a>] se v použité webové čtečce nezpřístupnil úplný text rozhraní závislého na JavaScriptu. Odkazy jsou určeny i pro následný audit; jejich aktuální podrobnosti se musejí doověřit v dokumentaci SDK a zkouškou, nikoli považovat za zde plně ověřené.</p>
+<p id="S01">[S01] Apple — Audio Session Categories and Modes, chování audio režimů při zámku: <code><a href="https://developer.apple.com/library/archive/documentation/Audio/Conceptual/AudioSessionProgrammingGuide/AudioSessionCategoriesandModes/AudioSessionCategoriesandModes.html">https://developer.apple.com/library/archive/documentation/Audio/Conceptual/AudioSessionProgrammingGuide/AudioSessionCategoriesandModes/AudioSessionCategoriesandModes.html</a></code></p>
+<p id="S02">[S02] Apple — Responding to Interruptions, přerušení a obnova audio session: <code><a href="https://developer.apple.com/library/archive/documentation/Audio/Conceptual/AudioSessionProgrammingGuide/HandlingAudioInterruptions/HandlingAudioInterruptions.html">https://developer.apple.com/library/archive/documentation/Audio/Conceptual/AudioSessionProgrammingGuide/HandlingAudioInterruptions/HandlingAudioInterruptions.html</a></code></p>
+<p id="S03">[S03] Apple — Responding to Route Changes, změny vstupu a zvukové cesty: <code><a href="https://developer.apple.com/library/archive/documentation/Audio/Conceptual/AudioSessionProgrammingGuide/HandlingAudioHardwareRouteChanges/HandlingAudioHardwareRouteChanges.html">https://developer.apple.com/library/archive/documentation/Audio/Conceptual/AudioSessionProgrammingGuide/HandlingAudioHardwareRouteChanges/HandlingAudioHardwareRouteChanges.html</a></code></p>
+<p id="S04">[S04] Apple — background(withIdentifier:), URLSession na pozadí: <code><a href="https://developer.apple.com/documentation/foundation/urlsessionconfiguration/background(withidentifier:)">https://developer.apple.com/documentation/foundation/urlsessionconfiguration/background(withidentifier:)</a></code></p>
+<p id="S05">[S05] Tailscale — Serve, soukromé zpřístupnění a síťová pravidla: <code><a href="https://tailscale.com/docs/features/tailscale-serve">https://tailscale.com/docs/features/tailscale-serve</a></code></p>
+<p id="S06">[S06] Tailscale — VPN On Demand for iOS and macOS: <code><a href="https://tailscale.com/docs/features/client/ios-vpn-on-demand">https://tailscale.com/docs/features/client/ios-vpn-on-demand</a></code></p>
+<p id="S07">[S07] OpenAI — File transcription, formáty, velikost vstupu a modelové rozdíly časových značek: <code><a href="https://developers.openai.com/api/docs/guides/speech-to-text">https://developers.openai.com/api/docs/guides/speech-to-text</a></code></p>
+<p id="S08">[S08] OpenAI — Data controls in the OpenAI platform, uchování dat a nastavení služeb: <code><a href="https://developers.openai.com/api/docs/guides/your-data">https://developers.openai.com/api/docs/guides/your-data</a></code></p>
+<p id="S09">[S09] OpenAI — Structured model outputs, schéma nezaručuje věcnou bezchybnost: <code><a href="https://developers.openai.com/api/docs/guides/structured-outputs">https://developers.openai.com/api/docs/guides/structured-outputs</a></code></p>
+<p id="S10">[S10] SQLite — Online Backup API, konzistentní záložní kopie: <code><a href="https://sqlite.org/backup.html">https://sqlite.org/backup.html</a></code></p>
+<p id="S11">[S11] FastAPI — Background Tasks, oddělení náročné práce: <code><a href="https://fastapi.tiangolo.com/tutorial/background-tasks/">https://fastapi.tiangolo.com/tutorial/background-tasks/</a></code></p>
+<p id="S12">[S12] OpenAI — Custom instructions with AGENTS.md, instrukce pro projektovou práci: <code><a href="https://developers.openai.com/codex/guides/agents-md/">https://developers.openai.com/codex/guides/agents-md/</a></code> (při ověření přesměrováno na oficiální ChatGPT Learn).</p>
+<p id="S13">[S13] Apple — FileProtectionType.completeUntilFirstUserAuthentication, ochrana souborů pro práci po odemknutí: <code><a href="https://developer.apple.com/documentation/foundation/fileprotectiontype/completeuntilfirstuserauthentication">https://developer.apple.com/documentation/foundation/fileprotectiontype/completeuntilfirstuserauthentication</a></code></p>
+<p id="S14">[S14] Apple — SDKs and system requirements, kombinace Xcode/macOS/SDK: <code><a href="https://developer.apple.com/xcode/system-requirements">https://developer.apple.com/xcode/system-requirements</a></code></p>
+<p><strong>Doprovodné soubory:</strong> testovací scénáře, plán úloh Codexu, krátký <code>AGENTS.md</code>, změnový list a čtecí HTML verze. Neobsahují hotový kód aplikace ani nepravdivá potvrzení testů. Autoritativní text specifikace je tento Markdown; HTML je jeho čtecí kopie.</p>
+<footer class="foot">Samantha pro Mílu · Zdrojový dokument: <a href="CAMINO_funkcni_specifikace_v0.4.md">CAMINO_funkcni_specifikace_v0.4.md</a> · HTML neobsahuje vzdálená písma, skripty ani analytiku.</footer></main></div></body></html>

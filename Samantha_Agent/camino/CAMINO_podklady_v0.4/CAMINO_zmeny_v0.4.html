@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light"><title>Camino — změny v0.3 → v0.4</title><style>
+:root{color-scheme:light;--ink:#172b3a;--muted:#536775;--line:#dce6ea;--accent:#166c70;--paper:#fff;--bg:#f1f5f6;--soft:#edf6f5}
+*{box-sizing:border-box}body{overflow-wrap:anywhere}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:#155e71;text-decoration-thickness:1px;text-underline-offset:3px}a:hover{color:#073841}.top{padding:15px 26px;background:#153746;color:white;border-bottom:4px solid #4da6a0}.top strong{letter-spacing:.12em;font-size:13px}.top span{font-size:13px;margin-left:18px;color:#d5e8e8}.layout{max-width:1420px;display:grid;grid-template-columns:268px minmax(0,1fr);gap:28px;margin:28px auto;padding:0 24px}.toc{position:sticky;top:20px;align-self:start;max-height:calc(100vh - 40px);overflow:auto;padding:14px 14px 20px;background:var(--paper);border:1px solid var(--line);border-radius:12px;font-size:13px;line-height:1.5}.toc summary{font-size:14px;font-weight:700;padding:3px 0 12px;cursor:pointer}.toc a{display:block;margin:0 0 9px;text-decoration:none;color:var(--muted)}.toc a:hover{color:var(--accent)}main{min-width:0;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:42px 48px;box-shadow:0 8px 30px #16354506}h1{font-size:36px;line-height:1.2;letter-spacing:-.035em;margin:14px 0 24px;max-width:900px}h2{font-size:26px;line-height:1.3;letter-spacing:-.02em;margin:50px 0 18px;padding-top:20px;border-top:2px solid var(--line);scroll-margin-top:24px}h3{font-size:20px;line-height:1.4;margin-top:28px;scroll-margin-top:24px}p{margin:13px 0}strong{font-weight:680}blockquote{margin:24px 0;padding:16px 22px;background:var(--soft);border-left:4px solid var(--accent);border-radius:0 8px 8px 0}blockquote p{margin:0}code{font:14px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere;background:#f0f4f6;border-radius:4px;padding:2px 4px}pre{overflow:auto;padding:18px 20px;background:#f1f5f7;border:1px solid var(--line);border-radius:8px;font-size:14px;line-height:1.55}pre code{padding:0;background:transparent;white-space:pre;overflow-wrap:normal}.table-wrap{overflow-x:auto;margin:22px 0;border:1px solid var(--line);border-radius:8px}table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.55;min-width:580px}th{background:#eaf2f3;color:#234652;text-align:left;font-size:13px}th,td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}tr:last-child td{border-bottom:0}tbody tr:nth-child(even){background:#fafcfc}ul,ol{padding-left:24px}li{margin:6px 0}.docnav{display:flex;gap:10px 18px;flex-wrap:wrap;font-size:13px;margin-bottom:14px;padding-bottom:18px;border-bottom:1px solid var(--line)}.docnav a{text-decoration:none}.notice{font-size:13px;line-height:1.5;color:var(--muted);border:1px solid var(--line);background:#f8fafb;padding:10px 14px;border-radius:7px}.foot{margin-top:44px;padding-top:18px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}.source-ref{font-size:.83em;text-decoration:none;padding:0 2px}p:target,h2:target,h3:target{background:#f1f8f6}.toc::-webkit-scrollbar{width:5px}.toc::-webkit-scrollbar-thumb{background:#b8cdd0;border-radius:4px}
+@media(max-width:1000px){.layout{grid-template-columns:220px minmax(0,1fr);gap:18px;padding:0 14px}main{padding:30px}.toc{font-size:12px}}
+@media(max-width:760px){body{font-size:16px}.top{padding:14px 18px}.top span{display:block;margin:5px 0 0}.layout{display:block;margin:16px auto;padding:0 12px}.toc{position:static;max-height:230px;margin-bottom:16px}main{padding:25px 19px;border-radius:10px}h1{font-size:29px}h2{font-size:23px;margin-top:38px}h3{font-size:19px}.docnav{font-size:12px}pre{font-size:12px;padding:13px}table{font-size:13px}.notice{font-size:12px}}
+@media print{body{background:white;font-size:10pt}.top,.toc,.docnav,.notice{display:none}.layout{display:block;padding:0;margin:0;max-width:none}main{border:0;padding:0;box-shadow:none}.table-wrap{overflow:visible;border-radius:0}table{min-width:0;font-size:8pt}pre{white-space:pre-wrap}h1{font-size:24pt}h2{font-size:17pt;page-break-after:avoid}h3{page-break-after:avoid}a{color:inherit;text-decoration:none}tr{break-inside:avoid}}
+</style></head><body>
+<header class="top"><strong>CAMINO / v0.4</strong><span>Funkční specifikace · 14. září 2026</span></header>
+<div class="layout"><aside class="toc"><details open><summary>Obsah dokumentu</summary><a href="#section-1">Zachováno jako potvrzené</a><a href="#section-2">Co v0.4 přidává</a><a href="#section-3">Nová návrhová rozhodnutí Samanthy, nikoli další uživatelův souhlas</a><a href="#section-4">Vyjasněné hranice</a><a href="#section-5">Co zůstává k ověření, nikoli k opakovanému dotazování</a></details></aside><main><nav class="docnav" aria-label="Soubory balíčku"><a href="CAMINO_funkcni_specifikace_v0.4.html">Specifikace</a><a href="CAMINO_akceptacni_testy_v0.4.html">Testovací scénáře</a><a href="CAMINO_Codex_v0.4.html">Codex</a><a href="CAMINO_zmeny_v0.4.html">Změny</a><a href="README_v0.4.html">Soubory</a></nav><div class="notice">Čtecí kopie dokumentace. Aplikace není tímto podkladem prohlášena za implementovanou; všechny akceptační zkoušky mají stav NEPROVEDENO.</div><h1>Camino — změny v0.3 → v0.4</h1>
+<p><strong>Datum:</strong> 14. září 2026. <strong>Stav:</strong> nová funkční specifikace, ne implementace. Původní soubory nebyly přepsány.</p>
+<h2 id="section-1">Zachováno jako potvrzené</h2>
+<p>Film cestopis + osobní příběh orientačně 20–30 minut; vedle něj podrobný deník. Krátká audio i úvahy, požadavek na zámek telefonu, jemné opravy úvah, bez povinné večerní práce, jeden autor, soukromý archiv a volitelný rodinný výběr. „Jen pro mě“ vylučuje film a rodinu, nikoli externí AI. Body polohy z aplikace, celá trasa z hodinek. Autentický hlas, případně pozdější nové namluvení, bez umělého hlasu. Podmíněná přijatelnost poplatku Apple, neurčený AI rozpočet.</p>
+<h2 id="section-2">Co v0.4 přidává</h2>
+<p>Patnáct obrazovek UI00–UI14 s přesným vstupem, obsahem, akcemi a chybami. Sedmdesát tři funkčních pravidel F01–F73. Osmdesát akceptačních scénářů T001–T080 a vazbu na malé úkoly C00–C11. Odděluje se první pouť P0, volitelné rodinné sdílení P1 a film po návratu P2.</p>
+<p>Konkrétně je definováno přiřazování příloh do Momentu, lokální záznam bez AI, rozpracovaný text, pozdější vzpomínka, importní reprezentace, nejistá časová metadata, trvalá fronta, potvrzení celého souboru, obnova journalu, konzistentní záložní snapshot, neaktuální souhrn a čtyři oddělené stavy.</p>
+<h2 id="section-3">Nová návrhová rozhodnutí Samanthy, nikoli další uživatelův souhlas</h2>
+<div aria-label="Tabulka, při malé šířce lze posouvat" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>Oblast</th>
+<th>Zpřesnění</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Režim soukromí nových záznamů</td>
+<td>Výchozí Do deníku; pak se pamatuje do změny. Zámek se sám nevypne návratem na domovskou obrazovku.</td>
+</tr>
+<tr>
+<td>Editace</td>
+<td>V P0 upravuje obsah a soukromí jen hlavní iPhone. Web je pro čtení a provozní stav.</td>
+</tr>
+<tr>
+<td>Soukromý dodatek</td>
+<td>Samostatná zamčená úvaha s vazbou, nikoli nejasně skrytá příloha běžné fotografie.</td>
+</tr>
+<tr>
+<td>Hovor a mikrofon</td>
+<td>Přerušit a zachovat dosavadní rozsah; pokračování pouze vědomým krokem.</td>
+</tr>
+<tr>
+<td>Přenosy</td>
+<td>Automaticky Wi-Fi; jednorázové mobilní povolení pro konkrétní dávku.</td>
+</tr>
+<tr>
+<td>Systémové Fotky</td>
+<td>Vlastní záznamy se tam automaticky neduplikují; import vytvoří vlastní kopii předaných dat.</td>
+</tr>
+<tr>
+<td>Skrytí</td>
+<td>Vratné vyřazení z deníku, ne fyzický výmaz a ne uvolnění místa.</td>
+</tr>
+<tr>
+<td>Přepis videa</td>
+<td>V P0 pouze samostatné hlasové nahrávky; ne automaticky všechny video ruchy.</td>
+</tr>
+<tr>
+<td>Rodinný export</td>
+<td>V P1 až po aktuální kontrole soukromí; bez offline předávání starého výběru.</td>
+</tr>
+<tr>
+<td>Rozhraní filmu</td>
+<td>V P0 žádná prázdná záložka nebo povinný večerní render.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Tyto volby se dají na základě testů či Mílova podnětu upravit. Žádná neznamená nákup, nový souhlas s publikací nebo schválení finančního limitu.</p>
+<h2 id="section-4">Vyjasněné hranice</h2>
+<p>Fotografie ukázaná jako náhled není nutně celá stažená z iCloudu. Importovaná upravená reprezentace se nesmí vydávat za nedotčený původní senzorový soubor. Stovka procent uploadu není dokončené ověření. Záloha médií neprokazuje, že už obsahuje novou změnu zámku. Kopie v Souborech na telefonu není nezávislá záloha. Přepis není jistě doslovný a strukturovaný výstup AI není důkaz pravdivosti.</p>
+<p>Předání výběru komunikační aplikaci není důkaz doručení. Soukromí nelze zpětně vynutit u již odeslané cizí kopie. Server nezná neodeslanou offline změnu. Obnova starého serveru proto musí porovnat nový stav telefonu před novými exporty.</p>
+<h2 id="section-5">Co zůstává k ověření, nikoli k opakovanému dotazování</h2>
+<p>Skutečný vývojový Mac vs domácí Mac server; verze systému a nástrojů; platnost instalace; mikrofon; chování nahrávání a přenosů na zamčeném telefonu; záložní disk a restart zabezpečeného Macu; reálná velikost a spotřeba testovacího dne. Částku pro API je potřeba rozhodnout před placeným pilotem. Export hodinek patří do pozdějšího ověření a neblokuje první záznamovou aplikaci.</p>
+<footer class="foot">Samantha pro Mílu · Zdrojový dokument: <a href="CAMINO_zmeny_v0.4.md">CAMINO_zmeny_v0.4.md</a> · HTML neobsahuje vzdálená písma, skripty ani analytiku.</footer></main></div></body></html>
