@@ -1,13 +1,13 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-14 10:39 CEST. Míla schválil další lokální řez čtecího HTTP rozhraní e-mailového archivu.
-- `AuditCockpit56_2.txt` v1.10: šest GET cest a tři obsluhy v `cockpit_email_archive_routes.py`; `cockpit.py` 10 801 → 10 705 řádků, `do_GET` 295 → 260. Předchozí dokumentový řez `8ce24999` zůstává lokální.
-- 53/53 syntetických HTTP kontraktů shodných před/po, 49 cílených testů a plná brána 1675/1675 prošly. AST potvrzuje zachování přesunuté logiky a zbytku hlavního souboru. Report `cockpit_email_archive_routes_2026_09_14.md` + JSON.
-- Přístupová ochrana, resolvery, EML dekódování, společná obsluha souborů a MIME/disposition pravidla zachovaná. UI, POST, zápisy a odchozí komunikace beze změny. Nový modul v CI, kompilaci i povinné plné bráně; inventura adres frontendu zahrnuje oba nové moduly.
-- Předchozí dokumentové HTTP kontrakty prošly znovu v cílené sadě. Živé soukromé dokumenty ani e-maily se nečetly. Oba strukturální kroky jsou lokální, bez nového push/nasazení; nejde o měření zrychlení UI.
-- Další krok: Na samostatný pokyn vydat oba HTTP řezy a společně ověřit dokumentové čtečky, archiv a přílohy na Macu/iPhonu. Pak navázat auditem/UI.
-- Otevřeno: prvních 8 výsledků hledání, nerozbalený panel přes Janiččinu zkratku a náhradní návrat nákupní čtečky. Záloha odložená kvůli nedostupnému disku; Santiago pouze zvažované téma.
+- Aktualizováno: 2026-09-14 10:47 CEST. Míla schválil push a nasazení obou HTTP řezů; navazující audit UI výslovně odložil na samostatný krok.
+- Dokumenty `8ce24999` a archiv `da9d0bea`: funkční head nasazen a ověřen, nový proces potvrzen, smoke 5/5, otisk `0461867a886fdf42`, receipt `2026-09-14T08:45:07+00:00`.
+- Vývojová plná brána 1675/1675; dokumenty 61/61 a archiv 53/53 shodných HTTP kontraktů. Ochrana přístupu, souborů a příloh zachovaná.
+- Uzavírací zápis je součást schváleného GitHub balíčku; aktuální push, CI a finální nasazený head ověřovat živým auditem. Tento zápis sám není důkaz dokončeného push.
+- Postup ruční přejímky a důkaz: `reports/cockpit_http_routes_release_2026_09_14.md`. Mac/iPhone test zatím čeká na Mílu.
+- Další krok: ruční přejímka dokumentů, nákupní čtečky, e-mailového archivu a příloh; potom samostatný audit UI.
+- Otevřené starší UI nálezy: prvních 8 výsledků hledání, nerozbalený panel přes Janiččinu zkratku, náhradní návrat nákupní čtečky. Záloha odložená kvůli nedostupnému disku; Santiago pouze zvažované téma.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Cockpit / hlavní architektura
@@ -925,3 +925,21 @@ Technický důkaz:
 - 53/53 HTTP kontraktů shodných (bez Date/Server), 49 cílených testů a plná brána 1675/1675, unit 231.324 s. Syntetické soubory/EML, ověřená ochrana před traversal/symlinkem a přesné bajty vybrané přílohy.
 - AST: šest větví, tři obsluhy a zbytek hlavního souboru zachované. MIME/disposition politika beze změny. CI, kompilace, rizikové gate cesty i inventura frontendových adres aktualizované.
 - Report `cockpit_email_archive_routes_2026_09_14.md` + JSON. Nový krok i dokumentový `8ce24999` pouze lokální, bez push/nasazení či ruční přejímky.
+
+### 2026-09-14 10:47 CEST — Vydání dokumentového a archivačního HTTP rozhraní
+
+Hotovo:
+- Funkční kód obou řezů nasazen, nový proces a smoke 5/5 ověřeny. Připraven přesný Mac/iPhone test v `reports/cockpit_http_routes_release_2026_09_14.md`.
+
+Rozhodnutí:
+- Míla schválil p+n včetně dokončení zápisů. Audit UI proběhne později samostatně.
+
+Další krok:
+- Dokončit společný GitHub balíček s tímto zápisem, ověřit CI a finální nasazení; Míla následně provede ruční přejímku.
+
+Navrhované další kroky:
+- Po přejímce samostatný audit UI podle AuditCockpit56_2.txt.
+
+Technický důkaz:
+- Nasazený funkční head `da9d0bea`, nový proces potvrzen, smoke 5/5, otisk `0461867a886fdf42`, receipt `2026-09-14T08:45:07+00:00`. Vývojová plná brána 1675/1675; HTTP kontrakty 61/61 a 53/53.
+- Ruční přejímka otevřená. Push/CI a finální head se ověřují živými registrovanými audity po uzavření balíčku; nejsou předjímány tímto zápisem.
