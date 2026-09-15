@@ -1,15 +1,15 @@
 # C01a — malý offline audio prototyp
 
-**Stav: ROZPRACOVÁNO / BLOCKED, 2026-09-15 18:36 CEST.** Zadání vytvořeno v C00.
+**Stav: ROZPRACOVÁNO / fyzická přejímka čeká, 2026-09-15 18:39 CEST.** Zadání vytvořeno v C00.
 Implementace a 25 testů logiky/syntetického audia hotovy; přímá iOS kompilace
 prošla. Standardní nepodepsaný Xcode build ověřen 15. září v 15:01 CEST;
-nově podepsaný build a strict podpis OK. Instalace na telefon prošla; spuštění blokuje Security, čeká kontrola důvěry a fyzická přejímka.
+nově podepsaný build a strict podpis OK. Instalace na telefon prošla a Míla potvrdil otevření; fyzická audio přejímka čeká.
 [Aktuální report](../docs/C01a_AUDIO_PROTOTYPE_REPORT.md) má přednost před
 historickými vstupními předpoklady C00 níže.
 Aktualizace předpokladů: Xcode 26.3 je nainstalovaný, první nastavení dokončené
 a iPhone SDK 26.2 ověřené; viz [instalační doklad](../docs/XCODE_INSTALLATION.md).
-Párování, Developer Mode a DDI byly 15. září přímo ověřeny. Podpis i instalace již ověřeny; spuštění
-a test prototypu na telefonu čekají na kontrolu důvěry. Míla zadal pokračování vývoje;
+Párování, Developer Mode a DDI byly 15. září přímo ověřeny. Podpis i instalace již ověřeny; otevření potvrdil Míla.
+Fyzické audio testy prototypu na telefonu čekají. Míla zadal pokračování vývoje;
 C01b, nákup členství a placené zpracování zadány nejsou.
 
 Cílové zařízení následně potvrzené Mílou: **iPhone 14 Plus, iOS 26.6.1**.

@@ -1,13 +1,23 @@
 # C01a — audio prototyp: průběžné předání
 
-Aktualizováno: 2026-09-15 18:36 CEST. Specifikace v0.4; U01–U11 beze změny.
+Aktualizováno: 2026-09-15 18:39 CEST. Specifikace v0.4; U01–U11 beze změny.
 
 **Celý C01a: BLOCKED.** Automatizovaná část A prošla, nativní zdroje byly
 přímo zkompilované a slinkované pro arm64/iOS. Standardní nepodepsaný Xcode build aplikace prošel 15. září v 15:01 CEST.
-Nově prošel také podepsaný build a strict ověření podpisu. Instalace na iPhone prošla; spuštění odmítnuto (Security), vizuální kontrola a fyzický poslech jsou NEPROVEDENO.
+Nově prošel také podepsaný build a strict ověření podpisu. Instalace na iPhone prošla a Míla potvrdil otevření aplikace; podrobná vizuální kontrola a fyzický poslech jsou NEPROVEDENO.
 Nejde o přijatý audio prototyp ani splnění G0/G1.
 
-## Aktuální instalace na iPhone
+## Aktuální potvrzení otevření
+
+### 2026-09-15 18:39 CEST — Míla potvrdil otevření aplikace; zadal c+p+n
+
+- Míla výslovně potvrdil, že se Camino Audio na iPhonu otevřelo. Otevření je potvrzení uživatele; nejde o automaticky ověřený průchod UI, mikrofon ani poslech. Předchozí blokace spuštění již podle tohoto potvrzení nebrání otevření.
+- Podepsaný build, strict podpis a instalace mají strojové doklady; profil platí do 2026-09-22 18:16 CEST. Ruční T015/T017/T025, oba audio vzorky a poslech zůstávají NEPROVEDENO, C01a není přijaté.
+- Míla zadal nejprve commit + push + nasazení aktuálního balíčku do Cockpitu. Autorizace zahrnuje čekající lokální commity a tento redigovaný stav; po c+p+n se zatím další vývoj ani nahrávání nespouští.
+- Doklad výsledku c+p+n: aktuální GitHub batch audit, plná brána a kanonická simple-main deployment receipt s novým PID, shodou otisku a smoke 5/5; historické nasazení není důkaz tohoto kroku.
+- Další krok: Po uzavření schváleného c+p+n pokračovat ruční přejímkou C01a na iPhonu: T015/T017/T025, neutrální krátký Komentář a Úvaha, Stop a poslech; nahrávání zahajuje Míla. C01b nezahajovat.
+
+## Historická instalace na iPhone
 
 ### 2026-09-15 18:36 CEST — Aplikace nainstalována, spuštění odmítnuto
 
@@ -100,7 +110,7 @@ Složka je vyloučena ze systémové zálohy; v této etapě existuje jen místn
 | `plutil -lint` nad project.pbxproj | OK. |
 | Společná plná brána `scripts/cockpit_quality_gate.py` | **1684/1684 testů OK**, oddělené od 25 Swift testů. |
 | Standardní Xcode build | **PASS**, 15:01 CEST exit 0, nepodepsaný arm64 .app. Původní blokace platformy odstraněna. |
-| Signing / instalace / spuštění | **Signing PASS**, 1 platná identita, strict podpis OK. Instalace PASS; spuštění BLOCKED (Security), kontrola důvěry čeká. |
+| Signing / instalace / spuštění | **Signing PASS**, 1 platná identita, strict podpis OK. Instalace PASS; otevření potvrzeno Mílou, audio přejímka čeká. |
 | T015/T017/T025, ruční poslech, UI na telefonu | **NEPROVEDENO**. |
 | G0/G1, T079 upgrade a migrace, terén | **NEPROVEDENO / nesplněno**. |
 
@@ -123,4 +133,4 @@ zařízení nejsou součástí commitu. Původní podklady v0.4 zůstaly neměnn
 
 ## Jediný následující krok
 
-Na iPhonu potvrdit důvěru vlastnímu vývojářskému účtu v Nastavení → Obecné → VPN a správa zařízení. Potom ověřit spuštění Camino Audio a provést fyzickou přejímku T015/T017/T025. C01b se automaticky nezahajuje.
+Po uzavření schváleného c+p+n pokračovat ruční přejímkou C01a na iPhonu: T015/T017/T025, neutrální krátký Komentář a Úvaha, Stop a poslech; nahrávání zahajuje Míla. C01b nezahajovat.
