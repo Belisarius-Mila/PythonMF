@@ -16,6 +16,8 @@ import XCTest
     var reading = CaptureSample(running: true, time: 0, power: -160,
                                 inputID: "built-in", inputLabel: "Test microphone")
     var isPlaying = false
+    var playbackTime: Double = 0
+    var playbackDuration: Double = 30
     func requestPermission() async -> Bool { permissionRequests += 1; return granted }
     func start(url: URL) async throws {
         starts += 1
@@ -26,7 +28,7 @@ import XCTest
     func stop() async -> Bool { stops += 1; return stopSuccess }
     func play(url: URL) throws {
         if failPlay { throw AudioPrototypeError.invalidAudio }
-        plays += 1; isPlaying = true
+        plays += 1; isPlaying = true; playbackTime = 0
     }
     func stopPlayback() { isPlaying = false }
 }
@@ -167,6 +169,47 @@ import XCTest
         c.play(try s.finish(s.begin(kind: .comment), interrupted: false))
         d.isPlaying = false; c.tick()
         XCTAssertEqual(c.phase, .idle); XCTAssertNil(c.playingID)
+        XCTAssertEqual(c.playbackElapsed, 0); XCTAssertEqual(c.playbackDuration, 0)
+    }
+
+    func testPlaybackProgressFollowsPlayerNotRecordingOrWallClock() async throws {
+        let d = FakeDriver(); let s = FakeStore(); var clock = 0.0
+        let c = AudioController(driver: d, store: s, now: { clock })
+        await c.start(kind: .comment); await c.stop()
+        XCTAssertEqual(c.elapsed, 1)
+        c.play(try XCTUnwrap(s.completed.first))
+        XCTAssertEqual(c.playbackElapsed, 0); XCTAssertEqual(c.playbackDuration, 30)
+        var changes = 0; c.changed = { changes += 1 }
+        d.playbackTime = 12; c.tick()
+        XCTAssertEqual(c.playbackElapsed, 12); XCTAssertEqual(c.playbackProgress, 0.4, accuracy: 0.001)
+        XCTAssertEqual(c.elapsed, 1); XCTAssertEqual(changes, 1)
+        clock = 100; c.tick(); c.tick()
+        XCTAssertEqual(c.playbackElapsed, 12) // A stalled player must not gain elapsed time.
+        XCTAssertEqual(d.starts, 1)
+    }
+
+    func testPlaybackProgressClampsInvalidPlayerValues() throws {
+        let d = FakeDriver(); let s = FakeStore(); let c = AudioController(driver: d, store: s)
+        c.play(try s.finish(s.begin(kind: .comment), interrupted: false))
+        d.playbackTime = 45; c.tick(); XCTAssertEqual(c.playbackProgress, 1)
+        d.playbackTime = -1; c.tick(); XCTAssertEqual(c.playbackElapsed, 0)
+        d.playbackTime = .nan; c.tick(); XCTAssertEqual(c.playbackElapsed, 0)
+        d.playbackDuration = .infinity; c.tick()
+        XCTAssertEqual(c.playbackDuration, 0); XCTAssertEqual(c.playbackProgress, 0)
+        d.playbackDuration = -1; c.tick(); XCTAssertEqual(c.playbackDuration, 0)
+    }
+
+    func testPlaybackStopReplayAndForegroundExitResetProgress() throws {
+        let d = FakeDriver(); let s = FakeStore(); let c = AudioController(driver: d, store: s)
+        let clip = try s.finish(s.begin(kind: .reflection), interrupted: false)
+        c.play(clip); d.playbackTime = 9; c.tick(); c.stopPlayback()
+        XCTAssertEqual(c.phase, .idle); XCTAssertEqual(c.playbackProgress, 0)
+        XCTAssertEqual(c.playbackElapsed, 0); XCTAssertNil(c.playingID)
+        c.play(clip); XCTAssertEqual(c.playbackElapsed, 0)
+        d.playbackTime = 4; c.tick(); c.leaveForeground()
+        XCTAssertEqual(c.phase, .idle); XCTAssertEqual(c.playbackElapsed, 0)
+        XCTAssertEqual(c.playbackDuration, 0); XCTAssertFalse(d.isPlaying)
+        XCTAssertEqual(d.starts, 0); XCTAssertEqual(s.completed.count, 1)
     }
 
     func testPlaybackFailureDoesNotStartMicrophoneOrClaimPlaying() throws {

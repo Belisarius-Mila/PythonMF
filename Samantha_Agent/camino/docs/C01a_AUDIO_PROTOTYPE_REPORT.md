@@ -1,10 +1,22 @@
 # C01a — audio prototyp: průběžné předání
 
-Aktualizováno: 2026-09-15 19:15 CEST. Specifikace v0.4; U01–U11 beze změny.
+Aktualizováno: 2026-09-15 19:25 CEST. Specifikace v0.4; U01–U11 beze změny.
 
-**C01a: částečně fyzicky ověřeno, úplná přejímka otevřená.** Automatizovaná část A, podepsaný build, strict podpis a instalace prošly. Míla potvrdil otevření a níže uvedené praktické zkoušky; ne všechny podmínky T015/T017/T025 jsou pokryté. G0/G1 neuzavřeny.
+**C01a: lokální oprava indikace přehrávání, ruční retest čeká.** Dosavadní nahrávání a poslech uživatelsky prošly; nehybný ukazatel odhalen snímkem a opraven. Nová verze prošla 28 testy, podepsaným buildem a strict podpisem; na telefonu dosud není. Úplná přejímka C01a a G0/G1 zůstávají otevřené.
 
-## Aktuální ruční zkoušky
+## Aktuální oprava přehrávání
+
+### 2026-09-15 19:25 CEST — Oprava zobrazení průběhu přehrávání
+
+- Míla po doplňujícím testu potvrdil přehrání Komentáře a nahlásil chybějící průběh. Snímek IMG_0503.PNG ukazuje režim Letadlo, Přehrávám, čas 00:30, název Mikrofon iPhonu a uložený Komentář 00:30. Obrázek nebyl kopírován do Gitu. Sám nedokládá pohyb času ani vypnutí Wi-Fi; přehrání potvrzuje uživatel.
+- Příčina ověřena v kódu: společná obrazovka při poslechu dál zobrazovala elapsed posledního záznamu, vstup a mikrofonní meter. Playback tick pouze hlídal konec, nečetl pozici přehrávače.
+- Oprava: AVAudioPlayer.currentTime a duration přes AudioDriver; samostatný stav přehrávání v controlleru a oznámení změny při každém odečtu. SwiftUI při poslechu zobrazuje uplynulý/celkový čas a modrý průběh místo údajů mikrofonu. Žádné dopočítávání času podle timeru. [Apple currentTime](https://developer.apple.com/documentation/avfaudio/avaudioplayer/currenttime).
+- Ověření: 28/28 Swift XCTest, podepsaný Debug xcodebuild generic/platform=iOS exit 0 a codesign --verify --deep --strict exit 0. Tři nové testy pokrývají skutečnou pozici vs. čas záznamu/nástěnné hodiny, chybné hodnoty a Stop/opakování/odchod do pozadí; rozšířen test přirozeného konce.
+- Zápis a formát médií se nemění. Nová verze zatím NENÍ nainstalovaná na iPhonu; ruční UI/poslech opravy NEOVĚŘENO. Před aktualizací čeká potvrzení, že nahrávání i přehrávání stojí. Existující vzorky zachovat, aplikaci neodinstalovávat.
+- T015: doplňující Komentář přehrán podle uživatele, screenshot v režimu Letadlo; offline test proběhl podle zadaného postupu, samostatný technický důkaz vypnuté Wi-Fi chybí. T017: název vstupu Mikrofon iPhonu nyní doložen snímkem (při poslechu šlo o zachovaný údaj záznamu). Přesná metadata vzorků a první odmítnutí systémového dialogu T025 zůstávají otevřené.
+- Další krok: Při zastaveném záznamu i přehrávání aktualizovat aplikaci v připojeném iPhonu a ručně ověřit běžící čas/průběh, Stop a opakované přehrání existujícího vzorku. Potom doplnit zbývající doklady C01a a první odmítnutí oprávnění; C01b nezahajovat.
+
+## Předchozí ruční zkoušky
 
 ### 2026-09-15 19:15 CEST — Uživatelské zkoušky krátkého audia
 
@@ -144,4 +156,4 @@ zařízení nejsou součástí commitu. Původní podklady v0.4 zůstaly neměnn
 
 ## Jediný následující krok
 
-Doplnit krátký Komentář bez internetu a potvrdit název zobrazeného vstupu. Potom doplnit doklady vzorků a přesný scénář prvního odmítnutí oprávnění T025; dosavadní výsledky neopakovat bez důvodu. C01b nezahajovat.
+Při zastaveném záznamu i přehrávání aktualizovat aplikaci v připojeném iPhonu a ručně ověřit běžící čas/průběh, Stop a opakované přehrání existujícího vzorku. Potom doplnit zbývající doklady C01a a první odmítnutí oprávnění; C01b nezahajovat.

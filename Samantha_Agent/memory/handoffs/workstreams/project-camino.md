@@ -1,17 +1,17 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-Aktualizováno: 2026-09-15 19:15 CEST
+Aktualizováno: 2026-09-15 19:25 CEST
 
-- C01a rozpracováno: izolovaný audio prototyp, 25 testů logiky a syntetického CAF audia OK; přímá kompilace/linkování pro arm64 iOS 17 / SDK 26.2 prošly.
+- C01a: lokálně opravena nehybná indikace přehrávání; samostatný čas a průběh podle AVAudioPlayer. 28 testů a podepsaný iOS build prošly. Nová verze zatím není v telefonu, ruční ověření opravy čeká.
 - Míla potvrdil funkční Komentář (čas, signál, uložení a celý poslech), Úvahu bez internetu, zachování a přehrání obou vzorků po úplném ukončení aplikace bez samovolného záznamu a správné hlášení zakázaného mikrofonu s funkčním záznamem po jeho povolení.
 - Xcode 26.3 / iOS SDK 26.2: podepsaný Debug build CaminoAudio pro iPhone prošel (exit 0), `codesign --verify --deep --strict` exit 0. Jedna platná vývojová identita; profil platí do 2026-09-22 18:16 CEST. Výběr týmu je pouze v ignorovaném LocalSigning.xcconfig.
-- C01a: praktické dílčí zkoušky uživatelsky potvrzeny, úplná přejímka ještě otevřená. Chybí výslovný offline Komentář, potvrzení označení vstupu, přesná metadata vzorků a první odmítnutí systémového dialogu (dosud otestováno odebrání práva v Nastavení). C01b nezahájeno.
+- Úplná přejímka C01a otevřená: nově nalezený problém zobrazení má lokální opravu, čeká aktualizace telefonu a retest; dále metadata vzorků a první odmítnutí systémového dialogu. Mikrofon iPhonu doložen snímkem, doplňující Komentář uživatel přehrál. C01b nezahájeno.
 
 ### Vzkaz pro pokračování
 
 - Restart a následný schválený úklid dokončeny. Před zahájením instalace bylo na SSD 85,79 GiB volných. Dřívější přesun USA neopakovat.
-- Instalace platformy i nepodepsaný build ověřeny. Doplnit krátký Komentář bez internetu a potvrdit název zobrazeného vstupu. Potom doplnit doklady vzorků a přesný scénář prvního odmítnutí oprávnění T025; dosavadní výsledky neopakovat bez důvodu. C01b nezahajovat.
+- Instalace platformy i nepodepsaný build ověřeny. Při zastaveném záznamu i přehrávání aktualizovat aplikaci v připojeném iPhonu a ručně ověřit běžící čas/průběh, Stop a opakované přehrání existujícího vzorku. Potom doplnit zbývající doklady C01a a první odmítnutí oprávnění; C01b nezahajovat.
 - c+p+n d573e90c dokončeno a ověřeno; dnešní nový zápis ručních zkoušek není součástí tohoto nasazení.
 
 ### Rizika
@@ -30,22 +30,22 @@ Typ: Project
 Priorita: 1
 Stav: rozpracovane
 Pripomenout pri startu: ano
-Datum: 2026-09-15 19:15 CEST
+Datum: 2026-09-15 19:25 CEST
 
 Co se resilo:
-Ruční testy krátkého nahrávání, poslechu, opětovného otevření a odebrání/povolení mikrofonu.
+Oprava nehybného času a chybějícího průběhu přehrávání podle Mílova snímku.
 
 Co je hotove:
-Kód C01a, 25 testů, podepsaný build, instalace a uživatelsky potvrzené dílčí audio zkoušky; podrobný rozsah je v reportu C01a.
+Lokální oprava přehrávání, 28 testů a podepsaný build. Dřívější verze je v telefonu a má uživatelsky potvrzené dílčí audio zkoušky; nová oprava zatím nainstalovaná není.
 
 Co neni hotove:
-Zbývající podmínky a doklady úplné přejímky C01a (offline Komentář, název vstupu, metadata a první odmítnutí oprávnění); G0/G1 nesplněné.
+Aktualizace a ruční retest opravy přehrávání, metadata vzorků a první odmítnutí oprávnění; G0/G1 nesplněné.
 
 Dalsi krok:
-Doplnit krátký Komentář bez internetu a potvrdit název zobrazeného vstupu. Potom doplnit doklady vzorků a přesný scénář prvního odmítnutí oprávnění T025; dosavadní výsledky neopakovat bez důvodu. C01b nezahajovat.
+Při zastaveném záznamu i přehrávání aktualizovat aplikaci v připojeném iPhonu a ručně ověřit běžící čas/průběh, Stop a opakované přehrání existujícího vzorku. Potom doplnit zbývající doklady C01a a první odmítnutí oprávnění; C01b nezahajovat.
 
 Navrhovane dalsi kroky:
-Doplnit krátký Komentář bez internetu a potvrdit název zobrazeného vstupu. Potom doplnit doklady vzorků a přesný scénář prvního odmítnutí oprávnění T025; dosavadní výsledky neopakovat bez důvodu. C01b nezahajovat.
+Při zastaveném záznamu i přehrávání aktualizovat aplikaci v připojeném iPhonu a ručně ověřit běžící čas/průběh, Stop a opakované přehrání existujícího vzorku. Potom doplnit zbývající doklady C01a a první odmítnutí oprávnění; C01b nezahajovat.
 
 Zmenene nebo relevantni soubory:
 `camino/`, `memory/projects/camino.md`, katalog, registry a kanonický TVBCP.
@@ -186,3 +186,13 @@ Technický důkaz:
 - Přesné délky, velikosti a SHA-256 telefonních vzorků dosud nezjištěny; obsah ani soubory nahrávek se nepřenášely. Žádný hlášený funkční FAIL, ale C01a zatím formálně nepřijato; G0/G1 neuzavřeny.
 - Dřívější c+p+n d573e90c dokončeno: 1684 testů, šest commitů pushnuto, canonical deployment receipt deployed a smoke 5/5. Tento nový zápis výsledků vzniká až po tomto nasazení a je určen k místnímu commitu.
 - Další krok: Doplnit krátký Komentář bez internetu a potvrdit název zobrazeného vstupu. Potom doplnit doklady vzorků a přesný scénář prvního odmítnutí oprávnění T025; dosavadní výsledky neopakovat bez důvodu. C01b nezahajovat.
+
+### 2026-09-15 19:25 CEST — Oprava zobrazení průběhu přehrávání
+
+- Míla po doplňujícím testu potvrdil přehrání Komentáře a nahlásil chybějící průběh. Snímek IMG_0503.PNG ukazuje režim Letadlo, Přehrávám, čas 00:30, název Mikrofon iPhonu a uložený Komentář 00:30. Obrázek nebyl kopírován do Gitu. Sám nedokládá pohyb času ani vypnutí Wi-Fi; přehrání potvrzuje uživatel.
+- Příčina ověřena v kódu: společná obrazovka při poslechu dál zobrazovala elapsed posledního záznamu, vstup a mikrofonní meter. Playback tick pouze hlídal konec, nečetl pozici přehrávače.
+- Oprava: AVAudioPlayer.currentTime a duration přes AudioDriver; samostatný stav přehrávání v controlleru a oznámení změny při každém odečtu. SwiftUI při poslechu zobrazuje uplynulý/celkový čas a modrý průběh místo údajů mikrofonu. Žádné dopočítávání času podle timeru. [Apple currentTime](https://developer.apple.com/documentation/avfaudio/avaudioplayer/currenttime).
+- Ověření: 28/28 Swift XCTest, podepsaný Debug xcodebuild generic/platform=iOS exit 0 a codesign --verify --deep --strict exit 0. Tři nové testy pokrývají skutečnou pozici vs. čas záznamu/nástěnné hodiny, chybné hodnoty a Stop/opakování/odchod do pozadí; rozšířen test přirozeného konce.
+- Zápis a formát médií se nemění. Nová verze zatím NENÍ nainstalovaná na iPhonu; ruční UI/poslech opravy NEOVĚŘENO. Před aktualizací čeká potvrzení, že nahrávání i přehrávání stojí. Existující vzorky zachovat, aplikaci neodinstalovávat.
+- T015: doplňující Komentář přehrán podle uživatele, screenshot v režimu Letadlo; offline test proběhl podle zadaného postupu, samostatný technický důkaz vypnuté Wi-Fi chybí. T017: název vstupu Mikrofon iPhonu nyní doložen snímkem (při poslechu šlo o zachovaný údaj záznamu). Přesná metadata vzorků a první odmítnutí systémového dialogu T025 zůstávají otevřené.
+- Další krok: Při zastaveném záznamu i přehrávání aktualizovat aplikaci v připojeném iPhonu a ručně ověřit běžící čas/průběh, Stop a opakované přehrání existujícího vzorku. Potom doplnit zbývající doklady C01a a první odmítnutí oprávnění; C01b nezahajovat.

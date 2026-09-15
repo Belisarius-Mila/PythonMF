@@ -116,6 +116,8 @@ import Foundation
     }
 
     var isPlaying: Bool { player?.isPlaying == true }
+    var playbackTime: Double { player?.currentTime ?? 0 }
+    var playbackDuration: Double { player?.duration ?? 0 }
     func stopPlayback() {
         player?.stop(); player = nil
         try? session.setActive(false, options: [.notifyOthersOnDeactivation])

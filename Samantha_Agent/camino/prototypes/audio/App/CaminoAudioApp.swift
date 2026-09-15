@@ -28,12 +28,23 @@ struct AudioScreen: View {
                         VStack(alignment: .leading, spacing: 14) {
                             Text(c.message).font(.headline)
                                 .accessibilityIdentifier("captureStatus")
-                            Text(duration(c.elapsed)).font(.system(.largeTitle, design: .monospaced).bold())
-                                .accessibilityLabel("Délka záznamu \(duration(c.elapsed))")
-                            Text(c.input).font(.subheadline)
-                            ProgressView(value: meter(c.power))
-                                .tint(c.phase == .recording ? .red : .secondary)
-                                .accessibilityLabel("Úroveň mikrofonu")
+                            if c.phase == .playing {
+                                Text("\(duration(c.playbackElapsed)) / \(duration(c.playbackDuration))")
+                                    .font(.system(.title, design: .monospaced).bold())
+                                    .accessibilityIdentifier("playbackTime")
+                                    .accessibilityLabel("Přehráno \(duration(c.playbackElapsed)) z \(duration(c.playbackDuration))")
+                                ProgressView(value: c.playbackProgress)
+                                    .tint(.blue)
+                                    .accessibilityIdentifier("playbackProgress")
+                                    .accessibilityLabel("Průběh přehrávání")
+                            } else {
+                                Text(duration(c.elapsed)).font(.system(.largeTitle, design: .monospaced).bold())
+                                    .accessibilityLabel("Délka záznamu \(duration(c.elapsed))")
+                                Text(c.input).font(.subheadline)
+                                ProgressView(value: meter(c.power))
+                                    .tint(c.phase == .recording ? .red : .secondary)
+                                    .accessibilityLabel("Úroveň mikrofonu")
+                            }
                             if c.canStop {
                                 Button { Task { await c.stop() } } label: {
                                     Label("Ukončit a uložit", systemImage: "stop.fill")

@@ -8,6 +8,11 @@ import Foundation
     public private(set) var input = "Mikrofon se ověří při spuštění"
     public private(set) var library = RecordingLibrary()
     public private(set) var playingID: UUID?
+    public private(set) var playbackElapsed: Double = 0
+    public private(set) var playbackDuration: Double = 0
+    public var playbackProgress: Double {
+        playbackDuration > 0 ? playbackElapsed / playbackDuration : 0
+    }
     public var changed: (() -> Void)?
     public var canStart: Bool { phase == .idle || phase == .failed }
     public var canStop: Bool { phase == .preparing || phase == .recording }
@@ -65,6 +70,7 @@ import Foundation
     public func tick() {
         if phase == .playing {
             if !driver.isPlaying { stopPlayback() }
+            else { updatePlaybackProgress(); changed?() }
             return
         }
         guard !starting, phase == .preparing || phase == .recording else { return }
@@ -105,13 +111,24 @@ import Foundation
         guard canStart else { return }
         do {
             try driver.play(url: store.url(for: clip.draft))
+            updatePlaybackProgress()
             playingID = clip.id; phase = .playing; message = "Přehrávám"; changed?()
         } catch { fail("Nahrávku nelze přehrát. Soubor zůstal zachovaný.") }
     }
 
     public func stopPlayback() {
         guard phase == .playing else { return }
-        driver.stopPlayback(); playingID = nil; phase = .idle; message = "Připraveno"; changed?()
+        driver.stopPlayback(); playingID = nil
+        playbackElapsed = 0; playbackDuration = 0
+        phase = .idle; message = "Připraveno"; changed?()
+    }
+
+    private func updatePlaybackProgress() {
+        // Observe the player's media position; timer ticks never invent progress.
+        let duration = driver.playbackDuration
+        let position = driver.playbackTime
+        playbackDuration = duration.isFinite && duration > 0 ? duration : 0
+        playbackElapsed = position.isFinite ? min(playbackDuration, max(0, position)) : 0
     }
 
     private func finish() async {

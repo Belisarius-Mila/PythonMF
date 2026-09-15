@@ -72,6 +72,8 @@ public struct CaptureSample: Sendable {
     func play(url: URL) throws
     func stopPlayback()
     var isPlaying: Bool { get }
+    var playbackTime: Double { get }
+    var playbackDuration: Double { get }
 }
 
 @MainActor public protocol RecordingStorage: AnyObject {
