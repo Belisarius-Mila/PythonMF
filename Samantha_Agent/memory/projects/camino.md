@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-15 21:25 CEST
+Aktualizováno: 2026-09-15 21:37 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,11 +11,11 @@ editující iPhone. Web v P0 slouží pro čtení a stav, bez veřejného publik
 
 ## Aktuální stav
 
-- C01a: oprava přehrávání verze 259b7476 potvrzena Mílou na iPhonu 14 Plus: běží čas i modrý průběh a nové přehrání po Stop začíná od začátku. Instalace/spuštění ověřeny; 32 testů jádra a 2 UI testy simulátoru prošly. Zbývají metadata vzorků a první odmítnutí mikrofonu.
-- Camino Test pro první odmítnutí mikrofonu je sestavený a podepsaný, zatím nenainstalovaný. Živé vývojové spojení s iPhonem selhává; čeká obnovení kabelového spojení.
+- C01a: oprava přehrávání verze 259b7476 potvrzena Mílou na iPhonu 14 Plus: běží čas i modrý průběh a nové přehrání po Stop začíná od začátku. Instalace/spuštění ověřeny; 32 testů jádra a 2 UI testy simulátoru prošly. Metadata 5 vzorků ověřena; zbývá ruční první odmítnutí a následné povolení mikrofonu.
+- Camino Test je samostatně nainstalovaný a spuštěný; oba bundle ověřeny v telefonu. Po restartu Xcode znovu fungují vývojové služby. Načtena metadata 5 vzorků a ověřena shoda velikostí CAF; audio se nekopírovalo. Ruční první odmítnutí mikrofonu čeká na výsledek.
 - Míla potvrdil funkční Komentář (čas, signál, uložení a celý poslech), Úvahu bez internetu, zachování a přehrání obou vzorků po úplném ukončení aplikace bez samovolného záznamu a správné hlášení zakázaného mikrofonu s funkčním záznamem po jeho povolení.
 - Xcode 26.3 / iOS SDK 26.2: podepsaný Debug build CaminoAudio pro iPhone prošel (exit 0), `codesign --verify --deep --strict` exit 0. Jedna platná vývojová identita; profil platí do 2026-09-22 18:16 CEST. Výběr týmu je pouze v ignorovaném LocalSigning.xcconfig.
-- Úplná přejímka C01a otevřená: oprava zobrazení je potvrzena na telefonu; zbývají metadata vzorků a první odmítnutí systémového dialogu. Mikrofon iPhonu doložen snímkem, doplňující Komentář uživatel přehrál. C01b nezahájeno.
+- Úplná přejímka C01a otevřená: oprava zobrazení je potvrzena na telefonu; metadata vzorků jsou ověřena, zbývá první odmítnutí systémového dialogu a následné povolení. Mikrofon iPhonu doložen snímkem, doplňující Komentář uživatel přehrál. C01b nezahájeno.
 - Restart a následný schválený úklid dokončeny. Před zahájením instalace bylo na SSD 85,79 GiB volných. Dřívější přesun USA neopakovat.
 - Poslední doložené c+p+n: d573e90c, 1684 testů, smoke 5/5. Nový zápis ručních zkoušek vzniká po tomto nasazení.
 
@@ -45,7 +45,7 @@ a rodinné výstupy. Externí přepis není důkaz zálohy. Lidskou revizi AI ne
 
 ## Další krok
 
-Po odpojení a opětovném připojení kabelu ověřit živé vývojové spojení s odemčeným iPhonem. Potom dokončit čtení metadat a instalaci připraveného Camino Test pro první odmítnutí mikrofonu; C01b nezahajovat.
+V nainstalovaném Camino Test dokončit ruční první odmítnutí mikrofonu, následné povolení v Nastavení a nový vědomý Start. T025 a přejímka C01a zůstávají otevřené; C01b nezahajovat.
 
 Historický doklad založení:
 Ověření založení: 56/56 testů integrace (54 + 2 profilové testy) a rychlá statická brána OK.
@@ -310,3 +310,23 @@ Technický důkaz:
 - Samostatný Debug build ze zdroje 0fbfd0b3: xcodebuild exit 0, strict codesign exit 0; bundle a jméno ověřeny z Info.plist. Profil do 2026-09-22 21:20 CEST; účty, podpisové identity a balíček zůstávají mimo Git.
 - Telefon v inventáři connected, ale živé details/apps skončily timeoutem. Opakovaný nerekurzivní inventář metadat: com.apple.mobiledevice / -402653181, Failed to allocate RSD device. Bez výpisu médií, bez kopírování audia, bez instalace či spuštění nové aplikace.
 - Míla dostal požadavek na odpojení/připojení kabelu a ponechání telefonu odemčeného. Odpověď dosud čeká. Kód se neměnil, testy jádra/UI se neopakovaly; oprava přehrávání zůstává uživatelsky potvrzená.
+
+### 2026-09-15 21:37 CEST — Obnovené spojení, Camino Test nainstalován a metadata ověřena
+
+Hotovo:
+- Přepojení kabelu nepomohlo. Po Mílou provedeném restartu Xcode živý seznam aplikací uspěl; VPN ani síťová konfigurace se neměnily. Příčina původní chyby RSD není definitivně určena.
+- Strict podpis, oddělený bundle a profil pro cílový telefon ověřeny. Instalace a spuštění Camino Test: exit 0 / success; původní Camino i Camino Test přítomné. Profil testovací aplikace platí do 22. září 21:20 CEST.
+- Přečteno pouze 5 completed.json a inventář souborů původního Camina. Všech 5 byteCount odpovídá skutečné velikosti příslušného CAF; 48 kHz, mono, interrupted=false. Obsah audia se nepřenášel ani neposlouchal nástrojem.
+
+Rozhodnutí:
+- První odmítnutí oprávnění se zkouší v oddělené aplikaci. Instalace sama není fyzický PASS T025. Původní nahrávky zachovány; C01b nezahájeno.
+
+Další krok:
+- V nainstalovaném Camino Test dokončit ruční první odmítnutí mikrofonu, následné povolení v Nastavení a nový vědomý Start. T025 a přejímka C01a zůstávají otevřené; C01b nezahajovat.
+
+Navrhované další kroky:
+- Po uživatelském výsledku doplnit T025 a vyhodnotit rozsah přejímky C01a; dosavadní úspěšné testy neopakovat bez důvodu.
+
+Technický důkaz:
+- Soukromá instalační účtenka latest_permission_check.txt odkazuje na poslední xcode_restart pokus: apps/install/launch/apps_after, 5 metadata copy receipts a file_sizes; git-safe tabulka délek/velikostí je v C01a_AUDIO_PROTOTYPE_REPORT.md.
+- Kód aplikace se neměnil; dřívějších 32 testů jádra a 2 UI testy nebyly opakovány. T025 první odmítnutí/povolení zatím uživatelsky NEOVĚŘENO; G0/G1 neuzavřeny.

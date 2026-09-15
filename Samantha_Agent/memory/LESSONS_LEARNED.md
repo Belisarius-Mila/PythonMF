@@ -705,3 +705,10 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Riziko: automatické vytvoření chybějícího vzorku při každém launchi by skrylo ztrátu dat mezi spuštěními.
 - Řešení: náhodné oddělené UUID úložiště, explicitní seed pouze při prvním launchi; při návratu zakázat seed. Pomocný kód kompilovat pouze pro Debug simulátor.
 - Ověření: 2 UI testy PASS, vizuální kontrola průběhu; binární program pro iPhone neobsahuje testovací vstupní značky.
+
+### LL-038 — iPhone dostupný přes USB, ale CoreDevice neodpovídá
+
+- Problém: Xcode ukazoval Connected a prázdný seznam aplikací, xcdevice available=true, ale devicectl info apps končilo timeoutem a log uváděl Failed to allocate RSD device.
+- Typ: jednorázový
+- Řešení nalezeno: 15092026
+- Řešení: Přepojení kabelu nepomohlo; běžné ukončení a znovuotevření Xcode uživatelem obnovilo seznam aplikací, instalaci/spuštění i čtení metadat. Ověřit živými příkazy, samotné Connected nestačí. VPN se neměnila; příčinná souvislost s VPN nebyla prokázána.
