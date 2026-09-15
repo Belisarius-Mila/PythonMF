@@ -1,8 +1,8 @@
 # C01a — audio prototyp: průběžné předání
 
-Aktualizováno: 2026-09-15 19:25 CEST. Specifikace v0.4; U01–U11 beze změny.
+Aktualizováno: 2026-09-15 20:15 CEST. Specifikace v0.4; U01–U11 beze změny.
 
-**C01a: lokální oprava indikace přehrávání, ruční retest čeká.** Dosavadní nahrávání a poslech uživatelsky prošly; nehybný ukazatel odhalen snímkem a opraven. Nová verze prošla 28 testy, podepsaným buildem a strict podpisem; na telefonu dosud není. Úplná přejímka C01a a G0/G1 zůstávají otevřené.
+**C01a: lokální oprava indikace přehrávání, ruční retest čeká.** Dosavadní nahrávání a poslech uživatelsky prošly; nehybný ukazatel odhalen snímkem a opraven. Nová verze včetně reakce na přerušení poslechu prošla 30 testy, podepsaným buildem a strict podpisem; na telefonu dosud není. Úplná přejímka C01a a G0/G1 zůstávají otevřené.
 
 ## Aktuální oprava přehrávání
 
@@ -157,3 +157,28 @@ zařízení nejsou součástí commitu. Původní podklady v0.4 zůstaly neměnn
 ## Jediný následující krok
 
 Při zastaveném záznamu i přehrávání aktualizovat aplikaci v připojeném iPhonu a ručně ověřit běžící čas/průběh, Stop a opakované přehrání existujícího vzorku. Potom doplnit zbývající doklady C01a a první odmítnutí oprávnění; C01b nezahajovat.
+
+### 2026-09-15 20:15 CEST — Přerušení poslechu, práce bez telefonu
+
+Hotovo:
+
+- Poslech po události přerušení ihned skončí a obrazovka přizná přerušení; další poslech vyžaduje Přehrát. Čas i průběh se vynulují.
+
+Rozhodnutí:
+
+- Na Mílův pokyn pokračováno bez připojeného telefonu v opravách C01a. C01b nezahájeno; bez změny formátu a zápisu médií.
+
+Další krok:
+
+- Po připojení telefonu a zastavení záznamu/poslechu aktualizovat aplikaci a ověřit průběh, Stop, opakované přehrání a přerušení poslechu.
+
+Navrhované další kroky:
+
+- Doplnit metadata neutrálních vzorků a první odmítnutí systémového oprávnění. Fyzická přejímka C01a zůstává otevřená.
+
+Technický důkaz:
+
+- Regresní test před opravou selhal: přerušení nechalo stav playing. Po opravě 30/30 Swift XCTest; podepsaný Debug xcodebuild a strict codesign exit 0. Dva nové testy ověřují okamžitou reakci bez timeru a opakované události bez automatického spuštění či změny nahrávek.
+- Instalace této verze, simulátor a fyzické zkoušky NEPROVEDENO. Starší verze zůstává v iPhonu.
+
+Obsluha události odpovídá požadavku aktualizovat UI při přerušení: [Apple — Responding to Interruptions](https://developer.apple.com/library/archive/documentation/Audio/Conceptual/AudioSessionProgrammingGuide/HandlingAudioInterruptions/HandlingAudioInterruptions.html).

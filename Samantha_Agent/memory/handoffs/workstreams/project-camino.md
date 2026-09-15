@@ -1,9 +1,9 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-Aktualizováno: 2026-09-15 19:25 CEST
+Aktualizováno: 2026-09-15 20:15 CEST
 
-- C01a: lokálně opravena nehybná indikace přehrávání; samostatný čas a průběh podle AVAudioPlayer. 28 testů a podepsaný iOS build prošly. Nová verze zatím není v telefonu, ruční ověření opravy čeká.
+- C01a: lokálně opraven průběh přehrávání i okamžité ukončení poslechu při systémovém přerušení. 30 testů, podepsaný iOS build a strict podpis prošly. Nová verze zatím není v telefonu, ruční ověření čeká.
 - Míla potvrdil funkční Komentář (čas, signál, uložení a celý poslech), Úvahu bez internetu, zachování a přehrání obou vzorků po úplném ukončení aplikace bez samovolného záznamu a správné hlášení zakázaného mikrofonu s funkčním záznamem po jeho povolení.
 - Xcode 26.3 / iOS SDK 26.2: podepsaný Debug build CaminoAudio pro iPhone prošel (exit 0), `codesign --verify --deep --strict` exit 0. Jedna platná vývojová identita; profil platí do 2026-09-22 18:16 CEST. Výběr týmu je pouze v ignorovaném LocalSigning.xcconfig.
 - Úplná přejímka C01a otevřená: nově nalezený problém zobrazení má lokální opravu, čeká aktualizace telefonu a retest; dále metadata vzorků a první odmítnutí systémového dialogu. Mikrofon iPhonu doložen snímkem, doplňující Komentář uživatel přehrál. C01b nezahájeno.
@@ -30,13 +30,13 @@ Typ: Project
 Priorita: 1
 Stav: rozpracovane
 Pripomenout pri startu: ano
-Datum: 2026-09-15 19:25 CEST
+Datum: 2026-09-15 20:15 CEST
 
 Co se resilo:
-Oprava nehybného času a chybějícího průběhu přehrávání podle Mílova snímku.
+Oprava průběhu přehrávání a okamžité reakce na přerušení poslechu; pokračování bez telefonu.
 
 Co je hotove:
-Lokální oprava přehrávání, 28 testů a podepsaný build. Dřívější verze je v telefonu a má uživatelsky potvrzené dílčí audio zkoušky; nová oprava zatím nainstalovaná není.
+Lokální oprava přehrávání a přerušení poslechu, 30 testů, podepsaný build a strict podpis. Dřívější verze je v telefonu a má uživatelsky potvrzené dílčí audio zkoušky; nová oprava zatím nainstalovaná není.
 
 Co neni hotove:
 Aktualizace a ruční retest opravy přehrávání, metadata vzorků a první odmítnutí oprávnění; G0/G1 nesplněné.
@@ -196,3 +196,26 @@ Technický důkaz:
 - Zápis a formát médií se nemění. Nová verze zatím NENÍ nainstalovaná na iPhonu; ruční UI/poslech opravy NEOVĚŘENO. Před aktualizací čeká potvrzení, že nahrávání i přehrávání stojí. Existující vzorky zachovat, aplikaci neodinstalovávat.
 - T015: doplňující Komentář přehrán podle uživatele, screenshot v režimu Letadlo; offline test proběhl podle zadaného postupu, samostatný technický důkaz vypnuté Wi-Fi chybí. T017: název vstupu Mikrofon iPhonu nyní doložen snímkem (při poslechu šlo o zachovaný údaj záznamu). Přesná metadata vzorků a první odmítnutí systémového dialogu T025 zůstávají otevřené.
 - Další krok: Při zastaveném záznamu i přehrávání aktualizovat aplikaci v připojeném iPhonu a ručně ověřit běžící čas/průběh, Stop a opakované přehrání existujícího vzorku. Potom doplnit zbývající doklady C01a a první odmítnutí oprávnění; C01b nezahajovat.
+
+### 2026-09-15 20:15 CEST — Přerušení poslechu, práce bez telefonu
+
+Hotovo:
+
+- Poslech po události přerušení ihned skončí a obrazovka přizná přerušení; další poslech vyžaduje Přehrát. Čas i průběh se vynulují.
+
+Rozhodnutí:
+
+- Na Mílův pokyn pokračováno bez připojeného telefonu v opravách C01a. C01b nezahájeno; bez změny formátu a zápisu médií.
+
+Další krok:
+
+- Po připojení telefonu a zastavení záznamu/poslechu aktualizovat aplikaci a ověřit průběh, Stop, opakované přehrání a přerušení poslechu.
+
+Navrhované další kroky:
+
+- Doplnit metadata neutrálních vzorků a první odmítnutí systémového oprávnění. Fyzická přejímka C01a zůstává otevřená.
+
+Technický důkaz:
+
+- Regresní test před opravou selhal: přerušení nechalo stav playing. Po opravě 30/30 Swift XCTest; podepsaný Debug xcodebuild a strict codesign exit 0. Dva nové testy ověřují okamžitou reakci bez timeru a opakované události bez automatického spuštění či změny nahrávek.
+- Instalace této verze, simulátor a fyzické zkoušky NEPROVEDENO. Starší verze zůstává v iPhonu.

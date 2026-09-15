@@ -8,6 +8,7 @@ import XCTest
     var starts = 0
     var stops = 0
     var plays = 0
+    var playbackStops = 0
     var stopSuccess = true
     var failStart = false
     var failPlay = false
@@ -30,7 +31,7 @@ import XCTest
         if failPlay { throw AudioPrototypeError.invalidAudio }
         plays += 1; isPlaying = true; playbackTime = 0
     }
-    func stopPlayback() { isPlaying = false }
+    func stopPlayback() { playbackStops += 1; isPlaying = false }
 }
 
 @MainActor final class FakeStore: RecordingStorage {
@@ -218,6 +219,35 @@ import XCTest
         c.play(try s.finish(s.begin(kind: .comment), interrupted: false))
         XCTAssertEqual(c.phase, .failed); XCTAssertNil(c.playingID)
         XCTAssertEqual(d.starts, 0); XCTAssertEqual(s.completed.count, 1)
+    }
+
+    func testPlaybackInterruptionUpdatesStateWithoutWaitingForTimer() throws {
+        for playerStillReportsPlaying in [true, false] {
+            let d = FakeDriver(); let s = FakeStore(); let c = AudioController(driver: d, store: s)
+            c.play(try s.finish(s.begin(kind: .comment), interrupted: false))
+            d.playbackTime = 12; c.tick()
+            d.isPlaying = playerStillReportsPlaying
+            var changes = 0; c.changed = { changes += 1 }
+            c.interrupt()
+            XCTAssertEqual(c.phase, .idle); XCTAssertNil(c.playingID)
+            XCTAssertEqual(c.playbackElapsed, 0); XCTAssertEqual(c.playbackDuration, 0)
+            XCTAssertFalse(d.isPlaying); XCTAssertEqual(d.playbackStops, 1)
+            XCTAssertEqual(changes, 1)
+            XCTAssertTrue(c.message.contains("přerušeno"))
+        }
+    }
+
+    func testRepeatedPlaybackInterruptionDoesNotRestartOrChangeRecordings() throws {
+        let d = FakeDriver(); let s = FakeStore(); let c = AudioController(driver: d, store: s)
+        let clip = try s.finish(s.begin(kind: .reflection), interrupted: false)
+        c.play(clip); c.interrupt(); c.interrupt(); c.tick()
+        XCTAssertEqual(d.playbackStops, 1); XCTAssertEqual(d.plays, 1)
+        XCTAssertEqual(d.starts, 0); XCTAssertEqual(d.stops, 0)
+        XCTAssertEqual(s.began.count, 1); XCTAssertEqual(s.completed.count, 1)
+        XCTAssertEqual(s.completed[0].id, clip.id); XCTAssertFalse(s.completed[0].interrupted)
+        c.play(clip) // Only an explicit Play starts a new player.
+        XCTAssertEqual(d.plays, 2); XCTAssertEqual(c.phase, .playing)
+        XCTAssertEqual(c.playbackElapsed, 0)
     }
 
     func testInterruptionDuringPreparationClosesBeforeNewStart() async {

@@ -95,6 +95,10 @@ import Foundation
     }
 
     public func interrupt() {
+        if phase == .playing {
+            endPlayback(message: "Přehrávání přerušeno. Spustíš je znovu tlačítkem Přehrát.")
+            return
+        }
         guard canStop else { return }
         interrupted = true
         // Transition before scheduling the task: a second event cannot race a new Start.
@@ -103,8 +107,8 @@ import Foundation
     }
 
     public func leaveForeground() {
-        interrupt()
         if phase == .playing { stopPlayback() }
+        else { interrupt() }
     }
 
     public func play(_ clip: RecordingClip) {
@@ -117,10 +121,14 @@ import Foundation
     }
 
     public func stopPlayback() {
+        endPlayback(message: "Připraveno")
+    }
+
+    private func endPlayback(message: String) {
         guard phase == .playing else { return }
         driver.stopPlayback(); playingID = nil
         playbackElapsed = 0; playbackDuration = 0
-        phase = .idle; message = "Připraveno"; changed?()
+        phase = .idle; self.message = message; changed?()
     }
 
     private func updatePlaybackProgress() {

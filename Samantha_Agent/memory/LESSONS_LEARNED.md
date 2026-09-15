@@ -691,3 +691,10 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Typ: opakující se
 - Řešení nalezeno: 15092026
 - Řešení: nový DerivedData v /private/tmp, bez plošného mazání xattr ze zdrojů. Podepsaný build a codesign --verify --deep --strict prošly. Tým patří do ignorovaného LocalSigning.xcconfig.
+
+### 2026-09-15 — Přerušení audia musí ukončit také stav přehrávání
+
+- Kontext: Camino C01a, společná obsluha systémové události pro recorder a player.
+- Problém: guard pouze pro záznam ignoroval přerušení poslechu; UI čekalo na další timer.
+- Řešení: událost zpracovat přímo i ve stavu playing, ukončit player a aktualizovat UI; nové spuštění jen vědomou akcí.
+- Ověření: regrese před opravou selhala; po opravě 30 testů, podepsaný iOS build a strict podpis OK. Testovat i bez dalšího ticku a s opakováním události; fyzický test zůstává samostatný.
