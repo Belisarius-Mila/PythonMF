@@ -39,7 +39,11 @@ Historické cesty na Plochu v zápisech níže už nejsou aktuální.
   Manifesty ani média nepatří do Gitu.
 - Bezprostředně po přesunu má interní SSD 18,85 GiB volných; čistý přírůstek
   proti začátku je 3,68 GiB. Velikost přesunutých dat není naměřená úspora.
-  Příčina další souběžné spotřeby místa nebyla v tomto kroku určena.
+  Následný read-only audit zjistil 14,73 GiB cache CloudKit; podle časů vzniku
+  vzniklo asi 14,65 GiB jejích souborů během přenosu. To vysvětluje hlavní
+  rozdíl proti očekávané úspoře; cache se ručně nemazala. Před restartem
+  v 10:33 CEST: cache 14,75 GiB, SSD volno 18,81 GiB, disk Falta odpojený.
+  Navazující měření po restartu je vedeno v kanonickém handoffu Camina.
 - Disk Falta není šifrovaný; tento stav byl před přesunem oznámen a nezměněn.
   Další data, Xcode ani systémové cache se nečistily.
 - Před další prací s filmovým formulářem připojit disk a přesměrovat cestu

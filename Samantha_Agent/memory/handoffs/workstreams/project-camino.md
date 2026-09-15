@@ -1,12 +1,40 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-Aktualizováno: 2026-09-15 08:19 CEST
+Aktualizováno: 2026-09-15 10:33 CEST
 
 - C01a rozpracováno: izolovaný audio prototyp, 25 testů logiky a syntetického CAF audia OK; přímá kompilace/linkování pro arm64 iOS 17 / SDK 26.2 prošly.
 - iPhone 14 Plus / iOS 26.6.1 build 23G83 přímo ověřen: paired, wired, tunnel connected, Developer Mode enabled, DDI available.
 - Xcode 26.3 je nainstalovaný, ale standardní build blokuje chybějící platform support iOS 26.2; samotné SDK nestačí. Platných podpisových identit je 0.
 - Celý C01a BLOCKED: instalace, ruční UI/poslech a fyzické T015/T017/T025 NEPROVEDENO. C01b nezahájeno.
+
+### Vzkaz pro pokračování po restartu
+
+- První krok je read-only měření po skutečném restartu Macu: boot, Cockpit,
+  volné místo SSD a cache CloudKit. Restart Macu zatím NEPROVEDENO;
+  poslední boot byl 2026-09-14 20:51 CEST (epoch 1789411872).
+- Před restartem 2026-09-15 10:33 CEST: CloudKit cache 14,75 GiB,
+  SSD volno 18,81 GiB. Nemaž cache ručně, nerestartuj služby ani nezačínej
+  instalaci bez dalšího zadání. Běžný restart nezaručuje vyčištění celé cache.
+- USA bylo kompletně přesunuto na disk Falta / USA: 2 759 souborů,
+  33,10 GiB, všechny SHA-256 shodné. Původní synchronizovaná složka odstraněna
+  až po ověření a po explicitním potvrzení dopadu do iCloudu. Přenos neopakovat.
+  Falta je při tomto handoffu ODPOJENÝ; kontrola obsahu vyžaduje připojení.
+- Proč přenos nepřidal 33 GiB volného místa: místně bylo asi 18,5 GiB;
+  během přenosu vzniklo asi 14,65 GiB souborů cache CloudKit. Bezprostředně
+  po přesunu byl čistý přírůstek volného místa 3,68 GiB. Žádné APFS ani
+  Time Machine snapshoty datového svazku se při následném auditu nenašly.
+- P+n dokončeno pro main `e4e667b5`: oba commity na GitHubu,
+  plná brána 1684/1684, Cockpit ověřen v novém procesu, smoke 5/5.
+  Dodatečný dokumentační handoff vzniká až po tomto p+n; po návratu ověř Git,
+  nepředpokládej automaticky shodu nového lokálního HEAD s origin/main.
+- Camino zůstává C01a BLOCKED: projekt a 25 testů hotové, fyzická instalace
+  a poslech NEPROVEDENO. Xcode 26.3 je nainstalovaný; Components nabízí
+  iOS 26.2 SDK + iOS 26.3.1 Simulator, 8,39 GB, Get / Components absent.
+  Signing není dořešený. iPhone 14 Plus, iOS 26.6.1; dříve potvrzené párování,
+  Developer Mode a DDI po restartu podle potřeby znovu ověřit.
+- Vývojový Mac a domácí server jsou tentýž Intel MacBook Pro 2020,
+  macOS 15.7.9, 16 GiB RAM. Nevracet zodpovězené otázky U01–U11.
 
 ### Rizika
 
@@ -24,7 +52,7 @@ Typ: Project
 Priorita: 1
 Stav: rozpracovane
 Pripomenout pri startu: ano
-Datum: 2026-09-15 08:19 CEST
+Datum: 2026-09-15 10:33 CEST
 
 Co se resilo:
 První implementace C01a a ověření připravenosti telefonu; skutečný Xcode build odhalil další blokaci.
@@ -36,10 +64,10 @@ Co neni hotove:
 Platform support, Xcode build aplikace, signing, instalace a hardwarová přejímka. C01a BLOCKED, G0/G1 nesplněné.
 
 Dalsi krok:
-V Xcode → Settings → Components ověřit a zpřístupnit Platform Support iOS 26.2, potom zopakovat build připraveného CaminoAudio projektu.
+Po skutečném restartu Macu nejprve jen čtením ověřit nový boot, stav Cockpitu, volné místo SSD a velikost cache CloudKit. Nic nemazat ani neinstalovat; teprve podle výsledku navázat na chybějící iOS Platform Support.
 
 Navrhovane dalsi kroky:
-Po C00 malý audio prototyp C01a podle zjištěného prostředí.
+Po vyřešení kapacity a doplnění iOS Platform Support dokončit Xcode build, podpis a fyzickou přejímku existujícího C01a prototypu.
 
 Zmenene nebo relevantni soubory:
 `camino/`, `memory/projects/camino.md`, katalog, registry a kanonický TVBCP.

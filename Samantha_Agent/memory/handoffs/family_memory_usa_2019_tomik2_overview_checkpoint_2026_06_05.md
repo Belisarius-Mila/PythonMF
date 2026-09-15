@@ -15,7 +15,10 @@ Aktuální stav 2026-09-15:
   `USA_overeni_presunu_20260915`; původní upozornění na neúplnou kopii
   bylo nahrazeno potvrzením dokončeného a ověřeného přesunu.
 - Interní SSD: bezprostředně po dokončení 18,85 GiB volných, čistý přírůstek
-  3,68 GiB. Další příčina spotřeby místa nebyla v tomto kroku auditována.
+  3,68 GiB. Následný read-only audit zjistil asi 14,65 GiB nových souborů
+  cache CloudKit vytvořených během přenosu. V 10:33 CEST cache 14,75 GiB,
+  SSD volno 18,81 GiB; cache se nemazala, Falta je odpojený. Restartové
+  předání a první read-only měření po restartu jsou v handoffu Camina.
 - Aktuální další krok projektu: připojit disk Falta, přesměrovat zdrojovou
   cestu k USA a ověřit přehrávání před pokračováním ve filmovém výběru.
 - Riziko: historické odkazy níže míří na již odstraněnou složku na Ploše.

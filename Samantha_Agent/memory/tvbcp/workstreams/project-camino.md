@@ -16,8 +16,14 @@ je první organizační krok; aplikace ani audit prostředí tím nevznikají.
 - iPhone 14 Plus / iOS 26.6.1 build 23G83 přímo ověřen: paired, wired, tunnel connected, Developer Mode enabled, DDI available.
 - Xcode 26.3 je nainstalovaný, ale standardní build blokuje chybějící platform support iOS 26.2; samotné SDK nestačí. Platných podpisových identit je 0.
 - Celý C01a BLOCKED: instalace, ruční UI/poslech a fyzické T015/T017/T025 NEPROVEDENO. C01b nezahájeno.
+- Před restartem 2026-09-15 10:33 CEST: SSD volno 18,81 GiB, CloudKit
+  cache 14,75 GiB; Falta odpojený. USA přesunuto a ověřeno, neopakovat.
+  Podrobný restartový vzkaz je v kanonickém handoffu Camina.
+- P+n ověřeno pro `e4e667b5`: 1684/1684 testů, nový Cockpit, smoke 5/5.
+  Tento dodatečný handoff předchozí p+n nezahrnovalo.
 
-V Xcode → Settings → Components ověřit a zpřístupnit Platform Support iOS 26.2, potom zopakovat build připraveného CaminoAudio projektu.
+
+Po skutečném restartu Macu nejprve jen čtením ověřit nový boot, stav Cockpitu, volné místo SSD a velikost cache CloudKit. Nic nemazat ani neinstalovat; teprve podle výsledku navázat na chybějící iOS Platform Support.
 
 ## Rizika
 
