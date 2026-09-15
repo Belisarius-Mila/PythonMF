@@ -1,8 +1,8 @@
 # C01a — audio prototyp: průběžné předání
 
-Aktualizováno: 2026-09-15 20:20 CEST. Specifikace v0.4; U01–U11 beze změny.
+Aktualizováno: 2026-09-15 20:42 CEST. Specifikace v0.4; U01–U11 beze změny.
 
-**C01a: lokální oprava indikace přehrávání, ruční retest čeká.** Dosavadní nahrávání a poslech uživatelsky prošly; nehybný ukazatel odhalen snímkem a opraven. Nová verze včetně reakce na přerušení a hlášení chyb poslechu prošla 32 testy, podepsaným buildem a strict podpisem; na telefonu dosud není. Úplná přejímka C01a a G0/G1 zůstávají otevřené.
+**C01a: opravy přehrávání ověřeny dvěma UI testy v simulátoru; fyzický retest čeká.** Dosavadní nahrávání a poslech uživatelsky prošly; nehybný ukazatel odhalen snímkem a opraven. Nová verze včetně reakce na přerušení a hlášení chyb poslechu prošla 32 testy, podepsaným buildem a strict podpisem; na telefonu dosud není. Úplná přejímka C01a a G0/G1 zůstávají otevřené.
 
 ## Aktuální oprava přehrávání
 
@@ -205,3 +205,27 @@ Technický důkaz:
 
 - 32/32 Swift XCTest, podepsaný Debug xcodebuild a strict codesign exit 0. Dva nové testy: nedostupný soubor bez změny evidence a následný poslech jiného vzorku; nabídka nastavení podle oprávnění i při nesouvisející chybě uložení.
 - Pět zdrojových/testovacích souborů; formát ani zápis médií beze změny. Instalace a fyzický retest NEPROVEDENO, C01a stále nepřijato.
+
+### 2026-09-15 20:42 CEST — Ověření rozhraní v iOS simulátoru
+
+Hotovo:
+
+- Dva opakovatelné UI testy ovládají SwiftUI a skutečný AVAudioPlayer: čas i průběh postupují, Stop a opakování fungují; vzorek přežije ukončení aplikace a návrat sám nic nepřehraje. Prohlédnutý snímek ukazuje 00:03 / 00:30, modrý průběh a dostupný Stop bez překryvů.
+
+Rozhodnutí:
+
+- Další práce bez telefonu zůstává v C01a. Samostatné schéma CaminoAudioUITests, pouze tiché syntetické audio a oddělené UUID úložiště. Pomocný kód se překládá jen pro Debug simulátor; návrat aplikace nesmí vytvořit náhradní vzorek.
+
+Další krok:
+
+- Po připojení telefonu a zastavení záznamu/poslechu aktualizovat aplikaci a ověřit opravený průběh, Stop a opakované přehrání.
+
+Navrhované další kroky:
+
+- Dokončit fyzickou přejímku oprávnění a metadat neutrálních vzorků. C01b nezahájeno.
+
+Technický důkaz:
+
+- CaminoAudioUITests: 2/2 PASS, 0 skipped, xcodebuild test exit 0; iPhone 14 Plus simulátor, iOS 26.3.1 / 23D8133, x86_64. Snímek exportován z xcresult a vizuálně zkontrolován. Logy, výsledek a snímek zůstávají mimo Git.
+- Dřívějších 32 testů jádra se beze změny jádra neopakovalo. Standardní podepsaný iPhone build a strict podpis OK; testovací vstupní značky nejsou v jeho programu.
+- Mikrofon, fyzický poslech, iOS 26.6.1 a instalace aktualizace na telefon NEOVĚŘENO tímto krokem. C01a/G0/G1 stále nepřijato.

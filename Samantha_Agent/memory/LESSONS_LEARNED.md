@@ -698,3 +698,10 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Problém: guard pouze pro záznam ignoroval přerušení poslechu; UI čekalo na další timer.
 - Řešení: událost zpracovat přímo i ve stavu playing, ukončit player a aktualizovat UI; nové spuštění jen vědomou akcí.
 - Ověření: regrese před opravou selhala; po opravě 30 testů, podepsaný iOS build a strict podpis OK. Testovat i bez dalšího ticku a s opakováním události; fyzický test zůstává samostatný.
+
+### 2026-09-15 — UI test návratu nesmí znovu vytvořit ztracený vzorek
+
+- Kontext: Camino, syntetická audio fixture pro XCTest v iOS simulátoru.
+- Riziko: automatické vytvoření chybějícího vzorku při každém launchi by skrylo ztrátu dat mezi spuštěními.
+- Řešení: náhodné oddělené UUID úložiště, explicitní seed pouze při prvním launchi; při návratu zakázat seed. Pomocný kód kompilovat pouze pro Debug simulátor.
+- Ověření: 2 UI testy PASS, vizuální kontrola průběhu; binární program pro iPhone neobsahuje testovací vstupní značky.

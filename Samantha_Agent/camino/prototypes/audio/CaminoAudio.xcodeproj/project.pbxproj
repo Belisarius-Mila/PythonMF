@@ -14,7 +14,16 @@
 		A86C4E6D7570CA482C7EFD15 /* App/AudioViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D716C4BBFC87424D4EC6751 /* App/AudioViewModel.swift */; };
 		C9501B9DA1B2EE32AB18A813 /* App/IOSAudioDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = C84EFB2CAC2838E47F4E018E /* App/IOSAudioDriver.swift */; };
 		ECB5595AA1AB1B90C271AB3D /* Core/AudioController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EC8F99D572E138FBDF5C62F /* Core/AudioController.swift */; };
+		59BC63F524792BF86F03DB4B /* PlaybackUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BF99EF2001A38FB3424944A; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		81CAE47D1FACEF2CA6BA4CE8 = {isa = PBXContainerItemProxy; containerPortal = 244210E48437B6556980A702; proxyType = 1; remoteGlobalIDString = 34A04005BCAF206EEC990BD9; remoteInfo = CaminoAudio; };
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXTargetDependency section */
+		DDDCBBDDBFDEFFA6661220D7 = {isa = PBXTargetDependency; target = 34A04005BCAF206EEC990BD9; targetProxy = 81CAE47D1FACEF2CA6BA4CE8; };
+/* End PBXTargetDependency section */
 
 /* Begin PBXFileReference section */
 		1D716C4BBFC87424D4EC6751 /* App/AudioViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/AudioViewModel.swift; sourceTree = "<group>"; };
@@ -26,6 +35,8 @@
 		A8792157CB4F27FB949C035F /* CaminoAudio.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; path = CaminoAudio.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BD920ACA7C0CC8C34B3B1AB2 /* App/CaminoAudioApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/CaminoAudioApp.swift; sourceTree = "<group>"; };
 		C84EFB2CAC2838E47F4E018E /* App/IOSAudioDriver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/IOSAudioDriver.swift; sourceTree = "<group>"; };
+		4BF99EF2001A38FB3424944A /* PlaybackUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITests/PlaybackUITests.swift; sourceTree = "<group>"; };
+		64B73DEF55AE7F9717F111F9 /* CaminoAudioUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = CaminoAudioUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -36,6 +47,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		F0F64FA1914A0948BC14D84D = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -43,6 +55,7 @@
 			isa = PBXGroup;
 			children = (
 				A8792157CB4F27FB949C035F /* CaminoAudio.app */,
+				64B73DEF55AE7F9717F111F9 /* CaminoAudioUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -58,6 +71,7 @@
 				84368FD76133B94C8F5E3774 /* Core/AudioTypes.swift */,
 				53E3833127F8AA7BAACCB10B /* Core/RecordingStore.swift */,
 				8500A105EFC3753A5CE8987E /* Config.xcconfig */,
+				4BF99EF2001A38FB3424944A /* PlaybackUITests.swift */,
 				0A3E27B8CA818264D75C8D81 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -82,6 +96,13 @@
 			productReference = A8792157CB4F27FB949C035F /* CaminoAudio.app */;
 			productType = "com.apple.product-type.application";
 		};
+		132E926E5455DA44ED65C4BA /* CaminoAudioUITests */ = {
+			isa = PBXNativeTarget; buildConfigurationList = 859BC9CC434CCCE5D900BB7A;
+			buildPhases = (113129D7F6292225229CE3C0, F0F64FA1914A0948BC14D84D, 4C9750833C86672220AF02A4);
+			buildRules = (); dependencies = (DDDCBBDDBFDEFFA6661220D7);
+			name = CaminoAudioUITests; productName = CaminoAudioUITests;
+			productReference = 64B73DEF55AE7F9717F111F9; productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -91,6 +112,7 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 2630;
 				TargetAttributes = {
+					132E926E5455DA44ED65C4BA = {CreatedOnToolsVersion = 26.3; TestTargetID = 34A04005BCAF206EEC990BD9; };
 					34A04005BCAF206EEC990BD9 = {
 						CreatedOnToolsVersion = 26.3;
 						ProvisioningStyle = Automatic;
@@ -111,6 +133,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
+				132E926E5455DA44ED65C4BA /* CaminoAudioUITests */,
 				34A04005BCAF206EEC990BD9 /* CaminoAudio */,
 			);
 		};
@@ -124,6 +147,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		4C9750833C86672220AF02A4 = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -141,6 +165,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		113129D7F6292225229CE3C0 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (59BC63F524792BF86F03DB4B,); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
@@ -236,6 +261,28 @@
 			};
 			name = Release;
 		};
+		3148BFDC677C1E8A82E921A6 /* Debug UI tests */ = {
+			isa = XCBuildConfiguration; name = Debug;
+			buildSettings = {
+				GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cz.pythonmf.camino.audio.prototype.uitests;
+				PRODUCT_NAME = "$(TARGET_NAME)"; SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = iphonesimulator; SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1; TEST_TARGET_NAME = CaminoAudio;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+		};
+		0CBC8D46C58683179EB06E63 /* Release UI tests */ = {
+			isa = XCBuildConfiguration; name = Release;
+			buildSettings = {
+				GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cz.pythonmf.camino.audio.prototype.uitests;
+				PRODUCT_NAME = "$(TARGET_NAME)"; SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = iphonesimulator; SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1; TEST_TARGET_NAME = CaminoAudio;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -257,6 +304,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		859BC9CC434CCCE5D900BB7A = {isa = XCConfigurationList; buildConfigurations = (3148BFDC677C1E8A82E921A6, 0CBC8D46C58683179EB06E63); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
 /* End XCConfigurationList section */
 	};
 	rootObject = 244210E48437B6556980A702 /* Project object */;

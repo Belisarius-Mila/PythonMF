@@ -4,7 +4,7 @@ Izolovaný nativní prototyp pro krátký Komentář nebo Úvahu. Swift 6, Swift
 AVFAudio, žádné externí balíčky, server ani AI. Nejde o celé Camino.
 
 **Stav: podepsaný Xcode build a strict kontrola podpisu ověřeny;
-instalace na iPhone prošla a otevření potvrdil Míla. Dílčí fyzické zkoušky uživatelsky prošly. Nová oprava průběhu přehrávání včetně reakce na přerušení a hlášení chyb prošla 32 testy a podepsaným buildem; aktualizace telefonu a retest čekají.** Viz
+instalace na iPhone prošla a otevření potvrdil Míla. Dílčí fyzické zkoušky uživatelsky prošly. Nová oprava průběhu přehrávání včetně reakce na přerušení a hlášení chyb prošla 32 testy a podepsaným buildem; nově prošly také 2 UI testy na simulátoru. Aktualizace telefonu a fyzický retest čekají.** Viz
 [report C01a](../../docs/C01a_AUDIO_PROTOTYPE_REPORT.md).
 
 ## Otevření a sestavení
@@ -31,6 +31,29 @@ vynech CODE_SIGNING_ALLOWED=NO a použij místní tým. DerivedData drž mimo
 synchronizovanou Plochu (například nový adresář v /private/tmp); při ověření
 podpisu build na Ploše blokoval atribut FinderInfo. Testy na
 Macu používají syntetické CAF soubory v nových dočasných složkách, ne mikrofon.
+
+### UI testy v iOS simulátoru
+
+Samostatné schéma `CaminoAudioUITests` ovládá skutečnou SwiftUI aplikaci a
+AVAudioPlayer. Ověřuje postup času i ukazatele, Stop, opakované přehrání a
+návrat po ukončení procesu bez samovolného poslechu. V Xcode vyber toto schéma,
+nainstalovaný iPhone simulátor a Test. Z příkazové řádky:
+
+```sh
+xcodebuild -project CaminoAudio.xcodeproj -scheme CaminoAudioUITests \
+  -configuration Debug -destination 'platform=iOS Simulator,id=<SIMULATOR_UDID>' \
+  -derivedDataPath /private/tmp/camino-ui-derived \
+  -parallel-testing-enabled NO CODE_SIGNING_ALLOWED=NO test
+```
+
+`<SIMULATOR_UDID>` nahraď ID dostupného simulátoru z `xcrun simctl list devices`.
+Testy vytvářejí 30sekundové tiché PCM/CAF bez mikrofonu. Každý test má vlastní
+UUID úložiště `CaminoAudioUITests`, při opětovném spuštění aplikace stejného
+testu se použije již dokončený vzorek; vytvoření náhradního vzorku je při návratu
+zakázané, aby test nemohl zakrýt ztrátu dat. Žádné soubory se automaticky nemažou.
+Pomocný kód je pod `DEBUG && targetEnvironment(simulator)`; fyzická a Release
+verze jej neobsahují. Testy na fyzickém zařízení se přeskočí. Výsledek simulátoru
+nenahrazuje přejímku mikrofonu, poslechu ani systémových přerušení na iPhonu.
 
 ## Chování a soubory
 
