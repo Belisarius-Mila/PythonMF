@@ -7,6 +7,7 @@ import XCTest
     var permissionRequests = 0
     var starts = 0
     var stops = 0
+    var pauses = 0
     var plays = 0
     var playbackStops = 0
     var stopSuccess = true
@@ -27,6 +28,7 @@ import XCTest
         if failStart { throw AudioPrototypeError.startFailed }
     }
     func sample() -> CaptureSample { reading }
+    func pauseCapture() { pauses += 1 }
     func stop() async -> Bool { stops += 1; return stopSuccess }
     func play(url: URL) throws {
         if missingPlaybackFile { throw AudioPrototypeError.missingAudio }
@@ -40,8 +42,8 @@ import XCTest
     var began: [RecordingDraft] = []
     var completed: [RecordingClip] = []
     var failFinish = false
-    func begin(kind: RecordingKind) throws -> RecordingDraft {
-        let d = RecordingDraft(id: UUID(), kind: kind, startedAt: Date()); began.append(d); return d
+    func begin(kind: RecordingKind, continuation: RecordingContinuation? = nil) throws -> RecordingDraft {
+        let d = RecordingDraft(id: UUID(), kind: kind, startedAt: Date(), continuation: continuation); began.append(d); return d
     }
     func url(for draft: RecordingDraft) -> URL { URL(fileURLWithPath: "/synthetic/\(draft.id).caf") }
     func finish(_ draft: RecordingDraft, interrupted: Bool) throws -> RecordingClip {

@@ -14,8 +14,11 @@ import Foundation
         playbackDuration > 0 ? playbackElapsed / playbackDuration : 0
     }
     public var changed: (() -> Void)?
-    public var canStart: Bool { phase == .idle || phase == .failed }
+    public var canStart: Bool { foreground && resumeDraft == nil && (phase == .idle || phase == .failed) }
+    public var canContinue: Bool { foreground && resumeDraft != nil && phase == .interrupted }
+    public var canPlay: Bool { foreground && (canStart || phase == .interrupted) }
     public var canStop: Bool { phase == .preparing || phase == .recording }
+    public var isFinishingInterrupted: Bool { phase == .finishing && interrupted }
     public var microphoneDenied: Bool { driver.permission == .denied }
     private let driver: AudioDriver
     private let store: RecordingStorage
@@ -26,6 +29,10 @@ import Foundation
     private var interrupted = false
     private var routeID = ""
     private var lastAdvance = 0.0
+    private var foreground = true
+    private var resumeDraft: RecordingDraft?
+    private var interruptedAt: Double?
+    private var interruptionReason = "Nahrávání přerušeno"
 
     public init(driver: AudioDriver, store: RecordingStorage,
                 now: @escaping () -> Double = { ProcessInfo.processInfo.systemUptime }) {
@@ -35,14 +42,33 @@ import Foundation
 
     public func start(kind: RecordingKind) async {
         guard canStart else { return }
+        await begin(kind: kind, continuation: nil)
+    }
+
+    public func continueRecording() async {
+        guard canContinue, let previous = resumeDraft else { return }
+        let gap = interruptedAt.map { now() - $0 }
+        let continuation = RecordingContinuation(sessionID: previous.sessionID,
+            previousPartID: previous.id, gapSeconds: gap.flatMap { $0.isFinite && $0 >= 0 ? $0 : nil })
+        await begin(kind: previous.kind, continuation: continuation)
+    }
+
+    public func endInterruptedSession() {
+        guard phase == .interrupted else { return }
+        resumeDraft = nil; interruptedAt = nil; phase = .idle
+        message = "Nahrávání ukončeno. Zachované části jsou v seznamu."; changed?()
+    }
+
+    private func begin(kind: RecordingKind, continuation: RecordingContinuation?) async {
         switch driver.permission {
         case .denied:
             fail("Mikrofon není povolený. Povol jej v Nastavení; uložené nahrávky lze přehrát.")
+            if resumeDraft != nil { phase = .interrupted; changed?() }
             return
         case .undetermined:
             phase = .permission; message = "Povolení mikrofonu"; changed?()
             let granted = await driver.requestPermission()
-            phase = .idle
+            phase = resumeDraft == nil ? .idle : .interrupted
             message = granted ? "Mikrofon povolen. Nahrávání spustíš tlačítkem Start."
                 : "Mikrofon není povolený. Nahrávání nezačalo."
             changed?(); return
@@ -52,17 +78,21 @@ import Foundation
         elapsed = 0; power = -160; stopRequested = false; interrupted = false
         routeID = ""; starting = true; changed?()
         do {
-            let attempt = try store.begin(kind: kind); draft = attempt
+            let attempt = try store.begin(kind: kind, continuation: continuation); draft = attempt
             try await driver.start(url: store.url(for: attempt))
             starting = false
             lastAdvance = now()
             if stopRequested { await finish(); return }
+            resumeDraft = nil; interruptedAt = nil
+            let initialInput = driver.sample()
+            routeID = initialInput.inputID; input = initialInput.inputLabel
             tick()
         } catch {
             starting = false; phase = .finishing; changed?()
             _ = await driver.stop()
             draft = nil
             fail("Nahrávání se nepodařilo spustit. Případný neúplný soubor zůstal zachovaný.")
+            if resumeDraft != nil { phase = .interrupted; changed?() }
             refreshLibrary()
         }
     }
@@ -95,25 +125,49 @@ import Foundation
         if !starting { await finish() }
     }
 
-    public func interrupt() {
+    public func interrupt(reason: String = "Nahrávání přerušeno") {
         if phase == .playing {
             endPlayback(message: "Přehrávání přerušeno. Spustíš je znovu tlačítkem Přehrát.")
             return
         }
         guard canStop else { return }
         interrupted = true
+        interruptionReason = reason; interruptedAt = now(); resumeDraft = draft
+        driver.pauseCapture()
         // Transition before scheduling the task: a second event cannot race a new Start.
         stopRequested = true; phase = .finishing; message = "Přerušeno — ověřuji zachovaný záznam"; changed?()
         if !starting { Task { await finish() } }
     }
 
     public func leaveForeground() {
+        foreground = false
         if phase == .playing { stopPlayback() }
-        else { interrupt() }
+        // A verified running recorder continues. Pending activation must never start behind a lock.
+        else if phase == .preparing { interrupt(reason: "Příprava nahrávání přerušena") }
+        changed?()
+    }
+
+    public func enterForeground() {
+        foreground = true
+        if phase == .recording || phase == .preparing { tick() }
+        else { refreshLibrary() }
+        changed?()
+    }
+
+    public func interruptionEnded() {
+        // Some interruptions have no end event. Only explicit Continue may try activation again.
+        changed?()
+    }
+
+    public func routeChanged() {
+        guard !starting, canStop else { return }
+        if !routeID.isEmpty && driver.sample().inputID != routeID {
+            interrupt(reason: "Mikrofon se změnil")
+        }
     }
 
     public func play(_ clip: RecordingClip) {
-        guard canStart else { return }
+        guard canPlay else { return }
         do {
             try driver.play(url: store.url(for: clip.draft))
             updatePlaybackProgress()
@@ -131,7 +185,9 @@ import Foundation
         guard phase == .playing else { return }
         driver.stopPlayback(); playingID = nil
         playbackElapsed = 0; playbackDuration = 0
-        phase = .idle; self.message = message; changed?()
+        phase = resumeDraft == nil ? .idle : .interrupted
+        self.message = resumeDraft == nil ? message : "Nahrávání přerušeno. Pokračování spustíš vědomě."
+        changed?()
     }
 
     private func updatePlaybackProgress() {
@@ -150,13 +206,15 @@ import Foundation
         do {
             guard closed else { throw AudioPrototypeError.invalidAudio }
             let clip = try store.finish(attempt, interrupted: interrupted)
-            elapsed = clip.audio.duration; power = -160; phase = .idle
-            message = interrupted ? "Přerušeno. Zachovaný záznam lze přehrát."
+            elapsed = clip.audio.duration; power = -160; phase = interrupted ? .interrupted : .idle
+            message = interrupted ? "\(interruptionReason). Zachovanou část lze přehrát."
                 : "Uloženo v telefonu"
         } catch {
             fail("Uložení se nepodařilo ověřit. Neúplný záznam zůstal zachovaný.")
+            if interrupted { phase = .interrupted }
         }
-        refreshLibrary(); changed?()
+        if foreground { refreshLibrary() }
+        changed?()
     }
 
     private func refreshLibrary() {
@@ -164,5 +222,8 @@ import Foundation
         catch { fail("Seznam nahrávek nelze načíst. Stávající soubory zůstaly zachované.") }
     }
 
-    private func fail(_ text: String) { phase = .failed; message = text; power = -160; changed?() }
+    private func fail(_ text: String) {
+        phase = resumeDraft == nil ? .failed : .interrupted
+        message = text; power = -160; changed?()
+    }
 }

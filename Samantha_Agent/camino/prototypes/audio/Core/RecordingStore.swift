@@ -18,15 +18,28 @@ import Glibc
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
     }
 
-    public func begin(kind: RecordingKind) throws -> RecordingDraft {
-        let draft = RecordingDraft(id: makeID(), kind: kind, startedAt: Date())
+    public func begin(kind: RecordingKind, continuation: RecordingContinuation? = nil) throws -> RecordingDraft {
+        if let continuation {
+            let prior = try JSONDecoder().decode(RecordingDraft.self,
+                from: Data(contentsOf: folder(continuation.previousPartID).appendingPathComponent("started.json")))
+            guard prior.id == continuation.previousPartID, prior.kind == kind,
+                  prior.sessionID == continuation.sessionID,
+                  continuation.gapSeconds.map({ $0.isFinite && $0 >= 0 }) ?? true else {
+                throw AudioPrototypeError.invalidMetadata
+            }
+        }
+        let draft = RecordingDraft(id: makeID(), kind: kind, startedAt: Date(), continuation: continuation)
         let directory = folder(draft.id)
         guard mkdir(directory.path, 0o700) == 0 else {
             if errno == EEXIST { throw AudioPrototypeError.collision }
             throw NSError(domain: NSPOSIXErrorDomain, code: Int(errno))
         }
-        try JSONEncoder().encode(draft).write(to: directory.appendingPathComponent("started.json"),
-                                            options: .withoutOverwriting)
+        #if os(iOS)
+        // Only this new attempt; never rewrite protection on pre-existing C01a media.
+        try FileManager.default.setAttributes([.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication],
+                                             ofItemAtPath: directory.path)
+        #endif
+        try writeReceipt(JSONEncoder().encode(draft), to: directory.appendingPathComponent("started.json"))
         return draft
     }
 
@@ -42,8 +55,7 @@ import Glibc
         guard result.valid else { throw AudioPrototypeError.invalidAudio }
         let clip = RecordingClip(draft: draft, audio: result, interrupted: interrupted)
         // Create-only: a later Stop or restart cannot overwrite a completed receipt.
-        try JSONEncoder().encode(clip).write(to: folder(draft.id).appendingPathComponent("completed.json"),
-                                           options: .withoutOverwriting)
+        try writeReceipt(JSONEncoder().encode(clip), to: folder(draft.id).appendingPathComponent("completed.json"))
         return clip
     }
 
@@ -72,4 +84,12 @@ import Glibc
     }
 
     private func folder(_ id: UUID) -> URL { root.appendingPathComponent(id.uuidString, isDirectory: true) }
+
+    private func writeReceipt(_ data: Data, to url: URL) throws {
+        var options: Data.WritingOptions = .withoutOverwriting
+        #if os(iOS)
+        options.insert(.completeFileProtectionUntilFirstUserAuthentication)
+        #endif
+        try data.write(to: url, options: options)
+    }
 }

@@ -8,7 +8,6 @@ import AVFAudio
 struct AudioScreen: View {
     @StateObject private var model = AudioViewModel()
     @Environment(\.scenePhase) private var scenePhase
-    private let timer = Timer.publish(every: 0.15, on: .main, in: .common).autoconnect()
 
     var body: some View {
         NavigationStack {
@@ -16,9 +15,9 @@ struct AudioScreen: View {
                 VStack(alignment: .leading, spacing: 24) {
                     Label("Jen v tomto telefonu", systemImage: "lock.fill")
                         .font(.subheadline).foregroundStyle(.secondary)
-                    Text("Krátký audio prototyp")
+                    Text("Audio prototyp")
                         .font(.title2.bold())
-                    Text("Nech aplikaci otevřenou. Při zamčení nebo odchodu se tento prototyp ukončí; dlouhé nahrávání přijde v další etapě.")
+                    Text("Spusť nahrávání před zamčením. Při hovoru nebo změně mikrofonu se přeruší; pokračování spustíš sám. Záznam pod zámkem nyní ověřujeme.")
                         .font(.subheadline).foregroundStyle(.secondary)
                     if let c = model.controller {
                         Picker("Typ nahrávky", selection: $model.kind) {
@@ -39,7 +38,8 @@ struct AudioScreen: View {
                                     .accessibilityLabel("Průběh přehrávání")
                             } else {
                                 Text(duration(c.elapsed)).font(.system(.largeTitle, design: .monospaced).bold())
-                                    .accessibilityLabel("Délka záznamu \(duration(c.elapsed))")
+                                    .accessibilityLabel("Délka aktuální části \(duration(c.elapsed))")
+                                Text("Aktuální část").font(.caption).foregroundStyle(.secondary)
                                 Text(c.input).font(.subheadline)
                                 ProgressView(value: meter(c.power))
                                     .tint(c.phase == .recording ? .red : .secondary)
@@ -50,6 +50,12 @@ struct AudioScreen: View {
                                     Label("Ukončit a uložit", systemImage: "stop.fill")
                                         .frame(maxWidth: .infinity).padding(.vertical, 12)
                                 }.buttonStyle(.borderedProminent).tint(.red)
+                            } else if c.phase == .interrupted {
+                                Button("Pokračovat", systemImage: "mic.fill") {
+                                    Task { await c.continueRecording() }
+                                }.buttonStyle(.borderedProminent).disabled(!c.canContinue)
+                                Button("Ukončit nahrávání") { c.endInterruptedSession() }
+                                    .buttonStyle(.bordered)
                             } else if c.phase == .playing {
                                 Button("Zastavit přehrávání", systemImage: "stop.fill") { c.stopPlayback() }
                                     .buttonStyle(.borderedProminent)
@@ -77,15 +83,25 @@ struct AudioScreen: View {
                                   systemImage: "exclamationmark.triangle")
                                 .font(.subheadline).foregroundStyle(.orange)
                         }
-                        ForEach(c.library.clips) { clip in
+                        ForEach(c.library.sessions) { session in
                             VStack(alignment: .leading, spacing: 8) {
-                                Text(clip.draft.kind.rawValue).font(.headline)
-                                Text(clip.draft.startedAt, format: .dateTime.day().month().hour().minute())
+                              if let first = session.parts.first {
+                                Text(first.draft.kind.rawValue).font(.headline)
+                                Text(first.draft.startedAt, format: .dateTime.day().month().hour().minute())
                                     .font(.subheadline).foregroundStyle(.secondary)
+                              }
+                              ForEach(Array(session.parts.enumerated()), id: \.element.id) { index, clip in
+                                if session.parts.count > 1 { Text("Část \(index + 1)").font(.subheadline.bold()) }
+                                if let continuation = clip.draft.continuation {
+                                    Text(continuation.gapSeconds.map { "Pauza před pokračováním: přibližně \(duration($0))" }
+                                         ?? "Pauza před pokračováním: délka neznámá")
+                                        .font(.caption).foregroundStyle(.secondary)
+                                }
                                 Text("\(duration(clip.audio.duration)) · \(clip.interrupted ? "Přerušený záznam" : "Uloženo v telefonu")")
                                     .font(.subheadline)
                                 Button("Přehrát", systemImage: "play.fill") { c.play(clip) }
-                                    .buttonStyle(.bordered).disabled(!c.canStart)
+                                    .buttonStyle(.bordered).disabled(!c.canPlay)
+                              }
                             }.frame(maxWidth: .infinity, alignment: .leading)
                                 .padding().background(.quaternary, in: RoundedRectangle(cornerRadius: 16))
                         }
@@ -94,18 +110,9 @@ struct AudioScreen: View {
             }.navigationTitle("Camino Audio")
                 .background(Color(.systemGroupedBackground))
         }
-        .onReceive(timer) { _ in model.tick() }
         .onChange(of: scenePhase) { _, phase in
-            if phase != .active { model.controller?.leaveForeground() }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: AVAudioSession.interruptionNotification)) {
-            model.interruption($0)
-        }
-        .onReceive(NotificationCenter.default.publisher(for: AVAudioSession.mediaServicesWereResetNotification)) { _ in
-            model.controller?.interrupt()
-        }
-        .onReceive(NotificationCenter.default.publisher(for: AVAudioSession.routeChangeNotification)) { _ in
-            model.tick()
+            if phase == .active { model.controller?.enterForeground() }
+            else { model.controller?.leaveForeground() }
         }
     }
 

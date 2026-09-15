@@ -10,7 +10,7 @@ T015 splněno pouze v prototypovém rozsahu bez integrace Momentu; G0/G1 tím ne
 Zadání a historické vstupní předpoklady C00 níže jsou zachovány; popis původní
 nedostupnosti buildu či zařízení není aktuální stav.
 
-C01a uzavřeno; vyčkat na zadání C01b pro audio pod zámkem, přerušení a vědomé pokračování. C01b automaticky nezahajovat.
+C01b bylo následně výslovně zahájeno; aktuální práce je v [zadání C01b](C01b_BACKGROUND_AUDIO.md).
 
 ## Cíl
 

@@ -76,4 +76,49 @@ import XCTest
         XCTAssertThrowsError(try s.finish(forged, interrupted: false))
         XCTAssertTrue(try s.library().clips.isEmpty)
     }
+
+    func testContinuationSurvivesReloadWithoutRewritingPreviousPart() throws {
+        let root = try directory(); let s = try RecordingStore(root: root, inspect: inspect)
+        let first = try s.begin(kind: .reflection)
+        try Data([1, 2, 3, 4]).write(to: s.url(for: first))
+        _ = try s.finish(first, interrupted: true)
+        let receipt = root.appendingPathComponent(first.id.uuidString).appendingPathComponent("completed.json")
+        let original = try Data(contentsOf: receipt)
+        let continuation = RecordingContinuation(sessionID: first.id, previousPartID: first.id, gapSeconds: 12)
+        let second = try s.begin(kind: .reflection, continuation: continuation)
+        try Data([1, 2, 3, 4]).write(to: s.url(for: second))
+        _ = try s.finish(second, interrupted: false)
+        let reloaded = try RecordingStore(root: root, inspect: inspect).library()
+        XCTAssertEqual(reloaded.sessions.count, 1); XCTAssertEqual(reloaded.sessions[0].parts.count, 2)
+        XCTAssertEqual(reloaded.sessions[0].parts[1].draft.continuation, continuation)
+        XCTAssertEqual(try Data(contentsOf: receipt), original)
+        XCTAssertEqual(try Data(contentsOf: s.url(for: first)), Data([1, 2, 3, 4]))
+    }
+
+    func testLegacyC01aJSONLoadsWithoutMigrationOrRewriting() throws {
+        let root = try directory(); let id = UUID()
+        let folder = root.appendingPathComponent(id.uuidString)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: false)
+        let draftJSON = "{\"id\":\"\(id.uuidString)\",\"kind\":\"Komentář\",\"startedAt\":12345}"
+        let clipJSON = "{\"draft\":\(draftJSON),\"audio\":{\"duration\":1,\"byteCount\":4,\"sampleRate\":48000,\"channels\":1},\"interrupted\":false}"
+        let receipt = folder.appendingPathComponent("completed.json")
+        try Data(draftJSON.utf8).write(to: folder.appendingPathComponent("started.json"))
+        try Data(clipJSON.utf8).write(to: receipt)
+        try Data([1, 2, 3, 4]).write(to: folder.appendingPathComponent("audio.caf"))
+        let lib = try RecordingStore(root: root, inspect: inspect).library()
+        XCTAssertEqual(lib.clips.count, 1); XCTAssertEqual(lib.unfinishedCount, 0)
+        XCTAssertNil(lib.clips[0].draft.continuation); XCTAssertEqual(lib.clips[0].draft.sessionID, id)
+        XCTAssertEqual(try Data(contentsOf: receipt), Data(clipJSON.utf8))
+    }
+
+    func testContinuationRejectsWrongKindSessionAndNegativeGapBeforeCreatingAttempt() throws {
+        let root = try directory(); let s = try RecordingStore(root: root, inspect: inspect)
+        let first = try s.begin(kind: .reflection)
+        for (kind, session, gap) in [(RecordingKind.comment, first.id, 1.0),
+                                      (.reflection, UUID(), 1.0), (.reflection, first.id, -1.0)] {
+            XCTAssertThrowsError(try s.begin(kind: kind, continuation:
+                RecordingContinuation(sessionID: session, previousPartID: first.id, gapSeconds: gap)))
+        }
+        XCTAssertEqual(try FileManager.default.contentsOfDirectory(atPath: root.path).count, 1)
+    }
 }

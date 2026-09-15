@@ -1,10 +1,10 @@
-# Camino Audio — C01a
+# Camino Audio — C01b
 
-Izolovaný nativní prototyp pro krátký Komentář nebo Úvahu. Swift 6, SwiftUI,
+Izolovaný nativní prototyp pro Komentář nebo Úvahu. Swift 6, SwiftUI,
 AVFAudio, žádné externí balíčky, server ani AI. Nejde o celé Camino.
 
-**Stav: C01a přijato 2026-09-15 21:43 CEST. Podepsaný build/install/run, 32 testů jádra a 2 UI testy prošly. Míla na iPhonu potvrdil záznam/poslech, zachování dokončených vzorků, průběh přehrávání i první odmítnutí a následné povolení mikrofonu bez samovolného záznamu. Metadata 5 původních vzorků ověřena. C01b nezahájeno; G0/G1 a terénní připravenost zůstávají otevřené.** Viz
-[report C01a](../../docs/C01a_AUDIO_PROTOTYPE_REPORT.md).
+**Stav: C01b implementováno, verze 0.2.0 (2), podepsaný build a strict podpis PASS. 47 testů jádra a 2 UI testy prošly; instalace a fyzická přejímka C01b čekají. C01a bylo přijaté samostatně.** Viz
+[report C01b](../../docs/C01b_BACKGROUND_AUDIO_REPORT.md).
 
 ## Otevření a sestavení
 
@@ -63,10 +63,11 @@ nenahrazuje přejímku mikrofonu, poslechu ani systémových přerušení na iPh
 - Stav Nahrávám vyžaduje postup mediálního času recorderu a skutečný vstup.
   Ticho je platný záznam. Při zastaveném postupu se nejpozději při následujícím
   vyhodnocení po dvousekundovém intervalu zahájí bezpečné dokončení.
-- Stop čeká na potvrzení recorderu a plné dekódování krátkého souboru.
+- Stop čeká na potvrzení recorderu a plné dekódování souboru.
   Chybějící potvrzení do tří sekund znamená neověřené uložení.
-- Jeden recorder nebo player. Odchod do pozadí i přerušení záznam ukončí;
-  návrat nikdy automaticky neotevírá mikrofon.
+- Jeden recorder nebo player. Běžící audio pokračuje po zámku; nový Start
+  vyžaduje aktivní aplikaci. Přerušení pozastaví vstup a uzavře dostupnou část.
+  Pokračovat vytvoří nový soubor stejné session s pauzou; nic se neobnovuje samo.
 - Každý pokus má výhradně vytvořenou UUID složku, `started.json`, `audio.caf`
   a po ověření nový `completed.json`. Existující soubory se nepřepisují.
 - Nedokončené/cizí/poškozené položky zůstávají zachované a viditelně započítané.
@@ -75,8 +76,9 @@ nenahrazuje přejímku mikrofonu, poslechu ani systémových přerušení na iPh
   Adresář je vyloučený ze systémové zálohy; v tomto prototypu existuje jen
   místní kopie. Žádné iCloud kontejnery či File Sharing nejsou zapnuté.
 - Krátké audio je PCM/CAF, mono, požadovaných 48 kHz / 16 bitů; skutečný
-  formát, délka a velikost jsou v dokončovacím záznamu. Ochrana médií je Complete.
+  formát, délka a velikost jsou v dokončovacím záznamu. Nové soubory používají completeUntilFirstUserAuthentication;
+  ochrana původních souborů z C01a se nemění.
 
-Segmentace, pokračování pod zámkem, hovory, dlouhé záznamy a záchrana po pádu
-během zápisu patří do C01b/C01c. Tato verze není vhodná pro ostrá osobní média.
-Přejímka používá neutrální 30–60s vzorky a ruční poslech na skutečném telefonu.
+Podpora zámku/přerušení C01b čeká na fyzickou zkoušku včetně 30 minut.
+Automatické segmenty a záchrana po pádu během zápisu patří do C01c.
+Tato verze není vhodná pro ostrá osobní média; přejímka používá neutrální záznamy.

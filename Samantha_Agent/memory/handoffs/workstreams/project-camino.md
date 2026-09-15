@@ -1,25 +1,25 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-Aktualizováno: 2026-09-15 21:43 CEST
+Aktualizováno: 2026-09-15 21:57 CEST
 
-- C01a přijato v rozsahu malého offline audio prototypu: Start/Stop, skutečný vstup/signál, místní soubor, poslech a zachování dokončených vzorků po ukončení aplikace. T015 pouze prototypová část bez integrace Momentu; T017 a T025 v rozsahu C01a uživatelsky PASS.
-- Opravené přehrávání verze 259b7476 na iPhonu 14 Plus / iOS 26.6.1 uživatelsky ověřeno: běžící čas a průběh, Stop a nové přehrání od začátku. Doloženo 32 testů jádra, 2 UI testy simulátoru, podepsaný build, strict podpis a instalace/spuštění.
-- Samostatný Camino Test: Míla potvrdil první odmítnutí mikrofonu bez nahrávání, následné povolení v Nastavení, návrat bez automatického záznamu a funkční vědomý Start, Stop a poslech. Doklad je svědectví uživatele, nikoli vzdálené pozorování obrazovky.
-- Metadata 5 původních vzorků přečtena, velikosti CAF se shodují s evidencí. Tři delší vzorky mají 30,199–30,613 s. Audio zůstalo v telefonu; bez kopírování hlasu.
-- Xcode 26.3 / SDK 26.2, Personal Team. Profil původní aplikace do 2026-09-22 18:16 CEST, Camino Test do 21:20 CEST téhož dne. Podpisové identity a místní konfigurace zůstávají mimo Git.
-- C01b nezahájeno. G0/G1 ani připravenost na pouť tímto nejsou splněné; zámek, dlouhý běh, hovory, segmentace a obnova během zápisu čekají na další etapy.
+- C01b zahájeno výslovným pokynem Míly; C01a zůstává přijaté. Prototyp 0.2.0 (2) je lokálně připraven pro background audio, přerušení a vědomé pokračování. Zatím není instalovaný na telefonu.
+- Běžící recorder přežije změnu scenePhase; nový Start/Pokračovat pouze v popředí. Přerušení ihned pozastaví vstup, ověří dostupnou část a nabídne Pokračovat/Ukončit. Pokračování vytváří novou část stejné session s evidovanou pauzou, bez přepisu předchozího média.
+- Nové soubory mají completeUntilFirstUserAuthentication; původní C01a soubory se nemigrují ani nemění. Staré JSON podporuje volitelné continuation. Není to C01c segmentový journal ani garance 60s ztráty.
+- Ověřeno 47/47 Swift testů, 2/2 UI testy simulátoru včetně snímku obrazovky, finální podepsaný iOS build a strict podpis; UIBackgroundModes=[audio]. Plná projektová brána PASS, 1684/1684 testů.
+- Instalace 0.2.0 (2), reálný zámek, 30 minut, hovor, sluchátka a ochrana před prvním odemknutím: NEPROVEDENO. Dotaz na připojený odemčený telefon se zastaveným audiem čeká na odpověď.
+- Profil hlavní aplikace do 22. září 18:16 CEST. G0/G1 a terénní připravenost nesplněné; C01c nezahájeno. Původní nahrávky i samostatný Camino Test zůstávají zachované.
 
 ### Vzkaz pro pokračování
 
 - Restart a následný schválený úklid dokončeny. Před zahájením instalace bylo na SSD 85,79 GiB volných. Dřívější přesun USA neopakovat.
-- Instalace platformy i nepodepsaný build ověřeny. C01a uzavřeno; vyčkat na zadání C01b pro audio pod zámkem, přerušení a vědomé pokračování. C01b automaticky nezahajovat.
+- Instalace platformy i nepodepsaný build ověřeny. Po potvrzení připraveného telefonu nainstalovat 0.2.0 (2) bez odinstalace a provést nejdřív krátkou zkoušku zámku. Potom T016/T018–T021/T024/T059 podle zadání C01b; C01c nezahajovat.
 - c+p+n d573e90c dokončeno a ověřeno; dnešní nový zápis ručních zkoušek není součástí tohoto nasazení.
 
 ### Rizika
 
 - C01a přijato, ale širší brány G0/G1 a terénní připravenost zůstávají nesplněné.
-- Pouze krátké foreground audio; žádná segmentace, záchrana po pádu během zápisu ani pokračování pod zámkem.
+- Podpora zámku je implementovaná, fyzicky dosud neověřená. Segmentace a záchrana po pádu během zápisu patří do C01c.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
 - Podepsaný build není instalace ani fyzická přejímka; vývojový profil je časově omezený. U01–U11 se neotevírají.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -32,22 +32,22 @@ Typ: Project
 Priorita: 1
 Stav: rozpracovane
 Pripomenout pri startu: ano
-Datum: 2026-09-15 21:43 CEST
+Datum: 2026-09-15 21:57 CEST
 
 Co se resilo:
-Dokončení fyzického T025 a přijetí krátkého audio prototypu C01a.
+Implementace C01b: audio pod zámkem, přerušení a vědomé pokračování.
 
 Co je hotove:
-C01a přijato: build/install/run, 32 testů jádra, 2 UI testy, metadata, prototypová část T015, T017 a T025; fyzický záznam, poslech a návrat bez samovolného mikrofonu potvrzeny Mílou.
+C01a přijato; implementace C01b, 47 testů jádra, 2 UI testy, podepsaný build a strict podpis. Detaily a hranice důkazů v reportu C01b.
 
 Co neni hotove:
-C01b a další etapy, G0/G1 a terénní připravenost; nejsou součástí dokončeného C01a.
+Instalace a fyzická přejímka C01b; C01c, G0/G1 a terénní připravenost.
 
 Dalsi krok:
-C01a uzavřeno; vyčkat na zadání C01b pro audio pod zámkem, přerušení a vědomé pokračování. C01b automaticky nezahajovat.
+Po potvrzení připraveného telefonu nainstalovat 0.2.0 (2) bez odinstalace a provést nejdřív krátkou zkoušku zámku. Potom T016/T018–T021/T024/T059 podle zadání C01b; C01c nezahajovat.
 
 Navrhovane dalsi kroky:
-C01a uzavřeno; vyčkat na zadání C01b pro audio pod zámkem, přerušení a vědomé pokračování. C01b automaticky nezahajovat.
+Po potvrzení připraveného telefonu nainstalovat 0.2.0 (2) bez odinstalace a provést nejdřív krátkou zkoušku zámku. Potom T016/T018–T021/T024/T059 podle zadání C01b; C01c nezahajovat.
 
 Zmenene nebo relevantni soubory:
 `camino/`, `memory/projects/camino.md`, katalog, registry a kanonický TVBCP.
@@ -382,3 +382,21 @@ Další krok:
 Technický důkaz:
 - Fyzické zkoušky: řízené uživatelské potvrzení z dnešní konverzace; výsledky a hranice důkazů v C01a_AUDIO_PROTOTYPE_REPORT.md.
 - Dosavadních 32 Swift testů a 2 UI testy simulátoru PASS; podepsaný build, strict podpis, instalace/spuštění a metadata mají místní účtenky. Kód se nyní neměnil a testy nebyly bez nového důvodu opakovány.
+
+### 2026-09-15 21:57 CEST — C01b zahájeno, připraven background audio prototyp
+
+Hotovo:
+- Výslovný pokyn Míly zahájit C01b; nové zadání a report. Verze 0.2.0 (2), background audio, explicitní navazující části a pauza, bezpečné omezení nového Start na popředí, lokální oznámení jen při již uděleném oprávnění.
+- 47 Swift testů PASS, 2 UI testy PASS; snímek vizuálně zkontrolován. Finální podepsaný build a strict podpis PASS, správné UIBackgroundModes. Plná projektová brána PASS, 1684/1684 testů.
+
+Rozhodnutí:
+- Změna ochrany platí jen pro nově vytvořené soubory; legacy data bez migrace. Žádný push/deploy, nákup ani C01c. Fyzická přejímka se nenahrazuje simulátorem.
+
+Rizika:
+- C01b dosud nepřijato, skutečný zámek/hovor/30 minut/Bluetooth a T059 NEPROVEDENO. Jediný soubor na nepřerušený úsek může být při pádu neúplný; žádná garance záchrany nebo kontinuity segmentů.
+
+Další krok:
+- Po potvrzení připraveného telefonu nainstalovat 0.2.0 (2) bez odinstalace a provést nejdřív krátkou zkoušku zámku. Potom T016/T018–T021/T024/T059 podle zadání C01b; C01c nezahajovat.
+
+Technický důkaz:
+- C01b_BACKGROUND_AUDIO_REPORT.md, C01b_BACKGROUND_AUDIO.md a soukromá účtenka latest_c01b.txt. 15 nových testů C01b + 32 dosavadních; hlasy ani soukromé identifikátory nejsou v Gitu.

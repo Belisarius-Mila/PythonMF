@@ -6,7 +6,7 @@ public enum RecordingKind: String, Codable, CaseIterable, Sendable {
 }
 
 public enum CapturePhase: Equatable, Sendable {
-    case idle, permission, preparing, recording, finishing, playing, failed
+    case idle, permission, preparing, recording, finishing, interrupted, playing, failed
 }
 
 public enum MicrophonePermission: Sendable { case undetermined, denied, granted }
@@ -26,12 +26,28 @@ public struct AudioInspection: Codable, Equatable, Sendable {
     }
 }
 
+/// An explicit user continuation, not an automatic C01c segment or a loss guarantee.
+public struct RecordingContinuation: Codable, Equatable, Sendable {
+    public let sessionID: UUID
+    public let previousPartID: UUID
+    /// Observed interruption to the next Start request; nil if the clock is invalid.
+    public let gapSeconds: Double?
+    public init(sessionID: UUID, previousPartID: UUID, gapSeconds: Double?) {
+        self.sessionID = sessionID; self.previousPartID = previousPartID
+        self.gapSeconds = gapSeconds
+    }
+}
+
 public struct RecordingDraft: Codable, Equatable, Sendable {
     public let id: UUID
     public let kind: RecordingKind
     public let startedAt: Date
-    public init(id: UUID, kind: RecordingKind, startedAt: Date) {
+    public let continuation: RecordingContinuation?
+    public var sessionID: UUID { continuation?.sessionID ?? id }
+    public init(id: UUID, kind: RecordingKind, startedAt: Date,
+                continuation: RecordingContinuation? = nil) {
         self.id = id; self.kind = kind; self.startedAt = startedAt
+        self.continuation = continuation
     }
 }
 
@@ -49,6 +65,27 @@ public struct RecordingLibrary: Sendable {
     public var clips: [RecordingClip] = []
     public var unfinishedCount = 0
     public init() {}
+    public var sessions: [RecordingSession] {
+        Dictionary(grouping: clips, by: { $0.draft.sessionID }).map { id, clips in
+            // Follow recorded predecessor links, even if the wall clock changed during a pause.
+            var remaining = clips.sorted { $0.draft.startedAt < $1.draft.startedAt }
+            var ordered: [RecordingClip] = []
+            while !remaining.isEmpty {
+                let index = remaining.firstIndex { $0.id == id }
+                    ?? remaining.firstIndex { clip in
+                        guard let prior = clip.draft.continuation?.previousPartID else { return true }
+                        return !remaining.contains { $0.id == prior }
+                    } ?? remaining.startIndex
+                ordered.append(remaining.remove(at: index))
+            }
+            return RecordingSession(id: id, parts: ordered)
+        }.sorted { ($0.parts.first?.draft.startedAt ?? .distantPast) > ($1.parts.first?.draft.startedAt ?? .distantPast) }
+    }
+}
+
+public struct RecordingSession: Identifiable, Sendable {
+    public let id: UUID
+    public let parts: [RecordingClip]
 }
 
 public struct CaptureSample: Sendable {
@@ -68,6 +105,7 @@ public struct CaptureSample: Sendable {
     func requestPermission() async -> Bool
     func start(url: URL) async throws
     func sample() -> CaptureSample
+    func pauseCapture()
     func stop() async -> Bool
     func play(url: URL) throws
     func stopPlayback()
@@ -77,10 +115,16 @@ public struct CaptureSample: Sendable {
 }
 
 @MainActor public protocol RecordingStorage: AnyObject {
-    func begin(kind: RecordingKind) throws -> RecordingDraft
+    func begin(kind: RecordingKind, continuation: RecordingContinuation?) throws -> RecordingDraft
     func url(for draft: RecordingDraft) -> URL
     func finish(_ draft: RecordingDraft, interrupted: Bool) throws -> RecordingClip
     func library() throws -> RecordingLibrary
+}
+
+public extension RecordingStorage {
+    func begin(kind: RecordingKind) throws -> RecordingDraft {
+        try begin(kind: kind, continuation: nil)
+    }
 }
 
 public enum AudioPrototypeError: Error { case collision, missingAudio, invalidAudio, invalidMetadata, startFailed }

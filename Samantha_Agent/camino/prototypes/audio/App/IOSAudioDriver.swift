@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 @preconcurrency import AVFAudio
 
 @MainActor final class IOSAudioDriver: NSObject, AudioDriver, AVAudioRecorderDelegate, AVAudioPlayerDelegate {
@@ -21,12 +22,13 @@ import Foundation
     func requestPermission() async -> Bool { await AVAudioApplication.requestRecordPermission() }
 
     func start(url: URL) async throws {
+        guard UIApplication.shared.applicationState == .active else { throw AudioPrototypeError.startFailed }
         guard recorder == nil, player == nil,
               !FileManager.default.fileExists(atPath: url.path) else {
             throw AudioPrototypeError.collision
         }
         completion = nil
-        try session.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker])
+        try session.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetoothHFP])
         try session.setPreferredSampleRate(48_000)
         try session.setActive(true)
         let settings: [String: Any] = [
@@ -36,11 +38,14 @@ import Foundation
         ]
         let new = try AVAudioRecorder(url: url, settings: settings)
         recorder = new; new.delegate = self; new.isMeteringEnabled = true
-        guard new.prepareToRecord(), new.record() else { throw AudioPrototypeError.startFailed }
-        // C01a is foreground only; retain normal data protection.
-        try FileManager.default.setAttributes([.protectionKey: FileProtectionType.complete],
+        guard new.prepareToRecord() else { throw AudioPrototypeError.startFailed }
+        // Applies only to the newly created recording, after the user's foreground Start.
+        try FileManager.default.setAttributes([.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication],
                                              ofItemAtPath: url.path)
+        guard new.record() else { throw AudioPrototypeError.startFailed }
     }
+
+    func pauseCapture() { recorder?.pause() }
 
     func sample() -> CaptureSample {
         recorder?.updateMeters()

@@ -1,0 +1,58 @@
+# C01b — audio pod zámkem a vědomé pokračování
+
+Zahájeno výslovným pokynem Míly 2026-09-15 po přijetí C01a.
+**Stav: implementace připravena, fyzická přejímka NEPROVEDENO.**
+Aktuální výsledky určuje [report C01b](../docs/C01b_BACKGROUND_AUDIO_REPORT.md).
+
+## Rozsah
+
+- Již spuštěné a ověřeně běžící audio pokračuje po zámku / přechodu do pozadí.
+- Nový Start a Pokračovat vyžadují aktivní odemčenou aplikaci; žádné Siri,
+  vzdálené povely, automatický restart či ovládání libovolnými sluchátky.
+- Hovor, zastavení média či změna skutečného vstupu pozastaví recorder ihned,
+  následně se pokusí uzavřít a ověřit dostupnou část. Neověřený soubor se zachová.
+- Přerušeno nabízí Pokračovat a Ukončit. Pokračovat vytvoří samostatný soubor
+  téže session s odkazem na předchozí část; původní soubor se nepřepisuje.
+- Pauza je změřený interval od zaznamenané události přerušení do vědomého
+  pokračování, nikoli přesný počet chybějících zvukových vzorků. Neznámý čas je null.
+- Nové soubory mají completeUntilFirstUserAuthentication. Ochrana původních
+  nahrávek z C01a se nemění, žádná migrace ani plošné vypnutí ochrany dat.
+- Vestavěný mikrofon a dostupná HFP sluchátka; UI ukazuje skutečnou route.
+- Místní upozornění jen při již uděleném oprávnění, bez soukromého textu;
+  doručení za každého stavu telefonu se neslibuje.
+
+## Automatizované ověření
+
+- Zámek nesmí ukončit běžící recorder, ale nesmí zahájit novou či opožděnou aktivaci.
+- Přerušení ihned pozastaví vstup, opakované události dokončí část právě jednou.
+- Konec hovoru / návrat / route změna samy mikrofon nezapnou.
+- Pokračování zachová typ a session, vytvoří nové ID, odkaz na předchozí část a pauzu.
+- Neúspěšné pokračování neztratí předchozí část; dovolí vědomý nový pokus.
+- Přehrání zachované části nezruší rozpracované pokračování.
+- Původní JSON bez continuation se načte beze změny; dokončené soubory a evidence
+  zůstávají create-only. Nesprávná vazba na session / typ se odmítne.
+- Znovu ověřit UI přehrávání a zachování syntetického vzorku po relaunch.
+
+## Fyzická přejímka — pouze iPhone, uživatel vědomě nahrává
+
+| Test | Postup a důkaz | Stav při zahájení |
+|---|---|---|
+| Krátká kontrola zámku | Offline Start, slyšitelná značka, zamknout asi 30 s, mluvit i pod zámkem, odemknout, značka, Stop, poslech celého vzorku. Délka/velikost z metadat; nejde o T016. | NEPROVEDENO |
+| T016 | 30 minut převážně pod zámkem, průběžné neosobní zvukové značky; Stop a celý poslech, skutečná délka/velikost. Jediný soubor v C01b není důkaz segmentace C01c. | NEPROVEDENO |
+| T018 | Dostupná sluchátka: skutečný vstup, stání/chůze a zámek; slyšitelný hlas, zapsat limity větru/připojení. Bez dostupných sluchátek neuvádět PASS. | NEPROVEDENO |
+| T019 | Uživatel zajistí příchozí hovor, jednou ignoruje a jednou přijme. Zachovaný zvuk před přerušením, nic z hovoru ani samovolné pokračování; Pokračovat až po ukončení hovoru. Agent nikomu nevolá. | NEPROVEDENO |
+| T020 | Odpojit/připojit skutečně aktivní mikrofon; přerušení, ověření staré části, vědomé pokračování a nová část stejné session s mezerou. | NEPROVEDENO |
+| T021 — prototyp | Během záznamu nelze spustit player ani druhý recorder; přepnutí aplikace nezruší běžící audio. Video / integrace Momentu až C04. | NEPROVEDENO |
+| T024 — hranice C01b | Po dokončené části pokračovat a nuceně zavřít. Po otevření žádný mikrofon, dokončená část zůstává přehratelná, neověřená je přiznaná. Žádný slib záchrany otevřeného souboru. | NEPROVEDENO |
+| T059 | Zámek po prvním odemknutí oproti restartu před prvním odemknutím; žádný automatický záznam/čtení chráněných dat před odemknutím, po něm zachované části. | NEPROVEDENO |
+
+Každý výsledek musí obsahovat datum, verzi aplikace, telefon/iOS, kroky,
+skutečnost, důkaz a PASS/FAIL/BLOCKED/NEPROVEDENO. Poslech potvrzuje člověk.
+Audio zůstává na telefonu; pro report se čtou jen technická metadata.
+
+## Zastavení
+
+C01b není přijaté pouze na základě testů či buildu. C01c (automatické segmenty,
+60s checkpoint, journal a obnova během zápisu) se tímto nezahajuje.
+G0/G1 a připravenost na pouť zůstávají otevřené. Žádný push/deploy ani nákup
+členství nejsou součástí tohoto pokynu.

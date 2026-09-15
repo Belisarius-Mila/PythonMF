@@ -1,10 +1,15 @@
 import SwiftUI
 import AVFAudio
+import Combine
+import UserNotifications
 
 @MainActor final class AudioViewModel: ObservableObject {
     let controller: AudioController?
     let startupError: String?
     @Published var kind: RecordingKind = .comment
+    private var subscriptions = Set<AnyCancellable>()
+    private var backgroundTask: UIBackgroundTaskIdentifier = .invalid
+    private var wasFinishing = false
 
     init() {
         do {
@@ -27,18 +32,70 @@ import AVFAudio
             var privateRoot = root; try privateRoot.setResourceValues(backupValues)
             let controller = AudioController(driver: driver, store: store)
             self.controller = controller; startupError = nil
-            driver.event = { [weak controller] in controller?.interrupt() }
-            controller.changed = { [weak self] in self?.objectWillChange.send() }
+            driver.event = { [weak controller] in controller?.interrupt(reason: "Zvukový vstup se zastavil") }
+            controller.changed = { [weak self] in
+                self?.captureChanged()
+                self?.objectWillChange.send()
+            }
+            // The model owns observation while audio runs behind the lock; no view timer dependency.
+            Timer.publish(every: 0.15, on: .main, in: .common).autoconnect()
+                .sink { [weak self] _ in self?.tick() }.store(in: &subscriptions)
+            observe(AVAudioSession.interruptionNotification) { [weak self] in self?.interruption($0) }
+            observe(AVAudioSession.routeChangeNotification) { [weak controller] _ in controller?.routeChanged() }
+            observe(AVAudioSession.mediaServicesWereLostNotification) { [weak controller] _ in
+                controller?.interrupt(reason: "Zvuková služba není dostupná")
+            }
+            observe(AVAudioSession.mediaServicesWereResetNotification) { [weak controller] _ in
+                controller?.interrupt(reason: "Zvuková služba byla obnovena")
+            }
         } catch {
             controller = nil
             startupError = "Soukromé úložiště nelze připravit. Nahrávání není dostupné; žádné soubory se nemažou."
         }
     }
 
+    private func observe(_ name: Notification.Name, action: @escaping @MainActor (Notification) -> Void) {
+        NotificationCenter.default.publisher(for: name).receive(on: RunLoop.main)
+            .sink { notification in action(notification) }.store(in: &subscriptions)
+    }
+
+    private func captureChanged() {
+        guard let controller else { return }
+        if controller.phase == .finishing && !wasFinishing {
+            backgroundTask = UIApplication.shared.beginBackgroundTask(withName: "Finish audio") { [weak self] in
+                Task { @MainActor in self?.endBackgroundTask() }
+            }
+            if controller.isFinishingInterrupted { notifyInterruptionIfAllowed() }
+        } else if controller.phase != .finishing { endBackgroundTask() }
+        wasFinishing = controller.phase == .finishing
+    }
+
+    private func endBackgroundTask() {
+        guard backgroundTask != .invalid else { return }
+        UIApplication.shared.endBackgroundTask(backgroundTask); backgroundTask = .invalid
+    }
+
+    private func notifyInterruptionIfAllowed() {
+        Task {
+            let center = UNUserNotificationCenter.current()
+            let settings = await center.notificationSettings()
+            guard settings.authorizationStatus == .authorized || settings.authorizationStatus == .provisional else { return }
+            let content = UNMutableNotificationContent()
+            content.title = "Nahrávání přerušeno"
+            content.body = "Otevři Camino a zkontroluj stav."
+            try? await center.add(UNNotificationRequest(identifier: "camino-audio-interrupted",
+                content: content, trigger: nil))
+        }
+    }
+
     func tick() { controller?.tick() }
     func interruption(_ notification: Notification) {
         let value = notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt
-        if value == AVAudioSession.InterruptionType.began.rawValue { controller?.interrupt() }
+        if value == AVAudioSession.InterruptionType.began.rawValue {
+            controller?.interrupt()
+        } else if value == AVAudioSession.InterruptionType.ended.rawValue {
+            controller?.interruptionEnded()
+        }
     }
 }
 
