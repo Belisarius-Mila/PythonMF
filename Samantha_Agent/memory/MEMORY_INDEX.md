@@ -59,7 +59,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] Restartový handoff 2026-09-15: po skutečném restartu nejprve read-only přeměřit CloudKit a SSD (předtím 14,75 / 18,81 GiB), ověřit Cockpit; nic nemazat/neinstalovat. USA přesun dokončen, Falta odpojený. C01a BLOCKED na iOS Platform Support, podpisu a fyzické přejímce.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] 2026-09-15 13:34: po restartu a schváleném úklidu spuštěno stahování iOS podpory v Xcode, 10,47 GB. Ověřit dokončení a nový build. C01a BLOCKED na dokončení podpory, podpisu a fyzické přejímce.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` - Cockpit 14. 9.: scroll 10ec0877 potvrzený Mílou. [PRIPOMENOUT] U07 až při příštím pokračování. TXT v2.8 shrnuje U01–U06; plná brána 1680/1680 OK, funkční nasazení 980aed7a a smoke 5/5. Publikační překážka odstraněna; finální balíček/head ověřovat živým auditem.
 

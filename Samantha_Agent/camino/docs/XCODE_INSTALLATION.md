@@ -64,3 +64,11 @@ klonování a otevření projektu. Následné příkazy nezávisle potvrdily dok
 Předchozí blokace licence je vyřešená. Z těchto kontrol neplyne, že byl
 proveden build, signing, párování nebo audio test iPhonu 14 Plus / iOS 26.6.1.
 Další projekt se v uvítacím okně nezakládal; pokračování C01a vyžaduje nový pokyn.
+
+### 2026-09-15 13:34 CEST — Zahájení instalace podpory iOS
+
+- Míla po dokončeném úklidu výslovně zadal spuštění instalace.
+- Xcode Components: spuštěn balíček iOS 26.2 + iOS 26.3.1 Simulator; živě potvrzen postup stahování 185 MB z 10,47 GB (2 %). Úvodní odhad před spuštěním byl 8,39 GB.
+- Před spuštěním 92 116 107 264 B volných (85,79 GiB). Instalační doklad je soukromý, mimo Git.
+- Dokončení instalace, nový Xcode build, signing a fyzická přejímka zatím neověřeny; C01a zůstává BLOCKED.
+- Další krok: Po dokončení stahování ověřit instalaci iOS Platform Support v Xcode Components a zopakovat nepodepsaný build C01a. Potom dořešit signing, instalaci na iPhone a fyzickou přejímku T015/T017/T025.

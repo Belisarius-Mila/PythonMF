@@ -14,23 +14,21 @@ je první organizační krok; aplikace ani audit prostředí tím nevznikají.
 
 - C01a rozpracováno: izolovaný audio prototyp, 25 testů logiky a syntetického CAF audia OK; přímá kompilace/linkování pro arm64 iOS 17 / SDK 26.2 prošly.
 - iPhone 14 Plus / iOS 26.6.1 build 23G83 přímo ověřen: paired, wired, tunnel connected, Developer Mode enabled, DDI available.
-- Xcode 26.3 je nainstalovaný, ale standardní build blokuje chybějící platform support iOS 26.2; samotné SDK nestačí. Platných podpisových identit je 0.
+- Xcode 26.3: 2026-09-15 ve 13:34 CEST na výslovný pokyn zahájeno stahování iOS 26.2 + iOS 26.3.1 Simulator. Xcode uvádí 10,47 GB; průběh potvrzen na 185 MB (2 %). Dokončení instalace a nový build zatím neověřeny. Při poslední kontrole bylo 0 platných podpisových identit.
 - Celý C01a BLOCKED: instalace, ruční UI/poslech a fyzické T015/T017/T025 NEPROVEDENO. C01b nezahájeno.
-- Před restartem 2026-09-15 10:33 CEST: SSD volno 18,81 GiB, CloudKit
-  cache 14,75 GiB; Falta odpojený. USA přesunuto a ověřeno, neopakovat.
-  Podrobný restartový vzkaz je v kanonickém handoffu Camina.
+- Restart a následný schválený úklid dokončeny. Před zahájením instalace bylo na SSD 85,79 GiB volných. Dřívější přesun USA neopakovat.
 - P+n ověřeno pro `e4e667b5`: 1684/1684 testů, nový Cockpit, smoke 5/5.
   Tento dodatečný handoff předchozí p+n nezahrnovalo.
 
 
-Po skutečném restartu Macu nejprve jen čtením ověřit nový boot, stav Cockpitu, volné místo SSD a velikost cache CloudKit. Nic nemazat ani neinstalovat; teprve podle výsledku navázat na chybějící iOS Platform Support.
+Po dokončení stahování ověřit instalaci iOS Platform Support v Xcode Components a zopakovat nepodepsaný build C01a. Potom dořešit signing, instalaci na iPhone a fyzickou přejímku T015/T017/T025.
 
 ## Rizika
 
 - Bez funkčního Xcode buildu, podpisu a fyzické přejímky nelze prototyp označit za přijatý; G0/G1 nesplněné.
 - Pouze krátké foreground audio; žádná segmentace, záchrana po pádu během zápisu ani pokračování pod zámkem.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
-- Před velkou instalací iOS komponent znovu posoudit diskovou kapacitu. U01–U11 se neotevírají.
+- Stahování ještě není důkaz dokončené instalace ani funkčního buildu; po instalaci znovu ověřit volné místo. U01–U11 se neotevírají.
 
 ## Chronologické záznamy
 
@@ -112,3 +110,11 @@ Technický důkaz:
 - 25/25 XCTest OK; arm64/iOS kompilace/link exit 0, bez warnings; project.pbxproj lint OK.
 - Xcode build exit 70: platform support iOS 26.2 chybí; platné signing identity 0. Fyzické testy NEPROVEDENO.
 - Plná společná brána před checkpointem: 1684/1684 testů OK; nové Swift testy jsou samostatných 25/25 výše.
+
+### 2026-09-15 13:34 CEST — Zahájení instalace podpory iOS
+
+- Míla po dokončeném úklidu výslovně zadal spuštění instalace.
+- Xcode Components: spuštěn balíček iOS 26.2 + iOS 26.3.1 Simulator; živě potvrzen postup stahování 185 MB z 10,47 GB (2 %). Úvodní odhad před spuštěním byl 8,39 GB.
+- Před spuštěním 92 116 107 264 B volných (85,79 GiB). Instalační doklad je soukromý, mimo Git.
+- Dokončení instalace, nový Xcode build, signing a fyzická přejímka zatím neověřeny; C01a zůstává BLOCKED.
+- Další krok: Po dokončení stahování ověřit instalaci iOS Platform Support v Xcode Components a zopakovat nepodepsaný build C01a. Potom dořešit signing, instalaci na iPhone a fyzickou přejímku T015/T017/T025.
