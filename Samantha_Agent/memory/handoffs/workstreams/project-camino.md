@@ -1,17 +1,17 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-Aktualizováno: 2026-09-15 21:09 CEST
+Aktualizováno: 2026-09-15 21:18 CEST
 
-- C01a: opravená verze 259b7476 aktualizována na iPhone 14 Plus; instalace, přesný bundle a spuštění ověřeny přes devicectl. Dosavadních 32 testů jádra a 2 UI testy simulátoru prošly. Ruční retest opraveného přehrávání nyní čeká.
+- C01a: oprava přehrávání verze 259b7476 potvrzena Mílou na iPhonu 14 Plus: běží čas i modrý průběh a nové přehrání po Stop začíná od začátku. Instalace/spuštění ověřeny; 32 testů jádra a 2 UI testy simulátoru prošly. Zbývají metadata vzorků a první odmítnutí mikrofonu.
 - Míla potvrdil funkční Komentář (čas, signál, uložení a celý poslech), Úvahu bez internetu, zachování a přehrání obou vzorků po úplném ukončení aplikace bez samovolného záznamu a správné hlášení zakázaného mikrofonu s funkčním záznamem po jeho povolení.
 - Xcode 26.3 / iOS SDK 26.2: podepsaný Debug build CaminoAudio pro iPhone prošel (exit 0), `codesign --verify --deep --strict` exit 0. Jedna platná vývojová identita; profil platí do 2026-09-22 18:16 CEST. Výběr týmu je pouze v ignorovaném LocalSigning.xcconfig.
-- Úplná přejímka C01a otevřená: nově nalezený problém zobrazení má lokální opravu, aktualizace telefonu provedena, čeká ruční retest; dále metadata vzorků a první odmítnutí systémového dialogu. Mikrofon iPhonu doložen snímkem, doplňující Komentář uživatel přehrál. C01b nezahájeno.
+- Úplná přejímka C01a otevřená: oprava zobrazení je potvrzena na telefonu; zbývají metadata vzorků a první odmítnutí systémového dialogu. Mikrofon iPhonu doložen snímkem, doplňující Komentář uživatel přehrál. C01b nezahájeno.
 
 ### Vzkaz pro pokračování
 
 - Restart a následný schválený úklid dokončeny. Před zahájením instalace bylo na SSD 85,79 GiB volných. Dřívější přesun USA neopakovat.
-- Instalace platformy i nepodepsaný build ověřeny. V otevřeném Caminu přehrát existující vzorek a ověřit běžící čas, modrý průběh, Stop a opakované přehrání. Potom doplnit metadata neutrálních vzorků a první odmítnutí oprávnění; C01b nezahajovat.
+- Instalace platformy i nepodepsaný build ověřeny. Při dostupném odemčeném telefonu doplnit délku a velikost neutrálních vzorků; potom provést první odmítnutí systémové žádosti o mikrofon na samostatné testovací instalaci podle T025. C01b nezahajovat.
 - c+p+n d573e90c dokončeno a ověřeno; dnešní nový zápis ručních zkoušek není součástí tohoto nasazení.
 
 ### Rizika
@@ -30,22 +30,22 @@ Typ: Project
 Priorita: 1
 Stav: rozpracovane
 Pripomenout pri startu: ano
-Datum: 2026-09-15 21:09 CEST
+Datum: 2026-09-15 21:18 CEST
 
 Co se resilo:
-Aktualizace opravené aplikace na iPhone a příprava ručního retestu.
+Uživatelské potvrzení opraveného průběhu přehrávání na iPhonu.
 
 Co je hotove:
-Lokální opravy přehrávání, dosavadních 32 testů jádra a nově 2 UI testy v simulátoru; podepsaný build a strict podpis. Opravená verze je nyní nainstalovaná a spuštěná na iPhonu; její ruční retest čeká.
+Lokální opravy přehrávání, dosavadních 32 testů jádra a nově 2 UI testy v simulátoru; podepsaný build a strict podpis. Opravená verze je na iPhonu a Míla potvrdil běh času/průběhu i nové přehrání od začátku.
 
 Co neni hotove:
-Ruční retest opravy přehrávání, metadata vzorků a první odmítnutí oprávnění; G0/G1 nesplněné.
+Metadata vzorků a první odmítnutí oprávnění; G0/G1 nesplněné.
 
 Dalsi krok:
-V otevřeném Caminu přehrát existující vzorek a ověřit běžící čas, modrý průběh, Stop a opakované přehrání. Potom doplnit metadata neutrálních vzorků a první odmítnutí oprávnění; C01b nezahajovat.
+Při dostupném odemčeném telefonu doplnit délku a velikost neutrálních vzorků; potom provést první odmítnutí systémové žádosti o mikrofon na samostatné testovací instalaci podle T025. C01b nezahajovat.
 
 Navrhovane dalsi kroky:
-V otevřeném Caminu přehrát existující vzorek a ověřit běžící čas, modrý průběh, Stop a opakované přehrání. Potom doplnit metadata neutrálních vzorků a první odmítnutí oprávnění; C01b nezahajovat.
+Při dostupném odemčeném telefonu doplnit délku a velikost neutrálních vzorků; potom provést první odmítnutí systémové žádosti o mikrofon na samostatné testovací instalaci podle T025. C01b nezahajovat.
 
 Zmenene nebo relevantni soubory:
 `camino/`, `memory/projects/camino.md`, katalog, registry a kanonický TVBCP.
@@ -289,3 +289,26 @@ Technický důkaz:
 
 - Zdroj aplikace 259b7476, Camino Audio 0.1.0 (1). Znovu ověřen strict podpis, platný profil a shoda zařízení. Devicectl install i launch: exit 0 / success; inventář potvrzuje přesný bundle aplikace.
 - Soukromé identifikátory, instalační doklady a runtime média zůstávají mimo Git. Zachování a poslech konkrétních vzorků po této aktualizaci čekají na potvrzení uživatele; C01a/G0/G1 stále otevřené.
+
+### 2026-09-15 21:18 CEST — Míla potvrdil opravu přehrávání na iPhonu
+
+Hotovo:
+
+- Míla potvrdil, že nové přehrání podle zadaného postupu po Stop začíná od začátku, a následně potvrdil běžící čas i modrý průběh. Regrese z původního snímku je uživatelsky ověřena jako opravená na telefonu.
+
+Rozhodnutí:
+
+- Zkoušku opraveného průběhu neopakovat bez nového důvodu. Celé C01a zatím neuzavírat kvůli zbývajícím dokladům a prvnímu odmítnutí oprávnění.
+
+Další krok:
+
+- Při dostupném odemčeném telefonu doplnit délku a velikost neutrálních vzorků; potom provést první odmítnutí systémové žádosti o mikrofon na samostatné testovací instalaci podle T025. C01b nezahajovat.
+
+Navrhované další kroky:
+
+- Po dokončení těchto dokladů vyhodnotit přijetí C01a.
+
+Technický důkaz:
+
+- Uživatelské potvrzení v této konverzaci, iPhone 14 Plus / iOS 26.6.1, instalovaný zdroj 259b7476. Není to nové automatické měření ani přejímka systémových přerušení.
+- Pokus o read-only inventář souborových metadat v kontejneru Camino přes devicectl skončil outcome timeout / exit 2. Délky a velikosti nebyly získány; žádný zvukový soubor se nekopíroval. Kód se neměnil, testy se neopakovaly.
