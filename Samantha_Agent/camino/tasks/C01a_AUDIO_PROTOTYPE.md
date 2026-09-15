@@ -1,6 +1,6 @@
 # C01a — malý offline audio prototyp
 
-**Stav: ROZPRACOVÁNO / přehrávání potvrzeno, Camino Test nainstalován/spuštěn, metadata 5 vzorků ověřena; čeká ruční T025, 2026-09-15 21:37 CEST.** Zadání vytvořeno v C00.
+**Stav: ROZPRACOVÁNO / přehrávání potvrzeno, Camino Test nainstalován/spuštěn, metadata 5 vzorků ověřena; první odmítnutí bez nahrávání potvrzeno, čeká návrat po povolení a vědomý Start (T025), 2026-09-15 21:39 CEST.** Zadání vytvořeno v C00.
 Implementace, 32 testů logiky/syntetického audia a nově 2 UI testy v simulátoru hotovy; přímá iOS kompilace
 prošla. Standardní nepodepsaný Xcode build ověřen 15. září v 15:01 CEST;
 nově podepsaný build a strict podpis OK. Instalace na telefon prošla a Míla potvrdil otevření; dílčí fyzické zkoušky uživatelsky prošly, úplná přejímka čeká.

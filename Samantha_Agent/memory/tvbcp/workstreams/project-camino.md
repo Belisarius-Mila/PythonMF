@@ -12,16 +12,16 @@ je první organizační krok; aplikace ani audit prostředí tím nevznikají.
 
 ## Aktuální stav a další krok
 
-- C01a: oprava přehrávání verze 259b7476 potvrzena Mílou na iPhonu 14 Plus: běží čas i modrý průběh a nové přehrání po Stop začíná od začátku. Instalace/spuštění ověřeny; 32 testů jádra a 2 UI testy simulátoru prošly. Metadata 5 vzorků ověřena; zbývá ruční první odmítnutí a následné povolení mikrofonu.
-- Camino Test je samostatně nainstalovaný a spuštěný; oba bundle ověřeny v telefonu. Po restartu Xcode znovu fungují vývojové služby. Načtena metadata 5 vzorků a ověřena shoda velikostí CAF; audio se nekopírovalo. Ruční první odmítnutí mikrofonu čeká na výsledek.
+- C01a: oprava přehrávání verze 259b7476 potvrzena Mílou na iPhonu 14 Plus: běží čas i modrý průběh a nové přehrání po Stop začíná od začátku. Instalace/spuštění ověřeny; 32 testů jádra a 2 UI testy simulátoru prošly. Metadata 5 vzorků ověřena; první odmítnutí bez zahájení záznamu potvrzeno Mílou, zbývá návrat po povolení mikrofonu.
+- Camino Test je samostatně nainstalovaný a spuštěný; oba bundle ověřeny v telefonu. Po restartu Xcode znovu fungují vývojové služby. Načtena metadata 5 vzorků a ověřena shoda velikostí CAF; audio se nekopírovalo. První odmítnutí mikrofonu s vysvětlením a bez nahrávání Míla potvrdil.
 - Míla potvrdil funkční Komentář (čas, signál, uložení a celý poslech), Úvahu bez internetu, zachování a přehrání obou vzorků po úplném ukončení aplikace bez samovolného záznamu a správné hlášení zakázaného mikrofonu s funkčním záznamem po jeho povolení.
 - Xcode 26.3 / iOS SDK 26.2: podepsaný Debug build CaminoAudio pro iPhone prošel (exit 0), `codesign --verify --deep --strict` exit 0. Jedna platná vývojová identita; profil platí do 2026-09-22 18:16 CEST. Výběr týmu je pouze v ignorovaném LocalSigning.xcconfig.
-- Úplná přejímka C01a otevřená: oprava zobrazení je potvrzena na telefonu; metadata vzorků jsou ověřena, zbývá první odmítnutí systémového dialogu a následné povolení. Mikrofon iPhonu doložen snímkem, doplňující Komentář uživatel přehrál. C01b nezahájeno.
+- Úplná přejímka C01a otevřená: oprava zobrazení je potvrzena na telefonu; metadata vzorků jsou ověřena, první odmítnutí systémového dialogu potvrzeno, zbývá následné povolení a vědomý Start. Mikrofon iPhonu doložen snímkem, doplňující Komentář uživatel přehrál. C01b nezahájeno.
 - Restart a následný schválený úklid dokončeny. Před zahájením instalace bylo na SSD 85,79 GiB volných. Dřívější přesun USA neopakovat.
 - Poslední doložené c+p+n: d573e90c, 1684 testů, smoke 5/5. Nový zápis ručních zkoušek vzniká po tomto nasazení.
 
 
-V nainstalovaném Camino Test dokončit ruční první odmítnutí mikrofonu, následné povolení v Nastavení a nový vědomý Start. T025 a přejímka C01a zůstávají otevřené; C01b nezahajovat.
+V Camino Test povolit mikrofon přes Nastavení, vrátit se a ověřit, že nahrávání nezačne samo. Potom vědomým Start pořídit krátký neutrální vzorek, Stop a přehrát. T025 a přejímka C01a zůstávají otevřené; C01b nezahajovat.
 
 ## Rizika
 
@@ -335,3 +335,10 @@ Navrhované další kroky:
 Technický důkaz:
 - Soukromá instalační účtenka latest_permission_check.txt odkazuje na poslední xcode_restart pokus: apps/install/launch/apps_after, 5 metadata copy receipts a file_sizes; git-safe tabulka délek/velikostí je v C01a_AUDIO_PROTOTYPE_REPORT.md.
 - Kód aplikace se neměnil; dřívějších 32 testů jádra a 2 UI testy nebyly opakovány. T025 první odmítnutí/povolení zatím uživatelsky NEOVĚŘENO; G0/G1 neuzavřeny.
+
+### 2026-09-15 21:39 CEST — První odmítnutí mikrofonu uživatelsky potvrzeno
+
+- Hotovo / důkaz: Míla po zadání Start → Nepovolovat v samostatném Camino Test potvrdil hlášení zakázaného mikrofonu a že nahrávání nezačalo. Tato část T025 je uživatelský PASS.
+- Rizika: následné povolení, návrat bez automatického záznamu a nový vědomý Start v této instalaci dosud NEOVĚŘENO; celý T025 ani C01a nejsou uzavřeny.
+- Další krok: V Camino Test povolit mikrofon přes Nastavení, vrátit se a ověřit, že nahrávání nezačne samo. Potom vědomým Start pořídit krátký neutrální vzorek, Stop a přehrát. T025 a přejímka C01a zůstávají otevřené; C01b nezahajovat.
+- Kód se neměnil; dřívější testy jádra/UI se neopakovaly.

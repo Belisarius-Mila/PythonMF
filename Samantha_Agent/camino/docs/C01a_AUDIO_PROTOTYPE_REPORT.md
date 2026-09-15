@@ -1,10 +1,10 @@
 # C01a — audio prototyp: průběžné předání
 
-Aktualizováno: 2026-09-15 21:37 CEST. Specifikace v0.4; U01–U11 beze změny.
+Aktualizováno: 2026-09-15 21:39 CEST. Specifikace v0.4; U01–U11 beze změny.
 
 **C01a: průběh přehrávání a opakování od začátku nyní potvrdil Míla také na iPhonu.** Dosavadní nahrávání a poslech uživatelsky prošly; nehybný ukazatel odhalen snímkem a opraven. Nová verze včetně reakce na přerušení a hlášení chyb poslechu prošla 32 testy, podepsaným buildem a strict podpisem; opravená aplikace je aktualizována a spuštěna na iPhonu, průběh a opakované přehrání uživatelsky ověřeny. Úplná přejímka C01a a G0/G1 zůstávají otevřené.
 
-Camino Test je nainstalovaný a spuštěný po restartu Xcode. Metadata 5 vzorků a velikosti CAF ověřeny; zbývá ruční první odmítnutí mikrofonu a následné povolení (T025).
+Camino Test je nainstalovaný a spuštěný po restartu Xcode. Metadata 5 vzorků a velikosti CAF ověřeny; první odmítnutí mikrofonu bez nahrávání Míla potvrdil. Zbývá následné povolení a vědomý Start (T025).
 
 ## Aktuální oprava přehrávání
 
@@ -333,3 +333,10 @@ Technický důkaz:
 | 5 | Komentář | 4.692 | 454528 | ano |
 
 Délka pochází z dokončovací evidence aplikace, velikost je nezávisle ověřena inventářem telefonu. SHA-256 se nepočítal; zadání připouští velikost. Dřívější poslech je uživatelsky potvrzen pro řízené zkoušky, nikoli samostatně pro každou položku této inventury. Vazba konkrétních položek na dřívější poslech nebyla nově ověřována.
+
+### 2026-09-15 21:39 CEST — První odmítnutí mikrofonu uživatelsky potvrzeno
+
+- Hotovo / důkaz: Míla po zadání Start → Nepovolovat v samostatném Camino Test potvrdil hlášení zakázaného mikrofonu a že nahrávání nezačalo. Tato část T025 je uživatelský PASS.
+- Rizika: následné povolení, návrat bez automatického záznamu a nový vědomý Start v této instalaci dosud NEOVĚŘENO; celý T025 ani C01a nejsou uzavřeny.
+- Další krok: V Camino Test povolit mikrofon přes Nastavení, vrátit se a ověřit, že nahrávání nezačne samo. Potom vědomým Start pořídit krátký neutrální vzorek, Stop a přehrát. T025 a přejímka C01a zůstávají otevřené; C01b nezahajovat.
+- Kód se neměnil; dřívější testy jádra/UI se neopakovaly.
