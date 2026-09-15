@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-15 21:39 CEST
+Aktualizováno: 2026-09-15 21:43 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,13 +11,12 @@ editující iPhone. Web v P0 slouží pro čtení a stav, bez veřejného publik
 
 ## Aktuální stav
 
-- C01a: oprava přehrávání verze 259b7476 potvrzena Mílou na iPhonu 14 Plus: běží čas i modrý průběh a nové přehrání po Stop začíná od začátku. Instalace/spuštění ověřeny; 32 testů jádra a 2 UI testy simulátoru prošly. Metadata 5 vzorků ověřena; první odmítnutí bez zahájení záznamu potvrzeno Mílou, zbývá návrat po povolení mikrofonu.
-- Camino Test je samostatně nainstalovaný a spuštěný; oba bundle ověřeny v telefonu. Po restartu Xcode znovu fungují vývojové služby. Načtena metadata 5 vzorků a ověřena shoda velikostí CAF; audio se nekopírovalo. První odmítnutí mikrofonu s vysvětlením a bez nahrávání Míla potvrdil.
-- Míla potvrdil funkční Komentář (čas, signál, uložení a celý poslech), Úvahu bez internetu, zachování a přehrání obou vzorků po úplném ukončení aplikace bez samovolného záznamu a správné hlášení zakázaného mikrofonu s funkčním záznamem po jeho povolení.
-- Xcode 26.3 / iOS SDK 26.2: podepsaný Debug build CaminoAudio pro iPhone prošel (exit 0), `codesign --verify --deep --strict` exit 0. Jedna platná vývojová identita; profil platí do 2026-09-22 18:16 CEST. Výběr týmu je pouze v ignorovaném LocalSigning.xcconfig.
-- Úplná přejímka C01a otevřená: oprava zobrazení je potvrzena na telefonu; metadata vzorků jsou ověřena, první odmítnutí systémového dialogu potvrzeno, zbývá následné povolení a vědomý Start. Mikrofon iPhonu doložen snímkem, doplňující Komentář uživatel přehrál. C01b nezahájeno.
-- Restart a následný schválený úklid dokončeny. Před zahájením instalace bylo na SSD 85,79 GiB volných. Dřívější přesun USA neopakovat.
-- Poslední doložené c+p+n: d573e90c, 1684 testů, smoke 5/5. Nový zápis ručních zkoušek vzniká po tomto nasazení.
+- C01a přijato v rozsahu malého offline audio prototypu: Start/Stop, skutečný vstup/signál, místní soubor, poslech a zachování dokončených vzorků po ukončení aplikace. T015 pouze prototypová část bez integrace Momentu; T017 a T025 v rozsahu C01a uživatelsky PASS.
+- Opravené přehrávání verze 259b7476 na iPhonu 14 Plus / iOS 26.6.1 uživatelsky ověřeno: běžící čas a průběh, Stop a nové přehrání od začátku. Doloženo 32 testů jádra, 2 UI testy simulátoru, podepsaný build, strict podpis a instalace/spuštění.
+- Samostatný Camino Test: Míla potvrdil první odmítnutí mikrofonu bez nahrávání, následné povolení v Nastavení, návrat bez automatického záznamu a funkční vědomý Start, Stop a poslech. Doklad je svědectví uživatele, nikoli vzdálené pozorování obrazovky.
+- Metadata 5 původních vzorků přečtena, velikosti CAF se shodují s evidencí. Tři delší vzorky mají 30,199–30,613 s. Audio zůstalo v telefonu; bez kopírování hlasu.
+- Xcode 26.3 / SDK 26.2, Personal Team. Profil původní aplikace do 2026-09-22 18:16 CEST, Camino Test do 21:20 CEST téhož dne. Podpisové identity a místní konfigurace zůstávají mimo Git.
+- C01b nezahájeno. G0/G1 ani připravenost na pouť tímto nejsou splněné; zámek, dlouhý běh, hovory, segmentace a obnova během zápisu čekají na další etapy.
 
 
 ## Zdroje a návaznost
@@ -38,14 +37,14 @@ a rodinné výstupy. Externí přepis není důkaz zálohy. Lidskou revizi AI ne
 
 ## Rizika a otevřeno
 
-- Bez funkčního Xcode buildu, podpisu a fyzické přejímky nelze prototyp označit za přijatý; G0/G1 nesplněné.
+- C01a přijato, ale širší brány G0/G1 a terénní připravenost zůstávají nesplněné.
 - Pouze krátké foreground audio; žádná segmentace, záchrana po pádu během zápisu ani pokračování pod zámkem.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
 - Podepsaný build není instalace ani fyzická přejímka; vývojový profil je časově omezený. U01–U11 se neotevírají.
 
 ## Další krok
 
-V Camino Test povolit mikrofon přes Nastavení, vrátit se a ověřit, že nahrávání nezačne samo. Potom vědomým Start pořídit krátký neutrální vzorek, Stop a přehrát. T025 a přejímka C01a zůstávají otevřené; C01b nezahajovat.
+C01a uzavřeno; vyčkat na zadání C01b pro audio pod zámkem, přerušení a vědomé pokračování. C01b automaticky nezahajovat.
 
 Historický doklad založení:
 Ověření založení: 56/56 testů integrace (54 + 2 profilové testy) a rychlá statická brána OK.
@@ -337,3 +336,20 @@ Technický důkaz:
 - Rizika: následné povolení, návrat bez automatického záznamu a nový vědomý Start v této instalaci dosud NEOVĚŘENO; celý T025 ani C01a nejsou uzavřeny.
 - Další krok: V Camino Test povolit mikrofon přes Nastavení, vrátit se a ověřit, že nahrávání nezačne samo. Potom vědomým Start pořídit krátký neutrální vzorek, Stop a přehrát. T025 a přejímka C01a zůstávají otevřené; C01b nezahajovat.
 - Kód se neměnil; dřívější testy jádra/UI se neopakovaly.
+
+### 2026-09-15 21:43 CEST — T025 dokončeno, C01a přijato v prototypovém rozsahu
+
+Hotovo:
+- Míla potvrdil všechny tři zadané kroky v Camino Test: povolení mikrofonu, návrat bez automatického záznamu a vědomý Start krátkého vzorku, Stop a poslech. Spolu s předchozím odmítnutím jde o uživatelský PASS T025 v C01a.
+- Vyhodnocena podmínka přijetí z C01a_AUDIO_PROTOTYPE.md: automatizovaná část A i fyzická část B doloženy, žádný známý otevřený FAIL vedoucí ke ztrátě/přepsání souboru či nevyžádanému mikrofonu. C01a přijato.
+
+Rozhodnutí a rizika:
+- Přijetí platí pro krátký foreground prototyp. T015 je splněno jen bez integrace Momentu; zámek, hovory, dlouhý běh a obnova při pádu během zápisu nejsou otestované funkce této etapy. G0/G1 zůstávají nesplněné.
+- Nahrávky mají jen místní kopii a prototyp není pro ostrá média. Profil původní aplikace vyprší 22. září 18:16 CEST.
+
+Další krok:
+- C01a uzavřeno; vyčkat na zadání C01b pro audio pod zámkem, přerušení a vědomé pokračování. C01b automaticky nezahajovat.
+
+Technický důkaz:
+- Fyzické zkoušky: řízené uživatelské potvrzení z dnešní konverzace; výsledky a hranice důkazů v C01a_AUDIO_PROTOTYPE_REPORT.md.
+- Dosavadních 32 Swift testů a 2 UI testy simulátoru PASS; podepsaný build, strict podpis, instalace/spuštění a metadata mají místní účtenky. Kód se nyní neměnil a testy nebyly bez nového důvodu opakovány.

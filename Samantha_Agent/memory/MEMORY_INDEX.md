@@ -59,7 +59,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] 2026-09-15: opravy přehrávání ověřeny (32 testů jádra, nově 2 UI testy simulátoru, podepsaný build OK). Průběh i opakování potvrzeny Mílou na iPhonu. Camino Test nainstalován a spuštěn po restartu Xcode; metadata 5 vzorků a velikosti CAF ověřeny, audio zůstalo v telefonu. První odmítnutí mikrofonu bez nahrávání Míla potvrdil; zbývá následné povolení bez automatického záznamu a vědomý Start (T025). C01a ještě nepřijato; C01b nezahájeno, profil do 22. 9. 18:16 CEST.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] 2026-09-15: C01a přijato v rozsahu krátkého offline audia. 32 testů jádra, 2 UI testy, signed build/install/run a metadata 5 vzorků doloženy. T015 prototypová část, T017 a T025 v C01a uživatelsky PASS. G0/G1 nesplněné; C01b nezahájeno. Profil původní aplikace do 22. 9. 18:16 CEST. Další krok pouze po zadání C01b.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` - Cockpit 14. 9.: scroll 10ec0877 potvrzený Mílou. [PRIPOMENOUT] U07 až při příštím pokračování. TXT v2.8 shrnuje U01–U06; plná brána 1680/1680 OK, funkční nasazení 980aed7a a smoke 5/5. Publikační překážka odstraněna; finální balíček/head ověřovat živým auditem.
 

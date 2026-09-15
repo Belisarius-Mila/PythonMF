@@ -3,8 +3,7 @@
 Izolovaný nativní prototyp pro krátký Komentář nebo Úvahu. Swift 6, SwiftUI,
 AVFAudio, žádné externí balíčky, server ani AI. Nejde o celé Camino.
 
-**Stav: podepsaný Xcode build a strict kontrola podpisu ověřeny;
-instalace na iPhone prošla a otevření potvrdil Míla. Dílčí fyzické zkoušky uživatelsky prošly. Nová oprava průběhu přehrávání včetně reakce na přerušení a hlášení chyb prošla 32 testy a podepsaným buildem; nově prošly také 2 UI testy na simulátoru. Opravená verze 259b7476 je na iPhonu; Míla potvrdil běžící čas/průběh i nové přehrání od začátku. Metadata 5 vzorků a velikosti CAF jsou ověřené. Samostatný Camino Test je nainstalovaný a spuštěný; první odmítnutí bez nahrávání Míla potvrdil, zbývá návrat po povolení mikrofonu a vědomý Start.** Viz
+**Stav: C01a přijato 2026-09-15 21:43 CEST. Podepsaný build/install/run, 32 testů jádra a 2 UI testy prošly. Míla na iPhonu potvrdil záznam/poslech, zachování dokončených vzorků, průběh přehrávání i první odmítnutí a následné povolení mikrofonu bez samovolného záznamu. Metadata 5 původních vzorků ověřena. C01b nezahájeno; G0/G1 a terénní připravenost zůstávají otevřené.** Viz
 [report C01a](../../docs/C01a_AUDIO_PROTOTYPE_REPORT.md).
 
 ## Otevření a sestavení

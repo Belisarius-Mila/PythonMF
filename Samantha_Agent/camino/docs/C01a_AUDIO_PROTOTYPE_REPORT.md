@@ -1,12 +1,42 @@
-# C01a — audio prototyp: průběžné předání
+# C01a — audio prototyp: přejímka
 
-Aktualizováno: 2026-09-15 21:39 CEST. Specifikace v0.4; U01–U11 beze změny.
+Aktualizováno: 2026-09-15 21:43 CEST. Specifikace v0.4; U01–U11 beze změny.
 
-**C01a: průběh přehrávání a opakování od začátku nyní potvrdil Míla také na iPhonu.** Dosavadní nahrávání a poslech uživatelsky prošly; nehybný ukazatel odhalen snímkem a opraven. Nová verze včetně reakce na přerušení a hlášení chyb poslechu prošla 32 testy, podepsaným buildem a strict podpisem; opravená aplikace je aktualizována a spuštěna na iPhonu, průběh a opakované přehrání uživatelsky ověřeny. Úplná přejímka C01a a G0/G1 zůstávají otevřené.
+**C01a PŘIJATO v rozsahu krátkého offline audio prototypu.** Míla potvrdil poslední
+kroky T025: povolení mikrofonu, návrat bez automatického nahrávání a vědomý Start,
+Stop a poslech. G0/G1 a připravenost na pouť zůstávají nesplněné; C01b nezahájeno.
 
-Camino Test je nainstalovaný a spuštěný po restartu Xcode. Metadata 5 vzorků a velikosti CAF ověřeny; první odmítnutí mikrofonu bez nahrávání Míla potvrdil. Zbývá následné povolení a vědomý Start (T025).
+## Souhrn přejímky
 
-## Aktuální oprava přehrávání
+Zařízení: iPhone 14 Plus / iOS 26.6.1, klient 0.1.0 (1), Xcode 26.3 / SDK 26.2.
+Hlavní aplikace se zdroji 259b7476; oddělený Camino Test sestaven z 0fbfd0b3
+(mezilehlé změny byly dokumentační). Server ani veřejný endpoint nejsou součástí C01a.
+
+| Kontrola | Výsledek a důkaz z 15. září 2026 |
+|---|---|
+| A — logika / syntetické audio | PASS, 32 Swift XCTest; důkazy v chronologii. |
+| UI simulátoru | PASS, 2 testy skutečného průběhu, Stop/opakování a zachování vzorku po relaunch. Nenahrazuje mikrofon telefonu. |
+| Build / podpis / instalace / spuštění | PASS, podepsané buildy a strict podpis, instalační a launch receipts; oba bundle inventarizovány. |
+| T015 — pouze prototypová část | Uživatelský PASS: krátký Komentář i Úvaha, Stop a celý poslech, správný typ a čas. Offline postup potvrzen uživatelem; snímek Komentáře dokládá Letadlo, nikoli samostatně vypnutou Wi-Fi. Integrace Momentu je až C04. |
+| T017 — rozsah C01a | Uživatelský PASS: reakce signálu a slyšitelný hlas; označení Mikrofon iPhonu doloženo snímkem. |
+| T025 — rozsah C01a | Uživatelský PASS v samostatném Camino Test: první odmítnutí → jasné hlášení bez záznamu; povolení v Nastavení → návrat bez automatického záznamu; vědomý Start → Stop → poslech fungují. |
+| Ukončení/relaunch po Stop | Uživatelský PASS: oba dokončené vzorky zachované a přehratelné, mikrofon se sám nespustil. Nejde o pád během zápisu. |
+| Oprava přehrávání | Uživatelský PASS na aktualizovaném telefonu: čas i modrý průběh běží, nové přehrání po Stop od začátku. |
+| Metadata | 5 dokončených vzorků; velikosti CAF nezávisle souhlasí s completed.json. Tabulka níže. Audio se nekopírovalo, hash nebyl počítán; zadání připouští velikost. |
+
+Poslech a chování telefonu jsou svědectví uživatele z řízených kroků, ne vzdáleně
+pozorovaný automatický test. Inventura metadat sama nepotvrzuje poslech každé položky.
+Žádný známý otevřený FAIL ztráty/přepsání souboru nebo nevyžádaného mikrofonu.
+
+Omezení: pouze krátký foreground záznam a místní kopie. Zámek, 30minutový běh,
+hovory a vědomé pokračování jsou C01b; segmenty a obnova během zápisu C01c.
+Prototyp není určen pro ostrá média. Profil hlavní aplikace platí do 22. září
+18:16 CEST, Camino Test do 21:20 CEST téhož dne. Níže zůstávají historické
+stavy a výsledky; aktuální závěr určuje tento souhrn.
+
+Další krok: C01a uzavřeno; vyčkat na zadání C01b pro audio pod zámkem, přerušení a vědomé pokračování. C01b automaticky nezahajovat.
+
+## Historie opravy přehrávání
 
 ### 2026-09-15 19:25 CEST — Oprava zobrazení průběhu přehrávání
 
@@ -121,7 +151,7 @@ Složka je vyloučena ze systémové zálohy; v této etapě existuje jen místn
 Žádné síťové API, iCloud kontejnery, File Sharing, AI, GPS, galerie ani export.
 Žádná aplikace zatím na telefonu neběžela, mikrofon nebyl agentem zapnut.
 
-## Ověření
+## Historické ověření před přejímkou
 
 | Kontrola | Skutečný výsledek |
 |---|---|
@@ -156,7 +186,7 @@ zařízení nejsou součástí commitu. Původní podklady v0.4 zůstaly neměnn
   Uloženo; soubor zůstává zachovaný. C01c teprve doplní záchranu při pádu.
 - Dílčí fyzické zkoušky uživatelsky prošly; úplná přejímka a doklady ještě nejsou uzavřené. Není určeno pro ostrá média.
 
-## Jediný následující krok
+## Historický následující krok před retestem
 
 Při zastaveném záznamu i přehrávání aktualizovat aplikaci v připojeném iPhonu a ručně ověřit běžící čas/průběh, Stop a opakované přehrání existujícího vzorku. Potom doplnit zbývající doklady C01a a první odmítnutí oprávnění; C01b nezahajovat.
 
@@ -340,3 +370,20 @@ Délka pochází z dokončovací evidence aplikace, velikost je nezávisle ově�
 - Rizika: následné povolení, návrat bez automatického záznamu a nový vědomý Start v této instalaci dosud NEOVĚŘENO; celý T025 ani C01a nejsou uzavřeny.
 - Další krok: V Camino Test povolit mikrofon přes Nastavení, vrátit se a ověřit, že nahrávání nezačne samo. Potom vědomým Start pořídit krátký neutrální vzorek, Stop a přehrát. T025 a přejímka C01a zůstávají otevřené; C01b nezahajovat.
 - Kód se neměnil; dřívější testy jádra/UI se neopakovaly.
+
+### 2026-09-15 21:43 CEST — T025 dokončeno, C01a přijato v prototypovém rozsahu
+
+Hotovo:
+- Míla potvrdil všechny tři zadané kroky v Camino Test: povolení mikrofonu, návrat bez automatického záznamu a vědomý Start krátkého vzorku, Stop a poslech. Spolu s předchozím odmítnutím jde o uživatelský PASS T025 v C01a.
+- Vyhodnocena podmínka přijetí z C01a_AUDIO_PROTOTYPE.md: automatizovaná část A i fyzická část B doloženy, žádný známý otevřený FAIL vedoucí ke ztrátě/přepsání souboru či nevyžádanému mikrofonu. C01a přijato.
+
+Rozhodnutí a rizika:
+- Přijetí platí pro krátký foreground prototyp. T015 je splněno jen bez integrace Momentu; zámek, hovory, dlouhý běh a obnova při pádu během zápisu nejsou otestované funkce této etapy. G0/G1 zůstávají nesplněné.
+- Nahrávky mají jen místní kopii a prototyp není pro ostrá média. Profil původní aplikace vyprší 22. září 18:16 CEST.
+
+Další krok:
+- C01a uzavřeno; vyčkat na zadání C01b pro audio pod zámkem, přerušení a vědomé pokračování. C01b automaticky nezahajovat.
+
+Technický důkaz:
+- Fyzické zkoušky: řízené uživatelské potvrzení z dnešní konverzace; výsledky a hranice důkazů v C01a_AUDIO_PROTOTYPE_REPORT.md.
+- Dosavadních 32 Swift testů a 2 UI testy simulátoru PASS; podepsaný build, strict podpis, instalace/spuštění a metadata mají místní účtenky. Kód se nyní neměnil a testy nebyly bez nového důvodu opakovány.

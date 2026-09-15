@@ -3,7 +3,7 @@
 Soukromý cestovní deník: offline záznam na iPhonu, soukromé zpracování na Macu
 a pozdější film z povolených zdrojů.
 
-**Stav: C01a rozpracované; 25 testů a přímá iOS kompilace prošly. Xcode build a fyzická přejímka blokované.**
+**Stav: C01a přijato — krátké offline audio ověřeno na iPhonu, 32 testů jádra a 2 UI testy prošly. C01b nezahájeno; G0/G1 a terénní připravenost zůstávají otevřené.**
 
 - [Podklady v0.4](CAMINO_podklady_v0.4/README_v0.4.md)
 - [Funkční specifikace](CAMINO_podklady_v0.4/CAMINO_funkcni_specifikace_v0.4.md)
@@ -21,8 +21,7 @@ V Human–Adam se projekt jmenuje **Camino** (`project-camino`).
 - [Prototyp C01a](prototypes/audio/README.md)
 - [Aktuální report a překážky](docs/C01a_AUDIO_PROTOTYPE_REPORT.md)
 
-V Xcode → Settings → Components ověřit a zpřístupnit Platform Support iOS 26.2, potom zopakovat build připraveného CaminoAudio projektu.
-Podpis, instalace a fyzické testy telefonu NEPROVEDENO.
+C01a uzavřeno; vyčkat na zadání C01b pro audio pod zámkem, přerušení a vědomé pokračování. C01b automaticky nezahajovat.
 
 Rozbalené podklady v0.4 jsou verzované včetně manifestu. Původní ZIP je
 zachovaný lokálně a ignorovaný Gitem; profilové workspaces přebírají dokumenty.

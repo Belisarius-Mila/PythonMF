@@ -1,20 +1,16 @@
 # C01a — malý offline audio prototyp
 
-**Stav: ROZPRACOVÁNO / přehrávání potvrzeno, Camino Test nainstalován/spuštěn, metadata 5 vzorků ověřena; první odmítnutí bez nahrávání potvrzeno, čeká návrat po povolení a vědomý Start (T025), 2026-09-15 21:39 CEST.** Zadání vytvořeno v C00.
-Implementace, 32 testů logiky/syntetického audia a nově 2 UI testy v simulátoru hotovy; přímá iOS kompilace
-prošla. Standardní nepodepsaný Xcode build ověřen 15. září v 15:01 CEST;
-nově podepsaný build a strict podpis OK. Instalace na telefon prošla a Míla potvrdil otevření; dílčí fyzické zkoušky uživatelsky prošly, úplná přejímka čeká.
-[Aktuální report](../docs/C01a_AUDIO_PROTOTYPE_REPORT.md) má přednost před
-historickými vstupními předpoklady C00 níže.
-Aktualizace předpokladů: Xcode 26.3 je nainstalovaný, první nastavení dokončené
-a iPhone SDK 26.2 ověřené; viz [instalační doklad](../docs/XCODE_INSTALLATION.md).
-Párování, Developer Mode a DDI byly 15. září přímo ověřeny. Podpis i instalace již ověřeny; otevření potvrdil Míla.
-Výsledky dílčích fyzických testů a zbývající mezery jsou v aktuálním reportu. Míla zadal pokračování vývoje;
-C01b, nákup členství a placené zpracování zadány nejsou.
+**Stav: PŘIJATO v prototypovém rozsahu, 2026-09-15 21:43 CEST.**
+Automatizovaná část A: 32 testů jádra, 2 UI testy simulátoru, podepsaný build a strict podpis PASS.
+Fyzická část B: iPhone 14 Plus / iOS 26.6.1, instalace/spuštění a uživatelsky potvrzené
+krátké nahrávání/poslech, zachování dokončených vzorků, skutečný vstup a T025.
+Metadata 5 původních vzorků a skutečné velikosti CAF ověřeny bez kopírování audia.
+T015 splněno pouze v prototypovém rozsahu bez integrace Momentu; G0/G1 tím nejsou uzavřeny.
+[Aktuální report](../docs/C01a_AUDIO_PROTOTYPE_REPORT.md) obsahuje přesné důkazy a omezení.
+Zadání a historické vstupní předpoklady C00 níže jsou zachovány; popis původní
+nedostupnosti buildu či zařízení není aktuální stav.
 
-Cílové zařízení následně potvrzené Mílou: **iPhone 14 Plus, iOS 26.6.1**.
-Nejde o provedenou fyzickou zkoušku; technický build iOS, párování, podpis,
-instalace a audio zůstávají NEOVĚŘENO. Model a verzi znovu nezjišťovat dotazníkem.
+C01a uzavřeno; vyčkat na zadání C01b pro audio pod zámkem, přerušení a vědomé pokračování. C01b automaticky nezahajovat.
 
 ## Cíl
 
