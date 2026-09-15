@@ -59,7 +59,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] 2026-09-15 15:01: podpora iOS nainstalována, standardní nepodepsaný Xcode build prošel. C01a BLOCKED na podpisu (0 identit, tým nenastaven) a fyzické přejímce; další krok nastavení podpisu v Xcode.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] 2026-09-15: podepsaný Xcode build a strict podpis OK; profil do 22. 9. 18:16 CEST. C01a BLOCKED: připojit iPhone, instalovat a provést fyzickou přejímku. Tým pouze v místním ignorovaném nastavení.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` - Cockpit 14. 9.: scroll 10ec0877 potvrzený Mílou. [PRIPOMENOUT] U07 až při příštím pokračování. TXT v2.8 shrnuje U01–U06; plná brána 1680/1680 OK, funkční nasazení 980aed7a a smoke 5/5. Publikační překážka odstraněna; finální balíček/head ověřovat živým auditem.
 

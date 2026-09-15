@@ -1,17 +1,17 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-Aktualizováno: 2026-09-15 15:02 CEST
+Aktualizováno: 2026-09-15 18:31 CEST
 
 - C01a rozpracováno: izolovaný audio prototyp, 25 testů logiky a syntetického CAF audia OK; přímá kompilace/linkování pro arm64 iOS 17 / SDK 26.2 prošly.
-- iPhone 14 Plus / iOS 26.6.1 build 23G83 přímo ověřen: paired, wired, tunnel connected, Developer Mode enabled, DDI available.
-- Xcode 26.3: podpora iOS 26.2 a runtime iOS 26.3.1 nainstalovány. Dne 2026-09-15 v 15:01 CEST standardní nepodepsaný Xcode build CaminoAudio pro generic/platform=iOS prošel (exit 0); vznikl arm64 .app. Aktuálně 0 platných podpisových identit, DEVELOPMENT_TEAM nenastaven.
+- iPhone 14 Plus při aktuální kontrole odpojený; dřívější párování a Developer Mode ověřeny, živé spojení je nutné obnovit.
+- Xcode 26.3 / iOS SDK 26.2: podepsaný Debug build CaminoAudio pro iPhone prošel (exit 0), `codesign --verify --deep --strict` exit 0. Jedna platná vývojová identita; profil platí do 2026-09-22 18:16 CEST. Výběr týmu je pouze v ignorovaném LocalSigning.xcconfig.
 - Celý C01a BLOCKED: instalace, ruční UI/poslech a fyzické T015/T017/T025 NEPROVEDENO. C01b nezahájeno.
 
 ### Vzkaz pro pokračování
 
 - Restart a následný schválený úklid dokončeny. Před zahájením instalace bylo na SSD 85,79 GiB volných. Dřívější přesun USA neopakovat.
-- Instalace platformy i nepodepsaný build ověřeny. Nastavit v Xcode Apple Account a vývojový tým pro podpis, potom podepsat a nainstalovat CaminoAudio na iPhone a provést fyzickou přejímku T015/T017/T025.
+- Instalace platformy i nepodepsaný build ověřeny. Připojit a odemknout iPhone, ověřit dostupnost zařízení a nainstalovat podepsaný CaminoAudio.app. Potom provést fyzickou přejímku T015/T017/T025; nahrávání zahajuje uživatel vědomým Start.
 - Předchozí push a nasazení se týkaly `e4e667b5`; tento zápis je místní.
 
 ### Rizika
@@ -19,7 +19,7 @@ Aktualizováno: 2026-09-15 15:02 CEST
 - Bez funkčního Xcode buildu, podpisu a fyzické přejímky nelze prototyp označit za přijatý; G0/G1 nesplněné.
 - Pouze krátké foreground audio; žádná segmentace, záchrana po pádu během zápisu ani pokračování pod zámkem.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
-- Nepodepsaný build není instalace ani fyzická přejímka; signing zatím chybí. U01–U11 se neotevírají.
+- Podepsaný build není instalace ani fyzická přejímka; vývojový profil je časově omezený. U01–U11 se neotevírají.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: Camino
@@ -30,22 +30,22 @@ Typ: Project
 Priorita: 1
 Stav: rozpracovane
 Pripomenout pri startu: ano
-Datum: 2026-09-15 15:02 CEST
+Datum: 2026-09-15 18:31 CEST
 
 Co se resilo:
-Ověření instalace podpory iOS a první úspěšný standardní Xcode build C01a.
+Ověření vývojového podpisu a podepsané aplikace C01a; instalace čeká na připojení telefonu.
 
 Co je hotove:
-Kód C01a a dřívějších 25 automatických testů; nově standardní nepodepsaný arm64 Xcode build OK. Párování, Developer Mode a DDI ověřeny při předchozí kontrole.
+Kód C01a a dřívějších 25 automatických testů; nově podepsaný arm64 Xcode build a strict ověření podpisu OK. Párování, Developer Mode a DDI ověřeny při předchozí kontrole.
 
 Co neni hotove:
-Signing, instalace aplikace na iPhone a hardwarová přejímka. C01a BLOCKED, G0/G1 nesplněné.
+Instalace aplikace na iPhone a hardwarová přejímka. C01a BLOCKED, G0/G1 nesplněné.
 
 Dalsi krok:
-Nastavit v Xcode Apple Account a vývojový tým pro podpis, potom podepsat a nainstalovat CaminoAudio na iPhone a provést fyzickou přejímku T015/T017/T025.
+Připojit a odemknout iPhone, ověřit dostupnost zařízení a nainstalovat podepsaný CaminoAudio.app. Potom provést fyzickou přejímku T015/T017/T025; nahrávání zahajuje uživatel vědomým Start.
 
 Navrhovane dalsi kroky:
-Nastavit v Xcode Apple Account a vývojový tým pro podpis, potom podepsat a nainstalovat CaminoAudio na iPhone a provést fyzickou přejímku T015/T017/T025.
+Připojit a odemknout iPhone, ověřit dostupnost zařízení a nainstalovat podepsaný CaminoAudio.app. Potom provést fyzickou přejímku T015/T017/T025; nahrávání zahajuje uživatel vědomým Start.
 
 Zmenene nebo relevantni soubory:
 `camino/`, `memory/projects/camino.md`, katalog, registry a kanonický TVBCP.
@@ -149,3 +149,12 @@ Technický důkaz:
 - Volné místo po instalaci přibližně 69,3 GiB. Platných podpisových identit aktuálně 0; DEVELOPMENT_TEAM v projektu nenastaven. Přihlášení k Apple Account zatím neověřeno.
 - Instalace aplikace na telefon, spuštění a fyzické T015/T017/T025 NEPROVEDENO. C01a zůstává BLOCKED na podpisu a fyzické přejímce; C01b nezahájeno.
 - Další krok: Nastavit v Xcode Apple Account a vývojový tým pro podpis, potom podepsat a nainstalovat CaminoAudio na iPhone a provést fyzickou přejímku T015/T017/T025.
+
+### 2026-09-15 18:31 CEST — Podpis ověřen, instalace čeká na telefon
+
+- Míla nastavil tým v Xcode. Aktuálně jedna platná podpisová identita; automatický vývojový podpis a profil ověřeny. Účty, certifikáty a identifikátory týmu nejsou v Gitu.
+- Podepsaný `xcodebuild` Debug / generic/platform=iOS: exit 0. `codesign --verify --deep --strict` nad CaminoAudio.app: exit 0. Vývojový profil platí do 2026-09-22 18:16 CEST, obsahuje jedno zařízení.
+- První build v projektovém data/private skončil na FinderInfo u .app. Nový DerivedData adresář v /private/tmp problém odstranil bez změny zdrojů či odstraňování atributů originálů. [Apple QA1940](https://developer.apple.com/library/archive/qa/qa1940/_index.html).
+- Volba týmu z Xcode přesunuta do existujícího mechanismu LocalSigning.xcconfig; význam verzovaných nastavení projektu je shodný s původním HEAD, zachováno jen formátování Xcode.
+- Poslední devicectl inventura: iPhone 14 Plus odpojený; Developer Mode enabled je evidovaný stav, nikoli důkaz aktuálního spojení. Instalace, spuštění a fyzický poslech NEPROVEDENO; C01a zůstává BLOCKED.
+- Další krok: Připojit a odemknout iPhone, ověřit dostupnost zařízení a nainstalovat podepsaný CaminoAudio.app. Potom provést fyzickou přejímku T015/T017/T025; nahrávání zahajuje uživatel vědomým Start.

@@ -3,15 +3,14 @@
 Izolovaný nativní prototyp pro krátký Komentář nebo Úvahu. Swift 6, SwiftUI,
 AVFAudio, žádné externí balíčky, server ani AI. Nejde o celé Camino.
 
-**Stav: logika a přímá kompilace pro iOS ověřeny; Xcode build, signing,
-instalace a fyzická přejímka dosud BLOKOVANÉ.** Viz
+**Stav: podepsaný Xcode build a strict kontrola podpisu ověřeny;
+instalace a fyzická přejímka čekají na připojení telefonu.** Viz
 [report C01a](../../docs/C01a_AUDIO_PROTOTYPE_REPORT.md).
 
 ## Otevření a sestavení
 
 Otevři `CaminoAudio.xcodeproj`, schéma `CaminoAudio`. Cíl je iPhone, minimální
-iOS 17; testovací zařízení je iPhone 14 Plus / iOS 26.6.1. Nejprve dokončit
-podporu platformy iOS v Xcode → Settings → Components.
+iOS 17; testovací zařízení je iPhone 14 Plus / iOS 26.6.1. Podpora platformy iOS je nainstalovaná.
 
 Podepisování používá Automatic Signing. Tým případně nastav jen v lokálním,
 ignorovaném `LocalSigning.xcconfig` pomocí `DEVELOPMENT_TEAM`; žádné identity
@@ -27,7 +26,10 @@ xcodebuild -project CaminoAudio.xcodeproj -scheme CaminoAudio \
   -derivedDataPath /private/tmp/camino-audio-derived CODE_SIGNING_ALLOWED=NO build
 ```
 
-Druhý příkaz není instalace a bez platform support zatím selhává. Testy na
+Druhý příkaz ověřuje nepodepsaný build, nikoli instalaci. Pro podepsaný build
+vynech CODE_SIGNING_ALLOWED=NO a použij místní tým. DerivedData drž mimo
+synchronizovanou Plochu (například nový adresář v /private/tmp); při ověření
+podpisu build na Ploše blokoval atribut FinderInfo. Testy na
 Macu používají syntetické CAF soubory v nových dočasných složkách, ne mikrofon.
 
 ## Chování a soubory
