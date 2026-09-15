@@ -1,6 +1,6 @@
 # C01a — audio prototyp: průběžné předání
 
-Aktualizováno: 2026-09-15 21:18 CEST. Specifikace v0.4; U01–U11 beze změny.
+Aktualizováno: 2026-09-15 21:25 CEST. Specifikace v0.4; U01–U11 beze změny.
 
 **C01a: průběh přehrávání a opakování od začátku nyní potvrdil Míla také na iPhonu.** Dosavadní nahrávání a poslech uživatelsky prošly; nehybný ukazatel odhalen snímkem a opraven. Nová verze včetně reakce na přerušení a hlášení chyb poslechu prošla 32 testy, podepsaným buildem a strict podpisem; opravená aplikace je aktualizována a spuštěna na iPhonu, průběh a opakované přehrání uživatelsky ověřeny. Úplná přejímka C01a a G0/G1 zůstávají otevřené.
 
@@ -275,3 +275,27 @@ Technický důkaz:
 
 - Uživatelské potvrzení v této konverzaci, iPhone 14 Plus / iOS 26.6.1, instalovaný zdroj 259b7476. Není to nové automatické měření ani přejímka systémových přerušení.
 - Pokus o read-only inventář souborových metadat v kontejneru Camino přes devicectl skončil outcome timeout / exit 2. Délky a velikosti nebyly získány; žádný zvukový soubor se nekopíroval. Kód se neměnil, testy se neopakovaly.
+
+### 2026-09-15 21:25 CEST — Připraven oddělený test mikrofonu, čeká obnovení spojení
+
+Hotovo:
+
+- Sestaven a podepsán Camino Test se samostatným bundle cz.pythonmf.camino.audio.permissioncheck; původní Camino ani jeho úložiště se neměnily. Testovací instalace zatím nezačala.
+
+Rozhodnutí:
+
+- Míla zadal pokračování přejímky a potvrdil připravený telefon. T025 používá novou samostatnou instalaci, aby nebylo nutné odinstalovat původní aplikaci s nahrávkami.
+
+Další krok:
+
+- Po odpojení a opětovném připojení kabelu ověřit živé vývojové spojení s odemčeným iPhonem. Potom dokončit čtení metadat a instalaci připraveného Camino Test pro první odmítnutí mikrofonu; C01b nezahajovat.
+
+Navrhované další kroky:
+
+- V Camino Test ručně odmítnout první systémovou žádost, později povolit mikrofon a ověřit nový vědomý Start. Do té doby T025 neoznačovat za PASS.
+
+Technický důkaz:
+
+- Samostatný Debug build ze zdroje 0fbfd0b3: xcodebuild exit 0, strict codesign exit 0; bundle a jméno ověřeny z Info.plist. Profil do 2026-09-22 21:20 CEST; účty, podpisové identity a balíček zůstávají mimo Git.
+- Telefon v inventáři connected, ale živé details/apps skončily timeoutem. Opakovaný nerekurzivní inventář metadat: com.apple.mobiledevice / -402653181, Failed to allocate RSD device. Bez výpisu médií, bez kopírování audia, bez instalace či spuštění nové aplikace.
+- Míla dostal požadavek na odpojení/připojení kabelu a ponechání telefonu odemčeného. Odpověď dosud čeká. Kód se neměnil, testy jádra/UI se neopakovaly; oprava přehrávání zůstává uživatelsky potvrzená.
