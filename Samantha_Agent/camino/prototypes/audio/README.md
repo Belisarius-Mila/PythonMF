@@ -4,7 +4,7 @@ Izolovaný nativní prototyp pro krátký Komentář nebo Úvahu. Swift 6, Swift
 AVFAudio, žádné externí balíčky, server ani AI. Nejde o celé Camino.
 
 **Stav: podepsaný Xcode build a strict kontrola podpisu ověřeny;
-instalace na iPhone prošla a otevření potvrdil Míla. Fyzická audio přejímka není hotová.** Viz
+instalace na iPhone prošla a otevření potvrdil Míla. Dílčí fyzické zkoušky uživatelsky prošly; úplná přejímka ještě není uzavřena.** Viz
 [report C01a](../../docs/C01a_AUDIO_PROTOTYPE_REPORT.md).
 
 ## Otevření a sestavení

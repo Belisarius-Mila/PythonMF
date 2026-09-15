@@ -1,13 +1,24 @@
 # C01a — audio prototyp: průběžné předání
 
-Aktualizováno: 2026-09-15 18:39 CEST. Specifikace v0.4; U01–U11 beze změny.
+Aktualizováno: 2026-09-15 19:15 CEST. Specifikace v0.4; U01–U11 beze změny.
 
-**Celý C01a: BLOCKED.** Automatizovaná část A prošla, nativní zdroje byly
-přímo zkompilované a slinkované pro arm64/iOS. Standardní nepodepsaný Xcode build aplikace prošel 15. září v 15:01 CEST.
-Nově prošel také podepsaný build a strict ověření podpisu. Instalace na iPhone prošla a Míla potvrdil otevření aplikace; podrobná vizuální kontrola a fyzický poslech jsou NEPROVEDENO.
-Nejde o přijatý audio prototyp ani splnění G0/G1.
+**C01a: částečně fyzicky ověřeno, úplná přejímka otevřená.** Automatizovaná část A, podepsaný build, strict podpis a instalace prošly. Míla potvrdil otevření a níže uvedené praktické zkoušky; ne všechny podmínky T015/T017/T025 jsou pokryté. G0/G1 neuzavřeny.
 
-## Aktuální potvrzení otevření
+## Aktuální ruční zkoušky
+
+### 2026-09-15 19:15 CEST — Uživatelské zkoušky krátkého audia
+
+- Zařízení: iPhone 14 Plus / iOS 26.6.1; Camino Audio 0.1.0 (1), instalovaný podepsaný Debug build z 15. září. Níže je svědectví Míly z řízených kroků v konverzaci, nikoli měření na dálku.
+- Komentář: podle potvrzení běžel čas, reagoval ukazatel signálu, Stop dokončil uložení a celý záznam byl slyšet včetně začátku a konce. Zadáno asi 30 s; skutečná délka a stav sítě nebyly změřeny.
+- Úvaha: Míla potvrdil všechny kroky zkoušky v režimu Letadlo s vypnutou Wi-Fi, včetně uložení a poslechu. Zadáno asi 30 s; skutečná délka nebyla změřena.
+- Opětovné otevření po ukončení přes přepínač aplikací: oba dokončené vzorky zachovány a přehratelné, mikrofon se sám nespustil — uživatelský PASS. Není to zkouška pádu během zápisu.
+- Odebrání oprávnění v Nastavení: aplikace oznámila zakázaný mikrofon; po povolení vše fungovalo — uživatelský PASS tohoto scénáře. První odmítnutí systémového dialogu tím není ověřeno; samovolný Start po změně oprávnění nebyl v poslední odpovědi zvlášť popsán.
+- T015 částečně ověřeno (oba typy a poslech, offline výslovně jen Úvaha), T017 částečně (signál a hlas, bez potvrzení názvu vstupu), T025 částečně (odebrání/povolení v Nastavení). Neoznačovat celé scénáře za PASS.
+- Přesné délky, velikosti a SHA-256 telefonních vzorků dosud nezjištěny; obsah ani soubory nahrávek se nepřenášely. Žádný hlášený funkční FAIL, ale C01a zatím formálně nepřijato; G0/G1 neuzavřeny.
+- Dřívější c+p+n d573e90c dokončeno: 1684 testů, šest commitů pushnuto, canonical deployment receipt deployed a smoke 5/5. Tento nový zápis výsledků vzniká až po tomto nasazení a je určen k místnímu commitu.
+- Další krok: Doplnit krátký Komentář bez internetu a potvrdit název zobrazeného vstupu. Potom doplnit doklady vzorků a přesný scénář prvního odmítnutí oprávnění T025; dosavadní výsledky neopakovat bez důvodu. C01b nezahajovat.
+
+## Historické potvrzení otevření
 
 ### 2026-09-15 18:39 CEST — Míla potvrdil otevření aplikace; zadal c+p+n
 
@@ -111,7 +122,7 @@ Složka je vyloučena ze systémové zálohy; v této etapě existuje jen místn
 | Společná plná brána `scripts/cockpit_quality_gate.py` | **1684/1684 testů OK**, oddělené od 25 Swift testů. |
 | Standardní Xcode build | **PASS**, 15:01 CEST exit 0, nepodepsaný arm64 .app. Původní blokace platformy odstraněna. |
 | Signing / instalace / spuštění | **Signing PASS**, 1 platná identita, strict podpis OK. Instalace PASS; otevření potvrzeno Mílou, audio přejímka čeká. |
-| T015/T017/T025, ruční poslech, UI na telefonu | **NEPROVEDENO**. |
+| T015/T017/T025, ruční poslech, UI na telefonu | **ČÁSTEČNĚ OVĚŘENO** uživatelem; podrobný rozsah a mezery v aktuální sekci. |
 | G0/G1, T079 upgrade a migrace, terén | **NEPROVEDENO / nesplněno**. |
 
 Build logy a syntetické fixture jsou lokálně mimo Git. Soukromé inventury
@@ -129,8 +140,8 @@ zařízení nejsou součástí commitu. Původní podklady v0.4 zůstaly neměnn
   soubor má ochranu Complete. Pokračování pod zámkem je samostatné C01b.
 - Chybějící callback, chybný zápis nebo neúplné dekódování nikdy neznamenají
   Uloženo; soubor zůstává zachovaný. C01c teprve doplní záchranu při pádu.
-- Chybí fyzická vizuální a audio přejímka. Není vhodné používat pro ostrá média.
+- Dílčí fyzické zkoušky uživatelsky prošly; úplná přejímka a doklady ještě nejsou uzavřené. Není určeno pro ostrá média.
 
 ## Jediný následující krok
 
-Po uzavření schváleného c+p+n pokračovat ruční přejímkou C01a na iPhonu: T015/T017/T025, neutrální krátký Komentář a Úvaha, Stop a poslech; nahrávání zahajuje Míla. C01b nezahajovat.
+Doplnit krátký Komentář bez internetu a potvrdit název zobrazeného vstupu. Potom doplnit doklady vzorků a přesný scénář prvního odmítnutí oprávnění T025; dosavadní výsledky neopakovat bez důvodu. C01b nezahajovat.
