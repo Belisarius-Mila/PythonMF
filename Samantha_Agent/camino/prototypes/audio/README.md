@@ -3,7 +3,7 @@
 Izolovaný nativní prototyp pro Komentář nebo Úvahu. Swift 6, SwiftUI,
 AVFAudio, žádné externí balíčky, server ani AI. Nejde o celé Camino.
 
-**Stav: C01b implementováno, verze 0.2.0 (2), podepsaný build a strict podpis PASS. 47 testů jádra a 2 UI testy prošly; verze 0.2.0 nainstalovaná a spuštěná na telefonu, fyzická přejímka C01b čeká. C01a bylo přijaté samostatně.** Viz
+**Stav: C01b implementováno, verze 0.2.0 (2), podepsaný build a strict podpis PASS. 47 testů jádra a 2 UI testy prošly; verze 0.2.0 nainstalovaná a spuštěná na telefonu, krátký funkční test zámku potvrzen Mílou; T016 a další fyzická přejímka čekají. C01a bylo přijaté samostatně.** Viz
 [report C01b](../../docs/C01b_BACKGROUND_AUDIO_REPORT.md).
 
 ## Otevření a sestavení

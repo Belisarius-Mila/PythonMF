@@ -1,7 +1,7 @@
 # C01b — audio pod zámkem, přerušení a pokračování
 
 Zahájeno 2026-09-15 po výslovném pokynu Míly. C01a bylo před zahájením přijaté.
-**Stav: 0.2.0 (2) nainstalováno a spuštěno; krátká zkouška zámku zadána, fyzická přejímka čeká na výsledek.**
+**Stav: 0.2.0 (2) nainstalováno a spuštěno; krátký funkční test zámku PASS podle Míly, další fyzická přejímka čeká.**
 
 ## Co se změnilo
 
@@ -79,8 +79,7 @@ zámku, hovoru, Bluetooth nebo ochrany dat před prvním odemknutím.
 
 ## Další krok
 
-Aktualizace je nainstalovaná a spuštěná. Nejdřív krátká zkouška zámku asi 30 sekund se slyšitelnými značkami před,
-pod zámkem a po něm. Potom samostatně 30minutový T016 a další scénáře podle
+Krátký funkční test zámku Míla potvrdil. Následuje 30minutový T016 a další scénáře podle
 [C01b_BACKGROUND_AUDIO.md](../tasks/C01b_BACKGROUND_AUDIO.md). Bez výsledků
 nelze C01b přijmout; C01c ani G0/G1 nejsou tímto uzavřeny.
 
@@ -109,3 +108,21 @@ Další krok:
 
 Ověření:
 - Kód se neměnil; dřívějších 47 Swift testů, 2 UI testy a plná brána 1684 testů nebyly opakovány. Soukromé instalační účtenky jsou pod latest_c01b.txt / latest_install.txt.
+
+### 2026-09-15 22:15 CEST — Krátký funkční test zámku potvrzen
+
+Hotovo:
+- Míla potvrdil nahrávání během zámku, pokračování po odemčení a přehrání záznamu v hlavním Camino Audio 0.2.0 (2). Krátké funkční ověření zámku: PASS podle uživatele.
+
+Rozhodnutí:
+- Žádné nové rozhodnutí. C01b/G0/G1 zůstávají otevřené; C01c nezahájeno.
+
+Další krok:
+- Provést T016: 30 minut záznamu převážně pod zámkem, průběžné neosobní zvukové značky, Stop a celý poslech; doplnit délku/velikost z metadat. Potom T018–T021/T024/T059; C01c nezahajovat.
+
+Navrhované další kroky:
+- Po T016 ověřit dostupná sluchátka a přerušení hovorem/změnou vstupu; poté zbývající scénáře C01b.
+
+Technický důkaz:
+- Uživatelské potvrzení z fyzického telefonu po instalaci 0.2.0. Přesná délka, velikost, úplnost poslechu a offline režim nejsou touto odpovědí samostatně doloženy; metadata nového vzorku ani aktuální verze iOS nebyly v tomto kroku čteny. Audio zůstalo na telefonu.
+- Kód beze změn; automatické testy se neopakovaly. Krátká zkouška neuzavírá 30minutový T016, hovor, sluchátka ani ochranu po restartu.

@@ -59,7 +59,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] 2026-09-15: C01a přijato. C01b zahájeno a implementováno ve verzi 0.2.0 (2): audio pod zámkem, přerušení a vědomé pokračování. 47 testů jádra, 2 UI testy a podepsaný build PASS. Instalace/spuštění 0.2.0 PASS; 15 původních souborů se shoduje v cestách a velikostech. Čeká výsledek krátké zkoušky zámku, fyzické T016/T018–T021/T024/T059 NEPROVEDENO. G0/G1 nesplněné, C01c nezahájeno. Profil do 22. 9. 18:16 CEST.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] 2026-09-15: C01a přijato. C01b zahájeno a implementováno ve verzi 0.2.0 (2): audio pod zámkem, přerušení a vědomé pokračování. 47 testů jádra, 2 UI testy a podepsaný build PASS. Instalace/spuštění 0.2.0 PASS; 15 původních souborů se shoduje v cestách a velikostech. Krátký funkční test zámku PASS podle Míly; přesná délka/velikost a offline režim vzorku nepotvrzeny. Fyzické T016/T018–T021/T024/T059 NEPROVEDENO. G0/G1 nesplněné, C01c nezahájeno. Profil do 22. 9. 18:16 CEST.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` - Cockpit 14. 9.: scroll 10ec0877 potvrzený Mílou. [PRIPOMENOUT] U07 až při příštím pokračování. TXT v2.8 shrnuje U01–U06; plná brána 1680/1680 OK, funkční nasazení 980aed7a a smoke 5/5. Publikační překážka odstraněna; finální balíček/head ověřovat živým auditem.
 

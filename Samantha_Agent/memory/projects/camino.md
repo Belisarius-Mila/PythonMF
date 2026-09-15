@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-15 22:03 CEST
+Aktualizováno: 2026-09-15 22:15 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -15,7 +15,7 @@ editující iPhone. Web v P0 slouží pro čtení a stav, bez veřejného publik
 - Běžící recorder přežije změnu scenePhase; nový Start/Pokračovat pouze v popředí. Přerušení ihned pozastaví vstup, ověří dostupnou část a nabídne Pokračovat/Ukončit. Pokračování vytváří novou část stejné session s evidovanou pauzou, bez přepisu předchozího média.
 - Nové soubory mají completeUntilFirstUserAuthentication; původní C01a soubory se nemigrují ani nemění. Staré JSON podporuje volitelné continuation. Není to C01c segmentový journal ani garance 60s ztráty.
 - Ověřeno 47/47 Swift testů, 2/2 UI testy simulátoru včetně snímku obrazovky, finální podepsaný iOS build a strict podpis; UIBackgroundModes=[audio]. Plná projektová brána PASS, 1684/1684 testů.
-- Instalace/spuštění 0.2.0 PASS. Reálný zámek, 30 minut, hovor, sluchátka a ochrana před prvním odemknutím: NEPROVEDENO. Krátká offline zkouška zámku zadána Mílovi, čeká výsledek.
+- Instalace/spuštění 0.2.0 PASS. Krátký funkční test zámku PASS podle Míly: záznam během zámku, pokračování po odemčení a přehrání. Přesná délka/velikost a offline režim tohoto vzorku samostatně nepotvrzeny. T016 a další fyzické scénáře čekají.
 - Profil hlavní aplikace do 22. září 18:16 CEST. G0/G1 a terénní připravenost nesplněné; C01c nezahájeno. Původní nahrávky i samostatný Camino Test zůstávají zachované.
 
 
@@ -38,13 +38,13 @@ a rodinné výstupy. Externí přepis není důkaz zálohy. Lidskou revizi AI ne
 ## Rizika a otevřeno
 
 - C01a přijato, ale širší brány G0/G1 a terénní připravenost zůstávají nesplněné.
-- Podpora zámku je implementovaná, fyzicky dosud neověřená. Segmentace a záchrana po pádu během zápisu patří do C01c.
+- Krátký funkční test zámku potvrzen Mílou; dlouhý záznam a další fyzické scénáře čekají. Segmentace a záchrana po pádu během zápisu patří do C01c.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
 - Podepsaný build není instalace ani fyzická přejímka; vývojový profil je časově omezený. U01–U11 se neotevírají.
 
 ## Další krok
 
-Dokončit krátkou offline zkoušku zámku v nainstalované verzi 0.2.0 (2): asi 30 s pod zámkem se slyšitelným počítáním, Stop a celý poslech. Potom T016/T018–T021/T024/T059; C01c nezahajovat.
+Provést T016: 30 minut záznamu převážně pod zámkem, průběžné neosobní zvukové značky, Stop a celý poslech; doplnit délku/velikost z metadat. Potom T018–T021/T024/T059; C01c nezahajovat.
 
 Historický doklad založení:
 Ověření založení: 56/56 testů integrace (54 + 2 profilové testy) a rychlá statická brána OK.
@@ -387,3 +387,21 @@ Další krok:
 
 Ověření:
 - Kód se neměnil; dřívějších 47 Swift testů, 2 UI testy a plná brána 1684 testů nebyly opakovány. Soukromé instalační účtenky jsou pod latest_c01b.txt / latest_install.txt.
+
+### 2026-09-15 22:15 CEST — Krátký funkční test zámku potvrzen
+
+Hotovo:
+- Míla potvrdil nahrávání během zámku, pokračování po odemčení a přehrání záznamu v hlavním Camino Audio 0.2.0 (2). Krátké funkční ověření zámku: PASS podle uživatele.
+
+Rozhodnutí:
+- Žádné nové rozhodnutí. C01b/G0/G1 zůstávají otevřené; C01c nezahájeno.
+
+Další krok:
+- Provést T016: 30 minut záznamu převážně pod zámkem, průběžné neosobní zvukové značky, Stop a celý poslech; doplnit délku/velikost z metadat. Potom T018–T021/T024/T059; C01c nezahajovat.
+
+Navrhované další kroky:
+- Po T016 ověřit dostupná sluchátka a přerušení hovorem/změnou vstupu; poté zbývající scénáře C01b.
+
+Technický důkaz:
+- Uživatelské potvrzení z fyzického telefonu po instalaci 0.2.0. Přesná délka, velikost, úplnost poslechu a offline režim nejsou touto odpovědí samostatně doloženy; metadata nového vzorku ani aktuální verze iOS nebyly v tomto kroku čteny. Audio zůstalo na telefonu.
+- Kód beze změn; automatické testy se neopakovaly. Krátká zkouška neuzavírá 30minutový T016, hovor, sluchátka ani ochranu po restartu.

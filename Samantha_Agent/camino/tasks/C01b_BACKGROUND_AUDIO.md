@@ -1,7 +1,7 @@
 # C01b — audio pod zámkem a vědomé pokračování
 
 Zahájeno výslovným pokynem Míly 2026-09-15 po přijetí C01a.
-**Stav: 0.2.0 (2) nainstalováno/spuštěno; krátká zkouška zámku zadána, fyzická přejímka čeká na výsledek.**
+**Stav: 0.2.0 (2) nainstalováno/spuštěno; krátký funkční test zámku PASS podle Míly, další fyzická přejímka čeká.**
 Aktuální výsledky určuje [report C01b](../docs/C01b_BACKGROUND_AUDIO_REPORT.md).
 
 ## Rozsah
@@ -35,9 +35,9 @@ Aktuální výsledky určuje [report C01b](../docs/C01b_BACKGROUND_AUDIO_REPORT.
 
 ## Fyzická přejímka — pouze iPhone, uživatel vědomě nahrává
 
-| Test | Postup a důkaz | Stav při zahájení |
+| Test | Postup a důkaz | Aktuální stav |
 |---|---|---|
-| Krátká kontrola zámku | Offline Start, slyšitelná značka, zamknout asi 30 s, mluvit i pod zámkem, odemknout, značka, Stop, poslech celého vzorku. Délka/velikost z metadat; nejde o T016. | NEPROVEDENO |
+| Krátká kontrola zámku | Offline Start, slyšitelná značka, zamknout asi 30 s, mluvit i pod zámkem, odemknout, značka, Stop, poslech celého vzorku. Délka/velikost z metadat; nejde o T016. | Funkční zámek/pokračování/přehrání PASS podle Míly 2026-09-15, 0.2.0 (2); metadata, úplnost poslechu a offline režim samostatně nepotvrzeny. |
 | T016 | 30 minut převážně pod zámkem, průběžné neosobní zvukové značky; Stop a celý poslech, skutečná délka/velikost. Jediný soubor v C01b není důkaz segmentace C01c. | NEPROVEDENO |
 | T018 | Dostupná sluchátka: skutečný vstup, stání/chůze a zámek; slyšitelný hlas, zapsat limity větru/připojení. Bez dostupných sluchátek neuvádět PASS. | NEPROVEDENO |
 | T019 | Uživatel zajistí příchozí hovor, jednou ignoruje a jednou přijme. Zachovaný zvuk před přerušením, nic z hovoru ani samovolné pokračování; Pokračovat až po ukončení hovoru. Agent nikomu nevolá. | NEPROVEDENO |
