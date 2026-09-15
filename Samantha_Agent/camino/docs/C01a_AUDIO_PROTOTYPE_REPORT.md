@@ -1,13 +1,25 @@
 # C01a — audio prototyp: průběžné předání
 
-Aktualizováno: 2026-09-15 08:19 CEST. Specifikace v0.4; U01–U11 beze změny.
+Aktualizováno: 2026-09-15 15:02 CEST. Specifikace v0.4; U01–U11 beze změny.
 
 **Celý C01a: BLOCKED.** Automatizovaná část A prošla, nativní zdroje byly
-přímo zkompilované a slinkované pro arm64/iOS. Standardní Xcode build aplikace,
-podepisování, instalace, vizuální kontrola a fyzický poslech jsou NEPROVEDENO.
+přímo zkompilované a slinkované pro arm64/iOS. Standardní nepodepsaný Xcode build aplikace prošel 15. září v 15:01 CEST.
+Podepisování, instalace, vizuální kontrola a fyzický poslech jsou NEPROVEDENO.
 Nejde o přijatý audio prototyp ani splnění G0/G1.
 
-## Aktuální zařízení a skutečné překážky
+## Aktuální ověření platformy a buildu
+
+### 2026-09-15 15:01 CEST — Podpora iOS a standardní build ověřeny
+
+- Xcode Components a `simctl list runtimes` potvrdily instalaci; iOS runtime 26.3.1 / 23D8133 dostupný.
+- `xcodebuild -project camino/prototypes/audio/CaminoAudio.xcodeproj -scheme CaminoAudio -configuration Debug -destination generic/platform=iOS -derivedDataPath <soukromý-build-adresář> CODE_SIGNING_ALLOWED=NO build`: exit 0, BUILD SUCCEEDED.
+- Vznikl skutečný balíček CaminoAudio.app s arm64 executable; `codesign` potvrdil, že není podepsaný. Jediné varování: přeskočená extrakce AppIntents metadat, protože target nemá AppIntents.framework.
+- SDK/platforma už build neblokují. Zdroje aplikace beze změny; dřívějších 25 testů logiky se bez nové změny neopakovalo.
+- Volné místo po instalaci přibližně 69,3 GiB. Platných podpisových identit aktuálně 0; DEVELOPMENT_TEAM v projektu nenastaven. Přihlášení k Apple Account zatím neověřeno.
+- Instalace aplikace na telefon, spuštění a fyzické T015/T017/T025 NEPROVEDENO. C01a zůstává BLOCKED na podpisu a fyzické přejímce; C01b nezahájeno.
+- Další krok: Nastavit v Xcode Apple Account a vývojový tým pro podpis, potom podepsat a nainstalovat CaminoAudio na iPhone a provést fyzickou přejímku T015/T017/T025.
+
+## Historický audit zařízení a překážek — 08:19 CEST
 
 - Připojený iPhone 14 Plus: iOS 26.6.1 / build 23G83; ověřeno přes devicectl.
 - `pairingState=paired`, `transportType=wired`, `tunnelState=connected`.
@@ -66,7 +78,7 @@ Složka je vyloučena ze systémové zálohy; v této etapě existuje jen místn
 | `vtool -show-build` nad výsledkem | Mach-O arm64, platform IOS, minos 17.0, sdk 26.2. Samostatný executable není podepsaný instalační balíček ani náhrada Xcode buildu. |
 | `plutil -lint` nad project.pbxproj | OK. |
 | Společná plná brána `scripts/cockpit_quality_gate.py` | **1684/1684 testů OK**, oddělené od 25 Swift testů. |
-| Standardní Xcode build | **BLOCKED**, exit 70 kvůli chybějící podpoře platformy. |
+| Standardní Xcode build | **PASS**, 15:01 CEST exit 0, nepodepsaný arm64 .app. Původní blokace platformy odstraněna. |
 | Signing / instalace / spuštění | **NEPROVEDENO**, 0 platných podpisových identit. |
 | T015/T017/T025, ruční poslech, UI na telefonu | **NEPROVEDENO**. |
 | G0/G1, T079 upgrade a migrace, terén | **NEPROVEDENO / nesplněno**. |
@@ -90,7 +102,4 @@ zařízení nejsou součástí commitu. Původní podklady v0.4 zůstaly neměnn
 
 ## Jediný následující krok
 
-V Xcode → Settings → Components ověřit a zpřístupnit Platform Support iOS 26.2,
-potom znovu sestavit existující CaminoAudio projekt. Před případným velkým
-stažením ověřit velikost a volnou kapacitu. Podpis a ruční přejímka navážou až
-po funkčním buildu; C01b se automaticky nezahajuje.
+Nastavit v Xcode Apple Account a vývojový tým pro podpis, potom podepsat a nainstalovat CaminoAudio na iPhone a provést fyzickou přejímku T015/T017/T025. C01b se automaticky nezahajuje.
