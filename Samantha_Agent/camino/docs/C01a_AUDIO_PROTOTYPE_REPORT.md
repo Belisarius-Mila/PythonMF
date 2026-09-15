@@ -1,13 +1,23 @@
 # C01a — audio prototyp: průběžné předání
 
-Aktualizováno: 2026-09-15 18:31 CEST. Specifikace v0.4; U01–U11 beze změny.
+Aktualizováno: 2026-09-15 18:36 CEST. Specifikace v0.4; U01–U11 beze změny.
 
 **Celý C01a: BLOCKED.** Automatizovaná část A prošla, nativní zdroje byly
 přímo zkompilované a slinkované pro arm64/iOS. Standardní nepodepsaný Xcode build aplikace prošel 15. září v 15:01 CEST.
-Nově prošel také podepsaný build a strict ověření podpisu. Instalace, vizuální kontrola a fyzický poslech jsou NEPROVEDENO.
+Nově prošel také podepsaný build a strict ověření podpisu. Instalace na iPhone prošla; spuštění odmítnuto (Security), vizuální kontrola a fyzický poslech jsou NEPROVEDENO.
 Nejde o přijatý audio prototyp ani splnění G0/G1.
 
-## Aktuální ověření podpisu
+## Aktuální instalace na iPhone
+
+### 2026-09-15 18:36 CEST — Aplikace nainstalována, spuštění odmítnuto
+
+- iPhone 14 Plus živě ověřen: wired, tunnel connected, Developer Mode enabled. Zařízení odpovídá vývojovému profilu; podpis znovu ověřen strict kontrolou.
+- `devicectl device install app`: exit 0, success, přesný bundle cz.pythonmf.camino.audio.prototype v installedApplications. Instalace na telefon PASS.
+- `devicectl device process launch`: exit 1, FBSOpenApplicationErrorDomain / Security. Hlášení uvádí podpis, oprávnění nebo nepotvrzenou důvěru profilu; vzhledem k platnému podpisu a úspěšné instalaci je dalším krokem ruční kontrola důvěry. Příčina zatím není definitivně potvrzena.
+- Spuštění, UI, mikrofon a fyzický poslech NEOVĚŘENO; C01a stále BLOCKED, C01b nezahájeno. Žádné nahrávání nebylo spuštěno.
+- Další krok: Na iPhonu potvrdit důvěru vlastnímu vývojářskému účtu v Nastavení → Obecné → VPN a správa zařízení. Potom ověřit spuštění Camino Audio a provést fyzickou přejímku T015/T017/T025.
+
+## Historické ověření podpisu
 
 ### 2026-09-15 18:31 CEST — Podpis ověřen, instalace čeká na telefon
 
@@ -90,7 +100,7 @@ Složka je vyloučena ze systémové zálohy; v této etapě existuje jen místn
 | `plutil -lint` nad project.pbxproj | OK. |
 | Společná plná brána `scripts/cockpit_quality_gate.py` | **1684/1684 testů OK**, oddělené od 25 Swift testů. |
 | Standardní Xcode build | **PASS**, 15:01 CEST exit 0, nepodepsaný arm64 .app. Původní blokace platformy odstraněna. |
-| Signing / instalace / spuštění | **Signing PASS**, 1 platná identita, strict podpis OK. Instalace a spuštění NEPROVEDENO, telefon odpojený. |
+| Signing / instalace / spuštění | **Signing PASS**, 1 platná identita, strict podpis OK. Instalace PASS; spuštění BLOCKED (Security), kontrola důvěry čeká. |
 | T015/T017/T025, ruční poslech, UI na telefonu | **NEPROVEDENO**. |
 | G0/G1, T079 upgrade a migrace, terén | **NEPROVEDENO / nesplněno**. |
 
@@ -113,4 +123,4 @@ zařízení nejsou součástí commitu. Původní podklady v0.4 zůstaly neměnn
 
 ## Jediný následující krok
 
-Připojit a odemknout iPhone, ověřit dostupnost zařízení a nainstalovat podepsaný CaminoAudio.app. Potom provést fyzickou přejímku T015/T017/T025; nahrávání zahajuje uživatel vědomým Start. C01b se automaticky nezahajuje.
+Na iPhonu potvrdit důvěru vlastnímu vývojářskému účtu v Nastavení → Obecné → VPN a správa zařízení. Potom ověřit spuštění Camino Audio a provést fyzickou přejímku T015/T017/T025. C01b se automaticky nezahajuje.
