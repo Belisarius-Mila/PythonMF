@@ -1,7 +1,7 @@
 # C01b — audio pod zámkem a vědomé pokračování
 
 Zahájeno výslovným pokynem Míly 2026-09-15 po přijetí C01a.
-**Stav: implementace připravena, fyzická přejímka NEPROVEDENO.**
+**Stav: 0.2.0 (2) nainstalováno/spuštěno; krátká zkouška zámku zadána, fyzická přejímka čeká na výsledek.**
 Aktuální výsledky určuje [report C01b](../docs/C01b_BACKGROUND_AUDIO_REPORT.md).
 
 ## Rozsah

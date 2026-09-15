@@ -1,7 +1,7 @@
 # C01b — audio pod zámkem, přerušení a pokračování
 
 Zahájeno 2026-09-15 po výslovném pokynu Míly. C01a bylo před zahájením přijaté.
-**Stav: implementace a automatické ověření; fyzická přejímka zatím NEPROVEDENO.**
+**Stav: 0.2.0 (2) nainstalováno a spuštěno; krátká zkouška zámku zadána, fyzická přejímka čeká na výsledek.**
 
 ## Co se změnilo
 
@@ -59,7 +59,9 @@ ověřenou další kopii; audio se v tomto kroku z telefonu nestahuje.
   projektové testy, nikoli testy audia.
 - Finální balíček odpovídá SHA-256 všech aktuálních zdrojů; neobsahuje
   simulator-only testovací launch flags. Dedikovaný simulátor byl po testu vypnut.
-- Instalace nové verze a fyzické T016/T018–T021/T024/T059: **NEPROVEDENO**.
+- Instalace/spuštění 0.2.0: **PASS**, živě ověřeno přes devicectl.
+- Původní soubory: inventář všech 15 cest/velikostí před/po shodný; bez čtení audia.
+- Fyzické T016/T018–T021/T024/T059: **NEPROVEDENO**.
 
 Příkazy:
 
@@ -77,8 +79,7 @@ zámku, hovoru, Bluetooth nebo ochrany dat před prvním odemknutím.
 
 ## Další krok
 
-Po ověření připraveného telefonu aktualizovat hlavní prototyp bez odinstalace.
-Nejdřív krátká zkouška zámku asi 30 sekund se slyšitelnými značkami před,
+Aktualizace je nainstalovaná a spuštěná. Nejdřív krátká zkouška zámku asi 30 sekund se slyšitelnými značkami před,
 pod zámkem a po něm. Potom samostatně 30minutový T016 a další scénáře podle
 [C01b_BACKGROUND_AUDIO.md](../tasks/C01b_BACKGROUND_AUDIO.md). Bez výsledků
 nelze C01b přijmout; C01c ani G0/G1 nejsou tímto uzavřeny.
@@ -92,3 +93,19 @@ nelze C01b přijmout; C01c ani G0/G1 nejsou tímto uzavřeny.
 - [Apple: Bluetooth HFP](https://developer.apple.com/documentation/avfaudio/avaudiosession/categoryoptions-swift.struct/allowbluetoothhfp)
 - Zadání: F16–F18/F42 a T016/T018–T021/T024/T059 z původního balíčku v0.4,
   který zůstává beze změny.
+
+### 2026-09-15 22:03 CEST — C01b 0.2.0 nainstalováno a spuštěno na iPhonu
+
+Hotovo / důkaz:
+- Míla potvrdil připojený odemčený telefon a zastavené audio. Aktuální zdroje se shodují s buildovou účtenkou 0d2ae8e0; strict podpis a platný profil pro připojený telefon ověřeny.
+- devicectl install a launch: exit 0 / success. Následný živý seznam aplikací potvrzuje hlavní bundle s verzí 0.2.0. Bez odinstalace.
+- Inventář před/po: stejné relativní cesty a velikosti všech 15 souborů původních pěti pokusů. Jde o metadata, nikoli porovnání obsahu či hashů; audio se nekopírovalo.
+
+Otevřeno / rizika:
+- Míla dostal postup krátkého offline testu zámku; výsledek dosud čeká. Instalace není PASS fyzického zámku, hovoru, Bluetooth ani 30minutového záznamu. C01b/G0/G1 nepřijato; C01c nezahájeno.
+
+Další krok:
+- Dokončit krátkou offline zkoušku zámku v nainstalované verzi 0.2.0 (2): asi 30 s pod zámkem se slyšitelným počítáním, Stop a celý poslech. Potom T016/T018–T021/T024/T059; C01c nezahajovat.
+
+Ověření:
+- Kód se neměnil; dřívějších 47 Swift testů, 2 UI testy a plná brána 1684 testů nebyly opakovány. Soukromé instalační účtenky jsou pod latest_c01b.txt / latest_install.txt.
