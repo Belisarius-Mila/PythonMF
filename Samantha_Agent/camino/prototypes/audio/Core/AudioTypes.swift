@@ -83,4 +83,4 @@ public struct CaptureSample: Sendable {
     func library() throws -> RecordingLibrary
 }
 
-public enum AudioPrototypeError: Error { case collision, invalidAudio, invalidMetadata, startFailed }
+public enum AudioPrototypeError: Error { case collision, missingAudio, invalidAudio, invalidMetadata, startFailed }

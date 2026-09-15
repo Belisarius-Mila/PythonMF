@@ -12,6 +12,7 @@ import XCTest
     var stopSuccess = true
     var failStart = false
     var failPlay = false
+    var missingPlaybackFile = false
     var delayStart = false
     var pendingStart: CheckedContinuation<Void, Never>?
     var reading = CaptureSample(running: true, time: 0, power: -160,
@@ -28,6 +29,7 @@ import XCTest
     func sample() -> CaptureSample { reading }
     func stop() async -> Bool { stops += 1; return stopSuccess }
     func play(url: URL) throws {
+        if missingPlaybackFile { throw AudioPrototypeError.missingAudio }
         if failPlay { throw AudioPrototypeError.invalidAudio }
         plays += 1; isPlaying = true; playbackTime = 0
     }
@@ -219,6 +221,37 @@ import XCTest
         c.play(try s.finish(s.begin(kind: .comment), interrupted: false))
         XCTAssertEqual(c.phase, .failed); XCTAssertNil(c.playingID)
         XCTAssertEqual(d.starts, 0); XCTAssertEqual(s.completed.count, 1)
+        XCTAssertTrue(c.message.contains("nelze načíst nebo přehrát"))
+        XCTAssertFalse(c.microphoneDenied)
+    }
+
+    func testMissingPlaybackFileKeepsMetadataAndAllowsAnotherClip() throws {
+        let d = FakeDriver(); let s = FakeStore()
+        let missing = try s.finish(s.begin(kind: .comment), interrupted: false)
+        let available = try s.finish(s.begin(kind: .reflection), interrupted: false)
+        let c = AudioController(driver: d, store: s)
+        d.missingPlaybackFile = true; c.play(missing)
+        XCTAssertEqual(c.phase, .failed); XCTAssertNil(c.playingID)
+        XCTAssertTrue(c.message.contains("Soubor nahrávky není dostupný"))
+        XCTAssertEqual(c.library.clips.map(\.id), [missing.id, available.id])
+        XCTAssertEqual(s.completed.count, 2); XCTAssertEqual(d.starts, 0)
+        d.missingPlaybackFile = false; c.play(available)
+        XCTAssertEqual(c.phase, .playing); XCTAssertEqual(c.playingID, available.id)
+        XCTAssertEqual(d.plays, 1)
+    }
+
+    func testMicrophoneSettingsReflectPermissionNotUnrelatedFailure() async {
+        let d = FakeDriver(); let s = FakeStore(); s.failFinish = true
+        let c = AudioController(driver: d, store: s)
+        await c.start(kind: .comment); await c.stop()
+        XCTAssertEqual(c.phase, .failed); XCTAssertFalse(c.microphoneDenied)
+        d.permission = .denied
+        XCTAssertTrue(c.microphoneDenied)
+        d.permission = .undetermined
+        XCTAssertFalse(c.microphoneDenied)
+        d.permission = .granted
+        XCTAssertFalse(c.microphoneDenied)
+        XCTAssertEqual(d.permissionRequests, 0); XCTAssertEqual(d.starts, 1)
     }
 
     func testPlaybackInterruptionUpdatesStateWithoutWaitingForTimer() throws {

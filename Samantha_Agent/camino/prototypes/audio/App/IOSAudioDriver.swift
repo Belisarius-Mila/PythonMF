@@ -101,7 +101,7 @@ import Foundation
 
     func play(url: URL) throws {
         guard recorder == nil, player == nil else { throw AudioPrototypeError.startFailed }
-        guard FileManager.default.fileExists(atPath: url.path) else { throw AudioPrototypeError.invalidAudio }
+        guard FileManager.default.fileExists(atPath: url.path) else { throw AudioPrototypeError.missingAudio }
         do {
             try session.setCategory(.playback, mode: .default)
             try session.setActive(true)

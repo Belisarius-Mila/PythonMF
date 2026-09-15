@@ -1,7 +1,7 @@
 # C01a — malý offline audio prototyp
 
-**Stav: ROZPRACOVÁNO / oprava průběhu přehrávání čeká na retest, 2026-09-15 20:15 CEST.** Zadání vytvořeno v C00.
-Implementace a 30 testů logiky/syntetického audia hotovy; přímá iOS kompilace
+**Stav: ROZPRACOVÁNO / oprava průběhu přehrávání čeká na retest, 2026-09-15 20:20 CEST.** Zadání vytvořeno v C00.
+Implementace a 32 testů logiky/syntetického audia hotovy; přímá iOS kompilace
 prošla. Standardní nepodepsaný Xcode build ověřen 15. září v 15:01 CEST;
 nově podepsaný build a strict podpis OK. Instalace na telefon prošla a Míla potvrdil otevření; dílčí fyzické zkoušky uživatelsky prošly, úplná přejímka čeká.
 [Aktuální report](../docs/C01a_AUDIO_PROTOTYPE_REPORT.md) má přednost před

@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-15 20:15 CEST
+Aktualizováno: 2026-09-15 20:20 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,7 +11,7 @@ editující iPhone. Web v P0 slouží pro čtení a stav, bez veřejného publik
 
 ## Aktuální stav
 
-- C01a: lokálně opraven průběh přehrávání i okamžité ukončení poslechu při systémovém přerušení. 30 testů, podepsaný iOS build a strict podpis prošly. Nová verze zatím není v telefonu, ruční ověření čeká.
+- C01a: lokálně opraven průběh, přerušení poslechu a hlášení chyb při zahájení přehrávání. 32 testů, podepsaný iOS build a strict podpis prošly. Nová verze zatím není v telefonu, ruční ověření čeká.
 - Míla potvrdil funkční Komentář (čas, signál, uložení a celý poslech), Úvahu bez internetu, zachování a přehrání obou vzorků po úplném ukončení aplikace bez samovolného záznamu a správné hlášení zakázaného mikrofonu s funkčním záznamem po jeho povolení.
 - Xcode 26.3 / iOS SDK 26.2: podepsaný Debug build CaminoAudio pro iPhone prošel (exit 0), `codesign --verify --deep --strict` exit 0. Jedna platná vývojová identita; profil platí do 2026-09-22 18:16 CEST. Výběr týmu je pouze v ignorovaném LocalSigning.xcconfig.
 - Úplná přejímka C01a otevřená: nově nalezený problém zobrazení má lokální opravu, čeká aktualizace telefonu a retest; dále metadata vzorků a první odmítnutí systémového dialogu. Mikrofon iPhonu doložen snímkem, doplňující Komentář uživatel přehrál. C01b nezahájeno.
@@ -192,3 +192,26 @@ Technický důkaz:
 
 - Regresní test před opravou selhal: přerušení nechalo stav playing. Po opravě 30/30 Swift XCTest; podepsaný Debug xcodebuild a strict codesign exit 0. Dva nové testy ověřují okamžitou reakci bez timeru a opakované události bez automatického spuštění či změny nahrávek.
 - Instalace této verze, simulátor a fyzické zkoušky NEPROVEDENO. Starší verze zůstává v iPhonu.
+
+### 2026-09-15 20:20 CEST — Srozumitelné chyby při zahájení poslechu
+
+Hotovo:
+
+- Nedostupný soubor má vlastní hlášení, odlišné od chyby načtení/přehrání. Nastavení mikrofonu se nabízí jen při zakázaném oprávnění. Po chybě lze vybrat jinou nahrávku.
+
+Rozhodnutí:
+
+- Pokračování bez telefonu v C01a; žádné nové projektové rozhodnutí ani zahájení C01b.
+
+Další krok:
+
+- Po připojení telefonu a zastavení záznamu/poslechu aktualizovat aplikaci a ověřit opravený průběh, Stop a opakované přehrání.
+
+Navrhované další kroky:
+
+- Dokončit ruční přejímku včetně oprávnění a metadat neutrálních vzorků.
+
+Technický důkaz:
+
+- 32/32 Swift XCTest, podepsaný Debug xcodebuild a strict codesign exit 0. Dva nové testy: nedostupný soubor bez změny evidence a následný poslech jiného vzorku; nabídka nastavení podle oprávnění i při nesouvisející chybě uložení.
+- Pět zdrojových/testovacích souborů; formát ani zápis médií beze změny. Instalace a fyzický retest NEPROVEDENO, C01a stále nepřijato.

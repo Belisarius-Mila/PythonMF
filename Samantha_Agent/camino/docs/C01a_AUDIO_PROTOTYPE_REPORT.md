@@ -1,8 +1,8 @@
 # C01a — audio prototyp: průběžné předání
 
-Aktualizováno: 2026-09-15 20:15 CEST. Specifikace v0.4; U01–U11 beze změny.
+Aktualizováno: 2026-09-15 20:20 CEST. Specifikace v0.4; U01–U11 beze změny.
 
-**C01a: lokální oprava indikace přehrávání, ruční retest čeká.** Dosavadní nahrávání a poslech uživatelsky prošly; nehybný ukazatel odhalen snímkem a opraven. Nová verze včetně reakce na přerušení poslechu prošla 30 testy, podepsaným buildem a strict podpisem; na telefonu dosud není. Úplná přejímka C01a a G0/G1 zůstávají otevřené.
+**C01a: lokální oprava indikace přehrávání, ruční retest čeká.** Dosavadní nahrávání a poslech uživatelsky prošly; nehybný ukazatel odhalen snímkem a opraven. Nová verze včetně reakce na přerušení a hlášení chyb poslechu prošla 32 testy, podepsaným buildem a strict podpisem; na telefonu dosud není. Úplná přejímka C01a a G0/G1 zůstávají otevřené.
 
 ## Aktuální oprava přehrávání
 
@@ -182,3 +182,26 @@ Technický důkaz:
 - Instalace této verze, simulátor a fyzické zkoušky NEPROVEDENO. Starší verze zůstává v iPhonu.
 
 Obsluha události odpovídá požadavku aktualizovat UI při přerušení: [Apple — Responding to Interruptions](https://developer.apple.com/library/archive/documentation/Audio/Conceptual/AudioSessionProgrammingGuide/HandlingAudioInterruptions/HandlingAudioInterruptions.html).
+
+### 2026-09-15 20:20 CEST — Srozumitelné chyby při zahájení poslechu
+
+Hotovo:
+
+- Nedostupný soubor má vlastní hlášení, odlišné od chyby načtení/přehrání. Nastavení mikrofonu se nabízí jen při zakázaném oprávnění. Po chybě lze vybrat jinou nahrávku.
+
+Rozhodnutí:
+
+- Pokračování bez telefonu v C01a; žádné nové projektové rozhodnutí ani zahájení C01b.
+
+Další krok:
+
+- Po připojení telefonu a zastavení záznamu/poslechu aktualizovat aplikaci a ověřit opravený průběh, Stop a opakované přehrání.
+
+Navrhované další kroky:
+
+- Dokončit ruční přejímku včetně oprávnění a metadat neutrálních vzorků.
+
+Technický důkaz:
+
+- 32/32 Swift XCTest, podepsaný Debug xcodebuild a strict codesign exit 0. Dva nové testy: nedostupný soubor bez změny evidence a následný poslech jiného vzorku; nabídka nastavení podle oprávnění i při nesouvisející chybě uložení.
+- Pět zdrojových/testovacích souborů; formát ani zápis médií beze změny. Instalace a fyzický retest NEPROVEDENO, C01a stále nepřijato.

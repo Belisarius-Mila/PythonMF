@@ -16,6 +16,7 @@ import Foundation
     public var changed: (() -> Void)?
     public var canStart: Bool { phase == .idle || phase == .failed }
     public var canStop: Bool { phase == .preparing || phase == .recording }
+    public var microphoneDenied: Bool { driver.permission == .denied }
     private let driver: AudioDriver
     private let store: RecordingStorage
     private let now: () -> Double
@@ -117,7 +118,9 @@ import Foundation
             try driver.play(url: store.url(for: clip.draft))
             updatePlaybackProgress()
             playingID = clip.id; phase = .playing; message = "Přehrávám"; changed?()
-        } catch { fail("Nahrávku nelze přehrát. Soubor zůstal zachovaný.") }
+        } catch AudioPrototypeError.missingAudio {
+            fail("Soubor nahrávky není dostupný. Její evidenci jsme zachovali.")
+        } catch { fail("Nahrávku nelze načíst nebo přehrát. Soubor se nemaže.") }
     }
 
     public func stopPlayback() {

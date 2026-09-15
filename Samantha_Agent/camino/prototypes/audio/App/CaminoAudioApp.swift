@@ -59,7 +59,7 @@ struct AudioScreen: View {
                                         .frame(maxWidth: .infinity).padding(.vertical, 12)
                                 }.buttonStyle(.borderedProminent).disabled(!c.canStart)
                             }
-                            if c.phase == .failed || c.message.contains("není povolený") {
+                            if c.microphoneDenied {
                                 Button("Otevřít nastavení aplikace") {
                                     if let url = URL(string: UIApplication.openSettingsURLString) {
                                         UIApplication.shared.open(url)

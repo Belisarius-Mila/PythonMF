@@ -4,7 +4,7 @@ Izolovaný nativní prototyp pro krátký Komentář nebo Úvahu. Swift 6, Swift
 AVFAudio, žádné externí balíčky, server ani AI. Nejde o celé Camino.
 
 **Stav: podepsaný Xcode build a strict kontrola podpisu ověřeny;
-instalace na iPhone prošla a otevření potvrdil Míla. Dílčí fyzické zkoušky uživatelsky prošly. Nová oprava průběhu přehrávání včetně reakce na přerušení prošla 30 testy a podepsaným buildem; aktualizace telefonu a retest čekají.** Viz
+instalace na iPhone prošla a otevření potvrdil Míla. Dílčí fyzické zkoušky uživatelsky prošly. Nová oprava průběhu přehrávání včetně reakce na přerušení a hlášení chyb prošla 32 testy a podepsaným buildem; aktualizace telefonu a retest čekají.** Viz
 [report C01a](../../docs/C01a_AUDIO_PROTOTYPE_REPORT.md).
 
 ## Otevření a sestavení
@@ -35,6 +35,7 @@ Macu používají syntetické CAF soubory v nových dočasných složkách, ne m
 ## Chování a soubory
 
 - První žádost o mikrofon pouze žádá o povolení; záznam vyžaduje nový Start.
+- Nedostupný soubor má jiné hlášení než chyba načtení či přehrání. Nastavení mikrofonu se nabízí jen při zakázaném oprávnění.
 - Systémové přerušení ihned ukončí poslech; nový poslech vyžaduje vědomé Přehrát.
 - Při přehrávání se zobrazuje aktuální/celkový čas a průběh podle skutečné pozice přehrávače; mikrofonní ukazatel patří jen záznamu.
 - Stav Nahrávám vyžaduje postup mediálního času recorderu a skutečný vstup.
