@@ -1,8 +1,8 @@
 # C01a — audio prototyp: průběžné předání
 
-Aktualizováno: 2026-09-15 20:42 CEST. Specifikace v0.4; U01–U11 beze změny.
+Aktualizováno: 2026-09-15 21:09 CEST. Specifikace v0.4; U01–U11 beze změny.
 
-**C01a: opravy přehrávání ověřeny dvěma UI testy v simulátoru; fyzický retest čeká.** Dosavadní nahrávání a poslech uživatelsky prošly; nehybný ukazatel odhalen snímkem a opraven. Nová verze včetně reakce na přerušení a hlášení chyb poslechu prošla 32 testy, podepsaným buildem a strict podpisem; na telefonu dosud není. Úplná přejímka C01a a G0/G1 zůstávají otevřené.
+**C01a: opravy přehrávání ověřeny dvěma UI testy v simulátoru; fyzický retest čeká.** Dosavadní nahrávání a poslech uživatelsky prošly; nehybný ukazatel odhalen snímkem a opraven. Nová verze včetně reakce na přerušení a hlášení chyb poslechu prošla 32 testy, podepsaným buildem a strict podpisem; opravená aplikace je již aktualizována a spuštěna na iPhonu, ruční retest čeká. Úplná přejímka C01a a G0/G1 zůstávají otevřené.
 
 ## Aktuální oprava přehrávání
 
@@ -229,3 +229,26 @@ Technický důkaz:
 - CaminoAudioUITests: 2/2 PASS, 0 skipped, xcodebuild test exit 0; iPhone 14 Plus simulátor, iOS 26.3.1 / 23D8133, x86_64. Snímek exportován z xcresult a vizuálně zkontrolován. Logy, výsledek a snímek zůstávají mimo Git.
 - Dřívějších 32 testů jádra se beze změny jádra neopakovalo. Standardní podepsaný iPhone build a strict podpis OK; testovací vstupní značky nejsou v jeho programu.
 - Mikrofon, fyzický poslech, iOS 26.6.1 a instalace aktualizace na telefon NEOVĚŘENO tímto krokem. C01a/G0/G1 stále nepřijato.
+
+### 2026-09-15 21:09 CEST — Aktualizace opravené aplikace na iPhone
+
+Hotovo:
+
+- Po Mílově potvrzení připravenosti aktualizována aplikace na připojeném iPhonu 14 Plus a úspěšně spuštěna. Instalovaná verze zahrnuje opravy průběhu, přerušení a hlášení chyb poslechu.
+
+Rozhodnutí:
+
+- Aktualizace stejného bundle bez odinstalace; před zahájením potvrzen zastavený záznam i poslech. Nahrávání nebylo spuštěno.
+
+Další krok:
+
+- V otevřeném Caminu přehrát existující vzorek a ověřit běžící čas, modrý průběh, Stop a opakované přehrání. Potom doplnit metadata neutrálních vzorků a první odmítnutí oprávnění; C01b nezahajovat.
+
+Navrhované další kroky:
+
+- Po dílčím retestu dokončit fyzickou přejímku C01a; nová etapa není tímto krokem zahájena.
+
+Technický důkaz:
+
+- Zdroj aplikace 259b7476, Camino Audio 0.1.0 (1). Znovu ověřen strict podpis, platný profil a shoda zařízení. Devicectl install i launch: exit 0 / success; inventář potvrzuje přesný bundle aplikace.
+- Soukromé identifikátory, instalační doklady a runtime média zůstávají mimo Git. Zachování a poslech konkrétních vzorků po této aktualizaci čekají na potvrzení uživatele; C01a/G0/G1 stále otevřené.

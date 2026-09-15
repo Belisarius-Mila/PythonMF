@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-15 20:42 CEST
+Aktualizováno: 2026-09-15 21:09 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,10 +11,10 @@ editující iPhone. Web v P0 slouží pro čtení a stav, bez veřejného publik
 
 ## Aktuální stav
 
-- C01a: lokální opravy přehrávání nyní ověřeny i dvěma UI testy na iOS simulátoru 26.3.1 (iPhone 14 Plus). Dřívějších 32 testů logiky/syntetického audia zůstává platných; podepsaný iPhone build a strict podpis prošly. Instalace a fyzický retest čekají.
+- C01a: opravená verze 259b7476 aktualizována na iPhone 14 Plus; instalace, přesný bundle a spuštění ověřeny přes devicectl. Dosavadních 32 testů jádra a 2 UI testy simulátoru prošly. Ruční retest opraveného přehrávání nyní čeká.
 - Míla potvrdil funkční Komentář (čas, signál, uložení a celý poslech), Úvahu bez internetu, zachování a přehrání obou vzorků po úplném ukončení aplikace bez samovolného záznamu a správné hlášení zakázaného mikrofonu s funkčním záznamem po jeho povolení.
 - Xcode 26.3 / iOS SDK 26.2: podepsaný Debug build CaminoAudio pro iPhone prošel (exit 0), `codesign --verify --deep --strict` exit 0. Jedna platná vývojová identita; profil platí do 2026-09-22 18:16 CEST. Výběr týmu je pouze v ignorovaném LocalSigning.xcconfig.
-- Úplná přejímka C01a otevřená: nově nalezený problém zobrazení má lokální opravu, čeká aktualizace telefonu a retest; dále metadata vzorků a první odmítnutí systémového dialogu. Mikrofon iPhonu doložen snímkem, doplňující Komentář uživatel přehrál. C01b nezahájeno.
+- Úplná přejímka C01a otevřená: nově nalezený problém zobrazení má lokální opravu, aktualizace telefonu provedena, čeká ruční retest; dále metadata vzorků a první odmítnutí systémového dialogu. Mikrofon iPhonu doložen snímkem, doplňující Komentář uživatel přehrál. C01b nezahájeno.
 - Restart a následný schválený úklid dokončeny. Před zahájením instalace bylo na SSD 85,79 GiB volných. Dřívější přesun USA neopakovat.
 - Poslední doložené c+p+n: d573e90c, 1684 testů, smoke 5/5. Nový zápis ručních zkoušek vzniká po tomto nasazení.
 
@@ -44,7 +44,7 @@ a rodinné výstupy. Externí přepis není důkaz zálohy. Lidskou revizi AI ne
 
 ## Další krok
 
-Při zastaveném záznamu i přehrávání aktualizovat aplikaci v připojeném iPhonu a ručně ověřit běžící čas/průběh, Stop a opakované přehrání existujícího vzorku. Potom doplnit zbývající doklady C01a a první odmítnutí oprávnění; C01b nezahajovat.
+V otevřeném Caminu přehrát existující vzorek a ověřit běžící čas, modrý průběh, Stop a opakované přehrání. Potom doplnit metadata neutrálních vzorků a první odmítnutí oprávnění; C01b nezahajovat.
 
 Historický doklad založení:
 Ověření založení: 56/56 testů integrace (54 + 2 profilové testy) a rychlá statická brána OK.
@@ -239,3 +239,26 @@ Technický důkaz:
 - CaminoAudioUITests: 2/2 PASS, 0 skipped, xcodebuild test exit 0; iPhone 14 Plus simulátor, iOS 26.3.1 / 23D8133, x86_64. Snímek exportován z xcresult a vizuálně zkontrolován. Logy, výsledek a snímek zůstávají mimo Git.
 - Dřívějších 32 testů jádra se beze změny jádra neopakovalo. Standardní podepsaný iPhone build a strict podpis OK; testovací vstupní značky nejsou v jeho programu.
 - Mikrofon, fyzický poslech, iOS 26.6.1 a instalace aktualizace na telefon NEOVĚŘENO tímto krokem. C01a/G0/G1 stále nepřijato.
+
+### 2026-09-15 21:09 CEST — Aktualizace opravené aplikace na iPhone
+
+Hotovo:
+
+- Po Mílově potvrzení připravenosti aktualizována aplikace na připojeném iPhonu 14 Plus a úspěšně spuštěna. Instalovaná verze zahrnuje opravy průběhu, přerušení a hlášení chyb poslechu.
+
+Rozhodnutí:
+
+- Aktualizace stejného bundle bez odinstalace; před zahájením potvrzen zastavený záznam i poslech. Nahrávání nebylo spuštěno.
+
+Další krok:
+
+- V otevřeném Caminu přehrát existující vzorek a ověřit běžící čas, modrý průběh, Stop a opakované přehrání. Potom doplnit metadata neutrálních vzorků a první odmítnutí oprávnění; C01b nezahajovat.
+
+Navrhované další kroky:
+
+- Po dílčím retestu dokončit fyzickou přejímku C01a; nová etapa není tímto krokem zahájena.
+
+Technický důkaz:
+
+- Zdroj aplikace 259b7476, Camino Audio 0.1.0 (1). Znovu ověřen strict podpis, platný profil a shoda zařízení. Devicectl install i launch: exit 0 / success; inventář potvrzuje přesný bundle aplikace.
+- Soukromé identifikátory, instalační doklady a runtime média zůstávají mimo Git. Zachování a poslech konkrétních vzorků po této aktualizaci čekají na potvrzení uživatele; C01a/G0/G1 stále otevřené.
