@@ -2,7 +2,26 @@ Nazev: USA 2019 - Tomik 2 prehled a navazujici predstrihovy formular
 Priorita: 1
 Stav: rozpracovane
 Pripomenout pri startu: ano
-Datum: 2026-06-05
+Datum: 2026-09-15
+
+Aktuální stav 2026-09-15:
+
+- Přesun originálů USA na externí disk Falta je dokončen. Všech 2 759 souborů,
+  4 podsložky a 33,10 GiB dat prošly kontrolou úplnosti a SHA-256.
+- Po výslovném potvrzení globální brzdy a dopadu do iCloudu byla původní
+  synchronizovaná složka odstraněna až po ověření celé externí kopie.
+  Odezva ostatních zařízení je NEOVĚŘENO.
+- Soukromé kontrolní součty a protokol jsou na externím disku ve složce
+  `USA_overeni_presunu_20260915`; původní upozornění na neúplnou kopii
+  bylo nahrazeno potvrzením dokončeného a ověřeného přesunu.
+- Interní SSD: bezprostředně po dokončení 18,85 GiB volných, čistý přírůstek
+  3,68 GiB. Další příčina spotřeby místa nebyla v tomto kroku auditována.
+- Aktuální další krok projektu: připojit disk Falta, přesměrovat zdrojovou
+  cestu k USA a ověřit přehrávání před pokračováním ve filmovém výběru.
+- Riziko: historické odkazy níže míří na již odstraněnou složku na Ploše.
+  Externí disk není šifrovaný; jeho nastavení se neměnilo.
+
+Historický handoff z 2026-06-05 (výběr a ratingy zůstávají zachované):
 
 Co se resilo:
 - Navazani na projekt Family Memory Films / USA 2019 po vycisteni dnu,

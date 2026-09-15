@@ -3,7 +3,7 @@
 Zalozeno: 2026-06-04
 Priorita: 1
 Stav: obecna platforma pro trideni rodinnych fotek/videi a pripravu
-vzpominkovych filmu; prvni prakticky dataset je USA 2019 na plose Macu
+vzpominkovych filmu; prvni prakticky dataset je USA 2019 na externím disku Falta
 
 ## Smysl
 
@@ -17,11 +17,34 @@ nastroj.
 
 ## Prvni dataset: USA 2019
 
-Pracovni kopie je na Macu:
+Aktuální umístění od 2026-09-15: externí disk **Falta**, složka **USA**
+v kořenu disku. Původní složka na synchronizované Ploše byla po úplném
+ověření odstraněna; Míla výslovně potvrdil i odstranění z iCloudu.
+Historické cesty na Plochu v zápisech níže už nejsou aktuální.
 
-```text
-/Users/miloslavfalta/Desktop/USA
-```
+### Přesun originálů 2026-09-15 — dokončeno
+
+- Přeneseno všech 2 759 souborů a 4 podsložky, 35 537 091 809 bajtů (33,10 GiB).
+- SHA-256 každého souboru na zdroji a cíli se shoduje; ověřeny velikosti,
+  časy změny, režimy oprávnění, uživatelské xattrs a úplná sada položek.
+  ACL všech adresářů se shodují. Cíl neobsahuje cloudové zástupné soubory.
+- Část originálů byla pouze v iCloudu. Byla stažena; po ověření jednotlivých
+  kopií se průběžně uvolňovala místní stažená data. Odstranění celého zdroje
+  proběhlo až po ověření všech souborů, uložení kontrolních součtů na externí
+  disk a dokončení F_FULLFSYNC.
+- Původní složka chybí na Ploše i v místním jmenném prostoru iCloud Drive;
+  propagace odstranění na ostatní zařízení je NEOVĚŘENO.
+- Soukromý protokol a kontrolní součty jsou vedle cílové složky v
+  `USA_overeni_presunu_20260915`; potvrzení je v `USA_PRESUN_OVERENO_20260915.txt`.
+  Manifesty ani média nepatří do Gitu.
+- Bezprostředně po přesunu má interní SSD 18,85 GiB volných; čistý přírůstek
+  proti začátku je 3,68 GiB. Velikost přesunutých dat není naměřená úspora.
+  Příčina další souběžné spotřeby místa nebyla v tomto kroku určena.
+- Disk Falta není šifrovaný; tento stav byl před přesunem oznámen a nezměněn.
+  Další data, Xcode ani systémové cache se nečistily.
+- Před další prací s filmovým formulářem připojit disk a přesměrovat cestu
+  lokálního serveru/katalogu k originálům. Funkčnost starých odkazů po přesunu
+  je NEOVĚŘENO; formuláře a hodnocení se tímto krokem neupravovaly.
 
 Soukrome vystupy patri mimo git do:
 
@@ -155,6 +178,9 @@ Relevantni git-safe skripty:
   `adam_rating_proposal.md`.
 
 ## Aktualni dalsi krok
+
+Po přesunu nejprve připojit disk Falta, upravit cestu k originálům USA
+a ověřit lokální přehrávání. Potom navázat na ruční výběr níže.
 
 Rucne projit predstrihovy formular:
 
