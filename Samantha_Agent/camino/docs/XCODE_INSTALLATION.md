@@ -1,5 +1,9 @@
 # Xcode 26.3 — instalační doklad
 
+Aktualizace 2026-09-15 08:19 CEST: C01a ověřilo spárovaný iPhone, zapnutý Developer Mode
+a DDI. Skutečný Xcode build však blokuje platform support iOS 26.2 navzdory
+přítomnému SDK. [Aktuální důkaz a rozsah](C01a_AUDIO_PROTOTYPE_REPORT.md).
+
 Datum: 14. září 2026, aktualizováno po prvním nastavení v 23:05 CEST.
 Navazuje na C00 a následný výslovný Mílův pokyn ověřit místo a nainstalovat Xcode.
 

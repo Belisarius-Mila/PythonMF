@@ -1,5 +1,9 @@
 # Camino — rozhodnutí z auditu C00
 
+Aktualizace 2026-09-15 08:19 CEST: C01a ověřilo spárovaný iPhone, zapnutý Developer Mode
+a DDI. Skutečný Xcode build však blokuje platform support iOS 26.2 navzdory
+přítomnému SDK. [Aktuální důkaz a rozsah](C01a_AUDIO_PROTOTYPE_REPORT.md).
+
 Checkpoint 2026-09-14 23:26 CEST: kanonická projektová paměť, handoff a TVBCP byly
 dorovnány po recovery záloze. Starší výroky níže o nezapsané paměti a chybějící
 instalaci popisují průběh C00; aktuální instalaci dokládá XCODE_INSTALLATION.md.

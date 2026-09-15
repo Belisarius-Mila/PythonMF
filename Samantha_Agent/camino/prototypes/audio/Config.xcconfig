@@ -1,0 +1,2 @@
+// Optional, ignored local signing selection. Never commit account identifiers.
+#include? "LocalSigning.xcconfig"

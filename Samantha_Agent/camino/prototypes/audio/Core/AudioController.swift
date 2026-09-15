@@ -1,0 +1,140 @@
+import Foundation
+
+@MainActor public final class AudioController {
+    public private(set) var phase: CapturePhase = .idle
+    public private(set) var message = "Připraveno"
+    public private(set) var elapsed: Double = 0
+    public private(set) var power: Float = -160
+    public private(set) var input = "Mikrofon se ověří při spuštění"
+    public private(set) var library = RecordingLibrary()
+    public private(set) var playingID: UUID?
+    public var changed: (() -> Void)?
+    public var canStart: Bool { phase == .idle || phase == .failed }
+    public var canStop: Bool { phase == .preparing || phase == .recording }
+    private let driver: AudioDriver
+    private let store: RecordingStorage
+    private let now: () -> Double
+    private var draft: RecordingDraft?
+    private var starting = false
+    private var stopRequested = false
+    private var interrupted = false
+    private var routeID = ""
+    private var lastAdvance = 0.0
+
+    public init(driver: AudioDriver, store: RecordingStorage,
+                now: @escaping () -> Double = { ProcessInfo.processInfo.systemUptime }) {
+        self.driver = driver; self.store = store; self.now = now
+        refreshLibrary()
+    }
+
+    public func start(kind: RecordingKind) async {
+        guard canStart else { return }
+        switch driver.permission {
+        case .denied:
+            fail("Mikrofon není povolený. Povol jej v Nastavení; uložené nahrávky lze přehrát.")
+            return
+        case .undetermined:
+            phase = .permission; message = "Povolení mikrofonu"; changed?()
+            let granted = await driver.requestPermission()
+            phase = .idle
+            message = granted ? "Mikrofon povolen. Nahrávání spustíš tlačítkem Start."
+                : "Mikrofon není povolený. Nahrávání nezačalo."
+            changed?(); return
+        case .granted: break
+        }
+        phase = .preparing; message = "Připravuji mikrofon"
+        elapsed = 0; power = -160; stopRequested = false; interrupted = false
+        routeID = ""; starting = true; changed?()
+        do {
+            let attempt = try store.begin(kind: kind); draft = attempt
+            try await driver.start(url: store.url(for: attempt))
+            starting = false
+            lastAdvance = now()
+            if stopRequested { await finish(); return }
+            tick()
+        } catch {
+            starting = false; phase = .finishing; changed?()
+            _ = await driver.stop()
+            draft = nil
+            fail("Nahrávání se nepodařilo spustit. Případný neúplný soubor zůstal zachovaný.")
+            refreshLibrary()
+        }
+    }
+
+    /// The timer only observes recorder media time; wall time can never assert recording.
+    public func tick() {
+        if phase == .playing {
+            if !driver.isPlaying { stopPlayback() }
+            return
+        }
+        guard !starting, phase == .preparing || phase == .recording else { return }
+        let value = driver.sample()
+        if !routeID.isEmpty && value.inputID != routeID {
+            interrupt(); return
+        }
+        if value.time.isFinite && value.time > elapsed && value.running && !value.inputID.isEmpty {
+            routeID = value.inputID; input = value.inputLabel
+            elapsed = value.time; power = value.power.isFinite ? value.power : -160
+            lastAdvance = now(); phase = .recording; message = "Nahrávám"
+        } else if !value.running || now() - lastAdvance >= 2 {
+            interrupt(); return
+        }
+        changed?()
+    }
+
+    public func stop() async {
+        guard canStop else { return }
+        stopRequested = true; phase = .finishing; message = "Ukončuji a ověřuji soubor"; changed?()
+        if !starting { await finish() }
+    }
+
+    public func interrupt() {
+        guard canStop else { return }
+        interrupted = true
+        // Transition before scheduling the task: a second event cannot race a new Start.
+        stopRequested = true; phase = .finishing; message = "Přerušeno — ověřuji zachovaný záznam"; changed?()
+        if !starting { Task { await finish() } }
+    }
+
+    public func leaveForeground() {
+        interrupt()
+        if phase == .playing { stopPlayback() }
+    }
+
+    public func play(_ clip: RecordingClip) {
+        guard canStart else { return }
+        do {
+            try driver.play(url: store.url(for: clip.draft))
+            playingID = clip.id; phase = .playing; message = "Přehrávám"; changed?()
+        } catch { fail("Nahrávku nelze přehrát. Soubor zůstal zachovaný.") }
+    }
+
+    public func stopPlayback() {
+        guard phase == .playing else { return }
+        driver.stopPlayback(); playingID = nil; phase = .idle; message = "Připraveno"; changed?()
+    }
+
+    private func finish() async {
+        guard let attempt = draft else { return }
+        // Taking ownership prevents duplicate delegate, Stop and interruption completion.
+        draft = nil
+        let closed = await driver.stop()
+        do {
+            guard closed else { throw AudioPrototypeError.invalidAudio }
+            let clip = try store.finish(attempt, interrupted: interrupted)
+            elapsed = clip.audio.duration; power = -160; phase = .idle
+            message = interrupted ? "Přerušeno. Zachovaný záznam lze přehrát."
+                : "Uloženo v telefonu"
+        } catch {
+            fail("Uložení se nepodařilo ověřit. Neúplný záznam zůstal zachovaný.")
+        }
+        refreshLibrary(); changed?()
+    }
+
+    private func refreshLibrary() {
+        do { library = try store.library() }
+        catch { fail("Seznam nahrávek nelze načíst. Stávající soubory zůstaly zachované.") }
+    }
+
+    private func fail(_ text: String) { phase = .failed; message = text; power = -160; changed?() }
+}

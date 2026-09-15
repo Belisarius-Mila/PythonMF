@@ -1,20 +1,19 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-Aktualizováno: 2026-09-14 23:26 CEST
+Aktualizováno: 2026-09-15 08:19 CEST
 
-- C00 dokončeno v dostupném rozsahu; audit, rozhodnutí a zadání C01a jsou připravené.
-- Xcode 26.3 Universal / build 17C529 nainstalovaný po samostatném souhlasu; první nastavení dokončené, iPhone SDK 26.2 ověřené.
-- Místní Intel MacBook Pro 2020 / macOS 15.7.9 / 16 GiB RAM plní podle Míly vývojovou i domácí serverovou roli.
-- Cílový iPhone 14 Plus / iOS 26.6.1 potvrzen Mílou; párování, signing, build/install/run a audio přejímka NEPROVEDENO.
-- C01a NEZAHÁJENO. Další krok: po výslovném zadání připojit odemčený iPhone a ověřit vývojovou cestu pro malý audio prototyp.
+- C01a rozpracováno: izolovaný audio prototyp, 25 testů logiky a syntetického CAF audia OK; přímá kompilace/linkování pro arm64 iOS 17 / SDK 26.2 prošly.
+- iPhone 14 Plus / iOS 26.6.1 build 23G83 přímo ověřen: paired, wired, tunnel connected, Developer Mode enabled, DDI available.
+- Xcode 26.3 je nainstalovaný, ale standardní build blokuje chybějící platform support iOS 26.2; samotné SDK nestačí. Platných podpisových identit je 0.
+- Celý C01a BLOCKED: instalace, ruční UI/poslech a fyzické T015/T017/T025 NEPROVEDENO. C01b nezahájeno.
 
 ### Rizika
 
-- G0/G1 nejsou splněné; přítomnost SDK neprokazuje instalaci ani nahrávání na telefonu.
-- Služby, úložiště a obnova provozních dat Camino zůstávají NEOVĚŘENO; neblokují offline C01a.
-- Recovery záloha zdrojů Samanthy není přejímka budoucí zálohy médií Camino.
-- T001–T080 jsou zadání akceptace, nikoli provedené testy. Osobní média, texty, GPS a klíče nepatří do Gitu; placené AI nezadáno.
+- Bez funkčního Xcode buildu, podpisu a fyzické přejímky nelze prototyp označit za přijatý; G0/G1 nesplněné.
+- Pouze krátké foreground audio; žádná segmentace, záchrana po pádu během zápisu ani pokračování pod zámkem.
+- Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
+- Před velkou instalací iOS komponent znovu posoudit diskovou kapacitu. U01–U11 se neotevírají.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: Camino
@@ -25,19 +24,19 @@ Typ: Project
 Priorita: 1
 Stav: rozpracovane
 Pripomenout pri startu: ano
-Datum: 2026-09-14 23:26 CEST
+Datum: 2026-09-15 08:19 CEST
 
 Co se resilo:
-Audit C00, následná instalace Xcode a checkpoint po ověřené recovery záloze.
+První implementace C01a a ověření připravenosti telefonu; skutečný Xcode build odhalil další blokaci.
 
 Co je hotove:
-C00, Xcode 26.3 / SDK 26.2, příprava zadání C01a a dohledatelné podklady v0.4.
+Kód C01a, 25 automatických testů a přímá iOS kompilace; párování, Developer Mode a DDI ověřeny.
 
 Co neni hotove:
-C01a ani žádná implementace, signing a hardwarová přejímka. G0/G1 nesplněné.
+Platform support, Xcode build aplikace, signing, instalace a hardwarová přejímka. C01a BLOCKED, G0/G1 nesplněné.
 
 Dalsi krok:
-Po výslovném zadání C01a připojit iPhone a ověřit vývojovou cestu.
+V Xcode → Settings → Components ověřit a zpřístupnit Platform Support iOS 26.2, potom zopakovat build připraveného CaminoAudio projektu.
 
 Navrhovane dalsi kroky:
 Po C00 malý audio prototyp C01a podle zjištěného prostředí.
@@ -99,3 +98,30 @@ Technický důkaz:
 - Instalační kontroly Xcode/first launch/iPhone SDK prošly; build a fyzické audio testy NEPROVEDENO.
 - Recovery: 63 295 souborů, 28 892 kopírováno, 34 360 hardlinků, 43 symlinků, 0 přeskočeno; zkušební obnova AGENTS.md se shodným SHA-256.
 - Závěrečná plná kontrolní brána checkpointu: 1684/1684 testů OK; syntaxe a Git safety check OK. Nejde o testy aplikace Camino.
+
+### 2026-09-15 08:19 CEST — C01a: první prototyp, telefon připraven, build blokován
+
+Hotovo:
+
+- Malý prototyp Start/Stop, skutečný vstup, místní evidence a přehrání; 25 testů logiky a syntetického audia prošlo.
+- Míla připravil důvěru a Developer Mode; přímý audit potvrdil párování, spojení a vývojové služby telefonu.
+
+Rozhodnutí:
+
+- Na Mílův pokyn pokračovat ve vývoji zahájeno pouze C01a. Žádná placená AI ani další etapa.
+- Přímá kompilace není náhrada Xcode buildu, instalace nebo fyzického poslechu. Celý krok zůstává BLOCKED.
+
+Další krok:
+
+- V Xcode → Settings → Components ověřit a zpřístupnit Platform Support iOS 26.2, potom zopakovat build připraveného CaminoAudio projektu.
+
+Navrhované další kroky:
+
+- Po sestavení připravit podpis, nainstalovat prototyp a ručně ověřit neutrální vzorky Komentář/Úvaha. Žádná automatická aktivace mikrofonu.
+
+Technický důkaz:
+
+- `camino/docs/C01a_AUDIO_PROTOTYPE_REPORT.md`, `camino/prototypes/audio/README.md`.
+- 25/25 XCTest OK; arm64/iOS kompilace/link exit 0, bez warnings; project.pbxproj lint OK.
+- Xcode build exit 70: platform support iOS 26.2 chybí; platné signing identity 0. Fyzické testy NEPROVEDENO.
+- Plná společná brána před checkpointem: 1684/1684 testů OK; nové Swift testy jsou samostatných 25/25 výše.
