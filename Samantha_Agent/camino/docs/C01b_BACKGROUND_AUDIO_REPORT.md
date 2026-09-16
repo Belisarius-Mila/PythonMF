@@ -1,7 +1,7 @@
 # C01b — audio pod zámkem, přerušení a pokračování
 
 Zahájeno 2026-09-15 po výslovném pokynu Míly. C01a bylo před zahájením přijaté.
-**Stav: 0.2.0 (2) nainstalováno a spuštěno; krátký test zámku, T016 a T018 PASS podle Míly, další fyzická přejímka čeká.**
+**Stav: 0.2.0 (2) nainstalováno a spuštěno; krátký test zámku a T016/T018/T019 PASS podle Míly, další fyzická přejímka čeká.**
 
 ## Co se změnilo
 
@@ -61,7 +61,7 @@ ověřenou další kopii; audio se v tomto kroku z telefonu nestahuje.
   simulator-only testovací launch flags. Dedikovaný simulátor byl po testu vypnut.
 - Instalace/spuštění 0.2.0: **PASS**, živě ověřeno přes devicectl.
 - Původní soubory: inventář všech 15 cest/velikostí před/po shodný; bez čtení audia.
-- Fyzické T016 a T018: **PASS podle Míly**; T019 má dílčí důkaz odchozím hovorem; T020–T021/T024/T059 a úplný T019: **NEPROVEDENO**.
+- Fyzické T016, T018 a T019: **PASS podle Míly**; T020–T021/T024/T059: **NEPROVEDENO**.
 
 Příkazy:
 
@@ -79,7 +79,7 @@ zámku, hovoru, Bluetooth nebo ochrany dat před prvním odemknutím.
 
 ## Další krok
 
-Krátký funkční test zámku, 30minutový T016 a AirPods T018 Míla potvrdil. Následuje úplný T019 a další scénáře podle
+Krátký funkční test zámku a T016/T018/T019 Míla potvrdil. Následuje T020 a další scénáře podle
 [C01b_BACKGROUND_AUDIO.md](../tasks/C01b_BACKGROUND_AUDIO.md). Bez zbývajících výsledků
 nelze C01b přijmout; C01c ani G0/G1 nejsou tímto uzavřeny.
 
@@ -162,3 +162,20 @@ Další krok:
 
 Ověření:
 - Přečteny pouze malé technické JSON účtenky a inventář velikostí; žádný CAF se nekopíroval ani neposlouchal. Kód beze změn, automatické testy se neopakovaly.
+
+### 2026-09-16 20:25 CEST — T019 PASS
+
+Hotovo / důkaz:
+- Míla potvrdil PASS ignorovaného i přijatého příchozího běžného telefonního hovoru: části před a po přerušení jsou přehratelné, nic z hovoru v audu není a nahrávání se samo neobnovilo.
+- Technická metadata potvrzují dvě první části označené `interrupted=true`: 44,410 s a 26,798 s. Jejich vědomá pokračování jsou samostatné části stejné session: 21,551 s po pauze 43,153 s a 20,999 s po pauze 112,272 s. Všechny čtyři části jsou 48 kHz mono.
+- Jeden dřívější běžně ukončený záznam bez přerušení a bez continuation byl od T019 oddělen.
+
+Hranice důkazu a rizika:
+- Poslech a nepřítomnost hovoru v audu potvrzuje Míla; nástroj četl pouze malé technické JSON účtenky. Žádný CAF se nekopíroval ani neposlouchal.
+- T020–T021/T024/T059, C01b/G0/G1 zůstávají otevřené. C01c nezahájeno.
+
+Další krok:
+- Provést T020 změnou skutečně aktivního vstupu během běžícího záznamu; ověřit přerušení, zachování staré části, žádné samovolné pokračování a novou navazující část stejné session.
+
+Ověření:
+- Kód aplikace se neměnil; aktualizuje se pouze výsledek fyzické přejímky a navazující projektový stav.
