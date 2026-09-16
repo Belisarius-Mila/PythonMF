@@ -1,16 +1,19 @@
 # Camino
 
-Aktualizováno: 2026-09-16 21:27 CEST
+Aktualizováno: 2026-09-16 21:43 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
 
-Soukromý offline deník na iPhonu, bezpečné originály a osobní deník na Macu;
-volitelný rodinný výběr a film až v dalších etapách. Jeden autor a jeden hlavní
-editující iPhone. Web v P0 slouží pro čtení a stav, bez veřejného publikování.
+Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý obsah
+`Do deníku` může být přes soukromý read-only Camino Viewer dostupný Janě;
+`Jen pro mě` je z Vieweru vyloučeno. Jeden autor a jeden hlavní editující iPhone,
+žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
 
+- Autoritativní podklady jsou v0.5 spolu s dodatkem U15. Původní balíček v0.5 je uložen beze změny a 6/6 manifestovaných souborů prošlo SHA-256 kontrolou; ZIP je lokálně zachovaný. U15: celá položka `Do deníku` je po synchronizaci Viewer-eligible, samostatná Úvaha vždy vzniká `Jen pro mě` a vyžaduje vědomé `Vložit do deníku`.
+- Delta C00 audit Vieweru: Tailscale 1.102.4 je online, soukromý HTTPS Serve vede na živý Cockpit, Funnel není povolený, Cockpit smoke 5/5, AC `sleep=0` a FileVault zapnutý. Samostatný Camino backend/worker/Viewer, jeho autorizace, záloha, restart a vzdálený test na Janiných zařízeních ještě neexistují; G8 NEPROVEDENO.
 - T016 PASS: přesně 30:24,406, 175 147 072 B, 48 kHz mono, režim Letadlo, převážně pod zámkem a celý poslech OK. T018–T020 PASS podle Míly. T021 PASS v rozsahu C01b prototypu: jediná aktivní session, pokračování po návratu z jiné aplikace a celý poslech OK; plná integrace se zopakuje v C04. Vítr neověřen.
 - C01b zahájeno výslovným pokynem Míly; C01a zůstává přijaté. Prototyp 0.2.0 (2) je lokálně připraven pro background audio, přerušení a vědomé pokračování. Verze 0.2.0 je nyní nainstalovaná a spuštěná na iPhonu; inventář 15 původních souborů se před/po shoduje v cestách a velikostech.
 - Běžící recorder přežije změnu scenePhase; nový Start/Pokračovat pouze v popředí. Přerušení ihned pozastaví vstup, ověří dostupnou část a nabídne Pokračovat/Ukončit. Pokračování vytváří novou část stejné session s evidovanou pauzou, bez přepisu předchozího média.
@@ -23,18 +26,21 @@ editující iPhone. Web v P0 slouží pro čtení a stav, bez veřejného publik
 ## Zdroje a návaznost
 
 - Kořen projektu: `camino/`, instrukce `camino/AGENTS.md`.
-- Autoritativní podklady: `camino/CAMINO_podklady_v0.4/README_v0.4.md`,
-  `CAMINO_funkcni_specifikace_v0.4.md`, `CAMINO_Codex_v0.4.md` a akceptační scénáře.
+- Autoritativní podklady: `camino/CAMINO_podklady_v0.5/README_v0.5.md`,
+  `CAMINO_funkcni_specifikace_v0.5.md`, `CAMINO_Codex_v0.5.md`, akceptační
+  scénáře a novější `camino/docs/V05_PRIVACY_AMENDMENT.md`.
 - Kanonický handoff: `memory/handoffs/workstreams/project-camino.md`.
 - Kanonický TVBCP: `memory/tvbcp/workstreams/project-camino.md`.
-- Původní balíček se nemění; nové auditní a vývojové výsledky patří mimo něj.
+- Původní balíčky v0.4/v0.5 se nemění; nové auditní a vývojové výsledky patří mimo ně.
 - Katalogové přidání samo neotevírá soukromé vlákno. To vznikne až při otevření projektu.
 
 ## Pevná pravidla
 
 Originály jsou neměnné, bez automatického mazání. Offline záznam nečeká na síť,
-GPS ani AI. „Do deníku“ je stále soukromé; „Jen pro mě“ vylučuje všechny filmy
-a rodinné výstupy. Externí přepis není důkaz zálohy. Lidskou revizi AI nepřepíše.
+GPS ani AI. `Do deníku` je po doručení serveru způsobilé pro soukromý Viewer
+Jany; `Jen pro mě` vylučuje Viewer, všechny filmy a rodinné výstupy. Samostatná
+Úvaha začíná vždy `Jen pro mě`. Externí přepis není důkaz zálohy a lidskou
+revizi AI nepřepíše.
 Po každém Mílou oznámeném výsledku fyzického testu Adam bez další žádosti
 vyhodnotí stav, řekne, zda je potřeba vývoj, a rovnou dá přesné podmínky, postup
 a kritéria PASS následujícího neprovedeného testu. Shoda s návrhem sama změnu
@@ -42,10 +48,10 @@ kódu nevyvolává; FAIL se nejdřív doloží a opraví v aktuálním rozsahu.
 
 ## Rizika a otevřeno
 
-- C01a přijato, ale širší brány G0/G1 a terénní připravenost zůstávají nesplněné.
+- C01a přijato, ale širší brány G0/G1/G8 a terénní připravenost zůstávají nesplněné.
 - T016 a T018–T021 potvrzeny v dosavadním rozsahu; vítr, plná integrace T021 v C04 a T024/T059 čekají. Segmentace a záchrana po pádu během zápisu patří do C01c.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
-- Podepsaný build není instalace ani fyzická přejímka; vývojový profil je časově omezený. U01–U11 se neotevírají.
+- Podepsaný build není instalace ani fyzická přejímka; vývojový profil je časově omezený. U01–U15 se bez nového rozhodnutí neotevírají.
 
 ## Další krok
 
@@ -516,3 +522,16 @@ Rozhodnutí a rizika:
 
 Další krok:
 - Provést T024, potom automaticky předat T059.
+
+### 2026-09-16 21:43 CEST — Přijetí v0.5 a U15
+
+Hotovo / důkaz:
+- Původní balíček v0.5 byl importován beze změny; 6/6 položek interního manifestu odpovídá velikostí i SHA-256 a lokální ZIP je přesná kopie Downloads.
+- Vznikl závazný U15 dodatek a read-only Viewer readiness audit. Živě ověřeno: Tailscale online, soukromý Serve bez Funnel, Cockpit smoke 5/5, AC bez systémového spánku, FileVault zapnutý.
+
+Rozhodnutí a rizika:
+- `Do deníku` je při zapnutém Vieweru po synchronizaci dostupné Janě celé. Samostatná Úvaha vzniká `Jen pro mě` a do deníku se vloží jen vědomou akcí. Původní v0.5 se kvůli manifestu nepřepisuje; rozpor řeší novější dodatek.
+- Viewer ani jeho data/služby nebyly vytvořeny. U15 se implementuje v C03/C04, Viewer v C08c–C08f; C01b se tím nerozšiřuje ani nepřebuildovává. G8 zůstává NEPROVEDENO.
+
+Další krok:
+- Dokončit T024, potom T059; C01c nezahajovat před uzavřením C01b.

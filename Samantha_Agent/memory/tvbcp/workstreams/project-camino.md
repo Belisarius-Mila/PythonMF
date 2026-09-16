@@ -7,11 +7,14 @@ Priorita: 1
 
 ## Cíl a hranice
 
-Samostatný soukromý cestovní deník podle v0.4. Založení a napojení na Human–Adam
-je první organizační krok; aplikace ani audit prostředí tím nevznikají.
+Soukromý cestovní deník podle v0.5 + U15: jeden autor na iPhonu, soukromý
+owner archiv a read-only Camino Viewer pro Janu bez veřejného webu. `Jen pro mě`
+je vyloučeno; celé `Do deníku` je po synchronizaci Viewer-eligible.
 
 ## Aktuální stav a další krok
 
+- V0.5 importovaná beze změny, 6/6 manifestovaných souborů ověřeno; U15 je závazný novější dodatek. Samostatná Úvaha začíná `Jen pro mě` a do deníku se převádí vědomě.
+- Viewer delta audit potvrdil Tailscale/Serve/Cockpit základ, smoke 5/5, Funnel vypnutý, AC bez spánku a FileVault zapnutý. Viewer služby, autorizace, záloha/restart a Janina vzdálená zkouška chybějí; G8 NEPROVEDENO.
 - T016 PASS: přesně 30:24,406, 175 147 072 B, 48 kHz mono, režim Letadlo, převážně pod zámkem a celý poslech OK. T018–T020 PASS podle Míly. T021 PASS v rozsahu C01b prototypu: jediná aktivní session, pokračování po návratu z jiné aplikace a celý poslech OK; plná integrace se zopakuje v C04. Vítr neověřen.
 - C01b zahájeno výslovným pokynem Míly; C01a zůstává přijaté. Prototyp 0.2.0 (2) je lokálně připraven pro background audio, přerušení a vědomé pokračování. Verze 0.2.0 je nyní nainstalovaná a spuštěná na iPhonu; inventář 15 původních souborů se před/po shoduje v cestách a velikostech.
 - Běžící recorder přežije změnu scenePhase; nový Start/Pokračovat pouze v popředí. Přerušení ihned pozastaví vstup, ověří dostupnou část a nabídne Pokračovat/Ukončit. Pokračování vytváří novou část stejné session s evidovanou pauzou, bez přepisu předchozího média.
@@ -19,17 +22,17 @@ je první organizační krok; aplikace ani audit prostředí tím nevznikají.
 - Ověřeno 47/47 Swift testů, 2/2 UI testy simulátoru včetně snímku obrazovky, finální podepsaný iOS build a strict podpis; UIBackgroundModes=[audio]. Plná projektová brána PASS, 1684/1684 testů.
 - Instalace/spuštění 0.2.0 PASS. Krátký test zámku a T016/T018–T021 PASS v dosavadním rozsahu. Metadata T021 potvrzují jedinou nepřerušenou část Úvahy 56,350 s; T024/T059 čekají.
 - Po každém Mílou oznámeném výsledku fyzického testu Adam bez další žádosti vyhodnotí stav, řekne, zda je potřeba vývoj, a rovnou předá podmínky, přesný postup a kritéria PASS následujícího neprovedeného testu. Shoda s návrhem sama změnu kódu nevyvolává.
-- Profil hlavní aplikace do 22. září 18:16 CEST. G0/G1 a terénní připravenost nesplněné; C01c nezahájeno. Původní nahrávky i samostatný Camino Test zůstávají zachované.
+- Profil hlavní aplikace do 22. září 18:16 CEST. G0/G1/G8 a terénní připravenost nesplněné; C01c nezahájeno. Původní nahrávky i samostatný Camino Test zůstávají zachované.
 
 
 Provést T024, potom T059; C01c nezahajovat.
 
 ## Rizika
 
-- C01a přijato, ale širší brány G0/G1 a terénní připravenost zůstávají nesplněné.
+- C01a přijato, ale širší brány G0/G1/G8 a terénní připravenost zůstávají nesplněné.
 - T016 a T018–T021 potvrzeny v dosavadním rozsahu; vítr, plná integrace T021 v C04 a T024/T059 čekají. Segmentace a záchrana po pádu během zápisu patří do C01c.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
-- Podepsaný build není instalace ani fyzická přejímka; vývojový profil je časově omezený. U01–U11 se neotevírají.
+- Podepsaný build není instalace ani fyzická přejímka; vývojový profil je časově omezený. U01–U15 se bez nového rozhodnutí neotevírají.
 
 ## Chronologické záznamy
 
@@ -481,3 +484,21 @@ Technický důkaz:
 - Rozhodnutí: T021 PASS v rozsahu C01b prototypu; plný scénář videa/Momentu se zopakuje v C04. Oprava ani nový build nejsou potřeba.
 - Rizika: T024/T059, C01b/G0/G1 otevřené; C01c nezahájeno.
 - Další krok: provést T024, potom automaticky předat T059.
+
+### 2026-09-16 21:43 CEST — Přijetí v0.5, rozhodnutí U15 a delta C00
+
+Hotovo:
+- Původní v0.5 je importovaná a ověřená; vznikl závazný U15 dodatek a Viewer readiness audit bez změny systému.
+
+Rozhodnutí:
+- Celé `Do deníku` může být po synchronizaci dostupné Janě v soukromém Vieweru. Samostatná Úvaha vždy vzniká `Jen pro mě` a vyžaduje vědomé `Vložit do deníku`.
+- Původní balíček se kvůli manifestu nepřepisuje. U15 se implementuje v C03/C04, Viewer v C08c–C08f; C01b zůstává izolovaný audio prototyp.
+
+Další krok:
+- Provést T024, potom T059; C01c nezahajovat před uzavřením C01b.
+
+Navrhované další kroky:
+- Po C01b pokračovat C01c; následně zachovat pořadí malých etap v0.5 a před C08 dokončit potřebný datový, přenosový a serverový základ.
+
+Technický důkaz:
+- Manifest v0.5 6/6, přesná kopie ZIP; Tailscale 1.102.4 online, Serve bez Funnel, Cockpit smoke 5/5, AC `sleep=0`, FileVault zapnutý. Viewer/G8 NEPROVEDENO.

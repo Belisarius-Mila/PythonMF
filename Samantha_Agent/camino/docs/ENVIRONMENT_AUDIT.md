@@ -1,5 +1,10 @@
 # Camino C00 — audit skutečného prostředí
 
+Aktualizace 2026-09-16 21:42 CEST: v0.5 přidalo Camino Viewer. Read-only delta
+audit Tailscale Serve, Cockpitu, napájení, FileVaultu, `launchd` a chybějících
+zkoušek je v [VIEWER_READINESS.md](VIEWER_READINESS.md). C00 se neopakovalo
+plošně a žádné systémové nastavení se neměnilo.
+
 Aktualizace 2026-09-15 08:19 CEST: C01a ověřilo spárovaný iPhone, zapnutý Developer Mode
 a DDI. Skutečný Xcode build však blokuje platform support iOS 26.2 navzdory
 přítomnému SDK. [Aktuální důkaz a rozsah](C01a_AUDIO_PROTOTYPE_REPORT.md).
@@ -21,7 +26,8 @@ Další upřesnění od Míly: domácí server je tentýž Intel MacBook Pro 202
 macOS 15.7.9, 16 GiB RAM. Vývoj a domácí server jsou dvě role jednoho stroje.
 Po tomto upřesnění znovu ověřeny Xcode/SDK, standardní umístění aplikace a volno:
 stále pouze CLT, chybí iPhone SDK, Xcode nenalezen, volno 28,7 GiB.
-Výchozí specifikace: **v0.4**. Stav: **C00 dokončen v dostupném rozsahu; G0 není splněna.**
+Původní výchozí specifikace: **v0.4**. Aktuální autorita je v0.5 s dodatkem U15.
+Stav: **C00 dokončen v dostupném rozsahu; G0 ani nové G8 nejsou splněné.**
 Výchozí Git HEAD: `17621bb48781165cb2a9b1e9b8a01a7f70ba98ac`, větev `main`, při zahájení čistá.
 
 ## Rozsah a význam výsledků

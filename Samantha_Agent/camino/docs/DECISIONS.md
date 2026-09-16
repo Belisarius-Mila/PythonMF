@@ -12,7 +12,8 @@ Navazující provedení: [instalační doklad Xcode 26.3](XCODE_INSTALLATION.md)
 Aplikace je již nainstalovaná, první nastavení dokončené a iPhone SDK 26.2 dostupné;
 níže uvedené návrhy C00 se nesmějí zaměnit za aktuální instalační stav.
 
-Datum: 14. září 2026. Autorita produktu: v0.4, U01–U11 beze změny.
+Datum původního auditu: 14. září 2026. Aktuální autorita produktu: v0.5 se
+závazným dodatkem U15 v `V05_PRIVACY_AMENDMENT.md`.
 Místní důkazy a limity: [ENVIRONMENT_AUDIT.md](ENVIRONMENT_AUDIT.md).
 Tento dokument obsahuje technické návrhy, nikoli souhlas s instalací,
 nákupem, změnou účtů nebo zahájením další etapy.
@@ -163,3 +164,21 @@ instalace nebo hotová funkce aplikace. Jediný další krok je samostatně zada
 příprava a ověření cesty **Xcode 26.3 → cílový iPhone**. C01a se automaticky
 nespouští. Centrální paměť, historické podklady, Git HEAD a index zůstaly beze změny;
 ve workspace přibyly pouze tři dosud necommitnuté dokumenty C00.
+
+## ADR-V05-01 — celý deník pro Janu, Úvaha bezpečně soukromá
+
+**Rozhodnutí Míly 16. září 2026:** `Jen pro mě` zůstává vlastníkovi. Celý obsah
+`Do deníku` může po synchronizaci vstoupit do soukromého read-only Camino
+Vieweru pro Janu. Nová samostatná `Úvaha` vždy začíná jako `Jen pro mě`; do
+deníku se převede pouze vědomou akcí `Vložit do deníku`.
+
+Toto rozhodnutí má přednost před rozpornými staršími větami v importované v0.5,
+ale původní balíček se kvůli ověřitelnosti manifestu nemění. Přesný význam,
+hranice odvolání a dopad na C03/C04/C08 stanoví
+[V05_PRIVACY_AMENDMENT.md](V05_PRIVACY_AMENDMENT.md).
+
+Současný C01b prototyp zkoumá bezpečný audio základ a nemá finální Moment ani
+politiku Vieweru. Přidání do jeho provizorních JSON účtenek by nevytvořilo
+správnou produktovou ochranu a zbytečně by zneplatnilo rozběhnuté fyzické testy.
+Implementace doménového pravidla proto patří do C03a/C04a/C04d; samotný Viewer
+do C08c–C08f. Do té doby žádné současné testovací audio není sdílené.

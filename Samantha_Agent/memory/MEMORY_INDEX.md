@@ -59,7 +59,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] Příště dokončit T019 příchozím hovorem ignorovaným i přijatým. C01a přijato. C01b 0.2.0 (2): 47 testů jádra, 2 UI testy a podepsaný build PASS; 15 původních souborů zachováno. T016 PASS 30:24,406 / 175 147 072 B / 48 kHz mono. T018 PASS podle Míly: AirPods, stání i chůze pod zámkem, bez výpadků; vítr neověřen. Odchozí hovor doložil správné přerušení a nový samostatný pokračovací soubor stejné session; úplný T019 a T020–T021/T024/T059 NEPROVEDENO. G0/G1 nesplněné, C01c nezahájeno. Profil do 22. 9. 18:16 CEST.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] V0.5 + U15 jsou autoritativní: `Do deníku` může být celé dostupné Janě v soukromém Vieweru, samostatná Úvaha začíná `Jen pro mě`. T016/T018–T021 PASS v dosavadním rozsahu; T024/T059 čekají. Viewer delta audit doložil Tailscale/Serve/Cockpit základ, nikoli Viewer runtime ani G8. C01c nezahájeno; profil do 22. 9. 18:16 CEST.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` - Cockpit 14. 9.: scroll 10ec0877 potvrzený Mílou. [PRIPOMENOUT] U07 až při příštím pokračování. TXT v2.8 shrnuje U01–U06; plná brána 1680/1680 OK, funkční nasazení 980aed7a a smoke 5/5. Publikační překážka odstraněna; finální balíček/head ověřovat živým auditem.
 

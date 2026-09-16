@@ -2,6 +2,8 @@
 
 Zahájeno 2026-09-15 po výslovném pokynu Míly. C01a bylo před zahájením přijaté.
 **Stav: 0.2.0 (2) nainstalováno a spuštěno; krátký test zámku a T016/T018–T021 PASS v dosavadním rozsahu, další fyzická přejímka čeká.**
+V0.5 + U15 byly přijaty 2026-09-16; význam tohoto izolovaného audio prototypu
+a zbývající T024/T059 se tím nemění. Finální soukromí Momentu patří do C03/C04.
 
 ## Co se změnilo
 

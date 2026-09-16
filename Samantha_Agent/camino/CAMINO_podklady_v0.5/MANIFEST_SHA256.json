@@ -1,0 +1,26 @@
+{
+  "AGENTS.md": {
+    "sha256": "6700644d0a3c4a4ac158d6207952330b33340f67194dd6a4ac4da73f1dc926f9",
+    "bytes": 4354
+  },
+  "CAMINO_funkcni_specifikace_v0.5.md": {
+    "sha256": "2d11c996868603e90ff87d613491306794adf64a915be9642feb0faffde8bf8a",
+    "bytes": 93122
+  },
+  "CAMINO_Codex_v0.5.md": {
+    "sha256": "843bc3ff098cf11dc7621e88839520a74fd03f79c43d254fba949fa0300be8b0",
+    "bytes": 14149
+  },
+  "CAMINO_akceptacni_testy_v0.5.md": {
+    "sha256": "00416e06e6c718f1924b94f5f1393742f1bc9244a8043b054df984a51937335d",
+    "bytes": 22429
+  },
+  "CAMINO_zmeny_v0.5.md": {
+    "sha256": "07e2c4399ed851ed5aa45313e1b15c5029a8d20dad656ab668c08623cc98b44b",
+    "bytes": 1768
+  },
+  "README_v0.5.md": {
+    "sha256": "09a8556b86703467c2640a76d28004bc5ce902d9b161466f3f17465210ff7645",
+    "bytes": 375
+  }
+}

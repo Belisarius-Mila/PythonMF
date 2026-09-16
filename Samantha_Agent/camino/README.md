@@ -3,11 +3,13 @@
 Soukromý cestovní deník: offline záznam na iPhonu, soukromé zpracování na Macu
 a pozdější film z povolených zdrojů.
 
-**Stav: C01a přijato; C01b zahájeno, verze 0.2.0 (2) sestavena a podepsána. 47 testů jádra a 2 UI testy PASS; instalace/spuštění 0.2.0 ověřeny; krátký funkční test zámku potvrzen Mílou; T016 a další fyzická přejímka čekají.**
+**Stav: autoritativní podklady v0.5 přijaty s dodatkem U15. C01a přijato; C01b 0.2.0 (2) nainstalováno. T016 a T018–T021 PASS v dosavadním rozsahu; T024/T059 čekají. Camino Viewer je P0, ale podle etap se implementuje až v C08c–C08f.**
 
-- [Podklady v0.4](CAMINO_podklady_v0.4/README_v0.4.md)
-- [Funkční specifikace](CAMINO_podklady_v0.4/CAMINO_funkcni_specifikace_v0.4.md)
-- [Postupné úkoly C00–C11](CAMINO_podklady_v0.4/CAMINO_Codex_v0.4.md)
+- [Podklady v0.5](CAMINO_podklady_v0.5/README_v0.5.md)
+- [Funkční specifikace v0.5](CAMINO_podklady_v0.5/CAMINO_funkcni_specifikace_v0.5.md)
+- [Závazný dodatek k soukromí](docs/V05_PRIVACY_AMENDMENT.md)
+- [Postupné úkoly C00–C11](CAMINO_podklady_v0.5/CAMINO_Codex_v0.5.md)
+- [Historické podklady v0.4](CAMINO_podklady_v0.4/README_v0.4.md)
 - [Projektová paměť](../memory/projects/camino.md)
 - [Handoff](../memory/handoffs/workstreams/project-camino.md)
 - [TVBCP](../memory/tvbcp/workstreams/project-camino.md)
@@ -15,6 +17,7 @@ a pozdější film z povolených zdrojů.
 V Human–Adam se projekt jmenuje **Camino** (`project-camino`).
 
 - [Audit prostředí C00](docs/ENVIRONMENT_AUDIT.md)
+- [Připravenost Camino Vieweru](docs/VIEWER_READINESS.md)
 - [Technická rozhodnutí](docs/DECISIONS.md)
 - [Ověřená instalace Xcode](docs/XCODE_INSTALLATION.md)
 - [Zadání C01a](tasks/C01a_AUDIO_PROTOTYPE.md)
@@ -23,7 +26,8 @@ V Human–Adam se projekt jmenuje **Camino** (`project-camino`).
 - [Audio prototyp](prototypes/audio/README.md)
 - [Aktuální report a překážky](docs/C01a_AUDIO_PROTOTYPE_REPORT.md)
 
-Provést T016: 30 minut záznamu převážně pod zámkem, průběžné neosobní zvukové značky, Stop a celý poslech; doplnit délku/velikost z metadat. Potom T018–T021/T024/T059; C01c nezahajovat.
+Provést T024 a potom T059; C01c nezahajovat před uzavřením C01b.
 
-Rozbalené podklady v0.4 jsou verzované včetně manifestu. Původní ZIP je
-zachovaný lokálně a ignorovaný Gitem; profilové workspaces přebírají dokumenty.
+Rozbalené podklady v0.4 a v0.5 jsou verzované včetně manifestů. Původní ZIPy
+jsou zachované lokálně a ignorované Gitem; profilové workspaces přebírají
+dokumenty. Původní v0.5 se kvůli dodatku nepřepisuje.

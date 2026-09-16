@@ -65,7 +65,7 @@ nesmi smesovat s Knihovnou clanku.
 | `project-mobile-input` | `Project` | iPhone Shortcuts / Mobile Input | paused | 2 | iPhone Shortcuts / Mobile Input Layer |
 | `project-colors-and-numbers` | `Project` | ColorsAndNumbers / automatické úkoly | active | 1 | Automaticke opakujici se ukoly / ColorsAndNumbers |
 | `project-to-be-to-have` | `Project` | ToBeToHave | active | 2 | ToBeToHave; navazuje na původní názvy To Be Training a ToBeTraining. |
-| `project-camino` | `Project` | Camino | active | 1 | Camino; podklady v0.4, vývoj začne C00 až po meziúkolu. |
+| `project-camino` | `Project` | Camino | active | 1 | Camino; autoritativní v0.5 + U15, C01b čeká na T024/T059, Viewer je P0 v pozdějších C08c–C08f. |
 | `project-linux-workstation` | `Project` | Linux / instalace a konfigurace | active | 2 | Linux / instalace a konfigurace; samostatná konzultace instalace, konfigurace a běžné práce na linuxovém počítači. |
 | `project-vocabulary-fr` | `Project` | Vocabulary FR | active | 2 | Potvrzeny kanonicky projekt v `project_capability_map.md`; lokalni a webova varianta patri dohromady. |
 | `project-vocabulary-it` | `Project` | Vocabulary IT | paused | 2 | Potvrzeny kanonicky projekt v `project_capability_map.md`; lokalni a webova varianta patri dohromady. |
