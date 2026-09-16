@@ -1,7 +1,7 @@
 # C01b — audio pod zámkem, přerušení a pokračování
 
 Zahájeno 2026-09-15 po výslovném pokynu Míly. C01a bylo před zahájením přijaté.
-**Stav: 0.2.0 (2) nainstalováno a spuštěno; krátký funkční test zámku PASS podle Míly, další fyzická přejímka čeká.**
+**Stav: 0.2.0 (2) nainstalováno a spuštěno; krátký test zámku a T016 PASS podle Míly, další fyzická přejímka čeká.**
 
 ## Co se změnilo
 
@@ -61,7 +61,7 @@ ověřenou další kopii; audio se v tomto kroku z telefonu nestahuje.
   simulator-only testovací launch flags. Dedikovaný simulátor byl po testu vypnut.
 - Instalace/spuštění 0.2.0: **PASS**, živě ověřeno přes devicectl.
 - Původní soubory: inventář všech 15 cest/velikostí před/po shodný; bez čtení audia.
-- Fyzické T016/T018–T021/T024/T059: **NEPROVEDENO**.
+- Fyzický T016: **PASS podle Míly**; T018–T021/T024/T059: **NEPROVEDENO**.
 
 Příkazy:
 
@@ -79,8 +79,8 @@ zámku, hovoru, Bluetooth nebo ochrany dat před prvním odemknutím.
 
 ## Další krok
 
-Krátký funkční test zámku Míla potvrdil. Následuje 30minutový T016 a další scénáře podle
-[C01b_BACKGROUND_AUDIO.md](../tasks/C01b_BACKGROUND_AUDIO.md). Bez výsledků
+Krátký funkční test zámku a 30minutový T016 Míla potvrdil. Následuje T018 a další scénáře podle
+[C01b_BACKGROUND_AUDIO.md](../tasks/C01b_BACKGROUND_AUDIO.md). Bez zbývajících výsledků
 nelze C01b přijmout; C01c ani G0/G1 nejsou tímto uzavřeny.
 
 ## Technické podklady
@@ -126,3 +126,19 @@ Navrhované další kroky:
 Technický důkaz:
 - Uživatelské potvrzení z fyzického telefonu po instalaci 0.2.0. Přesná délka, velikost, úplnost poslechu a offline režim nejsou touto odpovědí samostatně doloženy; metadata nového vzorku ani aktuální verze iOS nebyly v tomto kroku čteny. Audio zůstalo na telefonu.
 - Kód beze změn; automatické testy se neopakovaly. Krátká zkouška neuzavírá 30minutový T016, hovor, sluchátka ani ochranu po restartu.
+
+### 2026-09-16 13:43 CEST — T016 potvrzen na fyzickém telefonu
+
+Hotovo / důkaz:
+- Míla potvrdil přibližně 30:16 nahrávání, převážně pod zámkem, v režimu Letadlo. Nahrávání proběhlo bez problému a celý záznam se přehrál bez hlášeného výpadku. T016: PASS podle uživatele.
+- Pokus o přehrávání při zamčené obrazovce neběžel. T016 ověřuje nahrávání pod zámkem, nikoli background přehrávání; toto pozorování proto T016 nemění na FAIL.
+
+Hranice důkazu a rizika:
+- Velikost souboru nebyla sdělena. Dnešní zpráva znovu nečetla verzi aplikace, model telefonu ani iOS; výsledek navazuje na evidovaný kontext Camino Audio 0.2.0 (2) na iPhone 14 Plus / iOS 26.6.1.
+- Jediný nepřerušený soubor C01b není důkaz segmentace, journalu ani 60s obnovy C01c. Audio zůstává pouze na telefonu.
+
+Další krok:
+- T018 s dostupnými sluchátky: ověřit skutečný aktivní vstup, stání/chůzi a zámek. Potom T019–T021/T024/T059; C01c nezahajovat.
+
+Ověření:
+- Kód se neměnil; automatické testy se neopakovaly. Změněn je pouze zápis fyzického výsledku a navazující projektový stav.
