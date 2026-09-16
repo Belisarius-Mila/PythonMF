@@ -1,7 +1,7 @@
 # C01b — audio pod zámkem a vědomé pokračování
 
 Zahájeno výslovným pokynem Míly 2026-09-15 po přijetí C01a.
-**Stav: 0.2.0 (2) nainstalováno/spuštěno; krátký test zámku a T016/T018–T021 PASS v dosavadním rozsahu, další fyzická přejímka čeká.**
+**Stav: 0.2.0 (2) nainstalováno/spuštěno; krátký test zámku a T016/T018–T021/T024 PASS v dosavadním rozsahu, čeká T059.**
 Aktuální výsledky určuje [report C01b](../docs/C01b_BACKGROUND_AUDIO_REPORT.md).
 
 ## Rozsah
@@ -43,7 +43,7 @@ Aktuální výsledky určuje [report C01b](../docs/C01b_BACKGROUND_AUDIO_REPORT.
 | T019 | Uživatel zajistí příchozí hovor, jednou ignoruje a jednou přijme. Zachovaný zvuk před přerušením, nic z hovoru ani samovolné pokračování; Pokračovat až po ukončení hovoru. Agent nikomu nevolá. | PASS podle Míly 2026-09-16: ignorovaný i přijatý příchozí hovor, obě části přehratelné, nic z hovoru v audu a žádné samovolné pokračování. Technická metadata potvrzují dvě přerušené první části a jejich samostatná vědomá pokračování stejné session s pauzami 43,153 s a 112,272 s. |
 | T020 | Odpojit/připojit skutečně aktivní mikrofon; přerušení, ověření staré části, vědomé pokračování a nová část stejné session s mezerou. | PASS podle Míly 2026-09-16: odpojení AirPods přerušilo záznam, pokračování použilo mikrofon iPhonu, opětovné připojení ukončilo druhou část a AirPods se staly aktivním vstupem až při dalším vědomém pokračování. Všechny části přehratelné, bez samovolného pokračování. Metadata potvrzují tři samostatné části jedné session a dvě přerušení. |
 | T021 — prototyp | Během záznamu nelze spustit player ani druhý recorder; přepnutí aplikace nezruší běžící audio. Video / integrace Momentu až C04. | PASS podle Míly 2026-09-16 v rozsahu C01b: volba typu a Přehrát neaktivní, druhý recorder nešel spustit, po návratu z jiné aplikace pokračovala stejná Úvaha a čas narostl, jedna část bez přerušení a celý poslech OK. Metadata poslední Úvahy: 56,350 s, 48 kHz mono, `interrupted=false`, bez continuation. Plný T021 se po integraci videa/Momentu zopakuje v C04. |
-| T024 — hranice C01b | Po dokončené části pokračovat a nuceně zavřít. Po otevření žádný mikrofon, dokončená část zůstává přehratelná, neověřená je přiznaná. Žádný slib záchrany otevřeného souboru. | NEPROVEDENO |
+| T024 — hranice C01b | Za rozpracovaného audia nuceně zavřít aplikaci. Po otevření žádný mikrofon, dokončené části zůstávají přehratelné, neověřený pokus je přiznaný. Žádný slib záchrany otevřeného souboru. | PASS podle Míly 2026-09-16. Snímek po relaunchi ukazuje Připraveno 00:00, vědomý Start, jednu neověřenou/neúplnou položku a zachované přehratelné části. Metadata potvrzují jeden nový samostatný pokus se `started.json` a bez `completed.json`; předchozí dokončená session zůstala zachovaná. Pád proběhl v nové samostatné Úvaze, nikoli v continuation, což kanonický T024 neomezuje. |
 | T059 | Zámek po prvním odemknutí oproti restartu před prvním odemknutím; žádný automatický záznam/čtení chráněných dat před odemknutím, po něm zachované části. | NEPROVEDENO |
 
 Každý výsledek musí obsahovat datum, verzi aplikace, telefon/iOS, kroky,

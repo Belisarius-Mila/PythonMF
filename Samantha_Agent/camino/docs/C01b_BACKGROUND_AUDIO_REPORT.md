@@ -1,9 +1,9 @@
 # C01b — audio pod zámkem, přerušení a pokračování
 
 Zahájeno 2026-09-15 po výslovném pokynu Míly. C01a bylo před zahájením přijaté.
-**Stav: 0.2.0 (2) nainstalováno a spuštěno; krátký test zámku a T016/T018–T021 PASS v dosavadním rozsahu, další fyzická přejímka čeká.**
+**Stav: 0.2.0 (2) nainstalováno a spuštěno; krátký test zámku a T016/T018–T021/T024 PASS v dosavadním rozsahu, čeká T059.**
 V0.5 + U15 byly přijaty 2026-09-16; význam tohoto izolovaného audio prototypu
-a zbývající T024/T059 se tím nemění. Finální soukromí Momentu patří do C03/C04.
+a zbývající T059 se tím nemění. Finální soukromí Momentu patří do C03/C04.
 
 ## Co se změnilo
 
@@ -63,7 +63,7 @@ ověřenou další kopii; audio se v tomto kroku z telefonu nestahuje.
   simulator-only testovací launch flags. Dedikovaný simulátor byl po testu vypnut.
 - Instalace/spuštění 0.2.0: **PASS**, živě ověřeno přes devicectl.
 - Původní soubory: inventář všech 15 cest/velikostí před/po shodný; bez čtení audia.
-- Fyzické T016 a T018–T020: **PASS podle Míly**; T021: **PASS v rozsahu C01b prototypu**, plná integrace se zopakuje v C04; T024/T059: **NEPROVEDENO**.
+- Fyzické T016, T018–T020 a T024: **PASS podle Míly**; T021: **PASS v rozsahu C01b prototypu**, plná integrace se zopakuje v C04; T059: **NEPROVEDENO**.
 
 Příkazy:
 
@@ -81,7 +81,7 @@ zámku, hovoru, Bluetooth nebo ochrany dat před prvním odemknutím.
 
 ## Další krok
 
-Krátký funkční test zámku a T016/T018–T021 v dosavadním rozsahu Míla potvrdil. Následují T024 a T059 podle
+Krátký funkční test zámku a T016/T018–T021/T024 v dosavadním rozsahu Míla potvrdil. Následuje T059 podle
 [C01b_BACKGROUND_AUDIO.md](../tasks/C01b_BACKGROUND_AUDIO.md). Bez zbývajících výsledků
 nelze C01b přijmout; C01c ani G0/G1 nejsou tímto uzavřeny.
 
@@ -208,3 +208,16 @@ Vyhodnocení a rizika:
 
 Další krok:
 - T024: po dokončené části vědomě pokračovat, za běžícího pokračování nuceně ukončit aplikaci a po otevření ověřit žádný aktivní mikrofon, zachovanou dokončenou část a pravdivě přiznaný neověřený pokus. Potom T059.
+
+### 2026-09-16 22:41 CEST — T024 PASS
+
+Hotovo / důkaz:
+- Míla potvrdil očekávané chování po nuceném ukončení aplikace za rozpracovaného audia. Snímek po relaunchi ukazuje klidový stav `Připraveno` 00:00, vědomý `Start`, jednu neověřenou nebo neúplnou položku a zachované části s dostupným přehráním.
+- Živý CoreDevice inventář a pouze malé technické JSON účtenky potvrzují dokončenou session: první část 25,093 s, `interrupted=true`, pokračování 2,254 s po pauze 25,729 s, 48 kHz mono. Novější samostatná Úvaha má `started.json` a audio soubor, ale žádný `completed.json`; aplikace ji proto pravdivě započítala jako neověřenou.
+
+Vyhodnocení a rizika:
+- T024 PASS. Nuceně ukončený pokus byl samostatná nová Úvaha, nikoli continuation předchozí session. Kanonický T024 vyžaduje pád s rozpracovaným audiem, žádnou automatickou aktivaci mikrofonu a nabídku zachovaného přehratelného rozsahu; tyto podmínky jsou splněné.
+- Nejde o důkaz záchrany otevřeného CAF, segmentového journalu ani omezení ztráty na 60 s; to patří do C01c. Žádný CAF se nekopíroval ani neposlouchal. Oprava ani nový build nejsou potřeba.
+
+Další krok:
+- Provést T059. C01c nezahajovat před uzavřením C01b.

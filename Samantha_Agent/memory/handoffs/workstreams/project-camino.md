@@ -1,23 +1,23 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-Aktualizováno: 2026-09-16 21:48 CEST
+Aktualizováno: 2026-09-16 22:41 CEST
 
 - Autoritativní podklady jsou v0.5 + závazný dodatek U15. Původní v0.5 je importovaná beze změny a manifest 6/6 je ověřený. Celé `Do deníku` může po synchronizaci do soukromého Vieweru Jany; samostatná Úvaha vždy začíná `Jen pro mě` a vyžaduje vědomé `Vložit do deníku`.
 - Viewer delta audit: Tailscale/Serve/Cockpit tvoří použitelný základ, Funnel je vypnutý, Cockpit smoke 5/5, AC nespí a FileVault je zapnutý. Camino backend/worker/Viewer, samostatná autorizace, záloha, restart a test Janiných zařízení chybějí; G8 NEPROVEDENO.
 - Profilový fast-forward má opravený whitespace preflight: používá příchozí `.gitattributes`, bez globálního vypnutí kontroly; regresní test je zelený.
-- T016 PASS: přesně 30:24,406, 175 147 072 B, 48 kHz mono, režim Letadlo, převážně pod zámkem a celý poslech OK. T018–T020 PASS podle Míly. T021 PASS v rozsahu C01b prototypu: jediná aktivní session, pokračování po návratu z jiné aplikace a celý poslech OK; plná integrace se zopakuje v C04. Vítr neověřen.
+- T016 PASS: přesně 30:24,406, 175 147 072 B, 48 kHz mono, režim Letadlo, převážně pod zámkem a celý poslech OK. T018–T020 a T024 PASS podle Míly. T021 PASS v rozsahu C01b prototypu: jediná aktivní session, pokračování po návratu z jiné aplikace a celý poslech OK; plná integrace se zopakuje v C04. T024 po pádu zachoval přehratelné části, nespustil mikrofon a přiznal nový neověřený pokus. Vítr neověřen.
 - C01b zahájeno výslovným pokynem Míly; C01a zůstává přijaté. Prototyp 0.2.0 (2) je lokálně připraven pro background audio, přerušení a vědomé pokračování. Verze 0.2.0 je nyní nainstalovaná a spuštěná na iPhonu; inventář 15 původních souborů se před/po shoduje v cestách a velikostech.
 - Běžící recorder přežije změnu scenePhase; nový Start/Pokračovat pouze v popředí. Přerušení ihned pozastaví vstup, ověří dostupnou část a nabídne Pokračovat/Ukončit. Pokračování vytváří novou část stejné session s evidovanou pauzou, bez přepisu předchozího média.
 - Nové soubory mají completeUntilFirstUserAuthentication; původní C01a soubory se nemigrují ani nemění. Staré JSON podporuje volitelné continuation. Není to C01c segmentový journal ani garance 60s ztráty.
 - Ověřeno 47/47 Swift testů, 2/2 UI testy simulátoru včetně snímku obrazovky, finální podepsaný iOS build a strict podpis; UIBackgroundModes=[audio]. Plná projektová brána PASS, 1684/1684 testů.
-- Instalace/spuštění 0.2.0 PASS. Krátký test zámku a T016/T018–T021 PASS v dosavadním rozsahu. Metadata T021 potvrzují jedinou nepřerušenou část Úvahy 56,350 s; T024/T059 čekají.
+- Instalace/spuštění 0.2.0 PASS. Krátký test zámku a T016/T018–T021/T024 PASS v dosavadním rozsahu. Metadata T024 potvrzují jeden nový pokus bez `completed.json`; T059 čeká.
 - Profil hlavní aplikace do 22. září 18:16 CEST. G0/G1/G8 a terénní připravenost nesplněné; C01c nezahájeno. Původní nahrávky i samostatný Camino Test zůstávají zachované.
 
 ### Vzkaz pro pokračování
 
 - Restart a následný schválený úklid dokončeny. Před zahájením instalace bylo na SSD 85,79 GiB volných. Dřívější přesun USA neopakovat.
-- Instalace platformy i nepodepsaný build ověřeny. Provést T024, potom T059. C01c nezahajovat.
+- Instalace platformy i nepodepsaný build ověřeny. Provést T059. C01c nezahajovat před uzavřením C01b.
 - Viewer nepřeskakovat před C08c–C08f. U15 doménově implementovat v C03/C04; provizorně jej nepřidávat do C01b JSON.
 - Po každém Mílou oznámeném výsledku bez další žádosti vyhodnotit stav, říct, zda je potřeba vývoj, a rovnou dát přesný návod i kritéria PASS následujícího neprovedeného testu. Shoda s návrhem nevyžaduje změnu kódu; FAIL nejdřív doložit a potom opravit v C01b.
 - Starší c+p+n d573e90c je historické. Dnešní p+n zahrnuje celý balíček Camina a toto předání; výsledek určuje živý audit a kanonická deployment receipt.
@@ -25,7 +25,7 @@ Aktualizováno: 2026-09-16 21:48 CEST
 ### Rizika
 
 - C01a přijato, ale širší brány G0/G1/G8 a terénní připravenost zůstávají nesplněné.
-- T016 a T018–T021 potvrzeny v dosavadním rozsahu; vítr, plná integrace T021 v C04 a T024/T059 čekají. Segmentace a záchrana po pádu během zápisu patří do C01c.
+- T016, T018–T021 a T024 potvrzeny v dosavadním rozsahu; vítr, plná integrace T021 v C04 a T059 čekají. Segmentace a záchrana otevřeného souboru po pádu patří do C01c.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
 - Podepsaný build není instalace ani fyzická přejímka; vývojový profil je časově omezený. U01–U15 se bez nového rozhodnutí neotevírají.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -38,22 +38,22 @@ Typ: Project
 Priorita: 1
 Stav: rozpracovane
 Pripomenout pri startu: ano
-Datum: 2026-09-16 21:48 CEST
+Datum: 2026-09-16 22:41 CEST
 
 Co se resilo:
-Přijetí technického zadání v0.5, rozhodnutí U15 a delta audit Viewer readiness při zachování probíhající C01b.
+Fyzická přejímka T024 po pádu za rozpracovaného audia a její technické ověření bez čtení média.
 
 Co je hotove:
-V0.5 importovaná a ověřená, U15 závazně zapsané, delta C00 Viewer audit dokončený. C01a přijato; C01b nainstalované a T016/T018–T021 potvrzené v dosavadním rozsahu.
+V0.5 importovaná a ověřená, U15 závazně zapsané, delta C00 Viewer audit dokončený. C01a přijato; C01b nainstalované a T016/T018–T021/T024 potvrzené v dosavadním rozsahu.
 
 Co neni hotove:
-T024/T059 a plná integrace T021 v C04; C01c, doménová implementace U15 v C03/C04, Viewer C08c–C08f, G0/G1/G8 a terénní připravenost.
+T059 a plná integrace T021 v C04; C01c, doménová implementace U15 v C03/C04, Viewer C08c–C08f, G0/G1/G8 a terénní připravenost.
 
 Dalsi krok:
-Provést T024, potom T059; C01c nezahajovat.
+Provést T059; C01c nezahajovat před uzavřením C01b.
 
 Navrhovane dalsi kroky:
-Provést T024; potom T059. C01c nezahajovat.
+Provést T059. Po jeho vyhodnocení rozhodnout o uzavření C01b; C01c nezahajovat dříve.
 
 Zmenene nebo relevantni soubory:
 `camino/`, `memory/projects/camino.md`, katalog, registry a kanonický TVBCP.
@@ -565,3 +565,16 @@ Rozhodnutí a rizika:
 
 Další krok:
 - Po commitu zopakovat dorovnání čistých profilů; v Caminu pokračovat T024.
+
+### 2026-09-16 22:41 CEST — T024 PASS
+
+Hotovo / důkaz:
+- Míla potvrdil očekávaný relaunch po nuceném ukončení aplikace za rozpracované Úvahy. Snímek ukazuje `Připraveno` 00:00, vědomý `Start`, jednu neověřenou položku a dostupné přehrání zachovaných částí.
+- CoreDevice inventář a malé JSON účtenky potvrzují dokončenou session 25,093 s + continuation 2,254 s a nový samostatný pokus s `started.json`, ale bez `completed.json`. Žádný CAF se nekopíroval ani neposlouchal.
+
+Rozhodnutí a rizika:
+- T024 PASS; oprava ani nový build nejsou potřeba. Nuceně ukončený pokus byl samostatná nová Úvaha, ne continuation, ale splňuje kanonická kritéria T024.
+- Důkaz nezahrnuje záchranu otevřeného CAF, segmentový journal ani 60s limit ztráty C01c. T059 a širší G0/G1 zůstávají otevřené.
+
+Další krok:
+- Provést T059; C01c nezahajovat před uzavřením C01b.

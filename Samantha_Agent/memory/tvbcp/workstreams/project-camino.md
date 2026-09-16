@@ -16,22 +16,22 @@ je vyloučeno; celé `Do deníku` je po synchronizaci Viewer-eligible.
 - V0.5 importovaná beze změny, 6/6 manifestovaných souborů ověřeno; U15 je závazný novější dodatek. Samostatná Úvaha začíná `Jen pro mě` a do deníku se převádí vědomě.
 - Viewer delta audit potvrdil Tailscale/Serve/Cockpit základ, smoke 5/5, Funnel vypnutý, AC bez spánku a FileVault zapnutý. Viewer služby, autorizace, záloha/restart a Janina vzdálená zkouška chybějí; G8 NEPROVEDENO.
 - Profilový fast-forward nyní kontroluje whitespace s příchozími `.gitattributes`; ostatní fail-closed brány zůstávají zachované.
-- T016 PASS: přesně 30:24,406, 175 147 072 B, 48 kHz mono, režim Letadlo, převážně pod zámkem a celý poslech OK. T018–T020 PASS podle Míly. T021 PASS v rozsahu C01b prototypu: jediná aktivní session, pokračování po návratu z jiné aplikace a celý poslech OK; plná integrace se zopakuje v C04. Vítr neověřen.
+- T016 PASS: přesně 30:24,406, 175 147 072 B, 48 kHz mono, režim Letadlo, převážně pod zámkem a celý poslech OK. T018–T020 a T024 PASS podle Míly. T021 PASS v rozsahu C01b prototypu: jediná aktivní session, pokračování po návratu z jiné aplikace a celý poslech OK; plná integrace se zopakuje v C04. T024 po pádu zachoval přehratelné části, nespustil mikrofon a přiznal nový neověřený pokus. Vítr neověřen.
 - C01b zahájeno výslovným pokynem Míly; C01a zůstává přijaté. Prototyp 0.2.0 (2) je lokálně připraven pro background audio, přerušení a vědomé pokračování. Verze 0.2.0 je nyní nainstalovaná a spuštěná na iPhonu; inventář 15 původních souborů se před/po shoduje v cestách a velikostech.
 - Běžící recorder přežije změnu scenePhase; nový Start/Pokračovat pouze v popředí. Přerušení ihned pozastaví vstup, ověří dostupnou část a nabídne Pokračovat/Ukončit. Pokračování vytváří novou část stejné session s evidovanou pauzou, bez přepisu předchozího média.
 - Nové soubory mají completeUntilFirstUserAuthentication; původní C01a soubory se nemigrují ani nemění. Staré JSON podporuje volitelné continuation. Není to C01c segmentový journal ani garance 60s ztráty.
 - Ověřeno 47/47 Swift testů, 2/2 UI testy simulátoru včetně snímku obrazovky, finální podepsaný iOS build a strict podpis; UIBackgroundModes=[audio]. Plná projektová brána PASS, 1684/1684 testů.
-- Instalace/spuštění 0.2.0 PASS. Krátký test zámku a T016/T018–T021 PASS v dosavadním rozsahu. Metadata T021 potvrzují jedinou nepřerušenou část Úvahy 56,350 s; T024/T059 čekají.
+- Instalace/spuštění 0.2.0 PASS. Krátký test zámku a T016/T018–T021/T024 PASS v dosavadním rozsahu. Metadata T024 potvrzují jeden nový pokus bez `completed.json`; T059 čeká.
 - Po každém Mílou oznámeném výsledku fyzického testu Adam bez další žádosti vyhodnotí stav, řekne, zda je potřeba vývoj, a rovnou předá podmínky, přesný postup a kritéria PASS následujícího neprovedeného testu. Shoda s návrhem sama změnu kódu nevyvolává.
 - Profil hlavní aplikace do 22. září 18:16 CEST. G0/G1/G8 a terénní připravenost nesplněné; C01c nezahájeno. Původní nahrávky i samostatný Camino Test zůstávají zachované.
 
 
-Provést T024, potom T059; C01c nezahajovat.
+Provést T059; C01c nezahajovat před uzavřením C01b.
 
 ## Rizika
 
 - C01a přijato, ale širší brány G0/G1/G8 a terénní připravenost zůstávají nesplněné.
-- T016 a T018–T021 potvrzeny v dosavadním rozsahu; vítr, plná integrace T021 v C04 a T024/T059 čekají. Segmentace a záchrana po pádu během zápisu patří do C01c.
+- T016, T018–T021 a T024 potvrzeny v dosavadním rozsahu; vítr, plná integrace T021 v C04 a T059 čekají. Segmentace a záchrana otevřeného souboru po pádu patří do C01c.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
 - Podepsaný build není instalace ani fyzická přejímka; vývojový profil je časově omezený. U01–U15 se bez nového rozhodnutí neotevírají.
 
@@ -520,3 +520,20 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Regresní test + 192 souvisejících testů PASS; rychlá kontrolní brána PASS.
+
+### 2026-09-16 22:41 CEST — T024 PASS
+
+Hotovo:
+- Po nuceném ukončení aplikace za rozpracované Úvahy zůstal relaunch v klidu, dříve dokončené části byly přehratelné a nový neověřený pokus byl viditelně započítán.
+
+Rozhodnutí:
+- T024 PASS; oprava ani nový build nejsou potřeba. Samostatný rozpracovaný pokus splňuje kanonický scénář i bez vazby continuation.
+
+Další krok:
+- Provést T059; C01c nezahajovat před uzavřením C01b.
+
+Navrhované další kroky:
+- Po T059 vyhodnotit C01b a teprve potom případně zahájit C01c.
+
+Technický důkaz:
+- Snímek ukazuje `Připraveno` 00:00, vědomý `Start`, jednu neověřenou položku a přehratelné části. CoreDevice metadata: zachovaná dokončená session 25,093 s + 2,254 s, nový pokus jen `started.json` bez `completed.json`; žádný CAF se nekopíroval ani neposlouchal.
