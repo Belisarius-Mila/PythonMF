@@ -1,7 +1,7 @@
 # C01b — audio pod zámkem, přerušení a pokračování
 
 Zahájeno 2026-09-15 po výslovném pokynu Míly. C01a bylo před zahájením přijaté.
-**Stav: 0.2.0 (2) nainstalováno a spuštěno; krátký test zámku a T016 PASS podle Míly, další fyzická přejímka čeká.**
+**Stav: 0.2.0 (2) nainstalováno a spuštěno; krátký test zámku, T016 a T018 PASS podle Míly, další fyzická přejímka čeká.**
 
 ## Co se změnilo
 
@@ -61,7 +61,7 @@ ověřenou další kopii; audio se v tomto kroku z telefonu nestahuje.
   simulator-only testovací launch flags. Dedikovaný simulátor byl po testu vypnut.
 - Instalace/spuštění 0.2.0: **PASS**, živě ověřeno přes devicectl.
 - Původní soubory: inventář všech 15 cest/velikostí před/po shodný; bez čtení audia.
-- Fyzický T016: **PASS podle Míly**; T018–T021/T024/T059: **NEPROVEDENO**.
+- Fyzické T016 a T018: **PASS podle Míly**; T019 má dílčí důkaz odchozím hovorem; T020–T021/T024/T059 a úplný T019: **NEPROVEDENO**.
 
 Příkazy:
 
@@ -79,7 +79,7 @@ zámku, hovoru, Bluetooth nebo ochrany dat před prvním odemknutím.
 
 ## Další krok
 
-Krátký funkční test zámku a 30minutový T016 Míla potvrdil. Následuje T018 a další scénáře podle
+Krátký funkční test zámku, 30minutový T016 a AirPods T018 Míla potvrdil. Následuje úplný T019 a další scénáře podle
 [C01b_BACKGROUND_AUDIO.md](../tasks/C01b_BACKGROUND_AUDIO.md). Bez zbývajících výsledků
 nelze C01b přijmout; C01c ani G0/G1 nejsou tímto uzavřeny.
 
@@ -142,3 +142,23 @@ Další krok:
 
 Ověření:
 - Kód se neměnil; automatické testy se neopakovaly. Změněn je pouze zápis fyzického výsledku a navazující projektový stav.
+
+### 2026-09-16 19:46 CEST — T018 PASS a technická kontrola přerušení
+
+Hotovo / důkaz:
+- Míla potvrdil AirPods jako zobrazený aktivní mikrofon, několikaminutové záznamy ve stoje i za chůze pod zámkem, bez výpadků a s úspěšným celým poslechem. T018: PASS pro ověřené podmínky; vítr nebyl přítomen.
+- Snímek v Downloads ukázal T016 30:24 a jednu session rozdělenou na Část 1, pauzu a Část 2. Soukromý obsah snímku ani audia se do projektu nekopíroval.
+- Živý CoreDevice inventář na připojeném iPhone 14 Plus potvrdil Camino Audio 0.2.0 (2). T016 má 1824,406 s, 175 147 072 B, 48 kHz mono a `interrupted=false`.
+- Telefonát dokončil první samostatný CAF/JSON po 188,555 s s `interrupted=true`. Vědomé Pokračovat vytvořilo nový samostatný CAF/JSON o 293,571 s, navázaný na stejnou session a předchozí část, s evidovanou pauzou 145,130 s. Grafické seskupení je očekávané; média se neslepila do jednoho souboru.
+- Pozdější záznam přes mikrofon iPhonu je podle metadat samostatná nová session bez continuation. Nešlo o automatické pokračování rozpracované session.
+
+Hranice důkazu a rizika:
+- Odchozí hovor je dílčí důkaz T019, nikoli úplný předepsaný scénář příchozího hovoru jednou ignorovaného a jednou přijatého. Obsah hovoru nebyl nástrojem poslouchán.
+- Samostatný nový záznam po odpojení AirPods není T020; odpojení a opětovné připojení skutečně aktivního mikrofonu během běžícího záznamu čeká.
+- Mikrofon iPhonu v kapse byl podle Míly výrazně tišší a méně kvalitní. To je očekávatelné praktické omezení, nikoli důkaz chyby zápisu. Výkon AirPods ve větru nebyl ověřen.
+
+Další krok:
+- Dokončit T019 příchozím hovorem: jednou ignorovat, jednou přijmout; ověřit zachovanou část, žádný zvuk hovoru a žádné samovolné pokračování. Potom T020–T021/T024/T059; C01c nezahajovat.
+
+Ověření:
+- Přečteny pouze malé technické JSON účtenky a inventář velikostí; žádný CAF se nekopíroval ani neposlouchal. Kód beze změn, automatické testy se neopakovaly.

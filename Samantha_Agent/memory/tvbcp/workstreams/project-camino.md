@@ -12,21 +12,21 @@ je první organizační krok; aplikace ani audit prostředí tím nevznikají.
 
 ## Aktuální stav a další krok
 
-- T016 dokončen: přibližně 30:16 nahrávání převážně pod zámkem v režimu Letadlo, bez hlášeného výpadku a celý záznam přehratelný. PASS podle Míly; velikost souboru nebyla sdělena.
+- T016 PASS: přesně 30:24,406, 175 147 072 B, 48 kHz mono, režim Letadlo, převážně pod zámkem a celý poslech OK. T018 PASS podle Míly: AirPods jako skutečný vstup, stání i chůze pod zámkem, bez výpadků; vítr neověřen.
 - C01b zahájeno výslovným pokynem Míly; C01a zůstává přijaté. Prototyp 0.2.0 (2) je lokálně připraven pro background audio, přerušení a vědomé pokračování. Verze 0.2.0 je nyní nainstalovaná a spuštěná na iPhonu; inventář 15 původních souborů se před/po shoduje v cestách a velikostech.
 - Běžící recorder přežije změnu scenePhase; nový Start/Pokračovat pouze v popředí. Přerušení ihned pozastaví vstup, ověří dostupnou část a nabídne Pokračovat/Ukončit. Pokračování vytváří novou část stejné session s evidovanou pauzou, bez přepisu předchozího média.
 - Nové soubory mají completeUntilFirstUserAuthentication; původní C01a soubory se nemigrují ani nemění. Staré JSON podporuje volitelné continuation. Není to C01c segmentový journal ani garance 60s ztráty.
 - Ověřeno 47/47 Swift testů, 2/2 UI testy simulátoru včetně snímku obrazovky, finální podepsaný iOS build a strict podpis; UIBackgroundModes=[audio]. Plná projektová brána PASS, 1684/1684 testů.
-- Instalace/spuštění 0.2.0 PASS. Krátký funkční test zámku i T016 PASS podle Míly. Přehrávání při zamčené obrazovce neběželo; není to kritérium T016. T018–T021/T024/T059 čekají.
+- Instalace/spuštění 0.2.0 PASS. Krátký test zámku, T016 a T018 PASS podle Míly. Odchozí hovor správně vytvořil přerušenou první část a vědomé pokračování jako druhý samostatný soubor stejné session; úplný T019 a T020–T021/T024/T059 čekají.
 - Profil hlavní aplikace do 22. září 18:16 CEST. G0/G1 a terénní připravenost nesplněné; C01c nezahájeno. Původní nahrávky i samostatný Camino Test zůstávají zachované.
 
 
-Provést T018 s dostupnými sluchátky: ověřit skutečný aktivní vstup, stání/chůzi a zámek. Potom T019–T021/T024/T059; C01c nezahajovat.
+Dokončit T019 příchozím hovorem jednou ignorovaným a jednou přijatým. Potom T020–T021/T024/T059; C01c nezahajovat.
 
 ## Rizika
 
 - C01a přijato, ale širší brány G0/G1 a terénní připravenost zůstávají nesplněné.
-- T016 potvrzen Mílou; velikost souboru chybí a další fyzické scénáře čekají. Segmentace a záchrana po pádu během zápisu patří do C01c.
+- T016 a T018 potvrzeny; vítr, úplný T019 a další fyzické scénáře čekají. Segmentace a záchrana po pádu během zápisu patří do C01c.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
 - Podepsaný build není instalace ani fyzická přejímka; vývojový profil je časově omezený. U01–U11 se neotevírají.
 
@@ -440,3 +440,12 @@ Technický důkaz:
 - Rizika: T018–T021/T024/T059, C01b/G0/G1 zůstávají otevřené; C01c nezahájeno. Jediný soubor úseku není segmentový journal ani garance 60s obnovy. Audio zůstává pouze na telefonu.
 - Další krok: T018 s dostupnými sluchátky, potom T019–T021/T024/T059.
 - Ověření: kód beze změn, automatické testy se neopakovaly; změněn pouze projektový zápis.
+
+### 2026-09-16 19:46 CEST — T018 PASS a dílčí T019
+
+- Stav: T018 PASS podle Míly s AirPods jako zobrazeným aktivním vstupem; stání i chůze pod zámkem, několikaminutové úseky, bez výpadků, celý poslech OK. Vítr nebyl přítomen.
+- Důkaz: CoreDevice potvrdil Camino Audio 0.2.0 (2) a opravil T016 na 30:24,406 / 175 147 072 B / 48 kHz mono. Žádný CAF se nekopíroval ani neposlouchal.
+- Telefonát: první samostatná část 3:08,56 byla označena `interrupted=true`; Pokračovat vytvořilo druhý samostatný soubor 4:53,57 ve stejné session s pauzou 2:25,13. Grafické seskupení není fyzické slepení médií.
+- Mikrofon iPhonu: pozdější záznam byl nová session bez continuation. Podle Míly byl v kapse tišší a méně kvalitní; nejde o automatické pokračování.
+- Rizika: úplný T019 a T020 čekají; T019 vyžaduje příchozí hovor ignorovaný i přijatý, T020 změnu aktivního vstupu během záznamu. C01b/G0/G1 otevřené, C01c nezahájeno.
+- Další krok: dokončit T019, potom T020–T021/T024/T059.

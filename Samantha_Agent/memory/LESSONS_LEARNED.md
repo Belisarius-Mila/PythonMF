@@ -712,3 +712,10 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Typ: jednorázový
 - Řešení nalezeno: 15092026
 - Řešení: Přepojení kabelu nepomohlo; běžné ukončení a znovuotevření Xcode uživatelem obnovilo seznam aplikací, instalaci/spuštění i čtení metadat. Ověřit živými příkazy, samotné Connected nestačí. VPN se neměnila; příčinná souvislost s VPN nebyla prokázána.
+
+### 2026-09-16 — Grafické seskupení pokračování není sloučení audio souborů
+
+- Kontext: Camino C01b po telefonním přerušení a vědomém Pokračovat.
+- Riziko: Karta „Část 1 / Část 2“ může vypadat jako přilepený jediný záznam a zakrýt, zda se původní médium přepsalo.
+- Řešení: bez čtení audia porovnat snímek UI s technickými `started.json`/`completed.json`: rozdílná ID a CAF, první část `interrupted=true`, druhá má continuation na stejné session, předchozí část a evidovanou pauzu.
+- Ověření: fyzický iPhone po hovoru měl dvě samostatná média; CoreDevice metadata potvrdila návaznost a UI je správně seskupilo. Samotný vzhled karty ani jediný součet času by nestačil.
