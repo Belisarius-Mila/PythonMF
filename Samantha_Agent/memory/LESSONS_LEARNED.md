@@ -719,3 +719,10 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Riziko: Karta „Část 1 / Část 2“ může vypadat jako přilepený jediný záznam a zakrýt, zda se původní médium přepsalo.
 - Řešení: bez čtení audia porovnat snímek UI s technickými `started.json`/`completed.json`: rozdílná ID a CAF, první část `interrupted=true`, druhá má continuation na stejné session, předchozí část a evidovanou pauzu.
 - Ověření: fyzický iPhone po hovoru měl dvě samostatná média; CoreDevice metadata potvrdila návaznost a UI je správně seskupilo. Samotný vzhled karty ani jediný součet času by nestačil.
+
+### LL-039 — Připojené Bluetooth zařízení ještě není aktivní vstup
+
+- Problém: Po připojení AirPods během přerušené nebo ukončované části může UI ukázat jejich skutečný mikrofon až při další vědomé aktivaci audio session; samotný stav Bluetooth proto neprokazuje změnu vstupu ani samovolné pokračování.
+- Typ: opakující se
+- Řešení nalezeno: 16092026
+- Řešení: Posuzovat `currentRoute` při skutečně aktivní session a návaznost technických účtenek. U T020 potvrdit přerušenou část, explicitní continuation stejné session a nový aktivní vstup až po Pokračovat; nepovažovat pouhé připojení příslušenství za běžící mikrofon.

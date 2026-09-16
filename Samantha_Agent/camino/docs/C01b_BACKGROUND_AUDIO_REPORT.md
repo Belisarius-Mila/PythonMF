@@ -1,7 +1,7 @@
 # C01b — audio pod zámkem, přerušení a pokračování
 
 Zahájeno 2026-09-15 po výslovném pokynu Míly. C01a bylo před zahájením přijaté.
-**Stav: 0.2.0 (2) nainstalováno a spuštěno; krátký test zámku a T016/T018/T019 PASS podle Míly, další fyzická přejímka čeká.**
+**Stav: 0.2.0 (2) nainstalováno a spuštěno; krátký test zámku a T016/T018/T019/T020 PASS podle Míly, další fyzická přejímka čeká.**
 
 ## Co se změnilo
 
@@ -61,7 +61,7 @@ ověřenou další kopii; audio se v tomto kroku z telefonu nestahuje.
   simulator-only testovací launch flags. Dedikovaný simulátor byl po testu vypnut.
 - Instalace/spuštění 0.2.0: **PASS**, živě ověřeno přes devicectl.
 - Původní soubory: inventář všech 15 cest/velikostí před/po shodný; bez čtení audia.
-- Fyzické T016, T018 a T019: **PASS podle Míly**; T020–T021/T024/T059: **NEPROVEDENO**.
+- Fyzické T016 a T018–T020: **PASS podle Míly**; T021/T024/T059: **NEPROVEDENO**.
 
 Příkazy:
 
@@ -79,7 +79,7 @@ zámku, hovoru, Bluetooth nebo ochrany dat před prvním odemknutím.
 
 ## Další krok
 
-Krátký funkční test zámku a T016/T018/T019 Míla potvrdil. Následuje T020 a další scénáře podle
+Krátký funkční test zámku a T016/T018–T020 Míla potvrdil. Následuje T021 v prototypovém rozsahu a další scénáře podle
 [C01b_BACKGROUND_AUDIO.md](../tasks/C01b_BACKGROUND_AUDIO.md). Bez zbývajících výsledků
 nelze C01b přijmout; C01c ani G0/G1 nejsou tímto uzavřeny.
 
@@ -179,3 +179,17 @@ Další krok:
 
 Ověření:
 - Kód aplikace se neměnil; aktualizuje se pouze výsledek fyzické přejímky a navazující projektový stav.
+
+### 2026-09-16 20:39 CEST — T020 PASS
+
+Hotovo / důkaz:
+- Míla potvrdil, že odpojení skutečně aktivních AirPods přerušilo záznam, první část je přehratelná, vědomé pokračování zobrazilo mikrofon iPhonu, nic se samo neobnovilo a všechny části jsou přehratelné.
+- Po opětovném připojení se AirPods staly aktivním vstupem až při dalším vědomém spuštění. Technická metadata přitom potvrzují, že druhá část byla také systémově přerušena a třetí vznikla až jako její explicitní continuation.
+- Session obsahuje tři samostatné části: 34,776 s s `interrupted=true`, pokračování 25,944 s po pauze 28,002 s opět s `interrupted=true` a závěrečné pokračování 18,215 s po pauze 90,312 s s `interrupted=false`. Všechny jsou 48 kHz mono.
+
+Vyhodnocení a rizika:
+- T020 PASS. Pouhé Bluetooth připojení není totéž jako aktivní vstup; skutečná route AirPods se potvrdila až po vědomé reaktivaci audio session. To odpovídá F17 a neznamená samovolné pokračování.
+- Poslech potvrzuje Míla; nástroj četl jen technické JSON účtenky. Žádný CAF se nekopíroval ani neposlouchal. T021/T024/T059, C01b/G0/G1 zůstávají otevřené; C01c nezahájeno.
+
+Další krok:
+- Provést T021 v prototypovém rozsahu: za běžící Úvahy ověřit zákaz přehrávače a druhého recorderu a návrat z jiné aplikace bez zrušení aktivního záznamu. Video/Moment patří až do C04.

@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-16 20:25 CEST
+Aktualizováno: 2026-09-16 20:39 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,12 +11,12 @@ editující iPhone. Web v P0 slouží pro čtení a stav, bez veřejného publik
 
 ## Aktuální stav
 
-- T016 PASS: přesně 30:24,406, 175 147 072 B, 48 kHz mono, režim Letadlo, převážně pod zámkem a celý poslech OK. T018 PASS podle Míly: AirPods jako skutečný vstup, stání i chůze pod zámkem, bez výpadků; vítr neověřen. T019 PASS podle Míly pro ignorovaný i přijatý příchozí hovor; obě části přehratelné, bez audia hovoru a bez samovolného pokračování.
+- T016 PASS: přesně 30:24,406, 175 147 072 B, 48 kHz mono, režim Letadlo, převážně pod zámkem a celý poslech OK. T018–T020 PASS podle Míly: AirPods fyzicky ověřeny, oba příchozí hovory bezpečně přerušily a změna aktivního vstupu vytvořila tři samostatné navazující části bez samovolného pokračování; vítr neověřen.
 - C01b zahájeno výslovným pokynem Míly; C01a zůstává přijaté. Prototyp 0.2.0 (2) je lokálně připraven pro background audio, přerušení a vědomé pokračování. Verze 0.2.0 je nyní nainstalovaná a spuštěná na iPhonu; inventář 15 původních souborů se před/po shoduje v cestách a velikostech.
 - Běžící recorder přežije změnu scenePhase; nový Start/Pokračovat pouze v popředí. Přerušení ihned pozastaví vstup, ověří dostupnou část a nabídne Pokračovat/Ukončit. Pokračování vytváří novou část stejné session s evidovanou pauzou, bez přepisu předchozího média.
 - Nové soubory mají completeUntilFirstUserAuthentication; původní C01a soubory se nemigrují ani nemění. Staré JSON podporuje volitelné continuation. Není to C01c segmentový journal ani garance 60s ztráty.
 - Ověřeno 47/47 Swift testů, 2/2 UI testy simulátoru včetně snímku obrazovky, finální podepsaný iOS build a strict podpis; UIBackgroundModes=[audio]. Plná projektová brána PASS, 1684/1684 testů.
-- Instalace/spuštění 0.2.0 PASS. Krátký test zámku a T016/T018/T019 PASS podle Míly. Technická metadata T019 potvrzují dvě přerušené první části a jejich samostatná vědomá pokračování stejné session; T020–T021/T024/T059 čekají.
+- Instalace/spuštění 0.2.0 PASS. Krátký test zámku a T016/T018–T020 PASS podle Míly. Metadata T020 potvrzují tři části jedné session, dvě systémová přerušení a dvě vědomá pokračování; T021/T024/T059 čekají.
 - Profil hlavní aplikace do 22. září 18:16 CEST. G0/G1 a terénní připravenost nesplněné; C01c nezahájeno. Původní nahrávky i samostatný Camino Test zůstávají zachované.
 
 
@@ -43,13 +43,13 @@ kódu nevyvolává; FAIL se nejdřív doloží a opraví v aktuálním rozsahu.
 ## Rizika a otevřeno
 
 - C01a přijato, ale širší brány G0/G1 a terénní připravenost zůstávají nesplněné.
-- T016/T018/T019 potvrzeny; vítr a T020–T021/T024/T059 čekají. Segmentace a záchrana po pádu během zápisu patří do C01c.
+- T016 a T018–T020 potvrzeny; vítr a T021/T024/T059 čekají. Segmentace a záchrana po pádu během zápisu patří do C01c.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
 - Podepsaný build není instalace ani fyzická přejímka; vývojový profil je časově omezený. U01–U11 se neotevírají.
 
 ## Další krok
 
-Provést T020 změnou skutečně aktivního vstupu během běžícího záznamu. Potom T021/T024/T059; C01c nezahajovat.
+Provést T021 v prototypovém rozsahu. Potom T024/T059; C01c nezahajovat.
 
 Historický doklad založení:
 Ověření založení: 56/56 testů integrace (54 + 2 profilové testy) a rychlá statická brána OK.
@@ -490,3 +490,16 @@ Rozhodnutí a rizika:
 
 Další krok:
 - Provést T020 změnou skutečně aktivního vstupu během běžícího záznamu; potom automaticky předat T021.
+
+### 2026-09-16 20:39 CEST — T020 PASS
+
+Hotovo / důkaz:
+- Odpojení aktivních AirPods přerušilo záznam; první část i všechny navazující části jsou podle Míly přehratelné. Pokračování použilo mikrofon iPhonu, nic se samo neobnovilo a AirPods se staly aktivním vstupem až při dalším vědomém spuštění.
+- Metadata potvrzují tři samostatné části jedné session: 34,776 s přerušená, 25,944 s navazující a znovu přerušená, 18,215 s navazující a řádně dokončená; pauzy 28,002 s a 90,312 s, 48 kHz mono.
+
+Rozhodnutí a rizika:
+- T020 PASS. Bluetooth připojení není důkaz aktivního vstupu; AirPods se skutečnou route staly až po vědomé reaktivaci audio session. Oprava ani nový build nejsou potřeba.
+- T021/T024/T059, C01b/G0/G1 zůstávají otevřené; C01c nezahájeno. Žádný CAF se nekopíroval ani neposlouchal.
+
+Další krok:
+- Provést T021 v prototypovém rozsahu: za běžící Úvahy ověřit zákaz přehrávače a druhého recorderu a návrat z jiné aplikace bez zrušení záznamu. Video/Moment patří až do C04.

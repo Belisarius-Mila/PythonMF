@@ -1,7 +1,7 @@
 # C01b — audio pod zámkem a vědomé pokračování
 
 Zahájeno výslovným pokynem Míly 2026-09-15 po přijetí C01a.
-**Stav: 0.2.0 (2) nainstalováno/spuštěno; krátký test zámku a T016/T018/T019 PASS podle Míly, další fyzická přejímka čeká.**
+**Stav: 0.2.0 (2) nainstalováno/spuštěno; krátký test zámku a T016/T018/T019/T020 PASS podle Míly, další fyzická přejímka čeká.**
 Aktuální výsledky určuje [report C01b](../docs/C01b_BACKGROUND_AUDIO_REPORT.md).
 
 ## Rozsah
@@ -41,7 +41,7 @@ Aktuální výsledky určuje [report C01b](../docs/C01b_BACKGROUND_AUDIO_REPORT.
 | T016 | 30 minut převážně pod zámkem, průběžné neosobní zvukové značky; Stop a celý poslech, skutečná délka/velikost. Jediný soubor v C01b není důkaz segmentace C01c. | PASS podle Míly 2026-09-16. CoreDevice metadata: 30:24,406, 175 147 072 B, 48 kHz mono, dokončeno bez příznaku přerušení; režim Letadlo, celý poslech OK. Přehrávání při zamčené obrazovce neběželo, což není kritérium T016. |
 | T018 | Dostupná sluchátka: skutečný vstup, stání/chůze a zámek; slyšitelný hlas, zapsat limity větru/připojení. Bez dostupných sluchátek neuvádět PASS. | PASS podle Míly 2026-09-16: AirPods zobrazené jako aktivní mikrofon, několikaminutové záznamy ve stoje i za chůze, zámek, celý poslech a bez výpadků. Vítr nebyl přítomen, odolnost proti větru zůstává NEOVĚŘENA. |
 | T019 | Uživatel zajistí příchozí hovor, jednou ignoruje a jednou přijme. Zachovaný zvuk před přerušením, nic z hovoru ani samovolné pokračování; Pokračovat až po ukončení hovoru. Agent nikomu nevolá. | PASS podle Míly 2026-09-16: ignorovaný i přijatý příchozí hovor, obě části přehratelné, nic z hovoru v audu a žádné samovolné pokračování. Technická metadata potvrzují dvě přerušené první části a jejich samostatná vědomá pokračování stejné session s pauzami 43,153 s a 112,272 s. |
-| T020 | Odpojit/připojit skutečně aktivní mikrofon; přerušení, ověření staré části, vědomé pokračování a nová část stejné session s mezerou. | NEPROVEDENO. Následný záznam přes mikrofon iPhonu byl samostatná nová session; neprokazuje odpojení aktivního vstupu během běžícího záznamu. |
+| T020 | Odpojit/připojit skutečně aktivní mikrofon; přerušení, ověření staré části, vědomé pokračování a nová část stejné session s mezerou. | PASS podle Míly 2026-09-16: odpojení AirPods přerušilo záznam, pokračování použilo mikrofon iPhonu, opětovné připojení ukončilo druhou část a AirPods se staly aktivním vstupem až při dalším vědomém pokračování. Všechny části přehratelné, bez samovolného pokračování. Metadata potvrzují tři samostatné části jedné session a dvě přerušení. |
 | T021 — prototyp | Během záznamu nelze spustit player ani druhý recorder; přepnutí aplikace nezruší běžící audio. Video / integrace Momentu až C04. | NEPROVEDENO |
 | T024 — hranice C01b | Po dokončené části pokračovat a nuceně zavřít. Po otevření žádný mikrofon, dokončená část zůstává přehratelná, neověřená je přiznaná. Žádný slib záchrany otevřeného souboru. | NEPROVEDENO |
 | T059 | Zámek po prvním odemknutí oproti restartu před prvním odemknutím; žádný automatický záznam/čtení chráněných dat před odemknutím, po něm zachované části. | NEPROVEDENO |

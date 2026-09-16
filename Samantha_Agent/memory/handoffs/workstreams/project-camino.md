@@ -1,27 +1,27 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-Aktualizováno: 2026-09-16 20:25 CEST
+Aktualizováno: 2026-09-16 20:39 CEST
 
-- T016 PASS: přesně 30:24,406, 175 147 072 B, 48 kHz mono, režim Letadlo, převážně pod zámkem a celý poslech OK. T018 PASS podle Míly: AirPods jako skutečný vstup, stání i chůze pod zámkem, bez výpadků; vítr neověřen. T019 PASS podle Míly: ignorovaný i přijatý příchozí hovor, obě části přehratelné, bez audia hovoru a bez samovolného pokračování.
+- T016 PASS: přesně 30:24,406, 175 147 072 B, 48 kHz mono, režim Letadlo, převážně pod zámkem a celý poslech OK. T018–T020 PASS podle Míly: AirPods fyzicky ověřeny, oba příchozí hovory bezpečně přerušily a změna aktivního vstupu vytvořila tři samostatné navazující části bez samovolného pokračování; vítr neověřen.
 - C01b zahájeno výslovným pokynem Míly; C01a zůstává přijaté. Prototyp 0.2.0 (2) je lokálně připraven pro background audio, přerušení a vědomé pokračování. Verze 0.2.0 je nyní nainstalovaná a spuštěná na iPhonu; inventář 15 původních souborů se před/po shoduje v cestách a velikostech.
 - Běžící recorder přežije změnu scenePhase; nový Start/Pokračovat pouze v popředí. Přerušení ihned pozastaví vstup, ověří dostupnou část a nabídne Pokračovat/Ukončit. Pokračování vytváří novou část stejné session s evidovanou pauzou, bez přepisu předchozího média.
 - Nové soubory mají completeUntilFirstUserAuthentication; původní C01a soubory se nemigrují ani nemění. Staré JSON podporuje volitelné continuation. Není to C01c segmentový journal ani garance 60s ztráty.
 - Ověřeno 47/47 Swift testů, 2/2 UI testy simulátoru včetně snímku obrazovky, finální podepsaný iOS build a strict podpis; UIBackgroundModes=[audio]. Plná projektová brána PASS, 1684/1684 testů.
-- Instalace/spuštění 0.2.0 PASS. Krátký test zámku a T016/T018/T019 PASS podle Míly. Metadata T019 potvrzují dvě přerušené první části a jejich samostatná vědomá pokračování stejné session; T020–T021/T024/T059 čekají.
+- Instalace/spuštění 0.2.0 PASS. Krátký test zámku a T016/T018–T020 PASS podle Míly. Metadata T020 potvrzují tři části jedné session, dvě systémová přerušení a dvě vědomá pokračování; T021/T024/T059 čekají.
 - Profil hlavní aplikace do 22. září 18:16 CEST. G0/G1 a terénní připravenost nesplněné; C01c nezahájeno. Původní nahrávky i samostatný Camino Test zůstávají zachované.
 
 ### Vzkaz pro pokračování
 
 - Restart a následný schválený úklid dokončeny. Před zahájením instalace bylo na SSD 85,79 GiB volných. Dřívější přesun USA neopakovat.
-- Instalace platformy i nepodepsaný build ověřeny. Provést T020 změnou skutečně aktivního vstupu během běžícího záznamu; potom T021/T024/T059. C01c nezahajovat.
+- Instalace platformy i nepodepsaný build ověřeny. Provést T021 v prototypovém rozsahu; potom T024/T059. C01c nezahajovat.
 - Po každém Mílou oznámeném výsledku bez další žádosti vyhodnotit stav, říct, zda je potřeba vývoj, a rovnou dát přesný návod i kritéria PASS následujícího neprovedeného testu. Shoda s návrhem nevyžaduje změnu kódu; FAIL nejdřív doložit a potom opravit v C01b.
 - Starší c+p+n d573e90c je historické. Dnešní p+n zahrnuje celý balíček Camina a toto předání; výsledek určuje živý audit a kanonická deployment receipt.
 
 ### Rizika
 
 - C01a přijato, ale širší brány G0/G1 a terénní připravenost zůstávají nesplněné.
-- T016/T018/T019 potvrzeny; vítr a T020–T021/T024/T059 čekají. Segmentace a záchrana po pádu během zápisu patří do C01c.
+- T016 a T018–T020 potvrzeny; vítr a T021/T024/T059 čekají. Segmentace a záchrana po pádu během zápisu patří do C01c.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
 - Podepsaný build není instalace ani fyzická přejímka; vývojový profil je časově omezený. U01–U11 se neotevírají.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -34,22 +34,22 @@ Typ: Project
 Priorita: 1
 Stav: rozpracovane
 Pripomenout pri startu: ano
-Datum: 2026-09-16 20:25 CEST
+Datum: 2026-09-16 20:39 CEST
 
 Co se resilo:
 Implementace C01b: audio pod zámkem, přerušení a vědomé pokračování.
 
 Co je hotove:
-C01a přijato; implementace a instalace C01b, krátký test zámku a T016/T018/T019 potvrzeny Mílou; 47 testů jádra, 2 UI testy, podepsaný build a strict podpis. Detaily a hranice důkazů v reportu C01b.
+C01a přijato; implementace a instalace C01b, krátký test zámku a T016/T018–T020 potvrzeny Mílou; 47 testů jádra, 2 UI testy, podepsaný build a strict podpis. Detaily a hranice důkazů v reportu C01b.
 
 Co neni hotove:
-T020–T021/T024/T059; C01c, G0/G1 a terénní připravenost.
+T021/T024/T059; C01c, G0/G1 a terénní připravenost.
 
 Dalsi krok:
-Provést T020 změnou skutečně aktivního vstupu během běžícího záznamu. Potom T021/T024/T059; C01c nezahajovat.
+Provést T021 v prototypovém rozsahu. Potom T024/T059; C01c nezahajovat.
 
 Navrhovane dalsi kroky:
-Provést T020; potom T021/T024/T059. C01c nezahajovat.
+Provést T021; potom T024/T059. C01c nezahajovat.
 
 Zmenene nebo relevantni soubory:
 `camino/`, `memory/projects/camino.md`, katalog, registry a kanonický TVBCP.
@@ -513,3 +513,15 @@ Rozhodnutí a rizika:
 
 Další krok:
 - Provést T020 změnou skutečně aktivního vstupu během běžícího záznamu; potom automaticky předat T021.
+
+### 2026-09-16 20:39 CEST — T020 PASS
+
+Hotovo / důkaz:
+- Odpojení aktivních AirPods přerušilo záznam; všechny části jsou podle Míly přehratelné, vědomé pokračování použilo mikrofon iPhonu a nic se samo neobnovilo. AirPods se znovu staly skutečným vstupem až při dalším vědomém spuštění.
+- Metadata potvrzují tři samostatné části jedné session, dvě systémová přerušení a dvě explicitní continuation s pauzami 28,002 s a 90,312 s. Žádný CAF se nekopíroval ani neposlouchal.
+
+Rozhodnutí a rizika:
+- T020 PASS; oprava ani nový build nejsou potřeba. Pouhé Bluetooth připojení není důkaz aktivní route. T021/T024/T059, C01b/G0/G1 zůstávají otevřené; C01c nezahájeno.
+
+Další krok:
+- Provést T021 v prototypovém rozsahu; video/Moment patří až do C04. Potom automaticky předat T024.
