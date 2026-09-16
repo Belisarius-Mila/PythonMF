@@ -59,7 +59,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] V0.5 + U15 jsou autoritativní: `Do deníku` může být celé dostupné Janě v soukromém Vieweru, samostatná Úvaha začíná `Jen pro mě`. T016/T018–T021/T024 PASS v dosavadním rozsahu; čeká T059. Viewer delta audit doložil Tailscale/Serve/Cockpit základ, nikoli Viewer runtime ani G8. C01c nezahájeno; profil do 22. 9. 18:16 CEST.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] V0.5 + U15 jsou autoritativní: `Do deníku` může být celé dostupné Janě v soukromém Vieweru, samostatná Úvaha začíná `Jen pro mě`. T016/T018–T021/T024 PASS; první T059 má ochranu/restart PASS, ale audio pod zámkem FAIL a čeká řízené zopakování. Viewer delta audit doložil Tailscale/Serve/Cockpit základ, nikoli Viewer runtime ani G8. C01c nezahájeno; profil do 22. 9. 18:16 CEST.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` - Cockpit 14. 9.: scroll 10ec0877 potvrzený Mílou. [PRIPOMENOUT] U07 až při příštím pokračování. TXT v2.8 shrnuje U01–U06; plná brána 1680/1680 OK, funkční nasazení 980aed7a a smoke 5/5. Publikační překážka odstraněna; finální balíček/head ověřovat živým auditem.
 

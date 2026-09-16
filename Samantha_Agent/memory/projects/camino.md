@@ -20,7 +20,7 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 - Běžící recorder přežije změnu scenePhase; nový Start/Pokračovat pouze v popředí. Přerušení ihned pozastaví vstup, ověří dostupnou část a nabídne Pokračovat/Ukončit. Pokračování vytváří novou část stejné session s evidovanou pauzou, bez přepisu předchozího média.
 - Nové soubory mají completeUntilFirstUserAuthentication; původní C01a soubory se nemigrují ani nemění. Staré JSON podporuje volitelné continuation. Není to C01c segmentový journal ani garance 60s ztráty.
 - Ověřeno 47/47 Swift testů, 2/2 UI testy simulátoru včetně snímku obrazovky, finální podepsaný iOS build a strict podpis; UIBackgroundModes=[audio]. Plná projektová brána PASS, 1684/1684 testů.
-- Instalace/spuštění 0.2.0 PASS. Krátký test zámku a T016/T018–T021/T024 PASS v dosavadním rozsahu. Metadata T024 potvrzují jeden nový pokus bez `completed.json`; T059 čeká.
+- Instalace/spuštění 0.2.0 PASS. Krátký test zámku a T016/T018–T021/T024 PASS v dosavadním rozsahu. První T059 potvrdil ochranu/restart, ale při souvislém 53,567s souboru nebyla v poslechu slyšet Mílova řeč pod zámkem; T059 čeká na řízené zopakování.
 - Profil hlavní aplikace do 22. září 18:16 CEST. G0/G1 a terénní připravenost nesplněné; C01c nezahájeno. Původní nahrávky i samostatný Camino Test zůstávají zachované.
 
 
@@ -50,13 +50,13 @@ kódu nevyvolává; FAIL se nejdřív doloží a opraví v aktuálním rozsahu.
 ## Rizika a otevřeno
 
 - C01a přijato, ale širší brány G0/G1/G8 a terénní připravenost zůstávají nesplněné.
-- T016, T018–T021 a T024 potvrzeny v dosavadním rozsahu; vítr, plná integrace T021 v C04 a T059 čekají. Segmentace a záchrana otevřeného souboru po pádu patří do C01c.
+- T016, T018–T021 a T024 potvrzeny v dosavadním rozsahu; vítr a plná integrace T021 v C04 čekají. První T059 má ochranu/restart PASS, ale audio pod zámkem FAIL; příčina zatím neurčená. Segmentace a záchrana otevřeného souboru po pádu patří do C01c.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
 - Podepsaný build není instalace ani fyzická přejímka; vývojový profil je časově omezený. U01–U15 se bez nového rozhodnutí neotevírají.
 
 ## Další krok
 
-Provést T059; C01c nezahajovat před uzavřením C01b.
+Řízeně zopakovat pouze audio část T059 s Mikrofonem iPhonu; při opakovaném FAIL diagnostikovat a opravit C01b. C01c nezahajovat.
 
 Historický doklad založení:
 Ověření založení: 56/56 testů integrace (54 + 2 profilové testy) a rychlá statická brána OK.
@@ -560,3 +560,16 @@ Rozhodnutí a rizika:
 
 Další krok:
 - Provést T059; C01c nezahajovat před uzavřením C01b.
+
+### 2026-09-16 23:09 CEST — první T059: ochrana PASS, audio FAIL
+
+Hotovo / důkaz:
+- Před prvním odemknutím po restartu byl iPhone pro vývojové služby `unavailable`; soubory se nečetly. Po odemknutí Camino zůstalo `Připraveno 00:00`, nic samo nenahrávalo, počet neúplných položek zůstal 1 a testovací soubor byl přehratelný.
+- Míla během zámku mluvil, ale v poslechu byl hlas slyšet jen před zámkem a po odemčení. Účtenka přitom ukazuje jediný dokončený Komentář 53,567 s, 5 146 528 B, 48 kHz mono, bez přerušení. Žádný CAF se nekopíroval ani neposlouchal nástrojem.
+
+Rozhodnutí a rizika:
+- T059 je v prvním pokusu FAIL v audio části; ochrana/restart jsou PASS. Souvislá délka dokládá zápis rámců, nikoli slyšitelný signál. Příčina zůstává neurčená.
+- Dřívější T016 pod zámkem prošel, proto se před řízenou reprodukcí nemění kód ani build. Token a fronta v C01b nejsou implementované. C01b/G0/G1 zůstávají otevřené, C01c nezahájeno.
+
+Další krok:
+- Zopakovat pouze audio část T059 s potvrzeným Mikrofonem iPhonu a přesnými značkami; při opakovaném FAIL zahájit diagnostiku a opravu C01b.
