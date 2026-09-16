@@ -50,6 +50,13 @@ Každý výsledek musí obsahovat datum, verzi aplikace, telefon/iOS, kroky,
 skutečnost, důkaz a PASS/FAIL/BLOCKED/NEPROVEDENO. Poslech potvrzuje člověk.
 Audio zůstává na telefonu; pro report se čtou jen technická metadata.
 
+Po každém Mílou oznámeném výsledku Adam bez další žádosti výsledek vyhodnotí,
+řekne, zda odpovídá návrhu nebo vyžaduje vývoj, a rovnou uvede podmínky,
+přesný postup a kritéria PASS následujícího neprovedeného testu. Pokud chování
+odpovídá návrhu, pouhé dokončení testu není důvodem ke změně kódu. Při FAIL se
+nejdřív zaznamená přesný projev, potom se opraví C01b a zopakuje jen dotčený
+scénář; C01c se tím automaticky nezahajuje.
+
 ## Zastavení
 
 C01b není přijaté pouze na základě testů či buildu. C01c (automatické segmenty,

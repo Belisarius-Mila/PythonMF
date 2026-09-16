@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-16 19:46 CEST
+Aktualizováno: 2026-09-16 20:02 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -35,6 +35,10 @@ editující iPhone. Web v P0 slouží pro čtení a stav, bez veřejného publik
 Originály jsou neměnné, bez automatického mazání. Offline záznam nečeká na síť,
 GPS ani AI. „Do deníku“ je stále soukromé; „Jen pro mě“ vylučuje všechny filmy
 a rodinné výstupy. Externí přepis není důkaz zálohy. Lidskou revizi AI nepřepíše.
+Po každém Mílou oznámeném výsledku fyzického testu Adam bez další žádosti
+vyhodnotí stav, řekne, zda je potřeba vývoj, a rovnou dá přesné podmínky, postup
+a kritéria PASS následujícího neprovedeného testu. Shoda s návrhem sama změnu
+kódu nevyvolává; FAIL se nejdřív doloží a opraví v aktuálním rozsahu.
 
 ## Rizika a otevřeno
 
@@ -460,3 +464,15 @@ Další krok:
 
 Technický důkaz:
 - Připojený iPhone 14 Plus, Camino Audio 0.2.0 (2); CoreDevice inventář a pouze technické `started.json`/`completed.json`. Žádný CAF se nekopíroval ani neposlouchal. Kód beze změn.
+
+### 2026-09-16 20:02 CEST — Automatický návod k dalšímu testu
+
+Rozhodnutí:
+- Po každém Mílou oznámeném výsledku fyzického testu Adam bez další žádosti vyhodnotí PASS/FAIL/BLOCKED či dílčí stav, výslovně řekne, zda je potřeba vývoj, a rovnou přidá podmínky, přesný postup a kritéria PASS následujícího neprovedeného testu.
+- Pokud chování odpovídá návrhu, další vývoj se jen kvůli dokončenému testu nezahajuje. Při FAIL se nejdřív zachytí přesný projev, potom se opraví C01b a zopakuje dotčený scénář. C01c zůstává mimo rozsah.
+
+Další krok:
+- Dokončit T019 příchozím běžným telefonním hovorem jednou ignorovaným a jednou přijatým; potom automaticky předat postup T020.
+
+Ověření:
+- Jde pouze o projektové pracovní pravidlo; kód aplikace ani soukromá data se nemění.

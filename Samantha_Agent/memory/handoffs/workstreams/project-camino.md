@@ -1,7 +1,7 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-Aktualizováno: 2026-09-16 19:46 CEST
+Aktualizováno: 2026-09-16 20:02 CEST
 
 - T016 PASS: přesně 30:24,406, 175 147 072 B, 48 kHz mono, režim Letadlo, převážně pod zámkem a celý poslech OK. T018 PASS podle Míly: AirPods jako skutečný vstup, stání i chůze pod zámkem, bez výpadků; vítr neověřen.
 - C01b zahájeno výslovným pokynem Míly; C01a zůstává přijaté. Prototyp 0.2.0 (2) je lokálně připraven pro background audio, přerušení a vědomé pokračování. Verze 0.2.0 je nyní nainstalovaná a spuštěná na iPhonu; inventář 15 původních souborů se před/po shoduje v cestách a velikostech.
@@ -15,6 +15,7 @@ Aktualizováno: 2026-09-16 19:46 CEST
 
 - Restart a následný schválený úklid dokončeny. Před zahájením instalace bylo na SSD 85,79 GiB volných. Dřívější přesun USA neopakovat.
 - Instalace platformy i nepodepsaný build ověřeny. Dokončit T019 příchozím hovorem jednou ignorovaným a jednou přijatým; potom T020–T021/T024/T059. C01c nezahajovat.
+- Po každém Mílou oznámeném výsledku bez další žádosti vyhodnotit stav, říct, zda je potřeba vývoj, a rovnou dát přesný návod i kritéria PASS následujícího neprovedeného testu. Shoda s návrhem nevyžaduje změnu kódu; FAIL nejdřív doložit a potom opravit v C01b.
 - Starší c+p+n d573e90c je historické. Dnešní p+n zahrnuje celý balíček Camina a toto předání; výsledek určuje živý audit a kanonická deployment receipt.
 
 ### Rizika
@@ -33,7 +34,7 @@ Typ: Project
 Priorita: 1
 Stav: rozpracovane
 Pripomenout pri startu: ano
-Datum: 2026-09-16 19:46 CEST
+Datum: 2026-09-16 20:02 CEST
 
 Co se resilo:
 Implementace C01b: audio pod zámkem, přerušení a vědomé pokračování.
@@ -488,3 +489,15 @@ Další krok:
 
 Technický důkaz:
 - Připojený iPhone 14 Plus, Camino Audio 0.2.0 (2); CoreDevice inventář a pouze technické JSON účtenky. Žádný CAF ani jeho obsah se nekopíroval či poslouchal. Kód beze změn.
+
+### 2026-09-16 20:02 CEST — Automatický návod k dalšímu testu
+
+Rozhodnutí:
+- Po každém Mílou oznámeném výsledku fyzického testu Adam bez další žádosti vyhodnotí stav, řekne, zda je potřeba vývoj, a rovnou poskytne podmínky, přesný postup a kritéria PASS následujícího neprovedeného testu.
+- Při shodě s návrhem se kód nemění jen proto, že test skončil. Při FAIL se nejdřív zaznamená přesný projev, potom se opraví C01b a zopakuje dotčený scénář. C01c se nezahajuje.
+
+Další krok:
+- Dokončit T019 příchozím běžným telefonním hovorem jednou ignorovaným a jednou přijatým; potom automaticky předat T020.
+
+Technický důkaz:
+- Pouze projektový zápis pravidla; kód aplikace ani soukromá data se neměnily.

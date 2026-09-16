@@ -18,6 +18,7 @@ je první organizační krok; aplikace ani audit prostředí tím nevznikají.
 - Nové soubory mají completeUntilFirstUserAuthentication; původní C01a soubory se nemigrují ani nemění. Staré JSON podporuje volitelné continuation. Není to C01c segmentový journal ani garance 60s ztráty.
 - Ověřeno 47/47 Swift testů, 2/2 UI testy simulátoru včetně snímku obrazovky, finální podepsaný iOS build a strict podpis; UIBackgroundModes=[audio]. Plná projektová brána PASS, 1684/1684 testů.
 - Instalace/spuštění 0.2.0 PASS. Krátký test zámku, T016 a T018 PASS podle Míly. Odchozí hovor správně vytvořil přerušenou první část a vědomé pokračování jako druhý samostatný soubor stejné session; úplný T019 a T020–T021/T024/T059 čekají.
+- Po každém Mílou oznámeném výsledku fyzického testu Adam bez další žádosti vyhodnotí stav, řekne, zda je potřeba vývoj, a rovnou předá podmínky, přesný postup a kritéria PASS následujícího neprovedeného testu. Shoda s návrhem sama změnu kódu nevyvolává.
 - Profil hlavní aplikace do 22. září 18:16 CEST. G0/G1 a terénní připravenost nesplněné; C01c nezahájeno. Původní nahrávky i samostatný Camino Test zůstávají zachované.
 
 
@@ -449,3 +450,10 @@ Technický důkaz:
 - Mikrofon iPhonu: pozdější záznam byl nová session bez continuation. Podle Míly byl v kapse tišší a méně kvalitní; nejde o automatické pokračování.
 - Rizika: úplný T019 a T020 čekají; T019 vyžaduje příchozí hovor ignorovaný i přijatý, T020 změnu aktivního vstupu během záznamu. C01b/G0/G1 otevřené, C01c nezahájeno.
 - Další krok: dokončit T019, potom T020–T021/T024/T059.
+
+### 2026-09-16 20:02 CEST — Automatický návod k dalšímu testu
+
+- Rozhodnutí: po každém Mílou oznámeném výsledku fyzického testu Adam bez další žádosti vyhodnotí PASS/FAIL/BLOCKED či dílčí stav, řekne, zda je potřeba vývoj, a rovnou poskytne podmínky, přesný postup a kritéria PASS následujícího neprovedeného testu.
+- Hranice: shoda s návrhem nevyžaduje změnu kódu. Při FAIL se nejdřív doloží přesný projev, potom se opraví C01b a zopakuje dotčený scénář. C01c zůstává mimo rozsah.
+- Další krok: dokončit T019 příchozím běžným telefonním hovorem jednou ignorovaným a jednou přijatým; potom automaticky předat T020.
+- Ověření: pouze projektový zápis pravidla; kód aplikace ani soukromá data se neměnily.
