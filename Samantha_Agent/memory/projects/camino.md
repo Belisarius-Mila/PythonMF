@@ -15,12 +15,12 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 - Autoritativní podklady jsou v0.5 spolu s dodatkem U15. Původní balíček v0.5 je uložen beze změny a 6/6 manifestovaných souborů prošlo SHA-256 kontrolou; ZIP je lokálně zachovaný. U15: celá položka `Do deníku` je po synchronizaci Viewer-eligible, samostatná Úvaha vždy vzniká `Jen pro mě` a vyžaduje vědomé `Vložit do deníku`.
 - Delta C00 audit Vieweru: Tailscale 1.102.4 je online, soukromý HTTPS Serve vede na živý Cockpit, Funnel není povolený, Cockpit smoke 5/5, AC `sleep=0` a FileVault zapnutý. Samostatný Camino backend/worker/Viewer, jeho autorizace, záloha, restart a vzdálený test na Janiných zařízeních ještě neexistují; G8 NEPROVEDENO.
 - Profilový fast-forward byl opraven tak, aby whitespace preflight použil `.gitattributes` z přijímaného commitu; importované Markdown hard breaks tak neoslabují kontrolu ostatních souborů. Regrese je krytá testem.
-- T016 PASS: přesně 30:24,406, 175 147 072 B, 48 kHz mono, režim Letadlo, převážně pod zámkem a celý poslech OK. T018–T020 a T024 PASS podle Míly. T021 PASS v rozsahu C01b prototypu: jediná aktivní session, pokračování po návratu z jiné aplikace a celý poslech OK; plná integrace se zopakuje v C04. T024 po pádu zachoval dokončené části, nespustil mikrofon a přiznal jeden neověřený pokus. Vítr neověřen.
+- T016 PASS: přesně 30:24,406, 175 147 072 B, 48 kHz mono, režim Letadlo, převážně pod zámkem a celý poslech OK. T018–T020, T024 a T059 PASS podle Míly. T021 PASS v rozsahu C01b prototypu; plná integrace se zopakuje v C04. T059 po restartu ochránil data a řízené opakování zachytilo všechny značky pod zámkem. Vítr neověřen.
 - C01b zahájeno výslovným pokynem Míly; C01a zůstává přijaté. Prototyp 0.2.0 (2) je lokálně připraven pro background audio, přerušení a vědomé pokračování. Verze 0.2.0 je nyní nainstalovaná a spuštěná na iPhonu; inventář 15 původních souborů se před/po shoduje v cestách a velikostech.
 - Běžící recorder přežije změnu scenePhase; nový Start/Pokračovat pouze v popředí. Přerušení ihned pozastaví vstup, ověří dostupnou část a nabídne Pokračovat/Ukončit. Pokračování vytváří novou část stejné session s evidovanou pauzou, bez přepisu předchozího média.
 - Nové soubory mají completeUntilFirstUserAuthentication; původní C01a soubory se nemigrují ani nemění. Staré JSON podporuje volitelné continuation. Není to C01c segmentový journal ani garance 60s ztráty.
 - Ověřeno 47/47 Swift testů, 2/2 UI testy simulátoru včetně snímku obrazovky, finální podepsaný iOS build a strict podpis; UIBackgroundModes=[audio]. Plná projektová brána PASS, 1684/1684 testů.
-- Instalace/spuštění 0.2.0 PASS. Krátký test zámku a T016/T018–T021/T024 PASS v dosavadním rozsahu. První T059 potvrdil ochranu/restart, ale při souvislém 53,567s souboru nebyla v poslechu slyšet Mílova řeč pod zámkem; T059 čeká na řízené zopakování.
+- C01b 0.2.0 (2) přijato v prototypovém rozsahu. Krátký test zámku a T016/T018–T021/T024/T059 PASS; T059 prošel po řízeném zopakování jedním nepřerušeným 107,801s souborem. Předchozí nevysvětlený tichý úsek se nezopakoval.
 - Profil hlavní aplikace do 22. září 18:16 CEST. G0/G1 a terénní připravenost nesplněné; C01c nezahájeno. Původní nahrávky i samostatný Camino Test zůstávají zachované.
 
 
@@ -50,13 +50,13 @@ kódu nevyvolává; FAIL se nejdřív doloží a opraví v aktuálním rozsahu.
 ## Rizika a otevřeno
 
 - C01a přijato, ale širší brány G0/G1/G8 a terénní připravenost zůstávají nesplněné.
-- T016, T018–T021 a T024 potvrzeny v dosavadním rozsahu; vítr a plná integrace T021 v C04 čekají. První T059 má ochranu/restart PASS, ale audio pod zámkem FAIL; příčina zatím neurčená. Segmentace a záchrana otevřeného souboru po pádu patří do C01c.
+- C01b přijato v prototypovém rozsahu. Vítr a plná integrace T021 v C04 čekají; jeden nevysvětlený nereprodukovaný tichý úsek z prvního T059 zůstává rizikem. Segmentace a záchrana otevřeného souboru po pádu patří do C01c.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
 - Podepsaný build není instalace ani fyzická přejímka; vývojový profil je časově omezený. U01–U15 se bez nového rozhodnutí neotevírají.
 
 ## Další krok
 
-Řízeně zopakovat pouze audio část T059 s Mikrofonem iPhonu; při opakovaném FAIL diagnostikovat a opravit C01b. C01c nezahajovat.
+Vyčkat na výslovný pokyn k C01c; T022 na současném buildu 0.2.0 nespouštět.
 
 Historický doklad založení:
 Ověření založení: 56/56 testů integrace (54 + 2 profilové testy) a rychlá statická brána OK.
@@ -573,3 +573,16 @@ Rozhodnutí a rizika:
 
 Další krok:
 - Zopakovat pouze audio část T059 s potvrzeným Mikrofonem iPhonu a přesnými značkami; při opakovaném FAIL zahájit diagnostiku a opravu C01b.
+
+### 2026-09-16 23:21 CEST — T059 PASS po opakování; C01b přijato
+
+Hotovo / důkaz:
+- Řízené opakování zachytilo před zámkem, všechny tři značky pod zámkem i po odemčení; jedna nepřerušená část a nic nečekaného podle Míly.
+- Metadata potvrzují dokončený Komentář 107,801 s, 10 352 992 B, 48 kHz mono, bez přerušení/continuation. Audio se nekopírovalo ani neposlouchalo nástrojem. Název vstupu nebyl ve výsledné odpovědi zopakován.
+
+Rozhodnutí a rizika:
+- T059 PASS po řízeném zopakování a C01b přijato v prototypovém rozsahu; vývoj ani nový build nejsou potřeba. První tichý úsek se nezopakoval, ale zůstává evidovaný jako nevysvětlené pozorování.
+- C01c, G0/G1, ostrá terénní připravenost a plná integrace T021 v C04 nejsou tímto uzavřené. C01c se bez nového výslovného pokynu nezahajuje.
+
+Další krok:
+- Vyčkat na výslovný pokyn k C01c. Po jeho implementaci bude prvním fyzickým scénářem T022; současný build 0.2.0 pro něj není určen.

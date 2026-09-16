@@ -1,7 +1,7 @@
 # C01b — audio pod zámkem, přerušení a pokračování
 
 Zahájeno 2026-09-15 po výslovném pokynu Míly. C01a bylo před zahájením přijaté.
-**Stav: 0.2.0 (2) nainstalováno a spuštěno; krátký test zámku a T016/T018–T021/T024 PASS v dosavadním rozsahu. První T059 má PASS ochrany/restartu, ale FAIL slyšitelnosti pod zámkem; čeká řízené zopakování.**
+**Stav: C01b 0.2.0 (2) přijato v prototypovém rozsahu; krátký test zámku a T016/T018–T021/T024/T059 PASS v dosavadním rozsahu. T059 prošel po řízeném zopakování.**
 V0.5 + U15 byly přijaty 2026-09-16; význam tohoto izolovaného audio prototypu
 a zbývající T059 se tím nemění. Finální soukromí Momentu patří do C03/C04.
 
@@ -63,7 +63,7 @@ ověřenou další kopii; audio se v tomto kroku z telefonu nestahuje.
   simulator-only testovací launch flags. Dedikovaný simulátor byl po testu vypnut.
 - Instalace/spuštění 0.2.0: **PASS**, živě ověřeno přes devicectl.
 - Původní soubory: inventář všech 15 cest/velikostí před/po shodný; bez čtení audia.
-- Fyzické T016, T018–T020 a T024: **PASS podle Míly**; T021: **PASS v rozsahu C01b prototypu**, plná integrace se zopakuje v C04; první T059: **FAIL v audio části**, ochrana/restart PASS.
+- Fyzické T016, T018–T020, T024 a T059: **PASS podle Míly**; T021: **PASS v rozsahu C01b prototypu**, plná integrace se zopakuje v C04. T059 prošel po řízeném opakování; jeden předchozí tichý úsek zůstává nevysvětleným nereprodukovaným pozorováním.
 
 Příkazy:
 
@@ -81,9 +81,9 @@ zámku, hovoru, Bluetooth nebo ochrany dat před prvním odemknutím.
 
 ## Další krok
 
-Krátký funkční test zámku a T016/T018–T021/T024 v dosavadním rozsahu Míla potvrdil. Čeká řízené zopakování audio části T059 podle
-[C01b_BACKGROUND_AUDIO.md](../tasks/C01b_BACKGROUND_AUDIO.md). Bez zbývajících výsledků
-nelze C01b přijmout; C01c ani G0/G1 nejsou tímto uzavřeny.
+Krátký funkční test zámku a T016/T018–T021/T024/T059 v dosavadním rozsahu Míla potvrdil. C01b je přijato podle
+[C01b_BACKGROUND_AUDIO.md](../tasks/C01b_BACKGROUND_AUDIO.md). C01c ani G0/G1
+nejsou tímto automaticky zahájeny nebo uzavřeny.
 
 ## Technické podklady
 
@@ -234,3 +234,16 @@ Vyhodnocení a rizika:
 
 Další krok:
 - Zopakovat pouze audio část T059 s potvrzeným `Mikrofonem iPhonu`, telefonem nehybně na stole a přesnými hlasovými značkami před zámkem, pod zámkem a po odemčení. Při opakovaném FAIL zahájit diagnostiku a opravu C01b; C01c nezahajovat.
+
+### 2026-09-16 23:21 CEST — T059 PASS po řízeném zopakování; C01b přijato
+
+Hotovo / důkaz:
+- Míla potvrdil slyšitelnost všech pěti kontrolních skupin: před zámkem, tří oddělených značek pod zámkem a po odemčení. Záznam byl v UI jedna nepřerušená část a nic nečekaného nenastalo.
+- Technická účtenka potvrzuje jeden řádně dokončený Komentář 107,801 s, 10 352 992 B, 48 kHz mono, `interrupted=false`, bez continuation. Žádný CAF se nekopíroval ani neposlouchal nástrojem. Zobrazený název vstupu Míla ve výsledné odpovědi samostatně nezopakoval.
+
+Vyhodnocení a rizika:
+- T059 PASS po řízeném zopakování. Spolu s PASS ochrany/restartu z prvního pokusu jsou splněná kritéria T059 v rozsahu C01b. Původní souvislý 53,567s soubor s neslyšitelným vysloveným úsekem pod zámkem se nezopakoval a zůstává evidovaný jako nevysvětlené pozorování, nikoli odstraněná prokázaná chyba.
+- C01b je přijato v prototypovém rozsahu. Oprava ani nový build nejsou potřeba. T021 se v plné integraci zopakuje v C04; C01c segmentace/journal, G0/G1 a ostrá terénní připravenost zůstávají mimo tento důkaz.
+
+Další krok:
+- C01c automaticky nezahajovat. Po výslovném pokynu připravit C01c a teprve jeho build testovat scénářem T022; aktuální 0.2.0 není pro T022 určeno.
