@@ -1,7 +1,7 @@
 # C01b — audio pod zámkem, přerušení a pokračování
 
 Zahájeno 2026-09-15 po výslovném pokynu Míly. C01a bylo před zahájením přijaté.
-**Stav: 0.2.0 (2) nainstalováno a spuštěno; krátký test zámku a T016/T018/T019/T020 PASS podle Míly, další fyzická přejímka čeká.**
+**Stav: 0.2.0 (2) nainstalováno a spuštěno; krátký test zámku a T016/T018–T021 PASS v dosavadním rozsahu, další fyzická přejímka čeká.**
 
 ## Co se změnilo
 
@@ -61,7 +61,7 @@ ověřenou další kopii; audio se v tomto kroku z telefonu nestahuje.
   simulator-only testovací launch flags. Dedikovaný simulátor byl po testu vypnut.
 - Instalace/spuštění 0.2.0: **PASS**, živě ověřeno přes devicectl.
 - Původní soubory: inventář všech 15 cest/velikostí před/po shodný; bez čtení audia.
-- Fyzické T016 a T018–T020: **PASS podle Míly**; T021/T024/T059: **NEPROVEDENO**.
+- Fyzické T016 a T018–T020: **PASS podle Míly**; T021: **PASS v rozsahu C01b prototypu**, plná integrace se zopakuje v C04; T024/T059: **NEPROVEDENO**.
 
 Příkazy:
 
@@ -79,7 +79,7 @@ zámku, hovoru, Bluetooth nebo ochrany dat před prvním odemknutím.
 
 ## Další krok
 
-Krátký funkční test zámku a T016/T018–T020 Míla potvrdil. Následuje T021 v prototypovém rozsahu a další scénáře podle
+Krátký funkční test zámku a T016/T018–T021 v dosavadním rozsahu Míla potvrdil. Následují T024 a T059 podle
 [C01b_BACKGROUND_AUDIO.md](../tasks/C01b_BACKGROUND_AUDIO.md). Bez zbývajících výsledků
 nelze C01b přijmout; C01c ani G0/G1 nejsou tímto uzavřeny.
 
@@ -193,3 +193,16 @@ Vyhodnocení a rizika:
 
 Další krok:
 - Provést T021 v prototypovém rozsahu: za běžící Úvahy ověřit zákaz přehrávače a druhého recorderu a návrat z jiné aplikace bez zrušení aktivního záznamu. Video/Moment patří až do C04.
+
+### 2026-09-16 21:27 CEST — T021 PASS v rozsahu C01b prototypu
+
+Hotovo / důkaz:
+- Míla potvrdil neaktivní volbu typu i Přehrát, nemožnost spustit druhý recorder, pokračování stejné Úvahy po návratu z jiné aplikace, růst času, jednu část bez přerušení a celý poslech v pořádku.
+- Nejnovější technická Úvaha má 56,350 s, 5 413 696 B, 48 kHz mono, `interrupted=false` a nemá continuation. Předchozí samostatná Úvaha 31,717 s je oddělena jako přípravný pokus, nikoli druhá část testované session.
+
+Vyhodnocení a rizika:
+- T021 PASS v rozsahu C01b prototypu. Video a integrace Momentu zde nejsou implementované; úplný původní scénář se musí zopakovat v C04, aby pozdější galerie/přehrávač nezavedly soupeřící session.
+- Poslech potvrzuje Míla; nástroj četl jen technické JSON účtenky. Žádný CAF se nekopíroval ani neposlouchal. T024/T059, C01b/G0/G1 zůstávají otevřené; C01c nezahájeno.
+
+Další krok:
+- T024: po dokončené části vědomě pokračovat, za běžícího pokračování nuceně ukončit aplikaci a po otevření ověřit žádný aktivní mikrofon, zachovanou dokončenou část a pravdivě přiznaný neověřený pokus. Potom T059.

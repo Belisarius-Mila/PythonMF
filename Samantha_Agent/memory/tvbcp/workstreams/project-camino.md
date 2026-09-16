@@ -12,22 +12,22 @@ je první organizační krok; aplikace ani audit prostředí tím nevznikají.
 
 ## Aktuální stav a další krok
 
-- T016 PASS: přesně 30:24,406, 175 147 072 B, 48 kHz mono, režim Letadlo, převážně pod zámkem a celý poslech OK. T018–T020 PASS podle Míly: AirPods fyzicky ověřeny, oba příchozí hovory bezpečně přerušily a změna aktivního vstupu vytvořila tři samostatné navazující části bez samovolného pokračování; vítr neověřen.
+- T016 PASS: přesně 30:24,406, 175 147 072 B, 48 kHz mono, režim Letadlo, převážně pod zámkem a celý poslech OK. T018–T020 PASS podle Míly. T021 PASS v rozsahu C01b prototypu: jediná aktivní session, pokračování po návratu z jiné aplikace a celý poslech OK; plná integrace se zopakuje v C04. Vítr neověřen.
 - C01b zahájeno výslovným pokynem Míly; C01a zůstává přijaté. Prototyp 0.2.0 (2) je lokálně připraven pro background audio, přerušení a vědomé pokračování. Verze 0.2.0 je nyní nainstalovaná a spuštěná na iPhonu; inventář 15 původních souborů se před/po shoduje v cestách a velikostech.
 - Běžící recorder přežije změnu scenePhase; nový Start/Pokračovat pouze v popředí. Přerušení ihned pozastaví vstup, ověří dostupnou část a nabídne Pokračovat/Ukončit. Pokračování vytváří novou část stejné session s evidovanou pauzou, bez přepisu předchozího média.
 - Nové soubory mají completeUntilFirstUserAuthentication; původní C01a soubory se nemigrují ani nemění. Staré JSON podporuje volitelné continuation. Není to C01c segmentový journal ani garance 60s ztráty.
 - Ověřeno 47/47 Swift testů, 2/2 UI testy simulátoru včetně snímku obrazovky, finální podepsaný iOS build a strict podpis; UIBackgroundModes=[audio]. Plná projektová brána PASS, 1684/1684 testů.
-- Instalace/spuštění 0.2.0 PASS. Krátký test zámku a T016/T018–T020 PASS podle Míly. Metadata T020 potvrzují tři části jedné session, dvě systémová přerušení a dvě vědomá pokračování; T021/T024/T059 čekají.
+- Instalace/spuštění 0.2.0 PASS. Krátký test zámku a T016/T018–T021 PASS v dosavadním rozsahu. Metadata T021 potvrzují jedinou nepřerušenou část Úvahy 56,350 s; T024/T059 čekají.
 - Po každém Mílou oznámeném výsledku fyzického testu Adam bez další žádosti vyhodnotí stav, řekne, zda je potřeba vývoj, a rovnou předá podmínky, přesný postup a kritéria PASS následujícího neprovedeného testu. Shoda s návrhem sama změnu kódu nevyvolává.
 - Profil hlavní aplikace do 22. září 18:16 CEST. G0/G1 a terénní připravenost nesplněné; C01c nezahájeno. Původní nahrávky i samostatný Camino Test zůstávají zachované.
 
 
-Provést T021 v prototypovém rozsahu. Potom T024/T059; C01c nezahajovat.
+Provést T024, potom T059; C01c nezahajovat.
 
 ## Rizika
 
 - C01a přijato, ale širší brány G0/G1 a terénní připravenost zůstávají nesplněné.
-- T016 a T018–T020 potvrzeny; vítr a T021/T024/T059 čekají. Segmentace a záchrana po pádu během zápisu patří do C01c.
+- T016 a T018–T021 potvrzeny v dosavadním rozsahu; vítr, plná integrace T021 v C04 a T024/T059 čekají. Segmentace a záchrana po pádu během zápisu patří do C01c.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
 - Podepsaný build není instalace ani fyzická přejímka; vývojový profil je časově omezený. U01–U11 se neotevírají.
 
@@ -473,3 +473,11 @@ Technický důkaz:
 - Rozhodnutí: pouhé Bluetooth připojení není aktivní route; vstup AirPods se potvrdil až při vědomé reaktivaci audio session. Oprava ani nový build nejsou potřeba.
 - Rizika: T021/T024/T059, C01b/G0/G1 otevřené; C01c nezahájeno.
 - Další krok: provést T021 v prototypovém rozsahu; potom automaticky předat T024.
+
+### 2026-09-16 21:27 CEST — T021 PASS v rozsahu C01b prototypu
+
+- Stav: volba typu a Přehrát byly za běžící Úvahy neaktivní, druhý recorder nešel spustit, po návratu z jiné aplikace pokračovala stejná session a čas narostl; jedna část bez přerušení a celý poslech OK podle Míly.
+- Důkaz: poslední Úvaha 56,350 s, 5 413 696 B, 48 kHz mono, `interrupted=false`, bez continuation. Dřívější samostatný přípravný pokus byl oddělen; žádný CAF se nekopíroval ani neposlouchal.
+- Rozhodnutí: T021 PASS v rozsahu C01b prototypu; plný scénář videa/Momentu se zopakuje v C04. Oprava ani nový build nejsou potřeba.
+- Rizika: T024/T059, C01b/G0/G1 otevřené; C01c nezahájeno.
+- Další krok: provést T024, potom automaticky předat T059.
