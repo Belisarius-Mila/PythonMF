@@ -15,6 +15,7 @@ je vyloučeno; celé `Do deníku` je po synchronizaci Viewer-eligible.
 
 - V0.5 importovaná beze změny, 6/6 manifestovaných souborů ověřeno; U15 je závazný novější dodatek. Samostatná Úvaha začíná `Jen pro mě` a do deníku se převádí vědomě.
 - Viewer delta audit potvrdil Tailscale/Serve/Cockpit základ, smoke 5/5, Funnel vypnutý, AC bez spánku a FileVault zapnutý. Viewer služby, autorizace, záloha/restart a Janina vzdálená zkouška chybějí; G8 NEPROVEDENO.
+- Profilový fast-forward nyní kontroluje whitespace s příchozími `.gitattributes`; ostatní fail-closed brány zůstávají zachované.
 - T016 PASS: přesně 30:24,406, 175 147 072 B, 48 kHz mono, režim Letadlo, převážně pod zámkem a celý poslech OK. T018–T020 PASS podle Míly. T021 PASS v rozsahu C01b prototypu: jediná aktivní session, pokračování po návratu z jiné aplikace a celý poslech OK; plná integrace se zopakuje v C04. Vítr neověřen.
 - C01b zahájeno výslovným pokynem Míly; C01a zůstává přijaté. Prototyp 0.2.0 (2) je lokálně připraven pro background audio, přerušení a vědomé pokračování. Verze 0.2.0 je nyní nainstalovaná a spuštěná na iPhonu; inventář 15 původních souborů se před/po shoduje v cestách a velikostech.
 - Běžící recorder přežije změnu scenePhase; nový Start/Pokračovat pouze v popředí. Přerušení ihned pozastaví vstup, ověří dostupnou část a nabídne Pokračovat/Ukončit. Pokračování vytváří novou část stejné session s evidovanou pauzou, bez přepisu předchozího média.
@@ -502,3 +503,20 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Manifest v0.5 6/6, přesná kopie ZIP; Tailscale 1.102.4 online, Serve bez Funnel, Cockpit smoke 5/5, AC `sleep=0`, FileVault zapnutý. Viewer/G8 NEPROVEDENO.
+
+### 2026-09-16 21:48 CEST — Oprava profilového whitespace preflightu
+
+Hotovo:
+- Human–Adam workspace umí bezpečně převzít commit, který současně přidává importovaný Markdown i jeho `.gitattributes`.
+
+Rozhodnutí:
+- Preflight používá atributy z `FETCH_HEAD`; globální ignorování whitespace ani oslabení ostatních sync bran nebylo přijato.
+
+Další krok:
+- Po commitu zopakovat dorovnání čistých profilů; Camino pokračuje T024.
+
+Navrhované další kroky:
+- Žádný nový produktový krok; oprava pouze odstraňuje falešný blokátor převzetí již schváleného balíčku.
+
+Technický důkaz:
+- Regresní test + 192 souvisejících testů PASS; rychlá kontrolní brána PASS.

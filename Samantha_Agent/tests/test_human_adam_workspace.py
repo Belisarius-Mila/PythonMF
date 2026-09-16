@@ -646,6 +646,35 @@ class HumanAdamWorkspaceManagerTests(unittest.TestCase):
             self.assertEqual((manager.project_root / "tracked.py").read_text(), "VALUE = 2\n")
             self.assertFalse((manager.workspace_root / "AuditCockpit56_M.txt").exists())
 
+    def test_sync_uses_incoming_attributes_for_whitespace_preflight(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = make_source(root)
+            manager = HumanAdamWorkspaceManager(
+                source_repo=source,
+                workspace_root=root / "cell",
+                metadata_path=root / "meta.json",
+            )
+            manager.prepare()
+            imported = source / "Samantha_Agent" / "docs" / "imported.md"
+            imported.parent.mkdir()
+            imported.write_text("Intentional Markdown break  \n", encoding="utf-8")
+            (source / ".gitattributes").write_text(
+                "Samantha_Agent/docs/imported.md whitespace=-blank-at-eol\n",
+                encoding="utf-8",
+            )
+            git(source, "add", ".gitattributes", "Samantha_Agent/docs/imported.md")
+            git(source, "commit", "-m", "Add imported document attributes")
+
+            synced = manager.sync_from_main(confirmed=True)
+
+            self.assertTrue(synced["synced"])
+            self.assertEqual(synced["workspace_relation"], "aligned")
+            self.assertEqual(
+                (manager.project_root / "docs" / "imported.md").read_text(encoding="utf-8"),
+                "Intentional Markdown break  \n",
+            )
+
     def test_fetch_materializes_dataless_metadata_and_retries_one_mmap_failure(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

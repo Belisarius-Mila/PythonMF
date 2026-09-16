@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-16 21:43 CEST
+Aktualizováno: 2026-09-16 21:48 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -14,6 +14,7 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 
 - Autoritativní podklady jsou v0.5 spolu s dodatkem U15. Původní balíček v0.5 je uložen beze změny a 6/6 manifestovaných souborů prošlo SHA-256 kontrolou; ZIP je lokálně zachovaný. U15: celá položka `Do deníku` je po synchronizaci Viewer-eligible, samostatná Úvaha vždy vzniká `Jen pro mě` a vyžaduje vědomé `Vložit do deníku`.
 - Delta C00 audit Vieweru: Tailscale 1.102.4 je online, soukromý HTTPS Serve vede na živý Cockpit, Funnel není povolený, Cockpit smoke 5/5, AC `sleep=0` a FileVault zapnutý. Samostatný Camino backend/worker/Viewer, jeho autorizace, záloha, restart a vzdálený test na Janiných zařízeních ještě neexistují; G8 NEPROVEDENO.
+- Profilový fast-forward byl opraven tak, aby whitespace preflight použil `.gitattributes` z přijímaného commitu; importované Markdown hard breaks tak neoslabují kontrolu ostatních souborů. Regrese je krytá testem.
 - T016 PASS: přesně 30:24,406, 175 147 072 B, 48 kHz mono, režim Letadlo, převážně pod zámkem a celý poslech OK. T018–T020 PASS podle Míly. T021 PASS v rozsahu C01b prototypu: jediná aktivní session, pokračování po návratu z jiné aplikace a celý poslech OK; plná integrace se zopakuje v C04. Vítr neověřen.
 - C01b zahájeno výslovným pokynem Míly; C01a zůstává přijaté. Prototyp 0.2.0 (2) je lokálně připraven pro background audio, přerušení a vědomé pokračování. Verze 0.2.0 je nyní nainstalovaná a spuštěná na iPhonu; inventář 15 původních souborů se před/po shoduje v cestách a velikostech.
 - Běžící recorder přežije změnu scenePhase; nový Start/Pokračovat pouze v popředí. Přerušení ihned pozastaví vstup, ověří dostupnou část a nabídne Pokračovat/Ukončit. Pokračování vytváří novou část stejné session s evidovanou pauzou, bez přepisu předchozího média.
@@ -535,3 +536,14 @@ Rozhodnutí a rizika:
 
 Další krok:
 - Dokončit T024, potom T059; C01c nezahajovat před uzavřením C01b.
+
+### 2026-09-16 21:48 CEST — Oprava profilového převzetí v0.5
+
+Hotovo / důkaz:
+- Whitespace preflight Human–Adam workspace nyní při fast-forwardu používá `.gitattributes` z `FETCH_HEAD`. Nový regresní test pokrývá atribut a importovaný Markdown v témže commitu; 192 souvisejících testů a rychlá kontrolní brána prošly.
+
+Rozhodnutí a rizika:
+- Ostatní ochrany synchronizace se nemění. Oprava neignoruje whitespace globálně, nemění remote a nepovoluje merge/divergenci.
+
+Další krok:
+- Po lokálním commitu bezpečně zopakovat dorovnání čistých profilů; věcný krok Camina zůstává T024.

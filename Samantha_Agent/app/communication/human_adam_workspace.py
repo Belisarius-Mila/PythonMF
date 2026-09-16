@@ -618,7 +618,13 @@ class HumanAdamWorkspaceManager:
                     "balíkovou nebo příliš velkou mediální cestu."
                 )
 
-            _git_output(self.workspace_root, ["diff", "--check", "HEAD", "FETCH_HEAD"])
+            # The incoming commit may introduce .gitattributes for imported files in
+            # the same fast-forward. Use its attributes during preflight instead of
+            # the stale attributes from the current workspace checkout.
+            _git_output(
+                self.workspace_root,
+                ["--attr-source=FETCH_HEAD", "diff", "--check", "HEAD", "FETCH_HEAD"],
+            )
             _git_output(
                 self.workspace_root,
                 ["merge", "--ff-only", "--no-edit", "FETCH_HEAD"],

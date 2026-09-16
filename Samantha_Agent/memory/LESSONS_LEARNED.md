@@ -726,3 +726,10 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Typ: opakující se
 - Řešení nalezeno: 16092026
 - Řešení: Posuzovat `currentRoute` při skutečně aktivní session a návaznost technických účtenek. U T020 potvrdit přerušenou část, explicitní continuation stejné session a nový aktivní vstup až po Pokračovat; nepovažovat pouhé připojení příslušenství za běžící mikrofon.
+
+### 2026-09-16 — Sync musí použít příchozí Git atributy
+
+- Kontext: Human–Adam profil přebírá fast-forward, který ve stejném commitu přidává importovaný Markdown s úmyslnými konci řádků a odpovídající `.gitattributes`.
+- Problém: `git diff --check HEAD FETCH_HEAD` použil atributy starého checkoutu a bezpečný update falešně odmítl dříve, než mohl nový `.gitattributes` převzít.
+- Řešení: preflight spustit jako `git --attr-source=FETCH_HEAD diff --check HEAD FETCH_HEAD`; ostatní kontroly čistoty, povolených cest, mazání a fast-forward zůstávají beze změny.
+- Ověření: nový regresní test přidává atribut i Markdown ve stejném zdrojovém commitu; 192 souvisejících testů a rychlá kontrolní brána prošly.

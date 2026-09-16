@@ -1,10 +1,11 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-Aktualizováno: 2026-09-16 21:43 CEST
+Aktualizováno: 2026-09-16 21:48 CEST
 
 - Autoritativní podklady jsou v0.5 + závazný dodatek U15. Původní v0.5 je importovaná beze změny a manifest 6/6 je ověřený. Celé `Do deníku` může po synchronizaci do soukromého Vieweru Jany; samostatná Úvaha vždy začíná `Jen pro mě` a vyžaduje vědomé `Vložit do deníku`.
 - Viewer delta audit: Tailscale/Serve/Cockpit tvoří použitelný základ, Funnel je vypnutý, Cockpit smoke 5/5, AC nespí a FileVault je zapnutý. Camino backend/worker/Viewer, samostatná autorizace, záloha, restart a test Janiných zařízení chybějí; G8 NEPROVEDENO.
+- Profilový fast-forward má opravený whitespace preflight: používá příchozí `.gitattributes`, bez globálního vypnutí kontroly; regresní test je zelený.
 - T016 PASS: přesně 30:24,406, 175 147 072 B, 48 kHz mono, režim Letadlo, převážně pod zámkem a celý poslech OK. T018–T020 PASS podle Míly. T021 PASS v rozsahu C01b prototypu: jediná aktivní session, pokračování po návratu z jiné aplikace a celý poslech OK; plná integrace se zopakuje v C04. Vítr neověřen.
 - C01b zahájeno výslovným pokynem Míly; C01a zůstává přijaté. Prototyp 0.2.0 (2) je lokálně připraven pro background audio, přerušení a vědomé pokračování. Verze 0.2.0 je nyní nainstalovaná a spuštěná na iPhonu; inventář 15 původních souborů se před/po shoduje v cestách a velikostech.
 - Běžící recorder přežije změnu scenePhase; nový Start/Pokračovat pouze v popředí. Přerušení ihned pozastaví vstup, ověří dostupnou část a nabídne Pokračovat/Ukončit. Pokračování vytváří novou část stejné session s evidovanou pauzou, bez přepisu předchozího média.
@@ -37,7 +38,7 @@ Typ: Project
 Priorita: 1
 Stav: rozpracovane
 Pripomenout pri startu: ano
-Datum: 2026-09-16 21:43 CEST
+Datum: 2026-09-16 21:48 CEST
 
 Co se resilo:
 Přijetí technického zadání v0.5, rozhodnutí U15 a delta audit Viewer readiness při zachování probíhající C01b.
@@ -553,3 +554,14 @@ Rozhodnutí a rizika:
 
 Další krok:
 - Provést T024, potom T059; C01c nezahajovat před uzavřením C01b.
+
+### 2026-09-16 21:48 CEST — Oprava bezpečného profilového syncu
+
+Hotovo / důkaz:
+- Preflight workspace používá atributy přijímaného `FETCH_HEAD`; test reprodukuje nový `.gitattributes` a Markdown hard break v jednom commitu. Prošlo 192 souvisejících testů a rychlá kontrolní brána.
+
+Rozhodnutí a rizika:
+- Nejde o vypnutí kontroly whitespace. Zůstávají kontroly čistoty, povolených cest, mazání, divergence a fast-forward-only.
+
+Další krok:
+- Po commitu zopakovat dorovnání čistých profilů; v Caminu pokračovat T024.
