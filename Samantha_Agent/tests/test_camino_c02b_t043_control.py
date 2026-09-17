@@ -104,6 +104,20 @@ class CaminoC02bT043ControlTests(unittest.TestCase):
         self.assertEqual(0, completed.returncode, completed.stderr)
         self.assertIn("Camino C02b chunk receiver", completed.stdout)
 
+    def test_system_tls_context_keeps_verification_and_loads_mac_ca_bundle(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            bundle = Path(temp_dir) / "cert.pem"
+            bundle.write_text("test CA bundle\n", encoding="utf-8")
+            fake_context = mock.Mock()
+            with (
+                mock.patch.object(control.ssl, "create_default_context", return_value=fake_context),
+                mock.patch.object(control, "SYSTEM_CA_BUNDLE", bundle),
+            ):
+                result = control._system_tls_context()
+
+        self.assertIs(fake_context, result)
+        fake_context.load_verify_locations.assert_called_once_with(cafile=str(bundle))
+
     def test_start_uses_exact_private_route_and_keeps_token_out_of_output(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             config = self._config(Path(temp_dir))

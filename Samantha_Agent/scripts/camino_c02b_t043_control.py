@@ -10,6 +10,7 @@ import os
 import secrets
 import signal
 import socket
+import ssl
 import subprocess
 import sys
 import tempfile
@@ -29,6 +30,7 @@ DEFAULT_PYTHON = PROJECT_ROOT / ".venv" / "bin" / "python"
 DEFAULT_RECEIVER = PROJECT_ROOT / "app" / "camino_chunk_receiver.py"
 RECEIVER_MODULE = "app.camino_chunk_receiver"
 DEFAULT_PBCOPY = Path("/usr/bin/pbcopy")
+SYSTEM_CA_BUNDLE = Path("/etc/ssl/cert.pem")
 ROUTE_PATH = "/camino-c02b"
 LOOPBACK_HOST = "127.0.0.1"
 DEFAULT_PORT = 8765
@@ -234,13 +236,24 @@ def _ensure_port_available(port: int) -> None:
         probe.close()
 
 
+def _system_tls_context() -> ssl.SSLContext:
+    context = ssl.create_default_context()
+    if SYSTEM_CA_BUNDLE.is_file():
+        context.load_verify_locations(cafile=str(SYSTEM_CA_BUNDLE))
+    return context
+
+
 def _http_json(url: str, token: str, *, timeout: float = 8) -> tuple[int, dict[str, Any]]:
     request = urllib.request.Request(
         url,
         headers={"Authorization": f"Bearer {token}", "Cache-Control": "no-store"},
     )
     try:
-        with urllib.request.urlopen(request, timeout=timeout) as response:
+        with urllib.request.urlopen(
+            request,
+            timeout=timeout,
+            context=_system_tls_context() if url.lower().startswith("https://") else None,
+        ) as response:
             payload = response.read()
             status = response.status
     except urllib.error.HTTPError as error:
@@ -417,7 +430,11 @@ def start(config: ControlConfig = ControlConfig(), runner: Runner = run_command)
         if remote_status != 200 or remote_body.get("scope") != "c02b_synthetic_only":
             raise ControlError("private HTTPS health check failed")
         cockpit_request = urllib.request.Request(f"https://{dns_name}/api/server/health")
-        with urllib.request.urlopen(cockpit_request, timeout=8) as response:
+        with urllib.request.urlopen(
+            cockpit_request,
+            timeout=8,
+            context=_system_tls_context(),
+        ) as response:
             if response.status != 200:
                 raise ControlError("Cockpit root health changed during T043 setup")
 

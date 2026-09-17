@@ -1,13 +1,13 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno po bezpečně vráceném startu a opravě workflow: 2026-09-17 20:08 CEST
+- Aktualizováno po druhém bezpečném rollbacku a TLS opravě: 2026-09-17 20:15 CEST
 
 ### Hotovo
 - C02b receiver obnovuje syntetický přenos po 8MiB částech, doplní jen chybějící indexy a finalizuje jediný objekt až po serverové kontrole celkové délky a SHA-256.
 - Samostatný iOS harness používá souborové background `URLSession` úlohy, trvalý journal, Keychain, přesné znovuporovnání se serverem a nejvýše dvě připravené 8MiB části. Nečte Fotky, mikrofon ani Camino Audio.
 - Podepsaný build `Camino Transfer Test` 0.4.0 (1), strict podpis, instalace a spuštění na iPhonu 14 Plus / iOS 26.6.1 prošly. Camino Audio zůstalo nedotčené.
-- První start receiveru failnul na kolizi přímého skriptového spuštění s `app/email`, ale workflow odebralo trasu a ukončilo proces. Modulový entrypoint je opravený; plná projektová brána 1710/1710 prošla. Receiver ani Serve cesta nejsou aktivní.
+- První start failnul na kolizi `app/email`, druhý po opraveném receiveru na chybějícím Python CA řetězci; oba rollbacky odebraly trasu a proces. Modulový entrypoint i explicitní systémový CA bundle jsou opravené; tailnet health vrátil 200 a plná brána 1711/1711 prošla. Receiver ani Serve cesta nejsou aktivní.
 
 ### Otevřeno
 - Fyzické T043/T047–T050 na iPhonu a cizí síti jsou NEPROVEDENO.
@@ -16,7 +16,7 @@
 - Receiver je lokální standard-library experiment, ne produkční FastAPI, databáze, trvalá služba ani záloha. Instalace a launch neprokazují background plánování, zámek, force quit ani přechody skutečné sítě.
 
 ### Další krok
-- Po novém samostatném potvrzení zopakovat přesný registrovaný T043 workflow, vložit URL a dočasný token do otevřeného harnessu a provést řízené přerušení/obnovu sítě.
+- Zopakovat už potvrzený přesný T043 workflow, vložit URL a dočasný token do otevřeného harnessu a provést řízené přerušení/obnovu sítě.
 
 ### Rozhodnutí
 - Serverová pravda a stav `verifying` mají přednost před lokálním byte progress. Force quit nic neslibuje; po ručním relaunchi se fronta znovu porovná. Bez soukromé sítě není veřejný alternativní endpoint.
@@ -26,7 +26,7 @@
 - T047–T050 provést odděleně až po vyhodnocení T043.
 
 ### Technický stav checkpointu
-- Python receiver 10/10, Swift transfer core 18/18, C02a regrese 10/10, UI 1/1, arm64 build, podepsání, strict kontrola, instalace a launch PASS; regresní entrypoint test a plná brána po opravě workflow 1710/1710 PASS.
+- Python receiver 10/10, Swift transfer core 18/18, C02a regrese 10/10, UI 1/1, arm64 build, podepsání, strict kontrola, instalace a launch PASS; regresní entrypoint/TLS testy a plná brána po opravě workflow 1711/1711 PASS.
 - Vývojový profil transfer harnessu platí do 24. září 2026. Push ani nasazení neproběhly; Tailscale konfigurace je stále ve výchozím stavu a čeká na samostatné potvrzení workflow.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -62,10 +62,10 @@ je vyloučeno; celé `Do deníku` je po synchronizaci Viewer-eligible.
 - T022 PASS ve dvou odlišných fázích otevřené části: klidový relaunch, pravdivé označení obnoveného rozsahu a přehratelné uzavřené části. T023 PASS přes čtyři poslechnuté 55s hranice bez opakování či nevysvětlené díry. C01c je přijato v prototypovém rozsahu; G0/G1/G8 a terénní připravenost zůstávají nesplněné.
 - C02a minimální receiver prošel 10/10 automatickými testy i privátním HTTPS smoke přes dočasnou Tailscale Serve cestu. Správný upload vytvořil právě jeden objekt a účtenku, retry neduplikoval, chybný hash a konflikt byly odmítnuty. Funnel zůstal vypnutý, Cockpit dostupný a původní Serve stav byl obnoven.
 - C02b má druhý lokální checkpoint. Receiver podporuje obnovitelné 8MiB části; samostatný iOS harness má souborové background úlohy, trvalý journal, nejvýše dvě připravené části, Keychain a fail-closed serverovou reconciliaci. Python 10/10, Swift 18/18, UI 1/1, arm64 build a plná brána 1705/1705 PASS.
-- `Camino Transfer Test` 0.4.0 (1) je podepsaný, strict ověřený, nainstalovaný a spuštěný na iPhonu 14 Plus / iOS 26.6.1. První start receiveru bezpečně failnul a vrátil síť; modulový entrypoint je opravený a brána 1710/1710 PASS. Serve cesta ani receiver nyní neběží.
+- `Camino Transfer Test` 0.4.0 (1) je na iPhonu. Dva starty bezpečně vrátily Serve; modulový entrypoint i systémový CA bundle jsou opravené a brána 1711/1711 PASS. Serve cesta ani receiver nyní neběží.
 
 
-Po novém samostatném potvrzení zopakovat přesný registrovaný T043 workflow, vložit URL a dočasný token do otevřeného harnessu a provést první řízený T043 přes privátní HTTPS. C01c ani C02a dále nerozšiřovat bez nového důvodu.
+Zopakovat už potvrzený přesný registrovaný T043 workflow, vložit URL a dočasný token do otevřeného harnessu a provést první řízený T043 přes privátní HTTPS. C01c ani C02a dále nerozšiřovat bez nového důvodu.
 
 ## Rizika
 
@@ -800,3 +800,18 @@ Další krok:
 
 Technický důkaz:
 - Regresní test modulu PASS; cílená sada 31/31 a plná projektová brána 1710/1710 PASS. T043 zůstává NEPROVEDENO, Funnel ani kořen Cockpitu se nezměnily.
+
+### 2026-09-17 20:15 CEST — Druhý start bezpečně vrácen; systémový CA trust doplněn
+
+Hotovo:
+- Druhý start potvrdil opravený receiver, ale privátní HTTPS smoke skončil na `CERTIFICATE_VERIFY_FAILED` v Python.org instalaci. Workflow znovu odebralo `/camino-c02b`, ukončilo receiver a nezanechalo aktivní běh.
+- Podle LL-025 a existující macOS zkušenosti používá kontrolní `urllib` explicitní `/etc/ssl/cert.pem`; ověřování certifikátu zůstává zapnuté. Přímý tailnet Cockpit health s tímto kontextem vrátil HTTP 200.
+
+Rozhodnutí:
+- Přesný příkaz a jeho zápisový rozsah zůstaly stejné; Mílovo potvrzení se použije k dokončení opraveného startu bez třetí žádosti.
+
+Další krok:
+- Po checkpointu znovu spustit registrovaný start, vložit zkopírovanou URL a následně token do harnessu a pokračovat T043.
+
+Technický důkaz:
+- TLS regresní test zachovává `ssl.create_default_context` a načítá systémový CA bundle. Cílená sada 32/32 a plná projektová brána 1711/1711 PASS; Serve má opět jen původní handler a port 8765 neposlouchá.

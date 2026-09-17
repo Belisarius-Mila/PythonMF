@@ -79,8 +79,11 @@ Plná projektová brána je samostatný povinný důkaz tohoto změnového kroku
 - První potvrzený start odhalil kolizi přímého skriptového spuštění s balíčkem
   `app/email`; receiver neotevřel port a workflow trasu bezpečně odebralo.
   Entry point je opraven na `python -m app.camino_chunk_receiver` a chráněn
-  regresním testem. Plná brána po opravě 1710/1710 PASS. Opakování čeká na nové
-  samostatné potvrzení; receiver ani Serve cesta nyní neběží.
+  regresním testem. Druhý start už receiver otevřel, ale kontrolní Python HTTPS
+  skončilo na chybějícím CA řetězci; rollback znovu obnovil původní Serve.
+  Kontrola nyní načítá systémový `/etc/ssl/cert.pem` bez vypnutí TLS ověření.
+  Skutečný tailnet Cockpit health s tímto kontextem vrátil 200 a plná brána po
+  opravě 1711/1711 PASS. Receiver ani Serve cesta nyní neběží.
 
 ## Další krok
 
