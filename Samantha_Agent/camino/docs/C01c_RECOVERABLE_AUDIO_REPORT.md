@@ -5,7 +5,7 @@ přijaté v prototypovém rozsahu.
 
 **Stav: pád při prvním Start opraven ve verzi 0.3.0 (4), automaticky ověřeno,
 podepsáno, nainstalováno a spuštěno na iPhonu bez změny dosavadních dat.
-Krátký fyzický Start/Stop a T022/T023 zatím NEPROVEDENO.**
+Krátký fyzický Start/Stop a přehrání PASS; T022/T023 zatím NEPROVEDENO.**
 
 ## Implementace
 
@@ -56,7 +56,13 @@ Krátký fyzický Start/Stop a T022/T023 zatím NEPROVEDENO.**
   prošlo 1/1 a následný celý průchod prošel čistě. Po opravě prošla rychlá
   statická brána; změněná audio cesta je krytá výše uvedenými cílenými testy a
   oběma arm64 buildy.
-- Krátký fyzický Start/Stop buildu 4 a T022/T023: **NEPROVEDENO**.
+- Krátký fyzický Start/Stop buildu 4: **PASS podle Míly**. Aplikace nespadla,
+  čas i ukazatel rostly a nový záznam šel přehrát. Technická účtenka potvrzuje
+  jeden normálně dokončený Komentář 10,7 s, 2 058 496 B, 48 kHz mono, jeden
+  segment, bez přerušení, recovery a mezery. Všech 136 předchozích položek
+  zůstalo beze změny; přibylo sedm očekávaných položek nového pokusu. Žádný CAF
+  se nekopíroval ani neposlouchal nástrojem.
+- T022/T023: **NEPROVEDENO**.
 
 Automatizace používá jen syntetická data v dočasných složkách. Neprokazuje
 skutečný mikrofon, zámek, spotřebu, přechod CAF částí bez slyšitelné vady ani
@@ -74,8 +80,6 @@ záchranu po reálném nuceném ukončení na iPhonu.
 
 ## Další krok
 
-Nejdřív na buildu 4 provést krátký neutrální Start/Stop a celý poslech. Pokud
-aplikace nespadne, čas i ukazatel rostou a záznam je přehratelný, pokračovat
-T022 podle zadání: alespoň 2:15, časové značky, nucené ukončení během otevřené
-části, relaunch bez automatického mikrofonu a celý poslech zachovaného rozsahu.
-Teprve po jeho vyhodnocení následuje T023.
+Na buildu 4 provést T022 podle zadání: alespoň 2:15, časové značky, nucené
+ukončení během otevřené části, relaunch bez automatického mikrofonu a celý
+poslech zachovaného rozsahu. Teprve po jeho vyhodnocení následuje T023.

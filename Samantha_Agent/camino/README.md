@@ -3,7 +3,7 @@
 Soukromý cestovní deník: offline záznam na iPhonu, soukromé zpracování na Macu
 a pozdější film z povolených zdrojů.
 
-**Stav: autoritativní podklady v0.5 + U15. C01a a C01b přijaty v prototypovém rozsahu. Pád C01c při Start opravil build 0.3.0 (4), který je nainstalovaný bez změny dosavadních dat; čeká krátký fyzický smoke a potom T022/T023. Camino Viewer je P0, ale podle etap se implementuje až v C08c–C08f.**
+**Stav: autoritativní podklady v0.5 + U15. C01a a C01b přijaty v prototypovém rozsahu. Pád C01c při Start opravil build 0.3.0 (4); krátký fyzický smoke na iPhonu prošel. C01c dál čeká na T022/T023. Camino Viewer je P0, ale podle etap se implementuje až v C08c–C08f.**
 
 - [Podklady v0.5](CAMINO_podklady_v0.5/README_v0.5.md)
 - [Funkční specifikace v0.5](CAMINO_podklady_v0.5/CAMINO_funkcni_specifikace_v0.5.md)
@@ -28,8 +28,8 @@ V Human–Adam se projekt jmenuje **Camino** (`project-camino`).
 - [Audio prototyp](prototypes/audio/README.md)
 - [Aktuální report a překážky](docs/C01a_AUDIO_PROTOTYPE_REPORT.md)
 
-Nejdřív potvrdit krátký fyzický Start/Stop na nainstalované verzi 0.3.0 (4).
-Teprve potom provést T022 a podle výsledku pokračovat T023 nebo další opravou.
+Na nainstalované verzi 0.3.0 (4) provést T022 a podle výsledku pokračovat T023
+nebo další opravou.
 
 Rozbalené podklady v0.4 a v0.5 jsou verzované včetně manifestů. Původní ZIPy
 jsou zachované lokálně a ignorované Gitem; profilové workspaces přebírají

@@ -3,7 +3,7 @@
 Izolovaný nativní prototyp pro Komentář nebo Úvahu. Swift 6, SwiftUI,
 AVFAudio, žádné externí balíčky, server ani AI. Nejde o celé Camino.
 
-**Stav: C01c rozpracované, verze 0.3.0 (4). Tap callback už nedědí `MainActor`, takže opravený podepsaný build nevyžaduje hlavní executor na real-time audio frontě. 52 testů jádra a 2 UI testy prošly a build je nainstalovaný na iPhonu bez změny dosavadních dat. Krátký fyzický smoke a T022/T023 zatím čekají. C01a a C01b byly přijaté samostatně.** Viz
+**Stav: C01c rozpracované, verze 0.3.0 (4). Tap callback už nedědí `MainActor`, takže opravený podepsaný build nevyžaduje hlavní executor na real-time audio frontě. 52 testů jádra a 2 UI testy prošly; krátký fyzický smoke na iPhonu potvrdil Start/Stop i přehrání bez pádu. T022/T023 zatím čekají. C01a a C01b byly přijaté samostatně.** Viz
 [report C01c](../../docs/C01c_RECOVERABLE_AUDIO_REPORT.md).
 
 ## Otevření a sestavení

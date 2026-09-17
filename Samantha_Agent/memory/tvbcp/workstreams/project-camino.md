@@ -25,16 +25,16 @@ je vyloučeno; celé `Do deníku` je po synchronizaci Viewer-eligible.
 - Po každém Mílou oznámeném výsledku fyzického testu Adam bez další žádosti vyhodnotí stav, řekne, zda je potřeba vývoj, a rovnou předá podmínky, přesný postup a kritéria PASS následujícího neprovedeného testu. Shoda s návrhem sama změnu kódu nevyvolává.
 - C01c build 3 při prvním Start padal. Pět shodných crash reportů potvrdilo Swift 6 actor-isolation trap: inline tap callback zdědil `MainActor`, ale běžel na real-time audio frontě.
 - Opravený build 0.3.0 (4) vytváří callback v `nonisolated` helperu. 52/52 Swift + 2/2 UI PASS, oba arm64 buildy, strict podpis, instalace i launch PASS; všech 136 položek se po instalaci shoduje v cestě, typu a velikosti.
-- Pět nedokončených pokusů z pádů zůstalo zachováno. Profil hlavní aplikace do 22. září 18:16 CEST. Krátký fyzický smoke, T022/T023, G0/G1/G8 a terénní připravenost nesplněné.
+- Pět nedokončených pokusů z pádů zůstalo zachováno. Profil hlavní aplikace do 22. září 18:16 CEST. Krátký fyzický smoke buildu 4 PASS podle Míly: bez pádu, rostoucí čas i ukazatel a přehratelný nový záznam. T022/T023, G0/G1/G8 a terénní připravenost zůstávají nesplněné.
 
 
-Provést krátký neutrální Start/Stop a poslech na buildu 0.3.0 (4). Při PASS pokračovat T022; při FAIL zastavit další testy a znovu diagnostikovat.
+Provést první průchod T022 na buildu 0.3.0 (4): nejméně 2:15 neutrálního souvislého zvuku se značkami, nucené ukončení během otevřené části, relaunch bez automatického mikrofonu a poslech zachovaného rozsahu.
 
 ## Rizika
 
 - C01a přijato, ale širší brány G0/G1/G8 a terénní připravenost zůstávají nesplněné.
 - C01b přijato v prototypovém rozsahu. Vítr a plná integrace T021 v C04 čekají; jeden nevysvětlený nereprodukovaný tichý úsek z prvního T059 zůstává rizikem.
-- C01c má opravený potvrzený pád buildu 3, ale build 4 čeká na krátký fyzický Start/Stop. Kontinuita segmentů, background input a rozsah ztráty po pádu zůstávají otevřené do T022/T023.
+- C01c má opravený potvrzený pád buildu 3 a krátký fyzický smoke buildu 4 prošel. Kontinuita segmentů, background input a rozsah ztráty po pádu zůstávají otevřené do T022/T023.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
 - Podepsaný build není instalace ani fyzická přejímka; vývojový profil je časově omezený. U01–U15 se bez nového rozhodnutí neotevírají.
 
@@ -611,3 +611,17 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Pět shodných `SIGTRAP` v `_swift_task_checkIsolatedSwift`. Všech 136 položek před instalací zůstalo po instalaci a launchi shodných v cestě, typu a velikosti; audio se nekopírovalo ani neposlouchalo.
+
+### 2026-09-17 11:46 CEST — Krátký fyzický smoke buildu 4 PASS
+
+Hotovo:
+- Míla potvrdil, že Start nepadá, čas i ukazatel rostou a nový záznam lze po Stop přehrát.
+
+Rozhodnutí:
+- Oprava pádu je fyzicky potvrzená; před T022 není potřeba další vývoj. Krátký smoke nenahrazuje T022 ani přijetí C01c.
+
+Další krok:
+- Provést první průchod T022 na 0.3.0 (4), potom test zopakovat s pádem v jiné fázi otevřeného segmentu.
+
+Technický důkaz:
+- Účtenka: Komentář 10,7 s, 2 058 496 B, 48 kHz mono, jeden segment, `interrupted=false`, `recovered=false`, bez mezery. Všech 136 předchozích položek zůstalo shodných; přibylo sedm očekávaných položek. Žádný CAF se nekopíroval ani neposlouchal nástrojem.

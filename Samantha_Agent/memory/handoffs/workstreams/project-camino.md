@@ -1,7 +1,7 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-Aktualizováno: 2026-09-17 11:32 CEST
+Aktualizováno: 2026-09-17 11:46 CEST
 
 - Autoritativní podklady jsou v0.5 + závazný dodatek U15. Původní v0.5 je importovaná beze změny a manifest 6/6 je ověřený. Celé `Do deníku` může po synchronizaci do soukromého Vieweru Jany; samostatná Úvaha vždy začíná `Jen pro mě` a vyžaduje vědomé `Vložit do deníku`.
 - Viewer delta audit: Tailscale/Serve/Cockpit tvoří použitelný základ, Funnel je vypnutý, Cockpit smoke 5/5, AC nespí a FileVault je zapnutý. Camino backend/worker/Viewer, samostatná autorizace, záloha, restart a test Janiných zařízení chybějí; G8 NEPROVEDENO.
@@ -15,12 +15,12 @@ Aktualizováno: 2026-09-17 11:32 CEST
 - C01c build 3 při prvním Start padal. Pět shodných crash reportů potvrdilo Swift 6 actor-isolation trap v tap callbacku, nikoli neplatný audioformát nebo první zápis CAF.
 - Build 0.3.0 (4) vytváří tap callback v `nonisolated` helperu. 52/52 Swift testů, 2/2 UI testy, nepodepsaný i podepsaný build a strict podpis PASS.
 - 0.3.0 (4) je nainstalovaná a spuštěná bez odinstalace. Všech 136 položek se po instalaci a launchi shoduje v cestě, typu i velikosti; pět nedokončených pokusů se nemazalo. Profil do 22. září 18:16 CEST.
-- Krátký fyzický Start/Stop buildu 4, T022/T023, fyzická kontinuita segmentů, G0/G1/G8 a terénní připravenost zůstávají NEPROVEDENO.
+- Krátký fyzický Start/Stop buildu 4 PASS podle Míly: bez pádu, čas i ukazatel rostly a nový záznam šel přehrát. Účtenka: Komentář 10,7 s, 2 058 496 B, 48 kHz mono, jeden segment, bez přerušení a recovery. T022/T023, fyzická kontinuita segmentů, G0/G1/G8 a terénní připravenost zůstávají NEPROVEDENO.
 
 ### Vzkaz pro pokračování
 
 - Restart a následný schválený úklid dokončeny. Před zahájením instalace bylo na SSD 85,79 GiB volných. Dřívější přesun USA neopakovat.
-- C01c 0.3.0 (4) je nainstalované. Nejdřív krátký fyzický Start/Stop; T022 spustit až po jeho PASS. Build 3 ani starou 0.2.0 už nepoužívat.
+- C01c 0.3.0 (4) je nainstalované a krátký fyzický smoke prošel. Další je T022. Build 3 ani starou 0.2.0 už nepoužívat.
 - Viewer nepřeskakovat před C08c–C08f. U15 doménově implementovat v C03/C04; provizorně jej nepřidávat do C01b JSON.
 - Po každém Mílou oznámeném výsledku bez další žádosti vyhodnotit stav, říct, zda je potřeba vývoj, a rovnou dát přesný návod i kritéria PASS následujícího neprovedeného testu. Shoda s návrhem nevyžaduje změnu kódu; FAIL nejdřív doložit a potom opravit v aktuální etapě.
 - Starší c+p+n d573e90c je historické. Dnešní p+n zahrnuje celý balíček Camina a toto předání; výsledek určuje živý audit a kanonická deployment receipt.
@@ -29,7 +29,7 @@ Aktualizováno: 2026-09-17 11:32 CEST
 
 - C01a přijato, ale širší brány G0/G1/G8 a terénní připravenost zůstávají nesplněné.
 - C01b přijato v prototypovém rozsahu. Vítr a plná integrace T021 v C04 čekají; jeden nevysvětlený nereprodukovaný tichý úsek z prvního T059 zůstává rizikem.
-- C01c build 3 měl potvrzený pád při Start; build 4 jej opravuje, ale fyzický smoke ještě čeká. Kontinuita 55s přechodů, background běh input tapu a rozsah ztráty po pádu zůstávají neověřené do T022/T023.
+- C01c build 3 měl potvrzený pád při Start; build 4 jej opravil a krátký fyzický smoke prošel. Kontinuita 55s přechodů, background běh input tapu a rozsah ztráty po pádu zůstávají neověřené do T022/T023.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
 - Podepsaný build není instalace ani fyzická přejímka; vývojový profil je časově omezený. U01–U15 se bez nového rozhodnutí neotevírají.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -42,22 +42,22 @@ Typ: Project
 Priorita: 1
 Stav: rozpracovane
 Pripomenout pri startu: ano
-Datum: 2026-09-17 11:32 CEST
+Datum: 2026-09-17 11:46 CEST
 
 Co se resilo:
-Diagnostika a oprava okamžitého pádu C01c při prvním Start.
+Fyzické potvrzení opravy okamžitého pádu C01c při prvním Start.
 
 Co je hotove:
-V0.5 + U15 platí; C01a/C01b přijaty. Příčina pádu buildu 3 je potvrzená z pěti shodných crash reportů. Opravený build 0.3.0 (4) prošel 52/52 + 2/2, buildem, strict podpisem, instalací i launchem; všech 136 položek zůstalo beze změny.
+V0.5 + U15 platí; C01a/C01b přijaty. Příčina pádu buildu 3 je potvrzená z pěti shodných crash reportů. Opravený build 0.3.0 (4) prošel 52/52 + 2/2, buildem, strict podpisem, instalací i launchem. Krátký fyzický smoke PASS: Start bez pádu, rostoucí čas i ukazatel a přehratelný nový záznam. Všech 136 předchozích položek zůstalo beze změny.
 
 Co neni hotove:
-Krátký fyzický Start/Stop buildu 4, T022/T023 a plný T061, plná integrace T021 v C04, U15 v C03/C04, Viewer C08c–C08f, G0/G1/G8 a terénní připravenost. První tichý úsek T059 zůstává nereprodukovaným pozorováním.
+T022/T023 a plný T061, plná integrace T021 v C04, U15 v C03/C04, Viewer C08c–C08f, G0/G1/G8 a terénní připravenost. První tichý úsek T059 zůstává nereprodukovaným pozorováním.
 
 Dalsi krok:
-Provést 10–15s neutrální Start/Stop a poslech na nainstalované 0.3.0 (4); teprve při PASS pokračovat T022.
+Provést první průchod T022 na nainstalované 0.3.0 (4): nejméně 2:15 neutrálního souvislého zvuku se značkami, nucené ukončení během otevřené části, relaunch bez automatického mikrofonu a poslech zachovaného rozsahu.
 
 Navrhovane dalsi kroky:
-Po krátkém smoke automaticky předat T022; po T022 vyhodnotit T023 nebo další opravu.
+Po prvním T022 předat jeho opakování v jiné fázi otevřeného segmentu; po vyhodnocení pokračovat T023 nebo další opravou.
 
 Zmenene nebo relevantni soubory:
 `camino/`, `memory/projects/camino.md`, katalog, registry a kanonický TVBCP.
@@ -636,3 +636,15 @@ Rozhodnutí a rizika:
 
 Další krok:
 - Na buildu 4 provést krátký neutrální Start/Stop a celý poslech. Při PASS pokračovat T022; při FAIL znovu nemačkat Start a získat nový crash report.
+
+### 2026-09-17 11:46 CEST — Krátký fyzický smoke buildu 4 PASS
+
+Hotovo / důkaz:
+- Míla potvrdil Start bez pádu, růst času i ukazatele a přehrání nového záznamu po Stop.
+- Dokončený Komentář má 10,7 s, 2 058 496 B, 48 kHz mono, jeden segment, bez přerušení, recovery a mezery. Všech 136 předchozích položek zůstalo shodných; přibylo sedm očekávaných položek. Žádný CAF se nekopíroval ani neposlouchal nástrojem.
+
+Rozhodnutí a rizika:
+- Oprava pádu je fyzicky potvrzená; před T022 není potřeba další vývoj. C01c zůstává rozpracované do T022/T023.
+
+Další krok:
+- Provést první průchod T022 na 0.3.0 (4), potom vyhodnotit opakování v jiné fázi otevřeného segmentu.

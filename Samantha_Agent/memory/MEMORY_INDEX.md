@@ -59,7 +59,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] V0.5 + U15 jsou autoritativní. C01b přijato. Potvrzený actor-isolation pád C01c buildu 3 opravuje nainstalovaný build 0.3.0 (4); 52/52 + 2/2, podpis, instalace a zachování 136 položek PASS. Další je krátký fyzický Start/Stop, potom T022/T023; C01c zatím nepřijato. Viewer runtime/G8 chybí; profil do 22. 9. 18:16 CEST.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] V0.5 + U15 jsou autoritativní. C01b přijato. Potvrzený actor-isolation pád C01c buildu 3 opravuje nainstalovaný build 0.3.0 (4); 52/52 + 2/2, podpis, instalace, zachování 136 položek a krátký fyzický smoke PASS. Další je T022/T023; C01c zatím nepřijato. Viewer runtime/G8 chybí; profil do 22. 9. 18:16 CEST.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` - Cockpit 14. 9.: scroll 10ec0877 potvrzený Mílou. [PRIPOMENOUT] U07 až při příštím pokračování. TXT v2.8 shrnuje U01–U06; plná brána 1680/1680 OK, funkční nasazení 980aed7a a smoke 5/5. Publikační překážka odstraněna; finální balíček/head ověřovat živým auditem.
 

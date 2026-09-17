@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-17 11:32 CEST
+Aktualizováno: 2026-09-17 11:46 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -24,6 +24,7 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 - C01c zahájeno výslovným pokynem Míly. Verze 0.3.0 používá jeden `AVAudioEngine` input tap, 55s checkpointy s návrhovým stropem 60 s, create-only journal a obnovu platných částí po pádu bez automatického mikrofonu. Legacy C01a/C01b zůstává bez migrace.
 - Build 3 při prvním Start padal. Pět shodných crash reportů potvrdilo `SIGTRAP` v `_swift_task_checkIsolatedSwift`: inline tap callback zdědil `MainActor`, ale běžel na real-time audio frontě. Build 4 vytváří callback v `nonisolated` helperu; přísné Swift 6 kontroly zůstávají zapnuté.
 - Opravný průchod: 52/52 Swift testů, 2/2 UI testy, nepodepsaný i podepsaný build a strict podpis PASS. 0.3.0 (4) je nainstalovaná a spuštěná bez odinstalace. Všech 136 položek před instalací zůstalo po instalaci i launchi shodných v cestě, typu a velikosti; pět nedokončených pokusů se nemazalo.
+- Krátký fyzický smoke buildu 4 PASS podle Míly: Start nespadl, čas i ukazatel rostly, Stop fungoval a nový záznam šel přehrát. Účtenka potvrzuje normálně dokončený Komentář 10,7 s, 2 058 496 B, 48 kHz mono, jeden segment, bez přerušení, recovery a mezery. Všech 136 předchozích položek zůstalo beze změny; přibylo sedm očekávaných položek nového pokusu.
 - Profil hlavní aplikace do 22. září 18:16 CEST. T022/T023 a fyzická kontinuita segmentů NEPROVEDENO; G0/G1 a terénní připravenost nesplněné. Původní nahrávky i samostatný Camino Test zůstávají zachované.
 
 
@@ -54,13 +55,15 @@ kódu nevyvolává; FAIL se nejdřív doloží a opraví v aktuálním rozsahu.
 
 - C01a přijato, ale širší brány G0/G1/G8 a terénní připravenost zůstávají nesplněné.
 - C01b přijato v prototypovém rozsahu. Vítr a plná integrace T021 v C04 čekají; jeden nevysvětlený nereprodukovaný tichý úsek z prvního T059 zůstává rizikem.
-- C01c má opravený potvrzený pád buildu 3, ale build 4 ještě čeká na krátký fyzický Start/Stop. Skutečná kontinuita na 55s hranicích, background běh nového `AVAudioEngine` a rozsah ztráty po nuceném pádu čekají na T022/T023. Otevírání dalšího CAF v tap callbacku může na zařízení odhalit mezeru; T023 to musí posoudit poslechem.
+- C01c má opravený potvrzený pád buildu 3 a krátký fyzický smoke buildu 4 prošel. Skutečná kontinuita na 55s hranicích, background běh nového `AVAudioEngine` a rozsah ztráty po nuceném pádu čekají na T022/T023. Otevírání dalšího CAF v tap callbacku může na zařízení odhalit mezeru; T023 to musí posoudit poslechem.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
 - Podepsaný build není instalace ani fyzická přejímka; vývojový profil je časově omezený. U01–U15 se bez nového rozhodnutí neotevírají.
 
 ## Další krok
 
-Potvrdit krátký neutrální Start/Stop a přehrání na nainstalované 0.3.0 (4). Při PASS pokračovat T022; při FAIL znovu zastavit a diagnostikovat.
+Provést T022 na nainstalované 0.3.0 (4): nejméně 2:15 neutrálního souvislého
+zvuku se značkami, nucené ukončení během otevřené části, relaunch bez
+automatického mikrofonu a poslech zachovaného rozsahu.
 
 Historický doklad založení:
 Ověření založení: 56/56 testů integrace (54 + 2 profilové testy) a rychlá statická brána OK.
@@ -619,3 +622,17 @@ Rozhodnutí a rizika:
 
 Další krok:
 - Na buildu 4 provést 10–15s neutrální Start/Stop, potvrdit růst času/ukazatele a celý poslech. Při PASS pokračovat T022; při FAIL znovu netestovat a získat nový crash report.
+
+### 2026-09-17 11:46 CEST — Krátký fyzický smoke buildu 4 PASS
+
+Hotovo / důkaz:
+- Míla potvrdil všechny tři požadované body: aplikace při Start nespadla, čas i ukazatel rostly a po Stop šel nový záznam přehrát.
+- Technická účtenka potvrzuje jeden normálně dokončený Komentář 10,7 s, 2 058 496 B, 48 kHz mono, jeden segment, `interrupted=false`, `recovered=false` a bez mezery před segmentem.
+- Všech 136 předchozích položek zůstalo shodných v cestě, typu a velikosti; přibylo sedm očekávaných položek nového dokončeného pokusu. Žádný CAF se nekopíroval ani neposlouchal nástrojem.
+
+Rozhodnutí a rizika:
+- Oprava okamžitého pádu je fyzicky potvrzená; další vývoj před T022 není potřeba.
+- Tento krátký smoke není T022 ani přijetí C01c. Obnova po nuceném ukončení a kontinuita segmentů zůstávají otevřené do T022/T023.
+
+Další krok:
+- Provést první průchod T022 na 0.3.0 (4), potom podle výsledku předat opakování v jiné fázi otevřeného segmentu nebo opravu.
