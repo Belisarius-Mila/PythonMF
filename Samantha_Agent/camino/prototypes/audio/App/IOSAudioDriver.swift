@@ -147,6 +147,15 @@ private final class SegmentedCaptureWriter: @unchecked Sendable {
 
     func requestPermission() async -> Bool { await AVAudioApplication.requestRecordPermission() }
 
+    /// AVAudioEngine invokes tap blocks on its real-time audio queue. Build the
+    /// block outside MainActor isolation so Swift 6 does not require that queue
+    /// to be the main executor. SegmentedCaptureWriter provides its own lock.
+    private nonisolated static func captureTap(
+        writer: SegmentedCaptureWriter
+    ) -> AVAudioNodeTapBlock {
+        { buffer, _ in writer.append(buffer) }
+    }
+
     func start(url: URL) async throws {
         guard UIApplication.shared.applicationState == .active else {
             throw AudioPrototypeError.startFailed
@@ -169,9 +178,8 @@ private final class SegmentedCaptureWriter: @unchecked Sendable {
         }
         let nextWriter = try SegmentedCaptureWriter(firstPartialURL: url,
             format: format, policy: RecordingStore.checkpointPolicy)
-        input.installTap(onBus: 0, bufferSize: 4_096, format: format) { buffer, _ in
-            nextWriter.append(buffer)
-        }
+        input.installTap(onBus: 0, bufferSize: 4_096, format: format,
+                         block: Self.captureTap(writer: nextWriter))
         engine = nextEngine; writer = nextWriter
         do {
             nextEngine.prepare()

@@ -733,3 +733,15 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Problém: `git diff --check HEAD FETCH_HEAD` použil atributy starého checkoutu a bezpečný update falešně odmítl dříve, než mohl nový `.gitattributes` převzít.
 - Řešení: preflight spustit jako `git --attr-source=FETCH_HEAD diff --check HEAD FETCH_HEAD`; ostatní kontroly čistoty, povolených cest, mazání a fast-forward zůstávají beze změny.
 - Ověření: nový regresní test přidává atribut i Markdown ve stejném zdrojovém commitu; 192 souvisejících testů a rychlá kontrolní brána prošly.
+
+### 2026-09-17 — AVAudioEngine tap nesmí zdědit MainActor
+
+- Kontext: Camino C01c, Swift 6 strict concurrency a fyzický mikrofon.
+- Problém: inline tap closure vytvořená v `@MainActor` metodě zdědila izolaci;
+  `AVAudioEngine` ji zavolal na real-time audio frontě a runtime ukončil proces
+  přes `_swift_task_checkIsolatedSwift`. Simulátorová syntetická média tuto
+  cestu neprovedla.
+- Řešení: callback vytvořit v explicitně `nonisolated` helperu a předat mu jen
+  vlastní synchronizovaný `Sendable` stav. Nevypínat dynamické kontroly aktorů.
+- Ověření: shodný podpis v pěti crash reportech, 52 Swift testů, 2 UI testy,
+  arm64 build a strict podpis; fyzický Start/Stop zůstává samostatnou bránou.

@@ -23,17 +23,18 @@ je vyloučeno; celé `Do deníku` je po synchronizaci Viewer-eligible.
 - Ověřeno 47/47 Swift testů, 2/2 UI testy simulátoru včetně snímku obrazovky, finální podepsaný iOS build a strict podpis; UIBackgroundModes=[audio]. Plná projektová brána PASS, 1684/1684 testů.
 - C01b 0.2.0 (2) přijato v prototypovém rozsahu. Krátký test zámku a T016/T018–T021/T024/T059 PASS; T059 prošel po řízeném zopakování jedním nepřerušeným 107,801s souborem. Předchozí nevysvětlený tichý úsek se nezopakoval.
 - Po každém Mílou oznámeném výsledku fyzického testu Adam bez další žádosti vyhodnotí stav, řekne, zda je potřeba vývoj, a rovnou předá podmínky, přesný postup a kritéria PASS následujícího neprovedeného testu. Shoda s návrhem sama změnu kódu nevyvolává.
-- C01c 0.3.0 (3) zahájeno: jeden input tap, 55s checkpointy, journal a obnova platných částí bez automatického mikrofonu. 52/52 Swift + 2/2 UI PASS, podepsáno, strict podpis PASS, instalace/spuštění na iPhone PASS.
-- Inventář 111 původních položek a jeho hash cest/velikostí se po instalaci nezměnil. Profil hlavní aplikace do 22. září 18:16 CEST. T022/T023, G0/G1/G8 a terénní připravenost nesplněné.
+- C01c build 3 při prvním Start padal. Pět shodných crash reportů potvrdilo Swift 6 actor-isolation trap: inline tap callback zdědil `MainActor`, ale běžel na real-time audio frontě.
+- Opravený build 0.3.0 (4) vytváří callback v `nonisolated` helperu. 52/52 Swift + 2/2 UI PASS, oba arm64 buildy, strict podpis, instalace i launch PASS; všech 136 položek se po instalaci shoduje v cestě, typu a velikosti.
+- Pět nedokončených pokusů z pádů zůstalo zachováno. Profil hlavní aplikace do 22. září 18:16 CEST. Krátký fyzický smoke, T022/T023, G0/G1/G8 a terénní připravenost nesplněné.
 
 
-Provést T022 na nainstalovaném buildu 0.3.0 (3), potom T023 nebo opravu podle výsledku.
+Provést krátký neutrální Start/Stop a poslech na buildu 0.3.0 (4). Při PASS pokračovat T022; při FAIL zastavit další testy a znovu diagnostikovat.
 
 ## Rizika
 
 - C01a přijato, ale širší brány G0/G1/G8 a terénní připravenost zůstávají nesplněné.
 - C01b přijato v prototypovém rozsahu. Vítr a plná integrace T021 v C04 čekají; jeden nevysvětlený nereprodukovaný tichý úsek z prvního T059 zůstává rizikem.
-- C01c čeká na fyzický důkaz skutečné kontinuity segmentů, background inputu a rozsahu ztráty po pádu; automatické testy T022/T023 nenahrazují.
+- C01c má opravený potvrzený pád buildu 3, ale build 4 čeká na krátký fyzický Start/Stop. Kontinuita segmentů, background input a rozsah ztráty po pádu zůstávají otevřené do T022/T023.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
 - Podepsaný build není instalace ani fyzická přejímka; vývojový profil je časově omezený. U01–U15 se bez nového rozhodnutí neotevírají.
 
@@ -592,3 +593,21 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Build 0.3.0 (3), profil do 22. 9. 18:16 CEST. Dvoučástový UI fixture 15 + 15 s. Inventář před/po instalaci 111 položek se shodným SHA-256 cest/velikostí; audio se nečetlo.
+
+### 2026-09-17 11:32 CEST — Oprava pádu C01c při Start
+
+Hotovo:
+- Crash reporty určily chybnou actor izolaci tap callbacku. Build 4 vytváří callback v `nonisolated` kontextu a zachovává Swift 6 strict concurrency.
+- 52/52 Swift testů, 2/2 UI testy, nepodepsaný i podepsaný arm64 build, strict podpis, rychlá statická brána, instalace a launch PASS.
+
+Rozhodnutí:
+- C01c se nepřijímá bez fyzického mikrofonu. Pět nedokončených pokusů se nemaže; nejsou vydávány za dokončené nahrávky.
+
+Další krok:
+- Krátký neutrální Start/Stop a celý poslech na 0.3.0 (4); při PASS pokračovat T022.
+
+Navrhované další kroky:
+- Po T022 vyhodnotit T023 nebo další opravu; plný T061 zůstává C05a.
+
+Technický důkaz:
+- Pět shodných `SIGTRAP` v `_swift_task_checkIsolatedSwift`. Všech 136 položek před instalací zůstalo po instalaci a launchi shodných v cestě, typu a velikosti; audio se nekopírovalo ani neposlouchalo.

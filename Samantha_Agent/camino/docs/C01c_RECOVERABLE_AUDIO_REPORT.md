@@ -3,8 +3,9 @@
 Zahájeno 2026-09-17 po výslovném pokynu Míly. C01a a C01b byly před zahájením
 přijaté v prototypovém rozsahu.
 
-**Stav: implementace 0.3.0 (3) automaticky ověřená, podepsaná, nainstalovaná
-a spuštěná na iPhonu; fyzické T022/T023 zatím NEPROVEDENO.**
+**Stav: pád při prvním Start opraven ve verzi 0.3.0 (4), automaticky ověřeno,
+podepsáno, nainstalováno a spuštěno na iPhonu bez změny dosavadních dat.
+Krátký fyzický Start/Stop a T022/T023 zatím NEPROVEDENO.**
 
 ## Implementace
 
@@ -22,27 +23,40 @@ a spuštěná na iPhonu; fyzické T022/T023 zatím NEPROVEDENO.**
 - Přehrávání ověřených částí je sekvenční. Legacy C01a/C01b `audio.caf` a JSON
   se čtou v původním formátu bez migrace či přepisu.
 
+### Oprava pádu při Start
+
+- Pět shodných systémových crash reportů ukázalo `SIGTRAP` v
+  `_swift_task_checkIsolatedSwift` uvnitř tap callbacku. Nešlo o neplatný
+  hardwarový formát ani první zápis CAF.
+- `IOSAudioDriver` je `@MainActor`; původní inline closure proto zdědila
+  izolaci hlavního aktoru, přestože ji `AVAudioEngine` volá na real-time audio
+  frontě.
+- Build 4 vytváří callback v explicitně `nonisolated` helperu a předává mu
+  interně zamčený `SegmentedCaptureWriter`. Přísné kontroly Swift 6 zůstaly
+  zapnuté; audio architektura, checkpointy ani formát dat se nemění.
+
 ## Ověření
 
-- Swift XCTest: **52/52 PASS**. Pět nových testů pokrývá strop checkpointu,
+- Swift XCTest po opravě: **52/52 PASS**. Pět testů C01c pokrývá strop checkpointu,
   obnovu platné otevřené části bez aktivace mikrofonu, poškozený konec,
   osiřelou část po mezeře, idempotenci a normální vícečástové dokončení.
-- Nepodepsaný i podepsaný iOS Debug build: **PASS**. Strict podpis: **PASS**;
+- Nepodepsaný i podepsaný iOS Debug build po opravě: **PASS**. Strict podpis: **PASS**;
   profil platí do 22. září 2026 18:16 CEST.
-- UI testy: **2/2 PASS** na simulátoru iPhone 14 Plus / iOS 26.3.1. Fixture
+- UI testy po opravě: **2/2 PASS** na simulátoru iPhone 14 Plus / iOS 26.3.1. Fixture
   obsahuje dvě navazující 15s části; prošel průběh, Stop, opakování i relaunch
   bez automatického přehrání. Snímek byl vizuálně zkontrolovaný bez vady
-  rozložení. První běh se kvůli systémovému `signal kill` test runneru nedostal
-  k bootstrapu; po čistém restartu dedikovaného simulátoru opakování prošlo.
-- Instalace a spuštění 0.3.0 (3) na připojeném iPhonu: **PASS**, bez odinstalace.
-  Inventář Application Support před/po je přesně shodný: 111 položek,
-  28 `started.json`, 27 `completed.json` a 28 původních `audio.caf`; shoduje se
-  i SHA-256 seznamu relativních cest, velikostí a typu položky. Jde jen o
-  technická metadata, audio nebylo kopírováno ani posloucháno.
-- Plná projektová brána: **PASS, 1685/1685 testů**. První běh měl jediné
+  rozložení. Opravný průchod proběhl čistě.
+- Instalace a spuštění 0.3.0 (4) na připojeném iPhonu: **PASS**, bez
+  odinstalace. Všech 136 položek před instalací zůstalo po instalaci i launchi
+  shodných v relativní cestě, typu a velikosti. Jde o původních 111 položek a
+  25 zachovaných technických položek z pěti neúspěšných pokusů; nic se
+  nemazalo a audio nebylo kopírováno ani posloucháno.
+- Plná projektová brána před opravou: **PASS, 1685/1685 testů**. První běh měl jediné
   časovací selhání nesouvisejícího Human–Adam worker testu; cílené opakování
-  prošlo 1/1 a následný celý průchod prošel čistě.
-- Fyzické T022/T023: **NEPROVEDENO**.
+  prošlo 1/1 a následný celý průchod prošel čistě. Po opravě prošla rychlá
+  statická brána; změněná audio cesta je krytá výše uvedenými cílenými testy a
+  oběma arm64 buildy.
+- Krátký fyzický Start/Stop buildu 4 a T022/T023: **NEPROVEDENO**.
 
 Automatizace používá jen syntetická data v dočasných složkách. Neprokazuje
 skutečný mikrofon, zámek, spotřebu, přechod CAF částí bez slyšitelné vady ani
@@ -60,7 +74,8 @@ záchranu po reálném nuceném ukončení na iPhonu.
 
 ## Další krok
 
-Provést T022 podle zadání: neutrální souvislý záznam alespoň 2:15, několik
-časových značek, nucené ukončení během další otevřené části, relaunch bez
-automatického mikrofonu a celý poslech nabídnutého zachovaného rozsahu. Teprve
-po jeho vyhodnocení následuje T023.
+Nejdřív na buildu 4 provést krátký neutrální Start/Stop a celý poslech. Pokud
+aplikace nespadne, čas i ukazatel rostou a záznam je přehratelný, pokračovat
+T022 podle zadání: alespoň 2:15, časové značky, nucené ukončení během otevřené
+části, relaunch bez automatického mikrofonu a celý poslech zachovaného rozsahu.
+Teprve po jeho vyhodnocení následuje T023.

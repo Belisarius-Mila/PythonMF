@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-17 07:59 CEST
+Aktualizováno: 2026-09-17 11:32 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -21,8 +21,9 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 - Soubory vytvořené v C01b mají completeUntilFirstUserAuthentication; původní C01a soubory se nemigrují ani nemění. Staré JSON podporuje volitelné continuation. Tyto starší jednotlivé CAF samy nejsou C01c segmentový journal ani důkaz 60s cíle.
 - Ověřeno 47/47 Swift testů, 2/2 UI testy simulátoru včetně snímku obrazovky, finální podepsaný iOS build a strict podpis; UIBackgroundModes=[audio]. Plná projektová brána PASS, 1684/1684 testů.
 - C01b 0.2.0 (2) přijato v prototypovém rozsahu. Krátký test zámku a T016/T018–T021/T024/T059 PASS; T059 prošel po řízeném zopakování jedním nepřerušeným 107,801s souborem. Předchozí nevysvětlený tichý úsek se nezopakoval.
-- C01c zahájeno výslovným pokynem Míly. Verze 0.3.0 (3) používá jeden `AVAudioEngine` input tap, 55s checkpointy s návrhovým stropem 60 s, create-only journal a obnovu platných částí po pádu bez automatického mikrofonu. Legacy C01a/C01b zůstává bez migrace.
-- 52/52 Swift testů a 2/2 dvoučástové UI testy PASS; podepsaný build a strict podpis PASS. 0.3.0 je nainstalovaná a spuštěná na iPhonu bez odinstalace. Inventář 111 položek před/po a SHA-256 cest/velikostí se přesně shodují.
+- C01c zahájeno výslovným pokynem Míly. Verze 0.3.0 používá jeden `AVAudioEngine` input tap, 55s checkpointy s návrhovým stropem 60 s, create-only journal a obnovu platných částí po pádu bez automatického mikrofonu. Legacy C01a/C01b zůstává bez migrace.
+- Build 3 při prvním Start padal. Pět shodných crash reportů potvrdilo `SIGTRAP` v `_swift_task_checkIsolatedSwift`: inline tap callback zdědil `MainActor`, ale běžel na real-time audio frontě. Build 4 vytváří callback v `nonisolated` helperu; přísné Swift 6 kontroly zůstávají zapnuté.
+- Opravný průchod: 52/52 Swift testů, 2/2 UI testy, nepodepsaný i podepsaný build a strict podpis PASS. 0.3.0 (4) je nainstalovaná a spuštěná bez odinstalace. Všech 136 položek před instalací zůstalo po instalaci i launchi shodných v cestě, typu a velikosti; pět nedokončených pokusů se nemazalo.
 - Profil hlavní aplikace do 22. září 18:16 CEST. T022/T023 a fyzická kontinuita segmentů NEPROVEDENO; G0/G1 a terénní připravenost nesplněné. Původní nahrávky i samostatný Camino Test zůstávají zachované.
 
 
@@ -53,13 +54,13 @@ kódu nevyvolává; FAIL se nejdřív doloží a opraví v aktuálním rozsahu.
 
 - C01a přijato, ale širší brány G0/G1/G8 a terénní připravenost zůstávají nesplněné.
 - C01b přijato v prototypovém rozsahu. Vítr a plná integrace T021 v C04 čekají; jeden nevysvětlený nereprodukovaný tichý úsek z prvního T059 zůstává rizikem.
-- C01c je automaticky ověřené, ale skutečná kontinuita na 55s hranicích, background běh nového `AVAudioEngine` a rozsah ztráty po nuceném pádu čekají na T022/T023. Otevírání dalšího CAF v tap callbacku může na zařízení odhalit mezeru; T023 to musí posoudit poslechem.
+- C01c má opravený potvrzený pád buildu 3, ale build 4 ještě čeká na krátký fyzický Start/Stop. Skutečná kontinuita na 55s hranicích, background běh nového `AVAudioEngine` a rozsah ztráty po nuceném pádu čekají na T022/T023. Otevírání dalšího CAF v tap callbacku může na zařízení odhalit mezeru; T023 to musí posoudit poslechem.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
 - Podepsaný build není instalace ani fyzická přejímka; vývojový profil je časově omezený. U01–U15 se bez nového rozhodnutí neotevírají.
 
 ## Další krok
 
-Provést T022 na nainstalované verzi 0.3.0 (3); potom výsledek vyhodnotit a automaticky předat T023 nebo opravu C01c.
+Potvrdit krátký neutrální Start/Stop a přehrání na nainstalované 0.3.0 (4). Při PASS pokračovat T022; při FAIL znovu zastavit a diagnostikovat.
 
 Historický doklad založení:
 Ověření založení: 56/56 testů integrace (54 + 2 profilové testy) a rychlá statická brána OK.
@@ -604,3 +605,17 @@ Rozhodnutí a rizika:
 
 Další krok:
 - T022 na 0.3.0: nejméně 2:15 neutrálního souvislého zvuku se značkami, nucené ukončení během otevřené části, relaunch bez mikrofonu a celý poslech zachovaného rozsahu. Potom T023.
+
+### 2026-09-17 11:32 CEST — Oprava pádu C01c při Start
+
+Hotovo / důkaz:
+- Pět shodných crash reportů určilo příčinu: tap callback zdědil `MainActor` a Swift 6 ho na real-time audio frontě ukončil přes `_swift_task_checkIsolatedSwift`.
+- Build 0.3.0 (4) vytváří callback v `nonisolated` helperu. 52/52 Swift testů, 2/2 UI testy, oba arm64 buildy, strict podpis a rychlá statická brána PASS.
+- Instalace a launch přes stávající aplikaci PASS. Všech 136 položek před instalací zůstalo shodných; nic se nemazalo, nekopírovalo ani neposlouchalo.
+
+Rozhodnutí a rizika:
+- Kontroly Swift 6 se nevypínají. Pět nedokončených pokusů z pádů zůstává zachováno.
+- Automatické ověření nenahrazuje skutečný mikrofon; C01c a T022 zůstávají otevřené do krátkého fyzického smoke.
+
+Další krok:
+- Na buildu 4 provést 10–15s neutrální Start/Stop, potvrdit růst času/ukazatele a celý poslech. Při PASS pokračovat T022; při FAIL znovu netestovat a získat nový crash report.

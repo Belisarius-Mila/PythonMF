@@ -1,7 +1,7 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-Aktualizováno: 2026-09-17 07:59 CEST
+Aktualizováno: 2026-09-17 11:32 CEST
 
 - Autoritativní podklady jsou v0.5 + závazný dodatek U15. Původní v0.5 je importovaná beze změny a manifest 6/6 je ověřený. Celé `Do deníku` může po synchronizaci do soukromého Vieweru Jany; samostatná Úvaha vždy začíná `Jen pro mě` a vyžaduje vědomé `Vložit do deníku`.
 - Viewer delta audit: Tailscale/Serve/Cockpit tvoří použitelný základ, Funnel je vypnutý, Cockpit smoke 5/5, AC nespí a FileVault je zapnutý. Camino backend/worker/Viewer, samostatná autorizace, záloha, restart a test Janiných zařízení chybějí; G8 NEPROVEDENO.
@@ -12,14 +12,15 @@ Aktualizováno: 2026-09-17 07:59 CEST
 - Soubory vytvořené v C01b mají completeUntilFirstUserAuthentication; původní C01a soubory se nemigrují ani nemění. Staré JSON podporuje volitelné continuation. Tyto starší jednotlivé CAF samy nejsou C01c journal ani důkaz 60s cíle.
 - Ověřeno 47/47 Swift testů, 2/2 UI testy simulátoru včetně snímku obrazovky, finální podepsaný iOS build a strict podpis; UIBackgroundModes=[audio]. Plná projektová brána PASS, 1684/1684 testů.
 - C01b 0.2.0 (2) přijato v prototypovém rozsahu. Krátký test zámku a T016/T018–T021/T024/T059 PASS; T059 prošel po řízeném zopakování jedním nepřerušeným 107,801s souborem. Předchozí nevysvětlený tichý úsek se nezopakoval.
-- C01c zahájeno: 0.3.0 (3) má jeden input tap, 55s checkpointy, create-only journal a obnovu ověřitelných částí po pádu bez automatického mikrofonu. 52/52 Swift testů a 2/2 UI testy PASS; podepsaný build a strict podpis PASS.
-- 0.3.0 je nainstalovaná a spuštěná na iPhonu bez odinstalace. Inventář 111 položek a hash cest/velikostí se před/po přesně shodují; legacy data se nemigrovala. Profil do 22. září 18:16 CEST.
-- T022/T023, fyzická kontinuita segmentů, G0/G1/G8 a terénní připravenost zůstávají NEPROVEDENO.
+- C01c build 3 při prvním Start padal. Pět shodných crash reportů potvrdilo Swift 6 actor-isolation trap v tap callbacku, nikoli neplatný audioformát nebo první zápis CAF.
+- Build 0.3.0 (4) vytváří tap callback v `nonisolated` helperu. 52/52 Swift testů, 2/2 UI testy, nepodepsaný i podepsaný build a strict podpis PASS.
+- 0.3.0 (4) je nainstalovaná a spuštěná bez odinstalace. Všech 136 položek se po instalaci a launchi shoduje v cestě, typu i velikosti; pět nedokončených pokusů se nemazalo. Profil do 22. září 18:16 CEST.
+- Krátký fyzický Start/Stop buildu 4, T022/T023, fyzická kontinuita segmentů, G0/G1/G8 a terénní připravenost zůstávají NEPROVEDENO.
 
 ### Vzkaz pro pokračování
 
 - Restart a následný schválený úklid dokončeny. Před zahájením instalace bylo na SSD 85,79 GiB volných. Dřívější přesun USA neopakovat.
-- C01c 0.3.0 je nainstalované. Další krok je T022; starou 0.2.0 už pro tento test nepoužívat.
+- C01c 0.3.0 (4) je nainstalované. Nejdřív krátký fyzický Start/Stop; T022 spustit až po jeho PASS. Build 3 ani starou 0.2.0 už nepoužívat.
 - Viewer nepřeskakovat před C08c–C08f. U15 doménově implementovat v C03/C04; provizorně jej nepřidávat do C01b JSON.
 - Po každém Mílou oznámeném výsledku bez další žádosti vyhodnotit stav, říct, zda je potřeba vývoj, a rovnou dát přesný návod i kritéria PASS následujícího neprovedeného testu. Shoda s návrhem nevyžaduje změnu kódu; FAIL nejdřív doložit a potom opravit v aktuální etapě.
 - Starší c+p+n d573e90c je historické. Dnešní p+n zahrnuje celý balíček Camina a toto předání; výsledek určuje živý audit a kanonická deployment receipt.
@@ -28,7 +29,7 @@ Aktualizováno: 2026-09-17 07:59 CEST
 
 - C01a přijato, ale širší brány G0/G1/G8 a terénní připravenost zůstávají nesplněné.
 - C01b přijato v prototypovém rozsahu. Vítr a plná integrace T021 v C04 čekají; jeden nevysvětlený nereprodukovaný tichý úsek z prvního T059 zůstává rizikem.
-- C01c fyzicky neověřilo kontinuitu 55s přechodů, background běh nového input tapu ani rozsah ztráty po pádu. T022/T023 mohou vyžádat opravu.
+- C01c build 3 měl potvrzený pád při Start; build 4 jej opravuje, ale fyzický smoke ještě čeká. Kontinuita 55s přechodů, background běh input tapu a rozsah ztráty po pádu zůstávají neověřené do T022/T023.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
 - Podepsaný build není instalace ani fyzická přejímka; vývojový profil je časově omezený. U01–U15 se bez nového rozhodnutí neotevírají.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -41,22 +42,22 @@ Typ: Project
 Priorita: 1
 Stav: rozpracovane
 Pripomenout pri startu: ano
-Datum: 2026-09-17 07:59 CEST
+Datum: 2026-09-17 11:32 CEST
 
 Co se resilo:
-Zahájení C01c, segmentový journal, automatické ověření a instalace 0.3.0 na iPhone.
+Diagnostika a oprava okamžitého pádu C01c při prvním Start.
 
 Co je hotove:
-V0.5 + U15 platí; C01a/C01b přijaty. C01c 0.3.0 automaticky ověřeno 52/52 + 2/2, podepsáno, nainstalováno a spuštěno bez změny původních dat.
+V0.5 + U15 platí; C01a/C01b přijaty. Příčina pádu buildu 3 je potvrzená z pěti shodných crash reportů. Opravený build 0.3.0 (4) prošel 52/52 + 2/2, buildem, strict podpisem, instalací i launchem; všech 136 položek zůstalo beze změny.
 
 Co neni hotove:
-Fyzické T022/T023 a plný T061, plná integrace T021 v C04, U15 v C03/C04, Viewer C08c–C08f, G0/G1/G8 a terénní připravenost. První tichý úsek T059 zůstává nereprodukovaným pozorováním.
+Krátký fyzický Start/Stop buildu 4, T022/T023 a plný T061, plná integrace T021 v C04, U15 v C03/C04, Viewer C08c–C08f, G0/G1/G8 a terénní připravenost. První tichý úsek T059 zůstává nereprodukovaným pozorováním.
 
 Dalsi krok:
-Provést T022 na nainstalované 0.3.0 (3).
+Provést 10–15s neutrální Start/Stop a poslech na nainstalované 0.3.0 (4); teprve při PASS pokračovat T022.
 
 Navrhovane dalsi kroky:
-Po T022 automaticky vyhodnotit výsledek a předat T023, nebo nejdřív opravit C01c.
+Po krátkém smoke automaticky předat T022; po T022 vyhodnotit T023 nebo další opravu.
 
 Zmenene nebo relevantni soubory:
 `camino/`, `memory/projects/camino.md`, katalog, registry a kanonický TVBCP.
@@ -622,3 +623,16 @@ Rozhodnutí a rizika:
 
 Další krok:
 - T022 na 0.3.0: souvislý neutrální záznam nejméně 2:15, značky kolem checkpointů, nucené ukončení, relaunch bez mikrofonu a poslech zachovaného rozsahu.
+
+### 2026-09-17 11:32 CEST — Oprava pádu C01c při Start
+
+Hotovo / důkaz:
+- Pět shodných crash reportů ukazuje `SIGTRAP` v `_swift_task_checkIsolatedSwift` uvnitř tap callbacku. Build 3 zdědil `MainActor` do callbacku spouštěného na real-time audio frontě.
+- Build 0.3.0 (4) vytváří callback mimo actor izolaci. 52/52 Swift testů, 2/2 UI testy, oba arm64 buildy, strict podpis, rychlá statická brána, instalace a launch PASS.
+- Všech 136 položek před instalací zůstalo po instalaci i launchi shodných v cestě, typu a velikosti. Pět nedokončených pokusů se nemazalo; žádný CAF se nekopíroval ani neposlouchal.
+
+Rozhodnutí a rizika:
+- Swift 6 strict concurrency zůstává zapnuté. Automatické ověření není fyzický důkaz skutečného tap callbacku; C01c zůstává rozpracované.
+
+Další krok:
+- Na buildu 4 provést krátký neutrální Start/Stop a celý poslech. Při PASS pokračovat T022; při FAIL znovu nemačkat Start a získat nový crash report.
