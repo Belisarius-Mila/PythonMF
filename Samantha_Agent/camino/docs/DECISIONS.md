@@ -182,3 +182,25 @@ politiku Vieweru. Přidání do jeho provizorních JSON účtenek by nevytvořil
 správnou produktovou ochranu a zbytečně by zneplatnilo rozběhnuté fyzické testy.
 Implementace doménového pravidla proto patří do C03a/C04a/C04d; samotný Viewer
 do C08c–C08f. Do té doby žádné současné testovací audio není sdílené.
+
+## ADR-C02A-01 — izolovaný loopback přijímač před produkčním serverem
+
+**Rozhodnutí:** První C02a důkaz odděluje bezpečné přijetí a serverový hash od
+produkční serverové architektury. Malý proces používá standardní knihovnu
+Pythonu, naslouchá výhradně na loopback IP a přijímá pouze explicitně označená
+syntetická data. Tailscale Serve má v pozdějším autorizovaném smoke ukončit
+soukromé HTTPS; proces se sám nevystavuje do sítě.
+
+Sdílené prostředí Samanthy FastAPI neobsahuje. Přidat jej jen kvůli tomuto
+experimentu by smíchalo závislosti dvou provozních rolí, proti ADR-C00-04.
+Produkční cíl F51 proto zůstává Python/FastAPI v samostatném prostředí Camina;
+C02a standard-library server není rozhodnutí opustit FastAPI.
+
+Přijímač streamuje do soukromého stagingu, sám počítá velikost a SHA-256 a
+konečný objekt i účtenku vytváří create-only. Shodný retry je idempotentní;
+jiné bajty pod stejným ID jsou konflikt. Klientský název se nepoužije jako
+serverová cesta. Token, obsah ani cesty se nelogují.
+
+Tento krok neimplementuje chunkování, URLSession, SQLite, produkční párování ani
+obnovu po síťovém přerušení. Úspěšné lokální testy nejsou T043/T048/T051 ani
+důkaz soukromého HTTPS; tyto hranice zůstávají viditelné v reportu C02a.

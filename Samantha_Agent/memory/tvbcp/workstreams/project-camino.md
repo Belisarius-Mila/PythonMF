@@ -1,3 +1,38 @@
+<!-- SAMANTHA_CURRENT_STATUS_START -->
+## Aktuální stav
+
+- Obnoveno potvrzeným checkpointem: 2026-09-17 14:19 CEST
+
+### Hotovo
+- Lokální C02a přijímač bezpečně ověřuje syntetický soubor serverovým hashem bez přepisu či duplicit
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+
+### Otevřeno
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+
+### Rizika
+- Žádné další doložené provozní riziko.
+
+### Další krok
+- Po checkpointu autorizovat privátní HTTPS smoke přes Tailscale Serve se syntetickým souborem
+
+### Rozhodnutí
+- C02a zůstává izolovaný standard-library prototyp; produkční serverový cíl zůstává FastAPI v samostatném prostředí Camina
+
+### Navrhované další kroky
+- Ověřit správný upload a shodu velikosti/SHA-256
+- Ověřit chybný hash a identický retry
+- Potvrdit, že Funnel ani veřejná cesta nejsou aktivní
+
+### Technický stav checkpointu
+- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
+- Git před checkpointem: lokální `main` na `34a9e21bc148`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `34a9e21bc148` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-09-17T11:20:39+00:00.
+- Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
+- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
+- Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
+<!-- SAMANTHA_CURRENT_STATUS_END -->
+
 # TVBCP: Camino
 
 Pracovni proud: `project-camino`
@@ -644,3 +679,31 @@ Navrhované další kroky:
 
 Technický důkaz:
 - První T022 ukázalo tři obnovitelné části a 02:18 zachovaného přehratelného rozsahu; druhé splnilo stejná kritéria při pozdějším pádu. Osm značek T023 kolem čtyř hranic bylo podle Míly slyšet jednou a ve správném pořadí. Audio nebylo čteno nástrojem; telefon byl při závěrečném zápisu nedostupný.
+
+### 2026-09-17 14:19 CEST – Lokální C02a přijímač bezpečně ověřuje syntetický soubor serverovým hashem bez přepisu či duplicit
+
+Hotovo:
+- Lokální C02a přijímač bezpečně ověřuje syntetický soubor serverovým hashem bez přepisu či duplicit
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+
+Otevřeno:
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+
+Rizika:
+- Žádné další doložené provozní riziko.
+
+Rozhodnutí:
+- C02a zůstává izolovaný standard-library prototyp; produkční serverový cíl zůstává FastAPI v samostatném prostředí Camina
+
+Další krok:
+- Po checkpointu autorizovat privátní HTTPS smoke přes Tailscale Serve se syntetickým souborem
+
+Navrhované další kroky:
+- Ověřit správný upload a shodu velikosti/SHA-256
+- Ověřit chybný hash a identický retry
+- Potvrdit, že Funnel ani veřejná cesta nejsou aktivní
+
+Technický důkaz:
+- rychlá Cockpit brána syntaxe a whitespace: 5.2 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
+- Pracovní proud: `project-camino`.
+- Read-only živý stav při checkpointu: main=`aligned`, deployment=`verified_current`, runtime=`connected`.

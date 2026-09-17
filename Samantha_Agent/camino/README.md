@@ -3,7 +3,7 @@
 Soukromý cestovní deník: offline záznam na iPhonu, soukromé zpracování na Macu
 a pozdější film z povolených zdrojů.
 
-**Stav: autoritativní podklady v0.5 + U15. C01a, C01b a C01c jsou přijaty v prototypovém rozsahu. Build C01c 0.3.0 (4) prošel dvěma pády T022 i poslechovou kontrolou přechodů T023 na iPhonu. Camino Viewer je P0, ale podle etap se implementuje až v C08c–C08f.**
+**Stav: autoritativní podklady v0.5 + U15. C01a, C01b a C01c jsou přijaty v prototypovém rozsahu. C02a je zahájené: lokální minimální přijímač syntetického souboru prošel automatickým ověřením, privátní HTTPS smoke ale ještě neproběhl. Camino Viewer je P0, ale podle etap se implementuje až v C08c–C08f.**
 
 - [Podklady v0.5](CAMINO_podklady_v0.5/README_v0.5.md)
 - [Funkční specifikace v0.5](CAMINO_podklady_v0.5/CAMINO_funkcni_specifikace_v0.5.md)
@@ -25,11 +25,14 @@ V Human–Adam se projekt jmenuje **Camino** (`project-camino`).
 - [Report C01b](docs/C01b_BACKGROUND_AUDIO_REPORT.md)
 - [Zadání C01c](tasks/C01c_RECOVERABLE_AUDIO.md)
 - [Report C01c](docs/C01c_RECOVERABLE_AUDIO_REPORT.md)
+- [Zadání C02a](tasks/C02a_SYNTHETIC_RECEIVER.md)
+- [Report C02a](docs/C02a_SYNTHETIC_RECEIVER_REPORT.md)
 - [Audio prototyp](prototypes/audio/README.md)
 - [Aktuální report a překážky](docs/C01a_AUDIO_PROTOTYPE_REPORT.md)
 
-Další plánovanou etapou je C02a: minimální přijímač syntetického souboru a
-porovnání hashe přes soukromé HTTPS. Nezahajuje se bez výslovného pokynu.
+Aktuální etapou je C02a. Lokální create-only přijímač je připravený; dalším
+krokem je samostatně autorizovaný syntetický smoke přes soukromé HTTPS. Nejde
+zatím o produkční upload server ani PASS úplných T043/T048/T051.
 
 Rozbalené podklady v0.4 a v0.5 jsou verzované včetně manifestů. Původní ZIPy
 jsou zachované lokálně a ignorované Gitem; profilové workspaces přebírají

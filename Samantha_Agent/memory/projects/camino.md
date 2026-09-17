@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-17 13:12 CEST
+Aktualizováno: 2026-09-17 14:11 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -28,6 +28,8 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 - T022 PASS ve dvou odlišných fázích otevřené části. Po obou nucených ukončeních zůstal relaunch v klidu, obnovené částečné nahrávky byly pravdivě označené a zachovaný rozsah přehratelný. Snímek prvního průchodu ukazuje tři části a 02:18 zachovaného rozsahu.
 - T023 PASS podle Míly: v souvislém nejméně čtyřminutovém záznamu zazněly značky před a po čtyřech 55s hranicích jednou, ve správném pořadí, bez opakování, nevysvětlené mezery či useknutí. C01c 0.3.0 (4) je tím přijaté v prototypovém rozsahu.
 - Profil hlavní aplikace platí do 22. září 18:16 CEST. G0/G1/G8, terénní připravenost a dlouhodobá spotřeba zůstávají nesplněné; plný databázový T061 se vrátí v C05a. Původní nahrávky i samostatný Camino Test zůstávají zachované.
+- C02a zahájeno výslovným pokynem Míly. Lokální loopback přijímač pro syntetický soubor streamuje do soukromého stagingu, sám ověřuje velikost/SHA-256 a vytváří objekt i účtenku create-only. Identický retry neduplikuje; jiné bajty pod stejným ID jsou konflikt.
+- C02a cílené automatické ověření 10/10 PASS. Soukromé HTTPS přes Tailscale Serve, skutečný token, nasazení a fyzický klientský přenos NEPROVEDENO; úplné T043/T048/T051 nejsou tímto krokem splněné.
 
 
 ## Zdroje a návaznost
@@ -58,13 +60,15 @@ kódu nevyvolává; FAIL se nejdřív doloží a opraví v aktuálním rozsahu.
 - C01a přijato, ale širší brány G0/G1/G8 a terénní připravenost zůstávají nesplněné.
 - C01b přijato v prototypovém rozsahu. Vítr a plná integrace T021 v C04 čekají; jeden nevysvětlený nereprodukovaný tichý úsek z prvního T059 zůstává rizikem.
 - C01c je přijaté v prototypovém rozsahu po T022/T023. Čtyři fyzicky poslechnuté 55s přechody nevykázaly mezeru ani opakování a dva pády doložily pravdivou obnovu; nejde však o dlouhodobý terénní nebo spotřební test ani o plný databázový T061.
+- C02a je lokálně implementované, ale privátní HTTPS cesta zatím není živě ověřená. Standard-library receiver je jen izolovaný experiment; produkční cíl zůstává FastAPI v samostatném prostředí Camina.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
 - Podepsaný build není instalace ani fyzická přejímka; vývojový profil je časově omezený. U01–U15 se bez nového rozhodnutí neotevírají.
 
 ## Další krok
 
-Vyčkat na výslovný pokyn k C02a: minimální přijímač syntetického souboru a
-porovnání hashe přes soukromé HTTPS. C01c dále nerozšiřovat.
+Po checkpointu samostatně autorizovat privátní HTTPS smoke C02a se syntetickým
+souborem; ověřit shodu velikosti/SHA-256, jednu účtenku, chybný hash, identický
+retry a nepřítomnost veřejné cesty.
 
 Historický doklad založení:
 Ověření založení: 56/56 testů integrace (54 + 2 profilové testy) a rychlá statická brána OK.
@@ -651,3 +655,21 @@ Rozhodnutí a rizika:
 
 Další krok:
 - Vyčkat na výslovný pokyn k C02a; C01c dále nerozšiřovat.
+
+### 2026-09-17 14:11 CEST — C02a lokální syntetický přijímač
+
+Hotovo:
+- Vznikl minimální loopback přijímač syntetického souboru s bearer tokenem, proudovým zápisem, serverovým SHA-256 a create-only objektem i účtenkou.
+- Shodný retry nevytvoří duplicitu; rozdílná data pod stejným ID jsou konflikt bez přepsání.
+
+Rozhodnutí:
+- C02a zůstává izolovaný standard-library prototyp bez nové závislosti ve sdíleném prostředí Samanthy. Produkční cíl F51 zůstává FastAPI v samostatném prostředí Camina.
+
+Další krok:
+- Po checkpointu samostatně autorizovat syntetický smoke přes soukromé HTTPS za Tailscale Serve.
+
+Navrhované další kroky:
+- Ověřit správný upload, chybný hash, identický retry a nepřítomnost Funnel či veřejné cesty. T043/T048/T051 ponechat otevřené pro klientskou frontu a navazující etapy.
+
+Technický důkaz:
+- `tests.test_camino_receiver` 10/10 PASS. Lokální HTTP pouze v dočasném adresáři; služba nebyla nasazena, Tailscale se neměnil a žádné reálné médium ani skutečný token se nepoužil.
