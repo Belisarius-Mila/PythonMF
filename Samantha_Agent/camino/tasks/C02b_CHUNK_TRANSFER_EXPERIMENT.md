@@ -70,6 +70,8 @@ trvalou službu, Tailscale konfiguraci ani veřejný endpoint. Funnel se nezapí
 Jediný syntetický zdroj zůstává zachovaný a současně existují nejvýše dvě
 připravené části; nejde o důkaz chování skutečného velkého videa.
 
-T043 a T047–T050 zůstávají fyzicky NEPROVEDENO. Simulátor a arm64 build dokazují
-kompilaci, trvalou lokální frontu a UI nad syntetickými daty, nikoli chování
-background přenosu na skutečném telefonu nebo cizí síti.
+Podepsaný build 0.4.0 (1), strict podpis, instalace a spuštění na iPhonu prošly.
+Dočasnou privátní cestu řídí potvrzovaný registrovaný workflow, který zachová
+kořen Cockpitu, nezapne Funnel a po testu porovná původní Serve konfiguraci.
+T043 a T047–T050 přesto zůstávají fyzicky NEPROVEDENO: instalace a launch samy
+nedokládají background přenos, přerušení, zámek, force quit ani cizí síť.

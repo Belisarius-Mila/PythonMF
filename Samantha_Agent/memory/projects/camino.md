@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-17 16:53 CEST
+Aktualizováno: 2026-09-17 19:58 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -31,7 +31,8 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 - C02a zahájeno výslovným pokynem Míly. Lokální loopback přijímač pro syntetický soubor streamuje do soukromého stagingu, sám ověřuje velikost/SHA-256 a vytváří objekt i účtenku create-only. Identický retry neduplikuje; jiné bajty pod stejným ID jsou konflikt.
 - C02a cílené automatické ověření 10/10 PASS. Následný privátní HTTPS smoke přes dočasnou cestu Tailscale Serve ověřil správný upload, serverový hash a délku, právě jeden objekt a účtenku, chybný hash, konflikt i idempotentní retry. Funnel zůstal vypnutý, Cockpit dostupný a původní Serve konfigurace byla po testu přesně obnovena. C02a je přijaté v prototypovém rozsahu; fyzický iPhone/cizí síť a úplné T043/T048/T051 zůstávají neprovedené.
 - C02b má druhý lokální checkpoint. Receiver obnovuje 8MiB části; samostatná aplikace `Camino Transfer Test` pro syntetickou dávku 96 MiB + 257 B používá jednu background `URLSession`, uploady ze souborů, trvalý journal, Keychain a nejvýše dvě připravené části. Nečte Fotky, mikrofon ani Camino Audio.
-- Klient po relaunchi věří jen validnímu serverovému snapshotu, 100 % bytů drží jako `Ověřuji`, mobilní grant váže na jednu existující dávku a bez soukromé sítě nemá veřejný fallback. Python C02b 10/10, Swift core 18/18, C02a regrese 10/10, UI 1/1, nepodepsaný arm64 build a plná brána 1705/1705 PASS. Podepsání, instalace a fyzické T043/T047–T050 jsou NEPROVEDENO; Tailscale/Funnel ani telefon se neměnily.
+- Klient po relaunchi věří jen validnímu serverovému snapshotu, 100 % bytů drží jako `Ověřuji`, mobilní grant váže na jednu existující dávku a bez soukromé sítě nemá veřejný fallback. Python C02b 10/10, Swift core 18/18, C02a regrese 10/10 a UI 1/1 PASS.
+- Podepsaný build `Camino Transfer Test` 0.4.0 (1), strict podpis, instalace a spuštění na iPhonu 14 Plus / iOS 26.6.1 prošly; profil platí do 24. září 2026 a Camino Audio zůstalo nedotčené. Registrovaný vratný T043 workflow prošel plnou bránou 1709/1709. Fyzické T043/T047–T050 jsou NEPROVEDENO a dočasná Serve cesta/receiver zatím neběží.
 
 
 ## Zdroje a návaznost
@@ -63,16 +64,16 @@ kódu nevyvolává; FAIL se nejdřív doloží a opraví v aktuálním rozsahu.
 - C01b přijato v prototypovém rozsahu. Vítr a plná integrace T021 v C04 čekají; jeden nevysvětlený nereprodukovaný tichý úsek z prvního T059 zůstává rizikem.
 - C01c je přijaté v prototypovém rozsahu po T022/T023. Čtyři fyzicky poslechnuté 55s přechody nevykázaly mezeru ani opakování a dva pády doložily pravdivou obnovu; nejde však o dlouhodobý terénní nebo spotřební test ani o plný databázový T061.
 - C02a je přijaté v prototypovém rozsahu po lokálních testech a privátním HTTPS smoke. Smoke byl spuštěn z téhož Macu přes tailnet DNS; nedokládá iPhone, cizí síť, přerušení velkého souboru ani trvalou službu. Standard-library receiver zůstává izolovaný experiment; produkční cíl je FastAPI v samostatném prostředí Camina.
-- Druhý checkpoint C02b dokládá serverový kontrakt, trvalou klientskou frontu, kompilaci a UI v simulátoru, nikoli skutečný background přenos na zařízení. Žádný T043/T047–T050 zatím není fyzický PASS; receiver není produkční služba ani záloha.
+- C02b dokládá serverový kontrakt, trvalou klientskou frontu, kompilaci, UI, podpis, instalaci a launch, nikoli skutečný background přenos na zařízení. Žádný T043/T047–T050 zatím není fyzický PASS; receiver není produkční služba ani záloha.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
-- Podepsaný build není instalace ani fyzická přejímka; vývojový profil je časově omezený. U01–U15 se bez nového rozhodnutí neotevírají.
+- Instalace a launch nejsou fyzická přejímka přenosu; vývojový profil je časově omezený do 24. září 2026. U01–U15 se bez nového rozhodnutí neotevírají.
 
 ## Další krok
 
-Připojit a odemknout iPhone, lokálně podepsat a nainstalovat samostatný harness
-bez odinstalace Camino Audio. Potom otevřít první řízený fyzický T043 přes
-privátní HTTPS bez veřejného alternativního endpointu; T047–T050 následují
-odděleně.
+Po samostatném potvrzení spustit registrovaný `camino_c02b_t043_start`, vložit
+URL a dočasný token do již otevřeného harnessu a provést první řízený fyzický
+T043 přes privátní HTTPS bez veřejného alternativního endpointu. Potom trasu
+přesně odebrat; T047–T050 následují odděleně.
 
 Historický doklad založení:
 Ověření založení: 56/56 testů integrace (54 + 2 profilové testy) a rychlá statická brána OK.
@@ -714,3 +715,22 @@ Navrhované další kroky:
 Technický důkaz:
 - Python C02b 10/10, Swift core 18/18, C02a regrese 10/10, UI simulátoru 1/1, nepodepsaný arm64 iOS build a plná projektová brána 1705/1705 PASS.
 - Instalace, privátní HTTPS běh i fyzické T043/T047–T050 jsou NEPROVEDENO. Push, nasazení ani Tailscale/Funnel změna neproběhly.
+
+### 2026-09-17 19:58 CEST — C02b nainstalováno; T043 čeká na potvrzení trasy
+
+Hotovo:
+- `Camino Transfer Test` 0.4.0 (1) byl automaticky podepsán místním vývojovým týmem, strict ověřen, nainstalován a po odemčení spuštěn na iPhonu 14 Plus / iOS 26.6.1. Samostatný bundle neodinstaloval ani neměnil Camino Audio.
+- Přidán registrovaný vratný workflow pro jedinou privátní Serve cestu `/camino-c02b`, loopback receiver, bezpečné předání URL/token přes schránku, read-only důkaz a přesné ukončení se srovnáním původní konfigurace.
+
+Rozhodnutí:
+- Síťový zápis se nespustí ad hoc. Přesný `camino_c02b_t043_start` čeká na samostatné potvrzení po zobrazeném náhledu. Funnel se nezapíná a kořen Cockpitu se nesmí změnit.
+
+Další krok:
+- Po potvrzení spustit workflow, vložit URL a token do otevřeného harnessu, vytvořit syntetickou dávku a řízeně přerušit a obnovit síť u T043.
+
+Navrhované další kroky:
+- Po serverovém `verified` ověřit jediný objekt/účtenku, shodnou délku/hash a obnovu chybějících částí; potom dočasnou trasu registrovaně ukončit.
+
+Technický důkaz:
+- Podepsaný generic iOS build a `codesign --verify --deep --strict` PASS; instalace i launch PASS. Vývojový profil harnessu platí do 24. září 2026.
+- Cílené workflow testy 4/4; související sada 30/30; plná projektová brána 1709/1709 PASS. Serve/Funnel zůstaly po read-only auditu beze změny; fyzické T043/T047–T050 jsou NEPROVEDENO.

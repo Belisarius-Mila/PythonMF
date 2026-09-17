@@ -32,6 +32,9 @@ Audio. Po návratu porovnává frontu se serverem a nepoužívá veřejný fallb
 - iOS simulátor UI: 1/1 PASS; vytvoření 96MiB syntetické dávky, viditelný
   journal/progress a výchozí zákaz mobilních dat.
 - Nepodepsaný Debug build pro `generic/platform=iOS` arm64: PASS.
+- Podepsaný Debug build 0.4.0 (1), strict podpis, instalace a spuštění na
+  iPhonu 14 Plus / iOS 26.6.1: PASS. Vývojový profil platí do 24. září 2026;
+  Camino Audio nebylo odinstalováno ani změněno.
 - C02a regrese: 10/10 PASS; plná projektová brána: 1705/1705 PASS.
 - Pokrytý syntetický velký soubor má dvě plné 8MiB části a krátký konec. Test
   nejprve odešle části 0 a 2, po dotazu doplní jen část 1 a ověří jediný
@@ -69,11 +72,15 @@ Plná projektová brána je samostatný povinný důkaz tohoto změnového kroku
 - Výchozí experimentální maximum je 512 MiB a neříká nic o budoucím
   produkčním limitu videa.
 - Nebyla změněna Tailscale Serve konfigurace, nic nebylo vystaveno veřejně,
-  aplikace nebyla instalována a nebyla použita reálná média.
+  nebyla použita reálná média. Dočasný receiver ani Serve cesta zatím neběží.
+- Registrovaný ovladač T043 ukládá token a běhový stav jen do ignorovaného
+  `data/private`, přidá pouze `/camino-c02b`, ověřuje Funnel/Cockpit a při
+  ukončení porovná Serve se stavem před testem. Plná brána 1709/1709 PASS.
 
 ## Další krok
 
-Připojit a odemknout iPhone, lokálně podepsat a nainstalovat oddělenou aplikaci
-bez odinstalace Camino Audio. Potom otevřít privátní HTTPS cestu pouze po dobu
-řízeného testu a postupně provést T043 a T047–T050. Žádný scénář není PASS,
-dokud není doložen na fyzickém telefonu.
+Po samostatném potvrzení spustit registrovanou privátní HTTPS cestu, vložit URL
+a dočasný token do již otevřeného harnessu a provést T043. Potom cestu přesně
+odebrat a zkontrolovat objekt, účtenku, délku a serverový SHA-256. T047–T050
+následují odděleně; žádný scénář není PASS, dokud není doložen na fyzickém
+telefonu.

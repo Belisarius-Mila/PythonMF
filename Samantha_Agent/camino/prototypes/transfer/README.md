@@ -30,6 +30,9 @@ xcodebuild -project camino/prototypes/transfer/CaminoTransfer.xcodeproj \
 Účet ani tým se neverzují. Volitelný místní `LocalSigning.xcconfig` je ignorovaný
 Gitem a může obsahovat pouze lokální volbu `DEVELOPMENT_TEAM`.
 
+Podepsaný build 0.4.0 (1), strict kontrola podpisu, instalace a spuštění na
+iPhonu prošly. Profil je místní a časově omezený; tým ani účet nejsou verzované.
 Fyzické chování background `URLSession`, zámku, nuceného ukončení a cizí Wi-Fi
-zůstává neověřené. Připojení telefonu, instalace a T043/T047–T050 jsou další
-řízený krok C02b.
+zůstává neověřené. Registrovaný `camino_c02b_t043_*` workflow připraví a zase
+odebere jedinou dočasnou privátní Serve cestu; spuštění podléhá samostatnému
+potvrzení. T043/T047–T050 jsou další řízený krok C02b.

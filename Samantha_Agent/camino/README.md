@@ -3,7 +3,7 @@
 Soukromý cestovní deník: offline záznam na iPhonu, soukromé zpracování na Macu
 a pozdější film z povolených zdrojů.
 
-**Stav: autoritativní podklady v0.5 + U15. C01a, C01b, C01c a C02a jsou přijaty v prototypovém rozsahu. C02b má druhý lokální checkpoint: receiver, trvalá fronta a samostatný iOS URLSession harness jsou připravené k instalaci, ale fyzické T043/T047–T050 ještě neproběhly. Trvalá služba ani veřejná cesta nejsou aktivní. Camino Viewer je P0, ale podle etap se implementuje až v C08c–C08f.**
+**Stav: autoritativní podklady v0.5 + U15. C01a, C01b, C01c a C02a jsou přijaty v prototypovém rozsahu. C02b harness je podepsaný, nainstalovaný a spuštěný na iPhonu; fyzické T043/T047–T050 ještě neproběhly. Privátní T043 workflow je připravené, ale Serve cesta ani receiver nejsou před samostatným potvrzením aktivní. Trvalá služba ani veřejná cesta neexistují. Camino Viewer je P0, ale podle etap se implementuje až v C08c–C08f.**
 
 - [Podklady v0.5](CAMINO_podklady_v0.5/README_v0.5.md)
 - [Funkční specifikace v0.5](CAMINO_podklady_v0.5/CAMINO_funkcni_specifikace_v0.5.md)
@@ -34,8 +34,9 @@ V Human–Adam se projekt jmenuje **Camino** (`project-camino`).
 - [Aktuální report a překážky](docs/C01a_AUDIO_PROTOTYPE_REPORT.md)
 
 C02b má lokálně sestavený samostatný iOS `URLSession` harness pro syntetickou
-96MiB dávku, trvalý journal a nejvýše dvě připravené 8MiB části. Další krok je
-podpis, instalace na iPhone a řízené fyzické T043/T047–T050; žádný z nich zatím
+96MiB dávku, trvalý journal a nejvýše dvě připravené 8MiB části. Podepsaný build
+0.4.0 (1) je nainstalovaný a spuštěný na iPhonu. Další krok je samostatně
+potvrdit dočasný privátní receiver a provést T043; žádný z T043/T047–T050 zatím
 není PASS. C02a/C02b receiver není produkční upload server.
 
 Rozbalené podklady v0.4 a v0.5 jsou verzované včetně manifestů. Původní ZIPy
