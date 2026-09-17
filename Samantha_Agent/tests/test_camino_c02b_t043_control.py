@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import stat
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -90,6 +91,19 @@ class CaminoC02bT043ControlTests(unittest.TestCase):
             self.assertEqual(action, command.argv[-1])
             self.assertEqual(confirmation, command.requires_confirmation)
 
+    def test_receiver_module_entrypoint_does_not_shadow_standard_email(self) -> None:
+        completed = subprocess.run(
+            [sys.executable, "-m", control.RECEIVER_MODULE, "--help"],
+            cwd=str(control.PROJECT_ROOT),
+            text=True,
+            capture_output=True,
+            timeout=10,
+            check=False,
+        )
+
+        self.assertEqual(0, completed.returncode, completed.stderr)
+        self.assertIn("Camino C02b chunk receiver", completed.stdout)
+
     def test_start_uses_exact_private_route_and_keeps_token_out_of_output(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             config = self._config(Path(temp_dir))
@@ -156,6 +170,7 @@ class CaminoC02bT043ControlTests(unittest.TestCase):
             receiver_argv = fake_processes[0].argv
             token = fake_processes[0].kwargs["env"]["CAMINO_C02B_TOKEN"]
             self.assertNotIn(token, receiver_argv)
+            self.assertEqual(["-m", control.RECEIVER_MODULE], receiver_argv[1:3])
             self.assertIn("--read-delay-ms-per-mib", receiver_argv)
             self.assertIn("1000", receiver_argv)
             self.assertIn("--verify-delay-seconds", receiver_argv)

@@ -1,13 +1,13 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno po podepsání, instalaci a přípravě T043: 2026-09-17 19:58 CEST
+- Aktualizováno po bezpečně vráceném startu a opravě workflow: 2026-09-17 20:08 CEST
 
 ### Hotovo
 - C02b receiver obnovuje syntetický přenos po 8MiB částech, doplní jen chybějící indexy a finalizuje jediný objekt až po serverové kontrole celkové délky a SHA-256.
 - Samostatný iOS harness používá souborové background `URLSession` úlohy, trvalý journal, Keychain, přesné znovuporovnání se serverem a nejvýše dvě připravené 8MiB části. Nečte Fotky, mikrofon ani Camino Audio.
 - Podepsaný build `Camino Transfer Test` 0.4.0 (1), strict podpis, instalace a spuštění na iPhonu 14 Plus / iOS 26.6.1 prošly. Camino Audio zůstalo nedotčené.
-- Vratný T043 workflow je registrovaný a krytý testy; plná projektová brána 1709/1709 prošla. Dočasný receiver ani Serve cesta zatím nejsou aktivní.
+- První start receiveru failnul na kolizi přímého skriptového spuštění s `app/email`, ale workflow odebralo trasu a ukončilo proces. Modulový entrypoint je opravený; plná projektová brána 1710/1710 prošla. Receiver ani Serve cesta nejsou aktivní.
 
 ### Otevřeno
 - Fyzické T043/T047–T050 na iPhonu a cizí síti jsou NEPROVEDENO.
@@ -16,7 +16,7 @@
 - Receiver je lokální standard-library experiment, ne produkční FastAPI, databáze, trvalá služba ani záloha. Instalace a launch neprokazují background plánování, zámek, force quit ani přechody skutečné sítě.
 
 ### Další krok
-- Po samostatném potvrzení spustit přesný registrovaný T043 workflow, vložit URL a dočasný token do otevřeného harnessu a provést řízené přerušení/obnovu sítě.
+- Po novém samostatném potvrzení zopakovat přesný registrovaný T043 workflow, vložit URL a dočasný token do otevřeného harnessu a provést řízené přerušení/obnovu sítě.
 
 ### Rozhodnutí
 - Serverová pravda a stav `verifying` mají přednost před lokálním byte progress. Force quit nic neslibuje; po ručním relaunchi se fronta znovu porovná. Bez soukromé sítě není veřejný alternativní endpoint.
@@ -26,7 +26,7 @@
 - T047–T050 provést odděleně až po vyhodnocení T043.
 
 ### Technický stav checkpointu
-- Python receiver 10/10, Swift transfer core 18/18, C02a regrese 10/10, UI 1/1, arm64 build, podepsání, strict kontrola, instalace a launch PASS; plná brána po registraci workflow 1709/1709 PASS.
+- Python receiver 10/10, Swift transfer core 18/18, C02a regrese 10/10, UI 1/1, arm64 build, podepsání, strict kontrola, instalace a launch PASS; regresní entrypoint test a plná brána po opravě workflow 1710/1710 PASS.
 - Vývojový profil transfer harnessu platí do 24. září 2026. Push ani nasazení neproběhly; Tailscale konfigurace je stále ve výchozím stavu a čeká na samostatné potvrzení workflow.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -62,10 +62,10 @@ je vyloučeno; celé `Do deníku` je po synchronizaci Viewer-eligible.
 - T022 PASS ve dvou odlišných fázích otevřené části: klidový relaunch, pravdivé označení obnoveného rozsahu a přehratelné uzavřené části. T023 PASS přes čtyři poslechnuté 55s hranice bez opakování či nevysvětlené díry. C01c je přijato v prototypovém rozsahu; G0/G1/G8 a terénní připravenost zůstávají nesplněné.
 - C02a minimální receiver prošel 10/10 automatickými testy i privátním HTTPS smoke přes dočasnou Tailscale Serve cestu. Správný upload vytvořil právě jeden objekt a účtenku, retry neduplikoval, chybný hash a konflikt byly odmítnuty. Funnel zůstal vypnutý, Cockpit dostupný a původní Serve stav byl obnoven.
 - C02b má druhý lokální checkpoint. Receiver podporuje obnovitelné 8MiB části; samostatný iOS harness má souborové background úlohy, trvalý journal, nejvýše dvě připravené části, Keychain a fail-closed serverovou reconciliaci. Python 10/10, Swift 18/18, UI 1/1, arm64 build a plná brána 1705/1705 PASS.
-- `Camino Transfer Test` 0.4.0 (1) je podepsaný, strict ověřený, nainstalovaný a spuštěný na iPhonu 14 Plus / iOS 26.6.1. Registrovaný vratný T043 workflow prošel plnou bránou 1709/1709; Serve cesta ani receiver zatím neběží.
+- `Camino Transfer Test` 0.4.0 (1) je podepsaný, strict ověřený, nainstalovaný a spuštěný na iPhonu 14 Plus / iOS 26.6.1. První start receiveru bezpečně failnul a vrátil síť; modulový entrypoint je opravený a brána 1710/1710 PASS. Serve cesta ani receiver nyní neběží.
 
 
-Po samostatném potvrzení spustit přesný registrovaný T043 workflow, vložit URL a dočasný token do otevřeného harnessu a provést první řízený T043 přes privátní HTTPS. C01c ani C02a dále nerozšiřovat bez nového důvodu.
+Po novém samostatném potvrzení zopakovat přesný registrovaný T043 workflow, vložit URL a dočasný token do otevřeného harnessu a provést první řízený T043 přes privátní HTTPS. C01c ani C02a dále nerozšiřovat bez nového důvodu.
 
 ## Rizika
 
@@ -784,3 +784,19 @@ Navrhované další kroky:
 Technický důkaz:
 - Podepsaný generic iOS build a `codesign --verify --deep --strict` PASS; instalace i launch PASS. Vývojový profil harnessu platí do 24. září 2026.
 - Cílené workflow testy 4/4; související sada 30/30; plná projektová brána 1709/1709 PASS. Serve/Funnel zůstaly po read-only auditu beze změny; fyzické T043/T047–T050 jsou NEPROVEDENO.
+
+### 2026-09-17 20:08 CEST — První T043 start bezpečně vrácen; entrypoint opraven
+
+Hotovo:
+- Potvrzený `camino_c02b_t043_start` skončil před otevřením receiver portu. Přímé spuštění souboru z `app/` vložilo tento adresář na začátek importní cesty a místní `app/email` zastínilo standardní Python balíček `email`.
+- Fail-closed rollback odebral `/camino-c02b`, ukončil receiver a nevytvořil aktivní běh. Živý audit potom potvrdil jediný původní Serve handler, žádný listener na portu 8765 a žádnou aktivní Camino cestu.
+- Receiver se nyní spouští modulově přes `python -m app.camino_chunk_receiver`; vlastnictví procesu kontroluje stejný modulový podpis a nový regresní test ověřuje, že entrypoint načte standardní `email` správně.
+
+Rozhodnutí:
+- Původní potvrzení se po opravě nepoužije automaticky. Opakování stejného síťového workflow vyžaduje nový náhled a nové samostatné potvrzení.
+
+Další krok:
+- Znovu zobrazit přesný `camino_c02b_t043_start`; po potvrzení připravit URL/token a pokračovat fyzickým T043.
+
+Technický důkaz:
+- Regresní test modulu PASS; cílená sada 31/31 a plná projektová brána 1710/1710 PASS. T043 zůstává NEPROVEDENO, Funnel ani kořen Cockpitu se nezměnily.

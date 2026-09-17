@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-17 19:58 CEST
+Aktualizováno: 2026-09-17 20:08 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -32,7 +32,7 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 - C02a cílené automatické ověření 10/10 PASS. Následný privátní HTTPS smoke přes dočasnou cestu Tailscale Serve ověřil správný upload, serverový hash a délku, právě jeden objekt a účtenku, chybný hash, konflikt i idempotentní retry. Funnel zůstal vypnutý, Cockpit dostupný a původní Serve konfigurace byla po testu přesně obnovena. C02a je přijaté v prototypovém rozsahu; fyzický iPhone/cizí síť a úplné T043/T048/T051 zůstávají neprovedené.
 - C02b má druhý lokální checkpoint. Receiver obnovuje 8MiB části; samostatná aplikace `Camino Transfer Test` pro syntetickou dávku 96 MiB + 257 B používá jednu background `URLSession`, uploady ze souborů, trvalý journal, Keychain a nejvýše dvě připravené části. Nečte Fotky, mikrofon ani Camino Audio.
 - Klient po relaunchi věří jen validnímu serverovému snapshotu, 100 % bytů drží jako `Ověřuji`, mobilní grant váže na jednu existující dávku a bez soukromé sítě nemá veřejný fallback. Python C02b 10/10, Swift core 18/18, C02a regrese 10/10 a UI 1/1 PASS.
-- Podepsaný build `Camino Transfer Test` 0.4.0 (1), strict podpis, instalace a spuštění na iPhonu 14 Plus / iOS 26.6.1 prošly; profil platí do 24. září 2026 a Camino Audio zůstalo nedotčené. Registrovaný vratný T043 workflow prošel plnou bránou 1709/1709. Fyzické T043/T047–T050 jsou NEPROVEDENO a dočasná Serve cesta/receiver zatím neběží.
+- Podepsaný build `Camino Transfer Test` 0.4.0 (1), strict podpis, instalace a spuštění na iPhonu 14 Plus / iOS 26.6.1 prošly; profil platí do 24. září 2026 a Camino Audio zůstalo nedotčené. První potvrzený start receiveru bezpečně failnul na kolizi přímého skriptového entrypointu s `app/email` a vrátil Serve; opravené modulové spuštění prošlo plnou bránou 1710/1710. Fyzické T043/T047–T050 jsou NEPROVEDENO a Serve cesta/receiver nyní neběží.
 
 
 ## Zdroje a návaznost
@@ -70,7 +70,7 @@ kódu nevyvolává; FAIL se nejdřív doloží a opraví v aktuálním rozsahu.
 
 ## Další krok
 
-Po samostatném potvrzení spustit registrovaný `camino_c02b_t043_start`, vložit
+Po novém samostatném potvrzení zopakovat registrovaný `camino_c02b_t043_start`, vložit
 URL a dočasný token do již otevřeného harnessu a provést první řízený fyzický
 T043 přes privátní HTTPS bez veřejného alternativního endpointu. Potom trasu
 přesně odebrat; T047–T050 následují odděleně.
@@ -734,3 +734,19 @@ Navrhované další kroky:
 Technický důkaz:
 - Podepsaný generic iOS build a `codesign --verify --deep --strict` PASS; instalace i launch PASS. Vývojový profil harnessu platí do 24. září 2026.
 - Cílené workflow testy 4/4; související sada 30/30; plná projektová brána 1709/1709 PASS. Serve/Funnel zůstaly po read-only auditu beze změny; fyzické T043/T047–T050 jsou NEPROVEDENO.
+
+### 2026-09-17 20:08 CEST — První T043 start bezpečně vrácen; entrypoint opraven
+
+Hotovo:
+- Potvrzený `camino_c02b_t043_start` skončil před otevřením receiver portu. Přímé spuštění souboru z `app/` vložilo tento adresář na začátek importní cesty a místní `app/email` zastínilo standardní Python balíček `email`.
+- Fail-closed rollback odebral `/camino-c02b`, ukončil receiver a nevytvořil aktivní běh. Živý audit potom potvrdil jediný původní Serve handler, žádný listener na portu 8765 a žádnou aktivní Camino cestu.
+- Receiver se nyní spouští modulově přes `python -m app.camino_chunk_receiver`; vlastnictví procesu kontroluje stejný modulový podpis a nový regresní test ověřuje, že entrypoint načte standardní `email` správně.
+
+Rozhodnutí:
+- Původní potvrzení se po opravě nepoužije automaticky. Opakování stejného síťového workflow vyžaduje nový náhled a nové samostatné potvrzení.
+
+Další krok:
+- Znovu zobrazit přesný `camino_c02b_t043_start`; po potvrzení připravit URL/token a pokračovat fyzickým T043.
+
+Technický důkaz:
+- Regresní test modulu PASS; cílená sada 31/31 a plná projektová brána 1710/1710 PASS. T043 zůstává NEPROVEDENO, Funnel ani kořen Cockpitu se nezměnily.

@@ -75,7 +75,12 @@ Plná projektová brána je samostatný povinný důkaz tohoto změnového kroku
   nebyla použita reálná média. Dočasný receiver ani Serve cesta zatím neběží.
 - Registrovaný ovladač T043 ukládá token a běhový stav jen do ignorovaného
   `data/private`, přidá pouze `/camino-c02b`, ověřuje Funnel/Cockpit a při
-  ukončení porovná Serve se stavem před testem. Plná brána 1709/1709 PASS.
+  ukončení porovná Serve se stavem před testem.
+- První potvrzený start odhalil kolizi přímého skriptového spuštění s balíčkem
+  `app/email`; receiver neotevřel port a workflow trasu bezpečně odebralo.
+  Entry point je opraven na `python -m app.camino_chunk_receiver` a chráněn
+  regresním testem. Plná brána po opravě 1710/1710 PASS. Opakování čeká na nové
+  samostatné potvrzení; receiver ani Serve cesta nyní neběží.
 
 ## Další krok
 

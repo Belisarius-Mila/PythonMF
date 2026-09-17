@@ -27,6 +27,7 @@ DEFAULT_STATE_ROOT = PROJECT_ROOT / "data" / "private" / "camino" / "c02b_t043"
 DEFAULT_TAILSCALE_CLI = Path("/Applications/Tailscale.app/Contents/MacOS/Tailscale")
 DEFAULT_PYTHON = PROJECT_ROOT / ".venv" / "bin" / "python"
 DEFAULT_RECEIVER = PROJECT_ROOT / "app" / "camino_chunk_receiver.py"
+RECEIVER_MODULE = "app.camino_chunk_receiver"
 DEFAULT_PBCOPY = Path("/usr/bin/pbcopy")
 ROUTE_PATH = "/camino-c02b"
 LOOPBACK_HOST = "127.0.0.1"
@@ -301,7 +302,7 @@ def _owned_receiver_alive(state: Mapping[str, Any], config: ControlConfig) -> bo
     command = _process_command(pid)
     return bool(
         command
-        and str(config.receiver) in command
+        and f"-m {RECEIVER_MODULE}" in command
         and receiver_root in command
         and f"--port {config.port}" in command
     )
@@ -361,7 +362,8 @@ def start(config: ControlConfig = ControlConfig(), runner: Runner = run_command)
     os.fchmod(log_descriptor, 0o600)
     receiver_argv = [
         str(config.python),
-        str(config.receiver),
+        "-m",
+        RECEIVER_MODULE,
         "--host",
         LOOPBACK_HOST,
         "--port",
