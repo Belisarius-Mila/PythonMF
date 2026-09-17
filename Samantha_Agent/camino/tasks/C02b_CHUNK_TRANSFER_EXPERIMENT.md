@@ -84,3 +84,10 @@ koaleskuje; následná celá dávka doběhla automaticky bez dalšího klepnutí
 
 T047–T050 zůstávají fyzicky NEPROVEDENO: T043 samo nedokládá zámek, force quit,
 cizí síť, scope skutečných mobilních dat ani zadrženou finalizaci.
+
+Po T043 registrované ukončení zastavilo jen vlastněný receiver, odebralo pouze
+`/camino-c02b`, zachovalo tři ověřené syntetické důkazy a přesně obnovilo Serve;
+Funnel zůstal vypnutý. T047 má samostatný soukromý stav a nový prázdný běh.
+Jeho audit kontroluje i nedokončené relace a hashově ověřené přijaté části.
+Fyzicky se provede nejprve zámek a po dokončení první dávky samostatně nová
+dávka, force quit a ruční relaunch s porovnáním serveru.

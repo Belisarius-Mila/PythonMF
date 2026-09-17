@@ -246,3 +246,9 @@ který přijde během právě čekajícího průchodu, vyvolá ještě jeden pr�
 tichého zahození. Dostupná povolená Wi-Fi smí spustit automatický přenos;
 `Synchronizovat nyní` je ruční provozní záloha. Simulátor ani arm64 build samy
 nejsou fyzický PASS T043/T047–T050.
+
+T047 používá nový prázdný soukromý receiver oddělený od zachovaného důkazu
+T043. Zámek a force quit jsou dvě různé dávky. Read-only audit počítá relace,
+stav poslední relace a hashově ověřené serverové části, takže po force quit lze
+nejdřív doložit skutečný mezistav a až potom ručně spustit klientskou
+reconciliaci.

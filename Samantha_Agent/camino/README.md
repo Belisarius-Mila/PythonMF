@@ -3,7 +3,7 @@
 Soukromý cestovní deník: offline záznam na iPhonu, soukromé zpracování na Macu
 a pozdější film z povolených zdrojů.
 
-**Stav: autoritativní podklady v0.5 + U15. C01a/C01b/C01c/C02a jsou přijaty v prototypovém rozsahu. C02b harness 0.4.0 (2) je na iPhonu a fyzické T043 prošlo s řízeným výpadkem, doplněním částí a shodou serverového hashe. T047–T050 čekají. Dočasná privátní T043 cesta je po testu ještě aktivní a musí být registrovaně ukončena; Funnel je vypnutý. Trvalá služba ani veřejná cesta neexistují. Camino Viewer je P0, ale podle etap se implementuje až v C08c–C08f.**
+**Stav: autoritativní podklady v0.5 + U15. C01a/C01b/C01c/C02a jsou přijaty v prototypovém rozsahu. C02b harness 0.4.0 (2) je na iPhonu a fyzické T043 prošlo s řízeným výpadkem, doplněním částí a shodou serverového hashe. T043 receiver byl bezpečně zastaven a Serve přesně obnoven. Oddělený T047 workflow je připraven; fyzické T047–T050 čekají. Funnel je vypnutý, trvalá služba ani veřejná cesta neexistují. Camino Viewer je P0, ale podle etap se implementuje až v C08c–C08f.**
 
 - [Podklady v0.5](CAMINO_podklady_v0.5/README_v0.5.md)
 - [Funkční specifikace v0.5](CAMINO_podklady_v0.5/CAMINO_funkcni_specifikace_v0.5.md)
@@ -38,7 +38,8 @@ C02b má lokálně sestavený samostatný iOS `URLSession` harness pro syntetick
 0.4.0 (2) je nainstalovaný a spuštěný na iPhonu. T043 PASS doložil fyzické
 přerušení sítě, bezpečné doplnění všech 13 částí, shodnou délku/hash a jediný
 objekt daného Assetu. Další jsou T047–T050; C02a/C02b receiver není produkční
-upload server.
+upload server. T047 má vlastní prázdný běh a serverový audit nedokončených
+relací; zámek a force quit se provedou jako dvě oddělené fyzické zkoušky.
 
 Rozbalené podklady v0.4 a v0.5 jsou verzované včetně manifestů. Původní ZIPy
 jsou zachované lokálně a ignorované Gitem; profilové workspaces přebírají

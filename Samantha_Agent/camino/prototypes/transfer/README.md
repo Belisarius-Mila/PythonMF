@@ -37,6 +37,8 @@ iPhonu prošly. T043 doložil skutečné přerušení sítě, následné doplně
 odhalil zahozený souběžný impuls reconciliace; build 2 jej koaleskuje a následná
 96MiB dávka doběhla bez dalšího klepnutí. Profil je místní a časově omezený;
 tým ani účet nejsou verzované. Zámek, force quit, cizí Wi-Fi a T047–T050
-zůstávají neověřené. Registrovaný `camino_c02b_t043_*` workflow připraví a
-zase odebere jedinou dočasnou privátní Serve cestu; zápisové akce podléhají
+zůstávají neověřené. T043 workflow po důkazu receiver zastavil a původní Serve
+konfiguraci přesně obnovil. Registrovaný `camino_c02b_t047_*` workflow připraví
+nový prázdný běh pro oddělenou zkoušku zámku a force quit; audit fail-closed
+ověří relace, přijaté části, objekty a účtenky. Zápisové akce podléhají
 samostatnému potvrzení.

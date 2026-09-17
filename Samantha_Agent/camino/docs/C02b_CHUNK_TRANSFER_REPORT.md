@@ -4,7 +4,7 @@ Datum: 2026-09-17
 
 ## Výsledek
 
-C02b je zahájené a má dva lokální checkpointy. Syntetický receiver přijímá
+C02b je zahájené a má ověřené lokální checkpointy. Syntetický receiver přijímá
 výchozí 8MiB části, trvale eviduje manifest a bezpečně uložené části, po
 přerušení vrací přesný seznam chybějících indexů a teprve po sestavení a
 serverové kontrole celkové délky a SHA-256 vytvoří jediný objekt a účtenku.
@@ -38,6 +38,7 @@ Dostupná povolená Wi-Fi může spustit automatickou reconciliaci;
   iPhonu 14 Plus / iOS 26.6.1: PASS. Vývojový profil platí do 24. září 2026;
   Camino Audio nebylo odinstalováno ani změněno.
 - T043 ovladač, C02b receiver a C02a regrese: 28/28 PASS.
+- Sdílený T043/T047 ovladač a registr workflow: 11/11 PASS.
 - Pokrytý syntetický velký soubor má dvě plné 8MiB části a krátký konec. Test
   nejprve odešle části 0 a 2, po dotazu doplní jen část 1 a ověří jediný
   výsledný objekt se shodným hashem.
@@ -47,7 +48,7 @@ Dostupná povolená Wi-Fi může spustit automatickou reconciliaci;
   připravených částí, odmítnutí neplatného serverového snapshotu a koaleskování
   žádosti, která přijde během už běžící reconciliace.
 
-- Plná projektová brána: 1713/1713 PASS.
+- Plná projektová brána po přípravě T047: 1716/1716 PASS.
 
 ## Vazba na akceptační testy
 
@@ -58,7 +59,8 @@ Dostupná povolená Wi-Fi může spustit automatickou reconciliaci;
   vznikl jediný objekt tohoto Assetu o 100 663 553 B a jeho SHA-256 se shodoval
   s účtenkou.
 - T047: aplikace má background souborové úlohy a po relaunchi znovu porovnává
-  server; zámek a nucené ukončení na skutečném iPhonu NEPROVEDENO.
+  server. Vlastní prázdný T047 workflow a audit relací/částí jsou připravené;
+  zámek a nucené ukončení na skutečném iPhonu NEPROVEDENO.
 - T048: UI má pravdivé čekání bez veřejného fallbacku; cizí Wi-Fi, captive
   portal, přechod sítě a nedostupný tailnet NEPROVEDENO.
 - T049: trvalý grant je omezený na jednu dávku a nová dávka vzniká bez něj;
@@ -96,8 +98,8 @@ samostatný regresní test a nepřerušený fyzický doběh na buildu 2.
 - Výchozí experimentální maximum je 512 MiB a neříká nic o budoucím
   produkčním limitu videa.
 - Byla přidána pouze dočasná privátní Tailscale Serve cesta; Funnel zůstal
-  vypnutý a nebyla použita reálná média. Receiver a cesta po důkazu ještě běží
-  a čekají na samostatně potvrzené registrované ukončení.
+  vypnutý a nebyla použita reálná média. Po T043 byl receiver zastaven, cesta
+  odebrána a původní Serve konfigurace přesně obnovena. Tři důkazy zůstaly.
 - Registrovaný ovladač T043 ukládá token a běhový stav jen do ignorovaného
   `data/private`, přidá pouze `/camino-c02b`, ověřuje Funnel/Cockpit a při
   ukončení porovná Serve se stavem před testem.
@@ -108,12 +110,14 @@ samostatný regresní test a nepřerušený fyzický doběh na buildu 2.
   skončilo na chybějícím CA řetězci; rollback znovu obnovil původní Serve.
   Kontrola nyní načítá systémový `/etc/ssl/cert.pem` bez vypnutí TLS ověření.
   Skutečný tailnet Cockpit health s tímto kontextem vrátil 200 a plná brána po
-  opravě 1711/1711 PASS. Aktuální potvrzený běh je po fyzickém důkazu stále
-  aktivní jen do registrovaného ukončení.
+  opravě 1711/1711 PASS.
+- Samostatný T047 ovladač používá nový soukromý stav. Read-only audit ověřuje
+  vlastněný proces a trasu, Funnel, všechny manifesty relací, hash každé přijaté
+  části a finální objekty/účtenky. Stav z T043 se s T047 nemíchá.
 
 ## Další krok
 
-Po samostatném potvrzení registrovaně odebrat dočasnou trasu, zastavit jen
-vlastněný receiver a porovnat Serve s výchozím stavem. Potom provést T047:
-zvlášť zámek a zvlášť force quit s následným pravdivým porovnáním fronty.
-T048–T050 následují odděleně.
+Po samostatném potvrzení spustit nový prázdný T047 receiver. Nejprve provést
+dávku se zámkem telefonu a ověřit její dokončení. Potom vytvořit jinou dávku,
+uprostřed přenosu aplikaci nuceně ukončit, doložit skutečný serverový mezistav
+a teprve potom ji ručně otevřít a porovnat frontu. T048–T050 následují odděleně.

@@ -221,6 +221,7 @@ async def second():
         self.assertIn("app/camino_receiver.py", COMPILE_PATHS)
         self.assertIn("app/camino_chunk_receiver.py", COMPILE_PATHS)
         self.assertIn("scripts/camino_c02b_t043_control.py", COMPILE_PATHS)
+        self.assertIn("scripts/camino_c02b_t047_control.py", COMPILE_PATHS)
         self.assertIn("app/cockpit_readonly_routes.py", COMPILE_PATHS)
         self.assertIn("app/email/archive_browser.py", COMPILE_PATHS)
         self.assertIn("tests.test_email_archive_browser", TEST_MODULES)

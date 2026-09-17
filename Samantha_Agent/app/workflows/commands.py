@@ -19,6 +19,7 @@ BACKUP_SCRIPT = SAMANTHA_DIR / "scripts" / "backup_samantha_python.py"
 HUMAN_ADAM_TAKEOVER_SCRIPT = SAMANTHA_DIR / "scripts" / "human_adam_takeover.py"
 DEVELOPMENT_BRANCH_AUDIT_SCRIPT = SAMANTHA_DIR / "scripts" / "development_branch_audit.py"
 CAMINO_C02B_T043_CONTROL_SCRIPT = SAMANTHA_DIR / "scripts" / "camino_c02b_t043_control.py"
+CAMINO_C02B_T047_CONTROL_SCRIPT = SAMANTHA_DIR / "scripts" / "camino_c02b_t047_control.py"
 HUMAN_ADAM_TAKEOVER_CONFIRMATION = "POTVRZUJI PREVZETI HUMAN-ADAM WIP DO MAIN"
 SECURE_BACKUP_ROOT = Path("/Volumes/SamanthaSecureBackup/SamanthaBackups")
 DEFAULT_PENDING_COMMAND_PATH = SAMANTHA_DIR / "data" / "workflows" / "pending_command.json"
@@ -293,6 +294,111 @@ WORKFLOW_COMMANDS: tuple[WorkflowCommand, ...] = (
         required_keyword_groups=(
             ("ukonči", "ukonci", "zastav"),
             ("camino", "c02b", "t043"),
+        ),
+    ),
+    WorkflowCommand(
+        command_id="camino_c02b_t047_start",
+        title="Připravit privátní fyzický test Camino T047",
+        purpose=(
+            "Spustí nový prázdný syntetický receiver pro oddělené zkoušky zámku "
+            "a force quit, přidá jedinou privátní Serve cestu a vloží URL do schránky."
+        ),
+        aliases=(
+            "připrav camino t047",
+            "priprav camino t047",
+            "spusť camino t047",
+            "spust camino t047",
+        ),
+        argv=(str(PYTHON_BIN), str(CAMINO_C02B_T047_CONTROL_SCRIPT), "start"),
+        cwd=SAMANTHA_DIR,
+        risk="private_network_test_write",
+        writes=(
+            "soukromý běhový stav a token v data/private, jeden loopback proces, "
+            "Tailscale Serve cestu /camino-c02b a Mac schránku s privátní URL; "
+            "nemění Funnel ani kořen Cockpitu"
+        ),
+        requires_confirmation=True,
+        intent_keywords=("připrav", "priprav", "spusť", "spust", "camino", "c02b", "t047"),
+        required_keyword_groups=(
+            ("připrav", "priprav", "spusť", "spust"),
+            ("camino", "c02b", "t047"),
+        ),
+    ),
+    WorkflowCommand(
+        command_id="camino_c02b_t047_copy_token",
+        title="Vložit testovací token Camino T047 do schránky",
+        purpose=(
+            "Po živé kontrole privátní trasy nahradí URL ve schránce pouze dočasným "
+            "bearer tokenem aktuálního T047 běhu."
+        ),
+        aliases=(
+            "zkopíruj token camino t047",
+            "zkopiruj token camino t047",
+            "vlož token camino t047",
+            "vloz token camino t047",
+        ),
+        argv=(str(PYTHON_BIN), str(CAMINO_C02B_T047_CONTROL_SCRIPT), "copy-token"),
+        cwd=SAMANTHA_DIR,
+        risk="private_clipboard_write",
+        writes="Mac schránku s dočasným tokenem; nemění síť, Git ani projektová data",
+        requires_confirmation=True,
+        intent_keywords=("zkopíruj", "zkopiruj", "vlož", "vloz", "token", "camino", "t047"),
+        required_keyword_groups=(
+            ("zkopíruj", "zkopiruj", "vlož", "vloz"),
+            ("token",),
+            ("camino", "t047"),
+        ),
+    ),
+    WorkflowCommand(
+        command_id="camino_c02b_t047_status",
+        title="Ověřit stav a důkaz fyzického testu Camino T047",
+        purpose=(
+            "Read-only ověří receiver, privátní trasu, Funnel, všechny relace, "
+            "přijaté části a finální syntetické objekty."
+        ),
+        aliases=(
+            "stav camino t047",
+            "ověř camino t047",
+            "over camino t047",
+        ),
+        argv=(str(PYTHON_BIN), str(CAMINO_C02B_T047_CONTROL_SCRIPT), "status"),
+        cwd=SAMANTHA_DIR,
+        risk="read_only_preview",
+        writes=(
+            "nic; pouze čte privátní běhový stav, proces, Serve/Funnel, relace, "
+            "části a syntetické důkazy"
+        ),
+        requires_confirmation=False,
+        intent_keywords=("stav", "ověř", "over", "camino", "c02b", "t047"),
+        required_keyword_groups=(
+            ("stav", "ověř", "over", "zkontroluj"),
+            ("camino", "c02b", "t047"),
+        ),
+    ),
+    WorkflowCommand(
+        command_id="camino_c02b_t047_stop",
+        title="Ukončit privátní fyzický test Camino T047",
+        purpose=(
+            "Odebere jen vlastněnou Serve cestu, zastaví jen vlastněný receiver a "
+            "porovná konfiguraci s přesným stavem před testem."
+        ),
+        aliases=(
+            "ukonči camino t047",
+            "ukonci camino t047",
+            "zastav camino t047",
+        ),
+        argv=(str(PYTHON_BIN), str(CAMINO_C02B_T047_CONTROL_SCRIPT), "stop"),
+        cwd=SAMANTHA_DIR,
+        risk="private_network_test_write",
+        writes=(
+            "odebere pouze Serve cestu /camino-c02b, ukončí pouze vlastněný receiver "
+            "a zapíše soukromý závěrečný stav; syntetický důkaz nemaže"
+        ),
+        requires_confirmation=True,
+        intent_keywords=("ukonči", "ukonci", "zastav", "camino", "c02b", "t047"),
+        required_keyword_groups=(
+            ("ukonči", "ukonci", "zastav"),
+            ("camino", "c02b", "t047"),
         ),
     ),
     WorkflowCommand(

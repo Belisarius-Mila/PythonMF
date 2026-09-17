@@ -12,6 +12,7 @@ from unittest import mock
 
 from app.workflows.commands import WORKFLOW_COMMANDS
 from scripts import camino_c02b_t043_control as control
+from scripts import camino_c02b_t047_control as t047_control
 
 
 class _FakeHTTPResponse:
@@ -81,16 +82,35 @@ class CaminoC02bT043ControlTests(unittest.TestCase):
     def test_registered_commands_are_fixed_and_confirmation_gated(self) -> None:
         commands = {item.command_id: item for item in WORKFLOW_COMMANDS}
         expected_actions = {
-            "camino_c02b_t043_start": ("start", True),
-            "camino_c02b_t043_copy_token": ("copy-token", True),
-            "camino_c02b_t043_status": ("status", False),
-            "camino_c02b_t043_stop": ("stop", True),
+            "camino_c02b_t043_start": ("camino_c02b_t043_control.py", "start", True),
+            "camino_c02b_t043_copy_token": (
+                "camino_c02b_t043_control.py",
+                "copy-token",
+                True,
+            ),
+            "camino_c02b_t043_status": ("camino_c02b_t043_control.py", "status", False),
+            "camino_c02b_t043_stop": ("camino_c02b_t043_control.py", "stop", True),
+            "camino_c02b_t047_start": ("camino_c02b_t047_control.py", "start", True),
+            "camino_c02b_t047_copy_token": (
+                "camino_c02b_t047_control.py",
+                "copy-token",
+                True,
+            ),
+            "camino_c02b_t047_status": ("camino_c02b_t047_control.py", "status", False),
+            "camino_c02b_t047_stop": ("camino_c02b_t047_control.py", "stop", True),
         }
-        for command_id, (action, confirmation) in expected_actions.items():
+        for command_id, (script_name, action, confirmation) in expected_actions.items():
             command = commands[command_id]
-            self.assertEqual("camino_c02b_t043_control.py", Path(command.argv[-2]).name)
+            self.assertEqual(script_name, Path(command.argv[-2]).name)
             self.assertEqual(action, command.argv[-1])
             self.assertEqual(confirmation, command.requires_confirmation)
+
+    def test_t047_wrapper_uses_separate_private_state_and_label(self) -> None:
+        selected = t047_control.config()
+
+        self.assertEqual("T047", selected.test_label)
+        self.assertEqual("c02b_t047", selected.state_root.name)
+        self.assertNotEqual(control.DEFAULT_STATE_ROOT, selected.state_root)
 
     def test_receiver_module_entrypoint_does_not_shadow_standard_email(self) -> None:
         completed = subprocess.run(
@@ -343,6 +363,91 @@ class CaminoC02bT043ControlTests(unittest.TestCase):
 
             self.assertFalse(evidence["verified_match"])
             self.assertEqual(0, evidence["byte_count"])
+
+    def test_session_evidence_reports_verified_and_interrupted_latest_session(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            receiver_root = Path(temp_dir) / "receiver"
+            sessions = receiver_root / "sessions"
+            sessions.mkdir(parents=True)
+
+            def write_session(asset_id: str, *, state: str, accepted: int) -> Path:
+                session = sessions / asset_id
+                chunks = session / "chunks"
+                chunks.mkdir(parents=True)
+                manifest = {
+                    "asset_id": asset_id,
+                    "byte_count": 5,
+                    "sha256": "0" * 64,
+                    "chunk_size": 3,
+                    "chunk_count": 2,
+                    "state": state,
+                }
+                manifest_path = session / "manifest.json"
+                manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+                for index, body in enumerate((b"abc", b"de")[:accepted]):
+                    stem = f"{index:08d}"
+                    (chunks / f"{stem}.part").write_bytes(body)
+                    (chunks / f"{stem}.json").write_text(
+                        json.dumps(
+                            {
+                                "asset_id": asset_id,
+                                "chunk_index": index,
+                                "byte_count": len(body),
+                                "sha256": hashlib.sha256(body).hexdigest(),
+                            }
+                        ),
+                        encoding="utf-8",
+                    )
+                return manifest_path
+
+            write_session("asset-lock", state="verified", accepted=2)
+            latest = write_session("asset-force-quit", state="uploading", accepted=1)
+            latest.touch()
+
+            evidence = control._session_evidence({"receiver_root": str(receiver_root)})
+
+            self.assertTrue(evidence["valid"])
+            self.assertEqual(2, evidence["session_count"])
+            self.assertEqual(1, evidence["verified_count"])
+            self.assertEqual(1, evidence["uploading_count"])
+            self.assertEqual("uploading", evidence["latest_state"])
+            self.assertEqual(1, evidence["latest_accepted_chunks"])
+            self.assertEqual(2, evidence["latest_chunk_count"])
+
+    def test_session_evidence_fails_closed_for_tampered_chunk(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            receiver_root = Path(temp_dir) / "receiver"
+            chunks = receiver_root / "sessions" / "asset-one" / "chunks"
+            chunks.mkdir(parents=True)
+            (chunks.parent / "manifest.json").write_text(
+                json.dumps(
+                    {
+                        "asset_id": "asset-one",
+                        "byte_count": 3,
+                        "sha256": "0" * 64,
+                        "chunk_size": 3,
+                        "chunk_count": 1,
+                        "state": "uploading",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (chunks / "00000000.part").write_bytes(b"abc")
+            (chunks / "00000000.json").write_text(
+                json.dumps(
+                    {
+                        "asset_id": "asset-one",
+                        "chunk_index": 0,
+                        "byte_count": 3,
+                        "sha256": "0" * 64,
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            evidence = control._session_evidence({"receiver_root": str(receiver_root)})
+
+            self.assertFalse(evidence["valid"])
 
 
 if __name__ == "__main__":

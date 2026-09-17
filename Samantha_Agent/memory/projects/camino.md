@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-17 21:01 CEST
+Aktualizováno: 2026-09-17 21:23 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -31,8 +31,9 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 - C02a zahájeno výslovným pokynem Míly. Lokální loopback přijímač pro syntetický soubor streamuje do soukromého stagingu, sám ověřuje velikost/SHA-256 a vytváří objekt i účtenku create-only. Identický retry neduplikuje; jiné bajty pod stejným ID jsou konflikt.
 - C02a cílené automatické ověření 10/10 PASS. Následný privátní HTTPS smoke přes dočasnou cestu Tailscale Serve ověřil správný upload, serverový hash a délku, právě jeden objekt a účtenku, chybný hash, konflikt i idempotentní retry. Funnel zůstal vypnutý, Cockpit dostupný a původní Serve konfigurace byla po testu přesně obnovena. C02a je přijaté v prototypovém rozsahu; fyzický iPhone/cizí síť a úplné T043/T048/T051 zůstávají neprovedené.
 - C02b má druhý lokální checkpoint. Receiver obnovuje 8MiB části; samostatná aplikace `Camino Transfer Test` pro syntetickou dávku 96 MiB + 257 B používá jednu background `URLSession`, uploady ze souborů, trvalý journal, Keychain a nejvýše dvě připravené části. Nečte Fotky, mikrofon ani Camino Audio.
-- Klient po relaunchi věří jen validnímu serverovému snapshotu, 100 % bytů drží jako `Ověřuji`, mobilní grant váže na jednu existující dávku a bez soukromé sítě nemá veřejný fallback. Swift core 19/19, T043 ovladač + oba receivery 28/28, UI 1/1 a plná projektová brána 1713/1713 PASS.
-- T043 PASS v syntetickém rozsahu: Letový režim zachytil relaci `uploading` s 0/13 přijatými částmi; po obnově sítě vznikl jediný objekt daného Assetu, 13/13, 100 663 553 B a shodný SHA-256. Build 1 přitom odhalil zahozené souběžné impulsy a opakované ruční klepnutí; build `Camino Transfer Test` 0.4.0 (2) je koaleskuje a následná celá dávka doběhla automaticky bez dalšího klepnutí. Build 2 je strict podepsaný, nainstalovaný a spuštěný; profil platí do 24. září 2026 a Camino Audio zůstalo nedotčené. Privátní Serve cesta/receiver po důkazu ještě běží, Funnel je vypnutý a ukončení čeká na samostatné potvrzení.
+- Klient po relaunchi věří jen validnímu serverovému snapshotu, 100 % bytů drží jako `Ověřuji`, mobilní grant váže na jednu existující dávku a bez soukromé sítě nemá veřejný fallback. Swift core 19/19, T043 ovladač + oba receivery 28/28, T047/T043 workflow modul 11/11, UI 1/1 a plná projektová brána 1716/1716 PASS.
+- T043 PASS v syntetickém rozsahu: Letový režim zachytil relaci `uploading` s 0/13 přijatými částmi; po obnově sítě vznikl jediný objekt daného Assetu, 13/13, 100 663 553 B a shodný SHA-256. Build 1 přitom odhalil zahozené souběžné impulsy a opakované ruční klepnutí; build `Camino Transfer Test` 0.4.0 (2) je koaleskuje a následná celá dávka doběhla automaticky bez dalšího klepnutí. Build 2 je strict podepsaný, nainstalovaný a spuštěný; profil platí do 24. září 2026 a Camino Audio zůstalo nedotčené.
+- T043 receiver je zastavený, `/camino-c02b` odebraná, původní Serve přesně obnovený a Funnel vypnutý; všechny tři ověřené důkazy jsou zachované. Oddělený registrovaný T047 workflow má vlastní prázdný stav a audit hashově ověřených částí i nedokončených relací. T047 receiver zatím neběží.
 
 
 ## Zdroje a návaznost
@@ -70,9 +71,10 @@ kódu nevyvolává; FAIL se nejdřív doloží a opraví v aktuálním rozsahu.
 
 ## Další krok
 
-Po samostatném potvrzení spustit registrovaný `camino_c02b_t043_stop`, odebrat
-jen vlastněnou privátní cestu, zastavit receiver a porovnat Serve s výchozím
-stavem. Potom odděleně provést T047 se zámkem a force quit; T048–T050 následují.
+Po samostatném potvrzení spustit registrovaný `camino_c02b_t047_start`, vložit
+novou URL/token a nejprve provést dávku se zámkem. Potom vytvořit jinou dávku,
+uprostřed přenosu aplikaci nuceně ukončit, doložit serverový mezistav a teprve
+potom ručně otevřít aplikaci. T048–T050 následují odděleně.
 
 Historický doklad založení:
 Ověření založení: 56/56 testů integrace (54 + 2 profilové testy) a rychlá statická brána OK.
@@ -781,3 +783,20 @@ Další krok:
 Technický důkaz:
 - Živý receiver eviduje tři rozdílné ověřené syntetické Assety/účtenky, každý 13/13 a 100 663 553 B; celkem 301 990 659 B. Funnel je vypnutý.
 - Swift 19/19, T043 ovladač + oba receivery 28/28 a UI 1/1 PASS; podepsaný build 2, strict podpis, instalace a launch PASS. Plná projektová brána 1713/1713 PASS.
+
+
+### 2026-09-17 21:23 CEST — T043 ukončeno; oddělené T047 připraveno
+
+Hotovo:
+- Potvrzený stop odebral jen `/camino-c02b`, zastavil pouze vlastněný T043 receiver a doložil přesnou obnovu původního Serve. Funnel zůstal vypnutý; tři relace jsou `verified` 13/13 a jejich tři objekty/účtenky zůstaly hashově shodné, celkem 301 990 659 B.
+- Připravený T047 workflow používá vlastní soukromý stav a nový prázdný receiver. Read-only audit fail-closed ověřuje relace, stav poslední relace, každý přijatý chunk a finální objekty/účtenky. iOS build 0.4.0 (2) se neměnil.
+
+Rozhodnutí:
+- Zámek a force quit se provedou jako dvě různé dávky. Po force quit se nejprve zaznamená serverový mezistav a teprve potom proběhne ruční relaunch a klientská reconciliace.
+
+Další krok:
+- Po samostatném potvrzení spustit `camino_c02b_t047_start`, vložit novou URL/token a provést nejprve dávku se zámkem.
+
+Technický důkaz:
+- Živý T043 audit: `stopped`, receiver i cesta neaktivní, Funnel vypnutý, 3/3 relace ověřené a 39/39 částí. T047 audit: `INACTIVE`, žádný běh zatím nevznikl.
+- T047/T043 workflow modul 11/11, související sada 37/37 a plná projektová brána 1716/1716 PASS.

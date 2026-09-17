@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Bounded private-network control for the physical Camino C02b T043 test."""
+"""Bounded private-network control shared by physical Camino C02b tests."""
 
 from __future__ import annotations
 
@@ -48,6 +48,7 @@ class ControlConfig:
     receiver: Path = DEFAULT_RECEIVER
     pbcopy: Path = DEFAULT_PBCOPY
     port: int = DEFAULT_PORT
+    test_label: str = "T043"
 
     @property
     def current_path(self) -> Path:
@@ -142,9 +143,9 @@ def _load_state(path: Path) -> dict[str, Any] | None:
     except FileNotFoundError:
         return None
     except (json.JSONDecodeError, OSError) as error:
-        raise ControlError("private T043 state is unreadable") from error
+        raise ControlError("private Camino C02b state is unreadable") from error
     if not isinstance(value, dict) or value.get("schema") != 1:
-        raise ControlError("private T043 state has an unsupported schema")
+        raise ControlError("private Camino C02b state has an unsupported schema")
     return value
 
 
@@ -153,17 +154,24 @@ def _validate_state_paths(state: Mapping[str, Any], config: ControlConfig) -> No
     for key in ("run_dir", "receiver_root", "receiver_log", "token_path", "serve_before_path"):
         raw = state.get(key)
         if not isinstance(raw, str) or not raw:
-            raise ControlError(f"private T043 state is missing {key}")
+            raise ControlError(f"private {config.test_label} state is missing {key}")
         candidate = Path(raw)
         if not candidate.is_absolute() or not candidate.resolve().is_relative_to(root):
-            raise ControlError(f"private T043 state has an unsafe {key}")
+            raise ControlError(f"private {config.test_label} state has an unsafe {key}")
     try:
         pid = int(state["receiver_pid"])
         port = int(state["port"])
     except (KeyError, TypeError, ValueError) as error:
-        raise ControlError("private T043 state has invalid process metadata") from error
+        raise ControlError(f"private {config.test_label} state has invalid process metadata") from error
+    state_label = str(state.get("test_label") or "T043")
     if pid <= 1 or port != config.port or state.get("route_path") != ROUTE_PATH:
-        raise ControlError("private T043 state does not match the registered test scope")
+        raise ControlError(
+            f"private {config.test_label} state does not match the registered test scope"
+        )
+    if state_label != config.test_label:
+        raise ControlError(
+            f"private state belongs to {state_label}, not {config.test_label}"
+        )
 
 
 def _tailnet_state(config: ControlConfig, runner: Runner = run_command) -> dict[str, Any]:
@@ -351,14 +359,16 @@ def start(config: ControlConfig = ControlConfig(), runner: Runner = run_command)
     _private_directory(config.state_root)
     previous = _load_state(config.current_path)
     if previous is not None and previous.get("phase") in {"starting", "ready"}:
-        raise ControlError("a T043 run is already active; use status or stop")
+        raise ControlError(f"a {config.test_label} run is already active; use status or stop")
 
     status = _tailnet_state(config, runner)
     dns_name = _dns_name(status)
     serve_before = _serve_state(config, runner=runner)
     funnel_before = _serve_state(config, funnel=True, runner=runner)
     if _funnel_enabled(funnel_before):
-        raise ControlError("Tailscale Funnel is active; T043 start is blocked")
+        raise ControlError(
+            f"Tailscale Funnel is active; {config.test_label} start is blocked"
+        )
     if ROUTE_PATH in _handlers(serve_before):
         raise ControlError(f"Serve path {ROUTE_PATH} already exists")
     _ensure_port_available(config.port)
@@ -440,6 +450,7 @@ def start(config: ControlConfig = ControlConfig(), runner: Runner = run_command)
 
         state: dict[str, Any] = {
             "schema": 1,
+            "test_label": config.test_label,
             "phase": "ready",
             "started_at": started_at,
             "run_dir": str(run_dir),
@@ -491,7 +502,7 @@ def start(config: ControlConfig = ControlConfig(), runner: Runner = run_command)
 def copy_token(config: ControlConfig = ControlConfig(), runner: Runner = run_command) -> str:
     state = _load_state(config.current_path)
     if state is None or state.get("phase") != "ready":
-        raise ControlError("no ready T043 run exists")
+        raise ControlError(f"no ready {config.test_label} run exists")
     _validate_state_paths(state, config)
     if not _owned_receiver_alive(state, config):
         raise ControlError("the owned receiver is not running")
@@ -557,18 +568,136 @@ def _evidence(state: Mapping[str, Any]) -> dict[str, Any]:
     return result
 
 
+def _session_evidence(state: Mapping[str, Any]) -> dict[str, Any]:
+    sessions_root = Path(str(state.get("receiver_root", ""))) / "sessions"
+    result: dict[str, Any] = {
+        "valid": True,
+        "session_count": 0,
+        "verified_count": 0,
+        "uploading_count": 0,
+        "latest_state": "none",
+        "latest_accepted_chunks": 0,
+        "latest_chunk_count": 0,
+    }
+    if not sessions_root.exists():
+        return result
+    if sessions_root.is_symlink() or not sessions_root.is_dir():
+        result["valid"] = False
+        return result
+
+    summaries: list[tuple[int, str, int, int]] = []
+    for session_dir in sessions_root.iterdir():
+        if session_dir.is_symlink() or not session_dir.is_dir():
+            result["valid"] = False
+            return result
+        manifest_path = session_dir / "manifest.json"
+        chunks_dir = session_dir / "chunks"
+        try:
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            if not isinstance(manifest, dict):
+                raise ValueError("manifest must be an object")
+            manifest_asset = str(manifest.get("asset_id") or "")
+            byte_count = int(manifest.get("byte_count", 0))
+            chunk_size = int(manifest.get("chunk_size", 0))
+            chunk_count = int(manifest.get("chunk_count", 0))
+            session_state = str(manifest.get("state") or "")
+            if (
+                manifest_path.is_symlink()
+                or manifest_asset != session_dir.name
+                or byte_count <= 0
+                or chunk_size <= 0
+                or chunk_count <= 0
+                or chunk_count != (byte_count + chunk_size - 1) // chunk_size
+                or session_state not in {"uploading", "verifying", "verified"}
+                or chunks_dir.is_symlink()
+                or not chunks_dir.is_dir()
+            ):
+                raise ValueError("invalid session evidence")
+            expected_names: set[str] = set()
+            accepted = 0
+            for index in range(chunk_count):
+                stem = f"{index:08d}"
+                part_path = chunks_dir / f"{stem}.part"
+                receipt_path = chunks_dir / f"{stem}.json"
+                if not part_path.exists() and not receipt_path.exists():
+                    continue
+                expected_names.update({part_path.name, receipt_path.name})
+                if (
+                    part_path.is_symlink()
+                    or receipt_path.is_symlink()
+                    or not part_path.is_file()
+                    or not receipt_path.is_file()
+                ):
+                    raise ValueError("incomplete accepted chunk evidence")
+                receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+                expected_length = (
+                    chunk_size
+                    if index < chunk_count - 1
+                    else byte_count - (chunk_size * index)
+                )
+                digest = hashlib.sha256()
+                with part_path.open("rb") as handle:
+                    for block in iter(lambda: handle.read(1024 * 1024), b""):
+                        digest.update(block)
+                if (
+                    not isinstance(receipt, dict)
+                    or receipt.get("asset_id") != manifest_asset
+                    or receipt.get("chunk_index") != index
+                    or receipt.get("byte_count") != expected_length
+                    or part_path.stat().st_size != expected_length
+                    or receipt.get("sha256") != digest.hexdigest()
+                ):
+                    raise ValueError("invalid accepted chunk evidence")
+                accepted += 1
+            actual_names = {
+                path.name
+                for path in chunks_dir.iterdir()
+                if path.is_file() or path.is_symlink()
+            }
+            if actual_names != expected_names:
+                raise ValueError("unexpected accepted chunk evidence")
+            if session_state == "verified" and accepted != chunk_count:
+                raise ValueError("verified session is missing chunks")
+            modified = max(
+                manifest_path.stat().st_mtime_ns,
+                chunks_dir.stat().st_mtime_ns,
+            )
+        except (json.JSONDecodeError, OSError, TypeError, ValueError):
+            result["valid"] = False
+            return result
+        summaries.append((modified, session_state, accepted, chunk_count))
+
+    result["session_count"] = len(summaries)
+    result["verified_count"] = sum(
+        1 for _, state_name, _, _ in summaries if state_name == "verified"
+    )
+    result["uploading_count"] = sum(
+        1 for _, state_name, _, _ in summaries if state_name != "verified"
+    )
+    if summaries:
+        _, latest_state, latest_accepted, latest_count = max(
+            summaries, key=lambda row: row[0]
+        )
+        result["latest_state"] = latest_state
+        result["latest_accepted_chunks"] = latest_accepted
+        result["latest_chunk_count"] = latest_count
+    return result
+
+
 def status(config: ControlConfig = ControlConfig(), runner: Runner = run_command) -> str:
     state = _load_state(config.current_path)
     if state is None:
-        return "INACTIVE: no C02b T043 run has been prepared."
+        return f"INACTIVE: no C02b {config.test_label} run has been prepared."
     _validate_state_paths(state, config)
     serve = _serve_state(config, runner=runner)
     funnel = _serve_state(config, funnel=True, runner=runner)
     evidence = _evidence(state)
+    sessions = _session_evidence(state)
     route_exact = _route_proxy(serve) == f"http://{LOOPBACK_HOST}:{config.port}"
     receiver_alive = _owned_receiver_alive(state, config)
     return "\n".join(
         [
+            f"test_label={config.test_label}",
             f"phase={state.get('phase', 'unknown')}",
             f"receiver_alive={str(receiver_alive).lower()}",
             f"private_route_exact={str(route_exact).lower()}",
@@ -577,6 +706,12 @@ def status(config: ControlConfig = ControlConfig(), runner: Runner = run_command
             f"receipt_count={evidence['receipt_count']}",
             f"verified_match={str(evidence['verified_match']).lower()}",
             f"verified_byte_count={evidence['byte_count']}",
+            f"session_evidence_valid={str(sessions['valid']).lower()}",
+            f"session_count={sessions['session_count']}",
+            f"session_verified_count={sessions['verified_count']}",
+            f"session_incomplete_count={sessions['uploading_count']}",
+            f"latest_session_state={sessions['latest_state']}",
+            f"latest_session_chunks={sessions['latest_accepted_chunks']}/{sessions['latest_chunk_count']}",
         ]
     )
 
@@ -584,7 +719,7 @@ def status(config: ControlConfig = ControlConfig(), runner: Runner = run_command
 def stop(config: ControlConfig = ControlConfig(), runner: Runner = run_command) -> str:
     state = _load_state(config.current_path)
     if state is None:
-        raise ControlError("no C02b T043 run exists")
+        raise ControlError(f"no C02b {config.test_label} run exists")
     _validate_state_paths(state, config)
     serve_now = _serve_state(config, runner=runner)
     route = _route_proxy(serve_now)
@@ -613,7 +748,7 @@ def stop(config: ControlConfig = ControlConfig(), runner: Runner = run_command) 
     if not isinstance(serve_before, dict) or _canonical(serve_after) != _canonical(serve_before):
         raise ControlError("Serve configuration differs from the saved pre-test state")
     if _funnel_enabled(_serve_state(config, funnel=True, runner=runner)):
-        raise ControlError("Funnel is active after T043 stop")
+        raise ControlError(f"Funnel is active after {config.test_label} stop")
     completed = dict(state)
     completed["phase"] = "stopped"
     completed["stopped_at"] = datetime.now().astimezone().isoformat(timespec="seconds")
@@ -621,7 +756,7 @@ def stop(config: ControlConfig = ControlConfig(), runner: Runner = run_command) 
     _write_private_json(config.current_path, completed)
     evidence = _evidence(completed)
     return (
-        "STOPPED: Camino Serve path removed and the owned receiver stopped.\n"
+        f"STOPPED: Camino {config.test_label} Serve path removed and the owned receiver stopped.\n"
         "Original Serve configuration restored exactly; Funnel remains disabled.\n"
         f"Evidence: objects={evidence['object_count']}, receipts={evidence['receipt_count']}, "
         f"verified_match={str(evidence['verified_match']).lower()}, bytes={evidence['byte_count']}."
