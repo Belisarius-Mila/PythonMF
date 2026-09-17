@@ -207,3 +207,18 @@ HTTPS; samostatný autorizovaný smoke 2026-09-17 tuto síťovou vrstvu doložil
 po testu přesně obnovil původní Serve konfiguraci. Ani společně tyto důkazy
 nejsou T043/T048/T051 nebo vzdálený klientský test; hranice zůstávají viditelné
 v reportu C02a.
+
+## ADR-C02B-01 — serverová pravda před background klientem
+
+**Rozhodnutí:** První checkpoint C02b nejdřív zafixuje obnovitelný kontrakt
+částí a čistou klientskou reconciliaci. Skutečné souborové úlohy `URLSession`,
+trvalá iOS fronta a fyzické síťové scénáře navážou až na testovaný kontrakt.
+
+Výchozí část má 8 MiB. Server potvrzuje jen bezpečně zapsané části, vrací jejich
+skutečný seznam a konečný stav vydá až po vlastním ověření sestaveného souboru.
+Lokálních 100 % bytů není serverová účtenka. Po relaunchi nebo ztracené odpovědi
+se klient znovu dotáže; bez dosažitelné soukromé sítě čeká a nepoužije Funnel
+ani jiný veřejný endpoint.
+
+Čistý Swift model není vydáván za hotový iOS přenos. T043 a T047–T050 zůstávají
+otevřené do fyzického testu skutečného klienta.

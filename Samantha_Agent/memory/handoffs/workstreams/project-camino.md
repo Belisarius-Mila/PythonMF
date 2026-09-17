@@ -1,33 +1,32 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno po dokončení C02a: 2026-09-17 15:19 CEST
+- Aktualizováno po prvním checkpointu C02b: 2026-09-17 16:13 CEST
 
 ### Hotovo
-- C02a privátní HTTPS smoke prošel se syntetickým souborem, serverovým hashem, jednou účtenkou, chybným hashem, konfliktem a idempotentním retry.
-- Funnel zůstal vypnutý, Cockpit dostupný a původní Tailscale Serve konfigurace byla po testu přesně obnovena.
+- C02b receiver obnovuje syntetický přenos po 8MiB částech, doplní jen chybějící indexy a finalizuje jediný objekt až po serverové kontrole celkové délky a SHA-256.
+- Swift model po relaunchi věří serverovému snapshotu, rozlišuje `verifying` od `verifiedOnMac` a omezuje mobilní souhlas na jednu existující dávku.
+- Cílené ověření 28/28 a plná projektová brána 1704/1704 prošly.
 
 ### Otevřeno
-- C02a smoke nebyl fyzický test z iPhonu nebo cizí sítě a není PASS úplných T043/T048/T051.
+- Skutečný iOS `URLSession` klient, trvalá fronta, build/instalace a fyzické T043/T047–T050 na iPhonu a cizí síti jsou NEPROVEDENO.
 
 ### Rizika
-- Přijímač není trvalá služba; produkční FastAPI, klientská fronta, chunkování a obnova přenosu teprve následují.
+- Receiver je lokální standard-library experiment, ne produkční FastAPI, databáze, trvalá služba ani záloha; Swift package zatím neprovádí síť.
 
 ### Další krok
-- Vyčkat na výslovný pokyn k C02b: velký soubor, souborové části a chování iOS na cizí síti.
+- V druhém checkpointu C02b vytvořit malý nativní iOS harness se souborovými úlohami `URLSession`, trvalou frontou a nejvýše dvěma připravenými částmi.
 
 ### Rozhodnutí
-- C02a zůstává izolovaný standard-library prototyp; produkční serverový cíl zůstává FastAPI v samostatném prostředí Camina
+- Serverová pravda a stav `verifying` mají přednost před lokálním byte progress; bez soukromé sítě není veřejný alternativní endpoint.
 
 ### Navrhované další kroky
-- V C02b ověřit přerušení velkého souboru a obnovu po částech.
-- Ověřit chování skutečného iOS klienta na cizí síti.
-- Zachovat zákaz Funnel a veřejného alternativního endpointu.
+- Připojit iOS harness k privátní HTTPS cestě bez Funnel.
+- Potom řízeně provést T043 a odděleně T047–T050 na fyzickém telefonu.
 
 ### Technický stav checkpointu
-- Implementační commit `4e54f340e2af` byl před tímto uzavíracím zápisem na `origin/main` a živý audit potvrzoval jeho nasazení, smoke 5/5 a připojený runtime.
-- C02a HTTPS smoke: health 200, upload 201, retry 200 bez duplicity, chybný hash 422, konflikt 409, právě jeden objekt a účtenka.
-- Uzavírací dokumentační checkpoint po tomto zápisu může čekat lokálně na samostatně autorizovaný push; sám nemění běžící přijímač ani Cockpit.
+- Python receiver 9/9, Swift transfer core 9/9, C02a regrese 10/10 a plná brána 1704/1704 PASS.
+- Tento checkpoint je pouze lokální; push, nasazení, Tailscale změna ani instalace do iPhonu nejsou součástí kroku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -39,22 +38,22 @@ Typ: Project
 Priorita: 1
 Stav: rozpracovane
 Pripomenout pri startu: ano
-Datum: 2026-09-17 15:19 CEST
+Datum: 2026-09-17 16:13 CEST
 
 Co se resilo:
-Dokončení C02a privátním HTTPS smokem přes dočasnou cestu Tailscale Serve.
+První lokální checkpoint C02b pro obnovitelné části a pravdivý stav iOS fronty.
 
 Co je hotove:
-V0.5 + U15 platí; C01a/C01b/C01c/C02a jsou přijaty v prototypovém rozsahu. C02a přijímač prošel 10/10 testy a privátním HTTPS smokem: správný serverový hash a délka, jedna účtenka, chybný hash, konflikt a identický retry bez duplicity. Dočasná Serve cesta byla odebrána a původní konfigurace obnovena.
+V0.5 + U15 platí; C01a/C01b/C01c/C02a jsou přijaty v prototypovém rozsahu. C02b je zahájené. Lokální receiver podporuje výchozí 8MiB části, skutečný seznam chybějících částí, idempotentní retry a create-only finalizaci po serverovém hashi. Swift model drží pravdivé stavy relaunch/síť/verifying a scope mobilní dávky. Cíleně 28/28 a plná brána 1704/1704 PASS.
 
 Co neni hotove:
-C02b, fyzický klientský přenos z iPhonu/cizí sítě, T043/T048/T051, produkční FastAPI a trvalá služba. Dále plný databázový T061 v C05a, plná integrace T021 v C04, U15 v C03/C04, Viewer C08c–C08f, G0/G1/G8, dlouhodobá spotřeba a terénní připravenost.
+C02b není dokončené: chybí skutečný iOS `URLSession` klient, trvalá fronta, build/instalace a fyzické T043/T047–T050 na iPhonu/cizí síti. Produkční FastAPI a trvalá služba také nejsou hotové. Dále plný databázový T061 v C05a, plná integrace T021 v C04, U15 v C03/C04, Viewer C08c–C08f, G0/G1/G8, dlouhodobá spotřeba a terénní připravenost.
 
 Dalsi krok:
-Vyčkat na výslovný pokyn k C02b: experiment velkého souboru, souborových částí a chování iOS na cizí síti.
+Pokračovat druhým checkpointem C02b: malý nativní iOS harness se souborovými úlohami `URLSession`, trvalou lokální frontou a nejvýše dvěma připravenými částmi.
 
 Navrhovane dalsi kroky:
-Po schválení provést pouze C02b bez veřejného alternativního endpointu. U15 implementovat až v C03/C04 a Viewer v C08c–C08f.
+Po buildu a instalaci provést řízené T043 a T047–T050 přes privátní HTTPS bez veřejného alternativního endpointu. U15 implementovat až v C03/C04 a Viewer v C08c–C08f.
 
 Zmenene nebo relevantni soubory:
 `camino/`, `memory/projects/camino.md`, katalog, registry a kanonický TVBCP.
@@ -688,3 +687,21 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Tailnet HTTPS health 200; upload 201; retry 200 s `created=false`; chybný hash 422; konflikt 409; úložiště 1 objekt + 1 účtenka. Kořen Cockpitu 200, Funnel pouze tailnet, Serve stav po testu shodný s výchozím.
+
+### 2026-09-17 16:13 CEST — C02b zahájeno; části a pravdivá fronta lokálně ověřené
+
+Hotovo:
+- Receiver bezpečně eviduje 8MiB části, po přerušení vrací chybějící indexy a finalizuje jediný objekt až po serverové kontrole celkové délky a SHA-256.
+- Swift model po relaunchi používá serverovou pravdu, bez sítě čeká, 100 % bytů drží jako `verifying` a mobilní povolení nepřenáší na novou dávku.
+
+Rozhodnutí:
+- První checkpoint C02b zafixoval serverový kontrakt a čistou reconciliaci. Skutečný `URLSession` klient a fyzické scénáře navážou; žádný veřejný fallback nevzniká.
+
+Další krok:
+- Vytvořit nativní iOS harness se souborovými úlohami `URLSession`, trvalou frontou a nejvýše dvěma připravenými částmi.
+
+Navrhované další kroky:
+- Po buildu a instalaci provést T043 a odděleně T047–T050 přes privátní HTTPS na fyzickém telefonu a cizí síti.
+
+Technický důkaz:
+- Python C02b 9/9, Swift 9/9, C02a regrese 10/10 a plná projektová brána 1704/1704 PASS. Fyzický iPhone test NEPROVEDENO; push ani nasazení neproběhly.

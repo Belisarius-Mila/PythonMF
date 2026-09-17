@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-17 15:19 CEST
+Aktualizováno: 2026-09-17 16:13 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -30,6 +30,8 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 - Profil hlavní aplikace platí do 22. září 18:16 CEST. G0/G1/G8, terénní připravenost a dlouhodobá spotřeba zůstávají nesplněné; plný databázový T061 se vrátí v C05a. Původní nahrávky i samostatný Camino Test zůstávají zachované.
 - C02a zahájeno výslovným pokynem Míly. Lokální loopback přijímač pro syntetický soubor streamuje do soukromého stagingu, sám ověřuje velikost/SHA-256 a vytváří objekt i účtenku create-only. Identický retry neduplikuje; jiné bajty pod stejným ID jsou konflikt.
 - C02a cílené automatické ověření 10/10 PASS. Následný privátní HTTPS smoke přes dočasnou cestu Tailscale Serve ověřil správný upload, serverový hash a délku, právě jeden objekt a účtenku, chybný hash, konflikt i idempotentní retry. Funnel zůstal vypnutý, Cockpit dostupný a původní Serve konfigurace byla po testu přesně obnovena. C02a je přijaté v prototypovém rozsahu; fyzický iPhone/cizí síť a úplné T043/T048/T051 zůstávají neprovedené.
+- C02b zahájeno výslovným pokynem Míly. První lokální checkpoint přidává výchozí 8MiB části, stav přijatých/chybějících indexů, idempotentní retry a create-only finalizaci po serverovém hashi celku. Swift model po relaunchi věří serverovému snapshotu, bez sítě čeká, neodvozuje `verifiedOnMac` ze 100 % bytů a váže mobilní grant na jednu dávku.
+- C02b receiver 9/9, Swift transfer core 9/9, C02a regrese 10/10 a plná projektová brána 1704/1704 PASS. Skutečný `URLSession` klient, trvalá iOS fronta, build/instalace a fyzické T043/T047–T050 jsou NEPROVEDENO. Tailscale, Funnel, běžící Cockpit ani telefon se v tomto checkpointu neměnily.
 
 
 ## Zdroje a návaznost
@@ -61,13 +63,16 @@ kódu nevyvolává; FAIL se nejdřív doloží a opraví v aktuálním rozsahu.
 - C01b přijato v prototypovém rozsahu. Vítr a plná integrace T021 v C04 čekají; jeden nevysvětlený nereprodukovaný tichý úsek z prvního T059 zůstává rizikem.
 - C01c je přijaté v prototypovém rozsahu po T022/T023. Čtyři fyzicky poslechnuté 55s přechody nevykázaly mezeru ani opakování a dva pády doložily pravdivou obnovu; nejde však o dlouhodobý terénní nebo spotřební test ani o plný databázový T061.
 - C02a je přijaté v prototypovém rozsahu po lokálních testech a privátním HTTPS smoke. Smoke byl spuštěn z téhož Macu přes tailnet DNS; nedokládá iPhone, cizí síť, přerušení velkého souboru ani trvalou službu. Standard-library receiver zůstává izolovaný experiment; produkční cíl je FastAPI v samostatném prostředí Camina.
+- První checkpoint C02b dokládá lokální serverový kontrakt a čistý Swift model, nikoli background přenos na zařízení. Žádný T043/T047–T050 zatím není fyzický PASS; receiver není produkční služba ani záloha.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
 - Podepsaný build není instalace ani fyzická přejímka; vývojový profil je časově omezený. U01–U15 se bez nového rozhodnutí neotevírají.
 
 ## Další krok
 
-Vyčkat na výslovný pokyn k C02b: experiment velkého souboru, souborových částí
-a chování iOS na cizí síti bez veřejného alternativního endpointu.
+Pokračovat druhým checkpointem C02b: vytvořit malý nativní iOS harness se
+souborovými úlohami `URLSession`, trvalou lokální frontou a nejvýše dvěma
+připravenými částmi. Až potom otevřít fyzické T043/T047–T050 přes privátní
+HTTPS bez veřejného alternativního endpointu.
 
 Historický doklad založení:
 Ověření založení: 56/56 testů integrace (54 + 2 profilové testy) a rychlá statická brána OK.
