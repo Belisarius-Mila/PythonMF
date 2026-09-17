@@ -241,4 +241,8 @@ configuration](https://developer.apple.com/documentation/foundation/urlsessionco
 Jeden zdroj se neduplikuje celý. Současně jsou připravené nejvýše dvě 8MiB
 části a serverový snapshot musí přesně odpovídat manifestu. Token patří do
 Keychain, URL musí být HTTPS a žádný veřejný alternativní endpoint neexistuje.
-Simulátor ani arm64 build nejsou fyzický PASS T043/T047–T050.
+Síťová, dokončovací a uživatelská žádost o reconciliaci se koaleskují: impuls,
+který přijde během právě čekajícího průchodu, vyvolá ještě jeden průchod místo
+tichého zahození. Dostupná povolená Wi-Fi smí spustit automatický přenos;
+`Synchronizovat nyní` je ruční provozní záloha. Simulátor ani arm64 build samy
+nejsou fyzický PASS T043/T047–T050.

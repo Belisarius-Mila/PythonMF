@@ -149,4 +149,19 @@ final class TransferStateTests: XCTestCase {
         XCTAssertEqual(excessive.locallySentByteCount, excessive.byteCount)
         XCTAssertEqual(excessive.localByteProgress, 1)
     }
+
+    func testReconcileGateCoalescesRequestsArrivingDuringAnActivePass() {
+        var gate = ReconcileGate()
+
+        XCTAssertTrue(gate.request())
+        XCTAssertTrue(gate.isRunning)
+        XCTAssertTrue(gate.takeNext())
+
+        XCTAssertFalse(gate.request())
+        XCTAssertFalse(gate.request())
+        XCTAssertTrue(gate.takeNext())
+
+        XCTAssertFalse(gate.takeNext())
+        XCTAssertFalse(gate.isRunning)
+    }
 }

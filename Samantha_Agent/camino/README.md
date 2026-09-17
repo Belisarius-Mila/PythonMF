@@ -3,7 +3,7 @@
 Soukromý cestovní deník: offline záznam na iPhonu, soukromé zpracování na Macu
 a pozdější film z povolených zdrojů.
 
-**Stav: autoritativní podklady v0.5 + U15. C01a, C01b, C01c a C02a jsou přijaty v prototypovém rozsahu. C02b harness je podepsaný, nainstalovaný a spuštěný na iPhonu; fyzické T043/T047–T050 ještě neproběhly. Privátní T043 workflow je připravené, ale Serve cesta ani receiver nejsou před samostatným potvrzením aktivní. Trvalá služba ani veřejná cesta neexistují. Camino Viewer je P0, ale podle etap se implementuje až v C08c–C08f.**
+**Stav: autoritativní podklady v0.5 + U15. C01a/C01b/C01c/C02a jsou přijaty v prototypovém rozsahu. C02b harness 0.4.0 (2) je na iPhonu a fyzické T043 prošlo s řízeným výpadkem, doplněním částí a shodou serverového hashe. T047–T050 čekají. Dočasná privátní T043 cesta je po testu ještě aktivní a musí být registrovaně ukončena; Funnel je vypnutý. Trvalá služba ani veřejná cesta neexistují. Camino Viewer je P0, ale podle etap se implementuje až v C08c–C08f.**
 
 - [Podklady v0.5](CAMINO_podklady_v0.5/README_v0.5.md)
 - [Funkční specifikace v0.5](CAMINO_podklady_v0.5/CAMINO_funkcni_specifikace_v0.5.md)
@@ -35,9 +35,10 @@ V Human–Adam se projekt jmenuje **Camino** (`project-camino`).
 
 C02b má lokálně sestavený samostatný iOS `URLSession` harness pro syntetickou
 96MiB dávku, trvalý journal a nejvýše dvě připravené 8MiB části. Podepsaný build
-0.4.0 (1) je nainstalovaný a spuštěný na iPhonu. Další krok je samostatně
-potvrdit dočasný privátní receiver a provést T043; žádný z T043/T047–T050 zatím
-není PASS. C02a/C02b receiver není produkční upload server.
+0.4.0 (2) je nainstalovaný a spuštěný na iPhonu. T043 PASS doložil fyzické
+přerušení sítě, bezpečné doplnění všech 13 částí, shodnou délku/hash a jediný
+objekt daného Assetu. Další jsou T047–T050; C02a/C02b receiver není produkční
+upload server.
 
 Rozbalené podklady v0.4 a v0.5 jsou verzované včetně manifestů. Původní ZIPy
 jsou zachované lokálně a ignorované Gitem; profilové workspaces přebírají

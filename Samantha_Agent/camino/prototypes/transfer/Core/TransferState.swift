@@ -109,6 +109,35 @@ public enum TransferReconciler {
     }
 }
 
+/// Coalesces reconciliation requests without losing one that arrives while a
+/// previous pass is awaiting the network. The caller that receives `true`
+/// from `request()` owns the drain loop and calls `takeNext()` until it returns
+/// `false`.
+public struct ReconcileGate: Equatable, Sendable {
+    public private(set) var isRunning = false
+    private var isRequested = false
+
+    public init() {}
+
+    @discardableResult
+    public mutating func request() -> Bool {
+        isRequested = true
+        guard !isRunning else { return false }
+        isRunning = true
+        return true
+    }
+
+    public mutating func takeNext() -> Bool {
+        guard isRunning else { return false }
+        guard isRequested else {
+            isRunning = false
+            return false
+        }
+        isRequested = false
+        return true
+    }
+}
+
 public struct CellularBatchGrant: Equatable, Sendable {
     public private(set) var batchID: UUID?
 

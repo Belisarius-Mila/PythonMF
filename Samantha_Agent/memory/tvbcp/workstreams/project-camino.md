@@ -1,33 +1,33 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno po druhém bezpečném rollbacku a TLS opravě: 2026-09-17 20:15 CEST
+- Aktualizováno po fyzickém T043 a opravě fronty: 2026-09-17 21:01 CEST
 
 ### Hotovo
-- C02b receiver obnovuje syntetický přenos po 8MiB částech, doplní jen chybějící indexy a finalizuje jediný objekt až po serverové kontrole celkové délky a SHA-256.
-- Samostatný iOS harness používá souborové background `URLSession` úlohy, trvalý journal, Keychain, přesné znovuporovnání se serverem a nejvýše dvě připravené 8MiB části. Nečte Fotky, mikrofon ani Camino Audio.
-- Podepsaný build `Camino Transfer Test` 0.4.0 (1), strict podpis, instalace a spuštění na iPhonu 14 Plus / iOS 26.6.1 prošly. Camino Audio zůstalo nedotčené.
-- První start failnul na kolizi `app/email`, druhý po opraveném receiveru na chybějícím Python CA řetězci; oba rollbacky odebraly trasu a proces. Modulový entrypoint i explicitní systémový CA bundle jsou opravené; tailnet health vrátil 200 a plná brána 1711/1711 prošla. Receiver ani Serve cesta nejsou aktivní.
+- T043 PASS v rozsahu syntetického C02b: Letový režim přerušil upload při 0/13 serverových částech; po obnově sítě vznikl jediný objekt daného Assetu, 13/13 částí, 100 663 553 B a shodný SHA-256.
+- Fyzický průchod odhalil zahozené souběžné impulsy reconciliace a zdánlivě mrtvé tlačítko. Build `Camino Transfer Test` 0.4.0 (2) požadavky koaleskuje; následná 96MiB dávka doběhla automaticky bez dalšího klepnutí.
+- Build 2 je strict podepsaný, nainstalovaný a spuštěný na iPhonu 14 Plus / iOS 26.6.1. Camino Audio zůstalo nedotčené; profil harnessu platí do 24. září 2026.
+- Registrovaný audit potvrzuje tři různé ověřené syntetické Assety/účtenky, každý 100 663 553 B; celkem 301 990 659 B. Funnel je vypnutý a privátní cesta/receiver ještě čekají na potvrzené ukončení.
 
 ### Otevřeno
-- Fyzické T043/T047–T050 na iPhonu a cizí síti jsou NEPROVEDENO.
+- Fyzické T047–T050 jsou NEPROVEDENO. Přesné přerušení sítě nebylo po opravě zopakováno na buildu 2.
 
 ### Rizika
-- Receiver je lokální standard-library experiment, ne produkční FastAPI, databáze, trvalá služba ani záloha. Instalace a launch neprokazují background plánování, zámek, force quit ani přechody skutečné sítě.
+- Receiver je lokální standard-library experiment, ne produkční FastAPI, databáze, trvalá služba ani záloha. T043 neprokazuje zámek, force quit, cizí Wi-Fi, skutečná mobilní data ani zadrženou finalizaci.
 
 ### Další krok
-- Zopakovat už potvrzený přesný T043 workflow, vložit URL a dočasný token do otevřeného harnessu a provést řízené přerušení/obnovu sítě.
+- Po samostatném potvrzení spustit registrovaný `camino_c02b_t043_stop`; potom připravit oddělené T047 se zámkem a force quit.
 
 ### Rozhodnutí
-- Serverová pravda a stav `verifying` mají přednost před lokálním byte progress. Force quit nic neslibuje; po ručním relaunchi se fronta znovu porovná. Bez soukromé sítě není veřejný alternativní endpoint.
+- Serverová pravda a stav `verifying` mají přednost před lokálním byte progress. Dostupná povolená Wi-Fi může spustit automatickou synchronizaci; ruční tlačítko je provozní záloha. Souběžný impuls se koaleskuje, nezahazuje.
 
 ### Navrhované další kroky
-- Přes dočasnou privátní HTTPS cestu bez Funnel řízeně provést T043 a po důkazu trasu přesně odebrat.
-- T047–T050 provést odděleně až po vyhodnocení T043.
+- Přesně odebrat dočasnou privátní cestu a porovnat Serve s výchozím stavem.
+- T047–T050 provést odděleně; T047 nejprve zámek, potom force quit a ruční relaunch.
 
 ### Technický stav checkpointu
-- Python receiver 10/10, Swift transfer core 18/18, C02a regrese 10/10, UI 1/1, arm64 build, podepsání, strict kontrola, instalace a launch PASS; regresní entrypoint/TLS testy a plná brána po opravě workflow 1711/1711 PASS.
-- Vývojový profil transfer harnessu platí do 24. září 2026. Push ani nasazení neproběhly; Tailscale konfigurace je stále ve výchozím stavu a čeká na samostatné potvrzení workflow.
+- Swift transfer core 19/19, T043 ovladač + oba receivery 28/28 a UI 1/1 PASS; podepsaný build 2, strict kontrola, instalace a launch PASS. Plná projektová brána 1713/1713 PASS.
+- Push ani nasazení neproběhly. Dočasná privátní Serve cesta je aktivní, Funnel vypnutý; ukončení zůstává samostatně potvrzovanou operací.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -61,11 +61,11 @@ je vyloučeno; celé `Do deníku` je po synchronizaci Viewer-eligible.
 - Pět nedokončených pokusů z pádů zůstalo zachováno. Profil hlavní aplikace do 22. září 18:16 CEST. Krátký fyzický smoke buildu 4 PASS podle Míly: bez pádu, rostoucí čas i ukazatel a přehratelný nový záznam.
 - T022 PASS ve dvou odlišných fázích otevřené části: klidový relaunch, pravdivé označení obnoveného rozsahu a přehratelné uzavřené části. T023 PASS přes čtyři poslechnuté 55s hranice bez opakování či nevysvětlené díry. C01c je přijato v prototypovém rozsahu; G0/G1/G8 a terénní připravenost zůstávají nesplněné.
 - C02a minimální receiver prošel 10/10 automatickými testy i privátním HTTPS smoke přes dočasnou Tailscale Serve cestu. Správný upload vytvořil právě jeden objekt a účtenku, retry neduplikoval, chybný hash a konflikt byly odmítnuty. Funnel zůstal vypnutý, Cockpit dostupný a původní Serve stav byl obnoven.
-- C02b má druhý lokální checkpoint. Receiver podporuje obnovitelné 8MiB části; samostatný iOS harness má souborové background úlohy, trvalý journal, nejvýše dvě připravené části, Keychain a fail-closed serverovou reconciliaci. Python 10/10, Swift 18/18, UI 1/1, arm64 build a plná brána 1705/1705 PASS.
-- `Camino Transfer Test` 0.4.0 (1) je na iPhonu. Dva starty bezpečně vrátily Serve; modulový entrypoint i systémový CA bundle jsou opravené a brána 1711/1711 PASS. Serve cesta ani receiver nyní neběží.
+- C02b má fyzický PASS T043 v syntetickém rozsahu. Letový režim zachytil relaci s 0/13 přijatými částmi; po návratu sítě vznikl jediný objekt daného Assetu, 13/13, 100 663 553 B a shodný SHA-256.
+- `Camino Transfer Test` 0.4.0 (2) koaleskuje souběžné impulsy reconciliace a následná celá dávka doběhla automaticky bez dalšího klepnutí. Build 2 je strict podepsaný, nainstalovaný a spuštěný. Swift 19/19, T043 ovladač + oba receivery 28/28 a UI 1/1 PASS. Serve cesta/receiver po důkazu ještě běží; Funnel je vypnutý a ukončení čeká na samostatné potvrzení.
 
 
-Zopakovat už potvrzený přesný registrovaný T043 workflow, vložit URL a dočasný token do otevřeného harnessu a provést první řízený T043 přes privátní HTTPS. C01c ani C02a dále nerozšiřovat bez nového důvodu.
+Po samostatném potvrzení registrovaně ukončit T043 receiver/Serve cestu a ověřit přesnou obnovu výchozí konfigurace. Potom odděleně provést T047; C01c ani C02a dále nerozšiřovat bez nového důvodu.
 
 ## Rizika
 
@@ -73,7 +73,7 @@ Zopakovat už potvrzený přesný registrovaný T043 workflow, vložit URL a do�
 - C01b přijato v prototypovém rozsahu. Vítr a plná integrace T021 v C04 čekají; jeden nevysvětlený nereprodukovaný tichý úsek z prvního T059 zůstává rizikem.
 - C01c je přijato v prototypovém rozsahu po T022/T023. Výsledek nepokrývá dlouhodobou terénní spotřebu ani plný databázový a serverový T061, který zůstává C05a.
 - C02a je přijato jen v omezeném serverovém prototypu. Smoke z téhož Macu přes tailnet DNS není důkaz iPhone klienta, cizí sítě, přerušení velkého souboru, trvalé služby ani úplných T043/T048/T051.
-- C02b ověřuje kompilaci, lokální journal, UI, podpis, instalaci a launch, ne skutečné background plánování na zařízení. T043 a T047–T050 zůstávají fyzicky NEPROVEDENO do řízeného testu iOS klienta na privátní síti.
+- C02b má T043 PASS, ale přesný výpadek nebyl po opravě zopakován na buildu 2. T047–T050 zůstávají fyzicky NEPROVEDENO; receiver není produkční služba ani záloha.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
 - Instalace a launch nejsou fyzická přejímka přenosu; vývojový profil je časově omezený do 24. září 2026. U01–U15 se bez nového rozhodnutí neotevírají.
 
@@ -815,3 +815,20 @@ Další krok:
 
 Technický důkaz:
 - TLS regresní test zachovává `ssl.create_default_context` a načítá systémový CA bundle. Cílená sada 32/32 a plná projektová brána 1711/1711 PASS; Serve má opět jen původní handler a port 8765 neposlouchá.
+
+### 2026-09-17 21:01 CEST — T043 PASS; fyzický zádrhel fronty opraven
+
+Hotovo:
+- T043 fyzicky přerušil upload Letovým režimem při klientských 5 %, 0/13 potvrzených částech a 2/2 připravených. Mac doložil relaci `uploading` s 0/13 přijatými částmi a bez nového finálního objektu.
+- Po návratu sítě bylo přijato 13/13 částí; pro testovaný Asset vznikl jediný objekt a účtenka, oba 100 663 553 B, se shodným SHA-256. T043 je PASS v rozsahu syntetického C02b experimentu.
+- Build 0.4.0 (2) opravuje zahozené souběžné impulsy reconciliace. Je strict podepsaný, nainstalovaný a spuštěný; následná celá dávka doběhla automaticky bez dalšího klepnutí.
+
+Rozhodnutí:
+- Dostupná povolená Wi-Fi může spustit přenos automaticky; `Synchronizovat nyní` je ruční provozní záloha. Souběžné impulsy se koaleskují místo tichého zahození.
+
+Další krok:
+- Po samostatném potvrzení registrovaně ukončit T043 receiver a Serve cestu; poté odděleně provést T047 se zámkem a force quit.
+
+Technický důkaz:
+- Živý receiver eviduje tři rozdílné ověřené syntetické Assety/účtenky, každý 13/13 a 100 663 553 B; celkem 301 990 659 B. Funnel je vypnutý.
+- Swift 19/19, T043 ovladač + oba receivery 28/28 a UI 1/1 PASS; podepsaný build 2, strict podpis, instalace a launch PASS. Plná projektová brána 1713/1713 PASS.

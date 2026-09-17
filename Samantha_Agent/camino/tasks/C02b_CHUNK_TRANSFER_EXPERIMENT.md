@@ -70,8 +70,17 @@ trvalou službu, Tailscale konfiguraci ani veřejný endpoint. Funnel se nezapí
 Jediný syntetický zdroj zůstává zachovaný a současně existují nejvýše dvě
 připravené části; nejde o důkaz chování skutečného velkého videa.
 
-Podepsaný build 0.4.0 (1), strict podpis, instalace a spuštění na iPhonu prošly.
+Podepsaný build 0.4.0 (2), strict podpis, instalace a spuštění na iPhonu prošly.
 Dočasnou privátní cestu řídí potvrzovaný registrovaný workflow, který zachová
 kořen Cockpitu, nezapne Funnel a po testu porovná původní Serve konfiguraci.
-T043 a T047–T050 přesto zůstávají fyzicky NEPROVEDENO: instalace a launch samy
-nedokládají background přenos, přerušení, zámek, force quit ani cizí síť.
+
+T043 fyzicky prošel na iPhonu přes privátní HTTPS. Při Letovém režimu klient
+ukázal 5 % lokálních bytů, 0/13 serverem přijatých částí a 2/2 připravené;
+Mac současně evidoval nedokončenou relaci s 0/13 částmi. Po obnovení sítě se
+doplnilo 13/13, vznikl jediný objekt daného Assetu o 100 663 553 B a serverový
+SHA-256 se shodoval. Průchod odhalil, že souběžný callback mohl být zahozen a
+ruční tlačítko během automatické reconciliace působilo mrtvě. Build 2 impulsy
+koaleskuje; následná celá dávka doběhla automaticky bez dalšího klepnutí.
+
+T047–T050 zůstávají fyzicky NEPROVEDENO: T043 samo nedokládá zámek, force quit,
+cizí síť, scope skutečných mobilních dat ani zadrženou finalizaci.

@@ -526,25 +526,34 @@ def _evidence(state: Mapping[str, Any]) -> dict[str, Any]:
         "verified_match": False,
         "byte_count": 0,
     }
-    if len(object_paths) != 1 or len(receipt_paths) != 1:
+    if not object_paths or len(object_paths) != len(receipt_paths):
         return result
-    try:
-        receipt = json.loads(receipt_paths[0].read_text(encoding="utf-8"))
-    except (json.JSONDecodeError, OSError):
+    objects_by_id = {path.stem: path for path in object_paths}
+    receipts_by_id = {path.stem: path for path in receipt_paths}
+    if objects_by_id.keys() != receipts_by_id.keys():
         return result
-    if not isinstance(receipt, dict):
-        return result
-    digest = hashlib.sha256()
-    with object_paths[0].open("rb") as handle:
-        for block in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(block)
-    byte_count = object_paths[0].stat().st_size
-    result["byte_count"] = byte_count
-    result["verified_match"] = bool(
-        receipt.get("state") == "verified"
-        and receipt.get("byte_count") == byte_count
-        and receipt.get("sha256") == digest.hexdigest()
-    )
+    verified_byte_count = 0
+    for asset_id, object_path in objects_by_id.items():
+        try:
+            receipt = json.loads(receipts_by_id[asset_id].read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            return result
+        if not isinstance(receipt, dict) or receipt.get("asset_id") != asset_id:
+            return result
+        digest = hashlib.sha256()
+        with object_path.open("rb") as handle:
+            for block in iter(lambda: handle.read(1024 * 1024), b""):
+                digest.update(block)
+        byte_count = object_path.stat().st_size
+        if not (
+            receipt.get("state") == "verified"
+            and receipt.get("byte_count") == byte_count
+            and receipt.get("sha256") == digest.hexdigest()
+        ):
+            return result
+        verified_byte_count += byte_count
+    result["byte_count"] = verified_byte_count
+    result["verified_match"] = True
     return result
 
 

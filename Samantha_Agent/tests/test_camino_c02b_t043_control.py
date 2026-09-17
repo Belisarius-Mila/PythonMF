@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import stat
 import subprocess
@@ -283,6 +284,65 @@ class CaminoC02bT043ControlTests(unittest.TestCase):
                 ],
                 calls,
             )
+
+    def test_evidence_verifies_multiple_distinct_assets_without_false_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            receiver_root = Path(temp_dir) / "receiver"
+            objects = receiver_root / "objects"
+            receipts = receiver_root / "receipts"
+            objects.mkdir(parents=True)
+            receipts.mkdir()
+            expected_bytes = 0
+            for asset_id, body in (("asset-one", b"first"), ("asset-two", b"second")):
+                (objects / f"{asset_id}.bin").write_bytes(body)
+                (receipts / f"{asset_id}.json").write_text(
+                    json.dumps(
+                        {
+                            "schema": 1,
+                            "asset_id": asset_id,
+                            "byte_count": len(body),
+                            "sha256": hashlib.sha256(body).hexdigest(),
+                            "chunk_count": 1,
+                            "state": "verified",
+                            "content_kind": "synthetic",
+                        }
+                    ),
+                    encoding="utf-8",
+                )
+                expected_bytes += len(body)
+
+            evidence = control._evidence({"receiver_root": str(receiver_root)})
+
+            self.assertEqual(2, evidence["object_count"])
+            self.assertEqual(2, evidence["receipt_count"])
+            self.assertTrue(evidence["verified_match"])
+            self.assertEqual(expected_bytes, evidence["byte_count"])
+
+    def test_evidence_fails_closed_when_one_asset_receipt_does_not_match(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            receiver_root = Path(temp_dir) / "receiver"
+            objects = receiver_root / "objects"
+            receipts = receiver_root / "receipts"
+            objects.mkdir(parents=True)
+            receipts.mkdir()
+            body = b"source"
+            (objects / "asset-one.bin").write_bytes(body)
+            (receipts / "asset-one.json").write_text(
+                json.dumps(
+                    {
+                        "asset_id": "asset-one",
+                        "byte_count": len(body),
+                        "sha256": "0" * 64,
+                        "state": "verified",
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            evidence = control._evidence({"receiver_root": str(receiver_root)})
+
+            self.assertFalse(evidence["verified_match"])
+            self.assertEqual(0, evidence["byte_count"])
 
 
 if __name__ == "__main__":

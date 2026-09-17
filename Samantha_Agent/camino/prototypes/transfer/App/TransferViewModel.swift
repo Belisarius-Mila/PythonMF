@@ -23,7 +23,7 @@ import Foundation
     private let monitor: TransferNetworkMonitor
     private var path = NetworkPathState(available: false, expensive: false)
     private var partialSent: [Int: Int64] = [:]
-    private var reconciling = false
+    private var reconcileGate = ReconcileGate()
 
     private init() {
         do {
@@ -153,7 +153,7 @@ import Foundation
     }
 
     func synchronize() async {
-        await reconcile(userInitiated: true)
+        await reconcile()
     }
 
     func pause() async {
@@ -173,11 +173,11 @@ import Foundation
         try? store.save(current)
         journal = current
         await driver.resumeAll()
-        await reconcile(userInitiated: true)
+        await reconcile()
     }
 
     func applicationBecameActive() {
-        Task { await reconcile(userInitiated: false) }
+        Task { await reconcile() }
     }
 
     func reconnectBackgroundSession(identifier: String) {
@@ -198,7 +198,7 @@ import Foundation
                 setWaiting("Přenos části byl přerušen; skutečný stav se ověří po dalším spojení.")
             } else if let statusCode, (200...299).contains(statusCode) {
                 try? preparer.removePrepared(assetID: journal?.assetID ?? "", index: index)
-                Task { await reconcile(userInitiated: false) }
+                Task { await reconcile() }
             } else {
                 setNeedsAttention("Server část nepotvrdil; originál a připravená část zůstaly zachované.")
             }
@@ -215,7 +215,7 @@ import Foundation
                 ? "Čeká na Wi-Fi; mobilní data nejsou pro tuto dávku povolena."
                 : "Soukromá síť není dosažitelná; veřejný fallback neexistuje.")
         } else if !wasPermitted && networkPermitted {
-            Task { await reconcile(userInitiated: false) }
+            Task { await reconcile() }
         }
     }
 
@@ -223,8 +223,17 @@ import Foundation
         path.available && (!path.expensive || cellularAllowed)
     }
 
-    private func reconcile(userInitiated: Bool) async {
-        guard !reconciling, var current = journal,
+    private func reconcile() async {
+        guard reconcileGate.request() else { return }
+        isBusy = true
+        defer { isBusy = false }
+        while reconcileGate.takeNext() {
+            await reconcileOnce()
+        }
+    }
+
+    private func reconcileOnce() async {
+        guard var current = journal,
               current.phase != .paused, current.phase != .verified else { return }
         guard networkPermitted else {
             setWaiting(path.expensive && !current.cellularAllowed
@@ -232,9 +241,6 @@ import Foundation
                 : "Soukromá síť není dosažitelná; veřejný fallback neexistuje.")
             return
         }
-        reconciling = true
-        isBusy = userInitiated
-        defer { reconciling = false; isBusy = false }
         do {
             let api = try makeAPI()
             _ = try await api.createSession(for: current)

@@ -745,3 +745,17 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   vlastní synchronizovaný `Sendable` stav. Nevypínat dynamické kontroly aktorů.
 - Ověření: shodný podpis v pěti crash reportech, 52 Swift testů, 2 UI testy,
   arm64 build a strict podpis; fyzický Start/Stop zůstává samostatnou bránou.
+
+### 2026-09-17 — Asynchronní reconciliace nesmí zahodit souběžný impuls
+
+- Kontext: Camino C02b, background `URLSession` fronta po fyzickém výpadku sítě.
+- Problém: jediný příznak `reconciling` odmítl callback, který dorazil během
+  čekajícího serverového dotazu. Automatický průchod přitom neoznačil UI jako
+  zaneprázdněné; ruční tlačítko vypadalo aktivně, ale klepnutí nic neudělalo a
+  fronta mohla zůstat stát mezi dvojicemi částí.
+- Řešení: žádosti koaleskovat do jednoho příznaku čekajícího dalšího průchodu a
+  držet pravdivý busy stav po celou dobu drain loopu. Dostupná Wi-Fi smí spustit
+  automatiku; ruční tlačítko je fallback, nikoli paralelní worker.
+- Ověření: regresní test zachycuje žádost během aktivního průchodu; Swift 19/19.
+  Podepsaný build 0.4.0 (2) po instalaci sám dokončil fyzickou 96MiB dávku 13/13
+  bez dalšího klepnutí, se shodnou délkou a serverovým SHA-256.
