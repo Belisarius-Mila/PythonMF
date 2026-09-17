@@ -1,8 +1,9 @@
 # C02b — experiment částí a pravdivého stavu přenosu
 
-Zahájeno 2026-09-17 výslovným pokynem Míly. Tento první checkpoint staví
-lokálně ověřitelný přenosový kontrakt a čistý stavový model klienta. Není to
-ještě fyzický iPhone test ani dokončené C02b.
+Zahájeno 2026-09-17 výslovným pokynem Míly. První checkpoint postavil lokálně
+ověřitelný přenosový kontrakt a čistý stavový model klienta. Druhý checkpoint
+přidal samostatnou nativní iOS testovací aplikaci. Není to ještě fyzický iPhone
+test ani dokončené C02b.
 
 ## Cíl prvního checkpointu
 
@@ -36,24 +37,39 @@ Přijatá část je uznána až po kontrole délky, serverovém SHA-256 a bezpe�
 zápisu dat i vedlejší účtenky. Stav `verifying` je uložen před závěrečným
 ověřením. Teprve dokončený serverový objekt a účtenka dovolí `verified`.
 
-## Klientský stavový model
+## Druhý checkpoint — nativní iOS harness
 
-Swift package `camino/prototypes/transfer` zatím neprovádí síť. Definuje
-reconciliaci lokální fronty se serverovým snapshotem:
+Samostatná aplikace `Camino Transfer Test` (`cz.pythonmf.camino.transfer.prototype`)
+pracuje pouze se syntetickým 96MiB souborem. Nemá přístup k Fotkám, mikrofonu
+ani datům Camino Audio. Používá:
 
-- po relaunchi je autoritativní serverový seznam přijatých částí;
-- bez sítě nebo snapshotu se nepoužije staré lokální zelené potvrzení;
-- lokálních 100 % bytů stále znamená `Ověřuji`, dokud server nepotvrdí objekt;
-- `Ověřeno na Macu` vzniká pouze ze serverového `verified`;
-- povolení mobilních dat platí jen pro stejné `batchID`.
+- jednu background `URLSession` se stabilním identifikátorem a uploady výhradně
+  ze souborů;
+- trvalý JSON journal, syntetický zdroj a nejvýše dvě připravené 8MiB části;
+- bearer token uložený v Keychain a pouze explicitní privátní HTTPS základ;
+- serverový seznam přijatých částí jako autoritu po relaunchi;
+- pravdivé stavy `Čeká na síť`, `Ověřuji` a `Ověřeno na Macu`;
+- mobilní souhlas omezený na konkrétní již existující `batchID`.
+
+Snapshot serveru je přijímán fail-closed: identita, počet částí i přesné
+rozdělení přijatých/chybějících indexů musí odpovídat místnímu journalu.
+`verified` s chybějící nebo cizí částí se odmítne.
+
+Po uživatelském nuceném ukončení aplikace se neslibuje pokračování na pozadí.
+Při dalším ručním spuštění se znovu vytvoří relace se stejným identifikátorem a
+fronta se porovná se serverem. To odpovídá popsanému chování background session:
+upload musí být souborový a uživatelský force quit zruší přenosy bez
+automatického relaunchu. [Apple: background configuration](https://developer.apple.com/documentation/foundation/urlsessionconfiguration/background%28withidentifier%3A%29),
+[Apple: background downloads/uploads](https://developer.apple.com/documentation/foundation/downloading-files-in-the-background),
+[Apple: předání background událostí](https://developer.apple.com/documentation/uikit/uiapplicationdelegate/application%28_%3Ahandleeventsforbackgroundurlsession%3Acompletionhandler%3A%29).
 
 ## Hranice a zastavení
 
-Tento checkpoint nepřidává `URLSession`, iOS UI, čtení reálných videí,
-produkční FastAPI, databázi, trvalou službu, Tailscale konfiguraci ani veřejný
-endpoint. Funnel se nezapíná. Nevzniká druhá kopie celého videa na klientu;
-skutečné souborové úlohy a omezení nejvýše několika připravených částí musí
-doložit další klientský checkpoint.
+Tento checkpoint nepřidává čtení reálných videí, produkční FastAPI, databázi,
+trvalou službu, Tailscale konfiguraci ani veřejný endpoint. Funnel se nezapíná.
+Jediný syntetický zdroj zůstává zachovaný a současně existují nejvýše dvě
+připravené části; nejde o důkaz chování skutečného velkého videa.
 
-T043 a T047–T050 zůstávají fyzicky NEPROVEDENO. Automatické testy dokazují jen
-serverový kontrakt a čistou logiku pravdivých stavů.
+T043 a T047–T050 zůstávají fyzicky NEPROVEDENO. Simulátor a arm64 build dokazují
+kompilaci, trvalou lokální frontu a UI nad syntetickými daty, nikoli chování
+background přenosu na skutečném telefonu nebo cizí síti.

@@ -9,6 +9,7 @@ import threading
 import unittest
 from contextlib import contextmanager
 from pathlib import Path
+from unittest import mock
 
 from app.camino_chunk_receiver import (
     DEFAULT_CHUNK_BYTES,
@@ -359,6 +360,35 @@ class CaminoChunkReceiverTests(unittest.TestCase):
         with self.assertRaises(ReceiverError) as absent:
             self.store.status("absent")
         self.assertEqual(absent.exception.code, "upload_session_not_found")
+
+    def test_controlled_read_delay_is_proportional_and_rejects_negative_values(self) -> None:
+        with self.assertRaisesRegex(ValueError, "positive"):
+            ChunkedSyntheticAssetStore(self.root, read_delay_seconds_per_mib=-1)
+
+        delayed = ChunkedSyntheticAssetStore(
+            self.root,
+            max_bytes=1024,
+            max_chunk_bytes=1024,
+            read_delay_seconds_per_mib=2,
+        )
+        content = b"x" * 1024
+        delayed.create_session(
+            asset_id="slow-read",
+            byte_count=len(content),
+            sha256=digest(content),
+            chunk_size=len(content),
+        )
+        with mock.patch("app.camino_chunk_receiver.time.sleep") as sleeper:
+            delayed.receive_chunk(
+                asset_id="slow-read",
+                chunk_index=0,
+                expected_sha256=digest(content),
+                content_length=len(content),
+                stream=io.BytesIO(content),
+            )
+
+        sleeper.assert_called_once()
+        self.assertAlmostEqual(sleeper.call_args.args[0], 2 / 1024)
 
 
 if __name__ == "__main__":

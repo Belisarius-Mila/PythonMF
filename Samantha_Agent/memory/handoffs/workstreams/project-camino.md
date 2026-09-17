@@ -1,32 +1,32 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno po prvním checkpointu C02b: 2026-09-17 16:13 CEST
+- Aktualizováno po druhém checkpointu C02b: 2026-09-17 16:53 CEST
 
 ### Hotovo
 - C02b receiver obnovuje syntetický přenos po 8MiB částech, doplní jen chybějící indexy a finalizuje jediný objekt až po serverové kontrole celkové délky a SHA-256.
-- Swift model po relaunchi věří serverovému snapshotu, rozlišuje `verifying` od `verifiedOnMac` a omezuje mobilní souhlas na jednu existující dávku.
-- Cílené ověření 28/28 a plná projektová brána 1704/1704 prošly.
+- Samostatný iOS harness používá souborové background `URLSession` úlohy, trvalý journal, Keychain, přesné znovuporovnání se serverem a nejvýše dvě připravené 8MiB části. Nečte Fotky, mikrofon ani Camino Audio.
+- Python receiver 10/10, Swift core 18/18, UI 1/1, nepodepsaný arm64 build a plná projektová brána 1705/1705 prošly.
 
 ### Otevřeno
-- Skutečný iOS `URLSession` klient, trvalá fronta, build/instalace a fyzické T043/T047–T050 na iPhonu a cizí síti jsou NEPROVEDENO.
+- Podepsaný build, instalace a fyzické T043/T047–T050 na iPhonu a cizí síti jsou NEPROVEDENO.
 
 ### Rizika
-- Receiver je lokální standard-library experiment, ne produkční FastAPI, databáze, trvalá služba ani záloha; Swift package zatím neprovádí síť.
+- Receiver je lokální standard-library experiment, ne produkční FastAPI, databáze, trvalá služba ani záloha. Simulátor neprokazuje background plánování, zámek, force quit ani přechody skutečné sítě.
 
 ### Další krok
-- V druhém checkpointu C02b vytvořit malý nativní iOS harness se souborovými úlohami `URLSession`, trvalou frontou a nejvýše dvěma připravenými částmi.
+- Připojit a odemknout iPhone, lokálně podepsat a nainstalovat oddělený harness bez odinstalace Camino Audio; potom provést první fyzický T043 přes privátní HTTPS.
 
 ### Rozhodnutí
-- Serverová pravda a stav `verifying` mají přednost před lokálním byte progress; bez soukromé sítě není veřejný alternativní endpoint.
+- Serverová pravda a stav `verifying` mají přednost před lokálním byte progress. Force quit nic neslibuje; po ručním relaunchi se fronta znovu porovná. Bez soukromé sítě není veřejný alternativní endpoint.
 
 ### Navrhované další kroky
-- Připojit iOS harness k privátní HTTPS cestě bez Funnel.
-- Potom řízeně provést T043 a odděleně T047–T050 na fyzickém telefonu.
+- Podepsat a nainstalovat `Camino Transfer Test` na fyzický telefon.
+- Přes dočasnou privátní HTTPS cestu bez Funnel řízeně provést T043 a odděleně T047–T050.
 
 ### Technický stav checkpointu
-- Python receiver 9/9, Swift transfer core 9/9, C02a regrese 10/10 a plná brána 1704/1704 PASS.
-- Tento checkpoint je pouze lokální; push, nasazení, Tailscale změna ani instalace do iPhonu nejsou součástí kroku.
+- Python receiver 10/10, Swift transfer core 18/18, C02a regrese 10/10, UI 1/1, nepodepsaný arm64 build a plná brána 1705/1705 PASS.
+- Tento checkpoint je pouze lokální; push, nasazení, Tailscale změna, podepsání ani instalace do iPhonu nejsou součástí kroku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -38,22 +38,22 @@ Typ: Project
 Priorita: 1
 Stav: rozpracovane
 Pripomenout pri startu: ano
-Datum: 2026-09-17 16:13 CEST
+Datum: 2026-09-17 16:53 CEST
 
 Co se resilo:
-První lokální checkpoint C02b pro obnovitelné části a pravdivý stav iOS fronty.
+Druhý lokální checkpoint C02b: samostatný souborový iOS transfer harness.
 
 Co je hotove:
-V0.5 + U15 platí; C01a/C01b/C01c/C02a jsou přijaty v prototypovém rozsahu. C02b je zahájené. Lokální receiver podporuje výchozí 8MiB části, skutečný seznam chybějících částí, idempotentní retry a create-only finalizaci po serverovém hashi. Swift model drží pravdivé stavy relaunch/síť/verifying a scope mobilní dávky. Cíleně 28/28 a plná brána 1704/1704 PASS.
+V0.5 + U15 platí; C01a/C01b/C01c/C02a jsou přijaty v prototypovém rozsahu. C02b má receiver i samostatný iOS harness pro syntetickou 96MiB dávku. Harness používá background uploady ze souborů, trvalý journal, Keychain, serverovou autoritu, scope mobilní dávky a nejvýše dvě připravené části. Python 10/10, Swift 18/18, UI 1/1, arm64 build a plná brána 1705/1705 PASS.
 
 Co neni hotove:
-C02b není dokončené: chybí skutečný iOS `URLSession` klient, trvalá fronta, build/instalace a fyzické T043/T047–T050 na iPhonu/cizí síti. Produkční FastAPI a trvalá služba také nejsou hotové. Dále plný databázový T061 v C05a, plná integrace T021 v C04, U15 v C03/C04, Viewer C08c–C08f, G0/G1/G8, dlouhodobá spotřeba a terénní připravenost.
+C02b není dokončené: chybí podepsaný build, instalace a fyzické T043/T047–T050 na iPhonu/cizí síti. Produkční FastAPI a trvalá služba také nejsou hotové. Dále plný databázový T061 v C05a, plná integrace T021 v C04, U15 v C03/C04, Viewer C08c–C08f, G0/G1/G8, dlouhodobá spotřeba a terénní připravenost.
 
 Dalsi krok:
-Pokračovat druhým checkpointem C02b: malý nativní iOS harness se souborovými úlohami `URLSession`, trvalou lokální frontou a nejvýše dvěma připravenými částmi.
+Připojit a odemknout iPhone, lokálně podepsat a nainstalovat `Camino Transfer Test` bez odinstalace Camino Audio; potom zahájit řízený T043.
 
 Navrhovane dalsi kroky:
-Po buildu a instalaci provést řízené T043 a T047–T050 přes privátní HTTPS bez veřejného alternativního endpointu. U15 implementovat až v C03/C04 a Viewer v C08c–C08f.
+Po instalaci provést řízené T043 a T047–T050 přes privátní HTTPS bez veřejného alternativního endpointu. U15 implementovat až v C03/C04 a Viewer v C08c–C08f.
 
 Zmenene nebo relevantni soubory:
 `camino/`, `memory/projects/camino.md`, katalog, registry a kanonický TVBCP.
@@ -705,3 +705,22 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Python C02b 9/9, Swift 9/9, C02a regrese 10/10 a plná projektová brána 1704/1704 PASS. Fyzický iPhone test NEPROVEDENO; push ani nasazení neproběhly.
+
+### 2026-09-17 16:53 CEST — C02b druhý checkpoint; iOS harness připraven k instalaci
+
+Hotovo:
+- Samostatná aplikace `Camino Transfer Test` vytváří pouze syntetickou dávku 96 MiB + 257 B. Má trvalý journal, Keychain token, jednu background `URLSession`, souborové uploady a nejvýše dvě připravené 8MiB části.
+- Po relaunchi znovu porovnává server, 100 % bytů nevydává za ověření a mobilní povolení váže jen na aktuální dávku. Serverový snapshot s cizími či chybějícími indexy odmítá.
+
+Rozhodnutí:
+- Harness má vlastní bundle ID a nepřistupuje k Fotkám, mikrofonu ani kontejneru Camino Audio. Force quit neslibuje background pokračování; po ručním návratu proběhne reconciliace.
+
+Další krok:
+- Připojit a odemknout iPhone, lokálně podepsat a nainstalovat harness bez odinstalace Camino Audio; potom provést první řízený T043 přes privátní HTTPS.
+
+Navrhované další kroky:
+- Po T043 samostatně provést T047–T050 včetně zámku, force quit, cizí sítě, jednorázových mobilních dat a zadrženého serverového ověření.
+
+Technický důkaz:
+- Python C02b 10/10, Swift core 18/18, C02a regrese 10/10, UI simulátoru 1/1, nepodepsaný arm64 iOS build a plná projektová brána 1705/1705 PASS.
+- Instalace, privátní HTTPS běh i fyzické T043/T047–T050 jsou NEPROVEDENO. Push, nasazení ani Tailscale/Funnel změna neproběhly.

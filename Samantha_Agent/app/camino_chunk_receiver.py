@@ -9,6 +9,7 @@ import os
 import re
 import tempfile
 import threading
+import time
 from dataclasses import asdict, dataclass, replace
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -69,13 +70,15 @@ class ChunkedSyntheticAssetStore:
         max_bytes: int = DEFAULT_MAX_BYTES,
         max_chunk_bytes: int = DEFAULT_CHUNK_BYTES,
         before_verify: Callable[[str], None] | None = None,
+        read_delay_seconds_per_mib: float = 0,
     ) -> None:
-        if max_bytes <= 0 or max_chunk_bytes <= 0:
+        if max_bytes <= 0 or max_chunk_bytes <= 0 or read_delay_seconds_per_mib < 0:
             raise ValueError("receiver limits must be positive")
         self.root = Path(root)
         self.max_bytes = max_bytes
         self.max_chunk_bytes = max_chunk_bytes
         self.before_verify = before_verify
+        self.read_delay_seconds_per_mib = read_delay_seconds_per_mib
         self.sessions = self.root / "sessions"
         self.objects = self.root / "objects"
         self.receipts = self.root / "receipts"
@@ -417,6 +420,11 @@ class ChunkedSyntheticAssetStore:
                         raise ReceiverError(HTTPStatus.BAD_REQUEST, "incomplete_chunk")
                     handle.write(block)
                     remaining -= len(block)
+                    if self.read_delay_seconds_per_mib:
+                        time.sleep(
+                            self.read_delay_seconds_per_mib
+                            * (len(block) / (1024 * 1024))
+                        )
                 handle.flush()
                 os.fsync(handle.fileno())
             return path
@@ -651,6 +659,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--port", type=int, default=DEFAULT_PORT)
     parser.add_argument("--root", type=Path, default=None)
     parser.add_argument("--max-bytes", type=int, default=DEFAULT_MAX_BYTES)
+    parser.add_argument("--read-delay-ms-per-mib", type=float, default=0)
+    parser.add_argument("--verify-delay-seconds", type=float, default=0)
     args = parser.parse_args(argv)
     root = args.root or (
         Path(os.environ["CAMINO_C02B_ROOT"])
@@ -662,7 +672,20 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("--root or CAMINO_C02B_ROOT is required")
     if len(token) < 32:
         parser.error("CAMINO_C02B_TOKEN with at least 32 characters is required")
-    store = ChunkedSyntheticAssetStore(root, max_bytes=args.max_bytes)
+    if not 0 <= args.read_delay_ms_per_mib <= 5_000:
+        parser.error("--read-delay-ms-per-mib must be between 0 and 5000")
+    if not 0 <= args.verify_delay_seconds <= 300:
+        parser.error("--verify-delay-seconds must be between 0 and 300")
+    store = ChunkedSyntheticAssetStore(
+        root,
+        max_bytes=args.max_bytes,
+        read_delay_seconds_per_mib=args.read_delay_ms_per_mib / 1_000,
+        before_verify=(
+            (lambda _asset_id: time.sleep(args.verify_delay_seconds))
+            if args.verify_delay_seconds
+            else None
+        ),
+    )
     server = make_server(store=store, bearer_token=token, host=args.host, port=args.port)
     print(
         f"Camino C02b receiver listens on {args.host}:{server.server_port}; "

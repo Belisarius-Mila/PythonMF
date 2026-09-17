@@ -1,0 +1,330 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		B00100000000000000000001 /* CaminoTransferApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00100000000000000000001 /* CaminoTransferApp.swift */; };
+		B00100000000000000000002 /* TransferViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00100000000000000000002 /* TransferViewModel.swift */; };
+		B00100000000000000000003 /* BackgroundTransferDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00100000000000000000003 /* BackgroundTransferDriver.swift */; };
+		B00100000000000000000004 /* TransferAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00100000000000000000004 /* TransferAPI.swift */; };
+		B00100000000000000000005 /* KeychainTokenStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00100000000000000000005 /* KeychainTokenStore.swift */; };
+		B00100000000000000000006 /* TransferState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00100000000000000000006 /* TransferState.swift */; };
+		B00100000000000000000007 /* TransferJournal.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00100000000000000000007 /* TransferJournal.swift */; };
+		B00100000000000000000008 /* TransferFiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00100000000000000000008 /* TransferFiles.swift */; };
+		B00100000000000000000009 /* TransferProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00100000000000000000009 /* TransferProtocol.swift */; };
+		B00100000000000000000010 /* TransferUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00100000000000000000013 /* TransferUITests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		X00100000000000000000001 = {isa = PBXContainerItemProxy; containerPortal = PR0100000000000000000001; proxyType = 1; remoteGlobalIDString = T00100000000000000000001; remoteInfo = CaminoTransfer; };
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		F00100000000000000000001 /* CaminoTransferApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/CaminoTransferApp.swift; sourceTree = "<group>"; };
+		F00100000000000000000002 /* TransferViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/TransferViewModel.swift; sourceTree = "<group>"; };
+		F00100000000000000000003 /* BackgroundTransferDriver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/BackgroundTransferDriver.swift; sourceTree = "<group>"; };
+		F00100000000000000000004 /* TransferAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/TransferAPI.swift; sourceTree = "<group>"; };
+		F00100000000000000000005 /* KeychainTokenStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/KeychainTokenStore.swift; sourceTree = "<group>"; };
+		F00100000000000000000006 /* TransferState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/TransferState.swift; sourceTree = "<group>"; };
+		F00100000000000000000007 /* TransferJournal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/TransferJournal.swift; sourceTree = "<group>"; };
+		F00100000000000000000008 /* TransferFiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/TransferFiles.swift; sourceTree = "<group>"; };
+		F00100000000000000000009 /* TransferProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/TransferProtocol.swift; sourceTree = "<group>"; };
+		F00100000000000000000010 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = App/Info.plist; sourceTree = "<group>"; };
+		F00100000000000000000011 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
+		F00100000000000000000012 /* CaminoTransfer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; path = CaminoTransfer.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F00100000000000000000013 /* TransferUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITests/TransferUITests.swift; sourceTree = "<group>"; };
+		F00100000000000000000014 /* CaminoTransferUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = CaminoTransferUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		P00100000000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		P00100000000000000000004 /* UI test Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		G00100000000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				F00100000000000000000001 /* CaminoTransferApp.swift */,
+				F00100000000000000000002 /* TransferViewModel.swift */,
+				F00100000000000000000003 /* BackgroundTransferDriver.swift */,
+				F00100000000000000000004 /* TransferAPI.swift */,
+				F00100000000000000000005 /* KeychainTokenStore.swift */,
+				F00100000000000000000006 /* TransferState.swift */,
+				F00100000000000000000007 /* TransferJournal.swift */,
+				F00100000000000000000008 /* TransferFiles.swift */,
+				F00100000000000000000009 /* TransferProtocol.swift */,
+				F00100000000000000000010 /* Info.plist */,
+				F00100000000000000000011 /* Config.xcconfig */,
+				F00100000000000000000013 /* TransferUITests.swift */,
+				G00100000000000000000002 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		G00100000000000000000002 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F00100000000000000000012 /* CaminoTransfer.app */,
+				F00100000000000000000014 /* CaminoTransferUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		T00100000000000000000001 /* CaminoTransfer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C00100000000000000000002 /* Build configuration list for PBXNativeTarget "CaminoTransfer" */;
+			buildPhases = (
+				P00100000000000000000002 /* Sources */,
+				P00100000000000000000001 /* Frameworks */,
+				P00100000000000000000003 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = CaminoTransfer;
+			productName = CaminoTransfer;
+			productReference = F00100000000000000000012 /* CaminoTransfer.app */;
+			productType = "com.apple.product-type.application";
+		};
+		T00100000000000000000002 /* CaminoTransferUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C00100000000000000000003;
+			buildPhases = (P00100000000000000000005, P00100000000000000000004, P00100000000000000000006);
+			buildRules = ();
+			dependencies = (X00100000000000000000002);
+			name = CaminoTransferUITests;
+			productName = CaminoTransferUITests;
+			productReference = F00100000000000000000014;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXTargetDependency section */
+		X00100000000000000000002 = {isa = PBXTargetDependency; target = T00100000000000000000001; targetProxy = X00100000000000000000001; };
+/* End PBXTargetDependency section */
+
+/* Begin PBXProject section */
+		PR0100000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2630;
+				TargetAttributes = {
+					T00100000000000000000002 = {CreatedOnToolsVersion = 26.3; TestTargetID = T00100000000000000000001; };
+					T00100000000000000000001 = {
+						CreatedOnToolsVersion = 26.3;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = C00100000000000000000001 /* Build configuration list for PBXProject "CaminoTransfer" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = cs;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				cs,
+				en,
+				Base,
+			);
+			mainGroup = G00100000000000000000001;
+			productRefGroup = G00100000000000000000002 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				T00100000000000000000001 /* CaminoTransfer */,
+				T00100000000000000000002 /* CaminoTransferUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		P00100000000000000000003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		P00100000000000000000006 /* UI test Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		P00100000000000000000002 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B00100000000000000000001 /* CaminoTransferApp.swift in Sources */,
+				B00100000000000000000002 /* TransferViewModel.swift in Sources */,
+				B00100000000000000000003 /* BackgroundTransferDriver.swift in Sources */,
+				B00100000000000000000004 /* TransferAPI.swift in Sources */,
+				B00100000000000000000005 /* KeychainTokenStore.swift in Sources */,
+				B00100000000000000000006 /* TransferState.swift in Sources */,
+				B00100000000000000000007 /* TransferJournal.swift in Sources */,
+				B00100000000000000000008 /* TransferFiles.swift in Sources */,
+				B00100000000000000000009 /* TransferProtocol.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		P00100000000000000000005 /* UI test Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (B00100000000000000000010,); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		D00100000000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		D00100000000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		D00100000000000000000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = F00100000000000000000011 /* Config.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "$(SRCROOT)/App/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Camino Transfer Test";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.4.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cz.pythonmf.camino.transfer.prototype;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		D00100000000000000000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = F00100000000000000000011 /* Config.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "$(SRCROOT)/App/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Camino Transfer Test";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.4.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cz.pythonmf.camino.transfer.prototype;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		D00100000000000000000005 /* Debug UI tests */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cz.pythonmf.camino.transfer.prototype.uitests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = iphonesimulator;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = CaminoTransfer;
+			};
+			name = Debug;
+		};
+		D00100000000000000000006 /* Release UI tests */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cz.pythonmf.camino.transfer.prototype.uitests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = iphonesimulator;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = CaminoTransfer;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		C00100000000000000000001 /* Build configuration list for PBXProject "CaminoTransfer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D00100000000000000000001 /* Debug */,
+				D00100000000000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C00100000000000000000002 /* Build configuration list for PBXNativeTarget "CaminoTransfer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D00100000000000000000003 /* Debug */,
+				D00100000000000000000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C00100000000000000000003 /* Build configuration list for PBXNativeTarget "CaminoTransferUITests" */ = {isa = XCConfigurationList; buildConfigurations = (D00100000000000000000005, D00100000000000000000006); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
+/* End XCConfigurationList section */
+	};
+	rootObject = PR0100000000000000000001 /* Project object */;
+}

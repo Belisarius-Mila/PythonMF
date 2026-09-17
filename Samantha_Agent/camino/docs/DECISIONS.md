@@ -222,3 +222,23 @@ ani jiný veřejný endpoint.
 
 Čistý Swift model není vydáván za hotový iOS přenos. T043 a T047–T050 zůstávají
 otevřené do fyzického testu skutečného klienta.
+
+## ADR-C02B-02 — oddělený souborový iOS harness bez osobních médií
+
+**Rozhodnutí:** Druhý checkpoint používá samostatnou aplikaci a bundle ID.
+Vytváří jedině syntetickou 96MiB dávku, nemá oprávnění k Fotkám či mikrofonu a
+nesdílí kontejner s Camino Audio. Tím lze fyzicky měřit přenos bez dotyku
+ostrých médií.
+
+Upload jedné části je `URLSession` background task z připraveného souboru.
+Stabilní identifikátor session dovolí po relaunchi převzít systémové události;
+trvalý journal se přesto vždy porovná se serverem. Uživatelský force quit se
+neinterpretuje jako příslib pokračování: Apple uvádí, že zruší background
+přenosy a aplikaci kvůli nim automaticky znovu nespustí. [Apple: background
+configuration](https://developer.apple.com/documentation/foundation/urlsessionconfiguration/background%28withidentifier%3A%29),
+[Apple: background transfers](https://developer.apple.com/documentation/foundation/downloading-files-in-the-background).
+
+Jeden zdroj se neduplikuje celý. Současně jsou připravené nejvýše dvě 8MiB
+části a serverový snapshot musí přesně odpovídat manifestu. Token patří do
+Keychain, URL musí být HTTPS a žádný veřejný alternativní endpoint neexistuje.
+Simulátor ani arm64 build nejsou fyzický PASS T043/T047–T050.

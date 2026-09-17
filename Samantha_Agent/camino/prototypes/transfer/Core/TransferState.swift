@@ -16,7 +16,7 @@ public enum TransferDisplayState: Equatable, Sendable {
     case needsAttention
 }
 
-public struct TransferQueueItem: Equatable, Sendable {
+public struct TransferQueueItem: Codable, Equatable, Sendable {
     public let assetID: String
     public let batchID: UUID
     public let chunkCount: Int
@@ -86,7 +86,7 @@ public enum TransferReconciler {
             )
         }
 
-        let accepted = server.acceptedChunks.filter { allChunks.contains($0) }
+        let accepted = server.acceptedChunks.filter { $0 >= 0 && $0 < item.chunkCount }
         let missing = allChunks.filter { !accepted.contains($0) }
         switch server.state {
         case .verified:
