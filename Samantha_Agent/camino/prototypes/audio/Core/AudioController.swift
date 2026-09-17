@@ -169,7 +169,7 @@ import Foundation
     public func play(_ clip: RecordingClip) {
         guard canPlay else { return }
         do {
-            try driver.play(url: store.url(for: clip.draft))
+            try driver.play(urls: store.playbackURLs(for: clip))
             updatePlaybackProgress()
             playingID = clip.id; phase = .playing; message = "Přehrávám"; changed?()
         } catch AudioPrototypeError.missingAudio {

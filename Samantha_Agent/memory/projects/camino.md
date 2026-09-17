@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-16 21:48 CEST
+Aktualizováno: 2026-09-17 07:59 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -18,10 +18,12 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 - T016 PASS: přesně 30:24,406, 175 147 072 B, 48 kHz mono, režim Letadlo, převážně pod zámkem a celý poslech OK. T018–T020, T024 a T059 PASS podle Míly. T021 PASS v rozsahu C01b prototypu; plná integrace se zopakuje v C04. T059 po restartu ochránil data a řízené opakování zachytilo všechny značky pod zámkem. Vítr neověřen.
 - C01b zahájeno výslovným pokynem Míly; C01a zůstává přijaté. Prototyp 0.2.0 (2) je lokálně připraven pro background audio, přerušení a vědomé pokračování. Verze 0.2.0 je nyní nainstalovaná a spuštěná na iPhonu; inventář 15 původních souborů se před/po shoduje v cestách a velikostech.
 - Běžící recorder přežije změnu scenePhase; nový Start/Pokračovat pouze v popředí. Přerušení ihned pozastaví vstup, ověří dostupnou část a nabídne Pokračovat/Ukončit. Pokračování vytváří novou část stejné session s evidovanou pauzou, bez přepisu předchozího média.
-- Nové soubory mají completeUntilFirstUserAuthentication; původní C01a soubory se nemigrují ani nemění. Staré JSON podporuje volitelné continuation. Není to C01c segmentový journal ani garance 60s ztráty.
+- Soubory vytvořené v C01b mají completeUntilFirstUserAuthentication; původní C01a soubory se nemigrují ani nemění. Staré JSON podporuje volitelné continuation. Tyto starší jednotlivé CAF samy nejsou C01c segmentový journal ani důkaz 60s cíle.
 - Ověřeno 47/47 Swift testů, 2/2 UI testy simulátoru včetně snímku obrazovky, finální podepsaný iOS build a strict podpis; UIBackgroundModes=[audio]. Plná projektová brána PASS, 1684/1684 testů.
 - C01b 0.2.0 (2) přijato v prototypovém rozsahu. Krátký test zámku a T016/T018–T021/T024/T059 PASS; T059 prošel po řízeném zopakování jedním nepřerušeným 107,801s souborem. Předchozí nevysvětlený tichý úsek se nezopakoval.
-- Profil hlavní aplikace do 22. září 18:16 CEST. G0/G1 a terénní připravenost nesplněné; C01c nezahájeno. Původní nahrávky i samostatný Camino Test zůstávají zachované.
+- C01c zahájeno výslovným pokynem Míly. Verze 0.3.0 (3) používá jeden `AVAudioEngine` input tap, 55s checkpointy s návrhovým stropem 60 s, create-only journal a obnovu platných částí po pádu bez automatického mikrofonu. Legacy C01a/C01b zůstává bez migrace.
+- 52/52 Swift testů a 2/2 dvoučástové UI testy PASS; podepsaný build a strict podpis PASS. 0.3.0 je nainstalovaná a spuštěná na iPhonu bez odinstalace. Inventář 111 položek před/po a SHA-256 cest/velikostí se přesně shodují.
+- Profil hlavní aplikace do 22. září 18:16 CEST. T022/T023 a fyzická kontinuita segmentů NEPROVEDENO; G0/G1 a terénní připravenost nesplněné. Původní nahrávky i samostatný Camino Test zůstávají zachované.
 
 
 ## Zdroje a návaznost
@@ -50,13 +52,14 @@ kódu nevyvolává; FAIL se nejdřív doloží a opraví v aktuálním rozsahu.
 ## Rizika a otevřeno
 
 - C01a přijato, ale širší brány G0/G1/G8 a terénní připravenost zůstávají nesplněné.
-- C01b přijato v prototypovém rozsahu. Vítr a plná integrace T021 v C04 čekají; jeden nevysvětlený nereprodukovaný tichý úsek z prvního T059 zůstává rizikem. Segmentace a záchrana otevřeného souboru po pádu patří do C01c.
+- C01b přijato v prototypovém rozsahu. Vítr a plná integrace T021 v C04 čekají; jeden nevysvětlený nereprodukovaný tichý úsek z prvního T059 zůstává rizikem.
+- C01c je automaticky ověřené, ale skutečná kontinuita na 55s hranicích, background běh nového `AVAudioEngine` a rozsah ztráty po nuceném pádu čekají na T022/T023. Otevírání dalšího CAF v tap callbacku může na zařízení odhalit mezeru; T023 to musí posoudit poslechem.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
 - Podepsaný build není instalace ani fyzická přejímka; vývojový profil je časově omezený. U01–U15 se bez nového rozhodnutí neotevírají.
 
 ## Další krok
 
-Vyčkat na výslovný pokyn k C01c; T022 na současném buildu 0.2.0 nespouštět.
+Provést T022 na nainstalované verzi 0.3.0 (3); potom výsledek vyhodnotit a automaticky předat T023 nebo opravu C01c.
 
 Historický doklad založení:
 Ověření založení: 56/56 testů integrace (54 + 2 profilové testy) a rychlá statická brána OK.
@@ -586,3 +589,18 @@ Rozhodnutí a rizika:
 
 Další krok:
 - Vyčkat na výslovný pokyn k C01c. Po jeho implementaci bude prvním fyzickým scénářem T022; současný build 0.2.0 pro něj není určen.
+
+### 2026-09-17 07:59 CEST — C01c zahájeno, 0.3.0 nainstalováno
+
+Hotovo / důkaz:
+- C01c 0.3.0 (3) přidává jeden nepřerušený input tap, 55s segmenty, journal, obnovu platných částí a pravdivé označení chybějícího konce. Staré C01a/C01b soubory se nemigrují.
+- 52/52 Swift testů, 2/2 UI testy dvou 15s částí, podepsaný build a strict podpis PASS. První UI pokus zabil runner před bootstrapem; po čistém restartu simulátoru opakování prošlo.
+- Instalace a spuštění na iPhone PASS bez odinstalace. Technický inventář před/po: 111 položek, 28 zahájených, 27 dokončených a 28 legacy CAF; shodný hash cest, velikostí a typu. Audio se nekopírovalo ani neposlouchalo.
+- Plná projektová brána PASS, 1685/1685 testů. První průchod měl jediné časovací selhání nesouvisejícího Human–Adam worker testu; cílené opakování 1/1 a následný celý průchod prošly.
+
+Rozhodnutí a rizika:
+- Automatické testy nepředstavují fyzický PASS T022/T023. Nový `AVAudioEngine` musí na telefonu znovu doložit route, background běh, kontinuitu a absenci opakování na hranici částí.
+- Obnovený otevřený CAF se vždy označuje jako částečný s možným chybějícím koncem. Plný databázový T061 se vrátí v C05a.
+
+Další krok:
+- T022 na 0.3.0: nejméně 2:15 neutrálního souvislého zvuku se značkami, nucené ukončení během otevřené části, relaunch bez mikrofonu a celý poslech zachovaného rozsahu. Potom T023.

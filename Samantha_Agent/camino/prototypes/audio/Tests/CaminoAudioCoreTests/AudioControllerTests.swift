@@ -30,7 +30,8 @@ import XCTest
     func sample() -> CaptureSample { reading }
     func pauseCapture() { pauses += 1 }
     func stop() async -> Bool { stops += 1; return stopSuccess }
-    func play(url: URL) throws {
+    func play(urls: [URL]) throws {
+        guard !urls.isEmpty else { throw AudioPrototypeError.missingAudio }
         if missingPlaybackFile { throw AudioPrototypeError.missingAudio }
         if failPlay { throw AudioPrototypeError.invalidAudio }
         plays += 1; isPlaying = true; playbackTime = 0

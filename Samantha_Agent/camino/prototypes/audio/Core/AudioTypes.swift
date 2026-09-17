@@ -26,6 +26,27 @@ public struct AudioInspection: Codable, Equatable, Sendable {
     }
 }
 
+/// C01c closes parts before the 60 second loss ceiling. The smaller target
+/// leaves room for one hardware input buffer without claiming a hard storage guarantee.
+public struct SegmentCheckpointPolicy: Codable, Equatable, Sendable {
+    public let targetSeconds: Double
+    public let maximumSeconds: Double
+    public init(targetSeconds: Double = 55, maximumSeconds: Double = 60) {
+        self.targetSeconds = targetSeconds
+        self.maximumSeconds = maximumSeconds
+    }
+    public var valid: Bool {
+        targetSeconds.isFinite && maximumSeconds.isFinite
+            && targetSeconds > 0 && targetSeconds < maximumSeconds && maximumSeconds <= 60
+    }
+    public func shouldRotate(framesWritten: Int64, incomingFrames: Int64,
+                             sampleRate: Double) -> Bool {
+        guard valid, framesWritten > 0, incomingFrames > 0,
+              sampleRate.isFinite, sampleRate > 0 else { return false }
+        return Double(framesWritten + incomingFrames) / sampleRate > targetSeconds
+    }
+}
+
 /// An explicit user continuation, not an automatic C01c segment or a loss guarantee.
 public struct RecordingContinuation: Codable, Equatable, Sendable {
     public let sessionID: UUID
@@ -51,13 +72,42 @@ public struct RecordingDraft: Codable, Equatable, Sendable {
     }
 }
 
+public struct RecordingSegment: Codable, Equatable, Sendable {
+    public let index: Int
+    public let fileName: String
+    public let audio: AudioInspection
+    /// True when recovery found a valid but not normally finalized part.
+    public let recovered: Bool
+    /// A missing or invalid preceding index makes continuity unknown, not invented.
+    public let discontinuityBefore: Bool
+    public init(index: Int, fileName: String, audio: AudioInspection,
+                recovered: Bool = false, discontinuityBefore: Bool = false) {
+        self.index = index; self.fileName = fileName; self.audio = audio
+        self.recovered = recovered; self.discontinuityBefore = discontinuityBefore
+    }
+}
+
+public struct RecordingRecovery: Codable, Equatable, Sendable {
+    public let recoveredAfterCrash: Bool
+    public let missingTail: Bool
+    public init(recoveredAfterCrash: Bool, missingTail: Bool) {
+        self.recoveredAfterCrash = recoveredAfterCrash; self.missingTail = missingTail
+    }
+}
+
 public struct RecordingClip: Codable, Equatable, Identifiable, Sendable {
     public let draft: RecordingDraft
     public let audio: AudioInspection
     public let interrupted: Bool
+    /// Nil is the legacy C01a/C01b single-file representation.
+    public let segments: [RecordingSegment]?
+    /// Nil is a normal completion. Recovery never claims an unknown tail.
+    public let recovery: RecordingRecovery?
     public var id: UUID { draft.id }
-    public init(draft: RecordingDraft, audio: AudioInspection, interrupted: Bool) {
+    public init(draft: RecordingDraft, audio: AudioInspection, interrupted: Bool,
+                segments: [RecordingSegment]? = nil, recovery: RecordingRecovery? = nil) {
         self.draft = draft; self.audio = audio; self.interrupted = interrupted
+        self.segments = segments; self.recovery = recovery
     }
 }
 
@@ -107,7 +157,7 @@ public struct CaptureSample: Sendable {
     func sample() -> CaptureSample
     func pauseCapture()
     func stop() async -> Bool
-    func play(url: URL) throws
+    func play(urls: [URL]) throws
     func stopPlayback()
     var isPlaying: Bool { get }
     var playbackTime: Double { get }
@@ -119,11 +169,15 @@ public struct CaptureSample: Sendable {
     func url(for draft: RecordingDraft) -> URL
     func finish(_ draft: RecordingDraft, interrupted: Bool) throws -> RecordingClip
     func library() throws -> RecordingLibrary
+    func playbackURLs(for clip: RecordingClip) throws -> [URL]
 }
 
 public extension RecordingStorage {
     func begin(kind: RecordingKind) throws -> RecordingDraft {
         try begin(kind: kind, continuation: nil)
+    }
+    func playbackURLs(for clip: RecordingClip) throws -> [URL] {
+        [url(for: clip.draft)]
     }
 }
 

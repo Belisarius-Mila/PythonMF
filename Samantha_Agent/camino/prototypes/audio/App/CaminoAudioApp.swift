@@ -15,9 +15,9 @@ struct AudioScreen: View {
                 VStack(alignment: .leading, spacing: 24) {
                     Label("Jen v tomto telefonu", systemImage: "lock.fill")
                         .font(.subheadline).foregroundStyle(.secondary)
-                    Text("Audio prototyp")
+                    Text("Audio prototyp C01c")
                         .font(.title2.bold())
-                    Text("Spusť nahrávání před zamčením. Při hovoru nebo změně mikrofonu se přeruší; pokračování spustíš sám. Záznam pod zámkem nyní ověřujeme.")
+                    Text("Spusť nahrávání před zamčením. Camino průběžně uzavírá obnovitelné části; při hovoru, změně mikrofonu nebo pádu se samo znovu nerozběhne.")
                         .font(.subheadline).foregroundStyle(.secondary)
                     if let c = model.controller {
                         Picker("Typ nahrávky", selection: $model.kind) {
@@ -97,7 +97,20 @@ struct AudioScreen: View {
                                          ?? "Pauza před pokračováním: délka neznámá")
                                         .font(.caption).foregroundStyle(.secondary)
                                 }
-                                Text("\(duration(clip.audio.duration)) · \(clip.interrupted ? "Přerušený záznam" : "Uloženo v telefonu")")
+                                if clip.recovery?.recoveredAfterCrash == true {
+                                    Label("Obnovená částečná nahrávka · konec může chybět",
+                                          systemImage: "exclamationmark.triangle.fill")
+                                        .font(.subheadline).foregroundStyle(.orange)
+                                }
+                                if let segments = clip.segments, segments.count > 1 {
+                                    Text("Obnovitelné části: \(segments.count)")
+                                        .font(.caption).foregroundStyle(.secondary)
+                                }
+                                if clip.segments?.contains(where: { $0.discontinuityBefore }) == true {
+                                    Text("Mezi zachovanými částmi je neověřená mezera.")
+                                        .font(.caption).foregroundStyle(.orange)
+                                }
+                                Text("\(duration(clip.audio.duration)) · \(clip.recovery != nil ? "Zachovaný přehratelný rozsah" : (clip.interrupted ? "Přerušený záznam" : "Uloženo v telefonu"))")
                                     .font(.subheadline)
                                 Button("Přehrát", systemImage: "play.fill") { c.play(clip) }
                                     .buttonStyle(.bordered).disabled(!c.canPlay)

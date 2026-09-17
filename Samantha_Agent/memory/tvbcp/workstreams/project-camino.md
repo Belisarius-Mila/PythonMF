@@ -19,19 +19,21 @@ je vyloučeno; celé `Do deníku` je po synchronizaci Viewer-eligible.
 - T016 PASS: přesně 30:24,406, 175 147 072 B, 48 kHz mono, režim Letadlo, převážně pod zámkem a celý poslech OK. T018–T020, T024 a T059 PASS podle Míly. T021 PASS v rozsahu C01b prototypu; plná integrace se zopakuje v C04. T059 po restartu ochránil data a řízené opakování zachytilo všechny značky pod zámkem. Vítr neověřen.
 - C01b zahájeno výslovným pokynem Míly; C01a zůstává přijaté. Prototyp 0.2.0 (2) je lokálně připraven pro background audio, přerušení a vědomé pokračování. Verze 0.2.0 je nyní nainstalovaná a spuštěná na iPhonu; inventář 15 původních souborů se před/po shoduje v cestách a velikostech.
 - Běžící recorder přežije změnu scenePhase; nový Start/Pokračovat pouze v popředí. Přerušení ihned pozastaví vstup, ověří dostupnou část a nabídne Pokračovat/Ukončit. Pokračování vytváří novou část stejné session s evidovanou pauzou, bez přepisu předchozího média.
-- Nové soubory mají completeUntilFirstUserAuthentication; původní C01a soubory se nemigrují ani nemění. Staré JSON podporuje volitelné continuation. Není to C01c segmentový journal ani garance 60s ztráty.
+- Soubory vytvořené v C01b mají completeUntilFirstUserAuthentication; původní C01a soubory se nemigrují ani nemění. Staré JSON podporuje volitelné continuation. Tyto starší jednotlivé CAF samy nejsou C01c journal ani důkaz 60s cíle.
 - Ověřeno 47/47 Swift testů, 2/2 UI testy simulátoru včetně snímku obrazovky, finální podepsaný iOS build a strict podpis; UIBackgroundModes=[audio]. Plná projektová brána PASS, 1684/1684 testů.
 - C01b 0.2.0 (2) přijato v prototypovém rozsahu. Krátký test zámku a T016/T018–T021/T024/T059 PASS; T059 prošel po řízeném zopakování jedním nepřerušeným 107,801s souborem. Předchozí nevysvětlený tichý úsek se nezopakoval.
 - Po každém Mílou oznámeném výsledku fyzického testu Adam bez další žádosti vyhodnotí stav, řekne, zda je potřeba vývoj, a rovnou předá podmínky, přesný postup a kritéria PASS následujícího neprovedeného testu. Shoda s návrhem sama změnu kódu nevyvolává.
-- Profil hlavní aplikace do 22. září 18:16 CEST. G0/G1/G8 a terénní připravenost nesplněné; C01c nezahájeno. Původní nahrávky i samostatný Camino Test zůstávají zachované.
+- C01c 0.3.0 (3) zahájeno: jeden input tap, 55s checkpointy, journal a obnova platných částí bez automatického mikrofonu. 52/52 Swift + 2/2 UI PASS, podepsáno, strict podpis PASS, instalace/spuštění na iPhone PASS.
+- Inventář 111 původních položek a jeho hash cest/velikostí se po instalaci nezměnil. Profil hlavní aplikace do 22. září 18:16 CEST. T022/T023, G0/G1/G8 a terénní připravenost nesplněné.
 
 
-Vyčkat na výslovný pokyn k C01c; T022 na současném buildu 0.2.0 nespouštět.
+Provést T022 na nainstalovaném buildu 0.3.0 (3), potom T023 nebo opravu podle výsledku.
 
 ## Rizika
 
 - C01a přijato, ale širší brány G0/G1/G8 a terénní připravenost zůstávají nesplněné.
-- C01b přijato v prototypovém rozsahu. Vítr a plná integrace T021 v C04 čekají; jeden nevysvětlený nereprodukovaný tichý úsek z prvního T059 zůstává rizikem. Segmentace a záchrana otevřeného souboru po pádu patří do C01c.
+- C01b přijato v prototypovém rozsahu. Vítr a plná integrace T021 v C04 čekají; jeden nevysvětlený nereprodukovaný tichý úsek z prvního T059 zůstává rizikem.
+- C01c čeká na fyzický důkaz skutečné kontinuity segmentů, background inputu a rozsahu ztráty po pádu; automatické testy T022/T023 nenahrazují.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
 - Podepsaný build není instalace ani fyzická přejímka; vývojový profil je časově omezený. U01–U15 se bez nového rozhodnutí neotevírají.
 
@@ -571,3 +573,22 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Komentář 107,801 s, 10 352 992 B, 48 kHz mono, bez přerušení/continuation; poslech potvrzuje Míla, CAF nebyl kopírován ani poslouchán nástrojem. První tichý úsek zůstává nevysvětleným nereprodukovaným pozorováním.
+
+### 2026-09-17 07:59 CEST — C01c 0.3.0: implementace a instalace
+
+Hotovo:
+- Segmentový zápis s 55s checkpointem, create-only journalem, obnovou po pádu a sekvenčním přehráním. Staré C01a/C01b zůstává bez migrace.
+- 52/52 Swift testů, 2/2 UI testy, signed build, strict podpis, instalace a launch PASS.
+- Plná projektová brána PASS, 1685/1685 testů; po jednom nesouvisejícím časovacím selhání prošel cílený test 1/1 a celý opakovaný průchod čistě.
+
+Rozhodnutí:
+- C01c zůstává rozpracované do fyzických T022/T023. Platná otevřená část je po pádu vždy označena jako částečná s možným chybějícím koncem.
+
+Další krok:
+- T022 na fyzickém telefonu; potom automaticky T023 nebo oprava C01c.
+
+Navrhované další kroky:
+- Po přijetí T022/T023 uzavřít prototypový rozsah C01c; plný T061 zopakovat v C05a.
+
+Technický důkaz:
+- Build 0.3.0 (3), profil do 22. 9. 18:16 CEST. Dvoučástový UI fixture 15 + 15 s. Inventář před/po instalaci 111 položek se shodným SHA-256 cest/velikostí; audio se nečetlo.

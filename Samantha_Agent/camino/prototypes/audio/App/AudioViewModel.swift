@@ -109,11 +109,17 @@ import UserNotifications
         guard library.clips.isEmpty else { return } // Relaunch must reuse the completed clip.
         guard allowSeed else { throw AudioPrototypeError.invalidMetadata }
         let draft = try store.begin(kind: .comment)
-        try writeSilence(to: store.url(for: draft))
+        let firstPartial = store.url(for: draft)
+        try writeSilence(to: firstPartial, chunks: 150)
+        let media = firstPartial.deletingLastPathComponent()
+        try FileManager.default.moveItem(at: firstPartial,
+            to: media.appendingPathComponent("segment-000000.caf"))
+        try writeSilence(to: media.appendingPathComponent("segment-000001.partial.caf"),
+                         chunks: 150)
         _ = try store.finish(draft, interrupted: false)
     }
 
-    private static func writeSilence(to url: URL) throws {
+    private static func writeSilence(to url: URL, chunks: Int) throws {
         let format = AVAudioFormat(standardFormatWithSampleRate: 48_000, channels: 1)!
         let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: 4_800)!
         buffer.frameLength = 4_800
@@ -124,7 +130,7 @@ import UserNotifications
             AVLinearPCMIsFloatKey: false, AVLinearPCMIsBigEndianKey: false
         ]
         let file = try AVAudioFile(forWriting: url, settings: settings)
-        for _ in 0..<300 { try file.write(from: buffer) } // 30 seconds, no microphone.
+        for _ in 0..<chunks { try file.write(from: buffer) } // Synthetic; no microphone.
     }
 }
 #endif

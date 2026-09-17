@@ -1,10 +1,10 @@
-# Camino Audio — C01b
+# Camino Audio — C01c
 
 Izolovaný nativní prototyp pro Komentář nebo Úvahu. Swift 6, SwiftUI,
 AVFAudio, žádné externí balíčky, server ani AI. Nejde o celé Camino.
 
-**Stav: C01b implementováno, verze 0.2.0 (2), podepsaný build a strict podpis PASS. 47 testů jádra a 2 UI testy prošly; verze 0.2.0 nainstalovaná a spuštěná na telefonu, krátký funkční test zámku potvrzen Mílou; T016 a další fyzická přejímka čekají. C01a bylo přijaté samostatně.** Viz
-[report C01b](../../docs/C01b_BACKGROUND_AUDIO_REPORT.md).
+**Stav: C01c rozpracované, verze 0.3.0 (3). Segmentový journal a obnova po pádu jsou implementované; 52 testů jádra a 2 UI testy prošly, podepsaný build je nainstalovaný na iPhonu. Fyzické T022/T023 zatím čekají. C01a a C01b byly přijaté samostatně.** Viz
+[report C01c](../../docs/C01c_RECOVERABLE_AUDIO_REPORT.md).
 
 ## Otevření a sestavení
 
@@ -46,7 +46,7 @@ xcodebuild -project CaminoAudio.xcodeproj -scheme CaminoAudioUITests \
 ```
 
 `<SIMULATOR_UDID>` nahraď ID dostupného simulátoru z `xcrun simctl list devices`.
-Testy vytvářejí 30sekundové tiché PCM/CAF bez mikrofonu. Každý test má vlastní
+Testy vytvářejí dvě navazující 15sekundové tiché PCM/CAF části bez mikrofonu. Každý test má vlastní
 UUID úložiště `CaminoAudioUITests`, při opětovném spuštění aplikace stejného
 testu se použije již dokončený vzorek; vytvoření náhradního vzorku je při návratu
 zakázané, aby test nemohl zakrýt ztrátu dat. Žádné soubory se automaticky nemažou.
@@ -63,22 +63,24 @@ nenahrazuje přejímku mikrofonu, poslechu ani systémových přerušení na iPh
 - Stav Nahrávám vyžaduje postup mediálního času recorderu a skutečný vstup.
   Ticho je platný záznam. Při zastaveném postupu se nejpozději při následujícím
   vyhodnocení po dvousekundovém intervalu zahájí bezpečné dokončení.
-- Stop čeká na potvrzení recorderu a plné dekódování souboru.
-  Chybějící potvrzení do tří sekund znamená neověřené uložení.
+- Stop zastaví input tap, uzavře aktuální část a úplně dekóduje všechny části
+  před vytvořením dokončovacího záznamu.
 - Jeden recorder nebo player. Běžící audio pokračuje po zámku; nový Start
   vyžaduje aktivní aplikaci. Přerušení pozastaví vstup a uzavře dostupnou část.
   Pokračovat vytvoří nový soubor stejné session s pauzou; nic se neobnovuje samo.
-- Každý pokus má výhradně vytvořenou UUID složku, `started.json`, `audio.caf`
-  a po ověření nový `completed.json`. Existující soubory se nepřepisují.
+- Každý nový pokus má výhradně vytvořenou UUID složku, `started.json`,
+  `journal.json`, adresář `segments/` a po ověření nový `completed.json`.
+  Input tap zůstává aktivní, zatímco se nejpozději před 60 sekundami střídají
+  `.partial.caf` a stabilní CAF části. Existující soubory se nepřepisují.
 - Nedokončené/cizí/poškozené položky zůstávají zachované a viditelně započítané.
   Prototyp nemá funkci mazání, exportu ani automatické opravy rozpracovaného audia.
 - Média jsou v Application Support aplikace, nikoli v cache nebo repozitáři.
   Adresář je vyloučený ze systémové zálohy; v tomto prototypu existuje jen
   místní kopie. Žádné iCloud kontejnery či File Sharing nejsou zapnuté.
-- Krátké audio je PCM/CAF, mono, požadovaných 48 kHz / 16 bitů; skutečný
-  formát, délka a velikost jsou v dokončovacím záznamu. Nové soubory používají completeUntilFirstUserAuthentication;
+- Audio je PCM/CAF; požadovaná route preferuje 48 kHz a jeden vstupní kanál,
+  skutečný formát, délka a velikost každé části jsou v dokončovacím záznamu. Nové soubory používají completeUntilFirstUserAuthentication;
   ochrana původních souborů z C01a se nemění.
 
-Podpora zámku/přerušení C01b čeká na fyzickou zkoušku včetně 30 minut.
-Automatické segmenty a záchrana po pádu během zápisu patří do C01c.
+Podpora zámku a přerušení prošla C01b. Kontinuita automatických částí a záchrana
+po skutečném pádu čekají na fyzické T022/T023 v C01c.
 Tato verze není vhodná pro ostrá osobní média; přejímka používá neutrální záznamy.

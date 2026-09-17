@@ -13,6 +13,9 @@ import XCTest
         guard data == Data([1, 2, 3, 4]) else { throw AudioPrototypeError.invalidAudio }
         return AudioInspection(duration: 1, byteCount: 4, sampleRate: 48000, channels: 1)
     }
+    private func segmentFolder(_ root: URL, _ id: UUID) -> URL {
+        root.appendingPathComponent(id.uuidString).appendingPathComponent("segments")
+    }
 
     func testCollisionCannotOverwriteOriginalAudioOrReceipts() throws {
         let id = UUID(); let root = try directory()
@@ -120,5 +123,110 @@ import XCTest
                 RecordingContinuation(sessionID: session, previousPartID: first.id, gapSeconds: gap)))
         }
         XCTAssertEqual(try FileManager.default.contentsOfDirectory(atPath: root.path).count, 1)
+    }
+
+    func testCheckpointPolicyRotatesBeforeSixtySecondCeiling() {
+        let policy = SegmentCheckpointPolicy()
+        XCTAssertTrue(policy.valid)
+        let rate = 48_000.0
+        var current: Int64 = 0
+        var longest = 0.0
+        for _ in 0..<900 { // 90 seconds in 100 ms buffers.
+            let incoming: Int64 = 4_800
+            if policy.shouldRotate(framesWritten: current, incomingFrames: incoming,
+                                   sampleRate: rate) {
+                longest = max(longest, Double(current) / rate); current = 0
+            }
+            current += incoming
+        }
+        longest = max(longest, Double(current) / rate)
+        XCTAssertLessThanOrEqual(longest, policy.maximumSeconds)
+        XCTAssertGreaterThan(longest, 50)
+    }
+
+    func testRestartRecoversValidOpenPartAsPartialRecording() throws {
+        let root = try directory()
+        let store = try RecordingStore(root: root, inspect: inspect)
+        let draft = try store.begin(kind: .reflection)
+        let partial = store.url(for: draft)
+        try Data([1, 2, 3, 4]).write(to: partial)
+
+        let restarted = try RecordingStore(root: root, inspect: inspect)
+        let library = try restarted.library()
+        XCTAssertEqual(library.clips.count, 1); XCTAssertEqual(library.unfinishedCount, 0)
+        let clip = try XCTUnwrap(library.clips.first)
+        XCTAssertEqual(clip.recovery,
+            RecordingRecovery(recoveredAfterCrash: true, missingTail: true))
+        XCTAssertTrue(clip.interrupted)
+        XCTAssertEqual(clip.segments?.map(\.index), [0])
+        XCTAssertEqual(clip.segments?.first?.recovered, true)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: partial.path))
+        XCTAssertEqual(try restarted.playbackURLs(for: clip).count, 1)
+        let driver = FakeDriver()
+        let controller = AudioController(driver: driver, store: restarted)
+        XCTAssertEqual(controller.phase, .idle)
+        XCTAssertEqual(controller.library.clips.count, 1)
+        XCTAssertEqual(driver.starts, 0); XCTAssertEqual(driver.permissionRequests, 0)
+    }
+
+    func testRecoveryKeepsInvalidTailAndDoesNotDuplicateClosedPart() throws {
+        let root = try directory()
+        let store = try RecordingStore(root: root, inspect: inspect)
+        let draft = try store.begin(kind: .comment)
+        let media = segmentFolder(root, draft.id)
+        let first = store.url(for: draft)
+        try Data([1, 2, 3, 4]).write(to: first)
+        try FileManager.default.moveItem(at: first,
+            to: media.appendingPathComponent("segment-000000.caf"))
+        let invalidTail = media.appendingPathComponent("segment-000001.partial.caf")
+        try Data([9]).write(to: invalidTail)
+
+        let restarted = try RecordingStore(root: root, inspect: inspect)
+        let clip = try XCTUnwrap(try restarted.library().clips.first)
+        XCTAssertEqual(clip.segments?.map(\.index), [0])
+        XCTAssertTrue(FileManager.default.fileExists(atPath: invalidTail.path))
+        let restartedAgain = try RecordingStore(root: root, inspect: inspect)
+        let secondLibrary = try restartedAgain.library()
+        XCTAssertEqual(secondLibrary.clips.count, 1)
+        XCTAssertEqual(secondLibrary.clips[0].segments?.count, 1)
+    }
+
+    func testRecoveryRetainsValidOrphanAfterIndexGapAndMarksDiscontinuity() throws {
+        let root = try directory()
+        let store = try RecordingStore(root: root, inspect: inspect)
+        let draft = try store.begin(kind: .reflection)
+        let media = segmentFolder(root, draft.id)
+        let first = store.url(for: draft)
+        try Data([1, 2, 3, 4]).write(to: first)
+        try FileManager.default.moveItem(at: first,
+            to: media.appendingPathComponent("segment-000000.caf"))
+        try Data([1, 2, 3, 4]).write(
+            to: media.appendingPathComponent("segment-000002.caf"))
+
+        let restarted = try RecordingStore(root: root, inspect: inspect)
+        let clip = try XCTUnwrap(try restarted.library().clips.first)
+        XCTAssertEqual(clip.segments?.map(\.index), [0, 2])
+        XCTAssertEqual(clip.segments?.map(\.discontinuityBefore), [false, true])
+        XCTAssertEqual(try restarted.playbackURLs(for: clip).count, 2)
+    }
+
+    func testNormalFinishCommitsEveryClosedPartWithoutRecoveryLabel() throws {
+        let root = try directory()
+        let store = try RecordingStore(root: root, inspect: inspect)
+        let draft = try store.begin(kind: .comment)
+        let media = segmentFolder(root, draft.id)
+        let first = store.url(for: draft)
+        try Data([1, 2, 3, 4]).write(to: first)
+        try FileManager.default.moveItem(at: first,
+            to: media.appendingPathComponent("segment-000000.caf"))
+        try Data([1, 2, 3, 4]).write(
+            to: media.appendingPathComponent("segment-000001.partial.caf"))
+
+        let clip = try store.finish(draft, interrupted: false)
+        XCTAssertNil(clip.recovery); XCTAssertFalse(clip.interrupted)
+        XCTAssertEqual(clip.segments?.map(\.index), [0, 1])
+        XCTAssertEqual(clip.audio.duration, 2)
+        XCTAssertEqual(clip.audio.byteCount, 8)
+        XCTAssertEqual(try store.playbackURLs(for: clip).count, 2)
     }
 }
