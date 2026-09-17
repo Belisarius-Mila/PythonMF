@@ -3,9 +3,9 @@
 Zahájeno 2026-09-17 po výslovném pokynu Míly. C01a a C01b byly před zahájením
 přijaté v prototypovém rozsahu.
 
-**Stav: pád při prvním Start opraven ve verzi 0.3.0 (4), automaticky ověřeno,
-podepsáno, nainstalováno a spuštěno na iPhonu bez změny dosavadních dat.
-Krátký fyzický Start/Stop a přehrání PASS; T022/T023 zatím NEPROVEDENO.**
+**Stav: C01c přijato v prototypovém rozsahu ve verzi 0.3.0 (4). Pád při prvním
+Start je opravený; automatické ověření, krátký fyzický smoke, oba průchody T022
+a poslechová kontrola segmentových přechodů T023 prošly.**
 
 ## Implementace
 
@@ -62,7 +62,15 @@ Krátký fyzický Start/Stop a přehrání PASS; T022/T023 zatím NEPROVEDENO.**
   segment, bez přerušení, recovery a mezery. Všech 136 předchozích položek
   zůstalo beze změny; přibylo sedm očekávaných položek nového pokusu. Žádný CAF
   se nekopíroval ani neposlouchal nástrojem.
-- T022/T023: **NEPROVEDENO**.
+- T022: **PASS podle Míly ve dvou odlišných fázích otevřené části**. Po nuceném
+  ukončení se mikrofon sám nespustil, aplikace nabídla pravdivě označenou
+  obnovenou částečnou nahrávku a zachovaný rozsah šel celý přehrát. Snímek
+  prvního průchodu ukazuje `Připraveno 00:00`, tři obnovitelné části a 02:18
+  zachovaného přehratelného rozsahu; druhý průchod prošel stejnými kritérii při
+  pádu v pozdější fázi otevřené části.
+- T023: **PASS podle Míly**. V souvislém nejméně čtyřminutovém testu byly
+  poslechem ověřeny značky před a po čtyřech 55s hranicích; všechny zazněly
+  jednou, ve správném pořadí, bez opakování, nevysvětlené mezery či useknutí.
 
 Automatizace používá jen syntetická data v dočasných složkách. Neprokazuje
 skutečný mikrofon, zámek, spotřebu, přechod CAF částí bez slyšitelné vady ani
@@ -70,16 +78,16 @@ záchranu po reálném nuceném ukončení na iPhonu.
 
 ## Otevřeno a rizika
 
-- `AVAudioEngine` nahrazuje v prototypu dosavadní `AVAudioRecorder`; skutečná
-  route, formát, background běh a spotřeba se musí znovu ověřit na telefonu.
-- Otevírání dalšího souboru probíhá v tap callbacku. Teprve T023 rozhodne, zda
-  na fyzickém zařízení nevzniká slyšitelná mezera nebo opakování.
+- `AVAudioEngine` nahrazuje v prototypu dosavadní `AVAudioRecorder`; skutečný
+  mikrofon, background běh a segmentové přechody prošly prototypovou fyzickou
+  přejímkou. Dlouhodobá terénní spotřeba zůstává mimo rozsah C01c.
+- Otevírání dalšího souboru probíhá v tap callbacku. T023 na fyzickém zařízení
+  neodhalil slyšitelnou mezeru ani opakování na čtyřech přechodech.
 - Platná poslední otevřená CAF část může být po pádu dekódovatelná, ale vždy se
   označí jako zotavená s možným chybějícím koncem. Nic se nedomýšlí.
 - C01c neřeší síťovou finalizaci ani produkční databázi; plný T061 se vrátí v C05a.
 
 ## Další krok
 
-Na buildu 4 provést T022 podle zadání: alespoň 2:15, časové značky, nucené
-ukončení během otevřené části, relaunch bez automatického mikrofonu a celý
-poslech zachovaného rozsahu. Teprve po jeho vyhodnocení následuje T023.
+C01c dále nerozšiřovat. Další plánovanou etapou je po výslovném pokynu C02a;
+plný databázový a serverový T061 se zopakuje v C05a.

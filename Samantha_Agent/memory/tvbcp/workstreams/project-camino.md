@@ -17,7 +17,7 @@ je vyloučeno; celé `Do deníku` je po synchronizaci Viewer-eligible.
 - Viewer delta audit potvrdil Tailscale/Serve/Cockpit základ, smoke 5/5, Funnel vypnutý, AC bez spánku a FileVault zapnutý. Viewer služby, autorizace, záloha/restart a Janina vzdálená zkouška chybějí; G8 NEPROVEDENO.
 - Profilový fast-forward nyní kontroluje whitespace s příchozími `.gitattributes`; ostatní fail-closed brány zůstávají zachované.
 - T016 PASS: přesně 30:24,406, 175 147 072 B, 48 kHz mono, režim Letadlo, převážně pod zámkem a celý poslech OK. T018–T020, T024 a T059 PASS podle Míly. T021 PASS v rozsahu C01b prototypu; plná integrace se zopakuje v C04. T059 po restartu ochránil data a řízené opakování zachytilo všechny značky pod zámkem. Vítr neověřen.
-- C01b zahájeno výslovným pokynem Míly; C01a zůstává přijaté. Prototyp 0.2.0 (2) je lokálně připraven pro background audio, přerušení a vědomé pokračování. Verze 0.2.0 je nyní nainstalovaná a spuštěná na iPhonu; inventář 15 původních souborů se před/po shoduje v cestách a velikostech.
+- C01b 0.2.0 (2) je historicky přijaté pro background audio, přerušení a vědomé pokračování; před přechodem na C01c prošla instalace i zachování tehdejších 15 položek. Aktuálně je na iPhonu C01c 0.3.0 (4).
 - Běžící recorder přežije změnu scenePhase; nový Start/Pokračovat pouze v popředí. Přerušení ihned pozastaví vstup, ověří dostupnou část a nabídne Pokračovat/Ukončit. Pokračování vytváří novou část stejné session s evidovanou pauzou, bez přepisu předchozího média.
 - Soubory vytvořené v C01b mají completeUntilFirstUserAuthentication; původní C01a soubory se nemigrují ani nemění. Staré JSON podporuje volitelné continuation. Tyto starší jednotlivé CAF samy nejsou C01c journal ani důkaz 60s cíle.
 - Ověřeno 47/47 Swift testů, 2/2 UI testy simulátoru včetně snímku obrazovky, finální podepsaný iOS build a strict podpis; UIBackgroundModes=[audio]. Plná projektová brána PASS, 1684/1684 testů.
@@ -25,16 +25,17 @@ je vyloučeno; celé `Do deníku` je po synchronizaci Viewer-eligible.
 - Po každém Mílou oznámeném výsledku fyzického testu Adam bez další žádosti vyhodnotí stav, řekne, zda je potřeba vývoj, a rovnou předá podmínky, přesný postup a kritéria PASS následujícího neprovedeného testu. Shoda s návrhem sama změnu kódu nevyvolává.
 - C01c build 3 při prvním Start padal. Pět shodných crash reportů potvrdilo Swift 6 actor-isolation trap: inline tap callback zdědil `MainActor`, ale běžel na real-time audio frontě.
 - Opravený build 0.3.0 (4) vytváří callback v `nonisolated` helperu. 52/52 Swift + 2/2 UI PASS, oba arm64 buildy, strict podpis, instalace i launch PASS; všech 136 položek se po instalaci shoduje v cestě, typu a velikosti.
-- Pět nedokončených pokusů z pádů zůstalo zachováno. Profil hlavní aplikace do 22. září 18:16 CEST. Krátký fyzický smoke buildu 4 PASS podle Míly: bez pádu, rostoucí čas i ukazatel a přehratelný nový záznam. T022/T023, G0/G1/G8 a terénní připravenost zůstávají nesplněné.
+- Pět nedokončených pokusů z pádů zůstalo zachováno. Profil hlavní aplikace do 22. září 18:16 CEST. Krátký fyzický smoke buildu 4 PASS podle Míly: bez pádu, rostoucí čas i ukazatel a přehratelný nový záznam.
+- T022 PASS ve dvou odlišných fázích otevřené části: klidový relaunch, pravdivé označení obnoveného rozsahu a přehratelné uzavřené části. T023 PASS přes čtyři poslechnuté 55s hranice bez opakování či nevysvětlené díry. C01c je přijato v prototypovém rozsahu; G0/G1/G8 a terénní připravenost zůstávají nesplněné.
 
 
-Provést první průchod T022 na buildu 0.3.0 (4): nejméně 2:15 neutrálního souvislého zvuku se značkami, nucené ukončení během otevřené části, relaunch bez automatického mikrofonu a poslech zachovaného rozsahu.
+Vyčkat na výslovný pokyn k C02a: minimální přijímač syntetického souboru a porovnání hashe přes soukromé HTTPS. C01c dále nerozšiřovat.
 
 ## Rizika
 
 - C01a přijato, ale širší brány G0/G1/G8 a terénní připravenost zůstávají nesplněné.
 - C01b přijato v prototypovém rozsahu. Vítr a plná integrace T021 v C04 čekají; jeden nevysvětlený nereprodukovaný tichý úsek z prvního T059 zůstává rizikem.
-- C01c má opravený potvrzený pád buildu 3 a krátký fyzický smoke buildu 4 prošel. Kontinuita segmentů, background input a rozsah ztráty po pádu zůstávají otevřené do T022/T023.
+- C01c je přijato v prototypovém rozsahu po T022/T023. Výsledek nepokrývá dlouhodobou terénní spotřebu ani plný databázový a serverový T061, který zůstává C05a.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
 - Podepsaný build není instalace ani fyzická přejímka; vývojový profil je časově omezený. U01–U15 se bez nového rozhodnutí neotevírají.
 
@@ -625,3 +626,21 @@ Další krok:
 
 Technický důkaz:
 - Účtenka: Komentář 10,7 s, 2 058 496 B, 48 kHz mono, jeden segment, `interrupted=false`, `recovered=false`, bez mezery. Všech 136 předchozích položek zůstalo shodných; přibylo sedm očekávaných položek. Žádný CAF se nekopíroval ani neposlouchal nástrojem.
+
+### 2026-09-17 13:12 CEST — T022/T023 PASS; C01c přijato
+
+Hotovo:
+- T022 prošlo dvěma nucenými ukončeními v odlišných fázích otevřené části. Relaunch zůstal bez mikrofonu, obnovený rozsah byl pravdivě označený a přehratelný.
+- T023 prošlo souvislým testem přes čtyři 55s hranice bez slyšitelného opakování, nevysvětlené mezery nebo useknutí.
+
+Rozhodnutí:
+- C01c 0.3.0 (4) je přijato v prototypovém rozsahu. C01c se dál nerozšiřuje; plný databázový a serverový T061 patří do C05a.
+
+Další krok:
+- Vyčkat na výslovný pokyn k C02a.
+
+Navrhované další kroky:
+- V C02a připravit pouze minimální přijímač syntetického souboru a porovnání hashe přes soukromé HTTPS. U15 zůstává C03/C04 a Viewer C08c–C08f.
+
+Technický důkaz:
+- První T022 ukázalo tři obnovitelné části a 02:18 zachovaného přehratelného rozsahu; druhé splnilo stejná kritéria při pozdějším pádu. Osm značek T023 kolem čtyř hranic bylo podle Míly slyšet jednou a ve správném pořadí. Audio nebylo čteno nástrojem; telefon byl při závěrečném zápisu nedostupný.

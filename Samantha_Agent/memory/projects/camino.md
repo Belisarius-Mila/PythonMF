@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-17 11:46 CEST
+Aktualizováno: 2026-09-17 13:12 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -16,7 +16,7 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 - Delta C00 audit Vieweru: Tailscale 1.102.4 je online, soukromý HTTPS Serve vede na živý Cockpit, Funnel není povolený, Cockpit smoke 5/5, AC `sleep=0` a FileVault zapnutý. Samostatný Camino backend/worker/Viewer, jeho autorizace, záloha, restart a vzdálený test na Janiných zařízeních ještě neexistují; G8 NEPROVEDENO.
 - Profilový fast-forward byl opraven tak, aby whitespace preflight použil `.gitattributes` z přijímaného commitu; importované Markdown hard breaks tak neoslabují kontrolu ostatních souborů. Regrese je krytá testem.
 - T016 PASS: přesně 30:24,406, 175 147 072 B, 48 kHz mono, režim Letadlo, převážně pod zámkem a celý poslech OK. T018–T020, T024 a T059 PASS podle Míly. T021 PASS v rozsahu C01b prototypu; plná integrace se zopakuje v C04. T059 po restartu ochránil data a řízené opakování zachytilo všechny značky pod zámkem. Vítr neověřen.
-- C01b zahájeno výslovným pokynem Míly; C01a zůstává přijaté. Prototyp 0.2.0 (2) je lokálně připraven pro background audio, přerušení a vědomé pokračování. Verze 0.2.0 je nyní nainstalovaná a spuštěná na iPhonu; inventář 15 původních souborů se před/po shoduje v cestách a velikostech.
+- C01b 0.2.0 (2) je historicky přijaté pro background audio, přerušení a vědomé pokračování; před přechodem na C01c prošla instalace i zachování tehdejších 15 položek. Aktuálně je na iPhonu C01c 0.3.0 (4).
 - Běžící recorder přežije změnu scenePhase; nový Start/Pokračovat pouze v popředí. Přerušení ihned pozastaví vstup, ověří dostupnou část a nabídne Pokračovat/Ukončit. Pokračování vytváří novou část stejné session s evidovanou pauzou, bez přepisu předchozího média.
 - Soubory vytvořené v C01b mají completeUntilFirstUserAuthentication; původní C01a soubory se nemigrují ani nemění. Staré JSON podporuje volitelné continuation. Tyto starší jednotlivé CAF samy nejsou C01c segmentový journal ani důkaz 60s cíle.
 - Ověřeno 47/47 Swift testů, 2/2 UI testy simulátoru včetně snímku obrazovky, finální podepsaný iOS build a strict podpis; UIBackgroundModes=[audio]. Plná projektová brána PASS, 1684/1684 testů.
@@ -25,7 +25,9 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 - Build 3 při prvním Start padal. Pět shodných crash reportů potvrdilo `SIGTRAP` v `_swift_task_checkIsolatedSwift`: inline tap callback zdědil `MainActor`, ale běžel na real-time audio frontě. Build 4 vytváří callback v `nonisolated` helperu; přísné Swift 6 kontroly zůstávají zapnuté.
 - Opravný průchod: 52/52 Swift testů, 2/2 UI testy, nepodepsaný i podepsaný build a strict podpis PASS. 0.3.0 (4) je nainstalovaná a spuštěná bez odinstalace. Všech 136 položek před instalací zůstalo po instalaci i launchi shodných v cestě, typu a velikosti; pět nedokončených pokusů se nemazalo.
 - Krátký fyzický smoke buildu 4 PASS podle Míly: Start nespadl, čas i ukazatel rostly, Stop fungoval a nový záznam šel přehrát. Účtenka potvrzuje normálně dokončený Komentář 10,7 s, 2 058 496 B, 48 kHz mono, jeden segment, bez přerušení, recovery a mezery. Všech 136 předchozích položek zůstalo beze změny; přibylo sedm očekávaných položek nového pokusu.
-- Profil hlavní aplikace do 22. září 18:16 CEST. T022/T023 a fyzická kontinuita segmentů NEPROVEDENO; G0/G1 a terénní připravenost nesplněné. Původní nahrávky i samostatný Camino Test zůstávají zachované.
+- T022 PASS ve dvou odlišných fázích otevřené části. Po obou nucených ukončeních zůstal relaunch v klidu, obnovené částečné nahrávky byly pravdivě označené a zachovaný rozsah přehratelný. Snímek prvního průchodu ukazuje tři části a 02:18 zachovaného rozsahu.
+- T023 PASS podle Míly: v souvislém nejméně čtyřminutovém záznamu zazněly značky před a po čtyřech 55s hranicích jednou, ve správném pořadí, bez opakování, nevysvětlené mezery či useknutí. C01c 0.3.0 (4) je tím přijaté v prototypovém rozsahu.
+- Profil hlavní aplikace platí do 22. září 18:16 CEST. G0/G1/G8, terénní připravenost a dlouhodobá spotřeba zůstávají nesplněné; plný databázový T061 se vrátí v C05a. Původní nahrávky i samostatný Camino Test zůstávají zachované.
 
 
 ## Zdroje a návaznost
@@ -55,15 +57,14 @@ kódu nevyvolává; FAIL se nejdřív doloží a opraví v aktuálním rozsahu.
 
 - C01a přijato, ale širší brány G0/G1/G8 a terénní připravenost zůstávají nesplněné.
 - C01b přijato v prototypovém rozsahu. Vítr a plná integrace T021 v C04 čekají; jeden nevysvětlený nereprodukovaný tichý úsek z prvního T059 zůstává rizikem.
-- C01c má opravený potvrzený pád buildu 3 a krátký fyzický smoke buildu 4 prošel. Skutečná kontinuita na 55s hranicích, background běh nového `AVAudioEngine` a rozsah ztráty po nuceném pádu čekají na T022/T023. Otevírání dalšího CAF v tap callbacku může na zařízení odhalit mezeru; T023 to musí posoudit poslechem.
+- C01c je přijaté v prototypovém rozsahu po T022/T023. Čtyři fyzicky poslechnuté 55s přechody nevykázaly mezeru ani opakování a dva pády doložily pravdivou obnovu; nejde však o dlouhodobý terénní nebo spotřební test ani o plný databázový T061.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
 - Podepsaný build není instalace ani fyzická přejímka; vývojový profil je časově omezený. U01–U15 se bez nového rozhodnutí neotevírají.
 
 ## Další krok
 
-Provést T022 na nainstalované 0.3.0 (4): nejméně 2:15 neutrálního souvislého
-zvuku se značkami, nucené ukončení během otevřené části, relaunch bez
-automatického mikrofonu a poslech zachovaného rozsahu.
+Vyčkat na výslovný pokyn k C02a: minimální přijímač syntetického souboru a
+porovnání hashe přes soukromé HTTPS. C01c dále nerozšiřovat.
 
 Historický doklad založení:
 Ověření založení: 56/56 testů integrace (54 + 2 profilové testy) a rychlá statická brána OK.
@@ -636,3 +637,17 @@ Rozhodnutí a rizika:
 
 Další krok:
 - Provést první průchod T022 na 0.3.0 (4), potom podle výsledku předat opakování v jiné fázi otevřeného segmentu nebo opravu.
+
+### 2026-09-17 13:12 CEST — T022/T023 PASS; C01c přijato
+
+Hotovo / důkaz:
+- T022 prošlo ve dvou odlišných fázích otevřené části. Po obou nucených ukončeních se mikrofon sám nespustil, aplikace nabídla pravdivě označenou obnovenou částečnou nahrávku a celý zachovaný rozsah byl podle Míly přehratelný.
+- Snímek prvního průchodu ukazuje `Připraveno 00:00`, tři obnovitelné části a 02:18 zachovaného přehratelného rozsahu. Druhý průchod splnil stejná kritéria při pozdějším pádu v otevřené části.
+- T023 prošlo souvislým nejméně čtyřminutovým testem. Značky před a po čtyřech 55s hranicích byly podle Míly slyšet jednou, ve správném pořadí, bez opakování, nevysvětlené mezery a useknutí.
+
+Rozhodnutí a rizika:
+- C01c 0.3.0 (4) je přijato v prototypovém rozsahu. Další oprava ani nový build nejsou potřeba.
+- Tento výsledek není G0/G1/G8, dlouhodobý terénní ani spotřební test. Plný databázový a serverový T061 zůstává C05a.
+
+Další krok:
+- Vyčkat na výslovný pokyn k C02a; C01c dále nerozšiřovat.

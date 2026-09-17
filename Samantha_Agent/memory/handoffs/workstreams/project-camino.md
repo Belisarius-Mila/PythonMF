@@ -1,13 +1,13 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-Aktualizováno: 2026-09-17 11:46 CEST
+Aktualizováno: 2026-09-17 13:12 CEST
 
 - Autoritativní podklady jsou v0.5 + závazný dodatek U15. Původní v0.5 je importovaná beze změny a manifest 6/6 je ověřený. Celé `Do deníku` může po synchronizaci do soukromého Vieweru Jany; samostatná Úvaha vždy začíná `Jen pro mě` a vyžaduje vědomé `Vložit do deníku`.
 - Viewer delta audit: Tailscale/Serve/Cockpit tvoří použitelný základ, Funnel je vypnutý, Cockpit smoke 5/5, AC nespí a FileVault je zapnutý. Camino backend/worker/Viewer, samostatná autorizace, záloha, restart a test Janiných zařízení chybějí; G8 NEPROVEDENO.
 - Profilový fast-forward má opravený whitespace preflight: používá příchozí `.gitattributes`, bez globálního vypnutí kontroly; regresní test je zelený.
 - T016 PASS: přesně 30:24,406, 175 147 072 B, 48 kHz mono, režim Letadlo, převážně pod zámkem a celý poslech OK. T018–T020, T024 a T059 PASS podle Míly. T021 PASS v rozsahu C01b prototypu; plná integrace se zopakuje v C04. T059 po restartu ochránil data a řízené opakování zachytilo všechny značky pod zámkem. Vítr neověřen.
-- C01b zahájeno výslovným pokynem Míly; C01a zůstává přijaté. Prototyp 0.2.0 (2) je lokálně připraven pro background audio, přerušení a vědomé pokračování. Verze 0.2.0 je nyní nainstalovaná a spuštěná na iPhonu; inventář 15 původních souborů se před/po shoduje v cestách a velikostech.
+- C01b 0.2.0 (2) je historicky přijaté pro background audio, přerušení a vědomé pokračování; před přechodem na C01c prošla instalace i zachování tehdejších 15 položek. Aktuálně je na iPhonu C01c 0.3.0 (4).
 - Běžící recorder přežije změnu scenePhase; nový Start/Pokračovat pouze v popředí. Přerušení ihned pozastaví vstup, ověří dostupnou část a nabídne Pokračovat/Ukončit. Pokračování vytváří novou část stejné session s evidovanou pauzou, bez přepisu předchozího média.
 - Soubory vytvořené v C01b mají completeUntilFirstUserAuthentication; původní C01a soubory se nemigrují ani nemění. Staré JSON podporuje volitelné continuation. Tyto starší jednotlivé CAF samy nejsou C01c journal ani důkaz 60s cíle.
 - Ověřeno 47/47 Swift testů, 2/2 UI testy simulátoru včetně snímku obrazovky, finální podepsaný iOS build a strict podpis; UIBackgroundModes=[audio]. Plná projektová brána PASS, 1684/1684 testů.
@@ -15,12 +15,14 @@ Aktualizováno: 2026-09-17 11:46 CEST
 - C01c build 3 při prvním Start padal. Pět shodných crash reportů potvrdilo Swift 6 actor-isolation trap v tap callbacku, nikoli neplatný audioformát nebo první zápis CAF.
 - Build 0.3.0 (4) vytváří tap callback v `nonisolated` helperu. 52/52 Swift testů, 2/2 UI testy, nepodepsaný i podepsaný build a strict podpis PASS.
 - 0.3.0 (4) je nainstalovaná a spuštěná bez odinstalace. Všech 136 položek se po instalaci a launchi shoduje v cestě, typu i velikosti; pět nedokončených pokusů se nemazalo. Profil do 22. září 18:16 CEST.
-- Krátký fyzický Start/Stop buildu 4 PASS podle Míly: bez pádu, čas i ukazatel rostly a nový záznam šel přehrát. Účtenka: Komentář 10,7 s, 2 058 496 B, 48 kHz mono, jeden segment, bez přerušení a recovery. T022/T023, fyzická kontinuita segmentů, G0/G1/G8 a terénní připravenost zůstávají NEPROVEDENO.
+- Krátký fyzický Start/Stop buildu 4 PASS podle Míly: bez pádu, čas i ukazatel rostly a nový záznam šel přehrát. Účtenka: Komentář 10,7 s, 2 058 496 B, 48 kHz mono, jeden segment, bez přerušení a recovery.
+- T022 PASS ve dvou různých fázích otevřené části. Po pádu žádný automatický mikrofon, obnovené částečné nahrávky byly pravdivě označené a zachovaný rozsah přehratelný; první průchod měl tři části a 02:18 zachovaného rozsahu.
+- T023 PASS podle Míly: čtyři fyzicky poslechnuté 55s přechody bez opakování, nevysvětlené mezery či useknutí. C01c 0.3.0 (4) je přijato v prototypovém rozsahu. G0/G1/G8 a terénní připravenost zůstávají NEPROVEDENO.
 
 ### Vzkaz pro pokračování
 
 - Restart a následný schválený úklid dokončeny. Před zahájením instalace bylo na SSD 85,79 GiB volných. Dřívější přesun USA neopakovat.
-- C01c 0.3.0 (4) je nainstalované a krátký fyzický smoke prošel. Další je T022. Build 3 ani starou 0.2.0 už nepoužívat.
+- C01c 0.3.0 (4) je po T022/T023 přijaté v prototypovém rozsahu. Build 3 ani starou 0.2.0 už nepoužívat. C02a zahájit jen po výslovném pokynu.
 - Viewer nepřeskakovat před C08c–C08f. U15 doménově implementovat v C03/C04; provizorně jej nepřidávat do C01b JSON.
 - Po každém Mílou oznámeném výsledku bez další žádosti vyhodnotit stav, říct, zda je potřeba vývoj, a rovnou dát přesný návod i kritéria PASS následujícího neprovedeného testu. Shoda s návrhem nevyžaduje změnu kódu; FAIL nejdřív doložit a potom opravit v aktuální etapě.
 - Starší c+p+n d573e90c je historické. Dnešní p+n zahrnuje celý balíček Camina a toto předání; výsledek určuje živý audit a kanonická deployment receipt.
@@ -29,7 +31,7 @@ Aktualizováno: 2026-09-17 11:46 CEST
 
 - C01a přijato, ale širší brány G0/G1/G8 a terénní připravenost zůstávají nesplněné.
 - C01b přijato v prototypovém rozsahu. Vítr a plná integrace T021 v C04 čekají; jeden nevysvětlený nereprodukovaný tichý úsek z prvního T059 zůstává rizikem.
-- C01c build 3 měl potvrzený pád při Start; build 4 jej opravil a krátký fyzický smoke prošel. Kontinuita 55s přechodů, background běh input tapu a rozsah ztráty po pádu zůstávají neověřené do T022/T023.
+- C01c build 3 měl potvrzený pád při Start; build 4 jej opravil a T022/T023 prošly. Výsledek nepokrývá dlouhodobou terénní spotřebu ani plný databázový T061, který zůstává C05a.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
 - Podepsaný build není instalace ani fyzická přejímka; vývojový profil je časově omezený. U01–U15 se bez nového rozhodnutí neotevírají.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -42,22 +44,22 @@ Typ: Project
 Priorita: 1
 Stav: rozpracovane
 Pripomenout pri startu: ano
-Datum: 2026-09-17 11:46 CEST
+Datum: 2026-09-17 13:12 CEST
 
 Co se resilo:
-Fyzické potvrzení opravy okamžitého pádu C01c při prvním Start.
+Fyzická přejímka obnovy po pádu a kontinuity segmentů C01c.
 
 Co je hotove:
-V0.5 + U15 platí; C01a/C01b přijaty. Příčina pádu buildu 3 je potvrzená z pěti shodných crash reportů. Opravený build 0.3.0 (4) prošel 52/52 + 2/2, buildem, strict podpisem, instalací i launchem. Krátký fyzický smoke PASS: Start bez pádu, rostoucí čas i ukazatel a přehratelný nový záznam. Všech 136 předchozích položek zůstalo beze změny.
+V0.5 + U15 platí; C01a/C01b/C01c přijaty v prototypovém rozsahu. Build 0.3.0 (4) prošel 52/52 + 2/2, buildem, strict podpisem, instalací, krátkým smokem, dvěma pády T022 v odlišných fázích a poslechovým T023 přes čtyři 55s hranice. Všech 136 položek před instalací zůstalo beze změny.
 
 Co neni hotove:
-T022/T023 a plný T061, plná integrace T021 v C04, U15 v C03/C04, Viewer C08c–C08f, G0/G1/G8 a terénní připravenost. První tichý úsek T059 zůstává nereprodukovaným pozorováním.
+Plný databázový T061 v C05a, plná integrace T021 v C04, U15 v C03/C04, Viewer C08c–C08f, G0/G1/G8, dlouhodobá spotřeba a terénní připravenost. První tichý úsek T059 zůstává nereprodukovaným pozorováním.
 
 Dalsi krok:
-Provést první průchod T022 na nainstalované 0.3.0 (4): nejméně 2:15 neutrálního souvislého zvuku se značkami, nucené ukončení během otevřené části, relaunch bez automatického mikrofonu a poslech zachovaného rozsahu.
+Vyčkat na výslovný pokyn k C02a: minimální přijímač syntetického souboru a porovnání hashe přes soukromé HTTPS.
 
 Navrhovane dalsi kroky:
-Po prvním T022 předat jeho opakování v jiné fázi otevřeného segmentu; po vyhodnocení pokračovat T023 nebo další opravou.
+Po schválení provést pouze C02a; C01c dále nerozšiřovat. U15 implementovat až v C03/C04 a Viewer v C08c–C08f.
 
 Zmenene nebo relevantni soubory:
 `camino/`, `memory/projects/camino.md`, katalog, registry a kanonický TVBCP.
@@ -648,3 +650,16 @@ Rozhodnutí a rizika:
 
 Další krok:
 - Provést první průchod T022 na 0.3.0 (4), potom vyhodnotit opakování v jiné fázi otevřeného segmentu.
+
+### 2026-09-17 13:12 CEST — T022/T023 PASS; C01c přijato
+
+Hotovo / důkaz:
+- T022 prošlo ve dvou odlišných fázích otevřené části. Po obou pádech se mikrofon sám nespustil, obnovené částečné nahrávky byly pravdivě označené a zachovaný rozsah přehratelný. První průchod ukázal tři části a 02:18 zachovaného rozsahu.
+- T023 prošlo souvislým nejméně čtyřminutovým poslechem. Značky před a po čtyřech 55s hranicích byly podle Míly slyšet jednou, ve správném pořadí a bez mezery, opakování či useknutí.
+
+Rozhodnutí a rizika:
+- C01c 0.3.0 (4) je přijato v prototypovém rozsahu; další oprava ani nový build nejsou potřeba.
+- G0/G1/G8, dlouhodobá terénní spotřeba a plný databázový T061 zůstávají otevřené. Telefon nebyl při závěrečném zápisu připojený; poslech T023 je doložen Mílou, ne technickým čtením audia.
+
+Další krok:
+- Vyčkat na výslovný pokyn k C02a; C01c dále nerozšiřovat.
