@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-17 14:11 CEST
+Aktualizováno: 2026-09-17 15:19 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -29,7 +29,7 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 - T023 PASS podle Míly: v souvislém nejméně čtyřminutovém záznamu zazněly značky před a po čtyřech 55s hranicích jednou, ve správném pořadí, bez opakování, nevysvětlené mezery či useknutí. C01c 0.3.0 (4) je tím přijaté v prototypovém rozsahu.
 - Profil hlavní aplikace platí do 22. září 18:16 CEST. G0/G1/G8, terénní připravenost a dlouhodobá spotřeba zůstávají nesplněné; plný databázový T061 se vrátí v C05a. Původní nahrávky i samostatný Camino Test zůstávají zachované.
 - C02a zahájeno výslovným pokynem Míly. Lokální loopback přijímač pro syntetický soubor streamuje do soukromého stagingu, sám ověřuje velikost/SHA-256 a vytváří objekt i účtenku create-only. Identický retry neduplikuje; jiné bajty pod stejným ID jsou konflikt.
-- C02a cílené automatické ověření 10/10 PASS. Soukromé HTTPS přes Tailscale Serve, skutečný token, nasazení a fyzický klientský přenos NEPROVEDENO; úplné T043/T048/T051 nejsou tímto krokem splněné.
+- C02a cílené automatické ověření 10/10 PASS. Následný privátní HTTPS smoke přes dočasnou cestu Tailscale Serve ověřil správný upload, serverový hash a délku, právě jeden objekt a účtenku, chybný hash, konflikt i idempotentní retry. Funnel zůstal vypnutý, Cockpit dostupný a původní Serve konfigurace byla po testu přesně obnovena. C02a je přijaté v prototypovém rozsahu; fyzický iPhone/cizí síť a úplné T043/T048/T051 zůstávají neprovedené.
 
 
 ## Zdroje a návaznost
@@ -60,15 +60,14 @@ kódu nevyvolává; FAIL se nejdřív doloží a opraví v aktuálním rozsahu.
 - C01a přijato, ale širší brány G0/G1/G8 a terénní připravenost zůstávají nesplněné.
 - C01b přijato v prototypovém rozsahu. Vítr a plná integrace T021 v C04 čekají; jeden nevysvětlený nereprodukovaný tichý úsek z prvního T059 zůstává rizikem.
 - C01c je přijaté v prototypovém rozsahu po T022/T023. Čtyři fyzicky poslechnuté 55s přechody nevykázaly mezeru ani opakování a dva pády doložily pravdivou obnovu; nejde však o dlouhodobý terénní nebo spotřební test ani o plný databázový T061.
-- C02a je lokálně implementované, ale privátní HTTPS cesta zatím není živě ověřená. Standard-library receiver je jen izolovaný experiment; produkční cíl zůstává FastAPI v samostatném prostředí Camina.
+- C02a je přijaté v prototypovém rozsahu po lokálních testech a privátním HTTPS smoke. Smoke byl spuštěn z téhož Macu přes tailnet DNS; nedokládá iPhone, cizí síť, přerušení velkého souboru ani trvalou službu. Standard-library receiver zůstává izolovaný experiment; produkční cíl je FastAPI v samostatném prostředí Camina.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
 - Podepsaný build není instalace ani fyzická přejímka; vývojový profil je časově omezený. U01–U15 se bez nového rozhodnutí neotevírají.
 
 ## Další krok
 
-Po checkpointu samostatně autorizovat privátní HTTPS smoke C02a se syntetickým
-souborem; ověřit shodu velikosti/SHA-256, jednu účtenku, chybný hash, identický
-retry a nepřítomnost veřejné cesty.
+Vyčkat na výslovný pokyn k C02b: experiment velkého souboru, souborových částí
+a chování iOS na cizí síti bez veřejného alternativního endpointu.
 
 Historický doklad založení:
 Ověření založení: 56/56 testů integrace (54 + 2 profilové testy) a rychlá statická brána OK.
@@ -673,3 +672,21 @@ Navrhované další kroky:
 
 Technický důkaz:
 - `tests.test_camino_receiver` 10/10 PASS. Lokální HTTP pouze v dočasném adresáři; služba nebyla nasazena, Tailscale se neměnil a žádné reálné médium ani skutečný token se nepoužil.
+
+### 2026-09-17 15:19 CEST — C02a privátní HTTPS smoke PASS
+
+Hotovo:
+- Dočasná soukromá HTTPS cesta Tailscale Serve předala syntetický soubor loopback přijímači. Server potvrdil vlastní délku a SHA-256, vytvořil právě jeden objekt a jednu účtenku; identický retry neduplikoval a chybné či konfliktní údaje nic nepřepsaly.
+- Kořen Cockpitu zůstal dostupný, Funnel nebyl aktivní a po testu byla původní Serve konfigurace přesně obnovena. C02a je dokončené v prototypovém rozsahu.
+
+Rozhodnutí:
+- Žádné nové architektonické rozhodnutí. C02a zůstává izolovaný standard-library experiment; produkční cíl zůstává FastAPI v samostatném prostředí Camina.
+
+Další krok:
+- Vyčkat na výslovný pokyn k C02b.
+
+Navrhované další kroky:
+- V C02b ověřit velký soubor, souborové části, přerušení a chování iOS na cizí síti bez veřejného endpointu. T043/T048/T051 zatím neoznačovat za PASS.
+
+Technický důkaz:
+- Přes tailnet HTTPS: health 200; první upload 201; identický retry 200 s `created=false`; chybný hash 422; konflikt 409; úložiště 1 objekt + 1 účtenka se shodným hashem. Cockpit health 200, pouze tailnet, Serve stav po testu shodný s výchozím.

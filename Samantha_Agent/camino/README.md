@@ -3,7 +3,7 @@
 Soukromý cestovní deník: offline záznam na iPhonu, soukromé zpracování na Macu
 a pozdější film z povolených zdrojů.
 
-**Stav: autoritativní podklady v0.5 + U15. C01a, C01b a C01c jsou přijaty v prototypovém rozsahu. C02a je zahájené: lokální minimální přijímač syntetického souboru prošel automatickým ověřením, privátní HTTPS smoke ale ještě neproběhl. Camino Viewer je P0, ale podle etap se implementuje až v C08c–C08f.**
+**Stav: autoritativní podklady v0.5 + U15. C01a, C01b, C01c a C02a jsou přijaty v prototypovém rozsahu. Minimální přijímač C02a prošel automatickými testy i dočasným privátním HTTPS smoke přes Tailscale Serve; trvalá služba ani veřejná cesta nezůstala aktivní. Camino Viewer je P0, ale podle etap se implementuje až v C08c–C08f.**
 
 - [Podklady v0.5](CAMINO_podklady_v0.5/README_v0.5.md)
 - [Funkční specifikace v0.5](CAMINO_podklady_v0.5/CAMINO_funkcni_specifikace_v0.5.md)
@@ -30,9 +30,9 @@ V Human–Adam se projekt jmenuje **Camino** (`project-camino`).
 - [Audio prototyp](prototypes/audio/README.md)
 - [Aktuální report a překážky](docs/C01a_AUDIO_PROTOTYPE_REPORT.md)
 
-Aktuální etapou je C02a. Lokální create-only přijímač je připravený; dalším
-krokem je samostatně autorizovaný syntetický smoke přes soukromé HTTPS. Nejde
-zatím o produkční upload server ani PASS úplných T043/T048/T051.
+C02a je dokončené v prototypovém rozsahu. Další plánovanou etapou je po
+výslovném pokynu C02b: velký soubor, souborové části a chování iOS na cizí
+síti. C02a není produkční upload server ani PASS úplných T043/T048/T051.
 
 Rozbalené podklady v0.4 a v0.5 jsou verzované včetně manifestů. Původní ZIPy
 jsou zachované lokálně a ignorované Gitem; profilové workspaces přebírají

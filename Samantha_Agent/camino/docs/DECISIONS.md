@@ -202,5 +202,8 @@ jiné bajty pod stejným ID jsou konflikt. Klientský název se nepoužije jako
 serverová cesta. Token, obsah ani cesty se nelogují.
 
 Tento krok neimplementuje chunkování, URLSession, SQLite, produkční párování ani
-obnovu po síťovém přerušení. Úspěšné lokální testy nejsou T043/T048/T051 ani
-důkaz soukromého HTTPS; tyto hranice zůstávají viditelné v reportu C02a.
+obnovu po síťovém přerušení. Samotné lokální testy nebyly důkazem soukromého
+HTTPS; samostatný autorizovaný smoke 2026-09-17 tuto síťovou vrstvu doložil a
+po testu přesně obnovil původní Serve konfiguraci. Ani společně tyto důkazy
+nejsou T043/T048/T051 nebo vzdálený klientský test; hranice zůstávají viditelné
+v reportu C02a.

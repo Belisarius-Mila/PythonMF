@@ -1,35 +1,33 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-09-17 14:19 CEST
+- Aktualizováno po dokončení C02a: 2026-09-17 15:19 CEST
 
 ### Hotovo
-- Lokální C02a přijímač bezpečně ověřuje syntetický soubor serverovým hashem bez přepisu či duplicit
-- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- C02a privátní HTTPS smoke prošel se syntetickým souborem, serverovým hashem, jednou účtenkou, chybným hashem, konfliktem a idempotentním retry.
+- Funnel zůstal vypnutý, Cockpit dostupný a původní Tailscale Serve konfigurace byla po testu přesně obnovena.
 
 ### Otevřeno
-- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- C02a smoke nebyl fyzický test z iPhonu nebo cizí sítě a není PASS úplných T043/T048/T051.
 
 ### Rizika
-- Žádné další doložené provozní riziko.
+- Přijímač není trvalá služba; produkční FastAPI, klientská fronta, chunkování a obnova přenosu teprve následují.
 
 ### Další krok
-- Po checkpointu autorizovat privátní HTTPS smoke přes Tailscale Serve se syntetickým souborem
+- Vyčkat na výslovný pokyn k C02b: velký soubor, souborové části a chování iOS na cizí síti.
 
 ### Rozhodnutí
 - C02a zůstává izolovaný standard-library prototyp; produkční serverový cíl zůstává FastAPI v samostatném prostředí Camina
 
 ### Navrhované další kroky
-- Ověřit správný upload a shodu velikosti/SHA-256
-- Ověřit chybný hash a identický retry
-- Potvrdit, že Funnel ani veřejná cesta nejsou aktivní
+- V C02b ověřit přerušení velkého souboru a obnovu po částech.
+- Ověřit chování skutečného iOS klienta na cizí síti.
+- Zachovat zákaz Funnel a veřejného alternativního endpointu.
 
 ### Technický stav checkpointu
-- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `34a9e21bc148`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `34a9e21bc148` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-09-17T11:20:39+00:00.
-- Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
-- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
+- Implementační commit `4e54f340e2af` byl před tímto uzavíracím zápisem na `origin/main` a živý audit potvrzoval jeho nasazení, smoke 5/5 a připojený runtime.
+- C02a HTTPS smoke: health 200, upload 201, retry 200 bez duplicity, chybný hash 422, konflikt 409, právě jeden objekt a účtenka.
+- Uzavírací dokumentační checkpoint po tomto zápisu může čekat lokálně na samostatně autorizovaný push; sám nemění běžící přijímač ani Cockpit.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -41,22 +39,22 @@ Typ: Project
 Priorita: 1
 Stav: rozpracovane
 Pripomenout pri startu: ano
-Datum: 2026-09-17 13:12 CEST
+Datum: 2026-09-17 15:19 CEST
 
 Co se resilo:
-Fyzická přejímka obnovy po pádu a kontinuity segmentů C01c.
+Dokončení C02a privátním HTTPS smokem přes dočasnou cestu Tailscale Serve.
 
 Co je hotove:
-V0.5 + U15 platí; C01a/C01b/C01c přijaty v prototypovém rozsahu. Build 0.3.0 (4) prošel 52/52 + 2/2, buildem, strict podpisem, instalací, krátkým smokem, dvěma pády T022 v odlišných fázích a poslechovým T023 přes čtyři 55s hranice. Všech 136 položek před instalací zůstalo beze změny.
+V0.5 + U15 platí; C01a/C01b/C01c/C02a jsou přijaty v prototypovém rozsahu. C02a přijímač prošel 10/10 testy a privátním HTTPS smokem: správný serverový hash a délka, jedna účtenka, chybný hash, konflikt a identický retry bez duplicity. Dočasná Serve cesta byla odebrána a původní konfigurace obnovena.
 
 Co neni hotove:
-Plný databázový T061 v C05a, plná integrace T021 v C04, U15 v C03/C04, Viewer C08c–C08f, G0/G1/G8, dlouhodobá spotřeba a terénní připravenost. První tichý úsek T059 zůstává nereprodukovaným pozorováním.
+C02b, fyzický klientský přenos z iPhonu/cizí sítě, T043/T048/T051, produkční FastAPI a trvalá služba. Dále plný databázový T061 v C05a, plná integrace T021 v C04, U15 v C03/C04, Viewer C08c–C08f, G0/G1/G8, dlouhodobá spotřeba a terénní připravenost.
 
 Dalsi krok:
-Vyčkat na výslovný pokyn k C02a: minimální přijímač syntetického souboru a porovnání hashe přes soukromé HTTPS.
+Vyčkat na výslovný pokyn k C02b: experiment velkého souboru, souborových částí a chování iOS na cizí síti.
 
 Navrhovane dalsi kroky:
-Po schválení provést pouze C02a; C01c dále nerozšiřovat. U15 implementovat až v C03/C04 a Viewer v C08c–C08f.
+Po schválení provést pouze C02b bez veřejného alternativního endpointu. U15 implementovat až v C03/C04 a Viewer v C08c–C08f.
 
 Zmenene nebo relevantni soubory:
 `camino/`, `memory/projects/camino.md`, katalog, registry a kanonický TVBCP.
@@ -672,3 +670,21 @@ Další krok:
 - Změněné cesty před paměťovým zápisem (9): `Samantha_Agent/camino/README.md`, `Samantha_Agent/camino/docs/DECISIONS.md`, `Samantha_Agent/memory/projects/camino.md`, `Samantha_Agent/scripts/cockpit_quality_gate.py`, `Samantha_Agent/tests/test_cockpit_quality_gate.py`, `Samantha_Agent/app/camino_receiver.py`, `Samantha_Agent/camino/docs/C02a_SYNTHETIC_RECEIVER_REPORT.md`, `Samantha_Agent/camino/tasks/C02a_SYNTHETIC_RECEIVER.md`, `Samantha_Agent/tests/test_camino_receiver.py`
 - Commit: `Implement Camino C02a synthetic receiver`
 - Další krok: Po checkpointu autorizovat privátní HTTPS smoke přes Tailscale Serve se syntetickým souborem
+
+### 2026-09-17 15:19 CEST — C02a privátní HTTPS smoke PASS
+
+Hotovo:
+- Dočasná privátní HTTPS cesta Tailscale Serve předala syntetický soubor loopback přijímači; server ověřil délku a SHA-256 a bezpečně zachoval právě jeden výsledek.
+- Chybný hash i konflikt byly odmítnuty, identický retry nevytvořil duplicitu. Cockpit zůstal dostupný, Funnel vypnutý a původní Serve konfigurace byla přesně obnovena.
+
+Rozhodnutí:
+- C02a je přijato v prototypovém rozsahu. Produkční cíl zůstává FastAPI v samostatném prostředí; dočasný standard-library receiver se nepovyšuje na trvalou službu.
+
+Další krok:
+- Vyčkat na výslovný pokyn k C02b.
+
+Navrhované další kroky:
+- V C02b ověřit velký soubor, části, přerušení a skutečný iOS klient na cizí síti; T043/T048/T051 zatím ponechat otevřené.
+
+Technický důkaz:
+- Tailnet HTTPS health 200; upload 201; retry 200 s `created=false`; chybný hash 422; konflikt 409; úložiště 1 objekt + 1 účtenka. Kořen Cockpitu 200, Funnel pouze tailnet, Serve stav po testu shodný s výchozím.

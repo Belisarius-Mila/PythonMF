@@ -53,12 +53,14 @@ URLSession ani produkční autorizaci zařízení.
 - traversal, neplatný hash a symlinkovaná interní složka;
 - povinný token a odmítnutí veřejného bindu.
 
-## Další fyzická předávka
+## Výsledek privátní HTTPS předávky
 
-Po samostatně autorizovaném spuštění služby a privátní HTTPS cesty se použije
-jen syntetický soubor. Odesílatel a přijímač nezávisle spočítají velikost a
-SHA-256; shoda, jedna účtenka a nepřítomnost veřejné cesty tvoří C02a smoke.
-Potom se kontrolovaně zopakuje chybný hash a identický retry.
+Autorizovaný smoke 2026-09-17 použil jen syntetický soubor a dočasnou privátní
+HTTPS cestu Tailscale Serve. Odesílatel a přijímač nezávisle potvrdili shodnou
+velikost a SHA-256. Vznikl jeden objekt a jedna účtenka; chybný hash byl
+odmítnut, identický retry nevytvořil duplicitu a konflikt nepřepsal originál.
+Funnel zůstal vypnutý. Dočasná cesta byla po testu odebrána a původní Serve
+konfigurace se přesně obnovila.
 
 Tento smoke ještě není T043 s přerušením velkého videa, T048 na cizí síti ani
 T051 s vypnutým serverem. Ty vyžadují klientskou frontu a další etapy.
@@ -68,3 +70,6 @@ T051 s vypnutým serverem. Ty vyžadují klientskou frontu a další etapy.
 Žádná reálná média, osobní identifikátory, veřejný endpoint, změna Tailscale,
 push nebo nasazení nejsou součástí tohoto vývojového kroku. Neshoda hashe se
 neopravuje přepsáním očekávané hodnoty.
+
+Pozdější autorizovaný smoke provedl pouze dočasnou Serve změnu popsanou výše;
+trvalou síťovou cestu ani službu nezanechal.
