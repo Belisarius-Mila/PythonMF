@@ -1,6 +1,6 @@
 # C02b — report experimentu částí a iOS fronty
 
-Datum: 2026-09-17
+Datum: 2026-09-18
 
 ## Výsledek
 
@@ -58,9 +58,13 @@ Dostupná povolená Wi-Fi může spustit automatickou reconciliaci;
   přijatých a žádný nový finální objekt. Po obnovení sítě bylo přijato 13/13,
   vznikl jediný objekt tohoto Assetu o 100 663 553 B a jeho SHA-256 se shodoval
   s účtenkou.
-- T047: aplikace má background souborové úlohy a po relaunchi znovu porovnává
-  server. Vlastní prázdný T047 workflow a audit relací/částí jsou připravené;
-  zámek a nucené ukončení na skutečném iPhonu NEPROVEDENO.
+- T047: **PASS v rozsahu syntetického C02b experimentu.** Při první dávce byl
+  telefon uzamčen během přenosu; po odemčení UI pravdivě ukázalo mezistav a
+  server dokončil 13/13. Při druhé dávce byl po 1/13 přijatých částí skutečně
+  nuceně ukončen proces; audit po 20 s zůstal na 1/13 bez druhého objektu. Po
+  ručním relaunchi UI ukázalo 15 %, 1/13, 1/2 a server doplnil pouze chybějící
+  části do 13/13. T047 má dva objekty/účtenky, oba 100 663 553 B, hashově
+  shodné.
 - T048: UI má pravdivé čekání bez veřejného fallbacku; cizí Wi-Fi, captive
   portal, přechod sítě a nedostupný tailnet NEPROVEDENO.
 - T049: trvalý grant je omezený na jednu dávku a nová dávka vzniká bez něj;
@@ -68,7 +72,7 @@ Dostupná povolená Wi-Fi může spustit automatickou reconciliaci;
 - T050: server i UI drží `Ověřuji` po dosažení 100 % bytů; řízené zadržení
   serverového ověření na fyzickém iPhonu NEPROVEDENO.
 
-T047–T050 zatím nejsou označeny PASS.
+T048–T050 zatím nejsou označeny PASS.
 
 ## Pozorování a oprava z fyzického T043
 
@@ -89,8 +93,9 @@ samostatný regresní test a nepřerušený fyzický doběh na buildu 2.
 
 ## Rizika a hranice
 
-- Background `URLSession` a jeden síťový výpadek jsou ověřené na iPhonu;
-  zámek, force quit a přechod na cizí síť zůstávají neověřené.
+- Background `URLSession`, zámek a force quit s ručním relaunch jsou ověřené na
+  iPhonu; cizí Wi-Fi, captive portal, přechod sítě, jednorázová mobilní data a
+  zadržené serverové ověření zůstávají neověřené.
 - Receiver je izolovaný standard-library experiment, ne produkční FastAPI,
   databáze, launchd služba ani záloha.
 - Prototyp při každém stavovém dotazu znovu hashově kontroluje přijaté části;
@@ -114,10 +119,11 @@ samostatný regresní test a nepřerušený fyzický doběh na buildu 2.
 - Samostatný T047 ovladač používá nový soukromý stav. Read-only audit ověřuje
   vlastněný proces a trasu, Funnel, všechny manifesty relací, hash každé přijaté
   části a finální objekty/účtenky. Stav z T043 se s T047 nemíchá.
+- Po fyzickém důkazu T047 zůstává jeho receiver a privátní Serve cesta aktivní
+  pouze do samostatně potvrzeného registrovaného stopu.
 
 ## Další krok
 
-Po samostatném potvrzení spustit nový prázdný T047 receiver. Nejprve provést
-dávku se zámkem telefonu a ověřit její dokončení. Potom vytvořit jinou dávku,
-uprostřed přenosu aplikaci nuceně ukončit, doložit skutečný serverový mezistav
-a teprve potom ji ručně otevřít a porovnat frontu. T048–T050 následují odděleně.
+Po samostatném potvrzení spustit registrovaný `camino_c02b_t047_stop`, porovnat
+Serve s výchozím stavem a bezpečně uzavřít privátní receiver. Potom pokračovat
+T048–T050 odděleně.

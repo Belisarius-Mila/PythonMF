@@ -82,12 +82,16 @@ SHA-256 se shodoval. Průchod odhalil, že souběžný callback mohl být zahoze
 ruční tlačítko během automatické reconciliace působilo mrtvě. Build 2 impulsy
 koaleskuje; následná celá dávka doběhla automaticky bez dalšího klepnutí.
 
-T047–T050 zůstávají fyzicky NEPROVEDENO: T043 samo nedokládá zámek, force quit,
-cizí síť, scope skutečných mobilních dat ani zadrženou finalizaci.
+T047 je PASS v rozsahu syntetického C02b experimentu: první dávka proběhla pod
+zámkem; u druhé byl po 1/13 skutečně ukončen proces, audit po 20 s zůstal na
+1/13 bez druhého objektu a po ručním relaunchi se doplnily pouze chybějící části
+do 13/13. Dvě relace a dva objekty/účtenky jsou hashově ověřené, každý
+100 663 553 B. T048–T050 zůstávají fyzicky NEPROVEDENO: cizí síť, scope
+skutečných mobilních dat ani zadržená finalizace nejsou doložené.
 
 Po T043 registrované ukončení zastavilo jen vlastněný receiver, odebralo pouze
 `/camino-c02b`, zachovalo tři ověřené syntetické důkazy a přesně obnovilo Serve;
 Funnel zůstal vypnutý. T047 má samostatný soukromý stav a nový prázdný běh.
 Jeho audit kontroluje i nedokončené relace a hashově ověřené přijaté části.
-Fyzicky se provede nejprve zámek a po dokončení první dávky samostatně nová
-dávka, force quit a ruční relaunch s porovnáním serveru.
+Fyzický T047 je dokončený; jeho receiver/Serve cesta se ukončí až samostatným
+potvrzením registrovaného stopu. Potom následují T048–T050 odděleně.

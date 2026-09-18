@@ -33,12 +33,13 @@ Gitem a může obsahovat pouze lokální volbu `DEVELOPMENT_TEAM`.
 
 Podepsaný build 0.4.0 (2), strict kontrola podpisu, instalace a spuštění na
 iPhonu prošly. T043 doložil skutečné přerušení sítě, následné doplnění všech
-částí, shodnou délku/hash a jediný objekt daného Assetu. Fyzický průchod také
-odhalil zahozený souběžný impuls reconciliace; build 2 jej koaleskuje a následná
-96MiB dávka doběhla bez dalšího klepnutí. Profil je místní a časově omezený;
-tým ani účet nejsou verzované. Zámek, force quit, cizí Wi-Fi a T047–T050
-zůstávají neověřené. T043 workflow po důkazu receiver zastavil a původní Serve
-konfiguraci přesně obnovil. Registrovaný `camino_c02b_t047_*` workflow připraví
-nový prázdný běh pro oddělenou zkoušku zámku a force quit; audit fail-closed
-ověří relace, přijaté části, objekty a účtenky. Zápisové akce podléhají
-samostatnému potvrzení.
+částí, shodnou délku/hash a jediný objekt daného Assetu. T047 je fyzický PASS
+v syntetickém rozsahu: zámek, force quit, pravdivý mezistav a ruční relaunch
+doplnily jen chybějící části; dvě relace i dva objekty/účtenky jsou ověřené.
+Fyzický průchod také odhalil zahozený souběžný impuls reconciliace; build 2 jej
+koaleskuje a následná 96MiB dávka doběhla bez dalšího klepnutí. Profil je místní
+a časově omezený; tým ani účet nejsou verzované. Cizí Wi-Fi, mobilní data,
+zadržené ověření a T048–T050 zůstávají neověřené. T043 workflow po důkazu
+receiver zastavil a původní Serve konfiguraci přesně obnovil. T047 workflow
+zůstává aktivní do samostatně potvrzeného stopu; audit fail-closed ověřuje
+relace, přijaté části, objekty a účtenky.
