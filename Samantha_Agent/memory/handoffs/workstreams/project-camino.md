@@ -1,7 +1,7 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno po fyzickém PASS T047: 2026-09-18 08:23 CEST
+- Aktualizováno po ukončení T047: 2026-09-18 08:29 CEST
 
 ### Hotovo
 - T043 PASS v rozsahu syntetického C02b: Letový režim přerušil upload při 0/13 serverových částech; po obnově sítě vznikl jediný objekt daného Assetu, 13/13 částí, 100 663 553 B a shodný SHA-256.
@@ -12,24 +12,24 @@
 - T047 PASS v rozsahu syntetického C02b: první dávka byla zamčená během přenosu a po odemčení se dokončila 13/13; u druhé dávky byl po 1/13 skutečně ukončen proces, serverový stav zůstal 1/13 bez druhého objektu a po ručním relaunchi se doplnily pouze chybějící části do 13/13. Živé potvrzení má 2 relace, 2 ověřené objekty/účtenky, každý 100 663 553 B, celkem 201 327 106 B.
 
 ### Otevřeno
-- Fyzické T048–T050 jsou NEPROVEDENO. T047 receiver a privátní Serve cesta po důkazu ještě běží a čekají na samostatně potvrzený stop; cizí Wi-Fi, mobilní data a zadržené serverové ověření zůstávají neověřené.
+- Fyzické T048–T050 jsou NEPROVEDENO. Cizí Wi-Fi, mobilní data a zadržené serverové ověření zůstávají neověřené.
 
 ### Rizika
 - Receiver je lokální standard-library experiment, ne produkční FastAPI, databáze, trvalá služba ani záloha. T047 neprokazuje cizí Wi-Fi, skutečná mobilní data ani zadrženou finalizaci.
 
 ### Další krok
-- Po samostatném potvrzení spustit registrovaný `camino_c02b_t047_stop`, ověřit přesnou obnovu Serve; potom provést T048–T050.
+- T047 je registrovaně ukončený s přesnou obnovou Serve; potom provést T048–T050.
 
 ### Rozhodnutí
 - Serverová pravda a stav `verifying` mají přednost před lokálním byte progress. Dostupná povolená Wi-Fi může spustit automatickou synchronizaci; ruční tlačítko je provozní záloha. Souběžný impuls se koaleskuje, nezahazuje.
 
 ### Navrhované další kroky
 - T047 je fyzicky PASS v syntetickém rozsahu; jeho dva objekty/účtenky a relace zůstávají zachované.
-- Po potvrzeném stopu T047 provést T048–T050 odděleně.
+- T048–T050 provést odděleně.
 
 ### Technický stav checkpointu
 - Swift transfer core 19/19, T043 ovladač + oba receivery 28/28, T047/T043 workflow modul 11/11 a UI 1/1 PASS; podepsaný build 2, strict kontrola, instalace a launch PASS. Plná projektová brána 1716/1716 PASS.
-- Push ani nasazení neproběhly. T043 cesta je ukončená; T047 cesta/receiver jsou aktivní jen do samostatně potvrzeného stopu.
+- Push ani nasazení neproběhly. T043 i T047 cesta/receiver jsou ukončené; původní Serve je přesně obnovený a Funnel vypnutý.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -837,3 +837,20 @@ Technický důkaz:
   `session_count=2`, `session_verified_count=2`, `latest_session_chunks=13/13`.
 - Swift 19/19, T047/T043 workflow 11/11, související sada 37/37 a plná
   projektová brána 1716/1716 PASS. Push ani nasazení neproběhly.
+
+### 2026-09-18 08:29 CEST — T047 ukončeno a Serve obnoveno
+
+Hotovo:
+- Registrovaný stop odebral pouze `/camino-c02b`, zastavil pouze vlastněný T047
+  receiver a porovnal Serve s přesným stavem před testem.
+- Funnel zůstal vypnutý. Dva ověřené objekty/účtenky, dvě relace a celkem
+  201 327 106 B zůstaly zachované; syntetický důkaz se nemaže.
+
+Další krok:
+- T048–T050 zůstávají samostatné a fyzicky NEPROVEDENO.
+
+Technický důkaz:
+- Živý audit po stopu: `phase=stopped`, `receiver_alive=false`,
+  `funnel_enabled=false`, `object_count=2`, `receipt_count=2`,
+  `verified_match=true`, `session_count=2`, `session_verified_count=2`,
+  `latest_session_chunks=13/13`.

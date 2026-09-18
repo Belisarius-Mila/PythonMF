@@ -119,11 +119,10 @@ samostatný regresní test a nepřerušený fyzický doběh na buildu 2.
 - Samostatný T047 ovladač používá nový soukromý stav. Read-only audit ověřuje
   vlastněný proces a trasu, Funnel, všechny manifesty relací, hash každé přijaté
   části a finální objekty/účtenky. Stav z T043 se s T047 nemíchá.
-- Po fyzickém důkazu T047 zůstává jeho receiver a privátní Serve cesta aktivní
-  pouze do samostatně potvrzeného registrovaného stopu.
+- Registrovaný stop po fyzickém důkazu T047 odebral pouze `/camino-c02b`, zastavil
+  pouze vlastněný receiver a přesně obnovil původní Serve; Funnel zůstal vypnutý.
 
 ## Další krok
 
-Po samostatném potvrzení spustit registrovaný `camino_c02b_t047_stop`, porovnat
-Serve s výchozím stavem a bezpečně uzavřít privátní receiver. Potom pokračovat
+T047 je registrovaně ukončený s přesnou obnovou Serve. Potom pokračovat
 T048–T050 odděleně.

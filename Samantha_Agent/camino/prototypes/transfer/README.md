@@ -41,5 +41,5 @@ koaleskuje a následná 96MiB dávka doběhla bez dalšího klepnutí. Profil je
 a časově omezený; tým ani účet nejsou verzované. Cizí Wi-Fi, mobilní data,
 zadržené ověření a T048–T050 zůstávají neověřené. T043 workflow po důkazu
 receiver zastavil a původní Serve konfiguraci přesně obnovil. T047 workflow
-zůstává aktivní do samostatně potvrzeného stopu; audit fail-closed ověřuje
-relace, přijaté části, objekty a účtenky.
+byl po důkazu registrovaně ukončen; Serve je přesně obnovený, Funnel vypnutý a
+auditní objekty/účtenky zůstávají zachované.

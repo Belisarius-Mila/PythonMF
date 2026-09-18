@@ -59,7 +59,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] V0.5 + U15 jsou autoritativní. C01a/C01b/C01c/C02a přijaty v prototypovém rozsahu. C02b harness 0.4.0 (2) je na iPhonu; T043 i T047 PASS v syntetickém rozsahu. T047 má dvě ověřené relace/objekty a po force quit se po relaunchi doplnily jen chybějící části. Jeho receiver/Serve cesta zůstává aktivní do potvrzeného `camino_c02b_t047_stop`; T048–T050 čekají. Plná brána 1716/1716 PASS. Viewer runtime/G8 chybí a plný T061 zůstává C05a. Profil transfer harnessu do 24. 9. 2026, profil Camino Audio do 22. 9. 18:16 CEST.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] V0.5 + U15 jsou autoritativní. C01a/C01b/C01c/C02a přijaty v prototypovém rozsahu. C02b harness 0.4.0 (2) je na iPhonu; T043 i T047 PASS v syntetickém rozsahu. T047 má dvě ověřené relace/objekty a po force quit se po relaunchi doplnily jen chybějící části. Receiver je ukončený, `/camino-c02b` odebraná, Serve přesně obnovený a Funnel vypnutý; T048–T050 čekají. Plná brána 1716/1716 PASS. Viewer runtime/G8 chybí a plný T061 zůstává C05a. Profil transfer harnessu do 24. 9. 2026, profil Camino Audio do 22. 9. 18:16 CEST.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` - Cockpit 14. 9.: scroll 10ec0877 potvrzený Mílou. [PRIPOMENOUT] U07 až při příštím pokračování. TXT v2.8 shrnuje U01–U06; plná brána 1680/1680 OK, funkční nasazení 980aed7a a smoke 5/5. Publikační překážka odstraněna; finální balíček/head ověřovat živým auditem.
 

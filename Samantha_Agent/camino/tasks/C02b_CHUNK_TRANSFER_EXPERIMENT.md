@@ -93,5 +93,5 @@ Po T043 registrované ukončení zastavilo jen vlastněný receiver, odebralo po
 `/camino-c02b`, zachovalo tři ověřené syntetické důkazy a přesně obnovilo Serve;
 Funnel zůstal vypnutý. T047 má samostatný soukromý stav a nový prázdný běh.
 Jeho audit kontroluje i nedokončené relace a hashově ověřené přijaté části.
-Fyzický T047 je dokončený; jeho receiver/Serve cesta se ukončí až samostatným
-potvrzením registrovaného stopu. Potom následují T048–T050 odděleně.
+Fyzický T047 je dokončený; registrovaný stop odebral jeho cestu, zastavil
+receiver a přesně obnovil Serve. Potom následují T048–T050 odděleně.
