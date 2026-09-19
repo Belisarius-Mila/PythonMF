@@ -1087,3 +1087,37 @@ Technický důkaz:
   připojený iPhone PASS; CoreDevice hlásí verzi 0.4.0 (4). T049/T050 jsou
   read-only ověřené jako `stopped`, bez vlastní trasy a s vypnutým Funnelem.
   Aplikace po instalaci nebyla spuštěna; fyzický PASS zatím není.
+
+### 2026-09-19 22:11 CEST — Cílený fyzický test buildu 4; T049 ukončené
+
+Hotovo:
+- Část A PASS: mobilní grant, návrat z Ovládacího centra a obnova sítě
+  nespustily dosud nezahájenou syntetickou dávku. Telefon zůstal na 0/13,
+  server na 0 relacích, objektech a účtenkách.
+- V části B vědomý start vytvořil jednu relaci. Po přerušení při 1/13 a 8/13
+  byla aplikace nuceně ukončena; po otevření s dostupnou sítí dokončila stejnou
+  relaci bez dalšího stisku. Telefon potvrdil `Ověřeno na Macu`, server jednu
+  ověřenou relaci, objekt a účtenku, 13/13 a shodnou délku i SHA-256.
+- Potvrzený stop odstranil pouze vlastní Serve cestu a receiver, přesně
+  obnovil původní Serve a zachoval důkaz. Funnel zůstal vypnutý.
+
+Rozhodnutí:
+- Úplný PASS plánu B se netvrdí: při výpadku došlo k dalšímu stisku
+  synchronizace a aplikace se po nuceném ukončení znovu otevřela až s dostupnou
+  sítí. Otevření bez sítě a jeho UI zůstalo neověřené. Míla zvolil neopakovat
+  další mobilní dávku jen kvůli této mezeře, protože Letový režim odpojuje i
+  chat používající data iPhonu. Pozorované chování nevyžaduje změnu kódu.
+
+Další krok:
+- T048 až při dostupné cizí Wi-Fi, na novém potvrzeném privátním receiveru
+  a syntetické dávce podle `C02b_T048_T049_FIELD_PLAN.md`.
+
+Navrhované další kroky:
+- Plné T049 s novým skutečným videem až v integrované aplikaci; T050 opakovat
+  jen při nové pochybnosti o finalizaci.
+
+Technický důkaz:
+- Audit po stopu: `phase=stopped`, `receiver_alive=false`,
+  `private_route_exact=false`, `funnel_enabled=false`, `session_count=1`,
+  `session_verified_count=1`, `latest_session_chunks=13/13`, `object_count=1`,
+  `receipt_count=1`, `verified_byte_count=100663553`, `verified_match=true`.

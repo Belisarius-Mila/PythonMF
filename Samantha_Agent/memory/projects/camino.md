@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-19 21:34 CEST
+Aktualizováno: 2026-09-19 22:11 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -43,7 +43,8 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 - Při návratu aplikace z Ovládacího centra se čekající mobilně povolená dávka podle Míly spustila bez klepnutí na `Synchronizovat nyní`. Kód volá při aktivaci `reconcile()`, takže je to vysvětlení odpovídající pozorování, ne důkaz absence dotyku z videa. Video také zachytilo krátké `Vyžaduje pozornost` a bezpečný retry před finálním PASS. Následné rozhodnutí a oprava jsou v dalším bodě.
 - Míla zvolil vědomý první start nové dávky po mobilním grantu. Build `Camino Transfer Test` 0.4.0 (4) má trvalou bránu v journalu: grant sám, návrat aplikace ani změna sítě nezahájí dosud nespouštěnou dávku; `Synchronizovat nyní`/`Pokračovat` ji autorizuje. Po prvním startu zůstává retry a obnova; bez mobilního grantu zůstává automatická Wi-Fi. Starší journal zachovává obnovu. Na Macu Swift 22/22, simulátorový UI test, nepodepsaný iOS build a plná projektová brána 1719/1719 PASS.
 - Mílou schválené p+n dorovnalo vzdálený soví commit se shodným obsahem běžným sloučením bez přepisu historie. Funkční balíček 17 commitů byl pushnut na GitHub po plné bráně 1719/1719. Řízené nasazení `4a965ccb` do Cockpitu má účtenku s novým PID, shodou kódového otisku a smoke 5/5. Závěrečný dokumentační checkpoint a konečný stav `main` se ověřují živým auditem, ne tímto historickým ID.
-- Build 0.4.0 (4) byl 19. 9. podepsán místním vývojovým týmem a aktualizací stejného bundle ID nainstalován na připojený iPhone 14 Plus. Přísné ověření podpisu, shoda týmu s buildem 3, platný profil zahrnující iPhone a seznam aplikací s verzí 4 prošly; Camino Audio 0.3.0 (4) zůstává nainstalované. Oddělený podepsaný build 3 na Macu zůstal zachovaný. Aplikace po instalaci nebyla spuštěna, nový testovací receiver ani Serve cesta nebyly spuštěny. Cílený postup A/B je v `camino/tasks/C02b_BUILD4_FIRST_START_FIELD_PLAN.md`.
+- Build 0.4.0 (4) byl 19. 9. podepsán místním vývojovým týmem a aktualizací stejného bundle ID nainstalován na připojený iPhone 14 Plus. Přísné ověření podpisu, shoda týmu s buildem 3, platný profil zahrnující iPhone a seznam aplikací s verzí 4 prošly; Camino Audio 0.3.0 (4) zůstává nainstalované. Oddělený podepsaný build 3 na Macu zůstal zachovaný. Cílený postup A/B a výsledek jsou v `camino/tasks/C02b_BUILD4_FIRST_START_FIELD_PLAN.md`.
+- Cílený fyzický průchod buildu 4: část A PASS, protože mobilní grant, návrat z Ovládacího centra ani obnova sítě nespustily novou dávku (telefon 0/13, server 0 relací). V části B vědomý start vytvořil jednu relaci, Letový režim zachoval mezistav 1/13 bez finálního objektu a po nuceném ukončení a otevření aplikace s dostupnou sítí přenos bez dalšího klepnutí doběhl. Telefon potvrdil `Ověřeno na Macu`; server jednu ověřenou relaci/objekt/účtenku, 13/13, 100 663 553 B a shodný SHA-256. Otevření aplikace ještě bez sítě neproběhlo, proto úplný PASS B netvrdíme. Míla zvolil neopakovat další mobilní dávku kvůli přerušení spojení s chatem v Letovém režimu a spotřebě dat. Potvrzený stop přesně obnovil původní Serve, vypnul vlastní cestu/receiver a zachoval důkaz; Funnel je vypnutý. Kód se při testu neměnil.
 
 
 ## Zdroje a návaznost
@@ -77,13 +78,13 @@ kódu nevyvolává; FAIL se nejdřív doloží a opraví v aktuálním rozsahu.
 - C02a je přijaté v prototypovém rozsahu po lokálních testech a privátním HTTPS smoke. Smoke byl spuštěn z téhož Macu přes tailnet DNS; nedokládá iPhone, cizí síť, přerušení velkého souboru ani trvalou službu. Standard-library receiver zůstává izolovaný experiment; produkční cíl je FastAPI v samostatném prostředí Camina.
 - C02b má fyzický PASS T043, T047 a T050 v syntetickém rozsahu a syntetické mobilní části T049. T048 na cizí Wi-Fi zůstává NEPROVEDENO; receiver není produkční služba ani záloha.
 - Plné T049 s novým skutečným videem vyžaduje integrovanou kameru. Úplné znění fyzického potvrzovacího dialogu nebylo opsáno a serverových 100 663 553 B není měření spotřeby operátora; retry může přenést více.
-- T050 prošlo díky souběžnému důkazu telefonu a serveru v 14s okně; soukromé video obsahuje soukromou adresu, proto se necommitovalo. Oprava neočekávaného startu je na iPhonu nainstalovaná, ale její účinek dosud fyzicky NEOVĚŘENO. Krátké `Vyžaduje pozornost` před retry má neznámou příčinu.
+- T050 prošlo díky souběžnému důkazu telefonu a serveru v 14s okně; soukromé video obsahuje soukromou adresu, proto se necommitovalo. Oprava neočekávaného startu je na iPhonu fyzicky ověřená v části A; offline znovuotevření během části B zůstalo neověřené. Krátké `Vyžaduje pozornost` před dřívějším retry má neznámou příčinu.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
 - Instalace a launch nejsou fyzická přejímka přenosu; vývojový profil je časově omezený do 24. září 2026. U01–U15 se bez nového rozhodnutí neotevírají.
 
 ## Další krok
 
-Po samostatném pokynu spustit nový izolovaný T049 receiver/privátní cestu a na nově vytvořené syntetické dávce buildu 4 provést připravenou zkoušku: 0/13 bez relace po grantu a návratu, vědomý start, přerušení a automatickou obnovu stejné dávky. Plný T050 se neopakuje. T048 provést při dostupné cizí Wi-Fi; plné T049 s novým skutečným videem zůstává pro integrovanou aplikaci.
+T048 provést při dostupné cizí Wi-Fi podle `camino/tasks/C02b_T048_T049_FIELD_PLAN.md`, na vlastním potvrzeném receiveru a nové syntetické dávce. Plné T049 s novým skutečným videem zůstává pro integrovanou aplikaci; plný T050 se bez nové pochybnosti neopakuje. Offline znovuotevření buildu 4 je zapsaná mezera důkazu, ne důvod samočinně spustit další mobilní dávku.
 
 Historický doklad založení:
 Ověření založení: 56/56 testů integrace (54 + 2 profilové testy) a rychlá statická brána OK.

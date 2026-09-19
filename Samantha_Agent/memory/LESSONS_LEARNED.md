@@ -772,7 +772,8 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   obojí `false`. Monitor rozlišuje i skutečné mobilní rozhraní. Před grantem
   zobrazit počet, objem a upozornění na možné opakování bajtů.
 - Ověření: Swift 20/20, iOS build a UI test potvrzovací brány 1/1 PASS.
-  Skutečný mobilní přenos zůstává fyzicky NEOVĚŘENO.
+  Následný T049 s buildem 3 na iPhonu prošel v syntetickém mobilním rozsahu;
+  nešlo o plné T049 se skutečně novým videem.
 
 ### 2026-09-19 — Mobilní grant není start nové dávky
 
@@ -783,5 +784,8 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   zadržet novou dávku s mobilním grantem. Po prvním startu nechat retry a
   obnovu pokračovat; starší journal obnovovat podle dosavadního kontraktu.
 - Ověření: Swift 22/22 včetně nové a starší podoby journalu, simulátorový UI
-  test, nepodepsaný iOS build a plná projektová brána 1719/1719 PASS. Fyzický
-  test buildu 4 na iPhonu zůstává NEOVĚŘENO.
+  test, nepodepsaný iOS build a plná projektová brána 1719/1719 PASS. Fyzická
+  část A na iPhonu s buildem 4: po grantu, návratu aplikace a obnově sítě
+  telefon 0/13, server 0 relací. Po vědomém startu a pozdějším relaunchi s
+  dostupnou sítí se stejná relace automaticky dokončila 13/13; otevření ještě
+  bez sítě po force quit nebylo ověřeno.

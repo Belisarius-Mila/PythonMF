@@ -1,9 +1,10 @@
 # C02b — cílená fyzická zkouška prvního startu buildu 4
 
-Stav 2026-09-19 21:33 CEST: `Camino Transfer Test` 0.4.0 (4) je podepsaný a
-nainstalovaný na iPhonu 14 Plus. Instalace sama neověřuje chování aplikace;
-nový přenos ani testovací receiver se tímto plánem nespouští. T050 již prošel
-ve fyzickém syntetickém rozsahu a jeho 14s ověřovací okno se neopakuje.
+Stav 2026-09-19 22:11 CEST: `Camino Transfer Test` 0.4.0 (4) prošel částí A
+na iPhonu 14 Plus. Z části B je doložen vědomý start, přerušení a automatické
+dokončení po opětovném otevření aplikace s dostupnou sítí. Otevření aplikace
+ještě bez sítě neproběhlo, proto celý plán B není PASS. T049 je zastavené;
+syntetický důkaz zůstal zachovaný. T050 se neopakovalo.
 
 ## Rozsah a bezpečný začátek
 
@@ -64,3 +65,20 @@ ve fyzickém syntetickém rozsahu a jeho 14s ověřovací okno se neopakuje.
   Neznamená T048 na cizí Wi-Fi, plné T049 s novým skutečným videem,
   produkční server ani zálohu médií. Při FAIL nic nemazat ani nepřepisovat;
   zachovat journal, soukromý běh a přesný mezistav.
+
+## Výsledek průchodu 2026-09-19
+
+- A PASS: po grantu, návratu z Ovládacího centra a obnovení mobilního spojení
+  telefon ukazoval 0 %, 0/13; server měl 0 relací, objektů a účtenek.
+- B částečně ověřeno: první vědomý stisk založil jednu relaci. Letový režim
+  zastavil přenos při 1/13 bez objektu a účtenky. Během výpadku došlo k dalšímu
+  stisku synchronizace; po návratu sítě přenos dosáhl 8/13, znovu se přerušil,
+  a po nuceném ukončení a znovuotevření s dostupnou sítí se bez dalšího stisku
+  dokončil. Server potvrdil jedinou relaci, 13/13, jeden objekt a účtenku,
+  100 663 553 B a shodný SHA-256; Míla na telefonu viděl `Ověřeno na Macu`.
+- Neověřeno: znovuotevření aplikace se stále vypnutou sítí a pravdivý stav UI
+  v tomto okamžiku. Mílův chat používal mobilní spojení iPhonu, takže Letový
+  režim přerušil také živé navádění. Po dohodě se další přenos jen kvůli tomuto
+  mezikroku neprováděl; plný PASS B se netvrdí.
+- Potvrzený stop obnovil přesný původní Serve, odebral vlastní cestu a receiver,
+  ponechal Funnel vypnutý a zachoval ověřený syntetický důkaz. Kód se neměnil.
