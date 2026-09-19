@@ -789,3 +789,16 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   telefon 0/13, server 0 relací. Po vědomém startu a pozdějším relaunchi s
   dostupnou sítí se stejná relace automaticky dokončila 13/13; otevření ještě
   bez sítě po force quit nebylo ověřeno.
+
+### LL-040 — Viewer musí rozhodovat podle poslední přijaté revize
+
+- Problém: Výběr každého serverového snapshotu zvlášť by pustil starší
+  `diary` Moment, i když server už přijal novější zámek `owner_only`.
+- Typ: opakující se
+- Řešení nalezeno: 19092026
+- Řešení: Před projekcí zvolit pro každé ID nejvyšší serverem přijatou revizi;
+  `owner_only`, skrytí, neznámá hodnota nebo konflikt na stejné revizi se
+  uzavřou. Výstup neobsahuje počty vyloučených položek.
+- Ověření: Syntetický test zkouší obě pořadí staré a nové revize, neznámé
+  soukromí i konflikt; C03a 9/9 a plná brána 1728/1728 PASS. Provozní Viewer
+  ještě vyžaduje samostatnou integraci a fyzické ověření.

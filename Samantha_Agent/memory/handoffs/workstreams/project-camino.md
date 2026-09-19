@@ -1,7 +1,7 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno po fyzickém testu a potvrzeném zastavení T049: 2026-09-19 22:11 CEST
+- Aktualizováno po C03a: 2026-09-19 23:25 CEST
 
 ### Hotovo
 - T043 PASS v rozsahu syntetického C02b: Letový režim přerušil upload při 0/13 serverových částech; po obnově sítě vznikl jediný objekt daného Assetu, 13/13 částí, 100 663 553 B a shodný SHA-256.
@@ -21,17 +21,20 @@
 - Build 0.4.0 (4) je místně podepsaný a nainstalovaný na iPhonu 14 Plus přes stejné bundle ID. Přísný podpis, platný profil zahrnující telefon a seznam nainstalovaných aplikací s verzí 4 prošly. Camino Audio zůstává nainstalované, starší podepsaný build 3 je na Macu zachovaný. Cílený postup A/B a výsledek jsou v `camino/tasks/C02b_BUILD4_FIRST_START_FIELD_PLAN.md`.
 - Fyzický build 4: část A PASS (po mobilním grantu, návratu z Ovládacího centra a obnově sítě telefon 0/13, server 0 relací). Část B prokázala vědomý start, přerušení při 1/13 bez finálního objektu a automatické dokončení po nuceném ukončení a otevření aplikace s dostupnou sítí. Telefon hlásil `Ověřeno na Macu`; server 13/13, jednu ověřenou relaci, objekt a účtenku, 100 663 553 B a shodný SHA-256. Otevření aplikace ještě bez sítě neproběhlo, takže celý plán B není PASS.
 - Nový T049 běh byl po Mílově samostatném pokynu zastaven. Registrovaný stop přesně obnovil původní Serve, odebral jen vlastní cestu a receiver, Funnel zůstal vypnutý a syntetický důkaz zachovaný.
+- C03a má čistý referenční model identit Trip/Day/Moment/Asset, metadatových a textových revizí, časové provenience a polohy. U15 vynucuje soukromý vznik Úvahy, explicitní revizi pro vložení do deníku a Viewer výběr jen z nejnovější serverem přijaté revize. Devět syntetických testů a plná brána 1728/1728 PASS.
 
 ### Otevřeno
 - Otevření buildu 4 ještě bez sítě po nuceném ukončení zůstalo neověřené; celý plán B není PASS. T048 na cizí Wi-Fi je fyzicky NEPROVEDENO. Plné T049 s novým skutečným videem čeká na integrovanou aplikaci; C02b ještě není produkční přenos.
+- C03a není zatím napojené na iPhone, serverovou persistenci ani Viewer. Fyzické T005/T008/T027–T032/T039/T041 a U15 T096 nejsou PASS.
 
 ### Rizika
 - Receiver je lokální standard-library experiment, ne produkční FastAPI, databáze, trvalá služba ani záloha. T049 nedokládá cizí Wi-Fi ani zadrženou finalizaci.
 - T049 v samostatném harnessu nemá kameru a plné kritérium nového skutečného videa se musí ověřit až v integrované aplikaci. Serverových 100 663 553 B není měření spotřeby operátora; retry může přenést více dat.
 - V části B došlo k druhému stisku synchronizace během výpadku a k opětovnému otevření až s dostupnou sítí. Obnova bez dalšího stisku po otevření je doložená, ale stav UI při otevření bez sítě ne. Mílův chat používal mobilní spojení iPhonu, takže Letový režim přerušoval živé navádění. Journal ze staršího buildu zachovává staré obnovovací chování; video T050 dříve krátce ukázalo `Vyžaduje pozornost` před bezpečným retry bez zjištěné příčiny.
+- Lokální zámek se projeví na serveru až po přijetí revize; dříve vydané cizí kopie nelze odvolat. C08 musí hlídat aktuální oprávnění i u starých mediálních URL; referenční výběr C03a sám není provozní ochrana.
 
 ### Další krok
-- Při dostupnosti cizí Wi-Fi provést odděleně T048 podle `C02b_T048_T049_FIELD_PLAN.md`: nový potvrzený receiver a syntetická dávka, dostupný tailnet, sledování čekání/obnovy a finální jedné ověřené relace/objektu/účtenky. Captive portal hodnotit jen pokud je skutečně dostupný. Plné T049 se skutečným videem zůstává pro integrovanou aplikaci; T050 se bez nové pochybnosti neopakuje.
+- Navázat C03b verzovaným API kontraktem a mapováním C03a modelu do persistence/přenosu. T048 provést odděleně při dostupnosti cizí Wi-Fi podle `C02b_T048_T049_FIELD_PLAN.md`; plné T049 se skutečným videem čeká na integrovanou aplikaci. T050 bez nové pochybnosti neopakovat.
 
 ### Rozhodnutí
 - Serverová pravda a stav `verifying` mají přednost před lokálním byte progress. Dostupná povolená Wi-Fi může spustit automatickou synchronizaci; ruční tlačítko je provozní záloha. Souběžný impuls se koaleskuje, nezahazuje.
@@ -40,11 +43,13 @@
 - Míla následně zadal opravu na Macu. První start nové mobilně povolené dávky je vědomý; automatická obnova již zahájené dávky zůstává. T050 se znovu provádí jen při nové pochybnosti o finalizaci, která se v této změně neupravovala.
 - Míla schválil p+n celého čekajícího balíčku a dorovnání Git historie; sloučení shodného vzdáleného sovího obsahu nepřepisuje žádnou větev.
 - Po fyzickém průchodu Míla zvolil neopakovat další mobilní dávku jen kvůli neověřenému otevření bez sítě; přesný plán B zůstává částečný. Pozorovaný výsledek nevyžaduje další opravu kódu.
+- Míla zahájil C03a; v0.5 + U15 zůstávají autoritativní. C03a je oddělený referenční model bez migrace C01/C02 prototypů a bez tvrzení o dokončené integraci.
 
 ### Navrhované další kroky
 - T047 je fyzicky PASS v syntetickém rozsahu; jeho dva objekty/účtenky a relace zůstávají zachované.
 - T049 je v syntetickém mobilním rozsahu hotové a bezpečně ukončené; plné T049 s novým skutečným videem zůstává otevřené.
 - Po cíleném fyzickém ověření buildu 4 provést T048 na cizí Wi-Fi při dostupnosti sítě; plný T049 se skutečným novým videem až v integrované aplikaci.
+- C03b má navázat verzovaným API a explicitními serverovými konflikty; C04/C05/C08 následně musí model vynutit a fyzicky ověřit.
 
 ### Technický stav checkpointu
 - Swift transfer core 19/19, T043 ovladač + oba receivery 28/28, T047/T043 workflow modul 11/11 a UI 1/1 PASS; podepsaný build 2, strict kontrola, instalace a launch PASS. Plná projektová brána 1716/1716 PASS.
@@ -53,6 +58,7 @@
 - T050 před fyzickým testem: cílené testy 32/32 a plná projektová brána 1719/1719 PASS; kód se při testu neměnil. Server `verifying` 17:58:22–17:58:36 CEST při 13/13 a 0 objektech/účtenkách; soukromé video ukazuje `Ověřuji` v tomto okně a finální stav až po něm. Poslední T050 status po stopu: `phase=stopped`, `receiver_alive=false`, `private_route_exact=false`, `funnel_enabled=false`, `session_count=1`, `session_verified_count=1`, `object_count=1`, `receipt_count=1`, `verified_match=true`, `verified_byte_count=100663553`. T048 `INACTIVE`, T049 `stopped`; v době testu push ani nasazení neproběhly.
 - Oprava buildu 4: Swift 22/22 včetně nového i staršího journalu, simulátorový UI test exit 0, nepodepsaný generic iOS build exit 0 a plná projektová brána 1719/1719 PASS. Podepsaný iOS build, strict podpis a CoreDevice instalace verze 4 PASS. Nový T049 audit po stopu: `phase=stopped`, `receiver_alive=false`, `private_route_exact=false`, `funnel_enabled=false`, `session_count=1`, `session_verified_count=1`, `latest_session_chunks=13/13`, `object_count=1`, `receipt_count=1`, `verified_match=true`, `verified_byte_count=100663553`. Kód se při fyzickém testu neměnil.
 - P+n funkčního balíčku: GitHub 17 commitů pushnuto; plná brána 1719/1719. Soukromá kanonická účtenka nasazení `4a965ccb` potvrzuje změnu PID, shodu kódového otisku a smoke 5/5. Závěrečný stav dokumentačního checkpointu ověřit živě.
+- C03a: `tests.test_camino_domain` 9/9, `tests.test_cockpit_quality_gate` s C03a 27/27 a plná brána 1728/1728 PASS. Žádný iPhone build, push ani nasazení v tomto kroku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -64,25 +70,25 @@ Typ: Project
 Priorita: 1
 Stav: rozpracovane
 Pripomenout pri startu: ano
-Datum: 2026-09-19 22:11 CEST
+Datum: 2026-09-19 23:25 CEST
 
 Co se resilo:
-Fyzická zkouška prvního mobilního startu a obnovy buildu 4, potvrzené zastavení T049.
+C03a — datový kontrakt, revize, časové příklady a soukromí U15.
 
 Co je hotove:
-V0.5 + U15 platí; C01a/C01b/C01c/C02a jsou přijaty v prototypovém rozsahu. T043/T047/T050 prošly synteticky a starší T049 mobilně; všechny běhy jsou ukončené. Build 4 je podepsaný a nainstalovaný. Nová část A fyzicky PASS; v části B byl prokázán vědomý start a automatické dokončení stejné relace po nuceném ukončení a otevření s dostupnou sítí. Telefon i server potvrdily finále 13/13. Nový T049 je potvrzeně zastavený se zachovaným důkazem; Funnel vypnutý. Funkční balíček byl dříve pushnutý a řízeně nasazený do Cockpitu.
+Čistý C03a model a kontrakt fixují offline ID, vazby Moment/Asset, append-only metadatové a textové revize, místní čas s offsetem, nejistý import, volitelnou polohu a U15. Úvaha vzniká `owner_only`; výslovné vložení do deníku tvoří novou prioritní revizi. Viewer kandidáti se vybírají z nejnovější serverem přijaté revize, neznámý či konfliktní stav se zavře. Cílené testy 9/9 a plná brána 1728/1728 PASS. Dřívější C02b fyzický stav a potvrzený stop T049 zůstávají dle aktuálního bloku výše.
 
 Co neni hotove:
-C02b není dokončené: otevření buildu 4 bez sítě po force quit nebylo ověřeno, takže celý plán B není PASS; T048 je fyzicky neprovedené a plné T049 čeká na nové skutečné video. Produkční FastAPI a trvalá služba také nejsou hotové. Dále plný databázový T061 v C05a, plná integrace T021 v C04, U15 v C03/C04, Viewer C08c–C08f, G0/G1/G8, dlouhodobá spotřeba a terénní připravenost.
+C03a není zapojené do iPhonu, serveru ani Vieweru; fyzické testy C03a a T096 zůstávají otevřené. C02b: offline relaunch buildu 4 po force quit není ověřený, celý plán B není PASS, T048 je neprovedené a plné T049 čeká na skutečné video. Produkční persistence/API, Viewer C08c–C08f, G0/G1/G8 a plný T061 také chybějí.
 
 Dalsi krok:
-Při dostupné cizí Wi-Fi samostatně potvrdit a provést T048 podle `C02b_T048_T049_FIELD_PLAN.md`: nová syntetická dávka a jeden ověřený objekt/účtenka po návratu soukromé sítě. Plný T050 neopakovat bez nové pochybnosti o finalizaci.
+C03b: verzovaný API kontrakt a mapování C03a modelu na serverovou persistenci. T048 provést odděleně při dostupné cizí Wi-Fi podle připraveného postupu. Plný T050 neopakovat bez nové pochybnosti.
 
 Navrhovane dalsi kroky:
-Plné T049 s novým skutečným videem až v integrované aplikaci; U15 až v C03/C04 a Viewer v C08c–C08f.
+C04/C05/C08 vynutit U15 v telefonu, serveru a Vieweru; plné T049 s novým skutečným videem až v integrované aplikaci.
 
 Zmenene nebo relevantni soubory:
-`camino/`, `memory/projects/camino.md`, katalog, registry a kanonický TVBCP.
+`camino/domain/`, `camino/docs/C03a_DOMAIN_CONTRACT.md`, `tests/test_camino_domain.py`, brána, projektová paměť a kanonický TVBCP.
 
 Bezpecnost / neukladat:
 Žádná reálná média, osobní texty, přesná GPS, klíče nebo citlivé síťové údaje v Gitu.
@@ -1025,3 +1031,26 @@ Technický důkaz:
 - Audit po stopu: `phase=stopped`, `receiver_alive=false`,
   `private_route_exact=false`, `funnel_enabled=false`, jedna ověřená relace,
   objekt a účtenka, 13/13, 100 663 553 B, `verified_match=true`.
+
+### 2026-09-19 23:25 CEST — C03a datový kontrakt a soukromí
+
+Hotovo:
+- Přidán čistý model Trip/Day/Moment/Asset, append-only metadata a textových
+  revizí, časové provenience a volitelné polohy. U15 vynucuje nový soukromý
+  Moment Úvahy, explicitní revizi pro vložení do deníku a fail-closed výběr
+  Viewer kandidátů jen z poslední serverem přijaté revize.
+
+Rozhodnutí:
+- C03a je referenční doménový kontrakt bez migrace C01/C02 prototypů. Nejde o
+  provozní iPhone/server/Viewer integraci ani fyzický PASS akceptačních testů.
+
+Další krok:
+- C03b: verzované API, serializace a mapování do persistence včetně konfliktů.
+
+Navrhované další kroky:
+- C04/C05/C08 vynutit U15 a provést fyzické T096. T048 samostatně při cizí
+  Wi-Fi; plné T049 až s novým skutečným videem v integrované aplikaci.
+
+Technický důkaz:
+- `tests.test_camino_domain` 9/9, plná projektová brána 1728/1728 PASS.
+  Žádný push, instalace iPhone ani nasazení v C03a.
