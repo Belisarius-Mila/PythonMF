@@ -1,7 +1,7 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno po opravě prvního mobilního startu na Macu: 2026-09-19 19:12 CEST
+- Aktualizováno po schváleném p+n: 2026-09-19 19:31 CEST
 
 ### Hotovo
 - T043 PASS v rozsahu syntetického C02b: Letový režim přerušil upload při 0/13 serverových částech; po obnově sítě vznikl jediný objekt daného Assetu, 13/13 částí, 100 663 553 B a shodný SHA-256.
@@ -15,6 +15,7 @@
 - `Camino Transfer Test` 0.4.0 (3) se na iPhonu fyzicky spustil; Camino Audio 0.3.0 (4) zůstává nedotčené. Kód při testu nebyl měněn.
 - T050 PASS ve fyzickém syntetickém rozsahu: první běh doložil jen finále a zůstal neověřený, potvrzovací opakování zachytilo na iPhonu `Ověřuji` při 100 % a 13/13 současně se serverovým `verifying` bez objektu/účtenky. Až potom telefon ukázal `Ověřeno na Macu` a server ověřil jediný objekt/účtenku o 100 663 553 B se shodným SHA-256. Oba oddělené běhy jsou po potvrzených stopech zachované a bezpečně ukončené; soukromé video je mimo Git.
 - Build `Camino Transfer Test` 0.4.0 (4) na Macu přidal trvalou bránu prvního startu: nová dávka s mobilním grantem čeká na `Synchronizovat nyní` nebo `Pokračovat`, samotný grant, návrat aplikace a změna sítě ji nespustí. Po vědomém startu se zachovává automatická obnova; bez grantu zůstává automatická Wi-Fi. Starší journal zachovává dřívější obnovu. Swift 22/22, simulátorový UI test, nepodepsaný iOS build a plná projektová brána 1719/1719 PASS.
+- Schválené p+n pushnulo funkční balíček 17 commitů a řízeně nasadilo `4a965ccb` do Cockpitu. Závěrečný dokumentační checkpoint má svůj konečný Git a provozní stav doložený živým auditem.
 
 ### Otevřeno
 - Build 4 ještě není podepsaný ani instalovaný a fyzické chování opravy je NEOVĚŘENO. T048 na cizí Wi-Fi je fyzicky NEPROVEDENO. Plné T049 s novým skutečným videem čeká na integrovanou aplikaci; C02b ještě není produkční přenos.
@@ -32,6 +33,7 @@
 - Míla zvolil pořadí T049 před T048 kvůli nedostupné cizí Wi-Fi; nejde o změnu kritérií ani označení T048 za PASS.
 - Míla zvolil T050 před T048 a po nezachyceném prvním mezistavu výslovně opakování se záznamem obrazovky. Automatický start není nově schválené UX rozhodnutí.
 - Míla následně zadal opravu na Macu: první start nové mobilně povolené dávky má být vědomý, obnova již zahájeného přenosu automatická. Finalizace T050 se neměnila.
+- Míla schválil p+n celého čekajícího balíčku; dva obsahově shodné soví commity se zachovaly běžným sloučením bez přepisu historie.
 
 ### Navrhované další kroky
 - T047 je fyzicky PASS v syntetickém rozsahu; jeho dva objekty/účtenky a relace zůstávají zachované.
@@ -40,10 +42,11 @@
 
 ### Technický stav checkpointu
 - Swift transfer core 19/19, T043 ovladač + oba receivery 28/28, T047/T043 workflow modul 11/11 a UI 1/1 PASS; podepsaný build 2, strict kontrola, instalace a launch PASS. Plná projektová brána 1716/1716 PASS.
-- Push ani nasazení neproběhly. T043 i T047 cesta/receiver jsou ukončené; původní Serve je přesně obnovený a Funnel vypnutý.
+- V době T043/T047 push ani nasazení neproběhly. T043 i T047 cesta/receiver jsou ukončené; původní Serve je přesně obnovený a Funnel vypnutý.
 - T049 audit po stopu: `phase=stopped`, receiver/cesta vypnuté, Funnel vypnutý, 1/1 relace ověřená, 13/13 částí, jeden objekt/účtenka a 100 663 553 B se shodným hashem. Dřívější Swift core 20/20, iOS UI 1/1, podepsaný build 3 a plná projektová brána 1718/1718 PASS.
-- T050 před fyzickým průchodem: cílené testy 32/32 a plná projektová brána 1719/1719 PASS; kód se v testu neměnil. Server `verifying` 17:58:22–17:58:36 CEST při 13/13 a 0 objektech/účtenkách, soukromé video v tomto okně `Ověřuji`, 100 %, 13/13. Po stopu druhého běhu `phase=stopped`, receiver/cesta neaktivní, Funnel vypnutý, 1 ověřená relace, 1 objekt/účtenka, 100 663 553 B, `verified_match=true`. T048 `INACTIVE`, T049 `stopped`; push ani nasazení neproběhly.
+- T050 před fyzickým průchodem: cílené testy 32/32 a plná projektová brána 1719/1719 PASS; kód se v testu neměnil. Server `verifying` 17:58:22–17:58:36 CEST při 13/13 a 0 objektech/účtenkách, soukromé video v tomto okně `Ověřuji`, 100 %, 13/13. Po stopu druhého běhu `phase=stopped`, receiver/cesta neaktivní, Funnel vypnutý, 1 ověřená relace, 1 objekt/účtenka, 100 663 553 B, `verified_match=true`. T048 `INACTIVE`, T049 `stopped`; v době testu push ani nasazení neproběhly.
 - Oprava buildu 4: Swift 22/22 včetně nového a staršího journalu, simulátorový UI test exit 0, nepodepsaný generic iOS build exit 0 a plná projektová brána 1719/1719 PASS. Podepsaný build, instalace, fyzické UX a přenos NEPROVEDENO; soukromá trasa nebyla spuštěna a tento shell nemá nastavený vývojový tým.
+- P+n funkčního balíčku: plná publikační brána 1719/1719, GitHub 17 commitů, kanonická soukromá účtenka nasazení `4a965ccb` s novým PID, shodným otiskem a smoke 5/5. Závěrečný stav po dokumentačním checkpointu se ověřuje živě.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -1032,3 +1035,27 @@ Technický důkaz:
   shodný SHA-256. Druhý běh po stopu `phase=stopped`, `receiver_alive=false`,
   `private_route_exact=false`, `funnel_enabled=false`. iPhone build 0.4.0 (3)
   beze změny; předchozí automatická brána 1719/1719 PASS, neopakovaná.
+
+### 2026-09-19 19:31 CEST — Schválené p+n a dorovnání Git historie
+
+Hotovo:
+- Funkční oprava prvního mobilního startu buildu 4 je po potvrzeném p+n na
+  GitHubu a v řízeně restartovaném Cockpitu. Oba profily jsou čisté a navázané
+  na stejný místní `main`.
+
+Rozhodnutí:
+- Dva souběžné soví commity měly shodný obsah před změnou i po ní. Běžné
+  sloučení zachovalo obě historie; žádná větev nebyla přepsána.
+
+Další krok:
+- Podepsat a nainstalovat build 4 a na nové syntetické dávce fyzicky ověřit
+  vědomý první start a obnovu již zahájeného přenosu.
+
+Navrhované další kroky:
+- T048 provést při dostupné cizí Wi-Fi; plné T049 se skutečně novým videem až
+  v integrované aplikaci. T050 znovu jen při nové pochybnosti o finalizaci.
+
+Technický důkaz:
+- GitHub batch 17 commitů po plné bráně 1719/1719. Soukromá účtenka
+  nasazení funkčního commitu `4a965ccb`: nový PID, shodný kódový otisk a
+  smoke 5/5. Konečný stav dokumentačního checkpointu určuje živý audit.

@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-19 19:12 CEST
+Aktualizováno: 2026-09-19 19:31 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -42,6 +42,7 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 - T050 PASS v syntetickém fyzickém rozsahu na `Camino Transfer Test` 0.4.0 (3): první běh zachytil jen finále a nebyl vyhlášen PASS; druhý oddělený běh má video `Ověřuji` při 100 % a 13/13 současně se serverovým `verifying` a 0 objekty/účtenkami. Teprve potom vznikl jeden hashově ověřený objekt a účtenka o 100 663 553 B a telefon ukázal `Ověřeno na Macu`. Oba běhy jsou potvrzeně zastavené, původní Serve přesně obnovený, Funnel vypnutý a soukromé důkazy zachované mimo Git. Přípravná sada 32/32 a brána 1719/1719 PASS; kód se při fyzickém testu neměnil.
 - Při návratu aplikace z Ovládacího centra se čekající mobilně povolená dávka podle Míly spustila bez klepnutí na `Synchronizovat nyní`. Kód volá při aktivaci `reconcile()`, takže je to vysvětlení odpovídající pozorování, ne důkaz absence dotyku z videa. Video také zachytilo krátké `Vyžaduje pozornost` a bezpečný retry před finálním PASS. Následné rozhodnutí a oprava jsou v dalším bodě.
 - Míla zvolil vědomý první start nové dávky po mobilním grantu. Build `Camino Transfer Test` 0.4.0 (4) má trvalou bránu v journalu: grant sám, návrat aplikace ani změna sítě nezahájí dosud nespouštěnou dávku; `Synchronizovat nyní`/`Pokračovat` ji autorizuje. Po prvním startu zůstává retry a obnova; bez mobilního grantu zůstává automatická Wi-Fi. Starší journal zachovává obnovu. Na Macu Swift 22/22, simulátorový UI test, nepodepsaný iOS build a plná projektová brána 1719/1719 PASS. Build 4 není podepsaný, instalovaný ani fyzicky ověřený.
+- Mílou schválené p+n dorovnalo vzdálený soví commit se shodným obsahem běžným sloučením bez přepisu historie. Funkční balíček 17 commitů byl pushnut na GitHub po plné bráně 1719/1719. Řízené nasazení `4a965ccb` do Cockpitu má účtenku s novým PID, shodou kódového otisku a smoke 5/5. Závěrečný dokumentační checkpoint a konečný stav `main` se ověřují živým auditem, ne tímto historickým ID.
 
 
 ## Zdroje a návaznost
