@@ -1,7 +1,7 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno po schváleném p+n: 2026-09-19 19:31 CEST
+- Aktualizováno po podpisu, instalaci a přípravě cíleného testu: 2026-09-19 21:34 CEST
 
 ### Hotovo
 - T043 PASS v rozsahu syntetického C02b: Letový režim přerušil upload při 0/13 serverových částech; po obnově sítě vznikl jediný objekt daného Assetu, 13/13 částí, 100 663 553 B a shodný SHA-256.
@@ -18,17 +18,18 @@
 - Oba běhy T050 jsou potvrzeně ukončené. Poslední audit: `phase=stopped`, receiver/cesta neaktivní, přesná obnova původního Serve, Funnel vypnutý; v druhém běhu zůstává jeden ověřený objekt a účtenka. Soukromé video zůstává mimo Git.
 - Build `Camino Transfer Test` 0.4.0 (4) na Macu zapisuje vědomý první start do journalu. Novou dávku s mobilním grantem nerozběhne návrat aplikace ani změna sítě; první start provede `Synchronizovat nyní` nebo `Pokračovat`. Rozpracovaný přenos a starší journal si zachovávají automatickou obnovu, běžná Wi-Fi bez grantu zůstává automatická. Swift 22/22, simulátorový UI test, nepodepsaný iOS build a plná projektová brána 1719/1719 PASS.
 - Mílou schválené p+n zachovalo oba soví commity se stejným obsahem běžným sloučením. Funkční balíček 17 commitů je na GitHubu; řízené nasazení `4a965ccb` do Cockpitu má nový proces, shodný otisk a smoke 5/5. Konečný stav včetně tohoto zápisu se ověřuje živým auditem.
+- Build 0.4.0 (4) je místně podepsaný a nainstalovaný na iPhonu 14 Plus přes stejné bundle ID. Přísný podpis, platný profil zahrnující telefon a seznam nainstalovaných aplikací s verzí 4 prošly. Camino Audio zůstává nainstalované, starší podepsaný build 3 je na Macu zachovaný. Cílený postup A/B pro novou syntetickou dávku je připravený v `camino/tasks/C02b_BUILD4_FIRST_START_FIELD_PLAN.md`.
 
 ### Otevřeno
-- Build 4 není podepsaný, instalovaný ani fyzicky ověřený. T048 na cizí Wi-Fi je fyzicky NEPROVEDENO. Plné T049 s novým skutečným videem čeká na integrovanou aplikaci; C02b ještě není produkční přenos.
+- Build 4 po instalaci ještě nebyl spuštěn ani fyzicky otestován. T048 na cizí Wi-Fi je fyzicky NEPROVEDENO. Plné T049 s novým skutečným videem čeká na integrovanou aplikaci; C02b ještě není produkční přenos.
 
 ### Rizika
 - Receiver je lokální standard-library experiment, ne produkční FastAPI, databáze, trvalá služba ani záloha. T049 nedokládá cizí Wi-Fi ani zadrženou finalizaci.
 - T049 v samostatném harnessu nemá kameru a plné kritérium nového skutečného videa se musí ověřit až v integrované aplikaci. Serverových 100 663 553 B není měření spotřeby operátora; retry může přenést více dat.
-- Na telefonu je zatím build 3, kde návrat aplikace z Ovládacího centra mohl po grantu spustit čerstvou dávku. Oprava buildu 4 je pouze automaticky ověřená na Macu. Journal ze staršího buildu zachovává staré obnovovací chování; cílený fyzický test musí použít nově vytvořenou dávku. Video T050 krátce ukázalo `Vyžaduje pozornost` před bezpečným retry; příčina první chyby není zjištěná.
+- Na telefonu je už build 4, ale oprava je zatím ověřená jen automaticky na Macu. Journal ze staršího buildu zachovává staré obnovovací chování; cílený fyzický test musí použít nově vytvořenou dávku. Video T050 krátce ukázalo `Vyžaduje pozornost` před bezpečným retry; příčina první chyby není zjištěná.
 
 ### Další krok
-- Před dalším mobilním během podepsat a nainstalovat build 4. Na nově vytvořené syntetické dávce ověřit po grantu a návratu aplikace 0/13 bez serverové relace, pak vědomý start a pokračování po přerušení. Plný T050 s 14s zadržením se neopakuje. T048 provést odděleně podle `C02b_T048_T049_FIELD_PLAN.md`, až bude dostupná cizí Wi-Fi.
+- Po samostatném pokynu registrovaně spustit nový T049 receiver a privátní cestu; na nově vytvořené syntetické dávce buildu 4 ověřit po grantu a návratu aplikace 0/13 bez serverové relace, pak vědomý start a automatickou obnovu po přerušení. Plný T050 s 14s zadržením se neopakuje. T048 provést odděleně podle `C02b_T048_T049_FIELD_PLAN.md`, až bude dostupná cizí Wi-Fi.
 
 ### Rozhodnutí
 - Serverová pravda a stav `verifying` mají přednost před lokálním byte progress. Dostupná povolená Wi-Fi může spustit automatickou synchronizaci; ruční tlačítko je provozní záloha. Souběžný impuls se koaleskuje, nezahazuje.
@@ -47,7 +48,7 @@
 - V době T043/T047 push ani nasazení neproběhly. T043 i T047 cesta/receiver jsou ukončené; původní Serve je přesně obnovený a Funnel vypnutý.
 - T049 audit po stopu: `phase=stopped`, `receiver_alive=false`, `private_route_exact=false`, `funnel_enabled=false`, `session_count=1`, `session_verified_count=1`, `latest_session_chunks=13/13`, `object_count=1`, `receipt_count=1`, `verified_match=true`, `verified_byte_count=100663553`. Dřívější Swift core 20/20, iOS UI 1/1, podepsaný build 3 a plná projektová brána 1718/1718 PASS; kód se při fyzickém testu neměnil.
 - T050 před fyzickým testem: cílené testy 32/32 a plná projektová brána 1719/1719 PASS; kód se při testu neměnil. Server `verifying` 17:58:22–17:58:36 CEST při 13/13 a 0 objektech/účtenkách; soukromé video ukazuje `Ověřuji` v tomto okně a finální stav až po něm. Poslední T050 status po stopu: `phase=stopped`, `receiver_alive=false`, `private_route_exact=false`, `funnel_enabled=false`, `session_count=1`, `session_verified_count=1`, `object_count=1`, `receipt_count=1`, `verified_match=true`, `verified_byte_count=100663553`. T048 `INACTIVE`, T049 `stopped`; v době testu push ani nasazení neproběhly.
-- Oprava buildu 4: Swift 22/22 včetně nového i staršího journalu, simulátorový UI test exit 0, nepodepsaný generic iOS build exit 0 a plná projektová brána 1719/1719 PASS. Podepsaný build, instalace, fyzické UX a síťový přenos NEPROVEDENO. V tomto shellu není nastavený vývojový tým; soukromá trasa nebyla spuštěna.
+- Oprava buildu 4: Swift 22/22 včetně nového i staršího journalu, simulátorový UI test exit 0, nepodepsaný generic iOS build exit 0 a plná projektová brána 1719/1719 PASS. Nyní navíc podepsaný iOS build exit 0, strict podpis PASS a CoreDevice potvrdil instalaci verze 4. Fyzické UX a síťový přenos NEPROVEDENO; soukromá trasa nebyla spuštěna.
 - P+n funkčního balíčku: GitHub 17 commitů pushnuto; plná brána 1719/1719. Soukromá kanonická účtenka nasazení `4a965ccb` potvrzuje změnu PID, shodu kódového otisku a smoke 5/5. Závěrečný stav dokumentačního checkpointu ověřit živě.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -60,19 +61,19 @@ Typ: Project
 Priorita: 1
 Stav: rozpracovane
 Pripomenout pri startu: ano
-Datum: 2026-09-19 19:31 CEST
+Datum: 2026-09-19 21:34 CEST
 
 Co se resilo:
-Oprava neočekávaného prvního mobilního startu po T050 a schválené p+n.
+Oprava neočekávaného prvního mobilního startu, p+n, podpis a instalace buildu 4 a příprava cílené zkoušky.
 
 Co je hotove:
-V0.5 + U15 platí; C01a/C01b/C01c/C02a jsou přijaty v prototypovém rozsahu. T043 a T047 prošly synteticky, T049 v syntetickém mobilním rozsahu. T050 prošel ve druhém fyzickém syntetickém běhu; oba běhy jsou ukončené. Build 4 má na Macu ověřenou trvalou bránu prvního mobilního startu. Funkční balíček je pushnutý a řízeně nasazený do Cockpitu; důkaz je v aktuálním stavu výše a v živé účtence.
+V0.5 + U15 platí; C01a/C01b/C01c/C02a jsou přijaty v prototypovém rozsahu. T043 a T047 prošly synteticky, T049 v syntetickém mobilním rozsahu. T050 prošel ve druhém fyzickém syntetickém běhu; oba běhy jsou ukončené. Build 4 má na Macu automaticky ověřenou bránu prvního mobilního startu, je podepsaný a nainstalovaný na iPhonu. Cílený fyzický test je připravený, dosud neprovedený. Funkční balíček byl pushnutý a řízeně nasazený do Cockpitu.
 
 Co neni hotove:
-C02b není dokončené: build 4 čeká na podpis, instalaci a fyzický test; T048 je fyzicky neprovedené a plné T049 čeká na nové skutečné video. Produkční FastAPI a trvalá služba také nejsou hotové. Dále plný databázový T061 v C05a, plná integrace T021 v C04, U15 v C03/C04, Viewer C08c–C08f, G0/G1/G8, dlouhodobá spotřeba a terénní připravenost.
+C02b není dokončené: build 4 čeká na fyzický test; T048 je fyzicky neprovedené a plné T049 čeká na nové skutečné video. Produkční FastAPI a trvalá služba také nejsou hotové. Dále plný databázový T061 v C05a, plná integrace T021 v C04, U15 v C03/C04, Viewer C08c–C08f, G0/G1/G8, dlouhodobá spotřeba a terénní připravenost.
 
 Dalsi krok:
-Nainstalovat build 4 a ověřit první mobilní start a obnovu; potom při dostupné cizí Wi-Fi provést T048. Plný T050 neopakovat bez nové pochybnosti o finalizaci.
+Po samostatném pokynu spustit izolovaný T049 receiver a provést cílený test prvního mobilního startu a obnovy na nové syntetické dávce; potom při dostupné cizí Wi-Fi provést T048. Plný T050 neopakovat bez nové pochybnosti o finalizaci.
 
 Navrhovane dalsi kroky:
 Plné T049 s novým skutečným videem až v integrované aplikaci; U15 až v C03/C04 a Viewer v C08c–C08f.
@@ -965,3 +966,28 @@ Technický důkaz:
 - Plná publikační brána 1719/1719, push 17 commitů. Soukromá účtenka
   `4a965ccb`: nový PID, shodný otisk, smoke 5/5. Závěrečný dokumentační
   checkpoint a konečný vzdálený stav ověřit živě.
+
+### 2026-09-19 21:35 CEST — Podpis, instalace a plán cílené zkoušky
+
+Hotovo:
+- Build 0.4.0 (4) byl podepsán a jako aktualizace instalován na iPhone 14
+  Plus. Předchozí podepsaný build 3 zůstal na Macu, Camino Audio v telefonu.
+- Nový plán A/B stanoví přesné mezistavy telefonu a serveru před vědomým
+  startem a po obnově již zahájeného přenosu.
+
+Rozhodnutí:
+- Produktové chování se neměnilo; uživatelský pokyn zahrnoval podpis,
+  instalaci a přípravu testu. Soukromý receiver se zatím nespustil.
+
+Další krok:
+- Po samostatném pokynu spustit registrovaný T049 běh a na nové syntetické
+  dávce podle `C02b_BUILD4_FIRST_START_FIELD_PLAN.md` fyzicky provést A/B.
+
+Navrhované další kroky:
+- Po testu registrovaně ukončit běh a doložit obnovu Serve; T048 nechat na
+  dobu, kdy bude dostupná cizí Wi-Fi.
+
+Technický důkaz:
+- Podepsaný build a strict podpis PASS, platný profil zahrnuje připojený
+  iPhone, CoreDevice potvrzuje nainstalovanou verzi 4. T049/T050 jsou zastavené,
+  receiver/cesta neaktivní, Funnel vypnutý. Launch a fyzický přenos NEPROVEDENO.

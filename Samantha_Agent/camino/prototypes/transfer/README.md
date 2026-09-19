@@ -34,7 +34,7 @@ xcodebuild -project camino/prototypes/transfer/CaminoTransfer.xcodeproj \
 Účet ani tým se neverzují. Volitelný místní `LocalSigning.xcconfig` je ignorovaný
 Gitem a může obsahovat pouze lokální volbu `DEVELOPMENT_TEAM`.
 
-Poslední build na iPhonu je podepsaný 0.4.0 (3). T043 doložil skutečné
+Před buildem 4 byl na iPhonu podepsaný 0.4.0 (3). T043 doložil skutečné
 přerušení sítě, doplnění všech částí, shodnou délku/hash a jediný objekt
 daného Assetu. T047 je fyzický PASS
 v syntetickém rozsahu: zámek, force quit, pravdivý mezistav a ruční relaunch
@@ -55,4 +55,6 @@ na iPhonu syntetickou mobilní částí T049; T050 prošel ve druhém fyzickém
 syntetickém běhu. T048 na cizí Wi-Fi a plné T049 s novým skutečným videem
 zůstávají otevřené. Build 4 s vědomým prvním mobilním startem prošel 22/22
 Swift testy, simulátorovým UI testem, nepodepsaným iOS buildem a plnou
-projektovou bránou 1719/1719. Na iPhonu ještě není nainstalovaný.
+projektovou bránou 1719/1719. Build 4 je nyní podepsaný a na iPhonu 14 Plus
+nainstalovaný; cílené fyzické ověření prvního startu a obnovy je připravené v
+`camino/tasks/C02b_BUILD4_FIRST_START_FIELD_PLAN.md`, zatím neprovedené.
