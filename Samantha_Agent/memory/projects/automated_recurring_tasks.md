@@ -1,5 +1,23 @@
 # Obecna rutina pro automaticke opakujici se ukoly
 
+## 2026-09-19 – Dnešní promluva zveřejněná
+
+- Na Mílův pokyn přidán jediný řádek pro 2026-09-19 do `OwlSpeech.csv`.
+  Dodaný text je zachovaný znak po znaku bez stylistické opravy; v paměti se
+  záměrně neopakuje.
+- Lokální náhled `data/daily_3am/previews/owl_190926.mp3` má 117 648 B.
+- Přesné ověření CSV a 17 cílených testů `tests/test_daily_3am.py` prošlo.
+- Produkční zdrojový commit `009fa2d8` obsahuje pouze tento CSV řádek; vznikl
+  z izolovaného checkoutu nad `origin/main`, aby se nepublikovaly lokální
+  vývojové commity Camina. Lokální pracovní commit je `b24bd9b7`.
+- Pages workflow `35432115685` nad `009fa2d8` skončil úspěšně; deploy job je
+  `105868609077`. Veřejný `app.js` vybírá `owl_190926.mp3?v=20260919a`.
+- Veřejné audio: HTTP 200, `audio/mp3`, 117 648 B; veřejný `app.js`: HTTP 200.
+  Pages artifact zůstal publikační autoritou a workflow nezměnilo `main`.
+
+Další krok: bez zásahu; další text až na Mílův pokyn. Ruční poslech v prohlížeči
+nebyl součástí tohoto ověření.
+
 ## 2026-09-16 – Dnešní promluva studentkám zveřejněná
 
 - Přidán jediný řádek pro 2026-09-16 do `OwlSpeech.csv`; dodaný text je

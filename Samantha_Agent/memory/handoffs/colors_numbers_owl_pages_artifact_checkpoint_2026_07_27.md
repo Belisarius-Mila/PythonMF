@@ -1,22 +1,30 @@
-Nazev: ColorsAndNumbers sova - aktuální publikace 2026-09-16
+Nazev: ColorsAndNumbers sova - aktuální publikace 2026-09-19
 Priorita: 1
 Stav: hotovo
 Pripomenout pri startu: ne
-Datum: 2026-09-16
+Datum: 2026-09-19
 
 Co se resilo:
-- Nová denní promluva studentkám podle přesně dodaného textu.
+- Nová denní promluva podle přesně dodaného textu Míly.
 
 Co je hotove:
-- Jediný CSV řádek pro 2026-09-16, lokální MP3 náhled a veřejná publikace.
-- 25 cílených testů a plná brána 1 684 testů prošly.
-- Commit `57c716c7`, Pages workflow `35059699238` nad stejným commitem.
-- Veřejný app.js a owl_160926.mp3 ověřené 16. září v 07:31 CEST:
-  HTTP 200, audio/mp3, 125 424 B, přibližně 20,9 s.
+- Jediný CSV řádek pro 2026-09-19, lokální MP3 náhled a veřejná publikace.
+- Dodaný text je zachovaný znak po znaku, bez stylistické opravy; v handoffu se
+  záměrně neopakuje.
+- 17 cílených testů denní rutiny prošlo; lokální preview má 117 648 B.
+- Produkční zdrojový commit je `009fa2d8` a obsahuje pouze tento CSV řádek;
+  lokální pracovní commit je `b24bd9b7`.
+- Pages workflow `35432115685` nad `009fa2d8` a deploy job `105868609077`
+  uspěly.
+- Veřejný `app.js` a `owl_190926.mp3` jsou ověřené 19. září v 10:30 CEST:
+  `app.js` HTTP 200, výběr `owl_190926.mp3?v=20260919a`; audio HTTP 200,
+  `audio/mp3`, 117 648 B.
+- Pages artifact zůstal publikační autoritou a workflow nezměnilo `main`.
 - Pages artifact je publikační autorita; historický blok níže je uzavřený.
 
 Co neni hotove:
-- Žádný otevřený implementační krok; ruční poslech v prohlížeči neproběhl.
+- Ruční poslech v prohlížeči neproběhl; HTTP, MIME, velikost a výběr dnešního
+  souboru jsou ověřené.
 
 Dalsi krok:
 - Bez dalšího zásahu; nový text až na Mílův pokyn.
@@ -25,12 +33,14 @@ Navrhovane dalsi kroky:
 - Žádné nové.
 
 Zmenene nebo relevantni soubory:
-- OwlSpeech.csv, automated_recurring_tasks.md, ACTIVE_PROJECTS.md.
-- Technická účtenka mimo Git: data/daily_3am/receipts/20260916_publication.json.
+- `OwlSpeech.csv`, `automated_recurring_tasks.md`, `ACTIVE_PROJECTS.md`.
+- Produkční zdrojový commit `009fa2d8`; Pages workflow `35432115685`.
 
 Bezpecnost / neukladat:
 - Soukromý obsah ani audio se do tohoto handoffu nekopírují.
-- Souběžné změny Cockpitu zachované; publikován jen ověřený soví commit.
+- Souběžné změny Camina zachované; do produkčního `main` byl odeslán pouze
+  čistý owl commit z izolovaného checkoutu. Workflow oznámilo neblokující
+  upozornění na vynucený Node.js 24 pro některé Actions.
 
 ## Historický checkpoint 2026-07-27 (nasazení dokončeno 2026-07-30)
 
