@@ -74,12 +74,14 @@ Dostupná povolená Wi-Fi může spustit automatickou reconciliaci;
   telefonu se ukázalo `Ověřeno na Macu`. Nová syntetická dávka grant nezdědila,
   zůstala na 0 %, 0/13, 0/2 a serveru nepřibyla druhá relace. Plné T049 s novým
   skutečným videem zůstává NEPROVEDENO.
-- T050: server i UI drží `Ověřuji` po dosažení 100 % bytů; řízené zadržení
-  serverového ověření na fyzickém iPhonu NEPROVEDENO. Oddělený T050 běh s
-  pevnou 14s prodlevou je připravený, nikoli spuštěný.
+- T050: **PASS v syntetickém fyzickém rozsahu.** První samostatný běh doložil
+  jen finální stav, proto nebyl vydán za PASS. Ve druhém běhu server při 13/13
+  zůstal ve `verifying` bez objektu/účtenky; iPhone současně ukazoval
+  `Ověřuji`, 100 % a 13/13. Až poté se objevilo `Ověřeno na Macu` a jeden
+  serverově ověřený objekt/účtenka o 100 663 553 B se shodným SHA-256.
 
-T048 a T050 zatím nejsou označeny PASS. T049 má jen syntetický mobilní průchod,
-nikoli plný PASS scénáře se skutečným videem.
+T048 zatím není označené PASS. T049 má jen syntetický mobilní průchod, nikoli
+plný PASS scénáře se skutečným videem.
 
 Historická příprava 2026-09-19: T048 a T049 mají oddělené, potvrzované start/token/status/stop
 workflow a vlastní soukromý běhový stav. Kvůli nedostupné cizí Wi‑Fi se nejprve
@@ -106,9 +108,33 @@ workflow používá vlastní prázdný soukromý stav. Serverové ověření zad
 14 sekund až po zapsání `verifying` a přijetí všech 13 částí, bez vypnutí
 kontroly délky nebo SHA-256. Prodleva je kratší než 20s timeout klientského
 požadavku; iPhone build 0.4.0 (3) není třeba měnit. Cílená sada 32/32 a plná
-projektová brána 1719/1719 PASS. Read-only T050 status `INACTIVE`; fyzický
-T050 zůstává NEPROVEDENO. Přesný průchod a důkazní hranice jsou v
+projektová brána 1719/1719 PASS. V okamžiku přípravy byl read-only T050
+`INACTIVE` a fyzický test NEPROVEDENO. Přesný průchod a důkazní hranice jsou v
 `camino/tasks/C02b_T050_FIELD_PLAN.md`.
+
+Fyzický T050 2026-09-19: první běh měl na serveru 13/13, jediný ověřený
+objekt/účtenku a konečný snímek iPhonu, ale chyběl telefonní záznam během
+`verifying`; po potvrzeném stopu zůstal soukromý důkaz zachovaný. Druhý,
+oddělený běh začal prázdný. Serverový read-only monitoring zaznamenal
+`verifying` 17:58:22–17:58:36 CEST při 13/13 a 0 objektech/účtenkách.
+Soukromé 214s video z iPhonu v tomto okně ukazuje `Ověřuji`, 100 %, 13/13;
+po serverovém přechodu na `verified` ukazuje `Ověřeno na Macu`. Finále druhého
+běhu: 1 ověřená relace, 1 objekt, 1 účtenka, 100 663 553 B, shodný SHA-256.
+Video zůstává mimo Git, protože zachycuje soukromou adresu; k jeho identifikaci
+slouží lokální SHA-256
+`31f3a7ec1daf54e19bd2b94b6b1f9a15534f9ab2c3f4a773506b876e66d9c678`.
+Po potvrzeném stopu je receiver vypnutý, `/camino-c02b` odebraná, původní
+Serve přesně obnovený a Funnel vypnutý. Oba soukromé běhy zůstaly zachované.
+
+Uživatel pozoroval automatický start druhé dávky bez klepnutí na
+`Synchronizovat nyní` po návratu z Ovládacího centra. Kód při aktivaci aplikace
+volá `reconcile()`, které může u mobilně povolené čerstvé dávky samo naplánovat
+upload; video ukazuje běžící přenos krátce po návratu, samo však nedokládá
+absenci dotyku. Před prvním potvrzeným chunkem se krátce objevilo
+`Vyžaduje pozornost`, pak bezpečný retry a konečné ověření; přesná příčina
+první chyby nebyla zjištěna. Jde o oddělenou UX výhradu, nikoli o falešné
+serverové potvrzení. Před dalším mobilním během rozhodnout o explicitním
+startu čerstvé dávky, ale zachovat obnovu už rozpracovaného přenosu.
 
 ## Pozorování a oprava z fyzického T043
 
@@ -129,9 +155,10 @@ samostatný regresní test a nepřerušený fyzický doběh na buildu 2.
 
 ## Rizika a hranice
 
-- Background `URLSession`, zámek a force quit s ručním relaunch jsou ověřené na
-  iPhonu; cizí Wi-Fi, captive portal, přechod sítě, jednorázová mobilní data a
-  zadržené serverové ověření zůstávají neověřené.
+- Background `URLSession`, zámek, force quit s ručním relaunch, syntetický
+  jednorázový mobilní grant a zadržené serverové ověření jsou ověřené na
+  iPhonu; cizí Wi-Fi, captive portal, přechod sítě a plné T049 se skutečným
+  novým videem zůstávají neověřené.
 - Receiver je izolovaný standard-library experiment, ne produkční FastAPI,
   databáze, launchd služba ani záloha.
 - Prototyp při každém stavovém dotazu znovu hashově kontroluje přijaté části;
@@ -160,5 +187,6 @@ samostatný regresní test a nepřerušený fyzický doběh na buildu 2.
 
 ## Další krok
 
-T047 je registrovaně ukončený s přesnou obnovou Serve. Potom pokračovat
-T048–T050 odděleně.
+T043/T047/T049/T050 jsou registrovaně ukončené s přesnou obnovou Serve.
+Pokračovat T048 při dostupnosti cizí Wi-Fi; před dalším mobilním během
+vyjasnit automatický start čerstvé dávky.

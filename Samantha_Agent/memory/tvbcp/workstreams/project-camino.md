@@ -1,7 +1,7 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno po přípravě T050: 2026-09-19 17:33 CEST
+- Aktualizováno po fyzickém T050: 2026-09-19 18:06 CEST
 
 ### Hotovo
 - T043 PASS v rozsahu syntetického C02b: Letový režim přerušil upload při 0/13 serverových částech; po obnově sítě vznikl jediný objekt daného Assetu, 13/13 částí, 100 663 553 B a shodný SHA-256.
@@ -13,34 +13,34 @@
 - T049 prošel na iPhonu v syntetickém mobilním rozsahu: bez grantu zůstala dávka na 0 %, 0/13 a serveru 0 relací; zrušení dialogu zákaz zachovalo. Po grantu server doložil jedinou ověřenou relaci, 13/13 částí, jeden objekt a účtenku, 100 663 553 B a shodný SHA-256. Míla viděl `Ověřeno na Macu`.
 - Nová syntetická dávka mobilní povolení nezdědila: po `Synchronizovat nyní` zůstala na 0 %, 0/13, 0/2 a server stále evidoval jen první relaci. T049 bylo registrovaně ukončeno; receiver/cesta vypnuté, původní Serve přesně obnovený, Funnel vypnutý a důkaz zachovaný. T048 je neaktivní.
 - `Camino Transfer Test` 0.4.0 (3) se na iPhonu fyzicky spustil; Camino Audio 0.3.0 (4) zůstává nedotčené. Kód při testu nebyl měněn.
-- T050 má připravené samostatné registrované start/token/status/stop workflow a vlastní prázdný soukromý stav. Pouze v jeho běhu se serverové ověření zadrží o 14 s po přijetí 13/13 částí a zapsání `verifying`; běžné hashové ověření a účtenka zůstávají povinné. Živá cesta nebyla spuštěna.
+- T050 PASS ve fyzickém syntetickém rozsahu: první běh doložil jen finále a zůstal neověřený, potvrzovací opakování zachytilo na iPhonu `Ověřuji` při 100 % a 13/13 současně se serverovým `verifying` bez objektu/účtenky. Až potom telefon ukázal `Ověřeno na Macu` a server ověřil jediný objekt/účtenku o 100 663 553 B se shodným SHA-256. Oba oddělené běhy jsou po potvrzených stopech zachované a bezpečně ukončené; soukromé video je mimo Git.
 
 ### Otevřeno
-- T048 a T050 jsou fyzicky NEPROVEDENO. Plné T049 s novým skutečným videem čeká na integrovanou aplikaci.
+- T048 na cizí Wi-Fi je fyzicky NEPROVEDENO. Plné T049 s novým skutečným videem čeká na integrovanou aplikaci; C02b ještě není produkční přenos.
 
 ### Rizika
-- Receiver je lokální standard-library experiment, ne produkční FastAPI, databáze, trvalá služba ani záloha. T049 neprokazuje cizí Wi-Fi ani zadrženou finalizaci.
+- Receiver je lokální standard-library experiment, ne produkční FastAPI, databáze, trvalá služba ani záloha. T049 neprokazuje cizí Wi-Fi; zadržená finalizace byla ověřena odděleně v T050.
 - Harness nemá kameru; plné kritérium nového skutečného videa se musí ověřit až v integrované aplikaci. Úplné znění fyzického potvrzovacího dialogu nebylo opsáno a serverový počet bajtů není měření spotřeby operátora.
-- T050 má 14s pozorovací okno pod 20s klientským timeoutem; bez souběžného důkazu telefonu i serveru se fyzický PASS neprohlašuje.
+- Po mobilním grantu může návrat aplikace z Ovládacího centra vyvolat `applicationBecameActive()` → `reconcile()` a zahájit čerstvou dávku bez klepnutí na `Synchronizovat nyní`. Míla to pozoroval a kód i video s tím souhlasí; video samo absenci dotyku neprokazuje. Krátké `Vyžaduje pozornost` před bezpečným retry nemá určenou příčinu. UX chování rozhodnout odděleně, bez oslabení obnovy již rozpracovaného přenosu.
 
 ### Další krok
-- Po samostatném potvrzení spustit T050 a provést syntetický fyzický průchod podle `C02b_T050_FIELD_PLAN.md`; T048 čeká na cizí Wi-Fi.
+- Až bude dostupná cizí Wi-Fi, provést oddělený T048 podle `C02b_T048_T049_FIELD_PLAN.md`; před dalším mobilním během vyjasnit automatický start čerstvé dávky.
 
 ### Rozhodnutí
 - Serverová pravda a stav `verifying` mají přednost před lokálním byte progress. Dostupná povolená Wi-Fi může spustit automatickou synchronizaci; ruční tlačítko je provozní záloha. Souběžný impuls se koaleskuje, nezahazuje.
 - Míla zvolil pořadí T049 před T048 kvůli nedostupné cizí Wi-Fi; nejde o změnu kritérií ani označení T048 za PASS.
-- Míla zvolil přípravu T050 před T048; samostatné potvrzení živého startu stále platí.
+- Míla zvolil T050 před T048 a po nezachyceném prvním mezistavu výslovně opakování se záznamem obrazovky. Automatický start není nově schválené UX rozhodnutí.
 
 ### Navrhované další kroky
 - T047 je fyzicky PASS v syntetickém rozsahu; jeho dva objekty/účtenky a relace zůstávají zachované.
 - Plné T049 s novým skutečným videem ověřit až v integrované aplikaci.
-- Po T050 registrovaně ukončit pouze jeho receiver a Serve cestu; plné T049 a T048 zůstávají oddělené.
+- T048 provést při dostupnosti cizí Wi-Fi; UX automatického startu řešit před dalším mobilním během. T050 se neopakuje.
 
 ### Technický stav checkpointu
 - Swift transfer core 19/19, T043 ovladač + oba receivery 28/28, T047/T043 workflow modul 11/11 a UI 1/1 PASS; podepsaný build 2, strict kontrola, instalace a launch PASS. Plná projektová brána 1716/1716 PASS.
 - Push ani nasazení neproběhly. T043 i T047 cesta/receiver jsou ukončené; původní Serve je přesně obnovený a Funnel vypnutý.
 - T049 audit po stopu: `phase=stopped`, receiver/cesta vypnuté, Funnel vypnutý, 1/1 relace ověřená, 13/13 částí, jeden objekt/účtenka a 100 663 553 B se shodným hashem. Dřívější Swift core 20/20, iOS UI 1/1, podepsaný build 3 a plná projektová brána 1718/1718 PASS.
-- T050 cílené testy 32/32, plná projektová brána 1719/1719 PASS; T050 status `INACTIVE` a T049 `stopped`. Fyzický T050 NEPROVEDENO.
+- T050 před fyzickým průchodem: cílené testy 32/32 a plná projektová brána 1719/1719 PASS; kód se v testu neměnil. Server `verifying` 17:58:22–17:58:36 CEST při 13/13 a 0 objektech/účtenkách, soukromé video v tomto okně `Ověřuji`, 100 %, 13/13. Po stopu druhého běhu `phase=stopped`, receiver/cesta neaktivní, Funnel vypnutý, 1 ověřená relace, 1 objekt/účtenka, 100 663 553 B, `verified_match=true`. T048 `INACTIVE`, T049 `stopped`; push ani nasazení neproběhly.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -75,10 +75,10 @@ je vyloučeno; celé `Do deníku` je po synchronizaci Viewer-eligible.
 - T022 PASS ve dvou odlišných fázích otevřené části: klidový relaunch, pravdivé označení obnoveného rozsahu a přehratelné uzavřené části. T023 PASS přes čtyři poslechnuté 55s hranice bez opakování či nevysvětlené díry. C01c je přijato v prototypovém rozsahu; G0/G1/G8 a terénní připravenost zůstávají nesplněné.
 - C02a minimální receiver prošel 10/10 automatickými testy i privátním HTTPS smoke přes dočasnou Tailscale Serve cestu. Správný upload vytvořil právě jeden objekt a účtenku, retry neduplikoval, chybný hash a konflikt byly odmítnuty. Funnel zůstal vypnutý, Cockpit dostupný a původní Serve stav byl obnoven.
 - C02b má fyzický PASS T043 v syntetickém rozsahu. Letový režim zachytil relaci s 0/13 přijatými částmi; po návratu sítě vznikl jediný objekt daného Assetu, 13/13, 100 663 553 B a shodný SHA-256.
-- `Camino Transfer Test` 0.4.0 (2) koaleskuje souběžné impulsy reconciliace; následná celá dávka doběhla automaticky. Build 0.4.0 (3) přidal per-request síťovou politiku a prošel syntetickou mobilní částí T049. Swift 20/20, Python workflow 13/13 a UI 1/1 PASS při jeho přípravě. T050 má samostatně připravený 14s testovací běh, plná brána 1719/1719 PASS; fyzicky je NEPROVEDENO. T043/T047/T049 receiver i testovací cesta jsou po jejich bězích ukončené, Serve obnovený, Funnel vypnutý.
+- `Camino Transfer Test` 0.4.0 (2) koaleskuje souběžné impulsy reconciliace; následná celá dávka doběhla automaticky. Build 0.4.0 (3) přidal per-request síťovou politiku a prošel syntetickou mobilní částí T049. Swift 20/20, Python workflow 13/13 a UI 1/1 PASS při jeho přípravě. T050 prošel ve druhém fyzickém syntetickém běhu se 14s zadržením ověření a souběžným videodůkazem; předchozí brána 1719/1719 PASS. T043/T047/T049/T050 receiver a testovací cesta jsou po bězích ukončené, Serve obnovený, Funnel vypnutý.
 
 
-Po samostatném potvrzení provést T050; T048 odděleně až při dostupné cizí Wi-Fi. C01c ani C02a dále nerozšiřovat bez nového důvodu.
+T048 provést odděleně až při dostupné cizí Wi-Fi; před dalším mobilním během vyjasnit automatický start. C01c ani C02a dále nerozšiřovat bez nového důvodu.
 
 ## Rizika
 
@@ -86,7 +86,7 @@ Po samostatném potvrzení provést T050; T048 odděleně až při dostupné ciz
 - C01b přijato v prototypovém rozsahu. Vítr a plná integrace T021 v C04 čekají; jeden nevysvětlený nereprodukovaný tichý úsek z prvního T059 zůstává rizikem.
 - C01c je přijato v prototypovém rozsahu po T022/T023. Výsledek nepokrývá dlouhodobou terénní spotřebu ani plný databázový a serverový T061, který zůstává C05a.
 - C02a je přijato jen v omezeném serverovém prototypu. Smoke z téhož Macu přes tailnet DNS není důkaz iPhone klienta, cizí sítě, přerušení velkého souboru, trvalé služby ani úplných T043/T048/T051.
-- C02b má T043 a T047 PASS v syntetickém rozsahu a T049 úspěšnou syntetickou mobilní část. Přesný výpadek nebyl po opravě zopakován na buildu 2. T048, T050 a plné T049 se skutečným videem zůstávají NEPROVEDENO; receiver není produkční služba ani záloha.
+- C02b má T043, T047 a T050 PASS v syntetickém rozsahu a T049 úspěšnou syntetickou mobilní část. Přesný výpadek nebyl po opravě zopakován na buildu 2. T048 a plné T049 se skutečným videem zůstávají NEPROVEDENO; automatický start po návratu aplikace je otevřená UX výhrada. Receiver není produkční služba ani záloha.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
 - Instalace a launch nejsou fyzická přejímka přenosu; vývojový profil je časově omezený do 24. září 2026. U01–U15 se bez nového rozhodnutí neotevírají.
 
@@ -996,3 +996,36 @@ Technický důkaz:
   `INACTIVE`, T049 `stopped` s jedním zachovaným ověřeným objektem/účtenkou.
   Pozorovací okno 14 s je kratší než klientský timeout 20 s; fyzický T050
   NEPROVEDENO.
+
+### 2026-09-19 18:06 CEST — T050 fyzicky PASS v syntetickém rozsahu
+
+Hotovo:
+- První průchod měl správné finále, ale nezachytil souběžný stav telefonu a
+  serveru; nebyl vydán za PASS. Po potvrzeném stopu vznikl nový oddělený běh.
+- Ve druhém průchodu video iPhonu zachytilo `Ověřuji`, 100 % a 13/13 v době,
+  kdy server evidoval `verifying`, 13/13 a ještě žádný objekt ani účtenku.
+  Teprve následné serverové ověření délky a SHA-256 vytvořilo jediný objekt a
+  účtenku; telefon poté ukázal `Ověřeno na Macu`.
+- Oba běhy byly samostatně potvrzeným stopem ukončeny. Testovací Serve cesta a
+  vlastněný receiver jsou pryč, původní Serve přesně obnovený, Funnel vypnutý;
+  syntetické důkazy zůstaly zachované, soukromé video není v Gitu.
+
+Rozhodnutí:
+- Míla výslovně zvolil opakování s videem místo přijetí pouhého finále.
+  Automatický start čerstvé povolené dávky po návratu aplikace není schválené
+  produktové rozhodnutí; jeho UX se vyjasní samostatně.
+
+Další krok:
+- T048 na cizí Wi-Fi podle připraveného postupu, až bude dostupná.
+
+Navrhované další kroky:
+- Před dalším mobilním během oddělit vědomý start nové dávky od bezpečné obnovy
+  již rozpracovaného přenosu a prověřit krátké `Vyžaduje pozornost` před retry.
+- Plné T049 s novým skutečným videem až v integrované aplikaci.
+
+Technický důkaz:
+- Server `verifying` 17:58:22–17:58:36 CEST bez objektu/účtenky, video v tomto
+  okně `Ověřuji`; po něm 1/1 ověřená relace/objekt/účtenka, 100 663 553 B a
+  shodný SHA-256. Druhý běh po stopu `phase=stopped`, `receiver_alive=false`,
+  `private_route_exact=false`, `funnel_enabled=false`. iPhone build 0.4.0 (3)
+  beze změny; předchozí automatická brána 1719/1719 PASS, neopakovaná.

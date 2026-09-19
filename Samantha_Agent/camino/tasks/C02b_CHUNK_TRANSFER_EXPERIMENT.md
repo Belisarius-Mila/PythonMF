@@ -90,8 +90,11 @@ do 13/13. Dvě relace a dva objekty/účtenky jsou hashově ověřené, každý
 a po zrušení dialogu 0/13 bez serverové relace, po grantu jediná ověřená
 relace/objekt/účtenka 13/13 a 100 663 553 B se shodným hashem. Další dávka
 grant nezdědila, po ruční synchronizaci zůstala na 0/13 a server nepřijal
-druhou relaci. Plné T049 s novým skutečným videem, T048 na cizí Wi-Fi a T050
-se zadrženou finalizací zůstávají NEPROVEDENO.
+druhou relaci. T050 navíc prošlo ve druhém odděleném syntetickém fyzickém běhu:
+video iPhonu ukazuje `Ověřuji`, 100 % a 13/13 současně se serverovým
+`verifying` bez objektu/účtenky, následně `Ověřeno na Macu` a jediný
+hashově ověřený objekt/účtenku o 100 663 553 B. Plné T049 s novým skutečným
+videem a T048 na cizí Wi-Fi zůstávají NEPROVEDENO.
 
 Po T043 registrované ukončení zastavilo jen vlastněný receiver, odebralo pouze
 `/camino-c02b`, zachovalo tři ověřené syntetické důkazy a přesně obnovilo Serve;
@@ -101,11 +104,15 @@ Fyzický T047 je dokončený; registrovaný stop odebral jeho cestu, zastavil
 receiver a přesně obnovil Serve. Stejně byl po syntetickém T049 bezpečně
 zastaven jeho vlastní receiver, odebrána testovací cesta a obnovena přesná
 původní Serve konfigurace při vypnutém Funnelu. Důkaz jediné ověřené dávky
-zůstal zachovaný. T048 a T050 následují odděleně.
+zůstal zachovaný. Oba T050 běhy byly později potvrzeně zastavené se zachováním
+syntetických důkazů a přesnou obnovou Serve; Funnel zůstal vypnutý. T048
+následuje odděleně při dostupnosti cizí Wi-Fi.
 
-T050 má připravený samostatný soukromý běh s pevnou 14s prodlevou před
+Příprava T050 zavedla samostatný soukromý běh s pevnou 14s prodlevou před
 serverovým ověřením. Ta začíná až po 13/13 částech a stavu `verifying`, ale
 nevytváří předčasný objekt ani účtenku a nevypíná následnou kontrolu hashe.
-Příprava prošla 32/32 cílenými testy a plnou bránou 1719/1719; živá cesta
-zůstává vypnutá a fyzický T050 je NEPROVEDENO. Postup je v
-`C02b_T050_FIELD_PLAN.md`.
+Příprava prošla 32/32 cílenými testy a plnou bránou 1719/1719. Po fyzickém
+PASS je živá cesta opět vypnutá a soukromý důkaz zachovaný. Postup je v
+`C02b_T050_FIELD_PLAN.md`. Po návratu aplikace z Ovládacího centra může
+`applicationBecameActive()` spustit `reconcile()` a tím i čerstvou dávku s
+povolenými mobilními daty bez dalšího stisku tlačítka; UX zůstává otevřené.

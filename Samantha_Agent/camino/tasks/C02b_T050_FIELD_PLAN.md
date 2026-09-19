@@ -1,7 +1,11 @@
 # C02b — fyzický test T050 se zadrženým serverovým ověřením
 
-Stav 2026-09-19: oddělené testovací workflow je připravené, fyzický T050 je
-NEPROVEDENO. Tento plán sám nespouští přijímač ani Serve.
+Stav 2026-09-19 18:06 CEST: T050 PASS v syntetickém fyzickém rozsahu až ve
+druhém odděleném běhu; první doložil jen finále. Soukromé video ve 14s okně
+ukazuje telefonní `Ověřuji` při 100 % a 13/13 současně se serverovým
+`verifying` bez objektu/účtenky; potom vznikl jediný hashově ověřený objekt
+a účtenka. Oba běhy jsou potvrzeně ukončené, důkazy zachované, Funnel vypnutý.
+Postup níže zůstává záznamem testovacího protokolu; nic nespouští.
 
 ## Hranice a příprava
 
