@@ -48,14 +48,19 @@ class WorkflowCommand:
 
 
 def _camino_network_test_commands(label: str) -> tuple[WorkflowCommand, ...]:
-    """Register fixed, separately gated T048/T049 synthetic test lifecycles."""
+    """Register fixed, separately gated T048–T050 synthetic test lifecycles."""
     lower = label.lower()
     script = str(CAMINO_C02B_NETWORK_CONTROL_SCRIPT)
     return (
         WorkflowCommand(
             command_id=f"camino_c02b_{lower}_start",
             title=f"Připravit privátní fyzický test Camino {label}",
-            purpose="Spustí oddělený syntetický receiver a jedinou privátní Serve cestu; Funnel nezapíná.",
+            purpose=(
+                "Spustí oddělený syntetický receiver se 14s pozdržením ověření a "
+                "jedinou privátní Serve cestu; Funnel nezapíná."
+                if label == "T050"
+                else "Spustí oddělený syntetický receiver a jedinou privátní Serve cestu; Funnel nezapíná."
+            ),
             aliases=(f"připrav camino {lower}", f"spusť camino {lower}"),
             argv=(str(PYTHON_BIN), script, label, "start"),
             cwd=SAMANTHA_DIR,
@@ -519,7 +524,7 @@ WORKFLOW_COMMANDS: tuple[WorkflowCommand, ...] = (
         ),
         preflight=lambda command: _preflight_human_adam_takeover(command),
     ),
-) + _camino_network_test_commands("T048") + _camino_network_test_commands("T049")
+) + _camino_network_test_commands("T048") + _camino_network_test_commands("T049") + _camino_network_test_commands("T050")
 
 
 @function_tool

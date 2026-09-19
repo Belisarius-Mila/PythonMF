@@ -49,6 +49,7 @@ class ControlConfig:
     pbcopy: Path = DEFAULT_PBCOPY
     port: int = DEFAULT_PORT
     test_label: str = "T043"
+    verify_delay_seconds: int = 5
 
     @property
     def current_path(self) -> Path:
@@ -353,6 +354,8 @@ def _new_run_directory(config: ControlConfig) -> Path:
 
 
 def start(config: ControlConfig = ControlConfig(), runner: Runner = run_command) -> str:
+    if not 0 <= config.verify_delay_seconds < 20:
+        raise ControlError("verification delay must stay below the client request timeout")
     for required in (config.tailscale_cli, config.python, config.receiver, config.pbcopy):
         if not required.exists():
             raise ControlError(f"required executable or file is missing: {required.name}")
@@ -396,7 +399,7 @@ def start(config: ControlConfig = ControlConfig(), runner: Runner = run_command)
         "--read-delay-ms-per-mib",
         "1000",
         "--verify-delay-seconds",
-        "5",
+        str(config.verify_delay_seconds),
     ]
     environment = os.environ.copy()
     environment["CAMINO_C02B_TOKEN"] = token
@@ -461,6 +464,7 @@ def start(config: ControlConfig = ControlConfig(), runner: Runner = run_command)
             "base_url": base_url,
             "route_path": ROUTE_PATH,
             "port": config.port,
+            "verify_delay_seconds": config.verify_delay_seconds,
             "serve_before_path": str(run_dir / "serve-before.json"),
         }
         _write_private_json(run_dir / "run.json", state)

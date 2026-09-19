@@ -102,3 +102,10 @@ receiver a přesně obnovil Serve. Stejně byl po syntetickém T049 bezpečně
 zastaven jeho vlastní receiver, odebrána testovací cesta a obnovena přesná
 původní Serve konfigurace při vypnutém Funnelu. Důkaz jediné ověřené dávky
 zůstal zachovaný. T048 a T050 následují odděleně.
+
+T050 má připravený samostatný soukromý běh s pevnou 14s prodlevou před
+serverovým ověřením. Ta začíná až po 13/13 částech a stavu `verifying`, ale
+nevytváří předčasný objekt ani účtenku a nevypíná následnou kontrolu hashe.
+Příprava prošla 32/32 cílenými testy a plnou bránou 1719/1719; živá cesta
+zůstává vypnutá a fyzický T050 je NEPROVEDENO. Postup je v
+`C02b_T050_FIELD_PLAN.md`.

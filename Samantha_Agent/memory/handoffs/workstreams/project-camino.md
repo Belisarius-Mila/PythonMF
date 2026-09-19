@@ -1,7 +1,7 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno po fyzickém T049: 2026-09-19 11:45 CEST
+- Aktualizováno po přípravě T050: 2026-09-19 17:33 CEST
 
 ### Hotovo
 - T043 PASS v rozsahu syntetického C02b: Letový režim přerušil upload při 0/13 serverových částech; po obnově sítě vznikl jediný objekt daného Assetu, 13/13 částí, 100 663 553 B a shodný SHA-256.
@@ -14,6 +14,7 @@
 - Další syntetická dávka začala znovu s vypnutým mobilním povolením. Ruční synchronizace zůstala na 0 %, 0/13, 0/2; server nadále viděl jen první relaci a jediný objekt/účtenku. Úplné znění fyzického potvrzovacího dialogu nebylo opsáno.
 - T049 bylo registrovaně ukončeno: vlastní receiver neběží, testovací Serve cesta je odebraná, původní konfigurace přesně obnovená, Funnel vypnutý. Jediný ověřený syntetický důkaz zůstává zachovaný. T048 zůstává neaktivní a čeká na cizí Wi-Fi.
 - Zdroj `Camino Transfer Test` 0.4.0 (3) vynucuje síťovou politiku dávky u všech HTTPS požadavků. Podepsaný build 3 se na iPhonu fyzicky spustil a prošel uvedeným testem; Camino Audio 0.3.0 (4) zůstává nedotčené.
+- Na Mílův pokyn je připravené oddělené T050 workflow s vlastním prázdným soukromým během. Pouze T050 pozdrží serverové ověření o 14 s po stavu `verifying` a 13/13 částech; následný hash i účtenka zůstávají povinné. iPhone build 3 se neměnil. Žádný T050 receiver ani Serve cesta nebyly spuštěny.
 
 ### Otevřeno
 - T048 a T050 jsou fyzicky NEPROVEDENO. Plné T049 s novým skutečným videem čeká na integrovanou aplikaci.
@@ -21,23 +22,26 @@
 ### Rizika
 - Receiver je lokální standard-library experiment, ne produkční FastAPI, databáze, trvalá služba ani záloha. T049 nedokládá cizí Wi-Fi ani zadrženou finalizaci.
 - T049 v samostatném harnessu nemá kameru a plné kritérium nového skutečného videa se musí ověřit až v integrované aplikaci. Serverových 100 663 553 B není měření spotřeby operátora; retry může přenést více dat.
+- T050 má jen 14s pozorovací okno, omezené 20s klientským timeoutem. Bez současně doloženého serverového `verifying` bez účtenky a telefonního `Ověřuji` při 100 % nelze vyhlásit PASS; fyzický průchod zatím NEPROVEDENO.
 
 ### Další krok
-- Při dostupné cizí Wi-Fi provést oddělený T048 podle připraveného postupu; bez ní lze po samostatném zadání připravit T050 se zadrženou finalizací.
+- Po samostatném potvrzení spustit `camino_c02b_t050_start`, předat URL/token a provést řízený fyzický průchod podle `C02b_T050_FIELD_PLAN.md`. T048 čeká na cizí Wi-Fi.
 
 ### Rozhodnutí
 - Serverová pravda a stav `verifying` mají přednost před lokálním byte progress. Dostupná povolená Wi-Fi může spustit automatickou synchronizaci; ruční tlačítko je provozní záloha. Souběžný impuls se koaleskuje, nezahazuje.
 - Míla zvolil pořadí T049 před T048 kvůli nedostupné cizí Wi-Fi; nejde o změnu kritérií ani označení T048 za PASS.
+- Míla zvolil přípravu T050 před dostupností cizí Wi-Fi; neznamená to fyzický PASS ani povolení obejít samostatné potvrzení startu.
 
 ### Navrhované další kroky
 - T047 je fyzicky PASS v syntetickém rozsahu; jeho dva objekty/účtenky a relace zůstávají zachované.
 - T049 je v syntetickém mobilním rozsahu hotové a bezpečně ukončené; plné T049 s novým skutečným videem zůstává otevřené.
-- T050 zůstává samostatný fyzický test; jeho řízené zadržení serverového ověření se zatím nespouští.
+- T050 provést jen nad syntetickými daty a po testu potvrzeně ukončit vlastní trasu; plný T049 a T048 zůstávají oddělené.
 
 ### Technický stav checkpointu
 - Swift transfer core 19/19, T043 ovladač + oba receivery 28/28, T047/T043 workflow modul 11/11 a UI 1/1 PASS; podepsaný build 2, strict kontrola, instalace a launch PASS. Plná projektová brána 1716/1716 PASS.
 - Push ani nasazení neproběhly. T043 i T047 cesta/receiver jsou ukončené; původní Serve je přesně obnovený a Funnel vypnutý.
 - T049 audit po stopu: `phase=stopped`, `receiver_alive=false`, `private_route_exact=false`, `funnel_enabled=false`, `session_count=1`, `session_verified_count=1`, `latest_session_chunks=13/13`, `object_count=1`, `receipt_count=1`, `verified_match=true`, `verified_byte_count=100663553`. Dřívější Swift core 20/20, iOS UI 1/1, podepsaný build 3 a plná projektová brána 1718/1718 PASS; kód se při fyzickém testu neměnil.
+- T050 cílené testy 32/32 a plná projektová brána 1719/1719 PASS. Read-only T050 `INACTIVE`, T049 `stopped`; soukromá trasa se při přípravě neměnila. Push ani nasazení neproběhly.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -49,19 +53,19 @@ Typ: Project
 Priorita: 1
 Stav: rozpracovane
 Pripomenout pri startu: ano
-Datum: 2026-09-19 11:45 CEST
+Datum: 2026-09-19 17:33 CEST
 
 Co se resilo:
-Syntetická mobilní část T049, bezpečné ukončení běhu a další pořadí C02b.
+Příprava odděleného T050 po úspěšné syntetické mobilní části T049.
 
 Co je hotove:
-V0.5 + U15 platí; C01a/C01b/C01c/C02a jsou přijaty v prototypovém rozsahu. T043 a T047 prošly synteticky. T049 prošel v syntetickém mobilním rozsahu a jeho privátní běh je bezpečně ukončen s přesnou obnovou Serve. Podrobnosti a důkaz jsou v aktuálním stavu výše.
+V0.5 + U15 platí; C01a/C01b/C01c/C02a jsou přijaty v prototypovém rozsahu. T043 a T047 prošly synteticky, T049 v syntetickém mobilním rozsahu a je bezpečně ukončené. T050 má připravený oddělený, dosud nespustěný běh s řízenou 14s prodlevou a ověřený postup. Podrobnosti jsou v aktuálním stavu výše.
 
 Co neni hotove:
 C02b není dokončené: T048 a T050 jsou fyzicky neprovedené, plné T049 čeká na nové skutečné video. Produkční FastAPI a trvalá služba také nejsou hotové. Dále plný databázový T061 v C05a, plná integrace T021 v C04, U15 v C03/C04, Viewer C08c–C08f, G0/G1/G8, dlouhodobá spotřeba a terénní připravenost.
 
 Dalsi krok:
-Při dostupné cizí Wi-Fi provést oddělený T048; bez ní lze po samostatném zadání připravit T050.
+Po samostatném potvrzení spustit T050 a provést jeho fyzickou syntetickou zkoušku; T048 až při cizí Wi-Fi.
 
 Navrhovane dalsi kroky:
 Plné T049 s novým skutečným videem až v integrované aplikaci; U15 až v C03/C04 a Viewer v C08c–C08f.

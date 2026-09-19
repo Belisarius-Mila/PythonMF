@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Isolated private-network control for Camino C02b T048 and T049."""
+"""Isolated private-network control for Camino C02b T048, T049 and T050."""
 
 from __future__ import annotations
 
@@ -17,7 +17,8 @@ if str(PROJECT_ROOT) not in sys.path:
 from scripts import camino_c02b_t043_control as shared
 
 
-TEST_LABELS = ("T048", "T049")
+TEST_LABELS = ("T048", "T049", "T050")
+T050_VERIFY_DELAY_SECONDS = 14
 
 
 def config(test_label: str) -> shared.ControlConfig:
@@ -26,6 +27,9 @@ def config(test_label: str) -> shared.ControlConfig:
     return shared.ControlConfig(
         state_root=PROJECT_ROOT / "data" / "private" / "camino" / f"c02b_{test_label.lower()}",
         test_label=test_label,
+        verify_delay_seconds=(
+            T050_VERIFY_DELAY_SECONDS if test_label == "T050" else 5
+        ),
     )
 
 

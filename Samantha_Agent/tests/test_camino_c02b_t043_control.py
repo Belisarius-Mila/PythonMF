@@ -7,6 +7,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from dataclasses import replace
 from pathlib import Path
 from unittest import mock
 
@@ -106,7 +107,7 @@ class CaminoC02bT043ControlTests(unittest.TestCase):
             self.assertEqual(action, command.argv[-1])
             self.assertEqual(confirmation, command.requires_confirmation)
 
-        for label in ("T048", "T049"):
+        for label in ("T048", "T049", "T050"):
             for action in ("start", "copy-token", "status", "stop"):
                 command = commands[f"camino_c02b_{label.lower()}_{action.replace('-', '_')}"]
                 self.assertEqual("camino_c02b_network_control.py", Path(command.argv[-3]).name)
@@ -121,15 +122,21 @@ class CaminoC02bT043ControlTests(unittest.TestCase):
         self.assertEqual("c02b_t047", selected.state_root.name)
         self.assertNotEqual(control.DEFAULT_STATE_ROOT, selected.state_root)
 
-    def test_t048_t049_wrappers_have_distinct_private_state_and_fail_closed(self) -> None:
+    def test_t048_t050_wrappers_have_distinct_private_state_and_fail_closed(self) -> None:
         first = network_control.config("T048")
         second = network_control.config("T049")
+        third = network_control.config("T050")
         self.assertEqual("c02b_t048", first.state_root.name)
         self.assertEqual("c02b_t049", second.state_root.name)
+        self.assertEqual("c02b_t050", third.state_root.name)
         self.assertNotEqual(first.state_root, second.state_root)
+        self.assertNotEqual(second.state_root, third.state_root)
+        self.assertEqual((first.verify_delay_seconds, second.verify_delay_seconds), (5, 5))
+        self.assertEqual(third.verify_delay_seconds, network_control.T050_VERIFY_DELAY_SECONDS)
+        self.assertLess(third.verify_delay_seconds, 20)
         self.assertEqual(control.ROUTE_PATH, "/camino-c02b")
         with self.assertRaises(control.ControlError):
-            network_control.config("T050")
+            network_control.config("T051")
 
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -150,14 +157,14 @@ class CaminoC02bT043ControlTests(unittest.TestCase):
                 control._validate_state_paths(state, wrong)
 
     def test_network_workflow_routing_requires_exact_test_label(self) -> None:
-        for label in ("T048", "T049"):
+        for label in ("T048", "T049", "T050"):
             result = _resolve_command(request=f"připrav camino {label}")
             self.assertEqual(f"camino_c02b_{label.lower()}_start", result.command_id)
 
         ambiguous = _resolve_command(request="připrav camino")
         self.assertNotIn(
             ambiguous if isinstance(ambiguous, str) else ambiguous.command_id,
-            {"camino_c02b_t048_start", "camino_c02b_t049_start"},
+            {"camino_c02b_t048_start", "camino_c02b_t049_start", "camino_c02b_t050_start"},
         )
 
     def test_receiver_module_entrypoint_does_not_shadow_standard_email(self) -> None:
@@ -189,7 +196,10 @@ class CaminoC02bT043ControlTests(unittest.TestCase):
 
     def test_start_uses_exact_private_route_and_keeps_token_out_of_output(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
-            config = self._config(Path(temp_dir))
+            config = replace(
+                self._config(Path(temp_dir)),
+                verify_delay_seconds=network_control.T050_VERIFY_DELAY_SECONDS,
+            )
             baseline = self._baseline()
             active = False
             calls: list[list[str]] = []
@@ -257,7 +267,9 @@ class CaminoC02bT043ControlTests(unittest.TestCase):
             self.assertIn("--read-delay-ms-per-mib", receiver_argv)
             self.assertIn("1000", receiver_argv)
             self.assertIn("--verify-delay-seconds", receiver_argv)
-            self.assertIn("5", receiver_argv)
+            self.assertEqual(
+                receiver_argv[-1], str(network_control.T050_VERIFY_DELAY_SECONDS)
+            )
             self.assertIn(
                 [
                     str(config.tailscale_cli),
@@ -274,6 +286,16 @@ class CaminoC02bT043ControlTests(unittest.TestCase):
             token_path = Path(state["token_path"])
             self.assertEqual(token, token_path.read_text(encoding="utf-8"))
             self.assertEqual(stat.S_IMODE(token_path.stat().st_mode), 0o600)
+            self.assertEqual(
+                state["verify_delay_seconds"], network_control.T050_VERIFY_DELAY_SECONDS
+            )
+
+    def test_start_rejects_delay_at_client_timeout_before_writes(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            config = replace(self._config(Path(temp_dir)), verify_delay_seconds=20)
+            with self.assertRaisesRegex(control.ControlError, "client request timeout"):
+                control.start(config)
+            self.assertFalse(config.state_root.exists())
 
     def test_copy_token_and_stop_restore_exact_baseline_without_deleting_evidence(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

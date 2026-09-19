@@ -75,7 +75,8 @@ Dostupná povolená Wi-Fi může spustit automatickou reconciliaci;
   zůstala na 0 %, 0/13, 0/2 a serveru nepřibyla druhá relace. Plné T049 s novým
   skutečným videem zůstává NEPROVEDENO.
 - T050: server i UI drží `Ověřuji` po dosažení 100 % bytů; řízené zadržení
-  serverového ověření na fyzickém iPhonu NEPROVEDENO.
+  serverového ověření na fyzickém iPhonu NEPROVEDENO. Oddělený T050 běh s
+  pevnou 14s prodlevou je připravený, nikoli spuštěný.
 
 T048 a T050 zatím nejsou označeny PASS. T049 má jen syntetický mobilní průchod,
 nikoli plný PASS scénáře se skutečným videem.
@@ -99,6 +100,15 @@ potvrdil `phase=stopped`, `session_count=1`, `session_verified_count=1`,
 `latest_session_chunks=13/13`, `verified_match=true` a
 `verified_byte_count=100663553`. Úplné znění fyzického dialogu nebylo opsáno;
 serverový počet bajtů není měřením spotřeby operátora.
+
+Příprava T050 2026-09-19: samostatné potvrzované start/token/status/stop
+workflow používá vlastní prázdný soukromý stav. Serverové ověření zadrží o
+14 sekund až po zapsání `verifying` a přijetí všech 13 částí, bez vypnutí
+kontroly délky nebo SHA-256. Prodleva je kratší než 20s timeout klientského
+požadavku; iPhone build 0.4.0 (3) není třeba měnit. Cílená sada 32/32 a plná
+projektová brána 1719/1719 PASS. Read-only T050 status `INACTIVE`; fyzický
+T050 zůstává NEPROVEDENO. Přesný průchod a důkazní hranice jsou v
+`camino/tasks/C02b_T050_FIELD_PLAN.md`.
 
 ## Pozorování a oprava z fyzického T043
 
