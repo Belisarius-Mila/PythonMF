@@ -116,3 +116,11 @@ PASS je živá cesta opět vypnutá a soukromý důkaz zachovaný. Postup je v
 `C02b_T050_FIELD_PLAN.md`. Po návratu aplikace z Ovládacího centra může
 `applicationBecameActive()` spustit `reconcile()` a tím i čerstvou dávku s
 povolenými mobilními daty bez dalšího stisku tlačítka; UX zůstává otevřené.
+
+Oprava na Macu 2026-09-19: build 0.4.0 (4) má trvalý údaj o prvním startu.
+Nová dávka s mobilním grantem se po aktivaci aplikace ani změně sítě sama
+nespustí; první přenos vyžaduje `Synchronizovat nyní` nebo `Pokračovat`.
+Po startu zůstává automatická obnova, retry i výchozí Wi-Fi automatika.
+Starší journal zachovává obnovu. Swift 22/22, simulátorový UI test,
+nepodepsaný iOS build a plná projektová brána 1719/1719 PASS. Build 4 čeká
+na podpis, instalaci a fyzický cílený test; T050 není třeba celé opakovat.

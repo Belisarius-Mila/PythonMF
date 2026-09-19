@@ -23,6 +23,8 @@ public struct TransferJournal: Codable, Equatable, Sendable {
     public var locallySentByteCount: Int64
     public var phase: TransferJournalPhase
     public var cellularBatchID: UUID?
+    /// Nil is a journal from an older build; keep its existing recovery behavior.
+    public var startAuthorized: Bool?
     public var lastError: String?
 
     public init(
@@ -38,6 +40,7 @@ public struct TransferJournal: Codable, Equatable, Sendable {
         locallySentByteCount: Int64 = 0,
         phase: TransferJournalPhase = .ready,
         cellularBatchID: UUID? = nil,
+        startAuthorized: Bool = false,
         lastError: String? = nil
     ) {
         self.schema = schema
@@ -52,6 +55,7 @@ public struct TransferJournal: Codable, Equatable, Sendable {
         self.locallySentByteCount = locallySentByteCount
         self.phase = phase
         self.cellularBatchID = cellularBatchID
+        self.startAuthorized = startAuthorized
         self.lastError = lastError
     }
 
@@ -67,6 +71,10 @@ public struct TransferJournal: Codable, Equatable, Sendable {
 
     public var cellularAllowed: Bool {
         cellularBatchID == batchID
+    }
+
+    public var requiresExplicitStart: Bool {
+        cellularAllowed && startAuthorized == false
     }
 
     public var valid: Bool {

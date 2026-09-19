@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-19 18:06 CEST
+Aktualizováno: 2026-09-19 19:12 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -40,7 +40,8 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 - `Camino Transfer Test` 0.4.0 (3) omezuje mobilní i drahou síť u všech HTTPS požadavků na konkrétní povolenou dávku a rozlišuje mobilní rozhraní. Swift 20/20, Python workflow 13/13, UI simulátoru 1/1, podepsaný build, strict podpis a plná projektová brána 1718/1718 PASS. Build 3 se fyzicky spustil a T049 v syntetickém mobilním rozsahu prošel: bez grantu i po zrušení dialogu 0 %, 0/13 a serveru 0 relací; po grantu 13/13, jeden ověřený objekt/účtenka, 100 663 553 B a shodný SHA-256, na telefonu `Ověřeno na Macu`. Nová syntetická dávka grant nezdědila a při ruční synchronizaci zůstala na 0 %, 0/13, 0/2; serveru nepřibyla relace.
 - Registrovaný stop T049 obnovil přesnou původní Serve konfiguraci, vypnul vlastní receiver/cestu a ponechal Funnel vypnutý. Jediný ověřený syntetický důkaz zůstal zachovaný; T048 je neaktivní. Camino Audio 0.3.0 (4) zůstává nainstalované a nedotčené.
 - T050 PASS v syntetickém fyzickém rozsahu na `Camino Transfer Test` 0.4.0 (3): první běh zachytil jen finále a nebyl vyhlášen PASS; druhý oddělený běh má video `Ověřuji` při 100 % a 13/13 současně se serverovým `verifying` a 0 objekty/účtenkami. Teprve potom vznikl jeden hashově ověřený objekt a účtenka o 100 663 553 B a telefon ukázal `Ověřeno na Macu`. Oba běhy jsou potvrzeně zastavené, původní Serve přesně obnovený, Funnel vypnutý a soukromé důkazy zachované mimo Git. Přípravná sada 32/32 a brána 1719/1719 PASS; kód se při fyzickém testu neměnil.
-- Při návratu aplikace z Ovládacího centra se čekající mobilně povolená dávka podle Míly spustila bez klepnutí na `Synchronizovat nyní`. Kód volá při aktivaci `reconcile()`, takže je to vysvětlení odpovídající pozorování, ne důkaz absence dotyku z videa. Video také zachytilo krátké `Vyžaduje pozornost` a bezpečný retry před finálním PASS. UX čerstvého startu vs. obnova již rozpracovaného přenosu zůstává k rozhodnutí.
+- Při návratu aplikace z Ovládacího centra se čekající mobilně povolená dávka podle Míly spustila bez klepnutí na `Synchronizovat nyní`. Kód volá při aktivaci `reconcile()`, takže je to vysvětlení odpovídající pozorování, ne důkaz absence dotyku z videa. Video také zachytilo krátké `Vyžaduje pozornost` a bezpečný retry před finálním PASS. Následné rozhodnutí a oprava jsou v dalším bodě.
+- Míla zvolil vědomý první start nové dávky po mobilním grantu. Build `Camino Transfer Test` 0.4.0 (4) má trvalou bránu v journalu: grant sám, návrat aplikace ani změna sítě nezahájí dosud nespouštěnou dávku; `Synchronizovat nyní`/`Pokračovat` ji autorizuje. Po prvním startu zůstává retry a obnova; bez mobilního grantu zůstává automatická Wi-Fi. Starší journal zachovává obnovu. Na Macu Swift 22/22, simulátorový UI test, nepodepsaný iOS build a plná projektová brána 1719/1719 PASS. Build 4 není podepsaný, instalovaný ani fyzicky ověřený.
 
 
 ## Zdroje a návaznost
@@ -74,13 +75,13 @@ kódu nevyvolává; FAIL se nejdřív doloží a opraví v aktuálním rozsahu.
 - C02a je přijaté v prototypovém rozsahu po lokálních testech a privátním HTTPS smoke. Smoke byl spuštěn z téhož Macu přes tailnet DNS; nedokládá iPhone, cizí síť, přerušení velkého souboru ani trvalou službu. Standard-library receiver zůstává izolovaný experiment; produkční cíl je FastAPI v samostatném prostředí Camina.
 - C02b má fyzický PASS T043, T047 a T050 v syntetickém rozsahu a syntetické mobilní části T049. T048 na cizí Wi-Fi zůstává NEPROVEDENO; receiver není produkční služba ani záloha.
 - Plné T049 s novým skutečným videem vyžaduje integrovanou kameru. Úplné znění fyzického potvrzovacího dialogu nebylo opsáno a serverových 100 663 553 B není měření spotřeby operátora; retry může přenést více.
-- T050 prošlo díky souběžnému důkazu telefonu a serveru v 14s okně; soukromé video obsahuje soukromou adresu, proto se necommitovalo. Automatický start povolené čerstvé dávky po aktivaci aplikace může uživatele překvapit; přesný UX kontrakt a krátké `Vyžaduje pozornost` před retry zůstávají otevřené.
+- T050 prošlo díky souběžnému důkazu telefonu a serveru v 14s okně; soukromé video obsahuje soukromou adresu, proto se necommitovalo. Oprava neočekávaného startu je jen na Macu; její účinek na fyzickém iPhonu dosud NEOVĚŘENO. Krátké `Vyžaduje pozornost` před retry má neznámou příčinu.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
 - Instalace a launch nejsou fyzická přejímka přenosu; vývojový profil je časově omezený do 24. září 2026. U01–U15 se bez nového rozhodnutí neotevírají.
 
 ## Další krok
 
-T048 provést podle připraveného postupu, až bude dostupná cizí Wi-Fi. Před dalším mobilním během rozhodnout a případně opravit automatický start čerstvé dávky; plné T049 s novým skutečným videem zůstává pro integrovanou aplikaci.
+Před dalším mobilním během podepsat a nainstalovat build 4; na nové syntetické dávce ověřit 0/13 bez serverové relace po grantu/návratu, vědomý start a pokračování rozpracovaného přenosu. Plný T050 se neopakuje. T048 provést při dostupné cizí Wi-Fi; plné T049 s novým skutečným videem zůstává pro integrovanou aplikaci.
 
 Historický doklad založení:
 Ověření založení: 56/56 testů integrace (54 + 2 profilové testy) a rychlá statická brána OK.

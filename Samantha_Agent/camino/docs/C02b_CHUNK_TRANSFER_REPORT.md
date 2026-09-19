@@ -136,6 +136,23 @@ první chyby nebyla zjištěna. Jde o oddělenou UX výhradu, nikoli o falešné
 serverové potvrzení. Před dalším mobilním během rozhodnout o explicitním
 startu čerstvé dávky, ale zachovat obnovu už rozpracovaného přenosu.
 
+## 2026-09-19 — oprava prvního mobilního startu na Macu
+
+Build 0.4.0 (4) zapisuje do journalu, zda dávka už byla vědomě spuštěna nebo
+zahájila serverovou relaci na povolené Wi-Fi. Nová dávka po mobilním grantu
+čeká na `Synchronizovat nyní` nebo `Pokračovat`; pouhý návrat aplikace či změna
+sítě ji nespustí. Po prvním startu se běžná reconciliace, retry a obnova
+rozpracovaného přenosu zachovávají. Starší journal bez nové položky zachovává
+dosavadní obnovu, aby aktualizace nezastavila rozpracovanou dávku.
+
+Na Macu prošlo 22/22 Swift testů včetně uložení a zpětného načtení nové brány
+a staršího journalu, simulátorový UI test, nepodepsaný iOS build a plná
+projektová brána 1719/1719. Build 4 zatím není podepsaný ani nainstalovaný:
+v tomto shellu není nakonfigurovaný vývojový tým. Fyzicky zbývá na nové dávce
+ověřit, že grant a návrat do aplikace drží 0/13 bez serverové relace, vědomý
+start přenos spustí a rozpracovaný upload po přerušení pokračuje. T050 se
+nemusí znovu provádět s 14s zadržením ověření; jeho finalizace se neměnila.
+
 ## Pozorování a oprava z fyzického T043
 
 První obnovovací průchod nakonec bezpečně doběhl, ale vyžadoval několik stisků
@@ -188,5 +205,5 @@ samostatný regresní test a nepřerušený fyzický doběh na buildu 2.
 ## Další krok
 
 T043/T047/T049/T050 jsou registrovaně ukončené s přesnou obnovou Serve.
-Pokračovat T048 při dostupnosti cizí Wi-Fi; před dalším mobilním během
-vyjasnit automatický start čerstvé dávky.
+Před dalším mobilním během podepsat a nainstalovat build 4 a cíleně ověřit
+první start a obnovu. Potom pokračovat T048 při dostupnosti cizí Wi-Fi.

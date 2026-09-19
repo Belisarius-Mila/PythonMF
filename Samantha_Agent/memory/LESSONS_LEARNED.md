@@ -773,3 +773,15 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   zobrazit počet, objem a upozornění na možné opakování bajtů.
 - Ověření: Swift 20/20, iOS build a UI test potvrzovací brány 1/1 PASS.
   Skutečný mobilní přenos zůstává fyzicky NEOVĚŘENO.
+
+### 2026-09-19 — Mobilní grant není start nové dávky
+
+- Kontext: Camino C02b, návrat testovací aplikace po povolení mobilních dat.
+- Problém: `applicationBecameActive()` i změna sítě volaly reconciliaci, která
+  mohla sama vytvořit serverovou relaci dosud nespouštěné dávky.
+- Řešení: uložit vědomý první start do journalu a před serverovým voláním
+  zadržet novou dávku s mobilním grantem. Po prvním startu nechat retry a
+  obnovu pokračovat; starší journal obnovovat podle dosavadního kontraktu.
+- Ověření: Swift 22/22 včetně nové a starší podoby journalu, simulátorový UI
+  test, nepodepsaný iOS build a plná projektová brána 1719/1719 PASS. Fyzický
+  test buildu 4 na iPhonu zůstává NEOVĚŘENO.

@@ -145,7 +145,9 @@ import Foundation
             journal = current
             await driver.cancelAll()
             detailText = allowed
-                ? "Mobilní data platí jen pro tuto existující dávku."
+                ? (current.requiresExplicitStart
+                    ? "Mobilní data jsou povolena jen pro tuto dávku. Přenos spustíš tlačítkem Synchronizovat nyní."
+                    : "Mobilní data platí jen pro tuto existující dávku.")
                 : "Dávka čeká na neplacenou síť."
         } catch {
             detailText = "Změnu mobilního povolení se nepodařilo uložit."
@@ -153,6 +155,16 @@ import Foundation
     }
 
     func synchronize() async {
+        guard var current = journal,
+              current.phase != .verified, current.phase != .paused else { return }
+        current.startAuthorized = true
+        do {
+            try store.save(current)
+            journal = current
+        } catch {
+            detailText = "Vědomý start se nepodařilo uložit; přenos nezačal."
+            return
+        }
         await reconcile()
     }
 
@@ -170,7 +182,13 @@ import Foundation
     func resume() async {
         guard var current = journal, current.phase == .paused else { return }
         current.phase = .uploading
-        try? store.save(current)
+        current.startAuthorized = true
+        do {
+            try store.save(current)
+        } catch {
+            detailText = "Pokračování se nepodařilo uložit; přenos nezačal."
+            return
+        }
         journal = current
         await driver.resumeAll()
         await reconcile()
@@ -241,9 +259,26 @@ import Foundation
                 : "Soukromá síť není dosažitelná; veřejný fallback neexistuje.")
             return
         }
+        if current.requiresExplicitStart {
+            current.phase = .ready
+            do {
+                try store.save(current)
+                journal = current
+                statusText = "Dávka připravena"
+                detailText = "Mobilní data jsou povolena. Přenos spustíš tlačítkem Synchronizovat nyní."
+            } catch {
+                detailText = "Stav dávky se nepodařilo uložit; přenos nezačal."
+            }
+            return
+        }
         do {
             let api = try makeAPI()
             _ = try await api.createSession(for: current)
+            if current.startAuthorized == false {
+                current.startAuthorized = true
+                try store.save(current)
+                journal = current
+            }
             let remote = try await api.status(for: current)
             current.acceptedChunks = Set(remote.acceptedChunks)
             current.locallySentByteCount = acceptedByteCount(for: current)

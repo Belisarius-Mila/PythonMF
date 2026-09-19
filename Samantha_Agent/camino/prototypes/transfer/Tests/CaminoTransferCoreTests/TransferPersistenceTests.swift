@@ -52,6 +52,39 @@ final class TransferPersistenceTests: XCTestCase {
         XCTAssertEqual(loaded.queueItem.localByteProgress, 0.8, accuracy: 0.0001)
     }
 
+    func testNewGrantedBatchNeedsAStoredFirstStartButExistingTransferCanResume() throws {
+        let fixture = try fixture()
+        var journal = fixture.journal
+        XCTAssertFalse(journal.requiresExplicitStart)
+
+        journal.cellularBatchID = journal.batchID
+        journal.phase = .waitingForNetwork
+        try fixture.store.save(journal)
+        XCTAssertTrue(try fixture.store.load().requiresExplicitStart)
+
+        journal.startAuthorized = true
+        journal.phase = .waitingForNetwork
+        try fixture.store.save(journal)
+        XCTAssertFalse(try fixture.store.load().requiresExplicitStart)
+    }
+
+    func testLegacyJournalKeepsRecoveryAfterUpdate() throws {
+        let fixture = try fixture()
+        var journal = fixture.journal
+        journal.cellularBatchID = journal.batchID
+        let encoded = try JSONEncoder().encode(journal)
+        var values = try XCTUnwrap(
+            JSONSerialization.jsonObject(with: encoded) as? [String: Any]
+        )
+        values.removeValue(forKey: "startAuthorized")
+        let legacy = try JSONSerialization.data(withJSONObject: values)
+        try legacy.write(to: fixture.store.journalURL, options: .atomic)
+
+        let loaded = try fixture.store.load()
+        XCTAssertNil(loaded.startAuthorized)
+        XCTAssertFalse(loaded.requiresExplicitStart)
+    }
+
     func testCorruptJournalFailsClosedWithoutTouchingSource() throws {
         let fixture = try fixture()
         let original = try Data(contentsOf: fixture.sourceURL)
