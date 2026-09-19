@@ -47,6 +47,7 @@ COMPILE_PATHS = (
     "app/camino_chunk_receiver.py",
     "scripts/camino_c02b_t043_control.py",
     "scripts/camino_c02b_t047_control.py",
+    "scripts/camino_c02b_network_control.py",
     "app/decision_cockpit.py",
     "app/codex_approval_state.py",
     "app/autosave_service.py",

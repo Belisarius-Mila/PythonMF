@@ -18,7 +18,17 @@ final class TransferUITests: XCTestCase {
         expectation(for: predicate, evaluatedWith: status)
         waitForExpectations(timeout: 60)
         XCTAssertTrue(app.progressIndicators["transferProgress"].exists)
-        XCTAssertTrue(app.switches["cellularBatchGrant"].exists)
-        XCTAssertEqual(app.switches["cellularBatchGrant"].value as? String, "0")
+        let grant = app.switches["cellularBatchGrant"]
+        XCTAssertTrue(grant.exists)
+        XCTAssertEqual(grant.value as? String, "0")
+        grant.tap()
+        let alert = app.alerts.firstMatch
+        XCTAssertTrue(alert.waitForExistence(timeout: 5))
+        XCTAssertTrue(alert.buttons["Povolit pro tuto dávku"].exists)
+        XCTAssertEqual(grant.value as? String, "0")
+        alert.buttons["Povolit pro tuto dávku"].tap()
+        let granted = NSPredicate(format: "value == %@", "1")
+        expectation(for: granted, evaluatedWith: grant)
+        waitForExpectations(timeout: 5)
     }
 }

@@ -37,6 +37,7 @@ final class TransferAppDelegate: NSObject, UIApplicationDelegate {
 
 struct TransferScreen: View {
     @ObservedObject var model: TransferViewModel
+    @State private var showingCellularConfirmation = false
 
     var body: some View {
         NavigationStack {
@@ -59,6 +60,19 @@ struct TransferScreen: View {
             }
             .navigationTitle("Camino Transfer")
             .background(Color(.systemGroupedBackground))
+            .alert(
+                "Povolit mobilní data jen této dávce?",
+                isPresented: $showingCellularConfirmation
+            ) {
+                Button("Povolit pro tuto dávku") {
+                    Task { await model.setCellularAllowed(true) }
+                }
+                Button("Zrušit", role: .cancel) {}
+            } message: {
+                if let journal = model.journal {
+                    Text("1 syntetický soubor, \(journal.byteCount) B (přibližně 96 MiB). Opakované pokusy mohou přenést více dat. Nové dávky toto povolení nedostanou.")
+                }
+            }
         }
     }
 
@@ -104,7 +118,13 @@ struct TransferScreen: View {
                     "Povolit mobilní data jen této dávce",
                     isOn: Binding(
                         get: { model.cellularAllowed },
-                        set: { value in Task { await model.setCellularAllowed(value) } }
+                        set: { value in
+                            if value {
+                                showingCellularConfirmation = true
+                            } else {
+                                Task { await model.setCellularAllowed(false) }
+                            }
+                        }
                     )
                 )
                 .disabled(journal.phase == .verified)

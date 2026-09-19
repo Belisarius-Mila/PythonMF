@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-18 08:29 CEST
+Aktualizováno: 2026-09-19 11:12 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -36,6 +36,8 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 - T043 receiver je zastavený, `/camino-c02b` odebraná, původní Serve přesně obnovený a Funnel vypnutý; všechny tři ověřené důkazy jsou zachované. Oddělený registrovaný T047 workflow používá vlastní stav a audit hashově ověřených částí i nedokončených relací.
 - T047 PASS v rozsahu syntetického C02b: první dávka byla zamčená během přenosu a po odemčení se dokončila 13/13; u druhé dávky byl po 1/13 skutečně ukončen proces, serverový stav zůstal 1/13 bez druhého objektu a po ručním relaunchi se doplnily pouze chybějící části do 13/13. Živé potvrzení má 2 relace, 2 ověřené objekty/účtenky, každý 100 663 553 B, celkem 201 327 106 B.
 - T047 receiver je ukončený, `/camino-c02b` odebraná, původní Serve přesně obnovený a Funnel vypnutý; T048–T050 jsou stále NEPROVEDENO.
+- Míla zvolil kvůli nedostupné cizí Wi-Fi pořadí T049 → T048. Pro oba fyzické testy jsou připravená oddělená registrovaná start/token/status/stop workflow a postup v `camino/tasks/C02b_T048_T049_FIELD_PLAN.md`; žádný nový receiver ani Serve cesta spuštěny nebyly.
+- Zdroj `Camino Transfer Test` 0.4.0 (3) omezuje mobilní i drahou síť u všech HTTPS požadavků na konkrétní povolenou dávku, rozlišuje skutečné mobilní rozhraní a před grantem ukazuje 1 soubor / 100 663 553 B s upozorněním na retry. Swift 20/20, Python workflow 13/13, UI simulátoru 1/1, podepsaný build a strict podpis i plná projektová brána 1718/1718 PASS; build 3 je nainstalovaný na iPhonu. Launch blokoval zámek telefonu, takže fyzické chování buildu 3 je NEOVĚŘENO. Camino Audio 0.3.0 (4) zůstává nainstalované.
 
 
 ## Zdroje a návaznost
@@ -68,12 +70,13 @@ kódu nevyvolává; FAIL se nejdřív doloží a opraví v aktuálním rozsahu.
 - C01c je přijaté v prototypovém rozsahu po T022/T023. Čtyři fyzicky poslechnuté 55s přechody nevykázaly mezeru ani opakování a dva pády doložily pravdivou obnovu; nejde však o dlouhodobý terénní nebo spotřební test ani o plný databázový T061.
 - C02a je přijaté v prototypovém rozsahu po lokálních testech a privátním HTTPS smoke. Smoke byl spuštěn z téhož Macu přes tailnet DNS; nedokládá iPhone, cizí síť, přerušení velkého souboru ani trvalou službu. Standard-library receiver zůstává izolovaný experiment; produkční cíl je FastAPI v samostatném prostředí Camina.
 - C02b má fyzický PASS T043 i T047 v syntetickém rozsahu. T047 nedokládá cizí Wi-Fi, skutečná mobilní data ani zadrženou finalizaci; T048–T050 zůstávají NEPROVEDENO. Receiver není produkční služba ani záloha.
+- T049 v samostatném harnessu prokáže nejvýše syntetickou mobilní dávku a nepřenos povolení na další syntetickou dávku. Plné kritérium s novým skutečným videem vyžaduje až integrovanou kameru; mobilní retry může spotřebovat více než 100 663 553 B.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
 - Instalace a launch nejsou fyzická přejímka přenosu; vývojový profil je časově omezený do 24. září 2026. U01–U15 se bez nového rozhodnutí neotevírají.
 
 ## Další krok
 
-T047 je ukončený s přesnou obnovou Serve. Potom provést T048–T050 odděleně.
+Po odemčení iPhonu ověřit launch buildu 3 a pak odděleně potvrdit start syntetického T049. T048 až při dostupné cizí Wi-Fi; T050 samostatně.
 
 Historický doklad založení:
 Ověření založení: 56/56 testů integrace (54 + 2 profilové testy) a rychlá statická brána OK.

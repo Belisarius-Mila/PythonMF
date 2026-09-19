@@ -74,6 +74,17 @@ Dostupná povolená Wi-Fi může spustit automatickou reconciliaci;
 
 T048–T050 zatím nejsou označeny PASS.
 
+Příprava 2026-09-19: T048 a T049 mají oddělené, potvrzované start/token/status/stop
+workflow a vlastní soukromý běhový stav. Kvůli nedostupné cizí Wi‑Fi se nejprve
+plánuje syntetická mobilní část T049; plný T049 s novým skutečným videem tím
+nevznikne. Zdroj 0.4.0 (3) sjednocuje per-request zákaz mobilní a drahé sítě
+pro session/status/finalize i chunk a před grantem ukazuje rozsah 1 souboru
+o 100 663 553 B. Fyzické testy ještě nezačaly; přesný postup a podmínky jsou
+v `camino/tasks/C02b_T048_T049_FIELD_PLAN.md`.
+Příprava prošla Swift 20/20, Python workflow 13/13, iOS UI 1/1 a plnou
+projektovou bránou 1718/1718. Podepsaný build 3 prošel strict kontrolou a byl
+nainstalovaný na iPhone; launch je kvůli zámku telefonu NEOVĚŘENO.
+
 ## Pozorování a oprava z fyzického T043
 
 První obnovovací průchod nakonec bezpečně doběhl, ale vyžadoval několik stisků

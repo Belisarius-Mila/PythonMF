@@ -21,7 +21,7 @@ import Foundation
     private let keychain = KeychainTokenStore()
     private let driver: BackgroundTransferDriver
     private let monitor: TransferNetworkMonitor
-    private var path = NetworkPathState(available: false, expensive: false)
+    private var path = NetworkPathState(available: false, expensive: false, cellular: false)
     private var partialSent: [Int: Int64] = [:]
     private var reconcileGate = ReconcileGate()
 
@@ -211,7 +211,7 @@ import Foundation
         let wasPermitted = networkPermitted
         path = newPath
         if !networkPermitted, journal?.phase != .paused, journal?.phase != .verified {
-            setWaiting(newPath.expensive && !cellularAllowed
+            setWaiting(newPath.requiresBatchGrant && !cellularAllowed
                 ? "Čeká na Wi-Fi; mobilní data nejsou pro tuto dávku povolena."
                 : "Soukromá síť není dosažitelná; veřejný fallback neexistuje.")
         } else if !wasPermitted && networkPermitted {
@@ -220,7 +220,7 @@ import Foundation
     }
 
     private var networkPermitted: Bool {
-        path.available && (!path.expensive || cellularAllowed)
+        path.available && (!path.requiresBatchGrant || cellularAllowed)
     }
 
     private func reconcile() async {
@@ -236,7 +236,7 @@ import Foundation
         guard var current = journal,
               current.phase != .paused, current.phase != .verified else { return }
         guard networkPermitted else {
-            setWaiting(path.expensive && !current.cellularAllowed
+            setWaiting(path.requiresBatchGrant && !current.cellularAllowed
                 ? "Čeká na Wi-Fi; mobilní data nejsou pro tuto dávku povolena."
                 : "Soukromá síť není dosažitelná; veřejný fallback neexistuje.")
             return

@@ -105,7 +105,8 @@ public struct TransferEndpoint: Sendable {
         }
         var request = try authenticatedRequest(
             method: "POST",
-            components: ["v1", "c02b", "synthetic-assets", journal.assetID, "sessions"]
+            components: ["v1", "c02b", "synthetic-assets", journal.assetID, "sessions"],
+            allowsCellular: journal.cellularAllowed
         )
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("1", forHTTPHeaderField: "X-Camino-Synthetic")
@@ -119,17 +120,19 @@ public struct TransferEndpoint: Sendable {
         return request
     }
 
-    public func statusRequest(assetID: String) throws -> URLRequest {
+    public func statusRequest(assetID: String, allowsCellular: Bool = false) throws -> URLRequest {
         try authenticatedRequest(
             method: "GET",
-            components: ["v1", "c02b", "synthetic-assets", assetID, "status"]
+            components: ["v1", "c02b", "synthetic-assets", assetID, "status"],
+            allowsCellular: allowsCellular
         )
     }
 
-    public func finalizeRequest(assetID: String) throws -> URLRequest {
+    public func finalizeRequest(assetID: String, allowsCellular: Bool = false) throws -> URLRequest {
         try authenticatedRequest(
             method: "POST",
-            components: ["v1", "c02b", "synthetic-assets", assetID, "finalize"]
+            components: ["v1", "c02b", "synthetic-assets", assetID, "finalize"],
+            allowsCellular: allowsCellular
         )
     }
 
@@ -148,20 +151,20 @@ public struct TransferEndpoint: Sendable {
             method: "PUT",
             components: [
                 "v1", "c02b", "synthetic-assets", assetID, "chunks", String(chunk.index),
-            ]
+            ],
+            allowsCellular: allowsCellular
         )
         request.setValue("application/octet-stream", forHTTPHeaderField: "Content-Type")
         request.setValue("1", forHTTPHeaderField: "X-Camino-Synthetic")
         request.setValue(chunk.sha256, forHTTPHeaderField: "X-Camino-Chunk-SHA256")
         request.setValue(String(chunk.byteCount), forHTTPHeaderField: "Content-Length")
-        request.allowsCellularAccess = allowsCellular
-        request.allowsExpensiveNetworkAccess = allowsCellular
         return request
     }
 
     private func authenticatedRequest(
         method: String,
-        components: [String]
+        components: [String],
+        allowsCellular: Bool = false
     ) throws -> URLRequest {
         guard components.allSatisfy({ TransferJournal.validIdentifier($0) || Int($0) != nil }) else {
             throw TransferProtocolError.invalidPayload
@@ -174,6 +177,8 @@ public struct TransferEndpoint: Sendable {
         request.httpMethod = method
         request.timeoutInterval = 30
         request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
+        request.allowsCellularAccess = allowsCellular
+        request.allowsExpensiveNetworkAccess = allowsCellular
         request.setValue("Bearer \(bearerToken)", forHTTPHeaderField: "Authorization")
         request.setValue("no-store", forHTTPHeaderField: "Cache-Control")
         return request

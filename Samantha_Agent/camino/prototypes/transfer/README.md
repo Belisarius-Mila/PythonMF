@@ -43,3 +43,11 @@ zadržené ověření a T048–T050 zůstávají neověřené. T043 workflow po 
 receiver zastavil a původní Serve konfiguraci přesně obnovil. T047 workflow
 byl po důkazu registrovaně ukončen; Serve je přesně obnovený, Funnel vypnutý a
 auditní objekty/účtenky zůstávají zachované.
+
+Pro T048 a T049 jsou připravené oddělené registrované řadiče a terénní postup
+`camino/tasks/C02b_T048_T049_FIELD_PLAN.md`. Build 0.4.0 (3) navíc
+vyžaduje vědomé potvrzení mobilního přenosu s počtem a velikostí dávky; síťová
+politika platí pro všechny HTTPS požadavky, nejen velké části. Build je
+podepsaný, strict ověřený a nainstalovaný na iPhone, ale launch blokoval zámek
+telefonu. T048 a T049 jsou stále fyzicky neprovedené; T049 lze v harnessu
+ověřit jen synteticky, protože skutečné nové video tento prototyp nepořizuje.

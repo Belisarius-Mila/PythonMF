@@ -134,6 +134,9 @@ final class BackgroundTransferDriver: NSObject, URLSessionDataDelegate,
 struct NetworkPathState: Equatable, Sendable {
     let available: Bool
     let expensive: Bool
+    let cellular: Bool
+
+    var requiresBatchGrant: Bool { expensive || cellular }
 }
 
 final class TransferNetworkMonitor: @unchecked Sendable {
@@ -146,7 +149,8 @@ final class TransferNetworkMonitor: @unchecked Sendable {
         monitor.pathUpdateHandler = { path in
             handler(NetworkPathState(
                 available: path.status == .satisfied,
-                expensive: path.isExpensive
+                expensive: path.isExpensive,
+                cellular: path.usesInterfaceType(.cellular)
             ))
         }
     }

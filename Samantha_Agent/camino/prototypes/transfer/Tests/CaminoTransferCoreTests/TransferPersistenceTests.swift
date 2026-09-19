@@ -145,6 +145,8 @@ final class TransferPersistenceTests: XCTestCase {
         ).first)
 
         let create = try endpoint.createSessionRequest(for: fixture.journal)
+        let status = try endpoint.statusRequest(assetID: fixture.journal.assetID)
+        let finalize = try endpoint.finalizeRequest(assetID: fixture.journal.assetID)
         let upload = try endpoint.chunkRequest(
             assetID: fixture.journal.assetID,
             chunk: chunk,
@@ -156,13 +158,55 @@ final class TransferPersistenceTests: XCTestCase {
             "/private-path/v1/c02b/synthetic-assets/asset-123/sessions"
         )
         XCTAssertEqual(create.value(forHTTPHeaderField: "X-Camino-Synthetic"), "1")
+        for request in [create, status, finalize, upload] {
+            XCTAssertFalse(request.allowsCellularAccess)
+            XCTAssertFalse(request.allowsExpensiveNetworkAccess)
+        }
         XCTAssertEqual(upload.httpMethod, "PUT")
-        XCTAssertEqual(upload.allowsCellularAccess, false)
-        XCTAssertEqual(upload.allowsExpensiveNetworkAccess, false)
         XCTAssertEqual(
             upload.value(forHTTPHeaderField: "X-Camino-Chunk-SHA256"),
             chunk.sha256
         )
+    }
+
+    func testMobileGrantAppliesToAllRequestsOfOneBatchOnly() throws {
+        let fixture = try fixture(byteCount: 1_500_000)
+        let endpoint = try TransferEndpoint(
+            baseURL: URL(string: "https://camino.example.test/private-path")!,
+            bearerToken: "synthetic-token-with-at-least-32-characters"
+        )
+        let preparer = try FileChunkPreparer(root: fixture.store.preparedRoot)
+        let chunk = try XCTUnwrap(try preparer.prepare(
+            journal: fixture.journal,
+            sourceURL: fixture.sourceURL,
+            missingChunks: [0]
+        ).first)
+        var granted = fixture.journal
+        granted.cellularBatchID = granted.batchID
+
+        let requests = try [
+            endpoint.createSessionRequest(for: granted),
+            endpoint.statusRequest(assetID: granted.assetID, allowsCellular: granted.cellularAllowed),
+            endpoint.finalizeRequest(assetID: granted.assetID, allowsCellular: granted.cellularAllowed),
+            endpoint.chunkRequest(assetID: granted.assetID, chunk: chunk, allowsCellular: granted.cellularAllowed),
+        ]
+        for request in requests {
+            XCTAssertTrue(request.allowsCellularAccess)
+            XCTAssertTrue(request.allowsExpensiveNetworkAccess)
+        }
+
+        let nextBatch = TransferJournal(
+            assetID: "asset-next",
+            batchID: UUID(),
+            sourceFileName: granted.sourceFileName,
+            byteCount: granted.byteCount,
+            sha256: granted.sha256,
+            chunkSize: granted.chunkSize,
+            chunkCount: granted.chunkCount,
+            cellularBatchID: granted.cellularBatchID
+        )
+        XCTAssertFalse(nextBatch.cellularAllowed)
+        XCTAssertFalse(try endpoint.createSessionRequest(for: nextBatch).allowsCellularAccess)
     }
 
     func testEndpointRejectsHTTPCredentialsAndShortToken() throws {

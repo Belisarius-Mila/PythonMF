@@ -10,9 +10,10 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from app.workflows.commands import WORKFLOW_COMMANDS
+from app.workflows.commands import WORKFLOW_COMMANDS, _resolve_command
 from scripts import camino_c02b_t043_control as control
 from scripts import camino_c02b_t047_control as t047_control
+from scripts import camino_c02b_network_control as network_control
 
 
 class _FakeHTTPResponse:
@@ -105,12 +106,59 @@ class CaminoC02bT043ControlTests(unittest.TestCase):
             self.assertEqual(action, command.argv[-1])
             self.assertEqual(confirmation, command.requires_confirmation)
 
+        for label in ("T048", "T049"):
+            for action in ("start", "copy-token", "status", "stop"):
+                command = commands[f"camino_c02b_{label.lower()}_{action.replace('-', '_')}"]
+                self.assertEqual("camino_c02b_network_control.py", Path(command.argv[-3]).name)
+                self.assertEqual((label, action), command.argv[-2:])
+                self.assertEqual(action != "status", command.requires_confirmation)
+                self.assertNotIn("funnel", command.command_id)
+
     def test_t047_wrapper_uses_separate_private_state_and_label(self) -> None:
         selected = t047_control.config()
 
         self.assertEqual("T047", selected.test_label)
         self.assertEqual("c02b_t047", selected.state_root.name)
         self.assertNotEqual(control.DEFAULT_STATE_ROOT, selected.state_root)
+
+    def test_t048_t049_wrappers_have_distinct_private_state_and_fail_closed(self) -> None:
+        first = network_control.config("T048")
+        second = network_control.config("T049")
+        self.assertEqual("c02b_t048", first.state_root.name)
+        self.assertEqual("c02b_t049", second.state_root.name)
+        self.assertNotEqual(first.state_root, second.state_root)
+        self.assertEqual(control.ROUTE_PATH, "/camino-c02b")
+        with self.assertRaises(control.ControlError):
+            network_control.config("T050")
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            state = {
+                "schema": 1,
+                "test_label": "T048",
+                "run_dir": str(root / "run"),
+                "receiver_root": str(root / "run" / "receiver"),
+                "receiver_log": str(root / "run" / "receiver.log"),
+                "token_path": str(root / "run" / "token.txt"),
+                "serve_before_path": str(root / "run" / "serve-before.json"),
+                "receiver_pid": 4242,
+                "port": control.DEFAULT_PORT,
+                "route_path": control.ROUTE_PATH,
+            }
+            wrong = control.ControlConfig(state_root=root, test_label="T049")
+            with self.assertRaises(control.ControlError):
+                control._validate_state_paths(state, wrong)
+
+    def test_network_workflow_routing_requires_exact_test_label(self) -> None:
+        for label in ("T048", "T049"):
+            result = _resolve_command(request=f"připrav camino {label}")
+            self.assertEqual(f"camino_c02b_{label.lower()}_start", result.command_id)
+
+        ambiguous = _resolve_command(request="připrav camino")
+        self.assertNotIn(
+            ambiguous if isinstance(ambiguous, str) else ambiguous.command_id,
+            {"camino_c02b_t048_start", "camino_c02b_t049_start"},
+        )
 
     def test_receiver_module_entrypoint_does_not_shadow_standard_email(self) -> None:
         completed = subprocess.run(

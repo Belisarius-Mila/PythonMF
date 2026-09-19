@@ -759,3 +759,17 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Ověření: regresní test zachycuje žádost během aktivního průchodu; Swift 19/19.
   Podepsaný build 0.4.0 (2) po instalaci sám dokončil fyzickou 96MiB dávku 13/13
   bez dalšího klepnutí, se shodnou délkou a serverovým SHA-256.
+
+### 2026-09-19 — Síťová politika dávky patří na každý URLRequest
+
+- Kontext: Camino C02b, příprava mobilního testu T049 a background `URLSession`.
+- Problém: kontrola typu sítě jen před plánováním nestačí při přechodu sítě;
+  konfigurace background session připouští mobilní data. Velké uploadové
+  požadavky měly individuální zákaz správně, malé session/status/finalize
+  požadavky jej zatím neměly.
+- Řešení: u všech čtyř druhů požadavků nastavit `allowsCellularAccess` a
+  `allowsExpensiveNetworkAccess` podle povolení konkrétní dávky; bez grantu
+  obojí `false`. Monitor rozlišuje i skutečné mobilní rozhraní. Před grantem
+  zobrazit počet, objem a upozornění na možné opakování bajtů.
+- Ověření: Swift 20/20, iOS build a UI test potvrzovací brány 1/1 PASS.
+  Skutečný mobilní přenos zůstává fyzicky NEOVĚŘENO.

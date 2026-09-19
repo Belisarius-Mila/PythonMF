@@ -26,14 +26,20 @@ final class TransferAPI: @unchecked Sendable {
 
     func status(for journal: TransferJournal) async throws -> TransferStatusPayload {
         try await statusPayload(
-            for: endpoint.statusRequest(assetID: journal.assetID),
+            for: endpoint.statusRequest(
+                assetID: journal.assetID,
+                allowsCellular: journal.cellularAllowed
+            ),
             journal: journal
         )
     }
 
     func finalize(_ journal: TransferJournal) async throws -> TransferFinalizePayload {
         let (data, response) = try await session.data(
-            for: endpoint.finalizeRequest(assetID: journal.assetID)
+            for: endpoint.finalizeRequest(
+                assetID: journal.assetID,
+                allowsCellular: journal.cellularAllowed
+            )
         )
         try validate(response: response, data: data)
         let payload = try JSONDecoder().decode(TransferFinalizePayload.self, from: data)
