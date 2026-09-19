@@ -86,12 +86,19 @@ T047 je PASS v rozsahu syntetického C02b experimentu: první dávka proběhla p
 zámkem; u druhé byl po 1/13 skutečně ukončen proces, audit po 20 s zůstal na
 1/13 bez druhého objektu a po ručním relaunchi se doplnily pouze chybějící části
 do 13/13. Dvě relace a dva objekty/účtenky jsou hashově ověřené, každý
-100 663 553 B. T048–T050 zůstávají fyzicky NEPROVEDENO: cizí síť, scope
-skutečných mobilních dat ani zadržená finalizace nejsou doložené.
+100 663 553 B. T049 navíc prošel v syntetickém mobilním rozsahu: bez grantu
+a po zrušení dialogu 0/13 bez serverové relace, po grantu jediná ověřená
+relace/objekt/účtenka 13/13 a 100 663 553 B se shodným hashem. Další dávka
+grant nezdědila, po ruční synchronizaci zůstala na 0/13 a server nepřijal
+druhou relaci. Plné T049 s novým skutečným videem, T048 na cizí Wi-Fi a T050
+se zadrženou finalizací zůstávají NEPROVEDENO.
 
 Po T043 registrované ukončení zastavilo jen vlastněný receiver, odebralo pouze
 `/camino-c02b`, zachovalo tři ověřené syntetické důkazy a přesně obnovilo Serve;
 Funnel zůstal vypnutý. T047 má samostatný soukromý stav a nový prázdný běh.
 Jeho audit kontroluje i nedokončené relace a hashově ověřené přijaté části.
 Fyzický T047 je dokončený; registrovaný stop odebral jeho cestu, zastavil
-receiver a přesně obnovil Serve. Potom následují T048–T050 odděleně.
+receiver a přesně obnovil Serve. Stejně byl po syntetickém T049 bezpečně
+zastaven jeho vlastní receiver, odebrána testovací cesta a obnovena přesná
+původní Serve konfigurace při vypnutém Funnelu. Důkaz jediné ověřené dávky
+zůstal zachovaný. T048 a T050 následují odděleně.

@@ -67,23 +67,38 @@ Dostupná povolená Wi-Fi může spustit automatickou reconciliaci;
   shodné.
 - T048: UI má pravdivé čekání bez veřejného fallbacku; cizí Wi-Fi, captive
   portal, přechod sítě a nedostupný tailnet NEPROVEDENO.
-- T049: trvalý grant je omezený na jednu dávku a nová dávka vzniká bez něj;
-  skutečný mobilní přenos NEPROVEDENO.
+- T049: **PASS v syntetickém mobilním rozsahu.** Bez grantu zůstala první dávka
+  i po ruční synchronizaci na 0 %, 0/13 a serveru nepřibyla relace. Zrušení
+  potvrzovacího dialogu zachovalo zákaz. Po vědomém grantu pro tuto dávku Mac
+  doložil 13/13, jediný objekt/účtenku 100 663 553 B a shodný SHA-256; na
+  telefonu se ukázalo `Ověřeno na Macu`. Nová syntetická dávka grant nezdědila,
+  zůstala na 0 %, 0/13, 0/2 a serveru nepřibyla druhá relace. Plné T049 s novým
+  skutečným videem zůstává NEPROVEDENO.
 - T050: server i UI drží `Ověřuji` po dosažení 100 % bytů; řízené zadržení
   serverového ověření na fyzickém iPhonu NEPROVEDENO.
 
-T048–T050 zatím nejsou označeny PASS.
+T048 a T050 zatím nejsou označeny PASS. T049 má jen syntetický mobilní průchod,
+nikoli plný PASS scénáře se skutečným videem.
 
-Příprava 2026-09-19: T048 a T049 mají oddělené, potvrzované start/token/status/stop
+Historická příprava 2026-09-19: T048 a T049 mají oddělené, potvrzované start/token/status/stop
 workflow a vlastní soukromý běhový stav. Kvůli nedostupné cizí Wi‑Fi se nejprve
-plánuje syntetická mobilní část T049; plný T049 s novým skutečným videem tím
-nevznikne. Zdroj 0.4.0 (3) sjednocuje per-request zákaz mobilní a drahé sítě
+plánovala syntetická mobilní část T049; plný T049 s novým skutečným videem tím
+nevzniká. Zdroj 0.4.0 (3) sjednocuje per-request zákaz mobilní a drahé sítě
 pro session/status/finalize i chunk a před grantem ukazuje rozsah 1 souboru
-o 100 663 553 B. Fyzické testy ještě nezačaly; přesný postup a podmínky jsou
+o 100 663 553 B. Tehdy fyzické testy ještě nezačaly; postup a podmínky jsou
 v `camino/tasks/C02b_T048_T049_FIELD_PLAN.md`.
 Příprava prošla Swift 20/20, Python workflow 13/13, iOS UI 1/1 a plnou
 projektovou bránou 1718/1718. Podepsaný build 3 prošel strict kontrolou a byl
-nainstalovaný na iPhone; launch je kvůli zámku telefonu NEOVĚŘENO.
+nainstalovaný na iPhone; tehdejší launch blokoval zámek telefonu. Následný
+fyzický T049 prokázal spuštění buildu 3 a výše popsaný syntetický přenos.
+
+Po T049 byl registrovaným stopem odebrán pouze vlastní receiver a testovací
+Serve cesta. Původní Serve konfigurace se přesně obnovila, Funnel zůstal
+vypnutý a jedna ověřená relace/objekt/účtenka zůstala zachovaná. Audit po stopu
+potvrdil `phase=stopped`, `session_count=1`, `session_verified_count=1`,
+`latest_session_chunks=13/13`, `verified_match=true` a
+`verified_byte_count=100663553`. Úplné znění fyzického dialogu nebylo opsáno;
+serverový počet bajtů není měřením spotřeby operátora.
 
 ## Pozorování a oprava z fyzického T043
 

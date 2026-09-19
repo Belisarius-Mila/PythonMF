@@ -1,12 +1,17 @@
 # C02b — oddělené fyzické testy T048 a T049
 
-Stav: připravený postup, nikoli fyzický PASS. Po T047 jsou receiver i testovací
-Serve cesta vypnuté. T048 a T049 mají vlastní soukromý běhový stav, ale používají
-stejnou jedinou cestu `/camino-c02b`; nikdy nesmějí běžet současně. Každý start,
+Stav 2026-09-19: T049 prošel v syntetickém mobilním rozsahu a je bezpečně
+ukončený; plný T049 se skutečným novým videem zůstává otevřený. T048 čeká na
+cizí Wi-Fi. Receiver i testovací Serve cesta jsou vypnuté. T048 a T049 mají
+vlastní soukromý běhový stav, ale používají stejnou jedinou cestu
+`/camino-c02b`; nikdy nesmějí běžet současně. Každý start,
 zkopírování tokenu a stop prochází samostatně potvrzovaným registrovaným
 workflow. Start se tímto dokumentem nespouští.
 
 ## Pořadí kvůli nedostupné cizí Wi‑Fi
+
+Následující kroky T049 jsou zachovaný postup již provedené syntetické části;
+nový běh se bez samostatného zadání nespouští.
 
 Nejdříve lze provést **T049 v syntetickém rozsahu** na skutečných mobilních
 datech iPhonu. Mac zůstává na své dostupné síti a přijímač běží pouze na
