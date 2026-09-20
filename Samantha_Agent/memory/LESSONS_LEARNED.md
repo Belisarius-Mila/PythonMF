@@ -802,3 +802,16 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Ověření: Syntetický test zkouší obě pořadí staré a nové revize, neznámé
   soukromí i konflikt; C03a 9/9 a plná brána 1728/1728 PASS. Provozní Viewer
   ještě vyžaduje samostatnou integraci a fyzické ověření.
+
+### LL-041 — Vstupní typy API ověř před dotazem do SQLite
+
+- Problém: Pole ID s JSON typem pole by v dotazu SQLite skončilo jako chyba
+  úložiště `503`, i když jde o neplatný klientský vstup `422`.
+- Typ: opakující se
+- Řešení nalezeno: 20092026
+- Řešení: Striktně ověř tvar JSON, typ a kanonické UUID před použitím ve
+  storage vrstvě. Pro soukromou databázi současně vyžaduj cestu mimo repozitář
+  a práva 0600; širší práva odmítni při otevření.
+- Ověření: C03b synteticky kontroluje chybné ID jako `422` bez posunu kurzoru
+  a odmítnutí databáze s právy 0644. C03b je referenční kontrakt, ne běžící
+  produkční server.

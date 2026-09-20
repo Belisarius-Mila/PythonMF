@@ -305,7 +305,8 @@ class PrivacyChange:
         _operation_fields(self.id, self.moment_id, self.device_sequence, self.expected_revision)
         if not isinstance(self.new_privacy, Privacy):
             raise ContractError("unknown privacy cannot be chosen for a local change")
-        if self.user_action not in {"lock", "unlock", "insert_reflection_into_diary"}:
+        if (not isinstance(self.user_action, str)
+                or self.user_action not in {"lock", "unlock", "insert_reflection_into_diary"}):
             raise ContractError("privacy change needs an explicit user action")
 
     @property
@@ -502,7 +503,8 @@ class TextRevision:
             _uuid(source_id)
         if self.parent_revision_id is not None:
             _uuid(self.parent_revision_id)
-        if self.role not in {"typed_source", "transcript_raw", "transcript_clean", "human_revision"}:
+        if (not isinstance(self.role, str)
+                or self.role not in {"typed_source", "transcript_raw", "transcript_clean", "human_revision"}):
             raise ContractError("text role is invalid")
         _instant(self.created_at_utc_ms)
 
