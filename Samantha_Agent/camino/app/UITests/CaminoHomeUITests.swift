@@ -14,6 +14,8 @@ import XCTest
         XCTAssertTrue(app.staticTexts["Zkušební cesta"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.buttons["startComment"].exists)
         XCTAssertTrue(app.buttons["startReflection"].exists)
+        XCTAssertTrue(app.buttons["startPhoto"].exists)
+        XCTAssertTrue(app.buttons["startVideoCamera"].exists)
         XCTAssertTrue(app.staticTexts[
             "Po synchronizaci může být celý Moment dostupný v soukromém Vieweru."
         ].exists)
@@ -25,6 +27,10 @@ import XCTest
         app.buttons["Označit okamžik"].tap()
         XCTAssertTrue(app.staticTexts["Označený okamžik"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.staticTexts["Jen pro mě"].exists)
+        app.buttons["momentRow"].firstMatch.tap()
+        XCTAssertTrue(app.buttons["commentOnMoment"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["Přidat fotografii"].exists)
+        app.buttons["Hotovo"].tap()
         app.terminate()
         app.launch()
         XCTAssertTrue(app.staticTexts["Zkušební cesta"].waitForExistence(timeout: 15))

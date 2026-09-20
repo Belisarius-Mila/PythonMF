@@ -12,6 +12,7 @@ import CaminoLocalCore
     let media: RecordingStore
     private let metadata: CaminoLocalStore
     private(set) var currentSessionID: UUID?
+    var targetMomentID: UUID?
 
     init(media: RecordingStore, metadata: CaminoLocalStore) {
         self.media = media
@@ -24,7 +25,8 @@ import CaminoLocalCore
         _ = try metadata.beginAudioIntent(
             sessionID: draft.sessionID,
             kind: kind == .reflection ? .reflection : .comment,
-            startedAt: draft.startedAt)
+            startedAt: draft.startedAt,
+            targetMomentID: kind == .comment ? targetMomentID : nil)
         currentSessionID = draft.sessionID
         return draft
     }

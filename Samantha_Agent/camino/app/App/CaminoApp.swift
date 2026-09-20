@@ -26,6 +26,16 @@ import SwiftUI
             .fullScreenCover(isPresented: $model.showAudio) {
                 AudioCaptureView(model: model)
             }
+            .fullScreenCover(isPresented: $model.showCamera, onDismiss: {
+                model.startPendingComment()
+            }) {
+                CameraCaptureView(model: model)
+            }
+            .sheet(item: $model.momentDetail, onDismiss: {
+                model.startPendingComment()
+            }) { moment in
+                CaminoMediaDetailView(model: model, moment: moment)
+            }
             .onChange(of: scenePhase) { _, phase in model.scenePhaseChanged(phase) }
         }
     }
@@ -103,16 +113,17 @@ private struct CaptureHomeView: View {
                     .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
 
                     HStack(spacing: 12) {
-                        unavailableAction("Foto", symbol: "camera")
-                        unavailableAction("Video", symbol: "video")
+                        cameraAction("Foto", symbol: "camera", kind: .photo)
+                        cameraAction("Video", symbol: "video", kind: .video)
                     }
                     HStack(spacing: 12) {
                         captureAction("Komentář", symbol: "mic.fill", kind: .comment)
                         captureAction("Úvaha", symbol: "bubble.left.and.text.bubble.right.fill",
                                       kind: .reflection)
                     }
-                    Text("Foto a video budou dostupné v další verzi.")
-                        .font(.footnote).foregroundStyle(.secondary)
+                    if let error = model.cameraError {
+                        Text(error).font(.footnote).foregroundStyle(.orange)
+                    }
 
                     VStack(alignment: .leading, spacing: 10) {
                         Text("Dnes: \(model.todayMoments.count) · Momentů").font(.headline)
@@ -121,12 +132,14 @@ private struct CaptureHomeView: View {
                                 .foregroundStyle(.secondary)
                         } else {
                             ForEach(model.todayMoments.prefix(8)) { moment in
-                                HStack {
-                                    Image(systemName: moment.kind == .marker ? "mappin" : "waveform")
-                                    Text(moment.kind.title)
-                                    Spacer()
-                                    Text(String(moment.capture.localWall.dropFirst(11).prefix(5)))
-                                        .monospacedDigit()
+                                Button { model.momentDetail = moment } label: {
+                                    HStack {
+                                        Image(systemName: symbol(for: moment.kind))
+                                        Text(moment.kind.title)
+                                        Spacer()
+                                        Text(String(moment.capture.localWall.dropFirst(11).prefix(5)))
+                                            .monospacedDigit()
+                                    }
                                 }
                                 .font(.subheadline)
                                 .accessibilityIdentifier("momentRow")
@@ -147,6 +160,13 @@ private struct CaptureHomeView: View {
                         .font(.subheadline)
                     if model.pendingAudioCount > 0 || model.unmatchedAudioCount > 0 {
                         Label("Rozpracované nebo neověřené audio: \(model.pendingAudioCount + model.unmatchedAudioCount). Soubory zůstávají zachované.",
+                              systemImage: "exclamationmark.triangle")
+                            .font(.subheadline).foregroundStyle(.orange)
+                    }
+                    if model.mediaRecovery.pendingCount > 0 ||
+                       model.mediaRecovery.orphanCount > 0 ||
+                       model.mediaRecovery.missingCount > 0 {
+                        Label("Média ke kontrole: \(model.mediaRecovery.pendingCount) rozpracovaných, \(model.mediaRecovery.orphanCount) neznámých, \(model.mediaRecovery.missingCount) nedostupných. Nic se nemaže.",
                               systemImage: "exclamationmark.triangle")
                             .font(.subheadline).foregroundStyle(.orange)
                     }
@@ -172,11 +192,24 @@ private struct CaptureHomeView: View {
         }
     }
 
-    private func unavailableAction(_ title: String, symbol: String) -> some View {
-        Button(title, systemImage: symbol) {}
-            .frame(maxWidth: .infinity, minHeight: 72)
-            .buttonStyle(.bordered)
-            .disabled(true)
+    private func symbol(for kind: LocalMomentKind) -> String {
+        switch kind {
+        case .marker: "mappin"
+        case .comment, .reflection: "waveform"
+        case .photo: "photo"
+        case .video: "video"
+        }
+    }
+
+    private func cameraAction(_ title: String, symbol: String,
+                              kind: LocalMediaKind) -> some View {
+        Button { model.openCamera(kind) } label: {
+            Label(title, systemImage: symbol)
+                .frame(maxWidth: .infinity, minHeight: 72)
+        }
+        .buttonStyle(.borderedProminent)
+        .disabled(model.audioBusy || model.cameraError != nil)
+        .accessibilityIdentifier(kind == .photo ? "startPhoto" : "startVideoCamera")
     }
 
     private func captureAction(_ title: String, symbol: String,
@@ -249,6 +282,10 @@ private struct AudioCaptureView: View {
                         if model.selectedAudioKind == .reflection {
                             Text("Soukromí: Jen pro mě. Vložení do deníku vyžaduje pozdější vědomý krok.")
                                 .font(.subheadline).foregroundStyle(.secondary)
+                        } else if let targetID = model.audioTargetMomentID,
+                                  let target = model.moments.first(where: { $0.id == targetID }) {
+                            Text("Přidáváš komentář do: \(target.kind.title) · \(target.privacy.title)")
+                                .font(.subheadline)
                         } else {
                             Picker("Soukromí celého Komentáře", selection: Binding(
                                 get: { model.selectedAudioPrivacy },
@@ -309,7 +346,9 @@ private struct AudioCaptureView: View {
                             Text("Některé části vyžadují kontrolu. Soubory zůstaly zachované.")
                                 .foregroundStyle(.orange)
                         }
-                        let allowed = Set(model.moments.compactMap(\.audioSessionID))
+                        let allowed = Set(model.moments.flatMap {
+                            model.audioSessionIDs(for: $0.id)
+                        })
                         ForEach(audio.library.sessions.filter { allowed.contains($0.id) }) { session in
                             VStack(alignment: .leading, spacing: 8) {
                                 Text(session.parts.first?.draft.kind == .reflection

@@ -829,3 +829,16 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Ověření: C04a má syntetický integrační test restartu a idempotence, Swift
   8/8, UI simulátoru 1/1 a nepodepsaný iOS build PASS. Fyzický pád během
   nahrávání nové aplikace na iPhonu zatím NEPROVEDEN.
+
+### LL-043 — Create-only mediální soubor zapisuj bez kombinace Foundation voleb
+
+- Problém: Kombinace `.atomic` a `.withoutOverwriting` u `Data.write` skončila
+  při syntetickém C04b foto testu pádem Foundation místo ověřitelné chyby.
+- Typ: opakující se
+- Řešení nalezeno: 20092026
+- Řešení: Po trvalém záměru otevři nový soubor `O_CREAT | O_EXCL` s právy 0600,
+  zapiš celé bajty včetně krátkých zápisů a zavolej `fsync`. Při chybě
+  záměr/soubor zachovej a nikdy nepotvrzuj uložení před kontrolou formátu,
+  SHA-256, stabilní cestou a databázovou vazbou.
+- Ověření: C04b syntetický foto/restart průchod a Swift 13/13 PASS; fyzický
+  iPhone čeká na podpis nového bundle ID.

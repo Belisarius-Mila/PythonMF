@@ -15,7 +15,9 @@ let package = Package(
             path: ".",
             exclude: ["Camino.xcodeproj", "Config.xcconfig", "Core", "README.md", "UITests",
                       "Tests/CaminoLocalCoreTests", "App/CaminoApp.swift",
-                      "App/CaminoViewModel.swift", "App/Info.plist"],
+                      "App/CaminoViewModel.swift", "App/CameraCaptureController.swift",
+                      "App/CameraCaptureView.swift",
+                      "App/Info.plist"],
             sources: ["App/IntentRecordingStore.swift", "Tests/CaminoAudioLinkTests/AudioLinkTests.swift"]
         ),
     ]

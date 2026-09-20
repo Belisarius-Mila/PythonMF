@@ -1212,3 +1212,28 @@ Navrhované další kroky:
 Technický důkaz:
 - Swift 8/8, UI simulátoru 1/1, nepodepsaný iOS build a plná brána
   1740/1740 PASS. Žádná fyzická instalace, push ani nasazení.
+
+### 2026-09-20 10:00 CEST — C04b foto/video a výslovné vazby
+
+Hotovo:
+- Aplikace ukládá samostatné foto/video a dovoluje připojit další médium
+  nebo komentář ke konkrétnímu Momentu se stejným soukromím. Originály jsou
+  místní, neznámé a rozpracované soubory se nemažou. Tiché a částečné video
+  mají pravdivý stav.
+
+Rozhodnutí:
+- C04b navazuje na C04a bez serveru. Míla zadal instalaci/test, ale nové
+  bundle ID potřebuje provisioning profil. Profily prototypů se nepoužijí.
+
+Další krok:
+- Zajistit podpis nového ID, instalovat na iPhone a fyzicky projít
+  T007–T014/T060; syntetické testy nejsou jejich přijetí.
+
+Navrhované další kroky:
+- C04d detail/revize a C05a privátní produkční spojení. T048 a plné T049
+  zůstávají podle samostatných podmínek.
+
+Technický důkaz:
+- Swift 13/13, UI test simulátoru, nepodepsaný iOS build a plná brána
+  1740/1740 PASS. Podepsané
+  sestavení bez profilu selhalo. Bez instalace, fyzického PASS, push a nasazení.

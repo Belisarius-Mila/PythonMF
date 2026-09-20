@@ -1118,3 +1118,29 @@ Navrhované další kroky:
 Technický důkaz:
 - Swift 8/8, UI simulátoru 1/1, nepodepsaný iOS build a plná brána
   1740/1740 PASS. Fyzická instalace a test NEPROVEDENY; bez push a nasazení.
+
+### 2026-09-20 10:00 CEST — C04b místní kamera a média
+
+Hotovo:
+- Samostatná foto/video kamera vytváří Moment nebo výslovně připojí médium
+  do přesného Momentu. Komentář ze záběru či detailu používá stejné ID a
+  soukromí. Originály a rozpracované soubory se nemažou; video rozlišuje
+  vědomý tichý režim a částečný výsledek.
+
+Rozhodnutí:
+- Míla zadal C04b, instalaci a test. Podpis nového bundle ID zatím nemá
+  profil ani Xcode účet. Staré bundle ID prototypů se kvůli datům nepoužije.
+
+Další krok:
+- Zprovoznit podpis nového Camino bundle ID, pak instalovat do iPhonu a
+  fyzicky vyhodnotit T007–T014/T060 i návazné audio.
+
+Navrhované další kroky:
+- C04d detail/revize, C05a produkční napojení; T048 na cizí Wi-Fi a plné
+  T049 po skutečném videu v integrované aplikaci.
+
+Technický důkaz:
+- Swift 13/13, simulátorový UI test, nepodepsaný iOS build a plná brána
+  1740/1740 PASS. Podepsané
+  sestavení selhalo kvůli profilu. Instalace/fyzické testy NEPROVEDENY;
+  žádný push ani nasazení.

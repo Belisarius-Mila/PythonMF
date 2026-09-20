@@ -926,3 +926,29 @@ Technický důkaz:
 - Swift 8/8, izolovaný UI test iPhone 14 Plus simulátoru 1/1,
   nepodepsaný generic iOS build PASS, plná projektová brána 1740/1740 PASS.
 - Bez podepsané instalace na iPhone, push, nasazení a druhé zálohy.
+
+### 2026-09-20 10:00 CEST — C04b foto a video
+
+Hotovo:
+- Kamera ukládá samostatné foto/video i výslovné přílohy k přesnému Momentu.
+  Komentář ze záběru nebo detailu dědí jeho soukromí. Originály se automaticky
+  nemažou; dokončené soubory se ověřují a známé záměry po restartu navazují.
+- Video podporuje vědomě tichý režim, orientaci a označení částečného klipu.
+
+Rozhodnutí:
+- C04b zůstává místní offline etapou. Pro nové bundle ID chybí provisioning
+  profil a Xcode účet; stará identita prototypu se kvůli jeho datům nepoužije.
+
+Další krok:
+- Zajistit podpis nového bundle ID, nainstalovat do iPhonu a fyzicky projít
+  T007–T014/T060 na nové zkušební cestě.
+
+Navrhované další kroky:
+- C04d detail/revize a C05a produkční server. T048 odděleně na cizí Wi-Fi;
+  plné T049 až s novým skutečným videem přeneseným integrovanou aplikací.
+
+Technický důkaz:
+- Swift 13/13, simulátorový UI test a plná brána 1740/1740 PASS; nepodepsaný
+  iOS build PASS. Podepsané
+  sestavení selhalo na chybějícím profilu. Instalace, fyzické testy, push a
+  nasazení NEPROVEDENY.

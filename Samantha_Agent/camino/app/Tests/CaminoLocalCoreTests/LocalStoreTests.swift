@@ -130,6 +130,37 @@ import XCTest
                                                             privacy: .diary))
     }
 
+    func testCommentsAttachToExactPhotoMomentAndInheritItsPrivacy() throws {
+        let store = try CaminoLocalStore(inMemory: true)
+        let trip = try store.createTrip(name: "Synthetic")
+        let photo = try store.beginMediaIntent(kind: .photo)
+        let inspected = LocalMediaInspection(byteCount: 12,
+            sha256: String(repeating: "a", count: 64), width: 4, height: 3,
+            orientation: 1, durationMilliseconds: nil, hasAudio: false, partial: false)
+        _ = try store.acceptMedia(photo, inspection: inspected)
+        try store.setNewMomentPrivacy(.ownerOnly)
+        let firstID = UUID()
+        let first = try store.beginAudioIntent(sessionID: firstID, kind: .comment,
+            startedAt: Date(), targetMomentID: photo.momentID)
+        XCTAssertTrue(first.attaching)
+        XCTAssertEqual(first.privacy, .diary)
+        XCTAssertThrowsError(try store.setAudioIntentPrivacy(sessionID: firstID,
+                                                             privacy: .ownerOnly))
+        let attached = try store.acceptCompletedAudio(sessionID: firstID,
+            kind: .comment, partial: false)
+        XCTAssertEqual(attached.id, photo.momentID)
+        XCTAssertEqual(attached.kind, .photo)
+        XCTAssertEqual(try store.audioSessionIDs(momentID: photo.momentID), [firstID])
+        let secondID = UUID()
+        _ = try store.beginAudioIntent(sessionID: secondID, kind: .comment,
+            startedAt: Date(), targetMomentID: photo.momentID)
+        _ = try store.acceptCompletedAudio(sessionID: secondID,
+            kind: .comment, partial: true)
+        XCTAssertEqual(Set(try store.audioSessionIDs(momentID: photo.momentID)),
+                       Set([firstID, secondID]))
+        XCTAssertEqual(try store.moments(tripID: trip.id).count, 1)
+    }
+
     func testInvalidTripAndDuplicateIdentityCannotReplaceExistingData() throws {
         let store = try CaminoLocalStore(inMemory: true)
         XCTAssertThrowsError(try store.createTrip(name: "   "))

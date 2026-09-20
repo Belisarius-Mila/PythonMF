@@ -13,15 +13,25 @@ public enum LocalPrivacy: String, Codable, Sendable, CaseIterable {
 }
 
 public enum LocalMomentKind: String, Codable, Sendable {
-    case marker, comment, reflection
+    case marker, comment, reflection, photo, video
 
     public var title: String {
         switch self {
         case .marker: "Označený okamžik"
         case .comment: "Komentář"
         case .reflection: "Úvaha"
+        case .photo: "Fotografie"
+        case .video: "Video"
         }
     }
+}
+
+public enum LocalMediaKind: String, Codable, Sendable {
+    case photo, video
+
+    public var fileExtension: String { self == .photo ? "jpg" : "mov" }
+    public var momentKind: LocalMomentKind { self == .photo ? .photo : .video }
+    public var title: String { self == .photo ? "Fotografie" : "Video" }
 }
 
 public struct LocalTrip: Equatable, Identifiable, Sendable {
@@ -79,6 +89,56 @@ public struct AudioIntent: Equatable, Sendable {
     public let kind: LocalMomentKind
     public let privacy: LocalPrivacy
     public let capture: CaptureStamp
+    public let attaching: Bool
+}
+
+public struct LocalMediaIntent: Equatable, Sendable {
+    public let assetID: UUID
+    public let momentID: UUID
+    public let tripID: UUID
+    public let kind: LocalMediaKind
+    public let privacy: LocalPrivacy
+    public let capture: CaptureStamp
+    public let attaching: Bool
+    public let silentRequested: Bool
+
+    public var pendingRelativePath: String {
+        "Media/Pending/\(assetID.uuidString).\(kind.fileExtension)"
+    }
+    public var originalRelativePath: String {
+        "Media/Originals/\(assetID.uuidString).\(kind.fileExtension)"
+    }
+}
+
+public struct LocalMediaInspection: Equatable, Sendable {
+    public let byteCount: Int64
+    public let sha256: String
+    public let width: Int
+    public let height: Int
+    /// EXIF orientation for JPEG; display rotation in degrees for a movie.
+    public let orientation: Int
+    public let durationMilliseconds: Int64?
+    public let hasAudio: Bool
+    public let partial: Bool
+
+    public init(byteCount: Int64, sha256: String, width: Int, height: Int,
+                orientation: Int, durationMilliseconds: Int64?,
+                hasAudio: Bool, partial: Bool) {
+        self.byteCount = byteCount; self.sha256 = sha256
+        self.width = width; self.height = height; self.orientation = orientation
+        self.durationMilliseconds = durationMilliseconds
+        self.hasAudio = hasAudio; self.partial = partial
+    }
+}
+
+public struct LocalMediaAsset: Equatable, Identifiable, Sendable {
+    public let id: UUID
+    public let momentID: UUID
+    public let tripID: UUID
+    public let kind: LocalMediaKind
+    public let relativePath: String
+    public let inspection: LocalMediaInspection
+    public let silentRequested: Bool
 }
 
 public enum LocalStoreError: Error, LocalizedError, Equatable {
@@ -87,6 +147,9 @@ public enum LocalStoreError: Error, LocalizedError, Equatable {
     case tripMissing
     case momentMissing
     case invalidAudioIntent
+    case invalidMediaIntent
+    case invalidMedia
+    case insufficientSpace
     case duplicateIdentity
     case inconsistentStore
 
@@ -97,6 +160,9 @@ public enum LocalStoreError: Error, LocalizedError, Equatable {
         case .tripMissing: "Cesta není dostupná. Nic se nesmazalo."
         case .momentMissing: "Moment není dostupný. Nic se nesmazalo."
         case .invalidAudioIntent: "Vazbu nahrávky nelze ověřit. Audio zůstalo zachované."
+        case .invalidMediaIntent: "Vazbu média nelze ověřit. Soubor zůstal zachovaný."
+        case .invalidMedia: "Médium se nepodařilo ověřit. Dostupný soubor zůstal zachovaný."
+        case .insufficientSpace: "Pro tento záznam není dost bezpečného volného místa. Nic se nemaže."
         case .duplicateIdentity: "Stejné ID už patří jinému záznamu. Nic se nepřepsalo."
         case .inconsistentStore: "Místní evidence není konzistentní. Nic se nemaže."
         }

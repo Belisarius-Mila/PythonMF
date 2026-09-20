@@ -16,14 +16,27 @@ import UserNotifications
     @Published var showAudio = false
     @Published private(set) var selectedAudioKind: RecordingKind = .comment
     @Published private(set) var selectedAudioPrivacy: LocalPrivacy = .diary
+    @Published private(set) var audioTargetMomentID: UUID?
     @Published private(set) var launchingAudio = false
     @Published private(set) var audioUpdate = 0
+    @Published var showCamera = false
+    @Published private(set) var selectedMediaKind: LocalMediaKind = .photo
+    @Published private(set) var cameraTargetMomentID: UUID?
+    @Published private(set) var mediaByMoment: [UUID: [LocalMediaAsset]] = [:]
+    @Published private(set) var mediaRecovery = LocalMediaRecovery(
+        repairedCount: 0, pendingCount: 0, orphanCount: 0, missingCount: 0)
+    @Published private(set) var cameraError: String?
+    @Published var momentDetail: LocalMoment?
 
     private let local: CaminoLocalStore?
     private let recording: IntentRecordingStore?
+    private let mediaVault: CaminoMediaVault?
+    private var activeVideoIntent: LocalMediaIntent?
+    private var pendingCommentTargetID: UUID?
     let audio: AudioController?
     private var subscriptions = Set<AnyCancellable>()
     private var backgroundTask: UIBackgroundTaskIdentifier = .invalid
+    private var videoBackgroundTask: UIBackgroundTaskIdentifier = .invalid
     private var wasFinishing = false
     private var lastLinkedClipCount = -1
 
@@ -44,12 +57,15 @@ import UserNotifications
             let media = try RecordingStore(root: root.appendingPathComponent("Audio", isDirectory: true),
                                            inspect: AudioFileInspector.inspect)
             let recording = IntentRecordingStore(media: media, metadata: local)
+            let vault = try? CaminoMediaVault(root: root, metadata: local)
             let driver = IOSAudioDriver()
             let audio = AudioController(driver: driver, store: recording)
             self.local = local
             self.recording = recording
+            self.mediaVault = vault
             self.audio = audio
             startupError = nil
+            cameraError = vault == nil ? "Místní úložiště fotek a videí není dostupné." : nil
             driver.event = { [weak audio] in audio?.interrupt(reason: "Zvukový vstup se zastavil") }
             audio.changed = { [weak self] in self?.audioChanged() }
             Timer.publish(every: 0.15, on: .main, in: .common).autoconnect()
@@ -69,9 +85,11 @@ import UserNotifications
             }
             refresh()
             reconcileAudio()
+            Task { await reconcileMedia() }
         } catch {
             local = nil
             recording = nil
+            mediaVault = nil
             audio = nil
             startupError = "Místní úložiště nelze bezpečně otevřít. Žádná data se nemažou."
         }
@@ -94,7 +112,7 @@ import UserNotifications
     }
 
     func createTrip(name: String, isTest: Bool = false) {
-        guard !audioBusy, let local else { return }
+        guard !audioBusy, !showCamera, let local else { return }
         do {
             _ = try local.createTrip(name: name, isTest: isTest)
             message = nil
@@ -103,19 +121,19 @@ import UserNotifications
     }
 
     func selectTrip(_ id: UUID) {
-        guard !audioBusy, let local else { return }
+        guard !audioBusy, !showCamera, let local else { return }
         do { try local.selectTrip(id); message = nil; refresh() }
         catch { message = error.localizedDescription }
     }
 
     func setNewPrivacy(_ value: LocalPrivacy) {
-        guard !audioBusy, let local else { return }
+        guard !audioBusy, !showCamera, let local else { return }
         do { try local.setNewMomentPrivacy(value); message = nil; refresh() }
         catch { message = error.localizedDescription; refresh() }
     }
 
     func markMoment() {
-        guard !audioBusy, let local else { return }
+        guard !audioBusy, !showCamera, let local else { return }
         do {
             _ = try local.markMoment()
             message = "Okamžik označen. Uloženo v telefonu."
@@ -123,10 +141,18 @@ import UserNotifications
         } catch { message = error.localizedDescription }
     }
 
-    func startAudio(_ kind: RecordingKind) {
-        guard !audioBusy, activeTrip != nil, let audio, !showAudio else { return }
+    func startAudio(_ kind: RecordingKind, targetMomentID: UUID? = nil) {
+        guard !audioBusy, !showCamera, activeTrip != nil, let audio, !showAudio else { return }
+        let target = targetMomentID.flatMap { id in moments.first { $0.id == id } }
+        guard targetMomentID == nil || (kind == .comment && target != nil) else {
+            message = LocalStoreError.invalidAudioIntent.localizedDescription
+            return
+        }
+        audio.stopPlayback()
+        audioTargetMomentID = targetMomentID
+        recording?.targetMomentID = targetMomentID
         selectedAudioKind = kind
-        selectedAudioPrivacy = kind == .reflection ? .ownerOnly : newPrivacy
+        selectedAudioPrivacy = target?.privacy ?? (kind == .reflection ? .ownerOnly : newPrivacy)
         message = nil
         showAudio = true
         launchingAudio = true
@@ -149,7 +175,8 @@ import UserNotifications
 
     func stopAudio() { guard let audio else { return }; Task { await audio.stop() } }
     func setCurrentAudioPrivacy(_ privacy: LocalPrivacy) {
-        guard selectedAudioKind == .comment, audio?.phase == .recording,
+        guard selectedAudioKind == .comment, audioTargetMomentID == nil,
+              audio?.phase == .recording,
               let recording else { return }
         do {
             try recording.setCurrentPrivacy(privacy)
@@ -168,8 +195,15 @@ import UserNotifications
             audio?.enterForeground()
             if audioBusy { showAudio = true }
             reconcileAudio()
+            if !showCamera { Task { await reconcileMedia() } }
             refresh()
         } else {
+            if activeVideoIntent != nil && videoBackgroundTask == .invalid {
+                videoBackgroundTask = UIApplication.shared.beginBackgroundTask(
+                    withName: "Finish Camino video") { [weak self] in
+                    Task { @MainActor in self?.endVideoBackgroundTask() }
+                }
+            }
             audio?.leaveForeground()
         }
     }
@@ -209,6 +243,12 @@ import UserNotifications
         guard backgroundTask != .invalid else { return }
         UIApplication.shared.endBackgroundTask(backgroundTask)
         backgroundTask = .invalid
+    }
+
+    private func endVideoBackgroundTask() {
+        guard videoBackgroundTask != .invalid else { return }
+        UIApplication.shared.endBackgroundTask(videoBackgroundTask)
+        videoBackgroundTask = .invalid
     }
 
     private func notifyInterruptionIfAllowed() {
@@ -260,10 +300,136 @@ import UserNotifications
             activeTrip = try local.activeTrip()
             newPrivacy = try local.newMomentPrivacy()
             moments = try activeTrip.map { try local.moments(tripID: $0.id) } ?? []
+            mediaByMoment = try Dictionary(uniqueKeysWithValues:
+                moments.map { ($0.id, try local.mediaAssets(momentID: $0.id)) })
             pendingAudioCount = try local.pendingAudioIntents().count
         } catch {
             message = "Místní evidenci nelze načíst. Žádná data se nemažou."
             moments = []
+        }
+    }
+
+    func openCamera(_ kind: LocalMediaKind, targetMomentID: UUID? = nil) {
+        guard !audioBusy, !showAudio, !showCamera, mediaVault != nil,
+              activeTrip != nil else {
+            message = cameraError ?? "Kamera teď není dostupná."
+            return
+        }
+        if let targetMomentID, !moments.contains(where: { $0.id == targetMomentID }) {
+            message = LocalStoreError.momentMissing.localizedDescription
+            return
+        }
+        audio?.stopPlayback()
+        selectedMediaKind = kind
+        cameraTargetMomentID = targetMomentID
+        message = nil
+        showCamera = true
+    }
+
+    func closeCamera() {
+        showCamera = false
+        cameraTargetMomentID = nil
+        refresh()
+    }
+
+    func requestCommentFromCamera(momentID: UUID) {
+        pendingCommentTargetID = momentID
+        closeCamera()
+    }
+
+    func requestCommentFromDetail(momentID: UUID) {
+        pendingCommentTargetID = momentID
+        momentDetail = nil
+    }
+
+    func startPendingComment() {
+        guard let target = pendingCommentTargetID else { return }
+        pendingCommentTargetID = nil
+        startAudio(.comment, targetMomentID: target)
+    }
+
+    func audioSessionIDs(for momentID: UUID) -> Set<UUID> {
+        Set((try? local?.audioSessionIDs(momentID: momentID)) ?? [])
+    }
+
+    @discardableResult func savePhoto(_ data: Data) async -> LocalMediaAsset? {
+        guard let mediaVault, showCamera else { return nil }
+        do {
+            let asset = try await mediaVault.savePhoto(data,
+                targetMomentID: cameraTargetMomentID)
+            message = "Fotografie uložena v telefonu. Mac zatím neověřen."
+            refresh()
+            await reconcileMedia()
+            return asset
+        } catch {
+            message = "Fotografii nelze potvrdit jako uloženou. Dostupný soubor zůstal zachovaný."
+            await reconcileMedia()
+            return nil
+        }
+    }
+
+    func beginVideo(silent: Bool) -> URL? {
+        guard let mediaVault, showCamera, activeVideoIntent == nil else { return nil }
+        do {
+            let (intent, pendingURL, warning) = try mediaVault.beginVideo(
+                targetMomentID: cameraTargetMomentID, silent: silent)
+            activeVideoIntent = intent
+            message = warning ? "Volné místo kleslo pod 2 GiB. Video včas ukonči." : nil
+            return pendingURL
+        } catch {
+            message = error.localizedDescription
+            return nil
+        }
+    }
+
+    @discardableResult func finalizeVideo(at url: URL, interrupted: Bool) async -> LocalMediaAsset? {
+        guard let mediaVault, let intent = activeVideoIntent,
+              url.lastPathComponent == URL(fileURLWithPath: intent.pendingRelativePath).lastPathComponent else {
+            endVideoBackgroundTask()
+            message = "Vazbu videa nelze ověřit. Dostupný soubor zůstal zachovaný."
+            return nil
+        }
+        activeVideoIntent = nil
+        defer { endVideoBackgroundTask() }
+        do {
+            let asset = try await mediaVault.finalize(intent, interrupted: interrupted)
+            message = asset.inspection.partial
+                ? "Částečné video uloženo v telefonu; konec nebo zvuk může chybět."
+                : "Video uloženo v telefonu. Mac zatím neověřen."
+            refresh()
+            await reconcileMedia()
+            return asset
+        } catch {
+            message = "Video nelze potvrdit jako uložené. Dostupný soubor zůstal zachovaný."
+            await reconcileMedia()
+            return nil
+        }
+    }
+
+    func originalURL(for asset: LocalMediaAsset) -> URL? {
+        try? mediaVault?.originalURL(for: asset)
+    }
+
+    func stopVideoForLowSpace() -> Bool {
+        guard let mediaVault else { return true }
+        guard let available = try? mediaVault.availableBytes(),
+              available >= 536_870_912 else {
+            message = "Volné místo kleslo k bezpečnostní rezervě. Ukončuji video; nic se nemaže."
+            return true
+        }
+        if available < 2_147_483_648 {
+            message = "Volné místo je pod 2 GiB. Video včas ukonči."
+        }
+        return false
+    }
+
+    private func reconcileMedia() async {
+        guard let mediaVault else { return }
+        do {
+            mediaRecovery = try await mediaVault.reconcile()
+            refresh()
+        } catch {
+            cameraError = "Místní média nelze teď úplně ověřit; soubory se nemažou."
         }
     }
 }
