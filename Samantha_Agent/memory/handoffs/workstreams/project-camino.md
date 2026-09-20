@@ -1167,3 +1167,24 @@ Technický důkaz:
 - Ověřený podpis, správný profil včetně zařízení, `devicectl` instalace
   a launch PASS. Profil do 27. 9. 2026; fyzické T007–T014/T060 zatím
   NEOVĚŘENÉ. Bez push a nasazení.
+
+### 2026-09-20 12:27 CEST — C04b foto po restartu
+
+Hotovo:
+- Míla potvrdil uloženou fotografii v detailu Momentu i po úplném zavření
+  a novém spuštění aplikace na iPhonu.
+
+Rozhodnutí:
+- Úspěšný zápis a restart jsou fyzicky doložené. T007 zůstává částečný,
+  protože chybový zápis nebyl na zařízení vyvolán.
+
+Další krok:
+- T008: dvě rychlé fotografie jako dvě ID, pak komentář a další foto
+  výslovně připojit k prvnímu Momentu.
+
+Navrhované další kroky:
+- T011–T014 video, T009 oprávnění kamery a bezpečná část T060; poté C04d/C05a.
+
+Technický důkaz:
+- Pozorování Míly a nový proces aplikace po relaunchi. Bez kopie obsahu,
+  push a nasazení.

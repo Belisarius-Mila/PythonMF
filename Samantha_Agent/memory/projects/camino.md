@@ -976,3 +976,25 @@ Technický důkaz:
 - `codesign --verify --deep --strict` PASS, profil má přesné bundle ID a
   připojený iPhone; instalace i launch `devicectl` PASS, proces běžel.
   Profil vyprší 27. 9. 2026. Fyzické scénáře jsou zatím NEOVĚŘENÉ; bez push.
+
+### 2026-09-20 12:27 CEST — C04b první fyzická fotografie
+
+Hotovo:
+- Na iPhonu byla fotografie potvrzena jako místně uložená a zůstala v detailu
+  Momentu po úplném zavření a opětovném otevření aplikace.
+
+Rozhodnutí:
+- Jde o fyzický důkaz úspěšného zápisu a restartu, nikoli celý T007:
+  chybu dokončení zápisu jsme na zařízení nevyvolali.
+
+Další krok:
+- T008: dvě rychlé samostatné fotografie, pak komentář a další foto výslovně
+  připojené k prvnímu Momentu.
+
+Navrhované další kroky:
+- Následně T011–T014 skutečné video a T009 odmítnutá kamera; T060 nízké
+  místo bez nebezpečného zaplňování telefonu jen v bezpečném rozsahu.
+
+Technický důkaz:
+- Mílovo pozorování hlášky a snímku po restartu, na Macu nový proces aplikace.
+  Obsah fotografie nebyl kopírován ani zapisován.

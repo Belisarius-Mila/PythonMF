@@ -31,3 +31,10 @@ bez fotografií, hlasu a soukromých textů. Zkouška nevyžaduje letový režim
 T010 (textové revize) patří k C04d. Automatické přenesení skutečného videa na Mac
 a úplné T049 patří až k produkčnímu propojení C05a. Po testu zapiš výsledky
 jednotlivých ID, model/iOS, datum, zjištěná selhání a zda šlo o fyzický iPhone.
+
+## Průběžný fyzický výsledek 2026-09-20
+
+- T007, úspěšný zápis a restart: Míla potvrdil hlášku o uložení a fotografii
+  v detailu po úplném zavření a opětovném otevření aplikace. Na Macu byl po
+  znovuotevření pozorován nový proces aplikace. Chyba dokončení zápisu nebyla
+  na zařízení vyvolána; celý T007 zůstává částečně ověřený.

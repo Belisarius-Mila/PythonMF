@@ -1257,3 +1257,23 @@ Navrhované další kroky:
 Technický důkaz:
 - Podpis a profil pro přesné ID/telefon, instalace i launch ověřeny; profil
   do 27. 9. 2026. Fyzické testy zatím NEOVĚŘENÉ. Bez push a nasazení.
+
+### 2026-09-20 12:27 CEST — C04b úspěšný snímek po restartu
+
+Hotovo:
+- Na iPhonu byla fotografie uložena a zůstala v detailu Momentu po úplném
+  zavření a opětovném spuštění nové aplikace.
+
+Rozhodnutí:
+- T007 má fyzicky ověřený úspěšný zápis/restart, ale chyba zápisu na
+  zařízení nebyla vyvolána; celý test zůstává částečný.
+
+Další krok:
+- T008: rozlišit dva rychlé snímky a explicitní komentář/foto u prvního.
+
+Navrhované další kroky:
+- T011–T014 skutečné video a zbývající bezpečné fyzické scénáře.
+
+Technický důkaz:
+- Mílovo pozorování a nový proces při relaunchi; bez kopírování média,
+  push a nasazení.
