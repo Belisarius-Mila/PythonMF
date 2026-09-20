@@ -998,3 +998,23 @@ Navrhované další kroky:
 Technický důkaz:
 - Mílovo pozorování hlášky a snímku po restartu, na Macu nový proces aplikace.
   Obsah fotografie nebyl kopírován ani zapisován.
+
+### 2026-09-20 — C04b T008 průběžný fyzický výsledek
+
+Hotovo:
+- Dva rychlé snímky se na iPhonu zobrazily jako dva samostatné řádky
+  Fotografie. Míla potvrdil komentář u prvního z nich.
+
+Rozhodnutí:
+- Jde o dílčí fyzické ověření T008. Vazba další fotografie k prvnímu
+  Momentu a trvalost po restartu dosud nejsou potvrzené.
+
+Další krok:
+- Přidat fotografii výslovně z detailu prvního Momentu, ověřit obě vazby
+  a zopakovat kontrolu po úplném zavření a spuštění aplikace.
+
+Navrhované další kroky:
+- T011–T014 skutečné video, potom další bezpečné scénáře plánu.
+
+Technický důkaz:
+- Přímé pozorování Míly na fyzickém iPhonu, bez kopie médií nebo komentáře.

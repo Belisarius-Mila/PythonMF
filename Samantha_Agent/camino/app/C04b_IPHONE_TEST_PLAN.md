@@ -38,3 +38,6 @@ jednotlivých ID, model/iOS, datum, zjištěná selhání a zda šlo o fyzický 
   v detailu po úplném zavření a opětovném otevření aplikace. Na Macu byl po
   znovuotevření pozorován nový proces aplikace. Chyba dokončení zápisu nebyla
   na zařízení vyvolána; celý T007 zůstává částečně ověřený.
+- T008, průběžně: dvě rychlé fotografie se na hlavní obrazovce zobrazily jako
+  dva samostatné řádky. Míla potvrdil komentář u první fotografie. Přidání
+  další fotografie k prvnímu Momentu a kontrola vazeb po restartu čekají.

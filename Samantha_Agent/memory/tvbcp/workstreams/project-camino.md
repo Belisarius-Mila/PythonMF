@@ -1277,3 +1277,23 @@ Navrhované další kroky:
 Technický důkaz:
 - Mílovo pozorování a nový proces při relaunchi; bez kopírování média,
   push a nasazení.
+
+### 2026-09-20 — C04b T008 průběžně
+
+Hotovo:
+- Na iPhonu jsou dva samostatné řádky Fotografie po dvou rychlých snímcích
+  a komentář je u prvního.
+
+Rozhodnutí:
+- T008 není uzavřený: zbývá připojení další fotografie a kontrola po
+  restartu.
+
+Další krok:
+- Ověřit dvě fotografie a komentář u prvního Momentu, druhý beze změny,
+  následně trvalost vazeb po restartu.
+
+Navrhované další kroky:
+- T011–T014 a další bezpečné fyzické scénáře.
+
+Technický důkaz:
+- Mílovo pozorování; kontrolní brána 1740/1740 PASS. Bez push a nasazení.

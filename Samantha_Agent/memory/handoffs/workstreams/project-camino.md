@@ -1188,3 +1188,22 @@ Navrhované další kroky:
 Technický důkaz:
 - Pozorování Míly a nový proces aplikace po relaunchi. Bez kopie obsahu,
   push a nasazení.
+
+### 2026-09-20 — C04b T008 průběžně
+
+Hotovo:
+- Dva rychlé snímky vytvořily dva samostatné viditelné řádky Fotografie;
+  Míla potvrdil komentář u prvního.
+
+Rozhodnutí:
+- T008 zatím částečný; další foto u prvního a kontrola po restartu chybí.
+
+Další krok:
+- Přidat třetí snímek z detailu prvního Momentu, ověřit oddělení druhého
+  Momentu a vazby po úplném restartu aplikace.
+
+Navrhované další kroky:
+- T011–T014 skutečné video a ostatní bezpečná fyzická QA.
+
+Technický důkaz:
+- Pozorování Míly na iPhonu; kontrolní brána 1740/1740 PASS. Bez push.
