@@ -1083,3 +1083,23 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Uživatelské pozorování po restartu, bez kopie klipů. Bez push a nasazení.
+
+### 2026-09-20 — C04b T013 první fyzická část
+
+Hotovo:
+- Míla potvrdil vědomě zvolené tiché video a štítek Bez zvuku před Start,
+  během záznamu i v detailu po restartu.
+
+Rozhodnutí:
+- T013 zatím částečný. Zbývá fyzicky ověřit, že při odepřeném mikrofonu
+  běžné video nezačne tajně bez zvuku a tichý klip vyžaduje výslovnou volbu.
+
+Další krok:
+- Odepřít mikrofon v nastavení telefonu, znovu otevřít Camino a provést
+  obě větve T013 bez mazání uložených médií.
+
+Navrhované další kroky:
+- T014, T009 a bezpečná část T060; potom C04d/C05a.
+
+Technický důkaz:
+- Mílovo pozorování na fyzickém iPhonu; bez kopie média a bez push.

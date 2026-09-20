@@ -1355,3 +1355,22 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Mílovo pozorování bez kopie média, bez push a nasazení.
+
+### 2026-09-20 — C04b T013 částečný
+
+Hotovo:
+- Výslovně tiché video má štítek Bez zvuku před Start, během záznamu
+  i v detailu po restartu podle Mílova potvrzení.
+
+Rozhodnutí:
+- Celý T013 zůstává otevřený do testu s odepřeným mikrofonem.
+
+Další krok:
+- Při odepřeném mikrofonu ověřit odmítnutí běžného videa bez skrytého
+  přechodu na ticho a možnost výslovného tichého klipu.
+
+Navrhované další kroky:
+- T014, T009, bezpečná část T060; potom C04d/C05a.
+
+Technický důkaz:
+- Uživatelské pozorování na fyzickém iPhonu; bez kopie média či push.

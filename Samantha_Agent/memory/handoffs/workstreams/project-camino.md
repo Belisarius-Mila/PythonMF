@@ -1267,3 +1267,23 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Potvrzení Míly na fyzickém iPhonu, bez kopie médií a bez push.
+
+### 2026-09-20 — C04b T013 částečný
+
+Hotovo:
+- Vědomě tichý klip a štítek Bez zvuku před Start, během nahrávání i po
+  restartu Míla potvrdil na iPhonu.
+
+Rozhodnutí:
+- T013 ještě není celý PASS; odepřený mikrofon a zákaz skrytého fallbacku
+  čekají na fyzické pozorování.
+
+Další krok:
+- V nastavení odepřít mikrofon, běžné Video bez tiché volby musí odmítnout
+  start; tichý klip až po výslovné volbě.
+
+Navrhované další kroky:
+- T014, T009, bezpečná část T060; pak C04d/C05a.
+
+Technický důkaz:
+- Mílovo pozorování, bez kopírování obsahu a bez push.

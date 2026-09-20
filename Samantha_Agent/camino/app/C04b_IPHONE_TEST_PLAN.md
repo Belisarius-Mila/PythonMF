@@ -49,3 +49,6 @@ jednotlivých ID, model/iOS, datum, zjištěná selhání a zda šlo o fyzický 
 - T012, fyzický PASS podle Mílova potvrzení: krátké klipy na výšku i na šířku
   se po úplném zavření a opětovném otevření přehrávají se správnou orientací
   a bez chybného ořezu.
+- T013, průběžně: Míla potvrdil vědomě zvolené video bez zvuku a viditelný
+  štítek před Start, během záznamu a v detailu po restartu. Chování běžného
+  videa při odepřeném mikrofonu dosud není fyzicky potvrzené.
