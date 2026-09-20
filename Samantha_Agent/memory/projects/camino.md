@@ -1041,3 +1041,26 @@ Technický důkaz:
 - Mílovo potvrzení na fyzickém iPhonu, bez kopie fotografií nebo komentáře.
   Kontrolní brána 1740/1740 PASS. T007 chybový zápis zůstává neověřený na
   zařízení; bez push a nasazení.
+
+### 2026-09-20 — C04b T011 fyzický výsledek
+
+Hotovo:
+- Míla potvrdil, že video po návratu funguje podle očekávání: přehrává obraz
+  a zvuk, bez duplicit. Délku vidí v ovládání během přehrávání.
+
+Rozhodnutí:
+- T011 fyzicky PASS podle Mílova pozorování. Trvale zobrazená délka v
+  detailu není požadavkem kanonického T011; její absence je drobná poznámka
+  k UI. Aplikaci kvůli tomu nepřeinstalovávat.
+
+Další krok:
+- T012: krátké video na výšku a na šířku, přehrát obě po restartu a ověřit
+  orientaci a ořez.
+
+Navrhované další kroky:
+- T013–T014, T009, bezpečná část T060; potom C04d/C05a.
+
+Technický důkaz:
+- Uživatelské pozorování na fyzickém iPhonu; kanonický T011 požaduje
+  správný čas a zvuk, přehratelnost a bez duplicit. Bez kopie klipu, push
+  a nasazení.

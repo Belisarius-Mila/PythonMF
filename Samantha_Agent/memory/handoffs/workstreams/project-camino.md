@@ -1229,3 +1229,23 @@ Navrhované další kroky:
 Technický důkaz:
 - Uživatelské fyzické pozorování bez kopírování médií; gate 1740/1740 PASS.
   Bez push a nasazení.
+
+### 2026-09-20 — C04b T011 fyzický PASS
+
+Hotovo:
+- Míla potvrdil přehratelné video s obrazem a zvukem po návratu do aplikace
+  bez duplicit. Délka je dostupná při přehrávání.
+
+Rozhodnutí:
+- T011 PASS podle fyzického pozorování. Trvalý údaj o délce v detailu chybí;
+  kanonické kritérium ho nevyžaduje, jde o drobnou UX poznámku.
+
+Další krok:
+- T012: otestovat video na výšku a na šířku po restartu, včetně orientace
+  a ořezu.
+
+Navrhované další kroky:
+- T013–T014, T009, bezpečná část T060; pak C04d/C05a.
+
+Technický důkaz:
+- Mílovo pozorování na iPhonu 14 Plus; žádné kopírování klipu. Bez push.
