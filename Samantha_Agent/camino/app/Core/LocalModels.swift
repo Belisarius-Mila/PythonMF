@@ -1,0 +1,104 @@
+import Foundation
+
+public enum LocalPrivacy: String, Codable, Sendable, CaseIterable {
+    case ownerOnly = "owner_only"
+    case diary
+
+    public var title: String {
+        switch self {
+        case .ownerOnly: "Jen pro mě"
+        case .diary: "Do deníku"
+        }
+    }
+}
+
+public enum LocalMomentKind: String, Codable, Sendable {
+    case marker, comment, reflection
+
+    public var title: String {
+        switch self {
+        case .marker: "Označený okamžik"
+        case .comment: "Komentář"
+        case .reflection: "Úvaha"
+        }
+    }
+}
+
+public struct LocalTrip: Equatable, Identifiable, Sendable {
+    public let id: UUID
+    public let name: String
+    public let language: String
+    public let active: Bool
+    public let isTest: Bool
+    public let viewerEnabled: Bool
+    public let startDate: String?
+}
+
+public struct CaptureStamp: Equatable, Sendable {
+    public let utcMilliseconds: Int64
+    public let localWall: String
+    public let chapterDate: String
+    public let offsetMinutes: Int
+    public let timeZoneID: String
+
+    public static func record(_ date: Date, timeZone: TimeZone) -> CaptureStamp {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.timeZone = timeZone
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        let wall = formatter.string(from: date)
+        return CaptureStamp(
+            utcMilliseconds: Int64((date.timeIntervalSince1970 * 1_000).rounded()),
+            localWall: wall,
+            chapterDate: String(wall.prefix(10)),
+            offsetMinutes: timeZone.secondsFromGMT(for: date) / 60,
+            timeZoneID: timeZone.identifier
+        )
+    }
+}
+
+public struct LocalMoment: Equatable, Identifiable, Sendable {
+    public let id: UUID
+    public let tripID: UUID
+    public let dayID: UUID
+    public let kind: LocalMomentKind
+    public let capture: CaptureStamp
+    public let privacy: LocalPrivacy
+    public let revision: Int
+    public let hidden: Bool
+    public let important: Bool
+    public let audioSessionID: UUID?
+    public let partialAudio: Bool
+}
+
+public struct AudioIntent: Equatable, Sendable {
+    public let sessionID: UUID
+    public let momentID: UUID
+    public let tripID: UUID
+    public let kind: LocalMomentKind
+    public let privacy: LocalPrivacy
+    public let capture: CaptureStamp
+}
+
+public enum LocalStoreError: Error, LocalizedError, Equatable {
+    case invalidName
+    case noActiveTrip
+    case tripMissing
+    case momentMissing
+    case invalidAudioIntent
+    case duplicateIdentity
+    case inconsistentStore
+
+    public var errorDescription: String? {
+        switch self {
+        case .invalidName: "Zadej název cesty."
+        case .noActiveTrip: "Nejdřív vyber cestu."
+        case .tripMissing: "Cesta není dostupná. Nic se nesmazalo."
+        case .momentMissing: "Moment není dostupný. Nic se nesmazalo."
+        case .invalidAudioIntent: "Vazbu nahrávky nelze ověřit. Audio zůstalo zachované."
+        case .duplicateIdentity: "Stejné ID už patří jinému záznamu. Nic se nepřepsalo."
+        case .inconsistentStore: "Místní evidence není konzistentní. Nic se nemaže."
+        }
+    }
+}

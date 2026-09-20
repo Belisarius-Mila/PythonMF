@@ -1,0 +1,2 @@
+// Optional local team selection. Never commit signing identities.
+#include? "LocalSigning.xcconfig"

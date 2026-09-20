@@ -815,3 +815,17 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Ověření: C03b synteticky kontroluje chybné ID jako `422` bez posunu kurzoru
   a odmítnutí databáze s právy 0644. C03b je referenční kontrakt, ne běžící
   produkční server.
+
+### LL-042 — Před mikrofonem ulož vazbu audia k Momentu
+
+- Problém: Po pádu by dokončené audio bez trvalé identity cesty a soukromí
+  šlo při obnově chybně připsat jinému Momentu nebo uvolnit do deníku.
+- Typ: opakující se
+- Řešení nalezeno: 20092026
+- Řešení: Po vytvoření create-only audio journalu, ale před startem mikrofonu
+  ulož stabilní session ID, Moment ID, Trip ID a soukromí. Po restartu navazuj
+  jen ověřenou dokončenou session se shodným ID; neznámé nebo nedokončené
+  médium zachovej a ukaž k ruční kontrole.
+- Ověření: C04a má syntetický integrační test restartu a idempotence, Swift
+  8/8, UI simulátoru 1/1 a nepodepsaný iOS build PASS. Fyzický pád během
+  nahrávání nové aplikace na iPhonu zatím NEPROVEDEN.

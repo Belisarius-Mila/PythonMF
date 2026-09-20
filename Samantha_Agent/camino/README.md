@@ -31,6 +31,7 @@ V Human–Adam se projekt jmenuje **Camino** (`project-camino`).
 - [Report C02b](docs/C02b_CHUNK_TRANSFER_REPORT.md)
 - [Audio prototyp](prototypes/audio/README.md)
 - [Transfer harness C02b](prototypes/transfer/README.md)
+- [První integrovaná iPhone aplikace C04a](app/README.md)
 - [Aktuální report a překážky](docs/C01a_AUDIO_PROTOTYPE_REPORT.md)
 
 C02b má lokálně sestavený samostatný iOS `URLSession` harness pro syntetickou

@@ -1,0 +1,177 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A10000000000000000000001 /* CaminoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000001; };
+		A10000000000000000000002 /* CaminoViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000002; };
+		A10000000000000000000003 /* IntentRecordingStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000003; };
+		A10000000000000000000004 /* LocalModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000004; };
+		A10000000000000000000005 /* CaminoLocalStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000005; };
+		A10000000000000000000006 /* AudioTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000006; };
+		A10000000000000000000007 /* AudioController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000007; };
+		A10000000000000000000008 /* RecordingStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000008; };
+		A10000000000000000000009 /* AudioFileInspector.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000009; };
+		A1000000000000000000000A /* IOSAudioDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000A; };
+		B10000000000000000000001 /* CaminoHomeUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000001; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		B30000000000000000000001 = {isa = PBXContainerItemProxy; containerPortal = A60000000000000000000001; proxyType = 1; remoteGlobalIDString = A50000000000000000000001; remoteInfo = Camino; };
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		A20000000000000000000001 /* CaminoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaminoApp.swift; sourceTree = "<group>"; };
+		A20000000000000000000002 /* CaminoViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaminoViewModel.swift; sourceTree = "<group>"; };
+		A20000000000000000000003 /* IntentRecordingStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentRecordingStore.swift; sourceTree = "<group>"; };
+		A20000000000000000000004 /* LocalModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalModels.swift; sourceTree = "<group>"; };
+		A20000000000000000000005 /* CaminoLocalStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaminoLocalStore.swift; sourceTree = "<group>"; };
+		A20000000000000000000006 /* AudioTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ../prototypes/audio/Core/AudioTypes.swift; sourceTree = "<group>"; };
+		A20000000000000000000007 /* AudioController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ../prototypes/audio/Core/AudioController.swift; sourceTree = "<group>"; };
+		A20000000000000000000008 /* RecordingStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ../prototypes/audio/Core/RecordingStore.swift; sourceTree = "<group>"; };
+		A20000000000000000000009 /* AudioFileInspector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ../prototypes/audio/AudioIO/AudioFileInspector.swift; sourceTree = "<group>"; };
+		A2000000000000000000000A /* IOSAudioDriver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ../prototypes/audio/App/IOSAudioDriver.swift; sourceTree = "<group>"; };
+		A2000000000000000000000B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A2000000000000000000000C /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
+		A2000000000000000000000D /* Camino.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; path = Camino.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B20000000000000000000001 /* CaminoHomeUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaminoHomeUITests.swift; sourceTree = "<group>"; };
+		B20000000000000000000002 /* CaminoUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = CaminoUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A30000000000000000000001 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		B50000000000000000000001 /* UI Test Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A40000000000000000000001 = {isa = PBXGroup; children = (A40000000000000000000002, A40000000000000000000003, A40000000000000000000004, B60000000000000000000001, A2000000000000000000000C, A40000000000000000000005); sourceTree = "<group>"; };
+		A40000000000000000000002 /* App */ = {isa = PBXGroup; children = (A20000000000000000000001, A20000000000000000000002, A20000000000000000000003, A2000000000000000000000B); path = App; sourceTree = "<group>"; };
+		A40000000000000000000003 /* Core */ = {isa = PBXGroup; children = (A20000000000000000000004, A20000000000000000000005); path = Core; sourceTree = "<group>"; };
+		A40000000000000000000004 /* Accepted audio sources */ = {isa = PBXGroup; children = (A20000000000000000000006, A20000000000000000000007, A20000000000000000000008, A20000000000000000000009, A2000000000000000000000A); name = "Accepted audio sources"; sourceTree = "<group>"; };
+		A40000000000000000000005 /* Products */ = {isa = PBXGroup; children = (A2000000000000000000000D, B20000000000000000000002); name = Products; sourceTree = "<group>"; };
+		B60000000000000000000001 /* UITests */ = {isa = PBXGroup; children = (B20000000000000000000001); path = UITests; sourceTree = "<group>"; };
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A50000000000000000000001 /* Camino */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A90000000000000000000002;
+			buildPhases = (A30000000000000000000002, A30000000000000000000001);
+			buildRules = ();
+			dependencies = ();
+			name = Camino;
+			productName = Camino;
+			productReference = A2000000000000000000000D;
+			productType = "com.apple.product-type.application";
+		};
+		B70000000000000000000001 /* CaminoUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BA0000000000000000000001;
+			buildPhases = (B80000000000000000000001, B50000000000000000000001);
+			buildRules = ();
+			dependencies = (B40000000000000000000001);
+			name = CaminoUITests;
+			productName = CaminoUITests;
+			productReference = B20000000000000000000002;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A60000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {BuildIndependentTargetsInParallel = YES; LastUpgradeCheck = 2630; TargetAttributes = {A50000000000000000000001 = {CreatedOnToolsVersion = 26.3; ProvisioningStyle = Automatic; }; B70000000000000000000001 = {CreatedOnToolsVersion = 26.3; TestTargetID = A50000000000000000000001; }; }; };
+			buildConfigurationList = A90000000000000000000001;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = cs;
+			hasScannedForEncodings = 0;
+			knownRegions = (cs, en, Base);
+			mainGroup = A40000000000000000000001;
+			productRefGroup = A40000000000000000000005;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (A50000000000000000000001, B70000000000000000000001);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A30000000000000000000002 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (A10000000000000000000001, A10000000000000000000002, A10000000000000000000003, A10000000000000000000004, A10000000000000000000005, A10000000000000000000006, A10000000000000000000007, A10000000000000000000008, A10000000000000000000009, A1000000000000000000000A);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B80000000000000000000001 /* UI Test Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (B10000000000000000000001); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		B40000000000000000000001 = {isa = PBXTargetDependency; target = A50000000000000000000001; targetProxy = B30000000000000000000001; };
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		A70000000000000000000001 /* Project Debug */ = {isa = XCBuildConfiguration; buildSettings = {ALWAYS_SEARCH_USER_PATHS = NO; CLANG_ENABLE_MODULES = YES; CLANG_ENABLE_OBJC_ARC = YES; DEBUG_INFORMATION_FORMAT = dwarf; GCC_C_LANGUAGE_STANDARD = gnu17; GCC_OPTIMIZATION_LEVEL = 0; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SDKROOT = iphoneos; SWIFT_STRICT_CONCURRENCY = complete; SWIFT_VERSION = 6.0; }; name = Debug; };
+		A70000000000000000000002 /* Project Release */ = {isa = XCBuildConfiguration; buildSettings = {ALWAYS_SEARCH_USER_PATHS = NO; CLANG_ENABLE_MODULES = YES; CLANG_ENABLE_OBJC_ARC = YES; DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym"; GCC_C_LANGUAGE_STANDARD = gnu17; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SDKROOT = iphoneos; SWIFT_STRICT_CONCURRENCY = complete; SWIFT_VERSION = 6.0; }; name = Release; };
+		A70000000000000000000003 /* Camino Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A2000000000000000000000C;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "$(SRCROOT)/App/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Camino;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Mikrofon slouží pro soukromé nahrávání v tomto iPhonu, i při zamčení.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cz.pythonmf.camino.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		A70000000000000000000004 /* Camino Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A2000000000000000000000C;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "$(SRCROOT)/App/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Camino;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Mikrofon slouží pro soukromé nahrávání v tomto iPhonu, i při zamčení.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cz.pythonmf.camino.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		B90000000000000000000001 /* UI Tests Debug */ = {isa = XCBuildConfiguration; name = Debug; buildSettings = {GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0; PRODUCT_BUNDLE_IDENTIFIER = cz.pythonmf.camino.app.uitests; PRODUCT_NAME = "$(TARGET_NAME)"; SDKROOT = iphoneos; SUPPORTED_PLATFORMS = iphonesimulator; SWIFT_OPTIMIZATION_LEVEL = "-Onone"; SWIFT_VERSION = 6.0; TARGETED_DEVICE_FAMILY = 1; TEST_TARGET_NAME = Camino; }; };
+		B90000000000000000000002 /* UI Tests Release */ = {isa = XCBuildConfiguration; name = Release; buildSettings = {GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0; PRODUCT_BUNDLE_IDENTIFIER = cz.pythonmf.camino.app.uitests; PRODUCT_NAME = "$(TARGET_NAME)"; SDKROOT = iphoneos; SUPPORTED_PLATFORMS = iphonesimulator; SWIFT_VERSION = 6.0; TARGETED_DEVICE_FAMILY = 1; TEST_TARGET_NAME = Camino; }; };
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A90000000000000000000001 /* Project configuration list */ = {isa = XCConfigurationList; buildConfigurations = (A70000000000000000000001, A70000000000000000000002); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		A90000000000000000000002 /* Target configuration list */ = {isa = XCConfigurationList; buildConfigurations = (A70000000000000000000003, A70000000000000000000004); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		BA0000000000000000000001 /* UI Tests configuration list */ = {isa = XCConfigurationList; buildConfigurations = (B90000000000000000000001, B90000000000000000000002); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+/* End XCConfigurationList section */
+	};
+	rootObject = A60000000000000000000001;
+}

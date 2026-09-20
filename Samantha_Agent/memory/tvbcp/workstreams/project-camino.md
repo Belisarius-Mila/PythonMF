@@ -1,7 +1,7 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno po C03b: 2026-09-20 08:50 CEST
+- Aktualizováno po C04a: 2026-09-20 09:30 CEST
 
 ### Hotovo
 - T043 PASS v rozsahu syntetického C02b: Letový režim přerušil upload při 0/13 serverových částech; po obnově sítě vznikl jediný objekt daného Assetu, 13/13 částí, 100 663 553 B a shodný SHA-256.
@@ -20,18 +20,20 @@
 - Cílená fyzická část A buildu 4 PASS: grant ani návrat aplikace nespustily 0/13. Část B doložila vědomý start a automatické dokončení jedné relace po znovuotevření s dostupnou sítí do 13/13; otevření ještě bez sítě chybí, takže celý plán B není PASS. Nový T049 byl potvrzeně ukončen, původní Serve obnovený, Funnel vypnutý.
 - C03a fixuje čistý doménový kontrakt identit, revizí, časové provenience a soukromí U15. Úvaha začíná `owner_only`, uvolnění vyžaduje vědomou prioritní revizi a Viewer filtr čte nejnovější serverem přijatý stav. Syntetické testy 9/9 a plná brána 1728/1728 PASS.
 - C03b fixuje lokální owner API v1 se striktním JSON/OpenAPI schématem. Soukromá SQLite databáze trvale ukládá metadata, manifesty, revize, přesné operace a účtenky; souvislý kurzor, shodný retry a jeden deklarovaný zapisovatel se vynucují. Konflikty se zachovají a blokují výstupy. Změna epochy po řízené obnově vyžaduje porovnání inventáře Momentů a sama nic neodblokuje. Syntetické kontraktní testy 12/12 PASS.
+- C04a: první samostatná iPhone aplikace má offline Trip/Day/Moment, hlavní obrazovku, Zkoušku, značku a dnešní Momenty. Běžný Moment začíná `diary` podle D02; trvalá volba nevrací staré záznamy. Úvaha vzniká `owner_only` podle U15. C01c audio se znovu používá bez migrace prototypu; před mikrofonem vzniká trvalý záměr, validované dokončené části se po restartu idempotentně navazují. Komentář umí změnit soukromí celého vznikajícího Momentu. Swift 8/8, UI simulátoru 1/1 a nepodepsaný iOS build PASS.
 
 ### Otevřeno
-- C03a/C03b nejsou runtime iPhonu, produkčního serveru ani Vieweru; fyzické T005/T008/T027–T032/T039/T041 a T096 nejsou PASS. T044/T045/T053/T058 mají jen omezený či žádný kontraktní důkaz. T048 na cizí Wi-Fi je fyzicky NEPROVEDENO. Plné T049 s novým skutečným videem čeká na integrovanou aplikaci.
+- C04a je nyní lokální runtime iPhonu v nepodepsaném buildu, ale fyzické T001–T010/T015/T024–T026 a T096 nejsou PASS. Foto/video a detail čekají na C04b/C04d. C03b zůstává bez produkčního napojení; T044/T045/T053/T058 mají jen omezený či žádný kontraktní důkaz. T048 na cizí Wi-Fi je NEPROVEDENO a plné T049 čeká na skutečné video.
 
 ### Rizika
 - Receiver je lokální standard-library experiment, ne produkční FastAPI, databáze, trvalá služba ani záloha. T049 neprokazuje cizí Wi-Fi; zadržená finalizace byla ověřena odděleně v T050.
 - Harness nemá kameru; plné kritérium nového skutečného videa se musí ověřit až v integrované aplikaci. Úplné znění fyzického potvrzovacího dialogu nebylo opsáno a serverový počet bajtů není měření spotřeby operátora.
 - Build 4 má fyzické potvrzení jen části A a popsaného znovuotevření s dostupnou sítí. Starší journal zachovává své obnovovací chování; krátké `Vyžaduje pozornost` před bezpečným retry v T050 nemá určenou příčinu. Lokální zámek neodvolá již zkopírovaný cizí obsah; serverový Viewer musí při každém vydání znovu zkontrolovat aktuální oprávnění.
 - C03b nemá listener ani vazbu přihlášení na skutečné zařízení. C05 musí dodat privátní HTTPS, odvolatelné tokeny, párování, ověření bajtů Assetu a řešení konfliktů; C06b skutečnou zálohu a obnovu. Referenční porovnání po změně epochy zahrnuje jen Momenty.
+- C04a nebylo podepsáno ani nainstalováno na iPhone; simulátor neprokazuje mikrofon, zámek, přerušení, pád ani spotřebu. Místní databáze není druhá záloha a zatím neodesílá revize C03b. Nový bundle ID nevkládá data z C01c/C02b.
 
 ### Další krok
-- Po samostatném zadání navázat C04a místním úložištěm a hlavní obrazovkou; C05a následně produkčním privátním serverem. T048 podle `C02b_T048_T049_FIELD_PLAN.md` až při dostupné cizí Wi-Fi.
+- Další vývojový krok C04b foto/video; C04a vyžaduje fyzické ověření na iPhonu. C05a následně produkční privátní server. T048 podle `C02b_T048_T049_FIELD_PLAN.md` až při dostupné cizí Wi-Fi.
 
 ### Rozhodnutí
 - Serverová pravda a stav `verifying` mají přednost před lokálním byte progress. Dostupná povolená Wi-Fi může spustit automatickou synchronizaci; ruční tlačítko je provozní záloha. Souběžný impuls se koaleskuje, nezahazuje.
@@ -41,6 +43,7 @@
 - Míla schválil p+n celého čekajícího balíčku; dva obsahově shodné soví commity se zachovaly běžným sloučením bez přepisu historie.
 - Míla zadal C03a; původní v0.5 + novější U15 se nemění. Referenční model se nemigruje do izolovaných C01/C02 prototypů.
 - Míla zadal C03b; vzniká lokální referenční kontrakt, nikoli provozní služba. Syntetický T046 na kontraktní vrstvě nenahrazuje iPhone a serverový akceptační test.
+- Míla zadal C04a; samostatný bundle a místní kontejner zachovávají prototypy. V tomto kroku neprobíhá instalace telefonu, push ani nasazení.
 
 ### Navrhované další kroky
 - T047 je fyzicky PASS v syntetickém rozsahu; jeho dva objekty/účtenky a relace zůstávají zachované.
@@ -57,6 +60,7 @@
 - P+n funkčního balíčku: plná publikační brána 1719/1719, GitHub 17 commitů, kanonická soukromá účtenka nasazení `4a965ccb` s novým PID, shodným otiskem a smoke 5/5. Závěrečný stav po dokumentačním checkpointu se ověřuje živě.
 - C03a: 9/9 syntetických testů a plná brána 1728/1728 PASS; v tomto kroku se nic na telefonu neinstalovalo, nepushovalo ani nenasazovalo.
 - C03b: 12/12 syntetických testů, validní OpenAPI JSON a 21 komponent schématu, plná projektová brána 1740/1740 PASS. Žádná instalace, push ani nasazení.
+- C04a: 8/8 Swift testů, 1/1 izolovaný simulátorový UI test, nepodepsaný generic iOS build exit 0 a plná projektová brána 1740/1740 PASS. Fyzická přejímka NEPROVEDENA.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -94,7 +98,9 @@ je vyloučeno; celé `Do deníku` je po synchronizaci Viewer-eligible.
 - `Camino Transfer Test` 0.4.0 (2) koaleskuje souběžné impulsy reconciliace; následná celá dávka doběhla automaticky. Build 0.4.0 (3) přidal per-request síťovou politiku a prošel syntetickou mobilní částí T049. Swift 20/20, Python workflow 13/13 a UI 1/1 PASS při jeho přípravě. T050 prošel ve druhém fyzickém syntetickém běhu se 14s zadržením ověření a souběžným videodůkazem; předchozí brána 1719/1719 PASS. T043/T047/T049/T050 receiver a testovací cesta jsou po bězích ukončené, Serve obnovený, Funnel vypnutý.
 
 
-C04a může po samostatném zadání navázat místním úložištěm; C05a připojí produkční API a ověřená média. T048 zůstává oddělený fyzický test při dostupné cizí Wi-Fi. C01c ani C02a dále nerozšiřovat bez nového důvodu.
+C04a má lokální implementaci a čeká na fyzické ověření. C04b přidá foto/video;
+C05a připojí produkční API a ověřená média. T048 zůstává oddělený fyzický
+test při dostupné cizí Wi-Fi. C01c ani C02a dále nerozšiřovat bez nového důvodu.
 
 ## Rizika
 
@@ -1183,3 +1189,26 @@ Technický důkaz:
 - C03b syntetické kontraktní testy 12/12, OpenAPI JSON a 21 komponent schématu
   validní, plná projektová brána 1740/1740 PASS.
 - Bez iPhone instalace, push a nasazení.
+
+### 2026-09-20 09:30 CEST — C04a offline iPhone základ
+
+Hotovo:
+- Nové místní Trip/Day/Moment, Zkouška, značka a hlavní obrazovka. D02
+  výchozí `diary` a trvalá volba; U15 samostatná Úvaha `owner_only`.
+- C01c audio beze změny, trvalý záměr před mikrofonem a vazba validované
+  dokončené session na Moment po restartu. Komentář má soukromí pro celý záznam.
+
+Rozhodnutí:
+- Míla zadal C04a. Nový bundle a kontejner nemigrují prototypová média;
+  C03b není připojené síťové API.
+
+Další krok:
+- C04b foto/video; fyzický iPhone průchod C04a před přijetím audio chování.
+
+Navrhované další kroky:
+- C04d detail a vědomá revize Úvahy, C05a produkční server. T048 a plné T049
+  zůstávají oddělené podle svých podmínek.
+
+Technický důkaz:
+- Swift 8/8, UI simulátoru 1/1, nepodepsaný iOS build a plná brána
+  1740/1740 PASS. Žádná fyzická instalace, push ani nasazení.
