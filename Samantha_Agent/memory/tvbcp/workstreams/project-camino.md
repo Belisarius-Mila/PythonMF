@@ -1297,3 +1297,24 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Mílovo pozorování; kontrolní brána 1740/1740 PASS. Bez push a nasazení.
+
+### 2026-09-20 — C04b T008 fyzický PASS
+
+Hotovo:
+- Dva rychlé snímky zůstaly samostatnými Momenty; první má dvě fotografie
+  a komentář, druhý jednu fotografii. Vazby přežily úplné zavření a nové
+  spuštění podle Mílova potvrzení.
+
+Rozhodnutí:
+- T008 PASS na fyzickém iPhonu 14 Plus. T007 chybový zápis a ostatní
+  fyzické scénáře zůstávají otevřené.
+
+Další krok:
+- T011: nahrát video se zvukem, zastavit, znovu spustit aplikaci a ověřit
+  jediný klip, obraz, zvuk a délku.
+
+Navrhované další kroky:
+- T012–T014, T009, bezpečná část T060 a poté C04d/C05a.
+
+Technický důkaz:
+- Mílovo fyzické pozorování bez kopie obsahu; gate 1740/1740 PASS. Bez push.

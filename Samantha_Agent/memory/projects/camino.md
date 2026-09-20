@@ -1018,3 +1018,26 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Přímé pozorování Míly na fyzickém iPhonu, bez kopie médií nebo komentáře.
+
+### 2026-09-20 — C04b T008 fyzicky PASS
+
+Hotovo:
+- Míla dokončil přidání další fotografie k prvnímu Momentu a potvrdil
+  všechny vazby po úplném zavření a opětovném otevření aplikace. První Moment
+  má dvě fotografie a komentář, druhý svou jedinou fotografii.
+
+Rozhodnutí:
+- T008 má fyzický PASS podle uživatelského pozorování na iPhonu 14 Plus.
+  Předchozí průběžný zápis zůstává historií testu.
+
+Další krok:
+- T011: krátké skutečné video se zvukem, Stop, opětovné spuštění a ověření
+  jediné položky, obrazu, zvuku a délky.
+
+Navrhované další kroky:
+- T012–T014, T009 a bezpečná část T060; poté C04d/C05a.
+
+Technický důkaz:
+- Mílovo potvrzení na fyzickém iPhonu, bez kopie fotografií nebo komentáře.
+  Kontrolní brána 1740/1740 PASS. T007 chybový zápis zůstává neověřený na
+  zařízení; bez push a nasazení.
