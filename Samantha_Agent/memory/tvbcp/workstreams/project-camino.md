@@ -1337,3 +1337,21 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Přímé hlášení Míly na fyzickém iPhonu, bez kopie média a bez push.
+
+### 2026-09-20 — C04b T012 fyzický PASS
+
+Hotovo:
+- Klipy na výšku a na šířku po restartu přehrány se správnou orientací
+  a bez chybného ořezu podle Mílova potvrzení.
+
+Rozhodnutí:
+- T012 PASS na fyzickém iPhonu; další scénáře C04b čekají.
+
+Další krok:
+- T013 vědomé video bez zvuku a chování při odepřeném mikrofonu.
+
+Navrhované další kroky:
+- T014, T009, bezpečná část T060; poté C04d/C05a.
+
+Technický důkaz:
+- Mílovo pozorování bez kopie média, bez push a nasazení.

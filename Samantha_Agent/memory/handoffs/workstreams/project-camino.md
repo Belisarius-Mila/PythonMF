@@ -1249,3 +1249,21 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Mílovo pozorování na iPhonu 14 Plus; žádné kopírování klipu. Bez push.
+
+### 2026-09-20 — C04b T012 fyzický PASS
+
+Hotovo:
+- Oba klipy, na výšku i na šířku, se po restartu podle Míly přehrávají
+  správně otočené a bez chybného ořezu.
+
+Rozhodnutí:
+- T012 fyzicky PASS. T013–T014, T009 a T060 jsou stále otevřené.
+
+Další krok:
+- T013: vědomé tiché video a zkouška odepřeného mikrofonu bez fallbacku.
+
+Navrhované další kroky:
+- T014, T009, bezpečná část T060; následně C04d/C05a.
+
+Technický důkaz:
+- Potvrzení Míly na fyzickém iPhonu, bez kopie médií a bez push.

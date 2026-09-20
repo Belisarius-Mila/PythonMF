@@ -46,3 +46,6 @@ jednotlivých ID, model/iOS, datum, zjištěná selhání a zda šlo o fyzický 
   otevření přehrává s obrazem a zvukem a bez duplicit. Délka je vidět až v
   ovládání přehrávače během přehrávání, ne trvale v detailu; jde o poznámku
   k UI, nikoli o blokátor požadovaného správného času klipu.
+- T012, fyzický PASS podle Mílova potvrzení: krátké klipy na výšku i na šířku
+  se po úplném zavření a opětovném otevření přehrávají se správnou orientací
+  a bez chybného ořezu.

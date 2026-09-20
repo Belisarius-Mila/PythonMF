@@ -1064,3 +1064,22 @@ Technický důkaz:
 - Uživatelské pozorování na fyzickém iPhonu; kanonický T011 požaduje
   správný čas a zvuk, přehratelnost a bez duplicit. Bez kopie klipu, push
   a nasazení.
+
+### 2026-09-20 — C04b T012 fyzický PASS
+
+Hotovo:
+- Míla potvrdil, že klipy na výšku i na šířku se po restartu aplikace
+  přehrávají se správnou orientací a bez chybného ořezu.
+
+Rozhodnutí:
+- T012 fyzicky PASS podle Mílova potvrzení na iPhonu 14 Plus.
+
+Další krok:
+- T013: nejprve vědomé video bez zvuku s trvalým štítkem, potom odepření
+  mikrofonu bez skrytého přepnutí běžného videa na tiché.
+
+Navrhované další kroky:
+- T014, T009 a bezpečná část T060; potom C04d/C05a.
+
+Technický důkaz:
+- Uživatelské pozorování po restartu, bez kopie klipů. Bez push a nasazení.
