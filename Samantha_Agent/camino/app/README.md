@@ -32,9 +32,9 @@ nemigruje data ze samostatných prototypů Camino Audio a Camino Transfer Test.
   Přerušení ukončuje klip a označuje případný částečný záznam.
 
 Ruční revize Momentu, přenos na Mac, párování, Viewer a serverová záloha jsou
-další etapy. Aplikace zatím nehlásí úspěšnou synchronizaci. C04b zatím není
-fyzicky přijatá verze: pro nové bundle ID chybí místní provisioning profil a
-Xcode účet. Původní soubory se nemažou a při chybě databáze se neprovádí
+další etapy. Aplikace zatím nehlásí úspěšnou synchronizaci. C04b je
+podepsaná a nainstalovaná na zkušebním iPhonu, ale fyzické scénáře ještě
+nejsou přijaté. Původní soubory se nemažou a při chybě databáze se neprovádí
 automatická migrace či reset. Datový model C04b nemá automatickou migraci
 z případné instalace C04a; před instalací do zařízení s daty je třeba řízený
 postup zachování dat.

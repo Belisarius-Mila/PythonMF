@@ -1144,3 +1144,26 @@ Technický důkaz:
   1740/1740 PASS. Podepsané
   sestavení selhalo kvůli profilu. Instalace/fyzické testy NEPROVEDENY;
   žádný push ani nasazení.
+
+### 2026-09-20 12:12 CEST — C04b na iPhonu, test běží
+
+Hotovo:
+- Nové Camino 0.1.0 (1) je podepsané, nainstalované a spuštěné na iPhonu
+  14 Plus. Existující prototypy zůstaly oddělené.
+
+Rozhodnutí:
+- Předchozí blok podpisu je vyřešen. Fyzický PASS foto/video se netvrdí bez
+  uživatelského pozorování a kontroly přehrání na telefonu.
+
+Další krok:
+- V nové Zkoušce projít `C04b_IPHONE_TEST_PLAN.md`, začít prvním uloženým
+  snímkem a pak T008/T011–T014; výsledky zapsat podle ID.
+
+Navrhované další kroky:
+- C04d detail/revize a C05a produkční přenos; T048 a plné T049 zůstávají
+  samostatné.
+
+Technický důkaz:
+- Ověřený podpis, správný profil včetně zařízení, `devicectl` instalace
+  a launch PASS. Profil do 27. 9. 2026; fyzické T007–T014/T060 zatím
+  NEOVĚŘENÉ. Bez push a nasazení.

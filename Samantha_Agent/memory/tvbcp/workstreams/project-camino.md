@@ -1237,3 +1237,23 @@ Technický důkaz:
 - Swift 13/13, UI test simulátoru, nepodepsaný iOS build a plná brána
   1740/1740 PASS. Podepsané
   sestavení bez profilu selhalo. Bez instalace, fyzického PASS, push a nasazení.
+
+### 2026-09-20 12:12 CEST — C04b vývojově na iPhonu
+
+Hotovo:
+- Integrovaná aplikace 0.1.0 (1) je podepsaná, nainstalovaná a spuštěná
+  na iPhonu 14 Plus. Prototypy se nepřepisovaly.
+
+Rozhodnutí:
+- Instalace neuzavírá C04b hardware akceptaci; fyzické T007–T014/T060
+  čekají na pozorování a přehrání skutečných médií.
+
+Další krok:
+- Projít testovací plán na nové Zkoušce a zapsat PASS/FAIL po scénářích.
+
+Navrhované další kroky:
+- C04d detail/revize a C05a produkční přenos; plné T049 až s novým videem.
+
+Technický důkaz:
+- Podpis a profil pro přesné ID/telefon, instalace i launch ověřeny; profil
+  do 27. 9. 2026. Fyzické testy zatím NEOVĚŘENÉ. Bez push a nasazení.

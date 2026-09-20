@@ -840,5 +840,19 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   zapiš celé bajty včetně krátkých zápisů a zavolej `fsync`. Při chybě
   záměr/soubor zachovej a nikdy nepotvrzuj uložení před kontrolou formátu,
   SHA-256, stabilní cestou a databázovou vazbou.
-- Ověření: C04b syntetický foto/restart průchod a Swift 13/13 PASS; fyzický
-  iPhone čeká na podpis nového bundle ID.
+- Ověření: C04b syntetický foto/restart průchod a Swift 13/13 PASS; aplikace
+  je nainstalovaná na iPhonu, fyzické chování foto/video se teprve zkouší.
+
+### LL-044 — Podepisuj přes správný Xcode projekt a místní tým
+
+- Problém: Xcode ukazoval přihlášený Personal Team v projektu CaminoAudio,
+  zatímco příkazový podpis nového Camino hlásil `No Accounts` a žádný profil.
+- Typ: opakující se
+- Řešení nalezeno: 20092026
+- Řešení: Ověř správné bundle ID a cíl projektu, otevři právě tento projekt
+  v Xcode a nastav jeho tým v ignorovaném `LocalSigning.xcconfig`. Podepisuj
+  nové ID automaticky a ověř profil včetně konkrétního telefonu; nepoužívej
+  bundle ID staršího prototypu. Samostatnou příčinu rozporu účtu mezi GUI a
+  příkazovým buildem tento průchod neurčil.
+- Ověření: C04b potom získalo přesný profil, `codesign --verify` prošel a
+  nové Camino 0.1.0 (1) se nainstalovalo a spustilo na iPhonu 14 Plus.

@@ -952,3 +952,27 @@ Technický důkaz:
   iOS build PASS. Podepsané
   sestavení selhalo na chybějícím profilu. Instalace, fyzické testy, push a
   nasazení NEPROVEDENY.
+
+### 2026-09-20 12:12 CEST — C04b podepsaná instalace
+
+Hotovo:
+- Nový integrovaný Camino bundle 0.1.0 (1) je vývojově podepsaný, ověřený,
+  nainstalovaný a spuštěný na připojeném iPhonu 14 Plus. Starší Camino
+  prototypy se nenahrazovaly.
+
+Rozhodnutí:
+- Fyzické T007–T014/T060 se hodnotí až po pozorování kamery, uložených
+  souborů, přehrání, orientace a přerušení na telefonu. Spuštěný proces není
+  důkaz jejich PASS.
+
+Další krok:
+- Na nové Zkoušce projít cílený test v `C04b_IPHONE_TEST_PLAN.md` a zapsat
+  skutečné výsledky jednotlivých scénářů.
+
+Navrhované další kroky:
+- Po C04b QA navázat C04d a C05a; plné T049 až po skutečném přenosu videa.
+
+Technický důkaz:
+- `codesign --verify --deep --strict` PASS, profil má přesné bundle ID a
+  připojený iPhone; instalace i launch `devicectl` PASS, proces běžel.
+  Profil vyprší 27. 9. 2026. Fyzické scénáře jsou zatím NEOVĚŘENÉ; bez push.

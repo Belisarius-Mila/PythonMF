@@ -1,6 +1,8 @@
 # C04b — cílený test na iPhonu
 
-Stav 2026-09-20: čeká na provisioning profil nového `cz.pythonmf.camino.app`.
+Stav 2026-09-20 12:12 CEST: `cz.pythonmf.camino.app` 0.1.0 (1) je podepsaná,
+nainstalovaná a spuštěná na iPhonu 14 Plus. Fyzický průchod čeká na pozorování
+obrazovek, médií a zvuku.
 Syntetické testy a simulátor nenahrazují níže uvedený fyzický průchod. Použij
 novou zkušební cestu a neosobní záběry; do chatu stačí ID testu a PASS/FAIL,
 bez fotografií, hlasu a soukromých textů. Zkouška nevyžaduje letový režim.
