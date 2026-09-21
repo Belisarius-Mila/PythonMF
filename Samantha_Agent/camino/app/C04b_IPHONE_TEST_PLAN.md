@@ -42,6 +42,9 @@ jednotlivých ID, model/iOS, datum, zjištěná selhání a zda šlo o fyzický 
   fotografie vytvořily dva samostatné Momenty. U prvního zůstal komentář a
   výslovně přidaná druhá fotografie; druhý má jen svou fotografii. Míla
   potvrdil správné vazby také po úplném zavření a opětovném otevření aplikace.
+- T009, fyzický PASS podle Mílova potvrzení: při odepřené kameře otevření
+  `Foto` zobrazilo vysvětlení a `Zpět`; `Komentář` i místní deník dál
+  fungovaly.
 - T011, fyzický PASS podle Mílova pozorování: krátké video se po opětovném
   otevření přehrává s obrazem a zvukem a bez duplicit. Délka je vidět až v
   ovládání přehrávače během přehrávání, ne trvale v detailu; jde o poznámku

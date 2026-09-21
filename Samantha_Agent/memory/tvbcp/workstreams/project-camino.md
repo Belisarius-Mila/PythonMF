@@ -1,7 +1,7 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno po T014: 2026-09-21 21:43 CEST
+- Aktualizováno po T009: 2026-09-21 22:04 CEST
 
 ### Hotovo
 - T043 PASS v rozsahu syntetického C02b: Letový režim přerušil upload při 0/13 serverových částech; po obnově sítě vznikl jediný objekt daného Assetu, 13/13 částí, 100 663 553 B a shodný SHA-256.
@@ -25,19 +25,20 @@
 - C04a: první samostatná iPhone aplikace má offline Trip/Day/Moment, hlavní obrazovku, Zkoušku, značku a dnešní Momenty. Běžný Moment začíná `diary` podle D02; trvalá volba nevrací staré záznamy. Úvaha vzniká `owner_only` podle U15. C01c audio se znovu používá bez migrace prototypu; před mikrofonem vzniká trvalý záměr, validované dokončené části se po restartu idempotentně navazují. Komentář umí změnit soukromí celého vznikajícího Momentu. Swift 8/8, UI simulátoru 1/1 a nepodepsaný iOS build PASS.
 - C04b T013 fyzicky PASS podle Mílova potvrzení: při odepřeném mikrofonu se běžné video samo nepřepnulo na tiché a výslovně zvolený tichý klip zůstal dostupný a správně označený. Oprava kódu není potřeba.
 - C04b T014 fyzicky PASS podle Mílova potvrzení: zámek telefonu, odchod z aplikace i přijatý krátký hovor ukončily rozběhnuté video bez samovolného pokračování. Zachované klipy byly přehratelné a pravdivě označené jako částečné; hovor se do videa nezaznamenal. Oprava kódu není potřeba.
+- C04b T009 fyzicky PASS podle Mílova potvrzení: odmítnutá kamera zobrazila vysvětlení a `Zpět`, zatímco `Komentář` i místní deník dál fungovaly. Oprava kódu není potřeba.
 
 ### Otevřeno
-- Integrovaná aplikace je podepsaná, nainstalovaná a fyzicky částečně přijatá: T008/T011/T012/T013/T014 PASS a T007 částečný. T009 a bezpečná část T060 čekají. C03b zůstává bez produkčního napojení; T044/T045/T053/T058 mají jen omezený či žádný kontraktní důkaz. U T048 zůstává NEOVĚŘENO captive portal a plné T049 čeká na produkční spojení.
+- Integrovaná aplikace je podepsaná, nainstalovaná a fyzicky částečně přijatá: T008/T009/T011/T012/T013/T014 PASS a T007 částečný. Bezpečná část T060 čeká; vynucené zaplnění úložiště a tepelný stres nejsou součástí bezpečné zkoušky. C03b zůstává bez produkčního napojení; T044/T045/T053/T058 mají jen omezený či žádný kontraktní důkaz. U T048 zůstává NEOVĚŘENO captive portal a plné T049 čeká na produkční spojení.
 
 ### Rizika
 - Receiver je lokální standard-library experiment, ne produkční FastAPI, databáze, trvalá služba ani záloha. T048 dokládá tři dostupné syntetické síťové scénáře, ne captive portal ani produkční přenos skutečných médií.
 - Harness nemá kameru; plné kritérium nového skutečného videa se musí ověřit až v integrované aplikaci. Úplné znění fyzického potvrzovacího dialogu nebylo opsáno a serverový počet bajtů není měření spotřeby operátora.
 - Build 4 má fyzické potvrzení jen části A a popsaného znovuotevření s dostupnou sítí. Starší journal zachovává své obnovovací chování; krátké `Vyžaduje pozornost` před bezpečným retry v T050 nemá určenou příčinu. Lokální zámek neodvolá již zkopírovaný cizí obsah; serverový Viewer musí při každém vydání znovu zkontrolovat aktuální oprávnění.
 - C03b nemá listener ani vazbu přihlášení na skutečné zařízení. C05 musí dodat privátní HTTPS, odvolatelné tokeny, párování, ověření bajtů Assetu a řešení konfliktů; C06b skutečnou zálohu a obnovu. Referenční porovnání po změně epochy zahrnuje jen Momenty.
-- Integrovaná aplikace je podepsaná a nainstalovaná; T008/T011/T012/T013/T014 fyzicky prošly a T007 zůstává částečný. T009 a bezpečná část T060 ještě čekají. Místní databáze není druhá záloha a zatím neodesílá revize C03b; nový bundle ID nevkládá data z C01c/C02b.
+- Integrovaná aplikace je podepsaná a nainstalovaná; T008/T009/T011/T012/T013/T014 fyzicky prošly a T007 zůstává částečný. Bezpečná část T060 ještě čeká; vynucené zaplnění úložiště a tepelný stres zůstávají neověřené. Místní databáze není druhá záloha a zatím neodesílá revize C03b; nový bundle ID nevkládá data z C01c/C02b.
 
 ### Další krok
-- Provést T009 s odepřenou kamerou: otevřít `Foto`, ověřit vysvětlení a `Zpět` a potvrdit, že `Komentář` i místní deník dál fungují. Potom následuje bezpečná část T060, C04d a C05a. Captive portal T048 ověřit jen při skutečně dostupné síti.
+- Provést pouze bezpečnou část T060: vrátit Caminu kameru, bez zaplňování úložiště a tepelného stresu pořídit a normálně ukončit krátké video a ověřit, že při běžném volném místě není falešné varování, klip je přehratelný a nic se nemaže. T014 již dokládá pravdivé přerušení. Plné T060 zůstane částečné bez nízkého místa a tepelného stresu. Potom následují C04d a C05a. Captive portal T048 ověřit jen při skutečně dostupné síti.
 
 ### Rozhodnutí
 - Serverová pravda a stav `verifying` mají přednost před lokálním byte progress. Dostupná povolená Wi-Fi může spustit automatickou synchronizaci; ruční tlačítko je provozní záloha. Souběžný impuls se koaleskuje, nezahazuje.
@@ -105,7 +106,7 @@ je vyloučeno; celé `Do deníku` je po synchronizaci Viewer-eligible.
 - T048 prošel v dostupném syntetickém rozsahu běžné cizí Wi-Fi, přerušení a návratu sítě a nedostupného/obnoveného tailnetu. Captive portal zůstává NEOVĚŘENO. Po registrovaném stopu je receiver i cesta vypnutá, původní Serve obnovený a Funnel vypnutý.
 
 
-C04a/C04b mají lokální implementaci a pokračují T009 a bezpečnou částí
+C04a/C04b mají lokální implementaci a pokračují pouze bezpečnou částí
 T060; C05a připojí API.
 Captive portal T048 ověřit jen při skutečně dostupné síti. C01c ani C02a dále
 nerozšiřovat bez nového důvodu.
@@ -1531,4 +1532,29 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Přímé pozorování Míly na fyzickém iPhonu; bez kopírování média,
+  změny kódu, opakování automatických testů, push a nasazení.
+
+### 2026-09-21 22:04 CEST — C04b T009 fyzický PASS
+
+Hotovo:
+- Míla potvrdil celý fyzický scénář T009: při odepřené kameře
+  otevření `Foto` zobrazilo vysvětlení a `Zpět`; `Komentář` i místní
+  deník dál fungovaly.
+
+Rozhodnutí:
+- T009 je fyzicky PASS. Výsledek odpovídá návrhu a nevyžaduje opravu kódu.
+
+Další krok:
+- Provést pouze bezpečnou část T060: vrátit kamerové oprávnění, bez
+  zaplňování úložiště a tepelného stresu pořídit a normálně ukončit
+  krátké video, ověřit absenci falešného varování, přehratelnost a že se
+  nic nesmazalo. Plné T060 zůstane částečné bez nízkého místa a tepelného
+  stresu; pravdivé přerušení už dokládá T014.
+
+Navrhované další kroky:
+- Po bezpečné části T060 následují C04d a C05a; rizikovou část T060
+  neprovádět bez nového bezpečného plánu.
+
+Technický důkaz:
+- Přímé potvrzení Míly na fyzickém iPhonu; bez kopírování média,
   změny kódu, opakování automatických testů, push a nasazení.

@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-21 21:43 CEST
+Aktualizováno: 2026-09-21 22:04 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -51,6 +51,7 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 - C04a má první samostatnou iPhone aplikaci `camino/app/` s offline Core Data evidencí Trip/Day/Moment, oddělenou Zkouškou, hlavní obrazovkou, časovou značkou a dnešními Momenty. Výchozí režim běžných Momentů je podle D02 `diary`, volba trvá přes restart a nemění staré záznamy. Úvaha vzniká podle U15 vždy `owner_only`; soukromí Komentáře lze během nahrávání změnit pro celý Moment. Přijaté C01c audio jádro se používá přímo bez migrace jeho prototypových dat: trvalý audio záměr vzniká před mikrofonem, ověřené dokončené části se idempotentně navazují po restartu a neznámé soubory zůstávají zachované. Testy 8/8 Swift, 1/1 UI simulátoru a nepodepsaný iOS build prošly. Následná fyzická instalace a průběžná C04b přejímka jsou popsané níže; produkční synchronizace zůstává neověřená.
 - C04b T013 fyzicky PASS podle Mílova potvrzení na integrované aplikaci: vědomě tichý klip má trvalý štítek a při odepřeném mikrofonu se běžné video samo nepřepnulo na tiché; tichý klip zůstal dostupný jen po výslovné volbě. Výsledek odpovídá návrhu a nevyžaduje změnu kódu.
 - C04b T014 fyzicky PASS podle Mílova potvrzení: zámek telefonu, odchod z aplikace i přijatý krátký hovor ukončily rozběhnuté video bez samovolného pokračování. Zachované klipy byly přehratelné a pravdivě označené jako částečné; hovor se do videa nezaznamenal. Oprava kódu není potřeba.
+- C04b T009 fyzicky PASS podle Mílova potvrzení: odmítnutá kamera zobrazila vysvětlení a `Zpět`, zatímco `Komentář` i místní deník dál fungovaly. Oprava kódu není potřeba.
 
 
 ## Zdroje a návaznost
@@ -87,13 +88,13 @@ kódu nevyvolává; FAIL se nejdřív doloží a opraví v aktuálním rozsahu.
 - T050 prošlo díky souběžnému důkazu telefonu a serveru v 14s okně; soukromé video obsahuje soukromou adresu, proto se necommitovalo. Oprava neočekávaného startu je na iPhonu fyzicky ověřená v části A; offline znovuotevření během části B zůstalo neověřené. Krátké `Vyžaduje pozornost` před dřívějším retry má neznámou příčinu.
 - Lokální zámek je v C04a uložený na telefonu, ale server jej vynutí až po přijetí revize; již vydanou cizí kopii neodvolá. C08 musí kontrolovat aktuální oprávnění při každém výdeji média. C04a zatím nemá synchronizaci C05 ani Viewer C08, takže U15 není ověřená provozní ochrana.
 - C03b bylo ověřeno jen na syntetických metadatech v referenční databázi mimo repozitář. C05 musí navázat skutečné ověření identity zařízení, odvolatelné tokeny, privátní HTTPS, přijetí a hashovou finalizaci médií a řízené řešení konfliktů; C06b skutečnou zálohu a obnovu. Porovnání po obnově zatím zahrnuje Momenty, ne celý inventář médií; T044/T045/T053/T058 ani fyzické chování telefonu nejsou plně PASS.
-- Integrovaná aplikace je podepsaná a nainstalovaná; T008/T011/T012/T013/T014 fyzicky prošly a T007 zůstává částečný. T009 a bezpečná část T060 ještě čekají; detail a vědomé vložení Úvahy do deníku patří do C04d. Lokální databáze zatím nepředává revize do C03b API a není druhou zálohou.
+- Integrovaná aplikace je podepsaná a nainstalovaná; T008/T009/T011/T012/T013/T014 fyzicky prošly a T007 zůstává částečný. Bezpečná část T060 ještě čeká; vynucené zaplnění úložiště a tepelný stres zůstávají neověřené. Detail a vědomé vložení Úvahy do deníku patří do C04d. Lokální databáze zatím nepředává revize do C03b API a není druhou zálohou.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
 - Instalace a launch nejsou fyzická přejímka přenosu; vývojový profil je časově omezený do 24. září 2026. U01–U15 se bez nového rozhodnutí neotevírají.
 
 ## Další krok
 
-Provést T009 s odepřenou kamerou: otevřít `Foto`, ověřit vysvětlení a `Zpět` a potvrdit, že `Komentář` i místní deník dál fungují. Potom následuje bezpečná část T060, C04d a C05a. Captive portal T048 ověřit jen při skutečně dostupné síti a tři již doložené podscénáře bez nové pochybnosti neopakovat. Plné T049 s novým skutečným videem zůstává pro produkční propojení; T050 se bez nové pochybnosti neopakuje.
+Provést pouze bezpečnou část T060: vrátit Caminu oprávnění ke kameře, bez zaplňování úložiště a bez zahřívání telefonu pořídit a normálně ukončit krátké video a ověřit, že se při běžném volném místě neukazuje falešné varování, klip je přehratelný a nic se nemaže. Pravdivou hlášku o přerušení již dokládá T014. Plné T060 zůstane částečné bez nízkého místa a tepelného stresu. Potom následují C04d a C05a. Captive portal T048 ověřit jen při skutečně dostupné síti a tři již doložené podscénáře bez nové pochybnosti neopakovat. Plné T049 s novým skutečným videem zůstává pro produkční propojení; T050 se bez nové pochybnosti neopakuje.
 
 Historický doklad založení:
 Ověření založení: 56/56 testů integrace (54 + 2 profilové testy) a rychlá statická brána OK.
@@ -1251,4 +1252,25 @@ Další krok:
 
 Technický důkaz:
 - Přímé pozorování Míly na fyzickém iPhonu; bez kopírování média,
+  změny kódu, opakování automatických testů, push a nasazení.
+
+### 2026-09-21 22:04 CEST — C04b T009 fyzický PASS
+
+Hotovo:
+- Míla potvrdil celý fyzický scénář T009: při odepřené kameře
+  otevření `Foto` zobrazilo vysvětlení a `Zpět`; `Komentář` i místní
+  deník dál fungovaly.
+
+Rozhodnutí:
+- T009 je fyzicky PASS. Výsledek odpovídá návrhu a nevyžaduje opravu kódu.
+
+Další krok:
+- Provést pouze bezpečnou část T060: vrátit kamerové oprávnění, bez
+  zaplňování úložiště a tepelného stresu pořídit a normálně ukončit
+  krátké video, ověřit absenci falešného varování, přehratelnost a že se
+  nic nesmazalo. Plné T060 zůstane částečné bez nízkého místa a tepelného
+  stresu; pravdivé přerušení už dokládá T014.
+
+Technický důkaz:
+- Přímé potvrzení Míly na fyzickém iPhonu; bez kopírování média,
   změny kódu, opakování automatických testů, push a nasazení.
