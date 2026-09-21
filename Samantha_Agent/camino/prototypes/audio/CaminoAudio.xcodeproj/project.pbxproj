@@ -265,6 +265,7 @@
 		};
 		3148BFDC677C1E8A82E921A6 /* Debug UI tests */ = {
 			isa = XCBuildConfiguration; name = Debug;
+			baseConfigurationReference = 8500A105EFC3753A5CE8987E /* Config.xcconfig */;
 			buildSettings = {
 				GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				PRODUCT_BUNDLE_IDENTIFIER = cz.pythonmf.camino.audio.prototype.uitests;
@@ -276,6 +277,7 @@
 		};
 		0CBC8D46C58683179EB06E63 /* Release UI tests */ = {
 			isa = XCBuildConfiguration; name = Release;
+			baseConfigurationReference = 8500A105EFC3753A5CE8987E /* Config.xcconfig */;
 			buildSettings = {
 				GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				PRODUCT_BUNDLE_IDENTIFIER = cz.pythonmf.camino.audio.prototype.uitests;
