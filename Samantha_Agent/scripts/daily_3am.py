@@ -41,6 +41,7 @@ DOCS_COLORS_NUMBERS_APP_DIR = Path("docs") / "colors-numbers"
 COLORS_NUMBERS_ALLOWED_DIRS = (COLORS_NUMBERS_APP_DIR, DOCS_COLORS_NUMBERS_APP_DIR)
 COLORS_NUMBERS_DEFAULT_OWL_VOICE = "cs-CZ-AntoninNeural"
 COLORS_NUMBERS_DEFAULT_OWL_RATE = "-10%"
+COLORS_NUMBERS_OWL_FALLBACK_DATE = "default"
 
 
 class AlreadyRunningError(RuntimeError):
@@ -340,6 +341,7 @@ def generate_mp3(text: str, output_path: Path, voice: str, rate: str) -> None:
 
 
 def find_owl_speech_row(csv_path: Path, run_date: str) -> dict | None:
+    fallback_row = None
     try:
         with csv_path.open("r", encoding="utf-8", newline="") as handle:
             reader = csv.DictReader(handle)
@@ -352,9 +354,14 @@ def find_owl_speech_row(csv_path: Path, run_date: str) -> dict | None:
                     if not text:
                         raise DailyTaskError(f"Owl speech CSV row for {run_date} is missing full_text.")
                     return row
+                if row.get("date") == COLORS_NUMBERS_OWL_FALLBACK_DATE:
+                    text = (row.get("full_text") or "").strip()
+                    if not text:
+                        raise DailyTaskError("Default owl speech CSV row is missing full_text.")
+                    fallback_row = row
     except OSError as exc:
         raise DailyTaskError(f"Cannot read owl speech CSV: {csv_path}") from exc
-    return None
+    return fallback_row
 
 
 def owl_audio_filename(run_date: str) -> str:
@@ -422,9 +429,12 @@ def run_colors_numbers_owl_local_preview(
 
 def run_colors_numbers_owl_csv_task(
     context: DailyContext,
-    speech_csv_path: Path = DEFAULT_COLORS_NUMBERS_OWL_SPEECH_CSV,
+    speech_csv_path: Path | None = None,
     audio_generator=generate_mp3,
 ) -> dict:
+    speech_csv_path = Path(
+        speech_csv_path or context.project_dir / "config" / "OwlSpeech.csv"
+    )
     if not speech_csv_path.exists():
         return {
             "name": "colors_numbers_owl_tts_csv",
@@ -500,10 +510,16 @@ def run_colors_numbers_owl_csv_task(
 
 def run_colors_numbers_owl_task(
     context: DailyContext,
-    config_path: Path = DEFAULT_COLORS_NUMBERS_OWL_CONFIG,
-    speech_csv_path: Path = DEFAULT_COLORS_NUMBERS_OWL_SPEECH_CSV,
+    config_path: Path | None = None,
+    speech_csv_path: Path | None = None,
     audio_generator=generate_mp3,
 ) -> dict:
+    speech_csv_path = Path(
+        speech_csv_path or context.project_dir / "config" / "OwlSpeech.csv"
+    )
+    config_path = Path(
+        config_path or context.project_dir / "config" / "colors_numbers_owl_current.json"
+    )
     csv_result = run_colors_numbers_owl_csv_task(
         context,
         speech_csv_path=speech_csv_path,

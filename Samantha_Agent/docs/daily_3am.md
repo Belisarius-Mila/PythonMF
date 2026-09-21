@@ -93,7 +93,8 @@ python scripts/daily_3am.py --run-date YYYY-MM-DD --local-preview
 
 Rezim `--local-preview`:
 
-- nacte text pro zadane datum z `config/OwlSpeech.csv`,
+- nacte text pro zadane datum z `config/OwlSpeech.csv`; pokud datum nema
+  vlastni radek, pouzije radek `default`,
 - vytvori pouze `data/daily_3am/previews/owl_DDMMYY.mp3`,
 - nezmeni produkcni adresare `ColorsAndNumbers/web_colors_numbers/` ani
   `docs/colors-numbers/`,
@@ -104,6 +105,10 @@ Rezim `--local-preview`:
 Slozka `data/daily_3am/` je ignorovana Gitem. Po schvaleni nahledu se do `main`
 ulozi pouze vstupni text a produkcni MP3 vytvori GitHub Pages workflow ve svem
 docasnem runneru.
+
+Radek `default` je trvala zalozni promluva. Kazdy den bez vlastniho radku se z
+ni vytvori nove denni `owl_DDMMYY.mp3`; pripraveny radek s presnym datem ma vzdy
+prednost.
 
 ## Dulezite: spanek, probuzeni a vypnuty Mac
 
