@@ -30,11 +30,20 @@ nemigruje data ze samostatných prototypů Camino Audio a Camino Transfer Test.
   soubory se při startu zkusí bezpečně navázat, neznámé zůstanou ke kontrole.
   Video se zvukem vyžaduje mikrofon; bez zvuku vzniká jen po výslovné volbě.
   Přerušení ukončuje klip a označuje případný částečný záznam.
+- Volné místo vyhodnocuje společná politika nad skutečnou kapacitou svazku:
+  pod 2 GiB varuje, pod 1 GiB nespustí nové video a pod 512 MiB nespustí nové
+  foto ani audio. Krátká značka se i při nízkém místě zkusí uložit; výsledek
+  určí skutečný zápis. Klesne-li kapacita pod 512 MiB během audia nebo videa,
+  aplikace záznam bezpečně ukončí. Nic se automaticky nemaže.
+- Tepelný stav se sleduje bez skryté změny kvality. Stav `serious` varuje;
+  `critical` nespustí nové video a rozběhnuté video bezpečně ukončí.
 
 Ruční revize Momentu, přenos na Mac, párování, Viewer a serverová záloha jsou
 další etapy. Aplikace zatím nehlásí úspěšnou synchronizaci. C04b je
-podepsaná a nainstalovaná na zkušebním iPhonu, ale fyzické scénáře ještě
-nejsou přijaté. Původní soubory se nemažou a při chybě databáze se neprovádí
+podepsaná a nainstalovaná na zkušebním iPhonu; část fyzických scénářů je
+přijatá podle cíleného plánu. Nový low-space/thermal hardening je zatím pouze
+lokálně sestavený a nebyl na iPhone instalován. Původní soubory se nemažou a
+při chybě databáze se neprovádí
 automatická migrace či reset. Datový model C04b nemá automatickou migraci
 z případné instalace C04a; před instalací do zařízení s daty je třeba řízený
 postup zachování dat.
@@ -55,7 +64,10 @@ xcodebuild -project Camino.xcodeproj -scheme CaminoUITests -configuration Debug 
   -parallel-testing-enabled NO CODE_SIGNING_ALLOWED=NO test
 ```
 
-SwiftPM testy používají pouze syntetická data včetně krátkého videa. UI test
-používá jednorázový simulátorový kontejner. Samotný build ani simulátor
+SwiftPM testy používají pouze syntetická data včetně krátkého videa. UI testy
+používají jednorázové simulátorové kontejnery. Jen v Debug simulátoru lze přes
+`CAMINO_TEST_AVAILABLE_BYTES` a `CAMINO_TEST_THERMAL_LEVEL` dodat řízený stav;
+produkční cesta vždy čte skutečnou kapacitu a systémový tepelný stav. Samotný
+build ani simulátor
 netestují fyzickou kameru, mikrofon, orientaci, zámek, přerušení, přehrávání,
-nedostatek místa ani obnovu po pádu na iPhonu.
+skutečný nedostatek místa, skutečné zahřátí ani obnovu po pádu na iPhonu.

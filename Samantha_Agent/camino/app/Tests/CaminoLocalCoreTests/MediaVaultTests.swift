@@ -7,6 +7,103 @@ import XCTest
 @testable import CaminoLocalCore
 
 @MainActor final class MediaVaultTests: XCTestCase {
+    func testStorageSafetyPolicyKeepsShortTextAvailableAndFinishesActiveCapture() {
+        let policy = CaminoStorageSafetyPolicy()
+        let gib: Int64 = 1_073_741_824
+        let reserve = CaminoStorageSafetyPolicy.operatingReserveBytes
+
+        XCTAssertEqual(policy.action(for: .video, availableBytes: 2 * gib), .allow)
+        XCTAssertEqual(policy.action(for: .video, availableBytes: 2 * gib - 1), .warn)
+        XCTAssertEqual(policy.action(for: .video, availableBytes: gib), .warn)
+        XCTAssertEqual(policy.action(for: .video, availableBytes: gib - 1), .block)
+        XCTAssertEqual(policy.action(for: .photo, availableBytes: reserve), .warn)
+        XCTAssertEqual(policy.action(for: .audio, availableBytes: reserve), .warn)
+        XCTAssertEqual(policy.action(for: .photo, availableBytes: reserve - 1), .block)
+        XCTAssertEqual(policy.action(for: .audio, availableBytes: reserve - 1), .block)
+        XCTAssertEqual(policy.action(for: .audio, availableBytes: reserve, active: true),
+                       .warn)
+        XCTAssertEqual(policy.action(for: .video, availableBytes: reserve, active: true),
+                       .warn)
+        XCTAssertEqual(policy.action(for: .audio, availableBytes: reserve - 1, active: true),
+                       .finish)
+        XCTAssertEqual(policy.action(for: .video, availableBytes: reserve - 1, active: true),
+                       .finish)
+
+        for activity in [CaminoStorageActivity.text, .photo, .audio, .video] {
+            XCTAssertEqual(policy.action(for: activity, availableBytes: 3 * gib), .allow)
+            XCTAssertEqual(policy.action(for: activity, availableBytes: gib + gib / 2), .warn)
+        }
+
+        XCTAssertEqual(policy.action(for: .text, availableBytes: 900 * 1_048_576), .warn)
+        XCTAssertEqual(policy.action(for: .photo, availableBytes: 900 * 1_048_576), .warn)
+        XCTAssertEqual(policy.action(for: .audio, availableBytes: 900 * 1_048_576), .warn)
+        XCTAssertEqual(policy.action(for: .video, availableBytes: 900 * 1_048_576), .block)
+
+        let belowReserve: Int64 = 400 * 1_048_576
+        XCTAssertEqual(policy.action(for: .text, availableBytes: belowReserve), .warn)
+        XCTAssertEqual(policy.action(for: .photo, availableBytes: belowReserve), .block)
+        XCTAssertEqual(policy.action(for: .audio, availableBytes: belowReserve), .block)
+        XCTAssertEqual(policy.action(for: .video, availableBytes: belowReserve), .block)
+    }
+
+    func testThermalSafetyPolicyNeverSilentlyChangesQuality() {
+        let policy = CaminoThermalSafetyPolicy()
+        XCTAssertEqual(policy.videoAction(for: .nominal), .allow)
+        XCTAssertEqual(policy.videoAction(for: .fair), .allow)
+        XCTAssertEqual(policy.videoAction(for: .serious), .warn)
+        XCTAssertEqual(policy.videoAction(for: .critical), .block)
+        XCTAssertEqual(policy.videoAction(for: .critical, active: true), .finish)
+    }
+
+    func testLowSpaceBlocksNewLargeMediaWithoutDeletingExistingOriginal() async throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("camino-c04b-low-space-\(UUID())", isDirectory: true)
+        let store = try CaminoLocalStore(storeURL: root.appendingPathComponent("metadata.sqlite"))
+        let trip = try store.createTrip(name: "Synthetic")
+        let capacity = MutableCapacity(3 * 1_073_741_824)
+        let vault = try CaminoMediaVault(root: root, metadata: store,
+                                         capacityProvider: capacity)
+        let original = try await vault.savePhoto(jpeg())
+        let originalURL = try vault.originalURL(for: original)
+        let originalBytes = try Data(contentsOf: originalURL)
+        let originalMoments = try store.moments(tripID: trip.id).count
+        let originalAssets = try store.allMediaAssets().count
+        XCTAssertTrue(try store.pendingMediaIntents().isEmpty)
+
+        capacity.bytes = 400 * 1_048_576
+        do {
+            _ = try await vault.savePhoto(self.jpeg())
+            XCTFail("Expected insufficient-space refusal")
+        } catch {
+            XCTAssertEqual(error as? LocalStoreError, .insufficientSpace)
+        }
+        XCTAssertThrowsError(try vault.beginVideo(silent: true)) { error in
+            XCTAssertEqual(error as? LocalStoreError, .insufficientSpace)
+        }
+
+        XCTAssertEqual(try Data(contentsOf: originalURL), originalBytes)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: originalURL.path))
+        XCTAssertEqual(try store.moments(tripID: trip.id).count, originalMoments)
+        XCTAssertEqual(try store.allMediaAssets().count, originalAssets)
+        XCTAssertTrue(try store.pendingMediaIntents().isEmpty)
+    }
+
+    func testWarningRangeAllowsVideoIntentAndReportsWarning() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("camino-c04b-warning-\(UUID())", isDirectory: true)
+        let store = try CaminoLocalStore(storeURL: root.appendingPathComponent("metadata.sqlite"))
+        _ = try store.createTrip(name: "Synthetic")
+        let capacity = MutableCapacity(1_610_612_736)
+        let vault = try CaminoMediaVault(root: root, metadata: store,
+                                         capacityProvider: capacity)
+
+        let (_, pendingURL, warning) = try vault.beginVideo(silent: true)
+
+        XCTAssertTrue(warning)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: pendingURL.path))
+        XCTAssertEqual(try store.pendingMediaIntents().count, 1)
+    }
+
     func testTwoPhotosStaySeparateAndExplicitAttachmentInheritsPrivacy() async throws {
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent("camino-c04b-photos-\(UUID())", isDirectory: true)
@@ -148,5 +245,17 @@ import XCTest
             writer.finishWriting { continuation.resume() }
         }
         XCTAssertEqual(writer.status, .completed)
+    }
+}
+
+private final class MutableCapacity: CaminoStorageCapacityProviding {
+    var bytes: Int64
+
+    init(_ bytes: Int64) {
+        self.bytes = bytes
+    }
+
+    func availableBytes() throws -> Int64 {
+        bytes
     }
 }

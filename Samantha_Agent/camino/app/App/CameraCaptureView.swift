@@ -107,7 +107,7 @@ struct CameraCaptureView: View {
             }
         }
         .onReceive(Timer.publish(every: 5, on: .main, in: .common).autoconnect()) { _ in
-            if camera.phase == .recording && model.stopVideoForLowSpace() {
+            if camera.phase == .recording && model.stopVideoForSafety() {
                 camera.stopMovie(interrupted: true)
             }
         }

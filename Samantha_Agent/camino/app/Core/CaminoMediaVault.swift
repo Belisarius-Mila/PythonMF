@@ -4,6 +4,88 @@ import Darwin
 import Foundation
 import ImageIO
 
+public protocol CaminoStorageCapacityProviding {
+    func availableBytes() throws -> Int64
+}
+
+public enum CaminoStorageActivity: Equatable, Sendable {
+    case text
+    case photo
+    case audio
+    case video
+}
+
+public enum CaminoSafetyAction: Equatable, Sendable {
+    case allow
+    case warn
+    case block
+    case finish
+}
+
+/// Pure policy so thresholds can be exercised without filling a device.
+public struct CaminoStorageSafetyPolicy: Sendable {
+    public static let warningBytes: Int64 = 2_147_483_648
+    public static let operatingReserveBytes: Int64 = 536_870_912
+    public static let videoStartBytes: Int64 = 1_073_741_824
+
+    public init() {}
+
+    public func action(for activity: CaminoStorageActivity, availableBytes: Int64,
+                       active: Bool = false) -> CaminoSafetyAction {
+        if active && (activity == .audio || activity == .video) &&
+            availableBytes < Self.operatingReserveBytes {
+            return .finish
+        }
+        if !active {
+            switch activity {
+            case .video:
+                if availableBytes < Self.videoStartBytes { return .block }
+            case .photo, .audio:
+                if availableBytes < Self.operatingReserveBytes { return .block }
+            case .text:
+                break
+            }
+        }
+        return availableBytes < Self.warningBytes ? .warn : .allow
+    }
+}
+
+public enum CaminoThermalLevel: Equatable, Sendable {
+    case nominal
+    case fair
+    case serious
+    case critical
+}
+
+/// Thermal pressure never changes capture quality behind the user's back.
+public struct CaminoThermalSafetyPolicy: Sendable {
+    public init() {}
+
+    public func videoAction(for level: CaminoThermalLevel,
+                            active: Bool = false) -> CaminoSafetyAction {
+        switch level {
+        case .nominal, .fair:
+            return .allow
+        case .serious:
+            return .warn
+        case .critical:
+            return active ? .finish : .block
+        }
+    }
+}
+
+private struct CaminoVolumeCapacityProvider: CaminoStorageCapacityProviding {
+    let root: URL
+
+    func availableBytes() throws -> Int64 {
+        let values = try root.resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey])
+        guard let capacity = values.volumeAvailableCapacityForImportantUsage else {
+            throw LocalStoreError.insufficientSpace
+        }
+        return capacity
+    }
+}
+
 public struct LocalMediaRecovery: Equatable, Sendable {
     public let repairedCount: Int
     public let pendingCount: Int
@@ -17,10 +99,14 @@ public struct LocalMediaRecovery: Equatable, Sendable {
     private let root: URL
     private let metadata: CaminoLocalStore
     private let files = FileManager.default
+    private let capacity: any CaminoStorageCapacityProviding
+    private let storagePolicy = CaminoStorageSafetyPolicy()
 
-    public init(root: URL, metadata: CaminoLocalStore) throws {
+    public init(root: URL, metadata: CaminoLocalStore,
+                capacityProvider: (any CaminoStorageCapacityProviding)? = nil) throws {
         self.root = root.standardizedFileURL
         self.metadata = metadata
+        self.capacity = capacityProvider ?? CaminoVolumeCapacityProvider(root: root)
         for component in ["Media/Pending", "Media/Originals"] {
             let url = root.appendingPathComponent(component, isDirectory: true)
             try files.createDirectory(at: url, withIntermediateDirectories: true)
@@ -33,19 +119,19 @@ public struct LocalMediaRecovery: Equatable, Sendable {
     }
 
     public func availableBytes() throws -> Int64 {
-        let values = try root.resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey])
-        guard let capacity = values.volumeAvailableCapacityForImportantUsage else {
-            throw LocalStoreError.insufficientSpace
-        }
-        return capacity
+        try capacity.availableBytes()
+    }
+
+    public func storageAction(for activity: CaminoStorageActivity,
+                              active: Bool = false) throws -> CaminoSafetyAction {
+        storagePolicy.action(for: activity, availableBytes: try availableBytes(), active: active)
     }
 
     /// A working guard, not a promise of remaining video duration.
     public func checkSpace(for kind: LocalMediaKind) throws -> Bool {
-        let bytes = try availableBytes()
-        let minimum: Int64 = kind == .video ? 1_073_741_824 : 536_870_912
-        guard bytes >= minimum else { throw LocalStoreError.insufficientSpace }
-        return bytes < 2_147_483_648
+        let action = try storageAction(for: kind == .video ? .video : .photo)
+        guard action != .block else { throw LocalStoreError.insufficientSpace }
+        return action == .warn
     }
 
     @discardableResult public func savePhoto(_ data: Data, targetMomentID: UUID? = nil,

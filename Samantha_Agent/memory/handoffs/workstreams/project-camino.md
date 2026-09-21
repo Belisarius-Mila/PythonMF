@@ -1,7 +1,7 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno po bezpečné T060: 2026-09-21 22:12 CEST
+- Aktualizováno po C04b low-space/thermal hardeningu: 2026-09-21 22:36 CEST
 
 ### Hotovo
 - T043 PASS v rozsahu syntetického C02b: Letový režim přerušil upload při 0/13 serverových částech; po obnově sítě vznikl jediný objekt daného Assetu, 13/13 částí, 100 663 553 B a shodný SHA-256.
@@ -30,6 +30,7 @@
 - C04b T014 fyzicky PASS podle Mílova potvrzení: zámek telefonu, odchod z aplikace i přijatý krátký hovor ukončily rozběhnuté video bez samovolného pokračování. Zachované klipy byly přehratelné a pravdivě označené jako částečné; hovor se do videa nezaznamenal. Oprava kódu není potřeba.
 - C04b T009 fyzicky PASS podle Mílova potvrzení: odmítnutá kamera zobrazila vysvětlení a `Zpět`, zatímco `Komentář` i místní deník dál fungovaly. Oprava kódu není potřeba.
 - C04b T060 má bezpečnou fyzickou část PASS podle Mílova potvrzení: při běžném volném místě nebylo falešné varování, krátké video se normálně dokončilo a přehrálo a starší položky zůstaly zachované. Celý T060 zůstává částečný bez skutečného nízkého místa před/během audia, videa a textu.
+- Lokální C04b má injektovatelnou kapacitu a společnou fail-closed politiku: varování pod 2 GiB, blok nového videa pod 1 GiB, foto/audia pod 512 MiB, bezpečné dokončení běžícího audia/videa pod rezervou a pokus o krátkou značku bez automatického mazání. Tepelný stav videa při `serious` varuje a při `critical` blokuje nový Start nebo ukončí běžící klip bez skryté změny kvality. Swift 17/17, UI simulátoru 3/3, simulátorový a generic iOS build i plná projektová brána 1740/1740 PASS; starší originál zůstal v integračním testu byte-for-byte zachovaný.
 
 ### Otevřeno
 - Otevření buildu 4 ještě bez sítě po nuceném ukončení zůstalo neověřené; celý plán B není PASS. U T048 zůstává NEOVĚŘENO pouze captive portal. Plné T049 s novým skutečným videem čeká na integrovanou aplikaci; C02b ještě není produkční přenos.
@@ -41,10 +42,10 @@
 - V části B došlo k druhému stisku synchronizace během výpadku a k opětovnému otevření až s dostupnou sítí. Obnova bez dalšího stisku po otevření je doložená, ale stav UI při otevření bez sítě ne. Mílův chat používal mobilní spojení iPhonu, takže Letový režim přerušoval živé navádění. Journal ze staršího buildu zachovává staré obnovovací chování; video T050 dříve krátce ukázalo `Vyžaduje pozornost` před bezpečným retry bez zjištěné příčiny.
 - Lokální zámek se projeví na serveru až po přijetí revize; dříve vydané cizí kopie nelze odvolat. C08 musí hlídat aktuální oprávnění i u starých mediálních URL; referenční výběr C03a sám není provozní ochrana.
 - C03b nevystavuje síťovou službu, neověřuje skutečné zařízení ani bajty Assetu. C05 musí dodat privátní HTTPS, tokeny, párování, finalizaci médií a řešení konfliktů; C06b skutečnou zálohu a obnovu. Obnovovací porovnání je zatím jen pro Momenty. Databáze vyžaduje soukromou cestu a práva 0600.
-- Integrovaná aplikace je podepsaná a nainstalovaná; T008/T009/T011/T012/T013/T014 fyzicky prošly, T007 zůstává částečný a bezpečná část T060 je PASS. Plné T060 zůstává částečné bez skutečného nízkého místa. Kód má přímé prahy jen pro foto/video bez testovací injekce a prahových testů; audio/text nemají shodnou politiku doloženou a tepelný stav se nesleduje. Nový bundle ID nepřebírá prototypová audio data; místní úložiště není záloha na Macu.
+- Integrovaná aplikace je podepsaná a nainstalovaná; T008/T009/T011/T012/T013/T014 fyzicky prošly, T007 zůstává částečný a bezpečná část T060 je PASS. Nový hardening je zatím jen lokální a synteticky ověřený, nebyl na iPhone instalován. Plné T060 zůstává částečné bez skutečného nízkého místa; simulovaná kapacita ani teplota nejsou fyzická akceptace. Nový bundle ID nepřebírá prototypová audio data; místní úložiště není záloha na Macu.
 
 ### Další krok
-- Po Mílově souhlasu doplnit malý C04b hardening: injektovatelný zdroj volného místa, automatické prahové testy a fail-closed chování bez mazání pro foto/video i doložené chování audia a textu. Tepelnou politiku F14 řešit samostatně bez zahřívání hlavního telefonu. Fyzický low-space test ponechat postradatelnému zařízení nebo přirozenému stavu. Potom C04d a C05a. Captive portal T048 ověřit jen při skutečně dostupné síti; plné T049 čeká na produkční propojení.
+- Pokračovat C04d a potom C05a. Fyzický low-space test ponechat postradatelnému zařízení nebo přirozenému stavu; hlavní iPhone nezaplňovat ani nezahřívat. Instalace hardeningu na iPhone je samostatný potvrzený krok. Captive portal T048 ověřit jen při skutečně dostupné síti; plné T049 čeká na produkční propojení.
 
 ### Rozhodnutí
 - Serverová pravda a stav `verifying` mají přednost před lokálním byte progress. Dostupná povolená Wi-Fi může spustit automatickou synchronizaci; ruční tlačítko je provozní záloha. Souběžný impuls se koaleskuje, nezahazuje.
@@ -63,7 +64,7 @@
 - T049 je v syntetickém mobilním rozsahu hotové a bezpečně ukončené; plné T049 s novým skutečným videem zůstává otevřené.
 - Captive portal T048 doplnit pouze tehdy, až bude skutečně dostupný; neopakovat tři již doložené podscénáře bez nové pochybnosti.
 - C04/C05/C08 musí C03b integrovat, vynutit soukromí a fyzicky ověřit; T048 zůstává syntetickým terénním důkazem, ne produkční akceptací.
-- C04b čeká na rozhodnutí o bezpečně simulovatelném zbytku T060; C04d přidá detail a vědomou revizi Úvahy.
+- C04b bezpečně simulovatelný hardening T060/F14 je hotový; C04d přidá detail a vědomou revizi Úvahy.
 
 ### Technický stav checkpointu
 - Swift transfer core 19/19, T043 ovladač + oba receivery 28/28, T047/T043 workflow modul 11/11 a UI 1/1 PASS; podepsaný build 2, strict kontrola, instalace a launch PASS. Plná projektová brána 1716/1716 PASS.
@@ -1514,3 +1515,35 @@ Technický důkaz:
 - Přímé potvrzení Míly na fyzickém iPhonu a read-only kontrola
   `CaminoMediaVault.swift`, `CaminoViewModel.swift` a Swift testů. Bez změny
   aplikačního kódu, kopírování média, push a nasazení.
+
+### 2026-09-21 22:36 CEST — C04b low-space/thermal hardening
+
+Hotovo:
+- Kapacita úložiště je injektovatelná a společná politika pokrývá značku,
+  foto, audio i video. Varuje pod 2 GiB, blokuje nový video Start pod 1 GiB,
+  foto/audio pod 512 MiB a pod rezervou bezpečně dokončí běžící audio/video.
+- Tepelná politika videa při `serious` varuje a při `critical` blokuje
+  nový Start nebo bezpečně ukončí běžící klip. Kvalita se skrytě nemění.
+- Debug simulátor umí řízenou kapacitu a teplotu; produkční cesta dál používá
+  skutečný stav systému. Žádná větev automaticky nemaže originály.
+
+Rozhodnutí a rizika:
+- Automatizovaná bezpečnostní politika je PASS, ale nejde o fyzický PASS
+  nízkého místa ani tepelného stresu. Hardening nebyl instalován na iPhone;
+  celý T060 zůstává částečný.
+- Hlavní iPhone se uměle nezaplňuje ani nezahřívá. Skutečný low-space test až
+  na postradatelném zařízení nebo při přirozeném stavu.
+
+Další krok:
+- Pokračovat C04d a potom C05a. Případná instalace tohoto hardeningu na iPhone
+  je samostatný potvrzený krok.
+
+Navrhované další kroky:
+- C04d dokončí detail a vědomou revizi Úvahy; C05a připojí produkční API.
+
+Technický důkaz:
+- Swift 17/17, UI simulátoru 3/3, nepodepsaný simulátorový a generic iOS build
+  i plná projektová brána 1740/1740 PASS. UI při 400 MiB odmítlo velké
+  záznamy, uložilo značku přes restart a
+  při kritické teplotě odmítlo video; integrační test zachoval starší originál
+  byte-for-byte. Bez push, nasazení a instalace na telefon.

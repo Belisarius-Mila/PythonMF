@@ -869,3 +869,21 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   checkoutu, aby izolované testy nečetly jiný pracovní strom.
 - Ověření: 19 cílených testů, dvě plné brány, workflow nad přesným produkčním
   commitem a veřejný `app.js`/MP3 s HTTP 200 prošly.
+
+### LL-046 — Rizikový low-space scénář nejdřív odděl od skutečného měření
+
+- Problém: Prahy přímo svázané se skutečnou kapacitou dovolovaly ověřit
+  T060 jen zaplněním telefonu; audio, text a tepelný stav přitom neměly
+  stejnou řízenou a automaticky dokazatelnou politiku.
+- Typ: opakující se
+- Řešení nalezeno: 21092026
+- Řešení: Rozhodovací politiku drž jako čistou funkci nad injektovatelným
+  zdrojem. Produkce čte systémovou kapacitu a tepelný stav, pouze Debug
+  simulátor smí dodat řízenou hodnotu. Při neznámém stavu blokuj nový velký
+  záznam, aktivní bezpečně dokonči, krátký zápis nech rozhodnout skutečným
+  zápisem a nikdy automaticky nemaž originály.
+- Ověření: C04b Swift 17/17, UI simulátoru 3/3, nepodepsané buildy pro
+  simulátor i generic iOS a plná projektová brána 1740/1740 PASS. Integrační
+  test zachoval starší originál
+  byte-for-byte. Skutečný fyzický low-space a tepelný stres zůstávají
+  samostatnou akceptací.

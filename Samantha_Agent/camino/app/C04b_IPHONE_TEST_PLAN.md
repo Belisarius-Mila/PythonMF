@@ -65,3 +65,23 @@ jednotlivých ID, model/iOS, datum, zjištěná selhání a zda šlo o fyzický 
   dokončilo a přehrálo a dřívější položky zůstaly zachované. Skutečné
   nízké místo před/během audia, videa a textu zůstává NEOVĚŘENO; úložiště
   se na hlavním iPhonu uměle nezaplňovalo.
+
+## Bezpečně simulovaný hardening T060/F14 — 2026-09-21
+
+- Lokální C04b nyní používá jeden injektovatelný zdroj kapacity a společnou
+  politiku pro textovou značku, foto, audio a video. Pod 2 GiB pravdivě
+  varuje; pod 1 GiB nespustí video; pod 512 MiB nespustí foto ani audio a
+  rozběhnuté audio/video se bezpečně dokončí. Krátký textový záznam zůstává
+  dostupný, pokud projde skutečný zápis. Žádná větev nemaže starší originály.
+- Tepelná politika videa při `serious` varuje a při `critical` blokuje nový
+  Start nebo bezpečně ukončí rozběhnutý klip. Kvalita se skrytě nemění.
+- Automatický důkaz: Swift 17/17, simulátorové UI 3/3, nepodepsaný build pro
+  iOS simulátor i `generic/platform=iOS` a plná projektová brána 1740/1740
+  PASS. UI při simulovaných 400 MiB odmítlo audio/video/foto, uložilo krátkou
+  značku a zachovalo ji po restartu;
+  kritická teplota odmítla nový Start videa. Integrační test doložil, že
+  dříve uložený originál zůstal byte-for-byte zachovaný.
+- Toto je syntetický/automatizovaný PASS bezpečnostní politiky, nikoli fyzický
+  PASS nízkého místa nebo tepelného stresu. Hardening zatím nebyl nainstalován
+  na iPhone. Celý T060 zůstává částečný, dokud nebude skutečný low-space stav
+  ověřen na postradatelném zařízení nebo při přirozeně vzniklé situaci.

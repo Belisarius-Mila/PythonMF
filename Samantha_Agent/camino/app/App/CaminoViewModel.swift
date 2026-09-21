@@ -4,6 +4,13 @@ import Foundation
 import SwiftUI
 import UserNotifications
 
+#if DEBUG && targetEnvironment(simulator)
+private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
+    let bytes: Int64
+    func availableBytes() throws -> Int64 { bytes }
+}
+#endif
+
 @MainActor final class CaminoViewModel: ObservableObject {
     @Published private(set) var trips: [LocalTrip] = []
     @Published private(set) var activeTrip: LocalTrip?
@@ -39,6 +46,9 @@ import UserNotifications
     private var videoBackgroundTask: UIBackgroundTaskIdentifier = .invalid
     private var wasFinishing = false
     private var lastLinkedClipCount = -1
+    private let thermalPolicy = CaminoThermalSafetyPolicy()
+    private var thermalLevel: CaminoThermalLevel = .nominal
+    private var simulatedThermalLevel: CaminoThermalLevel?
 
     init() {
         do {
@@ -57,7 +67,17 @@ import UserNotifications
             let media = try RecordingStore(root: root.appendingPathComponent("Audio", isDirectory: true),
                                            inspect: AudioFileInspector.inspect)
             let recording = IntentRecordingStore(media: media, metadata: local)
-            let vault = try? CaminoMediaVault(root: root, metadata: local)
+            var capacityProvider: (any CaminoStorageCapacityProviding)?
+            #if DEBUG && targetEnvironment(simulator)
+            if let raw = ProcessInfo.processInfo.environment["CAMINO_TEST_AVAILABLE_BYTES"],
+               let bytes = Int64(raw), bytes >= 0 {
+                capacityProvider = CaminoSimulatedCapacityProvider(bytes: bytes)
+            }
+            simulatedThermalLevel = Self.parseSimulatedThermalLevel(
+                ProcessInfo.processInfo.environment["CAMINO_TEST_THERMAL_LEVEL"])
+            #endif
+            let vault = try? CaminoMediaVault(root: root, metadata: local,
+                                              capacityProvider: capacityProvider)
             let driver = IOSAudioDriver()
             let audio = AudioController(driver: driver, store: recording)
             self.local = local
@@ -83,6 +103,13 @@ import UserNotifications
             observe(AVAudioSession.mediaServicesWereResetNotification) { [weak audio] _ in
                 audio?.interrupt(reason: "Zvuková služba byla obnovena")
             }
+            observe(ProcessInfo.thermalStateDidChangeNotification) { [weak self] _ in
+                self?.thermalStateChanged()
+            }
+            thermalStateChanged()
+            Timer.publish(every: 5, on: .main, in: .common).autoconnect()
+                .sink { [weak self] _ in self?.monitorActiveAudioSafety() }
+                .store(in: &subscriptions)
             refresh()
             reconcileAudio()
             Task { await reconcileMedia() }
@@ -134,15 +161,21 @@ import UserNotifications
 
     func markMoment() {
         guard !audioBusy, !showCamera, let local else { return }
+        let warning = storageMessage(for: .text)
         do {
             _ = try local.markMoment()
-            message = "Okamžik označen. Uloženo v telefonu."
+            message = warning ?? "Okamžik označen. Uloženo v telefonu."
             refresh()
         } catch { message = error.localizedDescription }
     }
 
     func startAudio(_ kind: RecordingKind, targetMomentID: UUID? = nil) {
         guard !audioBusy, !showCamera, activeTrip != nil, let audio, !showAudio else { return }
+        let safety = storageAction(for: .audio)
+        guard safety != .block else {
+            message = blockedStorageMessage(for: .audio)
+            return
+        }
         let target = targetMomentID.flatMap { id in moments.first { $0.id == id } }
         guard targetMomentID == nil || (kind == .comment && target != nil) else {
             message = LocalStoreError.invalidAudioIntent.localizedDescription
@@ -153,7 +186,7 @@ import UserNotifications
         recording?.targetMomentID = targetMomentID
         selectedAudioKind = kind
         selectedAudioPrivacy = target?.privacy ?? (kind == .reflection ? .ownerOnly : newPrivacy)
-        message = nil
+        message = safety == .warn ? warningStorageMessage(for: .audio) : nil
         showAudio = true
         launchingAudio = true
         Task {
@@ -165,6 +198,12 @@ import UserNotifications
 
     func startAgainAfterPermission() {
         guard !audioBusy, let audio, showAudio else { return }
+        let safety = storageAction(for: .audio)
+        guard safety != .block else {
+            message = blockedStorageMessage(for: .audio)
+            return
+        }
+        if safety == .warn { message = warningStorageMessage(for: .audio) }
         launchingAudio = true
         Task {
             await audio.start(kind: selectedAudioKind)
@@ -222,6 +261,103 @@ import UserNotifications
             audio?.interruptionEnded()
         }
     }
+
+    private var thermalWarningMessage: String {
+        "Telefon hlásí vysokou teplotu. Kvalita videa se skrytě nemění; záznam včas ukonči."
+    }
+
+    private func storageAction(for activity: CaminoStorageActivity,
+                               active: Bool = false) -> CaminoSafetyAction {
+        guard let mediaVault else { return active ? .finish : .block }
+        do { return try mediaVault.storageAction(for: activity, active: active) }
+        catch {
+            if active { return .finish }
+            return activity == .text ? .warn : .block
+        }
+    }
+
+    private func warningStorageMessage(for activity: CaminoStorageActivity) -> String {
+        switch activity {
+        case .text:
+            "Volné místo je pod 2 GiB. Krátký zápis zkusím uložit; nic se nemaže."
+        case .photo:
+            "Volné místo je pod 2 GiB. Fotografie může selhat; nic se nemaže."
+        case .audio:
+            "Volné místo je pod 2 GiB. Audio včas ukonči; nic se nemaže."
+        case .video:
+            "Volné místo je pod 2 GiB. Video včas ukonči; nic se nemaže."
+        }
+    }
+
+    private func blockedStorageMessage(for activity: CaminoStorageActivity) -> String {
+        switch activity {
+        case .text:
+            "Místní zápis teď nelze bezpečně potvrdit. Nic se nemaže."
+        case .photo:
+            "Pro fotografii není dost bezpečného volného místa. Nic se nemaže."
+        case .audio:
+            "Pro audio není dost bezpečného volného místa. Nahrávání nezačalo a nic se nemaže."
+        case .video:
+            "Pro video není dost bezpečného volného místa. Nahrávání nezačalo a nic se nemaže."
+        }
+    }
+
+    private func storageMessage(for activity: CaminoStorageActivity) -> String? {
+        switch storageAction(for: activity) {
+        case .warn:
+            warningStorageMessage(for: activity)
+        case .block:
+            blockedStorageMessage(for: activity)
+        case .allow, .finish:
+            nil
+        }
+    }
+
+    private func monitorActiveAudioSafety() {
+        guard let audio, audio.phase == .recording || audio.phase == .preparing else { return }
+        let action = storageAction(for: .audio, active: true)
+        if action == .finish {
+            message = "Volné místo kleslo k bezpečnostní rezervě. Ukončuji audio; nic se nemaže."
+            Task { await audio.stop() }
+        } else if action == .warn {
+            message = warningStorageMessage(for: .audio)
+        }
+    }
+
+    private func thermalStateChanged() {
+        thermalLevel = simulatedThermalLevel ?? Self.thermalLevel(
+            from: ProcessInfo.processInfo.thermalState)
+        switch thermalPolicy.videoAction(for: thermalLevel) {
+        case .warn:
+            message = thermalWarningMessage
+        case .block:
+            message = "Telefon hlásí kritickou teplotu. Nové video nezačínej."
+        case .allow, .finish:
+            break
+        }
+    }
+
+    private static func thermalLevel(from state: ProcessInfo.ThermalState) -> CaminoThermalLevel {
+        switch state {
+        case .nominal: .nominal
+        case .fair: .fair
+        case .serious: .serious
+        case .critical: .critical
+        @unknown default: .critical
+        }
+    }
+
+    #if DEBUG && targetEnvironment(simulator)
+    private static func parseSimulatedThermalLevel(_ raw: String?) -> CaminoThermalLevel? {
+        switch raw?.lowercased() {
+        case "nominal": .nominal
+        case "fair": .fair
+        case "serious": .serious
+        case "critical": .critical
+        default: nil
+        }
+    }
+    #endif
 
     private func audioChanged() {
         guard let audio else { return }
@@ -315,6 +451,16 @@ import UserNotifications
             message = cameraError ?? "Kamera teď není dostupná."
             return
         }
+        let activity: CaminoStorageActivity = kind == .video ? .video : .photo
+        let storage = storageAction(for: activity)
+        guard storage != .block else {
+            message = blockedStorageMessage(for: activity)
+            return
+        }
+        if kind == .video && thermalPolicy.videoAction(for: thermalLevel) == .block {
+            message = "Telefon hlásí kritickou teplotu. Video nezačalo a kvalita se skrytě nemění."
+            return
+        }
         if let targetMomentID, !moments.contains(where: { $0.id == targetMomentID }) {
             message = LocalStoreError.momentMissing.localizedDescription
             return
@@ -322,7 +468,10 @@ import UserNotifications
         audio?.stopPlayback()
         selectedMediaKind = kind
         cameraTargetMomentID = targetMomentID
-        message = nil
+        message = storage == .warn ? warningStorageMessage(for: activity) : nil
+        if kind == .video && thermalPolicy.videoAction(for: thermalLevel) == .warn {
+            message = thermalWarningMessage
+        }
         showCamera = true
     }
 
@@ -361,6 +510,10 @@ import UserNotifications
             refresh()
             await reconcileMedia()
             return asset
+        } catch LocalStoreError.insufficientSpace {
+            message = blockedStorageMessage(for: .photo)
+            await reconcileMedia()
+            return nil
         } catch {
             message = "Fotografii nelze potvrdit jako uloženou. Dostupný soubor zůstal zachovaný."
             await reconcileMedia()
@@ -370,12 +523,21 @@ import UserNotifications
 
     func beginVideo(silent: Bool) -> URL? {
         guard let mediaVault, showCamera, activeVideoIntent == nil else { return nil }
+        let thermal = thermalPolicy.videoAction(for: thermalLevel)
+        guard thermal != .block else {
+            message = "Telefon hlásí kritickou teplotu. Video nezačalo a kvalita se skrytě nemění."
+            return nil
+        }
         do {
             let (intent, pendingURL, warning) = try mediaVault.beginVideo(
                 targetMomentID: cameraTargetMomentID, silent: silent)
             activeVideoIntent = intent
-            message = warning ? "Volné místo kleslo pod 2 GiB. Video včas ukonči." : nil
+            message = thermal == .warn ? thermalWarningMessage
+                : warning ? warningStorageMessage(for: .video) : nil
             return pendingURL
+        } catch LocalStoreError.insufficientSpace {
+            message = blockedStorageMessage(for: .video)
+            return nil
         } catch {
             message = error.localizedDescription
             return nil
@@ -410,16 +572,19 @@ import UserNotifications
         try? mediaVault?.originalURL(for: asset)
     }
 
-    func stopVideoForLowSpace() -> Bool {
-        guard let mediaVault else { return true }
-        guard let available = try? mediaVault.availableBytes(),
-              available >= 536_870_912 else {
+    func stopVideoForSafety() -> Bool {
+        let storage = storageAction(for: .video, active: true)
+        if storage == .finish {
             message = "Volné místo kleslo k bezpečnostní rezervě. Ukončuji video; nic se nemaže."
             return true
         }
-        if available < 2_147_483_648 {
-            message = "Volné místo je pod 2 GiB. Video včas ukonči."
+        let thermal = thermalPolicy.videoAction(for: thermalLevel, active: true)
+        if thermal == .finish {
+            message = "Telefon hlásí kritickou teplotu. Video bezpečně ukončuji; kvalita se skrytě nemění."
+            return true
         }
+        if thermal == .warn { message = thermalWarningMessage }
+        else if storage == .warn { message = warningStorageMessage(for: .video) }
         return false
     }
 
