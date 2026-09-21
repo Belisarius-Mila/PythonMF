@@ -53,3 +53,7 @@ jednotlivých ID, model/iOS, datum, zjištěná selhání a zda šlo o fyzický 
   viditelný štítek před Start, během záznamu i v detailu po restartu. Při
   odepřeném mikrofonu se běžné video samo nepřepnulo na tiché; výslovně tichý
   klip zůstal dostupný jen po vědomé volbě.
+- T014, větev zámku telefonu PASS podle Mílova potvrzení: rozběhnuté video se
+  po zámku ukončilo do přehratelného klipu a aplikace jej pravdivě označila
+  `Částečný záznam; konec může chybět`. Celý T014 zůstává částečný do
+  samostatného odchodu z aplikace a systémového přerušení.
