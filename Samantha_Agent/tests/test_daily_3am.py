@@ -518,6 +518,79 @@ class Daily3AmTests(unittest.TestCase):
                 ],
             )
 
+    def test_default_owl_speech_repeats_when_date_has_no_own_row(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo_root = Path(tmp)
+            project_dir = repo_root / "Samantha_Agent"
+            app_dir = repo_root / "ColorsAndNumbers" / "web_colors_numbers"
+            docs_dir = repo_root / "docs" / "colors-numbers"
+            project_dir.mkdir()
+            app_dir.mkdir(parents=True)
+            docs_dir.mkdir(parents=True)
+            for script_path in (app_dir / "app.js", docs_dir / "app.js"):
+                script_path.write_text(
+                    'const owlAudio = new Audio("old.mp3?v=1");\n',
+                    encoding="utf-8",
+                )
+            csv_path = project_dir / "OwlSpeech.csv"
+            csv_path.write_text(
+                "\n".join(
+                    [
+                        "date,part_a,part_b,part_c,full_text",
+                        'default,,,,"Repeated default"',
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            context = daily_3am.DailyContext(
+                project_dir=project_dir,
+                log_file=project_dir / "logs" / "daily_3am.log",
+                state_dir=project_dir / "data" / "daily_3am",
+                run_date="2026-09-21",
+                started_at=datetime.now(daily_3am.PRAGUE_TZ).isoformat(),
+                dry_run=False,
+                force=False,
+            )
+
+            result = daily_3am.run_colors_numbers_owl_task(
+                context,
+                speech_csv_path=csv_path,
+                audio_generator=lambda text, output, voice, rate: output.write_bytes(
+                    text.encode("utf-8")
+                ),
+            )
+
+            self.assertEqual(result["status"], "completed")
+            self.assertEqual((app_dir / "owl_210926.mp3").read_bytes(), b"Repeated default")
+            self.assertEqual(
+                (docs_dir / "owl_210926.mp3").read_bytes(), b"Repeated default"
+            )
+            self.assertIn(
+                'new Audio("owl_210926.mp3?v=20260921a")',
+                (docs_dir / "app.js").read_text(encoding="utf-8"),
+            )
+
+    def test_exact_owl_speech_overrides_default_row(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            csv_path = Path(tmp) / "OwlSpeech.csv"
+            csv_path.write_text(
+                "\n".join(
+                    [
+                        "date,part_a,part_b,part_c,full_text",
+                        'default,,,,"Repeated default"',
+                        '2026-09-21,,,,"Prepared for today"',
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            row = daily_3am.find_owl_speech_row(csv_path, "2026-09-21")
+
+            self.assertIsNotNone(row)
+            self.assertEqual(row["full_text"], "Prepared for today")
+
 
 if __name__ == "__main__":
     unittest.main()
