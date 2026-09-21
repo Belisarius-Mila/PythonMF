@@ -1,8 +1,12 @@
 # C02b — oddělené fyzické testy T048 a T049
 
-Stav 2026-09-19: T049 prošel v syntetickém mobilním rozsahu a je bezpečně
-ukončený; plný T049 se skutečným novým videem zůstává otevřený. T048 čeká na
-cizí Wi-Fi. Receiver i testovací Serve cesta jsou vypnuté. T048 a T049 mají
+Stav 2026-09-21: T049 prošel v syntetickém mobilním rozsahu a je bezpečně
+ukončený; plný T049 se skutečným novým videem zůstává otevřený. T048 na cizí
+Wi-Fi prošel v dostupném syntetickém rozsahu: běžný přenos, přerušení a návrat
+Wi-Fi i nedostupný a obnovený tailnet mají fyzický PASS. Přihlašovací portál
+zůstává NEOVĚŘENO, protože použitá síť jej neměla. T048 je registrovaně
+ukončený, receiver i testovací Serve cesta jsou vypnuté a Funnel zůstal
+vypnutý. T048 a T049 mají
 vlastní soukromý běhový stav, ale používají stejnou jedinou cestu
 `/camino-c02b`; nikdy nesmějí běžet současně. Každý start,
 zkopírování tokenu a stop prochází samostatně potvrzovaným registrovaným
