@@ -1,7 +1,7 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno po T048: 2026-09-21 20:46 CEST
+- Aktualizováno po T013: 2026-09-21 21:15 CEST
 
 ### Hotovo
 - T043 PASS v rozsahu syntetického C02b: Letový režim přerušil upload při 0/13 serverových částech; po obnově sítě vznikl jediný objekt daného Assetu, 13/13 částí, 100 663 553 B a shodný SHA-256.
@@ -26,6 +26,7 @@
 - C03a má čistý referenční model identit Trip/Day/Moment/Asset, metadatových a textových revizí, časové provenience a polohy. U15 vynucuje soukromý vznik Úvahy, explicitní revizi pro vložení do deníku a Viewer výběr jen z nejnovější serverem přijaté revize. Devět syntetických testů a plná brána 1728/1728 PASS.
 - C03b má verzované owner API v1 bez listeneru, striktní JSON/OpenAPI kontrakt a soukromou SQLite projekci s historií revizí, účtenkami, souvislým kurzorem, jediným deklarovaným zapisujícím zařízením, trvalými konflikty a blokováním výstupů. Obnova mění epochu a pouze porovná inventář Momentů. Syntetická kontraktní sada 12/12 PASS.
 - C04a přidalo samostatnou integrovanou iPhone aplikaci s offline Core Data Trip/Day/Moment, oddělenou Zkouškou, hlavní obrazovkou a dnešními Momenty. První běžný Moment je podle D02 `Do deníku`; změna volby trvá přes restart a neovlivní staré záznamy. Samostatná Úvaha vždy vzniká `Jen pro mě`. Přijaté C01c audio je použité bez úpravy prototypu; trvalý záměr je uložen před spuštěním mikrofonu a ověřená dokončená session se po restartu idempotentně naváže na Moment. Komentář umožní změnu soukromí během nahrávání pro celý Moment. Cílené Swift testy 8/8, UI simulátoru 1/1 a nepodepsaný iOS build PASS.
+- C04b T013 fyzicky PASS podle Mílova potvrzení: při odepřeném mikrofonu se běžné video samo nepřepnulo na tiché a výslovně zvolený tichý klip zůstal dostupný a správně označený. Výsledek odpovídá návrhu a nevyžaduje změnu kódu.
 
 ### Otevřeno
 - Otevření buildu 4 ještě bez sítě po nuceném ukončení zůstalo neověřené; celý plán B není PASS. U T048 zůstává NEOVĚŘENO pouze captive portal. Plné T049 s novým skutečným videem čeká na integrovanou aplikaci; C02b ještě není produkční přenos.
@@ -37,10 +38,10 @@
 - V části B došlo k druhému stisku synchronizace během výpadku a k opětovnému otevření až s dostupnou sítí. Obnova bez dalšího stisku po otevření je doložená, ale stav UI při otevření bez sítě ne. Mílův chat používal mobilní spojení iPhonu, takže Letový režim přerušoval živé navádění. Journal ze staršího buildu zachovává staré obnovovací chování; video T050 dříve krátce ukázalo `Vyžaduje pozornost` před bezpečným retry bez zjištěné příčiny.
 - Lokální zámek se projeví na serveru až po přijetí revize; dříve vydané cizí kopie nelze odvolat. C08 musí hlídat aktuální oprávnění i u starých mediálních URL; referenční výběr C03a sám není provozní ochrana.
 - C03b nevystavuje síťovou službu, neověřuje skutečné zařízení ani bajty Assetu. C05 musí dodat privátní HTTPS, tokeny, párování, finalizaci médií a řešení konfliktů; C06b skutečnou zálohu a obnovu. Obnovovací porovnání je zatím jen pro Momenty. Databáze vyžaduje soukromou cestu a práva 0600.
-- C04a má pouze nepodepsaný build a simulátorové ověření, ne fyzický mikrofon, zámek, přerušení či pád na iPhonu. Nový bundle ID nepřebírá prototypová audio data. Foto/video a ruční revize Momentu zůstávají C04b/C04d; místní úložiště není záloha na Macu.
+- Integrovaná aplikace je podepsaná a nainstalovaná; T008/T011/T012/T013 fyzicky prošly a T007 zůstává částečný. T014, T009 a bezpečná část T060 ještě čekají. Nový bundle ID nepřebírá prototypová audio data; místní úložiště není záloha na Macu.
 
 ### Další krok
-- Dokončit odepřený mikrofon v T013, potom T014, T009 a bezpečnou část T060; následně C04d a C05a. Captive portal T048 ověřit jen při skutečně dostupné síti; plné T049 se skutečným videem čeká na kameru integrované aplikace.
+- Provést T014: u krátkého rozběhnutého videa samostatně ověřit odchod z aplikace nebo zámek telefonu a pravdivý stav po návratu. Potom T009 a bezpečnou část T060; následně C04d a C05a. Captive portal T048 ověřit jen při skutečně dostupné síti; plné T049 čeká na produkční propojení.
 
 ### Rozhodnutí
 - Serverová pravda a stav `verifying` mají přednost před lokálním byte progress. Dostupná povolená Wi-Fi může spustit automatickou synchronizaci; ruční tlačítko je provozní záloha. Souběžný impuls se koaleskuje, nezahazuje.
@@ -59,7 +60,7 @@
 - T049 je v syntetickém mobilním rozsahu hotové a bezpečně ukončené; plné T049 s novým skutečným videem zůstává otevřené.
 - Captive portal T048 doplnit pouze tehdy, až bude skutečně dostupný; neopakovat tři již doložené podscénáře bez nové pochybnosti.
 - C04/C05/C08 musí C03b integrovat, vynutit soukromí a fyzicky ověřit; T048 zůstává syntetickým terénním důkazem, ne produkční akceptací.
-- C04b přidá foto/video, C04d detail a vědomou revizi Úvahy; fyzické audio testy nové aplikace po samostatné přípravě.
+- C04b pokračuje T014, T009 a bezpečnou částí T060; C04d přidá detail a vědomou revizi Úvahy.
 
 ### Technický stav checkpointu
 - Swift transfer core 19/19, T043 ovladač + oba receivery 28/28, T047/T043 workflow modul 11/11 a UI 1/1 PASS; podepsaný build 2, strict kontrola, instalace a launch PASS. Plná projektová brána 1716/1716 PASS.
@@ -71,7 +72,7 @@
 - P+n funkčního balíčku: GitHub 17 commitů pushnuto; plná brána 1719/1719. Soukromá kanonická účtenka nasazení `4a965ccb` potvrzuje změnu PID, shodu kódového otisku a smoke 5/5. Závěrečný stav dokumentačního checkpointu ověřit živě.
 - C03a: `tests.test_camino_domain` 9/9, `tests.test_cockpit_quality_gate` s C03a 27/27 a plná brána 1728/1728 PASS. Žádný iPhone build, push ani nasazení v tomto kroku.
 - C03b: 12/12 cílených syntetických testů, OpenAPI JSON a 21 komponent schématu validní, plná projektová brána 1740/1740 PASS. Žádný iPhone build, push ani nasazení v tomto kroku.
-- C04a: `swift test` 8/8, `CaminoUITests` 1/1 na izolovaném iPhone 14 Plus simulátoru, nepodepsaný generic iOS build exit 0 a plná projektová brána 1740/1740 PASS. Bez fyzické instalace, push a nasazení.
+- C04a checkpoint: `swift test` 8/8, `CaminoUITests` 1/1 na izolovaném iPhone 14 Plus simulátoru, nepodepsaný generic iOS build exit 0 a plná projektová brána 1740/1740 PASS. V tomto checkpointu ještě bez fyzické instalace; pozdější instalaci a fyzické výsledky dokládají navazující záznamy. Bez push a nasazení v tomto kroku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -1360,3 +1361,27 @@ Technický důkaz:
   vypnutý, 3/3 relace ověřené, 39/39 částí, 3 objekty, 3 účtenky,
   301 990 659 B a `verified_match=true`.
 - Kód se při fyzickém testu neměnil; automatické testy se neopakovaly.
+
+### 2026-09-21 21:15 CEST — C04b T013 fyzický PASS
+
+Hotovo:
+- Míla po dvouvětvém fyzickém postupu potvrdil T013 jako odpovídající
+  předpokladu: při odepřeném mikrofonu se běžné video samo nepřepnulo na tiché
+  a výslovně zvolený tichý klip zůstal dostupný a označený.
+
+Rozhodnutí:
+- T013 je fyzicky PASS. Pozorování odpovídá návrhu; oprava kódu není potřeba.
+- T048 se znovu neotevírá. Tři dostupné scénáře jsou hotové, captive portal
+  zůstává NEOVĚŘENO jen do přirozeně vhodné sítě.
+
+Další krok:
+- T014: během krátkého videa odejít z aplikace nebo zamknout telefon a po
+  návratu ověřit použitelný dokončený klip, nebo pravdivě částečný stav bez
+  tvrzení, že kamera stále nahrává.
+
+Navrhované další kroky:
+- Po T014 provést T009 a bezpečnou část T060; potom C04d a C05a.
+
+Technický důkaz:
+- Přímé potvrzení Míly na fyzickém iPhonu; bez kopírování média, změny kódu,
+  opakování automatických testů, push a nasazení.

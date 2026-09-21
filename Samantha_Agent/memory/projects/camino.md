@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-21 20:46 CEST
+Aktualizováno: 2026-09-21 21:15 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -48,7 +48,8 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 - Cílený fyzický průchod buildu 4: část A PASS, protože mobilní grant, návrat z Ovládacího centra ani obnova sítě nespustily novou dávku (telefon 0/13, server 0 relací). V části B vědomý start vytvořil jednu relaci, Letový režim zachoval mezistav 1/13 bez finálního objektu a po nuceném ukončení a otevření aplikace s dostupnou sítí přenos bez dalšího klepnutí doběhl. Telefon potvrdil `Ověřeno na Macu`; server jednu ověřenou relaci/objekt/účtenku, 13/13, 100 663 553 B a shodný SHA-256. Otevření aplikace ještě bez sítě neproběhlo, proto úplný PASS B netvrdíme. Míla zvolil neopakovat další mobilní dávku kvůli přerušení spojení s chatem v Letovém režimu a spotřebě dat. Potvrzený stop přesně obnovil původní Serve, vypnul vlastní cestu/receiver a zachoval důkaz; Funnel je vypnutý. Kód se při testu neměnil.
 - C03a je referenční doménový kontrakt v `camino/domain/` a `camino/docs/C03a_DOMAIN_CONTRACT.md`: stabilní offline ID Trip/Day/Moment/Asset, append-only metadata a textové revize, přesný čas s původním offsetem, nejistý import a volitelná poloha. Podle U15 vzniká samostatná Úvaha vždy `owner_only`, vložení do deníku vyžaduje vědomou prioritní revizi a kandidáty Vieweru vybírá jen poslední serverem přijatý stav; neznámý nebo konfliktní stav se zavře. Cílené syntetické testy 9/9 a plná brána 1728/1728 PASS. C03a není zatím iPhone/server/Viewer runtime a fyzické akceptační testy nejsou PASS.
 - C03b má lokální verzovaný JSON kontrakt `/api/v1/` a soukromé SQLite úložiště pro metadata, manifesty Assetů a append-only revize. Souvislé operace jediného deklarovaného zařízení dostávají trvalé účtenky; shodné bajty jsou idempotentní. Konfliktní kandidát se zachová bez přepisu a blokuje referenční Viewer výběr. Řízená obnova mění epochu a porovnává inventář Momentů bez automatického odblokování. Schéma OpenAPI, 12 syntetických kontraktních testů a plná projektová brána 1740/1740 prošly. Jde o referenční kontrakt bez síťového listeneru a produkční integrace.
-- C04a má první samostatnou iPhone aplikaci `camino/app/` s offline Core Data evidencí Trip/Day/Moment, oddělenou Zkouškou, hlavní obrazovkou, časovou značkou a dnešními Momenty. Výchozí režim běžných Momentů je podle D02 `diary`, volba trvá přes restart a nemění staré záznamy. Úvaha vzniká podle U15 vždy `owner_only`; soukromí Komentáře lze během nahrávání změnit pro celý Moment. Přijaté C01c audio jádro se používá přímo bez migrace jeho prototypových dat: trvalý audio záměr vzniká před mikrofonem, ověřené dokončené části se idempotentně navazují po restartu a neznámé soubory zůstávají zachované. Testy 8/8 Swift, 1/1 UI simulátoru a nepodepsaný iOS build prošly. Fyzický iPhone a produkční synchronizace zůstávají neověřené.
+- C04a má první samostatnou iPhone aplikaci `camino/app/` s offline Core Data evidencí Trip/Day/Moment, oddělenou Zkouškou, hlavní obrazovkou, časovou značkou a dnešními Momenty. Výchozí režim běžných Momentů je podle D02 `diary`, volba trvá přes restart a nemění staré záznamy. Úvaha vzniká podle U15 vždy `owner_only`; soukromí Komentáře lze během nahrávání změnit pro celý Moment. Přijaté C01c audio jádro se používá přímo bez migrace jeho prototypových dat: trvalý audio záměr vzniká před mikrofonem, ověřené dokončené části se idempotentně navazují po restartu a neznámé soubory zůstávají zachované. Testy 8/8 Swift, 1/1 UI simulátoru a nepodepsaný iOS build prošly. Následná fyzická instalace a průběžná C04b přejímka jsou popsané níže; produkční synchronizace zůstává neověřená.
+- C04b T013 fyzicky PASS podle Mílova potvrzení na integrované aplikaci: vědomě tichý klip má trvalý štítek a při odepřeném mikrofonu se běžné video samo nepřepnulo na tiché; tichý klip zůstal dostupný jen po výslovné volbě. Výsledek odpovídá návrhu a nevyžaduje změnu kódu.
 
 
 ## Zdroje a návaznost
@@ -85,13 +86,13 @@ kódu nevyvolává; FAIL se nejdřív doloží a opraví v aktuálním rozsahu.
 - T050 prošlo díky souběžnému důkazu telefonu a serveru v 14s okně; soukromé video obsahuje soukromou adresu, proto se necommitovalo. Oprava neočekávaného startu je na iPhonu fyzicky ověřená v části A; offline znovuotevření během části B zůstalo neověřené. Krátké `Vyžaduje pozornost` před dřívějším retry má neznámou příčinu.
 - Lokální zámek je v C04a uložený na telefonu, ale server jej vynutí až po přijetí revize; již vydanou cizí kopii neodvolá. C08 musí kontrolovat aktuální oprávnění při každém výdeji média. C04a zatím nemá synchronizaci C05 ani Viewer C08, takže U15 není ověřená provozní ochrana.
 - C03b bylo ověřeno jen na syntetických metadatech v referenční databázi mimo repozitář. C05 musí navázat skutečné ověření identity zařízení, odvolatelné tokeny, privátní HTTPS, přijetí a hashovou finalizaci médií a řízené řešení konfliktů; C06b skutečnou zálohu a obnovu. Porovnání po obnově zatím zahrnuje Momenty, ne celý inventář médií; T044/T045/T053/T058 ani fyzické chování telefonu nejsou plně PASS.
-- C04a nebylo podepsáno ani nainstalováno na fyzický iPhone. Simulátor nedokazuje mikrofon, zámek, přerušení, obnovu po pádu ani spotřebu. Foto/video patří do C04b, detail a vědomé vložení Úvahy do deníku do C04d; lokální databáze zatím nepředává revize do C03b API a není druhou zálohou.
+- Integrovaná aplikace je podepsaná a nainstalovaná; T008/T011/T012/T013 fyzicky prošly a T007 zůstává částečný. T014, T009 a bezpečná část T060 ještě čekají; detail a vědomé vložení Úvahy do deníku patří do C04d. Lokální databáze zatím nepředává revize do C03b API a není druhou zálohou.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
 - Instalace a launch nejsou fyzická přejímka přenosu; vývojový profil je časově omezený do 24. září 2026. U01–U15 se bez nového rozhodnutí neotevírají.
 
 ## Další krok
 
-Dokončit odepřený mikrofon v T013, potom T014, T009 a bezpečnou část T060; následně C04d a C05a. Captive portal T048 ověřit jen při skutečně dostupné síti a tři již doložené podscénáře bez nové pochybnosti neopakovat. Plné T049 s novým skutečným videem zůstává pro integrovanou kameru; T050 se bez nové pochybnosti neopakuje.
+Provést T014: u krátkého rozběhnutého videa samostatně ověřit odchod z aplikace nebo zámek telefonu a pravdivý stav po návratu. Potom T009 a bezpečnou část T060; následně C04d a C05a. Captive portal T048 ověřit jen při skutečně dostupné síti a tři již doložené podscénáře bez nové pochybnosti neopakovat. Plné T049 s novým skutečným videem zůstává pro produkční propojení; T050 se bez nové pochybnosti neopakuje.
 
 Historický doklad založení:
 Ověření založení: 56/56 testů integrace (54 + 2 profilové testy) a rychlá statická brána OK.
@@ -1166,3 +1167,25 @@ Technický důkaz:
 - Finální audit: T048 zastavený, receiver/cesta neaktivní, Funnel vypnutý,
   3/3 relace ověřené, 39/39 částí, 3 objekty, 3 účtenky, 301 990 659 B a
   shodný hash. Kód se při testu neměnil a automatické testy se neopakovaly.
+
+### 2026-09-21 21:15 CEST — C04b T013 fyzický PASS
+
+Hotovo:
+- Míla po dvouvětvém fyzickém postupu potvrdil T013 jako odpovídající
+  předpokladu: při odepřeném mikrofonu se běžné video samo nepřepnulo na tiché
+  a výslovně zvolený tichý klip zůstal dostupný a označený.
+
+Rozhodnutí:
+- T013 je fyzicky PASS. Pozorování odpovídá navrženému chování; oprava kódu
+  není potřeba.
+- T048 se znovu neotevírá: tři dostupné podscénáře jsou hotové, pouze captive
+  portal zůstává NEOVĚŘENO do přirozeně vhodné sítě.
+
+Další krok:
+- T014: během krátkého videa odejít z aplikace nebo zamknout telefon a po
+  návratu ověřit použitelný dokončený klip, nebo pravdivě částečný stav bez
+  tvrzení, že kamera stále nahrává.
+
+Technický důkaz:
+- Přímé potvrzení Míly na fyzickém iPhonu; bez kopírování média, změny kódu,
+  opakování automatických testů, push a nasazení.

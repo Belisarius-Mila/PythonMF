@@ -1,7 +1,7 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno po T048: 2026-09-21 20:46 CEST
+- Aktualizováno po T013: 2026-09-21 21:15 CEST
 
 ### Hotovo
 - T043 PASS v rozsahu syntetického C02b: Letový režim přerušil upload při 0/13 serverových částech; po obnově sítě vznikl jediný objekt daného Assetu, 13/13 částí, 100 663 553 B a shodný SHA-256.
@@ -23,19 +23,20 @@
 - C03a fixuje čistý doménový kontrakt identit, revizí, časové provenience a soukromí U15. Úvaha začíná `owner_only`, uvolnění vyžaduje vědomou prioritní revizi a Viewer filtr čte nejnovější serverem přijatý stav. Syntetické testy 9/9 a plná brána 1728/1728 PASS.
 - C03b fixuje lokální owner API v1 se striktním JSON/OpenAPI schématem. Soukromá SQLite databáze trvale ukládá metadata, manifesty, revize, přesné operace a účtenky; souvislý kurzor, shodný retry a jeden deklarovaný zapisovatel se vynucují. Konflikty se zachovají a blokují výstupy. Změna epochy po řízené obnově vyžaduje porovnání inventáře Momentů a sama nic neodblokuje. Syntetické kontraktní testy 12/12 PASS.
 - C04a: první samostatná iPhone aplikace má offline Trip/Day/Moment, hlavní obrazovku, Zkoušku, značku a dnešní Momenty. Běžný Moment začíná `diary` podle D02; trvalá volba nevrací staré záznamy. Úvaha vzniká `owner_only` podle U15. C01c audio se znovu používá bez migrace prototypu; před mikrofonem vzniká trvalý záměr, validované dokončené části se po restartu idempotentně navazují. Komentář umí změnit soukromí celého vznikajícího Momentu. Swift 8/8, UI simulátoru 1/1 a nepodepsaný iOS build PASS.
+- C04b T013 fyzicky PASS podle Mílova potvrzení: při odepřeném mikrofonu se běžné video samo nepřepnulo na tiché a výslovně zvolený tichý klip zůstal dostupný a správně označený. Oprava kódu není potřeba.
 
 ### Otevřeno
-- C04a je nyní lokální runtime iPhonu v nepodepsaném buildu, ale fyzické T001–T010/T015/T024–T026 a T096 nejsou PASS. Foto/video a detail čekají na C04b/C04d. C03b zůstává bez produkčního napojení; T044/T045/T053/T058 mají jen omezený či žádný kontraktní důkaz. U T048 zůstává NEOVĚŘENO captive portal a plné T049 čeká na skutečné video.
+- Integrovaná aplikace je podepsaná, nainstalovaná a fyzicky částečně přijatá: T008/T011/T012/T013 PASS, T007 částečný; T014, T009 a bezpečná část T060 čekají. C03b zůstává bez produkčního napojení; T044/T045/T053/T058 mají jen omezený či žádný kontraktní důkaz. U T048 zůstává NEOVĚŘENO captive portal a plné T049 čeká na produkční spojení.
 
 ### Rizika
 - Receiver je lokální standard-library experiment, ne produkční FastAPI, databáze, trvalá služba ani záloha. T048 dokládá tři dostupné syntetické síťové scénáře, ne captive portal ani produkční přenos skutečných médií.
 - Harness nemá kameru; plné kritérium nového skutečného videa se musí ověřit až v integrované aplikaci. Úplné znění fyzického potvrzovacího dialogu nebylo opsáno a serverový počet bajtů není měření spotřeby operátora.
 - Build 4 má fyzické potvrzení jen části A a popsaného znovuotevření s dostupnou sítí. Starší journal zachovává své obnovovací chování; krátké `Vyžaduje pozornost` před bezpečným retry v T050 nemá určenou příčinu. Lokální zámek neodvolá již zkopírovaný cizí obsah; serverový Viewer musí při každém vydání znovu zkontrolovat aktuální oprávnění.
 - C03b nemá listener ani vazbu přihlášení na skutečné zařízení. C05 musí dodat privátní HTTPS, odvolatelné tokeny, párování, ověření bajtů Assetu a řešení konfliktů; C06b skutečnou zálohu a obnovu. Referenční porovnání po změně epochy zahrnuje jen Momenty.
-- C04a nebylo podepsáno ani nainstalováno na iPhone; simulátor neprokazuje mikrofon, zámek, přerušení, pád ani spotřebu. Místní databáze není druhá záloha a zatím neodesílá revize C03b. Nový bundle ID nevkládá data z C01c/C02b.
+- Integrovaná aplikace je podepsaná a nainstalovaná; T008/T011/T012/T013 fyzicky prošly a T007 zůstává částečný. T014, T009 a bezpečná část T060 ještě čekají. Místní databáze není druhá záloha a zatím neodesílá revize C03b; nový bundle ID nevkládá data z C01c/C02b.
 
 ### Další krok
-- Dokončit odepřený mikrofon v T013, potom T014, T009 a bezpečnou část T060; následně C04d a C05a. Captive portal T048 ověřit jen při skutečně dostupné síti.
+- Provést T014: u krátkého rozběhnutého videa samostatně ověřit odchod z aplikace nebo zámek telefonu a pravdivý stav po návratu. Potom T009 a bezpečnou část T060; následně C04d a C05a. Captive portal T048 ověřit jen při skutečně dostupné síti.
 
 ### Rozhodnutí
 - Serverová pravda a stav `verifying` mají přednost před lokálním byte progress. Dostupná povolená Wi-Fi může spustit automatickou synchronizaci; ruční tlačítko je provozní záloha. Souběžný impuls se koaleskuje, nezahazuje.
@@ -64,7 +65,7 @@
 - P+n funkčního balíčku: plná publikační brána 1719/1719, GitHub 17 commitů, kanonická soukromá účtenka nasazení `4a965ccb` s novým PID, shodným otiskem a smoke 5/5. Závěrečný stav po dokumentačním checkpointu se ověřuje živě.
 - C03a: 9/9 syntetických testů a plná brána 1728/1728 PASS; v tomto kroku se nic na telefonu neinstalovalo, nepushovalo ani nenasazovalo.
 - C03b: 12/12 syntetických testů, validní OpenAPI JSON a 21 komponent schématu, plná projektová brána 1740/1740 PASS. Žádná instalace, push ani nasazení.
-- C04a: 8/8 Swift testů, 1/1 izolovaný simulátorový UI test, nepodepsaný generic iOS build exit 0 a plná projektová brána 1740/1740 PASS. Fyzická přejímka NEPROVEDENA.
+- C04a checkpoint: 8/8 Swift testů, 1/1 izolovaný simulátorový UI test, nepodepsaný generic iOS build exit 0 a plná projektová brána 1740/1740 PASS. Tehdejší fyzická přejímka byla NEPROVEDENA; pozdější instalaci a výsledky T008/T011/T012/T013 dokládají navazující záznamy.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -103,8 +104,8 @@ je vyloučeno; celé `Do deníku` je po synchronizaci Viewer-eligible.
 - T048 prošel v dostupném syntetickém rozsahu běžné cizí Wi-Fi, přerušení a návratu sítě a nedostupného/obnoveného tailnetu. Captive portal zůstává NEOVĚŘENO. Po registrovaném stopu je receiver i cesta vypnutá, původní Serve obnovený a Funnel vypnutý.
 
 
-C04a/C04b mají lokální implementaci a pokračují dokončením T013, potom T014,
-T009 a bezpečnou částí T060; C05a připojí produkční API a ověřená média.
+C04a/C04b mají lokální implementaci a pokračují T014, potom T009 a bezpečnou
+částí T060; C05a připojí produkční API a ověřená média.
 Captive portal T048 ověřit jen při skutečně dostupné síti. C01c ani C02a dále
 nerozšiřovat bez nového důvodu.
 
@@ -1434,3 +1435,27 @@ Technický důkaz:
 - Finální audit: T048 zastavený, receiver/cesta neaktivní, Funnel vypnutý,
   3/3 relace ověřené, 39/39 částí, 3 objekty, 3 účtenky, 301 990 659 B a
   shodný hash. Kód se neměnil; automatické testy se neopakovaly.
+
+### 2026-09-21 21:15 CEST — C04b T013 fyzický PASS
+
+Hotovo:
+- Míla po dvouvětvém fyzickém postupu potvrdil T013 jako odpovídající
+  předpokladu: při odepřeném mikrofonu se běžné video samo nepřepnulo na tiché
+  a výslovně zvolený tichý klip zůstal dostupný a označený.
+
+Rozhodnutí:
+- T013 je fyzicky PASS a nevyžaduje opravu kódu.
+- T048 se znovu neotevírá; jeho tři dostupné podscénáře jsou hotové a captive
+  portal zůstává NEOVĚŘENO do přirozeně vhodné sítě.
+
+Další krok:
+- T014: během krátkého videa odejít z aplikace nebo zamknout telefon a po
+  návratu ověřit použitelný dokončený klip, nebo pravdivě částečný stav bez
+  tvrzení, že kamera stále nahrává.
+
+Navrhované další kroky:
+- Po T014 provést T009 a bezpečnou část T060; potom C04d a C05a.
+
+Technický důkaz:
+- Přímé potvrzení Míly na fyzickém iPhonu; bez kopírování média, změny kódu,
+  opakování automatických testů, push a nasazení.

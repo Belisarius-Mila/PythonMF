@@ -32,7 +32,7 @@ T010 (textové revize) patří k C04d. Automatické přenesení skutečného vid
 a úplné T049 patří až k produkčnímu propojení C05a. Po testu zapiš výsledky
 jednotlivých ID, model/iOS, datum, zjištěná selhání a zda šlo o fyzický iPhone.
 
-## Průběžný fyzický výsledek 2026-09-20
+## Průběžný fyzický výsledek 2026-09-21
 
 - T007, úspěšný zápis a restart: Míla potvrdil hlášku o uložení a fotografii
   v detailu po úplném zavření a opětovném otevření aplikace. Na Macu byl po
@@ -49,6 +49,7 @@ jednotlivých ID, model/iOS, datum, zjištěná selhání a zda šlo o fyzický 
 - T012, fyzický PASS podle Mílova potvrzení: krátké klipy na výšku i na šířku
   se po úplném zavření a opětovném otevření přehrávají se správnou orientací
   a bez chybného ořezu.
-- T013, průběžně: Míla potvrdil vědomě zvolené video bez zvuku a viditelný
-  štítek před Start, během záznamu a v detailu po restartu. Chování běžného
-  videa při odepřeném mikrofonu dosud není fyzicky potvrzené.
+- T013, fyzický PASS podle Mílova potvrzení: vědomě zvolené video bez zvuku má
+  viditelný štítek před Start, během záznamu i v detailu po restartu. Při
+  odepřeném mikrofonu se běžné video samo nepřepnulo na tiché; výslovně tichý
+  klip zůstal dostupný jen po vědomé volbě.
