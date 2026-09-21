@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-21 22:04 CEST
+Aktualizováno: 2026-09-21 22:12 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -52,6 +52,7 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 - C04b T013 fyzicky PASS podle Mílova potvrzení na integrované aplikaci: vědomě tichý klip má trvalý štítek a při odepřeném mikrofonu se běžné video samo nepřepnulo na tiché; tichý klip zůstal dostupný jen po výslovné volbě. Výsledek odpovídá návrhu a nevyžaduje změnu kódu.
 - C04b T014 fyzicky PASS podle Mílova potvrzení: zámek telefonu, odchod z aplikace i přijatý krátký hovor ukončily rozběhnuté video bez samovolného pokračování. Zachované klipy byly přehratelné a pravdivě označené jako částečné; hovor se do videa nezaznamenal. Oprava kódu není potřeba.
 - C04b T009 fyzicky PASS podle Mílova potvrzení: odmítnutá kamera zobrazila vysvětlení a `Zpět`, zatímco `Komentář` i místní deník dál fungovaly. Oprava kódu není potřeba.
+- C04b T060 má bezpečnou fyzickou část PASS podle Mílova potvrzení: při běžném volném místě nebylo falešné varování, krátké video se normálně dokončilo a přehrálo a starší položky zůstaly zachované. Celý T060 zůstává částečný: skutečné nízké místo před/během audia, videa a textu nebylo na hlavním iPhonu vyvoláno.
 
 
 ## Zdroje a návaznost
@@ -88,13 +89,13 @@ kódu nevyvolává; FAIL se nejdřív doloží a opraví v aktuálním rozsahu.
 - T050 prošlo díky souběžnému důkazu telefonu a serveru v 14s okně; soukromé video obsahuje soukromou adresu, proto se necommitovalo. Oprava neočekávaného startu je na iPhonu fyzicky ověřená v části A; offline znovuotevření během části B zůstalo neověřené. Krátké `Vyžaduje pozornost` před dřívějším retry má neznámou příčinu.
 - Lokální zámek je v C04a uložený na telefonu, ale server jej vynutí až po přijetí revize; již vydanou cizí kopii neodvolá. C08 musí kontrolovat aktuální oprávnění při každém výdeji média. C04a zatím nemá synchronizaci C05 ani Viewer C08, takže U15 není ověřená provozní ochrana.
 - C03b bylo ověřeno jen na syntetických metadatech v referenční databázi mimo repozitář. C05 musí navázat skutečné ověření identity zařízení, odvolatelné tokeny, privátní HTTPS, přijetí a hashovou finalizaci médií a řízené řešení konfliktů; C06b skutečnou zálohu a obnovu. Porovnání po obnově zatím zahrnuje Momenty, ne celý inventář médií; T044/T045/T053/T058 ani fyzické chování telefonu nejsou plně PASS.
-- Integrovaná aplikace je podepsaná a nainstalovaná; T008/T009/T011/T012/T013/T014 fyzicky prošly a T007 zůstává částečný. Bezpečná část T060 ještě čeká; vynucené zaplnění úložiště a tepelný stres zůstávají neověřené. Detail a vědomé vložení Úvahy do deníku patří do C04d. Lokální databáze zatím nepředává revize do C03b API a není druhou zálohou.
+- Integrovaná aplikace je podepsaná a nainstalovaná; T008/T009/T011/T012/T013/T014 fyzicky prošly, T007 zůstává částečný a bezpečná část T060 je PASS. Plné T060 zůstává částečné bez skutečného nízkého místa. Read-only audit našel prahovou ochranu pouze u foto/videa, přímé čtení kapacity bez injektovatelného testovacího zdroje, žádné odpovídající prahové testy a žádné sledování tepelného stavu; audio a text nemají shodnou řízenou politiku doloženou. Detail a vědomé vložení Úvahy do deníku patří do C04d. Lokální databáze zatím nepředává revize do C03b API a není druhou zálohou.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
 - Instalace a launch nejsou fyzická přejímka přenosu; vývojový profil je časově omezený do 24. září 2026. U01–U15 se bez nového rozhodnutí neotevírají.
 
 ## Další krok
 
-Provést pouze bezpečnou část T060: vrátit Caminu oprávnění ke kameře, bez zaplňování úložiště a bez zahřívání telefonu pořídit a normálně ukončit krátké video a ověřit, že se při běžném volném místě neukazuje falešné varování, klip je přehratelný a nic se nemaže. Pravdivou hlášku o přerušení již dokládá T014. Plné T060 zůstane částečné bez nízkého místa a tepelného stresu. Potom následují C04d a C05a. Captive portal T048 ověřit jen při skutečně dostupné síti a tři již doložené podscénáře bez nové pochybnosti neopakovat. Plné T049 s novým skutečným videem zůstává pro produkční propojení; T050 se bez nové pochybnosti neopakuje.
+Po Mílově souhlasu dokončit nejmenší bezpečný C04b hardening místo zaplňování hlavního iPhonu: oddělit politiku volného místa od skutečného měření, injektovat testovací kapacitu a automaticky doložit prahy, včasné ukončení a nulové mazání pro foto/video i chování audia a textu. Tepelnou politiku F14 řešit samostatně bez fyzického přehřívání. Skutečný fyzický low-space PASS přiznat až na postradatelném testovacím zařízení nebo při přirozeně vzniklém stavu. Potom následují C04d a C05a. Captive portal T048 ověřit jen při skutečně dostupné síti a tři již doložené podscénáře bez nové pochybnosti neopakovat. Plné T049 s novým skutečným videem zůstává pro produkční propojení; T050 se bez nové pochybnosti neopakuje.
 
 Historický doklad založení:
 Ověření založení: 56/56 testů integrace (54 + 2 profilové testy) a rychlá statická brána OK.
@@ -1274,3 +1275,29 @@ Další krok:
 Technický důkaz:
 - Přímé potvrzení Míly na fyzickém iPhonu; bez kopírování média,
   změny kódu, opakování automatických testů, push a nasazení.
+
+### 2026-09-21 22:12 CEST — C04b T060 bezpečná část PASS
+
+Hotovo:
+- Míla při běžném volném místě dokončil bezpečný fyzický průchod:
+  bez falešného varování, s normálně dokončeným a přehratelným krátkým
+  videem a se zachovanými staršími položkami. Pravdivé přerušení dokládá
+  dřívější T014.
+
+Rozhodnutí a rizika:
+- Bezpečná část T060 je fyzicky PASS. Celý T060 zůstává částečný,
+  protože skutečné nízké místo před/během audia, videa a textu nebylo
+  vyvoláno.
+- Read-only audit kódu našel přímé prahy u foto/videa, ale bez
+  injektovatelné kapacity a prahových automatických testů. Audio/text nemají
+  shodnou politiku doloženou a tepelný stav se nesleduje.
+
+Další krok:
+- Po Mílově souhlasu doplnit malý bezpečně simulovatelný C04b hardening.
+  Hlavní iPhone uměle nezaplňovat ani nezahřívat; skutečný fyzický low-space
+  test ponechat postradatelnému zařízení nebo přirozenému stavu.
+
+Technický důkaz:
+- Přímé potvrzení Míly na fyzickém iPhonu a read-only kontrola
+  `CaminoMediaVault.swift`, `CaminoViewModel.swift` a Swift testů. Bez změny
+  aplikačního kódu, kopírování média, push a nasazení.

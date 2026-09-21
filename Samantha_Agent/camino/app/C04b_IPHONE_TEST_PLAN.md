@@ -60,3 +60,8 @@ jednotlivých ID, model/iOS, datum, zjištěná selhání a zda šlo o fyzický 
   i přijatý krátký hovor ukončily rozběhnuté video bez samovolného pokračování.
   Zachované klipy byly přehratelné a pravdivě označené jako částečné; hovor se
   do videa nezaznamenal.
+- T060, bezpečná fyzická část PASS podle Mílova potvrzení: při běžném
+  volném místě nevzniklo falešné varování, krátké video se normálně
+  dokončilo a přehrálo a dřívější položky zůstaly zachované. Skutečné
+  nízké místo před/během audia, videa a textu zůstává NEOVĚŘENO; úložiště
+  se na hlavním iPhonu uměle nezaplňovalo.
