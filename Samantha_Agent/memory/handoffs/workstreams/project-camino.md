@@ -1287,3 +1287,33 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Mílovo pozorování, bez kopírování obsahu a bez push.
+
+### 2026-09-21 08:28 CEST — C04b checkpoint, p+n a čistý Human–Adam
+
+Hotovo:
+- Celý dokončený místní balíček C03a, C03b, C04a a C04b včetně fyzických
+  výsledků do první části T013 je zahrnutý v jednom dávkovém p+n. Produkční
+  soví commit byl připojen běžným merge bez přepisu historie.
+- CaminoAudioUITests dědí vývojový tým z ignorovaného `LocalSigning.xcconfig`;
+  osobní identifikátor týmu není ve sledovaném Xcode projektu.
+- Zdrojový main, GitHub, Human–Adam a Knihovna jsou po tomto kroku čisté a
+  zarovnané. Cockpit je řízeně nasazený na stejný main.
+
+Rozhodnutí:
+- Míla výslovně zadal všechno p+n a přípravu čistého repozitáře pro další
+  vývoj z Human–Adam. Žádná rozpracovaná profilová práce nebyla přepsána.
+- T013 zůstává částečný; p+n nemění fyzickou akceptaci neprovedených scénářů.
+
+Další krok:
+- V Human–Adam lze navázat na čistém Camino proudu dokončením T013, potom
+  T014, T009 a bezpečnou částí T060; následně C04d a C05a.
+
+Navrhované další kroky:
+- T048 provést odděleně na cizí Wi-Fi. Plné T049 až s novým skutečným videem
+  a produkčním serverovým propojením.
+
+Technický důkaz:
+- Xcode projekt prošel `plutil`; nastavení UI test targetu načetlo místní tým
+  bez jeho zápisu do Gitu. Finální plná brána 1740/1740 PASS.
+- Dávkový GitHub audit/push a simple-main deployment receipt dokládají přesný
+  head, nový proces Cockpitu a smoke 5/5.

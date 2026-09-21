@@ -1103,3 +1103,35 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Mílovo pozorování na fyzickém iPhonu; bez kopie média a bez push.
+
+### 2026-09-21 08:28 CEST — Dávkové p+n a čistý návratový bod
+
+Hotovo:
+- Všechny dokončené místní Camino commity od C03a přes C04b a zaznamenané
+  fyzické výsledky do první části T013 byly připraveny a odeslány jako jeden
+  kontrolovaný GitHub balíček. Ekvivalentní produkční soví změna byla zachována
+  běžným merge; historie se nerebasovala ani nepřepisovala.
+- Poslední ruční volba týmu v CaminoAudioUITests byla převedena na dědění
+  ignorovaného `LocalSigning.xcconfig`. Lokální tým zůstává funkční, ale jeho
+  identifikátor není ve sledovaném Xcode projektu.
+- Human–Adam i Knihovna byly před synchronizací ověřené jako čisté, bez remote,
+  na `main`, bez aktivního tahu a bez nejistého doručení. Po p+n jsou oba
+  profily i zdrojový main zarovnané a Cockpit je řízeně nasazený na stejný head.
+
+Rozhodnutí:
+- Mílův pokyn „vše p+n, vyčistit repo pro možnost vývoje z Human-Adam“ zahrnul
+  dávkový push, bezpečný fast-forward obou profilů a simple-main nasazení.
+  Neznamenal mazání pracovních dat ani přepsání historie.
+- Fyzická akceptace se nemění: T008, T011 a T012 jsou PASS; T007 a T013 jsou
+  částečné. T009, T014, T060, T048 a plné T049 zůstávají otevřené.
+
+Další krok:
+- Z čistého Camino proudu v Human–Adam dokončit odepřený mikrofon v T013,
+  potom T014, T009 a bezpečnou část T060. Následně C04d a C05a.
+
+Technický důkaz:
+- `plutil` ověřil projekt; `xcodebuild -showBuildSettings` pro UI test target
+  potvrdil načtenou místní podpisovou hodnotu bez jejího výpisu. Plná projektová
+  brána 1740/1740 PASS.
+- GitHub batch receipt a simple-main deployment receipt jsou autoritou pro
+  finální head, nový PID, kódový otisk a Cockpit smoke 5/5.

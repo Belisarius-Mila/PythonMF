@@ -1374,3 +1374,27 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Uživatelské pozorování na fyzickém iPhonu; bez kopie média či push.
+
+### 2026-09-21 08:28 CEST — Camino p+n a předání Human–Adam
+
+Hotovo:
+- Dokončené C03a/C03b/C04a/C04b změny a fyzické výsledky do částečného T013
+  jsou v dávkovém p+n. Soví produkční commit byl sloučen bez přepisu historie.
+- UI testy staršího audio prototypu používají ignorovanou místní podpisovou
+  konfiguraci; osobní tým není ve sledovaném projektu.
+- Main, GitHub a oba profilové workspaces jsou čisté a zarovnané; Cockpit běží
+  z téhož main.
+
+Rozhodnutí:
+- Míla autorizoval všechno p+n a čistý návratový bod pro Human–Adam. T013 je
+  nadále jen částečný a neprovedené fyzické testy se nepovyšují na PASS.
+
+Další krok:
+- Dokončit T013, potom T014, T009 a bezpečnou část T060; následně C04d/C05a.
+
+Navrhované další kroky:
+- T048 na cizí Wi-Fi; plné T049 až s reálným videem a produkčním serverem.
+
+Technický důkaz:
+- Plná brána 1740/1740 PASS; GitHub batch a simple-main deployment receipt
+  potvrzují přesný head, nový proces a smoke 5/5.
