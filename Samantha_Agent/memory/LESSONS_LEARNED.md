@@ -856,3 +856,16 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   příkazovým buildem tento průchod neurčil.
 - Ověření: C04b potom získalo přesný profil, `codesign --verify` prošel a
   nové Camino 0.1.0 (1) se nainstalovalo a spustilo na iPhonu 14 Plus.
+
+### LL-045 — Den bez sovího řádku nesmí znovu nasadit starý zdrojový zvuk
+
+- Problém: Pages workflow v den bez přesného CSV řádku nevytvořilo nové audio
+  a znovu nahrálo zdrojový `app.js`, který ukazoval na historickou MP3.
+- Typ: opakující se
+- Řešení nalezeno: 21092026
+- Řešení: V `OwlSpeech.csv` drž jeden řádek `default`. Přesné datum má
+  přednost; bez něj generátor vytvoří z výchozí promluvy novou denní MP3 a
+  přepne denní cache adresu. Výchozí cesty CSV/configu odvozuj z aktivního
+  checkoutu, aby izolované testy nečetly jiný pracovní strom.
+- Ověření: 19 cílených testů, dvě plné brány, workflow nad přesným produkčním
+  commitem a veřejný `app.js`/MP3 s HTTP 200 prošly.

@@ -1,5 +1,26 @@
 # Obecna rutina pro automaticke opakujici se ukoly
 
+## 2026-09-21 – Výchozí promluva zveřejněná
+
+- Příčina návratu starého příběhu byla potvrzená na veřejném webu: při dni bez
+  vlastního CSV řádku workflow pouze znovu nasadilo zdrojový `app.js`, který
+  stále odkazoval na staré červencové audio.
+- `OwlSpeech.csv` má nyní jeden řádek `default` s přesně dodaným textem; text se
+  v paměti záměrně neopakuje. Přesný řádek pro konkrétní datum má vždy přednost.
+- Každý den bez vlastní položky generátor vytvoří denní `owl_DDMMYY.mp3` z
+  výchozí promluvy, takže už nedochází k návratu na historický zdroj.
+- Lokální náhled pro 2026-09-21 má 78 624 B a 13,104 s. Cílené testy 19/19,
+  lokální plná brána 1740/1740 a čistá produkční brána 1719/1719 prošly.
+- Lokální commit je `f71bc5d4`; produkční izolovaný commit `b16cae26` obsahuje
+  pouze CSV, generátor, dokumentaci a testy. Push byl fast-forward bez Camina.
+- Pages workflow `35567028291` nad `b16cae26` uspělo; deploy job
+  `106230984887` skončil úspěšně. Veřejný `app.js` vybírá
+  `owl_210926.mp3?v=20260921a`; MP3 vrací HTTP 200, `audio/mp3`, 78 624 B a
+  délku 13,104 s.
+
+Další krok: bez zásahu. Nový přesný denní řádek automaticky přebije výchozí
+promluvu; ruční poslech v prohlížeči nebyl součástí technického ověření.
+
 ## 2026-09-19 – Dnešní promluva zveřejněná
 
 - Na Mílův pokyn přidán jediný řádek pro 2026-09-19 do `OwlSpeech.csv`.

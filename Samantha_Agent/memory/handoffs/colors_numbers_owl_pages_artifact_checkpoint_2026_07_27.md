@@ -1,46 +1,50 @@
-Nazev: ColorsAndNumbers sova - aktuální publikace 2026-09-19
+Nazev: ColorsAndNumbers sova - výchozí publikace 2026-09-21
 Priorita: 1
 Stav: hotovo
 Pripomenout pri startu: ne
-Datum: 2026-09-19
+Datum: 2026-09-21
 
 Co se resilo:
-- Nová denní promluva podle přesně dodaného textu Míly.
+- Nová výchozí promluva pro každý den bez vlastní připravené položky a oprava
+  návratu starého červencového audia.
 
 Co je hotove:
-- Jediný CSV řádek pro 2026-09-19, lokální MP3 náhled a veřejná publikace.
-- Dodaný text je zachovaný znak po znaku, bez stylistické opravy; v handoffu se
-  záměrně neopakuje.
-- 17 cílených testů denní rutiny prošlo; lokální preview má 117 648 B.
-- Produkční zdrojový commit je `009fa2d8` a obsahuje pouze tento CSV řádek;
-  lokální pracovní commit je `b24bd9b7`.
-- Pages workflow `35432115685` nad `009fa2d8` a deploy job `105868609077`
+- Přesně dodaný text je v jediném řádku `default`; v handoffu se neopakuje.
+- Konkrétní datum má přednost, jinak se pro každý den vytvoří nová denní MP3.
+- Cílené testy 19/19, lokální brána 1740/1740 a čistá produkční brána
+  1719/1719 prošly. Náhled má 78 624 B a 13,104 s.
+- Lokální commit `f71bc5d4`; produkční commit `b16cae26` byl z čistého
+  izolovaného checkoutu odeslán fast-forward bez čekajících commitů Camina.
+- Pages workflow `35567028291` nad `b16cae26` a deploy job `106230984887`
   uspěly.
-- Veřejný `app.js` a `owl_190926.mp3` jsou ověřené 19. září v 10:30 CEST:
-  `app.js` HTTP 200, výběr `owl_190926.mp3?v=20260919a`; audio HTTP 200,
-  `audio/mp3`, 117 648 B.
-- Pages artifact zůstal publikační autoritou a workflow nezměnilo `main`.
-- Pages artifact je publikační autorita; historický blok níže je uzavřený.
+- Veřejný `app.js` vybírá `owl_210926.mp3?v=20260921a`; audio vrací HTTP 200,
+  `audio/mp3`, 78 624 B a 13,104 s.
 
 Co neni hotove:
 - Ruční poslech v prohlížeči neproběhl; HTTP, MIME, velikost a výběr dnešního
   souboru jsou ověřené.
 
 Dalsi krok:
-- Bez dalšího zásahu; nový text až na Mílův pokyn.
+- Bez dalšího zásahu. Vlastní denní řádek příště automaticky přebije `default`.
 
 Navrhovane dalsi kroky:
 - Žádné nové.
 
 Zmenene nebo relevantni soubory:
-- `OwlSpeech.csv`, `automated_recurring_tasks.md`, `ACTIVE_PROJECTS.md`.
-- Produkční zdrojový commit `009fa2d8`; Pages workflow `35432115685`.
+- `OwlSpeech.csv`, `daily_3am.py`, `test_daily_3am.py`, `daily_3am.md`.
+- Produkční zdrojový commit `b16cae26`; Pages workflow `35567028291`.
 
 Bezpecnost / neukladat:
 - Soukromý obsah ani audio se do tohoto handoffu nekopírují.
 - Souběžné změny Camina zachované; do produkčního `main` byl odeslán pouze
   čistý owl commit z izolovaného checkoutu. Workflow oznámilo neblokující
   upozornění na vynucený Node.js 24 pro některé Actions.
+
+## Historický checkpoint 2026-09-19
+
+- Denní promluva 19. 9. byla publikována workflow `35432115685` nad
+  `009fa2d8`; veřejné audio mělo 117 648 B. Tento stav byl 21. 9. nahrazen
+  výchozí promluvou popsanou výše.
 
 ## Historický checkpoint 2026-07-27 (nasazení dokončeno 2026-07-30)
 
