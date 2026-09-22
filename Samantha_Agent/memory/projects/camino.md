@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-21 22:36 CEST
+Aktualizováno: 2026-09-22 20:46 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -54,6 +54,7 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 - C04b T009 fyzicky PASS podle Mílova potvrzení: odmítnutá kamera zobrazila vysvětlení a `Zpět`, zatímco `Komentář` i místní deník dál fungovaly. Oprava kódu není potřeba.
 - C04b T060 má bezpečnou fyzickou část PASS podle Mílova potvrzení: při běžném volném místě nebylo falešné varování, krátké video se normálně dokončilo a přehrálo a starší položky zůstaly zachované. Celý T060 zůstává částečný: skutečné nízké místo před/během audia, videa a textu nebylo na hlavním iPhonu vyvoláno.
 - C04b low-space/thermal hardening je lokálně hotový: společná injektovatelná politika varuje pod 2 GiB, blokuje nový video Start pod 1 GiB, foto/audio pod 512 MiB a pod rezervou bezpečně dokončí běžící audio/video. Krátká značka se dál pokusí o skutečný zápis; starší originály se nemažou. Video při vážném tepelném stavu varuje a při kritickém nový Start blokuje nebo běžící klip ukončí bez skryté změny kvality. Swift 17/17, UI simulátoru 3/3, nepodepsané simulátorové i generic iOS buildy a plná projektová brána 1740/1740 PASS. Jde o syntetický důkaz; hardening zatím není na iPhonu a celý fyzický T060 zůstává částečný.
+- C04d je lokálně hotové bez změny Core Data schématu. Deník přidal výběr dne, filtry, detail Momentu, odolný textový koncept, append-only historii revizí s předností lidské úpravy, vědomé uvolnění Úvahy, zamknutí, skrytí/obnovu, přesun kapitoly se zachovaným původním časem a samostatný soukromý doplněk navázaný na rodičovský Moment. Budoucí serverové operace mají trvalé pořadí a stav `čeká na server`; Důležité zůstává lokální, protože C03b v1 pro ně nemá operaci. Swift 22/22, UI simulátoru 4/4, nepodepsaný generic iOS build a plná brána 1740/1740 PASS. Podepsání, instalace, push ani nasazení neproběhly.
 
 
 ## Zdroje a návaznost
@@ -90,13 +91,13 @@ kódu nevyvolává; FAIL se nejdřív doloží a opraví v aktuálním rozsahu.
 - T050 prošlo díky souběžnému důkazu telefonu a serveru v 14s okně; soukromé video obsahuje soukromou adresu, proto se necommitovalo. Oprava neočekávaného startu je na iPhonu fyzicky ověřená v části A; offline znovuotevření během části B zůstalo neověřené. Krátké `Vyžaduje pozornost` před dřívějším retry má neznámou příčinu.
 - Lokální zámek je v C04a uložený na telefonu, ale server jej vynutí až po přijetí revize; již vydanou cizí kopii neodvolá. C08 musí kontrolovat aktuální oprávnění při každém výdeji média. C04a zatím nemá synchronizaci C05 ani Viewer C08, takže U15 není ověřená provozní ochrana.
 - C03b bylo ověřeno jen na syntetických metadatech v referenční databázi mimo repozitář. C05 musí navázat skutečné ověření identity zařízení, odvolatelné tokeny, privátní HTTPS, přijetí a hashovou finalizaci médií a řízené řešení konfliktů; C06b skutečnou zálohu a obnovu. Porovnání po obnově zatím zahrnuje Momenty, ne celý inventář médií; T044/T045/T053/T058 ani fyzické chování telefonu nejsou plně PASS.
-- Integrovaná aplikace je podepsaná a nainstalovaná; T008/T009/T011/T012/T013/T014 fyzicky prošly, T007 zůstává částečný a bezpečná část T060 je PASS. Nová politika místa a teploty je automatizovaně doložená, ale dosud není nainstalovaná ani fyzicky ověřená na iPhonu. Plné T060 proto zůstává částečné bez skutečného nízkého místa; syntetická kapacita a teplota nejsou fyzická akceptace. Detail a vědomé vložení Úvahy do deníku patří do C04d. Lokální databáze zatím nepředává revize do C03b API a není druhou zálohou.
+- Integrovaná aplikace je podepsaná a nainstalovaná ve starším C04b stavu; T008/T009/T011/T012/T013/T014 fyzicky prošly, T007 zůstává částečný a bezpečná část T060 je PASS. Nová politika místa/teploty ani C04d dosud nejsou na iPhonu. Plné T060 zůstává částečné a T010/T019–T021/T026/T030/T038–T041/T096 čekají na cílenou fyzickou přejímku C04d. Lokální fronta nepředává revize do C03b API, není serverovým přijetím ani druhou zálohou; hvězdička se zatím nesynchronizuje.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
 - Instalace a launch nejsou fyzická přejímka přenosu; vývojový profil je časově omezený do 24. září 2026. U01–U15 se bez nového rozhodnutí neotevírají.
 
 ## Další krok
 
-Pokračovat C04d a potom C05a. Skutečný fyzický low-space PASS T060 přiznat až na postradatelném testovacím zařízení nebo při přirozeně vzniklém stavu; hlavní iPhone uměle nezaplňovat ani nezahřívat. Instalaci lokálního hardeningu na iPhone provést jen jako samostatně potvrzený krok. Captive portal T048 ověřit jen při skutečně dostupné síti a tři již doložené podscénáře bez nové pochybnosti neopakovat. Plné T049 s novým skutečným videem zůstává pro produkční propojení; T050 se bez nové pochybnosti neopakuje.
+Samostatně potvrdit podpis a instalaci aktuálního Camina na iPhone a projít `camino/app/C04d_IPHONE_TEST_PLAN.md`; až potom lze uzavřít fyzickou akceptaci C04d. Následně pokračovat C05a. Skutečný low-space PASS T060 přiznat jen na postradatelném zařízení nebo při přirozeném stavu; hlavní iPhone uměle nezaplňovat ani nezahřívat. Captive portal T048 ověřit jen při skutečně dostupné síti.
 
 Historický doklad založení:
 Ověření založení: 56/56 testů integrace (54 + 2 profilové testy) a rychlá statická brána OK.

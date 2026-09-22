@@ -28,7 +28,8 @@ bez fotografií, hlasu a soukromých textů. Zkouška nevyžaduje letový režim
 | T014 | U krátkého rozběhnutého videa odejít z aplikace nebo zamknout telefon. Po návratu zkontrolovat, zda je použitelný klip dokončen, nebo pravdivě označen jako částečný; nesmí se tvářit, že pokračuje v záznamu. |
 | T060 | Zkontrolovat běžné hlášky o místě a přerušení. Vynucené zaplnění úložiště a tepelný stres nejsou součástí této bezpečné zkoušky; tato část zůstává neověřená. |
 
-T010 (textové revize) patří k C04d. Automatické přenesení skutečného videa na Mac
+T010 a ostatní fyzická přejímka C04d mají samostatný postup v
+`C04d_IPHONE_TEST_PLAN.md`. Automatické přenesení skutečného videa na Mac
 a úplné T049 patří až k produkčnímu propojení C05a. Po testu zapiš výsledky
 jednotlivých ID, model/iOS, datum, zjištěná selhání a zda šlo o fyzický iPhone.
 

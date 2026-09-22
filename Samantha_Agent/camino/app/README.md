@@ -1,4 +1,4 @@
-# Camino app — C04a/C04b
+# Camino app — C04a až C04d
 
 První integrovaná iPhone aplikace Camina. Má vlastní bundle ID
 `cz.pythonmf.camino.app` a vlastní Application Support kontejner; nepřebírá ani
@@ -37,30 +37,51 @@ nemigruje data ze samostatných prototypů Camino Audio a Camino Transfer Test.
   aplikace záznam bezpečně ukončí. Nic se automaticky nemaže.
 - Tepelný stav se sleduje bez skryté změny kvality. Stav `serious` varuje;
   `critical` nespustí nové video a rozběhnuté video bezpečně ukončí.
+- C04d rozšiřuje místní deník o výběr dne a filtry **Vše / Důležité / Úvahy**,
+  detail s čtenářským textem, hvězdičkou, současným soukromím a původním časem.
+  Textový editor ukládá rozepsaný koncept při každé změně, ale teprve vědomé
+  **Uložit** vytvoří novou `typed_source` nebo `human_revision`. Pozdější
+  automatický přepis zůstane v historii a nepřebije lidskou revizi.
+- Změna soukromí, skrytí, přesun kapitoly a textová revize vznikají jako
+  souvisle číslované lokální operace s očekávanou revizí. Úvaha jde do deníku
+  jen přes varovný dialog **Vložit Úvahu do deníku**; telefon změnu označí
+  `čeká na server`. Skrytí je vratné, originály nemaže ani neuvolňuje místo a
+  obnovení zachová soukromí. Přesun kapitoly nemění původní čas zachycení.
+- **Soukromý dovětek** vytváří samostatnou `owner_only` Úvahu s vlastní
+  identitou a trvalou vazbou na původní Moment. Nezmění původní Moment ani
+  globální výchozí soukromí.
+- C04d nemění Core Data schéma: verzovaný text, koncepty, vazby a fronta
+  operací používají existující `SettingRecord`. Databáze současné C04b se tak
+  dál otevře bez automatické migrace nebo resetu.
 
-Ruční revize Momentu, přenos na Mac, párování, Viewer a serverová záloha jsou
-další etapy. Aplikace zatím nehlásí úspěšnou synchronizaci. C04b je
+Přenos lokálních revizí na Mac, párování, Viewer a serverová záloha jsou
+další etapy. Hvězdička je zatím pouze místní čtenářská pomůcka, protože C03b
+v1 pro její změnu nedefinuje operaci. Aplikace nehlásí úspěšnou synchronizaci.
+C04b je
 podepsaná a nainstalovaná na zkušebním iPhonu; část fyzických scénářů je
 přijatá podle cíleného plánu. Nový low-space/thermal hardening je zatím pouze
-lokálně sestavený a nebyl na iPhone instalován. Původní soubory se nemažou a
+lokálně sestavený a nebyl na iPhone instalován. C04d je rovněž pouze lokální
+vývojový checkpoint; nebyla podepsána ani instalována na iPhone. Původní
+soubory se nemažou a
 při chybě databáze se neprovádí
 automatická migrace či reset. Datový model C04b nemá automatickou migraci
 z případné instalace C04a; před instalací do zařízení s daty je třeba řízený
 postup zachování dat.
 
-Cílený fyzický průchod je v `C04b_IPHONE_TEST_PLAN.md`.
+Cílené fyzické průchody jsou v `C04b_IPHONE_TEST_PLAN.md` a
+`C04d_IPHONE_TEST_PLAN.md`.
 
 ## Vývojové ověření
 
 ```sh
 cd camino/app
-swift test --scratch-path /private/tmp/camino-c04b-tests
+swift test --scratch-path /private/tmp/camino-c04d-tests
 xcodebuild -project Camino.xcodeproj -scheme Camino -configuration Debug \
-  -destination 'generic/platform=iOS' -derivedDataPath /private/tmp/camino-c04b-derived \
+  -destination 'generic/platform=iOS' -derivedDataPath /private/tmp/camino-c04d-derived \
   CODE_SIGNING_ALLOWED=NO build
 xcodebuild -project Camino.xcodeproj -scheme CaminoUITests -configuration Debug \
   -destination 'platform=iOS Simulator,id=<SIMULATOR_ID>' \
-  -derivedDataPath /private/tmp/camino-c04b-ui-derived \
+  -derivedDataPath /private/tmp/camino-c04d-ui-derived \
   -parallel-testing-enabled NO CODE_SIGNING_ALLOWED=NO test
 ```
 

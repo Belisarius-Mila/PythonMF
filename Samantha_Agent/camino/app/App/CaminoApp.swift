@@ -32,7 +32,7 @@ import SwiftUI
                 CameraCaptureView(model: model)
             }
             .sheet(item: $model.momentDetail, onDismiss: {
-                model.startPendingComment()
+                model.startPendingAudioFromDetail()
             }) { moment in
                 CaminoMediaDetailView(model: model, moment: moment)
             }
@@ -72,9 +72,32 @@ private struct TripSetupView: View {
     }
 }
 
+private enum CaminoMomentFilter: String, CaseIterable {
+    case all = "Vše"
+    case important = "Důležité"
+    case reflections = "Úvahy"
+}
+
 private struct CaptureHomeView: View {
     @ObservedObject var model: CaminoViewModel
     @State private var showTrips = false
+    @State private var showArchive = false
+    @State private var selectedDay = Date()
+    @State private var filter: CaminoMomentFilter = .all
+
+    private var chapterDate: String {
+        CaptureStamp.record(selectedDay, timeZone: .current).chapterDate
+    }
+
+    private var selectedMoments: [LocalMoment] {
+        model.moments(on: chapterDate).filter { moment in
+            switch filter {
+            case .all: true
+            case .important: moment.important
+            case .reflections: moment.kind == .reflection
+            }
+        }
+    }
 
     var body: some View {
         NavigationStack {
@@ -126,16 +149,34 @@ private struct CaptureHomeView: View {
                     }
 
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("Dnes: \(model.todayMoments.count) · Momentů").font(.headline)
-                        if model.todayMoments.isEmpty {
-                            Text("První označený okamžik nebo dokončená nahrávka se objeví zde.")
+                        DatePicker("Den deníku", selection: $selectedDay,
+                                   displayedComponents: .date)
+                            .accessibilityIdentifier("journalDay")
+                        Picker("Filtr Momentů", selection: $filter) {
+                            ForEach(CaminoMomentFilter.allCases, id: \.self) { value in
+                                Text(value.rawValue).tag(value)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                        Text("\(Calendar.current.isDateInToday(selectedDay) ? "Dnes" : chapterDate): \(selectedMoments.count) · Momentů")
+                            .font(.headline)
+                        if selectedMoments.isEmpty {
+                            Text(filter == .all
+                                 ? "Zatím tu nejsou žádné záznamy. Souhrn není místně dostupný."
+                                 : "Tomuto filtru neodpovídá žádný Moment.")
                                 .foregroundStyle(.secondary)
                         } else {
-                            ForEach(model.todayMoments.prefix(8)) { moment in
+                            ForEach(selectedMoments) { moment in
                                 Button { model.momentDetail = moment } label: {
                                     HStack {
                                         Image(systemName: symbol(for: moment.kind))
                                         Text(moment.kind.title)
+                                        if moment.important {
+                                            Image(systemName: "star.fill").foregroundStyle(.yellow)
+                                        }
+                                        if moment.privacy == .ownerOnly {
+                                            Image(systemName: "lock.fill")
+                                        }
                                         Spacer()
                                         Text(String(moment.capture.localWall.dropFirst(11).prefix(5)))
                                             .monospacedDigit()
@@ -145,6 +186,9 @@ private struct CaptureHomeView: View {
                                 .accessibilityIdentifier("momentRow")
                                 Text(moment.privacy.title + (moment.partialAudio ? " · Částečný záznam" : ""))
                                     .font(.caption).foregroundStyle(.secondary)
+                                if let text = model.textHistory(for: moment.id).readerRevision?.content {
+                                    Text(text).lineLimit(2).font(.caption)
+                                }
                                 Divider()
                             }
                         }
@@ -185,10 +229,14 @@ private struct CaptureHomeView: View {
                         .disabled(model.audioBusy)
                         Button("Cesty", systemImage: "map") { showTrips = true }
                             .disabled(model.audioBusy)
+                        Button("Skryté (\(model.hiddenMoments.count))",
+                               systemImage: "archivebox") { showArchive = true }
+                            .disabled(model.audioBusy)
                     } label: { Label("Nabídka", systemImage: "ellipsis.circle") }
                 }
             }
             .sheet(isPresented: $showTrips) { TripListView(model: model) }
+            .sheet(isPresented: $showArchive) { CaminoHiddenArchiveView(model: model) }
         }
     }
 
@@ -221,6 +269,49 @@ private struct CaptureHomeView: View {
         .buttonStyle(.borderedProminent)
         .disabled(model.audioBusy)
         .accessibilityIdentifier(kind == .comment ? "startComment" : "startReflection")
+    }
+}
+
+private struct CaminoHiddenArchiveView: View {
+    @ObservedObject var model: CaminoViewModel
+    @Environment(\.dismiss) private var dismiss
+    @State private var selected: LocalMoment?
+
+    var body: some View {
+        NavigationStack {
+            List {
+                if model.hiddenMoments.isEmpty {
+                    Text("Archiv skrytých Momentů je prázdný.")
+                        .foregroundStyle(.secondary)
+                }
+                ForEach(model.hiddenMoments) { moment in
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Text(moment.kind.title)
+                            Spacer()
+                            Text(moment.capture.localWall)
+                                .font(.caption).foregroundStyle(.secondary)
+                        }
+                        Text(moment.privacy.title + " · Skryté neuvolňuje místo")
+                            .font(.caption).foregroundStyle(.secondary)
+                        Button("Zobrazit detail") { selected = moment }
+                            .buttonStyle(.borderless)
+                        Button("Obnovit se stejným soukromím") {
+                            model.setHidden(momentID: moment.id, hidden: false)
+                        }
+                        .buttonStyle(.borderless)
+                        .accessibilityIdentifier("restoreHiddenMoment")
+                    }
+                }
+            }
+            .navigationTitle("Skryté")
+            .toolbar { ToolbarItem(placement: .topBarTrailing) {
+                Button("Hotovo") { dismiss() }
+            } }
+            .sheet(item: $selected) { moment in
+                CaminoMediaDetailView(model: model, moment: moment)
+            }
+        }
     }
 }
 
@@ -280,6 +371,11 @@ private struct AudioCaptureView: View {
                         Text(model.selectedAudioKind == .reflection ? "Úvaha" : "Komentář")
                             .font(.title2.bold())
                         if model.selectedAudioKind == .reflection {
+                            if let relatedID = model.audioRelatedMomentID,
+                               let related = model.moment(with: relatedID) {
+                                Text("Soukromý dovětek k: \(related.kind.title) · \(related.capture.localWall)")
+                                    .font(.subheadline)
+                            }
                             Text("Soukromí: Jen pro mě. Vložení do deníku vyžaduje pozdější vědomý krok.")
                                 .font(.subheadline).foregroundStyle(.secondary)
                         } else if let targetID = model.audioTargetMomentID,

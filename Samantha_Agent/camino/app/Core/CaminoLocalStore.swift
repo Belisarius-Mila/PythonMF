@@ -1,6 +1,25 @@
 import CoreData
 import Foundation
 
+private struct LocalMomentJournal: Codable, Equatable {
+    let schemaVersion: Int
+    let momentID: UUID
+    let tripID: UUID
+    let baseRevision: Int
+    let originalPrivacy: LocalPrivacy
+    let originalHidden: Bool
+    let originalChapterDate: String
+    var currentChapterDate: String
+    var relatedMomentID: UUID?
+    var textHistory: LocalTextHistory
+    var operations: [LocalPendingOperation]
+}
+
+private struct LocalPendingMomentLink: Codable, Equatable {
+    let sessionID: UUID
+    let parentMomentID: UUID
+}
+
 /// C04 metadata only. Media bytes live in create-only audio/media journals.
 /// A failed save never recreates, deletes, or silently migrates an existing store.
 @MainActor public final class CaminoLocalStore {
@@ -119,17 +138,24 @@ import Foundation
     /// An unresolved intent remains visible after any audio or database failure.
     @discardableResult public func beginAudioIntent(
         sessionID: UUID, kind: LocalMomentKind, startedAt: Date,
-        timeZone: TimeZone = .current, targetMomentID: UUID? = nil
+        timeZone: TimeZone = .current, targetMomentID: UUID? = nil,
+        relatedMomentID: UUID? = nil
     ) throws -> AudioIntent {
         guard kind == .comment || kind == .reflection else { throw LocalStoreError.invalidAudioIntent }
         if let existing = try object("AudioIntentRecord", id: sessionID, key: "sessionID") {
             let intent = try decodeIntent(existing)
+            let pendingLink = try pendingMomentLink(sessionID: sessionID)
             guard intent.kind == kind,
                   intent.attaching == (targetMomentID != nil),
-                  !intent.attaching || intent.momentID == targetMomentID else {
+                  !intent.attaching || intent.momentID == targetMomentID,
+                  pendingLink?.parentMomentID == relatedMomentID else {
                 throw LocalStoreError.duplicateIdentity
             }
             return intent
+        }
+        guard targetMomentID == nil || relatedMomentID == nil,
+              relatedMomentID == nil || kind == .reflection else {
+            throw LocalStoreError.invalidAudioIntent
         }
         guard let trip = try activeTrip() else { throw LocalStoreError.noActiveTrip }
         let target: LocalMoment?
@@ -144,6 +170,15 @@ import Foundation
             }
             target = decoded
         } else { target = nil }
+        if let relatedMomentID {
+            guard let row = try object("MomentRecord", id: relatedMomentID) else {
+                throw LocalStoreError.invalidAudioIntent
+            }
+            let decoded = try decodeMoment(row)
+            guard decoded.tripID == trip.id, !decoded.hidden else {
+                throw LocalStoreError.invalidAudioIntent
+            }
+        }
         let privacy = try target?.privacy ??
             (kind == .reflection ? LocalPrivacy.ownerOnly : newMomentPrivacy())
         let stamp = CaptureStamp.record(startedAt, timeZone: timeZone)
@@ -158,6 +193,11 @@ import Foundation
             row.setValue(target != nil, forKey: "attaching")
             write(stamp, to: row)
             row.setValue(false, forKey: "finalized")
+            if let relatedMomentID {
+                try setEncodedSetting(LocalPendingMomentLink(
+                    sessionID: sessionID, parentMomentID: relatedMomentID),
+                    key: pendingLinkKey(sessionID))
+            }
             try save()
             return try decodeIntent(row)
         } catch { context.rollback(); throw error }
@@ -233,6 +273,16 @@ import Foundation
                                    dayID: day, kind: kind, privacy: intent.privacy,
                                    stamp: intent.capture, audioSessionID: sessionID,
                                    partialAudio: partial)
+            if let link = try pendingMomentLink(sessionID: sessionID) {
+                guard kind == .reflection,
+                      let parent = try object("MomentRecord", id: link.parentMomentID),
+                      (try required(parent, "tripID") as UUID) == intent.tripID else {
+                    throw LocalStoreError.invalidAudioIntent
+                }
+                var journal = try momentJournal(row)
+                journal.relatedMomentID = link.parentMomentID
+                try setMomentJournal(journal)
+            }
             intentRow.setValue(true, forKey: "finalized")
             try save()
             return try decodeMoment(row)
@@ -370,12 +420,286 @@ import Foundation
         try fetch("AssetRecord").map(decodeMediaAsset)
     }
 
-    public func moments(tripID: UUID) throws -> [LocalMoment] {
+    public func moments(tripID: UUID, includeHidden: Bool = false) throws -> [LocalMoment] {
         guard try object("TripRecord", id: tripID) != nil else { throw LocalStoreError.tripMissing }
         return try fetch("MomentRecord", predicate: NSPredicate(format: "tripID == %@", tripID as NSUUID))
             .map(decodeMoment)
-            .filter { !$0.hidden }
+            .filter { includeHidden || !$0.hidden }
             .sorted { $0.capture.utcMilliseconds > $1.capture.utcMilliseconds }
+    }
+
+    public func textHistory(momentID: UUID) throws -> LocalTextHistory {
+        guard let row = try object("MomentRecord", id: momentID) else {
+            throw LocalStoreError.momentMissing
+        }
+        return try momentJournal(row).textHistory
+    }
+
+    public func pendingOperations(momentID: UUID) throws -> [LocalPendingOperation] {
+        guard let row = try object("MomentRecord", id: momentID) else {
+            throw LocalStoreError.momentMissing
+        }
+        return try momentJournal(row).operations
+    }
+
+    /// A draft is durable local state, but never a published text revision.
+    public func saveTextDraft(momentID: UUID, content: String,
+                              at date: Date = Date()) throws {
+        guard let row = try object("MomentRecord", id: momentID) else {
+            throw LocalStoreError.momentMissing
+        }
+        do {
+            var journal = try momentJournal(row)
+            let base = journal.textHistory.draft?.baseRevisionID ??
+                journal.textHistory.readerRevision?.id
+            journal.textHistory = LocalTextHistory(
+                revisions: journal.textHistory.revisions,
+                draft: LocalTextDraft(momentID: momentID, baseRevisionID: base,
+                    content: content, updatedAtUTCMilliseconds: milliseconds(date)))
+            try setMomentJournal(journal)
+            try save()
+        } catch { context.rollback(); throw error }
+    }
+
+    public func discardTextDraft(momentID: UUID) throws {
+        guard let row = try object("MomentRecord", id: momentID) else {
+            throw LocalStoreError.momentMissing
+        }
+        do {
+            var journal = try momentJournal(row)
+            journal.textHistory = LocalTextHistory(
+                revisions: journal.textHistory.revisions, draft: nil)
+            try setMomentJournal(journal)
+            try save()
+        } catch { context.rollback(); throw error }
+    }
+
+    /// Saves the current draft as a typed source or a later human revision.
+    @discardableResult public func commitTextDraft(
+        momentID: UUID, revisionID: UUID = UUID(), operationID: UUID = UUID(),
+        expectedRevision: Int? = nil, at date: Date = Date()
+    ) throws -> LocalTextRevision {
+        guard let row = try object("MomentRecord", id: momentID) else {
+            throw LocalStoreError.momentMissing
+        }
+        var journal = try momentJournal(row)
+        guard let draft = journal.textHistory.draft,
+              !draft.content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            throw LocalStoreError.invalidText
+        }
+        let currentRevision: Int = try required(row, "revision")
+        let expected = expectedRevision ?? currentRevision
+        guard expected == currentRevision else { throw LocalStoreError.revisionConflict }
+        guard !journal.textHistory.revisions.contains(where: { $0.id == revisionID }) else {
+            throw LocalStoreError.operationConflict
+        }
+        if try existingOperation(id: operationID) != nil {
+            throw LocalStoreError.operationConflict
+        }
+        let parent = journal.textHistory.readerRevision?.id
+        let text = LocalTextRevision(
+            id: revisionID, momentID: momentID,
+            role: journal.textHistory.revisions.isEmpty ? .typedSource : .humanRevision,
+            content: draft.content, sourceIDs: parent.map { [$0] } ?? [],
+            parentRevisionID: parent, createdAtUTCMilliseconds: milliseconds(date))
+        do {
+            let operation = try makeOperation(
+                id: operationID, momentID: momentID, expectedRevision: expected,
+                kind: .appendText, at: date, textRevisionID: revisionID)
+            journal.textHistory = LocalTextHistory(
+                revisions: journal.textHistory.revisions + [text], draft: nil)
+            journal.operations.append(operation)
+            row.setValue(currentRevision + 1, forKey: "revision")
+            try setMomentJournal(journal)
+            try save()
+            return text
+        } catch { context.rollback(); throw error }
+    }
+
+    /// Used by later transcription integration; a late AI revision stays in
+    /// history and cannot become the reader text over a human revision.
+    @discardableResult public func appendTextRevision(
+        momentID: UUID, role: LocalTextRole, content: String,
+        sourceIDs: [UUID] = [], parentRevisionID: UUID? = nil,
+        revisionID: UUID = UUID(), operationID: UUID = UUID(),
+        expectedRevision: Int? = nil, at date: Date = Date()
+    ) throws -> LocalTextRevision {
+        guard !content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              let row = try object("MomentRecord", id: momentID) else {
+            throw LocalStoreError.invalidText
+        }
+        var journal = try momentJournal(row)
+        let candidate = LocalTextRevision(
+            id: revisionID, momentID: momentID, role: role, content: content,
+            sourceIDs: sourceIDs, parentRevisionID: parentRevisionID,
+            createdAtUTCMilliseconds: milliseconds(date))
+        if let prior = journal.textHistory.revisions.first(where: { $0.id == revisionID }) {
+            guard prior == candidate else { throw LocalStoreError.operationConflict }
+            return prior
+        }
+        if let parentRevisionID,
+           !journal.textHistory.revisions.contains(where: { $0.id == parentRevisionID }) {
+            throw LocalStoreError.invalidText
+        }
+        let currentRevision: Int = try required(row, "revision")
+        if let prior = try existingOperation(id: operationID) {
+            let requestedExpected = expectedRevision ?? prior.expectedRevision
+            guard prior.momentID == momentID, prior.kind == .appendText,
+                  prior.expectedRevision == requestedExpected,
+                  prior.textRevisionID == revisionID else {
+                throw LocalStoreError.operationConflict
+            }
+            guard let saved = journal.textHistory.revisions.first(where: { $0.id == revisionID }) else {
+                throw LocalStoreError.inconsistentStore
+            }
+            return saved
+        }
+        let expected = expectedRevision ?? currentRevision
+        guard expected == currentRevision else { throw LocalStoreError.revisionConflict }
+        do {
+            let operation = try makeOperation(
+                id: operationID, momentID: momentID, expectedRevision: expected,
+                kind: .appendText, at: date, textRevisionID: revisionID)
+            journal.textHistory = LocalTextHistory(
+                revisions: journal.textHistory.revisions + [candidate],
+                draft: journal.textHistory.draft)
+            journal.operations.append(operation)
+            row.setValue(currentRevision + 1, forKey: "revision")
+            try setMomentJournal(journal)
+            try save()
+            return candidate
+        } catch { context.rollback(); throw error }
+    }
+
+    @discardableResult public func changePrivacy(
+        momentID: UUID, to privacy: LocalPrivacy, action: LocalPrivacyAction,
+        operationID: UUID = UUID(), expectedRevision: Int? = nil,
+        at date: Date = Date()
+    ) throws -> LocalMoment {
+        guard let row = try object("MomentRecord", id: momentID) else {
+            throw LocalStoreError.momentMissing
+        }
+        let current = try decodeMoment(row)
+        let currentRevision = current.revision
+        if let prior = try existingOperation(id: operationID) {
+            let requestedExpected = expectedRevision ?? prior.expectedRevision
+            guard prior.momentID == momentID, prior.kind == .privacy,
+                  prior.expectedRevision == requestedExpected, prior.privacy == privacy,
+                  prior.privacyAction == action else {
+                throw LocalStoreError.operationConflict
+            }
+            return current
+        }
+        let expected = expectedRevision ?? currentRevision
+        guard expected == currentRevision else { throw LocalStoreError.revisionConflict }
+        guard current.privacy != privacy else { throw LocalStoreError.invalidMetadataChange }
+        let requiredAction: LocalPrivacyAction
+        if privacy == .ownerOnly {
+            requiredAction = .lock
+        } else if current.kind == .reflection {
+            requiredAction = .insertReflectionIntoDiary
+        } else {
+            requiredAction = .unlock
+        }
+        guard action == requiredAction else { throw LocalStoreError.invalidMetadataChange }
+        do {
+            var journal = try momentJournal(row)
+            let operation = try makeOperation(
+                id: operationID, momentID: momentID, expectedRevision: expected,
+                kind: .privacy, at: date, privacy: privacy, privacyAction: action)
+            journal.operations.append(operation)
+            row.setValue(privacy.rawValue, forKey: "privacy")
+            row.setValue(currentRevision + 1, forKey: "revision")
+            try setMomentJournal(journal)
+            try save()
+            return try decodeMoment(row)
+        } catch { context.rollback(); throw error }
+    }
+
+    @discardableResult public func setHidden(
+        momentID: UUID, hidden: Bool, operationID: UUID = UUID(),
+        expectedRevision: Int? = nil, at date: Date = Date()
+    ) throws -> LocalMoment {
+        guard let row = try object("MomentRecord", id: momentID) else {
+            throw LocalStoreError.momentMissing
+        }
+        let current = try decodeMoment(row)
+        if let prior = try existingOperation(id: operationID) {
+            let requestedExpected = expectedRevision ?? prior.expectedRevision
+            guard prior.momentID == momentID, prior.kind == .hidden,
+                  prior.expectedRevision == requestedExpected, prior.hidden == hidden else {
+                throw LocalStoreError.operationConflict
+            }
+            return current
+        }
+        let expected = expectedRevision ?? current.revision
+        guard expected == current.revision else { throw LocalStoreError.revisionConflict }
+        guard current.hidden != hidden else { throw LocalStoreError.invalidMetadataChange }
+        do {
+            var journal = try momentJournal(row)
+            let operation = try makeOperation(
+                id: operationID, momentID: momentID, expectedRevision: expected,
+                kind: .hidden, at: date, hidden: hidden)
+            journal.operations.append(operation)
+            row.setValue(hidden, forKey: "hidden")
+            row.setValue(current.revision + 1, forKey: "revision")
+            try setMomentJournal(journal)
+            try save()
+            return try decodeMoment(row)
+        } catch { context.rollback(); throw error }
+    }
+
+    @discardableResult public func moveMoment(
+        momentID: UUID, toChapterDate chapterDate: String,
+        operationID: UUID = UUID(), expectedRevision: Int? = nil,
+        at date: Date = Date()
+    ) throws -> LocalMoment {
+        guard validChapterDate(chapterDate),
+              let row = try object("MomentRecord", id: momentID) else {
+            throw LocalStoreError.invalidMetadataChange
+        }
+        let current = try decodeMoment(row)
+        if let prior = try existingOperation(id: operationID) {
+            let requestedExpected = expectedRevision ?? prior.expectedRevision
+            guard prior.momentID == momentID, prior.kind == .chapter,
+                  prior.expectedRevision == requestedExpected,
+                  prior.chapterDate == chapterDate else {
+                throw LocalStoreError.operationConflict
+            }
+            return current
+        }
+        let expected = expectedRevision ?? current.revision
+        guard expected == current.revision else { throw LocalStoreError.revisionConflict }
+        guard current.chapterDate != chapterDate else {
+            throw LocalStoreError.invalidMetadataChange
+        }
+        do {
+            var journal = try momentJournal(row)
+            let operation = try makeOperation(
+                id: operationID, momentID: momentID, expectedRevision: expected,
+                kind: .chapter, at: date, chapterDate: chapterDate)
+            journal.currentChapterDate = chapterDate
+            journal.operations.append(operation)
+            row.setValue(try dayID(for: current.tripID, date: chapterDate), forKey: "dayID")
+            row.setValue(current.revision + 1, forKey: "revision")
+            try setMomentJournal(journal)
+            try save()
+            return try decodeMoment(row)
+        } catch { context.rollback(); throw error }
+    }
+
+    /// The star is currently a local reading aid. C05 must decide how it enters
+    /// the versioned wire contract, which does not yet define this operation.
+    @discardableResult public func setImportant(momentID: UUID,
+                                                important: Bool) throws -> LocalMoment {
+        guard let row = try object("MomentRecord", id: momentID) else {
+            throw LocalStoreError.momentMissing
+        }
+        do {
+            row.setValue(important, forKey: "important")
+            try save()
+            return try decodeMoment(row)
+        } catch { context.rollback(); throw error }
     }
 
     private func dayID(for tripID: UUID, date: String) throws -> UUID {
@@ -410,6 +734,161 @@ import Foundation
         return row
     }
 
+    private func momentJournal(_ row: NSManagedObject) throws -> LocalMomentJournal {
+        let id: UUID = try required(row, "id")
+        let tripID: UUID = try required(row, "tripID")
+        let revision: Int = try required(row, "revision")
+        let privacyRaw: String = try required(row, "privacy")
+        let hidden: Bool = try required(row, "hidden")
+        let capture = try decodeStamp(row)
+        guard let privacy = LocalPrivacy(rawValue: privacyRaw) else {
+            throw LocalStoreError.inconsistentStore
+        }
+        guard let journal: LocalMomentJournal = try encodedSetting(journalKey(id)) else {
+            return LocalMomentJournal(
+                schemaVersion: 1, momentID: id, tripID: tripID,
+                baseRevision: revision, originalPrivacy: privacy,
+                originalHidden: hidden, originalChapterDate: capture.chapterDate,
+                currentChapterDate: capture.chapterDate, relatedMomentID: nil,
+                textHistory: LocalTextHistory(), operations: [])
+        }
+        guard journal.schemaVersion == 1, journal.momentID == id,
+              journal.tripID == tripID, journal.baseRevision >= 1,
+              validChapterDate(journal.originalChapterDate),
+              validChapterDate(journal.currentChapterDate),
+              journal.baseRevision + journal.operations.count == revision,
+              journal.textHistory.revisions.allSatisfy({ $0.momentID == id }),
+              journal.textHistory.draft?.momentID == id || journal.textHistory.draft == nil,
+              journal.operations.allSatisfy({ $0.momentID == id }),
+              Set(journal.operations.map(\.id)).count == journal.operations.count,
+              Set(journal.operations.map(\.deviceSequence)).count == journal.operations.count else {
+            throw LocalStoreError.inconsistentStore
+        }
+        return journal
+    }
+
+    private func setMomentJournal(_ journal: LocalMomentJournal) throws {
+        try setEncodedSetting(journal, key: journalKey(journal.momentID))
+    }
+
+    private func pendingMomentLink(sessionID: UUID) throws -> LocalPendingMomentLink? {
+        let value: LocalPendingMomentLink? = try encodedSetting(pendingLinkKey(sessionID))
+        guard value?.sessionID == sessionID || value == nil else {
+            throw LocalStoreError.inconsistentStore
+        }
+        return value
+    }
+
+    private func existingOperation(id: UUID) throws -> LocalPendingOperation? {
+        let rows = try fetch("SettingRecord", predicate: NSPredicate(
+            format: "key BEGINSWITH %@", Self.journalPrefix))
+        var matches: [LocalPendingOperation] = []
+        for row in rows {
+            guard let raw = row.value(forKey: "value") as? String,
+                  let data = raw.data(using: .utf8),
+                  let journal = try? JSONDecoder().decode(LocalMomentJournal.self, from: data) else {
+                throw LocalStoreError.inconsistentStore
+            }
+            matches.append(contentsOf: journal.operations.filter { $0.id == id })
+        }
+        guard matches.count <= 1 else { throw LocalStoreError.inconsistentStore }
+        return matches.first
+    }
+
+    private func makeOperation(
+        id: UUID, momentID: UUID, expectedRevision: Int,
+        kind: LocalOperationKind, at date: Date,
+        privacy: LocalPrivacy? = nil, privacyAction: LocalPrivacyAction? = nil,
+        hidden: Bool? = nil, chapterDate: String? = nil,
+        textRevisionID: UUID? = nil
+    ) throws -> LocalPendingOperation {
+        let sequence = try nextDeviceSequence()
+        return LocalPendingOperation(
+            id: id, momentID: momentID, deviceSequence: sequence,
+            expectedRevision: expectedRevision, kind: kind,
+            createdAtUTCMilliseconds: milliseconds(date), privacy: privacy,
+            privacyAction: privacyAction, hidden: hidden,
+            chapterDate: chapterDate, textRevisionID: textRevisionID)
+    }
+
+    private func nextDeviceSequence() throws -> Int64 {
+        let raw = try settingValue(Self.deviceSequenceKey)
+        let current: Int64
+        if let raw {
+            guard let value = Int64(raw), value >= 0 else {
+                throw LocalStoreError.inconsistentStore
+            }
+            current = value
+        } else {
+            current = 0
+        }
+        guard current < Int64.max else { throw LocalStoreError.inconsistentStore }
+        let next = current + 1
+        try setSettingValue(String(next), key: Self.deviceSequenceKey)
+        return next
+    }
+
+    private func encodedSetting<T: Decodable>(_ key: String) throws -> T? {
+        guard let value = try settingValue(key), let data = value.data(using: .utf8) else {
+            return nil
+        }
+        do { return try JSONDecoder().decode(T.self, from: data) }
+        catch { throw LocalStoreError.inconsistentStore }
+    }
+
+    private func setEncodedSetting<T: Encodable>(_ value: T, key: String) throws {
+        let data: Data
+        do { data = try JSONEncoder().encode(value) }
+        catch { throw LocalStoreError.inconsistentStore }
+        guard let string = String(data: data, encoding: .utf8) else {
+            throw LocalStoreError.inconsistentStore
+        }
+        try setSettingValue(string, key: key)
+    }
+
+    private func settingValue(_ key: String) throws -> String? {
+        let rows = try fetch("SettingRecord", predicate: NSPredicate(format: "key == %@", key))
+        guard rows.count <= 1 else { throw LocalStoreError.inconsistentStore }
+        guard let row = rows.first else { return nil }
+        return try required(row, "value")
+    }
+
+    private func setSettingValue(_ value: String, key: String) throws {
+        let rows = try fetch("SettingRecord", predicate: NSPredicate(format: "key == %@", key))
+        guard rows.count <= 1 else { throw LocalStoreError.inconsistentStore }
+        let row = rows.first ?? NSEntityDescription.insertNewObject(
+            forEntityName: "SettingRecord", into: context)
+        row.setValue(key, forKey: "key")
+        row.setValue(value, forKey: "value")
+    }
+
+    private func journalKey(_ momentID: UUID) -> String {
+        Self.journalPrefix + momentID.uuidString.lowercased()
+    }
+
+    private func pendingLinkKey(_ sessionID: UUID) -> String {
+        Self.pendingLinkPrefix + sessionID.uuidString.lowercased()
+    }
+
+    private func validChapterDate(_ value: String) -> Bool {
+        guard value.count == 10 else { return false }
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.timeZone = TimeZone(secondsFromGMT: 0)
+        formatter.dateFormat = "yyyy-MM-dd"
+        guard let parsed = formatter.date(from: value) else { return false }
+        return formatter.string(from: parsed) == value
+    }
+
+    private func milliseconds(_ date: Date) -> Int64 {
+        Int64((date.timeIntervalSince1970 * 1_000).rounded())
+    }
+
+    private static let journalPrefix = "c04d.moment."
+    private static let pendingLinkPrefix = "c04d.pending-link."
+    private static let deviceSequenceKey = "c04d.device-sequence"
+
     private func write(_ stamp: CaptureStamp, to row: NSManagedObject) {
         row.setValue(stamp.utcMilliseconds, forKey: "utcMilliseconds")
         row.setValue(stamp.localWall, forKey: "localWall")
@@ -433,14 +912,17 @@ import Foundation
               let privacy = LocalPrivacy(rawValue: privacyRaw) else {
             throw LocalStoreError.inconsistentStore
         }
+        let journal = try momentJournal(row)
         return LocalMoment(id: try required(row, "id"), tripID: try required(row, "tripID"),
                            dayID: try required(row, "dayID"), kind: kind,
-                           capture: try decodeStamp(row), privacy: privacy,
+                           capture: try decodeStamp(row), chapterDate: journal.currentChapterDate,
+                           privacy: privacy,
                            revision: try required(row, "revision"),
                            hidden: try required(row, "hidden"),
                            important: try required(row, "important"),
                            audioSessionID: row.value(forKey: "audioSessionID") as? UUID,
-                           partialAudio: try required(row, "partialAudio"))
+                           partialAudio: try required(row, "partialAudio"),
+                           relatedMomentID: journal.relatedMomentID)
     }
 
     private func decodeIntent(_ row: NSManagedObject) throws -> AudioIntent {

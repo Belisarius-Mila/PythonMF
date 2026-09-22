@@ -887,3 +887,14 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   test zachoval starší originál
   byte-for-byte. Skutečný fyzický low-space a tepelný stres zůstávají
   samostatnou akceptací.
+
+### LL-047 — Více tlačítek v jednom SwiftUI List řádku musí mít vlastní styl
+
+- Problém: Klepnutí na Obnovit ve skrytém Momentu současně spustilo i tlačítko
+  detailu ve stejném řádku `List`, takže archiv po správné obnově otevřel
+  neočekávaný detail.
+- Typ: opakující se
+- Řešení nalezeno: 22092026
+- Řešení: U samostatných akcí uvnitř jednoho SwiftUI `List` řádku nastavit
+  explicitní `.buttonStyle(.borderless)` a každé tlačítko ověřit vlastním UI
+  scénářem. C04d cílený test obnovy i následná celá matice 4/4 prošly.

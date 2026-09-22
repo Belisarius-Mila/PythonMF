@@ -105,4 +105,57 @@ import XCTest
         ].exists)
         XCTAssertFalse(app.staticTexts["Nahrávám"].exists)
     }
+
+    func testDraftRevisionLockHideAndRestoreStayLocalAcrossRelaunch() throws {
+        #if !targetEnvironment(simulator)
+        throw XCTSkip("This uses a simulator-only isolated Camino store.")
+        #endif
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchEnvironment["CAMINO_UI_TEST_SESSION"] = UUID().uuidString
+        app.launch()
+        XCTAssertTrue(app.buttons["Založit Zkoušku"].waitForExistence(timeout: 15))
+        app.buttons["Založit Zkoušku"].tap()
+        app.buttons["Nabídka"].tap()
+        app.buttons["Označit okamžik"].tap()
+        XCTAssertTrue(app.buttons["momentRow"].waitForExistence(timeout: 10))
+        app.buttons["momentRow"].tap()
+        XCTAssertTrue(app.buttons["editMomentText"].waitForExistence(timeout: 10))
+        app.buttons["editMomentText"].tap()
+        let editor = app.textViews["momentTextEditor"]
+        XCTAssertTrue(editor.waitForExistence(timeout: 10))
+        editor.tap()
+        editor.typeText("synthetic local note")
+
+        app.terminate()
+        app.launch()
+        XCTAssertTrue(app.buttons["momentRow"].waitForExistence(timeout: 15))
+        app.buttons["momentRow"].tap()
+        app.buttons["editMomentText"].tap()
+        XCTAssertTrue(app.staticTexts[
+            "Obnovený místní koncept · dosud není publikovanou revizí"
+        ].waitForExistence(timeout: 10))
+        XCTAssertEqual(app.textViews["momentTextEditor"].value as? String,
+                       "synthetic local note")
+        app.buttons["saveMomentText"].tap()
+        XCTAssertTrue(app.staticTexts["synthetic local note"].waitForExistence(timeout: 10))
+
+        app.buttons["lockMoment"].tap()
+        XCTAssertTrue(app.staticTexts["Jen pro mě"].waitForExistence(timeout: 10))
+        app.buttons["hideMoment"].tap()
+        XCTAssertTrue(app.alerts["Skrýt Moment?"].waitForExistence(timeout: 5))
+        app.alerts["Skrýt Moment?"].buttons["Skrýt"].tap()
+        app.buttons["Hotovo"].tap()
+        XCTAssertFalse(app.buttons["momentRow"].exists)
+
+        app.buttons["Nabídka"].tap()
+        let hidden = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Skryté'"))
+            .firstMatch
+        XCTAssertTrue(hidden.waitForExistence(timeout: 5))
+        hidden.tap()
+        XCTAssertTrue(app.buttons["restoreHiddenMoment"].waitForExistence(timeout: 10))
+        app.buttons["restoreHiddenMoment"].tap()
+        app.buttons["Hotovo"].tap()
+        XCTAssertTrue(app.buttons["momentRow"].waitForExistence(timeout: 10))
+    }
 }

@@ -13,6 +13,7 @@ import CaminoLocalCore
     private let metadata: CaminoLocalStore
     private(set) var currentSessionID: UUID?
     var targetMomentID: UUID?
+    var relatedMomentID: UUID?
 
     init(media: RecordingStore, metadata: CaminoLocalStore) {
         self.media = media
@@ -26,7 +27,8 @@ import CaminoLocalCore
             sessionID: draft.sessionID,
             kind: kind == .reflection ? .reflection : .comment,
             startedAt: draft.startedAt,
-            targetMomentID: kind == .comment ? targetMomentID : nil)
+            targetMomentID: kind == .comment ? targetMomentID : nil,
+            relatedMomentID: kind == .reflection ? relatedMomentID : nil)
         currentSessionID = draft.sessionID
         return draft
     }

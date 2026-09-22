@@ -15,6 +15,9 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
     @Published private(set) var trips: [LocalTrip] = []
     @Published private(set) var activeTrip: LocalTrip?
     @Published private(set) var moments: [LocalMoment] = []
+    @Published private(set) var hiddenMoments: [LocalMoment] = []
+    @Published private(set) var textByMoment: [UUID: LocalTextHistory] = [:]
+    @Published private(set) var pendingServerMomentIDs: Set<UUID> = []
     @Published private(set) var newPrivacy: LocalPrivacy = .diary
     @Published private(set) var pendingAudioCount = 0
     @Published private(set) var unmatchedAudioCount = 0
@@ -24,6 +27,7 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
     @Published private(set) var selectedAudioKind: RecordingKind = .comment
     @Published private(set) var selectedAudioPrivacy: LocalPrivacy = .diary
     @Published private(set) var audioTargetMomentID: UUID?
+    @Published private(set) var audioRelatedMomentID: UUID?
     @Published private(set) var launchingAudio = false
     @Published private(set) var audioUpdate = 0
     @Published var showCamera = false
@@ -40,6 +44,7 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
     private let mediaVault: CaminoMediaVault?
     private var activeVideoIntent: LocalMediaIntent?
     private var pendingCommentTargetID: UUID?
+    private var pendingAddendumTargetID: UUID?
     let audio: AudioController?
     private var subscriptions = Set<AnyCancellable>()
     private var backgroundTask: UIBackgroundTaskIdentifier = .invalid
@@ -135,7 +140,23 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
 
     var todayMoments: [LocalMoment] {
         let today = CaptureStamp.record(Date(), timeZone: .current).chapterDate
-        return moments.filter { $0.capture.chapterDate == today }
+        return moments.filter { $0.chapterDate == today }
+            .sorted { $0.capture.utcMilliseconds < $1.capture.utcMilliseconds }
+    }
+
+    var allMoments: [LocalMoment] { moments + hiddenMoments }
+
+    func moments(on chapterDate: String) -> [LocalMoment] {
+        moments.filter { $0.chapterDate == chapterDate }
+            .sorted { $0.capture.utcMilliseconds < $1.capture.utcMilliseconds }
+    }
+
+    func moment(with id: UUID) -> LocalMoment? {
+        allMoments.first { $0.id == id }
+    }
+
+    func textHistory(for momentID: UUID) -> LocalTextHistory {
+        textByMoment[momentID] ?? LocalTextHistory()
     }
 
     func createTrip(name: String, isTest: Bool = false) {
@@ -169,7 +190,8 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
         } catch { message = error.localizedDescription }
     }
 
-    func startAudio(_ kind: RecordingKind, targetMomentID: UUID? = nil) {
+    func startAudio(_ kind: RecordingKind, targetMomentID: UUID? = nil,
+                    relatedMomentID: UUID? = nil) {
         guard !audioBusy, !showCamera, activeTrip != nil, let audio, !showAudio else { return }
         let safety = storageAction(for: .audio)
         guard safety != .block else {
@@ -177,13 +199,18 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
             return
         }
         let target = targetMomentID.flatMap { id in moments.first { $0.id == id } }
-        guard targetMomentID == nil || (kind == .comment && target != nil) else {
+        let related = relatedMomentID.flatMap { id in moments.first { $0.id == id } }
+        guard (targetMomentID == nil || (kind == .comment && target != nil)),
+              (relatedMomentID == nil || (kind == .reflection && related != nil)),
+              targetMomentID == nil || relatedMomentID == nil else {
             message = LocalStoreError.invalidAudioIntent.localizedDescription
             return
         }
         audio.stopPlayback()
         audioTargetMomentID = targetMomentID
+        audioRelatedMomentID = relatedMomentID
         recording?.targetMomentID = targetMomentID
+        recording?.relatedMomentID = relatedMomentID
         selectedAudioKind = kind
         selectedAudioPrivacy = target?.privacy ?? (kind == .reflection ? .ownerOnly : newPrivacy)
         message = safety == .warn ? warningStorageMessage(for: .audio) : nil
@@ -435,13 +462,29 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
             trips = try local.trips()
             activeTrip = try local.activeTrip()
             newPrivacy = try local.newMomentPrivacy()
-            moments = try activeTrip.map { try local.moments(tripID: $0.id) } ?? []
+            let all = try activeTrip.map {
+                try local.moments(tripID: $0.id, includeHidden: true)
+            } ?? []
+            moments = all.filter { !$0.hidden }
+            hiddenMoments = all.filter(\.hidden)
             mediaByMoment = try Dictionary(uniqueKeysWithValues:
-                moments.map { ($0.id, try local.mediaAssets(momentID: $0.id)) })
+                all.map { ($0.id, try local.mediaAssets(momentID: $0.id)) })
+            textByMoment = try Dictionary(uniqueKeysWithValues:
+                all.map { ($0.id, try local.textHistory(momentID: $0.id)) })
+            pendingServerMomentIDs = Set(try all.compactMap {
+                try local.pendingOperations(momentID: $0.id).isEmpty ? nil : $0.id
+            })
+            if let selected = momentDetail,
+               let current = all.first(where: { $0.id == selected.id }) {
+                momentDetail = current
+            }
             pendingAudioCount = try local.pendingAudioIntents().count
         } catch {
             message = "Místní evidenci nelze načíst. Žádná data se nemažou."
             moments = []
+            hiddenMoments = []
+            textByMoment = [:]
+            pendingServerMomentIDs = []
         }
     }
 
@@ -491,10 +534,104 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
         momentDetail = nil
     }
 
+    func requestPrivateAddendumFromDetail(momentID: UUID) {
+        pendingAddendumTargetID = momentID
+        momentDetail = nil
+    }
+
     func startPendingComment() {
         guard let target = pendingCommentTargetID else { return }
         pendingCommentTargetID = nil
         startAudio(.comment, targetMomentID: target)
+    }
+
+    func startPendingAudioFromDetail() {
+        if let target = pendingCommentTargetID {
+            pendingCommentTargetID = nil
+            startAudio(.comment, targetMomentID: target)
+        } else if let target = pendingAddendumTargetID {
+            pendingAddendumTargetID = nil
+            startAudio(.reflection, relatedMomentID: target)
+        }
+    }
+
+    func saveTextDraft(momentID: UUID, content: String) {
+        guard let local else { return }
+        do {
+            try local.saveTextDraft(momentID: momentID, content: content)
+            textByMoment[momentID] = try local.textHistory(momentID: momentID)
+        } catch { message = error.localizedDescription }
+    }
+
+    func discardTextDraft(momentID: UUID) {
+        guard let local else { return }
+        do {
+            try local.discardTextDraft(momentID: momentID)
+            message = nil
+            refresh()
+        } catch { message = error.localizedDescription }
+    }
+
+    @discardableResult func commitTextDraft(momentID: UUID) -> Bool {
+        guard let local else { return false }
+        guard storageAction(for: .text) != .block else {
+            message = blockedStorageMessage(for: .text)
+            return false
+        }
+        do {
+            _ = try local.commitTextDraft(momentID: momentID)
+            message = storageMessage(for: .text) ?? "Textová revize uložena v telefonu."
+            refresh()
+            return true
+        } catch {
+            message = error.localizedDescription
+            refresh()
+            return false
+        }
+    }
+
+    func changePrivacy(momentID: UUID, to privacy: LocalPrivacy) {
+        guard !audioBusy, !showCamera, let local,
+              let moment = moment(with: momentID) else { return }
+        let action: LocalPrivacyAction = privacy == .ownerOnly ? .lock
+            : moment.kind == .reflection ? .insertReflectionIntoDiary : .unlock
+        do {
+            _ = try local.changePrivacy(momentID: momentID, to: privacy, action: action)
+            message = privacy == .ownerOnly
+                ? "Jen pro mě nastaveno v telefonu · čeká na server."
+                : "Do deníku nastaveno v telefonu · čeká na server."
+            refresh()
+        } catch { message = error.localizedDescription; refresh() }
+    }
+
+    func setHidden(momentID: UUID, hidden: Bool) {
+        guard !audioBusy, !showCamera, let local else { return }
+        do {
+            _ = try local.setHidden(momentID: momentID, hidden: hidden)
+            message = hidden
+                ? "Moment je v místním archivu. Skrytí neuvolnilo místo · čeká na server."
+                : "Moment je obnoven se stejným soukromím · čeká na server."
+            refresh()
+        } catch { message = error.localizedDescription; refresh() }
+    }
+
+    func setImportant(momentID: UUID, important: Bool) {
+        guard !audioBusy, !showCamera, let local else { return }
+        do {
+            _ = try local.setImportant(momentID: momentID, important: important)
+            message = important ? "Hvězdička uložena v telefonu." : "Hvězdička odebrána."
+            refresh()
+        } catch { message = error.localizedDescription; refresh() }
+    }
+
+    func moveMoment(momentID: UUID, to date: Date) {
+        guard !audioBusy, !showCamera, let local else { return }
+        let chapter = CaptureStamp.record(date, timeZone: .current).chapterDate
+        do {
+            _ = try local.moveMoment(momentID: momentID, toChapterDate: chapter)
+            message = "Kapitola změněna; původní čas zůstal zachovaný · čeká na server."
+            refresh()
+        } catch { message = error.localizedDescription; refresh() }
     }
 
     func audioSessionIDs(for momentID: UUID) -> Set<UUID> {

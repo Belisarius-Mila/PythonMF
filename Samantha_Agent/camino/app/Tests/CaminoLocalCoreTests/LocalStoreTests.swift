@@ -161,6 +161,135 @@ import XCTest
         XCTAssertEqual(try store.moments(tripID: trip.id).count, 1)
     }
 
+    func testDraftSurvivesRestartAndHumanRevisionWinsLateAutomation() throws {
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("camino-c04d-text-\(UUID())", isDirectory: true)
+            .appendingPathComponent("metadata.sqlite")
+        let first = try CaminoLocalStore(storeURL: url)
+        let trip = try first.createTrip(name: "Synthetic")
+        let moment = try first.markMoment(at: instant("2026-09-20T08:00:00Z"),
+                                          timeZone: prague)
+        let raw = try first.appendTextRevision(
+            momentID: moment.id, role: .transcriptRaw, content: "synthetic raw",
+            revisionID: UUID(), operationID: UUID(),
+            at: instant("2026-09-20T08:01:00Z"))
+        try first.saveTextDraft(momentID: moment.id, content: "synthetic draft",
+                                at: instant("2026-09-20T08:02:00Z"))
+
+        let reopened = try CaminoLocalStore(storeURL: url)
+        var history = try reopened.textHistory(momentID: moment.id)
+        XCTAssertEqual(history.draft?.content, "synthetic draft")
+        XCTAssertEqual(history.readerRevision, raw)
+        let human = try reopened.commitTextDraft(
+            momentID: moment.id, at: instant("2026-09-20T08:03:00Z"))
+        XCTAssertEqual(human.role, .humanRevision)
+        XCTAssertNil(try reopened.textHistory(momentID: moment.id).draft)
+        _ = try reopened.appendTextRevision(
+            momentID: moment.id, role: .transcriptClean, content: "synthetic late AI",
+            sourceIDs: [raw.id], parentRevisionID: raw.id,
+            at: instant("2026-09-20T08:04:00Z"))
+        history = try reopened.textHistory(momentID: moment.id)
+        XCTAssertEqual(history.revisions.count, 3)
+        XCTAssertEqual(history.readerRevision, human)
+        XCTAssertEqual(try reopened.moments(tripID: trip.id).first?.revision, 4)
+    }
+
+    func testReflectionReleaseRequiresConsciousActionAndCreatesOrderedOperations() throws {
+        let store = try CaminoLocalStore(inMemory: true)
+        let trip = try store.createTrip(name: "Synthetic")
+        let sessionID = UUID()
+        _ = try store.beginAudioIntent(sessionID: sessionID, kind: .reflection,
+                                       startedAt: instant("2026-09-20T08:00:00Z"))
+        let reflection = try store.acceptCompletedAudio(
+            sessionID: sessionID, kind: .reflection, partial: false)
+        XCTAssertThrowsError(try store.changePrivacy(
+            momentID: reflection.id, to: .diary, action: .unlock))
+        let releaseID = UUID()
+        let released = try store.changePrivacy(
+            momentID: reflection.id, to: .diary,
+            action: .insertReflectionIntoDiary, operationID: releaseID)
+        XCTAssertEqual(released.privacy, .diary)
+        XCTAssertEqual(released.revision, 2)
+        XCTAssertEqual(try store.changePrivacy(
+            momentID: reflection.id, to: .diary,
+            action: .insertReflectionIntoDiary, operationID: releaseID), released)
+        let locked = try store.changePrivacy(
+            momentID: reflection.id, to: .ownerOnly, action: .lock)
+        XCTAssertEqual(locked.privacy, .ownerOnly)
+        let operations = try store.pendingOperations(momentID: reflection.id)
+        XCTAssertEqual(operations.map(\.deviceSequence), [1, 2])
+        XCTAssertEqual(operations.map(\.expectedRevision), [1, 2])
+        XCTAssertEqual(try store.moments(tripID: trip.id).first?.revision, 3)
+    }
+
+    func testHideRestoreKeepsPrivacyAndMediaOriginalMetadata() throws {
+        let store = try CaminoLocalStore(inMemory: true)
+        let trip = try store.createTrip(name: "Synthetic")
+        try store.setNewMomentPrivacy(.ownerOnly)
+        let intent = try store.beginMediaIntent(kind: .photo)
+        let inspection = LocalMediaInspection(
+            byteCount: 12, sha256: String(repeating: "b", count: 64),
+            width: 4, height: 3, orientation: 1, durationMilliseconds: nil,
+            hasAudio: false, partial: false)
+        let asset = try store.acceptMedia(intent, inspection: inspection)
+        let hidden = try store.setHidden(momentID: intent.momentID, hidden: true)
+        XCTAssertTrue(hidden.hidden)
+        XCTAssertEqual(hidden.privacy, .ownerOnly)
+        XCTAssertTrue(try store.moments(tripID: trip.id).isEmpty)
+        XCTAssertEqual(try store.moments(tripID: trip.id, includeHidden: true).count, 1)
+        XCTAssertEqual(try store.mediaAssets(momentID: intent.momentID), [asset])
+        let restored = try store.setHidden(momentID: intent.momentID, hidden: false)
+        XCTAssertFalse(restored.hidden)
+        XCTAssertEqual(restored.privacy, .ownerOnly)
+        XCTAssertEqual(try store.mediaAssets(momentID: intent.momentID).first?.inspection,
+                       inspection)
+    }
+
+    func testPrivateAddendumIsSeparateLinkedOwnerOnlyMoment() throws {
+        let store = try CaminoLocalStore(inMemory: true)
+        let trip = try store.createTrip(name: "Synthetic")
+        let photoIntent = try store.beginMediaIntent(kind: .photo)
+        _ = try store.acceptMedia(photoIntent, inspection: LocalMediaInspection(
+            byteCount: 12, sha256: String(repeating: "c", count: 64),
+            width: 4, height: 3, orientation: 1, durationMilliseconds: nil,
+            hasAudio: false, partial: false))
+        let sessionID = UUID()
+        let addendumIntent = try store.beginAudioIntent(
+            sessionID: sessionID, kind: .reflection,
+            startedAt: instant("2026-09-20T09:00:00Z"),
+            relatedMomentID: photoIntent.momentID)
+        let addendum = try store.acceptCompletedAudio(
+            sessionID: sessionID, kind: .reflection, partial: false)
+        XCTAssertNotEqual(addendum.id, photoIntent.momentID)
+        XCTAssertEqual(addendum.id, addendumIntent.momentID)
+        XCTAssertEqual(addendum.relatedMomentID, photoIntent.momentID)
+        XCTAssertEqual(addendum.privacy, .ownerOnly)
+        let photo = try XCTUnwrap(try store.moments(tripID: trip.id)
+            .first(where: { $0.id == photoIntent.momentID }))
+        XCTAssertEqual(photo.privacy, .diary)
+        XCTAssertNil(photo.relatedMomentID)
+    }
+
+    func testChapterMovePreservesOriginalCaptureTimeAcrossRestart() throws {
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("camino-c04d-chapter-\(UUID())", isDirectory: true)
+            .appendingPathComponent("metadata.sqlite")
+        let first = try CaminoLocalStore(storeURL: url)
+        let trip = try first.createTrip(name: "Synthetic")
+        let original = try first.markMoment(at: instant("2026-09-20T08:00:00Z"),
+                                            timeZone: prague)
+        let moved = try first.moveMoment(momentID: original.id,
+                                         toChapterDate: "2026-09-21")
+        XCTAssertEqual(moved.chapterDate, "2026-09-21")
+        XCTAssertEqual(moved.capture, original.capture)
+        XCTAssertNotEqual(moved.dayID, original.dayID)
+        let reopened = try CaminoLocalStore(storeURL: url)
+        let recovered = try XCTUnwrap(try reopened.moments(tripID: trip.id).first)
+        XCTAssertEqual(recovered.chapterDate, "2026-09-21")
+        XCTAssertEqual(recovered.capture.chapterDate, "2026-09-20")
+        XCTAssertEqual(recovered.capture.utcMilliseconds, original.capture.utcMilliseconds)
+    }
+
     func testInvalidTripAndDuplicateIdentityCannotReplaceExistingData() throws {
         let store = try CaminoLocalStore(inMemory: true)
         XCTAssertThrowsError(try store.createTrip(name: "   "))

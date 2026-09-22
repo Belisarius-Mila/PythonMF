@@ -295,15 +295,73 @@ struct CaminoMediaDetailView: View {
     @ObservedObject var model: CaminoViewModel
     let moment: LocalMoment
     @Environment(\.dismiss) private var dismiss
+    @State private var showTextEditor = false
+    @State private var showChapterPicker = false
+    @State private var chapterDate = Date()
+    @State private var confirmDiary = false
+    @State private var confirmHide = false
+
+    private var current: LocalMoment { model.moment(with: moment.id) ?? moment }
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    Text(moment.kind.title).font(.title2.bold())
-                    Text("\(moment.capture.localWall) · \(moment.privacy.title)")
+                    HStack {
+                        Text(current.kind.title).font(.title2.bold())
+                        Spacer()
+                        Button {
+                            model.setImportant(momentID: current.id,
+                                               important: !current.important)
+                        } label: {
+                            Image(systemName: current.important ? "star.fill" : "star")
+                                .font(.title2)
+                        }
+                        .accessibilityLabel(current.important
+                            ? "Odebrat hvězdičku" : "Přidat hvězdičku")
+                    }
+                    Text("Nahráno: \(current.capture.localWall) · kapitola \(current.chapterDate)")
                         .font(.subheadline)
-                    let assets = model.mediaByMoment[moment.id] ?? []
+                    Label(current.privacy.title,
+                          systemImage: current.privacy == .ownerOnly ? "lock.fill" : "book")
+                    if model.pendingServerMomentIDs.contains(current.id) {
+                        Label("Místní revize · čeká na server",
+                              systemImage: "arrow.triangle.2.circlepath")
+                            .font(.caption).foregroundStyle(.orange)
+                    }
+                    if let parentID = current.relatedMomentID,
+                       let parent = model.moment(with: parentID) {
+                        Label("Patří k: \(parent.kind.title) · \(parent.capture.localWall)",
+                              systemImage: "link")
+                            .font(.subheadline)
+                    }
+
+                    let history = model.textHistory(for: current.id)
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Text").font(.headline)
+                        if let reader = history.readerRevision {
+                            Text(reader.content)
+                            Text("\(reader.role.title) · revize \(history.revisions.count)")
+                                .font(.caption).foregroundStyle(.secondary)
+                        } else {
+                            Text("Zatím bez čtenářského textu.")
+                                .foregroundStyle(.secondary)
+                        }
+                        if history.draft != nil {
+                            Label("Obnovitelný koncept je uložen jen v telefonu",
+                                  systemImage: "square.and.pencil")
+                                .font(.caption).foregroundStyle(.orange)
+                        }
+                        Button("Upravit text", systemImage: "pencil") {
+                            showTextEditor = true
+                        }
+                        .accessibilityIdentifier("editMomentText")
+                    }
+                    .padding()
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
+
+                    let assets = model.mediaByMoment[current.id] ?? []
                     ForEach(assets) { asset in
                         VStack(alignment: .leading, spacing: 8) {
                             Text(asset.kind.title).font(.headline)
@@ -335,10 +393,12 @@ struct CaminoMediaDetailView: View {
                     }
                     if assets.isEmpty { Text("Moment zatím nemá fotografii ani video.") }
                     if let audio = model.audio {
-                        let linked = model.audioSessionIDs(for: moment.id)
+                        let linked = model.audioSessionIDs(for: current.id)
                         ForEach(audio.library.sessions.filter { linked.contains($0.id) }) { session in
                             VStack(alignment: .leading, spacing: 8) {
-                                Text("Připojený komentář").font(.headline)
+                                Text(current.kind == .reflection
+                                     ? "Úvaha" : "Připojený komentář")
+                                    .font(.headline)
                                 ForEach(session.parts) { clip in
                                     Button("Přehrát komentář", systemImage: "play.fill") {
                                         model.play(clip)
@@ -351,21 +411,57 @@ struct CaminoMediaDetailView: View {
                             }
                         }
                     }
-                    Button("Přidat komentář", systemImage: "mic.fill") {
-                        model.requestCommentFromDetail(momentID: moment.id)
-                    }
-                    .accessibilityIdentifier("commentOnMoment")
-                    Button("Přidat fotografii") {
-                        dismiss()
-                        DispatchQueue.main.async {
-                            model.openCamera(.photo, targetMomentID: moment.id)
+                    if !current.hidden {
+                        Button("Přidat komentář", systemImage: "mic.fill") {
+                            model.requestCommentFromDetail(momentID: current.id)
+                        }
+                        .accessibilityIdentifier("commentOnMoment")
+                        Button("Soukromý dovětek", systemImage: "lock.bubble.left") {
+                            model.requestPrivateAddendumFromDetail(momentID: current.id)
+                        }
+                        .accessibilityIdentifier("privateAddendum")
+                        Button("Přidat fotografii") {
+                            dismiss()
+                            DispatchQueue.main.async {
+                                model.openCamera(.photo, targetMomentID: current.id)
+                            }
+                        }
+                        Button("Přidat video") {
+                            dismiss()
+                            DispatchQueue.main.async {
+                                model.openCamera(.video, targetMomentID: current.id)
+                            }
                         }
                     }
-                    Button("Přidat video") {
-                        dismiss()
-                        DispatchQueue.main.async {
-                            model.openCamera(.video, targetMomentID: moment.id)
+
+                    Divider()
+                    if current.privacy == .ownerOnly {
+                        Button(current.kind == .reflection
+                               ? "Vložit Úvahu do deníku" : "Nastavit Do deníku",
+                               systemImage: "book") {
+                            confirmDiary = true
                         }
+                        .accessibilityIdentifier("insertIntoDiary")
+                    } else {
+                        Button("Nastavit Jen pro mě", systemImage: "lock.fill") {
+                            model.changePrivacy(momentID: current.id, to: .ownerOnly)
+                        }
+                        .accessibilityIdentifier("lockMoment")
+                    }
+                    Button("Změnit den kapitoly", systemImage: "calendar") {
+                        chapterDate = date(from: current.chapterDate) ?? Date()
+                        showChapterPicker = true
+                    }
+                    if current.hidden {
+                        Button("Obnovit ze skrytých", systemImage: "arrow.uturn.backward") {
+                            model.setHidden(momentID: current.id, hidden: false)
+                        }
+                    } else {
+                        Button("Skrýt z deníku", systemImage: "archivebox") {
+                            confirmHide = true
+                        }
+                        .foregroundStyle(.orange)
+                        .accessibilityIdentifier("hideMoment")
                     }
                 }
                 .padding()
@@ -374,6 +470,129 @@ struct CaminoMediaDetailView: View {
             .toolbar { ToolbarItem(placement: .topBarTrailing) {
                 Button("Hotovo") { dismiss() }
             } }
+        }
+        .sheet(isPresented: $showTextEditor) {
+            CaminoTextEditorView(model: model, momentID: current.id)
+        }
+        .sheet(isPresented: $showChapterPicker) {
+            NavigationStack {
+                Form {
+                    DatePicker("Kapitola", selection: $chapterDate,
+                               displayedComponents: .date)
+                    Text("Čas původní fotografie nebo nahrávky zůstane zachován.")
+                        .font(.footnote).foregroundStyle(.secondary)
+                }
+                .navigationTitle("Změnit kapitolu")
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Zrušit") { showChapterPicker = false }
+                    }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Uložit") {
+                            model.moveMoment(momentID: current.id, to: chapterDate)
+                            showChapterPicker = false
+                        }
+                    }
+                }
+            }
+            .presentationDetents([.medium])
+        }
+        .alert(current.kind == .reflection ? "Vložit Úvahu do deníku?" : "Změnit soukromí?",
+               isPresented: $confirmDiary) {
+            Button("Zrušit", role: .cancel) {}
+            Button("Vložit do deníku") {
+                model.changePrivacy(momentID: current.id, to: .diary)
+            }
+        } message: {
+            Text("Po přijetí serverem může být text a povolené původní audio dostupné Janě v soukromém Vieweru. Změna teď zůstane jen v telefonu a bude čekat na server.")
+        }
+        .alert("Skrýt Moment?", isPresented: $confirmHide) {
+            Button("Zrušit", role: .cancel) {}
+            Button("Skrýt", role: .destructive) {
+                model.setHidden(momentID: current.id, hidden: true)
+            }
+        } message: {
+            Text("Moment i originály zůstanou v archivu. Skrytí neuvolní místo a již odeslané kopie nelze vzít zpět.")
+        }
+    }
+
+    private func date(from chapter: String) -> Date? {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.timeZone = .current
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.date(from: chapter)
+    }
+}
+
+private struct CaminoTextEditorView: View {
+    @ObservedObject var model: CaminoViewModel
+    let momentID: UUID
+    @Environment(\.dismiss) private var dismiss
+    @State private var text = ""
+    @State private var loaded = false
+    @State private var confirmDiscard = false
+
+    private var history: LocalTextHistory { model.textHistory(for: momentID) }
+    private var readerText: String { history.readerRevision?.content ?? "" }
+
+    var body: some View {
+        NavigationStack {
+            VStack(alignment: .leading, spacing: 12) {
+                if history.draft != nil {
+                    Label("Obnovený místní koncept · dosud není publikovanou revizí",
+                          systemImage: "arrow.counterclockwise")
+                        .font(.footnote).foregroundStyle(.orange)
+                }
+                TextEditor(text: $text)
+                    .padding(8)
+                    .background(Color(.secondarySystemBackground),
+                                in: RoundedRectangle(cornerRadius: 12))
+                    .accessibilityIdentifier("momentTextEditor")
+                Text("Koncept se ukládá průběžně jen do telefonu. Uložit vytvoří novou lidskou revizi; původní audio, média a starší text zůstávají zachované.")
+                    .font(.footnote).foregroundStyle(.secondary)
+            }
+            .padding()
+            .navigationTitle("Upravit text")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Zrušit") {
+                        if text != readerText || history.draft != nil {
+                            confirmDiscard = true
+                        } else {
+                            dismiss()
+                        }
+                    }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Uložit") {
+                        model.saveTextDraft(momentID: momentID, content: text)
+                        if model.commitTextDraft(momentID: momentID) { dismiss() }
+                    }
+                    .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    .accessibilityIdentifier("saveMomentText")
+                }
+            }
+        }
+        .interactiveDismissDisabled()
+        .onAppear {
+            guard !loaded else { return }
+            text = history.draft?.content ?? readerText
+            loaded = true
+        }
+        .onChange(of: text) { _, value in
+            guard loaded else { return }
+            model.saveTextDraft(momentID: momentID, content: value)
+        }
+        .alert("Zahodit koncept?", isPresented: $confirmDiscard) {
+            Button("Pokračovat v úpravě", role: .cancel) {}
+            Button("Zahodit koncept", role: .destructive) {
+                model.discardTextDraft(momentID: momentID)
+                dismiss()
+            }
+        } message: {
+            Text("Předchozí uložená revize zůstane zachovaná. Zahodí se jen tento rozpracovaný koncept.")
         }
     }
 }
