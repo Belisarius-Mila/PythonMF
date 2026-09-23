@@ -49,3 +49,12 @@ veřejný bind jsou zakázané.
 Tento návod není oprávnění službu nasadit nebo změnit Serve. C05a checkpoint
 ověřuje kód synteticky; skutečná služba, iPhone klient a vzdálený přenos jsou
 samostatné kroky.
+
+## Jednorázový loopback smoke
+
+Bezpečný integrační mezikrok je vedený v registru workflow pod ID
+`camino_c05a_loopback_smoke`. Náhled nejdřív ukáže pevný příkaz, přesný rozsah
+zápisů a vyžádá samostatné potvrzení; ruční improvizované spuštění se
+nepoužívá. Smoke pracuje jen se syntetickými daty, dynamickým loopback portem a
+dočasnými odvolatelnými tokeny. Zachovává privátní redigovaný důkaz, ale
+nemění Serve/Funnel, nepřipojuje iPhone a není nasazením trvalé služby.

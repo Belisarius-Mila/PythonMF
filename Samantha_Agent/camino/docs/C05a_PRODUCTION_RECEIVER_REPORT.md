@@ -51,7 +51,10 @@ párovací UI ani zálohu.
 - OpenAPI JSON: validní; deklarované cesty přesně odpovídají aplikaci a nemají
   přednastavený server.
 - Veřejný bind `0.0.0.0`: správně odmítnut, exit 2.
-- Plná projektová brána: syntaxe Python/JavaScript/shell a 1751/1751 testů PASS.
+- Příprava registrovaného loopback smoke: 4/4 bezpečnostních a registračních
+  testů PASS; oddělené C05a prostředí načte FastAPI, Uvicorn a aplikaci.
+- Plná projektová brána po přidání workflow: syntaxe Python/JavaScript/shell a
+  1763/1763 testů PASS.
 
 | Scénář | Lokální C05a důkaz | Co ještě chybí |
 |---|---|---|
@@ -64,7 +67,13 @@ párovací UI ani zálohu.
 
 ## Další krok
 
-Samostatně připravit soukromé cesty, token a loopback smoke nad prázdnými
-syntetickými daty. Teprve po jeho přijetí lze zvlášť potvrdit privátní
-Tailscale Serve a C05b iPhone klienta. Do té doby se místní stav `čeká na
-server` nesmí označit jako přijatý serverem.
+Registrovaný `camino_c05a_loopback_smoke` je připravený pro jednorázový běh v
+odděleném C05a prostředí. Vytvoří pouze syntetická data mimo repozitář,
+vlastněný loopback proces a redigovanou účtenku v ignorovaném privátním stavu;
+oba náhodné tokeny odvolá. Serve, Funnel, iPhone, Git, push a deployment
+nemění. Příprava workflow prošla cílenými testy, ale skutečný smoke zatím
+neproběhl a čeká na samostatné potvrzení přesného registrovaného příkazu.
+
+Teprve po přijatém loopback smoke lze zvlášť potvrdit privátní Tailscale Serve
+a C05b iPhone klienta. Do té doby se místní stav `čeká na server` nesmí
+označit jako přijatý serverem.

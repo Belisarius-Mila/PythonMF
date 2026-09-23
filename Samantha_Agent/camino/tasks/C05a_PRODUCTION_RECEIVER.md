@@ -55,3 +55,22 @@ opakovatelnému `retry_required`; nic se nevydává za ověřené.
 - hlavní projektová brána po přidání core testů;
 - žádný fyzický nebo provozní PASS bez samostatného spuštění služby, privátního
   HTTPS a skutečného iPhone klienta.
+
+## Registrovaný loopback smoke
+
+Jednorázový workflow `camino_c05a_loopback_smoke` je připravený jako
+samostatně potvrzovaný lokální mezikrok. Použije pouze syntetický manifest a
+syntetické bajty, dynamický port na `127.0.0.1` a dvě náhodná owner pověření,
+jejichž databáze obsahuje jen hashe. Přes skutečné HTTP musí doložit:
+
+- odmítnutí neautorizovaného požadavku a přijetí autorizovaného health;
+- přijetí C03b Trip/Day/Moment/Asset manifestu;
+- vícedílný upload, shodný retry části a blokaci předčasné finalizace;
+- serverové ověření celé délky a SHA-256 i idempotentní retry finalizace;
+- odvolání prvního tokenu, restart vlastněného procesu nad stejnými daty,
+  zachování účtenky `verified` a odvolání druhého tokenu.
+
+Workflow zachová syntetické databáze, bajty a privátní redigovanou účtenku pro
+audit. Nic nemaže, nemění Serve ani Funnel, nedotýká se iPhonu, nepushuje a
+nenasazuje. Jeho příprava sama není výsledkem smoke; PASS vznikne až po
+zobrazení přesného příkazu, samostatném potvrzení a úspěšném běhu.

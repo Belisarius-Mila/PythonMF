@@ -21,6 +21,8 @@ DEVELOPMENT_BRANCH_AUDIT_SCRIPT = SAMANTHA_DIR / "scripts" / "development_branch
 CAMINO_C02B_T043_CONTROL_SCRIPT = SAMANTHA_DIR / "scripts" / "camino_c02b_t043_control.py"
 CAMINO_C02B_T047_CONTROL_SCRIPT = SAMANTHA_DIR / "scripts" / "camino_c02b_t047_control.py"
 CAMINO_C02B_NETWORK_CONTROL_SCRIPT = SAMANTHA_DIR / "scripts" / "camino_c02b_network_control.py"
+CAMINO_C05A_LOOPBACK_SMOKE_SCRIPT = SAMANTHA_DIR / "scripts" / "camino_c05a_loopback_smoke.py"
+CAMINO_C05A_SMOKE_PYTHON = Path("/private/tmp/camino-c05a-venv/bin/python")
 HUMAN_ADAM_TAKEOVER_CONFIRMATION = "POTVRZUJI PREVZETI HUMAN-ADAM WIP DO MAIN"
 SECURE_BACKUP_ROOT = Path("/Volumes/SamanthaSecureBackup/SamanthaBackups")
 DEFAULT_PENDING_COMMAND_PATH = SAMANTHA_DIR / "data" / "workflows" / "pending_command.json"
@@ -475,6 +477,43 @@ WORKFLOW_COMMANDS: tuple[WorkflowCommand, ...] = (
         ),
     ),
     WorkflowCommand(
+        command_id="camino_c05a_loopback_smoke",
+        title="Provést syntetický loopback smoke Camino C05a",
+        purpose=(
+            "Jednorázově spustí vlastněný C05a proces pouze na 127.0.0.1, přes HTTP "
+            "ověří metadata, vícedílný upload, retry, finalizaci, odvolání tokenů a restart."
+        ),
+        aliases=(
+            "spusť camino c05a loopback smoke",
+            "spust camino c05a loopback smoke",
+            "proveď camino c05a smoke",
+            "proved camino c05a smoke",
+        ),
+        argv=(
+            str(CAMINO_C05A_SMOKE_PYTHON),
+            "-m",
+            "scripts.camino_c05a_loopback_smoke",
+            "--execute",
+        ),
+        cwd=SAMANTHA_DIR,
+        risk="private_local_test_write",
+        writes=(
+            "nový zachovaný syntetický běh v /private/tmp/camino-c05a-smoke-*, "
+            "redigovanou účtenku v ignorovaném data/private a dva dočasné hashované "
+            "smoke tokeny, které odvolá; spustí a ukončí pouze vlastní loopback proces; "
+            "nemění Serve, Funnel, iPhone, Git, push ani deployment"
+        ),
+        requires_confirmation=True,
+        intent_keywords=("spusť", "spust", "proveď", "proved", "camino", "c05a", "loopback", "smoke"),
+        required_keyword_groups=(
+            ("spusť", "spust", "proveď", "proved"),
+            ("camino",),
+            ("c05a",),
+            ("smoke", "loopback"),
+        ),
+        preflight=lambda command: _preflight_camino_c05a_loopback_smoke(command),
+    ),
+    WorkflowCommand(
         command_id="human_adam_takeover_audit",
         title="Kontrola Human–Adam WIP checkpointu",
         purpose="Read-only ověří, zda lze jeden izolovaný WIP převzít přesným fast-forwardem.",
@@ -806,6 +845,19 @@ def _preflight_human_adam_takeover(_command: WorkflowCommand) -> str:
         return ""
     detail = (completed.stderr or completed.stdout).strip().splitlines()
     return detail[-1] if detail else "Human–Adam WIP audit není připravený"
+
+
+def _preflight_camino_c05a_loopback_smoke(_command: WorkflowCommand) -> str:
+    if not CAMINO_C05A_LOOPBACK_SMOKE_SCRIPT.is_file():
+        return f"chybi smoke skript {CAMINO_C05A_LOOPBACK_SMOKE_SCRIPT}"
+    if not CAMINO_C05A_SMOKE_PYTHON.is_file():
+        return (
+            f"chybi oddelene Camino prostredi {CAMINO_C05A_SMOKE_PYTHON}; "
+            "nejdrive ho priprav podle camino/server/README.md"
+        )
+    if not (SAMANTHA_DIR / "camino" / "server" / "requirements.txt").is_file():
+        return "chybi pripnute C05a server requirements"
+    return ""
 
 
 def _has_command_confirmation(
