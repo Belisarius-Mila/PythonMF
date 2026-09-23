@@ -898,3 +898,17 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Řešení: U samostatných akcí uvnitř jednoho SwiftUI `List` řádku nastavit
   explicitní `.buttonStyle(.borderless)` a každé tlačítko ověřit vlastním UI
   scénářem. C04d cílený test obnovy i následná celá matice 4/4 prošly.
+
+### LL-048 — Retry fronty musí uchovat obálku a mobilní grant zmrazit dávku
+
+- Problém: Nové sestavení JSON při retry může změnit bajty idempotentní
+  operace; pouhé globální „mobilní data povolena“ zase může nechtěně zahrnout
+  médium pořízené až po souhlasu.
+- Typ: opakující se
+- Řešení nalezeno: 23092026
+- Řešení: Před prvním odesláním trvale uložit přesné bajty operace a její
+  sekvenci. Mobilní souhlas navázat na aktuální ID dávky a ve stejné transakci
+  otevřít nové ID pro všechny pozdější záznamy. Po výpadku vždy znovu číst
+  serverový stav; lokální stav uploadu není důkaz `verified`.
+- Ověření: C05b Swift 27/27, cílený UI relaunch/pause 1/1 a provozní workflow
+  13/13 PASS; fyzická mobilní a síťová akceptace zůstává samostatná.

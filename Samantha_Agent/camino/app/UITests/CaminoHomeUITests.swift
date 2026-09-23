@@ -158,4 +158,35 @@ import XCTest
         app.buttons["Hotovo"].tap()
         XCTAssertTrue(app.buttons["momentRow"].waitForExistence(timeout: 10))
     }
+
+    func testSyncQueuePauseSurvivesRelaunchWithoutBlockingLocalCapture() throws {
+        #if !targetEnvironment(simulator)
+        throw XCTSkip("This uses a simulator-only isolated Camino store.")
+        #endif
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchEnvironment["CAMINO_UI_TEST_SESSION"] = UUID().uuidString
+        app.launch()
+        XCTAssertTrue(app.buttons["Založit Zkoušku"].waitForExistence(timeout: 15))
+        app.buttons["Založit Zkoušku"].tap()
+
+        app.buttons["Nabídka"].tap()
+        app.buttons["Uložení a přenosy"].tap()
+        XCTAssertTrue(app.navigationBars["Uložení a přenosy"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["Místní záznam a čtení fungují i bez Macu."].exists)
+        app.swipeUp()
+        XCTAssertTrue(app.buttons["toggleSyncPause"].waitForExistence(timeout: 5))
+        app.buttons["toggleSyncPause"].tap()
+        XCTAssertTrue(app.staticTexts["Přenosy jsou pozastavené"].waitForExistence(timeout: 5))
+
+        app.terminate()
+        app.launch()
+        XCTAssertTrue(app.staticTexts["Zkušební cesta"].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.buttons["startComment"].exists)
+        app.buttons["Nabídka"].tap()
+        app.buttons["Uložení a přenosy"].tap()
+        app.swipeUp()
+        XCTAssertTrue(app.buttons["Pokračovat v přenosech"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["Přenosy jsou pozastavené"].exists)
+    }
 }

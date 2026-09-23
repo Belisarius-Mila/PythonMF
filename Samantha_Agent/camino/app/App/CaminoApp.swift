@@ -1,6 +1,7 @@
 import SwiftUI
 
 @main struct CaminoApp: App {
+    @UIApplicationDelegateAdaptor(CaminoAppDelegate.self) private var appDelegate
     @StateObject private var model = CaminoViewModel()
     @Environment(\.scenePhase) private var scenePhase
 
@@ -82,6 +83,7 @@ private struct CaptureHomeView: View {
     @ObservedObject var model: CaminoViewModel
     @State private var showTrips = false
     @State private var showArchive = false
+    @State private var showSync = false
     @State private var selectedDay = Date()
     @State private var filter: CaminoMomentFilter = .all
 
@@ -232,11 +234,18 @@ private struct CaptureHomeView: View {
                         Button("Skryté (\(model.hiddenMoments.count))",
                                systemImage: "archivebox") { showArchive = true }
                             .disabled(model.audioBusy)
+                        Button("Uložení a přenosy", systemImage: "arrow.triangle.2.circlepath") {
+                            showSync = true
+                        }
+                        .disabled(model.audioBusy || model.sync == nil)
                     } label: { Label("Nabídka", systemImage: "ellipsis.circle") }
                 }
             }
             .sheet(isPresented: $showTrips) { TripListView(model: model) }
             .sheet(isPresented: $showArchive) { CaminoHiddenArchiveView(model: model) }
+            .sheet(isPresented: $showSync) {
+                if let sync = model.sync { CaminoSyncView(sync: sync) }
+            }
         }
     }
 
@@ -269,6 +278,88 @@ private struct CaptureHomeView: View {
         .buttonStyle(.borderedProminent)
         .disabled(model.audioBusy)
         .accessibilityIdentifier(kind == .comment ? "startComment" : "startReflection")
+    }
+}
+
+private struct CaminoSyncView: View {
+    @ObservedObject var sync: CaminoSyncCoordinator
+    @Environment(\.dismiss) private var dismiss
+    @State private var confirmCellular = false
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Domácí Mac") {
+                    TextField("Soukromá HTTPS adresa", text: $sync.serverURL)
+                        .textInputAutocapitalization(.never)
+                        .keyboardType(.URL)
+                        .autocorrectionDisabled()
+                        .accessibilityIdentifier("syncServerURL")
+                    SecureField(sync.tokenStored ? "Token je uložený" : "Soukromý token",
+                                text: $sync.tokenInput)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .accessibilityIdentifier("syncToken")
+                    Button("Uložit připojení") { sync.saveConfiguration() }
+                        .accessibilityIdentifier("saveSyncConfiguration")
+                    Text("Token zůstává v Keychain. Aplikace přijímá jen HTTPS a nemá veřejný fallback.")
+                        .font(.footnote).foregroundStyle(.secondary)
+                }
+                Section("Telefon") {
+                    Text("Místní záznam a čtení fungují i bez Macu.")
+                    LabeledContent("Prioritní metadata", value: "\(sync.stats.metadataCount)")
+                    LabeledContent("Čekající média", value: "\(sync.stats.mediaCount)")
+                    LabeledContent("Čekající objem", value: formatBytes(sync.stats.mediaBytes))
+                }
+                Section("Mac") {
+                    Text(sync.statusText).font(.headline)
+                        .accessibilityIdentifier("syncStatus")
+                    if !sync.detailText.isEmpty {
+                        Text(sync.detailText).font(.subheadline)
+                    }
+                    if sync.reconciliationRequired {
+                        Label("Po změně epochy je nutná servisní kontrola. Nic se automaticky nemaže.",
+                              systemImage: "exclamationmark.shield")
+                            .foregroundStyle(.orange)
+                    }
+                }
+                Section("Ovládání") {
+                    Button("Synchronizovat nyní", systemImage: "arrow.clockwise") {
+                        sync.synchronizeNow()
+                    }
+                    .disabled(sync.busy || sync.paused || !sync.configurationReady)
+                    .accessibilityIdentifier("syncNow")
+                    Button(sync.paused ? "Pokračovat v přenosech" : "Pozastavit přenosy",
+                           systemImage: sync.paused ? "play.fill" : "pause.fill") {
+                        sync.setPaused(!sync.paused)
+                    }
+                    .accessibilityIdentifier("toggleSyncPause")
+                    Button("Odeslat zobrazenou dávku i přes mobilní data",
+                           systemImage: "antenna.radiowaves.left.and.right") {
+                        confirmCellular = true
+                    }
+                    .disabled(sync.cellularStats.mediaCount == 0 || sync.cellularGranted)
+                    .accessibilityIdentifier("grantCellularBatch")
+                    Text("Jednorázové povolení se nevztahuje na fotografie, audio ani video pořízené později.")
+                        .font(.footnote).foregroundStyle(.secondary)
+                }
+            }
+            .navigationTitle("Uložení a přenosy")
+            .toolbar { ToolbarItem(placement: .topBarTrailing) {
+                Button("Hotovo") { dismiss() }
+            } }
+            .onAppear { sync.refreshInventory() }
+            .alert("Povolit mobilní data jen pro tuto dávku?", isPresented: $confirmCellular) {
+                Button("Zrušit", role: .cancel) {}
+                Button("Povolit tuto dávku") { sync.grantCellularForDisplayedBatch() }
+            } message: {
+                Text("\(sync.cellularStats.mediaCount) souborů · \(formatBytes(sync.cellularStats.mediaBytes)). Retry může přenést další bajty; nové záznamy povolení nezdědí.")
+            }
+        }
+    }
+
+    private func formatBytes(_ value: Int64) -> String {
+        ByteCountFormatter.string(fromByteCount: value, countStyle: .file)
     }
 }
 

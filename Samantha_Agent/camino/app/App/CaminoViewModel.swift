@@ -42,6 +42,7 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
     private let local: CaminoLocalStore?
     private let recording: IntentRecordingStore?
     private let mediaVault: CaminoMediaVault?
+    let sync: CaminoSyncCoordinator?
     private var activeVideoIntent: LocalMediaIntent?
     private var pendingCommentTargetID: UUID?
     private var pendingAddendumTargetID: UUID?
@@ -89,6 +90,7 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
             self.recording = recording
             self.mediaVault = vault
             self.audio = audio
+            self.sync = try? CaminoSyncCoordinator(local: local, recording: recording, root: root)
             startupError = nil
             cameraError = vault == nil ? "Místní úložiště fotek a videí není dostupné." : nil
             driver.event = { [weak audio] in audio?.interrupt(reason: "Zvukový vstup se zastavil") }
@@ -123,6 +125,7 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
             recording = nil
             mediaVault = nil
             audio = nil
+            sync = nil
             startupError = "Místní úložiště nelze bezpečně otevřít. Žádná data se nemažou."
         }
     }
@@ -263,6 +266,7 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
             reconcileAudio()
             if !showCamera { Task { await reconcileMedia() } }
             refresh()
+            sync?.applicationBecameActive()
         } else {
             if activeVideoIntent != nil && videoBackgroundTask == .invalid {
                 videoBackgroundTask = UIApplication.shared.beginBackgroundTask(

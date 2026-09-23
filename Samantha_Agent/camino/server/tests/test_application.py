@@ -8,6 +8,7 @@ import tempfile
 import unittest
 from datetime import datetime, timezone
 from pathlib import Path
+from unittest import mock
 
 import httpx
 
@@ -155,6 +156,34 @@ class CaminoC05aFastAPITests(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(repeated.json()["created"])
         for key in ("asset_id", "byte_count", "sha256", "state", "verified_at"):
             self.assertEqual(finalized.json()[key], repeated.json()[key])
+
+    async def test_finalize_delay_is_bounded_and_precedes_server_truth(self) -> None:
+        with self.assertRaises(ValueError):
+            create_app(
+                metadata_api=self.contract,
+                media_store=self.media,
+                token_store=self.tokens,
+                finalize_delay_seconds=16,
+            )
+        delayed = create_app(
+            metadata_api=self.contract,
+            media_store=self.media,
+            token_store=self.tokens,
+            finalize_delay_seconds=5,
+        )
+        with mock.patch(
+            "camino.server.application.asyncio.sleep", new=mock.AsyncMock()
+        ) as sleep:
+            transport = httpx.ASGITransport(app=delayed)
+            async with httpx.AsyncClient(
+                transport=transport, base_url="https://camino.test"
+            ) as client:
+                response = await client.post(
+                    f"/api/v1/assets/{self.asset_id}/finalize", headers=self.headers
+                )
+        sleep.assert_awaited_once_with(5)
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()["error"]["code"], "upload_session_not_found")
 
     async def test_media_errors_are_stable_and_do_not_leak_paths(self) -> None:
         missing = await self.request(

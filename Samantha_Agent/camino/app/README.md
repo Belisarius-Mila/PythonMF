@@ -1,4 +1,4 @@
-# Camino app — C04a až C04d
+# Camino app — C04a až C05b
 
 První integrovaná iPhone aplikace Camina. Má vlastní bundle ID
 `cz.pythonmf.camino.app` a vlastní Application Support kontejner; nepřebírá ani
@@ -53,23 +53,25 @@ nemigruje data ze samostatných prototypů Camino Audio a Camino Transfer Test.
 - C04d nemění Core Data schéma: verzovaný text, koncepty, vazby a fronta
   operací používají existující `SettingRecord`. Databáze současné C04b se tak
   dál otevře bez automatické migrace nebo resetu.
+- C05b přidává trvalý přenosový journal nad stejnými místními daty. Přesné
+  obálky metadata operací přežijí restart, serverový kurzor zůstává souvislý a
+  priority jsou metadata, audio, fotografie, video. Jedna připravená 8MiB část
+  používá background `URLSession`; po každém přerušení se skutečný serverový
+  stav znovu porovná. `verified` vznikne až po serverové délce a SHA-256.
+- Obrazovka **Uložení a přenosy** odděluje místní záznam od serveru. Nabízí
+  ruční sync, trvalé pause a jednorázové mobilní povolení jen pro zobrazenou
+  dávku s počtem a objemem. Token je v Keychain, URL musí být HTTPS a veřejný
+  fallback neexistuje. Změna epochy zůstane fail-closed pro servisní kontrolu.
 
-Přenos lokálních revizí na Mac, párování, Viewer a serverová záloha jsou
-další etapy. Hvězdička je zatím pouze místní čtenářská pomůcka, protože C03b
-v1 pro její změnu nedefinuje operaci. Aplikace nehlásí úspěšnou synchronizaci.
-C04b je
-podepsaná a nainstalovaná na zkušebním iPhonu; část fyzických scénářů je
-přijatá podle cíleného plánu. Nový low-space/thermal hardening je zatím pouze
-lokálně sestavený a nebyl na iPhone instalován. C04d je rovněž pouze lokální
-vývojový checkpoint; nebyla podepsána ani instalována na iPhone. Původní
-soubory se nemažou a
-při chybě databáze se neprovádí
-automatická migrace či reset. Datový model C04b nemá automatickou migraci
-z případné instalace C04a; před instalací do zařízení s daty je třeba řízený
-postup zachování dat.
+Párování, C06a spravovaná služba, Viewer a serverová záloha jsou další etapy.
+Hvězdička je pouze místní čtenářská pomůcka, protože C03b v1 pro její změnu
+nemá operaci. C04d je nainstalované a fyzicky přijaté v dostupném lokálním
+rozsahu. C05b build a automatické testy samy nedokazují zámek, force quit,
+mobilní data ani fyzické UX; tyto výsledky se zapisují až podle cíleného plánu.
+Původní soubory se automaticky nemažou a chyba journalu nespouští reset.
 
-Cílené fyzické průchody jsou v `C04b_IPHONE_TEST_PLAN.md` a
-`C04d_IPHONE_TEST_PLAN.md`.
+Cílené fyzické průchody jsou v `C04b_IPHONE_TEST_PLAN.md`,
+`C04d_IPHONE_TEST_PLAN.md` a `C05b_IPHONE_TEST_PLAN.md`.
 
 ## Vývojové ověření
 

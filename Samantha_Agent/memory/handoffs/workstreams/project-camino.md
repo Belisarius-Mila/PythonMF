@@ -1,7 +1,7 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno po C05a loopback smoke PASS: 2026-09-23 22:59 CEST
+- Aktualizováno po lokální implementaci a plné bráně C05b: 2026-09-23 23:47 CEST
 
 ### Hotovo
 - T043 PASS v rozsahu syntetického C02b: Letový režim přerušil upload při 0/13 serverových částech; po obnově sítě vznikl jediný objekt daného Assetu, 13/13 částí, 100 663 553 B a shodný SHA-256.
@@ -33,10 +33,11 @@
 - Lokální C04b má injektovatelnou kapacitu a společnou fail-closed politiku: varování pod 2 GiB, blok nového videa pod 1 GiB, foto/audia pod 512 MiB, bezpečné dokončení běžícího audia/videa pod rezervou a pokus o krátkou značku bez automatického mazání. Tepelný stav videa při `serious` varuje a při `critical` blokuje nový Start nebo ukončí běžící klip bez skryté změny kvality. Swift 17/17, UI simulátoru 3/3, simulátorový a generic iOS build i plná projektová brána 1740/1740 PASS; starší originál zůstal v integračním testu byte-for-byte zachovaný.
 - C04d je hotové: deník umí výběr dne, filtry, detail Momentu, trvalý koncept textu po pádu, lidskou i automatickou historii revizí s předností lidské úpravy, zamknutí, skrytí a obnovu, přesun kapitoly bez změny původního času a samostatný soukromý doplněk navázaný na původní Moment. Úvahu lze uvolnit pouze výslovnou akcí `Vložit do deníku`; změny pro budoucí C05 mají trvalé pořadí a stav čekání na server. Schéma Core Data se nezměnilo: rozšíření je verzované v existujícím `SettingRecord`, aby se zachovalo otevření C04b databáze. Swift 22/22, UI simulátoru 4/4, nepodepsaný generic iOS build a plná brána 1740/1740 PASS. Zdroj `e3868100` byl pushnut na `origin/main`; podepsané Camino 0.1.0 (2) prošlo strict kontrolou, instalací a spuštěním na iPhonu 14 Plus / iOS 26.6.1 bez odinstalace a bez ztráty starších C04b dat.
 - C05a má lokální produkčně orientovaný serverový checkpoint. FastAPI přijímá streamované části pouze podle přijatého C03b manifestu, server počítá hash části i celého objektu a dvojitý SQLite/souborový journal obnovuje pád mezi zápisy. Shodné retry je idempotentní, konflikt nic nepřepíše, neznámé bajty se zachovají v karanténě a poškozený hotový objekt zruší `verified`. Owner token je odvolatelný a uložený jen jako hash; proces povoluje pouze loopback. Registrovaný smoke `20260923T205907Z-e64b0346` prošel 12/12 kontrolami přes skutečné loopback HTTP, 1 048 699 B v 5 částech, včetně retry, finalizace, odvolání obou tokenů a restartu se zachovaným `verified`. Smoke workflow 4/4, společná cílená sada 30/30 a plná brána 1763/1763 PASS.
+- C05b je lokálně implementované v integrované aplikaci: trvalý journal ukládá přesné C03b obálky i C05a stav částí, priorita je metadata → audio → foto → video, pause přežije relaunch, token je jen v Keychain a mobilní grant platí jen pro zobrazenou dávku. Po návratu se nejdřív porovnává server; změna epochy vyvolá fail-closed inventární porovnání. Registrovaný session-owned obal smí přidat pouze privátní Serve `/camino-api`, Funnel nezapíná a zachovává kořen Cockpitu.
 
 ### Otevřeno
 - Otevření buildu 4 ještě bez sítě po nuceném ukončení zůstalo neověřené; celý plán B není PASS. U T048 zůstává NEOVĚŘENO pouze captive portal. Plné T049 s novým skutečným videem čeká na integrovanou aplikaci; C02b ještě není produkční přenos.
-- C04d zatím nepředává revize a operace do C05a API a nemá Viewer. Lokální označení Důležité čeká na rozšíření serverového kontraktu. Zachování dat a T010/T019–T021/T026/T030/T039–T041/T096 jsou fyzicky PASS v dostupném lokálním rozsahu podle Mílova průchodu. T038 zůstává pouze synteticky doložené. C05a T043–T046/T052/T061 mají serverový syntetický důkaz a loopback smoke je PASS; Serve a C05b klient jsou NEPROVEDENO.
+- C05b kód a automatizace jsou PASS, ale push, řízené nasazení, podepsaná aktualizace iPhonu, privátní Serve a fyzické T047–T053/T058 jsou ještě NEPROVEDENO. Zachování C04b/C04d dat a dřívější fyzické výsledky zůstávají platné; Viewer, T038 a serverová větev Důležité jsou mimo C05b.
 
 ### Rizika
 - C05a kód je produkčně orientovaný FastAPI/SQLite/souborový základ, ale není to spuštěná trvalá služba ani záloha. T048 dokládá tři starší syntetické síťové scénáře, ne captive portal ani produkční přenos skutečných médií přes C05a.
@@ -44,11 +45,12 @@
 - V části B došlo k druhému stisku synchronizace během výpadku a k opětovnému otevření až s dostupnou sítí. Obnova bez dalšího stisku po otevření je doložená, ale stav UI při otevření bez sítě ne. Mílův chat používal mobilní spojení iPhonu, takže Letový režim přerušoval živé navádění. Journal ze staršího buildu zachovává staré obnovovací chování; video T050 dříve krátce ukázalo `Vyžaduje pozornost` před bezpečným retry bez zjištěné příčiny.
 - Lokální zámek se projeví na serveru až po přijetí revize; dříve vydané cizí kopie nelze odvolat. C08 musí hlídat aktuální oprávnění i u starých mediálních URL; referenční výběr C03a sám není provozní ochrana.
 - C05a loopback smoke ověřil síťový adaptér a bajty Assetu nad syntetickými daty. Není to spravovaný proces, Tailscale Serve, produkční úložiště ani záloha. Párovací UI patří C06 a skutečná záloha/obnova C06b. Obnovovací porovnání C03b je zatím jen pro Momenty.
+- C05b automatické testy nenahrazují fyzický zámek, force quit, síťový přechod, mobilní data ani pozorované UX. Připravený server je session-owned akceptační služba, ne trvalý C06a provoz ani druhá kopie dat.
 - Integrovaná aplikace včetně low-space/thermal hardeningu je podepsaná a nainstalovaná; starší C04b i nové C04d lokální scénáře uvedené výše fyzicky prošly. T007 a plné T060 zůstávají částečné bez skutečného nízkého místa; simulovaná kapacita ani teplota nejsou fyzická akceptace. Nový bundle ID nepřebírá prototypová audio data; místní úložiště není záloha na Macu.
 - Operace označené `čeká na server` jsou trvalý lokální frontový podklad, ne důkaz synchronizace ani serverového přijetí. C04d fyzicky ověřilo mikrofon, hovory, změnu audio vstupu, nucené ukončení aplikace, přehrávání a skutečné UX; neověřilo produkční server, Viewer ani opožděnou AI větev T038.
 
 ### Další krok
-- Loopback smoke je přijatý. Zvlášť rozhodnout o privátním Tailscale Serve a následně o C05b iPhone klientovi. Lokální frontu nepovýšovat na synchronizovanou před skutečným serverovým přijetím. T038 dokončit až s reálnou opožděnou AI.
+- Checkpointnout a pushnout C05b, zarovnat jen čisté profily, řízeně nasadit Cockpit a aktualizovat stejný iPhone bez odinstalace. Potom po povinném samostatném potvrzení spustit registrovaný privátní Serve a projít `C05b_IPHONE_TEST_PLAN.md`; Funnel zůstává vypnutý.
 
 ### Rozhodnutí
 - Serverová pravda a stav `verifying` mají přednost před lokálním byte progress. Dostupná povolená Wi-Fi může spustit automatickou synchronizaci; ruční tlačítko je provozní záloha. Souběžný impuls se koaleskuje, nezahazuje.
@@ -65,13 +67,14 @@
 - Míla zahájil C05a. Přijatý manifest je jediná autorita uploadu, FastAPI zůstává v odděleném prostředí Camino a smí bindovat jen loopback. Žádný skutečný token, Serve, nasazení ani iPhone integrace nebyly tímto pokynem automaticky povoleny.
 - Mílovo `pokračuj` pokrývá přípravu dalšího C05a kroku. Zápisový workflow ale podle registru vyžaduje po náhledu přesného příkazu ještě samostatné potvrzení; příprava proto neznamená provedený smoke.
 - Míla následným `ano` samostatně potvrdil uložený příkaz; právě tento registrovaný loopback smoke prošel. Potvrzení nerozšířilo oprávnění na Serve, iPhone, push ani nasazení.
+- Míla následně výslovně povolil celý navazující rozsah až do C05b včetně push, řízeného nasazení a podepsané aktualizace iPhonu; Funnel je výslovně mimo rozsah. Registrované síťové mutace nadále vyžadují svůj náhled a samostatné `ano`.
 
 ### Navrhované další kroky
 - T047 je fyzicky PASS v syntetickém rozsahu; jeho dva objekty/účtenky a relace zůstávají zachované.
 - T049 je v syntetickém mobilním rozsahu hotové a bezpečně ukončené; plné T049 s novým skutečným videem zůstává otevřené.
 - Captive portal T048 doplnit pouze tehdy, až bude skutečně dostupný; neopakovat tři již doložené podscénáře bez nové pochybnosti.
 - C04/C05/C08 musí C03b integrovat, vynutit soukromí a fyzicky ověřit; T048 zůstává syntetickým terénním důkazem, ne produkční akceptací.
-- Samostatně rozhodnout o privátním Serve; C05b iPhone klient následuje odděleně. Serverové větve T040/T096 a produkční AI větev T038 zůstávají otevřené.
+- Dokončit schválený push/deploy/install a potom fyzický C05b plán nad session-owned `/camino-api`; T058 provést jako poslední a po průchodu registrovaně zastavit službu. Serverové větve T040/T096 a produkční AI větev T038 zůstávají otevřené.
 
 ### Technický stav checkpointu
 - Swift transfer core 19/19, T043 ovladač + oba receivery 28/28, T047/T043 workflow modul 11/11 a UI 1/1 PASS; podepsaný build 2, strict kontrola, instalace a launch PASS. Plná projektová brána 1716/1716 PASS.
@@ -86,6 +89,7 @@
 - C04a checkpoint: `swift test` 8/8, `CaminoUITests` 1/1 na izolovaném iPhone 14 Plus simulátoru, nepodepsaný generic iOS build exit 0 a plná projektová brána 1740/1740 PASS. V tomto checkpointu ještě bez fyzické instalace; pozdější instalaci a fyzické výsledky dokládají navazující záznamy. Bez push a nasazení v tomto kroku.
 - C04d checkpoint: `swift test` 22/22, `CaminoUITests` 4/4 na izolovaném simulátoru, nepodepsaný generic iOS build exit 0 a plná projektová brána 1740/1740 PASS. Zdroj `e3868100` je na `origin/main`; podepsaný build 0.1.0 (2), strict podpis, instalace a launch PASS. Fyzický plán doložil zachování C04b dat a T010/T019–T021/T026/T030/T039–T041/T096. T038 není fyzický end-to-end PASS. Cockpit nebyl nasazen.
 - C05a checkpoint: core + C03b 23/23, FastAPI ASGI 4/4, smoke workflow 4/4, společná cílená sada 30/30, validní OpenAPI, veřejný bind odmítnut exit 2 a plná projektová brána 1763/1763 PASS. Registrovaný běh `20260923T205907Z-e64b0346` má 12/12, 1 048 699 B a 5 částí; restart zachoval `verified` a oba tokeny byly odvolány. Push, nasazení, Serve, trvalý proces a iPhone změna NEPROVEDENY.
+- C05b checkpoint: Swift 29/29, C05b provozní registr 13/13, FastAPI 5/5, UI 1/1, nepodepsaný simulátorový build a plná projektová brána 1768/1768 PASS. Push, nasazení, podepsaná instalace, Serve a fyzická akceptace jsou dosud NEPROVEDENY.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 

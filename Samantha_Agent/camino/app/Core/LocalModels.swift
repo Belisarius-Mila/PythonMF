@@ -44,6 +44,13 @@ public struct LocalTrip: Equatable, Identifiable, Sendable {
     public let startDate: String?
 }
 
+/// Stable chapter identity exported to the C05 sync planner.
+public struct LocalDay: Equatable, Identifiable, Sendable {
+    public let id: UUID
+    public let tripID: UUID
+    public let localDate: String
+}
+
 public struct CaptureStamp: Equatable, Sendable {
     public let utcMilliseconds: Int64
     public let localWall: String
@@ -258,6 +265,21 @@ public struct LocalMediaAsset: Equatable, Identifiable, Sendable {
     public let relativePath: String
     public let inspection: LocalMediaInspection
     public let silentRequested: Bool
+}
+
+/// The immutable creation state plus ordered local edits needed to reproduce
+/// the exact server history. `baseRevision` is normally one; text appends are
+/// deliberately kept separate because C03b does not advance Moment metadata
+/// revision for an `append_text` operation.
+public struct LocalMomentSyncSnapshot: Equatable, Sendable {
+    public let moment: LocalMoment
+    public let baseRevision: Int
+    public let originalPrivacy: LocalPrivacy
+    public let originalHidden: Bool
+    public let originalChapterDate: String
+    public let relatedMomentID: UUID?
+    public let textHistory: LocalTextHistory
+    public let operations: [LocalPendingOperation]
 }
 
 public enum LocalStoreError: Error, LocalizedError, Equatable {

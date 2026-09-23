@@ -59,7 +59,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] V0.5 + U15 jsou autoritativní. C04d je nainstalované a fyzicky přijaté v dostupném lokálním rozsahu. C05a má lokální FastAPI/SQLite/souborový checkpoint; potvrzený loopback smoke `20260923T205907Z-e64b0346` prošel 12/12, 1 048 699 B v 5 částech, restart a odvolání obou tokenů. Plná brána 1763/1763 PASS. Serve, C05b klient, push a nasazení NEPROVEDENO. Lokální fronta není serverové přijetí; T038, captive portal T048, Viewer/G8 a plné T060 zůstávají otevřené. Hlavní iPhone nezaplňovat ani nezahřívat; T048/T049 receiver je zastavený, Serve obnovený a Funnel vypnutý.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] V0.5 + U15 jsou autoritativní. C04d je fyzicky přijaté v dostupném lokálním rozsahu; C05a loopback smoke `20260923T205907Z-e64b0346` je PASS. C05b trvalá iOS fronta a session-owned privátní obal jsou lokálně hotové: Swift 29/29, workflow 13/13, FastAPI 5/5, UI 1/1 a plná brána 1768/1768 PASS. Push, nasazení, podepsaná aktualizace, Serve a fyzický C05b plán NEPROVEDENO. Funnel zůstává vypnutý; T038, captive portal T048, Viewer/G8 a plné T060 jsou otevřené.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` - Cockpit 14. 9.: scroll 10ec0877 potvrzený Mílou. [PRIPOMENOUT] U07 až při příštím pokračování. TXT v2.8 shrnuje U01–U06; plná brána 1680/1680 OK, funkční nasazení 980aed7a a smoke 5/5. Publikační překážka odstraněna; finální balíček/head ověřovat živým auditem.
 

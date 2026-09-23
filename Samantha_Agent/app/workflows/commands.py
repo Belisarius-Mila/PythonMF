@@ -22,6 +22,7 @@ CAMINO_C02B_T043_CONTROL_SCRIPT = SAMANTHA_DIR / "scripts" / "camino_c02b_t043_c
 CAMINO_C02B_T047_CONTROL_SCRIPT = SAMANTHA_DIR / "scripts" / "camino_c02b_t047_control.py"
 CAMINO_C02B_NETWORK_CONTROL_SCRIPT = SAMANTHA_DIR / "scripts" / "camino_c02b_network_control.py"
 CAMINO_C05A_LOOPBACK_SMOKE_SCRIPT = SAMANTHA_DIR / "scripts" / "camino_c05a_loopback_smoke.py"
+CAMINO_C05B_PRIVATE_CONTROL_SCRIPT = SAMANTHA_DIR / "scripts" / "camino_c05b_private_control.py"
 CAMINO_C05A_SMOKE_PYTHON = Path("/private/tmp/camino-c05a-venv/bin/python")
 HUMAN_ADAM_TAKEOVER_CONFIRMATION = "POTVRZUJI PREVZETI HUMAN-ADAM WIP DO MAIN"
 SECURE_BACKUP_ROOT = Path("/Volumes/SamanthaSecureBackup/SamanthaBackups")
@@ -117,6 +118,114 @@ def _camino_network_test_commands(label: str) -> tuple[WorkflowCommand, ...]:
             requires_confirmation=True,
             intent_keywords=("ukonči", "zastav", "camino", "c02b", lower),
             required_keyword_groups=(("ukonči", "zastav"), ("camino", "c02b"), (lower,)),
+        ),
+    )
+
+
+def _camino_c05b_private_commands() -> tuple[WorkflowCommand, ...]:
+    """Register the bounded private C05a lifecycle used by C05b acceptance."""
+    script = str(CAMINO_C05B_PRIVATE_CONTROL_SCRIPT)
+    common = {
+        "cwd": SAMANTHA_DIR,
+        "intent_keywords": ("camino", "c05b", "soukromá", "služba"),
+        "required_keyword_groups": (("camino",), ("c05b",)),
+        "preflight": lambda command: _preflight_camino_c05b_private(command),
+    }
+    return (
+        WorkflowCommand(
+            command_id="camino_c05b_private_start",
+            title="Spustit privátní službu pro Camino C05b",
+            purpose=(
+                "Spustí session-owned C05a jen na loopbacku, přidá jedinou privátní "
+                "Serve cestu /camino-api a zkopíruje privátní HTTPS URL; Funnel nezapíná."
+            ),
+            aliases=("spusť camino c05b", "připrav privátní camino c05b"),
+            argv=(str(PYTHON_BIN), script, "start"),
+            risk="private_network_service_write",
+            writes=(
+                "soukromý stav mimo Git v Library/Application Support, jeden loopback proces, "
+                "Serve cestu /camino-api a Mac schránku s privátní URL; nemění Funnel ani kořen Cockpitu"
+            ),
+            requires_confirmation=True,
+            **common,
+        ),
+        WorkflowCommand(
+            command_id="camino_c05b_private_copy_token",
+            title="Vložit privátní token Camino C05b do schránky",
+            purpose="Po živé kontrole služby zkopíruje pouze token aktuálního C05b běhu.",
+            aliases=("zkopíruj token camino c05b", "vlož token camino c05b"),
+            argv=(str(PYTHON_BIN), script, "copy-token"),
+            risk="private_clipboard_write",
+            writes="Mac schránku s dočasným tokenem; nemění síť, Git ani projektová data",
+            requires_confirmation=True,
+            **common,
+        ),
+        WorkflowCommand(
+            command_id="camino_c05b_private_status",
+            title="Ověřit privátní službu Camino C05b",
+            purpose="Read-only ověří vlastněný server, Serve/Funnel a redigované databázové počty.",
+            aliases=("stav camino c05b", "ověř camino c05b"),
+            argv=(str(PYTHON_BIN), script, "status"),
+            risk="read_only_preview",
+            writes="nic; pouze čte soukromý běhový stav a redigované důkazy",
+            requires_confirmation=False,
+            **common,
+        ),
+        WorkflowCommand(
+            command_id="camino_c05b_private_storage_full_on",
+            title="Zapnout řízený nedostatek místa Camino C05b",
+            purpose=(
+                "Restartuje pouze vlastněný C05a proces nad stejnými daty s testovací "
+                "rezervou, aby nové mediální zápisy bezpečně vrátily insufficient_storage."
+            ),
+            aliases=("zapni nedostatek místa camino c05b", "simuluj plný mac camino c05b"),
+            argv=(str(PYTHON_BIN), script, "storage-full-on"),
+            risk="private_acceptance_fault_write",
+            writes="restartuje jen vlastněný C05a proces a zapíše testovací režim; data ani Serve nemaže",
+            requires_confirmation=True,
+            **common,
+        ),
+        WorkflowCommand(
+            command_id="camino_c05b_private_storage_full_off",
+            title="Vypnout řízený nedostatek místa Camino C05b",
+            purpose="Restartuje vlastněný C05a proces nad stejnými daty s běžnou rezervou místa.",
+            aliases=("vypni nedostatek místa camino c05b", "obnov místo camino c05b"),
+            argv=(str(PYTHON_BIN), script, "storage-full-off"),
+            risk="private_acceptance_fault_write",
+            writes="restartuje jen vlastněný C05a proces a zapíše běžný režim; data ani Serve nemaže",
+            requires_confirmation=True,
+            **common,
+        ),
+        WorkflowCommand(
+            command_id="camino_c05b_private_rotate_epoch",
+            title="Otočit epochu testovacího serveru Camino C05b",
+            purpose=(
+                "V odděleném C05b stavu simuluje obnovu staršího serveru; nic nemaže, "
+                "vyžádá inventární porovnání a ponechá exporty blokované."
+            ),
+            aliases=("otoč epochu camino c05b", "simuluj obnovu camino c05b"),
+            argv=(str(PYTHON_BIN), script, "rotate-epoch"),
+            risk="private_acceptance_restore_write",
+            writes="novou epochu a fail-closed příznaky pouze v oddělené C05b metadata databázi",
+            requires_confirmation=True,
+            **common,
+        ),
+        WorkflowCommand(
+            command_id="camino_c05b_private_stop",
+            title="Ukončit privátní službu Camino C05b",
+            purpose=(
+                "Odebere jen vlastněnou Serve cestu, zastaví vlastněný C05a proces, "
+                "odvolá token a porovná původní Serve konfiguraci."
+            ),
+            aliases=("ukonči camino c05b", "zastav camino c05b"),
+            argv=(str(PYTHON_BIN), script, "stop"),
+            risk="private_network_service_write",
+            writes=(
+                "odebere pouze Serve cestu /camino-api, zastaví pouze vlastněný proces, "
+                "odvolá jeho token a zachová soukromá data i důkaz"
+            ),
+            requires_confirmation=True,
+            **common,
         ),
     )
 
@@ -563,7 +672,7 @@ WORKFLOW_COMMANDS: tuple[WorkflowCommand, ...] = (
         ),
         preflight=lambda command: _preflight_human_adam_takeover(command),
     ),
-) + _camino_network_test_commands("T048") + _camino_network_test_commands("T049") + _camino_network_test_commands("T050")
+) + _camino_network_test_commands("T048") + _camino_network_test_commands("T049") + _camino_network_test_commands("T050") + _camino_c05b_private_commands()
 
 
 @function_tool
@@ -857,6 +966,19 @@ def _preflight_camino_c05a_loopback_smoke(_command: WorkflowCommand) -> str:
         )
     if not (SAMANTHA_DIR / "camino" / "server" / "requirements.txt").is_file():
         return "chybi pripnute C05a server requirements"
+    return ""
+
+
+def _preflight_camino_c05b_private(_command: WorkflowCommand) -> str:
+    if not CAMINO_C05B_PRIVATE_CONTROL_SCRIPT.is_file():
+        return f"chybi control skript {CAMINO_C05B_PRIVATE_CONTROL_SCRIPT}"
+    if not CAMINO_C05A_SMOKE_PYTHON.is_file():
+        return (
+            f"chybi oddelene Camino prostredi {CAMINO_C05A_SMOKE_PYTHON}; "
+            "nejdrive ho priprav podle camino/server/README.md"
+        )
+    if not Path("/Applications/Tailscale.app/Contents/MacOS/Tailscale").is_file():
+        return "chybi Tailscale CLI"
     return ""
 
 

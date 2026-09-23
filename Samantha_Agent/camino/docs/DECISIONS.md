@@ -275,3 +275,22 @@ Owner tokeny jsou místně založené a odvolatelné; databáze drží pouze jej
 SHA-256 a síťové API nemá správu tokenů. Tento checkpoint neřeší párovací UI,
 C05b frontu, C05c UX, Viewer, zálohu ani provozní nasazení a netvrdí
 přesně-jednou síťové doručení.
+
+## ADR-C05B-01 — trvalý klientský journal, serverová pravda a zmrazená mobilní dávka
+
+**Rozhodnutí 23. září 2026:** C05b ukládá přesné bajty každé vytvořené C03b
+operace před prvním odesláním a při retry je nemění. Metadata a manifesty mají
+přednost před audiem, fotografiemi a videem. Médium se dělí po 8 MiB a klient
+drží jednu připravenou část, tedy méně než dovolené maximum dvou. Background
+`URLSession` je dopravní mechanismus, nikoli zdroj pravdy; po přerušení,
+relaunchi nebo ztracené odpovědi se vždy znovu čte serverový stav.
+
+Mobilní povolení se váže na ID právě zobrazené dávky. Potvrzením se současně
+otevře nové ID dávky, takže později pořízené médium nemůže oprávnění zdědit.
+Pozastavení je trvalý stav journalu a nemění dostupnost místního záznamu.
+
+Stav hotovo vyžaduje serverové `verified` po kontrole délky a celkového SHA-256.
+Změna epochy pouze odešle inventář, nic nemaže a zůstane fail-closed; telefon
+nemá právo odblokovat exporty. Token je pouze v Keychain, cílová URL musí být
+HTTPS a veřejný fallback je zakázaný. Session-owned `/camino-api` pro fyzický
+test je omezený acceptance deployment, nikoli C06a spravovaná služba.

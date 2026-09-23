@@ -58,3 +58,18 @@ zápisů a vyžádá samostatné potvrzení; ruční improvizované spuštění 
 nepoužívá. Smoke pracuje jen se syntetickými daty, dynamickým loopback portem a
 dočasnými odvolatelnými tokeny. Zachovává privátní redigovaný důkaz, ale
 nemění Serve/Funnel, nepřipojuje iPhone a není nasazením trvalé služby.
+
+## C05b fyzické přijetí
+
+Session-owned službu pro C05b řídí pouze registrované workflow
+`camino_c05b_private_start`, `copy_token`, `status` a `stop`. Data jsou mimo
+repozitář, proces binduje jen loopback a Tailscale Serve přidá jen
+`/camino-api`. Start ověřuje vypnutý Funnel, privátní HTTPS i zdraví kořene
+Cockpitu; stop odvolá token a porovná přesný původní Serve stav.
+
+Pro T050 používá tento oddělený acceptance běh pětisekundové zdržení finalizace.
+Pro T052 existují potvrzované režimy `storage_full_on/off`, které restartují
+jen vlastněný proces nad stejnými daty a vyvolají `insufficient_storage` bez
+plnění skutečného disku. T058 používá potvrzované `rotate_epoch`; nic nemaže,
+ale záměrně ponechá inventární kontrolu a exporty blokované. Tyto testovací
+volby nejsou C06a provozní konfigurace.

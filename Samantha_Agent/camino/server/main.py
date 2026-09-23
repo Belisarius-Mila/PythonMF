@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import ipaddress
+import math
 import os
 from pathlib import Path
 
@@ -21,6 +22,17 @@ def _required_path(parser: argparse.ArgumentParser, name: str) -> Path:
     if not value:
         parser.error(f"{name} is required")
     return Path(value)
+
+
+def _nonnegative_number(parser: argparse.ArgumentParser, name: str, default: str) -> float:
+    raw = os.environ.get(name, default)
+    try:
+        value = float(raw)
+    except ValueError:
+        parser.error(f"{name} must be a nonnegative number")
+    if not math.isfinite(value) or value < 0:
+        parser.error(f"{name} must be a nonnegative number")
+    return value
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -41,10 +53,20 @@ def main(argv: list[str] | None = None) -> int:
         _required_path(parser, "CAMINO_C05A_MEDIA_DB"),
         _required_path(parser, "CAMINO_C05A_MEDIA_ROOT"),
         asset_lookup=metadata.asset,
+        reserve_bytes=int(_nonnegative_number(
+            parser, "CAMINO_C05A_RESERVE_BYTES", str(512 * 1024 * 1024)
+        )),
     )
     contract = CaminoV1Contract(metadata, authenticate=tokens.authenticate)
     uvicorn.run(
-        create_app(metadata_api=contract, media_store=media, token_store=tokens),
+        create_app(
+            metadata_api=contract,
+            media_store=media,
+            token_store=tokens,
+            finalize_delay_seconds=_nonnegative_number(
+                parser, "CAMINO_C05A_FINALIZE_DELAY_SECONDS", "0"
+            ),
+        ),
         host=args.host,
         port=args.port,
         access_log=False,

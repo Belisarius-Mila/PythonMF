@@ -66,6 +66,21 @@ private struct LocalPendingMomentLink: Codable, Equatable {
         return try rows.first.map(decodeTrip)
     }
 
+    public func days(tripID: UUID) throws -> [LocalDay] {
+        guard try object("TripRecord", id: tripID) != nil else {
+            throw LocalStoreError.tripMissing
+        }
+        return try fetch("DayRecord", predicate: NSPredicate(
+            format: "tripID == %@", tripID as NSUUID))
+            .map { row in
+                LocalDay(
+                    id: try required(row, "id"),
+                    tripID: try required(row, "tripID"),
+                    localDate: try required(row, "localDate"))
+            }
+            .sorted { $0.localDate < $1.localDate }
+    }
+
     @discardableResult public func createTrip(name: String, isTest: Bool = false,
                                               id: UUID = UUID()) throws -> LocalTrip {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -440,6 +455,22 @@ private struct LocalPendingMomentLink: Codable, Equatable {
             throw LocalStoreError.momentMissing
         }
         return try momentJournal(row).operations
+    }
+
+    public func syncSnapshot(momentID: UUID) throws -> LocalMomentSyncSnapshot {
+        guard let row = try object("MomentRecord", id: momentID) else {
+            throw LocalStoreError.momentMissing
+        }
+        let journal = try momentJournal(row)
+        return LocalMomentSyncSnapshot(
+            moment: try decodeMoment(row),
+            baseRevision: journal.baseRevision,
+            originalPrivacy: journal.originalPrivacy,
+            originalHidden: journal.originalHidden,
+            originalChapterDate: journal.originalChapterDate,
+            relatedMomentID: journal.relatedMomentID,
+            textHistory: journal.textHistory,
+            operations: journal.operations.sorted { $0.deviceSequence < $1.deviceSequence })
     }
 
     /// A draft is durable local state, but never a published text revision.

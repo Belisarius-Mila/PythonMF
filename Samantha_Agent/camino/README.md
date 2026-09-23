@@ -3,7 +3,7 @@
 Soukromý cestovní deník: offline záznam na iPhonu, soukromé zpracování na Macu
 a pozdější film z povolených zdrojů.
 
-**Stav: autoritativní podklady v0.5 + U15. C04d je fyzicky přijaté v dostupném lokálním rozsahu. C05a má lokální FastAPI/SQLite/souborový základ pro odvolatelné owner přihlášení, obnovitelné části a hashově ověřenou finalizaci; 23/23 core/regresních, 4/4 síťových a plných 1751/1751 projektových testů prošlo. Služba není spuštěná ani nasazená, Tailscale Serve se nezměnil a iPhone zatím není připojený k C05a. Funnel je vypnutý. Viewer zůstává C08c–C08f.**
+**Stav: autoritativní podklady v0.5 + U15. C04d je fyzicky přijaté v dostupném lokálním rozsahu. C05a serverový základ prošel loopback smoke. C05b má lokálně implementovaný trvalý iOS journal, privátní C03b/C05a klient, pause a jednorázovou mobilní dávku; Swift 27/27, cílený UI test a registrovaný provozní obal prošly. Push, privátní Serve, instalace a fyzické T047–T053/T058 se dokládají samostatně; do té doby nejsou PASS. Funnel zůstává vypnutý. Viewer patří C08c–C08f.**
 
 - [Podklady v0.5](CAMINO_podklady_v0.5/README_v0.5.md)
 - [Funkční specifikace v0.5](CAMINO_podklady_v0.5/CAMINO_funkcni_specifikace_v0.5.md)
@@ -33,16 +33,19 @@ V Human–Adam se projekt jmenuje **Camino** (`project-camino`).
 - [Report C05a](docs/C05a_PRODUCTION_RECEIVER_REPORT.md)
 - [C05a mediální OpenAPI](docs/C05a_MEDIA_OPENAPI_V1.json)
 - [C05a server](server/README.md)
+- [Zadání C05b](tasks/C05b_IOS_SYNC_QUEUE.md)
+- [Report C05b](docs/C05b_IOS_SYNC_REPORT.md)
+- [Fyzický plán C05b](app/C05b_IPHONE_TEST_PLAN.md)
 - [Audio prototyp](prototypes/audio/README.md)
 - [Transfer harness C02b](prototypes/transfer/README.md)
 - [První integrovaná iPhone aplikace C04a](app/README.md)
 - [Aktuální report a překážky](docs/C01a_AUDIO_PROTOTYPE_REPORT.md)
 
-C05a nahrazuje standard-library receiver produkčně orientovaným, ale zatím
-jen lokálně ověřeným FastAPI základem. Přijatý C03b manifest je autorita,
-části a finální objekt mají serverový hash, journal opravuje doložitelné mezery
-mezi SQLite a soubory a neznámé bajty zachovává v karanténě. Provozní služba,
-privátní HTTPS a C05b iPhone klient jsou samostatné následující kroky.
+C05b používá přijatý C03b manifest jako autoritu a C05a serverovou finalizaci
+jako jediný důkaz hotového média. Přenos je alespoň-jednou: po zámku, relaunchi
+nebo síťové chybě se nejdřív porovná stav a odešlou se jen chybějící části.
+Session-owned privátní služba pro fyzické přijetí není C06a trvalé nasazení;
+nemá párovací UI, `launchd` dohled ani druhou zálohu.
 
 Rozbalené podklady v0.4 a v0.5 jsou verzované včetně manifestů. Původní ZIPy
 jsou zachované lokálně a ignorované Gitem; profilové workspaces přebírají

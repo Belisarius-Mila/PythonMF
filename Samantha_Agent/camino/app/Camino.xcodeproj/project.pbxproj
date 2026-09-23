@@ -19,6 +19,8 @@
 		A1000000000000000000000B /* CaminoMediaVault.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000E; };
 		A1000000000000000000000C /* CameraCaptureController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000F; };
 		A1000000000000000000000D /* CameraCaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000010; };
+		A1000000000000000000000E /* CaminoSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000011; };
+		A1000000000000000000000F /* CaminoSyncCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000012; };
 		B10000000000000000000001 /* CaminoHomeUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000001; };
 /* End PBXBuildFile section */
 
@@ -43,6 +45,8 @@
 		A2000000000000000000000E /* CaminoMediaVault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaminoMediaVault.swift; sourceTree = "<group>"; };
 		A2000000000000000000000F /* CameraCaptureController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraCaptureController.swift; sourceTree = "<group>"; };
 		A20000000000000000000010 /* CameraCaptureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraCaptureView.swift; sourceTree = "<group>"; };
+		A20000000000000000000011 /* CaminoSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaminoSync.swift; sourceTree = "<group>"; };
+		A20000000000000000000012 /* CaminoSyncCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaminoSyncCoordinator.swift; sourceTree = "<group>"; };
 		B20000000000000000000001 /* CaminoHomeUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaminoHomeUITests.swift; sourceTree = "<group>"; };
 		B20000000000000000000002 /* CaminoUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = CaminoUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -54,8 +58,8 @@
 
 /* Begin PBXGroup section */
 		A40000000000000000000001 = {isa = PBXGroup; children = (A40000000000000000000002, A40000000000000000000003, A40000000000000000000004, B60000000000000000000001, A2000000000000000000000C, A40000000000000000000005); sourceTree = "<group>"; };
-		A40000000000000000000002 /* App */ = {isa = PBXGroup; children = (A20000000000000000000001, A20000000000000000000002, A20000000000000000000003, A2000000000000000000000F, A20000000000000000000010, A2000000000000000000000B); path = App; sourceTree = "<group>"; };
-		A40000000000000000000003 /* Core */ = {isa = PBXGroup; children = (A20000000000000000000004, A20000000000000000000005, A2000000000000000000000E); path = Core; sourceTree = "<group>"; };
+		A40000000000000000000002 /* App */ = {isa = PBXGroup; children = (A20000000000000000000001, A20000000000000000000002, A20000000000000000000003, A2000000000000000000000F, A20000000000000000000010, A20000000000000000000012, A2000000000000000000000B); path = App; sourceTree = "<group>"; };
+		A40000000000000000000003 /* Core */ = {isa = PBXGroup; children = (A20000000000000000000004, A20000000000000000000005, A2000000000000000000000E, A20000000000000000000011); path = Core; sourceTree = "<group>"; };
 		A40000000000000000000004 /* Accepted audio sources */ = {isa = PBXGroup; children = (A20000000000000000000006, A20000000000000000000007, A20000000000000000000008, A20000000000000000000009, A2000000000000000000000A); name = "Accepted audio sources"; sourceTree = "<group>"; };
 		A40000000000000000000005 /* Products */ = {isa = PBXGroup; children = (A2000000000000000000000D, B20000000000000000000002); name = Products; sourceTree = "<group>"; };
 		B60000000000000000000001 /* UITests */ = {isa = PBXGroup; children = (B20000000000000000000001); path = UITests; sourceTree = "<group>"; };
@@ -107,7 +111,7 @@
 		A30000000000000000000002 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
-			files = (A10000000000000000000001, A10000000000000000000002, A10000000000000000000003, A10000000000000000000004, A10000000000000000000005, A10000000000000000000006, A10000000000000000000007, A10000000000000000000008, A10000000000000000000009, A1000000000000000000000A, A1000000000000000000000B, A1000000000000000000000C, A1000000000000000000000D);
+			files = (A10000000000000000000001, A10000000000000000000002, A10000000000000000000003, A10000000000000000000004, A10000000000000000000005, A10000000000000000000006, A10000000000000000000007, A10000000000000000000008, A10000000000000000000009, A1000000000000000000000A, A1000000000000000000000B, A1000000000000000000000C, A1000000000000000000000D, A1000000000000000000000E, A1000000000000000000000F);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		B80000000000000000000001 /* UI Test Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (B10000000000000000000001); runOnlyForDeploymentPostprocessing = 0; };

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 import os
 import sqlite3
@@ -69,7 +70,10 @@ def create_app(
     metadata_api: CaminoV1Contract,
     media_store: MediaStore,
     token_store: RevocableTokenStore,
+    finalize_delay_seconds: float = 0,
 ) -> FastAPI:
+    if not 0 <= finalize_delay_seconds <= 15:
+        raise ValueError("finalize delay must stay between 0 and 15 seconds")
     app = FastAPI(
         title="Camino private owner API",
         version="1",
@@ -188,6 +192,8 @@ def create_app(
         if not authorized(request):
             return _error(HTTPStatus.UNAUTHORIZED, "unauthorized", "private authorization required")
         try:
+            if finalize_delay_seconds:
+                await asyncio.sleep(finalize_delay_seconds)
             receipt, created = media_store.finalize(asset_id)
             body = dict(receipt)
             body["created"] = created
