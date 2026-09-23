@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-23 22:16 CEST
+Aktualizováno: 2026-09-23 22:59 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -55,7 +55,7 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 - C04b T060 má bezpečnou fyzickou část PASS podle Mílova potvrzení: při běžném volném místě nebylo falešné varování, krátké video se normálně dokončilo a přehrálo a starší položky zůstaly zachované. Celý T060 zůstává částečný: skutečné nízké místo před/během audia, videa a textu nebylo na hlavním iPhonu vyvoláno.
 - C04b low-space/thermal hardening je lokálně hotový: společná injektovatelná politika varuje pod 2 GiB, blokuje nový video Start pod 1 GiB, foto/audio pod 512 MiB a pod rezervou bezpečně dokončí běžící audio/video. Krátká značka se dál pokusí o skutečný zápis; starší originály se nemažou. Video při vážném tepelném stavu varuje a při kritickém nový Start blokuje nebo běžící klip ukončí bez skryté změny kvality. Swift 17/17, UI simulátoru 3/3, nepodepsané simulátorové i generic iOS buildy a plná projektová brána 1740/1740 PASS. Jde o syntetický důkaz; hardening zatím není na iPhonu a celý fyzický T060 zůstává částečný.
 - C04d je hotové bez změny Core Data schématu. Deník přidal výběr dne, filtry, detail Momentu, odolný textový koncept, append-only historii revizí s předností lidské úpravy, vědomé uvolnění Úvahy, zamknutí, skrytí/obnovu, přesun kapitoly se zachovaným původním časem a samostatný soukromý doplněk navázaný na rodičovský Moment. Budoucí serverové operace mají trvalé pořadí a stav `čeká na server`; Důležité zůstává lokální, protože C03b v1 pro ně nemá operaci. Swift 22/22, UI simulátoru 4/4, nepodepsaný generic iOS build a plná brána 1740/1740 PASS. Zdroj `e3868100` byl pushnut na `origin/main`; podepsané Camino 0.1.0 (2) prošlo strict kontrolou, aktualizací stejného bundle ID, instalací a spuštěním na iPhonu 14 Plus / iOS 26.6.1 bez ztráty starších C04b dat.
-- C05a má lokální produkčně orientovaný serverový checkpoint: přijatý C03b Asset manifest je autorita, FastAPI streamuje nejvýše 8MiB části do soukromého úložiště, SQLite/souborový journal bezpečně obnovuje mezery a stav `verified` vzniká až po serverovém ověření celé délky a SHA-256. Owner tokeny jsou odvolatelné, ukládá se jen jejich hash a správa nemá síťovou cestu. Proces odmítá veřejný bind a smí poslouchat jen na loopbacku. Registrovaný samostatně potvrzovaný smoke umí nad syntetickými daty ověřit skutečné HTTP, retry, finalizaci, odvolání obou tokenů a restart bez Serve/Funnel/iPhonu. Core + C03b 23/23, FastAPI 4/4, smoke workflow 4/4 a plná brána 1763/1763 PASS; samotný smoke ještě NEPROVEDEN.
+- C05a má lokální produkčně orientovaný serverový checkpoint: přijatý C03b Asset manifest je autorita, FastAPI streamuje nejvýše 8MiB části do soukromého úložiště, SQLite/souborový journal bezpečně obnovuje mezery a stav `verified` vzniká až po serverovém ověření celé délky a SHA-256. Owner tokeny jsou odvolatelné, ukládá se jen jejich hash a správa nemá síťovou cestu. Proces odmítá veřejný bind a smí poslouchat jen na loopbacku. Registrovaný smoke `20260923T205907Z-e64b0346` prošel 12/12 kontrolami přes skutečné loopback HTTP: 1 048 699 B v 5 částech, retry, předčasná blokace finalizace, celý hash, idempotentní finalizace, odvolání obou tokenů a restart se zachovaným `verified`. Core + C03b 23/23, FastAPI 4/4, smoke workflow 4/4 a plná brána 1763/1763 PASS. Serve, Funnel, iPhone, push a nasazení zůstaly beze změny.
 
 
 ## Zdroje a návaznost
@@ -93,13 +93,13 @@ kódu nevyvolává; FAIL se nejdřív doloží a opraví v aktuálním rozsahu.
 - Lokální zámek je v C04a uložený na telefonu, ale server jej vynutí až po přijetí revize; již vydanou cizí kopii neodvolá. C08 musí kontrolovat aktuální oprávnění při každém výdeji média. C04a zatím nemá synchronizaci C05 ani Viewer C08, takže U15 není ověřená provozní ochrana.
 - C03b bylo ověřeno jen na syntetických metadatech v referenční databázi mimo repozitář. C05 musí navázat skutečné ověření identity zařízení, odvolatelné tokeny, privátní HTTPS, přijetí a hashovou finalizaci médií a řízené řešení konfliktů; C06b skutečnou zálohu a obnovu. Porovnání po obnově zatím zahrnuje Momenty, ne celý inventář médií; T044/T045/T053/T058 ani fyzické chování telefonu nejsou plně PASS.
 - Integrovaná C04d je nainstalovaná a v dostupném lokálním rozsahu fyzicky přijatá: zachování starších C04b dat a T010/T019–T021/T026/T030/T039–T041/T096 jsou PASS podle Mílova průchodu. T038 zůstává jen synteticky a automatizovaně doložené, protože bez produkční AI nevznikl pozdější automatický text pro fyzický end-to-end test. Serverové části T040/T096 čekají na C05/C08. T007 a plné T060 zůstávají částečné; hlavní iPhone se kvůli nízkému místu nebo teplotě uměle nezatěžuje. Lokální fronta nepředává revize do C03b API, není serverovým přijetím ani druhou zálohou; hvězdička se zatím nesynchronizuje.
-- C05a je pouze lokální checkpoint kódu. Registrovaný loopback smoke je připravený, ale čeká na samostatné potvrzení přesného příkazu; jeho běh, Tailscale Serve, trvalá služba, provozní disk a C05b iPhone klient nejsou ověřené. T043–T046/T052/T061 mají serverový syntetický důkaz, ne úplný produkční nebo fyzický PASS.
+- C05a je pouze lokální checkpoint kódu s přijatým syntetickým loopback smoke. Není to Tailscale Serve, trvalá služba, provozní disk ani C05b iPhone klient. T043–T046/T052/T061 mají serverový syntetický důkaz, ne úplný produkční nebo fyzický PASS.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
 - Instalace a launch nejsou fyzická přejímka přenosu; vývojový profil je časově omezený do 24. září 2026. U01–U15 se bez nového rozhodnutí neotevírají.
 
 ## Další krok
 
-Zobrazit náhled přesného `camino_c05a_loopback_smoke` a po samostatném potvrzení provést jednorázový syntetický běh. Teprve po jeho přijetí zvlášť potvrdit Tailscale Serve a C05b iPhone klienta; místní `čeká na server` do té doby nepovyšovat na přijaté. T038 dokončit až s reálnou opožděnou AI; skutečný low-space PASS T060 přiznat jen na postradatelném zařízení nebo při přirozeném stavu a captive portal T048 jen při dostupné síti.
+Loopback smoke je přijatý. Samostatně rozhodnout o privátním Tailscale Serve a potom o C05b iPhone klientovi; místní `čeká na server` do skutečného produkčního přijetí nepovyšovat na přijaté. T038 dokončit až s reálnou opožděnou AI; skutečný low-space PASS T060 přiznat jen na postradatelném zařízení nebo při přirozeném stavu a captive portal T048 jen při dostupné síti.
 
 Historický doklad založení:
 Ověření založení: 56/56 testů integrace (54 + 2 profilové testy) a rychlá statická brána OK.
@@ -1398,3 +1398,15 @@ Další krok:
 - Bezpečnostní a registrační testy 4/4, společná cílená sada 30/30 a plná
   projektová brána 1763/1763 PASS. Oddělené C05a prostředí načte serverové
   závislosti.
+
+### 2026-09-23 22:59 CEST — C05a loopback smoke PASS
+
+- Míla samostatně potvrdil uložený registrovaný příkaz. Běh
+  `20260923T205907Z-e64b0346` prošel 12/12 kontrolami přes skutečné HTTP na
+  `127.0.0.1`: 1 048 699 B v 5 částech, autorizace, C03b metadata,
+  idempotentní retry, blokace časné finalizace, serverový hash, opakovaná
+  finalizace, odvolání obou tokenů a restart se zachovaným `verified` stavem.
+- Vlastněný proces skončil. Syntetická data a redigovaná privátní účtenka jsou
+  zachované; Serve, Funnel, iPhone, push ani nasazení se nezměnily.
+- Další krok vyžaduje nové samostatné rozhodnutí o privátním Tailscale Serve;
+  C05b iPhone klient následuje odděleně. Smoke není produkční přenos ani záloha.

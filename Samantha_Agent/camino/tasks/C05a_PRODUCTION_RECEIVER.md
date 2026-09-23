@@ -74,3 +74,14 @@ Workflow zachová syntetické databáze, bajty a privátní redigovanou účtenk
 audit. Nic nemaže, nemění Serve ani Funnel, nedotýká se iPhonu, nepushuje a
 nenasazuje. Jeho příprava sama není výsledkem smoke; PASS vznikne až po
 zobrazení přesného příkazu, samostatném potvrzení a úspěšném běhu.
+
+## Výsledek loopback smoke
+
+Dne 2026-09-23 proběhl potvrzený registrovaný běh
+`20260923T205907Z-e64b0346`: 12/12 kontrol PASS, 1 048 699 B v 5 částech.
+Ověřil skutečné loopback HTTP, autorizaci, C03b metadata, shodný retry části,
+blokaci předčasné finalizace, serverovou délku a SHA-256, idempotentní
+finalizaci, odvolání prvního tokenu, restart se zachovanou účtenkou `verified`
+a odvolání druhého tokenu. Vlastněný proces skončil; Serve, Funnel, iPhone,
+Git, push ani deployment se nezměnily. Syntetický běh a redigovaná privátní
+účtenka zůstávají zachované pro audit.

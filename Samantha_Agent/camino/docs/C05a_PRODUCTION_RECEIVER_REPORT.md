@@ -39,10 +39,12 @@ health, vytvoření session, stav, upload části a finalizaci. FastAPI běží 
 samostatném prostředí Camino; připnuté přímé závislosti jsou v
 `server/requirements.txt`. Sdílené prostředí Samanthy nebylo změněno.
 
-Tento checkpoint nevytvořil skutečné privátní adresáře ani token, nespustil
-trvalou službu, nezměnil Tailscale Serve, nepushoval, nenasadil a nepřipojil
-iPhone. Neimplementuje C05b iOS frontu, C05c uživatelské stavové osy, Viewer,
-párovací UI ani zálohu.
+Následný jednorázový smoke vytvořil pouze nový syntetický běh mimo repozitář,
+dva náhodné owner tokeny uložené jen jako hashe a redigovanou účtenku v
+ignorovaném privátním stavu. Oba tokeny byly po ověření odvolány a vlastněný
+loopback proces ukončen. Tailscale Serve, Funnel, iPhone, Git, push ani
+deployment se nezměnily. C05a stále neimplementuje C05b iOS frontu, C05c
+uživatelské stavové osy, Viewer, párovací UI ani zálohu.
 
 ## Důkaz
 
@@ -53,6 +55,12 @@ párovací UI ani zálohu.
 - Veřejný bind `0.0.0.0`: správně odmítnut, exit 2.
 - Příprava registrovaného loopback smoke: 4/4 bezpečnostních a registračních
   testů PASS; oddělené C05a prostředí načte FastAPI, Uvicorn a aplikaci.
+- Registrovaný loopback smoke `20260923T205907Z-e64b0346`: 12/12 PASS přes
+  skutečné HTTP na `127.0.0.1`; 1 048 699 B v 5 částech. Doložil odmítnutí
+  požadavku bez tokenu, health, přijetí C03b metadat, idempotentní retry části,
+  blokaci předčasné finalizace, serverový hash a délku, idempotentní finalizaci,
+  odvolání prvního tokenu, restart nad stejnými daty se zachovaným `verified`
+  stavem a odvolání druhého tokenu.
 - Plná projektová brána po přidání workflow: syntaxe Python/JavaScript/shell a
   1763/1763 testů PASS.
 
@@ -67,13 +75,7 @@ párovací UI ani zálohu.
 
 ## Další krok
 
-Registrovaný `camino_c05a_loopback_smoke` je připravený pro jednorázový běh v
-odděleném C05a prostředí. Vytvoří pouze syntetická data mimo repozitář,
-vlastněný loopback proces a redigovanou účtenku v ignorovaném privátním stavu;
-oba náhodné tokeny odvolá. Serve, Funnel, iPhone, Git, push a deployment
-nemění. Příprava workflow prošla cílenými testy, ale skutečný smoke zatím
-neproběhl a čeká na samostatné potvrzení přesného registrovaného příkazu.
-
-Teprve po přijatém loopback smoke lze zvlášť potvrdit privátní Tailscale Serve
-a C05b iPhone klienta. Do té doby se místní stav `čeká na server` nesmí
-označit jako přijatý serverem.
+Loopback mezikrok je přijatý. Další krok vyžaduje nové samostatné rozhodnutí:
+privátní Tailscale Serve a následně C05b iPhone klienta. Dokud neproběhne
+skutečné produkční spojení, místní stav `čeká na server` se nesmí označit jako
+přijatý serverem.
