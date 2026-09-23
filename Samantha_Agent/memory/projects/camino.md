@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-22 20:46 CEST
+Aktualizováno: 2026-09-23 21:35 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -54,7 +54,7 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 - C04b T009 fyzicky PASS podle Mílova potvrzení: odmítnutá kamera zobrazila vysvětlení a `Zpět`, zatímco `Komentář` i místní deník dál fungovaly. Oprava kódu není potřeba.
 - C04b T060 má bezpečnou fyzickou část PASS podle Mílova potvrzení: při běžném volném místě nebylo falešné varování, krátké video se normálně dokončilo a přehrálo a starší položky zůstaly zachované. Celý T060 zůstává částečný: skutečné nízké místo před/během audia, videa a textu nebylo na hlavním iPhonu vyvoláno.
 - C04b low-space/thermal hardening je lokálně hotový: společná injektovatelná politika varuje pod 2 GiB, blokuje nový video Start pod 1 GiB, foto/audio pod 512 MiB a pod rezervou bezpečně dokončí běžící audio/video. Krátká značka se dál pokusí o skutečný zápis; starší originály se nemažou. Video při vážném tepelném stavu varuje a při kritickém nový Start blokuje nebo běžící klip ukončí bez skryté změny kvality. Swift 17/17, UI simulátoru 3/3, nepodepsané simulátorové i generic iOS buildy a plná projektová brána 1740/1740 PASS. Jde o syntetický důkaz; hardening zatím není na iPhonu a celý fyzický T060 zůstává částečný.
-- C04d je lokálně hotové bez změny Core Data schématu. Deník přidal výběr dne, filtry, detail Momentu, odolný textový koncept, append-only historii revizí s předností lidské úpravy, vědomé uvolnění Úvahy, zamknutí, skrytí/obnovu, přesun kapitoly se zachovaným původním časem a samostatný soukromý doplněk navázaný na rodičovský Moment. Budoucí serverové operace mají trvalé pořadí a stav `čeká na server`; Důležité zůstává lokální, protože C03b v1 pro ně nemá operaci. Swift 22/22, UI simulátoru 4/4, nepodepsaný generic iOS build a plná brána 1740/1740 PASS. Podepsání, instalace, push ani nasazení neproběhly.
+- C04d je hotové bez změny Core Data schématu. Deník přidal výběr dne, filtry, detail Momentu, odolný textový koncept, append-only historii revizí s předností lidské úpravy, vědomé uvolnění Úvahy, zamknutí, skrytí/obnovu, přesun kapitoly se zachovaným původním časem a samostatný soukromý doplněk navázaný na rodičovský Moment. Budoucí serverové operace mají trvalé pořadí a stav `čeká na server`; Důležité zůstává lokální, protože C03b v1 pro ně nemá operaci. Swift 22/22, UI simulátoru 4/4, nepodepsaný generic iOS build a plná brána 1740/1740 PASS. Zdroj `e3868100` byl pushnut na `origin/main`; podepsané Camino 0.1.0 (2) prošlo strict kontrolou, aktualizací stejného bundle ID, instalací a spuštěním na iPhonu 14 Plus / iOS 26.6.1 bez ztráty starších C04b dat.
 
 
 ## Zdroje a návaznost
@@ -91,13 +91,13 @@ kódu nevyvolává; FAIL se nejdřív doloží a opraví v aktuálním rozsahu.
 - T050 prošlo díky souběžnému důkazu telefonu a serveru v 14s okně; soukromé video obsahuje soukromou adresu, proto se necommitovalo. Oprava neočekávaného startu je na iPhonu fyzicky ověřená v části A; offline znovuotevření během části B zůstalo neověřené. Krátké `Vyžaduje pozornost` před dřívějším retry má neznámou příčinu.
 - Lokální zámek je v C04a uložený na telefonu, ale server jej vynutí až po přijetí revize; již vydanou cizí kopii neodvolá. C08 musí kontrolovat aktuální oprávnění při každém výdeji média. C04a zatím nemá synchronizaci C05 ani Viewer C08, takže U15 není ověřená provozní ochrana.
 - C03b bylo ověřeno jen na syntetických metadatech v referenční databázi mimo repozitář. C05 musí navázat skutečné ověření identity zařízení, odvolatelné tokeny, privátní HTTPS, přijetí a hashovou finalizaci médií a řízené řešení konfliktů; C06b skutečnou zálohu a obnovu. Porovnání po obnově zatím zahrnuje Momenty, ne celý inventář médií; T044/T045/T053/T058 ani fyzické chování telefonu nejsou plně PASS.
-- Integrovaná aplikace je podepsaná a nainstalovaná ve starším C04b stavu; T008/T009/T011/T012/T013/T014 fyzicky prošly, T007 zůstává částečný a bezpečná část T060 je PASS. Nová politika místa/teploty ani C04d dosud nejsou na iPhonu. Plné T060 zůstává částečné a T010/T019–T021/T026/T030/T038–T041/T096 čekají na cílenou fyzickou přejímku C04d. Lokální fronta nepředává revize do C03b API, není serverovým přijetím ani druhou zálohou; hvězdička se zatím nesynchronizuje.
+- Integrovaná C04d je nainstalovaná a v dostupném lokálním rozsahu fyzicky přijatá: zachování starších C04b dat a T010/T019–T021/T026/T030/T039–T041/T096 jsou PASS podle Mílova průchodu. T038 zůstává jen synteticky a automatizovaně doložené, protože bez produkční AI nevznikl pozdější automatický text pro fyzický end-to-end test. Serverové části T040/T096 čekají na C05/C08. T007 a plné T060 zůstávají částečné; hlavní iPhone se kvůli nízkému místu nebo teplotě uměle nezatěžuje. Lokální fronta nepředává revize do C03b API, není serverovým přijetím ani druhou zálohou; hvězdička se zatím nesynchronizuje.
 - Vzorky v telefonu mají jen místní kopii, nejsou určeny pro ostrá média; žádná AI, síť, export nebo automatické mazání.
 - Instalace a launch nejsou fyzická přejímka přenosu; vývojový profil je časově omezený do 24. září 2026. U01–U15 se bez nového rozhodnutí neotevírají.
 
 ## Další krok
 
-Samostatně potvrdit podpis a instalaci aktuálního Camina na iPhone a projít `camino/app/C04d_IPHONE_TEST_PLAN.md`; až potom lze uzavřít fyzickou akceptaci C04d. Následně pokračovat C05a. Skutečný low-space PASS T060 přiznat jen na postradatelném zařízení nebo při přirozeném stavu; hlavní iPhone uměle nezaplňovat ani nezahřívat. Captive portal T048 ověřit jen při skutečně dostupné síti.
+Pokračovat C05a: napojit integrovanou iPhone aplikaci na produkční privátní API bez předstírání serverového přijetí. Zachovat jeden zapisující iPhone, odvolatelné přihlášení, privátní HTTPS, idempotentní operace, ověření médií a fail-closed soukromí U15. T038 dokončit až s reálnou opožděnou AI; skutečný low-space PASS T060 přiznat jen na postradatelném zařízení nebo při přirozeném stavu a captive portal T048 jen při dostupné síti.
 
 Historický doklad založení:
 Ověření založení: 56/56 testů integrace (54 + 2 profilové testy) a rychlá statická brána OK.
@@ -1332,3 +1332,34 @@ Technický důkaz:
   záznamy, uložilo značku přes restart a
   při kritické teplotě odmítlo video; integrační test zachoval starší originál
   byte-for-byte. Bez push, nasazení a instalace na telefon.
+
+### 2026-09-23 21:35 CEST — C04d instalace a fyzická přejímka
+
+Hotovo:
+- Zdrojový checkpoint `e3868100` po plné bráně 1740/1740 byl pushnut na
+  `origin/main`. Podepsané Camino 0.1.0 (2) prošlo strict kontrolou, aktualizací
+  stejného bundle ID, instalací a spuštěním na iPhonu 14 Plus / iOS 26.6.1.
+- Starší C04b data a média zůstala dostupná. Míla fyzicky potvrdil PASS pro
+  T010, obě větve T019, T020, T021, T026, T030, T039, T040, T041 a T096.
+  Použitá změna vstupu v T020 byla z mikrofonu iPhonu na AirPods s mikrofonem.
+
+Rozhodnutí a rizika:
+- C04d je přijaté v dostupném lokálním a na zařízení ověřitelném rozsahu;
+  z výsledků nevznikla potřeba opravy kódu.
+- T038 zůstává jen synteticky a automatizovaně ověřené. Bez produkční AI nebyl
+  možný fyzický end-to-end důkaz opožděného automatického textu. Serverové
+  přijetí a Viewer u T040/T096 zůstávají C05/C08; `čeká na server` není potvrzení.
+
+Další krok:
+- Navázat C05a produkčním privátním API, přičemž se zachová fail-closed U15,
+  jeden zapisující iPhone, odvolatelné přihlášení, idempotence, ověření médií
+  a pravdivé rozlišení místní fronty od serverového přijetí.
+
+Navrhované další kroky:
+- Po C05a doplnit integrační serverové důkazy; T038 dokončit až s reálnou
+  opožděnou AI. Plné T060 ani captive portal T048 bez vhodné podmínky nevyvolávat.
+
+Technický důkaz:
+- `C04d_IPHONE_TEST_PLAN.md` obsahuje jednotlivé výsledky a hranice. Strict
+  podpis, CoreDevice instalace/launch a inventář verze 0.1.0 (2) prošly; obsah
+  testovacích médií zůstal mimo Git. Cockpit se v tomto kroku nenasazoval.
