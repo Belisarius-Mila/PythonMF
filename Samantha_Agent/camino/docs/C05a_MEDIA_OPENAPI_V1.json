@@ -1,0 +1,183 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Camino C05a media extension",
+    "version": "1.0.0",
+    "description": "Owner-only upload sessions, durable chunks, verified finalization, and status. This extends C03b_OPENAPI_V1.json; pairing, Viewer, backup, and public access are not included."
+  },
+  "servers": [],
+  "security": [{ "ownerBearer": [] }],
+  "paths": {
+    "/healthz": {
+      "get": {
+        "operationId": "readC05aHealth",
+        "summary": "Read minimal authenticated service health",
+        "responses": {
+          "200": { "description": "Private service is ready" },
+          "401": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/api/v1/assets/{asset_id}/upload-session": {
+      "post": {
+        "operationId": "createAssetUploadSession",
+        "summary": "Create or recover an upload session from an accepted C03b Asset manifest",
+        "parameters": [{ "$ref": "#/components/parameters/AssetId" }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UploadSessionRequest" } } }
+        },
+        "responses": {
+          "200": { "description": "Identical existing session", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UploadStatus" } } } },
+          "201": { "description": "Durable session created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UploadStatus" } } } },
+          "401": { "$ref": "#/components/responses/Error" },
+          "404": { "$ref": "#/components/responses/Error" },
+          "409": { "$ref": "#/components/responses/Error" },
+          "413": { "$ref": "#/components/responses/Error" },
+          "415": { "$ref": "#/components/responses/Error" },
+          "422": { "$ref": "#/components/responses/Error" },
+          "426": { "$ref": "#/components/responses/Error" },
+          "503": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/api/v1/assets/{asset_id}/upload-status": {
+      "get": {
+        "operationId": "readAssetUploadStatus",
+        "summary": "Read server-confirmed chunks and verified finalization",
+        "parameters": [{ "$ref": "#/components/parameters/AssetId" }],
+        "responses": {
+          "200": { "description": "Current durable state", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UploadStatus" } } } },
+          "401": { "$ref": "#/components/responses/Error" },
+          "404": { "$ref": "#/components/responses/Error" },
+          "503": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/api/v1/assets/{asset_id}/chunks/{chunk_index}": {
+      "put": {
+        "operationId": "putAssetChunk",
+        "summary": "Stream and durably verify one bounded chunk",
+        "parameters": [
+          { "$ref": "#/components/parameters/AssetId" },
+          { "name": "chunk_index", "in": "path", "required": true, "schema": { "type": "integer", "minimum": 0 } },
+          { "name": "X-Camino-Chunk-SHA256", "in": "header", "required": true, "schema": { "type": "string", "pattern": "^[0-9a-f]{64}$" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": { "application/octet-stream": { "schema": { "type": "string", "format": "binary" } } }
+        },
+        "responses": {
+          "200": { "description": "Identical chunk was already durable", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UploadStatus" } } } },
+          "201": { "description": "Chunk is durable", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UploadStatus" } } } },
+          "400": { "$ref": "#/components/responses/Error" },
+          "401": { "$ref": "#/components/responses/Error" },
+          "404": { "$ref": "#/components/responses/Error" },
+          "409": { "$ref": "#/components/responses/Error" },
+          "411": { "$ref": "#/components/responses/Error" },
+          "415": { "$ref": "#/components/responses/Error" },
+          "422": { "$ref": "#/components/responses/Error" },
+          "503": { "$ref": "#/components/responses/Error" },
+          "507": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/api/v1/assets/{asset_id}/finalize": {
+      "post": {
+        "operationId": "finalizeAsset",
+        "summary": "Assemble, hash, install, and receipt one verified Asset",
+        "parameters": [{ "$ref": "#/components/parameters/AssetId" }],
+        "responses": {
+          "200": { "description": "Identical verified receipt already exists", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/VerifiedReceipt" } } } },
+          "201": { "description": "Asset was verified and installed", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/VerifiedReceipt" } } } },
+          "401": { "$ref": "#/components/responses/Error" },
+          "404": { "$ref": "#/components/responses/Error" },
+          "409": { "$ref": "#/components/responses/Error" },
+          "422": { "$ref": "#/components/responses/Error" },
+          "503": { "$ref": "#/components/responses/Error" },
+          "507": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "ownerBearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Revocable owner token provisioned outside the network API; only its SHA-256 digest is stored."
+      }
+    },
+    "parameters": {
+      "AssetId": { "name": "asset_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+    },
+    "responses": {
+      "Error": {
+        "description": "Stable code without stack trace, token, local path, or private payload",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+      }
+    },
+    "schemas": {
+      "UploadSessionRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["contract_version", "chunk_size"],
+        "properties": {
+          "contract_version": { "const": 1 },
+          "chunk_size": { "type": "integer", "minimum": 1, "maximum": 8388608 }
+        }
+      },
+      "UploadStatus": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["contract_version", "asset_id", "state", "byte_count", "sha256", "chunk_size", "chunk_count", "accepted_chunks", "missing_chunks"],
+        "properties": {
+          "contract_version": { "const": 1 },
+          "asset_id": { "type": "string", "format": "uuid" },
+          "state": { "enum": ["uploading", "verifying", "verified", "verification_failed", "recovery_required"] },
+          "byte_count": { "type": "integer", "minimum": 1 },
+          "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+          "chunk_size": { "type": "integer", "minimum": 1, "maximum": 8388608 },
+          "chunk_count": { "type": "integer", "minimum": 1 },
+          "accepted_chunks": { "type": "array", "items": { "type": "integer", "minimum": 0 } },
+          "missing_chunks": { "type": "array", "items": { "type": "integer", "minimum": 0 } },
+          "created": { "type": "boolean" },
+          "chunk_created": { "type": "boolean" },
+          "failure_code": { "type": "string" },
+          "receipt": { "$ref": "#/components/schemas/VerifiedReceipt" }
+        }
+      },
+      "VerifiedReceipt": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["contract_version", "asset_id", "moment_id", "media_kind", "byte_count", "sha256", "chunk_count", "state", "verified_at"],
+        "properties": {
+          "contract_version": { "const": 1 },
+          "asset_id": { "type": "string", "format": "uuid" },
+          "moment_id": { "type": "string", "format": "uuid" },
+          "media_kind": { "enum": ["photo", "video", "audio"] },
+          "byte_count": { "type": "integer", "minimum": 1 },
+          "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+          "chunk_count": { "type": "integer", "minimum": 1 },
+          "state": { "const": "verified" },
+          "verified_at": { "type": "string", "format": "date-time" },
+          "created": { "type": "boolean" }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["contract_version", "error"],
+        "properties": {
+          "contract_version": { "const": 1 },
+          "error": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["code", "message"],
+            "properties": { "code": { "type": "string" }, "message": { "type": "string" } }
+          }
+        }
+      }
+    }
+  }
+}

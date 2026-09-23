@@ -414,6 +414,17 @@ class RevisionStore:
             model = self._moment(connection, moment_id)
             return wire(model)
 
+    def asset(self, asset_id: str) -> dict[str, Any]:
+        """Return one accepted Asset manifest without implying media verification."""
+        asset_id = self._uuid(asset_id)
+        with self._connection() as connection:
+            row = connection.execute(
+                "SELECT body FROM assets WHERE id=?", (asset_id,),
+            ).fetchone()
+            if row is None:
+                raise StoreNotFound("Asset is missing")
+            return json.loads(row["body"])
+
     def moment_history(self, moment_id: str) -> tuple[dict[str, Any], ...]:
         with self._connection() as connection:
             return tuple(wire(value) for value in self._history(connection, moment_id).versions)

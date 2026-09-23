@@ -105,6 +105,7 @@ class CaminoC03bContractTests(unittest.TestCase):
                          ["diary", "owner_only", "owner_only"])
         self.assertEqual(reopened.moment(self.moment.id)["chapter_date"], "2026-09-21")
         self.assertEqual(reopened.moment(self.moment.id)["captured"], wire(self.capture))
+        self.assertEqual(reopened.asset(self.asset.id), wire(self.asset))
         self.assertEqual(reopened.text_history(self.moment.id), (wire(text),))
         with sqlite3.connect(self.database) as connection:
             self.assertEqual(connection.execute("SELECT count(*) FROM assets").fetchone()[0], 1)

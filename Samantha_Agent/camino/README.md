@@ -3,7 +3,7 @@
 Soukromý cestovní deník: offline záznam na iPhonu, soukromé zpracování na Macu
 a pozdější film z povolených zdrojů.
 
-**Stav: autoritativní podklady v0.5 + U15. C01a/C01b/C01c/C02a jsou přijaty v prototypovém rozsahu. C02b harness 0.4.0 (2) je na iPhonu; T043 i T047 prošly v syntetickém rozsahu. T047 po zámku a force quit/relaunch doložil dvě relace a dva hashově ověřené objekty; receiver je ukončený, `/camino-c02b` odebraná a Serve přesně obnovený. T048–T050 čekají. Funnel je vypnutý, trvalá služba ani veřejná cesta neexistují. Camino Viewer je P0, ale podle etap se implementuje až v C08c–C08f.**
+**Stav: autoritativní podklady v0.5 + U15. C04d je fyzicky přijaté v dostupném lokálním rozsahu. C05a má lokální FastAPI/SQLite/souborový základ pro odvolatelné owner přihlášení, obnovitelné části a hashově ověřenou finalizaci; 23/23 core/regresních, 4/4 síťových a plných 1751/1751 projektových testů prošlo. Služba není spuštěná ani nasazená, Tailscale Serve se nezměnil a iPhone zatím není připojený k C05a. Funnel je vypnutý. Viewer zůstává C08c–C08f.**
 
 - [Podklady v0.5](CAMINO_podklady_v0.5/README_v0.5.md)
 - [Funkční specifikace v0.5](CAMINO_podklady_v0.5/CAMINO_funkcni_specifikace_v0.5.md)
@@ -29,19 +29,20 @@ V Human–Adam se projekt jmenuje **Camino** (`project-camino`).
 - [Report C02a](docs/C02a_SYNTHETIC_RECEIVER_REPORT.md)
 - [Zadání C02b](tasks/C02b_CHUNK_TRANSFER_EXPERIMENT.md)
 - [Report C02b](docs/C02b_CHUNK_TRANSFER_REPORT.md)
+- [Zadání C05a](tasks/C05a_PRODUCTION_RECEIVER.md)
+- [Report C05a](docs/C05a_PRODUCTION_RECEIVER_REPORT.md)
+- [C05a mediální OpenAPI](docs/C05a_MEDIA_OPENAPI_V1.json)
+- [C05a server](server/README.md)
 - [Audio prototyp](prototypes/audio/README.md)
 - [Transfer harness C02b](prototypes/transfer/README.md)
 - [První integrovaná iPhone aplikace C04a](app/README.md)
 - [Aktuální report a překážky](docs/C01a_AUDIO_PROTOTYPE_REPORT.md)
 
-C02b má lokálně sestavený samostatný iOS `URLSession` harness pro syntetickou
-96MiB dávku, trvalý journal a nejvýše dvě připravené 8MiB části. Podepsaný build
-0.4.0 (2) je nainstalovaný a spuštěný na iPhonu. T043 PASS doložil fyzické
-přerušení sítě, bezpečné doplnění všech 13 částí, shodnou délku/hash a jediný
-objekt daného Assetu. T047 PASS doložil zámek, force quit, pravdivý mezistav a
-ruční relaunch s doplněním pouze chybějících částí. Další jsou T048–T050;
-C02a/C02b receiver není produkční upload server. T047 cesta je po testu
-ukončená a Serve obnovený.
+C05a nahrazuje standard-library receiver produkčně orientovaným, ale zatím
+jen lokálně ověřeným FastAPI základem. Přijatý C03b manifest je autorita,
+části a finální objekt mají serverový hash, journal opravuje doložitelné mezery
+mezi SQLite a soubory a neznámé bajty zachovává v karanténě. Provozní služba,
+privátní HTTPS a C05b iPhone klient jsou samostatné následující kroky.
 
 Rozbalené podklady v0.4 a v0.5 jsou verzované včetně manifestů. Původní ZIPy
 jsou zachované lokálně a ignorované Gitem; profilové workspaces přebírají

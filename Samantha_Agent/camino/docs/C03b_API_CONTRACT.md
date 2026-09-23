@@ -80,8 +80,11 @@ změnu epochy. Není to produkční databáze Camina ani úplný F50 API. T053 j
 doložené pouze pro metadata/text bez opětovného zápisu manifestu videa; T046
 pouze na kontraktní vrstvě. T058 má jen model změny epochy a porovnání
 Momentů, bez skutečné obnovy médií a inventáře Assetů. T044/T045 ztracené
-potvrzení finalizace a poškozené části zůstávají C02/C05. Fyzické testy iPhonu,
-serverová autentizace a soukromý HTTPS provoz jsou NEOVĚŘENO.
+potvrzení finalizace a poškozené části zůstávají C02/C05. Fyzické testy iPhonu
+a soukromý HTTPS provoz jsou NEOVĚŘENO. Navazující C05a
+už lokálně doplňuje odvolatelné owner tokeny, FastAPI adaptér, trvalé části,
+ověřenou finalizaci a obnovu journalu; provozní přijetí popisuje samostatný
+`C05a_PRODUCTION_RECEIVER_REPORT.md`.
 
 Další F50 operace se verzují v téže rodině `/api/v1/`, až je příslušná etapa
 implementuje: párování/odvolání (C06), upload session, části, finalizace,

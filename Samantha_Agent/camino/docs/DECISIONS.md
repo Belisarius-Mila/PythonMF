@@ -252,3 +252,26 @@ T043. Zámek a force quit jsou dvě různé dávky. Read-only audit počítá re
 stav poslední relace a hashově ověřené serverové části, takže po force quit lze
 nejdřív doložit skutečný mezistav a až potom ručně spustit klientskou
 reconciliaci.
+
+## ADR-C05A-01 — přijatý manifest, dvojitý journal a loopback-only FastAPI
+
+**Rozhodnutí 23. září 2026:** C05a používá C03b přijatý Asset manifest jako
+autoritu identity, typu, délky a celkového SHA-256. Mediální API nepřijímá nový
+manifest z upload požadavku. Shodné opakování session, části i finalizace je
+idempotentní; odlišná identita nebo bajty jsou konflikt bez tichého přepsání.
+
+Produkční cíl používá FastAPI v samostatném prostředí Camino, nikoli sdílené
+`.venv` Samanthy. Síťový proces smí bindovat pouze loopback; budoucí soukromé
+HTTPS ukončí samostatně potvrzený Tailscale Serve. Funnel, veřejný bind a
+veřejný fallback jsou zakázané.
+
+SQLite journal potvrzuje stav `pending` a `stored`; souborový systém nese
+hashově ověřené části a finální objekt. Stav `verified` vznikne až po serverovém
+ověření celého objektu a trvalé účtence. Restart opraví validní mezeru mezi
+souborem a databází. Neznámé nebo přerušené bajty se přesunou do karantény,
+nikoli automaticky smažou. Nedostatek místa je pravdivá blokace.
+
+Owner tokeny jsou místně založené a odvolatelné; databáze drží pouze jejich
+SHA-256 a síťové API nemá správu tokenů. Tento checkpoint neřeší párovací UI,
+C05b frontu, C05c UX, Viewer, zálohu ani provozní nasazení a netvrdí
+přesně-jednou síťové doručení.
