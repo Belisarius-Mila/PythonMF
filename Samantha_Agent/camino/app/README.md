@@ -1,4 +1,4 @@
-# Camino app — C04a až C05b
+# Camino app — C04a až C05c
 
 První integrovaná iPhone aplikace Camina. Má vlastní bundle ID
 `cz.pythonmf.camino.app` a vlastní Application Support kontejner; nepřebírá ani
@@ -62,6 +62,13 @@ nemigruje data ze samostatných prototypů Camino Audio a Camino Transfer Test.
   ruční sync, trvalé pause a jednorázové mobilní povolení jen pro zobrazenou
   dávku s počtem a objemem. Token je v Keychain, URL musí být HTTPS a veřejný
   fallback neexistuje. Změna epochy zůstane fail-closed pro servisní kontrolu.
+- C05c dělí výsledek na samostatné osy **Telefon / Mac / Další záloha / AI**.
+  Telefon a Mac počítají Momenty; čekající operace, média a bajty jsou provozní
+  údaje, nikoli jiný počet Momentů. Připojení nebo připravená fronta nejsou
+  zelené ověření. Kopie na Macu není další záloha a přepis není záloha.
+- Bez implementované C06b zůstává další záloha neověřená; bez C07 zůstává AI
+  vypnutá. Syntetické kombinace T054/T055 jsou dostupné jen v Debug simulátoru,
+  nikdy v produkční cestě fyzického zařízení.
 
 Párování, C06a spravovaná služba, Viewer a serverová záloha jsou další etapy.
 Hvězdička je pouze místní čtenářská pomůcka, protože C03b v1 pro její změnu
@@ -73,7 +80,8 @@ metadata-only změnu, změnu epochy a pause; captive portal T048 zůstává
 Původní soubory se automaticky nemažou a chyba journalu nespouští reset.
 
 Cílené fyzické průchody jsou v `C04b_IPHONE_TEST_PLAN.md`,
-`C04d_IPHONE_TEST_PLAN.md` a `C05b_IPHONE_TEST_PLAN.md`.
+`C04d_IPHONE_TEST_PLAN.md`, `C05b_IPHONE_TEST_PLAN.md` a
+`C05c_IPHONE_TEST_PLAN.md`.
 
 ## Vývojové ověření
 

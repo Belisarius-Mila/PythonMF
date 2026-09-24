@@ -163,4 +163,118 @@ import XCTest
         _ = try journal.exactEnvelope(for: next.id)
         XCTAssertEqual(journal.metadata[1].sequence, 6)
     }
+
+    func testCoverageCountsMomentsSeparatelyFromFilesAndSegments() throws {
+        let completeID = UUID(), waitingID = UUID()
+        let payload = try JSONSerialization.data(withJSONObject: ["synthetic": true])
+        let completeOperation = CaminoSyncMetadataItem(
+            id: UUID(), uniqueKey: "moment:complete", kind: "create_moment",
+            objectID: completeID, expectedRevision: nil, payload: payload,
+            phase: .accepted)
+        let waitingOperation = CaminoSyncMetadataItem(
+            id: UUID(), uniqueKey: "moment:waiting", kind: "create_moment",
+            objectID: waitingID, expectedRevision: nil, payload: payload)
+        var verifiedAudio = media(kind: .audio, batch: UUID(), bytes: 8)
+        verifiedAudio = CaminoSyncMediaItem(
+            id: verifiedAudio.id, momentID: completeID, kind: .audio,
+            sourceRelativePath: verifiedAudio.sourceRelativePath,
+            byteCount: verifiedAudio.byteCount, sha256: verifiedAudio.sha256,
+            durationMilliseconds: verifiedAudio.durationMilliseconds,
+            batchID: verifiedAudio.batchID, chunkSize: verifiedAudio.chunkSize,
+            acceptedChunks: [0, 1], phase: .verified)
+        let waitingVideo = CaminoSyncMediaItem(
+            id: UUID(), momentID: waitingID, kind: .video,
+            sourceRelativePath: "Media/Originals/waiting.bin", byteCount: 10,
+            sha256: String(repeating: "b", count: 64), durationMilliseconds: 1_000,
+            batchID: UUID(), chunkSize: 4)
+        var journal = CaminoSyncJournal(deviceID: UUID())
+        journal.metadata = [completeOperation, waitingOperation]
+        journal.media = [verifiedAudio, waitingVideo]
+
+        let coverage = journal.coverage(momentIDs: [completeID, waitingID])
+        XCTAssertEqual(coverage.phoneMomentCount, 2)
+        XCTAssertEqual(coverage.macCompleteMomentCount, 1)
+        XCTAssertEqual(coverage.macWaitingMomentCount, 1)
+        XCTAssertEqual(coverage.pendingMetadataCount, 1)
+        XCTAssertEqual(coverage.pendingMediaCount, 1)
+        XCTAssertEqual(coverage.pendingMediaBytes, 10)
+    }
+
+    func testT054FourAxesStayIndependent() {
+        let coverage = CaminoSyncCoverage(
+            phoneMomentCount: 2, macCompleteMomentCount: 2,
+            macWaitingMomentCount: 0)
+        let aiWithoutBackup = CaminoC05cDashboard(
+            coverage: coverage, macState: .verified,
+            backupState: .notVerified, aiState: .completed(count: 1))
+        XCTAssertEqual(aiWithoutBackup.axes.map(\.id), ["phone", "mac", "backup", "ai"])
+        XCTAssertEqual(aiWithoutBackup.mac.tone, .verified)
+        XCTAssertEqual(aiWithoutBackup.phone.tone, .verified)
+        XCTAssertEqual(aiWithoutBackup.ai.tone, .verified)
+        XCTAssertEqual(aiWithoutBackup.backup.tone, .neutral)
+        XCTAssertEqual(aiWithoutBackup.backup.value,
+                       "Další záloha zatím není ověřená")
+        XCTAssertTrue(aiWithoutBackup.ai.detail.contains("Přepis není záloha"))
+
+        let backupWithoutAI = CaminoC05cDashboard(
+            coverage: coverage, macState: .verified,
+            backupState: .verified(through: "18:42"),
+            aiState: .waiting(count: 1))
+        XCTAssertEqual(backupWithoutAI.backup.tone, .verified)
+        XCTAssertEqual(backupWithoutAI.backup.value, "Ověřeno do 18:42")
+        XCTAssertEqual(backupWithoutAI.ai.tone, .waiting)
+        XCTAssertEqual(backupWithoutAI.mac.tone, .verified)
+    }
+
+    func testT055MetadataChangeStalesOnlyBackupMetadataCoverage() {
+        let dashboard = CaminoC05cDashboard(
+            coverage: CaminoSyncCoverage(
+                phoneMomentCount: 1, macCompleteMomentCount: 1,
+                macWaitingMomentCount: 0),
+            macState: .verified,
+            backupState: .mediaVerifiedMetadataPending(through: "18:42"),
+            aiState: .completed(count: 1))
+        XCTAssertEqual(dashboard.mac.tone, .verified,
+                       "the already verified Mac media remains verified")
+        XCTAssertEqual(dashboard.backup.tone, .waiting)
+        XCTAssertEqual(dashboard.backup.value,
+                       "Média zálohována, novější změny ještě čekají")
+        XCTAssertTrue(dashboard.backup.detail.contains("text nebo soukromí"))
+        XCTAssertEqual(dashboard.ai.tone, .verified,
+                       "backup freshness must not rewrite the AI axis")
+    }
+
+    func testC05cUserMessagesDoNotInventNetworkCauseOrExposeServerCodes() {
+        let coverage = CaminoSyncCoverage(phoneMomentCount: 1,
+                                          macWaitingMomentCount: 1)
+        let wifi = CaminoC05cDashboard(
+            coverage: coverage, macState: .waitingForWiFi,
+            backupState: .notVerified, aiState: .notConfigured)
+        XCTAssertEqual(wifi.mac.value, "Čeká na Wi‑Fi. V telefonu je uloženo.")
+
+        let unavailable = CaminoC05cDashboard(
+            coverage: coverage, macState: .unavailable,
+            backupState: .notVerified, aiState: .notConfigured)
+        XCTAssertEqual(unavailable.mac.value, "Domácí Mac teď není dostupný")
+        XCTAssertTrue(unavailable.mac.detail.contains("Příčinu nelze spolehlivě určit"))
+
+        let verifying = CaminoC05cDashboard(
+            coverage: coverage, macState: .verifying,
+            backupState: .notVerified, aiState: .notConfigured)
+        XCTAssertEqual(verifying.mac.value, "Ověřuji")
+        XCTAssertTrue(verifying.mac.detail.contains("Ještě není Ověřeno na Macu"))
+
+        let rejected = CaminoC05cDashboard(
+            coverage: coverage, macState: .rejected,
+            backupState: .notVerified, aiState: .notConfigured)
+        XCTAssertFalse(rejected.mac.detail.contains("revision_conflict"))
+        XCTAssertTrue(rejected.mac.detail.contains("Originály zůstávají v telefonu"))
+
+        let inconsistentSuccess = CaminoC05cDashboard(
+            coverage: coverage, macState: .verified,
+            backupState: .notVerified, aiState: .notConfigured)
+        XCTAssertEqual(inconsistentSuccess.mac.tone, .attention,
+                       "a waiting Moment must fail closed even if the driver says verified")
+        XCTAssertEqual(CaminoC05cDashboard.initial.phone.tone, .neutral)
+    }
 }

@@ -927,3 +927,17 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Ověření: Přímý vstup i registrovaný C05b lifecycle prošly, port 8767 zůstal
   loopback-only, ScanDocu na 8766 nebylo ukončeno ani změněno a plná projektová
   brána prošla 1770/1770 testů.
+
+### LL-050 — Nezávislé skutečnosti nesmějí sdílet jeden zelený stav
+
+- Problém: Ověřená kopie na Macu může v jednom souhrnném stavu zakrýt
+  neověřenou další zálohu, čekající novější metadata nebo chybějící AI výsledek.
+- Typ: opakující se
+- Řešení nalezeno: 24092026
+- Řešení: Modelovat Telefon, primární kopii, další zálohu a AI jako oddělené
+  typované osy. Počty doménových položek držet odděleně od operací, souborů a
+  bajtů. Pouhé uložení připojení ani dokončení přenosu nevydávat za zálohu;
+  syntetické stavy povolit jen v Debug simulátoru.
+- Ověření: C05c Swift 33/33, cílené UI 1/1, regresní UI pause 1/1, generic iOS
+  build a plná projektová brána 1770/1770 PASS. Skutečná záloha a AI zůstávají
+  samostatnou fyzickou a produkční akceptací.

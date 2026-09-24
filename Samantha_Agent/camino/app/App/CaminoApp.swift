@@ -306,22 +306,25 @@ private struct CaminoSyncView: View {
                         .font(.footnote).foregroundStyle(.secondary)
                 }
                 Section("Telefon") {
-                    Text("Místní záznam a čtení fungují i bez Macu.")
+                    statusAxis(sync.dashboard.phone, identifier: "c05cPhoneStatus")
                     LabeledContent("Prioritní metadata", value: "\(sync.stats.metadataCount)")
                     LabeledContent("Čekající média", value: "\(sync.stats.mediaCount)")
                     LabeledContent("Čekající objem", value: formatBytes(sync.stats.mediaBytes))
                 }
                 Section("Mac") {
-                    Text(sync.statusText).font(.headline)
-                        .accessibilityIdentifier("syncStatus")
-                    if !sync.detailText.isEmpty {
-                        Text(sync.detailText).font(.subheadline)
-                    }
+                    statusAxis(sync.dashboard.mac, identifier: "syncStatus",
+                               detailOverride: sync.detailText)
                     if sync.reconciliationRequired {
                         Label("Po změně epochy je nutná servisní kontrola. Nic se automaticky nemaže.",
                               systemImage: "exclamationmark.shield")
                             .foregroundStyle(.orange)
                     }
+                }
+                Section("Další záloha") {
+                    statusAxis(sync.dashboard.backup, identifier: "c05cBackupStatus")
+                }
+                Section("AI") {
+                    statusAxis(sync.dashboard.ai, identifier: "c05cAIStatus")
                 }
                 Section("Ovládání") {
                     Button("Synchronizovat nyní", systemImage: "arrow.clockwise") {
@@ -360,6 +363,35 @@ private struct CaminoSyncView: View {
 
     private func formatBytes(_ value: Int64) -> String {
         ByteCountFormatter.string(fromByteCount: value, countStyle: .file)
+    }
+
+    @ViewBuilder private func statusAxis(_ axis: CaminoStatusAxis,
+                                         identifier: String,
+                                         detailOverride: String? = nil) -> some View {
+        Label(axis.value, systemImage: statusSymbol(axis.tone))
+            .font(.headline)
+            .foregroundStyle(statusColor(axis.tone))
+            .accessibilityIdentifier(identifier)
+        Text(detailOverride ?? axis.detail).font(.subheadline).foregroundStyle(.secondary)
+            .accessibilityIdentifier(identifier + "Detail")
+    }
+
+    private func statusSymbol(_ tone: CaminoStatusTone) -> String {
+        switch tone {
+        case .verified: "checkmark.circle.fill"
+        case .waiting: "clock.fill"
+        case .attention: "exclamationmark.triangle.fill"
+        case .neutral: "minus.circle"
+        }
+    }
+
+    private func statusColor(_ tone: CaminoStatusTone) -> Color {
+        switch tone {
+        case .verified: .green
+        case .waiting: .orange
+        case .attention: .red
+        case .neutral: .secondary
+        }
     }
 }
 

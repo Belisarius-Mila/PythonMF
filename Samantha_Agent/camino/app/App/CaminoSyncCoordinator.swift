@@ -366,6 +366,7 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
     @Published private(set) var paused = false
     @Published private(set) var busy = false
     @Published private(set) var reconciliationRequired = false
+    @Published private(set) var dashboard = CaminoC05cDashboard.initial
 
     private let local: CaminoLocalStore
     private let recording: IntentRecordingStore
@@ -375,6 +376,10 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
     private var journal: CaminoSyncJournal
     private var path = CaminoNetworkState(available: false, expensive: false)
     private var running = false
+    private var localMomentIDs: Set<UUID> = []
+    private var macCopyState: CaminoMacCopyState = .preparing
+    private var backupCopyState: CaminoBackupCopyState = .notVerified
+    private var aiProcessingState: CaminoAIProcessingState = .notConfigured
     private lazy var driver = CaminoSyncBackgroundDriver { [weak self] event in
         Task { @MainActor in self?.handle(event) }
     }
@@ -393,6 +398,8 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
         tokenStored = (try? keychain.load()) != nil
         paused = journal.paused
         reconciliationRequired = journal.reconciliationRequired
+        if paused { macCopyState = .paused }
+        applySimulatorStatusFixture()
         refreshPublishedState()
         _ = driver
         if paused { Task { await driver.suspendAll() } }
@@ -416,9 +423,9 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
             serverURL = clean
             tokenInput = ""
             tokenStored = true
-            detailText = "Soukromá HTTPS adresa je uložená; token zůstává v Keychain."
+            setMacCopyState(.connectionSaved)
         } catch {
-            detailText = "Zadej platnou HTTPS adresu a token o délce alespoň 32 znaků."
+            setMacCopyState(.invalidConfiguration)
         }
     }
 
@@ -436,8 +443,7 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
         try? journalStore.save(journal)
         if value {
             Task { await driver.suspendAll() }
-            statusText = "Přenosy jsou pozastavené"
-            detailText = "Nové úlohy se neplánují. Záznam a místní čtení dál fungují."
+            setMacCopyState(.paused)
         } else {
             Task {
                 await driver.resumeAll()
@@ -464,11 +470,15 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
     private func discoverOnly() async {
         do {
             try await discover()
-            statusText = journal.paused ? "Přenosy jsou pozastavené"
-                : stats.metadataCount == 0 && stats.mediaCount == 0
-                    ? "Vše známé je ověřeno na Macu" : "Fronta je připravená"
+            let coverage = journal.coverage(momentIDs: localMomentIDs)
+            let serverWasVerified = journal.serverID != nil && journal.epoch != nil
+            setMacCopyState(journal.paused ? .paused
+                : !configurationReady ? .notConfigured
+                : serverWasVerified && coverage.macWaitingMomentCount == 0
+                    && stats.metadataCount == 0 && stats.mediaCount == 0
+                    ? .verified : .queueReady)
         } catch {
-            detailText = CaminoSyncError.incompleteLocalInventory.localizedDescription
+            setMacCopyState(.localInventoryAttention)
         }
     }
 
@@ -533,6 +543,7 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
         }
         let discovery = try CaminoSyncDiscovery(
             trips: trips, days: days, moments: snapshots, media: candidates)
+        localMomentIDs = Set(snapshots.map(\.moment.id))
         journal.merge(metadata: discovery.metadata, media: discovery.media)
         try journalStore.save(journal)
         refreshPublishedState()
@@ -545,20 +556,20 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
         defer { running = false; busy = false }
         do {
             try await discover()
-            guard !journal.paused else { return }
+            guard !journal.paused else {
+                setMacCopyState(.paused)
+                return
+            }
             guard configurationReady else {
-                statusText = "Domácí Mac není nastavený"
-                detailText = "Místní záznam funguje dál. Vlož soukromou HTTPS adresu a token."
+                setMacCopyState(.notConfigured)
                 return
             }
             guard path.available else {
-                statusText = "Čeká na síť"
-                detailText = "Domácí Mac teď není dostupný. Data zůstávají v telefonu."
+                setMacCopyState(.waitingForNetwork)
                 return
             }
             guard !path.expensive || journal.cellularBatchID != nil else {
-                statusText = "Čeká na Wi‑Fi"
-                detailText = "Mobilní data nejsou pro zobrazenou dávku povolená."
+                setMacCopyState(.waitingForWiFi)
                 return
             }
             let api = try makeAPI()
@@ -578,8 +589,7 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
             }
             guard !journal.reconciliationRequired else {
                 reconciliationRequired = true
-                statusText = "Nutné porovnání po obnově Macu"
-                detailText = "Inventář byl porovnán bez mazání. Server zůstává bezpečně zablokovaný pro servisní kontrolu."
+                setMacCopyState(.reconciliationRequired)
                 return
             }
             while true {
@@ -594,8 +604,7 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
                     journal.revokeCellularIfFinished()
                     try journalStore.save(journal)
                     refreshPublishedState()
-                    statusText = "Vše známé je ověřeno na Macu"
-                    detailText = "Server potvrdil metadata, délku a SHA‑256 všech známých médií."
+                    setMacCopyState(.verified)
                     return
                 }
             }
@@ -610,7 +619,7 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
         }
         let body = try journal.exactEnvelope(for: id)
         try journalStore.save(journal)
-        statusText = "Odesílám prioritní metadata"
+        setMacCopyState(.sendingMetadata)
         do {
             journal.serverCursor = try await api.operation(exactBody: body)
             journal.metadata[index].phase = .accepted
@@ -637,7 +646,7 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
             throw CaminoSyncError.invalidJournal
         }
         var item = journal.media[index]
-        statusText = item.phase == .verifying ? "Ověřuji" : "Porovnávám médium se serverem"
+        setMacCopyState(item.phase == .verifying ? .verifying : .queueReady)
         let status = try await api.createSession(for: item)
         try validate(status, for: item)
         item.acceptedChunks = Set(status.acceptedChunks)
@@ -661,8 +670,7 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
             item.phase = .verifying
             journal.media[index] = item
             try journalStore.save(journal)
-            statusText = "Ověřuji"
-            detailText = "Všechny bajty dorazily; čekám na serverové ověření celého souboru."
+            setMacCopyState(.verifying)
             let verified = try await api.finalize(item)
             try validate(verified, for: item)
             guard verified.state == "verified" else {
@@ -681,8 +689,7 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
             item.phase = .uploading
             journal.media[index] = item
             try journalStore.save(journal)
-            statusText = "Nahrávám médium"
-            detailText = "Běží nejvýše dvě souborové úlohy; po návratu se stav znovu porovná."
+            setMacCopyState(.uploading)
             return
         }
         let chunkIndex = status.missingChunks[0]
@@ -695,8 +702,7 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
         item.phase = .uploading
         journal.media[index] = item
         try journalStore.save(journal)
-        statusText = "Nahrávám médium"
-        detailText = "Připravená je jedna část z bezpečného maxima dvou."
+        setMacCopyState(.uploading)
     }
 
     private func validate(_ status: CaminoMediaStatus,
@@ -814,12 +820,17 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
     }
 
     private func networkChanged(_ state: CaminoNetworkState) {
-        let wasAvailable = path.available
+        let previous = path
         path = state
-        if !state.available {
-            statusText = "Čeká na síť"
-            detailText = "Domácí Mac teď není dostupný. Záznam a místní čtení fungují dál."
-        } else if !wasAvailable {
+        if journal.paused {
+            setMacCopyState(.paused)
+        } else if !configurationReady {
+            setMacCopyState(.notConfigured)
+        } else if !state.available {
+            setMacCopyState(.waitingForNetwork)
+        } else if state.expensive && journal.cellularBatchID == nil {
+            setMacCopyState(.waitingForWiFi)
+        } else if !previous.available || previous.expensive != state.expensive {
             Task { await synchronize() }
         }
     }
@@ -828,19 +839,15 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
         switch event {
         case .completed(_, let statusCode, let errorCode):
             if errorCode != nil {
-                statusText = "Přenos byl přerušen"
-                detailText = "Po dalším spojení se porovná skutečný stav; originál zůstává v telefonu."
+                setMacCopyState(.interrupted)
             } else if let statusCode, (200...299).contains(statusCode) {
                 Task { await synchronize() }
             } else if statusCode == 507 {
-                statusText = "Na Macu není místo"
-                detailText = "Server část nepřijal. Připravená část i originál zůstávají v telefonu."
+                setMacCopyState(.insufficientStorage)
             } else if statusCode == 401 {
-                statusText = "Obnov připojení k domácímu Macu"
-                detailText = "Token server odmítl. Originál zůstává v telefonu."
+                setMacCopyState(.authorizationRequired)
             } else {
-                statusText = "Server část nepotvrdil"
-                detailText = "Připravená část i originál zůstávají v telefonu pro bezpečné opakování."
+                setMacCopyState(.verificationFailed)
             }
         case .finishedEvents:
             CaminoSyncBackgroundDriver.finishEvents()
@@ -851,25 +858,24 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
         if let value = error as? CaminoSyncAPIError {
             switch value {
             case .invalidConfiguration:
-                statusText = "Domácí Mac není nastavený"
-                detailText = "Oprav soukromou HTTPS adresu nebo token. Místní data zůstávají."
+                setMacCopyState(.invalidConfiguration)
             case .invalidResponse:
-                statusText = "Odpověď Macu nelze ověřit"
-                detailText = "Přenos zůstává čekat; žádný falešný úspěch se nezapsal."
+                setMacCopyState(.invalidResponse)
             case .server(let status, let code):
-                statusText = status == 401 ? "Obnov připojení k domácímu Macu"
-                    : code == "insufficient_storage" ? "Na Macu není místo"
-                    : "Domácí Mac změnu odmítl"
-                detailText = "Kód: \(code). Originály zůstávají v telefonu."
+                setMacCopyState(resolvedMacCopyState(status: status, code: code))
             }
         } else if let value = error as? CaminoSyncError {
-            statusText = "Synchronizace vyžaduje pozornost"
-            detailText = value.localizedDescription
+            switch value {
+            case .invalidJournal, .incompleteLocalInventory:
+                setMacCopyState(.localInventoryAttention)
+            case .invalidServerResponse:
+                setMacCopyState(.invalidResponse)
+            case .serverConflict(let code):
+                setMacCopyState(resolvedMacCopyState(status: nil, code: code))
+            }
         } else {
-            statusText = "Domácí Mac teď není dostupný"
-            detailText = "Příčinu nelze ze sítě spolehlivě určit. Data zůstávají v telefonu."
+            setMacCopyState(.unavailable)
         }
-        refreshPublishedState()
     }
 
     private func refreshPublishedState() {
@@ -877,5 +883,44 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
         cellularStats = journal.cellularBatchStats
         paused = journal.paused
         reconciliationRequired = journal.reconciliationRequired
+        dashboard = CaminoC05cDashboard(
+            coverage: journal.coverage(momentIDs: localMomentIDs),
+            macState: macCopyState, backupState: backupCopyState,
+            aiState: aiProcessingState)
+        statusText = dashboard.mac.value
+        detailText = dashboard.mac.detail
+    }
+
+    private func setMacCopyState(_ state: CaminoMacCopyState) {
+        macCopyState = state
+        refreshPublishedState()
+    }
+
+    private func resolvedMacCopyState(status: Int?, code: String) -> CaminoMacCopyState {
+        if status == 401 { return .authorizationRequired }
+        if status == 507 || code == "insufficient_storage" { return .insufficientStorage }
+        if ["verification_failed", "hash_mismatch", "length_mismatch"].contains(code) {
+            return .verificationFailed
+        }
+        if ["epoch_mismatch", "reconciliation_required"].contains(code) {
+            return .reconciliationRequired
+        }
+        return .rejected
+    }
+
+    private func applySimulatorStatusFixture() {
+        #if DEBUG && targetEnvironment(simulator)
+        switch ProcessInfo.processInfo.environment["CAMINO_TEST_C05C_SCENARIO"] {
+        case "ai_without_backup":
+            aiProcessingState = .completed(count: 1)
+        case "backup_without_ai":
+            backupCopyState = .verified(through: "18:42")
+            aiProcessingState = .waiting(count: 1)
+        case "metadata_after_backup":
+            backupCopyState = .mediaVerifiedMetadataPending(through: "18:42")
+        default:
+            break
+        }
+        #endif
     }
 }

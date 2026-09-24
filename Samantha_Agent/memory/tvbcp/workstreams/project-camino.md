@@ -1,7 +1,7 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno po fyzickém přijetí a bezpečném stopu C05b: 2026-09-24 22:47 CEST
+- Aktualizováno po lokální implementaci C05c: 2026-09-24 23:23 CEST
 
 ### Hotovo
 - T043 PASS v rozsahu syntetického C02b: Letový režim přerušil upload při 0/13 serverových částech; po obnově sítě vznikl jediný objekt daného Assetu, 13/13 částí, 100 663 553 B a shodný SHA-256.
@@ -32,20 +32,22 @@
 
 - C05a má lokální produkčně orientovaný serverový checkpoint. Přijatý C03b manifest je autorita uploadu; FastAPI streamuje části, server ověřuje délku i SHA-256 a SQLite/souborový journal bezpečně uzavírá validní mezery po pádu. Shodný retry je idempotentní, konflikt nic nepřepíše, neznámé bajty se zachovají v karanténě a poškozený hotový objekt zruší `verified`. Owner token je odvolatelný a uložený jen jako hash; listener je loopback-only. Registrovaný smoke `20260923T205907Z-e64b0346` prošel 12/12 kontrolami přes skutečné loopback HTTP, 1 048 699 B v 5 částech, včetně retry, finalizace, odvolání obou tokenů a restartu se zachovaným `verified`. Smoke workflow 4/4, společná cílená sada 30/30 a plná brána 1763/1763 PASS.
 - C05b je fyzicky přijaté v session-owned rozsahu integrované aplikace. Zdroj `d4b49b61` je pushnutý, čisté profily zarovnané, Cockpit řízeně nasazený se smoke 5/5 a podepsané Camino 0.1.0 (3) nainstalované bez odinstalace. Zachování dat, T051, T047-A/B, dostupná část T048, T049, T050, T052, T053, T058 a pause jsou PASS; captive portal T048 je `NEOVĚŘENO`. Konečný stop odebral `/camino-api`, zastavil vlastní proces, odvolal token a ponechal Funnel vypnutý.
+- C05c je lokálně implementované. Obrazovka **Uložení a přenosy** odděluje Telefon, Mac, Další zálohu a AI. Počet úplných Momentů na Macu se neplete s operacemi, soubory ani bajty a pouhé připojení nebo připravená fronta nejsou zelené. Bez C06b/C07 produkce pravdivě uvádí neověřenou další zálohu a vypnutou AI. T054/T055 jsou synteticky doložené; fixture existují jen pro Debug simulátor.
 
 ### Otevřeno
-- Integrovaná C05b je fyzicky přijatá a bezpečně zastavená. Otevřené zůstávají captive portal T048, T038, Viewer/G8, T007, plné T060 a následné etapy C05c/C06.
+- Integrovaná C05b je fyzicky přijatá a bezpečně zastavená. C05c čeká na push, podepsanou instalaci a fyzické UX přijetí; reálné T054/T055 čekají na C06b/C07. Otevřené zůstávají také captive portal T048, T038, Viewer/G8, T007 a plné T060.
 
 ### Rizika
 - C05a/C05b byly fyzicky použity jen jako session-owned akceptační služba. Nejde o trvalý proces, provozní dohled ani zálohu a serverový počet bajtů není měření spotřeby operátora.
 - Samostatný C02b harness bez kamery a jeho neúplná část B zůstávají historickými omezeními prototypu; integrované C05b T047-B a T049 už fyzicky prošly. Lokální zámek stále neodvolá již zkopírovaný cizí obsah; Viewer musí při každém vydání zkontrolovat aktuální oprávnění.
 - C05a loopback smoke ověřil síťový adaptér a bajty Assetu nad syntetickými daty. Není to spravovaný proces, Tailscale Serve, produkční úložiště ani záloha. Párovací UI patří C06 a skutečná záloha/obnova C06b. Referenční porovnání C03b po změně epochy zahrnuje jen Momenty.
 - C05b fyzický průchod dokládá zámek, force quit, síťový přechod, mobilní dávku a UX na tomto iPhonu. Akceptační server je však session-owned a není C06a trvalá služba ani C06b záloha.
+- C05c mění pravdivost prezentace, ne počet skutečných kopií. Syntetický stav zálohy nebo AI není fyzický ani produkční PASS.
 - Integrovaná aplikace včetně low-space/thermal hardeningu je podepsaná a nainstalovaná; starší C04b i nové C04d lokální scénáře uvedené výše fyzicky prošly. T007 a plné T060 zůstávají částečné bez skutečného nízkého místa; simulovaná kapacita ani teplota nejsou fyzická akceptace. Místní databáze není druhá záloha a zatím neodesílá revize C03b; nový bundle ID nevkládá data z C01c/C02b.
 - `Čeká na server` označuje místní trvalou frontu, nikoli synchronizaci nebo serverové přijetí. C04d fyzicky ověřilo mikrofon, hovory, změnu audio vstupu, nucené ukončení aplikace, přehrávání a skutečné UX; neověřilo produkční server, Viewer ani opožděnou AI větev T038. C03b v1 nemá operaci pro Důležité, proto je hvězdička zatím jen místní.
 
 ### Další krok
-- Navázat C05c stavovým UX. C06a spravovaný provoz a C06b druhá kopie/obnova vyžadují samostatné rozhodnutí; captive portal doplnit jen při bezpečně dostupné síti.
+- Samostatně povolit push a podepsanou aktualizaci C05c, potom projít `C05c_IPHONE_TEST_PLAN.md`. C06a/C06b/C07 se tím automaticky neotevírají.
 
 ### Rozhodnutí
 - Míla zahájil C05a. Přijatý manifest je jediná autorita uploadu, FastAPI zůstává v odděleném prostředí Camino a smí bindovat jen loopback. Žádný skutečný token, Serve, nasazení ani iPhone integrace nebyly tímto pokynem automaticky povoleny.
@@ -62,9 +64,10 @@
 - Míla zadal C04a; samostatný bundle a místní kontejner zachovávají prototypy. V tomto kroku neprobíhá instalace telefonu, push ani nasazení.
 - Míla zadal C04d. Kompatibilita již používané C04b databáze má přednost před novou Core Data migrací; rozšíření se ukládá jako verzovaný místní journal. Hvězdička se bez nové serverové operace nesmí předstírat jako synchronizovatelná.
 - Míla výslovně povolil pokračování až do C05b včetně push, řízeného nasazení a podepsané aktualizace iPhonu. Funnel je mimo rozsah; registrované síťové mutace si ponechávají povinný náhled a samostatné `ano`.
+- Míla zahájil C05c jako nový krok. Dřívější oprávnění pro C05b se nepřenáší na push, nasazení ani instalaci C05c.
 
 ### Navrhované další kroky
-- Aktuální: navázat C05c. Serverové větve T040/T096 a produkční AI větev T038 zůstávají otevřené; C05b Serve znovu spouštět jen po novém náhledu a potvrzení.
+- Aktuální: po samostatném souhlasu pushnout a nainstalovat C05c a fyzicky projít čtyři stavové sekce. Serverové větve T040/T096 a produkční AI větev T038 zůstávají otevřené; C05b Serve znovu spouštět jen po novém náhledu a potvrzení.
 - T047 je fyzicky PASS v syntetickém rozsahu; jeho dva objekty/účtenky a relace zůstávají zachované.
 - Integrované T049 s novým skutečným videem je PASS; starší harness ponechat jen jako historický důkaz.
 - Captive portal T048 doplnit jen při skutečně dostupné síti; ostatní tři podscénáře bez nové pochybnosti neopakovat. T050 se neopakuje bez nové pochybnosti o finalizaci.
@@ -73,6 +76,7 @@
 ### Technický stav checkpointu
 - C05a checkpoint: core + C03b 23/23, FastAPI ASGI 4/4, smoke workflow 4/4, společná cílená sada 30/30, validní OpenAPI, veřejný bind odmítnut exit 2 a plná projektová brána 1763/1763 PASS. Registrovaný běh `20260923T205907Z-e64b0346` má 12/12, 1 048 699 B a 5 částí; restart zachoval `verified` a oba tokeny byly odvolány. Push, nasazení, Serve, trvalý proces a iPhone změna NEPROVEDENY.
 - C05b: Swift 29/29, původní provozní registr 13/13, FastAPI 5/5, UI 1/1 a implementační brána 1768/1768 PASS. Podepsané Camino 0.1.0 (3), push, profilové zarovnání, řízené nasazení a fyzická akceptace PASS. Konečný stop má 104 operací, 41 Momentů, 45/45 médií, 214 555 219 B a 0 aktivních tokenů. Oprava přímého vstupu, portu 8767 a `copy_url` prošla uzavírací plnou bránou 1770/1770.
+- C05c před checkpointem: Swift 33/33, cílený UI T054 1/1, regresní UI pause 1/1, nepodepsaný generic iOS build a plná projektová brána 1770/1770 PASS. Push, nasazení, podepsaná instalace a fyzická akceptace NEPROVEDENY. Závěrečný registrovaný audit: C05b `phase=stopped`, server i privátní cesta neaktivní, Funnel vypnutý a 0 aktivních tokenů.
 - Swift transfer core 19/19, T043 ovladač + oba receivery 28/28, T047/T043 workflow modul 11/11 a UI 1/1 PASS; podepsaný build 2, strict kontrola, instalace a launch PASS. Plná projektová brána 1716/1716 PASS.
 - V době T043/T047 push ani nasazení neproběhly. T043 i T047 cesta/receiver jsou ukončené; původní Serve je přesně obnovený a Funnel vypnutý.
 - T049 audit po stopu: `phase=stopped`, receiver/cesta vypnuté, Funnel vypnutý, 1/1 relace ověřená, 13/13 částí, jeden objekt/účtenka a 100 663 553 B se shodným hashem. Dřívější Swift core 20/20, iOS UI 1/1, podepsaný build 3 a plná projektová brána 1718/1718 PASS.
@@ -1729,3 +1733,30 @@ Navrhované další kroky:
 Technický důkaz:
 - Konečný stop: 104 operací, 41 Momentů, 45 Assetů, 45/45 médií,
   214 555 219 B, 0 aktivních tokenů. Uzavírací plná brána 1770/1770 PASS.
+
+### 2026-09-24 23:23 CEST — C05c pravdivé stavové osy
+
+Hotovo:
+- Uložení a přenosy má čtyři samostatné pravdy: Telefon, Mac, Další záloha a
+  AI. Počty Momentů jsou oddělené od operací, médií a bajtů a chybové texty
+  nevymýšlejí neprokázanou příčinu.
+- Bez C06b/C07 produkční cesta nepředstírá zálohu ani AI. T054/T055 mají pouze
+  syntetický modelový důkaz a fixture jsou uzavřené v Debug simulátoru.
+
+Rozhodnutí:
+- Uložené připojení ani připravená fronta nejsou zelené ověření. Kopie na Macu
+  není další záloha a přepis není záloha.
+
+Další krok:
+- Samostatně povolit push a podepsanou aktualizaci C05c, potom projít
+  `C05c_IPHONE_TEST_PLAN.md`.
+
+Navrhované další kroky:
+- C06a, C06b a C07 otevřít vlastním rozhodnutím; fyzické T054/T055 uzavřít až
+  nad skutečnou zálohou a AI.
+
+Technický důkaz:
+- Swift 33/33, UI T054 1/1, UI pause 1/1, generic iOS build a plná projektová
+  brána 1770/1770 PASS. Push, instalace a fyzická akceptace NEPROVEDENY.
+  Registrovaný audit potvrdil zastavený C05b server, nepřítomnou privátní cestu,
+  vypnutý Funnel a 0 aktivních tokenů.

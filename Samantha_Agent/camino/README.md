@@ -3,7 +3,7 @@
 Soukromý cestovní deník: offline záznam na iPhonu, soukromé zpracování na Macu
 a pozdější film z povolených zdrojů.
 
-**Stav: autoritativní podklady v0.5 + U15. C04d je fyzicky přijaté v dostupném lokálním rozsahu. C05a serverový základ prošel loopback smoke. C05b má pushnutý a řízeně nasazený zdroj, podepsané Camino 0.1.0 (3) a dokončený fyzický session-owned průchod: zachování dat, T051, T047-A/B, dostupná část T048, T049, T050, T052, T053, T058 a pause jsou PASS. Captive portal T048 zůstává NEOVĚŘENO. Služba je po testu zastavená, token odvolaný a Funnel vypnutý. Viewer patří C08c–C08f.**
+**Stav: autoritativní podklady v0.5 + U15. C04d a C05b jsou fyzicky přijaté v dostupném rozsahu. C05c je lokálně implementované: Telefon, Mac, Další záloha a AI mají nezávislé pravdivé stavy; T054/T055 jsou zatím jen synteticky ověřené. C05c ještě není pushnuté ani nainstalované. C05b služba je zastavená, token odvolaný a Funnel vypnutý. Viewer patří C08c–C08f.**
 
 - [Podklady v0.5](CAMINO_podklady_v0.5/README_v0.5.md)
 - [Funkční specifikace v0.5](CAMINO_podklady_v0.5/CAMINO_funkcni_specifikace_v0.5.md)
@@ -36,6 +36,9 @@ V Human–Adam se projekt jmenuje **Camino** (`project-camino`).
 - [Zadání C05b](tasks/C05b_IOS_SYNC_QUEUE.md)
 - [Report C05b](docs/C05b_IOS_SYNC_REPORT.md)
 - [Fyzický plán C05b](app/C05b_IPHONE_TEST_PLAN.md)
+- [Zadání C05c](tasks/C05c_STATUS_AXES.md)
+- [Report C05c](docs/C05c_STATUS_UX_REPORT.md)
+- [Fyzický plán C05c](app/C05c_IPHONE_TEST_PLAN.md)
 - [Audio prototyp](prototypes/audio/README.md)
 - [Transfer harness C02b](prototypes/transfer/README.md)
 - [První integrovaná iPhone aplikace C04a](app/README.md)
@@ -46,6 +49,11 @@ jako jediný důkaz hotového média. Přenos je alespoň-jednou: po zámku, rel
 nebo síťové chybě se nejdřív porovná stav a odešlou se jen chybějící části.
 Session-owned privátní služba pro fyzické přijetí není C06a trvalé nasazení;
 nemá párovací UI, `launchd` dohled ani druhou zálohu.
+
+C05c nad stejným journalem počítá úplné Momenty odděleně od operací, souborů
+a bajtů a nikdy nepovýší kopii na Macu na další zálohu. Produkční výchozí stav
+pravdivě uvádí, že další záloha není ověřená a AI není zapnutá. Skutečná druhá
+kopie patří C06b a skutečné AI zpracování C07.
 
 Rozbalené podklady v0.4 a v0.5 jsou verzované včetně manifestů. Původní ZIPy
 jsou zachované lokálně a ignorované Gitem; profilové workspaces přebírají

@@ -173,7 +173,7 @@ import XCTest
         app.buttons["Nabídka"].tap()
         app.buttons["Uložení a přenosy"].tap()
         XCTAssertTrue(app.navigationBars["Uložení a přenosy"].waitForExistence(timeout: 10))
-        XCTAssertTrue(app.staticTexts["Místní záznam a čtení fungují i bez Macu."].exists)
+        XCTAssertTrue(app.staticTexts["c05cPhoneStatus"].exists)
         app.swipeUp()
         XCTAssertTrue(app.buttons["toggleSyncPause"].waitForExistence(timeout: 5))
         app.buttons["toggleSyncPause"].tap()
@@ -188,5 +188,33 @@ import XCTest
         app.swipeUp()
         XCTAssertTrue(app.buttons["Pokračovat v přenosech"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.staticTexts["Přenosy jsou pozastavené"].exists)
+    }
+
+    func testC05cShowsFourIndependentTruthfulStatusAxes() throws {
+        #if !targetEnvironment(simulator)
+        throw XCTSkip("This uses a simulator-only synthetic C05c status fixture.")
+        #endif
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchEnvironment["CAMINO_UI_TEST_SESSION"] = UUID().uuidString
+        app.launchEnvironment["CAMINO_TEST_C05C_SCENARIO"] = "ai_without_backup"
+        app.launch()
+        XCTAssertTrue(app.buttons["Založit Zkoušku"].waitForExistence(timeout: 15))
+        app.buttons["Založit Zkoušku"].tap()
+
+        app.buttons["Nabídka"].tap()
+        app.buttons["Uložení a přenosy"].tap()
+        XCTAssertTrue(app.navigationBars["Uložení a přenosy"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["c05cPhoneStatus"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["syncStatus"].exists)
+        app.swipeUp()
+        XCTAssertTrue(app.staticTexts["c05cBackupStatus"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.staticTexts["c05cBackupStatus"].label,
+                       "Další záloha zatím není ověřená")
+        XCTAssertTrue(app.staticTexts["c05cAIStatus"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.staticTexts["c05cAIStatus"].label,
+                       "1 výsledek AI je hotový")
+        XCTAssertTrue(app.staticTexts["c05cAIStatusDetail"].label.contains(
+            "Přepis není záloha"))
     }
 }
