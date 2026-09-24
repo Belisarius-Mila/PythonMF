@@ -62,9 +62,10 @@ nemění Serve/Funnel, nepřipojuje iPhone a není nasazením trvalé služby.
 ## C05b fyzické přijetí
 
 Session-owned službu pro C05b řídí pouze registrované workflow
-`camino_c05b_private_start`, `copy_token`, `status` a `stop`. Data jsou mimo
+`camino_c05b_private_start`, `copy_url`, `copy_token`, `status` a `stop`. Data jsou mimo
 repozitář, proces binduje jen loopback a Tailscale Serve přidá jen
-`/camino-api`. Start ověřuje vypnutý Funnel, privátní HTTPS i zdraví kořene
+`/camino-api`; vyhrazený acceptance port je `127.0.0.1:8767`, aby nekolidoval
+se ScanDocu na portu 8766. Start ověřuje vypnutý Funnel, privátní HTTPS i zdraví kořene
 Cockpitu; stop odvolá token a porovná přesný původní Serve stav.
 
 Pro T050 používá tento oddělený acceptance běh pětisekundové zdržení finalizace.

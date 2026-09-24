@@ -66,8 +66,10 @@ nemigruje data ze samostatných prototypů Camino Audio a Camino Transfer Test.
 Párování, C06a spravovaná služba, Viewer a serverová záloha jsou další etapy.
 Hvězdička je pouze místní čtenářská pomůcka, protože C03b v1 pro její změnu
 nemá operaci. C04d je nainstalované a fyzicky přijaté v dostupném lokálním
-rozsahu. C05b build a automatické testy samy nedokazují zámek, force quit,
-mobilní data ani fyzické UX; tyto výsledky se zapisují až podle cíleného plánu.
+rozsahu. C05b fyzicky prošlo zámek, force quit, ztrátu a návrat tailnetu,
+jednorázovou mobilní dávku, serverovou finalizaci, řízený nedostatek místa,
+metadata-only změnu, změnu epochy a pause; captive portal T048 zůstává
+`NEOVĚŘENO`. Přesné hranice jsou v cíleném plánu a nejde o C06a trvalý provoz.
 Původní soubory se automaticky nemažou a chyba journalu nespouští reset.
 
 Cílené fyzické průchody jsou v `C04b_IPHONE_TEST_PLAN.md`,

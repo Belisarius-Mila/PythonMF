@@ -150,6 +150,17 @@ def _camino_c05b_private_commands() -> tuple[WorkflowCommand, ...]:
             **common,
         ),
         WorkflowCommand(
+            command_id="camino_c05b_private_copy_url",
+            title="Vložit privátní adresu Camino C05b do schránky",
+            purpose="Po živé kontrole služby zkopíruje pouze HTTPS adresu aktuálního C05b běhu.",
+            aliases=("zkopíruj adresu camino c05b", "vlož adresu camino c05b"),
+            argv=(str(PYTHON_BIN), script, "copy-url"),
+            risk="private_clipboard_write",
+            writes="Mac schránku s privátní HTTPS adresou; nemění síť, Git ani projektová data",
+            requires_confirmation=True,
+            **common,
+        ),
+        WorkflowCommand(
             command_id="camino_c05b_private_copy_token",
             title="Vložit privátní token Camino C05b do schránky",
             purpose="Po živé kontrole služby zkopíruje pouze token aktuálního C05b běhu.",

@@ -5,6 +5,7 @@ import json
 import sqlite3
 import stat
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -53,9 +54,21 @@ class CaminoC05bPrivateControlTests(unittest.TestCase):
             tailscale_cli=paths[0], python=paths[1], pbcopy=paths[2], port=18766,
         )
 
+    def test_script_can_be_invoked_directly(self) -> None:
+        script = Path(control.__file__).resolve()
+        result = subprocess.run(
+            [sys.executable, str(script), "--help"],
+            cwd=script.parents[1],
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertIn("usage:", result.stdout)
+
     def test_registered_lifecycle_is_fixed_and_confirmation_gated(self) -> None:
         commands = {item.command_id: item for item in WORKFLOW_COMMANDS}
-        for action in ("start", "copy_token", "status", "stop"):
+        for action in ("start", "copy_url", "copy_token", "status", "stop"):
             command = commands[f"camino_c05b_private_{action}"]
             self.assertEqual("camino_c05b_private_control.py", Path(command.argv[-2]).name)
             self.assertEqual(action.replace("_", "-"), command.argv[-1])
@@ -79,13 +92,43 @@ class CaminoC05bPrivateControlTests(unittest.TestCase):
         ):
             self.assertTrue(commands[command_id].requires_confirmation)
 
+    def test_copy_url_requires_live_owned_route_and_keeps_value_out_of_output(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            config = self._config(Path(temp_dir))
+            config.state_root.mkdir(mode=0o700)
+            address = "https://private.example.ts.net/camino-api"
+            config.current_path.write_text(
+                json.dumps({"schema": 1, "phase": "ready", "base_url": address}),
+                encoding="utf-8",
+            )
+            copied: list[str] = []
+            with (
+                mock.patch.object(control, "_validate_state_paths"),
+                mock.patch.object(control, "_owned_server_alive", return_value=True),
+                mock.patch.object(control, "_serve_state", return_value={}),
+                mock.patch.object(
+                    control, "_route_proxy",
+                    return_value=f"http://{control.LOOPBACK_HOST}:{config.port}",
+                ),
+                mock.patch.object(control, "_funnel_enabled", return_value=False),
+                mock.patch.object(
+                    control, "_copy_to_clipboard",
+                    side_effect=lambda value, _config: copied.append(value),
+                ),
+            ):
+                result = control.copy_url(config)
+            self.assertEqual([address], copied)
+            self.assertIn("URL_READY", result)
+            self.assertNotIn(address, result)
+
     def test_route_is_separate_from_cockpit_and_funnel_stays_explicit(self) -> None:
         baseline = self._baseline()
         self.assertIsNone(control._route_proxy(baseline))
         changed = json.loads(json.dumps(baseline))
         handlers = changed["Web"]["private.example.ts.net:443"]["Handlers"]
-        handlers[control.ROUTE_PATH] = {"Proxy": "http://127.0.0.1:8766"}
-        self.assertEqual("http://127.0.0.1:8766", control._route_proxy(changed))
+        expected_proxy = f"http://127.0.0.1:{control.DEFAULT_PORT}"
+        handlers[control.ROUTE_PATH] = {"Proxy": expected_proxy}
+        self.assertEqual(expected_proxy, control._route_proxy(changed))
         self.assertEqual("http://127.0.0.1:8770", handlers["/"]["Proxy"])
         self.assertFalse(control._funnel_enabled(changed))
         self.assertTrue(control._funnel_enabled({"AllowFunnel": {"443": True}}))

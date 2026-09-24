@@ -21,8 +21,8 @@ serverové exporty sám neodblokuje.
 
 ## Provozní obal
 
-Registrovaný lifecycle `camino_c05b_private_start/copy_token/status/stop`
-spouští samostatný C05a proces pouze na `127.0.0.1:8766`, drží databáze a média
+Registrovaný lifecycle `camino_c05b_private_start/copy_url/copy_token/status/stop`
+spouští samostatný C05a proces pouze na `127.0.0.1:8767`, drží databáze a média
 mimo Git a přidává jen privátní Serve cestu `/camino-api`. Start se zablokuje,
 pokud je Funnel aktivní, cesta už existuje, port je obsazený, tailnet není
 online nebo neprojde C05a HTTPS health a zdraví kořene Cockpitu. Stop odebere
@@ -45,7 +45,26 @@ produkční zálohu/obnovu.
 
 ## Fyzické přijetí
 
-Instalace, privátní služba a fyzické scénáře T047–T053/T058 zatím nejsou tímto
-lokálním důkazem prohlášeny za PASS. Výsledky se zapisují výhradně podle
-`C05b_IPHONE_TEST_PLAN.md`; nedostupný captive portal zůstane viditelně
-`NEOVĚŘENO`.
+Podepsané Camino 0.1.0 (3) bylo nainstalováno jako aktualizace stejného bundle
+ID bez odinstalace. Starší Momenty a média zůstaly dostupné. Na iPhonu 14 Plus
+prošly T051, T047-A/B, dostupná část T048, T049, T050, T052, T053, T058 a
+trvalé pozastavení. Captive portal T048 zůstává viditelně `NEOVĚŘENO`, protože
+nebyl bezpečně dostupný.
+
+Závěrečný serverový důkaz po fyzickém průchodu obsahuje 104 přijatých operací,
+41 Momentů, 45 Assetů a 45/45 ověřených médií o 214 555 219 B. T050 má
+souběžný mezistav `43 verified + 1 uploading` před finálním 44/44. T052 při
+řízeném `insufficient_storage` zachoval 45. relaci neověřenou a po obnovení
+stejnou relaci dokončil. T053 zvýšil jen počet operací; mediální počty i bajty
+se nezměnily. T058 ponechal `reconciliation_required=1` a `exports_blocked=1`.
+
+Registrovaný stop odebral pouze `/camino-api`, zastavil vlastněný proces,
+odvolal token a přesně obnovil původní Serve konfiguraci. Konečný stav je
+`phase=stopped`, server ani cesta nejsou aktivní, Funnel zůstává vypnutý a
+aktivních tokenů je nula. Podrobná hranice každého výsledku je v
+`C05b_IPHONE_TEST_PLAN.md`.
+
+Při prvním reálném startu byly opraveny dvě vady provozního obalu: přímý Python
+vstup nyní přidá kořen projektu do importní cesty a vyhrazený C05b port 8767
+nekoliduje se ScanDocu na 8766. Opětovné vložení aktuální URL je samostatný
+potvrzovaný workflow `copy_url`.

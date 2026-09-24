@@ -55,3 +55,12 @@ serverovou pravdu, změnu epochy, sestavení aplikace a registrovaný provozní
 obal. Nedokazují zámek, force quit, skutečný síťový přechod, mobilní data ani UX
 na konkrétním iPhonu. Tyto body lze uzavřít jen podle
 `C05b_IPHONE_TEST_PLAN.md`.
+
+## Výsledek 2026-09-24
+
+C05b je přijato v session-owned fyzickém rozsahu na iPhonu 14 Plus. Zachování
+dat, T051, T047-A/B, dostupná část T048, T049, T050, T052, T053, T058 a
+Pozastavení jsou PASS; captive portal T048 je `NEOVĚŘENO`. Závěrečný
+registrovaný stop obnovil původní Serve, ponechal Funnel vypnutý a odvolal
+token. C06a spravovaná služba, C06b záloha/obnova a produkční Viewer tím nejsou
+dokončeny.

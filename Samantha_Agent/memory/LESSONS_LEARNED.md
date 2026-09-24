@@ -912,3 +912,18 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   serverový stav; lokální stav uploadu není důkaz `verified`.
 - Ověření: C05b Swift 27/27, cílený UI relaunch/pause 1/1 a provozní workflow
   13/13 PASS; fyzická mobilní a síťová akceptace zůstává samostatná.
+
+### LL-049 — Přímý workflow skript musí znát kořen projektu a vlastní port
+
+- Problém: Registrovaný C05b příkaz prošel importem v unit testu, ale při
+  přímém spuštění selhal na `ModuleNotFoundError`; po opravě narazil na port
+  8766, který už dlouhodobě vlastní ScanDocu.
+- Typ: opakující se
+- Řešení nalezeno: 24092026
+- Řešení: U přímo spouštěného skriptu vložit kořen projektu do `sys.path` ještě
+  před projektovými importy a regresně spustit jeho skutečný soubor přes
+  `--help`. Před přidělením pevného portu prohlédnout registr a živé listenery;
+  dlouhodobým službám port nebrat a akceptačnímu procesu dát vlastní port.
+- Ověření: Přímý vstup i registrovaný C05b lifecycle prošly, port 8767 zůstal
+  loopback-only, ScanDocu na 8766 nebylo ukončeno ani změněno a plná projektová
+  brána prošla 1770/1770 testů.

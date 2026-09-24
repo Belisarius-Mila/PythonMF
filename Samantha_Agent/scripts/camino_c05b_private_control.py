@@ -19,13 +19,16 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
 
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 from camino.domain.model import ContractError
 from camino.domain.revision_store import RevisionStore
 from camino.server.auth import RevocableTokenStore
 from scripts import camino_c02b_t043_control as network
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_STATE_ROOT = (
     Path.home() / "Library" / "Application Support" / "PythonMF" / "Camino" / "C05bAcceptance"
 )
@@ -35,7 +38,7 @@ DEFAULT_PBCOPY = Path("/usr/bin/pbcopy")
 SERVER_MODULE = "camino.server.main"
 ROUTE_PATH = "/camino-api"
 LOOPBACK_HOST = "127.0.0.1"
-DEFAULT_PORT = 8766
+DEFAULT_PORT = 8767
 FINALIZE_DELAY_SECONDS = 5
 STORAGE_FAULT_RESERVE_BYTES = 9_000_000_000_000_000_000
 
@@ -471,6 +474,29 @@ def copy_token(config: ControlConfig = ControlConfig(), runner: Runner = run_com
     return "TOKEN_READY: the private token replaced the URL in the Mac clipboard."
 
 
+def copy_url(config: ControlConfig = ControlConfig(), runner: Runner = run_command) -> str:
+    state = _load_state(config.current_path)
+    if state is None or state.get("phase") != "ready":
+        raise ControlError("no ready private C05b service exists")
+    _validate_state_paths(state, config)
+    if not _owned_server_alive(state, config):
+        raise ControlError("the owned C05a server is not running")
+    if _route_proxy(_serve_state(config, runner=runner)) != f"http://{LOOPBACK_HOST}:{config.port}":
+        raise ControlError("the exact private Camino route is not active")
+    if _funnel_enabled(_serve_state(config, funnel=True, runner=runner)):
+        raise ControlError("Funnel is active; URL copy is blocked")
+    base_url = state.get("base_url")
+    if (
+        not isinstance(base_url, str)
+        or not base_url.startswith("https://")
+        or not base_url.endswith(ROUTE_PATH)
+        or any(character.isspace() for character in base_url)
+    ):
+        raise ControlError("the private server URL is invalid")
+    _copy_to_clipboard(base_url, config)
+    return "URL_READY: the current private HTTPS address is in the Mac clipboard."
+
+
 def _scalar(database: Path, query: str, parameters: tuple[Any, ...] = ()) -> int:
     if database.is_symlink() or not database.is_file():
         return -1
@@ -573,13 +599,15 @@ def stop(config: ControlConfig = ControlConfig(), runner: Runner = run_command) 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=(
-        "start", "copy-token", "status", "storage-full-on", "storage-full-off",
+        "start", "copy-url", "copy-token", "status", "storage-full-on", "storage-full-off",
         "rotate-epoch", "stop",
     ))
     args = parser.parse_args(argv)
     try:
         if args.action == "start":
             result = start()
+        elif args.action == "copy-url":
+            result = copy_url()
         elif args.action == "copy-token":
             result = copy_token()
         elif args.action == "status":

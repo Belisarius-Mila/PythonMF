@@ -3,7 +3,7 @@
 Soukromý cestovní deník: offline záznam na iPhonu, soukromé zpracování na Macu
 a pozdější film z povolených zdrojů.
 
-**Stav: autoritativní podklady v0.5 + U15. C04d je fyzicky přijaté v dostupném lokálním rozsahu. C05a serverový základ prošel loopback smoke. C05b má lokálně implementovaný trvalý iOS journal, privátní C03b/C05a klient, pause a jednorázovou mobilní dávku; Swift 27/27, cílený UI test a registrovaný provozní obal prošly. Push, privátní Serve, instalace a fyzické T047–T053/T058 se dokládají samostatně; do té doby nejsou PASS. Funnel zůstává vypnutý. Viewer patří C08c–C08f.**
+**Stav: autoritativní podklady v0.5 + U15. C04d je fyzicky přijaté v dostupném lokálním rozsahu. C05a serverový základ prošel loopback smoke. C05b má pushnutý a řízeně nasazený zdroj, podepsané Camino 0.1.0 (3) a dokončený fyzický session-owned průchod: zachování dat, T051, T047-A/B, dostupná část T048, T049, T050, T052, T053, T058 a pause jsou PASS. Captive portal T048 zůstává NEOVĚŘENO. Služba je po testu zastavená, token odvolaný a Funnel vypnutý. Viewer patří C08c–C08f.**
 
 - [Podklady v0.5](CAMINO_podklady_v0.5/README_v0.5.md)
 - [Funkční specifikace v0.5](CAMINO_podklady_v0.5/CAMINO_funkcni_specifikace_v0.5.md)
