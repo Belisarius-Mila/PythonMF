@@ -1,9 +1,13 @@
 # C05c — fyzický plán stavového UX na iPhonu
 
+Aktuální příprava: Camino 0.1.0 (4) je podepsané, strict ověřené, nainstalované
+bez odinstalace a spuštěné na iPhonu 14 Plus. Fyzické výsledky níže zatím nejsou
+vyplněné; průchod je naplánovaný na 2026-09-25.
+
 ## Předpoklady
 
-- Nainstalovat podepsanou aktualizaci stejného bundle ID bez odinstalace.
-- Před instalací musí být zastavené pořizování i přehrávání.
+- Podepsaná aktualizace stejného bundle ID je nainstalovaná bez odinstalace.
+- Před fyzickým průchodem musí být zastavené pořizování i přehrávání.
 - C05b session-owned server zůstává vypnutý. Jeho nový start, URL a token mají
   vlastní náhled a potvrzení; pro základní C05c průchod nejsou potřeba.
 

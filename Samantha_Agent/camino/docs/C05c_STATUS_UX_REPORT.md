@@ -53,8 +53,13 @@ přepnout do falešného stavu. Reálná záloha patří C06b a reálná AI C07.
 
 ## Zbývající hranice
 
-Tento checkpoint není pushnutý, nasazený ani instalovaný. Nemění server, token,
-Serve ani Funnel. Fyzický průchod může přijmout pouze produkční výchozí stavy a
-skutečné C05b stavy Macu; skutečnou zálohu a AI nelze přijmout před C06b/C07.
+Zdrojový checkpoint `f0f714f4` je pushnutý. Podepsané Camino 0.1.0 (4) prošlo
+strict kontrolou, kontrolou týmu a profilu, instalací stejného bundle ID bez
+odinstalace a spuštěním. Fyzický průchod C05c zatím neproběhl; zachování dat,
+čitelnost a skutečné UX se přijmou podle `C05c_IPHONE_TEST_PLAN.md`.
+
+Tento krok nenasadil Cockpit a neměnil server, token, Serve ani Funnel. Fyzický
+průchod může přijmout pouze produkční výchozí stavy a skutečné C05b stavy Macu;
+skutečnou zálohu a AI nelze přijmout před C06b/C07.
 Závěrečný registrovaný read-only audit potvrdil C05b `phase=stopped`, neběžící
 server, nepřítomnou privátní cestu, vypnutý Funnel a nula aktivních tokenů.

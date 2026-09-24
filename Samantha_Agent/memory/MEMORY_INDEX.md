@@ -59,7 +59,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] V0.5 + U15 jsou autoritativní. C04d a C05b jsou fyzicky přijaté; C05a loopback smoke `20260923T205907Z-e64b0346` je PASS. C05c je lokálně implementované se samostatnými osami Telefon/Mac/Další záloha/AI; T054/T055 jsou zatím syntetické. Swift 33/33, oba cílené UI testy, generic iOS build a plná brána 1770/1770 PASS; push, instalace a fyzické přijetí C05c neproběhly. C05b server je zastavený, token odvolaný, Funnel vypnutý. Otevřené: fyzické C05c, C06, C07/T038, captive portal T048, Viewer/G8 a plné T060.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] V0.5 + U15 jsou autoritativní. C04d a C05b jsou fyzicky přijaté; C05a loopback smoke `20260923T205907Z-e64b0346` je PASS. C05c zdroj `f0f714f4` je pushnutý a podepsané Camino 0.1.0 (4) nainstalované/spuštěné bez odinstalace. Swift 33/33, UI 2/2, generic iOS build a plná brána 1770/1770 PASS; T054/T055 zůstávají syntetické a fyzický plán je na 2026-09-25. C05b server je zastavený, token odvolaný, Funnel vypnutý. Otevřené: fyzické C05c, C06, C07/T038, captive portal T048, Viewer/G8 a plné T060.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` - Cockpit 14. 9.: scroll 10ec0877 potvrzený Mílou. [PRIPOMENOUT] U07 až při příštím pokračování. TXT v2.8 shrnuje U01–U06; plná brána 1680/1680 OK, funkční nasazení 980aed7a a smoke 5/5. Publikační překážka odstraněna; finální balíček/head ověřovat živým auditem.
 

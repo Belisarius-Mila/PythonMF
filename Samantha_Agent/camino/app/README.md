@@ -77,6 +77,8 @@ rozsahu. C05b fyzicky prošlo zámek, force quit, ztrátu a návrat tailnetu,
 jednorázovou mobilní dávku, serverovou finalizaci, řízený nedostatek místa,
 metadata-only změnu, změnu epochy a pause; captive portal T048 zůstává
 `NEOVĚŘENO`. Přesné hranice jsou v cíleném plánu a nejde o C06a trvalý provoz.
+C05c je pushnuté a podepsaná verze 0.1.0 (4) nainstalovaná; fyzický průchod
+stavového UX a zachování dat zatím neproběhl.
 Původní soubory se automaticky nemažou a chyba journalu nespouští reset.
 
 Cílené fyzické průchody jsou v `C04b_IPHONE_TEST_PLAN.md`,

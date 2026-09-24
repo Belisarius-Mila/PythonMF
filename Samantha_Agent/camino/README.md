@@ -3,7 +3,7 @@
 Soukromý cestovní deník: offline záznam na iPhonu, soukromé zpracování na Macu
 a pozdější film z povolených zdrojů.
 
-**Stav: autoritativní podklady v0.5 + U15. C04d a C05b jsou fyzicky přijaté v dostupném rozsahu. C05c je lokálně implementované: Telefon, Mac, Další záloha a AI mají nezávislé pravdivé stavy; T054/T055 jsou zatím jen synteticky ověřené. C05c ještě není pushnuté ani nainstalované. C05b služba je zastavená, token odvolaný a Funnel vypnutý. Viewer patří C08c–C08f.**
+**Stav: autoritativní podklady v0.5 + U15. C04d a C05b jsou fyzicky přijaté v dostupném rozsahu. C05c má pushnutý zdroj `f0f714f4` a podepsané Camino 0.1.0 (4) je nainstalované a spuštěné jako aktualizace stejného bundle ID. Telefon, Mac, Další záloha a AI mají nezávislé pravdivé stavy; T054/T055 jsou zatím jen synteticky ověřené a fyzický průchod C05c čeká. C05b služba je zastavená, token odvolaný a Funnel vypnutý. Viewer patří C08c–C08f.**
 
 - [Podklady v0.5](CAMINO_podklady_v0.5/README_v0.5.md)
 - [Funkční specifikace v0.5](CAMINO_podklady_v0.5/CAMINO_funkcni_specifikace_v0.5.md)
