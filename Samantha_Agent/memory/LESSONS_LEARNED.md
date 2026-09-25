@@ -952,3 +952,14 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Ověření: syntetický ASGI průchod přes `/camino-api/viewer/`, obrázek 200,
   zamčená stará mediální URL 404 a neautorizovaný přístup 401. Není to důkaz
   skutečného Serve, privátní sítě nebo vzdáleného Safari.
+
+### 2026-09-25 — Doplnění audio pořadí nesmí změnit identitu již přenesených médií
+
+- Kontext: Camino M2b, starý journal a server už mají přijaté Asset manifesty.
+- Problém: přidání pořadí přímo do dříve poslaného create payloadu může
+  porušit byte-exact retry nebo vyvolat identity konflikt; UUID není časová osa.
+- Řešení: samostatný neměnný layout odvozený z dokončených účtenek, nová
+  operace až po serverové schopnosti. Původní Asset ID/obálky se nemění,
+  mezery zůstávají explicitní a chybějící úsek se automaticky nepřeskakuje.
+- Ověření: Swift backfill zachoval přesné obálky i verified média přes restart;
+  serverový test opačného doručení a pozdějšího prostředního úseku PASS.

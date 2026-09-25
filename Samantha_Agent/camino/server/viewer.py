@@ -7,12 +7,14 @@ import binascii
 import sqlite3
 from datetime import datetime, timezone
 from html import escape
+from pathlib import Path
 from typing import Callable
 
 from fastapi import APIRouter, Request
 from fastapi.responses import FileResponse, HTMLResponse, Response
 
 from camino.domain.model import ContractError
+from camino.domain.audio_layout import ordered_audio_groups
 from camino.domain.revision_store import RevisionStore
 from camino.server.auth import RevocableTokenStore
 from camino.server.media_store import MediaStore
@@ -22,7 +24,7 @@ from camino.server.viewer_media import OUTPUTS, ViewerMedia
 HEADERS = {
     "Cache-Control": "no-store, private", "X-Content-Type-Options": "nosniff",
     "Referrer-Policy": "no-referrer", "X-Frame-Options": "DENY",
-    "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'; img-src 'self'; media-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'",
+    "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'; script-src 'self'; img-src 'self'; media-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'",
 }
 CSS = """
 :root{color-scheme:light;font-family:system-ui,-apple-system,sans-serif;color:#233b35;background:#f3f2eb}
@@ -98,6 +100,40 @@ class CaminoViewer:
                     return asset
         return None
 
+    def audio_html(self, moment: dict, root_path: str) -> tuple[str, set[str]]:
+        groups, used = ordered_audio_groups(moment["assets"], moment["audio_layouts"])
+        body = ""
+        for group_index, group in enumerate(groups, 1):
+            body += f'<section aria-label="Nahrávka {group_index}"><h3>Nahrávka {group_index}</h3>'
+            for clip_index, clip in enumerate(group["clips"], 1):
+                if not clip["order_known"]:
+                    body += '<p class="notice">Předchozí část není dostupná; návaznost není ověřená.</p>'
+                if clip["previous_clip_id"] is not None:
+                    gap = clip["gap_before_ms"]
+                    label = 'délka neznámá' if gap is None else f'{gap / 1000:.3f}'.rstrip('0').rstrip('.') + ' s'
+                    body += f'<p class="notice">Pauza před pokračováním: {label}. Pokračování spusť tlačítkem přehrát.</p>'
+                ready = {part["asset_id"]: self.copies.ready(group["assets"][part["asset_id"]], verify=False)
+                         for part in clip["parts"]}
+                for offset, part in enumerate(clip["parts"]):
+                    identifier = part["asset_id"]
+                    if part["discontinuity_before"]:
+                        body += '<p class="notice">Zde chybí úsek nahrávky; délka mezery není známá.</p>'
+                    caption = f'Část {clip_index} · úsek {part["index"] + 1}'
+                    if not ready[identifier]:
+                        body += f'<p class="notice">{caption}: čeká na doručení nebo převod.</p>'
+                        continue
+                    following = clip["parts"][offset + 1] if offset + 1 < len(clip["parts"]) else None
+                    next_attr = ''
+                    if following and ready[following["asset_id"]] and not following["discontinuity_before"]:
+                        next_attr = f' data-next="audio-{following["asset_id"]}"'
+                    body += (f'<figure><audio id="audio-{identifier}"{next_attr} controls preload="none" '
+                             f'src="{root_path}/viewer/media/{identifier}/audio.m4a">Prohlížeč neumí přehrát audio.</audio>'
+                             f'<figcaption>{caption}</figcaption></figure>')
+                if clip["missing_tail"]:
+                    body += '<p class="notice">Konec této části není úplný; délka chybějícího konce není známá.</p>'
+            body += '</section>'
+        return body, used
+
     def page(self, day: str | None = None, *, root_path: str = "") -> str | None:
         if root_path not in ("", "/camino-api"):
             raise ContractError("unsupported Viewer proxy prefix")
@@ -122,7 +158,11 @@ class CaminoViewer:
                 body += f'<article><h3>{escape(moment["time"])} · {KINDS.get(moment["kind"], "Záznam")}</h3>'
                 if moment["text"]:
                     body += f'<p class="text">{escape(moment["text"])}</p>'
+                audio_body, ordered_ids = self.audio_html(moment, root_path)
+                body += audio_body
                 for index, asset in enumerate(moment["assets"], 1):
+                    if asset["id"] in ordered_ids:
+                        continue
                     ready = self.copies.ready(asset, verify=False)
                     if not ready:
                         body += '<p class="notice">Médium zatím není připravené k přehrání.</p>'
@@ -134,10 +174,9 @@ class CaminoViewer:
                     elif kind == "video":
                         element = f'<video controls playsinline preload="metadata" poster="{base}poster.jpg" src="{base}clip.mp4">Prohlížeč neumí přehrát video.</video>'
                     else:
+                        body += '<p class="notice">Pořadí této nahrávky zatím není přenesené; přehrává se samostatně.</p>'
                         element = f'<audio controls preload="none" src="{base}audio.m4a">Prohlížeč neumí přehrát audio.</audio>'
                     body += f'<figure>{element}<figcaption>{index}. médium</figcaption></figure>'
-                if len(moment["assets"]) > 1:
-                    body += '<p class="muted">Samostatná média v pořadí přijetí, nikoli nutně pořízení. Pořadí a mezery vícedílné nahrávky zatím server nezná; části nejsou spojované.</p>'
                 body += '</article>'
         built = escape(self.last_build or "zatím neproběhla")
         state = {"manual": "Automatická příprava není zapnutá.",
@@ -148,11 +187,13 @@ class CaminoViewer:
                  "stopped": "Automatická příprava je zastavená."}.get(self.build_state, "Stav přípravy neznámý.")
         return f'''<!doctype html><html lang="cs"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>{title} · Camino</title>
+<script src="{root_path}/viewer/player.js" defer></script>
 <style>{CSS}</style></head><body><header><p class="label">CAMINO · PRO JANU</p>
 <h1>{title}</h1><p class="muted">Malé zprávy z cesty. Fotografie, slova a původní hlas.</p>
 <a href="{root_path}/viewer/">Všechny dny</a></header><main>{body}</main><footer>
 Příprava médií: {built}<br>{state}<br>Zobrazuji doručené záznamy. Další mohou ještě čekat v telefonu.
-<br>Stránku obnovíš běžným tlačítkem prohlížeče.</footer></body></html>'''
+<br>Stránku obnovíš běžným tlačítkem prohlížeče.</footer>
+<p id="audioPlaybackStatus" role="status" aria-live="polite"></p></body></html>'''
 
     def router(self) -> APIRouter:
         router = APIRouter(prefix="/viewer", include_in_schema=False)
@@ -161,6 +202,13 @@ Příprava médií: {built}<br>{state}<br>Zobrazuji doručené záznamy. Další
             return Response("Soukromý přístup pro Janu.", status_code=401, headers={
                 **HEADERS, "WWW-Authenticate": 'Basic realm="Camino Viewer", charset="UTF-8"',
             })
+
+        @router.get("/player.js")
+        def player(request: Request):
+            if not self.authorized(request):
+                return denied()
+            return FileResponse(Path(__file__).with_name("viewer_player.js"),
+                                media_type="text/javascript", headers=HEADERS)
 
         @router.get("/")
         @router.get("/days/{day}")

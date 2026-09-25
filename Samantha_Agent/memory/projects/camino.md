@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-25 21:52 CEST
+Aktualizováno: 2026-09-25 22:13 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -18,8 +18,15 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
   prefix a konfigurovaný odkaz z Cockpitu. Testy a omezení jsou v
   `camino/docs/M2_RUNTIME_REPORT.md`. Bez nasazení, změny iPhonu/launchd/sítě,
   skutečné čtecí autorizace, zapnutí cesty nebo zpřístupnění osobních dat.
-- Další krok M2b: přenos pořadí/mezer audiočástí pro Viewer. Potom registrované
-  provozní ovládání a samostatně schválené nasazení. M2 není dokončené.
+- M2b lokálně přenáší pořadí/mezer audiočástí z existujících účtenek. Viewer
+  navazuje souvislé checkpointy, pauzu/díru nepřeskočí. Recorder, originály,
+  ID médií a Core Data nezměněné; staré ověřené audio se znovu neodesílá.
+  `camino/docs/M2b_AUDIO_LAYOUT_REPORT.md`: Swift 36/36, nepodepsaný iOS build,
+  Python layout/kontrakt 26/26 a server HTTP 21/21 PASS; fyzická přejímka otevřená.
+- M2c: registrované provozní ovládání a vědomé povolení cesty/čtenáře.
+  Před upgradem serverové SQLite na schéma 2 konzistentní kopie DB, potom
+  nasazení serveru a podepsaná aktualizace telefonu. Nic z toho zatím neproběhlo.
+  M2/RT3/G8 nejsou dokončené; M3 záloha a M4 zůstávají.
 - Novější rozsah a pořadí určuje `camino/docs/TRAVEL_MVP_PLAN.md`: soukromé
   cestovní MVP do 2. 10., M1 lokální jednoduchý HTML Viewer pro Janu, M2
   soukromý provoz a Cockpit odkaz, M3 minimální nezávislá záloha, M4 krátká
@@ -1610,3 +1617,33 @@ Technický důkaz:
 - Opětovný start aplikačního lifecycle je syntetický důkaz, ne launchd
   restart po pádu. Nové živé UI, vzdálená síť a G8 zůstávají neověřené.
 - Plná brána a přesné hranice jsou v `camino/docs/M2_RUNTIME_REPORT.md`.
+
+### 2026-09-25 22:13 CEST — M2b pořadí a mezery audiočástí lokálně
+
+Hotovo:
+- Telefonní sync umí z dokončených účtenek doplnit pořadí a zaznamenané mezery,
+  bez změny recorderu nebo opakovaného uploadu již ověřeného audia.
+- Viewer řadí podle návaznosti, souvislé úseky automaticky navazuje a skutečné
+  pauzy/nejistoty označuje. Soukromé layouty se nepromítají do Janina výstupu.
+
+Rozhodnutí:
+- M2b podle Mílova zadání používá samostatná neměnná metadata; staré obálky,
+  identita médií, originály a Core Data se nemění. Rozsah MVP nerozšiřujeme.
+- Pauza není uměle vyrobené ticho; pokračování po pauze spustí Jana ručně.
+  Safari autoplay zůstává k ověření, ruční přehrání je dostupné i bez skriptu.
+- Serverový upgrade přidává tabulku ve schématu 2. Před živým upgradem kopie
+  DB; instalovat nejdřív server, potom telefon. V tomto kroku jen syntetické DB.
+
+Další krok:
+- M2c: registrovaný provozní start/status/stop a vědomé povolení cesty/čtenáře.
+
+Navrhované další kroky:
+- Po schválení nasazení serveru a podepsaná aktualizace stejné iPhone aplikace.
+- Jeden krátký iPhone → Mac → Jana průchod podle M2b reportu, ne celá C01c matice.
+- M3 nezávislá záloha a M4 freeze podle cestovního plánu.
+
+Technický důkaz:
+- SwiftPM 36/36 a nepodepsaný generic iOS build PASS. Python layout/kontrakt
+  26/26, izolovaná serverová sada 21/21 PASS. Node ověřuje pokračování i fallback.
+- Plná brána a nasazovací hranice: `camino/docs/M2b_AUDIO_LAYOUT_REPORT.md`.
+  Žádný push, podpis, instalace, live migrace, deployment ani změna Serve/Funnel.

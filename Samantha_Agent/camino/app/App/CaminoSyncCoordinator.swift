@@ -12,11 +12,13 @@ private struct CaminoServerState: Decodable {
     let cursor: Int64
     let exportsBlocked: Bool
     let reconciliationRequired: Bool
+    let features: [String]?
 
     enum CodingKeys: String, CodingKey {
         case contractVersion = "contract_version"
         case serverID = "server_id"
         case epoch, cursor
+        case features
         case exportsBlocked = "exports_blocked"
         case reconciliationRequired = "reconciliation_required"
     }
@@ -482,6 +484,8 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
         }
     }
 
+    private var discoveredAudioLayouts: [CaminoSyncMetadataItem] = []
+
     private func discover() async throws {
         let trips = try local.trips()
         var days: [LocalDay] = []
@@ -509,9 +513,12 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
                 }
             })
         let library = try recording.library()
+        var audioLayouts: [CaminoSyncAudioLayout] = []
         for clip in library.clips {
             guard let momentID = momentBySession[clip.draft.sessionID] else { continue }
             let urls = try recording.playbackURLs(for: clip)
+            audioLayouts.append(try CaminoAudioSyncLayout.make(clip: clip, urls: urls, momentID: momentID))
+            let orderedSegments = clip.segments?.sorted { $0.index < $1.index }
             for (offset, url) in urls.enumerated() {
                 guard let relative = relativePath(for: url) else {
                     throw CaminoSyncError.incompleteLocalInventory
@@ -526,14 +533,12 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
                     try Self.sha256(of: url)
                 }.value
                 let duration: Int64
-                if let segments = clip.segments, offset < segments.count {
+                if let segments = orderedSegments, offset < segments.count {
                     duration = Int64((segments[offset].audio.duration * 1_000).rounded())
                 } else {
                     duration = Int64((clip.audio.duration * 1_000).rounded())
                 }
-                let id = CaminoStableID.uuid(
-                    namespace: "camino-c05b-audio-asset",
-                    value: "\(clip.id.uuidString.lowercased())|\(url.lastPathComponent)")
+                let id = CaminoAudioSyncLayout.assetID(clipID: clip.id, fileName: url.lastPathComponent)
                 candidates.append(CaminoSyncMediaItem(
                     id: id, momentID: momentID, kind: .audio,
                     sourceRelativePath: relative, byteCount: Int64(size),
@@ -542,9 +547,10 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
             }
         }
         let discovery = try CaminoSyncDiscovery(
-            trips: trips, days: days, moments: snapshots, media: candidates)
+            trips: trips, days: days, moments: snapshots, media: candidates, audioLayouts: audioLayouts)
         localMomentIDs = Set(snapshots.map(\.moment.id))
-        journal.merge(metadata: discovery.metadata, media: discovery.media)
+        discoveredAudioLayouts = discovery.metadata.filter { $0.kind == "create_audio_layout" }
+        journal.merge(metadata: discovery.metadata.filter { $0.kind != "create_audio_layout" }, media: discovery.media)
         try journalStore.save(journal)
         refreshPublishedState()
     }
@@ -592,6 +598,8 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
                 setMacCopyState(.reconciliationRequired)
                 return
             }
+            try journal.mergeAudioLayouts(discoveredAudioLayouts, serverFeatures: state.features)
+            try journalStore.save(journal)
             while true {
                 switch journal.nextWork(networkAvailable: true, expensive: path.expensive) {
                 case .metadata(let id):

@@ -86,7 +86,7 @@ public struct CaminoSyncMetadataItem: Codable, Equatable, Identifiable, Sendable
         if kind == "create_moment" || kind == "update_metadata" {
             return objectID
         }
-        guard kind == "create_asset" || kind == "append_text",
+        guard kind == "create_asset" || kind == "append_text" || kind == "create_audio_layout",
               let object = try? JSONSerialization.jsonObject(with: payload) as? [String: Any],
               let raw = object["moment_id"] as? String else { return nil }
         return UUID(uuidString: raw)
@@ -513,6 +513,19 @@ public struct CaminoSyncJournal: Codable, Equatable, Sendable {
         media.append(contentsOf: candidates.filter { !knownMedia.contains($0.id) })
     }
 
+    public mutating func mergeAudioLayouts(_ drafts: [CaminoSyncMetadataItem],
+                                           serverFeatures: [String]?) throws {
+        guard drafts.allSatisfy({ $0.kind == "create_audio_layout" }) else {
+            throw CaminoSyncError.invalidJournal
+        }
+        if serverFeatures?.contains("audio_layout_v1") == true {
+            merge(metadata: drafts, media: [])
+        } else if metadata.contains(where: { $0.kind == "create_audio_layout" && $0.phase != .accepted }) {
+            // A downgraded server must not consume or invalidate exact pending envelopes.
+            throw CaminoSyncError.serverConflict("audio_layout_server_upgrade_required")
+        }
+    }
+
     @discardableResult public mutating func observeServer(
         serverID newServerID: UUID, epoch newEpoch: UUID, cursor: Int64,
         at date: Date = Date()
@@ -594,13 +607,65 @@ public struct CaminoSyncJournal: Codable, Equatable, Sendable {
     }
 }
 
+public struct CaminoSyncAudioLayout: Sendable {
+    public struct Part: Sendable {
+        public let assetID: UUID
+        public let index: Int
+        public let discontinuityBefore: Bool
+        public init(assetID: UUID, index: Int, discontinuityBefore: Bool) {
+            self.assetID = assetID; self.index = index
+            self.discontinuityBefore = discontinuityBefore
+        }
+    }
+    public let clipID: UUID
+    public let momentID: UUID
+    public let sessionID: UUID
+    public let previousClipID: UUID?
+    public let gapBeforeMilliseconds: Int64?
+    public let missingTail: Bool
+    public let parts: [Part]
+
+    public init(clipID: UUID, momentID: UUID, sessionID: UUID, previousClipID: UUID?,
+                gapBeforeMilliseconds: Int64?, missingTail: Bool, parts: [Part]) {
+        self.clipID = clipID; self.momentID = momentID; self.sessionID = sessionID
+        self.previousClipID = previousClipID; self.gapBeforeMilliseconds = gapBeforeMilliseconds
+        self.missingTail = missingTail; self.parts = parts
+    }
+
+    public func payload() throws -> [String: Any] {
+        guard !parts.isEmpty, parts.count <= 4096,
+              Set(parts.map(\.assetID)).count == parts.count,
+              previousClipID != clipID,
+              (previousClipID == nil) == (clipID == sessionID),
+              previousClipID != nil || gapBeforeMilliseconds == nil,
+              gapBeforeMilliseconds.map({ (0...9_007_199_254_740_991).contains($0) }) ?? true
+        else { throw CaminoSyncError.incompleteLocalInventory }
+        var previous = -1
+        for part in parts {
+            guard part.index > previous, part.index <= 2_147_483_647,
+                  part.index == previous + 1 || part.discontinuityBefore
+            else { throw CaminoSyncError.incompleteLocalInventory }
+            previous = part.index
+        }
+        return ["clip_id": clipID.uuidString.lowercased(),
+                "moment_id": momentID.uuidString.lowercased(),
+                "session_id": sessionID.uuidString.lowercased(),
+                "previous_clip_id": previousClipID.map { $0.uuidString.lowercased() as Any } ?? NSNull(),
+                "gap_before_ms": gapBeforeMilliseconds.map { $0 as Any } ?? NSNull(),
+                "missing_tail": missingTail,
+                "parts": parts.map { ["asset_id": $0.assetID.uuidString.lowercased(),
+                                      "index": $0.index, "discontinuity_before": $0.discontinuityBefore] as [String: Any] }]
+    }
+}
+
 public struct CaminoSyncDiscovery: Sendable {
     public let metadata: [CaminoSyncMetadataItem]
     public let media: [CaminoSyncMediaItem]
 
     public init(trips: [LocalTrip], days: [LocalDay],
                 moments: [LocalMomentSyncSnapshot],
-                media: [CaminoSyncMediaItem]) throws {
+                media: [CaminoSyncMediaItem],
+                audioLayouts: [CaminoSyncAudioLayout] = []) throws {
         let dayByTripAndDate = Dictionary(uniqueKeysWithValues: days.map {
             ("\($0.tripID.uuidString.lowercased())|\($0.localDate)", $0)
         })
@@ -752,6 +817,15 @@ public struct CaminoSyncDiscovery: Sendable {
                     ]))
                 // C03b append_text intentionally keeps Moment metadata revision.
             }
+        }
+        for layout in audioLayouts.sorted(by: { $0.clipID.uuidString < $1.clipID.uuidString }) {
+            let sources = media.filter { $0.momentID == layout.momentID && $0.kind == .audio }
+            guard Set(layout.parts.map(\.assetID)).isSubset(of: Set(sources.map(\.id))) else {
+                throw CaminoSyncError.incompleteLocalInventory
+            }
+            drafts.append(try Self.item(
+                key: "audio-layout:\(layout.clipID)", kind: "create_audio_layout",
+                objectID: layout.clipID, payload: layout.payload()))
         }
         self.metadata = drafts
         self.media = media

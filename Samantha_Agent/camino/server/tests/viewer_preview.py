@@ -30,6 +30,9 @@ def main():
             page = page.replace(url, f'data:{mime};base64,{base64.b64encode(path.read_bytes()).decode()}')
     page = page.replace('href="/viewer/"', 'href="#"').replace('href="/viewer/days/2026-09-25"', 'href="#"')
     page = page.replace("CAMINO · PRO JANU", "CAMINO · SYNTETICKÝ NÁHLED M1")
+    script = Path(__file__).resolve().parents[1] / "viewer_player.js"
+    page = page.replace('<script src="/viewer/player.js" defer></script>', '')
+    page = page.replace('</body>', '<script>' + script.read_text() + '</script></body>')
     output = root / "preview.html"
     output.write_text(page)
     print(output)

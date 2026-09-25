@@ -277,4 +277,47 @@ import XCTest
                        "a waiting Moment must fail closed even if the driver says verified")
         XCTAssertEqual(CaminoC05cDashboard.initial.phone.tone, .neutral)
     }
+
+    func testAudioLayoutBackfillsWithoutReuploadOrRewritingOldJournalEnvelopes() throws {
+        let local = try CaminoLocalStore(inMemory: true)
+        let trip = try local.createTrip(name: "Synthetic")
+        let moment = try local.markMoment(at: instant("2026-09-25T08:00:00Z"), timeZone: prague)
+        let asset = CaminoSyncMediaItem(id: UUID(), momentID: moment.id, kind: .audio,
+            sourceRelativePath: "audio.caf", byteCount: 4, sha256: String(repeating: "a", count: 64),
+            durationMilliseconds: 1000, batchID: UUID(), phase: .verified)
+        let clip = UUID()
+        let layout = CaminoSyncAudioLayout(clipID: clip, momentID: moment.id, sessionID: clip,
+            previousClipID: nil, gapBeforeMilliseconds: nil, missingTail: false,
+            parts: [.init(assetID: asset.id, index: 0, discontinuityBefore: false)])
+        let original = try CaminoSyncDiscovery(trips: [trip], days: local.days(tripID: trip.id),
+            moments: [local.syncSnapshot(momentID: moment.id)], media: [asset])
+        let newer = try CaminoSyncDiscovery(trips: [trip], days: local.days(tripID: trip.id),
+            moments: [local.syncSnapshot(momentID: moment.id)], media: [asset], audioLayouts: [layout])
+        XCTAssertEqual(original.metadata, newer.metadata.filter { $0.kind != "create_audio_layout" })
+        var journal = CaminoSyncJournal(deviceID: UUID())
+        _ = journal.observeServer(serverID: UUID(), epoch: UUID(), cursor: 0)
+        journal.merge(metadata: original.metadata, media: [asset])
+        for item in original.metadata {
+            _ = try journal.exactEnvelope(for: item.id)
+            let index = try XCTUnwrap(journal.metadata.firstIndex { $0.id == item.id })
+            journal.metadata[index].phase = .accepted
+        }
+        let oldEnvelopes = journal.metadata.map(\.exactEnvelope)
+        let drafts = newer.metadata.filter { $0.kind == "create_audio_layout" }
+        try journal.mergeAudioLayouts(drafts, serverFeatures: nil)
+        XCTAssertEqual(journal.metadata.count, original.metadata.count)
+        try journal.mergeAudioLayouts(drafts, serverFeatures: ["audio_layout_v1"])
+        XCTAssertEqual(journal.metadata.dropLast().map(\.exactEnvelope), oldEnvelopes)
+        XCTAssertEqual(journal.media, [asset])
+        let item = try XCTUnwrap(journal.metadata.last)
+        XCTAssertEqual(item.relatedMomentID, moment.id)
+        let exact = try journal.exactEnvelope(for: item.id)
+        var reopened = try JSONDecoder().decode(CaminoSyncJournal.self, from: JSONEncoder().encode(journal))
+        XCTAssertEqual(try reopened.exactEnvelope(for: item.id), exact)
+        XCTAssertThrowsError(try reopened.mergeAudioLayouts(drafts, serverFeatures: []))
+        XCTAssertEqual(try reopened.exactEnvelope(for: item.id), exact)
+        try reopened.mergeAudioLayouts(drafts, serverFeatures: ["audio_layout_v1"])
+        XCTAssertEqual(reopened.metadata.count, original.metadata.count + 1)
+        XCTAssertEqual(reopened.media.first?.phase, .verified)
+    }
 }

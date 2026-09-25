@@ -17,6 +17,7 @@ from camino.server.auth import RevocableTokenStore
 from camino.server.viewer import CaminoViewer
 from camino.server.viewer_media import ViewerMedia
 from tests.camino_viewer_fixture import ViewerFixture, synthetic_media, uid
+from tests.test_camino_audio_layout import layout
 
 
 class ViewerHTTPTests(unittest.IsolatedAsyncioTestCase):
@@ -51,6 +52,59 @@ class ViewerHTTPTests(unittest.IsolatedAsyncioTestCase):
 
     def upload_media(self):
         return {k: self.f.upload(30 + i, k, v) for i, (k, v) in enumerate(self.payloads.items())}
+
+    async def test_recorded_audio_order_pause_and_private_layout(self):
+        for n in (30, 31, 32):
+            self.f.upload(n, "audio", self.payloads["audio"])
+        self.f.upload(40, "audio", self.payloads["audio"], private=True)
+        self.f.send("create_audio_layout", layout(51, [31], session=50, previous=50, gap=12_345, missing=True))
+        self.f.send("create_audio_layout", layout(50, [32, 30]))
+        self.f.send("create_audio_layout", layout(60, [40], moment=4))
+        self.assertEqual(self.viewer.build_pending(), {"ready": 3, "waiting": 0})
+        page = await self.request("/viewer/days/2026-09-25")
+        self.assertEqual(page.status_code, 200)
+        positions = [page.text.index(f'id="audio-{uid(n)}"') for n in (32, 30, 31)]
+        self.assertEqual(positions, sorted(positions))
+        self.assertIn(f'id="audio-{uid(32)}" data-next="audio-{uid(30)}"', page.text)
+        self.assertNotIn(f'id="audio-{uid(30)}" data-next=', page.text)
+        self.assertIn("12.345 s", page.text)
+        self.assertIn("Konec této části není úplný", page.text)
+        self.assertNotIn(uid(40), page.text)
+        self.assertNotIn(uid(60), page.text)
+        self.assertEqual((await self.request("/viewer/player.js", headers={})).status_code, 401)
+        script = await self.request("/viewer/player.js")
+        self.assertEqual(script.status_code, 200)
+        self.assertIn("script-src 'self'", page.headers["content-security-policy"])
+        self.f.lock()
+        for n in (30, 31, 32):
+            self.assertEqual((await self.request(f"/viewer/media/{uid(n)}/audio.m4a")).status_code, 404)
+
+    async def test_pending_middle_segment_is_not_skipped_and_late_upload_restores_chain(self):
+        for n in (30, 31, 32):
+            self.f.upload(n, "audio", self.payloads["audio"], complete=n != 30)
+        self.f.send("create_audio_layout", layout(50, [32, 30, 31]))
+        self.assertEqual(self.viewer.build_pending(), {"ready": 2, "waiting": 1})
+        page = await self.request("/viewer/days/2026-09-25")
+        self.assertNotIn(f'id="audio-{uid(32)}" data-next=', page.text)
+        self.assertIn("úsek 2: čeká", page.text)
+        self.f.upload(30, "audio", self.payloads["audio"])
+        self.assertEqual(self.viewer.build_pending(), {"ready": 3, "waiting": 0})
+        page = await self.request("/viewer/days/2026-09-25")
+        self.assertIn(f'id="audio-{uid(32)}" data-next="audio-{uid(30)}"', page.text)
+        self.assertIn(f'id="audio-{uid(30)}" data-next="audio-{uid(31)}"', page.text)
+
+    async def test_missing_predecessor_and_segment_hole_are_explicit_no_false_continuity(self):
+        for n in (30, 31):
+            self.f.upload(n, "audio", self.payloads["audio"])
+        value = layout(51, [30, 31], session=50, previous=50)
+        value["parts"][1].update(index=2, discontinuity_before=True)
+        self.f.send("create_audio_layout", value)
+        self.viewer.build_pending()
+        page = await self.request("/viewer/days/2026-09-25")
+        self.assertIn("návaznost není ověřená", page.text)
+        self.assertIn("Pauza před pokračováním: délka neznámá", page.text)
+        self.assertIn("Zde chybí úsek nahrávky", page.text)
+        self.assertNotIn("data-next=", page.text)
 
     async def test_auth_is_separate_revocable_and_no_content_writes(self):
         for path in ("/viewer/", "/viewer/days/2026-09-25", f"/viewer/media/{uid(30)}/preview.jpg"):

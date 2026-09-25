@@ -1,15 +1,15 @@
 # Camino — minimalistický cestovní plán
 
 Rozhodnutí Míly: 2026-09-25. Cesta 3.–17. října 2026; cílové zmrazení 2. října.
-Stav: M1 lokálně funguje podle potvrzení Míly; M2a místní runtime/odkaz hotové,
-nikoli povolené nasazení. Podrobnosti: [M2_RUNTIME_REPORT.md](M2_RUNTIME_REPORT.md).
+Stav: M1 lokálně funguje podle potvrzení Míly; M2a runtime/odkaz a M2b pořadí
+audia jsou lokálně implementované, nikoli nasazené. Podrobnosti:
+[M2b_AUDIO_LAYOUT_REPORT.md](M2b_AUDIO_LAYOUT_REPORT.md).
 
 Aktualizace M1 dne 25. 9.: lokální implementace a syntetické testy jsou
 v [M1_VIEWER_REPORT.md](M1_VIEWER_REPORT.md). Míla náhled potvrdil jako funkční;
-živý provoz nespouštěn. Zjištěná mezera původního API: pořadí částí dlouhého
-audia není přenesené. M1 je proto přehrává odděleně s upozorněním, nikoli
-automaticky spojené. Minimální oprava pořadí musí předcházet ostrému použití
-vícedílných komentářů; nejde o skryté rozšíření M1 ani již hotový iPhone fix.
+živý provoz nespouštěn. Původní mezera v pořadí audia je řešená lokálním M2b:
+samostatná metadata návaznosti, automatické pokračování souvislých úseků a
+viditelná pauza s ručním pokračováním. Telefon ještě není aktualizovaný.
 
 ## Co nyní stavíme
 
@@ -75,11 +75,13 @@ minimalistického cíle; nejsou tvrzením, že je Míla jednotlivě specifikoval
 | M3 — jednoduchá záloha (minimum C06b) | Konzistentní databázový snapshot + neměnná média na ověřený jiný disk, verzované dávky bez automatického mazání | Obnovit jeden malý testovací den do nového cíle, porovnat hashe a otevřít médium; nikdy neobnovovat přes živá data |
 | M4 — předodjezdový průchod (výběr C09) | Jeden běžný krátký venkovní pokus, kontrola místa, podpisu a stručný návod pro oba | RT1–RT6 níže s konkrétními omezeními, freeze nejpozději 2. 10. |
 
-Bezprostřední další vývojový krok po M2a je přenos pořadí audiočástí, ne AI
-a ne opakování všech iPhone testů. Chybějící krátkou kontrolu stavů C05c
+Bezprostřední další vývojový krok po M2b je registrované provozní ovládání M2c,
+ne AI a ne opakování všech iPhone testů. Chybějící krátkou kontrolu stavů C05c
 spojíme s M2/M4. M1 zahrnuje média v jednoduché podobě, nikoli plný C08 ani
 nový owner web. Po M1 žádné kosmetické rozšiřování. M2a připravilo worker a
-Cockpit odkaz nezávisle na iOS; ostrému použití musí předcházet oprava audia.
+Cockpit odkaz nezávisle na iOS; M2b doplnilo pořadí audia. Před ostrým použitím
+záloha metadatové DB, nasazení serveru, poté podepsaná aktualizace telefonu
+a jeden společný průchod. M2b nemění recorder ani Core Data schéma telefonu.
 
 Pro M3 nejdřív ověřit existující nezávislý cíl a kapacitu; žádný automatický
 nákup ani domněnka, že záloha repozitáře obsahuje Camino. Stačí denní dávka
@@ -166,8 +168,8 @@ problému nemaž aplikaci s daty. Před odjezdem volbu znovu prakticky zhodnotit
 
 ## Oprávnění a nejbližší zadání
 
-M1 a M2a implementují lokální kód a syntetické testy. Nenasazují službu,
+M1, M2a a M2b implementují lokální kód a syntetické testy. Nenasazují službu,
 nespouštějí osobní upload, nemění Serve/ACL, nepublikují média a nic nekupují.
 Push, deployment, instalace služby a zpřístupnění skutečných dat zůstávají
-odděleně potvrzované kroky. Další zadání: **M2b — minimální pořadí audiočástí
-pro Viewer**, potom registrované provozní ovládání a schválené nasazení.
+odděleně potvrzované kroky. Další zadání: **M2c — registrované provozní
+ovládání a vědomé povolení Vieweru**, potom schválené nasazení/podepsaná aktualizace.

@@ -4,6 +4,11 @@ Stav: lokální referenční kontrakt v1, 20. září 2026. Autoritativní jsou 
 v0.5 a novější U15. Strojově čitelná část je `C03b_OPENAPI_V1.json`; přesný
 význam objektů určuje `C03a_DOMAIN_CONTRACT.md` a `camino/domain/codec.py`.
 
+Rozšíření M2b (25. 9.): `features` ve stavu oznamuje `audio_layout_v1`.
+Jen po této schopnosti nový telefon odesílá `create_audio_layout`; původní
+typy operací/pole zůstávají beze změny. Podrobnosti a nasazovací hranice jsou
+v `M2b_AUDIO_LAYOUT_REPORT.md`. Starý klient může doplňkové pole stavu ignorovat.
+
 ## Rozsah první verze
 
 `CaminoV1Contract` přijímá metodu, cestu, autentizační hlavičku a bajty JSON.
@@ -39,11 +44,15 @@ neslučitelná změna dostane novou verzi kontraktu.
 | `create_day` | Všechna pole `JourneyDay`; rodičovská cesta už existuje. |
 | `create_moment` | Všechna pole `Moment` v revizi 1 včetně provenience a případné polohy; Úvaha smí vzniknout jen `owner_only`. |
 | `create_asset` | Všechna pole `Asset`; jde o manifest, nikoli potvrzení souborových bajtů. |
+| `create_audio_layout` | `clip_id`, `moment_id`, `session_id`, `previous_clip_id`, `gap_before_ms`, `missing_tail`, uspořádané `parts` s `asset_id`, `index`, `discontinuity_before`; jen po `audio_layout_v1`, očekávaná revize null. |
 | `update_metadata` | `moment_id`, `change`; změna je `privacy` s `new_privacy` a `user_action`, `hidden` s booleanem, nebo `chapter` s existujícím `day_id`. |
 | `append_text` | Všechna pole `TextRevision`; koncept se neposílá jako publikovaná revize. |
 
 Všechny volitelné položky jsou v JSON přítomné s `null`, nikoli vynechané.
-`camino/domain/codec.py` je jediný převod mezi v1 JSON a modelem C03a.
+`camino/domain/codec.py` převádí model C03a; `camino/domain/audio_layout.py`
+striktně validuje doplňkový M2b layout. Návaznost nesmí překročit Moment/session,
+větvit se, cyklit ani znovu použít Asset v jiném layoutu. Chybějící předchůdce
+může dorazit později a do té doby není návaznost prohlášena za ověřenou.
 Server nevěří klientskému názvu souboru jako cestě na disk.
 
 ## Potvrzení, konflikt a obnova
@@ -54,7 +63,8 @@ Server nevěří klientskému názvu souboru jako cestě na disk.
   původním obsahem vrátí `reused=true` bez duplicity; jiný obsah je konflikt.
 - SQLite v jedné transakci uloží projekci objektu, každou revizi, přesné bajty
   operace, hash požadavku, účtenku a souvislý kurzor. Zápis používá
-  `BEGIN IMMEDIATE`, `foreign_keys=ON`, `synchronous=FULL` a schéma verze 1.
+  `BEGIN IMMEDIATE`, `foreign_keys=ON`, `synchronous=FULL` a schéma verze 2
+  (M2b přidává k verzi 1 pouze tabulku audio layoutů; před upgradem záloha DB).
   Databáze musí být mimo zdrojový repozitář a mít práva pouze pro vlastníka;
   otevření širšího oprávnění se odmítne. Test pádu při zápisu účtenky
   potvrzuje rollback současně se změnou revize a kurzoru.

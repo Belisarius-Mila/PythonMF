@@ -314,7 +314,7 @@ class CaminoC03bContractTests(unittest.TestCase):
         self.assertEqual(set(spec["components"]["schemas"]["OperationEnvelope"]
                              ["properties"]["kind"]["enum"]), {
             "create_trip", "create_day", "create_moment", "create_asset",
-            "update_metadata", "append_text",
+            "update_metadata", "append_text", "create_audio_layout",
         })
         self.assertEqual(spec["security"], [{"ownerBearer": []}])
 

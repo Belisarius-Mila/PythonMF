@@ -75,6 +75,9 @@ přístupové údaje v tomto kroku nevznikly. Návod není povolení k nasazení
 
 ## Další krok
 
+Aktualizace: místní M2b je již implementované, viz `M2b_AUDIO_LAYOUT_REPORT.md`.
+Nyní navazuje M2c provozní ovládání; původní návaznost níže je historie M2a.
+
 M2b: doplnit minimální přenos pořadí a mezer audiočástí z iPhonu a jeho použití
 ve Vieweru; současné UUID/pořadí přijetí nejsou časová osa. Nezasahovat do
 samotného recorderu. Potom připravit registrovaný provozní start/status/stop,

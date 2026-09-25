@@ -22,7 +22,7 @@ from camino.domain.revision_store import RevisionStore, StoreConflict, StoreNotF
 MAX_REQUEST_BYTES = 1_048_576
 KINDS = frozenset({
     "create_trip", "create_day", "create_moment", "create_asset",
-    "update_metadata", "append_text",
+    "update_metadata", "append_text", "create_audio_layout",
 })
 
 

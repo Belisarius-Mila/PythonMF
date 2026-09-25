@@ -87,6 +87,12 @@ Cílené fyzické průchody jsou v `C04b_IPHONE_TEST_PLAN.md`,
 
 ## Vývojové ověření
 
+M2b (25. 9.) lokálně doplňuje do syncu pořadí a mezery z dokončených audio
+účtenek; recorder a Core Data se nemění. Telefon posílá nové layouty až po
+serverové schopnosti `audio_layout_v1`, již ověřené audio se znovu nenahrává.
+Zatím bez podpisu/instalace, nejdřív nasadit kompatibilní server. Viz
+`../docs/M2b_AUDIO_LAYOUT_REPORT.md` včetně jediného navazujícího fyzického průchodu.
+
 ```sh
 cd camino/app
 swift test --scratch-path /private/tmp/camino-c04d-tests

@@ -21,6 +21,7 @@ from .codec import (
     decode_trip, encode_change, exact_object, wire,
 )
 from .model import ContractError, MomentHistory, Privacy, RevisionConflict, TextHistory
+from .audio_layout import decode_audio_layout
 
 
 class StoreConflict(Exception):
@@ -34,7 +35,7 @@ class StoreNotFound(Exception):
     pass
 
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 _PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -86,7 +87,7 @@ class RevisionStore:
     def _initialize(self) -> None:
         with self._connection() as connection:
             version = connection.execute("PRAGMA user_version").fetchone()[0]
-            if version not in (0, SCHEMA_VERSION):
+            if version not in (0, 1, SCHEMA_VERSION):
                 raise ContractError("unsupported Camino database schema version")
             connection.execute("BEGIN IMMEDIATE")
             try:
@@ -107,6 +108,8 @@ class RevisionStore:
                     "CREATE TABLE IF NOT EXISTS assets (id TEXT PRIMARY KEY, moment_id TEXT NOT NULL, "
                     "body TEXT NOT NULL, FOREIGN KEY(moment_id) REFERENCES moments(id))",
                     "CREATE TABLE IF NOT EXISTS text_revisions (id TEXT PRIMARY KEY, moment_id TEXT NOT NULL, "
+                    "body TEXT NOT NULL, FOREIGN KEY(moment_id) REFERENCES moments(id))",
+                    "CREATE TABLE IF NOT EXISTS audio_layouts (id TEXT PRIMARY KEY, moment_id TEXT NOT NULL, "
                     "body TEXT NOT NULL, FOREIGN KEY(moment_id) REFERENCES moments(id))",
                     "CREATE TABLE IF NOT EXISTS accepted_operations (id TEXT PRIMARY KEY, "
                     "device_sequence INTEGER NOT NULL UNIQUE, epoch TEXT NOT NULL, "
@@ -144,6 +147,7 @@ class RevisionStore:
             meta = self._meta(connection)
             return {
                 "contract_version": 1,
+                "features": ["audio_layout_v1"],
                 "server_id": meta["server_id"],
                 "epoch": meta["epoch"],
                 "cursor": meta["cursor"],
@@ -251,6 +255,46 @@ class RevisionStore:
         kind = envelope["kind"]
         payload = envelope["payload"]
         expected = envelope["expected_revision"]
+        if kind == "create_audio_layout":
+            if expected is not None:
+                raise ContractError("audio layout does not change Moment revision")
+            data = decode_audio_layout(payload)
+            body = self._json(data)
+            old = connection.execute("SELECT body FROM audio_layouts WHERE id=?", (data["clip_id"],)).fetchone()
+            if old is not None:
+                if old["body"] != body:
+                    raise StoreConflict("identity_conflict", "audio layout ID has different content")
+                return kind, data["clip_id"], None, True
+            for part in data["parts"]:
+                row = connection.execute("SELECT body FROM assets WHERE id=?", (part["asset_id"],)).fetchone()
+                if row is None:
+                    raise StoreNotFound("audio source manifest is missing")
+                asset = decode_asset(json.loads(row["body"]))
+                if asset.moment_id != data["moment_id"] or asset.media_kind != "audio":
+                    raise ContractError("audio source must belong to this Moment")
+            existing = [json.loads(row["body"]) for row in connection.execute("SELECT body FROM audio_layouts")]
+            ids = {part["asset_id"] for part in data["parts"]}
+            for layout in existing:
+                if ids.intersection(part["asset_id"] for part in layout["parts"]):
+                    raise ContractError("audio source already belongs to another layout")
+                connected = (layout["session_id"] == data["session_id"]
+                             or layout["session_id"] == data["clip_id"]
+                             or layout["clip_id"] == data["session_id"]
+                             or layout["clip_id"] == data["previous_clip_id"]
+                             or layout["previous_clip_id"] == data["clip_id"])
+                if connected and (layout["moment_id"] != data["moment_id"] or layout["session_id"] != data["session_id"]):
+                    raise ContractError("audio continuation crosses Moment or session")
+                if layout["session_id"] == data["session_id"] and layout["previous_clip_id"] == data["previous_clip_id"]:
+                    raise ContractError("audio continuation cannot branch")
+            predecessors = {layout["clip_id"]: layout["previous_clip_id"] for layout in existing}
+            prior, visited = data["previous_clip_id"], {data["clip_id"]}
+            while prior is not None:
+                if prior in visited:
+                    raise ContractError("audio continuation cycle")
+                visited.add(prior)
+                prior = predecessors.get(prior)
+            connection.execute("INSERT INTO audio_layouts VALUES (?,?,?)", (data["clip_id"], data["moment_id"], body))
+            return kind, data["clip_id"], None, False
         if kind in {"create_trip", "create_day", "create_moment", "create_asset"}:
             if expected is not None:
                 raise ContractError("create operation must not supply expected revision")
@@ -504,6 +548,9 @@ class RevisionStore:
                     "day": moment.chapter_date,
                     "time": moment.captured.local_wall[11:16] if moment.captured.local_wall else "Čas neznámý",
                     "kind": moment.kind.value, "text": text, "assets": assets[moment.id],
+                    "audio_layouts": [json.loads(row["body"]) for row in connection.execute(
+                        "SELECT body FROM audio_layouts WHERE moment_id=? ORDER BY rowid", (moment.id,)
+                    )],
                 })
             return {"name": trip.name, "moments": sorted(result, key=lambda m: (m["day"], m["time"], m["id"]))}
 
