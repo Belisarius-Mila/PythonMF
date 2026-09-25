@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-25 20:59 CEST
+Aktualizováno: 2026-09-25 21:16 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -12,6 +12,12 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 
 ## Aktuální stav
 
+- M1 je lokálně implementované a synteticky ověřené: bezpečná projekce,
+  HTML dny, text/foto/audio/video a oddělené read-only oprávnění.
+  `camino/docs/M1_VIEWER_REPORT.md` obsahuje testy a omezení. Vizuální smoke
+  čeká na otevření připraveného náhledu; browser provider není dostupný.
+  Žádné nasazení, iPhone build ani živá média. Před ostrým použitím dlouhého
+  audia doplnit chybějící pořadí částí v přenosu; M1 nabízí části samostatně.
 - Novější rozsah a pořadí určuje `camino/docs/TRAVEL_MVP_PLAN.md`: soukromé
   cestovní MVP do 2. 10., M1 lokální jednoduchý HTML Viewer pro Janu, M2
   soukromý provoz a Cockpit odkaz, M3 minimální nezávislá záloha, M4 krátká
@@ -24,7 +30,7 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
   aplikací. Nefunkční ikona zůstává bez zásahu. Obnova celé cesty není zaručená,
   další ověření 1. 10. Postup a hranice důkazu jsou v novém plánu.
 - Níže jsou zachované dřívější milníky, nikoli dnešní živý provozní audit.
-  Viewer zatím není implementovaný; tento krok mění pouze dokumentaci.
+  Novější stav Vieweru je v úvodním bodu M1 a navazujícím reportu.
 - Autoritativní podklady jsou v0.5 spolu s dodatkem U15. Původní balíček v0.5 je uložen beze změny a 6/6 manifestovaných souborů prošlo SHA-256 kontrolou; ZIP je lokálně zachovaný. U15: celá položka `Do deníku` je po synchronizaci Viewer-eligible, samostatná Úvaha vždy vzniká `Jen pro mě` a vyžaduje vědomé `Vložit do deníku`.
 - Delta C00 audit Vieweru: Tailscale 1.102.4 je online, soukromý HTTPS Serve vede na živý Cockpit, Funnel není povolený, Cockpit smoke 5/5, AC `sleep=0` a FileVault zapnutý. Samostatný Camino backend/worker/Viewer, jeho autorizace, záloha, restart a vzdálený test na Janiných zařízeních ještě neexistují; G8 NEPROVEDENO.
 - Profilový fast-forward byl opraven tak, aby whitespace preflight použil `.gitattributes` z přijímaného commitu; importované Markdown hard breaks tak neoslabují kontrolu ostatních souborů. Regrese je krytá testem.
@@ -115,10 +121,10 @@ kódu nevyvolává; FAIL se nejdřív doloží a opraví v aktuálním rozsahu.
 
 ## Další krok
 
-M1 podle `camino/docs/TRAVEL_MVP_PLAN.md`: lokální minimalistický Viewer
-nad syntetickými daty bez AI a bez nasazení. Zbývající stavové C05c spojit
-s pozdějším M2/M4, zachování dat už Míla potvrdil. Serve, provozní služby,
-push a deployment se samotným přijetím plánu nespouštějí.
+Krátce otevřít syntetický náhled M1 a přehrát audio/video. Potom M2 podle
+`camino/docs/TRAVEL_MVP_PLAN.md`, včetně minimálního přenosu pořadí
+audiočástí před ostrými dlouhými nahrávkami. Zbývající C05c spojit s M2/M4.
+Nasazení, čtecí oprávnění Jany a síťové změny zůstávají samostatné.
 
 Historický doklad založení:
 Ověření založení: 56/56 testů integrace (54 + 2 profilové testy) a rychlá statická brána OK.
@@ -1539,3 +1545,37 @@ Technický důkaz:
   Nefunkční druhá ikona pravděpodobně souvisí s prvním pokusem; nic nesmazáno.
   Aktuální dlouhodobý provoz serveru ani automatická obnova podpisu nejsou
   tímto doložené. Tajemství a osobní data zůstávají mimo Git.
+
+### 2026-09-25 21:16 CEST — M1 lokální Viewer, vizuální přejímka otevřená
+
+Hotovo:
+- Lokální volitelný HTML Viewer umí dny, text, foto, audio a video. Čte jen
+  aktuální povolenou projekci; originály nemění. Oddělená čtecí autorizace,
+  revokace, staré URL po zámku a mediální Range mají syntetické testy.
+- Připraven samostatný HTML náhled s umělými médii. Běžící server, Cockpit,
+  iPhone, Serve, Funnel ani skutečná uživatelská data se nezměnily.
+
+Rozhodnutí:
+- M1 používá existující API/stores bez nové databázové migrace nebo závislosti.
+  Viewer je výchozím stavem vypnutý; zapojení `viewer=` je explicitní.
+- Server dosud nezná pořadí audiočástí/mezery (iPhone registruje Assety podle
+  UUID). M1 proto části nabízí samostatně s upozorněním. Před ostrými dlouhými
+  komentáři nutno vyřešit minimální přenos pořadí, ne odhadovat chronologii.
+- Vizuální/browser PASS nelze připsat: není připojený žádný browser provider.
+  M1 má hotový kód a automatické důkazy, nikoli úplnou fyzickou přejímku.
+
+Další krok:
+- Otevřít syntetický HTML náhled a ověřit vzhled, jedno audio a video.
+
+Navrhované další kroky:
+- Potom M2: minimální pořadí audiočástí a soukromý provoz/čtecí přístup,
+  Cockpit odkaz a Janina zkouška; skutečná publikace vyžaduje vlastní souhlas.
+- M3/M4 zůstávají podle cestovního plánu. Žádný nový test mikrofonu ani
+  opakování přijatého C05b jen kvůli serverovému HTML.
+
+Technický důkaz:
+- 29/29 projekce/C03b/media-store, 7/7 HTTP/deriváty a 5/5 stávající FastAPI
+  scénáře PASS; hash původních bajtů zachován, skutečné deriváty zkontrolované
+  ffprobe, citlivé testovací metadata odstraněné, Range 206.
+- Plná brána a přesné hranice jsou zaznamenané v `camino/docs/M1_VIEWER_REPORT.md`.
+  Browser náhled není privátní síťový test a G8 zůstává otevřená.

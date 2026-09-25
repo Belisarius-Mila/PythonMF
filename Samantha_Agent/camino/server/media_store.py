@@ -497,6 +497,14 @@ class MediaStore:
                 body["failure_code"] = session["failure_code"]
             return body
 
+    def verified_source(self, asset_id: str) -> Path | None:
+        """Internal derivative input, never a web download endpoint."""
+        asset_id = _uuid(asset_id, label="Asset ID")
+        with self._lock:
+            if self._verified_receipt(asset_id) is None:
+                return None
+            return self._object_path(asset_id)
+
     def recover(self) -> dict[str, int]:
         report = {"chunks_recovered": 0, "assets_recovered": 0, "files_quarantined": 0, "blocked": 0}
         with self._lock:

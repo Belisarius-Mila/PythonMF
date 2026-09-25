@@ -3,6 +3,13 @@
 Rozhodnutí Míly: 2026-09-25. Cesta 3.–17. října 2026; cílové zmrazení 2. října.
 Stav: nový rozsah a pořadí vývoje, nikoli hotový Viewer nebo povolené nasazení.
 
+Aktualizace M1 dne 25. 9.: lokální implementace a syntetické testy jsou
+v [M1_VIEWER_REPORT.md](M1_VIEWER_REPORT.md). Prohlížečová přejímka ještě čeká;
+M2/provoz nespouštěn. Zjištěná mezera původního API: pořadí částí dlouhého
+audia není přenesené. M1 je proto přehrává odděleně s upozorněním, nikoli
+automaticky spojené. Minimální oprava pořadí musí předcházet ostrému použití
+vícedílných komentářů; nejde o skryté rozšíření M1 ani již hotový iPhone fix.
+
 ## Co nyní stavíme
 
 Soukromou osobní aplikaci pro tuto cestu, ne produkt pro prodej. Zachováme

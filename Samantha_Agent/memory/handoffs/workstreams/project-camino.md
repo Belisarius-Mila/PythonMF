@@ -1,7 +1,17 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-25 20:59 CEST — zúžení cestovního rozsahu.
+- Aktualizováno: 2026-09-25 21:16 CEST — lokální M1.
+
+### M1 — nejnovější stav
+
+- Viewer je lokálně implementovaný a synteticky otestovaný; report
+  `camino/docs/M1_VIEWER_REPORT.md`. Bez nasazení, změn telefonu nebo sítě.
+- Další krok: otevřít syntetický HTML náhled a přehrát audio/video. Browser
+  kontrola není provedena, protože není dostupný browser provider.
+- Před M2/ostrými dlouhými komentáři doplnit přenos pořadí audiočástí;
+  současné API jej nezná. M1 části nabízí jednotlivě s upozorněním.
+- Dřívější plán M1–M4 níže platí s tímto posunem; žádné AI ani široké P0.
 
 ### Nejnovější rozhodnutí — platí před staršími body níže
 
@@ -1722,3 +1732,37 @@ Technický důkaz:
   Nefunkční druhá ikona pravděpodobně souvisí s prvním pokusem; nic nesmazáno.
   Aktuální dlouhodobý provoz serveru ani automatická obnova podpisu nejsou
   tímto doložené. Tajemství a osobní data zůstávají mimo Git.
+
+### 2026-09-25 21:16 CEST — M1 lokální Viewer, vizuální přejímka otevřená
+
+Hotovo:
+- Lokální volitelný HTML Viewer umí dny, text, foto, audio a video. Čte jen
+  aktuální povolenou projekci; originály nemění. Oddělená čtecí autorizace,
+  revokace, staré URL po zámku a mediální Range mají syntetické testy.
+- Připraven samostatný HTML náhled s umělými médii. Běžící server, Cockpit,
+  iPhone, Serve, Funnel ani skutečná uživatelská data se nezměnily.
+
+Rozhodnutí:
+- M1 používá existující API/stores bez nové databázové migrace nebo závislosti.
+  Viewer je výchozím stavem vypnutý; zapojení `viewer=` je explicitní.
+- Server dosud nezná pořadí audiočástí/mezery (iPhone registruje Assety podle
+  UUID). M1 proto části nabízí samostatně s upozorněním. Před ostrými dlouhými
+  komentáři nutno vyřešit minimální přenos pořadí, ne odhadovat chronologii.
+- Vizuální/browser PASS nelze připsat: není připojený žádný browser provider.
+  M1 má hotový kód a automatické důkazy, nikoli úplnou fyzickou přejímku.
+
+Další krok:
+- Otevřít syntetický HTML náhled a ověřit vzhled, jedno audio a video.
+
+Navrhované další kroky:
+- Potom M2: minimální pořadí audiočástí a soukromý provoz/čtecí přístup,
+  Cockpit odkaz a Janina zkouška; skutečná publikace vyžaduje vlastní souhlas.
+- M3/M4 zůstávají podle cestovního plánu. Žádný nový test mikrofonu ani
+  opakování přijatého C05b jen kvůli serverovému HTML.
+
+Technický důkaz:
+- 29/29 projekce/C03b/media-store, 7/7 HTTP/deriváty a 5/5 stávající FastAPI
+  scénáře PASS; hash původních bajtů zachován, skutečné deriváty zkontrolované
+  ffprobe, citlivé testovací metadata odstraněné, Range 206.
+- Plná brána a přesné hranice jsou zaznamenané v `camino/docs/M1_VIEWER_REPORT.md`.
+  Browser náhled není privátní síťový test a G8 zůstává otevřená.

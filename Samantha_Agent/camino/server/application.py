@@ -8,6 +8,7 @@ import os
 import sqlite3
 from http import HTTPStatus
 from typing import Any
+from typing import TYPE_CHECKING
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -16,6 +17,9 @@ from camino.api.v1 import CaminoV1Contract
 from camino.domain.model import ContractError
 from camino.server.auth import RevocableTokenStore
 from camino.server.media_store import DEFAULT_CHUNK_BYTES, MediaStore, MediaStoreError
+
+if TYPE_CHECKING:
+    from camino.server.viewer import CaminoViewer
 
 
 def _error(status: int | HTTPStatus, code: str, message: str) -> JSONResponse:
@@ -71,6 +75,7 @@ def create_app(
     media_store: MediaStore,
     token_store: RevocableTokenStore,
     finalize_delay_seconds: float = 0,
+    viewer: CaminoViewer | None = None,
 ) -> FastAPI:
     if not 0 <= finalize_delay_seconds <= 15:
         raise ValueError("finalize delay must stay between 0 and 15 seconds")
@@ -84,6 +89,12 @@ def create_app(
     app.state.metadata_api = metadata_api
     app.state.media_store = media_store
     app.state.token_store = token_store
+    if viewer is not None:
+        if viewer.tokens.path == token_store.path:
+            raise ValueError("Viewer must have a separate read-only credential store")
+        if viewer.metadata is not metadata_api.store or viewer.media is not media_store:
+            raise ValueError("Viewer must use this API's authoritative stores")
+        app.include_router(viewer.router())
 
     def authorized(request: Request) -> bool:
         return token_store.authenticate(_authorization(request))

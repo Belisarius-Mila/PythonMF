@@ -457,6 +457,56 @@ class RevisionStore:
                 if model.privacy == Privacy.DIARY.value and not model.hidden
             ))
 
+    def viewer_snapshot(self, trip_id: str) -> dict[str, Any]:
+        """Read one consistent, allowlisted projection; never return owner metadata.
+
+        No schema changes, writes, excluded counts, location, relationship links,
+        or owner summaries. Text provenance must also stay within the allowlist.
+        """
+        self._uuid(trip_id)
+        with self._connection() as connection:
+            connection.execute("BEGIN")
+            meta = self._meta(connection)
+            empty = {"name": "Camino", "moments": []}
+            if meta["exports_blocked"] or meta["reconciliation_required"]:
+                return empty
+            row = connection.execute("SELECT body FROM trips WHERE id=?", (trip_id,)).fetchone()
+            if row is None:
+                return empty
+            trip = decode_trip(json.loads(row["body"]))
+            if not trip.viewer_enabled:
+                return empty
+            allowed = [
+                model for model in (
+                    decode_moment(json.loads(row["body"])) for row in connection.execute(
+                        "SELECT body FROM moments WHERE trip_id=?", (trip_id,)
+                    )
+                ) if model.privacy == Privacy.DIARY.value and not model.hidden
+            ]
+            assets = {}
+            for moment in allowed:
+                assets[moment.id] = [json.loads(row["body"]) for row in connection.execute(
+                    "SELECT body FROM assets WHERE moment_id=? ORDER BY rowid", (moment.id,)
+                )]
+            safe_sources = {m.id for m in allowed} | {
+                a["id"] for group in assets.values() for a in group
+            }
+            result = []
+            for moment in allowed:
+                # Fail closed for provenance not represented by allowed source IDs.
+                texts = [decode_text(json.loads(row["body"])) for row in connection.execute(
+                    "SELECT body FROM text_revisions WHERE moment_id=? ORDER BY rowid", (moment.id,)
+                )]
+                reader = TextHistory(tuple(texts)).reader_revision
+                text = reader.content if reader and set(reader.source_ids) <= safe_sources else ""
+                result.append({
+                    "id": moment.id, "revision": moment.revision,
+                    "day": moment.chapter_date,
+                    "time": moment.captured.local_wall[11:16] if moment.captured.local_wall else "Čas neznámý",
+                    "kind": moment.kind.value, "text": text, "assets": assets[moment.id],
+                })
+            return {"name": trip.name, "moments": sorted(result, key=lambda m: (m["day"], m["time"], m["id"]))}
+
     def changes(self, epoch: str, cursor: int, limit: int = 100) -> dict[str, Any]:
         with self._connection() as connection:
             meta = self._meta(connection)
