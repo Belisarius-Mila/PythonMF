@@ -1,7 +1,8 @@
 # M1 — lokální minimalistický Viewer
 
 Datum: 2026-09-25. Stav: implementace a syntetické testy hotové;
-vizuální/browser přejímka otevřená. Bez nasazení a skutečných médií.
+Míla následně potvrdil, že lokální náhled funguje, a povolil pokračování.
+Bez nasazení a skutečných médií. Nejde o test Janiných zařízení nebo sítě.
 
 ## Výsledek
 
@@ -53,8 +54,9 @@ vizuální/browser přejímka otevřená. Bez nasazení a skutečných médií.
 
 ## Hranice a další krok
 
-- M1 není plně přijaté bez krátkého otevření náhledu v prohlížeči. Další krok:
-  zkontrolovat zobrazení a spustit jedno audio/video. Neopakovat C04/C05b.
+- Míla lokální náhled potvrdil jako funkční. Jednotlivé mediální zkoušky ani
+  prohlížeč ve zprávě nerozepisoval; nic dalšího se tím zpětně neoznačuje PASS.
+  Navazující místní M2a je v `M2_RUNTIME_REPORT.md`. Neopakovat C04/C05b.
 - Vícedílné audio: současný iPhone registruje Assety podle UUID a v API chybí
   pořadí session/částí a mezery (`CaminoSync.swift`, `CaminoSyncCoordinator.swift`).
   Proto Viewer nabízí samostatná média v pořadí přijetí s výslovným upozorněním,

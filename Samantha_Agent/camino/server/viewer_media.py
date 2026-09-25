@@ -8,6 +8,7 @@ import os
 import subprocess
 import tempfile
 from pathlib import Path
+from typing import Callable
 
 from camino.domain.model import ContractError
 
@@ -65,7 +66,9 @@ class ViewerMedia:
         except (OSError, ValueError, KeyError, TypeError):
             return {}
 
-    def build(self, asset: dict, source: Path) -> bool:
+    def build(self, asset: dict, source: Path, *, should_stop: Callable[[], bool] = lambda: False) -> bool:
+        if should_stop():
+            return False
         if self.ready(asset):
             return True
         if source.is_symlink() or not source.is_file():
@@ -95,6 +98,8 @@ class ViewerMedia:
             return False
         try:
             for input_path, options, name in commands:
+                if should_stop():
+                    return False
                 # Local files only; reject media that tries to resolve a remote input.
                 subprocess.run([
                     self.ffmpeg, "-nostdin", "-v", "error", "-n", "-threads", "2",

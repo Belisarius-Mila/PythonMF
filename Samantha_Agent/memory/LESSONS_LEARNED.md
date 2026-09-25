@@ -941,3 +941,14 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Ověření: C05c Swift 33/33, cílené UI 1/1, regresní UI pause 1/1, generic iOS
   build a plná projektová brána 1770/1770 PASS. Skutečná záloha a AI zůstávají
   samostatnou fyzickou a produkční akceptací.
+
+### 2026-09-25 — Viewer za privátní proxy musí prefixovat i mediální odkazy
+
+- Kontext: minimalistický Camino Viewer, přímý server a budoucí cesta `/camino-api`.
+- Problém: správně otevřená HTML stránka ještě nezaručuje funkční média;
+  absolutní `/viewer/...` bez proxy prefixu vedou na jiný backend.
+- Řešení: explicitní povolený `root_path` předat také tvorbě navigace a médií,
+  nepřebírat libovolný prefix z klientské hlavičky. Cockpit pouze odkazuje.
+- Ověření: syntetický ASGI průchod přes `/camino-api/viewer/`, obrázek 200,
+  zamčená stará mediální URL 404 a neautorizovaný přístup 401. Není to důkaz
+  skutečného Serve, privátní sítě nebo vzdáleného Safari.

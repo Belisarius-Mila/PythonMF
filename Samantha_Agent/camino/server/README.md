@@ -2,11 +2,12 @@
 
 Tento modul je lokální produkčně orientovaný základ soukromého owner API.
 Spojuje síťový adaptér C03b s trvalým příjmem médií C05a. Nespouští se
-automaticky, nemění Tailscale Serve a neposkytuje Viewer.
+automaticky a nemění Tailscale Serve. Viewer je explicitně volitelný.
 
-M1 přidává volitelný lokální Viewer přes `create_app(viewer=...)`; výchozí
-spouštěč jej nezapíná. Výsledek, testy a otevřená vizuální přejímka jsou v
-`../docs/M1_VIEWER_REPORT.md`. Provoz, přístup Jany a Cockpit odkaz patří M2.
+M1 přidává volitelný lokální Viewer přes `create_app(viewer=...)`. M2a přidává
+explicitní konfiguraci spouštěče, periodickou přípravu médií a konfigurovaný
+přímý odkaz z Cockpitu. Výchozí spouštěč dál Viewer nezapíná. Nastavení a
+hranice jsou v `../docs/M2_RUNTIME_REPORT.md`; služba není tímto nasazená.
 
 ## Oddělené prostředí
 

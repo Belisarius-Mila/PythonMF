@@ -6,6 +6,7 @@ import asyncio
 import json
 import os
 import sqlite3
+from contextlib import asynccontextmanager
 from http import HTTPStatus
 from typing import Any
 from typing import TYPE_CHECKING
@@ -17,6 +18,7 @@ from camino.api.v1 import CaminoV1Contract
 from camino.domain.model import ContractError
 from camino.server.auth import RevocableTokenStore
 from camino.server.media_store import DEFAULT_CHUNK_BYTES, MediaStore, MediaStoreError
+from camino.server.viewer_worker import ViewerWorker
 
 if TYPE_CHECKING:
     from camino.server.viewer import CaminoViewer
@@ -76,19 +78,40 @@ def create_app(
     token_store: RevocableTokenStore,
     finalize_delay_seconds: float = 0,
     viewer: CaminoViewer | None = None,
+    viewer_interval_seconds: float | None = None,
+    root_path: str = "",
 ) -> FastAPI:
     if not 0 <= finalize_delay_seconds <= 15:
         raise ValueError("finalize delay must stay between 0 and 15 seconds")
+    if root_path not in ("", "/camino-api"):
+        raise ValueError("unsupported private proxy prefix")
+    if viewer_interval_seconds is not None and viewer is None:
+        raise ValueError("Viewer worker requires an explicitly configured Viewer")
+    worker = ViewerWorker(viewer, interval=viewer_interval_seconds) if viewer_interval_seconds is not None else None
+
+    @asynccontextmanager
+    async def lifespan(_app):
+        if worker is not None:
+            worker.start()
+        try:
+            yield
+        finally:
+            if worker is not None:
+                await asyncio.to_thread(worker.stop)
+
     app = FastAPI(
         title="Camino private owner API",
         version="1",
         docs_url=None,
         redoc_url=None,
         openapi_url=None,
+        root_path=root_path,
+        lifespan=lifespan,
     )
     app.state.metadata_api = metadata_api
     app.state.media_store = media_store
     app.state.token_store = token_store
+    app.state.viewer_worker = worker
     if viewer is not None:
         if viewer.tokens.path == token_store.path:
             raise ValueError("Viewer must have a separate read-only credential store")

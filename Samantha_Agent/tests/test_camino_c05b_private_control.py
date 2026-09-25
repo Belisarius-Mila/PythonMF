@@ -67,6 +67,9 @@ class CaminoC05bPrivateControlTests(unittest.TestCase):
         self.assertIn("usage:", result.stdout)
 
     def test_registered_lifecycle_is_fixed_and_confirmation_gated(self) -> None:
+        with mock.patch.dict(control.os.environ, {"CAMINO_VIEWER_ENABLED": "1"}):
+            environment = control._server_environment(Path("/synthetic/run"), storage_fault=False)
+        self.assertEqual(environment["CAMINO_VIEWER_ENABLED"], "0")
         commands = {item.command_id: item for item in WORKFLOW_COMMANDS}
         for action in ("start", "copy_url", "copy_token", "status", "stop"):
             command = commands[f"camino_c05b_private_{action}"]

@@ -255,6 +255,7 @@ def _server_environment(run_dir: Path, *, storage_fault: bool) -> dict[str, str]
     environment = os.environ.copy()
     environment.update({
         "CAMINO_C05A_METADATA_DB": str(run_dir / "metadata.sqlite"),
+        "CAMINO_VIEWER_ENABLED": "0",  # acceptance workflow never publishes a Viewer
         "CAMINO_C05A_AUTH_DB": str(run_dir / "auth.sqlite"),
         "CAMINO_C05A_MEDIA_DB": str(run_dir / "media.sqlite"),
         "CAMINO_C05A_MEDIA_ROOT": str(run_dir / "media"),

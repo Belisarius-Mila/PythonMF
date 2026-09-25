@@ -7,6 +7,7 @@ import binascii
 import sqlite3
 from datetime import datetime, timezone
 from html import escape
+from typing import Callable
 
 from fastapi import APIRouter, Request
 from fastapi.responses import FileResponse, HTMLResponse, Response
@@ -47,6 +48,8 @@ class CaminoViewer:
         self.metadata, self.media, self.copies, self.tokens = metadata, media, copies, tokens
         self.trip_id = trip_id
         self.last_build: str | None = None
+        self.build_state = "manual"
+        self._conversion_failures: dict[str, int] = {}
 
     def authorized(self, request: Request) -> bool:
         # A separate, revocable reader credential; never accept an owner Bearer.
@@ -59,21 +62,31 @@ class CaminoViewer:
         except (ValueError, UnicodeError, binascii.Error):
             return False
 
-    def build_pending(self) -> dict[str, int]:
-        """Explicit local batch for M1. M2 will schedule it; never run in GET."""
+    def build_pending(self, *, should_stop: Callable[[], bool] = lambda: False) -> dict[str, int]:
+        """A serial batch invoked offline or by the lifespan worker, never GET."""
         report = {"ready": 0, "waiting": 0}
         for moment in self.metadata.viewer_snapshot(self.trip_id)["moments"]:
             for asset in moment["assets"]:
+                if should_stop():
+                    return report
                 # Recheck permission before starting each potentially long conversion.
                 if moment["id"] not in self.metadata.viewer_safe_ids(self.trip_id):
                     break
                 if self.copies.ready(asset, verify=False):
                     report["ready"] += 1
                     continue
+                if self._conversion_failures.get(asset["id"], 0) >= 3:
+                    # A broken source must not create private pending files forever.
+                    # Three attempts per process; a service restart permits retry.
+                    report["waiting"] += 1
+                    continue
                 source = self.media.verified_source(asset["id"])
-                if source and self.copies.build(asset, source):
+                if source and self.copies.build(asset, source, should_stop=should_stop):
                     report["ready"] += 1
+                    self._conversion_failures.pop(asset["id"], None)
                 else:
+                    if source and not should_stop():
+                        self._conversion_failures[asset["id"]] = self._conversion_failures.get(asset["id"], 0) + 1
                     report["waiting"] += 1
         self.last_build = datetime.now(timezone.utc).isoformat(timespec="seconds")
         return report
@@ -85,7 +98,9 @@ class CaminoViewer:
                     return asset
         return None
 
-    def page(self, day: str | None = None) -> str | None:
+    def page(self, day: str | None = None, *, root_path: str = "") -> str | None:
+        if root_path not in ("", "/camino-api"):
+            raise ContractError("unsupported Viewer proxy prefix")
         snapshot = self.metadata.viewer_snapshot(self.trip_id)
         moments = snapshot["moments"]
         days = sorted({m["day"] for m in moments}, reverse=True)
@@ -93,7 +108,7 @@ class CaminoViewer:
             return None
         title = escape(snapshot["name"])
         body = '<nav aria-label="Dny cesty">' + ''.join(
-            f'<a href="/viewer/days/{d}">{d[8:10]}. {d[5:7]}. {d[:4]}</a>' for d in days
+            f'<a href="{root_path}/viewer/days/{d}">{d[8:10]}. {d[5:7]}. {d[:4]}</a>' for d in days
         ) + '</nav>'
         if not days:
             body += '<p class="notice">Zatím tu nejsou žádné dostupné záznamy.</p>'
@@ -112,7 +127,7 @@ class CaminoViewer:
                     if not ready:
                         body += '<p class="notice">Médium zatím není připravené k přehrání.</p>'
                         continue
-                    base = f'/viewer/media/{asset["id"]}/'
+                    base = f'{root_path}/viewer/media/{asset["id"]}/'
                     kind = asset["media_kind"]
                     if kind == "photo":
                         element = f'<img src="{base}preview.jpg" loading="lazy" alt="Fotografie ze záznamu">'
@@ -125,12 +140,18 @@ class CaminoViewer:
                     body += '<p class="muted">Samostatná média v pořadí přijetí, nikoli nutně pořízení. Pořadí a mezery vícedílné nahrávky zatím server nezná; části nejsou spojované.</p>'
                 body += '</article>'
         built = escape(self.last_build or "zatím neproběhla")
+        state = {"manual": "Automatická příprava není zapnutá.",
+                 "building": "Připravuji doručená média.",
+                 "waiting": "Některá média čekají na doručení nebo úspěšný převod.",
+                 "checked": "Poslední kontrola doručených médií dokončena.",
+                 "failed": "Příprava se nepodařila; automaticky ji zkusím znovu.",
+                 "stopped": "Automatická příprava je zastavená."}.get(self.build_state, "Stav přípravy neznámý.")
         return f'''<!doctype html><html lang="cs"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>{title} · Camino</title>
 <style>{CSS}</style></head><body><header><p class="label">CAMINO · PRO JANU</p>
 <h1>{title}</h1><p class="muted">Malé zprávy z cesty. Fotografie, slova a původní hlas.</p>
-<a href="/viewer/">Všechny dny</a></header><main>{body}</main><footer>
-Příprava médií: {built}<br>Zobrazuji doručené záznamy. Další mohou ještě čekat v telefonu.
+<a href="{root_path}/viewer/">Všechny dny</a></header><main>{body}</main><footer>
+Příprava médií: {built}<br>{state}<br>Zobrazuji doručené záznamy. Další mohou ještě čekat v telefonu.
 <br>Stránku obnovíš běžným tlačítkem prohlížeče.</footer></body></html>'''
 
     def router(self) -> APIRouter:
@@ -147,7 +168,7 @@ Příprava médií: {built}<br>Zobrazuji doručené záznamy. Další mohou ješ
             try:
                 if not self.authorized(request):
                     return denied()
-                content = self.page(day)
+                content = self.page(day, root_path=request.scope.get("root_path", ""))
                 return HTMLResponse(content, headers=HEADERS) if content else Response(status_code=404, headers=HEADERS)
             except (OSError, sqlite3.DatabaseError, ContractError):
                 return Response("Přehled teď není dostupný.", status_code=503, headers=HEADERS)

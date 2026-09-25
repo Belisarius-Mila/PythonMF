@@ -2,7 +2,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const source = fs.readFileSync('app/frontend/cockpit/app.js', 'utf8');
-const names = ['renderDashboard','setDashboardPendingIfEmpty','dashboardValueIsPending','setDashboardValue','formatDashboardLoadedAt','dashboardStatusRank','dashboardStatusPriority','setDashboardStatusSignal','updateDashboardOverallStatus','escapeDashboardHtml'];
+const names = ['renderCaminoViewerLink','renderDashboard','setDashboardPendingIfEmpty','dashboardValueIsPending','setDashboardValue','formatDashboardLoadedAt','dashboardStatusRank','dashboardStatusPriority','setDashboardStatusSignal','updateDashboardOverallStatus','escapeDashboardHtml'];
 const functions = names.map(name => {
   const start = source.indexOf(`function ${name}(`);
   assert.ok(start >= 0, name);
@@ -12,8 +12,10 @@ const functions = names.map(name => {
 }).join('\n');
 const node = () => ({textContent:'',innerHTML:'',className:''});
 function setup() {
+  const document = {getElementById() {return null;}};
   const state = {console,Date,dashboardStatusSignals:{},renderCodexApproval(){},classifyBackup:(_text,status)=>({className:status?.status==='ok'?'ok':'warn',label:status?.status==='ok'?'OK':'záloha chybí'})};
   for (const name of ['dashboardOverall','dashboardOverallLabel','dashboardOverallReason','dashboardDocuments','dashboardScanDocu','dashboardReminders','dashboardProjects','dashboardQuantitative','dashboardConsistency','dashboardQuickNotes','dashboardBackup','dashboardGit']) state[name]=node();
+  state.document = document;
   const context=vm.createContext(state);vm.runInContext(functions,context);
   const healthy = {document_work:{summary:{new_pdf_count:0,review_pending_count:0,problem_count:0}},scandocu:{running:false},reminders:{counts:{active:0,open:0,conflicts:0}},git:{ok:true,dirty_count:0,ahead:0,behind:0},backup_status:{status:'ok'}};
   const render = data => {context.renderDashboard(data);for(const key of ['projects','consistency','quickNotes','decision']) context.setDashboardStatusSignal(key,'ok','Ověřeno');};

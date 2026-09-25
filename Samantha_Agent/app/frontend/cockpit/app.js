@@ -1626,7 +1626,23 @@
       revealReviewCard: () => { reviewReportCount.closest(".work-card").open = true; },
     });
 
+    function renderCaminoViewerLink(data) {
+      const link = document.getElementById("caminoViewerLink");
+      const status = document.getElementById("dashboardCamino");
+      if (!link || !status) return;
+      const value = data || {};
+      const url = typeof value.url === "string" ? value.url : "";
+      const valid = value.configured === true && url === url.trim() && /^https:\/\/[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.ts\.net\/(?:camino-api\/)?viewer\/$/.test(url);
+      link.classList.toggle("hidden", !valid);
+      if (valid) link.setAttribute("href", url);
+      else link.removeAttribute("href");
+      status.textContent = valid
+        ? "Soukromý odkaz nastavený; dostupnost ověří otevření a přihlášení Jany."
+        : "Soukromý odkaz není nastavený nebo má neplatné nastavení.";
+    }
+
 	    function renderDashboard(data) {
+      renderCaminoViewerLink(data.camino_viewer);
       setDashboardStatusSignal("main", "ok", "Hlavní status načten");
       const work = data.document_work || {};
       const summary = work.summary || {};

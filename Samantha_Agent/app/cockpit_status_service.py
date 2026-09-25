@@ -8,6 +8,8 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, Callable
 
+from app.camino_viewer_link import camino_viewer_link_status
+
 
 StatusLoader = Callable[[], Any]
 
@@ -122,6 +124,7 @@ def build_cockpit_status(
         "reminders": reminders,
         "urgent_reminders": urgent,
         "scandocu": scandocu,
+        "camino_viewer": camino_viewer_link_status(),
         "codex_approval": codex_approval,
         "git": git_status,
     }

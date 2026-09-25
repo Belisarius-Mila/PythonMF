@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-25 21:16 CEST
+Aktualizováno: 2026-09-25 21:52 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -12,12 +12,14 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 
 ## Aktuální stav
 
-- M1 je lokálně implementované a synteticky ověřené: bezpečná projekce,
-  HTML dny, text/foto/audio/video a oddělené read-only oprávnění.
-  `camino/docs/M1_VIEWER_REPORT.md` obsahuje testy a omezení. Vizuální smoke
-  čeká na otevření připraveného náhledu; browser provider není dostupný.
-  Žádné nasazení, iPhone build ani živá média. Před ostrým použitím dlouhého
-  audia doplnit chybějící pořadí částí v přenosu; M1 nabízí části samostatně.
+- Míla potvrdil funkční lokální M1 náhled. Jednotlivé zkoušky ani zařízení
+  nerozepisoval; vzdálený RT3 a Janina přejímka tím nejsou PASS.
+- M2a připravilo volitelný Viewer runtime, sériový 60s worker, privátní URL
+  prefix a konfigurovaný odkaz z Cockpitu. Testy a omezení jsou v
+  `camino/docs/M2_RUNTIME_REPORT.md`. Bez nasazení, změny iPhonu/launchd/sítě,
+  skutečné čtecí autorizace, zapnutí cesty nebo zpřístupnění osobních dat.
+- Další krok M2b: přenos pořadí/mezer audiočástí pro Viewer. Potom registrované
+  provozní ovládání a samostatně schválené nasazení. M2 není dokončené.
 - Novější rozsah a pořadí určuje `camino/docs/TRAVEL_MVP_PLAN.md`: soukromé
   cestovní MVP do 2. 10., M1 lokální jednoduchý HTML Viewer pro Janu, M2
   soukromý provoz a Cockpit odkaz, M3 minimální nezávislá záloha, M4 krátká
@@ -1579,3 +1581,32 @@ Technický důkaz:
   ffprobe, citlivé testovací metadata odstraněné, Range 206.
 - Plná brána a přesné hranice jsou zaznamenané v `camino/docs/M1_VIEWER_REPORT.md`.
   Browser náhled není privátní síťový test a G8 zůstává otevřená.
+
+### 2026-09-25 21:52 CEST — M1 náhled potvrzen, místní M2a připravené
+
+Hotovo:
+- Míla potvrdil funkční náhled a povolil pokračování. Připravená automatická
+  příprava doručených médií, privátní proxy odkazy a tlačítko z Cockpitu.
+- Vše jen v lokálním kódu a syntetických testech. Bez nasazení nebo iPhone
+  změny; skutečné tokeny, média, launchd, Serve a Funnel nedotčené.
+
+Rozhodnutí:
+- Rozsah cestovního MVP se nemění. M2a je nezávislá provozní příprava;
+  oprava pořadí audia stále musí předcházet ostrým dlouhým komentářům.
+- Cockpit jen otevře soukromou adresu; nestartuje server, nedrží čtecí token
+  a nenahrazuje autorizaci. Stav odkazu není živý audit dostupnosti.
+
+Další krok:
+- M2b: doplnit minimální přenos pořadí a mezer audiočástí, bez přepisu recorderu.
+
+Navrhované další kroky:
+- Registrovaný provozní start/status/stop a vědomé povolení cesty/čtenáře.
+- Samostatně schválené nasazení a jeden společný iPhone → Mac → Jana průchod.
+- M3 nezávislá záloha a M4 předcestovní přejímka podle cestovního plánu.
+
+Technický důkaz:
+- Nové testy: 5 rychlých worker/link a 6 izolovaných runtime/proxy PASS.
+  Regrese: 7 Viewer HTTP, 5 owner FastAPI, 18 frontend PASS.
+- Opětovný start aplikačního lifecycle je syntetický důkaz, ne launchd
+  restart po pádu. Nové živé UI, vzdálená síť a G8 zůstávají neověřené.
+- Plná brána a přesné hranice jsou v `camino/docs/M2_RUNTIME_REPORT.md`.
