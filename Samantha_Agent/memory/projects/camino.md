@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-24 23:33 CEST
+Aktualizováno: 2026-09-25 20:59 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -12,6 +12,19 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 
 ## Aktuální stav
 
+- Novější rozsah a pořadí určuje `camino/docs/TRAVEL_MVP_PLAN.md`: soukromé
+  cestovní MVP do 2. 10., M1 lokální jednoduchý HTML Viewer pro Janu, M2
+  soukromý provoz a Cockpit odkaz, M3 minimální nezávislá záloha, M4 krátká
+  společná přejímka. AI/C07, bohaté souhrny, širší import/export a P1/P2
+  odložené; U15 a ochrana originálů beze změny. Žádný nákup Apple členství
+  ani App Store příprava. Plná historická P0 akceptace není cílem této verze.
+- SideStore import původního Camina bez kabelu, spuštění a zachování dat
+  fyzicky PASS podle Míly. Log druhého pokusu potvrzuje původní ID a profil
+  do 2. 10. 20:27 CEST; první pokus s přidanou příponou selhal na limitu
+  aplikací. Nefunkční ikona zůstává bez zásahu. Obnova celé cesty není zaručená,
+  další ověření 1. 10. Postup a hranice důkazu jsou v novém plánu.
+- Níže jsou zachované dřívější milníky, nikoli dnešní živý provozní audit.
+  Viewer zatím není implementovaný; tento krok mění pouze dokumentaci.
 - Autoritativní podklady jsou v0.5 spolu s dodatkem U15. Původní balíček v0.5 je uložen beze změny a 6/6 manifestovaných souborů prošlo SHA-256 kontrolou; ZIP je lokálně zachovaný. U15: celá položka `Do deníku` je po synchronizaci Viewer-eligible, samostatná Úvaha vždy vzniká `Jen pro mě` a vyžaduje vědomé `Vložit do deníku`.
 - Delta C00 audit Vieweru: Tailscale 1.102.4 je online, soukromý HTTPS Serve vede na živý Cockpit, Funnel není povolený, Cockpit smoke 5/5, AC `sleep=0` a FileVault zapnutý. Samostatný Camino backend/worker/Viewer, jeho autorizace, záloha, restart a vzdálený test na Janiných zařízeních ještě neexistují; G8 NEPROVEDENO.
 - Profilový fast-forward byl opraven tak, aby whitespace preflight použil `.gitattributes` z přijímaného commitu; importované Markdown hard breaks tak neoslabují kontrolu ostatních souborů. Regrese je krytá testem.
@@ -102,7 +115,10 @@ kódu nevyvolává; FAIL se nejdřív doloží a opraví v aktuálním rozsahu.
 
 ## Další krok
 
-Dne 2026-09-25 projít `C05c_IPHONE_TEST_PLAN.md`, počínaje zachováním dat a čtyřmi stavovými sekcemi. C06a/C06b/C07 vyžadují vlastní rozhodnutí. Captive portal T048 doplnit jen při bezpečně dostupné síti; C05b Serve znovu nespouštět bez nového náhledu a potvrzení.
+M1 podle `camino/docs/TRAVEL_MVP_PLAN.md`: lokální minimalistický Viewer
+nad syntetickými daty bez AI a bez nasazení. Zbývající stavové C05c spojit
+s pozdějším M2/M4, zachování dat už Míla potvrdil. Serve, provozní služby,
+push a deployment se samotným přijetím plánu nespouštějí.
 
 Historický doklad založení:
 Ověření založení: 56/56 testů integrace (54 + 2 profilové testy) a rychlá statická brána OK.
@@ -1484,3 +1500,42 @@ Technický důkaz:
 - Strict podpis, shoda týmu, profil zahrnující iPhone, CoreDevice instalace,
   launch a inventář verze 0.1.0 (4) PASS. Cockpit deployment, C05b server,
   Serve a Funnel se nezměnily.
+
+### 2026-09-25 20:59 CEST — minimalistický cestovní plán a podpis
+
+Hotovo:
+- Nový `camino/docs/TRAVEL_MVP_PLAN.md` sjednocuje levnější cestovní rozsah,
+  pořadí M1–M4, krátkou přejímku RT1–RT6 a odložené funkce. Viewer zatím
+  není implementovaný; aplikace ani služby se tímto krokem nezměnily.
+- Míla potvrdil SideStore import bez kabelu, otevření původního Camina,
+  zachování starých záznamů a přehrávání. Celý stavový C05c není tímto PASS.
+
+Rozhodnutí:
+- Míla chce funkčnost pro cestu 3.–17. 10., nikoli absolutní spolehlivost,
+  komerční produkt nebo App Store přípravu. Prioritou je jednoduché HTML pro
+  Janu z Cockpitu. AI, souhrny a širší produkt se v novém plánu odkládají.
+- Zachovat U15, originály, autorizaci, hashové ověření a povinné rizikové
+  brány. Neopakovat přijaté nezměněné testy, fyzické zkoušky sloučit.
+- Návrh: API a Viewer v jednom Camino procesu s vlastní přímou URL,
+  odděleném od Cockpitu; jednoduché odvozeniny a nezávislá denní záloha.
+  Krátké výpadky a ruční retry jsou omezení MVP, ne zatajené chyby.
+
+Další krok:
+- M1: lokální minimalistický Viewer nad syntetickými daty; bez AI,
+  nového iOS buildu, startu služby, Serve, push či deploymentu.
+
+Navrhované další kroky:
+- M2 soukromý provoz/Cockpit a Janina zkouška; zbývající C05c spojit s ní.
+- M3 nezávislá kopie a jedna obnova dne, M4 krátká předcestovní přejímka.
+- Podpis znovu ověřit 1. 10.; opakovaný import s původním ID a vypnutým
+  Append Team ID. Standardní Refresh All ani celá cesta nejsou ověřené.
+
+Technický důkaz:
+- Pouze dokumentace; rychlá statická brána `--skip-unit-tests` PASS.
+  Dřívější plné sady ani iPhone build se kvůli plánu neopakovaly.
+- Soukromý log SideStore: první pokus s přidanou příponou selhal na limitu
+  aplikací; druhý v 20:27 zachoval ID a úspěšně instaloval profil do
+  2. 10. 20:27 CEST. Datum není odečtené z nainstalovaného profilu.
+  Nefunkční druhá ikona pravděpodobně souvisí s prvním pokusem; nic nesmazáno.
+  Aktuální dlouhodobý provoz serveru ani automatická obnova podpisu nejsou
+  tímto doložené. Tajemství a osobní data zůstávají mimo Git.

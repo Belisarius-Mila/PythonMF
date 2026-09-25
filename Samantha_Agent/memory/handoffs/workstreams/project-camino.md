@@ -1,7 +1,31 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno po pushi a podepsané instalaci C05c: 2026-09-24 23:33 CEST
+- Aktualizováno: 2026-09-25 20:59 CEST — zúžení cestovního rozsahu.
+
+### Nejnovější rozhodnutí — platí před staršími body níže
+
+- Aktuální plán: `camino/docs/TRAVEL_MVP_PLAN.md`. Míla chce zlevnit a zrychlit
+  vývoj pro cestu 3.–17. 10., jednoduchý HTML Viewer pro Janu z Cockpitu,
+  ne komerční produkt ani App Store distribuci.
+- Další krok M1: lokální Viewer nad syntetickými daty (den/text/foto/audio/video),
+  bez AI, nového iPhone buildu a nasazení. Potom M2 privátní provoz + odkaz,
+  M3 minimální nezávislá záloha a M4 jeden společný předcestovní průchod.
+- AI/C07, bohaté souhrny, širší import/export a P1/P2 jsou odložené. Ochrana
+  originálů, U15, autorizace a povinné rizikové/publikační brány zůstávají.
+  Dřívější úplné G0–G8 se tím neprohlašují za splněné.
+- SideStore: Míla potvrdil import bez kabelu, otevření původního Camina a data
+  PASS. Log druhého pokusu potvrzuje stejné ID a profil do 2. 10. 20:27 CEST;
+  nejde o extrakci nainstalovaného profilu ani záruku obnov až do 17. 10.
+  První pokus s jiným ID selhal; druhá nefunkční ikona pravděpodobně zůstala
+  po něm. Nic se nemaže, standardní Refresh All není ověřený postup.
+- Zachování dat po aktualizaci už neopakovat bez důvodu. Zbytek stavového
+  C05c spojit s M2/M4; nezapisovat celý C05c jako PASS. Další obnova podpisu
+  je plánovaná na 1. 10., nikoli na tento dokumentační krok.
+- Tento krok změnil jen plán. Stav C05b služby/Serve/Funnel níže je poslední
+  auditovaný snapshot z 24. 9., nikoli nový živý audit; nic nebylo spuštěno.
+
+Dřívější technické důkazy a omezení (historický souhrn do 24. září):
 
 ### Hotovo
 - T043 PASS v rozsahu syntetického C02b: Letový režim přerušil upload při 0/13 serverových částech; po obnově sítě vznikl jediný objekt daného Assetu, 13/13 částí, 100 663 553 B a shodný SHA-256.
@@ -1659,3 +1683,42 @@ Navrhované další kroky:
 Technický důkaz:
 - Konečný stop: 104 operací, 41 Momentů, 45 Assetů, 45/45 ověřených médií,
   214 555 219 B, 0 aktivních tokenů. Uzavírací plná brána 1770/1770 PASS.
+
+### 2026-09-25 20:59 CEST — minimalistický cestovní plán a podpis
+
+Hotovo:
+- Nový `camino/docs/TRAVEL_MVP_PLAN.md` sjednocuje levnější cestovní rozsah,
+  pořadí M1–M4, krátkou přejímku RT1–RT6 a odložené funkce. Viewer zatím
+  není implementovaný; aplikace ani služby se tímto krokem nezměnily.
+- Míla potvrdil SideStore import bez kabelu, otevření původního Camina,
+  zachování starých záznamů a přehrávání. Celý stavový C05c není tímto PASS.
+
+Rozhodnutí:
+- Míla chce funkčnost pro cestu 3.–17. 10., nikoli absolutní spolehlivost,
+  komerční produkt nebo App Store přípravu. Prioritou je jednoduché HTML pro
+  Janu z Cockpitu. AI, souhrny a širší produkt se v novém plánu odkládají.
+- Zachovat U15, originály, autorizaci, hashové ověření a povinné rizikové
+  brány. Neopakovat přijaté nezměněné testy, fyzické zkoušky sloučit.
+- Návrh: API a Viewer v jednom Camino procesu s vlastní přímou URL,
+  odděleném od Cockpitu; jednoduché odvozeniny a nezávislá denní záloha.
+  Krátké výpadky a ruční retry jsou omezení MVP, ne zatajené chyby.
+
+Další krok:
+- M1: lokální minimalistický Viewer nad syntetickými daty; bez AI,
+  nového iOS buildu, startu služby, Serve, push či deploymentu.
+
+Navrhované další kroky:
+- M2 soukromý provoz/Cockpit a Janina zkouška; zbývající C05c spojit s ní.
+- M3 nezávislá kopie a jedna obnova dne, M4 krátká předcestovní přejímka.
+- Podpis znovu ověřit 1. 10.; opakovaný import s původním ID a vypnutým
+  Append Team ID. Standardní Refresh All ani celá cesta nejsou ověřené.
+
+Technický důkaz:
+- Pouze dokumentace; rychlá statická brána `--skip-unit-tests` PASS.
+  Dřívější plné sady ani iPhone build se kvůli plánu neopakovaly.
+- Soukromý log SideStore: první pokus s přidanou příponou selhal na limitu
+  aplikací; druhý v 20:27 zachoval ID a úspěšně instaloval profil do
+  2. 10. 20:27 CEST. Datum není odečtené z nainstalovaného profilu.
+  Nefunkční druhá ikona pravděpodobně souvisí s prvním pokusem; nic nesmazáno.
+  Aktuální dlouhodobý provoz serveru ani automatická obnova podpisu nejsou
+  tímto doložené. Tajemství a osobní data zůstávají mimo Git.

@@ -1,5 +1,9 @@
 # Camino Viewer — delta audit připravenosti domácího Macu
 
+Aktuální rozsah a další postup od 2026-09-25: [TRAVEL_MVP_PLAN.md](TRAVEL_MVP_PLAN.md).
+Níže je historický audit z 16. září, nikoli dnešní živý stav nebo aktuální
+pořadí úkolů. Nový plán dovoluje společný API/Viewer proces oddělený od Cockpitu.
+
 Datum auditu: 16. září 2026, 21:42 CEST
 
 Tento read-only audit doplňuje C00 o nové požadavky v0.5. Nezměnil Tailscale,

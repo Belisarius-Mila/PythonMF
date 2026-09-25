@@ -1,8 +1,13 @@
 # C05c — fyzický plán stavového UX na iPhonu
 
 Aktuální příprava: Camino 0.1.0 (4) je podepsané, strict ověřené, nainstalované
-bez odinstalace a spuštěné na iPhonu 14 Plus. Fyzické výsledky níže zatím nejsou
-vyplněné; průchod je naplánovaný na 2026-09-25.
+bez odinstalace a spuštěné na iPhonu 14 Plus.
+
+Aktualizace 2026-09-25: Míla potvrdil po SideStore importu bez kabelu spuštění
+původního Camina, dostupnost starých dat a přehrávání — tato část A je PASS.
+Čtyři stavové sekce a části B/C nejsou tímto nově ověřené. Podle
+[cestovního plánu](../docs/TRAVEL_MVP_PLAN.md) je spojíme do krátkého průchodu
+M2/M4; neblokují lokální vývoj Vieweru a data netestujeme znovu bez důvodu.
 
 ## Předpoklady
 

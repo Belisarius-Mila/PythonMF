@@ -14,6 +14,11 @@ Platí pro celý adresář `camino/` ve společném repozitáři PythonMF.
   a `../memory/tvbcp/workstreams/project-camino.md`.
 - C00/C01a jsou historicky dokončené v doloženém rozsahu; aktuální malý krok
   určuje kanonický handoff. Nepřeskakuj etapy jen kvůli novému dlouhému zadání.
+- Novější rozhodnutí Míly z 2026-09-25 je v `docs/TRAVEL_MVP_PLAN.md`.
+  Pro cestu nahrazuje široký rozsah P0 a původní pořadí etap: nejdřív
+  minimalistický Viewer M1–M4, AI a širší produkt až později. V rozsahu,
+  pořadí, procesové topologii a cestovní přejímce má přednost před starým
+  plánem v0.5; U15, ochrana originálů a kořenové bezpečnostní brány platí dál.
 - Importované balíčky v0.4/v0.5 a jejich ZIPy zachovej jako původní podklady.
   Nové výsledky a novější rozhodnutí patří mimo ně, aby zůstaly ověřitelné
   původní manifesty.
