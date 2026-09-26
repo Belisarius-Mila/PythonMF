@@ -1,8 +1,9 @@
 # M2 — dokončení obnovy po T058
 
-2026-09-26. Lokální implementace pro **shodné úplné kopie**. Není nasazená;
-živý archiv zůstává blokovaný. T058 PASS dokazoval zachycení změny epochy,
-nikoli dokončení obnovy. Tento krok doplňuje chybějící potvrzení shody.
+Aktuálně 2026-09-26 23:19 CEST: **fyzické dokončení obnovy PASS**, nový
+komentář doručen na Mac. Původní T058 ověřovalo zachycení změny epochy;
+níže popsaná implementace nyní prošla i dokončením obnovy na skutečném iPhonu.
+Starší bloky jsou historické; konečný výsledek je na konci reportu.
 
 ## Co je doplněno
 
@@ -120,3 +121,27 @@ služby, podpis/instalace iPhonu, změna sítě ani živé odblokování.
   ponechat stejné ID a vypnutý Append Team ID, aplikaci neodinstalovávat.
   Potom otevřít novou Camino, ověřit připojení a klepnout na **Ověřit a dokončit
   obnovu**. Při rozdílu nic nemazat; při shodě zkontrolovat oba flagy=false.
+
+### Fyzická přejímka 2026-09-26 23:19 CEST
+
+- Míla potvrdil SideStore import buildu 5 do stejné aplikace a zachování dat.
+  Překážkou SideStore byl neaktuální RemotePair port: hodnota z Network
+  Discovery obnovila Device Reachability a umožnila import. Append Team ID
+  vypnuto při importu; datum nové expirace neodečtené, Refresh All neověřené.
+- Pro Camino bylo nutné přepnout LocalDevVPN na Tailscale a vložit aktuální
+  owner token. Starý token server odmítal (401), aktuální přijímal (200).
+  Obecné chybové hlášení telefonu tyto příčiny nerozlišuje; diagnostická
+  mezera zůstává. Žádné tokeny ani soukromé texty nejsou v tomto reportu.
+- Telefon: „Obnova ověřena a dokončena“, po zavření/otevření stav OK.
+  Současný serverový audit: HTTP 200, oba flagy=false, identita zachovaná,
+  původní archiv 104 operací / 41 Momentů / 45 médií / 214 555 219 B nezměněný.
+- Následný jediný komentář podle Míly prázdný; telefon zeleně 42 úplných.
+  Mac: 129 operací / 42 Momentů / 46 ověřených médií / 216 344 915 B,
+  oba flagy=false, 0 konfliktů. Delta operací: 1 den, 1 Moment, 1 médium,
+  22 audio layoutů; nové médium 1 789 696 B. Není to přejímka neprázdného
+  textu ani poslechu, ale přenos nového Momentu a média po obnově je PASS.
+- Původních 104 přesných operací, 41 Momentů a 45 mediálních účtenek se
+  shoduje s přípravným snapshotem. Všech 46 skutečných médií rehashováno.
+  Žádné soubory nebyly smazané ani kopie ručně sloučené.
+- T058 již neblokuje další práci. Viewer zůstává nepovolený; další krok
+  je jeho samostatné povolení a RT3/RT4. M3 nezávislá záloha a M4 zbývají.

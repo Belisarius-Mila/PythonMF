@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-26 17:08 CEST
+Aktualizováno: 2026-09-26 23:19 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,23 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- Aktualizováno: 2026-09-26 23:19 CEST — fyzická obnova a následný přenos PASS.
+- SideStore import buildu 5, zachování dat, dokončení obnovy a stav po novém
+  otevření Camina potvrzené Mílou. Server po obnově: oba flagy=false,
+  identita zachovaná, archiv 104 operací / 41 Momentů / 45 médií nezměněný.
+- Následný komentář: telefon zeleně 42 úplných; Mac 129 operací, 42 Momentů,
+  46 ověřených médií / 216 344 915 B, bez konfliktů. Původní operace, Momenty
+  a mediální účtenky shodné se snapshotem, skutečné soubory hashově ověřené.
+- Nové operace: 1 den, 1 Moment, 1 médium a 22 audio layoutů. Nové médium má
+  1 789 696 B; nejde o důkaz přenosu neprázdného textu ani poslechové přejímky.
+- Blok dokončení T058 vyřešen. Viewer dosud nepovolený; další krok je jeho
+  samostatné povolení a RT3/RT4 pro Janu. M3/M4 a kontrola podpisu 1. 10. zbývají.
+- SideStore: skutečný RemotePair port zjistit přes Network Discovery;
+  výchozí port nefungoval. Pro Camino přepnout LocalDevVPN na Tailscale
+  a použít aktuální owner token. Tajemství nejsou v dokumentaci.
+
+### Historické milníky (pro současnost platí přejímka výše)
 
 - 17:23: serverový release `6865bcab` je pushnutý a nasazený; Cockpit smoke
   5/5, Camino running/HTTPS/capability PASS. Archiv po upgradu 104 operací,
@@ -1854,3 +1871,32 @@ Technický důkaz:
 - Strict podpis/profil zahrnující telefon PASS, ZIP integrita PASS.
 - Podrobnosti a SHA-256 v M2_RECOVERY_REPORT.md; žádná instalace telefonu,
   změna sítě, reader grant ani živé dokončení T058.
+
+### 2026-09-26 23:19 CEST — fyzická obnova a nový komentář doručený na Mac
+
+Hotovo:
+- Import stejné aplikace přes SideStore a zachování dat potvrzené Mílou.
+- Obnova ověřena a dokončena, stav drží po zavření a otevření aplikace.
+- Jeden nový komentář doručen: telefon zeleně 42 úplných, Mac 42 Momentů.
+
+Rozhodnutí:
+- Rozsah MVP se nemění. Prázdný komentář není důkaz přenosu neprázdného textu.
+
+Další krok:
+- Samostatně povolit soukromý Viewer pro Janu a provést RT3/RT4.
+
+Navrhované další kroky:
+- M3 nezávislá záloha a izolovaná obnova, M4 krátká předcestovní přejímka.
+- Před cestou znovu ověřit SideStore podpis; jeho nová expirace nebyla odečtena.
+
+Technický důkaz:
+- Server po dokončení obnovy: oba blokující flagy=false, identita a původní
+  archiv 104/41/45 beze změny. Po novém komentáři 129 operací, 42 Momentů,
+  46 médií / 216 344 915 B; 0 konfliktů, původních 104 operací a 41 Momentů
+  byte-exact, původních 45 účtenek shodných se snapshotem; soubory rehashované.
+- Delta: create_day 1, create_moment 1, create_asset 1, create_audio_layout 22.
+  Nové médium 1 789 696 B. Obsah ani hlas nebyly přehrávány/posuzovány.
+- SideStore dostupnost napravena skutečným RemotePair portem z Network Discovery.
+  Obnova Camina prošla po přepnutí na Tailscale a výměně starého tokenu
+  (401) za aktuální (200). Nezaměňovat opravu podpisového připojení s Camino API.
+- Tento zápis mění jen dokumentaci; Viewer grant, službu ani síť nemění.

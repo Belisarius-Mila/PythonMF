@@ -22,6 +22,21 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-051 — SideStore RemotePair port a Camino owner token jsou dvě různé překážky
+
+- Problém: SideStore hlásil nedostupný telefon i se zapnutým LocalDevVPN;
+  po importu Camino hlásilo obecné selhání obnovy i přes dostupný Cockpit.
+- Typ: opakující se
+- Řešení nalezeno: 26092026
+- Řešení: SideStore 6032424 může držet starý RemotePair port. Skutečný zjistit
+  přes Settings → Experimental Features → Network Discovery → local → Remote
+  Pairing, ověřit zařízení a vložit do Connection Config. Port je proměnlivý,
+  nekopírovat historickou hodnotu. Zelená Device Reachability a import byly
+  fyzicky potvrzené až po této změně; restart ani změna masky samy nepomohly.
+  Pro Camino přepnout LocalDevVPN na Tailscale. Dostupný Cockpit nedokazuje
+  platnost owner tokenu: starý token vracel 401, aktuální 200. Po jeho výměně
+  obnova prošla a server potvrdil oba flagy=false i následný nový přenos.
+
 ### LL-001 — Lokální kontrola sovy znečišťovala pracovní strom
 
 - Problém: Opakované lokální generování sovího MP3 zapisovalo dvě MP3 a měnilo

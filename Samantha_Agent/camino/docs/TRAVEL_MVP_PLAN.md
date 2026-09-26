@@ -1,6 +1,13 @@
 # Camino — minimalistický cestovní plán
 
 Rozhodnutí Míly: 2026-09-25. Cesta 3.–17. října 2026; cílové zmrazení 2. října.
+Aktualizace 26. 9. 23:19 CEST: server a iPhone build 5 nasazené, fyzické
+dokončení obnovy i stav po novém otevření PASS. Následný komentář: telefon
+42 úplných, Mac 42 Momentů / 46 médií; původní archiv zachovaný, oba flagy=false.
+Viewer stále nepovolený. Další je povolení Vieweru/RT3/RT4, potom M3/M4.
+Podrobnosti a hranice důkazu: [M2_RECOVERY_REPORT.md](M2_RECOVERY_REPORT.md).
+
+Historický stav před večerní přejímkou:
 Stav k 26. 9.: M1 lokálně funguje podle potvrzení Míly; M2a runtime/odkaz,
 M2b pořadí audia a M2c provozní ovládání jsou lokálně implementované,
 Camino služba a soukromé HTTPS od 26. 9. 13:27 běží nad původním archivem
@@ -185,8 +192,8 @@ Push, deployment, instalace služby a zpřístupnění skutečných dat zůstáv
 odděleně potvrzované kroky. Nasazovací příprava a výběr stávajícího archivu
 byly následně schválené a provedené. Globální brzda pro instalaci služby/Serve
 byla přijata a instalace ověřená. Dokončení shodných kopií je lokálně doplněné;
-další je **nasadit server + aktualizaci iPhonu a ověřit dokončení T058**; potom skutečné
-povolení Vieweru, podepsaná aktualizace a společný krátký průchod.
+server i stejná iPhone aplikace jsou následně nasazené a dokončení T058
+fyzicky ověřené. Další je **samostatné povolení Vieweru a RT3/RT4 pro Janu**.
 M2c runbook vyžaduje trvalý Python, ověřený checkout, existující owner token
 a konkrétní trip/server ID/epochu. Schéma 3 přidává offline grant cesty;
 ověřený snapshot před upgradem není nezávislá záloha M3.

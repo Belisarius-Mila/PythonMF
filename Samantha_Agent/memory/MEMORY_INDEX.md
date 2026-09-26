@@ -59,7 +59,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] `camino/docs/M2_RECOVERY_REPORT.md`: 26. 9. 17:23 server upgrade nasazen na `6865bcab`, Cockpit smoke 5/5, Camino HTTPS a `identical_recovery_v1` živé; archiv 104/41/45 a 214 555 219 B shodný, T058 flagy stále true, grant=false, Funnel off. IPA build 5 čeká na SideStore import se stejným ID a vypnutým Append Team ID; CoreDevice 12040 blokuje přímou instalaci. Další: import, fyzické porovnání a teprve shoda odblokování; při rozdílu zachovat kopie. Viewer/RT3/RT4, M3/M4, U15 platí; SideStore kontrola 1. 10., Refresh All neověřen. G8/T060/captive portal nejsou PASS.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] `camino/docs/M2_RECOVERY_REPORT.md`: 26. 9. 23:19 fyzický import buildu 5, obnova a stav po otevření PASS; oba flagy=false. Nový komentář: telefon 42 úplných, Mac 129 operací / 42 Momentů / 46 médií / 216 344 915 B; původní archiv nezměněný, konflikty=0. SideStore vyřešen skutečným RemotePair portem, Camino aktuálním owner tokenem a Tailscale. Další: samostatné povolení Vieweru/RT3/RT4, potom M3/M4; U15 platí. SideStore kontrola 1. 10., nová expirace a Refresh All neověřené. G8/T060/captive portal nejsou PASS.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` - Cockpit 14. 9.: scroll 10ec0877 potvrzený Mílou. [PRIPOMENOUT] U07 až při příštím pokračování. TXT v2.8 shrnuje U01–U06; plná brána 1680/1680 OK, funkční nasazení 980aed7a a smoke 5/5. Publikační překážka odstraněna; finální balíček/head ověřovat živým auditem.
 
