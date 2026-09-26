@@ -3,6 +3,10 @@
 
 - Aktualizováno: 2026-09-26 17:08 CEST — schválené nasazení, upgrade a IPA připravené.
 
+- Nejnovější výsledek: registrovaný push 3 commitů, plná brána 1830/1830,
+  Cockpit smoke 5/5 a upgrade zastavené vlastní služby na `6865bcab`.
+  Camino HTTPS/API živé, archiv 104/41/45 a 214 555 219 B shodný,
+  T058 true/true, Viewer grant=false, Funnel off. IPA build 5 čeká na SideStore.
 - Nejnovější příprava: registrovaný upgrade zastavené vlastní služby,
   24 cílených testů a plná brána 1830/1830 PASS před nasazením. Build 5/strict
   podpis PASS, IPA ve Stahování. Profil jen do 27. 9. 12:10 CEST: neinstalovat

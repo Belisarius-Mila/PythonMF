@@ -12,6 +12,11 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 
 ## Aktuální stav
 
+- 17:23: serverový release `6865bcab` je pushnutý a nasazený; Cockpit smoke
+  5/5, Camino running/HTTPS/capability PASS. Archiv po upgradu 104 operací,
+  41 Momentů, 45 médií / 214 555 219 B shodný. T058 oba flagy=true, grant=false.
+  IPA build 5 čeká na SideStore import a fyzické porovnání.
+
 - Schválené pokračování server + telefon: registrovaný upgrade připravený,
   24 cílených testů a plná brána 1830/1830 PASS. Build 5 se stejným ID
   a strict podpisem PASS, IPA ve Stahování. Starý profil platí jen do 27. 9.

@@ -98,3 +98,25 @@ služby, podpis/instalace iPhonu, změna sítě ani živé odblokování.
 - Konečný výsledek nasazení a plné brány je uveden až v navazujícím bloku.
 - Přednasazovací plná brána **1830/1830 PASS** (237,917 s jednotkové sady),
   syntaxe a whitespace PASS. Po změně pouze dokumentace rychlá statická brána.
+
+### Skutečné nasazení 2026-09-26 17:23 CEST
+
+- Push registrovaně dokončen: 3 commity, plná brána **1830/1830 PASS**;
+  `origin/main` je na `6865bcab`. Cockpit nasazený na tomto commitu,
+  deploy-verification a smoke **5/5 PASS**.
+- Vlastní Camino služba byla řízeně zastavena, upgrade přepnul pouze immutable
+  `code_root` na `6865bcab` a vytvořil soukromou účtenku se snapshoty metadata,
+  auth a media DB i starého plistu/configu. Poté znovu spuštěna.
+- Živě: služba `loaded=true/running=true`, privátní HTTPS přesná, Cockpit
+  zdravý, Funnel vypnutý, ostatní Serve konfigurace zachovaná. API state 200,
+  identita shodná, `identical_recovery_v1` dostupné.
+- Archiv po přepnutí přesně odpovídá přípravě: 104 operací, 41 Momentů,
+  45 ověřených médií / 214 555 219 B. `exports_blocked=true` a
+  `reconciliation_required=true` zůstaly beze změny; Viewer grant=false.
+- IPA build 5 se stejným bundle ID je připravený pro SideStore. Přímá instalace
+  přes CoreDevice nebyla provedena: developer disk image chyba 12040. IPA má
+  ověřený ZIP a strict podpis, ale novou platnost musí vytvořit SideStore.
+- Další ruční krok: v SideStore importovat `Camino-Recovery-5-20260926.ipa`,
+  ponechat stejné ID a vypnutý Append Team ID, aplikaci neodinstalovávat.
+  Potom otevřít novou Camino, ověřit připojení a klepnout na **Ověřit a dokončit
+  obnovu**. Při rozdílu nic nemazat; při shodě zkontrolovat oba flagy=false.
