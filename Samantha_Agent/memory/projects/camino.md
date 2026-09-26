@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-26 06:30 CEST
+Aktualizováno: 2026-09-26 06:55 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,17 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- Nasazovací příprava provedena: původních 41 Momentů, 45 médií / 214 555 219 B
+  hashově ověřeno, identita zachovaná, tři SQLite snapshoty ověřené. Pevný
+  release `c9fbc3ee`, trvalý Python a soukromé owner připojení připravené.
+  Metadata stále schéma 1, žádný reader ani zásah do telefonu.
+- M2c status: configured=true, loaded/running/viewer_granted=false. Pro novou
+  instalaci LaunchAgentu a Serve čekáme na přesnou globální brzdu.
+  T058 ponechává zápis/export blokovaný; porovnání inventáře samo neodblokuje.
+- P+n kódu `c9fbc3ee` provedeno: plná brána 1809/1809, nový Cockpit proces,
+  smoke 5/5 PASS. Konečný docs checkpoint ověřit živou deploy účtenkou.
+  `camino/docs/M2c_SERVICE_REPORT.md` rozlišuje Cockpit a nespouštěné Camino.
 
 - Míla potvrdil funkční lokální M1 náhled. Jednotlivé zkoušky ani zařízení
   nerozepisoval; vzdálený RT3 a Janina přejímka tím nejsou PASS.
@@ -26,9 +37,8 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 - M2c lokálně hotové: registrované ovládání služby, konzistentní snapshot
   před upgradem SQLite na schéma 3, oddělený grant/odvolání cesty a readeru.
   `camino/docs/M2c_SERVICE_REPORT.md`: offline 17/17, server 22/22 PASS.
-  Nový runtime zatím nemá konfiguraci. Bez nasazení, změny skutečných dat,
-  tokenů, launchd, sítě či iPhonu. Další: schválit nasazovací přípravu se
-  zvoleným existujícím archivem; nejdřív server, potom aktualizace telefonu.
+  Jeho původně čistě lokální stav doplnila výše popsaná nasazovací příprava.
+  Launchd/síť/iPhone stále beze změny; skutečný Camino provoz ještě neověřen.
   M2/RT3/G8 nejsou dokončené; M3 záloha a M4 zůstávají.
 - Novější rozsah a pořadí určuje `camino/docs/TRAVEL_MVP_PLAN.md`: soukromé
   cestovní MVP do 2. 10., M1 lokální jednoduchý HTML Viewer pro Janu, M2
@@ -1704,3 +1714,29 @@ Technický důkaz:
   active_tokens=0, reconciliation_required=1, exports_blocked=1, konflikty=0.
 - `camino/docs/M2c_SERVICE_REPORT.md`; skutečná příprava/p+n zatím čekají
   na provedení, systémové změny na přesné potvrzení. Nic nebylo odblokováno.
+
+### 2026-09-26 06:55 CEST — příprava archivu provedena, p+n kódu ověřené
+
+Hotovo:
+- Archiv i všech 45 médií hashově ověřené a zachované; tři potvrzené DB
+  snapshoty, neměnný release a trvalé prostředí připravené.
+- Nové owner připojení pouze v soukromém úložišti. Kód pushnutý a běžící
+  Cockpit aktualizovaný s ověřením 5/5.
+
+Rozhodnutí:
+- Bez přesné globální brzdy neinstalovat LaunchAgent ani měnit Serve.
+  Neodblokovat T058 a neudělit Reader grant jako vedlejší účinek nasazení.
+
+Další krok:
+- Získat přesnou globální brzdu pro instalaci Camino služby a privátní Serve.
+
+Navrhované další kroky:
+- Bezpečně dokončit obnovu s telefonem; compare_inventory je nyní read-only.
+- Potom skutečný Viewer/Jana a RT3/RT4, M3 záloha a M4 přejímka.
+
+Technický důkaz:
+- 41 Momentů, 104 operací, 45 médií / 214 555 219 B; identita před/po shodná.
+  Snapshoty 3/3, release 27/27, runtime import/pip check PASS, schéma stále 1.
+- P+n `c9fbc3ee`: brána 1809/1809, nový Cockpit PID 90507, smoke 5/5.
+  Finální docs checkpoint nemění kód; konečný p+n stav určuje živá účtenka.
+- Camino není instalované/spuštěné; grant=false, obě T058 blokace=true.

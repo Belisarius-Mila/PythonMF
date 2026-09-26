@@ -1,9 +1,27 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-26 06:30 CEST — lokální M2c.
+- Aktualizováno: 2026-09-26 06:55 CEST — archiv připravený, p+n Cockpitu.
 
-### M2c — nejnovější stav
+### Nasazovací příprava — nejnovější stav
+
+- Stávající archiv ověřen a připraven pro službu: 41 Momentů, 45 médií,
+  214 555 219 B; všechny hashe a identita před/po shodné. Tři ověřené
+  SQLite snapshoty, pevný release `c9fbc3ee` (27 souborů), trvalý Python.
+- Soukromá konfigurace a nový owner token připravené, starý neoživený.
+  Metadata stále schéma 1, žádná migrace, reader DB ani iPhone změna.
+- Nový runtime configured=true, loaded/running/viewer_granted=false.
+  Instalace LaunchAgentu a Serve čeká na přesnou globální brzdu.
+- T058 stále vyžaduje obnovu: zápis/export blokovaný, konflikty=0.
+  Read-only porovnání inventáře samo neodblokuje; dořešit samostatně.
+- Šest commitů pushnuto, plná brána 1809/1809 PASS. Cockpit `c9fbc3ee`
+  nasazen, nový PID 90507, smoke 5/5 PASS. Konečný dokumentační p+n potvrzuje
+  živá registrovaná účtenka/deploy-verification. Nezaměňovat s Camino službou.
+- Další krok: přesná globální brzda pro Camino/Serve, pak bezpečné dokončení
+  obnovy s telefonem a teprve skutečný Viewer. M3/M4, U15 beze změny.
+- Podrobný důkaz: `camino/docs/M2c_SERVICE_REPORT.md`.
+
+### M2c — předchozí lokální krok
 
 - Lokálně hotové registrované ovládání služby, předmigrační SQLite snapshot
   a explicitní grant/odvolání Vieweru. `camino/docs/M2c_SERVICE_REPORT.md`.
@@ -43,7 +61,7 @@
   vývoj pro cestu 3.–17. 10., jednoduchý HTML Viewer pro Janu z Cockpitu,
   ne komerční produkt ani App Store distribuci.
 - M1 náhled je potvrzený, M2a/M2b a provozní ovládání M2c lokálně hotové.
-  Další samostatně schválená nasazovací příprava, nasazení/aktualizace telefonu,
+  Nasazovací příprava hotová; další jsou schválené systémové změny a obnova,
   M3 minimální nezávislá záloha a M4 jeden společný předcestovní průchod.
 - AI/C07, bohaté souhrny, širší import/export a P1/P2 jsou odložené. Ochrana
   originálů, U15, autorizace a povinné rizikové/publikační brány zůstávají.
@@ -1903,3 +1921,29 @@ Technický důkaz:
   active_tokens=0, reconciliation_required=1, exports_blocked=1, konflikty=0.
 - `camino/docs/M2c_SERVICE_REPORT.md`; skutečná příprava/p+n zatím čekají
   na provedení, systémové změny na přesné potvrzení. Nic nebylo odblokováno.
+
+### 2026-09-26 06:55 CEST — příprava archivu provedena, p+n kódu ověřené
+
+Hotovo:
+- Archiv i všech 45 médií hashově ověřené a zachované; tři potvrzené DB
+  snapshoty, neměnný release a trvalé prostředí připravené.
+- Nové owner připojení pouze v soukromém úložišti. Kód pushnutý a běžící
+  Cockpit aktualizovaný s ověřením 5/5.
+
+Rozhodnutí:
+- Bez přesné globální brzdy neinstalovat LaunchAgent ani měnit Serve.
+  Neodblokovat T058 a neudělit Reader grant jako vedlejší účinek nasazení.
+
+Další krok:
+- Získat přesnou globální brzdu pro instalaci Camino služby a privátní Serve.
+
+Navrhované další kroky:
+- Bezpečně dokončit obnovu s telefonem; compare_inventory je nyní read-only.
+- Potom skutečný Viewer/Jana a RT3/RT4, M3 záloha a M4 přejímka.
+
+Technický důkaz:
+- 41 Momentů, 104 operací, 45 médií / 214 555 219 B; identita před/po shodná.
+  Snapshoty 3/3, release 27/27, runtime import/pip check PASS, schéma stále 1.
+- P+n `c9fbc3ee`: brána 1809/1809, nový Cockpit PID 90507, smoke 5/5.
+  Finální docs checkpoint nemění kód; konečný p+n stav určuje živá účtenka.
+- Camino není instalované/spuštěné; grant=false, obě T058 blokace=true.

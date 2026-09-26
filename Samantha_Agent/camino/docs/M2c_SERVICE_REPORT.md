@@ -146,3 +146,28 @@ větě z `global_safety_brake.md`; samotné p+n ji nenahrazuje. Běžný registr
 push a restart existujícího Cockpitu mohou proběhnout nezávisle.
 Přípravná a provozní offline sada po doplnění: 20/20 PASS. Plná publikační
 brána a skutečný výsledek přípravy se evidují až po provedení.
+
+### Výsledek 2026-09-26 06:55 CEST
+
+- Příprava provedena nad původním archivem: 41 Momentů, 104 operací,
+  všech 45 médií / 214 555 219 B hashově shodných. Identita před/po shodná.
+- Tři SQLite snapshoty mají ověřenou účtenku, SHA-256 i quick_check. Metadata
+  zůstávají ve schématu 1, žádná migrace ještě neproběhla. Přípravné kopie
+  jsou na stejném disku, nikoli nezávislá záloha M3.
+- Pevný release z `c9fbc3ee`, 27/27 souborů shodných s Gitem. Trvalý Python
+  má nainstalované requirements, pip check i import/CLI serveru PASS.
+- Nový owner token je pouze v soukromém souboru 600 a jeho digest v původní
+  auth DB. Starý odvolaný token nebyl oživen. Telefonu nic nepředáno.
+- Registrovaný status: configured=true, loaded=false, running=false,
+  viewer_granted=false; LaunchAgent není instalovaný, reader DB neexistuje.
+  Restore/export blokace po T058 zůstaly beze změny. Ani pouhé budoucí
+  připojení telefonu samo neodemkne export: nynější compare_inventory je
+  read-only; bezpečné dokončení obnovy je otevřený samostatný krok.
+- Šest commitů bylo pushnuto s plnou bránou 1809/1809 PASS. Cockpit byl
+  registrovaně nasazen z `c9fbc3ee`: nový PID 90507 a smoke 5/5 PASS.
+  Následující dokumentační checkpoint nemění kód; jeho konečný p+n stav
+  dokládá registrované deploy-verification, nikoli předpoklad z tohoto textu.
+- Systémová instalace Camino/Serve čeká na přesnou globální brzdu. Viewer,
+  podpis/iPhone, nový přenos, fyzický restart Camina a RT3/RT4 neprovedeny.
+- Po převzetí archivu nepoužívat acceptance C05b start/stop pro spravovanou
+  službu; provozní ovládání je `camino_service_*`. Nic nemažeme.
