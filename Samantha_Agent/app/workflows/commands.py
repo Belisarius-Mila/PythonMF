@@ -270,7 +270,19 @@ def _camino_service_commands() -> tuple[WorkflowCommand, ...]:
         cwd=SAMANTHA_DIR, risk="private_service_write", requires_confirmation=True,
         writes="Soukromou přípravu mimo Git a nový owner token, pokud je starý odvolaný; nemění grant, epochu, blokace, launchd ani síť.",
         intent_keywords=("camino", "nasazení"), required_keyword_groups=(("camino",), ("nasazení",)),
-    ),)
+    ),) + tuple(WorkflowCommand(
+        command_id="camino_service_network_" + action,
+        title="Camino privátní HTTPS: " + action,
+        purpose="Ověří nebo spravuje jen vlastněnou Serve cestu; zachová Cockpit, data i granty.",
+        aliases=("camino privátní https " + action,),
+        argv=(str(PYTHON_BIN), str(SAMANTHA_DIR / "scripts/camino_service_network.py"), action)
+             + (() if action == "status" else ("--confirm",)),
+        cwd=SAMANTHA_DIR, risk="read_only_preview" if action == "status" else "private_service_write",
+        writes="nic" if action == "status" else "Pouze vlastněná Serve cesta /camino-api a soukromá účtenka; žádný Funnel.",
+        requires_confirmation=action != "status",
+        intent_keywords=("camino", "https", action),
+        required_keyword_groups=(("camino",), ("https",), (action,)),
+    ) for action in ("status", "enable", "disable"))
 
 
 WORKFLOW_COMMANDS: tuple[WorkflowCommand, ...] = (

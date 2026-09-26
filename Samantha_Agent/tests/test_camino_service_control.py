@@ -77,6 +77,20 @@ class CaminoServiceTests(unittest.TestCase):
         self.assertEqual(path.read_bytes(), b"foreign")
         self.assertFalse(any("bootout" in x for x in self.commands))
 
+    def test_exact_legacy_definition_is_preserved_and_upgraded(self):
+        self.agents.mkdir()
+        config = service.load_config(self.runtime)
+        legacy = plistlib.loads(service.service_plist(self.runtime, config))
+        legacy["EnvironmentVariables"].pop("TERM")
+        original = plistlib.dumps(legacy, sort_keys=True)
+        path = self.agents / (service.LABEL + ".plist")
+        private_write(path, original)
+        self.control("install")
+        self.assertEqual((self.runtime / "launchagent-before-term.plist").read_bytes(), original)
+        self.assertEqual(plistlib.loads(path.read_bytes())["EnvironmentVariables"]["TERM"], "dumb")
+        self.control("install")
+        self.assertFalse(any("bootstrap" in x for x in self.commands))
+
     def test_identity_path_privacy_and_alias_checks(self):
         for updates in ({"epoch": uid(999)}, {"auth_db": self.config["metadata_db"]},
                         {"viewer_media_root": self.config["media_root"]}, {"python": "/private/tmp/no-python"}):
@@ -227,9 +241,9 @@ class CaminoServiceTests(unittest.TestCase):
     def test_registry_uses_confirmation_and_status_is_read_only(self):
         from app.workflows.commands import WORKFLOW_COMMANDS
         commands = [c for c in WORKFLOW_COMMANDS if c.command_id.startswith("camino_service_")]
-        self.assertEqual(len(commands), 8)
+        self.assertEqual(len(commands), 11)
         for command in commands:
-            writes = command.command_id != "camino_service_status"
+            writes = command.command_id not in ("camino_service_status", "camino_service_network_status")
             self.assertEqual(command.requires_confirmation, writes)
             self.assertEqual("--confirm" in command.argv, writes)
 

@@ -1,6 +1,7 @@
 # M2c — provozní ovládání a vědomé povolení Vieweru
 
-2026-09-26, Europe/Prague. **Lokální implementace, nikoli nasazení.**
+2026-09-26, Europe/Prague. Původní lokální výsledek je historický;
+aktuální nasazení a živý důkaz jsou v nejnovějším bloku na konci reportu.
 
 ## Výsledek a hranice
 
@@ -171,3 +172,41 @@ brána a skutečný výsledek přípravy se evidují až po provedení.
   podpis/iPhone, nový přenos, fyzický restart Camina a RT3/RT4 neprovedeny.
 - Po převzetí archivu nepoužívat acceptance C05b start/stop pro spravovanou
   službu; provozní ovládání je `camino_service_*`. Nic nemažeme.
+
+### Živé nasazení 2026-09-26 13:27 CEST
+
+- Míla potvrdil přesnou globální brzdu pro Camino LaunchAgent a soukromý
+  Serve. Instalace/start proběhly nad připraveným archivem; žádný nový archiv.
+- První start bezpečně selhal: Tailscale app bez TERM vrací textovou chybu
+  GUI namísto JSON, i při exit 0. Služba byla zastavená. Minimální prostředí
+  s `TERM=dumb` je ověřené; vlastní plist jej nyní nastavuje. Registrovaný
+  install smí upgradovat pouze přesnou starou vlastní definici, kterou
+  create-only uchová. Cizí plist se stále odmítá; žádné tajemství v prostředí.
+- Backend dál běží z neměnného release `c9fbc3ee`; jeho soubory nepřepisujeme.
+  Nová definice prostředí a lokální řídicí skript jsou oddělené od backendu.
+- Metadata migrovala 1→3, předmigrační SQLite kopie má quick_check a SHA-256
+  shodný s účtenkou. Po migraci i restartu: shodná identita, 104 operací,
+  41 Momentů, 45 médií / 214 555 219 B; každý mediální hash shodný s přípravou.
+- Nové registrované `camino_service_network_status/enable/disable` ovládají
+  pouze `/camino-api` → `127.0.0.1:8767`. Vyžadují existující Cockpit HTTPS
+  endpoint, známé vlastnictví, privátní síť a pro enable běžící službu.
+  Před změnou soukromá kopie Serve, po změně přesná shoda ostatní konfigurace.
+  Cizí/nejednoznačná cesta a Funnel selžou zavřeně. Žádný reset Tailscale.
+- Enable provedeno: owner HTTPS health/state PASS, server ID/epocha shodné,
+  bez tokenu 401, kořen Cockpitu zdravý, ostatní Serve konfigurace zachovaná,
+  Funnel off. Reader grant=false, reader DB neexistuje, Viewer URL vrací 404.
+- Skutečný řízený stop/start: PID 14219→14329, poté znovu HTTPS status PASS.
+  `stop_requested` není dokončený stop; nejprve vyčkat unloaded a uvolnění
+  portu. Dva příliš časné pokusy o start byly bezpečně odmítnuté OSError
+  během doběhu/uvolňování socketu. Následný start uspěl; nic nebylo násilně
+  ukončené. Také po start_requested čekat na health, nikoli jen PID.
+- Cílená sada 29/29 PASS; plná brána 1818/1818 PASS (377,590 s), statika PASS.
+  Registr/provozní oprava jsou v novém lokálním checkpointu, zatím bez p+n;
+  existující Cockpit nebyl znovu nasazen. Karty mohou být do jeho nasazení
+  dostupné jen registrovaným CLI, ne v jeho již běžícím procesu.
+- T058 `exports_blocked/reconciliation_required=true` beze změny. Token
+  telefonu nepředán, žádný iPhone update ani nový přenos. Žádný grant pro Janu.
+  Pád procesu, reboot/přihlášení a vzdálené Safari se tím neprohlašují za PASS.
+
+Další krok: samostatně bezpečně dokončit obnovu s telefonem, potom vědomě
+povolit Viewer a jeden krátký společný průchod. M3 nezávislá záloha stále chybí.

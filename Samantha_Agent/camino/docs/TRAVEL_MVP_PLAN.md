@@ -3,9 +3,10 @@
 Rozhodnutí Míly: 2026-09-25. Cesta 3.–17. října 2026; cílové zmrazení 2. října.
 Stav k 26. 9.: M1 lokálně funguje podle potvrzení Míly; M2a runtime/odkaz,
 M2b pořadí audia a M2c provozní ovládání jsou lokálně implementované,
-Camino služba dosud nespouštěná. Nasazovací příprava nad původním archivem
-je hotová, kód pushnutý a Cockpit nasazený. LaunchAgent/Serve čeká na přesnou
-globální brzdu; obnova po T058 stále blokuje zápis a export.
+Camino služba a soukromé HTTPS od 26. 9. 13:27 běží nad původním archivem
+po potvrzené globální brzdě. Schéma 3, data hashově zachovaná, owner API
+ověřené i po stop/start. Viewer není povolený; obnova po T058 stále blokuje
+zápis a export. Nové provozní ovládání je zatím lokální, bez nového p+n.
 Podrobnosti: [M2c_SERVICE_REPORT.md](M2c_SERVICE_REPORT.md)
 a [M2b_AUDIO_LAYOUT_REPORT.md](M2b_AUDIO_LAYOUT_REPORT.md).
 
@@ -177,8 +178,8 @@ M1, M2a, M2b a M2c implementují lokální kód a syntetické testy. Nenasazují
 nespouštějí osobní upload, nemění Serve/ACL, nepublikují média a nic nekupují.
 Push, deployment, instalace služby a zpřístupnění skutečných dat zůstávají
 odděleně potvrzované kroky. Nasazovací příprava a výběr stávajícího archivu
-byly následně schválené a provedené. Další: **přesná globální brzda pro
-instalaci služby/Serve a bezpečné dokončení obnovy po T058**; potom skutečné
+byly následně schválené a provedené. Globální brzda pro instalaci služby/Serve
+byla přijata a instalace ověřená. Další: **bezpečné dokončení obnovy po T058**; potom skutečné
 povolení Vieweru, podepsaná aktualizace a společný krátký průchod.
 M2c runbook vyžaduje trvalý Python, ověřený checkout, existující owner token
 a konkrétní trip/server ID/epochu. Schéma 3 přidává offline grant cesty;

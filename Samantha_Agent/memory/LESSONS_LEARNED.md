@@ -973,3 +973,16 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   upgradem použít SQLite backup API a potvrdit integritu/hash create-only kopie.
 - Ověření: syntetický grant/revoke/regrant zachoval Trip i původní obálky,
   stará URL byla odmítnuta a snapshot obsahoval potvrzenou WAL transakci.
+
+### 2026-09-26 — Tailscale GUI binárka potřebuje pod launchd CLI prostředí
+
+- Kontext: první skutečný start spravované Camino služby na macOS.
+- Problém: bez TERM/TERM_PROGRAM vrací aplikace Tailscale při `serve status
+  --json` textovou chybu GUI, dokonce s návratovým kódem 0. JSON kontrola
+  správně zabrání startu, ale terminálové testy problém neukazují.
+- Řešení: vlastní plist má explicitní `TERM=dumb`; nepřebírat celé prostředí
+  terminálu ani tajemství. Upgrade dovolí jen přesnou vlastní starší definici,
+  kterou nejprve uchová v soukromé kopii. Při chybě bezpečně zastavit smyčku.
+- Ověření: stejný read-only příkaz s minimálním prostředím bez TERM selhal,
+  s `TERM=dumb` vrátil validní JSON. Test přesného upgradu a cizího plistu PASS;
+  skutečný start je evidován samostatně v M2c reportu.

@@ -1,9 +1,26 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-26 06:55 CEST — archiv připravený, p+n Cockpitu.
+- Aktualizováno: 2026-09-26 13:27 CEST — Camino služba a soukromé HTTPS běží.
 
-### Nasazovací příprava — nejnovější stav
+### Živé nasazení — nejnovější stav
+
+- Přesná globální brzda přijata pro LaunchAgent a privátní Serve. Služba
+  běží nad původním archivem, HTTPS owner health/state a odmítnutí bez tokenu
+  ověřené. Cockpit zachovaný, Funnel vypnutý. Viewer grant=false, URL 404.
+- Schéma 1→3 s ověřeným předmigračním snapshotem. Identita a všech 104 operací,
+  41 Momentů, 45 médií / 214 555 219 B shodné s přípravou včetně hashů.
+- Opraveno prostředí launchd: TERM=dumb pro Tailscale CLI; původní plist
+  uchovaný. Skutečný stop/start s novým PID a návratem HTTPS PASS; při restartu
+  vyčkat dokončení stop i uvolnění portu. Pád/restart Macu nejsou otestované.
+- Runtime dál pevný release `c9fbc3ee`; nový lokální controller spravuje plist
+  a Serve. 29 cílených a 1818 plných testů PASS. Nový kód zatím bez p+n;
+  již běžící Cockpit nebyl tímto krokem znovu nasazený.
+- T058 blokace trvají, reader neexistuje, telefonu nic nepředáno. Další:
+  bezpečně dokončit obnovu s iPhonem, potom vědomě povolit Viewer/RT3/RT4.
+  M3/M4 a U15 beze změny. Podrobnosti v `camino/docs/M2c_SERVICE_REPORT.md`.
+
+### Nasazovací příprava — předchozí stav
 
 - Stávající archiv ověřen a připraven pro službu: 41 Momentů, 45 médií,
   214 555 219 B; všechny hashe a identita před/po shodné. Tři ověřené
@@ -1947,3 +1964,31 @@ Technický důkaz:
 - P+n `c9fbc3ee`: brána 1809/1809, nový Cockpit PID 90507, smoke 5/5.
   Finální docs checkpoint nemění kód; konečný p+n stav určuje živá účtenka.
 - Camino není instalované/spuštěné; grant=false, obě T058 blokace=true.
+
+
+### 2026-09-26 13:27 CEST — služba a privátní HTTPS nad původním archivem
+
+Hotovo:
+- Po přesné globální brzdě instalace/start Camino a vlastní Serve cesta.
+  HTTPS owner API ověřené, Cockpit zachovaný, Funnel off; skutečný stop/start PASS.
+- Schéma 1→3 po ověřeném snapshotu, všechny původní údaje a média zachované.
+
+Rozhodnutí:
+- Runtime zachovává release c9fbc3ee. TERM=dumb opravuje Tailscale CLI pod
+  launchd; starý plist zůstává v soukromé kopii. Nové Serve karty jsou lokální.
+- T058 blokace ani Viewer grant se nemění. Žádná změna telefonu nebo reader token.
+
+Další krok:
+- Bezpečné dokončení obnovy s iPhonem; samotné compare_inventory neodblokuje.
+
+Navrhované další kroky:
+- Poté skutečné povolení Vieweru a RT3/RT4; M3 nezávislá záloha, M4 přejímka.
+- Nový lokální checkpoint lze samostatně publikovat; dnešní oprava zatím bez p+n.
+
+Technický důkaz:
+- Cíleně 29/29 a plná brána 1818/1818 PASS (377,590 s jednotkové sady).
+- 104 operací, 41 Momentů, 45 médií / 214 555 219 B hashově shodné s přípravou.
+- Registrovaný status: owned/loaded/running=true, privátní HTTPS=true,
+  Cockpit healthy=true, Funnel=false, grant=false; Viewer 404, reader DB absent.
+- Stop/start PID 14219→14329; po stop vyčkat uvolnění portu, ne ihned startovat.
+  Pád procesu, přihlášení/restart Macu ani nový iPhone přenos nejsou PASS.

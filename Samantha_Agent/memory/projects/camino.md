@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-26 06:55 CEST
+Aktualizováno: 2026-09-26 13:27 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,19 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- Nejnovější: globální brzda přijata, Camino LaunchAgent a privátní HTTPS
+  běží nad původním archivem. Owner health/identita/401 a kořen Cockpitu PASS,
+  Funnel off, Viewer grant=false/404. Po skutečném stop/start opět HTTPS PASS.
+- Migrace 1→3 s ověřenou kopíí; 104 operací, 41 Momentů, všech 45 médií
+  / 214 555 219 B i identita hashově zachované. T058 blokace beze změny.
+- Tailscale pod launchd opraven pomocí TERM=dumb, původní plist uchovaný.
+  Nové registrované Serve ovládání je lokální, 29 cílených / 1818 plných testů
+  PASS; nový kód zatím bez p+n. Backend zůstává pevný release `c9fbc3ee`.
+- Telefon ani přístup Jany nezměněné. Další: bezpečné dokončení obnovy s
+  iPhonem, potom grant a Viewer přejímka; M3/M4 a U15 zůstávají.
+
+### Předchozí nasazovací příprava (06:55)
 
 - Nasazovací příprava provedena: původních 41 Momentů, 45 médií / 214 555 219 B
   hashově ověřeno, identita zachovaná, tři SQLite snapshoty ověřené. Pevný
@@ -1740,3 +1753,31 @@ Technický důkaz:
 - P+n `c9fbc3ee`: brána 1809/1809, nový Cockpit PID 90507, smoke 5/5.
   Finální docs checkpoint nemění kód; konečný p+n stav určuje živá účtenka.
 - Camino není instalované/spuštěné; grant=false, obě T058 blokace=true.
+
+
+### 2026-09-26 13:27 CEST — služba a privátní HTTPS nad původním archivem
+
+Hotovo:
+- Po přesné globální brzdě instalace/start Camino a vlastní Serve cesta.
+  HTTPS owner API ověřené, Cockpit zachovaný, Funnel off; skutečný stop/start PASS.
+- Schéma 1→3 po ověřeném snapshotu, všechny původní údaje a média zachované.
+
+Rozhodnutí:
+- Runtime zachovává release c9fbc3ee. TERM=dumb opravuje Tailscale CLI pod
+  launchd; starý plist zůstává v soukromé kopii. Nové Serve karty jsou lokální.
+- T058 blokace ani Viewer grant se nemění. Žádná změna telefonu nebo reader token.
+
+Další krok:
+- Bezpečné dokončení obnovy s iPhonem; samotné compare_inventory neodblokuje.
+
+Navrhované další kroky:
+- Poté skutečné povolení Vieweru a RT3/RT4; M3 nezávislá záloha, M4 přejímka.
+- Nový lokální checkpoint lze samostatně publikovat; dnešní oprava zatím bez p+n.
+
+Technický důkaz:
+- Cíleně 29/29 a plná brána 1818/1818 PASS (377,590 s jednotkové sady).
+- 104 operací, 41 Momentů, 45 médií / 214 555 219 B hashově shodné s přípravou.
+- Registrovaný status: owned/loaded/running=true, privátní HTTPS=true,
+  Cockpit healthy=true, Funnel=false, grant=false; Viewer 404, reader DB absent.
+- Stop/start PID 14219→14329; po stop vyčkat uvolnění portu, ne ihned startovat.
+  Pád procesu, přihlášení/restart Macu ani nový iPhone přenos nejsou PASS.

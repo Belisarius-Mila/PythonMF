@@ -140,7 +140,8 @@ def service_plist(root: Path, config: dict) -> bytes:
         "ExitTimeOut": 330, "Umask": 0o077,
         "StandardOutPath": str(root / "service.log"),
         "StandardErrorPath": str(root / "service.log"),
-        "EnvironmentVariables": {"PATH": "/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin"},
+        # The macOS Tailscale app selects CLI mode only with a terminal marker.
+        "EnvironmentVariables": {"PATH": "/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin", "TERM": "dumb"},
     }, sort_keys=True)
 
 
@@ -211,7 +212,18 @@ def control(action: str, root: Path = ROOT, *, runner=run_command, agents: Path 
             agents.mkdir(parents=True, exist_ok=True)
             path = agents / (LABEL + ".plist")
             if path.exists():
-                verify_plist(root, config, agents)
+                expected = service_plist(root, config)
+                legacy = plistlib.loads(expected)
+                legacy["EnvironmentVariables"].pop("TERM")
+                if not path.is_symlink() and path.read_bytes() == plistlib.dumps(legacy, sort_keys=True):
+                    # Only our exact pre-TERM definition is eligible. Preserve it.
+                    private_write(root / "launchagent-before-term.plist", path.read_bytes())
+                    checked(["/bin/launchctl", "disable", target()], runner)
+                    staged = agents / (LABEL + ".term-update.plist")
+                    private_write(staged, expected)
+                    os.replace(staged, path)
+                else:
+                    verify_plist(root, config, agents)
             # Disable before creating the auto-login definition: install does not start it.
             checked(["/bin/launchctl", "disable", target()], runner)
             if not path.exists():
