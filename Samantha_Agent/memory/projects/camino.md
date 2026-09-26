@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-25 22:13 CEST
+Aktualizováno: 2026-09-26 06:30 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -23,9 +23,12 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
   ID médií a Core Data nezměněné; staré ověřené audio se znovu neodesílá.
   `camino/docs/M2b_AUDIO_LAYOUT_REPORT.md`: Swift 36/36, nepodepsaný iOS build,
   Python layout/kontrakt 26/26 a server HTTP 21/21 PASS; fyzická přejímka otevřená.
-- M2c: registrované provozní ovládání a vědomé povolení cesty/čtenáře.
-  Před upgradem serverové SQLite na schéma 2 konzistentní kopie DB, potom
-  nasazení serveru a podepsaná aktualizace telefonu. Nic z toho zatím neproběhlo.
+- M2c lokálně hotové: registrované ovládání služby, konzistentní snapshot
+  před upgradem SQLite na schéma 3, oddělený grant/odvolání cesty a readeru.
+  `camino/docs/M2c_SERVICE_REPORT.md`: offline 17/17, server 22/22 PASS.
+  Nový runtime zatím nemá konfiguraci. Bez nasazení, změny skutečných dat,
+  tokenů, launchd, sítě či iPhonu. Další: schválit nasazovací přípravu se
+  zvoleným existujícím archivem; nejdřív server, potom aktualizace telefonu.
   M2/RT3/G8 nejsou dokončené; M3 záloha a M4 zůstávají.
 - Novější rozsah a pořadí určuje `camino/docs/TRAVEL_MVP_PLAN.md`: soukromé
   cestovní MVP do 2. 10., M1 lokální jednoduchý HTML Viewer pro Janu, M2
@@ -1647,3 +1650,31 @@ Technický důkaz:
   26/26, izolovaná serverová sada 21/21 PASS. Node ověřuje pokračování i fallback.
 - Plná brána a nasazovací hranice: `camino/docs/M2b_AUDIO_LAYOUT_REPORT.md`.
   Žádný push, podpis, instalace, live migrace, deployment ani změna Serve/Funnel.
+
+### 2026-09-26 06:30 CEST — M2c provozní ovládání lokálně
+
+Hotovo:
+- Připravené potvrzované ovládání služby a Janina přístupu. Start sám neudělí
+  Viewer; instalace sama nespustí server. Stav netvrdí ověřený přenos.
+- Kopie před změnou DB zahrnuje potvrzený WAL a ověření integrity. Původní
+  data a operace zůstávají, povolení cesty se ukládá zvlášť.
+
+Rozhodnutí:
+- Míla povolil lokální M2c. Rozsah cestovního MVP se nerozšiřuje; nasazení,
+  skutečná oprávnění a síť zůstávají zvlášť potvrzované.
+- Provozní zdroj musí být konkrétní stávající archiv, ne nový prázdný server.
+  Lokální snapshot je pojistka upgradu, nikoli náhrada nezávislé zálohy M3.
+
+Další krok:
+- Schválit nasazovací přípravu a výběr konkrétního existujícího zdroje dat.
+
+Navrhované další kroky:
+- Nasadit nejdřív server, potom podepsanou aktualizaci stejné iPhone aplikace.
+- Jeden společný RT3/RT4 a skutečný návrat procesu; ne opakování celé matice.
+- M3 nezávislá záloha a M4 předcestovní průchod/freeze.
+
+Technický důkaz:
+- M2c offline 17/17 a izolovaný server 22/22 PASS. Plná brána a runbook:
+  `camino/docs/M2c_SERVICE_REPORT.md`. launchd operace jsou zatím mockované.
+- Nový status vrací konfiguraci nepřipravenou. Žádná reálná migrace, token,
+  instalace, síťová změna, push ani deployment nebyly provedené.

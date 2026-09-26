@@ -12,7 +12,8 @@ from pathlib import Path
 import uvicorn
 
 from camino.api.v1 import CaminoV1Contract
-from camino.domain.revision_store import RevisionStore
+from camino.domain.revision_store import RevisionStore, SCHEMA_VERSION
+from camino.server.service_safety import database_lock, snapshot_before_upgrade
 from camino.server.application import create_app
 from camino.server.auth import RevocableTokenStore
 from camino.server.media_store import MediaStore
@@ -79,6 +80,19 @@ def main(argv: list[str] | None = None) -> int:
             raise ValueError
     except ValueError:
         parser.error("C05a must bind to a loopback IP; use Tailscale Serve for private HTTPS")
+    # Keep the lock for the entire uvicorn lifetime, including worker shutdown.
+    database = _required_path(parser, "CAMINO_C05A_METADATA_DB")
+    if database.is_symlink() or database.resolve().is_relative_to(Path(__file__).resolve().parents[3]):
+        parser.error("metadata must be outside the source repository and not a symlink")
+    if database.exists() and (not database.is_file() or database.stat().st_mode & 0o077):
+        parser.error("metadata database must be private")
+    database = database.resolve()
+    with database_lock(database):
+        snapshot_before_upgrade(database, database.parent / "pre-upgrade-snapshots", SCHEMA_VERSION)
+        return _serve(parser, args)
+
+
+def _serve(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
     metadata = RevisionStore(_required_path(parser, "CAMINO_C05A_METADATA_DB"))
     tokens = RevocableTokenStore(_required_path(parser, "CAMINO_C05A_AUTH_DB"))
     if tokens.active_count() < 1:

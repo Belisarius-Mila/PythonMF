@@ -963,3 +963,13 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   mezery zůstávají explicitní a chybějící úsek se automaticky nepřeskakuje.
 - Ověření: Swift backfill zachoval přesné obálky i verified média přes restart;
   serverový test opačného doručení a pozdějšího prostředního úseku PASS.
+
+### 2026-09-26 — Viewer grant nesmí přepsat původní create_trip
+
+- Kontext: Camino M2c, samostatné provozní povolení soukromého HTML čtenáře.
+- Problém: dodatečný přepis neměnného Trip payloadu by změnil identitu již
+  přijaté operace; prostá kopie SQLite souboru může vynechat potvrzený WAL.
+- Řešení: grant v samostatné tabulce, číst jej při každé projekci. Před
+  upgradem použít SQLite backup API a potvrdit integritu/hash create-only kopie.
+- Ověření: syntetický grant/revoke/regrant zachoval Trip i původní obálky,
+  stará URL byla odmítnuta a snapshot obsahoval potvrzenou WAL transakci.

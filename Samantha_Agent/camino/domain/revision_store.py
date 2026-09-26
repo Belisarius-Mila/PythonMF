@@ -35,7 +35,7 @@ class StoreNotFound(Exception):
     pass
 
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 _PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -87,7 +87,7 @@ class RevisionStore:
     def _initialize(self) -> None:
         with self._connection() as connection:
             version = connection.execute("PRAGMA user_version").fetchone()[0]
-            if version not in (0, 1, SCHEMA_VERSION):
+            if version not in (0, 1, 2, SCHEMA_VERSION):
                 raise ContractError("unsupported Camino database schema version")
             connection.execute("BEGIN IMMEDIATE")
             try:
@@ -97,6 +97,9 @@ class RevisionStore:
                     "exports_blocked INTEGER NOT NULL, reconciliation_required INTEGER NOT NULL, "
                     "writer_device_id TEXT)",
                     "CREATE TABLE IF NOT EXISTS trips (id TEXT PRIMARY KEY, body TEXT NOT NULL)",
+                    "CREATE TABLE IF NOT EXISTS viewer_permissions (trip_id TEXT PRIMARY KEY, "
+                    "enabled INTEGER NOT NULL CHECK(enabled IN (0,1)), changed_at TEXT NOT NULL, "
+                    "FOREIGN KEY(trip_id) REFERENCES trips(id))",
                     "CREATE TABLE IF NOT EXISTS days (id TEXT PRIMARY KEY, trip_id TEXT NOT NULL, "
                     "body TEXT NOT NULL, FOREIGN KEY(trip_id) REFERENCES trips(id))",
                     "CREATE TABLE IF NOT EXISTS moments (id TEXT PRIMARY KEY, trip_id TEXT NOT NULL, "
@@ -481,6 +484,29 @@ class RevisionStore:
             ).fetchall()
             return tuple(json.loads(row["body"]) for row in rows)
 
+    def set_viewer_permission(self, trip_id: str, *, enabled: bool) -> None:
+        """Offline owner control, never an HTTP endpoint or a rewrite of create_trip."""
+        self._uuid(trip_id)
+        if type(enabled) is not bool:
+            raise ContractError("viewer permission must be boolean")
+        with self._connection() as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            if not connection.execute("SELECT 1 FROM trips WHERE id=?", (trip_id,)).fetchone():
+                raise StoreNotFound("trip is missing")
+            connection.execute(
+                "INSERT INTO viewer_permissions VALUES (?,?,strftime('%Y-%m-%dT%H:%M:%fZ','now')) "
+                "ON CONFLICT(trip_id) DO UPDATE SET enabled=excluded.enabled, changed_at=excluded.changed_at",
+                (trip_id, int(enabled)),
+            )
+            connection.commit()
+
+    @staticmethod
+    def _viewer_enabled(connection, trip) -> bool:
+        row = connection.execute(
+            "SELECT enabled FROM viewer_permissions WHERE trip_id=?", (trip.id,),
+        ).fetchone()
+        return bool(row[0]) if row is not None else trip.viewer_enabled
+
     def viewer_safe_ids(self, trip_id: str) -> tuple[str, ...]:
         """Reference projection: any unresolved conflict or restore closes output."""
         with self._connection() as connection:
@@ -491,7 +517,7 @@ class RevisionStore:
             if row is None:
                 raise StoreNotFound("trip is missing")
             trip = decode_trip(json.loads(row["body"]))
-            if not trip.viewer_enabled:
+            if not self._viewer_enabled(connection, trip):
                 return ()
             return tuple(sorted(
                 model.id for model in (
@@ -518,7 +544,7 @@ class RevisionStore:
             if row is None:
                 return empty
             trip = decode_trip(json.loads(row["body"]))
-            if not trip.viewer_enabled:
+            if not self._viewer_enabled(connection, trip):
                 return empty
             allowed = [
                 model for model in (

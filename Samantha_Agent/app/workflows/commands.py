@@ -241,6 +241,30 @@ def _camino_c05b_private_commands() -> tuple[WorkflowCommand, ...]:
     )
 
 
+def _camino_service_commands() -> tuple[WorkflowCommand, ...]:
+    """M2c controls never install implicitly and never change the private proxy."""
+    descriptions = (
+        ("status", "stav", "Ověřit lokální službu Camino", "Read-only stav launchd; není důkaz HTTPS ani přenosu dat."),
+        ("install", "nainstaluj", "Připravit službu Camino", "Vytvoří vypnutý LaunchAgent; službu nespustí."),
+        ("start", "spusť", "Spustit službu Camino", "Snapshot před upgradem, loopback start a automatický návrat procesu přes launchd."),
+        ("stop", "zastav", "Zastavit službu Camino", "Vypne pouze vlastní LaunchAgent, data a tokeny zachová."),
+        ("enable-viewer", "povol viewer", "Povolit Camino pro Janu", "Nad zastavenou službou povolí zvolenou cestu a samostatné čtecí oprávnění."),
+        ("disable-viewer", "zakaž viewer", "Odvolat Camino pro Janu", "Nad zastavenou službou zavře Viewer a odvolá všechny jeho čtecí tokeny."),
+        ("copy-reader", "zkopíruj token", "Vložit čtecí token Camino do schránky", "Zkopíruje aktivní read-only token Jany; token nikdy nevypíše."),
+    )
+    script = str(SAMANTHA_DIR / "scripts" / "camino_service_control.py")
+    return tuple(WorkflowCommand(
+        command_id="camino_service_" + action.replace("-", "_"), title=title, purpose=purpose,
+        aliases=(f"{verb} camino služba",),
+        argv=(str(PYTHON_BIN), script, action) + (() if action == "status" else ("--confirm",)),
+        cwd=SAMANTHA_DIR, risk="read_only_preview" if action == "status" else "private_service_write",
+        writes="nic" if action == "status" else purpose + " Nemění Serve, Funnel, iPhone ani Git.",
+        requires_confirmation=action != "status",
+        intent_keywords=("camino", "služba", verb),
+        required_keyword_groups=(("camino",), ("služba",), (verb,)),
+    ) for action, verb, title, purpose in descriptions)
+
+
 WORKFLOW_COMMANDS: tuple[WorkflowCommand, ...] = (
     WorkflowCommand(
         command_id="vocabularyfr_jana_bundle",
@@ -683,7 +707,7 @@ WORKFLOW_COMMANDS: tuple[WorkflowCommand, ...] = (
         ),
         preflight=lambda command: _preflight_human_adam_takeover(command),
     ),
-) + _camino_network_test_commands("T048") + _camino_network_test_commands("T049") + _camino_network_test_commands("T050") + _camino_c05b_private_commands()
+) + _camino_network_test_commands("T048") + _camino_network_test_commands("T049") + _camino_network_test_commands("T050") + _camino_c05b_private_commands() + _camino_service_commands()
 
 
 @function_tool

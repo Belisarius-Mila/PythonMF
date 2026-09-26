@@ -91,6 +91,14 @@ class ViewerStartupTests(unittest.TestCase):
             self.assertEqual(build.call_count, 3)
         self.assertEqual(viewer._conversion_failures[asset["id"]], 3)
 
+    def test_help_and_invalid_bind_never_lock_or_migrate(self):
+        with patch.dict(os.environ, {}, clear=True), patch("camino.server.main.database_lock") as lock:
+            for args, code in ((["--help"], 0), (["--host", "0.0.0.0"], 2)):
+                with self.assertRaises(SystemExit) as caught:
+                    main(args)
+                self.assertEqual(caught.exception.code, code)
+            lock.assert_not_called()
+
 
 class ViewerLifespanTests(unittest.IsolatedAsyncioTestCase):
     async def test_late_media_worker_restart_proxy_links_and_lock(self):

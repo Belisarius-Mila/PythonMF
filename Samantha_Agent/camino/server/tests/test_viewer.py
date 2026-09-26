@@ -53,6 +53,19 @@ class ViewerHTTPTests(unittest.IsolatedAsyncioTestCase):
     def upload_media(self):
         return {k: self.f.upload(30 + i, k, v) for i, (k, v) in enumerate(self.payloads.items())}
 
+    async def test_offline_trip_revoke_closes_old_media_url_without_rewriting_trip(self):
+        asset = self.f.upload(30, "photo", self.payloads["photo"])
+        self.viewer.build_pending()
+        url = f"/viewer/media/{asset['id']}/preview.jpg"
+        self.assertEqual((await self.request(url)).status_code, 200)
+        self.f.store.set_viewer_permission(self.f.trip.id, enabled=False)
+        self.assertEqual((await self.request(url)).status_code, 404)
+        self.assertNotIn("2026-09-25", (await self.request("/viewer/")).text)
+        self.f.store.set_viewer_permission(self.f.trip.id, enabled=True)
+        self.assertEqual((await self.request(url)).status_code, 200)
+        self.f.lock()
+        self.assertEqual((await self.request(url)).status_code, 404)
+
     async def test_recorded_audio_order_pause_and_private_layout(self):
         for n in (30, 31, 32):
             self.f.upload(n, "audio", self.payloads["audio"])

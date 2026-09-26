@@ -79,3 +79,18 @@ jen vlastněný proces nad stejnými daty a vyvolají `insufficient_storage` bez
 plnění skutečného disku. T058 používá potvrzované `rotate_epoch`; nic nemaže,
 ale záměrně ponechá inventární kontrolu a exporty blokované. Tyto testovací
 volby nejsou C06a provozní konfigurace.
+
+## M2c spravovaný provoz (lokálně připraveno, dosud nenasazeno)
+
+Pro cestovní Viewer použít registrované `camino_service_*`, nikoli nový C05b
+acceptance běh. [M2c_SERVICE_REPORT.md](../docs/M2c_SERVICE_REPORT.md) obsahuje
+konfiguraci, oddělené souhlasy a postup přechodu nad existujícím archivem.
+Instalace sama server nespouští; start sám nepovoluje Janě obsah ani nenastavuje
+proxy. Pro službu je port 8767; výše uvedený port 8766 je starý obecný příklad
+a na Mílově Macu je obsazený ScanDocu.
+
+Launcher drží zámek jedné instance a před upgradem metadat na schéma 3 pořídí
+ověřený SQLite snapshot vedle původní DB. Původní Trip/operace se nemění;
+samostatná tabulka uchovává explicitní grant Vieweru. Snapshot na témže disku
+není nezávislá záloha. Nasazení, reader token, Serve a telefon jsou samostatné
+potvrzované kroky, fyzický návrat launchd procesu zatím není ověřený.

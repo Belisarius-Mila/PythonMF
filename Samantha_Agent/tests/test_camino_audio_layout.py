@@ -87,7 +87,7 @@ class AudioLayoutTests(unittest.TestCase):
         self.f.send("create_audio_layout", first)
         again = RevisionStore(reopened.path)
         with again._connection() as c:
-            self.assertEqual(c.execute("PRAGMA user_version").fetchone()[0], 2)
+            self.assertEqual(c.execute("PRAGMA user_version").fetchone()[0], 3)
             self.assertEqual([tuple(row) for row in c.execute("SELECT * FROM assets")], before)
             self.assertEqual(c.execute("SELECT COUNT(*) FROM audio_layouts").fetchone()[0], 1)
             self.assertEqual(c.execute("SELECT revision FROM moments WHERE id=?", (uid(3),)).fetchone()[0], 1)

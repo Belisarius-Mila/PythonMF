@@ -1,9 +1,10 @@
 # Camino — minimalistický cestovní plán
 
 Rozhodnutí Míly: 2026-09-25. Cesta 3.–17. října 2026; cílové zmrazení 2. října.
-Stav: M1 lokálně funguje podle potvrzení Míly; M2a runtime/odkaz a M2b pořadí
-audia jsou lokálně implementované, nikoli nasazené. Podrobnosti:
-[M2b_AUDIO_LAYOUT_REPORT.md](M2b_AUDIO_LAYOUT_REPORT.md).
+Stav k 26. 9.: M1 lokálně funguje podle potvrzení Míly; M2a runtime/odkaz,
+M2b pořadí audia a M2c provozní ovládání jsou lokálně implementované,
+nikoli nasazené. Podrobnosti: [M2c_SERVICE_REPORT.md](M2c_SERVICE_REPORT.md)
+a [M2b_AUDIO_LAYOUT_REPORT.md](M2b_AUDIO_LAYOUT_REPORT.md).
 
 Aktualizace M1 dne 25. 9.: lokální implementace a syntetické testy jsou
 v [M1_VIEWER_REPORT.md](M1_VIEWER_REPORT.md). Míla náhled potvrdil jako funkční;
@@ -75,7 +76,8 @@ minimalistického cíle; nejsou tvrzením, že je Míla jednotlivě specifikoval
 | M3 — jednoduchá záloha (minimum C06b) | Konzistentní databázový snapshot + neměnná média na ověřený jiný disk, verzované dávky bez automatického mazání | Obnovit jeden malý testovací den do nového cíle, porovnat hashe a otevřít médium; nikdy neobnovovat přes živá data |
 | M4 — předodjezdový průchod (výběr C09) | Jeden běžný krátký venkovní pokus, kontrola místa, podpisu a stručný návod pro oba | RT1–RT6 níže s konkrétními omezeními, freeze nejpozději 2. 10. |
 
-Bezprostřední další vývojový krok po M2b je registrované provozní ovládání M2c,
+M2c připravilo registrované provozní ovládání a samostatné povolení Vieweru.
+Další krok je schválená nasazovací příprava nad vybraným existujícím archivem,
 ne AI a ne opakování všech iPhone testů. Chybějící krátkou kontrolu stavů C05c
 spojíme s M2/M4. M1 zahrnuje média v jednoduché podobě, nikoli plný C08 ani
 nový owner web. Po M1 žádné kosmetické rozšiřování. M2a připravilo worker a
@@ -168,8 +170,11 @@ problému nemaž aplikaci s daty. Před odjezdem volbu znovu prakticky zhodnotit
 
 ## Oprávnění a nejbližší zadání
 
-M1, M2a a M2b implementují lokální kód a syntetické testy. Nenasazují službu,
+M1, M2a, M2b a M2c implementují lokální kód a syntetické testy. Nenasazují službu,
 nespouštějí osobní upload, nemění Serve/ACL, nepublikují média a nic nekupují.
 Push, deployment, instalace služby a zpřístupnění skutečných dat zůstávají
-odděleně potvrzované kroky. Další zadání: **M2c — registrované provozní
-ovládání a vědomé povolení Vieweru**, potom schválené nasazení/podepsaná aktualizace.
+odděleně potvrzované kroky. Další zadání: **nasazovací příprava a výběr
+stávajícího archivu**, potom schválené nasazení/podepsaná aktualizace.
+M2c runbook vyžaduje trvalý Python, ověřený checkout, existující owner token
+a konkrétní trip/server ID/epochu. Schéma 3 přidává offline grant cesty;
+ověřený snapshot před upgradem není nezávislá záloha M3.
