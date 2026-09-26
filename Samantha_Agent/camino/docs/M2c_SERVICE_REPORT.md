@@ -124,3 +124,25 @@ LaunchAgent neřeší. Ani funkční proces není záruka nepřetržité dostupn
 
 Další krok: schválit nasazovací přípravu a konkrétní existující zdroj dat;
 pak krátké živé ověření včetně start/stop/návratu procesu. M3 a M4 zůstávají.
+
+## Navazující příprava 26. 9.
+
+Míla schválil přípravu nad stávajícím archivem a poté p+n. Registrované
+`camino_service_prepare` ověří zastavený C05b zdroj, jedinou naplněnou cestu,
+hash každého ověřeného média a všechny tři DB zkopíruje přes SQLite backup API.
+Připraví neměnný release z čistého commitu, trvalé izolované prostředí podle
+requirements a soukromou konfiguraci. Neodvolaný owner token zachová, jinak
+vytvoří nový, ale nikdy neoživuje odvolaný. Bez readeru, migrace, startu či sítě.
+Existující/neúplný adresář přípravy se automaticky nepřepisuje ani nemaže.
+
+Živý audit zdroje: 104 operací, 41 Momentů, 45 ověřených médií, 214 555 219 B;
+metadata/media SQLite quick_check OK, schéma 1. Dvě cesty, ale pouze jedna
+obsahuje Momenty. Žádný konflikt. Po T058 trvají `reconciliation_required=1`
+a `exports_blocked=1`; příprava ani nasazení je nesmí odblokovat. Viewer
+není připravený pro Janu, dokud nebude vyřešená autorizovaná obnova s telefonem.
+
+Nová instalace LaunchAgentu a změna Tailscale konfigurace podléhají přesné
+větě z `global_safety_brake.md`; samotné p+n ji nenahrazuje. Běžný registrovaný
+push a restart existujícího Cockpitu mohou proběhnout nezávisle.
+Přípravná a provozní offline sada po doplnění: 20/20 PASS. Plná publikační
+brána a skutečný výsledek přípravy se evidují až po provedení.

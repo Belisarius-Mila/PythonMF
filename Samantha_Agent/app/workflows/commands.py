@@ -262,7 +262,15 @@ def _camino_service_commands() -> tuple[WorkflowCommand, ...]:
         requires_confirmation=action != "status",
         intent_keywords=("camino", "služba", verb),
         required_keyword_groups=(("camino",), ("služba",), (verb,)),
-    ) for action, verb, title, purpose in descriptions)
+    ) for action, verb, title, purpose in descriptions) + (WorkflowCommand(
+        command_id="camino_service_prepare", title="Připravit nasazení Camino nad stávajícím archivem",
+        purpose="Ověří zastavený archiv, vytvoří snapshoty, pevný release, trvalý Python a owner připojení; nic nespustí.",
+        aliases=("připrav nasazení camino",),
+        argv=(str(PYTHON_BIN), str(SAMANTHA_DIR / "scripts/camino_service_prepare.py"), "--confirm"),
+        cwd=SAMANTHA_DIR, risk="private_service_write", requires_confirmation=True,
+        writes="Soukromou přípravu mimo Git a nový owner token, pokud je starý odvolaný; nemění grant, epochu, blokace, launchd ani síť.",
+        intent_keywords=("camino", "nasazení"), required_keyword_groups=(("camino",), ("nasazení",)),
+    ),)
 
 
 WORKFLOW_COMMANDS: tuple[WorkflowCommand, ...] = (

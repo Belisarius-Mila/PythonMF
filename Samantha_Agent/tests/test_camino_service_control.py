@@ -8,6 +8,7 @@ import sqlite3
 import sys
 import tempfile
 import unittest
+from contextlib import nullcontext
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -16,6 +17,7 @@ from camino.domain.revision_store import RevisionStore, SCHEMA_VERSION
 from camino.server.auth import RevocableTokenStore
 from camino.server.service_safety import database_lock, private_write, readonly, snapshot
 from scripts import camino_service_control as service
+from scripts import camino_service_prepare as preparation
 from tests.camino_viewer_fixture import ViewerFixture, uid
 
 
@@ -225,7 +227,7 @@ class CaminoServiceTests(unittest.TestCase):
     def test_registry_uses_confirmation_and_status_is_read_only(self):
         from app.workflows.commands import WORKFLOW_COMMANDS
         commands = [c for c in WORKFLOW_COMMANDS if c.command_id.startswith("camino_service_")]
-        self.assertEqual(len(commands), 7)
+        self.assertEqual(len(commands), 8)
         for command in commands:
             writes = command.command_id != "camino_service_status"
             self.assertEqual(command.requires_confirmation, writes)
@@ -241,6 +243,61 @@ class CaminoServiceTests(unittest.TestCase):
             service.control("stop", self.runtime, runner=runner, agents=self.agents)
         self.assertEqual(len(calls), 1)
         self.assertFalse(service.control("status", self.runtime, runner=runner, agents=self.agents)["running"])
+
+    def preparation_state(self):
+        return {**self.config, "phase": "stopped", "token_path": str(self.root / "archived-token.txt")}
+
+    def test_archive_audit_hashes_media_without_migration_or_private_content(self):
+        self.f.upload(30, "audio", b"synthetic audio")
+        before = self.f.store.path.read_bytes()
+        result = preparation.archive_evidence(self.preparation_state())
+        self.assertEqual(result["verified_assets"], 1)
+        self.assertEqual(result["verified_bytes"], 15)
+        self.assertNotIn("TAJNA", json.dumps(result))
+        self.assertEqual(self.f.store.path.read_bytes(), before)
+        path = self.root / "originals/objects" / (uid(30) + ".bin")
+        path.write_bytes(b"wrong")
+        with self.assertRaises(ValueError):
+            preparation.archive_evidence(self.preparation_state())
+
+    def test_archive_audit_does_not_guess_between_two_populated_trips(self):
+        with self.f.store._connection() as db:
+            db.execute("INSERT INTO trips VALUES (?,?)", (uid(80), "{}"))
+            db.execute("UPDATE moments SET trip_id=? WHERE id=?", (uid(80), self.f.private.id))
+        with self.assertRaises(ValueError):
+            preparation.archive_evidence(self.preparation_state())
+
+    def test_prepare_preserves_restore_flags_and_creates_no_reader_or_listener(self):
+        destination = self.root / "prepared-service"
+        with self.auth._open() as db:
+            db.execute("UPDATE owner_tokens SET revoked_at='synthetic-revocation'")
+        self.f.store.rotate_epoch_for_restore()
+        before = self.f.store.state()
+        code = self.root / "release-code"
+        (code / "scripts").mkdir(parents=True)
+        (code / "scripts/camino_service_control.py").write_text("# synthetic")
+        def environment(path):
+            (path / "bin").mkdir(parents=True)
+            (path / "bin/python").symlink_to(sys.executable)
+        with patch.object(preparation, "_load_state", return_value=self.preparation_state()), \
+             patch.object(preparation, "_validate_state_paths"), \
+             patch.object(service, "require_private_network"), \
+             patch.object(service, "offline", return_value=nullcontext()), \
+             patch.object(preparation, "release_checkout", return_value=code), \
+             patch.object(preparation.venv, "EnvBuilder") as builder, \
+             patch.object(preparation.subprocess, "run") as command:
+            builder.return_value.create.side_effect = environment
+            result = preparation.prepare(root=destination)
+        self.assertTrue(result["prepared"])
+        self.assertTrue(result["exports_blocked"])
+        self.assertFalse(result["installed"])
+        self.assertEqual(self.f.store.state(), before)
+        self.assertEqual(len(list((destination / "preparation-snapshots").glob("*/*.receipt.json"))), 3)
+        self.assertFalse((destination / "readers.sqlite").exists())
+        self.assertTrue(self.auth.authenticate("Bearer " + (destination / "owner-token.txt").read_text()))
+        self.assertNotIn((destination / "owner-token.txt").read_text(), json.dumps(result))
+        self.assertEqual(command.call_count, 2)
+        self.assertTrue(all(call.args[0][1:3] == ["-m", "pip"] for call in command.call_args_list))
 
 
 if __name__ == "__main__":

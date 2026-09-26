@@ -1877,3 +1877,29 @@ Technický důkaz:
   `camino/docs/M2c_SERVICE_REPORT.md`. launchd operace jsou zatím mockované.
 - Nový status vrací konfiguraci nepřipravenou. Žádná reálná migrace, token,
   instalace, síťová změna, push ani deployment nebyly provedené.
+
+### 2026-09-26 06:46 CEST — schválená nasazovací příprava a p+n
+
+Hotovo:
+- Živý read-only audit identifikoval zastavený stávající archiv: 41 Momentů,
+  45 médií, 214 555 219 B, SQLite integrita OK. Dvě cesty, jen jedna naplněná.
+- Připravené registrované workflow pro hashovou kontrolu, snapshoty, pevný
+  release, trvalý Python a owner připojení. Offline přípravná sada 20/20 PASS.
+
+Rozhodnutí:
+- Míla schválil přípravu a p+n. Archiv zachovat, nevracet starou epochu ani
+  neoživovat odvolaný token. T058 stále blokuje zápis/export; neobcházet.
+
+Další krok:
+- Provést ověřenou přípravu a schválený push/nasazení Cockpitu.
+
+Navrhované další kroky:
+- Instalace LaunchAgentu a privátní Serve až po přesné globální brzdě.
+- Dořešit obnovu s telefonem; potom povolení Vieweru a společný RT3/RT4.
+- M3 nezávislá záloha a M4 předcestovní průchod.
+
+Technický důkaz:
+- Audit staré služby: stopped, server/route neaktivní, Funnel off,
+  active_tokens=0, reconciliation_required=1, exports_blocked=1, konflikty=0.
+- `camino/docs/M2c_SERVICE_REPORT.md`; skutečná příprava/p+n zatím čekají
+  na provedení, systémové změny na přesné potvrzení. Nic nebylo odblokováno.

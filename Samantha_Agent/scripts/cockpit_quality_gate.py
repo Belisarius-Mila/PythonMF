@@ -70,6 +70,7 @@ COMPILE_PATHS = (
     "scripts/camino_c05a_loopback_smoke.py",
     "scripts/camino_c05b_private_control.py",
     "scripts/camino_service_control.py",
+    "scripts/camino_service_prepare.py",
     "app/decision_cockpit.py",
     "app/codex_approval_state.py",
     "app/autosave_service.py",
