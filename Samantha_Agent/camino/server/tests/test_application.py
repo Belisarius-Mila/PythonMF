@@ -64,6 +64,33 @@ class CaminoC05aFastAPITests(unittest.IsolatedAsyncioTestCase):
         async with httpx.AsyncClient(transport=transport, base_url="https://camino.test") as client:
             return await client.request(method, path, **kwargs)
 
+    async def test_recovery_is_owner_only_and_requires_complete_media(self):
+        from tests.test_camino_recovery import proof_for
+        self.metadata.rotate_epoch_for_restore()
+        proof = proof_for(self.metadata)
+        route = "/api/v1/recovery/complete"
+        response = await self.request("POST", route, json=proof)
+        self.assertEqual(response.status_code, 401)
+        response = await self.request("POST", route, json=proof, headers=self.headers)
+        self.assertEqual(response.status_code, 409)
+        self.assertTrue(self.metadata.state()["exports_blocked"])
+        state = await self.request("GET", "/api/v1/state", headers=self.headers)
+        self.assertIn("identical_recovery_v1", state.json()["features"])
+        # No assets required after creating an independent metadata-only fixture.
+        from tests.camino_viewer_fixture import ViewerFixture
+        other = Path(self.temporary.name) / "metadata-only"
+        other.mkdir()
+        fixture = ViewerFixture(other)
+        fixture.store.rotate_epoch_for_restore()
+        self.app = create_app(metadata_api=CaminoV1Contract(fixture.store, self.tokens.authenticate),
+                              media_store=fixture.media, token_store=self.tokens)
+        proof = proof_for(fixture.store)
+        first = await self.request("POST", route, json=proof, headers=self.headers)
+        second = await self.request("POST", route, json=proof, headers=self.headers)
+        self.assertEqual(first.status_code, 200, first.text)
+        self.assertEqual(first.json(), second.json())
+        self.assertFalse(fixture.store.state()["reconciliation_required"])
+
     def _register_manifest(self) -> None:
         trip = Trip(uid(1), "Synthetic trip", "cs", True, True)
         day = JourneyDay(uid(2), trip.id, "2026-09-23")

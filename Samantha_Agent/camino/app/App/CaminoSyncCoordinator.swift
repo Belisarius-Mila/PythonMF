@@ -46,12 +46,6 @@ private struct CaminoMediaStatus: Decodable {
     }
 }
 
-private struct CaminoInventoryMoment: Encodable, Sendable {
-    let id: String
-    let revision: Int
-    let privacy: String
-}
-
 private enum CaminoSyncAPIError: Error, Equatable {
     case invalidConfiguration
     case invalidResponse
@@ -87,11 +81,11 @@ private struct CaminoSyncAPI: Sendable {
         return receipt.cursor
     }
 
-    func reconcile(lastEpoch: UUID, moments: [CaminoInventoryMoment]) async throws {
+    func reconcile(lastEpoch: UUID, moments: [CaminoRecoveryMoment]) async throws {
         struct Request: Encodable {
             let contract_version: Int
             let last_known_epoch: String
-            let moments: [CaminoInventoryMoment]
+            let moments: [CaminoRecoveryMoment]
         }
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
@@ -110,6 +104,11 @@ private struct CaminoSyncAPI: Sendable {
         return try await send(
             path: ["api", "v1", "assets", item.id.uuidString.lowercased(), "upload-session"],
             method: "POST", contentType: "application/json", body: body)
+    }
+
+    func completeRecovery(_ proof: CaminoRecoveryProof) async throws -> CaminoRecoveryReceipt {
+        try await send(path: ["api", "v1", "recovery", "complete"], method: "POST",
+                       contentType: "application/json", body: proof.encoded())
     }
 
     func mediaStatus(for item: CaminoSyncMediaItem) async throws -> CaminoMediaStatus {
@@ -486,6 +485,67 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
 
     private var discoveredAudioLayouts: [CaminoSyncMetadataItem] = []
 
+    func completeRecovery() {
+        Task { await verifyAndCompleteRecovery() }
+    }
+
+    private func verifyAndCompleteRecovery() async {
+        guard !running else { return }
+        running = true; busy = true
+        defer { running = false; busy = false }
+        do {
+            // Recovery is an explicit Wi-Fi-only check, not an upload or cellular grant.
+            guard configurationReady, path.available, !path.expensive else {
+                detailText = "Pro kontrolu obnovy připoj telefon k Wi‑Fi a soukromému Macu."
+                return
+            }
+            guard await driver.activeDescriptions().isEmpty else {
+                detailText = "Nejdřív nech doběhnout přenosy. Obnova nyní nic nezměnila."
+                return
+            }
+            try await discover()
+            let api = try makeAPI()
+            let state = try await api.state()
+            guard state.features?.contains("identical_recovery_v1") == true else {
+                detailText = "Mac nejdřív potřebuje aktualizaci pro dokončení obnovy."
+                return
+            }
+            let proof = try journal.recoveryProof(serverID: state.serverID, epoch: state.epoch,
+                cursor: state.cursor, moments: reconciliationInventory())
+            detailText = "Porovnávám záznamy a ověřuji soubory. Nic se nemaže."
+            for item in journal.media {
+                let source = root.appendingPathComponent(item.sourceRelativePath).standardizedFileURL
+                guard source.path.hasPrefix(root.path + "/"),
+                      source.resolvingSymlinksInPath() == source else {
+                    throw CaminoSyncError.incompleteLocalInventory
+                }
+                let values = try source.resourceValues(forKeys: [.isRegularFileKey, .fileSizeKey])
+                guard values.isRegularFile == true, Int64(values.fileSize ?? -1) == item.byteCount else {
+                    throw CaminoSyncError.incompleteLocalInventory
+                }
+                let hash = try await Task.detached(priority: .utility) { try Self.sha256(of: source) }.value
+                guard hash == item.sha256 else { throw CaminoSyncError.incompleteLocalInventory }
+            }
+            // Capture edits made while hashing; never silently drop newly discovered work.
+            try await discover()
+            guard try journal.recoveryProof(serverID: state.serverID, epoch: state.epoch,
+                cursor: state.cursor, moments: reconciliationInventory()) == proof else {
+                throw CaminoSyncError.serverConflict("recovery_mismatch")
+            }
+            let receipt = try await api.completeRecovery(proof)
+            var completed = journal
+            try completed.finishRecovery(receipt, proof: proof)
+            try journalStore.save(completed) // Lost response/save: same proof can safely be repeated.
+            journal = completed
+            refreshPublishedState()
+            setMacCopyState(journal.paused ? .paused : .verified)
+            detailText = "Obnova ověřena a dokončena. Pozastavení přenosů zůstalo beze změny."
+        } catch {
+            setMacCopyState(.reconciliationRequired)
+            detailText = "Obnovu se nepodařilo potvrdit. Nic nemaž: kopie se mohou lišit nebo spojení selhalo. Kontrolu lze zopakovat."
+        }
+    }
+
     private func discover() async throws {
         let trips = try local.trips()
         var days: [LocalDay] = []
@@ -788,14 +848,14 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
             sha256: hasher.finalize().map { String(format: "%02x", $0) }.joined())
     }
 
-    private func reconciliationInventory() throws -> [CaminoInventoryMoment] {
+    private func reconciliationInventory() throws -> [CaminoRecoveryMoment] {
         try local.trips().flatMap { trip in
             try local.moments(tripID: trip.id, includeHidden: true).map { moment in
                 let snapshot = try local.syncSnapshot(momentID: moment.id)
                 let metadataRevision = snapshot.baseRevision + snapshot.operations.filter {
                     $0.kind != .appendText
                 }.count
-                return CaminoInventoryMoment(
+                return CaminoRecoveryMoment(
                     id: moment.id.uuidString.lowercased(), revision: metadataRevision,
                     privacy: moment.privacy.rawValue)
             }

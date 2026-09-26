@@ -10,6 +10,11 @@ zápis a export. Nové provozní ovládání je zatím lokální, bez nového p+
 Podrobnosti: [M2c_SERVICE_REPORT.md](M2c_SERVICE_REPORT.md)
 a [M2b_AUDIO_LAYOUT_REPORT.md](M2b_AUDIO_LAYOUT_REPORT.md).
 
+Navazující lokální krok 26. 9.: [M2_RECOVERY_REPORT.md](M2_RECOVERY_REPORT.md)
+doplňuje výslovné dokončení obnovy pro shodné úplné kopie. Rozdíly neslučuje;
+živou blokaci dosud nemění. Další je samostatné nasazení serveru a stejné
+podepsané iPhone appky, poté jeden společný průchod, ne opakování celé T058.
+
 Aktualizace M1 dne 25. 9.: lokální implementace a syntetické testy jsou
 v [M1_VIEWER_REPORT.md](M1_VIEWER_REPORT.md). Míla náhled potvrdil jako funkční;
 živý provoz nespouštěn. Původní mezera v pořadí audia je řešená lokálním M2b:
@@ -179,7 +184,8 @@ nespouštějí osobní upload, nemění Serve/ACL, nepublikují média a nic nek
 Push, deployment, instalace služby a zpřístupnění skutečných dat zůstávají
 odděleně potvrzované kroky. Nasazovací příprava a výběr stávajícího archivu
 byly následně schválené a provedené. Globální brzda pro instalaci služby/Serve
-byla přijata a instalace ověřená. Další: **bezpečné dokončení obnovy po T058**; potom skutečné
+byla přijata a instalace ověřená. Dokončení shodných kopií je lokálně doplněné;
+další je **nasadit server + aktualizaci iPhonu a ověřit dokončení T058**; potom skutečné
 povolení Vieweru, podepsaná aktualizace a společný krátký průchod.
 M2c runbook vyžaduje trvalý Python, ověřený checkout, existující owner token
 a konkrétní trip/server ID/epochu. Schéma 3 přidává offline grant cesty;

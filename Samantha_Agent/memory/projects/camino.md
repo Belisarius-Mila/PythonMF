@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-26 13:27 CEST
+Aktualizováno: 2026-09-26 13:40 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,16 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- Lokální dokončení T058 pro shodné úplné kopie: owner API + výslovné
+  tlačítko iPhonu. Přesné operace, revize/soukromí, média a identita; teprve
+  po shodě atomické odblokování. Ztracenou odpověď lze bezpečně zopakovat.
+  Report/testy/přejímka: `camino/docs/M2_RECOVERY_REPORT.md`.
+- Rozdíly/nová neposlaná data zůstávají blokované; žádný automatický merge.
+  Živý backend nezměněný, T058 neodblokováno, bez podpisu/instalace a p+n.
+  Další: schválený server + iPhone update a společné porovnání; potom Viewer.
+
+### Předchozí živé nasazení (13:27)
 
 - Nejnovější: globální brzda přijata, Camino LaunchAgent a privátní HTTPS
   běží nad původním archivem. Owner health/identita/401 a kořen Cockpitu PASS,
@@ -1781,3 +1791,31 @@ Technický důkaz:
   Cockpit healthy=true, Funnel=false, grant=false; Viewer 404, reader DB absent.
 - Stop/start PID 14219→14329; po stop vyčkat uvolnění portu, ne ihned startovat.
   Pád procesu, přihlášení/restart Macu ani nový iPhone přenos nejsou PASS.
+
+
+### 2026-09-26 13:42 CEST — lokální dokončení obnovy shodných kopií
+
+Hotovo:
+- Owner-only recovery endpoint a výslovné tlačítko iPhonu. Server ověřuje
+  historii operací, identity, revize/soukromí, skutečné soubory a absenci
+  konfliktů. Telefon kontroluje místní soubory a potvrzení přesného požadavku.
+
+Rozhodnutí:
+- Pouze shodné úplné kopie: žádné automatické slučování či přepis rozdílů.
+  Staré obálky se nemění; nová epocha platí pro další operace, pause zůstává.
+- Živý archiv neodblokovat jako součást vývoje. Nové místní čekající operace
+  či chybějící média vyžadují samostatné cílené řešení, nikoli vypnutí flagů.
+
+Další krok:
+- Samostatně schválit nasazení nového serveru a aktualizaci téže iPhone appky;
+  pak provést jeden krátký průchod z M2_RECOVERY_REPORT.md.
+
+Navrhované další kroky:
+- Při shodě dokončit obnovu, poté vědomě povolit Viewer a RT3/RT4; M3/M4 platí.
+
+Technický důkaz:
+- 9/9 recovery, 39/39 Swift, 24/24 HTTP/Viewer/runtime PASS; nepodepsaný iOS
+  build PASS. Výsledek plné brány zaznamenán v M2_RECOVERY_REPORT.md.
+- Živý read-only state HTTP 200: stejná identita, oba flagy=true,
+  identical_recovery_v1 není nasazené. Registrovaný HTTPS audit PASS, Funnel off.
+- Bez push, deploymentu, podpisu/instalace, změny sítě, grantu nebo osobních dat.

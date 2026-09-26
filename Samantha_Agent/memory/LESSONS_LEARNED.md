@@ -986,3 +986,14 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Ověření: stejný read-only příkaz s minimálním prostředím bez TERM selhal,
   s `TERM=dumb` vrátil validní JSON. Test přesného upgradu a cizího plistu PASS;
   skutečný start je evidován samostatně v M2c reportu.
+
+### 2026-09-26 — Dokončení obnovy musí zachovat byte-exact historii a zvládnout ztracenou odpověď
+
+- Kontext: T058 změnil epochu, ale klient i server zůstávaly blokované.
+- Problém: pouhé porovnání počtů nebo přepnutí flagů nedokazuje shodu;
+  přepis epochy historických obálek by zničil jejich přesné retry identity.
+- Řešení: explicitní shoda operací, revizí/soukromí a hashově ověřených médií,
+  atomické uvolnění pod zámkem, účtenka vázaná na přesný požadavek. Staré
+  přijaté obálky uchovat; novou epochu použít jen pro další operace.
+- Ověření: syntetická obnova a opakování po ztrátě odpovědi PASS, rozdíly
+  a nesprávná účtenka zůstávají blokované; pause a původní data se nemění.

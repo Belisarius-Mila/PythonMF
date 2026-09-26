@@ -1,4 +1,5 @@
 import Foundation
+import CryptoKit
 import XCTest
 @testable import CaminoLocalCore
 
@@ -7,6 +8,84 @@ import XCTest
 
     private func instant(_ value: String) -> Date {
         ISO8601DateFormatter().date(from: value)!
+    }
+
+    private func recoveryJournal() throws -> CaminoSyncJournal {
+        var journal = CaminoSyncJournal()
+        journal.observeServer(serverID: UUID(), epoch: UUID(), cursor: 0)
+        let item = CaminoSyncMetadataItem(id: UUID(), uniqueKey: "recovery-trip",
+            kind: "create_trip", objectID: UUID(), expectedRevision: nil,
+            payload: Data("{\"name\":\"synthetic\"}".utf8))
+        journal.metadata = [item]
+        _ = try journal.exactEnvelope(for: item.id)
+        journal.metadata[0].phase = .accepted
+        journal.observeServer(serverID: journal.serverID!, epoch: UUID(), cursor: 1)
+        journal.paused = true
+        return journal
+    }
+
+    private func recoveryReceipt(_ proof: CaminoRecoveryProof,
+                                 digest: String? = nil) throws -> CaminoRecoveryReceipt {
+        let data = try JSONSerialization.data(withJSONObject: [
+            "contract_version": 1, "server_id": proof.server_id, "epoch": proof.epoch,
+            "cursor": proof.cursor, "exports_blocked": false, "reconciliation_required": false,
+            "request_sha256": digest ?? SHA256.hash(data: proof.encoded())
+                .map { String(format: "%02x", $0) }.joined(),
+        ])
+        return try JSONDecoder().decode(CaminoRecoveryReceipt.self, from: data)
+    }
+
+    func testRecoveryPreservesExactHistoryPauseAndPersistsNewEpoch() throws {
+        var journal = try recoveryJournal()
+        let original = journal.metadata[0].exactEnvelope
+        let proof = try journal.recoveryProof(serverID: journal.serverID!,
+            epoch: journal.observedEpoch!, cursor: 1, moments: [])
+        try journal.finishRecovery(recoveryReceipt(proof), proof: proof)
+        XCTAssertTrue(journal.valid)
+        XCTAssertTrue(journal.paused)
+        XCTAssertFalse(journal.reconciliationRequired)
+        XCTAssertEqual(journal.epoch, UUID(uuidString: proof.epoch))
+        XCTAssertEqual(journal.metadata[0].exactEnvelope, original)
+        let decoded = try JSONDecoder().decode(CaminoSyncJournal.self, from: JSONEncoder().encode(journal))
+        XCTAssertEqual(decoded, journal)
+        XCTAssertTrue(decoded.valid)
+        let fresh = CaminoSyncMetadataItem(id: UUID(), uniqueKey: "later", kind: "create_trip",
+            objectID: UUID(), expectedRevision: nil, payload: Data("{}".utf8))
+        journal.metadata.append(fresh)
+        let envelope = try JSONSerialization.jsonObject(with: journal.exactEnvelope(for: fresh.id)) as! [String: Any]
+        XCTAssertEqual(envelope["epoch"] as? String, proof.epoch)
+        XCTAssertEqual(envelope["device_sequence"] as? Int, 2)
+    }
+
+    func testRecoveryLostReceiptCanRetryButBadReceiptCannotMutateJournal() throws {
+        var journal = try recoveryJournal()
+        journal.metadata[0].phase = .pending // Server accepted it, client lost the response.
+        let original = journal
+        let proof = try journal.recoveryProof(serverID: journal.serverID!,
+            epoch: journal.observedEpoch!, cursor: 1, moments: [])
+        XCTAssertThrowsError(try journal.finishRecovery(recoveryReceipt(proof, digest: "wrong"), proof: proof))
+        XCTAssertEqual(journal, original)
+        var reopened = try JSONDecoder().decode(CaminoSyncJournal.self, from: JSONEncoder().encode(journal))
+        XCTAssertEqual(try reopened.recoveryProof(serverID: journal.serverID!,
+            epoch: journal.observedEpoch!, cursor: 1, moments: []), proof)
+        try reopened.finishRecovery(recoveryReceipt(proof), proof: proof)
+        XCTAssertEqual(reopened.metadata[0].phase, .accepted)
+        XCTAssertEqual(reopened.metadata[0].exactEnvelope, original.metadata[0].exactEnvelope)
+    }
+
+    func testRecoveryRejectsOtherServerMissingSequencePendingWorkAndMedia() throws {
+        var journal = try recoveryJournal()
+        XCTAssertThrowsError(try journal.recoveryProof(serverID: UUID(), epoch: UUID(), cursor: 1, moments: []))
+        XCTAssertThrowsError(try journal.recoveryProof(serverID: journal.serverID!, epoch: UUID(), cursor: 0, moments: []))
+        journal.media = [media(kind: .video, batch: journal.openBatchID)]
+        XCTAssertThrowsError(try journal.recoveryProof(serverID: journal.serverID!, epoch: UUID(), cursor: 1, moments: []))
+        journal.media = []
+        journal.metadata[0].sequence = 2
+        XCTAssertThrowsError(try journal.recoveryProof(serverID: journal.serverID!, epoch: UUID(), cursor: 1, moments: []))
+        journal = try recoveryJournal()
+        journal.metadata.append(CaminoSyncMetadataItem(id: UUID(), uniqueKey: "unsent", kind: "create_trip",
+            objectID: UUID(), expectedRevision: nil, payload: Data("{}".utf8)))
+        XCTAssertThrowsError(try journal.recoveryProof(serverID: journal.serverID!, epoch: UUID(), cursor: 1, moments: []))
     }
 
     private func media(id: UUID = UUID(), kind: CaminoSyncMediaKind,

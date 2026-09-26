@@ -19,6 +19,8 @@ from camino.domain.model import ContractError
 from camino.server.auth import RevocableTokenStore
 from camino.server.media_store import DEFAULT_CHUNK_BYTES, MediaStore, MediaStoreError
 from camino.server.viewer_worker import ViewerWorker
+from camino.server.recovery import complete_recovery
+from camino.domain.revision_store import StoreConflict
 
 if TYPE_CHECKING:
     from camino.server.viewer import CaminoViewer
@@ -237,6 +239,23 @@ def create_app(
         except sqlite3.DatabaseError:
             return _error(HTTPStatus.SERVICE_UNAVAILABLE, "storage_unavailable", "server storage is unavailable")
 
+    @app.post("/api/v1/recovery/complete", include_in_schema=False)
+    async def recovery_complete(request: Request):
+        if not authorized(request):
+            return _error(401, "unauthorized", "private authorization required")
+        if request.headers.get("content-type") != "application/json" or request.url.query:
+            return _error(415, "invalid_request", "plain JSON request required")
+        raw = await request.body()
+        try:
+            receipt = await asyncio.to_thread(complete_recovery, metadata_api.store, media_store, raw)
+            return _json(200, receipt)
+        except StoreConflict:
+            return _error(409, "recovery_mismatch", "copies differ; preserve both and review")
+        except (ContractError, TypeError, ValueError, KeyError):
+            return _error(422, "invalid_recovery_proof", "recovery proof is invalid")
+        except (OSError, sqlite3.DatabaseError):
+            return _error(503, "recovery_unavailable", "recovery could not be verified")
+
     @app.api_route("/api/v1/{path:path}", methods=["GET", "POST"], include_in_schema=False)
     async def metadata(path: str, request: Request):
         if not authorized(request):
@@ -252,6 +271,8 @@ def create_app(
             body=raw,
             content_type=request.headers.get("content-type"),
         )
+        if request.method == "GET" and target == "/api/v1/state" and response.status == 200:
+            response.body["features"].append("identical_recovery_v1")
         return _json(response.status, response.body)
 
     return app

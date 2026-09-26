@@ -1,0 +1,71 @@
+# M2 — dokončení obnovy po T058
+
+2026-09-26. Lokální implementace pro **shodné úplné kopie**. Není nasazená;
+živý archiv zůstává blokovaný. T058 PASS dokazoval zachycení změny epochy,
+nikoli dokončení obnovy. Tento krok doplňuje chybějící potvrzení shody.
+
+## Co je doplněno
+
+- iPhone: tlačítko **Ověřit a dokončit obnovu** v Uložení a přenosy → Mac,
+  pouze při požadované reconciliaci. Vyžaduje dostupnou neměřenou síť,
+  uložené připojení a žádné rozpracované background upload úlohy.
+- Server hlásí schopnost `identical_recovery_v1`. Starý server telefon
+  neobchází; UI požádá o aktualizaci. Nový owner-only endpoint
+  `POST /api/v1/recovery/complete` má stávající autentizaci a JSON limit 1 MiB.
+- Důkaz obsahuje server ID, aktuální epochu, writer ID, kurzor, seřazená ID
+  operací s pořadím a SHA-256 původních přesných obálek, inventář Momentů
+  (revize/soukromí) a manifesty médií (ID/velikost/hash). Neobsahuje texty deníku.
+- Server pod media zámkem a SQLite `BEGIN IMMEDIATE` ověří přesnou návaznost
+  celého přijatého journalu, absenci konfliktů, shodu inventářů a všechny
+  skutečné mediální soubory proti ověřeným účtenkám. Teprve pak atomicky
+  uvolní oba příznaky. Nemění epochu, writer, operace, data ani Viewer grant.
+- Telefon před požadavkem ověří skutečné místní soubory a znovu projde
+  inventář kvůli změnám vzniklým během hashování. Účtenku váže hash přesného
+  požadavku, server ID, epocha a kurzor. Novou epochu uloží až po potvrzení.
+- Přijaté historické obálky zůstávají byte-exact ve staré epoše; nové operace
+  už používají novou. Pause a mobilní grant se nemění. Nový přenos se tímto
+  tlačítkem nespouští. Uložení journalu používá existující atomickou persistenci.
+- Ztracená serverová odpověď nebo neúspěšné uložení telefonu: kontrolu lze
+  zopakovat, dokud je serverová epocha/kurzor/inventář stejný. Nejde o slepé
+  „odemkni“, opakuje se ověření. Neznámý výsledek UI neoznačí za dokončení.
+
+## Záměrně nepodporované rozdíly
+
+Chybějící přijatá operace, nový dosud neposlaný záznam/změna, jiné soukromí,
+neověřené médium, rozdílný hash nebo konflikt **nevedou k odblokování**.
+Stejně tak cizí server/writer, novější obnova nebo mezera v pořadí.
+Tato malá varianta nedělá automatický merge ani replay ze starší zálohy.
+Při rozdílu se obě kopie zachovají a následuje cílené servisní řešení; ne mazání
+telefonních dat či ruční vypnutí flagů. Nejde o plnou obnovu zálohy C06b/M3.
+
+## Ověření
+
+- Doménová/serverová syntetická sada obnovy: 9/9 PASS.
+- Swift core + audio link: 39/39 PASS, včetně 3 nových scénářů obnovy,
+  nezměněných obálek, nové epochy, pause, neplatné účtenky a ztracené odpovědi.
+- Izolované HTTP/Viewer/runtime testy: 24/24 PASS, včetně owner-only obnovy,
+  chybějících médií, capability a idempotentního opakování požadavku.
+- Nepodepsaný iOS build PASS. Plná projektová brána **1827/1827 PASS**
+  (345,543 s jednotkové sady), syntaxe a whitespace PASS. Fyzická akceptace
+  nebyla provedena. První Swift build byl opakován, protože se jeho testovací
+  zdroj změnil během sestavování; konečný kompletní běh 39/39 PASS.
+- Živý read-only audit 13:42: HTTP 200, stejná identita, oba blokující flagy
+  stále true, nová capability není nasazená; HTTPS/Cockpit PASS, Funnel off.
+
+## Jeden navazující fyzický průchod — až po samostatném nasazení
+
+1. Nejprve nový pevný server release nad stejným archivem; potvrzená kopie
+   databází, stejný server ID/epocha. Nestačí nasadit pouze Cockpit.
+2. Potom podepsaná aktualizace **téže** aplikace bez odinstalace. Soukromě
+   předat připravené owner připojení; token nikdy do dokumentace ani výstupu.
+3. Telefon na Wi‑Fi/Tailscale, starší záznam a médium dostupné. Nezakládat
+   kvůli této kontrole další testovací záznam před porovnáním. Klepnout na
+   **Ověřit a dokončit obnovu**. Při rozdílu zastavit postup a nic neodstraňovat.
+4. Při potvrzené shodě: iPhone hlásí dokončení, server současně oba flagy=false,
+   staré počty/hash/identita zachované. Ukončit a otevřít appku; stav se zachová.
+   Bylo-li zapnuté pause, stále drží. Poté výslovně pokračovat a přenést jednu
+   novou neosobní značku; ostatní originály se neposílají znovu.
+
+Viewer pro Janu zůstává samostatným následným rozhodnutím. M3 nezávislá záloha
+a M4 předcestovní přejímka nadále zbývají. Není proveden push, aktualizace
+služby, podpis/instalace iPhonu, změna sítě ani živé odblokování.

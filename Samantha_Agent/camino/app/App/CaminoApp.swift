@@ -318,6 +318,11 @@ private struct CaminoSyncView: View {
                         Label("Po změně epochy je nutná servisní kontrola. Nic se automaticky nemaže.",
                               systemImage: "exclamationmark.shield")
                             .foregroundStyle(.orange)
+                        Button("Ověřit a dokončit obnovu") { sync.completeRecovery() }
+                            .disabled(sync.busy || !sync.configurationReady)
+                            .accessibilityIdentifier("completeRecovery")
+                        Text("Jen na Wi‑Fi. Povolí pokračování pouze při shodných úplných kopiích. Při rozdílu zůstane obnova k řešení.")
+                            .font(.footnote).foregroundStyle(.secondary)
                     }
                 }
                 Section("Další záloha") {

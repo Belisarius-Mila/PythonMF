@@ -420,6 +420,52 @@ public enum CaminoSyncNextWork: Equatable, Sendable {
     case none
 }
 
+public struct CaminoRecoveryMoment: Codable, Equatable, Sendable {
+    public let id: String
+    public let revision: Int
+    public let privacy: String
+    public init(id: String, revision: Int, privacy: String) {
+        self.id = id; self.revision = revision; self.privacy = privacy
+    }
+}
+
+public struct CaminoRecoveryProof: Codable, Equatable, Sendable {
+    public struct Operation: Codable, Equatable, Sendable {
+        public let id: String
+        public let sequence: Int64
+        public let sha256: String
+    }
+    public struct Asset: Codable, Equatable, Sendable {
+        public let id: String
+        public let byte_count: Int64
+        public let sha256: String
+    }
+    public let contract_version: Int
+    public let server_id: String
+    public let epoch: String
+    public let device_id: String
+    public let cursor: Int64
+    public let operations: [Operation]
+    public let moments: [CaminoRecoveryMoment]
+    public let assets: [Asset]
+
+    public func encoded() throws -> Data {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
+        return try encoder.encode(self)
+    }
+}
+
+public struct CaminoRecoveryReceipt: Decodable, Sendable {
+    public let contract_version: Int
+    public let server_id: String
+    public let epoch: String
+    public let cursor: Int64
+    public let request_sha256: String
+    public let exports_blocked: Bool
+    public let reconciliation_required: Bool
+}
+
 public struct CaminoSyncJournal: Codable, Equatable, Sendable {
     public let schema: Int
     public let deviceID: UUID
@@ -463,7 +509,9 @@ public struct CaminoSyncJournal: Codable, Equatable, Sendable {
                         as? [String: Any], let epoch else {
                     return item.exactEnvelope == nil
                 }
-                return envelope["epoch"] as? String == epoch.uuidString.lowercased()
+                let oldEpoch = (envelope["epoch"] as? String).flatMap(UUID.init(uuidString:))
+                // Accepted history keeps its original byte-exact envelope after recovery.
+                return (oldEpoch == epoch || (item.phase == .accepted && oldEpoch != nil))
                     && envelope["device_id"] as? String == deviceID.uuidString.lowercased()
             }
             && Set(media.map(\.id)).count == media.count
@@ -477,6 +525,56 @@ public struct CaminoSyncJournal: Codable, Equatable, Sendable {
             metadataCount: waitingMetadata.count,
             mediaCount: waitingMedia.count,
             mediaBytes: waitingMedia.reduce(0) { $0 + $1.byteCount })
+    }
+
+    /// Only identical complete copies. Pending local edits and partial media require review.
+    public func recoveryProof(serverID: UUID, epoch: UUID, cursor: Int64,
+                              moments: [CaminoRecoveryMoment]) throws -> CaminoRecoveryProof {
+        guard valid, self.serverID == serverID, reconciliationRequired,
+              cursor > 0, cursor == Int64(metadata.count),
+              metadata.allSatisfy({ $0.phase != .needsAttention && $0.exactEnvelope != nil }),
+              media.allSatisfy({ $0.phase == .verified }) else {
+            throw CaminoSyncError.serverConflict("recovery_mismatch")
+        }
+        let ordered = metadata.sorted { ($0.sequence ?? 0) < ($1.sequence ?? 0) }
+        let operations = try ordered.enumerated().map { offset, item in
+            guard item.sequence == Int64(offset + 1), let exact = item.exactEnvelope else {
+                throw CaminoSyncError.invalidJournal
+            }
+            return CaminoRecoveryProof.Operation(id: item.id.uuidString.lowercased(),
+                sequence: Int64(offset + 1), sha256: SHA256.hash(data: exact)
+                    .map { String(format: "%02x", $0) }.joined())
+        }
+        return CaminoRecoveryProof(contract_version: 1, server_id: serverID.uuidString.lowercased(),
+            epoch: epoch.uuidString.lowercased(), device_id: deviceID.uuidString.lowercased(), cursor: cursor,
+            operations: operations, moments: moments.sorted { $0.id < $1.id },
+            assets: media.map { CaminoRecoveryProof.Asset(id: $0.id.uuidString.lowercased(),
+                byte_count: $0.byteCount, sha256: $0.sha256) }.sorted { $0.id < $1.id })
+    }
+
+    public mutating func finishRecovery(_ receipt: CaminoRecoveryReceipt,
+                                         proof: CaminoRecoveryProof) throws {
+        guard let server = UUID(uuidString: proof.server_id), let epoch = UUID(uuidString: proof.epoch),
+              try recoveryProof(serverID: server, epoch: epoch, cursor: proof.cursor,
+                                moments: proof.moments) == proof,
+              receipt.contract_version == 1, receipt.server_id == proof.server_id,
+              receipt.epoch == proof.epoch, receipt.cursor == proof.cursor,
+              !receipt.exports_blocked, !receipt.reconciliation_required,
+              receipt.request_sha256 == SHA256.hash(data: try proof.encoded())
+                .map({ String(format: "%02x", $0) }).joined() else {
+            throw CaminoSyncError.invalidServerResponse
+        }
+        var updated = self
+        updated.epoch = epoch
+        updated.observedEpoch = epoch
+        updated.serverCursor = proof.cursor
+        updated.reconciliationRequired = false
+        for index in updated.metadata.indices {
+            updated.metadata[index].phase = .accepted
+            updated.metadata[index].lastErrorCode = nil
+        }
+        guard updated.valid else { throw CaminoSyncError.invalidJournal }
+        self = updated // Pause, grants, media and exact historical bytes are preserved.
     }
 
     public var cellularBatchStats: CaminoSyncQueueStats {
