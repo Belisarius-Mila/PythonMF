@@ -13,6 +13,7 @@ import subprocess
 import sys
 import tarfile
 import venv
+from uuid import uuid4
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -142,6 +143,61 @@ def prepare(*, root: Path = service.ROOT, source: ControlConfig = ControlConfig(
         private_write(root / "preparation-complete.json", json.dumps(evidence, sort_keys=True).encode())
     return {"prepared": True, "installed": False, "viewer_enabled": False,
             "network_changed": False, **evidence}
+
+
+def upgrade(*, root=service.ROOT, agents=service.LAUNCH_AGENTS, runner=service.run_command):
+    """Switch only a stopped owned service to a new immutable, clean Git release."""
+    config = service.load_config(root)
+    plist = service.verify_plist(root, config, agents)
+    service.require_private_network(runner)
+    with service.offline(config, runner):
+        before = archive_evidence(config)
+        old_config = (root / "config.json").read_bytes()
+        old_plist = plist.read_bytes()
+        code = release_checkout(root.parent / "Releases")
+        requirements = Path("camino/server/requirements.txt")
+        if (code / requirements).read_bytes() != (config["code_root"] / requirements).read_bytes():
+            raise ValueError("dependency changes require a separate isolated environment")
+        service.checked([str(config["python"]), "-I", "-c",
+            "import sys; sys.path.insert(0, " + repr(str(code)) + "); "
+            "from camino.server.application import create_app; "
+            "from camino.server.recovery import complete_recovery"], runner)
+        receipt = root / "upgrades" / uuid4().hex
+        receipt.mkdir(parents=True, mode=0o700)
+        os.chmod(receipt.parent, 0o700)
+        private_write(receipt / "config-before.json", old_config)
+        private_write(receipt / "launchagent-before.plist", old_plist)
+        for key in ("metadata_db", "auth_db", "media_db"):
+            snapshot(config[key], receipt / key)
+        if (root / "readers.sqlite").exists():
+            snapshot(service.private_path(root / "readers.sqlite"), receipt / "readers")
+        if archive_evidence(config) != before:
+            raise ValueError("archive changed during upgrade preparation")
+        updated = json.loads(old_config)
+        updated["code_root"] = str(code)
+        staged_config = receipt / "config-after.json"
+        private_write(staged_config, json.dumps(updated, sort_keys=True).encode())
+        # Preserve both definitions; separate create-only stage becomes the owned plist.
+        definition = service.service_plist(root, {**config, "code_root": code})
+        private_write(receipt / "launchagent-after.plist", definition)
+        staged_plist = agents / (service.LABEL + ".upgrade-" + receipt.name + ".plist")
+        private_write(staged_plist, definition)
+        if service.loaded(runner) or plist.read_bytes() != old_plist or (root / "config.json").read_bytes() != old_config:
+            raise ValueError("service configuration changed concurrently")
+        service.checked(["/bin/launchctl", "disable", service.target()], runner)
+        # If interrupted between replaces, the job stays disabled. No blind rollback;
+        # both definitions and data snapshots remain in the private receipt directory.
+        os.replace(staged_config, root / "config.json")
+        os.replace(staged_plist, plist)
+        service.load_config(root)
+        service.verify_plist(root, {**config, "code_root": code}, agents)
+        if archive_evidence(config) != before:
+            raise ValueError("archive changed during deployment")
+        private_write(receipt / "complete.json", json.dumps(before, sort_keys=True).encode())
+    return {"upgraded": True, "started": False, "network_changed": False,
+            "release": code.parent.name[:12], "archive_preserved": True,
+            "exports_blocked": before["exports_blocked"],
+            "reconciliation_required": before["reconciliation_required"]}
 
 
 def main(argv=None):

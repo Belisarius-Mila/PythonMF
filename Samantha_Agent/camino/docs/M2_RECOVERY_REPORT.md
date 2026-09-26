@@ -69,3 +69,32 @@ telefonních dat či ruční vypnutí flagů. Nejde o plnou obnovu zálohy C06b/
 Viewer pro Janu zůstává samostatným následným rozhodnutím. M3 nezávislá záloha
 a M4 předcestovní přejímka nadále zbývají. Není proveden push, aktualizace
 služby, podpis/instalace iPhonu, změna sítě ani živé odblokování.
+
+## Navazující nasazovací příprava 26. 9.
+
+- Míla schválil pokračování server + aktualizace téže appky. Nové registrované
+  `camino_service_upgrade` pracuje jen nad zastavenou vlastní službou: nový
+  neměnný Git release z čistého commitu, beze změny dependencies/venvu,
+  uchované staré konfigurace/plist a konzistentní snapshoty všech databází.
+  Identita, počty a mediální hashe se porovnají před/po. Nic se nemaže,
+  grant/token/flag/Serve se nemění. Služba zůstává vypnutá až do `start`.
+- Při neúplném přepnutí konfigurace/plistu zůstane launchd vypnutý; obě
+  definice a snapshoty jsou v soukromém `Service/upgrades`. Žádný automatický
+  rollback databází nebo nový pokus přes rozpor vlastnictví. Zachovat stav
+  a cíleně dokončit/vrátit jen ukazatele kódu podle soukromé účtenky.
+- Cílená sada ovládání 24/24 PASS, včetně shody dat/flagů, zachování starého
+  plistu, odmítnutí cizí/běžící služby a změněných dependencies.
+- Camino 0.1.0 (5) se stejným bundle ID je sestavené a strict podepsané;
+  profil zahrnuje telefon, ale je to starší profil do **27. 9. 12:10 CEST**.
+  Proto žádná přímá instalace, která by zkrátila dosavadní SideStore platnost.
+- Připravený `Camino-Recovery-5-20260926.ipa` ve Stahování (1 024 375 B), ZIP
+  integrita ověřená. SHA-256: `ea294065a3889aed3d53f0f017f53c5b2fb9588a05e2016aece0db78a3b142a4`.
+  Určeno k novému podpisu/importu přes již ověřený SideStore postup se stejným
+  ID, **Append Team ID vypnuto**, bez odinstalace Camina. Nová platnost až
+  podle výsledku SideStore; není předem slibovaná.
+- Kabelová read-only inventura aplikací selhala na CoreDevice 12040
+  (developer disk image nebylo možné připojit). Nic neopravováno silou,
+  žádná instalace, odinstalace či zásah do telefonu nebyly provedené.
+- Konečný výsledek nasazení a plné brány je uveden až v navazujícím bloku.
+- Přednasazovací plná brána **1830/1830 PASS** (237,917 s jednotkové sady),
+  syntaxe a whitespace PASS. Po změně pouze dokumentace rychlá statická brána.

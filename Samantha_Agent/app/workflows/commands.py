@@ -246,6 +246,7 @@ def _camino_service_commands() -> tuple[WorkflowCommand, ...]:
     descriptions = (
         ("status", "stav", "Ověřit lokální službu Camino", "Read-only stav launchd; není důkaz HTTPS ani přenosu dat."),
         ("install", "nainstaluj", "Připravit službu Camino", "Vytvoří vypnutý LaunchAgent; službu nespustí."),
+        ("upgrade", "aktualizuj", "Aktualizovat zastavenou službu Camino", "Uchová konfiguraci a DB snapshoty, přepne jen vlastní vypnutou službu na pevný Git release; nic nespustí."),
         ("start", "spusť", "Spustit službu Camino", "Snapshot před upgradem, loopback start a automatický návrat procesu přes launchd."),
         ("stop", "zastav", "Zastavit službu Camino", "Vypne pouze vlastní LaunchAgent, data a tokeny zachová."),
         ("enable-viewer", "povol viewer", "Povolit Camino pro Janu", "Nad zastavenou službou povolí zvolenou cestu a samostatné čtecí oprávnění."),

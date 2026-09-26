@@ -241,7 +241,7 @@ class CaminoServiceTests(unittest.TestCase):
     def test_registry_uses_confirmation_and_status_is_read_only(self):
         from app.workflows.commands import WORKFLOW_COMMANDS
         commands = [c for c in WORKFLOW_COMMANDS if c.command_id.startswith("camino_service_")]
-        self.assertEqual(len(commands), 11)
+        self.assertEqual(len(commands), 12)
         for command in commands:
             writes = command.command_id not in ("camino_service_status", "camino_service_network_status")
             self.assertEqual(command.requires_confirmation, writes)
@@ -280,6 +280,58 @@ class CaminoServiceTests(unittest.TestCase):
             db.execute("UPDATE moments SET trip_id=? WHERE id=?", (uid(80), self.f.private.id))
         with self.assertRaises(ValueError):
             preparation.archive_evidence(self.preparation_state())
+
+    def upgrade_fixture(self):
+        self.control("install")
+        code = self.root / "next-release" / "Samantha_Agent"
+        (code / "scripts").mkdir(parents=True)
+        (code / "scripts/camino_service_control.py").write_text("# synthetic")
+        (code / "camino/server").mkdir(parents=True)
+        (code / "camino/server/requirements.txt").write_bytes(
+            (service.PROJECT_ROOT / "camino/server/requirements.txt").read_bytes())
+        return code
+
+    def test_upgrade_preserves_archive_credentials_and_old_definition(self):
+        code = self.upgrade_fixture()
+        self.f.store.rotate_epoch_for_restore()
+        config = json.loads((self.runtime / "config.json").read_text())
+        config["epoch"] = self.f.store.state()["epoch"]
+        (self.runtime / "config.json").write_text(json.dumps(config))
+        before = self.f.store.state()
+        old_config = (self.runtime / "config.json").read_bytes()
+        plist = self.agents / (service.LABEL + ".plist")
+        old_plist = plist.read_bytes()
+        with patch.object(preparation, "release_checkout", return_value=code):
+            result = self.control("upgrade")
+        self.assertTrue(result["upgraded"])
+        self.assertFalse(result["started"])
+        self.assertEqual(self.f.store.state(), before)
+        receipt = next((self.runtime / "upgrades").iterdir())
+        self.assertEqual((receipt / "config-before.json").read_bytes(), old_config)
+        self.assertEqual((receipt / "launchagent-before.plist").read_bytes(), old_plist)
+        self.assertEqual(len(list(receipt.glob("*/*.receipt.json"))), 3)
+        self.assertEqual(service.load_config(self.runtime)["code_root"], code)
+        self.assertFalse(any("bootstrap" in x for x in self.commands))
+        self.assertEqual(self.auth.active_count(), 1)
+
+    def test_upgrade_refuses_changed_dependencies_without_switching(self):
+        code = self.upgrade_fixture()
+        (code / "camino/server/requirements.txt").write_text("unapproved-change")
+        original = (self.runtime / "config.json").read_bytes()
+        with patch.object(preparation, "release_checkout", return_value=code), self.assertRaises(ValueError):
+            self.control("upgrade")
+        self.assertEqual((self.runtime / "config.json").read_bytes(), original)
+
+    def test_upgrade_refuses_loaded_or_foreign_service_before_release(self):
+        self.upgrade_fixture()
+        with patch.object(preparation, "release_checkout") as release, \
+             patch.object(service, "loaded", return_value=True), self.assertRaises(ValueError):
+            self.control("upgrade")
+        release.assert_not_called()
+        (self.agents / (service.LABEL + ".plist")).write_bytes(b"foreign")
+        with patch.object(preparation, "release_checkout") as release, self.assertRaises(ValueError):
+            self.control("upgrade")
+        release.assert_not_called()
 
     def test_prepare_preserves_restore_flags_and_creates_no_reader_or_listener(self):
         destination = self.root / "prepared-service"

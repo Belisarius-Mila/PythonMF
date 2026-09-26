@@ -194,6 +194,9 @@ def control(action: str, root: Path = ROOT, *, runner=run_command, agents: Path 
     if action == "status" and not (root / "config.json").exists():
         return {"configured": False, "live_checked": False}
     config = load_config(root)
+    if action == "upgrade":
+        from scripts.camino_service_prepare import upgrade
+        return upgrade(root=root, agents=agents, runner=runner)
     if action == "status":
         result = runner(["/bin/launchctl", "print", target()])
         owned = False
@@ -313,7 +316,7 @@ def serve(root: Path):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=("status", "install", "start", "stop", "enable-viewer", "disable-viewer", "copy-reader", "run"))
+    parser.add_argument("action", choices=("status", "install", "upgrade", "start", "stop", "enable-viewer", "disable-viewer", "copy-reader", "run"))
     parser.add_argument("--root", type=Path, default=ROOT)
     parser.add_argument("--confirm", action="store_true")
     args = parser.parse_args(argv)

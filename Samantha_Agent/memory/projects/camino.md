@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-26 13:40 CEST
+Aktualizováno: 2026-09-26 17:08 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,13 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- Schválené pokračování server + telefon: registrovaný upgrade připravený,
+  24 cílených testů a plná brána 1830/1830 PASS. Build 5 se stejným ID
+  a strict podpisem PASS, IPA ve Stahování. Starý profil platí jen do 27. 9.
+  12:10 CEST, proto bez přímé instalace; SideStore jej musí nově podepsat.
+  Žádná odinstalace; CoreDevice 12040 blokuje kabelovou inventuru aplikací.
+  Výsledek nasazení ještě nepotvrzený, viz M2_RECOVERY_REPORT.md.
 
 - Lokální dokončení T058 pro shodné úplné kopie: owner API + výslovné
   tlačítko iPhonu. Přesné operace, revize/soukromí, média a identita; teprve
@@ -1819,3 +1826,26 @@ Technický důkaz:
 - Živý read-only state HTTP 200: stejná identita, oba flagy=true,
   identical_recovery_v1 není nasazené. Registrovaný HTTPS audit PASS, Funnel off.
 - Bez push, deploymentu, podpisu/instalace, změny sítě, grantu nebo osobních dat.
+
+
+### 2026-09-26 17:08 CEST — nasazovací příprava po souhlasu pokračovat
+
+Hotovo:
+- Registrovaný upgrade s archivem staré konfigurace a DB snapshoty; 24 cílených testů PASS.
+- Podepsaný build 5 se stejným ID a ověřená IPA pro nový podpis v SideStore.
+
+Rozhodnutí:
+- Zachovat archiv/flagy/granty; nic neodblokovat bez telefonu.
+- Přímá instalace neprovedena: starý profil do 27. 9. 12:10 CEST by zkrátil
+  předchozí SideStore platnost. Neřešit CoreDevice 12040 násilným zásahem.
+
+Další krok:
+- Dokončit plnou bránu, uložit čistý commit a registrovaně přepnout server.
+
+Navrhované další kroky:
+- Import stejné IPA přes SideStore, Append Team ID off, pak společné porovnání.
+
+Technický důkaz:
+- Strict podpis/profil zahrnující telefon PASS, ZIP integrita PASS.
+- Podrobnosti a SHA-256 v M2_RECOVERY_REPORT.md; žádná instalace telefonu,
+  změna sítě, reader grant ani živé dokončení T058.

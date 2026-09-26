@@ -1,7 +1,13 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-26 13:40 CEST — lokální dokončení obnovy shodných kopií.
+- Aktualizováno: 2026-09-26 17:08 CEST — schválené nasazení, upgrade a IPA připravené.
+
+- Nejnovější příprava: registrovaný upgrade zastavené vlastní služby,
+  24 cílených testů a plná brána 1830/1830 PASS před nasazením. Build 5/strict
+  podpis PASS, IPA ve Stahování. Profil jen do 27. 9. 12:10 CEST: neinstalovat
+  přímo, použít nový podpis/import SideStore se stejným ID, Append Team ID off.
+  Telefon nezměněný (CoreDevice 12040). Podrobnosti v M2_RECOVERY_REPORT.md.
 
 ### Dokončení T058 — nejnovější lokální krok
 
@@ -2035,3 +2041,26 @@ Technický důkaz:
 - Živý read-only state HTTP 200: stejná identita, oba flagy=true,
   identical_recovery_v1 není nasazené. Registrovaný HTTPS audit PASS, Funnel off.
 - Bez push, deploymentu, podpisu/instalace, změny sítě, grantu nebo osobních dat.
+
+
+### 2026-09-26 17:08 CEST — nasazovací příprava po souhlasu pokračovat
+
+Hotovo:
+- Registrovaný upgrade s archivem staré konfigurace a DB snapshoty; 24 cílených testů PASS.
+- Podepsaný build 5 se stejným ID a ověřená IPA pro nový podpis v SideStore.
+
+Rozhodnutí:
+- Zachovat archiv/flagy/granty; nic neodblokovat bez telefonu.
+- Přímá instalace neprovedena: starý profil do 27. 9. 12:10 CEST by zkrátil
+  předchozí SideStore platnost. Neřešit CoreDevice 12040 násilným zásahem.
+
+Další krok:
+- Dokončit plnou bránu, uložit čistý commit a registrovaně přepnout server.
+
+Navrhované další kroky:
+- Import stejné IPA přes SideStore, Append Team ID off, pak společné porovnání.
+
+Technický důkaz:
+- Strict podpis/profil zahrnující telefon PASS, ZIP integrita PASS.
+- Podrobnosti a SHA-256 v M2_RECOVERY_REPORT.md; žádná instalace telefonu,
+  změna sítě, reader grant ani živé dokončení T058.
