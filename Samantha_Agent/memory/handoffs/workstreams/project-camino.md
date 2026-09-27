@@ -1,9 +1,11 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-27 08:33 CEST — nová GPS verze otevřená, data a GPS1 PASS.
+- Aktualizováno: 2026-09-27 13:24 CEST — skutečný GPS bod uložen, GPS2 částečně PASS.
 - Míla potvrzuje novou položku „Povolit / obnovit GPS“, funkční všechna data
-  a nový okamžik bez polohy před jejím povolením. GPS2–GPS4 dosud NEOVĚŘENO.
+  a nový okamžik bez polohy před jejím povolením: data/GPS1 PASS. Nyní potvrzuje
+  „GPS uložena“, hlášená přesnost ±8 m. Offline/restart/média GPS2 a GPS3/GPS4
+  zbývají; nejbližší krok je offline vytvoření a znovuotevření nového bodu.
 - SideStore ukazuje 7 DAYS; přesné datum profilu neodečtené. Kolečko v jeho
   seznamu samo nebylo důkazem selhání aktualizace; nový kód se otevřel.
 
@@ -2202,3 +2204,16 @@ Technický důkaz:
 - Míla: „GPS u tohoto okamžiku není uložená ... všechna data fungují“.
   Dříve potvrdil nové tlačítko. SideStore 7 DAYS na snímku, přesná expirace
   neověřená. Žádné souřadnice, nový podpisový zásah, push či deploy.
+
+## 2026-09-27 13:24 CEST — první skutečný GPS bod
+
+Hotovo: GPS2 — část získání a uložení bodu PASS podle Míly, přesnost ±8 m.
+
+Rozhodnutí: Bez nového rozhodnutí; přesnost je hlášený odhad telefonu.
+
+Další krok: Offline vytvořit nový bod a ověřit zachování po zavření/otevření.
+
+Navrhované další kroky: GPS3 přenos, zbytek GPS2/GPS4 a mapový odkaz pro Janu.
+
+Technický důkaz: Míla hlásí „GPS uložena“ a ±8 m. Souřadnice nečteny.
+GPS2 není celé PASS; restart/offline, média a přenos nejsou tímto doložené.

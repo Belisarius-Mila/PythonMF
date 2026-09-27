@@ -1,6 +1,6 @@
 # GPS u nových okamžiků — lokální implementace
 
-## Fyzická přejímka 27. 9. 08:33 CEST
+## Fyzická přejímka 27. 9. — aktualizováno 13:24 CEST
 
 - **Import/spuštění nové verze a zachování dat PASS podle Míly**: původní
   Camino se otevře, obsahuje „Povolit / obnovit GPS“, všechna data fungují.
@@ -9,9 +9,10 @@
 - SideStore snímek v 08:29 ukazoval Camino / Sideloaded / 7 DAYS a kolečko
   místo ikony. Samotné kolečko nebylo důkazem selhání: následovalo úspěšné
   otevření nové funkce. Přesné datum nového profilu nebylo odečteno.
-- **GPS2–GPS4 NEOVĚŘENO**. Další: venku povolit při používání, počkat na
-  připravenou GPS a pořídit nový bod; starý se nedoplňuje. Potom offline
-  zachování a přenos na Mac. Bez další změny kódu, serveru či Vieweru.
+- **GPS2 částečně PASS (27. 9. 13:24)**: Míla potvrzuje „GPS uložena“,
+  hlášená přesnost ±8 m. Jde o odhad telefonu, ne geodetické ověření místa.
+  Offline vytvoření, zachování po restartu a mediální větve zbývají.
+  **GPS3/GPS4 NEOVĚŘENO**; přenos na Mac dosud nedoložen. Bez změny kódu/služeb.
 
 ### Historická příprava balíčku
 
