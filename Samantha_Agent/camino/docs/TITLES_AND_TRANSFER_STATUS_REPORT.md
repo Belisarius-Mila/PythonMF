@@ -3,6 +3,32 @@
 27. 9. 2026. Lokální implementace na výslovný pokyn Míly. Nasazení serveru,
 push, nový podpis a fyzická aktualizace telefonu jsou samostatné kroky.
 
+## Podepsaný balíček 27. 9. 20:04 CEST — nasazení čeká na brzdu
+
+Míla schválil pokračování nasazením, podpisem a instalací. Registrovaný
+upgrade přepisuje vlastní LaunchAgent mimo projekt; před stop/upgrade/start
+je vyžádaná nová přesná globální brzda. Služba se zatím nezastavila ani nezměnila.
+
+Camino 0.1.0 (7), zdroj 7dcee1c8, podepsaný generic iOS build PASS.
+Strict codesign PASS, stejné ID cz.pythonmf.camino.app, stejný tým a pokrytí
+zařízení jako build 6. Profil do 4. 10. 2026 18:07 CEST. Pro zvolenou instalaci
+přes SideStore se podepisuje znovu; jeho výslednou expiraci je třeba odečíst
+po importu, nejde o záruku provozu do 17. 10.
+
+Ve Stahování: Camino-Names-7-20260927.ipa, 1 065 916 B, SHA-256
+`8837340d63fcc3caecb095a07a39a1ef46ebcaa04d00613f8bbe794b6c413a87`.
+ZIP integrita a přesná shoda všech 5 souborů s podepsanou app PASS.
+První zabalení přidalo AppleDouble metadata; finální balíček vznikl bez nich
+a prošel úplnou kontrolou. Původní build 6 IPA se neměnil.
+
+**Zatím neimportovat.** Po globální brzdě nejprve upgrade serveru a živé
+ověření moment_title_v1, zachovaných dat/tokenu a soukromého Vieweru.
+Potom SideStore: LocalDevVPN, zelené Device Reachability, import buildu 7,
+Customize AppID ponechat zapnuté; pro tento import zkontrolovat původní ID
+a odškrtnout Append Team ID. Žádná odinstalace. Po importu kontrola starých
+dat a Přidat/Upravit název; pro přenos přepnout na Tailscale.
+Nasazení, import i fyzický přenos názvu stále NEPROVEDENO. Žádný push.
+
 ## Rozsah a rozhodnutí
 
 - Jeden nepovinný název celého Momentu: označený okamžik, samostatná fotografie,
@@ -63,7 +89,7 @@ další dávka nezdědí mobilní souhlas. Hlášení čekání uvádí počty �
   Logy: /private/tmp/camino-names-full-gate.log, camino-names-swift.log,
   camino-names-http.log, camino-title-wire.log, camino-names-ui.log
   a camino-names-device-build.log (všechny ve stejném dočasném adresáři).
-- Fyzický iPhone, podpis/instalace, živý přenos názvu a skutečná mobilní regrese:
+- Fyzický iPhone/import, živý přenos názvu a skutečná mobilní regrese:
   **NEPROVEDENO**. Běžící služba a osobní data se tímto vývojem nemění.
 
 ## Krátká fyzická přejímka po nasazení

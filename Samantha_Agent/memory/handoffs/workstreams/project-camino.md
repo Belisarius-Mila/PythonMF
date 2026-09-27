@@ -1,6 +1,12 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-09-27 20:04 CEST — nasazení/podpis/instalace schválené, ale přepnutí
+  LaunchAgentu čeká na novou globální brzdu. Služba zatím beze změny.
+  Podepsaná Camino-Names-7-20260927.ipa ve Stahování, zdroj 7dcee1c8;
+  strict codesign, ZIP a shoda app PASS. Profil do 4. 10. 18:07 CEST,
+  SideStore jej při importu znovu podepíše. Nejdříve server, pak import;
+  nic neodinstalovávat. Podrobnosti v reportu B01/B02 níže. Žádný push.
 - 2026-09-27 — B01/B02 implementované lokálně na pokyn Míly:
   názvy offline v telefonu, jednosměrný přenos a zobrazení ve Vieweru;
   oprava falešného čekání po dokončení mobilní dávky.
@@ -2451,3 +2457,22 @@ generic iOS build 7 bez podpisu PASS, plná brána 1836/1836 PASS.
 Neprovedené fyzické kroky drží uvedený report. Core Data schéma a originály
 beze změny; title je nová revize. Starší server explicitně odmítnut před
 odesláním názvů, staré přesné obálky zůstávají. Nasazení ani instalace neprovedené.
+
+## 2026-09-27 20:04 CEST — Podepsaná aktualizace připravená
+
+Hotovo: Build 7 s názvy a opravou mobilního stavu je podepsaný a zabalený
+ve Stahování jako Camino-Names-7-20260927.ipa. Starý balíček a data zachované.
+
+Rozhodnutí: Míla schválil nasazení, podpis a instalaci. Nové přepnutí
+LaunchAgentu vyžaduje přesnou globální brzdu, kterou jsme vyžádali.
+
+Další krok: Po potvrzení přepnout server, ověřit podporu názvů a zachování dat;
+teprve potom importovat aktualizaci přes SideStore do stejné aplikace.
+
+Navrhované další kroky: Jediný krátký fyzický test názvů a mobilního stavu;
+M3/M4; případný owner editor Mac zůstává odložený.
+
+Technický důkaz: Podepsaný build a strict codesign PASS, stejné ID/tým/zařízení
+jako build 6, ZIP a shoda všech 5 souborů PASS. Profil do 4. 10. 18:07 CEST;
+SideStore podpis/expirace až po importu. Služba/privátní HTTPS ověřené jako
+dostupné před nasazením, Funnel off. Žádný stop/upgrade, push ani instalace.
