@@ -1,13 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-09-27 21:56 CEST — Míla schválil nasazení, podpis a instalaci B03.
-  Podepsaný build 8 ze zdroje ee10ec28 připravený ve Stahování:
-  Camino-Attachments-8-20260927.ipa; strict podpis, ZIP a shoda obsahu PASS.
-  Stejné ID aplikace, tým a pokrytí zařízení jako build 7. Server běží,
-  ale upgrade čeká na novou přesnou globální brzdu pro LaunchAgent.
-  Neimportovat před serverem attachment_title_v1; telefon zatím nezměněný.
-  Push neautorizovaný/neprovedený. Tokeny, síť ani Cockpit neměněné.
+- 2026-09-27 22:13 CEST — po nové přesné globální brzdě nasazený B03 server
+  ab34bb5ec217. HTTPS attachment_title_v1 a Viewer PASS: 6 dnů, 40 zavřených
+  karet; anonymní přístup a záměna owner/reader odmítnuté. Zachováno 53 Momentů,
+  170 operací, 62 hashově ověřených médií / 271 510 864 B, metadata, identita
+  a oba tokeny; recovery flagy=false. Soukromá trasa zdravá, Funnel off.
+  Podepsaná Camino-Attachments-8-20260927.ipa připravená k importu do stejné
+  aplikace bez odinstalace: Customize AppID on, Append Team ID off.
+  Fyzická instalace/přejímka zatím NEOVĚŘENO. Žádný push ani restart Cockpitu.
 - 2026-09-27 21:31 CEST — Míla fyzicky potvrdil názvy Momentů a jejich přenos
   v buildu 7. B01 mobilní regrese tím není ověřená. Schválený B03 balíček:
   vlastní názvy foto/video/celých audio příloh, telefon nejnovější nahoře,
@@ -2686,3 +2687,27 @@ Technický důkaz: Zdroj ee10ec28, build 0.1.0 (8), strict codesign a všech
 profil do 4. 10. 18:07 CEST; SideStore expirace až po importu. SHA-256 a
 velikost v TITLES_AND_TRANSFER_STATUS_REPORT.md. Plná brána nezměněného kódu
 1838/1838 již PASS. Žádný stop/upgrade, push, změna tokenů/sítě ani instalace.
+
+## 2026-09-27 22:13 CEST — Server B03 nasazený, nyní import buildu 8
+
+Hotovo: Soukromý server a Viewer přijímají názvy jednotlivých příloh.
+Viewer má rozbalovací karty; archiv a přístupy zůstaly zachované.
+
+Rozhodnutí: Míla dodal novou přesnou globální brzdu pro tento upgrade.
+Registrovaný stop/upgrade/start hotový. Síť, tokeny ani Cockpit se nemění.
+
+Další krok: SideStore import Camino-Attachments-8-20260927.ipa do stejné app,
+bez odinstalace; Customize AppID on a Append Team ID off pro tento import.
+
+Navrhované další kroky: Krátký B03+B01 průchod; delší testování stejné verze;
+M3 nezávislá záloha; M4 před odjezdem.
+
+Technický důkaz: Release ab34bb5ec217 obsahuje kód ee10ec28. Před/po startu
+shodná metadata, identita, owner/reader tokeny a archiv: 53 Momentů,
+170 operací, 62 SHA-256 ověřených originálů / 271 510 864 B, recovery flagy=false.
+HTTPS attachment_title_v1, Viewer a 6 dnů HTTP 200, 40 výchozích zavřených karet;
+anonymní přístup a záměna rolí HTTP 401. Funnel off, Cockpit healthy.
+Upgrade uchoval DB snapshoty a konfiguraci, nikoli nezávislou M3 zálohu.
+Po stopu krátce obsazený port bez poslouchajícího procesu; po uvolnění normální
+start, bez kill či úpravy síťových ochran. Fyzický import a přejímka B03/B01
+dosud NEOVĚŘENO; žádný push. Podpis a SHA-256 IPA viz report.

@@ -16,12 +16,26 @@ Ve Stahování: Camino-Attachments-8-20260927.ipa, 1 093 217 B, SHA-256
 ZIP integrita a přesná shoda všech 5 souborů s podepsanou aplikací PASS,
 bez AppleDouble. Starší IPA zachované. Log: camino-attachments-signed-build.log.
 
-Registrovaný status potvrzuje běžící vlastněnou službu s Viewer grantem,
-nikoli živou HTTPS přejímku. Server zatím nepřepnutý: změna LaunchAgentu
-čeká na novou přesnou globální brzdu. Předchozí souhlas patřil buildu 7.
-Žádný push, stop/upgrade, změna tokenů/sítě/Cockpitu ani fyzická instalace.
-Nejdřív server attachment_title_v1, potom SideStore import stejné aplikace
-bez odinstalace: Customize AppID on, Append Team ID off pro tento import.
+### Server nasazený 27. 9. 2026 22:13 CEST
+
+Po nové přesné globální brzdě registrovaný stop/upgrade/start PASS:
+release ab34bb5ec217 s kódem ee10ec28. Před/po shodná metadata, identita,
+owner/reader tokeny a archiv: 53 Momentů / 170 operací / 62 hashově ověřených
+médií (271 510 864 B), recovery flagy=false. Upgrade uchoval DB snapshoty
+a původní konfiguraci; nejde o nezávislou M3 zálohu.
+
+Živé HTTPS API potvrzuje attachment_title_v1. Viewer a všech 6 denních stránek
+HTTP 200, 40 výchozích zavřených karet. Anonymní přístup a záměna owner/reader
+odmítnuté HTTP 401. Soukromá trasa zdravá, Funnel off; Cockpit zdravý,
+bez restartu. Po stopu port krátce obsazený bez poslouchajícího procesu;
+po jeho uvolnění standardní start, žádný kill ani obcházení ochrany.
+
+**Server je připravený, nyní lze importovat build 8.** SideStore: LocalDevVPN,
+zelené Device Reachability, Customize AppID on, Append Team ID off pro tento
+import, výsledné ID cz.pythonmf.camino.app. Bez odinstalace, tokeny zůstávají.
+Pro následný přenos přepnout LocalDevVPN na Tailscale.
+Fyzická instalace, skutečná SideStore expirace a přejímka B03/B01 zatím
+NEOVĚŘENO. Žádný push ani změna Tailscale/Serve/Funnel.
 
 ## B03 — názvy příloh a přehled dne, 27. 9. 2026
 
