@@ -1,5 +1,34 @@
 # GPS u nových okamžiků — lokální implementace
 
+Aktualizace 27. 9. 08:02 CEST: **Camino 0.1.0 (6)** ze zdroje `3fbf7232`
+je připravené ve Stahování jako `Camino-GPS-6-20260927.ipa` (1 049 786 B).
+Stejné ID `cz.pythonmf.camino.app`, stejný tým a pokrytí zařízení jako build 5;
+GPS usage description přítomný, background režim pouze audio. Podepsaný
+generic iOS build, strict codesign i ZIP integrita PASS, binární obsah IPA
+shodný s ověřenou aplikací. SHA-256:
+`e805f9866400897ddcd320632f370a9ece16ddfcf2d3d35c59ba09f189fa523c`.
+Přiložený starý profil vyprší **27. 9. 12:10 CEST**: pouze pro **nový podpis
+v SideStore**, ne přímou instalaci. Nová expirace bude známá až po importu.
+Na iPhonu zatím nic neinstalováno; GPS1–GPS4 zůstávají NEOVĚŘENO.
+Push, server, Viewer grant ani Serve/Funnel se tímto krokem nemění.
+
+### Import buildu 6
+
+1. Přenést nové IPA ze Stahování na Macu do **Souborů na iPhonu**, například
+   AirDropem. Kabel není pro import SideStore potřeba.
+2. Camino zavřít. Pro SideStore zapnout **LocalDevVPN**, ověřit zelené
+   **Device Reachability**. Při červené postupovat podle LL-051; RemotePair
+   port je proměnlivý, nepřebírat historickou hodnotu.
+3. SideStore → My Apps → **+** → vybrat `Camino-GPS-6-20260927.ipa`.
+   **Customize AppID** ponechat zapnuté. V dialogu tohoto konkrétního importu
+   ověřit ID `cz.pythonmf.camino.app` a **odškrtnout Append Team ID**.
+   Checkbox se může při každém importu znovu zaškrtnout. Nic neodinstalovávat.
+4. Po dokončení otevřít původní Camino, ověřit stará data a novou položku
+   **Povolit / obnovit GPS**. Zatím GPS nepovolovat: první krátký test GPS1
+   ověřuje nepovolenou polohu. Odečíst novou platnost v SideStore.
+5. Až pro přenos GPS3 odpojit LocalDevVPN a zapnout **Tailscale**. Nestřídat
+   tokeny ani znovu párovat, pokud stávající Camino připojení funguje.
+
 Rozhodnutí Míly 27. 9. 2026: mapu odložit, sběr a přenos GPS dokončit před
 cestou. Starší záznamy se nedoplňují. Před odjezdem naváže jednoduchý odkaz
 „Otevřít místo v mapě“ ve Vieweru pro Janu, ne vlastní mapa ani sledování trasy.
@@ -42,7 +71,7 @@ cestou. Starší záznamy se nedoplňují. Před odjezdem naváže jednoduchý o
   **UI 1/1 PASS**, nepovolená GPS neblokuje marker a stav přežije restart.
   Snímek hlavní obrazovky vizuálně zkontrolovaný. Plná projektová brána:
   **1830/1830 PASS** (364,7 s), následná rychlá statická brána PASS.
-  Fyzická GPS, podpis/instalace a přenos z iPhonu NEOVĚŘENO.
+  Fyzická GPS, nový SideStore podpis/instalace a přenos z iPhonu NEOVĚŘENO.
 
 Opakovatelná syntetická zkouška (v žádném kroku nečte živý archiv):
 

@@ -3,6 +3,8 @@
 Rozhodnutí Míly: 2026-09-25. Cesta 3.–17. října 2026; cílové zmrazení 2. října.
 Novější rozhodnutí 27. 9.: **GPS neodkládat**, pouze nové okamžiky; nyní
 lokální záznam a přenos bodu, poté podepsaná aktualizace a GPS1–GPS4.
+27. 9. 08:02: IPA build 6 připravený ve Stahování pro nový podpis/import
+SideStore se stejným ID, Append Team ID off. Telefon zatím nezměněný.
 Před odjezdem doplnit u povoleného okamžiku Janina Vieweru odkaz na externí
 mapu. Vlastní mapa/trasa zůstává odložená. [GPS_CAPTURE_REPORT.md](GPS_CAPTURE_REPORT.md)
 rozlišuje implementaci, automatické testy a dosud neověřený telefon.

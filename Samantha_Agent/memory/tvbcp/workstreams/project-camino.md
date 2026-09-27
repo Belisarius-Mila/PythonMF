@@ -1,7 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-27 07:55 CEST — GPS u nových Momentů lokálně implementovaná.
+- Aktualizováno: 2026-09-27 08:02 CEST — GPS IPA build 6 připravený pro SideStore.
+- `Camino-GPS-6-20260927.ipa` ve Stahování, zdroj `3fbf7232`, stejné ID;
+  strict podpis a ZIP PASS. Starý profil pouze do 27. 9. 12:10 CEST:
+  nutný nový SideStore podpis, Append Team ID off. Telefon dosud nezměněný.
 - Bod s časem/přesností se ukládá offline s capture intentem a přenáší původním
   API; staré záznamy se nedoplňují. Bez Core Data/server migrace a bez trasy.
 - Detaily, omezení prvního fixu a krátký GPS1–GPS4 průchod:
@@ -10,7 +13,7 @@
 - Nové rozhodnutí U16: před odjezdem odkaz z povoleného okamžiku Vieweru
   na externí mapu; samotná mapa/trasa odložená. Odkaz ještě není implementovaný.
 - Ověření: Swift 44/44, API 3/3, UI 1/1, iOS build a plná brána 1830/1830 PASS.
-- Další: samostatně schválená aktualizace iPhonu
+- Další: ruční import připraveného IPA do stejného Camina přes SideStore
   a GPS1–GPS4; naváže odkaz pro Janu, Viewer/RT3/RT4 a M3/M4.
 
 ### Poslední fyzická přejímka před GPS (historický stav)
@@ -2272,3 +2275,24 @@ Technický důkaz:
   iOS build a plná brána 1830/1830 PASS. Fyzická GPS NEOVĚŘENO.
 - Záznam nečeká; před prvním fixem či po stáří nad 120 s může bod chybět.
   Žádný backfill, změna živých dat, push, nasazení ani instalace iPhonu.
+
+## 2026-09-27 08:02 CEST — GPS aktualizace připravená pro SideStore
+
+Hotovo:
+- Nové IPA buildu 6 je ve Stahování; zachovává stejné ID a je ověřené.
+
+Rozhodnutí:
+- Pokračování autorizuje přípravu aktualizace, ne push či nasazení serveru.
+  Starý vývojový profil se nesmí použít k přímé instalaci; SideStore jej nahradí.
+
+Další krok:
+- Ruční import přes SideStore, Append Team ID off, ověřit data a novou platnost.
+
+Navrhované další kroky:
+- GPS1–GPS4, mapový odkaz pro Janu, Viewer/RT3/RT4, M3/M4.
+
+Technický důkaz:
+- Podepsaný build a strict codesign PASS, ZIP integrita a shoda binárky PASS.
+  Velikost/hash a postup v GPS_CAPTURE_REPORT.md. Kód nezměněn od 3fbf7232;
+  předešlá plná brána platí, nyní pouze statická kontrola dokumentace.
+  Telefon, soukromý archiv a služby beze změny; fyzická GPS NEOVĚŘENO.
