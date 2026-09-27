@@ -51,6 +51,7 @@ enum CaminoAudioSyncLayout {
     private(set) var currentSessionID: UUID?
     var targetMomentID: UUID?
     var relatedMomentID: UUID?
+    var locationAtCapture: ((Date) -> LocalLocationFix?)?
 
     init(media: RecordingStore, metadata: CaminoLocalStore) {
         self.media = media
@@ -65,7 +66,8 @@ enum CaminoAudioSyncLayout {
             kind: kind == .reflection ? .reflection : .comment,
             startedAt: draft.startedAt,
             targetMomentID: kind == .comment ? targetMomentID : nil,
-            relatedMomentID: kind == .reflection ? relatedMomentID : nil)
+            relatedMomentID: kind == .reflection ? relatedMomentID : nil,
+            location: continuation == nil ? locationAtCapture?(draft.startedAt) : nil)
         currentSessionID = draft.sessionID
         return draft
     }

@@ -22,6 +22,18 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-052 — Úplný přenos neprokazuje přítomnost nepovinné GPS
+
+- Problém: serverový model GPS existoval, ale iPhone posílal `location=null`;
+  zelený počet úplných Momentů proto nebyl důkazem zaznamenané polohy.
+- Typ: opakující se
+- Řešení nalezeno: 27092026
+- Řešení: ověřit celý řetězec capture → trvalý intent → Swift JSON → API →
+  znovuotevřená DB, ne jen existenci pole či stav uploadu. U audia/videa
+  zachovat bod začátku, přílohou jej neměnit. Test používá syntetické body;
+  skutečný fix a telefonní přenos potvrdit zvlášť GPS1–GPS4. Podrobnosti
+  `camino/docs/GPS_CAPTURE_REPORT.md`; staré body se nedoplňují.
+
 ### LL-051 — SideStore RemotePair port a Camino owner token jsou dvě různé překážky
 
 - Problém: SideStore hlásil nedostupný telefon i se zapnutým LocalDevVPN;

@@ -19,6 +19,7 @@ let package = Package(
                       "Tests/CaminoLocalCoreTests", "App/CaminoApp.swift",
                       "App/CaminoViewModel.swift", "App/CameraCaptureController.swift",
                       "App/CameraCaptureView.swift", "App/CaminoSyncCoordinator.swift",
+                      "App/CaminoLocationProvider.swift", "App/CaminoLocationStatusView.swift",
                       "App/Info.plist"],
             sources: ["App/IntentRecordingStore.swift", "Tests/CaminoAudioLinkTests/AudioLinkTests.swift"]
         ),

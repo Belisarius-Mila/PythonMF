@@ -322,6 +322,16 @@ struct CaminoMediaDetailView: View {
                     }
                     Text("Nahráno: \(current.capture.localWall) · kapitola \(current.chapterDate)")
                         .font(.subheadline)
+                    if let fix = current.location {
+                        Label(fix.approximate ? "GPS uložena · přibližná poloha" : "GPS uložena",
+                              systemImage: "location.fill")
+                        Text(String(format: "%.6f, %.6f · přesnost ±%.0f m",
+                                    fix.latitude, fix.longitude, fix.horizontalAccuracyMeters))
+                            .font(.caption).foregroundStyle(.secondary)
+                    } else {
+                        Label("GPS u tohoto okamžiku není uložená", systemImage: "location.slash")
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
                     Label(current.privacy.title,
                           systemImage: current.privacy == .ownerOnly ? "lock.fill" : "book")
                     if model.pendingServerMomentIDs.contains(current.id) {

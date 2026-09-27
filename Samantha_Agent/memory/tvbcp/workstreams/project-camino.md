@@ -1,6 +1,20 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- Aktualizováno: 2026-09-27 07:55 CEST — GPS u nových Momentů lokálně implementovaná.
+- Bod s časem/přesností se ukládá offline s capture intentem a přenáší původním
+  API; staré záznamy se nedoplňují. Bez Core Data/server migrace a bez trasy.
+- Detaily, omezení prvního fixu a krátký GPS1–GPS4 průchod:
+  `camino/docs/GPS_CAPTURE_REPORT.md`. Telefon zatím neaktualizovaný;
+  skutečná GPS a telefonní přenos NEOVĚŘENO. Bez push/nasazení/grantu Vieweru.
+- Nové rozhodnutí U16: před odjezdem odkaz z povoleného okamžiku Vieweru
+  na externí mapu; samotná mapa/trasa odložená. Odkaz ještě není implementovaný.
+- Ověření: Swift 44/44, API 3/3, UI 1/1, iOS build a plná brána 1830/1830 PASS.
+- Další: samostatně schválená aktualizace iPhonu
+  a GPS1–GPS4; naváže odkaz pro Janu, Viewer/RT3/RT4 a M3/M4.
+
+### Poslední fyzická přejímka před GPS (historický stav)
+
 - Aktualizováno: 2026-09-26 23:19 CEST — fyzická obnova a následný přenos PASS.
 - SideStore import buildu 5, zachování dat, dokončení obnovy a stav po novém
   otevření Camina potvrzené Mílou. Server po obnově: oba flagy=false,
@@ -2235,3 +2249,26 @@ Technický důkaz:
   Obnova Camina prošla po přepnutí na Tailscale a výměně starého tokenu
   (401) za aktuální (200). Nezaměňovat opravu podpisového připojení s Camino API.
 - Tento zápis mění jen dokumentaci; Viewer grant, službu ani síť nemění.
+
+## 2026-09-27 07:55 CEST — nové GPS body a plán odkazu pro Janu
+
+Hotovo:
+- Lokální implementace polohy nových Momentů, offline uložení, přenos a
+  zobrazení přítomnosti/přesnosti na telefonu. Staré záznamy beze změny.
+
+Rozhodnutí:
+- Míla: mapu odložit, GPS nikoli. Před cestou odkaz z povoleného okamžiku
+  Vieweru na mapový bod (U16), ne souvislé sledování. Staré body nedoplňovat.
+
+Další krok:
+- Samostatně schválená aktualizace telefonu a
+  jediný krátký GPS1–GPS4 průchod podle GPS_CAPTURE_REPORT.md.
+
+Navrhované další kroky:
+- Odkaz na mapu pro Janu, poté povolení Vieweru/RT3/RT4, M3/M4 a podpis 1. 10.
+
+Technický důkaz:
+- Swift 44/44, API 3/3 (včetně Swift → owner API → restart DB), UI 1/1,
+  iOS build a plná brána 1830/1830 PASS. Fyzická GPS NEOVĚŘENO.
+- Záznam nečeká; před prvním fixem či po stáří nad 120 s může bod chybět.
+  Žádný backfill, změna živých dat, push, nasazení ani instalace iPhonu.

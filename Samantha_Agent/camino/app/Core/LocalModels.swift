@@ -75,6 +75,37 @@ public struct CaptureStamp: Equatable, Sendable {
     }
 }
 
+/// A single measured point, never a track. Matches the existing server contract.
+public struct LocalLocationFix: Codable, Equatable, Sendable {
+    public let latitude: Double
+    public let longitude: Double
+    public let measuredAtUTCMilliseconds: Int64
+    public let horizontalAccuracyMeters: Double
+
+    public init(latitude: Double, longitude: Double, measuredAtUTCMilliseconds: Int64,
+                horizontalAccuracyMeters: Double) {
+        self.latitude = latitude
+        self.longitude = longitude
+        self.measuredAtUTCMilliseconds = measuredAtUTCMilliseconds
+        self.horizontalAccuracyMeters = horizontalAccuracyMeters
+    }
+
+    public func usable(at capture: Int64) -> Bool {
+        latitude.isFinite && longitude.isFinite && horizontalAccuracyMeters.isFinite
+            && (-90...90).contains(latitude) && (-180...180).contains(longitude)
+            && horizontalAccuracyMeters >= 0
+            && measuredAtUTCMilliseconds >= 0 && measuredAtUTCMilliseconds <= capture
+            && capture - measuredAtUTCMilliseconds <= 120_000
+    }
+
+    public var approximate: Bool { horizontalAccuracyMeters > 100 }
+    public var payload: [String: Any] {
+        ["latitude": latitude, "longitude": longitude,
+         "measured_at_utc_ms": measuredAtUTCMilliseconds,
+         "horizontal_accuracy_m": horizontalAccuracyMeters]
+    }
+}
+
 public struct LocalMoment: Equatable, Identifiable, Sendable {
     public let id: UUID
     public let tripID: UUID
@@ -91,6 +122,7 @@ public struct LocalMoment: Equatable, Identifiable, Sendable {
     public let partialAudio: Bool
     /// A private addendum is a separate Moment linked to, not merged into, this parent.
     public let relatedMomentID: UUID?
+    public var location: LocalLocationFix? = nil
 }
 
 public enum LocalTextRole: String, Codable, Sendable, CaseIterable {

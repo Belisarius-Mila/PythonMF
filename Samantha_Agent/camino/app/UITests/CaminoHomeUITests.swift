@@ -79,6 +79,7 @@ import XCTest
         XCTAssertTrue(app.staticTexts["Zkušební cesta"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.buttons["startComment"].exists)
         XCTAssertTrue(app.buttons["startReflection"].exists)
+        XCTAssertTrue(app.buttons["refreshLocation"].exists)
         XCTAssertTrue(app.buttons["startPhoto"].exists)
         XCTAssertTrue(app.buttons["startVideoCamera"].exists)
         XCTAssertTrue(app.staticTexts[
@@ -94,6 +95,7 @@ import XCTest
         XCTAssertTrue(app.staticTexts["Jen pro mě"].exists)
         app.buttons["momentRow"].firstMatch.tap()
         XCTAssertTrue(app.buttons["commentOnMoment"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["GPS u tohoto okamžiku není uložená"].exists)
         XCTAssertTrue(app.buttons["Přidat fotografii"].exists)
         app.buttons["Hotovo"].tap()
         app.terminate()

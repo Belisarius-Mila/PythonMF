@@ -14,6 +14,14 @@ import CaminoLocalCore
         let media = try RecordingStore(root: root.appendingPathComponent("Audio"),
                                        inspect: inspect)
         let linked = IntentRecordingStore(media: media, metadata: local)
+        var capturedLocation: LocalLocationFix?
+        linked.locationAtCapture = { date in
+            let fix = LocalLocationFix(latitude: 12.25, longitude: 34.5,
+                measuredAtUTCMilliseconds: Int64(date.timeIntervalSince1970 * 1_000),
+                horizontalAccuracyMeters: 8)
+            capturedLocation = fix
+            return fix
+        }
         let draft = try linked.begin(kind: .reflection, continuation: nil)
         let pending = try XCTUnwrap(local.pendingAudioIntents().first)
         XCTAssertEqual(pending.sessionID, draft.sessionID)
@@ -33,6 +41,8 @@ import CaminoLocalCore
         XCTAssertEqual(moment.id, pending.momentID)
         XCTAssertEqual(moment.privacy, .ownerOnly)
         XCTAssertEqual(moment.audioSessionID, draft.sessionID)
+        XCTAssertNotNil(capturedLocation)
+        XCTAssertEqual(moment.location, capturedLocation)
         XCTAssertEqual(try reopened.acceptCompletedAudio(sessionID: session.id,
                                                          kind: .reflection, partial: false), moment)
         XCTAssertEqual(try reopened.moments(tripID: trip.id).count, 1)

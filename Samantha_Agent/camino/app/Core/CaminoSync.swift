@@ -822,7 +822,7 @@ public struct CaminoSyncDiscovery: Sendable {
                     "related_moment_id": snapshot.relatedMomentID.map {
                         $0.uuidString.lowercased() as Any
                     } ?? NSNull(),
-                    "location": NSNull(),
+                    "location": moment.location.map { $0.payload as Any } ?? NSNull(),
                 ]))
         }
         for asset in media.sorted(by: { $0.id.uuidString < $1.id.uuidString }) {

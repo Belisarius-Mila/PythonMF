@@ -136,10 +136,11 @@ public struct LocalMediaRecovery: Equatable, Sendable {
 
     @discardableResult public func savePhoto(_ data: Data, targetMomentID: UUID? = nil,
                                               at date: Date = Date(),
-                                              timeZone: TimeZone = .current) async throws -> LocalMediaAsset {
+                                              timeZone: TimeZone = .current,
+                                              location: LocalLocationFix? = nil) async throws -> LocalMediaAsset {
         _ = try checkSpace(for: .photo)
         let intent = try metadata.beginMediaIntent(kind: .photo, targetMomentID: targetMomentID,
-                                                   at: date, timeZone: timeZone)
+                                                   at: date, timeZone: timeZone, location: location)
         let pending = url(intent.pendingRelativePath)
         try await Task.detached(priority: .utility) {
             try Self.writeExclusive(data, to: pending)
@@ -150,10 +151,10 @@ public struct LocalMediaRecovery: Equatable, Sendable {
     /// The movie delegate writes to this create-only pending URL. A sound
     /// capture never silently falls back to video-only when mic access fails.
     public func beginVideo(targetMomentID: UUID? = nil, silent: Bool,
-                           at date: Date = Date()) throws -> (LocalMediaIntent, URL, Bool) {
+                           at date: Date = Date(), location: LocalLocationFix? = nil) throws -> (LocalMediaIntent, URL, Bool) {
         let lowSpaceWarning = try checkSpace(for: .video)
         let intent = try metadata.beginMediaIntent(kind: .video,
-            targetMomentID: targetMomentID, silentRequested: silent, at: date)
+            targetMomentID: targetMomentID, silentRequested: silent, at: date, location: location)
         let pending = url(intent.pendingRelativePath)
         guard !files.fileExists(atPath: pending.path),
               !files.fileExists(atPath: url(intent.originalRelativePath).path) else {

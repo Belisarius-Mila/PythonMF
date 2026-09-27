@@ -58,3 +58,16 @@ rodiny nadále vyžaduje samostatnou vědomou akci.
   při globálním režimu `Do deníku` založit Úvahu, ověřit `Jen pro mě` na telefonu
   i nepřítomnost ve Vieweru, potom použít `Vložit do deníku`, doručit revizi a
   ověřit text i povolené původní audio ve Vieweru.
+
+## U16 — odkaz na místo ve Vieweru (rozhodnutí 27. 9. 2026)
+
+Míla výslovně požaduje před odjezdem odkaz z okamžiku ve Vieweru pro Janu
+na externí mapu s jeho GPS bodem. To pro tento odkaz nahrazuje starší zákaz
+vydání přesné polohy do Vieweru; neznamená povolení živého sledování trasy.
+Platí pouze pro aktuálně povolený neskrytý `diary` Moment. `Jen pro mě`,
+autorizace Vieweru, očištění EXIF médií a U15 zůstávají beze změny.
+Mapa se neotevírá ani nenačítá automaticky. Kliknutím se poskytovateli mapy
+předá bod, nikoli token nebo text deníku; již otevřený bod nelze odvolat.
+Tento zápis schvaluje rozsah navazující implementace, **neprohlašuje odkaz
+za hotový ani Viewer za povolený**. První krok sbírá/přenáší nové body do
+soukromého archivu, bez zpětného doplňování starých záznamů.

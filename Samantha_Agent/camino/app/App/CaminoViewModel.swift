@@ -12,6 +12,7 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
 #endif
 
 @MainActor final class CaminoViewModel: ObservableObject {
+    let location = CaminoLocationProvider()
     @Published private(set) var trips: [LocalTrip] = []
     @Published private(set) var activeTrip: LocalTrip?
     @Published private(set) var moments: [LocalMoment] = []
@@ -91,6 +92,7 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
             self.mediaVault = vault
             self.audio = audio
             self.sync = try? CaminoSyncCoordinator(local: local, recording: recording, root: root)
+            recording.locationAtCapture = { [weak location] date in location?.snapshot(at: date) }
             startupError = nil
             cameraError = vault == nil ? "Místní úložiště fotek a videí není dostupné." : nil
             driver.event = { [weak audio] in audio?.interrupt(reason: "Zvukový vstup se zastavil") }
@@ -187,8 +189,11 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
         guard !audioBusy, !showCamera, let local else { return }
         let warning = storageMessage(for: .text)
         do {
-            _ = try local.markMoment()
-            message = warning ?? "Okamžik označen. Uloženo v telefonu."
+            let date = Date()
+            let moment = try local.markMoment(at: date, location: location.snapshot(at: date))
+            message = warning ?? (moment.location == nil
+                ? "Okamžik označen. Uloženo v telefonu bez GPS."
+                : "Okamžik označen včetně GPS. Uloženo v telefonu.")
             refresh()
         } catch { message = error.localizedDescription }
     }
@@ -260,6 +265,7 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
     func leaveAudio() { if canLeaveAudio { showAudio = false; refresh() } }
 
     func scenePhaseChanged(_ phase: ScenePhase) {
+        location.setForeground(phase == .active)
         if phase == .active {
             audio?.enterForeground()
             if audioBusy { showAudio = true }
@@ -493,6 +499,7 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
     }
 
     func openCamera(_ kind: LocalMediaKind, targetMomentID: UUID? = nil) {
+        location.refresh()
         guard !audioBusy, !showAudio, !showCamera, mediaVault != nil,
               activeTrip != nil else {
             message = cameraError ?? "Kamera teď není dostupná."
@@ -645,8 +652,10 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
     @discardableResult func savePhoto(_ data: Data) async -> LocalMediaAsset? {
         guard let mediaVault, showCamera else { return nil }
         do {
+            let date = Date()
             let asset = try await mediaVault.savePhoto(data,
-                targetMomentID: cameraTargetMomentID)
+                targetMomentID: cameraTargetMomentID, at: date,
+                location: location.snapshot(at: date))
             message = "Fotografie uložena v telefonu. Mac zatím neověřen."
             refresh()
             await reconcileMedia()
@@ -670,8 +679,10 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
             return nil
         }
         do {
+            let date = Date()
             let (intent, pendingURL, warning) = try mediaVault.beginVideo(
-                targetMomentID: cameraTargetMomentID, silent: silent)
+                targetMomentID: cameraTargetMomentID, silent: silent, at: date,
+                location: location.snapshot(at: date))
             activeVideoIntent = intent
             message = thermal == .warn ? thermalWarningMessage
                 : warning ? warningStorageMessage(for: .video) : nil

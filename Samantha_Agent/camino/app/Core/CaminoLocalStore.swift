@@ -135,7 +135,8 @@ private struct LocalPendingMomentLink: Codable, Equatable {
     }
 
     @discardableResult public func markMoment(at date: Date = Date(),
-                                               timeZone: TimeZone = .current) throws -> LocalMoment {
+                                               timeZone: TimeZone = .current,
+                                               location: LocalLocationFix? = nil) throws -> LocalMoment {
         guard let trip = try activeTrip() else { throw LocalStoreError.noActiveTrip }
         let stamp = CaptureStamp.record(date, timeZone: timeZone)
         let privacy = try newMomentPrivacy()
@@ -144,6 +145,7 @@ private struct LocalPendingMomentLink: Codable, Equatable {
             let row = insertMoment(id: UUID(), tripID: trip.id, dayID: dayID,
                                    kind: .marker, privacy: privacy, stamp: stamp,
                                    audioSessionID: nil, partialAudio: false)
+            try saveCaptureLocation(location, momentID: required(row, "id"), stamp: stamp)
             try save()
             return try decodeMoment(row)
         } catch { context.rollback(); throw error }
@@ -154,7 +156,7 @@ private struct LocalPendingMomentLink: Codable, Equatable {
     @discardableResult public func beginAudioIntent(
         sessionID: UUID, kind: LocalMomentKind, startedAt: Date,
         timeZone: TimeZone = .current, targetMomentID: UUID? = nil,
-        relatedMomentID: UUID? = nil
+        relatedMomentID: UUID? = nil, location: LocalLocationFix? = nil
     ) throws -> AudioIntent {
         guard kind == .comment || kind == .reflection else { throw LocalStoreError.invalidAudioIntent }
         if let existing = try object("AudioIntentRecord", id: sessionID, key: "sessionID") {
@@ -208,6 +210,9 @@ private struct LocalPendingMomentLink: Codable, Equatable {
             row.setValue(target != nil, forKey: "attaching")
             write(stamp, to: row)
             row.setValue(false, forKey: "finalized")
+            if target == nil {
+                try saveCaptureLocation(location, momentID: required(row, "momentID"), stamp: stamp)
+            }
             if let relatedMomentID {
                 try setEncodedSetting(LocalPendingMomentLink(
                     sessionID: sessionID, parentMomentID: relatedMomentID),
@@ -322,7 +327,8 @@ private struct LocalPendingMomentLink: Codable, Equatable {
     /// An attachment explicitly names its existing Moment; proximity never links it.
     public func beginMediaIntent(kind: LocalMediaKind, targetMomentID: UUID? = nil,
                                  silentRequested: Bool = false, at date: Date = Date(),
-                                 timeZone: TimeZone = .current) throws -> LocalMediaIntent {
+                                 timeZone: TimeZone = .current,
+                                 location: LocalLocationFix? = nil) throws -> LocalMediaIntent {
         guard let trip = try activeTrip() else { throw LocalStoreError.noActiveTrip }
         guard kind == .video || !silentRequested else { throw LocalStoreError.invalidMediaIntent }
         let target: LocalMoment?
@@ -350,6 +356,9 @@ private struct LocalPendingMomentLink: Codable, Equatable {
             row.setValue(silentRequested, forKey: "silentRequested")
             row.setValue(false, forKey: "finalized")
             write(stamp, to: row)
+            if target == nil {
+                try saveCaptureLocation(location, momentID: required(row, "momentID"), stamp: stamp)
+            }
             try save()
             return try decodeMediaIntent(row)
         } catch { context.rollback(); throw error }
@@ -936,6 +945,24 @@ private struct LocalPendingMomentLink: Codable, Equatable {
                   startDate: row.value(forKey: "startDate") as? String)
     }
 
+    // Additive metadata in the existing store, no Core Data schema migration.
+    // Saved atomically with the capture intent, before media starts. Never backfilled.
+    private func saveCaptureLocation(_ fix: LocalLocationFix?, momentID: UUID,
+                                     stamp: CaptureStamp) throws {
+        guard let fix, fix.usable(at: stamp.utcMilliseconds) else { return }
+        let key = "captureLocation:\(momentID.uuidString.lowercased())"
+        guard try settingValue(key) == nil else { throw LocalStoreError.duplicateIdentity }
+        try setEncodedSetting(fix, key: key)
+    }
+
+    private func captureLocation(momentID: UUID, stamp: CaptureStamp) throws -> LocalLocationFix? {
+        let fix: LocalLocationFix? = try encodedSetting("captureLocation:\(momentID.uuidString.lowercased())")
+        guard fix == nil || fix!.usable(at: stamp.utcMilliseconds) else {
+            throw LocalStoreError.inconsistentStore
+        }
+        return fix
+    }
+
     private func decodeMoment(_ row: NSManagedObject) throws -> LocalMoment {
         let kindRaw: String = try required(row, "kind")
         let privacyRaw: String = try required(row, "privacy")
@@ -953,7 +980,8 @@ private struct LocalPendingMomentLink: Codable, Equatable {
                            important: try required(row, "important"),
                            audioSessionID: row.value(forKey: "audioSessionID") as? UUID,
                            partialAudio: try required(row, "partialAudio"),
-                           relatedMomentID: journal.relatedMomentID)
+                           relatedMomentID: journal.relatedMomentID,
+                           location: try captureLocation(momentID: required(row, "id"), stamp: decodeStamp(row)))
     }
 
     private func decodeIntent(_ row: NSManagedObject) throws -> AudioIntent {

@@ -1,6 +1,13 @@
 # Camino — minimalistický cestovní plán
 
 Rozhodnutí Míly: 2026-09-25. Cesta 3.–17. října 2026; cílové zmrazení 2. října.
+Novější rozhodnutí 27. 9.: **GPS neodkládat**, pouze nové okamžiky; nyní
+lokální záznam a přenos bodu, poté podepsaná aktualizace a GPS1–GPS4.
+Před odjezdem doplnit u povoleného okamžiku Janina Vieweru odkaz na externí
+mapu. Vlastní mapa/trasa zůstává odložená. [GPS_CAPTURE_REPORT.md](GPS_CAPTURE_REPORT.md)
+rozlišuje implementaci, automatické testy a dosud neověřený telefon.
+
+Historický stav před GPS krokem:
 Aktualizace 26. 9. 23:19 CEST: server a iPhone build 5 nasazené, fyzické
 dokončení obnovy i stav po novém otevření PASS. Následný komentář: telefon
 42 úplných, Mac 42 Momentů / 46 médií; původní archiv zachovaný, oba flagy=false.
@@ -67,7 +74,8 @@ minimalistického cíle; nejsou tvrzením, že je Míla jednotlivě specifikoval
 ## Obsah Vieweru a nepřekročitelné minimum
 
 - Index dnů a jednoduchý detail dne v časovém pořadí. Jen dostupný lidský text;
-  bez přepisu ukázat audio s přehrávačem, ne čekat na AI. Bez map a souhrnů.
+  bez přepisu ukázat audio s přehrávačem, ne čekat na AI. Bez vlastní mapy
+  a souhrnů; nově schválený jednoduchý odkaz na místo doplnit před odjezdem.
 - Jedna velikost očištěné foto kopie, lazy loading; jeden kompatibilní video
   proxy profil s posterem a posunem přehrávání; kompatibilní audio odvozenina
   zachovávající pořadí a mezery nahrávky. Originály neměnit ani veřejně vydávat.

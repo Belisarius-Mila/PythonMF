@@ -37,6 +37,7 @@ import SwiftUI
             }) { moment in
                 CaminoMediaDetailView(model: model, moment: moment)
             }
+            .onAppear { model.location.setForeground(scenePhase == .active) }
             .onChange(of: scenePhase) { _, phase in model.scenePhaseChanged(phase) }
         }
     }
@@ -136,6 +137,8 @@ private struct CaptureHomeView: View {
                     }
                     .padding()
                     .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
+
+                    CaminoLocationStatusView(location: model.location)
 
                     HStack(spacing: 12) {
                         cameraAction("Foto", symbol: "camera", kind: .photo)
