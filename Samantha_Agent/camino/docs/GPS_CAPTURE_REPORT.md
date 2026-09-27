@@ -120,7 +120,7 @@ a aktuální owner token. Žádné souřadnice ani tokeny neposílat do chatu.
    vypnutou přesnou polohu; záznam funguje, bod buď chybí, nebo je podle
    skutečné přesnosti označen jako přibližný. Nedostupné varianty NEOVĚŘENO.
 
-GPS1 **PASS** podle přejímky výše; GPS2–GPS4 **NEOVĚŘENO**. Syntetická API zkouška nedokládá fyzický GPS fix,
+GPS1 **PASS**, GPS2 **částečně PASS** podle přejímky výše; GPS3/GPS4 **NEOVĚŘENO**. Syntetická API zkouška nedokládá fyzický GPS fix,
 spotřebu ani skutečnou telefonní síť. Živý server, grant Vieweru, Serve/Funnel
 a instalace telefonu nebyly v tomto kroku změněny.
 
