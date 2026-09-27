@@ -1,19 +1,19 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-27 13:51 CEST — přesnost fota ±6 m shodná v telefonu i na Macu.
+- Aktualizováno: 2026-09-27 13:58 CEST — video s GPS ±11 m uložené a přenesené PASS.
 - Míla potvrzuje novou položku „Povolit / obnovit GPS“, funkční všechna data
   a nový okamžik bez polohy před jejím povolením: data/GPS1 PASS. Nyní potvrzuje
   „GPS uložena“, hlášená přesnost ±8 m. Nově potvrzuje vytvoření offline
   a zachování po zavření/otevření: PASS. Foto ±6 m a komentář ±11 m nyní
   potvrzené v telefonu; jejich offline/restart není samostatně doložený.
-- Mac read-only: 47 Momentů / 138 operací, 4 GPS body (2 markery, foto, komentář).
+- Mac read-only: 48 Momentů / 140 operací, 5 GPS bodů (2 markery, foto, komentář, video).
   Všechny přijaté GPS payloady se shodují s uložením i po novém otevření DB.
-  Nové foto/audio soubory velikostí i SHA-256 odpovídají ověřeným účtenkám.
-  Bez konfliktů, oba flagy=false. Telefon podle Míly 47 úplných / 0 čeká.
+  Nové foto/audio/video soubory velikostí i SHA-256 odpovídají ověřeným účtenkám.
+  Bez konfliktů, oba flagy=false. Míla potvrzuje synchronizaci videa s GPS ±11 m.
   Foto ±6 m potvrzené Mílou v detailu telefonu; původní hlášení ±4 m opravil.
-  Rozdíl vyřešen bez změny dat/kódu. Další krok: krátké video s GPS (GPS2).
-  GPS2/GPS3 částečně PASS, GPS4 NEOVĚŘENO; video a opakovaný přenos zbývají.
+  Rozdíl vyřešen bez změny dat/kódu. Další krok: opakovaná synchronizace bez nového záznamu.
+  GPS2/GPS3 částečně PASS, GPS4 NEOVĚŘENO; offline/restart médií a opakovaný přenos zbývají.
 - SideStore ukazuje 7 DAYS; přesné datum profilu neodečtené. Kolečko v jeho
   seznamu samo nebylo důkazem selhání aktualizace; nový kód se otevřel.
 
@@ -2411,3 +2411,21 @@ Navrhované další kroky: Zbytek GPS2/GPS3, GPS4 a mapový odkaz pro Janu.
 Technický důkaz: Míla potvrzuje „Ukazuje to +-6 m“. Mac ±6 m byl ověřen
 v 13:47; nyní bez opakování DB auditu a bez změny dat, tokenu nebo služeb.
 Přenos fota/komentáře doložen, plné GPS2/GPS3 tím ještě nejsou PASS.
+
+## 2026-09-27 13:58 CEST — video s GPS doručeno
+
+Hotovo: Video má GPS ±11 m v telefonu i na Macu; soubor dorazil beze změny.
+
+Rozhodnutí: Bez nového rozhodnutí. Video větev uložení/přenosu PASS.
+
+Další krok: Opakovat synchronizaci bez nového záznamu a ověřit stejné počty.
+
+Navrhované další kroky: Zbytek GPS2/GPS3, GPS4 a mapový odkaz pro Janu.
+
+Technický důkaz: Míla potvrzuje GPS ±11 m a dokončenou synchronizaci.
+Read-only Mac 48 Momentů / 140 operací / 5 GPS bodů / 49 ověřených médií.
+GPS u všech pěti bodů shodná přijatý payload → DB → nové otevření DB,
+hashe zpráv platné. Tři GPS média (foto/audio/video) ověřena velikostí
+a SHA-256 proti účtenkám. 0 konfliktů, oba recovery flagy=false, quick_check OK.
+Bez přehrání soukromého obsahu nebo výpisu souřadnic; služby a token nezměněné.
+Offline/restart mediálních větví ani opakovaný přenos tím nejsou doložené.
