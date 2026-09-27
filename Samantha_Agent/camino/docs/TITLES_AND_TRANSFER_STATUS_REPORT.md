@@ -3,6 +3,26 @@
 27. 9. 2026. Lokální implementace na výslovný pokyn Míly. Nasazení serveru,
 push, nový podpis a fyzická aktualizace telefonu jsou samostatné kroky.
 
+## B03 — podepsaný balíček, 27. 9. 2026 21:56 CEST
+
+Míla výslovně schválil nasazení, podpis a instalaci. Podepsaný generic build
+Camino 0.1.0 (8) ze zdroje ee10ec28 PASS. Strict codesign, stejné ID
+cz.pythonmf.camino.app, stejný tým a pokrytí zařízení jako build 7 PASS.
+Profil do 4. 10. 2026 18:07 CEST; SideStore podepíše při importu znovu,
+jeho výslednou expiraci je nutné odečíst v telefonu.
+
+Ve Stahování: Camino-Attachments-8-20260927.ipa, 1 093 217 B, SHA-256
+`7202246fda0bf3463bcd25650c318b15ea78a3e4d63c4c1c013ca0f672fd1963`.
+ZIP integrita a přesná shoda všech 5 souborů s podepsanou aplikací PASS,
+bez AppleDouble. Starší IPA zachované. Log: camino-attachments-signed-build.log.
+
+Registrovaný status potvrzuje běžící vlastněnou službu s Viewer grantem,
+nikoli živou HTTPS přejímku. Server zatím nepřepnutý: změna LaunchAgentu
+čeká na novou přesnou globální brzdu. Předchozí souhlas patřil buildu 7.
+Žádný push, stop/upgrade, změna tokenů/sítě/Cockpitu ani fyzická instalace.
+Nejdřív server attachment_title_v1, potom SideStore import stejné aplikace
+bez odinstalace: Customize AppID on, Append Team ID off pro tento import.
+
 ## B03 — názvy příloh a přehled dne, 27. 9. 2026
 
 Míla fyzicky potvrdil názvy Momentů a jejich přenos v buildu 7. To není PASS
@@ -11,7 +31,7 @@ společný funkční balíček; po jeho aktualizaci chce delší běžné testov
 sběr připomínek do bufferu a žádné další rychlé vydávání kosmetických verzí.
 Ztráta dat, únik soukromí či nefunkční záznam/přenos zůstávají důvodem k opravě.
 
-Lokálně implementováno (zatím bez nasazení, podpisu a instalace):
+Lokálně implementováno (aktuální podpis a stav nasazení viz výše):
 
 - Každá fotografie, video a celý hlasový komentář mají vlastní nepovinný
   název vedle názvu celého Momentu. Stejné Přidat/Upravit název, 160 znaků,

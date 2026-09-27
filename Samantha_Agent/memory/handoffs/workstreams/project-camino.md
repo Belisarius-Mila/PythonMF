@@ -1,6 +1,13 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-09-27 21:56 CEST — Míla schválil nasazení, podpis a instalaci B03.
+  Podepsaný build 8 ze zdroje ee10ec28 připravený ve Stahování:
+  Camino-Attachments-8-20260927.ipa; strict podpis, ZIP a shoda obsahu PASS.
+  Stejné ID aplikace, tým a pokrytí zařízení jako build 7. Server běží,
+  ale upgrade čeká na novou přesnou globální brzdu pro LaunchAgent.
+  Neimportovat před serverem attachment_title_v1; telefon zatím nezměněný.
+  Push neautorizovaný/neprovedený. Tokeny, síť ani Cockpit neměněné.
 - 2026-09-27 21:31 CEST — Míla fyzicky potvrdil názvy Momentů a jejich přenos
   v buildu 7. B01 mobilní regrese tím není ověřená. Schválený B03 balíček:
   vlastní názvy foto/video/celých audio příloh, telefon nejnovější nahoře,
@@ -2535,3 +2542,24 @@ originály i verified média se nemění; feature gate attachment_title_v1,
 nový audio layout před názvem session. Bez schématové migrace; downgrade po
 nové operaci nepodporovaný. Fyzický build 8 a Safari NEOVĚŘENO. Žádný nový
 push, deployment, podpis/IPA, token ani změna osobního archivu v tomto kroku.
+
+## 2026-09-27 21:56 CEST — Podepsaný build 8, server čeká na brzdu
+
+Hotovo: Balíček nové verze s názvy příloh je podepsaný a ověřený ve Stahování.
+Telefon se zatím nezměnil.
+
+Rozhodnutí: Míla schválil nasazení, podpis a instalaci. Pro zásah do
+LaunchAgentu je vyžádaná nová přesná globální brzda; dosud nedoručená.
+Push není součástí tohoto pokynu.
+
+Další krok: Po potvrzení přepnout registrovaným upgrade server a ověřit
+archiv, přístupy a attachment_title_v1; teprve potom import stejné app.
+
+Navrhované další kroky: Krátký B03+B01 průchod; delší používání stejné verze;
+M3 nezávislá záloha; M4 před odjezdem.
+
+Technický důkaz: Zdroj ee10ec28, build 0.1.0 (8), strict codesign a všech
+5 souborů IPA shodných s podepsaným výstupem PASS. Stejné ID/tým/zařízení,
+profil do 4. 10. 18:07 CEST; SideStore expirace až po importu. SHA-256 a
+velikost v TITLES_AND_TRANSFER_STATUS_REPORT.md. Plná brána nezměněného kódu
+1838/1838 již PASS. Žádný stop/upgrade, push, změna tokenů/sítě ani instalace.
