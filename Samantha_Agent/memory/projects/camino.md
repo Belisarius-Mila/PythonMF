@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-27 13:44 CEST
+Aktualizováno: 2026-09-27 13:47 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -12,15 +12,18 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-27 13:44 CEST — GPS foto/komentář v telefonu PASS; jejich přenos čeká.
+- Aktualizováno: 2026-09-27 13:47 CEST — foto/komentář i GPS doručeny; přesnost fota doověřit.
 - Míla potvrzuje novou položku „Povolit / obnovit GPS“, funkční všechna data
   a nový okamžik bez polohy před jejím povolením: data/GPS1 PASS. Nyní potvrzuje
   „GPS uložena“, hlášená přesnost ±8 m. Nově potvrzuje vytvoření offline
   a zachování po zavření/otevření: PASS. Foto ±4 m a komentář ±11 m nyní
   potvrzené v telefonu; jejich offline/restart není samostatně doložený.
-- Mac read-only: 45 Momentů / 133 operací, 2 GPS markery; přijaté GPS payloady
-  se shodují s uložením i po novém otevření DB. Bez konfliktů, oba flagy=false.
-  Nové foto/komentář v tomto snapshotu ještě nejsou; další krok jejich přenos.
+- Mac read-only: 47 Momentů / 138 operací, 4 GPS body (2 markery, foto, komentář).
+  Všechny přijaté GPS payloady se shodují s uložením i po novém otevření DB.
+  Nové foto/audio soubory velikostí i SHA-256 odpovídají ověřeným účtenkám.
+  Bez konfliktů, oba flagy=false. Telefon podle Míly 47 úplných / 0 čeká.
+  Foto na Macu zaokrouhleně ±6 m, dříve Míla hlásil ±4 m; komentář ±11 m.
+  Další krok: ověřit přesnost v detailu stejné fotografie, souřadnice neposílat.
   GPS2/GPS3 částečně PASS, GPS4 NEOVĚŘENO; video a opakovaný přenos zbývají.
 - SideStore ukazuje 7 DAYS; přesné datum profilu neodečtené. Kolečko v jeho
   seznamu samo nebylo důkazem selhání aktualizace; nový kód se otevřel.
@@ -2041,3 +2044,21 @@ U obou GPS shoda všech čtyř polí přijatý payload → uložený Moment,
 platný hash zprávy a zachování po novém otevření DB. Nová média dosud
 nejsou v tomto snapshotu; opakovaný přenos bez duplikátu neověřený.
 Souřadnice ani obsah nebyly vypsané; token, služba, síť a Viewer nezměněné.
+
+## 2026-09-27 13:47 CEST — přenos fotografie a komentáře s GPS
+
+Hotovo: Obě média i jejich GPS jsou na Macu. Telefon po synchronizaci 47/0.
+
+Rozhodnutí: Bez nového rozhodnutí; rozdíl hlášené přesnosti fota nezakrývat.
+
+Další krok: V telefonu zkontrolovat detail stejné fotografie: ±4 m nebo ±6 m.
+
+Navrhované další kroky: Zbývající GPS2/GPS3, GPS4 a mapový odkaz pro Janu.
+
+Technický důkaz: Read-only Mac 47 Momentů / 138 operací / 4 GPS body,
+48 ověřených médií celkem. Nové foto a audio ověřeny velikostí a SHA-256.
+Všechna čtyři GPS pole u všech bodů shodná mezi přijatou zprávou a DB
+i po novém otevření, hashe zpráv platné, 0 konfliktů, oba flagy=false,
+quick_check obou DB OK. Foto uložené zaokrouhleně ±6 m proti hlášení ±4 m,
+komentář ±11 m. Shoda přenosu na serveru neprokazuje shodu detailu telefonu.
+Bez výpisu souřadnic/obsahu, změny tokenu, služby, sítě nebo Vieweru.
