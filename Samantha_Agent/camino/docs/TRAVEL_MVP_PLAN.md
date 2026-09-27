@@ -130,7 +130,9 @@ Novější rozhodnutí 27. 9.: Míla schválil implementaci telefonu/názvů a B
 Jednosměrně iPhone → Mac → Viewer; opravy názvů na Macu později, bez návratu
 do telefonu, pouze pro Mílu. Stav lokální implementace a testů:
 [TITLES_AND_TRANSFER_STATUS_REPORT.md](TITLES_AND_TRANSFER_STATUS_REPORT.md).
-Push/nasazení/podpis/fyzická instalace tím zatím nejsou provedené.
+Aktualizace 27. 9. 20:35 CEST: server 403180320849 nasazený, živé ověření
+názvů/Vieweru a zachování archivu PASS; podepsané IPA build 7 připravené.
+Fyzický SideStore import a krátká přejímka čekají. Žádný nový push.
 Následuje původní buffer; novější rozhodnutí nahrazuje jeho otevřené otázky.
 
 - **B01 — zavádějící Čeká na Wi-Fi po úspěšné mobilní dávce.** Po ověření

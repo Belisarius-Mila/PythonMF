@@ -1,12 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-09-27 20:04 CEST — nasazení/podpis/instalace schválené, ale přepnutí
-  LaunchAgentu čeká na novou globální brzdu. Služba zatím beze změny.
-  Podepsaná Camino-Names-7-20260927.ipa ve Stahování, zdroj 7dcee1c8;
-  strict codesign, ZIP a shoda app PASS. Profil do 4. 10. 18:07 CEST,
-  SideStore jej při importu znovu podepíše. Nejdříve server, pak import;
-  nic neodinstalovávat. Podrobnosti v reportu B01/B02 níže. Žádný push.
+- 2026-09-27 20:35 CEST — po nové výslovné globální brzdě nasazený server
+  403180320849 s B01/B02. Živé HTTPS moment_title_v1 a Viewer (6 dnů) PASS.
+  Zachováno 51 Momentů / 155 operací / 58 médií (263 578 290 B), metadata,
+  identita i oba přístupy beze změny; oba recovery flagy=false, Funnel off.
+  Podepsaná Camino-Names-7-20260927.ipa je připravená ve Stahování;
+  nyní import do stejné app přes SideStore, bez odinstalace a bez Append Team ID.
+  Fyzický import a přenos názvu/mobilní regrese NEOVĚŘENO. Žádný push,
+  změna Tailscale ani restart Cockpitu. Report B01/B02 je aktuální předávka.
 - 2026-09-27 — B01/B02 implementované lokálně na pokyn Míly:
   názvy offline v telefonu, jednosměrný přenos a zobrazení ve Vieweru;
   oprava falešného čekání po dokončení mobilní dávky.
@@ -2599,3 +2601,26 @@ Technický důkaz: Podepsaný build a strict codesign PASS, stejné ID/tým/zař
 jako build 6, ZIP a shoda všech 5 souborů PASS. Profil do 4. 10. 18:07 CEST;
 SideStore podpis/expirace až po importu. Služba/privátní HTTPS ověřené jako
 dostupné před nasazením, Funnel off. Žádný stop/upgrade, push ani instalace.
+
+## 2026-09-27 20:35 CEST — Server připravený na názvy z telefonu
+
+Hotovo: Server a soukromý Viewer přijímají novou verzi s názvy. Všechna
+původní data a přístupy zůstaly zachované; IPA build 7 je připravený k importu.
+
+Rozhodnutí: Míla potvrdil novou globální brzdu pro registrovaný upgrade
+LaunchAgentu. Tailscale, tokeny ani běžící Cockpit se nemění. Push neproveden.
+
+Další krok: Import Camino-Names-7-20260927.ipa přes SideStore do téže aplikace
+bez odinstalace; Customize AppID zapnuté, Append Team ID vypnuté.
+
+Navrhované další kroky: Krátký fyzický průchod názvu a mobilní dávky;
+M3/M4. Mac owner editor nadále odložený.
+
+Technický důkaz: Registrovaný stop/upgrade/start, release 403180320849.
+Před/po shodné metadata, identita, owner/reader token a archiv: 51 Momentů,
+155 operací, 58 originálů ověřených SHA-256, 263 578 290 B; oba recovery
+flagy=false. HTTPS moment_title_v1 PASS, Viewer a 6 denních stránek HTTP 200,
+anonymní přístup i záměna owner/reader 401. Soukromá trasa a Cockpit zdravé,
+Funnel off; upgrade uchoval snapshoty DB a původní konfiguraci. Plná brána
+nezměněného kódu 1836/1836 PASS. Fyzický import, nový SideStore podpis a přenos
+názvu/mobilní regrese zatím NEOVĚŘENO; neproveden downgrade ani smazání dat.

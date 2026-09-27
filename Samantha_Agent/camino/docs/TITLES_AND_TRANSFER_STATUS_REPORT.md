@@ -3,11 +3,17 @@
 27. 9. 2026. Lokální implementace na výslovný pokyn Míly. Nasazení serveru,
 push, nový podpis a fyzická aktualizace telefonu jsou samostatné kroky.
 
-## Podepsaný balíček 27. 9. 20:04 CEST — nasazení čeká na brzdu
+## Nasazení serveru 27. 9. 20:35 CEST — připraveno k importu IPA
 
-Míla schválil pokračování nasazením, podpisem a instalací. Registrovaný
-upgrade přepisuje vlastní LaunchAgent mimo projekt; před stop/upgrade/start
-je vyžádaná nová přesná globální brzda. Služba se zatím nezastavila ani nezměnila.
+Míla schválil pokračování nasazením, podpisem a instalací a následně potvrdil
+novou přesnou globální brzdu. Registrovaný stop/upgrade/start dokončený;
+server release 403180320849 obsahuje implementaci B01/B02 z 7dcee1c8.
+Živý HTTPS API stav potvrzuje moment_title_v1, Viewer a všech 6 denních stránek
+HTTP 200. Anonymní přístup a záměna owner/reader odmítnuté HTTP 401.
+Před/po shodná metadata, serverová identita i owner/reader tokeny. Zachováno
+51 Momentů / 155 operací / 58 hashově ověřených médií (263 578 290 B),
+oba recovery flagy=false. Upgrade uchoval DB snapshoty a starou konfiguraci.
+Soukromá HTTPS trasa zdravá, Funnel off; Tailscale ani Cockpit se nepřepínaly.
 
 Camino 0.1.0 (7), zdroj 7dcee1c8, podepsaný generic iOS build PASS.
 Strict codesign PASS, stejné ID cz.pythonmf.camino.app, stejný tým a pokrytí
@@ -21,13 +27,12 @@ ZIP integrita a přesná shoda všech 5 souborů s podepsanou app PASS.
 První zabalení přidalo AppleDouble metadata; finální balíček vznikl bez nich
 a prošel úplnou kontrolou. Původní build 6 IPA se neměnil.
 
-**Zatím neimportovat.** Po globální brzdě nejprve upgrade serveru a živé
-ověření moment_title_v1, zachovaných dat/tokenu a soukromého Vieweru.
-Potom SideStore: LocalDevVPN, zelené Device Reachability, import buildu 7,
+**Server je připravený; nyní lze importovat.**
+SideStore: LocalDevVPN, zelené Device Reachability, import buildu 7,
 Customize AppID ponechat zapnuté; pro tento import zkontrolovat původní ID
 a odškrtnout Append Team ID. Žádná odinstalace. Po importu kontrola starých
 dat a Přidat/Upravit název; pro přenos přepnout na Tailscale.
-Nasazení, import i fyzický přenos názvu stále NEPROVEDENO. Žádný push.
+Import a fyzický přenos názvu stále NEPROVEDENO. Žádný push.
 
 ## Rozsah a rozhodnutí
 
@@ -90,7 +95,7 @@ další dávka nezdědí mobilní souhlas. Hlášení čekání uvádí počty �
   camino-names-http.log, camino-title-wire.log, camino-names-ui.log
   a camino-names-device-build.log (všechny ve stejném dočasném adresáři).
 - Fyzický iPhone/import, živý přenos názvu a skutečná mobilní regrese:
-  **NEPROVEDENO**. Běžící služba a osobní data se tímto vývojem nemění.
+  **NEPROVEDENO**. Server nasazený a ověřený výše, telefon se zatím nezměnil.
 
 ## Krátká fyzická přejímka po nasazení
 
