@@ -1024,3 +1024,16 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   přijaté obálky uchovat; novou epochu použít jen pro další operace.
 - Ověření: syntetická obnova a opakování po ztrátě odpovědi PASS, rozdíly
   a nesprávná účtenka zůstávají blokované; pause a původní data se nemění.
+
+### 2026-09-27 — Vyčerpaný mobilní souhlas není důkaz čekajícího přenosu
+
+- Problém: po úspěšném videu se správně zrušil grant dávky, ale synchronize
+  a networkChanged pak na mobilní síti hlásily Čeká na Wi-Fi i pro prázdnou frontu.
+- Řešení: společná rozhodovací funkce nejprve rozliší úplnou dříve potvrzenou
+  kopii od čekající práce. Žádné nové zelené potvrzení bez účtenky, identity
+  serveru a úplného pokrytí; obnova a dosud nezařazená audio metadata blokují.
+  Nové položky nesmějí zdědit předchozí grant. Stejná oprava musí být v obou
+  vstupních cestách, nikoli jen v textu dashboardu.
+- Ověření: lokální Swift regrese dokončení, nové dávky, chybějící účtenky,
+  offline a recovery PASS. Fyzický retest čeká na novou podepsanou aktualizaci;
+  serverově ověřený originál neprokazuje tehdejší stav celého journalu telefonu.

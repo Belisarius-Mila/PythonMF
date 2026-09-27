@@ -566,6 +566,19 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
         }
     }
 
+    func saveTitle(momentID: UUID, title: String) -> Bool {
+        guard let local else { return false }
+        do {
+            _ = try local.setTitle(momentID: momentID, title: title)
+            message = nil
+            refresh()
+            return true
+        } catch {
+            message = error.localizedDescription
+            return false
+        }
+    }
+
     func saveTextDraft(momentID: UUID, content: String) {
         guard let local else { return }
         do {

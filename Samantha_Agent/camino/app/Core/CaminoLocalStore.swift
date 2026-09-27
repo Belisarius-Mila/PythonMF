@@ -13,6 +13,7 @@ private struct LocalMomentJournal: Codable, Equatable {
     var relatedMomentID: UUID?
     var textHistory: LocalTextHistory
     var operations: [LocalPendingOperation]
+    var currentTitle: String? = nil // Missing in pre-title journals; no Core Data migration.
 }
 
 private struct LocalPendingMomentLink: Codable, Equatable {
@@ -656,6 +657,39 @@ private struct LocalPendingMomentLink: Codable, Equatable {
         } catch { context.rollback(); throw error }
     }
 
+    @discardableResult public func setTitle(
+        momentID: UUID, title: String, operationID: UUID = UUID(),
+        expectedRevision: Int? = nil, at date: Date = Date()
+    ) throws -> LocalMoment {
+        let title = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard LocalMoment.validTitle(title) else { throw LocalStoreError.invalidMetadataChange }
+        guard let row = try object("MomentRecord", id: momentID) else {
+            throw LocalStoreError.momentMissing
+        }
+        let current = try decodeMoment(row)
+        if let prior = try existingOperation(id: operationID) {
+            guard prior.momentID == momentID, prior.kind == .title, prior.title == title,
+                  prior.expectedRevision == (expectedRevision ?? prior.expectedRevision) else {
+                throw LocalStoreError.operationConflict
+            }
+            return current
+        }
+        let expected = expectedRevision ?? current.revision
+        guard expected == current.revision else { throw LocalStoreError.revisionConflict }
+        if current.title == title { return current }
+        do {
+            var journal = try momentJournal(row)
+            let operation = try makeOperation(id: operationID, momentID: momentID,
+                expectedRevision: expected, kind: .title, at: date, title: title)
+            journal.currentTitle = title
+            journal.operations.append(operation)
+            row.setValue(current.revision + 1, forKey: "revision")
+            try setMomentJournal(journal)
+            try save()
+            return try decodeMoment(row)
+        } catch { context.rollback(); throw error }
+    }
+
     @discardableResult public func setHidden(
         momentID: UUID, hidden: Bool, operationID: UUID = UUID(),
         expectedRevision: Int? = nil, at date: Date = Date()
@@ -793,6 +827,10 @@ private struct LocalPendingMomentLink: Codable, Equatable {
                 textHistory: LocalTextHistory(), operations: [])
         }
         guard journal.schemaVersion == 1, journal.momentID == id,
+              LocalMoment.validTitle(journal.currentTitle ?? ""),
+              journal.operations.filter({ $0.kind == .title }).allSatisfy({
+                  $0.title.map(LocalMoment.validTitle) == true }),
+              (journal.operations.last(where: { $0.kind == .title })?.title ?? "") == (journal.currentTitle ?? ""),
               journal.tripID == tripID, journal.baseRevision >= 1,
               validChapterDate(journal.originalChapterDate),
               validChapterDate(journal.currentChapterDate),
@@ -840,7 +878,7 @@ private struct LocalPendingMomentLink: Codable, Equatable {
         kind: LocalOperationKind, at date: Date,
         privacy: LocalPrivacy? = nil, privacyAction: LocalPrivacyAction? = nil,
         hidden: Bool? = nil, chapterDate: String? = nil,
-        textRevisionID: UUID? = nil
+        textRevisionID: UUID? = nil, title: String? = nil
     ) throws -> LocalPendingOperation {
         let sequence = try nextDeviceSequence()
         return LocalPendingOperation(
@@ -848,7 +886,7 @@ private struct LocalPendingMomentLink: Codable, Equatable {
             expectedRevision: expectedRevision, kind: kind,
             createdAtUTCMilliseconds: milliseconds(date), privacy: privacy,
             privacyAction: privacyAction, hidden: hidden,
-            chapterDate: chapterDate, textRevisionID: textRevisionID)
+            chapterDate: chapterDate, textRevisionID: textRevisionID, title: title)
     }
 
     private func nextDeviceSequence() throws -> Int64 {
@@ -981,7 +1019,8 @@ private struct LocalPendingMomentLink: Codable, Equatable {
                            audioSessionID: row.value(forKey: "audioSessionID") as? UUID,
                            partialAudio: try required(row, "partialAudio"),
                            relatedMomentID: journal.relatedMomentID,
-                           location: try captureLocation(momentID: required(row, "id"), stamp: decodeStamp(row)))
+                           location: try captureLocation(momentID: required(row, "id"), stamp: decodeStamp(row)),
+                           title: journal.currentTitle ?? "")
     }
 
     private func decodeIntent(_ row: NSManagedObject) throws -> AudioIntent {

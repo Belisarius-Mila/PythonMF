@@ -108,6 +108,39 @@ import XCTest
         XCTAssertFalse(app.staticTexts["Nahrávám"].exists)
     }
 
+    func testTitleSurvivesRelaunchAndCanBeCleared() throws {
+        #if !targetEnvironment(simulator)
+        throw XCTSkip("Isolated simulator only.")
+        #endif
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchEnvironment["CAMINO_UI_TEST_SESSION"] = UUID().uuidString
+        app.launch()
+        XCTAssertTrue(app.buttons["Založit Zkoušku"].waitForExistence(timeout: 15))
+        app.buttons["Založit Zkoušku"].tap()
+        app.buttons["Nabídka"].tap()
+        app.buttons["Označit okamžik"].tap()
+        app.buttons["momentRow"].tap()
+        app.buttons["editMomentTitle"].tap()
+        let field = app.textFields["momentTitleEditor"]
+        XCTAssertTrue(field.waitForExistence(timeout: 5))
+        field.tap()
+        field.typeText("Test title")
+        app.buttons["saveMomentTitle"].tap()
+        app.terminate()
+        app.launch()
+        XCTAssertTrue(app.buttons["momentRow"].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.buttons["momentRow"].label.contains("Test title"))
+        app.buttons["momentRow"].tap()
+        app.buttons["editMomentTitle"].tap()
+        XCTAssertEqual(field.value as? String, "Test title")
+        field.tap()
+        field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 10))
+        app.buttons["saveMomentTitle"].tap()
+        XCTAssertTrue(app.buttons["editMomentTitle"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.buttons["editMomentTitle"].label, "Přidat název")
+    }
+
     func testDraftRevisionLockHideAndRestoreStayLocalAcrossRelaunch() throws {
         #if !targetEnvironment(simulator)
         throw XCTSkip("This uses a simulator-only isolated Camino store.")

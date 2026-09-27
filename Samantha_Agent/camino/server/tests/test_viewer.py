@@ -56,6 +56,30 @@ class ViewerHTTPTests(unittest.IsolatedAsyncioTestCase):
     def upload_media(self):
         return {k: self.f.upload(30 + i, k, v) for i, (k, v) in enumerate(self.payloads.items())}
 
+    async def test_title_api_retry_html_escaping_and_reader_cannot_edit(self):
+        title = 'Káva <script>alert("x")</script> 🥾'
+        body = {"contract_version": 1, "epoch": self.f.store.state()["epoch"],
+                "operation_id": uid(850), "device_id": uid(90),
+                "device_sequence": self.f.sequence + 1, "kind": "update_metadata",
+                "expected_revision": 1, "payload": {"moment_id": self.f.public.id,
+                "change": {"type": "title", "title": title}}}
+        raw = json.dumps(body, sort_keys=True).encode()
+        async with httpx.AsyncClient(transport=httpx.ASGITransport(app=self.app), base_url="https://camino.test") as client:
+            forbidden = await client.post("/api/v1/operations", content=raw, headers=self.auth)
+            self.assertEqual(forbidden.status_code, 401)
+            headers = {"Authorization": f"Bearer {self.owner_token}", "Content-Type": "application/json"}
+            for _ in range(2):
+                response = await client.post("/api/v1/operations", content=raw, headers=headers)
+                self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual(self.f.store.moment(self.f.public.id)["revision"], 2)
+        self.f.sequence += 1
+        html = (await self.request("/viewer/days/2026-09-25")).text
+        self.assertIn('Káva &lt;script&gt;', html)
+        self.assertNotIn('<script>alert("x")</script>', html)
+        self.f.send("update_metadata", {"moment_id": self.f.public.id, "change": {
+            "type": "privacy", "new_privacy": "owner_only", "user_action": "lock"}}, expected=2)
+        self.assertNotIn("Káva", (await self.request("/viewer/")).text)
+
     async def test_offline_trip_revoke_closes_old_media_url_without_rewriting_trip(self):
         asset = self.f.upload(30, "photo", self.payloads["photo"])
         self.viewer.build_pending()

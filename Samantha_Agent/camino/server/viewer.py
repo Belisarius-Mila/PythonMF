@@ -158,7 +158,10 @@ class CaminoViewer:
             for moment in moments:
                 if moment["day"] != day:
                     continue
-                body += f'<article><h3>{escape(moment["time"])} · {KINDS.get(moment["kind"], "Záznam")}</h3>'
+                label = f'{escape(moment["time"])} · {KINDS.get(moment["kind"], "Záznam")}'
+                title_text = moment.get("title", "")
+                body += (f'<article><h3>{escape(title_text)}</h3><p class="muted">{label}</p>'
+                         if title_text else f'<article><h3>{label}</h3>')
                 if moment["text"]:
                     body += f'<p class="text">{escape(moment["text"])}</p>'
                 point = moment["map_point"]

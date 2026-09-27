@@ -126,8 +126,12 @@ zablokovat lokální M1. Pro iPhone nepředstírat neimplementovanou zelenou osu
 
 ## Buffer pro příští aktualizaci iPhonu — 27. 9. 17:53 CEST
 
-Stav: čeká na rozhodnutí o rozsahu, nyní pouze zápis. Žádný vývoj, nový build,
-podpis, instalace nebo nasazení tím nejsou zahájené.
+Novější rozhodnutí 27. 9.: Míla schválil implementaci telefonu/názvů a B01.
+Jednosměrně iPhone → Mac → Viewer; opravy názvů na Macu později, bez návratu
+do telefonu, pouze pro Mílu. Stav lokální implementace a testů:
+[TITLES_AND_TRANSFER_STATUS_REPORT.md](TITLES_AND_TRANSFER_STATUS_REPORT.md).
+Push/nasazení/podpis/fyzická instalace tím zatím nejsou provedené.
+Následuje původní buffer; novější rozhodnutí nahrazuje jeho otevřené otázky.
 
 - **B01 — zavádějící Čeká na Wi-Fi po úspěšné mobilní dávce.** Po ověření
   posledního média se mobilní grant správně zruší, ale následná synchronizace
@@ -142,9 +146,9 @@ podpis, instalace nebo nasazení tím nejsou zahájené.
   implementace. Název zadat/změnit v telefonu offline bez zdržení pořízení,
   přenést a zobrazit ve Vieweru. Míla upřesnil: nepojmenované položky chce
   později doplňovat on na Macu, nikoli Jana. Jana zůstává read-only.
-  Před vývojem rozhodnout návrat Mac úprav do telefonu a pravidlo souběhu;
-  neplést společný název se samostatným webovým popiskem. Jeden název
-  celého Momentu versus samostatné názvy připojených médií ještě není rozhodnuté.
+  Aktualizované řešení: jeden název celého Momentu; návrat z Macu není požadovaný.
+  Budoucí oddělený owner editor má lokální přepis názvu s předností před novým
+  importem. Samostatné názvy připojených médií a Mac editor nyní nevznikají.
 - **Společná krátká přejímka:** stará data po aktualizaci; nový offline
   název a jeho změna po restartu/přenosu; dokončená mobilní dávka bez falešného
   čekání; později přidané médium bez zděděného souhlasu; nedostupný Mac nesmí

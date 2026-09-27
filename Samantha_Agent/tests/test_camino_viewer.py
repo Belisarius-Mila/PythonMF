@@ -20,6 +20,28 @@ class ViewerProjectionTests(unittest.TestCase):
     def snapshot(self):
         return self.f.store.viewer_snapshot(self.f.trip.id)
 
+    def test_title_revisions_reopen_clear_and_privacy(self):
+        from camino.domain.revision_store import RevisionStore
+        old = self.f.store.moment(self.f.public.id)
+        self.assertNotIn("title", old)
+        self.f.send("update_metadata", {"moment_id": self.f.public.id,
+                    "change": {"type": "title", "title": "Večer u řeky"}}, expected=1)
+        self.f.send("update_metadata", {"moment_id": self.f.private.id,
+                    "change": {"type": "title", "title": "TAJNY-NAZEV"}}, expected=1)
+        reopened = RevisionStore(self.f.root / "metadata.sqlite")
+        self.assertEqual(reopened.moment(self.f.public.id)["title"], "Večer u řeky")
+        self.assertEqual(self.snapshot()["moments"][0]["title"], "Večer u řeky")
+        self.assertNotIn("TAJNY-NAZEV", json.dumps(self.snapshot()))
+        # Legacy unnamed identity can still be retried under a new envelope.
+        self.f.send("create_moment", old)
+        self.f.send("update_metadata", {"moment_id": self.f.public.id,
+                    "change": {"type": "title", "title": ""}}, expected=2)
+        self.assertEqual(self.snapshot()["moments"][0]["title"], "")
+        self.f.send("update_metadata", {"moment_id": self.f.public.id,
+                    "change": {"type": "privacy", "new_privacy": "owner_only",
+                               "user_action": "lock"}}, expected=3)
+        self.assertEqual(self.snapshot()["moments"], [])
+
     def test_only_allowed_rows_and_no_private_counts_or_provenance(self):
         self.f.upload(31, "audio", b"secret", private=True)
         data = self.snapshot()

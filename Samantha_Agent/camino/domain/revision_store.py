@@ -150,7 +150,7 @@ class RevisionStore:
             meta = self._meta(connection)
             return {
                 "contract_version": 1,
-                "features": ["audio_layout_v1"],
+                "features": ["audio_layout_v1", "moment_title_v1"],
                 "server_id": meta["server_id"],
                 "epoch": meta["epoch"],
                 "cursor": meta["cursor"],
@@ -391,6 +391,9 @@ class RevisionStore:
             elif change["type"] == "hidden":
                 exact_object(change, {"type", "hidden"})
                 common["hidden"] = change["hidden"]
+            elif change["type"] == "title":
+                exact_object(change, {"type", "title"})
+                common["title"] = change["title"]
             else:
                 raise ContractError("unknown metadata change")
             operation = decode_change(common)
@@ -574,7 +577,8 @@ class RevisionStore:
                     "id": moment.id, "revision": moment.revision,
                     "day": moment.chapter_date,
                     "time": moment.captured.local_wall[11:16] if moment.captured.local_wall else "Čas neznámý",
-                    "kind": moment.kind.value, "text": text, "assets": assets[moment.id],
+                    "kind": moment.kind.value, "title": moment.title,
+                    "text": text, "assets": assets[moment.id],
                     "map_point": {
                         "latitude": moment.location.latitude,
                         "longitude": moment.location.longitude,

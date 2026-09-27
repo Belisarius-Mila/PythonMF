@@ -485,6 +485,13 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
 
     private var discoveredAudioLayouts: [CaminoSyncMetadataItem] = []
 
+    private var blockedNetworkState: CaminoMacCopyState? {
+        let known = Set(journal.metadata.map(\.id))
+        return journal.blockedNetworkState(networkAvailable: path.available,
+            expensive: path.expensive, momentIDs: localMomentIDs,
+            hasUnqueuedMetadata: discoveredAudioLayouts.contains { !known.contains($0.id) })
+    }
+
     func completeRecovery() {
         Task { await verifyAndCompleteRecovery() }
     }
@@ -630,12 +637,8 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
                 setMacCopyState(.notConfigured)
                 return
             }
-            guard path.available else {
-                setMacCopyState(.waitingForNetwork)
-                return
-            }
-            guard !path.expensive || journal.cellularBatchID != nil else {
-                setMacCopyState(.waitingForWiFi)
+            if let blocked = blockedNetworkState {
+                setMacCopyState(blocked)
                 return
             }
             let api = try makeAPI()
@@ -658,6 +661,7 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
                 setMacCopyState(.reconciliationRequired)
                 return
             }
+            try journal.requireTitleSupport(serverFeatures: state.features)
             try journal.mergeAudioLayouts(discoveredAudioLayouts, serverFeatures: state.features)
             try journalStore.save(journal)
             while true {
@@ -894,10 +898,8 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
             setMacCopyState(.paused)
         } else if !configurationReady {
             setMacCopyState(.notConfigured)
-        } else if !state.available {
-            setMacCopyState(.waitingForNetwork)
-        } else if state.expensive && journal.cellularBatchID == nil {
-            setMacCopyState(.waitingForWiFi)
+        } else if let blocked = blockedNetworkState {
+            setMacCopyState(blocked)
         } else if !previous.available || previous.expensive != state.expensive {
             Task { await synchronize() }
         }
@@ -965,6 +967,7 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
     }
 
     private func resolvedMacCopyState(status: Int?, code: String) -> CaminoMacCopyState {
+        if code == "moment_title_server_upgrade_required" { return .serverUpgradeRequired }
         if status == 401 { return .authorizationRequired }
         if status == 507 || code == "insufficient_storage" { return .insufficientStorage }
         if ["verification_failed", "hash_mismatch", "length_mismatch"].contains(code) {

@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-27 17:53 CEST
+Aktualizováno: 2026-09-27 18:14 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -12,6 +12,15 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 
 ## Aktuální stav
 
+- 2026-09-27 — B01/B02 implementované lokálně na pokyn Míly:
+  názvy offline v telefonu, jednosměrný přenos a zobrazení ve Vieweru;
+  oprava falešného čekání po dokončení mobilní dávky.
+  `camino/docs/TITLES_AND_TRANSFER_STATUS_REPORT.md` je aktuální předávka.
+  Pozdější Mac owner editor je odložený, Jana zůstává read-only.
+  Ověření dokončené: Swift 47, doména/projekce 21, HTTP 14, wire 1, UI 1 PASS;
+  generic iOS build 7 bez podpisu PASS, plná brána 1836/1836 PASS.
+  Nasazení serveru musí předcházet aktualizaci telefonu.
+  Žádný nový push, podpis ani fyzická instalace zatím neproběhly.
 - 2026-09-27 17:53 CEST — buffer B01/B02 v `camino/docs/TRAVEL_MVP_PLAN.md`:
   falešné čekání na Wi-Fi po dokončení mobilní dávky ponechat na příští build
   spolu s případnými názvy. Doplňování na Macu chce Míla, ne Jana.
@@ -2205,3 +2214,28 @@ shodné, 0 konfliktů, oba recovery flagy=false. Kód ruší grant po dokončen�
 ale synchronize/networkChanged nastavují čekání bez podmínky neodeslané práce.
 Bez čtení journalu telefonu nejde doložit všechny jeho tehdejší položky.
 RT3/RT4 ani GPS okraje se tím nezvyšují na PASS. Jen dokumentační změna.
+
+## 2026-09-27 18:14 CEST — Jednosměrné názvy a oprava mobilního stavu
+
+Hotovo: Lokálně přidané nepovinné názvy Momentů v telefonu, přenos na Mac
+a zobrazení ve Vieweru. Dokončená mobilní dávka už nemá jen kvůli vyčerpanému
+souhlasu hlásit čekání na Wi-Fi. Podrobnosti a výsledky ověření v
+`camino/docs/TITLES_AND_TRANSFER_STATUS_REPORT.md`.
+
+Rozhodnutí: Míla výslovně schválil nejprve telefonní aplikaci/názvy a opravu
+B01. Tok názvů je jednosměrný; pozdější opravy na Macu se nevracejí do telefonu.
+Adam zvolil odložený owner editor s lokálním přepisem názvu, který telefon
+nepřepíše; Jana zůstává čtenář. Samostatné názvy připojených souborů nyní nejsou.
+
+Další krok: Po ověření samostatně nasadit server s podporou názvů a připravit
+jednu podepsanou aktualizaci telefonu, zachovat stávající aplikaci a data.
+
+Navrhované další kroky: Krátký sdružený fyzický test; M3 nezávislá záloha;
+M4 a podpis před cestou; owner editor Mac až podle času a kreditů.
+
+Technický důkaz: Cíleně Swift 47/47, doména/projekce 21/21, HTTP 14/14,
+Swift wire → ASGI API → reopen/Viewer 1/1 PASS, UI relaunch/clear 1/1 PASS,
+generic iOS build 7 bez podpisu PASS, plná brána 1836/1836 PASS.
+Neprovedené fyzické kroky drží uvedený report. Core Data schéma a originály
+beze změny; title je nová revize. Starší server explicitně odmítnut před
+odesláním názvů, staré přesné obálky zůstávají. Nasazení ani instalace neprovedené.

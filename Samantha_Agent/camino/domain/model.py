@@ -201,11 +201,13 @@ class Moment:
     important: bool = False
     related_moment_id: str | None = None
     location: LocationFix | None = None
+    title: str = ""
 
     def __post_init__(self) -> None:
         for value in (self.id, self.trip_id, self.day_id):
             _uuid(value)
         _day(self.chapter_date)
+        validate_title(self.title)
         if not isinstance(self.kind, MomentKind) or not isinstance(self.captured, CaptureTime):
             raise ContractError("Moment kind and capture provenance are required")
         if self.related_moment_id is not None:
@@ -344,7 +346,27 @@ class ChapterChange:
         _operation_fields(self.id, self.moment_id, self.device_sequence, self.expected_revision)
 
 
-MetadataOperation: TypeAlias = PrivacyChange | HiddenChange | ChapterChange
+def validate_title(value: str) -> None:
+    if (not isinstance(value, str) or len(value) > 160 or value != value.strip()
+            or any(ord(c) < 32 or 127 <= ord(c) <= 159 or 0xD800 <= ord(c) <= 0xDFFF
+                   or c in "\u2028\u2029" for c in value)):
+        raise ContractError("title must be a trimmed single line of at most 160 characters")
+
+
+@dataclass(frozen=True, slots=True)
+class TitleChange:
+    id: str
+    moment_id: str
+    device_sequence: int
+    expected_revision: int
+    title: str
+
+    def __post_init__(self) -> None:
+        _operation_fields(self.id, self.moment_id, self.device_sequence, self.expected_revision)
+        validate_title(self.title)
+
+
+MetadataOperation: TypeAlias = PrivacyChange | HiddenChange | ChapterChange | TitleChange
 
 
 @dataclass(frozen=True, slots=True)
@@ -401,6 +423,10 @@ class MomentHistory:
             if operation.hidden == current.hidden:
                 raise ContractError("hidden state is already at the requested value")
             updated = replace(current, hidden=operation.hidden, revision=current.revision + 1)
+        elif isinstance(operation, TitleChange):
+            if operation.title == current.title:
+                raise ContractError("title is already at the requested value")
+            updated = replace(current, title=operation.title, revision=current.revision + 1)
         elif isinstance(operation, ChapterChange):
             if operation.day.trip_id != current.trip_id:
                 raise ContractError("new chapter belongs to another trip")

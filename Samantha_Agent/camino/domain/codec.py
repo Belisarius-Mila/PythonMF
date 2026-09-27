@@ -13,7 +13,7 @@ from typing import Any
 from .model import (
     Asset, CaptureTime, ChapterChange, ContractError, HiddenChange, JourneyDay,
     LocationFix, Moment, MomentKind, Privacy, PrivacyChange, TextRevision,
-    TimeSource, Trip,
+    TimeSource, TitleChange, Trip,
 )
 
 
@@ -25,7 +25,11 @@ def exact_object(value: Any, fields: set[str]) -> dict[str, Any]:
 
 def wire(value: Any) -> dict[str, Any]:
     """Produce JSON-compatible, deterministic object fields from a dataclass."""
-    return json.loads(json.dumps(asdict(value), sort_keys=True, separators=(",", ":")))
+    result = json.loads(json.dumps(asdict(value), sort_keys=True, separators=(",", ":")))
+    # Preserve historical unnamed create bodies and their exact retry identity.
+    if isinstance(value, Moment) and not value.title:
+        result.pop("title")
+    return result
 
 
 def decode_trip(value: Any) -> Trip:
@@ -66,10 +70,11 @@ def decode_location(value: Any) -> LocationFix | None:
 
 
 def decode_moment(value: Any) -> Moment:
-    data = exact_object(value, {
+    fields = {
         "id", "trip_id", "day_id", "chapter_date", "kind", "captured", "privacy",
         "revision", "hidden", "important", "related_moment_id", "location",
-    })
+    }
+    data = exact_object(value, fields | ({"title"} if isinstance(value, dict) and "title" in value else set()))
     try:
         kind = MomentKind(data["kind"])
     except (TypeError, ValueError) as error:
@@ -81,6 +86,7 @@ def decode_moment(value: Any) -> Moment:
         revision=data["revision"], hidden=data["hidden"], important=data["important"],
         related_moment_id=data["related_moment_id"],
         location=decode_location(data["location"]),
+        title=data.get("title", ""),
     )
 
 
@@ -103,20 +109,25 @@ def decode_text(value: Any) -> TextRevision:
     )
 
 
-def encode_change(value: PrivacyChange | HiddenChange | ChapterChange) -> dict[str, Any]:
+def encode_change(value: PrivacyChange | HiddenChange | ChapterChange | TitleChange) -> dict[str, Any]:
     result = wire(value)
     result["type"] = (
         "privacy" if isinstance(value, PrivacyChange)
-        else "hidden" if isinstance(value, HiddenChange) else "chapter"
+        else "hidden" if isinstance(value, HiddenChange)
+        else "title" if isinstance(value, TitleChange) else "chapter"
     )
     return result
 
 
-def decode_change(value: Any) -> PrivacyChange | HiddenChange | ChapterChange:
+def decode_change(value: Any) -> PrivacyChange | HiddenChange | ChapterChange | TitleChange:
     if not isinstance(value, dict):
         raise ContractError("metadata change must be an object")
     kind = value.get("type")
     common = {"type", "id", "moment_id", "device_sequence", "expected_revision"}
+    if kind == "title":
+        data = exact_object(value, common | {"title"})
+        return TitleChange(data["id"], data["moment_id"], data["device_sequence"],
+                           data["expected_revision"], data["title"])
     if kind == "privacy":
         data = exact_object(value, common | {"new_privacy", "user_action"})
         try:

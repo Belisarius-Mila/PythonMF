@@ -296,6 +296,9 @@ struct CaminoMediaDetailView: View {
     let moment: LocalMoment
     @Environment(\.dismiss) private var dismiss
     @State private var showTextEditor = false
+    @State private var showTitleEditor = false
+    @State private var titleDraft = ""
+    @State private var titleSaveFailed = false
     @State private var showChapterPicker = false
     @State private var chapterDate = Date()
     @State private var confirmDiary = false
@@ -308,7 +311,7 @@ struct CaminoMediaDetailView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     HStack {
-                        Text(current.kind.title).font(.title2.bold())
+                        Text(current.displayTitle).font(.title2.bold())
                         Spacer()
                         Button {
                             model.setImportant(momentID: current.id,
@@ -320,7 +323,13 @@ struct CaminoMediaDetailView: View {
                         .accessibilityLabel(current.important
                             ? "Odebrat hvězdičku" : "Přidat hvězdičku")
                     }
-                    Text("Nahráno: \(current.capture.localWall) · kapitola \(current.chapterDate)")
+                    Button(current.title.isEmpty ? "Přidat název" : "Upravit název", systemImage: "pencil") {
+                        titleDraft = current.title
+                        titleSaveFailed = false
+                        showTitleEditor = true
+                    }
+                    .accessibilityIdentifier("editMomentTitle")
+                    Text("\(current.kind.title) · Nahráno: \(current.capture.localWall) · kapitola \(current.chapterDate)")
                         .font(.subheadline)
                     if let fix = current.location {
                         Label(fix.approximate ? "GPS uložena · přibližná poloha" : "GPS uložena",
@@ -480,6 +489,43 @@ struct CaminoMediaDetailView: View {
             .toolbar { ToolbarItem(placement: .topBarTrailing) {
                 Button("Hotovo") { dismiss() }
             } }
+        }
+        .sheet(isPresented: $showTitleEditor) {
+            NavigationStack {
+                Form {
+                    TextField("Nepovinný název", text: $titleDraft)
+                        .accessibilityIdentifier("momentTitleEditor")
+                    Text("Název celého okamžiku, nejvýše 160 znaků. Prázdné pole název odstraní. Média se nemění.")
+                        .font(.footnote)
+                    Text(current.privacy == .ownerOnly
+                         ? "Jen pro mě: také název zůstává soukromý."
+                         : "Do deníku: po synchronizaci uvidí název také Jana.")
+                        .font(.footnote)
+                    if !LocalMoment.validTitle(titleDraft.trimmingCharacters(in: .whitespacesAndNewlines)) {
+                        Text("Použij jeden řádek do 160 znaků.").foregroundStyle(.orange)
+                    }
+                    if titleSaveFailed {
+                        Text("Název se nepodařilo uložit. Text zůstává zde, zkus to znovu.")
+                            .foregroundStyle(.orange)
+                    }
+                }
+                .navigationTitle("Název okamžiku")
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Zrušit") { showTitleEditor = false }
+                    }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Uložit") {
+                            if model.saveTitle(momentID: current.id, title: titleDraft) {
+                                showTitleEditor = false
+                            } else { titleSaveFailed = true }
+                        }
+                        .disabled(!LocalMoment.validTitle(titleDraft.trimmingCharacters(in: .whitespacesAndNewlines)))
+                        .accessibilityIdentifier("saveMomentTitle")
+                    }
+                }
+            }
+            .interactiveDismissDisabled()
         }
         .sheet(isPresented: $showTextEditor) {
             CaminoTextEditorView(model: model, momentID: current.id)

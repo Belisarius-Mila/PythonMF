@@ -10,6 +10,69 @@ import XCTest
         ISO8601DateFormatter().date(from: value)!
     }
 
+    func testTitleWireSequenceDoesNotRewriteCreateAndRequiresServerSupport() throws {
+        let store = try CaminoLocalStore(inMemory: true)
+        let trip = try store.createTrip(name: "Synthetic title")
+        let moment = try store.markMoment()
+        func discovery() throws -> CaminoSyncDiscovery {
+            try CaminoSyncDiscovery(trips: [trip], days: store.days(tripID: trip.id),
+                moments: [store.syncSnapshot(momentID: moment.id)], media: [])
+        }
+        let original = try XCTUnwrap(discovery().metadata.first { $0.kind == "create_moment" }).payload
+        _ = try store.setTitle(momentID: moment.id, title: "Káva u řeky 🥾")
+        _ = try store.setTitle(momentID: moment.id, title: "Opravený název")
+        let items = try discovery().metadata
+        XCTAssertEqual(items.first { $0.kind == "create_moment" }?.payload, original)
+        XCTAssertEqual(items.filter(\.isTitleChange).map(\.expectedRevision), [1, 2])
+        var journal = CaminoSyncJournal()
+        journal.observeServer(serverID: UUID(), epoch: UUID(), cursor: 0)
+        journal.merge(metadata: items, media: [])
+        XCTAssertThrowsError(try journal.requireTitleSupport(serverFeatures: ["audio_layout_v1"]))
+        XCTAssertNoThrow(try journal.requireTitleSupport(serverFeatures: ["moment_title_v1"]))
+        var envelopes: [Any] = []
+        for item in journal.metadata {
+            let data = try journal.exactEnvelope(for: item.id)
+            envelopes.append(try JSONSerialization.jsonObject(with: data))
+            var reopened = try JSONDecoder().decode(CaminoSyncJournal.self, from: JSONEncoder().encode(journal))
+            XCTAssertEqual(try reopened.exactEnvelope(for: item.id), data)
+        }
+        if let path = ProcessInfo.processInfo.environment["CAMINO_TITLE_WIRE_FIXTURE"] {
+            try JSONSerialization.data(withJSONObject: envelopes, options: [.sortedKeys])
+                .write(to: URL(fileURLWithPath: path), options: .atomic)
+        }
+    }
+
+    func testCompletedCellularBatchKeepsVerifiedButNewWorkAndLostReceiptDoNot() throws {
+        var journal = CaminoSyncJournal()
+        journal.observeServer(serverID: UUID(), epoch: UUID(), cursor: 0)
+        var asset = media(kind: .video, batch: journal.openBatchID)
+        let momentID = asset.momentID
+        journal.metadata = [CaminoSyncMetadataItem(id: UUID(), uniqueKey: "moment", kind: "create_moment",
+            objectID: momentID, expectedRevision: nil, payload: Data("{}".utf8), phase: .accepted)]
+        journal.media = [asset]
+        _ = journal.grantCellularForDisplayedBatch()
+        XCTAssertNil(journal.blockedNetworkState(networkAvailable: true, expensive: true, momentIDs: [momentID]))
+        asset.phase = .verified
+        journal.media[0] = asset
+        journal.revokeCellularIfFinished()
+        XCTAssertNil(journal.cellularBatchID)
+        XCTAssertEqual(journal.blockedNetworkState(networkAvailable: true, expensive: true, momentIDs: [momentID]), .verified)
+        XCTAssertEqual(journal.blockedNetworkState(networkAvailable: false, expensive: true, momentIDs: [momentID]), .verified)
+        XCTAssertEqual(journal.blockedNetworkState(networkAvailable: true, expensive: true,
+            momentIDs: [momentID], hasUnqueuedMetadata: true), .waitingForWiFi)
+        journal.reconciliationRequired = true
+        XCTAssertEqual(journal.blockedNetworkState(networkAvailable: true, expensive: true, momentIDs: [momentID]), .reconciliationRequired)
+        journal.reconciliationRequired = false
+        journal.media[0].phase = .verifying // Server success without a client receipt is not green.
+        XCTAssertEqual(journal.blockedNetworkState(networkAvailable: false, expensive: true, momentIDs: [momentID]), .waitingForNetwork)
+        journal.media[0].phase = .verified
+        journal.media.append(media(kind: .photo, batch: journal.openBatchID))
+        XCTAssertEqual(journal.blockedNetworkState(networkAvailable: true, expensive: true, momentIDs: [momentID]), .waitingForWiFi)
+        XCTAssertEqual(journal.nextWork(networkAvailable: true, expensive: true), .none)
+        let empty = CaminoSyncJournal()
+        XCTAssertNotEqual(empty.blockedNetworkState(networkAvailable: true, expensive: true, momentIDs: []), .verified)
+    }
+
     private func recoveryJournal() throws -> CaminoSyncJournal {
         var journal = CaminoSyncJournal()
         journal.observeServer(serverID: UUID(), epoch: UUID(), cursor: 0)

@@ -123,6 +123,18 @@ public struct LocalMoment: Equatable, Identifiable, Sendable {
     /// A private addendum is a separate Moment linked to, not merged into, this parent.
     public let relatedMomentID: UUID?
     public var location: LocalLocationFix? = nil
+    public var title: String = ""
+
+    public var displayTitle: String { title.isEmpty ? kind.title : title }
+
+    public static func validTitle(_ value: String) -> Bool {
+        value.unicodeScalars.count <= 160
+            && value == value.trimmingCharacters(in: .whitespacesAndNewlines)
+            && !value.unicodeScalars.contains { scalar in
+                scalar.value < 32 || (127...159).contains(scalar.value)
+                    || scalar.value == 0x2028 || scalar.value == 0x2029
+            }
+    }
 }
 
 public enum LocalTextRole: String, Codable, Sendable, CaseIterable {
@@ -204,7 +216,7 @@ public enum LocalPrivacyAction: String, Codable, Sendable {
 }
 
 public enum LocalOperationKind: String, Codable, Sendable {
-    case privacy, hidden, chapter, appendText = "append_text"
+    case privacy, hidden, chapter, title, appendText = "append_text"
 }
 
 /// Durable, ordered local operation prepared for the later C05 server handoff.
@@ -220,12 +232,13 @@ public struct LocalPendingOperation: Codable, Equatable, Identifiable, Sendable 
     public let hidden: Bool?
     public let chapterDate: String?
     public let textRevisionID: UUID?
+    public let title: String?
 
     public init(id: UUID, momentID: UUID, deviceSequence: Int64,
                 expectedRevision: Int, kind: LocalOperationKind,
                 createdAtUTCMilliseconds: Int64, privacy: LocalPrivacy? = nil,
                 privacyAction: LocalPrivacyAction? = nil, hidden: Bool? = nil,
-                chapterDate: String? = nil, textRevisionID: UUID? = nil) {
+                chapterDate: String? = nil, textRevisionID: UUID? = nil, title: String? = nil) {
         self.id = id
         self.momentID = momentID
         self.deviceSequence = deviceSequence
@@ -237,6 +250,7 @@ public struct LocalPendingOperation: Codable, Equatable, Identifiable, Sendable 
         self.hidden = hidden
         self.chapterDate = chapterDate
         self.textRevisionID = textRevisionID
+        self.title = title
     }
 }
 

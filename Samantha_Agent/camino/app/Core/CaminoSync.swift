@@ -91,6 +91,13 @@ public struct CaminoSyncMetadataItem: Codable, Equatable, Identifiable, Sendable
               let raw = object["moment_id"] as? String else { return nil }
         return UUID(uuidString: raw)
     }
+
+    public var isTitleChange: Bool {
+        guard kind == "update_metadata",
+              let object = try? JSONSerialization.jsonObject(with: payload) as? [String: Any],
+              let change = object["change"] as? [String: Any] else { return false }
+        return change["type"] as? String == "title"
+    }
 }
 
 public struct CaminoSyncMediaItem: Codable, Equatable, Identifiable, Sendable {
@@ -214,6 +221,7 @@ public enum CaminoMacCopyState: Equatable, Sendable {
     case rejected
     case interrupted
     case localInventoryAttention
+    case serverUpgradeRequired
 }
 
 public enum CaminoBackupCopyState: Equatable, Sendable {
@@ -314,7 +322,7 @@ public struct CaminoC05cDashboard: Equatable, Sendable {
             tone = .waiting
         case .waitingForWiFi:
             value = "Čeká na Wi‑Fi. V telefonu je uloženo."
-            detail = "Mobilní data nejsou pro zobrazenou dávku povolená."
+            detail = "\(pending) Mobilní data nejsou pro čekající dávku povolená."
             tone = .waiting
         case .unavailable:
             value = "Domácí Mac teď není dostupný"
@@ -343,6 +351,10 @@ public struct CaminoC05cDashboard: Equatable, Sendable {
         case .invalidResponse:
             value = "Odpověď Macu nelze ověřit"
             detail = "Přenos zůstává čekat; žádný falešný úspěch se nezapsal."
+            tone = .attention
+        case .serverUpgradeRequired:
+            value = "Mac potřebuje aktualizaci pro názvy"
+            detail = "Názvy zůstávají uložené v telefonu. Po aktualizaci Macu přenos zopakuj."
             tone = .attention
         case .rejected:
             value = "Domácí Mac změnu odmítl"
@@ -601,6 +613,28 @@ public struct CaminoSyncJournal: Codable, Equatable, Sendable {
             pendingMetadataCount: currentStats.metadataCount,
             pendingMediaCount: currentStats.mediaCount,
             pendingMediaBytes: currentStats.mediaBytes)
+    }
+
+    /// Network policy is not evidence of unfinished work. Retain only a previously
+    /// receipt-proven copy; a missing receipt, new item or recovery flag blocks green.
+    public func blockedNetworkState(networkAvailable: Bool, expensive: Bool,
+                                    momentIDs: Set<UUID>, hasUnqueuedMetadata: Bool = false) -> CaminoMacCopyState? {
+        guard !networkAvailable || (expensive && cellularBatchID == nil) else { return nil }
+        if reconciliationRequired { return .reconciliationRequired }
+        let coverage = coverage(momentIDs: momentIDs)
+        if serverID != nil, epoch != nil, !momentIDs.isEmpty,
+           coverage.macWaitingMomentCount == 0,
+           stats.metadataCount == 0, stats.mediaCount == 0, !hasUnqueuedMetadata {
+            return .verified
+        }
+        return networkAvailable ? .waitingForWiFi : .waitingForNetwork
+    }
+
+    public func requireTitleSupport(serverFeatures: [String]?) throws {
+        if metadata.contains(where: { $0.phase != .accepted && $0.isTitleChange }),
+           serverFeatures?.contains("moment_title_v1") != true {
+            throw CaminoSyncError.serverConflict("moment_title_server_upgrade_required")
+        }
     }
 
     public mutating func merge(metadata drafts: [CaminoSyncMetadataItem],
@@ -892,6 +926,17 @@ public struct CaminoSyncDiscovery: Sendable {
                     payload: ["moment_id": operation.momentID.uuidString.lowercased(),
                               "change": ["type": "chapter",
                                          "day_id": day.id.uuidString.lowercased()]]))
+                wireRevision[operation.momentID] = expected + 1
+            case .title:
+                guard let title = operation.title, LocalMoment.validTitle(title) else {
+                    throw CaminoSyncError.incompleteLocalInventory
+                }
+                drafts.append(try Self.item(
+                    id: operation.id, key: "operation:\(operation.id)",
+                    kind: "update_metadata", objectID: operation.momentID,
+                    expectedRevision: expected,
+                    payload: ["moment_id": operation.momentID.uuidString.lowercased(),
+                              "change": ["type": "title", "title": title]]))
                 wireRevision[operation.momentID] = expected + 1
             case .appendText:
                 guard let revisionID = operation.textRevisionID,

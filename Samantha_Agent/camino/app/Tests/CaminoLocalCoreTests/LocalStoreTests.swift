@@ -10,6 +10,36 @@ import XCTest
         return formatter.date(from: value)!
     }
 
+    func testTitleReopenRetryClearAndLegacyJournal() throws {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("camino-title-\(UUID())/metadata.sqlite")
+        let store = try CaminoLocalStore(storeURL: url)
+        let trip = try store.createTrip(name: "Synthetic")
+        let moment = try store.markMoment()
+        XCTAssertEqual(moment.title, "")
+        let operation = UUID()
+        let changed = try store.setTitle(momentID: moment.id, title: " Káva u řeky 🥾 ", operationID: operation)
+        XCTAssertEqual(changed.title, "Káva u řeky 🥾")
+        XCTAssertEqual(changed.revision, 2)
+        XCTAssertEqual(changed.capture, moment.capture)
+        XCTAssertEqual(changed.privacy, moment.privacy)
+        let reopened = try CaminoLocalStore(storeURL: url)
+        XCTAssertEqual(try reopened.moments(tripID: trip.id).first?.title, changed.title)
+        XCTAssertEqual(try reopened.setTitle(momentID: moment.id, title: changed.title,
+            operationID: operation).revision, 2)
+        XCTAssertThrowsError(try reopened.setTitle(momentID: moment.id, title: "Other", operationID: operation))
+        XCTAssertThrowsError(try reopened.setTitle(momentID: moment.id, title: "Other", expectedRevision: 1))
+        XCTAssertThrowsError(try reopened.setTitle(momentID: moment.id, title: "x\ny"))
+        XCTAssertThrowsError(try reopened.setTitle(momentID: moment.id, title: String(repeating: "x", count: 161)))
+        XCTAssertEqual(try reopened.setTitle(momentID: moment.id, title: "").revision, 3)
+        XCTAssertEqual(try reopened.setTitle(momentID: moment.id, title: "").revision, 3)
+        let oldOperation = LocalPendingOperation(id: UUID(), momentID: moment.id,
+            deviceSequence: 7, expectedRevision: 3, kind: .hidden,
+            createdAtUTCMilliseconds: 1, hidden: true)
+        let encoded = try JSONEncoder().encode(oldOperation)
+        XCTAssertFalse(String(decoding: encoded, as: UTF8.self).contains("title"))
+        XCTAssertNil(try JSONDecoder().decode(LocalPendingOperation.self, from: encoded).title)
+    }
+
     func testOfflineTripsStaySeparateAndOnlyOneIsActive() throws {
         let store = try CaminoLocalStore(inMemory: true)
         XCTAssertNil(try store.activeTrip())

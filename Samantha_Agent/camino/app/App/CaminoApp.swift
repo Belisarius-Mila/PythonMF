@@ -175,7 +175,7 @@ private struct CaptureHomeView: View {
                                 Button { model.momentDetail = moment } label: {
                                     HStack {
                                         Image(systemName: symbol(for: moment.kind))
-                                        Text(moment.kind.title)
+                                        Text(moment.displayTitle).lineLimit(2)
                                         if moment.important {
                                             Image(systemName: "star.fill").foregroundStyle(.yellow)
                                         }

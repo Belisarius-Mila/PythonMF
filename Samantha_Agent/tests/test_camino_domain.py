@@ -11,7 +11,8 @@ from camino.domain import (
     TextRevision, Trip, create_moment, create_private_addendum,
     select_viewer_candidates, server_revision_pending,
 )
-from camino.domain.model import TimeSource
+from camino.domain.model import TimeSource, TitleChange
+from camino.domain.codec import decode_moment, decode_change, encode_change, wire
 
 
 def uid(number: int) -> str:
@@ -59,6 +60,30 @@ class CaminoDomainTests(unittest.TestCase):
         self.assertEqual(addendum.privacy, Privacy.OWNER_ONLY.value)
         with self.assertRaises(ContractError):
             replace(reflection, privacy=Privacy.DIARY.value)
+
+    def test_titles_preserve_legacy_wire_history_and_allow_clear(self):
+        original = self.moment()
+        self.assertNotIn("title", wire(original))
+        self.assertEqual(decode_moment(wire(original)).title, "")
+        change = TitleChange(uid(800), original.id, 1, 1, "Káva u řeky 🥾")
+        self.assertEqual(decode_change(encode_change(change)), change)
+        history = MomentHistory((original,)).apply(change)
+        self.assertEqual(history.apply(change), history)
+        self.assertEqual(decode_moment(wire(history.current)).title, change.title)
+        self.assertEqual(history.versions[0], original)
+        self.assertEqual(history.current.captured, original.captured)
+        self.assertEqual(history.current.privacy, original.privacy)
+        cleared = history.apply(TitleChange(uid(801), original.id, 2, 2, ""))
+        self.assertNotIn("title", wire(cleared.current))
+        self.assertEqual(cleared.current.revision, 3)
+
+    def test_title_contract_rejects_bad_values_and_stale_changes(self):
+        for title in (None, True, " leading", "trailing ", "a\nb", "x" * 161, "a\x00b"):
+            with self.subTest(title=repr(title)), self.assertRaises(ContractError):
+                TitleChange(uid(800), self.moment().id, 1, 1, title)
+        history = MomentHistory((self.moment(),)).apply(TitleChange(uid(800), self.moment().id, 1, 1, "First"))
+        with self.assertRaises(RevisionConflict):
+            history.apply(TitleChange(uid(801), self.moment().id, 2, 1, "Second"))
 
     def test_reflection_release_requires_explicit_action_and_new_revision(self):
         reflection = self.moment(4, MomentKind.REFLECTION)
