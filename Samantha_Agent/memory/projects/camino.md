@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-27 08:02 CEST
+Aktualizováno: 2026-09-27 08:33 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,14 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- Aktualizováno: 2026-09-27 08:33 CEST — nová GPS verze otevřená, data a GPS1 PASS.
+- Míla potvrzuje novou položku „Povolit / obnovit GPS“, funkční všechna data
+  a nový okamžik bez polohy před jejím povolením. GPS2–GPS4 dosud NEOVĚŘENO.
+- SideStore ukazuje 7 DAYS; přesné datum profilu neodečtené. Kolečko v jeho
+  seznamu samo nebylo důkazem selhání aktualizace; nový kód se otevřel.
+
+### Historická příprava před fyzickým ověřením
 
 - Aktualizováno: 2026-09-27 08:02 CEST — GPS IPA build 6 připravený pro SideStore.
 - `Camino-GPS-6-20260927.ipa` ve Stahování, zdroj `3fbf7232`, stejné ID;
@@ -1961,3 +1969,24 @@ Technický důkaz:
   Velikost/hash a postup v GPS_CAPTURE_REPORT.md. Kód nezměněn od 3fbf7232;
   předešlá plná brána platí, nyní pouze statická kontrola dokumentace.
   Telefon, soukromý archiv a služby beze změny; fyzická GPS NEOVĚŘENO.
+
+## 2026-09-27 08:33 CEST — data a GPS1 fyzicky PASS
+
+Hotovo:
+- Nová verze se otevřela, data fungují. Nový okamžik bez povolené GPS
+  správně uvádí nepřítomnost polohy; data a GPS1 PASS podle Míly.
+
+Rozhodnutí:
+- Bez nového rozhodnutí či změny kódu. GPS1 není důkaz polohy/přenosu.
+
+Další krok:
+- GPS2: venku povolit GPS při používání, počkat na připravený bod a vytvořit
+  nový okamžik; ověřit skutečnou polohu a zachování offline/po otevření.
+
+Navrhované další kroky:
+- GPS3 přenos, zbývající GPS4, mapový odkaz a Janin Viewer; M3/M4.
+
+Technický důkaz:
+- Míla: „GPS u tohoto okamžiku není uložená ... všechna data fungují“.
+  Dříve potvrdil nové tlačítko. SideStore 7 DAYS na snímku, přesná expirace
+  neověřená. Žádné souřadnice, nový podpisový zásah, push či deploy.

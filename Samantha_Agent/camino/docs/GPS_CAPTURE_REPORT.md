@@ -1,5 +1,20 @@
 # GPS u nových okamžiků — lokální implementace
 
+## Fyzická přejímka 27. 9. 08:33 CEST
+
+- **Import/spuštění nové verze a zachování dat PASS podle Míly**: původní
+  Camino se otevře, obsahuje „Povolit / obnovit GPS“, všechna data fungují.
+- **GPS1 PASS**: nový okamžik před povolením polohy ukazuje „GPS u tohoto
+  okamžiku není uložená“. To není důkaz skutečného GPS bodu ani přenosu.
+- SideStore snímek v 08:29 ukazoval Camino / Sideloaded / 7 DAYS a kolečko
+  místo ikony. Samotné kolečko nebylo důkazem selhání: následovalo úspěšné
+  otevření nové funkce. Přesné datum nového profilu nebylo odečteno.
+- **GPS2–GPS4 NEOVĚŘENO**. Další: venku povolit při používání, počkat na
+  připravenou GPS a pořídit nový bod; starý se nedoplňuje. Potom offline
+  zachování a přenos na Mac. Bez další změny kódu, serveru či Vieweru.
+
+### Historická příprava balíčku
+
 Aktualizace 27. 9. 08:02 CEST: **Camino 0.1.0 (6)** ze zdroje `3fbf7232`
 je připravené ve Stahování jako `Camino-GPS-6-20260927.ipa` (1 049 786 B).
 Stejné ID `cz.pythonmf.camino.app`, stejný tým a pokrytí zařízení jako build 5;
@@ -104,7 +119,7 @@ a aktuální owner token. Žádné souřadnice ani tokeny neposílat do chatu.
    vypnutou přesnou polohu; záznam funguje, bod buď chybí, nebo je podle
    skutečné přesnosti označen jako přibližný. Nedostupné varianty NEOVĚŘENO.
 
-GPS1–GPS4 zatím **NEOVĚŘENO**. Syntetická API zkouška nedokládá fyzický GPS fix,
+GPS1 **PASS** podle přejímky výše; GPS2–GPS4 **NEOVĚŘENO**. Syntetická API zkouška nedokládá fyzický GPS fix,
 spotřebu ani skutečnou telefonní síť. Živý server, grant Vieweru, Serve/Funnel
 a instalace telefonu nebyly v tomto kroku změněny.
 
