@@ -1,6 +1,42 @@
 # Viewer — minimalistický odkaz na místo (U16)
 
-27. 9. 2026. Lokální implementace; nasazení a grant pro Janu jsou oddělené.
+27. 9. 2026. Implementace i následné výslovně schválené nasazení.
+
+## Nasazeno 27. 9. 15:17 CEST
+
+- Míla schválil nasazení, Do deníku včetně GPS pro Janu a odkaz/restart
+  Cockpitu; následně potvrdil přesnou globální brzdu pro přepnutí LaunchAgentu.
+  Současná data označil za testovací a nahraditelná, pokud nejsou potřeba pro
+  další zkoušky. Nic se v tomto kroku nemaže; není to plošný souhlas s mazáním.
+- Přednasazovací plná brána **1833/1833 PASS** (314,386 s jednotkové sady).
+  Registrovaný stop → upgrade na **125fddbbcb56** → enable-viewer → start.
+  Snapshoty DB a předchozí konfigurace uchované soukromě. První start vrátil
+  OSError; po ověření uvolněného portu opakovaný start uspěl. Bez force kill.
+- Archiv po nasazení: 48 Momentů / 140 operací / 49 ověřených médií /
+  228 226 831 B. Identita, hashe všech původních tabulek i médií a owner token
+  shodné s výchozím stavem; oba recovery flagy=false. Nový pouze grant/reader
+  a očištěné odvozeniny. Owner připojení telefonu beze změny.
+- Camino běží, grant=true, privátní HTTPS ověřené, Funnel off; Serve se
+  neměnil. Reader HTTPS 200, 6 dnů / 35 povolených Momentů / 5 mapových odkazů.
+  Mapové body odpovídají povoleným zdrojům, ID owner-only/skrytých zdrojů
+  v HTML nepřítomná, no-store/no-referrer platí. Bez reálného otevření mapy.
+- Automatický worker dokončil přípravu: 34 povolených zdrojových médií,
+  **49/49 mediálních URL HEAD 200**, žádné čekající hlášení. Video Range
+  206/16 B ověřené. První kontrola zachytila běžící převod, nikoli ztrátu dat.
+- Nepřihlášený Viewer, owner Bearer na Vieweru i reader na owner API vrací
+  **401**. Soukromé HTML ani souřadnice nebyly vypisované do výstupu.
+  Pro HTTPS audit použit existující systémový TLS context; původní holý
+  Python neměl správný CA řetězec. Kontrola certifikátu se nevypínala.
+- Ignorovaná místní konfigurace Cockpitu obsahuje privátní Viewer URL,
+  předchozí konfigurace soukromě uchovaná, ostatní hodnoty beze změny.
+  Registrované nasazení stejného **125fddbbcb56**, PID 72621→8376,
+  **smoke 5/5**, `camino_viewer.configured=true`. Jeho rychlá brána je
+  oddělená od předem dokončené plné sady 1833/1833. Bez push.
+- Přihlášení `jana`; nové reader heslo vložené registrovaně do schránky
+  Macu, nikdy do URL/chatu/Gitu. Jde o jiné oprávnění než token telefonu.
+- **RT3/RT4 a vizuální Safari/mapový klik zbývají**. HTTP audit není důkaz
+  přehrání na Janině zařízení ani přístupu z jiné sítě. Další: otevřít
+  v Cockpitu **Otevřít Camino**, přihlásit se a společně projít jeden den.
 
 ## Výsledek
 
@@ -40,7 +76,7 @@ Konkrétní otevření mapy v Safari/Mapách zůstává fyzickým testem.
 - Plná sada ani iOS build se kvůli HTML/projekci neopakovaly. Před schváleným
   nasazením zůstává povinná publikační brána. Žádné reálné GPS odeslání mapám.
 
-## Aktuální provozní hranice
+## Historická provozní hranice před souhlasem s nasazením
 
 Živý registrovaný audit tohoto kroku: Camino služba vlastněná a běžící,
 privátní HTTPS dostupné, Funnel vypnutý, Viewer grant **false**.

@@ -6,10 +6,11 @@ Build 6 fyzicky funguje: GPS marker/foto/komentář/video uložené a přenesen�
 Mac 48 Momentů / 5 GPS. Zbývající okrajové scénáře nejsou PASS a nyní
 neblokují požadovaný přechod na Viewer. [GPS_CAPTURE_REPORT.md](GPS_CAPTURE_REPORT.md)
 rozlišuje jednotlivé důkazy.
-27. 9. navazuje lokálně hotový jednoduchý mapový odkaz U16:
-[VIEWER_MAP_REPORT.md](VIEWER_MAP_REPORT.md), cíleně 45/45 PASS.
-Živý Viewer grant=false, Cockpit odkaz nenastavený; nasazení a zpřístupnění
-Janě čekají na samostatné potvrzení. Vlastní mapa/trasa stále odložená.
+27. 9. 15:17: Viewer včetně mapového odkazu U16 nasazený z 125fddbbcb56,
+grant pro Janu povolený a Cockpit odkaz nastavený po výslovném souhlasu
+a globální brzdě. [VIEWER_MAP_REPORT.md](VIEWER_MAP_REPORT.md): cíleně
+45/45, plná brána 1833/1833, Cockpit smoke 5/5; HTTPS a média ověřené.
+Další skutečné otevření s Janou a společný RT3/RT4. Vlastní mapa/trasa odložená.
 
 Historický stav před GPS krokem:
 Aktualizace 26. 9. 23:19 CEST: server a iPhone build 5 nasazené, fyzické

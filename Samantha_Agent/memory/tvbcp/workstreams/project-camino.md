@@ -1,16 +1,20 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-27 14:21 CEST — Viewer mapový odkaz lokálně hotový.
+- Aktualizováno: 2026-09-27 15:17 CEST — Viewer pro Janu nasazený včetně GPS odkazu.
 - Míla žádá konečně pokračovat Viewerem. U16 přidává odkaz na Apple Mapy
   pouze u povoleného bodu, s přesností a informací o předání bodu po kliknutí.
   Cíleně 45/45 PASS, statická brána PASS; bez iOS změny nebo dalšího podpisu.
-- Živý audit: služba a soukromé HTTPS fungují, Funnel off, viewer_granted=false.
-  Cockpit odkaz configured=false. Nasazení/grant vyžádán, zatím nepotvrzený;
-  nastavení odkazu a restart Cockpitu zahrnout do samostatného souhlasu.
-  Vizuální smoke nedostupný (žádný připojený prohlížeč); RT3/RT4 NEOVĚŘENO.
-- Další: schválit nasazení + Viewer pro Janu + odkaz v Cockpitu, potom
-  jediný společný RT3/RT4. Podrobnosti a oprávnění: `camino/docs/VIEWER_MAP_REPORT.md`.
+- Po výslovném souhlasu i globální brzdě nasazené Camino/Cockpit 125fddbbcb56.
+  Plná brána 1833/1833, Cockpit PID 8376 a smoke 5/5; odkaz configured=true.
+  Živě HTTPS 200, grant=true, Funnel off, 6 dnů / 35 povolených Momentů,
+  5 mapových odkazů, 49/49 mediálních URL OK, bez čekání, video Range 206.
+  Nepřihlášený přístup i záměna reader/owner odmítnuté. Archiv a owner token
+  nezměněné (48 Momentů / 140 operací / 49 médií), oba recovery flagy=false.
+- Přihlášení `jana`, reader heslo zkopírované do schránky Macu, ne do Gitu/chatu.
+  Další: Cockpit → Otevřít Camino, skutečné přihlášení a společný RT3/RT4.
+  Vizuální Safari/mapový klik a jiná síť zatím NEOVĚŘENO.
+  Podrobnosti a hranice: `camino/docs/VIEWER_MAP_REPORT.md`.
   GPS okrajové scénáře zůstávají neověřené a nyní neblokují Viewer.
 
 ### Přijaté GPS — předchozí fyzická přejímka
@@ -2467,3 +2471,28 @@ není dostupný. Živě viewer_granted=false, Cockpit link configured=false,
 privátní HTTPS zdravé, Funnel off. Report `camino/docs/VIEWER_MAP_REPORT.md`.
 Při opakované kontrole GPS počet 48/140/5 beze změny; nejde o nucený retry.
 Žádné souřadnice/tokeny v Gitu, žádný push/deploy/grant ani placené volání.
+
+## 2026-09-27 15:17 CEST — Viewer pro Janu zprovozněný
+
+Hotovo: Soukromý Viewer běží nad stávajícími daty, včetně mapových odkazů.
+Cockpit má nastavené Otevřít Camino; samostatné přihlášení jana připravené,
+heslo předané do schránky Macu. Token telefonu zůstal stejný.
+
+Rozhodnutí: Míla schválil nasazení, Do deníku včetně GPS pro Janu a restart
+Cockpitu, poté přesnou globální brzdu pro LaunchAgent. Současná data označil
+za testovací/nahraditelná kromě dalšího testovacího využití; nyní nic nemažeme.
+
+Další krok: Otevřít Viewer z Cockpitu, přihlásit se a společně ověřit jeden den.
+
+Navrhované další kroky: RT3/RT4 se Safari/mapovým klikem, M3/M4, podpis 1. 10.
+
+Technický důkaz: Registrované stop/upgrade/enable-viewer/start na 125fddbbcb56,
+plná brána 1833/1833 PASS. První start OSError, po ověření volného portu
+opakovaný start uspěl. Cockpit registrované nasazení, PID 72621→8376, smoke 5/5.
+Privátní HTTPS 200: 6 dnů, 35 povolených Momentů, 5 správných mapových odkazů,
+49 mediálních URL HEAD 200, video Range 206/16 B, žádná čekající média.
+Owner-only/skrytá ID v HTML nepřítomná, anonymous/owner na Viewer i reader
+na owner API 401. Archiv/identita/tabulky/originály/owner token hashově shodné,
+48 Momentů / 140 operací / 49 médií / 228226831 B, oba recovery flagy=false.
+Konfigurace a DB snapshoty zachované; ostatní env hodnoty shodné, Serve beze změny.
+Žádný push, iPhone update, reálný mapový klik ani tvrzení fyzického RT3/RT4 PASS.

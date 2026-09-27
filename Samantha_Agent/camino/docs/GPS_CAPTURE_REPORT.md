@@ -7,7 +7,8 @@ Následný read-only audit: stále 48 Momentů / 140 operací / 5 GPS, 0 konflik
 Bez nového záznamu nepřibyla položka; nucený síťový replay tím není doložený.
 GPS4 a samostatný offline/restart médií zůstávají NEOVĚŘENO, nyní odložené
 ve prospěch Vieweru, nikoli dodatečně PASS. Mapový odkaz lokálně hotový:
-`VIEWER_MAP_REPORT.md`; zpřístupnění Janě a fyzický klik ještě neproběhly.
+`VIEWER_MAP_REPORT.md`; následně v 15:17 nasazeno a grant pro Janu povolený.
+Fyzické otevření s Janou a mapový klik ještě neproběhly.
 
 ## Fyzická přejímka 27. 9. — aktualizováno 13:58 CEST
 
