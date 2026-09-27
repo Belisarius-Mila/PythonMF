@@ -1,6 +1,6 @@
 # GPS u nových okamžiků — lokální implementace
 
-## Fyzická přejímka 27. 9. — aktualizováno 13:47 CEST
+## Fyzická přejímka 27. 9. — aktualizováno 13:51 CEST
 
 - **Import/spuštění nové verze a zachování dat PASS podle Míly**: původní
   Camino se otevře, obsahuje „Povolit / obnovit GPS“, všechna data fungují.
@@ -13,7 +13,8 @@
   hlášená přesnost ±8 m. Jde o odhad telefonu, ne geodetické ověření místa.
   V 13:30 Míla potvrzuje „GPS offline + po otevření PASS“: nový okamžik
   vytvořen offline, poloha zachovaná po zavření/otevření (marker).
-  V 13:44 potvrzuje GPS u nového fota ±4 m a komentáře ±11 m.
+  V 13:44 potvrzuje GPS u nového fota a komentáře ±11 m; přesnost fota
+  původně hlásil ±4 m, v 13:51 podle detailu telefonu opravil na ±6 m.
   Jejich offline/restart není samostatně doložený; video zbývá.
 - **GPS3 částečně PASS**: Mac 47 Momentů / 138 operací, 4 GPS body
   (2 markery, foto, komentář), 43 bez GPS. U všech bodů čtyři pole payloadu shodná
@@ -21,9 +22,9 @@
   Žádné konflikty, oba recovery flagy=false, quick_check OK.
   Nové foto/audio doručeny: oba soubory velikostí i SHA-256 odpovídají
   ověřeným účtenkám; celkem 48 ověřených médií. Telefon podle Míly 47/0.
-  Foto má na Macu zaokrouhleně ±6 m proti dříve hlášeným ±4 m; komentář ±11 m.
-  Nutné porovnat detail téže fotografie v telefonu; shoda payload → DB
-  sama tuto nesrovnalost nevysvětluje. Opakovaný přenos bez duplikátu zbývá.
+  Foto má na Macu zaokrouhleně ±6 m, v 13:51 Míla potvrdil stejnou hodnotu
+  v detailu telefonu a opravil původní hlášení ±4 m. Nesrovnalost uzavřená,
+  komentář ±11 m. Opakovaný přenos bez duplikátu zbývá.
   **GPS4 NEOVĚŘENO**.
   Bez výpisu souřadnic a změny tokenu/kódu/služeb/Vieweru.
 
