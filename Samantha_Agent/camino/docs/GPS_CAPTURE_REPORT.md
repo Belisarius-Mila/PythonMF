@@ -1,6 +1,6 @@
 # GPS u nových okamžiků — lokální implementace
 
-## Fyzická přejímka 27. 9. — aktualizováno 13:30 CEST
+## Fyzická přejímka 27. 9. — aktualizováno 13:44 CEST
 
 - **Import/spuštění nové verze a zachování dat PASS podle Míly**: původní
   Camino se otevře, obsahuje „Povolit / obnovit GPS“, všechna data fungují.
@@ -12,9 +12,16 @@
 - **GPS2 částečně PASS (27. 9. 13:24)**: Míla potvrzuje „GPS uložena“,
   hlášená přesnost ±8 m. Jde o odhad telefonu, ne geodetické ověření místa.
   V 13:30 Míla potvrzuje „GPS offline + po otevření PASS“: nový okamžik
-  vytvořen offline, poloha zachovaná po zavření/otevření. Mediální větve
-  GPS2 zbývají; toto potvrzení se vztahuje na test označení okamžiku.
-  **GPS3/GPS4 NEOVĚŘENO**; přenos na Mac dosud nedoložen. Bez změny kódu/služeb.
+  vytvořen offline, poloha zachovaná po zavření/otevření (marker).
+  V 13:44 potvrzuje GPS u nového fota ±4 m a komentáře ±11 m.
+  Jejich offline/restart není samostatně doložený; video zbývá.
+- **GPS3 částečně PASS**: Mac 45 Momentů / 133 operací, 2 GPS markery,
+  43 bez GPS. U obou bodů všechna čtyři pole přijatého payloadu shodná
+  s uloženým Momentem i po novém otevření DB, hash zprávy platný.
+  Žádné konflikty, oba recovery flagy=false, quick_check OK.
+  Nové foto/komentář dosud nejsou v tomto snapshotu; jejich přenos
+  a opakování bez duplikátu zbývá. **GPS4 NEOVĚŘENO**.
+  Bez výpisu souřadnic a změny tokenu/kódu/služeb/Vieweru.
 
 ### Historická příprava balíčku
 
@@ -122,7 +129,7 @@ a aktuální owner token. Žádné souřadnice ani tokeny neposílat do chatu.
    vypnutou přesnou polohu; záznam funguje, bod buď chybí, nebo je podle
    skutečné přesnosti označen jako přibližný. Nedostupné varianty NEOVĚŘENO.
 
-GPS1 **PASS**, GPS2 **částečně PASS** podle přejímky výše; GPS3/GPS4 **NEOVĚŘENO**. Syntetická API zkouška nedokládá fyzický GPS fix,
+GPS1 **PASS**, GPS2/GPS3 **částečně PASS** podle přejímky výše; GPS4 **NEOVĚŘENO**. Syntetická API zkouška nedokládá fyzický GPS fix,
 spotřebu ani skutečnou telefonní síť. Živý server, grant Vieweru, Serve/Funnel
 a instalace telefonu nebyly v tomto kroku změněny.
 

@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-27 13:30 CEST
+Aktualizováno: 2026-09-27 13:44 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -12,12 +12,16 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-27 13:30 CEST — GPS offline a po otevření PASS, GPS2 částečně PASS.
+- Aktualizováno: 2026-09-27 13:44 CEST — GPS foto/komentář v telefonu PASS; jejich přenos čeká.
 - Míla potvrzuje novou položku „Povolit / obnovit GPS“, funkční všechna data
   a nový okamžik bez polohy před jejím povolením: data/GPS1 PASS. Nyní potvrzuje
   „GPS uložena“, hlášená přesnost ±8 m. Nově potvrzuje vytvoření offline
-  a zachování po zavření/otevření: PASS. Zbývají média GPS2 a GPS3/GPS4;
-  nejbližší krok je malá dávka a ověření GPS na Macu (GPS3).
+  a zachování po zavření/otevření: PASS. Foto ±4 m a komentář ±11 m nyní
+  potvrzené v telefonu; jejich offline/restart není samostatně doložený.
+- Mac read-only: 45 Momentů / 133 operací, 2 GPS markery; přijaté GPS payloady
+  se shodují s uložením i po novém otevření DB. Bez konfliktů, oba flagy=false.
+  Nové foto/komentář v tomto snapshotu ještě nejsou; další krok jejich přenos.
+  GPS2/GPS3 částečně PASS, GPS4 NEOVĚŘENO; video a opakovaný přenos zbývají.
 - SideStore ukazuje 7 DAYS; přesné datum profilu neodečtené. Kolečko v jeho
   seznamu samo nebylo důkazem selhání aktualizace; nový kód se otevřel.
 
@@ -2019,3 +2023,21 @@ Navrhované další kroky: Média GPS2, GPS4 a mapový odkaz pro Janu.
 
 Technický důkaz: Míla potvrzuje „GPS offline + po otevření PASS“.
 Souřadnice nečteny; přenos a mediální větve nejsou tímto doložené.
+
+## 2026-09-27 13:44 CEST — GPS u fotografie a komentáře
+
+Hotovo: Míla potvrzuje GPS u nové fotografie (±4 m) a komentáře (±11 m).
+Předchozí dva GPS markery jsou prokazatelně uložené i na Macu.
+
+Rozhodnutí: Bez nového rozhodnutí. Telefonní PASS neznamená doručení médií.
+
+Další krok: Přenést nové foto/komentář a ověřit jejich GPS i média na Macu.
+
+Navrhované další kroky: Zbývající GPS2/GPS3, GPS4 a mapový odkaz pro Janu.
+
+Technický důkaz: Read-only Mac 45 Momentů / 133 operací / 2 GPS markery,
+43 bez GPS, 0 konfliktů, oba recovery flagy=false, quick_check OK.
+U obou GPS shoda všech čtyř polí přijatý payload → uložený Moment,
+platný hash zprávy a zachování po novém otevření DB. Nová média dosud
+nejsou v tomto snapshotu; opakovaný přenos bez duplikátu neověřený.
+Souřadnice ani obsah nebyly vypsané; token, služba, síť a Viewer nezměněné.
