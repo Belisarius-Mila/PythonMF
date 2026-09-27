@@ -1,6 +1,6 @@
 # GPS u nových okamžiků — lokální implementace
 
-## Fyzická přejímka 27. 9. — aktualizováno 13:24 CEST
+## Fyzická přejímka 27. 9. — aktualizováno 13:30 CEST
 
 - **Import/spuštění nové verze a zachování dat PASS podle Míly**: původní
   Camino se otevře, obsahuje „Povolit / obnovit GPS“, všechna data fungují.
@@ -11,7 +11,9 @@
   otevření nové funkce. Přesné datum nového profilu nebylo odečteno.
 - **GPS2 částečně PASS (27. 9. 13:24)**: Míla potvrzuje „GPS uložena“,
   hlášená přesnost ±8 m. Jde o odhad telefonu, ne geodetické ověření místa.
-  Offline vytvoření, zachování po restartu a mediální větve zbývají.
+  V 13:30 Míla potvrzuje „GPS offline + po otevření PASS“: nový okamžik
+  vytvořen offline, poloha zachovaná po zavření/otevření. Mediální větve
+  GPS2 zbývají; toto potvrzení se vztahuje na test označení okamžiku.
   **GPS3/GPS4 NEOVĚŘENO**; přenos na Mac dosud nedoložen. Bez změny kódu/služeb.
 
 ### Historická příprava balíčku

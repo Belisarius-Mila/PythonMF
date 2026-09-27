@@ -1,11 +1,12 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-27 13:24 CEST — skutečný GPS bod uložen, GPS2 částečně PASS.
+- Aktualizováno: 2026-09-27 13:30 CEST — GPS offline a po otevření PASS, GPS2 částečně PASS.
 - Míla potvrzuje novou položku „Povolit / obnovit GPS“, funkční všechna data
   a nový okamžik bez polohy před jejím povolením: data/GPS1 PASS. Nyní potvrzuje
-  „GPS uložena“, hlášená přesnost ±8 m. Offline/restart/média GPS2 a GPS3/GPS4
-  zbývají; nejbližší krok je offline vytvoření a znovuotevření nového bodu.
+  „GPS uložena“, hlášená přesnost ±8 m. Nově potvrzuje vytvoření offline
+  a zachování po zavření/otevření: PASS. Zbývají média GPS2 a GPS3/GPS4;
+  nejbližší krok je malá dávka a ověření GPS na Macu (GPS3).
 - SideStore ukazuje 7 DAYS; přesné datum profilu neodečtené. Kolečko v jeho
   seznamu samo nebylo důkazem selhání aktualizace; nový kód se otevřel.
 
@@ -2217,3 +2218,16 @@ Navrhované další kroky: GPS3 přenos, zbytek GPS2/GPS4 a mapový odkaz pro Ja
 
 Technický důkaz: Míla hlásí „GPS uložena“ a ±8 m. Souřadnice nečteny.
 GPS2 není celé PASS; restart/offline, média a přenos nejsou tímto doložené.
+
+## 2026-09-27 13:30 CEST — GPS offline a po otevření
+
+Hotovo: Nový GPS okamžik vznikl offline a poloha zůstala po zavření/otevření.
+
+Rozhodnutí: Bez nového rozhodnutí; GPS2 je stále částečně PASS, média zbývají.
+
+Další krok: GPS3 — přenést malou dávku a ověřit uloženou GPS na Macu.
+
+Navrhované další kroky: Média GPS2, GPS4 a mapový odkaz pro Janu.
+
+Technický důkaz: Míla potvrzuje „GPS offline + po otevření PASS“.
+Souřadnice nečteny; přenos a mediální větve nejsou tímto doložené.

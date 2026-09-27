@@ -59,7 +59,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] `camino/docs/GPS_CAPTURE_REPORT.md`: 27. 9. 13:24 GPS2 částečně PASS: skutečný bod uložen, hlášená přesnost ±8 m. Data a GPS1 PASS. SideStore 7 DAYS, přesná expirace neověřená. Další GPS2 offline/restart a média, GPS3 přenos, GPS4; U16 mapový odkaz pro Janu, Viewer/RT3/RT4 a M3/M4. Fyzická obnova z 26. 9. PASS zůstává; SideStore/RemotePair a Camino token/Tailscale viz LL-051. Kontrola podpisu 1. 10.; G8/T060/captive portal nejsou PASS.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] `camino/docs/GPS_CAPTURE_REPORT.md`: 27. 9. 13:30 GPS offline + po otevření PASS podle Míly; GPS2 částečně PASS, média zbývají. Data a GPS1 PASS. SideStore 7 DAYS, přesná expirace neověřená. Další GPS3 přenos, média GPS2, GPS4; U16 mapový odkaz pro Janu, Viewer/RT3/RT4 a M3/M4. Fyzická obnova z 26. 9. PASS zůstává; SideStore/RemotePair a Camino token/Tailscale viz LL-051. Kontrola podpisu 1. 10.; G8/T060/captive portal nejsou PASS.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` - Cockpit 14. 9.: scroll 10ec0877 potvrzený Mílou. [PRIPOMENOUT] U07 až při příštím pokračování. TXT v2.8 shrnuje U01–U06; plná brána 1680/1680 OK, funkční nasazení 980aed7a a smoke 5/5. Publikační překážka odstraněna; finální balíček/head ověřovat živým auditem.
 
