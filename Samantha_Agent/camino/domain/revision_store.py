@@ -530,8 +530,9 @@ class RevisionStore:
     def viewer_snapshot(self, trip_id: str) -> dict[str, Any]:
         """Read one consistent, allowlisted projection; never return owner metadata.
 
-        No schema changes, writes, excluded counts, location, relationship links,
-        or owner summaries. Text provenance must also stay within the allowlist.
+        No schema changes, writes, excluded counts, relationship links, or owner
+        summaries. U16 allows a map point only for these permitted Moments;
+        the raw location timestamp stays private. Text provenance is allowlisted.
         """
         self._uuid(trip_id)
         with self._connection() as connection:
@@ -574,6 +575,11 @@ class RevisionStore:
                     "day": moment.chapter_date,
                     "time": moment.captured.local_wall[11:16] if moment.captured.local_wall else "Čas neznámý",
                     "kind": moment.kind.value, "text": text, "assets": assets[moment.id],
+                    "map_point": {
+                        "latitude": moment.location.latitude,
+                        "longitude": moment.location.longitude,
+                        "accuracy_m": moment.location.horizontal_accuracy_m,
+                    } if moment.location else None,
                     "audio_layouts": [json.loads(row["body"]) for row in connection.execute(
                         "SELECT body FROM audio_layouts WHERE moment_id=? ORDER BY rowid", (moment.id,)
                     )],

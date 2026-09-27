@@ -8,6 +8,7 @@ import base64
 import tempfile
 from pathlib import Path
 
+from camino.domain.model import LocationFix
 from camino.server.auth import RevocableTokenStore
 from camino.server.viewer import CaminoViewer
 from camino.server.viewer_media import OUTPUTS, ViewerMedia
@@ -16,7 +17,7 @@ from tests.camino_viewer_fixture import ViewerFixture, synthetic_media
 
 def main():
     root = Path(tempfile.mkdtemp(prefix="camino-m1-preview-"))
-    fixture = ViewerFixture(root)
+    fixture = ViewerFixture(root, location=LocationFix(12.25, 34.5, 1790323200000, 8))
     assets = [fixture.upload(30 + i, kind, content)
               for i, (kind, content) in enumerate(synthetic_media(root).items())]
     viewer = CaminoViewer(fixture.store, fixture.media, ViewerMedia(root / "copies"),

@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 from html import escape
 from pathlib import Path
 from typing import Callable
+from urllib.parse import urlencode
 
 from fastapi import APIRouter, Request
 from fastapi.responses import FileResponse, HTMLResponse, Response
@@ -24,6 +25,7 @@ from camino.server.viewer_media import OUTPUTS, ViewerMedia
 HEADERS = {
     "Cache-Control": "no-store, private", "X-Content-Type-Options": "nosniff",
     "Referrer-Policy": "no-referrer", "X-Frame-Options": "DENY",
+    "X-DNS-Prefetch-Control": "off",
     "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'; script-src 'self'; img-src 'self'; media-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'",
 }
 CSS = """
@@ -38,6 +40,7 @@ article{background:#fff;border:1px solid #dce2d8;border-radius:16px;padding:22px
 img,video{display:block;max-width:100%;max-height:65vh;border-radius:10px;margin:auto}
 audio{width:100%}figcaption{margin:8px 0;color:#586961;font-size:.85rem}
 .notice{border-left:3px solid #ac792d;padding:10px 14px;background:#faf5e9}
+.place{margin:12px 0}.place a{display:inline-block;padding:10px 14px;border:1px solid #bfd0c5;border-radius:10px;text-decoration:none;font-weight:600}
 @media(max-width:520px){header,main,footer{padding:18px}h1{font-size:1.9rem}article{padding:16px}}
 """
 KINDS = {"photo": "Fotografie", "video": "Video", "comment": "Komentář", "reflection": "Úvaha", "marker": "Záznam"}
@@ -158,6 +161,19 @@ class CaminoViewer:
                 body += f'<article><h3>{escape(moment["time"])} · {KINDS.get(moment["kind"], "Záznam")}</h3>'
                 if moment["text"]:
                     body += f'<p class="text">{escape(moment["text"])}</p>'
+                point = moment["map_point"]
+                if point:
+                    # Only the allowlisted point and a constant label leave the
+                    # Viewer, on an explicit click. No token, title or diary text.
+                    query = urlencode({"ll": f'{point["latitude"]:.6f},{point["longitude"]:.6f}',
+                                       "q": "Místo záznamu"})
+                    url = escape("https://maps.apple.com/?" + query, quote=True)
+                    approximate = "Přibližná poloha · " if point["accuracy_m"] > 100 else ""
+                    body += (f'<div class="place"><a href="{url}" target="_blank" '
+                             'rel="noopener noreferrer" referrerpolicy="no-referrer">'
+                             'Otevřít místo v mapě</a>'
+                             f'<p class="muted">{approximate}Odhad přesnosti ±{point["accuracy_m"]:.0f} m. '
+                             'Kliknutím předáš tento bod Apple Mapám.</p></div>')
                 audio_body, ordered_ids = self.audio_html(moment, root_path)
                 body += audio_body
                 for index, asset in enumerate(moment["assets"], 1):
@@ -187,6 +203,7 @@ class CaminoViewer:
                  "stopped": "Automatická příprava je zastavená."}.get(self.build_state, "Stav přípravy neznámý.")
         return f'''<!doctype html><html lang="cs"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>{title} · Camino</title>
+<meta name="referrer" content="no-referrer"><meta http-equiv="x-dns-prefetch-control" content="off">
 <script src="{root_path}/viewer/player.js" defer></script>
 <style>{CSS}</style></head><body><header><p class="label">CAMINO · PRO JANU</p>
 <h1>{title}</h1><p class="muted">Malé zprávy z cesty. Fotografie, slova a původní hlas.</p>

@@ -1,5 +1,14 @@
 # GPS u nových okamžiků — lokální implementace
 
+## Přechod na Viewer 27. 9. 14:16 CEST
+
+Míla opakovanou kontrolu potvrzuje „Je to ok“ a žádá pokračovat Viewerem.
+Následný read-only audit: stále 48 Momentů / 140 operací / 5 GPS, 0 konfliktů.
+Bez nového záznamu nepřibyla položka; nucený síťový replay tím není doložený.
+GPS4 a samostatný offline/restart médií zůstávají NEOVĚŘENO, nyní odložené
+ve prospěch Vieweru, nikoli dodatečně PASS. Mapový odkaz lokálně hotový:
+`VIEWER_MAP_REPORT.md`; zpřístupnění Janě a fyzický klik ještě neproběhly.
+
 ## Fyzická přejímka 27. 9. — aktualizováno 13:58 CEST
 
 - **Import/spuštění nové verze a zachování dat PASS podle Míly**: původní
@@ -140,14 +149,14 @@ GPS1 **PASS**, GPS2/GPS3 **částečně PASS** podle přejímky výše; GPS4 **N
 spotřebu ani skutečnou telefonní síť. Živý server, grant Vieweru, Serve/Funnel
 a instalace telefonu nebyly v tomto kroku změněny.
 
-## Následuje: odkaz pro Janu
+## Odkaz pro Janu — lokální navazující implementace
 
 Pouze aktuální povolený `diary` Moment s bodem, nikdy `Jen pro mě`, skrytý,
 konfliktní či odvolaný zdroj. Odkaz otevře externí mapu až po kliknutí, bez
 vložené mapy a bez automatického stahování dlaždic. Poskytovatel mapy pak
 obdrží daný bod; nevkládat token ani obsah deníku do URL/referreru. Při
-přijatém zámku odkaz zmizí; už otevřenou mapu nelze odvolat. Před implementací
-doplnit projekční/HTML testy soukromí a pak ověřit kliknutí s Janou.
+přijatém zámku odkaz zmizí; už otevřenou mapu nelze odvolat. Projekční/HTML
+testy soukromí nyní PASS, viz `VIEWER_MAP_REPORT.md`; kliknutí s Janou zbývá.
 
 Platformní podklad: Apple [jednorázová poloha](https://developer.apple.com/documentation/corelocation/cllocationmanager/requestlocation())
 a [oprávnění při používání](https://developer.apple.com/documentation/corelocation/cllocationmanager/requestwheninuseauthorization()).

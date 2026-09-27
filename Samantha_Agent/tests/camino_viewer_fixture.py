@@ -17,7 +17,7 @@ def uid(n):
 
 
 class ViewerFixture:
-    def __init__(self, root: Path):
+    def __init__(self, root: Path, *, location=None):
         self.root = root
         self.store = RevisionStore(root / "metadata.sqlite")
         self.media = MediaStore(root / "media.sqlite", root / "originals", asset_lookup=self.store.asset, reserve_bytes=0)
@@ -27,7 +27,7 @@ class ViewerFixture:
         self.capture = CaptureTime(1790323200000, "2026-09-25T10:00:00", 120, "Europe/Prague", TimeSource.DEVICE_CAPTURE)
         self.send("create_trip", wire(self.trip))
         self.send("create_day", wire(self.day))
-        self.public = self.moment(3, Privacy.DIARY)
+        self.public = self.moment(3, Privacy.DIARY, location=location)
         self.private = self.moment(4, Privacy.OWNER_ONLY)
         self.text(self.public, 20, "Dnes začíná naše zkušební cesta. <script>alert('text')</script>")
         self.text(self.private, 21, "TAJNA-VETA-NEPATRI-JANE")
@@ -40,9 +40,9 @@ class ViewerFixture:
                     "expected_revision": expected, "payload": payload}
         return self.store.apply(envelope, json.dumps(envelope, sort_keys=True).encode())
 
-    def moment(self, n, privacy):
+    def moment(self, n, privacy, *, location=None):
         m = create_moment(id=uid(n), trip=self.trip, day=self.day, kind=MomentKind.COMMENT,
-                          captured=self.capture, new_moment_privacy=privacy)
+                          captured=self.capture, new_moment_privacy=privacy, location=location)
         self.send("create_moment", wire(m))
         return m
 

@@ -7,11 +7,14 @@ import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from html.parser import HTMLParser
 from unittest.mock import patch
+from urllib.parse import parse_qs, urlsplit
 
 import httpx
 
 from camino.api import CaminoV1Contract
+from camino.domain.model import LocationFix, Privacy
 from camino.server.application import create_app
 from camino.server.auth import RevocableTokenStore
 from camino.server.viewer import CaminoViewer
@@ -141,6 +144,57 @@ class ViewerHTTPTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("no-store", page.headers["cache-control"])
         self.assertIn("frame-ancestors 'none'", page.headers["content-security-policy"])
         self.assertEqual((await self.request("/viewer/days/2020-01-01")).status_code, 404)
+
+    async def test_map_link_is_click_only_allowlisted_and_has_no_referrer_or_credentials(self):
+        self.f.moment(70, Privacy.DIARY,
+                      location=LocationFix(12.25, 34.5, self.f.capture.utc_ms, 150))
+        self.f.moment(71, Privacy.OWNER_ONLY,
+                      location=LocationFix(66.123456, 77.654321, self.f.capture.utc_ms, 5))
+        page = await self.request("/viewer/days/2026-09-25")
+        self.assertEqual(page.status_code, 200)
+        self.assertEqual(page.headers["referrer-policy"], "no-referrer")
+        self.assertEqual(page.headers["x-dns-prefetch-control"], "off")
+        self.assertIn("Přibližná poloha", page.text)
+        self.assertIn("±150 m", page.text)
+        self.assertIn("Kliknutím předáš tento bod Apple Mapám", page.text)
+        tags = []
+        class Parser(HTMLParser):
+            def handle_starttag(self, tag, attrs):
+                tags.append((tag, dict(attrs)))
+        Parser().feed(page.text)
+        external = [(tag, attrs) for tag, attrs in tags
+                    if any(value and "maps.apple.com" in value for value in attrs.values())]
+        self.assertEqual(len(external), 1)
+        tag, attrs = external[0]
+        self.assertEqual(tag, "a")
+        self.assertEqual(attrs["rel"], "noopener noreferrer")
+        self.assertEqual(attrs["referrerpolicy"], "no-referrer")
+        self.assertEqual(attrs["target"], "_blank")
+        url = urlsplit(attrs["href"])
+        self.assertEqual((url.scheme, url.netloc), ("https", "maps.apple.com"))
+        self.assertEqual(parse_qs(url.query), {"ll": ["12.250000,34.500000"], "q": ["Místo záznamu"]})
+        for secret in ("66.123456", "77.654321", self.owner_token, self.reader_token, uid(71)):
+            self.assertNotIn(secret, page.text)
+        self.assertNotIn("maps.apple.com", (await self.request("/viewer/")).text)
+        self.assertNotIn("maps.apple.com", (await self.request("/viewer/days/2026-09-25", headers={})).text)
+
+    async def test_map_link_disappears_on_new_lock_hidden_revision_and_revocation(self):
+        moment = self.f.moment(70, Privacy.DIARY,
+                               location=LocationFix(12.25, 34.5, self.f.capture.utc_ms, 8))
+        path = "/viewer/days/2026-09-25"
+        self.assertIn("±8 m", (await self.request(path)).text)
+        changes = [("privacy", {"new_privacy": "owner_only", "user_action": "lock"}),
+                   ("privacy", {"new_privacy": "diary", "user_action": "unlock"}),
+                   ("hidden", {"hidden": True})]
+        for revision, (kind, fields) in enumerate(changes, 1):
+            self.f.send("update_metadata", {"moment_id": moment.id,
+                        "change": {"type": kind, **fields}}, expected=revision)
+            html = (await self.request(path)).text
+            self.assertEqual("maps.apple.com" in html, revision == 2)
+        self.f.store.set_viewer_permission(self.f.trip.id, enabled=False)
+        self.assertNotIn("maps.apple.com", (await self.request(path)).text)
+        self.reader.revoke(self.reader_id)
+        self.assertEqual((await self.request(path)).status_code, 401)
 
     async def test_real_derivatives_playable_ranges_metadata_and_originals_unchanged(self):
         assets = self.upload_media()

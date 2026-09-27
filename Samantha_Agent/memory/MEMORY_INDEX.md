@@ -59,7 +59,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] `camino/docs/GPS_CAPTURE_REPORT.md`: 27. 9. 13:58 video GPS ±11 m uložení/přenos PASS. Mac 48 Momentů / 5 GPS / 49 médií, nové foto/audio/video hashově ověřené. Foto ±6 m, komentář/video ±11 m shodně telefon/Mac. GPS2/GPS3 částečně PASS. Data/GPS1 a marker offline/restart PASS. SideStore 7 DAYS, přesná expirace neověřená. Další opakovaná synchronizace bez nového záznamu, zbytek GPS2/GPS3 a GPS4; U16 mapový odkaz, Viewer/RT3/RT4 a M3/M4. SideStore/RemotePair a token/Tailscale viz LL-051. Kontrola podpisu 1. 10.; G8/T060/captive portal nejsou PASS.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] `camino/docs/VIEWER_MAP_REPORT.md`: 27. 9. 14:21 mapový odkaz lokálně hotový, 45/45 a statika PASS. Živě Viewer grant=false, Cockpit link nenastavený; browser smoke nedostupný. Další potvrdit nasazení/grant a odkaz/restart Cockpitu, potom společný RT3/RT4, M3/M4. GPS marker/foto/audio/video uložení/přenos doložené (48 Momentů / 5 GPS); okrajové GPS testy odložené, nikoli PASS. SideStore/RemotePair a token/Tailscale viz LL-051. Kontrola podpisu 1. 10.; SideStore 7 DAYS, přesná expirace neověřená. G8/T060/captive portal nejsou PASS.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` - Cockpit 14. 9.: scroll 10ec0877 potvrzený Mílou. [PRIPOMENOUT] U07 až při příštím pokračování. TXT v2.8 shrnuje U01–U06; plná brána 1680/1680 OK, funkční nasazení 980aed7a a smoke 5/5. Publikační překážka odstraněna; finální balíček/head ověřovat živým auditem.
 

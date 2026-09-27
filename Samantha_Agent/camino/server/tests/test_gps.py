@@ -70,6 +70,11 @@ class GPSAPITests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(projection), 2)
         for projected in projection:
             self.assertNotIn("location", projected)
+            if projected["id"] == uid(700):
+                self.assertEqual(projected["map_point"],
+                                 {"latitude": 12.25, "longitude": 34.5, "accuracy_m": 150.0})
+            else:
+                self.assertIsNone(projected["map_point"])
 
 
 class SwiftGPSWireTests(unittest.IsolatedAsyncioTestCase):

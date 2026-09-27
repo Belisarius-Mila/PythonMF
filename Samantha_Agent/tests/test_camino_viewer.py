@@ -7,7 +7,7 @@ from dataclasses import replace
 from pathlib import Path
 
 from camino.domain.codec import wire
-from camino.domain.model import JourneyDay, Privacy
+from camino.domain.model import JourneyDay, LocationFix, Privacy
 from tests.camino_viewer_fixture import ViewerFixture, uid
 
 
@@ -36,6 +36,44 @@ class ViewerProjectionTests(unittest.TestCase):
         self.assertEqual(len(self.snapshot()["moments"]), 1)
         self.f.send("update_metadata", {"moment_id": self.f.public.id, "change": {
             "type": "hidden", "hidden": True}}, expected=3)
+        self.assertEqual(self.snapshot()["moments"], [])
+
+    def test_map_point_only_from_allowed_moment_without_measurement_timestamp(self):
+        point = LocationFix(0, 0, self.f.capture.utc_ms, 8)
+        allowed = self.f.moment(70, Privacy.DIARY, location=point)
+        self.f.moment(71, Privacy.OWNER_ONLY,
+                      location=LocationFix(66.123456, 77.654321, self.f.capture.utc_ms, 5))
+        data = self.snapshot()
+        projected = {m["id"]: m for m in data["moments"]}
+        self.assertEqual(projected[allowed.id]["map_point"],
+                         {"latitude": 0, "longitude": 0, "accuracy_m": 8})
+        self.assertIsNone(projected[self.f.public.id]["map_point"])
+        for secret in ("66.123456", "77.654321", uid(71), "measured_at_utc_ms"):
+            self.assertNotIn(secret, json.dumps(data))
+        self.assertIsNotNone(self.f.store.moment(uid(71))["location"])
+
+    def test_map_point_disappears_after_lock_hide_or_unknown_privacy(self):
+        point = LocationFix(12.25, 34.5, self.f.capture.utc_ms, 150)
+        moment = self.f.moment(70, Privacy.DIARY, location=point)
+        for privacy, hidden in (("owner_only", False), ("diary", True), ("unknown", False)):
+            with self.subTest(privacy=privacy, hidden=hidden):
+                with self.f.store._connection() as c:
+                    body = wire(replace(moment, privacy=privacy, hidden=hidden))
+                    c.execute("UPDATE moments SET body=? WHERE id=?", (json.dumps(body), moment.id))
+                self.assertNotIn("12.25", json.dumps(self.snapshot()))
+                self.assertNotIn(moment.id, json.dumps(self.snapshot()))
+
+    def test_map_point_cannot_bypass_trip_grant_conflict_or_recovery(self):
+        self.f.moment(70, Privacy.DIARY,
+                      location=LocationFix(12.25, 34.5, self.f.capture.utc_ms, 8))
+        self.f.store.set_viewer_permission(self.f.trip.id, enabled=False)
+        self.assertEqual(self.snapshot()["moments"], [])
+        self.f.store.set_viewer_permission(self.f.trip.id, enabled=True)
+        with self.f.store._connection() as c:
+            c.execute("UPDATE meta SET exports_blocked=1")
+        self.assertEqual(self.snapshot()["moments"], [])
+        with self.f.store._connection() as c:
+            c.execute("UPDATE meta SET exports_blocked=0, reconciliation_required=1")
         self.assertEqual(self.snapshot()["moments"], [])
 
     def test_conflict_restore_and_disabled_trip_close_projection(self):

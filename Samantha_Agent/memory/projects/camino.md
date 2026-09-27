@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-27 13:58 CEST
+Aktualizováno: 2026-09-27 14:21 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,20 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- Aktualizováno: 2026-09-27 14:21 CEST — Viewer mapový odkaz lokálně hotový.
+- Míla žádá konečně pokračovat Viewerem. U16 přidává odkaz na Apple Mapy
+  pouze u povoleného bodu, s přesností a informací o předání bodu po kliknutí.
+  Cíleně 45/45 PASS, statická brána PASS; bez iOS změny nebo dalšího podpisu.
+- Živý audit: služba a soukromé HTTPS fungují, Funnel off, viewer_granted=false.
+  Cockpit odkaz configured=false. Nasazení/grant vyžádán, zatím nepotvrzený;
+  nastavení odkazu a restart Cockpitu zahrnout do samostatného souhlasu.
+  Vizuální smoke nedostupný (žádný připojený prohlížeč); RT3/RT4 NEOVĚŘENO.
+- Další: schválit nasazení + Viewer pro Janu + odkaz v Cockpitu, potom
+  jediný společný RT3/RT4. Podrobnosti a oprávnění: `camino/docs/VIEWER_MAP_REPORT.md`.
+  GPS okrajové scénáře zůstávají neověřené a nyní neblokují Viewer.
+
+### Přijaté GPS — předchozí fyzická přejímka
 
 - Aktualizováno: 2026-09-27 13:58 CEST — video s GPS ±11 m uložené a přenesené PASS.
 - Míla potvrzuje novou položku „Povolit / obnovit GPS“, funkční všechna data
@@ -23,8 +37,9 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
   Nové foto/audio/video soubory velikostí i SHA-256 odpovídají ověřeným účtenkám.
   Bez konfliktů, oba flagy=false. Míla potvrzuje synchronizaci videa s GPS ±11 m.
   Foto ±6 m potvrzené Mílou v detailu telefonu; původní hlášení ±4 m opravil.
-  Rozdíl vyřešen bez změny dat/kódu. Další krok: opakovaná synchronizace bez nového záznamu.
-  GPS2/GPS3 částečně PASS, GPS4 NEOVĚŘENO; offline/restart médií a opakovaný přenos zbývají.
+  Rozdíl vyřešen bez změny dat/kódu. V 14:16 Míla potvrzuje opakovanou kontrolu
+  „Je to ok“; audit stále 48 Momentů / 140 operací / 5 GPS, bez konfliktů.
+  Nucený síťový replay nedoložený; GPS4 a offline/restart médií neověřené/odložené.
 - SideStore ukazuje 7 DAYS; přesné datum profilu neodečtené. Kolečko v jeho
   seznamu samo nebylo důkazem selhání aktualizace; nový kód se otevřel.
 
@@ -2094,3 +2109,26 @@ hashe zpráv platné. Tři GPS média (foto/audio/video) ověřena velikostí
 a SHA-256 proti účtenkám. 0 konfliktů, oba recovery flagy=false, quick_check OK.
 Bez přehrání soukromého obsahu nebo výpisu souřadnic; služby a token nezměněné.
 Offline/restart mediálních větví ani opakovaný přenos tím nejsou doložené.
+
+## 2026-09-27 14:21 CEST — minimalistický Viewer a mapový odkaz
+
+Hotovo: U povoleného okamžiku s GPS je lokálně odkaz „Otevřít místo v mapě“,
+odhad přesnosti a upozornění na předání bodu Apple Mapám po kliknutí.
+Dosavadní dny/texty/foto/audio/video zachované. Bez nové instalace iPhonu.
+
+Rozhodnutí: Na Mílovo přání pokračujeme Viewerem; zbývající okrajové GPS
+zkoušky necháváme neověřené, neoznačujeme je dodatečně PASS.
+
+Další krok: Potvrdit nasazení Camino serveru a grant pro Janu plus nastavení
+odkazu v Cockpitu s potřebným restartem. Bez takového souhlasu nyní nenasazeno.
+
+Navrhované další kroky: Společný RT3/RT4 a mapový klik, M3/M4, kontrola podpisu 1. 10.
+
+Technický důkaz: 45/45 cílených testů PASS a rychlá statická brána PASS.
+Projekce chrání owner-only/hidden/unknown, grant/obnovu/konflikt; HTTP testy
+chrání auth, staré URL, referrer a allowlist mapového odkazu. EXIF beze změny.
+Syntetický HTML náhled vygenerovaný; browser smoke neproveden, prohlížeč
+není dostupný. Živě viewer_granted=false, Cockpit link configured=false,
+privátní HTTPS zdravé, Funnel off. Report `camino/docs/VIEWER_MAP_REPORT.md`.
+Při opakované kontrole GPS počet 48/140/5 beze změny; nejde o nucený retry.
+Žádné souřadnice/tokeny v Gitu, žádný push/deploy/grant ani placené volání.
