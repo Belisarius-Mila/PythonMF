@@ -2,6 +2,15 @@
 
 27. 9. 2026. Implementace i následné výslovně schválené nasazení.
 
+## Uživatelské potvrzení 27. 9. 15:27 CEST
+
+Míla po předání Vieweru hlásí „Zdá se, že vše funguje skvěle...“.
+Základní funkčnost uživatelsky potvrzená; RT3 částečně, nikoli celý PASS.
+Zpráva neurčuje zařízení, síť ani jednotlivé přehrání/mapový klik.
+Zbývá krátká zkouška s Janou a fyzický RT4: jeden testovací záznam změnit
+na Jen pro mě, synchronizovat a ověřit skrytí ve Vieweru. Potom M3/M4.
+Pouze dokumentační zápis, bez změny kódu, dat nebo provozu.
+
 ## Nasazeno 27. 9. 15:17 CEST
 
 - Míla schválil nasazení, Do deníku včetně GPS pro Janu a odkaz/restart
@@ -34,9 +43,9 @@
   oddělená od předem dokončené plné sady 1833/1833. Bez push.
 - Přihlášení `jana`; nové reader heslo vložené registrovaně do schránky
   Macu, nikdy do URL/chatu/Gitu. Jde o jiné oprávnění než token telefonu.
-- **RT3/RT4 a vizuální Safari/mapový klik zbývají**. HTTP audit není důkaz
-  přehrání na Janině zařízení ani přístupu z jiné sítě. Další: otevřít
-  v Cockpitu **Otevřít Camino**, přihlásit se a společně projít jeden den.
+- Při nasazení **RT3/RT4 a vizuální Safari/mapový klik zbývaly**. HTTP audit
+  není důkaz přehrání na Janině zařízení ani přístupu z jiné sítě.
+  Následné uživatelské potvrzení a jeho hranice jsou uvedené výše.
 
 ## Výsledek
 

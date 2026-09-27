@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-27 15:17 CEST
+Aktualizováno: 2026-09-27 15:27 CEST
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -12,19 +12,21 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-27 15:17 CEST — Viewer pro Janu nasazený včetně GPS odkazu.
+- Aktualizováno: 2026-09-27 15:27 CEST — Míla potvrzuje základní funkčnost Vieweru.
 - Míla žádá konečně pokračovat Viewerem. U16 přidává odkaz na Apple Mapy
   pouze u povoleného bodu, s přesností a informací o předání bodu po kliknutí.
   Cíleně 45/45 PASS, statická brána PASS; bez iOS změny nebo dalšího podpisu.
 - Po výslovném souhlasu i globální brzdě nasazené Camino/Cockpit 125fddbbcb56.
   Plná brána 1833/1833, Cockpit PID 8376 a smoke 5/5; odkaz configured=true.
-  Živě HTTPS 200, grant=true, Funnel off, 6 dnů / 35 povolených Momentů,
+  Audit v 15:17: HTTPS 200, grant=true, Funnel off, 6 dnů / 35 povolených Momentů,
   5 mapových odkazů, 49/49 mediálních URL OK, bez čekání, video Range 206.
   Nepřihlášený přístup i záměna reader/owner odmítnuté. Archiv a owner token
   nezměněné (48 Momentů / 140 operací / 49 médií), oba recovery flagy=false.
 - Přihlášení `jana`, reader heslo zkopírované do schránky Macu, ne do Gitu/chatu.
-  Další: Cockpit → Otevřít Camino, skutečné přihlášení a společný RT3/RT4.
-  Vizuální Safari/mapový klik a jiná síť zatím NEOVĚŘENO.
+  Míla nyní hlásí „Zdá se, že vše funguje skvěle...“: první uživatelské
+  potvrzení základní funkčnosti, nikoli jednotlivé PASS pro všechny scénáře.
+  Zařízení, jiná síť, mapový klik a fyzický RT4 nejsou samostatně doložené.
+  Další: krátký průchod s Janou a zkouška skrytí, potom M3 nezávislá záloha.
   Podrobnosti a hranice: `camino/docs/VIEWER_MAP_REPORT.md`.
   GPS okrajové scénáře zůstávají neověřené a nyní neblokují Viewer.
 
@@ -2161,3 +2163,17 @@ na owner API 401. Archiv/identita/tabulky/originály/owner token hashově shodn�
 48 Momentů / 140 operací / 49 médií / 228226831 B, oba recovery flagy=false.
 Konfigurace a DB snapshoty zachované; ostatní env hodnoty shodné, Serve beze změny.
 Žádný push, iPhone update, reálný mapový klik ani tvrzení fyzického RT3/RT4 PASS.
+
+## 2026-09-27 15:27 CEST — První uživatelské potvrzení Vieweru
+
+Hotovo: Míla po předání nasazeného Vieweru uvádí „Zdá se, že vše funguje
+skvěle...“. Zapsané jako potvrzení základní funkčnosti, bez změny aplikace.
+
+Důkaz a hranice: Uživatelské hlášení; konkrétní zařízení/síť, přehrání
+jednotlivých médií ani otevření mapy neurčuje. RT3 částečně potvrzený,
+nikoli celý PASS; fyzický RT4 (skrytí po změně na Jen pro mě) zatím nedoložený.
+Technický audit z 15:17 se neopakuje a není vydáván za nové měření.
+
+Další krok: Krátká zkouška s Janou a jeden test skrytí záznamu po synchronizaci,
+potom M3 nezávislá záloha a M4 cestovní návod/přejímka; podpis zkontrolovat 1. 10.
+Bez změny dat, restartu, nového nasazení nebo push.

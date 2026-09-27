@@ -10,7 +10,10 @@ rozlišuje jednotlivé důkazy.
 grant pro Janu povolený a Cockpit odkaz nastavený po výslovném souhlasu
 a globální brzdě. [VIEWER_MAP_REPORT.md](VIEWER_MAP_REPORT.md): cíleně
 45/45, plná brána 1833/1833, Cockpit smoke 5/5; HTTPS a média ověřené.
-Další skutečné otevření s Janou a společný RT3/RT4. Vlastní mapa/trasa odložená.
+27. 9. 15:27: Míla potvrzuje základní funkčnost Vieweru. RT3 částečně,
+nikoli celý PASS; zařízení/jiná síť a mapový klik nejsou samostatně doložené.
+Další krátká zkouška s Janou a fyzický RT4 (skrytí), potom M3 nezávislá záloha
+a M4 cestovní přejímka. Vlastní mapa/trasa odložená.
 
 Historický stav před GPS krokem:
 Aktualizace 26. 9. 23:19 CEST: server a iPhone build 5 nasazené, fyzické
