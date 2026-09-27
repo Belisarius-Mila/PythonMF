@@ -124,6 +124,40 @@ disku může Viewer dál fungovat, ale stav zůstane „další záloha neověř
 Chybějící cíl je konkrétní otevřená podmínka předcestovní ochrany, ne důvod
 zablokovat lokální M1. Pro iPhone nepředstírat neimplementovanou zelenou osu.
 
+## Buffer pro příští aktualizaci iPhonu — 27. 9. 17:53 CEST
+
+Stav: čeká na rozhodnutí o rozsahu, nyní pouze zápis. Žádný vývoj, nový build,
+podpis, instalace nebo nasazení tím nejsou zahájené.
+
+- **B01 — zavádějící Čeká na Wi-Fi po úspěšné mobilní dávce.** Po ověření
+  posledního média se mobilní grant správně zruší, ale následná synchronizace
+  kontroluje grant dřív než prázdnou frontu. Také networkChanged nastavuje
+  čekání bez kontroly zbývající práce. Snímek telefonu hlásil čekání,
+  zatímco originál videa už měl na Macu ověřenou velikost a SHA-256.
+  Oprava odložená do společného buildu; nejde o důkaz ztráty videa.
+  Zachovat omezení souhlasu na konkrétní dávku. Návrh přidruženého UX:
+  zřetelné úplné/čekající počty a rozlišení dokončené dávky od nových položek,
+  které souhlas nemají. Při nejistém výsledku se nesmí zobrazit falešné ověření.
+- **B02 — nepovinné editovatelné názvy.** Záměr k návratu, ne schválená
+  implementace. Název zadat/změnit v telefonu offline bez zdržení pořízení,
+  přenést a zobrazit ve Vieweru. Míla upřesnil: nepojmenované položky chce
+  později doplňovat on na Macu, nikoli Jana. Jana zůstává read-only.
+  Před vývojem rozhodnout návrat Mac úprav do telefonu a pravidlo souběhu;
+  neplést společný název se samostatným webovým popiskem. Jeden název
+  celého Momentu versus samostatné názvy připojených médií ještě není rozhodnuté.
+- **Společná krátká přejímka:** stará data po aktualizaci; nový offline
+  název a jeho změna po restartu/přenosu; dokončená mobilní dávka bez falešného
+  čekání; později přidané médium bez zděděného souhlasu; nedostupný Mac nesmí
+  znamenat ověřeno; soukromý název nesmí do Vieweru. Podle dostupných podmínek
+  připojit odloženou kontrolu GPS bez fixu/přibližné polohy a offline zachování
+  u média. Neprovedené varianty zůstanou NEOVĚŘENO.
+
+Návrh: jediný společný iOS build, podpis a aktualizace zachovávající data až
+po schválení rozsahu. Samotné pozdější webové úpravy nevyžadují novou IPA,
+pokud se nemění telefonní datový/synchronizační kontrakt. M3 nezávislá záloha
+a M4 cestovní návod/podpis mají pokračovat samostatně, bez čekání na názvy.
+Žádná AI, vlastní mapa trasy, nový export ani přepis synchronizace navíc.
+
 ## Co odkládáme
 
 - C07: AI přepisy, korektury, rozpočtový worker a T038/T055 s reálnou AI.

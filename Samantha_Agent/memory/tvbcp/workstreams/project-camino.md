@@ -1,6 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-09-27 17:53 CEST — buffer B01/B02 v `camino/docs/TRAVEL_MVP_PLAN.md`:
+  falešné čekání na Wi-Fi po dokončení mobilní dávky ponechat na příští build
+  spolu s případnými názvy. Doplňování na Macu chce Míla, ne Jana.
+  Rozsah názvů/synchronizace čeká na rozhodnutí; nyní bez implementace.
+  Audit z 17:44: 51 Momentů / 58 hashově ověřených médií, 0 konfliktů,
+  oba recovery flagy=false. Diagnostika nepotvrdila ztrátu videa.
+  P+n v 15:45 ověřilo Cockpit/main/origin `22dea402`, plná brána 1833,
+  smoke 5/5, čisté profily; Camino release `125fddbb` zůstal beze změny.
 - Aktualizováno: 2026-09-27 15:27 CEST — Míla potvrzuje základní funkčnost Vieweru.
 - Míla žádá konečně pokračovat Viewerem. U16 přidává odkaz na Apple Mapy
   pouze u povoleného bodu, s přesností a informací o předání bodu po kliknutí.
@@ -2512,3 +2520,23 @@ Technický audit z 15:17 se neopakuje a není vydáván za nové měření.
 Další krok: Krátká zkouška s Janou a jeden test skrytí záznamu po synchronizaci,
 potom M3 nezávislá záloha a M4 cestovní návod/přejímka; podpis zkontrolovat 1. 10.
 Bez změny dat, restartu, nového nasazení nebo push.
+
+## 2026-09-27 17:53 CEST — Buffer společné aktualizace
+
+Hotovo: Diagnostikované zavádějící hlášení po dokončení mobilní dávky
+uložené jako B01 do cestovního plánu, bez opravy či nového podpisu.
+
+Rozhodnutí: Míla chce chybu odložit a zvážit společnou aktualizaci s názvy.
+Pozdější doplňování názvů na Macu má provádět on, nikoli Jana.
+
+Další krok: Při návratu schválit nejmenší rozsah B01/B02 před implementací.
+
+Navrhované další kroky: Společný build a krátký test včetně pravdivých stavů;
+M3 nezávislá záloha; M4 přejímka a obnova podpisu před cestou.
+
+Technický důkaz: Snímek ukázal čekání na Wi-Fi po serverovém ověření videa.
+Read-only audit v 17:44: 51 Momentů, 58 médií, všechny soubory velikostí/SHA-256
+shodné, 0 konfliktů, oba recovery flagy=false. Kód ruší grant po dokončení,
+ale synchronize/networkChanged nastavují čekání bez podmínky neodeslané práce.
+Bez čtení journalu telefonu nejde doložit všechny jeho tehdejší položky.
+RT3/RT4 ani GPS okraje se tím nezvyšují na PASS. Jen dokumentační změna.
