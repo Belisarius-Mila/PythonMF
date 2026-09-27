@@ -42,6 +42,72 @@ import XCTest
         }
     }
 
+    func testAttachmentWireDependenciesOldQueueAndMetadataOnlyRename() throws {
+        let store = try CaminoLocalStore(inMemory: true)
+        let trip = try store.createTrip(name: "Synthetic attachments")
+        let moment = try store.markMoment()
+        let photo = try store.beginMediaIntent(kind: .photo, targetMomentID: moment.id)
+        _ = try store.acceptMedia(photo, inspection: LocalMediaInspection(byteCount: 12,
+            sha256: String(repeating: "a", count: 64), width: 4, height: 3, orientation: 1,
+            durationMilliseconds: nil, hasAudio: false, partial: false))
+        let session = UUID(), audioID = UUID()
+        _ = try store.beginAudioIntent(sessionID: session, kind: .comment, startedAt: Date(), targetMomentID: moment.id)
+        _ = try store.acceptCompletedAudio(sessionID: session, kind: .comment, partial: false)
+        var journal = CaminoSyncJournal()
+        journal.observeServer(serverID: UUID(), epoch: UUID(), cursor: 0)
+        let candidates = [(photo.assetID, CaminoSyncMediaKind.photo), (audioID, .audio)].map { id, kind in
+            CaminoSyncMediaItem(id: id, momentID: moment.id, kind: kind,
+                sourceRelativePath: "synthetic/\(id).bin", byteCount: 12,
+                sha256: String(repeating: "a", count: 64), durationMilliseconds: kind == .audio ? 1000 : nil,
+                batchID: journal.openBatchID)
+        }
+        let layout = CaminoSyncAudioLayout(clipID: session, momentID: moment.id, sessionID: session,
+            previousClipID: nil, gapBeforeMilliseconds: nil, missingTail: false,
+            parts: [.init(assetID: audioID, index: 0, discontinuityBefore: false)])
+        func discovery() throws -> CaminoSyncDiscovery {
+            try CaminoSyncDiscovery(trips: [trip], days: store.days(tripID: trip.id),
+                moments: [store.syncSnapshot(momentID: moment.id)], media: candidates, audioLayouts: [layout])
+        }
+        let old = try discovery()
+        journal.mergeDiscovery(old) // Old pending journal has no optional audio layout yet.
+        var envelopes: [Any] = []
+        for item in journal.metadata {
+            let data = try journal.exactEnvelope(for: item.id)
+            envelopes.append(try JSONSerialization.jsonObject(with: data))
+        }
+        let original = journal.metadata
+        _ = try store.setTitle(momentID: moment.id, title: "Okamžik")
+        _ = try store.setAttachmentTitle(momentID: moment.id, kind: .asset, targetID: photo.assetID, title: "Fotografie 🥾")
+        _ = try store.setAttachmentTitle(momentID: moment.id, kind: .audioSession, targetID: session, title: "Komentář 🥾")
+        let updated = try discovery()
+        journal.mergeDiscovery(updated)
+        XCTAssertEqual(Array(journal.metadata.prefix(original.count)), original)
+        XCTAssertThrowsError(try journal.requireTitleSupport(serverFeatures: ["moment_title_v1", "audio_layout_v1"]))
+        XCTAssertNoThrow(try journal.requireTitleSupport(serverFeatures: ["moment_title_v1", "audio_layout_v1", "attachment_title_v1"]))
+        let layoutIndex = try XCTUnwrap(journal.metadata.firstIndex { $0.kind == "create_audio_layout" })
+        let lastTitle = try XCTUnwrap(journal.metadata.lastIndex(where: \.isAttachmentTitleChange))
+        XCTAssertLessThan(layoutIndex, lastTitle)
+        for item in journal.metadata.dropFirst(original.count) {
+            envelopes.append(try JSONSerialization.jsonObject(with: journal.exactEnvelope(for: item.id)))
+        }
+        for index in journal.metadata.indices { journal.metadata[index].phase = .accepted }
+        for index in journal.media.indices { journal.media[index].phase = .verified }
+        let before = journal.metadata.count
+        _ = try store.setAttachmentTitle(momentID: moment.id, kind: .audioSession, targetID: session, title: "Opravený komentář")
+        journal.mergeDiscovery(try discovery())
+        XCTAssertEqual(journal.metadata.count, before + 1)
+        XCTAssertTrue(journal.media.allSatisfy { $0.phase == .verified })
+        let last = try XCTUnwrap(journal.metadata.last)
+        let raw = try journal.exactEnvelope(for: last.id)
+        envelopes.append(try JSONSerialization.jsonObject(with: raw))
+        var reopened = try JSONDecoder().decode(CaminoSyncJournal.self, from: JSONEncoder().encode(journal))
+        XCTAssertEqual(try reopened.exactEnvelope(for: last.id), raw)
+        if let path = ProcessInfo.processInfo.environment["CAMINO_ATTACHMENT_WIRE_FIXTURE"] {
+            try JSONSerialization.data(withJSONObject: envelopes, options: [.sortedKeys])
+                .write(to: URL(fileURLWithPath: path), options: .atomic)
+        }
+    }
+
     func testCompletedCellularBatchKeepsVerifiedButNewWorkAndLostReceiptDoNot() throws {
         var journal = CaminoSyncJournal()
         journal.observeServer(serverID: UUID(), epoch: UUID(), cursor: 0)

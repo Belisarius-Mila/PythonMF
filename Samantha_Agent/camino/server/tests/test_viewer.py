@@ -80,6 +80,52 @@ class ViewerHTTPTests(unittest.IsolatedAsyncioTestCase):
             "type": "privacy", "new_privacy": "owner_only", "user_action": "lock"}}, expected=2)
         self.assertNotIn("Káva", (await self.request("/viewer/")).text)
 
+    async def test_attachment_api_retry_collapsed_cards_names_counts_and_chronology(self):
+        from dataclasses import replace
+        from camino.domain.codec import wire
+        self.f.upload(30, "photo", self.payloads["photo"])
+        for n in (31, 32):
+            self.f.upload(n, "audio", self.payloads["audio"])
+        self.f.send("create_audio_layout", layout(50, [31, 32]))
+        title = 'Most <script>bad()</script> "🥾"'
+        for revision, (kind, target, name) in enumerate([
+            ("asset", 30, title), ("audio_session", 50, "Celý komentář")
+        ], 1):
+            body = {"contract_version": 1, "epoch": self.f.store.state()["epoch"],
+                    "operation_id": uid(850 + revision), "device_id": uid(90),
+                    "device_sequence": self.f.sequence + 1, "kind": "update_metadata",
+                    "expected_revision": revision, "payload": {"moment_id": self.f.public.id,
+                    "change": {"type": "attachment_title", "attachment": {
+                        "kind": kind, "target_id": uid(target), "title": name}}}}
+            raw = json.dumps(body, sort_keys=True).encode()
+            async with httpx.AsyncClient(transport=httpx.ASGITransport(app=self.app), base_url="https://camino.test") as client:
+                self.assertEqual((await client.post("/api/v1/operations", content=raw, headers=self.auth)).status_code, 401)
+                for _ in range(2):
+                    response = await client.post("/api/v1/operations", content=raw, headers={
+                        "Authorization": f"Bearer {self.owner_token}", "Content-Type": "application/json"})
+                    self.assertEqual(response.status_code, 200, response.text)
+            self.f.sequence += 1
+        later = replace(self.f.public, id=uid(70), title="Večerní okamžik",
+                        captured=replace(self.f.capture, utc_ms=self.f.capture.utc_ms + 3600000,
+                                         local_wall="2026-09-25T11:00:00"))
+        self.f.send("create_moment", wire(later))
+        self.viewer.build_pending()
+        page = (await self.request("/viewer/days/2026-09-25")).text
+        self.assertEqual(page.count('<details>'), 2)
+        self.assertNotIn('<details open', page)
+        self.assertIn('Foto: 1 · Audio: 1', page)  # Two segments remain one comment.
+        self.assertIn('Most &lt;script&gt;', page)
+        self.assertNotIn('<script>bad()', page)
+        self.assertEqual(page.count('<h3>Celý komentář</h3>'), 1)
+        self.assertLess(page.index('10:00'), page.index('Večerní okamžik'))
+        self.f.send("update_metadata", {"moment_id": self.f.public.id, "change": {
+            "type": "hidden", "hidden": True}}, expected=3)
+        hidden = (await self.request("/viewer/days/2026-09-25")).text
+        self.assertNotIn('Celý komentář', hidden)
+        self.assertNotIn('Most &lt;script&gt;', hidden)
+        self.assertNotIn('Foto: 1', hidden)
+        self.assertEqual((await self.request(f'/viewer/media/{uid(30)}/preview.jpg')).status_code, 404)
+
     async def test_offline_trip_revoke_closes_old_media_url_without_rewriting_trip(self):
         asset = self.f.upload(30, "photo", self.payloads["photo"])
         self.viewer.build_pending()

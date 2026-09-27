@@ -40,6 +40,60 @@ import XCTest
         XCTAssertNil(try JSONDecoder().decode(LocalPendingOperation.self, from: encoded).title)
     }
 
+    func testAttachmentTitlesAreIndependentDurableAndValidateOwnership() throws {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("camino-attachment-\(UUID())/metadata.sqlite")
+        let store = try CaminoLocalStore(storeURL: url)
+        let trip = try store.createTrip(name: "Synthetic")
+        let moment = try store.markMoment(at: instant("2026-09-27T07:00:00Z"))
+        _ = try store.setTitle(momentID: moment.id, title: "Celý okamžik")
+        var ids: [UUID] = []
+        for kind in [LocalMediaKind.photo, .video] {
+            let intent = try store.beginMediaIntent(kind: kind, targetMomentID: moment.id)
+            _ = try store.acceptMedia(intent, inspection: LocalMediaInspection(byteCount: 12,
+                sha256: String(repeating: "a", count: 64), width: 4, height: 3, orientation: 1,
+                durationMilliseconds: kind == .video ? 1000 : nil, hasAudio: kind == .video, partial: false))
+            ids.append(intent.assetID)
+            _ = try store.setAttachmentTitle(momentID: moment.id, kind: .asset,
+                targetID: intent.assetID, title: "\(kind.title) 🥾")
+        }
+        let originalAssets = try store.allMediaAssets()
+        let sessionID = UUID()
+        _ = try store.beginAudioIntent(sessionID: sessionID, kind: .comment,
+            startedAt: Date(), targetMomentID: moment.id)
+        _ = try store.acceptCompletedAudio(sessionID: sessionID, kind: .comment, partial: true)
+        let operationID = UUID()
+        let named = try store.setAttachmentTitle(momentID: moment.id, kind: .audioSession,
+            targetID: sessionID, title: " Celý komentář ", operationID: operationID)
+        XCTAssertEqual(named.title, "Celý okamžik")
+        XCTAssertEqual(named.attachmentTitles.count, 3)
+        XCTAssertEqual(named.capture, moment.capture)
+        let reopened = try CaminoLocalStore(storeURL: url)
+        XCTAssertEqual(try reopened.moments(tripID: trip.id).first?.attachmentTitles, named.attachmentTitles)
+        XCTAssertEqual(try reopened.setAttachmentTitle(momentID: moment.id, kind: .audioSession,
+            targetID: sessionID, title: "Celý komentář", operationID: operationID), named)
+        XCTAssertThrowsError(try reopened.setAttachmentTitle(momentID: moment.id, kind: .audioSession,
+            targetID: sessionID, title: "Other", operationID: operationID))
+        XCTAssertThrowsError(try reopened.setAttachmentTitle(momentID: moment.id, kind: .asset,
+            targetID: ids[0], title: "New", expectedRevision: 1))
+        XCTAssertThrowsError(try reopened.setAttachmentTitle(momentID: moment.id, kind: .asset,
+            targetID: ids[0], title: "line\nbreak"))
+        let other = try reopened.markMoment(at: instant("2026-09-27T08:00:00Z"))
+        for (kind, id) in [(LocalAttachmentTitle.Kind.asset, ids[0]), (.audioSession, sessionID)] {
+            XCTAssertThrowsError(try reopened.setAttachmentTitle(momentID: other.id,
+                kind: kind, targetID: id, title: "Wrong parent"))
+        }
+        let cleared = try reopened.setAttachmentTitle(momentID: moment.id, kind: .asset, targetID: ids[0], title: "")
+        XCTAssertEqual(cleared.attachmentTitles.count, 2)
+        XCTAssertEqual(cleared.attachmentTitle(.asset, id: ids[0]), "")
+        XCTAssertEqual(try reopened.setAttachmentTitle(momentID: moment.id, kind: .asset,
+            targetID: ids[0], title: "").revision, cleared.revision)
+        XCTAssertEqual(try reopened.allMediaAssets(), originalAssets)
+        let newest = try reopened.moments(tripID: trip.id).sorted(by: LocalMoment.newestFirst)
+        XCTAssertEqual(newest.map(\.id), [other.id, moment.id])
+        _ = try reopened.setTitle(momentID: moment.id, title: "Pozdější úprava")
+        XCTAssertEqual(try reopened.moments(tripID: trip.id).sorted(by: LocalMoment.newestFirst).map(\.id), newest.map(\.id))
+    }
+
     func testOfflineTripsStaySeparateAndOnlyOneIsActive() throws {
         let store = try CaminoLocalStore(inMemory: true)
         XCTAssertNil(try store.activeTrip())

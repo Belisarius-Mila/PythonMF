@@ -1,9 +1,91 @@
-# Názvy z telefonu a stav mobilní dávky — B01/B02
+# Názvy z telefonu, přílohy a přehled dne — B01/B02/B03
 
 27. 9. 2026. Lokální implementace na výslovný pokyn Míly. Nasazení serveru,
 push, nový podpis a fyzická aktualizace telefonu jsou samostatné kroky.
 
-## Nasazení serveru 27. 9. 20:35 CEST — připraveno k importu IPA
+## B03 — názvy příloh a přehled dne, 27. 9. 2026
+
+Míla fyzicky potvrdil názvy Momentů a jejich přenos v buildu 7. To není PASS
+mobilní regrese B01 ani všech dalších scénářů. Následně schválil tento poslední
+společný funkční balíček; po jeho aktualizaci chce delší běžné testování,
+sběr připomínek do bufferu a žádné další rychlé vydávání kosmetických verzí.
+Ztráta dat, únik soukromí či nefunkční záznam/přenos zůstávají důvodem k opravě.
+
+Lokálně implementováno (zatím bez nasazení, podpisu a instalace):
+
+- Každá fotografie, video a celý hlasový komentář mají vlastní nepovinný
+  název vedle názvu celého Momentu. Stejné Přidat/Upravit název, 160 znaků,
+  prázdné pole název odstraní. Funguje i u starších již přenesených příloh.
+- Názvy jsou nové metadata revize, ne změny souborů, create manifestů či
+  audio layoutu. Přejmenování nepřidává přenos již ověřených médií.
+  Jeden komentář = audio session; technické segmenty nemají jednotlivé názvy.
+- Telefon řadí okamžiky podle zachyceného UTC času sestupně; shodné časy mají
+  stabilní ID tie-break. Přejmenování starší položku neposouvá. Seznam přidává
+  počty Foto / Video / Audio, audio po session, ne po segmentech.
+- Viewer zachovává současné pořadí od rána k večeru. Každý Moment je nativní
+  rozbalovací karta s názvem, časem a počty. Výchozí stav zavřený, nic se samo
+  nepřehrává ani neotvírá nejnovější položku. Úvodní seznam dnů se nemění.
+- Názvy, počty i HTML vznikají až z povolené projekce; zamčené/skryté zdroje
+  se nezobrazí ani v záhlaví. Titulky jsou escapované. Starší audio bez layoutu
+  má poctivé označení neověřeného seskupení, ne vymyšlený počet komentářů.
+
+### Kompatibilita B03 a pořadí nasazení
+
+Volitelná pole v dosavadním místním JSON journalu a serverovém JSON těle;
+bez Core Data či SQLite schématové migrace. Nová revize attachment_title
+obsahuje druh cíle, jeho stabilní ID a název. Server ověřuje příslušnost
+fotografie/videa nebo audio session k danému Momentu. Neznámý/cizí cíl odmítne.
+U nové session musí její neměnný audio layout dorazit před názvem. Planner
+doplňuje tuto závislost, nepřepisuje již připravené přesné obálky ani účtenky.
+
+Nový feature gate attachment_title_v1 zastaví odesílání čekajících názvů
+příloh na starý server; lokální data zůstanou. Nejdříve server, potom telefon.
+Návrat na starší aplikaci/server po těchto revizích není podporovaný.
+Mac editor ani zpětná synchronizace nevznikly; Jana je pouze čtenář.
+Živé nasazení 403180320849/build 7 z následující historické sekce se tímto
+lokálním vývojem nemění. Build 8 bude samostatná aktualizace stejné aplikace.
+
+### Ověření B03
+
+- Swift jádro 49/49 PASS: přílohy nezávisle, reopen, retry, clear, cizí cíl,
+  revize, stabilní řazení a staré obálky; již verified média zůstávají verified.
+- Python doména/projekce/audio layout 31/31 PASS.
+- Izolované HTTP/media testy 15/15 PASS; skutečné Swift zprávy → ASGI API →
+  reopen → Viewer 1/1 PASS. Dvojí replay nepřidává revize, více audio segmentů
+  je jeden komentář, privátní/skryté názvy ani počty neunikají.
+- Generic iOS Debug build 0.1.0 (8), CODE_SIGNING_ALLOWED=NO: PASS.
+- Simulátor iPhone 14 Plus: 2/2 UI testy PASS. Názvy foto/audio příloh,
+  reopen a pořadí (49,101 s); původní název Momentu/reopen/vymazání (43,344 s).
+  Izolovaná fixture používá foto metadata bez originálu a syntetické tiché
+  audio; nejde o fyzickou kameru/mikrofon ani nový podepsaný balíček.
+- Závěrečná plná projektová brána: 1838/1838 PASS (380,509 s jednotková sada).
+- Browser automatizace v této relaci není dostupná. Syntetický HTML náhled
+  vygenerovaný; HTML kontrola 13 zavřených karet, 3 médií, názvů, počtů,
+  pořadí a nepřítomnosti soukromé věty PASS. Interaktivní Safari/Janina
+  zařízení zatím NEOVĚŘENO. Generátor: camino.server.tests.viewer_preview.
+- Logy v /private/tmp: camino-attachments-swift.log, camino-attachments-python.log,
+  camino-attachments-http.log, camino-attachments-ui.log,
+  camino-attachments-build-final.log, camino-attachments-full-gate.log.
+- Fyzický build 8 a nová mobilní regrese NEPROVEDENO. Žádný push, nasazení,
+  podpis, IPA import, změna tokenů/Tailscale ani práce nad osobním archivem.
+
+### Přejímka a následné klidnější testování
+
+1. Aktualizace stejné app bez odinstalace; staré záznamy a názvy zůstanou.
+2. Jeden Moment se dvěma fotografiemi, videem a hlasovým komentářem: různé
+   názvy offline, změna a vymazání, zavřít/otevřít. Název Momentu se nemění.
+3. Odeslat a porovnat Viewer. Změnit už přenesený název a ověřit nulový nový
+   mediální objem; nový název musí dorazit i bez opětovného videa.
+4. V telefonu nové nahoře, přejmenovaný starý zůstává dole; ve Vieweru ráno
+   nahoře. Safari Mac+iPhone: rozbalit/sbalit delší den, přehrát audio/video.
+5. Jen pro mě a doručený zámek/skrytí: pryč celý obsah, názvy i počty.
+   Připojit dosud neověřenou B01 mobilní dávku a nový záznam bez zděděného grantu.
+
+Potom několik běžných delších použití stejné verze. Drobnosti shromažďovat,
+neinstalovat další build po každé připomínce. M3 nezávislá záloha a M4
+předcestovní kontrola zůstávají; nejsou prohlášené za hotové ani zrušené.
+
+## Historie B01/B02: nasazení serveru 27. 9. 20:35 CEST
 
 Míla schválil pokračování nasazením, podpisem a instalací a následně potvrdil
 novou přesnou globální brzdu. Registrovaný stop/upgrade/start dokončený;
@@ -34,7 +116,7 @@ a odškrtnout Append Team ID. Žádná odinstalace. Po importu kontrola starých
 dat a Přidat/Upravit název; pro přenos přepnout na Tailscale.
 Import a fyzický přenos názvu stále NEPROVEDENO. Žádný push.
 
-## Rozsah a rozhodnutí
+## Historický rozsah a rozhodnutí B01/B02
 
 - Jeden nepovinný název celého Momentu: označený okamžik, samostatná fotografie,
   video, komentář i úvaha. Připojená média patří pod tento název; samostatné
@@ -78,7 +160,7 @@ bez chybějících audio metadat a bez recovery flagu. Nejde o nové živé spoj
 Nové médium/pending metadata, ztracená účtenka či obnova nejsou zelené;
 další dávka nezdědí mobilní souhlas. Hlášení čekání uvádí počty čekající práce.
 
-## Ověření
+## Ověření B01/B02
 
 - Swift jádro: 47/47 PASS, včetně názvu po znovuotevření, retry, vymazání,
   odmítnutí neplatného názvu/revize, stabilního create payloadu a mobilního stavu.
@@ -97,7 +179,7 @@ další dávka nezdědí mobilní souhlas. Hlášení čekání uvádí počty �
 - Fyzický iPhone/import, živý přenos názvu a skutečná mobilní regrese:
   **NEPROVEDENO**. Server nasazený a ověřený výše, telefon se zatím nezměnil.
 
-## Krátká fyzická přejímka po nasazení
+## Původní krátká fyzická přejímka B01/B02
 
 1. Aktualizovat tutéž aplikaci bez odinstalace; stará data jsou dostupná.
 2. Offline pojmenovat jeden okamžik, změnit název, zavřít/otevřít aplikaci.

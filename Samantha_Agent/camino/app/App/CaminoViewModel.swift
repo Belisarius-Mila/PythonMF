@@ -85,6 +85,13 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
             #endif
             let vault = try? CaminoMediaVault(root: root, metadata: local,
                                               capacityProvider: capacityProvider)
+            #if DEBUG && targetEnvironment(simulator)
+            if ProcessInfo.processInfo.environment["CAMINO_TEST_ATTACHMENTS"] == "1",
+               UUID(uuidString: ProcessInfo.processInfo.environment["CAMINO_UI_TEST_SESSION"] ?? "") != nil,
+               try local.trips().isEmpty {
+                try Self.seedAttachmentUITest(local: local, recording: recording)
+            }
+            #endif
             let driver = IOSAudioDriver()
             let audio = AudioController(driver: driver, store: recording)
             self.local = local
@@ -132,6 +139,35 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
         }
     }
 
+    #if DEBUG && targetEnvironment(simulator)
+    private static func seedAttachmentUITest(local: CaminoLocalStore, recording: IntentRecordingStore) throws {
+        _ = try local.createTrip(name: "Synthetic attachments", isTest: true)
+        let old = try local.markMoment(at: Date().addingTimeInterval(-120))
+        _ = try local.setTitle(momentID: old.id, title: "Older moment")
+        let current = try local.markMoment()
+        _ = try local.setTitle(momentID: current.id, title: "Newer moment")
+        // Deliberately missing photo bytes: this fixture tests metadata controls,
+        // including a retained name when the original is unavailable, not capture.
+        let photo = try local.beginMediaIntent(kind: .photo, targetMomentID: current.id)
+        _ = try local.acceptMedia(photo, inspection: LocalMediaInspection(byteCount: 12,
+            sha256: String(repeating: "a", count: 64), width: 4, height: 3, orientation: 1,
+            durationMilliseconds: nil, hasAudio: false, partial: false))
+        recording.targetMomentID = current.id
+        let draft = try recording.begin(kind: .comment, continuation: nil)
+        let format = AVAudioFormat(standardFormatWithSampleRate: 16000, channels: 1)!
+        let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: 16000)!
+        buffer.frameLength = 16000
+        buffer.floatChannelData![0].initialize(repeating: 0, count: 16000)
+        do {
+            let file = try AVAudioFile(forWriting: recording.url(for: draft), settings: format.settings)
+            try file.write(from: buffer)
+        }
+        _ = try recording.finish(draft, interrupted: false)
+        _ = try local.acceptCompletedAudio(sessionID: draft.sessionID, kind: .comment, partial: false)
+        recording.targetMomentID = nil
+    }
+    #endif
+
     var audioBusy: Bool {
         guard let audio else { return false }
         return launchingAudio || [.permission, .preparing, .recording, .finishing,
@@ -146,14 +182,14 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
     var todayMoments: [LocalMoment] {
         let today = CaptureStamp.record(Date(), timeZone: .current).chapterDate
         return moments.filter { $0.chapterDate == today }
-            .sorted { $0.capture.utcMilliseconds < $1.capture.utcMilliseconds }
+            .sorted(by: LocalMoment.newestFirst)
     }
 
     var allMoments: [LocalMoment] { moments + hiddenMoments }
 
     func moments(on chapterDate: String) -> [LocalMoment] {
         moments.filter { $0.chapterDate == chapterDate }
-            .sorted { $0.capture.utcMilliseconds < $1.capture.utcMilliseconds }
+            .sorted(by: LocalMoment.newestFirst)
     }
 
     func moment(with id: UUID) -> LocalMoment? {
@@ -566,10 +602,24 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
         }
     }
 
-    func saveTitle(momentID: UUID, title: String) -> Bool {
+    func attachmentSummary(for momentID: UUID) -> String {
+        let assets = mediaByMoment[momentID] ?? []
+        let photos = assets.filter { $0.kind == .photo }.count
+        let videos = assets.filter { $0.kind == .video }.count
+        let comments = audioSessionIDs(for: momentID).count
+        return [(photos, "Foto"), (videos, "Video"), (comments, "Audio")]
+            .filter { $0.0 > 0 }.map { "\($0.1): \($0.0)" }.joined(separator: " · ")
+    }
+
+    func saveTitle(momentID: UUID, title: String, attachment: LocalAttachmentTitle? = nil) -> Bool {
         guard let local else { return false }
         do {
-            _ = try local.setTitle(momentID: momentID, title: title)
+            if let attachment {
+                _ = try local.setAttachmentTitle(momentID: momentID, kind: attachment.kind,
+                    targetID: attachment.targetID, title: title)
+            } else {
+                _ = try local.setTitle(momentID: momentID, title: title)
+            }
             message = nil
             refresh()
             return true

@@ -106,6 +106,21 @@ public struct LocalLocationFix: Codable, Equatable, Sendable {
     }
 }
 
+public struct LocalAttachmentTitle: Codable, Equatable, Sendable {
+    public enum Kind: String, Codable, Sendable { case asset, audioSession = "audio_session" }
+    public let kind: Kind
+    public let targetID: UUID
+    public let title: String
+
+    public init(kind: Kind, targetID: UUID, title: String) {
+        self.kind = kind; self.targetID = targetID; self.title = title
+    }
+
+    public var payload: [String: Any] {
+        ["kind": kind.rawValue, "target_id": targetID.uuidString.lowercased(), "title": title]
+    }
+}
+
 public struct LocalMoment: Equatable, Identifiable, Sendable {
     public let id: UUID
     public let tripID: UUID
@@ -124,6 +139,19 @@ public struct LocalMoment: Equatable, Identifiable, Sendable {
     public let relatedMomentID: UUID?
     public var location: LocalLocationFix? = nil
     public var title: String = ""
+    public var attachmentTitles: [LocalAttachmentTitle] = []
+
+    public func attachmentTitle(_ kind: LocalAttachmentTitle.Kind, id: UUID) -> String {
+        attachmentTitles.first { $0.kind == kind && $0.targetID == id }?.title ?? ""
+    }
+
+    /// Presentation only; capture stamps and synchronization order never change.
+    public static func newestFirst(_ lhs: LocalMoment, _ rhs: LocalMoment) -> Bool {
+        if lhs.capture.utcMilliseconds != rhs.capture.utcMilliseconds {
+            return lhs.capture.utcMilliseconds > rhs.capture.utcMilliseconds
+        }
+        return lhs.id.uuidString < rhs.id.uuidString
+    }
 
     public var displayTitle: String { title.isEmpty ? kind.title : title }
 
@@ -217,6 +245,7 @@ public enum LocalPrivacyAction: String, Codable, Sendable {
 
 public enum LocalOperationKind: String, Codable, Sendable {
     case privacy, hidden, chapter, title, appendText = "append_text"
+    case attachmentTitle = "attachment_title"
 }
 
 /// Durable, ordered local operation prepared for the later C05 server handoff.
@@ -233,12 +262,14 @@ public struct LocalPendingOperation: Codable, Equatable, Identifiable, Sendable 
     public let chapterDate: String?
     public let textRevisionID: UUID?
     public let title: String?
+    public let attachmentTitle: LocalAttachmentTitle?
 
     public init(id: UUID, momentID: UUID, deviceSequence: Int64,
                 expectedRevision: Int, kind: LocalOperationKind,
                 createdAtUTCMilliseconds: Int64, privacy: LocalPrivacy? = nil,
                 privacyAction: LocalPrivacyAction? = nil, hidden: Bool? = nil,
-                chapterDate: String? = nil, textRevisionID: UUID? = nil, title: String? = nil) {
+                chapterDate: String? = nil, textRevisionID: UUID? = nil, title: String? = nil,
+                attachmentTitle: LocalAttachmentTitle? = nil) {
         self.id = id
         self.momentID = momentID
         self.deviceSequence = deviceSequence
@@ -251,6 +282,7 @@ public struct LocalPendingOperation: Codable, Equatable, Identifiable, Sendable 
         self.chapterDate = chapterDate
         self.textRevisionID = textRevisionID
         self.title = title
+        self.attachmentTitle = attachmentTitle
     }
 }
 

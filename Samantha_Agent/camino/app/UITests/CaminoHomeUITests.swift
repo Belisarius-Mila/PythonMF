@@ -108,6 +108,43 @@ import XCTest
         XCTAssertFalse(app.staticTexts["Nahrávám"].exists)
     }
 
+    func testAttachmentTitlesAndNewestFirstSurviveRelaunch() throws {
+        #if !targetEnvironment(simulator)
+        throw XCTSkip("Synthetic isolated simulator only, no microphone or personal data.")
+        #endif
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchEnvironment["CAMINO_UI_TEST_SESSION"] = UUID().uuidString
+        app.launchEnvironment["CAMINO_TEST_ATTACHMENTS"] = "1"
+        app.launch()
+        let rows = app.buttons.matching(identifier: "momentRow")
+        XCTAssertTrue(rows.firstMatch.waitForExistence(timeout: 15))
+        XCTAssertTrue(rows.element(boundBy: 0).label.contains("Newer moment"))
+        XCTAssertTrue(rows.element(boundBy: 1).label.contains("Older moment"))
+        XCTAssertTrue(app.staticTexts["Foto: 1 · Audio: 1"].exists)
+        rows.firstMatch.tap()
+        let edits = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "editAttachmentTitle-"))
+        for (index, title) in [(0, "Photo title"), (1, "Audio title")] {
+            let edit = edits.element(boundBy: index)
+            for _ in 0..<5 where !edit.isHittable { app.swipeUp() }
+            XCTAssertTrue(edit.isHittable)
+            edit.tap()
+            let field = app.textFields["momentTitleEditor"]
+            XCTAssertTrue(field.waitForExistence(timeout: 5))
+            field.tap(); field.typeText(title)
+            app.buttons["saveMomentTitle"].tap()
+        }
+        app.terminate(); app.launch()
+        XCTAssertTrue(rows.firstMatch.waitForExistence(timeout: 15))
+        XCTAssertTrue(rows.firstMatch.label.contains("Newer moment"))
+        rows.firstMatch.tap()
+        for title in ["Photo title", "Audio title"] {
+            let label = app.staticTexts[title]
+            for _ in 0..<5 where !label.isHittable { app.swipeUp() }
+            XCTAssertTrue(label.exists)
+        }
+    }
+
     func testTitleSurvivesRelaunchAndCanBeCleared() throws {
         #if !targetEnvironment(simulator)
         throw XCTSkip("Isolated simulator only.")

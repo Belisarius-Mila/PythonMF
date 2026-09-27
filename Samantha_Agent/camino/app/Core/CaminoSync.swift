@@ -98,6 +98,13 @@ public struct CaminoSyncMetadataItem: Codable, Equatable, Identifiable, Sendable
               let change = object["change"] as? [String: Any] else { return false }
         return change["type"] as? String == "title"
     }
+
+    public var isAttachmentTitleChange: Bool {
+        guard kind == "update_metadata",
+              let object = try? JSONSerialization.jsonObject(with: payload) as? [String: Any],
+              let change = object["change"] as? [String: Any] else { return false }
+        return change["type"] as? String == "attachment_title"
+    }
 }
 
 public struct CaminoSyncMediaItem: Codable, Equatable, Identifiable, Sendable {
@@ -631,6 +638,10 @@ public struct CaminoSyncJournal: Codable, Equatable, Sendable {
     }
 
     public func requireTitleSupport(serverFeatures: [String]?) throws {
+        if metadata.contains(where: { $0.phase != .accepted && $0.isAttachmentTitleChange }),
+           serverFeatures?.contains("attachment_title_v1") != true {
+            throw CaminoSyncError.serverConflict("attachment_title_server_upgrade_required")
+        }
         if metadata.contains(where: { $0.phase != .accepted && $0.isTitleChange }),
            serverFeatures?.contains("moment_title_v1") != true {
             throw CaminoSyncError.serverConflict("moment_title_server_upgrade_required")
@@ -643,6 +654,14 @@ public struct CaminoSyncJournal: Codable, Equatable, Sendable {
         metadata.append(contentsOf: drafts.filter { !knownMetadata.contains($0.uniqueKey) })
         let knownMedia = Set(media.map(\.id))
         media.append(contentsOf: candidates.filter { !knownMedia.contains($0.id) })
+    }
+
+    public mutating func mergeDiscovery(_ discovery: CaminoSyncDiscovery) {
+        // Old servers retain optional-layout behavior until attachment titles
+        // are used; those edits require the new feature gate before any send.
+        let needsTitles = discovery.metadata.contains(where: \.isAttachmentTitleChange)
+        merge(metadata: discovery.metadata.filter { needsTitles || $0.kind != "create_audio_layout" },
+              media: discovery.media)
     }
 
     public mutating func mergeAudioLayouts(_ drafts: [CaminoSyncMetadataItem],
@@ -938,6 +957,35 @@ public struct CaminoSyncDiscovery: Sendable {
                     payload: ["moment_id": operation.momentID.uuidString.lowercased(),
                               "change": ["type": "title", "title": title]]))
                 wireRevision[operation.momentID] = expected + 1
+            case .attachmentTitle:
+                guard let value = operation.attachmentTitle, LocalMoment.validTitle(value.title) else {
+                    throw CaminoSyncError.incompleteLocalInventory
+                }
+                if value.kind == .audioSession {
+                    let layouts = audioLayouts.filter {
+                        $0.momentID == operation.momentID && $0.sessionID == value.targetID
+                    }
+                    guard !layouts.isEmpty else { throw CaminoSyncError.incompleteLocalInventory }
+                    // Prove session membership before its title. Existing queue
+                    // envelopes and immutable layout payloads never change.
+                    for layout in layouts.sorted(by: { $0.clipID.uuidString < $1.clipID.uuidString }) {
+                        guard Set(layout.parts.map(\.assetID)).isSubset(of: Set(media.filter {
+                            $0.momentID == layout.momentID && $0.kind == .audio
+                        }.map(\.id))) else { throw CaminoSyncError.incompleteLocalInventory }
+                        let key = "audio-layout:\(layout.clipID)"
+                        if !drafts.contains(where: { $0.uniqueKey == key }) {
+                            drafts.append(try Self.item(key: key, kind: "create_audio_layout",
+                                objectID: layout.clipID, payload: layout.payload()))
+                        }
+                    }
+                }
+                drafts.append(try Self.item(
+                    id: operation.id, key: "operation:\(operation.id)",
+                    kind: "update_metadata", objectID: operation.momentID,
+                    expectedRevision: expected,
+                    payload: ["moment_id": operation.momentID.uuidString.lowercased(),
+                              "change": ["type": "attachment_title", "attachment": value.payload]]))
+                wireRevision[operation.momentID] = expected + 1
             case .appendText:
                 guard let revisionID = operation.textRevisionID,
                       let text = edit.snapshot.textHistory.revisions.first(where: {
@@ -962,6 +1010,7 @@ public struct CaminoSyncDiscovery: Sendable {
             }
         }
         for layout in audioLayouts.sorted(by: { $0.clipID.uuidString < $1.clipID.uuidString }) {
+            if drafts.contains(where: { $0.uniqueKey == "audio-layout:\(layout.clipID)" }) { continue }
             let sources = media.filter { $0.momentID == layout.momentID && $0.kind == .audio }
             guard Set(layout.parts.map(\.assetID)).isSubset(of: Set(sources.map(\.id))) else {
                 throw CaminoSyncError.incompleteLocalInventory

@@ -150,7 +150,7 @@ class RevisionStore:
             meta = self._meta(connection)
             return {
                 "contract_version": 1,
-                "features": ["audio_layout_v1", "moment_title_v1"],
+                "features": ["audio_layout_v1", "moment_title_v1", "attachment_title_v1"],
                 "server_id": meta["server_id"],
                 "epoch": meta["epoch"],
                 "cursor": meta["cursor"],
@@ -328,6 +328,8 @@ class RevisionStore:
             elif kind == "create_moment":
                 if model.revision != 1:
                     raise ContractError("new Moment must start at revision one")
+                if model.attachment_titles:
+                    raise ContractError("attachment titles require existing targets and metadata revisions")
                 if model.privacy not in {Privacy.OWNER_ONLY.value, Privacy.DIARY.value}:
                     raise ContractError("new Moment privacy must be known")
                 if connection.execute("SELECT 1 FROM trips WHERE id=?", (model.trip_id,)).fetchone() is None:
@@ -394,9 +396,24 @@ class RevisionStore:
             elif change["type"] == "title":
                 exact_object(change, {"type", "title"})
                 common["title"] = change["title"]
+            elif change["type"] == "attachment_title":
+                exact_object(change, {"type", "attachment"})
+                common["attachment"] = change["attachment"]
             else:
                 raise ContractError("unknown metadata change")
             operation = decode_change(common)
+            if change["type"] == "attachment_title":
+                target = operation.attachment
+                if target.kind == "asset":
+                    row = connection.execute("SELECT body FROM assets WHERE id=? AND moment_id=?",
+                                             (target.target_id, moment_id)).fetchone()
+                    if row is None or json.loads(row["body"])["media_kind"] not in ("photo", "video"):
+                        raise ContractError("title target must be a photo or video of this Moment")
+                else:
+                    layouts = connection.execute("SELECT body FROM audio_layouts WHERE moment_id=?",
+                                                 (moment_id,))
+                    if not any(json.loads(row["body"])["session_id"] == target.target_id for row in layouts):
+                        raise ContractError("title target must be an audio session of this Moment")
             try:
                 updated = history.apply(operation)
             except RevisionConflict as error:
@@ -578,6 +595,7 @@ class RevisionStore:
                     "day": moment.chapter_date,
                     "time": moment.captured.local_wall[11:16] if moment.captured.local_wall else "Čas neznámý",
                     "kind": moment.kind.value, "title": moment.title,
+                    "attachment_titles": [wire(t) for t in moment.attachment_titles],
                     "text": text, "assets": assets[moment.id],
                     "map_point": {
                         "latitude": moment.location.latitude,

@@ -191,6 +191,10 @@ private struct CaptureHomeView: View {
                                 .accessibilityIdentifier("momentRow")
                                 Text(moment.privacy.title + (moment.partialAudio ? " · Částečný záznam" : ""))
                                     .font(.caption).foregroundStyle(.secondary)
+                                let attachments = model.attachmentSummary(for: moment.id)
+                                if !attachments.isEmpty {
+                                    Text(attachments).font(.caption).foregroundStyle(.secondary)
+                                }
                                 if let text = model.textHistory(for: moment.id).readerRevision?.content {
                                     Text(text).lineLimit(2).font(.caption)
                                 }

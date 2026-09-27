@@ -1,6 +1,15 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-09-27 21:31 CEST — Míla fyzicky potvrdil názvy Momentů a jejich přenos
+  v buildu 7. B01 mobilní regrese tím není ověřená. Schválený B03 balíček:
+  vlastní názvy foto/video/celých audio příloh, telefon nejnovější nahoře,
+  přehled počtů; Viewer rozbalovací, ale nadále od rána k večeru.
+  Lokální implementace: Swift 49, Python 31, HTTP/wire 16, UI 2 a iOS build 8
+  PASS; plná brána 1838/1838 PASS. Bez nového nasazení/podpisu/importu/push. Důkazy
+  a přejímka v `camino/docs/TITLES_AND_TRANSFER_STATUS_REPORT.md`.
+  Po jedné společné aktualizaci delší testování stejné verze, drobnosti
+  shromažďovat do bufferu; Mac editor odložený, M3/M4 zůstávají.
 - 2026-09-27 20:35 CEST — po nové výslovné globální brzdě nasazený server
   403180320849 s B01/B02. Živé HTTPS moment_title_v1 a Viewer (6 dnů) PASS.
   Zachováno 51 Momentů / 155 operací / 58 médií (263 578 290 B), metadata,
@@ -2501,3 +2510,28 @@ anonymní přístup i záměna owner/reader 401. Soukromá trasa a Cockpit zdrav
 Funnel off; upgrade uchoval snapshoty DB a původní konfiguraci. Plná brána
 nezměněného kódu 1836/1836 PASS. Fyzický import, nový SideStore podpis a přenos
 názvu/mobilní regrese zatím NEOVĚŘENO; neproveden downgrade ani smazání dat.
+
+## 2026-09-27 21:31 CEST — Přílohy a přehled dne, potom delší testování
+
+Hotovo: Míla potvrzuje názvy Momentů i přenos v předchozí aktualizaci.
+Lokálně doplněné názvy jednotlivých fotografií, videí a celých komentářů;
+telefon novější nahoře a počty příloh, Viewer rozbalovací karty.
+
+Rozhodnutí: Viewer se na výslovné přání Míly dál čte od rána k večeru.
+Přejmenování nepřesouvá Moment. Po jednom společném balíčku delší používání
+stejné verze a sběr drobností; žádné další rychlé kosmetické verze.
+Kritické chyby dat/soukromí/záznamu/přenosu se tím neodkládají. Mac editor později.
+
+Další krok: Samostatně schválit a provést
+serverovou aktualizaci, podpis a import stejné aplikace bez odinstalace.
+
+Navrhované další kroky: Krátká fyzická přejímka B03+B01; delší běžné testování;
+M3 nezávislá záloha; M4 před odjezdem. Jana zůstává pouze čtenář.
+
+Technický důkaz: 49 Swift, 31 Python doména/projekce/layout, 15 HTTP a jeden
+skutečný Swift wire → API/reopen/Viewer test PASS. iOS build 8 bez podpisu,
+UI 2/2 a plná brána 1838/1838 PASS; detaily v reportu B01/B02/B03. Staré přesné obálky,
+originály i verified média se nemění; feature gate attachment_title_v1,
+nový audio layout před názvem session. Bez schématové migrace; downgrade po
+nové operaci nepodporovaný. Fyzický build 8 a Safari NEOVĚŘENO. Žádný nový
+push, deployment, podpis/IPA, token ani změna osobního archivu v tomto kroku.

@@ -108,7 +108,12 @@ xcodebuild -project Camino.xcodeproj -scheme CaminoUITests -configuration Debug 
 SwiftPM testy používají pouze syntetická data včetně krátkého videa. UI testy
 používají jednorázové simulátorové kontejnery. Jen v Debug simulátoru lze přes
 `CAMINO_TEST_AVAILABLE_BYTES` a `CAMINO_TEST_THERMAL_LEVEL` dodat řízený stav;
-produkční cesta vždy čte skutečnou kapacitu a systémový tepelný stav. Samotný
+produkční cesta vždy čte skutečnou kapacitu a systémový tepelný stav.
+`CAMINO_TEST_ATTACHMENTS=1` spolu s platným `CAMINO_UI_TEST_SESSION` vytvoří
+pouze v Debug simulátoru a v prázdném izolovaném úložišti dva označené Momenty,
+foto metadata bez originálu a syntetické tiché audio pro UI test názvů příloh.
+Není to test fyzického mikrofonu ani kamery; release/device cestu to nemění.
+Samotný
 build ani simulátor
 netestují fyzickou kameru, mikrofon, orientaci, zámek, přerušení, přehrávání,
 skutečný nedostatek místa, skutečné zahřátí ani obnovu po pádu na iPhonu.

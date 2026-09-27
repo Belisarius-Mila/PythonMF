@@ -2,6 +2,13 @@
 
 Rozhodnutí Míly: 2026-09-25. Cesta 3.–17. října 2026; cílové zmrazení 2. října.
 Novější rozhodnutí 27. 9.: **GPS neodkládat**, pouze nové okamžiky.
+Novější večerní rozhodnutí 27. 9.: po fyzickém potvrzení názvů a přenosu buildu 7
+jediný společný B03 balíček: názvy každé foto/video/audio přílohy, nejnovější
+okamžiky nahoře pouze v telefonu, počty příloh, rozbalovací Viewer nadále
+od rána k večeru. Potom delší testování stejné verze, drobnosti do bufferu,
+bez rychlého vydávání dalších verzí; kritické chyby se dál opravují.
+Mac editor odložený. [TITLES_AND_TRANSFER_STATUS_REPORT.md](TITLES_AND_TRANSFER_STATUS_REPORT.md)
+je aktuální rozsah, důkaz a krátká přejímka; nasazení/podpis/instalace samostatně.
 Build 6 fyzicky funguje: GPS marker/foto/komentář/video uložené a přenesené;
 Mac 48 Momentů / 5 GPS. Zbývající okrajové scénáře nejsou PASS a nyní
 neblokují požadovaný přechod na Viewer. [GPS_CAPTURE_REPORT.md](GPS_CAPTURE_REPORT.md)

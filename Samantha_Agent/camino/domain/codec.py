@@ -13,7 +13,7 @@ from typing import Any
 from .model import (
     Asset, CaptureTime, ChapterChange, ContractError, HiddenChange, JourneyDay,
     LocationFix, Moment, MomentKind, Privacy, PrivacyChange, TextRevision,
-    TimeSource, TitleChange, Trip,
+    TimeSource, TitleChange, Trip, AttachmentTitle, AttachmentTitleChange, MetadataOperation,
 )
 
 
@@ -29,6 +29,8 @@ def wire(value: Any) -> dict[str, Any]:
     # Preserve historical unnamed create bodies and their exact retry identity.
     if isinstance(value, Moment) and not value.title:
         result.pop("title")
+    if isinstance(value, Moment) and not value.attachment_titles:
+        result.pop("attachment_titles")
     return result
 
 
@@ -74,7 +76,11 @@ def decode_moment(value: Any) -> Moment:
         "id", "trip_id", "day_id", "chapter_date", "kind", "captured", "privacy",
         "revision", "hidden", "important", "related_moment_id", "location",
     }
-    data = exact_object(value, fields | ({"title"} if isinstance(value, dict) and "title" in value else set()))
+    optional = {key for key in ("title", "attachment_titles") if isinstance(value, dict) and key in value}
+    data = exact_object(value, fields | optional)
+    titles = data.get("attachment_titles", [])
+    if not isinstance(titles, list):
+        raise ContractError("attachment titles must be an array")
     try:
         kind = MomentKind(data["kind"])
     except (TypeError, ValueError) as error:
@@ -87,6 +93,7 @@ def decode_moment(value: Any) -> Moment:
         related_moment_id=data["related_moment_id"],
         location=decode_location(data["location"]),
         title=data.get("title", ""),
+        attachment_titles=tuple(decode_attachment_title(item) for item in titles),
     )
 
 
@@ -109,21 +116,30 @@ def decode_text(value: Any) -> TextRevision:
     )
 
 
-def encode_change(value: PrivacyChange | HiddenChange | ChapterChange | TitleChange) -> dict[str, Any]:
+def decode_attachment_title(value: Any) -> AttachmentTitle:
+    return AttachmentTitle(**exact_object(value, {"kind", "target_id", "title"}))
+
+
+def encode_change(value: MetadataOperation) -> dict[str, Any]:
     result = wire(value)
     result["type"] = (
         "privacy" if isinstance(value, PrivacyChange)
         else "hidden" if isinstance(value, HiddenChange)
-        else "title" if isinstance(value, TitleChange) else "chapter"
+        else "title" if isinstance(value, TitleChange)
+        else "attachment_title" if isinstance(value, AttachmentTitleChange) else "chapter"
     )
     return result
 
 
-def decode_change(value: Any) -> PrivacyChange | HiddenChange | ChapterChange | TitleChange:
+def decode_change(value: Any) -> MetadataOperation:
     if not isinstance(value, dict):
         raise ContractError("metadata change must be an object")
     kind = value.get("type")
     common = {"type", "id", "moment_id", "device_sequence", "expected_revision"}
+    if kind == "attachment_title":
+        data = exact_object(value, common | {"attachment"})
+        return AttachmentTitleChange(data["id"], data["moment_id"], data["device_sequence"],
+                                     data["expected_revision"], decode_attachment_title(data["attachment"]))
     if kind == "title":
         data = exact_object(value, common | {"title"})
         return TitleChange(data["id"], data["moment_id"], data["device_sequence"],

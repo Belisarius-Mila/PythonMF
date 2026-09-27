@@ -1037,3 +1037,18 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Ověření: lokální Swift regrese dokončení, nové dávky, chybějící účtenky,
   offline a recovery PASS. Fyzický retest čeká na novou podepsanou aktualizaci;
   serverově ověřený originál neprokazuje tehdejší stav celého journalu telefonu.
+
+### 2026-09-27 — Název přílohy je revize metadat; audio session potřebuje vazbu před názvem
+
+- Kontext: Camino B03, dodatečné názvy již přenesených fotografií/videí
+  a celých hlasových komentářů.
+- Problém: přidání názvu do původního Asset/layout manifestu poruší jeho
+  neměnnou identitu. U audia může běžně odložený layout dorazit až za novou
+  operací názvu, takže server nemůže ověřit příslušnost session k Momentu.
+- Řešení: samostatná metadata revize s druhem a ID cíle, kontrola rodiče,
+  capability attachment_title_v1 před odesíláním. Layout dané session zařadit
+  před prvním názvem, ale staré přesné obálky a ověřené originály neměnit.
+  Komentář počítat/pojmenovat po session, nikoli po technických segmentech.
+- Ověření: skutečné Swift obálky ze starší fronty → izolované API, dvojí
+  replay a reopen/Viewer PASS. Přejmenování přidá jen metadata, verified média
+  zůstanou verified. Fyzická přejímka této nové verze zůstává samostatná.

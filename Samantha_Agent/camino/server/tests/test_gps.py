@@ -108,6 +108,43 @@ class SwiftTitleWireTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(reopened.viewer_snapshot(moment["trip_id"])["moments"][0]["title"], "Opravený název")
 
 
+class SwiftAttachmentWireTests(unittest.IsolatedAsyncioTestCase):
+    @unittest.skipUnless(os.environ.get("CAMINO_ATTACHMENT_WIRE_FIXTURE"), "optional generated Swift attachment fixture")
+    async def test_actual_swift_attachments_retry_reopen_and_viewer(self):
+        from camino.server.viewer import CaminoViewer
+        from camino.server.viewer_media import ViewerMedia
+        envelopes = json.loads(Path(os.environ["CAMINO_ATTACHMENT_WIRE_FIXTURE"]).read_text())
+        with tempfile.TemporaryDirectory(prefix="camino-attachment-api-") as directory:
+            root = Path(directory)
+            metadata = RevisionStore(root / "metadata.sqlite")
+            tokens = RevocableTokenStore(root / "auth.sqlite")
+            token = "synthetic-attachment-token-at-least-32"
+            tokens.add(token, label="synthetic")
+            media = MediaStore(root / "media.sqlite", root / "media", asset_lookup=metadata.asset, reserve_bytes=0)
+            app = create_app(metadata_api=CaminoV1Contract(metadata, tokens.authenticate), media_store=media, token_store=tokens)
+            async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="https://synthetic.test") as client:
+                for envelope in envelopes:
+                    envelope["epoch"] = metadata.state()["epoch"]
+                    raw = json.dumps(envelope, sort_keys=True, ensure_ascii=False).encode()
+                    for _ in range(2):
+                        response = await client.post("/api/v1/operations", content=raw,
+                            headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"})
+                        self.assertEqual(response.status_code, 200, response.text)
+            reopened = RevisionStore(root / "metadata.sqlite")
+            original = next(e["payload"] for e in envelopes if e["kind"] == "create_moment")
+            self.assertNotIn("attachment_titles", original)
+            current = reopened.moment(original["id"])
+            self.assertEqual(current["revision"], 5)
+            self.assertEqual(current["title"], "Okamžik")
+            self.assertEqual({t["title"] for t in current["attachment_titles"]}, {"Fotografie 🥾", "Opravený komentář"})
+            reopened.set_viewer_permission(original["trip_id"], enabled=True)
+            viewer = CaminoViewer(reopened, media, ViewerMedia(root / "copies"), tokens, original["trip_id"])
+            page = viewer.page(original["chapter_date"])
+            self.assertIn("Fotografie 🥾", page)
+            self.assertIn("Opravený komentář", page)
+            self.assertIn("Foto: 1 · Audio: 1", page)
+
+
 class SwiftGPSWireTests(unittest.IsolatedAsyncioTestCase):
     @unittest.skipUnless(os.environ.get("CAMINO_GPS_WIRE_FIXTURE"), "optional generated Swift wire fixture")
     async def test_actual_swift_envelopes(self):

@@ -14,6 +14,7 @@ private struct LocalMomentJournal: Codable, Equatable {
     var textHistory: LocalTextHistory
     var operations: [LocalPendingOperation]
     var currentTitle: String? = nil // Missing in pre-title journals; no Core Data migration.
+    var attachmentTitles: [LocalAttachmentTitle]? = nil
 }
 
 private struct LocalPendingMomentLink: Codable, Equatable {
@@ -690,6 +691,52 @@ private struct LocalPendingMomentLink: Codable, Equatable {
         } catch { context.rollback(); throw error }
     }
 
+    @discardableResult public func setAttachmentTitle(
+        momentID: UUID, kind: LocalAttachmentTitle.Kind, targetID: UUID, title: String,
+        operationID: UUID = UUID(), expectedRevision: Int? = nil, at date: Date = Date()
+    ) throws -> LocalMoment {
+        let value = LocalAttachmentTitle(kind: kind, targetID: targetID,
+            title: title.trimmingCharacters(in: .whitespacesAndNewlines))
+        guard LocalMoment.validTitle(value.title) else { throw LocalStoreError.invalidMetadataChange }
+        guard let row = try object("MomentRecord", id: momentID) else { throw LocalStoreError.momentMissing }
+        let current = try decodeMoment(row)
+        if let prior = try existingOperation(id: operationID) {
+            guard prior.momentID == momentID, prior.kind == .attachmentTitle,
+                  prior.attachmentTitle == value,
+                  prior.expectedRevision == (expectedRevision ?? prior.expectedRevision) else {
+                throw LocalStoreError.operationConflict
+            }
+            return current
+        }
+        let expected = expectedRevision ?? current.revision
+        guard expected == current.revision else { throw LocalStoreError.revisionConflict }
+        switch kind {
+        case .asset:
+            guard try allMediaAssets().contains(where: { $0.id == targetID && $0.momentID == momentID }) else {
+                throw LocalStoreError.invalidMediaIntent
+            }
+        case .audioSession:
+            guard try audioSessionIDs(momentID: momentID).contains(targetID) else {
+                throw LocalStoreError.invalidAudioIntent
+            }
+        }
+        if current.attachmentTitle(kind, id: targetID) == value.title { return current }
+        do {
+            var journal = try momentJournal(row)
+            let operation = try makeOperation(id: operationID, momentID: momentID,
+                expectedRevision: expected, kind: .attachmentTitle, at: date, attachmentTitle: value)
+            var titles = journal.attachmentTitles ?? []
+            titles.removeAll { $0.kind == kind && $0.targetID == targetID }
+            if !value.title.isEmpty { titles.append(value) }
+            journal.attachmentTitles = titles
+            journal.operations.append(operation)
+            row.setValue(current.revision + 1, forKey: "revision")
+            try setMomentJournal(journal)
+            try save()
+            return try decodeMoment(row)
+        } catch { context.rollback(); throw error }
+    }
+
     @discardableResult public func setHidden(
         momentID: UUID, hidden: Bool, operationID: UUID = UUID(),
         expectedRevision: Int? = nil, at date: Date = Date()
@@ -842,6 +889,15 @@ private struct LocalPendingMomentLink: Codable, Equatable {
               Set(journal.operations.map(\.deviceSequence)).count == journal.operations.count else {
             throw LocalStoreError.inconsistentStore
         }
+        var titles: [LocalAttachmentTitle] = []
+        for operation in journal.operations where operation.kind == .attachmentTitle {
+            guard let value = operation.attachmentTitle, LocalMoment.validTitle(value.title) else {
+                throw LocalStoreError.inconsistentStore
+            }
+            titles.removeAll { $0.kind == value.kind && $0.targetID == value.targetID }
+            if !value.title.isEmpty { titles.append(value) }
+        }
+        guard titles == (journal.attachmentTitles ?? []) else { throw LocalStoreError.inconsistentStore }
         return journal
     }
 
@@ -878,7 +934,7 @@ private struct LocalPendingMomentLink: Codable, Equatable {
         kind: LocalOperationKind, at date: Date,
         privacy: LocalPrivacy? = nil, privacyAction: LocalPrivacyAction? = nil,
         hidden: Bool? = nil, chapterDate: String? = nil,
-        textRevisionID: UUID? = nil, title: String? = nil
+        textRevisionID: UUID? = nil, title: String? = nil, attachmentTitle: LocalAttachmentTitle? = nil
     ) throws -> LocalPendingOperation {
         let sequence = try nextDeviceSequence()
         return LocalPendingOperation(
@@ -886,7 +942,8 @@ private struct LocalPendingMomentLink: Codable, Equatable {
             expectedRevision: expectedRevision, kind: kind,
             createdAtUTCMilliseconds: milliseconds(date), privacy: privacy,
             privacyAction: privacyAction, hidden: hidden,
-            chapterDate: chapterDate, textRevisionID: textRevisionID, title: title)
+            chapterDate: chapterDate, textRevisionID: textRevisionID, title: title,
+            attachmentTitle: attachmentTitle)
     }
 
     private func nextDeviceSequence() throws -> Int64 {
@@ -1020,7 +1077,7 @@ private struct LocalPendingMomentLink: Codable, Equatable {
                            partialAudio: try required(row, "partialAudio"),
                            relatedMomentID: journal.relatedMomentID,
                            location: try captureLocation(momentID: required(row, "id"), stamp: decodeStamp(row)),
-                           title: journal.currentTitle ?? "")
+                           title: journal.currentTitle ?? "", attachmentTitles: journal.attachmentTitles ?? [])
     }
 
     private func decodeIntent(_ row: NSManagedObject) throws -> AudioIntent {

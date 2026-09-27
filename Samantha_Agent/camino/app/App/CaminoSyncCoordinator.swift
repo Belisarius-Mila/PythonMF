@@ -617,7 +617,7 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
             trips: trips, days: days, moments: snapshots, media: candidates, audioLayouts: audioLayouts)
         localMomentIDs = Set(snapshots.map(\.moment.id))
         discoveredAudioLayouts = discovery.metadata.filter { $0.kind == "create_audio_layout" }
-        journal.merge(metadata: discovery.metadata.filter { $0.kind != "create_audio_layout" }, media: discovery.media)
+        journal.mergeDiscovery(discovery)
         try journalStore.save(journal)
         refreshPublishedState()
     }
@@ -968,6 +968,7 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
 
     private func resolvedMacCopyState(status: Int?, code: String) -> CaminoMacCopyState {
         if code == "moment_title_server_upgrade_required" { return .serverUpgradeRequired }
+        if code == "attachment_title_server_upgrade_required" { return .serverUpgradeRequired }
         if status == 401 { return .authorizationRequired }
         if status == 507 || code == "insufficient_storage" { return .insufficientStorage }
         if ["verification_failed", "hash_mismatch", "length_mismatch"].contains(code) {

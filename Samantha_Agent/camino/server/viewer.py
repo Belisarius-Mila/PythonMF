@@ -36,6 +36,9 @@ a{color:#225b48}a:focus-visible{outline:3px solid #bd751a;outline-offset:4px}
 .label{letter-spacing:.16em;font-size:.75rem;font-weight:700}.muted,footer{color:#586961;font-size:.9rem}
 nav{display:flex;flex-wrap:wrap;gap:12px}nav a{background:#fff;padding:14px 20px;border-radius:12px}
 article{background:#fff;border:1px solid #dce2d8;border-radius:16px;padding:22px;margin:18px 0}
+summary{cursor:pointer;min-height:48px;overflow-wrap:anywhere}summary:focus-visible{outline:3px solid #bd751a;outline-offset:4px}
+summary .moment-name{font-size:1.1rem;font-weight:700}summary .muted{display:block;margin-top:8px}
+details[open]>summary{padding-bottom:16px;border-bottom:1px solid #dce2d8;margin-bottom:16px}
 .text{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.7}figure{margin:16px 0}
 img,video{display:block;max-width:100%;max-height:65vh;border-radius:10px;margin:auto}
 audio{width:100%}figcaption{margin:8px 0;color:#586961;font-size:.85rem}
@@ -44,6 +47,24 @@ audio{width:100%}figcaption{margin:8px 0;color:#586961;font-size:.85rem}
 @media(max-width:520px){header,main,footer{padding:18px}h1{font-size:1.9rem}article{padding:16px}}
 """
 KINDS = {"photo": "Fotografie", "video": "Video", "comment": "Komentář", "reflection": "Úvaha", "marker": "Záznam"}
+
+
+def attachment_title(moment: dict, kind: str, target_id: str) -> str:
+    return next((t["title"] for t in moment.get("attachment_titles", [])
+                 if t["kind"] == kind and t["target_id"] == target_id), "")
+
+
+def attachment_summary(moment: dict) -> str:
+    groups, used = ordered_audio_groups(moment["assets"], moment["audio_layouts"])
+    # Count complete logical sessions, never their technical audio segments.
+    counts = [("Foto", sum(a["media_kind"] == "photo" for a in moment["assets"])),
+              ("Video", sum(a["media_kind"] == "video" for a in moment["assets"])),
+              ("Audio", len(groups))]
+    parts = [f"{label}: {count}" for label, count in counts if count]
+    unknown = sum(a["media_kind"] == "audio" and a["id"] not in used for a in moment["assets"])
+    if unknown:
+        parts.append(f"Audio bez ověřeného seskupení: {unknown}")
+    return " · ".join(parts) or "Bez příloh"
 
 
 class CaminoViewer:
@@ -107,7 +128,9 @@ class CaminoViewer:
         groups, used = ordered_audio_groups(moment["assets"], moment["audio_layouts"])
         body = ""
         for group_index, group in enumerate(groups, 1):
-            body += f'<section aria-label="Nahrávka {group_index}"><h3>Nahrávka {group_index}</h3>'
+            name = attachment_title(moment, "audio_session", group["clips"][0]["session_id"])
+            heading = escape(name) if name else f'Nahrávka {group_index}'
+            body += f'<section aria-label="{heading}"><h3>{heading}</h3>'
             for clip_index, clip in enumerate(group["clips"], 1):
                 if not clip["order_known"]:
                     body += '<p class="notice">Předchozí část není dostupná; návaznost není ověřená.</p>'
@@ -160,8 +183,11 @@ class CaminoViewer:
                     continue
                 label = f'{escape(moment["time"])} · {KINDS.get(moment["kind"], "Záznam")}'
                 title_text = moment.get("title", "")
-                body += (f'<article><h3>{escape(title_text)}</h3><p class="muted">{label}</p>'
-                         if title_text else f'<article><h3>{label}</h3>')
+                heading = escape(title_text) if title_text else label
+                body += (f'<article><details><summary><span class="moment-name">{heading}</span>'
+                         + (f'<span class="muted">{label}</span>' if title_text else '')
+                         + f'<span class="muted">{attachment_summary(moment)} · Rozbalit / sbalit</span>'
+                         + '</summary>')
                 if moment["text"]:
                     body += f'<p class="text">{escape(moment["text"])}</p>'
                 point = moment["map_point"]
@@ -182,9 +208,11 @@ class CaminoViewer:
                 for index, asset in enumerate(moment["assets"], 1):
                     if asset["id"] in ordered_ids:
                         continue
+                    name = attachment_title(moment, "asset", asset["id"])
+                    caption = escape(name) if name else f'{index}. médium'
                     ready = self.copies.ready(asset, verify=False)
                     if not ready:
-                        body += '<p class="notice">Médium zatím není připravené k přehrání.</p>'
+                        body += f'<p class="notice">{caption}: Médium zatím není připravené k přehrání.</p>'
                         continue
                     base = f'{root_path}/viewer/media/{asset["id"]}/'
                     kind = asset["media_kind"]
@@ -195,8 +223,8 @@ class CaminoViewer:
                     else:
                         body += '<p class="notice">Pořadí této nahrávky zatím není přenesené; přehrává se samostatně.</p>'
                         element = f'<audio controls preload="none" src="{base}audio.m4a">Prohlížeč neumí přehrát audio.</audio>'
-                    body += f'<figure>{element}<figcaption>{index}. médium</figcaption></figure>'
-                body += '</article>'
+                    body += f'<figure>{element}<figcaption>{caption}</figcaption></figure>'
+                body += '</details></article>'
         built = escape(self.last_build or "zatím neproběhla")
         state = {"manual": "Automatická příprava není zapnutá.",
                  "building": "Připravuji doručená média.",

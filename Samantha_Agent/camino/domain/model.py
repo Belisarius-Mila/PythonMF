@@ -188,6 +188,19 @@ class JourneyDay:
 
 
 @dataclass(frozen=True, slots=True)
+class AttachmentTitle:
+    kind: str
+    target_id: str
+    title: str
+
+    def __post_init__(self) -> None:
+        if self.kind not in ("asset", "audio_session"):
+            raise ContractError("unknown attachment title target")
+        _uuid(self.target_id)
+        validate_title(self.title)
+
+
+@dataclass(frozen=True, slots=True)
 class Moment:
     id: str
     trip_id: str
@@ -202,12 +215,17 @@ class Moment:
     related_moment_id: str | None = None
     location: LocationFix | None = None
     title: str = ""
+    attachment_titles: tuple[AttachmentTitle, ...] = ()
 
     def __post_init__(self) -> None:
         for value in (self.id, self.trip_id, self.day_id):
             _uuid(value)
         _day(self.chapter_date)
         validate_title(self.title)
+        if (not isinstance(self.attachment_titles, tuple)
+                or any(not isinstance(t, AttachmentTitle) or not t.title for t in self.attachment_titles)
+                or len({(t.kind, t.target_id) for t in self.attachment_titles}) != len(self.attachment_titles)):
+            raise ContractError("attachment titles must be unique nonempty titles")
         if not isinstance(self.kind, MomentKind) or not isinstance(self.captured, CaptureTime):
             raise ContractError("Moment kind and capture provenance are required")
         if self.related_moment_id is not None:
@@ -366,7 +384,21 @@ class TitleChange:
         validate_title(self.title)
 
 
-MetadataOperation: TypeAlias = PrivacyChange | HiddenChange | ChapterChange | TitleChange
+@dataclass(frozen=True, slots=True)
+class AttachmentTitleChange:
+    id: str
+    moment_id: str
+    device_sequence: int
+    expected_revision: int
+    attachment: AttachmentTitle
+
+    def __post_init__(self) -> None:
+        _operation_fields(self.id, self.moment_id, self.device_sequence, self.expected_revision)
+        if not isinstance(self.attachment, AttachmentTitle):
+            raise ContractError("attachment title is required")
+
+
+MetadataOperation: TypeAlias = PrivacyChange | HiddenChange | ChapterChange | TitleChange | AttachmentTitleChange
 
 
 @dataclass(frozen=True, slots=True)
@@ -427,6 +459,17 @@ class MomentHistory:
             if operation.title == current.title:
                 raise ContractError("title is already at the requested value")
             updated = replace(current, title=operation.title, revision=current.revision + 1)
+        elif isinstance(operation, AttachmentTitleChange):
+            value = operation.attachment
+            previous = next((t.title for t in current.attachment_titles
+                             if (t.kind, t.target_id) == (value.kind, value.target_id)), "")
+            if previous == value.title:
+                raise ContractError("attachment title is already at the requested value")
+            titles = tuple(t for t in current.attachment_titles
+                           if (t.kind, t.target_id) != (value.kind, value.target_id))
+            if value.title:
+                titles += (value,)
+            updated = replace(current, attachment_titles=titles, revision=current.revision + 1)
         elif isinstance(operation, ChapterChange):
             if operation.day.trip_id != current.trip_id:
                 raise ContractError("new chapter belongs to another trip")

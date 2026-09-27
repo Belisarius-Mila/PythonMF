@@ -7,7 +7,7 @@ from dataclasses import replace
 from pathlib import Path
 
 from camino.domain.codec import wire
-from camino.domain.model import JourneyDay, LocationFix, Privacy
+from camino.domain.model import JourneyDay, LocationFix, Privacy, ContractError
 from tests.camino_viewer_fixture import ViewerFixture, uid
 
 
@@ -19,6 +19,59 @@ class ViewerProjectionTests(unittest.TestCase):
 
     def snapshot(self):
         return self.f.store.viewer_snapshot(self.f.trip.id)
+
+    def test_attachment_titles_reopen_clear_keep_originals_and_follow_privacy(self):
+        from camino.domain.revision_store import RevisionStore
+        from tests.test_camino_audio_layout import layout
+        photo = self.f.upload(30, "photo", b"photo")
+        video = self.f.upload(31, "video", b"video")
+        self.f.upload(32, "audio", b"audio-one")
+        self.f.upload(33, "audio", b"audio-two")
+        self.f.send("create_audio_layout", layout(50, [32, 33]))
+        self.f.upload(40, "photo", b"private", private=True)
+        original = self.f.store.moment(self.f.public.id)
+        self.assertNotIn("attachment_titles", original)
+        for revision, (kind, target, title) in enumerate([
+            ("asset", 30, "Foto 🥾"), ("asset", 31, "Video"), ("audio_session", 50, "Celý komentář")
+        ], 1):
+            self.f.send("update_metadata", {"moment_id": self.f.public.id, "change": {
+                "type": "attachment_title", "attachment": {"kind": kind, "target_id": uid(target), "title": title}
+            }}, expected=revision)
+        self.f.send("update_metadata", {"moment_id": self.f.private.id, "change": {
+            "type": "attachment_title", "attachment": {"kind": "asset", "target_id": uid(40), "title": "SECRET-TITLE"}
+        }}, expected=1)
+        reopened = RevisionStore(self.f.root / "metadata.sqlite")
+        self.assertEqual(len(reopened.moment(self.f.public.id)["attachment_titles"]), 3)
+        self.assertEqual(self.f.store.asset(uid(30)), photo)
+        self.assertEqual(self.f.store.asset(uid(31)), video)
+        self.assertNotIn("SECRET-TITLE", json.dumps(self.snapshot()))
+        self.f.send("create_moment", original)  # Historical identity still matches.
+        self.f.send("create_asset", photo)
+        self.f.send("update_metadata", {"moment_id": self.f.public.id, "change": {
+            "type": "attachment_title", "attachment": {"kind": "asset", "target_id": uid(30), "title": ""}
+        }}, expected=4)
+        self.assertEqual(len(self.snapshot()["moments"][0]["attachment_titles"]), 2)
+        self.f.send("update_metadata", {"moment_id": self.f.public.id, "change": {
+            "type": "privacy", "new_privacy": "owner_only", "user_action": "lock"}}, expected=5)
+        self.assertEqual(self.snapshot()["moments"], [])
+
+    def test_attachment_title_rejects_foreign_missing_audio_segments_and_invalid_values(self):
+        from tests.test_camino_audio_layout import layout
+        self.f.upload(30, "photo", b"photo")
+        self.f.upload(31, "audio", b"audio")
+        self.f.upload(40, "photo", b"private", private=True)
+        self.f.upload(41, "audio", b"private audio", private=True)
+        self.f.send("create_audio_layout", layout(60, [41], moment=4))
+        for kind, target, title in [("asset", 40, "Foreign"), ("asset", 31, "Segment"),
+                                   ("asset", 99, "Missing"), ("audio_session", 60, "Foreign audio"),
+                                   ("audio_session", 61, "Missing audio"), ("asset", 30, "bad\nline"),
+                                   ("asset", 30, "x" * 161), ("unknown", 30, "Bad kind")]:
+            with self.subTest(kind=kind, target=target), self.assertRaises(ContractError):
+                self.f.send("update_metadata", {"moment_id": self.f.public.id, "change": {
+                    "type": "attachment_title", "attachment": {"kind": kind, "target_id": uid(target), "title": title}
+                }}, expected=1)
+            self.f.sequence -= 1
+            self.assertEqual(self.f.store.moment(self.f.public.id)["revision"], 1)
 
     def test_title_revisions_reopen_clear_and_privacy(self):
         from camino.domain.revision_store import RevisionStore

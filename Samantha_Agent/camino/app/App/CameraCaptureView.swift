@@ -298,6 +298,7 @@ struct CaminoMediaDetailView: View {
     @State private var showTextEditor = false
     @State private var showTitleEditor = false
     @State private var titleDraft = ""
+    @State private var titleAttachment: LocalAttachmentTitle? = nil
     @State private var titleSaveFailed = false
     @State private var showChapterPicker = false
     @State private var chapterDate = Date()
@@ -324,6 +325,7 @@ struct CaminoMediaDetailView: View {
                             ? "Odebrat hvězdičku" : "Přidat hvězdičku")
                     }
                     Button(current.title.isEmpty ? "Přidat název" : "Upravit název", systemImage: "pencil") {
+                        titleAttachment = nil
                         titleDraft = current.title
                         titleSaveFailed = false
                         showTitleEditor = true
@@ -383,7 +385,10 @@ struct CaminoMediaDetailView: View {
                     let assets = model.mediaByMoment[current.id] ?? []
                     ForEach(assets) { asset in
                         VStack(alignment: .leading, spacing: 8) {
-                            Text(asset.kind.title).font(.headline)
+                            let name = current.attachmentTitle(.asset, id: asset.id)
+                            Text(name.isEmpty ? asset.kind.title : name).font(.headline)
+                            if !name.isEmpty { Text(asset.kind.title).font(.caption).foregroundStyle(.secondary) }
+                            attachmentTitleButton(.asset, id: asset.id, title: name)
                             if let url = model.originalURL(for: asset) {
                                 if asset.kind == .photo {
                                     CaminoPhotoThumbnail(url: url)
@@ -415,9 +420,11 @@ struct CaminoMediaDetailView: View {
                         let linked = model.audioSessionIDs(for: current.id)
                         ForEach(audio.library.sessions.filter { linked.contains($0.id) }) { session in
                             VStack(alignment: .leading, spacing: 8) {
-                                Text(current.kind == .reflection
+                                let name = current.attachmentTitle(.audioSession, id: session.id)
+                                Text(!name.isEmpty ? name : current.kind == .reflection
                                      ? "Úvaha" : "Připojený komentář")
                                     .font(.headline)
+                                attachmentTitleButton(.audioSession, id: session.id, title: name)
                                 ForEach(session.parts) { clip in
                                     Button("Přehrát komentář", systemImage: "play.fill") {
                                         model.play(clip)
@@ -495,7 +502,9 @@ struct CaminoMediaDetailView: View {
                 Form {
                     TextField("Nepovinný název", text: $titleDraft)
                         .accessibilityIdentifier("momentTitleEditor")
-                    Text("Název celého okamžiku, nejvýše 160 znaků. Prázdné pole název odstraní. Média se nemění.")
+                    Text(titleAttachment == nil
+                         ? "Název celého okamžiku, nejvýše 160 znaků. Prázdné pole název odstraní. Média se nemění."
+                         : "Název této přílohy, nejvýše 160 znaků. Prázdné pole název odstraní. Celý hlasový komentář má jeden název; média se nemění.")
                         .font(.footnote)
                     Text(current.privacy == .ownerOnly
                          ? "Jen pro mě: také název zůstává soukromý."
@@ -509,14 +518,14 @@ struct CaminoMediaDetailView: View {
                             .foregroundStyle(.orange)
                     }
                 }
-                .navigationTitle("Název okamžiku")
+                .navigationTitle(titleAttachment == nil ? "Název okamžiku" : "Název přílohy")
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
                         Button("Zrušit") { showTitleEditor = false }
                     }
                     ToolbarItem(placement: .confirmationAction) {
                         Button("Uložit") {
-                            if model.saveTitle(momentID: current.id, title: titleDraft) {
+                            if model.saveTitle(momentID: current.id, title: titleDraft, attachment: titleAttachment) {
                                 showTitleEditor = false
                             } else { titleSaveFailed = true }
                         }
@@ -570,6 +579,16 @@ struct CaminoMediaDetailView: View {
         } message: {
             Text("Moment i originály zůstanou v archivu. Skrytí neuvolní místo a již odeslané kopie nelze vzít zpět.")
         }
+    }
+
+    private func attachmentTitleButton(_ kind: LocalAttachmentTitle.Kind, id: UUID, title: String) -> some View {
+        Button(title.isEmpty ? "Přidat název" : "Upravit název", systemImage: "pencil") {
+            titleAttachment = LocalAttachmentTitle(kind: kind, targetID: id, title: title)
+            titleDraft = title
+            titleSaveFailed = false
+            showTitleEditor = true
+        }
+        .accessibilityIdentifier("editAttachmentTitle-\(id.uuidString)")
     }
 
     private func date(from chapter: String) -> Date? {
