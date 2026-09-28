@@ -1,7 +1,8 @@
 # Mapa cesty — místa záznamů (U17)
 
 28. 9. 2026. Lokální implementace na výslovný pokyn Míly po schválení návrhu.
-**Zatím bez push, nasazení, restartu služby/Cockpitu či změny iPhone buildu 8.**
+**Od 23:04 CEST nasazená serverová verze ce903913bb35; bez push, restartu
+Cockpitu či změny iPhone buildu 8.** Níže vývojový důkaz a výsledek nasazení.
 B04 mazání zůstává pouze buffer. Žádná migrace nebo práce s reálnými GPS.
 
 ## Co Jana dostane
@@ -89,3 +90,36 @@ release archivu celé složky server; žádný ruční kopírovací krok do prod
    hláška a skryté staré body; po návratu aktuální stav.
 
 Fyzické výsledky zapsat jednotlivě, ne opakovat celou historickou sadu.
+
+## Nasazení 2026-09-28 23:04 CEST
+
+Míla samostatně schválil nasazení a krátkou zkoušku; následně přesnou globální
+brzdu. Registrované stop → potvrzeno loaded=false → upgrade → start.
+Neměnný release **ce903913bb35**, kód shodný s právě ověřenou plnou bránou
+1843/1843. Před upgradem konzistentní snapshoty metadat, media DB a obou auth
+DB, původní konfigurace i LaunchAgent zachované v soukromé upgrade účtence.
+
+Živý důkaz po startu:
+
+- Služba configured/owned/loaded/running=true; privátní HTTPS a Cockpit zdravé,
+  Funnel off; síťové cesty nebyly změněné.
+- Archiv shodný s dokončenou přednasazovací účtenkou: 53 Momentů, 177 operací,
+  62 médií / 271 510 864 B, všechna média hashově ověřená. Identita, epocha,
+  kurzor a oba recovery flagy zachované (flagy=false).
+- Obsah obou tabulek oprávnění shodný s předchozími snapshoty, existující
+  owner i reader credential fungují. Žádná rotace ani zveřejnění tajemství.
+- Mapa HTML a JSON přes skutečné HTTPS 200; čtyři JS/CSS soubory 200 a přesná
+  byte shoda s release. Správný `/camino-api` prefix, consent a CSP/referrer
+  hlavičky; běžný Viewer zůstává no-referrer.
+- 9 bodů v jednom dni přesně odpovídá aktuálním povoleným neskrytým `diary`
+  Momentům s GPS. Souřadnice i názvy porovnané jen v paměti, nevypisované.
+  Chronologie podle pořízení a všechny deníkové anchor cíle ověřené.
+- Všech 6 mapových endpointů odmítá anonymní i owner Bearer přístup 401;
+  reader nesmí do owner API, owner API 200. Žádný test neměnil osobní obsah.
+
+Browser automation neposkytuje žádný prohlížeč. Dlaždice OSM, vizuální mapa,
+zoom/klik/Safari a nový bod po fyzické synchronizaci jsou **NEOVĚŘENO**;
+HTTP/JSON kontrola není jejich náhradou. Mílovi předaný krátký průchod
+Viewer → Mapa cesty → Otevřít mapu → bod → okamžik v deníku.
+Žádný push, instalace telefonu, restart Cockpitu ani test smazání/skrytí
+reálných záznamů nebyl proveden.

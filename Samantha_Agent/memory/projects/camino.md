@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-28 — lokální U17 mapa
+Aktualizováno: 2026-09-28 23:04 CEST — nasazená U17 mapa
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,16 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-09-28 23:04 CEST — po výslovném nasazení i přesné globální brzdě
+  běží U17 mapa z release ce903913bb35. Živé privátní HTTPS PASS: HTML/JSON,
+  4 mapové assety, 9 povolených GPS bodů (1 den), pořadí a odkazy do deníku.
+  Anonymní přístup a záměna owner/reader odmítnuté; Funnel off, Cockpit zdravý.
+  Zachováno 53 Momentů / 177 operací / 62 hashově ověřených médií (271 510 864 B),
+  identita a obě oprávnění; recovery flagy=false. Bez změny telefonu nebo sítě,
+  bez push a restartu Cockpitu. Dále fyzicky Viewer → Mapa cesty → Otevřít mapu;
+  Safari/dlaždice/klik a přírůstek po novém přenosu zatím NEOVĚŘENO.
+  Podrobnosti v VIEWER_ROUTE_MAP_REPORT.md; B04 zůstává buffer.
 
 - 2026-09-28 — U17 Mapa cesty: Míla schválil návrh i lokální vývoj.
   Samostatná chráněná HTML mapa povolených GPS Momentů, Leaflet/OSM po kliknutí,

@@ -9,6 +9,10 @@ den/celá cesta a odkazy do deníku; žádné průběžné sledování nebo kilo
 Ověření a další krátká přejímka: [VIEWER_ROUTE_MAP_REPORT.md](VIEWER_ROUTE_MAP_REPORT.md).
 Nasazení serveru samostatně. B04 mazání dál pouze buffer. Jana podle Míly
 použila dosavadní Viewer ze svého Macu přes Cockpit; nikoli PASS nové mapy/G8.
+28. 9. 23:04: po samostatném souhlasu a globální brzdě U17 nasazená z ce903913bb35.
+HTTPS mapa/JSON/assety a 9 povolených GPS bodů/odkazy PASS; archiv i přístupy
+zachované. Bez nové IPA/push/restartu Cockpitu. Nyní krátká fyzická zkouška
+mapy; Safari, externí dlaždice a nový bod po přenosu zatím NEOVĚŘENO.
 Novější večerní rozhodnutí 27. 9.: po fyzickém potvrzení názvů a přenosu buildu 7
 jediný společný B03 balíček: názvy každé foto/video/audio přílohy, nejnovější
 okamžiky nahoře pouze v telefonu, počty příloh, rozbalovací Viewer nadále

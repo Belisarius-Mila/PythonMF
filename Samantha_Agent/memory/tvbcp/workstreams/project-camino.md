@@ -1,6 +1,16 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-09-28 23:04 CEST — po výslovném nasazení i přesné globální brzdě
+  běží U17 mapa z release ce903913bb35. Živé privátní HTTPS PASS: HTML/JSON,
+  4 mapové assety, 9 povolených GPS bodů (1 den), pořadí a odkazy do deníku.
+  Anonymní přístup a záměna owner/reader odmítnuté; Funnel off, Cockpit zdravý.
+  Zachováno 53 Momentů / 177 operací / 62 hashově ověřených médií (271 510 864 B),
+  identita a obě oprávnění; recovery flagy=false. Bez změny telefonu nebo sítě,
+  bez push a restartu Cockpitu. Dále fyzicky Viewer → Mapa cesty → Otevřít mapu;
+  Safari/dlaždice/klik a přírůstek po novém přenosu zatím NEOVĚŘENO.
+  Podrobnosti v VIEWER_ROUTE_MAP_REPORT.md; B04 zůstává buffer.
+
 - 2026-09-28 — U17 Mapa cesty: Míla schválil návrh i lokální vývoj.
   Samostatná chráněná HTML mapa povolených GPS Momentů, Leaflet/OSM po kliknutí,
   chronologie zachycení, dny, přerušované orientační spojnice, názvy/přesnost
@@ -2813,3 +2823,24 @@ Technický důkaz: 30/30 projekčních/runtime/audio + 17/17 HTTP testů PASS,
 Node frontend 4/4 PASS, ověřené Leaflet JS/CSS upstream SRI.
 Plná brána 1843/1843 PASS. Žádný dostupný browser: Safari, živé dlaždice a fyzické UX
 NEOVĚŘENO. Bez změn archivu, sítě, tokenů, běžící služby nebo telefonu.
+
+## 2026-09-28 23:04 CEST — Mapa nasazená na soukromém serveru
+
+Hotovo: Viewer nabízí Mapu cesty a server poskytuje 9 povolených GPS bodů
+včetně odkazů do správných okamžiků. Archiv i dosavadní přihlášení zachované.
+
+Rozhodnutí: Míla schválil nasazení serveru a krátkou zkoušku, poté přesnou
+globální brzdu. Žádná změna telefonu, sítě, nový push nebo restart Cockpitu.
+
+Další krok: Míla otevře Viewer → Mapa cesty → Otevřít mapu a vyzkouší bod
+a odkaz do deníku. Skutečné vykreslení není zatím potvrzené.
+
+Navrhované další kroky: Jeden nový GPS okamžik a přírůstek po synchronizaci;
+delší testování buildu 8; odložená kontrola zálohy a M3/M4; B04 jen buffer.
+
+Technický důkaz: Neměnný release ce903913bb35; předchozí plná brána stejného
+kódu 1843/1843 PASS. Registrovaný stop/upgrade/start a živé HTTPS/mapové
+assety/auth/projekce/anchor kontroly PASS. Zachováno 53 Momentů, 177 operací,
+62 hashově ověřených médií / 271 510 864 B, identita a obě tabulky oprávnění;
+Funnel off, recovery flagy=false. Safari/dlaždice/UX NEOVĚŘENO (browser není
+dostupný). Přesný redigovaný průchod v VIEWER_ROUTE_MAP_REPORT.md.
