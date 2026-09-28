@@ -179,7 +179,9 @@ Skrýt z deníku, které originály zachová a místo neuvolní.
 **Hranice:** dosavadní ochrana neměnných originálů a zákaz automatického
 mazání platí dál. Před implementací výslovně schválit výjimku pro konkrétní
 uživatelem potvrzené smazání; žádný automatický úklid podle stáří/kapacity.
-Volba ponechat originál na Macu zatím čeká na rozhodnutí Míly. Mazání je
+28. 9. 2026 13:40 CEST Míla souhlasí s ponecháním již přeneseného originálu
+v neveřejném archivu Macu; stále jde jen o buffer, ne pokyn k implementaci.
+Mazání je
 citlivější změna persistence a synchronizace, nikoli kosmetická změna Vieweru.
 
 **Budoucí cílené ověření:** nepřenesená položka offline a reálné uvolnění

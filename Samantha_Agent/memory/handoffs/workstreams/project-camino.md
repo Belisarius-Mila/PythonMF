@@ -5,7 +5,8 @@
   nejde o jednotlivé PASS celé B03/B01 přejímky. Nyní pouze buffer B04:
   skutečně smazatelné komentáře/Úvahy/foto/video kvůli místu v telefonu.
   Adam navrhuje přenos smazání do Vieweru další dávkou a ochranu před návratem
-  při retry; ponechání originálu v neveřejném Mac archivu je otevřená volba.
+  při retry; ponechání originálu v neveřejném Mac archivu Míla schválil
+  28. 9. 13:40 CEST. Implementace nadále není povolená.
   Rozsah a budoucí ověření v TRAVEL_MVP_PLAN.md. Žádný vývoj ani mazání.
   Zálohu Míla chce kontrolovat večer; nyní nebyla kontrolována.
 - 2026-09-27 22:13 CEST — po nové přesné globální brzdě nasazený B03 server
@@ -2614,3 +2615,20 @@ Technický důkaz: Read-only kontrola dosavadního kontraktu neměnných origin�
 a ochrany Vieweru; návrh B04 v TRAVEL_MVP_PLAN.md rozlišuje lokální uvolnění,
 doručené smazání, retry/obnovu a historické kopie. Žádné nové runtime testy,
 změny aplikace/služby, nasazení, podpis, push ani skutečné smazání.
+
+## 2026-09-28 13:40 CEST — Schválená archivní pojistka B04
+
+Hotovo: Upřesněný buffer B04: již přenesené originály zůstanou v neveřejném
+archivu Macu, po budoucím smazání v telefonu zmizí z aktivního Vieweru.
+
+Rozhodnutí: Míla souhlasí s touto archivní pojistkou. Žádný vývoj ani smazání
+nyní nejsou povolené; Jana zůstává čtenář. Míla požádal také o přístup k Vieweru.
+
+Další krok: Uložit existující čtecí heslo do správce hesel; dál testovat build 8.
+
+Navrhované další kroky: Večer kontrola recovery zálohy; B04 jen sbírat;
+M3/M4 zůstávají.
+
+Technický důkaz: Existující reader přístup jana ověřený živým soukromým HTTPS,
+HTTP 200. Heslo nevypsané, nezapsané do dokumentace ani změněné; žádná rotace,
+restart, nasazení nebo změna aplikace. Uložení hesla uživatelem není ověřené.
