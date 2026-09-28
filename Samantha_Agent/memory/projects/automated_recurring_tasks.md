@@ -1,5 +1,17 @@
 # Obecna rutina pro automaticke opakujici se ukoly
 
+## Aktuální stav 2026-09-28 21:58 CEST — příprava pro 29. září
+
+- Míla výslovně upřesnil datum 2026-09-29. Přidaný jediný přesný řádek
+  OwlSpeech.csv; historický příběh ani default se nepřepisují.
+- Dodaný text zachovaný znak po znaku, v paměti se neopakuje.
+- Ignorovaný náhled owl_290926.mp3: 220 896 B, 36,816 s; 19 cílených testů PASS.
+- Zatím pouze místní příprava. Push soví změny zvlášť od devíti čekajících
+  commitů Camina je nabídnutý k potvrzení; žádný push ani Pages dispatch.
+- Po schváleném odeslání má datum vybrat zítřejší automatika kolem 03:00
+  Praha. Dnešní ruční dispatch by vybral dnešek, nikoli 29. září.
+- Veřejné zítřejší audio ani skutečný poslech zatím NEOVĚŘENO.
+
 ## 2026-09-21 – Výchozí promluva zveřejněná
 
 - Příčina návratu starého příběhu byla potvrzená na veřejném webu: při dni bez
@@ -348,3 +360,17 @@ Technický důkaz:
   owl_100926.mp3?v=20260910a. Lokální náhled má stejnou velikost, nikoli
   shodný binární hash; produkční soubor vytvořil TTS z téhož commitu v Actions.
 - Podrobná účtenka: data/daily_3am/receipts/20260910_publication.json (mimo Git).
+
+## 2026-09-28 21:58 CEST — Zítřejší promluva připravená lokálně
+
+Hotovo: Přesný text pro 29. září uložený v denní frontě, kontrolní MP3 hotová.
+
+Rozhodnutí: Míla určil zítřek, ne dnešek. Zachovat doslova, dnešní audio neměnit.
+
+Další krok: Potvrdit odeslání pouze soví změny na GitHub pro zítřejší automatiku.
+
+Navrhované další kroky: Po zítřejším běhu ověřit workflow commit a veřejné JS/MP3.
+
+Technický důkaz: Jediný nový datumový řádek a přesná shoda textu ověřené,
+ostatní CSV řádky shodné s HEAD. Náhled 220 896 B / 36,816 s; test_daily_3am
+19/19 PASS. Bez push, změny produkčních app.js či denního completed stavu.

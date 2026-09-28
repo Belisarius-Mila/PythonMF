@@ -1,3 +1,14 @@
+## Aktuální předávka 2026-09-28 21:58 CEST
+
+Pro 29. září je místně připravený jediný nový řádek OwlSpeech.csv s doslovným
+Mílovým textem. Zítřek výslovně potvrzený. Náhled owl_290926.mp3 má 220 896 B
+a 36,816 s; přesná shoda CSV a 19 cílených testů PASS. Žádná MP3 v Gitu.
+Publikace zatím neprovedená: čeká na potvrzení odeslání jen soví změny,
+bez devíti čekajících commitů Camina. Budoucí datum nespouštět ručně dnes.
+Veřejný výsledek lze potvrdit až po zítřejším automatickém běhu a JS/MP3 auditu.
+
+## Historický stav 21. září
+
 Nazev: ColorsAndNumbers sova - výchozí publikace 2026-09-21
 Priorita: 1
 Stav: hotovo
