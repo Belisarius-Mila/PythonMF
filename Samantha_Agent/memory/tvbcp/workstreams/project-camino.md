@@ -1,6 +1,13 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-09-28 13:23 CEST — Míla používá build 8 a potvrzuje základní funkčnost;
+  nejde o jednotlivé PASS celé B03/B01 přejímky. Nyní pouze buffer B04:
+  skutečně smazatelné komentáře/Úvahy/foto/video kvůli místu v telefonu.
+  Adam navrhuje přenos smazání do Vieweru další dávkou a ochranu před návratem
+  při retry; ponechání originálu v neveřejném Mac archivu je otevřená volba.
+  Rozsah a budoucí ověření v TRAVEL_MVP_PLAN.md. Žádný vývoj ani mazání.
+  Zálohu Míla chce kontrolovat večer; nyní nebyla kontrolována.
 - 2026-09-27 22:13 CEST — po nové přesné globální brzdě nasazený B03 server
   ab34bb5ec217. HTTPS attachment_title_v1 a Viewer PASS: 6 dnů, 40 zavřených
   karet; anonymní přístup a záměna owner/reader odmítnuté. Zachováno 53 Momentů,
@@ -2711,3 +2718,22 @@ Upgrade uchoval DB snapshoty a konfiguraci, nikoli nezávislou M3 zálohu.
 Po stopu krátce obsazený port bez poslouchajícího procesu; po uvolnění normální
 start, bez kill či úpravy síťových ochran. Fyzický import a přejímka B03/B01
 dosud NEOVĚŘENO; žádný push. Podpis a SHA-256 IPA viz report.
+
+## 2026-09-28 13:23 CEST — Buffer B04, nikoli vývoj mazání
+
+Hotovo: Zapsaný požadavek na mazání každého typu obsahu a jednotlivých příloh
+s reálným uvolněním telefonu. Míla potvrzuje základní funkčnost buildu 8.
+
+Rozhodnutí: Pouze buffer změn, nic neimplementovat. Přenos smazání do Vieweru
+další dávkou je Adamův návrh; zachování již přenesených originálů v neveřejném
+Mac archivu zatím není Mílovo schválené rozhodnutí.
+
+Další krok: Upřesnit rozsah smazání na Macu; pokračovat v testování stejné verze.
+
+Navrhované další kroky: Večer kontrola rozběhnuté recovery zálohy; M3/M4;
+případné budoucí mazání až po samostatném schválení.
+
+Technický důkaz: Read-only kontrola dosavadního kontraktu neměnných originálů
+a ochrany Vieweru; návrh B04 v TRAVEL_MVP_PLAN.md rozlišuje lokální uvolnění,
+doručené smazání, retry/obnovu a historické kopie. Žádné nové runtime testy,
+změny aplikace/služby, nasazení, podpis, push ani skutečné smazání.

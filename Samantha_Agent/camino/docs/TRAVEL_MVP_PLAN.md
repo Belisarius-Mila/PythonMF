@@ -131,7 +131,65 @@ disku může Viewer dál fungovat, ale stav zůstane „další záloha neověř
 Chybějící cíl je konkrétní otevřená podmínka předcestovní ochrany, ne důvod
 zablokovat lokální M1. Pro iPhone nepředstírat neimplementovanou zelenou osu.
 
-## Buffer pro příští aktualizaci iPhonu — 27. 9. 17:53 CEST
+## Aktivní buffer B04 — skutečné mazání, 28. 9. 2026 13:23 CEST
+
+Míla potvrzuje používání a základní funkčnost buildu 8. Nejde o samostatný
+PASS všech scénářů B03/B01. Výslovně nyní pouze sbíráme změny; žádný vývoj,
+nasazení, podpis, instalace ani mazání dat nejsou tímto zadáním povolené.
+
+**Požadavek Míly:** každý komentář, Úvaha, fotografie a video musí být
+smazatelné, aby nepovedené záznamy nezabíraly paměť telefonu. Nejde o dnešní
+Skrýt z deníku, které originály zachová a místo neuvolní.
+
+**Adamův návrh, dosud nikoli schválené provedení:**
+
+- V detailu celé položky i jednotlivé přílohy nabídnout Smazat s potvrzením
+  přesného rozsahu. Samostatná fotka/video/komentář i Úvaha; v seskupeném
+  Momentu smazat jen vybranou přílohu, ostatní ponechat. Celý Moment má
+  samostatnou volbu s výčtem obsahu. Hlasový komentář = celá session, všechny
+  její technické segmenty; nesmazat jinou session. Prázdný rodič se nemaže skrytě.
+- Po potvrzení odstranit odpovídající místní obsah včetně jeho odvozenin,
+  aby se místo skutečně uvolnilo i offline. Žádný mediální koš v telefonu,
+  který dál zabírá stejné místo. U dosud nepřeneseného originálu výslovně
+  upozornit na nevratnou ztrátu jediné kopie. Záznam právě pořizovaného média
+  nejdříve bezpečně ukončit; nesmazat soubor používaný recorderem/uploaderem.
+- Nejdříve trvale uložit malý identifikátor/revizi smazání, potom uvolnit
+  soubory; dokončení úklidu musí přežít pád. Ponechat potřebnou synchronizační
+  historii, ne velká média. Přenos smazané přílohy už nezačínat/pokračovat;
+  nesmí být vyžadováno její doposlání jen proto, aby server přijal smazání.
+- U již přenesené nebo rozpracovaně přenášené položky odeslat záznam smazání
+  v další povolené dávce. Offline stav poctivě Smazáno v telefonu · čeká na Mac.
+  Teprve potvrzený příjem serverem znamená odstranění z Vieweru; ne samotné
+  stisknutí tlačítka. Žádné zpětné přenášení smazaného obsahu do telefonu.
+- Mac promítne smazání do HTML, názvů, počtů, mapových bodů a všech souvisejících
+  mediálních výdejů. Smazání přílohy nesmí odstranit nezávislou polohu nebo
+  ostatní obsah rodiče. Staré URL už nesmí vydat smazanou přílohu. Po obnovení
+  stránky Jana položku neuvidí; již načtené/stažené kopie nelze vzdáleně odvolat.
+- Opakování stejné dávky musí být neškodné, starší create/title/layout ani
+  opožděný upload nesmějí smazání přebít. Zohlednit již uložené přesné obálky,
+  pořadí revizí, přerušený upload a obnovu staré serverové zálohy; nesmazat
+  synchronizační důkaz předčasně. Kompatibilní server musí být nasazený první.
+- Pro nejmenší první variantu ponechat již přenesené originály v neveřejném
+  archivu Macu, ale odstranit je z aktivního deníku/Vieweru. Jana nemá právo
+  mazat. Toto uvolní telefon, nikoli disk Macu. Trvalý výmaz také z Macu,
+  derivátů a politika historických záloh vyžadují zvláštní rozhodnutí; návrh
+  nic neslibuje o výmazu již existujících záloh. Druhá funkce Uvolnit jen
+  telefon a ponechat v deníku je odlišná a není součástí tohoto bufferu.
+
+**Hranice:** dosavadní ochrana neměnných originálů a zákaz automatického
+mazání platí dál. Před implementací výslovně schválit výjimku pro konkrétní
+uživatelem potvrzené smazání; žádný automatický úklid podle stáří/kapacity.
+Volba ponechat originál na Macu zatím čeká na rozhodnutí Míly. Mazání je
+citlivější změna persistence a synchronizace, nikoli kosmetická změna Vieweru.
+
+**Budoucí cílené ověření:** nepřenesená položka offline a reálné uvolnění
+místa; přenesená položka a další dávka/Viewer včetně staré URL; příloha mezi
+ostatními a komentář z více segmentů; restart během úklidu/přenosu; opakovaná
+dávka a starší operace bez návratu obsahu; obnova serverové zálohy a nedostupný
+Mac. Text/Úvaha bez mediálního souboru také musí zmizet ze všech aktivních
+pohledů. Testy nyní neprovádíme, jde jen o návrh budoucí přejímky.
+
+## Historický buffer — 27. 9. 17:53 CEST
 
 Novější rozhodnutí 27. 9.: Míla schválil implementaci telefonu/názvů a B01.
 Jednosměrně iPhone → Mac → Viewer; opravy názvů na Macu později, bez návratu
