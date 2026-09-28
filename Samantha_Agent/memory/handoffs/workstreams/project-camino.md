@@ -1,6 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-09-28 22:04 CEST — c+p+n všeho výslovně schválené. Publikace celého
+  balíčku včetně sovy na 29. září; B04 pouze buffer. Camino B03/build 8
+  znovu neinstalovat, tokeny a síť neměnit. Přesný výsledek ověřit přes
+  main/origin, řízenou deployment receipt Cockpitu a živý audit služby.
 - 2026-09-28 13:23 CEST — Míla používá build 8 a potvrzuje základní funkčnost;
   nejde o jednotlivé PASS celé B03/B01 přejímky. Nyní pouze buffer B04:
   skutečně smazatelné komentáře/Úvahy/foto/video kvůli místu v telefonu.
@@ -2632,3 +2636,23 @@ M3/M4 zůstávají.
 Technický důkaz: Existující reader přístup jana ověřený živým soukromým HTTPS,
 HTTP 200. Heslo nevypsané, nezapsané do dokumentace ani změněné; žádná rotace,
 restart, nasazení nebo změna aplikace. Uložení hesla uživatelem není ověřené.
+
+## 2026-09-28 22:04 CEST — Autorizovaný c+p+n celého balíčku
+
+Hotovo: Předpublikační audit čistého main a obou zarovnaných profilů.
+B03 server je nasazený z ab34bb5ec217; Míla používá build 8.
+
+Rozhodnutí: Míla výslovně schválil c+p+n všeho, včetně připravené sovy
+pro 29. září. B04 zůstává jen buffer; žádný vývoj mazání ani nové IPA.
+Neměnit tokeny, Serve/Funnel, archiv ani znovu instalovat nezměněné Camino.
+
+Další krok: Plná brána a push přesného celého balíčku, řízené nasazení
+aktuálního main do Cockpitu a živé ověření; výsledek v běhové deployment receipt.
+
+Navrhované další kroky: Zítra veřejná kontrola sovy; pokračovat v delším
+testování buildu 8; M3/M4.
+
+Technický důkaz: Audit main a1382856 před tímto zápisem: 10 commitů / 31 cest,
+origin 22dea402 je předkem, profily čisté/zarovnané. Žádný force push ani
+přepis historie. Předchozí plná vývojová brána 1838/1838 nenahrazuje dnešní
+publikační bránu. Nové fyzické scénáře ani recovery záloha zde neověřované.

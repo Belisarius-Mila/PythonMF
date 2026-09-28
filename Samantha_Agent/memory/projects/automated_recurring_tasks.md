@@ -6,8 +6,11 @@
   OwlSpeech.csv; historický příběh ani default se nepřepisují.
 - Dodaný text zachovaný znak po znaku, v paměti se neopakuje.
 - Ignorovaný náhled owl_290926.mp3: 220 896 B, 36,816 s; 19 cílených testů PASS.
-- Zatím pouze místní příprava. Push soví změny zvlášť od devíti čekajících
-  commitů Camina je nabídnutý k potvrzení; žádný push ani Pages dispatch.
+- 28. 9. 22:04 Míla výslovně schválil c+p+n všeho: společný balíček sovy
+  i všech čekajících commitů Camina. Oddělený soví push již není požadovaný.
+  Provést plnou publikační bránu, přesný audit/push a řízené nasazení Cockpitu.
+  Výsledek doložit živou shodou main/origin a deployment receipt; ne dnešním
+  ručním Pages dispatch. Ten by zítřejší datum nepublikoval.
 - Po schváleném odeslání má datum vybrat zítřejší automatika kolem 03:00
   Praha. Dnešní ruční dispatch by vybral dnešek, nikoli 29. září.
 - Veřejné zítřejší audio ani skutečný poslech zatím NEOVĚŘENO.
@@ -367,10 +370,26 @@ Hotovo: Přesný text pro 29. září uložený v denní frontě, kontrolní MP3
 
 Rozhodnutí: Míla určil zítřek, ne dnešek. Zachovat doslova, dnešní audio neměnit.
 
-Další krok: Potvrdit odeslání pouze soví změny na GitHub pro zítřejší automatiku.
+Další krok: Nahrazeno souhlasem c+p+n všeho z 22:04; společný auditovaný balíček.
 
 Navrhované další kroky: Po zítřejším běhu ověřit workflow commit a veřejné JS/MP3.
 
 Technický důkaz: Jediný nový datumový řádek a přesná shoda textu ověřené,
 ostatní CSV řádky shodné s HEAD. Náhled 220 896 B / 36,816 s; test_daily_3am
 19/19 PASS. Bez push, změny produkčních app.js či denního completed stavu.
+
+## 2026-09-28 22:04 CEST — Schválený společný publikační balíček
+
+Hotovo: Přesný zítřejší text a MP3 náhled připravené; GitHub workflow živě active.
+
+Rozhodnutí: Míla zadal c+p+n všeho, včetně čekajícího Camina. Žádný dnešní
+dispatch budoucího data; automatika 29. září kolem 03:00 CEST.
+
+Další krok: Dokončit plnou bránu, push a nasazení přes auditované ovládání;
+konkrétní výsledky drží jeho běhové účtenky a závěrečný živý audit.
+
+Navrhované další kroky: Zítra ověřit veřejné JS/MP3 a skutečný poslech.
+
+Technický důkaz: Předpublikační audit 10 commitů / 31 cest, čistý main,
+oba profily zarovnané; origin je předkem main, žádný merge/rebase/force push.
+Zítřejší veřejné audio nyní není potvrzené, příprava není důkazem publikace.
