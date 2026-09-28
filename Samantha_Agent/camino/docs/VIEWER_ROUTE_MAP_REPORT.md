@@ -123,3 +123,12 @@ HTTP/JSON kontrola není jejich náhradou. Mílovi předaný krátký průchod
 Viewer → Mapa cesty → Otevřít mapu → bod → okamžik v deníku.
 Žádný push, instalace telefonu, restart Cockpitu ani test smazání/skrytí
 reálných záznamů nebyl proveden.
+
+## Uživatelská přejímka 2026-09-28 23:09 CEST
+
+Míla výslovně chválí mapu a její fungování; základní fyzická přejímka U17
+**PASS podle uživatele**. Předchozí NEOVĚŘENO samotného zobrazení/fungování
+tím nahrazené v rozsahu jeho praktické zkoušky. Neuvedl zařízení/prohlížeč
+ani výsledky jednotlivých scénářů, proto nejde o plošný Safari/iPhone/G8 PASS,
+nový bod po přenosu nebo odvolání/výpadek. Pro dnešek práci ukončuje;
+nic dalšího nenasazovat, běžně používat stejnou verzi. Bez dalšího runtime zásahu.

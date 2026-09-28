@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-28 23:04 CEST — nasazená U17 mapa
+Aktualizováno: 2026-09-28 23:09 CEST — uživatelská přejímka U17
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,14 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-09-28 23:09 CEST — Míla nadšeně potvrzuje mapu a její fungování:
+  základní fyzická přejímka nasazené U17 PASS podle uživatele. Zařízení,
+  prohlížeč a jednotlivé okrajové scénáře neuvedl; nový bod po přenosu,
+  revokace/výpadek a všechny platformy nejsou tímto plošně PASS.
+  Pro dnešek práce ukončená, nic dalšího nenasazovat. Příště běžné používání
+  stejné verze, případně jeden nový GPS bod po synchronizaci; M3/M4,
+  odložená kontrola zálohy a buffer B04 zůstávají.
 
 - 2026-09-28 23:04 CEST — po výslovném nasazení i přesné globální brzdě
   běží U17 mapa z release ce903913bb35. Živé privátní HTTPS PASS: HTML/JSON,

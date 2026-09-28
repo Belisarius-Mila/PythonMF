@@ -59,7 +59,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] 28. 9. 23:04 U17 mapa nasazená ce903913bb35; HTTPS/9 GPS bodů/odkazy/auth PASS, archiv a přístupy zachované. Další krátká fyzická zkouška Viewer → Mapa cesty → Otevřít mapu a bod/odkaz; Safari/dlaždice/nový bod po přenosu NEOVĚŘENO. Viz `camino/docs/VIEWER_ROUTE_MAP_REPORT.md`. Bez iPhone změny/push/restartu Cockpitu. B04 zůstává buffer; M3/M4 a odložená kontrola zálohy zůstávají, G8/T060/captive portal nejsou PASS.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] 28. 9. 23:09 Míla potvrzuje mapu a její fungování, základní fyzická přejímka U17 PASS. Release ce903913bb35, HTTPS/9 bodů/odkazy/auth ověřené, archiv zachovaný. Pro dnešek konec práce; dál používat stejnou verzi. Přírůstek nového GPS bodu, okrajové scénáře/platformy nejsou plošně PASS. M3/M4, odložená kontrola zálohy a B04 buffer zůstávají. Viz `camino/docs/VIEWER_ROUTE_MAP_REPORT.md`.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` - Cockpit 14. 9.: scroll 10ec0877 potvrzený Mílou. [PRIPOMENOUT] U07 až při příštím pokračování. TXT v2.8 shrnuje U01–U06; plná brána 1680/1680 OK, funkční nasazení 980aed7a a smoke 5/5. Publikační překážka odstraněna; finální balíček/head ověřovat živým auditem.
 

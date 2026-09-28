@@ -13,6 +13,9 @@ použila dosavadní Viewer ze svého Macu přes Cockpit; nikoli PASS nové mapy/
 HTTPS mapa/JSON/assety a 9 povolených GPS bodů/odkazy PASS; archiv i přístupy
 zachované. Bez nové IPA/push/restartu Cockpitu. Nyní krátká fyzická zkouška
 mapy; Safari, externí dlaždice a nový bod po přenosu zatím NEOVĚŘENO.
+28. 9. 23:09: Míla potvrzuje výborné fungování mapy, základní fyzická přejímka
+U17 PASS. Konkrétní platformy a okrajové scénáře neuvedené; dál používat
+stejnou verzi, pro dnešek konec práce bez dalšího nasazení.
 Novější večerní rozhodnutí 27. 9.: po fyzickém potvrzení názvů a přenosu buildu 7
 jediný společný B03 balíček: názvy každé foto/video/audio přílohy, nejnovější
 okamžiky nahoře pouze v telefonu, počty příloh, rozbalovací Viewer nadále

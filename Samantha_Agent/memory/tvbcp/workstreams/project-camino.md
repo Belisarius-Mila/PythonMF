@@ -1,6 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-09-28 23:09 CEST — Míla nadšeně potvrzuje mapu a její fungování:
+  základní fyzická přejímka nasazené U17 PASS podle uživatele. Zařízení,
+  prohlížeč a jednotlivé okrajové scénáře neuvedl; nový bod po přenosu,
+  revokace/výpadek a všechny platformy nejsou tímto plošně PASS.
+  Pro dnešek práce ukončená, nic dalšího nenasazovat. Příště běžné používání
+  stejné verze, případně jeden nový GPS bod po synchronizaci; M3/M4,
+  odložená kontrola zálohy a buffer B04 zůstávají.
+
 - 2026-09-28 23:04 CEST — po výslovném nasazení i přesné globální brzdě
   běží U17 mapa z release ce903913bb35. Živé privátní HTTPS PASS: HTML/JSON,
   4 mapové assety, 9 povolených GPS bodů (1 den), pořadí a odkazy do deníku.
@@ -2844,3 +2852,20 @@ assety/auth/projekce/anchor kontroly PASS. Zachováno 53 Momentů, 177 operací,
 62 hashově ověřených médií / 271 510 864 B, identita a obě tabulky oprávnění;
 Funnel off, recovery flagy=false. Safari/dlaždice/UX NEOVĚŘENO (browser není
 dostupný). Přesný redigovaný průchod v VIEWER_ROUTE_MAP_REPORT.md.
+
+## 2026-09-28 23:09 CEST — Míla potvrzuje mapu, konec dne
+
+Hotovo: Základní fyzická přejímka mapy PASS podle Mílova výslovného potvrzení
+jejího výborného fungování. Stav pro příští pokračování uložený.
+
+Rozhodnutí: Pro dnešek ukončit práci, nic dalšího nenasazovat.
+
+Další krok: Běžné používání a delší testování stejné verze.
+
+Navrhované další kroky: Přírůstek nového GPS bodu po synchronizaci;
+odložená kontrola zálohy; M3/M4; B04 dál pouze buffer.
+
+Technický důkaz: Uživatelské potvrzení 28. 9. 23:09, nikoli automatický test.
+Zařízení/prohlížeč a jednotlivé okrajové scénáře neuvedené; nerozšiřovat na
+celé G8, všechny platformy ani revokaci/výpadek. Pouze dokumentační zápis,
+bez změny kódu, sítě, archivu, telefonu, nasazení či push.
