@@ -593,6 +593,9 @@ class RevisionStore:
                 result.append({
                     "id": moment.id, "revision": moment.revision,
                     "day": moment.chapter_date,
+                    "captured_utc_ms": moment.captured.utc_ms,
+                    "captured_local": moment.captured.local_wall,
+                    "capture_uncertain": moment.captured.uncertain,
                     "time": moment.captured.local_wall[11:16] if moment.captured.local_wall else "Čas neznámý",
                     "kind": moment.kind.value, "title": moment.title,
                     "attachment_titles": [wire(t) for t in moment.attachment_titles],

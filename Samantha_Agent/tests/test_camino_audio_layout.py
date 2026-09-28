@@ -157,7 +157,8 @@ function player(id, next) {return {id, dataset: {next}, events: {}, played: 0, p
 const a=player('a','b'), b=player('b'), c=player('c'), d=player('d','not-a-player');
 const status={}; const players=[a,b,c,d];
 const document={querySelectorAll(){return players;},getElementById(id){return id==='audioPlaybackStatus'?status:players.find(p=>p.id===id);}};
-vm.runInNewContext(fs.readFileSync('camino/server/viewer_player.js','utf8'), {document});
+const window={location:{hash:''},addEventListener(){}};
+vm.runInNewContext(fs.readFileSync('camino/server/viewer_player.js','utf8'), {document,window});
 (async()=>{
  b.currentTime=42; await a.events.ended(); assert.equal(b.played,1); assert.equal(b.currentTime,0); assert.equal(c.played,0);
  await b.events.ended(); assert.equal(c.played,0); // real pause/discontinuity, no next link

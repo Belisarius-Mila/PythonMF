@@ -71,3 +71,27 @@ předá bod, nikoli token nebo text deníku; již otevřený bod nelze odvolat.
 Tento zápis schvaluje rozsah navazující implementace, **neprohlašuje odkaz
 za hotový ani Viewer za povolený**. První krok sbírá/přenáší nové body do
 soukromého archivu, bez zpětného doplňování starých záznamů.
+
+## U17 — soukromá mapa míst záznamů (rozhodnutí 28. 9. 2026)
+
+Míla schválil návrh a vývoj samostatné stránky Mapa cesty v existujícím Vieweru.
+Jde o body již povolených neskrytých `diary` Momentů, řazené podle zachycení
+v UTC, nikoli doručení. Orientační přerušované spojnice nejsou měřená prošlá
+trasa; žádná navigace, kilometráž, průběžný GPS tracking ani změna iPhonu.
+Přílohy nepřidávají nové body. Chybějící GPS se nedoplňuje ani neodhaduje.
+
+Tímto se pro tento rodinný Viewer nahrazuje dřívější odklad mapy/spojnic;
+U15, revokace přístupu, ochrana originálů a očištění EXIF stále platí.
+Server vydává jen aktuální Viewer-safe body v konzistentní projekci, bez
+soukromých počtů, textů a syrového času GPS měření. Grant/obnova/konflikt
+projekci uzavírají. Změna známá jen offline telefonu není serveru dostupná.
+Již zobrazené či zkopírované body nelze odvolat; viditelná stránka je znovu
+ověřuje po minutě, při chybě/odchodu do pozadí své body a odkazy schová.
+
+Leaflet je místní pevně určená knihovna. Podklad OpenStreetMap se načítá až
+po vědomém stisku Otevřít mapu s vysvětlením: poskytovatel uvidí IP, oblast
+mapových dlaždic a origin soukromého serveru, nikoli cestu deníku, názvy,
+seznam souřadnic či tokeny. Pouze mapová stránka používá `Referrer-Policy:
+origin` a úzkou CSP výjimku pro dlaždice; běžný Viewer zůstává no-referrer.
+Bez veřejného webu/Funnel, placených API a stahování offline map.
+Nasazení je samostatný krok. Podrobnosti: `VIEWER_ROUTE_MAP_REPORT.md`.

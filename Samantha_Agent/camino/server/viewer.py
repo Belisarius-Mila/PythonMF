@@ -12,7 +12,7 @@ from typing import Callable
 from urllib.parse import urlencode
 
 from fastapi import APIRouter, Request
-from fastapi.responses import FileResponse, HTMLResponse, Response
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response
 
 from camino.domain.model import ContractError
 from camino.domain.audio_layout import ordered_audio_groups
@@ -20,6 +20,7 @@ from camino.domain.revision_store import RevisionStore
 from camino.server.auth import RevocableTokenStore
 from camino.server.media_store import MediaStore
 from camino.server.viewer_media import OUTPUTS, ViewerMedia
+from camino.server.viewer_map import map_page, route_snapshot
 
 
 HEADERS = {
@@ -27,6 +28,12 @@ HEADERS = {
     "Referrer-Policy": "no-referrer", "X-Frame-Options": "DENY",
     "X-DNS-Prefetch-Control": "off",
     "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'; script-src 'self'; img-src 'self'; media-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'",
+}
+MAP_HEADERS = {
+    **HEADERS,
+    # OSM requires a Referer. Send only the origin, never diary paths or IDs.
+    "Referrer-Policy": "origin",
+    "Content-Security-Policy": "default-src 'none'; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; img-src 'self' data: https://tile.openstreetmap.org; frame-ancestors 'none'; base-uri 'none'; form-action 'none'",
 }
 CSS = """
 :root{color-scheme:light;font-family:system-ui,-apple-system,sans-serif;color:#233b35;background:#f3f2eb}
@@ -184,7 +191,7 @@ class CaminoViewer:
                 label = f'{escape(moment["time"])} · {KINDS.get(moment["kind"], "Záznam")}'
                 title_text = moment.get("title", "")
                 heading = escape(title_text) if title_text else label
-                body += (f'<article><details><summary><span class="moment-name">{heading}</span>'
+                body += (f'<article id="moment-{moment["id"]}"><details><summary><span class="moment-name">{heading}</span>'
                          + (f'<span class="muted">{label}</span>' if title_text else '')
                          + f'<span class="muted">{attachment_summary(moment)} · Rozbalit / sbalit</span>'
                          + '</summary>')
@@ -238,7 +245,8 @@ class CaminoViewer:
 <script src="{root_path}/viewer/player.js" defer></script>
 <style>{CSS}</style></head><body><header><p class="label">CAMINO · PRO JANU</p>
 <h1>{title}</h1><p class="muted">Malé zprávy z cesty. Fotografie, slova a původní hlas.</p>
-<a href="{root_path}/viewer/">Všechny dny</a></header><main>{body}</main><footer>
+<nav><a href="{root_path}/viewer/">Všechny dny</a>
+<a href="{root_path}/viewer/map">Mapa cesty</a></nav></header><main>{body}</main><footer>
 Příprava médií: {built}<br>{state}<br>Zobrazuji doručené záznamy. Další mohou ještě čekat v telefonu.
 <br>Stránku obnovíš běžným tlačítkem prohlížeče.</footer>
 <p id="audioPlaybackStatus" role="status" aria-live="polite"></p></body></html>'''
@@ -257,6 +265,36 @@ Příprava médií: {built}<br>{state}<br>Zobrazuji doručené záznamy. Další
                 return denied()
             return FileResponse(Path(__file__).with_name("viewer_player.js"),
                                 media_type="text/javascript", headers=HEADERS)
+
+        @router.get("/map")
+        def route_page(request: Request):
+            if not self.authorized(request):
+                return denied()
+            try:
+                return HTMLResponse(map_page(request.scope.get("root_path", "")), headers=MAP_HEADERS)
+            except ContractError:
+                return Response(status_code=503, headers=HEADERS)
+
+        @router.get("/map-data")
+        def route_data(request: Request):
+            if not self.authorized(request):
+                return denied()
+            try:
+                return JSONResponse(route_snapshot(self.metadata.viewer_snapshot(self.trip_id),
+                                    root_path=request.scope.get("root_path", "")), headers=HEADERS)
+            except (OSError, sqlite3.DatabaseError, ContractError):
+                return Response("Mapa teď není dostupná.", status_code=503, headers=HEADERS)
+
+        @router.get("/map-assets/{name}")
+        def route_asset(request: Request, name: str):
+            if not self.authorized(request):
+                return denied()
+            files = {"leaflet.js": "text/javascript", "map.js": "text/javascript",
+                     "leaflet.css": "text/css", "map.css": "text/css"}
+            if name not in files:
+                return Response(status_code=404, headers=HEADERS)
+            return FileResponse(Path(__file__).with_name("map_assets") / name,
+                                media_type=files[name], headers=HEADERS)
 
         @router.get("/")
         @router.get("/days/{day}")

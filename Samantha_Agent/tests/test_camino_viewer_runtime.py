@@ -15,6 +15,11 @@ from scripts.cockpit_quality_gate import node_binary
 
 
 class ViewerRuntimeTests(unittest.TestCase):
+    def test_map_frontend_offline_regressions(self):
+        run = subprocess.run([node_binary(), "--test", "tests/camino_map_frontend.test.cjs"],
+                             text=True, capture_output=True, timeout=20)
+        self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
+
     def test_link_accepts_only_private_https_without_credentials_or_queries(self):
         valid = ["https://mac.tail123.ts.net/viewer/", "https://mac.tail123.ts.net/camino-api/viewer/"]
         invalid = ["", "https://example.com/viewer/", "http://mac.tail123.ts.net/viewer/",

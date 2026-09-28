@@ -56,6 +56,41 @@ class ViewerHTTPTests(unittest.IsolatedAsyncioTestCase):
     def upload_media(self):
         return {k: self.f.upload(30 + i, k, v) for i, (k, v) in enumerate(self.payloads.items())}
 
+    async def test_route_endpoints_reader_auth_headers_and_live_revoke(self):
+        paths = ['/viewer/map', '/viewer/map-data', '/viewer/map-assets/map.js',
+                 '/viewer/map-assets/map.css', '/viewer/map-assets/leaflet.js', '/viewer/map-assets/leaflet.css']
+        for path in paths:
+            for headers in ({}, {"Authorization": "Bearer " + self.owner_token}):
+                self.assertEqual((await self.request(path, headers=headers)).status_code, 401)
+            response = await self.request(path)
+            self.assertEqual(response.status_code, 200)
+            self.assertIn('no-store', response.headers['cache-control'])
+        self.assertEqual((await self.request('/viewer/map-assets/LICENSE.txt')).status_code, 404)
+        page = await self.request('/viewer/map')
+        self.assertEqual(page.headers['referrer-policy'], 'origin')
+        self.assertIn('https://tile.openstreetmap.org', page.headers['content-security-policy'])
+        diary = await self.request('/viewer/')
+        self.assertEqual(diary.headers['referrer-policy'], 'no-referrer')
+        self.assertNotIn('tile.openstreetmap', diary.headers['content-security-policy'])
+        m = self.f.moment(70, Privacy.DIARY, location=LocationFix(0, 0, self.f.capture.utc_ms, 8))
+        self.assertEqual(len((await self.request('/viewer/map-data')).json()['points']), 1)
+        self.f.send('update_metadata', {'moment_id': m.id, 'change': {'type': 'hidden', 'hidden': True}}, expected=1)
+        self.assertEqual((await self.request('/viewer/map-data')).json(), {'points': []})
+        self.reader.revoke(self.reader_id)
+        for path in paths:
+            self.assertEqual((await self.request(path)).status_code, 401)
+
+    async def test_route_proxy_prefix_and_diary_anchor(self):
+        self.f.moment(70, Privacy.DIARY, location=LocationFix(0, 0, self.f.capture.utc_ms, 8))
+        transport = httpx.ASGITransport(app=self.app, root_path='/camino-api')
+        async with httpx.AsyncClient(transport=transport, base_url='https://camino.test', headers=self.auth) as client:
+            page = await client.get('/viewer/map')
+            self.assertIn('data-map-url="/camino-api/viewer/map-data"', page.text)
+            point = (await client.get('/viewer/map-data')).json()['points'][0]
+            self.assertEqual(point['href'], f'/camino-api/viewer/days/2026-09-25#moment-{uid(70)}')
+            diary = await client.get('/viewer/days/2026-09-25')
+            self.assertIn(f'id="moment-{uid(70)}"', diary.text)
+
     async def test_title_api_retry_html_escaping_and_reader_cannot_edit(self):
         title = 'Káva <script>alert("x")</script> 🥾'
         body = {"contract_version": 1, "epoch": self.f.store.state()["epoch"],

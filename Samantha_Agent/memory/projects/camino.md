@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-28 13:40 CEST
+Aktualizováno: 2026-09-28 — lokální U17 mapa
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,17 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-09-28 — U17 Mapa cesty: Míla schválil návrh i lokální vývoj.
+  Samostatná chráněná HTML mapa povolených GPS Momentů, Leaflet/OSM po kliknutí,
+  chronologie zachycení, dny, přerušované orientační spojnice, názvy/přesnost
+  a odkazy do rozbaleného deníku. Telefon/build 8 a archiv beze změny.
+  30 projekčních/runtime/audio a 17 HTTP testů PASS, frontend 4/4 PASS;
+  plná brána 1843/1843 PASS. Safari/živé dlaždice/UX nové mapy NEOVĚŘENO.
+  Další: samostatně schválit nasazení serveru a krátce převzít mapu podle
+  `camino/docs/VIEWER_ROUTE_MAP_REPORT.md`. Bez nového push/nasazení/podpisu.
+  B04 dál jen buffer. Jana podle Míly používá dosavadní Viewer na svém Macu;
+  nejde o PASS mapy, všech sítí/iPhonu nebo celé G8.
 
 - 2026-09-28 22:04 CEST — c+p+n všeho výslovně schválené. Publikace celého
   balíčku včetně sovy na 29. září; B04 pouze buffer. Camino B03/build 8

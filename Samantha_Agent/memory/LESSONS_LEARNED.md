@@ -22,6 +22,20 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-053 — Mapa musí dědit aktuální Viewer projekci a čas pořízení
+
+- Problém: řazení uploadem/kapitolou posune pozdě doručený bod; oddělená
+  statická trasa nebo starý klientský popup může přežít změnu soukromí.
+- Typ: opakující se
+- Řešení nalezeno: 28092026
+- Řešení: mapový JSON vždy z aktuální konzistentní viewer_snapshot, řadit
+  capture UTC + ID, den podle původního místního času. Odkaz může vést do jiné
+  aktuální kapitoly. Zrušit staré požadavky při skrytí stránky, vyčistit vrstvy,
+  popupy i odkazy a po návratu znovu ověřit. Syntetické projekční/HTTP/Node
+  testy v VIEWER_ROUTE_MAP_REPORT.md; Safari a živý podklad zvlášť NEOVĚŘENO.
+  OSM navíc vyžaduje Referer: origin výjimka patří jen mapové stránce,
+  běžný Viewer nadále no-referrer; podklad až po vědomém kliknutí.
+
 ### LL-052 — Úplný přenos neprokazuje přítomnost nepovinné GPS
 
 - Problém: serverový model GPS existoval, ale iPhone posílal `location=null`;

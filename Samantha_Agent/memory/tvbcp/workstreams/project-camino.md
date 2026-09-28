@@ -1,6 +1,17 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-09-28 — U17 Mapa cesty: Míla schválil návrh i lokální vývoj.
+  Samostatná chráněná HTML mapa povolených GPS Momentů, Leaflet/OSM po kliknutí,
+  chronologie zachycení, dny, přerušované orientační spojnice, názvy/přesnost
+  a odkazy do rozbaleného deníku. Telefon/build 8 a archiv beze změny.
+  30 projekčních/runtime/audio a 17 HTTP testů PASS, frontend 4/4 PASS;
+  plná brána 1843/1843 PASS. Safari/živé dlaždice/UX nové mapy NEOVĚŘENO.
+  Další: samostatně schválit nasazení serveru a krátce převzít mapu podle
+  `camino/docs/VIEWER_ROUTE_MAP_REPORT.md`. Bez nového push/nasazení/podpisu.
+  B04 dál jen buffer. Jana podle Míly používá dosavadní Viewer na svém Macu;
+  nejde o PASS mapy, všech sítí/iPhonu nebo celé G8.
+
 - 2026-09-28 22:04 CEST — c+p+n všeho výslovně schválené. Publikace celého
   balíčku včetně sovy na 29. září; B04 pouze buffer. Camino B03/build 8
   znovu neinstalovat, tokeny a síť neměnit. Přesný výsledek ověřit přes
@@ -2779,3 +2790,26 @@ Technický důkaz: Audit main a1382856 před tímto zápisem: 10 commitů / 31 c
 origin 22dea402 je předkem, profily čisté/zarovnané. Žádný force push ani
 přepis historie. Předchozí plná vývojová brána 1838/1838 nenahrazuje dnešní
 publikační bránu. Nové fyzické scénáře ani recovery záloha zde neověřované.
+
+## 2026-09-28 22:50 CEST — Mapa cesty v read-only Vieweru
+
+Hotovo: Lokální samostatná mapa míst záznamů, celá cesta/jeden den,
+orientační spojnice, názvy/čas/přesnost a odkazy do rozbalených okamžiků.
+Nové doručené body přibývají při obnově bez změny přiblížení. Jana podle Míly
+už používá dosavadní Viewer ze svého Macu; nová mapa není fyzicky převzatá.
+
+Rozhodnutí: Míla schválil návrh a zahájení vývoje; U17 rozšiřuje Viewer o mapu
+existujících povolených GPS, ne o průběžné sledování. Telefon/build 8 beze změny.
+Leaflet lokálně, OSM podklad až po kliknutí a vysvětlení externích požadavků.
+B04 zůstává buffer, žádné mazání nebo Mac editor. Žádný nový push/nasazení.
+
+Další krok: Samostatně schválit nasazení serveru a krátce převzít mapu podle
+VIEWER_ROUTE_MAP_REPORT.md; není potřeba nové IPA ani restart Cockpitu.
+
+Navrhované další kroky: Delší testování buildu 8; odložená kontrola zálohy;
+M3/M4; pozdější B04 podle času a kreditů.
+
+Technický důkaz: 30/30 projekčních/runtime/audio + 17/17 HTTP testů PASS,
+Node frontend 4/4 PASS, ověřené Leaflet JS/CSS upstream SRI.
+Plná brána 1843/1843 PASS. Žádný dostupný browser: Safari, živé dlaždice a fyzické UX
+NEOVĚŘENO. Bez změn archivu, sítě, tokenů, běžící služby nebo telefonu.

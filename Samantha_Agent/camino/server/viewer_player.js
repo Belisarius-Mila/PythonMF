@@ -1,4 +1,14 @@
 "use strict";
+// Map deep links open only their target card; never auto-play its media.
+function caminoOpenMoment() {
+  const id = window.location.hash.slice(1);
+  if (!/^moment-[0-9a-f-]{36}$/.test(id)) return;
+  const article = document.getElementById(id);
+  const detail = article && article.querySelector("details");
+  if (detail) { detail.open = true; article.scrollIntoView(); }
+}
+window.addEventListener("hashchange", caminoOpenMoment);
+caminoOpenMoment();
 // Only server-proven adjacent checkpoint segments auto-advance. Never skip gaps.
 const caminoAudioPlayers = Array.from(document.querySelectorAll("audio"));
 for (const player of caminoAudioPlayers) {

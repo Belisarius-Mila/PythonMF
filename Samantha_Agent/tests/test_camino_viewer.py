@@ -9,6 +9,7 @@ from pathlib import Path
 from camino.domain.codec import wire
 from camino.domain.model import JourneyDay, LocationFix, Privacy, ContractError
 from tests.camino_viewer_fixture import ViewerFixture, uid
+from camino.server.viewer_map import route_snapshot, map_page
 
 
 class ViewerProjectionTests(unittest.TestCase):
@@ -19,6 +20,73 @@ class ViewerProjectionTests(unittest.TestCase):
 
     def snapshot(self):
         return self.f.store.viewer_snapshot(self.f.trip.id)
+
+    def test_route_capture_order_late_upload_and_chapter_do_not_move_points(self):
+        for n, seconds in ((72, 50), (71, 20), (70, 20)):
+            m = replace(self.f.public, id=uid(n),
+                        captured=replace(self.f.capture, utc_ms=self.f.capture.utc_ms + seconds * 1000,
+                                         local_wall=f"2026-09-25T10:00:{seconds:02d}"),
+                        location=LocationFix(0, n / 10000, self.f.capture.utc_ms + seconds * 1000, 8))
+            self.f.send("create_moment", wire(m))
+        other = JourneyDay(uid(7), self.f.trip.id, "2026-09-24")
+        self.f.send("create_day", wire(other))
+        self.f.send("update_metadata", {"moment_id": uid(72), "change": {
+            "type": "chapter", "day_id": other.id}}, expected=1)
+        points = route_snapshot(self.snapshot(), root_path="/camino-api")["points"]
+        self.assertEqual([p["id"] for p in points], [uid(70), uid(71), uid(72)])
+        self.assertEqual([p["connect_previous"] for p in points], [False, False, True])
+        self.assertEqual(points[-1]["day"], "2026-09-25")
+        self.assertEqual(points[-1]["href"], f"/camino-api/viewer/days/2026-09-24#moment-{uid(72)}")
+
+    def test_route_privacy_revoke_hide_unknown_recovery_and_missing_gps(self):
+        m = self.f.moment(70, Privacy.DIARY, location=LocationFix(0, 0, self.f.capture.utc_ms, 8))
+        self.f.moment(71, Privacy.OWNER_ONLY, location=LocationFix(66, 77, self.f.capture.utc_ms, 8))
+        result = route_snapshot(self.snapshot())
+        self.assertEqual(len(result["points"]), 1)
+        for forbidden in (uid(71), self.f.private.id, "TAJNA", "assets", "measured_at", "excluded"):
+            self.assertNotIn(forbidden, json.dumps(result))
+        for privacy, hidden in (("owner_only", False), ("diary", True), ("unknown", False)):
+            with self.f.store._connection() as c:
+                c.execute("UPDATE moments SET body=? WHERE id=?", (json.dumps(wire(replace(m, privacy=privacy, hidden=hidden))), m.id))
+            self.assertEqual(route_snapshot(self.snapshot()), {"points": []})
+        with self.f.store._connection() as c:
+            c.execute("UPDATE moments SET body=? WHERE id=?", (json.dumps(wire(m)), m.id))
+        self.f.store.set_viewer_permission(self.f.trip.id, enabled=False)
+        self.assertEqual(route_snapshot(self.snapshot()), {"points": []})
+        self.f.store.set_viewer_permission(self.f.trip.id, enabled=True)
+        for flags in ("exports_blocked=1", "exports_blocked=0, reconciliation_required=1"):
+            with self.f.store._connection() as c:
+                c.execute("UPDATE meta SET " + flags)
+            self.assertEqual(route_snapshot(self.snapshot()), {"points": []})
+
+    def test_route_breaks_are_conservative_and_no_location_is_invented(self):
+        self.f.moment(70, Privacy.DIARY, location=LocationFix(0, 0, self.f.capture.utc_ms, 8))
+        base = self.snapshot()["moments"][-1]
+        # Isolated projection inputs: edge cases need no private/runtime archive.
+        base = next(m for m in self.snapshot()["moments"] if m["map_point"])
+        second = {**base, "id": uid(71), "captured_utc_ms": base["captured_utc_ms"] + 1000,
+                  "map_point": {"latitude": 0, "longitude": .001, "accuracy_m": 8}}
+        def linked(changes):
+            return route_snapshot({"moments": [base, {**second, **changes}]})["points"][1]["connect_previous"]
+        self.assertTrue(linked({}))
+        for changes in ({"captured_local": "2026-09-26T00:00:00"},
+                        {"captured_utc_ms": base["captured_utc_ms"] + 21600001},
+                        {"capture_uncertain": True}, {"captured_utc_ms": None},
+                        {"map_point": {"latitude": 0, "longitude": .001, "accuracy_m": 101}},
+                        {"map_point": {"latitude": 0, "longitude": 10, "accuracy_m": 8}}):
+            with self.subTest(changes=changes):
+                self.assertFalse(linked(changes))
+        self.assertEqual(route_snapshot({"moments": [m for m in self.snapshot()["moments"] if not m["map_point"]]}), {"points": []})
+
+    def test_map_shell_contains_no_diary_and_only_local_scripts(self):
+        html = map_page("/camino-api")
+        self.assertIn('/camino-api/viewer/map-assets/map.js', html)
+        self.assertIn('id="open-map"', html)
+        self.assertNotIn('src="https:', html)
+        self.assertNotIn('tile.openstreetmap.org', html)
+        self.assertNotIn(self.f.public.id, html)
+        with self.assertRaises(ContractError):
+            map_page('//untrusted.test')
 
     def test_attachment_titles_reopen_clear_keep_originals_and_follow_privacy(self):
         from camino.domain.revision_store import RevisionStore

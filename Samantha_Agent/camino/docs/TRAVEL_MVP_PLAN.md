@@ -2,6 +2,13 @@
 
 Rozhodnutí Míly: 2026-09-25. Cesta 3.–17. října 2026; cílové zmrazení 2. října.
 Novější rozhodnutí 27. 9.: **GPS neodkládat**, pouze nové okamžiky.
+Novější rozhodnutí 28. 9.: Míla schválil **Mapu cesty ve Vieweru** (U17).
+Lokálně implementováno, bez změny telefonu; dosavadní odklad mapy níže je
+historický. Samostatná stránka, aktuálně povolené body, orientační spojnice,
+den/celá cesta a odkazy do deníku; žádné průběžné sledování nebo kilometráž.
+Ověření a další krátká přejímka: [VIEWER_ROUTE_MAP_REPORT.md](VIEWER_ROUTE_MAP_REPORT.md).
+Nasazení serveru samostatně. B04 mazání dál pouze buffer. Jana podle Míly
+použila dosavadní Viewer ze svého Macu přes Cockpit; nikoli PASS nové mapy/G8.
 Novější večerní rozhodnutí 27. 9.: po fyzickém potvrzení názvů a přenosu buildu 7
 jediný společný B03 balíček: názvy každé foto/video/audio přílohy, nejnovější
 okamžiky nahoře pouze v telefonu, počty příloh, rozbalovací Viewer nadále

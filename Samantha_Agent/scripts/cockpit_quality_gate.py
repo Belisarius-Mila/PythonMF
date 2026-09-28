@@ -62,6 +62,7 @@ COMPILE_PATHS = (
     "camino/server/recovery.py",
     "camino/server/media_store.py",
     "camino/server/viewer.py",
+    "camino/server/viewer_map.py",
     "camino/server/viewer_media.py",
     "camino/server/viewer_worker.py",
     "app/camino_viewer_link.py",

@@ -1,0 +1,16 @@
+:root{font-family:system-ui,-apple-system,sans-serif;color:#233b35;background:#f3f2eb;color-scheme:light}
+*{box-sizing:border-box}body{margin:0}header,main,footer{max-width:1100px;margin:auto;padding:22px}
+header{padding-top:32px;padding-bottom:0}h1{font-size:2.4rem;margin:.25em 0}h2{font-size:1.2rem}
+a{color:#225b48}button,select{font:inherit;min-height:44px;padding:10px 14px;border:1px solid #b5c7bc;border-radius:9px;background:#fff;color:#233b35}
+button{cursor:pointer}button:disabled{opacity:.55;cursor:wait}button:hover{background:#eef4eb}
+:focus-visible{outline:3px solid #bd751a;outline-offset:3px}.eyebrow{font-size:.75rem;letter-spacing:.15em;font-weight:700}
+.notice{border-left:3px solid #ac792d;padding:10px 14px;background:#faf5e9;line-height:1.5}
+#consent{padding:18px;background:white;border-radius:14px}#consent p{line-height:1.6}
+#map-controls{display:flex;align-items:center;flex-wrap:wrap;gap:10px}
+#map{height:58vh;min-height:330px;border:1px solid #bccabc;border-radius:12px;background:#e3e6df}
+[hidden]{display:none!important}#legend,footer{font-size:.9rem;line-height:1.6;color:#586961}
+#status{min-height:1.5em}#tile-status{color:#864e0b}#point-list{margin-top:18px}summary{cursor:pointer;padding:12px 0}
+#points{line-height:1.8;padding-left:24px}#points li{padding:5px 0;overflow-wrap:anywhere}
+.leaflet-popup-content{max-height:260px;overflow:auto;overflow-wrap:anywhere}.leaflet-popup-content a{display:block;padding:8px 0}
+.leaflet-control-attribution{font-size:11px}.leaflet-container{font-family:inherit}
+@media(max-width:520px){header,main,footer{padding:16px}h1{font-size:1.9rem}#map{height:55vh}#map-controls button{flex:1}}

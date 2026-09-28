@@ -59,7 +59,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] 28. 9. Míla potvrzuje základní funkčnost buildu 8, nikoli jednotlivé PASS B03/B01. Pouze buffer B04 v `camino/docs/TRAVEL_MVP_PLAN.md`: skutečné mazání obsahu a příloh kvůli místu v telefonu, návrh následného odstranění z Vieweru; ponechání originálů v neveřejném archivu Macu Míla schválil 28. 9. 13:40. Žádný vývoj/mazání/nasazení. Testovat stejnou verzi; večer zkontrolovat zálohu. M3/M4 a cílená přejímka zbývají, Jana read-only, Mac editor odložený; G8/T060/captive portal nejsou PASS.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] 28. 9. lokální U17 Mapa cesty: chráněné GPS body/spojnice, Leaflet/OSM po kliknutí, bez iPhone změny. Další samostatné nasazení serveru a krátká přejímka v `camino/docs/VIEWER_ROUTE_MAP_REPORT.md`; nová mapa/Safari NEOVĚŘENO. Jana podle Míly používá dosavadní Viewer na Macu. B04 mazání zůstává jen buffer s neveřejnou Mac archivní pojistkou. M3/M4, cílená přejímka a odložená kontrola zálohy zůstávají; G8/T060/captive portal nejsou PASS.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` - Cockpit 14. 9.: scroll 10ec0877 potvrzený Mílou. [PRIPOMENOUT] U07 až při příštím pokračování. TXT v2.8 shrnuje U01–U06; plná brána 1680/1680 OK, funkční nasazení 980aed7a a smoke 5/5. Publikační překážka odstraněna; finální balíček/head ověřovat živým auditem.
 
