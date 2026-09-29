@@ -2746,3 +2746,25 @@ server mazání zůstávají NEOVĚŘENÉ.
 
 Další krok: Dokončit serverový delete kontrakt jako samostatný krok, potom nový
 podepsaný build a krátké fyzické testy mazání/obnovy bez odinstalace.
+
+## 2026-09-29 20:35 CEST — B05 pořadí obsahu v detailu Momentu
+
+Hotovo: Detail Momentu začíná panelem pro přidání komentáře, Úvahy, fotografie
+a videa. Nové ovládání je nahoře; text, přílohy a nahrávky jsou pod ním. Foto/video
+se zobrazují v opačném pořadí přijatých záznamů, tedy nejnovější první. Stávající
+lokální persistence, privacy a vazby příloh zůstaly beze změny.
+
+Rozhodnutí: Změna je pouze iOS UI a testovací adaptace. Bez push, deploymentu,
+podepsaného buildu nebo fyzické instalace na iPhonu.
+
+Další krok: Při schváleném novém buildu ověřit panel a přidání přílohy na fyzickém
+iPhonu bez odinstalace současné aplikace.
+
+Navrhované další kroky: Při stejném průchodu zkontrolovat scroll po více přílohách;
+serverové mazání a archivní pojistka B04 zůstávají samostatné.
+
+Technický důkaz: Swift 56/56 PASS, generic iOS Simulator build PASS, UI sada 8/8
+PASS. UI test relaunch ověřil titulky příloh po asynchronním uložení a restartu.
+Otevřené riziko: AssetRecord nemá vlastní prezentační timestamp; foto/video používá
+aktuální accepted insertion order obrácený na newest-first. Fyzický iPhone UX je
+NEOVĚŘENÝ.

@@ -352,3 +352,19 @@ Tato dávka zatím nemaže již přenesenou kopii z Mac/Vieweru; serverový dele
 kontrakt, archivní pojistka a fyzické ověření na iPhonu jsou otevřené kroky.
 Po potvrzení serverové části musí staré URL přestat vydávat smazanou přílohu,
 bez odstranění neveřejného Mac archivu.
+
+## 2026-09-29 — B05 pořadí obsahu v detailu Momentu
+
+Detail Momentu nyní začíná panelem „Přidat do tohoto Momentu“ se čtyřmi akcemi:
+komentář, Úvaha, fotografie a video. Text, nové přílohy a nahrávky následují
+pod panelem; přijímané foto/video přílohy se v detailu zobrazují od nejnovějších.
+Význam akcí, lokální ukládání, privacy a vazba příloh na Moment se nezměnily.
+
+Ověření: 56/56 Swift testů, generic iOS Simulator build a 8/8 UI testů PASS.
+UI test relaunch ověřil názvy foto/audio po uložení a restartu; test hledá název
+uvnitř sloučeného SwiftUI accessibility labelu a čeká na dokončení asynchronního
+zápisu. Fyzický iPhone nový UI build zatím nemá, push ani deployment neproběhly.
+
+Otevřené riziko: AssetRecord nemá samostatný prezentační timestamp; pořadí foto/video
+využívá aktuální pořadí přijatých záznamů obrácené na nejnovější první. Audio sessions
+už mají vlastní newest-first řazení. Fyzická kontrola na iPhonu zůstává dalším krokem.

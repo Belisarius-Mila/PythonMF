@@ -2942,3 +2942,23 @@ server mazání zůstávají NEOVĚŘENÉ.
 
 Další krok: Dokončit serverový delete kontrakt jako samostatný krok, potom nový
 podepsaný build a krátké fyzické testy mazání/obnovy bez odinstalace.
+
+## 2026-09-29 20:35 CEST — B05 pořadí obsahu v detailu Momentu
+
+Hotovo: Akce pro přidání komentáře, Úvahy, fotografie a videa jsou na začátku
+detailu Momentu. Obsah se přidává pod nimi a přijaté foto/video přílohy se ukazují
+od nejnovějších; lokální data a privacy kontrakt se nemění.
+
+Rozhodnutí: Lokální iOS UI krok uzavřený automatickým ověřením. Push, deployment,
+podpis a iPhone instalace nejsou součástí tohoto kroku.
+
+Další krok: Samostatně připravit schválený podepsaný build a krátkou fyzickou
+kontrolu panelu na iPhonu.
+
+Navrhované další kroky: Ověřit více příloh v jednom Momentu; pokračovat odděleně
+v B04 serverovém delete kontraktu a archivní pojistce.
+
+Technický důkaz: 56/56 Swift testů, generic simulator build a UI 8/8 PASS. Test
+relaunch ověřil titulky foto/audio po uložení a restartu. AssetRecord stále nemá
+samostatný presentation timestamp, takže foto/video používá obrácený accepted order;
+fyzické zařízení zůstává NEOVĚŘENO.

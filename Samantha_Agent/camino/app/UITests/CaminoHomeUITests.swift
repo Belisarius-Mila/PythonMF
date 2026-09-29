@@ -133,15 +133,19 @@ import XCTest
             XCTAssertTrue(field.waitForExistence(timeout: 5))
             field.tap(); field.typeText(title)
             app.buttons["saveMomentTitle"].tap()
+            let savedLabel = app.staticTexts.matching(
+                NSPredicate(format: "label CONTAINS %@", title)).firstMatch
+            XCTAssertTrue(savedLabel.waitForExistence(timeout: 5))
         }
         app.terminate(); app.launch()
         XCTAssertTrue(rows.firstMatch.waitForExistence(timeout: 15))
         XCTAssertTrue(rows.firstMatch.label.contains("Newer moment"))
         rows.firstMatch.tap()
         for title in ["Photo title", "Audio title"] {
-            let label = app.staticTexts[title]
-            for _ in 0..<5 where !label.isHittable { app.swipeUp() }
-            XCTAssertTrue(label.exists)
+            let label = app.staticTexts.matching(
+                NSPredicate(format: "label CONTAINS %@", title)).firstMatch
+            for _ in 0..<10 where !label.isHittable { app.swipeUp() }
+            XCTAssertTrue(label.waitForExistence(timeout: 5))
         }
     }
 

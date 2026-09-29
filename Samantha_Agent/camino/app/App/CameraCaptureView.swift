@@ -378,6 +378,56 @@ struct CaminoMediaDetailView: View {
                             .font(.subheadline)
                     }
 
+                    if !current.hidden {
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Přidat do tohoto Momentu")
+                                .font(.headline)
+                            HStack(spacing: 12) {
+                                Button {
+                                    model.requestCommentFromDetail(momentID: current.id)
+                                } label: {
+                                    Label("Komentář", systemImage: "mic.fill")
+                                        .frame(maxWidth: .infinity, minHeight: 56)
+                                }
+                                .buttonStyle(.borderedProminent)
+                                .accessibilityIdentifier("commentOnMoment")
+                                Button {
+                                    model.requestPrivateAddendumFromDetail(momentID: current.id)
+                                } label: {
+                                    Label("Úvaha", systemImage: "lock.bubble.left")
+                                        .frame(maxWidth: .infinity, minHeight: 56)
+                                }
+                                .buttonStyle(.borderedProminent)
+                                .accessibilityIdentifier("privateAddendum")
+                            }
+                            HStack(spacing: 12) {
+                                Button {
+                                    dismiss()
+                                    DispatchQueue.main.async {
+                                        model.openCamera(.photo, targetMomentID: current.id)
+                                    }
+                                } label: {
+                                    Label("Přidat fotografii", systemImage: "camera")
+                                        .frame(maxWidth: .infinity, minHeight: 56)
+                                }
+                                .buttonStyle(.borderedProminent)
+                                Button {
+                                    dismiss()
+                                    DispatchQueue.main.async {
+                                        model.openCamera(.video, targetMomentID: current.id)
+                                    }
+                                } label: {
+                                    Label("Přidat video", systemImage: "video")
+                                        .frame(maxWidth: .infinity, minHeight: 56)
+                                }
+                                .buttonStyle(.borderedProminent)
+                            }
+                        }
+                        .padding()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
+                    }
+
                     let history = model.textHistory(for: current.id)
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Text").font(.headline)
@@ -403,7 +453,9 @@ struct CaminoMediaDetailView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
 
-                    let assets = model.mediaByMoment[current.id] ?? []
+                    // AssetRecord has no separate presentation timestamp yet; Core Data
+                    // returns accepted assets in insertion order, so the newest is shown first.
+                    let assets = Array((model.mediaByMoment[current.id] ?? []).reversed())
                     ForEach(assets) { asset in
                         VStack(alignment: .leading, spacing: 8) {
                             let name = current.attachmentTitle(.asset, id: asset.id)
@@ -469,29 +521,6 @@ struct CaminoMediaDetailView: View {
                             }
                         }
                     }
-                    if !current.hidden {
-                        Button("Přidat komentář", systemImage: "mic.fill") {
-                            model.requestCommentFromDetail(momentID: current.id)
-                        }
-                        .accessibilityIdentifier("commentOnMoment")
-                        Button("Soukromý dovětek", systemImage: "lock.bubble.left") {
-                            model.requestPrivateAddendumFromDetail(momentID: current.id)
-                        }
-                        .accessibilityIdentifier("privateAddendum")
-                        Button("Přidat fotografii") {
-                            dismiss()
-                            DispatchQueue.main.async {
-                                model.openCamera(.photo, targetMomentID: current.id)
-                            }
-                        }
-                        Button("Přidat video") {
-                            dismiss()
-                            DispatchQueue.main.async {
-                                model.openCamera(.video, targetMomentID: current.id)
-                            }
-                        }
-                    }
-
                     Divider()
                     if current.privacy == .ownerOnly {
                         Button(current.kind == .reflection

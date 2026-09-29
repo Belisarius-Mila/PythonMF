@@ -2525,3 +2525,18 @@ server mazání zůstávají NEOVĚŘENÉ.
 
 Další krok: Dokončit serverový delete kontrakt jako samostatný krok, potom nový
 podepsaný build a krátké fyzické testy mazání/obnovy bez odinstalace.
+
+## 2026-09-29 20:35 CEST — B05 pořadí obsahu v detailu Momentu
+
+Detail Momentu má nahoře čtyři akce pro přidání komentáře, Úvahy, fotografie a
+videa; existující a nově přijatý obsah je pod panelem. Foto/video je newest-first
+podle aktuálního pořadí přijatých záznamů. Lokální ukládání, privacy, synchronizace
+a vazby příloh nebyly změněny.
+
+Důkaz: 56/56 Swift testů, generic iOS Simulator build a 8/8 UI testů PASS.
+UI relaunch scénář potvrdil titulky foto/audio po asynchronním uložení. Fyzický
+iPhone, push, deployment a podepsaný build pro tento krok ještě nejsou provedené.
+
+Riziko a další krok: Samostatný AssetRecord timestamp zatím neexistuje; pokud bude
+potřeba přesné časové pořadí po migraci, bude to další datový krok. Nejbližší je
+schválený fyzický průchod nového buildu bez odinstalace současné aplikace.
