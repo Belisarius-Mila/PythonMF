@@ -611,22 +611,34 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
             .filter { $0.0 > 0 }.map { "\($0.1): \($0.0)" }.joined(separator: " · ")
     }
 
-    func saveTitle(momentID: UUID, title: String, attachment: LocalAttachmentTitle? = nil) -> Bool {
-        guard let local else { return false }
+    func saveTitle(momentID: UUID, title: String,
+                   attachment: LocalAttachmentTitle? = nil) async -> Bool {
+        guard let local, let before = moment(with: momentID) else { return false }
         do {
-            if let attachment {
-                _ = try local.setAttachmentTitle(momentID: momentID, kind: attachment.kind,
-                    targetID: attachment.targetID, title: title)
-            } else {
-                _ = try local.setTitle(momentID: momentID, title: title)
-            }
-            message = nil
-            refresh()
+            let updated = try await local.setTitleInBackground(
+                momentID: momentID, title: title, attachment: attachment)
+            applyTitleUpdate(updated, previousRevision: before.revision)
             return true
         } catch {
             message = error.localizedDescription
             return false
         }
+    }
+
+    private func applyTitleUpdate(_ updated: LocalMoment, previousRevision: Int) {
+        if let index = moments.firstIndex(where: { $0.id == updated.id }) {
+            moments[index] = updated
+        }
+        if let index = hiddenMoments.firstIndex(where: { $0.id == updated.id }) {
+            hiddenMoments[index] = updated
+        }
+        if momentDetail?.id == updated.id {
+            momentDetail = updated
+        }
+        if updated.revision > previousRevision {
+            pendingServerMomentIDs.insert(updated.id)
+        }
+        message = nil
     }
 
     func saveTextDraft(momentID: UUID, content: String) {

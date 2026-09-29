@@ -40,6 +40,44 @@ import XCTest
         XCTAssertNil(try JSONDecoder().decode(LocalPendingOperation.self, from: encoded).title)
     }
 
+    func testBackgroundTitleWriteKeepsTargetedMomentAndRetryIdempotent() async throws {
+        let store = try CaminoLocalStore(inMemory: true)
+        let trip = try store.createTrip(name: "Synthetic")
+        let first = try store.markMoment(at: instant("2026-09-27T07:00:00Z"))
+        let second = try store.markMoment(at: instant("2026-09-27T08:00:00Z"))
+        let operation = UUID()
+
+        let changed = try await store.setTitleInBackground(
+            momentID: first.id, title: "Název z backgroundu", operationID: operation)
+        XCTAssertEqual(changed.title, "Název z backgroundu")
+        XCTAssertEqual(changed.revision, first.revision + 1)
+        XCTAssertEqual(try store.moments(tripID: trip.id).first(where: { $0.id == first.id })?.title,
+                       changed.title)
+        XCTAssertEqual(try store.moments(tripID: trip.id).first(where: { $0.id == second.id })?.revision,
+                       second.revision)
+
+        let retry = try await store.setTitleInBackground(
+            momentID: first.id, title: changed.title, operationID: operation)
+        XCTAssertEqual(retry, changed)
+        XCTAssertEqual(try store.pendingOperations(momentID: first.id).count, 1)
+    }
+
+    func testBackgroundAttachmentTitleValidatesOnlyTargetAsset() async throws {
+        let store = try CaminoLocalStore(inMemory: true)
+        _ = try store.createTrip(name: "Synthetic")
+        let moment = try store.markMoment(at: instant("2026-09-27T07:00:00Z"))
+        let intent = try store.beginMediaIntent(kind: .photo, targetMomentID: moment.id)
+        _ = try store.acceptMedia(intent, inspection: LocalMediaInspection(
+            byteCount: 12, sha256: String(repeating: "a", count: 64), width: 4, height: 3,
+            orientation: 1, durationMilliseconds: nil, hasAudio: false, partial: false))
+        let changed = try await store.setTitleInBackground(
+            momentID: moment.id,
+            title: "Fotografie z backgroundu",
+            attachment: LocalAttachmentTitle(kind: .asset, targetID: intent.assetID, title: ""))
+        XCTAssertEqual(changed.attachmentTitle(.asset, id: intent.assetID), "Fotografie z backgroundu")
+        XCTAssertEqual(try store.mediaAssets(momentID: moment.id).count, 1)
+    }
+
     func testAttachmentTitlesAreIndependentDurableAndValidateOwnership() throws {
         let url = FileManager.default.temporaryDirectory.appendingPathComponent("camino-attachment-\(UUID())/metadata.sqlite")
         let store = try CaminoLocalStore(storeURL: url)

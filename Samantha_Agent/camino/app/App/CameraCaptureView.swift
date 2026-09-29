@@ -300,6 +300,7 @@ struct CaminoMediaDetailView: View {
     @State private var titleDraft = ""
     @State private var titleAttachment: LocalAttachmentTitle? = nil
     @State private var titleSaveFailed = false
+    @State private var titleSaving = false
     @State private var showChapterPicker = false
     @State private var chapterDate = Date()
     @State private var confirmDiary = false
@@ -522,14 +523,22 @@ struct CaminoMediaDetailView: View {
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
                         Button("Zrušit") { showTitleEditor = false }
+                            .disabled(titleSaving)
                     }
                     ToolbarItem(placement: .confirmationAction) {
                         Button("Uložit") {
-                            if model.saveTitle(momentID: current.id, title: titleDraft, attachment: titleAttachment) {
-                                showTitleEditor = false
-                            } else { titleSaveFailed = true }
+                            titleSaving = true
+                            Task { @MainActor in
+                                let saved = await model.saveTitle(
+                                    momentID: current.id, title: titleDraft,
+                                    attachment: titleAttachment)
+                                titleSaving = false
+                                if saved { showTitleEditor = false }
+                                else { titleSaveFailed = true }
+                            }
                         }
-                        .disabled(!LocalMoment.validTitle(titleDraft.trimmingCharacters(in: .whitespacesAndNewlines)))
+                        .disabled(titleSaving || !LocalMoment.validTitle(
+                            titleDraft.trimmingCharacters(in: .whitespacesAndNewlines)))
                         .accessibilityIdentifier("saveMomentTitle")
                     }
                 }

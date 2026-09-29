@@ -55,6 +55,7 @@ private struct LocalPendingMomentLink: Codable, Equatable {
         container.loadPersistentStores { _, error in loadingError = error }
         if let loadingError { throw loadingError }
         container.viewContext.undoManager = nil
+        container.viewContext.automaticallyMergesChangesFromParent = true
         self.container = container
     }
 
@@ -737,6 +738,32 @@ private struct LocalPendingMomentLink: Codable, Equatable {
         } catch { context.rollback(); throw error }
     }
 
+    /// Title edits use a private background context so the main actor is not
+    /// blocked by Core Data fetch, journal encoding, or SQLite I/O. The
+    /// synchronous APIs above remain the compatibility path for other callers
+    /// and for the local-core tests.
+    public func setTitleInBackground(
+        momentID: UUID, title: String, attachment: LocalAttachmentTitle? = nil,
+        operationID: UUID = UUID(), expectedRevision: Int? = nil, at date: Date = Date()
+    ) async throws -> LocalMoment {
+        let container = self.container
+        return try await withCheckedThrowingContinuation { continuation in
+            let background = container.newBackgroundContext()
+            background.perform {
+                do {
+                    let result = try Self.writeTitle(
+                        in: background, momentID: momentID, title: title,
+                        attachment: attachment, operationID: operationID,
+                        expectedRevision: expectedRevision, at: date)
+                    continuation.resume(returning: result)
+                } catch {
+                    background.rollback()
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
+    }
+
     @discardableResult public func setHidden(
         momentID: UUID, hidden: Bool, operationID: UUID = UUID(),
         expectedRevision: Int? = nil, at date: Date = Date()
@@ -821,6 +848,303 @@ private struct LocalPendingMomentLink: Codable, Equatable {
             try save()
             return try decodeMoment(row)
         } catch { context.rollback(); throw error }
+    }
+
+    private nonisolated static func writeTitle(
+        in context: NSManagedObjectContext, momentID: UUID, title rawTitle: String,
+        attachment: LocalAttachmentTitle?, operationID: UUID,
+        expectedRevision: Int?, at date: Date
+    ) throws -> LocalMoment {
+        let title = rawTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard LocalMoment.validTitle(title) else { throw LocalStoreError.invalidMetadataChange }
+        guard let row = try backgroundObject("MomentRecord", id: momentID, in: context) else {
+            throw LocalStoreError.momentMissing
+        }
+        var journal = try backgroundJournal(row, in: context)
+        let current = try backgroundMoment(row, journal: journal, in: context)
+        if let prior = try backgroundExistingOperation(id: operationID, in: context) {
+            if let attachment {
+                let value = LocalAttachmentTitle(kind: attachment.kind, targetID: attachment.targetID,
+                                                  title: title)
+                guard prior.momentID == momentID, prior.kind == .attachmentTitle,
+                      prior.attachmentTitle == value,
+                      prior.expectedRevision == (expectedRevision ?? prior.expectedRevision) else {
+                    throw LocalStoreError.operationConflict
+                }
+            } else {
+                guard prior.momentID == momentID, prior.kind == .title, prior.title == title,
+                      prior.expectedRevision == (expectedRevision ?? prior.expectedRevision) else {
+                    throw LocalStoreError.operationConflict
+                }
+            }
+            return current
+        }
+        let expected = expectedRevision ?? current.revision
+        guard expected == current.revision else { throw LocalStoreError.revisionConflict }
+
+        if let attachment {
+            let value = LocalAttachmentTitle(kind: attachment.kind, targetID: attachment.targetID,
+                                              title: title)
+            switch value.kind {
+            case .asset:
+                let rows = try backgroundFetch("AssetRecord", in: context, predicate: NSPredicate(
+                    format: "id == %@ AND momentID == %@", value.targetID as NSUUID, momentID as NSUUID))
+                guard rows.count == 1 else { throw LocalStoreError.invalidMediaIntent }
+            case .audioSession:
+                let primary = row.value(forKey: "audioSessionID") as? UUID
+                let attached = try backgroundFetch("AudioAttachmentRecord", in: context, predicate: NSPredicate(
+                    format: "sessionID == %@ AND momentID == %@",
+                    value.targetID as NSUUID, momentID as NSUUID))
+                guard primary == value.targetID || attached.count == 1 else {
+                    throw LocalStoreError.invalidAudioIntent
+                }
+            }
+            if current.attachmentTitle(value.kind, id: value.targetID) == value.title { return current }
+            let operation = try backgroundOperation(
+                id: operationID, momentID: momentID, expectedRevision: expected,
+                kind: .attachmentTitle, at: date, attachmentTitle: value, in: context)
+            var titles = journal.attachmentTitles ?? []
+            titles.removeAll { $0.kind == value.kind && $0.targetID == value.targetID }
+            if !value.title.isEmpty { titles.append(value) }
+            journal.attachmentTitles = titles
+            journal.operations.append(operation)
+        } else {
+            if current.title == title { return current }
+            let operation = try backgroundOperation(
+                id: operationID, momentID: momentID, expectedRevision: expected,
+                kind: .title, at: date, title: title, in: context)
+            journal.currentTitle = title
+            journal.operations.append(operation)
+        }
+
+        row.setValue(current.revision + 1, forKey: "revision")
+        try backgroundSetEncodedSetting(
+            journal, key: Self.journalPrefix + momentID.uuidString.lowercased(), in: context)
+        try context.save()
+        return try backgroundMoment(row, journal: journal, in: context)
+    }
+
+    private nonisolated static func backgroundOperation(
+        id: UUID, momentID: UUID, expectedRevision: Int,
+        kind: LocalOperationKind, at date: Date,
+        title: String? = nil, attachmentTitle: LocalAttachmentTitle? = nil,
+        in context: NSManagedObjectContext
+    ) throws -> LocalPendingOperation {
+        let raw = try backgroundSettingValue(Self.deviceSequenceKey, in: context)
+        let current: Int64
+        if let raw {
+            guard let value = Int64(raw), value >= 0 else { throw LocalStoreError.inconsistentStore }
+            current = value
+        } else {
+            current = 0
+        }
+        guard current < Int64.max else { throw LocalStoreError.inconsistentStore }
+        let next = current + 1
+        try backgroundSetSettingValue(String(next), key: Self.deviceSequenceKey, in: context)
+        return LocalPendingOperation(
+            id: id, momentID: momentID, deviceSequence: next,
+            expectedRevision: expectedRevision, kind: kind,
+            createdAtUTCMilliseconds: milliseconds(date), title: title,
+            attachmentTitle: attachmentTitle)
+    }
+
+    private nonisolated static func backgroundJournal(
+        _ row: NSManagedObject, in context: NSManagedObjectContext
+    ) throws -> LocalMomentJournal {
+        let id: UUID = try backgroundRequired(row, "id")
+        let tripID: UUID = try backgroundRequired(row, "tripID")
+        let revision: Int = try backgroundRequired(row, "revision")
+        let privacyRaw: String = try backgroundRequired(row, "privacy")
+        let hidden: Bool = try backgroundRequired(row, "hidden")
+        let capture = try backgroundStamp(row)
+        guard let privacy = LocalPrivacy(rawValue: privacyRaw) else {
+            throw LocalStoreError.inconsistentStore
+        }
+        let key = Self.journalPrefix + id.uuidString.lowercased()
+        guard let raw = try backgroundSettingValue(key, in: context) else {
+            return LocalMomentJournal(
+                schemaVersion: 1, momentID: id, tripID: tripID,
+                baseRevision: revision, originalPrivacy: privacy,
+                originalHidden: hidden, originalChapterDate: capture.chapterDate,
+                currentChapterDate: capture.chapterDate, relatedMomentID: nil,
+                textHistory: LocalTextHistory(), operations: [])
+        }
+        guard let data = raw.data(using: .utf8),
+              let journal = try? JSONDecoder().decode(LocalMomentJournal.self, from: data) else {
+            throw LocalStoreError.inconsistentStore
+        }
+        guard journal.schemaVersion == 1, journal.momentID == id,
+              LocalMoment.validTitle(journal.currentTitle ?? ""),
+              journal.operations.filter({ $0.kind == .title }).allSatisfy({
+                  $0.title.map(LocalMoment.validTitle) == true
+              }),
+              (journal.operations.last(where: { $0.kind == .title })?.title ?? "") == (journal.currentTitle ?? ""),
+              journal.tripID == tripID, journal.baseRevision >= 1,
+              validChapterDate(journal.originalChapterDate),
+              validChapterDate(journal.currentChapterDate),
+              journal.baseRevision + journal.operations.count == revision,
+              journal.textHistory.revisions.allSatisfy({ $0.momentID == id }),
+              journal.textHistory.draft?.momentID == id || journal.textHistory.draft == nil,
+              journal.operations.allSatisfy({ $0.momentID == id }),
+              Set(journal.operations.map(\.id)).count == journal.operations.count,
+              Set(journal.operations.map(\.deviceSequence)).count == journal.operations.count else {
+            throw LocalStoreError.inconsistentStore
+        }
+        var titles: [LocalAttachmentTitle] = []
+        for operation in journal.operations where operation.kind == .attachmentTitle {
+            guard let value = operation.attachmentTitle, LocalMoment.validTitle(value.title) else {
+                throw LocalStoreError.inconsistentStore
+            }
+            titles.removeAll { $0.kind == value.kind && $0.targetID == value.targetID }
+            if !value.title.isEmpty { titles.append(value) }
+        }
+        guard titles == (journal.attachmentTitles ?? []) else {
+            throw LocalStoreError.inconsistentStore
+        }
+        return journal
+    }
+
+    private nonisolated static func backgroundExistingOperation(
+        id: UUID, in context: NSManagedObjectContext
+    ) throws -> LocalPendingOperation? {
+        let rows = try backgroundFetch("SettingRecord", in: context, predicate: NSPredicate(
+            format: "key BEGINSWITH %@ AND value CONTAINS[c] %@", Self.journalPrefix,
+            id.uuidString))
+        var matches: [LocalPendingOperation] = []
+        for row in rows {
+            guard let raw: String = try? backgroundRequired(row, "value"),
+                  let data = raw.data(using: .utf8),
+                  let journal = try? JSONDecoder().decode(LocalMomentJournal.self, from: data) else {
+                throw LocalStoreError.inconsistentStore
+            }
+            matches.append(contentsOf: journal.operations.filter { $0.id == id })
+        }
+        guard matches.count <= 1 else { throw LocalStoreError.inconsistentStore }
+        return matches.first
+    }
+
+    private nonisolated static func backgroundMoment(
+        _ row: NSManagedObject, journal: LocalMomentJournal, in context: NSManagedObjectContext
+    ) throws -> LocalMoment {
+        let kindRaw: String = try backgroundRequired(row, "kind")
+        let privacyRaw: String = try backgroundRequired(row, "privacy")
+        guard let kind = LocalMomentKind(rawValue: kindRaw),
+              let privacy = LocalPrivacy(rawValue: privacyRaw) else {
+            throw LocalStoreError.inconsistentStore
+        }
+        let id: UUID = try backgroundRequired(row, "id")
+        let stamp = try backgroundStamp(row)
+        let location: LocalLocationFix?
+        if let raw = try backgroundSettingValue("captureLocation:\(id.uuidString.lowercased())", in: context) {
+            guard let data = raw.data(using: .utf8),
+                  let decoded = try? JSONDecoder().decode(LocalLocationFix.self, from: data) else {
+                throw LocalStoreError.inconsistentStore
+            }
+            guard decoded.usable(at: stamp.utcMilliseconds) else {
+                throw LocalStoreError.inconsistentStore
+            }
+            location = decoded
+        } else {
+            location = nil
+        }
+        return LocalMoment(
+            id: id, tripID: try backgroundRequired(row, "tripID"),
+            dayID: try backgroundRequired(row, "dayID"), kind: kind,
+            capture: stamp, chapterDate: journal.currentChapterDate,
+            privacy: privacy, revision: try backgroundRequired(row, "revision"),
+            hidden: try backgroundRequired(row, "hidden"),
+            important: try backgroundRequired(row, "important"),
+            audioSessionID: row.value(forKey: "audioSessionID") as? UUID,
+            partialAudio: try backgroundRequired(row, "partialAudio"),
+            relatedMomentID: journal.relatedMomentID, location: location,
+            title: journal.currentTitle ?? "",
+            attachmentTitles: journal.attachmentTitles ?? [])
+    }
+
+    private nonisolated static func backgroundStamp(_ row: NSManagedObject) throws -> CaptureStamp {
+        let localWall: String = try backgroundRequired(row, "localWall")
+        let chapterDate: String = try backgroundRequired(row, "chapterDate")
+        guard localWall.hasPrefix(chapterDate) else { throw LocalStoreError.inconsistentStore }
+        return CaptureStamp(
+            utcMilliseconds: try backgroundRequired(row, "utcMilliseconds"),
+            localWall: localWall, chapterDate: chapterDate,
+            offsetMinutes: try backgroundRequired(row, "offsetMinutes"),
+            timeZoneID: try backgroundRequired(row, "timeZoneID"))
+    }
+
+    private nonisolated static func backgroundObject(
+        _ entity: String, id: UUID, in context: NSManagedObjectContext
+    ) throws -> NSManagedObject? {
+        let rows = try backgroundFetch(entity, in: context, predicate: NSPredicate(
+            format: "id == %@", id as NSUUID))
+        guard rows.count <= 1 else { throw LocalStoreError.inconsistentStore }
+        return rows.first
+    }
+
+    private nonisolated static func backgroundFetch(
+        _ entity: String, in context: NSManagedObjectContext, predicate: NSPredicate? = nil
+    ) throws -> [NSManagedObject] {
+        let request = NSFetchRequest<NSManagedObject>(entityName: entity)
+        request.predicate = predicate
+        return try context.fetch(request)
+    }
+
+    private nonisolated static func backgroundRequired<T>(
+        _ row: NSManagedObject, _ key: String
+    ) throws -> T {
+        guard let value = row.value(forKey: key) as? T else {
+            throw LocalStoreError.inconsistentStore
+        }
+        return value
+    }
+
+    private nonisolated static func backgroundSettingValue(
+        _ key: String, in context: NSManagedObjectContext
+    ) throws -> String? {
+        let rows = try backgroundFetch("SettingRecord", in: context, predicate: NSPredicate(
+            format: "key == %@", key))
+        guard rows.count <= 1 else { throw LocalStoreError.inconsistentStore }
+        guard let row = rows.first else { return nil }
+        return try backgroundRequired(row, "value")
+    }
+
+    private nonisolated static func backgroundSetSettingValue(
+        _ value: String, key: String, in context: NSManagedObjectContext
+    ) throws {
+        let rows = try backgroundFetch("SettingRecord", in: context, predicate: NSPredicate(
+            format: "key == %@", key))
+        guard rows.count <= 1 else { throw LocalStoreError.inconsistentStore }
+        let row = rows.first ?? NSEntityDescription.insertNewObject(
+            forEntityName: "SettingRecord", into: context)
+        row.setValue(key, forKey: "key")
+        row.setValue(value, forKey: "value")
+    }
+
+    private nonisolated static func backgroundSetEncodedSetting<T: Encodable>(
+        _ value: T, key: String, in context: NSManagedObjectContext
+    ) throws {
+        let data: Data
+        do { data = try JSONEncoder().encode(value) }
+        catch { throw LocalStoreError.inconsistentStore }
+        guard let string = String(data: data, encoding: .utf8) else {
+            throw LocalStoreError.inconsistentStore
+        }
+        try backgroundSetSettingValue(string, key: key, in: context)
+    }
+
+    private nonisolated static func validChapterDate(_ value: String) -> Bool {
+        guard value.count == 10 else { return false }
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.timeZone = TimeZone(secondsFromGMT: 0)
+        formatter.dateFormat = "yyyy-MM-dd"
+        guard let parsed = formatter.date(from: value) else { return false }
+        return formatter.string(from: parsed) == value
+    }
+
+    private nonisolated static func milliseconds(_ date: Date) -> Int64 {
+        Int64((date.timeIntervalSince1970 * 1_000).rounded())
     }
 
     private func dayID(for tripID: UUID, date: String) throws -> UUID {
@@ -1020,9 +1344,9 @@ private struct LocalPendingMomentLink: Codable, Equatable {
         Int64((date.timeIntervalSince1970 * 1_000).rounded())
     }
 
-    private static let journalPrefix = "c04d.moment."
-    private static let pendingLinkPrefix = "c04d.pending-link."
-    private static let deviceSequenceKey = "c04d.device-sequence"
+    private nonisolated static let journalPrefix = "c04d.moment."
+    private nonisolated static let pendingLinkPrefix = "c04d.pending-link."
+    private nonisolated static let deviceSequenceKey = "c04d.device-sequence"
 
     private func write(_ stamp: CaptureStamp, to row: NSManagedObject) {
         row.setValue(stamp.utcMilliseconds, forKey: "utcMilliseconds")

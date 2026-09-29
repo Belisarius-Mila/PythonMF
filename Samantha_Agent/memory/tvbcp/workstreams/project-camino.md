@@ -1,6 +1,15 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-09-29 — Cílený title-save performance krok dokončen lokálně: Core Data
+  zápis názvu běží v background kontextu, aktualizace UI je pouze pro cílový
+  Moment a validace přílohy neprochází celou knihovnu. Journal/wire kontrakt
+  zůstal beze změny; přidány Core testy pro cílenost, přílohu a idempotentní
+  retry. Důkaz: 51/51 Core testů a iOS Simulator build PASS. Stav: lokální
+  checkpoint čeká na commit; žádný push/deploy/podpis ani fyzická přejímka.
+  Riziko: psaní v detailu stále sdílí velké SwiftUI tělo a samostatně se musí
+  ověřit, zda zbylé zpomalení při každém znaku vyžaduje izolaci editoru.
+
 - 2026-09-29 — Rozhodnutí: každý nový GPS bod má v U17 orientační mapě
   dostat čáru od předchozího bodu, i při horší přesnosti, velké vzdálenosti,
   časové mezeře, přes půlnoc nebo nejistém čase. Implementace odstranila

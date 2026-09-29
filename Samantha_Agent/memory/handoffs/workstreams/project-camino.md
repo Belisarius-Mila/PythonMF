@@ -1,6 +1,17 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-09-29 — Na Mílův požadavek optimalizováno ukládání názvů Momentů a
+  příloh: zápis běží v background Core Data kontextu, validace přílohy načítá
+  jen cílový Asset/AudioSession a ViewModel po úspěchu aktualizuje pouze
+  dotčený Moment bez globálního `refresh()`. Zachován stávající journal/wire
+  kontrakt i synchronní API pro ostatní operace. Cílené testy background title,
+  attachment a idempotence spolu s celým Core balíčkem 51/51 PASS; iOS
+  Simulator build PASS. Změna je pouze lokální, bez podpisu, push, nasazení
+  nebo fyzické přejímky. Další krok: krátký fyzický test psaní/uložení na
+  stejném zařízení; optimalizace překreslování při každém znaku zůstává
+  samostatným otevřeným krokem.
+
 - 2026-09-29 — Na Mílův požadavek upravena U17 Mapa cesty: každý další GPS
   bod v chronologii se nyní spojí s předchozím bodem. Čára se už nezastaví
   kvůli přesnosti nad ±100 m, velké vzdálenosti, časové mezeře, půlnoci nebo

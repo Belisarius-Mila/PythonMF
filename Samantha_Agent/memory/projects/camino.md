@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-29 — U17 spojnice každého nového GPS bodu
+Aktualizováno: 2026-09-29 — U17 spojnice každého nového GPS bodu a optimalizace title save
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,14 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-09-29 — Názvy Momentů a příloh se ukládají v background Core Data
+  kontextu a po úspěchu se v paměti mění jen dotčený Moment; odstraněn celý
+  `refresh()` z této cesty a vlastnictví příloh se ověřuje cíleným dotazem.
+  Journal/wire kontrakt a synchronní API ostatních operací zůstaly zachované.
+  Core testy 51/51 a iOS Simulator build PASS. Lokální vývojový krok čeká na
+  commit, bez push/nasazení/podpisu. Otevřeno: fyzické ověření na zařízení a
+  případná samostatná izolace editoru kvůli překreslení při psaní.
 
 - 2026-09-29 — U17 nyní kreslí orientační úsek od každého nového GPS bodu
   k předchozímu bodu v chronologii, bez blokace podle přesnosti, vzdálenosti,
