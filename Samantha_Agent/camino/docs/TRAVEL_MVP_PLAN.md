@@ -368,3 +368,13 @@ zápisu. Fyzický iPhone nový UI build zatím nemá, push ani deployment neprob
 Otevřené riziko: AssetRecord nemá samostatný prezentační timestamp; pořadí foto/video
 využívá aktuální pořadí přijatých záznamů obrácené na nejnovější první. Audio sessions
 už mají vlastní newest-first řazení. Fyzická kontrola na iPhonu zůstává dalším krokem.
+
+## 2026-09-29 20:47 CEST — B05 podepsaný build nainstalován
+
+Podepsaný build z aktuálního main byl nainstalován přes CoreDevice na spárovaný
+iPhone bez odinstalace stejného bundle ID. Camino se následně spustilo a proces
+je na zařízení viditelný. IPA je lokálně v Downloads jako `Camino-MomentOrder-9-20260929.ipa`;
+podpis archive i exportovaného IPA prošel strict ověřením.
+
+Fyzické UX panelu, přidání přílohy a pořadí více příloh zatím Míla ještě nepotvrdil.
+Další krok je krátký průchod na telefonu; při chybě neodinstalovávat aplikaci.

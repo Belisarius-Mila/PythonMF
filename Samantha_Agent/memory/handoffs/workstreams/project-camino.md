@@ -2768,3 +2768,24 @@ PASS. UI test relaunch ověřil titulky příloh po asynchronním uložení a re
 Otevřené riziko: AssetRecord nemá vlastní prezentační timestamp; foto/video používá
 aktuální accepted insertion order obrácený na newest-first. Fyzický iPhone UX je
 NEOVĚŘENÝ.
+
+## 2026-09-29 20:47 CEST — B05 podepsaný build na iPhonu
+
+Hotovo: Podepsaný build z `dd4a57eb` byl nainstalovaný přes CoreDevice na spárovaný
+iPhone 14 Plus bez odinstalace stejné aplikace. Camino `0.1.0` se stejným bundle ID
+je po instalaci spuštěné; lokální data se během kroku nemažou.
+
+Rozhodnutí: Instalace byla provedena jako samostatný fyzický testovací krok.
+Push a deployment zůstávají neprovedené.
+
+Další krok: Míla provede krátký fyzický průchod: otevřít existující Moment, ověřit
+panel nahoře, přidat jednu fotografii nebo video do právě otevřeného Momentu a
+zkontrolovat, že nový obsah je pod panelem. Potom ověřit komentář/Úvahu a návrat.
+
+Navrhované další kroky: Při více přílohách zkontrolovat newest-first; po testu
+zachovat aplikaci bez odinstalace a případné chyby zapsat před dalším buildem.
+
+Technický důkaz: Archive a export IPA `Camino-MomentOrder-9-20260929.ipa` prošly
+strict codesign; SHA-256 IPA je uložený v lokálním build důkazu. `devicectl` hlásí
+instalaci bundle ID `cz.pythonmf.camino.app` a běžící proces Camino. Fyzické UX je
+stále NEOVĚŘENO, dokud ho Míla nepotvrdí.

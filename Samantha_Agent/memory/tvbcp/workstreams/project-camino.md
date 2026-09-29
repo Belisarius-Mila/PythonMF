@@ -2962,3 +2962,20 @@ Technický důkaz: 56/56 Swift testů, generic simulator build a UI 8/8 PASS. Te
 relaunch ověřil titulky foto/audio po uložení a restartu. AssetRecord stále nemá
 samostatný presentation timestamp, takže foto/video používá obrácený accepted order;
 fyzické zařízení zůstává NEOVĚŘENO.
+
+## 2026-09-29 20:47 CEST — B05 podepsaný build nainstalován
+
+Hotovo: Aktuální B05 build byl podepsán, exportován do IPA a přes CoreDevice
+nainstalován na spárovaný iPhone 14 Plus bez odinstalace. Stejné bundle ID
+`cz.pythonmf.camino.app`, aplikace `0.1.0`; po instalaci úspěšně spuštěná.
+
+Rozhodnutí: Fyzická instalace je hotová, uživatelská přejímka nového pořadí
+zatím čeká na Mílův krátký průchod. Push, deployment ani serverová změna se nedělaly.
+
+Další krok: Na iPhonu otevřít Moment a ověřit panel přidávání nahoře, přidat jednu
+fotografii/video a zkontrolovat jejich umístění pod panelem; následně zkusit
+komentář nebo Úvahu a návrat bez ztráty stávajících dat.
+
+Technický důkaz: Archive/export strict codesign PASS; `devicectl` install a launch
+PASS, proces Camino je viditelný v seznamu procesů. Fyzické UX a pořadí více příloh
+zůstávají NEOVĚŘENÉ do uživatelského potvrzení.

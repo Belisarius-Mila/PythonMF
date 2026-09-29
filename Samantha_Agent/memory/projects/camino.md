@@ -2540,3 +2540,14 @@ iPhone, push, deployment a podepsaný build pro tento krok ještě nejsou proved
 Riziko a další krok: Samostatný AssetRecord timestamp zatím neexistuje; pokud bude
 potřeba přesné časové pořadí po migraci, bude to další datový krok. Nejbližší je
 schválený fyzický průchod nového buildu bez odinstalace současné aplikace.
+
+## 2026-09-29 20:47 CEST — B05 build na iPhonu
+
+Podepsaný build z aktuálního commitu byl nainstalovaný přes CoreDevice na spárovaný
+iPhone 14 Plus bez odinstalace. Camino `0.1.0` se stejným bundle ID se spustilo;
+stávající data zůstávají v aplikaci. IPA `Camino-MomentOrder-9-20260929.ipa` je
+uložené lokálně v Downloads.
+
+Automatické ověření zůstává 56/56 Swift, simulator build a 8/8 UI PASS. Fyzické
+ověření panelu, přidání přílohy a newest-first pořadí ještě čeká na Mílův průchod.
+Další krok: otestovat jeden Moment bez odinstalace; při problému aplikaci nemazat.
