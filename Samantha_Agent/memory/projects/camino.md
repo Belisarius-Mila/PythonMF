@@ -12,13 +12,20 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 
 ## Aktuální stav
 
+- 2026-09-29 22:12 CEST — Oprava GPS capture je v checkpointu `cb13727f`
+  pushnutá na GitHub; push workflow znovu potvrdil plnou bránu 1843/1843.
+  Podepsaný generic iOS build prošel strict codesign kontrolou a stejná app
+  byla bez odinstalace přes devicectl nainstalována a spuštěna na spárovaném
+  iPhonu. Funkční GPS průchod v aplikaci ještě čeká na ruční fyzický test;
+  serverový Viewer ani archiv se neměnily.
+
 - 2026-09-29 21:53 CEST — Implementace opravy GPS je lokálně dokončená:
   před novým Momentem se použije připravený fix okamžitě, jinak aplikace čeká
   nejvýše 5 sekund a pak pravdivě uloží záznam bez GPS s upozorněním. Kamera se
   otevírá hned; fotografie čeká až po spoušti, nové video/komentář/úvaha před
   startem, příloha k existujícímu Momentu nečeká. Swift 56/56 a generic iOS
   build PASS. UI result bundle byl neúplný, proto nemá spolehlivý PASS/FAIL;
-  fyzická kontrola iPhonu, commit, push a nasazení zůstávají otevřené. Starší
+  fyzická kontrola iPhonu zůstává otevřená. Starší
   Momenty bez GPS se nedoplňují.
 
 - 2026-09-29 21:23 CEST — U17 je po schválení „vše p+n“ pushnutá a nasazená

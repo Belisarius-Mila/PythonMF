@@ -1,6 +1,11 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-09-29 22:12 CEST — `cb13727f` je pushnutý po plné bráně 1843/1843;
+  podepsaný iOS build prošel strict codesign, byl bez odinstalace přes
+  devicectl nainstalován a spuštěn na spárovaném iPhonu. Serverový Viewer
+  zůstal beze změny. Funkční GPS průchod na telefonu je ještě NEOVĚŘENO.
+
 - 2026-09-29 21:53 CEST — Na Mílův požadavek je připravená oprava GPS capture:
   bounded wait 5 s pouze při chybějícím použitelném fixu; s připraveným fixem
   bez prodlevy. Nové foto čeká až po shutteru, video/audio před startem,

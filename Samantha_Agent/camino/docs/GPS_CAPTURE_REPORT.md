@@ -18,6 +18,17 @@ Automatické ověření po změně: Swift sada **56/56 PASS**, generic iOS build
 spolehlivého PASS/FAIL výsledku, proto fyzická kontrola čekání na iPhonu
 zůstává otevřená. Starší Momenty bez GPS se zpětně nedoplňují.
 
+### c+p+n dokončeno — 29. 9. 22:12 CEST
+
+Checkpoint `cb13727f` je pushnutý a `main`/`origin/main` se shodují. Push
+workflow znovu proběhl plnou branou **1843/1843 PASS**. Podepsaný generic iOS
+build prošel `codesign --verify --deep --strict`; stejná aplikace
+`cz.pythonmf.camino.app` byla přes `devicectl` nainstalována bez odinstalace
+a úspěšně spuštěna na spárovaném iPhonu. Serverový Viewer ani archiv se tímto
+krokem neměnily a nepotřebovaly nové nasazení. Instalace/spuštění je ověřené,
+ale skutečný GPS průchod bez fixu, s připraveným fixem a s přílohou k existujícímu
+Momentu čeká na fyzické ověření v aplikaci.
+
 ## Přechod na Viewer 27. 9. 14:16 CEST
 
 Míla opakovanou kontrolu potvrzuje „Je to ok“ a žádá pokračovat Viewerem.

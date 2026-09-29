@@ -1,6 +1,11 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-09-29 22:12 CEST — c+p+n pro `cb13727f` dokončeno: push a plná brána
+  1843/1843 PASS, strict codesign PASS, instalace i spuštění stejné bundle
+  aplikace přes devicectl na spárovaném iPhonu PASS. Viewer/server beze změny.
+  Fyzický GPS scénář v běžícím UI zůstává NEOVĚŘENO.
+
 - 2026-09-29 21:53 CEST — Rozpracována změna capture GPS: nový Moment nejprve
   použije platný fix, při jeho absenci čeká nejvýše 5 s a pak uloží bez GPS;
   náhled kamery se neblokuje, foto čeká až po shutteru, video/audio před
