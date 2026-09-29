@@ -237,7 +237,7 @@ struct CameraCaptureView: View {
 
     private func startVideo() async {
         guard await camera.prepareVideoSound(silent: silent) else { return }
-        if let url = model.beginVideo(silent: silent) {
+        if let url = await model.beginVideo(silent: silent) {
             camera.startMovie(at: url)
         } else {
             camera.finishSaving(success: false, message: model.message ?? "Video nezačalo")

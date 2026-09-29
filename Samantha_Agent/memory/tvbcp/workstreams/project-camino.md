@@ -1,6 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-09-29 21:53 CEST — Rozpracována změna capture GPS: nový Moment nejprve
+  použije platný fix, při jeho absenci čeká nejvýše 5 s a pak uloží bez GPS;
+  náhled kamery se neblokuje, foto čeká až po shutteru, video/audio před
+  startem a attachment k existujícímu Momentu bez čekání. Důkaz: Swift 56/56,
+  generic iOS build PASS. UI result bundle je po přerušení neúplný, fyzický
+  iPhone test a c+p+n jsou NEOVĚŘENO. Riziko: GPS může i po 5 s zůstat
+  nedostupná; starší záznamy se zpětně nemění.
+
 - 2026-09-29 21:23 CEST — U17 mapa je po schválení „vše p+n“ pushnutá a
   nasazená z `879a2e7199b6`. Čárkované spojnice vedou mezi každým dalším
   povoleným GPS bodem bez blokace přesností, vzdáleností nebo časem a poslední

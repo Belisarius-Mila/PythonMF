@@ -1,6 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-09-29 21:53 CEST — Na Mílův požadavek je připravená oprava GPS capture:
+  bounded wait 5 s pouze při chybějícím použitelném fixu; s připraveným fixem
+  bez prodlevy. Nové foto čeká až po shutteru, video/audio před startem,
+  přílohy existujících Momentů čekání přeskočí. Fallback je bez GPS s viditelnou
+  zprávou a bez zpětného doplňování. Swift 56/56 a generic iOS build PASS;
+  UI bundle je neúplný, takže bez PASS/FAIL. C+p+n a fyzická instalace/test
+  iPhonu jsou další kroky.
+
 - 2026-09-29 21:23 CEST — U17 je po Mílou schváleném „vše p+n“ pushnutá a
   nasazená z `879a2e7199b6`. Čárkované spojnice vedou mezi každým dalším
   povoleným GPS bodem bez prahu přesnosti, vzdálenosti nebo času a poslední

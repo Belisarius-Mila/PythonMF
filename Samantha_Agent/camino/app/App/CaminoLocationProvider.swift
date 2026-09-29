@@ -45,7 +45,26 @@ import Foundation
         }
     }
 
-    /// Capture never waits. A late fix is for a later Moment, never a backfill.
+    /// Return a currently usable fix immediately, or briefly wait for the
+    /// foreground one-shot request to produce one. The caller still saves
+    /// without GPS after the bounded wait; a late fix is for a later Moment.
+    func snapshotForCapture(timeout: Duration = .seconds(5)) async -> LocalLocationFix? {
+        authorization = manager.authorizationStatus
+        guard authorized else { return nil }
+        if let current = usableFix(at: Date()) { return current }
+        refresh()
+        let clock = ContinuousClock()
+        let deadline = clock.now.advanced(by: timeout)
+        while clock.now < deadline {
+            if Task.isCancelled { return nil }
+            try? await Task.sleep(for: .milliseconds(100))
+            if let current = usableFix(at: Date()) { return current }
+        }
+        return usableFix(at: Date())
+    }
+
+    /// Immediate snapshot used by the recorder's synchronous callback.
+    /// Capture actions call ``snapshotForCapture`` before entering that path.
     func snapshot(at date: Date) -> LocalLocationFix? {
         authorization = manager.authorizationStatus
         let result = authorized ? usableFix(at: date) : nil
@@ -62,7 +81,7 @@ import Foundation
         if let fix = usableFix(at: date) {
             return fix.approximate ? "GPS připravená · přibližná poloha" : "GPS připravená"
         }
-        return requesting ? "Zjišťuji GPS · záznam na ni nečeká" : "GPS není dostupná · obnov polohu"
+        return requesting ? "Zjišťuji GPS · nový záznam chvíli počká" : "GPS není dostupná · obnov polohu"
     }
 
     private var authorized: Bool {

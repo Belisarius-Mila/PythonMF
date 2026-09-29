@@ -12,6 +12,15 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 
 ## Aktuální stav
 
+- 2026-09-29 21:53 CEST — Implementace opravy GPS je lokálně dokončená:
+  před novým Momentem se použije připravený fix okamžitě, jinak aplikace čeká
+  nejvýše 5 sekund a pak pravdivě uloží záznam bez GPS s upozorněním. Kamera se
+  otevírá hned; fotografie čeká až po spoušti, nové video/komentář/úvaha před
+  startem, příloha k existujícímu Momentu nečeká. Swift 56/56 a generic iOS
+  build PASS. UI result bundle byl neúplný, proto nemá spolehlivý PASS/FAIL;
+  fyzická kontrola iPhonu, commit, push a nasazení zůstávají otevřené. Starší
+  Momenty bez GPS se nedoplňují.
+
 - 2026-09-29 21:23 CEST — U17 je po schválení „vše p+n“ pushnutá a nasazená
   z `879a2e7199b6`. Čára zůstává čárkovaná, každý další povolený GPS bod se
   spojuje s předchozím a poslední úsek má malou směrovou šipku. Plná brána

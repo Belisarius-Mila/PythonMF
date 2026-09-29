@@ -1,5 +1,23 @@
 # GPS u nových okamžiků — lokální implementace
 
+## Krátké čekání před novým záznamem — 29. 9. 21:53 CEST
+
+Na Mílův požadavek aplikace před vznikem nového Momentu krátce ověří GPS.
+Pokud je použitelný bod už připravený, pokračuje okamžitě. Jinak jednorázově
+požádá Core Location a čeká nejvýše 5 sekund; po limitu uloží záznam bez GPS
+a zobrazí to uživateli. Pozdní fix se zpětně nepřiřazuje.
+
+Kamera se otevře hned. U nové fotografie se čeká až po stisku spouště, takže
+náhled ani komponování nejsou zpomalené. U nového videa a nového komentáře či
+úvahy je čekání před začátkem nahrávání. Příloha k existujícímu Momentu čekání
+nemá a zachovává GPS rodičovského Momentu. Tím se běžné pořízení prodlouží jen
+v případě, kdy GPS není připravená, a nejvýše o 5 sekund.
+
+Automatické ověření po změně: Swift sada **56/56 PASS**, generic iOS build
+**BUILD SUCCEEDED**. UI runner vytvořil neúplný/corrupt result bundle bez
+spolehlivého PASS/FAIL výsledku, proto fyzická kontrola čekání na iPhonu
+zůstává otevřená. Starší Momenty bez GPS se zpětně nedoplňují.
+
 ## Přechod na Viewer 27. 9. 14:16 CEST
 
 Míla opakovanou kontrolu potvrzuje „Je to ok“ a žádá pokračovat Viewerem.
@@ -80,16 +98,14 @@ cestou. Starší záznamy se nedoplňují. Před odjezdem naváže jednoduchý o
 - iPhone pořídí jednorázový bod přes Core Location; oprávnění pouze při
   používání. Na hlavní obrazovce je stav a **Povolit / obnovit GPS**.
 - Po povolení se poloha připravuje při příchodu do popředí, otevření kamery,
-  ruční obnově a při zachycení (výsledek tohoto posledního požadavku je až
-  pro následující okamžik). Bez periodického měření, historie pohybu,
+  ruční obnově a při zachycení. Bez periodického měření, historie pohybu,
   oprávnění Always nebo background location. Po odchodu do pozadí se požadavek ruší.
-- Zachycení nikdy nečeká na polohu. Použije se již dostupný bod nejvýše
-  120 sekund starý a ne z budoucnosti; chybějící, neplatný a starý bod znamená
-  `location=null`. Přesnost nad 100 m se označí jako přibližná.
-- **Omezení:** první okamžik před dokončením měření nebo po delší nečinnosti
-  může být bez GPS. Pokud je poloha důležitá, před zachycením ověřit
-  „GPS připravená“, případně použít obnovu. Pozdní bod se nepřiřazuje zpětně.
-  Jednorázový požadavek má limit 15 s; nejde o garanci získání GPS.
+- Před novým Momentem se nejprve použije již dostupný bod nejvýše 120 sekund
+  starý a ne z budoucnosti. Když chybí, proběhne omezené čekání nejvýše 5 sekund;
+  potom `location=null`. Přesnost nad 100 m se označí jako přibližná.
+- **Omezení:** první okamžik po delší nečinnosti může čekat až 5 sekund a přesto
+  skončit bez GPS. Pozdní bod se nepřiřazuje zpětně. Jednorázový Core Location
+  požadavek má vlastní limit 15 s, ale capture čekání je kratší a pevně omezené.
 - Bod patří vzniku Momentu: marker, nové foto/video, komentář a úvaha.
   U audia/videa je uložen s počátečním intentem; dokončení či obnova používá
   původní bod. Připojené médium ani pokračování nahrávky jej nemění.

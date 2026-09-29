@@ -1,5 +1,6 @@
 import AVFAudio
 import Combine
+import CoreLocation
 import Foundation
 import SwiftUI
 import UserNotifications
@@ -38,6 +39,7 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
     @Published private(set) var mediaRecovery = LocalMediaRecovery(
         repairedCount: 0, pendingCount: 0, orphanCount: 0, missingCount: 0)
     @Published private(set) var cameraError: String?
+    @Published private(set) var awaitingLocation = false
     @Published var momentDetail: LocalMoment?
 
     private let local: CaminoLocalStore?
@@ -222,21 +224,30 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
     }
 
     func markMoment() {
-        guard !audioBusy, !showCamera, let local else { return }
-        let warning = storageMessage(for: .text)
-        do {
-            let date = Date()
-            let moment = try local.markMoment(at: date, location: location.snapshot(at: date))
-            message = warning ?? (moment.location == nil
-                ? "Okamžik označen. Uloženo v telefonu bez GPS."
-                : "Okamžik označen včetně GPS. Uloženo v telefonu.")
-            refresh()
-        } catch { message = error.localizedDescription }
+        guard !audioBusy, !showCamera, !awaitingLocation, local != nil else { return }
+        awaitingLocation = true
+        message = "Ověřuji GPS…"
+        Task { [weak self] in
+            guard let self else { return }
+            let (fix, gpsWarning) = await self.captureLocationForNewMoment()
+            self.awaitingLocation = false
+            guard let local = self.local else { return }
+            let warning = self.storageMessage(for: .text)
+            do {
+                let moment = try local.markMoment(at: Date(), location: fix)
+                let saved = moment.location == nil
+                    ? "Okamžik označen. Uloženo v telefonu bez GPS."
+                    : "Okamžik označen včetně GPS. Uloženo v telefonu."
+                self.message = Self.joinMessages(gpsWarning, warning, saved)
+                self.refresh()
+            } catch { self.message = error.localizedDescription }
+        }
     }
 
     func startAudio(_ kind: RecordingKind, targetMomentID: UUID? = nil,
                     relatedMomentID: UUID? = nil) {
-        guard !audioBusy, !showCamera, activeTrip != nil, let audio, !showAudio else { return }
+        guard !audioBusy, !showCamera, activeTrip != nil, audio != nil, !showAudio,
+              !awaitingLocation else { return }
         let safety = storageAction(for: .audio)
         guard safety != .block else {
             message = blockedStorageMessage(for: .audio)
@@ -250,6 +261,30 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
             message = LocalStoreError.invalidAudioIntent.localizedDescription
             return
         }
+        if targetMomentID == nil {
+            awaitingLocation = true
+            message = "Ověřuji GPS…"
+            Task { [weak self] in
+                guard let self else { return }
+                let (_, gpsWarning) = await self.captureLocationForNewMoment()
+                self.awaitingLocation = false
+                self.startAudioNow(kind, targetMomentID: targetMomentID,
+                                   relatedMomentID: relatedMomentID,
+                                   storageWarning: safety == .warn ? self.warningStorageMessage(for: .audio) : nil,
+                                   gpsWarning: gpsWarning)
+            }
+            return
+        }
+        startAudioNow(kind, targetMomentID: targetMomentID, relatedMomentID: relatedMomentID,
+                      storageWarning: safety == .warn ? warningStorageMessage(for: .audio) : nil,
+                      gpsWarning: nil)
+    }
+
+    private func startAudioNow(_ kind: RecordingKind, targetMomentID: UUID?,
+                               relatedMomentID: UUID?, storageWarning: String?,
+                               gpsWarning: String?) {
+        guard let audio, !audioBusy, !showCamera, !showAudio else { return }
+        let target = targetMomentID.flatMap { id in moments.first { $0.id == id } }
         audio.stopPlayback()
         audioTargetMomentID = targetMomentID
         audioRelatedMomentID = relatedMomentID
@@ -257,7 +292,7 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
         recording?.relatedMomentID = relatedMomentID
         selectedAudioKind = kind
         selectedAudioPrivacy = target?.privacy ?? (kind == .reflection ? .ownerOnly : newPrivacy)
-        message = safety == .warn ? warningStorageMessage(for: .audio) : nil
+        message = Self.joinMessages(gpsWarning, storageWarning)
         showAudio = true
         launchingAudio = true
         Task {
@@ -408,6 +443,26 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
         case .allow, .finish:
             break
         }
+    }
+
+    private func captureLocationForNewMoment() async -> (LocalLocationFix?, String?) {
+        let fix = await location.snapshotForCapture()
+        guard fix == nil else { return (fix, nil) }
+        let warning: String
+        switch location.authorization {
+        case .denied, .restricted:
+            warning = "GPS není povolená. Ukládám bez GPS."
+        case .notDetermined:
+            warning = "GPS není zapnutá. Ukládám bez GPS."
+        default:
+            warning = "GPS se během 5 s nepodařilo získat. Ukládám bez GPS."
+        }
+        return (nil, warning)
+    }
+
+    private static func joinMessages(_ messages: String?...) -> String? {
+        let values = messages.compactMap { $0 }.filter { !$0.isEmpty }
+        return values.isEmpty ? nil : values.joined(separator: " ")
     }
 
     private static func thermalLevel(from state: ProcessInfo.ThermalState) -> CaminoThermalLevel {
@@ -788,12 +843,17 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
 
     @discardableResult func savePhoto(_ data: Data) async -> LocalMediaAsset? {
         guard let mediaVault, showCamera else { return nil }
+        let targetMomentID = cameraTargetMomentID
+        if targetMomentID == nil { message = "Ověřuji GPS…" }
+        let (fix, gpsWarning) = targetMomentID == nil
+            ? await captureLocationForNewMoment()
+            : (nil, nil)
         do {
             let date = Date()
             let asset = try await mediaVault.savePhoto(data,
-                targetMomentID: cameraTargetMomentID, at: date,
-                location: location.snapshot(at: date))
-            message = "Fotografie uložena v telefonu. Mac zatím neověřen."
+                targetMomentID: targetMomentID, at: date, location: fix)
+            message = Self.joinMessages(gpsWarning,
+                "Fotografie uložena v telefonu. Mac zatím neověřen.")
             refresh()
             await reconcileMedia()
             return asset
@@ -808,21 +868,26 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
         }
     }
 
-    func beginVideo(silent: Bool) -> URL? {
+    func beginVideo(silent: Bool) async -> URL? {
         guard let mediaVault, showCamera, activeVideoIntent == nil else { return nil }
         let thermal = thermalPolicy.videoAction(for: thermalLevel)
         guard thermal != .block else {
             message = "Telefon hlásí kritickou teplotu. Video nezačalo a kvalita se skrytě nemění."
             return nil
         }
+        let targetMomentID = cameraTargetMomentID
+        if targetMomentID == nil { message = "Ověřuji GPS…" }
+        let (fix, gpsWarning) = targetMomentID == nil
+            ? await captureLocationForNewMoment()
+            : (nil, nil)
         do {
             let date = Date()
             let (intent, pendingURL, warning) = try mediaVault.beginVideo(
-                targetMomentID: cameraTargetMomentID, silent: silent, at: date,
-                location: location.snapshot(at: date))
+                targetMomentID: targetMomentID, silent: silent, at: date, location: fix)
             activeVideoIntent = intent
-            message = thermal == .warn ? thermalWarningMessage
-                : warning ? warningStorageMessage(for: .video) : nil
+            message = Self.joinMessages(gpsWarning,
+                thermal == .warn ? thermalWarningMessage : nil,
+                warning ? warningStorageMessage(for: .video) : nil)
             return pendingURL
         } catch LocalStoreError.insufficientSpace {
             message = blockedStorageMessage(for: .video)

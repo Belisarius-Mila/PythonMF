@@ -235,7 +235,7 @@ private struct CaptureHomeView: View {
                         Button("Označit okamžik", systemImage: "mappin") {
                             model.markMoment()
                         }
-                        .disabled(model.audioBusy)
+                        .disabled(model.audioBusy || model.awaitingLocation)
                         Button("Cesty", systemImage: "map") { showTrips = true }
                             .disabled(model.audioBusy)
                         Button("Skryté (\(model.hiddenMoments.count))",
@@ -283,7 +283,7 @@ private struct CaptureHomeView: View {
                 .frame(maxWidth: .infinity, minHeight: 72)
         }
         .buttonStyle(.borderedProminent)
-        .disabled(model.audioBusy)
+        .disabled(model.audioBusy || model.awaitingLocation)
         .accessibilityIdentifier(kind == .comment ? "startComment" : "startReflection")
     }
 }
