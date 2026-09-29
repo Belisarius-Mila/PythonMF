@@ -117,7 +117,7 @@ import XCTest
             targetID: ids[0], title: "line\nbreak"))
         let other = try reopened.markMoment(at: instant("2026-09-27T08:00:00Z"))
         for (kind, id) in [(LocalAttachmentTitle.Kind.asset, ids[0]), (.audioSession, sessionID)] {
-            XCTAssertThrowsError(try reopened.setAttachmentTitle(momentID: other.id,
+        XCTAssertThrowsError(try reopened.setAttachmentTitle(momentID: other.id,
                 kind: kind, targetID: id, title: "Wrong parent"))
         }
         let cleared = try reopened.setAttachmentTitle(momentID: moment.id, kind: .asset, targetID: ids[0], title: "")
@@ -130,6 +130,64 @@ import XCTest
         XCTAssertEqual(newest.map(\.id), [other.id, moment.id])
         _ = try reopened.setTitle(momentID: moment.id, title: "Pozdější úprava")
         XCTAssertEqual(try reopened.moments(tripID: trip.id).sorted(by: LocalMoment.newestFirst).map(\.id), newest.map(\.id))
+    }
+
+    func testAttachmentDeletionKeepsParentAndSurvivesRestart() throws {
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("camino-delete-asset-\(UUID())/metadata.sqlite")
+        let store = try CaminoLocalStore(storeURL: url)
+        let trip = try store.createTrip(name: "Synthetic")
+        let moment = try store.markMoment()
+        let intent = try store.beginMediaIntent(kind: .photo, targetMomentID: moment.id)
+        _ = try store.acceptMedia(intent, inspection: LocalMediaInspection(
+            byteCount: 12, sha256: String(repeating: "a", count: 64), width: 4, height: 3,
+            orientation: 1, durationMilliseconds: nil, hasAudio: false, partial: false))
+
+        let deletion = try store.deleteAsset(assetID: intent.assetID)
+        XCTAssertEqual(deletion.kind, .asset)
+        XCTAssertEqual(try store.moments(tripID: trip.id).map(\.id), [moment.id])
+        XCTAssertTrue(try store.mediaAssets(momentID: moment.id).isEmpty)
+        XCTAssertEqual(try store.deletionRecords(momentID: moment.id).count, 1)
+        let reopened = try CaminoLocalStore(storeURL: url)
+        XCTAssertEqual(try reopened.moments(tripID: trip.id).map(\.id), [moment.id])
+        XCTAssertTrue(try reopened.mediaAssets(momentID: moment.id).isEmpty)
+        XCTAssertThrowsError(try reopened.deleteAsset(assetID: intent.assetID))
+    }
+
+    func testWholeMomentDeletionHidesTextMediaAndAudioAndIsIdempotentlyBlocked() throws {
+        let store = try CaminoLocalStore(inMemory: true)
+        let trip = try store.createTrip(name: "Synthetic")
+        let moment = try store.markMoment()
+        _ = try store.appendTextRevision(momentID: moment.id, role: .typedSource,
+            content: "synthetic", at: Date())
+        let photo = try store.beginMediaIntent(kind: .photo, targetMomentID: moment.id)
+        _ = try store.acceptMedia(photo, inspection: LocalMediaInspection(
+            byteCount: 12, sha256: String(repeating: "b", count: 64), width: 4, height: 3,
+            orientation: 1, durationMilliseconds: nil, hasAudio: false, partial: false))
+        let session = UUID()
+        _ = try store.beginAudioIntent(sessionID: session, kind: .comment,
+            startedAt: Date(), targetMomentID: moment.id)
+        _ = try store.acceptCompletedAudio(sessionID: session, kind: .comment, partial: false)
+
+        let records = try store.deleteMoment(momentID: moment.id)
+        XCTAssertEqual(records.map(\.kind), [.moment, .asset, .audioSession])
+        XCTAssertTrue(try store.moments(tripID: trip.id).isEmpty)
+        XCTAssertTrue(try store.allMediaAssets().isEmpty)
+        XCTAssertTrue(try store.audioSessionIDs(momentID: moment.id).isEmpty)
+        XCTAssertThrowsError(try store.textHistory(momentID: moment.id))
+        XCTAssertThrowsError(try store.deleteMoment(momentID: moment.id))
+    }
+
+    func testDeleteActiveCaptureIsBlockedWithoutTombstone() throws {
+        let store = try CaminoLocalStore(inMemory: true)
+        _ = try store.createTrip(name: "Synthetic")
+        let moment = try store.markMoment()
+        let intent = try store.beginMediaIntent(kind: .photo, targetMomentID: moment.id)
+        XCTAssertThrowsError(try store.deleteMoment(momentID: moment.id)) { error in
+            XCTAssertEqual(error as? LocalStoreError, .activeCapture)
+        }
+        XCTAssertTrue(try store.deletionRecords().isEmpty)
+        XCTAssertEqual(try store.pendingMediaIntents(), [intent])
     }
 
     func testOfflineTripsStaySeparateAndOnlyOneIsActive() throws {

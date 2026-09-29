@@ -325,6 +325,8 @@ struct CaminoMediaDetailView: View {
     @State private var chapterDate = Date()
     @State private var confirmDiary = false
     @State private var confirmHide = false
+    @State private var confirmDelete = false
+    @State private var deleteTarget: CaminoDeleteTarget?
 
     private var current: LocalMoment { model.moment(with: moment.id) ?? moment }
 
@@ -408,6 +410,10 @@ struct CaminoMediaDetailView: View {
                             Text(name.isEmpty ? asset.kind.title : name).font(.headline)
                             if !name.isEmpty { Text(asset.kind.title).font(.caption).foregroundStyle(.secondary) }
                             attachmentTitleButton(.asset, id: asset.id, title: name)
+                            Button("Smazat tuto přílohu", systemImage: "trash", role: .destructive) {
+                                deleteTarget = .asset(asset.id, asset.kind.title)
+                                confirmDelete = true
+                            }
                             if let url = model.originalURL(for: asset) {
                                 if asset.kind == .photo {
                                     CaminoPhotoThumbnail(url: url)
@@ -451,7 +457,14 @@ struct CaminoMediaDetailView: View {
                                     .disabled(!audio.canPlay)
                                 }
                                 if audio.phase == .playing {
-                                    Button("Zastavit přehrávání") { model.stopPlayback() }
+                                Button("Zastavit přehrávání") { model.stopPlayback() }
+                                }
+                                let standalone = current.audioSessionID == session.id
+                                    && (current.kind == .comment || current.kind == .reflection)
+                                Button(standalone ? "Smazat celý Moment" : "Smazat celou nahrávku",
+                                       systemImage: "trash", role: .destructive) {
+                                    deleteTarget = standalone ? .moment : .audio(session.id)
+                                    confirmDelete = true
                                 }
                             }
                         }
@@ -508,6 +521,11 @@ struct CaminoMediaDetailView: View {
                         .foregroundStyle(.orange)
                         .accessibilityIdentifier("hideMoment")
                     }
+                    Button("Smazat celý Moment", systemImage: "trash", role: .destructive) {
+                        deleteTarget = .moment
+                        confirmDelete = true
+                    }
+                    .accessibilityIdentifier("deleteMoment")
                 }
                 .padding()
             }
@@ -562,6 +580,36 @@ struct CaminoMediaDetailView: View {
         } message: {
             Text("Moment i originály zůstanou v archivu. Skrytí neuvolní místo a již odeslané kopie nelze vzít zpět.")
         }
+        .alert("Smazat z telefonu?", isPresented: $confirmDelete) {
+            Button("Zrušit", role: .cancel) { deleteTarget = nil }
+            Button("Smazat", role: .destructive) {
+                guard let target = deleteTarget else { return }
+                switch target {
+                case .moment:
+                    model.deleteMoment(momentID: current.id)
+                case .asset(let id, _):
+                    model.deleteAsset(assetID: id)
+                case .audio(let id):
+                    model.deleteAudioSession(sessionID: id, momentID: current.id)
+                }
+                deleteTarget = nil
+            }
+        } message: {
+            Text(deleteMessage)
+        }
+    }
+
+    private var deleteMessage: String {
+        switch deleteTarget {
+        case .moment:
+            return "Smaže se celý Moment včetně textu, fotek, videí a nahrávek z telefonu. Již odeslaná kopie na Macu zůstane do samostatného serverového mazání."
+        case .asset(_, let title):
+            return "Smaže se pouze \(title.lowercased()) z telefonu. Ostatní obsah Momentu zůstane zachovaný."
+        case .audio:
+            return "Smaže se celá nahrávka včetně všech technických částí z telefonu."
+        case .none:
+            return "Obsah se smaže z telefonu."
+        }
     }
 
     private func attachmentTitleButton(_ kind: LocalAttachmentTitle.Kind, id: UUID, title: String) -> some View {
@@ -580,6 +628,12 @@ struct CaminoMediaDetailView: View {
         formatter.dateFormat = "yyyy-MM-dd"
         return formatter.date(from: chapter)
     }
+}
+
+private enum CaminoDeleteTarget: Equatable {
+    case moment
+    case asset(UUID, String)
+    case audio(UUID)
 }
 
 private struct CaminoTitleEditorView: View {

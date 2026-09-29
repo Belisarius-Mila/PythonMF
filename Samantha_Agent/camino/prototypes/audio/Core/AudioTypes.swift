@@ -179,6 +179,8 @@ public extension RecordingStorage {
     func playbackURLs(for clip: RecordingClip) throws -> [URL] {
         [url(for: clip.draft)]
     }
+    /// Older test doubles may keep the default; the production store overrides it.
+    func delete(sessionID: UUID) throws {}
 }
 
 public enum AudioPrototypeError: Error { case collision, missingAudio, invalidAudio, invalidMetadata, startFailed }

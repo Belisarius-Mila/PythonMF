@@ -618,6 +618,24 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
         localMomentIDs = Set(snapshots.map(\.moment.id))
         discoveredAudioLayouts = discovery.metadata.filter { $0.kind == "create_audio_layout" }
         journal.mergeDiscovery(discovery)
+        let deletions = try local.deletionRecords()
+        let deletedMomentIDs = Set(deletions.filter { $0.kind == .moment }.map(\.momentID))
+        var deletedAssetIDs = Set(deletions.filter { $0.kind == .asset }.map(\.targetID))
+        let deletedSessions = Set(deletions.filter { $0.kind == .audioSession }.map(\.targetID))
+        // Audio is represented by stable segment Asset IDs in the sync journal;
+        // recover those IDs from the already discovered immutable layout.
+        for item in journal.metadata where item.kind == "create_audio_layout" {
+            guard let object = (try? JSONSerialization.jsonObject(with: item.payload)) as? [String: Any],
+                  let sessionRaw = object["session_id"] as? String,
+                  let sessionID = UUID(uuidString: sessionRaw), deletedSessions.contains(sessionID),
+                  let parts = object["parts"] as? [[String: Any]] else { continue }
+            for part in parts {
+                if let raw = part["asset_id"] as? String, let id = UUID(uuidString: raw) {
+                    deletedAssetIDs.insert(id)
+                }
+            }
+        }
+        journal.suppressDeletedContent(momentIDs: deletedMomentIDs, assetIDs: deletedAssetIDs)
         try journalStore.save(journal)
         refreshPublishedState()
     }

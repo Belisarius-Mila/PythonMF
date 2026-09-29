@@ -158,6 +158,18 @@ private struct SegmentScan {
         }
     }
 
+    /// Remove one complete logical session, including all continuation parts.
+    public func delete(sessionID: UUID) throws {
+        let session = try library().sessions.first { $0.id == sessionID }
+        guard let session else { return }
+        for clip in session.parts {
+            let directory = folder(clip.id)
+            if FileManager.default.fileExists(atPath: directory.path) {
+                try FileManager.default.removeItem(at: directory)
+            }
+        }
+    }
+
     private func recoverJournaledAttempts() throws {
         for directory in try FileManager.default.contentsOfDirectory(
             at: root, includingPropertiesForKeys: [.isSymbolicLinkKey]) {

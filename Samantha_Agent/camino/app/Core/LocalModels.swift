@@ -140,6 +140,8 @@ public struct LocalMoment: Equatable, Identifiable, Sendable {
     public var location: LocalLocationFix? = nil
     public var title: String = ""
     public var attachmentTitles: [LocalAttachmentTitle] = []
+    /// A local tombstone; deleted Moments are excluded from normal inventory.
+    public var deleted: Bool = false
 
     public func attachmentTitle(_ kind: LocalAttachmentTitle.Kind, id: UUID) -> String {
         attachmentTitles.first { $0.kind == kind && $0.targetID == id }?.title ?? ""
@@ -343,6 +345,30 @@ public struct LocalMediaAsset: Equatable, Identifiable, Sendable {
     public let relativePath: String
     public let inspection: LocalMediaInspection
     public let silentRequested: Bool
+    /// A local tombstone; the media vault removes the bytes separately.
+    public var deleted: Bool = false
+}
+
+public enum LocalDeletionKind: String, Codable, Sendable {
+    case moment, asset, audioSession = "audio_session"
+}
+
+public struct LocalDeletionRecord: Codable, Equatable, Identifiable, Sendable {
+    public let id: UUID
+    public let kind: LocalDeletionKind
+    public let targetID: UUID
+    public let momentID: UUID
+    public let createdAtUTCMilliseconds: Int64
+    public let expectedRevision: Int
+
+    public init(id: UUID = UUID(), kind: LocalDeletionKind, targetID: UUID,
+                momentID: UUID, createdAtUTCMilliseconds: Int64,
+                expectedRevision: Int) {
+        self.id = id; self.kind = kind; self.targetID = targetID
+        self.momentID = momentID
+        self.createdAtUTCMilliseconds = createdAtUTCMilliseconds
+        self.expectedRevision = expectedRevision
+    }
 }
 
 /// The immutable creation state plus ordered local edits needed to reproduce
@@ -375,6 +401,8 @@ public enum LocalStoreError: Error, LocalizedError, Equatable {
     case insufficientSpace
     case duplicateIdentity
     case inconsistentStore
+    case activeCapture
+    case invalidDeletion
 
     public var errorDescription: String? {
         switch self {
@@ -392,6 +420,8 @@ public enum LocalStoreError: Error, LocalizedError, Equatable {
         case .insufficientSpace: "Pro tento záznam není dost bezpečného volného místa. Nic se nemaže."
         case .duplicateIdentity: "Stejné ID už patří jinému záznamu. Nic se nepřepsalo."
         case .inconsistentStore: "Místní evidence není konzistentní. Nic se nemaže."
+        case .activeCapture: "Nahrávání ještě běží. Nejdřív ho bezpečně ukonči."
+        case .invalidDeletion: "Tento obsah už byl smazán nebo ho nelze bezpečně určit."
         }
     }
 }

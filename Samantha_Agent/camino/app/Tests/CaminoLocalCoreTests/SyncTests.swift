@@ -339,6 +339,25 @@ import XCTest
                        "unresolved metadata must block lower-priority media")
     }
 
+    func testDeletedContentSuppressesOnlyPendingWorkAndKeepsAcceptedHistory() throws {
+        let momentID = UUID(), assetID = UUID()
+        var journal = CaminoSyncJournal(deviceID: UUID())
+        let moment = CaminoSyncMetadataItem(id: UUID(), uniqueKey: "moment",
+            kind: "create_moment", objectID: momentID, expectedRevision: nil,
+            payload: Data("{}".utf8), phase: .pending)
+        let asset = CaminoSyncMetadataItem(id: assetID, uniqueKey: "asset",
+            kind: "create_asset", objectID: assetID, expectedRevision: nil,
+            payload: Data("{\"moment_id\":\"\(momentID.uuidString.lowercased())\"}".utf8), phase: .pending)
+        let accepted = CaminoSyncMetadataItem(id: UUID(), uniqueKey: "accepted",
+            kind: "create_asset", objectID: assetID, expectedRevision: nil,
+            payload: Data("{}".utf8), phase: .accepted)
+        journal.metadata = [moment, asset, accepted]
+        journal.media = [media(id: assetID, kind: .photo, batch: journal.openBatchID)]
+        journal.suppressDeletedContent(momentIDs: [momentID], assetIDs: [assetID])
+        XCTAssertEqual(journal.metadata.map(\.uniqueKey), ["accepted"])
+        XCTAssertTrue(journal.media.isEmpty)
+    }
+
     func testInvalidJournalCannotClaimVerifiedOrAcceptedState() throws {
         let payload = try JSONSerialization.data(withJSONObject: ["synthetic": true])
         var journal = CaminoSyncJournal(deviceID: UUID())

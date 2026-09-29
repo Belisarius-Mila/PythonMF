@@ -318,12 +318,16 @@ private struct LocalPendingMomentLink: Codable, Equatable {
     }
 
     public func audioSessionIDs(momentID: UUID) throws -> [UUID] {
+        guard let moment = try object("MomentRecord", id: momentID),
+              !(try decodeMoment(moment)).deleted else { return [] }
         let primary = try object("MomentRecord", id: momentID)
             .flatMap { $0.value(forKey: "audioSessionID") as? UUID }
         let attached: [UUID] = try fetch("AudioAttachmentRecord",
             predicate: NSPredicate(format: "momentID == %@", momentID as NSUUID))
             .map { try required($0, "sessionID") }
-        return (primary.map { [$0] } ?? []) + attached
+        return ((primary.map { [$0] } ?? []) + attached).filter {
+            (try? hasDeletion(kind: .audioSession, targetID: $0)) != true
+        }
     }
 
     /// Persist identity/privacy before starting a video file or accepting a photo.
@@ -441,17 +445,88 @@ private struct LocalPendingMomentLink: Codable, Equatable {
     public func mediaAssets(momentID: UUID) throws -> [LocalMediaAsset] {
         try fetch("AssetRecord", predicate: NSPredicate(format: "momentID == %@", momentID as NSUUID))
             .map(decodeMediaAsset)
+            .filter { !$0.deleted }
     }
 
     public func allMediaAssets() throws -> [LocalMediaAsset] {
-        try fetch("AssetRecord").map(decodeMediaAsset)
+        try fetch("AssetRecord").map(decodeMediaAsset).filter { !$0.deleted }
+    }
+
+    /// Deletes one selected local attachment. The tombstone is committed before
+    /// the caller removes bytes, so a restart cannot rediscover the attachment.
+    @discardableResult public func deleteAsset(assetID: UUID, at date: Date = Date()) throws -> LocalDeletionRecord {
+        guard let row = try object("AssetRecord", id: assetID) else {
+            throw LocalStoreError.invalidDeletion
+        }
+        let asset = try decodeMediaAsset(row)
+        guard !asset.deleted, let moment = try object("MomentRecord", id: asset.momentID),
+              let current = try? decodeMoment(moment), !current.deleted else {
+            throw LocalStoreError.invalidDeletion
+        }
+        guard try pendingMediaIntents().allSatisfy({ $0.assetID != assetID }) else {
+            throw LocalStoreError.activeCapture
+        }
+        return try commitDeletion(kind: .asset, targetID: assetID, moment: current, at: date)
+    }
+
+    /// Deletes the complete audio session (all technical segments), whether it
+    /// is a standalone comment/reflection or an attached comment.
+    @discardableResult public func deleteAudioSession(sessionID: UUID, momentID: UUID,
+                                                       at date: Date = Date()) throws -> LocalDeletionRecord {
+        guard let momentRow = try object("MomentRecord", id: momentID),
+              let moment = try? decodeMoment(momentRow), !moment.deleted,
+              try audioSessionIDs(momentID: momentID).contains(sessionID) else {
+            throw LocalStoreError.invalidDeletion
+        }
+        guard try pendingAudioIntents().allSatisfy({ $0.sessionID != sessionID }) else {
+            throw LocalStoreError.activeCapture
+        }
+        return try commitDeletion(kind: .audioSession, targetID: sessionID, moment: moment, at: date)
+    }
+
+    /// Deletes the complete Moment and its local attachments. An empty parent
+    /// remains a separate Moment when only one attachment is deleted.
+    @discardableResult public func deleteMoment(momentID: UUID, at date: Date = Date()) throws -> [LocalDeletionRecord] {
+        guard let row = try object("MomentRecord", id: momentID),
+              let moment = try? decodeMoment(row), !moment.deleted else {
+            throw LocalStoreError.invalidDeletion
+        }
+        guard try pendingMediaIntents().allSatisfy({ $0.momentID != momentID }),
+              try pendingAudioIntents().allSatisfy({ $0.momentID != momentID }) else {
+            throw LocalStoreError.activeCapture
+        }
+        let assets = try fetch("AssetRecord", predicate: NSPredicate(format: "momentID == %@", momentID as NSUUID))
+            .map(decodeMediaAsset).filter { !$0.deleted }
+        let sessions = try audioSessionIDs(momentID: momentID)
+        var records = [try commitDeletion(kind: .moment, targetID: momentID, moment: moment, at: date)]
+        for asset in assets {
+            records.append(try commitDeletion(kind: .asset, targetID: asset.id, moment: moment, at: date))
+        }
+        for sessionID in sessions {
+            records.append(try commitDeletion(kind: .audioSession, targetID: sessionID, moment: moment, at: date))
+        }
+        return records
+    }
+
+    public func deletionRecords(momentID: UUID? = nil) throws -> [LocalDeletionRecord] {
+        let rows = try fetch("SettingRecord", predicate: NSPredicate(format: "key BEGINSWITH %@", Self.deletionPrefix))
+        let records: [LocalDeletionRecord] = try rows.map { row in
+            guard let value = row.value(forKey: "value") as? String,
+                  let data = value.data(using: .utf8),
+                  let record = try? JSONDecoder().decode(LocalDeletionRecord.self, from: data) else {
+                throw LocalStoreError.inconsistentStore
+            }
+            return record
+        }
+        return records.filter { momentID == nil || $0.momentID == momentID }
+            .sorted { $0.createdAtUTCMilliseconds < $1.createdAtUTCMilliseconds }
     }
 
     public func moments(tripID: UUID, includeHidden: Bool = false) throws -> [LocalMoment] {
         guard try object("TripRecord", id: tripID) != nil else { throw LocalStoreError.tripMissing }
         return try fetch("MomentRecord", predicate: NSPredicate(format: "tripID == %@", tripID as NSUUID))
             .map(decodeMoment)
-            .filter { includeHidden || !$0.hidden }
+            .filter { !$0.deleted && (includeHidden || !$0.hidden) }
             .sorted { $0.capture.utcMilliseconds > $1.capture.utcMilliseconds }
     }
 
@@ -459,6 +534,7 @@ private struct LocalPendingMomentLink: Codable, Equatable {
         guard let row = try object("MomentRecord", id: momentID) else {
             throw LocalStoreError.momentMissing
         }
+        guard !(try decodeMoment(row)).deleted else { throw LocalStoreError.momentMissing }
         return try momentJournal(row).textHistory
     }
 
@@ -466,6 +542,7 @@ private struct LocalPendingMomentLink: Codable, Equatable {
         guard let row = try object("MomentRecord", id: momentID) else {
             throw LocalStoreError.momentMissing
         }
+        guard !(try decodeMoment(row)).deleted else { throw LocalStoreError.momentMissing }
         return try momentJournal(row).operations
     }
 
@@ -1229,6 +1306,28 @@ private struct LocalPendingMomentLink: Codable, Equatable {
         try setEncodedSetting(journal, key: journalKey(journal.momentID))
     }
 
+    private func commitDeletion(kind: LocalDeletionKind, targetID: UUID,
+                                moment: LocalMoment, at date: Date) throws -> LocalDeletionRecord {
+        guard !moment.deleted else { throw LocalStoreError.invalidDeletion }
+        if try hasDeletion(kind: kind, targetID: targetID) {
+            throw LocalStoreError.invalidDeletion
+        }
+        let record = LocalDeletionRecord(kind: kind, targetID: targetID,
+            momentID: moment.id, createdAtUTCMilliseconds: milliseconds(date),
+            expectedRevision: moment.revision)
+        try setEncodedSetting(record, key: deletionKey(kind: kind, targetID: targetID))
+        try save()
+        return record
+    }
+
+    private func hasDeletion(kind: LocalDeletionKind, targetID: UUID) throws -> Bool {
+        try settingValue(deletionKey(kind: kind, targetID: targetID)) != nil
+    }
+
+    private func deletionKey(kind: LocalDeletionKind, targetID: UUID) -> String {
+        Self.deletionPrefix + "\(kind.rawValue).\(targetID.uuidString.lowercased())"
+    }
+
     private func pendingMomentLink(sessionID: UUID) throws -> LocalPendingMomentLink? {
         let value: LocalPendingMomentLink? = try encodedSetting(pendingLinkKey(sessionID))
         guard value?.sessionID == sessionID || value == nil else {
@@ -1347,6 +1446,7 @@ private struct LocalPendingMomentLink: Codable, Equatable {
     private nonisolated static let journalPrefix = "c04d.moment."
     private nonisolated static let pendingLinkPrefix = "c04d.pending-link."
     private nonisolated static let deviceSequenceKey = "c04d.device-sequence"
+    private nonisolated static let deletionPrefix = "c04d.deletion."
 
     private func write(_ stamp: CaptureStamp, to row: NSManagedObject) {
         row.setValue(stamp.utcMilliseconds, forKey: "utcMilliseconds")
@@ -1390,7 +1490,8 @@ private struct LocalPendingMomentLink: Codable, Equatable {
             throw LocalStoreError.inconsistentStore
         }
         let journal = try momentJournal(row)
-        return LocalMoment(id: try required(row, "id"), tripID: try required(row, "tripID"),
+        let momentID: UUID = try required(row, "id")
+        return LocalMoment(id: momentID, tripID: try required(row, "tripID"),
                            dayID: try required(row, "dayID"), kind: kind,
                            capture: try decodeStamp(row), chapterDate: journal.currentChapterDate,
                            privacy: privacy,
@@ -1400,8 +1501,9 @@ private struct LocalPendingMomentLink: Codable, Equatable {
                            audioSessionID: row.value(forKey: "audioSessionID") as? UUID,
                            partialAudio: try required(row, "partialAudio"),
                            relatedMomentID: journal.relatedMomentID,
-                           location: try captureLocation(momentID: required(row, "id"), stamp: decodeStamp(row)),
-                           title: journal.currentTitle ?? "", attachmentTitles: journal.attachmentTitles ?? [])
+                           location: try captureLocation(momentID: momentID, stamp: decodeStamp(row)),
+                           title: journal.currentTitle ?? "", attachmentTitles: journal.attachmentTitles ?? [],
+                           deleted: try hasDeletion(kind: .moment, targetID: momentID))
     }
 
     private func decodeIntent(_ row: NSManagedObject) throws -> AudioIntent {
@@ -1445,12 +1547,14 @@ private struct LocalPendingMomentLink: Codable, Equatable {
             orientation: try required(row, "orientation"),
             durationMilliseconds: row.value(forKey: "durationMilliseconds") as? Int64,
             hasAudio: try required(row, "hasAudio"), partial: try required(row, "partial"))
-        return LocalMediaAsset(id: try required(row, "id"),
+        let assetID: UUID = try required(row, "id")
+        return LocalMediaAsset(id: assetID,
                                momentID: try required(row, "momentID"),
                                tripID: try required(row, "tripID"), kind: kind,
                                relativePath: try required(row, "relativePath"),
                                inspection: inspection,
-                               silentRequested: try required(row, "silentRequested"))
+                               silentRequested: try required(row, "silentRequested"),
+                               deleted: try hasDeletion(kind: .asset, targetID: assetID))
     }
 
     private func decodeStamp(_ row: NSManagedObject) throws -> CaptureStamp {

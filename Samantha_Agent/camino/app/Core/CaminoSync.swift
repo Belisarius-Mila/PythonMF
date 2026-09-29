@@ -677,6 +677,29 @@ public struct CaminoSyncJournal: Codable, Equatable, Sendable {
         }
     }
 
+    /// Local deletion tombstones must stop any not-yet-sent create work from
+    /// reaching the Mac. Already accepted history stays byte-for-byte intact;
+    /// the later server deletion contract will handle that copy separately.
+    public mutating func suppressDeletedContent(momentIDs: Set<UUID>, assetIDs: Set<UUID>) {
+        func payloadObject(_ item: CaminoSyncMetadataItem) -> [String: Any]? {
+            (try? JSONSerialization.jsonObject(with: item.payload)) as? [String: Any]
+        }
+        metadata.removeAll { item in
+            guard item.phase != .accepted else { return false }
+            if item.kind == "create_asset" && assetIDs.contains(item.objectID) { return true }
+            if item.relatedMomentID.map(momentIDs.contains) == true { return true }
+            if let object = payloadObject(item),
+               let momentRaw = object["moment_id"] as? String,
+               let momentID = UUID(uuidString: momentRaw), momentIDs.contains(momentID) {
+                return true
+            }
+            return false
+        }
+        media.removeAll { item in
+            item.phase != .verified && (momentIDs.contains(item.momentID) || assetIDs.contains(item.id))
+        }
+    }
+
     @discardableResult public mutating func observeServer(
         serverID newServerID: UUID, epoch newEpoch: UUID, cursor: Int64,
         at date: Date = Date()

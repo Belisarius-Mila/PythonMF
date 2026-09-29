@@ -2722,3 +2722,27 @@ Technický důkaz: Audit main a1382856 před tímto zápisem: 10 commitů / 31 c
 origin 22dea402 je předkem, profily čisté/zarovnané. Žádný force push ani
 přepis historie. Předchozí plná vývojová brána 1838/1838 nenahrazuje dnešní
 publikační bránu. Nové fyzické scénáře ani recovery záloha zde neověřované.
+
+## 2026-09-29 18:59 CEST — B04 lokální mazání před novým buildem
+
+Hotovo: Implementováno potvrzené lokální mazání celého Momentu i jednotlivé
+foto/video přílohy. Komentář nebo Úvaha se mažou jako celá audio session včetně
+technických segmentů; u připojené session zůstává rodičovský Moment. Běžící
+foto/video/audio capture mazání zablokuje. Trvalý tombstone je v SettingRecord,
+originál se uvolňuje až po potvrzení metadata a restart smazaný obsah nevrátí.
+Synchronizační fronta potlačí dosud neodeslané create položky, přijatá historie
+zůstává zachovaná.
+
+Rozhodnutí: Míla výslovně schválil implementaci před novým buildem a fyzickými
+testy. Změna je lokální část B04; serverový delete/Viewer, Mac archivní pojistka
+pro již přenesené originály a podepsaný iPhone build nejsou tímto krokem hotové.
+Žádný push, deploy, podpis ani skutečné uživatelské mazání dat se neprovedlo.
+
+Důkaz: 56/56 Swift package testů PASS, generic iOS Simulator build bude znovu
+ověřen po poslední úpravě. Nové testy pokrývají restart tombstonu, zachování
+rodiče při mazání přílohy, blokaci aktivního capture, fyzické uvolnění JPEG a
+potlačení čekající sync práce. Fyzické iPhone UX, reálné volné místo a Viewer
+server mazání zůstávají NEOVĚŘENÉ.
+
+Další krok: Dokončit serverový delete kontrakt jako samostatný krok, potom nový
+podepsaný build a krátké fyzické testy mazání/obnovy bez odinstalace.

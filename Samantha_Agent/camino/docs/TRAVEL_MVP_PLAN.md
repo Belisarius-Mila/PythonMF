@@ -334,3 +334,21 @@ fyzicky ověřené. Další je **samostatné povolení Vieweru a RT3/RT4 pro Jan
 M2c runbook vyžaduje trvalý Python, ověřený checkout, existující owner token
 a konkrétní trip/server ID/epochu. Schéma 3 přidává offline grant cesty;
 ověřený snapshot před upgradem není nezávislá záloha M3.
+
+## 2026-09-29 — B04 lokální mazání implementováno před novým buildem
+
+Míla nyní výslovně schválil vývoj mazání nepovedených fotek, videí, komentářů
+a úvah. Telefonní část B04 je implementovaná: detail nabízí potvrzené mazání
+celého Momentu i jedné fotky/videa; hlasový komentář se maže jako celá session
+včetně technických segmentů. Smazání jednotlivé přílohy ponechá rodičovský
+Moment, text, GPS i ostatní přílohy. Běžící capture se nejdřív musí ukončit.
+
+Metadata nejdříve zapíší malý trvalý lokální tombstone bez změny Core Data
+schématu, potom vault uvolní ověřený originál. Obnova aplikace už tombstonovaný
+obsah nevrátí a synchronizační fronta zahodí dosud neodeslané create položky,
+zatímco přijatá historie zůstává nedotčená.
+
+Tato dávka zatím nemaže již přenesenou kopii z Mac/Vieweru; serverový delete
+kontrakt, archivní pojistka a fyzické ověření na iPhonu jsou otevřené kroky.
+Po potvrzení serverové části musí staré URL přestat vydávat smazanou přílohu,
+bez odstranění neveřejného Mac archivu.

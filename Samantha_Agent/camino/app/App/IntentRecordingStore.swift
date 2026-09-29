@@ -85,4 +85,8 @@ enum CaminoAudioSyncLayout {
     func playbackURLs(for clip: RecordingClip) throws -> [URL] {
         try media.playbackURLs(for: clip)
     }
+
+    func delete(sessionID: UUID) throws {
+        try media.delete(sessionID: sessionID)
+    }
 }

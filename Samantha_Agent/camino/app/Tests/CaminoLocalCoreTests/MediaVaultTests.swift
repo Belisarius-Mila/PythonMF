@@ -132,6 +132,26 @@ import XCTest
                                                         targetMomentID: first.momentID))
     }
 
+    func testDeletedPhotoOriginalIsRemovedOnlyAfterMetadataTombstone() async throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("camino-delete-media-\(UUID())", isDirectory: true)
+        let store = try CaminoLocalStore(storeURL: root.appendingPathComponent("metadata.sqlite"))
+        _ = try store.createTrip(name: "Synthetic")
+        let vault = try CaminoMediaVault(root: root, metadata: store)
+        let asset = try await vault.savePhoto(jpeg())
+        let original = try vault.originalURL(for: asset)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: original.path))
+
+        _ = try store.deleteAsset(assetID: asset.id)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: original.path),
+                      "the tombstone is committed before byte cleanup")
+        var deleted = asset
+        deleted.deleted = true
+        try vault.delete(deleted)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: original.path))
+        XCTAssertThrowsError(try vault.delete(asset))
+    }
+
     func testPendingPhotoIsRecoveredWithoutDuplicateAndUnknownFileIsPreserved() async throws {
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent("camino-c04b-recovery-\(UUID())", isDirectory: true)

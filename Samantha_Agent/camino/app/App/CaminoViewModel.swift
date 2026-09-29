@@ -701,6 +701,68 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
         } catch { message = error.localizedDescription; refresh() }
     }
 
+    /// Deletes a complete Moment after the UI confirmation. Metadata tombstones
+    /// are committed first; byte cleanup is then best-effort and never restores
+    /// a deleted item after a restart.
+    func deleteMoment(momentID: UUID) {
+        guard !audioBusy, !showCamera, let local,
+              moment(with: momentID) != nil else { return }
+        let assets = mediaByMoment[momentID] ?? []
+        let sessions = audioSessionIDs(for: momentID)
+        do {
+            _ = try local.deleteMoment(momentID: momentID)
+            var cleanupFailed = false
+            for asset in assets {
+                var deleted = asset; deleted.deleted = true
+                if let mediaVault {
+                    do { try mediaVault.delete(deleted) } catch { cleanupFailed = true }
+                } else {
+                    cleanupFailed = true
+                }
+            }
+            for sessionID in sessions {
+                if let recording {
+                    do { try recording.delete(sessionID: sessionID) } catch { cleanupFailed = true }
+                } else {
+                    cleanupFailed = true
+                }
+            }
+            message = cleanupFailed
+                ? "Moment je smazaný z telefonu; úklid některého souboru se dokončí později."
+                : "Moment a jeho přílohy jsou smazané z telefonu."
+            momentDetail = nil
+            refresh()
+        } catch { message = error.localizedDescription; refresh() }
+    }
+
+    /// Deletes only the selected photo/video attachment; the parent Moment stays.
+    func deleteAsset(assetID: UUID) {
+        guard !audioBusy, !showCamera, let local else { return }
+        do {
+            guard let asset = mediaByMoment.values.flatMap({ $0 }).first(where: { $0.id == assetID }) else {
+                throw LocalStoreError.invalidDeletion
+            }
+            _ = try local.deleteAsset(assetID: assetID)
+            var deleted = asset; deleted.deleted = true
+            guard let mediaVault else { throw LocalStoreError.invalidMedia }
+            try mediaVault.delete(deleted)
+            message = "Příloha je smazaná z telefonu; ostatní obsah Momentu zůstal zachovaný."
+            refresh()
+        } catch { message = error.localizedDescription; refresh() }
+    }
+
+    /// Deletes one complete audio session, including all technical segments.
+    func deleteAudioSession(sessionID: UUID, momentID: UUID) {
+        guard !audioBusy, !showCamera, let local else { return }
+        do {
+            _ = try local.deleteAudioSession(sessionID: sessionID, momentID: momentID)
+            guard let recording else { throw LocalStoreError.invalidAudioIntent }
+            try recording.delete(sessionID: sessionID)
+            message = "Nahrávka a všechny její části jsou smazané z telefonu."
+            refresh()
+        } catch { message = error.localizedDescription; refresh() }
+    }
+
     func setImportant(momentID: UUID, important: Bool) {
         guard !audioBusy, !showCamera, let local else { return }
         do {

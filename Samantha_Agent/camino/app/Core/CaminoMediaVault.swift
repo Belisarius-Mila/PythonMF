@@ -226,6 +226,19 @@ public struct LocalMediaRecovery: Equatable, Sendable {
         return result
     }
 
+    /// Removes one already-tombstoned local original. The path is derived from
+    /// the verified asset identity; arbitrary paths can never be deleted here.
+    public func delete(_ asset: LocalMediaAsset) throws {
+        guard asset.deleted else { throw LocalStoreError.invalidDeletion }
+        guard asset.relativePath == "Media/Originals/\(asset.id.uuidString).\(asset.kind.fileExtension)" else {
+            throw LocalStoreError.invalidMedia
+        }
+        let original = url(asset.relativePath)
+        if files.fileExists(atPath: original.path) { try files.removeItem(at: original) }
+        let pending = url("Media/Pending/\(asset.id.uuidString).\(asset.kind.fileExtension)")
+        if files.fileExists(atPath: pending.path) { try files.removeItem(at: pending) }
+    }
+
     private func url(_ relativePath: String) -> URL {
         root.appendingPathComponent(relativePath)
     }
