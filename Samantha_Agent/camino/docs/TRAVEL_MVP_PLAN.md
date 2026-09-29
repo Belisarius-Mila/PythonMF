@@ -7,6 +7,9 @@ Lokálně implementováno, bez změny telefonu; dosavadní odklad mapy níže je
 historický. Samostatná stránka, aktuálně povolené body, orientační spojnice,
 den/celá cesta a odkazy do deníku; žádné průběžné sledování nebo kilometráž.
 Ověření a další krátká přejímka: [VIEWER_ROUTE_MAP_REPORT.md](VIEWER_ROUTE_MAP_REPORT.md).
+29. 9. 21:02: lokálně doplněna koncová šipka posledního úseku; čára zůstává
+čárkovaná a spojuje každý další bod bez prahů. Živý Viewer zatím není z této
+změny nasazený.
 Nasazení serveru samostatně. B04 mazání dál pouze buffer. Jana podle Míly
 použila dosavadní Viewer ze svého Macu přes Cockpit; nikoli PASS nové mapy/G8.
 28. 9. 23:04: po samostatném souhlasu a globální brzdě U17 nasazená z ce903913bb35.

@@ -31,18 +31,36 @@
       if (!map.hasLayer(tiles)) tiles.addTo(map);
     }
   }
+  function bearing(from, to) {
+    const latitude = (from.latitude + to.latitude) * Math.PI / 360;
+    return Math.atan2((to.longitude - from.longitude) * Math.cos(latitude),
+      to.latitude - from.latitude) * 180 / Math.PI;
+  }
+  function addRouteArrow(from, to) {
+    const rotation = bearing(from, to).toFixed(1);
+    const icon = L.divIcon({
+      className: "route-arrow",
+      html: `<span aria-hidden="true" style="transform:rotate(${rotation}deg)"></span>`,
+      iconSize: [18, 18], iconAnchor: [9, 9]
+    });
+    L.marker([to.latitude, to.longitude], {
+      icon, interactive: false, keyboard: false, zIndexOffset: 1000
+    }).addTo(layer);
+  }
   function render(reframe = false) {
     map.closePopup(); layer.clearLayers(); el("points").replaceChildren();
     const visible = selected(), days = [...new Set(points.map(p => p.day))].sort();
     const known = visible.filter(p => p.utc_ms !== null && !p.uncertain);
     const first = known[0], last = known[known.length - 1];
     const groups = new Map();
-    let previous;
+    let previous, lastSegmentStart, lastSegmentEnd;
     for (const p of visible) {
       const color = palette[days.indexOf(p.day) % palette.length];
       if (previous && p.connect_previous) {
         L.polyline([[previous.latitude, previous.longitude], [p.latitude, p.longitude]],
           {color, weight: 3, dashArray: "6 8", interactive: false}).addTo(layer);
+        lastSegmentStart = previous;
+        lastSegmentEnd = p;
       }
       const key = `${p.latitude},${p.longitude}`;
       if (!groups.has(key)) groups.set(key, []);
@@ -50,6 +68,7 @@
       const item = document.createElement("li"); item.append(link(p)); el("points").append(item);
       previous = p;
     }
+    if (lastSegmentStart && lastSegmentEnd) addRouteArrow(lastSegmentStart, lastSegmentEnd);
     for (const group of groups.values()) {
       const p = group[0], popup = document.createElement("div");
       const roles = [];

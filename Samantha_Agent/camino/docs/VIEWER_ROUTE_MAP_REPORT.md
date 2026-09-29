@@ -1,5 +1,12 @@
 # Mapa cesty — místa záznamů (U17)
 
+29. 9. 2026 21:02 CEST. Doplněna malá koncová šipka orientovaná podle
+posledního úseku; spojnice zůstávají čárkované a každý další povolený GPS bod
+se stále spojuje s předchozím bez prahu přesnosti, vzdálenosti nebo času.
+Lokální projekce **16/16 PASS**, Node frontend **5/5 PASS**, syntaxe JS a
+`git diff --check` PASS. Tato změna čeká na samostatný push a nasazení; živý
+Viewer proto zatím stále běží ze staršího release.
+
 29. 9. 2026. Na požadavek Míly se každý nový GPS bod v chronologii spojuje
 s předchozím bodem. Původní blokace podle přesnosti, vzdálenosti, časové mezery,
 půlnoci a nejistého času byla odstraněna; označení nepřesnosti a orientační
@@ -32,8 +39,9 @@ Bez přenosu GPS nejsou body; nejde o živé sledování ani úplný inventář 
   nejistém čase. Jde o orientační vizualizaci zaznamenaných bodů, ne rozpoznání
   chůze/dopravy, měřenou trasu nebo důkaz správnosti GPS. Body se při přerušení
   nezahazují.
-- Přerušované spojnice, žádné přichytávání k silnicím, výpočet kilometrů,
-  přehrávací animace, GPX import ani pozadí telefonu.
+- Přerušované spojnice s malou šipkou na konci posledního úseku, žádné
+  přichytávání k silnicím, výpočet kilometrů, přehrávací animace, GPX import
+  ani pozadí telefonu.
 - Obnova po 60 s jen ve viditelné stránce, ručně Obnovit; timeout 15 s,
   žádné souběžné načítání. Nové body automaticky nepřibližují/nehýbou mapou;
   k tomu je Zobrazit všechny body výběru. Změna dne rámuje nový výběr.

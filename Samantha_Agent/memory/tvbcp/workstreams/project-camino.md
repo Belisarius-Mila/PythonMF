@@ -1,6 +1,13 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-09-29 21:02 CEST — U17 mapa má lokálně čárkované spojnice mezi každým
+  dalším povoleným GPS bodem bez blokace přesností, vzdáleností nebo časem a
+  malou šipku na konci posledního úseku. Cílený důkaz: projekce 16/16, Node
+  frontend 5/5, syntaxe JS a diff check PASS. Stav je lokální checkpoint před
+  push/deploy; živý Viewer, Safari, dlaždice a fyzický nový bod zůstávají
+  NEOVĚŘENO. Soukromí a archiv se nemění.
+
 - 2026-09-29 — Bod 2 dokončen lokálně: title editor je samostatný podview se
   svým draft stavem a video přehrávač vlastní stabilní `AVPlayer`; psaní proto
   nespouští znovuvytvoření celého detailu ani nových přehrávačů. Důkaz: Core

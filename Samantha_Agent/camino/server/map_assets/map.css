@@ -13,4 +13,6 @@ button{cursor:pointer}button:disabled{opacity:.55;cursor:wait}button:hover{backg
 #points{line-height:1.8;padding-left:24px}#points li{padding:5px 0;overflow-wrap:anywhere}
 .leaflet-popup-content{max-height:260px;overflow:auto;overflow-wrap:anywhere}.leaflet-popup-content a{display:block;padding:8px 0}
 .leaflet-control-attribution{font-size:11px}.leaflet-container{font-family:inherit}
+.route-arrow{width:18px!important;height:18px!important;margin:0!important;pointer-events:none}
+.route-arrow span{display:block;width:0;height:0;margin:1px;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:14px solid #233b35;filter:drop-shadow(0 1px 1px #fff);transform-origin:50% 50%}
 @media(max-width:520px){header,main,footer{padding:16px}h1{font-size:1.9rem}#map{height:55vh}#map-controls button{flex:1}}

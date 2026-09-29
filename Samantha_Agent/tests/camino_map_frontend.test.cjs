@@ -29,6 +29,8 @@ function fixture() {
   for(const kind of ['circleMarker','polyline']) L[kind]=(coords,opts)=>({
     bindPopup(popup){this.popup=popup;return this;},addTo(){stats.drawings.push({kind,coords,opts,popup:this.popup});return this;}
   });
+  L.divIcon=(opts)=>opts;
+  L.marker=(coords,opts)=>({addTo(){stats.drawings.push({kind:'marker',coords,opts});return this;}});
   window.L=L;
   let data={points:[]}, fail=false, deferred, serial=0;
   const context={document,window,L,Option:function(text,value){this.textContent=text;this.value=value;},AbortController,
@@ -62,6 +64,17 @@ test('consent, empty state, late points, grouping, text safety and stable viewpo
   assert.equal(f.stats.fits,2); assert.equal(f.stats.drawings.length,1);
   await f.el('refresh').events.click(); assert.equal(f.el('day').value,'2026-09-26');
   assert.equal(f.stats.fits,2); assert.equal(f.el('points').children.length,1);
+});
+test('final route arrow follows the last segment',async()=>{
+  const f=fixture();
+  f.setData([point(1,'2026-09-25',{latitude:0,longitude:0}),
+    point(2,'2026-09-25',{latitude:.001,longitude:0})]);
+  f.el('open-map').events.click(); await settle(); await f.el('refresh').events.click();
+  const arrows=f.stats.drawings.filter(x=>x.kind==='marker');
+  assert.equal(arrows.length,1);
+  assert.equal(arrows[0].coords[0],.001); assert.equal(arrows[0].coords[1],0);
+  assert.match(arrows[0].opts.icon.html,/rotate\(0\.0deg\)/);
+  assert.equal(arrows[0].opts.interactive,false);
 });
 test('refresh failures and revoked projection clear stale private layers and links',async()=>{
   const f=fixture(); f.setData([point(1)]);f.el('open-map').events.click();await settle();

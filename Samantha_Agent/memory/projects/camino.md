@@ -12,6 +12,12 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 
 ## Aktuální stav
 
+- 2026-09-29 21:02 CEST — U17 lokálně doplněna malá šipka na konci posledního
+  mapového úseku; směr se počítá z předchozího a koncového GPS bodu. Čára
+  zůstává čárkovaná a spojuje všechny další povolené body bez prahu. Důkaz:
+  projekce 16/16, Node frontend 5/5, syntaxe JS a diff check PASS. Změna není
+  pushnutá ani nasazená; živý Viewer proto používá starší release.
+
 - 2026-09-29 18:38 CEST — Kód bodu 2 je pushnutý jako `9579dcfb`; aktuální
   `main` a `origin/main` jsou shodné. Plná brána 1843/1843 PASS. Cockpit byl
   řízeně restartován a ověřen z tohoto main: nový proces, shodný kódový otisk
