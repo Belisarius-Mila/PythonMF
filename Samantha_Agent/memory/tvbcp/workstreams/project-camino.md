@@ -2896,3 +2896,24 @@ Technický důkaz: Uživatelské potvrzení 28. 9. 23:09, nikoli automatický te
 Zařízení/prohlížeč a jednotlivé okrajové scénáře neuvedené; nerozšiřovat na
 celé G8, všechny platformy ani revokaci/výpadek. Pouze dokumentační zápis,
 bez změny kódu, sítě, archivu, telefonu, nasazení či push.
+
+## 2026-09-29 18:38 CEST — Bod 2 push a řízené nasazení
+
+Hotovo: Oddělený editor názvů a stabilní video přehrávač jsou součástí
+pushnutého main. Cockpit nyní běží z tohoto main a jeho základní smoke kontroly
+jsou po restartu v pořádku.
+
+Rozhodnutí: Míla výslovně schválil push a nasazení. Nasazení se týká běžícího
+Cockpitu; aktualizace iOS aplikace je samostatný podepsaný build a instalace.
+
+Další krok: Připravit podepsaný iOS build, nainstalovat jej bez odinstalace
+stávající Camino a krátce ověřit psaní i ukládání názvů na telefonu.
+
+Navrhované další kroky: Zopakovat přerušené UI testy na stabilním runneru;
+po fyzickém průchodu vyhodnotit případné další zpomalení profilerem.
+
+Technický důkaz: `9579dcfb` je shodný lokálně i na `origin/main`; plná brána
+1843/1843 PASS. Předrestartový audit měl oba profilové workspaces čisté a
+zarovnané; po restartu byl potvrzen nový proces, shodný otisk a Cockpit smoke
+5/5. Cílený UI runner byl dříve přerušen bez PASS/FAIL a fyzický iPhone test
+zůstává NEOVĚŘENÝ.

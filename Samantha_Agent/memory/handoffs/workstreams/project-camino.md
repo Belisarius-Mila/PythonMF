@@ -1,6 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-09-29 18:38 CEST — Bod 2 je pushnutý na GitHub jako `9579dcfb` po
+  plné bráně 1843/1843; `main` a `origin/main` jsou shodné a oba čisté
+  profilové workspaces jsou fast-forwardem zarovnané. Řízené nasazení do
+  Cockpitu PASS: nový proces, očekávaný kódový otisk a smoke 5/5. Tato
+  serverová deployment receipt neinstaluje iOS aplikaci; podepsaný iPhone
+  build a fyzické ověření psaní zůstávají NEOVĚŘENO. Další krok: podepsat,
+  nainstalovat a krátce fyzicky ověřit Camino na telefonu.
+
 - 2026-09-29 — Bod 2 optimalizace dokončen lokálně: editor názvů je oddělený
   do vlastního SwiftUI podview, takže stav rozepsaného textu už při každém znaku
   nepřepočítává celý detail Momentu. Video má stabilní vlastní `AVPlayer` a při
