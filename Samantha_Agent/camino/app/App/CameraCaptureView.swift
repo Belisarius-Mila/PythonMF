@@ -291,16 +291,36 @@ struct CaminoPhotoThumbnail: View {
     }
 }
 
+private struct CaminoVideoPlayer: View {
+    let url: URL
+    @State private var player: AVPlayer?
+
+    var body: some View {
+        Group {
+            if let player {
+                VideoPlayer(player: player)
+            } else {
+                ProgressView()
+                    .frame(maxWidth: .infinity, minHeight: 80)
+            }
+        }
+        .task(id: url) {
+            player?.pause()
+            player = AVPlayer(url: url)
+        }
+        .onDisappear {
+            player?.pause()
+        }
+    }
+}
+
 struct CaminoMediaDetailView: View {
     @ObservedObject var model: CaminoViewModel
     let moment: LocalMoment
     @Environment(\.dismiss) private var dismiss
     @State private var showTextEditor = false
     @State private var showTitleEditor = false
-    @State private var titleDraft = ""
     @State private var titleAttachment: LocalAttachmentTitle? = nil
-    @State private var titleSaveFailed = false
-    @State private var titleSaving = false
     @State private var showChapterPicker = false
     @State private var chapterDate = Date()
     @State private var confirmDiary = false
@@ -327,8 +347,6 @@ struct CaminoMediaDetailView: View {
                     }
                     Button(current.title.isEmpty ? "Přidat název" : "Upravit název", systemImage: "pencil") {
                         titleAttachment = nil
-                        titleDraft = current.title
-                        titleSaveFailed = false
                         showTitleEditor = true
                     }
                     .accessibilityIdentifier("editMomentTitle")
@@ -395,7 +413,7 @@ struct CaminoMediaDetailView: View {
                                     CaminoPhotoThumbnail(url: url)
                                         .frame(maxWidth: .infinity, minHeight: 240)
                                 } else {
-                                    VideoPlayer(player: AVPlayer(url: url))
+                                    CaminoVideoPlayer(url: url)
                                         .frame(height: 240)
                                 }
                             } else {
@@ -499,51 +517,7 @@ struct CaminoMediaDetailView: View {
             } }
         }
         .sheet(isPresented: $showTitleEditor) {
-            NavigationStack {
-                Form {
-                    TextField("Nepovinný název", text: $titleDraft)
-                        .accessibilityIdentifier("momentTitleEditor")
-                    Text(titleAttachment == nil
-                         ? "Název celého okamžiku, nejvýše 160 znaků. Prázdné pole název odstraní. Média se nemění."
-                         : "Název této přílohy, nejvýše 160 znaků. Prázdné pole název odstraní. Celý hlasový komentář má jeden název; média se nemění.")
-                        .font(.footnote)
-                    Text(current.privacy == .ownerOnly
-                         ? "Jen pro mě: také název zůstává soukromý."
-                         : "Do deníku: po synchronizaci uvidí název také Jana.")
-                        .font(.footnote)
-                    if !LocalMoment.validTitle(titleDraft.trimmingCharacters(in: .whitespacesAndNewlines)) {
-                        Text("Použij jeden řádek do 160 znaků.").foregroundStyle(.orange)
-                    }
-                    if titleSaveFailed {
-                        Text("Název se nepodařilo uložit. Text zůstává zde, zkus to znovu.")
-                            .foregroundStyle(.orange)
-                    }
-                }
-                .navigationTitle(titleAttachment == nil ? "Název okamžiku" : "Název přílohy")
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button("Zrušit") { showTitleEditor = false }
-                            .disabled(titleSaving)
-                    }
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button("Uložit") {
-                            titleSaving = true
-                            Task { @MainActor in
-                                let saved = await model.saveTitle(
-                                    momentID: current.id, title: titleDraft,
-                                    attachment: titleAttachment)
-                                titleSaving = false
-                                if saved { showTitleEditor = false }
-                                else { titleSaveFailed = true }
-                            }
-                        }
-                        .disabled(titleSaving || !LocalMoment.validTitle(
-                            titleDraft.trimmingCharacters(in: .whitespacesAndNewlines)))
-                        .accessibilityIdentifier("saveMomentTitle")
-                    }
-                }
-            }
-            .interactiveDismissDisabled()
+            CaminoTitleEditorView(model: model, moment: current, attachment: titleAttachment)
         }
         .sheet(isPresented: $showTextEditor) {
             CaminoTextEditorView(model: model, momentID: current.id)
@@ -593,8 +567,6 @@ struct CaminoMediaDetailView: View {
     private func attachmentTitleButton(_ kind: LocalAttachmentTitle.Kind, id: UUID, title: String) -> some View {
         Button(title.isEmpty ? "Přidat název" : "Upravit název", systemImage: "pencil") {
             titleAttachment = LocalAttachmentTitle(kind: kind, targetID: id, title: title)
-            titleDraft = title
-            titleSaveFailed = false
             showTitleEditor = true
         }
         .accessibilityIdentifier("editAttachmentTitle-\(id.uuidString)")
@@ -607,6 +579,73 @@ struct CaminoMediaDetailView: View {
         formatter.timeZone = .current
         formatter.dateFormat = "yyyy-MM-dd"
         return formatter.date(from: chapter)
+    }
+}
+
+private struct CaminoTitleEditorView: View {
+    @ObservedObject var model: CaminoViewModel
+    let moment: LocalMoment
+    let attachment: LocalAttachmentTitle?
+    @Environment(\.dismiss) private var dismiss
+    @State private var draft: String
+    @State private var saveFailed = false
+    @State private var saving = false
+
+    private var current: LocalMoment { model.moment(with: moment.id) ?? moment }
+
+    init(model: CaminoViewModel, moment: LocalMoment,
+         attachment: LocalAttachmentTitle?) {
+        self.model = model
+        self.moment = moment
+        self.attachment = attachment
+        _draft = State(initialValue: attachment?.title ?? moment.title)
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                TextField("Nepovinný název", text: $draft)
+                    .accessibilityIdentifier("momentTitleEditor")
+                Text(attachment == nil
+                     ? "Název celého okamžiku, nejvýše 160 znaků. Prázdné pole název odstraní. Média se nemění."
+                     : "Název této přílohy, nejvýše 160 znaků. Prázdné pole název odstraní. Celý hlasový komentář má jeden název; média se nemění.")
+                    .font(.footnote)
+                Text(current.privacy == .ownerOnly
+                     ? "Jen pro mě: také název zůstává soukromý."
+                     : "Do deníku: po synchronizaci uvidí název také Jana.")
+                    .font(.footnote)
+                if !LocalMoment.validTitle(draft.trimmingCharacters(in: .whitespacesAndNewlines)) {
+                    Text("Použij jeden řádek do 160 znaků.").foregroundStyle(.orange)
+                }
+                if saveFailed {
+                    Text("Název se nepodařilo uložit. Text zůstává zde, zkus to znovu.")
+                        .foregroundStyle(.orange)
+                }
+            }
+            .navigationTitle(attachment == nil ? "Název okamžiku" : "Název přílohy")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Zrušit") { dismiss() }
+                        .disabled(saving)
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Uložit") {
+                        saving = true
+                        Task { @MainActor in
+                            let saved = await model.saveTitle(
+                                momentID: current.id, title: draft, attachment: attachment)
+                            saving = false
+                            if saved { dismiss() }
+                            else { saveFailed = true }
+                        }
+                    }
+                    .disabled(saving || !LocalMoment.validTitle(
+                        draft.trimmingCharacters(in: .whitespacesAndNewlines)))
+                    .accessibilityIdentifier("saveMomentTitle")
+                }
+            }
+        }
+        .interactiveDismissDisabled(saving)
     }
 }
 

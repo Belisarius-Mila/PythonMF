@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-29 — U17 spojnice každého nového GPS bodu a optimalizace title save
+Aktualizováno: 2026-09-29 — U17 spojnice každého nového GPS bodu a optimalizace title editoru/save
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -12,12 +12,19 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 
 ## Aktuální stav
 
+- 2026-09-29 — Editor názvů je samostatný SwiftUI podview s vlastním stavem a
+  videa používají stabilní vlastní `AVPlayer`, takže psaní nevyhodnocuje celý
+  mediální detail ani nevytváří přehrávače znovu. Core testy 51/51 a iOS
+  Simulator build PASS. Cílený UI test skončil přerušením XCTest/simulátor
+  runneru bez výsledku PASS/FAIL; fyzická kontrola psaní a ukládání je otevřená.
+  Změna zůstává lokální, bez podpisu, push a nasazení.
+
 - 2026-09-29 — Názvy Momentů a příloh se ukládají v background Core Data
   kontextu a po úspěchu se v paměti mění jen dotčený Moment; odstraněn celý
   `refresh()` z této cesty a vlastnictví příloh se ověřuje cíleným dotazem.
   Journal/wire kontrakt a synchronní API ostatních operací zůstaly zachované.
-  Core testy 51/51 a iOS Simulator build PASS. Lokální vývojový krok čeká na
-  commit, bez push/nasazení/podpisu. Otevřeno: fyzické ověření na zařízení a
+  Core testy 51/51 a iOS Simulator build PASS. Checkpoint `5b528dc5`, bez
+  push/nasazení/podpisu. Otevřeno: fyzické ověření na zařízení a
   případná samostatná izolace editoru kvůli překreslení při psaní.
 
 - 2026-09-29 — U17 nyní kreslí orientační úsek od každého nového GPS bodu

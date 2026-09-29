@@ -1,6 +1,15 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-09-29 — Bod 2 optimalizace dokončen lokálně: editor názvů je oddělený
+  do vlastního SwiftUI podview, takže stav rozepsaného textu už při každém znaku
+  nepřepočítává celý detail Momentu. Video má stabilní vlastní `AVPlayer` a při
+  běžném překreslení se znovu nevytváří. Core testy 51/51 a iOS Simulator build
+  PASS. Cílený UI test názvů byl spuštěn, ale XCTest/simulátor runner byl po
+  čekání přerušen (bez PASS/FAIL výsledku); fyzické zařízení zatím NEOVĚŘENO.
+  Bez podpisu, push a nasazení. Další krok: zopakovat UI test na stabilním
+  runneru a krátce ověřit psaní/ukládání na telefonu.
+
 - 2026-09-29 — Na Mílův požadavek optimalizováno ukládání názvů Momentů a
   příloh: zápis běží v background Core Data kontextu, validace přílohy načítá
   jen cílový Asset/AudioSession a ViewModel po úspěchu aktualizuje pouze

@@ -1,12 +1,21 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-09-29 — Bod 2 dokončen lokálně: title editor je samostatný podview se
+  svým draft stavem a video přehrávač vlastní stabilní `AVPlayer`; psaní proto
+  nespouští znovuvytvoření celého detailu ani nových přehrávačů. Důkaz: Core
+  testy 51/51 a iOS Simulator build PASS. Cílený UI test byl sestaven a spuštěn,
+  ale runner XCTest/simulátoru byl po čekání přerušen, takže nemá PASS/FAIL
+  důkaz; zařízení a skutečný pocit při psaní zůstávají NEOVĚŘENÉ. Stav:
+  checkpoint `c2dd8277`, bez push/deploy/podpisu. Další: opakovat UI test a
+  provést krátkou fyzickou regresi názvů.
+
 - 2026-09-29 — Cílený title-save performance krok dokončen lokálně: Core Data
   zápis názvu běží v background kontextu, aktualizace UI je pouze pro cílový
   Moment a validace přílohy neprochází celou knihovnu. Journal/wire kontrakt
   zůstal beze změny; přidány Core testy pro cílenost, přílohu a idempotentní
-  retry. Důkaz: 51/51 Core testů a iOS Simulator build PASS. Stav: lokální
-  checkpoint čeká na commit; žádný push/deploy/podpis ani fyzická přejímka.
+  retry. Důkaz: 51/51 Core testů a iOS Simulator build PASS. Stav: checkpoint
+  `5b528dc5`; žádný push/deploy/podpis ani fyzická přejímka.
   Riziko: psaní v detailu stále sdílí velké SwiftUI tělo a samostatně se musí
   ověřit, zda zbylé zpomalení při každém znaku vyžaduje izolaci editoru.
 
