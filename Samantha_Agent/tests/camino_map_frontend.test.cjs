@@ -52,6 +52,7 @@ test('consent, empty state, late points, grouping, text safety and stable viewpo
   f.setData([point(1),point(2,'2026-09-25',{longitude:.001})]);
   await f.el('refresh').events.click();
   assert.equal(f.stats.fits,1); assert.equal(f.stats.drawings.filter(x=>x.kind==='circleMarker').length,1);
+  assert.equal(f.stats.drawings.filter(x=>x.kind==='polyline').length,1);
   const popup=f.stats.drawings.find(x=>x.kind==='circleMarker').popup;
   assert.equal(popup.children.length,3); assert.match(popup.children[1].textContent,/<img/);
   assert.equal(popup.children[1].innerHTML,undefined);

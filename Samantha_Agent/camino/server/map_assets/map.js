@@ -40,7 +40,7 @@
     let previous;
     for (const p of visible) {
       const color = palette[days.indexOf(p.day) % palette.length];
-      if (previous && p.connect_previous && points.indexOf(p) === points.indexOf(previous) + 1) {
+      if (previous && p.connect_previous) {
         L.polyline([[previous.latitude, previous.longitude], [p.latitude, p.longitude]],
           {color, weight: 3, dashArray: "6 8", interactive: false}).addTo(layer);
       }

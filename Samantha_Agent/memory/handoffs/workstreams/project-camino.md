@@ -1,6 +1,15 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-09-29 — Na Mílův požadavek upravena U17 Mapa cesty: každý další GPS
+  bod v chronologii se nyní spojí s předchozím bodem. Čára se už nezastaví
+  kvůli přesnosti nad ±100 m, velké vzdálenosti, časové mezeře, půlnoci nebo
+  nejistému času; bod zůstává označený jako přibližný/nejistý. Lokální cílené
+  projekční testy 16/16 a Node frontend 4/4 PASS; změna zatím není nasazená.
+  Další krok: po běžném lokálním commitu samostatně schválit push/nasazení a
+  ověřit mapu v reálném Vieweru. Archiv, telefon, oprávnění a GPS data se
+  nemění.
+
 - 2026-09-28 23:09 CEST — Míla nadšeně potvrzuje mapu a její fungování:
   základní fyzická přejímka nasazené U17 PASS podle uživatele. Zařízení,
   prohlížeč a jednotlivé okrajové scénáře neuvedl; nový bod po přenosu,

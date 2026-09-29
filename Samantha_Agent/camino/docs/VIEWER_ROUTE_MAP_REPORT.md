@@ -1,5 +1,10 @@
 # Mapa cesty — místa záznamů (U17)
 
+29. 9. 2026. Na požadavek Míly se každý nový GPS bod v chronologii spojuje
+s předchozím bodem. Původní blokace podle přesnosti, vzdálenosti, časové mezery,
+půlnoci a nejistého času byla odstraněna; označení nepřesnosti a orientační
+charakter čáry zůstávají. Změna je lokální a čeká na samostatné nasazení.
+
 28. 9. 2026. Lokální implementace na výslovný pokyn Míly po schválení návrhu.
 **Od 23:04 CEST nasazená serverová verze ce903913bb35; bez push, restartu
 Cockpitu či změny iPhone buildu 8.** Níže vývojový důkaz a výsledek nasazení.
@@ -20,12 +25,13 @@ Bez přenosu GPS nejsou body; nejde o živé sledování ani úplný inventář 
 - Jeden bod na Moment, přílohy sdílejí jeho polohu. Žádná změna zachytávání GPS.
 - Chronologie `captured.utc_ms`, při shodě stabilní ID. Dny podle původního
   místního data zachycení, nikoli dne kapitoly. Odkaz vede do současné kapitoly.
-- Nejistý čas zůstává označený, bez spojnice. Bod bez času lze zobrazit
-  v Neznámý den pořízení, nikdy mu nevymýšlet datum nebo pozici.
-- Spojovat jen sousední body téhož dne, s kladným časovým rozdílem nejvýše
-  6 hodin, vzdáleností do 20 km a oběma přesnostmi nejvýše ±100 m.
-  Nepřekračovat datovou hranici. Jde o ochranné heuristiky, ne rozpoznání
-  chůze/dopravy nebo důkaz správnosti GPS. Body se při přerušení nezahazují.
+- Nejistý čas zůstává označený. Bod bez času lze zobrazit v Neznámý den
+  pořízení, nikdy mu nevymýšlet datum nebo pozici.
+- Každý další GPS bod se spojí s předchozím bodem v pořadí pořízení, i při
+  nepřesnosti nad ±100 m, velké vzdálenosti, časové mezeře, přes půlnoc nebo
+  nejistém čase. Jde o orientační vizualizaci zaznamenaných bodů, ne rozpoznání
+  chůze/dopravy, měřenou trasu nebo důkaz správnosti GPS. Body se při přerušení
+  nezahazují.
 - Přerušované spojnice, žádné přichytávání k silnicím, výpočet kilometrů,
   přehrávací animace, GPX import ani pozadí telefonu.
 - Obnova po 60 s jen ve viditelné stránce, ručně Obnovit; timeout 15 s,

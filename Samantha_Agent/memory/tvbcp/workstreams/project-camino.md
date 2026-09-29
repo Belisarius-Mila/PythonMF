@@ -1,6 +1,15 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-09-29 — Rozhodnutí: každý nový GPS bod má v U17 orientační mapě
+  dostat čáru od předchozího bodu, i při horší přesnosti, velké vzdálenosti,
+  časové mezeře, přes půlnoc nebo nejistém čase. Implementace odstranila
+  pouze blokující heuristiky projekce/vykreslení; ochrana Viewer projekce,
+  označení přesnosti a chronologické řazení zůstávají. Cílené testy 16/16 a
+  Node frontend 4/4 PASS, lokálně bez nasazení. Další krok: checkpoint,
+  případný schválený push/nasazení a živá přejímka; fyzický nový GPS bod,
+  Safari a externí dlaždice jsou zatím NEOVĚŘENO.
+
 - 2026-09-28 23:09 CEST — Míla nadšeně potvrzuje mapu a její fungování:
   základní fyzická přejímka nasazené U17 PASS podle uživatele. Zařízení,
   prohlížeč a jednotlivé okrajové scénáře neuvedl; nový bod po přenosu,

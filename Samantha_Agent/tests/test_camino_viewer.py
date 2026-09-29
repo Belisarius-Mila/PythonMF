@@ -34,7 +34,7 @@ class ViewerProjectionTests(unittest.TestCase):
             "type": "chapter", "day_id": other.id}}, expected=1)
         points = route_snapshot(self.snapshot(), root_path="/camino-api")["points"]
         self.assertEqual([p["id"] for p in points], [uid(70), uid(71), uid(72)])
-        self.assertEqual([p["connect_previous"] for p in points], [False, False, True])
+        self.assertEqual([p["connect_previous"] for p in points], [False, True, True])
         self.assertEqual(points[-1]["day"], "2026-09-25")
         self.assertEqual(points[-1]["href"], f"/camino-api/viewer/days/2026-09-24#moment-{uid(72)}")
 
@@ -59,7 +59,7 @@ class ViewerProjectionTests(unittest.TestCase):
                 c.execute("UPDATE meta SET " + flags)
             self.assertEqual(route_snapshot(self.snapshot()), {"points": []})
 
-    def test_route_breaks_are_conservative_and_no_location_is_invented(self):
+    def test_route_connects_every_new_gps_even_when_fix_is_poor_or_far(self):
         self.f.moment(70, Privacy.DIARY, location=LocationFix(0, 0, self.f.capture.utc_ms, 8))
         base = self.snapshot()["moments"][-1]
         # Isolated projection inputs: edge cases need no private/runtime archive.
@@ -75,7 +75,7 @@ class ViewerProjectionTests(unittest.TestCase):
                         {"map_point": {"latitude": 0, "longitude": .001, "accuracy_m": 101}},
                         {"map_point": {"latitude": 0, "longitude": 10, "accuracy_m": 8}}):
             with self.subTest(changes=changes):
-                self.assertFalse(linked(changes))
+                self.assertTrue(linked(changes))
         self.assertEqual(route_snapshot({"moments": [m for m in self.snapshot()["moments"] if not m["map_point"]]}), {"points": []})
 
     def test_map_shell_contains_no_diary_and_only_local_scripts(self):

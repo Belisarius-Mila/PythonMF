@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-28 23:09 CEST — uživatelská přejímka U17
+Aktualizováno: 2026-09-29 — U17 spojnice každého nového GPS bodu
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,12 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-09-29 — U17 nyní kreslí orientační úsek od každého nového GPS bodu
+  k předchozímu bodu v chronologii, bez blokace podle přesnosti, vzdálenosti,
+  časové mezery, dne nebo jistoty času. Přesnost se dál zobrazuje a čára není
+  vydávána za skutečně prošlou trasu. Změna je lokální a čeká na samostatné
+  nasazení; cílené projekční testy 16/16 a Node frontend 4/4 PASS.
 
 - 2026-09-28 23:09 CEST — Míla nadšeně potvrzuje mapu a její fungování:
   základní fyzická přejímka nasazené U17 PASS podle uživatele. Zařízení,
