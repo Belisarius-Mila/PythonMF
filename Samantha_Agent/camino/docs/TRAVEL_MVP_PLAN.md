@@ -7,9 +7,11 @@ Lokálně implementováno, bez změny telefonu; dosavadní odklad mapy níže je
 historický. Samostatná stránka, aktuálně povolené body, orientační spojnice,
 den/celá cesta a odkazy do deníku; žádné průběžné sledování nebo kilometráž.
 Ověření a další krátká přejímka: [VIEWER_ROUTE_MAP_REPORT.md](VIEWER_ROUTE_MAP_REPORT.md).
-29. 9. 21:02: lokálně doplněna koncová šipka posledního úseku; čára zůstává
-čárkovaná a spojuje každý další bod bez prahů. Živý Viewer zatím není z této
-změny nasazený.
+29. 9. 21:23: po schválení „vše p+n“ je U17 pushnutá a nasazená z release
+`879a2e7199b6`. Čára zůstává čárkovaná, spojuje každý další povolený bod bez
+prahu a poslední úsek má malou šipku. Plná brána 1843/1843, Cockpit smoke 5/5
+a živý privátní HTTPS audit 13/13 PASS; archiv zachovaný, Funnel off. Safari,
+OSM dlaždice, vizuální UX a nový bod po fyzické synchronizaci jsou NEOVĚŘENO.
 Nasazení serveru samostatně. B04 mazání dál pouze buffer. Jana podle Míly
 použila dosavadní Viewer ze svého Macu přes Cockpit; nikoli PASS nové mapy/G8.
 28. 9. 23:04: po samostatném souhlasu a globální brzdě U17 nasazená z ce903913bb35.

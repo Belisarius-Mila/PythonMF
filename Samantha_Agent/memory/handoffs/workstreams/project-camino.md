@@ -1,12 +1,15 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-09-29 21:02 CEST — Dokončena lokální U17 úprava Viewer mapy: čárkované
-  spojnice vedou mezi každým dalším povoleným GPS bodem bez prahu přesnosti,
-  vzdálenosti nebo času a na posledním úseku je malá směrová šipka. Projekce
-  16/16, Node frontend 5/5, syntaxe JS a `git diff --check` PASS. Změna čeká
-  na lokální checkpoint a samostatné schválení push/nasazení; živý Viewer je
-  stále starší release. Ochrana soukromí, archiv, iPhone a data beze změny.
+- 2026-09-29 21:23 CEST — U17 je po Mílou schváleném „vše p+n“ pushnutá a
+  nasazená z `879a2e7199b6`. Čárkované spojnice vedou mezi každým dalším
+  povoleným GPS bodem bez prahu přesnosti, vzdálenosti nebo času a poslední
+  úsek má malou směrovou šipku. Plná brána 1843/1843, Cockpit smoke 5/5,
+  živý privátní HTTPS audit 13/13; 13 bodů/12 úseků, anonymní i owner Viewer
+  odmítnutý, Funnel off. Archiv, data, tokeny, síť a iPhone beze změny.
+  Safari/OSM vizuální přejímka a nový bod po fyzické synchronizaci zůstávají
+  NEOVĚŘENO. Další krok: při běžném používání otevřít mapu a ověřit vizuální
+  šipku, popup a přírůstek nového bodu.
 
 - 2026-09-29 18:38 CEST — Kód bodu 2 je pushnutý na GitHub jako `9579dcfb` po
   plné bráně 1843/1843; aktuální `main` a `origin/main` jsou shodné a oba čisté

@@ -12,11 +12,13 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 
 ## Aktuální stav
 
-- 2026-09-29 21:02 CEST — U17 lokálně doplněna malá šipka na konci posledního
-  mapového úseku; směr se počítá z předchozího a koncového GPS bodu. Čára
-  zůstává čárkovaná a spojuje všechny další povolené body bez prahu. Důkaz:
-  projekce 16/16, Node frontend 5/5, syntaxe JS a diff check PASS. Změna není
-  pushnutá ani nasazená; živý Viewer proto používá starší release.
+- 2026-09-29 21:23 CEST — U17 je po schválení „vše p+n“ pushnutá a nasazená
+  z `879a2e7199b6`. Čára zůstává čárkovaná, každý další povolený GPS bod se
+  spojuje s předchozím a poslední úsek má malou směrovou šipku. Plná brána
+  1843/1843, Cockpit smoke 5/5, živý privátní HTTPS Viewer audit 13/13; ověřeno
+  13 bodů a 12 návazných úseků, anonymní/owner Viewer odmítnutý, Funnel off.
+  Archiv, data, tokeny, síť a iPhone beze změny. Safari/OSM vizuální přejímka a
+  nový bod po fyzické synchronizaci zůstávají NEOVĚŘENO.
 
 - 2026-09-29 18:38 CEST — Kód bodu 2 je pushnutý jako `9579dcfb`; aktuální
   `main` a `origin/main` jsou shodné. Plná brána 1843/1843 PASS. Cockpit byl

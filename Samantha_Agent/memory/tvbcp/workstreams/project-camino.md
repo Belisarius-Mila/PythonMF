@@ -1,12 +1,12 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-09-29 21:02 CEST — U17 mapa má lokálně čárkované spojnice mezi každým
-  dalším povoleným GPS bodem bez blokace přesností, vzdáleností nebo časem a
-  malou šipku na konci posledního úseku. Cílený důkaz: projekce 16/16, Node
-  frontend 5/5, syntaxe JS a diff check PASS. Stav je lokální checkpoint před
-  push/deploy; živý Viewer, Safari, dlaždice a fyzický nový bod zůstávají
-  NEOVĚŘENO. Soukromí a archiv se nemění.
+- 2026-09-29 21:23 CEST — U17 mapa je po schválení „vše p+n“ pushnutá a
+  nasazená z `879a2e7199b6`. Čárkované spojnice vedou mezi každým dalším
+  povoleným GPS bodem bez blokace přesností, vzdáleností nebo časem a poslední
+  úsek má malou směrovou šipku. Plná brána 1843/1843, Cockpit smoke 5/5 a živý
+  privátní HTTPS audit 13/13 PASS; 13 bodů má 12 návazných úseků, Funnel off.
+  Safari, OSM dlaždice, vizuální šipka a fyzický nový bod zůstávají NEOVĚŘENO.
 
 - 2026-09-29 — Bod 2 dokončen lokálně: title editor je samostatný podview se
   svým draft stavem a video přehrávač vlastní stabilní `AVPlayer`; psaní proto
@@ -2986,3 +2986,34 @@ komentář nebo Úvahu a návrat bez ztráty stávajících dat.
 Technický důkaz: Archive/export strict codesign PASS; `devicectl` install a launch
 PASS, proces Camino je viditelný v seznamu procesů. Fyzické UX a pořadí více příloh
 zůstávají NEOVĚŘENÉ do uživatelského potvrzení.
+
+
+## 2026-09-29 21:23 CEST — U17 mapa pushnutá a nasazená po „vše p+n“
+
+Hotovo: Míla výslovně schválil kompletní „vše p+n“. Čtyři čekající lokální
+commity byly po plné bráně odeslané na GitHub; `main` a `origin/main` nyní
+ukazují na `879a2e7199b6` a oba čisté profilové workspace jsou fast-forwardem
+zarovnané. Cockpit byl řízeně restartován z aktuálního main a smoke je 5/5 PASS.
+
+Rozhodnutí: Camino managed service byla řízeně zastavena, upgradována na
+neměnný release z tohoto commitu a znovu spuštěna. Původní soukromý archiv,
+konfigurace, oprávnění a data zůstaly zachované; Serve cesta se neměnila a
+Funnel zůstal vypnutý. iPhone build se neměnil, protože jde o serverový Viewer.
+
+Další krok: Při běžném používání otevřít Viewer → Mapa cesty → Otevřít mapu a
+krátce ověřit vizuální šipku, popup/odkaz a přírůstek jednoho nového bodu po
+fyzické synchronizaci.
+
+Navrhované další kroky: Pokud vizuální průchod projde, ponechat release v běžném
+používání; při nesouladu nejdříve pořídit redigovaný screenshot nebo popis
+scénáře a teprve potom řešit další úpravu. M3/M4, kontrola zálohy a B04 buffer
+zůstávají samostatné otevřené položky.
+
+Technický důkaz: Lokální cílené testy projekce 16/16, Node frontend 5/5,
+syntax check a diff check PASS; před push byla plná brána 1843/1843 PASS.
+Cockpit deployment receipt potvrdila nový proces a smoke 5/5. Živý HTTPS audit
+13/13 PASS: mapa/data 200, anonymní i owner Viewer 401, správný prefix a
+hlavičky, map.js/map.css 200 s no-store, živý asset obsahuje čárkované úseky
+a `route-arrow`; 13 bodů/12 návazných úseků. Audit nevypisoval souřadnice,
+názvy ani tokeny a neměnil osobní data. Safari/OSM dlaždice a fyzická UX jsou
+NEOVĚŘENO.

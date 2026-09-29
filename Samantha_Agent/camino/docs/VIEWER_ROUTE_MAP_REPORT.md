@@ -1,11 +1,13 @@
 # Mapa cesty — místa záznamů (U17)
 
-29. 9. 2026 21:02 CEST. Doplněna malá koncová šipka orientovaná podle
-posledního úseku; spojnice zůstávají čárkované a každý další povolený GPS bod
-se stále spojuje s předchozím bez prahu přesnosti, vzdálenosti nebo času.
-Lokální projekce **16/16 PASS**, Node frontend **5/5 PASS**, syntaxe JS a
-`git diff --check` PASS. Tato změna čeká na samostatný push a nasazení; živý
-Viewer proto zatím stále běží ze staršího release.
+29. 9. 2026 21:23 CEST. U17 je po schválení „vše p+n“ pushnutá a nasazená
+z release `879a2e7199b6`. Každý další povolený GPS bod se spojuje s předchozím,
+spojnice jsou čárkované a poslední úsek má malou směrovou šipku. Lokální
+projekce **16/16 PASS**, Node frontend **5/5 PASS**, plná brána **1843/1843
+PASS**, Cockpit smoke **5/5 PASS**. Řízený stop → upgrade → start Camino služby
+zachoval archiv a síť; skutečný privátní HTTPS Viewer audit **13/13 PASS**
+(včetně 13 bodů/12 návazných úseků, autentizace, hlaviček a živých assetů).
+Safari/OSM dlaždice a vizuální přejímka zůstávají NEOVĚŘENO.
 
 29. 9. 2026. Na požadavek Míly se každý nový GPS bod v chronologii spojuje
 s předchozím bodem. Původní blokace podle přesnosti, vzdálenosti, časové mezery,
@@ -71,7 +73,7 @@ a verze podle [Leaflet Download](https://leafletjs.com/download.html).
 - HTTP Viewer včetně mapy, autentizace, revokace, hlaviček, proxy a anchor:
   **17/17 PASS**, izolovaná syntetická data; použit stávající serverový Python
   environment, bez změny jeho balíčků, služby nebo archivu.
-- Node frontend **4/4 PASS**: consent/no-network-before-click, empty/stale data,
+- Node frontend **5/5 PASS**: consent/no-network-before-click, empty/stale data,
   seskupení, text-safe popup, filtr, stabilní viewport, zrušený request,
   návrat z pozadí/bfcache, výpadek podkladu, deníkový hash bez přehrání.
   Test je součástí běžné brány přes ViewerRuntimeTests.
@@ -146,3 +148,19 @@ tím nahrazené v rozsahu jeho praktické zkoušky. Neuvedl zařízení/prohlí�
 ani výsledky jednotlivých scénářů, proto nejde o plošný Safari/iPhone/G8 PASS,
 nový bod po přenosu nebo odvolání/výpadek. Pro dnešek práci ukončuje;
 nic dalšího nenasazovat, běžně používat stejnou verzi. Bez dalšího runtime zásahu.
+
+## Nasazení 2026-09-29 21:23 CEST
+
+Míla výslovně schválil kompletní „vše p+n“. Po předchozím ověření plné brány
+proběhl GitHub batch push čtyř čekajících commitů na `main`, fast-forward
+zarovnání obou čistých profilových workspace a řízené nasazení Cockpitu.
+Aktuální `main` i `origin/main` jsou `879a2e7199b6`; Cockpit byl restartován
+a novém procesu a smoke je **5/5 PASS**.
+
+Camino managed service prošla registrovaným stop → upgrade → start. Upgradeytvořil neměnný release z tohoto commitu, zachoval předchozí soukromý archiv,\konfiguraci a data; Serve cesta zůstala stejná a Funnel je vypnutý.
+
+Redigovaný živý HTTPS audit je **13/13 PASS**: Viewer mapa a map-data 200,nonymní i owner přístup k Vieweru 401, správný `/camino-api` prefix, CSP aeferrer hlavičky, mapové assety 200 s `no-store`, živý JavaScript obsahuje\čárkované úseky i koncovou šipku a 13 bodů má 12 návazných úseků. Kontrola
+evypsala žádné souřadnice, názvy ani tokeny a neměnila osobní data.
+
+Safari/OSM dlaždice, zoom/popup, skutečná vizuální šipka a nový bod po fyzické\synchronizaci zůstávají **NEOVĚŘENO**. Telefon kvůli serverové mapě nepotřebuje
+ový build; fyzická přejímka se provede při běžném používání Vieweru.
