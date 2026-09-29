@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import csv
+import hashlib
 import json
 import logging
 from logging.handlers import RotatingFileHandler
@@ -14,7 +15,7 @@ from pathlib import Path
 import re
 import shutil
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
@@ -116,6 +117,10 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--dry-run", action="store_true", help="Run checks without marking the day completed.")
     parser.add_argument("--force", action="store_true", help="Run even if today's state is already completed.")
     parser.add_argument(
+        "--publish-owl", action="store_true",
+        help="Build and verify today's Pages owl artifact, without a clock window or completed-day no-op.",
+    )
+    parser.add_argument(
         "--local-preview",
         action="store_true",
         help=(
@@ -200,6 +205,10 @@ def validate_run_date(run_date: str) -> None:
 
 
 def validate_time_gate_args(args: argparse.Namespace) -> None:
+    if args.publish_owl and (args.run_date is not None or args.dry_run or args.local_preview
+                            or args.only_at_hour is not None or args.window_start_hour is not None
+                            or args.window_hours is not None):
+        raise ValueError("--publish-owl cannot use a date override, preview, dry run or time gate.")
     if args.local_preview and args.dry_run:
         raise ValueError("--local-preview cannot be combined with --dry-run.")
     if args.local_preview and (
@@ -637,9 +646,8 @@ def mark_failed(context: DailyContext, error: str) -> None:
 def run_daily_tasks(context: DailyContext) -> dict:
     """Run configured daily work.
 
-    Concrete tasks must keep their own date gates and write allowlists. Git commit
-    and push are handled by the GitHub Actions workflow, not by this Python entry
-    point.
+    Concrete tasks keep their own date gates and write allowlists. Pages uses
+    the separate fail-closed publication mode; neither path commits or pushes.
     """
 
     logging.info("Daily 3 AM routine started for %s.", context.run_date)
@@ -697,6 +705,57 @@ def run_local_preview_once(context: DailyContext) -> int:
     return EXIT_OK
 
 
+def run_owl_publication(context: DailyContext, *, audio_generator=None, clock=None) -> int:
+    """Fail closed before Pages upload, even after a delayed cron or stale state.
+
+    Only runs in an explicitly authorized publication checkout. No Git writes,
+    legacy-config fallback, other maintenance task, or completed-day shortcut.
+    """
+    clock = clock or (lambda: datetime.now(PRAGUE_TZ))
+    if context.dry_run or context.run_date != clock().astimezone(PRAGUE_TZ).date().isoformat():
+        raise DailyTaskError("Publication requires the current Prague date.")
+    context = replace(context, force=True)
+    with FileLock(context.state_dir / "daily_3am.lock"):
+        result = run_colors_numbers_owl_csv_task(context, audio_generator=audio_generator or generate_mp3)
+        if result.get("status") != "completed" or result.get("scheduled_date") != context.run_date:
+            raise DailyTaskError("No fresh daily owl was generated; refusing Pages publication.")
+        root = context.project_dir.parent.resolve()
+        targets = colors_numbers_targets(root, owl_audio_filename(context.run_date))
+        expected_src = owl_audio_src(context.run_date, owl_audio_filename(context.run_date))
+        payloads = []
+        for audio_path, script_path in targets:
+            if str(audio_path.relative_to(root)) not in result.get("changed_files", []):
+                raise DailyTaskError("Publication requires a freshly generated audio file.")
+            payload = audio_path.read_bytes()
+            if len(payload) < 128 or not (payload.startswith(b"ID3") or
+                                         (payload[0] == 0xff and payload[1] & 0xe0 == 0xe0)):
+                raise DailyTaskError("Owl audio is empty or is not an MP3 stream.")
+            sources = re.findall(r'const owlAudio = new Audio\("([^"]+)"\);',
+                                 script_path.read_text(encoding="utf-8"))
+            if sources != [expected_src]:
+                raise DailyTaskError("The site does not select exactly today's generated owl.")
+            payloads.append(payload)
+        if payloads[0] != payloads[1]:
+            raise DailyTaskError("Owl publication copies differ.")
+        # A same-day correction also gets a new audio URL and script cache key.
+        audio_src = expected_src + "-" + hashlib.sha256(payloads[0]).hexdigest()[:12]
+        for _, script_path in targets:
+            update_owl_audio_source(script_path, audio_src)
+            version = hashlib.sha256(script_path.read_bytes()).hexdigest()[:16]
+            index = script_path.with_name("index.html")
+            ensure_under(index.resolve(), script_path.parent)
+            original = index.read_text(encoding="utf-8")
+            pattern = r'(<script\b[^>]*\bsrc=")app\.js(?:\?[^"<>]*)?("[^>]*>)'
+            if len(re.findall(pattern, original)) != 1:
+                raise DailyTaskError("The site must contain exactly one local app.js script.")
+            updated = re.sub(pattern, lambda m: m[1] + "app.js?v=" + version + m[2], original)
+            index.write_text(updated, encoding="utf-8")
+        if context.run_date != clock().astimezone(PRAGUE_TZ).date().isoformat():
+            raise DailyTaskError("Date changed during generation; refusing stale Pages publication.")
+        logging.info("Verified Pages owl artifact for %s (%s bytes).", context.run_date, len(payloads[0]))
+    return EXIT_OK
+
+
 def main(argv: list[str] | None = None) -> int:
     argv = argv if argv is not None else sys.argv[1:]
     try:
@@ -745,7 +804,7 @@ def main(argv: list[str] | None = None) -> int:
         return EXIT_OK
 
     try:
-        return run_once(context)
+        return run_owl_publication(context) if args.publish_owl else run_once(context)
     except AlreadyRunningError:
         logging.warning("Daily 3 AM routine is already running; exiting.")
         return EXIT_ALREADY_RUNNING

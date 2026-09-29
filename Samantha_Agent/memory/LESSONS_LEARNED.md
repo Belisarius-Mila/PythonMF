@@ -28,11 +28,12 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   skončil no-op, ale navazující Pages job zveřejnil staré zdrojové app.js.
 - Typ: opakující se
 - Řešení nalezeno: 29092026
-- Řešení: dnešní autorizovaný ruční dispatch (bez časového okna) obnovil
-  správnou sovu. Ověřit cílový CSV řádek, headSha, veřejné app.js a MP3,
-  ne jen zelený workflow. Důkaz: plánovaný 36385316711/no-op, ruční
-  36525919936/success, veřejná MP3 200. Trvalá ochrana publikace po no-op
-  zatím neimplementovaná; vyžaduje navazující schválení, problém se může vrátit.
+- Řešení: publikační režim `--publish-owl` už nemá časové okno ani
+  completed-day shortcut. Před uploadem vyžaduje čerstvě vytvořené MP3,
+  platný header, shodné kopie, přesný dnešní selector v obou `app.js` a nové
+  cache klíče v `app.js`/`index.html`; při chybě skončí fail-closed. Ověření:
+  cílených 23 testů a plná brána 1843/1843. Po pushi znovu ověřit `headSha`,
+  veřejný JS a MP3, ne jen zelený workflow.
 
 ### LL-053 — Mapa musí dědit aktuální Viewer projekci a čas pořízení
 

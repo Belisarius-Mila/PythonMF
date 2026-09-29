@@ -1,6 +1,6 @@
 # Obecna rutina pro automaticke opakujici se ukoly
 
-## Aktuální stav 2026-09-29 — ruční publikace dnešní sovy
+## Aktuální stav 2026-09-29 — opravená automatická publikace sovy
 
 - Na Mílův výslovný pokyn ručně zveřejněná doslovná promluva připravená večer
   pro 29. září; CSV na vzdáleném main přesně odpovídá místnímu řádku.
@@ -12,12 +12,16 @@
   pozdě, v 08:13 CEST přeskočil generování kvůli oknu 03–08, ale workflow
   přesto publikovalo zdrojový web s červencovou sovou. Dnešní plánovaný běh
   v okamžiku auditu 07:23 ještě nebyl v seznamu; workflow je active.
-- Trvalá oprava automatického workflow zatím není schválená/provedená;
-  Mílovi nabídnutá samostatně. Pozdní plánovaný běh může problém zopakovat.
-  Ruční spuštění nemá časové okno. Veřejný index ponechává starší cache klíč
-  app.js; při starém otevřeném tabu doporučit úplné obnovení stránky.
-- Zdrojové soubory ani MP3 nebyly měněné/commitované; publikovaný artefakt
-  je autorita. Lokální čekající Camino commity zůstaly neodeslané.
+- Oprava je implementovaná v `scripts/daily_3am.py` a v obou kopiích
+  `samantha-daily-3am.yml`: publikační režim používá aktuální pražské datum i
+  při opožděném startu, vyžaduje čerstvě vytvořené MP3, shodné kopie a přesný
+  dnešní výběr v obou `app.js`; při chybě skončí před uploadem.
+- Oprava zároveň mění cache klíč obou `app.js` a příslušných `index.html`,
+  takže starý otevřený tab nemá zůstat u předchozího audia. Workflow nic
+  nezapisuje do Gitu; Pages publikuje pouze ověřený artifact.
+- Cílené testy `tests.test_daily_3am` (23) a plná brána `1843/1843` prošly.
+  Lokální checkpoint čeká na schválený push celého balíčku; dnešní ruční
+  publikace zůstává veřejnou autoritou do dalšího automatického běhu.
 
 ## Aktuální stav 2026-09-28 21:58 CEST — příprava pro 29. září
 

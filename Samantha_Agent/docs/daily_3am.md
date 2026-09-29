@@ -2,6 +2,35 @@
 
 Tento dokument popisuje bezpecnou denni rutinu pro `Samantha_Agent`.
 
+## Produkční Pages publikace — oprava 29. 9. 2026
+
+Plánovaný i ruční GitHub běh používají jediný příkaz:
+
+```bash
+python scripts/daily_3am.py --publish-owl
+```
+
+Tento režim patří do dočasného publikačního checkoutu, **ne do pracovního
+main pro náhled**. Čas cron startu není zaručený. Režim vždy generuje pro
+aktuální datum Europe/Prague i po 08:00, nevyužívá completed-day no-op ani
+historický JSON fallback. Vyžaduje aktuální CSV řádek nebo default.
+Datum nelze přepsat; preview, dry-run a časové brány se s režimem vylučují.
+
+Před úspěchem ověřuje čerstvý výsledek generování, neprázdný MP3 stream header,
+shodu obou audio kopií, právě jeden správný denní odkaz v každém app.js a
+právě jeden místní script odkaz v každém index.html. Audio URL obsahuje hash
+audio bajtů a index hash app.js, takže i nová promluva ve stejný den dostane
+nové cache klíče. Pokud během generování přejde pražská půlnoc, publikaci
+odmítne. Tato kontrola nenahrazuje poslech/dekódování všech audio framů.
+
+Chybějící text, neúplné audio nebo chyba TTS jsou neúspěch buildu. Upload
+artefaktu i deploy závisí na jeho úspěchu, takže nezveřejní starý zdrojový web.
+Práva zůstávají contents: read, pages: write, id-token: write; žádný zápis
+generovaných médií do main. Projektový workflow template je totožný s kořenovým.
+Původní obecné CLI/local-preview a jejich časové brány zůstávají pro lokální
+použití beze změny. Následující historické plánovací poznámky nejsou aktuální
+instrukcí k nastavení produkčního Pages workflow.
+
 ## Co rutina dela
 
 Hlavni vstupni bod je:

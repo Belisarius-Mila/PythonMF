@@ -3,6 +3,7 @@ import json
 import sys
 import tempfile
 import unittest
+from contextlib import nullcontext
 from datetime import datetime
 from pathlib import Path
 from unittest.mock import patch
@@ -37,6 +38,83 @@ class Daily3AmTests(unittest.TestCase):
         self.assertNotIn("git add", workflow)
         self.assertNotIn("git commit", workflow)
         self.assertNotIn("git push", workflow)
+        self.assertIn("python scripts/daily_3am.py --publish-owl", workflow)
+        self.assertNotIn("--window-start-hour", workflow)
+        self.assertNotIn("continue-on-error", workflow)
+        self.assertLess(workflow.index("--publish-owl"), workflow.index("actions/upload-pages-artifact"))
+        self.assertIn("needs: build-pages", workflow)
+        self.assertEqual(workflow, (SCRIPT_PATH.parents[1] / '.github/workflows/samantha-daily-3am.yml').read_text())
+
+    def publication_fixture(self, root):
+        project = root / 'Samantha_Agent'
+        (project / 'config').mkdir(parents=True)
+        (project / 'config/OwlSpeech.csv').write_text('date,full_text\n2026-09-29,Exact daily text\ndefault,Fallback\n')
+        for directory in daily_3am.COLORS_NUMBERS_ALLOWED_DIRS:
+            target = root / directory
+            target.mkdir(parents=True)
+            (target / 'app.js').write_text('const owlAudio = new Audio("old.mp3?v=1");\n')
+            (target / 'index.html').write_text('<html><script src="app.js?v=old"></script></html>')
+        now = datetime(2026, 9, 29, 8, 13, tzinfo=daily_3am.PRAGUE_TZ)
+        context = daily_3am.build_context(daily_3am.parse_args(['--project-dir',str(project),'--publish-owl']), now)
+        return context, now
+
+    def test_publication_runs_late_despite_completed_state_and_busts_both_caches(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            context, now = self.publication_fixture(root)
+            daily_3am.mark_completed(context, {'tasks': []})
+            calls = []
+            def generate(text, output, voice, rate):
+                calls.append(text)
+                output.write_bytes(b'ID3' + bytes([len(calls)]) * 200)
+            index_versions = []
+            for _ in range(2):
+                self.assertEqual(daily_3am.run_owl_publication(context, audio_generator=generate, clock=lambda:now),0)
+                scripts = [(root/d/'app.js').read_text() for d in daily_3am.COLORS_NUMBERS_ALLOWED_DIRS]
+                self.assertEqual(scripts[0], scripts[1])
+                self.assertRegex(scripts[0], r'owl_290926\.mp3\?v=20260929a-[0-9a-f]{12}')
+                index_versions.append((root/daily_3am.DOCS_COLORS_NUMBERS_APP_DIR/'index.html').read_text())
+                self.assertNotIn('app.js?v=old', index_versions[-1])
+            self.assertEqual(calls,['Exact daily text','Exact daily text'])
+            self.assertNotEqual(index_versions[0], index_versions[1])
+
+    def test_publication_rejects_missing_text_invalid_audio_and_old_selector(self):
+        for failure in ('missing_csv','missing_row','empty','not_mp3','old_selector','duplicate_selector','missing_index'):
+            with self.subTest(failure=failure), tempfile.TemporaryDirectory() as tmp:
+                root=Path(tmp)
+                context,now=self.publication_fixture(root)
+                csv=context.project_dir/'config/OwlSpeech.csv'
+                if failure=='missing_csv': csv.rename(csv.with_suffix('.saved'))
+                if failure=='missing_row': csv.write_text('date,full_text\n2026-09-28,Yesterday\n')
+                target=root/daily_3am.DOCS_COLORS_NUMBERS_APP_DIR
+                if failure=='duplicate_selector':
+                    with (target/'app.js').open('a') as stream: stream.write('const owlAudio = new Audio("extra.mp3");')
+                if failure=='missing_index': (target/'index.html').write_text('<html>No script</html>')
+                def generate(text,output,voice,rate):
+                    output.write_bytes(b'' if failure=='empty' else b'not audio'*100 if failure=='not_mp3' else b'ID3'+b'x'*200)
+                with patch.object(daily_3am,'update_owl_audio_source',return_value=False) if failure=='old_selector' else nullcontext():
+                    with self.assertRaises(daily_3am.DailyTaskError):
+                        daily_3am.run_owl_publication(context,audio_generator=generate,clock=lambda:now)
+
+    def test_publication_fails_on_tts_error_midnight_and_forbidden_modes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            context,now=self.publication_fixture(Path(tmp))
+            with self.assertRaises(daily_3am.DailyTaskError), patch.object(daily_3am,'generate_mp3',side_effect=daily_3am.DailyTaskError('TTS failed')):
+                daily_3am.run_owl_publication(context,clock=lambda:now)
+            moments=iter([now,now.replace(day=30)])
+            with self.assertRaises(daily_3am.DailyTaskError):
+                daily_3am.run_owl_publication(context,clock=lambda:next(moments),
+                    audio_generator=lambda text,output,voice,rate:output.write_bytes(b'ID3'+b'x'*200))
+        for extra in (['--dry-run'],['--local-preview'],['--run-date','2026-09-28'],
+                      ['--only-at-hour','3'],['--window-start-hour','3','--window-hours','5']):
+            with self.subTest(extra=extra),self.assertRaises(ValueError):
+                daily_3am.validate_time_gate_args(daily_3am.parse_args(['--publish-owl',*extra]))
+
+    def test_publication_cli_failure_is_not_a_successful_noop(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project=Path(tmp)/'Samantha_Agent'
+            project.mkdir()
+            self.assertEqual(daily_3am.main(['--project-dir',str(project),'--publish-owl']),daily_3am.EXIT_TASK_ERROR)
 
     def test_first_run_marks_day_completed_and_second_run_is_noop(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   schedule:
     # GitHub cron is UTC. During Prague summer time this starts at 03:00.
-    # The Python task still checks the 03:00-08:00 Prague window as a safety gate.
+    # GitHub may start late. Publish the actual Prague day, never a timed no-op.
     - cron: "0 1 * * *"
 
 permissions:
@@ -34,13 +34,8 @@ jobs:
       - name: Install Python dependencies
         run: python -m pip install -r requirements.txt edge-tts
 
-      - name: Run scheduled daily routine
-        if: github.event_name == 'schedule'
-        run: python scripts/daily_3am.py --window-start-hour 3 --window-hours 5
-
-      - name: Run manual daily routine
-        if: github.event_name == 'workflow_dispatch'
-        run: python scripts/daily_3am.py
+      - name: Generate and verify today's owl before publication
+        run: python scripts/daily_3am.py --publish-owl
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5

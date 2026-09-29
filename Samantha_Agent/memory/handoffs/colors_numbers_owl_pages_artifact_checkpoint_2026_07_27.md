@@ -1,7 +1,8 @@
-## Aktuální předávka 2026-09-29 — sova ručně zveřejněná
+## Aktuální předávka 2026-09-29 — ruční publikace a oprava automatiky
 
-Priorita: 1. Stav: hotovo v rozsahu dnešní ruční publikace.
-Pripomenout pri startu: ano — nevyřešené pozdní automatické spuštění.
+Priorita: 1. Stav: vývoj opravy hotový, čeká lokální checkpoint a schválený
+push celého balíčku.
+Pripomenout pri startu: ano — po dalším automatickém běhu ověřit veřejný JS/MP3.
 
 Hotovo: na výslovný pokyn Míly dnešní přesná CSV promluva zveřejněná ručním
 workflow 36525919936 nad d3c34d7c680e. Veřejný app.js odkazuje na
@@ -12,11 +13,17 @@ Příčina: plánovaný běh z 28. 9. dorazil až po 08:00 CEST. Generování pr
 no-op kvůli časovému oknu, ale publikace přesto nasadila staré zdrojové audio.
 Dnešní automatický běh v 07:23 ještě nebyl evidovaný. Ruční běh okno nemá.
 
-Další krok: Míla obnoví stránku a poslechne sovu. Trvalá oprava automatického
-workflow nabídnutá samostatně, zatím bez souhlasu/implementace. Opožděný
-plánovaný běh může znovu přepsat dnešní artefakt; neprohlašovat problém za
-trvale vyřešený. Veřejný index má starý cache klíč app.js, proto při starém
-otevřeném tabu zkusit úplné obnovení. Žádná tajemství/text promluvy v handoffu.
+Oprava: nový publikační režim `--publish-owl` nepoužívá časové okno ani
+completed-day no-op; vynutí čerstvou generaci aktuálního pražského dne,
+validuje MP3 header, shodu kopií, přesný výběr v obou `app.js` a cache-busting
+`app.js`/`index.html`. Při nesplnění kterékoliv podmínky skončí před Pages
+uploadem. Cílených 23 testů a plná brána `1843/1843` prošly. Hlavní workflow
+i projektová kopie jsou shodné a nemají Git commit/push kroky.
+
+Další krok: po lokálním commitu a schváleném pushi nechat proběhnout další
+plánovaný běh a ověřit jeho `headSha`, veřejný `app.js` a MP3 HTTP 200/
+`audio/mp3`/nenulovou velikost. Ruční poslech zůstává samostatné ověření.
+Žádná tajemství ani text promluvy se do handoffu nekopírují.
 
 ## Historická předávka 2026-09-28 21:58 CEST
 
