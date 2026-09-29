@@ -1,4 +1,24 @@
-## Aktuální předávka 2026-09-28 21:58 CEST
+## Aktuální předávka 2026-09-29 — sova ručně zveřejněná
+
+Priorita: 1. Stav: hotovo v rozsahu dnešní ruční publikace.
+Pripomenout pri startu: ano — nevyřešené pozdní automatické spuštění.
+
+Hotovo: na výslovný pokyn Míly dnešní přesná CSV promluva zveřejněná ručním
+workflow 36525919936 nad d3c34d7c680e. Veřejný app.js odkazuje na
+owl_290926.mp3?v=20260929a, MP3 HTTP 200, audio/mp3, 220 896 B / 36,816 s.
+GitHub main beze změny; žádný push Camina ani nové TTS v lokálním repozitáři.
+
+Příčina: plánovaný běh z 28. 9. dorazil až po 08:00 CEST. Generování provedlo
+no-op kvůli časovému oknu, ale publikace přesto nasadila staré zdrojové audio.
+Dnešní automatický běh v 07:23 ještě nebyl evidovaný. Ruční běh okno nemá.
+
+Další krok: Míla obnoví stránku a poslechne sovu. Trvalá oprava automatického
+workflow nabídnutá samostatně, zatím bez souhlasu/implementace. Opožděný
+plánovaný běh může znovu přepsat dnešní artefakt; neprohlašovat problém za
+trvale vyřešený. Veřejný index má starý cache klíč app.js, proto při starém
+otevřeném tabu zkusit úplné obnovení. Žádná tajemství/text promluvy v handoffu.
+
+## Historická předávka 2026-09-28 21:58 CEST
 
 Pro 29. září je místně připravený jediný nový řádek OwlSpeech.csv s doslovným
 Mílovým textem. Zítřek výslovně potvrzený. Náhled owl_290926.mp3 má 220 896 B

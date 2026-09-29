@@ -22,6 +22,18 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-054 — Opožděné soví workflow může po no-op publikovat starý web
+
+- Problém: plánovaný běh přišel po oknu 03–08 CEST; generátor korektně
+  skončil no-op, ale navazující Pages job zveřejnil staré zdrojové app.js.
+- Typ: opakující se
+- Řešení nalezeno: 29092026
+- Řešení: dnešní autorizovaný ruční dispatch (bez časového okna) obnovil
+  správnou sovu. Ověřit cílový CSV řádek, headSha, veřejné app.js a MP3,
+  ne jen zelený workflow. Důkaz: plánovaný 36385316711/no-op, ruční
+  36525919936/success, veřejná MP3 200. Trvalá ochrana publikace po no-op
+  zatím neimplementovaná; vyžaduje navazující schválení, problém se může vrátit.
+
 ### LL-053 — Mapa musí dědit aktuální Viewer projekci a čas pořízení
 
 - Problém: řazení uploadem/kapitolou posune pozdě doručený bod; oddělená

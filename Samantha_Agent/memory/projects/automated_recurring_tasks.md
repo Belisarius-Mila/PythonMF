@@ -1,5 +1,24 @@
 # Obecna rutina pro automaticke opakujici se ukoly
 
+## Aktuální stav 2026-09-29 — ruční publikace dnešní sovy
+
+- Na Mílův výslovný pokyn ručně zveřejněná doslovná promluva připravená večer
+  pro 29. září; CSV na vzdáleném main přesně odpovídá místnímu řádku.
+- Ruční Pages workflow `36525919936`, zdroj `d3c34d7c680e`, success;
+  deploy job `109269135381` success. Bez nového push, Camina nebo změny sítě.
+- Veřejný app.js vybírá `owl_290926.mp3?v=20260929a`; MP3 HTTP 200,
+  `audio/mp3`, 220 896 B / 36,816 s. Skutečný poslech uživatele neověřený.
+- Příčina staré sovy doložená: včerejší plánovaný běh `36385316711` začal
+  pozdě, v 08:13 CEST přeskočil generování kvůli oknu 03–08, ale workflow
+  přesto publikovalo zdrojový web s červencovou sovou. Dnešní plánovaný běh
+  v okamžiku auditu 07:23 ještě nebyl v seznamu; workflow je active.
+- Trvalá oprava automatického workflow zatím není schválená/provedená;
+  Mílovi nabídnutá samostatně. Pozdní plánovaný běh může problém zopakovat.
+  Ruční spuštění nemá časové okno. Veřejný index ponechává starší cache klíč
+  app.js; při starém otevřeném tabu doporučit úplné obnovení stránky.
+- Zdrojové soubory ani MP3 nebyly měněné/commitované; publikovaný artefakt
+  je autorita. Lokální čekající Camino commity zůstaly neodeslané.
+
 ## Aktuální stav 2026-09-28 21:58 CEST — příprava pro 29. září
 
 - Míla výslovně upřesnil datum 2026-09-29. Přidaný jediný přesný řádek
