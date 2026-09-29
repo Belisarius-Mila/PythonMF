@@ -12,9 +12,10 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 
 ## Aktuální stav
 
-- 2026-09-29 18:38 CEST — Bod 2 je pushnutý na `origin/main` jako `9579dcfb`.
-  Plná brána 1843/1843 PASS. Cockpit byl řízeně restartován a ověřen z tohoto
-  main: nový proces, shodný kódový otisk a smoke 5/5 PASS; profilové workspaces
+- 2026-09-29 18:38 CEST — Kód bodu 2 je pushnutý jako `9579dcfb`; aktuální
+  `main` a `origin/main` jsou shodné. Plná brána 1843/1843 PASS. Cockpit byl
+  řízeně restartován a ověřen z tohoto main: nový proces, shodný kódový otisk
+  a smoke 5/5 PASS; profilové workspaces
   jsou čisté a zarovnané. Serverové nasazení samo neaktualizuje iPhone, proto
   podepsaný build, instalace a fyzické ověření psaní/ukládání zůstávají otevřené.
 

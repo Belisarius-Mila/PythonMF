@@ -2912,8 +2912,9 @@ stávající Camino a krátce ověřit psaní i ukládání názvů na telefonu.
 Navrhované další kroky: Zopakovat přerušené UI testy na stabilním runneru;
 po fyzickém průchodu vyhodnotit případné další zpomalení profilerem.
 
-Technický důkaz: `9579dcfb` je shodný lokálně i na `origin/main`; plná brána
-1843/1843 PASS. Předrestartový audit měl oba profilové workspaces čisté a
+Technický důkaz: Kód bodu 2 je v pushnutém main jako `9579dcfb` a aktuální
+lokální main je shodný s `origin/main`; plná brána 1843/1843 PASS. Předrestartový
+audit měl oba profilové workspaces čisté a
 zarovnané; po restartu byl potvrzen nový proces, shodný otisk a Cockpit smoke
 5/5. Cílený UI runner byl dříve přerušen bez PASS/FAIL a fyzický iPhone test
 zůstává NEOVĚŘENÝ.

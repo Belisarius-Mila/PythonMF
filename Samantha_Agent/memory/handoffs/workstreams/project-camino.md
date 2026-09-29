@@ -1,8 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-09-29 18:38 CEST — Bod 2 je pushnutý na GitHub jako `9579dcfb` po
-  plné bráně 1843/1843; `main` a `origin/main` jsou shodné a oba čisté
+- 2026-09-29 18:38 CEST — Kód bodu 2 je pushnutý na GitHub jako `9579dcfb` po
+  plné bráně 1843/1843; aktuální `main` a `origin/main` jsou shodné a oba čisté
   profilové workspaces jsou fast-forwardem zarovnané. Řízené nasazení do
   Cockpitu PASS: nový proces, očekávaný kódový otisk a smoke 5/5. Tato
   serverová deployment receipt neinstaluje iOS aplikaci; podepsaný iPhone
