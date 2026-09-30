@@ -33,6 +33,21 @@ FastAPI test nebyl spuštěn kvůli chybějícímu modulu ve venv. Push, nasazen
 fyzická Safari/iPhone přejímka zůstávají otevřené; aktuální runtime proto dál
 odpovídá dříve nasazenému releasu `8c4660e7`.
 
+## Tmavý režim, souhrny a návrat nahoru — 2026-09-30
+
+Lokální checkpoint `2fc5d7a8` přidává tmavé barvy podle `prefers-color-scheme`.
+Souhrn každého rozbalovacího okamžiku má malé štítky jako `Foto 2 · Video 2`
+a zachovává textovou aria-label pro přístupnost. Na dlouhé stránce se po
+posunu objeví plovoucí tlačítko `↑ Nahoru`, které plynule vrátí stránku na
+začátek. Data, API, přístupová ochrana, média a původní rozbalovací chování se
+nemění.
+
+Ověření: `tests.test_camino_viewer` a `tests.test_camino_audio_layout` celkem
+27/27, Node frontend 5/5, `py_compile` a `git diff --check` PASS. HTTP
+integrační testy nebyly spuštěny, protože dostupné prostředí nemá `fastapi`.
+Push, nasazení a fyzická Safari/iPhone přejímka zůstávají otevřené; runtime
+stále odpovídá releasu `8c4660e7`.
+
 ## Nasazení lightboxu — 2026-09-30
 
 Commit `8c4660e7` byl po plné bráně 1845/1845 pushnutý na GitHub. Cockpit byl

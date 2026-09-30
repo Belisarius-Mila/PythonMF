@@ -1,6 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-09-30 19:49 CEST — Viewer checkpoint `2fc5d7a8` přidává tmavý režim
+  podle `prefers-color-scheme`, kompaktní štítky souhrnu (`Foto 2 · Video 2`)
+  a plovoucí `↑ Nahoru` po posunu. Data/API/originály/privacy/přehrávání se
+  nemění. Cílené testy 27/27, Node 5/5, `py_compile` a diff-check PASS;
+  HTTP integrační test blokuje chybějící FastAPI ve venv. Push, nasazení a
+  Safari/iPhone zůstávají NEOVĚŘENO; runtime je stále `8c4660e7`.
+  Další krok: případně samostatně schválit push/nasazení a vizuální přejímku.
+
 - 2026-09-30 19:44 CEST — Lokální Viewer checkpoint `2c3c07b8` rezervuje dva
   řádky pod názvem každého média a přidává do video náhledu značku `▶ Video`.
   Delší názvy se zalamují, data/API/originály/privacy/přehrávání zůstávají

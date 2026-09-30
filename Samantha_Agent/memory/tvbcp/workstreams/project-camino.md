@@ -1,6 +1,12 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-09-30 19:49 CEST — Checkpoint `2fc5d7a8` přidává tmavý režim podle
+  nastavení zařízení, štítky souhrnu `Foto 2 · Video 2` a tlačítko `↑ Nahoru`.
+  Python 27/27, Node 5/5, `py_compile` a diff-check PASS; HTTP integrační test
+  blokuje chybějící FastAPI. Push, deployment a Safari/iPhone jsou NEOVĚŘENO;
+  běžící runtime zůstává na `8c4660e7`.
+
 - 2026-09-30 19:44 CEST — Lokální checkpoint `2c3c07b8` stabilizuje názvy ve
   dvousloupcové mřížce minimálně dvěma řádky a přidává video badge `▶ Video`.
   Cílený Python 26/26, Node 5/5, `py_compile` a diff-check PASS; FastAPI HTTP

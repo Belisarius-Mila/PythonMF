@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-30 19:44 CEST — Viewer media tiles lokálně checkpointované
+Aktualizováno: 2026-09-30 19:49 CEST — Viewer grafické úpravy lokálně checkpointované
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,14 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-09-30 19:49 CEST — Lokální checkpoint `2fc5d7a8` přidává tmavý režim
+  podle nastavení zařízení, štítky souhrnu typu `Foto 2 · Video 2` a tlačítko
+  `↑ Nahoru` po delším posunu. Data, API, média, privacy filtr a rozbalování
+  zůstávají beze změny. Cílené Python testy 27/27, Node 5/5, `py_compile` a
+  diff-check PASS; HTTP integrační testy blokuje chybějící FastAPI ve venv.
+  Push, nasazení a Safari/iPhone přejímka jsou NEOVĚŘENO; runtime stále běží
+  z releasu `8c4660e7`.
 
 - 2026-09-30 19:44 CEST — Lokální checkpoint `2c3c07b8` zlepšuje Viewer mřížku:
   pod každým médiem rezervuje nejméně dva řádky pro název a video náhled má
