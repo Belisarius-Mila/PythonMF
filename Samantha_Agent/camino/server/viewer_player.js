@@ -44,6 +44,19 @@ if (caminoLightbox) caminoLightbox.addEventListener("click", event => {
 window.addEventListener("keydown", event => {
   if (event.key === "Escape" && caminoLightbox && !caminoLightbox.hidden) caminoCloseLightbox();
 });
+// Long day pages expose a compact, keyboard-accessible way back to the top.
+const caminoBackToTop = document.getElementById("backToTop");
+if (caminoBackToTop && window.addEventListener) {
+  const caminoUpdateBackToTop = () => {
+    const offset = Number(window.scrollY || window.pageYOffset || 0);
+    caminoBackToTop.hidden = offset < 480;
+  };
+  caminoBackToTop.addEventListener("click", () => {
+    if (typeof window.scrollTo === "function") window.scrollTo({top: 0, behavior: "smooth"});
+  });
+  window.addEventListener("scroll", caminoUpdateBackToTop, {passive: true});
+  caminoUpdateBackToTop();
+}
 // Only server-proven adjacent checkpoint segments auto-advance. Never skip gaps.
 const caminoAudioPlayers = Array.from(document.querySelectorAll("audio"));
 for (const player of caminoAudioPlayers) {

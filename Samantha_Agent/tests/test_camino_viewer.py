@@ -173,6 +173,13 @@ class ViewerProjectionTests(unittest.TestCase):
         self.assertEqual(page.count('class="media-video-preview"'), 2)
         self.assertEqual(page.count('class="media-video-badge"'), 2)
         self.assertIn("▶ Video", page)
+        self.assertIn("@media(prefers-color-scheme:dark)", page)
+        self.assertIn('id="backToTop"', page)
+        self.assertIn('aria-label="Zpět nahoru"', page)
+        self.assertIn('class="muted moment-summary"', page)
+        self.assertIn('class="moment-badge">Foto 2</span>', page)
+        self.assertIn('class="moment-badge">Video 2</span>', page)
+        self.assertIn('aria-label="Foto: 2 · Video: 2 · Rozbalit nebo sbalit"', page)
         self.assertIn("overflow-wrap:anywhere", page)
         self.assertIn("Dlouhý název fotografie, který se musí v mřížce zalomit", page)
         positions = [page.index(asset["id"]) for asset in (photo, video_one, video_two, photo_two)]

@@ -46,6 +46,12 @@ article{background:#fff;border:1px solid #dce2d8;border-radius:16px;padding:22px
 summary{cursor:pointer;min-height:48px;overflow-wrap:anywhere}summary:focus-visible{outline:3px solid #bd751a;outline-offset:4px}
 summary .moment-name{font-size:1.1rem;font-weight:700}summary .muted{display:block;margin-top:8px}
 details[open]>summary{padding-bottom:16px;border-bottom:1px solid #dce2d8;margin-bottom:16px}
+.moment-summary{display:flex;align-items:center;flex-wrap:wrap;gap:7px}
+.moment-badges{display:inline-flex;align-items:center;flex-wrap:wrap;gap:5px}
+.moment-badge{display:inline-flex;align-items:center;padding:4px 8px;border:1px solid #c9ddd0;border-radius:999px;background:#edf5ef;color:#225b48;font-size:.78rem;font-weight:700;line-height:1.1}
+.moment-badge-warning{border-color:#d8bd84;background:#faf3df;color:#76521a}
+.moment-badge-separator{color:#8a9b92;font-weight:700}
+.moment-summary-action{font-size:.8rem}
 .text{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.7}figure{margin:16px 0}
 .media-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:18px 0;align-items:start}
 figure.media-tile{min-width:0;margin:0}
@@ -65,7 +71,19 @@ img,video{display:block;max-width:100%;max-height:65vh;border-radius:10px;margin
 audio{width:100%}figcaption{margin:8px 0;color:#586961;font-size:.85rem}
 .notice{border-left:3px solid #ac792d;padding:10px 14px;background:#faf5e9}
 .place{margin:12px 0}.place a{display:inline-block;padding:10px 14px;border:1px solid #bfd0c5;border-radius:10px;text-decoration:none;font-weight:600}
-@media(max-width:520px){header,main,footer{padding:18px}h1{font-size:1.9rem}article{padding:16px}.media-lightbox{padding:14px}.media-lightbox img{max-width:96vw;max-height:82vh}}
+.back-to-top{position:fixed;right:22px;bottom:22px;z-index:20;padding:12px 16px;border:1px solid #225b48;border-radius:999px;background:#225b48;color:#fff;font:inherit;font-weight:700;box-shadow:0 4px 14px rgba(17,29,26,.22);cursor:pointer}
+.back-to-top:hover{background:#174536}.back-to-top:focus-visible{outline:3px solid #bd751a;outline-offset:4px}.back-to-top[hidden]{display:none}
+@media(prefers-color-scheme:dark){
+ :root{color-scheme:dark;color:#e4eee9;background:#15201d}
+ body{background:#15201d;color:#e4eee9}a{color:#9bd4b7}.muted,footer{color:#abc0b6}
+ nav a,article{background:#20302a;border-color:#3c5148}details[open]>summary{border-color:#3c5148}
+ .moment-badge{border-color:#507563;background:#294237;color:#b9e4c9}.moment-badge-warning{border-color:#a8874f;background:#4a3d22;color:#f1d596}
+ .moment-badge-separator{color:#91aa9e}.media-video-badge{background:rgba(0,0,0,.72)}
+ figure.media-tile img,figure.media-tile video{background:#2c3a35}figure.media-tile figcaption{color:#e4eee9}
+ .notice{border-color:#d3aa5a;background:#332d1e;color:#f1ead4}.place a{border-color:#507563;color:#b9e4c9}
+ .back-to-top{border-color:#9bd4b7;background:#9bd4b7;color:#15201d}.back-to-top:hover{background:#b9e4c9}
+}
+@media(max-width:520px){header,main,footer{padding:18px}h1{font-size:1.9rem}article{padding:16px}.media-lightbox{padding:14px}.media-lightbox img{max-width:96vw;max-height:82vh}.back-to-top{right:16px;bottom:16px;padding:11px 14px}}
 """
 KINDS = {"photo": "Fotografie", "video": "Video", "comment": "Komentář", "reflection": "Úvaha", "marker": "Záznam"}
 
@@ -75,17 +93,34 @@ def attachment_title(moment: dict, kind: str, target_id: str) -> str:
                  if t["kind"] == kind and t["target_id"] == target_id), "")
 
 
-def attachment_summary(moment: dict) -> str:
+def attachment_summary_parts(moment: dict) -> list[tuple[str, int, str]]:
     groups, used = ordered_audio_groups(moment["assets"], moment["audio_layouts"])
     # Count complete logical sessions, never their technical audio segments.
-    counts = [("Foto", sum(a["media_kind"] == "photo" for a in moment["assets"])),
-              ("Video", sum(a["media_kind"] == "video" for a in moment["assets"])),
-              ("Audio", len(groups))]
-    parts = [f"{label}: {count}" for label, count in counts if count]
+    counts = [("Foto", sum(a["media_kind"] == "photo" for a in moment["assets"]), "photo"),
+              ("Video", sum(a["media_kind"] == "video" for a in moment["assets"]), "video"),
+              ("Audio", len(groups), "audio")]
+    parts = [(label, count, css) for label, count, css in counts if count]
     unknown = sum(a["media_kind"] == "audio" and a["id"] not in used for a in moment["assets"])
     if unknown:
-        parts.append(f"Audio bez ověřeného seskupení: {unknown}")
-    return " · ".join(parts) or "Bez příloh"
+        parts.append(("Audio bez ověřeného seskupení", unknown, "warning"))
+    return parts
+
+
+def attachment_summary(moment: dict) -> str:
+    return " · ".join(f"{label}: {count}" for label, count, _ in attachment_summary_parts(moment)) or "Bez příloh"
+
+
+def attachment_summary_badges(moment: dict) -> str:
+    parts = attachment_summary_parts(moment)
+    if not parts:
+        return '<span class="moment-badge moment-badge-empty">Bez příloh</span>'
+    badges = []
+    for index, (label, count, css) in enumerate(parts):
+        if index:
+            badges.append('<span class="moment-badge-separator" aria-hidden="true">·</span>')
+        class_name = "moment-badge moment-badge-warning" if css == "warning" else "moment-badge"
+        badges.append(f'<span class="{class_name}">{escape(f"{label} {count}")}</span>')
+    return '<span class="moment-badges">' + ''.join(badges) + '</span>'
 
 
 class CaminoViewer:
@@ -205,9 +240,11 @@ class CaminoViewer:
                 label = f'{escape(moment["time"])} · {KINDS.get(moment["kind"], "Záznam")}'
                 title_text = moment.get("title", "")
                 heading = escape(title_text) if title_text else label
+                summary = attachment_summary(moment)
                 body += (f'<article id="moment-{moment["id"]}"><details><summary><span class="moment-name">{heading}</span>'
                          + (f'<span class="muted">{label}</span>' if title_text else '')
-                         + f'<span class="muted">{attachment_summary(moment)} · Rozbalit / sbalit</span>'
+                         + f'<span class="muted moment-summary" aria-label="{escape(summary, quote=True)} · Rozbalit nebo sbalit">'
+                           f'{attachment_summary_badges(moment)}<span class="moment-summary-action">Rozbalit / sbalit</span></span>'
                          + '</summary>')
                 if moment["text"]:
                     body += f'<p class="text">{escape(moment["text"])}</p>'
@@ -275,6 +312,7 @@ class CaminoViewer:
 <a href="{root_path}/viewer/map">Mapa cesty</a></nav></header><main>{body}</main><footer>
 Příprava médií: {built}<br>{state}<br>Zobrazuji doručené záznamy. Další mohou ještě čekat v telefonu.
 <br>Stránku obnovíš běžným tlačítkem prohlížeče.</footer>
+<button id="backToTop" type="button" class="back-to-top" aria-label="Zpět nahoru" hidden>↑ Nahoru</button>
 <div id="mediaLightbox" class="media-lightbox" hidden role="dialog" aria-modal="true" aria-hidden="true" aria-label="Zvětšená fotografie">
 <button type="button" class="media-lightbox-close" aria-label="Zavřít zvětšenou fotografii">×</button>
 <img id="mediaLightboxImage" alt=""></div>

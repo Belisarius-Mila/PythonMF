@@ -170,6 +170,24 @@ vm.runInNewContext(fs.readFileSync('camino/server/viewer_player.js','utf8'), {do
         run = subprocess.run([node_binary(), "-"], input=javascript, text=True, capture_output=True, timeout=10)
         self.assertEqual(run.returncode, 0, run.stderr)
 
+    def test_player_shows_and_uses_back_to_top_button(self):
+        javascript = r'''
+const assert = require('node:assert/strict');
+const vm = require('node:vm');
+const fs = require('node:fs');
+const back = {hidden:true, events:{}, addEventListener(name, fn){this.events[name]=fn;}};
+const document = {querySelectorAll(){return [];}, getElementById(id){return id === 'backToTop' ? back : null;}};
+const window = {location:{hash:''}, scrollY:0, events:{}, addEventListener(name, fn){this.events[name]=fn;},
+  scrollTo(options){this.scrolled=options;}};
+vm.runInNewContext(fs.readFileSync('camino/server/viewer_player.js','utf8'), {document,window});
+assert.equal(back.hidden, true);
+window.scrollY=700; window.events.scroll(); assert.equal(back.hidden, false);
+back.events.click(); assert.equal(window.scrolled.top, 0); assert.equal(window.scrolled.behavior, 'smooth');
+window.scrollY=0; window.events.scroll(); assert.equal(back.hidden, true);
+''';
+        run = subprocess.run([node_binary(), "-"], input=javascript, text=True, capture_output=True, timeout=10)
+        self.assertEqual(run.returncode, 0, run.stderr)
+
     def test_player_opens_and_closes_photo_lightbox(self):
         javascript = r'''
 const assert = require('node:assert/strict');
