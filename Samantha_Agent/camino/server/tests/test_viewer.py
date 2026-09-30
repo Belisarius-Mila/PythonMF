@@ -329,6 +329,28 @@ class ViewerHTTPTests(unittest.IsolatedAsyncioTestCase):
                 self.assertNotIn("location", tags)
         self.assertFalse(any(self.viewer.copies.root.glob("pending-*")))
 
+    async def test_photo_video_media_use_two_column_grid_and_wrapped_titles(self):
+        photo = self.f.upload(30, "photo", self.payloads["photo"])
+        video_one = self.f.upload(31, "video", self.payloads["video"])
+        video_two = self.f.upload(32, "video", self.payloads["video"])
+        photo_two = self.f.upload(33, "photo", self.payloads["photo"])
+        self.assertEqual(self.viewer.build_pending(), {"ready": 4, "waiting": 0})
+        long_title = "Dlouhý název fotografie, který se musí v mřížce zalomit na další řádek"
+        revision = self.f.store.moment(self.f.public.id)["revision"]
+        self.f.send("update_metadata", {"moment_id": self.f.public.id, "change": {
+            "type": "attachment_title", "attachment": {
+                "kind": "asset", "target_id": photo["id"], "title": long_title
+            }}}, expected=revision)
+        page = (await self.request("/viewer/days/2026-09-25")).text
+        self.assertIn('class="media-grid" aria-label="Fotografie a videa"', page)
+        self.assertEqual(page.count('class="media-tile"'), 4)
+        self.assertEqual(page.count('class="media-title"'), 4)
+        self.assertIn("grid-template-columns:repeat(2,minmax(0,1fr))", page)
+        self.assertIn("overflow-wrap:anywhere", page)
+        self.assertIn("Dlouhý název fotografie, který se musí v mřížce zalomit", page)
+        for asset in (video_one, video_two, photo_two):
+            self.assertIn(asset["id"], page)
+
     async def test_lock_denies_old_html_media_head_and_range(self):
         asset = self.f.upload(30, "photo", self.payloads["photo"])
         self.viewer.build_pending()

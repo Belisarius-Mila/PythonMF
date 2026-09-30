@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-29 — U17 spojnice každého nového GPS bodu a optimalizace title editoru/save
+Aktualizováno: 2026-09-30 — Viewer mřížka foto/videa po dvou
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,16 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-09-30 07:47 CEST — Viewer layout je lokálně upravený: po rozbalení
+  okamžiku se připravené foto/video řadí do dvousloupcové mřížky, pořadí se
+  zachovává a další média pokračují na dalších řádcích. Název je pod médiem,
+  tučný, mírně větší a zalomitelný; media zůstávají lazy/metadata preload a
+  celé se zobrazují bez ořezu. Text, audio, rozbalovací řádky, privacy hranice,
+  originály a wire/API se neměnily. Důkaz: root Viewer 17/17 PASS, cílený HTML
+  test, py_compile a diff-check PASS. FastAPI HTTP test nového layoutu nebyl
+  spuštěn, protože dostupné izolované prostředí nemá `fastapi`; fyzický Safari/
+  iPhone vzhled, push a nasazení jsou NEOVĚŘENO. Lokální změna čeká na checkpoint.
 
 - 2026-09-29 22:12 CEST — Oprava GPS capture je v checkpointu `cb13727f`
   pushnutá na GitHub; push workflow znovu potvrdil plnou bránu 1843/1843.

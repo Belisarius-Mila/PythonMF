@@ -4,6 +4,21 @@ Datum: 2026-09-25. Stav: implementace a syntetické testy hotové;
 Míla následně potvrdil, že lokální náhled funguje, a povolil pokračování.
 Bez nasazení a skutečných médií. Nejde o test Janiných zařízení nebo sítě.
 
+## Aktuální změna rozložení — 2026-09-30
+
+Po rozbalení okamžiku se připravené fotografie a videa vykreslují v kompaktní
+mřížce se dvěma sloupci. Pořadí médií zůstává zachované; další položky proto
+automaticky pokračují v dalších řádcích. Název je pod médiem, tučný, mírně
+větší a zalomí se i u dlouhých slov. Audio, text, rozbalovací řádky, přístupová
+ochrana a originály se tím nemění. Media tiles používají lazy photo loading,
+video `preload="metadata"` a `object-fit: contain`, aby se nic neořezávalo.
+
+Ověření: `tests.test_camino_viewer` 17/17 PASS, cílený HTML test mřížky PASS,
+`py_compile` a `git diff --check` PASS. Integrační FastAPI test nového HTML
+zůstává v testovacím souboru, ale v dostupném izolovaném prostředí nyní chybí
+modul `fastapi`, takže nebyl spuštěn. Safari/iPhone vizuální přejímka,
+push a nasazení zůstávají otevřené.
+
 ## Výsledek
 
 - Volitelný read-only Viewer v existující FastAPI aplikaci: `/viewer/`,

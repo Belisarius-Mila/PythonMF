@@ -1,6 +1,15 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-09-30 07:47 CEST — Lokální Viewer layout: po rozbalení okamžiku se
+  foto/video vykresluje po dvou vedle sebe, se zachovaným pořadím a novým
+  řádkem pro další dvojice; název je pod médiem, tučný, větší a zalomitelný.
+  Audio, text, details, privacy filtr, originály a wire/API beze změny.
+  Root projekce 17/17 PASS, cílený layout test, `py_compile` a diff-check PASS.
+  FastAPI HTTP regresní test nebyl spuštěn kvůli chybějícímu modulu v dostupném
+  venv; Safari/iPhone, push a deployment jsou NEOVĚŘENO. Stav: lokální práce
+  před checkpointem; riziko je pouze neověřený skutečný mobilní render.
+
 - 2026-09-29 22:12 CEST — c+p+n pro `cb13727f` dokončeno: push a plná brána
   1843/1843 PASS, strict codesign PASS, instalace i spuštění stejné bundle
   aplikace přes devicectl na spárovaném iPhonu PASS. Viewer/server beze změny.

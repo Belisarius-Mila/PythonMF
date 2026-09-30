@@ -1,6 +1,17 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-09-30 07:47 CEST — Na Mílův požadavek je lokálně upraven Viewer:
+  okamžik zůstává rozbalovací, ale připravené fotografie a videa jsou po
+  rozbalení v mřížce po dvou. Pořadí zůstává chronologické, další položky jsou
+  v dalších řádcích; názvy jsou pod médiem, tučné, mírně větší a zalamují se.
+  Audio/text, přístupová ochrana, lazy/preload chování, originály a API se
+  nemění. Důkaz: `tests.test_camino_viewer` 17/17, cílený test mřížky,
+  `py_compile` a `git diff --check` PASS. HTTP test čeká na prostředí s
+  FastAPI; dostupný izolovaný venv ho nemá. Safari/iPhone vizuální test,
+  push/nasazení a reálná média zůstávají NEOVĚŘENO. Další krok: lokální
+  checkpoint, poté samostatně schválit případný push/nasazení.
+
 - 2026-09-29 22:12 CEST — `cb13727f` je pushnutý po plné bráně 1843/1843;
   podepsaný iOS build prošel strict codesign, byl bez odinstalace přes
   devicectl nainstalován a spuštěn na spárovaném iPhonu. Serverový Viewer

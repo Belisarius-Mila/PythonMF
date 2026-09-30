@@ -1,15 +1,34 @@
 """Fast projection regressions without FastAPI, media codecs or paid services."""
 
 import json
+import importlib
+import sys
 import tempfile
+import types
 import unittest
 from dataclasses import replace
 from pathlib import Path
+from unittest.mock import patch
 
 from camino.domain.codec import wire
 from camino.domain.model import JourneyDay, LocationFix, Privacy, ContractError
 from tests.camino_viewer_fixture import ViewerFixture, uid
 from camino.server.viewer_map import route_snapshot, map_page
+
+
+def _viewer_class_without_fastapi():
+    """Load the pure HTML projection without requiring the HTTP test stack."""
+    loaded = sys.modules.get("camino.server.viewer")
+    if loaded is not None:
+        return loaded.CaminoViewer
+    fastapi = types.ModuleType("fastapi")
+    fastapi.APIRouter = type("APIRouter", (), {})
+    fastapi.Request = type("Request", (), {})
+    responses = types.ModuleType("fastapi.responses")
+    for name in ("FileResponse", "HTMLResponse", "JSONResponse", "Response"):
+        setattr(responses, name, type(name, (), {}))
+    with patch.dict(sys.modules, {"fastapi": fastapi, "fastapi.responses": responses}):
+        return importlib.import_module("camino.server.viewer").CaminoViewer
 
 
 class ViewerProjectionTests(unittest.TestCase):
@@ -122,6 +141,35 @@ class ViewerProjectionTests(unittest.TestCase):
         self.f.send("update_metadata", {"moment_id": self.f.public.id, "change": {
             "type": "privacy", "new_privacy": "owner_only", "user_action": "lock"}}, expected=5)
         self.assertEqual(self.snapshot()["moments"], [])
+
+    def test_photo_video_media_use_two_column_grid_and_wrapped_titles(self):
+        viewer_class = _viewer_class_without_fastapi()
+        photo = self.f.upload(30, "photo", b"photo")
+        video_one = self.f.upload(31, "video", b"video-one")
+        video_two = self.f.upload(32, "video", b"video-two")
+        photo_two = self.f.upload(33, "photo", b"photo-two")
+        long_title = "Dlouhý název fotografie, který se musí v mřížce zalomit na další řádek"
+        revision = self.f.store.moment(self.f.public.id)["revision"]
+        self.f.send("update_metadata", {"moment_id": self.f.public.id, "change": {
+            "type": "attachment_title", "attachment": {
+                "kind": "asset", "target_id": photo["id"], "title": long_title
+            }}}, expected=revision)
+
+        class ReadyCopies:
+            @staticmethod
+            def ready(_asset, verify=False):
+                return {"ready": object()}
+
+        viewer = viewer_class(self.f.store, None, ReadyCopies(), None, self.f.trip.id)
+        page = viewer.page("2026-09-25")
+        self.assertIn('class="media-grid" aria-label="Fotografie a videa"', page)
+        self.assertEqual(page.count('class="media-tile"'), 4)
+        self.assertEqual(page.count('class="media-title"'), 4)
+        self.assertIn("grid-template-columns:repeat(2,minmax(0,1fr))", page)
+        self.assertIn("overflow-wrap:anywhere", page)
+        self.assertIn("Dlouhý název fotografie, který se musí v mřížce zalomit", page)
+        positions = [page.index(asset["id"]) for asset in (photo, video_one, video_two, photo_two)]
+        self.assertEqual(positions, sorted(positions))
 
     def test_attachment_title_rejects_foreign_missing_audio_segments_and_invalid_values(self):
         from tests.test_camino_audio_layout import layout

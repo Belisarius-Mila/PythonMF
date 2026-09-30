@@ -47,6 +47,10 @@ summary{cursor:pointer;min-height:48px;overflow-wrap:anywhere}summary:focus-visi
 summary .moment-name{font-size:1.1rem;font-weight:700}summary .muted{display:block;margin-top:8px}
 details[open]>summary{padding-bottom:16px;border-bottom:1px solid #dce2d8;margin-bottom:16px}
 .text{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.7}figure{margin:16px 0}
+.media-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:18px 0;align-items:start}
+figure.media-tile{min-width:0;margin:0}
+figure.media-tile img,figure.media-tile video{width:100%;height:auto;max-height:42vh;aspect-ratio:4/3;object-fit:contain;background:#eef0eb}
+figure.media-tile figcaption{margin:9px 2px 0;color:#233b35;font-size:1rem;font-weight:700;line-height:1.3;overflow-wrap:anywhere;word-break:break-word}
 img,video{display:block;max-width:100%;max-height:65vh;border-radius:10px;margin:auto}
 audio{width:100%}figcaption{margin:8px 0;color:#586961;font-size:.85rem}
 .notice{border-left:3px solid #ac792d;padding:10px 14px;background:#faf5e9}
@@ -212,6 +216,8 @@ class CaminoViewer:
                              'Kliknutím předáš tento bod Apple Mapám.</p></div>')
                 audio_body, ordered_ids = self.audio_html(moment, root_path)
                 body += audio_body
+                media_tiles = []
+                other_media = []
                 for index, asset in enumerate(moment["assets"], 1):
                     if asset["id"] in ordered_ids:
                         continue
@@ -219,7 +225,7 @@ class CaminoViewer:
                     caption = escape(name) if name else f'{index}. médium'
                     ready = self.copies.ready(asset, verify=False)
                     if not ready:
-                        body += f'<p class="notice">{caption}: Médium zatím není připravené k přehrání.</p>'
+                        other_media.append(f'<p class="notice">{caption}: Médium zatím není připravené k přehrání.</p>')
                         continue
                     base = f'{root_path}/viewer/media/{asset["id"]}/'
                     kind = asset["media_kind"]
@@ -228,9 +234,15 @@ class CaminoViewer:
                     elif kind == "video":
                         element = f'<video controls playsinline preload="metadata" poster="{base}poster.jpg" src="{base}clip.mp4">Prohlížeč neumí přehrát video.</video>'
                     else:
-                        body += '<p class="notice">Pořadí této nahrávky zatím není přenesené; přehrává se samostatně.</p>'
+                        other_media.append('<p class="notice">Pořadí této nahrávky zatím není přenesené; přehrává se samostatně.</p>')
                         element = f'<audio controls preload="none" src="{base}audio.m4a">Prohlížeč neumí přehrát audio.</audio>'
-                    body += f'<figure>{element}<figcaption>{caption}</figcaption></figure>'
+                    if kind in ("photo", "video"):
+                        media_tiles.append(f'<figure class="media-tile">{element}<figcaption class="media-title">{caption}</figcaption></figure>')
+                    else:
+                        other_media.append(f'<figure>{element}<figcaption>{caption}</figcaption></figure>')
+                if media_tiles:
+                    body += '<div class="media-grid" aria-label="Fotografie a videa">' + ''.join(media_tiles) + '</div>'
+                body += ''.join(other_media)
                 body += '</details></article>'
         built = escape(self.last_build or "zatím neproběhla")
         state = {"manual": "Automatická příprava není zapnutá.",
