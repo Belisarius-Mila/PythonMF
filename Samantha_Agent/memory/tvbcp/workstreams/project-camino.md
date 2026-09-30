@@ -1,6 +1,15 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-09-30 18:58 CEST — Nasazení Viewer layoutu dokončeno: commit
+  `d2da13b4` je na origin/main, pushová brána 1844/1844 PASS, Cockpit nový
+  PID a smoke 5/5 PASS. Camino service stop/upgrade/start zachoval archiv,
+  grant i konfiguraci privátní route; HTTPS audit PASS, Funnel off. Živý
+  autorizovaný Viewer smoke PASS (200/401, 8 dnů, 7 grid dnů, 59 titulů,
+  dvousloupcové CSS, zalomení, lazy foto, metadata video, contain, no-store).
+  Safari/iPhone vizuální přejímka je stále NEOVĚŘENO; riziko je pouze skutečný
+  mobilní render a přístup zařízení do tailnetu.
+
 - 2026-09-30 07:47 CEST — Lokální Viewer layout: po rozbalení okamžiku se
   foto/video vykresluje po dvou vedle sebe, se zachovaným pořadím a novým
   řádkem pro další dvojice; název je pod médiem, tučný, větší a zalomitelný.

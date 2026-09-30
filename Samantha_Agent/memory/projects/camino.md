@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-30 — Viewer mřížka foto/videa po dvou
+Aktualizováno: 2026-09-30 — Viewer mřížka foto/videa nasazená
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,16 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-09-30 18:58 CEST — p+n dokončeno pro Viewer layout commit `d2da13b4`:
+  origin/main je shodný, pushová plná brána 1844/1844 PASS. Cockpit byl
+  řízeně restartován na tomto main, nový PID a smoke 5/5 PASS. Camino služba
+  byla po ověřeném stopu upgradována z předchozího immutable release na
+  `d2da13b4`, archiv i viewer grant zachovány; privátní HTTPS route zůstala
+  přítomná, ostatní Serve konfigurace beze změny a Funnel off. Živý Viewer
+  smoke: autorizovaný 200, neautorizovaný 401, 8 dnů, 7 dnů s mřížkou, 59
+  názvů; dvousloupcové CSS, tučné zalamování, lazy/metadata/contain PASS.
+  Safari/iPhone vizuální přejímka zůstává NEOVĚŘENO.
 
 - 2026-09-30 07:47 CEST — Viewer layout je lokálně upravený: po rozbalení
   okamžiku se připravené foto/video řadí do dvousloupcové mřížky, pořadí se

@@ -1,6 +1,15 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-09-30 18:58 CEST — p+n dokončeno pro `d2da13b4`. GitHub push proběhl
+  po plné bráně 1844/1844; Cockpit nový proces potvrdil smoke 5/5 a oba čisté
+  profily jsou zarovnané. Spravovaná Camino služba byla řízeně zastavena,
+  upgradována na immutable release `d2da13b4` a spuštěna; data/archiv a Viewer
+  grant se nezměnily, privátní HTTPS route zůstala a Funnel je vypnutý. Živý
+  Viewer smoke ověřil 200 s readerem, 401 bez readera, 8 dnů, 7 dnů s mřížkou
+  a 59 názvů; dvousloupcový layout, tituly, lazy/preload/contain a privacy
+  hlavičky PASS. Fyzický Safari/iPhone render zůstává NEOVĚŘENO.
+
 - 2026-09-30 07:47 CEST — Na Mílův požadavek je lokálně upraven Viewer:
   okamžik zůstává rozbalovací, ale připravené fotografie a videa jsou po
   rozbalení v mřížce po dvou. Pořadí zůstává chronologické, další položky jsou

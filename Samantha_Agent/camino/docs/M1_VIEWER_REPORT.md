@@ -19,6 +19,22 @@ zůstává v testovacím souboru, ale v dostupném izolovaném prostředí nyní
 modul `fastapi`, takže nebyl spuštěn. Safari/iPhone vizuální přejímka,
 push a nasazení zůstávají otevřené.
 
+## Nasazení — 2026-09-30
+
+Commit `d2da13b4` je na `origin/main`; pushová plná brána potvrdila
+1844/1844 testů. Cockpit byl řízeně restartován na stejném main, nový proces
+prošel smoke 5/5 a obě profilové kopie jsou čisté a zarovnané. Samostatná
+spravovaná Camino služba byla bezpečně zastavena, přepnuta z předchozího
+immutable release na release `d2da13b4` a znovu spuštěna; archiv zůstal
+zachovaný, viewer grant zůstal zapnutý, HTTPS route zůstala stejná a Funnel
+zůstal vypnutý.
+
+Živý Viewer smoke nad privátní loopback službou ověřil autorizovaný 200,
+neautorizovaný 401, 8 dostupných dnů, 7 dnů s mediální mřížkou a 59 názvů.
+Ověřeny byly dva sloupce, tučné zalomení, lazy foto, metadata preload videa,
+`contain`, no-store a zachování privacy hlaviček. Fyzický vizuální průchod
+Safari/iPhone nebyl proveden; služba a síť jsou ověřené serverovým smoke.
+
 ## Výsledek
 
 - Volitelný read-only Viewer v existující FastAPI aplikaci: `/viewer/`,
