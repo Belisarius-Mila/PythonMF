@@ -50,7 +50,9 @@ details[open]>summary{padding-bottom:16px;border-bottom:1px solid #dce2d8;margin
 .media-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:18px 0;align-items:start}
 figure.media-tile{min-width:0;margin:0}
 figure.media-tile img,figure.media-tile video{width:100%;height:auto;max-height:42vh;aspect-ratio:4/3;object-fit:contain;background:#eef0eb}
-figure.media-tile figcaption{margin:9px 2px 0;color:#233b35;font-size:1rem;font-weight:700;line-height:1.3;overflow-wrap:anywhere;word-break:break-word}
+figure.media-tile figcaption{margin:9px 2px 0;color:#233b35;font-size:1rem;font-weight:700;line-height:1.3;min-height:2.6em;overflow-wrap:anywhere;word-break:break-word}
+.media-video-preview{position:relative;display:block;width:100%}
+.media-video-badge{position:absolute;top:10px;left:10px;z-index:1;padding:5px 8px;border-radius:999px;background:rgba(17,29,26,.78);color:#fff;font-size:.75rem;font-weight:700;line-height:1;pointer-events:none}
 .media-open{display:block;width:100%;padding:0;border:0;border-radius:10px;background:transparent;cursor:zoom-in}
 .media-open:focus-visible{outline:3px solid #bd751a;outline-offset:4px}
 .media-lightbox[hidden]{display:none}
@@ -243,7 +245,8 @@ class CaminoViewer:
                                    'data-lightbox-alt="Fotografie ze záznamu" aria-label="Zvětšit fotografii">'
                                    f'<img src="{preview}" loading="lazy" alt="Fotografie ze záznamu"></button>')
                     elif kind == "video":
-                        element = f'<video controls playsinline preload="metadata" poster="{base}poster.jpg" src="{base}clip.mp4">Prohlížeč neumí přehrát video.</video>'
+                        video = f'<video controls playsinline preload="metadata" poster="{base}poster.jpg" src="{base}clip.mp4">Prohlížeč neumí přehrát video.</video>'
+                        element = f'<span class="media-video-preview"><span class="media-video-badge" aria-hidden="true">▶ Video</span>{video}</span>'
                     else:
                         other_media.append('<p class="notice">Pořadí této nahrávky zatím není přenesené; přehrává se samostatně.</p>')
                         element = f'<audio controls preload="none" src="{base}audio.m4a">Prohlížeč neumí přehrát audio.</audio>'

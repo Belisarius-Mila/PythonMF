@@ -169,6 +169,10 @@ class ViewerProjectionTests(unittest.TestCase):
         self.assertIn('id="mediaLightbox"', page)
         self.assertIn('aria-label="Zvětšená fotografie"', page)
         self.assertIn("grid-template-columns:repeat(2,minmax(0,1fr))", page)
+        self.assertIn("min-height:2.6em", page)
+        self.assertEqual(page.count('class="media-video-preview"'), 2)
+        self.assertEqual(page.count('class="media-video-badge"'), 2)
+        self.assertIn("▶ Video", page)
         self.assertIn("overflow-wrap:anywhere", page)
         self.assertIn("Dlouhý název fotografie, který se musí v mřížce zalomit", page)
         positions = [page.index(asset["id"]) for asset in (photo, video_one, video_two, photo_two)]
