@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-30 19:49 CEST — Viewer grafické úpravy lokálně checkpointované
+Aktualizováno: 2026-09-30 20:01 CEST — Viewer grafické úpravy nasazené
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,16 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-09-30 20:01 CEST — p+n dokončeno pro commit `0b75bc94`: plná brána
+  1846/1846 PASS, GitHub push, oba čisté profilové workspaces fast-forwardem
+  zarovnané na `main`, Cockpit nový PID `10074`, otisk
+  `49308f729c685835` a smoke 5/5 PASS. Camino služba byla stop/upgrade/start
+  přepnuta na immutable release `0b75bc9425af`, nový PID `10307`, archiv a
+  Viewer grant zachované, Funnel off. Živý Viewer smoke: 200/401, 8 dnů,
+  7 grid dnů, 33 lightbox tlačítek, 26 video značek, 56 souhrnných štítků,
+  dark CSS, návrat nahoru a no-store PASS. FastAPI HTTP test blokuje chybějící
+  modul ve venv; fyzický Safari/iPhone render zůstává NEOVĚŘENO.
 
 - 2026-09-30 19:49 CEST — Lokální checkpoint `2fc5d7a8` přidává tmavý režim
   podle nastavení zařízení, štítky souhrnu typu `Foto 2 · Video 2` a tlačítko

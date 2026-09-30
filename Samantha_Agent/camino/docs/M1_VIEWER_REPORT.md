@@ -48,6 +48,24 @@ integrační testy nebyly spuštěny, protože dostupné prostředí nemá `fast
 Push, nasazení a fyzická Safari/iPhone přejímka zůstávají otevřené; runtime
 stále odpovídá releasu `8c4660e7`.
 
+## p+n grafických úprav — 2026-09-30
+
+Commit `0b75bc94` byl po plné bráně `1846/1846` pushnutý na GitHub. Oba čisté
+profilové workspaces byly fast-forwardem zarovnány na stejný `main`; kanonická
+simple-main účtenka je ve stavu deployed. Cockpit se řízeně restartoval na
+nový PID `10074`, kódový otisk `49308f729c685835` sedí a smoke prošel `5/5`.
+
+Spravovaná Camino služba byla zastavena, přepnuta na immutable release
+`0b75bc9425af` a znovu spuštěna s novým PID `10307`. Archiv, identita, Viewer
+grant a privátní route zůstaly zachované; Funnel je vypnutý. Živý loopback
+Viewer smoke potvrdil autorizovaný `200`, neautorizovaný `401`, 8 dnů, 7 dnů
+s mřížkou, 33 fotografických tlačítek, 26 video značek, 56 souhrnných štítků,
+tmavý režim, tlačítko nahoru a `no-store` na všech dnech.
+
+FastAPI HTTP testy v lokálním venv stále blokuje chybějící modul; živý smoke
+spravované služby proběhl samostatně. Fyzická Safari/iPhone přejímka zůstává
+NEOVĚŘENO.
+
 ## Nasazení lightboxu — 2026-09-30
 
 Commit `8c4660e7` byl po plné bráně 1845/1845 pushnutý na GitHub. Cockpit byl

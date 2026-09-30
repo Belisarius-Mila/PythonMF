@@ -1,6 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-09-30 20:01 CEST — p+n pro `0b75bc94` je dokončeno: plná brána
+  1846/1846, push, fast-forward profilů, Cockpit restart PID `10074`/smoke 5/5
+  a otisk `49308f729c685835` PASS. Camino immutable release `0b75bc9425af`
+  běží na PID `10307`; archiv, grant a route zachované, Funnel off. Live Viewer
+  audit 200/401, 8 dnů, 7 grid dnů, 33 lightbox, 26 video badge, 56 summary
+  badge, dark mode, návrat nahoru a no-store PASS. FastAPI HTTP test blokuje
+  chybějící modul; Safari/iPhone vizuální přejímka NEOVĚŘENO.
+
 - 2026-09-30 19:49 CEST — Checkpoint `2fc5d7a8` přidává tmavý režim podle
   nastavení zařízení, štítky souhrnu `Foto 2 · Video 2` a tlačítko `↑ Nahoru`.
   Python 27/27, Node 5/5, `py_compile` a diff-check PASS; HTTP integrační test

@@ -1,6 +1,15 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-09-30 20:01 CEST — p+n dokončeno pro `0b75bc94`: plná brána 1846/1846,
+  GitHub push, oba čisté profily zarovnané fast-forwardem, Cockpit PID `10074`,
+  otisk `49308f729c685835` a smoke 5/5 PASS. Camino stop/upgrade/start přešel
+  na immutable release `0b75bc9425af`, PID `10307`, archiv/grant/privátní route
+  zachované, Funnel off. Živý Viewer smoke PASS: 200/401, 8 dnů, 7 grid dnů,
+  33 lightbox tlačítek, 26 video badges, 56 souhrnných štítků, dark mode,
+  `↑ Nahoru` a no-store. FastAPI HTTP test blokuje chybějící modul ve venv;
+  Safari/iPhone zůstává NEOVĚŘENO. Další krok: fyzická vizuální přejímka.
+
 - 2026-09-30 19:49 CEST — Viewer checkpoint `2fc5d7a8` přidává tmavý režim
   podle `prefers-color-scheme`, kompaktní štítky souhrnu (`Foto 2 · Video 2`)
   a plovoucí `↑ Nahoru` po posunu. Data/API/originály/privacy/přehrávání se
