@@ -4,6 +4,21 @@ Datum: 2026-09-25. Stav: implementace a syntetické testy hotové;
 Míla následně potvrdil, že lokální náhled funguje, a povolil pokračování.
 Bez nasazení a skutečných médií. Nejde o test Janiných zařízení nebo sítě.
 
+## Fotografie ve zvětšeném náhledu — 2026-09-30
+
+Fotografie v dvousloupcové mřížce jsou nyní tlačítkem otevřitelné ve zvětšeném
+náhledu přes stejný doručený `preview.jpg`. Náhled má zavírací tlačítko,
+zavře se kliknutím do ztmaveného pozadí nebo klávesou Escape, zamkne posun
+stránky a po zavření vrací fokus na původní fotografii. Videa dál používají
+nativní přehrávač. Originály, API, přístupová ochrana, lazy načítání i data se
+nemění.
+
+Lokální checkpoint: `de168178`. Ověření: `tests.test_camino_viewer` 17/17,
+`tests.test_camino_audio_layout` 9/9, Node frontend 5/5, test otevření/zavření
+lightboxu, `py_compile` a `git diff --check` PASS. Integrační FastAPI test
+zůstává v repozitáři, ale dostupné izolované prostředí nemá `fastapi`, takže
+nebyl spuštěn. Push, nasazení a fyzický Safari/iPhone průchod jsou otevřené.
+
 ## Aktuální změna rozložení — 2026-09-30
 
 Po rozbalení okamžiku se připravené fotografie a videa vykreslují v kompaktní

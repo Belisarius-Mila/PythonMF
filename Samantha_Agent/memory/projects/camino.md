@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-30 — Viewer mřížka foto/videa nasazená
+Aktualizováno: 2026-09-30 19:15 CEST — Viewer lightbox lokálně checkpointovaný
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,17 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-09-30 19:15 CEST — Lokální Viewer doplnil zvětšený náhled fotografií:
+  kliknutí na foto otevře bezpečný doručený `preview.jpg`, zavření funguje
+  tlačítkem, kliknutím do pozadí nebo Escape a fokus se vrací na původní tile.
+  Video zůstává u nativního přehrávače; originály, API, data, privacy filtr a
+  lazy načítání se nemění. Checkpoint `de168178`. `tests.test_camino_viewer`
+  17/17, `tests.test_camino_audio_layout` 9/9, Node frontend 5/5,
+  `py_compile` a diff-check PASS. FastAPI HTTP test nebyl spuštěn kvůli
+  chybějícímu modulu v dostupném izolovaném venv. Push, nasazení a skutečný
+  Safari/iPhone render zůstávají NEOVĚŘENO; další krok je samostatné schválení
+  push/nasazení a potom krátký vizuální průchod.
 
 - 2026-09-30 18:58 CEST — p+n dokončeno pro Viewer layout commit `d2da13b4`:
   origin/main je shodný, pushová plná brána 1844/1844 PASS. Cockpit byl
