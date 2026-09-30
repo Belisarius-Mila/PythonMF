@@ -1,6 +1,12 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-09-30 19:44 CEST — Lokální checkpoint `2c3c07b8` stabilizuje názvy ve
+  dvousloupcové mřížce minimálně dvěma řádky a přidává video badge `▶ Video`.
+  Cílený Python 26/26, Node 5/5, `py_compile` a diff-check PASS; FastAPI HTTP
+  test blokuje chybějící modul ve venv. Push, deployment a Safari/iPhone jsou
+  NEOVĚŘENO; běžící runtime zůstává na `8c4660e7`.
+
 - 2026-09-30 19:15 CEST — Fotografický lightbox z `de168178` je nasazený z
   immutable release `8c4660e7`. Plná brána 1845/1845, GitHub push, Cockpit
   nový PID/smoke 5/5, Camino stop/upgrade/start a živý Viewer smoke PASS:

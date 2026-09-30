@@ -1,6 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-09-30 19:44 CEST — Lokální Viewer checkpoint `2c3c07b8` rezervuje dva
+  řádky pod názvem každého média a přidává do video náhledu značku `▶ Video`.
+  Delší názvy se zalamují, data/API/originály/privacy/přehrávání zůstávají
+  beze změny. Cílené testy 26/26, Node 5/5, `py_compile` a diff-check PASS;
+  FastAPI HTTP test nebyl spuštěn kvůli chybějícímu modulu ve venv. Push,
+  nasazení a Safari/iPhone zůstávají NEOVĚŘENO; runtime je stále `8c4660e7`.
+  Další krok: případně samostatně schválit push/nasazení a vizuální přejímku.
+
 - 2026-09-30 19:15 CEST — Lightbox z checkpointu `de168178` je nasazený z
   immutable runtime release `8c4660e7`. Fotografie používají bezpečný
   `preview.jpg`; zavření přes tlačítko, pozadí nebo Escape vrací fokus.

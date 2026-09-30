@@ -19,6 +19,20 @@ lightboxu, `py_compile` a `git diff --check` PASS. Integrační FastAPI test
 zůstává v repozitáři, ale dostupné izolované prostředí nemá `fastapi`, takže
 nebyl spuštěn.
 
+## Stabilní názvy a označení videa — 2026-09-30
+
+Lokální checkpoint `2c3c07b8` rezervuje pod názvem každého média minimálně dva
+řádky. Krátký název proto neshodí druhou řadu mřížky výš; delší název se dál
+bezpečně zalamuje. Každé video má v levém horním rohu náhledu malou značku
+`▶ Video`. Data, API, originály, přístupová ochrana, přehrávání a pořadí médií
+se nemění; volitelná délka videa zatím není doplňována.
+
+Ověření: `tests.test_camino_viewer` a `tests.test_camino_audio_layout` celkem
+26/26, Node frontend 5/5, `py_compile` a `git diff --check` PASS. Integrační
+FastAPI test nebyl spuštěn kvůli chybějícímu modulu ve venv. Push, nasazení a
+fyzická Safari/iPhone přejímka zůstávají otevřené; aktuální runtime proto dál
+odpovídá dříve nasazenému releasu `8c4660e7`.
+
 ## Nasazení lightboxu — 2026-09-30
 
 Commit `8c4660e7` byl po plné bráně 1845/1845 pushnutý na GitHub. Cockpit byl
