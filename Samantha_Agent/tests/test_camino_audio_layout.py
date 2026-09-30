@@ -169,3 +169,37 @@ vm.runInNewContext(fs.readFileSync('camino/server/viewer_player.js','utf8'), {do
 '''
         run = subprocess.run([node_binary(), "-"], input=javascript, text=True, capture_output=True, timeout=10)
         self.assertEqual(run.returncode, 0, run.stderr)
+
+    def test_player_opens_and_closes_photo_lightbox(self):
+        javascript = r'''
+const assert = require('node:assert/strict');
+const vm = require('node:vm');
+const fs = require('node:fs');
+function events() { return {events:{}, addEventListener(name, fn){this.events[name]=fn;}}; }
+const button = events(); button.dataset = {lightboxSrc:'/viewer/media/photo/preview.jpg', lightboxAlt:'Fotografie ze záznamu'};
+button.focus = () => {button.focused = true;};
+const close = events(); close.focus = () => {close.focused = true;};
+const image = {src:'', alt:'', removeAttribute(name){if(name==='src') this.src='';}};
+const lightbox = events(); lightbox.hidden = true; lightbox.attributes = {};
+lightbox.querySelector = selector => selector === '.media-lightbox-close' ? close : null;
+lightbox.setAttribute = (name, value) => {lightbox.attributes[name]=value;};
+const classes = new Set();
+const document = {
+  body: {classList: {add(name){classes.add(name);}, remove(name){classes.delete(name);}}},
+  querySelectorAll(selector) { return selector === '[data-lightbox-src]' ? [button] : []; },
+  getElementById(id) { return {mediaLightbox:lightbox, mediaLightboxImage:image}[id] || null; }
+};
+const window = {location:{hash:''}, addEventListener(name, fn){this.events[name]=fn;}, events:{}};
+vm.runInNewContext(fs.readFileSync('camino/server/viewer_player.js','utf8'), {document,window});
+button.events.click();
+assert.equal(lightbox.hidden, false); assert.equal(image.src, button.dataset.lightboxSrc);
+assert.equal(image.alt, button.dataset.lightboxAlt); assert.ok(classes.has('media-lightbox-open'));
+assert.equal(close.focused, true);
+window.events.keydown({key:'Escape'});
+assert.equal(lightbox.hidden, true); assert.equal(image.src, ''); assert.ok(!classes.has('media-lightbox-open'));
+assert.equal(button.focused, true);
+button.events.click(); lightbox.events.click({target:lightbox});
+assert.equal(lightbox.hidden, true);
+''';
+        run = subprocess.run([node_binary(), "-"], input=javascript, text=True, capture_output=True, timeout=10)
+        self.assertEqual(run.returncode, 0, run.stderr)

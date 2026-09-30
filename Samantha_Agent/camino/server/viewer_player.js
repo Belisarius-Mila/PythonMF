@@ -9,6 +9,41 @@ function caminoOpenMoment() {
 }
 window.addEventListener("hashchange", caminoOpenMoment);
 caminoOpenMoment();
+// Photos open in a read-only enlarged preview; the served derivative remains the same.
+const caminoLightbox = document.getElementById("mediaLightbox");
+const caminoLightboxImage = document.getElementById("mediaLightboxImage");
+const caminoLightboxClose = caminoLightbox && caminoLightbox.querySelector
+  ? caminoLightbox.querySelector(".media-lightbox-close") : null;
+let caminoLightboxReturnFocus = null;
+function caminoCloseLightbox() {
+  if (!caminoLightbox || !caminoLightboxImage) return;
+  caminoLightbox.hidden = true;
+  caminoLightbox.setAttribute("aria-hidden", "true");
+  caminoLightboxImage.removeAttribute("src");
+  if (document.body && document.body.classList) document.body.classList.remove("media-lightbox-open");
+  if (caminoLightboxReturnFocus && caminoLightboxReturnFocus.focus) caminoLightboxReturnFocus.focus();
+  caminoLightboxReturnFocus = null;
+}
+function caminoOpenLightbox(button) {
+  const source = button.dataset.lightboxSrc;
+  if (!source || !caminoLightbox || !caminoLightboxImage) return;
+  caminoLightboxReturnFocus = button;
+  caminoLightboxImage.src = source;
+  caminoLightboxImage.alt = button.dataset.lightboxAlt || "Zvětšená fotografie";
+  caminoLightbox.hidden = false;
+  caminoLightbox.setAttribute("aria-hidden", "false");
+  if (document.body && document.body.classList) document.body.classList.add("media-lightbox-open");
+  if (caminoLightboxClose && caminoLightboxClose.focus) caminoLightboxClose.focus();
+}
+const caminoLightboxButtons = Array.from(document.querySelectorAll("[data-lightbox-src]"));
+for (const button of caminoLightboxButtons) button.addEventListener("click", () => caminoOpenLightbox(button));
+if (caminoLightboxClose) caminoLightboxClose.addEventListener("click", caminoCloseLightbox);
+if (caminoLightbox) caminoLightbox.addEventListener("click", event => {
+  if (event.target === caminoLightbox) caminoCloseLightbox();
+});
+window.addEventListener("keydown", event => {
+  if (event.key === "Escape" && caminoLightbox && !caminoLightbox.hidden) caminoCloseLightbox();
+});
 // Only server-proven adjacent checkpoint segments auto-advance. Never skip gaps.
 const caminoAudioPlayers = Array.from(document.querySelectorAll("audio"));
 for (const player of caminoAudioPlayers) {

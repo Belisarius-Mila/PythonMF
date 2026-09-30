@@ -51,11 +51,19 @@ details[open]>summary{padding-bottom:16px;border-bottom:1px solid #dce2d8;margin
 figure.media-tile{min-width:0;margin:0}
 figure.media-tile img,figure.media-tile video{width:100%;height:auto;max-height:42vh;aspect-ratio:4/3;object-fit:contain;background:#eef0eb}
 figure.media-tile figcaption{margin:9px 2px 0;color:#233b35;font-size:1rem;font-weight:700;line-height:1.3;overflow-wrap:anywhere;word-break:break-word}
+.media-open{display:block;width:100%;padding:0;border:0;border-radius:10px;background:transparent;cursor:zoom-in}
+.media-open:focus-visible{outline:3px solid #bd751a;outline-offset:4px}
+.media-lightbox[hidden]{display:none}
+.media-lightbox{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:24px;background:rgba(17,29,26,.92)}
+.media-lightbox img{display:block;max-width:94vw;max-height:86vh;width:auto;height:auto;border-radius:10px;object-fit:contain;background:#eef0eb}
+.media-lightbox-close{position:absolute;top:14px;right:16px;min-width:48px;min-height:48px;border:1px solid rgba(255,255,255,.5);border-radius:999px;background:rgba(0,0,0,.35);color:#fff;font-size:2rem;line-height:1;cursor:pointer}
+.media-lightbox-close:focus-visible{outline:3px solid #f7d17b;outline-offset:4px}
+body.media-lightbox-open{overflow:hidden}
 img,video{display:block;max-width:100%;max-height:65vh;border-radius:10px;margin:auto}
 audio{width:100%}figcaption{margin:8px 0;color:#586961;font-size:.85rem}
 .notice{border-left:3px solid #ac792d;padding:10px 14px;background:#faf5e9}
 .place{margin:12px 0}.place a{display:inline-block;padding:10px 14px;border:1px solid #bfd0c5;border-radius:10px;text-decoration:none;font-weight:600}
-@media(max-width:520px){header,main,footer{padding:18px}h1{font-size:1.9rem}article{padding:16px}}
+@media(max-width:520px){header,main,footer{padding:18px}h1{font-size:1.9rem}article{padding:16px}.media-lightbox{padding:14px}.media-lightbox img{max-width:96vw;max-height:82vh}}
 """
 KINDS = {"photo": "Fotografie", "video": "Video", "comment": "Komentář", "reflection": "Úvaha", "marker": "Záznam"}
 
@@ -230,7 +238,10 @@ class CaminoViewer:
                     base = f'{root_path}/viewer/media/{asset["id"]}/'
                     kind = asset["media_kind"]
                     if kind == "photo":
-                        element = f'<img src="{base}preview.jpg" loading="lazy" alt="Fotografie ze záznamu">'
+                        preview = f'{base}preview.jpg'
+                        element = (f'<button type="button" class="media-open" data-lightbox-src="{preview}" '
+                                   'data-lightbox-alt="Fotografie ze záznamu" aria-label="Zvětšit fotografii">'
+                                   f'<img src="{preview}" loading="lazy" alt="Fotografie ze záznamu"></button>')
                     elif kind == "video":
                         element = f'<video controls playsinline preload="metadata" poster="{base}poster.jpg" src="{base}clip.mp4">Prohlížeč neumí přehrát video.</video>'
                     else:
@@ -261,6 +272,9 @@ class CaminoViewer:
 <a href="{root_path}/viewer/map">Mapa cesty</a></nav></header><main>{body}</main><footer>
 Příprava médií: {built}<br>{state}<br>Zobrazuji doručené záznamy. Další mohou ještě čekat v telefonu.
 <br>Stránku obnovíš běžným tlačítkem prohlížeče.</footer>
+<div id="mediaLightbox" class="media-lightbox" hidden role="dialog" aria-modal="true" aria-hidden="true" aria-label="Zvětšená fotografie">
+<button type="button" class="media-lightbox-close" aria-label="Zavřít zvětšenou fotografii">×</button>
+<img id="mediaLightboxImage" alt=""></div>
 <p id="audioPlaybackStatus" role="status" aria-live="polite"></p></body></html>'''
 
     def router(self) -> APIRouter:
