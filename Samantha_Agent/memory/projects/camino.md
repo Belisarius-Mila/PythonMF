@@ -12,16 +12,16 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 
 ## Aktuální stav
 
-- 2026-09-30 19:15 CEST — Lokální Viewer doplnil zvětšený náhled fotografií:
-  kliknutí na foto otevře bezpečný doručený `preview.jpg`, zavření funguje
-  tlačítkem, kliknutím do pozadí nebo Escape a fokus se vrací na původní tile.
-  Video zůstává u nativního přehrávače; originály, API, data, privacy filtr a
-  lazy načítání se nemění. Checkpoint `de168178`. `tests.test_camino_viewer`
-  17/17, `tests.test_camino_audio_layout` 9/9, Node frontend 5/5,
-  `py_compile` a diff-check PASS. FastAPI HTTP test nebyl spuštěn kvůli
-  chybějícímu modulu v dostupném izolovaném venv. Push, nasazení a skutečný
-  Safari/iPhone render zůstávají NEOVĚŘENO; další krok je samostatné schválení
-  push/nasazení a potom krátký vizuální průchod.
+- 2026-09-30 19:15 CEST — Fotografický lightbox je nasazený z runtime release
+  `8c4660e7`: kliknutí otevře bezpečný `preview.jpg`, zavření funguje tlačítkem,
+  pozadím nebo Escape a fokus se vrací na původní tile. Video, originály, API,
+  data, privacy filtr a lazy načítání se nemění. Plná brána 1845/1845 PASS,
+  GitHub push, nový Cockpit PID/smoke 5/5 a řízený upgrade/start Camino služby
+  PASS. Živý Viewer smoke: 200/401, 8 dnů, 7 grid dnů, 33 lightbox tlačítek,
+  no-store a Funnel off. Starý syntetický C05a smoke skončil
+  `ModuleNotFoundError`, ale spravovaná služba prošla samostatným smoke.
+  Fyzický Safari/iPhone render zůstává NEOVĚŘENO; další krok je ruční vizuální
+  přejímka na Macu/iPhonu.
 
 - 2026-09-30 18:58 CEST — p+n dokončeno pro Viewer layout commit `d2da13b4`:
   origin/main je shodný, pushová plná brána 1844/1844 PASS. Cockpit byl

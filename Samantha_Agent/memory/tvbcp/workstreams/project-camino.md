@@ -1,15 +1,13 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-09-30 19:15 CEST — Vývojový checkpoint `de168178` doplnil Vieweru
-  fotografický lightbox nad bezpečným `preview.jpg`; video zůstává nativní.
-  Zavření funguje tlačítkem, pozadím i Escape a fokus se vrací na původní
-  fotografii. Ověřeno: Viewer 17/17, audio/player 9/9, Node frontend 5/5,
-  `py_compile` a diff-check PASS. FastAPI HTTP test blokuje chybějící modul ve
-  venv. Stav: lokálně hotovo, bez push/nasazení; fyzický Safari/iPhone render
-  NEOVĚŘENO. Riziko: pouze skutečný mobilní UX overlaye. Další krok: po
-  samostatném schválení provést plnou publikační bránu, nasazení a vizuální
-  přejímku.
+- 2026-09-30 19:15 CEST — Fotografický lightbox z `de168178` je nasazený z
+  immutable release `8c4660e7`. Plná brána 1845/1845, GitHub push, Cockpit
+  nový PID/smoke 5/5, Camino stop/upgrade/start a živý Viewer smoke PASS:
+  200/401, 8 dnů, 7 grid dnů, 33 lightbox tlačítek, no-store, Funnel off.
+  FastAPI HTTP test blokuje chybějící modul ve venv; starý syntetický C05a
+  smoke skončil `ModuleNotFoundError` a není započten do přejímky. Fyzický
+  Safari/iPhone render NEOVĚŘENO. Další krok: vizuální přejímka overlaye.
 
 - 2026-09-30 18:58 CEST — Nasazení Viewer layoutu dokončeno: commit
   `d2da13b4` je na origin/main, pushová brána 1844/1844 PASS, Cockpit nový

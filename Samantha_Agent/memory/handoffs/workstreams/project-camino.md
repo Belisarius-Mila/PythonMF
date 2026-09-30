@@ -1,16 +1,15 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-09-30 19:15 CEST — Lokální checkpoint `de168178` přidává do Vieweru
-  lightbox pouze pro fotografie. Tlačítko otevře stejný doručený `preview.jpg`;
-  zavření je přes tlačítko, pozadí nebo Escape a fokus se vrací na původní
-  položku. Video, originály, API, data, privacy filtr a lazy/preload hranice
-  zůstávají beze změny. Důkaz: Viewer 17/17, audio/player 9/9, Node frontend
-  5/5, `py_compile` a diff-check PASS. FastAPI HTTP test nebyl spuštěn, protože
-  dostupný izolovaný venv nemá `fastapi`. Otevřeno: push, nasazení a fyzické
-  Safari/iPhone ověření; riziko je skutečné chování mobilního overlaye.
-  Další krok: samostatně schválit p+n a po nasazení ověřit otevření, zavření,
-  Escape a návrat na mřížku.
+- 2026-09-30 19:15 CEST — Lightbox z checkpointu `de168178` je nasazený z
+  immutable runtime release `8c4660e7`. Fotografie používají bezpečný
+  `preview.jpg`; zavření přes tlačítko, pozadí nebo Escape vrací fokus.
+  Plná brána 1845/1845, GitHub push, Cockpit nový PID/smoke 5/5, service
+  stop/upgrade/start a živý Viewer smoke PASS: 200/401, 8 dnů, 7 grid dnů,
+  33 lightbox tlačítek, no-store, Funnel off. FastAPI HTTP test nebyl spuštěn
+  kvůli chybějícímu modulu ve venv; starý syntetický C05a smoke skončil
+  `ModuleNotFoundError`. Fyzické Safari/iPhone ověření zůstává NEOVĚŘENO.
+  Další krok: vizuální přejímka overlaye na Macu a iPhonu.
 
 - 2026-09-30 18:58 CEST — p+n dokončeno pro `d2da13b4`. GitHub push proběhl
   po plné bráně 1844/1844; Cockpit nový proces potvrdil smoke 5/5 a oba čisté

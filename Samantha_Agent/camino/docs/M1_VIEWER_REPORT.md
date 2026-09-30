@@ -17,7 +17,22 @@ Lokální checkpoint: `de168178`. Ověření: `tests.test_camino_viewer` 17/17,
 `tests.test_camino_audio_layout` 9/9, Node frontend 5/5, test otevření/zavření
 lightboxu, `py_compile` a `git diff --check` PASS. Integrační FastAPI test
 zůstává v repozitáři, ale dostupné izolované prostředí nemá `fastapi`, takže
-nebyl spuštěn. Push, nasazení a fyzický Safari/iPhone průchod jsou otevřené.
+nebyl spuštěn.
+
+## Nasazení lightboxu — 2026-09-30
+
+Commit `8c4660e7` byl po plné bráně 1845/1845 pushnutý na GitHub. Cockpit byl
+řízeně restartovaný na stejném runtime commitu; nový PID a povinný smoke 5/5
+prošly. Spravovaná Camino služba byla zastavena, přepnuta na immutable release
+`8c4660e7` a znovu spuštěna. Archiv, identita, Viewer grant a privátní HTTPS
+route zůstaly zachované; Funnel je vypnutý.
+
+Živý loopback smoke autorizoval Viewer 200 a bez readera vrátil 401. Ověřeno
+bylo 8 dnů, 7 dnů s mediální mřížkou, 33 fotografických tlačítek lightboxu,
+overlay, player.js logika, `no-store` a release kód. Starý syntetický C05a
+smoke nebyl použit jako důkaz, protože jeho izolované spuštění skončilo
+`ModuleNotFoundError`; spravovaná služba a Viewer smoke prošly samostatně.
+Fyzický Safari/iPhone průchod zůstává NEOVĚŘENO.
 
 ## Aktuální změna rozložení — 2026-09-30
 
@@ -34,7 +49,7 @@ zůstává v testovacím souboru, ale v dostupném izolovaném prostředí nyní
 modul `fastapi`, takže nebyl spuštěn. Safari/iPhone vizuální přejímka,
 push a nasazení zůstávají otevřené.
 
-## Nasazení — 2026-09-30
+## Předchozí nasazení layoutu — 2026-09-30
 
 Commit `d2da13b4` je na `origin/main`; pushová plná brána potvrdila
 1844/1844 testů. Cockpit byl řízeně restartován na stejném main, nový proces
