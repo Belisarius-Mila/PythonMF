@@ -1,6 +1,15 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-01 09:22 CEST — Vytvořen nový podepsaný iOS build z čistého
+  `main` (`1c1096e6`) s poslední GPS opravou (`cb13727f`). Swift testy 56/56,
+  archive, strict codesign, export a ZIP kontrola PASS. IPA
+  `Camino-GPS-10-20261001.ipa` je v `Downloads`, bundle `cz.pythonmf.camino.app`,
+  verze `0.1.0 (10)`, SHA-256 byl ověřen při exportu.
+  Profil je vývojový a platí do 4. 10. 2026; SideStore import a fyzická
+  regresní kontrola GPS na iPhonu zůstávají NEOVĚŘENO. Další krok: importovat
+  IPA přes SideStore a provést krátký fyzický test pouze po samostatném pokynu.
+
 - 2026-09-30 20:01 CEST — p+n dokončeno pro `0b75bc94`: plná brána 1846/1846,
   GitHub push, oba čisté profily zarovnané fast-forwardem, Cockpit PID `10074`,
   otisk `49308f729c685835` a smoke 5/5 PASS. Camino stop/upgrade/start přešel

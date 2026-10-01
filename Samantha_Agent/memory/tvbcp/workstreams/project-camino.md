@@ -1,6 +1,13 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-01 09:22 CEST — Podepsaná IPA `Camino-GPS-10-20261001.ipa` vznikla
+  z čistého `main` `1c1096e6`; obsahuje GPS capture opravu z `cb13727f`.
+  Swift 56/56, archive, strict codesign, export a `unzip -t` PASS. Metadata:
+  `0.1.0 (10)`, bundle `cz.pythonmf.camino.app`; vývojový profil expiruje
+  4. 10. 2026. IPA je připravená v `Downloads`; import SideStore, instalace,
+  zachování existujících dat a fyzický GPS scénář na iPhonu jsou NEOVĚŘENO.
+
 - 2026-09-30 20:01 CEST — p+n pro `0b75bc94` je dokončeno: plná brána
   1846/1846, push, fast-forward profilů, Cockpit restart PID `10074`/smoke 5/5
   a otisk `49308f729c685835` PASS. Camino immutable release `0b75bc9425af`

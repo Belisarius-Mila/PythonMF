@@ -12,6 +12,13 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 
 ## Aktuální stav
 
+- 2026-10-01 09:22 CEST — Připraven nový podepsaný iOS build
+  `Camino-GPS-10-20261001.ipa` z čistého `main` `1c1096e6`, s GPS capture
+  opravou `cb13727f`. Swift 56/56, strict codesign, archive/export a ZIP
+  validace PASS; `0.1.0 (10)`, bundle `cz.pythonmf.camino.app`. IPA je pouze
+  v `Downloads`, bez instalace a bez změny zdrojů. SideStore import a fyzické
+  ověření GPS zůstávají otevřené; vývojový profil expiruje 4. 10. 2026.
+
 - 2026-09-30 20:01 CEST — p+n dokončeno pro commit `0b75bc94`: plná brána
   1846/1846 PASS, GitHub push, oba čisté profilové workspaces fast-forwardem
   zarovnané na `main`, Cockpit nový PID `10074`, otisk
