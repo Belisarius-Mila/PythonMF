@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-02 11:51 CEST — čistý server a iPhone sync reset dokončen
+Aktualizováno: 2026-10-02 12:04 CEST — iOS discovery prázdného telefonu opravené a build 12 nainstalovaný
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,17 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-02 12:04 CEST — Diagnostika obrazovky s `13` metadaty odpovídala
+  2 lokálním Tripům a 11 Day záznamům bez aktivních Momentů nebo médií;
+  server zůstal prázdný. iOS discovery nyní prázdnému telefonu neposílá tuto
+  historickou prázdnou kostru; Trip/Day se přidají až společně s prvním
+  skutečným Momentem, médiem nebo audio layoutem. Změna je v commitu
+  `06dca6d7`. SwiftPM 58/58 a nepodepsaný generic iOS build PASS; podepsaný
+  `Camino 0.1.0 (12)` byl strict ověřen, exportován a bez odinstalace
+  nainstalován/spuštěn na iPhonu. Read-only journal po spuštění: metadata 0,
+  media 0, cursor 0, reconciliation false. První nový Moment a jeho přenos
+  zůstávají fyzicky otevřené.
 
 - 2026-10-02 11:51 CEST — Diagnostika iPhonu ukázala 0 aktivních Momentů,
   0 médií a jedinou čekající položku `create_day`; místní audio i media

@@ -1,6 +1,18 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-02 12:04 CEST — `13` metadat na telefonu nebylo třináct skrytých
+  Momentů: read-only inventář ukázal 2 lokální Trip záznamy a 11 Day záznamů
+  bez aktivního obsahu; Mac server zůstal na cursoru 0. Přijaté rozhodnutí:
+  prázdný telefon nemá do fronty posílat historickou Trip/Day kostru. iOS
+  discovery proto předává Trip/Day jen tehdy, když existuje skutečný Moment,
+  médium nebo audio layout; při prvním obsahu se struktura přibalí do stejné
+  dávky. Commit `06dca6d7`; SwiftPM 58/58, generic iOS build, strict podpis,
+  export, instalace a spuštění buildu `0.1.0 (12)` PASS. Read-only journal po
+  spuštění má metadata/media 0, cursor 0 a reconciliation false. Otevřený
+  krok: vytvořit jeden nový Moment a ověřit první fyzický přenos; riziko je
+  pouze dosud neověřené chování při prvním skutečném obsahu.
+
 - 2026-10-02 11:51 CEST — Těsně před resetem měl iPhone 0 aktivních Momentů,
   0 médií a jedinou čekající `create_day` metadata položku. Diagnostika odhalila
   druhý blokátor: serverový empty bootstrap vracel 503 kvůli mazání Trip před
@@ -3127,3 +3139,29 @@ hlavičky, map.js/map.css 200 s no-store, živý asset obsahuje čárkované ús
 a `route-arrow`; 13 bodů/12 návazných úseků. Audit nevypisoval souřadnice,
 názvy ani tokeny a neměnil osobní data. Safari/OSM dlaždice a fyzická UX jsou
 NEOVĚŘENO.
+
+## 2026-10-02 12:04 CEST — iOS discovery po čistém resetu přestává frontovat prázdnou kostru
+
+Hotovo: Diagnostika telefonního stavu vysvětlila viditelných 13 metadat jako 2
+historické Trip záznamy a 11 Day záznamů bez aktivních Momentů nebo médií.
+Úprava iOS discovery prázdný telefon vynechá; skutečný Trip/Day se přidá při
+prvním Momentu, médiu nebo audio layoutu. Podepsaný Camino 0.1.0 (12) byl bez
+odinstalace nainstalován a spuštěn.
+
+Rozhodnutí: Nulový lokální obsah nesmí vytvářet přenosovou frontu pouze z
+prázdné historické struktury. Místní soubory, nastavení a serverová data se
+úpravou nemění.
+
+Další krok: Na iPhonu vytvořit jeden malý nový Moment a ověřit, že se první
+skutečný obsah i s potřebnou strukturou přenese na čistý server; potom ověřit
+Viewer.
+
+Navrhované další kroky: Pokud průchod projde, ponechat build v běžném používání.
+Při opakování prázdných metadat nejdříve zachytit redigovaný stav journalu a
+serverového cursoru; neprovádět další ruční reset.
+
+Technický důkaz: Commit `06dca6d7`; SwiftPM 58/58, generic iOS build, strict
+codesign, IPA export/ZIP validace, `devicectl` install/launch PASS. Read-only
+journal po spuštění: metadata 0, media 0, cursor 0, reconciliation false.
+Plná projektová brána po předchozím serverovém kroku zůstává 1847/1847 PASS;
+GitHub push a serverové nasazení tohoto iOS-only kroku se neprováděly.

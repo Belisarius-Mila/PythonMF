@@ -1,6 +1,18 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-02 12:04 CEST — Obrazovka telefonu ukázala 13 metadat, ale
+  read-only kontrola Core Data je rozlišila jako 2 prázdné Trip záznamy a 11
+  prázdných Day záznamů; aktivní Moment/media/audio zůstaly nulové a Mac server
+  měl cursor 0. iOS discovery byla upravena tak, aby bez skutečného Momentu,
+  média nebo audio layoutu tuto historickou kostru do journalu nezařadila;
+  struktura se přidá s prvním skutečným obsahem. Commit `06dca6d7`, SwiftPM
+  58/58 a generic build PASS. Podepsaný build `0.1.0 (12)` prošel strict
+  podpisem, exportem, instalací a spuštěním přes `devicectl` bez odinstalace.
+  Po spuštění read-only journal: metadata 0, media 0, cursor 0,
+  reconciliation false. Další krok je uživatelsky vytvořit jeden malý Moment
+  a ověřit první přenos; nebyla mazána místní data ani nastavení.
+
 - 2026-10-02 11:51 CEST — Fyzická diagnostika odhalila, že telefon má 0
   aktivních Momentů, 0 médií a jednu čekající metadata položku `create_day`.
   Původní serverový `POST /api/v1/bootstrap/empty` současně vracel 503:
