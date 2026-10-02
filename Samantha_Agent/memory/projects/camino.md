@@ -12,6 +12,13 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 
 ## Aktuální stav
 
+- 2026-10-02 09:03 CEST — Na Mílův pokyn byl proveden reset pouze Macových
+  Camino dat. Zastavená Service přišla o aktivní `C05bAcceptance` a svůj
+  datový/credential/config obsah; ponechány jsou `Releases` a `Service/venv`.
+  Cockpit, Tailscale, repozitář i iPhone zůstaly beze změny. Uvolnění svazku:
+  992 083 968 B. Camino Service se bez nové inicializace nespustí; iPhone dál
+  obsahuje Camino `0.1.0 (10)` se svými daty.
+
 - 2026-10-01 09:22 CEST — Připraven nový podepsaný iOS build
   `Camino-GPS-10-20261001.ipa` z čistého `main` `1c1096e6`, s GPS capture
   opravou `cb13727f`. Swift 56/56, strict codesign, archive/export a ZIP

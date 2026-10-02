@@ -1,6 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-02 09:03 CEST — Na výslovný pokyn byl proveden Mac-only reset
+  současných Camino dat. Camino Service byla zastavena; smazány byly aktivní
+  `C05bAcceptance` a všechny položky `Camino/Service` kromě technického
+  `Service/venv`. `Releases`, repozitář, Cockpit, Tailscale a iPhone zůstaly
+  nedotčené. Měřený pokles obsazení svazku je 992 083 968 B. Service je nyní
+  záměrně bez konfigurace/dat a nebude znovu spuštěna bez nové inicializace.
+  iPhone zůstal nainstalovaný jako Camino `0.1.0 (10)`; jeho data se neměnila.
+
 - 2026-10-01 09:22 CEST — Vytvořen nový podepsaný iOS build z čistého
   `main` (`1c1096e6`) s poslední GPS opravou (`cb13727f`). Swift testy 56/56,
   archive, strict codesign, export a ZIP kontrola PASS. IPA

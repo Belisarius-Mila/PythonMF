@@ -1,6 +1,13 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-02 09:03 CEST — Dokončen schválený Mac-only reset dat. Po zastavení
+  služby byly odstraněny `C05bAcceptance` a obsah `Camino/Service` kromě
+  `venv`; `Releases`, zdrojový repozitář, Cockpit, Tailscale a telefon se
+  neměnily. `df` doložil uvolnění 992 083 968 B. Camino Service je zastavená
+  a bez konfigurace, takže další start vyžaduje novou inicializaci. iPhone
+  zůstal s Camino `0.1.0 (10)` a beze změny místních dat.
+
 - 2026-10-01 09:22 CEST — Podepsaná IPA `Camino-GPS-10-20261001.ipa` vznikla
   z čistého `main` `1c1096e6`; obsahuje GPS capture opravu z `cb13727f`.
   Swift 56/56, archive, strict codesign, export a `unzip -t` PASS. Metadata:
