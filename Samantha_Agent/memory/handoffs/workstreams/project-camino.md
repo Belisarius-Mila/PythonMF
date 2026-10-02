@@ -1,16 +1,29 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-10-02 — Dokončen lokální vývoj guarded bootstrapu pro čistý server.
+- 2026-10-02 11:51 CEST — Fyzická diagnostika odhalila, že telefon má 0
+  aktivních Momentů, 0 médií a jednu čekající metadata položku `create_day`.
+  Původní serverový `POST /api/v1/bootstrap/empty` současně vracel 503:
+  reset mazal parent Trip před child Day a SQLite odmítlo foreign-key vazbu.
+  Oprava je v lokálním commitu `5e6fba7a` a plná brána prošla 1847/1847.
+  Camino Service byla stop/upgrade/start přepnuta na release
+  `5e6fba7a6911`; bootstrap pak vrátil 200, cursor 0 a oba blokovací příznaky
+  false. Po schválené globální brzdě byla z telefonu odstraněna pouze čekající
+  `create_day` položka a journal byl nastaven na prázdný serverový stav.
+  Read-only ověření po spuštění: telefonní journal metadata 0/media 0,
+  cursor 0/reconciliation false; Mac health/state 200/cursor 0. Nový Moment
+  ještě nebyl vytvořen, takže ostrý přenos je další fyzický krok.
+
+- 2026-10-02 — Původní lokální checkpoint guarded bootstrapu pro čistý server
+  byl následně opraven a nasazen výše uvedeným commitem.
   `POST /api/v1/bootstrap/empty` je owner-only a přijme jen přesný kontrakt,
   když metadata i MediaStore nemají obsah ani zbytky uploadů. iOS obrazovka
   nabízí potvrzené „Připojit k novému prázdnému serveru“ pouze v režimu
   reconciliation; před voláním ověří Wi‑Fi, nulové Momenty/média/audio klipy
   a prázdnou frontu. `adoptEmptyServer` mění pouze journal identity/historii,
   místní soubory nemaže. Ověření: SwiftPM 58/58, server 7/7, iOS generic
-  build PASS, diff-check PASS. Lokální kód ještě není pushnutý ani nasazený;
-  telefon nebyl změněn. Další krok: samostatně schválit p+n, potom připravit
-  nový podepsaný build a fyzicky projít obnovu na telefonu.
+  build PASS, diff-check PASS. Tato položka je historická; aktuální nasazení a
+  fyzický stav telefonu jsou popsány v nejnovějším záznamu výše.
 
 - 2026-10-02 09:37 CEST — Na Mílův výslovný pokyn byla připravena nová
   čistá Camino Service. Vznikla nová privátní identita, prázdný Trip a první

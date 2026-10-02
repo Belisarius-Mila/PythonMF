@@ -1,14 +1,27 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-10-02 — Lokální checkpoint guarded bootstrapu je připraven: server
+- 2026-10-02 11:51 CEST — Těsně před resetem měl iPhone 0 aktivních Momentů,
+  0 médií a jedinou čekající `create_day` metadata položku. Diagnostika odhalila
+  druhý blokátor: serverový empty bootstrap vracel 503 kvůli mazání Trip před
+  Day při zapnutých SQLite foreign keys. Oprava `5e6fba7a` změnila pořadí na
+  child před parent; cílený serverový test i plná brána 1847/1847 PASS.
+  Služba byla stop/upgrade/start přepnuta na release `5e6fba7a6911` a
+  bootstrap po opravě vrátil 200, cursor 0, `exports_blocked=false` a
+  `reconciliation_required=false`. Po přesné globální brzdě byla z iPhonu
+  odstraněna pouze čekající `create_day` položka; synchronizační journal byl
+  nastaven na prázdný server, bez mazání místních souborů nebo nastavení.
+  Následný read-only audit potvrdil iPhone journal metadata/media 0, cursor 0,
+  reconciliation false a Mac health/state 200/cursor 0. Fyzický přenos nového
+  Momentu zůstává NEOVĚŘENO.
+
+- 2026-10-02 — Původní lokální checkpoint guarded bootstrapu: server
   kontroluje skutečně prázdný metadata store i media/upload residue a iOS
   před resetem journalu kontroluje Wi‑Fi a prázdný telefon. Operace nemá mazací
   větev; zachovává místní soubory a resetuje pouze historii synchronizace.
-  Důkaz: Swift 58/58, server 7/7, generic iOS build a `git diff --check`
-  PASS. Stav je `lokální / NEOVĚŘENO` pro push, deployment, podepsaný IPA a
-  fyzický iPhone průchod. Riziko: dokud nebude nasazen nový server i klient,
-  tlačítko nebude použitelné proti běžící starší službě.
+  Důkaz původní implementace: Swift 58/58, server 7/7, generic iOS build a
+  `git diff --check` PASS. Položka je historická; aktuální oprava, deployment a
+  telefonní reset jsou popsány v nejnovějším záznamu výše.
 
 - 2026-10-02 09:37 CEST — Připravena nová čistá Camino Service s novou
   identitou, prázdným Tripem a prvním dnem; kurzor 2, 0 Momentů a 0 ověřených

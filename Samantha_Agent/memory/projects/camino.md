@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-09-30 20:01 CEST — Viewer grafické úpravy nasazené
+Aktualizováno: 2026-10-02 11:51 CEST — čistý server a iPhone sync reset dokončen
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,20 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-02 11:51 CEST — Diagnostika iPhonu ukázala 0 aktivních Momentů,
+  0 médií a jedinou čekající položku `create_day`; místní audio i media
+  úložiště byla prázdná. Opravený commit `5e6fba7a` mění pořadí mazání při
+  serverovém empty bootstrapu (dny před tripy), protože původní reset padal na
+  SQLite foreign-key vazbě a vracel 503. Serverová služba byla stop/upgrade/start
+  přepnuta na release `5e6fba7a6911`, endpoint bootstrapu následně vrátil 200,
+  kurzor 0 a flags false. Z telefonu byla po schválené globální brzdě odstraněna
+  pouze čekající `create_day` položka a poté byl synchronizační journal obnoven
+  na prázdnou identitu serveru; místní soubory a nastavení se neměnily. Finální
+  read-only kontrola: telefonní journal metadata 0, media 0, cursor 0,
+  reconciliation false; Mac health/state 200, cursor 0. Nový Moment zatím
+  nebyl fyzicky vytvořen, takže první ostrý přenos zůstává otevřený.
+
 
 - 2026-10-02 — Lokálně je připraven bezpečný tok pro připojení iPhonu k novému
   prázdnému serveru po ztrátě původní serverové identity. Serverový endpoint
