@@ -22,6 +22,21 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-055 — Camino „Mac není dostupný“ může být odmítnutý místní zápis
+
+- Problém: Po servisní obnově telefonu sync journal zůstal beze změn a aplikace
+  střídala nedostupný Mac a požadavek na kontrolu inventáře.
+- Typ: opakující se
+- Řešení nalezeno: 02102026
+- Řešení: Získat doménu/kód skutečné chyby bez userInfo či citlivého obsahu.
+  Cocoa 513 s POSIX 13 byl atomický zápis journalu do Sync vlastněného rootem
+  (0755), nikoli síť. „Writable“ v devicectl není důkaz práv procesu aplikace.
+  Ověřit vlastníka adresáře přímo v procesu; původní adresář zachovat a nový
+  vytvořit samotnou aplikací. Až potom hodnotit síť/token (zde následoval 401).
+  Prázdný journal ani úspěšný build nejsou důkaz přenosu; vyžadovat accepted
+  metadata + verified médium současně na telefonu a Macu. Po empty bootstrapu
+  ověřit i config trip vazbu a skutečný restart Mac služby.
+
 ### LL-054 — Opožděné soví workflow může po no-op publikovat starý web
 
 - Problém: plánovaný běh přišel po oknu 03–08 CEST; generátor korektně

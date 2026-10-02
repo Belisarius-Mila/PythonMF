@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-02 12:04 CEST — iOS discovery prázdného telefonu opravené a build 12 nainstalovaný
+Aktualizováno: 2026-10-02 17:35 CEST — přenos na fyzickém iPhonu opraven a ověřen, build 14
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,25 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-02 17:35 CEST — Obnoven skutečný přenos iPhone → Mac po resetu. Debugger na
+  telefonu prokázal NSCocoaErrorDomain 513 / POSIX EACCES při atomickém zápisu
+  journalu: adresář Sync vlastnil root (0755), aplikace běží jako mobile.
+  Původní adresář byl zachován jako místní servisní kopie; aplikace vytvořila
+  vlastní Sync a bezpečně uložila platnou frontu. Následný HTTP 401 prokázal
+  další blokátor: neplatný uložený token. Aktuální Mac token byl bezpečně
+  uložen do iOS Keychain, bez zveřejnění. Mac přijal 1 nový Moment a ověřil
+  1 fotografii; journal má 15 accepted metadat, 1 verified médium, cursor 15,
+  žádnou čekající položku. Historická prázdná Trip/Day kostra není obsah.
+  Konfigurace služby odkazovala na již odstraněný Trip; přesměrována na
+  jedinou cestu s přijatým Momentem, původní config zachován. Řízený restart
+  služby i nový start aplikace prošly; ověřené HTTPS 200/cursor 15/flags false,
+  registrovaný service status running/owned true. Viewer grant zůstává false.
+  Build 0.1.0 (14) rozlišuje místní Cocoa chyby od nedostupnosti Macu a loguje
+  jen fázi/doménu/kód, bez popisů, URL a obsahu. Instalován bez odinstalace.
+  SwiftPM 58/58, podepsaný iOS build a rychlá statická brána PASS. Data se
+  nemazala, GitHub bez odeslání. Další krok: běžný uživatelský test nového
+  okamžiku; další typy médií a spojení mimo současnou Wi-Fi tím nejsou ověřeny.
 
 - 2026-10-02 12:04 CEST — Diagnostika obrazovky s `13` metadaty odpovídala
   2 lokálním Tripům a 11 Day záznamům bez aktivních Momentů nebo médií;

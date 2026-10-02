@@ -487,6 +487,7 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
                     && stats.metadataCount == 0 && stats.mediaCount == 0
                     ? .verified : .queueReady)
         } catch {
+            Self.logFailure(error, stage: "inventory")
             setMacCopyState(.localInventoryAttention)
         }
     }
@@ -1002,6 +1003,7 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
     }
 
     private func handle(_ error: Error) {
+        Self.logFailure(error, stage: "sync")
         if let value = error as? CaminoSyncAPIError {
             switch value {
             case .invalidConfiguration:
@@ -1020,9 +1022,19 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
             case .serverConflict(let code):
                 setMacCopyState(resolvedMacCopyState(status: nil, code: code))
             }
+        } else if (error as NSError).domain == NSCocoaErrorDomain {
+            // Local storage failures must not masquerade as an unreachable Mac.
+            // Network/response failures are handled separately above or below.
+            setMacCopyState(.localInventoryAttention)
         } else {
             setMacCopyState(.unavailable)
         }
+    }
+
+    private static func logFailure(_ error: Error, stage: String) {
+        let value = error as NSError
+        // Never log descriptions/userInfo: they can contain URLs, tokens or content.
+        NSLog("Camino failure stage=%@ domain=%@ code=%ld", stage, value.domain, value.code)
     }
 
     private func refreshPublishedState() {

@@ -1,6 +1,25 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-02 17:35 CEST — Obnoven skutečný přenos iPhone → Mac po resetu. Debugger na
+  telefonu prokázal NSCocoaErrorDomain 513 / POSIX EACCES při atomickém zápisu
+  journalu: adresář Sync vlastnil root (0755), aplikace běží jako mobile.
+  Původní adresář byl zachován jako místní servisní kopie; aplikace vytvořila
+  vlastní Sync a bezpečně uložila platnou frontu. Následný HTTP 401 prokázal
+  další blokátor: neplatný uložený token. Aktuální Mac token byl bezpečně
+  uložen do iOS Keychain, bez zveřejnění. Mac přijal 1 nový Moment a ověřil
+  1 fotografii; journal má 15 accepted metadat, 1 verified médium, cursor 15,
+  žádnou čekající položku. Historická prázdná Trip/Day kostra není obsah.
+  Konfigurace služby odkazovala na již odstraněný Trip; přesměrována na
+  jedinou cestu s přijatým Momentem, původní config zachován. Řízený restart
+  služby i nový start aplikace prošly; ověřené HTTPS 200/cursor 15/flags false,
+  registrovaný service status running/owned true. Viewer grant zůstává false.
+  Build 0.1.0 (14) rozlišuje místní Cocoa chyby od nedostupnosti Macu a loguje
+  jen fázi/doménu/kód, bez popisů, URL a obsahu. Instalován bez odinstalace.
+  SwiftPM 58/58, podepsaný iOS build a rychlá statická brána PASS. Data se
+  nemazala, GitHub bez odeslání. Další krok: běžný uživatelský test nového
+  okamžiku; další typy médií a spojení mimo současnou Wi-Fi tím nejsou ověřeny.
+
 - 2026-10-02 12:04 CEST — `13` metadat na telefonu nebylo třináct skrytých
   Momentů: read-only inventář ukázal 2 lokální Trip záznamy a 11 Day záznamů
   bez aktivního obsahu; Mac server zůstal na cursoru 0. Přijaté rozhodnutí:
@@ -3165,3 +3184,21 @@ codesign, IPA export/ZIP validace, `devicectl` install/launch PASS. Read-only
 journal po spuštění: metadata 0, media 0, cursor 0, reconciliation false.
 Plná projektová brána po předchozím serverovém kroku zůstává 1847/1847 PASS;
 GitHub push a serverové nasazení tohoto iOS-only kroku se neprováděly.
+
+## 2026-10-02 17:35 CEST — Oprava přenosu po resetu
+
+**Hotovo:** Telefon znovu přenáší nový Moment i fotografii na Mac; ověřeno také
+po restartu aplikace a služby. Místní chyba zápisu má odpovídající hlášení.
+
+**Rozhodnutí:** Opravit současné úložiště a přístup bez dalšího mazání.
+GitHub zůstává bez odeslání podle Mílova pokynu.
+
+**Další krok:** Uživatelsky ověřit další nový okamžik.
+
+**Navrhované další kroky:** Žádné nové.
+
+**Technický důkaz:** Root-owned Sync/0755 → Cocoa 513/EACCES; po obnově
+adresáře pod mobile odhalen a opraven HTTP 401. Journal accepted 15 /
+verified 1 / pending 0, server cursor 15, HTTPS s ověřením certifikátu PASS.
+Opravena zaniklá trip vazba configu; registrovaný restart/status PASS.
+SwiftPM 58/58, build 14 a statická brána PASS. Bez plošné přejímky ostatních médií.
