@@ -666,8 +666,14 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
                     batchID: journal.openBatchID))
             }
         }
+        // A phone with no live Moments, media or audio has no content to send.
+        // Do not enqueue historical empty trip/day scaffolding after a clean
+        // server bootstrap; the structure is discovered again with the first
+        // real Moment and then travels in the same metadata batch.
+        let hasLocalContent = !snapshots.isEmpty || !candidates.isEmpty || !audioLayouts.isEmpty
         let discovery = try CaminoSyncDiscovery(
-            trips: trips, days: days, moments: snapshots, media: candidates, audioLayouts: audioLayouts)
+            trips: hasLocalContent ? trips : [], days: hasLocalContent ? days : [],
+            moments: snapshots, media: candidates, audioLayouts: audioLayouts)
         localMomentIDs = Set(snapshots.map(\.moment.id))
         discoveredAudioLayouts = discovery.metadata.filter { $0.kind == "create_audio_layout" }
         journal.mergeDiscovery(discovery)
