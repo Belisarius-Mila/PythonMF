@@ -1,6 +1,13 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-02 09:37 CEST — Připravena nová čistá Camino Service s novou
+  identitou, prázdným Tripem a prvním dnem; kurzor 2, 0 Momentů a 0 ověřených
+  médií. Owner token zůstal pouze v soukromém Mac úložišti. LaunchAgent běží na
+  PID `50505`, owner health 200 a stav API PASS. Soukromá Tailscale cesta
+  `/camino-api` zůstala na portu 8767, Funnel je vypnutý, Viewer je vypnutý.
+  Telefon nebyl měněn; před synchronizací bude nutné uložit nový token/adresu.
+
 - 2026-10-02 09:15 CEST — p+n dokončeno pro `64bc88b6`: plná brána
   1846/1846 PASS, GitHub push, fast-forward obou čistých profilových workspace
   a řízený Cockpit restart na PID `49126` s otiskem `49308f729c685835`.

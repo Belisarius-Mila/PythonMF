@@ -1,6 +1,15 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-02 09:37 CEST — Na Mílův výslovný pokyn byla připravena nová
+  čistá Camino Service. Vznikla nová privátní identita, prázdný Trip a první
+  den; metadata kurzor je 2, Momentů i ověřených médií 0. Nový owner token je
+  uložen pouze v soukromém úložišti Macu a nebyl vypsán do logu ani odpovědi.
+  LaunchAgent je nainstalovaný a služba běží (PID `50505`); owner health 200 a
+  `/api/v1/state` PASS. Existující privátní Tailscale cesta `/camino-api` míří
+  na 8767, Funnel zůstává vypnutý a Viewer grant je vypnutý. iPhone se neměnil;
+  pro jeho další použití bude potřeba uložit novou adresu/token této identity.
+
 - 2026-10-02 09:15 CEST — p+n po Mac-only resetu dokončeno pro `64bc88b6`.
   Plná lokální brána v projektovém venv prošla 1846/1846, GitHub push sjednotil
   `origin/main`, oba čisté izolované profily byly fast-forwardem zarovnány.

@@ -12,6 +12,13 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 
 ## Aktuální stav
 
+- 2026-10-02 09:37 CEST — Připraven nový čistý Camino server: nová interní
+  identita, prázdný Trip a první den, kurzor 2, 0 Momentů a 0 médií. Owner token
+  je uložen pouze privátně na Macu. Služba běží jako LaunchAgent (PID `50505`),
+  owner health 200 a `/api/v1/state` PASS. Privátní Tailscale `/camino-api`
+  zůstala na 8767, Funnel i Viewer jsou vypnuté. iPhone se neměnil; před dalším
+  sync je třeba uložit nové připojení.
+
 - 2026-10-02 09:15 CEST — p+n dokončeno pro `64bc88b6`: plná brána
   1846/1846, push na GitHub, fast-forward obou profilových workspace a řízený
   restart Cockpitu na PID `49126`; otisk `49308f729c685835`, health 200 a smoke
