@@ -111,6 +111,14 @@ private struct CaminoSyncAPI: Sendable {
                        contentType: "application/json", body: proof.encoded())
     }
 
+    func bootstrapEmptyServer() async throws -> CaminoServerState {
+        let body = try JSONSerialization.data(withJSONObject: [
+            "contract_version": 1,
+        ], options: [.sortedKeys])
+        return try await send(path: ["api", "v1", "bootstrap", "empty"], method: "POST",
+                              contentType: "application/json", body: body)
+    }
+
     func mediaStatus(for item: CaminoSyncMediaItem) async throws -> CaminoMediaStatus {
         try await send(path: ["api", "v1", "assets", item.id.uuidString.lowercased(),
                               "upload-status"], method: "GET")
@@ -494,6 +502,51 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
 
     func completeRecovery() {
         Task { await verifyAndCompleteRecovery() }
+    }
+
+    func bootstrapEmptyServer() {
+        Task { await verifyAndBootstrapEmptyServer() }
+    }
+
+    private func verifyAndBootstrapEmptyServer() async {
+        guard !running else { return }
+        running = true; busy = true
+        defer { running = false; busy = false }
+        do {
+            guard configurationReady, path.available, !path.expensive else {
+                detailText = "Pro nový prázdný server připoj telefon k Wi‑Fi a soukromému Macu."
+                return
+            }
+            guard await driver.activeDescriptions().isEmpty else {
+                detailText = "Nejdřív nech doběhnout přenosy. Nový server nic nezměnil."
+                return
+            }
+            try await discover()
+            guard localMomentIDs.isEmpty,
+                  journal.stats.metadataCount == 0,
+                  journal.stats.mediaCount == 0,
+                  discoveredAudioLayouts.isEmpty,
+                  (try recording.library().clips).isEmpty else {
+                detailText = "Nový server lze přijmout jen s prázdným telefonem bez čekajících médií."
+                return
+            }
+            let api = try makeAPI()
+            let state = try await api.bootstrapEmptyServer()
+            guard state.cursor == 0, !state.exportsBlocked, !state.reconciliationRequired else {
+                throw CaminoSyncError.serverConflict("empty_bootstrap_not_pristine")
+            }
+            var fresh = journal
+            try fresh.adoptEmptyServer(serverID: state.serverID, epoch: state.epoch, cursor: state.cursor)
+            try journalStore.save(fresh)
+            journal = fresh
+            refreshPublishedState()
+            setMacCopyState(journal.paused ? .paused : .queueReady)
+            detailText = "Nový prázdný server byl bezpečně přijat. Místní data zůstala zachována."
+            if !journal.paused { await synchronize() }
+        } catch {
+            setMacCopyState(.reconciliationRequired)
+            detailText = "Nový server nelze bezpečně přijmout. Nic se nemaže; zkontroluj prázdný telefon a server."
+        }
     }
 
     private func verifyAndCompleteRecovery() async {

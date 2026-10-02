@@ -1,6 +1,17 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-02 — Dokončen lokální vývoj guarded bootstrapu pro čistý server.
+  `POST /api/v1/bootstrap/empty` je owner-only a přijme jen přesný kontrakt,
+  když metadata i MediaStore nemají obsah ani zbytky uploadů. iOS obrazovka
+  nabízí potvrzené „Připojit k novému prázdnému serveru“ pouze v režimu
+  reconciliation; před voláním ověří Wi‑Fi, nulové Momenty/média/audio klipy
+  a prázdnou frontu. `adoptEmptyServer` mění pouze journal identity/historii,
+  místní soubory nemaže. Ověření: SwiftPM 58/58, server 7/7, iOS generic
+  build PASS, diff-check PASS. Lokální kód ještě není pushnutý ani nasazený;
+  telefon nebyl změněn. Další krok: samostatně schválit p+n, potom připravit
+  nový podepsaný build a fyzicky projít obnovu na telefonu.
+
 - 2026-10-02 09:37 CEST — Na Mílův výslovný pokyn byla připravena nová
   čistá Camino Service. Vznikla nová privátní identita, prázdný Trip a první
   den; metadata kurzor je 2, Momentů i ověřených médií 0. Nový owner token je

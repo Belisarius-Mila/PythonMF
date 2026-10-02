@@ -91,6 +91,44 @@ class CaminoC05aFastAPITests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(first.json(), second.json())
         self.assertFalse(fixture.store.state()["reconciliation_required"])
 
+    async def test_empty_bootstrap_is_owner_only_and_pristine_only(self):
+        route = "/api/v1/bootstrap/empty"
+        denied = await self.request(
+            "POST", route,
+            headers={"Content-Type": "application/json"},
+            json={"contract_version": 1},
+        )
+        self.assertEqual(denied.status_code, 401)
+        blocked = await self.request(
+            "POST", route,
+            headers={**self.headers, "Content-Type": "application/json"},
+            json={"contract_version": 1},
+        )
+        self.assertEqual(blocked.status_code, 409)
+        root = Path(self.temporary.name) / "empty-bootstrap"
+        root.mkdir()
+        tokens = RevocableTokenStore(root / "auth.sqlite")
+        token = "synthetic-empty-bootstrap-token-long-enough"
+        tokens.add(token, label="synthetic iPhone")
+        metadata = RevisionStore(root / "metadata.sqlite")
+        media = MediaStore(
+            root / "media.sqlite", root / "media", asset_lookup=metadata.asset,
+            max_asset_bytes=1024 * 1024, max_chunk_bytes=8, reserve_bytes=0,
+        )
+        app = create_app(
+            metadata_api=CaminoV1Contract(metadata, authenticate=tokens.authenticate),
+            media_store=media, token_store=tokens,
+        )
+        transport = httpx.ASGITransport(app=app)
+        async with httpx.AsyncClient(transport=transport, base_url="https://camino.test") as client:
+            headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+            first = await client.post(route, headers=headers, json={"contract_version": 1})
+            second = await client.post(route, headers=headers, json={"contract_version": 1})
+        self.assertEqual(first.status_code, 200, first.text)
+        self.assertEqual(first.json()["cursor"], 0)
+        self.assertTrue(first.json()["bootstrapped"])
+        self.assertEqual(first.json(), second.json())
+
     def _register_manifest(self) -> None:
         trip = Trip(uid(1), "Synthetic trip", "cs", True, True)
         day = JourneyDay(uid(2), trip.id, "2026-09-23")

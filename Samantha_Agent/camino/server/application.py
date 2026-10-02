@@ -256,6 +256,27 @@ def create_app(
         except (OSError, sqlite3.DatabaseError):
             return _error(503, "recovery_unavailable", "recovery could not be verified")
 
+    @app.post("/api/v1/bootstrap/empty", include_in_schema=False)
+    async def empty_bootstrap(request: Request):
+        if not authorized(request):
+            return _error(401, "unauthorized", "private authorization required")
+        if request.headers.get("content-type") != "application/json" or request.url.query:
+            return _error(415, "invalid_request", "plain JSON request required")
+        try:
+            body = _exact_json(await request.body(), {"contract_version"})
+            if body["contract_version"] != 1:
+                return _error(426, "unsupported_version", "API contract version is unsupported")
+            if not media_store.empty_bootstrap_ready():
+                raise StoreConflict("empty_bootstrap_not_pristine", "server is not a pristine empty bootstrap target")
+            state = await asyncio.to_thread(metadata_api.store.empty_bootstrap)
+            return _json(200, {**state, "bootstrapped": True})
+        except StoreConflict:
+            return _error(409, "empty_bootstrap_not_pristine", "server is not a pristine empty bootstrap target")
+        except (ContractError, TypeError, ValueError):
+            return _error(422, "invalid_request", "bootstrap request is invalid")
+        except (OSError, sqlite3.DatabaseError):
+            return _error(503, "bootstrap_unavailable", "empty bootstrap could not be verified")
+
     @app.api_route("/api/v1/{path:path}", methods=["GET", "POST"], include_in_schema=False)
     async def metadata(path: str, request: Request):
         if not authorized(request):

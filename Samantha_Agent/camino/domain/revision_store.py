@@ -174,6 +174,45 @@ class RevisionStore:
                 raise
         return self.state()
 
+    def empty_bootstrap(self) -> dict[str, Any]:
+        """Reset only a demonstrably empty server for a new phone journal."""
+        with self._connection() as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            try:
+                meta = self._meta(connection)
+                if meta["exports_blocked"] or meta["reconciliation_required"]:
+                    raise StoreConflict("empty_bootstrap_not_pristine", "server is not a pristine empty bootstrap target")
+                accepted = connection.execute(
+                    "SELECT device_sequence,kind FROM accepted_operations ORDER BY device_sequence"
+                ).fetchall()
+                if len(accepted) not in (0, 2) or meta["cursor"] != len(accepted):
+                    raise StoreConflict("empty_bootstrap_not_pristine", "server is not a pristine empty bootstrap target")
+                if accepted and [(row["device_sequence"], row["kind"]) for row in accepted] != [
+                    (1, "create_trip"), (2, "create_day")
+                ]:
+                    raise StoreConflict("empty_bootstrap_not_pristine", "server is not a pristine empty bootstrap target")
+                trip_count = connection.execute("SELECT COUNT(*) FROM trips").fetchone()[0]
+                day_count = connection.execute("SELECT COUNT(*) FROM days").fetchone()[0]
+                if (len(accepted), trip_count, day_count) not in ((0, 0, 0), (2, 1, 1)):
+                    raise StoreConflict("empty_bootstrap_not_pristine", "server is not a pristine empty bootstrap target")
+                for table in (
+                    "moments", "moment_revisions", "assets", "text_revisions",
+                    "audio_layouts", "conflict_candidates", "viewer_permissions",
+                ):
+                    if connection.execute(f"SELECT 1 FROM {table} LIMIT 1").fetchone():
+                        raise StoreConflict("empty_bootstrap_not_pristine", "server is not a pristine empty bootstrap target")
+                for table in ("accepted_operations", "trips", "days"):
+                    connection.execute(f"DELETE FROM {table}")
+                connection.execute(
+                    "UPDATE meta SET cursor=0, writer_device_id=NULL, exports_blocked=0, "
+                    "reconciliation_required=0 WHERE singleton=1"
+                )
+                connection.commit()
+            except Exception:
+                connection.rollback()
+                raise
+        return self.state()
+
     def _save_conflict(self, connection: sqlite3.Connection, envelope: dict[str, Any],
                        raw: bytes, digest: str, error: StoreConflict) -> None:
         connection.execute("BEGIN IMMEDIATE")

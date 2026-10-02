@@ -292,6 +292,7 @@ private struct CaminoSyncView: View {
     @ObservedObject var sync: CaminoSyncCoordinator
     @Environment(\.dismiss) private var dismiss
     @State private var confirmCellular = false
+    @State private var confirmEmptyBootstrap = false
 
     var body: some View {
         NavigationStack {
@@ -329,6 +330,13 @@ private struct CaminoSyncView: View {
                             .disabled(sync.busy || !sync.configurationReady)
                             .accessibilityIdentifier("completeRecovery")
                         Text("Jen na Wi‑Fi. Povolí pokračování pouze při shodných úplných kopiích. Při rozdílu zůstane obnova k řešení.")
+                            .font(.footnote).foregroundStyle(.secondary)
+                        Button("Připojit k novému prázdnému serveru") {
+                            confirmEmptyBootstrap = true
+                        }
+                        .disabled(sync.busy || !sync.configurationReady)
+                        .accessibilityIdentifier("bootstrapEmptyServer")
+                        Text("Použij jen tehdy, když byly všechny Momenty a média v telefonu smazané. Místní soubory se nemažou.")
                             .font(.footnote).foregroundStyle(.secondary)
                     }
                 }
@@ -369,6 +377,14 @@ private struct CaminoSyncView: View {
                 Button("Povolit tuto dávku") { sync.grantCellularForDisplayedBatch() }
             } message: {
                 Text("\(sync.cellularStats.mediaCount) souborů · \(formatBytes(sync.cellularStats.mediaBytes)). Retry může přenést další bajty; nové záznamy povolení nezdědí.")
+            }
+            .alert("Připojit k novému prázdnému serveru?", isPresented: $confirmEmptyBootstrap) {
+                Button("Zrušit", role: .cancel) { }
+                Button("Přijmout nový server", role: .destructive) {
+                    sync.bootstrapEmptyServer()
+                }
+            } message: {
+                Text("Ověří se prázdný telefon i server. Resetuje se pouze historie synchronizace; Momenty, média a nastavení telefonu zůstanou.")
             }
         }
     }

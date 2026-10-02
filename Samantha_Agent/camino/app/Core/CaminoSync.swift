@@ -596,6 +596,23 @@ public struct CaminoSyncJournal: Codable, Equatable, Sendable {
         self = updated // Pause, grants, media and exact historical bytes are preserved.
     }
 
+    public mutating func adoptEmptyServer(serverID: UUID, epoch: UUID, cursor: Int64) throws {
+        guard valid, reconciliationRequired, cursor == 0,
+              metadata.allSatisfy({ $0.phase == .accepted }),
+              media.allSatisfy({ $0.phase == .verified }) else {
+            throw CaminoSyncError.serverConflict("empty_bootstrap_not_pristine")
+        }
+        let preservedDevice = deviceID
+        let preservedPause = paused
+        self = CaminoSyncJournal(deviceID: preservedDevice)
+        self.serverID = serverID
+        self.epoch = epoch
+        self.observedEpoch = epoch
+        self.serverCursor = cursor
+        self.paused = preservedPause
+        self.lastContactUTCMilliseconds = Int64((Date().timeIntervalSince1970 * 1_000).rounded())
+    }
+
     public var cellularBatchStats: CaminoSyncQueueStats {
         let waiting = media.filter { $0.batchID == openBatchID && $0.phase != .verified }
         return CaminoSyncQueueStats(

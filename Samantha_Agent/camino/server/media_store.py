@@ -199,6 +199,19 @@ class MediaStore:
                 connection.execute(statement)
             connection.execute(f"PRAGMA user_version={SCHEMA_VERSION}")
 
+    def empty_bootstrap_ready(self) -> bool:
+        """Return whether no media or upload residue exists to preserve."""
+        with self._lock, self._open() as connection:
+            if any(
+                connection.execute(f"SELECT 1 FROM {table} LIMIT 1").fetchone()
+                for table in (
+                    "upload_sessions", "upload_chunks", "verified_assets",
+                    "finalization_journal", "recovery_events",
+                )
+            ):
+                return False
+        return not any(path.is_file() for path in self.root.rglob("*"))
+
     def create_session(self, asset_id: str, *, chunk_size: int = DEFAULT_CHUNK_BYTES) -> tuple[dict[str, Any], bool]:
         asset_id = _uuid(asset_id, label="Asset ID")
         if isinstance(chunk_size, bool) or not isinstance(chunk_size, int) or not 1 <= chunk_size <= self.max_chunk_bytes:

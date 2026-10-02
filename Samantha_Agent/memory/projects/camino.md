@@ -12,6 +12,16 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 
 ## Aktuální stav
 
+- 2026-10-02 — Lokálně je připraven bezpečný tok pro připojení iPhonu k novému
+  prázdnému serveru po ztrátě původní serverové identity. Serverový endpoint
+  přijme pouze prokazatelně prázdné metadata i úložiště a iPhone předem ověří
+  nulový počet Momentů, médií, audio klipů a čekajících přenosů; resetuje se
+  jen synchronizační historie, žádné místní soubory. Přidáno potvrzení v UI,
+  testy serveru 7/7 a Swift 58/58, generic iOS build PASS. Změna je zatím
+  pouze lokální; push, nasazení služby, nový podepsaný build a fyzická kontrola
+  na iPhonu zůstávají otevřené. Stávající čistý server běží ze staršího
+  releasu bez tohoto endpointu, dokud nebude samostatně schváleno p+n.
+
 - 2026-10-02 09:37 CEST — Připraven nový čistý Camino server: nová interní
   identita, prázdný Trip a první den, kurzor 2, 0 Momentů a 0 médií. Owner token
   je uložen pouze privátně na Macu. Služba běží jako LaunchAgent (PID `50505`),

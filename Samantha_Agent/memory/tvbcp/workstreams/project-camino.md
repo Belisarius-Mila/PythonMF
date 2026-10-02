@@ -1,6 +1,15 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-02 — Lokální checkpoint guarded bootstrapu je připraven: server
+  kontroluje skutečně prázdný metadata store i media/upload residue a iOS
+  před resetem journalu kontroluje Wi‑Fi a prázdný telefon. Operace nemá mazací
+  větev; zachovává místní soubory a resetuje pouze historii synchronizace.
+  Důkaz: Swift 58/58, server 7/7, generic iOS build a `git diff --check`
+  PASS. Stav je `lokální / NEOVĚŘENO` pro push, deployment, podepsaný IPA a
+  fyzický iPhone průchod. Riziko: dokud nebude nasazen nový server i klient,
+  tlačítko nebude použitelné proti běžící starší službě.
+
 - 2026-10-02 09:37 CEST — Připravena nová čistá Camino Service s novou
   identitou, prázdným Tripem a prvním dnem; kurzor 2, 0 Momentů a 0 ověřených
   médií. Owner token zůstal pouze v soukromém Mac úložišti. LaunchAgent běží na

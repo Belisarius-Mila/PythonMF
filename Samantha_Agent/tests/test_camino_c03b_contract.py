@@ -13,7 +13,7 @@ from camino.domain.model import (
     Asset, CaptureTime, ContractError, JourneyDay, MomentKind, Privacy, TextHistory,
     TextRevision, TimeSource, Trip, create_moment,
 )
-from camino.domain.revision_store import RevisionStore
+from camino.domain.revision_store import RevisionStore, StoreConflict
 
 
 def uid(number: int) -> str:
@@ -231,6 +231,16 @@ class CaminoC03bContractTests(unittest.TestCase):
             authorization="Bearer synthetic-only",
         )
         self.assertEqual(old_cursor.body["error"]["code"], "epoch_mismatch")
+
+    def test_empty_bootstrap_clears_only_empty_seed_and_rejects_content(self):
+        first = self.store.empty_bootstrap()
+        self.assertEqual(first["cursor"], 0)
+        self.assertIsNone(first["writer_device_id"])
+        self.assertEqual(self.store.state()["cursor"], 0)
+        self.assertEqual(self.send(self.envelope(1, "create_trip", wire(self.trip))).status, 200)
+        with self.assertRaises(StoreConflict) as caught:
+            self.store.empty_bootstrap()
+        self.assertEqual(caught.exception.code, "empty_bootstrap_not_pristine")
 
     def test_transaction_rolls_back_projection_if_receipt_write_fails(self):
         self.register()

@@ -273,6 +273,35 @@ import XCTest
         XCTAssertEqual(journal.nextWork(networkAvailable: true, expensive: false), .none)
     }
 
+    func testAdoptEmptyServerResetsOnlySyncIdentityAndPreservesPause() throws {
+        var journal = CaminoSyncJournal(deviceID: UUID())
+        journal.observeServer(serverID: UUID(), epoch: UUID(), cursor: 0)
+        journal.reconciliationRequired = true
+        journal.paused = true
+        let serverID = UUID(), epoch = UUID()
+        try journal.adoptEmptyServer(serverID: serverID, epoch: epoch, cursor: 0)
+        XCTAssertEqual(journal.serverID, serverID)
+        XCTAssertEqual(journal.epoch, epoch)
+        XCTAssertEqual(journal.observedEpoch, epoch)
+        XCTAssertEqual(journal.serverCursor, 0)
+        XCTAssertFalse(journal.reconciliationRequired)
+        XCTAssertTrue(journal.paused)
+        XCTAssertTrue(journal.metadata.isEmpty)
+        XCTAssertTrue(journal.media.isEmpty)
+    }
+
+    func testAdoptEmptyServerRejectsPendingHistoryOrNonzeroCursor() throws {
+        var journal = CaminoSyncJournal()
+        journal.observeServer(serverID: UUID(), epoch: UUID(), cursor: 0)
+        journal.reconciliationRequired = true
+        journal.metadata = [CaminoSyncMetadataItem(id: UUID(), uniqueKey: "pending",
+            kind: "create_trip", objectID: UUID(), expectedRevision: nil,
+            payload: Data("{}".utf8))]
+        XCTAssertThrowsError(try journal.adoptEmptyServer(serverID: UUID(), epoch: UUID(), cursor: 0))
+        journal.metadata.removeAll()
+        XCTAssertThrowsError(try journal.adoptEmptyServer(serverID: UUID(), epoch: UUID(), cursor: 1))
+    }
+
     func testExactEnvelopeSurvivesJournalRestart() throws {
         let payload = try JSONSerialization.data(
             withJSONObject: ["id": UUID().uuidString.lowercased(), "name": "Synthetic"],
