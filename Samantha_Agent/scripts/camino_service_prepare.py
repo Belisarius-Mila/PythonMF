@@ -40,8 +40,9 @@ def archive_evidence(state: dict) -> dict:
             raise ValueError("metadata integrity failed")
         identity = db.execute("SELECT server_id,epoch,cursor,writer_device_id FROM meta WHERE singleton=1").fetchone()
         trip_rows = db.execute("SELECT DISTINCT trip_id FROM moments").fetchall()
-        if len(trip_rows) != 1:
-            raise ValueError("exactly one populated trip required; explicit selection needed")
+        trip_count = db.execute("SELECT COUNT(*) FROM trips").fetchone()[0]
+        if trip_count != 1 or len(trip_rows) > 1:
+            raise ValueError("exactly one selected trip required; explicit selection needed")
         flags = db.execute("SELECT exports_blocked,reconciliation_required FROM meta WHERE singleton=1").fetchone()
         result = {"operations": db.execute("SELECT COUNT(*) FROM accepted_operations").fetchone()[0],
                   "moments": db.execute("SELECT COUNT(*) FROM moments").fetchone()[0],
