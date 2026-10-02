@@ -111,6 +111,29 @@ class CaminoC05aFastAPITests(unittest.IsolatedAsyncioTestCase):
         token = "synthetic-empty-bootstrap-token-long-enough"
         tokens.add(token, label="synthetic iPhone")
         metadata = RevisionStore(root / "metadata.sqlite")
+        # Exercise the seeded empty server shape used by the managed service:
+        # create_day references create_trip and must be removed first.
+        seed_trip = Trip(uid(11), "Seed trip", "cs", True, True)
+        seed_day = JourneyDay(uid(12), seed_trip.id, "2026-10-02")
+        seed_contract = CaminoV1Contract(metadata, authenticate=tokens.authenticate)
+        seed_epoch = metadata.state()["epoch"]
+        for sequence, kind, value in ((1, "create_trip", seed_trip), (2, "create_day", seed_day)):
+            body = {
+                "contract_version": 1,
+                "epoch": seed_epoch,
+                "operation_id": uid(200 + sequence),
+                "device_id": uid(300),
+                "device_sequence": sequence,
+                "kind": kind,
+                "expected_revision": None,
+                "payload": wire(value),
+            }
+            raw = json.dumps(body, sort_keys=True, separators=(",", ":")).encode()
+            response = seed_contract.handle(
+                "POST", "/api/v1/operations", authorization=f"Bearer {token}",
+                body=raw, content_type="application/json",
+            )
+            self.assertEqual(response.status, 200, response.body)
         media = MediaStore(
             root / "media.sqlite", root / "media", asset_lookup=metadata.asset,
             max_asset_bytes=1024 * 1024, max_chunk_bytes=8, reserve_bytes=0,

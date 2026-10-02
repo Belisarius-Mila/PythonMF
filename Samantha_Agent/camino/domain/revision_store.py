@@ -201,7 +201,9 @@ class RevisionStore:
                 ):
                     if connection.execute(f"SELECT 1 FROM {table} LIMIT 1").fetchone():
                         raise StoreConflict("empty_bootstrap_not_pristine", "server is not a pristine empty bootstrap target")
-                for table in ("accepted_operations", "trips", "days"):
+                # Days reference trips; remove children before their parent so
+                # the pristine reset remains valid with foreign keys enabled.
+                for table in ("accepted_operations", "days", "trips"):
                     connection.execute(f"DELETE FROM {table}")
                 connection.execute(
                     "UPDATE meta SET cursor=0, writer_device_id=NULL, exports_blocked=0, "
