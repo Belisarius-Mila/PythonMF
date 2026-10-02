@@ -12,6 +12,13 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 
 ## Aktuální stav
 
+- 2026-10-02 09:15 CEST — p+n dokončeno pro `64bc88b6`: plná brána
+  1846/1846, push na GitHub, fast-forward obou profilových workspace a řízený
+  restart Cockpitu na PID `49126`; otisk `49308f729c685835`, health 200 a smoke
+  5/5 PASS, receipt `deployed`. Camino Service po schváleném Mac-only resetu
+  zůstává záměrně vypnutá a bez konfigurace/dat, takže Viewer/Service live audit
+  je NEOVĚŘENO. Telefon se neměnil.
+
 - 2026-10-02 09:03 CEST — Na Mílův pokyn byl proveden reset pouze Macových
   Camino dat. Zastavená Service přišla o aktivní `C05bAcceptance` a svůj
   datový/credential/config obsah; ponechány jsou `Releases` a `Service/venv`.

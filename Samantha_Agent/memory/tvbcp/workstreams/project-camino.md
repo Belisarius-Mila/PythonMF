@@ -1,6 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-02 09:15 CEST — p+n dokončeno pro `64bc88b6`: plná brána
+  1846/1846 PASS, GitHub push, fast-forward obou čistých profilových workspace
+  a řízený Cockpit restart na PID `49126` s otiskem `49308f729c685835`.
+  Health endpoint a Cockpit smoke 5/5 PASS, deployment receipt `deployed`.
+  Camino Service zůstává po schváleném Mac-only resetu vypnutá a bez dat;
+  Viewer/Service live kontrola proto není provedena (NEOVĚŘENO). iPhone zůstal
+  beze změny.
+
 - 2026-10-02 09:03 CEST — Dokončen schválený Mac-only reset dat. Po zastavení
   služby byly odstraněny `C05bAcceptance` a obsah `Camino/Service` kromě
   `venv`; `Releases`, zdrojový repozitář, Cockpit, Tailscale a telefon se

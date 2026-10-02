@@ -1,6 +1,15 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-02 09:15 CEST — p+n po Mac-only resetu dokončeno pro `64bc88b6`.
+  Plná lokální brána v projektovém venv prošla 1846/1846, GitHub push sjednotil
+  `origin/main`, oba čisté izolované profily byly fast-forwardem zarovnány.
+  Řízený Cockpit deployment promítl main do nového procesu PID `49126`, otisk
+  `49308f729c685835`, health 200 a smoke 5/5 PASS; deployment receipt je
+  `deployed`. Camino Service zůstává záměrně zastavená a bez konfigurace/dat po
+  schváleném resetu, proto Viewer/Service live audit není použitelný a zůstává
+  NEOVĚŘENO. iPhone se neměnil.
+
 - 2026-10-02 09:03 CEST — Na výslovný pokyn byl proveden Mac-only reset
   současných Camino dat. Camino Service byla zastavena; smazány byly aktivní
   `C05bAcceptance` a všechny položky `Camino/Service` kromě technického
