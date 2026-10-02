@@ -1,6 +1,16 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-02 21:16 CEST — Na Mílův výslovný požadavek obnoven privátní Viewer pro Janu.
+  Příčina 404: po resetu chyběl Viewer grant; registrovaný status jej potvrdil
+  jako false. Během řízeného zastavení vzniklo nové náhodné čitelné heslo
+  ze slov pro oddělený reader účet jana; tajemství pouze v privátním runtime.
+  Registrované enable-viewer/start prošly, bez změny owner přístupu iPhonu
+  a bez změny Tailscale tras. HTTPS s ověřením certifikátu: anonymní Viewer
+  401, Jana /viewer/ 200, mapa 200, owner /api/v1/state 200. Přístup z telefonu
+  novým heslem ještě musí potvrdit Míla. Heslo předáno pouze schránkou Macu;
+  staré heslo uložené v prohlížeči je potřeba nahradit. GitHub bez odeslání.
+
 - 2026-10-02 17:35 CEST — Obnoven skutečný přenos iPhone → Mac po resetu. Debugger na
   telefonu prokázal NSCocoaErrorDomain 513 / POSIX EACCES při atomickém zápisu
   journalu: adresář Sync vlastnil root (0755), aplikace běží jako mobile.
