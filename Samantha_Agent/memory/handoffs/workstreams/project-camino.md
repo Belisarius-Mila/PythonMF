@@ -1,6 +1,17 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-03 21:23 WEST — Míla fyzicky potvrdil vložení 14s videa z Fotek do okamžiku
+  a jeho úspěšný přenos. Základní import + přenos videa PASS podle uživatele;
+  nejde o plošnou přejímku HEIC, iCloudu, dlouhých videí, zvuku nebo orientace.
+  Následně výslovně zadal p+n celé čekající Camino dávky. Zdrojový serverový
+  kód se od již nasazené opravy 5e6fba7a nezměnil; nová funkce je v iOS.
+  Publikační postup: audit celé dávky, plná brána, push přesného main,
+  zarovnání čistých profilů a řízené nasazení Cockpitu s živým smoke 5/5.
+  Skutečný výsledek konkrétního nasazení dokládá živý deploy audit a soukromá
+  deployment účtenka; tento předpublikační zápis jej nepředjímá.
+  Další uživatelský krok: běžné používání; při příležitosti jeden HEIC snímek.
+
 - 2026-10-03 21:06 WEST — Na Mílův pokyn vytvořen podepsaný Camino 0.1.0 (15)
   z commitu `73085f17` s importem z Fotek. IPA `Camino-15-20261003.ipa`
   v Downloads, 1 229 377 B; strict codesign před zabalením i po rozbalení,

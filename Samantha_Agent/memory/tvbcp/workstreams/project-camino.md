@@ -3314,3 +3314,21 @@ Podepsaný iOS build, strict codesign před i po ZIP roundtrip, CRC a kontrola
 verze PASS; 1 229 377 B. Podpis aktuálního profilu vyprší 4. 10. 16:07 UTC,
 SideStore provede nový podpis. Předchozí 63/63 a plná brána 1847/1847 platí
 pro stejný kód. Telefon bez instalace; fyzická přejímka není tímto potvrzena.
+
+## 2026-10-03 21:23 WEST — Fyzický import videa a pokyn p+n
+
+**Hotovo:** Míla potvrzuje vložení 14s videa z Fotek a jeho úspěšný přenos.
+
+**Rozhodnutí:** Míla nyní výslovně autorizoval p+n čekající Camino dávky.
+Nasazení Cockpitu se dokončí řízeným postupem a živým auditem; skutečnou
+publikační účtenku vydává backend po pushnutí a ověření nového procesu.
+Server Camina již obsahuje potřebný kontrakt; nový import je iOS funkce.
+
+**Další krok:** Dokončit autorizované p+n; následně běžné používání.
+
+**Navrhované další kroky:** Při příležitosti ověřit jednu HEIC fotografii.
+
+**Technický důkaz:** Uživatelský PASS se týká importu a přenosu konkrétního
+14s videa. Zvuk, orientace, iCloud, HEIC a dlouhá videa tím nejsou plošně
+přijaté. Stejný kód má 63/63 SwiftPM, závěrečné 14/14 a bránu 1847/1847;
+publikační brána se provede v registrovaném push/deploy postupu.

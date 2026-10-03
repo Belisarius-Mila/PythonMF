@@ -1,14 +1,15 @@
 # Výběr média z Fotek do okamžiku
 
-Implementace 2026-10-03, pouze iOS. Nasazení na telefon a fyzická přejímka
-jsou samostatný následující krok. Serverový kód ani živá data se nemění.
+Implementace 2026-10-03, pouze iOS. Míla následně fyzicky potvrdil vložení
+14s videa a jeho přenos. Ostatní fyzické scénáře zůstávají samostatné.
+Serverový kód se kvůli importu nemění.
 
 ## Instalační balíček
 
 2026-10-03: podepsaný build **0.1.0 (15)** z `73085f17`,
 `Camino-15-20261003.ipa` v Downloads (1 229 377 B). Podepsaný iOS build,
 strict podpis před zabalením i po rozbalení, ZIP CRC a verze/bundle ID PASS.
-Telefon zatím nezměněn. Import přes SideStore do stejné aplikace, bez
+Balíček je určen pro SideStore do stejné aplikace, bez
 odinstalace a bez Append Team ID; SideStore zajistí nový podpis.
 
 ## Ovládání a hranice
@@ -80,8 +81,10 @@ Po instalaci nového buildu přes SideStore, po jednom PASS/FAIL:
 4. Větší video, návrat po zamčení/aplikaci a import v owner_only okamžiku;
    soukromá položka se nesmí objevit ve Vieweru.
 
-Tyto fyzické body jsou NEOVĚŘENO. Neměnit podpis/instalaci ani služby bez
-příslušného následného kroku; GitHub push nebyl zadán.
+Uživatel potvrdil základní import a přenos 14s videa. Další části uvedených
+bodů (zejména HEIC, zvuk/orientace, iCloud, větší video a owner_only) jsou
+NEOVĚŘENO. Neměnit podpis/instalaci ani služby bez
+příslušného následného kroku. Po fyzickém testu Míla výslovně zadal p+n.
 
 Technický podklad Apple: [reprezentace položky ve PhotosPicker](https://developer.apple.com/documentation/photosui/phpickerconfiguration-swift.struct/preferredassetrepresentationmode).
 Zvolená current omezuje dodatečné převody systémem; kompatibilní importní

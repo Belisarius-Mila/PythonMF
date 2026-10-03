@@ -12,7 +12,8 @@ Fotografie se připravují jako JPEG, Live Photo jako statický snímek;
 video jako MOV bez překódování stop. Stav čekání je viditelný a načítání
 lze zrušit. Přesné hranice a fyzický test jsou v
 [PHOTO_LIBRARY_IMPORT.md](../docs/PHOTO_LIBRARY_IMPORT.md).
-Nová funkce zatím není nainstalovaná na fyzickém iPhonu.
+Míla 2026-10-03 fyzicky potvrdil vložení 14s videa a jeho přenos;
+HEIC, iCloud a další okrajové scénáře zůstávají neověřené.
 
 ## Rozsah
 
