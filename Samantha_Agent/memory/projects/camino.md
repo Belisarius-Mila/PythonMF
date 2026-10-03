@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-03 21:02 WEST — iOS import z Fotek lokálně doplněn, fyzická přejímka čeká
+Aktualizováno: 2026-10-03 21:06 WEST — podepsaný build 15 / IPA pro SideStore připraven
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,17 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-03 21:06 WEST — Na Mílův pokyn vytvořen podepsaný Camino 0.1.0 (15)
+  z commitu `73085f17` s importem z Fotek. IPA `Camino-15-20261003.ipa`
+  v Downloads, 1 229 377 B; strict codesign před zabalením i po rozbalení,
+  ZIP CRC a bundle/build kontrola PASS. SHA-256
+  `d8e4b5a40d09cb00e5e35e34f5a21123f2cc50cffc1d48c715bff78eaf508f6b`.
+  Použit stávající vývojový profil, platný do 4. 10. 16:07 UTC; pro nový
+  týdenní podpis použít SideStore. Stejné bundle ID, bez odinstalace a bez
+  Append Team ID. Telefon ani běžící služby nebyly změněny, GitHub bez push.
+  Další krok: import IPA přes SideStore a jeden fyzický test HEIC do okamžiku.
+  Picker/iCloud a end-to-end přenos nově importovaného média stále NEOVĚŘENO.
 
 - 2026-10-03 21:02 WEST — Na výslovný požadavek Míly doplněn iOS výběr fotografie/video
   z Fotek do existujícího okamžiku. Tlačítko je nahoře v menu; výběr po jednom,

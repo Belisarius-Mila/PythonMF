@@ -3296,3 +3296,21 @@ smazaný parent a obnova bez duplicit mají syntetickou regresi. Plná
 projektová brána 1847/1847 a rychlá statická kontrola PASS. Bez instalace,
 změny serveru a GitHub push. Fyzický picker/iCloud a end-to-end přenos
 nově importovaného média zůstávají NEOVĚŘENO.
+
+## 2026-10-03 21:06 WEST — Build 15 pro SideStore
+
+**Hotovo:** Podepsaný instalační balíček s importem z Fotek je v Downloads
+jako `Camino-15-20261003.ipa`.
+
+**Rozhodnutí:** Míla výslovně zadal nový build. Instalace proběhne přes
+SideStore se zachováním původní aplikace a dat; žádný GitHub push.
+
+**Další krok:** Import IPA v SideStore a fyzický test jedné HEIC fotografie.
+
+**Navrhované další kroky:** Žádné nové.
+
+**Technický důkaz:** Zdroj `73085f17`, verze 0.1.0 (15), původní bundle ID.
+Podepsaný iOS build, strict codesign před i po ZIP roundtrip, CRC a kontrola
+verze PASS; 1 229 377 B. Podpis aktuálního profilu vyprší 4. 10. 16:07 UTC,
+SideStore provede nový podpis. Předchozí 63/63 a plná brána 1847/1847 platí
+pro stejný kód. Telefon bez instalace; fyzická přejímka není tímto potvrzena.

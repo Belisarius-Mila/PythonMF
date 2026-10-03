@@ -3,6 +3,14 @@
 Implementace 2026-10-03, pouze iOS. Nasazení na telefon a fyzická přejímka
 jsou samostatný následující krok. Serverový kód ani živá data se nemění.
 
+## Instalační balíček
+
+2026-10-03: podepsaný build **0.1.0 (15)** z `73085f17`,
+`Camino-15-20261003.ipa` v Downloads (1 229 377 B). Podepsaný iOS build,
+strict podpis před zabalením i po rozbalení, ZIP CRC a verze/bundle ID PASS.
+Telefon zatím nezměněn. Import přes SideStore do stejné aplikace, bez
+odinstalace a bez Append Team ID; SideStore zajistí nový podpis.
+
 ## Ovládání a hranice
 
 V horním menu detailu existujícího okamžiku je **Vybrat z Fotek**. Systémový
