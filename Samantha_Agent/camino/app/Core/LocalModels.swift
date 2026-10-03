@@ -307,6 +307,7 @@ public struct LocalMediaIntent: Equatable, Sendable {
     public let capture: CaptureStamp
     public let attaching: Bool
     public let silentRequested: Bool
+    public var imported: Bool = false
 
     public var pendingRelativePath: String {
         "Media/Pending/\(assetID.uuidString).\(kind.fileExtension)"
@@ -347,6 +348,7 @@ public struct LocalMediaAsset: Equatable, Identifiable, Sendable {
     public let silentRequested: Bool
     /// A local tombstone; the media vault removes the bytes separately.
     public var deleted: Bool = false
+    public var imported: Bool = false
 }
 
 public enum LocalDeletionKind: String, Codable, Sendable {

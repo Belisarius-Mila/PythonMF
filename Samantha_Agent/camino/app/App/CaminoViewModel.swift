@@ -2,6 +2,7 @@ import AVFAudio
 import Combine
 import CoreLocation
 import Foundation
+import PhotosUI
 import SwiftUI
 import UserNotifications
 
@@ -40,6 +41,11 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
         repairedCount: 0, pendingCount: 0, orphanCount: 0, missingCount: 0)
     @Published private(set) var cameraError: String?
     @Published private(set) var awaitingLocation = false
+    @Published private(set) var importingMedia = false
+    @Published private(set) var canCancelLibraryLoad = false
+    private var libraryLoadID: UUID?
+    private var libraryLoadProgress: Progress?
+    private var libraryLoadContinuation: CheckedContinuation<CaminoPickedFile?, Error>?
     @Published var momentDetail: LocalMoment?
 
     private let local: CaminoLocalStore?
@@ -341,7 +347,7 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
             audio?.enterForeground()
             if audioBusy { showAudio = true }
             reconcileAudio()
-            if !showCamera { Task { await reconcileMedia() } }
+            if !showCamera && !importingMedia { Task { await reconcileMedia() } }
             refresh()
             sync?.applicationBecameActive()
         } else {
@@ -839,6 +845,77 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
 
     func audioSessionIDs(for momentID: UUID) -> Set<UUID> {
         Set((try? local?.audioSessionIDs(momentID: momentID)) ?? [])
+    }
+
+
+    /// Cancellation releases the UI immediately, even if iCloud's provider has
+    /// not returned yet. A late provider callback only disposes its own copy.
+    private func loadLibraryItem(_ item: PhotosPickerItem) async throws -> CaminoPickedFile? {
+        let id = UUID()
+        return try await withTaskCancellationHandler {
+            try await withCheckedThrowingContinuation { continuation in
+                guard !Task.isCancelled else {
+                    continuation.resume(throwing: CancellationError())
+                    return
+                }
+                libraryLoadID = id
+                libraryLoadContinuation = continuation
+                canCancelLibraryLoad = true
+                libraryLoadProgress = item.loadTransferable(type: CaminoPickedFile.self) { result in
+                    Task { @MainActor [weak self] in
+                        guard let self, self.libraryLoadID == id,
+                              let continuation = self.libraryLoadContinuation else {
+                            if case .success(let copy) = result { copy?.removeTemporaryCopy() }
+                            return
+                        }
+                        self.libraryLoadID = nil
+                        self.libraryLoadContinuation = nil
+                        self.libraryLoadProgress = nil
+                        self.canCancelLibraryLoad = false
+                        continuation.resume(with: result)
+                    }
+                }
+            }
+        } onCancel: {
+            Task { @MainActor [weak self] in self?.cancelLibraryLoad(id: id) }
+        }
+    }
+
+    func cancelLibraryLoad(id: UUID? = nil) {
+        guard id == nil || libraryLoadID == id else { return }
+        let continuation = libraryLoadContinuation
+        libraryLoadContinuation = nil
+        libraryLoadID = nil
+        libraryLoadProgress?.cancel()
+        libraryLoadProgress = nil
+        canCancelLibraryLoad = false
+        continuation?.resume(throwing: CancellationError())
+    }
+
+    func importFromPhotos(_ item: PhotosPickerItem, into momentID: UUID) async {
+        guard !importingMedia, !audioBusy, !showCamera, let mediaVault else { return }
+        importingMedia = true
+        defer { importingMedia = false }
+        message = "Načítám z Fotek… Pokud je soubor na iCloudu, může to chvíli trvat."
+        do {
+            guard let picked = try await loadLibraryItem(item) else {
+                throw LocalStoreError.invalidMedia
+            }
+            defer { picked.removeTemporaryCopy() }
+            try Task.checkCancellation()
+            message = "Připravuji a ověřuji médium…"
+            _ = try await mediaVault.importLibraryFile(picked.url, kind: picked.kind,
+                                                       targetMomentID: momentID)
+            message = "Médium vloženo do okamžiku. Originál ve Fotkách zůstal zachovaný."
+            refresh()
+        } catch is CancellationError {
+            message = "Výběr z Fotek byl zrušen."
+        } catch LocalStoreError.insufficientSpace {
+            message = "Na vložení média není dost volného místa. Originál ve Fotkách zůstal zachovaný."
+        } catch {
+            message = "Médium se nepodařilo vložit. Zkontroluj jeho dostupnost ve Fotkách a případné připojení k iCloudu."
+        }
+        await reconcileMedia()
     }
 
     @discardableResult func savePhoto(_ data: Data) async -> LocalMediaAsset? {

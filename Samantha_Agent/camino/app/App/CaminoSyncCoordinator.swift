@@ -617,7 +617,8 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
                 snapshots.append(try local.syncSnapshot(momentID: moment.id))
             }
         }
-        var candidates = try local.allMediaAssets().map { asset in
+        let localAssets = try local.allMediaAssets()
+        var candidates = localAssets.map { asset in
             CaminoSyncMediaItem(
                 id: asset.id, momentID: asset.momentID,
                 kind: asset.kind == .photo ? .photo : .video,
@@ -674,7 +675,8 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
         let hasLocalContent = !snapshots.isEmpty || !candidates.isEmpty || !audioLayouts.isEmpty
         let discovery = try CaminoSyncDiscovery(
             trips: hasLocalContent ? trips : [], days: hasLocalContent ? days : [],
-            moments: snapshots, media: candidates, audioLayouts: audioLayouts)
+            moments: snapshots, media: candidates, audioLayouts: audioLayouts,
+            importedAssetIDs: Set(localAssets.filter(\.imported).map(\.id)))
         localMomentIDs = Set(snapshots.map(\.moment.id))
         discoveredAudioLayouts = discovery.metadata.filter { $0.kind == "create_audio_layout" }
         journal.mergeDiscovery(discovery)

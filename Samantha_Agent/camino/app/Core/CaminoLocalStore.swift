@@ -333,7 +333,7 @@ private struct LocalPendingMomentLink: Codable, Equatable {
     /// Persist identity/privacy before starting a video file or accepting a photo.
     /// An attachment explicitly names its existing Moment; proximity never links it.
     public func beginMediaIntent(kind: LocalMediaKind, targetMomentID: UUID? = nil,
-                                 silentRequested: Bool = false, at date: Date = Date(),
+                                 silentRequested: Bool = false, imported: Bool = false, at date: Date = Date(),
                                  timeZone: TimeZone = .current,
                                  location: LocalLocationFix? = nil) throws -> LocalMediaIntent {
         guard let trip = try activeTrip() else { throw LocalStoreError.noActiveTrip }
@@ -344,7 +344,7 @@ private struct LocalPendingMomentLink: Codable, Equatable {
                 throw LocalStoreError.momentMissing
             }
             let decoded = try decodeMoment(row)
-            guard decoded.tripID == trip.id, !decoded.hidden else {
+            guard decoded.tripID == trip.id, !decoded.hidden, !decoded.deleted else {
                 throw LocalStoreError.invalidMediaIntent
             }
             target = decoded
@@ -362,6 +362,10 @@ private struct LocalPendingMomentLink: Codable, Equatable {
             row.setValue(target != nil, forKey: "attaching")
             row.setValue(silentRequested, forKey: "silentRequested")
             row.setValue(false, forKey: "finalized")
+            if imported {
+                let assetID: UUID = try required(row, "assetID")
+                try setSettingValue("photo_picker", key: "media.origin.\(assetID.uuidString)")
+            }
             write(stamp, to: row)
             if target == nil {
                 try saveCaptureLocation(location, momentID: required(row, "momentID"), stamp: stamp)
@@ -402,6 +406,8 @@ private struct LocalPendingMomentLink: Codable, Equatable {
         do {
             if intent.attaching {
                 guard let target = try object("MomentRecord", id: intent.momentID),
+                      !(try decodeMoment(target)).deleted,
+                      !(try decodeMoment(target)).hidden,
                       (try required(target, "tripID") as UUID) == intent.tripID,
                       (try required(target, "privacy") as String) == intent.privacy.rawValue else {
                     throw LocalStoreError.invalidMediaIntent
@@ -1528,12 +1534,14 @@ private struct LocalPendingMomentLink: Codable, Equatable {
               let privacy = LocalPrivacy(rawValue: privacyRaw) else {
             throw LocalStoreError.inconsistentStore
         }
-        return LocalMediaIntent(assetID: try required(row, "assetID"),
+        let assetID: UUID = try required(row, "assetID")
+        return LocalMediaIntent(assetID: assetID,
                                 momentID: try required(row, "momentID"),
                                 tripID: try required(row, "tripID"), kind: kind,
                                 privacy: privacy, capture: try decodeStamp(row),
                                 attaching: try required(row, "attaching"),
-                                silentRequested: try required(row, "silentRequested"))
+                                silentRequested: try required(row, "silentRequested"),
+                                imported: try settingValue("media.origin.\(assetID.uuidString)") == "photo_picker")
     }
 
     private func decodeMediaAsset(_ row: NSManagedObject) throws -> LocalMediaAsset {
@@ -1554,7 +1562,8 @@ private struct LocalPendingMomentLink: Codable, Equatable {
                                relativePath: try required(row, "relativePath"),
                                inspection: inspection,
                                silentRequested: try required(row, "silentRequested"),
-                               deleted: try hasDeletion(kind: .asset, targetID: assetID))
+                               deleted: try hasDeletion(kind: .asset, targetID: assetID),
+                               imported: try settingValue("media.origin.\(assetID.uuidString)") == "photo_picker")
     }
 
     private func decodeStamp(_ row: NSManagedObject) throws -> CaptureStamp {

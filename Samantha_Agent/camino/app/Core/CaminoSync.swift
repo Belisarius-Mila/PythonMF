@@ -856,7 +856,8 @@ public struct CaminoSyncDiscovery: Sendable {
     public init(trips: [LocalTrip], days: [LocalDay],
                 moments: [LocalMomentSyncSnapshot],
                 media: [CaminoSyncMediaItem],
-                audioLayouts: [CaminoSyncAudioLayout] = []) throws {
+                audioLayouts: [CaminoSyncAudioLayout] = [],
+                importedAssetIDs: Set<UUID> = []) throws {
         let dayByTripAndDate = Dictionary(uniqueKeysWithValues: days.map {
             ("\($0.tripID.uuidString.lowercased())|\($0.localDate)", $0)
         })
@@ -925,7 +926,8 @@ public struct CaminoSyncDiscovery: Sendable {
                     "id": asset.id.uuidString.lowercased(),
                     "moment_id": asset.momentID.uuidString.lowercased(),
                     "media_kind": asset.kind.rawValue,
-                    "origin": asset.kind == .audio ? "recording" : "camera",
+                    "origin": importedAssetIDs.contains(asset.id) ? "photo_picker"
+                        : asset.kind == .audio ? "recording" : "camera",
                     "byte_count": asset.byteCount,
                     "sha256": asset.sha256,
                     "duration_ms": asset.durationMilliseconds.map { $0 as Any } ?? NSNull(),

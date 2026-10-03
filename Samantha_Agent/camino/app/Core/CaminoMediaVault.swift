@@ -148,6 +148,91 @@ public struct LocalMediaRecovery: Equatable, Sendable {
         return try await finalize(intent, interrupted: false)
     }
 
+    /// Import only into an existing Moment. Preparation happens before the durable
+    /// intent: cancellation/bad input cannot create an empty Moment or ghost job.
+    /// Photos remain untouched; the library representation becomes JPEG/MOV here.
+    @discardableResult public func importLibraryFile(
+        _ source: URL, kind: LocalMediaKind, targetMomentID: UUID
+    ) async throws -> LocalMediaAsset {
+        try Task.checkCancellation()
+        _ = try checkSpace(for: kind)
+        let values = try source.resourceValues(forKeys: [.fileSizeKey, .isRegularFileKey])
+        guard values.isRegularFile == true, let size = values.fileSize, size > 0 else {
+            throw LocalStoreError.invalidMedia
+        }
+        guard Int64(size) < (try availableBytes()) - CaminoStorageSafetyPolicy.operatingReserveBytes else {
+            throw LocalStoreError.insufficientSpace
+        }
+        let staging = FileManager.default.temporaryDirectory
+            .appendingPathComponent("CaminoImport-\(UUID())", isDirectory: true)
+        try files.createDirectory(at: staging, withIntermediateDirectories: false)
+        // Only our generated temporary copy; never the caller's/library file.
+        defer { try? files.removeItem(at: staging) }
+        let prepared = staging.appendingPathComponent("prepared.\(kind.fileExtension)")
+        let inspection: LocalMediaInspection
+        if kind == .photo {
+            try await Task.detached(priority: .utility) {
+                try Self.prepareImportedPhoto(source, destination: prepared)
+            }.value
+            inspection = try await Self.inspectPhoto(prepared)
+        } else {
+            try await Task.detached(priority: .utility) {
+                let asset = AVURLAsset(url: source)
+                guard let exporter = AVAssetExportSession(asset: asset,
+                    presetName: AVAssetExportPresetPassthrough) else {
+                    throw LocalStoreError.invalidMedia
+                }
+                exporter.outputURL = prepared
+                exporter.outputFileType = .mov
+                await exporter.export()
+                guard exporter.status == .completed else { throw LocalStoreError.invalidMedia }
+            }.value
+            // A library clip without an audio track is valid, not a failed mic capture.
+            inspection = try await Self.inspectVideo(prepared, interrupted: false, silentRequested: true)
+        }
+        try Task.checkCancellation()
+        guard try availableBytes() > CaminoStorageSafetyPolicy.operatingReserveBytes else {
+            throw LocalStoreError.insufficientSpace
+        }
+        let intent = try metadata.beginMediaIntent(kind: kind, targetMomentID: targetMomentID,
+            silentRequested: kind == .video && !inspection.hasAudio, imported: true)
+        // Same volume, atomic move. From this point recovery owns the pending file.
+        let pending = url(intent.pendingRelativePath)
+        let original = url(intent.originalRelativePath)
+        try files.moveItem(at: prepared, to: pending)
+        try files.moveItem(at: pending, to: original)
+        #if os(iOS)
+        try files.setAttributes(
+            [.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication],
+            ofItemAtPath: original.path)
+        #endif
+        // Already inspected/hashed; no suspension or second full video hash here.
+        // A failure now leaves a durable intent + original for launch recovery.
+        return try metadata.acceptMedia(intent, inspection: inspection)
+    }
+
+    private nonisolated static func prepareImportedPhoto(_ source: URL, destination: URL) throws {
+        guard let image = CGImageSourceCreateWithURL(source as CFURL, nil),
+              CGImageSourceGetCount(image) > 0,
+              let properties = CGImageSourceCopyPropertiesAtIndex(image, 0, nil) as? [CFString: Any],
+              let width = properties[kCGImagePropertyPixelWidth] as? Int,
+              let height = properties[kCGImagePropertyPixelHeight] as? Int,
+              width > 0, height > 0, Double(width) * Double(height) <= 100_000_000 else {
+            throw LocalStoreError.invalidMedia
+        }
+        if CGImageSourceGetType(image) as String? == "public.jpeg" {
+            try FileManager.default.copyItem(at: source, to: destination)
+            return
+        }
+        guard let output = CGImageDestinationCreateWithURL(destination as CFURL,
+            "public.jpeg" as CFString, 1, nil) else { throw LocalStoreError.invalidMedia }
+        CGImageDestinationAddImageFromSource(output, image, 0, [
+            kCGImageDestinationLossyCompressionQuality: 0.95,
+            kCGImagePropertyOrientation: properties[kCGImagePropertyOrientation] ?? 1,
+        ] as CFDictionary)
+        guard CGImageDestinationFinalize(output) else { throw LocalStoreError.invalidMedia }
+    }
+
     /// The movie delegate writes to this create-only pending URL. A sound
     /// capture never silently falls back to video-only when mic access fails.
     public func beginVideo(targetMomentID: UUID? = nil, silent: Bool,
@@ -173,7 +258,7 @@ public struct LocalMediaRecovery: Equatable, Sendable {
         if intent.kind == .photo {
             inspection = try await Self.inspectPhoto(source)
         } else {
-            inspection = try await Self.inspectVideo(source, interrupted: interrupted,
+            inspection = try await Self.inspectVideo(source, interrupted: interrupted && !intent.imported,
                                                      silentRequested: intent.silentRequested)
         }
         if source == pending {

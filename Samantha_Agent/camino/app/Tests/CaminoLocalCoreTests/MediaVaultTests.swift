@@ -214,6 +214,150 @@ import XCTest
         XCTAssertNotEqual(saved.momentID, partial.momentID)
     }
 
+
+    func testLibraryJPEGPreservesBytesParentPrivacyAndOriginAfterReopen() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("import-test-\(UUID())")
+        let storeURL = root.appendingPathComponent("metadata.sqlite")
+        let store = try CaminoLocalStore(storeURL: storeURL)
+        let trip = try store.createTrip(name: "Synthetic")
+        try store.setNewMomentPrivacy(.ownerOnly)
+        let vault = try CaminoMediaVault(root: root, metadata: store)
+        let original = try await vault.savePhoto(jpeg())
+        let before = try XCTUnwrap(store.moments(tripID: trip.id).first)
+        let source = try vault.originalURL(for: original)
+        let sourceData = try Data(contentsOf: source)
+        let imported = try await vault.importLibraryFile(source, kind: .photo,
+                                                        targetMomentID: original.momentID)
+        XCTAssertEqual(try Data(contentsOf: source), sourceData)
+        XCTAssertEqual(try Data(contentsOf: vault.originalURL(for: imported)), sourceData)
+        XCTAssertEqual(imported.momentID, original.momentID)
+        XCTAssertTrue(imported.imported)
+        XCTAssertFalse(original.imported)
+        XCTAssertEqual(try store.moments(tripID: trip.id).first, before)
+        XCTAssertTrue(try store.pendingMediaIntents().isEmpty)
+        let reopened = try CaminoLocalStore(storeURL: storeURL)
+        XCTAssertTrue(try XCTUnwrap(reopened.allMediaAssets().first { $0.id == imported.id }).imported)
+        let media = CaminoSyncMediaItem(id: imported.id, momentID: imported.momentID, kind: .photo,
+            sourceRelativePath: imported.relativePath, byteCount: imported.inspection.byteCount,
+            sha256: imported.inspection.sha256, durationMilliseconds: nil, batchID: UUID())
+        let discovery = try CaminoSyncDiscovery(trips: reopened.trips(), days: reopened.days(tripID: trip.id),
+            moments: [reopened.syncSnapshot(momentID: before.id)], media: [media],
+            importedAssetIDs: [imported.id])
+        let manifest = try XCTUnwrap(discovery.metadata.first { $0.kind == "create_asset" })
+        let payload = try XCTUnwrap(JSONSerialization.jsonObject(with: manifest.payload) as? [String: Any])
+        XCTAssertEqual(payload["origin"] as? String, "photo_picker")
+    }
+
+    func testLibraryPNGAndHEICBecomeJPEGWithOrientationWithoutChangingSource() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("import-formats-\(UUID())")
+        let store = try CaminoLocalStore(storeURL: root.appendingPathComponent("metadata.sqlite"))
+        _ = try store.createTrip(name: "Synthetic")
+        let vault = try CaminoMediaVault(root: root, metadata: store)
+        let parent = try await vault.savePhoto(jpeg())
+        for type in ["public.png", "public.heic"] {
+            let source = root.appendingPathComponent(UUID().uuidString)
+            let image = try XCTUnwrap(CGImageSourceCreateWithData(jpeg() as CFData, nil))
+            let destination = try XCTUnwrap(CGImageDestinationCreateWithURL(source as CFURL, type as CFString, 1, nil))
+            CGImageDestinationAddImageFromSource(destination, image, 0,
+                [kCGImagePropertyOrientation: 6] as CFDictionary)
+            XCTAssertTrue(CGImageDestinationFinalize(destination))
+            let bytes = try Data(contentsOf: source)
+            let result = try await vault.importLibraryFile(source, kind: .photo, targetMomentID: parent.momentID)
+            XCTAssertEqual(try Data(contentsOf: source), bytes)
+            let output = try XCTUnwrap(CGImageSourceCreateWithURL(vault.originalURL(for: result) as CFURL, nil))
+            XCTAssertEqual(CGImageSourceGetType(output) as String?, "public.jpeg")
+            XCTAssertEqual(result.inspection.width, 4)
+            XCTAssertEqual(result.inspection.height, 3)
+            XCTAssertEqual(result.inspection.orientation, 6)
+        }
+    }
+
+    func testLibrarySilentMP4ImportsAsCompleteMOVAndRetainsSource() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("import-video-\(UUID())")
+        let store = try CaminoLocalStore(storeURL: root.appendingPathComponent("metadata.sqlite"))
+        _ = try store.createTrip(name: "Synthetic")
+        let vault = try CaminoMediaVault(root: root, metadata: store)
+        let parent = try await vault.savePhoto(jpeg())
+        let source = root.appendingPathComponent("library.mp4")
+        try await writeSyntheticMovie(source, fileType: .mp4)
+        let bytes = try Data(contentsOf: source)
+        let result = try await vault.importLibraryFile(source, kind: .video, targetMomentID: parent.momentID)
+        XCTAssertEqual(try Data(contentsOf: source), bytes)
+        XCTAssertTrue(result.imported)
+        XCTAssertTrue(result.silentRequested)
+        XCTAssertFalse(result.inspection.partial)
+        XCTAssertFalse(result.inspection.hasAudio)
+        XCTAssertGreaterThan(result.inspection.durationMilliseconds ?? 0, 0)
+        XCTAssertEqual(result.inspection.width, 32)
+        XCTAssertEqual(result.inspection.height, 24)
+        let recovery = try await vault.reconcile()
+        XCTAssertEqual(recovery.pendingCount, 0)
+        XCTAssertEqual(recovery.missingCount, 0)
+    }
+
+    func testFailedLibraryImportLeavesNoNewAssetsOrPendingIntents() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("import-fail-\(UUID())")
+        let store = try CaminoLocalStore(storeURL: root.appendingPathComponent("metadata.sqlite"))
+        let trip = try store.createTrip(name: "Synthetic")
+        let capacity = MutableCapacity(3 * 1_073_741_824)
+        let vault = try CaminoMediaVault(root: root, metadata: store, capacityProvider: capacity)
+        let parent = try await vault.savePhoto(jpeg())
+        let invalid = root.appendingPathComponent("broken")
+        try Data([1, 2, 3]).write(to: invalid)
+        do {
+            _ = try await vault.importLibraryFile(invalid, kind: .photo, targetMomentID: parent.momentID)
+            XCTFail("Invalid image accepted")
+        } catch { XCTAssertEqual(error as? LocalStoreError, .invalidMedia) }
+        capacity.bytes = CaminoStorageSafetyPolicy.operatingReserveBytes + 1
+        do {
+            _ = try await vault.importLibraryFile(vault.originalURL(for: parent), kind: .photo,
+                                                  targetMomentID: parent.momentID)
+            XCTFail("Insufficient capacity accepted")
+        } catch { XCTAssertEqual(error as? LocalStoreError, .insufficientSpace) }
+        capacity.bytes = 3 * 1_073_741_824
+        let task = Task {
+            try await vault.importLibraryFile(vault.originalURL(for: parent), kind: .photo,
+                                              targetMomentID: parent.momentID)
+        }
+        task.cancel()
+        do { _ = try await task.value; XCTFail("Cancelled import accepted") }
+        catch { XCTAssertTrue(error is CancellationError) }
+        XCTAssertEqual(try store.moments(tripID: trip.id).count, 1)
+        XCTAssertEqual(try store.allMediaAssets().count, 1)
+        XCTAssertTrue(try store.pendingMediaIntents().isEmpty)
+        XCTAssertEqual(try Data(contentsOf: invalid), Data([1, 2, 3]))
+        _ = try store.deleteMoment(momentID: parent.momentID)
+        do {
+            _ = try await vault.importLibraryFile(vault.originalURL(for: parent), kind: .photo,
+                                                  targetMomentID: parent.momentID)
+            XCTFail("Deleted parent accepted")
+        } catch { XCTAssertEqual(error as? LocalStoreError, .invalidMediaIntent) }
+        XCTAssertTrue(try store.pendingMediaIntents().isEmpty)
+    }
+
+
+    func testCompleteImportedVideoRecoversOnceWithoutPartialMarker() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("import-recovery-\(UUID())")
+        let storeURL = root.appendingPathComponent("metadata.sqlite")
+        let store = try CaminoLocalStore(storeURL: storeURL)
+        _ = try store.createTrip(name: "Synthetic")
+        let vault = try CaminoMediaVault(root: root, metadata: store)
+        let parent = try await vault.savePhoto(jpeg())
+        let intent = try store.beginMediaIntent(kind: .video, targetMomentID: parent.momentID,
+                                                silentRequested: true, imported: true)
+        try await writeSyntheticMovie(root.appendingPathComponent(intent.pendingRelativePath))
+        let reopened = try CaminoLocalStore(storeURL: storeURL)
+        let recoveredVault = try CaminoMediaVault(root: root, metadata: reopened)
+        let first = try await recoveredVault.reconcile()
+        let second = try await recoveredVault.reconcile()
+        XCTAssertEqual(first.repairedCount, 1)
+        XCTAssertEqual(second.repairedCount, 0)
+        let result = try XCTUnwrap(reopened.allMediaAssets().first { $0.id == intent.assetID })
+        XCTAssertTrue(result.imported)
+        XCTAssertFalse(result.inspection.partial)
+        XCTAssertEqual(try reopened.allMediaAssets().count, 2)
+    }
+
     private func jpeg() throws -> Data {
         let context = try XCTUnwrap(CGContext(data: nil, width: 4, height: 3,
             bitsPerComponent: 8, bytesPerRow: 0, space: CGColorSpaceCreateDeviceRGB(),
@@ -229,8 +373,8 @@ import XCTest
         return result as Data
     }
 
-    private func writeSyntheticMovie(_ url: URL) async throws {
-        let writer = try AVAssetWriter(outputURL: url, fileType: .mov)
+    private func writeSyntheticMovie(_ url: URL, fileType: AVFileType = .mov) async throws {
+        let writer = try AVAssetWriter(outputURL: url, fileType: fileType)
         let input = AVAssetWriterInput(mediaType: .video, outputSettings: [
             AVVideoCodecKey: AVVideoCodecType.h264,
             AVVideoWidthKey: 32,

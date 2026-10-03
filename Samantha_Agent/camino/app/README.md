@@ -4,6 +4,16 @@ První integrovaná iPhone aplikace Camina. Má vlastní bundle ID
 `cz.pythonmf.camino.app` a vlastní Application Support kontejner; nepřebírá ani
 nemigruje data ze samostatných prototypů Camino Audio a Camino Transfer Test.
 
+## Výběr z Fotek (2026-10-03)
+
+Detail okamžiku nově nabízí **Vybrat z Fotek** pro jednu fotografii/video.
+Originál v knihovně zůstane zachovaný; import dědí okamžik a jeho soukromí.
+Fotografie se připravují jako JPEG, Live Photo jako statický snímek;
+video jako MOV bez překódování stop. Stav čekání je viditelný a načítání
+lze zrušit. Přesné hranice a fyzický test jsou v
+[PHOTO_LIBRARY_IMPORT.md](../docs/PHOTO_LIBRARY_IMPORT.md).
+Nová funkce zatím není nainstalovaná na fyzickém iPhonu.
+
 ## Rozsah
 
 - Offline založení a přepínání cest včetně oddělené Zkoušky.

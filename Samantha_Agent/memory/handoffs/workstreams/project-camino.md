@@ -1,6 +1,24 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-03 21:02 WEST — Na výslovný požadavek Míly doplněn iOS výběr fotografie/video
+  z Fotek do existujícího okamžiku. Tlačítko je nahoře v menu; výběr po jednom,
+  stav načítání a zrušení čekání na iCloud. Příprava/hashování mimo hlavní
+  vlákno, video file-backed; datum/GPS/kapitola/soukromí parentu zachovány.
+  JPEG byte-for-byte, HEIC/PNG → JPEG s orientací; Live Photo staticky,
+  video MOV passthrough včetně zvuku, tiché video není chybně partial.
+  Zdroj ve Fotkách zůstává. Původ photo_picker v existujícím SettingRecord
+  bez migrace DB/journalu; serverový kontrakt už tento původ podporuje.
+  Příprava před trvalým záměrem, kontrola kapacity a obnovitelný přesun;
+  odmítnutý vstup/zrušení před záměrem nevytvoří prázdný Moment. Reopen
+  importu zachovává původ; obnova hotového videa nevytváří duplicitu/partial.
+  SwiftPM 63/63, po poslední úpravě rezervy cíleně 14/14, generic iOS build
+  PASS. Plná projektová brána 1847/1847 a rychlá statická kontrola PASS.
+  Bez instalace na iPhone, zásahu do služby/živých dat a GitHub push.
+  Další krok: podepsaný build pro SideStore a jeden fyzický test HEIC;
+  skutečný picker/iCloud, větší a ozvučené video i end-to-end importovaný
+  přenos jsou NEOVĚŘENO. Viz `camino/docs/PHOTO_LIBRARY_IMPORT.md`.
+
 - 2026-10-03 20:39 WEST — Po konkrétním schválení a přesné globální brzdě dokončen
   selektivní fyzický úklid 3 Momentů z ČR, 2. 10. v 12:08, 17:37 a 20:24
   českého času (2 fotografie, 1 video). Před zásahem souhlasil inventář

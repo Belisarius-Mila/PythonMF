@@ -2,6 +2,9 @@ import AVFoundation
 import AVKit
 import ImageIO
 import SwiftUI
+import PhotosUI
+import CoreTransferable
+import UniformTypeIdentifiers
 
 private final class CaminoPreviewUIView: UIView {
     override class var layerClass: AnyClass { AVCaptureVideoPreviewLayer.self }
@@ -318,6 +321,7 @@ struct CaminoMediaDetailView: View {
     @ObservedObject var model: CaminoViewModel
     let moment: LocalMoment
     @Environment(\.dismiss) private var dismiss
+    @State private var librarySelection: PhotosPickerItem?
     @State private var showTextEditor = false
     @State private var showTitleEditor = false
     @State private var titleAttachment: LocalAttachmentTitle? = nil
@@ -422,6 +426,16 @@ struct CaminoMediaDetailView: View {
                                 }
                                 .buttonStyle(.borderedProminent)
                             }
+                            PhotosPicker(selection: $librarySelection,
+                                         matching: .any(of: [.images, .videos]),
+                                         preferredItemEncoding: .current) {
+                                Label("Vybrat z Fotek", systemImage: "photo.on.rectangle.angled")
+                                    .frame(maxWidth: .infinity, minHeight: 48)
+                            }
+                            .buttonStyle(.bordered)
+                            .accessibilityIdentifier("importFromPhotos")
+                            Text("Vloží kopii do tohoto okamžiku. Fotografie jako JPEG, Live Photo jako snímek. Originál ve Fotkách zůstane.")
+                                .font(.caption).foregroundStyle(.secondary)
                         }
                         .padding()
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -480,7 +494,7 @@ struct CaminoMediaDetailView: View {
                             Text("\(asset.inspection.byteCount) B · \(asset.inspection.width) × \(asset.inspection.height) px")
                                 .font(.caption)
                             if asset.kind == .video {
-                                Text(asset.silentRequested ? "Bez zvuku · vědomě zvoleno"
+                                Text(asset.silentRequested ? (asset.imported ? "Bez zvukové stopy" : "Bez zvuku · vědomě zvoleno")
                                      : asset.inspection.hasAudio ? "Se zvukem" : "Zvuk chybí")
                                 if asset.inspection.partial {
                                     Text("Částečný záznam; konec může chybět.")
@@ -558,10 +572,33 @@ struct CaminoMediaDetailView: View {
                 }
                 .padding()
             }
+            .disabled(model.importingMedia)
+            .safeAreaInset(edge: .top) {
+                if model.importingMedia {
+                    HStack {
+                        ProgressView()
+                        Text(model.message ?? "Načítám médium…").font(.subheadline)
+                        if model.canCancelLibraryLoad {
+                            Button("Zrušit") { model.cancelLibraryLoad() }
+                        }
+                    }
+                    .padding().frame(maxWidth: .infinity)
+                    .background(.regularMaterial)
+                } else if let message = model.message {
+                    Text(message).font(.footnote).padding(8)
+                        .frame(maxWidth: .infinity).background(.regularMaterial)
+                }
+            }
             .navigationTitle("Moment")
             .toolbar { ToolbarItem(placement: .topBarTrailing) {
-                Button("Hotovo") { dismiss() }
+                Button("Hotovo") { dismiss() }.disabled(model.importingMedia)
             } }
+        }
+        .interactiveDismissDisabled(model.importingMedia)
+        .task(id: librarySelection) {
+            guard let item = librarySelection else { return }
+            await model.importFromPhotos(item, into: moment.id)
+            librarySelection = nil
         }
         .sheet(isPresented: $showTitleEditor) {
             CaminoTitleEditorView(model: model, moment: current, attachment: titleAttachment)
@@ -800,5 +837,48 @@ private struct CaminoTextEditorView: View {
         } message: {
             Text("Předchozí uložená revize zůstane zachovaná. Zahodí se jen tento rozpracovaný koncept.")
         }
+    }
+}
+
+/// File-backed transfer: never loads a whole video into Data. The provider URL
+/// expires after the callback, so take an owned temporary copy before returning.
+struct CaminoPickedFile: Transferable, Sendable {
+    let url: URL
+    let kind: LocalMediaKind
+
+    static var transferRepresentation: some TransferRepresentation {
+        FileRepresentation(importedContentType: .movie) { received in
+            try copy(received.file, kind: .video)
+        }
+        FileRepresentation(importedContentType: .image) { received in
+            try copy(received.file, kind: .photo)
+        }
+    }
+
+    private static func copy(_ source: URL, kind: LocalMediaKind) throws -> Self {
+        let files = FileManager.default
+        let directory = files.temporaryDirectory.appendingPathComponent(
+            "CaminoPicker-\(UUID())", isDirectory: true)
+        try files.createDirectory(at: directory, withIntermediateDirectories: false)
+        do {
+            let size = try source.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0
+            let capacity = try directory.resourceValues(
+                forKeys: [.volumeAvailableCapacityForImportantUsageKey])
+                .volumeAvailableCapacityForImportantUsage ?? 0
+            guard size > 0, Int64(size) < capacity - CaminoStorageSafetyPolicy.operatingReserveBytes else {
+                throw LocalStoreError.insufficientSpace
+            }
+            let target = directory.appendingPathComponent("selected")
+                .appendingPathExtension(source.pathExtension)
+            try files.copyItem(at: source, to: target)
+            return Self(url: target, kind: kind)
+        } catch {
+            try? files.removeItem(at: directory)
+            throw error
+        }
+    }
+
+    func removeTemporaryCopy() {
+        try? FileManager.default.removeItem(at: url.deletingLastPathComponent())
     }
 }

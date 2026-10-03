@@ -3276,3 +3276,23 @@ historie 19 operací/identity/cursor beze změny. Na kopiích retry, nový Momen
 a complete_recovery PASS. Live DB/FK, HTTPS owner 200, Jana 200, anonym 401,
 4 staré mediální URL 404; telefon znovu kontaktoval Mac bez blokace či pauzy.
 Bez nového buildu a bez GitHub odeslání.
+
+## 2026-10-03 21:02 WEST — Vložení fotografie či videa z Fotek
+
+**Hotovo:** Horní menu okamžiku má výběr jedné fotografie/video z knihovny.
+Import má stav, zrušení načítání a zachová originál ve Fotkách i údaje
+okamžiku. Funkce je zatím jen v lokálně ověřeném kódu.
+
+**Rozhodnutí:** Míla výslovně schválil doplnění navrženého importu do okamžiku.
+Kompatibilní kopie JPEG/MOV využívají stávající ukládání a synchronizaci.
+
+**Další krok:** Nový podepsaný build pro SideStore a fyzický test jedné HEIC.
+
+**Navrhované další kroky:** Žádné nové.
+
+**Technický důkaz:** SwiftPM 63/63, závěrečné cílené testy médií 14/14,
+generic iOS build PASS; původ, orientace, tiché video, kapacita, zrušení,
+smazaný parent a obnova bez duplicit mají syntetickou regresi. Plná
+projektová brána 1847/1847 a rychlá statická kontrola PASS. Bez instalace,
+změny serveru a GitHub push. Fyzický picker/iCloud a end-to-end přenos
+nově importovaného média zůstávají NEOVĚŘENO.
