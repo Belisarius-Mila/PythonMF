@@ -22,6 +22,21 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-056 — Selektivní odstranění média musí zachovat sekvenci, ale upravit inventář obnovy
+
+- Problém: Reset journalu/identity rozbije spojení; ponechané verified položky
+  fyzicky smazaných médií zase způsobí recovery_mismatch nebo chybějící soubor.
+- Typ: opakující se
+- Řešení nalezeno: 03102026
+- Řešení: Pro samostatně schválený úklid používat přesný seznam ID a hashů,
+  živý inventář obou stran a zkoušku na kopiích. iOS mazat přes vlastní API
+  aplikace s trvalým tombstonem; u oboustranného fyzického smazání vyřadit jen
+  příslušné media položky journalu. Accepted metadata obálky, sekvence, cursor,
+  identita a přihlášení zůstávají. Mac změnit offline jen pro stejné cíle,
+  včetně chunků a Viewer kopií. Ověřit FK, retry bez obnovení smazaného obsahu,
+  nový Moment, úplný recovery proof a pak skutečný kontakt telefonu.
+  Nejde o podporu běžného serverového delete API ani návod na reset archivu.
+
 ### LL-055 — Camino „Mac není dostupný“ může být odmítnutý místní zápis
 
 - Problém: Po servisní obnově telefonu sync journal zůstal beze změn a aplikace

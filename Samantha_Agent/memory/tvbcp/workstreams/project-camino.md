@@ -1,6 +1,34 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-03 20:39 WEST — Po konkrétním schválení a přesné globální brzdě dokončen
+  selektivní fyzický úklid 3 Momentů z ČR, 2. 10. v 12:08, 17:37 a 20:24
+  českého času (2 fotografie, 1 video). Před zásahem souhlasil inventář
+  telefonu/serveru, všechny cílové ID a SHA-256; nebyl žádný další živý Moment.
+  Na iPhonu použito existující deleteMoment přes běžící aplikaci, zachovány
+  tombstones; smazány 3 originály + 1 přesně ověřená cache přenosu. Z journalu
+  odstraněny pouze 3 verified media položky, které by jinak při obnově
+  vyžadovaly již smazané soubory. Všech 19 accepted metadata položek zůstalo
+  byte-for-byte stejné; journal nebyl resetován ani zvenčí přepisován.
+  Na Macu při registrovaném stop odstraněny jen cílové projekční/media řádky,
+  13 souborů (originály, upload kopie, Viewer odvozeniny/manifesty) a 9 jejich
+  prázdných adresářů. Odstraněno 21 434 394 logických B; měřený přírůstek
+  volného místa při zásahu 21 528 576 B (obsazení svazku může ovlivnit jiné I/O).
+  Konfigurace, owner/reader credentials, server ID, epoch, writer ID, cursor 19,
+  Trip/Day struktura a Viewer grant zachovány. Původní synchronizační metadata
+  a potvrzení zůstávají dle dohody; nejde o úplný výmaz veškeré historie.
+  Zkoušky na soukromých kopiích: native iOS CoreData deletion/reopen PASS,
+  přesný retry bez vzkříšení PASS, další Moment s navazující sekvencí PASS,
+  klient/server complete_recovery PASS. Live: SQLite/FK obou DB PASS,
+  registrovaný restart/status running+grant true, HTTPS owner 200 bez blokace,
+  Viewer Jana 200/anonym 401, mapa bez českých bodů, 4/4 staré Viewer media
+  URL 404. iPhone po obnovení přenosů navázal nový kontakt, paused=false,
+  reconciliation=false, 19 accepted metadat/0 médií, originály/cílová cache
+  read-backem nepřítomné. Debugger odpojen, aplikace běží. Dočasná auditní
+  mediální kopie také smazána. Bez změny kódu, podpisu, tokenů nebo GitHub push.
+  Další krok: pořídit první portugalský Moment a potvrdit jeho skutečný přenos;
+  syntetický záznam byl vytvořen pouze ve zkušební kopii, nikoli v ostrém deníku.
+
 - 2026-10-02 21:16 CEST — Na Mílův výslovný požadavek obnoven privátní Viewer pro Janu.
   Příčina 404: po resetu chyběl Viewer grant; registrovaný status jej potvrdil
   jako false. Během řízeného zastavení vzniklo nové náhodné čitelné heslo
@@ -3227,3 +3255,24 @@ SwiftPM 58/58, build 14 a statická brána PASS. Bez plošné přejímky ostatn�
 **Technický důkaz:** Registrované stop/enable-viewer/start, živý grant true;
 HTTPS Viewer anonymous 401, Jana 200, mapa 200, owner state 200.
 Bez mazání dat, změny zdrojů aplikace nebo GitHub odeslání.
+
+## 2026-10-03 20:39 WEST — Přesný úklid českých Momentů před Portugalskem
+
+**Hotovo:** Po schválení odstraněny 2 fotky, 1 video a jejich odvozené/přenosové
+kopie z aplikace a Macu. Tři české Momenty už nejsou v deníku ani Vieweru.
+Spojení telefonu, přístup Jany a historie synchronizace zůstaly zachovány.
+
+**Rozhodnutí:** Míla požadoval fyzické smazání konkrétních tří záznamů; schválil
+ponechání původních synchronizačních metadat a potvrdil globální brzdu.
+Nejde o reset serveru ani plošné mazání jiných dat či starších záloh.
+
+**Další krok:** První portugalský Moment a uživatelské potvrzení jeho přenosu.
+
+**Navrhované další kroky:** Žádné nové.
+
+**Technický důkaz:** Telefon 3 originály + cache pryč; Mac 13 souborů a 9
+prázdných adresářů pryč, měřený nárůst volného místa 21 528 576 B. Přesná
+historie 19 operací/identity/cursor beze změny. Na kopiích retry, nový Moment
+a complete_recovery PASS. Live DB/FK, HTTPS owner 200, Jana 200, anonym 401,
+4 staré mediální URL 404; telefon znovu kontaktoval Mac bez blokace či pauzy.
+Bez nového buildu a bez GitHub odeslání.
