@@ -2,6 +2,10 @@
 
 Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezna aktivni prace, `paused` je pozastavene a `archived` se zobrazuje jen v archivnim filtru Cockpitu.
 
+Pozastavená provozní diagnostika bez nového projektu: **Seznam v iPhone Mailu** —
+[PRIPOMENOUT] pokračovat zítra; priorita nebyla určena. Stav a další test:
+`handoffs/seznam_iphone_mail_2026_10_03.md`. Účet ani hesla se neměnily.
+
 Samostatný terminálový projekt bez pracovního proudu v Cockpitu:
 
 - **Python se Samanthou** — priorita 2, aktivní; 1.5/Codex na Linuxu Míla potvrdil. Nový třetí balíček Praktické úlohy: 7 lekcí, celkem 21. 62 testů a GUI s nezměněnou 1.5 prošly. Paměť: `projects/python_se_samanthou.md`; handoff: `handoffs/python_se_samanthou_course_package_2026_09_06.md`. Další krok: přikopírovat samostatný balíček do kurzy a restartovat. Samostatný terminálový projekt, dosud bez integrace do Cockpitu.

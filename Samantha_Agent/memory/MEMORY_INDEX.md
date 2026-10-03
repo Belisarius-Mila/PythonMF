@@ -1,5 +1,6 @@
 # Memory Index
 
+- `handoffs/seznam_iphone_mail_2026_10_03.md` — [PRIPOMENOUT] Zítra navázat diagnostikou Seznam IMAP v iPhone Mailu; web funguje, bez 2FA, mobilní data s Tailscale nepomohla. Test bez Tailscale dosud neověřen.
 Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 - `ACTIVE_PROJECTS.md` - registr projektu a oblasti vcetne rezimu `active` / `paused` / `archived`, priorit, stavu, handoffu a dalsich kroku.
