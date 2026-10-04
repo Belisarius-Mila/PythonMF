@@ -1,6 +1,6 @@
 # Název stávající cesty a záhlaví
 
-2026-10-04 — lokální implementace, dosud bez nasazení a fyzické přejímky.
+2026-10-04 — server nasazen, build 16 připraven; fyzická přejímka čeká.
 
 ## Ovládání
 
@@ -70,4 +70,22 @@ syntetických datech nenahrazují tuto přejímku.
   vyžaduje nový build a skutečné použití na iPhonu.
 
 Soukromé dočasné logy mají prefix `/private/tmp/camino-trip-`; nepatří do
-Gitu. Nebyl vytvořen instalační IPA, nasazena služba ani odeslán GitHub push.
+Gitu. Tyto testy předcházely následujícímu nasazení; GitHub push neproběhl.
+
+## Nasazení a instalační balíček
+
+Registrované stop/upgrade/start nasadilo release `16de4d0b7973`; archiv
+zůstal zachovaný včetně dalších prázdných cest. Plná brána 1850/1850 PASS.
+Živě ověřena schopnost `trip_title_v1`, HTTPS owner 200, Viewer Jana 200,
+anonym 401 a oba příznaky blokace false. Původní přístupy a URL zachovány.
+
+**Camino-16-20261004.ipa**, verze 0.1.0 (16), je v Downloads. Má 1 258 019 B,
+SHA-256 `b41390c6eabc88671cc285fd27646a52ab31617bf7aeb063e9ee4e0998929f3e`.
+Stejné iOS zdroje jako `4ecd21f9`; stejná identita aplikace jako build 15.
+Podpis a ZIP ověřeny i po rozbalení. Profil platí do 2026-10-11 22:09 UTC;
+SideStore při instalaci použije svůj podpis.
+
+Aktualizovat existující aplikaci přes SideStore. Potom v původní cestě
+otevřít **Nabídka → Cesty → Upravit název cesty → Uložit**. Ověřit zachované
+Momenty, záhlaví a přenos nového názvu do Vieweru. Instalace na telefon,
+fyzická a vizuální přejímka zatím neproběhly. Novou cestu nezakládat.

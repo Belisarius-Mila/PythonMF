@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-04 — přejmenování cesty a nové záhlaví, lokální ověření
+Aktualizováno: 2026-10-04 23:33 WEST — server s přejmenováním nasazen, build 16 pro SideStore připraven
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,24 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-04 23:33 WEST — Nasazení a build 16 dokončeny. Po opravě kontroly
+  prázdných cest proběhlo registrované stop/upgrade/start na release
+  16de4d0b79738d1d3aec46445d53ee401516e3b5. Snapshoty a porovnání archivu
+  PASS, všechny cesty, originály, serverová identita, epoch a přístupy
+  zachovány. Živý HTTPS audit: trip_title_v1 přítomno, owner 200, Viewer
+  Jana 200, anonym 401, služba running a grant true, exports_blocked=false
+  a reconciliation_required=false. Síťová konfigurace se neměnila.
+  Camino-16-20261004.ipa je v Downloads, 1 258 019 B, SHA-256
+  b41390c6eabc88671cc285fd27646a52ab31617bf7aeb063e9ee4e0998929f3e.
+  Build 0.1.0 (16) ze stejných iOS zdrojů jako 4ecd21f9, stejné bundle ID,
+  application-identifier i tým jako build 15; strict codesign/ZIP/reopen PASS.
+  Profil do 11. 10. 22:09 UTC. Plná brána opravy nasazení 1850/1850 PASS.
+  Soukromé účtenky v data/private/camino_installation; bez GitHub push.
+  Další krok: uživatel aktualizuje přes SideStore a v původní cestě zvolí
+  Nabídka → Cesty → Upravit název cesty → Uložit. Ověřit zachované Momenty,
+  nový název a jeho přenos do Vieweru. Telefon se neinstaloval nástrojem;
+  fyzické a vizuální potvrzení buildu 16 NEOVĚŘENO. Novou cestu nezakládat.
 
 - 2026-10-04 — Míla autorizoval nasazení serveru a nový build. První řízený
   upgrade se bezpečně zastavil před releasem: historická kontrola odmítala
