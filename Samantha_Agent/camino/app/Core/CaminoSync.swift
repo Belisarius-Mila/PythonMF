@@ -655,6 +655,10 @@ public struct CaminoSyncJournal: Codable, Equatable, Sendable {
     }
 
     public func requireTitleSupport(serverFeatures: [String]?) throws {
+        if metadata.contains(where: { $0.phase != .accepted && $0.kind == "set_trip_title" }),
+           serverFeatures?.contains("trip_title_v1") != true {
+            throw CaminoSyncError.serverConflict("trip_title_server_upgrade_required")
+        }
         if metadata.contains(where: { $0.phase != .accepted && $0.isAttachmentTitleChange }),
            serverFeatures?.contains("attachment_title_v1") != true {
             throw CaminoSyncError.serverConflict("attachment_title_server_upgrade_required")
@@ -866,11 +870,18 @@ public struct CaminoSyncDiscovery: Sendable {
             drafts.append(try Self.item(
                 key: "trip:\(trip.id)", kind: "create_trip", objectID: trip.id,
                 payload: [
-                    "id": trip.id.uuidString.lowercased(), "name": trip.name,
+                    "id": trip.id.uuidString.lowercased(), "name": trip.originalName,
                     "language": trip.language, "active": trip.active,
                     "viewer_enabled": trip.viewerEnabled,
                     "start_date": trip.startDate.map { $0 as Any } ?? NSNull(),
                 ]))
+            for (index, change) in trip.titleChanges.enumerated() {
+                drafts.append(try Self.item(
+                    id: change.id, key: "trip-title:\(change.id)",
+                    kind: "set_trip_title", objectID: trip.id,
+                    expectedRevision: index + 1,
+                    payload: ["trip_id": trip.id.uuidString.lowercased(), "title": change.title]))
+            }
         }
         for day in days.sorted(by: { $0.localDate == $1.localDate
             ? $0.id.uuidString < $1.id.uuidString : $0.localDate < $1.localDate }) {

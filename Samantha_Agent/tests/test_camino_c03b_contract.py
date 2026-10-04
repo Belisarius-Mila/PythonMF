@@ -75,6 +75,59 @@ class CaminoC03bContractTests(unittest.TestCase):
             response = self.send(self.envelope(sequence, kind, wire(value)))
             self.assertEqual(response.status, 200, response.body)
 
+    def test_trip_title_preserves_original_identity_and_viewer_content_after_restart(self):
+        self.register()
+        before = self.store.viewer_snapshot(self.trip.id)
+        rename = self.envelope(5, "set_trip_title", {
+            "trip_id": self.trip.id, "title": "Camino de Santiago",
+        }, expected_revision=1)
+        receipt = self.send(rename)
+        self.assertEqual(receipt.status, 200, receipt.body)
+        self.assertEqual(receipt.body["revision"], 2)
+        self.assertEqual(self.send(rename).body, receipt.body)
+        self.assertIn("trip_title_v1", self.store.state()["features"])
+        retry = self.send(self.envelope(6, "create_trip", wire(self.trip)))
+        self.assertEqual(retry.status, 200, retry.body)
+        self.assertTrue(retry.body["reused"])
+        reopened = RevisionStore(self.database)
+        self.assertEqual(reopened.viewer_snapshot(self.trip.id), {
+            "name": "Camino de Santiago", "moments": before["moments"],
+        })
+        self.assertEqual(reopened.asset(self.asset.id), wire(self.asset))
+        with sqlite3.connect(self.database) as connection:
+            self.assertEqual(json.loads(connection.execute("SELECT body FROM trips").fetchone()[0]), wire(self.trip))
+            self.assertEqual(connection.execute("PRAGMA user_version").fetchone()[0], 3)
+        second = self.send(self.envelope(7, "set_trip_title", {
+            "trip_id": self.trip.id, "title": "Další jméno",
+        }, expected_revision=2))
+        self.assertEqual(second.status, 200, second.body)
+        self.assertEqual(self.store.viewer_snapshot(self.trip.id)["name"], "Další jméno")
+        self.store.set_viewer_permission(self.trip.id, enabled=False)
+        self.assertEqual(self.store.viewer_snapshot(self.trip.id), {"name": "Camino", "moments": []})
+
+    def test_trip_title_rejects_bad_input_and_conflict_without_changing_content(self):
+        self.register()
+        for title in ("", " leading", "x\ny", "x\u2028y", "x" * 161, 12):
+            response = self.send(self.envelope(5, "set_trip_title", {
+                "trip_id": self.trip.id, "title": title,
+            }, expected_revision=1))
+            self.assertEqual(response.status, 422, response.body)
+            self.assertEqual(self.store.state()["cursor"], 4)
+        wrong_parent = self.send(self.envelope(5, "set_trip_title", {
+            "trip_id": uid(999), "title": "Other",
+        }, expected_revision=1))
+        self.assertEqual(wrong_parent.status, 404)
+        conflict = self.send(self.envelope(5, "set_trip_title", {
+            "trip_id": self.trip.id, "title": "Other",
+        }, expected_revision=2))
+        self.assertEqual(conflict.status, 409)
+        self.assertEqual(self.store.state()["cursor"], 4)
+        self.assertTrue(self.store.state()["exports_blocked"])
+        self.assertEqual(self.store.viewer_snapshot(self.trip.id), {"name": "Camino", "moments": []})
+        with sqlite3.connect(self.database) as connection:
+            self.assertEqual(json.loads(connection.execute("SELECT body FROM trips").fetchone()[0]), wire(self.trip))
+        self.assertEqual(self.store.asset(self.asset.id), wire(self.asset))
+
     def test_revisions_survive_restart_without_media_reupload(self):
         self.register()
         lock = self.envelope(5, "update_metadata", {

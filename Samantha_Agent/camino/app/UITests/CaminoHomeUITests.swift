@@ -1,6 +1,37 @@
 import XCTest
 
 @MainActor final class CaminoHomeUITests: XCTestCase {
+    func testRenameExistingTrialKeepsMomentAndNewHeadingAfterRelaunch() throws {
+        #if !targetEnvironment(simulator)
+        throw XCTSkip("Uses an isolated simulator store.")
+        #endif
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchEnvironment["CAMINO_UI_TEST_SESSION"] = UUID().uuidString
+        app.launch()
+        XCTAssertTrue(app.buttons["Založit Zkoušku"].waitForExistence(timeout: 15))
+        app.buttons["Založit Zkoušku"].tap()
+        app.buttons["Nabídka"].tap()
+        app.buttons["Označit okamžik"].tap()
+        XCTAssertTrue(app.staticTexts["Označený okamžik"].waitForExistence(timeout: 15))
+        app.buttons["Nabídka"].tap()
+        app.buttons["Cesty"].tap()
+        app.buttons["Upravit název cesty"].tap()
+        XCTAssertEqual(app.textFields["editTripName"].value as? String, "Camino de Santiago")
+        app.buttons["Uložit"].tap()
+        app.buttons["Hotovo"].tap()
+        app.terminate()
+        app.launch()
+        XCTAssertTrue(app.staticTexts["Camino de Santiago"].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.staticTexts["caminoHeading"].exists)
+        XCTAssertFalse(app.staticTexts["Zkušební cesta"].exists)
+        XCTAssertTrue(app.staticTexts["Označený okamžik"].exists)
+        let screenshot = XCTAttachment(screenshot: app.screenshot())
+        screenshot.name = "Camino renamed trip and one-line heading"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+    }
+
     func testSimulatedLowSpaceBlocksLargeCapturesButKeepsMarker() throws {
         #if !targetEnvironment(simulator)
         throw XCTSkip("This uses simulator-only safety injection.")

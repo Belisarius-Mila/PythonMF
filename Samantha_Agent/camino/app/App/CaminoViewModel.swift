@@ -223,6 +223,16 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
         catch { message = error.localizedDescription }
     }
 
+    func updateTrip(_ id: UUID, name: String, isTest: Bool) -> Bool {
+        guard !audioBusy, !showCamera, let local else { return false }
+        do {
+            _ = try local.updateTrip(id, name: name, isTest: isTest)
+            message = nil
+            refresh()
+            return true
+        } catch { message = error.localizedDescription; return false }
+    }
+
     func setNewPrivacy(_ value: LocalPrivacy) {
         guard !audioBusy, !showCamera, let local else { return }
         do { try local.setNewMomentPrivacy(value); message = nil; refresh() }

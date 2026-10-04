@@ -56,6 +56,18 @@ class ViewerHTTPTests(unittest.IsolatedAsyncioTestCase):
     def upload_media(self):
         return {k: self.f.upload(30 + i, k, v) for i, (k, v) in enumerate(self.payloads.items())}
 
+    async def test_trip_rename_updates_same_viewer_without_changing_map_or_access(self):
+        self.f.moment(70, Privacy.DIARY, location=LocationFix(0, 0, self.f.capture.utc_ms, 8))
+        before = (await self.request('/viewer/map-data')).json()
+        self.f.send('set_trip_title', {
+            'trip_id': self.f.trip.id, 'title': 'Camino de Santiago <test>',
+        }, expected=1)
+        page = await self.request('/viewer/')
+        self.assertEqual(page.status_code, 200)
+        self.assertIn('<h1>Camino de Santiago &lt;test&gt;</h1>', page.text)
+        self.assertEqual((await self.request('/viewer/map-data')).json(), before)
+        self.assertEqual((await self.request('/viewer/', headers={})).status_code, 401)
+
     async def test_route_endpoints_reader_auth_headers_and_live_revoke(self):
         paths = ['/viewer/map', '/viewer/map-data', '/viewer/map-assets/map.js',
                  '/viewer/map-assets/map.css', '/viewer/map-assets/leaflet.js', '/viewer/map-assets/leaflet.css']

@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-03 21:23 WEST — import a přenos 14s videa fyzicky potvrzen; p+n autorizováno
+Aktualizováno: 2026-10-04 — přejmenování cesty a nové záhlaví, lokální ověření
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,27 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-04 — Lokálně doplněno přejmenování stávající cesty a nové záhlaví
+  „Caminos de descubrimiento“ na jednom řádku menším písmem. Pod ním Camino,
+  aktuální název a datum. Nabídka → Cesty → Upravit název cesty nabídne u
+  výchozí Zkoušky Camino de Santiago a vypnutí testovacího označení; změna
+  nastane až po Uložit. Stejné Trip ID, Momenty, média, kapitoly a soukromí.
+  Nové názvy jsou samostatné revize set_trip_title; původní create_trip,
+  přesné přenosové obálky a verified média se nepřepisují. Bez migrace schémat:
+  iOS SettingRecord, server accepted_operations. Viewer převezme poslední
+  přijatý název po kontrole oprávnění, zachová URL, přístup a mapové body.
+  Ověření: SwiftPM 64/64, server/Viewer 34/34 a 6 skutečných Swift obálek
+  přes Python API včetně retry/reopen PASS; generic iOS build PASS.
+  Plná projektová brána 1849/1849 a rychlá statická kontrola PASS.
+  Simulátorový UI test je připraven a sestaven, ale testovací runtime
+  nedokončil start; běhy ukončeny, ani jeden testovací případ neproběhl.
+  Ani restart simulátoru nepomohl; vizuální a fyzická přejímka NEOVĚŘENO.
+  Bez push, nasazení, instalačního IPA a změny živých dat. Další krok:
+  po autorizaci nasadit nejprve server s trip_title_v1, pak nový iPhone build
+  přes SideStore a fyzicky ověřit přejmenování a Viewer. Starý server novou
+  operaci nepřijme; čekající název do upgradu blokuje přenosovou frontu.
+  Viz camino/docs/TRIP_TITLES.md. Fyzická přejímka této změny NEOVĚŘENO.
 
 - 2026-10-03 21:23 WEST — Míla fyzicky potvrdil vložení 14s videa z Fotek do okamžiku
   a jeho úspěšný přenos. Základní import + přenos videa PASS podle uživatele;

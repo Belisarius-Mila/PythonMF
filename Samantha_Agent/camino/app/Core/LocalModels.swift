@@ -42,6 +42,14 @@ public struct LocalTrip: Equatable, Identifiable, Sendable {
     public let isTest: Bool
     public let viewerEnabled: Bool
     public let startDate: String?
+    // The original create_trip payload remains immutable after a rename.
+    public let originalName: String
+    public let titleChanges: [LocalTripTitleChange]
+}
+
+public struct LocalTripTitleChange: Codable, Equatable, Sendable {
+    public let id: UUID
+    public let title: String
 }
 
 /// Stable chapter identity exported to the C05 sync planner.
@@ -408,7 +416,7 @@ public enum LocalStoreError: Error, LocalizedError, Equatable {
 
     public var errorDescription: String? {
         switch self {
-        case .invalidName: "Zadej název cesty."
+        case .invalidName: "Zadej název cesty na jednom řádku (nejvýše 160 znaků)."
         case .noActiveTrip: "Nejdřív vyber cestu."
         case .tripMissing: "Cesta není dostupná. Nic se nesmazalo."
         case .momentMissing: "Moment není dostupný. Nic se nesmazalo."

@@ -108,7 +108,8 @@ private struct CaptureHomeView: View {
                 VStack(alignment: .leading, spacing: 20) {
                     if let trip = model.activeTrip {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text(trip.name).font(.title2.bold())
+                            Text("Camino").font(.title2.bold())
+                            Text(trip.name).font(.headline)
                             Text(Date(), format: .dateTime.day().month(.wide).year())
                                 .font(.subheadline).foregroundStyle(.secondary)
                             if trip.isTest {
@@ -228,8 +229,16 @@ private struct CaptureHomeView: View {
                 .padding()
             }
             .background(Color(.systemGroupedBackground))
-            .navigationTitle("Zachytit")
+            .navigationTitle("Caminos de descubrimiento")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("Caminos de descubrimiento")
+                        .font(.subheadline.weight(.semibold))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.65)
+                        .accessibilityIdentifier("caminoHeading")
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
                         Button("Označit okamžik", systemImage: "mappin") {
@@ -470,10 +479,17 @@ private struct TripListView: View {
     @ObservedObject var model: CaminoViewModel
     @Environment(\.dismiss) private var dismiss
     @State private var name = ""
+    @State private var editingTrip: LocalTrip?
 
     var body: some View {
         NavigationStack {
             Form {
+                if let trip = model.activeTrip {
+                    Section("Současná cesta") {
+                        Button("Upravit název cesty") { editingTrip = trip }
+                            .disabled(model.audioBusy)
+                    }
+                }
                 Section("Cesty") {
                     ForEach(model.trips) { trip in
                         Button {
@@ -506,6 +522,53 @@ private struct TripListView: View {
             .toolbar { ToolbarItem(placement: .topBarTrailing) {
                 Button("Hotovo") { dismiss() }
             } }
+            .sheet(item: $editingTrip) { trip in
+                TripEditView(model: model, trip: trip)
+            }
+        }
+    }
+}
+
+private struct TripEditView: View {
+    @ObservedObject var model: CaminoViewModel
+    let trip: LocalTrip
+    @Environment(\.dismiss) private var dismiss
+    @State private var name: String
+    @State private var isTest: Bool
+
+    init(model: CaminoViewModel, trip: LocalTrip) {
+        self.model = model
+        self.trip = trip
+        let convertingTrial = trip.isTest && trip.name == "Zkouška"
+        _name = State(initialValue: convertingTrial ? "Camino de Santiago" : trip.name)
+        _isTest = State(initialValue: convertingTrial ? false : trip.isTest)
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    TextField("Název cesty", text: $name)
+                        .accessibilityIdentifier("editTripName")
+                    Toggle("Zkušební cesta", isOn: $isTest)
+                } footer: {
+                    Text("Okamžiky zůstanou v této cestě. Název se po přenosu změní také ve vieweru.")
+                }
+                if let message = model.message { Text(message).foregroundStyle(.red) }
+            }
+            .navigationTitle("Upravit cestu")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Zrušit") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Uložit") {
+                        if model.updateTrip(trip.id, name: name, isTest: isTest) { dismiss() }
+                    }
+                    .disabled(model.audioBusy || name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+            }
         }
     }
 }

@@ -1109,3 +1109,17 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Ověření: skutečné Swift obálky ze starší fronty → izolované API, dvojí
   replay a reopen/Viewer PASS. Přejmenování přidá jen metadata, verified média
   zůstanou verified. Fyzická přejímka této nové verze zůstává samostatná.
+
+### 2026-10-04 — Přejmenování cesty nesmí přepsat přijatý create_trip
+
+- Kontext: přechod existující Zkoušky na pojmenovanou cestu Camino se
+  zachováním Momentů a stejného Vieweru.
+- Problém: změna původního create_trip by porušila neměnnou identitu při
+  replay. Nový Trip by oddělil další záznamy od již existujících.
+- Řešení: původní Trip a přesné obálky zachovat; nový název poslat jako
+  samostatnou revizi set_trip_title s capability trip_title_v1. iOS ukládá
+  historii do SettingRecord, server čte přijaté názvy z accepted_operations;
+  žádná migrace schématu ani nový upload médií. Nejdřív nasadit server.
+- Ověření: reopen a exact retry skutečných Swift obálek na izolovaném API
+  PASS, původní Trip/Moment/Asset i Viewer mapa a auth zachovány. Fyzické
+  přejmenování na iPhonu zůstává samostatný krok.

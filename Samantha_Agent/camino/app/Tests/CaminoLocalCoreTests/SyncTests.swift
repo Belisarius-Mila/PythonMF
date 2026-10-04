@@ -10,6 +10,71 @@ import XCTest
         ISO8601DateFormatter().date(from: value)!
     }
 
+    func testTripRenamePreservesIdentityMediaAndExactQueueAcrossReopen() throws {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("camino-trip-\(UUID())/metadata.sqlite")
+        let store = try CaminoLocalStore(storeURL: url)
+        let trip = try store.createTrip(name: "Zkouška", isTest: true)
+        let moment = try store.markMoment()
+        let photo = try store.beginMediaIntent(kind: .photo, targetMomentID: moment.id)
+        _ = try store.acceptMedia(photo, inspection: LocalMediaInspection(byteCount: 12,
+            sha256: String(repeating: "a", count: 64), width: 4, height: 3, orientation: 1,
+            durationMilliseconds: nil, hasAudio: false, partial: false))
+        let assets = try store.allMediaAssets()
+        let before = try store.syncSnapshot(momentID: moment.id)
+        let days = try store.days(tripID: trip.id)
+        var journal = CaminoSyncJournal()
+        journal.observeServer(serverID: UUID(), epoch: UUID(), cursor: 0)
+        let candidate = CaminoSyncMediaItem(id: photo.assetID, momentID: moment.id, kind: .photo,
+            sourceRelativePath: "synthetic/photo.jpg", byteCount: 12, sha256: String(repeating: "a", count: 64),
+            durationMilliseconds: nil, batchID: journal.openBatchID)
+        let original = try CaminoSyncDiscovery(trips: store.trips(), days: days, moments: [before], media: [candidate])
+        journal.mergeDiscovery(original)
+        var envelopes: [Any] = []
+        for item in journal.metadata {
+            envelopes.append(try JSONSerialization.jsonObject(with: journal.exactEnvelope(for: item.id)))
+        }
+        for index in journal.metadata.indices { journal.metadata[index].phase = .accepted }
+        for index in journal.media.indices { journal.media[index].phase = .verified }
+        let oldQueue = journal.metadata
+        let renamed = try store.updateTrip(trip.id, name: " Camino de Santiago ", isTest: false)
+        XCTAssertEqual(renamed.id, trip.id)
+        XCTAssertEqual(renamed.name, "Camino de Santiago")
+        XCTAssertFalse(renamed.isTest)
+        _ = try store.updateTrip(trip.id, name: renamed.name, isTest: false)
+        XCTAssertThrowsError(try store.updateTrip(trip.id, name: "", isTest: true))
+        XCTAssertThrowsError(try store.updateTrip(trip.id, name: "a\u{2028}b", isTest: true))
+        XCTAssertThrowsError(try store.updateTrip(trip.id, name: String(repeating: "x", count: 161), isTest: true))
+        let reopened = try CaminoLocalStore(storeURL: url)
+        XCTAssertEqual(try reopened.activeTrip(), renamed)
+        XCTAssertEqual(try reopened.allMediaAssets(), assets)
+        XCTAssertEqual(try reopened.days(tripID: trip.id), days)
+        XCTAssertEqual(try reopened.syncSnapshot(momentID: moment.id), before)
+        let next = try CaminoSyncDiscovery(trips: reopened.trips(), days: days, moments: [before], media: [candidate])
+        XCTAssertEqual(next.metadata.first?.payload, original.metadata.first?.payload)
+        journal.mergeDiscovery(next)
+        XCTAssertEqual(Array(journal.metadata.prefix(oldQueue.count)), oldQueue)
+        XCTAssertEqual(journal.metadata.count, oldQueue.count + 1)
+        XCTAssertTrue(journal.media.allSatisfy { $0.phase == .verified })
+        XCTAssertThrowsError(try journal.requireTitleSupport(serverFeatures: []))
+        XCTAssertNoThrow(try journal.requireTitleSupport(serverFeatures: ["trip_title_v1"]))
+        let change = try XCTUnwrap(journal.metadata.last)
+        XCTAssertEqual(change.expectedRevision, 1)
+        let raw = try journal.exactEnvelope(for: change.id)
+        envelopes.append(try JSONSerialization.jsonObject(with: raw))
+        var restoredJournal = try JSONDecoder().decode(CaminoSyncJournal.self, from: JSONEncoder().encode(journal))
+        XCTAssertEqual(try restoredJournal.exactEnvelope(for: change.id), raw)
+        _ = try reopened.updateTrip(trip.id, name: "Druhé jméno", isTest: false)
+        let second = try CaminoSyncDiscovery(trips: reopened.trips(), days: days, moments: [before], media: [candidate])
+        restoredJournal.mergeDiscovery(second)
+        let last = try XCTUnwrap(restoredJournal.metadata.last)
+        XCTAssertEqual(last.expectedRevision, 2)
+        envelopes.append(try JSONSerialization.jsonObject(with: restoredJournal.exactEnvelope(for: last.id)))
+        if let path = ProcessInfo.processInfo.environment["CAMINO_TRIP_WIRE_FIXTURE"] {
+            try JSONSerialization.data(withJSONObject: envelopes, options: [.sortedKeys])
+                .write(to: URL(fileURLWithPath: path), options: .atomic)
+        }
+    }
+
     func testTitleWireSequenceDoesNotRewriteCreateAndRequiresServerSupport() throws {
         let store = try CaminoLocalStore(inMemory: true)
         let trip = try store.createTrip(name: "Synthetic title")

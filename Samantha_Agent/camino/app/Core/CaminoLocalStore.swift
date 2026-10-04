@@ -113,6 +113,28 @@ private struct LocalPendingMomentLink: Codable, Equatable {
         } catch { context.rollback(); throw error }
     }
 
+    /// Rename the existing trip without rewriting its original sync identity.
+    /// Both the title history and test flag are committed in one transaction.
+    @discardableResult public func updateTrip(_ id: UUID, name: String,
+                                               isTest: Bool) throws -> LocalTrip {
+        let title = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !title.isEmpty, title.unicodeScalars.count <= 160,
+              !title.unicodeScalars.contains(where: { CharacterSet.controlCharacters.union(.newlines).contains($0) })
+        else { throw LocalStoreError.invalidName }
+        guard let row = try object("TripRecord", id: id) else { throw LocalStoreError.tripMissing }
+        do {
+            let current = try decodeTrip(row)
+            if title != current.name {
+                var changes = current.titleChanges
+                changes.append(LocalTripTitleChange(id: UUID(), title: title))
+                try setEncodedSetting(changes, key: "trip.titles.\(id.uuidString.lowercased())")
+            }
+            row.setValue(isTest, forKey: "isTest")
+            try save()
+            return try decodeTrip(row)
+        } catch { context.rollback(); throw error }
+    }
+
     /// The choice applies only to future ordinary Moments, never old Moments.
     public func newMomentPrivacy() throws -> LocalPrivacy {
         let rows = try fetch("SettingRecord", predicate: NSPredicate(format: "key == %@", "newPrivacy"))
@@ -1463,11 +1485,20 @@ private struct LocalPendingMomentLink: Codable, Equatable {
     }
 
     private func decodeTrip(_ row: NSManagedObject) throws -> LocalTrip {
-        LocalTrip(id: try required(row, "id"), name: try required(row, "name"),
+        let id: UUID = try required(row, "id")
+        let originalName: String = try required(row, "name")
+        let changes: [LocalTripTitleChange] = try encodedSetting(
+            "trip.titles.\(id.uuidString.lowercased())") ?? []
+        guard Set(changes.map(\.id)).count == changes.count,
+              changes.allSatisfy({ !$0.title.isEmpty && $0.title.unicodeScalars.count <= 160
+                  && !$0.title.unicodeScalars.contains(where: { CharacterSet.controlCharacters.union(.newlines).contains($0) }) })
+        else { throw LocalStoreError.inconsistentStore }
+        return LocalTrip(id: id, name: changes.last?.title ?? originalName,
                   language: try required(row, "language"),
                   active: try required(row, "active"), isTest: try required(row, "isTest"),
                   viewerEnabled: try required(row, "viewerEnabled"),
-                  startDate: row.value(forKey: "startDate") as? String)
+                  startDate: row.value(forKey: "startDate") as? String,
+                  originalName: originalName, titleChanges: changes)
     }
 
     // Additive metadata in the existing store, no Core Data schema migration.

@@ -20,7 +20,7 @@ from .codec import (
     decode_asset, decode_change, decode_day, decode_moment, decode_text,
     decode_trip, encode_change, exact_object, wire,
 )
-from .model import ContractError, MomentHistory, Privacy, RevisionConflict, TextHistory
+from .model import ContractError, MomentHistory, Privacy, RevisionConflict, TextHistory, validate_title
 from .audio_layout import decode_audio_layout
 
 
@@ -150,7 +150,7 @@ class RevisionStore:
             meta = self._meta(connection)
             return {
                 "contract_version": 1,
-                "features": ["audio_layout_v1", "moment_title_v1", "attachment_title_v1"],
+                "features": ["audio_layout_v1", "moment_title_v1", "attachment_title_v1", "trip_title_v1"],
                 "server_id": meta["server_id"],
                 "epoch": meta["epoch"],
                 "cursor": meta["cursor"],
@@ -299,6 +299,23 @@ class RevisionStore:
         kind = envelope["kind"]
         payload = envelope["payload"]
         expected = envelope["expected_revision"]
+        if kind == "set_trip_title":
+            data = exact_object(payload, {"trip_id", "title"})
+            trip_id = self._uuid(data["trip_id"])
+            validate_title(data["title"])
+            if not data["title"]:
+                raise ContractError("trip title must not be empty")
+            if connection.execute("SELECT 1 FROM trips WHERE id=?", (trip_id,)).fetchone() is None:
+                raise StoreNotFound("trip is missing")
+            # Keep the original create_trip body unchanged. The accepted log is
+            # the durable title history; no new schema or media projection needed.
+            revision = 1 + connection.execute(
+                "SELECT COUNT(*) FROM accepted_operations WHERE kind='set_trip_title' AND object_id=?",
+                (trip_id,),
+            ).fetchone()[0]
+            if expected != revision:
+                raise StoreConflict("revision_conflict", "trip title revision differs", revision)
+            return kind, trip_id, revision + 1, False
         if kind == "create_audio_layout":
             if expected is not None:
                 raise ContractError("audio layout does not change Moment revision")
@@ -650,7 +667,12 @@ class RevisionStore:
                         "SELECT body FROM audio_layouts WHERE moment_id=? ORDER BY rowid", (moment.id,)
                     )],
                 })
-            return {"name": trip.name, "moments": sorted(result, key=lambda m: (m["day"], m["time"], m["id"]))}
+            title_row = connection.execute(
+                "SELECT request_body FROM accepted_operations WHERE kind='set_trip_title' AND object_id=? "
+                "ORDER BY device_sequence DESC LIMIT 1", (trip_id,),
+            ).fetchone()
+            title = json.loads(title_row["request_body"])["payload"]["title"] if title_row else trip.name
+            return {"name": title, "moments": sorted(result, key=lambda m: (m["day"], m["time"], m["id"]))}
 
     def changes(self, epoch: str, cursor: int, limit: int = 100) -> dict[str, Any]:
         with self._connection() as connection:

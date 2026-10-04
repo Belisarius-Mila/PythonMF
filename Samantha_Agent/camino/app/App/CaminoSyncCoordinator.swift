@@ -668,11 +668,12 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
                     batchID: journal.openBatchID))
             }
         }
-        // A phone with no live Moments, media or audio has no content to send.
+        // A phone with no live content or explicit rename has nothing to send.
         // Do not enqueue historical empty trip/day scaffolding after a clean
         // server bootstrap; the structure is discovered again with the first
         // real Moment and then travels in the same metadata batch.
         let hasLocalContent = !snapshots.isEmpty || !candidates.isEmpty || !audioLayouts.isEmpty
+            || trips.contains(where: { !$0.titleChanges.isEmpty })
         let discovery = try CaminoSyncDiscovery(
             trips: hasLocalContent ? trips : [], days: hasLocalContent ? days : [],
             moments: snapshots, media: candidates, audioLayouts: audioLayouts,
@@ -1060,6 +1061,7 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
     private func resolvedMacCopyState(status: Int?, code: String) -> CaminoMacCopyState {
         if code == "moment_title_server_upgrade_required" { return .serverUpgradeRequired }
         if code == "attachment_title_server_upgrade_required" { return .serverUpgradeRequired }
+        if code == "trip_title_server_upgrade_required" { return .serverUpgradeRequired }
         if status == 401 { return .authorizationRequired }
         if status == 507 || code == "insufficient_storage" { return .insufficientStorage }
         if ["verification_failed", "hash_mismatch", "length_mismatch"].contains(code) {
