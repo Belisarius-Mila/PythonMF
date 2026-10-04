@@ -2,9 +2,9 @@
 
 Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezna aktivni prace, `paused` je pozastavene a `archived` se zobrazuje jen v archivnim filtru Cockpitu.
 
-Pozastavená provozní diagnostika bez nového projektu: **Seznam v iPhone Mailu** —
-[PRIPOMENOUT] pokračovat zítra; priorita nebyla určena. Stav a další test:
-`handoffs/seznam_iphone_mail_2026_10_03.md`. Účet ani hesla se neměnily.
+Uzavřená provozní diagnostika: **Seznam v iPhone Mailu** — 4. 10. Míla
+potvrdil příjem nové zprávy a funkčnost i se zapnutou Wi-Fi/VPN. Bez změny
+účtu nebo hesla; příčina nepotvrzena. Viz `handoffs/seznam_iphone_mail_2026_10_03.md`.
 
 Samostatný terminálový projekt bez pracovního proudu v Cockpitu:
 

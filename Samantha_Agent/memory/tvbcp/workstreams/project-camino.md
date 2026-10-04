@@ -1,6 +1,15 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-04 večer — Míla výslovně autorizoval p+n celého čekajícího
+  balíčku a ukončení dne. Camino server již prokazatelně běží na
+  16de4d0b7973 s trip_title_v1; IPA build 16 je připraven, fyzická instalace
+  a přejmenování na telefonu čekají. Publikační krok zahrnuje audit přesného
+  rozsahu, plnou večerní bránu, GitHub push a řízený Cockpit restart se smoke.
+  Tento zápis je předpublikační; konečný výsledek a přesný head dokládají
+  soukromé pn_20261004 účtenky a registrovaný živý deploy audit. Bez dalšího
+  vývoje; při pokračování nejprve ověřit stav instalace buildu 16 u Míly.
+
 - 2026-10-04 23:33 WEST — Nasazení a build 16 dokončeny. Po opravě kontroly
   prázdných cest proběhlo registrované stop/upgrade/start na release
   16de4d0b79738d1d3aec46445d53ee401516e3b5. Snapshoty a porovnání archivu

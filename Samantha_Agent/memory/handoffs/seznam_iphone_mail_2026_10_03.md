@@ -1,9 +1,24 @@
-# Seznam v Apple Mailu na iPhonu — pokračovat zítra
+# Seznam v Apple Mailu na iPhonu — příjem obnoven
 
-Stav: rozpracovane, na zadost Mily preruseno do zitra
-Pripomenout pri startu: ano
+Stav: vyreseno podle uzivatelskeho overeni 2026-10-04; pricina nepotvrzena
+Pripomenout pri startu: ne
 Datum: 2026-10-03 21:48 WEST
 Priorita nebyla uzivatelem urcena; nevznika novy projekt ani TVBCP.
+
+## Výsledek 2026-10-04
+
+Míla potvrdil platnost hesla. Snímek zabezpečení účtu potvrdil, že 2FA
+není nastavené. Po dočasném odpojení Wi-Fi a VPN na iPhonu byla doručena
+nová testovací zpráva do Seznamu bez chyby a výzvy k heslu. Zprávu odeslal
+sám Míla; agent nic neodesílal. Následně uživatel potvrdil plnou funkčnost
+i se znovu zapnutou Wi-Fi, Tailscale a další VPN.
+
+Přesná příčina není prokázaná; VPN ani heslo neoznačovat za viníka.
+Agent neměnil nastavení účtu ani heslo. Není naplánovaný další zásah.
+Při případném návratu nejprve rozlišit konkrétní schránku a skutečné
+načtení nové zprávy; nevynucovat reset nebo smazání účtu.
+
+Níže je historický stav ze 3. října, nikoli aktuální otevřené kroky.
 
 ## Co se resilo
 
