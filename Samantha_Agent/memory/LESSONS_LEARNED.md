@@ -1123,3 +1123,15 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Ověření: reopen a exact retry skutečných Swift obálek na izolovaném API
   PASS, původní Trip/Moment/Asset i Viewer mapa a auth zachovány. Fyzické
   přejmenování na iPhonu zůstává samostatný krok.
+
+### 2026-10-04 — Upgrade Camino může zachovat další prázdné cesty
+
+- Kontext: řízený upgrade archivu s jednou naplněnou cestou a staršími
+  prázdnými Trip záznamy.
+- Problém: historické `trip_count == 1` zastavilo upgrade i s jednoznačným
+  platným `trip_id` v konfiguraci. Prázdné cesty se kvůli nasazení nemažou.
+- Řešení: ověřit existenci explicitně zvolené cesty a nepřítomnost Momentů
+  v jiných cestách. Zachovat všechny Trip řádky a jejich přesný otisk
+  porovnat před/po. Bez výběru zůstává požadavek jediné cesty.
+- Ověření: sada služby 25/25 PASS; prázdné cesty zůstaly, neznámý výběr
+  nebo jiná naplněná cesta byly odmítnuty, změna otisku byla rozpoznána.

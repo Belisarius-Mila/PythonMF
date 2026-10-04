@@ -14,6 +14,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 from camino.domain.revision_store import RevisionStore, SCHEMA_VERSION
+from camino.domain.codec import wire
 from camino.server.auth import RevocableTokenStore
 from camino.server.service_safety import database_lock, private_write, readonly, snapshot
 from scripts import camino_service_control as service
@@ -281,6 +282,24 @@ class CaminoServiceTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             preparation.archive_evidence(self.preparation_state())
 
+    def test_archive_audit_preserves_empty_trips_only_with_explicit_valid_selection(self):
+        self.f.send("create_trip", {**wire(self.f.trip), "id": uid(80), "name": "Empty synthetic trip"})
+        before = self.f.store.path.read_bytes()
+        evidence = preparation.archive_evidence(self.preparation_state())
+        self.assertEqual(evidence["trips"], 2)
+        self.assertEqual(self.f.store.path.read_bytes(), before)
+        state = self.preparation_state()
+        state.pop("trip_id")
+        with self.assertRaises(ValueError):
+            preparation.archive_evidence(state)
+        for selected in (uid(999), uid(80)):
+            with self.assertRaises(ValueError):
+                preparation.archive_evidence({**state, "trip_id": selected})
+        with self.f.store._connection() as db:
+            db.execute("UPDATE trips SET body=? WHERE id=?", ('{}', uid(80)))
+        self.assertNotEqual(preparation.archive_evidence(self.preparation_state())["trips_sha256"],
+                            evidence["trips_sha256"])
+
     def upgrade_fixture(self):
         self.control("install")
         code = self.root / "next-release" / "Samantha_Agent"
@@ -293,6 +312,7 @@ class CaminoServiceTests(unittest.TestCase):
 
     def test_upgrade_preserves_archive_credentials_and_old_definition(self):
         code = self.upgrade_fixture()
+        self.f.send("create_trip", {**wire(self.f.trip), "id": uid(80), "name": "Empty synthetic trip"})
         self.f.store.rotate_epoch_for_restore()
         config = json.loads((self.runtime / "config.json").read_text())
         config["epoch"] = self.f.store.state()["epoch"]
@@ -304,6 +324,7 @@ class CaminoServiceTests(unittest.TestCase):
         with patch.object(preparation, "release_checkout", return_value=code):
             result = self.control("upgrade")
         self.assertTrue(result["upgraded"])
+        self.assertEqual(preparation.archive_evidence(service.load_config(self.runtime))["trips"], 2)
         self.assertFalse(result["started"])
         self.assertEqual(self.f.store.state(), before)
         receipt = next((self.runtime / "upgrades").iterdir())

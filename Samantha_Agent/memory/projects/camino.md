@@ -12,6 +12,21 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 
 ## Aktuální stav
 
+- 2026-10-04 — Míla autorizoval nasazení serveru a nový build. První řízený
+  upgrade se bezpečně zastavil před releasem: historická kontrola odmítala
+  další prázdné Trip záznamy. Původní služba znovu spuštěna a HTTPS owner,
+  Viewer Jana/anonym ověřeny 200/200/401. Zjištěné 3 cesty mají Momenty jen
+  v jedné, výslovně zvolené v konfiguraci. Oprava zachová všechny cesty,
+  povolí jejich prázdnou kostru pouze s platným explicitním výběrem a
+  porovná jejich počet i přesný otisk; cizí obsah nebo nejasný výběr odmítá.
+  Cílené testy služby 25/25, plná brána 1850/1850 a rychlá statická kontrola PASS.
+  Build Camino 0.1.0 (16) z iOS zdrojů 4ecd21f9 je podepsán a zabalen
+  v Downloads jako Camino-16-20261004.ipa, 1 258 019 B. Strict codesign
+  před/po ZIP roundtrip, CRC, bundle a verze PASS; profil do 11. 10. 22:09 UTC.
+  Telefon nebyl instalován ani přejmenován. Bez GitHub push. Další krok:
+  po bráně nasadit opravu a trip_title_v1, pak fyzická aktualizace přes
+  SideStore a přejmenování původní cesty. Vizuální a fyzická přejímka čeká.
+
 - 2026-10-04 — Lokálně doplněno přejmenování stávající cesty a nové záhlaví
   „Caminos de descubrimiento“ na jednom řádku menším písmem. Pod ním Camino,
   aktuální název a datum. Nabídka → Cesty → Upravit název cesty nabídne u

@@ -210,3 +210,22 @@ brána a skutečný výsledek přípravy se evidují až po provedení.
 
 Další krok: samostatně bezpečně dokončit obnovu s telefonem, potom vědomě
 povolit Viewer a jeden krátký společný průchod. M3 nezávislá záloha stále chybí.
+
+
+## 2026-10-04 — Upgrade se zachováním prázdných cest
+
+Nasazení změny názvu cesty odhalilo příliš úzkou historickou kontrolu:
+archiv obsahuje další prázdné Trip záznamy, ale konfigurace již výslovně
+vybírá jedinou cestu obsahující Momenty. Původní kontrola vyžadovala právě
+jeden Trip v celé DB a upgrade zastavila před vytvořením releasu.
+
+`archive_evidence` nově přijímá více Tripů jen s platným existujícím
+`trip_id` v konfiguraci a žádným Momentem mimo tuto vybranou cestu.
+Bez výslovného výběru, při neznámém ID nebo při obsahu jiné cesty dál
+odmítá. Všechny původní cesty zachová; počet a otisk jejich přesných
+řádků jsou součástí porovnání před/po. Nic nemaže ani neslučuje.
+
+Cílená sada služby 25/25 PASS, včetně skutečného offline upgradu syntetické
+DB s další prázdnou cestou, zachování oprávnění a odmítnutí nesprávného
+výběru. Nasazení dál vyžaduje čistý ověřený commit a registrované stop,
+upgrade, start. Provozní výsledek je v aktuálním Camino handoffu.

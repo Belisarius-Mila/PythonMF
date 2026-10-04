@@ -40,13 +40,21 @@ def archive_evidence(state: dict) -> dict:
             raise ValueError("metadata integrity failed")
         identity = db.execute("SELECT server_id,epoch,cursor,writer_device_id FROM meta WHERE singleton=1").fetchone()
         trip_rows = db.execute("SELECT DISTINCT trip_id FROM moments").fetchall()
-        trip_count = db.execute("SELECT COUNT(*) FROM trips").fetchone()[0]
-        if trip_count != 1 or len(trip_rows) > 1:
-            raise ValueError("exactly one selected trip required; explicit selection needed")
+        trips = db.execute("SELECT id,body FROM trips ORDER BY id").fetchall()
+        selected = state.get("trip_id")
+        if selected is None:
+            if len(trips) != 1 or len(trip_rows) > 1:
+                raise ValueError("exactly one selected trip required; explicit selection needed")
+        else:
+            service.RevisionStore._uuid(selected)
+            if selected not in {row[0] for row in trips} or any(row[0] != selected for row in trip_rows):
+                raise ValueError("configured trip is missing or another trip contains Moments")
         flags = db.execute("SELECT exports_blocked,reconciliation_required FROM meta WHERE singleton=1").fetchone()
         result = {"operations": db.execute("SELECT COUNT(*) FROM accepted_operations").fetchone()[0],
                   "moments": db.execute("SELECT COUNT(*) FROM moments").fetchone()[0],
                   "identity_sha256": hashlib.sha256(json.dumps(identity).encode()).hexdigest(),
+                  "trips": len(trips),
+                  "trips_sha256": hashlib.sha256(json.dumps(trips).encode()).hexdigest(),
                   "exports_blocked": bool(flags[0]), "reconciliation_required": bool(flags[1])}
     finally:
         db.close()
