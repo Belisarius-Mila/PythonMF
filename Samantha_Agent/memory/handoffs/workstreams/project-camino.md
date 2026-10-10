@@ -1,23 +1,22 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-10-10 21:32 CEST
+- Aktualizováno: 2026-10-10 22:15 CEST — schválená upřesnění filmové dílny
 
 ### Hotovo
-- Podrobný návrh filmové dílny je uložen v TVBCP včetně obou Mílových připomínek
-- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Podrobný návrh filmové dílny obsahuje obě Mílovy podmínky a sedm schválených upřesnění z revize zadání; závazné podrobnosti jsou v posledním chronologickém záznamu.
 
 ### Otevřeno
-- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Implementace P2-A ani práce s reálnými médii nebyly zahájeny. Míla autorizoval push celého čekajícího balíčku a nasazení Cockpitu; výsledek doloží aktuální publikační a nasazovací účtenka.
 
 ### Rizika
-- Žádné další doložené provozní riziko.
+- Čas exportu, nároky na disk a skutečné přehrávání ověří až prototyp P2-A.
 
 ### Další krok
 - Po zadání vývoje zahájit syntetický prototyp P2-A s uloženou časovou osou
 
 ### Rozhodnutí
-- Videa se nabízejí celá s možností ručního zkrácení. Filmová práce začíná pouze nad konečnými uzavřenými daty a metadaty přijatými na Macu, bez čekajícího či probíhajícího přenosu z telefonu.
+- Videa a komentáře se nabízejí celé s ručním výběrem úseku. Film začíná až nad ověřenými uzavřenými vstupy; ruční úpravy jsou automaticky chráněné, první návrh obsahuje všechny povolené položky dne a náhled odpovídá stejné revizi jako finále.
 
 ### Navrhované další kroky
 - P2-B: ověřitelné uzavření vstupů a uložený projekt jednoho dne
@@ -26,11 +25,8 @@
 - Po přijetí základu posoudit prolínání, titulky řeči, hudbu a skutečnou trasu
 
 ### Technický stav checkpointu
-- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `e1de2d743733`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `e1de2d743733` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-10-10T18:27:14+00:00.
-- Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
-- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
+- Tento zápis je dokumentační; není důkazem funkčního rendereru. Rychlá statická brána prošla; autorizovaný denní GitHub balíček má vlastní plnou bránu a Cockpit následnou živou verifikaci.
+- Pro konečný výsledek p+n použít aktuální GitHub audit a nasazovací účtenku; nepřenášet sem starší provozní PASS jako důkaz nového nasazení.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -2429,3 +2425,25 @@ stále NEOVĚŘENO, dokud ho Míla nepotvrdí.
 - Změněné cesty před paměťovým zápisem (3): `Samantha_Agent/memory/handoffs/workstreams/project-camino.md`, `Samantha_Agent/memory/projects/camino.md`, `Samantha_Agent/memory/tvbcp/workstreams/project-camino.md`
 - Commit: `Document Camino film workshop plan and confirmed constraints`
 - Další krok: Po zadání vývoje zahájit syntetický prototyp P2-A s uloženou časovou osou
+
+
+## 2026-10-10 22:15 CEST — Revize zadání filmové dílny a autorizované p+n
+
+Hotovo: Sedm schválených upřesnění je v posledním záznamu kanonického TVBCP:
+automatická ochrana ručních úprav, pravidla souběhu zvuku, ruční výběr hlasu,
+všechny povolené položky dne, věrný i krátký náhled, vědomé uzavření vstupů
+a jednoduché opakování exportu s měřením nároků již v P2-A.
+
+Rozhodnutí: Míla schválil doplnění a p+n celého čekajícího balíčku.
+Implementace filmu ani použití skutečných médií tím nejsou zahájené.
+Nový záznam TVBCP má přednost před rozpornými návrhy z 20:18 a 21:31.
+
+Další krok: Dokončit autorizovaný GitHub balíček a řízené nasazení Cockpitu;
+potom čekat na zadání syntetického P2-A.
+
+Navrhované další kroky: P2-B uzavření vstupů; P2-C/P2-D editor a export;
+P2-E/P2-F skutečný den a více dnů. Optimalizace po částech až podle měření.
+
+Technický důkaz: Dokumentační revize proti F68–F70 a etapám P2-A až P2-F.
+Renderer ani fyzické přehrávání se netestovaly. Čas, diskové nároky a mobilní
+přejímka zůstávají otevřené; konečný p+n stav doloží živé audity a účtenka.

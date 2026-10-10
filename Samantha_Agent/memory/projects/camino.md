@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-04 23:33 WEST — server s přejmenováním nasazen, build 16 pro SideStore připraven
+Aktualizováno: 2026-10-10 22:15 CEST — schválená upřesnění zadání filmové dílny
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,15 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-10 22:15 CEST — Míla schválil sedm upřesnění filmové dílny a p+n
+  celého čekajícího balíčku. Podrobný závazný dodatek je v posledním záznamu
+  TVBCP: automaticky chráněné ruční úpravy a samostatné varianty, pravidla
+  souběhu zvuku, ruční výběr úseku hlasu, všechny povolené položky dne,
+  shodný střih náhledu a finále plus krátký náhled, vědomé uzavření vstupů
+  a opakování exportu od začátku. P2-A má změřit čas a diskové nároky.
+  Starší rozporné návrhy jsou tím nahrazené. Filmová implementace ani práce
+  s reálnými médii se nezahajují; p+n ověří samostatné živé audity.
 
 - 2026-10-10 21:31 CEST — Podrobný plán filmové dílny je uložen v kanonickém
   TVBCP (P2-A až P2-F). Závazná Mílova upřesnění: nabízet celá videa,

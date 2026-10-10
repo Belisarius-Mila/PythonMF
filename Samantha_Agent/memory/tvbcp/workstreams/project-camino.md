@@ -1,23 +1,22 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-10-10 21:32 CEST
+- Aktualizováno: 2026-10-10 22:15 CEST — schválená upřesnění filmové dílny
 
 ### Hotovo
-- Podrobný návrh filmové dílny je uložen v TVBCP včetně obou Mílových připomínek
-- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Podrobný návrh filmové dílny obsahuje obě Mílovy podmínky a sedm schválených upřesnění z revize zadání; závazné podrobnosti jsou v posledním chronologickém záznamu.
 
 ### Otevřeno
-- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Implementace P2-A ani práce s reálnými médii nebyly zahájeny. Míla autorizoval push celého čekajícího balíčku a nasazení Cockpitu; výsledek doloží aktuální publikační a nasazovací účtenka.
 
 ### Rizika
-- Žádné další doložené provozní riziko.
+- Čas exportu, nároky na disk a skutečné přehrávání ověří až prototyp P2-A.
 
 ### Další krok
 - Po zadání vývoje zahájit syntetický prototyp P2-A s uloženou časovou osou
 
 ### Rozhodnutí
-- Videa se nabízejí celá s možností ručního zkrácení. Filmová práce začíná pouze nad konečnými uzavřenými daty a metadaty přijatými na Macu, bez čekajícího či probíhajícího přenosu z telefonu.
+- Videa a komentáře se nabízejí celé s ručním výběrem úseku. Film začíná až nad ověřenými uzavřenými vstupy; ruční úpravy jsou automaticky chráněné, první návrh obsahuje všechny povolené položky dne a náhled odpovídá stejné revizi jako finále.
 
 ### Navrhované další kroky
 - P2-B: ověřitelné uzavření vstupů a uložený projekt jednoho dne
@@ -26,11 +25,8 @@
 - Po přijetí základu posoudit prolínání, titulky řeči, hudbu a skutečnou trasu
 
 ### Technický stav checkpointu
-- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `e1de2d743733`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `e1de2d743733` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-10-10T18:27:14+00:00.
-- Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
-- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
+- Tento zápis je dokumentační; není důkazem funkčního rendereru. Rychlá statická brána prošla; autorizovaný denní GitHub balíček má vlastní plnou bránu a Cockpit následnou živou verifikaci.
+- Pro konečný výsledek p+n použít aktuální GitHub audit a nasazovací účtenku; nepřenášet sem starší provozní PASS jako důkaz nového nasazení.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -3014,3 +3010,72 @@ Technický důkaz:
 - rychlá Cockpit brána syntaxe a whitespace: 8.0 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
 - Pracovní proud: `project-camino`.
 - Read-only živý stav při checkpointu: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
+
+
+## 2026-10-10 22:15 CEST — Schválená upřesnění filmové dílny po revizi zadání
+
+**Hotovo:** Plán filmové dílny je doplněný o sedm upřesnění níže. Tento zápis
+má přednost před rozpornými návrhy z 20:18 a 21:31, zejména před ručním
+zapínáním ochrany střihu, automatickým vynecháváním zdrojů a požadavkem na
+pokračování renderu po částech již v první verzi.
+
+**Rozhodnutí:** Míla schválil doplnění návrhu a následné p+n celého čekajícího
+balíčku. Jde o zadání budoucí filmové dílny a publikaci dokumentace, nikoli
+pokyn k zahájení P2-A nebo práci s reálnými médii. Platí obě dřívější podmínky:
+celá videa ve výchozím výběru a konečné uzavřené vstupy přijaté na Macu.
+
+1. **Automatická ochrana ručních úprav (P2-B/P2-C/P2-F).** Každá uživatelská
+   změna pořadí, délky, titulku, zvuku či vyřazení se zachová automaticky;
+   uživatel nemusí dodatečně zapínat „Zachovat“. Nový automatický návrh vznikne
+   jako samostatná varianta. Ochrana ručních úprav nikdy neobchází pozdější
+   zneplatnění soukromí zdroje.
+2. **Souběh komentáře a zvuku videa (P2-A/P2-C).** Během hlasového komentáře
+   je zvuk videa ve výchozím nastavení ztišený; uživatel může poměr změnit.
+   U videa s důležitou řečí lze komentář umístit před video nebo za ně.
+   Automatické rozpoznání důležité řeči není součástí tohoto zadání.
+3. **Ruční výběr úseku hlasu (P2-C).** Komentář se nabídne celý a uživatel
+   může vědomě nastavit začátek a konec. Cílová stopáž řeč automaticky nekrátí.
+   Pokud hlas přesahuje obraz, editor ukáže přesah a nabídne prodloužení
+   fotografie nebo přidání záběrů; dlouhý nehybný závěr nevznikne bez
+   upozornění. Návaznosti, skutečné mezery a chybějící audiočásti zůstávají
+   rozlišitelné podle dosavadního kontraktu.
+4. **Jednoduchý první návrh (P2-B).** Výchozí chronologický návrh zahrne
+   všechny povolené položky vybraného uzavřeného dne; nic nevynechá jen kvůli
+   orientační délce. Samostatný hlas se nabídne ve výběru komentářů a jeho
+   umístění se potvrdí v editoru. Uživatel rozhoduje o vyřazení; automatický
+   výběr menšího počtu položek je odložený.
+5. **Věrný a krátký pracovní náhled (P2-A/P2-D).** Náhled a finále vycházejí
+   ze stejné konkrétní uložené revize časové osy: shodné pořadí, délky,
+   titulky, orientace a zvuk. Lišit se mohou rozlišením a kvalitou kódování.
+   Po změně projektu je starší náhled jasně označený. Doplnit náhled zvoleného
+   úseku pro kontrolu drobné opravy bez renderu celého filmu.
+6. **Srozumitelné uzavření podkladů (P2-B).** Vědomá akce „Ověřit přenos
+   a uzavřít podklady“ ověří dokončení telefonní fronty, přijaté revize
+   metadat a dostupnost hashově ověřených médií. Při neúspěchu vypíše
+   konkrétní chybějící či neověřenou část a filmovou práci nepovolí. Další
+   doplnění vytvoří novou uzavřenou sadu; dosavadní střih se zachová a jeho
+   převzetí nad novými vstupy musí být přehledné a vědomé. Pouhý prázdný
+   seznam úloh nadále není důkazem úplnosti.
+7. **Jednoduchá obnova a měření (P2-A/P2-D).** První verze po pádu bezpečně
+   zopakuje export od začátku ze stejné uložené revize a manifestu, po
+   opětovné kontrole povolenosti a integrity zdrojů. Zachová projekt i starší
+   hotové exporty; neúplný soubor se nevydává za výsledek. Pokračování z
+   vyrenderovaných částí je odložené do doby, kdy ho odůvodní naměřené časy.
+   Už P2-A změří na Mílově Macu délku vzorku, čas náhledu/exportu, velikost
+   výsledku a nejvyšší dodatečnou spotřebu disku včetně pracovních kopií.
+
+**Další krok:** Dokončit autorizované p+n dokumentačního balíčku. Po
+samostatném zadání vývoje začít syntetickým P2-A s uloženou časovou osou,
+přejímkou obrazu/zvuku a měřením času i prostoru.
+
+**Navrhované další kroky:**
+- P2-B: ověřitelné uzavření vstupů, všechny povolené zdroje dne a uložený projekt.
+- P2-C/P2-D: mobilní editor s chráněnými úpravami, pravidla hlasu, věrný náhled a opakovatelný export.
+- P2-E/P2-F: přejímka skutečného dne a vícedenní film se zachováním ručního střihu.
+- Optimalizace renderu po částech až podle naměřených nároků základu.
+
+**Technický důkaz:** Revize byla porovnána s plánem P2-A až P2-F a F68–F70.
+Jde pouze o dokumentaci; funkční, renderovací a fyzické přejímky nejsou
+provedené. Rizika času exportu, diskových nároků a použitelnosti mobilního
+střihu zůstávají otevřená. Výsledek p+n dokládá aktuální GitHub audit a
+serverová nasazovací účtenka, nikoli tento předpublikační zápis.
