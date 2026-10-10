@@ -12,6 +12,15 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 
 ## Aktuální stav
 
+- 2026-10-10 21:31 CEST — Podrobný plán filmové dílny je uložen v kanonickém
+  TVBCP (P2-A až P2-F). Závazná Mílova upřesnění: nabízet celá videa,
+  zkracovat jen ručně; film začíná až z konečných uzavřených dat a metadat
+  přijatých na Macu, nic na telefonu nečeká ani se nepřenáší. Orientační
+  stopáž neopravňuje k automatickému krácení videa nebo hlasu. Ověřitelné
+  uzavření vstupů je navržená funkce P2-B, nikoli hotový provozní důkaz.
+  Uložení návrhu není pokyn k implementaci nebo nasazení. Další vývojový
+  krok po zadání: P2-A se syntetickým filmem a uloženou časovou osou.
+
 - 2026-10-04 večer — Míla výslovně autorizoval p+n celého čekajícího
   balíčku a ukončení dne. Camino server již prokazatelně běží na
   16de4d0b7973 s trip_title_v1; IPA build 16 je připraven, fyzická instalace

@@ -1,642 +1,36 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-10-04 večer — Míla výslovně autorizoval p+n celého čekajícího
-  balíčku a ukončení dne. Camino server již prokazatelně běží na
-  16de4d0b7973 s trip_title_v1; IPA build 16 je připraven, fyzická instalace
-  a přejmenování na telefonu čekají. Publikační krok zahrnuje audit přesného
-  rozsahu, plnou večerní bránu, GitHub push a řízený Cockpit restart se smoke.
-  Tento zápis je předpublikační; konečný výsledek a přesný head dokládají
-  soukromé pn_20261004 účtenky a registrovaný živý deploy audit. Bez dalšího
-  vývoje; při pokračování nejprve ověřit stav instalace buildu 16 u Míly.
-
-- 2026-10-04 23:33 WEST — Nasazení a build 16 dokončeny. Po opravě kontroly
-  prázdných cest proběhlo registrované stop/upgrade/start na release
-  16de4d0b79738d1d3aec46445d53ee401516e3b5. Snapshoty a porovnání archivu
-  PASS, všechny cesty, originály, serverová identita, epoch a přístupy
-  zachovány. Živý HTTPS audit: trip_title_v1 přítomno, owner 200, Viewer
-  Jana 200, anonym 401, služba running a grant true, exports_blocked=false
-  a reconciliation_required=false. Síťová konfigurace se neměnila.
-  Camino-16-20261004.ipa je v Downloads, 1 258 019 B, SHA-256
-  b41390c6eabc88671cc285fd27646a52ab31617bf7aeb063e9ee4e0998929f3e.
-  Build 0.1.0 (16) ze stejných iOS zdrojů jako 4ecd21f9, stejné bundle ID,
-  application-identifier i tým jako build 15; strict codesign/ZIP/reopen PASS.
-  Profil do 11. 10. 22:09 UTC. Plná brána opravy nasazení 1850/1850 PASS.
-  Soukromé účtenky v data/private/camino_installation; bez GitHub push.
-  Další krok: uživatel aktualizuje přes SideStore a v původní cestě zvolí
-  Nabídka → Cesty → Upravit název cesty → Uložit. Ověřit zachované Momenty,
-  nový název a jeho přenos do Vieweru. Telefon se neinstaloval nástrojem;
-  fyzické a vizuální potvrzení buildu 16 NEOVĚŘENO. Novou cestu nezakládat.
-
-- 2026-10-04 — Míla autorizoval nasazení serveru a nový build. První řízený
-  upgrade se bezpečně zastavil před releasem: historická kontrola odmítala
-  další prázdné Trip záznamy. Původní služba znovu spuštěna a HTTPS owner,
-  Viewer Jana/anonym ověřeny 200/200/401. Zjištěné 3 cesty mají Momenty jen
-  v jedné, výslovně zvolené v konfiguraci. Oprava zachová všechny cesty,
-  povolí jejich prázdnou kostru pouze s platným explicitním výběrem a
-  porovná jejich počet i přesný otisk; cizí obsah nebo nejasný výběr odmítá.
-  Cílené testy služby 25/25, plná brána 1850/1850 a rychlá statická kontrola PASS.
-  Build Camino 0.1.0 (16) z iOS zdrojů 4ecd21f9 je podepsán a zabalen
-  v Downloads jako Camino-16-20261004.ipa, 1 258 019 B. Strict codesign
-  před/po ZIP roundtrip, CRC, bundle a verze PASS; profil do 11. 10. 22:09 UTC.
-  Telefon nebyl instalován ani přejmenován. Bez GitHub push. Další krok:
-  po bráně nasadit opravu a trip_title_v1, pak fyzická aktualizace přes
-  SideStore a přejmenování původní cesty. Vizuální a fyzická přejímka čeká.
-
-- 2026-10-04 — Lokálně doplněno přejmenování stávající cesty a nové záhlaví
-  „Caminos de descubrimiento“ na jednom řádku menším písmem. Pod ním Camino,
-  aktuální název a datum. Nabídka → Cesty → Upravit název cesty nabídne u
-  výchozí Zkoušky Camino de Santiago a vypnutí testovacího označení; změna
-  nastane až po Uložit. Stejné Trip ID, Momenty, média, kapitoly a soukromí.
-  Nové názvy jsou samostatné revize set_trip_title; původní create_trip,
-  přesné přenosové obálky a verified média se nepřepisují. Bez migrace schémat:
-  iOS SettingRecord, server accepted_operations. Viewer převezme poslední
-  přijatý název po kontrole oprávnění, zachová URL, přístup a mapové body.
-  Ověření: SwiftPM 64/64, server/Viewer 34/34 a 6 skutečných Swift obálek
-  přes Python API včetně retry/reopen PASS; generic iOS build PASS.
-  Plná projektová brána 1849/1849 a rychlá statická kontrola PASS.
-  Simulátorový UI test je připraven a sestaven, ale testovací runtime
-  nedokončil start; běhy ukončeny, ani jeden testovací případ neproběhl.
-  Ani restart simulátoru nepomohl; vizuální a fyzická přejímka NEOVĚŘENO.
-  Bez push, nasazení, instalačního IPA a změny živých dat. Další krok:
-  po autorizaci nasadit nejprve server s trip_title_v1, pak nový iPhone build
-  přes SideStore a fyzicky ověřit přejmenování a Viewer. Starý server novou
-  operaci nepřijme; čekající název do upgradu blokuje přenosovou frontu.
-  Viz camino/docs/TRIP_TITLES.md. Fyzická přejímka této změny NEOVĚŘENO.
-
-- 2026-10-03 20:39 WEST — Po konkrétním schválení a přesné globální brzdě dokončen
-  selektivní fyzický úklid 3 Momentů z ČR, 2. 10. v 12:08, 17:37 a 20:24
-  českého času (2 fotografie, 1 video). Před zásahem souhlasil inventář
-  telefonu/serveru, všechny cílové ID a SHA-256; nebyl žádný další živý Moment.
-  Na iPhonu použito existující deleteMoment přes běžící aplikaci, zachovány
-  tombstones; smazány 3 originály + 1 přesně ověřená cache přenosu. Z journalu
-  odstraněny pouze 3 verified media položky, které by jinak při obnově
-  vyžadovaly již smazané soubory. Všech 19 accepted metadata položek zůstalo
-  byte-for-byte stejné; journal nebyl resetován ani zvenčí přepisován.
-  Na Macu při registrovaném stop odstraněny jen cílové projekční/media řádky,
-  13 souborů (originály, upload kopie, Viewer odvozeniny/manifesty) a 9 jejich
-  prázdných adresářů. Odstraněno 21 434 394 logických B; měřený přírůstek
-  volného místa při zásahu 21 528 576 B (obsazení svazku může ovlivnit jiné I/O).
-  Konfigurace, owner/reader credentials, server ID, epoch, writer ID, cursor 19,
-  Trip/Day struktura a Viewer grant zachovány. Původní synchronizační metadata
-  a potvrzení zůstávají dle dohody; nejde o úplný výmaz veškeré historie.
-  Zkoušky na soukromých kopiích: native iOS CoreData deletion/reopen PASS,
-  přesný retry bez vzkříšení PASS, další Moment s navazující sekvencí PASS,
-  klient/server complete_recovery PASS. Live: SQLite/FK obou DB PASS,
-  registrovaný restart/status running+grant true, HTTPS owner 200 bez blokace,
-  Viewer Jana 200/anonym 401, mapa bez českých bodů, 4/4 staré Viewer media
-  URL 404. iPhone po obnovení přenosů navázal nový kontakt, paused=false,
-  reconciliation=false, 19 accepted metadat/0 médií, originály/cílová cache
-  read-backem nepřítomné. Debugger odpojen, aplikace běží. Dočasná auditní
-  mediální kopie také smazána. Bez změny kódu, podpisu, tokenů nebo GitHub push.
-  Další krok: pořídit první portugalský Moment a potvrdit jeho skutečný přenos;
-  syntetický záznam byl vytvořen pouze ve zkušební kopii, nikoli v ostrém deníku.
-
-- 2026-10-02 21:16 CEST — Na Mílův výslovný požadavek obnoven privátní Viewer pro Janu.
-  Příčina 404: po resetu chyběl Viewer grant; registrovaný status jej potvrdil
-  jako false. Během řízeného zastavení vzniklo nové náhodné čitelné heslo
-  ze slov pro oddělený reader účet jana; tajemství pouze v privátním runtime.
-  Registrované enable-viewer/start prošly, bez změny owner přístupu iPhonu
-  a bez změny Tailscale tras. HTTPS s ověřením certifikátu: anonymní Viewer
-  401, Jana /viewer/ 200, mapa 200, owner /api/v1/state 200. Přístup z telefonu
-  novým heslem ještě musí potvrdit Míla. Heslo předáno pouze schránkou Macu;
-  staré heslo uložené v prohlížeči je potřeba nahradit. GitHub bez odeslání.
-
-- 2026-10-02 17:35 CEST — Obnoven skutečný přenos iPhone → Mac po resetu. Debugger na
-  telefonu prokázal NSCocoaErrorDomain 513 / POSIX EACCES při atomickém zápisu
-  journalu: adresář Sync vlastnil root (0755), aplikace běží jako mobile.
-  Původní adresář byl zachován jako místní servisní kopie; aplikace vytvořila
-  vlastní Sync a bezpečně uložila platnou frontu. Následný HTTP 401 prokázal
-  další blokátor: neplatný uložený token. Aktuální Mac token byl bezpečně
-  uložen do iOS Keychain, bez zveřejnění. Mac přijal 1 nový Moment a ověřil
-  1 fotografii; journal má 15 accepted metadat, 1 verified médium, cursor 15,
-  žádnou čekající položku. Historická prázdná Trip/Day kostra není obsah.
-  Konfigurace služby odkazovala na již odstraněný Trip; přesměrována na
-  jedinou cestu s přijatým Momentem, původní config zachován. Řízený restart
-  služby i nový start aplikace prošly; ověřené HTTPS 200/cursor 15/flags false,
-  registrovaný service status running/owned true. Viewer grant zůstává false.
-  Build 0.1.0 (14) rozlišuje místní Cocoa chyby od nedostupnosti Macu a loguje
-  jen fázi/doménu/kód, bez popisů, URL a obsahu. Instalován bez odinstalace.
-  SwiftPM 58/58, podepsaný iOS build a rychlá statická brána PASS. Data se
-  nemazala, GitHub bez odeslání. Další krok: běžný uživatelský test nového
-  okamžiku; další typy médií a spojení mimo současnou Wi-Fi tím nejsou ověřeny.
-
-- 2026-10-02 12:04 CEST — `13` metadat na telefonu nebylo třináct skrytých
-  Momentů: read-only inventář ukázal 2 lokální Trip záznamy a 11 Day záznamů
-  bez aktivního obsahu; Mac server zůstal na cursoru 0. Přijaté rozhodnutí:
-  prázdný telefon nemá do fronty posílat historickou Trip/Day kostru. iOS
-  discovery proto předává Trip/Day jen tehdy, když existuje skutečný Moment,
-  médium nebo audio layout; při prvním obsahu se struktura přibalí do stejné
-  dávky. Commit `06dca6d7`; SwiftPM 58/58, generic iOS build, strict podpis,
-  export, instalace a spuštění buildu `0.1.0 (12)` PASS. Read-only journal po
-  spuštění má metadata/media 0, cursor 0 a reconciliation false. Otevřený
-  krok: vytvořit jeden nový Moment a ověřit první fyzický přenos; riziko je
-  pouze dosud neověřené chování při prvním skutečném obsahu.
-
-- 2026-10-02 11:51 CEST — Těsně před resetem měl iPhone 0 aktivních Momentů,
-  0 médií a jedinou čekající `create_day` metadata položku. Diagnostika odhalila
-  druhý blokátor: serverový empty bootstrap vracel 503 kvůli mazání Trip před
-  Day při zapnutých SQLite foreign keys. Oprava `5e6fba7a` změnila pořadí na
-  child před parent; cílený serverový test i plná brána 1847/1847 PASS.
-  Služba byla stop/upgrade/start přepnuta na release `5e6fba7a6911` a
-  bootstrap po opravě vrátil 200, cursor 0, `exports_blocked=false` a
-  `reconciliation_required=false`. Po přesné globální brzdě byla z iPhonu
-  odstraněna pouze čekající `create_day` položka; synchronizační journal byl
-  nastaven na prázdný server, bez mazání místních souborů nebo nastavení.
-  Následný read-only audit potvrdil iPhone journal metadata/media 0, cursor 0,
-  reconciliation false a Mac health/state 200/cursor 0. Fyzický přenos nového
-  Momentu zůstává NEOVĚŘENO.
-
-- 2026-10-02 — Původní lokální checkpoint guarded bootstrapu: server
-  kontroluje skutečně prázdný metadata store i media/upload residue a iOS
-  před resetem journalu kontroluje Wi‑Fi a prázdný telefon. Operace nemá mazací
-  větev; zachovává místní soubory a resetuje pouze historii synchronizace.
-  Důkaz původní implementace: Swift 58/58, server 7/7, generic iOS build a
-  `git diff --check` PASS. Položka je historická; aktuální oprava, deployment a
-  telefonní reset jsou popsány v nejnovějším záznamu výše.
-
-- 2026-10-02 09:37 CEST — Připravena nová čistá Camino Service s novou
-  identitou, prázdným Tripem a prvním dnem; kurzor 2, 0 Momentů a 0 ověřených
-  médií. Owner token zůstal pouze v soukromém Mac úložišti. LaunchAgent běží na
-  PID `50505`, owner health 200 a stav API PASS. Soukromá Tailscale cesta
-  `/camino-api` zůstala na portu 8767, Funnel je vypnutý, Viewer je vypnutý.
-  Telefon nebyl měněn; před synchronizací bude nutné uložit nový token/adresu.
-
-- 2026-10-02 09:15 CEST — p+n dokončeno pro `64bc88b6`: plná brána
-  1846/1846 PASS, GitHub push, fast-forward obou čistých profilových workspace
-  a řízený Cockpit restart na PID `49126` s otiskem `49308f729c685835`.
-  Health endpoint a Cockpit smoke 5/5 PASS, deployment receipt `deployed`.
-  Camino Service zůstává po schváleném Mac-only resetu vypnutá a bez dat;
-  Viewer/Service live kontrola proto není provedena (NEOVĚŘENO). iPhone zůstal
-  beze změny.
-
-- 2026-10-02 09:03 CEST — Dokončen schválený Mac-only reset dat. Po zastavení
-  služby byly odstraněny `C05bAcceptance` a obsah `Camino/Service` kromě
-  `venv`; `Releases`, zdrojový repozitář, Cockpit, Tailscale a telefon se
-  neměnily. `df` doložil uvolnění 992 083 968 B. Camino Service je zastavená
-  a bez konfigurace, takže další start vyžaduje novou inicializaci. iPhone
-  zůstal s Camino `0.1.0 (10)` a beze změny místních dat.
-
-- 2026-10-01 09:22 CEST — Podepsaná IPA `Camino-GPS-10-20261001.ipa` vznikla
-  z čistého `main` `1c1096e6`; obsahuje GPS capture opravu z `cb13727f`.
-  Swift 56/56, archive, strict codesign, export a `unzip -t` PASS. Metadata:
-  `0.1.0 (10)`, bundle `cz.pythonmf.camino.app`; vývojový profil expiruje
-  4. 10. 2026. IPA je připravená v `Downloads`; import SideStore, instalace,
-  zachování existujících dat a fyzický GPS scénář na iPhonu jsou NEOVĚŘENO.
-
-- 2026-09-30 20:01 CEST — p+n pro `0b75bc94` je dokončeno: plná brána
-  1846/1846, push, fast-forward profilů, Cockpit restart PID `10074`/smoke 5/5
-  a otisk `49308f729c685835` PASS. Camino immutable release `0b75bc9425af`
-  běží na PID `10307`; archiv, grant a route zachované, Funnel off. Live Viewer
-  audit 200/401, 8 dnů, 7 grid dnů, 33 lightbox, 26 video badge, 56 summary
-  badge, dark mode, návrat nahoru a no-store PASS. FastAPI HTTP test blokuje
-  chybějící modul; Safari/iPhone vizuální přejímka NEOVĚŘENO.
-
-- 2026-09-30 19:49 CEST — Checkpoint `2fc5d7a8` přidává tmavý režim podle
-  nastavení zařízení, štítky souhrnu `Foto 2 · Video 2` a tlačítko `↑ Nahoru`.
-  Python 27/27, Node 5/5, `py_compile` a diff-check PASS; HTTP integrační test
-  blokuje chybějící FastAPI. Push, deployment a Safari/iPhone jsou NEOVĚŘENO;
-  běžící runtime zůstává na `8c4660e7`.
-
-- 2026-09-30 19:44 CEST — Lokální checkpoint `2c3c07b8` stabilizuje názvy ve
-  dvousloupcové mřížce minimálně dvěma řádky a přidává video badge `▶ Video`.
-  Cílený Python 26/26, Node 5/5, `py_compile` a diff-check PASS; FastAPI HTTP
-  test blokuje chybějící modul ve venv. Push, deployment a Safari/iPhone jsou
-  NEOVĚŘENO; běžící runtime zůstává na `8c4660e7`.
-
-- 2026-09-30 19:15 CEST — Fotografický lightbox z `de168178` je nasazený z
-  immutable release `8c4660e7`. Plná brána 1845/1845, GitHub push, Cockpit
-  nový PID/smoke 5/5, Camino stop/upgrade/start a živý Viewer smoke PASS:
-  200/401, 8 dnů, 7 grid dnů, 33 lightbox tlačítek, no-store, Funnel off.
-  FastAPI HTTP test blokuje chybějící modul ve venv; starý syntetický C05a
-  smoke skončil `ModuleNotFoundError` a není započten do přejímky. Fyzický
-  Safari/iPhone render NEOVĚŘENO. Další krok: vizuální přejímka overlaye.
-
-- 2026-09-30 18:58 CEST — Nasazení Viewer layoutu dokončeno: commit
-  `d2da13b4` je na origin/main, pushová brána 1844/1844 PASS, Cockpit nový
-  PID a smoke 5/5 PASS. Camino service stop/upgrade/start zachoval archiv,
-  grant i konfiguraci privátní route; HTTPS audit PASS, Funnel off. Živý
-  autorizovaný Viewer smoke PASS (200/401, 8 dnů, 7 grid dnů, 59 titulů,
-  dvousloupcové CSS, zalomení, lazy foto, metadata video, contain, no-store).
-  Safari/iPhone vizuální přejímka je stále NEOVĚŘENO; riziko je pouze skutečný
-  mobilní render a přístup zařízení do tailnetu.
-
-- 2026-09-30 07:47 CEST — Lokální Viewer layout: po rozbalení okamžiku se
-  foto/video vykresluje po dvou vedle sebe, se zachovaným pořadím a novým
-  řádkem pro další dvojice; název je pod médiem, tučný, větší a zalomitelný.
-  Audio, text, details, privacy filtr, originály a wire/API beze změny.
-  Root projekce 17/17 PASS, cílený layout test, `py_compile` a diff-check PASS.
-  FastAPI HTTP regresní test nebyl spuštěn kvůli chybějícímu modulu v dostupném
-  venv; Safari/iPhone, push a deployment jsou NEOVĚŘENO. Stav: lokální práce
-  před checkpointem; riziko je pouze neověřený skutečný mobilní render.
-
-- 2026-09-29 22:12 CEST — c+p+n pro `cb13727f` dokončeno: push a plná brána
-  1843/1843 PASS, strict codesign PASS, instalace i spuštění stejné bundle
-  aplikace přes devicectl na spárovaném iPhonu PASS. Viewer/server beze změny.
-  Fyzický GPS scénář v běžícím UI zůstává NEOVĚŘENO.
-
-- 2026-09-29 21:53 CEST — Rozpracována změna capture GPS: nový Moment nejprve
-  použije platný fix, při jeho absenci čeká nejvýše 5 s a pak uloží bez GPS;
-  náhled kamery se neblokuje, foto čeká až po shutteru, video/audio před
-  startem a attachment k existujícímu Momentu bez čekání. Důkaz: Swift 56/56,
-  generic iOS build PASS. UI result bundle je po přerušení neúplný, fyzický
-  iPhone test a c+p+n jsou NEOVĚŘENO. Riziko: GPS může i po 5 s zůstat
-  nedostupná; starší záznamy se zpětně nemění.
-
-- 2026-09-29 21:23 CEST — U17 mapa je po schválení „vše p+n“ pushnutá a
-  nasazená z `879a2e7199b6`. Čárkované spojnice vedou mezi každým dalším
-  povoleným GPS bodem bez blokace přesností, vzdáleností nebo časem a poslední
-  úsek má malou směrovou šipku. Plná brána 1843/1843, Cockpit smoke 5/5 a živý
-  privátní HTTPS audit 13/13 PASS; 13 bodů má 12 návazných úseků, Funnel off.
-  Safari, OSM dlaždice, vizuální šipka a fyzický nový bod zůstávají NEOVĚŘENO.
-
-- 2026-09-29 — Bod 2 dokončen lokálně: title editor je samostatný podview se
-  svým draft stavem a video přehrávač vlastní stabilní `AVPlayer`; psaní proto
-  nespouští znovuvytvoření celého detailu ani nových přehrávačů. Důkaz: Core
-  testy 51/51 a iOS Simulator build PASS. Cílený UI test byl sestaven a spuštěn,
-  ale runner XCTest/simulátoru byl po čekání přerušen, takže nemá PASS/FAIL
-  důkaz; zařízení a skutečný pocit při psaní zůstávají NEOVĚŘENÉ. Stav:
-  checkpoint `c2dd8277`, bez push/deploy/podpisu. Další: opakovat UI test a
-  provést krátkou fyzickou regresi názvů.
-
-- 2026-09-29 — Cílený title-save performance krok dokončen lokálně: Core Data
-  zápis názvu běží v background kontextu, aktualizace UI je pouze pro cílový
-  Moment a validace přílohy neprochází celou knihovnu. Journal/wire kontrakt
-  zůstal beze změny; přidány Core testy pro cílenost, přílohu a idempotentní
-  retry. Důkaz: 51/51 Core testů a iOS Simulator build PASS. Stav: checkpoint
-  `5b528dc5`; žádný push/deploy/podpis ani fyzická přejímka.
-  Riziko: psaní v detailu stále sdílí velké SwiftUI tělo a samostatně se musí
-  ověřit, zda zbylé zpomalení při každém znaku vyžaduje izolaci editoru.
-
-- 2026-09-29 — Rozhodnutí: každý nový GPS bod má v U17 orientační mapě
-  dostat čáru od předchozího bodu, i při horší přesnosti, velké vzdálenosti,
-  časové mezeře, přes půlnoc nebo nejistém čase. Implementace odstranila
-  pouze blokující heuristiky projekce/vykreslení; ochrana Viewer projekce,
-  označení přesnosti a chronologické řazení zůstávají. Cílené testy 16/16 a
-  Node frontend 4/4 PASS, lokálně bez nasazení. Další krok: checkpoint,
-  případný schválený push/nasazení a živá přejímka; fyzický nový GPS bod,
-  Safari a externí dlaždice jsou zatím NEOVĚŘENO.
-
-- 2026-09-28 23:09 CEST — Míla nadšeně potvrzuje mapu a její fungování:
-  základní fyzická přejímka nasazené U17 PASS podle uživatele. Zařízení,
-  prohlížeč a jednotlivé okrajové scénáře neuvedl; nový bod po přenosu,
-  revokace/výpadek a všechny platformy nejsou tímto plošně PASS.
-  Pro dnešek práce ukončená, nic dalšího nenasazovat. Příště běžné používání
-  stejné verze, případně jeden nový GPS bod po synchronizaci; M3/M4,
-  odložená kontrola zálohy a buffer B04 zůstávají.
-
-- 2026-09-28 23:04 CEST — po výslovném nasazení i přesné globální brzdě
-  běží U17 mapa z release ce903913bb35. Živé privátní HTTPS PASS: HTML/JSON,
-  4 mapové assety, 9 povolených GPS bodů (1 den), pořadí a odkazy do deníku.
-  Anonymní přístup a záměna owner/reader odmítnuté; Funnel off, Cockpit zdravý.
-  Zachováno 53 Momentů / 177 operací / 62 hashově ověřených médií (271 510 864 B),
-  identita a obě oprávnění; recovery flagy=false. Bez změny telefonu nebo sítě,
-  bez push a restartu Cockpitu. Dále fyzicky Viewer → Mapa cesty → Otevřít mapu;
-  Safari/dlaždice/klik a přírůstek po novém přenosu zatím NEOVĚŘENO.
-  Podrobnosti v VIEWER_ROUTE_MAP_REPORT.md; B04 zůstává buffer.
-
-- 2026-09-28 — U17 Mapa cesty: Míla schválil návrh i lokální vývoj.
-  Samostatná chráněná HTML mapa povolených GPS Momentů, Leaflet/OSM po kliknutí,
-  chronologie zachycení, dny, přerušované orientační spojnice, názvy/přesnost
-  a odkazy do rozbaleného deníku. Telefon/build 8 a archiv beze změny.
-  30 projekčních/runtime/audio a 17 HTTP testů PASS, frontend 4/4 PASS;
-  plná brána 1843/1843 PASS. Safari/živé dlaždice/UX nové mapy NEOVĚŘENO.
-  Další: samostatně schválit nasazení serveru a krátce převzít mapu podle
-  `camino/docs/VIEWER_ROUTE_MAP_REPORT.md`. Bez nového push/nasazení/podpisu.
-  B04 dál jen buffer. Jana podle Míly používá dosavadní Viewer na svém Macu;
-  nejde o PASS mapy, všech sítí/iPhonu nebo celé G8.
-
-- 2026-09-28 22:04 CEST — c+p+n všeho výslovně schválené. Publikace celého
-  balíčku včetně sovy na 29. září; B04 pouze buffer. Camino B03/build 8
-  znovu neinstalovat, tokeny a síť neměnit. Přesný výsledek ověřit přes
-  main/origin, řízenou deployment receipt Cockpitu a živý audit služby.
-- 2026-09-28 13:23 CEST — Míla používá build 8 a potvrzuje základní funkčnost;
-  nejde o jednotlivé PASS celé B03/B01 přejímky. Nyní pouze buffer B04:
-  skutečně smazatelné komentáře/Úvahy/foto/video kvůli místu v telefonu.
-  Adam navrhuje přenos smazání do Vieweru další dávkou a ochranu před návratem
-  při retry; ponechání originálu v neveřejném Mac archivu Míla schválil
-  28. 9. 13:40 CEST. Implementace nadále není povolená.
-  Rozsah a budoucí ověření v TRAVEL_MVP_PLAN.md. Žádný vývoj ani mazání.
-  Zálohu Míla chce kontrolovat večer; nyní nebyla kontrolována.
-- 2026-09-27 22:13 CEST — po nové přesné globální brzdě nasazený B03 server
-  ab34bb5ec217. HTTPS attachment_title_v1 a Viewer PASS: 6 dnů, 40 zavřených
-  karet; anonymní přístup a záměna owner/reader odmítnuté. Zachováno 53 Momentů,
-  170 operací, 62 hashově ověřených médií / 271 510 864 B, metadata, identita
-  a oba tokeny; recovery flagy=false. Soukromá trasa zdravá, Funnel off.
-  Podepsaná Camino-Attachments-8-20260927.ipa připravená k importu do stejné
-  aplikace bez odinstalace: Customize AppID on, Append Team ID off.
-  Fyzická instalace/přejímka zatím NEOVĚŘENO. Žádný push ani restart Cockpitu.
-- 2026-09-27 21:31 CEST — Míla fyzicky potvrdil názvy Momentů a jejich přenos
-  v buildu 7. B01 mobilní regrese tím není ověřená. Schválený B03 balíček:
-  vlastní názvy foto/video/celých audio příloh, telefon nejnovější nahoře,
-  přehled počtů; Viewer rozbalovací, ale nadále od rána k večeru.
-  Lokální implementace: Swift 49, Python 31, HTTP/wire 16, UI 2 a iOS build 8
-  PASS; plná brána 1838/1838 PASS. Bez nového nasazení/podpisu/importu/push. Důkazy
-  a přejímka v `camino/docs/TITLES_AND_TRANSFER_STATUS_REPORT.md`.
-  Po jedné společné aktualizaci delší testování stejné verze, drobnosti
-  shromažďovat do bufferu; Mac editor odložený, M3/M4 zůstávají.
-- 2026-09-27 20:35 CEST — po nové výslovné globální brzdě nasazený server
-  403180320849 s B01/B02. Živé HTTPS moment_title_v1 a Viewer (6 dnů) PASS.
-  Zachováno 51 Momentů / 155 operací / 58 médií (263 578 290 B), metadata,
-  identita i oba přístupy beze změny; oba recovery flagy=false, Funnel off.
-  Podepsaná Camino-Names-7-20260927.ipa je připravená ve Stahování;
-  nyní import do stejné app přes SideStore, bez odinstalace a bez Append Team ID.
-  Fyzický import a přenos názvu/mobilní regrese NEOVĚŘENO. Žádný push,
-  změna Tailscale ani restart Cockpitu. Report B01/B02 je aktuální předávka.
-- 2026-09-27 — B01/B02 implementované lokálně na pokyn Míly:
-  názvy offline v telefonu, jednosměrný přenos a zobrazení ve Vieweru;
-  oprava falešného čekání po dokončení mobilní dávky.
-  `camino/docs/TITLES_AND_TRANSFER_STATUS_REPORT.md` je aktuální předávka.
-  Pozdější Mac owner editor je odložený, Jana zůstává read-only.
-  Ověření dokončené: Swift 47, doména/projekce 21, HTTP 14, wire 1, UI 1 PASS;
-  generic iOS build 7 bez podpisu PASS, plná brána 1836/1836 PASS.
-  Nasazení serveru musí předcházet aktualizaci telefonu.
-  Žádný nový push, podpis ani fyzická instalace zatím neproběhly.
-- 2026-09-27 17:53 CEST — buffer B01/B02 v `camino/docs/TRAVEL_MVP_PLAN.md`:
-  falešné čekání na Wi-Fi po dokončení mobilní dávky ponechat na příští build
-  spolu s případnými názvy. Doplňování na Macu chce Míla, ne Jana.
-  Rozsah názvů/synchronizace čeká na rozhodnutí; nyní bez implementace.
-  Audit z 17:44: 51 Momentů / 58 hashově ověřených médií, 0 konfliktů,
-  oba recovery flagy=false. Diagnostika nepotvrdila ztrátu videa.
-  P+n v 15:45 ověřilo Cockpit/main/origin `22dea402`, plná brána 1833,
-  smoke 5/5, čisté profily; Camino release `125fddbb` zůstal beze změny.
-- Aktualizováno: 2026-09-27 15:27 CEST — Míla potvrzuje základní funkčnost Vieweru.
-- Míla žádá konečně pokračovat Viewerem. U16 přidává odkaz na Apple Mapy
-  pouze u povoleného bodu, s přesností a informací o předání bodu po kliknutí.
-  Cíleně 45/45 PASS, statická brána PASS; bez iOS změny nebo dalšího podpisu.
-- Po výslovném souhlasu i globální brzdě nasazené Camino/Cockpit 125fddbbcb56.
-  Plná brána 1833/1833, Cockpit PID 8376 a smoke 5/5; odkaz configured=true.
-  Audit v 15:17: HTTPS 200, grant=true, Funnel off, 6 dnů / 35 povolených Momentů,
-  5 mapových odkazů, 49/49 mediálních URL OK, bez čekání, video Range 206.
-  Nepřihlášený přístup i záměna reader/owner odmítnuté. Archiv a owner token
-  nezměněné (48 Momentů / 140 operací / 49 médií), oba recovery flagy=false.
-- Přihlášení `jana`, reader heslo zkopírované do schránky Macu, ne do Gitu/chatu.
-  Míla nyní hlásí „Zdá se, že vše funguje skvěle...“: první uživatelské
-  potvrzení základní funkčnosti, nikoli jednotlivé PASS pro všechny scénáře.
-  Zařízení, jiná síť, mapový klik a fyzický RT4 nejsou samostatně doložené.
-  Další: krátký průchod s Janou a zkouška skrytí, potom M3 nezávislá záloha.
-  Podrobnosti a hranice: `camino/docs/VIEWER_MAP_REPORT.md`.
-  GPS okrajové scénáře zůstávají neověřené a nyní neblokují Viewer.
-
-### Přijaté GPS — předchozí fyzická přejímka
-
-- Aktualizováno: 2026-09-27 13:58 CEST — video s GPS ±11 m uložené a přenesené PASS.
-- Míla potvrzuje novou položku „Povolit / obnovit GPS“, funkční všechna data
-  a nový okamžik bez polohy před jejím povolením: data/GPS1 PASS. Nyní potvrzuje
-  „GPS uložena“, hlášená přesnost ±8 m. Nově potvrzuje vytvoření offline
-  a zachování po zavření/otevření: PASS. Foto ±6 m a komentář ±11 m nyní
-  potvrzené v telefonu; jejich offline/restart není samostatně doložený.
-- Mac read-only: 48 Momentů / 140 operací, 5 GPS bodů (2 markery, foto, komentář, video).
-  Všechny přijaté GPS payloady se shodují s uložením i po novém otevření DB.
-  Nové foto/audio/video soubory velikostí i SHA-256 odpovídají ověřeným účtenkám.
-  Bez konfliktů, oba flagy=false. Míla potvrzuje synchronizaci videa s GPS ±11 m.
-  Foto ±6 m potvrzené Mílou v detailu telefonu; původní hlášení ±4 m opravil.
-  Rozdíl vyřešen bez změny dat/kódu. V 14:16 Míla potvrzuje opakovanou kontrolu
-  „Je to ok“; audit stále 48 Momentů / 140 operací / 5 GPS, bez konfliktů.
-  Nucený síťový replay nedoložený; GPS4 a offline/restart médií neověřené/odložené.
-- SideStore ukazuje 7 DAYS; přesné datum profilu neodečtené. Kolečko v jeho
-  seznamu samo nebylo důkazem selhání aktualizace; nový kód se otevřel.
-
-### Historická příprava před fyzickým ověřením
-
-- Aktualizováno: 2026-09-27 08:02 CEST — GPS IPA build 6 připravený pro SideStore.
-- `Camino-GPS-6-20260927.ipa` ve Stahování, zdroj `3fbf7232`, stejné ID;
-  strict podpis a ZIP PASS. Starý profil pouze do 27. 9. 12:10 CEST:
-  nutný nový SideStore podpis, Append Team ID off. Telefon dosud nezměněný.
-- Bod s časem/přesností se ukládá offline s capture intentem a přenáší původním
-  API; staré záznamy se nedoplňují. Bez Core Data/server migrace a bez trasy.
-- Detaily, omezení prvního fixu a krátký GPS1–GPS4 průchod:
-  `camino/docs/GPS_CAPTURE_REPORT.md`. Telefon zatím neaktualizovaný;
-  skutečná GPS a telefonní přenos NEOVĚŘENO. Bez push/nasazení/grantu Vieweru.
-- Nové rozhodnutí U16: před odjezdem odkaz z povoleného okamžiku Vieweru
-  na externí mapu; samotná mapa/trasa odložená. Odkaz ještě není implementovaný.
-- Ověření: Swift 44/44, API 3/3, UI 1/1, iOS build a plná brána 1830/1830 PASS.
-- Další: ruční import připraveného IPA do stejného Camina přes SideStore
-  a GPS1–GPS4; naváže odkaz pro Janu, Viewer/RT3/RT4 a M3/M4.
-
-### Poslední fyzická přejímka před GPS (historický stav)
-
-- Aktualizováno: 2026-09-26 23:19 CEST — fyzická obnova a následný přenos PASS.
-- SideStore import buildu 5, zachování dat, dokončení obnovy a stav po novém
-  otevření Camina potvrzené Mílou. Server po obnově: oba flagy=false,
-  identita zachovaná, archiv 104 operací / 41 Momentů / 45 médií nezměněný.
-- Následný komentář: telefon zeleně 42 úplných; Mac 129 operací, 42 Momentů,
-  46 ověřených médií / 216 344 915 B, bez konfliktů. Původní operace, Momenty
-  a mediální účtenky shodné se snapshotem, skutečné soubory hashově ověřené.
-- Nové operace: 1 den, 1 Moment, 1 médium a 22 audio layoutů. Nové médium má
-  1 789 696 B; nejde o důkaz přenosu neprázdného textu ani poslechové přejímky.
-- Blok dokončení T058 vyřešen. Viewer dosud nepovolený; další krok je jeho
-  samostatné povolení a RT3/RT4 pro Janu. M3/M4 a kontrola podpisu 1. 10. zbývají.
-- SideStore: skutečný RemotePair port zjistit přes Network Discovery;
-  výchozí port nefungoval. Pro Camino přepnout LocalDevVPN na Tailscale
-  a použít aktuální owner token. Tajemství nejsou v dokumentaci.
-
-### Historický stav nasazovací přípravy (překonaný přejímkou výše)
-
-- Nejnovější výsledek: registrovaný push 3 commitů, plná brána 1830/1830,
-  Cockpit smoke 5/5 a upgrade zastavené vlastní služby na `6865bcab`.
-  Camino HTTPS/API živé, archiv 104/41/45 a 214 555 219 B shodný,
-  T058 true/true, Viewer grant=false, Funnel off. IPA build 5 čeká na SideStore.
-- Nejnovější příprava: registrovaný upgrade zastavené vlastní služby,
-  24 cílených testů a plná brána 1830/1830 PASS před nasazením. Build 5/strict
-  podpis PASS, IPA ve Stahování. Profil jen do 27. 9. 12:10 CEST: neinstalovat
-  přímo, použít nový podpis/import SideStore se stejným ID, Append Team ID off.
-  Telefon nezměněný (CoreDevice 12040). Podrobnosti v M2_RECOVERY_REPORT.md.
-
-### Dokončení T058 — nejnovější lokální krok
-
-- Owner-only server endpoint a tlačítko iPhonu **Ověřit a dokončit obnovu**.
-  Jen přesná shoda celé historie operací, revizí/soukromí a skutečných médií;
-  žádný konflikt. Atomické uvolnění flagů až po důkazu, retry po ztrátě odpovědi.
-- Historické obálky byte-exact, nová epocha jen pro další operace; pause,
-  granty, originály a identity zachované. Žádný automatický merge/replay:
-  při nových neposlaných datech, chybějící kopii či rozdílu zůstává blokace.
-- Lokální testy a krátký fyzický plán: `camino/docs/M2_RECOVERY_REPORT.md`.
-  Živý backend dál předchozí release, T058 neodblokováno; bez push/deploy,
-  podpisu/instalace telefonu a bez povolení Vieweru.
-- Další: samostatně nasadit server + tutéž podepsanou appku, porovnat s telefonem
-  a provést jeden průchod. Pokud shoda není, zachovat obě kopie a cíleně řešit
-  rozdíly. Teprve potom Viewer; M3/M4 a U15 beze změny.
-
-### Živé nasazení — předchozí krok (stav služby ověřit živě)
-
-- Přesná globální brzda přijata pro LaunchAgent a privátní Serve. Služba
-  běží nad původním archivem, HTTPS owner health/state a odmítnutí bez tokenu
-  ověřené. Cockpit zachovaný, Funnel vypnutý. Viewer grant=false, URL 404.
-- Schéma 1→3 s ověřeným předmigračním snapshotem. Identita a všech 104 operací,
-  41 Momentů, 45 médií / 214 555 219 B shodné s přípravou včetně hashů.
-- Opraveno prostředí launchd: TERM=dumb pro Tailscale CLI; původní plist
-  uchovaný. Skutečný stop/start s novým PID a návratem HTTPS PASS; při restartu
-  vyčkat dokončení stop i uvolnění portu. Pád/restart Macu nejsou otestované.
-- Runtime dál pevný release `c9fbc3ee`; nový lokální controller spravuje plist
-  a Serve. 29 cílených a 1818 plných testů PASS. Nový kód zatím bez p+n;
-  již běžící Cockpit nebyl tímto krokem znovu nasazený.
-- T058 blokace trvají, reader neexistuje, telefonu nic nepředáno. Další:
-  bezpečně dokončit obnovu s iPhonem, potom vědomě povolit Viewer/RT3/RT4.
-  M3/M4 a U15 beze změny. Podrobnosti v `camino/docs/M2c_SERVICE_REPORT.md`.
-
-### Nasazovací příprava — předchozí stav
-
-- Stávající archiv ověřen a připraven pro službu: 41 Momentů, 45 médií,
-  214 555 219 B; všechny hashe a identita před/po shodné. Tři ověřené
-  SQLite snapshoty, pevný release `c9fbc3ee` (27 souborů), trvalý Python.
-- Soukromá konfigurace a nový owner token připravené, starý neoživený.
-  Metadata stále schéma 1, žádná migrace, reader DB ani iPhone změna.
-- Nový runtime configured=true, loaded/running/viewer_granted=false.
-  Instalace LaunchAgentu a Serve čeká na přesnou globální brzdu.
-- T058 stále vyžaduje obnovu: zápis/export blokovaný, konflikty=0.
-  Read-only porovnání inventáře samo neodblokuje; dořešit samostatně.
-- Šest commitů pushnuto, plná brána 1809/1809 PASS. Cockpit `c9fbc3ee`
-  nasazen, nový PID 90507, smoke 5/5 PASS. Konečný dokumentační p+n potvrzuje
-  živá registrovaná účtenka/deploy-verification. Nezaměňovat s Camino službou.
-- Další krok: přesná globální brzda pro Camino/Serve, pak bezpečné dokončení
-  obnovy s telefonem a teprve skutečný Viewer. M3/M4, U15 beze změny.
-- Podrobný důkaz: `camino/docs/M2c_SERVICE_REPORT.md`.
-
-### M2c — předchozí lokální krok
-
-- Lokálně hotové registrované ovládání služby, předmigrační SQLite snapshot
-  a explicitní grant/odvolání Vieweru. `camino/docs/M2c_SERVICE_REPORT.md`.
-- LaunchAgent se instalací nespustí; start/stop jsou zvlášť potvrzované.
-  Privátní runtime zachovává server ID/epochu a vyžaduje vybraný existující
-  archiv. Zámek proti dvěma procesům, kontrola starého zapisovatele a Funnelu.
-- SQLite schéma 3 přidává samostatné oprávnění cesty, nepřepisuje Trip ani
-  původní přenosové operace. Před upgradem verze 1/2 vznikne ověřený snapshot.
-- M2c offline sada 17/17, izolovaný server 22/22 PASS; plná brána a hranice
-  důkazu v reportu. Skutečné launchd, vzdálené Safari a RT3/RT4 NEPROVEDENO.
-- Read-only kontrola nového ovládání 26. 9.: konfigurace M2c dosud neexistuje.
-  Není to audit staré C05b služby. Žádný push, nasazení, token, migrace osobních
-  dat, instalace služby/telefonu ani změna Serve/Funnel.
-- Další krok: samostatně schválit nasazovací přípravu a konkrétní zdroj dat;
-  pak server, podepsaná aktualizace a jeden společný průchod. M3/M4 zůstávají.
-- M1 náhled potvrzen Mílou, M2a/M2b lokálně připravené. M2 ani G8 nejsou PASS.
-
-### M2b — předchozí lokální krok
-
-- Lokální M2b přenáší pořadí, předchůdce a mezery audiočástí z existujících
-  účtenek; Viewer navazuje souvislé úseky a označuje skutečné pauzy/díry.
-  Report: `camino/docs/M2b_AUDIO_LAYOUT_REPORT.md`.
-- Recorder, originály, ID médií a Core Data beze změny. Backfill layoutů
-  nevyvolá reupload; starý server je dostane až po `audio_layout_v1`.
-- Swift 36/36, nepodepsaný iOS build, layout/kontrakt 26/26 a server HTTP
-  21/21 PASS. Fyzický iPhone/Safari průchod nového přehrávání NEPROVEDENO.
-- Metadatový server přidává tabulku (SQLite schéma 2). Před ostrým upgradem
-  konzistentní kopie DB; nejdřív server, pak podepsaná aktualizace telefonu.
-- Žádný push, podpis/instalace, nasazení, živá migrace nebo změna sítě.
-  M2c: registrované provozní ovládání a vědomé povolení cesty/čtenáře.
-- M1 náhled potvrzen Mílou, M2a připraveno; celá M2 a RT3/G8 nejsou PASS.
-  M3 nezávislá záloha a M4 přejímka zůstávají, AI odložena.
-
-### Nejnovější rozhodnutí — platí před staršími body níže
-
-- Aktuální plán: `camino/docs/TRAVEL_MVP_PLAN.md`. Míla chce zlevnit a zrychlit
-  vývoj pro cestu 3.–17. 10., jednoduchý HTML Viewer pro Janu z Cockpitu,
-  ne komerční produkt ani App Store distribuci.
-- M1 náhled je potvrzený, M2a/M2b a provozní ovládání M2c lokálně hotové.
-  Nasazovací příprava hotová; další jsou schválené systémové změny a obnova,
-  M3 minimální nezávislá záloha a M4 jeden společný předcestovní průchod.
-- AI/C07, bohaté souhrny, širší import/export a P1/P2 jsou odložené. Ochrana
-  originálů, U15, autorizace a povinné rizikové/publikační brány zůstávají.
-  Dřívější úplné G0–G8 se tím neprohlašují za splněné.
-- SideStore: Míla potvrdil import bez kabelu, otevření původního Camina a data
-  PASS. Log druhého pokusu potvrzuje stejné ID a profil do 2. 10. 20:27 CEST;
-  nejde o extrakci nainstalovaného profilu ani záruku obnov až do 17. 10.
-  První pokus s jiným ID selhal; druhá nefunkční ikona pravděpodobně zůstala
-  po něm. Nic se nemaže, standardní Refresh All není ověřený postup.
-- Zachování dat po aktualizaci už neopakovat bez důvodu. Zbytek stavového
-  C05c spojit s M2/M4; nezapisovat celý C05c jako PASS. Další obnova podpisu
-  je plánovaná na 1. 10., nikoli na tento dokumentační krok.
-- Stav C05b služby/Serve/Funnel níže je poslední auditovaný snapshot z 24. 9.,
-  nikoli nový živý audit. M1/M2a změnily lokální kód, nikoli tuto službu.
-
-Dřívější technické důkazy a omezení (historický souhrn do 24. září):
+- Obnoveno potvrzeným checkpointem: 2026-10-10 21:32 CEST
 
 ### Hotovo
-- T043 PASS v rozsahu syntetického C02b: Letový režim přerušil upload při 0/13 serverových částech; po obnově sítě vznikl jediný objekt daného Assetu, 13/13 částí, 100 663 553 B a shodný SHA-256.
-- Fyzický průchod odhalil zahozené souběžné impulsy reconciliace a zdánlivě mrtvé tlačítko. Build `Camino Transfer Test` 0.4.0 (2) požadavky koaleskuje; následná 96MiB dávka doběhla automaticky bez dalšího klepnutí.
-- Build 2 je strict podepsaný, nainstalovaný a spuštěný na iPhonu 14 Plus / iOS 26.6.1. Camino Audio zůstalo nedotčené; profil harnessu platí do 24. září 2026.
-- T043 byl potvrzeně ukončen: vlastněný receiver neběží, `/camino-c02b` je odebraná, původní Serve konfigurace je přesně obnovená a Funnel zůstává vypnutý. Tři ověřené Assety/účtenky, každý 100 663 553 B, jsou zachované.
-- Oddělený registrovaný T047 workflow používá vlastní soukromý běh. Jeho read-only audit fail-closed kontroluje relace, stav poslední relace, hash každé přijaté části a finální objekty/účtenky.
-- T047 PASS v rozsahu syntetického C02b: první dávka byla zamčená během přenosu a po odemčení se dokončila 13/13; u druhé dávky byl po 1/13 skutečně ukončen proces, serverový stav zůstal 1/13 bez druhého objektu a po ručním relaunchi se doplnily pouze chybějící části do 13/13. Živé potvrzení má 2 relace, 2 ověřené objekty/účtenky, každý 100 663 553 B, celkem 201 327 106 B.
-- T048 prošel na fyzickém iPhonu v dostupném syntetickém rozsahu cizí Wi-Fi. Běžná dávka skončila 13/13; při vypnutí Wi-Fi zůstaly klient i server na 2/13 bez objektu a po návratu se bez dalšího stisku doplnily jen chybějící části. S vypnutým tailnetem nevznikla serverová relace ani veřejný fallback; po obnovení Tailscale se bez dalšího stisku dokončila třetí dávka. Server má 3 ověřené relace, objekty a účtenky, každý 100 663 553 B se shodným SHA-256. Captive portal zůstává NEOVĚŘENO, protože použitá síť jej neměla.
-- T048 je registrovaně ukončený: receiver i vlastní Serve cesta jsou neaktivní, původní Serve je přesně obnovený a Funnel vypnutý.
-- T049 prošel na iPhonu v syntetickém mobilním rozsahu: bez grantu zůstala dávka na 0 %, 0/13 a serveru 0 relací; zrušení dialogu zákaz zachovalo. Po grantu server doložil jedinou ověřenou relaci, 13/13 částí, jeden objekt a účtenku, 100 663 553 B a shodný SHA-256. Míla viděl `Ověřeno na Macu`.
-- Nová syntetická dávka mobilní povolení nezdědila: po `Synchronizovat nyní` zůstala na 0 %, 0/13, 0/2 a server stále evidoval jen první relaci. T049 bylo registrovaně ukončeno; receiver/cesta vypnuté, původní Serve přesně obnovený, Funnel vypnutý a důkaz zachovaný.
-- `Camino Transfer Test` 0.4.0 (3) se na iPhonu fyzicky spustil; Camino Audio 0.3.0 (4) zůstává nedotčené. Kód při testu nebyl měněn.
-- T050 PASS ve fyzickém syntetickém rozsahu: první běh doložil jen finále a zůstal neověřený, potvrzovací opakování zachytilo na iPhonu `Ověřuji` při 100 % a 13/13 současně se serverovým `verifying` bez objektu/účtenky. Až potom telefon ukázal `Ověřeno na Macu` a server ověřil jediný objekt/účtenku o 100 663 553 B se shodným SHA-256. Oba oddělené běhy jsou po potvrzených stopech zachované a bezpečně ukončené; soukromé video je mimo Git.
-- Build `Camino Transfer Test` 0.4.0 (4) na Macu přidal trvalou bránu prvního startu: nová dávka s mobilním grantem čeká na `Synchronizovat nyní` nebo `Pokračovat`, samotný grant, návrat aplikace a změna sítě ji nespustí. Po vědomém startu se zachovává automatická obnova; bez grantu zůstává automatická Wi-Fi. Starší journal zachovává dřívější obnovu. Swift 22/22, simulátorový UI test, nepodepsaný iOS build a plná projektová brána 1719/1719 PASS.
-- Schválené p+n pushnulo funkční balíček 17 commitů a řízeně nasadilo `4a965ccb` do Cockpitu. Závěrečný dokumentační checkpoint má svůj konečný Git a provozní stav doložený živým auditem.
-- Build 0.4.0 (4) je místně podepsaný a na iPhonu 14 Plus nainstalovaný jako aktualizace stejného bundle ID. Strict podpis a platný profil zahrnující telefon prošly; CoreDevice hlásí verzi 4. Camino Audio zůstává nainstalované. Cílený postup A/B pro novou syntetickou dávku je připravený v `camino/tasks/C02b_BUILD4_FIRST_START_FIELD_PLAN.md`.
-- Cílená fyzická část A buildu 4 PASS: grant ani návrat aplikace nespustily 0/13. Část B doložila vědomý start a automatické dokončení jedné relace po znovuotevření s dostupnou sítí do 13/13; otevření ještě bez sítě chybí, takže celý plán B není PASS. Nový T049 byl potvrzeně ukončen, původní Serve obnovený, Funnel vypnutý.
-- C03a fixuje čistý doménový kontrakt identit, revizí, časové provenience a soukromí U15. Úvaha začíná `owner_only`, uvolnění vyžaduje vědomou prioritní revizi a Viewer filtr čte nejnovější serverem přijatý stav. Syntetické testy 9/9 a plná brána 1728/1728 PASS.
-- C03b fixuje lokální owner API v1 se striktním JSON/OpenAPI schématem. Soukromá SQLite databáze trvale ukládá metadata, manifesty, revize, přesné operace a účtenky; souvislý kurzor, shodný retry a jeden deklarovaný zapisovatel se vynucují. Konflikty se zachovají a blokují výstupy. Změna epochy po řízené obnově vyžaduje porovnání inventáře Momentů a sama nic neodblokuje. Syntetické kontraktní testy 12/12 PASS.
-- C04a: první samostatná iPhone aplikace má offline Trip/Day/Moment, hlavní obrazovku, Zkoušku, značku a dnešní Momenty. Běžný Moment začíná `diary` podle D02; trvalá volba nevrací staré záznamy. Úvaha vzniká `owner_only` podle U15. C01c audio se znovu používá bez migrace prototypu; před mikrofonem vzniká trvalý záměr, validované dokončené části se po restartu idempotentně navazují. Komentář umí změnit soukromí celého vznikajícího Momentu. Swift 8/8, UI simulátoru 1/1 a nepodepsaný iOS build PASS.
-- C04b T013 fyzicky PASS podle Mílova potvrzení: při odepřeném mikrofonu se běžné video samo nepřepnulo na tiché a výslovně zvolený tichý klip zůstal dostupný a správně označený. Oprava kódu není potřeba.
-- C04b T014 fyzicky PASS podle Mílova potvrzení: zámek telefonu, odchod z aplikace i přijatý krátký hovor ukončily rozběhnuté video bez samovolného pokračování. Zachované klipy byly přehratelné a pravdivě označené jako částečné; hovor se do videa nezaznamenal. Oprava kódu není potřeba.
-- C04b T009 fyzicky PASS podle Mílova potvrzení: odmítnutá kamera zobrazila vysvětlení a `Zpět`, zatímco `Komentář` i místní deník dál fungovaly. Oprava kódu není potřeba.
-- C04b T060 má bezpečnou fyzickou část PASS podle Mílova potvrzení: při běžném volném místě nebylo falešné varování, krátké video se normálně dokončilo a přehrálo a starší položky zůstaly zachované. Celý T060 zůstává částečný bez skutečného nízkého místa před/během audia, videa a textu.
-- Lokální C04b má injektovatelnou kapacitu a společnou fail-closed politiku: varování pod 2 GiB, blok nového videa pod 1 GiB, foto/audia pod 512 MiB, bezpečné dokončení běžícího audia/videa pod rezervou a pokus o krátkou značku bez automatického mazání. Tepelný stav videa při `serious` varuje a při `critical` blokuje nový Start nebo ukončí běžící klip bez skryté změny kvality. Swift 17/17, UI simulátoru 3/3, simulátorový a generic iOS build i plná projektová brána 1740/1740 PASS; starší originál zůstal v integračním testu byte-for-byte zachovaný.
-- C04d je hotové: deník umí výběr dne, filtry, detail Momentu, trvalý koncept textu po pádu, historii lidských i automatických revizí s předností člověka, zamknutí, skrytí a obnovu, přesun kapitoly bez změny původního času a samostatný soukromý doplněk navázaný na původní Moment. Úvahu lze uvolnit jen vědomým `Vložit do deníku`; budoucí C05 operace mají trvalé pořadí a viditelný stav čekání na server. Core Data schéma zůstalo beze změny a rozšíření je verzované v existujícím `SettingRecord`, aby se zachovalo otevření C04b databáze. Swift 22/22, UI simulátoru 4/4, nepodepsaný generic iOS build a plná brána 1740/1740 PASS. Zdroj `e3868100` byl pushnut na `origin/main`; podepsané Camino 0.1.0 (2) prošlo strict kontrolou, instalací a spuštěním na iPhonu 14 Plus / iOS 26.6.1 bez odinstalace a bez ztráty starších C04b dat.
-
-- C05a má lokální produkčně orientovaný serverový checkpoint. Přijatý C03b manifest je autorita uploadu; FastAPI streamuje části, server ověřuje délku i SHA-256 a SQLite/souborový journal bezpečně uzavírá validní mezery po pádu. Shodný retry je idempotentní, konflikt nic nepřepíše, neznámé bajty se zachovají v karanténě a poškozený hotový objekt zruší `verified`. Owner token je odvolatelný a uložený jen jako hash; listener je loopback-only. Registrovaný smoke `20260923T205907Z-e64b0346` prošel 12/12 kontrolami přes skutečné loopback HTTP, 1 048 699 B v 5 částech, včetně retry, finalizace, odvolání obou tokenů a restartu se zachovaným `verified`. Smoke workflow 4/4, společná cílená sada 30/30 a plná brána 1763/1763 PASS.
-- C05b je fyzicky přijaté v session-owned rozsahu integrované aplikace. Zdroj `d4b49b61` je pushnutý, čisté profily zarovnané, Cockpit řízeně nasazený se smoke 5/5 a podepsané Camino 0.1.0 (3) nainstalované bez odinstalace. Zachování dat, T051, T047-A/B, dostupná část T048, T049, T050, T052, T053, T058 a pause jsou PASS; captive portal T048 je `NEOVĚŘENO`. Konečný stop odebral `/camino-api`, zastavil vlastní proces, odvolal token a ponechal Funnel vypnutý.
-- C05c je implementované a zdroj `f0f714f4` pushnutý. Obrazovka **Uložení a přenosy** odděluje Telefon, Mac, Další zálohu a AI. Podepsané Camino 0.1.0 (4) prošlo strict podpisem, shodou týmu a profilem zahrnujícím iPhone a bylo nainstalováno bez odinstalace a spuštěno. T054/T055 jsou synteticky doložené; fyzický průchod C05c čeká.
+- Podrobný návrh filmové dílny je uložen v TVBCP včetně obou Mílových připomínek
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
-- Integrovaná C05b je fyzicky přijatá a bezpečně zastavená. C05c je pushnuté a nainstalované, ale čeká na fyzické UX přijetí a potvrzení zachování dat; reálné T054/T055 čekají na C06b/C07. Otevřené zůstávají také captive portal T048, T038, Viewer/G8, T007 a plné T060.
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
 
 ### Rizika
-- C05a/C05b byly fyzicky použity jen jako session-owned akceptační služba. Nejde o trvalý proces, provozní dohled ani zálohu a serverový počet bajtů není měření spotřeby operátora.
-- Samostatný C02b harness bez kamery a jeho neúplná část B zůstávají historickými omezeními prototypu; integrované C05b T047-B a T049 už fyzicky prošly. Lokální zámek stále neodvolá již zkopírovaný cizí obsah; Viewer musí při každém vydání zkontrolovat aktuální oprávnění.
-- C05a loopback smoke ověřil síťový adaptér a bajty Assetu nad syntetickými daty. Není to spravovaný proces, Tailscale Serve, produkční úložiště ani záloha. Párovací UI patří C06 a skutečná záloha/obnova C06b. Referenční porovnání C03b po změně epochy zahrnuje jen Momenty.
-- C05b fyzický průchod dokládá zámek, force quit, síťový přechod, mobilní dávku a UX na tomto iPhonu. Akceptační server je však session-owned a není C06a trvalá služba ani C06b záloha.
-- C05c mění pravdivost prezentace, ne počet skutečných kopií. Syntetický stav zálohy nebo AI není fyzický ani produkční PASS.
-- Integrovaná aplikace včetně low-space/thermal hardeningu je podepsaná a nainstalovaná; starší C04b i nové C04d lokální scénáře uvedené výše fyzicky prošly. T007 a plné T060 zůstávají částečné bez skutečného nízkého místa; simulovaná kapacita ani teplota nejsou fyzická akceptace. Místní databáze není druhá záloha a zatím neodesílá revize C03b; nový bundle ID nevkládá data z C01c/C02b.
-- `Čeká na server` označuje místní trvalou frontu, nikoli synchronizaci nebo serverové přijetí. C04d fyzicky ověřilo mikrofon, hovory, změnu audio vstupu, nucené ukončení aplikace, přehrávání a skutečné UX; neověřilo produkční server, Viewer ani opožděnou AI větev T038. C03b v1 nemá operaci pro Důležité, proto je hvězdička zatím jen místní.
+- Žádné další doložené provozní riziko.
 
 ### Další krok
-- Dne 2026-09-25 projít `C05c_IPHONE_TEST_PLAN.md`, počínaje zachováním dat a čtyřmi sekcemi. C06a/C06b/C07 se tím automaticky neotevírají.
+- Po zadání vývoje zahájit syntetický prototyp P2-A s uloženou časovou osou
 
 ### Rozhodnutí
-- Míla zahájil C05a. Přijatý manifest je jediná autorita uploadu, FastAPI zůstává v odděleném prostředí Camino a smí bindovat jen loopback. Žádný skutečný token, Serve, nasazení ani iPhone integrace nebyly tímto pokynem automaticky povoleny.
-- Mílovo `pokračuj` pokrývá přípravu dalšího C05a kroku. Zápisový workflow ale podle registru vyžaduje po náhledu přesného příkazu ještě samostatné potvrzení; příprava proto neznamená provedený smoke.
-- Míla následným `ano` samostatně potvrdil uložený příkaz; právě tento registrovaný loopback smoke prošel. Potvrzení nerozšířilo oprávnění na Serve, iPhone, push ani nasazení.
-- Serverová pravda a stav `verifying` mají přednost před lokálním byte progress. Dostupná povolená Wi-Fi může spustit automatickou synchronizaci; ruční tlačítko je provozní záloha. Souběžný impuls se koaleskuje, nezahazuje.
-- Míla zvolil pořadí T049 před T048 kvůli nedostupné cizí Wi-Fi; nejde o změnu kritérií ani označení T048 za PASS.
-- Po zpřístupnění cizí Wi-Fi Míla samostatně potvrdil start, token i stop T048. Chybějící captive portal se nepovyšuje na PASS; ostatní tři fyzicky provedené podscénáře mají souběžný klientský a serverový důkaz.
-- Míla zvolil T050 před T048 a po nezachyceném prvním mezistavu výslovně opakování se záznamem obrazovky. Automatický start není nově schválené UX rozhodnutí.
-- Míla následně zadal opravu na Macu: první start nové mobilně povolené dávky má být vědomý, obnova již zahájeného přenosu automatická. Finalizace T050 se neměnila.
-- Míla schválil p+n celého čekajícího balíčku; dva obsahově shodné soví commity se zachovaly běžným sloučením bez přepisu historie.
-- Míla zadal C03a; původní v0.5 + novější U15 se nemění. Referenční model se nemigruje do izolovaných C01/C02 prototypů.
-- Míla zadal C03b; vzniká lokální referenční kontrakt, nikoli provozní služba. Syntetický T046 na kontraktní vrstvě nenahrazuje iPhone a serverový akceptační test.
-- Míla zadal C04a; samostatný bundle a místní kontejner zachovávají prototypy. V tomto kroku neprobíhá instalace telefonu, push ani nasazení.
-- Míla zadal C04d. Kompatibilita již používané C04b databáze má přednost před novou Core Data migrací; rozšíření se ukládá jako verzovaný místní journal. Hvězdička se bez nové serverové operace nesmí předstírat jako synchronizovatelná.
-- Míla výslovně povolil pokračování až do C05b včetně push, řízeného nasazení a podepsané aktualizace iPhonu. Funnel je mimo rozsah; registrované síťové mutace si ponechávají povinný náhled a samostatné `ano`.
-- Míla zahájil C05c jako nový krok. Dřívější oprávnění pro C05b se nepřenáší na push, nasazení ani instalaci C05c.
-- Míla následně výslovně povolil push a podepsanou aktualizaci C05c; fyzický průchod odložil na 2026-09-25. Cockpit deployment, start C05b serveru, Serve a Funnel zůstaly mimo rozsah.
+- Videa se nabízejí celá s možností ručního zkrácení. Filmová práce začíná pouze nad konečnými uzavřenými daty a metadaty přijatými na Macu, bez čekajícího či probíhajícího přenosu z telefonu.
 
 ### Navrhované další kroky
-- Aktuální: dne 2026-09-25 fyzicky projít zachování dat, čtyři stavové sekce a místní záznam podle C05c plánu. Serverové větve T040/T096 a produkční AI větev T038 zůstávají otevřené; C05b Serve znovu spouštět jen po novém náhledu a potvrzení.
-- T047 je fyzicky PASS v syntetickém rozsahu; jeho dva objekty/účtenky a relace zůstávají zachované.
-- Integrované T049 s novým skutečným videem je PASS; starší harness ponechat jen jako historický důkaz.
-- Captive portal T048 doplnit jen při skutečně dostupné síti; ostatní tři podscénáře bez nové pochybnosti neopakovat. T050 se neopakuje bez nové pochybnosti o finalizaci.
-- C08 musí nad přijatými C03b/C05 daty vynutit aktuální Viewer práva; C06 musí doplnit spravovaný provoz a druhou kopii.
+- P2-B: ověřitelné uzavření vstupů a uložený projekt jednoho dne
+- P2-C/P2-D: mobilní editor, náhled a obnovitelný export
+- P2-E/P2-F: přejímka skutečného dne a vícedenní film
+- Po přijetí základu posoudit prolínání, titulky řeči, hudbu a skutečnou trasu
 
 ### Technický stav checkpointu
-- C05a checkpoint: core + C03b 23/23, FastAPI ASGI 4/4, smoke workflow 4/4, společná cílená sada 30/30, validní OpenAPI, veřejný bind odmítnut exit 2 a plná projektová brána 1763/1763 PASS. Registrovaný běh `20260923T205907Z-e64b0346` má 12/12, 1 048 699 B a 5 částí; restart zachoval `verified` a oba tokeny byly odvolány. Push, nasazení, Serve, trvalý proces a iPhone změna NEPROVEDENY.
-- C05b: Swift 29/29, původní provozní registr 13/13, FastAPI 5/5, UI 1/1 a implementační brána 1768/1768 PASS. Podepsané Camino 0.1.0 (3), push, profilové zarovnání, řízené nasazení a fyzická akceptace PASS. Konečný stop má 104 operací, 41 Momentů, 45/45 médií, 214 555 219 B a 0 aktivních tokenů. Oprava přímého vstupu, portu 8767 a `copy_url` prošla uzavírací plnou bránou 1770/1770.
-- C05c: Swift 33/33, cílené UI 2/2, generic iOS build a plná projektová brána 1770/1770 PASS. Zdroj `f0f714f4` je na `origin/main`; podepsané Camino 0.1.0 (4), strict podpis, kontrola týmu/profilu, CoreDevice instalace a launch PASS. Fyzická akceptace NEPROVEDENA. Závěrečný registrovaný audit: C05b `phase=stopped`, server i privátní cesta neaktivní, Funnel vypnutý a 0 aktivních tokenů.
-- Swift transfer core 19/19, T043 ovladač + oba receivery 28/28, T047/T043 workflow modul 11/11 a UI 1/1 PASS; podepsaný build 2, strict kontrola, instalace a launch PASS. Plná projektová brána 1716/1716 PASS.
-- V době T043/T047 push ani nasazení neproběhly. T043 i T047 cesta/receiver jsou ukončené; původní Serve je přesně obnovený a Funnel vypnutý.
-- T049 audit po stopu: `phase=stopped`, receiver/cesta vypnuté, Funnel vypnutý, 1/1 relace ověřená, 13/13 částí, jeden objekt/účtenka a 100 663 553 B se shodným hashem. Dřívější Swift core 20/20, iOS UI 1/1, podepsaný build 3 a plná projektová brána 1718/1718 PASS.
-- T050 před fyzickým průchodem: cílené testy 32/32 a plná projektová brána 1719/1719 PASS; kód se v testu neměnil. Server `verifying` 17:58:22–17:58:36 CEST při 13/13 a 0 objektech/účtenkách, soukromé video v tomto okně `Ověřuji`, 100 %, 13/13. Po stopu druhého běhu `phase=stopped`, receiver/cesta neaktivní, Funnel vypnutý, 1 ověřená relace, 1 objekt/účtenka, 100 663 553 B, `verified_match=true`. V době T050 byl T048 `INACTIVE` a T049 `stopped`; push ani nasazení neproběhly.
-- T048 audit po stopu: `phase=stopped`, receiver/cesta neaktivní, Funnel vypnutý, 3/3 relace ověřené, 39/39 částí, 3 objekty, 3 účtenky, 301 990 659 B a `verified_match=true`. Původní Serve byl přesně obnoven; kód se při fyzickém testu neměnil.
-- Oprava buildu 4: Swift 22/22 včetně nového a staršího journalu, simulátorový UI test exit 0, nepodepsaný generic iOS build exit 0 a plná projektová brána 1719/1719 PASS. Nyní také podepsaný iOS build exit 0, strict podpis PASS a instalace verze 4 potvrzená CoreDevice. Fyzické UX a přenos NEPROVEDENO; soukromá trasa nebyla spuštěna.
-- P+n funkčního balíčku: plná publikační brána 1719/1719, GitHub 17 commitů, kanonická soukromá účtenka nasazení `4a965ccb` s novým PID, shodným otiskem a smoke 5/5. Závěrečný stav po dokumentačním checkpointu se ověřuje živě.
-- C03a: 9/9 syntetických testů a plná brána 1728/1728 PASS; v tomto kroku se nic na telefonu neinstalovalo, nepushovalo ani nenasazovalo.
-- C03b: 12/12 syntetických testů, validní OpenAPI JSON a 21 komponent schématu, plná projektová brána 1740/1740 PASS. Žádná instalace, push ani nasazení.
-- C04a checkpoint: 8/8 Swift testů, 1/1 izolovaný simulátorový UI test, nepodepsaný generic iOS build exit 0 a plná projektová brána 1740/1740 PASS. Tehdejší fyzická přejímka byla NEPROVEDENA; pozdější instalaci a výsledky T008/T011/T012/T013 dokládají navazující záznamy.
-- C04d checkpoint: Swift 22/22, UI simulátoru 4/4, nepodepsaný generic iOS build exit 0 a plná projektová brána 1740/1740 PASS. Zdroj `e3868100` je na `origin/main`; podepsaný build 0.1.0 (2), strict podpis, instalace a launch PASS. Fyzický plán doložil zachování C04b dat a T010/T019–T021/T026/T030/T039–T041/T096. T038 není fyzický end-to-end PASS. Cockpit nebyl nasazen.
+- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
+- Git před checkpointem: lokální `main` na `e1de2d743733`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `e1de2d743733` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-10-10T18:27:14+00:00.
+- Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
+- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -3444,3 +2838,179 @@ uložení a opakované úpravy návrhu; chytrý výběr záběrů ponechat na po
 **Technický důkaz:** Dokumentační zápis vychází z návrhu v rozhovoru
 10. října 2026. V tomto kroku se nemění aplikace ani média a nevzniká film;
 funkčnost exportu nebyla testována.
+
+## 2026-10-10 21:31 CEST — Podrobný návrh filmové dílny a Mílova upřesnění
+
+**Hotovo:** Na výslovný pokyn Míly je zde uložen rozpracovaný plán P2 po
+zapracování jeho připomínek. Jde o návrh vývoje; aplikace ani render nevznikly.
+Tento zápis upřesňuje návrh z 20:18 a nahrazuje dřívější návrh automaticky
+nabízet krátké výřezy videí a řešit čekající telefonní změny až před exportem.
+
+**Rozhodnutí:** Míla určil dvě závazné podmínky:
+
+- Každé video nabídnout celé. Výchozí rozsah je od začátku do konce;
+  zkrácení začátku či konce provádí uživatel. Cílová délka filmu nesmí
+  automaticky zkrátit video ani useknout hlas. Při přesahu se ukáže skutečná
+  délka a uživatel může upravit výběr, ručně zkrátit klip nebo přijmout přesah.
+- Film se vytváří výhradně z konečných, uzavřených dat a metadat doručených
+  na Mac. Před zahájením filmové práce jsou všechny změny z telefonu odeslané
+  a přijetí ověřené; nic nečeká ani se právě nepřenáší. Filmová dílna není
+  živým střihem souběžně se měnící telefonní fronty. Telefon může dál sloužit
+  jako prohlížeč pro ovládání dílny; to není pokračování sběru či synchronizace.
+
+Ostatní níže uvedené technické volby a etapy zůstávají návrhem Adama.
+Uložení plánu samo nepovoluje implementaci, nasazení ani práci s reálnými médii.
+
+### Výsledek a první verze
+
+Filmová dílna dostupná z Cockpitu, ovladatelná v prohlížeči na Macu i iPhonu;
+film sestavuje Mac. První verze pracuje s jedním uzavřeným dnem, fotografiemi,
+celými videi s ručním zkrácením, skutečným hlasem a jednoduchými titulky.
+Orientační délka 2–5 minut je doporučení, ne limit; skutečný materiál má přednost.
+Dlouhodobý cíl z F68 zůstává cestopis přibližně 20–30 minut podle materiálu.
+Uložení a opakované úpravy návrhu patří už do první použitelné verze.
+
+### Uživatelský postup
+
+1. Dokončit záznamy a změny, odeslat je z telefonu a ověřit úplné přijetí
+   na Macu. Teprve potom uzavřít vstupní sadu pro film.
+2. V dílně vybrat uzavřený den, název a orientační délku filmu.
+3. Projít chronologický návrh; fotografie mají navrženou délku, videa celou
+   délku. U každé položky je patrný zdrojový okamžik a možnost vyřazení.
+4. Upravit pořadí, délky fotografií, případně ručně zkrátit videa, doplnit
+   titulky a vybrat vlastní hlasové komentáře.
+5. Vytvořit a přehrát pracovní náhled, opravit střih a poté vytvořit MP4.
+6. Uložený návrh lze později upravit; nový export má vlastní verzi a
+   nepřepisuje předchozí film ani zdrojová média.
+
+### Ovládání na telefonu
+
+Čtyři části: Moje filmy, Výběr zdrojů, Sestavení, Náhled a export.
+Editor používá svislé karty s náhledy, tlačítky Nahoru/Dolů, délkou fotografie,
+in/out videa s přehráním úseku, zvukem, titulkem a volbou Zachovat při novém
+návrhu. Vyřadit z filmu nemaže obsah Camina. Automatické ukládání ukazuje
+Uloženo / Změny čekají na uložení; souběžná editace ze dvou prohlížečů nesmí
+potichu přepsat novější revizi. Tato editace filmového projektu je oddělená
+od již uzavřených zdrojových dat Camina.
+
+### Návrh střihu, hlas a mapy
+
+Automatika řadí chronologicky a může navrhnout výběr napříč dnem. Vynechané
+povolené zdroje zůstávají dostupné k ručnímu přidání. Fotografie mohou mít
+výchozí délku přibližně 4 s; video vždy celé. Hvězdičky se použijí jen při
+ověřené dostupnosti jejich stavu na Macu. Ručně uzamčené střihy se při
+přepočtu zachovají. Automatika bez obrazové analýzy neprohlašuje výřez za
+nejlepší záběr a nevymýšlí události.
+
+Zvuk videa lze ponechat, ztlumit nebo vypnout. Vlastní hlasový komentář lze
+položit přes jeden nebo více obrazových záběrů; délka obrazu se přizpůsobí
+řeči nebo se nabídne doplnění záběrů. Audio segmenty se skládají podle
+skutečných návazností; mezery a chybějící části se nemaskují. Názvy filmu,
+dne a záběrů jsou editovatelné titulky. Časově zarovnané titulky řeči jsou
+pozdější funkce; upravený deník není přesným přepisem audia.
+
+Mapa etapy může být obyčejný zařazený obrázek, například na začátku kapitoly.
+Nevytváří GPS body ani nemění celkovou mapu Vieweru. Animovaná mapa a import
+skutečné trasy patří do navazující etapy.
+
+### Technický návrh a uzavření vstupů
+
+Využít metadata a ověřené originály Camina, kontroly integrity a přípravu
+náhledů. Doplnit filmový projekt, editor/API, validátor časové osy a samostatný
+renderovací proces. Navržený základ: Python v prostředí Camina, SQLite pro
+filmové projekty a trvalou frontu, soukromé pracovní soubory mimo Git a FFmpeg.
+Zpočátku jeden render současně s nižší prioritou než základní provoz Camina.
+Cockpit poskytuje vstup; nasazení filmové služby se ověřuje samostatně.
+
+Před vznikem návrhu musí být ověřeno dokončení telefonní fronty, shoda
+přijatých metadat a dostupnost ověřených médií na Macu. Samotný momentálně
+prázdný seznam úloh není důkazem úplnosti. P2-B proto navrhne a ověří explicitní
+uzavření vstupů s manifestem zdrojových ID, revizí a hashů. Nelze-li úplnost
+prokázat, sada není uzavřená a filmová práce nezačne. Nejde o už existující
+runtime funkci ani o požadavek, aby během renderu zůstával telefon připojený.
+
+Časová osa ukládá stabilní ID položky, zdrojové ID/revizi/hash, in/out,
+umístění ve filmu, orientaci, zvuk, původ titulku a ruční uzamčení. Export
+odkazuje na konkrétní revizi návrhu a uzavřený manifest. Další zdrojové změny
+se do něj samy nepřimíchají; jejich zahrnutí vyžaduje nové dokončení přenosu
+a novou uzavřenou revizi vstupů.
+
+Pracovní náhled navržen v 720p, finále MP4 1080p/16:9 z ověřených originálů,
+nikoli ze zmenšených videí Vieweru. Svislé záběry celé bez automatického ořezu;
+HDR a různé snímkové frekvence se sjednotí pouze v pracovních kopiích.
+Nejprve jednoduché střihy, prolínání po ověření základu. FFmpeg a jeho místní
+schopnosti ověří prototyp; nic zde netvrdí hotový či otestovaný export.
+
+### Soukromí a spolehlivost
+
+Editor je pro vlastníka; Jana zůstává čtenář. Filmový výběr má samostatnou
+kontrolu povolenosti: Jen pro mě, skryté či nejasné zdroje se vyloučí již
+před návrhem. Osobní souhrn není vstupem filmu. Originály se nemění.
+Uzavření vstupů neobchází soukromí: případné pozdější doručené uzamčení
+zneplatní ovládané navázané návrhy a výstupy a zastaví jejich výdej/render;
+již stažené kopie nelze odvolat. Kontrola před renderem a před předáním
+ověří platnost uzavřené sady, nikoli čekání na běžící synchronizaci.
+
+Přerušený render se nevydává za hotový. Trvalá fronta zachová stav po restartu
+a umožní bezpečné opakování nebo pokračování v ověřených částech. Kontrolovat
+volné místo, zdroje, délky obrazu/zvuku a dokončení výsledného souboru.
+Hudba, generovaný hlas, obrazová AI a automatické sdílení nejsou v první verzi.
+
+### Etapy a přejímka
+
+| Etapa | Výsledek | Podmínka dokončení |
+|---|---|---|
+| P2-A | Syntetický krátký film a minimální uložená časová osa. | Foto, celé vodorovné/svislé video, hlas a české titulky; správná orientace, celý konec řeči a přehrání na Macu/iPhonu. |
+| P2-B | Uložený projekt, uzavření vstupů a výběr jednoho dne. | Doložená úplnost přenosu dat/metadat, manifest, obnova po restartu, vyloučení nepovolených zdrojů a nezměněné originály. |
+| P2-C | Mobilní editor včetně ručního zkrácení celých videí. | Úpravy přežijí reload, konflikty neztratí práci, výchozí video není automaticky krácené, fyzické ovládání na iPhonu přijato. |
+| P2-D | Trvalá renderovací fronta, náhled a verzovaný export. | Pád, zrušení, plný disk či chybějící zdroj nevytvoří falešný úspěch; render používá přesnou uzavřenou sadu. |
+| P2-E | Jeden skutečný den upravený Mílou. | Celý film zhlédnutý a poslechnutý, přijatý výběr/stopáž/obraz/zvuk; základní provoz Camina zachovaný. |
+| P2-F | Více dnů, kapitoly, prolog a závěr. | Delší projekt zachová ruční úpravy a původ zdrojů při přepočtu. |
+
+T077 rozpadnout na konkrétní scénáře: úplnost a uzavření dat, odmítnutí čekajícího
+či probíhajícího přenosu, celé video ve výchozím návrhu, ruční trim, přesah
+stopáže bez automatického krácení, orientace/HDR/fps, návaznost hlasu,
+zneplatnění zdroje, restart, chyba disku a skutečné přehrání výsledku.
+Časový odhad dalších etap určit až podle rychlosti a nároků prototypu P2-A.
+
+**Další krok:** Při samostatně zadaném vývoji začít P2-A se syntetickými
+médii a minimálním formátem časové osy; zatím je uložen pouze plán.
+
+**Navrhované další kroky:**
+- P2-B: ověřitelné uzavření vstupů a uložený projekt jednoho dne.
+- P2-C/P2-D: mobilní editor, pracovní náhled a obnovitelný export.
+- P2-E/P2-F: přejímka skutečného dne a rozšíření na vícedenní film.
+- Až po základu posoudit prolínání, titulky řeči, hudbu a skutečnou trasu.
+
+**Technický důkaz:** Dokumentační úprava podle dvou výslovných připomínek
+Míly. Kontrolují se dokumenty a diff; render, změna runtime, média ani
+implementační testy nejsou součástí tohoto kroku.
+
+### 2026-10-10 21:32 CEST – Podrobný návrh filmové dílny je uložen v TVBCP včetně obou Mílových připomínek
+
+Hotovo:
+- Podrobný návrh filmové dílny je uložen v TVBCP včetně obou Mílových připomínek
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+
+Otevřeno:
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+
+Rizika:
+- Žádné další doložené provozní riziko.
+
+Rozhodnutí:
+- Videa se nabízejí celá s možností ručního zkrácení. Filmová práce začíná pouze nad konečnými uzavřenými daty a metadaty přijatými na Macu, bez čekajícího či probíhajícího přenosu z telefonu.
+
+Další krok:
+- Po zadání vývoje zahájit syntetický prototyp P2-A s uloženou časovou osou
+
+Navrhované další kroky:
+- P2-B: ověřitelné uzavření vstupů a uložený projekt jednoho dne
+- P2-C/P2-D: mobilní editor, náhled a obnovitelný export
+- P2-E/P2-F: přejímka skutečného dne a vícedenní film
+- Po přijetí základu posoudit prolínání, titulky řeči, hudbu a skutečnou trasu
+
+Technický důkaz:
+- rychlá Cockpit brána syntaxe a whitespace: 8.0 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu.
+- Pracovní proud: `project-camino`.
+- Read-only živý stav při checkpointu: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
