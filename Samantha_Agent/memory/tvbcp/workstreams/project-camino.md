@@ -3395,3 +3395,52 @@ Server Camina již obsahuje potřebný kontrakt; nový import je iOS funkce.
 14s videa. Zvuk, orientace, iCloud, HEIC a dlouhá videa tím nejsou plošně
 přijaté. Stejný kód má 63/63 SwiftPM, závěrečné 14/14 a bránu 1847/1847;
 publikační brána se provede v registrovaném push/deploy postupu.
+
+## 2026-10-10 20:18 CEST — Návrh filmové dílny z dat Camina
+
+**Hotovo:** Na Mílův výslovný požadavek je zde uložen návrh, aby si ho mohl
+přečíst celý bez posouvání SSH konverzace na telefonu. Jde o návrh budoucí
+filmové dílny, nikoli o dokončenou funkci.
+
+Navrhuji jednoduchou filmovou dílnu přímo v Cockpitu. Ovládala by se
+v prohlížeči i z telefonu; samotný film by sestavoval Mac. Nebylo by potřeba
+používat iMovie ani jiný samostatný videoeditor.
+
+Největší smysl má automatický návrh, který můžeš před exportem upravit:
+
+1. **Vybereš rozsah a délku:** jeden den, několik dnů nebo celou cestu
+   a přibližnou požadovanou délku výsledného filmu.
+2. **Aplikace sestaví návrh:** použije fotografie, vybrané úseky videí,
+   názvy Momentů a tvoje nahrané hlasové komentáře. Dny mohou tvořit kapitoly.
+3. **Návrh si prohlédneš a upravíš:** v přehledu záběrů změníš pořadí,
+   vyřadíš záběr, zkrátíš video, nastavíš délku zobrazení fotografie
+   a upravíš titulky.
+4. **Tlačítkem „Vytvořit film“ vznikne MP4:** běžný soubor pro přehrávání
+   a následné sdílení podle tvé volby.
+5. **Návrh zůstane uložený:** později ho upravíš a vytvoříš novou verzi filmu
+   bez nutnosti začínat znovu.
+
+První verzi bych postavil jako krátký film z jednoho dne: chronologické
+pořadí, fotografie, vybrané úseky videí, tvůj hlas a jednoduché titulky.
+Technické sestavení může zajišťovat FFmpeg; jednoduché prolínání záběrů
+je možné doplnit do návrhu. Rozsah a proveditelnost konkrétního exportu
+ověří až prototyp.
+
+Chytrý výběr nejlepších záběrů bych přidal později. Automatika nemusí poznat,
+který okamžik má pro tebe osobní význam, proto je důležitá možnost ručních
+úprav. Originály musí zůstat zachované a obsah označený „Jen pro mě“ se do
+filmu nezařadí. Filmová část patří do samostatné budoucí etapy P2.
+
+**Rozhodnutí:** Míla požádal uložit návrh do existujícího TVBCP Camina.
+Zahájení implementace, konkrétní rozsah první verze ani nasazení tím nejsou
+schválené; nové architektonické rozhodnutí nevzniklo.
+
+**Další krok:** Míla si přečte návrh; před případným vývojem společně
+upřesnit a potvrdit rozsah prvního filmu z jednoho dne.
+
+**Navrhované další kroky:** Po odsouhlasení jednoduché první verze doplnit
+uložení a opakované úpravy návrhu; chytrý výběr záběrů ponechat na později.
+
+**Technický důkaz:** Dokumentační zápis vychází z návrhu v rozhovoru
+10. října 2026. V tomto kroku se nemění aplikace ani média a nevzniká film;
+funkčnost exportu nebyla testována.
