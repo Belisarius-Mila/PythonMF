@@ -1,33 +1,35 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-10-10 22:15 CEST — schválená upřesnění filmové dílny
+- Aktualizováno: 2026-10-10 22:38 CEST — P2-A lokální syntetický prototyp
 
 ### Hotovo
-- Podrobný návrh filmové dílny obsahuje obě Mílovy podmínky a sedm schválených upřesnění z revize zadání; závazné podrobnosti jsou v posledním chronologickém záznamu.
+- Uložená časová osa s revizemi a kontrolou zdrojů, syntetický 22s film, náhled 720p a finále 1080p, české titulky a hlas přes střihy.
+- Cílené testy P2-A 15/15 PASS; plná Cockpit brána 1865/1865 PASS; oba soubory celé dekódované, obrazové snímky vizuálně ověřené a konec řeči potvrzený porovnáním PCM.
+- Náhled 4,221 s / 1 865 006 B; finále 12,490 s / 4 723 927 B. Celý experiment špička cca 9,9 MiB alokovaně při vzorkování po 50 ms.
 
 ### Otevřeno
-- Implementace P2-A ani práce s reálnými médii nebyly zahájeny. Míla autorizoval push celého čekajícího balíčku a nasazení Cockpitu; výsledek doloží aktuální publikační a nasazovací účtenka.
+- P2-A/MAC1 a P2-A/IPHONE1: celé fyzické přehrání a poslech NEOVĚŘENO. P2-A není plně přijaté.
+- Tento nový krok je lokální, bez push/deploy; konečný výsledek plné brány je v `camino/docs/P2A_FILM_REPORT.md`.
 
 ### Rizika
-- Čas exportu, nároky na disk a skutečné přehrávání ověří až prototyp P2-A.
-
-### Další krok
-- Po zadání vývoje zahájit syntetický prototyp P2-A s uloženou časovou osou
+- Jen syntetické SDR vstupy; HDR odmítnuto. Testovací řeč macOS není skutečný autorův hlas. Časy nejsou odhadem výkonu dlouhého reálného filmu.
+- Žádné napojení na owner archiv nebo ověření uzavření telefonních dat; to patří P2-B. Editor a trvalá fronta jsou P2-C/D.
 
 ### Rozhodnutí
-- Videa a komentáře se nabízejí celé s ručním výběrem úseku. Film začíná až nad ověřenými uzavřenými vstupy; ruční úpravy jsou automaticky chráněné, první návrh obsahuje všechny povolené položky dne a náhled odpovídá stejné revizi jako finále.
+- Míla zadal P2-A a závěrečný report rozsahu, řádků kódu a struktury. Původní závazné podmínky filmu a sedm upřesnění zůstávají v platnosti.
+
+### Další krok
+- P2-A/MAC1: přehrát celé syntetické finále se zvukem a potvrdit PASS/FAIL; potom teprve samostatná zkouška iPhonu.
 
 ### Navrhované další kroky
-- P2-B: ověřitelné uzavření vstupů a uložený projekt jednoho dne
-- P2-C/P2-D: mobilní editor, náhled a obnovitelný export
-- P2-E/P2-F: přejímka skutečného dne a vícedenní film
-- Po přijetí základu posoudit prolínání, titulky řeči, hudbu a skutečnou trasu
+- Po fyzické přejímce P2-A zadat P2-B: uzavření vstupů a skutečný den.
+- HDR a produkční autorizaci zdrojů ověřit před přijetím skutečných médií.
 
-### Technický stav checkpointu
-- Tento zápis je dokumentační; není důkazem funkčního rendereru. Rychlá statická brána prošla; autorizovaný denní GitHub balíček má vlastní plnou bránu a Cockpit následnou živou verifikaci.
-- Pro konečný výsledek p+n použít aktuální GitHub audit a nasazovací účtenku; nepřenášet sem starší provozní PASS jako důkaz nového nasazení.
-- Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
+### Technický důkaz
+- `camino/docs/P2A_FILM_REPORT.md`; soukromý běh `data/private/camino/p2a/run-xip7fnef/`.
+- 577 nových řádků aplikace/runneru, 213 řádků testů, 19 řádků integrace do workflow/gate; fyzické řádky včetně komentářů a prázdných řádků.
+- Předchozí dokumentační p+n `0cbfd5ea` je samostatný dokončený krok; nedokládá nasazení P2-A.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Camino
@@ -3079,3 +3081,35 @@ Jde pouze o dokumentaci; funkční, renderovací a fyzické přejímky nejsou
 provedené. Rizika času exportu, diskových nároků a použitelnosti mobilního
 střihu zůstávají otevřená. Výsledek p+n dokládá aktuální GitHub audit a
 serverová nasazovací účtenka, nikoli tento předpublikační zápis.
+
+
+## 2026-10-10 22:38 CEST — P2-A: lokální syntetický film, časová osa a měření
+
+**Hotovo:** Implementovaný jednorázový prototyp sestaví z uloženého projektu
+syntetický film s fotografií, celými videi v obou orientacích i s rotační
+maticí, českými titulky a testovací řečí přes střihy. Náhled a finále mají
+stejnou 22s časovou osu. Vzniká kontrolovaný MP4, místní přehrávač výsledků
+a měřicí účtenka. Zdrojová média ani předchozí exporty se nepřepisují.
+
+**Rozhodnutí:** Míla výslovně zahájil P2-A a požádal o report struktury a
+řádků kódu. Vyvinutý rozsah je lokální syntetický prototyp. P2-B ani práce
+nad skutečným archivem se nezahajují; nový krok není pushnutý nebo nasazený.
+Testovací lokální TTS není produktová funkce generovaného hlasu. HDR se
+zatím odmítá, protože převod barev nebyl ověřený.
+
+**Další krok:** Jediný fyzický checkpoint P2-A/MAC1: přehrát celé finále
+se zvukem. PASS = česká diakritika, správná orientace a celé rámy, celý
+komentář včetně „šťastnou cestu“. Potom samostatně P2-A/IPHONE1.
+
+**Navrhované další kroky:**
+- P2-B po přijetí P2-A: ověřitelné uzavření skutečných vstupů a projekt dne.
+- P2-C/P2-D: mobilní editor, dílčí náhled a trvalá fronta.
+- Převod HDR a produkční povolenost médií ověřit před skutečnými vstupy.
+
+**Technický důkaz:** 15/15 cílených testů P2-A PASS; celý 720p/1080p výstup
+dekódován, snímky pěti scén vizuálně ověřené. Konec aktivní řeči má korelaci
+PCM se zdrojem 0,996558. Běh `run-xip7fnef`: náhled 4,221 s / 1 865 006 B,
+finále 12,490 s / 4 723 927 B; celý experiment 20,877 s a měřená alokovaná
+špička 10 383 360 B. Podrobná metoda, konečný výsledek plné brány, rozsah
+809 přidaných řádků Pythonu a struktura jsou v `camino/docs/P2A_FILM_REPORT.md`.
+Fyzický Mac/iPhone a lidský poslech NEOVĚŘENO, P2-A není plně přijaté.

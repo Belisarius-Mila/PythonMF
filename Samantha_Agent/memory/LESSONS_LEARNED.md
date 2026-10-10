@@ -22,6 +22,17 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-057 — Otočení testovacího videa prokazuje matice a dekódovaný obraz
+
+- Problém: FFmpeg 8.1 při syntetické zkoušce po `-metadata:s:v:0 rotate=90`
+  nevytvořil display matrix; údaj v příkazu tak nebyl důkazem testu rotace.
+- Typ: opakující se
+- Řešení nalezeno: 10102026
+- Řešení: Vstupní `-display_rotation:v:0 90` před stream-copy; přes FFprobe
+  ověřit skutečnou matici a přes dekódovaný snímek výslednou orientaci bez
+  ořezu. Ověřeno v `tests/test_camino_film.py` a syntetickém běhu P2-A;
+  fyzické přehrání zůstává samostatná přejímka.
+
 ### LL-056 — Selektivní odstranění média musí zachovat sekvenci, ale upravit inventář obnovy
 
 - Problém: Reset journalu/identity rozbije spojení; ponechané verified položky

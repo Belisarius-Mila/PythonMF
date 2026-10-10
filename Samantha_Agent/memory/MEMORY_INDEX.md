@@ -60,7 +60,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] 28. 9. 23:09 Míla potvrzuje mapu a její fungování, základní fyzická přejímka U17 PASS. Release ce903913bb35, HTTPS/9 bodů/odkazy/auth ověřené, archiv zachovaný. Pro dnešek konec práce; dál používat stejnou verzi. Přírůstek nového GPS bodu, okrajové scénáře/platformy nejsou plošně PASS. M3/M4, odložená kontrola zálohy a B04 buffer zůstávají. Viz `camino/docs/VIEWER_ROUTE_MAP_REPORT.md`.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] 10. 10. P2-A lokálně: syntetický 22s film, uložená časová osa a oba MP4 profily, 15/15 cílených testů PASS. Report `camino/docs/P2A_FILM_REPORT.md`. Fyzické P2-A/MAC1 a IPHONE1 čekají; nový krok bez push/deploy. Historický U17 PASS a otevřené M3/M4 nejsou touto etapou rozšířené.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` - Cockpit 14. 9.: scroll 10ec0877 potvrzený Mílou. [PRIPOMENOUT] U07 až při příštím pokračování. TXT v2.8 shrnuje U01–U06; plná brána 1680/1680 OK, funkční nasazení 980aed7a a smoke 5/5. Publikační překážka odstraněna; finální balíček/head ověřovat živým auditem.
 

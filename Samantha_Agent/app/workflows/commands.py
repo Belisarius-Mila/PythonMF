@@ -642,6 +642,19 @@ WORKFLOW_COMMANDS: tuple[WorkflowCommand, ...] = (
         ),
     ),
     WorkflowCommand(
+        command_id="camino_p2a_synthetic_film",
+        title="Ověřit syntetický film Camino P2-A",
+        purpose="Vytvoří nový syntetický projekt, náhled 720p, export 1080p a změří čas i pracovní prostor.",
+        aliases=("spusť camino p2a", "spust camino p2a", "ověř camino p2a"),
+        argv=(str(PYTHON_BIN), "-m", "scripts.camino_p2a_film", "--execute"),
+        cwd=SAMANTHA_DIR,
+        risk="private_local_test_write",
+        writes="nový zachovaný syntetický běh v data/private/camino/p2a; bez reálných médií, sítě, mazání a nasazení",
+        requires_confirmation=True,
+        intent_keywords=("spust", "over", "camino", "p2a"),
+        required_keyword_groups=(("spust", "over"), ("camino",), ("p2a",)),
+    ),
+    WorkflowCommand(
         command_id="camino_c05a_loopback_smoke",
         title="Provést syntetický loopback smoke Camino C05a",
         purpose=(

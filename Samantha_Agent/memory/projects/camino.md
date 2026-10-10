@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-10 22:15 CEST — schválená upřesnění zadání filmové dílny
+Aktualizováno: 2026-10-10 22:38 CEST — P2-A lokálně, fyzická přejímka otevřená
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,18 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-10 22:38 CEST — P2-A implementované lokálně: uložená syntetická
+  časová osa, video 720p/1080p, české titulky, hlas přes střihy a měření.
+  15/15 cílených testů a plná Cockpit brána 1865/1865 PASS; celé MP4
+  dekódované, obraz vizuálně ověřený.
+  22s film: náhled 4,221 s, finále 12,490 s; špička celého běhu cca 9,9 MiB
+  alokovaně. Report: `camino/docs/P2A_FILM_REPORT.md` (577 řádků aplikace,
+  213 testů, 19 integrace). Běh `run-xip7fnef` je jen syntetický, bez archivu.
+  HDR odmítnuté, skutečný autorův hlas ani browser/iPhone přehrání neověřené.
+  Další krok P2-A/MAC1, potom P2-A/IPHONE1; P2-A ještě není plně přijaté.
+  Nový vývojový krok bez push/deploy; předchozí dokumentační `0cbfd5ea`
+  je na GitHubu a byl živě nasazený se smoke 5/5, neobsahoval P2-A kód.
 
 - 2026-10-10 22:15 CEST — Míla schválil sedm upřesnění filmové dílny a p+n
   celého čekajícího balíčku. Podrobný závazný dodatek je v posledním záznamu
