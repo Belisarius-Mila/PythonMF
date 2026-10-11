@@ -1,26 +1,29 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-10-10 22:38 CEST — P2-A lokální syntetický prototyp
+- Aktualizováno: 2026-10-11 16:05 CEST — P2-A, přímé spuštění v Cockpitu připravené lokálně
 
 ### Hotovo
 - Uložená časová osa s revizemi a kontrolou zdrojů, syntetický 22s film, náhled 720p a finále 1080p, české titulky a hlas přes střihy.
 - Cílené testy P2-A 15/15 PASS; plná Cockpit brána 1865/1865 PASS; oba soubory celé dekódované, obrazové snímky vizuálně ověřené a konec řeči potvrzený porovnáním PCM.
 - Náhled 4,221 s / 1 865 006 B; finále 12,490 s / 4 723 927 B. Celý experiment špička cca 9,9 MiB alokovaně při vzorkování po 50 ms.
+- Soukromá cesta Cockpitu pro syntetické MP4 byla pushnutá a nasazená, tailnet HTTP 200/206 a smoke 5/5 PASS. Po Mílově hlášení chyby přímého Safari odkazu je lokálně doplněné tlačítko Film P2-A a vestavěný přehrávač v Cockpitu.
 
 ### Otevřeno
-- P2-A/MAC1 a P2-A/IPHONE1: celé fyzické přehrání a poslech NEOVĚŘENO. P2-A není plně přijaté.
-- Tento nový krok je lokální, bez push/deploy; konečný výsledek plné brány je v `camino/docs/P2A_FILM_REPORT.md`.
+- P2-A/IPHONE1 a P2-A/MAC1: celé fyzické přehrání a poslech NEOVĚŘENO. P2-A není plně přijaté.
+- Nový vstup v UI je lokální a čeká na c+p+n; přesný Safari error zatím není známý.
 
 ### Rizika
 - Jen syntetické SDR vstupy; HDR odmítnuto. Testovací řeč macOS není skutečný autorův hlas. Časy nejsou odhadem výkonu dlouhého reálného filmu.
 - Žádné napojení na owner archiv nebo ověření uzavření telefonních dat; to patří P2-B. Editor a trvalá fronta jsou P2-C/D.
+- Integrovaný přehrávač řeší chybějící vstup v Cockpitu; příčina přímé Safari chyby není potvrzená a iPhone přejímka je nutná.
 
 ### Rozhodnutí
 - Míla zadal P2-A a závěrečný report rozsahu, řádků kódu a struktury. Původní závazné podmínky filmu a sedm upřesnění zůstávají v platnosti.
+- Míla upřesnil spouštění filmu přímo v Cockpitu. Zůstává jen syntetický film a dosavadní úzký allowlist.
 
 ### Další krok
-- P2-A/MAC1: přehrát celé syntetické finále se zvukem a potvrdit PASS/FAIL; potom teprve samostatná zkouška iPhonu.
+- Dokončit c+p+n integrovaného vstupu; potom na iPhonu přehrát celé finále z Cockpitu se zvukem a potvrdit P2-A/IPHONE1 PASS/FAIL. P2-A/MAC1 až po návratu.
 
 ### Navrhované další kroky
 - Po fyzické přejímce P2-A zadat P2-B: uzavření vstupů a skutečný den.
@@ -28,6 +31,7 @@
 
 ### Technický důkaz
 - `camino/docs/P2A_FILM_REPORT.md`; soukromý běh `data/private/camino/p2a/run-xip7fnef/`.
+- Nové UI: `app/frontend/cockpit/page.html`, `app.js`, `styles.css`; frontend/server cíleně 22/22 PASS před novou plnou branou.
 - 577 nových řádků aplikace/runneru, 213 řádků testů, 19 řádků integrace do workflow/gate; fyzické řádky včetně komentářů a prázdných řádků.
 - Předchozí dokumentační p+n `0cbfd5ea` je samostatný dokončený krok; nedokládá nasazení P2-A.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -3153,3 +3157,22 @@ o přijetí P2-A a navázání P2-B.
 **Technický důkaz:** Plná brána 1867/1867 PASS, GitHub `main` po pushi
 shodný s lokálním, Cockpit `deployed` a smoke 5/5. Tailnet HTTPS stránka
 200, video 206, celé MP4 200 a SHA-256 shodné s místním výstupem.
+
+## 2026-10-11 16:05 CEST — P2-A: film přímo v Cockpitu
+
+**Hotovo:** Lokálně připravený přímý vstup Film P2-A v horní liště Cockpitu
+otevírá vestavěný přehrávač finálního syntetického filmu. Po zavření se video
+zastaví. Původní soukromá serverová cesta a allowlist zůstaly stejné.
+
+**Rozhodnutí:** Míla chtěl film spustit přes Cockpit; samostatný Safari odkaz
+hlásil chybu a nesplnil očekávaný způsob otevření. Přesný text chyby neznáme,
+proto změna netvrdí vyřešení síťové příčiny.
+
+**Další krok:** Dokončit schválené c+p+n opravy a ověřit nový vstup přes
+tailnet; pak Míla provede P2-A/IPHONE1 přímo v Cockpitu.
+
+**Navrhované další kroky:** P2-A/MAC1 po návratu. Po obou fyzických výsledcích
+rozhodnout o přijetí P2-A a pokračování P2-B.
+
+**Technický důkaz:** Frontend a server cíleně 22/22 PASS; plná brána a nové
+nasazení ještě běží. Fyzický iPhone zůstává NEOVĚŘENO.

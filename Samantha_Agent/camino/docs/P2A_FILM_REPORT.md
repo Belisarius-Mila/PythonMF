@@ -1,8 +1,8 @@
 # P2-A — syntetický film a uložená časová osa
 
-Stav 2026-10-10: lokální implementace a strojová přejímka; skutečné přehrání
-celého filmu na Macu a iPhonu zůstává NEOVĚŘENO. Bez push a nasazení tohoto
-vývojového kroku. Produkční archiv ani média Camina nebyly použité.
+Stav 2026-10-11: syntetický film a soukromá cesta v Cockpitu byly pushnuté
+a nasazené. Skutečné přehrání celého filmu na Macu a iPhonu zůstává
+NEOVĚŘENO. Produkční archiv ani média Camina nebyly použité.
 
 ## Rozsah
 
@@ -110,7 +110,7 @@ je třeba přehrát celé finále 22 s se zvukem. PASS znamená správné titulk
 a orientaci, celé obrazy a slyšitelnou závěrečnou větu „šťastnou cestu“.
 Po upřesnění z 2026-10-11 jde první iPhone kontrola; Mac kontrola počká na
 návrat. P2-A nelze označit za plně přijaté před oběma výsledky. Originály
-a skutečný archiv se při tom nepoužijí. Nový krok nebyl pushnutý ani nasazený.
+a skutečný archiv se při tom nepoužijí.
 
 Soukromé důkazy a výstupy jsou v `data/private/camino/p2a/run-xip7fnef/`:
 `experiment.json`, `audio-tail-check.json`, `contact-sheet.png`, `review.html`,
@@ -137,3 +137,12 @@ HTTP 200 a SHA-256 shodné s místním MP4
 Nasazovací ověření hlásilo `deployed` a smoke 5/5. Test modulu serveru
 4/4 PASS, plná Cockpit brána 1867/1867 PASS. Fyzické přehrání na iPhonu
 a lidský poslech stále čekají na Mílův výsledek.
+
+Po první zkoušce Míla nahlásil chybu při přímém otevření odkazu v Safari.
+Přesný text chyby zatím není známý. Do horní lišty Cockpitu proto přibyl
+vstup **Film P2-A**, který otevře finální MP4 ve vestavěném přehrávači na
+stejné stránce. Zdroj videa se načte až po klepnutí a při zavření se zastaví;
+serverový allowlist ani obsah filmu se nemění. To řeší chybějící vstup v UI,
+nikoli ještě neprokázanou příčinu Safari chyby. Po novém nasazení ověřit
+HTML Cockpitu a HTTP 206 filmu přes tailnet; P2-A/IPHONE1 zůstává otevřené,
+dokud Míla nezkontroluje celé video se zvukem přímo na telefonu.

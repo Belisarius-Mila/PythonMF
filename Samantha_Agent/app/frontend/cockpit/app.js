@@ -12,6 +12,11 @@
     const webAppsBtn = document.getElementById("webAppsBtn");
     const libraryBtn = document.getElementById("libraryBtn");
     const familyCalendarBtn = document.getElementById("familyCalendarBtn");
+    const caminoFilmBtn = document.getElementById("caminoFilmBtn");
+    const caminoFilmModal = document.getElementById("caminoFilmModal");
+    const caminoFilmCloseBtn = document.getElementById("caminoFilmCloseBtn");
+    const caminoFilmVideo = document.getElementById("caminoFilmVideo");
+    const caminoFilmStatus = document.getElementById("caminoFilmStatus");
     const projectsBtn = document.getElementById("projectsBtn");
     const remindersBtn = document.getElementById("remindersBtn");
     const emailProcessingBtn = document.getElementById("emailProcessingBtn");
@@ -6535,6 +6540,19 @@ ${item.context || ""}`);
       janickaModal.classList.remove("hidden");
     }
 
+    function openCaminoFilm() {
+      caminoFilmStatus.textContent = "Připraveno k přehrání.";
+      caminoFilmVideo.src = "/local-apps/camino-p2a-review/final-59b109f77f12/film.mp4";
+      caminoFilmModal.classList.remove("hidden");
+    }
+
+    function closeCaminoFilm() {
+      caminoFilmVideo.pause();
+      caminoFilmVideo.removeAttribute("src");
+      caminoFilmVideo.load();
+      caminoFilmModal.classList.add("hidden");
+    }
+
     function closeJanickaModal() {
       janickaModal.classList.add("hidden");
     }
@@ -6684,6 +6702,14 @@ ${item.context || ""}`);
     }
 
     janickaBtn.addEventListener("click", openJanickaModal);
+    caminoFilmBtn.addEventListener("click", openCaminoFilm);
+    caminoFilmCloseBtn.addEventListener("click", closeCaminoFilm);
+    caminoFilmVideo.addEventListener("error", () => {
+      if (caminoFilmVideo.error) caminoFilmStatus.textContent = `Video se nepodařilo načíst (kód ${caminoFilmVideo.error.code}).`;
+    });
+    caminoFilmModal.addEventListener("click", (event) => {
+      if (event.target === caminoFilmModal) closeCaminoFilm();
+    });
     janickaCloseBtn.addEventListener("click", closeJanickaModal);
     janickaFindDocumentBtn.addEventListener("click", () => focusDocumentSearchForJanicka("Zadej, co chceš najít. Po otevření detailu lze dokument přečíst, otevřít nebo vytisknout."));
     janickaR2ChatBtn.addEventListener("click", () => {
@@ -7043,6 +7069,7 @@ ${item.context || ""}`);
       });
     });
     const cockpitDialogEntries = [
+      {element: caminoFilmModal, close: closeCaminoFilm},
       {element: emailHubModal, close: closeEmailHub},
       {element: janickaModal, close: closeJanickaModal},
       {element: janickaFamilyModal, close: closeJanickaFamilyModal},
@@ -7067,6 +7094,7 @@ ${item.context || ""}`);
       servis: serviceBtn, komunikace: emailProcessingBtn, knihovna: libraryBtn, rodina: janickaBtn,
     };
     const cockpitModalAreas = {
+      caminoFilmModal: "rodina",
       emailHubModal: "komunikace", remindersModal: "komunikace", urgentRemindersModal: "komunikace",
       libraryModal: "knihovna", libraryAttachmentViewerModal: "knihovna",
       janickaModal: "rodina", janickaFamilyModal: "rodina", familyCalendarModal: "rodina",
