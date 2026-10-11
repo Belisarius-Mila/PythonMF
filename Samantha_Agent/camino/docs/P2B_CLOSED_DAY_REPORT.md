@@ -57,3 +57,19 @@ aplikace není nainstalovaná a čerstvý důkaz z telefonu ještě nebyl přija
 Push, nasazení a instalace jsou oddělené kroky. Po jejich samostatném
 schválení se na iPhonu spustí **Uložení a přenosy → Film → Ověřit a uzavřít
 den**; pak se přes owner API ověří uložený projekt a 30 povolených zdrojů.
+
+## Příprava iPhone balíčku 11. 10. 17:46 CEST
+
+Podepsaný Release build verze 17 ze zdroje `cde61193` zastavil macOS
+CodeSign s `errSecInternalComponent`; kontrola login Keychain hlásí
+`User interaction is not allowed`. Je přítomna jedna platná podpisová
+identita, ale její privátní klíč není v této vzdálené relaci dostupný.
+Účet ani klíče se neměnily.
+
+Nepodepsaný Release iPhoneOS build 17 prošel. Místní balíček
+`Camino-P2B-17-20261011-unsigned.ipa` ve Stahování má 1 226 501 B,
+SHA-256 `d4611113245932fd9ff5c19f085235d209c45b08da65a0f132e6d8ab251b1a34`;
+ZIP kontrola PASS, binárka v IPA má stejný hash jako výchozí sestavení,
+bundle ID zůstává `cz.pythonmf.camino.app`. Balíček **není podepsaný ani
+nainstalovaný**. Zda jej SideStore na iPhonu přijme a přepodepíše,
+zůstává fyzicky neověřené. Distribuce balíčku neproběhla.

@@ -1,11 +1,12 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-10-11 17:31 CEST — P2-B lokální vývoj, den čeká na důkaz iPhonu
+- Aktualizováno: 2026-10-11 17:46 CEST — P2-B commit, iPhone podpis blokuje Keychain
 
 ### Hotovo
 - Míla zadal P2-B pro 6. 10. 2026. Redigovaný read-only audit Macu ověřil 11 Momentů a 34 originálů; 30 příloh `diary` je povolených, 4 soukromá audia se vyloučí.
 - Lokální kód P2-B přidává vědomé uzavření v iPhonu, soukromý owner API kontrakt, neměnný manifest a projekt jednoho dne. Syntetický HTTP test, iOS Simulator build a plná brána 1876/1876 prošly.
+- Kód je v lokálním commitu `cde61193` a oba čisté profilové workspaces jsou zarovnané. Nepodepsaný iPhoneOS build 17 a IPA prošly ZIP kontrolou a shodou binárky.
 - Uložená časová osa s revizemi a kontrolou zdrojů, syntetický 22s film, náhled 720p a finále 1080p, české titulky a hlas přes střihy.
 - Cílené testy P2-A 15/15 PASS; plná Cockpit brána 1865/1865 PASS; oba soubory celé dekódované, obrazové snímky vizuálně ověřené a konec řeči potvrzený porovnáním PCM.
 - Náhled 4,221 s / 1 865 006 B; finále 12,490 s / 4 723 927 B. Celý experiment špička cca 9,9 MiB alokovaně při vzorkování po 50 ms.
@@ -16,12 +17,14 @@
 
 ### Otevřeno
 - Skutečný den 6. 10. nebyl uzavřen: chybí čerstvý inventář z nového iPhone buildu, nové API není nasazené a žádný reálný projekt nevznikl.
+- Podepsaný build 17 blokuje nedostupný login Keychain; SideStore přepodepsání nepodepsaného IPA na iPhonu není ověřené.
 - Původní chybná verze nebyla přijata; nový iPhone výsledek je PASS. P2-A/MAC1 zůstává NEOVĚŘENO, proto P2-A ještě není plně přijaté.
 - Původní samostatný Safari odkaz hlásil chybu neznámého znění; její příčina není objasněná. Míla následně potvrdil PASS při přehrání přes vestavěný Cockpit.
 - Podrobný důkaz dosavadního nasazení a nového lokálního kroku je v `camino/docs/P2A_FILM_REPORT.md`.
 
 ### Rizika
 - Nový server a aplikace nejsou provozně spárované; změna dne nebo soukromí po uzavření vyžaduje nový důkaz. Push, nasazení a instalace P2-B čekají na samostatné oprávnění.
+- Systémový CodeSign vrací `errSecInternalComponent` a Keychain `User interaction is not allowed`; nejde o limit kreditu.
 - Jen syntetické SDR vstupy; HDR odmítnuto. Testovací řeč macOS není skutečný autorův hlas. Časy nejsou odhadem výkonu dlouhého reálného filmu.
 - Žádné napojení na owner archiv nebo ověření uzavření telefonních dat; to patří P2-B. Editor a trvalá fronta jsou P2-C/D.
 - Mac přehrání je samostatná fyzická přejímka; iPhone PASS ji nenahrazuje.
@@ -44,6 +47,7 @@
 - P2-A/MAC1 fyzicky dokončit po návratu k Macu.
 
 ### Technický důkaz
+- `camino/docs/P2B_CLOSED_DAY_REPORT.md`: commit `cde61193`, brána 1876/1876, iOS Simulator i nepodepsaný iPhoneOS build PASS; IPA 1 226 501 B, ZIP a binárka shodné. Podepsaný build/instalace NEOVĚŘENO.
 - `camino/docs/P2B_CLOSED_DAY_REPORT.md`; syntetický owner HTTP test odmítá neúplnou frontu, chybějící médium a anonymní přístup, prokazuje idempotenci, restart a zneplatnění po změně soukromí.
 - `camino/docs/P2A_FILM_REPORT.md`; soukromý běh `data/private/camino/p2a/run-xip7fnef/`; test modulu Cockpit serveru 4/4 PASS, plná brána 1867/1867 PASS; tailnet HTTP 200/206 a shodný SHA-256 celého MP4.
 - Nový vstup používá `app/frontend/cockpit/page.html`, `app.js` a `styles.css`; cílené testy frontend/server 22/22 PASS, plná brána 1867/1867 PASS, nasazení smoke 5/5 a tailnet video HTTP 206. Původní produkční route zůstává beze změny.
@@ -2523,3 +2527,24 @@ push/nasazení a instalaci bez mazání dat; pak na iPhonu vědomě uzavřít
 
 **Technický důkaz:** `camino/docs/P2B_CLOSED_DAY_REPORT.md`; syntetický
 HTTP test, iOS Simulator build a plná brána 1876/1876 PASS.
+
+## 2026-10-11 17:46 CEST — P2-B: iPhone instalační příprava
+
+**Hotovo:** P2-B kód je v lokálním commitu `cde61193`; oba čisté profilové
+workspaces odpovídají novému `main`. Nepodepsaný Release iPhoneOS build 17
+a IPA jsou lokálně připravené, ZIP a binárka ověřené.
+
+**Rozhodnutí:** Žádné push, nasazení, distribuce IPA ani instalace neproběhly.
+Balíček se nesmí vydávat za podepsaný či fyzicky přijatý.
+
+**Rizika:** Vzdálené CodeSign skončilo `errSecInternalComponent`, protože
+login Keychain hlásí `User interaction is not allowed`. SideStore podpis
+nepodepsaného IPA na telefonu je dosud NEOVĚŘENÝ.
+
+**Další krok:** Po samostatném schválení push/nasazení a mobilní distribuce
+ověřit SideStore import a zachování stávajících dat; potom odeslat čerstvý
+iPhone důkaz uzavření dne. P2-A/MAC1 zůstává po návratu k Macu.
+
+**Technický důkaz:** `camino/docs/P2B_CLOSED_DAY_REPORT.md`; plná brána
+1876/1876, iOS Simulator build PASS, nepodepsané IPA 1 226 501 B se
+shodnou binárkou. Skutečný projekt dne nevznikl.

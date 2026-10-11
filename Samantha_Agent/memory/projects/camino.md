@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-11 17:31 CEST — P2-B lokální vývoj, skutečný den neuzavřený
+Aktualizováno: 2026-10-11 17:46 CEST — P2-B lokální vývoj, iPhone podpis blokuje Keychain
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,14 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-11 17:46 CEST — P2-B kód je v lokálním commitu `cde61193`, čistý
+  `main` je tři commity před `origin/main`; Human–Adam a Knihovna jsou čistě
+  zarovnané. Plná brána 1876/1876 a iOS Simulator build PASS. Podepsaný
+  Release build 17 selhal při CodeSign kvůli nedostupnému login Keychain.
+  Nepodepsaný iPhoneOS IPA build 17 je lokálně připravený a ZIP/binárka
+  ověřené; SideStore podpis a fyzická instalace jsou NEOVĚŘENÉ. Žádný
+  push, nasazení, distribuce ani uzavření skutečného dne neproběhly.
 
 - 2026-10-11 17:31 CEST — Míla zahájil P2-B pro 6. 10. 2026 a potvrdil,
   že data prvního dne jsou na Macu kompletní. Redigovaný read-only audit

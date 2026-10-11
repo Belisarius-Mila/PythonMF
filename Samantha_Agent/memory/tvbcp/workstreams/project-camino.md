@@ -3287,3 +3287,24 @@ originálů; 30 zdrojů `diary` a 4 soukromé audio přílohy. Syntetický owner
 API test ověřil odmítnutí neúplnosti, idempotenci, restart a pozdější
 změnu soukromí; iOS Simulator build a plná brána 1876/1876 prošly. Skutečný
 filmový projekt ani manifest nebyly uloženy.
+
+## 2026-10-11 17:46 CEST — P2-B: lokální checkpoint a iPhone artefakt
+
+**Hotovo:** Lokální kód P2-B je v commitu `cde61193`, oba profilové
+workspaces jsou čistě zarovnané. Nepodepsaný iPhoneOS build 17 a IPA byly
+sestaveny a ověřeny bez instalace.
+
+**Rozhodnutí:** Podpis a fyzická přejímka jsou samostatné. Nepodepsané IPA
+není důkaz instalovatelnosti ani úplnosti dne; dosud nebylo distribuováno.
+
+**Další krok:** Po samostatném publikačním pokynu bezpečně zpřístupnit
+kompatibilní server a aplikaci, na iPhonu ověřit SideStore podpis a
+zachování dat, potom uzavřít 6. 10. přes čerstvý inventář telefonu.
+
+**Navrhované další kroky:** P2-A/MAC1 dokončit po návratu k Macu; po
+skutečném uzavření dne navázat P2-C/D.
+
+**Technický důkaz:** Plná brána 1876/1876 a iOS Simulator build PASS.
+Podepsaný Release build zastavil CodeSign `errSecInternalComponent` při
+nepřístupném login Keychain. Nepodepsané IPA 1 226 501 B prošlo ZIP
+kontrolou a shodou binárky; podrobnost je v P2-B reportu.
