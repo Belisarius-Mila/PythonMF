@@ -73,3 +73,23 @@ ZIP kontrola PASS, binárka v IPA má stejný hash jako výchozí sestavení,
 bundle ID zůstává `cz.pythonmf.camino.app`. Balíček **není podepsaný ani
 nainstalovaný**. Zda jej SideStore na iPhonu přijme a přepodepíše,
 zůstává fyzicky neověřené. Distribuce balíčku neproběhla.
+
+## Schválené p+n — průběžný stav 11. 10. 18:03 CEST
+
+Míla schválil push a řízené nasazení serveru. Před nasazením se ukázalo, že
+výběr souborů do neměnného serverového releasu nezahrnoval nový modul P2-B a
+jeho pomocnou knihovnu. Commit `2fada468` je do releasu doplnil. Plná brána
+znovu prošla 1876/1876; izolovaný `git archive` release úspěšně importoval
+server i P2-B pouze ze svých souborů. Audit GitHub balíčku ověřil čistý
+fast-forward pěti commitů z `1208ea21` na `2fada468`, bez private cest.
+
+Samotný HTTPS push zastavil macOS Keychain `-25308`; uložené přihlášení `gh`
+je neplatné a SSH klíč GitHub nepřijal. Probíhá nové přihlášení GitHub CLI
+přes jednorázový kód na Mílově iPhonu. K 18:03 není push ani upgrade
+potvrzený, běžící služba stále nehlásí `film_closed_day_v1`. Před upgradem
+read-only audit doložil 578 operací, 75 Momentů a 202 ověřených médií.
+Stávající Tailscale Serve cestu neprovádíme znovu: existuje, ale schází její
+vlastnická účtenka pro registrovaný síťový audit. Po přihlášení je další
+krok přesný push, kontrolovaný stop/upgrade/start a přímý živý HTTP/HTTPS
+audit při zachování archivních počtů. iPhone app ani skutečný den tím
+nebudou nainstalované či uzavřené.

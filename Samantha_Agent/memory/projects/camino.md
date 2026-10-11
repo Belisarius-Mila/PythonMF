@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-11 17:46 CEST — P2-B lokální vývoj, iPhone podpis blokuje Keychain
+Aktualizováno: 2026-10-11 18:03 CEST — P2-B p+n čeká na GitHub přihlášení
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,15 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-11 18:03 CEST — Míla schválil P2-B push a řízené nasazení.
+  Doplněné soubory filmového modulu do serverového releasu jsou v lokálním
+  `2fada468`; plná brána 1876/1876 a izolovaný import releasu PASS. Audit
+  potvrdil čistý fast-forward pěti commitů. HTTPS push blokuje Keychain
+  `-25308`, uložené `gh` přihlášení je neplatné a SSH autentizace neprošla;
+  čeká se na Mílovo potvrzení GitHub device loginu na iPhonu. Server zatím
+  běží na starém releasu bez P2-B. Před změnou archiv obsahoval 578 operací,
+  75 Momentů a 202 ověřených médií. Podrobnosti v P2-B reportu.
 
 - 2026-10-11 17:46 CEST — P2-B kód je v lokálním commitu `cde61193`, čistý
   `main` je tři commity před `origin/main`; Human–Adam a Knihovna jsou čistě

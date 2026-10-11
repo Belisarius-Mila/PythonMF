@@ -3308,3 +3308,24 @@ skutečném uzavření dne navázat P2-C/D.
 Podepsaný Release build zastavil CodeSign `errSecInternalComponent` při
 nepřístupném login Keychain. Nepodepsané IPA 1 226 501 B prošlo ZIP
 kontrolou a shodou binárky; podrobnost je v P2-B reportu.
+
+## 2026-10-11 18:03 CEST — P2-B: připravený release, push čeká
+
+**Hotovo:** Míla schválil push a řízené nasazení P2-B. Opravený výběr
+serverových souborů zahrnuje filmový modul i jeho pomocnou knihovnu;
+izolovaný release import a plná brána 1876/1876 prošly.
+
+**Rozhodnutí:** Po přesném pushi provést stop, upgrade a start vlastněné
+služby, s kontrolou archivu a živého owner API. Existující Serve cestu
+nepřenastavovat.
+
+**Další krok:** Dokončit GitHub přihlášení na iPhonu a odeslat auditovaný
+balíček; pak řízeně nasadit server a ověřit funkci P2-B.
+
+**Navrhované další kroky:** Samostatně řešit podpis/instalaci iPhone app;
+P2-A/MAC1 dokončit po návratu k Macu; po uzavření dne navázat P2-C/D.
+
+**Technický důkaz:** Lokální `2fada468`, pět čekajících commitů vůči
+`1208ea21`. HTTPS push blokuje Keychain `-25308`; `gh` token je neplatný,
+SSH klíč GitHub nepřijal. Archiv před změnou: 578 operací, 75 Momentů,
+202 ověřených médií. Server stále běží na starém releasu bez P2-B.

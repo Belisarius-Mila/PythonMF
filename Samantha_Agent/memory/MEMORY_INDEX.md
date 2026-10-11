@@ -60,7 +60,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] P2-A/IPHONE1 PASS; P2-A/MAC1 čeká na fyzické přehrání finále se zvukem. Míla zahájil P2-B pro 6. 10.: Mac read-only ověřil 11 Momentů a 34 originálů, kód je v lokálním `cde61193` (brána 1876/1876). Skutečný den čeká na iPhone důkaz. Podepsaný build blokuje nepřístupný Mac Keychain; nepodepsané IPA 17 je jen lokální, SideStore instalace neověřená. Server/app nejsou publikované ani instalované; push/nasazení/distribuce vyžadují samostatný pokyn. Reporty `camino/docs/P2A_FILM_REPORT.md`, `camino/docs/P2B_CLOSED_DAY_REPORT.md`.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] P2-A/IPHONE1 PASS; P2-A/MAC1 čeká na fyzické přehrání finále se zvukem. P2-B pro 6. 10.: Mac read-only ověřil 11 Momentů a 34 originálů. Release opraven v lokálním `2fada468`, plná brána 1876/1876 PASS. Míla schválil p+n; push čeká na GitHub device login na iPhonu po Keychain `-25308`, služba zatím běží bez P2-B. Skutečný den čeká na iPhone důkaz; nepodepsané IPA 17 je jen lokální, SideStore instalace neověřená. Reporty `camino/docs/P2A_FILM_REPORT.md`, `camino/docs/P2B_CLOSED_DAY_REPORT.md`.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` - Cockpit 14. 9.: scroll 10ec0877 potvrzený Mílou. [PRIPOMENOUT] U07 až při příštím pokračování. TXT v2.8 shrnuje U01–U06; plná brána 1680/1680 OK, funkční nasazení 980aed7a a smoke 5/5. Publikační překážka odstraněna; finální balíček/head ověřovat živým auditem.
 

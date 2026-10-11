@@ -1,9 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-10-11 17:46 CEST — P2-B commit, iPhone podpis blokuje Keychain
+- Aktualizováno: 2026-10-11 18:03 CEST — P2-B p+n čeká na GitHub přihlášení
 
 ### Hotovo
+- Doplněný serverový release obsahuje P2-B moduly; commit `2fada468`, plná brána 1876/1876 a izolovaný import PASS. Míla schválil push a řízené nasazení.
 - Míla zadal P2-B pro 6. 10. 2026. Redigovaný read-only audit Macu ověřil 11 Momentů a 34 originálů; 30 příloh `diary` je povolených, 4 soukromá audia se vyloučí.
 - Lokální kód P2-B přidává vědomé uzavření v iPhonu, soukromý owner API kontrakt, neměnný manifest a projekt jednoho dne. Syntetický HTTP test, iOS Simulator build a plná brána 1876/1876 prošly.
 - Kód je v lokálním commitu `cde61193` a oba čisté profilové workspaces jsou zarovnané. Nepodepsaný iPhoneOS build 17 a IPA prošly ZIP kontrolou a shodou binárky.
@@ -16,6 +17,7 @@
 - Míla po výzvě k přehrání opraveného 22s finále se zvukem v Cockpitu na iPhonu oznámil **P2-A/IPHONE1 PASS**. Jde o Mílův fyzický výsledek; serverový audit ho nenahrazuje.
 
 ### Otevřeno
+- Push blokuje Keychain `-25308`; GitHub CLI čeká na potvrzení device loginu na iPhonu. Server stále běží bez nové funkce P2-B.
 - Skutečný den 6. 10. nebyl uzavřen: chybí čerstvý inventář z nového iPhone buildu, nové API není nasazené a žádný reálný projekt nevznikl.
 - Podepsaný build 17 blokuje nedostupný login Keychain; SideStore přepodepsání nepodepsaného IPA na iPhonu není ověřené.
 - Původní chybná verze nebyla přijata; nový iPhone výsledek je PASS. P2-A/MAC1 zůstává NEOVĚŘENO, proto P2-A ještě není plně přijaté.
@@ -23,6 +25,7 @@
 - Podrobný důkaz dosavadního nasazení a nového lokálního kroku je v `camino/docs/P2A_FILM_REPORT.md`.
 
 ### Rizika
+- Registrovaný síťový audit nemá vlastnickou účtenku existující Serve cesty; při nasazení síť neměnit a ověřit živé HTTP/HTTPS přímo.
 - Nový server a aplikace nejsou provozně spárované; změna dne nebo soukromí po uzavření vyžaduje nový důkaz. Push, nasazení a instalace P2-B čekají na samostatné oprávnění.
 - Systémový CodeSign vrací `errSecInternalComponent` a Keychain `User interaction is not allowed`; nejde o limit kreditu.
 - Jen syntetické SDR vstupy; HDR odmítnuto. Testovací řeč macOS není skutečný autorův hlas. Časy nejsou odhadem výkonu dlouhého reálného filmu.
@@ -39,7 +42,7 @@
 - Po Mílově poslechu opravujeme pouze syntetický text a jeho polohu vůči konci filmu; starý běh zůstává nedotčený jako diagnostický důkaz.
 
 ### Další krok
-- Po samostatném oprávnění publikovat kompatibilní server a aplikaci bez mazání dat, na iPhonu vědomě uzavřít 6. 10. a ověřit uložený projekt s 30 povolenými zdroji. P2-A/MAC1 dokončit fyzicky po dostupnosti Macu.
+- Po dokončení GitHub přihlášení pushnout přesný balíček, řízeně nasadit server a ověřit živé API i zachování archivu. Mobilní instalace a uzavření dne zůstávají samostatné.
 
 ### Navrhované další kroky
 - Po uzavření P2-B navázat mobilním editorem P2-C a pozdějším renderem P2-D.
@@ -47,6 +50,7 @@
 - P2-A/MAC1 fyzicky dokončit po návratu k Macu.
 
 ### Technický důkaz
+- `camino/docs/P2B_CLOSED_DAY_REPORT.md`: před nasazením 578 operací, 75 Momentů, 202 ověřených médií; staré owner API 200 bez `film_closed_day_v1`.
 - `camino/docs/P2B_CLOSED_DAY_REPORT.md`: commit `cde61193`, brána 1876/1876, iOS Simulator i nepodepsaný iPhoneOS build PASS; IPA 1 226 501 B, ZIP a binárka shodné. Podepsaný build/instalace NEOVĚŘENO.
 - `camino/docs/P2B_CLOSED_DAY_REPORT.md`; syntetický owner HTTP test odmítá neúplnou frontu, chybějící médium a anonymní přístup, prokazuje idempotenci, restart a zneplatnění po změně soukromí.
 - `camino/docs/P2A_FILM_REPORT.md`; soukromý běh `data/private/camino/p2a/run-xip7fnef/`; test modulu Cockpit serveru 4/4 PASS, plná brána 1867/1867 PASS; tailnet HTTP 200/206 a shodný SHA-256 celého MP4.
@@ -2548,3 +2552,22 @@ iPhone důkaz uzavření dne. P2-A/MAC1 zůstává po návratu k Macu.
 **Technický důkaz:** `camino/docs/P2B_CLOSED_DAY_REPORT.md`; plná brána
 1876/1876, iOS Simulator build PASS, nepodepsané IPA 1 226 501 B se
 shodnou binárkou. Skutečný projekt dne nevznikl.
+
+## 2026-10-11 18:03 CEST — P2-B: publikační brána a přihlášení
+
+**Hotovo:** Míla schválil push a řízené nasazení. Serverový release má
+doplněné P2-B moduly a izolovaně se načetl. Plná brána 1876/1876 PASS.
+
+**Rozhodnutí:** Nejprve push přesně auditovaného balíčku, potom řízený
+upgrade. Dosavadní Serve cestu neměníme.
+
+**Rizika:** Keychain `-25308` zabránil HTTPS pushi; uložené `gh` přihlášení
+je neplatné a SSH klíč GitHub nepřijal. GitHub CLI čeká na potvrzení
+jednorázového přihlášení na iPhonu. Server nadále běží ze starého releasu.
+
+**Další krok:** Po dokončení přihlášení ověřit GitHub, provést přesný push,
+stop/upgrade/start a živou kontrolu API i zachování archivu.
+
+**Technický důkaz:** `camino/docs/P2B_CLOSED_DAY_REPORT.md`; čistý
+fast-forward pěti commitů, izolovaný release import PASS. Archiv před
+upgradem: 578 operací, 75 Momentů a 202 ověřených médií.
