@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-11 17:10 CEST — P2-A, opravený syntetický film živě nasazený
+Aktualizováno: 2026-10-11 17:16 CEST — P2-A/IPHONE1 PASS, MAC1 otevřené
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,12 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-11 17:16 CEST — Míla po přehrání opraveného filmu přes Cockpit na
+  iPhonu oznámil **P2-A/IPHONE1 PASS**. Předchozí chybná verze tím není
+  zpětně přijata. P2-A/MAC1 vyžaduje samostatné fyzické přehrání celého
+  22s finále se zvukem po dostupnosti Macu. P2-A jako celek zatím není
+  přijaté; navázání P2-B čeká na oba fyzické výsledky.
 
 - 2026-10-11 17:10 CEST — Opravený běh `run-112rz9am` z commitu `1208ea21`
   je na GitHubu i v běžícím Cockpitu. Publikační brána 1868/1868 PASS,

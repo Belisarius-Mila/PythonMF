@@ -3243,3 +3243,21 @@ Tailnet HTTPS stránka vrací 200; finální MP4 podporuje 206 `video/mp4` a
 celých 4 728 960 B má SHA-256
 `abb68af56188dea97e40e0eb54fe3f85626d262309a12ffb4437591c10142e1d`.
 Fyzický iPhone poslech ani Mac přehrání nové verze nebyly provedené.
+
+## 2026-10-11 17:16 CEST — P2-A/IPHONE1: opravený film PASS
+
+**Hotovo:** Míla po přehrání opraveného 22s finále přes Film P2-A v Cockpitu
+na iPhonu oznámil **P2-A/IPHONE1 PASS**.
+
+**Rozhodnutí:** Jde o přejímku opravené verze; původní chybná verze zůstává
+nepřijatá. P2-A jako celek vyžaduje ještě samostatné P2-A/MAC1.
+
+**Další krok:** Po dostupnosti Macu přehrát celé opravené finále se zvukem
+a sdělit P2-A/MAC1 PASS/FAIL.
+
+**Navrhované další kroky:** Po obou fyzických přejímkách rozhodnout o
+přijetí P2-A a zahájení P2-B s uzavřenými skutečnými vstupy.
+
+**Technický důkaz:** Mílovo přímé hlášení PASS po výzvě k fyzickému přehrání
+nového filmu; nasazení commitu `1208ea21` a shoda vzdáleného MP4 byly
+ověřené samostatně. Mac výsledek dosud chybí.

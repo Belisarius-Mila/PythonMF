@@ -1,10 +1,9 @@
 # P2-A — syntetický film a uložená časová osa
 
-Stav 2026-10-11 16:35 CEST: původní syntetický film je v Cockpitu nasazený,
-ale Mílova kontrola na iPhonu odhalila nevhodný text a předčasný konec řeči.
-Opravený neměnný běh je lokálně strojově ověřený; jeho push a nasazení dosud
-neproběhly. P2-A/IPHONE1 ani P2-A/MAC1 nejsou PASS. Produkční archiv ani
-média Camina nebyly použité.
+Stav 2026-10-11 17:16 CEST: opravený neměnný syntetický film je nasazený
+v Cockpitu a Míla po přehrání na iPhonu oznámil **P2-A/IPHONE1 PASS**.
+P2-A/MAC1 čeká na samostatnou fyzickou kontrolu; P2-A jako celek zatím
+není přijaté. Produkční archiv ani média Camina nebyly použité.
 
 ## Rozsah
 
@@ -191,3 +190,7 @@ nový proces a smoke 5/5. Tailnet HTTPS stránka vrací 200, nové MP4 vrací 20
 `video/mp4` pro rozsah 0–1023 B a celé má 4 728 960 B se stejným SHA-256 jako
 místní soubor výše. P2-A/IPHONE1 a P2-A/MAC1 zůstávají otevřené pro fyzický
 poslech a přehrání.
+
+Po výzvě k přehrání celého opraveného 22s finále se zvukem přes vestavěný
+Cockpit na iPhonu Míla oznámil **P2-A/IPHONE1 PASS**. Jde o jeho fyzickou
+přejímku, ne o výsledek serverového testu. P2-A/MAC1 nadále čeká.
