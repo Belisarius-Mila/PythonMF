@@ -299,6 +299,7 @@ def serve(root: Path):
             os.environ.pop(key)
     for key in ("metadata_db", "auth_db", "media_db", "media_root"):
         os.environ["CAMINO_C05A_" + key.upper()] = str(config[key])
+    os.environ["CAMINO_P2B_ROOT"] = str(root / "film-projects")
     reader_path = root / "readers.sqlite"
     if reader_path.exists() and viewer_granted(config):
         connection = readonly(reader_path)

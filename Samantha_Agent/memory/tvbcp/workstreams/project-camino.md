@@ -3261,3 +3261,29 @@ přijetí P2-A a zahájení P2-B s uzavřenými skutečnými vstupy.
 **Technický důkaz:** Mílovo přímé hlášení PASS po výzvě k fyzickému přehrání
 nového filmu; nasazení commitu `1208ea21` a shoda vzdáleného MP4 byly
 ověřené samostatně. Mac výsledek dosud chybí.
+
+## 2026-10-11 17:31 CEST — P2-B: rozhodnutí o uzavření jednoho dne
+
+**Hotovo:** Míla zadal P2-B pro první den 6. 10. 2026 a potvrdil úplnost
+Macu. Lokální kód přidal vědomé uzavření telefonu proti autoritativnímu
+Macu, neměnný manifest a uložený projekt dne. P2-B zatím nevytváří MP4.
+
+**Rozhodnutí:** Server vyžaduje shodu úplného inventáře včetně revizí,
+identity serveru, epochy a kurzoru, nulovou čekající frontu a ověření
+originálů. Do projektu vybírá aktuální `diary` a neskryté zdroje;
+videa zůstávají celá, audio je samostatnou volbou. Po změně inventáře,
+povolenosti nebo hashů vyžaduje nové uzavření. Skutečný den se neprohlašuje
+za uzavřený bez čerstvého iPhone důkazu.
+
+**Další krok:** Po samostatném oprávnění k publikaci nasadit kompatibilní
+server a aplikaci bez mazání dat; na iPhonu vědomě uzavřít den a ověřit
+projekt s 30 povolenými zdroji.
+
+**Navrhované další kroky:** P2-A/MAC1 dokončit fyzicky po návratu k Macu;
+po skutečném uzavření dne navázat P2-C/D.
+
+**Technický důkaz:** Read-only Mac audit: 11 Momentů, 34 úplných ověřených
+originálů; 30 zdrojů `diary` a 4 soukromé audio přílohy. Syntetický owner
+API test ověřil odmítnutí neúplnosti, idempotenci, restart a pozdější
+změnu soukromí; iOS Simulator build a plná brána 1876/1876 prošly. Skutečný
+filmový projekt ani manifest nebyly uloženy.

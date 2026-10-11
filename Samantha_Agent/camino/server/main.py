@@ -17,6 +17,7 @@ from camino.server.service_safety import database_lock, snapshot_before_upgrade
 from camino.server.application import create_app
 from camino.server.auth import RevocableTokenStore
 from camino.server.media_store import MediaStore
+from camino.film.closed_day import ClosedDayStore
 
 
 def _viewer_options(parser, metadata, media, owner_tokens) -> dict:
@@ -106,6 +107,8 @@ def _serve(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
         )),
     )
     contract = CaminoV1Contract(metadata, authenticate=tokens.authenticate)
+    film_root = os.environ.get("CAMINO_P2B_ROOT")
+    closed_day_store = ClosedDayStore(Path(film_root), metadata, media) if film_root else None
     uvicorn.run(
         create_app(
             metadata_api=contract,
@@ -115,6 +118,7 @@ def _serve(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
                 parser, "CAMINO_C05A_FINALIZE_DELAY_SECONDS", "0"
             ),
             root_path=args.root_path,
+            closed_day_store=closed_day_store,
             **_viewer_options(parser, metadata, media, tokens),
         ),
         host=args.host,

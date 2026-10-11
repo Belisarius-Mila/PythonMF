@@ -1,7 +1,9 @@
-# Camino film — P2-A
+# Camino film
 
-Lokální syntetický prototyp. Není připojený k owner archivu, iPhonu, Vieweru
-ani HTTP API Cockpitu. Nevytváří návrhy nad skutečným dnem; to patří P2-B.
+## P2-A: syntetický prototyp
+
+P2-A zůstává syntetický. Jeho renderer není připojený k owner archivu,
+iPhonu ani Vieweru a nevytváří návrhy nad skutečným dnem.
 
 Registrovaný workflow `camino_p2a_synthetic_film` spouští ze Samantha_Agent:
 
@@ -31,5 +33,26 @@ Limity P2-A: nejvýše 120 sekund, 16 zdrojů/obrazových položek, 8 nepřekrý
 se komentářů, SDR a rozměry zdrojů do 3840 pixelů. HDR/BT.2020 se odmítá.
 Knihovní renderer přijímá pouze tento prototypový formát; jeho příznaky
 nenahrazují produkční ověření úplnosti a oprávnění z P2-B.
+
+## P2-B: uzavření skutečného dne
+
+`closed_day.py` přijímá důkaz z iPhonu pouze přes soukromé owner API
+`POST /api/v1/film/closed-days`. Telefon v obrazovce **Uložení a přenosy**
+vědomě vybere 6. 10. 2026, po nové inventuře zkontroluje prázdnou frontu,
+neaktivní přenosy a SHA-256 místních originálů. Mac ve stejném požadavku
+porovná identitu serveru, epochu, kurzor, úplný inventář Momentů/revizí a
+médií, ověřené účtenky i SHA-256 všech původních souborů. Při nesouladu se
+projekt nevytvoří.
+
+Uzavřený manifest a chronologický projekt revize 1 jsou v soukromém
+`film-projects/` mimo Git. Obsahují všechny povolené obrazové zdroje dne,
+celá videa a samostatný seznam povoleného audia. `owner_only`, skryté a
+neznámě povolené zdroje nejsou v návrhu. Originály se nekopírují ani
+nepřepisují. `GET /api/v1/film/projects/{id}` po restartu znovu kontroluje
+celý inventář, aktuální povolenost a hash zdrojů; změna vyžaduje nové
+uzavření. P2-B neprovádí render, editor ani publikování filmu.
+
+Aktuální místní vývoj a oddělený provozní stav jsou v
+[P2-B reportu](../docs/P2B_CLOSED_DAY_REPORT.md).
 
 Podrobný důkaz a přejímka: [P2-A report](../docs/P2A_FILM_REPORT.md).

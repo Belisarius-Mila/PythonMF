@@ -1,9 +1,11 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-10-11 17:16 CEST — P2-A/IPHONE1 PASS, Mac přejímka čeká
+- Aktualizováno: 2026-10-11 17:31 CEST — P2-B lokální vývoj, den čeká na důkaz iPhonu
 
 ### Hotovo
+- Míla zadal P2-B pro 6. 10. 2026. Redigovaný read-only audit Macu ověřil 11 Momentů a 34 originálů; 30 příloh `diary` je povolených, 4 soukromá audia se vyloučí.
+- Lokální kód P2-B přidává vědomé uzavření v iPhonu, soukromý owner API kontrakt, neměnný manifest a projekt jednoho dne. Syntetický HTTP test, iOS Simulator build a plná brána 1876/1876 prošly.
 - Uložená časová osa s revizemi a kontrolou zdrojů, syntetický 22s film, náhled 720p a finále 1080p, české titulky a hlas přes střihy.
 - Cílené testy P2-A 15/15 PASS; plná Cockpit brána 1865/1865 PASS; oba soubory celé dekódované, obrazové snímky vizuálně ověřené a konec řeči potvrzený porovnáním PCM.
 - Náhled 4,221 s / 1 865 006 B; finále 12,490 s / 4 723 927 B. Celý experiment špička cca 9,9 MiB alokovaně při vzorkování po 50 ms.
@@ -13,17 +15,20 @@
 - Míla po výzvě k přehrání opraveného 22s finále se zvukem v Cockpitu na iPhonu oznámil **P2-A/IPHONE1 PASS**. Jde o Mílův fyzický výsledek; serverový audit ho nenahrazuje.
 
 ### Otevřeno
+- Skutečný den 6. 10. nebyl uzavřen: chybí čerstvý inventář z nového iPhone buildu, nové API není nasazené a žádný reálný projekt nevznikl.
 - Původní chybná verze nebyla přijata; nový iPhone výsledek je PASS. P2-A/MAC1 zůstává NEOVĚŘENO, proto P2-A ještě není plně přijaté.
 - Původní samostatný Safari odkaz hlásil chybu neznámého znění; její příčina není objasněná. Míla následně potvrdil PASS při přehrání přes vestavěný Cockpit.
 - Podrobný důkaz dosavadního nasazení a nového lokálního kroku je v `camino/docs/P2A_FILM_REPORT.md`.
 
 ### Rizika
+- Nový server a aplikace nejsou provozně spárované; změna dne nebo soukromí po uzavření vyžaduje nový důkaz. Push, nasazení a instalace P2-B čekají na samostatné oprávnění.
 - Jen syntetické SDR vstupy; HDR odmítnuto. Testovací řeč macOS není skutečný autorův hlas. Časy nejsou odhadem výkonu dlouhého reálného filmu.
 - Žádné napojení na owner archiv nebo ověření uzavření telefonních dat; to patří P2-B. Editor a trvalá fronta jsou P2-C/D.
 - Mac přehrání je samostatná fyzická přejímka; iPhone PASS ji nenahrazuje.
 - Chybové hlášení původního samostatného Safari odkazu stále neznáme.
 
 ### Rozhodnutí
+- Mílovo potvrzení úplnosti Macu je vstup, ne náhrada důkazu telefonu. P2-B lze vyvíjet při otevřeném P2-A/MAC1 díky jeho výslovnému zadání.
 - Míla zadal P2-A a závěrečný report rozsahu, řádků kódu a struktury. Původní závazné podmínky filmu a sedm upřesnění zůstávají v platnosti.
 - Míla upřesnil, že je na Caminu daleko od Macu. Přesun pořadí fyzické kontroly na iPhone nemění dvě původní přejímky.
 - Míla výslovně zadal c+p+n připraveného P2-A filmu a Cockpit náhledu; nasazení proběhlo bez změny Tailscale Serve cest.
@@ -31,14 +36,15 @@
 - Po Mílově poslechu opravujeme pouze syntetický text a jeho polohu vůči konci filmu; starý běh zůstává nedotčený jako diagnostický důkaz.
 
 ### Další krok
-- Po dostupnosti Macu přehrát celé opravené 22s finále se zvukem a zapsat P2-A/MAC1 PASS/FAIL.
+- Po samostatném oprávnění publikovat kompatibilní server a aplikaci bez mazání dat, na iPhonu vědomě uzavřít 6. 10. a ověřit uložený projekt s 30 povolenými zdroji. P2-A/MAC1 dokončit fyzicky po dostupnosti Macu.
 
 ### Navrhované další kroky
-- Po fyzické přejímce P2-A zadat P2-B: uzavření vstupů a skutečný den.
+- Po uzavření P2-B navázat mobilním editorem P2-C a pozdějším renderem P2-D.
 - HDR a produkční autorizaci zdrojů ověřit před přijetím skutečných médií.
 - P2-A/MAC1 fyzicky dokončit po návratu k Macu.
 
 ### Technický důkaz
+- `camino/docs/P2B_CLOSED_DAY_REPORT.md`; syntetický owner HTTP test odmítá neúplnou frontu, chybějící médium a anonymní přístup, prokazuje idempotenci, restart a zneplatnění po změně soukromí.
 - `camino/docs/P2A_FILM_REPORT.md`; soukromý běh `data/private/camino/p2a/run-xip7fnef/`; test modulu Cockpit serveru 4/4 PASS, plná brána 1867/1867 PASS; tailnet HTTP 200/206 a shodný SHA-256 celého MP4.
 - Nový vstup používá `app/frontend/cockpit/page.html`, `app.js` a `styles.css`; cílené testy frontend/server 22/22 PASS, plná brána 1867/1867 PASS, nasazení smoke 5/5 a tailnet video HTTP 206. Původní produkční route zůstává beze změny.
 - Opravené finále: `camino/docs/P2A_FILM_REPORT.md`, 16/16 filmových testů, plná publikační brána 1868/1868 PASS, hlas 7,335–21,000 s, závěrečné ticho od 20,956 s. GitHub `main` = `1208ea21`, účtenka `deployed`, smoke 5/5; tailnet HTTPS stránka 200, MP4 206 `video/mp4`, 4 728 960 B a SHA-256 `abb68af56188dea97e40e0eb54fe3f85626d262309a12ffb4437591c10142e1d`.
@@ -2496,3 +2502,24 @@ finále 12,490 s / 4 723 927 B; celý experiment 20,877 s a měřená alokovaná
 špička 10 383 360 B. Podrobná metoda, konečný výsledek plné brány, rozsah
 809 přidaných řádků Pythonu a struktura jsou v `camino/docs/P2A_FILM_REPORT.md`.
 Fyzický Mac/iPhone a lidský poslech NEOVĚŘENO, P2-A není plně přijaté.
+
+## 2026-10-11 17:31 CEST — P2-B: lokální uzavření jednoho dne
+
+**Hotovo:** Míla zahájil P2-B pro 6. 10. a potvrdil úplnost dat na Macu.
+Read-only audit našel 11 Momentů a 34 originálů s ověřenými účtenkami a
+SHA-256. Lokální kód přidal důkaz telefonu, owner API a neměnný projekt.
+V návrhu budou všechny povolené foto a celá videa; soukromé Úvahy se vyloučí.
+
+**Rozhodnutí:** Skutečný den zatím není uzavřen. Chybí čerstvý inventář
+iPhonu, nové API není nasazené a nový build není nainstalovaný. P2-A/MAC1
+zůstává otevřené; vývoj P2-B Míla nyní výslovně zadal.
+
+**Rizika:** Bez fyzického telefonu nelze doložit jeho frontu ani UX.
+Pozdější změna obsahu či povolenosti zneplatní uložený projekt.
+
+**Další krok:** Po samostatném pokynu k publikaci provést kompatibilní
+push/nasazení a instalaci bez mazání dat; pak na iPhonu vědomě uzavřít
+6. 10. a ověřit 30 povolených zdrojů. P2-A/MAC1 dokončit později.
+
+**Technický důkaz:** `camino/docs/P2B_CLOSED_DAY_REPORT.md`; syntetický
+HTTP test, iOS Simulator build a plná brána 1876/1876 PASS.

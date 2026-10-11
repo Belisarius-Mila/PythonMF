@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-11 17:16 CEST — P2-A/IPHONE1 PASS, MAC1 otevřené
+Aktualizováno: 2026-10-11 17:31 CEST — P2-B lokální vývoj, skutečný den neuzavřený
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,18 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-11 17:31 CEST — Míla zahájil P2-B pro 6. 10. 2026 a potvrdil,
+  že data prvního dne jsou na Macu kompletní. Redigovaný read-only audit
+  potvrdil 11 Momentů a 34 ověřených originálů; 30 příloh je `diary`,
+  4 audio ze 3 `owner_only` Úvah jsou mimo film. Lokální P2-B implementace
+  přidává explicitní iPhone důkaz a create-only soukromý projekt s úplnými
+  videi; syntetický HTTP test, iOS Simulator build a plná brána 1876/1876
+  prošly. Skutečný projekt dne ještě nevznikl: nový server není nasazený,
+  nová aplikace není na iPhonu
+  a její čerstvý inventář chybí. P2-A/MAC1 zůstává otevřené. Push, nasazení
+  a instalace P2-B nebyly autorizované. Podrobnosti jsou v
+  `camino/docs/P2B_CLOSED_DAY_REPORT.md`.
 
 - 2026-10-11 17:16 CEST — Míla po přehrání opraveného filmu přes Cockpit na
   iPhonu oznámil **P2-A/IPHONE1 PASS**. Předchozí chybná verze tím není

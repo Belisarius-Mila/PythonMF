@@ -60,7 +60,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] P2-A: opravený 22s syntetický film `run-112rz9am` je nasazený (`1208ea21`, brána 1868/1868, smoke 5/5, tailnet MP4 SHA-256 shodné). Míla oznámil P2-A/IPHONE1 PASS po přehrání v Cockpitu. P2-A/MAC1 čeká na fyzické přehrání celého finále se zvukem; P2-B až po obou přejímkách. Report `camino/docs/P2A_FILM_REPORT.md`; historický U17 PASS a M3/M4 nejsou rozšířené.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] P2-A/IPHONE1 PASS; P2-A/MAC1 čeká na fyzické přehrání finále se zvukem. Míla mezitím výslovně zahájil P2-B pro 6. 10. 2026: na Macu read-only ověřeno 11 Momentů a 34 originálů, lokálně vyvinuté uzavření a projekt, ale žádný skutečný den dosud neuzavřený bez iPhone důkazu. Nový server/app nejsou publikované ani instalované; push/nasazení/instalace vyžadují samostatný pokyn. Reporty `camino/docs/P2A_FILM_REPORT.md`, `camino/docs/P2B_CLOSED_DAY_REPORT.md`; historický U17 PASS a M3/M4 nejsou rozšířené.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` - Cockpit 14. 9.: scroll 10ec0877 potvrzený Mílou. [PRIPOMENOUT] U07 až při příštím pokračování. TXT v2.8 shrnuje U01–U06; plná brána 1680/1680 OK, funkční nasazení 980aed7a a smoke 5/5. Publikační překážka odstraněna; finální balíček/head ověřovat živým auditem.
 

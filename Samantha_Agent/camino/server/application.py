@@ -18,6 +18,7 @@ from camino.api.v1 import CaminoV1Contract
 from camino.domain.model import ContractError
 from camino.server.auth import RevocableTokenStore
 from camino.server.media_store import DEFAULT_CHUNK_BYTES, MediaStore, MediaStoreError
+from camino.film.closed_day import ClosedDayError, ClosedDayStore
 from camino.server.viewer_worker import ViewerWorker
 from camino.server.recovery import complete_recovery
 from camino.domain.revision_store import StoreConflict
@@ -45,8 +46,8 @@ def _authorization(request: Request) -> str:
     return request.headers.get("authorization", "")
 
 
-def _exact_json(raw: bytes, expected: set[str]) -> dict[str, Any]:
-    if not raw or len(raw) > 4096:
+def _exact_json(raw: bytes, expected: set[str], *, max_bytes: int = 4096) -> dict[str, Any]:
+    if not raw or len(raw) > max_bytes:
         raise ContractError("request body is empty or too large")
 
     def unique(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
@@ -82,6 +83,7 @@ def create_app(
     viewer: CaminoViewer | None = None,
     viewer_interval_seconds: float | None = None,
     root_path: str = "",
+    closed_day_store: ClosedDayStore | None = None,
 ) -> FastAPI:
     if not 0 <= finalize_delay_seconds <= 15:
         raise ValueError("finalize delay must stay between 0 and 15 seconds")
@@ -114,6 +116,7 @@ def create_app(
     app.state.media_store = media_store
     app.state.token_store = token_store
     app.state.viewer_worker = worker
+    app.state.closed_day_store = closed_day_store
     if viewer is not None:
         if viewer.tokens.path == token_store.path:
             raise ValueError("Viewer must have a separate read-only credential store")
@@ -277,6 +280,43 @@ def create_app(
         except (OSError, sqlite3.DatabaseError):
             return _error(503, "bootstrap_unavailable", "empty bootstrap could not be verified")
 
+    @app.post("/api/v1/film/closed-days", include_in_schema=False)
+    async def close_film_day(request: Request):
+        if not authorized(request):
+            return _error(401, "unauthorized", "private authorization required")
+        if closed_day_store is None:
+            return _error(404, "not_configured", "film projects are not configured")
+        if request.headers.get("content-type") != "application/json" or request.url.query:
+            return _error(415, "invalid_request", "plain JSON request required")
+        try:
+            body = _exact_json(await request.body(), {
+                "contract_version", "request_id", "trip_id", "day_id", "device_id",
+                "server_id", "epoch", "cursor", "pending_metadata", "pending_media",
+                "active_uploads", "moments", "assets",
+            }, max_bytes=1_000_000)
+            receipt = await asyncio.to_thread(closed_day_store.close, body)
+            return _json(200, receipt)
+        except ClosedDayError as error:
+            return _error(409 if error.code not in ("invalid_proof", "unsupported_version") else 422,
+                          error.code, str(error))
+        except (ContractError, TypeError, ValueError):
+            return _error(422, "invalid_request", "closed day proof is invalid")
+        except (OSError, sqlite3.DatabaseError):
+            return _error(503, "storage_unavailable", "film project storage is unavailable")
+
+    @app.get("/api/v1/film/projects/{project_id}", include_in_schema=False)
+    async def film_project_status(project_id: str, request: Request):
+        if not authorized(request):
+            return _error(401, "unauthorized", "private authorization required")
+        if closed_day_store is None:
+            return _error(404, "not_configured", "film projects are not configured")
+        try:
+            return _json(200, await asyncio.to_thread(closed_day_store.status, project_id))
+        except ClosedDayError as error:
+            return _error(404 if error.code == "project_missing" else 422, error.code, str(error))
+        except (OSError, sqlite3.DatabaseError):
+            return _error(503, "storage_unavailable", "film project storage is unavailable")
+
     @app.api_route("/api/v1/{path:path}", methods=["GET", "POST"], include_in_schema=False)
     async def metadata(path: str, request: Request):
         if not authorized(request):
@@ -294,6 +334,8 @@ def create_app(
         )
         if request.method == "GET" and target == "/api/v1/state" and response.status == 200:
             response.body["features"].append("identical_recovery_v1")
+            if closed_day_store is not None:
+                response.body["features"].append("film_closed_day_v1")
         return _json(response.status, response.body)
 
     return app

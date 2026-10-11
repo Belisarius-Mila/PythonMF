@@ -46,6 +46,55 @@ private struct CaminoMediaStatus: Decodable {
     }
 }
 
+private struct CaminoClosedDayProof: Encodable, Equatable {
+    struct Moment: Encodable, Equatable {
+        let id: String
+        let revision: Int
+        let privacy: String
+        let hidden: Bool
+        let chapter_date: String
+    }
+    struct Asset: Encodable, Equatable {
+        let id: String
+        let moment_id: String
+        let media_kind: String
+        let byte_count: Int64
+        let sha256: String
+    }
+    let contract_version: Int
+    let request_id: String
+    let trip_id: String
+    let day_id: String
+    let device_id: String
+    let server_id: String
+    let epoch: String
+    let cursor: Int64
+    let pending_metadata: Int
+    let pending_media: Int
+    let active_uploads: Int
+    let moments: [Moment]
+    let assets: [Asset]
+}
+
+private struct CaminoClosedDayReceipt: Decodable {
+    let state: String
+    let project_id: String
+    let local_date: String
+    let source_count: Int
+    let shot_count: Int
+    let voice_choice_count: Int
+}
+
+private struct CaminoClosedDayStatus: Decodable {
+    let project_id: String
+    let local_date: String
+    let source_count: Int
+    let shot_count: Int
+    let voice_choice_count: Int
+    let valid: Bool
+    let reason: String?
+}
+
 private enum CaminoSyncAPIError: Error, Equatable {
     case invalidConfiguration
     case invalidResponse
@@ -117,6 +166,17 @@ private struct CaminoSyncAPI: Sendable {
         ], options: [.sortedKeys])
         return try await send(path: ["api", "v1", "bootstrap", "empty"], method: "POST",
                               contentType: "application/json", body: body)
+    }
+
+    func closeFilmDay(_ proof: CaminoClosedDayProof) async throws -> CaminoClosedDayReceipt {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
+        return try await send(path: ["api", "v1", "film", "closed-days"], method: "POST",
+                              contentType: "application/json", body: encoder.encode(proof))
+    }
+
+    func filmProjectStatus(_ projectID: String) async throws -> CaminoClosedDayStatus {
+        try await send(path: ["api", "v1", "film", "projects", projectID], method: "GET")
     }
 
     func mediaStatus(for item: CaminoSyncMediaItem) async throws -> CaminoMediaStatus {
@@ -376,6 +436,8 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
     @Published private(set) var busy = false
     @Published private(set) var reconciliationRequired = false
     @Published private(set) var dashboard = CaminoC05cDashboard.initial
+    @Published private(set) var filmDays: [LocalDay] = []
+    @Published private(set) var filmResult = "Vyber den až po dokončení přenosu."
 
     private let local: CaminoLocalStore
     private let recording: IntentRecordingStore
@@ -389,6 +451,7 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
     private var macCopyState: CaminoMacCopyState = .preparing
     private var backupCopyState: CaminoBackupCopyState = .notVerified
     private var aiProcessingState: CaminoAIProcessingState = .notConfigured
+    private let filmProjectKey = "camino.p2b.project.2026-10-06"
     private lazy var driver = CaminoSyncBackgroundDriver { [weak self] event in
         Task { @MainActor in self?.handle(event) }
     }
@@ -439,11 +502,163 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
     }
 
     func refreshInventory() {
-        Task { await discoverOnly() }
+        Task {
+            await discoverOnly()
+            await refreshFilmProject()
+        }
     }
 
     func synchronizeNow() {
         Task { await synchronize() }
+    }
+
+    func closeFilmDay(_ dayID: UUID) {
+        Task { await verifyAndCloseFilmDay(dayID) }
+    }
+
+    private func verifyAndCloseFilmDay(_ dayID: UUID) async {
+        guard !running else { return }
+        running = true; busy = true
+        defer { running = false; busy = false }
+        do {
+            guard configurationReady, path.available, !journal.paused else {
+                filmResult = "Připoj telefon k soukromému Macu a dokonči přenosy."
+                return
+            }
+            guard await driver.activeDescriptions().isEmpty else {
+                filmResult = "Ještě běží přenos souborů."
+                return
+            }
+            try await discover()
+            let api = try makeAPI()
+            let state = try await api.state()
+            guard state.features?.contains("film_closed_day_v1") == true else {
+                filmResult = "Mac ještě nemá podporu pro uzavření dne."
+                return
+            }
+            let requestID = Self.filmRequestID(dayID: dayID, state: state)
+            let proof = try filmProof(dayID: dayID, requestID: requestID, state: state)
+            filmResult = "Porovnávám den a kontroluji originály…"
+            for item in journal.media where proof.assets.contains(where: {
+                $0.id == item.id.uuidString.lowercased()
+            }) {
+                let source = root.appendingPathComponent(item.sourceRelativePath).standardizedFileURL
+                guard source.path.hasPrefix(root.path + "/"),
+                      source.resolvingSymlinksInPath() == source else {
+                    throw CaminoSyncError.incompleteLocalInventory
+                }
+                let values = try source.resourceValues(forKeys: [.isRegularFileKey, .fileSizeKey])
+                guard values.isRegularFile == true, Int64(values.fileSize ?? -1) == item.byteCount else {
+                    throw CaminoSyncError.incompleteLocalInventory
+                }
+                let hash = try await Task.detached(priority: .utility) {
+                    try Self.sha256(of: source)
+                }.value
+                guard hash == item.sha256 else { throw CaminoSyncError.incompleteLocalInventory }
+            }
+            try await discover()
+            let after = try await api.state()
+            guard after.serverID == state.serverID, after.epoch == state.epoch,
+                  after.cursor == state.cursor,
+                  try filmProof(dayID: dayID, requestID: requestID, state: after) == proof,
+                  await driver.activeDescriptions().isEmpty else {
+                throw CaminoSyncError.incompleteLocalInventory
+            }
+            let receipt = try await api.closeFilmDay(proof)
+            guard receipt.state == "closed", receipt.project_id == requestID.uuidString.lowercased() else {
+                throw CaminoSyncAPIError.invalidResponse
+            }
+            UserDefaults.standard.set(receipt.project_id, forKey: filmProjectKey)
+            filmResult = "Den \(receipt.local_date) uzavřen: \(receipt.source_count) zdrojů, \(receipt.shot_count) záběrů, \(receipt.voice_choice_count) zvukových voleb. Projekt je uložený na Macu."
+        } catch CaminoSyncAPIError.server(_, let code) {
+            filmResult = "Den se neuzavřel (\(code)). Zkontroluj přenosy a zkus to znovu."
+        } catch {
+            Self.logFailure(error, stage: "film-day")
+            filmResult = "Den se neuzavřel. Zkontroluj přenosy a úplnost souborů."
+        }
+    }
+
+    private func refreshFilmProject() async {
+        guard configurationReady,
+              let projectID = UserDefaults.standard.string(forKey: filmProjectKey) else { return }
+        do {
+            let status = try await makeAPI().filmProjectStatus(projectID)
+            guard status.project_id == projectID else { throw CaminoSyncAPIError.invalidResponse }
+            guard !running else { return }
+            filmResult = status.valid
+                ? "Uložený projekt \(status.local_date) je ověřený: \(status.source_count) zdrojů, \(status.shot_count) záběrů, \(status.voice_choice_count) zvukových voleb."
+                : "Uložený projekt už neodpovídá aktuálním datům (\(status.reason ?? "změna")). Den znovu uzavři."
+        } catch {
+            guard !running else { return }
+            filmResult = "Uložený projekt nelze nyní na Macu ověřit."
+        }
+    }
+
+    private static func filmRequestID(dayID: UUID, state: CaminoServerState) -> UUID {
+        // The same closed inventory can be retried after a lost response or app restart.
+        let value = [state.serverID.uuidString.lowercased(), state.epoch.uuidString.lowercased(),
+                     String(state.cursor), dayID.uuidString.lowercased()].joined(separator: ":")
+        var bytes = Array(SHA256.hash(data: Data(value.utf8)).prefix(16))
+        bytes[6] = (bytes[6] & 0x0f) | 0x50
+        bytes[8] = (bytes[8] & 0x3f) | 0x80
+        return UUID(uuid: (bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5],
+                           bytes[6], bytes[7], bytes[8], bytes[9], bytes[10], bytes[11],
+                           bytes[12], bytes[13], bytes[14], bytes[15]))
+    }
+
+    private func filmProof(dayID: UUID, requestID: UUID,
+                           state: CaminoServerState) throws -> CaminoClosedDayProof {
+        guard let day = filmDays.first(where: { $0.id == dayID }),
+              !state.exportsBlocked, !state.reconciliationRequired,
+              !journal.reconciliationRequired, journal.serverID == state.serverID,
+              journal.epoch == state.epoch, journal.serverCursor == state.cursor,
+              journal.stats.metadataCount == 0, journal.stats.mediaCount == 0,
+              journal.coverage(momentIDs: localMomentIDs).macWaitingMomentCount == 0 else {
+            throw CaminoSyncError.incompleteLocalInventory
+        }
+        let snapshots = try local.moments(tripID: day.tripID, includeHidden: true)
+            .filter { $0.dayID == dayID }
+            .map { try local.syncSnapshot(momentID: $0.id) }
+        guard !snapshots.isEmpty else { throw CaminoSyncError.incompleteLocalInventory }
+        let ids = Set(snapshots.map(\.moment.id))
+        guard try local.pendingMediaIntents().allSatisfy({ !ids.contains($0.momentID) }),
+              try local.pendingAudioIntents().allSatisfy({ !ids.contains($0.momentID) }),
+              snapshots.allSatisfy({ $0.textHistory.draft == nil }) else {
+            throw CaminoSyncError.incompleteLocalInventory
+        }
+        let assets = journal.media.filter { ids.contains($0.momentID) }
+        guard assets.allSatisfy({ $0.phase == .verified }) else {
+            throw CaminoSyncError.incompleteLocalInventory
+        }
+        let localAssetIDs = Set(try local.allMediaAssets().filter {
+            ids.contains($0.momentID)
+        }.map(\.id))
+        guard localAssetIDs.isSubset(of: Set(assets.map(\.id))) else {
+            throw CaminoSyncError.incompleteLocalInventory
+        }
+        return CaminoClosedDayProof(
+            contract_version: 1, request_id: requestID.uuidString.lowercased(),
+            trip_id: day.tripID.uuidString.lowercased(), day_id: dayID.uuidString.lowercased(),
+            device_id: journal.deviceID.uuidString.lowercased(),
+            server_id: state.serverID.uuidString.lowercased(),
+            epoch: state.epoch.uuidString.lowercased(), cursor: state.cursor,
+            pending_metadata: 0, pending_media: 0, active_uploads: 0,
+            moments: snapshots.map { snapshot in
+                CaminoClosedDayProof.Moment(
+                    id: snapshot.moment.id.uuidString.lowercased(),
+                    revision: snapshot.baseRevision + snapshot.operations.filter {
+                        $0.kind != .appendText
+                    }.count,
+                    privacy: snapshot.moment.privacy.rawValue, hidden: snapshot.moment.hidden,
+                    chapter_date: snapshot.moment.chapterDate)
+            }.sorted { $0.id < $1.id },
+            assets: assets.map { item in
+                CaminoClosedDayProof.Asset(
+                    id: item.id.uuidString.lowercased(),
+                    moment_id: item.momentID.uuidString.lowercased(),
+                    media_kind: item.kind.rawValue, byte_count: item.byteCount,
+                    sha256: item.sha256)
+            }.sorted { $0.id < $1.id })
     }
 
     func setPaused(_ value: Bool) {
@@ -679,6 +894,8 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
             moments: snapshots, media: candidates, audioLayouts: audioLayouts,
             importedAssetIDs: Set(localAssets.filter(\.imported).map(\.id)))
         localMomentIDs = Set(snapshots.map(\.moment.id))
+        filmDays = days.filter { day in snapshots.contains { $0.moment.dayID == day.id } }
+            .sorted { $0.localDate > $1.localDate }
         discoveredAudioLayouts = discovery.metadata.filter { $0.kind == "create_audio_layout" }
         journal.mergeDiscovery(discovery)
         let deletions = try local.deletionRecords()

@@ -302,6 +302,8 @@ private struct CaminoSyncView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var confirmCellular = false
     @State private var confirmEmptyBootstrap = false
+    @State private var confirmFilmDay = false
+    @State private var selectedFilmDayID: UUID?
 
     var body: some View {
         NavigationStack {
@@ -355,6 +357,20 @@ private struct CaminoSyncView: View {
                 Section("AI") {
                     statusAxis(sync.dashboard.ai, identifier: "c05cAIStatus")
                 }
+                Section("Film · 6. 10. 2026") {
+                    ForEach(sync.filmDays.filter { $0.localDate == "2026-10-06" }) { day in
+                        Button("Ověřit a uzavřít den") {
+                            selectedFilmDayID = day.id
+                            confirmFilmDay = true
+                        }
+                        .disabled(sync.busy || !sync.configurationReady)
+                        .accessibilityIdentifier("closeFilmDay")
+                    }
+                    Text(sync.filmResult).font(.footnote).foregroundStyle(.secondary)
+                        .accessibilityIdentifier("filmDayResult")
+                    Text("Telefon a Mac musí mít shodný úplný den. Soukromé Úvahy se do filmu nezařadí; video zůstane celé. Uzavření uloží projekt na Macu, film zatím nevyrenderuje.")
+                        .font(.footnote).foregroundStyle(.secondary)
+                }
                 Section("Ovládání") {
                     Button("Synchronizovat nyní", systemImage: "arrow.clockwise") {
                         sync.synchronizeNow()
@@ -394,6 +410,15 @@ private struct CaminoSyncView: View {
                 }
             } message: {
                 Text("Ověří se prázdný telefon i server. Resetuje se pouze historie synchronizace; Momenty, média a nastavení telefonu zůstanou.")
+            }
+            .alert("Uzavřít den 6. 10. 2026 pro film?", isPresented: $confirmFilmDay) {
+                Button("Zrušit", role: .cancel) { selectedFilmDayID = nil }
+                Button("Ověřit a uložit projekt") {
+                    if let selectedFilmDayID { sync.closeFilmDay(selectedFilmDayID) }
+                    selectedFilmDayID = nil
+                }
+            } message: {
+                Text("Porovná se inventář telefonu a Macu a ověří se originály. Samotný film se nyní nevytvoří.")
             }
         }
     }

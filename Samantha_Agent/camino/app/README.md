@@ -80,6 +80,11 @@ HEIC, iCloud a další okrajové scénáře zůstávají neověřené.
 - Bez implementované C06b zůstává další záloha neověřená; bez C07 zůstává AI
   vypnutá. Syntetické kombinace T054/T055 jsou dostupné jen v Debug simulátoru,
   nikdy v produkční cestě fyzického zařízení.
+- P2-B přidává do **Uložení a přenosy** vědomé uzavření dne 6. 10. 2026.
+  iPhone porovná čerstvý inventář a původní soubory se soukromým Macem;
+  při neshodě projekt nevznikne. Potvrzení uloží pouze filmový projekt na Macu,
+  nevytváří video. Funkce je zatím jen v lokálně sestaveném zdrojovém kódu;
+  fyzická instalace a přejímka čekají.
 
 Párování, C06a spravovaná služba, Viewer a serverová záloha jsou další etapy.
 Hvězdička je pouze místní čtenářská pomůcka, protože C03b v1 pro její změnu

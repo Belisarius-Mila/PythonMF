@@ -21,6 +21,7 @@ from camino.domain.revision_store import RevisionStore
 from camino.server.application import create_app
 from camino.server.auth import RevocableTokenStore
 from camino.server.media_store import MediaStore
+from camino.film.closed_day import ClosedDayStore
 
 
 def uid(number: int) -> str:
@@ -63,6 +64,115 @@ class CaminoC05aFastAPITests(unittest.IsolatedAsyncioTestCase):
         transport = httpx.ASGITransport(app=self.app)
         async with httpx.AsyncClient(transport=transport, base_url="https://camino.test") as client:
             return await client.request(method, path, **kwargs)
+
+    async def test_closed_day_requires_phone_inventory_and_verified_private_originals(self):
+        video = b"synthetic-video-bytes"
+        private_audio = b"synthetic-private-audio"
+        trip = Trip(uid(1), "Synthetic trip", "cs", True, True)
+        day = JourneyDay(uid(2), trip.id, "2026-09-23")
+        captured = CaptureTime(
+            int(datetime(2026, 9, 23, 19, tzinfo=timezone.utc).timestamp() * 1000),
+            "2026-09-23T21:00:00", 120, "Europe/Prague", TimeSource.DEVICE_CAPTURE,
+        )
+        reflection = create_moment(id=uid(6), trip=trip, day=day,
+                                   kind=MomentKind.REFLECTION, captured=captured,
+                                   new_moment_privacy=Privacy.OWNER_ONLY)
+        operations = (
+            (5, "create_asset", Asset(uid(5), uid(3), "video", "camera",
+                                      len(video), digest(video), 2500)),
+            (6, "create_moment", reflection),
+            (7, "create_asset", Asset(uid(7), uid(6), "audio", "recording",
+                                      len(private_audio), digest(private_audio), 1000)),
+        )
+        epoch = self.metadata.state()["epoch"]
+        for sequence, kind, value in operations:
+            envelope = {
+                "contract_version": 1, "epoch": epoch,
+                "operation_id": uid(100 + sequence), "device_id": uid(90),
+                "device_sequence": sequence, "kind": kind,
+                "expected_revision": None, "payload": wire(value),
+            }
+            raw = json.dumps(envelope, sort_keys=True, separators=(",", ":")).encode()
+            accepted = self.contract.handle(
+                "POST", "/api/v1/operations", authorization=f"Bearer {self.token}",
+                body=raw, content_type="application/json")
+            self.assertEqual(accepted.status, 200, accepted.body)
+        film = ClosedDayStore(Path(self.temporary.name) / "film-projects", self.metadata, self.media)
+        self.app = create_app(metadata_api=self.contract, media_store=self.media,
+                              token_store=self.tokens, closed_day_store=film)
+        state = await self.request("GET", "/api/v1/state", headers=self.headers)
+        self.assertIn("film_closed_day_v1", state.json()["features"])
+        proof = {
+            "contract_version": 1, "request_id": uid(99), "trip_id": uid(1),
+            "day_id": uid(2), "device_id": uid(90),
+            "server_id": state.json()["server_id"], "epoch": epoch,
+            "cursor": 7, "pending_metadata": 0, "pending_media": 0,
+            "active_uploads": 0,
+        }
+        with self.metadata._connection() as connection:
+            proof["moments"] = [
+                {key: row[key] for key in ("id", "revision", "privacy", "hidden", "chapter_date")}
+                for (body,) in connection.execute("SELECT body FROM moments")
+                for row in [json.loads(body)]
+            ]
+            proof["assets"] = [
+                {key: row[key] for key in ("id", "moment_id", "media_kind", "byte_count", "sha256")}
+                for (body,) in connection.execute("SELECT body FROM assets")
+                for row in [json.loads(body)]
+            ]
+        route = "/api/v1/film/closed-days"
+        headers = {**self.headers, "Content-Type": "application/json"}
+        self.assertEqual((await self.request("POST", route, json=proof)).status_code, 401)
+        pending = {**proof, "pending_media": 1}
+        self.assertEqual((await self.request("POST", route, headers=headers, json=pending)).status_code, 409)
+        unverified = await self.request("POST", route, headers=headers, json=proof)
+        self.assertEqual(unverified.json()["error"]["code"], "media_missing")
+        for asset_id, content in ((self.asset_id, self.content), (uid(5), video), (uid(7), private_audio)):
+            created = await self.request("POST", f"/api/v1/assets/{asset_id}/upload-session",
+                                         headers=headers, json={"contract_version": 1, "chunk_size": 8})
+            self.assertEqual(created.status_code, 201, created.text)
+            for index in range(created.json()["chunk_count"]):
+                chunk = content[index * 8:(index + 1) * 8]
+                sent = await self.request("PUT", f"/api/v1/assets/{asset_id}/chunks/{index}",
+                                          headers={**self.headers,
+                                                   "Content-Type": "application/octet-stream",
+                                                   "X-Camino-Chunk-SHA256": digest(chunk)}, content=chunk)
+                self.assertEqual(sent.status_code, 201, sent.text)
+            finalized = await self.request("POST", f"/api/v1/assets/{asset_id}/finalize",
+                                           headers=self.headers)
+            self.assertEqual(finalized.status_code, 201, finalized.text)
+        first = await self.request("POST", route, headers=headers, json=proof)
+        self.assertEqual(first.status_code, 200, first.text)
+        self.assertEqual((first.json()["source_count"], first.json()["shot_count"],
+                          first.json()["voice_choice_count"]), (2, 1, 1))
+        self.assertEqual((await self.request("POST", route, headers=headers, json=proof)).json(), first.json())
+        status_path = f"/api/v1/film/projects/{proof['request_id']}"
+        self.assertTrue((await self.request("GET", status_path, headers=self.headers)).json()["valid"])
+        reopened = ClosedDayStore(film.root, self.metadata, self.media)
+        self.assertTrue(reopened.status(proof["request_id"])["valid"])
+        project = json.loads((film.root / proof["request_id"] / "project-r1.json").read_text())
+        manifest = json.loads((film.root / proof["request_id"] / "manifest.json").read_text())
+        self.assertEqual(project["shots"][0]["asset_id"], uid(5))
+        self.assertEqual((project["shots"][0]["in_ms"], project["shots"][0]["out_ms"]),
+                         (0, 2500))
+        self.assertEqual({row["asset_id"] for row in manifest["sources"]}, {uid(4), uid(5)})
+        changed = {**proof, "request_id": uid(98), "assets": proof["assets"][:-1]}
+        mismatch = await self.request("POST", route, headers=headers, json=changed)
+        self.assertEqual(mismatch.json()["error"]["code"], "asset_mismatch")
+        with self.metadata._connection() as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            row = json.loads(connection.execute(
+                "SELECT body FROM moments WHERE id=?", (uid(3),)).fetchone()[0])
+            row["privacy"] = "owner_only"
+            row["revision"] += 1
+            connection.execute("UPDATE moments SET revision=?,body=? WHERE id=?",
+                               (row["revision"], json.dumps(row), uid(3)))
+            connection.commit()
+        stale = await self.request("GET", status_path, headers=self.headers)
+        self.assertEqual(stale.json()["reason"], "day_inventory_changed")
+        self.assertFalse(stale.json()["valid"])
+        retry = await self.request("POST", route, headers=headers, json=proof)
+        self.assertEqual(retry.json()["error"]["code"], "closed_day_stale")
 
     async def test_recovery_is_owner_only_and_requires_complete_media(self):
         from tests.test_camino_recovery import proof_for
