@@ -410,7 +410,13 @@ def family_video_organizer_app_root(
 
 LOCAL_WEB_APPS = {
     "family-video-organizer": family_video_organizer_app_root(),
+    "camino-p2a-review": PROJECT_ROOT / "data" / "private" / "camino" / "p2a" / "run-xip7fnef",
 }
+CAMINO_P2A_REVIEW_FILES = frozenset({
+    "review.html",
+    "preview-712fb6726a95/film.mp4",
+    "final-59b109f77f12/film.mp4",
+})
 DESKTOP_APP_CATALOG: tuple[dict[str, Any], ...] = (
     {
         "id": "multilo",
@@ -10648,6 +10654,9 @@ class CockpitServer:
                     relative = Path(*rel_parts) / "index.html"
                 else:
                     relative = Path(*rel_parts)
+                if app_id == "camino-p2a-review" and relative.as_posix() not in CAMINO_P2A_REVIEW_FILES:
+                    self.respond_json({"error": "not_found"}, status=HTTPStatus.NOT_FOUND)
+                    return
                 try:
                     root_resolved = root.resolve(strict=True)
                     target = (root / relative).resolve(strict=True)
@@ -10661,14 +10670,51 @@ class CockpitServer:
                     self.respond_json({"error": "not_found"}, status=HTTPStatus.NOT_FOUND)
                     return
                 data = target.read_bytes()
-                self.send_response(HTTPStatus.OK)
+                is_video = target.suffix.casefold() == ".mp4"
+                byte_range = None
+                if is_video and self.headers.get("Range"):
+                    try:
+                        byte_range = parse_single_http_byte_range(self.headers["Range"], len(data))
+                    except ValueError:
+                        self.send_response(HTTPStatus.REQUESTED_RANGE_NOT_SATISFIABLE)
+                        self.send_header("Content-Range", f"bytes */{len(data)}")
+                        self.send_header("Content-Length", "0")
+                        self.end_headers()
+                        return
+                self.send_response(HTTPStatus.PARTIAL_CONTENT if byte_range else HTTPStatus.OK)
                 self.send_header("Content-Type", content_type_for_path(target))
                 self.send_header("Cache-Control", "no-store, max-age=0")
+                if is_video:
+                    self.send_header("Accept-Ranges", "bytes")
+                if byte_range:
+                    first, last = byte_range
+                    self.send_header("Content-Range", f"bytes {first}-{last}/{len(data)}")
+                    data = data[first:last + 1]
                 self.send_header("Content-Length", str(len(data)))
                 self.end_headers()
                 self.wfile.write(data)
 
         return Handler
+
+
+def parse_single_http_byte_range(value: str, size: int) -> tuple[int, int]:
+    """Parse one inclusive byte range for browser video playback."""
+    match = re.fullmatch(r"bytes=(\d*)-(\d*)", value.strip())
+    if not match or size <= 0:
+        raise ValueError("invalid byte range")
+    first_text, last_text = match.groups()
+    if not first_text and not last_text:
+        raise ValueError("empty byte range")
+    if not first_text:
+        suffix_length = int(last_text)
+        if suffix_length <= 0:
+            raise ValueError("empty suffix")
+        return max(0, size - suffix_length), size - 1
+    first = int(first_text)
+    last = min(int(last_text), size - 1) if last_text else size - 1
+    if first >= size or last < first:
+        raise ValueError("unsatisfiable byte range")
+    return first, last
 
 
 def content_type_for_path(path: Path) -> str:
@@ -10697,6 +10743,8 @@ def content_type_for_path(path: Path) -> str:
         return "image/jpeg"
     if suffix == ".webp":
         return "image/webp"
+    if suffix == ".mp4":
+        return "video/mp4"
     return "application/octet-stream"
 
 

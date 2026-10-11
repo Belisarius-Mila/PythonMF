@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-10 22:38 CEST — P2-A lokálně, fyzická přejímka otevřená
+Aktualizováno: 2026-10-11 15:20 CEST — P2-A, příprava kontroly z iPhonu
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,14 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-11 15:20 CEST — Míla je na Caminu a Mac je fyzicky nedostupný.
+  Pro první přehrání se připravuje úzce omezený náhled syntetického filmu
+  přes tailnet Cockpit: jedna stránka a dvě konkrétní MP4, HTTP byte ranges
+  pro Safari. Lokální test modulu serveru 4/4 a plná brána 1867/1867 PASS. Nová cesta zatím není
+  pushnutá ani nasazená; živý odkaz a přehrání na iPhonu jsou NEOVĚŘENO.
+  Po nasazení je nejbližším fyzickým checkpointem P2-A/IPHONE1, P2-A/MAC1
+  zůstává na návrat k Macu. Plná přejímka P2-A vyžaduje oba výsledky.
 
 - 2026-10-10 22:38 CEST — P2-A implementované lokálně: uložená syntetická
   časová osa, video 720p/1080p, české titulky, hlas přes střihy a měření.

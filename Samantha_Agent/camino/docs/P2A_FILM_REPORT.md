@@ -105,12 +105,12 @@ Kontrola příznaků syntetického manifestu není napojení na živou autoritu
 souhlasů. Uzavření telefonní fronty a zdrojů patří P2-B. Mobilní editor,
 krátké dílčí náhledy a trvalá renderovací fronta patří P2-C/D.
 
-Jediný následující fyzický checkpoint **P2-A/MAC1**: otevřít finální MP4
-v prohlížeči nebo QuickTime, přehrát všech 22 s se zvukem. PASS znamená
-správné titulky a orientaci, celé obrazy a slyšitelnou závěrečnou větu
-„šťastnou cestu“. Pak následuje samostatný P2-A/IPHONE1. P2-A nelze označit
-za plně přijaté před oběma výsledky. Originály a skutečný archiv se při tom
-nepoužijí. Nový krok nebyl pushnutý ani nasazený.
+Fyzické checkpointy jsou **P2-A/IPHONE1** a **P2-A/MAC1**. V obou případech
+je třeba přehrát celé finále 22 s se zvukem. PASS znamená správné titulky
+a orientaci, celé obrazy a slyšitelnou závěrečnou větu „šťastnou cestu“.
+Po upřesnění z 2026-10-11 jde první iPhone kontrola; Mac kontrola počká na
+návrat. P2-A nelze označit za plně přijaté před oběma výsledky. Originály
+a skutečný archiv se při tom nepoužijí. Nový krok nebyl pushnutý ani nasazený.
 
 Soukromé důkazy a výstupy jsou v `data/private/camino/p2a/run-xip7fnef/`:
 `experiment.json`, `audio-tail-check.json`, `contact-sheet.png`, `review.html`,
@@ -119,3 +119,17 @@ Soukromé důkazy a výstupy jsou v `data/private/camino/p2a/run-xip7fnef/`:
 Technická reference: [FFmpeg filtry](https://ffmpeg.org/ffmpeg-filters.html)
 a [FFmpeg volby vstupu a výstupu](https://ffmpeg.org/ffmpeg.html).
 Konkrétní schopnosti byly ověřené místním FFmpeg, nikoli pouze dokumentací.
+
+## 2026-10-11 — Kontrola z iPhonu přes Cockpit
+
+Míla je na Caminu a Mac nemá fyzicky k dispozici. První ruční kontrolou proto
+bude **P2-A/IPHONE1**; P2-A/MAC1 zůstává otevřené na dobu návratu. Kritéria
+obrazu a zvuku jsou stejná. Plné přijetí P2-A stále vyžaduje oba výsledky.
+
+Lokální změna Cockpitu připravuje soukromý náhled na
+`/local-apps/camino-p2a-review/review.html`. Cesta dovoluje jen tuto stránku
+a dvě konkrétní syntetická MP4, podporuje `video/mp4` a HTTP byte ranges pro
+přehrání v Safari. Žádný skutečný obsah Camina ani jiné soubory z adresáře
+se touto cestou nevydávají. Běžící Cockpit zatím změnu neobsahuje; iPhone
+kontrola může začít až po samostatně schváleném nasazení a živém ověření odkazu.
+Test modulu serveru 4/4 PASS, plná Cockpit brána 1867/1867 PASS.

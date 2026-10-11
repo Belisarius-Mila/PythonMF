@@ -3113,3 +3113,24 @@ finále 12,490 s / 4 723 927 B; celý experiment 20,877 s a měřená alokovaná
 špička 10 383 360 B. Podrobná metoda, konečný výsledek plné brány, rozsah
 809 přidaných řádků Pythonu a struktura jsou v `camino/docs/P2A_FILM_REPORT.md`.
 Fyzický Mac/iPhone a lidský poslech NEOVĚŘENO, P2-A není plně přijaté.
+
+## 2026-10-11 15:20 CEST — P2-A: první kontrola přes iPhone
+
+**Hotovo:** Lokálně připravená Cockpit stránka zpřístupní jen syntetický
+náhled a finální film P2-A. Video se vydává jako MP4 s podporou částečného
+načítání pro Safari; jiné soubory z testovacího adresáře cesta odmítá.
+
+**Rozhodnutí:** Míla je na Caminu daleko od Macu. První fyzická kontrola se
+proto přesouvá na iPhone; Mac kontrola zůstává otevřená pro pozdější návrat.
+Původní kritéria obrazu a zvuku ani požadavek obou výsledků se nemění.
+
+**Další krok:** Po samostatném schválení nasazení Cockpitu živě ověřit odkaz,
+pak požádat Mílu jen o P2-A/IPHONE1: celé 22s finále se zvukem PASS/FAIL.
+
+**Navrhované další kroky:** Po návratu dokončit P2-A/MAC1. Po přijetí P2-A
+navázat P2-B s uzavřením skutečných vstupů.
+
+**Technický důkaz:** Test modulu Cockpit serveru 4/4 PASS včetně HTTP 206,
+MIME `video/mp4`, odmítnutí jiné cesty a neplatného rozsahu; plná brána
+1867/1867 PASS. Běžící Cockpit
+ani fyzický iPhone ještě nejsou ověřené; připravený kód není pushnutý/nasazený.
