@@ -60,7 +60,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] P2-A: syntetický 22s film, uložená časová osa a dva MP4 profily. Omezená serverová cesta i vstup Film P2-A s přehrávačem přímo v Cockpitu jsou pushnuté a nasazené; tailnet HTTP 206 a smoke 5/5. Report `camino/docs/P2A_FILM_REPORT.md`. Fyzické P2-A/IPHONE1 a později MAC1 čekají; příčina původní Safari chyby neznámá. Historický U17 PASS a M3/M4 nejsou rozšířené.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] P2-A: původní 22s film v Cockpitu má po Mílově poslechu obsahovou chybu, P2-A/IPHONE1 není PASS. Opravený neměnný běh `run-112rz9am` s hlasem do 21,000 s, 16/16 filmovými testy a plnou branou 1868/1868 je zatím lokální; čeká push, nasazení a nový iPhone poslech. P2-A/MAC1 zůstává otevřené. Report `camino/docs/P2A_FILM_REPORT.md`; historický U17 PASS a M3/M4 nejsou rozšířené.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` - Cockpit 14. 9.: scroll 10ec0877 potvrzený Mílou. [PRIPOMENOUT] U07 až při příštím pokračování. TXT v2.8 shrnuje U01–U06; plná brána 1680/1680 OK, funkční nasazení 980aed7a a smoke 5/5. Publikační překážka odstraněna; finální balíček/head ověřovat živým auditem.
 

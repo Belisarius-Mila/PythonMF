@@ -12,8 +12,8 @@ from camino.film.project import FilmError, digest, save_project, write_json
 
 
 SPEECH = ('Toto je syntetická zkouška filmové dílny Camino. '
-          'Obraz se mění, komentář pokračuje. '
-          'Na konci musí být slyšet celá věta: šťastnou cestu.')
+          'Vidíme fotografii, celé video na šířku i na výšku a záběr, který se správně otočil. '
+          'Komentář pokračuje přes střihy. Šťastnou cestu.')
 
 
 def create_fixture(root: Path) -> Path:
@@ -52,23 +52,25 @@ def create_fixture(root: Path) -> Path:
                          'duration_ms': 0 if kind == 'photo' else duration_ms(probe(sources / name), kind if kind == 'audio' else 'video'),
                          'privacy': 'diary', 'synthetic': True}
     voice_ms = manifest['voice']['duration_ms']
-    # Voice tail is followed by >= 1s of visible picture, never capped by a template.
-    closing_ms = max(3000, math.ceil((2500 + voice_ms + 1000 - 19000) / 1000) * 1000)
+    # Keep a closing picture long enough for the full voice and one final second.
+    closing_ms = max(3000, math.ceil((voice_ms + 1000 - 19000) / 1000) * 1000)
     shots, cursor = [], 0
     for n, (sid, length, title) in enumerate([
         ('photo', 4000, 'Český titulek: Příliš žluťoučký kůň'),
         ('landscape', 5000, 'Vodorovné video • celý záběr 0–5 s'),
         ('portrait', 5000, 'Svislé video • celý obraz bez ořezu'),
         ('rotated', 5000, 'Otočení podle metadat • celý záběr'),
-        ('photo', closing_ms, 'Závěr řeči se nesmí ztratit. Šťastnou cestu!'),
+        ('photo', closing_ms, 'Šťastnou cestu!'),
     ]):
         shots.append({'id': f'shot-{n}', 'source': sid, 'source_revision': 1,
                       'at_ms': cursor, 'in_ms': 0, 'out_ms': length, 'title': title,
                       'title_origin': 'synthetic', 'manual': False, 'gain': .6})
         cursor += length
+    # The closing phrase belongs near the end, with one second of picture after it.
+    voice_at_ms = cursor - voice_ms - 1000
     project = {'schema': 1, 'scope': 'synthetic-p2a', 'id': 'camino-p2a-demo', 'revision': 1,
                'sources': manifest, 'shots': shots,
-               'voices': [{'id': 'narration', 'source': 'voice', 'source_revision': 1, 'at_ms': 2500,
+               'voices': [{'id': 'narration', 'source': 'voice', 'source_revision': 1, 'at_ms': voice_at_ms,
                            'in_ms': 0, 'out_ms': voice_ms, 'manual': False, 'gain': 1.0}]}
     path = root / 'project-r1.json'
     save_project(path, project)

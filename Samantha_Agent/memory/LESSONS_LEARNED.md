@@ -22,6 +22,18 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-058 — Syntetický film nesmí namlouvat přejímací instrukci
+
+- Problém: TTS komentář vyslovil technický požadavek „Na konci musí být slyšet…“
+  a skončil 9,225 s před koncem filmu; úplné dekódování ani kontrola posledního
+  zvuku neodhalily nevhodný obsah a polohu věty.
+- Typ: opakující se
+- Řešení nalezeno: 11102026
+- Řešení: V syntetickém scénáři použít přirozenou samostatnou závěrečnou větu,
+  umístit konec zdrojového hlasu jednu sekundu před konec obrazu a ověřit
+  skutečný čas ticha ve finálním MP4. Nový běh P2-A a test časové osy prošly;
+  lidský poslech nové verze zůstává samostatnou přejímkou.
+
 ### LL-057 — Otočení testovacího videa prokazuje matice a dekódovaný obraz
 
 - Problém: FFmpeg 8.1 při syntetické zkoušce po `-metadata:s:v:0 rotate=90`

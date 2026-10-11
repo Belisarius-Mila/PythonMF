@@ -6542,7 +6542,7 @@ ${item.context || ""}`);
 
     function openCaminoFilm() {
       caminoFilmStatus.textContent = "Připraveno k přehrání.";
-      caminoFilmVideo.src = "/local-apps/camino-p2a-review/final-59b109f77f12/film.mp4";
+      caminoFilmVideo.src = "/local-apps/camino-p2a-review/final-fed41c8f9697/film.mp4";
       caminoFilmModal.classList.remove("hidden");
     }
 

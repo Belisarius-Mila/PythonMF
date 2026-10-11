@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-11 16:17 CEST — P2-A, přímý vstup do filmu v Cockpitu nasazený
+Aktualizováno: 2026-10-11 16:35 CEST — P2-A, opravovaný syntetický komentář po kontrole na iPhonu
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,18 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-11 16:35 CEST — Míla při přehrání původního filmu v Cockpitu slyšel
+  namluvenou kontrolní instrukci a další obraz po řeči. Audit projektu potvrdil,
+  že komentář končil v 12,775 s z 22 s. P2-A/IPHONE1 proto není PASS.
+  Opravený syntetický běh `run-112rz9am` má přirozenou závěrečnou větu
+  „Šťastnou cestu.“, hlas do 21,000 s a jednu sekundu závěrečného obrazu.
+  Finále 4 728 960 B, SHA-256
+  `abb68af56188dea97e40e0eb54fe3f85626d262309a12ffb4437591c10142e1d`;
+  16/16 filmových testů a plná brána 1868/1868 PASS, úplné dekódování a
+  vizuální kontrola závěru. Nová verze je zatím jen lokální, starý film je
+  stále nasazený. Po pushi a řízeném nasazení musí Míla provést nové
+  P2-A/IPHONE1. MAC1 čeká.
 
 - 2026-10-11 16:17 CEST — Přímý vstup Film P2-A a vestavěný přehrávač byly
   pushnuté a řízeně nasazené do Cockpitu. Plná brána 1867/1867 PASS,

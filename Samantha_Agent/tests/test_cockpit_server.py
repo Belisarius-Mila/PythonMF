@@ -44,8 +44,8 @@ class CaminoFilmReviewRouteTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             root = Path(temp_dir)
             (root / "review.html").write_text("review", encoding="utf-8")
-            (root / "final-59b109f77f12").mkdir()
-            (root / "final-59b109f77f12" / "film.mp4").write_bytes(b"0123456789")
+            (root / "final-fed41c8f9697").mkdir()
+            (root / "final-fed41c8f9697" / "film.mp4").write_bytes(b"0123456789")
             (root / "secret.txt").write_text("hidden", encoding="utf-8")
             with patch.dict(cockpit.LOCAL_WEB_APPS, {"camino-p2a-review": root}):
                 server = ThreadingHTTPServer(("127.0.0.1", 0), cockpit.CockpitServer().make_handler())
@@ -58,7 +58,7 @@ class CaminoFilmReviewRouteTests(unittest.TestCase):
                     response = conn.getresponse()
                     self.assertEqual(response.status, 200)
                     self.assertEqual(response.read(), b"review")
-                    conn.request("GET", base + "final-59b109f77f12/film.mp4", headers={"Range": "bytes=2-5"})
+                    conn.request("GET", base + "final-fed41c8f9697/film.mp4", headers={"Range": "bytes=2-5"})
                     response = conn.getresponse()
                     self.assertEqual(response.status, 206)
                     self.assertEqual(response.getheader("Content-Type"), "video/mp4")
@@ -68,7 +68,7 @@ class CaminoFilmReviewRouteTests(unittest.TestCase):
                     response = conn.getresponse()
                     self.assertEqual(response.status, 404)
                     response.read()
-                    conn.request("GET", base + "final-59b109f77f12/film.mp4", headers={"Range": "bytes=99-"})
+                    conn.request("GET", base + "final-fed41c8f9697/film.mp4", headers={"Range": "bytes=99-"})
                     response = conn.getresponse()
                     self.assertEqual(response.status, 416)
                     self.assertEqual(response.getheader("Content-Range"), "bytes */10")

@@ -15,6 +15,7 @@ from app.file_persistence import FilePersistenceError
 from camino.film.media import FONT, binary, ffmpeg, probe, run
 from camino.film.project import FilmError, digest, fingerprint, load_project, save_project, validate
 from camino.film.render import directory_bytes, render
+from camino.film.synthetic import SPEECH, create_fixture
 
 
 class FilmWorkflowTests(unittest.TestCase):
@@ -135,6 +136,18 @@ class FilmContractTests(unittest.TestCase):
 @unittest.skipUnless(shutil.which('ffmpeg') and shutil.which('ffprobe') and FONT.is_file(), 'Local FFmpeg and Czech font required')
 class FilmRenderTests(unittest.TestCase):
     setUp = FilmContractTests.setUp
+
+    @unittest.skipUnless(Path('/usr/bin/say').is_file(), 'macOS speech fixture required')
+    def test_synthetic_closing_sentence_is_near_film_end(self):
+        root = self.root / 'fixture'
+        root.mkdir()
+        project = load_project(create_fixture(root))
+        total_ms = validate(project, root)
+        voice = project['voices'][0]
+        voice_end_ms = voice['at_ms'] + voice['out_ms'] - voice['in_ms']
+        self.assertEqual(total_ms - voice_end_ms, 1000)
+        self.assertTrue(SPEECH.endswith('Šťastnou cestu.'))
+        self.assertNotIn('musí být slyšet', SPEECH)
 
     def test_display_matrix_rotates_landscape_without_cropping(self):
         raw = self.root / 'raw.mp4'

@@ -410,12 +410,12 @@ def family_video_organizer_app_root(
 
 LOCAL_WEB_APPS = {
     "family-video-organizer": family_video_organizer_app_root(),
-    "camino-p2a-review": PROJECT_ROOT / "data" / "private" / "camino" / "p2a" / "run-xip7fnef",
+    "camino-p2a-review": PROJECT_ROOT / "data" / "private" / "camino" / "p2a" / "run-112rz9am",
 }
 CAMINO_P2A_REVIEW_FILES = frozenset({
     "review.html",
-    "preview-712fb6726a95/film.mp4",
-    "final-59b109f77f12/film.mp4",
+    "preview-8bb3a5793fc9/film.mp4",
+    "final-fed41c8f9697/film.mp4",
 })
 DESKTOP_APP_CATALOG: tuple[dict[str, Any], ...] = (
     {

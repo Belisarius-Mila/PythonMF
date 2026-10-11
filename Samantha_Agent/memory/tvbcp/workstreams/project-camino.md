@@ -1,29 +1,32 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-10-11 16:17 CEST — P2-A, přímé spuštění v Cockpitu nasazené
+- Aktualizováno: 2026-10-11 16:35 CEST — P2-A, opravený syntetický komentář lokálně připravený
 
 ### Hotovo
 - Uložená časová osa s revizemi a kontrolou zdrojů, syntetický 22s film, náhled 720p a finále 1080p, české titulky a hlas přes střihy.
 - Cílené testy P2-A 15/15 PASS; plná Cockpit brána 1865/1865 PASS; oba soubory celé dekódované, obrazové snímky vizuálně ověřené a konec řeči potvrzený porovnáním PCM.
 - Náhled 4,221 s / 1 865 006 B; finále 12,490 s / 4 723 927 B. Celý experiment špička cca 9,9 MiB alokovaně při vzorkování po 50 ms.
 - Soukromá cesta Cockpitu pro syntetické MP4 i nový vstup Film P2-A s vestavěným přehrávačem byly pushnuté a nasazené. Tailnet stránka obsahuje nový vstup, MP4 vrací HTTP 206 se správným MIME a úplný SHA-256 souhlasí; nasazení smoke 5/5 PASS.
+- Po Mílově poslechu vznikl nový neměnný syntetický běh `run-112rz9am`: hlas končí v 21,000 s z 22 s a samostatnou větou „Šťastnou cestu.“. Je strojově ověřený, ale dosud není pushnutý ani nasazený.
 
 ### Otevřeno
-- P2-A/IPHONE1 a P2-A/MAC1: celé fyzické přehrání a poslech NEOVĚŘENO. P2-A není plně přijaté.
+- Původní film Míla na iPhonu slyšel, ale obsahoval namluvenou kontrolní instrukci a řeč končila 9,225 s před koncem obrazu. Není to P2-A/IPHONE1 PASS. Opravená verze čeká na novou fyzickou přejímku; P2-A/MAC1 také není ověřené.
 - Přesný Safari error z prvního přímého odkazu zatím není známý. Nový vstup v UI čeká na fyzické ověření na iPhonu.
 
 ### Rizika
 - Jen syntetické SDR vstupy; HDR odmítnuto. Testovací řeč macOS není skutečný autorův hlas. Časy nejsou odhadem výkonu dlouhého reálného filmu.
 - Žádné napojení na owner archiv nebo ověření uzavření telefonních dat; to patří P2-B. Editor a trvalá fronta jsou P2-C/D.
 - Integrovaný přehrávač řeší chybějící vstup v Cockpitu; příčina přímé Safari chyby není potvrzená a iPhone přejímka je nutná.
+- Do nasazení opravy zůstává v Cockpitu starý film; test staré verze není důkazem opravené verze.
 
 ### Rozhodnutí
 - Míla zadal P2-A a závěrečný report rozsahu, řádků kódu a struktury. Původní závazné podmínky filmu a sedm upřesnění zůstávají v platnosti.
 - Míla upřesnil spouštění filmu přímo v Cockpitu. Zůstává jen syntetický film a dosavadní úzký allowlist.
+- Mílův poslech vedl k opravě syntetického textu a časování; původní běh zůstává nedotčený pro diagnostiku.
 
 ### Další krok
-- Na iPhonu otevřít v Cockpitu Film P2-A, přehrát celé finále se zvukem a potvrdit P2-A/IPHONE1 PASS/FAIL. P2-A/MAC1 až po návratu.
+- Dokončit push a řízené nasazení opraveného filmu; pak na iPhonu přehrát celé nové finále se zvukem a potvrdit P2-A/IPHONE1 PASS/FAIL. P2-A/MAC1 až po návratu.
 
 ### Navrhované další kroky
 - Po fyzické přejímce P2-A zadat P2-B: uzavření vstupů a skutečný den.
@@ -32,6 +35,7 @@
 ### Technický důkaz
 - `camino/docs/P2A_FILM_REPORT.md`; soukromý běh `data/private/camino/p2a/run-xip7fnef/`.
 - Nové UI: `app/frontend/cockpit/page.html`, `app.js`, `styles.css`; frontend/server cíleně 22/22 PASS, plná brána 1867/1867 PASS a nasazení smoke 5/5.
+- Opravený běh: filmové testy 16/16 a plná brána 1868/1868 PASS, oba profily celé dekódované, hlas 7,335–21,000 s, 1 s závěrečného obrazu, finální SHA-256 `abb68af56188dea97e40e0eb54fe3f85626d262309a12ffb4437591c10142e1d`; fyzická přejímka a publikační audit čekají.
 - 577 nových řádků aplikace/runneru, 213 řádků testů, 19 řádků integrace do workflow/gate; fyzické řádky včetně komentářů a prázdných řádků.
 - Předchozí dokumentační p+n `0cbfd5ea` je samostatný dokončený krok; nedokládá nasazení P2-A.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -3195,3 +3199,25 @@ rozhodnout o přijetí P2-A a pokračování P2-B.
 **Technický důkaz:** 1867/1867 testů PASS, nasazení `deployed` a smoke 5/5.
 Tailnet HTTPS stránka obsahuje nový vstup; finální MP4 HTTP 206 `video/mp4`,
 4 723 927 B a shodný SHA-256.
+
+## 2026-10-11 16:35 CEST — P2-A: oprava závěru syntetického komentáře
+
+**Hotovo:** Mílův poslech odhalil, že původní testovací film mluví kontrolní
+instrukci a hlas končí dlouho před obrazem. Nový neměnný syntetický běh má
+samostatnou závěrečnou větu „Šťastnou cestu.“ a po ní jednu sekundu obrazu.
+Původní běh zůstává zachovaný, opravená verze je zatím jen lokální.
+
+**Rozhodnutí:** Původní iPhone přehrání není P2-A/IPHONE1 PASS. Opravujeme
+pouze obsah a časování syntetické zkoušky; skutečná média ani soukromostní
+pravidla se nemění.
+
+**Další krok:** Dokončit push a řízené nasazení opravené verze;
+potom Míla znovu přehraje celé finále na iPhonu se zvukem a sdělí PASS/FAIL.
+
+**Navrhované další kroky:** P2-A/MAC1 po návratu; P2-B až po obou fyzických
+přejímkách.
+
+**Technický důkaz:** Původní hlas končil v 12,775 s z 22 s. Nový hlas začíná
+v 7,335 s a končí v 21,000 s; finální MP4 začíná poslední ticho v 20,956 s.
+Nový běh `run-112rz9am`, 16/16 filmových testů a plná brána 1868/1868 PASS, oba profily celé
+dekódované, závěrečný snímek vizuálně ověřený. Publikační a lidský důkaz čekají.

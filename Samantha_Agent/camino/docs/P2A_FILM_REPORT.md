@@ -1,8 +1,10 @@
 # P2-A — syntetický film a uložená časová osa
 
-Stav 2026-10-11: syntetický film a soukromá cesta v Cockpitu byly pushnuté
-a nasazené. Skutečné přehrání celého filmu na Macu a iPhonu zůstává
-NEOVĚŘENO. Produkční archiv ani média Camina nebyly použité.
+Stav 2026-10-11 16:35 CEST: původní syntetický film je v Cockpitu nasazený,
+ale Mílova kontrola na iPhonu odhalila nevhodný text a předčasný konec řeči.
+Opravený neměnný běh je lokálně strojově ověřený; jeho push a nasazení dosud
+neproběhly. P2-A/IPHONE1 ani P2-A/MAC1 nejsou PASS. Produkční archiv ani
+média Camina nebyly použité.
 
 ## Rozsah
 
@@ -155,3 +157,30 @@ Doplněný Cockpit frontend má 43 nových fyzických řádků: 14 v šabloně
 modal s HTML5 videem → existující same-origin allowlistovaná MP4 cesta.
 Při zavření se přehrávání zastaví; syntetický film ani serverový kontrakt
 nebyly měněné.
+
+## 2026-10-11 — Oprava po poslechu na iPhonu
+
+Míla slyšel ve staré verzi jako komentář samotnou kontrolní instrukci
+„Na konci musí být slyšet…“ a pak ještě dlouhý obraz. Zdrojový projekt
+potvrdil konec řeči v 12,775 s z 22 s, tedy 9,225 s před koncem. Starý film
+proto neprošel obsahovou přejímkou a nesmí se označit za P2-A/IPHONE1 PASS.
+
+Nový neměnný běh `run-112rz9am` nahrazuje tuto verzi. Syntetický komentář
+popisuje zkušební obrazy a končí samostatnou větou „Šťastnou cestu.“;
+závěrečný titulek zní „Šťastnou cestu!“. Hlas začíná v 7,335 s, konec
+zdrojového audia je v 21,000 s a obraz končí ve 22,000 s. Ve finálním MP4
+začíná poslední ticho podle `silencedetect` v 20,956 s; přibližně 1,04 s
+obrazu tak zůstává po řeči. Oprava nemění skutečná média ani renderovací
+kontrakt. Původní běh se zachovává jako diagnostický důkaz, ale po nasazení
+už nebude nabízen v Cockpitu.
+
+Nový náhled `preview-8bb3a5793fc9/film.mp4` a finále
+`final-fed41c8f9697/film.mp4` mají shodnou 22s osu a otisk projektu
+`4cda1e233cb6c273ee5481d4cd96b954629724d743c5756747c58b95eb928df4`.
+Finále má 4 728 960 B a SHA-256
+`abb68af56188dea97e40e0eb54fe3f85626d262309a12ffb4437591c10142e1d`.
+Oba soubory byly celé dekódované; nový závěrečný snímek byl vizuálně
+zkontrolovaný. Cílené filmové testy 16/16 PASS a plná Cockpit brána
+1868/1868 PASS. Lidský poslech nové verze
+a fyzická přejímka zůstávají otevřené. Další krok: kontrolovaně publikovat
+novou omezenou cestu v Cockpitu a požádat Mílu o nové P2-A/IPHONE1.
