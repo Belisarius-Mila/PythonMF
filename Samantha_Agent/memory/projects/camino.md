@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-11 16:35 CEST — P2-A, opravovaný syntetický komentář po kontrole na iPhonu
+Aktualizováno: 2026-10-11 17:10 CEST — P2-A, opravený syntetický film živě nasazený
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,14 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-11 17:10 CEST — Opravený běh `run-112rz9am` z commitu `1208ea21`
+  je na GitHubu i v běžícím Cockpitu. Publikační brána 1868/1868 PASS,
+  řízené nasazení `deployed`, nový PID a smoke 5/5. Tailnet HTTPS stránka
+  vrací 200, nové MP4 podporuje 206 `video/mp4`; celé finále 4 728 960 B
+  má stejný SHA-256 jako místní soubor:
+  `abb68af56188dea97e40e0eb54fe3f85626d262309a12ffb4437591c10142e1d`.
+  P2-A/IPHONE1 vyžaduje nový fyzický poslech celých 22 s; P2-A/MAC1 čeká.
 
 - 2026-10-11 16:35 CEST — Míla při přehrání původního filmu v Cockpitu slyšel
   namluvenou kontrolní instrukci a další obraz po řeči. Audit projektu potvrdil,

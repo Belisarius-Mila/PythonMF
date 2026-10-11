@@ -3221,3 +3221,25 @@ přejímkách.
 v 7,335 s a končí v 21,000 s; finální MP4 začíná poslední ticho v 20,956 s.
 Nový běh `run-112rz9am`, 16/16 filmových testů a plná brána 1868/1868 PASS, oba profily celé
 dekódované, závěrečný snímek vizuálně ověřený. Publikační a lidský důkaz čekají.
+
+## 2026-10-11 17:10 CEST — P2-A: opravený film živě v Cockpitu
+
+**Hotovo:** Opravené syntetické finále je dostupné přes tlačítko Film P2-A
+v běžícím Cockpitu. Vzdáleně vydávaný soubor odpovídá přesně místnímu
+opravenému běhu.
+
+**Rozhodnutí:** Rozsah P2-A a kritéria fyzické přejímky se nemění. Dřívější
+iPhone přehrání chybné verze není PASS.
+
+**Další krok:** Míla na iPhonu přehraje celé nové 22s finále se zvukem a
+sdělí P2-A/IPHONE1 PASS/FAIL nebo přesnou chybu.
+
+**Navrhované další kroky:** P2-A/MAC1 po návratu k Macu; P2-B až po obou
+fyzických přejímkách.
+
+**Technický důkaz:** GitHub `main` obsahuje `1208ea21`, publikační brána
+1868/1868 PASS, řízené nasazení `deployed`, nový proces a smoke 5/5.
+Tailnet HTTPS stránka vrací 200; finální MP4 podporuje 206 `video/mp4` a
+celých 4 728 960 B má SHA-256
+`abb68af56188dea97e40e0eb54fe3f85626d262309a12ffb4437591c10142e1d`.
+Fyzický iPhone poslech ani Mac přehrání nové verze nebyly provedené.

@@ -184,3 +184,10 @@ zkontrolovaný. Cílené filmové testy 16/16 PASS a plná Cockpit brána
 1868/1868 PASS. Lidský poslech nové verze
 a fyzická přejímka zůstávají otevřené. Další krok: kontrolovaně publikovat
 novou omezenou cestu v Cockpitu a požádat Mílu o nové P2-A/IPHONE1.
+
+Opravený commit `1208ea21` byl následně pushnutý po plné publikační bráně
+1868/1868 a řízeně nasazený do Cockpitu. Nasazovací účtenka hlásí `deployed`,
+nový proces a smoke 5/5. Tailnet HTTPS stránka vrací 200, nové MP4 vrací 206
+`video/mp4` pro rozsah 0–1023 B a celé má 4 728 960 B se stejným SHA-256 jako
+místní soubor výše. P2-A/IPHONE1 a P2-A/MAC1 zůstávají otevřené pro fyzický
+poslech a přehrání.
