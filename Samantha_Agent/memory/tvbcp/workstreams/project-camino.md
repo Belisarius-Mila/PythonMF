@@ -3329,3 +3329,21 @@ P2-A/MAC1 dokončit po návratu k Macu; po uzavření dne navázat P2-C/D.
 `1208ea21`. HTTPS push blokuje Keychain `-25308`; `gh` token je neplatný,
 SSH klíč GitHub nepřijal. Archiv před změnou: 578 operací, 75 Momentů,
 202 ověřených médií. Server stále běží na starém releasu bez P2-B.
+
+## 2026-10-11 18:10 CEST — P2-B: přihlášení vypršelo
+
+**Hotovo:** Lokální release a projektové předání jsou uložené. Stará
+služba běží dál; žádný archivní soubor ani Serve cesta se neměnily.
+
+**Rozhodnutí:** Schválené p+n pokračuje až po nové GitHub autentizaci.
+Zastavení a upgrade služby před pushem neproběhly.
+
+**Další krok:** Obnovit přihlášení GitHub CLI z iPhonu, zkontrolovat přesný
+fast-forward, pushnout a řízeně nasadit s živým auditem.
+
+**Navrhované další kroky:** Samostatně řešit instalaci iPhone app a
+skutečný důkaz uzavření dne; P2-A/MAC1 po návratu k Macu.
+
+**Technický důkaz:** Device flow skončil `expired_token`. K 18:10 bylo
+šest lokálních commitů nad `origin/main` a běžící owner API stále
+nehlásilo `film_closed_day_v1`.

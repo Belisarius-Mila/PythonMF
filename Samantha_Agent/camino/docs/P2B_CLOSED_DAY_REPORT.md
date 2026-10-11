@@ -93,3 +93,10 @@ vlastnická účtenka pro registrovaný síťový audit. Po přihlášení je da
 krok přesný push, kontrolovaný stop/upgrade/start a přímý živý HTTP/HTTPS
 audit při zachování archivních počtů. iPhone app ani skutečný den tím
 nebudou nainstalované či uzavřené.
+
+Aktualizace 18:10 CEST: jednorázový GitHub kód vypršel bez potvrzení.
+Závěrečný audit stále ukazuje čistý lokální `main` se šesti commity před
+`origin/main` (`1208ea21` → `7e43c42b`). Push ani nasazení neproběhly;
+služba a Serve zůstaly beze změny. Po novém přihlášení není třeba znovu
+vyrábět film, serverový kód ani IPA; je třeba znovu ověřit přesný Git stav,
+pushnout a nasadit podle schváleného p+n.

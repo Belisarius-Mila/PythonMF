@@ -22,6 +22,18 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-059 — Izolovaný Camino release musí obsahovat nové importy
+
+- Problém: P2-B server importoval filmový modul a pomocnou knihovnu, které
+  selektivní `git archive` releasu neobsahoval; běh ze zdrojového stromu to
+  neodhalil.
+- Typ: opakující se
+- Řešení nalezeno: 11102026
+- Řešení: Při novém serverovém importu doplnit závislosti do `RELEASE_PATHS`
+  a před nasazením spustit izolovaný `python -I` import pouze z výsledného
+  archivu. Opravený P2-B release takto prošel; provozní upgrade je samostatný
+  krok po GitHub pushi.
+
 ### LL-058 — Syntetický film nesmí namlouvat přejímací instrukci
 
 - Problém: TTS komentář vyslovil technický požadavek „Na konci musí být slyšet…“

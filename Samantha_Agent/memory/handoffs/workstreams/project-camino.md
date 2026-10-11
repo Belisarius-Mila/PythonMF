@@ -1,7 +1,7 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-10-11 18:03 CEST — P2-B p+n čeká na GitHub přihlášení
+- Aktualizováno: 2026-10-11 18:10 CEST — P2-B p+n blokuje vypršené GitHub přihlášení
 
 ### Hotovo
 - Doplněný serverový release obsahuje P2-B moduly; commit `2fada468`, plná brána 1876/1876 a izolovaný import PASS. Míla schválil push a řízené nasazení.
@@ -17,7 +17,7 @@
 - Míla po výzvě k přehrání opraveného 22s finále se zvukem v Cockpitu na iPhonu oznámil **P2-A/IPHONE1 PASS**. Jde o Mílův fyzický výsledek; serverový audit ho nenahrazuje.
 
 ### Otevřeno
-- Push blokuje Keychain `-25308`; GitHub CLI čeká na potvrzení device loginu na iPhonu. Server stále běží bez nové funkce P2-B.
+- Push blokuje Keychain `-25308`; náhradní GitHub device kód vypršel bez potvrzení. Server stále běží bez nové funkce P2-B.
 - Skutečný den 6. 10. nebyl uzavřen: chybí čerstvý inventář z nového iPhone buildu, nové API není nasazené a žádný reálný projekt nevznikl.
 - Podepsaný build 17 blokuje nedostupný login Keychain; SideStore přepodepsání nepodepsaného IPA na iPhonu není ověřené.
 - Původní chybná verze nebyla přijata; nový iPhone výsledek je PASS. P2-A/MAC1 zůstává NEOVĚŘENO, proto P2-A ještě není plně přijaté.
@@ -2571,3 +2571,22 @@ stop/upgrade/start a živou kontrolu API i zachování archivu.
 **Technický důkaz:** `camino/docs/P2B_CLOSED_DAY_REPORT.md`; čistý
 fast-forward pěti commitů, izolovaný release import PASS. Archiv před
 upgradem: 578 operací, 75 Momentů a 202 ověřených médií.
+
+## 2026-10-11 18:10 CEST — P2-B: přihlášení vypršelo
+
+**Hotovo:** Kód i dokumentační checkpoint jsou na čistém lokálním `main`;
+oba profilové workspaces jsou čistě zarovnané. Běžící archiv se nezměnil.
+
+**Rozhodnutí:** Po neúspěšném přihlášení zastavení ani upgrade služby
+neproběhly. Mílovo p+n nadále platí pro připravený balíček.
+
+**Rizika:** Jednorázový GitHub kód vypršel; bez nové autentizace nelze
+odeslat šest čekajících commitů. iPhone instalace ani uzavření dne nejsou
+součástí tohoto p+n.
+
+**Další krok:** Zahájit nové GitHub device přihlášení, znovu ověřit přesný
+Git stav, pushnout a řízeně nasadit s živou kontrolou archivu a API.
+
+**Technický důkaz:** `main` `7e43c42b`, `origin/main` `1208ea21`, šest
+lokálních commitů; device flow skončil `expired_token`. Karta čekání v
+Cockpitu byla vyčištěna.

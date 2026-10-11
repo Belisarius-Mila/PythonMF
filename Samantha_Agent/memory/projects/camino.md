@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-11 18:03 CEST — P2-B p+n čeká na GitHub přihlášení
+Aktualizováno: 2026-10-11 18:10 CEST — P2-B p+n blokuje GitHub přihlášení
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,12 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-11 18:10 CEST — GitHub device kód vypršel bez potvrzení.
+  Push a nasazení P2-B neproběhly, stará služba a Serve zůstaly beze
+  změny. Lokální kód a ověření jsou zachované; po nové autentizaci lze
+  pokračovat přesným fast-forward pushem a řízeným upgradem. Karta čekání
+  v Cockpitu je vyčištěná.
 
 - 2026-10-11 18:03 CEST — Míla schválil P2-B push a řízené nasazení.
   Doplněné soubory filmového modulu do serverového releasu jsou v lokálním
