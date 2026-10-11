@@ -27,6 +27,7 @@ from scripts import camino_service_control as service
 
 RELEASE_PATHS = (
     "Samantha_Agent/camino/api", "Samantha_Agent/camino/domain", "Samantha_Agent/camino/server",
+    "Samantha_Agent/camino/film", "Samantha_Agent/app/file_persistence.py",
     "Samantha_Agent/scripts/camino_service_control.py",
     "Samantha_Agent/scripts/camino_c02b_t043_control.py",
 )
