@@ -143,6 +143,15 @@ Přesný text chyby zatím není známý. Do horní lišty Cockpitu proto přiby
 vstup **Film P2-A**, který otevře finální MP4 ve vestavěném přehrávači na
 stejné stránce. Zdroj videa se načte až po klepnutí a při zavření se zastaví;
 serverový allowlist ani obsah filmu se nemění. To řeší chybějící vstup v UI,
-nikoli ještě neprokázanou příčinu Safari chyby. Po novém nasazení ověřit
-HTML Cockpitu a HTTP 206 filmu přes tailnet; P2-A/IPHONE1 zůstává otevřené,
-dokud Míla nezkontroluje celé video se zvukem přímo na telefonu.
+nikoli ještě neprokázanou příčinu Safari chyby. Nové UI bylo pushnuté a
+řízeně nasazené; kontrola nasazení hlásí `deployed`, smoke 5/5. Tailnet HTTPS
+stránka obsahuje tlačítko, přehrávač i správnou cestu k filmu; MP4 vrací
+`206 video/mp4` pro úsek 0–1023 B a celé finále má 4 723 927 B se shodným
+SHA-256. P2-A/IPHONE1 zůstává otevřené, dokud Míla nezkontroluje celé video
+se zvukem přímo na telefonu.
+
+Doplněný Cockpit frontend má 43 nových fyzických řádků: 14 v šabloně
+`page.html`, 28 v `app.js` a 1 ve `styles.css`. Tok je tlačítko v horní liště →
+modal s HTML5 videem → existující same-origin allowlistovaná MP4 cesta.
+Při zavření se přehrávání zastaví; syntetický film ani serverový kontrakt
+nebyly měněné.

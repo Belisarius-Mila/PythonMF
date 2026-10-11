@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-11 16:05 CEST — P2-A, přímý vstup do filmu v Cockpitu lokálně připravený
+Aktualizováno: 2026-10-11 16:17 CEST — P2-A, přímý vstup do filmu v Cockpitu nasazený
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -12,11 +12,19 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 
 ## Aktuální stav
 
+- 2026-10-11 16:17 CEST — Přímý vstup Film P2-A a vestavěný přehrávač byly
+  pushnuté a řízeně nasazené do Cockpitu. Plná brána 1867/1867 PASS,
+  nasazení `deployed` a smoke 5/5. Tailnet HTTPS stránka obsahuje nový vstup;
+  finální syntetické MP4 vrací HTTP 206 `video/mp4`, celé má 4 723 927 B
+  a shodný SHA-256. První přímý Safari odkaz Mílovi hlásil chybu neznámého
+  znění; P2-A/IPHONE1 musí fyzicky ověřit nové otevření v Cockpitu i zvuk.
+  P2-A/MAC1 zůstává po návratu k Macu. P2-A ještě není plně přijaté.
+
 - 2026-10-11 16:05 CEST — Míla oznámil Safari chybu při přímém odkazu a
   upřesnil, že film chce spustit přes Cockpit. Přímý vstup Film P2-A v horní
   liště s vestavěným HTML5 přehrávačem je lokálně hotový; používá již
   nasazenou allowlistovanou cestu k finálnímu syntetickému MP4. Frontend/server
-  cíleně 22/22 PASS. Nové UI čeká na c+p+n a fyzické P2-A/IPHONE1; přesná
+  cíleně 22/22 PASS. Nové UI tehdy čekalo na c+p+n a fyzické P2-A/IPHONE1; přesná
   příčina Safari chyby zůstává neznámá. Mac přejímka zůstává později.
 
 - 2026-10-11 15:45 CEST — Míla schválil c+p+n pro syntetický film P2-A

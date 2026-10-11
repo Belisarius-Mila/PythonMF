@@ -1,25 +1,25 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-10-11 16:05 CEST — P2-A, vstup do filmu přímo v Cockpitu připraven lokálně
+- Aktualizováno: 2026-10-11 16:17 CEST — P2-A, film přímo v Cockpitu nasazený
 
 ### Hotovo
 - Uložená časová osa s revizemi a kontrolou zdrojů, syntetický 22s film, náhled 720p a finále 1080p, české titulky a hlas přes střihy.
 - Cílené testy P2-A 15/15 PASS; plná Cockpit brána 1865/1865 PASS; oba soubory celé dekódované, obrazové snímky vizuálně ověřené a konec řeči potvrzený porovnáním PCM.
 - Náhled 4,221 s / 1 865 006 B; finále 12,490 s / 4 723 927 B. Celý experiment špička cca 9,9 MiB alokovaně při vzorkování po 50 ms.
 - Cockpit přes tailnet HTTPS vydává stránku a dvě konkrétní syntetická MP4; video podporuje byte ranges. Push dvou commitů a řízené nasazení prošly, nový PID/otisk a smoke 5/5 ověřeny.
-- Horní lišta Cockpitu má nově tlačítko Film P2-A s vestavěným přehrávačem finálního MP4; tato oprava je zatím lokální a čeká na nové c+p+n.
+- Horní lišta Cockpitu má tlačítko Film P2-A s vestavěným přehrávačem finálního MP4. Oprava byla pushnutá a řízeně nasazená; kontrola nasazení `deployed`, smoke 5/5. Tailnet HTTPS stránka obsahuje nový vstup a MP4 vrací `206 video/mp4` se shodným úplným SHA-256.
 
 ### Otevřeno
 - P2-A/IPHONE1 a P2-A/MAC1: celé fyzické přehrání a poslech NEOVĚŘENO. Míla je mimo domov, proto se první kontrola přesouvá na iPhone; Mac později. P2-A není plně přijaté.
-- Míla oznámil chybu Safari při přímém otevření odkazu; přesný text chyby a příčina jsou zatím neznámé. Integrovaný přehrávač potřebuje nasadit a fyzicky ověřit.
+- Míla oznámil chybu Safari při přímém otevření odkazu; přesný text chyby a příčina jsou zatím neznámé. Integrovaný přehrávač potřebuje fyzicky ověřit na iPhonu.
 - Podrobný důkaz dosavadního nasazení a nového lokálního kroku je v `camino/docs/P2A_FILM_REPORT.md`.
 
 ### Rizika
 - Jen syntetické SDR vstupy; HDR odmítnuto. Testovací řeč macOS není skutečný autorův hlas. Časy nejsou odhadem výkonu dlouhého reálného filmu.
 - Žádné napojení na owner archiv nebo ověření uzavření telefonních dat; to patří P2-B. Editor a trvalá fronta jsou P2-C/D.
 - Tailnet HTTPS stránka a celé MP4 byly technicky ověřené, ale přehrání v Safari a lidský poslech na fyzickém iPhonu jsou stále NEOVĚŘENO.
-- Nové tlačítko zatím běží jen v pracovním kódu; i po nasazení nelze z Macu potvrdit skutečné přehrání na telefonu.
+- Z Macu nelze potvrdit skutečné přehrání na telefonu; chybové hlášení Safari z prvního přímého odkazu stále neznáme.
 
 ### Rozhodnutí
 - Míla zadal P2-A a závěrečný report rozsahu, řádků kódu a struktury. Původní závazné podmínky filmu a sedm upřesnění zůstávají v platnosti.
@@ -28,7 +28,7 @@
 - Míla upřesnil, že chce film spustit přímo přes Cockpit; původní samostatný Safari odkaz to nesplnil. Přímý vstup v Cockpitu používá stejnou úzce omezenou serverovou cestu.
 
 ### Další krok
-- Dokončit c+p+n opravy, ověřit přehrávač a video přes tailnet HTTPS; potom Míla v Cockpitu na iPhonu přehraje celé 22s finále se zvukem a potvrdí P2-A/IPHONE1 PASS/FAIL.
+- Míla v Cockpitu na iPhonu klepne na Film P2-A, přehraje celé 22s finále se zvukem a potvrdí P2-A/IPHONE1 PASS/FAIL.
 
 ### Navrhované další kroky
 - Po fyzické přejímce P2-A zadat P2-B: uzavření vstupů a skutečný den.
@@ -37,7 +37,7 @@
 
 ### Technický důkaz
 - `camino/docs/P2A_FILM_REPORT.md`; soukromý běh `data/private/camino/p2a/run-xip7fnef/`; test modulu Cockpit serveru 4/4 PASS, plná brána 1867/1867 PASS; tailnet HTTP 200/206 a shodný SHA-256 celého MP4.
-- Nový vstup používá `app/frontend/cockpit/page.html`, `app.js` a `styles.css`; cílené testy frontend/server 22/22 PASS, předchozí produkční route zůstává beze změny.
+- Nový vstup používá `app/frontend/cockpit/page.html`, `app.js` a `styles.css`; cílené testy frontend/server 22/22 PASS, plná brána 1867/1867 PASS, nasazení smoke 5/5 a tailnet video HTTP 206. Původní produkční route zůstává beze změny.
 - 577 nových řádků aplikace/runneru, 213 řádků testů, 19 řádků integrace do workflow/gate; fyzické řádky včetně komentářů a prázdných řádků.
 - Předchozí dokumentační p+n `0cbfd5ea` je samostatný dokončený krok; nedokládá nasazení P2-A.
 <!-- SAMANTHA_CURRENT_STATUS_END -->

@@ -1,17 +1,17 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-10-11 16:05 CEST — P2-A, přímé spuštění v Cockpitu připravené lokálně
+- Aktualizováno: 2026-10-11 16:17 CEST — P2-A, přímé spuštění v Cockpitu nasazené
 
 ### Hotovo
 - Uložená časová osa s revizemi a kontrolou zdrojů, syntetický 22s film, náhled 720p a finále 1080p, české titulky a hlas přes střihy.
 - Cílené testy P2-A 15/15 PASS; plná Cockpit brána 1865/1865 PASS; oba soubory celé dekódované, obrazové snímky vizuálně ověřené a konec řeči potvrzený porovnáním PCM.
 - Náhled 4,221 s / 1 865 006 B; finále 12,490 s / 4 723 927 B. Celý experiment špička cca 9,9 MiB alokovaně při vzorkování po 50 ms.
-- Soukromá cesta Cockpitu pro syntetické MP4 byla pushnutá a nasazená, tailnet HTTP 200/206 a smoke 5/5 PASS. Po Mílově hlášení chyby přímého Safari odkazu je lokálně doplněné tlačítko Film P2-A a vestavěný přehrávač v Cockpitu.
+- Soukromá cesta Cockpitu pro syntetické MP4 i nový vstup Film P2-A s vestavěným přehrávačem byly pushnuté a nasazené. Tailnet stránka obsahuje nový vstup, MP4 vrací HTTP 206 se správným MIME a úplný SHA-256 souhlasí; nasazení smoke 5/5 PASS.
 
 ### Otevřeno
 - P2-A/IPHONE1 a P2-A/MAC1: celé fyzické přehrání a poslech NEOVĚŘENO. P2-A není plně přijaté.
-- Nový vstup v UI je lokální a čeká na c+p+n; přesný Safari error zatím není známý.
+- Přesný Safari error z prvního přímého odkazu zatím není známý. Nový vstup v UI čeká na fyzické ověření na iPhonu.
 
 ### Rizika
 - Jen syntetické SDR vstupy; HDR odmítnuto. Testovací řeč macOS není skutečný autorův hlas. Časy nejsou odhadem výkonu dlouhého reálného filmu.
@@ -23,7 +23,7 @@
 - Míla upřesnil spouštění filmu přímo v Cockpitu. Zůstává jen syntetický film a dosavadní úzký allowlist.
 
 ### Další krok
-- Dokončit c+p+n integrovaného vstupu; potom na iPhonu přehrát celé finále z Cockpitu se zvukem a potvrdit P2-A/IPHONE1 PASS/FAIL. P2-A/MAC1 až po návratu.
+- Na iPhonu otevřít v Cockpitu Film P2-A, přehrát celé finále se zvukem a potvrdit P2-A/IPHONE1 PASS/FAIL. P2-A/MAC1 až po návratu.
 
 ### Navrhované další kroky
 - Po fyzické přejímce P2-A zadat P2-B: uzavření vstupů a skutečný den.
@@ -31,7 +31,7 @@
 
 ### Technický důkaz
 - `camino/docs/P2A_FILM_REPORT.md`; soukromý běh `data/private/camino/p2a/run-xip7fnef/`.
-- Nové UI: `app/frontend/cockpit/page.html`, `app.js`, `styles.css`; frontend/server cíleně 22/22 PASS před novou plnou branou.
+- Nové UI: `app/frontend/cockpit/page.html`, `app.js`, `styles.css`; frontend/server cíleně 22/22 PASS, plná brána 1867/1867 PASS a nasazení smoke 5/5.
 - 577 nových řádků aplikace/runneru, 213 řádků testů, 19 řádků integrace do workflow/gate; fyzické řádky včetně komentářů a prázdných řádků.
 - Předchozí dokumentační p+n `0cbfd5ea` je samostatný dokončený krok; nedokládá nasazení P2-A.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -3176,3 +3176,22 @@ rozhodnout o přijetí P2-A a pokračování P2-B.
 
 **Technický důkaz:** Frontend a server cíleně 22/22 PASS; plná brána a nové
 nasazení ještě běží. Fyzický iPhone zůstává NEOVĚŘENO.
+
+## 2026-10-11 16:17 CEST — P2-A: vstup v Cockpitu nasazený
+
+**Hotovo:** Film P2-A lze v běžícím Cockpitu otevřít přímo z horní lišty a
+spustit ve vestavěném přehrávači. Nasazení i kontrola soukromé HTTPS cesty
+proběhly; syntetické finále je bitově shodné s původním výstupem.
+
+**Rozhodnutí:** P2-A/IPHONE1 zůstává otevřená fyzická přejímka. Nasazené UI
+a síťový test nenahrazují lidské přehrání ani nevysvětlují původní Safari chybu.
+
+**Další krok:** Míla přehraje celé 22s finále se zvukem přes Film P2-A v
+Cockpitu na iPhonu a sdělí P2-A/IPHONE1 PASS/FAIL nebo přesnou chybu.
+
+**Navrhované další kroky:** P2-A/MAC1 po návratu; po obou fyzických výsledcích
+rozhodnout o přijetí P2-A a pokračování P2-B.
+
+**Technický důkaz:** 1867/1867 testů PASS, nasazení `deployed` a smoke 5/5.
+Tailnet HTTPS stránka obsahuje nový vstup; finální MP4 HTTP 206 `video/mp4`,
+4 723 927 B a shodný SHA-256.
