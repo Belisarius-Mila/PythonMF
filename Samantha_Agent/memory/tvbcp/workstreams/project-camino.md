@@ -3134,3 +3134,22 @@ navázat P2-B s uzavřením skutečných vstupů.
 MIME `video/mp4`, odmítnutí jiné cesty a neplatného rozsahu; plná brána
 1867/1867 PASS. Běžící Cockpit
 ani fyzický iPhone ještě nejsou ověřené; připravený kód není pushnutý/nasazený.
+
+## 2026-10-11 15:45 CEST — P2-A: nasazení náhledu pro iPhone
+
+**Hotovo:** Syntetický film lze otevřít přes tailnet Cockpit. Dva lokální
+vývojové commity byly odeslány na GitHub; řízený restart nasadil nový kód.
+Stránka i MP4 fungují přes HTTPS, finální soubor je bitově shodný s místním.
+
+**Rozhodnutí:** Míla výslovně zadal c+p+n. První fyzickou přejímkou zůstává
+iPhone, Mac bude možné ověřit po návratu; automatické testy nejsou lidský PASS.
+
+**Další krok:** Míla otevře odkaz na iPhonu, přehraje celé 22s finále se
+zvukem a vrátí výsledek P2-A/IPHONE1 PASS/FAIL.
+
+**Navrhované další kroky:** P2-A/MAC1 po návratu; po obou výsledcích rozhodnout
+o přijetí P2-A a navázání P2-B.
+
+**Technický důkaz:** Plná brána 1867/1867 PASS, GitHub `main` po pushi
+shodný s lokálním, Cockpit `deployed` a smoke 5/5. Tailnet HTTPS stránka
+200, video 206, celé MP4 200 a SHA-256 shodné s místním výstupem.

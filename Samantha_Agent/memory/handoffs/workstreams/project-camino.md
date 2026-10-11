@@ -1,29 +1,30 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-10-11 15:20 CEST — P2-A, příprava kontroly z iPhonu
+- Aktualizováno: 2026-10-11 15:45 CEST — P2-A, film dostupný pro kontrolu z iPhonu
 
 ### Hotovo
 - Uložená časová osa s revizemi a kontrolou zdrojů, syntetický 22s film, náhled 720p a finále 1080p, české titulky a hlas přes střihy.
 - Cílené testy P2-A 15/15 PASS; plná Cockpit brána 1865/1865 PASS; oba soubory celé dekódované, obrazové snímky vizuálně ověřené a konec řeči potvrzený porovnáním PCM.
 - Náhled 4,221 s / 1 865 006 B; finále 12,490 s / 4 723 927 B. Celý experiment špička cca 9,9 MiB alokovaně při vzorkování po 50 ms.
-- Lokálně připravená Cockpit cesta pro stránku a dvě konkrétní syntetická MP4; video podporuje byte ranges. Běžící Cockpit zatím novou cestu neobsahuje.
+- Cockpit přes tailnet HTTPS vydává stránku a dvě konkrétní syntetická MP4; video podporuje byte ranges. Push dvou commitů a řízené nasazení prošly, nový PID/otisk a smoke 5/5 ověřeny.
 
 ### Otevřeno
 - P2-A/IPHONE1 a P2-A/MAC1: celé fyzické přehrání a poslech NEOVĚŘENO. Míla je mimo domov, proto se první kontrola přesouvá na iPhone; Mac později. P2-A není plně přijaté.
-- Tento nový krok je lokální, bez push/deploy; nasazení Cockpitu vyžaduje samostatné schválení. Výsledek plné brány bude v `camino/docs/P2A_FILM_REPORT.md`.
+- GitHub `main` i lokální `main` byly po pushi shodné; finální dokumentační checkpoint je součástí tohoto c+p+n. Podrobný důkaz je v `camino/docs/P2A_FILM_REPORT.md`.
 
 ### Rizika
 - Jen syntetické SDR vstupy; HDR odmítnuto. Testovací řeč macOS není skutečný autorův hlas. Časy nejsou odhadem výkonu dlouhého reálného filmu.
 - Žádné napojení na owner archiv nebo ověření uzavření telefonních dat; to patří P2-B. Editor a trvalá fronta jsou P2-C/D.
-- Odkaz pro iPhone není živě ověřený, dokud nová cesta nebude nasazená a fyzicky otevřená na telefonu.
+- Tailnet HTTPS stránka a celé MP4 byly technicky ověřené, ale přehrání v Safari a lidský poslech na fyzickém iPhonu jsou stále NEOVĚŘENO.
 
 ### Rozhodnutí
 - Míla zadal P2-A a závěrečný report rozsahu, řádků kódu a struktury. Původní závazné podmínky filmu a sedm upřesnění zůstávají v platnosti.
 - Míla upřesnil, že je na Caminu daleko od Macu. Přesun pořadí fyzické kontroly na iPhone nemění dvě původní přejímky.
+- Míla výslovně zadal c+p+n připraveného P2-A filmu a Cockpit náhledu; nasazení proběhlo bez změny Tailscale Serve cest.
 
 ### Další krok
-- Po samostatném schválení nasadit připravenou Cockpit cestu, ověřit tailnet HTTPS náhled a dát Mílovi jediný checkpoint P2-A/IPHONE1: celé finále se zvukem PASS/FAIL.
+- P2-A/IPHONE1: Míla na iPhonu otevře tailnet Cockpit náhled, přehraje celé 22s finále se zvukem a potvrdí PASS/FAIL.
 
 ### Navrhované další kroky
 - Po fyzické přejímce P2-A zadat P2-B: uzavření vstupů a skutečný den.
@@ -31,7 +32,7 @@
 - P2-A/MAC1 fyzicky dokončit po návratu k Macu.
 
 ### Technický důkaz
-- `camino/docs/P2A_FILM_REPORT.md`; soukromý běh `data/private/camino/p2a/run-xip7fnef/`; test modulu Cockpit serveru 4/4 PASS, plná brána 1867/1867 PASS.
+- `camino/docs/P2A_FILM_REPORT.md`; soukromý běh `data/private/camino/p2a/run-xip7fnef/`; test modulu Cockpit serveru 4/4 PASS, plná brána 1867/1867 PASS; tailnet HTTP 200/206 a shodný SHA-256 celého MP4.
 - 577 nových řádků aplikace/runneru, 213 řádků testů, 19 řádků integrace do workflow/gate; fyzické řádky včetně komentářů a prázdných řádků.
 - Předchozí dokumentační p+n `0cbfd5ea` je samostatný dokončený krok; nedokládá nasazení P2-A.
 <!-- SAMANTHA_CURRENT_STATUS_END -->

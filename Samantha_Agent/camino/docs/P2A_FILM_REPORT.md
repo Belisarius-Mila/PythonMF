@@ -126,10 +126,14 @@ Míla je na Caminu a Mac nemá fyzicky k dispozici. První ruční kontrolou pro
 bude **P2-A/IPHONE1**; P2-A/MAC1 zůstává otevřené na dobu návratu. Kritéria
 obrazu a zvuku jsou stejná. Plné přijetí P2-A stále vyžaduje oba výsledky.
 
-Lokální změna Cockpitu připravuje soukromý náhled na
+Cockpit nabízí náhled na
 `/local-apps/camino-p2a-review/review.html`. Cesta dovoluje jen tuto stránku
 a dvě konkrétní syntetická MP4, podporuje `video/mp4` a HTTP byte ranges pro
 přehrání v Safari. Žádný skutečný obsah Camina ani jiné soubory z adresáře
-se touto cestou nevydávají. Běžící Cockpit zatím změnu neobsahuje; iPhone
-kontrola může začít až po samostatně schváleném nasazení a živém ověření odkazu.
-Test modulu serveru 4/4 PASS, plná Cockpit brána 1867/1867 PASS.
+se touto cestou nevydávají. Nasazení a živé ověření přes tailnet HTTPS
+proběhly 2026-10-11: stránka HTTP 200, část filmu HTTP 206, celé finále
+HTTP 200 a SHA-256 shodné s místním MP4
+`4296cf048fcad8c8ff7a6ab85e889bab26be1d44594671ce903c4ba2a47ae8f8`.
+Nasazovací ověření hlásilo `deployed` a smoke 5/5. Test modulu serveru
+4/4 PASS, plná Cockpit brána 1867/1867 PASS. Fyzické přehrání na iPhonu
+a lidský poslech stále čekají na Mílův výsledek.

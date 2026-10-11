@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-11 15:20 CEST — P2-A, příprava kontroly z iPhonu
+Aktualizováno: 2026-10-11 15:45 CEST — P2-A, film dostupný pro kontrolu z iPhonu
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,14 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-11 15:45 CEST — Míla schválil c+p+n pro syntetický film P2-A
+  a úzce omezený Cockpit náhled. Dva vývojové commity byly pushnuté,
+  Cockpit řízeně nasazený a ověřený (`deployed`, smoke 5/5). Tailnet HTTPS
+  stránka i celé finální MP4 fungují; video podporuje HTTP 206 a vzdálený
+  SHA-256 souhlasí s místním výstupem. Závěrečný dokumentační checkpoint
+  doplňuje kanonický stav. Fyzické P2-A/IPHONE1 je další krok; P2-A/MAC1
+  čeká na návrat k Macu. Žádné lidské PASS zatím není.
 
 - 2026-10-11 15:20 CEST — Míla je na Caminu a Mac je fyzicky nedostupný.
   Pro první přehrání se připravuje úzce omezený náhled syntetického filmu
