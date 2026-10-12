@@ -1,18 +1,19 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-10-12 17:58 CEST — P2-B: skutečný projekt z konečných Mac dat uložený, nový Cockpit lokálně
+- Aktualizováno: 2026-10-12 18:19 CEST — P2-B: skutečný Mac projekt dostupný v nasazeném Cockpitu
 
 ### Hotovo
 - Míla upřesnil, že data 6. 10. na Macu jsou konečná; nové uzavření v telefonu nebylo jeho záměrem. Následně výslovně zadal pokračování uložením projektu z Mac sady a zpřístupněním v Cockpitu.
 - Skutečný neměnný Mac projekt 6. 10. je uložený a ověřený: 30 povolených zdrojů, 11 foto, 14 celých videí, 5 samostatných zvukových voleb a 25 obrazových položek. Výchozí foto 3 s, obrazová osa 200 475 ms.
 - Projekt má výslovný původ `owner_confirmed_mac`; neobsahuje tvrzení o telefonní frontě ani fingovaný iPhone důkaz. Původní telefonní API je zachované jako oddělená cesta.
 - Archiv se nezměnil: před/po 624 operací, 82 Momentů, 216 originálů, 1 673 901 399 B; shodné všechny SHA-256, identity, epocha a kurzor. Přístup k archivním SQLite je pouze `mode=ro`, nevzniká nový archive store ani migrace.
-- Lokální Cockpit má vstup Film Camino, přehled skutečného projektu a oddělenou testovací P2-A ukázku. HTTP náhled na jiném loopback portu vrací 200 a ověřený projekt; nový backend/frontend 12/12 a související sada 82/82 PASS.
+- Po samostatném Mílově „p+n“ je `2e60f8db` na GitHubu a nasazený pouze Cockpit. Nový proces PID 98814 má očekávaný kódový otisk `59ae89a955a402c4`; řízená účtenka je `deployed` a smoke 5/5 PASS. Film Camino ukazuje skutečný projekt; P2-A ukázka zůstává samostatně.
 - Běžící Camino nadále používá ověřený release `e95568b7999e`; telefon, originály, přístupy a síť zůstaly beze změny. Předchozí GitHub CI oprava `31927650` prošla vzdálenou bránou.
 
+- Nový přehled je nasazený a živě ověřený přes loopback i soukromé HTTPS. Plná místní brána 1888/1888 PASS; GitHub brána přesného nasazeného `2e60f8db` má success: 1888 testů OK, 10 podmíněně přeskočených, 157,222 s (běh `38276225453`).
+
 ### Otevřeno
-- Nový Cockpit přehled je zatím lokální: plná brána 1888/1888 PASS a push/nasazení tohoto nového kroku čekají na samostatné potvrzení. Ve starém běžícím Cockpitu je dosud Film P2-A.
 - Prohlížečové UI nebylo vizuálně ověřené: CUA nemá dostupný prohlížeč. Funkční JS testy a skutečný HTTP náhled prošly; fyzický Cockpit klik po nasazení čeká.
 - Nevznikl skutečný MP4 ani editor. P2-C/D jsou další samostatné kroky. P2-A/MAC1 zůstává otevřené.
 
@@ -27,7 +28,7 @@
 - Běžící Camino se kvůli této změně nezastavuje ani neaktualizuje. Nové rozhraní se týká pouze Cockpitu a oddělených filmových souborů.
 
 ### Další krok
-- Po lokálním checkpointu a samostatném schválení pushnout a nasadit pouze Cockpit; potom ověřit Film Camino a počty skutečného projektu.
+- Obnovit Cockpit a otevřít Film Camino; fyzicky potvrdit čitelnost přehledu skutečného projektu. Další editor/render vyžaduje samostatné zadání.
 
 ### Navrhované další kroky
 - Po přijetí přehledu pokračovat P2-C editorem této uložené sady; render patří P2-D.
@@ -35,7 +36,8 @@
 
 ### Technický důkaz
 - `app/camino_film_workshop.py`, `scripts/camino_mac_film_project.py` a `camino/docs/P2B_CLOSED_DAY_REPORT.md`.
-- Mac projekt má platný manifest a zdroje; skutečný loopback HTTP 200, 30/25/5 a 200 475 ms. 12/12 nových bezpečnostních/HTTP/JS testů a 82/82 souvisejících testů PASS; plná brána 1888/1888 PASS.
+- Živý loopback i HTTPS: root a projekt 200, 30 zdrojů / 25 obrazových položek / 5 zvukových voleb a 200 475 ms. 12/12 nových bezpečnostních/HTTP/JS testů, 82/82 souvisejících a plná místní brána 1888/1888 PASS.
+- Camino beze změny na `e95568b7999e`, PID 67017. Owner HTTP/HTTPS 200/401, Viewer/přehled/mapa 200, foto/audio/video Range 206, anonymní 401 a soukromý zdroj 404. Archiv všech 216 originálů přesně shodný před/po, Serve otisk shodný a Funnel off.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: Camino
@@ -2648,3 +2650,27 @@ voleb. Plná závěrečná brána 1888/1888 PASS (297,270 s testů). Archiv pře
 82 Momentů, 216 ověřených originálů a 1 673 901 399 B, stejné identity
 a SHA-256. Telefon, Camino služba a síť beze změny. Prohlížečová vizuální
 kontrola NEOVĚŘENO (CUA nemá prohlížeč); nový Cockpit není nasazený.
+
+## 2026-10-12 18:19 CEST — P2-B: schválené Cockpit p+n dokončené
+
+**Hotovo:** Přesný commit `2e60f8db` je na GitHubu. Řízeně se restartoval
+jen ověřený Cockpit: PID 23125 → 98814, otisk `59ae89a955a402c4`, účtenka
+`deployed`, smoke 5/5. Film Camino je dostupný přes loopback i soukromé
+HTTPS a vrací skutečný validní projekt 6. 10.: 11 foto, 14 celých videí,
+5 zvukových voleb, 25 obrazových položek a 200 475 ms.
+
+**Rozhodnutí:** Míla výslovně zadal „ok, p+n“ pro připravený Mac projekt
+a nasazení pouze Cockpitu. Telefon, Camino služba ani síť se nemění.
+
+**Další krok:** Obnovit Cockpit a fyzicky potvrdit přehled Film Camino.
+
+**Navrhované další kroky:** P2-C editor této uložené sady po samostatném
+zadání; P2-D render a P2-A/MAC1 poslech zůstávají oddělené.
+
+**Technický důkaz:** Plná místní brána 1888/1888 PASS. Živý root/projekt
+HTTP/HTTPS 200; owner API a Viewer/mapa zdravé, foto/audio/video Range 206,
+anonymní 401, owner-only zdroj 404. Archiv před/po přesně shodný:
+624 operací, 82 Momentů, 216 originálů a 1 673 901 399 B, shodné identity,
+epocha, kurzor, tripy a všechny SHA-256. Camino zůstává na `e95568b7999e`,
+PID 67017; Serve beze změny, Funnel off. Vizuální Safari/telefonní klik
+NEOVĚŘENO (CUA nemá prohlížeč). [GitHub brána 38276225453](https://github.com/Belisarius-Mila/PythonMF/actions/runs/38276225453) pro `2e60f8db` má success: 1888 testů OK, 10 podmíněně přeskočených, 157,222 s.

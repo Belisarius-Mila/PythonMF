@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-12 17:58 CEST — skutečný Mac projekt 6. 10. uložený; nový Cockpit lokálně
+Aktualizováno: 2026-10-12 18:19 CEST — skutečný Mac projekt 6. 10. dostupný v nasazeném Cockpitu
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,16 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-12 18:19 CEST — Míla schválil „p+n“. Přesný `2e60f8db` je na GitHubu,
+  nasazený pouze Cockpit: nový PID 98814, otisk `59ae89a955a402c4`, účtenka
+  `deployed`, smoke 5/5. Film Camino vrací přes loopback i soukromé HTTPS
+  validní skutečný projekt 30 zdrojů / 25 obrazových položek / 5 audio voleb.
+  Archiv před/po přesně shodný včetně všech 216 originálů; Camino nadále
+  `e95568b7999e`, PID 67017, telefon a síť beze změny. Owner/Viewer/mapa
+  200, foto/audio/video Range 206, anonymní 401 a owner-only zdroj 404.
+  Plná místní brána 1888/1888 PASS; GitHub kontrola nasazeného `2e60f8db` má success (`38276225453`).
+  Vizuální UI klik není ověřený; editor/render zůstávají další samostatné kroky.
 
 - 2026-10-12 17:58 CEST — Míla potvrdil konečnost Mac dat 6. 10. a zadal projekt
   z této sady v Cockpitu, bez nového telefonního uzavření. Skutečný projekt

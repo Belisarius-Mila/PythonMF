@@ -60,7 +60,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] 12. 10.: Míla potvrdil konečnost Mac dat 6. 10.; skutečný projekt uložený bez telefonního uzavření (11 foto, 14 celých videí, 5 audio, 25 záběrů, 200 475 ms). Archiv, telefon a Camino služba zachované. Nový Cockpit Film Camino lokálně; 12/12, 82/82 a HTTP náhled PASS, plná brána 1888/1888 PASS; push/nasazení čekají na samostatné potvrzení. P2-A/MAC1 otevřené, editor/render P2-C/D samostatně. Report `camino/docs/P2B_CLOSED_DAY_REPORT.md`.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] 12. 10.: skutečný Mac projekt 6. 10. je v nasazeném Film Camino (11 foto, 14 celých videí, 5 audio voleb, 25 záběrů, 200 475 ms). Schválené p+n `2e60f8db`, řízená Cockpit účtenka deployed, smoke 5/5, HTTP/HTTPS 200. Archiv, telefon, Camino služba a síť zachované. Místní plná brána 1888/1888 PASS; GitHub brána nasazeného `2e60f8db` success (`38276225453`). Fyzicky ověřit nový přehled; P2-A/MAC1 a editor/render P2-C/D odděleně. Report `camino/docs/P2B_CLOSED_DAY_REPORT.md`.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` - Cockpit 14. 9.: scroll 10ec0877 potvrzený Mílou. [PRIPOMENOUT] U07 až při příštím pokračování. TXT v2.8 shrnuje U01–U06; plná brána 1680/1680 OK, funkční nasazení 980aed7a a smoke 5/5. Publikační překážka odstraněna; finální balíček/head ověřovat živým auditem.
 

@@ -1,6 +1,6 @@
 # Camino P2-B — uzavření dne 6. 10. 2026
 
-Stav 12. 10. 2026: **skutečný projekt z konečných Mac dat uložený a ověřený; nový Cockpit přehled lokálně**.
+Stav 12. 10. 2026: **skutečný projekt z konečných Mac dat uložený, ověřený a dostupný v nasazeném Film Camino**.
 P2-A/IPHONE1 má Mílův PASS; P2-A/MAC1 zůstává na fyzické přehrání.
 Míla výslovně zahájil P2-B a oznámil, že data prvního dne jsou na Macu
 kompletní. To je vstupní tvrzení, nikoli ještě důkaz telefonu.
@@ -217,3 +217,30 @@ odlišený syntetický test a skutečný projekt 30/25/5. CUA nemá prohlížeč
 proto vizuální UI/Safari přejímka je NEOVĚŘENO. Závěrečná plná brána **1888/1888 PASS** (297,270 s testů);
 nové zdrojové soubory, push a nasazení Cockpitu nejsou publikované.
 Další je lokální checkpoint a po samostatném souhlasu pouze Cockpit p+n.
+
+## Schválené p+n pouze Cockpitu — 2026-10-12 18:19 CEST
+
+Míla výslovně zadal „ok, p+n“ pro připravený Mac projekt. Přesný commit
+`2e60f8db7d842a7ae3a036c945503026db52f5a4` je na GitHubu. Řízená příprava
+zkontrolovala čistý main i oba profilové workspaces a provedla rychlou
+statickou bránu; stejný kód má již plnou místní bránu 1888/1888 PASS.
+Restart se týkal pouze ověřeného Cockpit procesu PID 23125. Nový PID 98814
+má očekávaný otisk `59ae89a955a402c4`, soukromá účtenka je `deployed`
+a povinný smoke 5/5 PASS. Žádný druhý server se nespustil.
+
+Čerstvý redigovaný audit přes loopback a soukromé HTTPS potvrzuje root
+s Film Camino i `/api/camino/film/day` 200, validní projekt a shodné počty:
+30 zdrojů, 11 foto, 14 celých videí, 5 audio voleb, 25 obrazových položek,
+200 475 ms. P2-A je samostatná testovací ukázka. Editor ani MP4 nevznikly.
+
+Camino služba se nezastavila ani nezměnila: release `e95568b7999e`, PID 67017.
+Owner API HTTP/HTTPS zdravé; Viewer/přehled/mapa/map-data 200, skutečné
+foto/audio/video Range 206, anonymní 401 a owner-only médium 404. Archiv
+před/po přesně shodný: 624 operací, 82 Momentů, 216 originálů,
+1 673 901 399 B; stejné identity/epoch/cursor/tripy a všechny SHA-256.
+Soukromý Serve otisk zůstal shodný a Funnel je vypnutý. Telefon beze změny.
+
+Vizuální Safari/telefonní klik zůstává NEOVĚŘENO, CUA nemá prohlížeč.
+Další je obnovit Cockpit a fyzicky přijmout přehled Film Camino.
+[GitHub běh 38276225453](https://github.com/Belisarius-Mila/PythonMF/actions/runs/38276225453) pro přesný nasazený `2e60f8db` skončil success:
+1888 testů OK, 10 podmíněně přeskočených, 157,222 s testů.
