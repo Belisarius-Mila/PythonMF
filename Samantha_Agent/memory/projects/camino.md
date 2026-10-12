@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-12 19:47 CEST — P2-C/D: nasazený editor a skutečné MP4
+Aktualizováno: 2026-10-12 20:14 CEST — první hodnocení filmu OK; ovládání editoru 13. 10.
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,9 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-12 20:14 CEST — Míla 12. 10. hodnotí první skutečný film „na první dobrou ok“ a strukturu editoru dobře. Ovládání vyzkouší 13. 10.; není hlášená chyba vyžadující dnešní opravu.
+  Další krok: 13. 10. ověřit ovládání: změnit pořadí dvou záběrů a délku jedné fotky, vyčkat uložení, obnovit stránku a přehrát dílčí náhled. PASS: pořadí i délka zůstanou uložené a náhled odpovídá střihu.
 
 - 2026-10-12 19:47 CEST — Po potvrzení „ok p+n cockpit“ je `7c9547fc` na GitHubu
   a nasazený pouze Cockpit (PID 35526, otisk `4f1f0c17ac72659f`, smoke 5/5).
@@ -3067,3 +3070,21 @@ nadále `e95568b7999e`, PID 67017; owner HTTP/HTTPS, Viewer/mapa/map-data
 200, foto/audio/video Range 206, anonymní Viewer 401. Serve shodný,
 Funnel off. Safari/iPhone ovládání a celý lidský poslech NEOVĚŘENO.
 [GitHub brána 38285925799](https://github.com/Belisarius-Mila/PythonMF/actions/runs/38285925799) nasazeného `7c9547fc` má success: 1907 testů OK, 13 podmíněně přeskočených, 203,452 s. Skutečné render testy a všech 19 editor testů prošly místně bez přeskočení.
+
+
+## 2026-10-12 20:14 CEST — první hodnocení filmu OK, editor zítra
+
+**Hotovo:** Míla 12. 10. hodnotí první skutečný film „na první dobrou ok“ a strukturu editoru dobře. Ovládání vyzkouší 13. 10.; není hlášená chyba vyžadující dnešní opravu.
+
+**Rozhodnutí:** Dnes ukončit relaci; pokračovat zkouškou editoru 13. 10.
+Žádné nové vývojové, renderovací ani provozní změny nejsou potřebné.
+
+**Další krok:** 13. 10. ověřit ovládání: změnit pořadí dvou záběrů a délku jedné fotky, vyčkat uložení, obnovit stránku a přehrát dílčí náhled. PASS: pořadí i délka zůstanou uložené a náhled odpovídá střihu.
+
+**Navrhované další kroky:** Ruční komentář a podrobná P2-E přejímka;
+P2-F až po přijetí základu a samostatném zadání.
+
+**Technický důkaz:** Uživatelské hodnocení v této relaci. Zařízení, profil
+a rozsah poslechu nejsou uvedené; není to úplný protokol P2-E. Technické
+ověření nasazení zůstává v `P2CD_EDITOR_MP4_REPORT.md`. Tento krok mění
+pouze projektové zápisy, bez nového renderu či nasazení.

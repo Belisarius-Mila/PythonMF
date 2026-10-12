@@ -1,9 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-10-12 19:47 CEST — P2-C/D: nasazený editor a skutečné MP4 dne 6. 10.
+- Aktualizováno: 2026-10-12 20:14 CEST — první hodnocení filmu OK, ovládání editoru 13. 10.
 
 ### Hotovo
+- Míla 12. 10. hodnotí první skutečný film „na první dobrou ok“ a strukturu editoru dobře. Ovládání vyzkouší 13. 10.; není hlášená chyba vyžadující dnešní opravu.
 - Nad konečnou Mílou potvrzenou Mac sadou funguje editor v nasazeném Cockpitu: pořadí, výslovné vyřazení, titulek, délka foto, ruční in/out videa, zvukové části a hlasitost. Platné změny se automaticky ukládají do neměnných revizí; retry a souběžná okna nepřepisují práci.
 - Soukromá trvalá fronta vytváří věrný 720p náhled, dílčí úsek a 1080p MP4 konkrétní uložené revize. Proces renderu je oddělený od Cockpitu a Camina; po přerušení se opakuje od začátku, staré výsledky i pokusy zůstávají.
 - Skutečný den má oba ověřené exporty revize 1: 25 záběrů, časová osa 200 475 ms, 6014 video snímků, video 200 465 ms a audio 200 466 ms. Náhled 25 617 860 B / 135,034 s; finále 115 011 021 B / 181,017 s. První sestavení používá celé video se skutečným zvukem; pět samostatných hlasových částí zůstává k výslovnému umístění v editoru.
@@ -11,7 +12,7 @@
 - Archiv je přesně shodný před/po: 624 operací, 82 Momentů, 216 originálů, 1 673 901 399 B, stejné identity/tripy a všechny SHA-256. Camino nadále `e95568b7999e`, živé owner HTTP/HTTPS, Viewer/mapa 200, foto/audio/video Range 206, anonymní Viewer 401. Telefon, služba i síť beze změny, Serve otisk shodný, Funnel off.
 
 ### Otevřeno
-- Safari/iPhone ovládání editoru a celý lidský poslech skutečného filmu NEOVĚŘENO. P2-E je fyzická přejímka; P2-A/MAC1 zůstává odděleně otevřené.
+- P2-E: první filmové hodnocení OK podle Míly; ovládání editoru a ruční komentář čekají na zkoušku 13. 10. P2-A/MAC1 zůstává odděleně otevřené.
 
 ### Rizika
 - První verze podporuje jeden uzavřený den, 256 zdrojů, 60 minut obrazu a 16 rozpracovaných exportů. HDR video bezpečně odmítá; fotografie používají hlavní SDR obraz včetně EXIF/ICC převodu. Originály včetně ostatních MPO vrstev zůstávají celé.
@@ -23,7 +24,7 @@
 - Samostatný hlas se umisťuje vědomě. Žádný automatický střih na cílovou délku, hudba, AI hlas ani veřejné sdílení. Camino se kvůli editoru nenastavuje ani nerestartuje.
 
 ### Další krok
-- P2-E: fyzicky otevřít editor a přehrát celý skutečný film se zvukem přes Film Camino.
+- 13. 10. ověřit ovládání: změnit pořadí dvou záběrů a délku jedné fotky, vyčkat uložení, obnovit stránku a přehrát dílčí náhled. PASS: pořadí i délka zůstanou uložené a náhled odpovídá střihu.
 
 ### Navrhované další kroky
 - P2-E: fyzicky ověřit editor, celý skutečný film se zvukem a ruční komentář.
@@ -2727,3 +2728,21 @@ nadále `e95568b7999e`, PID 67017; owner HTTP/HTTPS, Viewer/mapa/map-data
 200, foto/audio/video Range 206, anonymní Viewer 401. Serve shodný,
 Funnel off. Safari/iPhone ovládání a celý lidský poslech NEOVĚŘENO.
 [GitHub brána 38285925799](https://github.com/Belisarius-Mila/PythonMF/actions/runs/38285925799) nasazeného `7c9547fc` má success: 1907 testů OK, 13 podmíněně přeskočených, 203,452 s. Skutečné render testy a všech 19 editor testů prošly místně bez přeskočení.
+
+
+## 2026-10-12 20:14 CEST — první hodnocení filmu OK, editor zítra
+
+**Hotovo:** Míla 12. 10. hodnotí první skutečný film „na první dobrou ok“ a strukturu editoru dobře. Ovládání vyzkouší 13. 10.; není hlášená chyba vyžadující dnešní opravu.
+
+**Rozhodnutí:** Dnes ukončit relaci; pokračovat zkouškou editoru 13. 10.
+Žádné nové vývojové, renderovací ani provozní změny nejsou potřebné.
+
+**Další krok:** 13. 10. ověřit ovládání: změnit pořadí dvou záběrů a délku jedné fotky, vyčkat uložení, obnovit stránku a přehrát dílčí náhled. PASS: pořadí i délka zůstanou uložené a náhled odpovídá střihu.
+
+**Navrhované další kroky:** Ruční komentář a podrobná P2-E přejímka;
+P2-F až po přijetí základu a samostatném zadání.
+
+**Technický důkaz:** Uživatelské hodnocení v této relaci. Zařízení, profil
+a rozsah poslechu nejsou uvedené; není to úplný protokol P2-E. Technické
+ověření nasazení zůstává v `P2CD_EDITOR_MP4_REPORT.md`. Tento krok mění
+pouze projektové zápisy, bez nového renderu či nasazení.

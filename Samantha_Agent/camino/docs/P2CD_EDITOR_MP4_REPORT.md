@@ -101,9 +101,17 @@ Cílené testy editoru, HTTP, JS, souběhu, obnovy, soukromí a skutečných
 renderů PASS. Závěrečná plná brána **1907/1907 PASS** (319,041 s testů).
 Nová sada editoru má 19/19 testů PASS, včetně skutečného renderu
 720p/1080p, zlomkových střihů a MPO/EXIF/ICC. Nový editor je publikovaný a nasazený pouze do Cockpitu.
-Vizuální browser/Safari ovládání a celý lidský poslech NEOVĚŘENO;
-CUA hlásí prázdný seznam prohlížečů. P2-E nepřijato.
+Míla 12. 10. oznámil první hodnocení filmu OK a ocenil strukturu editoru;
+ovládání vyzkouší 13. 10. Jeho zařízení, profil a rozsah poslechu nejsou
+uvedené. Podrobná P2-E přejímka ovládání a ručního komentáře čeká.
+Nástrojová browser QA neměla dostupný prohlížeč.
 
 ## Publikační ověření
 
 [GitHub brána 38285925799](https://github.com/Belisarius-Mila/PythonMF/actions/runs/38285925799) nasazeného `7c9547fc` má success: 1907 testů OK, 13 podmíněně přeskočených, 203,452 s. Skutečné render testy a všech 19 editor testů prošly místně bez přeskočení.
+
+## 2026-10-12 20:14 CEST — uživatelské hodnocení a předání
+
+Míla 12. 10. hodnotí první skutečný film „na první dobrou ok“ a strukturu editoru dobře. Ovládání vyzkouší 13. 10.; není hlášená chyba vyžadující dnešní opravu.
+
+13. 10. ověřit ovládání: změnit pořadí dvou záběrů a délku jedné fotky, vyčkat uložení, obnovit stránku a přehrát dílčí náhled. PASS: pořadí i délka zůstanou uložené a náhled odpovídá střihu.

@@ -60,7 +60,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] 2026-10-12 19:47 CEST: P2-C/D `7c9547fc` publikované a nasazené pouze do Cockpitu, smoke 5/5. Film Camino má editor a existující skutečné 720p/1080p MP4 6. 10. revize 1 (~3:20, 25 záběrů); žádný nový render. Živé HTTP/HTTPS editor 200, MP4 HEAD 200/Range 206 a celé HTTPS finále shodný SHA-256. Camino PID/release, všech 216 originálů i síť zachované. Plná místní brána 1907 testů OK; GitHub brána 1907 testů OK (13 podmíněně přeskočených). P2-E fyzická přejímka editoru/filmu a P2-A/MAC1 odděleně. Report `camino/docs/P2CD_EDITOR_MP4_REPORT.md`.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] 2026-10-12 20:14 CEST: Míla hodnotí první film 6. 10. „na první dobrou ok“ a strukturu editoru dobře; ovládání vyzkouší 13. 10. Navázat změnou pořadí/délky fotky, uložením po obnovení stránky a dílčím náhledem. Nasazený P2-C/D editor a 720p/1080p MP4 zachované, Camino i archiv beze změny; dnešní technické ověření v `camino/docs/P2CD_EDITOR_MP4_REPORT.md`. P2-E ovládání/ruční komentář a P2-A/MAC1 zůstávají otevřené.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` - Cockpit 14. 9.: scroll 10ec0877 potvrzený Mílou. [PRIPOMENOUT] U07 až při příštím pokračování. TXT v2.8 shrnuje U01–U06; plná brána 1680/1680 OK, funkční nasazení 980aed7a a smoke 5/5. Publikační překážka odstraněna; finální balíček/head ověřovat živým auditem.
 
