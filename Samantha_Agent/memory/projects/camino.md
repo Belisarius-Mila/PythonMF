@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-11 18:10 CEST — P2-B p+n blokuje GitHub přihlášení
+Aktualizováno: 2026-10-12 16:45 CEST — P2-B server publikovaný, skutečný den čeká na telefon
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,25 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- První GitHub CI běh po pushi selhal na starém Xcode Git a chybějícím
+  `httpx`. Oprava se omezuje na kontrolní workflow; čerstvá plná místní
+  brána 1876/1876 PASS, nová GitHub brána čeká na výsledek. Běžící Camino
+  zůstává beze změny.
+
+- 2026-10-12 16:45 CEST — GitHub přihlášení obnoveno a schválené p+n dokončené
+  po přesném potvrzení globální brzdy. Server běží z `e95568b7999e`, soukromé
+  API hlásí `film_closed_day_v1`. Čerstvých 71/71 testů, izolovaný import,
+  HTTP/HTTPS, Viewer/mapa a mediální 206 prošly; Cockpit smoke 5/5.
+  Archiv přesně zachovaný: 624 operací, 82 Momentů, 216 originálů,
+  1 673 901 399 B se shodnými SHA-256, identitou, epochou a kurzorem.
+  Stejné schéma 3, závislosti i kód přenosů/obnovy/Vieweru; čtyři DB snapshoty
+  a původní konfigurace zachované, Serve beze změny a Funnel off.
+  Míla oznámil běžnou funkčnost po znovunačtení posledního buildu; dnešní krok
+  telefon neměnil a jeho verze/P2-B UI nejsou doložené. Skutečný den 6. 10.
+  čeká na explicitní čerstvý důkaz telefonu, P2-A/MAC1 čeká na fyzický poslech.
+  GitHub CLI používá místní přihlašovací soubor s ověřenými soukromými právy;
+  bez tajemství v Gitu. Report: `camino/docs/P2B_CLOSED_DAY_REPORT.md`.
 
 - 2026-10-11 18:10 CEST — GitHub device kód vypršel bez potvrzení.
   Push a nasazení P2-B neproběhly, stará služba a Serve zůstaly beze

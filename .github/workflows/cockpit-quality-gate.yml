@@ -6,6 +6,7 @@ on:
     paths:
       - ".github/workflows/cockpit-quality-gate.yml"
       - "Samantha_Agent/requirements.txt"
+      - "Samantha_Agent/camino/server/requirements.txt"
       - "Samantha_Agent/app/cockpit.py"
       - "Samantha_Agent/app/cockpit_frontend.py"
       - "Samantha_Agent/app/library_images.py"
@@ -63,6 +64,7 @@ on:
     paths:
       - ".github/workflows/cockpit-quality-gate.yml"
       - "Samantha_Agent/requirements.txt"
+      - "Samantha_Agent/camino/server/requirements.txt"
       - "Samantha_Agent/app/cockpit.py"
       - "Samantha_Agent/app/cockpit_frontend.py"
       - "Samantha_Agent/app/library_images.py"
@@ -124,8 +126,11 @@ concurrency:
 
 jobs:
   quality-gate:
-    runs-on: macos-14
+    runs-on: macos-15
     timeout-minutes: 25
+    env:
+      # git_runtime resolves Git through xcrun, rather than the Homebrew PATH.
+      DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
     defaults:
       run:
         working-directory: Samantha_Agent
@@ -139,10 +144,18 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
-          cache-dependency-path: Samantha_Agent/requirements.txt
+          cache-dependency-path: |
+            Samantha_Agent/requirements.txt
+            Samantha_Agent/camino/server/requirements.txt
+
+      - name: Verify selected Git supports incoming attributes
+        run: |
+          selected_git="$(/usr/bin/xcrun --find git)"
+          "$selected_git" --version
+          "$selected_git" --attr-source=HEAD diff --check HEAD HEAD
 
       - name: Install dependencies
-        run: python -m pip install -r requirements.txt
+        run: python -m pip install -r requirements.txt -r camino/server/requirements.txt
 
       - name: Run Cockpit quality gate
         env:

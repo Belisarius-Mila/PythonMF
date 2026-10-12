@@ -60,7 +60,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] P2-A/IPHONE1 PASS; P2-A/MAC1 čeká na fyzické přehrání finále se zvukem. P2-B pro 6. 10.: Mac read-only ověřil 11 Momentů a 34 originálů. Release opraven v lokálním `2fada468`, plná brána 1876/1876 PASS. Míla schválil p+n; push blokuje Keychain `-25308` a náhradní GitHub device kód vypršel. Služba běží bez P2-B, nasazení neproběhlo. Skutečný den čeká na iPhone důkaz; nepodepsané IPA 17 je jen lokální, SideStore instalace neověřená. Reporty `camino/docs/P2A_FILM_REPORT.md`, `camino/docs/P2B_CLOSED_DAY_REPORT.md`.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] 12. 10.: GitHub přihlášení obnovené, oprava CI místně 1876/1876 PASS a vzdálená brána čeká; P2-B server `e95568b7999e` publikovaný, owner API hlásí `film_closed_day_v1`. Cíleně 71/71, izolovaný import, HTTP/HTTPS, Viewer/mapa a média PASS; Cockpit smoke 5/5. Archiv přesně zachovaný: 82 Momentů, 216 originálů. Míla oznámil běžnou funkčnost znovunačtené aplikace; dnešní krok telefon ani Serve neměnil. Skutečný den 6. 10. čeká na čerstvý iPhone důkaz; P2-A/IPHONE1 PASS, P2-A/MAC1 čeká. Reporty `camino/docs/P2A_FILM_REPORT.md`, `camino/docs/P2B_CLOSED_DAY_REPORT.md`.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` - Cockpit 14. 9.: scroll 10ec0877 potvrzený Mílou. [PRIPOMENOUT] U07 až při příštím pokračování. TXT v2.8 shrnuje U01–U06; plná brána 1680/1680 OK, funkční nasazení 980aed7a a smoke 5/5. Publikační překážka odstraněna; finální balíček/head ověřovat živým auditem.
 

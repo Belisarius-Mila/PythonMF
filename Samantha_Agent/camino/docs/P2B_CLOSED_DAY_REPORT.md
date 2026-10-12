@@ -1,6 +1,6 @@
 # Camino P2-B — uzavření dne 6. 10. 2026
 
-Stav 11. 10. 2026: **lokálně vyvinuté, skutečný den neuzavřený**.
+Stav 12. 10. 2026: **server publikovaný a živě ověřený, skutečný den neuzavřený**.
 P2-A/IPHONE1 má Mílův PASS; P2-A/MAC1 zůstává na fyzické přehrání.
 Míla výslovně zahájil P2-B a oznámil, že data prvního dne jsou na Macu
 kompletní. To je vstupní tvrzení, nikoli ještě důkaz telefonu.
@@ -52,8 +52,8 @@ iOS Debug Simulator build ověřuje Swift 6 kompilaci, nikoli fyzické chování
 Plná brána včetně nového API testu prošla **1876/1876**. iOS Debug Simulator
 build po poslední změně Swift kódu prošel bez podpisu.
 
-Skutečný projekt 6. 10. nyní **neexistuje**: nové API není nasazené, nová
-aplikace není nainstalovaná a čerstvý důkaz z telefonu ještě nebyl přijatý.
+Historický stav před p+n 11. 10.: projekt 6. 10. **neexistoval**, nové API nebylo nasazené, nová
+aplikace nebyla nainstalovaná a čerstvý důkaz z telefonu ještě nebyl přijatý.
 Push, nasazení a instalace jsou oddělené kroky. Po jejich samostatném
 schválení se na iPhonu spustí **Uložení a přenosy → Film → Ověřit a uzavřít
 den**; pak se přes owner API ověří uložený projekt a 30 povolených zdrojů.
@@ -100,3 +100,69 @@ Závěrečný audit stále ukazuje čistý lokální `main` se šesti commity p�
 služba a Serve zůstaly beze změny. Po novém přihlášení není třeba znovu
 vyrábět film, serverový kód ani IPA; je třeba znovu ověřit přesný Git stav,
 pushnout a nasadit podle schváleného p+n.
+
+## Dokončené p+n — 2026-10-12 16:45 CEST
+
+Míla potvrdil běžnou funkčnost Camina po poledním znovunačtení posledního
+buildu a zadal dokončení P2-B s prioritou zachování aplikace. Přesně potvrdil
+globální brzdu pro vlastní LaunchAgent a dokončil GitHub device přihlášení.
+Přesný fast-forward `1208ea21` → `e95568b7` byl odeslán. Pro push se pouze
+v daném příkazu použil helper GitHub CLI místo nedostupného Keychain;
+žádné tajemství nešlo do argv, výstupu nebo Gitu. GitHub CLI samo uložilo
+přihlášení do místního souboru s ověřenými soukromými právy.
+
+Před zastavením prošlo 71/71 cílených serverových, přenosových, obnovovacích,
+Viewer a servisních testů. Izolovaný archiv přesného releasu se načetl
+produkčním Pythonem v režimu `-I`; závislosti a zdroje API/domény,
+autentizace, médií, obnovy i Vieweru jsou shodné s běžícím předchůdcem.
+Schéma DB zůstává 3. Kód odpovídá plně ověřenému `2fada468` (1876/1876);
+pozdější commity do `e95568b7` jsou pouze dokumentační, proto se nezměněná
+plná místní brána neopakovala.
+
+Registrované stop/upgrade/start přepnuly vlastní službu z `16de4d0b7973`
+na `e95568b7999e`. Upgrade zachoval původní konfiguraci, LaunchAgent a
+čtyři konzistentní DB snapshoty s ověřenými SHA-256 účtenkami. Mimo
+`code_root` jsou konfigurační hodnoty shodné, včetně původních cest
+archivu a přístupových DB. Běžící služba má vlastněnou definici a Viewer
+grant je zachovaný. Neproběhla instalace telefonu ani restart Cockpitu.
+
+Redigovaný audit před přepnutím a po startu je přesně shodný: **624 operací,
+82 Momentů, 216 ověřených originálů, 1 673 901 399 B a tři cesty**.
+Všech 216 původních souborů prošlo úplným SHA-256; identita serveru, epocha,
+kurzor i otisk cest jsou zachované, oba recovery/export flagy jsou false.
+Serve otisk je před/po shodný, privátní route zůstala stejná a Funnel off.
+Registrovaný síťový status má nadále chybějící vlastnickou účtenku existující
+route; nic se nepřenastavovalo a skutečné HTTPS bylo ověřené přímo.
+
+Živé loopback i HTTPS kontroly: owner health/state 200,
+`film_closed_day_v1` přítomné, nakonfigurované filmové API odmítá anonymní
+POST (401) a pro neexistující syntetické ID vrací `project_missing` (404).
+Viewer a mapa 200; foto, původní povolené audio a video proxy dne 6. 10.
+vracejí Range 206, 16/16 požadovaných B a správné MIME. Anonymní Viewer 401,
+soukromý owner-only mediální zdroj 404. Cockpit smoke 5/5 PASS.
+
+**Hranice:** serverový publikační blokátor je odstraněný, ale skutečný den
+nebyl uzavřený a žádný reálný filmový projekt nebyl vytvořený. Mílovo hlášení
+běžné funkčnosti aplikace neuvádí číslo buildu ani fyzický P2-B test. Telefon
+dnes zůstal beze změny. Další je na fungujícím telefonu ověřit
+**Uložení a přenosy → Film → Ověřit a uzavřít den** pro 6. 10. a potom
+ověřit skutečnou účtenku a aktuální povolené zdroje. P2-A/MAC1 zůstává
+na fyzickém přehrání po návratu; P2-C/D nejsou zahájené.
+
+### GitHub kontrolní prostředí — oprava po prvním pushi
+
+GitHub běh `38264584628` pro `e95568b7` skončil 16 chybami prostředí:
+15 testů odmítl starší Xcode Git s `unknown option: --attr-source=FETCH_HEAD`
+a nový serverový test se nenačetl kvůli `ModuleNotFoundError: httpx`.
+Workflow instaloval jen kořenové závislosti a jeho macOS 14 vybíral starý
+Apple Git přes `xcrun`, i když byl jiný Git v PATH.
+
+Oprava mění pouze `.github/workflows/cockpit-quality-gate.yml`: runner
+macOS 15, explicitní Xcode 26.3 (shodné s ověřeným místním toolchainem),
+čerstvý preflight skutečně vybraného Gitu s `--attr-source`, instalaci
+kořenových i serverových závislostí a jejich společný cache klíč/trigger.
+Běžící služba zůstává na ověřeném `e95568b7999e`; tato oprava nemění
+Camino aplikaci ani serverový kód a nevyžaduje další nasazení.
+YAML a shell syntaxe prošly. Čerstvá plná místní brána prošla
+**1876/1876 PASS** (246,151 s testů). Nová GitHub brána zatím čeká na
+výsledek; bez něj oprava CI není uzavřená.

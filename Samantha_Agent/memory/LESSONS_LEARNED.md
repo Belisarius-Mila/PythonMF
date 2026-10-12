@@ -22,6 +22,20 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-060 — GitHub push může použít ověřené CLI přihlášení místo Keychain
+
+- Problém: HTTPS push blokoval macOS Keychain `-25308`, zatímco staré
+  přihlášení GitHub CLI bylo neplatné.
+- Typ: opakující se
+- Řešení nalezeno: 12102026
+- Řešení: Dokončit nové GitHub device přihlášení a ověřit `gh auth status`,
+  přesné heads a push guard. Pro jediný již schválený push použít
+  `git -c credential.helper= -c 'credential.helper=!gh auth git-credential' push …`;
+  tento příkaz nepotřebuje změnu globálního helperu ani token v argv.
+  Ověřeno na přesném P2-B fast-forwardu. CLI může při nedostupném Keychain
+  uložit přihlášení do místního souboru; ověřit soukromá práva a nikdy
+  nevypisovat ani necommitovat jeho obsah.
+
 ### LL-059 — Izolovaný Camino release musí obsahovat nové importy
 
 - Problém: P2-B server importoval filmový modul a pomocnou knihovnu, které

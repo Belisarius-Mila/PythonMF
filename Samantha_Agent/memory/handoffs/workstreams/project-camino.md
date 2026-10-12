@@ -1,64 +1,44 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-10-11 18:10 CEST — P2-B p+n blokuje vypršené GitHub přihlášení
+- Aktualizováno: 2026-10-12 16:45 CEST — P2-B server publikovaný a živě ověřený
 
 ### Hotovo
-- Doplněný serverový release obsahuje P2-B moduly; commit `2fada468`, plná brána 1876/1876 a izolovaný import PASS. Míla schválil push a řízené nasazení.
-- Míla zadal P2-B pro 6. 10. 2026. Redigovaný read-only audit Macu ověřil 11 Momentů a 34 originálů; 30 příloh `diary` je povolených, 4 soukromá audia se vyloučí.
-- Lokální kód P2-B přidává vědomé uzavření v iPhonu, soukromý owner API kontrakt, neměnný manifest a projekt jednoho dne. Syntetický HTTP test, iOS Simulator build a plná brána 1876/1876 prošly.
-- Kód je v lokálním commitu `cde61193` a oba čisté profilové workspaces jsou zarovnané. Nepodepsaný iPhoneOS build 17 a IPA prošly ZIP kontrolou a shodou binárky.
-- Uložená časová osa s revizemi a kontrolou zdrojů, syntetický 22s film, náhled 720p a finále 1080p, české titulky a hlas přes střihy.
-- Cílené testy P2-A 15/15 PASS; plná Cockpit brána 1865/1865 PASS; oba soubory celé dekódované, obrazové snímky vizuálně ověřené a konec řeči potvrzený porovnáním PCM.
-- Náhled 4,221 s / 1 865 006 B; finále 12,490 s / 4 723 927 B. Celý experiment špička cca 9,9 MiB alokovaně při vzorkování po 50 ms.
-- Cockpit přes tailnet HTTPS vydává stránku a dvě konkrétní syntetická MP4; video podporuje byte ranges. Push dvou commitů a řízené nasazení prošly, nový PID/otisk a smoke 5/5 ověřeny.
-- Horní lišta Cockpitu má tlačítko Film P2-A s vestavěným přehrávačem finálního MP4. Oprava byla pushnutá a řízeně nasazená; kontrola nasazení `deployed`, smoke 5/5. Tailnet HTTPS stránka obsahuje nový vstup a MP4 vrací `206 video/mp4` se shodným úplným SHA-256.
-- Nový neměnný syntetický běh `run-112rz9am` opravuje namluvenou kontrolní instrukci a posouvá konec hlasu z 12,775 s na 21,000 s z 22 s. Cílené filmové testy 16/16 a plná publikační brána 1868/1868 PASS. Commit `1208ea21` je na GitHubu; řízené nasazení hlásí `deployed`, nový PID a smoke 5/5. Tailnet HTTPS vydává nové finále bitově shodné s místním souborem.
-- Míla po výzvě k přehrání opraveného 22s finále se zvukem v Cockpitu na iPhonu oznámil **P2-A/IPHONE1 PASS**. Jde o Mílův fyzický výsledek; serverový audit ho nenahrazuje.
+- GitHub přihlášení je obnovené; schválený balíček `e95568b7` je na GitHubu a vlastní Camino služba běží z releasu `e95568b7999e`.
+- Owner API přes loopback i soukromé HTTPS hlásí `film_closed_day_v1`; filmové API je nakonfigurované a anonymní přístup odmítá.
+- Archiv před a po přepnutí je přesně shodný: 624 operací, 82 Momentů, 216 originálů, 1 673 901 399 B. Všechny originály prošly úplným SHA-256; identita, epocha, kurzor i všechny tři cesty zůstaly zachované.
+- Viewer, den 6. 10. a mapa vracejí 200; foto, původní povolené audio a video proxy vracejí 206 se správným MIME. Anonymní Viewer a soukromý zdroj jsou odmítnuté. Cockpit smoke 5/5 PASS.
+- Stejné schéma 3, stejné závislosti a stejný kód přenosů, autentizace, obnovy a Vieweru. Zachovaná původní konfigurace, LaunchAgent a čtyři ověřené DB snapshoty; Serve konfigurace beze změny, Funnel off.
+- Míla 12. 10. oznámil obnovenou běžnou funkčnost Camina po znovunačtení posledního buildu. Dnešní krok telefon neinstaloval ani neměnil.
+- P2-A/IPHONE1 má Mílův PASS. P2-B pro 6. 10. má dosavadní Mac důkaz 11 Momentů a 34 originálů, z nich 30 povolených zdrojů.
 
 ### Otevřeno
-- Push blokuje Keychain `-25308`; náhradní GitHub device kód vypršel bez potvrzení. Server stále běží bez nové funkce P2-B.
-- Skutečný den 6. 10. nebyl uzavřen: chybí čerstvý inventář z nového iPhone buildu, nové API není nasazené a žádný reálný projekt nevznikl.
-- Podepsaný build 17 blokuje nedostupný login Keychain; SideStore přepodepsání nepodepsaného IPA na iPhonu není ověřené.
-- Původní chybná verze nebyla přijata; nový iPhone výsledek je PASS. P2-A/MAC1 zůstává NEOVĚŘENO, proto P2-A ještě není plně přijaté.
-- Původní samostatný Safari odkaz hlásil chybu neznámého znění; její příčina není objasněná. Míla následně potvrdil PASS při přehrání přes vestavěný Cockpit.
-- Podrobný důkaz dosavadního nasazení a nového lokálního kroku je v `camino/docs/P2A_FILM_REPORT.md`.
+- Plná místní brána opravy CI prošla 1876/1876; opravené GitHub prostředí čeká na vzdálený běh; první GitHub běh selhal kvůli starému Git a chybějícímu `httpx`, nikoli na živém Camino serveru.
+- Skutečný den 6. 10. není uzavřený: chybí čerstvý explicitní důkaz telefonu a fyzická P2-B přejímka; žádný skutečný filmový projekt nevznikl.
+- Konkrétní verze znovunačteného telefonu nebyla sdělena; běžná funkčnost není důkaz přítomnosti P2-B UI. Nová distribuce ani instalace dnes neproběhly.
+- P2-A/MAC1 čeká na fyzické přehrání opraveného finále se zvukem.
 
 ### Rizika
-- Registrovaný síťový audit nemá vlastnickou účtenku existující Serve cesty; při nasazení síť neměnit a ověřit živé HTTP/HTTPS přímo.
-- Nový server a aplikace nejsou provozně spárované; změna dne nebo soukromí po uzavření vyžaduje nový důkaz. Push, nasazení a instalace P2-B čekají na samostatné oprávnění.
-- Systémový CodeSign vrací `errSecInternalComponent` a Keychain `User interaction is not allowed`; nejde o limit kreditu.
-- Jen syntetické SDR vstupy; HDR odmítnuto. Testovací řeč macOS není skutečný autorův hlas. Časy nejsou odhadem výkonu dlouhého reálného filmu.
-- Žádné napojení na owner archiv nebo ověření uzavření telefonních dat; to patří P2-B. Editor a trvalá fronta jsou P2-C/D.
-- Mac přehrání je samostatná fyzická přejímka; iPhone PASS ji nenahrazuje.
-- Chybové hlášení původního samostatného Safari odkazu stále neznáme.
+- Registrovaný síťový audit nemá vlastnickou účtenku existující Serve cesty. Síť nebyla měněná; živé HTTP/HTTPS a shodný otisk Serve byly ověřené přímo.
+- Po změně inventáře nebo soukromí vyžaduje film nový důkaz uzavření. P2-C/D se tímto krokem nezahajují.
+- GitHub CLI kvůli nedostupnému Keychain uložilo přihlášení do místního souboru s ověřenými soukromými právy; tajemství nebylo vypsáno ani přidáno do Gitu.
+- Poslední recovery záloha Samanthy je z 27. 9.; autosave watcher neběží. Čtyři místní DB snapshoty releasu nenahrazují nezávislou zálohu médií.
 
 ### Rozhodnutí
-- Mílovo potvrzení úplnosti Macu je vstup, ne náhrada důkazu telefonu. P2-B lze vyvíjet při otevřeném P2-A/MAC1 díky jeho výslovnému zadání.
-- Míla zadal P2-A a závěrečný report rozsahu, řádků kódu a struktury. Původní závazné podmínky filmu a sedm upřesnění zůstávají v platnosti.
-- Míla upřesnil, že je na Caminu daleko od Macu. Přesun pořadí fyzické kontroly na iPhone nemění dvě původní přejímky.
-- Míla výslovně zadal c+p+n připraveného P2-A filmu a Cockpit náhledu; nasazení proběhlo bez změny Tailscale Serve cest.
-- Míla upřesnil, že chce film spustit přímo přes Cockpit; původní samostatný Safari odkaz to nesplnil. Přímý vstup v Cockpitu používá stejnou úzce omezenou serverovou cestu.
-- Po Mílově poslechu opravujeme pouze syntetický text a jeho polohu vůči konci filmu; starý běh zůstává nedotčený jako diagnostický důkaz.
+- Platné p+n z 11. 10. pokračovalo po obnovení GitHub přihlášení a Mílově přesném potvrzení globální brzdy 12. 10.
+- Prioritou je zachování fungujícího Camina; pouze řízené přepnutí vlastní služby, bez změny telefonu, originálů či síťové cesty.
 
 ### Další krok
-- Po dokončení GitHub přihlášení pushnout přesný balíček, řízeně nasadit server a ověřit živé API i zachování archivu. Mobilní instalace a uzavření dne zůstávají samostatné.
+- Dokončit GitHub bránu opraveného workflow. Potom na fungujícím telefonu ověřit přítomnost Film → Ověřit a uzavřít den a vědomě uzavřít 6. 10.; pak ověřit skutečnou účtenku a povolené zdroje. Bez tohoto důkazu P2-B jako celek není PASS.
 
 ### Navrhované další kroky
-- Po uzavření P2-B navázat mobilním editorem P2-C a pozdějším renderem P2-D.
-- HDR a produkční autorizaci zdrojů ověřit před přijetím skutečných médií.
-- P2-A/MAC1 fyzicky dokončit po návratu k Macu.
+- P2-A/MAC1 dokončit po návratu k Macu.
+- P2-C/D až po skutečném uzavření dne a samostatném zadání.
 
 ### Technický důkaz
-- `camino/docs/P2B_CLOSED_DAY_REPORT.md`: před nasazením 578 operací, 75 Momentů, 202 ověřených médií; staré owner API 200 bez `film_closed_day_v1`.
-- `camino/docs/P2B_CLOSED_DAY_REPORT.md`: commit `cde61193`, brána 1876/1876, iOS Simulator i nepodepsaný iPhoneOS build PASS; IPA 1 226 501 B, ZIP a binárka shodné. Podepsaný build/instalace NEOVĚŘENO.
-- `camino/docs/P2B_CLOSED_DAY_REPORT.md`; syntetický owner HTTP test odmítá neúplnou frontu, chybějící médium a anonymní přístup, prokazuje idempotenci, restart a zneplatnění po změně soukromí.
-- `camino/docs/P2A_FILM_REPORT.md`; soukromý běh `data/private/camino/p2a/run-xip7fnef/`; test modulu Cockpit serveru 4/4 PASS, plná brána 1867/1867 PASS; tailnet HTTP 200/206 a shodný SHA-256 celého MP4.
-- Nový vstup používá `app/frontend/cockpit/page.html`, `app.js` a `styles.css`; cílené testy frontend/server 22/22 PASS, plná brána 1867/1867 PASS, nasazení smoke 5/5 a tailnet video HTTP 206. Původní produkční route zůstává beze změny.
-- Opravené finále: `camino/docs/P2A_FILM_REPORT.md`, 16/16 filmových testů, plná publikační brána 1868/1868 PASS, hlas 7,335–21,000 s, závěrečné ticho od 20,956 s. GitHub `main` = `1208ea21`, účtenka `deployed`, smoke 5/5; tailnet HTTPS stránka 200, MP4 206 `video/mp4`, 4 728 960 B a SHA-256 `abb68af56188dea97e40e0eb54fe3f85626d262309a12ffb4437591c10142e1d`.
-- P2-A/IPHONE1 PASS sdělil Míla 2026-10-11 po nasazení opraveného filmu. P2-A/MAC1 zatím nemá lidský výsledek.
-- 577 nových řádků aplikace/runneru, 213 řádků testů, 19 řádků integrace do workflow/gate; fyzické řádky včetně komentářů a prázdných řádků.
-- Předchozí dokumentační p+n `0cbfd5ea` je samostatný dokončený krok; nedokládá nasazení P2-A.
+- Čerstvá plná místní brána po opravě workflow 1876/1876 PASS; YAML a shell syntaxe PASS.
+- `camino/docs/P2B_CLOSED_DAY_REPORT.md`: čerstvých 71/71 cílených testů, izolovaný release import PASS, přesně shodný archiv a HTTP/HTTPS kontroly výše.
+- Publikovaný kód je shodný s dříve plně ověřeným `2fada468` (1876/1876 PASS); pozdější commity do `e95568b7` měnily jen dokumentaci.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: Camino
@@ -2590,3 +2570,35 @@ Git stav, pushnout a řízeně nasadit s živou kontrolou archivu a API.
 **Technický důkaz:** `main` `7e43c42b`, `origin/main` `1208ea21`, šest
 lokálních commitů; device flow skončil `expired_token`. Karta čekání v
 Cockpitu byla vyčištěna.
+
+## 2026-10-12 16:45 CEST — P2-B: publikace dokončena bez změny telefonu
+
+**Hotovo:** GitHub blokátor je vyřešený a připravený server P2-B je
+publikovaný a běží. Soukromé owner API, Viewer, mapa a přehratelné mediální
+cesty prošly kontrolou. Archiv včetně všech 216 originálů zůstal přesně
+shodný. Míla oznámil polední obnovení běžné funkčnosti aplikace; dnešní
+serverový krok telefon neměnil.
+
+**Rozhodnutí:** Navázali jsme na schválené p+n; Míla doplnil přesnou globální
+brzdu. Přepnula se pouze vlastní služba se zachovanou původní konfigurací
+a čtyřmi DB snapshoty. Síť ani přístupy se neměnily. Skutečný den nelze
+uzavřít bez nového explicitního důkazu telefonu.
+
+**Další krok:** Dokončit GitHub bránu opraveného workflow; potom na
+fungujícím iPhonu ověřit P2-B vstup Film a vědomě uzavřít 6. 10.; potom zkontrolovat skutečnou účtenku a povolené zdroje.
+
+**Navrhované další kroky:** P2-A/MAC1 po návratu k Macu; P2-C/D teprve po
+skutečném uzavření dne a samostatném zadání.
+
+**Technický důkaz:** Release `e95568b7999e`, owner API 200 a
+`film_closed_day_v1`, Viewer/mapa 200, foto/audio/video 206, anonymní přístup
+odmítnutý, soukromý zdroj 404, Cockpit smoke 5/5. Cíleně 71/71 PASS a
+izolovaný import PASS; přenosový kód, schéma i závislosti shodné s běžící
+předchozí verzí. Archiv před/po: 624 operací, 82 Momentů, 216 médií,
+1 673 901 399 B, shodné identity/cesty a všechny SHA-256. Podrobnosti v
+`camino/docs/P2B_CLOSED_DAY_REPORT.md`. Fyzické P2-B a P2-A/MAC1 neověřené.
+GitHub běh `38264584628` odhalil starší Xcode Git a chybějící serverové
+závislosti. Opravuje se pouze workflow (macOS 15/Xcode 26.3, Git preflight,
+oba requirements); plná místní brána 1876/1876 PASS, nová GitHub brána
+zatím čeká na výsledek.
+Běžící Camino se kvůli opravě CI znovu nenasazuje.
