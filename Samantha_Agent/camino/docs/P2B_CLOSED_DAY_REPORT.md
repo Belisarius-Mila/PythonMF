@@ -164,5 +164,15 @@ kořenových i serverových závislostí a jejich společný cache klíč/trigge
 Běžící služba zůstává na ověřeném `e95568b7999e`; tato oprava nemění
 Camino aplikaci ani serverový kód a nevyžaduje další nasazení.
 YAML a shell syntaxe prošly. Čerstvá plná místní brána prošla
-**1876/1876 PASS** (246,151 s testů). Nová GitHub brána zatím čeká na
-výsledek; bez něj oprava CI není uzavřená.
+**1876/1876 PASS** (246,151 s testů). [GitHub běh 38266173656](https://github.com/Belisarius-Mila/PythonMF/actions/runs/38266173656)
+pro commit `31927650` dokončil bránu s **success**: 1876 testů OK,
+10 podmíněně přeskočených, 211,019 s testů. Preflight potvrdil skutečně
+vybraný Apple Git 2.50.1 a podporu `--attr-source`; oba requirements
+se úspěšně nainstalovaly. Oprava CI je ověřená. Dostupnost použitého
+Xcode 26.3 byla předem ověřená v oficiálním
+[runner image přehledu](https://github.com/actions/runner-images/blob/main/images/macos/macos-15-Readme.md).
+
+Závěrečné redigované čtení filmového úložiště potvrdilo 0 projektů;
+skutečný den nadále čeká na explicitní telefonní uzavření.
+Běžící serverový kód je mezi `e95568b7` a `31927650` přesně shodný.
+Závěrečná dokumentace a CI oprava nevyžadují další restart služby.

@@ -22,6 +22,20 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-061 — GitHub brána musí připravit skutečný Git i serverové závislosti
+
+- Problém: Na macOS 14 byl moderní Homebrew Git v PATH, ale aplikace přes
+  `xcrun` zvolila starší Apple Git bez `--attr-source`. Nový serverový test
+  současně neměl `httpx`, protože workflow instaloval jen root requirements.
+- Typ: opakující se
+- Řešení nalezeno: 12102026
+- Řešení: CI vybere dostupný Xcode přes `DEVELOPER_DIR`, před testy ověří
+  skutečný `xcrun --find git` a podporu `--attr-source`, instaluje oba
+  requirements a zahrne serverový soubor do cache i triggeru. Ověřeno na
+  macOS 15/Xcode 26.3, Apple Git 2.50.1: GitHub běh `38266173656` success,
+  1876 testů OK (10 skip). Není nutná změna produkčního kódu ani restart
+  běžícího Camina; fail-closed whitespace kontrola zůstává zachovaná.
+
 ### LL-060 — GitHub push může použít ověřené CLI přihlášení místo Keychain
 
 - Problém: HTTPS push blokoval macOS Keychain `-25308`, zatímco staré

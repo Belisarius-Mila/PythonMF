@@ -1,9 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-10-12 16:45 CEST — P2-B server publikovaný a živě ověřený
+- Aktualizováno: 2026-10-12 17:01 CEST — P2-B server i GitHub brána ověřené
 
 ### Hotovo
+- Opravené GitHub testovací prostředí má success v běhu `38266173656` pro `31927650`: 1876 testů OK, 10 podmíněně přeskočených. Čerstvá místní plná brána 1876/1876 PASS.
 - GitHub přihlášení je obnovené; schválený balíček `e95568b7` je na GitHubu a vlastní Camino služba běží z releasu `e95568b7999e`.
 - Owner API přes loopback i soukromé HTTPS hlásí `film_closed_day_v1`; filmové API je nakonfigurované a anonymní přístup odmítá.
 - Archiv před a po přepnutí je přesně shodný: 624 operací, 82 Momentů, 216 originálů, 1 673 901 399 B. Všechny originály prošly úplným SHA-256; identita, epocha, kurzor i všechny tři cesty zůstaly zachované.
@@ -13,7 +14,6 @@
 - P2-A/IPHONE1 má Mílův PASS. P2-B pro 6. 10. má dosavadní Mac důkaz 11 Momentů a 34 originálů, z nich 30 povolených zdrojů.
 
 ### Otevřeno
-- Plná místní brána opravy CI prošla 1876/1876; opravené GitHub prostředí čeká na vzdálený běh; první GitHub běh selhal kvůli starému Git a chybějícímu `httpx`, nikoli na živém Camino serveru.
 - Skutečný den 6. 10. není uzavřený: chybí čerstvý explicitní důkaz telefonu a fyzická P2-B přejímka; žádný skutečný filmový projekt nevznikl.
 - Konkrétní verze znovunačteného telefonu nebyla sdělena; běžná funkčnost není důkaz přítomnosti P2-B UI. Nová distribuce ani instalace dnes neproběhly.
 - P2-A/MAC1 čeká na fyzické přehrání opraveného finále se zvukem.
@@ -29,7 +29,7 @@
 - Prioritou je zachování fungujícího Camina; pouze řízené přepnutí vlastní služby, bez změny telefonu, originálů či síťové cesty.
 
 ### Další krok
-- Dokončit GitHub bránu opraveného workflow. Potom na fungujícím telefonu ověřit přítomnost Film → Ověřit a uzavřít den a vědomě uzavřít 6. 10.; pak ověřit skutečnou účtenku a povolené zdroje. Bez tohoto důkazu P2-B jako celek není PASS.
+- Na fungujícím telefonu ověřit přítomnost Film → Ověřit a uzavřít den a vědomě uzavřít 6. 10.; pak ověřit skutečnou účtenku a povolené zdroje. Bez tohoto důkazu P2-B jako celek není PASS.
 
 ### Navrhované další kroky
 - P2-A/MAC1 dokončit po návratu k Macu.
@@ -3380,3 +3380,26 @@ závislosti. Opravuje se pouze workflow (macOS 15/Xcode 26.3, Git preflight,
 oba requirements); plná místní brána 1876/1876 PASS, nová GitHub brána
 zatím čeká na výsledek.
 Běžící Camino se kvůli opravě CI znovu nenasazuje.
+
+## 2026-10-12 17:01 CEST — P2-B: GitHub kontrola dokončená
+
+**Hotovo:** Publikační blokátory P2-B jsou odstraněné. Připravený server
+běží a opravené GitHub kontrolní prostředí prošlo celou bránou.
+Fungující telefonní aplikace zůstala beze změny, archiv i Viewer mají
+ověřené zachování. Skutečný den ještě čeká na důkaz telefonu.
+
+**Rozhodnutí:** Žádné nové produktové rozhodnutí. Oprava se týká jen
+GitHub testovacího prostředí; ověřená služba se znovu nenasazuje.
+
+**Další krok:** Na fungujícím telefonu ověřit sekci Film a vědomě uzavřít
+6. 10.; potom zkontrolovat skutečnou účtenku a aktuální povolené zdroje.
+
+**Navrhované další kroky:** P2-A/MAC1 po návratu k Macu; P2-C/D až po
+skutečném uzavření dne a samostatném zadání.
+
+**Technický důkaz:** Čerstvá místní plná brána 1876/1876 PASS.
+[GitHub běh 38266173656](https://github.com/Belisarius-Mila/PythonMF/actions/runs/38266173656) pro `31927650` je success:
+1876 testů OK, 10 podmíněně přeskočených; vybraný Apple Git 2.50.1
+přijal `--attr-source` a oba requirements se nainstalovaly. Běžící
+Camino release `e95568b7999e` má stejný serverový kód; mezi těmito heads
+jsou jen workflow a dokumentace. Privátní filmové úložiště zatím 0 projektů.

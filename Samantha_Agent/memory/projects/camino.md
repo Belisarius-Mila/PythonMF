@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-12 16:45 CEST — P2-B server publikovaný, skutečný den čeká na telefon
+Aktualizováno: 2026-10-12 17:01 CEST — P2-B server a GitHub brána ověřené, skutečný den čeká na telefon
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -12,10 +12,11 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 
 ## Aktuální stav
 
-- První GitHub CI běh po pushi selhal na starém Xcode Git a chybějícím
-  `httpx`. Oprava se omezuje na kontrolní workflow; čerstvá plná místní
-  brána 1876/1876 PASS, nová GitHub brána čeká na výsledek. Běžící Camino
-  zůstává beze změny.
+- GitHub kontrolní prostředí je opravené: běh `38266173656` pro
+  `31927650` má success (1876 testů OK, 10 podmíněně přeskočených).
+  Čerstvá místní plná brána 1876/1876 PASS. Runner macOS 15/Xcode 26.3
+  vybírá Apple Git 2.50.1 s ověřeným `--attr-source` a instaluje kořenové
+  i serverové závislosti. Běžící Camino se kvůli opravě CI znovu nenasazuje.
 
 - 2026-10-12 16:45 CEST — GitHub přihlášení obnoveno a schválené p+n dokončené
   po přesném potvrzení globální brzdy. Server běží z `e95568b7999e`, soukromé
