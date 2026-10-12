@@ -1,17 +1,16 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-10-12 19:21 CEST — P2-C/D: lokální editor a skutečné ověřené MP4 dne 6. 10.
+- Aktualizováno: 2026-10-12 19:47 CEST — P2-C/D: nasazený editor a skutečné MP4 dne 6. 10.
 
 ### Hotovo
-- Nad konečnou Mílou potvrzenou Mac sadou funguje lokální editor: pořadí, výslovné vyřazení, titulek, délka foto, ruční in/out videa, zvukové části a hlasitost. Platné změny se automaticky ukládají do neměnných revizí; retry a souběžná okna nepřepisují práci.
+- Nad konečnou Mílou potvrzenou Mac sadou funguje editor v nasazeném Cockpitu: pořadí, výslovné vyřazení, titulek, délka foto, ruční in/out videa, zvukové části a hlasitost. Platné změny se automaticky ukládají do neměnných revizí; retry a souběžná okna nepřepisují práci.
 - Soukromá trvalá fronta vytváří věrný 720p náhled, dílčí úsek a 1080p MP4 konkrétní uložené revize. Proces renderu je oddělený od Cockpitu a Camina; po přerušení se opakuje od začátku, staré výsledky i pokusy zůstávají.
 - Skutečný den má oba ověřené exporty revize 1: 25 záběrů, časová osa 200 475 ms, 6014 video snímků, video 200 465 ms a audio 200 466 ms. Náhled 25 617 860 B / 135,034 s; finále 115 011 021 B / 181,017 s. První sestavení používá celé video se skutečným zvukem; pět samostatných hlasových částí zůstává k výslovnému umístění v editoru.
-- Celý soubor obou profilů je dekódovaný; všech 25 záběrů náhledu vizuálně zkontrolovaných. Lokální izolovaný Cockpit HTTP vrací editor 200 a MP4 GET Range 206 / HEAD 200. CUA aktuálně nemá dostupný prohlížeč.
+- Celý soubor obou profilů je dekódovaný; všech 25 záběrů náhledu vizuálně zkontrolovaných. Živý Cockpit HTTP/HTTPS vrací root/editor 200 a oba MP4 GET Range 206 / HEAD 200 s přesnými bajty; celé HTTPS finále má shodný SHA-256. CUA aktuálně nemá dostupný prohlížeč.
 - Archiv je přesně shodný před/po: 624 operací, 82 Momentů, 216 originálů, 1 673 901 399 B, stejné identity/tripy a všechny SHA-256. Camino nadále `e95568b7999e`, živé owner HTTP/HTTPS, Viewer/mapa 200, foto/audio/video Range 206, anonymní Viewer 401. Telefon, služba i síť beze změny, Serve otisk shodný, Funnel off.
 
 ### Otevřeno
-- Závěrečná plná brána 1907/1907 PASS (319,041 s testů). Nový P2-C/D editor není pushnutý ani nasazený. Běžící Cockpit zůstává na dřívějším ověřeném přehledu P2-B, PID 98814, otisk `59ae89a955a402c4`.
 - Safari/iPhone ovládání editoru a celý lidský poslech skutečného filmu NEOVĚŘENO. P2-E je fyzická přejímka; P2-A/MAC1 zůstává odděleně otevřené.
 
 ### Rizika
@@ -20,11 +19,11 @@
 - Dřívější dnešní audit hlásil recovery zálohu z 27. 9. a neaktivní autosave; filmový krok je neměnil. Projekt a export nejsou nezávislá záloha originálů.
 
 ### Rozhodnutí
-- Míla výslovně zadal „Pokračuj editorem a mp4.“ Vývoj a skutečný místní render jsou autorizované; nové publikování/nasazení zatím není potvrzené.
+- Míla zadal „Pokračuj editorem a mp4.“ a potvrdil „ok p+n cockpit“. Připravený editor `7c9547fc` je na GitHubu a nasazený pouze Cockpit; hotové MP4 se znovu nevyráběly.
 - Samostatný hlas se umisťuje vědomě. Žádný automatický střih na cílovou délku, hudba, AI hlas ani veřejné sdílení. Camino se kvůli editoru nenastavuje ani nerestartuje.
 
 ### Další krok
-- Po lokálním checkpointu získat samostatné p+n a nasadit pouze nový Cockpit.
+- P2-E: fyzicky otevřít editor a přehrát celý skutečný film se zvukem přes Film Camino.
 
 ### Navrhované další kroky
 - P2-E: fyzicky ověřit editor, celý skutečný film se zvukem a ruční komentář.
@@ -33,6 +32,8 @@
 ### Technický důkaz
 - `camino/docs/P2CD_EDITOR_MP4_REPORT.md`; cílené bezpečnostní/HTTP/JS a skutečné render testy PASS, závěrečná plná brána 1907/1907 PASS (319,041 s testů).
 - Shodný edit/manifest obou profilů, úplný decode, 6014 snímků. Hash finále `3013f072f34d6e7654c17e44955fec5de950811629bb62e4c33a5a09a3c542ee`.
+- Řízené nasazení `7c9547fc`: Cockpit PID 35526, otisk `4f1f0c17ac72659f`, účtenka `deployed`, smoke 5/5. Camino zůstává PID 67017; žádný jeho restart ani nový render.
+- [GitHub brána 38285925799](https://github.com/Belisarius-Mila/PythonMF/actions/runs/38285925799) nasazeného `7c9547fc` má success: 1907 testů OK, 13 podmíněně přeskočených, 203,452 s. Skutečné render testy a všech 19 editor testů prošly místně bez přeskočení.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Camino
@@ -3474,3 +3475,33 @@ závěrečná plná brána 1907/1907 PASS (319,041 s testů). Archiv před/po p�
 82 Momentů, 216 originálů, 1 673 901 399 B a všechny SHA-256. Owner/Viewer,
 mapa i média zdravé, Serve beze změny a Funnel off. Safari/iPhone ovládání
 a celý lidský poslech NEOVĚŘENO. Report `P2CD_EDITOR_MP4_REPORT.md`.
+
+
+## 2026-10-12 19:47 CEST — P2-C/D: nasazený editor a skutečné MP4 v Cockpitu
+
+**Hotovo:** Film Camino v běžícím Cockpitu nabízí editor a oba hotové
+720p/1080p filmy dne 6. 10., revize 1, přibližně 3:20. Existující MP4
+se použily přímo, bez nového renderu. Původní Camino a všechna data jsou
+zachované.
+
+**Rozhodnutí:** Míla potvrdil „ok p+n cockpit“: publikovat připravený
+editor a nasadit pouze Cockpit. Telefon, Camino služba, originály ani
+síť se nemění.
+
+**Další krok:** P2-E: fyzicky otevřít editor a přehrát celý skutečný film
+se zvukem přes Film Camino.
+
+**Navrhované další kroky:** Ruční umístění samostatných hlasových částí
+a přejímka takto upraveného filmu; P2-F až po přijetí základu.
+
+**Technický důkaz:** Nasazený `7c9547fc`, nový Cockpit PID 35526, otisk
+`4f1f0c17ac72659f`, účtenka `deployed`, smoke 5/5. Plná místní brána
+1907 testů OK (319,041 s), přednasazovací statická brána PASS. Živý
+HTTP/HTTPS root/editor 200, 25 záběrů a 5 hlasových nabídek; oba MP4
+HEAD 200 / Range 206 s přesnými bajty. Celé HTTPS finále má shodný
+SHA-256. Archiv před/po přesně shodný: 624 operací, 82 Momentů, 216
+originálů, 1 673 901 399 B, identity/tripy a všechny SHA-256. Camino
+nadále `e95568b7999e`, PID 67017; owner HTTP/HTTPS, Viewer/mapa/map-data
+200, foto/audio/video Range 206, anonymní Viewer 401. Serve shodný,
+Funnel off. Safari/iPhone ovládání a celý lidský poslech NEOVĚŘENO.
+[GitHub brána 38285925799](https://github.com/Belisarius-Mila/PythonMF/actions/runs/38285925799) nasazeného `7c9547fc` má success: 1907 testů OK, 13 podmíněně přeskočených, 203,452 s. Skutečné render testy a všech 19 editor testů prošly místně bez přeskočení.

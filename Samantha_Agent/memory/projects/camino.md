@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-12 19:21 CEST — P2-C/D: lokální editor a skutečné ověřené MP4
+Aktualizováno: 2026-10-12 19:47 CEST — P2-C/D: nasazený editor a skutečné MP4
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,15 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-12 19:47 CEST — Po potvrzení „ok p+n cockpit“ je `7c9547fc` na GitHubu
+  a nasazený pouze Cockpit (PID 35526, otisk `4f1f0c17ac72659f`, smoke 5/5).
+  Film Camino nabízí editor a existující 720p/1080p filmy revize 1 (~3:20);
+  žádný nový render. Root/editor HTTP/HTTPS 200, oba MP4 HEAD 200 / Range
+  206, celý HTTPS finální soubor má shodný SHA-256. Camino nadále
+  `e95568b7999e`, PID 67017; archiv všech 216 originálů, identity i síť
+  přesně shodné. Plná místní brána 1907 testů OK. [GitHub brána 38285925799](https://github.com/Belisarius-Mila/PythonMF/actions/runs/38285925799) nasazeného `7c9547fc` má success: 1907 testů OK, 13 podmíněně přeskočených, 203,452 s. Skutečné render testy a všech 19 editor testů prošly místně bez přeskočení.
+  P2-E fyzické ovládání a celý lidský poslech čekají.
 
 - 2026-10-12 19:21 CEST — Na pokyn „Pokračuj editorem a mp4“ je lokální editor,
   neměnné revize, soukromá trvalá fronta, dílčí náhled a hotové skutečné
@@ -3028,3 +3037,33 @@ uložené lokálně v Downloads.
 Automatické ověření zůstává 56/56 Swift, simulator build a 8/8 UI PASS. Fyzické
 ověření panelu, přidání přílohy a newest-first pořadí ještě čeká na Mílův průchod.
 Další krok: otestovat jeden Moment bez odinstalace; při problému aplikaci nemazat.
+
+
+## 2026-10-12 19:47 CEST — P2-C/D: nasazený editor a skutečné MP4 v Cockpitu
+
+**Hotovo:** Film Camino v běžícím Cockpitu nabízí editor a oba hotové
+720p/1080p filmy dne 6. 10., revize 1, přibližně 3:20. Existující MP4
+se použily přímo, bez nového renderu. Původní Camino a všechna data jsou
+zachované.
+
+**Rozhodnutí:** Míla potvrdil „ok p+n cockpit“: publikovat připravený
+editor a nasadit pouze Cockpit. Telefon, Camino služba, originály ani
+síť se nemění.
+
+**Další krok:** P2-E: fyzicky otevřít editor a přehrát celý skutečný film
+se zvukem přes Film Camino.
+
+**Navrhované další kroky:** Ruční umístění samostatných hlasových částí
+a přejímka takto upraveného filmu; P2-F až po přijetí základu.
+
+**Technický důkaz:** Nasazený `7c9547fc`, nový Cockpit PID 35526, otisk
+`4f1f0c17ac72659f`, účtenka `deployed`, smoke 5/5. Plná místní brána
+1907 testů OK (319,041 s), přednasazovací statická brána PASS. Živý
+HTTP/HTTPS root/editor 200, 25 záběrů a 5 hlasových nabídek; oba MP4
+HEAD 200 / Range 206 s přesnými bajty. Celé HTTPS finále má shodný
+SHA-256. Archiv před/po přesně shodný: 624 operací, 82 Momentů, 216
+originálů, 1 673 901 399 B, identity/tripy a všechny SHA-256. Camino
+nadále `e95568b7999e`, PID 67017; owner HTTP/HTTPS, Viewer/mapa/map-data
+200, foto/audio/video Range 206, anonymní Viewer 401. Serve shodný,
+Funnel off. Safari/iPhone ovládání a celý lidský poslech NEOVĚŘENO.
+[GitHub brána 38285925799](https://github.com/Belisarius-Mila/PythonMF/actions/runs/38285925799) nasazeného `7c9547fc` má success: 1907 testů OK, 13 podmíněně přeskočených, 203,452 s. Skutečné render testy a všech 19 editor testů prošly místně bez přeskočení.

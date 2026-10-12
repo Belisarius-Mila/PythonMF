@@ -1,9 +1,9 @@
 # Camino P2-C/D — editor a MP4 z uzavřeného dne
 
-Stav: lokální editor implementovaný; skutečný náhled 720p a finále 1080p jsou ověřené.
+Stav: editor nasazený v Cockpitu; skutečný náhled 720p a finále 1080p jsou ověřené a dostupné.
 Míla 12. 10. výslovně zadal pokračování editorem a MP4 nad potvrzenou Mac
 sadou 6. 10. Telefon, běžící Camino, jeho archiv a síť se nemění.
-Nový Cockpit zatím není nasazený; publikace potřebuje samostatné p+n.
+Míla potvrdil „ok p+n cockpit“; přesný `7c9547fc` je na GitHubu a nasazený pouze Cockpit. Hotové MP4 se znovu nevyráběly.
 
 ## Editor
 
@@ -89,11 +89,21 @@ owner HTTP/HTTPS zdravé, Viewer/mapa/map-data 200, foto/audio/video Range 206,
 anonymní Viewer 401. Archiv před/po přesně shodný: 624 operací, 82 Momentů,
 216 originálů, 1 673 901 399 B, stejné identity/tripy a všechny SHA-256.
 Serve otisk beze změny, Funnel off. Telefon a Camino služba se neměnily.
-Běžící Cockpit je stále původní PID 98814/otisk `59ae89a955a402c4`.
+Po autorizovaném nasazení běží pouze nový Cockpit PID 35526/otisk
+`4f1f0c17ac72659f`, účtenka `deployed`, smoke 5/5. Camino zůstává PID 67017
+a release `e95568b7999e`. Živý HTTP/HTTPS root/editor 200 a oba MP4
+HEAD 200 / Range 206; všechny odpovědi mají přesné bajty původních výstupů.
+Celé 1080p finále stažené přes HTTPS má shodný SHA-256 uvedený výše.
+Zopakovaný audit všech 216 originálů, identity/tripů a Serve je přesně
+shodný; nevznikl nový render a žádná Camino/síťová změna.
 
 Cílené testy editoru, HTTP, JS, souběhu, obnovy, soukromí a skutečných
 renderů PASS. Závěrečná plná brána **1907/1907 PASS** (319,041 s testů).
 Nová sada editoru má 19/19 testů PASS, včetně skutečného renderu
-720p/1080p, zlomkových střihů a MPO/EXIF/ICC. Nový editor není publikovaný.
+720p/1080p, zlomkových střihů a MPO/EXIF/ICC. Nový editor je publikovaný a nasazený pouze do Cockpitu.
 Vizuální browser/Safari ovládání a celý lidský poslech NEOVĚŘENO;
 CUA hlásí prázdný seznam prohlížečů. P2-E nepřijato.
+
+## Publikační ověření
+
+[GitHub brána 38285925799](https://github.com/Belisarius-Mila/PythonMF/actions/runs/38285925799) nasazeného `7c9547fc` má success: 1907 testů OK, 13 podmíněně přeskočených, 203,452 s. Skutečné render testy a všech 19 editor testů prošly místně bez přeskočení.
