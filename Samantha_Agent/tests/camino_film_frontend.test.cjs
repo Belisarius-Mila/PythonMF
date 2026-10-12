@@ -13,6 +13,7 @@ function node(hidden = false) {
     pause() {}, load() {}, removeAttribute() {}};
 }
 const context = {console, document: {hidden: false, createElement: () => node()},
+  caminoFilmEditor: {invalidate() {}, open() {}, close() {}, canClose: () => true},
   confirm: () => false, fetch: async () => { throw new Error("unexpected fetch"); },
   setInterval: () => 1, clearInterval() {}};
 for (const name of ["caminoFilmModal", "caminoFilmSummary", "caminoFilmShots", "caminoFilmCreateBtn",

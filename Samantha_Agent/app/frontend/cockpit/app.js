@@ -22,6 +22,7 @@
     const caminoFilmCreateBtn = document.getElementById("caminoFilmCreateBtn");
     const caminoFilmRefreshBtn = document.getElementById("caminoFilmRefreshBtn");
     const caminoFilmTest = document.getElementById("caminoFilmTest");
+    const caminoFilmEditor = window.SamanthaFilmEditor.create(document.getElementById("caminoFilmEditor"));
     const projectsBtn = document.getElementById("projectsBtn");
     const remindersBtn = document.getElementById("remindersBtn");
     const emailProcessingBtn = document.getElementById("emailProcessingBtn");
@@ -6558,6 +6559,7 @@ ${item.context || ""}`);
       clearCaminoFilmProject();
       if (!data.ok) {
         caminoFilmStatus.textContent = data.message || "Projekt se nepodařilo ověřit.";
+        caminoFilmEditor.invalidate();
         return;
       }
       if (!data.exists) {
@@ -6567,9 +6569,9 @@ ${item.context || ""}`);
       }
       caminoFilmStatus.textContent = data.message;
       caminoFilmCreateBtn.disabled = data.valid;
-      if (!data.valid) return;
+      if (!data.valid) { caminoFilmEditor.invalidate(); return; }
       const seconds = Math.round(data.duration_ms / 1000);
-      caminoFilmSummary.textContent = `${data.photo_count} fotografií · ${data.video_count} celých videí · ${data.audio_count} zvukových voleb. Obrazová osa ${Math.floor(seconds / 60)} min ${seconds % 60} s.`;
+      caminoFilmSummary.textContent = `Uzavřené zdroje: ${data.photo_count} fotografií · ${data.video_count} celých videí · ${data.audio_count} zvukových voleb. Výchozí osa ${Math.floor(seconds / 60)} min ${seconds % 60} s.`;
       caminoFilmSummary.classList.remove("hidden");
       for (const shot of data.shots) {
         const li = document.createElement("li");
@@ -6622,6 +6624,7 @@ ${item.context || ""}`);
 
     function openCaminoFilm() {
       caminoFilmModal.classList.remove("hidden");
+      caminoFilmEditor.open();
       refreshCaminoFilmProject();
       clearInterval(caminoFilmTimer);
       caminoFilmTimer = setInterval(() => {
@@ -6630,6 +6633,8 @@ ${item.context || ""}`);
     }
 
     function closeCaminoFilm() {
+      if (!caminoFilmEditor.canClose()) return;
+      caminoFilmEditor.close();
       ++caminoFilmRequest;
       clearInterval(caminoFilmTimer);
       clearCaminoFilmProject();

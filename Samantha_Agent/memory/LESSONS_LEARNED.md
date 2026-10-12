@@ -22,6 +22,29 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-064 — Zvuk po spojení PCM segmentů potřebuje souvislé PTS vzorků
+
+- Problém: Milisekundové časové značky pracovních MKV se při spojení
+  překryly o osm PCM vzorků; strict MP4 mux odmítl Non-monotonic DTS.
+- Typ: opakující se
+- Řešení nalezeno: 12102026
+- Řešení: Po concat nastavit audio timebase 1/48000 a PTS podle počtu
+  skutečně přijatých vzorků (`asettb=1/48000,asetpts=N/SR/TB`), potom mix
+  a AAC. Kontrolovat délku obou stop a celý decode; neoslabovat `-xerror`.
+  Regrese má 20 zlomkových střihů; oba skutečné 200s profily prošly.
+
+### LL-063 — Vícevrstvé iPhone MPO nelze přímo smyčkovat jako fotografii
+
+- Problém: JPEG/MPO s další obrazovou vrstvou resetoval video filtry;
+  část fotografií skončila bez obrazu, přesto segment měl plnou audio délku.
+- Typ: opakující se
+- Řešení nalezeno: 12102026
+- Řešení: Ze zdrojového originálu načíst hlavní obraz (seek 0), EXIF
+  orientaci a ICC převod do sRGB; vytvořit pracovní PNG bez metadat,
+  zachovat celý rám a originál včetně dalších vrstev. Na výsledku ověřit
+  i přesný počet snímků, nejen délku kontejneru. Syntetické dvouvrstvé
+  MPO i skutečné 720p/1080p se všemi 25 záběry prošly.
+
 ### LL-062 — Konečná Mac sada potřebuje vlastní původ a read-only archiv
 
 - Problém: Potvrzená konečnost Mac dat byla zaměněna za další telefonní

@@ -1,0 +1,99 @@
+# Camino P2-C/D — editor a MP4 z uzavřeného dne
+
+Stav: lokální editor implementovaný; skutečný náhled 720p a finále 1080p jsou ověřené.
+Míla 12. 10. výslovně zadal pokračování editorem a MP4 nad potvrzenou Mac
+sadou 6. 10. Telefon, běžící Camino, jeho archiv a síť se nemění.
+Nový Cockpit zatím není nasazený; publikace potřebuje samostatné p+n.
+
+## Editor
+
+Film Camino zachovává původní projekt a nabízí všechny jeho povolené zdroje.
+Záběry lze řadit, výslovně vyřadit, upravit titulek, délku fotografie,
+ruční in/out videa a hlasitost. Vyřazení nikdy nemaže původní médium.
+Výchozí videa jsou celá. Každý platný střih se automaticky ukládá do nové
+create-only revize; původní návrh a všechny uložené úpravy zůstávají.
+Optimistická kontrola revize zabrání přepsání z jiného okna. Retry stejného
+požadavku neduplikuje uloženou revizi.
+
+Povolené zvukové části se nabízejí celé, vypnuté do výslovného umístění.
+Uživatel volí čas ve filmu, in/out i hlasitost. Překrytí více komentářů
+nebo přesah za obraz se odmítne s vysvětlením; je třeba vědomě upravit
+umístění nebo prodloužit obraz. Zvuk videa se při komentáři ztiší na
+uživatelův poměr, výchozí 0,2. Žádná generovaná řeč, hudba ani AI.
+
+## Export a obnova
+
+Náhled 720p, finále 1080p/16:9 a dílčí pracovní úsek používají přesnou
+uloženou revizi a manifest. Starší výsledek je označený svou revizí.
+Soukromá fronta je trvalá, idempotentní a serializovaná systémovým zámkem.
+Po vědomém zadání exportu běží samostatný místní proces; změna stránky či
+restart Cockpitu ho neukončí. Neinstaluje se služba ani LaunchAgent.
+Přerušený export se opakuje od začátku v novém adresáři. Starší hotové
+výsledky i neúplné pokusy zůstávají zachované; žádný úklid ani mazání.
+
+FFmpeg běží s nice 10, dvěma vlákny a jedním filtrovacím vláknem. Záběry se
+normalizují postupně. Fotografie mají pracovní PNG hlavního obrazu, EXIF
+otočení a případný ICC převod do sRGB, bez metadat; vícevrstvé MPO se nesmí
+přímo smyčkovat jako video. [Pillow dokumentace MPO](https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html#mpo)
+popisuje hlavní obraz a další vrstvy. Videa respektují vlastní rotační
+matici a celý rám bez automatického ořezu. HDR video se nyní bezpečně
+odmítá; tento den má ověřené SDR video zdroje. HDR gain map fotografií se
+neaplikuje; výsledkem je jejich standardní hlavní SDR obraz.
+
+Po spojení pracovních segmentů dostane audio časovou bázi 48 kHz a
+souvislé PTS podle počtu vzorků (`asettb=1/48000,asetpts=N/SR/TB`), podle
+[oficiální dokumentace FFmpeg](https://ffmpeg.org/ffmpeg-filters.html#setpts_002c-asetpts).
+Tím se odstraní malá překrytí milisekundových časů mezi PCM segmenty.
+Kontroluje se počet video snímků, délka obou stop, H.264/AAC, rozměry,
+celé dekódování i hash. Zdrojové soukromí, integrita a neměnnost revize se
+ověřují před renderem, mezi záběry a před publikací. MP4 se zpřístupní až
+po úplné validaci; každý GET/HEAD/Range znovu kontroluje aktuální povolenost.
+Originály se nikdy nevydávají novou filmovou HTTP cestou.
+
+První reálný pokus odhalil PCM timestamp kolizi a MPO vedlejší vrstvy,
+které běžný smyčkový dekodér zaměňoval za další obrazy. Oba neplatné výstupy
+byly správně zadrženy. Opravy mají syntetické regresní testy pro mnoho
+zlomkových střihů a otočené dvouvrstvé MPO, včetně posledního snímku.
+
+## Hranice první verze
+
+Jeden uzavřený den, nejvýše 256 zdrojů a 60 minut obrazu, fotografie do
+300 sekund, 16 rozpracovaných exportů. Žádné automatické doplňování
+nehybného závěru, automatický výběr kratšího obsahu ani změny P0.
+Filmové soubory jsou mimo Git a archiv. Browser/Safari a celý lidský
+poslech jsou samostatná fyzická přejímka; decode/hash nejsou lidský PASS.
+Staženou cizí kopii nelze pozdější změnou soukromí odvolat.
+
+## Důkaz skutečného dne
+
+Oba profily vycházejí z revize 1 a stejného edit/manifest otisku. Zahrnují
+25 záběrů: 11 foto a 14 celých videí. Pět samostatných hlasových částí
+zůstává k výslovnému umístění, první sestavení zachovává zvuk videí.
+Časová osa 200 475 ms, skutečné video 200 465 ms / audio 200 466 ms;
+6014 snímků v obou MP4. Všechny záběry náhledu byly vizuálně prohlédnuté.
+
+| Profil | Rozměr | MP4 bajtů | Render sekund | Špička pracovního adresáře, alokované B |
+| --- | --- | ---: | ---: | ---: |
+| Náhled | 1280×720 | 25 617 860 | 135.034 | 101150720 |
+| Finále | 1920×1080 | 115 011 021 | 181.017 | 291872768 |
+
+Špičky jsou 50ms měření jednoho pracovního adresáře, nikoli celého APFS.
+Neúplné starší pokusy zůstávají v historii a nevydávají se. Hash náhledu:
+`2e979374f63ba8dbeb3a1171a6142679d7167414e65604aaf0f265d328b766f4`.
+Hash finále:
+`3013f072f34d6e7654c17e44955fec5de950811629bb62e4c33a5a09a3c542ee`.
+
+Izolovaný skutečný Cockpit HTTP: root/editor 200, revize 1, 25 obrazových
+a 5 zvukových nabídek, oba MP4 Range 206 a HEAD 200. Čerstvý audit Camina:
+owner HTTP/HTTPS zdravé, Viewer/mapa/map-data 200, foto/audio/video Range 206,
+anonymní Viewer 401. Archiv před/po přesně shodný: 624 operací, 82 Momentů,
+216 originálů, 1 673 901 399 B, stejné identity/tripy a všechny SHA-256.
+Serve otisk beze změny, Funnel off. Telefon a Camino služba se neměnily.
+Běžící Cockpit je stále původní PID 98814/otisk `59ae89a955a402c4`.
+
+Cílené testy editoru, HTTP, JS, souběhu, obnovy, soukromí a skutečných
+renderů PASS. Závěrečná plná brána **1907/1907 PASS** (319,041 s testů).
+Nová sada editoru má 19/19 testů PASS, včetně skutečného renderu
+720p/1080p, zlomkových střihů a MPO/EXIF/ICC. Nový editor není publikovaný.
+Vizuální browser/Safari ovládání a celý lidský poslech NEOVĚŘENO;
+CUA hlásí prázdný seznam prohlížečů. P2-E nepřijato.

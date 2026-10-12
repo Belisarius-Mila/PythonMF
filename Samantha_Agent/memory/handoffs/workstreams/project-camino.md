@@ -1,43 +1,38 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-10-12 18:19 CEST — P2-B: skutečný Mac projekt dostupný v nasazeném Cockpitu
+- Aktualizováno: 2026-10-12 19:21 CEST — P2-C/D: lokální editor a skutečné ověřené MP4 dne 6. 10.
 
 ### Hotovo
-- Míla upřesnil, že data 6. 10. na Macu jsou konečná; nové uzavření v telefonu nebylo jeho záměrem. Následně výslovně zadal pokračování uložením projektu z Mac sady a zpřístupněním v Cockpitu.
-- Skutečný neměnný Mac projekt 6. 10. je uložený a ověřený: 30 povolených zdrojů, 11 foto, 14 celých videí, 5 samostatných zvukových voleb a 25 obrazových položek. Výchozí foto 3 s, obrazová osa 200 475 ms.
-- Projekt má výslovný původ `owner_confirmed_mac`; neobsahuje tvrzení o telefonní frontě ani fingovaný iPhone důkaz. Původní telefonní API je zachované jako oddělená cesta.
-- Archiv se nezměnil: před/po 624 operací, 82 Momentů, 216 originálů, 1 673 901 399 B; shodné všechny SHA-256, identity, epocha a kurzor. Přístup k archivním SQLite je pouze `mode=ro`, nevzniká nový archive store ani migrace.
-- Po samostatném Mílově „p+n“ je `2e60f8db` na GitHubu a nasazený pouze Cockpit. Nový proces PID 98814 má očekávaný kódový otisk `59ae89a955a402c4`; řízená účtenka je `deployed` a smoke 5/5 PASS. Film Camino ukazuje skutečný projekt; P2-A ukázka zůstává samostatně.
-- Běžící Camino nadále používá ověřený release `e95568b7999e`; telefon, originály, přístupy a síť zůstaly beze změny. Předchozí GitHub CI oprava `31927650` prošla vzdálenou bránou.
-
-- Nový přehled je nasazený a živě ověřený přes loopback i soukromé HTTPS. Plná místní brána 1888/1888 PASS; GitHub brána přesného nasazeného `2e60f8db` má success: 1888 testů OK, 10 podmíněně přeskočených, 157,222 s (běh `38276225453`).
+- Nad konečnou Mílou potvrzenou Mac sadou funguje lokální editor: pořadí, výslovné vyřazení, titulek, délka foto, ruční in/out videa, zvukové části a hlasitost. Platné změny se automaticky ukládají do neměnných revizí; retry a souběžná okna nepřepisují práci.
+- Soukromá trvalá fronta vytváří věrný 720p náhled, dílčí úsek a 1080p MP4 konkrétní uložené revize. Proces renderu je oddělený od Cockpitu a Camina; po přerušení se opakuje od začátku, staré výsledky i pokusy zůstávají.
+- Skutečný den má oba ověřené exporty revize 1: 25 záběrů, časová osa 200 475 ms, 6014 video snímků, video 200 465 ms a audio 200 466 ms. Náhled 25 617 860 B / 135,034 s; finále 115 011 021 B / 181,017 s. První sestavení používá celé video se skutečným zvukem; pět samostatných hlasových částí zůstává k výslovnému umístění v editoru.
+- Celý soubor obou profilů je dekódovaný; všech 25 záběrů náhledu vizuálně zkontrolovaných. Lokální izolovaný Cockpit HTTP vrací editor 200 a MP4 GET Range 206 / HEAD 200. CUA aktuálně nemá dostupný prohlížeč.
+- Archiv je přesně shodný před/po: 624 operací, 82 Momentů, 216 originálů, 1 673 901 399 B, stejné identity/tripy a všechny SHA-256. Camino nadále `e95568b7999e`, živé owner HTTP/HTTPS, Viewer/mapa 200, foto/audio/video Range 206, anonymní Viewer 401. Telefon, služba i síť beze změny, Serve otisk shodný, Funnel off.
 
 ### Otevřeno
-- Prohlížečové UI nebylo vizuálně ověřené: CUA nemá dostupný prohlížeč. Funkční JS testy a skutečný HTTP náhled prošly; fyzický Cockpit klik po nasazení čeká.
-- Nevznikl skutečný MP4 ani editor. P2-C/D jsou další samostatné kroky. P2-A/MAC1 zůstává otevřené.
+- Závěrečná plná brána 1907/1907 PASS (319,041 s testů). Nový P2-C/D editor není pushnutý ani nasazený. Běžící Cockpit zůstává na dřívějším ověřeném přehledu P2-B, PID 98814, otisk `59ae89a955a402c4`.
+- Safari/iPhone ovládání editoru a celý lidský poslech skutečného filmu NEOVĚŘENO. P2-E je fyzická přejímka; P2-A/MAC1 zůstává odděleně otevřené.
 
 ### Rizika
-- Potvrzení konečnosti je Mílovo rozhodnutí; Mac kontrola ověřuje přijatou sadu a originály, netvrdí nezávisle, že na telefonu nic nečeká.
-- Pozdější změna dne, povolenosti nebo zdrojů zneplatní projekt. Neplatný stav nevydává staré počty, názvy ani seznam; nové potvrzení vytvoří samostatný projekt bez přepisu předchozího.
-- Projektové soubory jsou soukromé mimo Git a mimo všechny archivní adresáře. Originály se nekopírují, nemění ani nevydávají novými HTTP cestami.
-- Poslední recovery záloha Samanthy je z 27. 9., autosave neběží; místní filmový manifest není nezávislá záloha médií.
+- První verze podporuje jeden uzavřený den, 256 zdrojů, 60 minut obrazu a 16 rozpracovaných exportů. HDR video bezpečně odmítá; fotografie používají hlavní SDR obraz včetně EXIF/ICC převodu. Originály včetně ostatních MPO vrstev zůstávají celé.
+- Změna zdrojů, soukromí, integrity nebo uložené revize zastaví render/vydání; nepovolený stav schová stará data a přehrávač. Již staženou cizí kopii nelze odvolat.
+- Dřívější dnešní audit hlásil recovery zálohu z 27. 9. a neaktivní autosave; filmový krok je neměnil. Projekt a export nejsou nezávislá záloha originálů.
 
 ### Rozhodnutí
-- Pro den 6. 10. je kanonická cesta vlastnické potvrzení konečné Mac sady a projekt přístupný přes Cockpit. Dřívější telefonní potvrzovací krok není podmínkou této varianty.
-- Běžící Camino se kvůli této změně nezastavuje ani neaktualizuje. Nové rozhraní se týká pouze Cockpitu a oddělených filmových souborů.
+- Míla výslovně zadal „Pokračuj editorem a mp4.“ Vývoj a skutečný místní render jsou autorizované; nové publikování/nasazení zatím není potvrzené.
+- Samostatný hlas se umisťuje vědomě. Žádný automatický střih na cílovou délku, hudba, AI hlas ani veřejné sdílení. Camino se kvůli editoru nenastavuje ani nerestartuje.
 
 ### Další krok
-- Obnovit Cockpit a otevřít Film Camino; fyzicky potvrdit čitelnost přehledu skutečného projektu. Další editor/render vyžaduje samostatné zadání.
+- Po lokálním checkpointu získat samostatné p+n a nasadit pouze nový Cockpit.
 
 ### Navrhované další kroky
-- Po přijetí přehledu pokračovat P2-C editorem této uložené sady; render patří P2-D.
-- P2-A/MAC1 fyzicky dokončit po návratu k Macu.
+- P2-E: fyzicky ověřit editor, celý skutečný film se zvukem a ruční komentář.
+- P2-F vícedenní film až po přijetí základu a samostatném zadání.
 
 ### Technický důkaz
-- `app/camino_film_workshop.py`, `scripts/camino_mac_film_project.py` a `camino/docs/P2B_CLOSED_DAY_REPORT.md`.
-- Živý loopback i HTTPS: root a projekt 200, 30 zdrojů / 25 obrazových položek / 5 zvukových voleb a 200 475 ms. 12/12 nových bezpečnostních/HTTP/JS testů, 82/82 souvisejících a plná místní brána 1888/1888 PASS.
-- Camino beze změny na `e95568b7999e`, PID 67017. Owner HTTP/HTTPS 200/401, Viewer/přehled/mapa 200, foto/audio/video Range 206, anonymní 401 a soukromý zdroj 404. Archiv všech 216 originálů přesně shodný před/po, Serve otisk shodný a Funnel off.
+- `camino/docs/P2CD_EDITOR_MP4_REPORT.md`; cílené bezpečnostní/HTTP/JS a skutečné render testy PASS, závěrečná plná brána 1907/1907 PASS (319,041 s testů).
+- Shodný edit/manifest obou profilů, úplný decode, 6014 snímků. Hash finále `3013f072f34d6e7654c17e44955fec5de950811629bb62e4c33a5a09a3c542ee`.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: Camino
@@ -2674,3 +2669,30 @@ anonymní 401, owner-only zdroj 404. Archiv před/po přesně shodný:
 epocha, kurzor, tripy a všechny SHA-256. Camino zůstává na `e95568b7999e`,
 PID 67017; Serve beze změny, Funnel off. Vizuální Safari/telefonní klik
 NEOVĚŘENO (CUA nemá prohlížeč). [GitHub brána 38276225453](https://github.com/Belisarius-Mila/PythonMF/actions/runs/38276225453) pro `2e60f8db` má success: 1888 testů OK, 10 podmíněně přeskočených, 157,222 s.
+
+
+## 2026-10-12 19:21 CEST — P2-C/D: editor a první skutečné MP4
+
+**Hotovo:** Lokální editor uloženého dne 6. 10. umí řadit záběry, upravit
+foto/video/titulky/zvuk a chrání ruční práci neměnnými revizemi. Trvalá
+fronta má dílčí náhled, 720p a 1080p MP4; hotové jsou oba skutečné profily
+revize 1, přibližně 3:20, se všemi 25 obrazovými položkami. Pět hlasových
+částí se nabízí celých k vědomému umístění. Původní archiv je beze změny.
+
+**Rozhodnutí:** Míla zadal pokračování editorem a MP4. Nový krok je místní;
+push a nasazení nového Cockpitu vyžadují samostatné potvrzení. Telefon ani
+Camino služba se nemění; žádné zkracování obsahu jen kvůli cílové délce.
+
+**Další krok:** Po checkpointu samostatné p+n pouze Cockpitu.
+
+**Navrhované další kroky:** P2-E fyzická přejímka editoru a celého filmu
+se zvukem; P2-F až po přijetí základu a samostatném zadání.
+
+**Technický důkaz:** Oba MP4 úplně dekódované, 6014 snímků, video
+200 465 ms / audio 200 466 ms. Náhled 25 617 860 B / 135,034 s, finále
+115 011 021 B / 181,017 s. Lokální HTTP editor 200 a film Range 206 / HEAD
+200, všechny záběry náhledu vizuálně zkontrolované. Cílené testy PASS,
+závěrečná plná brána 1907/1907 PASS (319,041 s testů). Archiv před/po přesně shodný: 624 operací,
+82 Momentů, 216 originálů, 1 673 901 399 B a všechny SHA-256. Owner/Viewer,
+mapa i média zdravé, Serve beze změny a Funnel off. Safari/iPhone ovládání
+a celý lidský poslech NEOVĚŘENO. Report `P2CD_EDITOR_MP4_REPORT.md`.

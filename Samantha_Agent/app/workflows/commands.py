@@ -245,6 +245,14 @@ def _camino_mac_film_commands() -> tuple[WorkflowCommand, ...]:
     script = str(SAMANTHA_DIR / "scripts/camino_mac_film_project.py")
     return (
         WorkflowCommand(
+            command_id="camino_film_render", title="Vytvořit MP4 uloženého filmu Camino",
+            purpose="Ověří uloženou revizi a vytvoří 720p náhled i 1080p MP4 v soukromé frontě.",
+            aliases=("vytvoř mp4 camino",),
+            argv=(str(PYTHON_BIN), str(SAMANTHA_DIR / "scripts/camino_film_editor.py"), "render", "--execute"),
+            cwd=SAMANTHA_DIR, risk="private_write", requires_confirmation=True,
+            writes="pouze nové filmové exporty a pracovní soubory; žádné změny originálů, telefonu, služby nebo sítě",
+        ),
+        WorkflowCommand(
             command_id="camino_mac_film_status", title="Ověřit filmový projekt 6. října na Macu",
             purpose="Read-only ověřuje uložený projekt, současné soukromí a původní soubory.",
             aliases=("stav filmu camino",), argv=(str(PYTHON_BIN), script, "status"),

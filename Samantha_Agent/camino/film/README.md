@@ -68,3 +68,27 @@ Camino nemění. Registrovaný create vyžaduje výslovnou konečnost Mac dat.
 Cockpit Film Camino zobrazí přehled uloženého dne, celá videa a počty audia;
 editor/render zůstávají další fáze. Každý přehled znovu ověřuje povolenost
 a SHA-256, neplatný stav staré položky ani počty nevydá.
+
+## P2-C/D: uložený střih a soukromý MP4 export
+
+`app/camino_film_editor.py` váže neměnné revize střihu a frontu exportů na
+potvrzený Mac manifest. Cockpit nabízí pořadí, výslovné vyřazení, titulky,
+délku foto, ruční in/out videa a původních hlasových částí, hlasitost a
+ztišení videa během komentáře. Platné úpravy se automaticky ukládají,
+souběžný střih neprojde bez aktuální revize. Originály zůstávají beze změny.
+
+`app/camino_film_render.py` vyrenderuje jednotlivé záběry v pracovních
+kopiích, ověří všechna média a znovu prověří zdroje i revizi. Náhled 720p,
+dílčí úsek a MP4 1080p jsou v soukromé idempotentní frontě. Neúplný výsledek
+se nevydává; každý GET/HEAD/Range kontroluje aktuální povolenost projektu.
+MPO foto používá hlavní SDR obraz s EXIF/ICC převodem, HDR video je zatím
+odmítnuté. Po přerušení se export opakuje od začátku a staré soubory se zachovají.
+
+Registrovaný workflow `camino_film_render` po výslovném zadání spouští:
+
+```bash
+.venv/bin/python scripts/camino_film_editor.py render --execute
+```
+
+Vytvoří oba profily aktuální uložené revize. Běžící Camino, telefon a síť
+nemění. Provozní stav a výsledky jsou v [P2-C/D reportu](../docs/P2CD_EDITOR_MP4_REPORT.md).

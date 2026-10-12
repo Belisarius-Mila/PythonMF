@@ -36,9 +36,9 @@ EXPECTED_PAGES = {
     ),
     "cockpit": (
         COCKPIT_HTML,
-        513048,
-        10317,
-        "a2fa5818aa7d7e913dc98593261adb229fe74440def3606f5e73888b0561a46e",
+        529765,
+        10562,
+        "a627b22bf281e83aa141460986b8dcee703e9754da71092c523e04f56599b08a",
     ),
 }
 
@@ -199,7 +199,7 @@ class CockpitFrontendContractTests(unittest.TestCase):
 
         self.assertEqual(
             FRONTEND_JAVASCRIPT_MODULES["cockpit"],
-            ("navigation.js", "health_recovery_autosave.js", "codex_sessions.js", "library_photos.js", "document_review.js", "document_search.js"),
+            ("navigation.js", "health_recovery_autosave.js", "codex_sessions.js", "library_photos.js", "document_review.js", "document_search.js", "film_editor.js"),
         )
         self.assertIn("createHealthRecoveryAutosaveFrontend", module_source)
         self.assertIn("async function runFrontendHealthCheck()", module_source)

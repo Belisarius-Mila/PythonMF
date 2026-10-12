@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-12 18:19 CEST — skutečný Mac projekt 6. 10. dostupný v nasazeném Cockpitu
+Aktualizováno: 2026-10-12 19:21 CEST — P2-C/D: lokální editor a skutečné ověřené MP4
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,17 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-12 19:21 CEST — Na pokyn „Pokračuj editorem a mp4“ je lokální editor,
+  neměnné revize, soukromá trvalá fronta, dílčí náhled a hotové skutečné
+  720p/1080p MP4 dne 6. 10. Oba profily revize 1: 25 záběrů, 6014 snímků,
+  video 200 465 ms / audio 200 466 ms; náhled 25 617 860 B / 135,034 s,
+  finále 115 011 021 B / 181,017 s. Všech 25 záběrů náhledu vizuálně
+  ověřeno, celé soubory dekódované. HTTP editor 200 a MP4 Range 206 / HEAD
+  200. Archiv všech 216 originálů přesně zachovaný; Camino, telefon a síť
+  beze změny. 19/19 cílených testů, plná brána 1907/1907 PASS; nový push/nasazení nejsou
+  potvrzené. Fyzický Safari/iPhone editor a celý lidský poslech čekají.
+  Report `camino/docs/P2CD_EDITOR_MP4_REPORT.md`.
 
 - 2026-10-12 18:19 CEST — Míla schválil „p+n“. Přesný `2e60f8db` je na GitHubu,
   nasazený pouze Cockpit: nový PID 98814, otisk `59ae89a955a402c4`, účtenka

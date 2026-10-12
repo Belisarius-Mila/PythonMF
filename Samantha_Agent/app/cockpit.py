@@ -53,6 +53,7 @@ from app.camino_film_workshop import (
     camino_mac_film_project_action,
     camino_mac_film_project_status,
 )
+from app.camino_film_editor import film_editor_action, production_editor
 from app.screen_recovery import ScreenRecovery
 from app.cockpit_document_routes import DocumentReadRoutes
 from app.cockpit_email_archive_routes import EmailArchiveReadRoutes
@@ -8571,6 +8572,18 @@ def shell_quote_for_applescript(value: str) -> str:
 
 COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
     {
+        "path": "/api/camino/film/save",
+        "label": "Uložit novou revizi filmového střihu",
+        "risk": "private_write", "confirmation": "explicit_editor_change_or_save",
+        "handler_name": "film_editor_action", "test_level": "direct",
+    },
+    {
+        "path": "/api/camino/film/render",
+        "label": "Vytvořit soukromý náhled nebo MP4 uloženého střihu",
+        "risk": "private_write", "confirmation": "explicit_render_button",
+        "handler_name": "film_editor_action", "test_level": "direct",
+    },
+    {
         "path": "/api/camino/film/close-mac-day",
         "label": "Uložit filmový projekt z konečných Mac dat 6. října",
         "risk": "private_write",
@@ -9508,6 +9521,15 @@ class CockpitServer:
             def do_GET(self) -> None:  # noqa: N802
                 self.validate_request_access(require_origin=False)
                 parsed = urlparse(self.path)
+                if parsed.path == "/api/camino/film/editor":
+                    if parsed.query:
+                        self.respond_json({"ok": False, "error": "invalid_request"}, status=HTTPStatus.BAD_REQUEST)
+                    else:
+                        self.respond_json(film_editor_action("view"))
+                    return
+                if parsed.path.startswith("/api/camino/film/output/"):
+                    self.respond_film_output(parsed)
+                    return
                 if parsed.path == "/api/camino/film/day":
                     if parsed.query:
                         self.respond_json({"ok": False, "error": "invalid_request"}, status=HTTPStatus.BAD_REQUEST)
@@ -9775,6 +9797,12 @@ class CockpitServer:
             def do_POST(self) -> None:  # noqa: N802
                 self.validate_request_access(require_origin=True)
                 parsed = urlparse(self.path)
+                if parsed.path == "/api/camino/film/save":
+                    self.respond_film_edit("save", parsed)
+                    return
+                if parsed.path == "/api/camino/film/render":
+                    self.respond_film_edit("render", parsed)
+                    return
                 if parsed.path == "/api/camino/film/close-mac-day":
                     payload = self.read_json()
                     if parsed.query or set(payload) != {"confirmed_final_mac_data"}:
@@ -10628,6 +10656,70 @@ class CockpitServer:
                 self.send_header("Content-Length", str(len(data)))
                 self.end_headers()
                 self.wfile.write(data)
+
+            def respond_film_edit(self, operation, parsed) -> None:
+                payload = self.read_json()
+                keys = {"project_id", "expected_revision", "request_id", "draft"} if operation == "save" else {"project_id", "revision", "request_id", "profile", "range"}
+                if parsed.query or set(payload) != keys:
+                    self.respond_json({"ok": False, "error": "invalid_request"}, status=HTTPStatus.BAD_REQUEST)
+                    return
+                result = film_editor_action(operation, payload)
+                self.respond_json(result, status=HTTPStatus.OK if result.get("ok") else HTTPStatus.CONFLICT)
+
+            def do_HEAD(self) -> None:  # noqa: N802
+                self.validate_request_access(require_origin=False)
+                parsed = urlparse(self.path)
+                if parsed.path.startswith("/api/camino/film/output/"):
+                    self.respond_film_output(parsed)
+                else:
+                    self.send_error(HTTPStatus.METHOD_NOT_ALLOWED)
+
+            def respond_film_output(self, parsed) -> None:
+                parts = parsed.path.split("/")
+                try:
+                    if parsed.query or len(parts) != 7:
+                        raise ValueError("invalid output request")
+                    target = production_editor().output(parts[5], parts[6])
+                except (OSError, ValueError, KeyError):
+                    if self.command == "HEAD":
+                        self.send_response(HTTPStatus.NOT_FOUND)
+                        self.send_header("Content-Length", "0")
+                        self.end_headers()
+                    else:
+                        self.respond_json({"ok": False, "message": "Film není hotový nebo už není povolený."}, status=HTTPStatus.NOT_FOUND)
+                    return
+                size = target.stat().st_size
+                first, last = 0, size - 1
+                if self.headers.get("Range"):
+                    try:
+                        first, last = parse_single_http_byte_range(self.headers["Range"], size)
+                    except ValueError:
+                        self.send_response(HTTPStatus.REQUESTED_RANGE_NOT_SATISFIABLE)
+                        self.send_header("Content-Range", f"bytes */{size}")
+                        self.send_header("Content-Length", "0")
+                        self.end_headers()
+                        return
+                partial = bool(self.headers.get("Range"))
+                self.send_response(HTTPStatus.PARTIAL_CONTENT if partial else HTTPStatus.OK)
+                self.send_header("Content-Type", "video/mp4")
+                self.send_header("Content-Disposition", 'inline; filename="Camino-2026-10-06.mp4"')
+                self.send_header("Cache-Control", "no-store, max-age=0")
+                self.send_header("Accept-Ranges", "bytes")
+                self.send_header("Content-Length", str(last - first + 1))
+                if partial:
+                    self.send_header("Content-Range", f"bytes {first}-{last}/{size}")
+                self.end_headers()
+                if self.command == "HEAD":
+                    return
+                with target.open("rb") as handle:
+                    handle.seek(first)
+                    remaining = last - first + 1
+                    while remaining:
+                        chunk = handle.read(min(256 * 1024, remaining))
+                        if not chunk:
+                            break
+                        self.wfile.write(chunk)
+                        remaining -= len(chunk)
 
             def respond_local_file_bytes(self, *, target: Path, content_type: str, filename: str) -> None:
                 data = target.read_bytes()

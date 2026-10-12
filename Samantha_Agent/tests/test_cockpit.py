@@ -6542,7 +6542,8 @@ Dalsi krok:
         self.assertIn("openWebApp(app)", COCKPIT_HTML)
         self.assertIn("openDesktopApp(app)", COCKPIT_HTML)
         self.assertIn("SamanthaWebApp_", COCKPIT_HTML)
-        self.assertNotIn('target = "_blank"', COCKPIT_HTML)
+        web_app_launch = COCKPIT_HTML.split("function openWebApp(app) {", 1)[1].split("function openEmailHub() {", 1)[0]
+        self.assertNotIn('target = "_blank"', web_app_launch)
         self.assertIn("Zavřít", COCKPIT_HTML)
 
     def test_web_apps_are_available_directly_from_main_toolbar(self) -> None:

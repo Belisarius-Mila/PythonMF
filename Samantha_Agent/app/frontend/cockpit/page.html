@@ -340,15 +340,32 @@
         <button class="secondary" id="caminoFilmCloseBtn" type="button">Zavřít</button>
       </div>
       <div class="modal-body">
-        <p>Projekt používá konečná data na Macu. Fotografie mají výchozí délku 3 sekundy, videa zůstávají celá a původní audio je připravené k pozdějšímu střihu.</p>
+        <p>Projekt používá konečná data na Macu. Výchozí návrh nabízí všechny fotografie a celá videa. Střih i exporty se ukládají odděleně od originálů.</p>
         <div id="caminoFilmStatus" class="status-line" role="status" aria-live="polite"></div>
         <div id="caminoFilmSummary" class="message hidden"></div>
         <div class="actions">
           <button id="caminoFilmCreateBtn" type="button">Uložit projekt z Macu</button>
           <button id="caminoFilmRefreshBtn" class="secondary" type="button">Znovu ověřit projekt</button>
         </div>
-        <ol id="caminoFilmShots" class="camino-film-shots"></ol>
-        <p class="muted">Zde je přehled uloženého projektu. Střih a vytvoření výsledného filmu jsou další krok.</p>
+        <details><summary>Výchozí záběry uzavřené sady</summary><ol id="caminoFilmShots" class="camino-film-shots"></ol></details>
+        <section id="caminoFilmEditor" class="hidden" aria-label="Editor filmu">
+          <h3>Střih</h3>
+          <p>Úpravy se automaticky ukládají jako nové revize. Vyřazení odstraní záběr jen z filmu. Začátek a konec úseku vybíráš ručně.</p>
+          <div data-film="status" role="status" aria-live="polite"></div>
+          <div class="actions"><button data-film="save" type="button">Uložit střih</button><button data-film="reload" type="button" class="secondary">Načíst poslední střih</button></div>
+          <ol data-film="shots" class="camino-film-edit-list"></ol>
+          <details><summary>Hlasové komentáře</summary>
+            <p>Každá nabídka je celá původní zvuková část. Její umístění a případné zkrácení volíš ručně. Přesah hlasu vyžaduje prodloužení fotografie nebo doplnění obrazu.</p>
+            <label>Zvuk videa během komentáře (0–1)<input data-film="duck" type="number" min="0" max="1" step="0.05" value="0.2"></label>
+            <ol data-film="voices" class="camino-film-edit-list"></ol>
+          </details>
+          <h3>Náhled a MP4</h3>
+          <div class="actions"><button data-film="preview" type="button">Vytvořit náhled 720p</button><button data-film="final" type="button">Vytvořit MP4 1080p</button></div>
+          <div class="camino-film-fields"><label>Náhled od (s)<input data-film="from" type="number" min="0" step="0.001" value="0"></label><label>Do (s)<input data-film="to" type="number" min="0.1" step="0.001" value="10"></label><button data-film="range" type="button" class="secondary">Náhled úseku</button></div>
+          <p class="muted">Náhled a MP4 používají konkrétní uloženou revizi. Starší výsledek zůstává označený. Export se při přerušení zopakuje od začátku; nic se veřejně nesdílí.</p>
+          <ul data-film="jobs"></ul>
+          <video data-film="player" controls playsinline preload="none" aria-label="Film Camino z uloženého střihu"></video>
+        </section>
         <details id="caminoFilmTest"><summary>Testovací ukázka P2-A · 22 sekund</summary>
           <p>Syntetický test obrazu, titulků a zvuku.</p>
           <video id="caminoFilmVideo" controls playsinline preload="none" aria-label="Finální testovací film Camino P2-A"></video>

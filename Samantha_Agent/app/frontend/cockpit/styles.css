@@ -445,3 +445,11 @@
     .toolbar [aria-current="page"] { box-shadow: inset 0 -3px 0 #60a5fa; }
     .toolbar button { min-height: 44px; }
     @media (max-width: 900px) { .toolbar { gap: 12px; } }
+    .camino-film-edit-list { padding-left: 1.5rem; }
+    .camino-film-edit-list > li { margin: 1rem 0; padding: .75rem; border: 1px solid var(--border, #ddd); border-radius: .5rem; }
+    .camino-film-edit-list label { display: block; margin: .4rem 0; }
+    .camino-film-fields { display: flex; flex-wrap: wrap; gap: .75rem; align-items: end; }
+    .camino-film-fields label { flex: 1 1 10rem; }
+    .camino-film-fields input { display: block; width: 100%; box-sizing: border-box; }
+    #caminoFilmEditor video { width: 100%; max-height: 65vh; margin-top: .75rem; }
+    #caminoFilmEditor a { margin-left: .75rem; }
