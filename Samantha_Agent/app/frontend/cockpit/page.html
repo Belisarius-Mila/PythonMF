@@ -29,7 +29,7 @@
         <button class="janicka-button" id="janickaBtn">Janička</button>
         <button class="secondary" id="familyCalendarBtn">Rodinný kalendář</button>
         <a class="button-link secondary-link hidden" id="caminoViewerLink" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">Otevřít Camino</a>
-        <button class="secondary" id="caminoFilmBtn" type="button">Film P2-A</button>
+        <button class="secondary" id="caminoFilmBtn" type="button">Film Camino</button>
       </div>
       <div class="toolbar-group" role="group" aria-label="Projekty a servis">
         <button class="secondary" id="webAppsBtn">Webové aplikace</button>
@@ -336,13 +336,23 @@
   <div id="caminoFilmModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="caminoFilmTitle">
     <div class="modal">
       <div class="modal-header">
-        <h2 id="caminoFilmTitle">Camino — testovací film P2-A</h2>
+        <h2 id="caminoFilmTitle">Camino — projekt filmu z 6. října</h2>
         <button class="secondary" id="caminoFilmCloseBtn" type="button">Zavřít</button>
       </div>
       <div class="modal-body">
-        <p>Syntetický 22sekundový film. Klepni na přehrání a zkontroluj obraz, titulky i závěrečnou větu se zvukem.</p>
-        <video id="caminoFilmVideo" controls playsinline preload="none" aria-label="Finální testovací film Camino P2-A"></video>
+        <p>Projekt používá konečná data na Macu. Fotografie mají výchozí délku 3 sekundy, videa zůstávají celá a původní audio je připravené k pozdějšímu střihu.</p>
         <div id="caminoFilmStatus" class="status-line" role="status" aria-live="polite"></div>
+        <div id="caminoFilmSummary" class="message hidden"></div>
+        <div class="actions">
+          <button id="caminoFilmCreateBtn" type="button">Uložit projekt z Macu</button>
+          <button id="caminoFilmRefreshBtn" class="secondary" type="button">Znovu ověřit projekt</button>
+        </div>
+        <ol id="caminoFilmShots" class="camino-film-shots"></ol>
+        <p class="muted">Zde je přehled uloženého projektu. Střih a vytvoření výsledného filmu jsou další krok.</p>
+        <details id="caminoFilmTest"><summary>Testovací ukázka P2-A · 22 sekund</summary>
+          <p>Syntetický test obrazu, titulků a zvuku.</p>
+          <video id="caminoFilmVideo" controls playsinline preload="none" aria-label="Finální testovací film Camino P2-A"></video>
+        </details>
       </div>
     </div>
   </div>

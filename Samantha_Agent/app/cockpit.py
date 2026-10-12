@@ -49,6 +49,10 @@ from app.cockpit_awake_mode import (
 )
 from app.codex_sessions import CodexSessionController
 from app.screen_sessions import ScreenSessionController
+from app.camino_film_workshop import (
+    camino_mac_film_project_action,
+    camino_mac_film_project_status,
+)
 from app.screen_recovery import ScreenRecovery
 from app.cockpit_document_routes import DocumentReadRoutes
 from app.cockpit_email_archive_routes import EmailArchiveReadRoutes
@@ -8567,6 +8571,14 @@ def shell_quote_for_applescript(value: str) -> str:
 
 COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
     {
+        "path": "/api/camino/film/close-mac-day",
+        "label": "Uložit filmový projekt z konečných Mac dat 6. října",
+        "risk": "private_write",
+        "confirmation": "explicit_ui_confirmation_of_final_mac_inputs",
+        "handler_name": "camino_mac_film_project_action",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/screen/sessions/attach",
         "label": "Obnovit screen ve VS Code na Macu",
         "risk": "local_service",
@@ -9496,6 +9508,12 @@ class CockpitServer:
             def do_GET(self) -> None:  # noqa: N802
                 self.validate_request_access(require_origin=False)
                 parsed = urlparse(self.path)
+                if parsed.path == "/api/camino/film/day":
+                    if parsed.query:
+                        self.respond_json({"ok": False, "error": "invalid_request"}, status=HTTPStatus.BAD_REQUEST)
+                    else:
+                        self.respond_json(camino_mac_film_project_status())
+                    return
                 if parsed.path == "/api/screen/sessions":
                     self.respond_json(SCREEN_SESSIONS.status())
                     return
@@ -9757,6 +9775,14 @@ class CockpitServer:
             def do_POST(self) -> None:  # noqa: N802
                 self.validate_request_access(require_origin=True)
                 parsed = urlparse(self.path)
+                if parsed.path == "/api/camino/film/close-mac-day":
+                    payload = self.read_json()
+                    if parsed.query or set(payload) != {"confirmed_final_mac_data"}:
+                        self.respond_json({"ok": False, "error": "invalid_request"}, status=HTTPStatus.BAD_REQUEST)
+                        return
+                    result = camino_mac_film_project_action(confirmed=payload["confirmed_final_mac_data"])
+                    self.respond_json(result, status=HTTPStatus.OK if result.get("ok") else HTTPStatus.CONFLICT)
+                    return
                 if parsed.path == "/api/screen/sessions/attach":
                     self.respond_json(screen_session_attach_action(self.read_json(), int(self.server.server_address[1])))
                     return

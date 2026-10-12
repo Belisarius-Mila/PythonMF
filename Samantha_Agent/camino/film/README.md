@@ -56,3 +56,15 @@ Aktuální místní vývoj a oddělený provozní stav jsou v
 [P2-B reportu](../docs/P2B_CLOSED_DAY_REPORT.md).
 
 Podrobný důkaz a přejímka: [P2-A report](../docs/P2A_FILM_REPORT.md).
+
+## P2-B z konečné Mac sady v Cockpitu
+
+Po výslovném potvrzení Míly pro 6. 10. je dostupná oddělená varianta
+`app/camino_film_workshop.py`: potvrzené konečné Mac vstupy, striktně
+read-only SQLite a stejné ověření originálů. Původ je `owner_confirmed_mac`,
+nikoli iPhone důkaz; telefonní fronty se nevymýšlejí. Uložení vytváří
+samostatné soukromé filmové soubory mimo archiv a Git. Službu ani aplikaci
+Camino nemění. Registrovaný create vyžaduje výslovnou konečnost Mac dat.
+Cockpit Film Camino zobrazí přehled uloženého dne, celá videa a počty audia;
+editor/render zůstávají další fáze. Každý přehled znovu ověřuje povolenost
+a SHA-256, neplatný stav staré položky ani počty nevydá.

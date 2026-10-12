@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-12 17:01 CEST — P2-B server a GitHub brána ověřené, skutečný den čeká na telefon
+Aktualizováno: 2026-10-12 17:58 CEST — skutečný Mac projekt 6. 10. uložený; nový Cockpit lokálně
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,16 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-12 17:58 CEST — Míla potvrdil konečnost Mac dat 6. 10. a zadal projekt
+  z této sady v Cockpitu, bez nového telefonního uzavření. Skutečný projekt
+  je uložený odděleně od archivu: 11 foto, 14 celých videí, 5 zvukových
+  voleb, 25 obrazových položek, 200 475 ms. Původ `owner_confirmed_mac`
+  neobsahuje fingovanou telefonní frontu. Read-only SQLite a SHA-256 audit
+  prokázaly přesně shodný archiv: 624 operací, 82 Momentů a 216 originálů.
+  Nový Cockpit přehled je lokální; 12/12 nových a 82/82 souvisejících testů
+  i HTTP náhled PASS, plná brána 1888/1888 PASS. Push/nasazení Cockpitu tohoto kroku
+  čekají na samostatné potvrzení. Camino služba i telefon zůstaly beze změny.
 
 - GitHub kontrolní prostředí je opravené: běh `38266173656` pro
   `31927650` má success (1876 testů OK, 10 podmíněně přeskočených).

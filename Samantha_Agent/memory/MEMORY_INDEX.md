@@ -60,7 +60,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] 12. 10.: GitHub přihlášení obnovené, plná místní brána 1876/1876 PASS a GitHub běh `38266173656` success (1876 testů, 10 skip); P2-B server `e95568b7999e` publikovaný, owner API hlásí `film_closed_day_v1`. Cíleně 71/71, izolovaný import, HTTP/HTTPS, Viewer/mapa a média PASS; Cockpit smoke 5/5. Archiv přesně zachovaný: 82 Momentů, 216 originálů. Míla oznámil běžnou funkčnost znovunačtené aplikace; dnešní krok telefon ani Serve neměnil. Skutečný den 6. 10. čeká na čerstvý iPhone důkaz; P2-A/IPHONE1 PASS, P2-A/MAC1 čeká. Reporty `camino/docs/P2A_FILM_REPORT.md`, `camino/docs/P2B_CLOSED_DAY_REPORT.md`.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] 12. 10.: Míla potvrdil konečnost Mac dat 6. 10.; skutečný projekt uložený bez telefonního uzavření (11 foto, 14 celých videí, 5 audio, 25 záběrů, 200 475 ms). Archiv, telefon a Camino služba zachované. Nový Cockpit Film Camino lokálně; 12/12, 82/82 a HTTP náhled PASS, plná brána 1888/1888 PASS; push/nasazení čekají na samostatné potvrzení. P2-A/MAC1 otevřené, editor/render P2-C/D samostatně. Report `camino/docs/P2B_CLOSED_DAY_REPORT.md`.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` - Cockpit 14. 9.: scroll 10ec0877 potvrzený Mílou. [PRIPOMENOUT] U07 až při příštím pokračování. TXT v2.8 shrnuje U01–U06; plná brána 1680/1680 OK, funkční nasazení 980aed7a a smoke 5/5. Publikační překážka odstraněna; finální balíček/head ověřovat živým auditem.
 

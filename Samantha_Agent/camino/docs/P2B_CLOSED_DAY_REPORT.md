@@ -1,6 +1,6 @@
 # Camino P2-B — uzavření dne 6. 10. 2026
 
-Stav 12. 10. 2026: **server publikovaný a živě ověřený, skutečný den neuzavřený**.
+Stav 12. 10. 2026: **skutečný projekt z konečných Mac dat uložený a ověřený; nový Cockpit přehled lokálně**.
 P2-A/IPHONE1 má Mílův PASS; P2-A/MAC1 zůstává na fyzické přehrání.
 Míla výslovně zahájil P2-B a oznámil, že data prvního dne jsou na Macu
 kompletní. To je vstupní tvrzení, nikoli ještě důkaz telefonu.
@@ -176,3 +176,44 @@ Závěrečné redigované čtení filmového úložiště potvrdilo 0 projektů;
 skutečný den nadále čeká na explicitní telefonní uzavření.
 Běžící serverový kód je mezi `e95568b7` a `31927650` přesně shodný.
 Závěrečná dokumentace a CI oprava nevyžadují další restart služby.
+
+## Konečná Mac sada — vlastnické potvrzení a Cockpit přehled
+
+Míla upřesnil, že 6. 10. považuje za konečnou sadu na Macu a v Cockpitu
+vidí jen syntetický Film P2-A. Zadání dalšího potvrzování v telefonu nebylo
+jeho záměrem. Po vysvětlení zadal pokračování vytvořením projektu z Mac
+sady a přehledem v Cockpitu. Tím pro tento den výslovně přijal původ
+`owner_confirmed_mac`; nezávislý důkaz nulové telefonní fronty se netvrdí.
+Původní telefonní API zůstává odděleně zachované, bez změny aplikace.
+
+Nový `app/camino_film_workshop.py` používá jen SQLite `mode=ro` adaptéry.
+Neinstancuje zapisující RevisionStore/MediaStore, nemigruje schéma,
+nerecoveruje uploady a neovládá službu. Sdílený P2-B validátor kontroluje
+aktuální revize, serverové flagy, úplnost přijaté Mac sady, manifesty,
+verified session/receipt a SHA-256 všech originálů dne. Filmové soubory
+mají vlastní soukromý kořen mimo Git a mimo všechny archivní adresáře;
+obsahují `mac-confirmation.json`, neměnný manifest, projekt a účtenku.
+Opakování stejného inventáře používá stejný projekt, předchozí revize se
+nepřepisují. Změna zdrojů/soukromí zneplatní přehled; neplatný stav
+nevydává staré počty, názvy ani položky. Originály se nekopírují ani nemění.
+
+Registrované `camino_mac_film_status/create` a Cockpit GET/POST mají
+samostatnou potvrzovací bránu. UI Film Camino ukazuje skutečný projekt,
+počty a chronologickou obrazovou osu, syntetické P2-A je pod samostatným
+rozbalením. Seznam se znovu ověřuje po návratu do popředí a po minutě;
+staré odpovědi se nepoužijí a chyba/soukromí smaže starý přehled.
+Nejde o editor ani render a nové HTTP cesty nevydávají původní média.
+
+Skutečný projekt 6. 10. byl autorizovaně uložen a je validní: **30 zdrojů,
+11 fotografií, 14 celých videí, 5 zvukových voleb, 25 obrazových položek**.
+Foto má výchozí 3 s, žádné automatické video zkrácení; osa **200 475 ms**.
+Archiv před/po je přesně shodný: 624 operací, 82 Momentů, 216 originálů,
+1 673 901 399 B, stejné identity/epoch/cursor a všechny SHA-256.
+Běžící Camino nadále používá `e95568b7999e`, telefon a síť beze změny.
+
+12/12 nových syntetických bezpečnostních/HTTP/JS testů a 82/82 souvisejících
+prošly. Oddělený loopback náhled Cockpitu vrátil 200, nový vstup/panel,
+odlišený syntetický test a skutečný projekt 30/25/5. CUA nemá prohlížeč,
+proto vizuální UI/Safari přejímka je NEOVĚŘENO. Závěrečná plná brána **1888/1888 PASS** (297,270 s testů);
+nové zdrojové soubory, push a nasazení Cockpitu nejsou publikované.
+Další je lokální checkpoint a po samostatném souhlasu pouze Cockpit p+n.

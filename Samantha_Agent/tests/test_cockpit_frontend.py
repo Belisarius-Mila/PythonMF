@@ -36,9 +36,9 @@ EXPECTED_PAGES = {
     ),
     "cockpit": (
         COCKPIT_HTML,
-        507592,
-        10207,
-        "2f9620b1bd391e8d245d31d5542a945e19d7ad74f31c2f50f7abf871181f8850",
+        513048,
+        10317,
+        "a2fa5818aa7d7e913dc98593261adb229fe74440def3606f5e73888b0561a46e",
     ),
 }
 
@@ -84,7 +84,7 @@ class CockpitFrontendContractTests(unittest.TestCase):
         )
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
-    def test_rendered_pages_keep_exact_pre_extraction_contract(self) -> None:
+    def test_rendered_pages_keep_expected_asset_contract(self) -> None:
         for page_id, (rendered, length, line_count, expected_sha256) in EXPECTED_PAGES.items():
             with self.subTest(page_id=page_id):
                 self.assertEqual(len(rendered), length)

@@ -17,6 +17,11 @@
     const caminoFilmCloseBtn = document.getElementById("caminoFilmCloseBtn");
     const caminoFilmVideo = document.getElementById("caminoFilmVideo");
     const caminoFilmStatus = document.getElementById("caminoFilmStatus");
+    const caminoFilmSummary = document.getElementById("caminoFilmSummary");
+    const caminoFilmShots = document.getElementById("caminoFilmShots");
+    const caminoFilmCreateBtn = document.getElementById("caminoFilmCreateBtn");
+    const caminoFilmRefreshBtn = document.getElementById("caminoFilmRefreshBtn");
+    const caminoFilmTest = document.getElementById("caminoFilmTest");
     const projectsBtn = document.getElementById("projectsBtn");
     const remindersBtn = document.getElementById("remindersBtn");
     const emailProcessingBtn = document.getElementById("emailProcessingBtn");
@@ -6540,17 +6545,99 @@ ${item.context || ""}`);
       janickaModal.classList.remove("hidden");
     }
 
+    let caminoFilmRequest = 0;
+    let caminoFilmTimer = null;
+
+    function clearCaminoFilmProject() {
+      caminoFilmSummary.textContent = "";
+      caminoFilmSummary.classList.add("hidden");
+      caminoFilmShots.replaceChildren();
+    }
+
+    function renderCaminoFilmProject(data) {
+      clearCaminoFilmProject();
+      if (!data.ok) {
+        caminoFilmStatus.textContent = data.message || "Projekt se nepodařilo ověřit.";
+        return;
+      }
+      if (!data.exists) {
+        caminoFilmStatus.textContent = "Projekt 6. října zatím není uložený. Potvrď konečná data na Macu a ulož projekt.";
+        caminoFilmCreateBtn.disabled = false;
+        return;
+      }
+      caminoFilmStatus.textContent = data.message;
+      caminoFilmCreateBtn.disabled = data.valid;
+      if (!data.valid) return;
+      const seconds = Math.round(data.duration_ms / 1000);
+      caminoFilmSummary.textContent = `${data.photo_count} fotografií · ${data.video_count} celých videí · ${data.audio_count} zvukových voleb. Obrazová osa ${Math.floor(seconds / 60)} min ${seconds % 60} s.`;
+      caminoFilmSummary.classList.remove("hidden");
+      for (const shot of data.shots) {
+        const li = document.createElement("li");
+        const kind = shot.kind === "photo" ? "Fotografie" : "Video";
+        li.textContent = `${kind} · ${shot.title || "Bez názvu"} · ${(shot.duration_ms / 1000).toLocaleString("cs-CZ")} s`;
+        caminoFilmShots.appendChild(li);
+      }
+    }
+
+    async function refreshCaminoFilmProject() {
+      const request = ++caminoFilmRequest;
+      clearCaminoFilmProject();
+      caminoFilmStatus.textContent = "Ověřuji projekt a zdroje na Macu…";
+      caminoFilmCreateBtn.disabled = true;
+      try {
+        const response = await fetch("/api/camino/film/day", {cache: "no-store"});
+        const data = await response.json();
+        if (request !== caminoFilmRequest || caminoFilmModal.classList.contains("hidden") || document.hidden) return;
+        renderCaminoFilmProject(data);
+      } catch (_) {
+        if (request === caminoFilmRequest) {
+          clearCaminoFilmProject();
+          caminoFilmStatus.textContent = "Projekt nelze nyní na Macu ověřit.";
+        }
+      }
+    }
+
+    async function createCaminoFilmProject() {
+      if (!confirm("Potvrzuji, že všechna data a metadata 6. října jsou na Macu konečná. Uložit z nich filmový projekt?")) return;
+      const request = ++caminoFilmRequest;
+      clearCaminoFilmProject();
+      caminoFilmCreateBtn.disabled = true;
+      caminoFilmStatus.textContent = "Kontroluji originály a ukládám projekt…";
+      try {
+        const response = await fetch("/api/camino/film/close-mac-day", {
+          method: "POST", headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({confirmed_final_mac_data: true}),
+        });
+        const data = await response.json();
+        if (request !== caminoFilmRequest || caminoFilmModal.classList.contains("hidden") || document.hidden) return;
+        renderCaminoFilmProject(data);
+        if (!data.ok) caminoFilmCreateBtn.disabled = false;
+      } catch (_) {
+        if (request === caminoFilmRequest) {
+          caminoFilmStatus.textContent = "Odpověď se ztratila. Znovu ověř projekt; opakované uložení je bezpečné.";
+          caminoFilmCreateBtn.disabled = false;
+        }
+      }
+    }
+
     function openCaminoFilm() {
-      caminoFilmStatus.textContent = "Připraveno k přehrání.";
-      caminoFilmVideo.src = "/local-apps/camino-p2a-review/final-fed41c8f9697/film.mp4";
       caminoFilmModal.classList.remove("hidden");
+      refreshCaminoFilmProject();
+      clearInterval(caminoFilmTimer);
+      caminoFilmTimer = setInterval(() => {
+        if (!document.hidden) refreshCaminoFilmProject();
+      }, 60000);
     }
 
     function closeCaminoFilm() {
+      ++caminoFilmRequest;
+      clearInterval(caminoFilmTimer);
+      clearCaminoFilmProject();
       caminoFilmVideo.pause();
       caminoFilmVideo.removeAttribute("src");
       caminoFilmVideo.load();
       caminoFilmModal.classList.add("hidden");
+      caminoFilmTest.open = false;
     }
 
     function closeJanickaModal() {
@@ -6703,6 +6790,17 @@ ${item.context || ""}`);
 
     janickaBtn.addEventListener("click", openJanickaModal);
     caminoFilmBtn.addEventListener("click", openCaminoFilm);
+    caminoFilmCreateBtn.addEventListener("click", createCaminoFilmProject);
+    caminoFilmRefreshBtn.addEventListener("click", refreshCaminoFilmProject);
+    caminoFilmTest.addEventListener("toggle", () => {
+      if (caminoFilmTest.open) caminoFilmVideo.src = "/local-apps/camino-p2a-review/final-fed41c8f9697/film.mp4";
+      else { caminoFilmVideo.pause(); caminoFilmVideo.removeAttribute("src"); caminoFilmVideo.load(); }
+    });
+    document.addEventListener("visibilitychange", () => {
+      if (caminoFilmModal.classList.contains("hidden")) return;
+      if (document.hidden) { ++caminoFilmRequest; clearCaminoFilmProject(); }
+      else refreshCaminoFilmProject();
+    });
     caminoFilmCloseBtn.addEventListener("click", closeCaminoFilm);
     caminoFilmVideo.addEventListener("error", () => {
       if (caminoFilmVideo.error) caminoFilmStatus.textContent = `Video se nepodařilo načíst (kód ${caminoFilmVideo.error.code}).`;

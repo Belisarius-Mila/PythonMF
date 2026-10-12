@@ -241,6 +241,27 @@ def _camino_c05b_private_commands() -> tuple[WorkflowCommand, ...]:
     )
 
 
+def _camino_mac_film_commands() -> tuple[WorkflowCommand, ...]:
+    script = str(SAMANTHA_DIR / "scripts/camino_mac_film_project.py")
+    return (
+        WorkflowCommand(
+            command_id="camino_mac_film_status", title="Ověřit filmový projekt 6. října na Macu",
+            purpose="Read-only ověřuje uložený projekt, současné soukromí a původní soubory.",
+            aliases=("stav filmu camino",), argv=(str(PYTHON_BIN), script, "status"),
+            cwd=SAMANTHA_DIR, risk="read_only_preview", writes="nic",
+        ),
+        WorkflowCommand(
+            command_id="camino_mac_film_create", title="Uložit filmový projekt z konečných Mac dat",
+            purpose="Po potvrzení konečnosti 6. října vytvoří oddělený neměnný manifest a projekt.",
+            aliases=("ulož projekt filmu camino",),
+            argv=(str(PYTHON_BIN), script, "create", "--confirm-final-mac-data"),
+            cwd=SAMANTHA_DIR, risk="private_write",
+            writes="pouze nové soukromé filmové soubory; archiv, telefon, službu a síť nemění",
+            requires_confirmation=True,
+        ),
+    )
+
+
 def _camino_service_commands() -> tuple[WorkflowCommand, ...]:
     """M2c controls never install implicitly and never change the private proxy."""
     descriptions = (
@@ -741,7 +762,7 @@ WORKFLOW_COMMANDS: tuple[WorkflowCommand, ...] = (
         ),
         preflight=lambda command: _preflight_human_adam_takeover(command),
     ),
-) + _camino_network_test_commands("T048") + _camino_network_test_commands("T049") + _camino_network_test_commands("T050") + _camino_c05b_private_commands() + _camino_service_commands()
+) + _camino_network_test_commands("T048") + _camino_network_test_commands("T049") + _camino_network_test_commands("T050") + _camino_c05b_private_commands() + _camino_service_commands() + _camino_mac_film_commands()
 
 
 @function_tool

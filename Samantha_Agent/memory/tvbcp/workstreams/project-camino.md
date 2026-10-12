@@ -1,44 +1,41 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-10-12 17:01 CEST — P2-B server i GitHub brána ověřené
+- Aktualizováno: 2026-10-12 17:58 CEST — P2-B: skutečný projekt z konečných Mac dat uložený, nový Cockpit lokálně
 
 ### Hotovo
-- Opravené GitHub testovací prostředí má success v běhu `38266173656` pro `31927650`: 1876 testů OK, 10 podmíněně přeskočených. Čerstvá místní plná brána 1876/1876 PASS.
-- GitHub přihlášení je obnovené; schválený balíček `e95568b7` je na GitHubu a vlastní Camino služba běží z releasu `e95568b7999e`.
-- Owner API přes loopback i soukromé HTTPS hlásí `film_closed_day_v1`; filmové API je nakonfigurované a anonymní přístup odmítá.
-- Archiv před a po přepnutí je přesně shodný: 624 operací, 82 Momentů, 216 originálů, 1 673 901 399 B. Všechny originály prošly úplným SHA-256; identita, epocha, kurzor i všechny tři cesty zůstaly zachované.
-- Viewer, den 6. 10. a mapa vracejí 200; foto, původní povolené audio a video proxy vracejí 206 se správným MIME. Anonymní Viewer a soukromý zdroj jsou odmítnuté. Cockpit smoke 5/5 PASS.
-- Stejné schéma 3, stejné závislosti a stejný kód přenosů, autentizace, obnovy a Vieweru. Zachovaná původní konfigurace, LaunchAgent a čtyři ověřené DB snapshoty; Serve konfigurace beze změny, Funnel off.
-- Míla 12. 10. oznámil obnovenou běžnou funkčnost Camina po znovunačtení posledního buildu. Dnešní krok telefon neinstaloval ani neměnil.
-- P2-A/IPHONE1 má Mílův PASS. P2-B pro 6. 10. má dosavadní Mac důkaz 11 Momentů a 34 originálů, z nich 30 povolených zdrojů.
+- Míla upřesnil, že data 6. 10. na Macu jsou konečná; nové uzavření v telefonu nebylo jeho záměrem. Následně výslovně zadal pokračování uložením projektu z Mac sady a zpřístupněním v Cockpitu.
+- Skutečný neměnný Mac projekt 6. 10. je uložený a ověřený: 30 povolených zdrojů, 11 foto, 14 celých videí, 5 samostatných zvukových voleb a 25 obrazových položek. Výchozí foto 3 s, obrazová osa 200 475 ms.
+- Projekt má výslovný původ `owner_confirmed_mac`; neobsahuje tvrzení o telefonní frontě ani fingovaný iPhone důkaz. Původní telefonní API je zachované jako oddělená cesta.
+- Archiv se nezměnil: před/po 624 operací, 82 Momentů, 216 originálů, 1 673 901 399 B; shodné všechny SHA-256, identity, epocha a kurzor. Přístup k archivním SQLite je pouze `mode=ro`, nevzniká nový archive store ani migrace.
+- Lokální Cockpit má vstup Film Camino, přehled skutečného projektu a oddělenou testovací P2-A ukázku. HTTP náhled na jiném loopback portu vrací 200 a ověřený projekt; nový backend/frontend 12/12 a související sada 82/82 PASS.
+- Běžící Camino nadále používá ověřený release `e95568b7999e`; telefon, originály, přístupy a síť zůstaly beze změny. Předchozí GitHub CI oprava `31927650` prošla vzdálenou bránou.
 
 ### Otevřeno
-- Skutečný den 6. 10. není uzavřený: chybí čerstvý explicitní důkaz telefonu a fyzická P2-B přejímka; žádný skutečný filmový projekt nevznikl.
-- Konkrétní verze znovunačteného telefonu nebyla sdělena; běžná funkčnost není důkaz přítomnosti P2-B UI. Nová distribuce ani instalace dnes neproběhly.
-- P2-A/MAC1 čeká na fyzické přehrání opraveného finále se zvukem.
+- Nový Cockpit přehled je zatím lokální: plná brána 1888/1888 PASS a push/nasazení tohoto nového kroku čekají na samostatné potvrzení. Ve starém běžícím Cockpitu je dosud Film P2-A.
+- Prohlížečové UI nebylo vizuálně ověřené: CUA nemá dostupný prohlížeč. Funkční JS testy a skutečný HTTP náhled prošly; fyzický Cockpit klik po nasazení čeká.
+- Nevznikl skutečný MP4 ani editor. P2-C/D jsou další samostatné kroky. P2-A/MAC1 zůstává otevřené.
 
 ### Rizika
-- Registrovaný síťový audit nemá vlastnickou účtenku existující Serve cesty. Síť nebyla měněná; živé HTTP/HTTPS a shodný otisk Serve byly ověřené přímo.
-- Po změně inventáře nebo soukromí vyžaduje film nový důkaz uzavření. P2-C/D se tímto krokem nezahajují.
-- GitHub CLI kvůli nedostupnému Keychain uložilo přihlášení do místního souboru s ověřenými soukromými právy; tajemství nebylo vypsáno ani přidáno do Gitu.
-- Poslední recovery záloha Samanthy je z 27. 9.; autosave watcher neběží. Čtyři místní DB snapshoty releasu nenahrazují nezávislou zálohu médií.
+- Potvrzení konečnosti je Mílovo rozhodnutí; Mac kontrola ověřuje přijatou sadu a originály, netvrdí nezávisle, že na telefonu nic nečeká.
+- Pozdější změna dne, povolenosti nebo zdrojů zneplatní projekt. Neplatný stav nevydává staré počty, názvy ani seznam; nové potvrzení vytvoří samostatný projekt bez přepisu předchozího.
+- Projektové soubory jsou soukromé mimo Git a mimo všechny archivní adresáře. Originály se nekopírují, nemění ani nevydávají novými HTTP cestami.
+- Poslední recovery záloha Samanthy je z 27. 9., autosave neběží; místní filmový manifest není nezávislá záloha médií.
 
 ### Rozhodnutí
-- Platné p+n z 11. 10. pokračovalo po obnovení GitHub přihlášení a Mílově přesném potvrzení globální brzdy 12. 10.
-- Prioritou je zachování fungujícího Camina; pouze řízené přepnutí vlastní služby, bez změny telefonu, originálů či síťové cesty.
+- Pro den 6. 10. je kanonická cesta vlastnické potvrzení konečné Mac sady a projekt přístupný přes Cockpit. Dřívější telefonní potvrzovací krok není podmínkou této varianty.
+- Běžící Camino se kvůli této změně nezastavuje ani neaktualizuje. Nové rozhraní se týká pouze Cockpitu a oddělených filmových souborů.
 
 ### Další krok
-- Na fungujícím telefonu ověřit přítomnost Film → Ověřit a uzavřít den a vědomě uzavřít 6. 10.; pak ověřit skutečnou účtenku a povolené zdroje. Bez tohoto důkazu P2-B jako celek není PASS.
+- Po lokálním checkpointu a samostatném schválení pushnout a nasadit pouze Cockpit; potom ověřit Film Camino a počty skutečného projektu.
 
 ### Navrhované další kroky
-- P2-A/MAC1 dokončit po návratu k Macu.
-- P2-C/D až po skutečném uzavření dne a samostatném zadání.
+- Po přijetí přehledu pokračovat P2-C editorem této uložené sady; render patří P2-D.
+- P2-A/MAC1 fyzicky dokončit po návratu k Macu.
 
 ### Technický důkaz
-- Čerstvá plná místní brána po opravě workflow 1876/1876 PASS; YAML a shell syntaxe PASS.
-- `camino/docs/P2B_CLOSED_DAY_REPORT.md`: čerstvých 71/71 cílených testů, izolovaný release import PASS, přesně shodný archiv a HTTP/HTTPS kontroly výše.
-- Publikovaný kód je shodný s dříve plně ověřeným `2fada468` (1876/1876 PASS); pozdější commity do `e95568b7` měnily jen dokumentaci.
+- `app/camino_film_workshop.py`, `scripts/camino_mac_film_project.py` a `camino/docs/P2B_CLOSED_DAY_REPORT.md`.
+- Mac projekt má platný manifest a zdroje; skutečný loopback HTTP 200, 30/25/5 a 200 475 ms. 12/12 nových bezpečnostních/HTTP/JS testů a 82/82 souvisejících testů PASS; plná brána 1888/1888 PASS.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Camino
@@ -3403,3 +3400,29 @@ skutečném uzavření dne a samostatném zadání.
 přijal `--attr-source` a oba requirements se nainstalovaly. Běžící
 Camino release `e95568b7999e` má stejný serverový kód; mezi těmito heads
 jsou jen workflow a dokumentace. Privátní filmové úložiště zatím 0 projektů.
+
+## 2026-10-12 17:58 CEST — P2-B: konečná Mac sada a projekt pro Cockpit
+
+**Hotovo:** Skutečný projekt 6. října je uložený na Macu a ověřený.
+Obsahuje 11 fotografií, 14 celých videí a 5 zvukových voleb; obrazová osa
+má 25 položek a 3 min 20,475 s. Lokální Cockpit zobrazí jeho přehled,
+syntetickou ukázku drží samostatně. Původní archiv zůstal přesně shodný.
+
+**Rozhodnutí:** Míla potvrdil konečnost Mac dat a upřesnil zamýšlený postup
+přes Cockpit. Následně zadal pokračování. Projekt proto zaznamenává
+vlastnické potvrzení Mac sady, nepředstírá telefonní inventář ani prázdnou
+frontu. Tato varianta nepotřebuje změnu nebo znovupotvrzení v telefonu.
+Archiv se čte striktně read-only, filmové soubory jsou oddělené.
+
+**Další krok:** Po lokálním checkpointu a samostatném souhlasu
+pushnout a nasadit pouze Cockpit a ověřit nový přehled skutečného projektu.
+
+**Navrhované další kroky:** P2-C editor uloženého projektu po přijetí
+přehledu; render P2-D samostatně; P2-A/MAC1 po návratu k Macu.
+
+**Technický důkaz:** 12/12 nových testů a 82/82 souvisejících PASS;
+HTTP náhled 200, 30 povolených zdrojů, 25 obrazových položek a 5 audio
+voleb. Plná závěrečná brána 1888/1888 PASS (297,270 s testů). Archiv před/po je přesně shodný: 624 operací,
+82 Momentů, 216 ověřených originálů a 1 673 901 399 B, stejné identity
+a SHA-256. Telefon, Camino služba a síť beze změny. Prohlížečová vizuální
+kontrola NEOVĚŘENO (CUA nemá prohlížeč); nový Cockpit není nasazený.

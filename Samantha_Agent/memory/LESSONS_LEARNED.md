@@ -22,6 +22,20 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-062 — Konečná Mac sada potřebuje vlastní původ a read-only archiv
+
+- Problém: Potvrzená konečnost Mac dat byla zaměněna za další telefonní
+  uzavření, zatímco Cockpit nabízel pouze syntetickou ukázku.
+- Typ: opakující se
+- Řešení nalezeno: 12102026
+- Řešení: Po výslovném vlastnickém potvrzení konečnosti lze uložit
+  samostatný projekt s původem `owner_confirmed_mac`, bez fingovaných
+  telefonních front. Archivní DB otevírat `mode=ro`, nikoli přes
+  zapisující/migrující konstruktory; manifest uložit mimo archiv i Git.
+  Sdílený validátor zachová účtenky, hashe, revize a soukromí. Ověřeno
+  na skutečném dni 6. 10.: 30 zdrojů, přesně shodný archiv před/po a
+  funkční Cockpit přehled v odděleném HTTP náhledu, bez restartu Camina.
+
 ### LL-061 — GitHub brána musí připravit skutečný Git i serverové závislosti
 
 - Problém: Na macOS 14 byl moderní Homebrew Git v PATH, ale aplikace přes
