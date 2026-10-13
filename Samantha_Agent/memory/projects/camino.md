@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-12 20:14 CEST — první hodnocení filmu OK; ovládání editoru 13. 10.
+Aktualizováno: 2026-10-13 18:11 CEST — spouštění videa se zvukem obnovené; příčina nepotvrzená
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,8 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-13 18:11 CEST — Video se zvukem podle Míly opět běží i se zapnutým Bluetooth. Tiché video a Komentář fungují; povolení mikrofonu bylo zapnuté. Pracovní hypotéza je dočasně zaseknutá příprava zvuku, přesný spouštěč není prokázaný. Uložení a slyšitelný zvuk posledního klipu potvrdit. Žádná aktualizace, instalace nebo změna služby; pouze diagnostika. Report `camino/docs/VIDEO_AUDIO_INCIDENT_20261013.md`.
 
 - 2026-10-12 20:14 CEST — Míla 12. 10. hodnotí první skutečný film „na první dobrou ok“ a strukturu editoru dobře. Ovládání vyzkouší 13. 10.; není hlášená chyba vyžadující dnešní opravu.
   Další krok: 13. 10. ověřit ovládání: změnit pořadí dvou záběrů a délku jedné fotky, vyčkat uložení, obnovit stránku a přehrát dílčí náhled. PASS: pořadí i délka zůstanou uložené a náhled odpovídá střihu.
@@ -3088,3 +3090,26 @@ P2-F až po přijetí základu a samostatném zadání.
 a rozsah poslechu nejsou uvedené; není to úplný protokol P2-E. Technické
 ověření nasazení zůstává v `P2CD_EDITOR_MP4_REPORT.md`. Tento krok mění
 pouze projektové zápisy, bez nového renderu či nasazení.
+
+
+## 2026-10-13 18:11 CEST — video se zvukem opět startuje; příčina nepotvrzená
+
+**Hotovo:** Po cílených telefonních testech Míla hlásí, že video se
+zvukem v Caminu opět běží i se zapnutým Bluetooth. Kamera, tiché video
+a Komentář fungují. Aplikace se neaktualizovala ani nepřeinstalovala.
+
+**Rozhodnutí:** Příčinu nepřipsat Bluetooth bez reprodukce. Pracovní
+hypotéza je dočasně zaseknutá příprava zvuku videa; další opravu
+neodvozovat jen z matoucí hlášky o mikrofonu.
+
+**Další krok:** Ukončit a uložit nynější klip, přehrát a potvrdit
+slyšitelný zvuk. Při návratu závady nejdřív zachytit přesnou hlášku
+a předchozí činnost.
+
+**Navrhované další kroky:** Ovládání filmového editoru po stabilizaci
+běžného záznamu; podrobná P2-E přejímka zůstává otevřená.
+
+**Technický důkaz:** Uživatelská pozorování a čtení nezměněného kódu.
+Samostatně nepotvrzené uložení/poslech posledního klipu a chybějící
+telefonní log nedovolují označit kořenovou příčinu či úplný PASS.
+Report `VIDEO_AUDIO_INCIDENT_20261013.md`. Tento krok mění jen zápisy.

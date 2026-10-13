@@ -1,30 +1,32 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-10-12 20:14 CEST — první hodnocení filmu OK, ovládání editoru 13. 10.
+- Aktualizováno: 2026-10-13 18:11 CEST — zvuk videa: spouštění obnovené, příčina nepotvrzená
 
 ### Hotovo
+- Video se zvukem opět startuje i se zapnutým Bluetooth podle Míly; tiché video a Komentář fungují. Přesná příčina ani uložení a poslech posledního klipu zatím nejsou potvrzené. Report `VIDEO_AUDIO_INCIDENT_20261013.md`.
 - Míla 12. 10. hodnotí první skutečný film „na první dobrou ok“ a strukturu editoru dobře. Ovládání vyzkouší 13. 10.; není hlášená chyba vyžadující dnešní opravu.
 - Nad konečnou Mílou potvrzenou Mac sadou funguje editor v nasazeném Cockpitu: pořadí, výslovné vyřazení, titulek, délka foto, ruční in/out videa, zvukové části a hlasitost. Platné změny se automaticky ukládají do neměnných revizí; retry a souběžná okna nepřepisují práci.
 - Soukromá trvalá fronta vytváří věrný 720p náhled, dílčí úsek a 1080p MP4 konkrétní uložené revize. Proces renderu je oddělený od Cockpitu a Camina; po přerušení se opakuje od začátku, staré výsledky i pokusy zůstávají.
 - Skutečný den má oba ověřené exporty revize 1: 25 záběrů, časová osa 200 475 ms, 6014 video snímků, video 200 465 ms a audio 200 466 ms. Náhled 25 617 860 B / 135,034 s; finále 115 011 021 B / 181,017 s. První sestavení používá celé video se skutečným zvukem; pět samostatných hlasových částí zůstává k výslovnému umístění v editoru.
-- Celý soubor obou profilů je dekódovaný; všech 25 záběrů náhledu vizuálně zkontrolovaných. Živý Cockpit HTTP/HTTPS vrací root/editor 200 a oba MP4 GET Range 206 / HEAD 200 s přesnými bajty; celé HTTPS finále má shodný SHA-256. CUA aktuálně nemá dostupný prohlížeč.
-- Archiv je přesně shodný před/po: 624 operací, 82 Momentů, 216 originálů, 1 673 901 399 B, stejné identity/tripy a všechny SHA-256. Camino nadále `e95568b7999e`, živé owner HTTP/HTTPS, Viewer/mapa 200, foto/audio/video Range 206, anonymní Viewer 401. Telefon, služba i síť beze změny, Serve otisk shodný, Funnel off.
+- Celý soubor obou profilů je dekódovaný; všech 25 záběrů náhledu vizuálně zkontrolovaných. Audit 12. 10. ověřil Cockpit HTTP/HTTPS root/editor 200 a oba MP4 GET Range 206 / HEAD 200 s přesnými bajty; celé HTTPS finále mělo shodný SHA-256. CUA aktuálně nemá dostupný prohlížeč.
+- Audit 12. 10. prokázal přesně shodný archiv před/po: 624 operací, 82 Momentů, 216 originálů, 1 673 901 399 B, stejné identity/tripy a všechny SHA-256. Camino nadále `e95568b7999e`, živé owner HTTP/HTTPS, Viewer/mapa 200, foto/audio/video Range 206, anonymní Viewer 401. Telefon, služba i síť beze změny, Serve otisk shodný, Funnel off.
 
 ### Otevřeno
+- Ověřit uložení a slyšitelný zvuk nynějšího klipu; při návratu závady zachytit stav před dalšími změnami. Bluetooth není potvrzený viník.
 - P2-E: první filmové hodnocení OK podle Míly; ovládání editoru a ruční komentář čekají na zkoušku 13. 10. P2-A/MAC1 zůstává odděleně otevřené.
 
 ### Rizika
 - První verze podporuje jeden uzavřený den, 256 zdrojů, 60 minut obrazu a 16 rozpracovaných exportů. HDR video bezpečně odmítá; fotografie používají hlavní SDR obraz včetně EXIF/ICC převodu. Originály včetně ostatních MPO vrstev zůstávají celé.
 - Změna zdrojů, soukromí, integrity nebo uložené revize zastaví render/vydání; nepovolený stav schová stará data a přehrávač. Již staženou cizí kopii nelze odvolat.
-- Dřívější dnešní audit hlásil recovery zálohu z 27. 9. a neaktivní autosave; filmový krok je neměnil. Projekt a export nejsou nezávislá záloha originálů.
+- Dřívější audit 12. 10. hlásil recovery zálohu z 27. 9. a neaktivní autosave; filmový krok je neměnil. Projekt a export nejsou nezávislá záloha originálů.
 
 ### Rozhodnutí
 - Míla zadal „Pokračuj editorem a mp4.“ a potvrdil „ok p+n cockpit“. Připravený editor `7c9547fc` je na GitHubu a nasazený pouze Cockpit; hotové MP4 se znovu nevyráběly.
 - Samostatný hlas se umisťuje vědomě. Žádný automatický střih na cílovou délku, hudba, AI hlas ani veřejné sdílení. Camino se kvůli editoru nenastavuje ani nerestartuje.
 
 ### Další krok
-- 13. 10. ověřit ovládání: změnit pořadí dvou záběrů a délku jedné fotky, vyčkat uložení, obnovit stránku a přehrát dílčí náhled. PASS: pořadí i délka zůstanou uložené a náhled odpovídá střihu.
+- Ukončit a uložit nynější klip a přehrát jej se slyšitelným zvukem. Ovládání filmového editoru naváže po stabilizaci záznamu.
 
 ### Navrhované další kroky
 - P2-E: fyzicky ověřit editor, celý skutečný film se zvukem a ruční komentář.
@@ -3524,3 +3526,26 @@ P2-F až po přijetí základu a samostatném zadání.
 a rozsah poslechu nejsou uvedené; není to úplný protokol P2-E. Technické
 ověření nasazení zůstává v `P2CD_EDITOR_MP4_REPORT.md`. Tento krok mění
 pouze projektové zápisy, bez nového renderu či nasazení.
+
+
+## 2026-10-13 18:11 CEST — video se zvukem opět startuje; příčina nepotvrzená
+
+**Hotovo:** Po cílených telefonních testech Míla hlásí, že video se
+zvukem v Caminu opět běží i se zapnutým Bluetooth. Kamera, tiché video
+a Komentář fungují. Aplikace se neaktualizovala ani nepřeinstalovala.
+
+**Rozhodnutí:** Příčinu nepřipsat Bluetooth bez reprodukce. Pracovní
+hypotéza je dočasně zaseknutá příprava zvuku videa; další opravu
+neodvozovat jen z matoucí hlášky o mikrofonu.
+
+**Další krok:** Ukončit a uložit nynější klip, přehrát a potvrdit
+slyšitelný zvuk. Při návratu závady nejdřív zachytit přesnou hlášku
+a předchozí činnost.
+
+**Navrhované další kroky:** Ovládání filmového editoru po stabilizaci
+běžného záznamu; podrobná P2-E přejímka zůstává otevřená.
+
+**Technický důkaz:** Uživatelská pozorování a čtení nezměněného kódu.
+Samostatně nepotvrzené uložení/poslech posledního klipu a chybějící
+telefonní log nedovolují označit kořenovou příčinu či úplný PASS.
+Report `VIDEO_AUDIO_INCIDENT_20261013.md`. Tento krok mění jen zápisy.
