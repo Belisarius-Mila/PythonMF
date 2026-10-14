@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-14 18:57 CEST — nasazená oprava a IPA18 v iCloud Dokumentech
+Aktualizováno: 2026-10-14 20:18 CEST — Míla potvrdil opravený přenos a zadal p+n
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,8 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-14 20:18 CEST — Míla po IPA18 potvrzuje „funguje ok“ a zadal p+n. Mac přijal dalších 27 operací, jedno storno smazaného názvu a 30 médií: 767 operací/kurzor, 103 Momentů, 264 ověřených originálů / 2 068 743 342 B, úplný SHA-256 audit PASS. Starých 740 paketů a 234 mediálních účtenek přesně zachované; server/epocha/zařízení a tripy shodné, flags false. Camino dál `d5d19b4b9ddd`, PID 7951, owner HTTP/HTTPS repair feature PASS; Cockpit aktuálně PID 9218 / `118d4c6208030edb` odpovídá zdrojům, smoke 5/5; Serve shodný, Funnel off. Akutní incident uživatelsky přijatý jako vyřešený; podrobné retesty jednotlivých telefonních funkcí nejsou obecnou odpovědí doložené. Schválená publikace git-safe dávky, běžící oprava nepotřebuje nové přepnutí. Film/editor podle dalšího pokynu. Report `camino/docs/METADATA_REJECTION_INCIDENT_20261014.md`.
 
 - 2026-10-14 18:57 CEST — Po aktuálním potvrzení je opravný server `d5d19b4b9ddd` nasazený, PID 7951, repair feature přes owner HTTP/HTTPS PASS. Všechny řádky metadata/auth/media/readers DB, identity/tripy, 740 operací/kurzor 740, 103 Momentů a všech 234 originálů / 1 870 503 746 B se shodnými SHA-256 zachované; čtyři ověřené snapshoty a původní konfigurace uchované. Viewer/mapa 200, foto/audio/video Range 206, anonymní 401. IPA18 `Camino-SyncRepair-18-20261014-r2-unsigned.ipa` create-only v iCloud Dokumentech; macOS potvrzuje dokončený upload bez chyby, kopie i soukromé náhradní HTTPS stažení mají shodný SHA-256. Cockpit PID 35526 / `4f1f0c17ac72659f`, smoke 5/5; Serve shodný, Funnel off. Karta schvalování vyčištěná. GitHub push neproběhl. Další krok: SideStore aktualizace původního Camina bez odinstalování, kontrola starých záznamů a jeden sync. Podpis/import a skutečné dokončení metadat/médií čekají na fyzickou přejímku; film odložený. Report `camino/docs/METADATA_REJECTION_INCIDENT_20261014.md`.
 

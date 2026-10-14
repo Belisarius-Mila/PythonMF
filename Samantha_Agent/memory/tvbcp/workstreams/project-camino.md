@@ -1,37 +1,37 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-10-14 18:57 CEST — opravný server nasazený, IPA18 v iCloud Dokumentech
+- Aktualizováno: 2026-10-14 20:18 CEST — Míla potvrdil funkční aktualizaci a přenos; p+n schválené
 
 ### Hotovo
-- Odmítnutí názvu smazané přílohy je zachycené a potvrzený scénář zopakovaný. Vymezené storno uchová původní odmítnutou obálku a pořadí/revize; klient vyžaduje místní deletion record a čerstvý důkaz nepřijetí, server původní obálku znovu validuje. Běžná kontrola názvu zůstává přísná.
-- Po aktuálním potvrzení je nasazený pouze Camino server `d5d19b4b9ddd`, PID 7951. Živé owner HTTP/HTTPS hlásí repair feature a zdravý archiv. Všechny řádky všech čtyř DB i všech 234 ověřených originálů mají shodný stav před/po; čtyři ověřené snapshoty a původní konfigurace zachované.
-- `Camino-SyncRepair-18-20261014-r2-unsigned.ipa` je create-only zkopírovaný do existujících iCloud Dokumentů; macOS pro soubor potvrzuje dokončený upload bez chyby. Kopie má shodný plný SHA-256. Chráněný náhradní download přes stávající Basic Viewer přihlášení je také živě ověřený.
-- Build 0.1.0 (18), stejné bundle ID `cz.pythonmf.camino.app`. Model telefonní databáze, vault, kamera a audio zdroje jsou shodné s přijatým buildem 16. Schéma serveru zůstává 3. Cockpit, Serve a Funnel se neměnily; karta schvalování je vyčištěná.
+- Míla po dodání IPA18 odpověděl „funguje ok“ a zadal p+n. Telefonní funkčnost a odblokování přenosu jsou uživatelsky přijaté; nejde o automatické měření každé funkce telefonu.
+- Mac potvrzuje skutečné pokračování: kurzor/operace 740 → 767, jedno přijaté storno smazaného názvu a 30 nově ověřených médií. Archiv nyní 103 Momentů, 264 originálů / 2 068 743 342 B; úplný SHA-256 audit PASS, flags false.
+- Všech 740 dříve přijatých paketů a účtenky všech 234 dřívějších originálů jsou beze změny. Server/epocha/zařízení a tripy shodné; změna starého souhrnného identity hashe zahrnuje nový kurzor a není rotací identity.
+- Opravný Camino server `d5d19b4b9ddd` dál běží, PID 7951, owner HTTP/HTTPS a repair feature PASS. IPA18 je v iCloud Dokumentech a soukromém stagingu. Zdrojový kód se po plné bráně neměnil.
+- Čerstvý Cockpit audit: PID 9218, otisk `118d4c6208030edb` přesně odpovídá současnému zdrojovému main, smoke 5/5. Je to novější proces než v dřívějším auditním zápisu; tento krok ho nepřepínal. Serve shodný, Funnel off.
 
 ### Otevřeno
-- Viditelnost balíčku na iPhonu, SideStore podpis/import do původní aplikace, zachování záznamů a skutečné dokončení metadat i médií čekají na Mílu. Přenos zatím není fyzicky přijatý jako opravený.
-- Film je odložený. P2-E ovládání editoru a P2-A/MAC1 zůstávají oddělené.
+- Akutní odmítání metadat je podle Míly vyřešené. Samostatný nový telefonní retest foto/video se zvukem, Komentáře a přesná čísla telefonních front touto obecnou odpovědí nejsou doložené.
+- Film je odložený; P2-E ovládání editoru a P2-A/MAC1 zůstávají oddělené.
 
 ### Rizika
-- Nepovolit storno při jiném serveru/epoše/revizi, již přijatém pořadí nebo existujícím Assetu. Fronty se neresetují; opravuje se jen název smazané fotografie/videa, mazání audio session je mimo rozsah.
-- Telefonní data ani podpis nejsou prokázané buildem/serverovým auditem. Zachovat stejnou identitu a dříve ověřené SideStore volby; původní Camino neodinstalovat.
-- Storno je nová metadata revize; platí běžná kontrola uzavřeného filmového zdroje. Hotový MP4 se nepřerenderoval. Starší záloha a zastavený autosave byly již oznámené.
+- Zachovat stejnou aplikaci a data, nepřeskakovat cursor ani přepisovat přijatou historii. Storno je vymezené na jinde nedeklarovaný smazaný foto/video Asset; běžná validace zůstává přísná.
+- 264 ověřených originálů není důkaz příjmu každé historicky deklarované položky. Uživatelské přijetí přenosu a úplný audit Macu nenahrazují podrobnou přejímku všech funkcí telefonu.
+- Storno je nová metadata revize; běžná kontrola uzavřeného filmového zdroje dál platí. Hotový MP4 se nepřerenderoval. Starší záloha a zastavený autosave byly již oznámené.
 
 ### Rozhodnutí
-- Míla výslovně požádal o dodání do iCloud Dokumentů a přesnou větou globální brzdy potvrdil připravenou opravu serveru. GitHub push ani nasazení Cockpitu nebyly součástí tohoto kroku.
+- Míla potvrdil funkčnost a výslovně zadal p+n hotové opravy. IPA a soukromý archiv zůstávají mimo veřejný GitHub; publikují se pouze ověřené git-safe zdroje a zápisy.
 
 ### Další krok
-- Na iPhonu importovat IPA18 přes SideStore do stejného Camina bez odinstalování; otevřít původní ikonu, ověřit staré záznamy a provést jeden sync.
+- Film/editor až na další Mílův pokyn. Běžící server už obsahuje opravný kód a Cockpit odpovídá zdrojům; nové přepnutí těchto procesů není potřeba.
 
 ### Navrhované další kroky
-- Potvrdit dokončení metadat i médií, foto/video se zvukem a Komentář. Film/editor až po stabilizaci přenosu.
+- Film/editor naváže až na další Mílův pokyn. P2-E ovládání a P2-A/MAC1 zůstávají otevřené.
 
 ### Technický důkaz
-- Předchozí plná brána 1925/1925, Swift 68/68 a 52 cílených API/HTTP/workflow testů PASS; zdrojový kód se po nich neměnil. Živé owner/Viewer/mapa 200, foto/audio/video Range 206, anonymní 401; IPA celý download/hash 200, HEAD 200, Range 206.
-- Archiv 740 operací/kurzor 740, 103 Momentů, 234 originálů / 1 870 503 746 B a identity/tripy přesně shodné. Všechny čtyři DB snapshoty mají ověřené účtenky/hash/quick_check a shodné všechny řádky tabulek se živými DB.
-- IPA 1247937 B, SHA-256 `42c964f9579fe09663632dbafc7a2dfc85e6e8d6424f2c9a7f04fef07ec64f51`. iCloud `isUbiquitousItem=true`, `isUploaded=true`, bez chyby; telefonní přejímka NEPROVEDENO.
-- Cockpit PID 35526 / `4f1f0c17ac72659f`, smoke 5/5, Serve shodný, Funnel off. Report `camino/docs/METADATA_REJECTION_INCIDENT_20261014.md`; místní ignorované účtenky `camino_repair_upgrade_verified_20261014.log` a `camino_repair_icloud_delivery_20261014.log`.
+- Předchozí plná brána 1925/1925, Swift 68/68 a 52 cílených API/HTTP/workflow testů PASS; jen aktuální projektové zápisy. Čerstvý archivní audit všech 264 originálů, owner HTTP/HTTPS a Cockpit smoke 5/5 PASS.
+- `logs/camino_repair_phone_acceptance_20261014.log`: 767 operací/kurzor, jedno storno, 30 nových médií; starých 740 paketů a 234 mediálních účtenek zachované, identita/epocha/zařízení shodné.
+- IPA18 1247937 B, SHA-256 `42c964f9579fe09663632dbafc7a2dfc85e6e8d6424f2c9a7f04fef07ec64f51`. Report `camino/docs/METADATA_REJECTION_INCIDENT_20261014.md`; žádná soukromá média, tokeny ani instalační balík v Gitu.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Camino
@@ -3638,3 +3638,22 @@ Navrhované další kroky:
 Technický důkaz:
 - Server `d5d19b4b9ddd`, PID 7951, owner HTTP/HTTPS repair feature PASS; Viewer/mapa 200, foto/audio/video Range 206. Čtyři DB snapshoty/hash/quick_check a všechny řádky tabulek shodné; 740 operací, 103 Momentů, všech 234 originálů / 1 870 503 746 B se shodnými SHA-256.
 - IPA18 1247937 B, SHA-256 `42c964f9579fe09663632dbafc7a2dfc85e6e8d6424f2c9a7f04fef07ec64f51`, iCloud upload a soukromé HTTPS stažení/hash PASS. Plná brána 1925/1925 a Swift 68/68 PASS. Cockpit PID 35526 / `4f1f0c17ac72659f`, smoke 5/5; Serve shodný, Funnel off. Telefonní instalace a přenos NEPROVEDENO.
+
+
+### 2026-10-14 20:18 CEST — Míla přijal opravu přenosu a zadal p+n
+
+Hotovo:
+- Po IPA18 Míla potvrzuje „funguje ok“. Mac současně přijal dalších 27 operací, jedno storno smazaného názvu a 30 ověřených médií. Akutní přenosový incident je uživatelsky přijatý jako vyřešený.
+
+Rozhodnutí:
+- Míla výslovně zadal p+n hotové opravy. Publikuje se git-safe kód a zápis přejímky; server už opravu používá, nový Cockpit proces odpovídá aktuálním zdrojům.
+
+Další krok:
+- Film/editor až podle dalšího Mílova pokynu; služby není potřeba znovu přepínat.
+
+Navrhované další kroky:
+- Film/editor až podle dalšího Mílova pokynu; P2-E ovládání a P2-A/MAC1 zůstávají samostatné.
+
+Technický důkaz:
+- Kurzor/operace 767, 103 Momentů, 264 ověřených originálů / 2 068 743 342 B; plný SHA-256 audit PASS. Starých 740 přijatých paketů a 234 mediálních účtenek přesně zachované; server/epocha/zařízení a tripy shodné, flags false.
+- Camino `d5d19b4b9ddd`, PID 7951, owner HTTP/HTTPS + repair feature PASS. Cockpit PID 9218 / `118d4c6208030edb` odpovídá aktuálním zdrojům, smoke 5/5; Serve shodný, Funnel off. Předchozí plná brána 1925/1925 a Swift 68/68 PASS. Podrobné retesty telefonu nelze odvodit jen z obecné odpovědi.

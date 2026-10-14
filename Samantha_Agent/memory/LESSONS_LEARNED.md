@@ -34,7 +34,9 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   Asset; storno zachová všechny hodnoty Momentu a spotřebuje jeho revizi.
   Nepřeskakovat cursor, nepřepisovat přijatou historii a neobnovovat smazané médium.
   Skutečné Swift obálky → API, retry/reopen a negativní důkazy PASS; 68 Swift
-  a plná brána 1925/1925 PASS. Aktualizace iPhonu a fyzický přenos ještě čekají.
+  a plná brána 1925/1925 PASS. Míla po IPA18 potvrdil funkčnost; Mac přijal
+  jedno vymezené storno a navazující operace/média. Starých 740 paketů a
+  234 mediálních účtenek přesně zachovaných, úplný SHA audit PASS.
 
 ### LL-064 — Zvuk po spojení PCM segmentů potřebuje souvislé PTS vzorků
 

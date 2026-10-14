@@ -1,6 +1,6 @@
 # Camino — odmítnutí metadat na Macu 14. 10. 2026
 
-Stav 2026-10-14 18:57 CEST: opravný server nasazený a živě ověřený; IPA18 nahraný do iCloud Dokumentů. Ruční aktualizace a skutečný přenos na iPhonu čekají.
+Stav 2026-10-14 20:18 CEST: Míla potvrdil „funguje ok“ po aktualizaci; Mac dokládá pokračující metadata i média. Oprava běží, p+n hotové dávky schválené.
 
 Míla po devíti dnech úspěšných přenosů hlásí, že telefon zůstane u
 „Odesílám metadata“ a zobrazí „Domácí Mac změnu odmítl“. Film je odložený.
@@ -180,3 +180,28 @@ a dříve ověřené Customize AppID ON / Append Team ID OFF. Tyto volby jsou
 z předchozího postupu; dnešní podpis/import na zařízení se teprve ověří.
 Otevřít původní ikonu, ověřit staré záznamy a zkusit jeden sync. Úspěšné
 dokončení metadat i médií, foto/video se zvukem a Komentář čekají na Mílu.
+
+
+## 2026-10-14 20:18 CEST — telefonní přijetí a schválená publikace
+
+Míla po instrukci aktualizace IPA18 odpověděl „funguje ok“ a zadal p+n.
+Tím je funkční aktualizace a odblokování přenosu uživatelsky přijaté.
+Samostatný nový retest foto/video se zvukem, Komentáře, přesná verze z UI
+a číselné telefonní fronty nejsou touto obecnou odpovědí doložené.
+
+Čerstvý read-only Mac audit potvrzuje kurzor/operace 740 → 767, jedno
+`cancel_deleted_attachment_title` a 30 nově ověřených médií. Všech
+264 originálů / 2 068 743 342 B prošlo úplnou kontrolou SHA-256.
+Všech 740 původně přijatých paketů je přesně zachovaných v aktuálním ledgeru;
+účtenky původních 234 médií také. Server/epocha/zařízení i tripy zůstaly shodné,
+flags false. Souhrnný identity hash nyní obsahuje nový kurzor, jeho změna
+proto není důkazem rotace identity. Archiv zůstává u 103 Momentů.
+
+Camino stále `d5d19b4b9ddd`, PID 7951, owner HTTP/HTTPS a repair feature PASS.
+Cockpit nyní PID 9218 / `118d4c6208030edb`, smoke 5/5 a shodný otisk
+se současným zdrojovým main; tento krok žádnou službu nerestartoval.
+Serve shodný, Funnel off. Vlastní vývojový kód se od brány 1925/1925
+nezměnil; aktualizují se pouze projektové zápisy a LL-065.
+Míla autorizoval fast-forward push celé hotové dávky. Nové nasazení téhož
+kódu není potřebné; IPA a všechna soukromá data zůstávají mimo veřejný Git.
+Důkaz `logs/camino_repair_phone_acceptance_20261014.log`.
