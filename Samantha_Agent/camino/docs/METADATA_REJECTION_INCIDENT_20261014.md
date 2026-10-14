@@ -1,10 +1,10 @@
 # Camino — odmítnutí metadat na Macu 14. 10. 2026
 
-Stav: diagnostika připravená místně, nenasazená; přenos není označený za opravený.
+Stav 2026-10-14 18:01 CEST: diagnostika nasazená, zachycené odmítnutí změny názvu přílohy; přenos není opravený.
 
 Míla po devíti dnech úspěšných přenosů hlásí, že telefon zůstane u
 „Odesílám metadata“ a zobrazí „Domácí Mac změnu odmítl“. Film je odložený.
-Přesný důvod odmítnutí ani obsah první nepřijaté operace nejsou zatím známé.
+Technický důvod je nyní zachycený; konkrétní cíl ani spouštěč chybějící vazby nejsou zatím prokázané.
 
 ## Živě ověřeno
 
@@ -52,15 +52,29 @@ Bez změny schématu, závislostí, validátorů, journalu, oprávnění nebo te
 
 ## Další krok a bezpečnostní hranice
 
-Po samostatném potvrzení nasadit tuto diagnostiku registrovaným upgrade
-workflow pouze do Camino služby. Workflow ověřuje vlastnictví, ukládá
-snapshoty databází a původní konfiguraci a porovnává úplný archiv před/po.
-Krátce přeruší Camino službu; Cockpit a Serve se nemění. Protože upgrade
-mění její LaunchAgent mimo projekt, platí přesná věta globální brzdy.
+Míla přesnou větou globální brzdy potvrdil nasazení této diagnostiky.
+Registrované stop/upgrade/start přepnuly pouze vlastní Camino službu na
+`e815ae75dc38`, PID 75891. Všechny identity, tripy, 740 operací, kurzor 740,
+103 Momentů a 234 ověřených originálů se všemi SHA-256 jsou před/po přesně
+shodné. Čtyři DB snapshoty mají ověřené účtenky/hash a původní konfigurace
+je zachovaná. Owner HTTP/HTTPS i Viewer/mapa 200, foto/audio/video Range 206,
+anonymní Viewer 401. Cockpit zůstal PID 35526 / `4f1f0c17ac72659f`, smoke
+5/5; Serve má shodný otisk a Funnel je vypnutý. Telefon se neměnil.
+Karta schvalování je vyčištěná. Mílův následný pokus zachytil odmítnutí operace 741.
 
-Potom jeden telefonní pokus „Synchronizovat nyní“ poskytne konkrétní důvod
-a umožní cílenou opravu. Bez toho neopravovat domnělý konflikt, neuvolňovat
-validaci, neměnit identity/epochu/kurzor a nemaž ani frontu či originály.
+Nový bezpečný log dvakrát zaznamenal stejnou operaci 741, HTTP 422,
+`invalid_request`, `kind=update_metadata`, důvod
+`title target must be a photo or video of this Moment`. Jde o změnu názvu
+přílohy, jejíž cílové médium není platnou fotografií/videem daného Momentu.
+Samotný log nerozlišuje nedeklarovaný, smazaný či jinam patřící cíl.
+
+Čtení klienta prokazuje riziko názvů smazaných příloh: `allMediaAssets`
+vyřadí smazané Assety, snapshot zachová operace názvu a
+`suppressDeletedContent` vyřadí deklaraci, ale ne název přílohy u ponechaného
+Momentu. Mílovo přejmenování/smazání dosud není potvrzené; tuto možnost
+nevydávat za prokázaný spouštěč. Další krok je toto upřesnění a cílená oprava.
+Další telefonní retry nyní není potřeba. Neuvolňovat validaci, neměnit
+identity/epochu/kurzor a nemaž ani frontu či originály.
 Telefon se neodinstaluje ani znovu nepáruje. Hotový film se nepřerenderuje.
 
 Recovery kontrola znovu hlásí zálohu z 27. 9. a zastavený autosave; Míla

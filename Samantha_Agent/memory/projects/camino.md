@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-14 17:26 CEST — odmítnutí metadat, diagnostika místní a nenasazená
+Aktualizováno: 2026-10-14 18:01 CEST — odmítnutá změna názvu přílohy, oprava otevřená
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,10 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-14 18:01 CEST — Odmítnutí zachycené: operace 741, HTTP 422 `invalid_request`, změna názvu přílohy; server nemůže ověřit cílovou fotografii/video u daného Momentu. Přenos zůstává zastavený. Zjistit, zda před selháním proběhlo přejmenování nebo smazání přílohy; příčina chybějící vazby ještě není prokázaná. Čtení kódu ukazuje riziko: smazaná příloha se vyřadí z deklarací, ale její stará operace názvu u ponechaného Momentu zůstává. Žádný reset ani obejití kontroly. Po odpovědi Míly o přejmenování/smazání rozlišit chybějící deklaraci, smazaný cíl či nesprávnou vazbu a připravit cílenou opravu bez ztráty dat. Další pokus synchronizace nyní není potřeba.
+
+- 2026-10-14 17:55 CEST — Po přesném potvrzení globální brzdy je diagnostika `e815ae75dc38` nasazená pouze do Camino služby, PID 75891. Živé owner HTTP/HTTPS, Viewer/mapa 200, foto/audio/video Range 206 a anonymní Viewer 401 PASS. Čtyři ověřené DB snapshoty a původní konfigurace zachované. Archiv před/po přesně shodný: 740 operací, kurzor 740, 103 Momentů a všech 234 ověřených originálů / 1 870 503 746 B, identity i tripy shodné. Cockpit nadále PID 35526 / `4f1f0c17ac72659f`, smoke 5/5; Serve shodný, Funnel off. Telefon, pravidla přijímání a síť se neměnily. Přenos není opravený, konkrétní odmítnutí zatím nezachycené; další krok jeden telefonní sync. Report `camino/docs/METADATA_REJECTION_INCIDENT_20261014.md`.
 
 - 2026-10-14 17:26 CEST — Míla hlásí zastavení přenosu u „Odesílám metadata“ a odmítnutí Macem; film odložený. Živá služba a owner HTTP/HTTPS 200, integrita SQLite i všech 234 ověřených originálů / 1 870 503 746 B PASS; 740 přijatých operací, kurzor 740, 103 Momentů, flags false, žádný konfliktní kandidát. Konkrétní důvod neznámý, dosavadní server ho neloguje. Připravená bezpečná diagnostika je místní, nenasazená; 17 cílených testů, plná brána 1909/1909 a sedm samostatných nových testů PASS, izolovaný import PASS. Přenos není označený za opravený. Nasazení pouze Camino služby po aktuálním samostatném potvrzení a globální brzdě; poté jeden telefonní pokus. Žádný reset/párování/instalace či změna archivu, Cockpitu nebo sítě. Report `camino/docs/METADATA_REJECTION_INCIDENT_20261014.md`.
 
@@ -3134,3 +3138,40 @@ Navrhované další kroky:
 
 Technický důkaz:
 - HTTP/HTTPS 200, flags false, žádný konfliktní kandidát; 740 operací, 103 Momentů, všech 234 ověřených originálů / 1 870 503 746 B má správné SHA-256. Cílené testy 17/17, plná brána 1909/1909 a sedm samostatných nových testů PASS; izolovaný import PASS. Report `METADATA_REJECTION_INCIDENT_20261014.md`.
+
+
+### 2026-10-14 17:55 CEST — Diagnostika odmítnutých metadat nasazená
+
+Hotovo:
+- Mac už umí zaznamenat technický důvod odmítnuté operace bez soukromých textů, médií, GPS, UUID či přihlašovacích údajů. Nasazení dokončené, konkrétní chyba zatím nezachycená a přenos není označený za opravený.
+- Archiv před/po přesně shodný včetně všech 234 ověřených originálů; owner HTTP/HTTPS, Viewer/mapa a foto/audio/video Range fungují. Čtyři snapshoty DB a původní konfigurace ověřené; Cockpit a Serve beze změny.
+
+Rozhodnutí:
+- Míla přesnou větou globální brzdy potvrdil nasazení diagnostiky pouze Camino služby. Žádná instalace telefonu, změna validace, reset, párování, archivní oprava ani síťový zásah.
+
+Další krok:
+- Jeden telefonní pokus „Synchronizovat nyní“; přečíst bezpečný nový log a podle konkrétního důvodu cíleně opravit přenos.
+
+Navrhované další kroky:
+- Po opravě ověřit dokončení metadat i médií; film/editor naváže později.
+
+Technický důkaz:
+- Registrované stop/upgrade/start: vydání `e815ae75dc38`, PID 75891. Shodných 740 operací, kurzor 740, 103 Momentů, identity/tripy a 234 originálů / 1 870 503 746 B, SHA-256 PASS. Owner/Viewer/mapa HTTP/HTTPS 200, mediální Range 206, anonymní Viewer 401. Cockpit PID 35526 / otisk `4f1f0c17ac72659f`, smoke 5/5; Serve otisk shodný, Funnel off. Karta schvalování vyčištěná; report `METADATA_REJECTION_INCIDENT_20261014.md`.
+
+
+### 2026-10-14 18:01 CEST — Zachycená neplatná změna názvu přílohy
+
+Hotovo:
+- Mílův telefonní pokus je zachycený: stále stejná operace názvu přílohy 741 končí HTTP 422. Server nevidí platnou cílovou fotografii/video u požadovaného Momentu; přenos není opravený.
+
+Rozhodnutí:
+- Žádné nové rozhodnutí o opravě dat. Kontrola vazby, přijaté přesné obálky, cursor a originály zůstávají zachované.
+
+Další krok:
+- Zjistit od Míly, zda před závadou přejmenoval či smazal přílohu; podle doložené příčiny připravit cílenou opravu.
+
+Navrhované další kroky:
+- Po opravě ověřit navazující metadata i média. Další opakování stejného telefonního pokusu nyní nepomůže.
+
+Technický důkaz:
+- Bezpečný log: `status=422 code=invalid_request reason=title target must be a photo or video of this Moment kind=update_metadata sequence=741`, shodný při opakování. `CaminoSyncDiscovery` vychází z živých Assetů, zatímco snapshot zachovává historické změny názvů; `suppressDeletedContent` odstraňuje deklaraci smazaného Assetu, ale ne název přílohy ponechaného Momentu. Jde o doložené riziko kódu, nikoli ještě potvrzený spouštěč tohoto incidentu.

@@ -1,29 +1,29 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-10-14 17:26 CEST — odmítnutí metadat, diagnostika připravená místně
+- Aktualizováno: 2026-10-14 18:01 CEST — odmítnutá změna názvu přílohy, oprava otevřená
 
 ### Hotovo
-- Živý read-only audit: Camino služba běží z dosavadního `e95568b7999e`; owner HTTP i soukromé HTTPS health/state 200. Archiv nemá blokaci výstupů ani povinnou reconciliaci a tabulka konfliktů je prázdná.
+- Živý read-only audit: Camino služba po potvrzeném upgradu běží z `e815ae75dc38`, PID 75891; owner HTTP i soukromé HTTPS health/state 200. Archiv nemá blokaci výstupů ani povinnou reconciliaci a tabulka konfliktů je prázdná.
 - Kontrola SQLite a všech 234 dosud ověřených originálů (1 870 503 746 B) prošla. Přijato 740 operací, kurzor 740, 103 Momentů. Z 268 deklarovaných Assetů není 34 ještě ověřených; samotný rozdíl není důkaz ztráty.
-- Připravená diagnostika zaznamená pouze technický důvod odmítnutého POST, druh operace a pořadí; žádné soukromé texty, UUID, GPS, média či tokeny. Odpovědi a pravidla přijímání zůstávají stejné. Změna je místní, nenasazená; přenos není označený za opravený.
+- Nasazená diagnostika zaznamená pouze technický důvod odmítnutého POST, druh operace a pořadí; žádné soukromé texty, UUID, GPS, média či tokeny. Odpovědi a pravidla přijímání zůstávají stejné. Nasazení ověřené; Odmítnutí zachycené: operace 741, HTTP 422 `invalid_request`, změna názvu přílohy; server nemůže ověřit cílovou fotografii/video u daného Momentu. Přenos zůstává zastavený.
 - První skutečný film Míla 12. 10. přijal „na první dobrou ok“. Editor a MP4 jsou zachované; filmové práce jsou dnes výslovně odložené. Včerejší spouštění videa se zvukem se podle Míly obnovilo, přesná příčina nepotvrzená.
 
 ### Otevřeno
-- Zjistit konkrétní kód a důvod první odmítnuté operace; dosavadní server odmítnutí neloguje. Žádná hypotéza příčiny není zatím potvrzená.
-- Nasazení diagnostiky do Camino služby vyžaduje samostatné aktuální potvrzení a globální brzdu kvůli změně jejího LaunchAgentu. Telefon, archiv, síť a Cockpit se během přípravy neměnily.
+- Zjistit, zda před selháním proběhlo přejmenování nebo smazání přílohy; příčina chybějící vazby ještě není prokázaná. Čtení kódu ukazuje riziko: smazaná příloha se vyřadí z deklarací, ale její stará operace názvu u ponechaného Momentu zůstává. Žádný reset ani obejití kontroly.
+- Míla potvrdil globální brzdu pro toto nasazení. Čtyři ověřené DB snapshoty a původní konfigurace zachované; celý archiv před/po přesně shodný. Telefon, Serve a Cockpit beze změny.
 - P2-E ovládání editoru a ruční komentář počkají; P2-A/MAC1 zůstává odděleně otevřené.
 
 ### Rizika
 - Bez konkrétního důvodu neopravovat domnělý konflikt ani neuvolňovat validaci. Zachovat journal, přesná přijatá těla, identity, epochu, kurzor, původní média a konfliktní kandidáty.
 - Recovery audit 14. 10. znovu hlásí zálohu z 27. 9. a neaktivní autosave; Míla upozorněn. Integritní audit není další záloha. Zálohování tento krok neměnil.
-- Řízený upgrade pouze Camino služby krátce přeruší její dostupnost; předem zachová snapshoty DB a původní konfiguraci a ověří archiv před/po. Serve a Cockpit zůstávají mimo jeho rozsah.
+- Řízený upgrade pouze Camino služby dokončený. Žádná změna pravidel přijímání, schématu či závislostí; konkrétní oprava se určí teprve podle zachyceného důvodu.
 
 ### Rozhodnutí
-- Míla zadal urgentní diagnostiku přenosu a odložil film. Příprava není souhlas s nasazením; žádná instalace telefonu, reset ani nové párování.
+- Míla zadal urgentní diagnostiku přenosu a odložil film. Přesnou větou následně potvrdil nasazení pouze diagnostiky Camino. Žádná instalace telefonu, reset ani nové párování.
 
 ### Další krok
-- Po samostatném potvrzení nasadit připravenou diagnostiku registrovaným workflow a jedním telefonním pokusem „Synchronizovat nyní“ zjistit přesný důvod odmítnutí.
+- Po odpovědi Míly o přejmenování/smazání rozlišit chybějící deklaraci, smazaný cíl či nesprávnou vazbu a připravit cílenou opravu bez ztráty dat. Další pokus synchronizace nyní není potřeba.
 
 ### Navrhované další kroky
 - Podle získaného důvodu opravit konkrétní příčinu a ověřit dokončení metadat i médií na telefonu.
@@ -32,7 +32,7 @@
 ### Technický důkaz
 - `camino/docs/METADATA_REJECTION_INCIDENT_20261014.md`; cílené HTTP/diagnostické testy 17/17 PASS, plná brána 1909/1909 PASS (320,413 s). Sedm nových diagnostických testů prošlo samostatně a je doplněných do seznamu plné brány.
 - Izolovaný import v Pythonu běžící služby a veřejný katalog důvodů PASS. Kandidátní soubory se shodují s pracovním kódem; schéma ani závislosti se nemění.
-- Živý Serve otisk `1568d3d56928ccfc88baea55fdead012ba433f119c935f3cd256bc121c1c5be5`, Funnel off. Během tohoto incidentu žádný restart, nasazení či síťový zápis.
+- Živý Serve otisk `1568d3d56928ccfc88baea55fdead012ba433f119c935f3cd256bc121c1c5be5`, Funnel off. Potvrzené nasazení `e815ae75dc38`: owner HTTP/HTTPS, Viewer/mapa 200; foto/audio/video Range 206, anonymní Viewer 401. Cockpit PID 35526, otisk `4f1f0c17ac72659f`, smoke 5/5; žádný síťový zápis.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Camino
@@ -3564,3 +3564,40 @@ Navrhované další kroky:
 
 Technický důkaz:
 - HTTP/HTTPS 200, flags false, žádný konfliktní kandidát; 740 operací, 103 Momentů, všech 234 ověřených originálů / 1 870 503 746 B má správné SHA-256. Cílené testy 17/17, plná brána 1909/1909 a sedm samostatných nových testů PASS; izolovaný import PASS. Report `METADATA_REJECTION_INCIDENT_20261014.md`.
+
+
+### 2026-10-14 17:55 CEST — Diagnostika odmítnutých metadat nasazená
+
+Hotovo:
+- Mac už umí zaznamenat technický důvod odmítnuté operace bez soukromých textů, médií, GPS, UUID či přihlašovacích údajů. Nasazení dokončené, konkrétní chyba zatím nezachycená a přenos není označený za opravený.
+- Archiv před/po přesně shodný včetně všech 234 ověřených originálů; owner HTTP/HTTPS, Viewer/mapa a foto/audio/video Range fungují. Čtyři snapshoty DB a původní konfigurace ověřené; Cockpit a Serve beze změny.
+
+Rozhodnutí:
+- Míla přesnou větou globální brzdy potvrdil nasazení diagnostiky pouze Camino služby. Žádná instalace telefonu, změna validace, reset, párování, archivní oprava ani síťový zásah.
+
+Další krok:
+- Jeden telefonní pokus „Synchronizovat nyní“; přečíst bezpečný nový log a podle konkrétního důvodu cíleně opravit přenos.
+
+Navrhované další kroky:
+- Po opravě ověřit dokončení metadat i médií; film/editor naváže později.
+
+Technický důkaz:
+- Registrované stop/upgrade/start: vydání `e815ae75dc38`, PID 75891. Shodných 740 operací, kurzor 740, 103 Momentů, identity/tripy a 234 originálů / 1 870 503 746 B, SHA-256 PASS. Owner/Viewer/mapa HTTP/HTTPS 200, mediální Range 206, anonymní Viewer 401. Cockpit PID 35526 / otisk `4f1f0c17ac72659f`, smoke 5/5; Serve otisk shodný, Funnel off. Karta schvalování vyčištěná; report `METADATA_REJECTION_INCIDENT_20261014.md`.
+
+
+### 2026-10-14 18:01 CEST — Zachycená neplatná změna názvu přílohy
+
+Hotovo:
+- Mílův telefonní pokus je zachycený: stále stejná operace názvu přílohy 741 končí HTTP 422. Server nevidí platnou cílovou fotografii/video u požadovaného Momentu; přenos není opravený.
+
+Rozhodnutí:
+- Žádné nové rozhodnutí o opravě dat. Kontrola vazby, přijaté přesné obálky, cursor a originály zůstávají zachované.
+
+Další krok:
+- Zjistit od Míly, zda před závadou přejmenoval či smazal přílohu; podle doložené příčiny připravit cílenou opravu.
+
+Navrhované další kroky:
+- Po opravě ověřit navazující metadata i média. Další opakování stejného telefonního pokusu nyní nepomůže.
+
+Technický důkaz:
+- Bezpečný log: `status=422 code=invalid_request reason=title target must be a photo or video of this Moment kind=update_metadata sequence=741`, shodný při opakování. `CaminoSyncDiscovery` vychází z živých Assetů, zatímco snapshot zachovává historické změny názvů; `suppressDeletedContent` odstraňuje deklaraci smazaného Assetu, ale ne název přílohy ponechaného Momentu. Jde o doložené riziko kódu, nikoli ještě potvrzený spouštěč tohoto incidentu.
