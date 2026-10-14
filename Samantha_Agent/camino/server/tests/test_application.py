@@ -313,6 +313,41 @@ class CaminoC05aFastAPITests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(denied.status_code, 401)
         self.assertEqual(denied.json()["error"]["code"], "unauthorized")
 
+    async def test_metadata_rejection_reports_safe_reason_without_changing_response_or_state(self):
+        raw = json.dumps({
+            "contract_version": 1, "epoch": self.metadata.state()["epoch"],
+            "operation_id": uid(105), "device_id": uid(90), "device_sequence": 5,
+            "kind": "update_metadata", "expected_revision": 1,
+            "payload": {"moment_id": uid(3), "change": {"type": "attachment_title",
+                "attachment": {"kind": "asset", "target_id": uid(99), "title": "private title"}}},
+        }).encode()
+        before = self.metadata.state()
+        expected = self.contract.handle("POST", "/api/v1/operations",
+            authorization=f"Bearer {self.token}", body=raw, content_type="application/json")
+        with self.assertLogs("camino.metadata", level="WARNING") as logs:
+            response = await self.request("POST", "/api/v1/operations", content=raw,
+                headers={**self.headers, "Content-Type": "application/json"})
+        self.assertEqual(response.status_code, expected.status)
+        self.assertEqual(response.json(), expected.body)
+        self.assertEqual(self.metadata.state(), before)
+        text = " ".join(logs.output)
+        self.assertIn("title target must be a photo or video of this Moment", text)
+        self.assertIn("kind=update_metadata sequence=5", text)
+        for private in (self.token, "private title", uid(99), uid(105), before["epoch"]):
+            self.assertNotIn(private, text)
+
+    async def test_metadata_exact_retry_and_reads_have_no_rejection_log(self):
+        with self.metadata._connection() as db:
+            raw = db.execute("SELECT request_body FROM accepted_operations ORDER BY device_sequence DESC LIMIT 1").fetchone()[0]
+        before = self.metadata.state()
+        with self.assertNoLogs("camino.metadata", level="WARNING"):
+            response = await self.request("POST", "/api/v1/operations", content=raw,
+                headers={**self.headers, "Content-Type": "application/json"})
+            unknown = await self.request("GET", "/api/v1/unknown", headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(unknown.status_code, 404)
+        self.assertEqual(self.metadata.state(), before)
+
     async def test_streamed_chunks_finalize_and_lost_response_retry(self) -> None:
         created = await self.request(
             "POST",

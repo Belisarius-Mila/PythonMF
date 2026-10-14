@@ -1,42 +1,38 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-10-13 18:11 CEST — zvuk videa: spouštění obnovené, příčina nepotvrzená
+- Aktualizováno: 2026-10-14 17:26 CEST — odmítnutí metadat, diagnostika připravená místně
 
 ### Hotovo
-- Video se zvukem opět startuje i se zapnutým Bluetooth podle Míly; tiché video a Komentář fungují. Přesná příčina ani uložení a poslech posledního klipu zatím nejsou potvrzené. Report `VIDEO_AUDIO_INCIDENT_20261013.md`.
-- Míla 12. 10. hodnotí první skutečný film „na první dobrou ok“ a strukturu editoru dobře. Ovládání vyzkouší 13. 10.; není hlášená chyba vyžadující dnešní opravu.
-- Nad konečnou Mílou potvrzenou Mac sadou funguje editor v nasazeném Cockpitu: pořadí, výslovné vyřazení, titulek, délka foto, ruční in/out videa, zvukové části a hlasitost. Platné změny se automaticky ukládají do neměnných revizí; retry a souběžná okna nepřepisují práci.
-- Soukromá trvalá fronta vytváří věrný 720p náhled, dílčí úsek a 1080p MP4 konkrétní uložené revize. Proces renderu je oddělený od Cockpitu a Camina; po přerušení se opakuje od začátku, staré výsledky i pokusy zůstávají.
-- Skutečný den má oba ověřené exporty revize 1: 25 záběrů, časová osa 200 475 ms, 6014 video snímků, video 200 465 ms a audio 200 466 ms. Náhled 25 617 860 B / 135,034 s; finále 115 011 021 B / 181,017 s. První sestavení používá celé video se skutečným zvukem; pět samostatných hlasových částí zůstává k výslovnému umístění v editoru.
-- Celý soubor obou profilů je dekódovaný; všech 25 záběrů náhledu vizuálně zkontrolovaných. Audit 12. 10. ověřil Cockpit HTTP/HTTPS root/editor 200 a oba MP4 GET Range 206 / HEAD 200 s přesnými bajty; celé HTTPS finále mělo shodný SHA-256. CUA aktuálně nemá dostupný prohlížeč.
-- Audit 12. 10. prokázal přesně shodný archiv před/po: 624 operací, 82 Momentů, 216 originálů, 1 673 901 399 B, stejné identity/tripy a všechny SHA-256. Camino nadále `e95568b7999e`, živé owner HTTP/HTTPS, Viewer/mapa 200, foto/audio/video Range 206, anonymní Viewer 401. Telefon, služba i síť beze změny, Serve otisk shodný, Funnel off.
+- Živý read-only audit: Camino služba běží z dosavadního `e95568b7999e`; owner HTTP i soukromé HTTPS health/state 200. Archiv nemá blokaci výstupů ani povinnou reconciliaci a tabulka konfliktů je prázdná.
+- Kontrola SQLite a všech 234 dosud ověřených originálů (1 870 503 746 B) prošla. Přijato 740 operací, kurzor 740, 103 Momentů. Z 268 deklarovaných Assetů není 34 ještě ověřených; samotný rozdíl není důkaz ztráty.
+- Připravená diagnostika zaznamená pouze technický důvod odmítnutého POST, druh operace a pořadí; žádné soukromé texty, UUID, GPS, média či tokeny. Odpovědi a pravidla přijímání zůstávají stejné. Změna je místní, nenasazená; přenos není označený za opravený.
+- První skutečný film Míla 12. 10. přijal „na první dobrou ok“. Editor a MP4 jsou zachované; filmové práce jsou dnes výslovně odložené. Včerejší spouštění videa se zvukem se podle Míly obnovilo, přesná příčina nepotvrzená.
 
 ### Otevřeno
-- Ověřit uložení a slyšitelný zvuk nynějšího klipu; při návratu závady zachytit stav před dalšími změnami. Bluetooth není potvrzený viník.
-- P2-E: první filmové hodnocení OK podle Míly; ovládání editoru a ruční komentář čekají na zkoušku 13. 10. P2-A/MAC1 zůstává odděleně otevřené.
+- Zjistit konkrétní kód a důvod první odmítnuté operace; dosavadní server odmítnutí neloguje. Žádná hypotéza příčiny není zatím potvrzená.
+- Nasazení diagnostiky do Camino služby vyžaduje samostatné aktuální potvrzení a globální brzdu kvůli změně jejího LaunchAgentu. Telefon, archiv, síť a Cockpit se během přípravy neměnily.
+- P2-E ovládání editoru a ruční komentář počkají; P2-A/MAC1 zůstává odděleně otevřené.
 
 ### Rizika
-- První verze podporuje jeden uzavřený den, 256 zdrojů, 60 minut obrazu a 16 rozpracovaných exportů. HDR video bezpečně odmítá; fotografie používají hlavní SDR obraz včetně EXIF/ICC převodu. Originály včetně ostatních MPO vrstev zůstávají celé.
-- Změna zdrojů, soukromí, integrity nebo uložené revize zastaví render/vydání; nepovolený stav schová stará data a přehrávač. Již staženou cizí kopii nelze odvolat.
-- Dřívější audit 12. 10. hlásil recovery zálohu z 27. 9. a neaktivní autosave; filmový krok je neměnil. Projekt a export nejsou nezávislá záloha originálů.
+- Bez konkrétního důvodu neopravovat domnělý konflikt ani neuvolňovat validaci. Zachovat journal, přesná přijatá těla, identity, epochu, kurzor, původní média a konfliktní kandidáty.
+- Recovery audit 14. 10. znovu hlásí zálohu z 27. 9. a neaktivní autosave; Míla upozorněn. Integritní audit není další záloha. Zálohování tento krok neměnil.
+- Řízený upgrade pouze Camino služby krátce přeruší její dostupnost; předem zachová snapshoty DB a původní konfiguraci a ověří archiv před/po. Serve a Cockpit zůstávají mimo jeho rozsah.
 
 ### Rozhodnutí
-- Míla zadal „Pokračuj editorem a mp4.“ a potvrdil „ok p+n cockpit“. Připravený editor `7c9547fc` je na GitHubu a nasazený pouze Cockpit; hotové MP4 se znovu nevyráběly.
-- Samostatný hlas se umisťuje vědomě. Žádný automatický střih na cílovou délku, hudba, AI hlas ani veřejné sdílení. Camino se kvůli editoru nenastavuje ani nerestartuje.
+- Míla zadal urgentní diagnostiku přenosu a odložil film. Příprava není souhlas s nasazením; žádná instalace telefonu, reset ani nové párování.
 
 ### Další krok
-- Ukončit a uložit nynější klip a přehrát jej se slyšitelným zvukem. Ovládání filmového editoru naváže po stabilizaci záznamu.
+- Po samostatném potvrzení nasadit připravenou diagnostiku registrovaným workflow a jedním telefonním pokusem „Synchronizovat nyní“ zjistit přesný důvod odmítnutí.
 
 ### Navrhované další kroky
-- P2-E: fyzicky ověřit editor, celý skutečný film se zvukem a ruční komentář.
-- P2-F vícedenní film až po přijetí základu a samostatném zadání.
+- Podle získaného důvodu opravit konkrétní příčinu a ověřit dokončení metadat i médií na telefonu.
+- K filmu/editoru se vrátit po obnovení spolehlivého přenosu.
 
 ### Technický důkaz
-- `camino/docs/P2CD_EDITOR_MP4_REPORT.md`; cílené bezpečnostní/HTTP/JS a skutečné render testy PASS, závěrečná plná brána 1907/1907 PASS (319,041 s testů).
-- Shodný edit/manifest obou profilů, úplný decode, 6014 snímků. Hash finále `3013f072f34d6e7654c17e44955fec5de950811629bb62e4c33a5a09a3c542ee`.
-- Řízené nasazení `7c9547fc`: Cockpit PID 35526, otisk `4f1f0c17ac72659f`, účtenka `deployed`, smoke 5/5. Camino zůstává PID 67017; žádný jeho restart ani nový render.
-- [GitHub brána 38285925799](https://github.com/Belisarius-Mila/PythonMF/actions/runs/38285925799) nasazeného `7c9547fc` má success: 1907 testů OK, 13 podmíněně přeskočených, 203,452 s. Skutečné render testy a všech 19 editor testů prošly místně bez přeskočení.
+- `camino/docs/METADATA_REJECTION_INCIDENT_20261014.md`; cílené HTTP/diagnostické testy 17/17 PASS, plná brána 1909/1909 PASS (320,413 s). Sedm nových diagnostických testů prošlo samostatně a je doplněných do seznamu plné brány.
+- Izolovaný import v Pythonu běžící služby a veřejný katalog důvodů PASS. Kandidátní soubory se shodují s pracovním kódem; schéma ani závislosti se nemění.
+- Živý Serve otisk `1568d3d56928ccfc88baea55fdead012ba433f119c935f3cd256bc121c1c5be5`, Funnel off. Během tohoto incidentu žádný restart, nasazení či síťový zápis.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Camino
@@ -3549,3 +3545,22 @@ běžného záznamu; podrobná P2-E přejímka zůstává otevřená.
 Samostatně nepotvrzené uložení/poslech posledního klipu a chybějící
 telefonní log nedovolují označit kořenovou příčinu či úplný PASS.
 Report `VIDEO_AUDIO_INCIDENT_20261013.md`. Tento krok mění jen zápisy.
+
+
+### 2026-10-14 17:26 CEST — Odmítnutá metadata, příprava bezpečné diagnostiky
+
+Hotovo:
+- Mac je dostupný a dosavadní archiv prošel úplným integritním auditem. Připravené doplnění ukáže technický důvod konkrétního odmítnutí bez soukromého obsahu; dosud není nasazené a přenos není opravený.
+
+Rozhodnutí:
+- Míla odložil film a zadal diagnostiku přenosu. Žádná nová instalace, reset, změna identity, sítě nebo archivních dat. Nasazení není dosud schválené.
+
+Další krok:
+- Po aktuálním potvrzení řízeně nasadit diagnostiku pouze Camino služby a jedním opakováním telefonní synchronizace zachytit konkrétní důvod.
+
+Navrhované další kroky:
+- Cílená oprava podle doloženého důvodu a kontrola dokončení metadat i médií.
+- Film/editor až po obnovení spolehlivého přenosu.
+
+Technický důkaz:
+- HTTP/HTTPS 200, flags false, žádný konfliktní kandidát; 740 operací, 103 Momentů, všech 234 ověřených originálů / 1 870 503 746 B má správné SHA-256. Cílené testy 17/17, plná brána 1909/1909 a sedm samostatných nových testů PASS; izolovaný import PASS. Report `METADATA_REJECTION_INCIDENT_20261014.md`.

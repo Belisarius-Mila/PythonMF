@@ -18,6 +18,7 @@ from camino.api.v1 import CaminoV1Contract
 from camino.domain.model import ContractError
 from camino.server.auth import RevocableTokenStore
 from camino.server.media_store import DEFAULT_CHUNK_BYTES, MediaStore, MediaStoreError
+from camino.server.metadata_diagnostics import record_metadata_rejection
 from camino.film.closed_day import ClosedDayError, ClosedDayStore
 from camino.server.viewer_worker import ViewerWorker
 from camino.server.recovery import complete_recovery
@@ -332,6 +333,8 @@ def create_app(
             body=raw,
             content_type=request.headers.get("content-type"),
         )
+        if request.method == "POST" and path == "operations":
+            record_metadata_rejection(response, raw)
         if request.method == "GET" and target == "/api/v1/state" and response.status == 200:
             response.body["features"].append("identical_recovery_v1")
             if closed_day_store is not None:

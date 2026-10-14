@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-13 18:11 CEST — spouštění videa se zvukem obnovené; příčina nepotvrzená
+Aktualizováno: 2026-10-14 17:26 CEST — odmítnutí metadat, diagnostika místní a nenasazená
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,8 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-14 17:26 CEST — Míla hlásí zastavení přenosu u „Odesílám metadata“ a odmítnutí Macem; film odložený. Živá služba a owner HTTP/HTTPS 200, integrita SQLite i všech 234 ověřených originálů / 1 870 503 746 B PASS; 740 přijatých operací, kurzor 740, 103 Momentů, flags false, žádný konfliktní kandidát. Konkrétní důvod neznámý, dosavadní server ho neloguje. Připravená bezpečná diagnostika je místní, nenasazená; 17 cílených testů, plná brána 1909/1909 a sedm samostatných nových testů PASS, izolovaný import PASS. Přenos není označený za opravený. Nasazení pouze Camino služby po aktuálním samostatném potvrzení a globální brzdě; poté jeden telefonní pokus. Žádný reset/párování/instalace či změna archivu, Cockpitu nebo sítě. Report `camino/docs/METADATA_REJECTION_INCIDENT_20261014.md`.
 
 - 2026-10-13 18:11 CEST — Video se zvukem podle Míly opět běží i se zapnutým Bluetooth. Tiché video a Komentář fungují; povolení mikrofonu bylo zapnuté. Pracovní hypotéza je dočasně zaseknutá příprava zvuku, přesný spouštěč není prokázaný. Uložení a slyšitelný zvuk posledního klipu potvrdit. Žádná aktualizace, instalace nebo změna služby; pouze diagnostika. Report `camino/docs/VIDEO_AUDIO_INCIDENT_20261013.md`.
 
@@ -3113,3 +3115,22 @@ běžného záznamu; podrobná P2-E přejímka zůstává otevřená.
 Samostatně nepotvrzené uložení/poslech posledního klipu a chybějící
 telefonní log nedovolují označit kořenovou příčinu či úplný PASS.
 Report `VIDEO_AUDIO_INCIDENT_20261013.md`. Tento krok mění jen zápisy.
+
+
+### 2026-10-14 17:26 CEST — Odmítnutá metadata, příprava bezpečné diagnostiky
+
+Hotovo:
+- Mac je dostupný a dosavadní archiv prošel úplným integritním auditem. Připravené doplnění ukáže technický důvod konkrétního odmítnutí bez soukromého obsahu; dosud není nasazené a přenos není opravený.
+
+Rozhodnutí:
+- Míla odložil film a zadal diagnostiku přenosu. Žádná nová instalace, reset, změna identity, sítě nebo archivních dat. Nasazení není dosud schválené.
+
+Další krok:
+- Po aktuálním potvrzení řízeně nasadit diagnostiku pouze Camino služby a jedním opakováním telefonní synchronizace zachytit konkrétní důvod.
+
+Navrhované další kroky:
+- Cílená oprava podle doloženého důvodu a kontrola dokončení metadat i médií.
+- Film/editor až po obnovení spolehlivého přenosu.
+
+Technický důkaz:
+- HTTP/HTTPS 200, flags false, žádný konfliktní kandidát; 740 operací, 103 Momentů, všech 234 ověřených originálů / 1 870 503 746 B má správné SHA-256. Cílené testy 17/17, plná brána 1909/1909 a sedm samostatných nových testů PASS; izolovaný import PASS. Report `METADATA_REJECTION_INCIDENT_20261014.md`.

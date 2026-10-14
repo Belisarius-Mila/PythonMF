@@ -60,7 +60,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] 2026-10-13 18:11 CEST: video se zvukem po diagnostických testech opět startuje i s Bluetooth podle Míly. Kořenová příčina nepotvrzená; uložit a přehrát nynější klip se slyšitelným zvukem. Při návratu závady zachytit přesnou hlášku a předchozí činnost, bez spekulativní instalace. Report `camino/docs/VIDEO_AUDIO_INCIDENT_20261013.md`. Ovládání filmového editoru a P2-E navážou po stabilizaci záznamu; P2-A/MAC1 odděleně.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] 2026-10-14 17:26 CEST: odmítnutí metadat blokuje přenos; důvod zatím neznámý. Mac/HTTPS a úplná integrita 234 ověřených originálů PASS. Bezpečná diagnostika připravená místně, nenasazená; samostatné potvrzení upgradu pouze Camino služby a globální brzda kvůli LaunchAgentu. Potom jeden telefonní sync a cílená oprava. Žádný reset/párování nebo zásah do archivu/sítě; film odložený. Report `camino/docs/METADATA_REJECTION_INCIDENT_20261014.md`.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` - Cockpit 14. 9.: scroll 10ec0877 potvrzený Mílou. [PRIPOMENOUT] U07 až při příštím pokračování. TXT v2.8 shrnuje U01–U06; plná brána 1680/1680 OK, funkční nasazení 980aed7a a smoke 5/5. Publikační překážka odstraněna; finální balíček/head ověřovat živým auditem.
 
