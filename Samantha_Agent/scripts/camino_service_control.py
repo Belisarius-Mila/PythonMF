@@ -209,6 +209,25 @@ def control(action: str, root: Path = ROOT, *, runner=run_command, agents: Path 
                 "viewer_granted": viewer_granted(config),
                 "running": owned and result.returncode == 0 and "state = running" in result.stdout,
                 "https_checked": False, "data_delivery_checked": False}
+    if action == "stage-client-update":
+        from camino.server.client_update import client_update_response
+        verify_plist(root, config, agents)
+        require_private_network(runner)
+        source = PROJECT_ROOT / "data/private/camino_client_update_stage"
+        response = client_update_response(source, {})
+        if response.status_code != 200:
+            raise ValueError("verified staged update required")
+        destination = root / "client-update"
+        if destination.exists() or destination.is_symlink():
+            raise ValueError("client update already staged; preserve and inspect it")
+        destination.mkdir(mode=0o700)
+        name = Path(response.path).name
+        private_write(destination / name, Path(response.path).read_bytes())
+        private_write(destination / "update.json", (source / "update.json").read_bytes())
+        if client_update_response(destination, {}).status_code != 200:
+            raise ValueError("copied client update verification failed")
+        return {"client_update_staged": True, "filename": name,
+                "archive_changed": False, "network_changed": False, "service_changed": False}
     if action == "install":
         with offline(config, runner):
             checked([str(config["python"]), "-c", "import fastapi, uvicorn, httpx"], runner)
@@ -300,6 +319,7 @@ def serve(root: Path):
     for key in ("metadata_db", "auth_db", "media_db", "media_root"):
         os.environ["CAMINO_C05A_" + key.upper()] = str(config[key])
     os.environ["CAMINO_P2B_ROOT"] = str(root / "film-projects")
+    os.environ["CAMINO_CLIENT_UPDATE_ROOT"] = str(root / "client-update")
     reader_path = root / "readers.sqlite"
     if reader_path.exists() and viewer_granted(config):
         connection = readonly(reader_path)
@@ -317,7 +337,7 @@ def serve(root: Path):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=("status", "install", "upgrade", "start", "stop", "enable-viewer", "disable-viewer", "copy-reader", "run"))
+    parser.add_argument("action", choices=("status", "install", "upgrade", "start", "stop", "stage-client-update", "enable-viewer", "disable-viewer", "copy-reader", "run"))
     parser.add_argument("--root", type=Path, default=ROOT)
     parser.add_argument("--confirm", action="store_true")
     args = parser.parse_args(argv)

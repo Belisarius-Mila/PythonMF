@@ -1,38 +1,40 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-10-14 18:01 CEST — odmítnutá změna názvu přílohy, oprava otevřená
+- Aktualizováno: 2026-10-14 18:41 CEST — oprava smazané pojmenované přílohy místně připravená
 
 ### Hotovo
-- Živý read-only audit: Camino služba po potvrzeném upgradu běží z `e815ae75dc38`, PID 75891; owner HTTP i soukromé HTTPS health/state 200. Archiv nemá blokaci výstupů ani povinnou reconciliaci a tabulka konfliktů je prázdná.
-- Kontrola SQLite a všech 234 dosud ověřených originálů (1 870 503 746 B) prošla. Přijato 740 operací, kurzor 740, 103 Momentů. Z 268 deklarovaných Assetů není 34 ještě ověřených; samotný rozdíl není důkaz ztráty.
-- Nasazená diagnostika zaznamená pouze technický důvod odmítnutého POST, druh operace a pořadí; žádné soukromé texty, UUID, GPS, média či tokeny. Odpovědi a pravidla přijímání zůstávají stejné. Nasazení ověřené; Odmítnutí zachycené: operace 741, HTTP 422 `invalid_request`, změna názvu přílohy; server nemůže ověřit cílovou fotografii/video u daného Momentu. Přenos zůstává zastavený.
-- První skutečný film Míla 12. 10. přijal „na první dobrou ok“. Editor a MP4 jsou zachované; filmové práce jsou dnes výslovně odložené. Včerejší spouštění videa se zvukem se podle Míly obnovilo, přesná příčina nepotvrzená.
+- Míla potvrdil opakované přejmenování/smazání příloh. Stejný scénář se skutečnými Swift obálkami končí na nezměněném validátoru stejným HTTP 422 jako živá operace 741.
+- Připravená oprava vyžaduje místní tombstone přílohy, skutečné 422, stejný server/epochu, čerstvý kurzor před odmítnutou operací a shodnou revizi Momentu. Původní odmítnutá obálka zůstává v telefonu i uvnitř výslovného storna. Přijaté pakety, pořadí, revize, ostatní obsah a média se nepřepisují.
+- Mac znovu ověří vloženou původní obálku ve stejné transakci; povolí storno pouze platného názvu globálně nedeklarovaného Assetu. Existující, jinam patřící, audio nebo obecně neplatný cíl nelze takto obejít. Výsledná revize zachová všechny hodnoty Momentu; stávající codec i schéma 3 zůstávají čitelné.
+- Build iPhone 0.1.0 (18), stejné bundle ID `cz.pythonmf.camino.app`, arm64, CRC a binární ZIP roundtrip PASS. IPA je nepodepsaný pro přepodepsání SideStore a není nainstalovaný. Model místní databáze, vault, kamera a audio zdroje se shodují s přijatým buildem 16.
+- Soukromé stažení přes stávající přihlášení Vieweru je místně připravené, není aktivované. Kontroluje konkrétní IPA, soukromá práva a hash; anonymní nebo odvolaný přístup, symlinky, jiná identita a změněné bajty se odmítají. Registrované staging workflow nezasahuje do archivu, procesu ani sítě.
 
 ### Otevřeno
-- Zjistit, zda před selháním proběhlo přejmenování nebo smazání přílohy; příčina chybějící vazby ještě není prokázaná. Čtení kódu ukazuje riziko: smazaná příloha se vyřadí z deklarací, ale její stará operace názvu u ponechaného Momentu zůstává. Žádný reset ani obejití kontroly.
-- Míla potvrdil globální brzdu pro toto nasazení. Čtyři ověřené DB snapshoty a původní konfigurace zachované; celý archiv před/po přesně shodný. Telefon, Serve a Cockpit beze změny.
-- P2-E ovládání editoru a ruční komentář počkají; P2-A/MAC1 zůstává odděleně otevřené.
+- Závěrečná plná brána 1925/1925 PASS. Oprava není nasazená; dosavadní diagnostické vydání `e815ae75dc38` dál běží, živý read-only stav má 740 přijatých operací a žádný konfliktní kandidát.
+- Potřeba aktuálního konkrétního potvrzení opravného serveru a chráněného zpřístupnění IPA; dřívější souhlas byl jen diagnostika. Telefon se aktualizuje ručně do stejné aplikace až po ověřeném nasazení. Skutečné odblokování přenosu a zachování telefonních dat čeká na fyzickou přejímku.
+- Film je odložený. P2-E ovládání editoru a P2-A/MAC1 zůstávají oddělené.
 
 ### Rizika
-- Bez konkrétního důvodu neopravovat domnělý konflikt ani neuvolňovat validaci. Zachovat journal, přesná přijatá těla, identity, epochu, kurzor, původní média a konfliktní kandidáty.
-- Recovery audit 14. 10. znovu hlásí zálohu z 27. 9. a neaktivní autosave; Míla upozorněn. Integritní audit není další záloha. Zálohování tento krok neměnil.
-- Řízený upgrade pouze Camino služby dokončený. Žádná změna pravidel přijímání, schématu či závislostí; konkrétní oprava se určí teprve podle zachyceného důvodu.
+- Neprovádět storno při nepovoleném stavu, jiné epoše/revizi nebo již přijatém pořadí. Metadata a media fronta se neresetují, běžná kontrola názvu zůstává přísná. Oprava je vymezená na názvy smazaných fotografií/videí; mazání audio session je mimo tento krok.
+- SideStore podpis a fyzické zachování dat nejsou doložené pouhým buildem. Zachovat stejnou identitu a dříve ověřené nastavení importu; neodinstalovat původní Camino. Recovery záloha z 27. 9. a zastavený autosave byly již oznámené.
+- Storno je nová metadata revize, takže běžná kontrola uzavřeného filmového zdroje nadále platí; žádné nové renderování ani odstranění exportů.
 
 ### Rozhodnutí
-- Míla zadal urgentní diagnostiku přenosu a odložil film. Přesnou větou následně potvrdil nasazení pouze diagnostiky Camino. Žádná instalace telefonu, reset ani nové párování.
+- Míla odložil film a zadal opravu přenosu. Potvrdil odpovídající přejmenování/smazání; nové nasazení opravy a aktualizace telefonu dosud nejsou schválené.
 
 ### Další krok
-- Po odpovědi Míly o přejmenování/smazání rozlišit chybějící deklaraci, smazaný cíl či nesprávnou vazbu a připravit cílenou opravu bez ztráty dat. Další pokus synchronizace nyní není potřeba.
+- Po konkrétním aktuálním potvrzení registrovaně nasadit server a chráněné stažení, pak ruční SideStore aktualizace stejného Camina a jeden sync.
 
 ### Navrhované další kroky
-- Podle získaného důvodu opravit konkrétní příčinu a ověřit dokončení metadat i médií na telefonu.
-- K filmu/editoru se vrátit po obnovení spolehlivého přenosu.
+- Ověřit na telefonu původní záznamy, fotografie/video se zvukem, Komentář a dokončení metadat i médií.
+- Film/editor naváže až po stabilizaci přenosu.
 
 ### Technický důkaz
-- `camino/docs/METADATA_REJECTION_INCIDENT_20261014.md`; cílené HTTP/diagnostické testy 17/17 PASS, plná brána 1909/1909 PASS (320,413 s). Sedm nových diagnostických testů prošlo samostatně a je doplněných do seznamu plné brány.
-- Izolovaný import v Pythonu běžící služby a veřejný katalog důvodů PASS. Kandidátní soubory se shodují s pracovním kódem; schéma ani závislosti se nemění.
-- Živý Serve otisk `1568d3d56928ccfc88baea55fdead012ba433f119c935f3cd256bc121c1c5be5`, Funnel off. Potvrzené nasazení `e815ae75dc38`: owner HTTP/HTTPS, Viewer/mapa 200; foto/audio/video Range 206, anonymní Viewer 401. Cockpit PID 35526, otisk `4f1f0c17ac72659f`, smoke 5/5; žádný síťový zápis.
+- Swift 68/68 PASS, skutečné Swift → API storno/retry/reopen i negativní důkazy PASS; 52 cílených HTTP/staging/workflow testů PASS. Izolovaný import v Pythonu běžící služby PASS; závislosti a schéma beze změny.
+- IPA `Camino-SyncRepair-18-20261014-r2-unsigned.ipa`, 1247937 B, SHA-256 `42c964f9579fe09663632dbafc7a2dfc85e6e8d6424f2c9a7f04fef07ec64f51`, zdroje iOS `0a69eb86c479a4f2e9ad55327742ae8498487e198662f426e41096061b65c038`. Balíček jen v soukromém místním stagingu, žádná veřejná publikace.
+- Report `camino/docs/METADATA_REJECTION_INCIDENT_20261014.md`; chráněná cesta po potvrzení `/camino-api/viewer/client-update`. Současný diagnostický server/archiv, Cockpit a síť se při přípravě neměnily.
+- Kompatibilita: dosavadní server `e815ae75dc38` přečetl syntetickou historii po stornu a přesně zopakoval všech osm přijatých obálek bez změny stavu; živý archiv se neotevřel pro zápis.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Camino
@@ -3601,3 +3603,22 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Bezpečný log: `status=422 code=invalid_request reason=title target must be a photo or video of this Moment kind=update_metadata sequence=741`, shodný při opakování. `CaminoSyncDiscovery` vychází z živých Assetů, zatímco snapshot zachovává historické změny názvů; `suppressDeletedContent` odstraňuje deklaraci smazaného Assetu, ale ne název přílohy ponechaného Momentu. Jde o doložené riziko kódu, nikoli ještě potvrzený spouštěč tohoto incidentu.
+
+
+### 2026-10-14 18:41 CEST — Místní oprava fronty po smazání přejmenované přílohy
+
+Hotovo:
+- Mílou potvrzený scénář je zopakovaný. Připravené výslovné storno zachovává odmítnutý požadavek i revize a dovolí pokračovat ve stejném pořadí bez přepsání přijaté historie nebo médií. Dosud není nasazené.
+- Balíček stejného Camina 0.1.0 (18) a chráněné soukromé stažení jsou místně ověřené; SideStore podpis a skutečný přenos na telefonu zůstávají otevřené.
+
+Rozhodnutí:
+- Míla potvrdil několikeré přejmenování/smazání. Oprava je pouze pro smazané fotografie/video, s místním tombstonem, čerstvým důkazem odmítnutí a dodatečným serverovým ověřením. Diagnostické schválení není schválení nového nasazení.
+
+Další krok:
+- Po konkrétním aktuálním potvrzení pouze Camino server/staging, potom SideStore aktualizace stejné aplikace a fyzický sync.
+
+Navrhované další kroky:
+- Ověřit původní telefonní data, video se zvukem, Komentář a dokončení přenosu. Film až později.
+
+Technický důkaz:
+- 68 Swift testů, 52 cílených API/HTTP/workflow testů, arm64 build, CRC/binární roundtrip a izolovaný import PASS. Nepodepsaný IPA 1247937 B, SHA-256 `42c964f9579fe09663632dbafc7a2dfc85e6e8d6424f2c9a7f04fef07ec64f51`. Živý diagnostický server nezměněný; report `METADATA_REJECTION_INCIDENT_20261014.md`.

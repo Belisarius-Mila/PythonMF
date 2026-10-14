@@ -119,6 +119,8 @@ def _serve(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
             ),
             root_path=args.root_path,
             closed_day_store=closed_day_store,
+            client_update_root=Path(os.environ["CAMINO_CLIENT_UPDATE_ROOT"])
+                if os.environ.get("CAMINO_CLIENT_UPDATE_ROOT") else None,
             **_viewer_options(parser, metadata, media, tokens),
         ),
         host=args.host,

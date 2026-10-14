@@ -22,6 +22,20 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-065 — Přejmenovaná a smazaná příloha nesmí zablokovat metadata frontu
+
+- Problém: Klient vyřadí smazaný Asset, ale historický název přílohy zůstane
+  u živého Momentu. Server správně odmítne neexistující cíl a zastaví i další data.
+- Typ: opakující se
+- Řešení nalezeno: 14102026
+- Řešení: Původní odmítnutou obálku zachovat. Storno dovolovat jen s místním
+  tombstonem, skutečným 422 a čerstvým důkazem, že pořadí nebylo přijato.
+  Server vložený originál znovu validuje a vyžaduje globálně nedeklarovaný
+  Asset; storno zachová všechny hodnoty Momentu a spotřebuje jeho revizi.
+  Nepřeskakovat cursor, nepřepisovat přijatou historii a neobnovovat smazané médium.
+  Skutečné Swift obálky → API, retry/reopen a negativní důkazy PASS; 68 Swift
+  a plná brána 1925/1925 PASS. Aktualizace iPhonu a fyzický přenos ještě čekají.
+
 ### LL-064 — Zvuk po spojení PCM segmentů potřebuje souvislé PTS vzorků
 
 - Problém: Milisekundové časové značky pracovních MKV se při spojení

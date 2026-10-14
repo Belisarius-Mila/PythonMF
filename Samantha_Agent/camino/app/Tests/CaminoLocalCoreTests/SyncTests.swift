@@ -10,6 +10,151 @@ import XCTest
         ISO8601DateFormatter().date(from: value)!
     }
 
+    private func rejectedTitleJournal() throws -> (CaminoSyncJournal, UUID, UUID, CaminoDeletedTitleRepairProof) {
+        var journal = CaminoSyncJournal()
+        let server = UUID(), epoch = UUID(), moment = UUID(), asset = UUID()
+        journal.observeServer(serverID: server, epoch: epoch, cursor: 0)
+        let accepted = CaminoSyncMetadataItem(id: UUID(), uniqueKey: "moment", kind: "create_moment",
+            objectID: moment, expectedRevision: nil, payload: Data("{}".utf8))
+        let title = CaminoSyncMetadataItem(id: UUID(), uniqueKey: "title", kind: "update_metadata",
+            objectID: moment, expectedRevision: 1, payload: try JSONSerialization.data(withJSONObject:
+                ["moment_id": moment.uuidString.lowercased(), "change": ["type": "attachment_title",
+                    "attachment": ["kind": "asset", "target_id": asset.uuidString.lowercased(),
+                                   "title": "Synthetic deleted title"]]],
+                options: [.sortedKeys, .withoutEscapingSlashes]))
+        journal.metadata = [accepted, title]
+        _ = try journal.exactEnvelope(for: accepted.id)
+        journal.metadata[0].phase = .accepted
+        journal.serverCursor = 1
+        _ = try journal.exactEnvelope(for: title.id)
+        let proof = CaminoDeletedTitleRepairProof(serverID: server, epoch: epoch, cursor: 1,
+            momentID: moment, revision: 1, hidden: false)
+        XCTAssertTrue(journal.valid)
+        return (journal, title.id, asset, proof)
+    }
+
+    func testDeletedTitleRepairPreservesAcceptedBytesRevisionAndRejectedHistoryAcrossReopen() throws {
+        let (initial, id, asset, proof) = try rejectedTitleJournal()
+        var journal = initial
+        XCTAssertTrue(try journal.repairRejectedDeletedTitle(id: id, deletedAssetIDs: [asset],
+            status: 422, code: "invalid_request", proof: proof, serverBlocked: false))
+        XCTAssertEqual(journal.metadata[0], initial.metadata[0])
+        XCTAssertEqual(journal.metadata[1].id, id)
+        XCTAssertEqual(journal.metadata[1].sequence, initial.metadata[1].sequence)
+        XCTAssertEqual(journal.metadata[1].expectedRevision, initial.metadata[1].expectedRevision)
+        XCTAssertEqual(journal.rejectedTitleHistory?.first?.original, initial.metadata[1])
+        XCTAssertEqual(journal.media, initial.media)
+        let payload = try XCTUnwrap(JSONSerialization.jsonObject(with: journal.metadata[1].payload) as? [String: Any])
+        let change = try XCTUnwrap(payload["change"] as? [String: Any])
+        XCTAssertEqual(change["type"] as? String, "cancel_deleted_attachment_title")
+        XCTAssertEqual(change["rejected_envelope"] as? String,
+                       String(data: try XCTUnwrap(initial.metadata[1].exactEnvelope), encoding: .utf8))
+        let exact = try journal.exactEnvelope(for: id)
+        var reopened = try JSONDecoder().decode(CaminoSyncJournal.self, from: JSONEncoder().encode(journal))
+        XCTAssertTrue(reopened.valid)
+        XCTAssertEqual(try reopened.exactEnvelope(for: id), exact)
+        XCTAssertEqual(reopened.rejectedTitleHistory?.first?.original.exactEnvelope, initial.metadata[1].exactEnvelope)
+        XCTAssertFalse(try reopened.repairRejectedDeletedTitle(id: id, deletedAssetIDs: [asset],
+            status: 422, code: "invalid_request", proof: proof, serverBlocked: false))
+    }
+
+    func testDeletedTitleRepairRefusesUnprovenRejectionAcceptanceIdentityRevisionAndLiveTargets() throws {
+        let (initial, id, asset, proof) = try rejectedTitleJournal()
+        let cases: [(Int, String, Bool, Set<UUID>, CaminoDeletedTitleRepairProof)] = [
+            (409, "invalid_request", false, [asset], proof),
+            (503, "invalid_request", false, [asset], proof),
+            (422, "revision_conflict", false, [asset], proof),
+            (422, "invalid_request", true, [asset], proof),
+            (422, "invalid_request", false, [], proof),
+            (422, "invalid_request", false, [asset], .init(serverID: UUID(), epoch: proof.epoch,
+                cursor: 1, momentID: proof.momentID, revision: 1, hidden: false)),
+            (422, "invalid_request", false, [asset], .init(serverID: proof.serverID, epoch: UUID(),
+                cursor: 1, momentID: proof.momentID, revision: 1, hidden: false)),
+            (422, "invalid_request", false, [asset], .init(serverID: proof.serverID, epoch: proof.epoch,
+                cursor: 2, momentID: proof.momentID, revision: 1, hidden: false)),
+            (422, "invalid_request", false, [asset], .init(serverID: proof.serverID, epoch: proof.epoch,
+                cursor: Int64.max, momentID: proof.momentID, revision: 1, hidden: false)),
+            (422, "invalid_request", false, [asset], .init(serverID: proof.serverID, epoch: proof.epoch,
+                cursor: 1, momentID: UUID(), revision: 1, hidden: false)),
+            (422, "invalid_request", false, [asset], .init(serverID: proof.serverID, epoch: proof.epoch,
+                cursor: 1, momentID: proof.momentID, revision: 2, hidden: false)),
+        ]
+        for (status, code, blocked, deleted, evidence) in cases {
+            var journal = initial
+            XCTAssertFalse(try journal.repairRejectedDeletedTitle(id: id, deletedAssetIDs: deleted,
+                status: status, code: code, proof: evidence, serverBlocked: blocked))
+            XCTAssertEqual(journal, initial)
+        }
+        var accepted = initial
+        accepted.metadata[1].phase = .accepted
+        let acceptedBefore = accepted
+        XCTAssertFalse(try accepted.repairRejectedDeletedTitle(id: id, deletedAssetIDs: [asset],
+            status: 422, code: "invalid_request", proof: proof, serverBlocked: false))
+        XCTAssertEqual(accepted, acceptedBefore)
+    }
+
+    func testLegacyJournalWithoutRejectedTitleHistoryStillDecodes() throws {
+        let (journal, _, _, _) = try rejectedTitleJournal()
+        var object = try XCTUnwrap(JSONSerialization.jsonObject(with: JSONEncoder().encode(journal)) as? [String: Any])
+        object.removeValue(forKey: "rejectedTitleHistory")
+        let legacy = try JSONDecoder().decode(CaminoSyncJournal.self,
+            from: JSONSerialization.data(withJSONObject: object))
+        XCTAssertEqual(legacy, journal)
+        XCTAssertTrue(legacy.valid)
+    }
+
+    func testRenameDeleteThenContinueLiveTitleAndPrivacyEmitsRepairWireFixture() throws {
+        let store = try CaminoLocalStore(inMemory: true)
+        let trip = try store.createTrip(name: "Synthetic deleted attachment")
+        let moment = try store.markMoment()
+        func photo() throws -> LocalMediaIntent {
+            let intent = try store.beginMediaIntent(kind: .photo, targetMomentID: moment.id)
+            _ = try store.acceptMedia(intent, inspection: LocalMediaInspection(byteCount: 12,
+                sha256: String(repeating: "a", count: 64), width: 4, height: 3, orientation: 1,
+                durationMilliseconds: nil, hasAudio: false, partial: false))
+            return intent
+        }
+        let deleted = try photo(), live = try photo()
+        _ = try store.setAttachmentTitle(momentID: moment.id, kind: .asset, targetID: deleted.assetID, title: "Old")
+        _ = try store.setAttachmentTitle(momentID: moment.id, kind: .asset, targetID: deleted.assetID, title: "Renamed")
+        _ = try store.setAttachmentTitle(momentID: moment.id, kind: .asset, targetID: live.assetID, title: "Live")
+        _ = try store.setHidden(momentID: moment.id, hidden: true)
+        _ = try store.deleteAsset(assetID: deleted.assetID)
+        var journal = CaminoSyncJournal()
+        let server = UUID(), epoch = UUID()
+        journal.observeServer(serverID: server, epoch: epoch, cursor: 0)
+        let candidate = CaminoSyncMediaItem(id: live.assetID, momentID: moment.id, kind: .photo,
+            sourceRelativePath: "synthetic/live.jpg", byteCount: 12, sha256: String(repeating: "a", count: 64),
+            durationMilliseconds: nil, batchID: journal.openBatchID)
+        journal.mergeDiscovery(try CaminoSyncDiscovery(trips: [trip], days: store.days(tripID: trip.id),
+            moments: [store.syncSnapshot(momentID: moment.id)], media: [candidate]))
+        var repaired: [Any] = [], rejected: [Any] = []
+        var revision = 1
+        for index in journal.metadata.indices {
+            let item = journal.metadata[index]
+            let raw = try journal.exactEnvelope(for: item.id)
+            if item.attachmentTitleAssetID == deleted.assetID {
+                rejected.append(try JSONSerialization.jsonObject(with: raw))
+                let proof = CaminoDeletedTitleRepairProof(serverID: server, epoch: epoch,
+                    cursor: journal.serverCursor, momentID: moment.id, revision: revision, hidden: false)
+                XCTAssertTrue(try journal.repairRejectedDeletedTitle(id: item.id, deletedAssetIDs: [deleted.assetID],
+                    status: 422, code: "invalid_request", proof: proof, serverBlocked: false))
+            }
+            repaired.append(try JSONSerialization.jsonObject(with: journal.exactEnvelope(for: item.id)))
+            journal.metadata[index].phase = .accepted
+            journal.serverCursor = try XCTUnwrap(journal.metadata[index].sequence)
+            if item.kind == "update_metadata" { revision += 1 }
+        }
+        XCTAssertEqual(journal.rejectedTitleHistory?.count, 2)
+        XCTAssertEqual(revision, try store.syncSnapshot(momentID: moment.id).moment.revision)
+        XCTAssertEqual(journal.media, [candidate])
+        if let path = ProcessInfo.processInfo.environment["CAMINO_DELETED_TITLE_WIRE_FIXTURE"] {
+            try JSONSerialization.data(withJSONObject: ["server_id": server.uuidString.lowercased(),
+                "epoch": epoch.uuidString.lowercased(), "repaired": repaired, "rejected": rejected], options: [.sortedKeys])
+                .write(to: URL(fileURLWithPath: path), options: .atomic)
+        }
+    }
+
     func testTripRenamePreservesIdentityMediaAndExactQueueAcrossReopen() throws {
         let url = FileManager.default.temporaryDirectory.appendingPathComponent("camino-trip-\(UUID())/metadata.sqlite")
         let store = try CaminoLocalStore(storeURL: url)

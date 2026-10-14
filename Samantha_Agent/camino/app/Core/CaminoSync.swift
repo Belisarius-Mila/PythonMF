@@ -105,6 +105,16 @@ public struct CaminoSyncMetadataItem: Codable, Equatable, Identifiable, Sendable
               let change = object["change"] as? [String: Any] else { return false }
         return change["type"] as? String == "attachment_title"
     }
+
+    public var attachmentTitleAssetID: UUID? {
+        guard isAttachmentTitleChange,
+              let object = try? JSONSerialization.jsonObject(with: payload) as? [String: Any],
+              let change = object["change"] as? [String: Any],
+              let attachment = change["attachment"] as? [String: Any],
+              attachment["kind"] as? String == "asset",
+              let raw = attachment["target_id"] as? String else { return nil }
+        return UUID(uuidString: raw)
+    }
 }
 
 public struct CaminoSyncMediaItem: Codable, Equatable, Identifiable, Sendable {
@@ -485,6 +495,26 @@ public struct CaminoRecoveryReceipt: Decodable, Sendable {
     public let reconciliation_required: Bool
 }
 
+public struct CaminoDeletedTitleRepairProof: Codable, Equatable, Sendable {
+    public let serverID: UUID
+    public let epoch: UUID
+    public let cursor: Int64
+    public let momentID: UUID
+    public let revision: Int
+    public let hidden: Bool
+
+    public init(serverID: UUID, epoch: UUID, cursor: Int64, momentID: UUID,
+                revision: Int, hidden: Bool) {
+        self.serverID = serverID; self.epoch = epoch; self.cursor = cursor
+        self.momentID = momentID; self.revision = revision; self.hidden = hidden
+    }
+}
+
+public struct CaminoRejectedTitleHistory: Codable, Equatable, Sendable {
+    public let original: CaminoSyncMetadataItem
+    public let proof: CaminoDeletedTitleRepairProof
+}
+
 public struct CaminoSyncJournal: Codable, Equatable, Sendable {
     public let schema: Int
     public let deviceID: UUID
@@ -499,6 +529,8 @@ public struct CaminoSyncJournal: Codable, Equatable, Sendable {
     public var metadata: [CaminoSyncMetadataItem]
     public var media: [CaminoSyncMediaItem]
     public var lastContactUTCMilliseconds: Int64?
+    // Optional for byte-compatible decoding of every pre-repair journal.
+    public var rejectedTitleHistory: [CaminoRejectedTitleHistory]?
 
     public init(deviceID: UUID = UUID(), openBatchID: UUID = UUID()) {
         schema = 1
@@ -535,6 +567,62 @@ public struct CaminoSyncJournal: Codable, Equatable, Sendable {
             }
             && Set(media.map(\.id)).count == media.count
             && media.allSatisfy(\.valid)
+            && (rejectedTitleHistory?.allSatisfy {
+                $0.original.valid && $0.original.phase == .pending
+                    && $0.original.attachmentTitleAssetID != nil
+                    && $0.proof.cursor >= 0 && $0.proof.cursor < Int64.max
+                    && $0.original.sequence == $0.proof.cursor + 1
+                    && $0.original.objectID == $0.proof.momentID
+                    && $0.original.expectedRevision == $0.proof.revision
+            } ?? true)
+    }
+
+    /// Only a locally deleted attachment and an explicit 422 may be repaired.
+    /// Fresh server evidence must prove this exact sequence is unaccepted.
+    /// Preserve the rejected bytes in an explicit cancellation revision. The
+    /// server revalidates them before accepting it; no history or media is erased.
+    @discardableResult public mutating func repairRejectedDeletedTitle(
+        id: UUID, deletedAssetIDs: Set<UUID>, status: Int, code: String,
+        proof: CaminoDeletedTitleRepairProof, serverBlocked: Bool
+    ) throws -> Bool {
+        guard valid, status == 422, code == "invalid_request", !serverBlocked,
+              !reconciliationRequired, serverID == proof.serverID, epoch == proof.epoch,
+              proof.cursor >= 0, proof.cursor < Int64.max, serverCursor <= proof.cursor,
+              let index = metadata.firstIndex(where: { $0.id == id }),
+              metadata[index].phase == .pending,
+              let target = metadata[index].attachmentTitleAssetID,
+              deletedAssetIDs.contains(target),
+              metadata[index].sequence == proof.cursor + 1,
+              metadata[index].objectID == proof.momentID,
+              metadata[index].expectedRevision == proof.revision,
+              !metadata.contains(where: {
+                  $0.phase == .accepted && ($0.sequence ?? 0) > proof.cursor
+              }),
+              let originalEnvelope = metadata[index].exactEnvelope,
+              var envelope = try JSONSerialization.jsonObject(with: originalEnvelope)
+                as? [String: Any],
+              let rejectedBody = String(data: originalEnvelope, encoding: .utf8),
+              let originalPayload = envelope["payload"] as? [String: Any],
+              originalPayload["moment_id"] as? String == proof.momentID.uuidString.lowercased()
+        else { return false }
+        let original = metadata[index]
+        let payload: [String: Any] = ["moment_id": original.objectID.uuidString.lowercased(),
+            "change": ["type": "cancel_deleted_attachment_title", "rejected_envelope": rejectedBody]]
+        let options: JSONSerialization.WritingOptions = [.sortedKeys, .withoutEscapingSlashes]
+        envelope["payload"] = payload
+        var repaired = self
+        repaired.metadata[index] = CaminoSyncMetadataItem(
+            id: original.id, uniqueKey: original.uniqueKey, kind: original.kind,
+            objectID: original.objectID, expectedRevision: original.expectedRevision,
+            payload: try JSONSerialization.data(withJSONObject: payload, options: options),
+            sequence: original.sequence,
+            exactEnvelope: try JSONSerialization.data(withJSONObject: envelope, options: options))
+        repaired.rejectedTitleHistory = (rejectedTitleHistory ?? [])
+            + [CaminoRejectedTitleHistory(original: original, proof: proof)]
+        repaired.serverCursor = proof.cursor
+        guard repaired.valid else { throw CaminoSyncError.invalidJournal }
+        self = repaired
+        return true
     }
 
     public var stats: CaminoSyncQueueStats {

@@ -10,6 +10,7 @@ from contextlib import asynccontextmanager
 from http import HTTPStatus
 from typing import Any
 from typing import TYPE_CHECKING
+from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -85,6 +86,7 @@ def create_app(
     viewer_interval_seconds: float | None = None,
     root_path: str = "",
     closed_day_store: ClosedDayStore | None = None,
+    client_update_root: Path | None = None,
 ) -> FastAPI:
     if not 0 <= finalize_delay_seconds <= 15:
         raise ValueError("finalize delay must stay between 0 and 15 seconds")
@@ -123,7 +125,7 @@ def create_app(
             raise ValueError("Viewer must have a separate read-only credential store")
         if viewer.metadata is not metadata_api.store or viewer.media is not media_store:
             raise ValueError("Viewer must use this API's authoritative stores")
-        app.include_router(viewer.router())
+        app.include_router(viewer.router(client_update_root=client_update_root))
 
     def authorized(request: Request) -> bool:
         return token_store.authenticate(_authorization(request))

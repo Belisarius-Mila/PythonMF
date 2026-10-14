@@ -278,6 +278,7 @@ def _camino_service_commands() -> tuple[WorkflowCommand, ...]:
         ("upgrade", "aktualizuj", "Aktualizovat zastavenou službu Camino", "Uchová konfiguraci a DB snapshoty, přepne jen vlastní vypnutou službu na pevný Git release; nic nespustí."),
         ("start", "spusť", "Spustit službu Camino", "Snapshot před upgradem, loopback start a automatický návrat procesu přes launchd."),
         ("stop", "zastav", "Zastavit službu Camino", "Vypne pouze vlastní LaunchAgent, data a tokeny zachová."),
+        ("stage-client-update", "připrav aktualizaci", "Připravit ověřenou aktualizaci iPhonu Camino", "Zkopíruje jen místně ověřený IPA a jeho účtenku do nové soukromé složky služby; archiv, síť a proces nemění."),
         ("enable-viewer", "povol viewer", "Povolit Camino pro Janu", "Nad zastavenou službou povolí zvolenou cestu a samostatné čtecí oprávnění."),
         ("disable-viewer", "zakaž viewer", "Odvolat Camino pro Janu", "Nad zastavenou službou zavře Viewer a odvolá všechny jeho čtecí tokeny."),
         ("copy-reader", "zkopíruj token", "Vložit čtecí token Camino do schránky", "Zkopíruje aktivní read-only token Jany; token nikdy nevypíše."),

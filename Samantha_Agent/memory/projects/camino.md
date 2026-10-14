@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-14 18:01 CEST — odmítnutá změna názvu přílohy, oprava otevřená
+Aktualizováno: 2026-10-14 18:41 CEST — místní oprava přenosu po smazání přejmenované přílohy
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,8 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-14 18:41 CEST — Míla potvrdil opakované přejmenování/smazání; skutečné Swift obálky zopakovaly živou chybu 422. Místně připravené vymezené storno zachovává původní odmítnutou obálku, přijatou historii, pořadí i revize. Klient vyžaduje místní tombstone a čerstvý důkaz ne-přijetí; server původní obálku znovu validuje a dovolí jen globálně chybějící Asset. Schéma 3, codec, originály a model telefonu nezměněné. Swift 68/68, 52 cílených testů, izolovaný import a arm64 IPA/CRC PASS; závěrečná plná brána 1925/1925 PASS. Oprava a chráněné stažení nejsou nasazené. IPA 0.1.0 (18), stejné bundle ID, nepodepsaný pro SideStore: `Camino-SyncRepair-18-20261014-r2-unsigned.ipa`, 1247937 B, SHA-256 `42c964f9579fe09663632dbafc7a2dfc85e6e8d6424f2c9a7f04fef07ec64f51`. Dřívější potvrzení bylo jen diagnostika; nový server/staging vyžaduje konkrétní potvrzení, pak fyzický import do stejné aplikace a sync. Report `camino/docs/METADATA_REJECTION_INCIDENT_20261014.md`.
 
 - 2026-10-14 18:01 CEST — Odmítnutí zachycené: operace 741, HTTP 422 `invalid_request`, změna názvu přílohy; server nemůže ověřit cílovou fotografii/video u daného Momentu. Přenos zůstává zastavený. Zjistit, zda před selháním proběhlo přejmenování nebo smazání přílohy; příčina chybějící vazby ještě není prokázaná. Čtení kódu ukazuje riziko: smazaná příloha se vyřadí z deklarací, ale její stará operace názvu u ponechaného Momentu zůstává. Žádný reset ani obejití kontroly. Po odpovědi Míly o přejmenování/smazání rozlišit chybějící deklaraci, smazaný cíl či nesprávnou vazbu a připravit cílenou opravu bez ztráty dat. Další pokus synchronizace nyní není potřeba.
 
@@ -3175,3 +3177,24 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Bezpečný log: `status=422 code=invalid_request reason=title target must be a photo or video of this Moment kind=update_metadata sequence=741`, shodný při opakování. `CaminoSyncDiscovery` vychází z živých Assetů, zatímco snapshot zachovává historické změny názvů; `suppressDeletedContent` odstraňuje deklaraci smazaného Assetu, ale ne název přílohy ponechaného Momentu. Jde o doložené riziko kódu, nikoli ještě potvrzený spouštěč tohoto incidentu.
+
+
+### 2026-10-14 18:41 CEST — Místní oprava fronty po smazání přejmenované přílohy
+
+Hotovo:
+- Mílou potvrzený scénář je zopakovaný. Připravené výslovné storno zachovává odmítnutý požadavek i revize a dovolí pokračovat ve stejném pořadí bez přepsání přijaté historie nebo médií. Dosud není nasazené.
+- Balíček stejného Camina 0.1.0 (18) a chráněné soukromé stažení jsou místně ověřené; SideStore podpis a skutečný přenos na telefonu zůstávají otevřené.
+
+Rozhodnutí:
+- Míla potvrdil několikeré přejmenování/smazání. Oprava je pouze pro smazané fotografie/video, s místním tombstonem, čerstvým důkazem odmítnutí a dodatečným serverovým ověřením. Diagnostické schválení není schválení nového nasazení.
+
+Další krok:
+- Po konkrétním aktuálním potvrzení pouze Camino server/staging, potom SideStore aktualizace stejné aplikace a fyzický sync.
+
+Navrhované další kroky:
+- Ověřit původní telefonní data, video se zvukem, Komentář a dokončení přenosu. Film až později.
+
+Technický důkaz:
+- 68 Swift testů, 52 cílených API/HTTP/workflow testů, arm64 build, CRC/binární roundtrip a izolovaný import PASS. Nepodepsaný IPA 1247937 B, SHA-256 `42c964f9579fe09663632dbafc7a2dfc85e6e8d6424f2c9a7f04fef07ec64f51`. Živý diagnostický server nezměněný; report `METADATA_REJECTION_INCIDENT_20261014.md`.
+
+- Kompatibilita: dosavadní server `e815ae75dc38` přečetl syntetickou historii po stornu a přesně zopakoval všech osm přijatých obálek bez změny stavu; živý archiv se neotevřel pro zápis.

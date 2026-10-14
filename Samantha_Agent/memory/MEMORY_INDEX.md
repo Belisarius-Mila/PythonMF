@@ -60,7 +60,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] 2026-10-14 18:01 CEST: bezpečná diagnostika po potvrzení nasazená, archiv/HTTPS PASS. Zachycená operace 741 končí HTTP 422: název přílohy nemá platnou vazbu na fotografii/video Momentu. Spouštěč dosud neprokázaný; upřesnit předchozí přejmenování/smazání a cíleně opravit bez resetu. Další telefonní retry teď není potřeba. Film odložený. Report `camino/docs/METADATA_REJECTION_INCIDENT_20261014.md`.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] 2026-10-14 18:41 CEST: přejmenování/smazání potvrzené a skutečné obálky zopakovaly 422. Místní vymezená oprava storna a IPA18 stejné aplikace PASS; plná brána 1925/1925 PASS. Nové nasazení serveru/chráněného stažení čeká na konkrétní potvrzení, potom ruční SideStore import a fyzický sync. Přenos není přijatý jako opravený; film odložený. Report `camino/docs/METADATA_REJECTION_INCIDENT_20261014.md`.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` - Cockpit 14. 9.: scroll 10ec0877 potvrzený Mílou. [PRIPOMENOUT] U07 až při příštím pokračování. TXT v2.8 shrnuje U01–U06; plná brána 1680/1680 OK, funkční nasazení 980aed7a a smoke 5/5. Publikační překážka odstraněna; finální balíček/head ověřovat živým auditem.
 

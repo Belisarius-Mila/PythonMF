@@ -21,6 +21,7 @@ from camino.server.auth import RevocableTokenStore
 from camino.server.media_store import MediaStore
 from camino.server.viewer_media import OUTPUTS, ViewerMedia
 from camino.server.viewer_map import map_page, route_snapshot
+from camino.server.client_update import client_update_response
 
 
 HEADERS = {
@@ -318,13 +319,19 @@ Příprava médií: {built}<br>{state}<br>Zobrazuji doručené záznamy. Další
 <img id="mediaLightboxImage" alt=""></div>
 <p id="audioPlaybackStatus" role="status" aria-live="polite"></p></body></html>'''
 
-    def router(self) -> APIRouter:
+    def router(self, *, client_update_root: Path | None = None) -> APIRouter:
         router = APIRouter(prefix="/viewer", include_in_schema=False)
 
         def denied() -> Response:
             return Response("Soukromý přístup pro Janu.", status_code=401, headers={
                 **HEADERS, "WWW-Authenticate": 'Basic realm="Camino Viewer", charset="UTF-8"',
             })
+
+        @router.api_route("/client-update", methods=["GET", "HEAD"])
+        def client_update(request: Request):
+            if not self.authorized(request):
+                return denied()
+            return client_update_response(client_update_root, HEADERS)
 
         @router.get("/player.js")
         def player(request: Request):

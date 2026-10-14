@@ -68,6 +68,43 @@ class CaminoServiceTests(unittest.TestCase):
         self.assertFalse(any("bootstrap" in x or "enable" in x for x in self.commands))
         self.assertFalse((self.runtime / "readers.sqlite").exists())
 
+    def test_client_update_stage_is_verified_create_only_without_archive_or_process_changes(self):
+        self.control("install")
+        config = service.load_config(self.runtime)
+        source_project = self.root / "source"
+        source = source_project / "data/private/camino_client_update_stage"
+        source.mkdir(parents=True, mode=0o700)
+        name = "Camino-Synthetic-18.ipa"
+        data = b"synthetic staged IPA"
+        private_write(source / name, data)
+        proof = {"filename": name, "bytes": len(data), "sha256": hashlib.sha256(data).hexdigest(),
+                 "bundle_id": "cz.pythonmf.camino.app"}
+        private_write(source / "update.json", json.dumps(proof).encode())
+        before = self.f.store.state()
+        definition = (self.agents / (service.LABEL + ".plist")).read_bytes()
+        self.commands.clear()
+        with patch.object(service, "PROJECT_ROOT", source_project), \
+             patch.object(service, "load_config", return_value=config):
+            result = self.control("stage-client-update")
+            self.assertTrue(result["client_update_staged"])
+            self.assertEqual((self.runtime / "client-update" / name).read_bytes(), data)
+            with self.assertRaises(ValueError):
+                self.control("stage-client-update")
+        self.assertEqual(self.f.store.state(), before)
+        self.assertEqual((self.agents / (service.LABEL + ".plist")).read_bytes(), definition)
+        self.assertFalse(any(command[0] == "/bin/launchctl" for command in self.commands))
+
+    def test_invalid_client_update_cannot_create_service_artifact_directory(self):
+        self.control("install")
+        config = service.load_config(self.runtime)
+        source_project = self.root / "source"
+        source = source_project / "data/private/camino_client_update_stage"
+        source.mkdir(parents=True, mode=0o700)
+        with patch.object(service, "PROJECT_ROOT", source_project), \
+             patch.object(service, "load_config", return_value=config), self.assertRaises(ValueError):
+            self.control("stage-client-update")
+        self.assertFalse((self.runtime / "client-update").exists())
+
     def test_foreign_definition_cannot_be_overwritten_or_stopped(self):
         self.agents.mkdir()
         path = self.agents / (service.LABEL + ".plist")
@@ -242,7 +279,7 @@ class CaminoServiceTests(unittest.TestCase):
     def test_registry_uses_confirmation_and_status_is_read_only(self):
         from app.workflows.commands import WORKFLOW_COMMANDS
         commands = [c for c in WORKFLOW_COMMANDS if c.command_id.startswith("camino_service_")]
-        self.assertEqual(len(commands), 12)
+        self.assertEqual(len(commands), 13)
         for command in commands:
             writes = command.command_id not in ("camino_service_status", "camino_service_network_status")
             self.assertEqual(command.requires_confirmation, writes)

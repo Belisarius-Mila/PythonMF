@@ -1,6 +1,6 @@
 # Camino — odmítnutí metadat na Macu 14. 10. 2026
 
-Stav 2026-10-14 18:01 CEST: diagnostika nasazená, zachycené odmítnutí změny názvu přílohy; přenos není opravený.
+Stav 2026-10-14 18:41 CEST: scénář potvrzený a zopakovaný, oprava klienta/serveru a IPA18 místně připravené; oprava ještě nenasazená.
 
 Míla po devíti dnech úspěšných přenosů hlásí, že telefon zůstane u
 „Odesílám metadata“ a zobrazí „Domácí Mac změnu odmítl“. Film je odložený.
@@ -29,7 +29,7 @@ a HTTP access log je vypnutý. Zdravé spojení a prázdná tabulka konfliktů
 nevylučují například neplatnou deklaraci nebo chybějící závislost operace.
 Žádná z těchto hypotéz zatím není potvrzená.
 
-## Připravená změna
+## Nasazená diagnostika před opravou fronty
 
 Pouze zamítnutý POST `/api/v1/operations` zaznamená HTTP status, známý
 chybový kód, veřejný důvod ze zdrojového kódu, druh operace a její pořadové
@@ -40,7 +40,7 @@ odpověď API, transakci či opakování přenosu. Přijaté operace se neloguj�
 Produkční změna je jen v `application.py` a novém `metadata_diagnostics.py`.
 Bez změny schématu, závislostí, validátorů, journalu, oprávnění nebo telefonu.
 
-## Ověření přípravy
+## Ověření původní diagnostiky
 
 - Cílené testy diagnostiky a skutečného HTTP endpointu: 17/17 PASS.
 - Kontrolují redakci soukromého obsahu, neplatné/velké tělo, pořadová čísla,
@@ -50,7 +50,7 @@ Bez změny schématu, závislostí, validátorů, journalu, oprávnění nebo te
 - Plná projektová brána: 1909/1909 PASS (320,413 s); sedm nových
   diagnostických testů samostatně PASS a doplněných do seznamu plné brány.
 
-## Další krok a bezpečnostní hranice
+## Nasazení diagnostiky a zachycení odmítnutí
 
 Míla přesnou větou globální brzdy potvrdil nasazení této diagnostiky.
 Registrované stop/upgrade/start přepnuly pouze vlastní Camino službu na
@@ -79,3 +79,64 @@ Telefon se neodinstaluje ani znovu nepáruje. Hotový film se nepřerenderuje.
 
 Recovery kontrola znovu hlásí zálohu z 27. 9. a zastavený autosave; Míla
 byl upozorněn. Tento incident je nezměnil. Integritní audit není další záloha.
+
+
+## 2026-10-14 18:41 CEST — oprava po potvrzeném přejmenování/smazání
+
+Míla odpověděl „Ano, několikrát“. Skutečná Swift sekvence dvou názvů následně
+smazané přílohy a názvu ponechané přílohy zopakovala HTTP 422. Samotný stávající
+server odmítá i prostou metadata změnu na již platnou hodnotu, takže zahození
+operace nebo nahodilá náhrada by nezachovala konzistentní revize.
+
+Oprava používá výslovné `cancel_deleted_attachment_title` se vloženou původní
+přesnou obálkou. Klient vyžaduje odpovídající místní deletion record, skutečné
+422 `invalid_request`, feature `deleted_attachment_title_repair_v1`, stejný
+server/epochu, čerstvý kurzor přesně před odmítnutým pořadím a aktuální revizi
+Momentu. Před dalším POST atomicky uloží původní obálku i důkaz. Opakování,
+restart a ztracená odpověď odesílají shodné uložené bajty.
+
+Server uvnitř téže transakce vyžaduje shodné ID/pořadí/epochu/zařízení/revizi,
+stejný Moment a původní platnou změnu názvu Assetu. Cíl nesmí být deklarovaný
+nikde v archivu; existence u jiného Momentu nebo jiného druhu také storno
+zakazuje. Vložený originál znovu projde původním validátorem a musí stále
+selhat výhradně na chybějícím cíli. Storno přijme jeden krok revize bez změny
+jakékoli hodnoty Momentu. Přijatá obálka uchová explicitní storno i originál;
+historická projekce používá stávající čitelný codec. Schéma zůstává 3,
+neprovádí se migrace, přepis původních operací ani obnova chybějících médií.
+
+Negativní testy odmítají přijaté pořadí, cizí identitu/epochu/revizi, jiný
+Moment, živý Asset, audio, neplatný název, duplicitní JSON a nepovolený stav.
+68/68 Swift testů a 52 cílených skutečných Swift→API/HTTP/staging/workflow
+testů PASS. Závěrečná plná brána 1925/1925 PASS. Izolovaný import v Pythonu služby
+PASS. Model místní databáze, vault, kamera a audio zdroje jsou shodné s
+přijatým buildem 16; SideStore/iPhone přejímka zatím NEPROVEDENO.
+
+Balíček `Camino-SyncRepair-18-20261014-r2-unsigned.ipa`: 0.1.0 (18), arm64,
+`cz.pythonmf.camino.app`, 1247937 B, SHA-256
+`42c964f9579fe09663632dbafc7a2dfc85e6e8d6424f2c9a7f04fef07ec64f51`.
+CRC, zabalená binárka a skutečný hash pro stahování PASS. IPA je nepodepsaný,
+neobsahuje provision/profile, přihlašovací údaje, deník ani média; podepíše
+ho SideStore. Přijetí SideStore a zachování telefonních dat není důkaz buildu.
+Zdrojový otisk iOS `0a69eb86c479a4f2e9ad55327742ae8498487e198662f426e41096061b65c038`;
+původní dřívější balíčky zachované, bez veřejné distribuce.
+
+Pro iPhone vzdálený od Macu je připravené stažení přes existující soukromé
+HTTPS `/camino-api/viewer/client-update`, se stávajícím Basic přihlášením
+Vieweru. Bez explicitně staged souboru vrací 404; anonymní/odvolaný přístup
+401. Ověřuje soukromá práva, pevnou identitu, délku a plný SHA-256, žádná
+uživatelská cesta. Soubor ani přístup není nyní aktivovaný. Registrovaný
+`camino_service_stage_client_update` zapisuje pouze novou artifact složku,
+nikdy ji nepřepisuje a nemění archiv, běžící proces ani síť.
+
+Další krok: po konkrétním aktuálním potvrzení stage/stop/upgrade/start pouze
+Camino služby se čtyřmi DB snapshoty a porovnáním celého archivu před/po.
+Ověřit chráněné HTTPS a celý hash staženého IPA, potom ruční SideStore import
+do stejné aplikace; neodinstalovat. Ověřit původní záznamy, foto/video se
+zvukem, Komentář a dokončení metadat i médií. Cockpit/Serve a zálohování
+zůstávají mimo rozsah. Přenos není přijatý jako opravený před telefonním testem.
+Storno je nová metadata revize, takže běžná kontrola uzavřeného filmu dál
+platí; žádný hotový MP4 se nemaže ani automaticky nepřerenderuje.
+
+Doplněný izolovaný důkaz: dosavadní vydání `e815ae75dc38` přečetlo historii
+po stornu a přesně zopakovalo všech osm přijatých obálek bez změny stavu.
+Kompatibilita ověřená na syntetické DB, bez zápisu do živého archivu.

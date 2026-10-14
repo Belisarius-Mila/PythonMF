@@ -24,6 +24,17 @@ private struct CaminoServerState: Decodable {
     }
 }
 
+private struct CaminoServerMoment: Decodable {
+    struct Moment: Decodable {
+        let id: UUID
+        let revision: Int
+        let hidden: Bool
+    }
+    let contract_version: Int
+    let epoch: UUID
+    let moment: Moment
+}
+
 private struct CaminoMediaStatus: Decodable {
     let assetID: UUID
     let state: String
@@ -120,6 +131,10 @@ private struct CaminoSyncAPI: Sendable {
 
     func state() async throws -> CaminoServerState {
         try await send(path: ["api", "v1", "state"], method: "GET")
+    }
+
+    func moment(_ id: UUID) async throws -> CaminoServerMoment {
+        try await send(path: ["api", "v1", "moments", id.uuidString.lowercased()], method: "GET")
     }
 
     func operation(exactBody: Data) async throws -> Int64 {
@@ -997,7 +1012,35 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
             journal.lastContactUTCMilliseconds = Int64(Date().timeIntervalSince1970 * 1_000)
             try journalStore.save(journal)
             refreshPublishedState()
-        } catch CaminoSyncAPIError.server(_, let code) {
+        } catch CaminoSyncAPIError.server(let status, let code) {
+            if status == 422, code == "invalid_request",
+               let target = journal.metadata[index].attachmentTitleAssetID {
+                let deleted = Set(try local.deletionRecords().filter {
+                    $0.kind == .asset && $0.momentID == journal.metadata[index].objectID
+                }.map(\.targetID))
+                if deleted.contains(target) {
+                    let state = try await api.state()
+                    guard state.features?.contains("deleted_attachment_title_repair_v1") == true else {
+                        throw CaminoSyncError.serverConflict("attachment_title_server_upgrade_required")
+                    }
+                    let moment = try await api.moment(journal.metadata[index].objectID)
+                    guard state.contractVersion == 1, moment.contract_version == 1,
+                          moment.epoch == state.epoch else {
+                        throw CaminoSyncAPIError.invalidResponse
+                    }
+                    let proof = CaminoDeletedTitleRepairProof(
+                        serverID: state.serverID, epoch: state.epoch, cursor: state.cursor,
+                        momentID: moment.moment.id, revision: moment.moment.revision,
+                        hidden: moment.moment.hidden)
+                    if try journal.repairRejectedDeletedTitle(id: id, deletedAssetIDs: deleted,
+                        status: status, code: code, proof: proof,
+                        serverBlocked: state.exportsBlocked || state.reconciliationRequired) {
+                        try journalStore.save(journal) // Archive original bytes before the replacement POST.
+                        refreshPublishedState()
+                        return // The normal loop sends the saved byte-exact replacement next.
+                    }
+                }
+            }
             if code == "epoch_mismatch" || code == "reconciliation_required" {
                 journal.reconciliationRequired = true
                 try journalStore.save(journal)

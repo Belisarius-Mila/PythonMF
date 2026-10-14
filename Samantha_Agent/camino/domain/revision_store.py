@@ -11,6 +11,7 @@ import json
 import os
 import sqlite3
 import stat
+from dataclasses import replace
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
@@ -150,7 +151,8 @@ class RevisionStore:
             meta = self._meta(connection)
             return {
                 "contract_version": 1,
-                "features": ["audio_layout_v1", "moment_title_v1", "attachment_title_v1", "trip_title_v1"],
+                "features": ["audio_layout_v1", "moment_title_v1", "attachment_title_v1", "trip_title_v1",
+                             "deleted_attachment_title_repair_v1"],
                 "server_id": meta["server_id"],
                 "epoch": meta["epoch"],
                 "cursor": meta["cursor"],
@@ -457,6 +459,12 @@ class RevisionStore:
             elif change["type"] == "attachment_title":
                 exact_object(change, {"type", "attachment"})
                 common["attachment"] = change["attachment"]
+            elif change["type"] == "cancel_deleted_attachment_title":
+                self._validate_cancelled_title(connection, envelope, change)
+                # Keep existing history codecs readable, including old releases.
+                # The accepted raw envelope records the explicit cancellation;
+                # its revision retains every field of the current Moment.
+                common.update(type="hidden", hidden=history.current.hidden)
             else:
                 raise ContractError("unknown metadata change")
             operation = decode_change(common)
@@ -473,7 +481,12 @@ class RevisionStore:
                     if not any(json.loads(row["body"])["session_id"] == target.target_id for row in layouts):
                         raise ContractError("title target must be an audio session of this Moment")
             try:
-                updated = history.apply(operation)
+                if change["type"] == "cancel_deleted_attachment_title":
+                    updated = MomentHistory(
+                        history.versions + (replace(history.current, revision=history.current.revision + 1),),
+                        history.operations + (operation,))
+                else:
+                    updated = history.apply(operation)
             except RevisionConflict as error:
                 raise StoreConflict("revision_conflict", "expected Moment revision differs",
                                     history.current.revision) from error
@@ -516,6 +529,60 @@ class RevisionStore:
             return kind, text_revision.id, current.revision, False
 
         raise ContractError("unknown operation kind")
+
+    def _validate_cancelled_title(self, connection: sqlite3.Connection,
+                                  envelope: dict[str, Any], change: dict[str, Any]) -> None:
+        """Only the same unaccepted, valid title of a globally absent Asset.
+
+        Re-evaluate the supplied original inside the same transaction. It must
+        still fail solely because the target is missing; the normal caption
+        validator and every identity/revision/sequence guard remain enforced.
+        """
+        data = exact_object(change, {"type", "rejected_envelope"})
+        raw = data["rejected_envelope"]
+        if not isinstance(raw, str) or not raw or len(raw.encode("utf-8")) > 8192:
+            raise ContractError("cancelled title proof must be a bounded original envelope")
+
+        def unique(pairs):
+            result = {}
+            for key, value in pairs:
+                if key in result:
+                    raise ContractError("cancelled title proof has duplicate fields")
+                result[key] = value
+            return result
+
+        def nonfinite(_value):
+            raise ContractError("cancelled title proof has a non-finite number")
+
+        try:
+            original = json.loads(raw, object_pairs_hook=unique, parse_constant=nonfinite)
+        except (ValueError, RecursionError) as error:
+            raise ContractError("cancelled title proof is not valid JSON") from error
+        exact_object(original, {"contract_version", "epoch", "operation_id", "device_sequence",
+                                "device_id", "kind", "expected_revision", "payload"})
+        for key in ("contract_version", "epoch", "operation_id", "device_sequence",
+                    "device_id", "kind", "expected_revision"):
+            if type(original[key]) is not type(envelope[key]) or original[key] != envelope[key]:
+                raise ContractError("cancelled title proof belongs to another operation")
+        payload = exact_object(original["payload"], {"moment_id", "change"})
+        if payload["moment_id"] != envelope["payload"]["moment_id"]:
+            raise ContractError("cancelled title proof belongs to another Moment")
+        title = exact_object(payload["change"], {"type", "attachment"})
+        if title["type"] != "attachment_title":
+            raise ContractError("only an attachment title may be cancelled")
+        attachment = exact_object(title["attachment"], {"kind", "target_id", "title"})
+        if attachment["kind"] != "asset":
+            raise ContractError("only a deleted photo or video title may be cancelled")
+        target = self._uuid(attachment["target_id"])
+        if connection.execute("SELECT 1 FROM assets WHERE id=?", (target,)).fetchone() is not None:
+            raise ContractError("declared Asset titles cannot be cancelled")
+        try:
+            self._project(connection, original)
+        except ContractError as error:
+            if str(error) == "title target must be a photo or video of this Moment":
+                return
+            raise
+        raise ContractError("cancelled title proof was not rejected for a missing Asset")
 
     def _moment(self, connection: sqlite3.Connection, moment_id: str):
         row = connection.execute("SELECT body FROM moments WHERE id=?", (moment_id,)).fetchone()
