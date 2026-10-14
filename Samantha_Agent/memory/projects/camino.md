@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-14 18:41 CEST — místní oprava přenosu po smazání přejmenované přílohy
+Aktualizováno: 2026-10-14 18:57 CEST — nasazená oprava a IPA18 v iCloud Dokumentech
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,8 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-14 18:57 CEST — Po aktuálním potvrzení je opravný server `d5d19b4b9ddd` nasazený, PID 7951, repair feature přes owner HTTP/HTTPS PASS. Všechny řádky metadata/auth/media/readers DB, identity/tripy, 740 operací/kurzor 740, 103 Momentů a všech 234 originálů / 1 870 503 746 B se shodnými SHA-256 zachované; čtyři ověřené snapshoty a původní konfigurace uchované. Viewer/mapa 200, foto/audio/video Range 206, anonymní 401. IPA18 `Camino-SyncRepair-18-20261014-r2-unsigned.ipa` create-only v iCloud Dokumentech; macOS potvrzuje dokončený upload bez chyby, kopie i soukromé náhradní HTTPS stažení mají shodný SHA-256. Cockpit PID 35526 / `4f1f0c17ac72659f`, smoke 5/5; Serve shodný, Funnel off. Karta schvalování vyčištěná. GitHub push neproběhl. Další krok: SideStore aktualizace původního Camina bez odinstalování, kontrola starých záznamů a jeden sync. Podpis/import a skutečné dokončení metadat/médií čekají na fyzickou přejímku; film odložený. Report `camino/docs/METADATA_REJECTION_INCIDENT_20261014.md`.
 
 - 2026-10-14 18:41 CEST — Míla potvrdil opakované přejmenování/smazání; skutečné Swift obálky zopakovaly živou chybu 422. Místně připravené vymezené storno zachovává původní odmítnutou obálku, přijatou historii, pořadí i revize. Klient vyžaduje místní tombstone a čerstvý důkaz ne-přijetí; server původní obálku znovu validuje a dovolí jen globálně chybějící Asset. Schéma 3, codec, originály a model telefonu nezměněné. Swift 68/68, 52 cílených testů, izolovaný import a arm64 IPA/CRC PASS; závěrečná plná brána 1925/1925 PASS. Oprava a chráněné stažení nejsou nasazené. IPA 0.1.0 (18), stejné bundle ID, nepodepsaný pro SideStore: `Camino-SyncRepair-18-20261014-r2-unsigned.ipa`, 1247937 B, SHA-256 `42c964f9579fe09663632dbafc7a2dfc85e6e8d6424f2c9a7f04fef07ec64f51`. Dřívější potvrzení bylo jen diagnostika; nový server/staging vyžaduje konkrétní potvrzení, pak fyzický import do stejné aplikace a sync. Report `camino/docs/METADATA_REJECTION_INCIDENT_20261014.md`.
 

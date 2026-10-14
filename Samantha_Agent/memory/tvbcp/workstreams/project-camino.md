@@ -1,40 +1,37 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-10-14 18:41 CEST — oprava smazané pojmenované přílohy místně připravená
+- Aktualizováno: 2026-10-14 18:57 CEST — opravný server nasazený, IPA18 v iCloud Dokumentech
 
 ### Hotovo
-- Míla potvrdil opakované přejmenování/smazání příloh. Stejný scénář se skutečnými Swift obálkami končí na nezměněném validátoru stejným HTTP 422 jako živá operace 741.
-- Připravená oprava vyžaduje místní tombstone přílohy, skutečné 422, stejný server/epochu, čerstvý kurzor před odmítnutou operací a shodnou revizi Momentu. Původní odmítnutá obálka zůstává v telefonu i uvnitř výslovného storna. Přijaté pakety, pořadí, revize, ostatní obsah a média se nepřepisují.
-- Mac znovu ověří vloženou původní obálku ve stejné transakci; povolí storno pouze platného názvu globálně nedeklarovaného Assetu. Existující, jinam patřící, audio nebo obecně neplatný cíl nelze takto obejít. Výsledná revize zachová všechny hodnoty Momentu; stávající codec i schéma 3 zůstávají čitelné.
-- Build iPhone 0.1.0 (18), stejné bundle ID `cz.pythonmf.camino.app`, arm64, CRC a binární ZIP roundtrip PASS. IPA je nepodepsaný pro přepodepsání SideStore a není nainstalovaný. Model místní databáze, vault, kamera a audio zdroje se shodují s přijatým buildem 16.
-- Soukromé stažení přes stávající přihlášení Vieweru je místně připravené, není aktivované. Kontroluje konkrétní IPA, soukromá práva a hash; anonymní nebo odvolaný přístup, symlinky, jiná identita a změněné bajty se odmítají. Registrované staging workflow nezasahuje do archivu, procesu ani sítě.
+- Odmítnutí názvu smazané přílohy je zachycené a potvrzený scénář zopakovaný. Vymezené storno uchová původní odmítnutou obálku a pořadí/revize; klient vyžaduje místní deletion record a čerstvý důkaz nepřijetí, server původní obálku znovu validuje. Běžná kontrola názvu zůstává přísná.
+- Po aktuálním potvrzení je nasazený pouze Camino server `d5d19b4b9ddd`, PID 7951. Živé owner HTTP/HTTPS hlásí repair feature a zdravý archiv. Všechny řádky všech čtyř DB i všech 234 ověřených originálů mají shodný stav před/po; čtyři ověřené snapshoty a původní konfigurace zachované.
+- `Camino-SyncRepair-18-20261014-r2-unsigned.ipa` je create-only zkopírovaný do existujících iCloud Dokumentů; macOS pro soubor potvrzuje dokončený upload bez chyby. Kopie má shodný plný SHA-256. Chráněný náhradní download přes stávající Basic Viewer přihlášení je také živě ověřený.
+- Build 0.1.0 (18), stejné bundle ID `cz.pythonmf.camino.app`. Model telefonní databáze, vault, kamera a audio zdroje jsou shodné s přijatým buildem 16. Schéma serveru zůstává 3. Cockpit, Serve a Funnel se neměnily; karta schvalování je vyčištěná.
 
 ### Otevřeno
-- Závěrečná plná brána 1925/1925 PASS. Oprava není nasazená; dosavadní diagnostické vydání `e815ae75dc38` dál běží, živý read-only stav má 740 přijatých operací a žádný konfliktní kandidát.
-- Potřeba aktuálního konkrétního potvrzení opravného serveru a chráněného zpřístupnění IPA; dřívější souhlas byl jen diagnostika. Telefon se aktualizuje ručně do stejné aplikace až po ověřeném nasazení. Skutečné odblokování přenosu a zachování telefonních dat čeká na fyzickou přejímku.
+- Viditelnost balíčku na iPhonu, SideStore podpis/import do původní aplikace, zachování záznamů a skutečné dokončení metadat i médií čekají na Mílu. Přenos zatím není fyzicky přijatý jako opravený.
 - Film je odložený. P2-E ovládání editoru a P2-A/MAC1 zůstávají oddělené.
 
 ### Rizika
-- Neprovádět storno při nepovoleném stavu, jiné epoše/revizi nebo již přijatém pořadí. Metadata a media fronta se neresetují, běžná kontrola názvu zůstává přísná. Oprava je vymezená na názvy smazaných fotografií/videí; mazání audio session je mimo tento krok.
-- SideStore podpis a fyzické zachování dat nejsou doložené pouhým buildem. Zachovat stejnou identitu a dříve ověřené nastavení importu; neodinstalovat původní Camino. Recovery záloha z 27. 9. a zastavený autosave byly již oznámené.
-- Storno je nová metadata revize, takže běžná kontrola uzavřeného filmového zdroje nadále platí; žádné nové renderování ani odstranění exportů.
+- Nepovolit storno při jiném serveru/epoše/revizi, již přijatém pořadí nebo existujícím Assetu. Fronty se neresetují; opravuje se jen název smazané fotografie/videa, mazání audio session je mimo rozsah.
+- Telefonní data ani podpis nejsou prokázané buildem/serverovým auditem. Zachovat stejnou identitu a dříve ověřené SideStore volby; původní Camino neodinstalovat.
+- Storno je nová metadata revize; platí běžná kontrola uzavřeného filmového zdroje. Hotový MP4 se nepřerenderoval. Starší záloha a zastavený autosave byly již oznámené.
 
 ### Rozhodnutí
-- Míla odložil film a zadal opravu přenosu. Potvrdil odpovídající přejmenování/smazání; nové nasazení opravy a aktualizace telefonu dosud nejsou schválené.
+- Míla výslovně požádal o dodání do iCloud Dokumentů a přesnou větou globální brzdy potvrdil připravenou opravu serveru. GitHub push ani nasazení Cockpitu nebyly součástí tohoto kroku.
 
 ### Další krok
-- Po konkrétním aktuálním potvrzení registrovaně nasadit server a chráněné stažení, pak ruční SideStore aktualizace stejného Camina a jeden sync.
+- Na iPhonu importovat IPA18 přes SideStore do stejného Camina bez odinstalování; otevřít původní ikonu, ověřit staré záznamy a provést jeden sync.
 
 ### Navrhované další kroky
-- Ověřit na telefonu původní záznamy, fotografie/video se zvukem, Komentář a dokončení metadat i médií.
-- Film/editor naváže až po stabilizaci přenosu.
+- Potvrdit dokončení metadat i médií, foto/video se zvukem a Komentář. Film/editor až po stabilizaci přenosu.
 
 ### Technický důkaz
-- Swift 68/68 PASS, skutečné Swift → API storno/retry/reopen i negativní důkazy PASS; 52 cílených HTTP/staging/workflow testů PASS. Izolovaný import v Pythonu běžící služby PASS; závislosti a schéma beze změny.
-- IPA `Camino-SyncRepair-18-20261014-r2-unsigned.ipa`, 1247937 B, SHA-256 `42c964f9579fe09663632dbafc7a2dfc85e6e8d6424f2c9a7f04fef07ec64f51`, zdroje iOS `0a69eb86c479a4f2e9ad55327742ae8498487e198662f426e41096061b65c038`. Balíček jen v soukromém místním stagingu, žádná veřejná publikace.
-- Report `camino/docs/METADATA_REJECTION_INCIDENT_20261014.md`; chráněná cesta po potvrzení `/camino-api/viewer/client-update`. Současný diagnostický server/archiv, Cockpit a síť se při přípravě neměnily.
-- Kompatibilita: dosavadní server `e815ae75dc38` přečetl syntetickou historii po stornu a přesně zopakoval všech osm přijatých obálek bez změny stavu; živý archiv se neotevřel pro zápis.
+- Předchozí plná brána 1925/1925, Swift 68/68 a 52 cílených API/HTTP/workflow testů PASS; zdrojový kód se po nich neměnil. Živé owner/Viewer/mapa 200, foto/audio/video Range 206, anonymní 401; IPA celý download/hash 200, HEAD 200, Range 206.
+- Archiv 740 operací/kurzor 740, 103 Momentů, 234 originálů / 1 870 503 746 B a identity/tripy přesně shodné. Všechny čtyři DB snapshoty mají ověřené účtenky/hash/quick_check a shodné všechny řádky tabulek se živými DB.
+- IPA 1247937 B, SHA-256 `42c964f9579fe09663632dbafc7a2dfc85e6e8d6424f2c9a7f04fef07ec64f51`. iCloud `isUbiquitousItem=true`, `isUploaded=true`, bez chyby; telefonní přejímka NEPROVEDENO.
+- Cockpit PID 35526 / `4f1f0c17ac72659f`, smoke 5/5, Serve shodný, Funnel off. Report `camino/docs/METADATA_REJECTION_INCIDENT_20261014.md`; místní ignorované účtenky `camino_repair_upgrade_verified_20261014.log` a `camino_repair_icloud_delivery_20261014.log`.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Camino
@@ -3622,3 +3619,22 @@ Navrhované další kroky:
 
 Technický důkaz:
 - 68 Swift testů, 52 cílených API/HTTP/workflow testů, arm64 build, CRC/binární roundtrip a izolovaný import PASS. Nepodepsaný IPA 1247937 B, SHA-256 `42c964f9579fe09663632dbafc7a2dfc85e6e8d6424f2c9a7f04fef07ec64f51`. Živý diagnostický server nezměněný; report `METADATA_REJECTION_INCIDENT_20261014.md`.
+
+
+### 2026-10-14 18:57 CEST — Opravný server a IPA18 v iCloud Dokumentech
+
+Hotovo:
+- Serverová část opravy běží a je živě ověřená. IPA18 je nahraný do iCloud Dokumentů; plný hash je shodný, macOS potvrzuje dokončený upload bez chyby. Archiv a ostatní služby zachované.
+
+Rozhodnutí:
+- Míla požádal o iCloud dodání a přesnou větou globální brzdy potvrdil připravené nasazení Camino opravy. GitHub ani Cockpit se nepublikovaly.
+
+Další krok:
+- Ruční SideStore aktualizace původního Camina bez odinstalování, kontrola starých záznamů a jeden sync.
+
+Navrhované další kroky:
+- Potvrdit dokončení metadat i médií, video se zvukem a Komentář. Film až po stabilizaci přenosu.
+
+Technický důkaz:
+- Server `d5d19b4b9ddd`, PID 7951, owner HTTP/HTTPS repair feature PASS; Viewer/mapa 200, foto/audio/video Range 206. Čtyři DB snapshoty/hash/quick_check a všechny řádky tabulek shodné; 740 operací, 103 Momentů, všech 234 originálů / 1 870 503 746 B se shodnými SHA-256.
+- IPA18 1247937 B, SHA-256 `42c964f9579fe09663632dbafc7a2dfc85e6e8d6424f2c9a7f04fef07ec64f51`, iCloud upload a soukromé HTTPS stažení/hash PASS. Plná brána 1925/1925 a Swift 68/68 PASS. Cockpit PID 35526 / `4f1f0c17ac72659f`, smoke 5/5; Serve shodný, Funnel off. Telefonní instalace a přenos NEPROVEDENO.

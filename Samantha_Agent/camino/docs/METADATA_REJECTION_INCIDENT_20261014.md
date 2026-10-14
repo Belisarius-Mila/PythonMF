@@ -1,12 +1,12 @@
 # Camino — odmítnutí metadat na Macu 14. 10. 2026
 
-Stav 2026-10-14 18:41 CEST: scénář potvrzený a zopakovaný, oprava klienta/serveru a IPA18 místně připravené; oprava ještě nenasazená.
+Stav 2026-10-14 18:57 CEST: opravný server nasazený a živě ověřený; IPA18 nahraný do iCloud Dokumentů. Ruční aktualizace a skutečný přenos na iPhonu čekají.
 
 Míla po devíti dnech úspěšných přenosů hlásí, že telefon zůstane u
 „Odesílám metadata“ a zobrazí „Domácí Mac změnu odmítl“. Film je odložený.
-Technický důvod je nyní zachycený; konkrétní cíl ani spouštěč chybějící vazby nejsou zatím prokázané.
+Odmítnutý název smazané přílohy je zachycený, Mílou potvrzený scénář zopakovaný skutečnými Swift obálkami. Identita konkrétní přílohy se do tohoto Git-safe reportu nezapisuje.
 
-## Živě ověřeno
+## Původní živý audit před diagnostikou
 
 - Vlastněná Camino služba běží z dosavadního vydání `e95568b7999e`.
 - Owner health/state přes loopback i soukromé HTTPS vrací 200. Přihlašování
@@ -140,3 +140,43 @@ platí; žádný hotový MP4 se nemaže ani automaticky nepřerenderuje.
 Doplněný izolovaný důkaz: dosavadní vydání `e815ae75dc38` přečetlo historii
 po stornu a přesně zopakovalo všech osm přijatých obálek bez změny stavu.
 Kompatibilita ověřená na syntetické DB, bez zápisu do živého archivu.
+
+## 2026-10-14 18:57 CEST — nasazená oprava a iCloud dodání
+
+Míla výslovně požádal o soubor v iCloud Dokumentech a přesnou větou globální
+brzdy potvrdil připravené nasazení. Create-only kopie stejného ověřeného IPA
+do existujících iCloud Dokumentů nepřepsala žádný soubor. macOS Foundation
+pro konkrétní soubor potvrzuje `isUbiquitousItem=true`,
+`ubiquitousItemIsUploaded=true`, bez probíhajícího uploadu a bez chyby.
+Velikost i plný SHA-256 kopie jsou shodné s balíčkem výše. Viditelnost a
+import na iPhonu zatím nejsou fyzicky ověřené.
+
+Registrované staging/stop/upgrade/start nasadily pouze Camino server
+`d5d19b4b9ddd`, PID 7951. Owner loopback i soukromé HTTPS health/state 200;
+obě cesty hlásí `deleted_attachment_title_repair_v1`, kurzor 740 a flags false.
+Viewer, den 6. 10. a mapa 200, skutečné foto/audio/video Range 206,
+anonymní přístup 401. Chráněný náhradní download IPA vrací celý soubor 200
+se shodným SHA-256; HEAD 200, Range 206, anonymní i owner Bearer 401.
+Soubor je dostupný pouze se stávajícím Basic přihlášením Vieweru.
+
+Úplný audit před/po zachoval identitu, epochu, tripy, 740 operací, kurzor 740,
+103 Momentů a všech 234 ověřených originálů / 1 870 503 746 B se shodnými
+SHA-256. Čtyři DB snapshoty mají ověřené účtenky/hash/quick_check; všechny
+řádky všech tabulek metadata/auth/media/readers jsou shodné se živými DB.
+Původní konfigurace a LaunchAgent jsou zachované. Cockpit zůstal PID 35526
+/ `4f1f0c17ac72659f`, smoke 5/5. Serve má shodný otisk, Funnel je vypnutý.
+Karta schvalování je vyčištěná. GitHub push nebyl součástí tohoto kroku.
+
+Důkazy: `logs/camino_repair_upgrade_baseline_20261014.log`,
+`logs/camino_repair_upgrade_verified_20261014.log`,
+`logs/camino_repair_icloud_delivery_20261014.log` (ignorované místní účtenky).
+Povinná předchozí plná brána 1925/1925 a Swift 68/68 PASS; zdrojový kód se
+po ní neměnil. Telefonní instalace a přenos nejsou těmito audity nahrazené.
+
+Další krok: Soubory → iCloud Drive → Dokumenty →
+`Camino-SyncRepair-18-20261014-r2-unsigned.ipa`; SideStore My Apps → +,
+aktualizovat původní Camino bez odinstalování, zachovat stejný Apple účet
+a dříve ověřené Customize AppID ON / Append Team ID OFF. Tyto volby jsou
+z předchozího postupu; dnešní podpis/import na zařízení se teprve ověří.
+Otevřít původní ikonu, ověřit staré záznamy a zkusit jeden sync. Úspěšné
+dokončení metadat i médií, foto/video se zvukem a Komentář čekají na Mílu.
