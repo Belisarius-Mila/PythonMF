@@ -177,3 +177,24 @@ Implementační kontrakt:
 - Ovládání se povolí po načtení metadat. Pozdní odpověď předchozího výběru ani zavřeného okna neobnoví staré video. Chyba média, skrytí stránky, odvolání soukromí nebo zavření vyčistí přehrávač.
 
 Aktualizovaný kontrolní otisk stránky odpovídá přidaným ovládacím prvkům; 18/18 frontendových kontraktních testů PASS. Závěrečná plná brána 1940/1940 PASS (326,925 s testů). Žádný push ani nasazení v tomto kroku.
+
+## 2026-10-15 20:26 CEST — p+n, skutečný náhled a prostředí filmového workeru
+
+Hotovo:
+- Schválená dávka čtyř commitů je na GitHubu, `298b6dc2` má úspěšnou vzdálenou bránu. Cockpit byl řízeně přepnutý, nový proces ověřený a smoke 5/5.
+- Skutečný pokus o zdrojový náhled zachytil rozdíl oproti terminálu: launchd nemá v PATH místní FFmpeg/FFprobe. Neúspěšný pokus zůstal zachovaný, nic se nevydalo.
+- Místní oprava rozšiřuje PATH výhradně novému filmovému workeru o známé instalační adresáře, dosavadní výběr nástroje má přednost. Nemění rodičovský proces, macOS konfiguraci, přenosovou službu ani síť. Pod omezeným PATH už skutečný samostatný worker vytvořil ověřený celý náhled 6 732 ms / 988 097 B; revize 1 a střih zůstaly shodné.
+
+Rozhodnutí:
+- Mílovo „ok p+n“ schvaluje push a nasazení pouze Cockpitu včetně nutné opravy nalezené při živém ověření. iPhone IPA ani služba Camino se nepřepínají.
+
+Další krok:
+- Dokončit bránu opravy, push a druhé řízené nasazení Cockpitu; potom ověřit nové video přes HTTP/HTTPS a zachování archivu.
+
+Navrhované další kroky:
+- Po úspěšném nasazení fyzická přejímka iPhone úsek/save/reload/náhled. P2-F až později.
+
+Technický důkaz:
+- 24/24 cílených testů PASS, včetně dohledání mediálních nástrojů při službovém PATH bez změny rodiče. Plná brána 1941/1941 PASS.
+- První nasazení `298b6dc2`: PID 70357, stamp `9b76cb02cb956175`, receipt deployed a smoke 5/5. [GitHub brána 38784392159](https://github.com/Belisarius-Mila/PythonMF/actions/runs/38784392159) success. Skutečný omezený worker: úplné dekódování a SHA-256 `70aa61e3ab27a85078bf20adf33ee86e94e0814f58f415f04ef56d339b8b4ab6` PASS; nejde o fyzický poslech.
+- Archiv před/po prvním nasazení přesně shodný: 883 operací, 123 Momentů, 300 originálů / 2 316 799 213 B SHA-256 PASS, flags false. Camino stále `f60a33c98fd5`, PID 47332, konfigurace i Serve shodné, Funnel off. Produkční střih revize 1 a oba hotové filmy zůstávají zachované. Důkazy `logs/camino_film_trim_predeploy_20261015.log`, `logs/camino_film_trim_postdeploy_20261015.log`, `logs/camino_film_trim_worker_live_20261015.log` a worker test/gate logy.

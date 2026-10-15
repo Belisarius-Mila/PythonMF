@@ -4,6 +4,7 @@ import array
 import http.client
 import json
 import math
+import os
 import shutil
 import subprocess
 import tempfile
@@ -243,6 +244,18 @@ class EditorTests(unittest.TestCase):
         state = json.loads((self.store.root / self.pid / "jobs" / job["job_id"] / "status.json").read_text())
         self.assertEqual(state["state"], "failed")
         with self.assertRaises(FilmError): self.editor.output(self.pid, job["job_id"])
+
+    @unittest.skipUnless(shutil.which("ffmpeg") and shutil.which("ffprobe"), "Local media tools required")
+    def test_worker_finds_media_tools_with_service_path_without_changing_parent(self):
+        service_path = "/usr/bin:/bin:/usr/sbin:/sbin"
+        with patch.dict(os.environ, {"PATH": service_path}), patch("app.camino_film_editor.subprocess.Popen") as launch:
+            self.editor.start_worker(self.pid)
+            child = launch.call_args.kwargs["env"]
+            self.assertEqual(os.environ["PATH"], service_path)
+            self.assertEqual(child["PATH"].split(os.pathsep)[:4], service_path.split(os.pathsep))
+            for name in ("ffmpeg", "ffprobe"):
+                self.assertTrue(shutil.which(name, path=child["PATH"]), f"{name} unavailable in the film worker")
+            self.assertTrue(Path(launch.call_args.args[0][0]).is_absolute())
 
     def test_http_save_origin_and_streaming_range_contract(self):
         _, job = self.queue()

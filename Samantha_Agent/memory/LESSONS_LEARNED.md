@@ -13,6 +13,13 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Šablona
 
+### LL-066 — Filmový worker musí najít nástroje i při startu z launchd
+
+- Problém: render v terminálu prošel, ale zdrojový náhled spuštěný z Cockpitu selhal před vytvořením pracovních souborů; launchd PATH neobsahoval místní FFmpeg/FFprobe.
+- Typ: opakující se
+- Řešení nalezeno: 15102026
+- Řešení: pouze dítěti filmové fronty přidat známé `/opt/homebrew/bin` a `/usr/local/bin` za dosavadní PATH. Neměnit prostředí rodiče, LaunchAgents ani službu Camino. Ověřit dohledání obou nástrojů pod službovým PATH a skutečný background render; terminálový render s bohatším PATH sám nestačí.
+
 ### LL-NNN — Stručný název
 
 - Problém:

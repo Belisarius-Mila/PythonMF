@@ -1,35 +1,32 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-10-15 20:09 CEST — přímý náhled a ruční trim místně připravené, bez nasazení
+- Aktualizováno: 2026-10-15 20:26 CEST — p+n probíhá, ověřená oprava prostředí filmového workeru
 
 ### Hotovo
-- Míla schválil realizaci přímého náhledu videa v Cockpitu. Místně hotové otevření celého videa, seek, „Tady začít“ / „Tady skončit“, přehrání výběru a návaznost na číselné časy i nové uložené revize.
-- Náhled je ověřená 720p odvozenina v dosavadní soukromé sériové frontě, opakovaně použitelná nezávisle na střihu. Výchozí video zůstává celé; originály, manifest a starší revize se nemění. Titulky a hlasový komentář patří do renderovaného filmu.
-- Cílené testy 23/23 a frontend Node PASS. Plná brána 1940/1940 PASS.
-- Živý audit 19:58 CEST: 883 operací, 123 Momentů, všech 300 originálů / 2 316 799 213 B SHA-256 PASS a přesná shoda s podkladem před vývojem. Camino běží `f60a33c98fd5`, flags false, Serve shodný, Funnel off. Produkční film 6. 10. stále platný v revizi 1, 25 záběrů / 5 hlasových nabídek, 200 475 ms; žádný nový produkční render ani editace. Cockpit smoke 5/5.
+- `298b6dc2` a předchozí tři commity pushnuté; GitHub brána success. Cockpit první řízené nasazení: nový proces, stamp `9b76cb02cb956175`, smoke 5/5.
+- Živé otevření videa odhalilo chybějící FFmpeg/FFprobe ve službovém PATH. Lokální úzká oprava mění prostředí jen nového filmového workeru; pod omezeným PATH už skutečný proces vytvořil a plně dekódoval celý náhled 6 732 ms / 988 097 B. 24/24 cílených testů PASS. Plná brána 1941/1941 PASS.
+- Archiv před/po prvním přepnutí přesně shodný: 883 operací, 123 Momentů, 300 originálů / 2 316 799 213 B SHA-256 PASS a flags false. Camino stále `f60a33c98fd5`, PID 47332; konfigurace i Serve shodné, Funnel off. Revize 1 dne 6. 10. a oba dřívější hotové filmy zachované, bez nového renderu celého filmu.
 
 ### Otevřeno
-- Nový editor není nasazený ani pushnutý. Nasazení jen Cockpitu vyžaduje samostatný pokyn; telefon ani přenosová služba ho nepotřebují.
-- P2-C/E fyzická přejímka na iPhonu: vybrat úsek, uložit/reload a porovnat s renderovaným náhledem. Prohlížeč pro nástrojovou QA není dostupný. Původní film Míla dříve přijal, ovládání dosud není přijaté.
-- P2-F vícedenní film a P2-A/MAC1 zůstávají oddělené. Starší záloha z 27. 9. a zastavený autosave byly dnes oznámené.
+- Dokončit autorizované p+n opravy workeru a živý test nového videa přes běžící Cockpit. První neúspěšný i následný hotový odvozený náhled zůstávají zachované.
+- P2-C/E fyzická Safari/iPhone přejímka stále neprovedená, nástrojový prohlížeč nedostupný. P2-F a P2-A/MAC1 odděleně.
 
 ### Rizika
-- První otevření videa vyžaduje přípravu odvozeniny; další otevření používá ověřenou kopii. Render zůstává SDR do 4096 px, 30 fps, bez automatického ořezu.
-- Výdej odvozeniny vždy podléhá současnému soukromí, manifestu a hashi. Při skrytí/odvolání projektu, chybě nebo zavření se přehrávač vyčistí; originály nemají novou HTTP cestu.
+- První otevření připravuje chráněnou odvozeninu, originál se HTTP nevydává. Aktuální soukromí, manifest a hash zůstávají povinné pro každý výdej.
+- Oprava nezasahuje do iPhone IPA, macOS konfigurace, služby Camino ani sítě. Starší záloha z 27. 9. a zastavený autosave byly dnes oznámené.
 
 ### Rozhodnutí
-- „ok, jdeme na to!“ schvaluje uvedený vývoj ve střižně. Žádná změna iPhone aplikace, služby Camino ani sítě; žádné nové publikování/nasazení.
+- Míla „ok p+n“ schválil publikování a nasazení pouze Cockpitu; nutná oprava při živém ověření je součást dokončení.
 
 ### Další krok
-- Po samostatném pokynu nasadit pouze Cockpit a provést první vlastní ruční trim dne 6. 10. na iPhonu.
+- Dokončit push/nasazení opravy workeru a prokázat nový zdrojový náhled z Cockpitu, potom předat fyzický test iPhonu.
 
 ### Navrhované další kroky
-- Dokončit přejímku pořadí záběrů a délky fotografie; vícedenní film až potom.
+- Ruční úsek/save/reload/náhled a pořadí/délka fotografie pro P2-C/E; vícedenní film až potom.
 
 ### Technický důkaz
-- Report `camino/docs/P2CD_EDITOR_MP4_REPORT.md`; redigované lokální důkazy `logs/camino_film_trim_*_20261015.log`.
-- Produkční archiv, filmová revize 1 a síť zachované; dosavadní uživatelská přejímka opravy přenosu platí.
+- Report `camino/docs/P2CD_EDITOR_MP4_REPORT.md`, redigované pre/postdeploy a worker logy v `logs/`.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Camino
@@ -3736,3 +3733,24 @@ Technický důkaz:
 - 23/23 cílených editorových testů PASS, včetně skutečné odvozeniny celého videa a renderu ručního úseku: barvy/snímky, délka, svislý celý obraz, odstranění soukromých metadat, nezměněný SHA originálu. Node test ověřuje tlačítka, čísla, uložení/reload, konec přehrání, chybu média, pozdní odpověď a odvolání soukromí. Plná brána 1940/1940 PASS.
 - Registrovaný POST `/api/camino/film/source` připravuje jen odvozeninu; dosavadní chráněný output kontroluje manifest, aktuální soukromí a hash pro GET/HEAD/Range. Originál se nevydává. Ověřeno odmítnutí cizího Origin, soukromého/cizího zdroje, poškozeného náhledu a změny soukromí během renderu i před výdejem.
 - Důkazy: `logs/camino_film_trim_final_tests_20261015.log`, `logs/camino_film_trim_gate_final_20261015.log`, `logs/camino_film_trim_live_audit_20261015.log`, `logs/camino_film_trim_smoke_20261015.log`; report `camino/docs/P2CD_EDITOR_MP4_REPORT.md`. Nástrojový prohlížeč není dostupný; fyzická Safari/iPhone přejímka neprovedena.
+
+### 2026-10-15 20:26 CEST — p+n, skutečný náhled a prostředí filmového workeru
+
+Hotovo:
+- Schválená dávka čtyř commitů je na GitHubu, `298b6dc2` má úspěšnou vzdálenou bránu. Cockpit byl řízeně přepnutý, nový proces ověřený a smoke 5/5.
+- Skutečný pokus o zdrojový náhled zachytil rozdíl oproti terminálu: launchd nemá v PATH místní FFmpeg/FFprobe. Neúspěšný pokus zůstal zachovaný, nic se nevydalo.
+- Místní oprava rozšiřuje PATH výhradně novému filmovému workeru o známé instalační adresáře, dosavadní výběr nástroje má přednost. Nemění rodičovský proces, macOS konfiguraci, přenosovou službu ani síť. Pod omezeným PATH už skutečný samostatný worker vytvořil ověřený celý náhled 6 732 ms / 988 097 B; revize 1 a střih zůstaly shodné.
+
+Rozhodnutí:
+- Mílovo „ok p+n“ schvaluje push a nasazení pouze Cockpitu včetně nutné opravy nalezené při živém ověření. iPhone IPA ani služba Camino se nepřepínají.
+
+Další krok:
+- Dokončit bránu opravy, push a druhé řízené nasazení Cockpitu; potom ověřit nové video přes HTTP/HTTPS a zachování archivu.
+
+Navrhované další kroky:
+- Po úspěšném nasazení fyzická přejímka iPhone úsek/save/reload/náhled. P2-F až později.
+
+Technický důkaz:
+- 24/24 cílených testů PASS, včetně dohledání mediálních nástrojů při službovém PATH bez změny rodiče. Plná brána 1941/1941 PASS.
+- První nasazení `298b6dc2`: PID 70357, stamp `9b76cb02cb956175`, receipt deployed a smoke 5/5. [GitHub brána 38784392159](https://github.com/Belisarius-Mila/PythonMF/actions/runs/38784392159) success. Skutečný omezený worker: úplné dekódování a SHA-256 `70aa61e3ab27a85078bf20adf33ee86e94e0814f58f415f04ef56d339b8b4ab6` PASS; nejde o fyzický poslech.
+- Archiv před/po prvním nasazení přesně shodný: 883 operací, 123 Momentů, 300 originálů / 2 316 799 213 B SHA-256 PASS, flags false. Camino stále `f60a33c98fd5`, PID 47332, konfigurace i Serve shodné, Funnel off. Produkční střih revize 1 a oba hotové filmy zůstávají zachované. Důkazy `logs/camino_film_trim_predeploy_20261015.log`, `logs/camino_film_trim_postdeploy_20261015.log`, `logs/camino_film_trim_worker_live_20261015.log` a worker test/gate logy.

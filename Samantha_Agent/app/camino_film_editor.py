@@ -299,10 +299,15 @@ class FilmEditor:
     @staticmethod
     def start_worker(project_id):
         root = Path(__file__).resolve().parents[1]
+        # launchd has a smaller PATH than Terminal. Extend only this film worker,
+        # preserving the existing tool choice and leaving all running services alone.
+        environment = os.environ.copy()
+        environment["PATH"] = os.pathsep.join((environment.get("PATH") or os.defpath,
+            "/opt/homebrew/bin", "/usr/local/bin"))
         # An explicitly queued job survives Cockpit reload/restart; this is not a service installation.
         subprocess.Popen([str(root / ".venv/bin/python"), str(root / "scripts/camino_film_editor.py"),
             "work", "--project-id", identifier(project_id)], cwd=root, stdin=subprocess.DEVNULL,
-            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True, env=environment)
 
     def run_queue(self, project_id):
         from app.camino_film_render import render_edit

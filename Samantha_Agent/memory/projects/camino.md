@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-15 20:09 CEST — přímý náhled a ruční trim místně připravené, bez nasazení
+Aktualizováno: 2026-10-15 20:26 CEST — autorizované p+n a oprava prostředí filmového workeru
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,8 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-15 20:26 CEST — `298b6dc2` pushnutý a první Cockpit nasazení ověřené, GitHub brána success a smoke 5/5. Skutečné video odhalilo chybějící FFmpeg/FFprobe ve službovém PATH; úzká oprava mění prostředí pouze nového filmového workeru. 24/24 cílených testů PASS a skutečný worker pod omezeným PATH vytvořil ověřený celý náhled 6 732 ms / 988 097 B. Plná brána 1941/1941 PASS. Archiv 883 operací, všech 300 originálů SHA PASS, služba Camino PID 47332 / `f60a33c98fd5`, konfigurace a síť shodné. Film 6. 10. stále revize 1, dva původní filmy zachované; žádný nový render celého filmu. Dokončit už schválený push/nasazení opravy a živý test nového zdroje. Fyzická iPhone přejímka čeká; report `camino/docs/P2CD_EDITOR_MP4_REPORT.md`.
 
 - 2026-10-15 20:09 CEST — Schválený přímý náhled videa a ruční trim v Cockpitu místně hotové: celé video, seek, tlačítka začátku/konce, přehrání výběru a číselné doladění; nové revize beze změny originálů. 720p odvozeniny v existující soukromé frontě, reuse podle manifestu/zdroje, současné soukromí/hash při každém výdeji. 23/23 cílených testů a Node PASS. Plná brána 1940/1940 PASS. Živý audit 19:58 CEST: přesná shoda archivu 883 operací, 123 Momentů, všech 300 originálů / 2 316 799 213 B SHA-256 PASS, flags false, Serve shodný, Funnel off; Camino stále `f60a33c98fd5`, Cockpit smoke 5/5. Produkční film 6. 10. platný, revize 1, beze změny a bez nového renderu. Nový editor nepushnutý/nenasazený. Další krok samostatně nasadit pouze Cockpit a fyzicky na iPhonu ověřit úsek/save/reload/výsledný náhled; P2-F později. Report `camino/docs/P2CD_EDITOR_MP4_REPORT.md`.
 
