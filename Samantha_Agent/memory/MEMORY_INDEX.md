@@ -60,7 +60,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] 2026-10-15 17:11 CEST: nové odmítnutí `create_audio_layout` 879/404, chybějící audio manifest. Archiv všech 264 originálů a 878 operací ověřený. Prevence osiřelých layoutů a vymezené storno s místním tombstonem/serverovým důkazem místně připravené; Swift 74/74, 24 cílených testů a IPA19 PASS, plná brána 1936/1936 PASS. Nové nasazení/dodání/přejímka čekají na konkrétní potvrzení; dnešní skutečné smazání nepotvrzené. Film odložený. Report `camino/docs/AUDIO_LAYOUT_REJECTION_INCIDENT_20261015.md`.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] 2026-10-15 17:20 CEST: audio oprava `f60a33c98fd5` nasazená a živě ověřená, IPA19 nahraný do iCloud Dokumentů, upload/hash PASS. Všech 264 originálů, 878 operací a všechny řádky DB zachované; Cockpit a síť shodné. Plná brána 1936/1936 a Swift 74/74 PASS. Další krok SideStore aktualizace stejného Camina bez odinstalování, staré záznamy a jeden sync; bez lokálního tombstonu další diagnostika. Telefonní přejímka otevřená, nový push neprovedený; film odložený. Report `camino/docs/AUDIO_LAYOUT_REJECTION_INCIDENT_20261015.md`.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` - Cockpit 14. 9.: scroll 10ec0877 potvrzený Mílou. [PRIPOMENOUT] U07 až při příštím pokračování. TXT v2.8 shrnuje U01–U06; plná brána 1680/1680 OK, funkční nasazení 980aed7a a smoke 5/5. Publikační překážka odstraněna; finální balíček/head ověřovat živým auditem.
 

@@ -1,9 +1,9 @@
 # Camino — odmítnutý popis zvukového záznamu 15. 10. 2026
 
-Stav: cílená oprava klienta/serveru a IPA19 místně připravené; nenasazeno.
+Stav 2026-10-15 17:20 CEST: opravný server nasazený a živě ověřený, IPA19 v iCloud Dokumentech. Telefonní aktualizace a skutečný přenos čekají.
 Plná projektová brána 1936/1936 PASS (349,213 s); cílené audio varianty také PASS.
 
-## Zjištění
+## Zjištění před opravou
 
 Dnešní bezpečný log opakovaně zachytil operaci 879, HTTP 404 `not_found`,
 `kind=create_audio_layout`, veřejná odpověď `requested object is missing`.
@@ -75,7 +75,7 @@ Místní ignorované účtenky: `camino_deleted_audio_baseline_20261015.log`,
 `camino_deleted_audio_full_gate_20261015.log`,
 `camino_deleted_audio_ios_build_20261015.log`, `camino_deleted_audio_ipa_20261015.log`.
 
-## Další krok
+## Příprava nasazení před potvrzením
 
 Po konkrétním potvrzení nasadit pouze Camino server přes registrované
 stop/upgrade/start, se čtyřmi DB snapshoty a úplným archivním porovnáním.
@@ -85,3 +85,36 @@ Poté SideStore aktualizace původního Camina bez odinstalování a jeden sync.
 Pokud pro odmítnutý zvuk místní tombstone chybí, automatické storno se neprovede;
 je nutná další diagnostika původního odkazu, žádné obecné obcházení 404.
 Cockpit, síť, kamera, film a původní média zůstávají mimo zásah.
+
+
+## 2026-10-15 17:20 CEST — nasazení a iCloud dodání
+
+Míla aktuální připravené nasazení a iCloud dodání potvrdil přesnou větou
+globální brzdy. Registrované stop/upgrade/start přepnuly pouze Camino
+na `f60a33c98fd5`, PID 47332. Owner loopback i soukromé HTTPS health/state
+200, obě repair features přítomné, kurzor 878 a flags false.
+Viewer, den 6. 10. a mapa 200; foto/audio/video Range 206, anonymní 401.
+
+Před/po je přesně shodný archiv: 878 operací/kurzor 878, 123 Momentů,
+identity/tripy a všech 264 ověřených originálů / 2 068 743 342 B se shodnými
+SHA-256. Čtyři DB snapshoty mají ověřené velikosti, hash a quick_check;
+všechny řádky všech metadata/auth/media/readers tabulek jsou shodné se
+živými DB. Původní konfigurace a LaunchAgent zachované. Cockpit zůstal
+PID 9218 / `118d4c6208030edb`, smoke 5/5; Serve shodný, Funnel off.
+Karta schvalování vyčištěná. Nový push nebyl součástí tohoto potvrzení.
+
+IPA19 create-only zkopírovaný do existujících iCloud Dokumentů.
+Velikost a plný SHA-256 přesně odpovídají připravenému balíčku.
+macOS Foundation pro soubor potvrzuje ubiquitous/uploaded true,
+uploading false a žádnou upload chybu. Starší balíčky nebyly přepsané.
+Důkazy `camino_deleted_audio_upgrade_baseline_20261015.log`,
+`camino_deleted_audio_upgrade_verified_20261015.log`,
+`camino_deleted_audio_icloud_delivery_20261015.log` v ignorovaných logs.
+
+Další krok: Soubory → iCloud Drive → Dokumenty →
+`Camino-SyncRepair-19-20261015-unsigned.ipa`, SideStore My Apps → +,
+stejné Camino a Apple účet, bez odinstalování. Zachovat předchozí ověřené
+Customize AppID ON / Append Team ID OFF; dnešní podpis/import ještě není
+fyzicky přijatý. Otevřít původní ikonu, ověřit staré záznamy a jeden sync.
+Konkrétní místní tombstone není zatím potvrzený; nový klient ho musí
+ověřit sám, jinak nesmí storno provést a je nutná další diagnostika.

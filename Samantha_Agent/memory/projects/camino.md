@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-15 17:11 CEST — nové odmítnutí audio layoutu, IPA19 místně připravený
+Aktualizováno: 2026-10-15 17:20 CEST — audio oprava nasazená, IPA19 v iCloud Dokumentech
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,8 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-15 17:20 CEST — Po aktuálním potvrzení nasazený pouze Camino server `f60a33c98fd5`, PID 47332. Obě repair features přes owner HTTP/HTTPS PASS; Viewer/den/mapa 200, foto/audio/video Range 206, anonymní 401. Před/po přesně shodných 878 operací/kurzor, 123 Momentů, identity/tripy a všech 264 originálů / 2 068 743 342 B se shodnými SHA-256; všechny řádky čtyř DB a ověřené snapshoty shodné, původní konfigurace zachovaná. Cockpit zůstal PID 9218 / `118d4c6208030edb`, smoke 5/5; Serve shodný, Funnel off. IPA19 create-only v iCloud Dokumentech, upload a plný hash PASS; původní IPA18 zachovaný, nový push neprovedený. Karta schvalování vyčištěná. Další krok ruční SideStore aktualizace stejného Camina bez odinstalování, staré záznamy a jeden sync; skutečný tombstone klient ověří sám, bez něj storno odmítne. Plná brána 1936/1936 a Swift 74/74 PASS; telefonní přejímka otevřená. Report `camino/docs/AUDIO_LAYOUT_REJECTION_INCIDENT_20261015.md`.
 
 - 2026-10-15 17:11 CEST — Nová blokace 879: `create_audio_layout`, HTTP 404, chybějící audio manifest; nejde o včerejší title operaci. Živý archiv 878 operací/kurzor, 123 Momentů a všech 264 originálů / 2 068 743 342 B PASS, flags false. Zopakováno na smazané audio session: potlačený zdroj přežije v osiřelém layoutu; staré potlačení navíc nesmělo zahodit přidělenou obálku. Místní prevence a explicitní storno vyžadují skutečné 404, lokální odpovídající tombstone a čerstvý serverový důkaz; původní paket/tombstone se ukládají, server původní layout a vazby znovu validuje. Schéma 3, žádné vytvořené zdroje/revize či mazání. Swift 74/74, 24 cílených API testů, kompatibilita starého serveru, import a arm64 build19/CRC PASS. Plná brána viz report. IPA19 stejné identity připravený v private stagingu; nový server, iCloud dodání a telefonní přejímka čekají na konkrétní potvrzení. Skutečné dnešní smazání Mílou zatím nepotvrzené, žádné automatické storno bez tombstonu. Film odložený. Report `camino/docs/AUDIO_LAYOUT_REJECTION_INCIDENT_20261015.md`.
 
