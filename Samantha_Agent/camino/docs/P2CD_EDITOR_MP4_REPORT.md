@@ -115,3 +115,34 @@ Nástrojová browser QA neměla dostupný prohlížeč.
 Míla 12. 10. hodnotí první skutečný film „na první dobrou ok“ a strukturu editoru dobře. Ovládání vyzkouší 13. 10.; není hlášená chyba vyžadující dnešní opravu.
 
 13. 10. ověřit ovládání: změnit pořadí dvou záběrů a délku jedné fotky, vyčkat uložení, obnovit stránku a přehrát dílčí náhled. PASS: pořadí i délka zůstanou uložené a náhled odpovídá střihu.
+
+
+## 2026-10-15 19:40 CEST — živý návrat ke střižně a doporučení dalšího kroku
+
+Míla po přijetí opravy přenosu požádal o prohlídku střižny a návrh dalšího
+vývojového kroku. Registrovaný Mac film status a běžící editor potvrdily
+platný projekt 6. 10., revizi 1, 25 obrazových záběrů (11 foto/14 videí),
+pět samostatných hlasových nabídek, z nichž žádná není zapnutá, a stopáž
+200 475 ms. Oba hotové 720p/1080p MP4 jsou přes HTTP i soukromé HTTPS
+dostupné HEAD 200 / Range 206, se stejnými velikostmi 25 617 860 B
+a 115 011 021 B. Nový projekt, úprava ani render se nespustily.
+
+P2-C/E ruční ovládání na iPhonu a první vlastní uložený střih stále čekají
+na přejímku. Zdroj `film_editor.js` nabízí in/out číselně a tlačítko
+náhledu záběru zadává dílčí render; API neposkytuje přímý zdrojový přehrávač.
+Nejde o nástrojový browser klik ani fyzickou Safari přejímku.
+
+Doporučený malý krok k rozhodnutí: přímý náhled vybraného videa ve střižně,
+posun po záznamu a tlačítka „Tady začít“ / „Tady skončit“, pak přehrání
+vybraného úseku bez nového renderování celého filmu. Číselné hodnoty
+zůstanou dostupné pro upřesnění. Výchozí video zůstává celé, ruční trim
+je výslovný, ukládá se nová revize. První přejímka nad dnem 6. 10.:
+zvolit úsek, uložit/reload, ověřit odpovídající náhled/MP4 a zachovaný
+celý originál i revizi 1. Později také dosavadní změna pořadí/délky fotky.
+
+Návrh je pouze doporučení, dnešní zadání není implementační autorizace.
+Při realizaci použít chráněné odvozené náhledy nad stejným uzavřeným
+manifestem, kontrolovat aktuální soukromí a nevydávat originály novou
+HTTP cestou. Rozsah má být uvnitř filmové střižny v Cockpitu bez změn
+telefonní aplikace a přenosové služby. P2-F vícedenní film zůstává později.
+Důkaz `logs/camino_film_return_audit_20261015.log`; pouze zápisy, bez renderu.

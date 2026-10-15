@@ -1,6 +1,6 @@
 # Camino — odmítnutý popis zvukového záznamu 15. 10. 2026
 
-Stav 2026-10-15 17:20 CEST: opravný server nasazený a živě ověřený, IPA19 v iCloud Dokumentech. Telefonní aktualizace a skutečný přenos čekají.
+Stav 2026-10-15 19:40 CEST: Míla potvrdil funkční aktualizaci a přenos; jedno audio storno a navazující metadata/média jsou potvrzené i Macem. Incident uživatelsky přijatý jako vyřešený.
 Plná projektová brána 1936/1936 PASS (349,213 s); cílené audio varianty také PASS.
 
 ## Zjištění před opravou
@@ -118,3 +118,18 @@ Customize AppID ON / Append Team ID OFF; dnešní podpis/import ještě není
 fyzicky přijatý. Otevřít původní ikonu, ověřit staré záznamy a jeden sync.
 Konkrétní místní tombstone není zatím potvrzený; nový klient ho musí
 ověřit sám, jinak nesmí storno provést a je nutná další diagnostika.
+
+
+## 2026-10-15 19:40 CEST — uživatelské přijetí opravy
+
+Míla po dodání IPA19 odpověděl „Tak to funguje“ a vrátil téma k filmové
+střižně. Funkční aktualizace a odblokování přenosu jsou uživatelsky přijaté.
+Přesná verze z obrazovky, samostatné kamerové/audio retesty ani číselná
+telefonní fronta nebyly touto obecnou odpovědí samostatně doložené.
+
+Živý Mac potvrzuje 878 → 883 přijatých operací, jedno výslovné storno
+audio layoutu a 36 dalších ověřených médií. Nyní 123 Momentů a všech
+300 originálů / 2 316 799 213 B s úplným SHA-256 auditem PASS; flags false,
+server stále `f60a33c98fd5`. Jde o uživatelské přijetí tohoto incidentu,
+nikoli obecné povolení přeskakovat chybějící audio deklarace.
+Důkaz `logs/camino_film_return_audit_20261015.log`.

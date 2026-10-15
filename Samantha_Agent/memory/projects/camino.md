@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-15 17:20 CEST — audio oprava nasazená, IPA19 v iCloud Dokumentech
+Aktualizováno: 2026-10-15 19:40 CEST — přenos přijatý, návrat ke střižně a návrh přímého náhledu
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,8 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-15 19:40 CEST — Míla po IPA19 potvrzuje „Tak to funguje“ a vrací téma ke střižně. Živý Mac 883 operací/kurzor, jedno audio storno, 123 Momentů a 300 ověřených originálů / 2 316 799 213 B, úplný SHA audit PASS, flags false. Akutní incident přenosu uživatelsky přijatý. Platný film 6. 10., revize 1, 25 záběrů/5 samostatných hlasových nabídek (vypnuté), 200 475 ms; 720p i 1080p HTTP/HTTPS HEAD 200 / Range 206. Číselné in/out a renderovaný dílčí náhled jsou implementované; přímý přehrávač pro označení začátku/konce zatím chybí. Doporučený další krok k rozhodnutí: přímý náhled a ruční trim jednoho videa, pak první vlastní střih/P2-E na 6. 10. Vývoj, render a nasazení se tímto návrhem nezahajují; celé video výchozí, originály/revize zachované. Podrobná Safari přejímka otevřená, P2-F později. Report `camino/docs/P2CD_EDITOR_MP4_REPORT.md`.
 
 - 2026-10-15 17:20 CEST — Po aktuálním potvrzení nasazený pouze Camino server `f60a33c98fd5`, PID 47332. Obě repair features přes owner HTTP/HTTPS PASS; Viewer/den/mapa 200, foto/audio/video Range 206, anonymní 401. Před/po přesně shodných 878 operací/kurzor, 123 Momentů, identity/tripy a všech 264 originálů / 2 068 743 342 B se shodnými SHA-256; všechny řádky čtyř DB a ověřené snapshoty shodné, původní konfigurace zachovaná. Cockpit zůstal PID 9218 / `118d4c6208030edb`, smoke 5/5; Serve shodný, Funnel off. IPA19 create-only v iCloud Dokumentech, upload a plný hash PASS; původní IPA18 zachovaný, nový push neprovedený. Karta schvalování vyčištěná. Další krok ruční SideStore aktualizace stejného Camina bez odinstalování, staré záznamy a jeden sync; skutečný tombstone klient ověří sám, bez něj storno odmítne. Plná brána 1936/1936 a Swift 74/74 PASS; telefonní přejímka otevřená. Report `camino/docs/AUDIO_LAYOUT_REJECTION_INCIDENT_20261015.md`.
 

@@ -60,7 +60,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] 2026-10-15 17:20 CEST: audio oprava `f60a33c98fd5` nasazená a živě ověřená, IPA19 nahraný do iCloud Dokumentů, upload/hash PASS. Všech 264 originálů, 878 operací a všechny řádky DB zachované; Cockpit a síť shodné. Plná brána 1936/1936 a Swift 74/74 PASS. Další krok SideStore aktualizace stejného Camina bez odinstalování, staré záznamy a jeden sync; bez lokálního tombstonu další diagnostika. Telefonní přejímka otevřená, nový push neprovedený; film odložený. Report `camino/docs/AUDIO_LAYOUT_REJECTION_INCIDENT_20261015.md`.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] 2026-10-15 19:40 CEST: Míla přijal opravu přenosu a žádá další krok střižny. Mac 883 operací a 300 originálů, plný SHA audit PASS. Film 6. 10. platný, editor revize 1, 25 záběrů/5 hlasových nabídek, oba MP4 HTTP/HTTPS 200/206. Návrh k rozhodnutí: přímý náhled videa s označením začátku/konce a přehráním výběru pro první vlastní střih/P2-E. Implementace ani render nejsou zadané; celé video a originály zachované, P2-F později. Report `camino/docs/P2CD_EDITOR_MP4_REPORT.md`.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` - Cockpit 14. 9.: scroll 10ec0877 potvrzený Mílou. [PRIPOMENOUT] U07 až při příštím pokračování. TXT v2.8 shrnuje U01–U06; plná brána 1680/1680 OK, funkční nasazení 980aed7a a smoke 5/5. Publikační překážka odstraněna; finální balíček/head ověřovat živým auditem.
 

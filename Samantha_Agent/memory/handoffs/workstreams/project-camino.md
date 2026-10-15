@@ -1,38 +1,39 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-10-15 17:20 CEST — opravný server nasazený, IPA19 v iCloud Dokumentech; telefonní přejímka čeká
+- Aktualizováno: 2026-10-15 19:40 CEST — audio oprava uživatelsky přijatá, návrat k filmové střižně
 
 ### Hotovo
-- Míla přesnou větou globální brzdy potvrdil připravené nasazení a iCloud dodání. Registrované stop/upgrade/start nasadily pouze Camino server `f60a33c98fd5`, PID 47332; owner HTTP/HTTPS hlásí obě opravy `deleted_audio_layout_repair_v1` i `deleted_attachment_title_repair_v1`.
-- Před/po shodných 878 operací/kurzor 878, 123 Momentů, identity/tripy a všech 264 originálů / 2 068 743 342 B se shodnými SHA-256. Všechny řádky všech tabulek metadata/auth/media/readers DB odpovídají čtyřem snapshotům s ověřeným hash/účtenkou/quick_check. Původní konfigurace a LaunchAgent zachované.
-- Živé owner HTTP/HTTPS, Viewer/den/mapa 200; foto/audio/video Range 206, anonymní 401. Cockpit zachovaný PID 9218 / `118d4c6208030edb`, smoke 5/5. Serve přesně shodný, Funnel off.
-- `Camino-SyncRepair-19-20261015-unsigned.ipa` create-only dodaný do existujících iCloud Dokumentů. Přesná kopie, plný SHA-256 i macOS `isUbiquitousItem=true`, `isUploaded=true`, bez chyby PASS. Původní balíčky zachované; karta schvalování vyčištěná.
-- Oprava potlačuje neposlané audio závislosti společně a zachová každý přidělený/přijatý paket. Explicitní storno vyžaduje skutečné 404, místní tombstone stejné session/Momentu, čerstvý důkaz nepřijetí a striktní serverové ověření. Původní obálka/tombstone zůstanou uložené; nevzniká médium, Moment, layout ani Moment revize. Schéma 3 a závislosti shodné.
+- Míla po IPA19 potvrzuje „Tak to funguje“ a žádá návrh dalšího kroku střižny. Akutní přenosový incident je uživatelsky přijatý jako vyřešený; jednotlivé kamerové/audio retesty a přesná verze z UI nebyly samostatně uvedené.
+- Mac potvrzuje pokračování: 878 → 883 operací/kurzor, jedno přijaté `cancel_deleted_audio_layout`, 36 nových ověřených médií. Nyní 123 Momentů, 300 originálů / 2 316 799 213 B, úplný SHA-256 audit PASS; server `f60a33c98fd5`, oba flagy false.
+- Registrovaný živý filmový audit ověřil stále platný uzavřený projekt 6. 10.: 11 foto, 14 videí, 5 hlasových nabídek; 25 záběrů, 200 475 ms. Editor vrací revizi 1, všech 25 záběrů zařazených a žádnou z pěti samostatných hlasových částí zapnutou.
+- Hotové 720p a 1080p výstupy revize 1 jsou přes HTTP i soukromé HTTPS dostupné: HEAD 200 a Range 206. Starší neúspěšné pokusy jsou historie, oba následné hotové výsledky zůstávají použitelné. Nový render ani úprava projektu neproběhly.
+- Čtení `film_editor.js` a editorového API potvrzuje současné zadávání in/out čísly; „Náhled tohoto záběru“ zadává dílčí render. Přímý přehrávač zdroje s označením střihu zatím není implementovaný.
 
 ### Otevřeno
-- Ruční SideStore aktualizace původního Camina, ověření starých záznamů a skutečný sync po operaci 879 čekají na Mílu. Nasazení serveru ani iCloud upload nenahrazují telefonní přejímku.
-- Konkrétní dnešní místní záznam o smazání zatím není potvrzený. Pokud pro odmítnutý layout chybí odpovídající tombstone, klient storno odmítne a je nutná další diagnostika původní vazby.
-- Film, P2-E ovládání a P2-A/MAC1 jsou odložené.
+- P2-C/E fyzické ovládání na iPhonu a první vlastní uložený ruční střih dne 6. 10. nejsou přijaté. Původní film Míla dříve hodnotil OK; úplný P2-E protokol tím není nahrazený.
+- Doporučený další vývojový krok je pouze návrh: přímý náhled vybraného videa s ručním označením začátku/konce a přehráním vybraného úseku. Dnešní zadání autorizovalo audit a návrh, ne implementaci.
+- P2-F vícedenní film a P2-A/MAC1 zůstávají oddělené; dosavadní IPA18 náhradní download nenahrazuje nynější iCloud IPA19.
 
 ### Rizika
-- Neřešit 404 obecným přeskočením, resetem nebo smyšleným zdrojem. Přijatá historie, originály a běžná validace zůstávají zachované.
-- Zachovat stejnou identitu a data telefonu, původní Camino neodinstalovat. Model místní databáze, LocalStore, kamera a audio capture/link kód jsou shodné s buildem 18; fyzický podpis a instalace IPA19 zatím NEPROVEDENO.
-- Náhradní Viewer download dál obsahuje IPA18, pro tento krok použít pouze nový IPA19 z iCloud Dokumentů. Starší záloha z 27. 9. a zastavený autosave byly dnes oznámené.
+- Návrh nesmí měnit výchozí celé video, originály, uzavřený manifest ani dřívější střihové revize. Nový náhled musí používat chráněnou odvozeninu a současnou kontrolu soukromí; originál se nesmí novou HTTP cestou vydávat.
+- Živý HTTP/hash audit není fyzická přejímka Safari ovládání. Případné pozdější renderování či nasazení jsou samostatné kroky.
+- Starší záloha z 27. 9. a zastavený autosave byly dnes oznámené; toto přepnutí tématu je nemění.
 
 ### Rozhodnutí
-- Míla aktuálně potvrdil pouze vymezený Camino server a iCloud aktualizaci. Cockpit, síť, kamera a film se neměnily. Nový GitHub push není součástí tohoto potvrzení.
+- Míla potvrzuje funkční opravu přenosu a výslovně vrací téma ke střižně se žádostí o návrh dalšího kroku. Přímý náhled/ruční trim je Adamův návrh k rozhodnutí, nikoli nové přijaté zadání implementace.
 
 ### Další krok
-- Na iPhonu Soubory → iCloud Drive → Dokumenty → IPA19; SideStore My Apps → + do stejného Camina bez odinstalování, původní ikona a staré záznamy, pak jeden sync.
+- Rozhodnout o navrženém přímém náhledu záběru a pohodlném ručním in/out pro první vlastní střih dne 6. 10.
 
 ### Navrhované další kroky
-- Potvrdit skutečný přenos; při opětovném odmítnutí dohledat nový přesný důvod, neobcházet chybějící důkaz. Film až po stabilizaci.
+- Ověřit na iPhonu: vybrat část videa tlačítky z aktuálního místa, přehrát výběr, uložit, obnovit stránku a porovnat výsledný náhled/MP4. Celý originál a revize 1 zůstávají zachované.
+- Vícedenní film až po přijetí ovládání prvního dne.
 
 ### Technický důkaz
-- Plná brána 1936/1936, Swift 74/74 a 24 cílených skutečných Swift → API/audio/title testů PASS. Dosavadní `d5d19b4b9ddd` přečetl syntetickou projekci a přesně zopakoval šest přijatých paketů bez změny stavu; izolovaný import přesného commitu v Pythonu služby PASS.
-- IPA 0.1.0 (19), arm64, `cz.pythonmf.camino.app`, 1259687 B, SHA-256 `6d532538e18c333f3cfdae2de64c081a29c5e0c07c7ed822f66e97ebae5bf3cf`; Release build, CRC a binární roundtrip PASS.
-- Report `camino/docs/AUDIO_LAYOUT_REJECTION_INCIDENT_20261015.md`; ignorované účtenky `camino_deleted_audio_upgrade_baseline_20261015.log`, `camino_deleted_audio_upgrade_verified_20261015.log`, `camino_deleted_audio_icloud_delivery_20261015.log`.
+- `logs/camino_film_return_audit_20261015.log`: platný projekt/editor 6. 10. revize 1, 25 záběrů/5 hlasových nabídek, hotové soubory 25 617 860 B a 115 011 021 B, HTTP/HTTPS HEAD 200 a Range 206.
+- Archiv 883 operací, 123 Momentů, 300 originálů / 2 316 799 213 B a flags false; úplný SHA audit PASS. Nová přejímka přenosu podložená Mílou i jedním přijatým audio stornem a dalšími médii.
+- Tento krok mění pouze projektové zápisy; žádná implementace, render, push nebo nasazení. Dosavadní vývojová brána opravy 1936/1936 a Swift 74/74 PASS se bez změny kódu neopakovala.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: Camino
@@ -2919,3 +2920,23 @@ Navrhované další kroky:
 Technický důkaz:
 - `f60a33c98fd5`, PID 47332; owner HTTP/HTTPS repair features PASS, Viewer/den/mapa 200, foto/audio/video Range 206, anonymní 401. Před/po stejných 878 operací/kurzor, 123 Momentů, identity/tripy a všech 264 originálů / 2 068 743 342 B se shodnými SHA-256; všechny řádky čtyř DB a ověřené snapshoty shodné.
 - Cockpit PID 9218 / `118d4c6208030edb`, smoke 5/5, Serve shodný, Funnel off. IPA19 1259687 B, SHA-256 `6d532538e18c333f3cfdae2de64c081a29c5e0c07c7ed822f66e97ebae5bf3cf`, iCloud upload/hash PASS. Plná brána 1936/1936, Swift 74/74 PASS; telefonní přejímka NEPROVEDENO.
+
+
+### 2026-10-15 19:40 CEST — Přenos uživatelsky přijatý a návrh dalšího kroku střižny
+
+Hotovo:
+- Míla potvrzuje funkční přenos po IPA19. Mac přijal storno zvukového layoutu a navazující metadata i 36 nových ověřených médií; akutní incident je uživatelsky uzavřený.
+- Film 6. 10. zůstává platný: 25 záběrů, 5 samostatných hlasových nabídek, revize 1 a oba hotové MP4 živě dostupné. Nový střih ani render neproběhly.
+
+Rozhodnutí:
+- Míla požádal o audit střižny a návrh dalšího vývojového kroku. Navržený přímý náhled a ruční trim jsou návrh k rozhodnutí, ne souhlas s implementací.
+
+Další krok:
+- Rozhodnout o přehrávání vybraného videa přímo ve střižně, tlačítkách začátku/konce z aktuální pozice a přehrání zvoleného úseku pro první vlastní střih 6. 10.
+
+Navrhované další kroky:
+- Přijmout jeden skutečný ruční střih na iPhonu: výběr úseku, uložení/reload a shodný náhled/MP4. Videa jsou výchozí celá, staré revize a originály zachované; P2-F až později.
+
+Technický důkaz:
+- Kurzor 883, 123 Momentů, 300 ověřených originálů / 2 316 799 213 B, plný SHA audit PASS, flags false, jedno audio storno. Registrovaný Mac film status a editor HTTP vrací validní den 6. 10., revizi 1, 11 foto/14 videí/5 zvuků; žádný samostatný hlas zapnutý.
+- Oba výstupy přes HTTP/HTTPS HEAD 200 a Range 206. Frontend nyní nabízí číselné in/out a renderovaný dílčí náhled; přímý zdrojový náhled není implementovaný. Jen projektové zápisy, bez provozních změn.

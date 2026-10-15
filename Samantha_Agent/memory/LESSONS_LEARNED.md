@@ -41,8 +41,9 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   neposlaný playback layout, včetně pozdního backfillu. Přidělené obálky
   neodstraňovat. Pro již odmítnutý layout použít pouze vymezené storno
   s místním tombstonem a čerstvým důkazem 404/nepřijetí, zachovat originál.
-  Místní skutečné Swift → API testy a retry/reopen PASS; nová telefonní
-  přejímka otevřená. Běžnou validaci a deklarované zdroje neobcházet.
+  Skutečné Swift → API testy a retry/reopen PASS; Míla po IPA19 potvrdil
+  přenos, Mac přijal audio storno a navazující metadata/média. Běžnou
+  validaci a deklarované zdroje neobcházet.
 
 ### LL-064 — Zvuk po spojení PCM segmentů potřebuje souvislé PTS vzorků
 
