@@ -1,39 +1,35 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-10-15 19:40 CEST — audio oprava uživatelsky přijatá, návrat k filmové střižně
+- Aktualizováno: 2026-10-15 20:09 CEST — přímý náhled a ruční trim místně připravené, bez nasazení
 
 ### Hotovo
-- Míla po IPA19 potvrzuje „Tak to funguje“ a žádá návrh dalšího kroku střižny. Akutní přenosový incident je uživatelsky přijatý jako vyřešený; jednotlivé kamerové/audio retesty a přesná verze z UI nebyly samostatně uvedené.
-- Mac potvrzuje pokračování: 878 → 883 operací/kurzor, jedno přijaté `cancel_deleted_audio_layout`, 36 nových ověřených médií. Nyní 123 Momentů, 300 originálů / 2 316 799 213 B, úplný SHA-256 audit PASS; server `f60a33c98fd5`, oba flagy false.
-- Registrovaný živý filmový audit ověřil stále platný uzavřený projekt 6. 10.: 11 foto, 14 videí, 5 hlasových nabídek; 25 záběrů, 200 475 ms. Editor vrací revizi 1, všech 25 záběrů zařazených a žádnou z pěti samostatných hlasových částí zapnutou.
-- Hotové 720p a 1080p výstupy revize 1 jsou přes HTTP i soukromé HTTPS dostupné: HEAD 200 a Range 206. Starší neúspěšné pokusy jsou historie, oba následné hotové výsledky zůstávají použitelné. Nový render ani úprava projektu neproběhly.
-- Čtení `film_editor.js` a editorového API potvrzuje současné zadávání in/out čísly; „Náhled tohoto záběru“ zadává dílčí render. Přímý přehrávač zdroje s označením střihu zatím není implementovaný.
+- Míla schválil realizaci přímého náhledu videa v Cockpitu. Místně hotové otevření celého videa, seek, „Tady začít“ / „Tady skončit“, přehrání výběru a návaznost na číselné časy i nové uložené revize.
+- Náhled je ověřená 720p odvozenina v dosavadní soukromé sériové frontě, opakovaně použitelná nezávisle na střihu. Výchozí video zůstává celé; originály, manifest a starší revize se nemění. Titulky a hlasový komentář patří do renderovaného filmu.
+- Cílené testy 23/23 a frontend Node PASS. Plná brána 1940/1940 PASS.
+- Živý audit 19:58 CEST: 883 operací, 123 Momentů, všech 300 originálů / 2 316 799 213 B SHA-256 PASS a přesná shoda s podkladem před vývojem. Camino běží `f60a33c98fd5`, flags false, Serve shodný, Funnel off. Produkční film 6. 10. stále platný v revizi 1, 25 záběrů / 5 hlasových nabídek, 200 475 ms; žádný nový produkční render ani editace. Cockpit smoke 5/5.
 
 ### Otevřeno
-- P2-C/E fyzické ovládání na iPhonu a první vlastní uložený ruční střih dne 6. 10. nejsou přijaté. Původní film Míla dříve hodnotil OK; úplný P2-E protokol tím není nahrazený.
-- Doporučený další vývojový krok je pouze návrh: přímý náhled vybraného videa s ručním označením začátku/konce a přehráním vybraného úseku. Dnešní zadání autorizovalo audit a návrh, ne implementaci.
-- P2-F vícedenní film a P2-A/MAC1 zůstávají oddělené; dosavadní IPA18 náhradní download nenahrazuje nynější iCloud IPA19.
+- Nový editor není nasazený ani pushnutý. Nasazení jen Cockpitu vyžaduje samostatný pokyn; telefon ani přenosová služba ho nepotřebují.
+- P2-C/E fyzická přejímka na iPhonu: vybrat úsek, uložit/reload a porovnat s renderovaným náhledem. Prohlížeč pro nástrojovou QA není dostupný. Původní film Míla dříve přijal, ovládání dosud není přijaté.
+- P2-F vícedenní film a P2-A/MAC1 zůstávají oddělené. Starší záloha z 27. 9. a zastavený autosave byly dnes oznámené.
 
 ### Rizika
-- Návrh nesmí měnit výchozí celé video, originály, uzavřený manifest ani dřívější střihové revize. Nový náhled musí používat chráněnou odvozeninu a současnou kontrolu soukromí; originál se nesmí novou HTTP cestou vydávat.
-- Živý HTTP/hash audit není fyzická přejímka Safari ovládání. Případné pozdější renderování či nasazení jsou samostatné kroky.
-- Starší záloha z 27. 9. a zastavený autosave byly dnes oznámené; toto přepnutí tématu je nemění.
+- První otevření videa vyžaduje přípravu odvozeniny; další otevření používá ověřenou kopii. Render zůstává SDR do 4096 px, 30 fps, bez automatického ořezu.
+- Výdej odvozeniny vždy podléhá současnému soukromí, manifestu a hashi. Při skrytí/odvolání projektu, chybě nebo zavření se přehrávač vyčistí; originály nemají novou HTTP cestu.
 
 ### Rozhodnutí
-- Míla potvrzuje funkční opravu přenosu a výslovně vrací téma ke střižně se žádostí o návrh dalšího kroku. Přímý náhled/ruční trim je Adamův návrh k rozhodnutí, nikoli nové přijaté zadání implementace.
+- „ok, jdeme na to!“ schvaluje uvedený vývoj ve střižně. Žádná změna iPhone aplikace, služby Camino ani sítě; žádné nové publikování/nasazení.
 
 ### Další krok
-- Rozhodnout o navrženém přímém náhledu záběru a pohodlném ručním in/out pro první vlastní střih dne 6. 10.
+- Po samostatném pokynu nasadit pouze Cockpit a provést první vlastní ruční trim dne 6. 10. na iPhonu.
 
 ### Navrhované další kroky
-- Ověřit na iPhonu: vybrat část videa tlačítky z aktuálního místa, přehrát výběr, uložit, obnovit stránku a porovnat výsledný náhled/MP4. Celý originál a revize 1 zůstávají zachované.
-- Vícedenní film až po přijetí ovládání prvního dne.
+- Dokončit přejímku pořadí záběrů a délky fotografie; vícedenní film až potom.
 
 ### Technický důkaz
-- `logs/camino_film_return_audit_20261015.log`: platný projekt/editor 6. 10. revize 1, 25 záběrů/5 hlasových nabídek, hotové soubory 25 617 860 B a 115 011 021 B, HTTP/HTTPS HEAD 200 a Range 206.
-- Archiv 883 operací, 123 Momentů, 300 originálů / 2 316 799 213 B a flags false; úplný SHA audit PASS. Nová přejímka přenosu podložená Mílou i jedním přijatým audio stornem a dalšími médii.
-- Tento krok mění pouze projektové zápisy; žádná implementace, render, push nebo nasazení. Dosavadní vývojová brána opravy 1936/1936 a Swift 74/74 PASS se bez změny kódu neopakovala.
+- Report `camino/docs/P2CD_EDITOR_MP4_REPORT.md`; redigované lokální důkazy `logs/camino_film_trim_*_20261015.log`.
+- Produkční archiv, filmová revize 1 a síť zachované; dosavadní uživatelská přejímka opravy přenosu platí.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: Camino
@@ -2940,3 +2936,25 @@ Navrhované další kroky:
 Technický důkaz:
 - Kurzor 883, 123 Momentů, 300 ověřených originálů / 2 316 799 213 B, plný SHA audit PASS, flags false, jedno audio storno. Registrovaný Mac film status a editor HTTP vrací validní den 6. 10., revizi 1, 11 foto/14 videí/5 zvuků; žádný samostatný hlas zapnutý.
 - Oba výstupy přes HTTP/HTTPS HEAD 200 a Range 206. Frontend nyní nabízí číselné in/out a renderovaný dílčí náhled; přímý zdrojový náhled není implementovaný. Jen projektové zápisy, bez provozních změn.
+
+### 2026-10-15 20:09 CEST — přímý náhled videa a ruční označení střihu
+
+Hotovo:
+- Ve střižně je místně připravené otevření celého videa, posun v přehrávači, „Tady začít“, „Tady skončit“ a „Přehrát výběr“. Číselné upřesnění zůstává; změny používají dosavadní automatické ukládání nových revizí.
+- Chráněný 720p náhled zdroje se připraví jednou v dosavadní sériové frontě a při dalším otevření se znovu použije. Výběr se přehrává bez renderování filmu. Náhled zdroje neobsahuje titulek ani samostatný hlas; ty patří do renderovaného střihu.
+- Originály, uložené revize a výchozí celé video jsou zachované. Živý audit v 19:58 CEST: přesná shoda archivu s podkladem před vývojem, všech 300 originálů / 2 316 799 213 B SHA-256 PASS, 883 operací, flags false a stejný Serve; Camino stále běží na `f60a33c98fd5`. Skutečný film 6. 10. zůstal v revizi 1, bez nového produkčního renderu či změny střihu.
+
+Rozhodnutí:
+- Míla „ok, jdeme na to!“ výslovně schválil realizaci navrženého přímého náhledu a ručního trimu v Cockpitu. Rozsah neobsahuje nový telefonní build, změnu přenosové služby, push ani nasazení.
+
+Další krok:
+- Po samostatném pokynu nasadit pouze Cockpit a na iPhonu vybrat úsek jednoho videa ze 6. 10., uložit/reload a porovnat s náhledem výsledného filmu.
+
+Navrhované další kroky:
+- Dokončit P2-C/E fyzickou přejímku: ruční úsek, pořadí záběrů a délka fotografie; původní revize i celé video musí zůstat dostupné.
+- P2-F vícedenní film až po přijetí ovládání prvního dne.
+
+Technický důkaz:
+- 23/23 cílených editorových testů PASS, včetně skutečné odvozeniny celého videa a renderu ručního úseku: barvy/snímky, délka, svislý celý obraz, odstranění soukromých metadat, nezměněný SHA originálu. Node test ověřuje tlačítka, čísla, uložení/reload, konec přehrání, chybu média, pozdní odpověď a odvolání soukromí. Plná brána 1940/1940 PASS.
+- Registrovaný POST `/api/camino/film/source` připravuje jen odvozeninu; dosavadní chráněný output kontroluje manifest, aktuální soukromí a hash pro GET/HEAD/Range. Originál se nevydává. Ověřeno odmítnutí cizího Origin, soukromého/cizího zdroje, poškozeného náhledu a změny soukromí během renderu i před výdejem.
+- Důkazy: `logs/camino_film_trim_final_tests_20261015.log`, `logs/camino_film_trim_gate_final_20261015.log`, `logs/camino_film_trim_live_audit_20261015.log`, `logs/camino_film_trim_smoke_20261015.log`; report `camino/docs/P2CD_EDITOR_MP4_REPORT.md`. Nástrojový prohlížeč není dostupný; fyzická Safari/iPhone přejímka neprovedena.

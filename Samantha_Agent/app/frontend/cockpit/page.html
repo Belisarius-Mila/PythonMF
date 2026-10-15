@@ -353,6 +353,14 @@
           <p>Úpravy se automaticky ukládají jako nové revize. Vyřazení odstraní záběr jen z filmu. Začátek a konec úseku vybíráš ručně.</p>
           <div data-film="status" role="status" aria-live="polite"></div>
           <div class="actions"><button data-film="save" type="button">Uložit střih</button><button data-film="reload" type="button" class="secondary">Načíst poslední střih</button></div>
+          <section data-film="source" class="camino-film-source hidden" aria-label="Ruční výběr úseku videa">
+            <h4 data-film="sourceTitle"></h4>
+            <p data-film="sourceStatus" role="status" aria-live="polite"></p>
+            <video data-film="sourcePlayer" controls playsinline preload="metadata" aria-label="Celé zdrojové video pro výběr střihu"></video>
+            <p data-film="selection" aria-live="polite"></p>
+            <div class="actions"><button data-film="start" type="button" disabled>Tady začít</button><button data-film="end" type="button" disabled>Tady skončit</button><button data-film="playSelection" type="button" class="secondary" disabled>Přehrát výběr</button></div>
+            <p class="muted">Časy můžeš doladit i číselně u záběru. Titulek a hlasový komentář uvidíš a uslyšíš ve vytvořeném náhledu filmu.</p>
+          </section>
           <ol data-film="shots" class="camino-film-edit-list"></ol>
           <details><summary>Hlasové komentáře</summary>
             <p>Každá nabídka je celá původní zvuková část. Její umístění a případné zkrácení volíš ručně. Přesah hlasu vyžaduje prodloužení fotografie nebo doplnění obrazu.</p>

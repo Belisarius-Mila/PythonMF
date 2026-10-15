@@ -7,14 +7,88 @@
     const later = options.setTimeout || setTimeout;
     const cancel = options.clearTimeout || clearTimeout;
     const nodes = Object.fromEntries(["status", "shots", "voices", "jobs", "save", "preview", "final",
-      "range", "from", "to", "duck", "player", "reload"].map(key => [key, root.querySelector(`[data-film="${key}"]`)]));
+      "range", "from", "to", "duck", "player", "reload", "source", "sourcePlayer", "sourceStatus",
+      "sourceTitle", "selection", "start", "end", "playSelection"].map(key => [key, root.querySelector(`[data-film="${key}"]`)]));
     let model = null, active = false, dirty = false, saving = false, version = 0, epoch = 0;
     let pending = null, timer = null, refreshTimer = null, preserved = null, readRequest = 0;
+    let selected = null, sourceJob = null, sourceRequest = 0, sourceTimer = null, selectionTimer = null, playingSelection = false;
     function text(tag, value) { const n = doc.createElement(tag); n.textContent = value; return n; }
     function stopPlayer() { nodes.player.pause(); nodes.player.removeAttribute("src"); nodes.player.load(); }
+    function stopSource() {
+      ++sourceRequest; cancel(sourceTimer); cancel(selectionTimer); selected = null; sourceJob = null; playingSelection = false;
+      nodes.sourcePlayer.pause(); nodes.sourcePlayer.removeAttribute("src"); nodes.sourcePlayer.load();
+      nodes.source.classList.add("hidden");
+      for (const key of ["start", "end", "playSelection"]) nodes[key].disabled = true;
+    }
+    function selectedRow() { return model?.draft.shots.find(row => row.asset_id === selected); }
+    function safeOutput(url) {
+      return typeof url === "string" && url.startsWith(`/api/camino/film/output/${model.project_id}/`)
+        && url.split("/").length === 7 && /^[a-f0-9-]{36}$/.test(url.split("/")[6]);
+    }
+    function syncSelection() {
+      const row = selectedRow(); if (!row) return;
+      const source = model.sources.find(s => s.asset_id === selected);
+      nodes.sourceTitle.textContent = `Video ${model.draft.shots.indexOf(row) + 1} · ${source.title || "Bez názvu"}`;
+      nodes.selection.textContent = `Vybraný úsek: ${(row.in_ms / 1000).toFixed(3)}–${(row.out_ms / 1000).toFixed(3)} s · ${((row.out_ms - row.in_ms) / 1000).toFixed(3)} s${row.included ? "" : " · vyřazeno z filmu"}`;
+      const ready = !!nodes.sourcePlayer.getAttribute("src") && nodes.sourcePlayer.readyState >= 1;
+      nodes.start.disabled = nodes.end.disabled = !ready;
+      nodes.playSelection.disabled = !ready || row.in_ms < 0 || row.out_ms > source.duration_ms || row.out_ms <= row.in_ms;
+    }
+    function updateSource(jobs) {
+      cancel(sourceTimer);
+      if (!selected || !sourceJob) return;
+      const job = jobs.find(j => j.job_id === sourceJob && j.source_asset_id === selected);
+      if (!job) return;
+      if (job.state === "ready" && safeOutput(job.url)) {
+        if (nodes.sourcePlayer.getAttribute("src") !== job.url) {
+          nodes.sourcePlayer.src = job.url; nodes.sourcePlayer.load();
+        }
+        nodes.sourceStatus.textContent = "Posuň video na požadované místo a označ začátek nebo konec. Přehrát výběr přehraje jen označenou část.";
+      } else if (["failed", "interrupted"].includes(job.state)) {
+        nodes.sourceStatus.textContent = "Náhled se nedokončil. Tlačítkem u záběru ho můžeš připravit znovu.";
+      } else {
+        nodes.sourceStatus.textContent = `Připravuji náhled videa${job.state === "rendering" ? ` · ${job.progress} %` : " · ve frontě"}…`;
+        sourceTimer = later(() => check(), 1500);
+      }
+      syncSelection();
+    }
+    async function selectVideo(assetId) {
+      if (!model) return;
+      stopSource(); stopPlayer(); selected = assetId;
+      const current = epoch, selection = sourceRequest;
+      nodes.source.classList.remove("hidden"); syncSelection();
+      nodes.sourceStatus.textContent = "Ověřuji a připravuji náhled celého videa…";
+      nodes.source.scrollIntoView?.({block: "nearest", behavior: "smooth"});
+      try {
+        const response = await request("/api/camino/film/source", {method: "POST", headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({project_id: model.project_id, asset_id: assetId, request_id: uuid()})});
+        const data = await response.json();
+        if (current !== epoch || selection !== sourceRequest || !active || doc.hidden) return;
+        if (!data.ok) { nodes.sourceStatus.textContent = data.message; return; }
+        sourceJob = data.job_id; check();
+      } catch (_) {
+        if (current === epoch && selection === sourceRequest) nodes.sourceStatus.textContent = "Příprava se nepotvrdila. Zkus znovu otevřít video u záběru.";
+      }
+    }
+    function mark(key) {
+      const row = selectedRow(); if (!row || nodes[key === "in_ms" ? "start" : "end"].disabled) return;
+      const source = model.sources.find(s => s.asset_id === selected);
+      const ms = Math.max(0, Math.min(source.duration_ms, Math.round(nodes.sourcePlayer.currentTime * 1000)));
+      if (!Number.isFinite(ms) || (key === "in_ms" ? ms > row.out_ms - 100 : ms < row.in_ms + 100)) {
+        nodes.sourceStatus.textContent = "Konec musí být alespoň 0,1 sekundy za začátkem. Posuň video nebo uprav číselné časy."; return;
+      }
+      playingSelection = false; nodes.sourcePlayer.pause(); row[key] = ms; change(); renderRows();
+    }
+    function boundSelection() {
+      cancel(selectionTimer);
+      const row = selectedRow(); if (!playingSelection || !row) return;
+      if (nodes.sourcePlayer.currentTime >= row.out_ms / 1000) {
+        playingSelection = false; nodes.sourcePlayer.pause(); nodes.sourcePlayer.currentTime = row.out_ms / 1000;
+      } else if (!nodes.sourcePlayer.paused) selectionTimer = later(boundSelection, 40);
+    }
     function invalidate(message = "Projekt nelze nyní ověřit. Starší film se nezobrazuje.") {
       ++epoch; model = null; dirty = false; pending = null; preserved = null;
-      cancel(timer); stopPlayer();
+      cancel(timer); stopPlayer(); stopSource();
       for (const key of ["shots", "voices", "jobs"]) nodes[key].replaceChildren();
       for (const key of ["save", "preview", "final", "range"]) nodes[key].disabled = true;
       nodes.status.textContent = message;
@@ -29,6 +103,8 @@
     }
     function change() {
       dirty = true; ++version; controls();
+      if (playingSelection) nodes.sourcePlayer.pause();
+      playingSelection = false; cancel(selectionTimer); syncSelection();
       nodes.status.textContent = "Úpravy čekají na uložení…";
       cancel(timer); timer = later(() => save(), 700);
     }
@@ -66,6 +142,10 @@
         }
         li.appendChild(fields);
         const actions = doc.createElement("div"); actions.className = "actions";
+        if (source.kind === "video") {
+          const open = text("button", "Otevřít video pro střih"); open.type = "button"; open.className = "secondary";
+          open.addEventListener("click", () => selectVideo(row.asset_id)); actions.appendChild(open);
+        }
         for (const [label, delta] of [["↑ Dříve", -1], ["↓ Později", 1]]) {
           const b = text("button", label); b.type = "button"; b.className = "secondary";
           b.disabled = index + delta < 0 || index + delta >= model.draft.shots.length;
@@ -75,7 +155,7 @@
             change(); renderRows();
           }); actions.appendChild(b);
         }
-        const preview = text("button", "Náhled tohoto záběru"); preview.type = "button"; preview.className = "secondary";
+        const preview = text("button", "Vytvořit náhled záběru s titulkem"); preview.type = "button"; preview.className = "secondary";
         preview.addEventListener("click", async () => {
           if (!await save()) return;
           let start = 0;
@@ -102,19 +182,20 @@
         li.appendChild(fields); nodes.voices.appendChild(li);
       }
       nodes.duck.value = model.draft.duck_gain;
+      syncSelection();
     }
     function renderJobs(jobs) {
       nodes.jobs.replaceChildren();
       const labels = {queued: "Ve frontě", rendering: "Vytváří se", ready: "Hotovo", failed: "Selhalo — lze zopakovat", interrupted: "Přerušeno — lze zopakovat"};
       const key = j => JSON.stringify([j.revision, j.profile, j.range]);
-      const completed = new Set(jobs.filter(j => j.state === "ready").map(key));
-      for (const job of jobs.slice().reverse()) {
+      const exports = jobs.filter(j => !j.source_asset_id);
+      const completed = new Set(exports.filter(j => j.state === "ready").map(key));
+      for (const job of exports.slice().reverse()) {
         const superseded = ["failed", "interrupted"].includes(job.state) && completed.has(key(job));
         const li = text("li", `${job.profile === "final" ? "MP4 1080p" : "Náhled 720p"} · revize ${job.revision}${job.revision !== model.revision ? " (starší střih)" : ""}${job.range ? " · dílčí úsek" : ""} · ${superseded ? "Starší neúspěšný pokus; hotový výsledek je výše" : labels[job.state] || "Neznámý stav"}${job.state === "rendering" ? ` ${job.progress} %` : ""}`);
-        if (job.state === "ready" && typeof job.url === "string" && job.url.startsWith("/api/camino/film/output/")
-            && job.url.split("/").length === 7 && job.url.split("/").slice(5).every(part => /^[a-f0-9-]{36}$/.test(part))) {
+        if (job.state === "ready" && safeOutput(job.url)) {
           const play = text("button", "Přehrát"); play.type = "button"; play.className = "secondary";
-          play.addEventListener("click", () => { stopPlayer(); nodes.player.src = job.url; nodes.player.load(); });
+          play.addEventListener("click", () => { nodes.sourcePlayer.pause(); playingSelection = false; stopPlayer(); nodes.player.src = job.url; nodes.player.load(); });
           li.appendChild(play);
           const link = text("a", "Otevřít / uložit MP4"); link.href = job.url; link.target = "_blank"; link.rel = "noopener";
           li.appendChild(link);
@@ -148,7 +229,7 @@
         }
         if (model.project_id !== data.project_id) { invalidate("Uzavřená sada se změnila. Znovu načti editor."); return; }
         if (dirty && model.revision !== data.revision && !saving) nodes.status.textContent = "Jiné okno uložilo novější střih. Tvoje změny zůstávají zde; před pokračováním načti poslední revizi.";
-        renderJobs(data.jobs); controls();
+        renderJobs(data.jobs); updateSource(data.jobs); controls();
       } catch (_) { if (current === epoch && read === readRequest) conceal(); }
     }
     async function save() {
@@ -189,6 +270,31 @@
       } catch (_) { if (current === epoch) nodes.status.textContent = "Požadavek se nepotvrdil. Znovu načti stav fronty před opakováním."; }
     }
     nodes.save.addEventListener("click", () => save());
+    nodes.start.addEventListener("click", () => mark("in_ms"));
+    nodes.end.addEventListener("click", () => mark("out_ms"));
+    nodes.playSelection.addEventListener("click", () => {
+      const row = selectedRow(); if (!row || nodes.playSelection.disabled) return;
+      nodes.player.pause(); nodes.sourcePlayer.currentTime = row.in_ms / 1000; playingSelection = true;
+      const current = sourceRequest;
+      nodes.sourcePlayer.play().catch(() => {
+        if (current === sourceRequest) { playingSelection = false; nodes.sourceStatus.textContent = "Přehrávání se nespustilo. Zkus Přehrát výběr znovu."; }
+      });
+    });
+    nodes.sourcePlayer.addEventListener("loadedmetadata", syncSelection);
+    nodes.sourcePlayer.addEventListener("playing", boundSelection);
+    nodes.sourcePlayer.addEventListener("timeupdate", boundSelection);
+    nodes.sourcePlayer.addEventListener("pause", () => cancel(selectionTimer));
+    nodes.sourcePlayer.addEventListener("seeking", () => {
+      const row = selectedRow(), ms = nodes.sourcePlayer.currentTime * 1000;
+      if (playingSelection && row && (ms < row.in_ms || ms >= row.out_ms)) { playingSelection = false; nodes.sourcePlayer.pause(); }
+    });
+    nodes.sourcePlayer.addEventListener("error", () => {
+      if (selected) {
+        playingSelection = false; sourceJob = null; cancel(sourceTimer); cancel(selectionTimer);
+        nodes.sourcePlayer.pause(); nodes.sourcePlayer.removeAttribute("src"); nodes.sourcePlayer.load(); syncSelection();
+        nodes.sourceStatus.textContent = "Video nelze načíst. Znovu otevři video u záběru a ověř připojení.";
+      }
+    });
     nodes.preview.addEventListener("click", () => render("preview"));
     nodes.final.addEventListener("click", () => render("final"));
     nodes.range.addEventListener("click", () => render("preview", {start_ms: Math.round(Number(nodes.from.value) * 1000), end_ms: Math.round(Number(nodes.to.value) * 1000)}));

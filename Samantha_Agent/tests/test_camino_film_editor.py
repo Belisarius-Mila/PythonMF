@@ -197,6 +197,53 @@ class EditorTests(unittest.TestCase):
         self.assertFalse((folder / "jobs").exists())
         self.assertFalse((folder / ".render-worker").exists())
 
+    def source_payload(self):
+        sid = next(s["asset_id"] for s in self.editor.view()["sources"] if s["kind"] == "video")
+        return {"project_id": self.pid, "asset_id": sid, "request_id": str(uuid4())}
+
+    def test_source_preview_is_whole_cached_and_does_not_change_saved_edits(self):
+        p = self.payload(); p["draft"]["shots"][1].update(in_ms=500, out_ms=1000, included=False)
+        self.editor.save(p)
+        before = self.editor.view()["draft"]
+        source = self.source_payload(); first = self.editor.source_preview(source, background=False)
+        self.assertEqual(self.editor.source_preview(source, background=False)["job_id"], first["job_id"])
+        def render(edit, manifest, *args, **kwargs):
+            shots = [s for s in edit["draft"]["shots"] if s["included"]]
+            self.assertEqual(len(shots), 1)
+            self.assertEqual((shots[0]["in_ms"], shots[0]["out_ms"], shots[0]["title"], shots[0]["gain"]), (0, 1500, "", 1))
+            self.assertFalse(any(v["included"] for v in edit["draft"]["voices"]))
+            return self.fake_render(edit, manifest, *args, **kwargs)
+        with patch("app.camino_film_render.render_edit", side_effect=render): self.editor.run_queue(self.pid)
+        again = self.editor.source_preview({**source, "request_id": str(uuid4())}, background=False)
+        self.assertEqual(again["job_id"], first["job_id"])
+        self.assertEqual(self.editor.view()["revision"], 2)
+        self.assertEqual(self.editor.view()["draft"], before)
+        job = self.editor.view()["jobs"][0]
+        self.assertEqual(job["source_asset_id"], source["asset_id"])
+        target = self.editor.output(self.pid, job["job_id"])
+        self.assertFalse(target.is_relative_to(self.f.media.objects))
+        target.write_bytes(b"corrupt")
+        replacement = self.editor.source_preview({**source, "request_id": str(uuid4())}, background=False)
+        self.assertNotEqual(replacement["job_id"], first["job_id"])
+
+    def test_source_preview_rejects_foreign_private_nonvideo_and_conflicting_request(self):
+        source = self.source_payload()
+        for sid in (str(uuid4()), self.f.private.id, self.editor.view()["sources"][0]["asset_id"]):
+            with self.assertRaises(FilmError): self.editor.source_preview({**source, "asset_id": sid}, background=False)
+        self.editor.source_preview(source, background=False)
+        with self.assertRaises(FilmError):
+            self.editor.enqueue({"project_id": self.pid, "revision": 1, "request_id": source["request_id"],
+                "profile": "preview", "range": None}, background=False)
+
+    def test_source_preview_privacy_change_blocks_publication_and_delivery(self):
+        job = self.editor.source_preview(self.source_payload(), background=False)
+        def change(*args, **kwargs):
+            result = self.fake_render(*args, **kwargs); self.f.lock(); return result
+        with patch("app.camino_film_render.render_edit", side_effect=change): self.editor.run_queue(self.pid)
+        state = json.loads((self.store.root / self.pid / "jobs" / job["job_id"] / "status.json").read_text())
+        self.assertEqual(state["state"], "failed")
+        with self.assertRaises(FilmError): self.editor.output(self.pid, job["job_id"])
+
     def test_http_save_origin_and_streaming_range_contract(self):
         _, job = self.queue()
         with patch("app.camino_film_render.render_edit", side_effect=self.fake_render): self.editor.run_queue(self.pid)
@@ -215,6 +262,16 @@ class EditorTests(unittest.TestCase):
                 self.assertEqual(request("POST", "/api/camino/film/save", self.payload(), {"Origin": "https://foreign.example"})[0], 403)
                 self.assertEqual(request("POST", "/api/camino/film/save", self.payload())[0], 200)
                 self.assertEqual(request("POST", "/api/camino/film/render", {"project_id": self.pid, "revision": 2, "request_id": str(uuid4()), "profile": "preview", "range": None})[0], 200)
+                source = self.source_payload()
+                self.assertEqual(request("POST", "/api/camino/film/source", source, {"Origin": "https://foreign.example"})[0], 403)
+                self.assertEqual(request("POST", "/api/camino/film/source?file=secret", source)[0], 400)
+                code, _, body = request("POST", "/api/camino/film/source", source)
+                self.assertEqual(code, 200)
+                source_id = json.loads(body)["job_id"]
+                with patch("app.camino_film_render.render_edit", side_effect=self.fake_render): self.editor.run_queue(self.pid)
+                source_url = f'/api/camino/film/output/{self.pid}/{source_id}'
+                self.assertEqual(request("GET", source_url, headers={"Range": "bytes=0-3"})[2], b"synt")
+                self.assertEqual(request("HEAD", source_url)[0], 200)
                 url = f'/api/camino/film/output/{self.pid}/{job["job_id"]}'
                 code, headers, body = request("GET", url, headers={"Range": "bytes=0-3"})
                 self.assertEqual((code, body), (206, b"synt")); self.assertEqual(headers["Content-Type"], "video/mp4")
@@ -223,6 +280,8 @@ class EditorTests(unittest.TestCase):
                 self.assertEqual(request("GET", url, headers={"Range": "bytes=9999-"})[0], 416)
                 self.assertEqual(request("GET", url + "?file=secret")[0], 404)
                 self.f.lock(); self.assertEqual(request("GET", url)[0], 404)
+                self.assertEqual(request("HEAD", source_url)[0], 404)
+                self.assertEqual(request("GET", source_url, headers={"Range": "bytes=0-3"})[0], 404)
                 conn.close()
             finally:
                 server.shutdown(); server.server_close(); thread.join(timeout=3)
@@ -256,6 +315,44 @@ class EditorTests(unittest.TestCase):
 
 @unittest.skipUnless(shutil.which("ffmpeg") and shutil.which("ffprobe") and FONT.is_file(), "Local FFmpeg and Czech font required")
 class RenderTests(unittest.TestCase):
+    def test_full_source_preview_and_saved_trim_show_the_same_selected_frames(self):
+        from PIL import Image
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as tmp:
+            root = Path(tmp); archive = root / "archive"; archive.mkdir(mode=0o700)
+            f = ViewerFixture(archive); video = root / "source.mp4"
+            ffmpeg(["-f", "lavfi", "-i", "color=red:s=60x90:r=30:d=0.5",
+                "-f", "lavfi", "-i", "color=lime:s=60x90:r=30:d=0.5",
+                "-f", "lavfi", "-i", "color=blue:s=60x90:r=30:d=0.5",
+                "-f", "lavfi", "-i", "sine=frequency=880:duration=1.5",
+                "-filter_complex", "[0:v][1:v][2:v]concat=n=3:v=1:a=0[v]", "-map", "[v]", "-map", "3:a",
+                "-metadata", "location=PRIVATE-LOCATION", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", str(video)])
+            f.upload(31, "video", video.read_bytes())
+            store = MacFilmProjectStore(root / "projects", metadata_db=f.store.path, media_db=f.media.database_path,
+                media_root=f.media.root, trip_id=f.trip.id)
+            pid = store.close_mac_day(f.day.local_date, confirmed=True)["project_id"]
+            e = FilmEditor(store, day=f.day.local_date); v = e.view(); sid = v["sources"][0]["asset_id"]
+            original = f.media.objects / (sid + ".bin"); before = digest(original)
+            source = e.source_preview({"project_id": pid, "asset_id": sid, "request_id": str(uuid4())}, background=False)
+            e.run_queue(pid); full = e.output(pid, source["job_id"])
+            data = probe(full)
+            self.assertNotIn("PRIVATE-LOCATION", json.dumps(data))
+            self.assertEqual(next(s for s in data["streams"] if s["codec_type"] == "video")["nb_frames"], "45")
+            v["draft"]["shots"][0].update(in_ms=500, out_ms=1000, title="")
+            e.save({"project_id": pid, "expected_revision": 1, "request_id": str(uuid4()), "draft": v["draft"]})
+            render_id = str(uuid4())
+            e.enqueue({"project_id": pid, "revision": 2, "request_id": render_id, "profile": "preview", "range": None}, background=False)
+            e.run_queue(pid); trimmed = e.output(pid, render_id)
+            receipt = json.loads((trimmed.parent / "receipt.json").read_text())
+            self.assertEqual(receipt["timeline_ms"], 500)
+            for index, (path, seconds, channel) in enumerate(((full, .2, 0), (full, .7, 1), (full, 1.3, 2), (trimmed, .2, 1))):
+                frame = root / f"frame-{index}.png"
+                ffmpeg(["-ss", str(seconds), "-i", str(path), "-frames:v", "1", "-update", "1", str(frame)])
+                with Image.open(frame) as image:
+                    self.assertGreater(image.getpixel((640, 200))[channel], 200)
+                    self.assertLess(max(image.getpixel((320, 200))[:3]), 15)
+            self.assertEqual(e.source_preview({"project_id": pid, "asset_id": sid, "request_id": str(uuid4())}, background=False)["job_id"], source["job_id"])
+            self.assertEqual(digest(original), before)
+
     def test_mpo_main_photo_preserves_full_duration_and_exif_orientation(self):
         from PIL import Image, ImageCms
         with tempfile.TemporaryDirectory(dir="/private/tmp") as tmp:

@@ -205,6 +205,8 @@ class FilmEditor:
                 state = {"state": "interrupted", "progress": 0}
             item = {"job_id": directory.name, "revision": spec["revision"], "profile": spec["profile"],
                 "range": spec["range"], "state": state["state"], "progress": state.get("progress", 0)}
+            if "source_asset_id" in spec:
+                item["source_asset_id"] = spec["source_asset_id"]
             if state["state"] == "ready":
                 item["url"] = f'/api/camino/film/output/{folder.name}/{directory.name}'
                 item["bytes"] = state["bytes"]
@@ -226,19 +228,70 @@ class FilmEditor:
             if payload["profile"] != "preview":
                 raise FilmError("Dílčí úsek je určený jen pro pracovní náhled.")
         spec = {**payload, "edit_sha256": fingerprint(edit), "manifest_sha256": fingerprint(manifest)}
+        return self._enqueue(folder, spec, background=background)
+
+    def job_edit(self, folder, manifest, spec):
+        """Source previews use an isolated full-video draft; saved edits stay immutable."""
+        edit = self.revision(folder, manifest, spec["revision"])
+        if "source_asset_id" not in spec:
+            return edit
+        sid = identifier(spec["source_asset_id"])
+        source = next((s for s in manifest["sources"] if s["asset_id"] == sid), None)
+        if source is None or source["media_kind"] != "video":
+            raise FilmError("Pro přímý náhled vyber video z uzavřené sady.")
+        edit = copy.deepcopy(edit)
+        for row in edit["draft"]["shots"]:
+            row["included"] = row["asset_id"] == sid
+            if row["included"]:
+                row.update(in_ms=0, out_ms=source["duration_ms"], title="", gain=1)
+        for row in edit["draft"]["voices"]:
+            row["included"] = False
+        validate_draft(edit["draft"], manifest)
+        return edit
+
+    def source_preview(self, payload, *, background=True):
+        exact(payload, "project_id asset_id request_id")
+        folder, manifest = self.inputs(identifier(payload["project_id"]))
+        identifier(payload["request_id"])
+        spec = {"project_id": folder.name, "revision": 1, "request_id": payload["request_id"],
+            "profile": "preview", "range": None, "source_asset_id": payload["asset_id"],
+            "manifest_sha256": fingerprint(manifest)}
+        spec["edit_sha256"] = fingerprint(self.job_edit(folder, manifest, spec))
+        return self._enqueue(folder, spec, background=background)
+
+    def _enqueue(self, folder, spec, *, background):
         with _store_lock(self.store.root):
             root = _private_directory(folder / "jobs")
-            target = root / payload["request_id"]
+            target = root / spec["request_id"]
             if target.exists():
                 _private_directory(target)
                 if self.store._read(target / "request.json") != spec:
                     raise FilmError("Stejné ID exportu bylo použité pro jinou revizi nebo úsek.")
             else:
-                if sum(j["state"] in ("queued", "rendering", "interrupted") for j in self.jobs(folder)) >= 16:
+                # Reopening a source reuses its verified derivative, independent of edit revision.
+                if "source_asset_id" in spec:
+                    for job in reversed(self.jobs(folder)):
+                        if (job.get("source_asset_id") != spec["source_asset_id"]
+                                or job["state"] not in ("ready", "queued", "rendering", "interrupted")):
+                            continue
+                        saved = self.store._read(root / job["job_id"] / "request.json")
+                        if any(saved.get(k) != v for k, v in spec.items() if k != "request_id"):
+                            continue
+                        if job["state"] == "ready":
+                            try:
+                                self.output(folder.name, job["job_id"])
+                            except (FilmError, OSError):
+                                continue
+                        target = root / job["job_id"]
+                        break
+                if target.exists():
+                    pass
+                elif sum(j["state"] in ("queued", "rendering", "interrupted") for j in self.jobs(folder)) >= 16:
                     raise FilmError("Ve frontě je již 16 exportů. Nejdříve dokonči existující úlohy.")
-                staging = _private_directory(root / (".pending-" + payload["request_id"]))
-                write_json(staging / "request.json", spec)
-                os.rename(staging, target)
+                else:
+                    staging = _private_directory(root / (".pending-" + spec["request_id"]))
+                    write_json(staging / "request.json", spec)
+                    os.rename(staging, target)
         if background:
             self.start_worker(folder.name)
         return {"ok": True, "job_id": target.name, "queued": True}
@@ -271,17 +324,18 @@ class FilmEditor:
                         progress(0)
                         _, manifest = self.inputs(project_id)
                         spec = self.store._read(directory / "request.json")
-                        edit = self.revision(folder, manifest, spec["revision"])
+                        edit = self.job_edit(folder, manifest, spec)
                         if fingerprint(edit) != spec["edit_sha256"] or fingerprint(manifest) != spec["manifest_sha256"]:
                             raise FilmError("Uložené podklady exportu se změnily.")
                         def revalidate():
                             _, current = self.inputs(project_id)
                             if (fingerprint(current) != spec["manifest_sha256"]
-                                    or fingerprint(self.revision(folder, current, spec["revision"])) != spec["edit_sha256"]):
+                                    or fingerprint(self.job_edit(folder, current, spec)) != spec["edit_sha256"]):
                                 raise FilmError("Uložené podklady se během renderu změnily.")
                         receipt = render_edit(edit, manifest, self.store.media.objects, attempt,
                             spec["profile"], spec["range"], progress=progress,
                             revalidate=revalidate)
+                        revalidate()
                         atomic_write_json(state_path, {"state": "ready", "progress": 100,
                             "output": str((attempt / "film.mp4").relative_to(directory)),
                             "bytes": receipt["bytes"], "sha256": receipt["sha256"]})
@@ -300,7 +354,7 @@ class FilmEditor:
         _private_directory(folder / "jobs")
         _private_directory(directory)
         spec = self.store._read(directory / "request.json")
-        edit = self.revision(folder, manifest, spec["revision"])
+        edit = self.job_edit(folder, manifest, spec)
         if fingerprint(edit) != spec["edit_sha256"] or fingerprint(manifest) != spec["manifest_sha256"]:
             raise FilmError("Export už neodpovídá uloženým podkladům.")
         state = self.store._read(directory / "status.json")
@@ -329,6 +383,8 @@ def film_editor_action(operation, payload=None):
             return editor.save(payload)
         if operation == "render":
             return editor.enqueue(payload)
+        if operation == "source":
+            return editor.source_preview(payload)
         raise FilmError("Neznámá filmová operace.")
     except FilmError as error:
         return {"ok": False, "message": str(error)}

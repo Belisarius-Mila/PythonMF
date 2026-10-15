@@ -8572,6 +8572,12 @@ def shell_quote_for_applescript(value: str) -> str:
 
 COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
     {
+        "path": "/api/camino/film/source",
+        "label": "Připravit chráněný náhled celého zdrojového videa pro ruční střih",
+        "risk": "private_write", "confirmation": "explicit_source_preview_button",
+        "handler_name": "film_editor_action", "test_level": "direct",
+    },
+    {
         "path": "/api/camino/film/save",
         "label": "Uložit novou revizi filmového střihu",
         "risk": "private_write", "confirmation": "explicit_editor_change_or_save",
@@ -9797,6 +9803,9 @@ class CockpitServer:
             def do_POST(self) -> None:  # noqa: N802
                 self.validate_request_access(require_origin=True)
                 parsed = urlparse(self.path)
+                if parsed.path == "/api/camino/film/source":
+                    self.respond_film_edit("source", parsed)
+                    return
                 if parsed.path == "/api/camino/film/save":
                     self.respond_film_edit("save", parsed)
                     return
@@ -10659,7 +10668,9 @@ class CockpitServer:
 
             def respond_film_edit(self, operation, parsed) -> None:
                 payload = self.read_json()
-                keys = {"project_id", "expected_revision", "request_id", "draft"} if operation == "save" else {"project_id", "revision", "request_id", "profile", "range"}
+                keys = {"save": {"project_id", "expected_revision", "request_id", "draft"},
+                    "source": {"project_id", "asset_id", "request_id"},
+                    "render": {"project_id", "revision", "request_id", "profile", "range"}}[operation]
                 if parsed.query or set(payload) != keys:
                     self.respond_json({"ok": False, "error": "invalid_request"}, status=HTTPStatus.BAD_REQUEST)
                     return

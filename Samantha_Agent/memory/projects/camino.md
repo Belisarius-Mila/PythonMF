@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-15 19:40 CEST — přenos přijatý, návrat ke střižně a návrh přímého náhledu
+Aktualizováno: 2026-10-15 20:09 CEST — přímý náhled a ruční trim místně připravené, bez nasazení
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,8 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-15 20:09 CEST — Schválený přímý náhled videa a ruční trim v Cockpitu místně hotové: celé video, seek, tlačítka začátku/konce, přehrání výběru a číselné doladění; nové revize beze změny originálů. 720p odvozeniny v existující soukromé frontě, reuse podle manifestu/zdroje, současné soukromí/hash při každém výdeji. 23/23 cílených testů a Node PASS. Plná brána 1940/1940 PASS. Živý audit 19:58 CEST: přesná shoda archivu 883 operací, 123 Momentů, všech 300 originálů / 2 316 799 213 B SHA-256 PASS, flags false, Serve shodný, Funnel off; Camino stále `f60a33c98fd5`, Cockpit smoke 5/5. Produkční film 6. 10. platný, revize 1, beze změny a bez nového renderu. Nový editor nepushnutý/nenasazený. Další krok samostatně nasadit pouze Cockpit a fyzicky na iPhonu ověřit úsek/save/reload/výsledný náhled; P2-F později. Report `camino/docs/P2CD_EDITOR_MP4_REPORT.md`.
 
 - 2026-10-15 19:40 CEST — Míla po IPA19 potvrzuje „Tak to funguje“ a vrací téma ke střižně. Živý Mac 883 operací/kurzor, jedno audio storno, 123 Momentů a 300 ověřených originálů / 2 316 799 213 B, úplný SHA audit PASS, flags false. Akutní incident přenosu uživatelsky přijatý. Platný film 6. 10., revize 1, 25 záběrů/5 samostatných hlasových nabídek (vypnuté), 200 475 ms; 720p i 1080p HTTP/HTTPS HEAD 200 / Range 206. Číselné in/out a renderovaný dílčí náhled jsou implementované; přímý přehrávač pro označení začátku/konce zatím chybí. Doporučený další krok k rozhodnutí: přímý náhled a ruční trim jednoho videa, pak první vlastní střih/P2-E na 6. 10. Vývoj, render a nasazení se tímto návrhem nezahajují; celé video výchozí, originály/revize zachované. Podrobná Safari přejímka otevřená, P2-F později. Report `camino/docs/P2CD_EDITOR_MP4_REPORT.md`.
 

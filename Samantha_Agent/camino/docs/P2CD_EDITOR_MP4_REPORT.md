@@ -146,3 +146,34 @@ manifestem, kontrolovat aktuální soukromí a nevydávat originály novou
 HTTP cestou. Rozsah má být uvnitř filmové střižny v Cockpitu bez změn
 telefonní aplikace a přenosové služby. P2-F vícedenní film zůstává později.
 Důkaz `logs/camino_film_return_audit_20261015.log`; pouze zápisy, bez renderu.
+
+## 2026-10-15 20:09 CEST — přímý náhled videa a ruční označení střihu
+
+Hotovo:
+- Ve střižně je místně připravené otevření celého videa, posun v přehrávači, „Tady začít“, „Tady skončit“ a „Přehrát výběr“. Číselné upřesnění zůstává; změny používají dosavadní automatické ukládání nových revizí.
+- Chráněný 720p náhled zdroje se připraví jednou v dosavadní sériové frontě a při dalším otevření se znovu použije. Výběr se přehrává bez renderování filmu. Náhled zdroje neobsahuje titulek ani samostatný hlas; ty patří do renderovaného střihu.
+- Originály, uložené revize a výchozí celé video jsou zachované. Živý audit v 19:58 CEST: přesná shoda archivu s podkladem před vývojem, všech 300 originálů / 2 316 799 213 B SHA-256 PASS, 883 operací, flags false a stejný Serve; Camino stále běží na `f60a33c98fd5`. Skutečný film 6. 10. zůstal v revizi 1, bez nového produkčního renderu či změny střihu.
+
+Rozhodnutí:
+- Míla „ok, jdeme na to!“ výslovně schválil realizaci navrženého přímého náhledu a ručního trimu v Cockpitu. Rozsah neobsahuje nový telefonní build, změnu přenosové služby, push ani nasazení.
+
+Další krok:
+- Po samostatném pokynu nasadit pouze Cockpit a na iPhonu vybrat úsek jednoho videa ze 6. 10., uložit/reload a porovnat s náhledem výsledného filmu.
+
+Navrhované další kroky:
+- Dokončit P2-C/E fyzickou přejímku: ruční úsek, pořadí záběrů a délka fotografie; původní revize i celé video musí zůstat dostupné.
+- P2-F vícedenní film až po přijetí ovládání prvního dne.
+
+Technický důkaz:
+- 23/23 cílených editorových testů PASS, včetně skutečné odvozeniny celého videa a renderu ručního úseku: barvy/snímky, délka, svislý celý obraz, odstranění soukromých metadat, nezměněný SHA originálu. Node test ověřuje tlačítka, čísla, uložení/reload, konec přehrání, chybu média, pozdní odpověď a odvolání soukromí. Plná brána 1940/1940 PASS.
+- Registrovaný POST `/api/camino/film/source` připravuje jen odvozeninu; dosavadní chráněný output kontroluje manifest, aktuální soukromí a hash pro GET/HEAD/Range. Originál se nevydává. Ověřeno odmítnutí cizího Origin, soukromého/cizího zdroje, poškozeného náhledu a změny soukromí během renderu i před výdejem.
+- Důkazy: `logs/camino_film_trim_final_tests_20261015.log`, `logs/camino_film_trim_gate_final_20261015.log`, `logs/camino_film_trim_live_audit_20261015.log`, `logs/camino_film_trim_smoke_20261015.log`; report `camino/docs/P2CD_EDITOR_MP4_REPORT.md`. Nástrojový prohlížeč není dostupný; fyzická Safari/iPhone přejímka neprovedena.
+
+Implementační kontrakt:
+- POST `/api/camino/film/source` přijímá jen `project_id`, `asset_id`, `request_id`; vyžaduje video z ověřeného uzavřeného manifestu a stejné přístupové/Origin kontroly jako ostatní zápisy editoru.
+- Interní pracovní draft obsahuje jediný celý vybraný zdroj bez titulku a samostatných hlasů, odvozený z neměnné revize 1. Nevzniká uložená edit revize. Zdrojové úlohy jsou v API odlišené `source_asset_id` a nezobrazují se jako výsledné filmy.
+- Stejný renderer, soukromé adresáře, sériový worker, kontrola místa, celé dekódování a hash. Staré výstupy i neúplné pokusy zůstávají zachované. Opětovné otevření používá hotový ověřený náhled, po poškození se vytvoří nový pokus.
+- Kontrola konce přehrávání přes čas videa a krátký časovač; čísla v milisekundách, výstup kvantovaný na dosavadních 30 fps. Tlačítka zachovávají úsek alespoň 0,1 s, konec za začátkem a v délce média.
+- Ovládání se povolí po načtení metadat. Pozdní odpověď předchozího výběru ani zavřeného okna neobnoví staré video. Chyba média, skrytí stránky, odvolání soukromí nebo zavření vyčistí přehrávač.
+
+Aktualizovaný kontrolní otisk stránky odpovídá přidaným ovládacím prvkům; 18/18 frontendových kontraktních testů PASS. Závěrečná plná brána 1940/1940 PASS (326,925 s testů). Žádný push ani nasazení v tomto kroku.
