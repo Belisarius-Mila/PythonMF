@@ -1,37 +1,39 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-10-14 20:18 CEST — Míla potvrdil funkční aktualizaci a přenos; p+n schválené
+- Aktualizováno: 2026-10-15 17:11 CEST — nová blokace audio layoutu, cílená oprava a IPA19 místně připravené
 
 ### Hotovo
-- Míla po dodání IPA18 odpověděl „funguje ok“ a zadal p+n. Telefonní funkčnost a odblokování přenosu jsou uživatelsky přijaté; nejde o automatické měření každé funkce telefonu.
-- Mac potvrzuje skutečné pokračování: kurzor/operace 740 → 767, jedno přijaté storno smazaného názvu a 30 nově ověřených médií. Archiv nyní 103 Momentů, 264 originálů / 2 068 743 342 B; úplný SHA-256 audit PASS, flags false.
-- Všech 740 dříve přijatých paketů a účtenky všech 234 dřívějších originálů jsou beze změny. Server/epocha/zařízení a tripy shodné; změna starého souhrnného identity hashe zahrnuje nový kurzor a není rotací identity.
-- Opravný Camino server `d5d19b4b9ddd` dál běží, PID 7951, owner HTTP/HTTPS a repair feature PASS. IPA18 je v iCloud Dokumentech a soukromém stagingu. Zdrojový kód se po plné bráně neměnil.
-- Čerstvý Cockpit audit: PID 9218, otisk `118d4c6208030edb` přesně odpovídá současnému zdrojovému main, smoke 5/5. Je to novější proces než v dřívějším auditním zápisu; tento krok ho nepřepínal. Serve shodný, Funnel off.
+- Včerejší oprava názvu byla Mílou přijatá a zveřejněná v `d507f52d`; GitHub brána 38614242983 success. Dnešní log zachytil jiný krok: operace 879, `create_audio_layout`, HTTP 404 `not_found`, chybějící audio manifest.
+- Dosavadní server `d5d19b4b9ddd` běží. Živý audit: kurzor/operace 878, 123 Momentů, všech 264 originálů / 2 068 743 342 B se shodnými SHA-256; identity/tripy a flags false, owner HTTP/HTTPS 200. Serve shodný, Funnel off, Cockpit smoke 5/5.
+- Na syntetických datech zopakováno: smazaná audio session potlačí neposlaný zdroj, ale starý journal ponechá playback layout. Dvě regrese prokázaly i riziko odstranění už přidělené obálky. Připravená oprava potlačuje neposlané závislosti společně a zachová každý přidělený nebo přijatý paket.
+- Výslovné storno již odmítnutého layoutu vyžaduje místní tombstone stejné session/Momentu, skutečné 404 a čerstvý kurzor právě před paketem, stejný server/epochu a feature `deleted_audio_layout_repair_v1`. Originál, tombstone a důkaz se uloží před novým POST. Server ve stejné transakci ověří původní obálku, všechny existující zdroje/vazby i skutečně chybějící manifest.
+- Storno spotřebuje pouze souvislý ledger krok; nevytvoří médium, Moment, layout ani Moment revizi. Běžná validace, schéma 3 a identita zůstávají zachované. Build 0.1.0 (19) stejné app, arm64/CRC/binární roundtrip PASS; databázový model, LocalStore, kamera a audio capture/link zdroje beze změny.
 
 ### Otevřeno
-- Akutní odmítání metadat je podle Míly vyřešené. Samostatný nový telefonní retest foto/video se zvukem, Komentáře a přesná čísla telefonních front touto obecnou odpovědí nejsou doložené.
-- Film je odložený; P2-E ovládání editoru a P2-A/MAC1 zůstávají oddělené.
+- Oprava není nasazená, IPA19 není dodaný/instalovaný; přenos stále stojí před 879. Nasazení čeká na aktuální konkrétní potvrzení.
+- Mílovo skutečné smazání dnešního zvuku/Momentu zatím není potvrzené. Položená otázka zůstává otevřená; při chybějícím tombstonu se automatické storno neprovede.
+- Film, P2-E ovládání a P2-A/MAC1 jsou odložené.
 
 ### Rizika
-- Zachovat stejnou aplikaci a data, nepřeskakovat cursor ani přepisovat přijatou historii. Storno je vymezené na jinde nedeklarovaný smazaný foto/video Asset; běžná validace zůstává přísná.
-- 264 ověřených originálů není důkaz příjmu každé historicky deklarované položky. Uživatelské přijetí přenosu a úplný audit Macu nenahrazují podrobnou přejímku všech funkcí telefonu.
-- Storno je nová metadata revize; běžná kontrola uzavřeného filmového zdroje dál platí. Hotový MP4 se nepřerenderoval. Starší záloha a zastavený autosave byly již oznámené.
+- Neřešit 404 obecným přeskočením, resetem nebo doplněním smyšleného zdroje. Přijatá historie ani originály se nemění; není dovoleno rušit platný layout, plně deklarované zdroje ani cizí/nesouvisející obsah.
+- Telefonní podpis, zachování dat a skutečný sync vyžadují novou přejímku. Původní Camino neodinstalovat, zachovat stejnou identitu. Starší záloha z 27. 9. a zastavený autosave dnes znovu oznámené.
+- Nový IPA19 je pouze v soukromém stagingu. Původní iCloud IPA18 a náhradní Viewer download zůstávají zachované; pro nový krok se plánuje iCloud dodání IPA19.
 
 ### Rozhodnutí
-- Míla potvrdil funkčnost a výslovně zadal p+n hotové opravy. IPA a soukromý archiv zůstávají mimo veřejný GitHub; publikují se pouze ověřené git-safe zdroje a zápisy.
+- Míla zadal nové vyšetření odmítnutého přenosu; tento lokální krok opravuje pouze synchronizaci zvuku. Dřívější nasazení neznamená automatické potvrzení nového serveru.
 
 ### Další krok
-- Film/editor až na další Mílův pokyn. Běžící server už obsahuje opravný kód a Cockpit odpovídá zdrojům; nové přepnutí těchto procesů není potřeba.
+- Po konkrétním potvrzení pouze Camino stop/upgrade/start se snapshoty a úplným porovnáním archivu; dodat IPA19 do iCloud Dokumentů, pak ruční SideStore aktualizace stejné app a jeden sync.
 
 ### Navrhované další kroky
-- Film/editor naváže až na další Mílův pokyn. P2-E ovládání a P2-A/MAC1 zůstávají otevřené.
+- Pokud na telefonu pro odmítnutý zvuk není odpovídající smazání, dál dohledat původní vazbu; neobcházet chybějící důkaz. Film až po stabilizaci přenosu.
 
 ### Technický důkaz
-- Předchozí plná brána 1925/1925, Swift 68/68 a 52 cílených API/HTTP/workflow testů PASS; jen aktuální projektové zápisy. Čerstvý archivní audit všech 264 originálů, owner HTTP/HTTPS a Cockpit smoke 5/5 PASS.
-- `logs/camino_repair_phone_acceptance_20261014.log`: 767 operací/kurzor, jedno storno, 30 nových médií; starých 740 paketů a 234 mediálních účtenek zachované, identita/epocha/zařízení shodné.
-- IPA18 1247937 B, SHA-256 `42c964f9579fe09663632dbafc7a2dfc85e6e8d6424f2c9a7f04fef07ec64f51`. Report `camino/docs/METADATA_REJECTION_INCIDENT_20261014.md`; žádná soukromá média, tokeny ani instalační balík v Gitu.
+- Swift 74/74 a 24 cílených skutečných Swift → API/audio/title testů PASS. Dosavadní `d5d19b4b9ddd` přečetl syntetickou projekci a přesně zopakoval všech šest přijatých obálek, beze změny stavu. Izolovaný import v Pythonu služby a schéma 3 PASS.
+- Plná projektová brána 1936/1936 PASS (349,213 s); cílené audio varianty také PASS.
+- IPA `Camino-SyncRepair-19-20261015-unsigned.ipa`, 1259687 B, SHA-256 `6d532538e18c333f3cfdae2de64c081a29c5e0c07c7ed822f66e97ebae5bf3cf`, nepodepsaný pro SideStore; fyzická přejímka NEPROVEDENO.
+- Report `camino/docs/AUDIO_LAYOUT_REJECTION_INCIDENT_20261015.md`; ignorované účtenky `camino_deleted_audio_baseline_20261015.log`, `camino_deleted_audio_api_targeted_20261015.log`, `camino_deleted_audio_full_gate_20261015.log`.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Camino
@@ -3657,3 +3659,23 @@ Navrhované další kroky:
 Technický důkaz:
 - Kurzor/operace 767, 103 Momentů, 264 ověřených originálů / 2 068 743 342 B; plný SHA-256 audit PASS. Starých 740 přijatých paketů a 234 mediálních účtenek přesně zachované; server/epocha/zařízení a tripy shodné, flags false.
 - Camino `d5d19b4b9ddd`, PID 7951, owner HTTP/HTTPS + repair feature PASS. Cockpit PID 9218 / `118d4c6208030edb` odpovídá aktuálním zdrojům, smoke 5/5; Serve shodný, Funnel off. Předchozí plná brána 1925/1925 a Swift 68/68 PASS. Podrobné retesty telefonu nelze odvodit jen z obecné odpovědi.
+
+
+### 2026-10-15 17:11 CEST — Nové odmítnutí audio layoutu, připravená oprava IPA19
+
+Hotovo:
+- Dnešní blokace je dohledaná: popis zvuku odkazuje na chybějící deklaraci zdroje. Na syntetických datech zopakované smazání audio session před přenosem, připravená prevence a vymezené storno s původní obálkou a místním tombstonem.
+- Již přidělené/přijaté pakety zůstávají zachované. Originály, model telefonu, kamera a nahrávání se nemění. IPA19 stejné identity je připravený, nenasazený.
+
+Rozhodnutí:
+- Míla zadal vyšetření obnovené chyby; nová oprava běžící služby zatím nemá konkrétní potvrzení. Skutečné dnešní smazání není odvozené jen ze serverové hlášky.
+
+Další krok:
+- Po aktuálním potvrzení Camino server se snapshoty/archivním porovnáním, iCloud IPA19 a SideStore aktualizace původní app bez odinstalování.
+
+Navrhované další kroky:
+- Ověřit jeden skutečný sync; pokud chybí místní deletion record, pokračovat v diagnostice původního odkazu. Film až později.
+
+Technický důkaz:
+- HTTP 404 `not_found`, `create_audio_layout`, sequence 879; kurzor 878, 123 Momentů a všech 264 originálů / 2 068 743 342 B ověřené. Owner HTTP/HTTPS a Cockpit smoke 5/5 PASS, Serve shodný, Funnel off.
+- Swift 74/74, 24 cílených testů a kompatibilní retry šesti paketů na starém serveru PASS; Release arm64 build19, CRC/binární roundtrip PASS. Plná brána viz aktuální stav/report. Telefonní přejímka NEPROVEDENO.

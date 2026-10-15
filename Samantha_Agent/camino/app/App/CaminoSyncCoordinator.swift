@@ -913,13 +913,19 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
             .sorted { $0.localDate > $1.localDate }
         discoveredAudioLayouts = discovery.metadata.filter { $0.kind == "create_audio_layout" }
         journal.mergeDiscovery(discovery)
+        try suppressLocalDeletedContent()
+        try journalStore.save(journal)
+        refreshPublishedState()
+    }
+
+    private func suppressLocalDeletedContent() throws {
         let deletions = try local.deletionRecords()
         let deletedMomentIDs = Set(deletions.filter { $0.kind == .moment }.map(\.momentID))
         var deletedAssetIDs = Set(deletions.filter { $0.kind == .asset }.map(\.targetID))
         let deletedSessions = Set(deletions.filter { $0.kind == .audioSession }.map(\.targetID))
         // Audio is represented by stable segment Asset IDs in the sync journal;
         // recover those IDs from the already discovered immutable layout.
-        for item in journal.metadata where item.kind == "create_audio_layout" {
+        for item in journal.metadata + discoveredAudioLayouts where item.kind == "create_audio_layout" {
             guard let object = (try? JSONSerialization.jsonObject(with: item.payload)) as? [String: Any],
                   let sessionRaw = object["session_id"] as? String,
                   let sessionID = UUID(uuidString: sessionRaw), deletedSessions.contains(sessionID),
@@ -930,9 +936,8 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
                 }
             }
         }
-        journal.suppressDeletedContent(momentIDs: deletedMomentIDs, assetIDs: deletedAssetIDs)
-        try journalStore.save(journal)
-        refreshPublishedState()
+        journal.suppressDeletedContent(momentIDs: deletedMomentIDs, assetIDs: deletedAssetIDs,
+                                       audioSessionIDs: deletedSessions)
     }
 
     private func synchronize() async {
@@ -976,6 +981,8 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
             }
             try journal.requireTitleSupport(serverFeatures: state.features)
             try journal.mergeAudioLayouts(discoveredAudioLayouts, serverFeatures: state.features)
+            // Optional backfill and edits while hashing must obey fresh tombstones too.
+            try suppressLocalDeletedContent()
             try journalStore.save(journal)
             while true {
                 switch journal.nextWork(networkAvailable: true, expensive: path.expensive) {
@@ -1013,6 +1020,26 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
             try journalStore.save(journal)
             refreshPublishedState()
         } catch CaminoSyncAPIError.server(let status, let code) {
+            if status == 404, code == "not_found",
+               let target = journal.metadata[index].audioLayoutTarget {
+                let deletions = try local.deletionRecords()
+                if deletions.contains(where: { target.matches($0) }) {
+                    let state = try await api.state()
+                    guard state.features?.contains("deleted_audio_layout_repair_v1") == true else {
+                        throw CaminoSyncError.serverConflict("audio_layout_server_upgrade_required")
+                    }
+                    guard state.contractVersion == 1 else { throw CaminoSyncAPIError.invalidResponse }
+                    let proof = CaminoDeletedAudioLayoutRepairProof(
+                        serverID: state.serverID, epoch: state.epoch, cursor: state.cursor)
+                    if try journal.repairRejectedDeletedAudioLayout(id: id, deletions: deletions,
+                        status: status, code: code, proof: proof,
+                        serverBlocked: state.exportsBlocked || state.reconciliationRequired) {
+                        try journalStore.save(journal) // Persist original packet and deletion before POST.
+                        refreshPublishedState()
+                        return
+                    }
+                }
+            }
             if status == 422, code == "invalid_request",
                let target = journal.metadata[index].attachmentTitleAssetID {
                 let deleted = Set(try local.deletionRecords().filter {

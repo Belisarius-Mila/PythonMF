@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-14 20:18 CEST — Míla potvrdil opravený přenos a zadal p+n
+Aktualizováno: 2026-10-15 17:11 CEST — nové odmítnutí audio layoutu, IPA19 místně připravený
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,8 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-15 17:11 CEST — Nová blokace 879: `create_audio_layout`, HTTP 404, chybějící audio manifest; nejde o včerejší title operaci. Živý archiv 878 operací/kurzor, 123 Momentů a všech 264 originálů / 2 068 743 342 B PASS, flags false. Zopakováno na smazané audio session: potlačený zdroj přežije v osiřelém layoutu; staré potlačení navíc nesmělo zahodit přidělenou obálku. Místní prevence a explicitní storno vyžadují skutečné 404, lokální odpovídající tombstone a čerstvý serverový důkaz; původní paket/tombstone se ukládají, server původní layout a vazby znovu validuje. Schéma 3, žádné vytvořené zdroje/revize či mazání. Swift 74/74, 24 cílených API testů, kompatibilita starého serveru, import a arm64 build19/CRC PASS. Plná brána viz report. IPA19 stejné identity připravený v private stagingu; nový server, iCloud dodání a telefonní přejímka čekají na konkrétní potvrzení. Skutečné dnešní smazání Mílou zatím nepotvrzené, žádné automatické storno bez tombstonu. Film odložený. Report `camino/docs/AUDIO_LAYOUT_REJECTION_INCIDENT_20261015.md`.
 
 - 2026-10-14 20:18 CEST — Míla po IPA18 potvrzuje „funguje ok“ a zadal p+n. Mac přijal dalších 27 operací, jedno storno smazaného názvu a 30 médií: 767 operací/kurzor, 103 Momentů, 264 ověřených originálů / 2 068 743 342 B, úplný SHA-256 audit PASS. Starých 740 paketů a 234 mediálních účtenek přesně zachované; server/epocha/zařízení a tripy shodné, flags false. Camino dál `d5d19b4b9ddd`, PID 7951, owner HTTP/HTTPS repair feature PASS; Cockpit aktuálně PID 9218 / `118d4c6208030edb` odpovídá zdrojům, smoke 5/5; Serve shodný, Funnel off. Akutní incident uživatelsky přijatý jako vyřešený; podrobné retesty jednotlivých telefonních funkcí nejsou obecnou odpovědí doložené. Schválená publikace git-safe dávky, běžící oprava nepotřebuje nové přepnutí. Film/editor podle dalšího pokynu. Report `camino/docs/METADATA_REJECTION_INCIDENT_20261014.md`.
 

@@ -152,7 +152,7 @@ class RevisionStore:
             return {
                 "contract_version": 1,
                 "features": ["audio_layout_v1", "moment_title_v1", "attachment_title_v1", "trip_title_v1",
-                             "deleted_attachment_title_repair_v1"],
+                             "deleted_attachment_title_repair_v1", "deleted_audio_layout_repair_v1"],
                 "server_id": meta["server_id"],
                 "epoch": meta["epoch"],
                 "cursor": meta["cursor"],
@@ -321,6 +321,11 @@ class RevisionStore:
         if kind == "create_audio_layout":
             if expected is not None:
                 raise ContractError("audio layout does not change Moment revision")
+            if payload.get("type") == "cancel_deleted_audio_layout":
+                data = self._validate_cancelled_audio_layout(connection, envelope)
+                # The accepted ledger preserves both cancellation and original.
+                # Do not create a playback layout, media declaration or revision.
+                return kind, data["clip_id"], None, False
             data = decode_audio_layout(payload)
             body = self._json(data)
             old = connection.execute("SELECT body FROM audio_layouts WHERE id=?", (data["clip_id"],)).fetchone()
@@ -335,27 +340,7 @@ class RevisionStore:
                 asset = decode_asset(json.loads(row["body"]))
                 if asset.moment_id != data["moment_id"] or asset.media_kind != "audio":
                     raise ContractError("audio source must belong to this Moment")
-            existing = [json.loads(row["body"]) for row in connection.execute("SELECT body FROM audio_layouts")]
-            ids = {part["asset_id"] for part in data["parts"]}
-            for layout in existing:
-                if ids.intersection(part["asset_id"] for part in layout["parts"]):
-                    raise ContractError("audio source already belongs to another layout")
-                connected = (layout["session_id"] == data["session_id"]
-                             or layout["session_id"] == data["clip_id"]
-                             or layout["clip_id"] == data["session_id"]
-                             or layout["clip_id"] == data["previous_clip_id"]
-                             or layout["previous_clip_id"] == data["clip_id"])
-                if connected and (layout["moment_id"] != data["moment_id"] or layout["session_id"] != data["session_id"]):
-                    raise ContractError("audio continuation crosses Moment or session")
-                if layout["session_id"] == data["session_id"] and layout["previous_clip_id"] == data["previous_clip_id"]:
-                    raise ContractError("audio continuation cannot branch")
-            predecessors = {layout["clip_id"]: layout["previous_clip_id"] for layout in existing}
-            prior, visited = data["previous_clip_id"], {data["clip_id"]}
-            while prior is not None:
-                if prior in visited:
-                    raise ContractError("audio continuation cycle")
-                visited.add(prior)
-                prior = predecessors.get(prior)
+            self._validate_audio_layout_links(connection, data)
             connection.execute("INSERT INTO audio_layouts VALUES (?,?,?)", (data["clip_id"], data["moment_id"], body))
             return kind, data["clip_id"], None, False
         if kind in {"create_trip", "create_day", "create_moment", "create_asset"}:
@@ -529,6 +514,89 @@ class RevisionStore:
             return kind, text_revision.id, current.revision, False
 
         raise ContractError("unknown operation kind")
+
+    @staticmethod
+    def _validate_audio_layout_links(connection: sqlite3.Connection, data: dict) -> None:
+        existing = [json.loads(row["body"]) for row in connection.execute("SELECT body FROM audio_layouts")]
+        ids = {part["asset_id"] for part in data["parts"]}
+        for layout in existing:
+            if ids.intersection(part["asset_id"] for part in layout["parts"]):
+                raise ContractError("audio source already belongs to another layout")
+            connected = (layout["session_id"] == data["session_id"]
+                         or layout["session_id"] == data["clip_id"]
+                         or layout["clip_id"] == data["session_id"]
+                         or layout["clip_id"] == data["previous_clip_id"]
+                         or layout["previous_clip_id"] == data["clip_id"])
+            if connected and (layout["moment_id"] != data["moment_id"] or layout["session_id"] != data["session_id"]):
+                raise ContractError("audio continuation crosses Moment or session")
+            if layout["session_id"] == data["session_id"] and layout["previous_clip_id"] == data["previous_clip_id"]:
+                raise ContractError("audio continuation cannot branch")
+        predecessors = {layout["clip_id"]: layout["previous_clip_id"] for layout in existing}
+        prior, visited = data["previous_clip_id"], {data["clip_id"]}
+        while prior is not None:
+            if prior in visited:
+                raise ContractError("audio continuation cycle")
+            visited.add(prior)
+            prior = predecessors.get(prior)
+
+    def _validate_cancelled_audio_layout(self, connection: sqlite3.Connection,
+                                         envelope: dict[str, Any]) -> dict:
+        """Cancel only this unaccepted layout with a genuinely missing source.
+
+        Existing source declarations must still be valid audio of the same
+        Moment, and every playback-link constraint remains enforced. No missing
+        declaration, layout or media is synthesized to make validation pass.
+        """
+        wrapper = exact_object(envelope["payload"], {"type", "clip_id", "moment_id", "rejected_envelope"})
+        raw = wrapper["rejected_envelope"]
+        if not isinstance(raw, str) or not raw or len(raw.encode("utf-8")) > 524_288:
+            raise ContractError("cancelled audio proof must be a bounded original envelope")
+
+        def unique(pairs):
+            result = {}
+            for key, value in pairs:
+                if key in result:
+                    raise ContractError("cancelled audio proof has duplicate fields")
+                result[key] = value
+            return result
+
+        def nonfinite(_value):
+            raise ContractError("cancelled audio proof has a non-finite number")
+
+        try:
+            original = json.loads(raw, object_pairs_hook=unique, parse_constant=nonfinite)
+        except (ValueError, RecursionError) as error:
+            raise ContractError("cancelled audio proof is not valid JSON") from error
+        exact_object(original, {"contract_version", "epoch", "operation_id", "device_sequence",
+                                "device_id", "kind", "expected_revision", "payload"})
+        for key in ("contract_version", "epoch", "operation_id", "device_sequence",
+                    "device_id", "kind", "expected_revision"):
+            if type(original[key]) is not type(envelope[key]) or original[key] != envelope[key]:
+                raise ContractError("cancelled audio proof belongs to another operation")
+        data = decode_audio_layout(original["payload"])
+        if wrapper["clip_id"] != data["clip_id"] or wrapper["moment_id"] != data["moment_id"]:
+            raise ContractError("cancelled audio proof belongs to another clip or Moment")
+        if connection.execute("SELECT 1 FROM audio_layouts WHERE id=?", (data["clip_id"],)).fetchone() is not None:
+            raise ContractError("existing audio layouts cannot be cancelled")
+        missing = False
+        for part in data["parts"]:
+            row = connection.execute("SELECT body FROM assets WHERE id=?", (part["asset_id"],)).fetchone()
+            if row is None:
+                missing = True
+                continue
+            asset = decode_asset(json.loads(row["body"]))
+            if asset.moment_id != data["moment_id"] or asset.media_kind != "audio":
+                raise ContractError("audio source must belong to this Moment")
+        if not missing:
+            raise ContractError("declared audio sources cannot be cancelled")
+        self._validate_audio_layout_links(connection, data)
+        try:
+            self._project(connection, original)
+        except StoreNotFound as error:
+            if str(error) == "audio source manifest is missing":
+                return data
+            raise
+        raise ContractError("cancelled audio proof was not rejected for a missing source")
 
     def _validate_cancelled_title(self, connection: sqlite3.Connection,
                                   envelope: dict[str, Any], change: dict[str, Any]) -> None:

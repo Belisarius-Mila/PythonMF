@@ -115,6 +115,35 @@ public struct CaminoSyncMetadataItem: Codable, Equatable, Identifiable, Sendable
               let raw = attachment["target_id"] as? String else { return nil }
         return UUID(uuidString: raw)
     }
+
+    public var audioLayoutTarget: CaminoSyncAudioLayoutTarget? {
+        guard kind == "create_audio_layout",
+              let object = try? JSONSerialization.jsonObject(with: payload) as? [String: Any],
+              Set(object.keys) == Set(["clip_id", "moment_id", "session_id", "previous_clip_id",
+                                       "gap_before_ms", "missing_tail", "parts"]),
+              let clip = (object["clip_id"] as? String).flatMap(UUID.init(uuidString:)),
+              clip == objectID,
+              let moment = (object["moment_id"] as? String).flatMap(UUID.init(uuidString:)),
+              let session = (object["session_id"] as? String).flatMap(UUID.init(uuidString:)),
+              let parts = object["parts"] as? [[String: Any]], !parts.isEmpty else { return nil }
+        let assets = parts.compactMap { ($0["asset_id"] as? String).flatMap(UUID.init(uuidString:)) }
+        guard assets.count == parts.count, Set(assets).count == parts.count else { return nil }
+        return CaminoSyncAudioLayoutTarget(clipID: clip, momentID: moment, sessionID: session,
+                                            assetIDs: Set(assets))
+    }
+}
+
+public struct CaminoSyncAudioLayoutTarget: Equatable, Sendable {
+    public let clipID: UUID
+    public let momentID: UUID
+    public let sessionID: UUID
+    public let assetIDs: Set<UUID>
+
+    public func matches(_ deletion: LocalDeletionRecord) -> Bool {
+        deletion.momentID == momentID && (
+            (deletion.kind == .audioSession && deletion.targetID == sessionID)
+            || (deletion.kind == .moment && deletion.targetID == momentID))
+    }
 }
 
 public struct CaminoSyncMediaItem: Codable, Equatable, Identifiable, Sendable {
@@ -515,6 +544,22 @@ public struct CaminoRejectedTitleHistory: Codable, Equatable, Sendable {
     public let proof: CaminoDeletedTitleRepairProof
 }
 
+public struct CaminoDeletedAudioLayoutRepairProof: Codable, Equatable, Sendable {
+    public let serverID: UUID
+    public let epoch: UUID
+    public let cursor: Int64
+
+    public init(serverID: UUID, epoch: UUID, cursor: Int64) {
+        self.serverID = serverID; self.epoch = epoch; self.cursor = cursor
+    }
+}
+
+public struct CaminoRejectedAudioLayoutHistory: Codable, Equatable, Sendable {
+    public let original: CaminoSyncMetadataItem
+    public let proof: CaminoDeletedAudioLayoutRepairProof
+    public let deletion: LocalDeletionRecord
+}
+
 public struct CaminoSyncJournal: Codable, Equatable, Sendable {
     public let schema: Int
     public let deviceID: UUID
@@ -531,6 +576,7 @@ public struct CaminoSyncJournal: Codable, Equatable, Sendable {
     public var lastContactUTCMilliseconds: Int64?
     // Optional for byte-compatible decoding of every pre-repair journal.
     public var rejectedTitleHistory: [CaminoRejectedTitleHistory]?
+    public var rejectedAudioLayoutHistory: [CaminoRejectedAudioLayoutHistory]?
 
     public init(deviceID: UUID = UUID(), openBatchID: UUID = UUID()) {
         schema = 1
@@ -574,6 +620,13 @@ public struct CaminoSyncJournal: Codable, Equatable, Sendable {
                     && $0.original.sequence == $0.proof.cursor + 1
                     && $0.original.objectID == $0.proof.momentID
                     && $0.original.expectedRevision == $0.proof.revision
+            } ?? true)
+            && (rejectedAudioLayoutHistory?.allSatisfy {
+                $0.original.valid && $0.original.phase == .pending
+                    && $0.original.expectedRevision == nil
+                    && $0.original.audioLayoutTarget?.matches($0.deletion) == true
+                    && $0.proof.cursor >= 0 && $0.proof.cursor < Int64.max
+                    && $0.original.sequence == $0.proof.cursor + 1
             } ?? true)
     }
 
@@ -619,6 +672,49 @@ public struct CaminoSyncJournal: Codable, Equatable, Sendable {
             exactEnvelope: try JSONSerialization.data(withJSONObject: envelope, options: options))
         repaired.rejectedTitleHistory = (rejectedTitleHistory ?? [])
             + [CaminoRejectedTitleHistory(original: original, proof: proof)]
+        repaired.serverCursor = proof.cursor
+        guard repaired.valid else { throw CaminoSyncError.invalidJournal }
+        self = repaired
+        return true
+    }
+
+    /// A rejected layout can be cancelled only after its complete local session
+    /// (or parent Moment) was explicitly deleted. Keep the original packet and
+    /// tombstone; replacement uses the same unaccepted operation and sequence.
+    @discardableResult public mutating func repairRejectedDeletedAudioLayout(
+        id: UUID, deletions: [LocalDeletionRecord], status: Int, code: String,
+        proof: CaminoDeletedAudioLayoutRepairProof, serverBlocked: Bool
+    ) throws -> Bool {
+        guard valid, status == 404, code == "not_found", !serverBlocked,
+              !reconciliationRequired, serverID == proof.serverID, epoch == proof.epoch,
+              proof.cursor >= 0, proof.cursor < Int64.max, serverCursor <= proof.cursor,
+              let index = metadata.firstIndex(where: { $0.id == id }),
+              metadata[index].phase == .pending, metadata[index].expectedRevision == nil,
+              let target = metadata[index].audioLayoutTarget,
+              let deletion = deletions.first(where: { target.matches($0) }),
+              metadata[index].sequence == proof.cursor + 1,
+              !metadata.contains(where: { $0.phase == .accepted && ($0.sequence ?? 0) > proof.cursor }),
+              let originalEnvelope = metadata[index].exactEnvelope,
+              originalEnvelope.count <= 524_288,
+              let rejectedBody = String(data: originalEnvelope, encoding: .utf8),
+              var envelope = try JSONSerialization.jsonObject(with: originalEnvelope) as? [String: Any]
+        else { return false }
+        let original = metadata[index]
+        let payload: [String: Any] = ["type": "cancel_deleted_audio_layout",
+            "clip_id": target.clipID.uuidString.lowercased(),
+            "moment_id": target.momentID.uuidString.lowercased(), "rejected_envelope": rejectedBody]
+        let options: JSONSerialization.WritingOptions = [.sortedKeys, .withoutEscapingSlashes]
+        envelope["payload"] = payload
+        let exact = try JSONSerialization.data(withJSONObject: envelope, options: options)
+        guard exact.count <= 1_048_576 else { return false }
+        var repaired = self
+        repaired.metadata[index] = CaminoSyncMetadataItem(
+            id: original.id, uniqueKey: original.uniqueKey, kind: original.kind,
+            objectID: original.objectID, expectedRevision: nil,
+            payload: try JSONSerialization.data(withJSONObject: payload, options: options),
+            sequence: original.sequence, exactEnvelope: exact)
+        repaired.rejectedAudioLayoutHistory = (rejectedAudioLayoutHistory ?? []) + [
+            CaminoRejectedAudioLayoutHistory(original: original, proof: proof, deletion: deletion)]
         repaired.serverCursor = proof.cursor
         guard repaired.valid else { throw CaminoSyncError.invalidJournal }
         self = repaired
@@ -789,13 +885,25 @@ public struct CaminoSyncJournal: Codable, Equatable, Sendable {
     /// Local deletion tombstones must stop any not-yet-sent create work from
     /// reaching the Mac. Already accepted history stays byte-for-byte intact;
     /// the later server deletion contract will handle that copy separately.
-    public mutating func suppressDeletedContent(momentIDs: Set<UUID>, assetIDs: Set<UUID>) {
+    public mutating func suppressDeletedContent(momentIDs: Set<UUID>, assetIDs: Set<UUID>,
+                                                audioSessionIDs: Set<UUID> = []) {
+        var deletedAssets = assetIDs
+        for target in metadata.compactMap(\.audioLayoutTarget)
+            where momentIDs.contains(target.momentID) || audioSessionIDs.contains(target.sessionID) {
+            deletedAssets.formUnion(target.assetIDs)
+        }
         func payloadObject(_ item: CaminoSyncMetadataItem) -> [String: Any]? {
             (try? JSONSerialization.jsonObject(with: item.payload)) as? [String: Any]
         }
         metadata.removeAll { item in
-            guard item.phase != .accepted else { return false }
-            if item.kind == "create_asset" && assetIDs.contains(item.objectID) { return true }
+            // An assigned packet may already have reached the Mac. It cannot
+            // disappear or be resequenced, even when its local content is deleted.
+            guard item.phase != .accepted, item.exactEnvelope == nil, item.sequence == nil else { return false }
+            if item.kind == "create_asset" && deletedAssets.contains(item.objectID) { return true }
+            if let target = item.audioLayoutTarget,
+               audioSessionIDs.contains(target.sessionID) || !target.assetIDs.isDisjoint(with: deletedAssets) {
+                return true
+            }
             if item.relatedMomentID.map(momentIDs.contains) == true { return true }
             if let object = payloadObject(item),
                let momentRaw = object["moment_id"] as? String,
@@ -805,7 +913,7 @@ public struct CaminoSyncJournal: Codable, Equatable, Sendable {
             return false
         }
         media.removeAll { item in
-            item.phase != .verified && (momentIDs.contains(item.momentID) || assetIDs.contains(item.id))
+            item.phase != .verified && (momentIDs.contains(item.momentID) || deletedAssets.contains(item.id))
         }
     }
 

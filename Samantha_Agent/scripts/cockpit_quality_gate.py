@@ -249,6 +249,7 @@ TEST_MODULES = (
     "camino.server.tests.test_application",
     "tests.test_camino_metadata_diagnostics",
     "tests.test_camino_deleted_title_repair",
+    "tests.test_camino_deleted_audio_layout_repair",
     "tests.test_camino_client_update",
     "tests.test_camino_service_control",
     "tests.test_camino_service_network",

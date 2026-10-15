@@ -37,6 +37,12 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   a plná brána 1925/1925 PASS. Míla po IPA18 potvrdil funkčnost; Mac přijal
   jedno vymezené storno a navazující operace/média. Starých 740 paketů a
   234 mediálních účtenek přesně zachovaných, úplný SHA audit PASS.
+  Doplnění 15. 10.: při smazání audio session musí být potlačen i dosud
+  neposlaný playback layout, včetně pozdního backfillu. Přidělené obálky
+  neodstraňovat. Pro již odmítnutý layout použít pouze vymezené storno
+  s místním tombstonem a čerstvým důkazem 404/nepřijetí, zachovat originál.
+  Místní skutečné Swift → API testy a retry/reopen PASS; nová telefonní
+  přejímka otevřená. Běžnou validaci a deklarované zdroje neobcházet.
 
 ### LL-064 — Zvuk po spojení PCM segmentů potřebuje souvislé PTS vzorků
 
