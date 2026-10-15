@@ -60,7 +60,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] 2026-10-15 20:26 CEST: autorizované p+n. `298b6dc2` push/deploy a CI success, ale skutečné video odhalilo službový PATH. Úzká lokální oprava pouze filmového workeru: 24/24 testů a skutečný náhled pod omezeným PATH PASS. Plná brána 1941/1941 PASS. Archiv 300 originálů SHA PASS, Camino a síť zachované, film stále revize 1. Dokončit schválený push/nasazení opravy a živý test nového zdroje; pak iPhone P2-C/E. Report `camino/docs/P2CD_EDITOR_MP4_REPORT.md`.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — [PRIPOMENOUT] 2026-10-15 20:29 CEST: střižna pushnutá a nasazená, `ff87ee2d` / stamp `ba5bfa185ffd57b9`, nový proces, receipt deployed a smoke 5/5. 1941/1941 plná místní brána, 24/24 cílených PASS; další video připravené skutečným workerem z Cockpitu, původní filmy i nový náhled HTTP/HTTPS 200/206. Archiv všech 300 originálů SHA PASS a přesná shoda před/po; Camino, konfigurace a síť zachované, střih revize 1 nezměněný. Nová GitHub brána ještě může běžet. Další krok iPhone úsek/save/reload/náhled pro P2-C/E. Report `camino/docs/P2CD_EDITOR_MP4_REPORT.md`.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` - Cockpit 14. 9.: scroll 10ec0877 potvrzený Mílou. [PRIPOMENOUT] U07 až při příštím pokračování. TXT v2.8 shrnuje U01–U06; plná brána 1680/1680 OK, funkční nasazení 980aed7a a smoke 5/5. Publikační překážka odstraněna; finální balíček/head ověřovat živým auditem.
 

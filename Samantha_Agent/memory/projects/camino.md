@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-15 20:26 CEST — autorizované p+n a oprava prostředí filmového workeru
+Aktualizováno: 2026-10-15 20:29 CEST — střižna pushnutá/nasazená, skutečný náhled a archiv ověřené
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,8 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-15 20:29 CEST — p+n dokončené: přímý náhled a ruční trim v Cockpitu, kód `ff87ee2d`, stamp `ba5bfa185ffd57b9`, nový proces, receipt deployed a smoke 5/5. Nutná PATH oprava se týká jen nového filmového workeru, bez systémových změn. 1941/1941 plná místní brána a 24/24 cílených PASS. Skutečný nový náhled z běžícího Cockpitu 8 763 ms / 1 484 481 B plně dekódovaný/hash PASS; oba původní filmy i nový zdroj HTTP/HTTPS 200/206. Střih revize 1 přesně zachovaný; žádný nový render celého filmu. Archiv všech 300 originálů, 883 operací a 123 Momentů přesně shodný; Camino stále PID 47332 / `f60a33c98fd5`, konfigurace, Serve a flags zachované, Funnel off, owner/anonymous kontrola PASS. Nová GitHub brána ještě může běžet, předchozí `298b6dc2` success. Další krok fyzicky na iPhonu úsek/save/reload/náhled pro P2-C/E; P2-F později. Report `camino/docs/P2CD_EDITOR_MP4_REPORT.md`.
 
 - 2026-10-15 20:26 CEST — `298b6dc2` pushnutý a první Cockpit nasazení ověřené, GitHub brána success a smoke 5/5. Skutečné video odhalilo chybějící FFmpeg/FFprobe ve službovém PATH; úzká oprava mění prostředí pouze nového filmového workeru. 24/24 cílených testů PASS a skutečný worker pod omezeným PATH vytvořil ověřený celý náhled 6 732 ms / 988 097 B. Plná brána 1941/1941 PASS. Archiv 883 operací, všech 300 originálů SHA PASS, služba Camino PID 47332 / `f60a33c98fd5`, konfigurace a síť shodné. Film 6. 10. stále revize 1, dva původní filmy zachované; žádný nový render celého filmu. Dokončit už schválený push/nasazení opravy a živý test nového zdroje. Fyzická iPhone přejímka čeká; report `camino/docs/P2CD_EDITOR_MP4_REPORT.md`.
 
