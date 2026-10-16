@@ -14,12 +14,17 @@ REPO_ROOT = PROJECT_ROOT.parent
 DEFAULT_METRICS_PATH = PROJECT_ROOT / "data" / "metrics" / "samantha_quantitative_status.jsonl"
 
 EXCLUDED_DIR_NAMES = {
+    ".build",
     ".git",
     ".mypy_cache",
     ".pytest_cache",
     ".ruff_cache",
     ".venv",
+    "DerivedData",
     "__pycache__",
+    "build",
+    "dist",
+    "node_modules",
 }
 
 EXCLUDED_RELATIVE_DIRS = {
@@ -27,6 +32,7 @@ EXCLUDED_RELATIVE_DIRS = {
     Path("data/session_autosave"),
     Path("data/email/archive"),
     Path("data/metrics"),
+    Path("data/daily_3am"),
     Path("data/tmp"),
     Path("logs"),
 }
@@ -124,6 +130,11 @@ def _iter_local_files(project_root: Path) -> Iterable[Path]:
     files: list[Path] = []
     for root, dir_names, file_names in os.walk(project_root):
         root_path = Path(root)
+        # A clone/worktree is another project, even when its directory name
+        # does not look temporary. Its .git marker may be a file or directory.
+        if root_path != project_root and (root_path / ".git").exists():
+            dir_names.clear()
+            continue
         dir_names[:] = [
             dir_name
             for dir_name in dir_names
@@ -132,7 +143,7 @@ def _iter_local_files(project_root: Path) -> Iterable[Path]:
         for file_name in file_names:
             path = root_path / file_name
             relative = path.relative_to(project_root)
-            if not _is_excluded(relative):
+            if not path.is_symlink() and not _is_excluded(relative):
                 files.append(path)
     return files
 
@@ -155,7 +166,7 @@ def _iter_git_files(project_root: Path, repo_root: Path, runner: Runner) -> list
         if not line.startswith(f"{project_root.name}/"):
             continue
         path = repo_root / line
-        if path.is_file() and not _is_excluded(path.relative_to(project_root)):
+        if not path.is_symlink() and path.is_file() and not _is_excluded(path.relative_to(project_root)):
             files.append(path)
     return files
 

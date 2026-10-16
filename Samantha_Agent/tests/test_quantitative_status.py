@@ -97,6 +97,67 @@ class QuantitativeStatusTests(unittest.TestCase):
 
         self.assertEqual(relative_paths, {"app/main.py"})
 
+    def test_local_files_skip_publish_workspaces_and_build_outputs(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            (root / "app").mkdir()
+            (root / "app" / "main.py").write_text("source\n", encoding="utf-8")
+            excluded_dirs = (
+                "data/daily_3am/publish_20260921/Samantha_Agent/app",
+                "camino/app/.build/debug",
+                "camino/prototypes/transfer/.build/debug",
+                "camino/app/DerivedData",
+                "app/frontend/node_modules/package",
+                "build/lib",
+                "dist/bundle",
+            )
+            for relative in excluded_dirs:
+                directory = root / relative
+                directory.mkdir(parents=True)
+                (directory / "copy.py").write_text("duplicate\n" * 100, encoding="utf-8")
+
+            result = run_samantha_quantitative_status(
+                project_root=root,
+                repo_root=root.parent,
+                runner=_runner(ls_files="", status="## main\n"),
+            )
+
+        self.assertEqual(result.local_stats[".py"].files, 1)
+        self.assertEqual(result.local_stats[".py"].lines, 1)
+
+    def test_local_files_skip_nested_repositories_and_external_symlinks(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            base = Path(temp_dir)
+            root = base / "project"
+            root.mkdir()
+            (root / "main.py").write_text("source\n", encoding="utf-8")
+            (root / "local_only.py").write_text("local source\n", encoding="utf-8")
+            (root / ".git").mkdir()
+            for name, is_worktree in (("another_clone", False), ("another_worktree", True)):
+                directory = root / "workspaces" / name
+                directory.mkdir(parents=True)
+                marker = directory / ".git"
+                if is_worktree:
+                    marker.write_text("gitdir: elsewhere\n", encoding="utf-8")
+                else:
+                    marker.mkdir()
+                (directory / "copy.py").write_text("duplicate\n" * 100, encoding="utf-8")
+            external = base / "external.py"
+            external.write_text("outside project\n", encoding="utf-8")
+            (root / "link.py").symlink_to(external)
+
+            relative_paths = {path.relative_to(root).as_posix() for path in _iter_local_files(root)}
+
+            result = run_samantha_quantitative_status(
+                project_root=root,
+                repo_root=base,
+                runner=_runner(ls_files="project/main.py\nproject/link.py\n", status="## main\n"),
+            )
+
+        self.assertEqual(relative_paths, {"main.py", "local_only.py"})
+        self.assertEqual(result.git_stats[".py"].files, 1)
+        self.assertEqual(result.git_stats[".py"].lines, 1)
+
 
 def _project_root(repo_root: Path) -> Path:
     project_root = repo_root / "Samantha_Agent"

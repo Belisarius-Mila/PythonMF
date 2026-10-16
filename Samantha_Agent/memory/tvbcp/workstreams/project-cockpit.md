@@ -1,6 +1,12 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-16 19:45 CEST: kvantitativní přehled místně opravený a 12 cílených
+  testů PASS; push/nasazení čekají. Původních 877 153 řádků zahrnovalo cizí
+  publikační klon a Swift build cache; opravený místní rozsah přibližně
+  347 tisíc řádků / 2 143 souborů. Další krok je samostatně nasadit Cockpit
+  a ověřit živé API. U07 tím není zahájený. Běžící proces má zatím starý výpočet.
+
 - 2026-09-14 21:44 CEST: meziúkol ToBeToHave vrací Webové aplikace do horní lišty. Jejich přesun do Servisu v U06 způsobil ztrátu dohledatelnosti. Dlaždice ToBeToHave nyní míří na web; U07 zůstává odložený. 22 cílených testů OK; finální nasazení ověřovat živě.
 
 - Aktualizováno 2026-09-14 20:25 CEST: U01–U06 funkčně nasazené, head `980aed7a`, nový proces potvrzen, smoke 5/5 a shoda podávaného HTML; otisk `55373c8c1c4da728`.
@@ -1170,3 +1176,35 @@ Technický důkaz:
 - Regresní test hlídá vstup do aplikací přímo v hlavičce a webový cíl dlaždice.
 - Zdrojový checkpoint předchází publikaci; finální head, Pages a nasazení
   ověřují živé GitHub a Cockpit účtenky. Podrobnosti v `reports/to_be_web_release_2026_09_14.md`.
+
+
+### 2026-10-16 19:45 CEST — Kvantitativní přehled vynechává pracovní kopie a sestavené soubory
+
+Hotovo:
+- Místní statistika znovu měří vlastní projekt: přibližně 347 tisíc řádků
+  a 2 143 souborů místo 877 153 řádků / 16 164 souborů.
+- Skutečné nesledované zdroje zůstávají zahrnuté; jde o text včetně testů,
+  paměti a dokumentace, nikoli pouze programový kód.
+
+Rozhodnutí:
+- Cílená oprava počítání; žádný úklid ani mazání. Film, Camino aplikace,
+  přenosová služba, archiv a síť nejsou součástí změny. U07 se nezahajuje.
+
+Další krok:
+- Samostatně autorizovat nasazení Cockpitu a porovnat živý součet. Do té
+  doby běžící proces používá starý výpočet; push neproběhl.
+
+Navrhované další kroky:
+- U07 Servis podle účelu zůstává odložený. Filmové ovládání Míla vyzkouší
+  v neděli 18. 10. doma; tato oprava film nemění.
+
+Technický důkaz:
+- Původní oprava `f5014992` zůstala v kódu; pokrývala Python prostředí a tmp,
+  ne `data/daily_3am` (8 519 souborů / 525 023 řádků) a Swift `.build`
+  (5 502 souborů / 5 251 řádků). Oprava navíc vynechává vnořené Git kořeny
+  podle `.git` adresáře i souboru, běžné build/závislostní adresáře a symlinky.
+- Registrovaný read-only CLI a živé API měly před opravou shodné součty.
+  Po opravě místní CLI 2 143 souborů / 347 049 řádků včetně zápisu dokumentace.
+  12 cílených testů PASS (agregace, klony/buildy/worktrees/symlinky, Cockpit
+  přehled a systémový audit). Rychlá statická brána PASS; důkaz
+  `logs/cockpit_quantitative_scope_20261016.log` (agregáty, mimo Git).

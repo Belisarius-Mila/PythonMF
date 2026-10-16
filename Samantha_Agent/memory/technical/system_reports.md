@@ -20,6 +20,12 @@ Samantha pouzit tool `samantha_system_reports`.
 
 ## Pravidla
 
+- Kvantitativní status počítá řádky textu, tedy i testy, dokumentaci a paměť,
+  nikoli pouze programový kód. Lokální rozsah zahrnuje také nesledované
+  projektové soubory; vynechává soukromé/provozní oblasti, publikační workspace
+  `data/daily_3am`, sestavené výstupy a závislosti (`.build`, `build`, `dist`,
+  `DerivedData`, `node_modules`), vnořené Git repozitáře/worktrees a symlinky.
+  Počty nejsou inventurou disku; nic kvůli nim nemaže ani neuklízí.
 - Reporty maji byt kratke, ad hoc a bezpecne.
 - Reporty nesmi cist ani vypisovat soukroma data, e-maily, tokeny nebo tajemstvi.
 - Pokud report uklada data, musi jit o agregovanou datovou vetu bez nazvu

@@ -29,6 +29,20 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-067 — Do objemu projektu nepatří publikační klony a sestavené výstupy
+
+- Problém: Kvantitativní přehled ukazoval 877 153 lokálních řádků, protože
+  sečetl také celý publikační klon a Swift build cache. Starší oprava
+  dočasných adresářů a Python prostředí byla přítomná, ale tyto cesty nepokrývala.
+- Typ: opakující se
+- Řešení nalezeno: 16102026
+- Řešení: Při průchodu vynechat provozní publikační workspace, obvyklé
+  build/závislostní adresáře a každý vnořený Git kořen (`.git` adresář i soubor),
+  nikoli jen konkrétní název starého klonu. Zachovat skutečné lokální zdroje
+  mimo Git; symlinky nečíst. Ověřit agregaci i API a skutečné read-only měření.
+  Místní výsledek přibližně 347 tisíc řádků / 2 143 souborů, 12 cílených
+  testů PASS. Nasazení je samostatný krok; staré soubory se nemažou.
+
 ### LL-065 — Přejmenovaná a smazaná příloha nesmí zablokovat metadata frontu
 
 - Problém: Klient vyřadí smazaný Asset, ale historický název přílohy zůstane
