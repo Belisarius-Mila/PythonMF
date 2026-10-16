@@ -45,6 +45,7 @@ class WorkflowCommand:
     intent_keywords: tuple[str, ...] = ()
     required_keyword_groups: tuple[tuple[str, ...], ...] = ()
     preflight: Preflight | None = None
+    confirmation_phrase: str = ""
 
     def exact_shell(self) -> str:
         return " ".join(shlex.quote(part) for part in self.argv)
@@ -317,6 +318,49 @@ def _camino_service_commands() -> tuple[WorkflowCommand, ...]:
 
 
 WORKFLOW_COMMANDS: tuple[WorkflowCommand, ...] = (
+    WorkflowCommand(
+        command_id="prepare_autosave_service",
+        title="Připravit trvalé autosave",
+        purpose="Připraví kontrolovatelný LaunchAgent uvnitř projektu; systém nemění.",
+        aliases=("připrav trvalé autosave",),
+        argv=(str(PYTHON_BIN), str(SAMANTHA_DIR / "scripts/autosave_launchd.py"), "prepare"),
+        cwd=SAMANTHA_DIR, risk="local_config_preview", writes="data/autosave_service, bez změny LaunchAgents",
+        requires_confirmation=True,
+    ),
+    WorkflowCommand(
+        command_id="install_autosave_service",
+        title="Zapnout trvalé autosave po přihlášení",
+        purpose="Vlastní LaunchAgent obnoví autosave po pádu; historické kopie nemaže.",
+        aliases=("zapni trvalé autosave",),
+        argv=(str(PYTHON_BIN), str(SAMANTHA_DIR / "scripts/autosave_launchd.py"), "install",
+              "--confirmation", "Potvrzuji globální brzdu: rozumím riziku a chci pokračovat."),
+        cwd=SAMANTHA_DIR, risk="system_configuration_write",
+        writes="pouze vlastní autosave LaunchAgent a autosave proces; nemění Camino ani síť",
+        requires_confirmation=True,
+        confirmation_phrase="Potvrzuji globální brzdu: rozumím riziku a chci pokračovat.",
+    ),
+    WorkflowCommand(
+        command_id="restart_session_autosave",
+        title="Obnovit vlastní autosave proces",
+        purpose="Ověří vlastnictví procesu a obnoví jej s aktuálním kódem, bez mazání historie.",
+        aliases=("obnov autosave",),
+        argv=(str(PYTHON_BIN), str(SAMANTHA_DIR / "scripts/start_autosave.py"), "--restart"),
+        cwd=SAMANTHA_DIR, risk="local_process_write", writes="pouze vlastní autosave proces a nové kopie",
+        requires_confirmation=True,
+    ),
+    WorkflowCommand(
+        command_id="start_session_autosave",
+        title="Zapnout průběžné autosave",
+        purpose="Spustí jeden nezávislý autosave proces a zachová všechny starší kopie.",
+        aliases=("zapni autosave", "spusť autosave"),
+        argv=(str(PYTHON_BIN), str(SAMANTHA_DIR / "scripts/start_autosave.py")),
+        cwd=SAMANTHA_DIR,
+        risk="local_process_write",
+        writes="aktuální autosave a nové historické kopie; nic nemaže, nemění systém ani Camino",
+        requires_confirmation=True,
+        intent_keywords=("zapni", "spusť", "autosave"),
+        required_keyword_groups=(("zapni", "spusť"), ("autosave",)),
+    ),
     WorkflowCommand(
         command_id="vocabularyfr_jana_bundle",
         title="Sestavit VocabularyFR pro Janu",
@@ -848,7 +892,10 @@ def preview_workflow_command_text(
         lines.append(f"- nelze spustit: {preflight_error}")
     else:
         lines.append("- pripraveno ke spusteni")
-        if resolved.requires_confirmation:
+        if resolved.requires_confirmation and resolved.confirmation_phrase:
+            _save_pending_command(resolved, pending_path=pending_path)
+            lines.extend(["", "Potvrzeni:", resolved.confirmation_phrase])
+        elif resolved.requires_confirmation:
             _save_pending_command(resolved, pending_path=pending_path)
             lines.extend(
                 [
@@ -889,6 +936,8 @@ def run_workflow_command_text(
         user_confirmed=user_confirmed,
         pending_path=pending_path,
     ):
+        if resolved.confirmation_phrase:
+            return "Workflow prikaz nespusten: vyzaduje presnou potvrzovaci vetu.\n" + resolved.confirmation_phrase
         return (
             "Workflow prikaz nespusten: chybi samostatne potvrzeni.\n"
             f"Nejdrive si nech zobrazit nahled prikazu a potom napis `ano`, "
@@ -1089,6 +1138,8 @@ def _has_command_confirmation(
 ) -> bool:
     if not user_confirmed:
         return False
+    if command.confirmation_phrase:
+        return confirmation_text.strip() == command.confirmation_phrase
     normalized = _normalize(confirmation_text)
     explicit = (
         _normalize(command.command_id) in normalized

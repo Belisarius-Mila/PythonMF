@@ -283,11 +283,21 @@ Pri vyzve na adresar vybrat session directory `~/Desktop/PythonMF/Samantha_Agent
 
 ## Automaticky autosave
 
-Pri spusteni pres `samantha` bezi na pozadi:
+Od 16. 10. 2026 příkaz `samantha` používá nezávislý start:
 
 ```bash
-scripts/autosave_codex_session.sh --watch
+.venv/bin/python scripts/start_autosave.py
 ```
+
+Ukončení terminálové relace tento proces nezastavuje. Start ověřuje čerstvé
+uložení a nepovažuje pouhé vytvoření procesu za úspěšný autosave.
+Samostatný LaunchAgent s `RunAtLoad` a `KeepAlive` připravuje registrovaný
+`prepare_autosave_service`; jeho instalace `install_autosave_service` vyžaduje
+přesnou globální brzdu, protože zapisuje do uživatelských LaunchAgents.
+Do samostatného potvrzení je tato instalace pouze připravená, nikoli aktivní.
+
+Nový bezpečný start automatický úklid nezapíná a zachovává starší historii.
+Skutečný režim retence se zobrazuje ze stavu posledního úspěšného uložení.
 
 Interval obnovy `latest_session.jsonl` a `latest_session.txt` je výchozí
 600 sekund. Změnit se dá proměnnou:
@@ -313,6 +323,17 @@ Typicke soubory:
 - `latest_session.txt` - citelny textovy vytah uzivatelskych a asistentskych zprav.
 - `session_YYYYMMDD_HHMMSS.jsonl` - casovana technicka kopie.
 - `session_YYYYMMDD_HHMMSS.txt` - casovana textova kopie.
+- `previous_session.jsonl/txt` a `previous_info.txt` - předchozí úspěšná
+  dvojice, chráněná také při chybě mezi zveřejněním aktuálních souborů.
+- `last_attempt.json` - bezpečný stav posledního pokusu bez obsahu konverzace.
+
+Záznam se vybírá podle příslušnosti k projektu; novější relace cizího projektu
+nesmí přepsat poslední obnovu Samanthy. Textový převod rozpoznává starší
+události i současné zprávy `response_item`; interní analýzu ani systémové
+zprávy do čitelného výtahu nevkládá. Technická kopie zachovává úplné řádky.
+Výstupy se nejdřív připraví bokem, před výměnou se zachová předchozí úspěšná
+kopie a teprve po dokončení se obnoví metadata. Chybný či chybějící zdroj
+nesmí vytvořit zdání čerstvého úspěšného autosave.
 
 Dulezite: tyto soubory mohou obsahovat citlive udaje z konverzace. Proto jsou
 ignorovane v `.gitignore` a nemaji se commitovat ani kopirovat do `memory/` bez
@@ -337,6 +358,11 @@ Vychozi pravidlo:
 - nikdy nemazat `latest_session.jsonl`, `latest_session.txt`, `latest_info.txt`
   ani jine soubory, ktere neodpovidaji tvaru `session_YYYYMMDD_HHMMSS.jsonl/txt`,
 - necist obsah autosave souboru, jen nazvy a velikosti.
+
+Předchozí pravidlo 12 dvojic platí při výslovně zapnuté automatické retenci.
+Nový nezávislý start má `SAMANTHA_AUTOSAVE_AUTO_CLEANUP=0`; existující
+historické kopie nemaže. Samotná nula kandidátů k úklidu není důkaz, že
+autosave běží. Kontrolovat také jeden proces, stáří uložení a poslední chybu.
 
 Autosave stav hlasi volne misto na SSD. Pod 30 GiB jde o varovani a pod 15 GiB
 o kriticky stav.

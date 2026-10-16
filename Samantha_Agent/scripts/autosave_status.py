@@ -7,6 +7,7 @@ import argparse
 import json
 import shutil
 import subprocess
+import plistlib
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -35,6 +36,9 @@ class AutosaveStatus:
     disk_free_gib: float | None
     disk_state: str
     warning: str
+    automatic_cleanup: bool | None = None
+    service_configured: bool = False
+    last_error: str = ""
 
 
 def autosave_status(
@@ -43,10 +47,36 @@ def autosave_status(
     warn_minutes: int = DEFAULT_WARN_MINUTES,
     runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
     disk_usage_getter: Callable[[Path], object] = shutil.disk_usage,
+    service_path: Path | None = None,
 ) -> AutosaveStatus:
     latest_age_minutes: int | None = None
     latest_modified_at = ""
     warnings: list[str] = []
+    automatic_cleanup = None
+    service_configured = False
+    last_error = ""
+    try:
+        attempt = json.loads((latest_info_path.parent / "last_attempt.json").read_text())
+        if attempt.get("ok") is False:
+            last_error = str(attempt.get("error") or "unknown")[:80]
+            warnings.append("posledni autosave selhal: " + last_error)
+    except (OSError, ValueError, TypeError):
+        pass
+    try:
+        info = latest_info_path.read_text(encoding="utf-8")
+        retention = next((line for line in info.splitlines() if line.startswith("Automaticka retence:")), "")
+        if retention:
+            automatic_cleanup = "(ok)" in retention
+    except OSError:
+        pass
+    try:
+        definition = service_path or Path.home() / "Library/LaunchAgents/com.miloslavfalta.samantha.autosave.plist"
+        spec = plistlib.loads(definition.read_bytes())
+        service_configured = bool(spec.get("Label") == "com.miloslavfalta.samantha.autosave"
+                                  and spec.get("KeepAlive") and spec.get("RunAtLoad")
+                                  and spec.get("ProgramArguments") == ["/bin/zsh", str(PROJECT_ROOT / "scripts/autosave_codex_session.sh"), "--watch"])
+    except (OSError, ValueError, plistlib.InvalidFileException):
+        pass
 
     if latest_info_path.exists():
         modified = datetime.fromtimestamp(latest_info_path.stat().st_mtime, tz=timezone.utc)
@@ -99,6 +129,9 @@ def autosave_status(
         disk_free_gib=disk_free_gib,
         disk_state=disk_state,
         warning="; ".join(warnings),
+        automatic_cleanup=automatic_cleanup,
+        service_configured=service_configured,
+        last_error=last_error,
     )
 
 
@@ -147,6 +180,7 @@ def format_autosave_status(status: AutosaveStatus) -> str:
         lines.append(f"- latest age: {status.latest_age_minutes} min")
     lines.append(f"- watcher: {'bezi' if status.watcher_running else 'nebezi'}")
     lines.append(f"- watcher count: {status.watcher_count}")
+    lines.append(f"- start po prihlaseni a obnova po padu: {'nastaveno' if status.service_configured else 'nenastaveno'}")
     if status.watcher_pids:
         lines.append(f"- watcher pids: {', '.join(str(pid) for pid in status.watcher_pids)}")
     if status.disk_free_gib is None:

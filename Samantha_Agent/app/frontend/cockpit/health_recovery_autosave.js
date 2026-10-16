@@ -334,6 +334,61 @@
       return `${Math.round(value / 86400)} d`;
     }
 
+    function renderAutosaveState(data) {
+      const runtime = data.runtime || {};
+      const age = runtime.latest_age_minutes;
+      const running = runtime.watcher_count === 1;
+      const fresh = Number.isFinite(age) && age <= 20;
+      const label = !running ? "Autosave NEBĚŽÍ správně"
+        : runtime.last_error ? "Poslední autosave selhal"
+        : !fresh ? "Autosave neukládá čerstvé kopie"
+        : "Autosave běží";
+      const level = !running || !fresh || runtime.last_error || runtime.disk_state === "critical" ? "bad"
+        : runtime.disk_state === "warning" || !runtime.service_configured ? "warn" : "ok";
+      if (elements.autosaveState) {
+        elements.autosaveState.textContent = label;
+        elements.autosaveState.className = `voice-card-title ${level}`;
+      }
+      if (elements.autosaveDetail) {
+        const when = runtime.latest_modified_at ? new Date(runtime.latest_modified_at).toLocaleString("cs-CZ") : "nezjištěno";
+        elements.autosaveDetail.textContent = `Poslední uložení: ${when}`
+          + (Number.isFinite(age) ? ` · před ${age} min` : "")
+          + ` · automatický start a obnova po pádu: ${runtime.service_configured ? "nastavené" : "zatím nenastavené"}`;
+      }
+      if (elements.autosaveRetention) {
+        elements.autosaveRetention.textContent = runtime.automatic_cleanup === true
+          ? "Aktuální kopie každých 10 minut, historie nejvýše jednou za hodinu; automaticky se ponechává 12 historických dvojic."
+          : runtime.automatic_cleanup === false
+            ? "Aktuální kopie každých 10 minut, historie nejvýše jednou za hodinu. Starší kopie se nyní automaticky nemažou."
+            : "Režim automatického úklidu se nepodařilo ověřit.";
+      }
+      if (deps.setDashboardStatusSignal) deps.setDashboardStatusSignal("autosave", level, label);
+    }
+
+    let autosaveStatusInFlight = false;
+    let autosaveObservation = 0;
+    async function refreshAutosaveStatus() {
+      if (autosaveStatusInFlight) return;
+      autosaveStatusInFlight = true;
+      const observation = ++autosaveObservation;
+      try {
+        const data = await deps.postJson("/api/session-autosave/cleanup", {
+          retention_days: 0, keep_latest_snapshots: 12, apply: false
+        });
+        if (data.ok === false || !data.runtime) throw new Error("Autosave stav není dostupný");
+        if (observation === autosaveObservation) renderAutosaveState(data);
+      } catch (error) {
+        if (observation !== autosaveObservation) return;
+        if (elements.autosaveState) {
+          elements.autosaveState.textContent = "Stav autosave nelze ověřit";
+          elements.autosaveState.className = "voice-card-title bad";
+        }
+        if (deps.setDashboardStatusSignal) deps.setDashboardStatusSignal("autosave", "bad", "Stav autosave nelze ověřit");
+      } finally {
+        autosaveStatusInFlight = false;
+      }
+    }
+
     function formatAutosaveCleanupPlan(data) {
       const plan = data.plan || {};
       const runtime = data.runtime || {};
@@ -373,6 +428,7 @@
     }
 
     async function previewAutosaveCleanup(button) {
+      const observation = ++autosaveObservation;
       const targetButton = button || elements.autosaveCleanupPreviewBtn || elements.dashboardAutosaveCleanupBtn;
       targetButton.disabled = true;
       if (elements.autosaveCleanupStatus) elements.autosaveCleanupStatus.textContent = "Počítám autosave úklid...";
@@ -384,9 +440,13 @@
           apply: false
         });
         currentAutosaveCleanupPlan = data.plan || null;
+        if (observation === autosaveObservation) renderAutosaveState(data);
         if (elements.autosaveCleanupStatus) elements.autosaveCleanupStatus.textContent = data.message || "Dry-run hotov.";
         if (elements.autosaveCleanupOutput) elements.autosaveCleanupOutput.textContent = formatAutosaveCleanupPlan(data);
-        if (elements.autosaveCleanupApplyBtn) elements.autosaveCleanupApplyBtn.disabled = !((data.plan || {}).delete_count > 0);
+        if (elements.autosaveCleanupApplyBtn) {
+          elements.autosaveCleanupApplyBtn.disabled = !((data.plan || {}).delete_count > 0);
+          elements.autosaveCleanupApplyBtn.hidden = !((data.plan || {}).delete_count > 0);
+        }
         elements.servicePanel.open = true;
         deps.showMessage(data.message || "Autosave úklid spočítán.");
       } catch (err) {
@@ -455,6 +515,8 @@
       openDiagnosticsModal,
       openRecoveryModal,
       previewAutosaveCleanup,
+      refreshAutosaveStatus,
+      renderAutosaveState,
       runFrontendHealthCheck,
     });
   }

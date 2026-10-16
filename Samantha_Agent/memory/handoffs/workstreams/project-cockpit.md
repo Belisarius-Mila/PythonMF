@@ -1,6 +1,16 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-16 20:38 CEST: absolutní priorita autosave. Průběžné ukládání je obnoveno
+  v jediném nezávislém procesu, čerstvá technická i čitelná kopie ověřená,
+  původních 12 dvojic zachováno. Nový převod podporuje současné zprávy,
+  zapisuje atomicky po souborech a zachovává předchozí úspěšnou dvojici.
+  Lokálně připraven panel Stav autosave (běh/stáří/poslední chyba/retence),
+  nezávislý start a vlastní LaunchAgent s obnovou po pádu. 72 cílených testů
+  PASS; úplná brána 1954/1954 PASS. LaunchAgent zatím není nainstalovaný: podle
+  globální brzdy čeká přesná věta pro systémovou konfiguraci. Push a nasazení
+  panelu rovněž nejsou zatím provedené. Aktuální běžící proces historii nemaže.
+
 - 2026-10-16 19:59 CEST: oprava kvantitativního přehledu je pushnutá a řízeně nasazená
   v Cockpitu. Kód `475fc852`, otisk `236dd9f53426942e`, nový proces potvrzený,
   receipt `deployed` a smoke 5/5. Živé API při ověření 2 143 souborů /
@@ -1151,3 +1161,39 @@ Technický důkaz:
   `logs/cockpit_quantitative_live_20261016.log` a před/po Camino logy.
   Zápis předchází dokumentačnímu uzavření; jeho finální head/PID potvrzuje
   řízené nasazení a následná živá účtenka.
+
+
+### 2026-10-16 20:38 CEST — Autosave znovu ukládá i mimo původní terminálovou relaci
+
+Hotovo:
+- Obnoveno průběžné ukládání aktuální relace a čitelný text. Původních
+  12 historických dvojic je zachováno; automatické mazání zůstává vypnuté.
+- Lokálně je připravený přehled Stav autosave: červené zastavení, zastarání
+  i chyba ukládání, datum poslední kopie a vysvětlení režimu retence.
+- Samostatný start přežije zavření terminálu. Připravený vlastní LaunchAgent
+  zajistí start po přihlášení a automatické obnovení po pádu po jeho aktivaci.
+
+Rozhodnutí:
+- Míla označil trvalý běh autosave za absolutní prioritu a zadal zapnutí
+  i navržené úpravy. Systémová instalace vyžaduje přesnou globální brzdu;
+  bez ní je připravená pouze v projektu. Camino, přenosy a film se nemění.
+
+Další krok:
+- Potvrdit přesnou globální brzdu pro připravený LaunchAgent a samostatně
+  schválit push/nasazení panelu; průběžné ukládání mezitím běží.
+
+Navrhované další kroky:
+- Aktivovat připravené spouštění po přihlášení a znovu ověřit čerstvou kopii.
+- Fyzický filmový test zůstává na neděli 18. 10.; tato oprava ho nezahajuje.
+
+Technický důkaz:
+- 72 cílených testů PASS: moderní zprávy, cizí projekt, neúplný koncový
+  řádek, chybějící zdroj, zachování předchozí dvojice při diskové chybě
+  a následná obnova, ochrana historie, vlastnictví procesu, restartový
+  LaunchAgent a zákaz zaměnit běžné ano za globální potvrzení.
+- Živý redigovaný důkaz `logs/autosave_continuity_live_20261016.log`: jeden
+  proces, čerstvý záznam právě této relace, čitelný TXT přes 90 KiB,
+  předchozí dvojice a všech 24 původních historických souborů zachované.
+- Úplná brána 1954/1954 PASS (334,664 s testů),
+  `logs/autosave_continuity_full_gate_20261016.log`. Žádný obsah konverzace
+  ani soukromé autosave soubory nejsou součástí Gitu.

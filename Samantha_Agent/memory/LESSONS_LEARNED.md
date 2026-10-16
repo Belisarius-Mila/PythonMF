@@ -29,6 +29,21 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-068 — Prázdný úklid nedokazuje funkční autosave
+
+- Problém: Automatická retence držela 12 dvojic, ale proces po ukončení
+  původní relace neběžel. Cockpit proto dlouho správně nenabízel úklid,
+  zatímco nouzová kopie byla zastaralá. Starý textový převod současných
+  zpráv navíc vytvářel pouze hlavičku.
+- Typ: opakující se
+- Řešení nalezeno: 16102026
+- Řešení: Nezávislý proces neukončovat s terminálem, po startu ověřit čerstvou
+  kopii a v panelu prioritně ukazovat běh, stáří a chybu posledního pokusu.
+  Nulový počet kandidátů není zdravotní kontrola. Rozpoznávat i současné
+  zprávy, nepřepisovat projekt cizí relací a chránit předchozí úspěšnou dvojici.
+  Trvalý LaunchAgent je samostatně schvalovaná systémová konfigurace.
+  Při prvním obnovení je automatické mazání vypnuté a starší historie zachovaná.
+
 ### LL-067 — Do objemu projektu nepatří publikační klony a sestavené výstupy
 
 - Problém: Kvantitativní přehled ukazoval 877 153 lokálních řádků, protože

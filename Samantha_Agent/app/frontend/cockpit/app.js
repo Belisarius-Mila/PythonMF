@@ -290,6 +290,9 @@
     const autosaveCleanupApplyBtn = document.getElementById("autosaveCleanupApplyBtn");
     const autosaveCleanupStatus = document.getElementById("autosaveCleanupStatus");
     const autosaveCleanupOutput = document.getElementById("autosaveCleanupOutput");
+    const autosaveState = document.getElementById("autosaveState");
+    const autosaveDetail = document.getElementById("autosaveDetail");
+    const autosaveRetention = document.getElementById("autosaveRetention");
     const dashboardDiagnosticsBtn = document.getElementById("dashboardDiagnosticsBtn");
     const dashboardRestartBtn = document.getElementById("dashboardRestartBtn");
 			const awakeModeCard = document.getElementById("awakeModeCard");
@@ -739,6 +742,9 @@
     const healthRecoveryAutosave = window.SamanthaHealthRecoveryAutosave.create({
       elements: {
         autosaveCleanupApplyBtn,
+        autosaveState,
+        autosaveDetail,
+        autosaveRetention,
         autosaveCleanupOutput,
         autosaveCleanupPreviewBtn,
         autosaveCleanupStatus,
@@ -775,6 +781,7 @@
       recordFrontendError,
       refresh,
       setHealthValue,
+      setDashboardStatusSignal,
       showMessage,
       verifyButtonHealth,
     });
@@ -785,6 +792,7 @@
       openDiagnosticsModal,
       openRecoveryModal,
       previewAutosaveCleanup,
+      refreshAutosaveStatus,
       runFrontendHealthCheck,
     } = healthRecoveryAutosave;
 
@@ -946,6 +954,7 @@
     }
 
     function refreshSecondaryStatus() {
+      refreshAutosaveStatus();
       refreshDecisionCockpit();
       refreshProjectsSummary();
       refreshQuantitativeSummary();
@@ -2013,6 +2022,7 @@
     function dashboardStatusPriority(key) {
       const priorities = {
         main: 100,
+        autosave: 98,
         decision: 95,
         consistency: 90,
         documents: 80,
@@ -7275,6 +7285,7 @@ ${item.context || ""}`);
 	    });
 	    runFrontendHealthCheck();
 	    window.setInterval(runFrontendHealthCheck, 60000);
+      window.setInterval(refreshAutosaveStatus, 60000);
 	    window.setInterval(() => refresh({silent: true, includeSecondary: false}), FULL_STATUS_MONITOR_MS);
       window.setInterval(refreshAwakeMode, AWAKE_MODE_MONITOR_MS);
       window.setInterval(tickAwakeModeCountdown, 1000);
@@ -7282,6 +7293,7 @@ ${item.context || ""}`);
       window.setInterval(refreshUrgentRemindersSummary, URGENT_REMINDERS_MONITOR_MS);
       window.setInterval(runEmailIntakeMonitor, INTAKE_EMAIL_MONITOR_MS);
       window.addEventListener("focus", () => {
+        refreshAutosaveStatus();
         refreshLiveStatus();
         refreshMainStatusOnReturn();
         refreshAwakeMode();

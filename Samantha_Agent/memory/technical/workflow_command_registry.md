@@ -158,3 +158,21 @@ Bezpecnostni brany:
 - `Pict/mapping.json` se neupravuje bez samostatneho potvrzeni a zalohy,
 - API klice se nesmi ukladat do repo souboru ani memory,
 - nepouzivat `git add .`.
+
+
+## Průběžné autosave — 16. 10. 2026
+
+- `start_session_autosave`: jeden nezávislý proces, potvrzení prvního uložení,
+  zachování všech starších kopií. Registrované argv spouští `start_autosave.py`.
+- `restart_session_autosave`: před obnovením kontroluje přesné argv a vlastnictví
+  procesu. Nezasahuje do cizích procesů ani Camina.
+- `prepare_autosave_service`: vytvoří kontrolovatelný plist jen v projektovém
+  `data/autosave_service/`; žádná systémová instalace.
+- `install_autosave_service`: po přesné globální brzdě nainstaluje pouze
+  vlastní autosave LaunchAgent. Spouštění po přihlášení a obnova po pádu;
+  automatické mazání vypnuté. Instalační skript i registr vyžadují stejnou
+  přesnou větu, běžné ano nestačí.
+
+Volitelné `confirmation_phrase` v kartě vyžaduje přesnou textovou shodu
+namísto obecného potvrzení. Preview uloží právě tuto kartu jako čekající,
+aby následné ano nemohlo omylem potvrdit jiný starší příkaz.

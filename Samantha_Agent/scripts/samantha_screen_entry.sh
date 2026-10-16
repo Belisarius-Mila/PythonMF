@@ -63,19 +63,9 @@ if [[ -n "${SAMANTHA_START_REQUEST:-}" ]]; then
 $SAMANTHA_START_REQUEST"
 fi
 
-AUTOSAVE_PID=""
 if [[ "${SAMANTHA_AUTOSAVE_WATCH:-1}" != "0" ]]; then
-  "$AUTOSAVE_SCRIPT" --watch &
-  AUTOSAVE_PID=$!
+  "$PYTHON_BIN" "$PROJECT_DIR/scripts/start_autosave.py" || echo "Autosave se nepodarilo overit."
 fi
-
-cleanup() {
-  if [[ -n "$AUTOSAVE_PID" ]]; then
-    kill "$AUTOSAVE_PID" 2>/dev/null || true
-  fi
-}
-
-trap cleanup EXIT INT TERM
 
 cd "$PROJECT_DIR"
 

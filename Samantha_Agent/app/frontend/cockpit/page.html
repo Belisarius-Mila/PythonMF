@@ -212,7 +212,7 @@
             <button class="secondary" id="dashboardRecoveryBtn">Recovery centrum</button>
             <button class="secondary" id="dashboardSessionsBtn">Běžící relace</button>
             <button class="secondary" id="dashboardCommandCheatsheetBtn">Pamatováček</button>
-            <button class="secondary" id="dashboardAutosaveCleanupBtn">Autosave úklid</button>
+            <button class="secondary" id="dashboardAutosaveCleanupBtn">Stav autosave</button>
             <button class="secondary" id="dashboardDiagnosticsBtn">Diagnostika</button>
             <button class="secondary" id="dashboardRestartBtn">Restart Cockpitu</button>
             <button class="secondary" id="dashboardSpeakBtn">Přečíst stav</button>
@@ -257,13 +257,15 @@
         </div>
       </section>
       <section>
-        <h2>Autosave úklid</h2>
+        <h2>Stav autosave</h2>
         <div class="body">
           <div class="voice-card">
-            <div class="voice-card-title">12 nejnovějších session snapshotů</div>
+            <div id="autosaveState" class="voice-card-title warn" aria-live="polite">Ověřuji průběžné ukládání…</div>
+            <div id="autosaveDetail" class="status-line"></div>
+            <div id="autosaveRetention" class="status-line"></div>
             <div id="autosaveCleanupStatus" class="status-line">Dry-run zatím nebyl spuštěný.</div>
             <div class="voice-card-actions">
-              <button class="secondary" id="autosaveCleanupPreviewBtn" type="button">Spočítat úklid</button>
+              <button class="secondary" id="autosaveCleanupPreviewBtn" type="button">Obnovit stav a spočítat úklid</button>
               <button class="secondary danger" id="autosaveCleanupApplyBtn" type="button" disabled>Vyčistit staré autosave</button>
             </div>
             <pre id="autosaveCleanupOutput" class="voice-card-text"></pre>

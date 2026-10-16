@@ -36,9 +36,9 @@ EXPECTED_PAGES = {
     ),
     "cockpit": (
         COCKPIT_HTML,
-        537803,
-        10678,
-        "facd6b241fa42515d416809addf97e50597a146f752c85bc732172d57925139b",
+        541658,
+        10754,
+        "923d3339f70c8b2db34e2a770dcdfbea69e300a4b7eed22bafe4ef4fd8bb1bad",
     ),
 }
 
@@ -215,6 +215,47 @@ class CockpitFrontendContractTests(unittest.TestCase):
             COCKPIT_HTML.index("createHealthRecoveryAutosaveFrontend"),
             COCKPIT_HTML.index("window.SamanthaHealthRecoveryAutosave.create"),
         )
+
+    def test_autosave_state_is_red_when_stopped_even_without_cleanup_candidates(self) -> None:
+        module_path = FRONTEND_ROOT / "cockpit" / "health_recovery_autosave.js"
+        script = f"""
+global.window = {{}};
+require({json.dumps(str(module_path))});
+const state = {{textContent: "", className: ""}};
+const detail = {{textContent: ""}};
+const retention = {{textContent: ""}};
+const panel = {{open: false}};
+const signals = [];
+const requests = [];
+let fail = false;
+const api = window.SamanthaHealthRecoveryAutosave.create({{
+  elements: {{autosaveState: state, autosaveDetail: detail, autosaveRetention: retention, servicePanel: panel}},
+  setDashboardStatusSignal: (...args) => signals.push(args),
+  postJson: async (url, payload) => {{
+    requests.push({{url, payload}});
+    if (fail) throw new Error("offline");
+    return {{ok: true, plan: {{delete_count: 0}}, runtime: {{watcher_count: 1, latest_age_minutes: 0,
+      latest_modified_at: "2026-10-16T18:00:00Z", automatic_cleanup: false, service_configured: true, disk_state: "ok"}}}};
+  }},
+}});
+api.renderAutosaveState({{plan: {{delete_count: 0}}, runtime: {{watcher_count: 0, latest_age_minutes: 0}}}});
+if (!state.textContent.includes("NEBĚŽÍ") || !state.className.includes("bad")) throw new Error("stopped autosave hidden by zero cleanup");
+api.renderAutosaveState({{runtime: {{watcher_count: 1, latest_age_minutes: 61}}}});
+if (!state.className.includes("bad")) throw new Error("stale autosave accepted");
+api.renderAutosaveState({{runtime: {{watcher_count: 1, latest_age_minutes: 0, last_error: "OSError"}}}});
+if (!state.textContent.includes("selhal")) throw new Error("failed save accepted");
+(async () => {{
+  await api.refreshAutosaveStatus();
+  if (!state.textContent.includes("běží") || !state.className.includes("ok")) throw new Error("fresh save missing");
+  if (!retention.textContent.includes("automaticky nemažou")) throw new Error("wrong retention explanation");
+  if (panel.open || requests[0].payload.apply !== false) throw new Error("background check changed user state");
+  fail = true;
+  await api.refreshAutosaveStatus();
+  if (!state.textContent.includes("nelze ověřit") || signals.at(-1)[1] !== "bad") throw new Error("offline accepted");
+}})().catch(error => {{console.error(error);process.exitCode=1;}});
+"""
+        result = subprocess.run([node_binary(), "-"], input=script, text=True, capture_output=True, timeout=15)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     def test_health_recovery_autosave_module_runs_preview_through_injected_api(self) -> None:
         module_path = FRONTEND_ROOT / "cockpit" / "health_recovery_autosave.js"

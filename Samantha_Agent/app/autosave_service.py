@@ -27,7 +27,8 @@ def latest_autosave_metadata(path: Path) -> dict[str, Any]:
         item
         for item in path.iterdir()
         if item.is_file()
-        and item.name.startswith("session_")
+        and not item.is_symlink()
+        and (item.name.startswith("session_") or item.name in {"latest_session.jsonl", "latest_session.txt"})
         and item.suffix.lower() in {".txt", ".jsonl"}
     ]
     if not files:
@@ -132,6 +133,11 @@ def autosave_runtime_dict(status: Any) -> dict[str, Any]:
     warning = " ".join(str(getattr(status, "warning", "") or "").split())[:300]
     return {
         "ok": bool(getattr(status, "ok", False)),
+        "latest_age_minutes": getattr(status, "latest_age_minutes", None),
+        "latest_modified_at": str(getattr(status, "latest_modified_at", "") or ""),
+        "automatic_cleanup": getattr(status, "automatic_cleanup", None),
+        "service_configured": bool(getattr(status, "service_configured", False)),
+        "last_error": str(getattr(status, "last_error", "") or ""),
         "watcher_running": bool(getattr(status, "watcher_running", False)),
         "watcher_count": int(getattr(status, "watcher_count", len(watcher_pids)) or 0),
         "disk_free_gib": getattr(status, "disk_free_gib", None),
