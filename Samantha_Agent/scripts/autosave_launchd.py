@@ -9,12 +9,14 @@ from pathlib import Path
 import plistlib
 import subprocess
 import sys
+import time
 from uuid import uuid4
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 from scripts.start_autosave import start_autosave, stop_owned_workers
+from scripts.autosave_status import autosave_status
 
 LABEL = "com.miloslavfalta.samantha.autosave"
 CONFIRMATION = "Potvrzuji globální brzdu: rozumím riziku a chci pokračovat."
@@ -23,7 +25,7 @@ CONFIRMATION = "Potvrzuji globální brzdu: rozumím riziku a chci pokračovat."
 def launch_agent(project: Path = PROJECT_ROOT) -> dict:
     return {
         "Label": LABEL,
-        "ProgramArguments": ["/bin/zsh", str(project / "scripts/autosave_codex_session.sh"), "--watch"],
+        "ProgramArguments": [str(project / ".venv/bin/python"), str(project / "scripts/start_autosave.py"), "--service"],
         "WorkingDirectory": str(project),
         "EnvironmentVariables": {
             "SAMANTHA_PROJECT_DIR": str(project),
@@ -49,7 +51,9 @@ def prepare(*, project: Path = PROJECT_ROOT, agents: Path | None = None) -> dict
     spec = launch_agent(project)
     if target.exists():
         current = plistlib.loads(target.read_bytes())
-        if current.get("Label") != LABEL or current.get("ProgramArguments") != spec["ProgramArguments"]:
+        owned_commands = (spec["ProgramArguments"],
+                          ["/bin/zsh", str(project / "scripts/autosave_codex_session.sh"), "--watch"])
+        if current.get("Label") != LABEL or current.get("ProgramArguments") not in owned_commands:
             raise ValueError("Existing LaunchAgent is not owned by this autosave")
     preview = project / "data/autosave_service" / target.name
     preview.parent.mkdir(parents=True, exist_ok=True)
@@ -58,8 +62,21 @@ def prepare(*, project: Path = PROJECT_ROOT, agents: Path | None = None) -> dict
             "automatic_cleanup": False, "run_at_login": True, "restart_after_failure": True}
 
 
+def wait_for_service_save(started_at: float) -> None:
+    deadline = time.monotonic() + 25
+    info = PROJECT_ROOT / "data/session_autosave/latest_info.txt"
+    while time.monotonic() < deadline:
+        status = autosave_status()
+        if (info.exists() and info.stat().st_mtime >= started_at
+                and status.watcher_count == 1 and not status.last_error):
+            return
+        time.sleep(.2)
+    raise RuntimeError("Autosave service first save was not confirmed; detached recovery requested")
+
+
 def install(*, confirmation: str, project: Path = PROJECT_ROOT, agents: Path | None = None,
-            runner=subprocess.run, stop_worker=stop_owned_workers, recover=start_autosave) -> dict:
+            runner=subprocess.run, stop_worker=stop_owned_workers, recover=start_autosave,
+            verify=wait_for_service_save) -> dict:
     if confirmation.strip() != CONFIRMATION:
         raise ValueError("Missing exact global safety confirmation")
     plan = prepare(project=project, agents=agents)
@@ -89,7 +106,9 @@ def install(*, confirmation: str, project: Path = PROJECT_ROOT, agents: Path | N
         # The job is registered before the old detached worker is retired.
         stop_worker()
         run(["/bin/launchctl", "enable", job])
+        started_at = time.time()
         run(["/bin/launchctl", "kickstart", "-k", job])
+        verify(started_at)
     except Exception:
         recover()
         raise

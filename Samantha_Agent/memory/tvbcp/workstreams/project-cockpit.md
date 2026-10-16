@@ -1,15 +1,13 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-10-16 20:38 CEST: absolutní priorita autosave. Průběžné ukládání je obnoveno
-  v jediném nezávislém procesu, čerstvá technická i čitelná kopie ověřená,
-  původních 12 dvojic zachováno. Nový převod podporuje současné zprávy,
-  zapisuje atomicky po souborech a zachovává předchozí úspěšnou dvojici.
-  Lokálně připraven panel Stav autosave (běh/stáří/poslední chyba/retence),
-  nezávislý start a vlastní LaunchAgent s obnovou po pádu. 72 cílených testů
-  PASS; úplná brána 1954/1954 PASS. LaunchAgent zatím není nainstalovaný: podle
-  globální brzdy čeká přesná věta pro systémovou konfiguraci. Push a nasazení
-  panelu rovněž nejsou zatím provedené. Aktuální běžící proces historii nemaže.
+- 2026-10-16 21:13 CEST: po přesném potvrzení je trvalý autosave nainstalovaný
+  a živě ověřený. Start přes projektový Python drží jediný ukládací proces;
+  po řízeném ukončení jej LaunchAgent sám nahradil a vytvořil čerstvou
+  technickou i čitelnou kopii. Původní historie a předchozí úspěšná dvojice
+  zachované, automatické mazání vypnuté. 45 cílených servisních testů PASS;
+  závěrečná plná brána 1957/1957 PASS po opravě startu služby. Push a řízené nasazení panelu
+  Stav autosave jsou schválené, jejich provedení zatím tento zápis nedokládá.
 
 - 2026-10-16 19:59 CEST: oprava kvantitativního přehledu je pushnutá a řízeně nasazená
   v Cockpitu. Kód `475fc852`, otisk `236dd9f53426942e`, nový proces potvrzený,
@@ -1293,3 +1291,33 @@ Technický důkaz:
 - Úplná brána 1954/1954 PASS (334,664 s testů),
   `logs/autosave_continuity_full_gate_20261016.log`. Žádný obsah konverzace
   ani soukromé autosave soubory nejsou součástí Gitu.
+
+
+### 2026-10-16 21:19 CEST — Trvalý autosave a automatická obnova jsou živě ověřené
+
+Hotovo:
+- Autosave je po přesném potvrzení nainstalovaný jako vlastní uživatelská
+  služba; nezávisí na otevřeném terminálu a je nastavený ke startu po přihlášení.
+- Po řízeném ukončení ukládacího procesu služba sama vytvořila nový proces
+  a čerstvou technickou i čitelnou kopii. Starší historie zůstala zachovaná.
+
+Rozhodnutí:
+- Potvrzení zahrnuje připravenou systémovou aktivaci i push/nasazení panelu.
+  Automatické mazání zůstává vypnuté. Camino ani síť se neupravují.
+- Start služby používá projektový Python jako rodiče workeru; přímý shellový
+  start na tomto Macu nedokázal otevřít skript na Ploše. Instalace vyžaduje
+  čerstvé úspěšné uložení; samotná registrace není důkazem funkčnosti.
+
+Další krok:
+- Odeslat schválené změny a řízeně nasadit panel Stav autosave v Cockpitu.
+
+Navrhované další kroky:
+- Fyzický filmový test zůstává na neděli 18. 10.; U07 zůstává odložený.
+
+Technický důkaz:
+- 45 cílených servisních testů PASS, závěrečná plná brána 1957/1957 PASS
+  (338,377 s testů); log `logs/autosave_continuity_service_full_gate_20261016.log`.
+- Živá obnova: supervisor 15687 → 15724, worker 15689 → 15725, jediný
+  watcher, čerstvý JSONL/TXT (čitelný text přes 90 KiB), předchozí dvojice
+  zachovaná, bez poslední chyby. `logs/autosave_continuity_launchd_20261016.log`.
+- Skutečný restart Macu ani nové přihlášení nebyly fyzicky zkoušeny.

@@ -19,6 +19,34 @@ if str(PROJECT_ROOT) not in sys.path:
 from scripts.autosave_status import autosave_status
 
 
+def worker_environment() -> dict[str, str]:
+    env = os.environ.copy()
+    env["SAMANTHA_AUTOSAVE_AUTO_CLEANUP"] = "0"
+    env["SAMANTHA_PROJECT_DIR"] = str(PROJECT_ROOT)
+    env["SAMANTHA_AUTOSAVE_OUT_DIR"] = str(PROJECT_ROOT / "data/session_autosave")
+    env["SAMANTHA_CODEX_SESSIONS_DIR"] = str(Path.home() / ".codex/sessions")
+    return env
+
+
+def run_service() -> int:
+    """Keep the project Python as launchd parent and forward shutdown to its worker."""
+    worker = subprocess.Popen(
+        ["/bin/zsh", str(PROJECT_ROOT / "scripts/autosave_codex_session.sh"), "--watch"],
+        cwd=PROJECT_ROOT, env=worker_environment(), stdin=subprocess.DEVNULL,
+    )
+    def stop(_signum, _frame):
+        if worker.poll() is None:
+            worker.terminate()
+    previous = {sig: signal.signal(sig, stop) for sig in (signal.SIGTERM, signal.SIGINT)}
+    try:
+        return worker.wait()
+    finally:
+        stop(None, None)
+        worker.wait()
+        for sig, handler in previous.items():
+            signal.signal(sig, handler)
+
+
 def stop_owned_workers() -> None:
     pids = autosave_status().watcher_pids
     for pid in pids:
@@ -31,9 +59,11 @@ def stop_owned_workers() -> None:
     for pid in pids:
         os.kill(pid, signal.SIGTERM)
     deadline = time.monotonic() + 10
-    while autosave_status().watcher_running and time.monotonic() < deadline:
+    def original_workers_running():
+        return bool(set(pids).intersection(autosave_status().watcher_pids))
+    while original_workers_running() and time.monotonic() < deadline:
         time.sleep(.1)
-    if autosave_status().watcher_running:
+    if original_workers_running():
         raise RuntimeError("Owned autosave worker did not stop")
 
 
@@ -45,18 +75,13 @@ def start_autosave(*, restart: bool = False) -> dict:
         return {"ok": status.watcher_count == 1 and status.latest_age_minutes is not None
                 and status.latest_age_minutes <= 20 and not status.last_error, "started": False,
                 "watcher_count": status.watcher_count}
-    env = os.environ.copy()
-    env["SAMANTHA_AUTOSAVE_AUTO_CLEANUP"] = "0"
-    env["SAMANTHA_PROJECT_DIR"] = str(PROJECT_ROOT)
-    env["SAMANTHA_AUTOSAVE_OUT_DIR"] = str(PROJECT_ROOT / "data/session_autosave")
-    env["SAMANTHA_CODEX_SESSIONS_DIR"] = str(Path.home() / ".codex/sessions")
     logs = PROJECT_ROOT / "logs"
     logs.mkdir(exist_ok=True)
     with (logs / "autosave_worker.log").open("ab") as output:
         started_at = time.time()
         worker = subprocess.Popen(
             ["/bin/zsh", str(PROJECT_ROOT / "scripts/autosave_codex_session.sh"), "--watch"],
-            cwd=PROJECT_ROOT, env=env, stdin=subprocess.DEVNULL,
+            cwd=PROJECT_ROOT, env=worker_environment(), stdin=subprocess.DEVNULL,
             stdout=output, stderr=output, start_new_session=True,
         )
     deadline = time.monotonic() + 20
@@ -75,6 +100,10 @@ def start_autosave(*, restart: bool = False) -> dict:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--restart", action="store_true")
-    result = start_autosave(restart=parser.parse_args().restart)
+    parser.add_argument("--service", action="store_true", help="Foreground launchd worker parent")
+    args = parser.parse_args()
+    if args.service:
+        raise SystemExit(run_service())
+    result = start_autosave(restart=args.restart)
     print(json.dumps(result))
     raise SystemExit(0 if result["ok"] else 1)

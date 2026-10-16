@@ -294,7 +294,12 @@ uložení a nepovažuje pouhé vytvoření procesu za úspěšný autosave.
 Samostatný LaunchAgent s `RunAtLoad` a `KeepAlive` připravuje registrovaný
 `prepare_autosave_service`; jeho instalace `install_autosave_service` vyžaduje
 přesnou globální brzdu, protože zapisuje do uživatelských LaunchAgents.
-Do samostatného potvrzení je tato instalace pouze připravená, nikoli aktivní.
+Po přesném potvrzení Míly byl LaunchAgent dne 16. 10. 2026 nainstalován.
+Startuje projektovým Pythonem, který drží ukládací proces jako své dítě;
+přímý start shellového skriptu z launchd na tomto Macu selhal při otevření
+souboru na Ploše. Instalace nyní vyžaduje také první čerstvé úspěšné uložení.
+Živá zkouška potvrdila automatickou obnovu procesu a nové uložení bez ručního
+startu. Tento časovaný důkaz nenahrazuje aktuální `autosave_status.py --json`.
 
 Nový bezpečný start automatický úklid nezapíná a zachovává starší historii.
 Skutečný režim retence se zobrazuje ze stavu posledního úspěšného uložení.

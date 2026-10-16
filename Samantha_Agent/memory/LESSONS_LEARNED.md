@@ -43,6 +43,11 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   zprávy, nepřepisovat projekt cizí relací a chránit předchozí úspěšnou dvojici.
   Trvalý LaunchAgent je samostatně schvalovaná systémová konfigurace.
   Při prvním obnovení je automatické mazání vypnuté a starší historie zachovaná.
+  Na tomto Macu přímý shellový start z launchd nemohl otevřít skript na Ploše;
+  ověřený start přes projektový Python drží worker jako dítě a předává ukončení.
+  Úspěšná registrace služby sama nestačí: vyžadovat nové uložení a zkoušku
+  automatické obnovy. Při zastavování čekat pouze na původní ověřené PID,
+  protože správce služby mezitím může spustit náhradu.
 
 ### LL-067 — Do objemu projektu nepatří publikační klony a sestavené výstupy
 

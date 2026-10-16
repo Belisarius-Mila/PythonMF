@@ -74,7 +74,7 @@ def autosave_status(
         spec = plistlib.loads(definition.read_bytes())
         service_configured = bool(spec.get("Label") == "com.miloslavfalta.samantha.autosave"
                                   and spec.get("KeepAlive") and spec.get("RunAtLoad")
-                                  and spec.get("ProgramArguments") == ["/bin/zsh", str(PROJECT_ROOT / "scripts/autosave_codex_session.sh"), "--watch"])
+                                  and spec.get("ProgramArguments") == [str(PROJECT_ROOT / ".venv/bin/python"), str(PROJECT_ROOT / "scripts/start_autosave.py"), "--service"])
     except (OSError, ValueError, plistlib.InvalidFileException):
         pass
 

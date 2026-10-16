@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 import plistlib
+import signal
 import subprocess
 import tempfile
 import time
@@ -14,7 +15,7 @@ from scripts.autosave_snapshot import save_snapshot, select_source
 from scripts.autosave_launchd import CONFIRMATION, LABEL, install, launch_agent, prepare
 from scripts.autosave_status import autosave_status
 from app.workflows.commands import preview_workflow_command_text, run_workflow_command_text
-from scripts.start_autosave import stop_owned_workers
+from scripts.start_autosave import stop_owned_workers, run_service
 from types import SimpleNamespace
 
 
@@ -120,6 +121,23 @@ class AutosaveContinuityTests(unittest.TestCase):
         self.assertTrue(spec["RunAtLoad"])
         self.assertEqual(spec["EnvironmentVariables"]["SAMANTHA_AUTOSAVE_AUTO_CLEANUP"], "0")
         self.assertEqual(spec["EnvironmentVariables"]["SAMANTHA_AUTOSAVE_SECONDS"], "600")
+        self.assertTrue(spec["ProgramArguments"][0].endswith("/.venv/bin/python"))
+        self.assertEqual(spec["ProgramArguments"][-1], "--service")
+
+    def test_service_parent_waits_and_forwards_shutdown_to_its_worker(self):
+        worker = unittest.mock.Mock()
+        worker.poll.return_value = None
+        worker.wait.return_value = 0
+        callbacks = {}
+        def register(sig, handler):
+            callbacks[sig] = handler
+            return signal.SIG_DFL
+        with patch("scripts.start_autosave.subprocess.Popen", return_value=worker) as launch, \
+                patch("scripts.start_autosave.signal.signal", side_effect=register):
+            self.assertEqual(run_service(), 0)
+        self.assertNotIn("start_new_session", launch.call_args.kwargs)
+        self.assertEqual(launch.call_args.kwargs["env"]["SAMANTHA_AUTOSAVE_AUTO_CLEANUP"], "0")
+        worker.terminate.assert_called_once()
 
     def test_stop_never_signals_a_foreign_process(self):
         with patch("scripts.start_autosave.autosave_status", return_value=SimpleNamespace(watcher_pids=(123,))), \
@@ -128,6 +146,17 @@ class AutosaveContinuityTests(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 stop_owned_workers()
             kill.assert_not_called()
+
+    def test_stop_waits_only_for_original_worker_when_launchd_replaces_it(self):
+        expected = str(Path(__file__).resolve().parents[1] / "scripts/autosave_codex_session.sh")
+        with patch("scripts.start_autosave.autosave_status", side_effect=[
+                SimpleNamespace(watcher_pids=(123,)), SimpleNamespace(watcher_pids=(456,)),
+                SimpleNamespace(watcher_pids=(456,))]), \
+                patch("scripts.start_autosave.subprocess.run", return_value=subprocess.CompletedProcess(
+                    [], 0, f"/bin/zsh {expected} --watch", "")), \
+                patch("scripts.start_autosave.os.kill") as kill:
+            stop_owned_workers()
+            kill.assert_called_once_with(123, signal.SIGTERM)
 
     def test_prepare_changes_only_project_preview_and_rejects_foreign_definition(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -157,10 +186,24 @@ class AutosaveContinuityTests(unittest.TestCase):
                 events.append(argv[1])
                 return subprocess.CompletedProcess(argv, 1 if argv[1] == "print" else 0, "", "")
             result = install(confirmation=CONFIRMATION, project=project, agents=Path(tmp) / "agents",
-                             runner=run, stop_worker=lambda: events.append("stop-worker"))
+                             runner=run, stop_worker=lambda: events.append("stop-worker"),
+                             verify=lambda _: events.append("verified-save"))
             self.assertTrue(result["installed"])
             self.assertLess(events.index("bootstrap"), events.index("stop-worker"))
             self.assertIn("kickstart", events)
+            self.assertLess(events.index("kickstart"), events.index("verified-save"))
+
+    def test_registration_without_successful_save_fails_and_restores_detached_worker(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project, sessions, output, source = self.fixture(tmp)
+            def run(argv, **kwargs):
+                return subprocess.CompletedProcess(argv, 1 if argv[1] == "print" else 0, "", "")
+            recover = unittest.mock.Mock()
+            verify = unittest.mock.Mock(side_effect=RuntimeError("first save failed"))
+            with self.assertRaises(RuntimeError):
+                install(confirmation=CONFIRMATION, project=project, agents=Path(tmp) / "agents",
+                        runner=run, stop_worker=lambda: None, recover=recover, verify=verify)
+            recover.assert_called_once()
 
     def test_install_failure_restores_detached_saving_without_stopping_it_first(self):
         with tempfile.TemporaryDirectory() as tmp:
