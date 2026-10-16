@@ -1,15 +1,16 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-10-16 19:45 CEST: cílená oprava kvantitativního přehledu je místně
-  ověřená, zatím bez push/nasazení. Živé API původně 16 164 souborů /
-  877 153 řádků; chybně zahrnulo publikační klon `data/daily_3am` a Swift
-  `.build`. Opravený místní report přibližně 347 tisíc řádků / 2 143 souborů.
-  Vnořené Git kořeny, sestavené výstupy/závislosti a symlinky se vynechávají;
-  skutečné nesledované zdroje zůstávají. 12 cílených testů PASS. Další krok:
-  samostatně nasadit Cockpit a porovnat živý přehled; U07 zůstává odložený.
-  Riziko: běžící proces do nasazení dál používá starý výpočet. Camino,
-  filmové projekty, archiv a síť nejsou součástí změny.
+- 2026-10-16 19:59 CEST: oprava kvantitativního přehledu je pushnutá a řízeně nasazená
+  v Cockpitu. Kód `475fc852`, otisk `236dd9f53426942e`, nový proces potvrzený,
+  receipt `deployed` a smoke 5/5. Živé API při ověření 2 143 souborů /
+  347 051 řádků místo 16 164 / 877 153; další projektové zápisy součet mírně
+  mění. Úplná místní publikační brána 1941/1941 PASS, cíleně 12/12 PASS.
+  Camino zůstalo ve stejném procesu PID 47332/release `f60a33c98fd5`;
+  konfigurace, Serve, 893 operací, 304 ověřených médií, flags false a úplná
+  odpověď filmového editoru shodné před/po. Owner HTTP/HTTPS i anonymní
+  odmítnutí PASS, Funnel off. Další krok: obnovit přehled v Cockpitu.
+  U07 zůstává odložený; finální Git head a proces ověřuje živá účtenka.
 
 - 2026-09-14 21:44 CEST: meziúkol ToBeToHave vrací Webové aplikace do horní lišty. Jejich přesun do Servisu v U06 způsobil ztrátu dohledatelnosti. Dlaždice ToBeToHave nyní míří na web; U07 zůstává odložený. 22 cílených testů OK; finální nasazení ověřovat živě.
 
@@ -1116,3 +1117,37 @@ Technický důkaz:
   12 cílených testů PASS (agregace, klony/buildy/worktrees/symlinky, Cockpit
   přehled a systémový audit). Rychlá statická brána PASS; důkaz
   `logs/cockpit_quantitative_scope_20261016.log` (agregáty, mimo Git).
+
+
+### 2026-10-16 19:59 CEST — Opravený počet souborů a řádků je v živém Cockpitu
+
+Hotovo:
+- Živá statistika při přejímce ukázala 2 143 souborů / 347 051 řádků;
+  publikační klon a sestavené výstupy se už nezapočítávají.
+- Oprava je na GitHubu a řízeně nasazená v Cockpitu, smoke 5/5 PASS.
+
+Rozhodnutí:
+- Míla zadal „prosím p+n“ pro tuto opravu. Nasazuje se pouze Cockpit.
+  U07 ani další vývoj střižny se tím nezahajují.
+
+Další krok:
+- Obnovit přehled v Cockpitu a zkontrolovat nový součet.
+
+Navrhované další kroky:
+- U07 Servis podle účelu zůstává odložený; fyzický test filmového ovládání
+  podle dohody v neděli 18. 10. doma.
+
+Technický důkaz:
+- Kód `475fc852`, otisk `236dd9f53426942e`, při prvním ověřeném nasazení
+  PID 2889, nový proces potvrzený a receipt `deployed`. Úplná místní brána
+  1941/1941 PASS (477,2 s), předchozích 12 cílených testů PASS a rychlá
+  nasazovací brána PASS. GitHub workflow tuto změnu podle filtrů samo
+  nespouští; publikační důkaz je místní úplná brána, nikoli výsledek CI.
+- Camino: PID 47332, release `f60a33c98fd5`, konfigurace/Serve a stav
+  893 operací / 304 ověřených médií přesně shodné před/po, flags false.
+  Owner HTTP/HTTPS i anonymní 401 PASS, Funnel off; celý JSON filmového
+  editoru má shodný hash. Žádný nový render ani změna střihu.
+- Redigované důkazy `logs/cockpit_quantitative_publish_gate_20261016.log`,
+  `logs/cockpit_quantitative_live_20261016.log` a před/po Camino logy.
+  Zápis předchází dokumentačnímu uzavření; jeho finální head/PID potvrzuje
+  řízené nasazení a následná živá účtenka.
