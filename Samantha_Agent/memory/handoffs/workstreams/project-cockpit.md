@@ -1,13 +1,16 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-10-16 21:13 CEST: po přesném potvrzení je trvalý autosave nainstalovaný
-  a živě ověřený. Start přes projektový Python drží jediný ukládací proces;
-  po řízeném ukončení jej LaunchAgent sám nahradil a vytvořil čerstvou
-  technickou i čitelnou kopii. Původní historie a předchozí úspěšná dvojice
-  zachované, automatické mazání vypnuté. 45 cílených servisních testů PASS;
-  závěrečná plná brána 1957/1957 PASS po opravě startu služby. Push a řízené nasazení panelu
-  Stav autosave jsou schválené, jejich provedení zatím tento zápis nedokládá.
+- 2026-10-16 21:21 CEST: trvalý autosave po přesném potvrzení aktivovaný a živě
+  ověřený včetně automatické obnovy po ukončení workeru. Právě jeden proces,
+  čerstvý technický i čitelný záznam, historie a předchozí dvojice zachované;
+  automatické mazání vypnuté. Panel Stav autosave pushnutý a řízeně nasazený,
+  kód `0c2908c9`, otisk `1de95c8007aa2f39`, nový proces a smoke 5/5.
+  45 cílených servisních testů a závěrečná plná brána 1957/1957 PASS.
+  Camino před/po přesně shodné (proces, release, konfigurace, Serve, stav
+  a filmový editor), owner HTTP/HTTPS i anonymní 401 PASS, Funnel off.
+  Zbývá žluté upozornění SSD 23,6 GiB; nejde o chybu ukládání. Finální
+  dokumentační head/PID dokládá živá účtenka, tento zápis jí předchází.
 
 - 2026-10-16 19:59 CEST: oprava kvantitativního přehledu je pushnutá a řízeně nasazená
   v Cockpitu. Kód `475fc852`, otisk `236dd9f53426942e`, nový proces potvrzený,
@@ -1225,3 +1228,36 @@ Technický důkaz:
   watcher, čerstvý JSONL/TXT (čitelný text přes 90 KiB), předchozí dvojice
   zachovaná, bez poslední chyby. `logs/autosave_continuity_launchd_20261016.log`.
 - Skutečný restart Macu ani nové přihlášení nebyly fyzicky zkoušeny.
+
+
+### 2026-10-16 21:21 CEST — Stav autosave je nasazený a Camino zachované
+
+Hotovo:
+- Cockpit ukazuje běh, stáří poslední kopie, případnou chybu a skutečný
+  režim mazání; červené zastavení není skryté prázdným seznamem úklidu.
+- Trvalá služba ukládá nezávisle na relaci a přežila restart Cockpitu.
+  Automatické obnovení workeru a čerstvé kopie byly před nasazením živě ověřené.
+- Schválený kód je na GitHubu a v běžícím Cockpitu, smoke 5/5.
+
+Rozhodnutí:
+- Historie zůstává zachovaná a automatické mazání vypnuté. Žádná změna
+  služby Camino, původních médií, filmového střihu ani síťové konfigurace.
+
+Další krok:
+- Obnovit stránku Cockpitu a používat přehled Stav autosave.
+
+Navrhované další kroky:
+- Filmový editor vyzkoušet podle dohody v neděli 18. 10.; U07 je odložený.
+
+Technický důkaz:
+- Kód `0c2908c9`, otisk `1de95c8007aa2f39`, první nový PID 25774,
+  receipt `deployed`, smoke 5/5. Místní úplná brána 1957/1957 PASS;
+  GitHub kontrola byla při publikaci spuštěná, tento zápis její výsledek netvrdí.
+- Camino PID 47332/release `f60a33c98fd5`, konfigurace/Serve,
+  cursor 893, flags false a úplný JSON editoru shodné před/po.
+  Owner HTTP/HTTPS i anonymní 401 PASS, Funnel off.
+- Redigované důkazy `logs/autosave_continuity_deploy_code_20261016.log`,
+  `logs/autosave_continuity_launchd_20261016.log` a Camino before/after logy.
+  Finální dokumentační head/PID potvrdí závěrečná živá účtenka.
+- Skutečný restart Macu/přihlášení ani fyzický Safari/iPhone test neproběhly.
+  SSD hlásí 23,6 GiB volného místa; ukládání samo chybu nehlásí.
