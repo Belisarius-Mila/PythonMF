@@ -1,6 +1,12 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-16 21:59 CEST: po přesném potvrzení proveden omezený úklid SSD:
+  čtyři starší stažené aktualizační balíčky Wordu a npm cache. Nejnovější
+  instalátor zachovaný; měřené volné místo 23.47 → 28.51 GiB
+  (skutečný zisk 5.04 GiB). Camino i filmový editor před/po shodné,
+  autosave nadále jeden čerstvý proces bez chyby. Další mazání neproběhlo.
+
 - Aktualizováno: 2026-09-12 20:50 CEST
 
 ### Hotovo
@@ -263,3 +269,38 @@ Technický důkaz:
   bez nejistého doručení. Toto je časovaný důkaz, ne trvalá provozní záruka.
 - Závěrečný paměťový zápis nemění aplikační kód; jeho commit bude zahrnut
   do téhož autorizovaného publikování a ověření aktuálního main.
+
+
+### 2026-10-16 21:59 CEST — Cílený úklid SSD s ověřeným skutečným ziskem
+
+Hotovo:
+- Odstraněny čtyři schválené starší instalátory Wordu 16.113 (buildy
+  26091433, 26091740, 26092012, 26092714) a pouze domácí npm `_cacache`.
+- Nejnovější stažený instalátor 26100421 a ostatní npm složky zůstaly zachované.
+- Skutečné volné místo SSD vzrostlo z 23.47 na 28.51 GiB;
+  přírůstek podle `df` je 5.04 GiB. Autosave i Camino ověřené bez změny.
+
+Rozhodnutí:
+- Míla přesnou globální brzdou potvrdil právě tento omezený rozsah.
+  Nainstalované aplikace, dokumenty, média, autosave, Claude VM a podpora
+  iPhonu zůstaly mimo úklid. Žádný restart ani síťová změna.
+
+Další krok:
+- Po plánovaném restartu Macu doma znovu změřit SSD a ověřit dostupnost
+  Cockpitu a průběžné autosave.
+
+Navrhované další kroky:
+- Případné další mazání posoudit samostatně podle nového měření.
+
+Technický důkaz:
+- Před zásahem ověřena totožnost čtyř souborů a neexistence symlinků či
+  otevřených cílů; úklid přes přesná jména a adresářové deskriptory.
+- Logická/alokovaná velikost kandidátů 6,36 GiB není slib zisku na APFS;
+  doložený zisk je až výše uvedený rozdíl `df`. Volno zůstává pod 30 GiB.
+- Camino PID 47332/release `f60a33c98fd5`, konfigurace, Serve, cursor 893,
+  flags false a celý editor shodné před/po; owner HTTP/HTTPS i anonymní
+  401 PASS, Funnel off. Autosave PID 15725, jeden watcher, čerstvé uložení,
+  poslední chyba prázdná, trvalá služba nastavená a automatické mazání vypnuté.
+- Redigované účtenky `logs/ssd_cleanup_receipt_20261016.log` a
+  `logs/ssd_cleanup_camino_before_20261016.log` / `ssd_cleanup_camino_after_20261016.log`.
+- Jde o provozní úklid; aplikační kód se neměnil a publikování není součástí kroku.
