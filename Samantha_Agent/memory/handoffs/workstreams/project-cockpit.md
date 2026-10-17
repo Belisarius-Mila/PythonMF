@@ -1,6 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-17 14:30 CEST: bod 3 lokálně hotový. Audit schopností odděluje zjištěné
+  mezery registru od ručně udržovaných podnětů; odstraněné staré úkoly
+  kalendáře a pevný červnový termín. Projektový audit uvádí čas sestavení,
+  poslední commit podkladu i zdroj u projektu a označuje neověřený provoz.
+  Při novější kanonické paměti nenavrhuje konkrétní práci ze starého agregátu.
+  20 cílených testů a statická brána PASS; skutečné read-only CLI výstupy
+  ověřené. Body 1–3 čekají na samostatný push/nasazení; služby beze změny.
+
 - 2026-10-17 13:51 CEST: bod 2 U07 je lokálně hotový. Servis má pět samostatně
   rozbalovacích částí Provoz / Relace / Obnova / Vývoj / Diagnostika;
   relace a autosave mají přímý vstup bez vzdálené duplicitní zkratky.
@@ -67,17 +75,17 @@ Stav: rozpracovane
 Pripomenout pri startu: ano
 
 Co se resilo:
-U07: pravdivé provozní stavy a Servis podle účelu, lokálně hotové; push/nasazení čekají.
+Body 1–3: pravdivé provozní stavy, Servis podle účelu a aktuálnost doporučení auditů; lokálně hotové, push/nasazení čekají.
 
 Co je hotove:
 - U01–U06 implementované a funkčně nasazené; důkazy jednotlivých kroků a souhrnná roadmapa v2.8.
-- U07 body 1 a 2 lokálně implementované a ověřené; push/nasazení čekají.
+- Body 1–3 lokálně implementované a ověřené; push/nasazení čekají.
 
 Co neni hotove:
-- Push/nasazení lokálních bodů 1 a 2; fyzická přejímka. U08–U11 zůstávají další práce podle roadmapy.
+- Push/nasazení lokálních bodů 1–3; fyzická přejímka. U08–U11 zůstávají další práce podle roadmapy.
 
 Dalsi krok:
-Samostatně potvrdit push/nasazení dokončených bodů 1 a 2; další návrh je bod 3 systémového auditu.
+Samostatně potvrdit push/nasazení dokončených bodů 1–3; potom fyzická přejímka Servisu.
 
 Navrhovane dalsi kroky:
 - Grafika a fyzická přejímka podle TXT.
@@ -1356,3 +1364,46 @@ Technický důkaz:
 - Report `reports/cockpit_ui_u07_2026_10_17.json`, redigované logy
   `logs/cockpit_service_groups_*_20261017.log`. Běžící Cockpit nebyl nasazený;
   fyzický Safari/iPhone/VoiceOver test tohoto kroku zůstává otevřený.
+
+
+### 2026-10-17 14:30 CEST — Bod 3: Doporučení auditů mají zdroj a přiznávají nejistotu
+
+Hotovo:
+- Audit schopností už neoznačuje ručně napsané podněty jako zjištěné mezery
+  nebo aktuální priority. Starý návrh implementovat kalendář a červnový
+  termín sítě odstraněné; u zkratek, tisku a fotografií odkaz na dnešní ověření.
+- Projektový audit uvádí čas sestavení, poslední commit ACTIVE_PROJECTS.md
+  a odkaz na handoff u projektu. Čas celého souboru nepovažuje za důkaz
+  stáří či pravdivosti každého údaje. Neověřený provoz přiznává i u vrstev.
+- Při zjištěném driftu se ze starého agregátu nenabízí konkrétní projektová
+  práce. Skutečné registry gaps zůstávají viditelné.
+
+Rozhodnutí:
+- Míla schválil bod 3. Reporty zůstávají read-only nad git-safe podklady;
+  živou aktivaci kalendáře, doručení ani fyzická zařízení samy neověřují.
+  Pro tyto údaje odkazují na registrované živé audity, bez čtení tajemství.
+- Žádná změna služeb Camino/Cockpit/autosave, sítě, médií či odesílání.
+  Starý nesledovaný report z 16. 10. zachovaný, nikoli automaticky přepsaný.
+  Push a nasazení nebyly zadané ani provedené.
+
+Další krok:
+- Samostatně potvrdit publikování a nasazení dokončených bodů 1–3.
+
+Navrhované další kroky:
+- Po nasazení fyzicky vyzkoušet nové členění Servisu na iPhonu.
+- Filmový editor vyzkoušet doma podle dohody 18. 10.
+
+Technický důkaz:
+- 20 cílených testů PASS včetně skutečně chybějícího toolu, starých podnětů,
+  času podkladu vs. sestavení, neznámého stáří, potlačení práce při driftu,
+  save=False bez nového reportu a původního Cockpit rozhraní/reportů.
+- Rychlá Cockpit statická brána PASS. Nezměněná persistence ani odchozí
+  workflow, proto se pro tento reportovací krok neopakuje plná brána.
+- Registrované CLI capability a quick projektového auditu ověřené read-only;
+  tool registry 85/85, původní autoritativní drift kontrola zachovaná.
+- Důkazy `logs/cockpit_audit_recommendations_targeted_20261017.log`,
+  `logs/cockpit_audit_recommendations_static_20261017.log` a oba after logy.
+  Vše lokální; běžící Cockpit používá dosavadní nasazení.
+- Read-only kontrola 14:30 CEST: Camino vlastněné/běžící, autosave jediný
+  worker, kopie 5 min, bez poslední chyby, automatické mazání vypnuté;
+  `logs/cockpit_audit_recommendations_live_20261017.log`.

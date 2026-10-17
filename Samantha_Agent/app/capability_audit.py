@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import ast
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 
 from app.capabilities import all_capabilities, validate_registry
@@ -19,7 +20,7 @@ class CapabilityArea:
     level: str
     safety: str
     tools: tuple[str, ...]
-    next_gap: str
+    follow_up: str
 
 
 CAPABILITY_AREAS = (
@@ -36,7 +37,7 @@ CAPABILITY_AREAS = (
             "samantha_capability_audit",
             "samantha_project_audit",
         ),
-        next_gap="Keep new repeated audits registered as system reports.",
+        follow_up="Keep new repeated audits registered as system reports.",
     ),
     CapabilityArea(
         name="Knowledge inbox",
@@ -47,7 +48,7 @@ CAPABILITY_AREAS = (
             "samantha_downloads_inventory",
             "copy_downloads_files_to_knowledge_inbox",
         ),
-        next_gap="Add scoped summarization/import only after explicit file selection and redacted memory diff.",
+        follow_up="Add scoped summarization/import only after explicit file selection and redacted memory diff.",
     ),
     CapabilityArea(
         name="iPhone shortcuts",
@@ -57,14 +58,14 @@ CAPABILITY_AREAS = (
             "iphone_shortcuts_playground_status",
             "prepare_iphone_shortcut",
         ),
-        next_gap="Manually import and test Najit auto v3 before broader shortcut generation.",
+        follow_up="Use iphone_shortcuts_playground_status to choose a current device test; device acceptance is not checked here.",
     ),
     CapabilityArea(
         name="Rodinny kalendar",
         level="L3",
         safety="read-only redacted readiness; no secret read, state write, recovery mutation, or send",
         tools=("family_calendar_delivery_readiness",),
-        next_gap="Implement the enabled runtime only after every readiness blocker has a reviewed design.",
+        follow_up="Use family_calendar_delivery_readiness for the current delivery mode; activation and delivery are not checked here.",
     ),
     CapabilityArea(
         name="Quick notes",
@@ -75,7 +76,7 @@ CAPABILITY_AREAS = (
             "show_quick_note_detail",
             "quick_notes_action_status",
         ),
-        next_gap="Convert selected quick notes to explicit confirmed actions only after Mila chooses them.",
+        follow_up="Convert selected quick notes to explicit confirmed actions only after Mila chooses them.",
     ),
     CapabilityArea(
         name="Email read-only and cases",
@@ -106,7 +107,7 @@ CAPABILITY_AREAS = (
             "build_rixo_insurance_case_from_uids",
             "show_email_case_links",
         ),
-        next_gap="Use saved local full triage reports for longer human reviews.",
+        follow_up="Use saved local full triage reports for longer human reviews.",
     ),
     CapabilityArea(
         name="Messages outbound",
@@ -115,7 +116,7 @@ CAPABILITY_AREAS = (
         tools=(
             "send_confirmed_sms_rcs",
         ),
-        next_gap="Run the next real family SMS/RCS through the confirmed tool and compare Messages DB status.",
+        follow_up="Run the next real family SMS/RCS through the confirmed tool and compare Messages DB status.",
     ),
     CapabilityArea(
         name="Reminders and payment cases",
@@ -130,7 +131,7 @@ CAPABILITY_AREAS = (
             "show_reminder_detail",
             "mark_reminder_done",
         ),
-        next_gap="Verify the next real payment SMS end to end.",
+        follow_up="Verify the next real payment SMS end to end.",
     ),
     CapabilityArea(
         name="Backup, restore and shell workflows",
@@ -144,7 +145,7 @@ CAPABILITY_AREAS = (
             "preview_workflow_command",
             "run_workflow_command",
         ),
-        next_gap="Do a small backup/restore drill when the external container is available.",
+        follow_up="Check current backup/restore readiness before choosing a separately confirmed restore drill.",
     ),
     CapabilityArea(
         name="Document vault",
@@ -174,7 +175,7 @@ CAPABILITY_AREAS = (
             "propose_document_inbox_cleanup",
             "resolve_document_inbox_item",
         ),
-        next_gap="Before more development, physically verify at least one printed document.",
+        follow_up="Physical print acceptance is not checked here; check the latest device result before choosing a print test.",
     ),
     CapabilityArea(
         name="Lekarna",
@@ -190,19 +191,19 @@ CAPABILITY_AREAS = (
             "apply_lekarna_photo_import",
             "validate_lekarna_photo_sources",
         ),
-        next_gap="Add Silymarin photo only when a real source photo arrives.",
+        follow_up="Choose a current missing photo in the pharmacy audit before preparing a confirmed import.",
     ),
     CapabilityArea(
         name="Media utilities",
         level="L3",
         safety="preview first; apply resizes only after confirmation and backup rules",
         tools=("preview_zmenseni_obrazku", "apply_zmenseni_obrazku"),
-        next_gap="Use as shared utility for future vocabulary image batches.",
+        follow_up="Use as shared utility for future vocabulary image batches.",
     ),
 )
 
 
-def format_samantha_capability_audit() -> str:
+def format_samantha_capability_audit(*, now: datetime | None = None) -> str:
     tool_names = _agent_tool_names(SAMANTHA_AGENT_PATH)
     mapped_tools = _mapped_tool_names()
     unmapped_tools = tuple(tool for tool in tool_names if tool not in mapped_tools)
@@ -225,6 +226,10 @@ def format_samantha_capability_audit() -> str:
 
     lines = [
         "Samantha Capability Audit",
+        f"- Generated at: {(now or datetime.now().astimezone()).isoformat(timespec='seconds')}",
+        "- Evidence: current agent tools, capability registry and registered workflow definitions.",
+        "- Scope: registry coverage only; runtime, delivery and physical acceptance are not verified.",
+        "- Area levels, safety notes and follow-ups are maintained guidance, not detected gaps or live tasks.",
         f"- Agent tools: {len(tool_names)}",
         f"- Mapped tools: {len(tool_names) - len(unmapped_tools)}",
         f"- Unmapped tools: {len(unmapped_tools)}",
@@ -238,13 +243,13 @@ def format_samantha_capability_audit() -> str:
         f"- Read-only or low-risk missing records: {len(low_risk_missing_registry_tools)}",
         "",
         "Capability areas:",
-        "| Area | Level | Tools present | Safety | Next gap |",
+        "| Area | Level | Tools present | Safety | Follow-up guidance (not verified) |",
         "| --- | --- | ---: | --- | --- |",
     ]
     for area in CAPABILITY_AREAS:
         present = len([tool for tool in area.tools if tool in tool_names])
         lines.append(
-            f"| {area.name} | {area.level} | {present}/{len(area.tools)} | {area.safety} | {area.next_gap} |"
+            f"| {area.name} | {area.level} | {present}/{len(area.tools)} | {area.safety} | {area.follow_up} |"
         )
 
     lines.extend(["", "Registry gaps:"])
@@ -303,10 +308,11 @@ def format_samantha_capability_audit() -> str:
     lines.extend(
         [
             "",
-            "Priority reserves:",
-            "- Reduce active `[PRIPOMENOUT]` noise when it starts hiding true next actions.",
-            "- Register PictNew and VocabularyEN workflows before routing human requests to shell.",
-            "- Keep network/T-Mobile retest pending until 2026-06-01 unless the connection worsens.",
+            "Planning guidance (not ranked live tasks):",
+            "- Choose actual next work from the current canonical handoff and registered live audits.",
+            "- Review `[PRIPOMENOUT]` noise only when it starts hiding current actions.",
+            "- Check current workflow registration before routing a selected human request to shell.",
+            "- Network status is not checked here; choose a registered network audit for a reported connection issue.",
         ]
     )
     return "\n".join(lines)

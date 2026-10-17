@@ -419,6 +419,12 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   Návrat pouze tohoto pole na `paused` odstranil rozpor i živou P1 kartu.
   Režim a prioritu souvisejícího proudu nepřebírat z právě vyvíjeného projektu;
   při skutečné změně režimu musí souhlasit katalog i souhrnný registr.
+- Doplnění 17102026: ručně udržované podněty capability auditu nejsou zjištěné
+  mezery ani aktuální úkoly. Odstranit pevné staré termíny a návrhy již hotové
+  implementace; u provozního stavu odkázat na registrovaný živý audit.
+  Projektový report uvede zdroj a čas podkladu odděleně od času sestavení,
+  přizná neznámé stáří/neověřený provoz a při driftu nepřebírá konkrétní práci
+  z agregátu. Čas commitu celého souboru není důkazem čerstvosti jeho řádků.
 
 ### LL-012 — IMAP složka s mezerou musí být při SELECT správně zakódovaná
 

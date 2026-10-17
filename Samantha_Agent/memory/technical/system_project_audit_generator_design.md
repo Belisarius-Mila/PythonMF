@@ -326,3 +326,22 @@ dorovnává v jednom checkpointovém commitu kanonický handoff, TVBCP a primár
 řádek `ACTIVE_PROJECTS.md`. Chybějící nebo duplicitní řádek a neshoda
 priority/režimu operaci zablokují; při chybě zápisu nebo commitu se trojice
 vrátí. Terminálové commity mimo tento workflow se dál dorovnávají ručně.
+
+
+## Doplnění 2026-10-17: čas podkladu a skutečné mezery vs. podněty
+
+- Capability audit označuje ověřené pokrytí nástrojů/workflow/registru a čas
+  sestavení. Udržovaná tabulka má podněty, nikoli automaticky zjištěné mezery
+  nebo dnešní priority. Konkrétní staré implementační úkoly a pevná minulá
+  data se nepřenášejí do nového auditu jako platné pokyny.
+- Kalendářový režim, doručení, síť a fyzická přejímka nejsou důkazem tohoto
+  registru; podnět odkazuje na odpovídající registrovaný živý audit.
+- Projektový audit odděluje čas sestavení od posledního commitu
+  ACTIVE_PROJECTS.md. Neznámý čas přizná; čas souboru není důkazem stáří či
+  pravdivosti každého řádku a obsah může mít lokální změny.
+- U projektů uvádí zdroj/odkaz na handoff, stav a krok dle paměti. U vrstev
+  netvrdí živý provoz bez jeho ověření. Při zjištěném driftu nenavrhuje
+  konkrétní projektovou práci ze starého agregátu, nejprve chce dorovnat zdroj.
+- Rozsah čtení, potvrzení, redakce a save=False/save=True se nemění. Staré
+  uložené reporty zůstávají historickými snapshoty a nepřepisují se.
+- Ověření: 20 cílených testů, statická brána a skutečné read-only CLI PASS.

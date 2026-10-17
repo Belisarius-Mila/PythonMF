@@ -10,8 +10,8 @@ Samantha pouzit tool `samantha_system_reports`.
 | --- | --- | --- |
 | Health check | Rychla kontrola rozpracovanosti, git stavu, pending bodu a varovani. | `.venv/bin/python scripts/samantha_health_check.py --mode quick` |
 | Kvantitativni status | Objemovy rust Samanthy: soubory, radky, lokalni stav vs git tracked. | `.venv/bin/python scripts/samantha_quantitative_status.py` |
-| Capability audit | Prehled registrovanych schopnosti, toolu, workflow a hlavních rezerv. | `.venv/bin/python scripts/samantha_capability_audit.py` |
-| Systemovy audit projektu, toolu a vrstev | Aktualni lidsky itinerar podobny rucnimu auditu: projekty, provozni rizika, tooly, vrstvy a nejmensi dalsi krok. | `.venv/bin/python scripts/samantha_project_audit.py --mode quick` |
+| Capability audit | Přehled pokrytí registru; zjištěné mezery oddělené od udržovaných neověřených podnětů. Čas sestavení; bez ověření provozu. | `.venv/bin/python scripts/samantha_capability_audit.py` |
+| Systemovy audit projektu, toolu a vrstev | Git-safe podklad pro výběr práce: zdroj a čas projektové paměti, neověřený provoz přiznaný; při driftu nejprve dorovnání podkladů. | `.venv/bin/python scripts/samantha_project_audit.py --mode quick` |
 | Knowledge inbox inventory | Bezpecny inventar velkych podkladu ve private knowledge inboxu bez cteni obsahu. | `.venv/bin/python scripts/samantha_knowledge_inbox.py` |
 | Downloads inventory | Bezpecny inventar top-level souboru ve Stazenych pred kopirovanim do knowledge inboxu. | `.venv/bin/python scripts/samantha_downloads_to_knowledge_inbox.py --list` |
 | iPhone shortcuts status | Kontrola pripravenosti MacStories Shortcuts Playground pro tvorbu iPhone zkratek. | `.venv/bin/python scripts/samantha_iphone_shortcuts.py --status` |

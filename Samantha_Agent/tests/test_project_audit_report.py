@@ -9,6 +9,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 from app.backup.activity_state import record_backup_completed
+from app.memory_truth_audit import GitFileEvidence
 from app.project_audit_report import (
     format_project_audit_result,
     parse_active_project_rows,
@@ -70,18 +71,28 @@ class ProjectAuditReportTests(unittest.TestCase):
             backup_path = project_root / "data" / "backup" / "activity_state.json"
             record_backup_completed("2026-06-23", path=backup_path)
 
-            result = run_samantha_project_audit(
-                mode="quick",
-                memory_dir=memory_dir,
-                project_root=project_root,
-                repo_root=root,
-                backup_state_path=backup_path,
-                runner=fake_git_runner,
-            )
+            with patch(
+                "app.project_audit_report.git_file_evidence",
+                return_value=GitFileEvidence(committed_at="2026-06-23T09:00:00+02:00", commit="abc123"),
+            ):
+                result = run_samantha_project_audit(
+                    mode="quick",
+                    memory_dir=memory_dir,
+                    project_root=project_root,
+                    repo_root=root,
+                    backup_state_path=backup_path,
+                    runner=fake_git_runner,
+                )
+            self.assertFalse((memory_dir / "reports").exists())
             text = format_project_audit_result(result)
 
-        self.assertIn("RANNI PROVOZNI POZNAMKA", text)
-        self.assertIn("RYCHLE DOPORUCENI PRO DNES", text)
+        self.assertIn("AKTUALNI PREHLED PODKLADU", text)
+        self.assertIn("NAVRHY DALSICH KROKU PODLE PODKLADU", text)
+        self.assertIn(f"Sestaveno: {result.created_at}", text)
+        self.assertIn("Poslední commit ACTIVE_PROJECTS.md: 2026-06-23T09:00:00+02:00", text)
+        self.assertIn("Čas souboru nedokazuje stáří jednotlivých údajů", text)
+        self.assertIn("Stav dle paměti (provoz neověřený)", text)
+        self.assertIn("odkaz na handoff: `handoffs/library.md`", text)
         self.assertIn("PRIORITA 1 - HLAVNI KANDIDATI", text)
         self.assertIn("TOOLY A SCHOPNOSTI - RYCHLA MAPA", text)
         self.assertIn("VRSTVY - SYSTEMOVA ARCHITEKTURA", text)
@@ -139,6 +150,9 @@ class ProjectAuditReportTests(unittest.TestCase):
         self.assertEqual(result.memory_drift_workstreams, ("Cockpit",))
         self.assertIn("1 proudů má novější kanonický handoff/TVBCP", text)
         self.assertIn("synchronizovat ACTIVE_PROJECTS.md", text)
+        self.assertFalse(any("Cockpit Knihovna" in step for step in result.quick_recommendations))
+        self.assertIsNone(result.registry_committed_at)
+        self.assertIn("Poslední commit ACTIVE_PROJECTS.md: nezjištěný", text)
 
     def test_save_writes_git_safe_report_to_reports_dir(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

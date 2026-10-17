@@ -9,6 +9,14 @@ TOTO JE AKTUÁLNÍ ROZHODOVACÍ ČÁST DOKUMENTU.
 Architektonický průběh a původní audit zůstávají níže jako historie.
 Čísla, provozní stavy a priority historických oddílů nejsou dnešním stavem.
 
+VÝVOJOVÝ STAV — 2026-10-17 14:30 CEST
+Bod 3 lokálně hotový: zdroje auditů opravené, zjištěné registry gaps oddělené
+od udržovaných podnětů, bez staré implementace kalendáře a červnového termínu.
+Projektový audit ukazuje čas sestavení/commitu podkladu, zdroj a neověřený
+provoz. Při driftu nepřebírá konkrétní projektovou práci ze starého agregátu.
+20 cílených testů, statická brána a skutečné read-only CLI PASS. Body 1–3
+jsou lokální, push/nasazení a fyzická přejímka čekají. Camino a autosave beze změny.
+
 VÝVOJOVÝ STAV — 2026-10-17 13:51 CEST
 U07 / bod 2 lokálně dokončený: Servis má Provoz / Relace / Obnova / Vývoj /
 Diagnostika, samostatně rozbalovací a s původními akcemi u souvisejícího stavu.

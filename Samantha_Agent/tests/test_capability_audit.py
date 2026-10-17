@@ -1,12 +1,38 @@
 from __future__ import annotations
 
 import unittest
+from datetime import datetime, timezone
+from unittest.mock import patch
 
 from app.capability_audit import format_samantha_capability_audit
 from app.capabilities import all_capabilities
 
 
 class CapabilityAuditTests(unittest.TestCase):
+    def test_actual_missing_registry_tool_remains_a_detected_gap(self) -> None:
+        with patch("app.capability_audit._agent_tool_names", return_value=("new_unregistered_tool",)):
+            text = format_samantha_capability_audit()
+        self.assertIn("Unmapped tools: 1", text)
+        self.assertIn("Registry-covered agent tools: 0/1", text)
+        self.assertIn("Registry gaps:\n- Unmapped agent tool: `new_unregistered_tool`", text)
+        self.assertIn("Agent tools missing capability records:\n- `new_unregistered_tool`", text)
+
+    def test_registry_audit_does_not_reissue_completed_or_expired_work_as_a_gap(self) -> None:
+        for now in (
+            datetime(2026, 5, 30, tzinfo=timezone.utc),
+            datetime(2026, 10, 17, tzinfo=timezone.utc),
+        ):
+            with self.subTest(now=now):
+                text = format_samantha_capability_audit(now=now)
+                self.assertIn(now.isoformat(timespec="seconds"), text)
+                self.assertIn("runtime, delivery and physical acceptance are not verified", text)
+                self.assertIn("family_calendar_delivery_readiness for the current delivery mode", text)
+                self.assertNotIn("Implement the enabled runtime", text)
+                self.assertNotIn("2026-06-01", text)
+                self.assertNotIn("Register PictNew and VocabularyEN workflows", text)
+                self.assertNotIn("Priority reserves:", text)
+                self.assertIn("Registry-covered agent tools: 85/85", text)
+
     def test_capability_audit_reports_mapped_tools_and_workflow_count(self) -> None:
         text = format_samantha_capability_audit()
 

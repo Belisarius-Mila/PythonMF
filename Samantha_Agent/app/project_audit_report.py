@@ -74,6 +74,7 @@ class ProjectAuditResult:
     git_lines: int
     layers: tuple[AuditLayer, ...]
     saved_path: Path | None
+    registry_committed_at: str | None = None
 
 
 def format_samantha_project_audit(
@@ -117,6 +118,9 @@ def run_samantha_project_audit(
     memory_index_text = _read_text(memory_dir / "MEMORY_INDEX.md")
     rows = parse_active_project_rows(active_projects_text)
     reminders = _reminder_lines(memory_index_text)
+    registry_evidence = git_file_evidence(
+        project_root, "memory/ACTIVE_PROJECTS.md", runner=runner
+    )
 
     health = run_samantha_health_check(
         mode="full" if normalized_mode == "full" else "quick",
@@ -187,6 +191,7 @@ def run_samantha_project_audit(
         git_lines=git_totals[1],
         layers=layers,
         saved_path=None,
+        registry_committed_at=registry_evidence.committed_at,
     )
     if save:
         saved_path = save_project_audit_result(result, reports_dir=reports_dir)
@@ -238,9 +243,13 @@ def format_project_audit_result(result: ProjectAuditResult) -> str:
     lines = [
         "Nazev: Systemovy audit Samanthy - projekty, tooly, vrstvy",
         f"Datum: {result.created_at[:10]}",
+        f"Sestaveno: {result.created_at}",
         f"Mode: {result.mode}",
         "Zdroj: ACTIVE_PROJECTS.md, MEMORY_INDEX.md, audit autority paměti, health check, backup status, quantitative status, capability audit",
         "Ucel: Opakovatelny lidsky itinerar pro vyber, na co navazat.",
+        f"Poslední commit ACTIVE_PROJECTS.md: {result.registry_committed_at or 'nezjištěný'}.",
+        "Čas souboru nedokazuje stáří jednotlivých údajů ani jejich pravdivost; obsah může mít lokální změny.",
+        "Projektové stavy a kroky jsou návrhy z paměti; tento audit neověřuje živý provoz ani dokončení jednotlivých úkolů.",
         "",
         "Bezpecnost:",
         "- Report je git-safe souhrn. Necetl private vault, cela tela e-mailu, soukrome dokumenty ani fulltexty clanku.",
@@ -248,7 +257,7 @@ def format_project_audit_result(result: ProjectAuditResult) -> str:
         "- Stav priorit je odvozeny z registru projektu a systemovych reportu; neni to pravni, financni ani zdravotni doporuceni.",
         "",
         "======================================================================",
-        "RANNI PROVOZNI POZNAMKA",
+        "AKTUALNI PREHLED PODKLADU",
         "======================================================================",
         "",
         f"- Git: {result.git_summary}",
@@ -262,7 +271,7 @@ def format_project_audit_result(result: ProjectAuditResult) -> str:
         *_bullet_lines(result.health_warnings or ("Zadna hlavni varovani z health checku.",)),
         "",
         "======================================================================",
-        "RYCHLE DOPORUCENI PRO DNES",
+        "NAVRHY DALSICH KROKU PODLE PODKLADU",
         "======================================================================",
         "",
         *_numbered_lines(result.quick_recommendations),
@@ -367,8 +376,8 @@ def _quick_recommendations(
         items.append("Zmensit sum v pameti: vybrat malou davku zastaralych `[PRIPOMENOUT]` a presunout je mimo startovni pozornost.")
     if capability.unmapped_tools:
         items.append("Doplnit capability mapu pro nemapovane tooly, aby lidske pokyny sly pres registrovane schopnosti.")
-    if priority_1:
-        items.append(f"Jako vecny smer vybrat jednu prioritu 1: {priority_1[0].name}. Dalsi krok: {priority_1[0].next_step}")
+    if priority_1 and not memory_drift_count:
+        items.append(f"Návrh z projektové paměti: {priority_1[0].name}. Před zahájením ověřit v kanonickém handoffu: {priority_1[0].next_step}")
     items.append("Nemichat dnes vice velkych smeru; generator ma byt podklad pro vyber jedne konkretni navaznosti.")
     return tuple(_sanitize_text(item) for item in _dedupe(items)[:5])
 
@@ -397,12 +406,12 @@ def _build_layers(
     capability: CapabilityAuditSummary,
     priority_1: Sequence[ProjectAuditItem],
 ) -> tuple[AuditLayer, ...]:
-    cockpit_status = "silna, pokud je Cockpit aktualne dostupny; overit manualnim smoke testem po zmenach"
-    knowledge_status = "aktivni" if any("knihovna" in item.name.casefold() or "znalost" in item.name.casefold() for item in priority_1) else "stabilni"
+    cockpit_status = "živá dostupnost tímto auditem neověřená"
+    knowledge_status = "záměr v projektovém registru; provoz neověřený" if any("knihovna" in item.name.casefold() or "znalost" in item.name.casefold() for item in priority_1) else "živý stav tímto auditem neověřený"
     return (
         AuditLayer(
             "Lidska orientacni vrstva",
-            f"funkcni, ale hluk `[PRIPOMENOUT]` je {reminder_count}",
+            f"projektový registr načten; počet `[PRIPOMENOUT]` je {reminder_count}",
             "cistit po malych davkach a drzet aktualni report v indexu",
         ),
         AuditLayer(
@@ -417,12 +426,12 @@ def _build_layers(
         ),
         AuditLayer("Cockpit UI vrstva", cockpit_status, "manualni smoke test po zmenach"),
         AuditLayer("Private data vrstva", "oddelená od reportu", "pokracovat jen pres potvrzene tooly"),
-        AuditLayer("Knowledge vrstva", knowledge_status, "sloucit orientaci clanku, receptu, AI nastroju a inboxu"),
-        AuditLayer("Mobile/voice vrstva", "pouzitelna, ale resit jen pri realnem provoznim bloku", "pred approval z iPhonu pouzit cockpit notice pravidlo"),
+        AuditLayer("Knowledge vrstva", knowledge_status, "vybrat krok z aktuálního kanonického handoffu"),
+        AuditLayer("Mobile/voice vrstva", "provoz ani fyzická zařízení tímto auditem neověřené", "pred approval z iPhonu pouzit cockpit notice pravidlo"),
         AuditLayer(
             "Workflow registry vrstva",
-            "dobra zakladna" if not capability.unmapped_tools else "ma registry gaps",
-            "dopsat mezery pred dalsim routovanim lidskych pokynu na shell",
+            "pokrytí nezjištěné" if capability.unmapped_tools is None else f"nemapované agent tooly: {capability.unmapped_tools}",
+            "ověřit registraci pro konkrétní zvolenou akci",
         ),
     )
 
@@ -468,8 +477,9 @@ def _format_items(items: Sequence[ProjectAuditItem]) -> list[str]:
                 f"Typ: {item.inferred_type}",
                 f"Priorita: {item.priority or '-'}",
                 f"Rezim: {item.lifecycle}",
-                f"Stav: {_truncate(item.status, 420)}",
-                f"Dalsi krok: {_truncate(item.next_step, 260)}",
+                f"Zdroj: ACTIVE_PROJECTS.md; odkaz na handoff: {_truncate(_sanitize_text(item.handoff), 260) or 'neuvedený'}",
+                f"Stav dle paměti (provoz neověřený): {_truncate(item.status, 420)}",
+                f"Návrh kroku dle paměti: {_truncate(item.next_step, 260)}",
                 "",
             ]
         )
