@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import tempfile
 import time
 import unittest
@@ -42,6 +43,28 @@ class FakeService:
 
 
 class LunaReleaseTests(unittest.TestCase):
+    def test_service_query_forces_cli_only_for_tailscale_and_preserves_parent_environment(self):
+        from scripts import camino_service_control as camino
+
+        with patch.dict(os.environ, {"TAILSCALE_BE_CLI": "0"}), patch.object(release.subprocess, "run") as run:
+            release._protected_service_query([camino.TAILSCALE, "serve", "status", "--json"])
+            self.assertEqual(run.call_args.kwargs["env"]["TAILSCALE_BE_CLI"], "1")
+            self.assertEqual(os.environ["TAILSCALE_BE_CLI"], "0")
+            self.assertEqual(run.call_args.args[0], [camino.TAILSCALE, "serve", "status", "--json"])
+            release._protected_service_query(["/bin/launchctl", "print", "owned-service"])
+            self.assertNotIn("env", run.call_args.kwargs)
+
+    def test_protection_failure_is_separate_from_a_successful_model_handoff(self):
+        job = self.create(dry_run=True)
+        calls = Mock()
+        result = release.run_release(job["job_id"], store=self.store, call=calls,
+            accept=Mock(return_value={**EXECUTOR,"accepted":True,"target_head":TARGET}),
+            protect=Mock(side_effect=ValueError("private-network-details")))
+        self.assertEqual(result["job"]["failure_phase"], "protection")
+        self.assertEqual(result["job"]["push_state"], "not_started")
+        self.assertNotIn("private-network-details", json.dumps(result))
+        calls.assert_not_called()
+
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory()
         self.addCleanup(self.directory.cleanup)

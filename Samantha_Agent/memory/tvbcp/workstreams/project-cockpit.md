@@ -1,6 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-17 18:31 CEST: pilot C odhalil chybu čtecí ochrany Tailscale pod launchd. Lokální oprava explicitního CLI režimu a samostatné fáze protection prošla 43 cílenými testy, skutečným minimálním prostředím a plnou branou 2034/2034. Dokumentace a oprava tvoří dva autorizované commity; následné p+n a srovnání doloží runtime účtenka a logs/pn_async_comparison_20261017.log.
+
 - 2026-10-17 18:18 CEST: A/B dokončené a živě ověřené; náklad dohledu převážil úsporu Luny. Míla autorizoval nový pilot C přes skutečný Cockpit bez průběžných modelových návratů. Jeden nový dokumentační commit; stávající modely a ochrany zůstávají zachované. Výsledek C dokládají runtime účtenka a logs/pn_async_comparison_20261017.log.
 
 - 2026-10-17 17:30 CEST: měření je nasazené; přímé p+n A prošlo 2032 testy a smoke 5/5, GitHub aligned, Camino/autosave zachované. UI identity balíčku nasazené. UI výsledků kontrol lokálně hotové (68 UI testů a Node VM PASS); Míla schválil následné měřené p+n B přes Lunu. Aktuální výsledek B a číselné srovnání dokládají runtime účtenka a logs/pn_cost_comparison_20261017.log.
@@ -1847,3 +1849,23 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Předchozí finální důkazy: logs/pn_cost_comparison_20261017.log a účtenka 4afbc4a25c40ec4a545deb6745b498b4. C doloží nová trvalá runtime účtenka a logs/pn_async_comparison_20261017.log; tento checkpoint před publikací jeho výsledek nepředjímá.
+
+### 2026-10-17 18:26 CEST — Ochranné ověření v prostředí služby opravené
+
+Hotovo:
+- Oba první asynchronní pokusy skončily před push: Luna balíček přijala, ale čtecí síťová kontrola spustila Tailscale GUI a místo JSON dostala chybový text. Návrat účtenky do původního Cockpit vlákna v obou případech fungoval.
+- Oprava vynucuje TAILSCALE_BE_CLI=1 pouze pro Tailscale čtecí subprocess. Nastavení služby, sítě ani Camino se nemění. Fáze protection nyní odděluje úspěšné modelové převzetí od selhání ochranného auditu.
+- Cílené testy a skutečný ochranný snapshot v minimálním launchd prostředí PASS, přesná shoda s původními chráněnými službami.
+
+Rozhodnutí:
+- Dokončení schváleného pilotu vyžaduje tuto úzkou opravu. Původní dokumentační commit a oprava tvoří jeden přesný dvoucommitový balíček. Předchozí neúspěšné účtenky zůstávají zachované.
+- Čistý úspěšný pokus se změří samostatně; celkový souhrn přizná i předchozí pokusy a opravu. Obnovené Cockpit vlákno vykázalo aktuální gpt-6.1-sol, bez zásahu do modelových nastavení.
+
+Další krok:
+- Dokončit plnou bránu opravy, commit a autorizované asynchronní p+n obou commitů.
+
+Navrhované další kroky:
+- Fyzická přejímka UI/filmu zůstává samostatně.
+
+Technický důkaz:
+- logs/pn_async_fix_targeted_20261017.log, logs/pn_async_fix_live_20261017.log; plná brána 2034/2034 PASS (262,874 s unit testů), logs/pn_async_fix_full_gate_20261017.log. Neúspěšné joby 5a5129c49ba44e26047c4402d4e4cbf4 a 424f7252a5273566b8f63c1c7fa253e9. Finální pilot dokládá runtime účtenka a logs/pn_async_comparison_20261017.log.

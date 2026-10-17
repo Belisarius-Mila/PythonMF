@@ -218,3 +218,17 @@ nativního modelového pomocníka navíc. Původní model Cockpitu se nepřepín
 případný rozdíl proti terminálovému Sol 6.1 bude ve výsledku výslovný.
 Aktuální výsledek je v logs/pn_async_comparison_20261017.log a runtime
 účtence. Historické A/B zůstává beze změn v původním souhrnu.
+
+Oprava pilotu C: ve službovém prostředí bez TERM se macOS Tailscale přepnul
+do GUI a vracel ne-JSON výstup. Ochranné čtecí dotazy vynucují
+TAILSCALE_BE_CLI=1 pouze v prostředí daného subprocessu; rodičovské
+prostředí ani konfigurace sítě/Camino se nemění. Stav protection nyní
+jednoznačně odděluje síťový audit od převzetí Lunou. Ověřeno skutečným
+snapshotem s minimálním launchd prostředím a přesnou shodou baseline.
+Zdroj: https://tailscale.com/docs/reference/tailscale-cli?tab=macos .
+Schválený balíček C nyní obsahuje dokumentační commit i tuto opravu; počet
+commitů a dodatečné náklady budou ve výsledku výslovné.
+
+Oprava C ověřena: 43 cílených testů, skutečný minimální launchd audit a
+plná brána 2034/2034 PASS (unit část 262,874 s). Publikační výsledek zůstává
+samostatným živým důkazem v runtime účtence a finálním souhrnu.

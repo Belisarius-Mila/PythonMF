@@ -29,6 +29,13 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-072 — Tailscale audit služby potřebuje explicitní CLI režim
+
+- Problém: V launchd prostředí bez TERM macOS Tailscale vrací s exit 0 chybu GUI místo JSON; ochrana pak selže po úspěšném převzetí Lunou.
+- Typ: opakující se
+- Řešení nalezeno: 17102026
+- Řešení: Pouze čtecímu Tailscale subprocessu předat TAILSCALE_BE_CLI=1, neměnit rodičovské prostředí, síť ani služby. Pojmenovat ochrannou fázi samostatně. Test s minimálním launchd prostředím vrací přesný původní snapshot Camino/Serve/autosave.
+
 ### LL-071 — Spotřeba p+n zahrnuje i předání a dohled
 
 - Problém: Samotná levná sazba pomocníka nedokazuje úsporu celého workflow; kumulativní thread total, cached input a reasoning se snadno započítají dvakrát.

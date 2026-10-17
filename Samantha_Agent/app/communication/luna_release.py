@@ -495,14 +495,25 @@ def return_release(
     return {"ok": True, "job": public_job(job)}
 
 
+def _protected_service_query(argv: list[str]) -> subprocess.CompletedProcess[str]:
+    """Read service metadata without letting the macOS Tailscale app open a GUI."""
+    from scripts import camino_service_control as camino
+
+    options: dict[str, Any] = {}
+    if argv[:1] == [camino.TAILSCALE]:
+        options["env"] = {**os.environ, "TAILSCALE_BE_CLI": "1"}
+    return subprocess.run(argv, capture_output=True, text=True, timeout=30,
+                          check=False, **options)
+
+
 def protected_snapshot() -> dict[str, Any]:
     """Registered read-only service checks; no private media or autosave content."""
     from scripts import camino_service_control as camino
     from scripts import camino_service_network as network
     from scripts.autosave_status import autosave_status
 
-    status = camino.control("status")
-    process = camino.run_command(["/bin/launchctl", "print", camino.target()])
+    status = camino.control("status", runner=_protected_service_query)
+    process = _protected_service_query(["/bin/launchctl", "print", camino.target()])
     pid = re.search(r"\bpid = (\d+)", process.stdout)
     auto = autosave_status()
     if (not status.get("running") or not status.get("owned_definition") or not pid
@@ -511,7 +522,7 @@ def protected_snapshot() -> dict[str, Any]:
         raise LunaReleaseError("Ochranný stav Camino nebo autosave nelze potvrdit.")
     return {"camino_pid": int(pid[1]),
             "camino_config": hashlib.sha256((camino.ROOT / "config.json").read_bytes()).hexdigest(),
-            "serve_config": hashlib.sha256(json.dumps(network.state("serve", camino.run_command),
+            "serve_config": hashlib.sha256(json.dumps(network.state("serve", _protected_service_query),
                 sort_keys=True, separators=(",", ":")).encode()).hexdigest(),
             "autosave_pids": list(auto.watcher_pids), "automatic_cleanup": auto.automatic_cleanup}
 
@@ -552,7 +563,8 @@ def run_release(
                     or agent_roles.validate_selection(proof) != selected
                     or proof.get("target_head") != job["target_head"]):
                 raise LunaReleaseError("Převzetí Lunou nemá doklad přesného cíle.")
-            job = store.update(job_id, luna_proof=proof)
+            job = store.update(job_id, luna_proof=proof, phase="protection",
+                               message="Vykonavatel převzal balíček; ověřuje Camino a autosave.")
             before = protect()
             if job["dry_run"]:
                 if protect() != before:
