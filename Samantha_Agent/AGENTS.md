@@ -122,8 +122,8 @@ Společné pracovní instrukce PythonMF; cesty níže jsou vůči `Samantha_Agen
   má vlastní roli `routine_reviewer`; vývoj používá `simple_developer`.
   Nepředávej historii ani soukromá data, neprováděj modelový polling a neopakuj
   nejistý či nadlimitní krok automaticky. Čekání a testy obstará program.
-  Nové role zůstávají do samostatného nasazení podpory více rolí neaktivní;
-  jejich předčasné přidání do centrálního JSON by zablokovalo starší Cockpit.
+  Novou roli aktivuj až po živém ověření kompatibilního runtime registrovaným
+  postupem; předčasná změna JSON může zablokovat starší parser Cockpitu.
 
 ## Technické preference
 

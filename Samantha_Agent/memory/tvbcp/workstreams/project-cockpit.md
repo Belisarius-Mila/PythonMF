@@ -1922,3 +1922,25 @@ Navrhované další kroky:
 Technický důkaz:
 - Skutečný probe 9396d97054df4e549a777d930622df1f: 11 093 tokenů a 0,58125 odhad Standard pomocníka; první zastavený test 0,55645. První nevyhovující odpověď nic nepřepsala; upřesnění zadání doložené novou zkouškou.
 - logs/simple_development_candidate_corrected_20261017.log, logs/simple_development_acceptance_20261017.log a logs/simple_development_portal_ipc_20261017.log; souhrn logs/simple_development_report_20261017.log. Plná brána 2096/2096 PASS (299,646 s unit testů), logs/simple_development_full_gate_20261017.log. Závěrečný živý chráněný snapshot a role p+n před/po přesně shodné; logs/simple_development_final_verification_20261017.log. Žádný push, restart, změna sítě ani Camino/autosave.
+
+
+## 2026-10-17 19:55 CEST — Nasazení předávání a aktivace vývojové role
+
+Hotovo:
+- Luna převzala celý dvoucommitový balíček a nasadila nový Cockpit; plná publikační brána 2096 testů PASS, živé ověření 5/5. Přesný head af5db5a3, stamp 7fa6d9e50f794ddf a chráněné služby doložené účtenkou 34406940c02bfea7e175725a9c93cbb6.
+- Stabilní lokální zámek atomického zápisu centrální konfigurace je přesně ignorovaný v Gitu; zůstává na disku a samotný agent_roles.json se dál verzovává.
+- Registrovaný activation_plan ověřil skutečně nasazený nový parser a přijatý vývojový dry-run. activate zapnul simple_developer v jediné centrální konfiguraci; živý capabilities hlásí enabled=true a katalog potvrdil gpt-6.1-sol/medium. Původní role Luna/release_executor i Camino/autosave mají přesně stejný otisk a procesy. Čtecí routine_reviewer zůstává neaktivní.
+
+Rozhodnutí:
+- Míla výslovně povolil p+n přes Lunu včetně bezpečné konfigurační aktivace. Aktivace je druhá fáze prvního zavedení; neproběhla před podporou nových rolí. Bez změny hlavního modelu, síťového sandboxu, Camina nebo autosave.
+- Toto je checkpoint centrální konfigurace a povinného projektového zápisu před závěrečnou publikací. Konečný head a výsledek tohoto p+n vždy ověřit podle finální serverové účtenky 4935e2096cff56f7aa768ec9d3ab936e; tento zápis je nepředjímá.
+
+Další krok:
+- Dokončit plnou bránu a lokální konfigurační commit, zarovnat čisté profily a předat přesný závěrečný balíček Luně v rámci již schváleného p+n.
+
+Navrhované další kroky:
+- Fyzická přejímka vhodného drobného vývojového úkolu přes portál/UI zůstává samostatně; systémový dry-run a izolované IPC jsou ověřené.
+- Fyzická přejímka filmu čeká podle původní dohody.
+
+Technický důkaz:
+- logs/simple_development_release_phase1_20261017.log, logs/simple_development_activation_live_20261017.log a logs/simple_development_activation_model_20261017.log. Konfigurační plná brána 2096/2096 PASS (295,435 s unit testů), logs/simple_development_activation_full_gate_20261017.log; závěrečné p+n doloží logs/simple_development_release_phase2_20261017.log a bezpečná serverová účtenka 4935e2096cff56f7aa768ec9d3ab936e. Žádná zpráva do jiného Cockpit vlákna, mazání ani změna chráněných služeb.

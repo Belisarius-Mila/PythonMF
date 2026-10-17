@@ -337,9 +337,9 @@ exec session; nevyvolávat model kvůli průběžným kontrolám.
 
 ### První zavedení po samostatném p+n
 
-Centrální config/agent_roles.json je nyní beze změny: starý běžící Cockpit
-umí jen release_executor. Dokončený kód je lokální, produkční delegace neaktivní.
-První zavedení patří pod výslovné p+n a má dvě konfigurační fáze:
+Při dokončení vývoje zůstal config/agent_roles.json původní, protože tehdejší
+Cockpit uměl jen release_executor. První zavedení pod výslovným p+n používá
+následující konfigurační fáze:
 
 1. Dosavadní registrovanou cestou publikovat a nasadit připravené commity.
 2. Na čistém main zavolat activation_plan s probe ID
@@ -349,7 +349,8 @@ První zavedení patří pod výslovné p+n a má dvě konfigurační fáze:
    Starý runtime změnu odmítne před zápisem. Aktivuje se jen simple_developer;
    původní release_executor zůstane přesně zachovaný. routine_reviewer se tím
    nezapíná. Vazba bude pouze v centrálním config/agent_roles.json.
-3. Zkontrolovat a lokálně commitnout pouze tuto konfiguraci, zarovnat bezpečné
+3. Zkontrolovat a lokálně commitnout tuto konfiguraci s povinným projektovým
+   zápisem (bez dalších změn kódu), zarovnat bezpečné
    profily, provést nový audit přesného balíčku a dokončit autorizované p+n.
    Nový vývoj není zapotřebí; konfigurační fáze má samostatné ověření a účtenku.
 
@@ -363,3 +364,15 @@ a jednorázová implementace se s cenou jedné opravy nesměšují; bez kontroln
 běhu úspora neprokázaná. Číselný souhrn v logs/simple_development_report_20261017.log.
 Skutečná zkouška souborového IPC uvnitř networkAccess=false PASS; žádný modelový
 tah ani rozšíření sítě. Fyzická přejímka portálu zůstává až po nasazení.
+
+
+### Aktivace po skutečném nasazení 2026-10-17 19:55 CEST
+
+Luna nasadila af5db5a3 / 7fa6d9e50f794ddf, full gate 2096 a smoke 5/5.
+Registrovaná aktivace přijala probe 9396d97054df4e549a777d930622df1f a
+nezměněný digest 51725aeaeb9504ed3dd015ca8a1f0622a801a8663029e11c05234892f138b703.
+Role simple_developer je nyní v centrálním JSON, katalog ověřil gpt-6.1-sol/medium
+a živý capabilities vrací enabled=true. routine_reviewer zůstává neaktivní;
+release_executor beze změny. Konečnou publikaci konfiguračního checkpointu
+dokládá logs/simple_development_release_phase2_20261017.log a účtenka 4935e2096cff56f7aa768ec9d3ab936e.
+Předpoklad předchozích historických odstavců o neaktivní vývojové roli tím končí.

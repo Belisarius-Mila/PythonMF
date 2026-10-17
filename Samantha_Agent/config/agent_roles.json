@@ -12,6 +12,18 @@
           "dry_run_evidence": "logs/luna_general_live_dry_run_20261017.log"
         }
       ]
+    },
+    "simple_developer": {
+      "label": "Pomocník pro jednu čistou Python funkci",
+      "preferred_model": "gpt-6.1-sol",
+      "approved_models": [
+        {
+          "model": "gpt-6.1-sol",
+          "reasoning_effort": "medium",
+          "cost_review": "Mila 2026-10-17: Standard credits/MTok 50 input, 2.5 cached, 250 output; one bounded development turn; no upgrade",
+          "dry_run_evidence": "data/private/simple_development_probes/9396d97054df4e549a777d930622df1f/proof.json"
+        }
+      ]
     }
   }
 }

@@ -15,3 +15,4 @@ logs/*.log
 logs/*.log.*
 logs/*.lock
 logs/network_watchdog/
+config/agent_roles.json.lock
