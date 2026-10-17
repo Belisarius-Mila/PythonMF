@@ -198,3 +198,8 @@ Kanonický stav a důkazy patří do handoffu/TVBCP `project-cockpit`.
 
 Měřený UI krok A: identita dokončeného balíčku. 68 UI testů a skutečná
 účtenka v Node VM PASS; přímé p+n a srovnání dokládají uvedené runtime logy.
+
+Měřený krok A potvrzen: d9e6e287, plná brána 2032/2032 a smoke 5/5;
+2 369 937 tokenů, Standard odhad 7,27533 kreditu. Krok B (UI doložených
+kontrol) má 68 UI testů a Node VM PASS. Jeho p+n a úplné souhrny včetně
+režie hlavního Adama se ověřují v runtime účtence a uvedeném finálním logu.

@@ -29,6 +29,13 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-071 — Spotřeba p+n zahrnuje i předání a dohled
+
+- Problém: Samotná levná sazba pomocníka nedokazuje úsporu celého workflow; kumulativní thread total, cached input a reasoning se snadno započítají dvakrát.
+- Typ: opakující se
+- Řešení nalezeno: 17102026
+- Řešení: Změřit rozdíl počítadel původního Adama a celou spotřebu čerstvého pomocníka i jednorázového modelového převzetí. Cached input je část vstupu, reasoning část výstupu. Chybějící telemetrie zůstane neznámá; Standard kreditní odhad označit zvlášť od vyúčtování. Ověřeno živým modelovým tahem, přímým p+n A a testy normalizace/soukromé projekce.
+
 ### LL-070 — Doporučený nástupce modelu není schválená náhrada
 
 - Problém: Pevné jméno modelu zastaví delegaci po jeho stažení; automatický

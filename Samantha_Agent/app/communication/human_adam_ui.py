@@ -2579,6 +2579,16 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       label += /^[0-9a-f]{7,12}$/.test(head) ? ` · main ${head}` : " · commit neověřený";
       label += Number.isInteger(count) && count >= 0 ? ` · ${count} nových commitů` : " · počet commitů neověřený";
       label += model ? ` · model ${model}` : " · model neověřený";
+      const gate = lunaReleaseJob.gate || {};
+      const verification = lunaReleaseJob.verification || {};
+      const testsConfirmed = gate.passed === true && gate.mode === "full"
+        && Number.isInteger(gate.test_count) && gate.test_count > 0;
+      label += testsConfirmed ? ` · ${gate.test_count} testů PASS` : " · testy neověřené";
+      label += testsConfirmed && Number.isFinite(gate.duration_seconds) && gate.duration_seconds >= 0
+        ? ` · brána ${Math.round(gate.duration_seconds)} s` : " · čas brány neověřený";
+      const smokeConfirmed = lunaReleaseJob.deployment_state === "confirmed"
+        && verification.state === "deployed" && verification.smoke_count === 5;
+      label += smokeConfirmed ? " · živá kontrola 5/5" : " · živá kontrola neověřená";
     }
     lunaReleaseStatus.textContent = label;
     lunaReleaseStatus.hidden = false;

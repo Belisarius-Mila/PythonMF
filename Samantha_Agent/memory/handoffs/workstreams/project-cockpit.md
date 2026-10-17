@@ -1,6 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-17 17:30 CEST: měření je nasazené; přímé p+n A prošlo 2032 testy a smoke 5/5, GitHub aligned, Camino/autosave zachované. UI identity balíčku nasazené. UI výsledků kontrol lokálně hotové (68 UI testů a Node VM PASS); Míla schválil následné měřené p+n B přes Lunu. Aktuální výsledek B a číselné srovnání dokládají runtime účtenka a logs/pn_cost_comparison_20261017.log.
+
 - 2026-10-17 16:53 CEST: role `release_executor` je lokálně oddělená od konkrétního modelu.
   Jediné nastavení `config/agent_roles.json` platí pro všechny vývojové proudy
   i nativního pomocníka. Schválený model/úsilí a otisk politiky jsou v účtence;
@@ -1711,3 +1713,22 @@ Navrhované další kroky:
 
 Technický důkaz:
 - 68 UI testů PASS; skutečná bezpečná účtenka a chybějící údaje ověřené v Node VM. Důkazy logs/pn_benchmark_a_ui_tests_20261017.log a logs/pn_benchmark_a_identity_20261017.log. Aktuální publikaci doloží serverová účtenka a logs/pn_benchmark_a_20261017.log; celkové srovnání logs/pn_cost_comparison_20261017.log.
+
+### 2026-10-17 17:30 CEST — Výsledky kontrol, měřený krok B
+
+Hotovo:
+- Karta výsledku nově ukazuje doložený počet testů, dobu plné brány a živou kontrolu 5/5. Chybějící či nepotvrzené důkazy výslovně označí jako neověřené.
+- Přímé p+n A je ověřené: commit d9e6e287, 2032 testů PASS, smoke 5/5, GitHub aligned a chráněné služby přesně zachované. Interval A: 2 369 937 tokenů, odhad Standard 7,27533 kreditu.
+
+Rozhodnutí:
+- Druhý malý UI commit převezme čerstvý nativní pomocník centrální role. Interval B zahrne předání, pomocníka, jednorázové převzetí i závěrečnou kontrolu Adama; vývoj a sepsání reportu jsou mimo měření.
+- Jeden pár je orientační srovnání konkrétního workflow v dlouhé relaci, nikoli obecná úspora modelu. Kredity nejsou vyúčtování ani procenta limitu.
+
+Další krok:
+- Provést měřené p+n B přes Lunu a porovnat bezpečné číselné souhrny.
+
+Navrhované další kroky:
+- Fyzická přejímka UI/filmu čeká.
+
+Technický důkaz:
+- 68 UI testů PASS a Node VM s reálnou účtenkou i nepotvrzenými důkazy PASS. A: logs/pn_benchmark_a_20261017.log a logs/pn_benchmark_a_usage_20261017.log. B doloží trvalá runtime účtenka vykonavatele a logs/pn_benchmark_b_usage_20261017.log. Finální srovnání logs/pn_cost_comparison_20261017.log; tento checkpoint před měřením B nepředjímá jeho výsledek.
