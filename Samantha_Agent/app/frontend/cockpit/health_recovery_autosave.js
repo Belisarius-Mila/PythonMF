@@ -429,7 +429,7 @@
 
     async function previewAutosaveCleanup(button) {
       const observation = ++autosaveObservation;
-      const targetButton = button || elements.autosaveCleanupPreviewBtn || elements.dashboardAutosaveCleanupBtn;
+      const targetButton = button || elements.autosaveCleanupPreviewBtn;
       targetButton.disabled = true;
       if (elements.autosaveCleanupStatus) elements.autosaveCleanupStatus.textContent = "Počítám autosave úklid...";
       if (elements.autosaveCleanupOutput) elements.autosaveCleanupOutput.textContent = "";

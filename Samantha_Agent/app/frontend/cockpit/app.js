@@ -287,7 +287,6 @@
 		    const dashboardQuickNotesBtn = document.getElementById("dashboardQuickNotesBtn");
     const dashboardRecoveryBtn = document.getElementById("dashboardRecoveryBtn");
     const dashboardCommandCheatsheetBtn = document.getElementById("dashboardCommandCheatsheetBtn");
-    const dashboardAutosaveCleanupBtn = document.getElementById("dashboardAutosaveCleanupBtn");
     const autosaveCleanupPreviewBtn = document.getElementById("autosaveCleanupPreviewBtn");
     const autosaveCleanupApplyBtn = document.getElementById("autosaveCleanupApplyBtn");
     const autosaveCleanupStatus = document.getElementById("autosaveCleanupStatus");
@@ -705,7 +704,6 @@
         "commandCheatsheetCloseBtn",
         "commandCheatsheetStatus",
         "commandCheatsheetList",
-        "dashboardAutosaveCleanupBtn",
         "autosaveCleanupPreviewBtn",
         "autosaveCleanupApplyBtn",
         "autosaveCleanupStatus",
@@ -750,7 +748,6 @@
         autosaveCleanupOutput,
         autosaveCleanupPreviewBtn,
         autosaveCleanupStatus,
-        dashboardAutosaveCleanupBtn,
         diagnosticsEndpointList,
         diagnosticsErrorList,
         diagnosticsFrontend,
@@ -6919,11 +6916,6 @@ ${item.context || ""}`);
 		    dashboardRecoveryBtn.addEventListener("click", openRecoveryModal);
     dashboardCommandCheatsheetBtn.addEventListener("click", openCommandCheatsheetModal);
     recoveryCommandCheatsheetBtn.addEventListener("click", openCommandCheatsheetModal);
-    dashboardAutosaveCleanupBtn.addEventListener("click", () => {
-      servicePanel.open = true;
-      previewAutosaveCleanup(dashboardAutosaveCleanupBtn);
-      autosaveCleanupStatus.scrollIntoView({behavior: "smooth", block: "center"});
-    });
     dashboardDiagnosticsBtn.addEventListener("click", openDiagnosticsModal);
     dashboardOverall.addEventListener("click", openDiagnosticsModal);
     dashboardOverall.addEventListener("keydown", (event) => {

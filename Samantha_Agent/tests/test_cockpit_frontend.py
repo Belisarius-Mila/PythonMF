@@ -36,9 +36,9 @@ EXPECTED_PAGES = {
     ),
     "cockpit": (
         COCKPIT_HTML,
-        543339,
-        10777,
-        "a05eb0acd28d8aaff389ac510b64f255a6f29f3d05c5c75d58784a4a8cc4d5fd",
+        546429,
+        10819,
+        "dc8dc409815fa77448a72dc27c1d062e067b3f5739c8da239fec1002da1c4ba6",
     ),
 }
 
@@ -339,7 +339,6 @@ const api = window.SamanthaHealthRecoveryAutosave.create({{
     autosaveCleanupOutput: output,
     autosaveCleanupPreviewBtn: previewButton,
     autosaveCleanupStatus: status,
-    dashboardAutosaveCleanupBtn: previewButton,
     servicePanel,
   }},
   postJson: async (url, payload) => {{

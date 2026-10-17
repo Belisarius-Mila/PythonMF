@@ -936,6 +936,7 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Projev: pevný seznam Escape zavře jinou vrstvu, Tab uteče za dialog a close/reopen vyčistí editor. Plovoucí návrat navíc může překrýt společná odezva.
 - Řešení: jeden správce viditelných vrstev, původního fokusu a inertního pozadí; volat existující close obsluhy, uchovat drafty v DOM a reset ponechat explicitní. Návrat navázaný na hledání umístit k hledání.
 - Ověření: skutečné Tab/Shift+Tab/Escape, vnořený náhled a Recovery, Janiččiny projekty/hledání se zobrazenou odezvou, draft nové i existující položky a hash/reload. Pouhý textContent neprokazuje dostupnost návratu. Report: reports/cockpit_ui_u06_2026_09_14.json.
+- Doplnění 17102026: při členění Servisu zachovat DOM ID akcí a vracení fokusu, odstranit jen duplicitní zkratky včetně jejich bindingů. Nativní details ověřit Enter/mezerníkem; na 320 px zkoušet i rozbalené dlouhé výpisy a tabulku, protože overflow:hidden může obsah skrýt. Potvrzení zkoušet zrušením nad výhradně testovacími API. Report: reports/cockpit_ui_u07_2026_10_17.json.
 
 ### LL-037 — Podepisovaný iOS build mimo synchronizovanou Plochu
 

@@ -9,6 +9,16 @@ TOTO JE AKTUÁLNÍ ROZHODOVACÍ ČÁST DOKUMENTU.
 Architektonický průběh a původní audit zůstávají níže jako historie.
 Čísla, provozní stavy a priority historických oddílů nejsou dnešním stavem.
 
+VÝVOJOVÝ STAV — 2026-10-17 13:51 CEST
+U07 / bod 2 lokálně dokončený: Servis má Provoz / Relace / Obnova / Vývoj /
+Diagnostika, samostatně rozbalovací a s původními akcemi u souvisejícího stavu.
+Dvě vzdálené duplicitní zkratky odstraněné; relace, obnova screenu, autosave,
+audit, záloha a restart dostupné. Původní potvrzení a ochrany procesů zachované.
+341 cílených testů, závěrečný frontend 20/20, navigace a statická brána PASS;
+3 simulované browser scénáře 320/390/1440 px PASS. Report:
+memory/reports/cockpit_ui_u07_2026_10_17.json. Body 1 i 2 jsou lokální,
+bez push/nasazení. Fyzická Safari/iPhone/VoiceOver přejímka čeká.
+
 MEZIÚKOL TOBETOHAVE — 2026-09-14 21:45 CEST
 Míla potvrdil lokální prototyp a požádal o webový vstup. Přesun Webových
 aplikací do Servisu v U06 zhoršil dohledatelnost; jediné tlačítko je vrácené
@@ -453,7 +463,9 @@ Závislosti: U02/U05. Nejprve jeden reprezentativní modal, pak ostatní.
 
 U07 / P1 / M — Servis podle účelu (N14,N15).
 Stav 17. 10. 2026: přesnost kontroly UI a živý stav kalendáře lokálně opravené,
-42 cílených testů PASS; plná brána 1961/1961 PASS, nasazení čeká. Struktura Servisu zbývá.
+42 cílených testů PASS; plná brána 1961/1961 PASS, nasazení čeká.
+Bod 2 struktury Servisu také lokálně hotový: 341 cílených + 20 finálních frontend
+testů, navigace/statická brána a 3 browser scénáře PASS. Push/nasazení čekají.
 Sloučit navigační duplicity, detaily na vyžádání, přejmenovat zavádějící health
 štítek a odvodit intervaly z konfigurace. Přehled relací a obnova zůstávají.
 Důkaz: restart, screen obnova, audit a záloha mají jednoznačný dostupný vstup;

@@ -182,10 +182,5 @@
 
   refreshButton.addEventListener("click", refresh);
   panel.addEventListener("toggle", () => { if (panel.open) refresh(); });
-  document.getElementById("dashboardSessionsBtn").addEventListener("click", () => {
-    panel.open = true;
-    panel.scrollIntoView({behavior: "smooth", block: "start"});
-    refresh();
-  });
   window.setInterval(() => { if (panel.open && !document.hidden) refresh(); }, 10000);
 })();

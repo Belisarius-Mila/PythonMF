@@ -1,6 +1,15 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-17 13:51 CEST: bod 2 U07 je lokálně hotový. Servis má pět samostatně
+  rozbalovacích částí Provoz / Relace / Obnova / Vývoj / Diagnostika;
+  relace a autosave mají přímý vstup bez vzdálené duplicitní zkratky.
+  Původní akce, ochrany procesů a potvrzení zachované, Webové aplikace
+  zůstávají v horní liště. 341 cílených testů PASS, závěrečný frontend 20/20
+  PASS, navigace a statická brána PASS; 3 browser scénáře 320/390/1440 px
+  s testovacími daty. Bod 1 i 2 čekají na samostatný push/nasazení.
+  Fyzická Safari/iPhone/VoiceOver přejímka čeká. Další návrh: bod 3 auditu.
+
 - 2026-10-17 13:39 CEST: bod 1 U07/U08 je implementovaný lokálně. Kontrola UI nyní
   přesně hlásí přítomnost prvků; diagnostika netvrdí ověření funkčnosti tlačítek.
   Kalendář má samostatný read-only stav z registrovaného auditu, čas ověření,
@@ -35,7 +44,7 @@
 - Aktualizováno 2026-09-14 20:25 CEST: U01–U06 funkčně nasazené, head `980aed7a`, nový proces potvrzen, smoke 5/5 a shoda podávaného HTML; otisk `55373c8c1c4da728`.
 - Míla schválil přesun nesouvisejících podkladů mimo Git; provedeno, 35 souborů shodných podle SHA-256. Publikační překážka odstraněna.
 - Uzavírací zápis je součást schváleného GitHub balíčku. Aktuální odeslání a finální nasazený head poskytují živé audity; tento zápis předchází závěrečnému push.
-- **U07 až příště**, dnes jej nezahajovat.
+- Historie 14. 9.: U07 tehdy odložený; aktuálně body 1 a 2 lokálně hotové.
 
 - Závěrečné ověření 2026-09-14 20:19 CEST: plná brána **1680/1680 OK**, testy 318,932 s a statické kontroly OK. Opraven jeden zastaralý test odstraněné funkce; původní kontrola zachovaná. Souhrnný report `reports/cockpit_ui_release_2026_09_14.md`.
 - Souhrn U01–U06: společná odezva, hlavička/návraty, kompaktní Dokumenty, stránkování, prioritní Přehled a jednotná navigace/dialogy. TXT v2.8 obsahuje aktuální bod návratu a odkazy na důkazy.
@@ -43,7 +52,7 @@
 - Šest hlavních oblastí má bezpečné přímé odkazy/hash a označení aktivního místa. Komunikace sdružuje poštu/připomenutí, projekty a katalog jsou v Servisu; rodinné zkratky zachované.
 - Zavření/obnova Knihovny drží vybranou položku, editor, nové texty a fotografie; rodinný formulář se nečistí. Záměrné přepnutí/reset dál chrání původní potvrzení. Návrat k Janičce je u hledání, kde ho nepřekrývá odezva.
 - Důkaz: 28 cílených testů včetně stavů dialogů a vazeb DOM; 3 browser scénáře na 320/390/1440 px, v každém 16 dialogů a 6 přímých odkazů/reloadů. Rychlá statická brána prošla. `reports/cockpit_ui_u06_2026_09_14.json`. Regrese návratů rodiny, Recovery, vnořeného náhledu, rozepsané editace i varování před opuštěním stránky.
-- Příští vývojový krok U07: uspořádat Servis podle účelu a upravit zavádějící health štítky; dnes nezahajovat.
+- U07: struktura Servisu a přesné health štítky jsou 17. 10. lokálně dokončené; nasazení a fyzická přejímka čekají.
 - Rizika: fyzický Safari/iPhone/VoiceOver čeká; drafty žijí jen v aktuální kartě, potvrzený reload/ukončení je může ztratit. beforeunload není záruka proti ukončení OS. Odkaz obnoví hlavní oblast, ne přesný vnořený kontext.
 - Záloha odložená kvůli disku; Santiago pouze zvažované. Cizí nesledovaný adresář zachovaný mimo commit.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -1402,3 +1411,43 @@ Technický důkaz:
 - Důkazy v `logs/cockpit_truthful_status_targeted_20261017.log`,
   `logs/cockpit_truthful_status_full_gate_20261017.log` a redigované validation log.
   Běžící Cockpit zůstává v předchozím nasazení; fyzická přejímka nového UI čeká.
+
+
+### 2026-10-17 13:51 CEST — Bod 2: Servis přehledně podle účelu
+
+Hotovo:
+- Servis má pět samostatně rozbalovacích částí: Provoz, Relace, Obnova,
+  Vývoj a Diagnostika. Každá má stručnou nápovědu k obsahu.
+- Přehled relací a stav autosave se otevírají přímo; odstraněné dvě vzdálené
+  duplicitní zkratky. Akce jsou u souvisejícího stavu, podrobnosti dokumentů
+  a zálohy se rozbalují na vyžádání. Dlouhé výpisy se zalamují, tabulka PDF
+  má na úzkém displeji vlastní posouvání.
+
+Rozhodnutí:
+- Míla zadal bod 2. Použité běžné rozbalovací prvky prohlížeče, bez další
+  vrstvy navigace či ukládání. Původní ovládání, potvrzení a ochrana procesů
+  zůstávají; samotné otevření části nespouští restart ani úklid.
+- Změna je lokální. Push, nasazení a fyzická přejímka se posuzují samostatně.
+  Camino, filmová data, síť ani služba autosave se neupravují.
+
+Další krok:
+- Samostatně potvrdit publikování a nasazení dokončených bodů 1 a 2.
+
+Navrhované další kroky:
+- Bod 3: narovnat zastaralé návrhy v systémových auditech.
+- Filmový editor vyzkoušet doma podle dohody 18. 10.
+
+Technický důkaz:
+- 341 cílených testů PASS; po finálním mobilním zalamování frontend 20/20
+  PASS. Společná navigace a rychlá statická brána PASS; úplná brána se pro
+  tento omezený frontendový krok neopakuje, předchozí bod 1 měl 1961/1961 PASS.
+- Headless Edge: 320/390/1440 px, Enter/mezerník, návrat fokusu z pěti dialogů,
+  dostupnost obnovy screenu a zrušení ukončení relace, obnovy, úklidu i restartu.
+  Všechny požadavky nahrazené testovacími odpověďmi; žádná živá akce neproběhla.
+  Rozbalené podrobnosti na 320 px: výpis čitelný, tabulka posouvatelná, bez
+  vodorovného posouvání celé stránky. Screenshoty vizuálně zkontrolované.
+- Read-only provozní kontrola 13:49 CEST: Camino vlastněné/běžící; autosave
+  jediný worker, kopie 4 min, bez poslední chyby, automatické mazání vypnuté.
+- Report `reports/cockpit_ui_u07_2026_10_17.json`, redigované logy
+  `logs/cockpit_service_groups_*_20261017.log`. Běžící Cockpit nebyl nasazený;
+  fyzický Safari/iPhone/VoiceOver test tohoto kroku zůstává otevřený.

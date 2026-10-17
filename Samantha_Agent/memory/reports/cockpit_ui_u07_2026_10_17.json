@@ -1,0 +1,102 @@
+{
+  "date": "2026-10-17 13:51 CEST",
+  "base_commit": "6af2d63e",
+  "scope": "U07 point 2, local Service layout only; no push or deployment",
+  "implementation": {
+    "groups": [
+      "Provoz",
+      "Relace",
+      "Obnova",
+      "Vývoj",
+      "Diagnostika"
+    ],
+    "interaction": "Native independently expandable details, initially collapsed; headings and visible keyboard focus",
+    "deduplication": "Removed two remote shortcuts (sessions/autosave); their direct panels retain refresh, preview and original confirmation gates",
+    "mobile": "Wrap long preformatted text; horizontally scroll PDF table inside its own container",
+    "preserved": "All remaining original Servis IDs; unchanged action handlers, API endpoints, process protection and confirmations; Webove aplikace remains in top navigation"
+  },
+  "verification": {
+    "targeted_tests": 341,
+    "final_frontend_recheck": 20,
+    "navigation_node_test": "PASS",
+    "static_gate": "PASS; final whitespace/syntax check recorded separately",
+    "browser": "Headless Edge; all requests intercepted with synthetic data, no real private data or live actions",
+    "expanded_layout": {
+      "width": 320,
+      "scrollWidth": 320,
+      "overflowElements": [],
+      "preFits": true,
+      "tableScrollable": true,
+      "tableWithinPage": true
+    },
+    "visual_review": "390 px collapsed Service and expanded Diagnostics screenshots inspected",
+    "logs": [
+      "logs/cockpit_service_groups_targeted_20261017.log",
+      "logs/cockpit_service_groups_final_frontend_20261017.log",
+      "logs/cockpit_service_groups_navigation_20261017.log",
+      "logs/cockpit_service_groups_static_20261017.log",
+      "logs/cockpit_service_groups_browser_20261017.log"
+    ],
+    "local_artifacts": "data/tmp/cockpit_service_groups_20261017"
+  },
+  "browser": [
+    {
+      "width": 320,
+      "groups": 5,
+      "keyboard": true,
+      "screenRestoreEntry": true,
+      "cancelledDangerousActions": true,
+      "dialogFocusReturn": true,
+      "onlyMockedRequests": true,
+      "noLiveActions": true,
+      "measurements": {
+        "height": 590.875,
+        "width": 280,
+        "overflow": false
+      },
+      "errors": []
+    },
+    {
+      "width": 390,
+      "groups": 5,
+      "keyboard": true,
+      "screenRestoreEntry": true,
+      "cancelledDangerousActions": true,
+      "dialogFocusReturn": true,
+      "onlyMockedRequests": true,
+      "noLiveActions": true,
+      "measurements": {
+        "height": 536.3125,
+        "width": 350,
+        "overflow": false
+      },
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "groups": 5,
+      "keyboard": true,
+      "screenRestoreEntry": true,
+      "cancelledDangerousActions": true,
+      "dialogFocusReturn": true,
+      "onlyMockedRequests": true,
+      "noLiveActions": true,
+      "measurements": {
+        "height": 483.9375,
+        "width": 1400,
+        "overflow": false
+      },
+      "errors": []
+    }
+  ],
+  "runtime_snapshot": {
+    "checked_at": "2026-10-17 13:49 CEST",
+    "camino": "Owned service loaded/running; no restart, config, network, archive or film change",
+    "autosave": "One worker, copy 4 min old, no last error, automatic cleanup off, persistent service configured"
+  },
+  "limits": [
+    "Physical Safari/iPhone/VoiceOver acceptance after deployment is pending",
+    "Opening Service changes only layout; action authorization remains separate",
+    "Point 1 local full gate 1961/1961 is historical; this bounded frontend step used targeted and static checks"
+  ]
+}

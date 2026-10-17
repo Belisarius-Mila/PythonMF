@@ -180,159 +180,202 @@
     </details>
     <details id="servicePanel" class="section-toggle">
       <summary>Servis</summary>
-      <section>
-        <h2>Podrobnosti kontrol a práce</h2>
-        <div class="body dashboard-list">
-          <div class="dashboard-row"><span class="dashboard-label">Dokumenty</span><span id="dashboardDocuments" class="dashboard-value"></span></div>
-          <div class="dashboard-row"><span class="dashboard-label">Připomenutí</span><span id="dashboardReminders" class="dashboard-value"></span></div>
-          <div class="dashboard-row"><span class="dashboard-label">Záloha</span><span id="dashboardBackup" class="dashboard-value"></span></div>
-          <div class="dashboard-row"><span class="dashboard-label">Statistika souborů</span><span id="dashboardQuantitative" class="dashboard-value"></span></div>
-          <div class="dashboard-row"><span class="dashboard-label">ScanDocu</span><span id="dashboardScanDocu" class="dashboard-value"></span></div>
-          <div class="dashboard-row"><span class="dashboard-label">Camino pro Janu</span><span id="dashboardCamino" class="dashboard-value">Soukromý odkaz zatím není ověřený.</span></div>
-          <div class="dashboard-row"><span class="dashboard-label">Projekty</span><span id="dashboardProjects" class="dashboard-value"></span></div>
-          <div class="dashboard-row"><span class="dashboard-label">Kontrola</span><span id="dashboardConsistency" class="dashboard-value"></span></div>
-          <div class="dashboard-row"><span class="dashboard-label">Rychlé poznámky</span><span id="dashboardQuickNotes" class="dashboard-value"></span></div>
-          <div class="dashboard-row"><span class="dashboard-label">Git</span><span id="dashboardGit" class="dashboard-value"></span></div>
-        </div>
-      </section>
-      <details class="decision-catalog">
-		          <summary>Úplný katalog provozních položek</summary>
-		          <div id="actionQueueStatus" class="status-line">Načítám doporučené akce...</div>
-		          <div id="actionQueueList" class="action-queue"></div>
-		        </details>
-      <section>
-        <h2>Servisní akce</h2>
-        <div class="body">
-          <div class="quick-actions service-actions">
-            <button class="secondary" id="projectsBtn">Projekty</button>
-            <button class="secondary" id="dashboardTerminalBtn">Terminál v projektu</button>
-            <button class="secondary" id="dashboardQuantitativeBtn">Systémový souhrn</button>
-            <button class="secondary" id="dashboardProjectAuditBtn">Systémový audit</button>
-            <button class="secondary" id="dashboardQuickNotesBtn">Rychlé poznámky</button>
-            <button class="secondary" id="dashboardRecoveryBtn">Recovery centrum</button>
-            <button class="secondary" id="dashboardSessionsBtn">Běžící relace</button>
-            <button class="secondary" id="dashboardCommandCheatsheetBtn">Pamatováček</button>
-            <button class="secondary" id="dashboardAutosaveCleanupBtn">Stav autosave</button>
-            <button class="secondary" id="dashboardDiagnosticsBtn">Diagnostika</button>
-            <button class="secondary" id="dashboardRestartBtn">Restart Cockpitu</button>
-            <button class="secondary" id="dashboardSpeakBtn">Přečíst stav</button>
-            <button class="secondary" id="dashboardSpeakSelectionBtn">Přečíst výběr</button>
-          </div>
-        </div>
-      </section>
-      <section>
-        <h2>Běžící relace a screeny</h2>
-        <div class="body">
-          <details id="codexSessionsPanel">
-            <summary>Codex a screen – přehled a ukončení</summary>
-            <p>Běžící proces nemusí právě odpovídat ani být zaseknutý. Před ukončením zkontroluj terminál a čas spuštění.</p>
-            <button class="secondary" id="codexSessionsRefreshBtn" type="button">Obnovit přehled</button>
-            <h3>Relace Codexu</h3>
-            <div id="codexSessionsStatus" class="status-line" aria-live="polite">Přehled se načte po otevření.</div>
-            <div id="codexSessionsList" class="recovery-list"></div>
-            <p class="status-line">Ukončuje se pouze vybraný Codex. Screen, Cockpit a služby Human–Adam zůstávají spuštěné. Rozpracované soubory se nemažou; probíhající odpověď může zůstat nedokončená.</p>
-            <h3>Screeny</h3>
-            <div id="screenSessionsStatus" class="status-line" aria-live="polite">Přehled se načte po otevření.</div>
-            <div id="screenSessionsList" class="recovery-list"></div>
-            <p class="status-line">Uzavření screenu ukončí jeho terminálová okna a může přerušit práci uvnitř. Soubory se nemažou. Screen s běžícím Codexem nebo chráněnou službou nejprve vyžaduje ukončení příslušné relace.</p>
-            <p class="status-line">Pokud startovací guard hlásí rozpracované změny v Gitu, nejprve je ulož. Ukončení relace tuto kontrolu neobchází.</p>
+      <p class="status-line">Vyber oblast podle toho, co potřebuješ zkontrolovat nebo udělat.</p>
+      <details id="serviceOperationsPanel" class="service-group">
+        <summary><h2>Provoz</h2><span class="service-group-hint">Aktuální stav, dokumenty, záloha a dočasné bdění Macu</span></summary>
+        <div class="service-group-body">
+          <section>
+            <h3>Aktuální stav</h3>
+            <div class="body dashboard-list">
+              <div class="dashboard-row"><span class="dashboard-label">Dokumenty</span><span id="dashboardDocuments" class="dashboard-value"></span></div>
+              <div class="dashboard-row"><span class="dashboard-label">Připomenutí</span><span id="dashboardReminders" class="dashboard-value"></span></div>
+              <div class="dashboard-row"><span class="dashboard-label">Záloha</span><span id="dashboardBackup" class="dashboard-value"></span></div>
+              <div class="dashboard-row"><span class="dashboard-label">ScanDocu</span><span id="dashboardScanDocu" class="dashboard-value"></span></div>
+              <div class="dashboard-row"><span class="dashboard-label">Camino pro Janu</span><span id="dashboardCamino" class="dashboard-value">Soukromý odkaz zatím není ověřený.</span></div>
+              <div class="dashboard-row"><span class="dashboard-label">Rychlé poznámky</span><span id="dashboardQuickNotes" class="dashboard-value"></span></div>
+              <div class="quick-actions service-actions">
+                <button class="secondary" id="dashboardQuickNotesBtn">Rychlé poznámky</button>
+                <button class="secondary" id="dashboardSpeakBtn">Přečíst stav</button>
+                <button class="secondary" id="dashboardSpeakSelectionBtn">Přečíst výběr</button>
+              </div>
+            </div>
+          </section>
+          <section>
+            <h3>Vzdálený Cockpit na baterii</h3>
+            <div class="body">
+              <div id="awakeModeCard" class="voice-card awake-mode-card">
+                <div class="voice-card-title">Dočasně ponechat Mac vzhůru</div>
+                <div id="awakeModeStatus" class="status-line" aria-live="polite">Načítám stav…</div>
+                <div id="awakeModeCountdown" class="awake-mode-countdown">Režim není aktivní.</div>
+                <div id="awakeModeActions" class="voice-card-actions">
+                  <button class="secondary" type="button" data-awake-mode-hours="1">Zapnout na 1 hodinu</button>
+                  <button class="secondary" type="button" data-awake-mode-hours="2">Zapnout na 2 hodiny</button>
+                  <button class="secondary" type="button" data-awake-mode-hours="4">Zapnout na 4 hodiny</button>
+                  <button class="secondary danger" id="awakeModeStopBtn" type="button" disabled>Ukončit</button>
+                </div>
+                <div class="status-line awake-mode-warning">MacBook musí zůstat otevřený. Aktivní režim zvyšuje spotřebu baterie a po vypršení se automaticky ukončí.</div>
+              </div>
+            </div>
+          </section>
+          <details class="service-reports"><summary>Podrobnosti dokumentů a zálohy</summary>
+            <div class="service-group-body">
+              <section>
+                <h3>PDF ve Downloads za 7 dní</h3>
+                <div class="body">
+                  <div id="downloadPills" class="pills"></div>
+                  <div class="service-table-wrap">
+                    <table>
+                      <thead><tr><th>Soubor</th><th>Stav</th><th>Změněno</th></tr></thead>
+                      <tbody id="downloadsBody"></tbody>
+                    </table>
+                  </div>
+                </div>
+              </section>
+              <section>
+                <h3>ScanDocu</h3>
+                <div class="body">
+                  <div id="scanDocuState" class="status-line"></div>
+                </div>
+              </section>
+              <section>
+                <h3>Záloha</h3>
+                <div class="body"><pre id="backupText"></pre></div>
+              </section>
+              <section>
+                <h3>Dokumentový trezor</h3>
+                <div class="body"><div id="vaultText" class="vault-summary"></div></div>
+              </section>
+            </div>
           </details>
         </div>
-      </section>
-      <section>
-        <h2>Vzdálený Cockpit na baterii</h2>
-        <div class="body">
-          <div id="awakeModeCard" class="voice-card awake-mode-card">
-            <div class="voice-card-title">Dočasně ponechat Mac vzhůru</div>
-            <div id="awakeModeStatus" class="status-line" aria-live="polite">Načítám stav…</div>
-            <div id="awakeModeCountdown" class="awake-mode-countdown">Režim není aktivní.</div>
-            <div id="awakeModeActions" class="voice-card-actions">
-              <button class="secondary" type="button" data-awake-mode-hours="1">Zapnout na 1 hodinu</button>
-              <button class="secondary" type="button" data-awake-mode-hours="2">Zapnout na 2 hodiny</button>
-              <button class="secondary" type="button" data-awake-mode-hours="4">Zapnout na 4 hodiny</button>
-              <button class="secondary danger" id="awakeModeStopBtn" type="button" disabled>Ukončit</button>
+      </details>
+      <details id="codexSessionsPanel" class="service-group">
+        <summary><h2>Relace</h2><span class="service-group-hint">Běžící Codexy, screeny a obnova ve VS Code</span></summary>
+        <div class="service-group-body">
+          <p>Běžící proces nemusí právě odpovídat ani být zaseknutý. Před ukončením zkontroluj terminál a čas spuštění.</p>
+          <button class="secondary" id="codexSessionsRefreshBtn" type="button">Obnovit přehled</button>
+          <h3>Relace Codexu</h3>
+          <div id="codexSessionsStatus" class="status-line" aria-live="polite">Přehled se načte po otevření.</div>
+          <div id="codexSessionsList" class="recovery-list"></div>
+          <p class="status-line">Ukončuje se pouze vybraný Codex. Screen, Cockpit a služby Human–Adam zůstávají spuštěné. Rozpracované soubory se nemažou; probíhající odpověď může zůstat nedokončená.</p>
+          <h3>Screeny</h3>
+          <div id="screenSessionsStatus" class="status-line" aria-live="polite">Přehled se načte po otevření.</div>
+          <div id="screenSessionsList" class="recovery-list"></div>
+          <p class="status-line">Uzavření screenu ukončí jeho terminálová okna a může přerušit práci uvnitř. Soubory se nemažou. Screen s běžícím Codexem nebo chráněnou službou nejprve vyžaduje ukončení příslušné relace.</p>
+          <p class="status-line">Pokud startovací guard hlásí rozpracované změny v Gitu, nejprve je ulož. Ukončení relace tuto kontrolu neobchází.</p>
+        </div>
+      </details>
+      <details id="serviceRecoveryPanel" class="service-group">
+        <summary><h2>Obnova</h2><span class="service-group-hint">Recovery centrum, autosave, pamatováček a restart</span></summary>
+        <div class="service-group-body">
+          <section>
+            <h3>Obnova relace</h3>
+            <div class="body dashboard-list">
+              <div class="quick-actions service-actions">
+                <button class="secondary" id="dashboardRecoveryBtn">Recovery centrum</button>
+                <button class="secondary" id="dashboardCommandCheatsheetBtn">Pamatováček</button>
+              </div>
             </div>
-            <div class="status-line awake-mode-warning">MacBook musí zůstat otevřený. Aktivní režim zvyšuje spotřebu baterie a po vypršení se automaticky ukončí.</div>
-          </div>
-        </div>
-      </section>
-      <section>
-        <h2>Stav autosave</h2>
-        <div class="body">
-          <div class="voice-card">
-            <div id="autosaveState" class="voice-card-title warn" aria-live="polite">Ověřuji průběžné ukládání…</div>
-            <div id="autosaveDetail" class="status-line"></div>
-            <div id="autosaveRetention" class="status-line"></div>
-            <div id="autosaveCleanupStatus" class="status-line">Dry-run zatím nebyl spuštěný.</div>
-            <div class="voice-card-actions">
-              <button class="secondary" id="autosaveCleanupPreviewBtn" type="button">Obnovit stav a spočítat úklid</button>
-              <button class="secondary danger" id="autosaveCleanupApplyBtn" type="button" disabled>Vyčistit staré autosave</button>
+          </section>
+          <section>
+            <h3>Stav autosave</h3>
+            <div class="body">
+              <div class="voice-card">
+                <div id="autosaveState" class="voice-card-title warn" aria-live="polite">Ověřuji průběžné ukládání…</div>
+                <div id="autosaveDetail" class="status-line"></div>
+                <div id="autosaveRetention" class="status-line"></div>
+                <div id="autosaveCleanupStatus" class="status-line">Dry-run zatím nebyl spuštěný.</div>
+                <div class="voice-card-actions">
+                  <button class="secondary" id="autosaveCleanupPreviewBtn" type="button">Obnovit stav a spočítat úklid</button>
+                  <button class="secondary danger" id="autosaveCleanupApplyBtn" type="button" disabled>Vyčistit staré autosave</button>
+                </div>
+                <pre id="autosaveCleanupOutput" class="voice-card-text"></pre>
+              </div>
             </div>
-            <pre id="autosaveCleanupOutput" class="voice-card-text"></pre>
-          </div>
-        </div>
-      </section>
-      <section>
-        <h2>Technický stav Cockpitu</h2>
-        <div class="body">
-		      <div id="frontendHealthPanel" class="health-panel" aria-label="Health stav Cockpitu">
-		        <div class="health-grid">
-		          <div class="health-item"><span class="health-label">Frontend</span><span id="frontendHealthJs" class="health-value warn">JS se zatím nespustil</span></div>
-		          <div class="health-item"><span class="health-label">Prvky UI</span><span id="frontendHealthButtons" class="health-value warn">čekám na kontrolu přítomnosti</span></div>
-		          <div class="health-item"><span class="health-label">API</span><span id="frontendHealthApi" class="health-value warn">čekám na kontrolu</span></div>
-		          <div class="health-item"><span class="health-label">Poslední chyba</span><span id="frontendHealthError" class="health-value ok">žádná</span></div>
-		        </div>
-		      </div>
-        </div>
-      </section>
-      <section>
-        <h2>Vývojový runner</h2>
-        <div class="body">
-          <div id="devRunnerPanel" class="voice-card">
-            <div class="voice-card-title">Pevné vývojové akce</div>
-            <div class="status-line">Spouští jen allowlistované příkazy pro opakované ladění, ne volný shell.</div>
-            <div class="voice-card-actions">
-              <button class="secondary" data-dev-runner="cockpit_tests">Testy Cockpitu</button>
-              <button class="secondary" data-dev-runner="cockpit_py_compile">Python syntax</button>
-              <button class="secondary" data-dev-runner="git_diff_check">Diff check</button>
+          </section>
+          <section>
+            <h3>Restart Cockpitu</h3>
+            <div class="body dashboard-list">
+              <p>Před restartem se zobrazí potvrzení.</p>
+              <div class="quick-actions service-actions">
+                <button class="secondary" id="dashboardRestartBtn">Restart Cockpitu</button>
+              </div>
             </div>
-            <pre id="devRunnerOutput" class="voice-card-text"></pre>
-          </div>
+          </section>
         </div>
-      </section>
-      <h2>Servisní přehledy</h2>
-    <div class="grid">
-      <section>
-        <h2>PDF ve Downloads za 7 dní</h2>
-        <div class="body">
-          <div id="downloadPills" class="pills"></div>
-          <table>
-            <thead><tr><th>Soubor</th><th>Stav</th><th>Změněno</th></tr></thead>
-            <tbody id="downloadsBody"></tbody>
-          </table>
+      </details>
+      <details id="serviceDevelopmentPanel" class="service-group">
+        <summary><h2>Vývoj</h2><span class="service-group-hint">Projekty, Git, terminál a vývojové kontroly</span></summary>
+        <div class="service-group-body">
+          <section>
+            <h3>Projekty a Git</h3>
+            <div class="body dashboard-list">
+              <div class="dashboard-row"><span class="dashboard-label">Projekty</span><span id="dashboardProjects" class="dashboard-value"></span></div>
+              <div class="dashboard-row"><span class="dashboard-label">Git</span><span id="dashboardGit" class="dashboard-value"></span></div>
+              <div class="quick-actions service-actions">
+                <button class="secondary" id="projectsBtn">Projekty</button>
+                <button class="secondary" id="dashboardTerminalBtn">Terminál v projektu</button>
+              </div>
+            </div>
+          </section>
+          <section>
+            <h3>Vývojový runner</h3>
+            <div class="body">
+              <div id="devRunnerPanel" class="voice-card">
+                <div class="voice-card-title">Pevné vývojové akce</div>
+                <div class="status-line">Spouští jen allowlistované příkazy pro opakované ladění, ne volný shell.</div>
+                <div class="voice-card-actions">
+                  <button class="secondary" data-dev-runner="cockpit_tests">Testy Cockpitu</button>
+                  <button class="secondary" data-dev-runner="cockpit_py_compile">Python syntax</button>
+                  <button class="secondary" data-dev-runner="git_diff_check">Diff check</button>
+                </div>
+                <pre id="devRunnerOutput" class="voice-card-text"></pre>
+              </div>
+            </div>
+          </section>
         </div>
-      </section>
-      <div class="stack">
-        <section>
-          <h2>ScanDocu</h2>
-          <div class="body">
-            <div id="scanDocuState" class="status-line"></div>
-          </div>
-        </section>
-        <section>
-          <h2>Záloha</h2>
-          <div class="body"><pre id="backupText"></pre></div>
-        </section>
-      </div>
-    </div>
-    <section>
-      <h2>Dokumentový trezor</h2>
-      <div class="body"><div id="vaultText" class="vault-summary"></div></div>
-    </section>
-    <section>
-      <h2>Kontrola nesrovnalostí</h2>
-      <div class="body"><div id="consistencyText" class="consistency-panel"></div></div>
-    </section>
+      </details>
+      <details id="serviceDiagnosticsPanel" class="service-group">
+        <summary><h2>Diagnostika</h2><span class="service-group-hint">Technický stav, systémový souhrn a audity</span></summary>
+        <div class="service-group-body">
+          <section>
+            <h3>Technický stav Cockpitu</h3>
+            <div class="body">
+              <div id="frontendHealthPanel" class="health-panel" aria-label="Health stav Cockpitu">
+                <div class="health-grid">
+                  <div class="health-item"><span class="health-label">Frontend</span><span id="frontendHealthJs" class="health-value warn">JS se zatím nespustil</span></div>
+                  <div class="health-item"><span class="health-label">Prvky UI</span><span id="frontendHealthButtons" class="health-value warn">čekám na kontrolu přítomnosti</span></div>
+                  <div class="health-item"><span class="health-label">API</span><span id="frontendHealthApi" class="health-value warn">čekám na kontrolu</span></div>
+                  <div class="health-item"><span class="health-label">Poslední chyba</span><span id="frontendHealthError" class="health-value ok">žádná</span></div>
+                </div>
+              </div>
+              <div class="quick-actions service-actions">
+                <button class="secondary" id="dashboardDiagnosticsBtn">Diagnostika</button>
+              </div>
+            </div>
+          </section>
+          <section>
+            <h3>Souhrn a audity</h3>
+            <div class="body dashboard-list">
+              <div class="dashboard-row"><span class="dashboard-label">Statistika souborů</span><span id="dashboardQuantitative" class="dashboard-value"></span></div>
+              <div class="dashboard-row"><span class="dashboard-label">Kontrola</span><span id="dashboardConsistency" class="dashboard-value"></span></div>
+              <div class="quick-actions service-actions">
+                <button class="secondary" id="dashboardQuantitativeBtn">Systémový souhrn</button>
+                <button class="secondary" id="dashboardProjectAuditBtn">Systémový audit</button>
+              </div>
+            </div>
+          </section>
+          <section>
+            <h3>Kontrola nesrovnalostí</h3>
+            <div class="body"><div id="consistencyText" class="consistency-panel"></div></div>
+          </section>
+          <details class="decision-catalog">
+            <summary>Úplný katalog provozních položek</summary>
+            <div id="actionQueueStatus" class="status-line">Načítám doporučené akce...</div>
+            <div id="actionQueueList" class="action-queue"></div>
+          </details>
+        </div>
+      </details>
     </details>
   </main>
   <div id="caminoFilmModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="caminoFilmTitle">
