@@ -2572,6 +2572,14 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     else if (state === "completed") label = `Balíček dokončen · push ${pushState} · nasazení ${deploymentState}${lunaReleaseJob.returned_to_adam === true ? " · Adam má výsledek" : ""}${message ? ` · ${message}` : ""}`;
     else if (state === "dry_run_completed") label = `Zkouška dokončena bez publikování${message ? ` · ${message}` : ""}`;
     else if (state === "attention") label = `Balíček vyžaduje kontrolu · push ${pushState} · nasazení ${deploymentState} · Adam ověří výsledek${message ? ` · ${message}` : ""}`;
+    if (state === "completed") {
+      const head = String(lunaReleaseJob.target_short || "");
+      const count = lunaReleaseJob.commit_count;
+      const model = String((lunaReleaseJob.executor || {}).model || "").trim();
+      label += /^[0-9a-f]{7,12}$/.test(head) ? ` · main ${head}` : " · commit neověřený";
+      label += Number.isInteger(count) && count >= 0 ? ` · ${count} nových commitů` : " · počet commitů neověřený";
+      label += model ? ` · model ${model}` : " · model neověřený";
+    }
     lunaReleaseStatus.textContent = label;
     lunaReleaseStatus.hidden = false;
     if (state === "attention") lunaReleaseStatus.classList.add("attention");

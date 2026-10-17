@@ -1692,4 +1692,22 @@ Navrhované další kroky:
 - Fyzická přejímka UI a filmu zůstává samostatně.
 
 Technický důkaz:
-- 81 cílených testů PASS; plná brána přípravy 2032/2032 PASS a skutečný modelový tah vrátil číselnou spotřebu. Důkazy: logs/release_usage_targeted_20261017.log, logs/release_usage_full_gate_20261017.log, logs/release_usage_live_probe_20261017.log. Výsledné číselné srovnání bude logs/pn_cost_comparison_20261017.md; tento checkpoint žádné budoucí nasazení nepotvrzuje.
+- 81 cílených testů PASS; plná brána přípravy 2032/2032 PASS a skutečný modelový tah vrátil číselnou spotřebu. Důkazy: logs/release_usage_targeted_20261017.log, logs/release_usage_full_gate_20261017.log, logs/release_usage_live_probe_20261017.log. Výsledné číselné srovnání bude logs/pn_cost_comparison_20261017.log; tento checkpoint žádné budoucí nasazení nepotvrzuje.
+
+### 2026-10-17 17:23 CEST — Identita balíčku, měřený krok A
+
+Hotovo:
+- Karta dokončeného p+n zobrazuje commit, počet nových commitů a použitý model. Chybějící identita je výslovně neověřená.
+- Společné měření je nasazené a ověřené: 2032 testů PASS, smoke 5/5, Camino/autosave přesně zachované.
+
+Rozhodnutí:
+- První UI commit publikuje Adam přímo registrovanými kroky; začátek měření následuje až po commitu a zarovnání profilů. Příprava a vývoj zůstávají mimo interval.
+
+Další krok:
+- Provést měřené přímé p+n A, potom doplnit výsledky kontrol a změřit Lunu.
+
+Navrhované další kroky:
+- Fyzická přejímka UI/filmu čeká.
+
+Technický důkaz:
+- 68 UI testů PASS; skutečná bezpečná účtenka a chybějící údaje ověřené v Node VM. Důkazy logs/pn_benchmark_a_ui_tests_20261017.log a logs/pn_benchmark_a_identity_20261017.log. Aktuální publikaci doloží serverová účtenka a logs/pn_benchmark_a_20261017.log; celkové srovnání logs/pn_cost_comparison_20261017.log.

@@ -193,5 +193,8 @@ Kanonický stav a důkazy patří do handoffu/TVBCP `project-cockpit`.
 - Měří se od hotového commitu do závěrečného read-only ověření včetně
   předání, pomocníka, modelového převzetí a kontroly hlavním Adamem.
   Společná příprava a psaní závěrečného reportu zůstávají mimo oba intervaly.
-  Bezpečný souhrn je logs/pn_cost_comparison_20261017.md; raw logy zůstávají
+  Bezpečný souhrn je logs/pn_cost_comparison_20261017.log; raw logy zůstávají
   soukromé, nezveřejňují se a nekopírují se do Gitu.
+
+Měřený UI krok A: identita dokončeného balíčku. 68 UI testů a skutečná
+účtenka v Node VM PASS; přímé p+n a srovnání dokládají uvedené runtime logy.
