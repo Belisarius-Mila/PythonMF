@@ -107,10 +107,23 @@ Společné pracovní instrukce PythonMF; cesty níže jsou vůči `Samantha_Agen
   nástupce z katalogu samo nepovoluje přechod. Nedostupný model bez schválené
   kompatibilní náhrady zastaví předání před publikováním; model běžící úlohy
   se nepřepíná.
-- V autorizovaném vývoji zvaž jednou při plánování předání jedné čisté Python
-  funkce s existujícími testy přes `app.simple_development.run`. Rozsah určí
-  program bez dalšího modelu; kritické, nejasné, rozpracované nebo triviální
-  úkoly zůstávají hlavnímu Adamovi. Podrobnosti a aktivace jsou v
+- Po analýze navrhni Lunu jen pro delší, jasně vymezený a ověřitelný vývoj
+  s nízkým rizikem, u kterého lze čekat úsporu i po započtení předání,
+  kontroly a integrace hlavním Adamem. Opakování samo nestačí; také opakovaný
+  úkol musí být dostatečně dlouhý. Drobné změny, nové kritické úpravy a nejasné
+  zásahy řeší hlavní Adam bez nabídky delegace. U vícekrokového vývoje označ
+  vhodné kroky a navrženého vykonavatele už v plánu; schválení plánu pokrývá
+  toto rozdělení, neopakuj dotaz před každým schváleným krokem. U vhodného
+  ad hoc úkolu nabídni jednou po analýze `Předat Luně: ano/ne`.
+  Pevný časový práh zatím neurčuj; pravidlo dolaďuj s Mílou podle skutečné
+  práce a celkových nákladů. Každé zvlášť autorizované p+n provádí Luna.
+- Volba Luny pro vývoj je schválený směr; není důkazem aktivace. Před prvním
+  použitím musí mít role `simple_developer` cenové posouzení a skutečnou
+  přijatou vývojovou zkoušku Luny. Do té doby ji nevydávej za aktivní ani
+  místo nabídnuté Luny tiše nepoužij Sola. Současný registrovaný rozsah je
+  jedna čistá Python funkce s existujícími testy přes
+  `app.simple_development.run`; samotné pravidlo jej nerozšiřuje. Způsobilost
+  určí program bez dalšího modelu. Podrobnosti a aktivace jsou v
   `memory/technical/luna_release_orchestration.md`, sekce Jednoduchý vývoj.
   Pomocník má pouze vybranou funkci a cíl; testy provádí program v oddělené
   kopii. Hlavní Adam jednou zkontroluje diff a účtenku a použije `accept`.

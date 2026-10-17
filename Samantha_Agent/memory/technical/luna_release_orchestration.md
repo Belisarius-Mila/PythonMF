@@ -293,6 +293,36 @@ produkční konfigurace. Nové nasazení během tohoto úkolu nebylo autorizovan
 
 ## Jednoduchý vývoj (17. 10. 2026)
 
+### Výběr vývojových kroků pro Lunu — dohoda 17. 10. 2026
+
+- Hlavní Adam nejprve analyzuje zadání. Lunu navrhne pouze pro **delší**,
+  zvládnutelný, jasně vymezený a ověřitelný vývoj s nízkým rizikem, kde lze
+  čekat úsporu i po započtení přípravy, předání, kontroly a integrace.
+  Opakovaná práce je vhodný kandidát, ale také musí být dostatečně dlouhá;
+  samotné opakování ani nízké riziko u krátké změny nestačí.
+- U složitějšího vývoje rozděleného do kroků už plán uvede, které kroky
+  navrhuje pro Lunu a které provede hlavní Adam, s krátkým důvodem a způsobem
+  ověření. Schválení takového plánu pokrývá navržené rozdělení; není třeba
+  znovu potvrzovat každý nezměněný schválený krok.
+- U ad hoc vývoje přijde po analýze jediná nabídka `Předat Luně: ano/ne`,
+  pouze pokud jsou splněné předchozí podmínky. Drobné změny, nové kritické
+  úpravy, nejasný rozsah a úkoly, u nichž by režie převážila přínos, řeší
+  hlavní Adam bez nabídky. Neúspěšný či nejistý pokus se automaticky neopakuje.
+- Pevný počet minut, řádků ani procento úspory zatím neurčujeme. Výchozí
+  úsudek hlavního Adama se bude s Mílou zpřesňovat podle zkušeností a nákladů
+  celého postupu, ne pouze podle sazby nebo spotřeby pomocníka.
+- Každé samostatně autorizované p+n provádí Luna registrovaným společným
+  vstupem. Rozdělení vývoje samo push ani nasazení nepovoluje.
+
+Míla výslovně zvolil Lunu také pro uvedenou vývojovou práci. Jde o schválené
+pravidlo výběru, nikoli o provedenou změnu modelu či rozšíření technického
+rozsahu. Při tomto zápisu zůstává v `config/agent_roles.json` dosavadní
+`simple_developer` se Solem; Lunu nelze vydávat za aktivní ani ji bez upozornění
+nahradit Solem. Před prvním skutečným použitím Luny je nutné doložit cenové
+posouzení a přijatou skutečnou vývojovou zkoušku a dokončit bezpečnou změnu
+centrální role. Důkaz Luny pro p+n není vývojovou zkouškou. Následující omezení
+jedné funkce nadále platí; širší kroky vyžadují vlastní rozšíření mechanismu.
+
 Míla autorizoval dokončení vývojového předávání. První podporovaná třída je
 jedna čistá vrcholová synchronní Python funkce v app/ s 1–3 existujícími
 unittest moduly. Hlavní Adam při plánování jednou vybere cíl, funkci a testy;

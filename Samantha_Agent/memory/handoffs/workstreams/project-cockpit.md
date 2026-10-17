@@ -1,6 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-17 23:36 CEST: Schválené pravidlo pro nabídku Luny při vývoji je zapsané v AGENTS.md a technickém návodu: vždy delší, jasný a ověřitelný úkol s nízkým rizikem, očekávaný přínos včetně režie Adama; samotné opakování nestačí. Vícekrokový plán navrhne rozdělení předem, vhodný ad hoc úkol jednu nabídku ano/ne. Drobné a nové kritické úpravy bez nabídky. Pevný časový práh se zatím neurčuje. Technická role simple_developer zůstává Sol; před prvním použitím Luny zbývá vývojová zkouška a bezpečné přepnutí. Pravidlo nerozšiřuje omezení jedné funkce. Poslední ověřené p+n této relace publikovalo a nasadilo 8cda502f (účtenka 0944dbd793fb4450d6475882c7cb4cef, 2109 PASS, smoke 5/5); nynější pravidlo je jen nový lokální dokumentační krok. Každé zvlášť zadané p+n dál provádí Luna.
+
 - 2026-10-17 22:33 CEST: P+n nového společného postupu DOKONČENÉ přes jedinou Lunu. Oba schválené commity publikované, nasazený b47b0bb609bb4eff5c6d0f5971350d007d73fbbe / stamp d769959026d9b405; účtenka cb55493cb02cdfe7055873e1d7485869 completed, plná brána 2109 PASS a smoke 5/5. Konečný živý audit potvrdil čistý zarovnaný main/GitHub i oba profilové workspaces, simple_developer enabled=true a přesně zachované Camino/autosave. Důkaz: logs/release_single_entry_pn_final_20261017.log. Při navázání p+n ani aktivaci neopakovat; níže uvedené čekání na publikaci je historické. Tento závěrečný dokumentační checkpoint zůstává pouze lokální.
 
 - 2026-10-17 21:32 CEST: NOVÝ lokální krok — společný submit_release audituje a spouští jedinou Lunu, v terminálu bez nativního modelového pomocníka. Vyžaduje schválený head a projekt, programové čekání na přesnou účtenku a idempotenci. 59 cílených testů a skutečný syntetický dry-run PASS; plná brána 2109/2109 PASS. Bez push/nasazení. Starší ruční předání níže zachovává historický stav před touto úpravou.
@@ -1936,3 +1938,25 @@ Zmenene nebo relevantni soubory:
 - Tento závěrečný dokumentační checkpoint je pouze lokální a může jít do příštího autorizovaného balíčku; kód je již nasazený.
 Bezpecnost / neukladat:
 - Camino, autosave a centrální schválené role zachovat. Nic nemazat, nepřenášet soukromá data ani historii do modelových pomocníků, neprovádět automatický retry publikace.
+
+## 2026-10-17 23:36 CEST — Luna pro delší vhodný vývoj, nabídka po analýze
+
+Hotovo:
+- Společná pravidla nyní určují, kdy Adam nabídne Lunu: jen delší, jasně vymezený a ověřitelný vývoj s nízkým rizikem a očekávaným přínosem po započtení předání, kontroly a integrace.
+- U vícekrokového plánu se vhodné kroky a jejich vykonavatel navrhnou předem. U vhodného ad hoc úkolu přijde po analýze jedna nabídka ano/ne. Drobné a nové kritické změny takovou nabídku nevyvolají.
+
+Rozhodnutí:
+- Míla výslovně zvolil Lunu i pro vývoj. Delší trvání je vždy nutná podmínka, také u opakované práce. Pevný časový práh zatím není; pravidlo se bude s Mílou dolaďovat podle zkušeností a nákladů celého postupu.
+- Schválený plán pokrývá navržené rozdělení práce bez opakovaného potvrzování každého nezměněného kroku. Každé samostatně autorizované p+n dál provádí Luna.
+- Tento krok ukládá pravidlo. Centrální vývojová role nadále používá Sola; Luna se nesmí vydávat za aktivní ani tiše nahrazovat Solem. Dosavadní rozsah jedné čisté Python funkce s testy se nemění.
+
+Další krok:
+- Před prvním skutečným vývojovým předáním Luně doložit cenové posouzení, přijmout skutečnou vývojovou zkoušku a bezpečně změnit centrální roli. Volbu Luny již Míla schválil; důkaz převzetí p+n nenahrazuje vývojovou zkoušku.
+
+Navrhované další kroky:
+- Při vhodném delším úkolu vyhodnotit celkovou režii a podle zkušenosti upřesnit pravidlo; širší úkoly vyžadují rozšíření stávajícího mechanismu.
+- Fyzická přejímka portálu/UI/filmu zůstává podle původní dohody.
+
+Technický důkaz:
+- Změněné jsou pouze společné instrukce a projektová dokumentace; config/agent_roles.json ani vykonávací kód se nemění. Registrovaný mechanismus nadále přijímá jednu čistou Python funkci s existujícími testy.
+- Předchozí p+n 8cda502f je uzavřené: účtenka 0944dbd793fb4450d6475882c7cb4cef completed, 2109 PASS, smoke 5/5 a chráněné služby zachované; logs/release_cockpit_handoff_pn_final_20261017.log. Nynější dokumentační pravidlo se automaticky nepublikuje.

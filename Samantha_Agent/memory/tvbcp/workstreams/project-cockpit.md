@@ -2005,3 +2005,25 @@ Navrhované další kroky:
 Technický důkaz:
 - b47b0bb609bb4eff5c6d0f5971350d007d73fbbe / stamp d769959026d9b405; účtenka cb55493cb02cdfe7055873e1d7485869 completed, 2109 testů PASS, smoke 5/5. Živý audit: GitHub aligned, oba profily aligned, simple_developer enabled=true, chráněné služby shodné. logs/release_single_entry_pn_final_20261017.log.
 - Programové čekání hlavního modelu: 0 nových tokenů; jde pouze o čekací interval, ne celý náklad p+n. logs/release_single_entry_pn_20261017.log.
+
+## 2026-10-17 23:36 CEST — Luna pro delší vhodný vývoj, nabídka po analýze
+
+Hotovo:
+- Společná pravidla nyní určují, kdy Adam nabídne Lunu: jen delší, jasně vymezený a ověřitelný vývoj s nízkým rizikem a očekávaným přínosem po započtení předání, kontroly a integrace.
+- U vícekrokového plánu se vhodné kroky a jejich vykonavatel navrhnou předem. U vhodného ad hoc úkolu přijde po analýze jedna nabídka ano/ne. Drobné a nové kritické změny takovou nabídku nevyvolají.
+
+Rozhodnutí:
+- Míla výslovně zvolil Lunu i pro vývoj. Delší trvání je vždy nutná podmínka, také u opakované práce. Pevný časový práh zatím není; pravidlo se bude s Mílou dolaďovat podle zkušeností a nákladů celého postupu.
+- Schválený plán pokrývá navržené rozdělení práce bez opakovaného potvrzování každého nezměněného kroku. Každé samostatně autorizované p+n dál provádí Luna.
+- Tento krok ukládá pravidlo. Centrální vývojová role nadále používá Sola; Luna se nesmí vydávat za aktivní ani tiše nahrazovat Solem. Dosavadní rozsah jedné čisté Python funkce s testy se nemění.
+
+Další krok:
+- Před prvním skutečným vývojovým předáním Luně doložit cenové posouzení, přijmout skutečnou vývojovou zkoušku a bezpečně změnit centrální roli. Volbu Luny již Míla schválil; důkaz převzetí p+n nenahrazuje vývojovou zkoušku.
+
+Navrhované další kroky:
+- Při vhodném delším úkolu vyhodnotit celkovou režii a podle zkušenosti upřesnit pravidlo; širší úkoly vyžadují rozšíření stávajícího mechanismu.
+- Fyzická přejímka portálu/UI/filmu zůstává podle původní dohody.
+
+Technický důkaz:
+- Změněné jsou pouze společné instrukce a projektová dokumentace; config/agent_roles.json ani vykonávací kód se nemění. Registrovaný mechanismus nadále přijímá jednu čistou Python funkci s existujícími testy.
+- Předchozí p+n 8cda502f je uzavřené: účtenka 0944dbd793fb4450d6475882c7cb4cef completed, 2109 PASS, smoke 5/5 a chráněné služby zachované; logs/release_cockpit_handoff_pn_final_20261017.log. Nynější dokumentační pravidlo se automaticky nepublikuje.
