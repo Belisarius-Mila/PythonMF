@@ -1,6 +1,36 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+### Předání pro příští relaci — 2026-10-17 21:18 CEST
+
+Nazev: Úsporné předávání vývoje Solovi a p+n Luně
+Priorita: 1
+Stav: ceka na retest
+Pripomenout pri startu: ano
+Datum: 2026-10-17 21:18 CEST
+
+Co se resilo:
+- Dokončení, nasazení a náklady delegace; nyní uložit stav a šetřit kredit.
+Co je hotove:
+- Všechny tři vývojové/aktivační commity jsou publikované; poslední nasazený head a1437ec2, stamp 7fa6d9e50f794ddf. Finální p+n přes Lunu dokončené, plná brána 2096 PASS, smoke 5/5; Camino/autosave podle konečného auditu přesně zachované.
+- release_executor = gpt-6-luna/high; simple_developer = gpt-6.1-sol/medium. Konfigurace je jedině config/agent_roles.json, routine_reviewer zůstává neaktivní. Nynější čtecí kontrola capabilities znovu potvrdila enabled=true a serverová účtenka completed.
+- p+n přebírá celý přesný balíček commitů po výslovném pokynu. Program provádí brány, push/deploy a čekání, hlavní Adam ověří výsledek. Platí pro všech 33 registrovaných proudů; nový musí mít registraci a cíl. Samostatné vydání klienta/služby Camino má vlastní postup.
+- Sol podporuje jednu čistou Python funkci s existujícími testy v čistém autorizovaném workspace; jeden izolovaný návrh a jedno převzetí. Nejasný, kritický, triviální nebo nevyhovující úkol zůstává hlavnímu Adamovi. Portál používá grant aktuálního writable tahu a místní souborový kanál bez rozšíření sítě.
+- Celé poslední p+n včetně jednorázové aktivace a dvou nasazení: hlavní Adam 14,62797 + nativní Luna 0,5673575 + dvě samostatná převzetí Lunou 0,128115 = 15,3234425 odhadovaných kreditů Standard. Úspora tohoto běhu neprokázaná; samotná levná Luna není cena celku.
+Co neni hotove:
+- Fyzická přejímka vývojového předání v portálu/UI a filmu. Syntetický Sol FAIL → PASS, převzetí i IPC uvnitř síťového sandboxu již prošly.
+- Srovnatelné měření příštího běžného p+n bez nastavování; starší asynchronní pilot 1,7030575 proti přímému 7,27533 (asi o 77 % méně) je jiné měření, nikoli úspora posledního vydání.
+Dalsi krok:
+- Při navázání načíst toto předání a technický návod, ověřit aktuální stav a provést fyzický retest při nejbližším vhodném drobném úkolu. Neopakovat již dokončenou aktivaci ani p+n a nerozvíjet automatiku bez nového zadání.
+Navrhovane dalsi kroky:
+- Při příštím výslovném běžném p+n měřit celý interval včetně obou modelových rolí a převzetí, předem zachytit číselný začátek. Žádné modelové hlídkování.
+Zmenene nebo relevantni soubory:
+- luna_release_orchestration.md, agent_roles.json, simple_development*.py, luna_release.py; tento handoff a odpovídající TVBCP.
+- Důkazy logs/simple_development_pn_final_20261017.log a logs/simple_development_release_phase2_20261017.log; finální job 4935e2096cff56f7aa768ec9d3ab936e. Poslední nasazení a1437ec2. Po nynějším uložení zůstane jeden pouze lokální dokumentační commit, bez push/nasazení.
+Bezpecnost / neukladat:
+- Camino a trvalé autosave chránit; nic nemazat, neukládat tajemství ani soukromé autosave do Gitu. Odhad Standard není faktura ani procento limitu. Modely neměnit automaticky.
+
+
 - 2026-10-17 19:55 CEST: podpora vývojového předávání nasazená přes Lunu (af5db5a3 / 7fa6d9e50f794ddf, 2096 testů a smoke 5/5). simple_developer zapnutý registrovaně až po nasazení; centrálně gpt-6.1-sol/medium, capabilities enabled=true. Finální publikaci konfiguračního checkpointu dokládá serverová účtenka 4935e2096cff56f7aa768ec9d3ab936e a logs/simple_development_release_phase2_20261017.log. Role p+n a chráněné služby shodné.
 
 - 2026-10-17 19:37 CEST: lokálně dokončené předávání jedné čisté Python funkce s testy přes simple_developer; skutečný Sol FAIL → PASS a převzetí ověřené. Portálový serverový souborový kanál funguje uvnitř networkAccess=false, aktuální writable grant se ruší po tahu. Centrální role neaktivní do samostatného p+n a chráněné konfigurační aktivace. Plná brána 2096/2096 PASS (299,646 s unit testů); návod v luna_release_orchestration.md, sekce Jednoduchý vývoj.

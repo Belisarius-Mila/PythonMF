@@ -376,3 +376,47 @@ a živý capabilities vrací enabled=true. routine_reviewer zůstává neaktivn�
 release_executor beze změny. Konečnou publikaci konfiguračního checkpointu
 dokládá logs/simple_development_release_phase2_20261017.log a účtenka 4935e2096cff56f7aa768ec9d3ab936e.
 Předpoklad předchozích historických odstavců o neaktivní vývojové roli tím končí.
+
+
+## Stav pro navázání a skutečné náklady — 2026-10-17 21:18 CEST
+
+Obě fáze prvního zavedení jsou dokončené. Nasazený head a1437ec2,
+stamp 7fa6d9e50f794ddf, finální účtenka 4935e2096cff56f7aa768ec9d3ab936e:
+completed, push/deploy potvrzené, 2096 testů PASS a smoke 5/5. Aktuální handoff
+má prioritu 1, ceka na retest a připomenutí při startu. Neopakovat bootstrap.
+Další krok je fyzická přejímka vhodného drobného úkolu přes portál; další
+vývoj ani nové p+n tím nejsou zadané. Dnešní uložení je pouze lokální dokumentace.
+
+Odhad celého posledního p+n od přijetí pokynu po konečnou odpověď:
+
+| Složka | Kredity Standard |
+|---|---:|
+| Hlavní Adam včetně aktivační práce, zápisů a kontrol | 14,62797 |
+| Nativní pomocník Luna za obě fáze | 0,5673575 |
+| Dvě samostatná převzetí balíčku Lunou | 0,128115 |
+| Celkem | 15,3234425 |
+
+Číselný interval hlavní relace: 2026-10-17 17:46:19.916–18:09:15.384 UTC,
+3 530 781 input (z toho 3 494 528 cached), 16 316 output, 3 547 097 celkem.
+Nativní pomocník: 1 343 599 input (1 287 040 cached), 8 336 output,
+1 351 935 celkem. Samostatná převzetí: 49 426 tokenů, 0,0632825 a 0,0648325
+Standard. Cached input a reasoning jsou podmnožiny, nepřičítají se podruhé.
+Zdroj jsou pouze číselné záznamy vybraných relací a bezpečné účtenky obou fází;
+žádný obsah promptů či soukromých dat. Přepočet Standard dle ceníku ověřeného
+17. 10. 2026: https://learn.chatgpt.com/docs/pricing#token-rates . Nejde o fakturu,
+změnu zůstatku ani procenta předplatného; rychlostní multiplikátory nejsou doložené.
+
+Poslední běh zahrnoval jednorázovou aktivaci a dvě nasazení; úspora celku
+není prokázaná. Dřívější asynchronní pilot 1,7030575 proti přímému 7,27533
+(asi o 77 % méně) není měřením tohoto vydání. Podklady:
+logs/simple_development_release_phase1_20261017.log,
+logs/simple_development_release_phase2_20261017.log,
+logs/pn_async_comparison_20261017.log. Při dalším běžném výslovném p+n zachytit
+začátek měření před předáním a započítat všechny modelové role i finální převzetí.
+
+Rozsah: p+n všech 33 registrovaných proudů; nový proud zdědí společný postup
+po registraci svého cíle. Samostatný klient/služba Camino používá vlastní postup.
+Sol zatím jen jedna čistá Python funkce s existujícími testy, ne obecný automatický
+vývoj. Model a úsilí jsou výhradně v config/agent_roles.json; neaktivní
+routine_reviewer není překážka aktivního simple_developer. Během čekání model
+nehlídkuje. Nejistý krok se automaticky neopakuje.

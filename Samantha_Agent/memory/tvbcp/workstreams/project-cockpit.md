@@ -1944,3 +1944,24 @@ Navrhované další kroky:
 
 Technický důkaz:
 - logs/simple_development_release_phase1_20261017.log, logs/simple_development_activation_live_20261017.log a logs/simple_development_activation_model_20261017.log. Konfigurační plná brána 2096/2096 PASS (295,435 s unit testů), logs/simple_development_activation_full_gate_20261017.log; závěrečné p+n doloží logs/simple_development_release_phase2_20261017.log a bezpečná serverová účtenka 4935e2096cff56f7aa768ec9d3ab936e. Žádná zpráva do jiného Cockpit vlákna, mazání ani změna chráněných služeb.
+
+
+## 2026-10-17 21:18 CEST — Dokončené p+n a předání na příští relaci
+
+Hotovo:
+- Předávání je nasazené, Luna dokončila i konfigurační fázi a vývojová role Sol je zapnutá. Plná publikační brána 2096 PASS a smoke 5/5, chráněné služby zachované. Dnešní čtecí kontrola znovu potvrdila dokončenou účtenku a capabilities enabled=true.
+- Obnovitelné předání je na začátku kanonického handoffu, priorita 1, stav ceka na retest, připomenout při startu. Náklady posledního p+n jsou rozlišené od dřívějších benchmarků.
+
+Rozhodnutí:
+- Míla požádal uložit stav před vyčerpáním kreditu. Nyní pouze dokumentace a lokální checkpoint, bez dalšího vývoje a publikování.
+- Poslední dvoufázové p+n včetně aktivace vyšlo na 15,3234425 odhadovaného kreditu Standard (hlavní Adam 14,62797, všechny složky Luny 0,6954725); úspora celku neprokázaná. Starší asi 77% pokles patří jinému asynchronnímu pilotu. Nejde o fakturaci či procento limitu.
+
+Další krok:
+- Při navázání přečíst aktuální handoff a fyzicky ověřit předání na vhodném drobném vývojovém úkolu; neopakovat dokončené p+n/aktivaci.
+
+Navrhované další kroky:
+- Příští běžné autorizované p+n změřit celé včetně předání a převzetí, s počátečními číselnými snapshoty a programovým čekáním.
+- Fyzická přejímka UI/filmu podle původní dohody.
+
+Technický důkaz:
+- Nasazený a1437ec2 / stamp 7fa6d9e50f794ddf, job 4935e2096cff56f7aa768ec9d3ab936e completed, testy 2096, smoke 5. logs/simple_development_pn_final_20261017.log a logs/simple_development_release_phase2_20261017.log; podrobnosti výpočtu v technickém návodu. Nynější dokumentační commit zůstává lokální.
