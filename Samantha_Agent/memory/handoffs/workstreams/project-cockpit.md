@@ -1,6 +1,17 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-17 14:41 CEST: body 1–3 jsou pushnuté a funkčně nasazené. Kód `ae30beddcdfd`,
+  otisk `50ffdf992ae6552a`, nový proces potvrzený, receipt deployed a smoke 5/5.
+  Plná publikační brána 1963 testů OK (11 přeskočených). Shoda místního
+  a Tailscale HTTPS HTML; pět částí Servisu, bezpečný kalendářový stav
+  a zdroje/neověřený provoz v auditu ověřené přes běžící API.
+  Camino před/po shodné: PID 47332, konfigurace, Serve, stav i editor filmu;
+  owner HTTP/HTTPS a anonymní 401 PASS, Funnel off. Autosave jeden čerstvý
+  worker, bez poslední chyby, automatické mazání vypnuté.
+  Fyzická Safari/iPhone/VoiceOver přejímka čeká. Finální dokumentační head
+  a PID dokládá živá účtenka; následuje zveřejnění tohoto uzavíracího zápisu.
+
 - 2026-10-17 14:30 CEST: bod 3 lokálně hotový. Audit schopností odděluje zjištěné
   mezery registru od ručně udržovaných podnětů; odstraněné staré úkoly
   kalendáře a pevný červnový termín. Projektový audit uvádí čas sestavení,
@@ -75,17 +86,17 @@ Stav: rozpracovane
 Pripomenout pri startu: ano
 
 Co se resilo:
-Body 1–3: pravdivé provozní stavy, Servis podle účelu a aktuálnost doporučení auditů; lokálně hotové, push/nasazení čekají.
+Body 1–3: pravdivé provozní stavy, Servis podle účelu a aktuálnost doporučení auditů; pushnuté a funkčně nasazené.
 
 Co je hotove:
 - U01–U06 implementované a funkčně nasazené; důkazy jednotlivých kroků a souhrnná roadmapa v2.8.
-- Body 1–3 lokálně implementované a ověřené; push/nasazení čekají.
+- Body 1–3 implementované, pushnuté a funkčně nasazené; smoke 5/5.
 
 Co neni hotove:
-- Push/nasazení lokálních bodů 1–3; fyzická přejímka. U08–U11 zůstávají další práce podle roadmapy.
+- Fyzická přejímka Servisu a dalších UI změn. Zbývající části U08–U11 jsou další práce podle roadmapy.
 
 Dalsi krok:
-Samostatně potvrdit push/nasazení dokončených bodů 1–3; potom fyzická přejímka Servisu.
+Obnovit Cockpit a fyzicky vyzkoušet Servis na iPhonu.
 
 Navrhovane dalsi kroky:
 - Grafika a fyzická přejímka podle TXT.
@@ -1407,3 +1418,48 @@ Technický důkaz:
 - Read-only kontrola 14:30 CEST: Camino vlastněné/běžící, autosave jediný
   worker, kopie 5 min, bez poslední chyby, automatické mazání vypnuté;
   `logs/cockpit_audit_recommendations_live_20261017.log`.
+
+
+### 2026-10-17 14:41 CEST — Body 1–3 zveřejněné a funkčně nasazené
+
+Hotovo:
+- V běžícím Cockpitu je přesná kontrola přítomnosti prvků, živý bezpečný stav
+  kalendáře, pět účelových částí Servisu a opravené zdroje doporučení auditů.
+- Čtyřcommitový balíček včetně dřívějšího zápisu o omezeném SSD úklidu je
+  na GitHubu. Řízené nasazení doložilo nový proces a smoke 5/5.
+- Místní i Tailscale HTTPS HTML přesně odpovídá implementaci; nové API
+  kalendáře vrací aktivní režim, čas a read-only příznak. Projektový audit
+  má zdroje a neověřený provoz, GET nevytvořil uložený report.
+
+Rozhodnutí:
+- Míla výslovně zadal „Vše nyní p+n“. Publikování a nasazení jsou tím
+  schválené včetně tohoto povinného uzavíracího zápisu.
+- Push po úspěšné plné bráně narazil na Keychain helper v Cockpitu;
+  platné terminálové CLI přihlášení dokončilo stejný přesný fast-forward
+  po novém auditu hlav a push guardu podle LL-060.
+- Starší nesledovaný TXT audit z 16. 10. zůstal na stejném místě a se
+  shodným SHA-256; přesné místní exclude pravidlo vyjímá jen tento podklad.
+  Žádné mazání, změna Camino, sítě, médií, střihu ani služby autosave.
+
+Další krok:
+- Obnovit Cockpit a fyzicky vyzkoušet nové členění Servisu na iPhonu.
+
+Navrhované další kroky:
+- Filmový editor vyzkoušet doma podle dohody 18. 10.
+- Další UI vývoj vybírat podle fyzické přejímky a zbývajících bodů roadmapy.
+
+Technický důkaz:
+- Kód `ae30beddcdfd`, otisk `50ffdf992ae6552a`, první nový PID 59776,
+  receipt deployed, new_process_confirmed=true, smoke 5/5. Plná publikační
+  brána: 1963 testů OK, 11 přeskočených (266,195 s samotných testů).
+  Nasazení používá navazující rychlou bránu; fyzická přejímka se netvrdí.
+- Hash místního/HTTPS HTML shodný. Nový kalendářový GET vrací výhradně
+  ok/state/message/checked_at/read_only; změny automatiky ani odeslání neproběhly.
+- Camino PID, konfigurace, Serve a HTTP/HTTPS state i celý JSON filmového
+  editoru přesně shodné před/po. Owner HTTP/HTTPS a anonymní 401 PASS,
+  Funnel off. Autosave jediný worker, kopie 5 min, bez poslední chyby;
+  automatické mazání vypnuté a trvalá služba zachovaná.
+- Redigované důkazy `logs/cockpit_release_deploy_code_20261017.log`,
+  `logs/cockpit_release_ui_code_20261017.log`, protected before/after logy
+  a záznam zachování TXT auditu. Finální dokumentační head/PID ověřuje živá
+  účtenka po závěrečné publikaci tohoto zápisu.

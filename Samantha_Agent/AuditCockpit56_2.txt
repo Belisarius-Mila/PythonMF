@@ -9,6 +9,15 @@ TOTO JE AKTUÁLNÍ ROZHODOVACÍ ČÁST DOKUMENTU.
 Architektonický průběh a původní audit zůstávají níže jako historie.
 Čísla, provozní stavy a priority historických oddílů nejsou dnešním stavem.
 
+PŘEDÁNÍ A VYDÁNÍ — 2026-10-17 14:41 CEST
+Body 1–3 pushnuté a funkčně nasazené: kód ae30beddcdfd, nový proces potvrzený,
+otisk 50ffdf992ae6552a, receipt deployed a smoke 5/5. Plná publikační
+brána 1963 testů OK (11 přeskočených); místní/HTTPS HTML i nová API ověřené.
+Camino (PID, konfigurace, Serve, stav, editor) přesně zachované; owner HTTP/HTTPS
+a anonymní 401 PASS, Funnel off. Autosave jediný čerstvý worker bez chyby.
+Fyzická Safari/iPhone/VoiceOver přejímka čeká; finální dokumentační head/PID
+poskytuje živá účtenka po zveřejnění tohoto uzavíracího zápisu.
+
 VÝVOJOVÝ STAV — 2026-10-17 14:30 CEST
 Bod 3 lokálně hotový: zdroje auditů opravené, zjištěné registry gaps oddělené
 od udržovaných podnětů, bez staré implementace kalendáře a červnového termínu.

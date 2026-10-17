@@ -11,6 +11,10 @@
 
 ## Aktuální stav
 
+- 2026-10-17 14:41 CEST: zobrazení bezpečného stavu je v Cockpitu pushnuté a řízeně
+  nasazené (kód `ae30beddcdfd`, nový proces, smoke 5/5). Živý GET po nasazení
+  potvrdil aktivní režim a bezpečnou projekci s časem; konfigurace automatiky
+  ani odesílání se nemění. Důkaz drží proud `project-cockpit` a jeho release logy.
 - 2026-10-17 13:33 CEST: v proudu Cockpit je lokálně připravená náhrada nepravdivého
   pevného textu o vypnutém odesílání. GET `/api/family-calendar/delivery-status`
   vrací jen bezpečný souhrn registrovaného read-only auditu a čas kontroly;

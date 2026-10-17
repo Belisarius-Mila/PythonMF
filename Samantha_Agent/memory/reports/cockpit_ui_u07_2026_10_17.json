@@ -98,5 +98,19 @@
     "Physical Safari/iPhone/VoiceOver acceptance after deployment is pending",
     "Opening Service changes only layout; action authorization remains separate",
     "Point 1 local full gate 1961/1961 is historical; this bounded frontend step used targeted and static checks"
-  ]
+  ],
+  "release": {
+    "verified_at": "2026-10-17 14:41 CEST",
+    "implementation_head": "ae30beddcdfd66397b8f6323bfb5efeb08a2f320",
+    "code_stamp": "50ffdf992ae6552a",
+    "new_process_confirmed": true,
+    "smoke_checks": 5,
+    "full_gate_tests": 1963,
+    "skipped_tests": 11,
+    "local_and_https_html_identical": true,
+    "calendar_mode_verified": "active",
+    "camino_and_autosave_preserved": true,
+    "physical_device_acceptance": "pending",
+    "final_documentation_head": "See live deployment receipt after closing publication"
+  }
 }
