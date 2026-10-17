@@ -29,6 +29,13 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-073 — Krátké zadání není krátký kontext kontrolora
+
+- Problém: Čtecí Sol dostal 165 bajtů dat, ale implicitní kontext vytvořil 18 337 tokenů; režie může převážit užitečnou práci.
+- Typ: opakující se
+- Řešení nalezeno: 17102026
+- Řešení: Pro pevnou datovou rutinu samostatný jednorázový kontext, pouze potřebné instrukce a podklady, per-thread vypnuté nástroje/konektory/MCP/hooky/paměti/dovednosti a projektové instrukce. Stejný podklad klesl na 10 995 tokenů; měřit stále celý hlavní model i kontrolora. Limit přijetí po dokončení není tvrdý fakturační strop. Nezvyšovat limit jen pro průchod testu a neopakovat automaticky.
+
 ### LL-072 — Tailscale audit služby potřebuje explicitní CLI režim
 
 - Problém: V launchd prostředí bez TERM macOS Tailscale vrací s exit 0 chybu GUI místo JSON; ochrana pak selže po úspěšném převzetí Lunou.

@@ -419,6 +419,8 @@ class CodexAppServerClient:
         sandbox: str = "read-only",
         approval_policy: str = "never",
         model: str | None = None,
+        config_overrides: dict[str, Any] | None = None,
+        base_instructions: str | None = None,
     ) -> str:
         params: dict[str, Any] = {
             "cwd": str(cwd.resolve()),
@@ -429,6 +431,10 @@ class CodexAppServerClient:
         }
         if model:
             params["model"] = model
+        if config_overrides is not None:
+            params["config"] = dict(config_overrides)
+        if base_instructions is not None:
+            params["baseInstructions"] = base_instructions
         result = self.transport.request("thread/start", params)
         return self._thread_id(result, operation="thread/start")
 

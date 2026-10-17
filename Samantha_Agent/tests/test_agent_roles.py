@@ -93,6 +93,20 @@ class AgentRoleTests(unittest.TestCase):
         selected = roles.resolve_role([entry(approved["model"], approved["reasoning_effort"])])
         self.assertEqual(selected["model"], policy["preferred_model"])
 
+    def test_routine_role_does_not_change_release_binding_or_accept_release_proof(self):
+        release = roles.resolve_role([entry()], path=self.path)
+        self.document["roles"][roles.ROUTINE_ROLE] = {
+            "label": "Routine reviewer", "preferred_model": "review-model",
+            "approved_models": [candidate("review-model", "medium")]}
+        self.write()
+        self.assertEqual(roles.resolve_role([entry()], path=self.path), release)
+        review = roles.resolve_role([entry("review-model", "medium")], path=self.path, role=roles.ROUTINE_ROLE)
+        self.assertEqual(review["model"], "review-model")
+        with self.assertRaises(roles.AgentRoleError):
+            roles.validate_selection(review)
+        with self.assertRaises(roles.AgentRoleError):
+            roles.assert_current(release, path=self.path, role=roles.ROUTINE_ROLE)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -12,6 +12,31 @@ from app.capabilities.models import (
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
+        capability_id="route_routine_task", label="Route one reviewed routine task type",
+        risk=RiskLevel.READ_ONLY, reads=("fixed routine task type",), writes=(),
+        tool="app.routine_tasks.route_routine_task",
+        notes="Exact type only, no model call. Unknown types return to Adam; no keyword-based approval.",
+    ),
+    CapabilityRecord(
+        capability_id="run_routine_task", label="Review public report documentation with the approved role",
+        risk=RiskLevel.EXTERNAL_SEND,
+        reads=("public report catalogue and its fixed documentation", "reviewed model role and catalog"),
+        writes=("one ephemeral model turn", "empty isolated runtime context"),
+        tool="app.routine_tasks.run_routine_task", requires_confirmation=True,
+        confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE,
+        voice_allowed=VoicePolicy.APPROVAL_ONLY, mobile_allowed=MobilePolicy.APPROVAL_CARD,
+        notes="Only confirmed fixed audit; no caller paths, private content, source edits, retries, publication or service changes. Usage threshold is checked after completion, not a billing hard cap.",
+    ),
+    CapabilityRecord(
+        capability_id="probe_routine_reviewer", label="Probe one price-reviewed routine reviewer candidate",
+        risk=RiskLevel.EXTERNAL_SEND, reads=("fixed synthetic contradiction", "model catalogue"),
+        writes=("one ephemeral model turn", "empty isolated runtime context"),
+        tool="app.routine_tasks.probe_routine_reviewer", requires_confirmation=True,
+        confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE,
+        voice_allowed=VoicePolicy.APPROVAL_ONLY, mobile_allowed=MobilePolicy.APPROVAL_CARD,
+        notes="Does not approve or modify a role. Requires explicit model and effort and prior cost review.",
+    ),
+    CapabilityRecord(
         capability_id="release_usage_snapshot",
         label="Read numeric token counters for one selected release participant",
         risk=RiskLevel.READ_ONLY,

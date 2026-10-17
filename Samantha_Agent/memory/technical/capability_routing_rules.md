@@ -68,6 +68,9 @@ Aktualni registrovane reporty:
 | "Prekopiruj vybrane soubory ze Stazenych do knowledge inboxu" | `copy_downloads_files_to_knowledge_inbox(...)` | kopiruje jen vybrane relativni soubory z Downloads do private inboxu az po potvrzeni |
 | "Chci iPhone zkratku", "vytvor Apple Shortcut", "stav Shortcuts Playground" | `iphone_shortcuts_playground_status()` nebo `prepare_iphone_shortcut(...)` | status je read-only; private request draft se zapisuje az po potvrzeni a realny `.shortcut` se musi rucne overit |
 | "Stav pameti", "priority", "pripomenuti" | `memory_status()` | cte jen bezpecnou lokalni memory diagnostiku; nezapisuje |
+| "Náhled rutinní kontroly dokumentace" | `app.routine_tasks.route_routine_task("report_documentation_review")` | přesný typ a role bez modelového tahu; neznámý typ vrátí Adamovi |
+| "Prověř dokumentaci reportů Solem" | `app.routine_tasks.run_routine_task("report_documentation_review", confirmed=True)` | po souhlasu jeden čtecí modelový tah nad pevnými veřejnými podklady; bez změn zdrojů, opakování a publikace |
+| "Ověř kandidáta rutinního kontrolora" | `app.routine_tasks.probe_routine_reviewer(model, reasoning_effort)` | jen po cenovém posouzení a výslovné volbě modelu; pevný syntetický vstup, neschvaluje ani nemění roli |
 
 Kdyz pri praci vznikne novy opakovatelny ad hoc status, audit nebo report,
 Samantha se ma zeptat: "Udelame z toho novy systemovy report?" Pokud Mila

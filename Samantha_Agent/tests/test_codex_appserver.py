@@ -18,6 +18,19 @@ from app.codex_appserver import (
 
 
 class CodexContractTests(unittest.TestCase):
+    def test_thread_overrides_are_per_thread_and_optional(self) -> None:
+        transport = _ScriptedTransport(completed_items=[])
+        with patch("app.codex_appserver.read_codex_version", return_value=CodexVersion.parse("codex-cli 0.147.0")):
+            client = CodexAppServerClient(transport_factory=lambda **_kwargs: transport)
+            with patch.object(transport, "request", return_value={"thread": {"id": "new"}}) as request:
+                client.start_thread(cwd=Path("."), config_overrides={"project_doc_max_bytes": 0},
+                                    base_instructions="Data-only task")
+                self.assertEqual(request.call_args.args[1]["config"], {"project_doc_max_bytes": 0})
+                self.assertEqual(request.call_args.args[1]["baseInstructions"], "Data-only task")
+                client.start_thread(cwd=Path("."))
+                self.assertNotIn("config", request.call_args.args[1])
+                self.assertNotIn("baseInstructions", request.call_args.args[1])
+
     def test_token_receipt_uses_latest_matching_thread_total_and_discards_extras(self) -> None:
         transport = _ScriptedTransport(completed_items=[])
         usage = dict(inputTokens=100, cachedInputTokens=80, outputTokens=10,

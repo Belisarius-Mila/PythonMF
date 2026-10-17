@@ -1,6 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-17: Po úspěšném pilotu je routine_reviewer opět neaktivní. Běžící Cockpit má starý parser vyžadující jedinou roli release_executor; původní config/agent_roles.json zůstává zachovaný. Pilotní schválení a výsledky jsou uložené v runtime logu. Aktivace nové role až po samostatném nasazení podpory více rolí, bez obcházení současného p+n.
+
+- 2026-10-17 19:06 CEST: omezený lokální pilot report_documentation_review přes samostatnou roli Sol/medium. Skutečný audit veřejného katalogu a dokumentace dokončen za 4,95 s bez doložených rozporů; 0,6515 Standard za kontrolora + 0,64077 za jedno převzetí hlavním Adamem = 1,29227 odhadovaného kreditu. Nulové přírůstky hlavního modelu během čekání, chráněné služby a role p+n přesně shodné. 63 cílených testů PASS, plná brána 2046/2046 PASS (261,278 s unit testů); logs/routine_full_gate_20261017.log. Zatím bez push/nasazení, bez obecného autonomního vývoje. Předchozí C je dokončené podle runtime účtenky a logs/pn_async_comparison_20261017.log.
+
 - 2026-10-17 18:31 CEST: pilot C odhalil chybu čtecí ochrany Tailscale pod launchd. Lokální oprava explicitního CLI režimu a samostatné fáze protection prošla 43 cílenými testy, skutečným minimálním prostředím a plnou branou 2034/2034. Dokumentace a oprava tvoří dva autorizované commity; následné p+n a srovnání doloží runtime účtenka a logs/pn_async_comparison_20261017.log.
 
 - 2026-10-17 18:18 CEST: A/B dokončené a živě ověřené; náklad dohledu převážil úsporu Luny. Míla autorizoval nový pilot C přes skutečný Cockpit bez průběžných modelových návratů. Jeden nový dokumentační commit; stávající modely a ochrany zůstávají zachované. Výsledek C dokládají runtime účtenka a logs/pn_async_comparison_20261017.log.
@@ -1869,3 +1873,29 @@ Navrhované další kroky:
 
 Technický důkaz:
 - logs/pn_async_fix_targeted_20261017.log, logs/pn_async_fix_live_20261017.log; plná brána 2034/2034 PASS (262,874 s unit testů), logs/pn_async_fix_full_gate_20261017.log. Neúspěšné joby 5a5129c49ba44e26047c4402d4e4cbf4 a 424f7252a5273566b8f63c1c7fa253e9. Finální pilot dokládá runtime účtenka a logs/pn_async_comparison_20261017.log.
+
+
+## 2026-10-17 19:06 CEST — Pilot rutinního kontrolora dokumentace
+
+Hotovo:
+- Sol v jediném čtecím tahu porovnal devět veřejných reportů s jejich dokumentací; konkrétní rozpor nedoložen. Program vybírá přesný schválený typ bez modelového rozhodování, neznámé typy vrací Adamovi.
+- Oddělená role, krátké zadání, per-thread vypnuté nástroje/konektory/MCP/hooky/paměti a projektové instrukce/dovednosti; historie hlavní relace se nepřenáší. Běžné nastavení hlavního Adama a vykonavatele p+n se nemění.
+- Skutečné ceny včetně jednoho převzetí změřené. C dřívějšího p+n je dokončené: 1,7030575 Standard úspěšný běh, 37,6101705 celá série s opravou; tento pilot je oddělené měření.
+
+Rozhodnutí:
+- Míla souhlasil s pokusem jedné omezené rutiny. Jde výhradně o tento čtecí pilot; obecné automatické směrování vývoje ani automatické publikování nevzniklo.
+- Neznámý rozsah, chyba, drift rolí/podkladů nebo nadlimitní spotřeba vrací stav k posouzení bez automatického opakování. Limit 12 000 bajtů vstupu a jeden tah; 16 000 tokenů / 1 Standard kontrolora jsou hranice přijetí po dokončení, nikoli pevný fakturační strop.
+- Původní syntetický test (neukládání vs mazání) byl nejednoznačný a Sol správně nevymyslel rozpor; opraven na výslovné ukládání. Novější readOnly.access instalovaný server odmítl před modelem; zachován podporovaný read-only režim a vypnutí nástrojů.
+
+Další krok:
+- Vyhodnotit přínos této úzké rutiny před rozšiřováním na zápis do kódu; push a nasazení zůstávají samostatně. Jediný běh bez srovnatelného přímého kontrolního pokusu neprokazuje úsporu.
+
+Navrhované další kroky:
+- Fyzická přejímka UI/filmu zůstává samostatně.
+
+Technický důkaz:
+- 63 cílených testů PASS; plná brána 2046/2046 PASS (261,278 s unit testů), logs/routine_full_gate_20261017.log. Syntetický test i skutečný audit prošly, chráněný snapshot Camino/autosave a otisk release_executor před/po shodné.
+- Úspěšný audit 12 594 tokenů, 0,6515 Standard; hlavní převzetí 177 625 tokenů (175 488 cached input), 0,64077 Standard. Celkem 190 219 tokenů / 1,29227 Standard. Během čekání nula nových tokenů hlavního modelu.
+- logs/routine_candidate_probe_20261017.log, logs/routine_pilot_completed_20261017.log, logs/routine_pilot_usage_20261017.log; souhrn v logs/routine_pilot_report_20261017.log. Náklady zavedení jsou oddělené, nevyvozují se z ceny samotného kontrolora.
+
+Doplnění k aktivaci pilotu: Novou roli nyní neaktivovat v centrálním JSON. Běžící starší Cockpit by odmítl celý seznam rolí, takže je po experimentu obnovena přesná původní konfigurace. Kód a měření jsou lokálně připravené; registrované spuštění bez schválené role bezpečně vrátí attention. Nejprve samostatně nasadit podporu více rolí, teprve potom aktivovat routine_reviewer v config/agent_roles.json.

@@ -319,6 +319,22 @@ def _camino_service_commands() -> tuple[WorkflowCommand, ...]:
 
 WORKFLOW_COMMANDS: tuple[WorkflowCommand, ...] = (
     WorkflowCommand(
+        command_id="preview_routine_report_review", title="Náhled předání kontroly dokumentace",
+        purpose="Ukáže přesný typ a roli bez modelového tahu.",
+        aliases=("náhled předání kontroly dokumentace",),
+        argv=(str(PYTHON_BIN), str(SAMANTHA_DIR / "scripts/routine_task.py")),
+        cwd=SAMANTHA_DIR, risk="read_only_preview", writes="nic",
+    ),
+    WorkflowCommand(
+        command_id="run_routine_report_review", title="Prověřit dokumentaci reportů Solem",
+        purpose="Jeden omezený audit veřejného katalogu a dokumentace, bez změn zdrojů.",
+        aliases=("prověř dokumentaci reportů solem",),
+        argv=(str(PYTHON_BIN), str(SAMANTHA_DIR / "scripts/routine_task.py"), "--run-confirmed"),
+        cwd=SAMANTHA_DIR, risk="external_ai_review",
+        writes="jediný dočasný modelový tah a prázdný runtime kontext; bez změny služeb a Gitu",
+        requires_confirmation=True,
+    ),
+    WorkflowCommand(
         command_id="prepare_autosave_service",
         title="Připravit trvalé autosave",
         purpose="Připraví kontrolovatelný LaunchAgent uvnitř projektu; systém nemění.",

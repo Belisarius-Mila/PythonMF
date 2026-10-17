@@ -232,3 +232,51 @@ commitů a dodatečné náklady budou ve výsledku výslovné.
 Oprava C ověřena: 43 cílených testů, skutečný minimální launchd audit a
 plná brána 2034/2034 PASS (unit část 262,874 s). Publikační výsledek zůstává
 samostatným živým důkazem v runtime účtence a finálním souhrnu.
+
+
+## Omezený pilot rutinního kontrolora (17. 10. 2026)
+
+Vedle role p+n existuje nezávislá role routine_reviewer, schválená pro jediný
+typ report_documentation_review v app/routine_tasks.py. Jde o čtecí porovnání
+veřejného katalogu app/system_reports.py a jeho pevné dokumentace. Nejde o
+obecný směrovač vývoje, nový scheduler ani automatickou změnu kódu.
+
+Přesný typ vybírá program bez modelového tahu. Neznámé typy vrací Adamovi;
+spuštění vyžaduje existující souhlas. Registrovaný náhled je bezplatný, placené
+spuštění je ve workflow registru s pevným argv. Jediný samostatný tah používá
+read-only sandbox bez síťových nástrojů; per-thread vypíná shell, konektory,
+MCP, další agenty, hooky, paměti, projektové instrukce a katalog dovedností.
+Vlastní baseInstructions platí pouze v tomto prázdném kontextu; žádná historie
+ani soukromý obsah se nepřenáší. Hlavní model a globální nastavení se nemění.
+
+Pevný vstup do 12 000 bajtů, jeden tah, žádné automatické opakování. Nejvýše
+tři nálezy s přesnou citací v dokumentaci; neplatná citace, změna role či
+podkladů, chybějící spotřeba nebo překročení 16 000 tokenů / 1 Standard
+kontrolora vrací attention. Tokenový/kreditní limit je kontrola přijetí po
+dokončení, nikoli tvrdý limit fakturace. Runtime kontext je prázdný a privátní,
+necommitovaný; zdroje, služby, Git, síť ani data Camina se auditem nemění.
+
+První 165bajtový payload měl kvůli implicitnímu kontextu 18 337 tokenů a
+neprošel limitem. Omezený kontext stejného zadání měl 10 995 tokenů. Úspěšný
+skutečný audit devíti reportů: 4,95 s, 0,6515 Standard kontrolora a 0,64077
+jednorázové převzetí hlavním Adamem. Celkem 1,29227 Standard, žádné nálezy,
+nulová spotřeba hlavního modelu při čekání. Cache, práce zavedení a hranice
+měření jsou zvlášť v logs/routine_pilot_report_20261017.log. Neexistuje
+přímý srovnatelný kontrolní běh, takže úspora není prokázaná.
+
+Model role: gpt-6.1-sol / medium, pouze config/agent_roles.json; skutečný
+syntetický dry-run s doloženým rozporem v logs/routine_candidate_probe_20261017.log.
+Standard sazby ověřené 17. 10. 2026: 50 vstup / 2,5 cached / 250 výstup za
+milion tokenů, https://learn.chatgpt.com/docs/pricing#token-rates . Nastavení
+vykonavatele p+n a jeho otisk jsou před/po totožné. Celkové náklady se sledují
+včetně případného probuzení hlavního Adama; samotná levná role úsporu nedokazuje.
+
+Aktivace je po pilotu odložená: starý běžící Cockpit vyžaduje v seznamu rolí
+pouze release_executor. Centrální JSON byl proto po úspěšném experimentu
+vrácen přesně do původního stavu a obyčejné p+n zůstává kompatibilní.
+Bez role run_routine_task bezpečně vrátí attention; náhled pouze ukazuje
+rezervovanou routu, nikoli dostupnost aktivního modelu. Nejprve samostatně
+nasadit podporu více rolí; aktivace routine_reviewer v centrálním JSON je
+až následný krok s novým otiskem a kontrolou. Pilotní vazba a její důkazy
+jsou v logs/routine_pending_role_20261017.log, ne jako alternativní
+produkční konfigurace. Nové nasazení během tohoto úkolu nebylo autorizované.

@@ -107,6 +107,15 @@ Společné pracovní instrukce PythonMF; cesty níže jsou vůči `Samantha_Agen
   nástupce z katalogu samo nepovoluje přechod. Nedostupný model bez schválené
   kompatibilní náhrady zastaví předání před publikováním; model běžící úlohy
   se nepřepíná.
+- Rutinní delegace má zatím jediný schválený typ `report_documentation_review`
+  v `app/routine_tasks.py`: čtecí kontrolu veřejného katalogu reportů a jeho
+  dokumentace. Použij registrovaný náhled/spuštění; ostatní typy se vracejí
+  hlavnímu Adamovi. Role `routine_reviewer` má vlastní nastavení a nemění
+  vykonavatele p+n. Nepředávej historii relace ani soukromá data, neprováděj
+  modelový polling a neopakuj nejistý či nadlimitní krok automaticky.
+  Jde o omezený pilot, nikoli obecné schválení samostatného vývoje nebo publikace.
+  Role zůstává do samostatného nasazení podpory více rolí neaktivní; její
+  předčasné přidání do centrálního JSON by zablokovalo starší běžící Cockpit.
 
 ## Technické preference
 
