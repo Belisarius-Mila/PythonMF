@@ -203,3 +203,18 @@ Měřený krok A potvrzen: d9e6e287, plná brána 2032/2032 a smoke 5/5;
 2 369 937 tokenů, Standard odhad 7,27533 kreditu. Krok B (UI doložených
 kontrol) má 68 UI testů a Node VM PASS. Jeho p+n a úplné souhrny včetně
 režie hlavního Adama se ověřují v runtime účtence a uvedeném finálním logu.
+
+## Opakování přes skutečný asynchronní Cockpit
+
+Míla 2026-10-17 schválil nový pilot C po terminálovém A/B. Pro jeden nový
+dokumentační commit se použije registrovaný start_release hlavního Cockpitu
+s návratem do jeho již existujícího vlákna project-cockpit. Jde o výslovně
+zadaný test portálové cesty; běžné terminálové předávání se tím nemění.
+
+Během čekání stav čte deterministický observer, hlavní model nedělá polling.
+Započítá se úvodní předání, jednorázová Luna, skutečný read-only callback
+Cockpit Adama i terminálová závěrečná kontrola. Nový benchmark nepoužívá
+nativního modelového pomocníka navíc. Původní model Cockpitu se nepřepíná;
+případný rozdíl proti terminálovému Sol 6.1 bude ve výsledku výslovný.
+Aktuální výsledek je v logs/pn_async_comparison_20261017.log a runtime
+účtence. Historické A/B zůstává beze změn v původním souhrnu.

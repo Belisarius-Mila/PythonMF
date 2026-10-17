@@ -1,6 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-17 18:18 CEST: A/B dokončené a živě ověřené; náklad dohledu převážil úsporu Luny. Míla autorizoval nový pilot C přes skutečný Cockpit bez průběžných modelových návratů. Jeden nový dokumentační commit; stávající modely a ochrany zůstávají zachované. Výsledek C dokládají runtime účtenka a logs/pn_async_comparison_20261017.log.
+
 - 2026-10-17 17:30 CEST: měření je nasazené; přímé p+n A prošlo 2032 testy a smoke 5/5, GitHub aligned, Camino/autosave zachované. UI identity balíčku nasazené. UI výsledků kontrol lokálně hotové (68 UI testů a Node VM PASS); Míla schválil následné měřené p+n B přes Lunu. Aktuální výsledek B a číselné srovnání dokládají runtime účtenka a logs/pn_cost_comparison_20261017.log.
 
 - 2026-10-17 16:53 CEST: role `release_executor` je lokálně oddělená od konkrétního modelu.
@@ -1825,3 +1827,23 @@ Navrhované další kroky:
 
 Technický důkaz:
 - 68 UI testů PASS a Node VM s reálnou účtenkou i nepotvrzenými důkazy PASS. A: logs/pn_benchmark_a_20261017.log a logs/pn_benchmark_a_usage_20261017.log. B doloží trvalá runtime účtenka vykonavatele a logs/pn_benchmark_b_usage_20261017.log. Finální srovnání logs/pn_cost_comparison_20261017.log; tento checkpoint před měřením B nepředjímá jeho výsledek.
+
+### 2026-10-17 18:18 CEST — Opakování měření asynchronní cestou Cockpitu
+
+Hotovo:
+- Předchozí UI kroky A/B jsou nasazené: main f0ccfb49, oba úspěšné běhy 2032 testů PASS a smoke 5/5, GitHub aligned a Camino/autosave zachované.
+- Skutečné dosavadní náklady Standard: A 7,27533; úspěšný terminálový B včetně dohledu 10,276513; celý B s incidentem 26,941798. Z toho samotná Luna v úspěšném B 0,534383. Nejde o účetní vyúčtování.
+
+Rozhodnutí:
+- Míla schválil opakování podle návrhu: skutečná registrovaná asynchronní cesta Cockpitu, deterministické sledování bez průběžných modelových kontrol, jediný read-only návrat do původního projektového vlákna. Jeho model se nemění.
+- Tento malý dokumentační commit vytvoří nový skutečný jednocommitový balíček. Nebude se předstírat push již nasazeného commitu.
+- Pro tento pilot se použije start_release hlavního Cockpitu a jeho původní projektový callback; výslovný test portálové cesty je výjimkou z terminálového předávání přes start_terminal_release. Nejde o změnu pravidel dalších vydání.
+
+Další krok:
+- Provést autorizované p+n C, změřit také callback Cockpit Adama a závěrečnou kontrolu terminálového Adama, výsledek porovnat s A/B.
+
+Navrhované další kroky:
+- Fyzická přejímka UI/filmu zůstává samostatně.
+
+Technický důkaz:
+- Předchozí finální důkazy: logs/pn_cost_comparison_20261017.log a účtenka 4afbc4a25c40ec4a545deb6745b498b4. C doloží nová trvalá runtime účtenka a logs/pn_async_comparison_20261017.log; tento checkpoint před publikací jeho výsledek nepředjímá.
