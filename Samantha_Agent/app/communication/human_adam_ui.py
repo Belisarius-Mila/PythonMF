@@ -405,10 +405,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <ul id="githubBatchCommits" hidden></ul>
         <input id="githubBatchConfirmation" maxlength="80" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" placeholder="Po auditu sem vlož potvrzovací větu" hidden disabled>
         <button class="deploy-action" id="githubBatchBtn" type="button" hidden disabled>Odeslat denní balíček na GitHub</button>
-        <section class="integration-audit-box" id="lunaReleaseBox" aria-label="Předání balíčku Luně" hidden>
-          <h3>Předání balíčku Luně</h3>
+        <section class="integration-audit-box" id="lunaReleaseBox" aria-label="Předání balíčku vykonavateli" hidden>
+          <h3>Předání balíčku vykonavateli</h3>
           <p id="lunaReleaseMeta" role="status" aria-live="polite">Stav balíčku se obnoví ze serveru.</p>
-          <button class="audit-action" id="lunaReleaseStartBtn" type="button">Předat p+n Luně</button>
+          <button class="audit-action" id="lunaReleaseStartBtn" type="button">Předat p+n vykonavateli</button>
           <button id="lunaReleaseDryRunBtn" type="button">Zkouška bez publikování</button>
         </section>
       </section>
@@ -812,7 +812,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     let tone = "";
     if (lunaReleaseJob) {
       const connectionText = connectionBadge.textContent || "Odpojeno";
-      text = `${connectionText} · ${lunaReleaseStatus.textContent || "Luna pracuje na balíčku."}`;
+      text = `${connectionText} · ${lunaReleaseStatus.textContent || "Vykonavatel pracuje na balíčku."}`;
       tone = lunaReleaseJobActive() || String(lunaReleaseJob.state || "") === "attention" ? "warn" : "ok";
     } else if (sessionTurnBusy) {
       text = turnActivity.textContent || "Adam pracuje · čas neznámý · pokyn neposílej znovu";
@@ -2566,8 +2566,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     const pushState = releaseStateLabel(lunaReleaseJob.push_state);
     const deploymentState = releaseStateLabel(lunaReleaseJob.deployment_state);
     let label = "Balíček čeká na stav.";
-    if (state === "queued") label = message || "Luna balíček převzala a čeká na zahájení.";
-    else if (state === "running") label = message || "Luna pracuje na balíčku.";
+    if (state === "queued") label = message || "Vykonavatel balíček převzala a čeká na zahájení.";
+    else if (state === "running") label = message || "Vykonavatel pracuje na balíčku.";
     else if (state === "returning") label = message || "Výsledek balíčku se předává Adamovi.";
     else if (state === "completed") label = `Balíček dokončen · push ${pushState} · nasazení ${deploymentState}${lunaReleaseJob.returned_to_adam === true ? " · Adam má výsledek" : ""}${message ? ` · ${message}` : ""}`;
     else if (state === "dry_run_completed") label = `Zkouška dokončena bez publikování${message ? ` · ${message}` : ""}`;
@@ -2645,7 +2645,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     lunaReleaseStarting = true;
     syncControls();
     try {
-      lunaReleaseMeta.textContent = "Ověřuji přesný balíček pro předání Luně…";
+      lunaReleaseMeta.textContent = "Ověřuji přesný balíček pro předání vykonavateli…";
       const audit = await api("/api/human-adam/luna-release/audit", {cache:"no-store"});
       if (!audit || audit.ok !== true || audit.ready !== true) {
         throw new Error(audit && audit.message || "Balíček není připravený k předání.");
@@ -2658,10 +2658,14 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       if (!confirmationText) throw new Error("Server nevrátil potvrzovací větu.");
       const originHead = String(audit.expected_origin_head || "");
       const localHead = String(audit.expected_local_head || "");
-      const packageSummary = `${audit.deployment_label || audit.deployment_target} · ${Number(audit.commit_count || 0)} nových commitů · origin ${originHead} · lokální main ${localHead}${audit.message ? `\n${audit.message}` : ""}`;
+      const executor = audit.executor;
+      if (!executor || executor.role !== "release_executor" || !executor.model || !executor.policy_digest) {
+        throw new Error("Server nevrátil ověřenou roli vykonavatele.");
+      }
+      const packageSummary = `${audit.deployment_label || audit.deployment_target} · vykonavatel ${executor.model} · ${Number(audit.commit_count || 0)} nových commitů · origin ${originHead} · lokální main ${localHead}${audit.message ? `\n${audit.message}` : ""}`;
       lunaReleaseMeta.textContent = packageSummary;
       const confirmed = window.confirm(
-        `${dryRun ? "Zkouška bez publikování" : "Předání p+n Luně"}\n\nPřesný balíček:\n${packageSummary}\n\nPotvrzovací věta: ${confirmationText}\n\nPotvrzuješ tuto akci?`,
+        `${dryRun ? "Zkouška bez publikování" : "Předání p+n vykonavateli"}\n\nPřesný balíček:\n${packageSummary}\n\nPotvrzovací věta: ${confirmationText}\n\nPotvrzuješ tuto akci?`,
       );
       if (!confirmed) {
         lunaReleaseMeta.textContent = "Předání bylo zrušeno. Balíček se nespustil.";
@@ -2693,6 +2697,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
           expected_local_head:localHead,
           expected_workstream_id:String(audit.workstream_id),
           expected_deployment_target:String(audit.deployment_target),
+          expected_executor:executor,
           confirmation,
           client_message_id:messageIdValue,
           user_text:userText,
@@ -2704,7 +2709,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       lunaReleaseMeta.textContent = packageSummary;
       if (lunaReleaseJobActive(payload.job)) scheduleLunaReleasePoll();
       else await loadStatus();
-      notice.textContent = dryRun ? "Zkouška balíčku začala." : "Předání p+n Luně začalo.";
+      notice.textContent = dryRun ? "Zkouška balíčku začala." : "Předání p+n vykonavateli začalo.";
       return true;
     } catch (error) {
       lunaReleaseMeta.textContent = `Balíček se nepodařilo předat: ${error.message}`;

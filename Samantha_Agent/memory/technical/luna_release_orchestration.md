@@ -1,4 +1,4 @@
-# Předání p+n celého balíčku Luně
+# Předání p+n celého balíčku vykonavateli
 
 Rozhodnutí Míly 2026-10-17: hlavní Adam dokončí vývoj a commity; po samostatném
 p+n převezme Luna celý schválený balíček. Výsledek se vrací do stejné konverzace
@@ -7,8 +7,9 @@ proudy portálu (aktuálně 33), včetně přímé terminálové relace.
 
 ## Technologie a rozsah
 
-- Stávající Codex App Server, model `gpt-6-luna`, krátké nové dočasné vlákno.
-  Nemění se výchozí model, konfigurace ani komunikační architektura.
+- Stávající Codex App Server, centrální role `release_executor` v
+  `config/agent_roles.json`, krátké nové dočasné vlákno. Nemění se hlavní
+  model uživatele ani komunikační architektura.
 - Luna dostává pouze projekt, koncové commity rozsahu, počet commitů, režim
   a názvy chráněných služeb. Nedostává celou historii, přihlašovací údaje,
   soukromá data ani oprávnění opravovat kód či systém.
@@ -34,7 +35,9 @@ proudy portálu (aktuálně 33), včetně přímé terminálové relace.
 4. Uživatelské potvrzení se vztahuje na zobrazený přesný balíček. API navíc
    vyžaduje `POTVRZUJI PREDANI P+N LUNE`, oba auditované commity,
    `expected_workstream_id`, `expected_deployment_target` a request ID.
-   Stejný commit nelze po potvrzení přesměrovat na jiný projekt nebo cíl.
+   Navíc vyžaduje `expected_executor` z auditu: roli, model, úsilí a otisk
+   schválené politiky. Stejný commit nelze po potvrzení přesměrovat na jiný
+   projekt, cíl nebo model.
 5. Výsledek je vidět ve stejné konverzaci. Po ostrém dokončení či překážce
    hlavní Adam dostane strojovou účtenku do původního vlákna. Jeho kontrolní
    tah má read-only sandbox bez sítě a nesmí opakovat vývoj ani publikování.
@@ -43,7 +46,8 @@ Zkouška bez publikování volá skutečnou Lunu a read-only ochranné kontroly;
 nevolá push/deploy ani nový kontrolní tah hlavního Adama. Karta zobrazí výsledek.
 
 V přímé terminálové/Codex relaci hlavní Adam deleguje krátké zadání pomocnému
-agentovi `gpt-6-luna` bez kopírování celé historie. Předá i zamýšlené ID
+agentovi z `resolve_release_executor()` (vrácený model i úsilí), bez
+kopírování celé historie. Předá i zmrazenou roli a zamýšlené ID
 projektu. Pomocník použije `audit_release()` bez argumentu `service`,
 porovná projekt s předáním a při rozdílu se zastaví. Potom použije registrované
 `start_terminal_release`, sleduje soukromou účtenku a výsledek vrátí původnímu
@@ -58,6 +62,29 @@ relaci. Během p+n zůstává společný main bez dalších vývojových změn.
 GitHub HTTPS push může jednorázově použít již ověřené přihlášení GitHub CLI
 podle LL-060; bez změny globální konfigurace, nového přihlášení, tokenu v argv
 nebo opakování push. Ostatní remotes zachovávají dosavadní transport.
+
+## Výměna modelu společné role
+
+- Jediným aktivním nastavením je `config/agent_roles.json`; název modelu
+  není zapsaný zvlášť v projektech ani v pokynech pro nativního pomocníka.
+- Preferovaný model má přednost. Jen pokud chybí nebo není kompatibilní
+  s požadovaným úsilím/textem, vybírá se v pořadí ze schválených kandidátů.
+  Default účtu, novější název ani katalogové `upgrade` neudělují oprávnění.
+- Každý kandidát musí mít `cost_review` a `dry_run_evidence`. Jde o doložené
+  lidské cenové posouzení, ne automatický výpočet ceny z katalogu. Současná
+  Luna zachovává Mílou zvolenou rozpočtovou roli a doložené skutečné zkoušky.
+- Nového kandidáta nejprve cenově posoudit a výslovně určit pro test. Volání
+  `probe_release_executor_candidate(model, reasoning_effort)` dostane jen
+  pevný syntetický vstup do dočasného read-only vlákna bez sítě. Nikdy nezmění
+  nastavení role, nespustí job, push ani nasazení. Vrací redigovaný důkaz.
+- Teprve po úspěchu zapsat kandidáta s oběma důkazy do centrálního nastavení,
+  podle potřeby změnit preferenci, provést kontroly/commit a schválené p+n.
+  Po tomto jediném nastavení ho používají všechny vývojové proudy.
+- Audit i soukromá účtenka zmrazí roli/model/úsilí/otisk. Změna politiky před
+  publikací nebo jiný model v odpovědi zastaví běh; uvnitř jobu se nepřepíná.
+  Staré účtenky zůstávají čitelné; nový worker bez zmrazeného modelu nezačne.
+- Výběr role neprovádí modelový tah. Chybí-li schválený kompatibilní model,
+  předání se zastaví před publikováním a vrátí bezpečné vysvětlení.
 
 ## Registrované cíle
 
@@ -123,9 +150,23 @@ nebo opakování push. Ostatní remotes zachovávají dosavadní transport.
   `logs/luna_general_live_dry_run_20261017.log`.
 - Závěrečná plná brána obecného rozšíření: 2011/2011 PASS, bez přeskočení,
   unit část 263,223 s. `logs/luna_general_full_gate_20261017.log`.
-- Ostré p+n a fyzická přejímka nejsou suchým během prokázané. První nasazení
-  této funkce provede Adam dosavadní cestou po výslovném p+n, protože starý
-  běžící Cockpit nové routy ještě nemá. Další balíčky už mohou využít Lunu.
+- Míla následně schválil implementaci společné modelové role a p+n celého
+  připraveného balíčku. První zavedení používá existující potvrzené GitHub/
+  Cockpit operace; u runtime jobu s neprázdným balíčkem není potřeba nová
+  interní route pro Pages nebo již zarovnaný main.
+- Provozní výsledek publikování je mimo Git: autoritou je soukromá účtenka
+  vykonavatele a poslední serverová deployment účtenka. Při navázání ověřit
+  `GET /api/human-adam/luna-release/status`, `GET /api/human-adam/status`
+  (pouze redigovaný deployment souhrn) a GitHub batch audit. Samotný tento
+  vývojový checkpoint neprohlašuje budoucí nasazení za ověřené.
+- Centrální modelová role: 169 integračních testů a plná brána 2024/2024
+  PASS, bez přeskočení, unit část 265,823 s. Skutečný suchý běh role 6,8 s
+  i samostatný kandidátský probe prošly bez publikování. Důkazy
+  `logs/executor_role_integration_20261017.log`,
+  `logs/executor_role_full_gate_20261017.log`,
+  `logs/executor_role_live_probe_20261017.log`,
+  `logs/executor_candidate_live_probe_20261017.log`.
+- Fyzická iPhone/Safari přejímka zůstává samostatným krokem.
 
 Implementace: `app/communication/luna_release.py`, `luna_release_worker.py`,
 nové registrované routy Cockpitu, úzké napojení chatu a návrat do session hubu.

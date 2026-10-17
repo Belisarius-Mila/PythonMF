@@ -34,6 +34,7 @@ const audit = {
   ok: true,
   ready: true,
   workstream_id: "project-cockpit",
+  executor: {role:"release_executor",model:"test-executor",reasoning_effort:"high",policy_digest:"f".repeat(64)},
   deployment_target: "cockpit",
   deployment_label: "Běžící Samantha / Cockpit",
   expected_origin_head: "a".repeat(40),

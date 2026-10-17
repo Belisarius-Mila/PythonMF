@@ -12,6 +12,29 @@ from app.capabilities.models import (
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
+        capability_id="probe_release_executor_candidate",
+        label="Probe one explicitly selected replacement executor",
+        risk=RiskLevel.EXTERNAL_SEND,
+        reads=("current model catalog", "fixed synthetic handoff only"),
+        writes=("ephemeral read-only model turn",),
+        requires_confirmation=True, confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE,
+        voice_allowed=VoicePolicy.APPROVAL_ONLY, mobile_allowed=MobilePolicy.APPROVAL_CARD,
+        audit=AuditPolicy.SAFE_SUMMARY,
+        tool="app.communication.luna_release.probe_release_executor_candidate",
+        notes="Only after explicit candidate/cost review. Never approves a role, starts a job, pushes, deploys, or receives private user context.",
+    ),
+    CapabilityRecord(
+        capability_id="resolve_release_executor",
+        label="Resolve the reviewed release-executor model role",
+        risk=RiskLevel.READ_ONLY,
+        reads=("config/agent_roles.json", "current account App Server model catalog"),
+        writes=(), requires_confirmation=False,
+        voice_allowed=VoicePolicy.ALLOWED, mobile_allowed=MobilePolicy.ALLOWED,
+        audit=AuditPolicy.SAFE_SUMMARY,
+        tool="app.communication.luna_release.resolve_release_executor",
+        notes="Only cost-reviewed and dry-run-approved candidates; catalog upgrade suggestions never authorize a replacement. No model turn or publication.",
+    ),
+    CapabilityRecord(
         capability_id="audit_luna_release",
         label="Audit exact active-project release batch and registered target for Luna",
         risk=RiskLevel.READ_ONLY,

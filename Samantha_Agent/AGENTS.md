@@ -89,7 +89,10 @@ Společné pracovní instrukce PythonMF; cesty níže jsou vůči `Samantha_Agen
 - Při výslovném p+n libovolného vývojového proudu předávej po auditu celý přesný balíček Luně podle
   `memory/technical/luna_release_orchestration.md`. Použij registrované
   `audit_release` / `start_release`; v přímé terminálové relaci použij pomocného
-  agenta `gpt-6-luna` s krátkým předáním a `start_terminal_release`, který vrací
+  agenta z centrální role `release_executor`: nejprve zavolej registrované
+  `resolve_release_executor()` a použij vrácený model i úsilí při delegaci.
+  Krátké předání musí obsahovat i zmrazenou roli/model/otisk jejího nastavení.
+  Pomocník použije `start_terminal_release`, který vrací
   účtenku volajícímu a neposílá ji do jiné konverzace. Audit musí odpovídat
   zamýšlenému projektu; potvrzení zmrazí projekt, registrovaný cíl a oba heads.
   Běžné proudy nasazují společný runtime Samanthy, registrovaný webový cíl
@@ -99,6 +102,11 @@ Společné pracovní instrukce PythonMF; cesty níže jsou vůči `Samantha_Agen
   Hlavní Adam kontroluje výslednou účtenku; Luna nepřevzatý nebo nejistý krok
   neopravuje ani znovu nedeleguje. Neznámý cíl se nesmí odhadnout.
   První zavedení nových rout proběhne dosavadní cestou po samostatném p+n.
+- Modely role se spravují pouze v `config/agent_roles.json`; nový kandidát
+  vyžaduje doložené cenové posouzení a skutečný suchý test. Doporučení
+  nástupce z katalogu samo nepovoluje přechod. Nedostupný model bez schválené
+  kompatibilní náhrady zastaví předání před publikováním; model běžící úlohy
+  se nepřepíná.
 
 ## Technické preference
 

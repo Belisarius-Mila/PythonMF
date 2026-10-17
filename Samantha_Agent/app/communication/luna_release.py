@@ -16,6 +16,7 @@ import re
 import secrets
 import subprocess
 import time
+import tempfile
 import urllib.error
 import urllib.request
 from contextlib import contextmanager
@@ -29,6 +30,7 @@ from app.codex_appserver import (
 )
 from app.communication.github_batch import GITHUB_BATCH_CONFIRMATION
 from app.communication.local_runtime import DEFAULT_SOCKET_PATH
+from app.communication import agent_roles
 from app.communication.human_adam_workstream_catalog import (
     WORKSTREAM_CATALOG_BY_ID, WORKSTREAM_ID_RE,
 )
@@ -37,7 +39,6 @@ from app.file_persistence import atomic_write_json
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_ROOT = PROJECT_ROOT / "data/private/communication/luna_release"
-MODEL = "gpt-6-luna"
 CONFIRMATION = "POTVRZUJI PREDANI P+N LUNE"
 BASE_URL = "http://127.0.0.1:8770"
 ACTIVE_STATES = frozenset({"queued", "running", "returning"})
@@ -54,7 +55,7 @@ PAGES_PROJECT_PATHS = {
     "project-to-be-to-have": "to-be-to-have/",
 }
 INSTRUCTIONS = (
-    "Jsi Luna, vykonavatel přesně vymezeného balíčku p+n. Dostáváš pouze "
+    "Jsi vykonavatel přesně vymezeného balíčku p+n. Dostáváš pouze "
     "technické předání, ne celou konverzaci. Nepoužívej žádné nástroje, shell, "
     "soubory ani síť. Nic neopravuj. Git, testy a nasazení provádí registrovaný "
     "serverový postup. Potvrď jen předaný cíl; při rozporu vrať stop. "
@@ -71,7 +72,7 @@ def release_target(workstream_id: str) -> str:
     """Use the portal's existing deployment contract, never a client target."""
     record = WORKSTREAM_CATALOG_BY_ID.get(workstream_id)
     if record is None or record.mode == "archived":
-        raise LunaReleaseError("Proud není dostupný pro vývojové předání Luně.")
+        raise LunaReleaseError("Proud není dostupný pro vývojové předání vykonavateli.")
     # Empty production target is the existing shared Samantha/Cockpit runtime.
     # It never authorizes a separate client, Camino receiver, or system release.
     declared = record.capabilities.production_deployment_target
@@ -98,6 +99,8 @@ def _validated(job: Any) -> dict[str, Any]:
             or job.get("return_channel") not in {"cockpit", "caller"}
             or job["commit_count"] < 0):
         raise LunaReleaseError("Předání Luně nemá platný rozsah.")
+    if job.get("executor") is not None:
+        agent_roles.validate_selection(job["executor"])
     return {"deployment_target": "cockpit", **job}
 
 
@@ -112,6 +115,7 @@ def public_job(job: dict[str, Any] | None) -> dict[str, Any] | None:
     gate = checked.get("gate") or {}
     verification = checked.get("verification") or {}
     return {**{key: checked.get(key) for key in keys},
+            "executor": agent_roles.validate_selection(checked["executor"]) if checked.get("executor") else None,
             "active": checked["state"] in ACTIVE_STATES,
             "target_short": checked["target_head"][:12],
             "gate": {key: gate[key] for key in ("passed", "mode", "test_count", "duration_seconds") if key in gate},
@@ -143,13 +147,13 @@ class LunaReleaseStore:
             try:
                 job_id = json.loads(pointer.read_text())["job_id"]
             except (OSError, ValueError, KeyError, TypeError) as exc:
-                raise LunaReleaseError("Stav předání Luně nelze ověřit.") from exc
+                raise LunaReleaseError("Stav předání vykonavateli nelze ověřit.") from exc
         if not JOB_ID.fullmatch(str(job_id)):
-            raise LunaReleaseError("Neplatná identita předání Luně.")
+            raise LunaReleaseError("Neplatná identita předání vykonavateli.")
         try:
             return _validated(json.loads((self.root / f"{job_id}.json").read_text()))
         except (OSError, ValueError) as exc:
-            raise LunaReleaseError("Účtenku předání Luně nelze načíst.") from exc
+            raise LunaReleaseError("Účtenku předání vykonavateli nelze načíst.") from exc
 
     def write(self, job: dict[str, Any]) -> dict[str, Any]:
         job = _validated({**job, "updated_at": utc_now()})
@@ -194,32 +198,64 @@ def new_luna_client() -> CodexAppServerClient:
 
 def accept_handoff(
     handoff: dict[str, Any], *, client_factory: Callable[..., Any] = new_luna_client,
-    cwd: Path = PROJECT_ROOT,
+    cwd: Path = PROJECT_ROOT, executor: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """One bounded, read-only Luna turn; no main-thread/model settings change."""
+    """One bounded role-approved turn; no main-thread/model settings change."""
     with client_factory() as client:
         models = client.list_models(include_hidden=True)
-        if not any(item.get("model") == MODEL for item in models):
-            raise LunaReleaseError("Luna není v aktuálním katalogu dostupná.")
-        thread_id = client.start_thread(cwd=cwd, ephemeral=True,
-                                        developer_instructions=INSTRUCTIONS,
-                                        sandbox="read-only", approval_policy="never", model=MODEL)
-        receipt = client.send_text(
-            thread_id=thread_id, text=json.dumps(handoff, ensure_ascii=False),
-            model=MODEL, effort="high", sandbox_policy={"type": "readOnly", "networkAccess": False},
-            output_schema={"type": "object", "properties": {
-                "action": {"type": "string", "enum": ["accept", "stop"]},
-                "target_head": {"type": "string"}, "message": {"type": "string"}},
-                "required": ["action", "target_head", "message"], "additionalProperties": False},
-        )
+        selected = agent_roles.assert_current(executor) if executor is not None else agent_roles.resolve_role(models)
+        return _accept_selected(client, models, handoff, cwd, selected)
+
+
+def _accept_selected(client: Any, models: list[dict[str, Any]], handoff: dict[str, Any],
+                     cwd: Path, selected: dict[str, Any]) -> dict[str, Any]:
+    if not any(agent_roles.compatible(item, selected) for item in models):
+        raise LunaReleaseError("Zmrazený model vykonavatele není dostupný s požadovaným úsilím.")
+    thread_id = client.start_thread(cwd=cwd, ephemeral=True,
+                                    developer_instructions=INSTRUCTIONS,
+                                    sandbox="read-only", approval_policy="never", model=selected["model"])
+    receipt = client.send_text(
+        thread_id=thread_id, text=json.dumps(handoff, ensure_ascii=False),
+        model=selected["model"], effort=selected["reasoning_effort"], sandbox_policy={"type": "readOnly", "networkAccess": False},
+        output_schema={"type": "object", "properties": {
+            "action": {"type": "string", "enum": ["accept", "stop"]},
+            "target_head": {"type": "string"}, "message": {"type": "string"}},
+            "required": ["action", "target_head", "message"], "additionalProperties": False},
+    )
     try:
         result = json.loads(receipt.answer)
     except (ValueError, TypeError) as exc:
-        raise LunaReleaseError("Luna nevrátila ověřitelné předání.") from exc
+        raise LunaReleaseError("Vykonavatel nevrátil ověřitelné předání.") from exc
     if (not isinstance(result, dict) or result.get("action") != "accept"
             or result.get("target_head") != handoff["target_head"]):
-        raise LunaReleaseError("Luna balíček nepřevzala; řízení vrací Adamovi.")
-    return {"model": MODEL, "accepted": True, "target_head": result["target_head"]}
+        raise LunaReleaseError("Vykonavatel balíček nepřevzal; řízení vrací Adamovi.")
+    return {**agent_roles.validate_selection(selected), "accepted": True, "target_head": result["target_head"]}
+
+
+def probe_release_executor_candidate(model: str, reasoning_effort: str, *,
+                                     client_factory: Callable[..., Any] = new_luna_client) -> dict[str, Any]:
+    """Synthetic read-only probe for a price-reviewed candidate, never a release.
+
+    The zero target/policy cannot satisfy any real job's frozen proof. This
+    entrypoint cannot approve a model or change the production role file.
+    """
+    selected = agent_roles.validate_selection({"role": agent_roles.ROLE, "model": model,
+        "reasoning_effort": reasoning_effort, "policy_digest": "0" * 64})
+    handoff = {"workstream_id": "candidate-probe", "deployment_target": "none",
+        "target_head": "0" * 40, "origin_head": "0" * 40, "commit_count": 0,
+        "dry_run": True, "protected_services": []}
+    with tempfile.TemporaryDirectory(prefix="release-candidate-probe-") as directory:
+        with client_factory() as client:
+            proof = _accept_selected(client, client.list_models(include_hidden=True),
+                                     handoff, Path(directory), selected)
+    return {"ok": True, "probe_only": True, "published": False, "model": proof["model"],
+            "reasoning_effort": proof["reasoning_effort"], "verified_at": utc_now()}
+
+
+def resolve_release_executor() -> dict[str, Any]:
+    """Read-only catalog discovery and one centrally reviewed role binding."""
+    with new_luna_client() as client:
+        return agent_roles.resolve_role(client.list_models(include_hidden=True))
 
 
 def audit_release(service: Any = None, *, require_parent: bool = True) -> dict[str, Any]:
@@ -240,6 +276,7 @@ def audit_release(service: Any = None, *, require_parent: bool = True) -> dict[s
             or deployment.get("workstream_id") != workstream_id
             or batch.get("local_head") != deployment.get("main_head")):
         raise LunaReleaseError("Balíček nebo cílové nasazení není připravené.")
+    executor = agent_roles.validate_selection(resolve_release_executor())
     return {"ok": True, "ready": True, "workstream_id": workstream_id,
             "deployment_target": target,
             "deployment_label": "Web GitHub Pages" if target == "github_pages" else "Běžící Samantha / Cockpit",
@@ -247,8 +284,9 @@ def audit_release(service: Any = None, *, require_parent: bool = True) -> dict[s
             "expected_local_head": batch["local_head"],
             "commit_count": count,
             "expected_code_stamp": deployment["expected_code_stamp"],
+            "executor": executor,
             "confirmation_text": CONFIRMATION,
-            "message": "Celý přesný balíček je připravený k předání Luně."}
+            "message": "Celý přesný balíček je připravený k předání vykonavateli."}
 
 
 def start_release(
@@ -257,7 +295,7 @@ def start_release(
     return_channel: str = "cockpit",
 ) -> dict[str, Any]:
     if return_channel not in {"cockpit", "caller"} or payload.get("confirmation") != CONFIRMATION:
-        raise LunaReleaseError("Předání p+n Luně vyžaduje výslovné potvrzení.")
+        raise LunaReleaseError("Předání p+n vykonavateli vyžaduje výslovné potvrzení.")
     request_id = str(payload.get("client_message_id") or "")
     if not CLIENT_ID.fullmatch(request_id) or type(payload.get("dry_run")) is not bool:
         raise LunaReleaseError("Předání nemá platnou identitu nebo režim.")
@@ -271,6 +309,7 @@ def start_release(
                     or existing["origin_head"] != payload.get("expected_origin_head")
                     or existing["workstream_id"] != payload.get("expected_workstream_id")
                     or existing["deployment_target"] != payload.get("expected_deployment_target")
+                    or existing.get("executor") != agent_roles.validate_selection(payload.get("expected_executor"))
                     or existing["return_channel"] != return_channel
                     or existing["dry_run"] != payload["dry_run"]):
                 raise LunaReleaseError("Stejné předání už má jiný rozsah.")
@@ -284,12 +323,15 @@ def start_release(
                 or audit["workstream_id"] != payload.get("expected_workstream_id")
                 or audit["deployment_target"] != payload.get("expected_deployment_target")):
             raise LunaReleaseError("Balíček se od náhledu změnil. Proveď nový náhled.")
+        if audit["executor"] != agent_roles.validate_selection(payload.get("expected_executor")):
+            raise LunaReleaseError("Model vykonavatele se od náhledu změnil. Proveď nové předání.")
         session = service.active_service.hub.snapshot() if return_channel == "cockpit" else {}
         timestamp = utc_now()
         job = store.write({
             "schema": 1, "job_id": job_id, "state": "queued", "phase": "handoff",
             "workstream_id": audit["workstream_id"], "deployment_target": audit["deployment_target"],
             "target_head": audit["expected_local_head"],
+            "executor": audit["executor"],
             "origin_head": audit["expected_origin_head"], "commit_count": audit["commit_count"],
             "expected_code_stamp": audit["expected_code_stamp"], "token": secrets.token_hex(32),
             "client_message_id": request_id, "user_text": str(payload.get("user_text") or "p+n")[:300],
@@ -298,7 +340,7 @@ def start_release(
             "push_state": "not_started", "deployment_state": "not_started",
             "returned_to_adam": False, "return_dispatched": False,
             "return_channel": return_channel,
-            "message": "Luna přebírá balíček.", "created_at": timestamp,
+            "message": "Vykonavatel přebírá balíček.", "created_at": timestamp,
             "queued_epoch": time.time(),
         })
         atomic_write_json(store.root / "current.json", {"job_id": job_id})
@@ -333,7 +375,7 @@ def authorize_job_call(store: LunaReleaseStore, path: str, token: str) -> str:
             or allowed.get(job["phase"]) != path
             or (job["phase"] in {"deploy_requested", "verification"} and job["deployment_target"] != "cockpit")
             or (job["phase"] == "publish_requested" and job["deployment_target"] != "github_pages")):
-        raise LunaReleaseError("Luna právě zpracovává přesný balíček. Další změna počká na dokončení.")
+        raise LunaReleaseError("Vykonavatel právě zpracovává přesný balíček. Další změna počká na dokončení.")
     return str(job["target_head"])
 
 
@@ -430,7 +472,7 @@ def return_release(
              "gate": job.get("gate", {})}
     prompt = (
         "[DEVELOPMENT_CONTROL]\nwritable=false\n[/DEVELOPMENT_CONTROL]\n"
-        "Luna předává výsledek uživatelem schváleného p+n. Neprováděj další akce, "
+        "Vykonavatel předává výsledek uživatelem schváleného p+n. Neprováděj další akce, "
         "nepoužívej nástroje ani síť. Zkontroluj pouze přiloženou strojovou účtenku "
         "a stručně česky odpověz Mílovi jako Adam. Vývoj znovu netestuj a p+n "
         "neopakuj. Odděl potvrzený push a nasazení od nepotvrzených kroků. "
@@ -491,14 +533,18 @@ def run_release(
         assert job is not None
         if job["state"] != "queued":
             return {"ok": False, "job": public_job(job)}  # Never replay a write.
-        job = store.update(job_id, state="running", message="Luna ověřuje předání.")
+        job = store.update(job_id, state="running", message="Vykonavatel ověřuje předání.")
         try:
             handoff = {key: job[key] for key in ("workstream_id", "deployment_target", "target_head", "origin_head", "commit_count", "dry_run")}
             handoff["protected_services"] = ["Camino", "autosave"]
+            if not job.get("executor"):
+                raise LunaReleaseError("Staré předání nemá zmrazený model. Vyžaduje nové ověřené předání.")
+            selected = agent_roles.assert_current(job["executor"])
             context_root = store.root / "context"
             context_root.mkdir(mode=0o700, exist_ok=True)
-            proof = accept(handoff, cwd=context_root)
-            if (proof.get("accepted") is not True or proof.get("model") != MODEL
+            proof = accept(handoff, cwd=context_root, executor=selected)
+            if (proof.get("accepted") is not True
+                    or agent_roles.validate_selection(proof) != selected
                     or proof.get("target_head") != job["target_head"]):
                 raise LunaReleaseError("Převzetí Lunou nemá doklad přesného cíle.")
             job = store.update(job_id, luna_proof=proof)
@@ -507,16 +553,17 @@ def run_release(
                 if protect() != before:
                     raise LunaReleaseError("Ochranný stav se během zkoušky změnil.")
                 job = store.update(job_id, state="dry_run_completed", phase="done",
-                                   message="Luna převzala celý balíček. Zkouška nic nepublikovala.")
+                                   message="Role převzala celý balíček. Zkouška nic nepublikovala.")
                 return {"ok": True, "job": public_job(job)}
             token = job["token"]
+            agent_roles.assert_current(job["executor"])
             batch = call("/api/human-adam/github-batch-audit")
             if batch.get("local_head") != job["target_head"] or batch.get("origin_head") != job["origin_head"]:
                 raise LunaReleaseError("Balíček se po předání změnil.")
             _check_deployment_audit(call("/api/human-adam/deploy-audit"), job)
             if job["commit_count"]:
                 job = store.update(job_id, phase="push_requested", push_state="requested",
-                                   message="Luna odesílá ověřený balíček.")
+                                   message="Vykonavatel odesílá ověřený balíček.")
                 pushed = call("/api/human-adam/github-batch", {
                     "expected_origin_head": job["origin_head"], "expected_local_head": job["target_head"],
                     "confirmation": GITHUB_BATCH_CONFIRMATION}, token=token)
@@ -525,7 +572,7 @@ def run_release(
                 job = store.update(job_id, pushed=True, push_state="confirmed", gate=pushed.get("gate", {}))
             else:
                 job = store.update(job_id, phase="validation", push_state="already_aligned",
-                                   message="Luna ověřuje již odeslaný main plnou bránou.")
+                                   message="Vykonavatel ověřuje již odeslaný main plnou bránou.")
                 validated = call("/api/human-adam/luna-release/execute", {"job_id": job_id}, token=token)
                 if not validated.get("ok"):
                     raise LunaReleaseError("Plná publikační brána neprošla.")
@@ -539,7 +586,7 @@ def run_release(
             _check_deployment_audit(call("/api/human-adam/deploy-audit"), job)
             if job["deployment_target"] == "github_pages":
                 job = store.update(job_id, phase="publish_requested", deployment_state="requested",
-                                   message="Luna publikuje registrovaný web GitHub Pages.")
+                                   message="Vykonavatel publikuje registrovaný web GitHub Pages.")
                 published = call("/api/human-adam/luna-release/execute", {"job_id": job_id}, token=token)
                 if (published.get("ok") is not True or published.get("main_head") != job["target_head"]
                         or published.get("status") not in {"deployed", "already_deployed"}
@@ -554,7 +601,7 @@ def run_release(
             else:
                 health = call("/api/server/health")["server"]
                 job = store.update(job_id, phase="deploy_requested", deployment_state="requested",
-                                   message="Luna nasazuje balíček do Cockpitu.")
+                                   message="Vykonavatel nasazuje balíček do Cockpitu.")
                 try:
                     result = call("/api/human-adam/deploy", {
                         "confirmation": "POTVRZUJI NASAZENI AKTUALNIHO MAIN DO COCKPITU"}, token=token)
@@ -572,7 +619,7 @@ def run_release(
                     pause(1)
                 else:
                     raise LunaReleaseError("Nový proces s předaným kódem nebyl potvrzený.")
-                job = store.update(job_id, phase="verification", message="Luna kontroluje výsledek nasazení.")
+                job = store.update(job_id, phase="verification", message="Vykonavatel kontroluje výsledek nasazení.")
                 for _ in range(30):
                     verified = call("/api/human-adam/deploy-verification", {}, token=token)
                     if verified.get("ok"):
@@ -595,8 +642,8 @@ def run_release(
                 "deployment_target": job["deployment_target"], "protected_services_unchanged": True})
         except Exception as exc:
             # No raw command, exception text, tokens or private output is exposed.
-            failure_message = (str(exc) if type(exc) is LunaReleaseError else
-                               "Luna narazila na překážku. Adam musí ověřit poslední krok.")
+            failure_message = (str(exc) if type(exc) in {LunaReleaseError, agent_roles.AgentRoleError} else
+                               "Vykonavatel narazil na překážku. Adam musí ověřit poslední krok.")
             job = store.update(job_id, failure_phase=job["phase"],
                                failure_message=failure_message,
                                push_state="uncertain" if job.get("push_state") == "requested" else job.get("push_state"),
@@ -609,7 +656,7 @@ def run_release(
             job = store.update(job_id, state="completed" if job["deployed"] else "attention", phase="done",
                                message="Účtenka je připravená pro původního Adama ve stejné relaci.")
             return {"ok": job["state"] == "completed", "job": public_job(job)}
-        job = store.update(job_id, state="returning", phase="return", message="Luna předává výsledek Adamovi.")
+        job = store.update(job_id, state="returning", phase="return", message="Vykonavatel předává výsledek Adamovi.")
         try:
             returned = call("/api/human-adam/luna-release/return", {"job_id": job_id}, token=job["token"])
             if not returned.get("ok"):

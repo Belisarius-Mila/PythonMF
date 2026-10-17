@@ -14,6 +14,10 @@ from app.communication import luna_release as release
 TARGET = "b" * 40
 ORIGIN = "a" * 40
 STAMP = "c" * 16
+ROLE_POLICY = release.agent_roles.load_role()
+ROLE_CANDIDATE = next(item for item in ROLE_POLICY["approved_models"] if item["model"] == ROLE_POLICY["preferred_model"])
+ROLE_CATALOG = [{"model": ROLE_CANDIDATE["model"], "supportedReasoningEfforts": [{"reasoningEffort": ROLE_CANDIDATE["reasoning_effort"]}]}]
+EXECUTOR = release.agent_roles.validate_selection(release.agent_roles.resolve_role(ROLE_CATALOG))
 
 
 class FakeService:
@@ -43,12 +47,15 @@ class LunaReleaseTests(unittest.TestCase):
         self.addCleanup(self.directory.cleanup)
         self.store = release.LunaReleaseStore(Path(self.directory.name) / "private")
         self.service = FakeService()
+        resolver = patch.object(release, "resolve_release_executor", return_value=EXECUTOR)
+        resolver.start()
+        self.addCleanup(resolver.stop)
         self.launcher = Mock()
 
     def create(self, **changes):
         payload = {"confirmation": release.CONFIRMATION, "client_message_id": "release-request-123",
                    "expected_origin_head": ORIGIN, "expected_local_head": TARGET,
-                   "dry_run": False, "user_text": "vše p+n",
+                   "dry_run": False, "user_text": "vše p+n", "expected_executor": EXECUTOR,
                    "expected_workstream_id": self.service.active_workstream_id,
                    "expected_deployment_target": release.release_target(self.service.active_workstream_id), **changes}
         result = release.start_release(payload, service=self.service, store=self.store,
@@ -102,7 +109,7 @@ class LunaReleaseTests(unittest.TestCase):
         return call, calls
 
     def run_job(self, job, **kwargs):
-        accept = Mock(return_value={"accepted": True, "model": release.MODEL, "target_head": TARGET})
+        accept = Mock(return_value={"accepted": True, **EXECUTOR, "target_head": TARGET})
         result = release.run_release(job["job_id"], store=self.store, accept=accept,
                                      protect=lambda: {"camino_pid": 99, "autosave_pids": [98]},
                                      pause=lambda _: None, **kwargs)
@@ -120,6 +127,47 @@ class LunaReleaseTests(unittest.TestCase):
         self.assertEqual((self.store.root / f"{job['job_id']}.json").stat().st_mode & 0o777, 0o600)
         self.assertNotIn(job["token"], json.dumps(release.public_job(job)))
         self.assertNotIn("parent_thread_id", release.public_job(job))
+        self.assertEqual(release.public_job(job)["executor"], EXECUTOR)
+        job["executor"]["private_extra"] = "must-not-leak"
+        self.assertNotIn("must-not-leak", json.dumps(release.public_job(job)))
+
+    def test_client_cannot_replace_the_audited_executor(self):
+        with self.assertRaises(release.LunaReleaseError):
+            self.create(expected_executor={**EXECUTOR, "model":"different-executor"})
+        self.launcher.assert_not_called()
+
+    def test_policy_change_or_wrong_executor_proof_cannot_publish(self):
+        job = self.create()
+        call, calls = self.fake_api()
+        accept = Mock()
+        with patch.object(release.agent_roles, "assert_current",
+                          side_effect=release.agent_roles.AgentRoleError("Nastavení vykonavatele se změnilo.")):
+            result = release.run_release(job["job_id"],store=self.store,call=call,accept=accept)
+        self.assertEqual(result["job"]["state"], "attention")
+        self.assertIn("změnilo", result["job"]["failure_message"])
+        accept.assert_not_called()
+        self.assertNotIn("/api/human-adam/github-batch", calls)
+        self.assertNotIn("/api/human-adam/deploy", calls)
+
+    def test_wrong_executor_answer_stops_before_protected_or_publication_operations(self):
+        job = self.create(dry_run=True)
+        call = Mock()
+        protect = Mock()
+        result = release.run_release(job["job_id"],store=self.store,call=call,protect=protect,
+            accept=Mock(return_value={**EXECUTOR,"model":"different-executor","target_head":TARGET,"accepted":True}))
+        self.assertEqual(result["job"]["state"], "attention")
+        call.assert_not_called()
+        protect.assert_not_called()
+
+    def test_legacy_receipt_is_readable_but_new_worker_cannot_guess_its_model(self):
+        job = self.create(dry_run=True)
+        del job["executor"]
+        self.store.write(job)
+        accept = Mock()
+        result = release.run_release(job["job_id"],store=self.store,accept=accept)
+        self.assertEqual(result["job"]["state"], "attention")
+        self.assertIsNone(result["job"]["executor"])
+        accept.assert_not_called()
 
     def test_missing_confirmation_changed_head_and_invalid_mode_do_not_launch(self):
         for changes in ({"confirmation": "ano"}, {"expected_local_head": "d" * 40}, {"dry_run": "false"}):
@@ -275,7 +323,7 @@ class LunaReleaseTests(unittest.TestCase):
     def test_terminal_agent_returns_to_its_caller_without_inserting_a_different_chat(self):
         call, calls = self.fake_api()
         started = release.start_terminal_release({
-            "confirmation": release.CONFIRMATION, "client_message_id": "native-release-123",
+            "confirmation": release.CONFIRMATION, "client_message_id": "native-release-123", "expected_executor": EXECUTOR,
             "expected_origin_head": ORIGIN, "expected_local_head": TARGET, "dry_run": False,
             "expected_workstream_id": self.service.active_workstream_id,
             "expected_deployment_target": release.release_target(self.service.active_workstream_id),
@@ -301,7 +349,7 @@ class LunaReleaseTests(unittest.TestCase):
         self.assertEqual(audit["deployment_target"], "github_pages")
         result = release.start_terminal_release({**audit, "confirmation": release.CONFIRMATION,
             "expected_workstream_id": "project-mmtx", "expected_deployment_target": "github_pages",
-            "client_message_id": "native-pages-release-123", "dry_run": False},
+            "client_message_id": "native-pages-release-123", "expected_executor": EXECUTOR, "dry_run": False},
             store=self.store, call=call, launcher=self.launcher)
         job = self.store.load(result["job"]["job_id"])
         result = self.run_job(job, call=call)
@@ -473,17 +521,33 @@ class LunaReleaseTests(unittest.TestCase):
         client = Mock()
         client.__enter__ = Mock(return_value=client)
         client.__exit__ = Mock(return_value=False)
-        client.list_models.return_value = [{"model": release.MODEL}]
+        client.list_models.return_value = ROLE_CATALOG
         client.start_thread.return_value = "luna-thread"
         client.send_text.return_value = SimpleNamespace(answer=json.dumps({"action": "accept", "target_head": TARGET, "message": "Přebírám."}))
         result = release.accept_handoff({"target_head": TARGET, "commit_count": 7}, client_factory=lambda: client)
         self.assertTrue(result["accepted"])
-        self.assertEqual(client.start_thread.call_args.kwargs["model"], release.MODEL)
+        self.assertEqual(client.start_thread.call_args.kwargs["model"], EXECUTOR["model"])
         self.assertTrue(client.start_thread.call_args.kwargs["ephemeral"])
         self.assertEqual(client.send_text.call_args.kwargs["sandbox_policy"], {"type": "readOnly", "networkAccess": False})
         client.send_text.return_value.answer = json.dumps({"action": "accept", "target_head": ORIGIN})
         with self.assertRaises(release.LunaReleaseError):
             release.accept_handoff({"target_head": TARGET}, client_factory=lambda: client)
+
+    def test_unapproved_candidate_probe_cannot_approve_or_publish_a_role(self):
+        before = release.agent_roles.CONFIG_PATH.read_bytes()
+        client = Mock()
+        client.__enter__ = Mock(return_value=client)
+        client.__exit__ = Mock(return_value=False)
+        client.list_models.return_value = [{"model":"candidate-future", "supportedReasoningEfforts":[{"reasoningEffort":"medium"}]}]
+        client.send_text.return_value = SimpleNamespace(answer=json.dumps({"action":"accept","target_head":"0"*40,"message":"OK"}))
+        proof = release.probe_release_executor_candidate("candidate-future","medium",client_factory=lambda:client)
+        self.assertTrue(proof["probe_only"])
+        self.assertFalse(proof["published"])
+        self.assertEqual(before, release.agent_roles.CONFIG_PATH.read_bytes())
+        self.assertEqual(client.send_text.call_args.kwargs["sandbox_policy"], {"type":"readOnly","networkAccess":False})
+        prompt = json.loads(client.send_text.call_args.kwargs["text"])
+        self.assertEqual(prompt["target_head"], "0"*40)
+        self.assertEqual(prompt["deployment_target"], "none")
 
 
 if __name__ == "__main__":

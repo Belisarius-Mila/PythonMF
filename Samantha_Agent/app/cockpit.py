@@ -9940,7 +9940,7 @@ class CockpitServer:
                                     or luna_release.release_target(owned_job["workstream_id"]) != owned_job["deployment_target"]):
                                 raise luna_release.LunaReleaseError("Původní pracovní proud nebo cíl se změnil.")
                     except (AppServerError, OSError, ValueError, TypeError):
-                        self.respond_json({"ok": False, "message": "Luna zpracovává přesný balíček; další změna počká na ověření."},
+                        self.respond_json({"ok": False, "message": "Vykonavatel zpracovává přesný balíček; další změna počká na ověření."},
                                           status=HTTPStatus.CONFLICT)
                         return
                 if parsed.path == "/api/camino/film/source":

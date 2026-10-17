@@ -9,6 +9,14 @@ TOTO JE AKTUÁLNÍ ROZHODOVACÍ ČÁST DOKUMENTU.
 Architektonický průběh a původní audit zůstávají níže jako historie.
 Čísla, provozní stavy a priority historických oddílů nejsou dnešním stavem.
 
+VÝVOJOVÝ STAV — 2026-10-17 16:53 CEST
+Centrální role vykonavatele p+n oddělená od modelu: jedno nastavení, cenově
+posouzení a otestovaní kandidáti, neměnný model/úsilí/otisk v účtence.
+169 integračních testů a skutečné syntetické zkoušky PASS; plná brána role 2024/2024 PASS (265,823 s testů).
+Míla autorizoval p+n celého připraveného balíčku. Provozní výsledek publikace
+se ověřuje runtime účtenkou, serverovým deployment souhrnem a GitHub auditem;
+tento zápis je vývojový checkpoint před publikací. Fyzická přejímka samostatně.
+
 VÝVOJOVÝ STAV — 2026-10-17 16:37 CEST
 Předání p+n přes Lunu rozšířené lokálně na všech 33 vývojových proudů portálu
 včetně přímé relace. Potvrzení váže projekt, cíl i heads; běžný runtime a

@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "roles": {
+    "release_executor": {
+      "label": "Vykonavatel p+n",
+      "preferred_model": "gpt-6-luna",
+      "approved_models": [
+        {
+          "model": "gpt-6-luna",
+          "reasoning_effort": "high",
+          "cost_review": "Mila 2026-10-17: approved current budget executor; no automatic upgrade",
+          "dry_run_evidence": "logs/luna_general_live_dry_run_20261017.log"
+        }
+      ]
+    }
+  }
+}

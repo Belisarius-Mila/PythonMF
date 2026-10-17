@@ -1,6 +1,17 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-17 16:53 CEST: role `release_executor` je lokálně oddělená od konkrétního modelu.
+  Jediné nastavení `config/agent_roles.json` platí pro všechny vývojové proudy
+  i nativního pomocníka. Schválený model/úsilí a otisk politiky jsou v účtence;
+  katalogové doporučení nepovoluje migraci. Kandidát vyžaduje cenové posouzení
+  a samostatnou syntetickou zkoušku. 169 integračních testů PASS, skutečný
+  suchý běh role i izolovaná zkouška kandidáta PASS; plná brána role 2024/2024 PASS (265,823 s testů).
+  Míla výslovně autorizoval následné p+n celého připraveného balíčku.
+  Provozní výsledek této publikace ověřit podle aktuální účtenky vykonavatele,
+  serverového deployment souhrnu a shody main/GitHub; tento záznam je vývojový
+  checkpoint před publikací. Fyzická přejímka zůstává samostatně.
+
 - 2026-10-17 16:37 CEST: předání celého p+n balíčku Luně je lokálně rozšířené na všech
   33 kanonických vývojových proudů portálu i přímou relaci. Potvrzení váže
   projekt, registrovaný cíl a oba heads; výsledek míří původnímu Adamovi.
@@ -116,7 +127,7 @@ Pripomenout pri startu: ano
 Co se resilo:
 Body 1–3: pravdivé provozní stavy, Servis podle účelu a aktuálnost doporučení auditů; pushnuté a funkčně nasazené.
 Navazující zjednodušení: panel Vývojový runner lokálně odstraněný; push/nasazení čekají.
-Orchestrace p+n přes Lunu lokálně rozšířená na všechny vývojové proudy; první zavedení a ostrý průchod čekají.
+Orchestrace p+n rozšířená na všechny proudy a centrální modelovou roli; Míla autorizoval celý publikační balíček, aktuální výsledek dokládá runtime účtenka.
 
 Co je hotove:
 - U01–U06 implementované a funkčně nasazené; důkazy jednotlivých kroků a souhrnná roadmapa v2.8.
@@ -1620,3 +1631,46 @@ Technický důkaz:
 - Živý Cockpit je PID 1710 pod stávajícím launchd supervisorem (start 16:22:39);
   poslední ověřená deployment účtenka stále patří staršímu e3c7075ef4ad.
   Toto rozšíření nebylo samostatně nasazeno ani serverově ověřeno.
+
+### 2026-10-17 16:53 CEST — Společná modelová role vykonavatele a schválené p+n
+
+Hotovo:
+- Nové i existující vývojové proudy používají jednu modelovou roli; změna
+  modelu nevyžaduje úpravy jednotlivých proudů ani pevný model nativního pomocníka.
+- Upřednostňuje se centrální preference; případná náhrada musí být výslovně
+  schválená, cenově posouzená, doložená suchou zkouškou a kompatibilní s katalogem.
+- Syntetická zkouška kandidáta nepublikuje, nezmění roli a nepřebírá skutečný
+  balíček. Účtenka běhu zmrazí model, úsilí a otisk nastavení; změna před
+  publikováním se zastaví. Hlavní model konverzace zůstává zachovaný.
+
+Rozhodnutí:
+- Míla schválil implementaci této vrstvy a poté výslovně všechny připravené p+n.
+- Současná volba zachovává již schválenou rozpočtovou Lunu. Žádný nový dražší
+  model se automaticky nevybírá. Katalog není zdrojem automaticky ověřené ceny.
+- Pro první runtime balíček s čekajícími commity lze použít dosavadní registrované
+  GitHub/deploy/verification operace. Publikační cesta zůstává oddělená od
+  vydání klienta nebo receiveru Camino; autosave se nevypíná.
+
+Další krok:
+- Dokončit schválené p+n a ověřit aktuální soukromou účtenku vykonavatele,
+  serverovou deployment účtenku, ochrany Camino/autosave a shodu GitHub/main.
+  Provozní výsledek je registrovaný runtime důkaz mimo Git; tento zápis jej
+  předem neprohlašuje za úspěšný.
+
+Navrhované další kroky:
+- Fyzicky vyzkoušet portál a editor podle dřívější dohody.
+
+Technický důkaz:
+- 169 integračních testů PASS: schválená náhrada, ignorované katalogové upgrade,
+  chybějící/cenově neposouzený model, nepodporované úsilí, zmrazení politiky,
+  klientská změna modelu, syntetický kandidát a původní publikační ochrany.
+- Skutečný suchý běh nové role: gpt-6-luna/high, dry_run_completed za 6,8 s,
+  skutečné read-only ochrany, bez publikování.
+- Skutečný samostatný kandidátský probe téže schválené Luny: probe_only=true,
+  published=false. Důkazy `logs/executor_role_live_probe_20261017.log`,
+  `logs/executor_candidate_live_probe_20261017.log` a integrační log.
+- plná brána role 2024/2024 PASS (265,823 s testů). Log `logs/executor_role_full_gate_20261017.log`.
+- Oficiální model/list dokumentace ověřená: https://learn.chatgpt.com/docs/app-server#list-models-modellist
+- Provozní důkaz p+n: read-only `GET /api/human-adam/luna-release/status`
+  a deployment souhrn `GET /api/human-adam/status`; nečíst celé soukromé vlákno.
+  Stav origin/main ověřit registrovaným GitHub batch auditem.

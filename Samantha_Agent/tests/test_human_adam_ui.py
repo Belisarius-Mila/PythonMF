@@ -166,7 +166,7 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn('verification.state !== "deployed"', HUMAN_ADAM_HTML)
 
     def test_luna_release_ui_uses_explicit_audit_confirmation_and_durable_status(self) -> None:
-        self.assertIn('id="lunaReleaseStartBtn" type="button">Předat p+n Luně', HUMAN_ADAM_HTML)
+        self.assertIn('id="lunaReleaseStartBtn" type="button">Předat p+n vykonavateli', HUMAN_ADAM_HTML)
         self.assertIn('id="lunaReleaseDryRunBtn" type="button">Zkouška bez publikování', HUMAN_ADAM_HTML)
         self.assertIn('api("/api/human-adam/luna-release/audit", {cache:"no-store"})', HUMAN_ADAM_HTML)
         self.assertIn('api("/api/human-adam/luna-release/start"', HUMAN_ADAM_HTML)

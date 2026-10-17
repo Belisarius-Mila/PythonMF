@@ -29,6 +29,18 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-070 — Doporučený nástupce modelu není schválená náhrada
+
+- Problém: Pevné jméno modelu zastaví delegaci po jeho stažení; automatický
+  přechod na default nebo doporučené upgrade může změnit cenu i kompatibilitu.
+- Typ: opakující se
+- Řešení nalezeno: 17102026
+- Řešení: Jedna centrální role s cenově posouzenými a skutečně otestovanými
+  kandidáty, živý katalog ověřující model/úsilí a neměnný otisk volby v jobu.
+  Kandidátský probe používá pouze syntetický vstup a nic neschvaluje ani
+  nepublikuje. Bez schválené kompatibilní náhrady se zastaví před push.
+  Ověřeno integračními testy a skutečnými read-only zkouškami nové role.
+
 ### LL-069 — Obecné p+n musí zmrazit projekt i registrovaný cíl
 
 - Problém: Stejný Git head může patřit předání různých projektů, ale jejich
