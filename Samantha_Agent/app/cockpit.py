@@ -178,6 +178,7 @@ from app.family_calendar import (
     load_family_people,
     save_family_person,
 )
+from app.family_calendar_delivery_readiness import inspect_family_calendar_delivery_readiness
 from app.documents.case_service import (
     DocumentCaseDependencies,
     document_case_detail_status as build_document_case_detail_status,
@@ -1151,6 +1152,45 @@ def library_article_reextract_preview_action(payload: dict[str, Any]) -> dict[st
             "message": "Náhled nové extrakce se nepodařilo připravit.",
             "error": "archive_failed",
         }
+
+
+def family_calendar_delivery_status_action(
+    *,
+    readiness_loader: Callable[..., Any] | None = None,
+    now: datetime | None = None,
+) -> dict[str, Any]:
+    """Expose only a read-only automation summary, never recipients or credentials."""
+    result = {
+        "ok": False,
+        "state": "unavailable",
+        "message": "Stav automatického e-mailového odesílání se nepodařilo ověřit.",
+        "checked_at": (now or datetime.now(timezone.utc)).isoformat(),
+        "read_only": True,
+    }
+    try:
+        report = (readiness_loader or inspect_family_calendar_delivery_readiness)()
+        if report.writes_performed or report.secret_read or report.transport_called:
+            return result
+        if report.config_mode == "disabled":
+            state = "disabled"
+            message = "Automatické e-mailové odesílání je vypnuté."
+        elif report.config_mode == "dry_run":
+            state = "dry_run" if report.ready_to_enable else "attention"
+            message = "Automatika je v náhledovém režimu; e-maily neodesílá."
+            if not report.ready_to_enable:
+                message += " Kontrola hlásí překážku."
+        elif report.config_mode == "enabled":
+            if report.status == "active" and report.automation_active and report.ready_to_enable:
+                state = "active"
+                message = "Automatické e-mailové odesílání je zapnuté; kontrola předpokladů je v pořádku."
+            else:
+                state = "attention"
+                message = "Automatické e-mailové odesílání je zapnuté, ale kontrola hlásí překážku."
+        else:
+            return result
+        return {**result, "ok": True, "state": state, "message": message}
+    except Exception:  # Private configuration and Keychain errors must remain redacted.
+        return result
 
 
 def family_calendar_status_action(
@@ -9758,6 +9798,9 @@ class CockpitServer:
                     return
                 if parsed.path == "/api/family-calendar/status":
                     self.respond_json(family_calendar_status_action())
+                    return
+                if parsed.path == "/api/family-calendar/delivery-status":
+                    self.respond_json(family_calendar_delivery_status_action())
                     return
                 if parsed.path == "/api/quantitative-status":
                     self.respond_json(quantitative_status_overview())

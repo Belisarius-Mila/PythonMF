@@ -11,6 +11,12 @@
 
 ## Aktuální stav
 
+- 2026-10-17 13:33 CEST: v proudu Cockpit je lokálně připravená náhrada nepravdivého
+  pevného textu o vypnutém odesílání. GET `/api/family-calendar/delivery-status`
+  vrací jen bezpečný souhrn registrovaného read-only auditu a čas kontroly;
+  nečte tajemství, neodesílá a nic nezapisuje. Rozlišuje režimy a překážku,
+  při nedostupnosti přiznává neověřený stav. Změna neaktivuje ani nevypíná
+  automatiku. Nasazení zatím neproběhlo; kanonický důkaz v `project-cockpit`.
 - Živý redigovaný read-only audit 2026-08-01 12:04 CEST potvrdil
   `config_mode=enabled`, `automation_active=true`, `planner_ready`, čtyři
   nakonfigurované příjemce a nula blokujících stavů. Nebyl evidován žádný stav

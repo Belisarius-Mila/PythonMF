@@ -200,6 +200,8 @@
     const familyCalendarModal = document.getElementById("familyCalendarModal");
     const familyCalendarCloseBtn = document.getElementById("familyCalendarCloseBtn");
     const familyCalendarUpcoming = document.getElementById("familyCalendarUpcoming");
+    const familyCalendarDeliveryStatus = document.getElementById("familyCalendarDeliveryStatus");
+    let familyCalendarDeliveryRequest = 0;
     const familyCalendarPreviewForm = document.getElementById("familyCalendarPreviewForm");
     const familyCalendarRecipientOne = document.getElementById("familyCalendarRecipientOne");
     const familyCalendarRecipientTwo = document.getElementById("familyCalendarRecipientTwo");
@@ -560,7 +562,7 @@
     document.addEventListener("mouseup", captureSelectedSpeechText);
     document.addEventListener("keyup", captureSelectedSpeechText);
 
-    function verifyButtonHealth() {
+    function verifyUiElementsPresent() {
       const requiredIds = [
         "refreshBtn",
         "serviceBtn",
@@ -732,10 +734,10 @@
       const missing = requiredIds.filter((id) => !document.getElementById(id));
       if (missing.length) {
         setHealthValue(frontendHealthButtons, `chybí ${missing.length}: ${missing.slice(0, 3).join(", ")}`, "bad");
-        recordFrontendError(`Chybí UI tlačítka: ${missing.join(", ")}`);
+        recordFrontendError(`Chybí prvky UI: ${missing.join(", ")}`);
         return false;
       }
-      setHealthValue(frontendHealthButtons, "napojeno", "ok");
+      setHealthValue(frontendHealthButtons, "přítomné", "ok");
       return true;
     }
 
@@ -783,7 +785,7 @@
       setHealthValue,
       setDashboardStatusSignal,
       showMessage,
-      verifyButtonHealth,
+      verifyUiElementsPresent,
     });
     const {
       applyAutosaveCleanup,
@@ -3595,14 +3597,33 @@ Soubor nebude trvale smazán.`);
       }
     }
 
+    async function refreshFamilyCalendarDeliveryStatus() {
+      const request = ++familyCalendarDeliveryRequest;
+      familyCalendarDeliveryStatus.textContent = "Ověřuji stav automatického e-mailového odesílání…";
+      try {
+        const data = await fetchJsonWithTimeout("/api/family-calendar/delivery-status", 15000);
+        if (request !== familyCalendarDeliveryRequest) return;
+        const known = ["active", "disabled", "dry_run", "attention"].includes(data.state);
+        if (data.ok !== true || !known || !data.message || !Number.isFinite(Date.parse(data.checked_at))) {
+          throw new Error("Neověřený stav automatického odesílání");
+        }
+        familyCalendarDeliveryStatus.textContent = `${data.message} Ověřeno: ${new Date(data.checked_at).toLocaleString("cs-CZ")}.`;
+      } catch (_err) {
+        if (request !== familyCalendarDeliveryRequest) return;
+        familyCalendarDeliveryStatus.textContent = "Stav automatického e-mailového odesílání se nepodařilo ověřit. Zkus kalendář znovu otevřít.";
+      }
+    }
+
     async function openFamilyCalendarModal() {
       familyCalendarBirthDateInput.max = new Date().toISOString().slice(0, 10);
       familyCalendarModal.classList.remove("hidden");
-      await loadFamilyCalendar();
+      await Promise.all([loadFamilyCalendar(), refreshFamilyCalendarDeliveryStatus()]);
     }
 
     function closeFamilyCalendarModal() {
       familyCalendarModal.classList.add("hidden");
+      familyCalendarDeliveryRequest += 1;
+      familyCalendarDeliveryStatus.textContent = "Stav automatického odesílání se ověří po otevření kalendáře.";
       return true;
     }
 
@@ -7293,6 +7314,7 @@ ${item.context || ""}`);
       window.setInterval(refreshUrgentRemindersSummary, URGENT_REMINDERS_MONITOR_MS);
       window.setInterval(runEmailIntakeMonitor, INTAKE_EMAIL_MONITOR_MS);
       window.addEventListener("focus", () => {
+        if (!familyCalendarModal.classList.contains("hidden")) refreshFamilyCalendarDeliveryStatus();
         refreshAutosaveStatus();
         refreshLiveStatus();
         refreshMainStatusOnReturn();

@@ -311,6 +311,10 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   historický kontext a bezpečnostní pravidla, ne jako důkaz současného runtime
   stavu. Po významné provozní změně zapsat git-safe redigovanou účtenku bez
   tajemství a soukromého obsahu.
+- Doplnění 17102026: stejné pravidlo platí pro texty Cockpitu. Stav kalendáře
+  zobrazovat z read-only auditu s časem kontroly; při chybě přiznat nejistotu,
+  neodvozovat vypnutí. Kontrola existence DOM prvků prokazuje jejich přítomnost,
+  nikoli napojené události nebo úspěch akce.
 
 ### LL-004 — Sdílený provozní stav nesmí být relativní k profilovému workspace
 

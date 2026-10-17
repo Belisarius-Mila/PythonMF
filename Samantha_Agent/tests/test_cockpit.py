@@ -3973,7 +3973,7 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("/api/documents/intake-email-scan", COCKPIT_HTML)
         self.assertIn("recordFrontendError", COCKPIT_HTML)
         self.assertIn("clearFrontendErrorsMatching", COCKPIT_HTML)
-        self.assertIn("verifyButtonHealth", COCKPIT_HTML)
+        self.assertIn("verifyUiElementsPresent", COCKPIT_HTML)
         self.assertIn("runFrontendHealthCheck", COCKPIT_HTML)
         self.assertIn('window.addEventListener("error"', COCKPIT_HTML)
         self.assertIn("remindersBtn", COCKPIT_HTML)

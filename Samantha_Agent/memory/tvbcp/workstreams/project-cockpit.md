@@ -1,6 +1,13 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-17 13:39 CEST: bod 1 U07/U08 je implementovaný lokálně. Kontrola UI nyní
+  přesně hlásí přítomnost prvků; diagnostika netvrdí ověření funkčnosti tlačítek.
+  Kalendář má samostatný read-only stav z registrovaného auditu, čas ověření,
+  rozlišení zapnuto/vypnuto/náhled/překážka a bezpečný neověřený stav při chybě.
+  42 cílených testů PASS; plná brána 1961/1961 PASS. Běžící Cockpit zatím
+  nebyl aktualizovaný; push a nasazení zůstávají samostatným krokem.
+
 - 2026-10-16 21:21 CEST: trvalý autosave po přesném potvrzení aktivovaný a živě
   ověřený včetně automatické obnovy po ukončení workeru. Právě jeden proces,
   čerstvý technický i čitelný záznam, historie a předchozí dvojice zachované;
@@ -1357,3 +1364,41 @@ Technický důkaz:
   Finální dokumentační head/PID potvrdí závěrečná živá účtenka.
 - Skutečný restart Macu/přihlášení ani fyzický Safari/iPhone test neproběhly.
   SSD hlásí 23,6 GiB volného místa; ukládání samo chybu nehlásí.
+
+
+### 2026-10-17 13:39 CEST — Bod 1: pravdivé provozní informace připravené lokálně
+
+Hotovo:
+- Kontrola stránky a diagnostika označují přítomnost UI prvků; netvrdí ověření
+  napojených událostí nebo funkčnosti všech tlačítek.
+- Rodinný kalendář čte aktuální bezpečný stav automatiky s časem kontroly.
+  Rozlišuje zapnuté/vypnuté odesílání, náhledový režim a překážku; výpadek
+  nebo neplatná odpověď přizná neověřený stav.
+- Novější odpověď má přednost před opožděnou a zavřený dialog zneplatní
+  probíhající kontrolu. Návrat do otevřeného kalendáře stav znovu ověří.
+
+Rozhodnutí:
+- Míla zadal bod 1. Jde o zobrazení a read-only GET, nikoli změnu konfigurace
+  nebo aktivace odesílání. Bod 2 (struktura Servisu) zůstává další samostatný krok.
+- Implementace a ověření jsou lokální; push ani nasazení tím nejsou provedené.
+
+Další krok:
+- Samostatně potvrdit publikování a nasazení tohoto dokončeného kroku.
+
+Navrhované další kroky:
+- Bod 2 U07: rozdělit Servis podle účelu.
+- Bod 3: narovnat zastaralé návrhy v systémových auditech.
+- Filmový editor vyzkoušet doma podle dohody 18. 10.
+
+Technický důkaz:
+- 42 cílených testů PASS, plná brána 1961/1961 PASS (267.752 s testů).
+  Ověřeny režimy, bezpečný výpadek, redakce soukromé chyby, skutečný read-only
+  GET a regresní pořadí/zavření asynchronních odpovědí v prohlížeči.
+- GET `/api/family-calendar/delivery-status` vrací pouze stav, bezpečnou zprávu,
+  čas a read-only příznak. Přímý registrovaný audit potvrdil aktivní režim;
+  kontrolní součty soukromé konfigurace i doručovacího stavu se nezměnily.
+- Camino PID 47332, konfigurace a Serve shodné; owner HTTP/HTTPS a anonymní
+  401 ověřené, Funnel off. Autosave nadále jeden čerstvý proces bez chyby.
+- Důkazy v `logs/cockpit_truthful_status_targeted_20261017.log`,
+  `logs/cockpit_truthful_status_full_gate_20261017.log` a redigované validation log.
+  Běžící Cockpit zůstává v předchozím nasazení; fyzická přejímka nového UI čeká.

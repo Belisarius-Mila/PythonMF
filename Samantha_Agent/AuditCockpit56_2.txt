@@ -452,6 +452,8 @@ Důkaz: ovládání klávesnicí, vnořený náhled, reload/přímý odkaz, fyzi
 Závislosti: U02/U05. Nejprve jeden reprezentativní modal, pak ostatní.
 
 U07 / P1 / M — Servis podle účelu (N14,N15).
+Stav 17. 10. 2026: přesnost kontroly UI a živý stav kalendáře lokálně opravené,
+42 cílených testů PASS; plná brána 1961/1961 PASS, nasazení čeká. Struktura Servisu zbývá.
 Sloučit navigační duplicity, detaily na vyžádání, přejmenovat zavádějící health
 štítek a odvodit intervaly z konfigurace. Přehled relací a obnova zůstávají.
 Důkaz: restart, screen obnova, audit a záloha mají jednoznačný dostupný vstup;

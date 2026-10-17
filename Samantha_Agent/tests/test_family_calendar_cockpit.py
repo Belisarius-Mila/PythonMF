@@ -1,13 +1,19 @@
 from __future__ import annotations
 
 import shutil
+import http.client
+import json
 import subprocess
 import sys
 import tempfile
+import threading
 import unittest
 from datetime import date, datetime, timezone
 from pathlib import Path
 from types import ModuleType
+from types import SimpleNamespace
+from http.server import ThreadingHTTPServer
+from unittest.mock import patch
 
 try:
     import dotenv  # noqa: F401
@@ -39,6 +45,8 @@ except ImportError:  # pragma: no cover - isolated workspace dependency fallback
 from app.cockpit import (
     COCKPIT_HTML,
     COCKPIT_POST_ACTIONS,
+    CockpitServer,
+    family_calendar_delivery_status_action,
     family_calendar_notification_preview_action,
     family_calendar_prefill_action,
     family_calendar_save_action,
@@ -47,6 +55,70 @@ from app.cockpit import (
 
 
 class FamilyCalendarCockpitTests(unittest.TestCase):
+    @staticmethod
+    def readiness(**changes):
+        return SimpleNamespace(**{
+            "status": "active", "config_mode": "enabled", "automation_active": True,
+            "ready_to_enable": True, "writes_performed": False, "secret_read": False,
+            "transport_called": False, "recipients": ["private@example.invalid"],
+            "credential": "private-secret", **changes,
+        })
+
+    def test_delivery_summary_distinguishes_configured_modes_and_failed_checks(self) -> None:
+        cases = [
+            ({}, "active", "zapnuté"),
+            ({"config_mode": "disabled", "automation_active": False, "ready_to_enable": False}, "disabled", "vypnuté"),
+            ({"config_mode": "dry_run", "automation_active": False}, "dry_run", "náhledovém"),
+            ({"config_mode": "dry_run", "ready_to_enable": False}, "attention", "překážku"),
+            ({"ready_to_enable": False}, "attention", "překážku"),
+            ({"status": "not_ready"}, "attention", "překážku"),
+            ({"config_mode": "unknown"}, "unavailable", "nepodařilo ověřit"),
+            ({"secret_read": True}, "unavailable", "nepodařilo ověřit"),
+            ({"transport_called": True}, "unavailable", "nepodařilo ověřit"),
+            ({"writes_performed": True}, "unavailable", "nepodařilo ověřit"),
+        ]
+        for changes, state, message in cases:
+            with self.subTest(changes=changes):
+                result = family_calendar_delivery_status_action(
+                    readiness_loader=lambda: self.readiness(**changes),
+                    now=datetime(2026, 10, 17, 12, 0, tzinfo=timezone.utc),
+                )
+                self.assertEqual(result["state"], state)
+                self.assertEqual(result["ok"], state != "unavailable")
+                self.assertIn(message, result["message"])
+                self.assertTrue(result["read_only"])
+                self.assertEqual(result["checked_at"], "2026-10-17T12:00:00+00:00")
+                self.assertNotIn("private", json.dumps(result))
+
+    def test_failed_delivery_probe_does_not_expose_private_error_or_claim_disabled(self) -> None:
+        def unavailable():
+            raise OSError("private-secret /private/config.json private@example.invalid")
+        result = family_calendar_delivery_status_action(readiness_loader=unavailable)
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["state"], "unavailable")
+        self.assertNotIn("private", json.dumps(result))
+        self.assertNotIn("vypnuté", result["message"])
+
+    def test_delivery_status_get_uses_only_the_readonly_probe(self) -> None:
+        with patch("app.cockpit.inspect_family_calendar_delivery_readiness", return_value=self.readiness()) as probe:
+            server = ThreadingHTTPServer(("127.0.0.1", 0), CockpitServer().make_handler())
+            thread = threading.Thread(target=server.serve_forever, daemon=True)
+            thread.start()
+            try:
+                conn = http.client.HTTPConnection("127.0.0.1", server.server_port, timeout=5)
+                conn.request("GET", "/api/family-calendar/delivery-status")
+                response = conn.getresponse()
+                data = json.loads(response.read())
+                conn.close()
+                self.assertEqual(response.status, 200)
+                self.assertEqual(data["state"], "active")
+                self.assertNotIn("private", json.dumps(data))
+                probe.assert_called_once_with()
+            finally:
+                server.shutdown()
+                server.server_close()
+                thread.join(timeout=5)
+
     def test_status_and_save_actions_use_private_registry(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             path = Path(temp_dir) / "family" / "people.json"
@@ -228,7 +300,9 @@ class FamilyCalendarCockpitTests(unittest.TestCase):
         self.assertIn('id="familyCalendarTableBody"', COCKPIT_HTML)
         self.assertIn("Datum narození", COCKPIT_HTML)
         self.assertIn("Datum svátku", COCKPIT_HTML)
-        self.assertIn("e-mailové odesílání zatím není aktivní", COCKPIT_HTML)
+        self.assertNotIn("e-mailové odesílání zatím není aktivní", COCKPIT_HTML)
+        self.assertIn('id="familyCalendarDeliveryStatus"', COCKPIT_HTML)
+        self.assertIn('fetchJsonWithTimeout("/api/family-calendar/delivery-status", 15000)', COCKPIT_HTML)
         self.assertIn('id="familyCalendarPreviewForm"', COCKPIT_HTML)
         self.assertIn('id="familyCalendarRecipientOne" type="email"', COCKPIT_HTML)
         self.assertIn('id="familyCalendarRecipientTwo" type="email"', COCKPIT_HTML)

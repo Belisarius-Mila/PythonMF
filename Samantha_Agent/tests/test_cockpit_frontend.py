@@ -36,14 +36,74 @@ EXPECTED_PAGES = {
     ),
     "cockpit": (
         COCKPIT_HTML,
-        541658,
-        10754,
-        "923d3339f70c8b2db34e2a770dcdfbea69e300a4b7eed22bafe4ef4fd8bb1bad",
+        543339,
+        10777,
+        "a05eb0acd28d8aaff389ac510b64f255a6f29f3d05c5c75d58784a4a8cc4d5fd",
     ),
 }
 
 
 class CockpitFrontendContractTests(unittest.TestCase):
+    def test_calendar_delivery_status_rejects_stale_failed_and_closed_responses(self) -> None:
+        source = (FRONTEND_ROOT / "cockpit" / "app.js").read_text()
+        start = source.index("    async function refreshFamilyCalendarDeliveryStatus()")
+        end = source.index("    function editFamilyCalendarPerson(", start)
+        script = r'''
+const assert = require("node:assert/strict");
+const vm = require("node:vm");
+const source = JSON.parse(require("node:fs").readFileSync(0, "utf8"));
+const status = {textContent: ""};
+const modal = {classList: {add() {}, remove() {}}};
+let fetcher;
+let listReads = 0;
+const scope = {familyCalendarDeliveryRequest: 0, familyCalendarDeliveryStatus: status,
+  familyCalendarBirthDateInput: {}, familyCalendarModal: modal,
+  loadFamilyCalendar: async () => {listReads += 1;},
+  fetchJsonWithTimeout: (url, timeout) => {
+    assert.equal(url, "/api/family-calendar/delivery-status");
+    assert.equal(timeout, 15000);
+    return fetcher();
+  }};
+vm.createContext(scope);
+vm.runInContext(source + ";globalThis.api = {refreshFamilyCalendarDeliveryStatus, openFamilyCalendarModal, closeFamilyCalendarModal};", scope);
+const active = {ok:true, state:"active", message:"Automatika zapnutá", checked_at:"2026-10-17T12:00:00Z"};
+const disabled = {...active, state:"disabled", message:"Automatika vypnutá"};
+(async () => {
+  fetcher = async () => active;
+  await scope.api.openFamilyCalendarModal();
+  assert.equal(listReads, 1);
+  assert.match(status.textContent, /zapnutá.*Ověřeno/);
+  fetcher = async () => {throw new Error("offline");};
+  await scope.api.refreshFamilyCalendarDeliveryStatus();
+  assert.match(status.textContent, /nepodařilo ověřit/);
+  assert.doesNotMatch(status.textContent, /zapnutá|vypnutá/);
+  fetcher = async () => disabled;
+  await scope.api.refreshFamilyCalendarDeliveryStatus();
+  assert.match(status.textContent, /vypnutá/);
+  fetcher = async () => ({...active, checked_at:"unknown"});
+  await scope.api.refreshFamilyCalendarDeliveryStatus();
+  assert.match(status.textContent, /nepodařilo ověřit/);
+  const pending = [];
+  fetcher = () => new Promise(resolve => pending.push(resolve));
+  const old = scope.api.refreshFamilyCalendarDeliveryStatus();
+  const current = scope.api.refreshFamilyCalendarDeliveryStatus();
+  pending[1](active); await current;
+  pending[0](disabled); await old;
+  assert.match(status.textContent, /zapnutá/);
+  const closing = scope.api.refreshFamilyCalendarDeliveryStatus();
+  scope.api.closeFamilyCalendarModal();
+  const closedText = status.textContent;
+  pending[2](active); await closing;
+  assert.equal(status.textContent, closedText);
+})().catch(error => {console.error(error);process.exitCode=1;});
+'''
+        with tempfile.TemporaryDirectory() as directory:
+            script_path = Path(directory) / "calendar_status_test.cjs"
+            script_path.write_text(script)
+            result = subprocess.run([node_binary(), str(script_path)], input=json.dumps(source[start:end]),
+                                    text=True, capture_output=True, timeout=15)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
     def test_dashboard_status_separates_work_from_operational_problems(self) -> None:
         result = subprocess.run(
             [node_binary(), str(Path(__file__).with_name("dashboard_status_frontend.test.cjs"))],

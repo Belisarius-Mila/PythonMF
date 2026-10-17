@@ -278,7 +278,7 @@
 		      <div id="frontendHealthPanel" class="health-panel" aria-label="Health stav Cockpitu">
 		        <div class="health-grid">
 		          <div class="health-item"><span class="health-label">Frontend</span><span id="frontendHealthJs" class="health-value warn">JS se zatím nespustil</span></div>
-		          <div class="health-item"><span class="health-label">Tlačítka</span><span id="frontendHealthButtons" class="health-value warn">čekám na napojení</span></div>
+		          <div class="health-item"><span class="health-label">Prvky UI</span><span id="frontendHealthButtons" class="health-value warn">čekám na kontrolu přítomnosti</span></div>
 		          <div class="health-item"><span class="health-label">API</span><span id="frontendHealthApi" class="health-value warn">čekám na kontrolu</span></div>
 		          <div class="health-item"><span class="health-label">Poslední chyba</span><span id="frontendHealthError" class="health-value ok">žádná</span></div>
 		        </div>
@@ -1023,7 +1023,8 @@
         <button class="secondary" id="familyCalendarCloseBtn" type="button">Zavřít</button>
       </div>
       <div class="modal-body">
-        <div class="family-calendar-intro">Přehled narozenin a svátků. Rok narození slouží k výpočtu věku; e-mailové odesílání zatím není aktivní.</div>
+        <div class="family-calendar-intro">Přehled narozenin a svátků. Rok narození slouží k výpočtu věku.</div>
+        <div id="familyCalendarDeliveryStatus" class="family-calendar-intro" role="status" aria-live="polite">Stav automatického odesílání se ověří po otevření kalendáře.</div>
         <div id="familyCalendarUpcoming" class="family-calendar-upcoming" aria-live="polite"></div>
         <form id="familyCalendarPreviewForm" class="family-calendar-preview" autocomplete="off">
           <h3>Náhled upozornění</h3>

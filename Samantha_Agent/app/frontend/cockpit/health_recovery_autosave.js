@@ -46,7 +46,7 @@
 
     async function runFrontendHealthCheck() {
       deps.setHealthValue(elements.frontendHealthJs, "běží", "ok");
-      deps.verifyButtonHealth();
+      deps.verifyUiElementsPresent();
       deps.setHealthValue(elements.frontendHealthApi, "kontroluji...", "warn");
       const results = await Promise.all([
         checkEndpointHealth("/api/server/health"),
@@ -79,11 +79,11 @@
       renderDiagnosticsStatusSignals();
       elements.diagnosticsEndpointList.innerHTML = "";
       elements.diagnosticsErrorList.innerHTML = "";
-      const buttonsOk = deps.verifyButtonHealth();
+      const elementsPresent = deps.verifyUiElementsPresent();
       const errorState = deps.getFrontendErrorState();
       elements.diagnosticsFrontend.textContent = [
         "Frontend JS: běží",
-        `Tlačítka: ${buttonsOk ? "napojeno" : "problém"}`,
+        `Prvky UI: ${elementsPresent ? "přítomné" : "některé chybí"}`,
         `Poslední chyba: ${errorState.lastError || "žádná"}`
       ].join(" | ");
       try {
