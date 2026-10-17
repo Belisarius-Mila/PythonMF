@@ -34,6 +34,8 @@ const audit = {
   ok: true,
   ready: true,
   workstream_id: "project-cockpit",
+  deployment_target: "cockpit",
+  deployment_label: "Běžící Samantha / Cockpit",
   expected_origin_head: "a".repeat(40),
   expected_local_head: "b".repeat(40),
   commit_count: 2,
@@ -157,24 +159,31 @@ async function main() {
     assert.equal(exact.test.exactLunaReleaseCommand(ordinaryText), false, ordinaryText);
   }
   assert.equal(exact.test.shouldInterceptLunaReleaseCommand("p+n"), true);
-  exact.scope.activeWorkstreamId = "mmtx";
+  exact.scope.activeWorkstreamId = "project-mmtx";
+  assert.equal(exact.test.shouldInterceptLunaReleaseCommand("p+n"), true);
+  exact.scope.workstreamDevelopmentEnabled = false;
   assert.equal(exact.test.shouldInterceptLunaReleaseCommand("p+n"), false);
-  exact.scope.input.value = "p+n";
-  let mmtxSendBody = null;
-  exact.scope.api = async (path, options={}) => {
-    exact.calls.push({path, options});
-    if (path === "/api/human-adam/send") {
-      mmtxSendBody = JSON.parse(options.body);
-      return {ok:true,session:{thread_id:"mmtx-thread",messages:[]}};
-    }
-    if (path === "/api/human-adam/status") return {ok:true,session:{thread_id:"mmtx-thread",messages:[]}};
+
+  const pages = harness(async (path) => {
+    if (path.endsWith("/audit")) return {...audit, workstream_id:"project-mmtx", deployment_target:"github_pages", deployment_label:"Web GitHub Pages"};
+    if (path.endsWith("/start")) return {ok:true,job:{state:"queued",active:true}};
     throw new Error(`unexpected request ${path}`);
-  };
-  await exact.test.sendMessage({preventDefault() {}});
-  assert.equal(exact.calls.filter((call) => call.path.endsWith("/audit")).length, 0);
-  assert.equal(exact.calls.filter((call) => call.path.endsWith("/start")).length, 0);
-  assert.equal(exact.calls.filter((call) => call.path === "/api/human-adam/send").length, 1);
-  assert.equal(mmtxSendBody.message, "p+n");
+  });
+  pages.scope.activeWorkstreamId = "project-mmtx";
+  await pages.test.sendMessage({preventDefault() {}});
+  const pagesStart = pages.calls.find((call) => call.path.endsWith("/start"));
+  const pagesBody = JSON.parse(pagesStart.options.body);
+  assert.equal(pagesBody.expected_workstream_id,"project-mmtx");
+  assert.equal(pagesBody.expected_deployment_target,"github_pages");
+  assert.equal(pages.calls.some((call) => call.path === "/api/human-adam/send"),false);
+
+  const stale = harness(async (path) => {
+    if (path.endsWith("/audit")) return {...audit,workstream_id:"project-mmtx",deployment_target:"github_pages"};
+    if (path.endsWith("/status")) return {ok:true,job:null,session:{messages:[]}};
+    throw new Error(`unexpected request ${path}`);
+  });
+  assert.equal(await stale.test.startLunaRelease(),false);
+  assert.equal(stale.calls.some((call) => call.path.endsWith("/start")),false);
 
   const noParent = harness(async () => { throw new Error("release API must not be called without an existing parent thread"); });
   noParent.scope.lastSession = null;

@@ -29,7 +29,7 @@ from app.communication.deferred_integration import (
     DeferredIntegrationError,
     DeferredIntegrationStore,
 )
-from app.communication.checkpoint_quality_gate import HumanAdamGateError
+from app.communication.checkpoint_quality_gate import HumanAdamGateError, run_checkpoint_quality_gate
 from app.communication.human_adam_service import (
     DEVELOPMENT_CONTROL_DEVELOPER_INSTRUCTIONS,
     HUMAN_ADAM_DEVELOPER_INSTRUCTIONS,
@@ -1166,6 +1166,40 @@ class HumanAdamProfileManager:
                 expected_local_head=expected_local_head,
                 confirmation=confirmation,
             )
+
+    def _luna_release_preflight(self, *, expected_head: str, workstream_id: str, service: Any) -> None:
+        from app.communication.luna_release import release_target
+        if self.active_workstream_id != workstream_id:
+            raise AppServerError("Původní projekt předání se změnil.")
+        release_target(workstream_id)
+        self._assert_all_profile_sessions_idle(operation="Předaný p+n balíček")
+        self._active_canonical_binding()
+        self._main_remote_sync_workspaces()
+        audit = audit_daily_github_batch(source_repo=service.workspace.source_repo)
+        if (audit.get("state") != "aligned" or audit.get("local_head") != expected_head
+                or audit.get("origin_head") != expected_head):
+            raise AppServerError("Předaný main není přesně zarovnaný s GitHubem.")
+
+    def validate_luna_release(self, *, expected_head: str, workstream_id: str) -> dict[str, Any]:
+        """Full publication gate when the exact batch is already on GitHub."""
+        with self.profile_operation() as service:
+            self._luna_release_preflight(expected_head=expected_head, workstream_id=workstream_id, service=service)
+            gate = run_checkpoint_quality_gate(workspace=service.workspace)
+            self._luna_release_preflight(expected_head=expected_head, workstream_id=workstream_id, service=service)
+            return {"ok": True, "gate": gate.public_dict()}
+
+    def publish_luna_release(self, *, expected_head: str, workstream_id: str) -> dict[str, Any]:
+        """Only the catalog-selected Pages adapter may publish a frozen job."""
+        from app.communication.luna_release import PAGES_PROJECT_PATHS, release_target
+        with self.profile_operation() as service:
+            self._luna_release_preflight(expected_head=expected_head, workstream_id=workstream_id, service=service)
+            if release_target(workstream_id) != "github_pages":
+                raise AppServerError("Proud nemá registrovaný Pages cíl.")
+            result = publish_mmtx_pages_current_main(source_repo=service.workspace.source_repo,
+                                                     expected_head=expected_head,
+                                                     smoke_path=PAGES_PROJECT_PATHS.get(workstream_id, ""))
+            self._luna_release_preflight(expected_head=expected_head, workstream_id=workstream_id, service=service)
+            return {**result, "ok": True}
 
     def _publish_active_pages_production(
         self,

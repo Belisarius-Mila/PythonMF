@@ -1,6 +1,17 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-17 16:37 CEST: předání celého p+n balíčku Luně je lokálně rozšířené na všech
+  33 kanonických vývojových proudů portálu i přímou relaci. Potvrzení váže
+  projekt, registrovaný cíl a oba heads; výsledek míří původnímu Adamovi.
+  Běžné proudy nasazují runtime Samanthy, MMTX/ToBeToHave/ColorsAndNumbers
+  používají Pages s vlastní HTTP kontrolou. Již odeslaný main projde plnou
+  bránou bez dalšího push. 286 integračních testů PASS; plná brána obecného rozšíření 2011/2011 PASS (263,223 s testů).
+  Skutečná Luna a živé ochrany prošly v oddělených syntetických suchých bězích
+  pro obecný proud i Pages. Žádný push, restart ani změna Camino/autosave.
+  První zavedení stále čeká na samostatné p+n; vydání samostatných klientů
+  a zařízení zůstává oddělenou operací s vlastními pravidly.
+
 - 2026-10-17 15:43 CEST: orchestrace p+n přes Lunu je implementovaná lokálně. Převzetí
   celého balíčku s přesnými heads, trvalá soukromá účtenka a vykonavatel mimo
   restartovaný Cockpit; původní plná brána/push/deploy/smoke zachované.
@@ -1656,3 +1667,49 @@ Technický důkaz:
   `logs/luna_release_full_gate_20261017.log`.
 - Pravidla `technical/luna_release_orchestration.md`. Ostré p+n a fyzická
   přejímka nejsou suchým během prokázané. Zavedení ještě neproběhlo.
+
+### 2026-10-17 16:37 CEST — Obecné p+n přes Lunu pro vývoj v portálu
+
+Hotovo:
+- Stejné předání celého balíčku a návrat původnímu Adamovi funguje lokálně
+  ve všech 33 kanonických vývojových proudech a v přímé relaci.
+- Náhled a potvrzení svazují projekt, registrovaný cíl a přesné koncové commity.
+  Změna projektu se zastaví ještě před push; nonce platí pouze pro danou fázi.
+- Běžné proudy používají dosavadní společný runtime Samanthy/Cockpitu.
+  MMTX, ToBeToHave a ColorsAndNumbers používají existující Pages publisher;
+  webové aplikace mají vlastní HTTP smoke cestu, bez restartu Cockpitu.
+- Již odeslaný main lze po plné bráně nasadit bez dalšího push. Soukromá
+  účtenka, nepublikující zkouška, ochrany a návrat do původní konverzace zůstávají.
+
+Rozhodnutí:
+- Míla výslovně rozšířil workflow na jakýkoliv vývoj obecně.
+- Server volí cíl z katalogu a registrovaných vazeb; klient nemůže zadat URL,
+  jinou službu ani cestu. Neznámý cíl se neodhaduje. Hlavní Adam dokončí
+  projektové kontroly a zápis před commitem; Luna přebírá hotový rozsah.
+- Samostatné vydání iPhone aplikace nebo receiveru Camino, instalace a
+  systémové změny mají vlastní postup a oprávnění. Toto p+n je neprovádí.
+- Historický MMTX modelový protokol zachovaný; jeho strict receipt nepřebírá
+  rozšířená interní pole nové orchestrace.
+
+Další krok:
+- Po samostatném p+n zavést společný balíček dosavadní cestou; potom ověřit
+  první ostré předání Luně ve vybraném vývojovém proudu.
+
+Navrhované další kroky:
+- Fyzická přejímka portálu/Servisu a nové karty na iPhonu.
+- Filmový editor vyzkoušet doma podle dřívější dohody.
+
+Technický důkaz:
+- 286 integračních testů PASS, včetně katalogu všech 33 proudů, Pages cest,
+  obnovení účtenky, neměnného projektu/cíle a původního MMTX kontraktu.
+  Log `logs/luna_general_integration_20261017.log`.
+- Skutečná Luna a skutečné read-only ochrany: syntetický sedmicommitový
+  obecný proud 5,29 s a MMTX 5,19 s, oba dry_run_completed bez publikování.
+  Log `logs/luna_general_live_dry_run_20261017.log`.
+- plná brána obecného rozšíření 2011/2011 PASS (263,223 s testů).
+  Log `logs/luna_general_full_gate_20261017.log`.
+- Pravidla `technical/luna_release_orchestration.md`; ostré p+n ani fyzická
+  přejímka nejsou suchým během doložené. Camino a autosave prošly živou kontrolou.
+- Živý Cockpit je PID 1710 pod stávajícím launchd supervisorem (start 16:22:39);
+  poslední ověřená deployment účtenka stále patří staršímu e3c7075ef4ad.
+  Toto rozšíření nebylo samostatně nasazeno ani serverově ověřeno.

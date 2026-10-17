@@ -1851,6 +1851,46 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             str(lazy.hubs["project-family-calendar"].last_send["model_input_text"]),
         )
 
+    def test_luna_pages_publication_preserves_exact_project_head_and_registered_publisher(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, *_ = self.make_manager(Path(temp_dir))
+            manager.workstream_threads = FakeLazyThreads(Path(temp_dir) / "lazy")
+            manager.activate_grouped_workstream(workstream_id="project-mmtx", confirmed=True)
+            with patch("app.communication.human_adam_profiles.audit_daily_github_batch",
+                       return_value={"state":"aligned", "local_head":"a"*40, "origin_head":"a"*40}), \
+                 patch("app.communication.human_adam_profiles.publish_mmtx_pages_current_main",
+                       return_value={"status":"deployed", "main_head":"a"*40}) as publish:
+                result = manager.publish_luna_release(expected_head="a"*40, workstream_id="project-mmtx")
+        self.assertTrue(result["ok"])
+        self.assertEqual(publish.call_args.kwargs["expected_head"], "a"*40)
+
+    def test_luna_publication_refuses_wrong_project_target_and_dirty_profile(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, workspace, *_ = self.make_manager(Path(temp_dir))
+            with patch("app.communication.human_adam_profiles.audit_daily_github_batch",
+                       return_value={"state":"aligned", "local_head":"a"*40, "origin_head":"a"*40}), \
+                 patch("app.communication.human_adam_profiles.publish_mmtx_pages_current_main") as publish:
+                for identity in ("project-mmtx", "layer-human-adam-development"):
+                    with self.subTest(identity=identity), self.assertRaises(AppServerError):
+                        manager.publish_luna_release(expected_head="a"*40, workstream_id=identity)
+                workspace.dirty = True
+                with self.assertRaises(AppServerError):
+                    manager.validate_luna_release(expected_head="a"*40, workstream_id="layer-human-adam-development")
+                publish.assert_not_called()
+
+    def test_luna_aligned_validation_runs_full_gate_and_rechecks_head_after_it(self) -> None:
+        aligned = {"state":"aligned", "local_head":"a"*40, "origin_head":"a"*40}
+        drifted = {**aligned, "local_head":"b"*40}
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, *_ = self.make_manager(Path(temp_dir))
+            with patch("app.communication.human_adam_profiles.audit_daily_github_batch",
+                       side_effect=[aligned, drifted]), \
+                 patch("app.communication.human_adam_profiles.run_checkpoint_quality_gate",
+                       return_value=SimpleNamespace(public_dict=lambda: {"passed":True,"mode":"full","test_count":10})) as gate:
+                with self.assertRaises(AppServerError):
+                    manager.validate_luna_release(expected_head="a"*40, workstream_id="layer-human-adam-development")
+                self.assertNotIn("skip_unit_tests", gate.call_args.kwargs)
+
     def test_mmtx_p_plus_n_authorizes_server_owned_pages_publication(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             manager, human_workspace, _library_workspace, _human_hub, _library_hub = (

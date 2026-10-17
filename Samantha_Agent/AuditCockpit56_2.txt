@@ -9,6 +9,15 @@ TOTO JE AKTUÁLNÍ ROZHODOVACÍ ČÁST DOKUMENTU.
 Architektonický průběh a původní audit zůstávají níže jako historie.
 Čísla, provozní stavy a priority historických oddílů nejsou dnešním stavem.
 
+VÝVOJOVÝ STAV — 2026-10-17 16:37 CEST
+Předání p+n přes Lunu rozšířené lokálně na všech 33 vývojových proudů portálu
+včetně přímé relace. Potvrzení váže projekt, cíl i heads; běžný runtime a
+registrované weby mají vlastní cestu a kontrolu. Již odeslaný main se znovu
+nepushuje. 286 integračních testů PASS; plná brána obecného rozšíření 2011/2011 PASS (263,223 s testů).
+Skutečná Luna pro obecný proud i Pages a živé read-only ochrany PASS.
+Bez push/nasazení či změn Camino/autosave; první zavedení po samostatném p+n.
+Pravidla memory/technical/luna_release_orchestration.md.
+
 VÝVOJOVÝ STAV — 2026-10-17 15:43 CEST
 Lokálně implementované p+n celého balíčku přes Lunu: přesné heads, soukromá
 trvalá účtenka, původní publikační brány a návrat původnímu Adamovi. UI má

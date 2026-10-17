@@ -34,7 +34,7 @@ class FakeService:
 
     def audit_simple_main_deployment(self):
         return {"ok": True, "ready": True, "main_head": TARGET,
-                "expected_code_stamp": STAMP, "workstream_id": "project-cockpit"}
+                "expected_code_stamp": STAMP, "workstream_id": self.active_workstream_id}
 
 
 class LunaReleaseTests(unittest.TestCase):
@@ -48,14 +48,16 @@ class LunaReleaseTests(unittest.TestCase):
     def create(self, **changes):
         payload = {"confirmation": release.CONFIRMATION, "client_message_id": "release-request-123",
                    "expected_origin_head": ORIGIN, "expected_local_head": TARGET,
-                   "dry_run": False, "user_text": "vše p+n", **changes}
+                   "dry_run": False, "user_text": "vše p+n",
+                   "expected_workstream_id": self.service.active_workstream_id,
+                   "expected_deployment_target": release.release_target(self.service.active_workstream_id), **changes}
         result = release.start_release(payload, service=self.service, store=self.store,
                                        launcher=self.launcher)
         return self.store.load(result["job"]["job_id"])
 
     def fake_api(self, *, fail_at="", disconnect_deploy=False, bad_stamp=False):
         calls = []
-        pushes = 0
+        pushes = 1 if self.service.batch["state"] == "aligned" else 0
         health_reads = 0
 
         def call(path, payload=None, **kwargs):
@@ -77,7 +79,7 @@ class LunaReleaseTests(unittest.TestCase):
                                    "code_stamp": "wrong" if bad_stamp else STAMP}}
             if path.endswith("deploy-audit"):
                 return {"ok": True, "ready": True, "main_head": TARGET, "expected_code_stamp": STAMP,
-                        "workstream_id": "project-cockpit"}
+                        "workstream_id": self.service.active_workstream_id}
             if path.endswith("/deploy"):
                 if disconnect_deploy:
                     raise ConnectionError("restart")
@@ -85,6 +87,13 @@ class LunaReleaseTests(unittest.TestCase):
             if path.endswith("deploy-verification"):
                 return {"ok": True, "state": "deployed", "main_head": TARGET,
                         "smoke": {"check_count": 5}}
+            if path.endswith("luna-release/execute"):
+                job = self.store.load()
+                if job["phase"] == "validation":
+                    return {"ok": True, "gate": {"test_count": 2000, "passed": True, "mode": "full"}}
+                return {"ok": True, "status": "deployed", "main_head": TARGET,
+                        "workflow_run_id": 123, "deployment_id": 456, "smoke_http_status": 200,
+                        "smoke_path": release.PAGES_PROJECT_PATHS.get(self.service.active_workstream_id, "")}
             if path.endswith("luna-release/return"):
                 return release.return_release(payload, token=kwargs["token"],
                                               service=self.service, store=self.store)
@@ -97,7 +106,7 @@ class LunaReleaseTests(unittest.TestCase):
         result = release.run_release(job["job_id"], store=self.store, accept=accept,
                                      protect=lambda: {"camino_pid": 99, "autosave_pids": [98]},
                                      pause=lambda _: None, **kwargs)
-        self.assertEqual(accept.call_args.args[0]["commit_count"], 7)
+        self.assertEqual(accept.call_args.args[0]["commit_count"], job["commit_count"])
         self.assertNotIn("token", accept.call_args.args[0])
         self.assertNotIn("parent_thread_id", accept.call_args.args[0])
         return result
@@ -118,15 +127,118 @@ class LunaReleaseTests(unittest.TestCase):
                 self.create(**changes)
         self.launcher.assert_not_called()
 
-    def test_other_workstream_and_empty_batch_are_rejected(self):
-        self.service.active_workstream_id = "project-camino"
-        with self.assertRaises(release.LunaReleaseError):
-            self.create()
-        self.service.active_workstream_id = "project-cockpit"
+    def test_every_development_workstream_resolves_its_existing_registered_target(self):
+        for record in release.WORKSTREAM_CATALOG_BY_ID.values():
+            if record.mode == "archived":
+                continue
+            with self.subTest(workstream=record.workstream_id):
+                self.service.active_workstream_id = record.workstream_id
+                audit = release.audit_release(self.service)
+                self.assertEqual(audit["workstream_id"], record.workstream_id)
+                expected = "github_pages" if record.workstream_id in {"project-mmtx", "project-to-be-to-have", "project-colors-and-numbers"} else "cockpit"
+                self.assertEqual(audit["deployment_target"], expected)
+        self.launcher.assert_not_called()
+
+    def test_inconsistent_empty_batch_is_rejected(self):
         self.service.batch.update(state="aligned", commit_count=0)
         with self.assertRaises(release.LunaReleaseError):
             self.create()
         self.launcher.assert_not_called()
+
+    def test_unknown_archived_and_unregistered_targets_are_rejected(self):
+        from dataclasses import replace
+        record = release.WORKSTREAM_CATALOG_BY_ID["project-cockpit"]
+        for changed in (replace(record, mode="archived"), replace(record, capabilities=replace(record.capabilities, production_deployment_target="unknown"))):
+            with patch.dict(release.WORKSTREAM_CATALOG_BY_ID, {record.workstream_id: changed}), self.assertRaises(release.LunaReleaseError):
+                self.create()
+        with self.assertRaises(release.LunaReleaseError):
+            release.release_target("project-does-not-exist")
+        self.launcher.assert_not_called()
+
+    def test_confirmation_cannot_be_reinterpreted_for_another_project_or_target(self):
+        for changes in ({"expected_workstream_id": "project-mmtx"}, {"expected_deployment_target": "github_pages"}):
+            with self.subTest(changes=changes), self.assertRaises(release.LunaReleaseError):
+                self.create(**changes)
+        self.launcher.assert_not_called()
+
+    def test_camino_development_uses_shared_runtime_without_releasing_camino_service(self):
+        self.service.active_workstream_id = "project-camino"
+        job = self.create()
+        call, calls = self.fake_api()
+        result = self.run_job(job, call=call)
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["job"]["workstream_id"], "project-camino")
+        self.assertEqual(calls.count("/api/human-adam/deploy"), 1)
+        self.assertFalse(any("camino" in path for path in calls))
+
+    def test_pages_target_uses_registered_publisher_without_cockpit_restart(self):
+        self.service.active_workstream_id = "project-mmtx"
+        job = self.create()
+        call, calls = self.fake_api()
+        result = self.run_job(job, call=call)
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["job"]["verification"]["deployment_id"], 456)
+        self.assertEqual(result["job"]["verification"]["smoke_http_status"], 200)
+        self.assertEqual(calls.count("/api/human-adam/luna-release/execute"), 1)
+        self.assertNotIn("/api/human-adam/deploy", calls)
+        self.assertNotIn("/api/server/health", calls)
+        self.assertTrue(self.service.hub.send.call_args.kwargs["read_only"])
+
+    def test_already_pushed_batch_runs_full_validation_without_another_push(self):
+        self.service.active_workstream_id = "project-mmtx"
+        self.service.batch.update(state="aligned", origin_head=TARGET, commit_count=0)
+        job = self.create(expected_origin_head=TARGET)
+        call, calls = self.fake_api()
+        result = self.run_job(job, call=call)
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["job"]["push_state"], "already_aligned")
+        self.assertFalse(result["job"]["pushed"])
+        self.assertEqual(calls.count("/api/human-adam/luna-release/execute"), 2)
+        self.assertNotIn("/api/human-adam/github-batch", calls)
+
+    def test_other_public_web_apps_use_pages_and_their_own_http_smoke(self):
+        for index, (identity, path) in enumerate((("project-to-be-to-have", "to-be-to-have/"),
+                                                  ("project-colors-and-numbers", "colors-numbers/"))):
+            with self.subTest(workstream=identity):
+                self.service.active_workstream_id = identity
+                job = self.create(client_message_id=f"web-app-release-00{index}")
+                call, calls = self.fake_api()
+                result = self.run_job(job, call=call)
+                self.assertTrue(result["ok"])
+                self.assertEqual(result["job"]["verification"]["smoke_path"], path)
+                self.assertNotIn("/api/human-adam/deploy", calls)
+
+    def test_uncertain_pages_result_is_not_retried_or_replaced_by_runtime_deployment(self):
+        self.service.active_workstream_id = "project-mmtx"
+        job = self.create()
+        call, calls = self.fake_api(fail_at="/api/human-adam/luna-release/execute")
+        result = self.run_job(job, call=call)
+        self.assertEqual(result["job"]["state"], "attention")
+        self.assertEqual(result["job"]["deployment_state"], "uncertain")
+        self.assertEqual(calls.count("/api/human-adam/luna-release/execute"), 1)
+        self.assertNotIn("/api/human-adam/deploy", calls)
+
+    def test_changed_project_after_handoff_cannot_push_or_deploy(self):
+        job = self.create()
+        self.service.active_workstream_id = "project-mmtx"
+        call, calls = self.fake_api()
+        result = self.run_job(job, call=call)
+        self.assertEqual(result["job"]["state"], "attention")
+        self.assertNotIn("/api/human-adam/github-batch", calls)
+        self.assertNotIn("/api/human-adam/deploy", calls)
+
+    def test_internal_execution_uses_stored_head_and_target_without_client_override(self):
+        self.service.active_workstream_id = "project-mmtx"
+        job = self.create()
+        self.store.update(job["job_id"], state="running", phase="publish_requested")
+        self.service.publish_luna_release = Mock(return_value={"ok": True})
+        result = release.execute_release({"job_id": job["job_id"], "expected_head": ORIGIN,
+            "deployment_target": "cockpit"}, token=job["token"], service=self.service, store=self.store)
+        self.assertTrue(result["ok"])
+        self.service.publish_luna_release.assert_called_once_with(expected_head=TARGET, workstream_id="project-mmtx")
+        for token in ("wrong", ""):
+            with self.assertRaises(release.LunaReleaseError):
+                release.execute_release({"job_id": job["job_id"]}, token=token, service=self.service, store=self.store)
 
     def test_missing_original_conversation_cannot_start_release(self):
         self.service.hub.snapshot = lambda: {"thread_id": "", "connected": False}
@@ -165,6 +277,8 @@ class LunaReleaseTests(unittest.TestCase):
         started = release.start_terminal_release({
             "confirmation": release.CONFIRMATION, "client_message_id": "native-release-123",
             "expected_origin_head": ORIGIN, "expected_local_head": TARGET, "dry_run": False,
+            "expected_workstream_id": self.service.active_workstream_id,
+            "expected_deployment_target": release.release_target(self.service.active_workstream_id),
         }, store=self.store, call=call, launcher=self.launcher)
         job = self.store.load(started["job"]["job_id"])
         self.assertEqual(job["return_channel"], "caller")
@@ -177,6 +291,23 @@ class LunaReleaseTests(unittest.TestCase):
     def test_http_payload_cannot_redirect_return_channel(self):
         job = self.create(return_channel="caller")
         self.assertEqual(job["return_channel"], "cockpit")
+
+    def test_native_audit_and_return_follow_the_selected_pages_project(self):
+        self.service.active_workstream_id = "project-mmtx"
+        call, calls = self.fake_api()
+        with patch.object(release, "http_call", side_effect=call):
+            audit = release.audit_release()
+        self.assertEqual(audit["workstream_id"], "project-mmtx")
+        self.assertEqual(audit["deployment_target"], "github_pages")
+        result = release.start_terminal_release({**audit, "confirmation": release.CONFIRMATION,
+            "expected_workstream_id": "project-mmtx", "expected_deployment_target": "github_pages",
+            "client_message_id": "native-pages-release-123", "dry_run": False},
+            store=self.store, call=call, launcher=self.launcher)
+        job = self.store.load(result["job"]["job_id"])
+        result = self.run_job(job, call=call)
+        self.assertTrue(result["ok"])
+        self.assertNotIn("/api/human-adam/luna-release/return", calls)
+        self.service.hub.send.assert_not_called()
 
     def test_success_survives_store_reload_and_returns_once_to_read_only_parent(self):
         job = self.create()

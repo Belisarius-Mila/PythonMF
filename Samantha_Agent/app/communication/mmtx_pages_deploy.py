@@ -1,4 +1,4 @@
-"""Verified GitHub Pages publication for the MMTX production site."""
+"""Verified publication of the shared PythonMF Pages site (legacy MMTX name)."""
 
 from __future__ import annotations
 
@@ -227,14 +227,20 @@ def publish_mmtx_pages_current_main(
     smoke_fetcher: SmokeFetcher = _default_smoke_fetcher,
     deployment_attempts: int = 30,
     sleeper: Sleeper = time.sleep,
+    expected_head: str = "",
+    smoke_path: str = "",
 ) -> dict[str, object]:
     """Publish one clean GitHub-aligned main and prove the Pages deployment."""
 
     repo = Path(source_repo).resolve()
+    if smoke_path not in {"", "colors-numbers/", "to-be-to-have/"}:
+        raise MmtxPagesDeployError("Pages nemají registrovanou HTTP kontrolu aplikace.")
     if not _PUBLISH_LOCK.acquire(blocking=False):
         raise MmtxPagesDeployError("Jiné MMTX nasazení právě probíhá.")
     try:
         target_head = _git_head(runner, repo)
+        if expected_head and (not _HEAD_RE.fullmatch(expected_head) or target_head != expected_head):
+            raise MmtxPagesDeployError("Pages main se liší od předaného commitu.")
         existing = _successful_deployment(
             runner,
             source_repo=repo,
@@ -242,12 +248,15 @@ def publish_mmtx_pages_current_main(
         )
         if existing is not None:
             smoke_status = smoke_fetcher(
-                f"{existing['production_url']}?verify={target_head[:12]}"
+                f"{existing['production_url']}{smoke_path}?verify={target_head[:12]}"
             )
             if smoke_status != 200:
                 raise MmtxPagesDeployError("Publikovaná MMTX stránka neprošla HTTP smoke.")
+            if expected_head and _git_head(runner, repo) != expected_head:
+                raise MmtxPagesDeployError("Pages main se během publikace změnil.")
             return {
                 "status": "already_deployed",
+                **({"main_head": target_head, "smoke_path": smoke_path} if expected_head else {}),
                 "main_short": target_head[:12],
                 "workflow_run_id": 0,
                 "deployment_id": int(existing["deployment_id"]),
@@ -325,12 +334,15 @@ def publish_mmtx_pages_current_main(
                 "Workflow skončil, ale produkční Pages deployment není potvrzený."
             )
         smoke_status = smoke_fetcher(
-            f"{deployment['production_url']}?verify={target_head[:12]}"
+            f"{deployment['production_url']}{smoke_path}?verify={target_head[:12]}"
         )
         if smoke_status != 200:
             raise MmtxPagesDeployError("Publikovaná MMTX stránka neprošla HTTP smoke.")
+        if expected_head and _git_head(runner, repo) != expected_head:
+            raise MmtxPagesDeployError("Pages main se během publikace změnil.")
         return {
             "status": "deployed",
+            **({"main_head": target_head, "smoke_path": smoke_path} if expected_head else {}),
             "main_short": target_head[:12],
             "workflow_run_id": run_id,
             "deployment_id": int(deployment["deployment_id"]),

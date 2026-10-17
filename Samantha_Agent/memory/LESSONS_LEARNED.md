@@ -29,6 +29,19 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-069 — Obecné p+n musí zmrazit projekt i registrovaný cíl
+
+- Problém: Stejný Git head může patřit předání různých projektů, ale jejich
+  runtime a veřejný web vyžadují jiný způsob nasazení a jiný důkaz.
+- Typ: opakující se
+- Řešení nalezeno: 17102026
+- Řešení: Potvrzení svázat s oběma heads, původním projektem a serverovým
+  cílem; hlídat je i před push a při interním kroku. Použít registrovaný
+  publisher, pro web ověřit jeho cestu. Již zarovnaný main plně otestovat
+  bez dalšího push. Rozšířená účtenka nesmí měnit starý striktní modelový
+  kontrakt. Ověřeno 286 integračními testy a skutečnými suchými běhy Luny;
+  pravidla v `technical/luna_release_orchestration.md`.
+
 ### LL-068 — Prázdný úklid nedokazuje funkční autosave
 
 - Problém: Automatická retence držela 12 dvojic, ale proces po ukončení

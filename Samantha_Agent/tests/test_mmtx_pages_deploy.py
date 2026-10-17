@@ -83,6 +83,48 @@ class FakeRunner:
 
 
 class MmtxPagesDeployTests(unittest.TestCase):
+    def test_legacy_publication_still_passes_the_existing_strict_operation_contract(self) -> None:
+        from app.communication.human_adam_operations import (
+            HumanAdamOperationRequest, MMTX_PAGES_DEPLOY, execute_human_adam_operation,
+        )
+        with tempfile.TemporaryDirectory() as temp_dir:
+            result = publish_mmtx_pages_current_main(source_repo=Path(temp_dir),
+                runner=FakeRunner(already_deployed=True), smoke_fetcher=lambda _url: 200)
+        legacy = {**result, "pushed":False, "commit_count":0}
+        verified = execute_human_adam_operation(HumanAdamOperationRequest(MMTX_PAGES_DEPLOY),
+            workstream_id="project-mmtx", publication_authorized=True,
+            production_publisher=lambda: legacy)
+        self.assertEqual(verified["status"], "already_deployed")
+
+    def test_registered_web_path_is_checked_and_unregistered_path_cannot_publish(self) -> None:
+        urls = []
+        with tempfile.TemporaryDirectory() as temp_dir:
+            result = publish_mmtx_pages_current_main(source_repo=Path(temp_dir),
+                runner=FakeRunner(already_deployed=True), expected_head=HEAD, smoke_path="to-be-to-have/",
+                smoke_fetcher=lambda url: urls.append(url) or 200)
+            forbidden = FakeRunner()
+            with self.assertRaises(MmtxPagesDeployError):
+                publish_mmtx_pages_current_main(source_repo=Path(temp_dir), runner=forbidden,
+                    expected_head=HEAD, smoke_path="../private/")
+            self.assertEqual(forbidden.calls, [])
+        self.assertEqual(result["smoke_path"], "to-be-to-have/")
+        self.assertIn("/to-be-to-have/?verify=", urls[0])
+
+    def test_frozen_head_mismatch_cannot_trigger_any_publication(self) -> None:
+        runner = FakeRunner()
+        with tempfile.TemporaryDirectory() as temp_dir, self.assertRaises(MmtxPagesDeployError):
+            publish_mmtx_pages_current_main(source_repo=Path(temp_dir), runner=runner,
+                                          expected_head="b" * 40)
+        self.assertFalse(any("workflow" in command for command in runner.calls))
+
+    def test_frozen_head_is_returned_with_full_sha_and_rechecked_after_publication(self) -> None:
+        runner = FakeRunner(already_deployed=True)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            result = publish_mmtx_pages_current_main(source_repo=Path(temp_dir), runner=runner,
+                expected_head=HEAD, smoke_fetcher=lambda _url: 200)
+        self.assertEqual(result["main_head"], HEAD)
+        self.assertEqual(sum(command[-2:] == ("rev-parse", "HEAD") for command in runner.calls), 2)
+
     def test_publish_triggers_exact_workflow_and_verifies_deployment_and_smoke(self) -> None:
         runner = FakeRunner()
         with tempfile.TemporaryDirectory() as temp_dir:

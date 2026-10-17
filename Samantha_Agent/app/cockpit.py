@@ -8277,6 +8277,15 @@ def human_adam_luna_release_return_action(
         return {"ok": False, "message": "Automatické převzetí účtenky vyžaduje ověření Adamem."}
 
 
+def human_adam_luna_release_execute_action(
+    payload: dict[str, Any], *, token: str, service: Any = HUMAN_ADAM,
+) -> dict[str, Any]:
+    try:
+        return luna_release.execute_release(payload, token=token, service=service)
+    except (AppServerError, OSError, ValueError, TypeError):
+        return {"ok": False, "message": "Interní ověření nebo publikace vyžaduje kontrolu Adamem."}
+
+
 def human_adam_main_remote_sync_action(
     payload: dict[str, Any],
     *,
@@ -8966,6 +8975,14 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "risk": "private_write",
         "confirmation": "private_job_token_and_original_thread",
         "handler_name": "human_adam_luna_release_return_action",
+        "test_level": "direct",
+    },
+    {
+        "path": "/api/human-adam/luna-release/execute",
+        "label": "Ověřit nebo publikovat přesný předaný projekt",
+        "risk": "git_push",
+        "confirmation": "private_job_token_and_exact_registered_target",
+        "handler_name": "human_adam_luna_release_execute_action",
         "test_level": "direct",
     },
     {
@@ -9917,8 +9934,11 @@ class CockpitServer:
                             luna_release.LunaReleaseStore(), parsed.path,
                             self.headers.get("X-Luna-Release", ""),
                         )
-                        if luna_release_target and HUMAN_ADAM.active_workstream_id != "project-cockpit":
-                            raise luna_release.LunaReleaseError("Původní pracovní proud se změnil.")
+                        if luna_release_target:
+                            owned_job = luna_release.LunaReleaseStore().load()
+                            if (not owned_job or HUMAN_ADAM.active_workstream_id != owned_job["workstream_id"]
+                                    or luna_release.release_target(owned_job["workstream_id"]) != owned_job["deployment_target"]):
+                                raise luna_release.LunaReleaseError("Původní pracovní proud nebo cíl se změnil.")
                     except (AppServerError, OSError, ValueError, TypeError):
                         self.respond_json({"ok": False, "message": "Luna zpracovává přesný balíček; další změna počká na ověření."},
                                           status=HTTPStatus.CONFLICT)
@@ -10156,6 +10176,10 @@ class CockpitServer:
                     return
                 if parsed.path == "/api/human-adam/luna-release/return":
                     self.respond_json(human_adam_luna_release_return_action(
+                        self.read_json(), token=self.headers.get("X-Luna-Release", ""), service=HUMAN_ADAM))
+                    return
+                if parsed.path == "/api/human-adam/luna-release/execute":
+                    self.respond_json(human_adam_luna_release_execute_action(
                         self.read_json(), token=self.headers.get("X-Luna-Release", ""), service=HUMAN_ADAM))
                     return
                 if parsed.path == "/api/codex-approval/clear":

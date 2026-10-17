@@ -29,6 +29,9 @@ from app.codex_appserver import (
 )
 from app.communication.github_batch import GITHUB_BATCH_CONFIRMATION
 from app.communication.local_runtime import DEFAULT_SOCKET_PATH
+from app.communication.human_adam_workstream_catalog import (
+    WORKSTREAM_CATALOG_BY_ID, WORKSTREAM_ID_RE,
+)
 from app.file_persistence import atomic_write_json
 
 
@@ -42,6 +45,14 @@ STATES = ACTIVE_STATES | {"completed", "attention", "dry_run_completed"}
 JOB_ID = re.compile(r"[0-9a-f]{32}")
 HEAD = re.compile(r"[0-9a-f]{40}")
 CLIENT_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:-]{7,127}")
+RELEASE_TARGETS = frozenset({"cockpit", "github_pages"})
+# Registered Pages applications share PythonMF's existing publisher. These
+# bindings do not change the legacy MMTX model-operation protocol.
+PAGES_PROJECT_PATHS = {
+    "project-mmtx": "",
+    "project-colors-and-numbers": "colors-numbers/",
+    "project-to-be-to-have": "to-be-to-have/",
+}
 INSTRUCTIONS = (
     "Jsi Luna, vykonavatel přesně vymezeného balíčku p+n. Dostáváš pouze "
     "technické předání, ne celou konverzaci. Nepoužívej žádné nástroje, shell, "
@@ -56,12 +67,27 @@ class LunaReleaseError(AppServerError):
     """The release cannot safely proceed; control belongs to Adam."""
 
 
+def release_target(workstream_id: str) -> str:
+    """Use the portal's existing deployment contract, never a client target."""
+    record = WORKSTREAM_CATALOG_BY_ID.get(workstream_id)
+    if record is None or record.mode == "archived":
+        raise LunaReleaseError("Proud není dostupný pro vývojové předání Luně.")
+    # Empty production target is the existing shared Samantha/Cockpit runtime.
+    # It never authorizes a separate client, Camino receiver, or system release.
+    declared = record.capabilities.production_deployment_target
+    target = declared or ("github_pages" if workstream_id in PAGES_PROJECT_PATHS else "cockpit")
+    if target not in RELEASE_TARGETS:
+        raise LunaReleaseError("Proud nemá registrovaný postup nasazení.")
+    return target
+
+
 def _validated(job: Any) -> dict[str, Any]:
     if not isinstance(job, dict) or job.get("schema") != 1:
         raise LunaReleaseError("Předání Luně má neznámé schéma.")
     if (not JOB_ID.fullmatch(str(job.get("job_id", "")))
             or job.get("state") not in STATES
-            or job.get("workstream_id") != "project-cockpit"
+            or not WORKSTREAM_ID_RE.fullmatch(str(job.get("workstream_id", "")))
+            or job.get("deployment_target", "cockpit" if job.get("workstream_id") == "project-cockpit" else "") not in RELEASE_TARGETS
             or not HEAD.fullmatch(str(job.get("target_head", "")))
             or not HEAD.fullmatch(str(job.get("origin_head", "")))
             or not re.fullmatch(r"[0-9a-f]{16}", str(job.get("expected_code_stamp", "")))
@@ -72,7 +98,7 @@ def _validated(job: Any) -> dict[str, Any]:
             or job.get("return_channel") not in {"cockpit", "caller"}
             or job["commit_count"] < 0):
         raise LunaReleaseError("Předání Luně nemá platný rozsah.")
-    return job
+    return {"deployment_target": "cockpit", **job}
 
 
 def public_job(job: dict[str, Any] | None) -> dict[str, Any] | None:
@@ -81,14 +107,15 @@ def public_job(job: dict[str, Any] | None) -> dict[str, Any] | None:
     checked = _validated(job)
     keys = ("job_id", "state", "phase", "message", "dry_run", "commit_count",
             "pushed", "deployed", "returned_to_adam", "created_at", "updated_at",
-            "push_state", "deployment_state", "failure_phase", "failure_message")
+            "push_state", "deployment_state", "failure_phase", "failure_message",
+            "workstream_id", "deployment_target")
     gate = checked.get("gate") or {}
     verification = checked.get("verification") or {}
     return {**{key: checked.get(key) for key in keys},
             "active": checked["state"] in ACTIVE_STATES,
             "target_short": checked["target_head"][:12],
             "gate": {key: gate[key] for key in ("passed", "mode", "test_count", "duration_seconds") if key in gate},
-            "verification": {key: verification[key] for key in ("state", "main_head", "code_stamp", "smoke_count", "protected_services_unchanged") if key in verification}}
+            "verification": {key: verification[key] for key in ("state", "main_head", "code_stamp", "smoke_count", "protected_services_unchanged", "deployment_target", "deployment_id", "workflow_run_id", "smoke_http_status", "smoke_path") if key in verification}}
 
 
 class LunaReleaseStore:
@@ -195,23 +222,30 @@ def accept_handoff(
     return {"model": MODEL, "accepted": True, "target_head": result["target_head"]}
 
 
-def audit_release(service: Any, *, require_parent: bool = True) -> dict[str, Any]:
-    if service.active_workstream_id != "project-cockpit":
-        raise LunaReleaseError("První verze předává Luně pouze p+n Cockpitu.")
+def audit_release(service: Any = None, *, require_parent: bool = True) -> dict[str, Any]:
+    if service is None:
+        service, require_parent = TerminalAuthority(), False
+    workstream_id = service.active_workstream_id
+    target = release_target(workstream_id)
     if require_parent and not service.active_service.hub.snapshot().get("thread_id"):
         raise LunaReleaseError("Nejdřív připoj původní konverzaci Adama pro převzetí výsledku.")
     batch = service.audit_github_batch()
     deployment = service.audit_simple_main_deployment()
-    if (batch.get("state") != "ready" or int(batch.get("commit_count") or 0) < 1
+    count = int(batch.get("commit_count") or 0)
+    if (batch.get("state") not in {"ready", "aligned"} or count < 0
+            or (batch.get("state") == "ready" and count < 1)
+            or (batch.get("state") == "aligned" and (count != 0 or batch.get("local_head") != batch.get("origin_head")))
             or not deployment.get("ready")
-            or service.active_workstream_id != "project-cockpit"
-            or deployment.get("workstream_id") != "project-cockpit"
+            or service.active_workstream_id != workstream_id
+            or deployment.get("workstream_id") != workstream_id
             or batch.get("local_head") != deployment.get("main_head")):
         raise LunaReleaseError("Balíček nebo cílové nasazení není připravené.")
-    return {"ok": True, "ready": True, "workstream_id": "project-cockpit",
+    return {"ok": True, "ready": True, "workstream_id": workstream_id,
+            "deployment_target": target,
+            "deployment_label": "Web GitHub Pages" if target == "github_pages" else "Běžící Samantha / Cockpit",
             "expected_origin_head": batch["origin_head"],
             "expected_local_head": batch["local_head"],
-            "commit_count": int(batch["commit_count"]),
+            "commit_count": count,
             "expected_code_stamp": deployment["expected_code_stamp"],
             "confirmation_text": CONFIRMATION,
             "message": "Celý přesný balíček je připravený k předání Luně."}
@@ -235,6 +269,8 @@ def start_release(
             assert existing is not None
             if (existing["target_head"] != payload.get("expected_local_head")
                     or existing["origin_head"] != payload.get("expected_origin_head")
+                    or existing["workstream_id"] != payload.get("expected_workstream_id")
+                    or existing["deployment_target"] != payload.get("expected_deployment_target")
                     or existing["return_channel"] != return_channel
                     or existing["dry_run"] != payload["dry_run"]):
                 raise LunaReleaseError("Stejné předání už má jiný rozsah.")
@@ -244,13 +280,16 @@ def start_release(
             raise LunaReleaseError("Předchozí balíček Luny ještě není uzavřený.")
         audit = audit_release(service, require_parent=return_channel == "cockpit")
         if (audit["expected_local_head"] != payload.get("expected_local_head")
-                or audit["expected_origin_head"] != payload.get("expected_origin_head")):
+                or audit["expected_origin_head"] != payload.get("expected_origin_head")
+                or audit["workstream_id"] != payload.get("expected_workstream_id")
+                or audit["deployment_target"] != payload.get("expected_deployment_target")):
             raise LunaReleaseError("Balíček se od náhledu změnil. Proveď nový náhled.")
         session = service.active_service.hub.snapshot() if return_channel == "cockpit" else {}
         timestamp = utc_now()
         job = store.write({
             "schema": 1, "job_id": job_id, "state": "queued", "phase": "handoff",
-            "workstream_id": "project-cockpit", "target_head": audit["expected_local_head"],
+            "workstream_id": audit["workstream_id"], "deployment_target": audit["deployment_target"],
+            "target_head": audit["expected_local_head"],
             "origin_head": audit["expected_origin_head"], "commit_count": audit["commit_count"],
             "expected_code_stamp": audit["expected_code_stamp"], "token": secrets.token_hex(32),
             "client_message_id": request_id, "user_text": str(payload.get("user_text") or "p+n")[:300],
@@ -283,13 +322,17 @@ def authorize_job_call(store: LunaReleaseStore, path: str, token: str) -> str:
             raise LunaReleaseError("Není dostupné čekající předání Adamovi.")
         return ""
     allowed = {
+        "validation": "/api/human-adam/luna-release/execute",
+        "publish_requested": "/api/human-adam/luna-release/execute",
         "push_requested": "/api/human-adam/github-batch",
         "deploy_requested": "/api/human-adam/deploy",
         "verification": "/api/human-adam/deploy-verification",
         "return": "/api/human-adam/luna-release/return",
     }
     if (not hmac.compare_digest(str(token), job["token"])
-            or allowed.get(job["phase"]) != path):
+            or allowed.get(job["phase"]) != path
+            or (job["phase"] in {"deploy_requested", "verification"} and job["deployment_target"] != "cockpit")
+            or (job["phase"] == "publish_requested" and job["deployment_target"] != "github_pages")):
         raise LunaReleaseError("Luna právě zpracovává přesný balíček. Další změna počká na dokončení.")
     return str(job["target_head"])
 
@@ -300,11 +343,25 @@ def http_call(path: str, payload: dict[str, Any] | None = None, *, token: str = 
         headers={"Content-Type": "application/json", "X-Luna-Release": token},
         method="GET" if payload is None else "POST",
     )
-    with urllib.request.urlopen(request, timeout=900 if payload is not None else 15) as response:
+    with urllib.request.urlopen(request, timeout=1800 if payload is not None else 15) as response:
         result = json.load(response)
     if not isinstance(result, dict):
         raise LunaReleaseError("Server nevrátil ověřitelný stav.")
     return result
+
+
+class TerminalAuthority:
+    """Read the active canonical identity; HTTP input cannot select another."""
+
+    def __init__(self, call: Callable[..., dict[str, Any]] | None = None):
+        self.call = call or http_call
+        self.active_workstream_id = str(self.audit_simple_main_deployment().get("workstream_id") or "")
+
+    def audit_github_batch(self) -> dict[str, Any]:
+        return self.call("/api/human-adam/github-batch-audit")
+
+    def audit_simple_main_deployment(self) -> dict[str, Any]:
+        return self.call("/api/human-adam/deploy-audit")
 
 
 def start_terminal_release(
@@ -317,20 +374,30 @@ def start_terminal_release(
     The same canonical server audits/executes the release. Only this Python
     entrypoint selects caller handback; HTTP payloads cannot redirect a chat.
     """
-    class ServerAuthority:
-        active_workstream_id = "project-cockpit"
-
-        def audit_github_batch(self) -> dict[str, Any]:
-            return call("/api/human-adam/github-batch-audit")
-
-        def audit_simple_main_deployment(self) -> dict[str, Any]:
-            result = call("/api/human-adam/deploy-audit")
-            if result.get("workstream_id") != "project-cockpit":
-                raise LunaReleaseError("Hlavní Cockpit nemá vybraný původní proud Cockpit.")
-            return result
-
-    return start_release(payload, service=ServerAuthority(), store=store,
+    return start_release(payload, service=TerminalAuthority(call), store=store,
                          launcher=launcher, return_channel="caller")
+
+
+def execute_release(
+    payload: dict[str, Any], *, token: str, service: Any,
+    store: LunaReleaseStore | None = None,
+) -> dict[str, Any]:
+    """Internal full validation or registered publication for the frozen job."""
+    store = store or LunaReleaseStore()
+    target_head = authorize_job_call(store, "/api/human-adam/luna-release/execute", token)
+    job = store.load()
+    if (not job or job["job_id"] != payload.get("job_id")
+            or job["state"] != "running" or job["dry_run"]
+            or job["workstream_id"] != service.active_workstream_id
+            or release_target(job["workstream_id"]) != job["deployment_target"]):
+        raise LunaReleaseError("Interní krok nemá původní potvrzený projekt a cíl.")
+    if job["phase"] == "validation":
+        return service.validate_luna_release(expected_head=target_head,
+                                              workstream_id=job["workstream_id"])
+    if job["phase"] == "publish_requested" and job["deployment_target"] == "github_pages":
+        return service.publish_luna_release(expected_head=target_head,
+                                             workstream_id=job["workstream_id"])
+    raise LunaReleaseError("Pro tuto fázi není registrovaný interní krok.")
 
 
 def return_release(
@@ -402,6 +469,15 @@ def protected_snapshot() -> dict[str, Any]:
             "autosave_pids": list(auto.watcher_pids), "automatic_cleanup": auto.automatic_cleanup}
 
 
+
+def _check_deployment_audit(audit: dict[str, Any], job: dict[str, Any]) -> None:
+    if (not audit.get("ready") or audit.get("main_head") != job["target_head"]
+            or audit.get("workstream_id") != job["workstream_id"]
+            or release_target(job["workstream_id"]) != job["deployment_target"]
+            or audit.get("expected_code_stamp") != job["expected_code_stamp"]):
+        raise LunaReleaseError("Projekt nebo cíl nasazení se od předání změnil.")
+
+
 def run_release(
     job_id: str, *, store: LunaReleaseStore | None = None,
     call: Callable[..., dict[str, Any]] = http_call,
@@ -417,7 +493,7 @@ def run_release(
             return {"ok": False, "job": public_job(job)}  # Never replay a write.
         job = store.update(job_id, state="running", message="Luna ověřuje předání.")
         try:
-            handoff = {key: job[key] for key in ("workstream_id", "target_head", "origin_head", "commit_count", "dry_run")}
+            handoff = {key: job[key] for key in ("workstream_id", "deployment_target", "target_head", "origin_head", "commit_count", "dry_run")}
             handoff["protected_services"] = ["Camino", "autosave"]
             context_root = store.root / "context"
             context_root.mkdir(mode=0o700, exist_ok=True)
@@ -437,7 +513,7 @@ def run_release(
             batch = call("/api/human-adam/github-batch-audit")
             if batch.get("local_head") != job["target_head"] or batch.get("origin_head") != job["origin_head"]:
                 raise LunaReleaseError("Balíček se po předání změnil.")
-            health = call("/api/server/health")["server"]
+            _check_deployment_audit(call("/api/human-adam/deploy-audit"), job)
             if job["commit_count"]:
                 job = store.update(job_id, phase="push_requested", push_state="requested",
                                    message="Luna odesílá ověřený balíček.")
@@ -447,51 +523,76 @@ def run_release(
                 if not pushed.get("ok") or not pushed.get("pushed"):
                     raise LunaReleaseError("Odeslání balíčku nebylo potvrzené. Řízení má Adam.")
                 job = store.update(job_id, pushed=True, push_state="confirmed", gate=pushed.get("gate", {}))
-                gate = job["gate"]
-                if not gate.get("passed") or gate.get("mode") != "full" or int(gate.get("test_count") or 0) < 1:
-                    raise LunaReleaseError("Push je potvrzený, ale chybí doklad plné publikační brány.")
+            else:
+                job = store.update(job_id, phase="validation", push_state="already_aligned",
+                                   message="Luna ověřuje již odeslaný main plnou bránou.")
+                validated = call("/api/human-adam/luna-release/execute", {"job_id": job_id}, token=token)
+                if not validated.get("ok"):
+                    raise LunaReleaseError("Plná publikační brána neprošla.")
+                job = store.update(job_id, gate=validated.get("gate", {}))
+            gate = job["gate"]
+            if not gate.get("passed") or gate.get("mode") != "full" or int(gate.get("test_count") or 0) < 1:
+                raise LunaReleaseError("Chybí doklad plné publikační brány.")
             exact = call("/api/human-adam/github-batch-audit")
             if exact.get("state") != "aligned" or exact.get("local_head") != job["target_head"]:
                 raise LunaReleaseError("Shoda GitHubu a předaného balíčku není potvrzená.")
-            audit = call("/api/human-adam/deploy-audit")
-            if (not audit.get("ready") or audit.get("main_head") != job["target_head"]
-                    or audit.get("expected_code_stamp") != job["expected_code_stamp"]):
-                raise LunaReleaseError("Cíl nasazení se změnil.")
-            job = store.update(job_id, phase="deploy_requested", deployment_state="requested",
-                               message="Luna nasazuje balíček do Cockpitu.")
-            try:
-                result = call("/api/human-adam/deploy", {
-                    "confirmation": "POTVRZUJI NASAZENI AKTUALNIHO MAIN DO COCKPITU"}, token=token)
-                if not result.get("ok"):
-                    raise LunaReleaseError("Příprava nasazení selhala. Řízení má Adam.")
-            except (ConnectionError, TimeoutError, urllib.error.URLError):
-                pass  # A restart may close HTTP. Do not submit deployment again.
-            for _ in range(90):
+            _check_deployment_audit(call("/api/human-adam/deploy-audit"), job)
+            if job["deployment_target"] == "github_pages":
+                job = store.update(job_id, phase="publish_requested", deployment_state="requested",
+                                   message="Luna publikuje registrovaný web GitHub Pages.")
+                published = call("/api/human-adam/luna-release/execute", {"job_id": job_id}, token=token)
+                if (published.get("ok") is not True or published.get("main_head") != job["target_head"]
+                        or published.get("status") not in {"deployed", "already_deployed"}
+                        or published.get("smoke_http_status") != 200
+                        or type(published.get("deployment_id")) is not int
+                        or published["deployment_id"] <= 0):
+                    raise LunaReleaseError("Pages nedoložily přesný commit, deployment a HTTP smoke.")
+                if published.get("smoke_path", "") != PAGES_PROJECT_PATHS.get(job["workstream_id"], ""):
+                    raise LunaReleaseError("Pages nedoložily HTTP kontrolu původní aplikace.")
+                verification = {key: published[key] for key in ("deployment_id", "workflow_run_id", "smoke_http_status")}
+                verification["smoke_path"] = published.get("smoke_path", "")
+            else:
+                health = call("/api/server/health")["server"]
+                job = store.update(job_id, phase="deploy_requested", deployment_state="requested",
+                                   message="Luna nasazuje balíček do Cockpitu.")
                 try:
-                    current = call("/api/server/health")["server"]
-                    if current["pid"] != health["pid"] and current["code_stamp"] == job["expected_code_stamp"]:
+                    result = call("/api/human-adam/deploy", {
+                        "confirmation": "POTVRZUJI NASAZENI AKTUALNIHO MAIN DO COCKPITU"}, token=token)
+                    if not result.get("ok"):
+                        raise LunaReleaseError("Příprava nasazení selhala. Řízení má Adam.")
+                except (ConnectionError, TimeoutError, urllib.error.URLError):
+                    pass  # A restart may close HTTP. Do not submit deployment again.
+                for _ in range(90):
+                    try:
+                        current = call("/api/server/health")["server"]
+                        if current["pid"] != health["pid"] and current["code_stamp"] == job["expected_code_stamp"]:
+                            break
+                    except (OSError, ValueError, KeyError):
+                        pass
+                    pause(1)
+                else:
+                    raise LunaReleaseError("Nový proces s předaným kódem nebyl potvrzený.")
+                job = store.update(job_id, phase="verification", message="Luna kontroluje výsledek nasazení.")
+                for _ in range(30):
+                    verified = call("/api/human-adam/deploy-verification", {}, token=token)
+                    if verified.get("ok"):
                         break
-                except (OSError, ValueError, KeyError):
-                    pass
-                pause(1)
-            else:
-                raise LunaReleaseError("Nový proces s předaným kódem nebyl potvrzený.")
-            job = store.update(job_id, phase="verification", message="Luna kontroluje výsledek nasazení.")
-            for _ in range(30):
-                verified = call("/api/human-adam/deploy-verification", {}, token=token)
-                if verified.get("ok"):
-                    break
-                if "jinou operaci" not in str(verified.get("message", "")):
-                    raise LunaReleaseError("Ověření nasazení neprošlo. Řízení má Adam.")
-                pause(1)
-            else:
-                raise LunaReleaseError("Ověření nasazení zůstalo nedokončené.")
-            if (verified.get("state") != "deployed" or verified.get("main_head") != job["target_head"]
-                    or verified.get("smoke", {}).get("check_count") != 5 or protect() != before):
-                raise LunaReleaseError("Úplná účtenka nebo zachování chráněných služeb není potvrzené.")
+                    if "jinou operaci" not in str(verified.get("message", "")):
+                        raise LunaReleaseError("Ověření nasazení neprošlo. Řízení má Adam.")
+                    pause(1)
+                else:
+                    raise LunaReleaseError("Ověření nasazení zůstalo nedokončené.")
+                if (verified.get("state") != "deployed" or verified.get("main_head") != job["target_head"]
+                        or verified.get("smoke", {}).get("check_count") != 5):
+                    raise LunaReleaseError("Úplná účtenka nasazení není potvrzená.")
+                verification = {"smoke_count": 5, "code_stamp": job["expected_code_stamp"]}
+            exact = call("/api/human-adam/github-batch-audit")
+            if (exact.get("state") != "aligned" or exact.get("local_head") != job["target_head"]
+                    or exact.get("origin_head") != job["target_head"] or protect() != before):
+                raise LunaReleaseError("Přesný main nebo zachování chráněných služeb není potvrzené.")
             job = store.update(job_id, deployed=True, deployment_state="confirmed", verification={
-                "state": "deployed", "main_head": job["target_head"], "smoke_count": 5,
-                "code_stamp": job["expected_code_stamp"], "protected_services_unchanged": True})
+                **verification, "state": "deployed", "main_head": job["target_head"],
+                "deployment_target": job["deployment_target"], "protected_services_unchanged": True})
         except Exception as exc:
             # No raw command, exception text, tokens or private output is exposed.
             failure_message = (str(exc) if type(exc) is LunaReleaseError else

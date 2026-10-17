@@ -2558,6 +2558,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     const message = String(lunaReleaseJob.message || "").trim();
     const releaseStateLabel = (value) => ({
       not_started:"zatím nezačal",
+      already_aligned:"již na GitHubu",
       requested:"čeká na potvrzení",
       confirmed:"potvrzeno",
       uncertain:"nejisté, ověřuje Adam",
@@ -2631,14 +2632,14 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   }
 
   function shouldInterceptLunaReleaseCommand(value) {
-    return activeWorkstreamId === "project-cockpit" && exactLunaReleaseCommand(value);
+    return workstreamDevelopmentEnabled && exactLunaReleaseCommand(value);
   }
 
   async function startLunaRelease({dryRun=false, userText="p+n", clientMessageId=""}={}) {
     if (lunaReleaseStarting || lunaReleaseJobActive()) return false;
-    if (activeWorkstreamId !== "project-cockpit") return false;
+    if (!workstreamDevelopmentEnabled) return false;
     if (!sessionConnected || !lastSession || !String(lastSession.thread_id || "")) {
-      lunaReleaseMeta.textContent = "Nejdřív obnov existující relaci Cockpitu; předání nezaloží nové vlákno.";
+      lunaReleaseMeta.textContent = "Nejdřív obnov existující relaci projektu; předání nezaloží nové vlákno.";
       return false;
     }
     lunaReleaseStarting = true;
@@ -2649,14 +2650,15 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       if (!audit || audit.ok !== true || audit.ready !== true) {
         throw new Error(audit && audit.message || "Balíček není připravený k předání.");
       }
-      if (String(audit.workstream_id || "") !== "project-cockpit" || Number(audit.commit_count || 0) <= 0) {
-        throw new Error("První verze předání podporuje pouze neprázdný balíček pracovního proudu Cockpit.");
+      if (String(audit.workstream_id || "") !== activeWorkstreamId || !Number.isInteger(audit.commit_count) || audit.commit_count < 0
+          || !["cockpit", "github_pages"].includes(String(audit.deployment_target || ""))) {
+        throw new Error("Audit neodpovídá vybranému projektu nebo registrovanému cíli.");
       }
       const confirmationText = String(audit.confirmation_text || "").trim();
       if (!confirmationText) throw new Error("Server nevrátil potvrzovací větu.");
       const originHead = String(audit.expected_origin_head || "");
       const localHead = String(audit.expected_local_head || "");
-      const packageSummary = `${Number(audit.commit_count || 0)} commitů · origin ${originHead} · lokální main ${localHead}${audit.message ? `\n${audit.message}` : ""}`;
+      const packageSummary = `${audit.deployment_label || audit.deployment_target} · ${Number(audit.commit_count || 0)} nových commitů · origin ${originHead} · lokální main ${localHead}${audit.message ? `\n${audit.message}` : ""}`;
       lunaReleaseMeta.textContent = packageSummary;
       const confirmed = window.confirm(
         `${dryRun ? "Zkouška bez publikování" : "Předání p+n Luně"}\n\nPřesný balíček:\n${packageSummary}\n\nPotvrzovací věta: ${confirmationText}\n\nPotvrzuješ tuto akci?`,
@@ -2689,6 +2691,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         body:JSON.stringify({
           expected_origin_head:originHead,
           expected_local_head:localHead,
+          expected_workstream_id:String(audit.workstream_id),
+          expected_deployment_target:String(audit.deployment_target),
           confirmation,
           client_message_id:messageIdValue,
           user_text:userText,
@@ -2720,7 +2724,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   function renderWork(payload) {
     deploymentAudit = null;
     githubBatchModeEnabled = payload.github_batch_mode === true;
-    lunaReleaseBox.hidden = !githubBatchModeEnabled || activeWorkstreamId !== "project-cockpit";
+    lunaReleaseBox.hidden = !githubBatchModeEnabled || !workstreamDevelopmentEnabled;
     if (!githubBatchModeEnabled) renderGithubBatchAudit(null);
     renderMainRemoteSyncAudit(null);
     renderHandoffTakeoverCheck(null);
