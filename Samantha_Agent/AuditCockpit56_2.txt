@@ -9,6 +9,13 @@ TOTO JE AKTUÁLNÍ ROZHODOVACÍ ČÁST DOKUMENTU.
 Architektonický průběh a původní audit zůstávají níže jako historie.
 Čísla, provozní stavy a priority historických oddílů nejsou dnešním stavem.
 
+VÝVOJOVÝ STAV — 2026-10-17 14:58 CEST
+Míla potvrdil odstranění panelu Vývojový runner ze Servisu. Lokálně hotovo:
+odstraněný panel i navázaný JavaScript; Vývoj obsahuje Projekty, Git a terminál.
+Backendový allowlist/API a vývojové brány zachované. 33 cílených testů a rychlá
+statická brána PASS. Žádný restart ani zásah do Camino/autosave; push a nasazení
+čekají na samostatné p+n. Kanonický zápis: handoff/TVBCP project-cockpit.
+
 PŘEDÁNÍ A VYDÁNÍ — 2026-10-17 14:41 CEST
 Body 1–3 pushnuté a funkčně nasazené: kód ae30beddcdfd, nový proces potvrzený,
 otisk 50ffdf992ae6552a, receipt deployed a smoke 5/5. Plná publikační

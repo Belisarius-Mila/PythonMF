@@ -1,6 +1,13 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-17 14:58 CEST: podle Mílova rozhodnutí je lokálně odstraněný panel Vývojový
+  runner ze Servisu včetně jeho DOM vazeb, obsluhy tlačítek a formátování
+  výstupu. Vývoj nabízí Projekty, Git a terminál. Serverový allowlist/API
+  a standardní vývojové brány zůstávají zachované. 33 cílených testů
+  a rychlá statická brána PASS. Bez restartu či změny Camino/autosave;
+  push a nasazení této úpravy čekají na samostatné p+n.
+
 - 2026-10-17 14:41 CEST: body 1–3 jsou pushnuté a funkčně nasazené. Kód `ae30beddcdfd`,
   otisk `50ffdf992ae6552a`, nový proces potvrzený, receipt deployed a smoke 5/5.
   Plná publikační brána 1963 testů OK (11 přeskočených). Shoda místního
@@ -87,6 +94,7 @@ Pripomenout pri startu: ano
 
 Co se resilo:
 Body 1–3: pravdivé provozní stavy, Servis podle účelu a aktuálnost doporučení auditů; pushnuté a funkčně nasazené.
+Navazující zjednodušení: panel Vývojový runner lokálně odstraněný; push/nasazení čekají.
 
 Co je hotove:
 - U01–U06 implementované a funkčně nasazené; důkazy jednotlivých kroků a souhrnná roadmapa v2.8.
@@ -96,7 +104,7 @@ Co neni hotove:
 - Fyzická přejímka Servisu a dalších UI změn. Zbývající části U08–U11 jsou další práce podle roadmapy.
 
 Dalsi krok:
-Obnovit Cockpit a fyzicky vyzkoušet Servis na iPhonu.
+Po samostatném p+n nasadit odstranění runneru; potom fyzicky vyzkoušet Servis na iPhonu.
 
 Navrhovane dalsi kroky:
 - Grafika a fyzická přejímka podle TXT.
@@ -1463,3 +1471,31 @@ Technický důkaz:
   `logs/cockpit_release_ui_code_20261017.log`, protected before/after logy
   a záznam zachování TXT auditu. Finální dokumentační head/PID ověřuje živá
   účtenka po závěrečné publikaci tohoto zápisu.
+
+
+### 2026-10-17 14:58 CEST — Vývojový runner vyřazený ze Servisu
+
+Hotovo:
+- V místní verzi už Servis neobsahuje panel Vývojový runner ani jeho tři
+  tlačítka. Část Vývoj ponechává Projekty, Git a terminál; popisek tomu odpovídá.
+- Odstraněné jsou také příslušné DOM proměnné, click handler a formátování
+  výsledku, aby po odebrání panelu nevznikla chyba při inicializaci stránky.
+
+Rozhodnutí:
+- Míla potvrdil odstranění panelu, protože jej pro společnou práci nepotřebuje.
+- Rozsah je pouze frontend. Backendový allowlist/API a standardní kontroly
+  vývoje zůstávají. Žádná změna služeb, síťové konfigurace ani soukromých dat.
+
+Další krok:
+- Po samostatném p+n nasadit tuto místní změnu a zkontrolovat Servis.
+
+Navrhované další kroky:
+- Zachovat domluvenou fyzickou přejímku Servisu a filmového editoru.
+
+Technický důkaz:
+- 33 cílených unittestů PASS: frontendové kontrakty, navigace, vyřazený hlasový
+  frontend a hlavní HTML/route kontrakty. Aktualizovaný očekávaný otisk HTML.
+- Rychlá statická brána PASS; logy `logs/cockpit_runner_ui_targeted_20261017.log`
+  a `logs/cockpit_runner_ui_static_20261017.log`.
+- Bez push a restartu/nasazení. Fyzická přejímka nové úpravy čeká;
+  současný provoz se tímto zápisem znovu nepotvrzuje.

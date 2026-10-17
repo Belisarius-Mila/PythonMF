@@ -321,7 +321,7 @@ class CockpitVoiceFrontendRetirementTests(unittest.TestCase):
         combined_source = source + COCKPIT_HTML
 
         self.assertIn('"id": "cockpit_tests"', source)
-        self.assertIn('data-dev-runner="cockpit_tests"', COCKPIT_HTML)
+        self.assertNotIn('data-dev-runner', COCKPIT_HTML)
         self.assertIn('"tests.test_cockpit"', source)
         self.assertNotIn("cockpit_voice_tests", combined_source)
         self.assertNotIn("tests.test_adam_voice_mode", combined_source)

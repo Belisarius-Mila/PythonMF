@@ -304,8 +304,6 @@
 			const awakeModeDurationButtons = Array.from(document.querySelectorAll("[data-awake-mode-hours]"));
 			    const dashboardSpeakBtn = document.getElementById("dashboardSpeakBtn");
 			    const dashboardSpeakSelectionBtn = document.getElementById("dashboardSpeakSelectionBtn");
-    const devRunnerPanel = document.getElementById("devRunnerPanel");
-    const devRunnerOutput = document.getElementById("devRunnerOutput");
     const codexApprovalCard = document.getElementById("codexApprovalCard");
     const codexApprovalReason = document.getElementById("codexApprovalReason");
     const codexApprovalCommand = document.getElementById("codexApprovalCommand");
@@ -2827,45 +2825,6 @@
 			    refreshAwakeMode();
 			  }
 			}
-
-	    function formatDevRunnerResult(data) {
-	      const parts = [data.message || "Vývojová akce dokončena."];
-	      const stdout = String(data.stdout || "").trim();
-	      const stderr = String(data.stderr || "").trim();
-	      if (stdout) {
-	        parts.push(`STDOUT:\n${stdout}`);
-	      }
-	      if (stderr) {
-	        parts.push(`STDERR:\n${stderr}`);
-	      }
-	      return parts.join("\n\n");
-	    }
-
-	    async function runDevRunnerAction(actionId, button) {
-	      const action = String(actionId || "").trim();
-	      if (!action) return;
-	      if (button) button.disabled = true;
-	      if (devRunnerOutput) {
-	        devRunnerOutput.textContent = "Spouštím vývojovou akci...";
-	      }
-	      showMessage("Spouštím vývojovou akci...");
-	      try {
-	        const data = await postJson("/api/dev-runner/run", {action_id: action});
-	        if (devRunnerOutput) {
-	          devRunnerOutput.textContent = formatDevRunnerResult(data);
-	        }
-	        showMessage(data.message || (data.ok ? "Vývojová akce prošla." : "Vývojová akce selhala."));
-	        await refresh({silent: true, includeSecondary: false});
-	      } catch (err) {
-	        recordFrontendError(err);
-	        if (devRunnerOutput) {
-	          devRunnerOutput.textContent = `Vývojová akce selhala: ${err}`;
-	        }
-	        showMessage(`Vývojová akce selhala: ${err}`);
-	      } finally {
-	        if (button) button.disabled = false;
-	      }
-	    }
 
 	    function isRemoteCockpitClient() {
 	      const host = String(window.location.hostname || "").toLowerCase();
@@ -6933,11 +6892,6 @@ ${item.context || ""}`);
     awakeModeStopBtn.addEventListener("click", stopAwakeMode);
     autosaveCleanupPreviewBtn.addEventListener("click", () => previewAutosaveCleanup(autosaveCleanupPreviewBtn));
     autosaveCleanupApplyBtn.addEventListener("click", applyAutosaveCleanup);
-    devRunnerPanel.addEventListener("click", (event) => {
-      const button = event.target.closest("button[data-dev-runner]");
-      if (!button) return;
-      runDevRunnerAction(button.dataset.devRunner || "", button);
-    });
     dashboardSpeakBtn.addEventListener("click", speakDashboardStatus);
     dashboardSpeakSelectionBtn.addEventListener("pointerdown", captureSelectedSpeechText);
     dashboardSpeakSelectionBtn.addEventListener("mousedown", captureSelectedSpeechText);
