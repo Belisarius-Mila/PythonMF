@@ -7,6 +7,7 @@ merges, rebases, squashes, force-pushes, or changes the local working tree.
 
 from __future__ import annotations
 
+import os
 import re
 import subprocess
 import threading
@@ -32,6 +33,30 @@ _BLOCKED_PREFIXES = (
     "Samantha_Agent/data/session_autosave/",
 )
 _BLOCKED_NAMES = frozenset({".env", ".env.local", ".env.production"})
+
+
+def _push_exact_head(repo: Path, head: str) -> None:
+    """Use an already valid CLI login for one HTTPS GitHub push (LL-060).
+
+    Never log/read the token, change config, start login, or retry a push.
+    Other remotes and unavailable CLI credentials keep the existing transport.
+    """
+    args = ["push", "origin", f"{head}:refs/heads/main"]
+    remote = _git(repo, ["remote", "get-url", "--push", "origin"])
+    if re.fullmatch(r"https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", remote):
+        gh = next((path for path in (Path("/usr/local/bin/gh"), Path("/opt/homebrew/bin/gh"))
+                   if path.is_file() and os.access(path, os.X_OK)), None)
+        if gh is not None:
+            try:
+                auth = subprocess.run([str(gh), "auth", "status", "--hostname", "github.com"],
+                                      stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                                      timeout=15, check=False)
+                if auth.returncode == 0:
+                    args = ["-c", "credential.helper=", "-c",
+                            f"credential.helper=!{gh} auth git-credential", *args]
+            except (OSError, subprocess.TimeoutExpired):
+                pass
+    _git(repo, args)
 
 
 class GitHubBatchError(AppServerError):
@@ -323,10 +348,7 @@ def push_github_batch(
             raise GitHubBatchError(
                 "GitHub nebo lokální main se během brány změnil; nic se nepushnulo."
             )
-        _git(
-            workspace.source_repo,
-            ["push", "origin", f"{expected_local}:refs/heads/main"],
-        )
+        _push_exact_head(workspace.source_repo, expected_local)
         verified_origin = _refresh_origin_main(workspace.source_repo)
         if verified_origin != expected_local or _source_head(workspace.source_repo) != expected_local:
             raise GitHubBatchError("Push proběhl, ale závěrečná shoda GitHubu není doložená.")

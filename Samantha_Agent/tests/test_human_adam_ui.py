@@ -1,8 +1,13 @@
 from __future__ import annotations
 
+import json
+import subprocess
+import tempfile
 import unittest
+from pathlib import Path
 
 from app.communication.human_adam_ui import HUMAN_ADAM_HTML
+from scripts.cockpit_quality_gate import node_binary
 
 
 class HumanAdamUiTests(unittest.TestCase):
@@ -66,6 +71,11 @@ class HumanAdamUiTests(unittest.TestCase):
             "githubBatchCommits",
             "githubBatchConfirmation",
             "githubBatchBtn",
+            "lunaReleaseBox",
+            "lunaReleaseMeta",
+            "lunaReleaseStartBtn",
+            "lunaReleaseDryRunBtn",
+            "lunaReleaseStatus",
             "handoffTakeoverCheck",
             "deployAuditBtn",
             "deployConfirmation",
@@ -138,6 +148,7 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertNotIn("checkpoint_token:deploymentAudit.checkpoint_token", HUMAN_ADAM_HTML)
         self.assertIn("confirmation.trim() !== required", HUMAN_ADAM_HTML)
         self.assertIn("const confirmation = deployConfirmation.value.trim();", HUMAN_ADAM_HTML)
+
         self.assertIn('deployConfirmation.addEventListener("input"', HUMAN_ADAM_HTML)
         self.assertNotIn("window.prompt", HUMAN_ADAM_HTML)
         failure = HUMAN_ADAM_HTML.index("const deploymentFailure =")
@@ -145,20 +156,57 @@ class HumanAdamUiTests(unittest.TestCase):
         restore = HUMAN_ADAM_HTML.index("deployMeta.textContent = deploymentFailure;", refresh)
         self.assertLess(refresh, restore)
         self.assertIn("await waitForCockpitAndReload(", HUMAN_ADAM_HTML)
-        self.assertIn(
-            "String(payload.main_short || auditedMainShort)",
-            HUMAN_ADAM_HTML,
-        )
+        self.assertIn("String(payload.main_short || auditedMainShort)", HUMAN_ADAM_HTML)
         verification = HUMAN_ADAM_HTML.index('api("/api/human-adam/deploy-verification"')
         stored = HUMAN_ADAM_HTML.index("storeVerifiedDeploymentResult(verification)", verification)
         reload_page = HUMAN_ADAM_HTML.index("window.location.reload();", verification)
         self.assertLess(verification, stored)
         self.assertLess(stored, reload_page)
-        self.assertNotIn(
-            "if (!storeVerifiedDeploymentResult(verification)) return;",
-            HUMAN_ADAM_HTML,
-        )
+        self.assertNotIn("if (!storeVerifiedDeploymentResult(verification)) return;", HUMAN_ADAM_HTML)
         self.assertIn('verification.state !== "deployed"', HUMAN_ADAM_HTML)
+
+    def test_luna_release_ui_uses_explicit_audit_confirmation_and_durable_status(self) -> None:
+        self.assertIn('id="lunaReleaseStartBtn" type="button">Předat p+n Luně', HUMAN_ADAM_HTML)
+        self.assertIn('id="lunaReleaseDryRunBtn" type="button">Zkouška bez publikování', HUMAN_ADAM_HTML)
+        self.assertIn('api("/api/human-adam/luna-release/audit", {cache:"no-store"})', HUMAN_ADAM_HTML)
+        self.assertIn('api("/api/human-adam/luna-release/start"', HUMAN_ADAM_HTML)
+        self.assertIn('api("/api/human-adam/luna-release/status", {cache:"no-store"})', HUMAN_ADAM_HTML)
+        self.assertIn("expected_origin_head:originHead", HUMAN_ADAM_HTML)
+        self.assertIn("expected_local_head:localHead", HUMAN_ADAM_HTML)
+        self.assertIn("confirmation_text", HUMAN_ADAM_HTML)
+        self.assertIn("window.confirm(", HUMAN_ADAM_HTML)
+        self.assertIn("client_message_id:messageIdValue", HUMAN_ADAM_HTML)
+        self.assertIn("user_text:userText", HUMAN_ADAM_HTML)
+        self.assertIn("dry_run:Boolean(dryRun)", HUMAN_ADAM_HTML)
+        self.assertIn("const LUNA_RELEASE_POLL_INTERVAL_MS = 2500;", HUMAN_ADAM_HTML)
+        self.assertIn("restoreLunaReleaseState();", HUMAN_ADAM_HTML)
+        self.assertIn('loadStatus();\n  }', HUMAN_ADAM_HTML)
+        self.assertIn('new Set(["p+n", "p*n", "vše p+n"])', HUMAN_ADAM_HTML)
+        self.assertIn("if (shouldInterceptLunaReleaseCommand(text))", HUMAN_ADAM_HTML)
+        self.assertIn('activeWorkstreamId === "project-cockpit" && exactLunaReleaseCommand(value)', HUMAN_ADAM_HTML)
+        self.assertIn('lunaReleaseBox.hidden = !githubBatchModeEnabled || activeWorkstreamId !== "project-cockpit";', HUMAN_ADAM_HTML)
+        self.assertIn('!lastSession || !String(lastSession.thread_id || "")', HUMAN_ADAM_HTML)
+        self.assertIn("setWriteIntentArmed(false);", HUMAN_ADAM_HTML)
+        self.assertIn("input.disabled = lunaReleaseBusy;", HUMAN_ADAM_HTML)
+        self.assertIn("sendBtn.disabled = busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing || lunaReleaseBusy;", HUMAN_ADAM_HTML)
+        self.assertIn("|| !lunaReleaseStatusLoaded", HUMAN_ADAM_HTML)
+        self.assertIn('String(audit.workstream_id || "") !== "project-cockpit"', HUMAN_ADAM_HTML)
+        self.assertIn('if (!dryRun) {\n        const pendingMessage', HUMAN_ADAM_HTML)
+        self.assertIn('uncertain:"nejisté, ověřuje Adam"', HUMAN_ADAM_HTML)
+        self.assertIn("lunaReleaseJobActive() || !lunaReleaseStatusLoaded", HUMAN_ADAM_HTML)
+        self.assertIn("loadLunaReleaseStatus();\n    if (sessionTurnBusy", HUMAN_ADAM_HTML)
+        self.assertIn('window.addEventListener("pagehide", () => {\n    stopResultWatch();\n    stopLunaReleasePoll();', HUMAN_ADAM_HTML)
+
+    def test_luna_release_frontend_behavior_in_node_vm(self) -> None:
+        result = subprocess.run(
+            [node_binary(), str(Path(__file__).with_name("luna_release_frontend.test.cjs"))],
+            input=json.dumps(HUMAN_ADAM_HTML),
+            text=True,
+            capture_output=True,
+            timeout=30,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     def test_deployment_wait_recovers_late_success_without_false_fallback(self) -> None:
         wait_start = HUMAN_ADAM_HTML.index(

@@ -416,6 +416,7 @@ class CanonicalSessionHub:
         client_message_id: str,
         client_sent_at: str = "",
         model_input_text: str | None = None,
+        read_only: bool = False,
     ) -> dict[str, Any]:
         clean_text = str(text or "").strip()
         clean_model_input = str(model_input_text if model_input_text is not None else clean_text).strip()
@@ -476,7 +477,8 @@ class CanonicalSessionHub:
                     text=clean_model_input,
                     client_message_id=clean_id,
                     effort=self.reasoning_effort,
-                    sandbox_policy=self.sandbox_policy,
+                    sandbox_policy=({"type": "readOnly", "networkAccess": False}
+                                    if read_only else self.sandbox_policy),
                     approval_policy=self.approval_policy,
                     model=self.model,
                 )

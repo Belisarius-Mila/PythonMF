@@ -1,6 +1,16 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-17 15:43 CEST: orchestrace p+n přes Lunu je implementovaná lokálně. Převzetí
+  celého balíčku s přesnými heads, trvalá soukromá účtenka a vykonavatel mimo
+  restartovaný Cockpit; původní plná brána/push/deploy/smoke zachované.
+  Návrat míří do původního vlákna Cockpitu nebo k původnímu terminálovému
+  Adamovi. UI má přesné p+n, zkoušku, potvrzení balíčku a obnovu stavu.
+  147 cílených a 27 závěrečných regresních testů PASS; plná brána 1993/1993 PASS (267,315 s testů).
+  Skutečná Luna přijala syntetických 7 commitů; celý suchý běh prošel i
+  read-only ochranami Camino/autosave. Bez push, nasazení a změny služeb.
+  První zavedení nových rout a ostré p+n zbývají jako samostatný krok.
+
 - 2026-10-17 14:58 CEST: podle Mílova rozhodnutí je lokálně odstraněný panel Vývojový
   runner ze Servisu včetně jeho DOM vazeb, obsluhy tlačítek a formátování
   výstupu. Vývoj nabízí Projekty, Git a terminál. Serverový allowlist/API
@@ -95,6 +105,7 @@ Pripomenout pri startu: ano
 Co se resilo:
 Body 1–3: pravdivé provozní stavy, Servis podle účelu a aktuálnost doporučení auditů; pushnuté a funkčně nasazené.
 Navazující zjednodušení: panel Vývojový runner lokálně odstraněný; push/nasazení čekají.
+Orchestrace p+n přes Lunu lokálně implementovaná; první zavedení a ostrý průchod čekají.
 
 Co je hotove:
 - U01–U06 implementované a funkčně nasazené; důkazy jednotlivých kroků a souhrnná roadmapa v2.8.
@@ -104,7 +115,7 @@ Co neni hotove:
 - Fyzická přejímka Servisu a dalších UI změn. Zbývající části U08–U11 jsou další práce podle roadmapy.
 
 Dalsi krok:
-Po samostatném p+n nasadit odstranění runneru; potom fyzicky vyzkoušet Servis na iPhonu.
+Po samostatném p+n zavést odstranění runneru a orchestraci; další balíček předat Luně a fyzicky ověřit UI.
 
 Navrhovane dalsi kroky:
 - Grafika a fyzická přejímka podle TXT.
@@ -1499,3 +1510,56 @@ Technický důkaz:
   a `logs/cockpit_runner_ui_static_20261017.log`.
 - Bez push a restartu/nasazení. Fyzická přejímka nové úpravy čeká;
   současný provoz se tímto zápisem znovu nepotvrzuje.
+
+
+### 2026-10-17 15:43 CEST — Předání celého p+n balíčku Luně a návrat původnímu Adamovi
+
+Hotovo:
+- Lokální implementace předává Luně celý neprázdný rozsah commitů pro Cockpit.
+  Náhled a souhlas určují oba přesné heads; počet commitů není omezený na jeden.
+- Záznam a oddělený vykonavatel přežijí zavření karty či restart Cockpitu.
+  Dosavadní plná brána, batch push, řízený restart a následné smoke zůstávají.
+- Chat Cockpitu umí přesné p+n, přehled stavu a zkoušku bez publikování.
+  Běžné otázky a p+n jiných pracovních proudů zachovávají původní cestu.
+- Řízení se vrací původnímu Adamovi: Cockpit do stejného uloženého vlákna
+  v read-only režimu; přímá relace přes pomocného agenta ke svému volajícímu.
+  Výchozí model ani globální konfigurace se nepřepínají.
+
+Rozhodnutí:
+- Míla schválil implementaci předání celého balíčku a návratu do jedné
+  konverzace. Vývoj není souhlasem k ostrému push/nasazení tohoto kroku.
+- První podporovaný cíl je Cockpit. Luna má krátké předání a read-only
+  modelový tah; privilegované kroky vlastní registrovaný Python.
+- Neopakovat nejistý push ani restart, neopravovat kód či přihlášení. Soukromý
+  token je svázaný s fází, změna SHA/projektu blokuje další publikování.
+- Známý Keychain problém řeší jen jednorázová volba již platného CLI helperu
+  pro přesný HTTPS GitHub push podle LL-060. Žádná změna globálního helperu
+  ani token v argv; stav stávajícího CLI přihlášení read-only potvrzený.
+
+Další krok:
+- Po samostatném p+n zavést nové routy dosavadní cestou; následující balíček
+  projde prvním ostrým předáním Luně.
+
+Navrhované další kroky:
+- Fyzicky vyzkoušet Servis a novou kartu předání na iPhonu.
+- Filmový editor vyzkoušet doma podle dřívější dohody.
+
+Technický důkaz:
+- 147 cílených a 27 závěrečných regresních testů PASS; širší integrační sada 554 testů PASS.
+  Plná brána 1993/1993 PASS, bez přeskočení (267,315 s testů).
+  Ověřená oprava zastaralého počtu rizikových schopností a souběhu při
+  dokončení úlohy; bezpečný důvod chyby se zachovává v účtence pro Adama.
+- Skutečný model gpt-6-luna přijal syntetický balíček 7 commitů s přesným SHA
+  za 5,81 s. Suchý běh vykonavatele prošel i skutečnými read-only kontrolami
+  Camino/autosave. Žádný push, restart, změna sítě, filmu ani autosave.
+- Skutečný App Server návrat do stejného vlákna prošel v oddělené syntetické
+  konverzaci; doručení potvrzené, testovací model zachovaný, provozní konverzace
+  beze změny. Log `logs/luna_release_live_return_20261017.log`.
+- Node VM ověřil zrušení potvrzení, nepublikující dry-run, chybu transportu,
+  obnovení výsledku po reloadu a zachování běžného p+n jiných proudů.
+- Logy `logs/luna_release_final_targeted_20261017.log`,
+  `logs/luna_release_live_probe_20261017.log`,
+  `logs/luna_release_live_dry_run_20261017.log`,
+  `logs/luna_release_full_gate_20261017.log`.
+- Pravidla `technical/luna_release_orchestration.md`. Ostré p+n a fyzická
+  přejímka nejsou suchým během prokázané. Zavedení ještě neproběhlo.

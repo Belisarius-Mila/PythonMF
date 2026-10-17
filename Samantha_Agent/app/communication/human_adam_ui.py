@@ -45,6 +45,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     #deploymentReceipt { margin:8px 0 0; padding:6px 10px; border-radius:10px; color:var(--ok); background:#ecfdf3; font-size:13px; }
     #deploymentReceipt.stale { color:var(--warn); background:#fff7ed; }
     #deploymentReceipt[hidden] { display:none; }
+    #lunaReleaseStatus { margin:8px 0 0; padding:6px 10px; border-radius:10px; color:#1d4ed8; background:#eff6ff; font-size:13px; }
+    #lunaReleaseStatus[hidden] { display:none; }
+    #lunaReleaseStatus.attention { color:var(--warn); background:#fff7ed; }
+    #lunaReleaseStatus.completed { color:var(--ok); background:#ecfdf3; }
     #stepCompletionReceipt { margin:8px 0 0; padding:6px 10px; border-radius:10px; color:var(--ok); background:#ecfdf3; font-size:13px; font-weight:700; }
     #stepCompletionReceipt.running { color:#1d4ed8; background:#eff6ff; }
     #stepCompletionReceipt.warn { color:var(--warn); background:#fff7ed; }
@@ -206,6 +210,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       <div id="turnActivity" role="status" aria-live="polite" hidden></div>
       <div id="stepCompletionReceipt" role="status" aria-live="polite" hidden></div>
       <div id="deploymentReceipt" role="status" aria-live="polite" hidden></div>
+      <div id="lunaReleaseStatus" role="status" aria-live="polite" hidden></div>
     </div>
   </header>
   <div id="notice" role="status" aria-live="polite"></div>
@@ -400,6 +405,12 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <ul id="githubBatchCommits" hidden></ul>
         <input id="githubBatchConfirmation" maxlength="80" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" placeholder="Po auditu sem vlož potvrzovací větu" hidden disabled>
         <button class="deploy-action" id="githubBatchBtn" type="button" hidden disabled>Odeslat denní balíček na GitHub</button>
+        <section class="integration-audit-box" id="lunaReleaseBox" aria-label="Předání balíčku Luně" hidden>
+          <h3>Předání balíčku Luně</h3>
+          <p id="lunaReleaseMeta" role="status" aria-live="polite">Stav balíčku se obnoví ze serveru.</p>
+          <button class="audit-action" id="lunaReleaseStartBtn" type="button">Předat p+n Luně</button>
+          <button id="lunaReleaseDryRunBtn" type="button">Zkouška bez publikování</button>
+        </section>
       </section>
     </div>
     </div>
@@ -411,6 +422,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const notice = document.getElementById("notice");
   const stepCompletionReceipt = document.getElementById("stepCompletionReceipt");
   const deploymentReceipt = document.getElementById("deploymentReceipt");
+  const lunaReleaseStatus = document.getElementById("lunaReleaseStatus");
   const mobileStatusSummary = document.getElementById("mobileStatusSummary");
   const mobileStatusText = document.getElementById("mobileStatusText");
   const mobileStatusToggleText = document.getElementById("mobileStatusToggleText");
@@ -511,6 +523,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const githubBatchCommits = document.getElementById("githubBatchCommits");
   const githubBatchConfirmation = document.getElementById("githubBatchConfirmation");
   const githubBatchBtn = document.getElementById("githubBatchBtn");
+  const lunaReleaseBox = document.getElementById("lunaReleaseBox");
+  const lunaReleaseMeta = document.getElementById("lunaReleaseMeta");
+  const lunaReleaseStartBtn = document.getElementById("lunaReleaseStartBtn");
+  const lunaReleaseDryRunBtn = document.getElementById("lunaReleaseDryRunBtn");
   const handoffTakeoverCheck = document.getElementById("handoffTakeoverCheck");
   const deployAuditBtn = document.getElementById("deployAuditBtn");
   const deployConfirmation = document.getElementById("deployConfirmation");
@@ -544,6 +560,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   let mainRemoteSyncAudit = null;
   let githubBatchAudit = null;
   let githubBatchModeEnabled = false;
+  let lunaReleaseJob = null;
+  let lunaReleaseStarting = false;
+  let lunaReleaseStatusLoaded = false;
+  let lunaReleasePollTimerId = null;
   let pendingIntegrationAudit = null;
   let pendingIntegrationRecovery = null;
   let currentWorkstreamLiveStatus = null;
@@ -568,6 +588,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const HUMAN_ADAM_SEND_PATH = "/api/human-adam/send";
   const RESULT_WATCH_MAX_ATTEMPTS = 60;
   const RESULT_WATCH_MAX_DELAY_MS = 30000;
+  const LUNA_RELEASE_POLL_INTERVAL_MS = 2500;
 
   function messageId() {
     if (window.crypto && crypto.randomUUID) return `human-adam-${crypto.randomUUID()}`;
@@ -717,23 +738,27 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   }
 
   function syncControls() {
-    const rotationBlocked = busy || sendInFlight || sessionTurnBusy;
-    connectBtn.disabled = busy;
-    profileSelect.disabled = busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing;
+    const lunaReleaseBusy = lunaReleaseStarting || lunaReleaseJobActive() || !lunaReleaseStatusLoaded;
+    const rotationBlocked = busy || sendInFlight || sessionTurnBusy || lunaReleaseBusy;
+    connectBtn.disabled = busy || lunaReleaseBusy;
+    profileSelect.disabled = busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing || lunaReleaseBusy;
     profileSwitchBtn.disabled = profileSelect.disabled || !profileSelect.value || profileSelect.value === activeWorkstreamId;
     refreshBtn.disabled = busy || resultWatchActive;
     workOpenBtn.disabled = busy;
     refreshBtn.textContent = resultWatchActive ? "Čekám na výsledek…" : "Stav";
-    sendBtn.disabled = busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing;
-    writeIntentBtn.disabled = busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing || !sessionConnected || !workstreamDevelopmentEnabled;
+    sendBtn.disabled = busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing || lunaReleaseBusy;
+    input.disabled = lunaReleaseBusy;
+    writeIntentBtn.disabled = busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing || lunaReleaseBusy || !sessionConnected || !workstreamDevelopmentEnabled;
     writeIntentBtn.classList.toggle("armed", writeIntentArmed);
     writeIntentBtn.setAttribute("aria-pressed", writeIntentArmed ? "true" : "false");
     writeIntentBtn.textContent = writeIntentArmed ? "Vývoj připraven" : "Zahájit vývoj";
-    voiceRecordBtn.disabled = busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing;
+    voiceRecordBtn.disabled = busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing || lunaReleaseBusy;
     voiceRecordBtn.classList.toggle("recording", voiceRecording);
     voiceRecordBtn.textContent = voiceRecording ? "Nahrávám…" : "Nahrát pokyn";
     voiceStopBtn.hidden = !voiceRecording;
     voiceStopBtn.disabled = !voiceRecording;
+    lunaReleaseStartBtn.disabled = busy || lunaReleaseStarting || lunaReleaseJobActive() || !lunaReleaseStatusLoaded;
+    lunaReleaseDryRunBtn.disabled = busy || lunaReleaseStarting || lunaReleaseJobActive() || !lunaReleaseStatusLoaded;
     threadRotationAuditBtn.disabled = rotationBlocked || !sessionConnected;
     const rotationRequired = threadRotationAudit ? String(threadRotationAudit.confirmation_text || "") : "";
     threadRotationConfirmation.disabled = rotationBlocked || !threadRotationAudit || threadRotationAudit.ready !== true;
@@ -749,6 +774,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     developmentResumeBtn.disabled = busy || !semaphoreValid || developmentSemaphore.can_resume !== true;
     developmentReleaseBtn.disabled = busy || !semaphoreValid || developmentSemaphore.can_release !== true;
     projectContinuityAuditBtn.disabled = busy;
+  }
+
+  function lunaReleaseJobActive(job=lunaReleaseJob) {
+    return Boolean(job && job.active === true && new Set(["queued", "running", "returning"]).has(String(job.state || "")));
   }
 
   function setBusy(value, text="") {
@@ -781,7 +810,11 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   function updateMobileStatusSummary() {
     let text = "";
     let tone = "";
-    if (sessionTurnBusy) {
+    if (lunaReleaseJob) {
+      const connectionText = connectionBadge.textContent || "Odpojeno";
+      text = `${connectionText} · ${lunaReleaseStatus.textContent || "Luna pracuje na balíčku."}`;
+      tone = lunaReleaseJobActive() || String(lunaReleaseJob.state || "") === "attention" ? "warn" : "ok";
+    } else if (sessionTurnBusy) {
       text = turnActivity.textContent || "Adam pracuje · čas neznámý · pokyn neposílej znovu";
       tone = "warn";
     } else if (deliveryUncertain) {
@@ -1952,8 +1985,11 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   }
 
   function handleRefreshStatus() {
+    loadLunaReleaseStatus();
     if (sessionTurnBusy || deliveryUncertain || sendInFlight) startResultWatch();
-    else loadStatus();
+    else {
+      loadStatus();
+    }
   }
 
   async function connect() {
@@ -2508,9 +2544,183 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     }
   }
 
+  function renderLunaReleaseJob(job) {
+    lunaReleaseJob = job && typeof job === "object" ? job : null;
+    lunaReleaseStatus.className = "";
+    if (!lunaReleaseJob) {
+      lunaReleaseStatus.hidden = true;
+      lunaReleaseStatus.textContent = "";
+      updateMobileStatusSummary();
+      syncControls();
+      return;
+    }
+    const state = String(lunaReleaseJob.state || "");
+    const message = String(lunaReleaseJob.message || "").trim();
+    const releaseStateLabel = (value) => ({
+      not_started:"zatím nezačal",
+      requested:"čeká na potvrzení",
+      confirmed:"potvrzeno",
+      uncertain:"nejisté, ověřuje Adam",
+    }[String(value || "")] || "nelze ověřit");
+    const pushState = releaseStateLabel(lunaReleaseJob.push_state);
+    const deploymentState = releaseStateLabel(lunaReleaseJob.deployment_state);
+    let label = "Balíček čeká na stav.";
+    if (state === "queued") label = message || "Luna balíček převzala a čeká na zahájení.";
+    else if (state === "running") label = message || "Luna pracuje na balíčku.";
+    else if (state === "returning") label = message || "Výsledek balíčku se předává Adamovi.";
+    else if (state === "completed") label = `Balíček dokončen · push ${pushState} · nasazení ${deploymentState}${lunaReleaseJob.returned_to_adam === true ? " · Adam má výsledek" : ""}${message ? ` · ${message}` : ""}`;
+    else if (state === "dry_run_completed") label = `Zkouška dokončena bez publikování${message ? ` · ${message}` : ""}`;
+    else if (state === "attention") label = `Balíček vyžaduje kontrolu · push ${pushState} · nasazení ${deploymentState} · Adam ověří výsledek${message ? ` · ${message}` : ""}`;
+    lunaReleaseStatus.textContent = label;
+    lunaReleaseStatus.hidden = false;
+    if (state === "attention") lunaReleaseStatus.classList.add("attention");
+    else if (state === "completed" || state === "dry_run_completed") lunaReleaseStatus.classList.add("completed");
+    updateMobileStatusSummary();
+    syncControls();
+  }
+
+  function stopLunaReleasePoll() {
+    if (lunaReleasePollTimerId !== null) window.clearTimeout(lunaReleasePollTimerId);
+    lunaReleasePollTimerId = null;
+  }
+
+  function scheduleLunaReleasePoll() {
+    stopLunaReleasePoll();
+    if (lunaReleaseJobActive() || !lunaReleaseStatusLoaded) {
+      lunaReleasePollTimerId = window.setTimeout(checkLunaReleaseStatus, LUNA_RELEASE_POLL_INTERVAL_MS);
+    }
+  }
+
+  async function loadLunaReleaseStatus() {
+    try {
+      const payload = await api("/api/human-adam/luna-release/status", {cache:"no-store"});
+      if (!payload || payload.ok !== true) throw new Error(payload && payload.message || "Stav balíčku nelze ověřit.");
+      lunaReleaseStatusLoaded = true;
+      renderLunaReleaseJob(payload.job || null);
+      if (lunaReleaseJobActive()) scheduleLunaReleasePoll();
+      else stopLunaReleasePoll();
+      return payload;
+    } catch (error) {
+      lunaReleaseStatusLoaded = false;
+      lunaReleaseStatus.textContent = `Stav balíčku nelze ověřit: ${error.message}`;
+      lunaReleaseStatus.className = "attention";
+      lunaReleaseStatus.hidden = false;
+      scheduleLunaReleasePoll();
+      syncControls();
+      return null;
+    }
+  }
+
+  async function checkLunaReleaseStatus() {
+    lunaReleasePollTimerId = null;
+    const payload = await loadLunaReleaseStatus();
+    if (payload && payload.job && !lunaReleaseJobActive(payload.job)) {
+      stopLunaReleasePoll();
+      await loadStatus();
+    }
+  }
+
+  function restoreLunaReleaseState() {
+    syncControls();
+    loadLunaReleaseStatus();
+  }
+
+  function exactLunaReleaseCommand(value) {
+    const normalized = String(value || "").normalize("NFKC").trim().toLocaleLowerCase("cs-CZ").replace(/\s+/g, " ");
+    return new Set(["p+n", "p*n", "vše p+n"]).has(normalized);
+  }
+
+  function shouldInterceptLunaReleaseCommand(value) {
+    return activeWorkstreamId === "project-cockpit" && exactLunaReleaseCommand(value);
+  }
+
+  async function startLunaRelease({dryRun=false, userText="p+n", clientMessageId=""}={}) {
+    if (lunaReleaseStarting || lunaReleaseJobActive()) return false;
+    if (activeWorkstreamId !== "project-cockpit") return false;
+    if (!sessionConnected || !lastSession || !String(lastSession.thread_id || "")) {
+      lunaReleaseMeta.textContent = "Nejdřív obnov existující relaci Cockpitu; předání nezaloží nové vlákno.";
+      return false;
+    }
+    lunaReleaseStarting = true;
+    syncControls();
+    try {
+      lunaReleaseMeta.textContent = "Ověřuji přesný balíček pro předání Luně…";
+      const audit = await api("/api/human-adam/luna-release/audit", {cache:"no-store"});
+      if (!audit || audit.ok !== true || audit.ready !== true) {
+        throw new Error(audit && audit.message || "Balíček není připravený k předání.");
+      }
+      if (String(audit.workstream_id || "") !== "project-cockpit" || Number(audit.commit_count || 0) <= 0) {
+        throw new Error("První verze předání podporuje pouze neprázdný balíček pracovního proudu Cockpit.");
+      }
+      const confirmationText = String(audit.confirmation_text || "").trim();
+      if (!confirmationText) throw new Error("Server nevrátil potvrzovací větu.");
+      const originHead = String(audit.expected_origin_head || "");
+      const localHead = String(audit.expected_local_head || "");
+      const packageSummary = `${Number(audit.commit_count || 0)} commitů · origin ${originHead} · lokální main ${localHead}${audit.message ? `\n${audit.message}` : ""}`;
+      lunaReleaseMeta.textContent = packageSummary;
+      const confirmed = window.confirm(
+        `${dryRun ? "Zkouška bez publikování" : "Předání p+n Luně"}\n\nPřesný balíček:\n${packageSummary}\n\nPotvrzovací věta: ${confirmationText}\n\nPotvrzuješ tuto akci?`,
+      );
+      if (!confirmed) {
+        lunaReleaseMeta.textContent = "Předání bylo zrušeno. Balíček se nespustil.";
+        return false;
+      }
+      const confirmation = confirmationText;
+      const sentAt = new Date().toISOString();
+      const messageIdValue = clientMessageId || messageId();
+      if (!dryRun) {
+        const pendingMessage = {
+          user_text:userText,
+          client_message_id:messageIdValue,
+          client_sent_at:sentAt,
+          received_at:sentAt,
+          status:"pending",
+          answer:"",
+        };
+        const optimistic = lastSession
+          ? {...lastSession, turn_busy:true, active_turn:{client_message_id:messageIdValue,started_at:sentAt}, messages:[...(lastSession.messages || []), pendingMessage]}
+          : {turn_busy:true, active_turn:{client_message_id:messageIdValue,started_at:sentAt}, messages:[pendingMessage]};
+        clearMessageInput();
+        renderSession(optimistic, {forceScrollToEnd:true});
+        renderTurnState(optimistic);
+      }
+      const payload = await api("/api/human-adam/luna-release/start", {
+        method:"POST",
+        body:JSON.stringify({
+          expected_origin_head:originHead,
+          expected_local_head:localHead,
+          confirmation,
+          client_message_id:messageIdValue,
+          user_text:userText,
+          dry_run:Boolean(dryRun),
+        }),
+      });
+      if (!payload || payload.ok !== true || !payload.job) throw new Error(payload && payload.message || "Předání balíčku nebylo potvrzeno.");
+      renderLunaReleaseJob(payload.job);
+      lunaReleaseMeta.textContent = packageSummary;
+      if (lunaReleaseJobActive(payload.job)) scheduleLunaReleasePoll();
+      else await loadStatus();
+      notice.textContent = dryRun ? "Zkouška balíčku začala." : "Předání p+n Luně začalo.";
+      return true;
+    } catch (error) {
+      lunaReleaseMeta.textContent = `Balíček se nepodařilo předat: ${error.message}`;
+      lunaReleaseStatus.textContent = `Ověřuji stav předání: ${error.message}`;
+      lunaReleaseStatus.className = "attention";
+      lunaReleaseStatus.hidden = false;
+      await loadLunaReleaseStatus();
+      await loadStatus();
+      notice.textContent = `Stav předání se nepodařilo potvrdit: ${error.message} Zkontroluj stav před dalším pokusem.`;
+      return false;
+    } finally {
+      lunaReleaseStarting = false;
+      syncControls();
+    }
+  }
+
   function renderWork(payload) {
     deploymentAudit = null;
     githubBatchModeEnabled = payload.github_batch_mode === true;
+    lunaReleaseBox.hidden = !githubBatchModeEnabled || activeWorkstreamId !== "project-cockpit";
     if (!githubBatchModeEnabled) renderGithubBatchAudit(null);
     renderMainRemoteSyncAudit(null);
     renderHandoffTakeoverCheck(null);
@@ -3223,9 +3433,14 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
 
   async function sendMessage(event) {
     event.preventDefault();
-    if (busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing) return;
+    if (busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing || !lunaReleaseStatusLoaded) return;
     const text = input.value.trim();
     if (!text) { notice.textContent = "Napiš nejdřív zprávu."; return; }
+    if (shouldInterceptLunaReleaseCommand(text)) {
+      setWriteIntentArmed(false);
+      await startLunaRelease({userText:text});
+      return;
+    }
     const writeIntent = writeIntentArmed;
     writeIntentArmed = false;
     sendInFlight = true;
@@ -3293,6 +3508,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   mediaSoundTestBtn.addEventListener("click", testCompletionMediaSound);
   window.addEventListener("pagehide", () => {
     stopResultWatch();
+    stopLunaReleasePoll();
     stopAnswerSpeech(false);
     stopCompletionMediaSound();
   });
@@ -3318,6 +3534,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     githubBatchBtn.disabled = !required || githubBatchConfirmation.value.trim() !== required;
   });
   githubBatchBtn.addEventListener("click", pushGithubBatch);
+  lunaReleaseStartBtn.addEventListener("click", () => startLunaRelease({dryRun:false,userText:"p+n"}));
+  lunaReleaseDryRunBtn.addEventListener("click", () => startLunaRelease({dryRun:true,userText:"Zkouška bez publikování"}));
   integrationConfirmation.addEventListener("input", syncIntegrationRecoveryAction);
   integrationRecoveryCommit.addEventListener("input", syncIntegrationRecoveryAction);
   integrationRecoverySummary.addEventListener("input", syncIntegrationRecoveryAction);
@@ -3349,6 +3567,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   clearMessageInput();
   window.addEventListener("pageshow", clearMessageInput);
   restoreVerifiedDeploymentResult();
+  restoreLunaReleaseState();
 </script>
 </body>
 </html>

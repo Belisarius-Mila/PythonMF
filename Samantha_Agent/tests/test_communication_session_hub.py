@@ -6,6 +6,7 @@ import threading
 import unittest
 from pathlib import Path
 from typing import Callable
+from unittest.mock import patch
 
 from app.codex_appserver import AppServerError, TurnReceipt
 from app.communication.session_hub import (
@@ -84,6 +85,22 @@ class FakeClient:
 
 
 class CanonicalSessionHubTests(unittest.TestCase):
+    def test_service_receipt_downgrades_only_its_turn_and_preserves_parent_model(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            hub = self.make_hub(Path(directory))
+            hub.sandbox_policy = {"type": "workspaceWrite", "networkAccess": True}
+            hub.model = "original-parent-model"
+            hub.connect()
+            client = FakeClient.instances[-1]
+            with patch.object(client, "send_text", wraps=client.send_text) as send:
+                hub.send(text="p+n", client_message_id="release-parent-123", read_only=True)
+                hub.send(text="Další práce", client_message_id="normal-parent-123")
+            self.assertEqual(send.call_args_list[0].kwargs["sandbox_policy"],
+                             {"type": "readOnly", "networkAccess": False})
+            self.assertEqual(send.call_args_list[1].kwargs["sandbox_policy"], hub.sandbox_policy)
+            self.assertTrue(all(call.kwargs["model"] == "original-parent-model" for call in send.call_args_list))
+            self.assertEqual(hub.model, "original-parent-model")
+
     def setUp(self) -> None:
         FakeClient.instances = []
         FakeClient.block_started = None

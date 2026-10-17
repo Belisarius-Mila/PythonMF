@@ -55,6 +55,8 @@ Aktualni registrovane reporty:
 | "Kvantitativni status", "kolik mame souboru/radku?", "objemovy rust" | `samantha_quantitative_status(save=False)` | cte agregovane souborove statistiky mimo soukroma data; bez `save=True` nezapisuje |
 | "Uloz kvantitativni snapshot" | `samantha_quantitative_status(save=True)` | ulozi jen agregovanou JSONL datovou vetu bez nazvu souboru a soukromeho obsahu |
 | "Jake mame systemove reporty?" | `samantha_system_reports()` | vypise registr reportu; nezapisuje |
+| "Připrav balíček pro Lunu" | `app.communication.luna_release.audit_release(...)` | read-only přesný rozsah commitů a cíl Cockpitu; bez modelového tahu a publikování |
+| "p+n Cockpitu přes Lunu" | `app.communication.luna_release.start_release(...)` | jen výslovně schválený přesný balíček, původní brány, soukromá účtenka a návrat Adamovi; zkouška bez publikování je samostatný režim |
 | "Co Samantha umi?", "audit schopnosti", "kde jsou workflow rezervy?" | `samantha_capability_audit()` | cte registr toolu a workflow; nezapisuje |
 | "Je Rodinny kalendar pripraveny na automatiku?", "readiness kalendare" | `family_calendar_delivery_readiness()` | cte jen validaci private konfigurace, agregovane dorucovaci stavy, metadata planovace a existenci Keychain polozky; necte heslo, nezapisuje, nerecoveruje a neodesila |
 | "Udelej aktualni systemovy audit", "audit projektu/toolu/vrstev", "na cem dnes navazat?" | `samantha_project_audit(mode="quick", save=False)` | cte jen git-safe pametove registry a systemove reporty; necte private vault, e-maily ani soukrome dokumenty |

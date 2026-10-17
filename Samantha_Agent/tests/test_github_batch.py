@@ -4,6 +4,7 @@ import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from app.communication.github_batch import (
     GITHUB_BATCH_CONFIRMATION,
@@ -28,6 +29,28 @@ def successful_gate(command, **kwargs):
 
 
 class GitHubBatchTests(unittest.TestCase):
+    def test_one_https_push_uses_valid_existing_cli_credentials_without_config_write(self) -> None:
+        from app.communication.github_batch import _push_exact_head
+        with patch("app.communication.github_batch._git", side_effect=["https://github.com/owner/repo.git", ""]) as run_git, \
+                patch("app.communication.github_batch.Path.is_file", return_value=True), \
+                patch("app.communication.github_batch.os.access", return_value=True), \
+                patch("app.communication.github_batch.subprocess.run", return_value=subprocess.CompletedProcess([], 0)) as auth:
+            _push_exact_head(Path("/fixture"), "a" * 40)
+        self.assertEqual(run_git.call_count, 2)
+        self.assertEqual(run_git.call_args.args[1], ["-c", "credential.helper=", "-c",
+                         "credential.helper=!/usr/local/bin/gh auth git-credential",
+                         "push", "origin", f"{'a' * 40}:refs/heads/main"])
+        self.assertEqual(auth.call_args.args[0], ["/usr/local/bin/gh", "auth", "status", "--hostname", "github.com"])
+        self.assertEqual(auth.call_args.kwargs["stdout"], subprocess.DEVNULL)
+
+    def test_other_remote_does_not_probe_or_change_credentials(self) -> None:
+        from app.communication.github_batch import _push_exact_head
+        with patch("app.communication.github_batch._git", side_effect=["/fixture/origin.git", ""]) as run_git, \
+                patch("app.communication.github_batch.subprocess.run") as auth:
+            _push_exact_head(Path("/fixture"), "a" * 40)
+        auth.assert_not_called()
+        self.assertEqual(run_git.call_args.args[1], ["push", "origin", f"{'a' * 40}:refs/heads/main"])
+
     def test_audit_lists_accumulated_commits_without_writing(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             source, _manager = prepare_with_origin(Path(temp_dir))

@@ -47,6 +47,7 @@ from app.cockpit_awake_mode import (
     cockpit_awake_mode_action,
     cockpit_awake_mode_status_action,
 )
+from app.communication import luna_release
 from app.codex_sessions import CodexSessionController
 from app.screen_sessions import ScreenSessionController
 from app.camino_film_workshop import (
@@ -8019,6 +8020,7 @@ def human_adam_simple_main_deployment_action(
     host: str = "127.0.0.1",
     port: int = COCKPIT_PORT,
     restart_action: Callable[..., dict[str, Any]] | None = None,
+    expected_head: str = "",
 ) -> dict[str, Any]:
     """Privately bind a clean-main deployment to the controlled restart worker.
 
@@ -8044,6 +8046,7 @@ def human_adam_simple_main_deployment_action(
             previous_pid=previous_pid,
             confirmed=confirmed,
             restart_scheduler=schedule_restart,
+            **({"expected_head": expected_head} if expected_head else {}),
         )
     except (AppServerError, SessionHubError, OSError, TypeError, ValueError) as exc:
         return {
@@ -8240,6 +8243,38 @@ def human_adam_github_batch_action(
             "status": "github_batch_failed",
             "message": str(exc),
         }
+
+
+def human_adam_luna_release_audit_action(*, service: Any = HUMAN_ADAM) -> dict[str, Any]:
+    try:
+        return luna_release.audit_release(service)
+    except (AppServerError, OSError, ValueError, TypeError) as exc:
+        return {"ok": False, "ready": False, "message": str(exc)}
+
+
+def human_adam_luna_release_status_action() -> dict[str, Any]:
+    try:
+        return luna_release.LunaReleaseStore().status()
+    except (AppServerError, OSError, ValueError, TypeError):
+        return {"ok": False, "job": None, "message": "Stav Luny nelze bezpečně ověřit."}
+
+
+def human_adam_luna_release_start_action(
+    payload: dict[str, Any], *, service: Any = HUMAN_ADAM,
+) -> dict[str, Any]:
+    try:
+        return luna_release.start_release(payload, service=service)
+    except (AppServerError, OSError, ValueError, TypeError) as exc:
+        return {"ok": False, "message": str(exc)}
+
+
+def human_adam_luna_release_return_action(
+    payload: dict[str, Any], *, token: str, service: Any = HUMAN_ADAM,
+) -> dict[str, Any]:
+    try:
+        return luna_release.return_release(payload, token=token, service=service)
+    except (AppServerError, OSError, ValueError, TypeError):
+        return {"ok": False, "message": "Automatické převzetí účtenky vyžaduje ověření Adamem."}
 
 
 def human_adam_main_remote_sync_action(
@@ -8915,6 +8950,22 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "risk": "private_write",
         "confirmation": "pending_receipt_server_evidence",
         "handler_name": "human_adam_simple_main_deployment_verification_action",
+        "test_level": "direct",
+    },
+    {
+        "path": "/api/human-adam/luna-release/start",
+        "label": "Předat celý potvrzený p+n balíček Luně",
+        "risk": "git_push",
+        "confirmation": "exact_phrase_and_exact_audited_heads",
+        "handler_name": "human_adam_luna_release_start_action",
+        "test_level": "direct",
+    },
+    {
+        "path": "/api/human-adam/luna-release/return",
+        "label": "Vrátit serverovou účtenku do původní konverzace Adama",
+        "risk": "private_write",
+        "confirmation": "private_job_token_and_original_thread",
+        "handler_name": "human_adam_luna_release_return_action",
         "test_level": "direct",
     },
     {
@@ -9702,6 +9753,12 @@ class CockpitServer:
                         human_adam_simple_main_deployment_audit_action(service=HUMAN_ADAM)
                     )
                     return
+                if parsed.path == "/api/human-adam/luna-release/audit":
+                    self.respond_json(human_adam_luna_release_audit_action(service=HUMAN_ADAM))
+                    return
+                if parsed.path == "/api/human-adam/luna-release/status":
+                    self.respond_json(human_adam_luna_release_status_action())
+                    return
                 if parsed.path == "/api/human-adam/main-sync-audit":
                     self.respond_json(
                         human_adam_main_remote_sync_audit_action(service=HUMAN_ADAM)
@@ -9846,6 +9903,26 @@ class CockpitServer:
             def do_POST(self) -> None:  # noqa: N802
                 self.validate_request_access(require_origin=True)
                 parsed = urlparse(self.path)
+                canonical_release_server = int(self.server.server_address[1]) == COCKPIT_PORT
+                luna_release_target = ""
+                if parsed.path.startswith("/api/human-adam/luna-release/") and not canonical_release_server:
+                    self.respond_json({"ok": False, "message": "Předání Luně patří pouze do hlavního Cockpitu."},
+                                      status=HTTPStatus.CONFLICT)
+                    return
+                if canonical_release_server and ((parsed.path.startswith("/api/human-adam/")
+                     and parsed.path != "/api/human-adam/luna-release/start")
+                        or parsed.path == "/api/cockpit/restart"):
+                    try:
+                        luna_release_target = luna_release.authorize_job_call(
+                            luna_release.LunaReleaseStore(), parsed.path,
+                            self.headers.get("X-Luna-Release", ""),
+                        )
+                        if luna_release_target and HUMAN_ADAM.active_workstream_id != "project-cockpit":
+                            raise luna_release.LunaReleaseError("Původní pracovní proud se změnil.")
+                    except (AppServerError, OSError, ValueError, TypeError):
+                        self.respond_json({"ok": False, "message": "Luna zpracovává přesný balíček; další změna počká na ověření."},
+                                          status=HTTPStatus.CONFLICT)
+                        return
                 if parsed.path == "/api/camino/film/source":
                     self.respond_film_edit("source", parsed)
                     return
@@ -10044,6 +10121,7 @@ class CockpitServer:
                             service=HUMAN_ADAM,
                             host=cockpit_host,
                             port=cockpit_port,
+                            expected_head=luna_release_target,
                         )
                     )
                     return
@@ -10072,6 +10150,13 @@ class CockpitServer:
                             service=HUMAN_ADAM
                         )
                     )
+                    return
+                if parsed.path == "/api/human-adam/luna-release/start":
+                    self.respond_json(human_adam_luna_release_start_action(self.read_json(), service=HUMAN_ADAM))
+                    return
+                if parsed.path == "/api/human-adam/luna-release/return":
+                    self.respond_json(human_adam_luna_release_return_action(
+                        self.read_json(), token=self.headers.get("X-Luna-Release", ""), service=HUMAN_ADAM))
                     return
                 if parsed.path == "/api/codex-approval/clear":
                     payload = self.read_json()

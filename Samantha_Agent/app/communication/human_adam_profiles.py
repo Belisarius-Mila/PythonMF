@@ -1261,19 +1261,20 @@ class HumanAdamProfileManager:
         previous_pid: int,
         confirmed: bool,
         restart_scheduler: Callable[[], dict[str, Any]] | None = None,
+        expected_head: str = "",
     ) -> dict[str, Any]:
         """Bind the private clean-main deployment backend to the active workstream.
 
-        The caller cannot provide a workstream ID, commit, workspace or receipt
-        path.  An optional trusted app-layer callback can schedule the existing
-        restart worker after the full pre-restart proof succeeds.  No HTTP or UI
-        surface invokes this method in phase 2.2.
+        Workstream, workspace and receipt paths remain server-owned. A trusted
+        release job can pin its previously approved head; the same clean-main
+        preflight rejects drift. The optional app-layer callback schedules the
+        existing restart only after the complete pre-restart proof succeeds.
         """
 
         with self.profile_operation() as service:
             self._assert_all_profile_sessions_idle()
             binding = self._active_canonical_binding()
-            source_head = str(service.workspace.status().get("source_head") or "")
+            source_head = expected_head or str(service.workspace.status().get("source_head") or "")
             peers = self._peer_workspaces(service.workspace)
             result = prepare_clean_main_deployment(
                 workspace=service.workspace,

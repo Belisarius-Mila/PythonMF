@@ -9,6 +9,15 @@ TOTO JE AKTUÁLNÍ ROZHODOVACÍ ČÁST DOKUMENTU.
 Architektonický průběh a původní audit zůstávají níže jako historie.
 Čísla, provozní stavy a priority historických oddílů nejsou dnešním stavem.
 
+VÝVOJOVÝ STAV — 2026-10-17 15:43 CEST
+Lokálně implementované p+n celého balíčku přes Lunu: přesné heads, soukromá
+trvalá účtenka, původní publikační brány a návrat původnímu Adamovi. UI má
+přesný příkaz, potvrzení, stav a zkoušku bez publikování. Jiným proudům jejich
+p+n zůstává. 147 cílených a 27 závěrečných regresních testů PASS; plná brána 1993/1993 PASS (267,315 s testů).
+Skutečná Luna i suchý běh syntetických 7 commitů PASS, read-only ochrany
+Camino/autosave PASS; bez push/nasazení nebo změny služeb. První zavedení
+po samostatném p+n. Pravidla memory/technical/luna_release_orchestration.md.
+
 VÝVOJOVÝ STAV — 2026-10-17 14:58 CEST
 Míla potvrdil odstranění panelu Vývojový runner ze Servisu. Lokálně hotovo:
 odstraněný panel i navázaný JavaScript; Vývoj obsahuje Projekty, Git a terminál.

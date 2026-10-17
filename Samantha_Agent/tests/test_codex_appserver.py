@@ -18,6 +18,19 @@ from app.codex_appserver import (
 
 
 class CodexContractTests(unittest.TestCase):
+    def test_turn_passes_structured_output_without_changing_model(self) -> None:
+        transport = _ScriptedTransport(completed_items=[])
+        with patch("app.codex_appserver.read_codex_version", return_value=CodexVersion.parse("codex-cli 0.147.0")):
+            client = CodexAppServerClient(transport_factory=lambda **_kwargs: transport)
+            schema = {"type": "object", "properties": {"accepted": {"type": "boolean"}}}
+            with patch.object(transport, "request", wraps=transport.request) as request:
+                receipt = client.send_text(thread_id="thread-1", client_message_id="message-1",
+                                           text="Handoff", model="gpt-6-luna", output_schema=schema)
+            params = request.call_args.args[1]
+            self.assertEqual(params["outputSchema"], schema)
+            self.assertEqual(params["model"], "gpt-6-luna")
+            self.assertTrue(receipt.delivered)
+
     def test_version_parser_is_strict(self) -> None:
         version = CodexVersion.parse("codex-cli 0.144.1")
         self.assertEqual((version.major, version.minor, version.patch), (0, 144, 1))

@@ -86,6 +86,15 @@ Společné pracovní instrukce PythonMF; cesty níže jsou vůči `Samantha_Agen
   bez servisního rozhodnutí neprováděj merge, rebase ani force push.
 - Publikování a nasazení jsou samostatně autorizované akce s vlastním ověřením.
   Nasazení do běžícího Cockpitu vyžaduje odpovídající samostatné potvrzení.
+- Při výslovném p+n Cockpitu předávej po auditu celý přesný balíček Luně podle
+  `memory/technical/luna_release_orchestration.md`. Použij registrované
+  `audit_release` / `start_release`; v přímé terminálové relaci použij pomocného
+  agenta `gpt-6-luna` s krátkým předáním a `start_terminal_release`, který vrací
+  účtenku volajícímu a neposílá ji do jiné konverzace. Nepředávej celou historii
+  a nevymýšlej znovu shellový postup publikování.
+  Hlavní Adam kontroluje výslednou účtenku; Luna nepřevzatý nebo nejistý krok
+  neopravuje ani znovu nedeleguje. Ostatní projekty zachovávají své postupy.
+  První zavedení nových rout proběhne dosavadní cestou po samostatném p+n.
 
 ## Technické preference
 

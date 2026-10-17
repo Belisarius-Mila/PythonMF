@@ -151,6 +151,11 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
   uložit přihlášení do místního souboru; ověřit soukromá práva a nikdy
   nevypisovat ani necommitovat jeho obsah.
 
+- Doplnění 17102026: registrovaný GitHub batch před jediným HTTPS push
+  umí vybrat již platné CLI přihlášení podle tohoto postupu. Ověření CLI
+  přihlášení neukládá výstup, helper platí pouze pro daný příkaz a globální
+  konfigurace se nemění. Ostatní remotes zachované; cílené testy PASS.
+
 ### LL-059 — Izolovaný Camino release musí obsahovat nové importy
 
 - Problém: P2-B server importoval filmový modul a pomocnou knihovnu, které

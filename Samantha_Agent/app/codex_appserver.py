@@ -481,6 +481,7 @@ class CodexAppServerClient:
         sandbox_policy: dict[str, Any] | None = None,
         approval_policy: str = "never",
         model: str | None = None,
+        output_schema: dict[str, Any] | None = None,
     ) -> TurnReceipt:
         clean_text = str(text or "").strip()
         if not clean_text:
@@ -498,6 +499,8 @@ class CodexAppServerClient:
         }
         if model:
             params["model"] = model
+        if output_schema is not None:
+            params["outputSchema"] = dict(output_schema)
         result = self.transport.request("turn/start", params)
         accepted_at = utc_now()
         turn = result.get("turn")
