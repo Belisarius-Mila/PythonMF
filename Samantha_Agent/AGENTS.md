@@ -86,22 +86,22 @@ Společné pracovní instrukce PythonMF; cesty níže jsou vůči `Samantha_Agen
   bez servisního rozhodnutí neprováděj merge, rebase ani force push.
 - Publikování a nasazení jsou samostatně autorizované akce s vlastním ověřením.
   Nasazení do běžícího Cockpitu vyžaduje odpovídající samostatné potvrzení.
-- Při výslovném p+n libovolného vývojového proudu předávej po auditu celý přesný balíček Luně podle
-  `memory/technical/luna_release_orchestration.md`. Použij registrované
-  `audit_release` / `start_release`; v přímé terminálové relaci použij pomocného
-  agenta z centrální role `release_executor`: nejprve zavolej registrované
-  `resolve_release_executor()` a použij vrácený model i úsilí při delegaci.
-  Krátké předání musí obsahovat i zmrazenou roli/model/otisk jejího nastavení.
-  Pomocník použije `start_terminal_release`, který vrací
-  účtenku volajícímu a neposílá ji do jiné konverzace. Audit musí odpovídat
-  zamýšlenému projektu; potvrzení zmrazí projekt, registrovaný cíl a oba heads.
-  Běžné proudy nasazují společný runtime Samanthy, registrovaný webový cíl
-  používá svůj serverový publisher. Samostatná vydání klientů či služby Camino
-  mají dál vlastní postup a oprávnění. Nepředávej celou historii
-  a nevymýšlej znovu shellový postup publikování.
-  Hlavní Adam kontroluje výslednou účtenku; Luna nepřevzatý nebo nejistý krok
-  neopravuje ani znovu nedeleguje. Neznámý cíl se nesmí odhadnout.
-  První zavedení nových rout proběhne dosavadní cestou po samostatném p+n.
+- Při výslovném p+n libovolného vývojového proudu použij jediné registrované
+  `app.communication.luna_release.submit_release` podle
+  `memory/technical/luna_release_orchestration.md`. Předáš zamýšlený projekt,
+  schválený lokální commit, stabilní ID požadavku, potvrzení a režim. Program
+  sám audituje celý balíček, vybere centrální roli, zmrazí oba heads/cíl/model
+  a znovu ověří souběžné změny. Nesestavuj ručně další předání ani modelová
+  nastavení. V terminálu volej přímo s `wait=True` v jednom programovém běhu;
+  nevytvářej nativního pomocného agenta. Jediná Luna běží uvnitř workeru.
+  Portál používá tentýž vstup asynchronně a zachovává původní potvrzovací kartu.
+  Terminál vrací účtenku volajícímu, portál původnímu projektovému vláknu.
+  Čekej programově na přesné job ID, ne modelovým pollingem. Při timeoutu či
+  nejistotě ověř stejnou účtenku; nic automaticky neopakuj. Hlavní Adam jednou
+  zkontroluje konečný výsledek. Neznámý projekt/cíl se nesmí odhadnout.
+  Běžné proudy nasazují společný runtime Samanthy; registrované webové cíle
+  vlastní serverový publisher. Samostatná vydání klientů či služby Camino
+  mají dále vlastní postup a oprávnění. Vývoj sám nepovoluje p+n.
 - Modely role se spravují pouze v `config/agent_roles.json`; nový kandidát
   vyžaduje doložené cenové posouzení a skutečný suchý test. Doporučení
   nástupce z katalogu samo nepovoluje přechod. Nedostupný model bez schválené

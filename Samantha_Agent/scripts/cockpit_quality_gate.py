@@ -317,6 +317,7 @@ TEST_MODULES = (
     "tests.test_human_adam_workspace",
     "tests.test_github_batch",
     "tests.test_luna_release",
+    "tests.test_luna_release_submission",
     "tests.test_agent_roles",
     "tests.test_main_remote_sync",
     "tests.test_simple_main_checkpoint",

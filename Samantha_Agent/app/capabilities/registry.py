@@ -145,6 +145,22 @@ CAPABILITIES: tuple[CapabilityRecord, ...] = (
         notes="Read-only plan for any canonical development stream; includes exact project and registered target. Native caller uses audit_release() without a service. No model turn or publication.",
     ),
     CapabilityRecord(
+        capability_id="submit_luna_release", label="Audit and submit one authorized release with one Luna",
+        risk=RiskLevel.EXTERNAL_SEND,
+        reads=("intended registered workstream", "current exact Git batch and central role policy", "protected service metadata"),
+        writes=("private frozen receipt", "explicitly authorized GitHub push and registered deployment"),
+        tool="app.communication.luna_release.submit_release", requires_confirmation=True,
+        confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE,
+        voice_allowed=VoicePolicy.APPROVAL_ONLY, mobile_allowed=MobilePolicy.APPROVAL_CARD,
+        notes="Shared native/portal entrypoint. No native model intermediary. Server fills heads/target/role and revalidates; optional UI pins stay binding. Stable request ID is idempotent, wait is programmatic and pinned to its job. Never retries writes or changes Camino/autosave.",
+    ),
+    CapabilityRecord(
+        capability_id="wait_luna_release", label="Wait programmatically for one exact release receipt",
+        risk=RiskLevel.READ_ONLY, reads=("one explicitly selected safe release receipt",), writes=(),
+        tool="app.communication.luna_release.wait_for_release",
+        notes="No model calls or write retries. Timeout preserves the original job and returns uncertainty. Current-pointer changes cannot redirect the result.",
+    ),
+    CapabilityRecord(
         capability_id="start_luna_release",
         label="Delegate a confirmed exact active-project p+n batch to Luna",
         risk=RiskLevel.EXTERNAL_SEND,
@@ -166,7 +182,7 @@ CAPABILITIES: tuple[CapabilityRecord, ...] = (
         voice_allowed=VoicePolicy.APPROVAL_ONLY, mobile_allowed=MobilePolicy.APPROVAL_CARD,
         audit=AuditPolicy.SAFE_SUMMARY,
         tool="app.communication.luna_release.start_terminal_release",
-        notes="Native Luna subagent returns its receipt to the original caller, without sending to a different Cockpit conversation.",
+        notes="Legacy exact-payload API; new native callers use submit_release directly without a model intermediary. Receipt stays with original caller, no different Cockpit conversation.",
     ),
     CapabilityRecord(
         capability_id="git_safety_check",

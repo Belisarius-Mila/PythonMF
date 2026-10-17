@@ -57,6 +57,8 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Řešení nalezeno: 17102026
 - Řešení: Změřit rozdíl počítadel původního Adama a celou spotřebu čerstvého pomocníka i jednorázového modelového převzetí. Cached input je část vstupu, reasoning část výstupu. Chybějící telemetrie zůstane neznámá; Standard kreditní odhad označit zvlášť od vyúčtování. Ověřeno živým modelovým tahem, přímým p+n A a testy normalizace/soukromé projekce.
 
+Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli, pokud worker již sám volá Lunu. Společný submit_release nyní audituje a spouští jednu Lunu přímo; programové wait_for_release je připnuté k job ID, timeout neprovádí retry. Ověřeno všemi 33 proudy a skutečným syntetickým tahem bez publikace; z počtu vrstev samotného nevyvozovat procento úspory.
+
 ### LL-070 — Doporučený nástupce modelu není schválená náhrada
 
 - Problém: Pevné jméno modelu zastaví delegaci po jeho stažení; automatický

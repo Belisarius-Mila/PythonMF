@@ -1,6 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-17 21:32 CEST: NOVÝ lokální krok — společný submit_release audituje a spouští jedinou Lunu, v terminálu bez nativního modelového pomocníka. Vyžaduje schválený head a projekt, programové čekání na přesnou účtenku a idempotenci. 59 cílených testů a skutečný syntetický dry-run PASS; plná brána 2109/2109 PASS. Bez push/nasazení. Starší ruční předání níže zachovává historický stav před touto úpravou.
+
 ### Předání pro příští relaci — 2026-10-17 21:18 CEST
 
 Nazev: Úsporné předávání vývoje Solovi a p+n Luně
@@ -1885,3 +1887,24 @@ Navrhované další kroky:
 
 Technický důkaz:
 - logs/simple_development_release_phase1_20261017.log, logs/simple_development_activation_live_20261017.log a logs/simple_development_activation_model_20261017.log. Konfigurační plná brána 2096/2096 PASS (295,435 s unit testů), logs/simple_development_activation_full_gate_20261017.log; závěrečné p+n doloží logs/simple_development_release_phase2_20261017.log a bezpečná serverová účtenka 4935e2096cff56f7aa768ec9d3ab936e. Žádná zpráva do jiného Cockpit vlákna, mazání ani změna chráněných služeb.
+
+
+## 2026-10-17 21:32 CEST — Jednodušší společné p+n s jedinou Lunou
+
+Hotovo:
+- Lokálně jeden vstup provede audit, zmrazení a spuštění jedné Luny. Terminál již nepotřebuje nativního pomocného agenta; portál používá stejnou funkci se zachováním potvrzovací karty a návratu do původního vlákna.
+- Programové čekání sleduje konkrétní účtenku, opakování identity nevolá další model ani publikaci. Původní ochrany a celý přesný rozsah commitů zůstávají zachované pro všech 33 proudů.
+
+Rozhodnutí:
+- Míla schválil tuto obecnou úpravu. Schválený lokální SHA a zamýšlený projekt jsou povinné; origin/cíl/model určuje program. Všechny publikační brány platí dál, žádné automatické retry či odhad neznámého cíle.
+- Toto zadání nezahrnuje nové p+n. Poslední provozní head zůstává a1437ec2; předchozí dokumentační 66e27e70 a tento vývojový checkpoint budou čekat lokálně.
+
+Další krok:
+- Po lokálním dokončení samostatné p+n přes nový jediný vstup a provozní ověření; nepoužívat další modelovou mezivrstvu.
+
+Navrhované další kroky:
+- Při běžném autorizovaném p+n měřit celý interval včetně startu a převzetí, oddělit jednorázový vývoj. Celková úspora této změny zatím nedoložená.
+- Fyzická přejímka portálu/UI/filmu podle dřívější dohody.
+
+Technický důkaz:
+- 59 cílených testů PASS; skutečná Luna v syntetickém dry-run: jeden modelový tah, jeden worker, žádný odchozí zápis. Opakované volání vrátilo stejnou účtenku; ochranný snapshot shodný. logs/release_single_entry_dry_20261017.log. Plná brána 2109/2109 PASS (301,702 s unit testů); logs/release_single_entry_full_gate_20261017.log.

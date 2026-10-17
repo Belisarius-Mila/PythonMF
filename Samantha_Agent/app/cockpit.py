@@ -8263,7 +8263,7 @@ def human_adam_luna_release_start_action(
     payload: dict[str, Any], *, service: Any = HUMAN_ADAM,
 ) -> dict[str, Any]:
     try:
-        return luna_release.start_release(payload, service=service)
+        return luna_release.submit_release(payload, service=service)
     except (AppServerError, OSError, ValueError, TypeError) as exc:
         return {"ok": False, "message": str(exc)}
 

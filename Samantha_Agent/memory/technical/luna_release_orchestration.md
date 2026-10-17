@@ -45,19 +45,28 @@ proudy portálu (aktuálně 33), včetně přímé terminálové relace.
 Zkouška bez publikování volá skutečnou Lunu a read-only ochranné kontroly;
 nevolá push/deploy ani nový kontrolní tah hlavního Adama. Karta zobrazí výsledek.
 
-V přímé terminálové/Codex relaci hlavní Adam deleguje krátké zadání pomocnému
-agentovi z `resolve_release_executor()` (vrácený model i úsilí), bez
-kopírování celé historie. Předá i zmrazenou roli a zamýšlené ID
-projektu. Pomocník použije `audit_release()` bez argumentu `service`,
-porovná projekt s předáním a při rozdílu se zastaví. Potom použije registrované
-`start_terminal_release`, sleduje soukromou účtenku a výsledek vrátí původnímu
-volajícímu agentovi. Pro čekání a závěrečný důkaz používá pouze
-`LunaReleaseStore().status()` a jeho bezpečnou projekci `job.gate` /
-`job.verification`; nikdy nevypisuje celý interní záznam z `load()` ani token.
-Stejný serverový postup provede publikování, ale žádná
-zpráva se neposílá do jiné konverzace Cockpitu. Způsob návratu nelze přepnout
-uživatelským HTTP payloadem. Hlavní Adam poté ověří účtenku a odpoví v původní
-relaci. Během p+n zůstává společný main bez dalších vývojových změn.
+V přímé terminálové/Codex relaci hlavní Adam volá přímo registrované
+`submit_release(payload, wait=True)`. Nevytváří nativního modelového pomocníka.
+Stejný vstup obsluhuje portál přes existující `/luna-release/start`, kde je
+čekání asynchronní a návrat zůstává v původním vlákně. Jediná Luna převezme
+balíček uvnitř workeru; její roli/model/úsilí vybírá program z centrálního JSON.
+Krátký payload obsahuje confirmation=CONFIRMATION, client_message_id (stabilní
+pro jeden požadavek), expected_workstream_id, expected_local_head (celý SHA
+schváleného lokálního commitu) a dry_run (bool). Caller nedoplňuje origin,
+cíl ani model. Existující UI smí předat úplné auditované údaje; zůstávají závazné.
+Program audit provede a při zamčeném startu znovu ověří přesnou shodu. Celý
+rozsah čekajících commitů se nemění; jiný projekt/head/model se odmítne.
+
+Pro nativní spuštění použít jeden programový běh (např. functions.exec s
+programovým await na exec session), ne opakované modelové dotazy. `wait=True`
+vrací až bezpečnou konečnou účtenku nebo timeout, sleduje přesné job ID.
+Samostatné `wait_for_release(job_id)` také nic nespouští znovu. Změna current
+pointeru nemůže přesměrovat čekání. Stejná identita požadavku vrací původní
+účtenku i po úspěšném push; změna projektu, headu, režimu, kanálu nebo původního
+portálového vlákna je odmítnutá. Timeout zachovává stav a neprovádí retry.
+`start_release` a `start_terminal_release` zůstávají kompatibilní interní/starší
+vstupy. Pro nový běžný postup se používá pouze submit_release.
+V terminálu se neposílá zpráva do jiné konverzace. Během p+n se main nemění.
 
 GitHub HTTPS push může jednorázově použít již ověřené přihlášení GitHub CLI
 podle LL-060; bez změny globální konfigurace, nového přihlášení, tokenu v argv
@@ -420,3 +429,25 @@ Sol zatím jen jedna čistá Python funkce s existujícími testy, ne obecný au
 vývoj. Model a úsilí jsou výhradně v config/agent_roles.json; neaktivní
 routine_reviewer není překážka aktivního simple_developer. Během čekání model
 nehlídkuje. Nejistý krok se automaticky neopakuje.
+
+
+## Jediný programový vstup — 2026-10-17 21:32 CEST
+
+Míla schválil obecné odstranění nativní mezivrstvy Luny a ručního sestavování
+předání. `submit_release` je společné pro všech 33 registrovaných proudů,
+včetně Pages cílů, a dědí se přes společná AGENTS i do nově registrovaných
+proudů. Povinný schválený lokální SHA brání přibrání jiného novějšího commitu;
+program dopočítá origin, cíl a zmrazený model. Zachovává všechny původní plné,
+bezpečnostní a publikační brány. Nepovoluje samostatná vydání Camina.
+
+59 cílených testů PASS: kompaktní i úplný UI payload, TOCTOU, idempotence,
+čekání na konkrétní účtenku, timeout bez retry, návrat původnímu volajícímu,
+bez změn modelové politiky. Skutečný syntetický dry-run vykonal právě jeden
+modelový tah Luny, jeden worker a nula odchozích zápisů; opakování stejné
+identity nevolalo další model. Důkaz logs/release_single_entry_dry_20261017.log.
+Worker 24 691 tokenů / odhad 0,0639475 Standard není cena celého budoucího p+n;
+celková úspora není změřená. Camino/autosave před/po shodné. Plná brána
+2109/2109 PASS (301,702 s unit testů); logs/release_single_entry_full_gate_20261017.log.
+Tento krok je pouze lokální vývoj, bez push/nasazení; portál nový vstup použije
+po příštím samostatném p+n. Pro nativní spuštění není potřebná nová HTTP route
+ani konfigurační bootstrap. Historické benchmarky a jejich výsledky se nemění.

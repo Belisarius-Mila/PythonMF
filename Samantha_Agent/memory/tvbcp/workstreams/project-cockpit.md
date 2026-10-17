@@ -1965,3 +1965,24 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Nasazený a1437ec2 / stamp 7fa6d9e50f794ddf, job 4935e2096cff56f7aa768ec9d3ab936e completed, testy 2096, smoke 5. logs/simple_development_pn_final_20261017.log a logs/simple_development_release_phase2_20261017.log; podrobnosti výpočtu v technickém návodu. Nynější dokumentační commit zůstává lokální.
+
+
+## 2026-10-17 21:32 CEST — Jednodušší společné p+n s jedinou Lunou
+
+Hotovo:
+- Lokálně jeden vstup provede audit, zmrazení a spuštění jedné Luny. Terminál již nepotřebuje nativního pomocného agenta; portál používá stejnou funkci se zachováním potvrzovací karty a návratu do původního vlákna.
+- Programové čekání sleduje konkrétní účtenku, opakování identity nevolá další model ani publikaci. Původní ochrany a celý přesný rozsah commitů zůstávají zachované pro všech 33 proudů.
+
+Rozhodnutí:
+- Míla schválil tuto obecnou úpravu. Schválený lokální SHA a zamýšlený projekt jsou povinné; origin/cíl/model určuje program. Všechny publikační brány platí dál, žádné automatické retry či odhad neznámého cíle.
+- Toto zadání nezahrnuje nové p+n. Poslední provozní head zůstává a1437ec2; předchozí dokumentační 66e27e70 a tento vývojový checkpoint budou čekat lokálně.
+
+Další krok:
+- Po lokálním dokončení samostatné p+n přes nový jediný vstup a provozní ověření; nepoužívat další modelovou mezivrstvu.
+
+Navrhované další kroky:
+- Při běžném autorizovaném p+n měřit celý interval včetně startu a převzetí, oddělit jednorázový vývoj. Celková úspora této změny zatím nedoložená.
+- Fyzická přejímka portálu/UI/filmu podle dřívější dohody.
+
+Technický důkaz:
+- 59 cílených testů PASS; skutečná Luna v syntetickém dry-run: jeden modelový tah, jeden worker, žádný odchozí zápis. Opakované volání vrátilo stejnou účtenku; ochranný snapshot shodný. logs/release_single_entry_dry_20261017.log. Plná brána 2109/2109 PASS (301,702 s unit testů); logs/release_single_entry_full_gate_20261017.log.

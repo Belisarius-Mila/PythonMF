@@ -170,8 +170,8 @@ class LunaReleaseStore:
             assert job is not None
             return self.write({**job, **changes})
 
-    def status(self) -> dict[str, Any]:
-        job = self.load()
+    def status(self, job_id: str | None = None) -> dict[str, Any]:
+        job = self.load(job_id)
         if job and job["state"] in ACTIVE_STATES:
             # Acquiring the detached process lease proves its absence. A crash
             # becomes an explicit handback; status never restarts a write.
@@ -180,7 +180,7 @@ class LunaReleaseStore:
                     # The worker may have finished between the first read and
                     # acquiring its lease. Never overwrite its terminal receipt.
                     with self.lock():
-                        job = self.load()
+                        job = self.load(job_id)
                         if job and job["state"] in ACTIVE_STATES:
                             age = time.time() - float(job.get("queued_epoch", 0))
                             if age > 30:
@@ -416,13 +416,113 @@ def start_terminal_release(
     call: Callable[..., dict[str, Any]] = http_call,
     launcher: Callable[..., Any] = subprocess.Popen,
 ) -> dict[str, Any]:
-    """Native Luna subagent entrypoint; return to its caller, not another chat.
+    """Legacy exact-payload entrypoint; return to its caller, not another chat.
 
     The same canonical server audits/executes the release. Only this Python
     entrypoint selects caller handback; HTTP payloads cannot redirect a chat.
     """
     return start_release(payload, service=TerminalAuthority(call), store=store,
                          launcher=launcher, return_channel="caller")
+
+
+def wait_for_release(
+    job_id: str, *, store: LunaReleaseStore | None = None,
+    timeout: float = 1200, poll_interval: float = 1,
+) -> dict[str, Any]:
+    """Wait in program code for this receipt only; never restart a write."""
+    if (not JOB_ID.fullmatch(str(job_id)) or isinstance(timeout, bool)
+            or not isinstance(timeout, (int, float)) or not 0 < timeout <= 3600
+            or isinstance(poll_interval, bool) or not isinstance(poll_interval, (int, float))
+            or not 0 < poll_interval <= 30):
+        raise LunaReleaseError("Čekání nemá platnou účtenku nebo časový limit.")
+    store = store or LunaReleaseStore()
+    deadline = time.monotonic() + timeout
+    while True:
+        status = store.status(job_id)
+        job = status.get("job")
+        if not job or job.get("job_id") != job_id:
+            raise LunaReleaseError("Původní účtenku nelze ověřit.")
+        if not job["active"]:
+            return {"ok": job["state"] in {"completed", "dry_run_completed"}, "job": job}
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            return {"ok": False, "job": job, "timed_out": True,
+                    "message": "Čas čekání vypršel; ověř původní účtenku, neopakuj publikaci."}
+        time.sleep(min(poll_interval, remaining))
+
+
+def _check_submission_pins(payload: dict[str, Any], frozen: dict[str, Any]) -> None:
+    for key in ("expected_origin_head", "expected_local_head", "expected_deployment_target", "expected_executor"):
+        if key not in payload:
+            continue
+        value = agent_roles.validate_selection(payload[key]) if key == "expected_executor" else payload[key]
+        field = {"expected_executor": "executor", "expected_deployment_target": "deployment_target"}.get(key, key)
+        expected = frozen[field]
+        if value != expected:
+            raise LunaReleaseError("Balíček nebo model neodpovídá potvrzenému zadání.")
+
+
+def submit_release(
+    payload: dict[str, Any], *, service: Any = None, store: LunaReleaseStore | None = None,
+    call: Callable[..., dict[str, Any]] = http_call, launcher: Callable[..., Any] = subprocess.Popen,
+    wait: bool = False, timeout: float = 1200,
+) -> dict[str, Any]:
+    """One authorized call: audit, freeze and launch the sole worker-owned Luna.
+
+    Native Adam calls directly with wait=True. Portal calls asynchronously with
+    its server-owned service and keeps its original-thread callback. Existing
+    UI pins remain binding; compact callers need only the intended workstream,
+    approved local head, stable request ID, explicit confirmation and dry-run mode.
+    """
+    required = {"confirmation", "client_message_id", "expected_workstream_id", "expected_local_head", "dry_run"}
+    optional = {"expected_origin_head", "expected_deployment_target", "expected_executor", "user_text"}
+    if (not isinstance(payload, dict) or not required.issubset(payload)
+            or not set(payload).issubset(required | optional)
+            or payload.get("confirmation") != CONFIRMATION
+            or not isinstance(payload.get("client_message_id"), str)
+            or not CLIENT_ID.fullmatch(payload["client_message_id"])
+            or not isinstance(payload.get("expected_local_head"), str)
+            or not HEAD.fullmatch(payload["expected_local_head"])
+            or type(payload.get("dry_run")) is not bool or type(wait) is not bool
+            or not isinstance(payload.get("expected_workstream_id"), str)):
+        raise LunaReleaseError("Spuštění vyžaduje přesný projekt, identitu, režim a výslovný pokyn p+n.")
+    if wait and (isinstance(timeout, bool) or not isinstance(timeout, (int, float)) or not 0 < timeout <= 3600):
+        raise LunaReleaseError("Časový limit čekání není platný.")
+    workstream = payload["expected_workstream_id"]
+    target = release_target(workstream)  # Unknown/archived targets stop before any audit/model.
+    native = service is None
+    channel = "caller" if native else "cockpit"
+    authority = TerminalAuthority(call) if native else service
+    if authority.active_workstream_id != workstream:
+        raise LunaReleaseError("Aktivní projekt neodpovídá zamýšlenému předání.")
+    store = store or LunaReleaseStore()
+    job_id = hashlib.sha256(payload["client_message_id"].encode()).hexdigest()[:32]
+    existing = None
+    with store.lock():
+        if (store.root / f"{job_id}.json").exists():
+            existing = store.load(job_id)
+            assert existing is not None
+            if (existing["workstream_id"] != workstream or existing["deployment_target"] != target
+                    or existing["dry_run"] != payload["dry_run"] or existing["return_channel"] != channel
+                    or (not native and existing["parent_thread_id"] != authority.active_service.hub.snapshot().get("thread_id"))):
+                raise LunaReleaseError("Stejná identita už patří jinému předání.")
+            _check_submission_pins(payload, {
+                "expected_local_head": existing["target_head"], "expected_origin_head": existing["origin_head"],
+                "deployment_target": existing["deployment_target"], "executor": existing.get("executor")})
+    if existing is not None:
+        result = {"ok": True, "job": public_job(existing)}
+    else:
+        audit = audit_release(authority, require_parent=not native)
+        if audit["workstream_id"] != workstream or audit["deployment_target"] != target:
+            raise LunaReleaseError("Projekt nebo cíl se při auditu změnil.")
+        _check_submission_pins(payload, audit)
+        frozen_payload = {**payload, "expected_local_head": audit["expected_local_head"],
+                          "expected_origin_head": audit["expected_origin_head"],
+                          "expected_deployment_target": target, "expected_executor": audit["executor"]}
+        # Existing locked start revalidates the exact audit against concurrent drift.
+        result = start_release(frozen_payload, service=authority, store=store,
+                               launcher=launcher, return_channel=channel)
+    return wait_for_release(job_id, store=store, timeout=timeout) if wait else result
 
 
 def execute_release(
