@@ -35,6 +35,7 @@ from app.communication.human_adam_workstream_catalog import (
     WORKSTREAM_CATALOG_BY_ID, WORKSTREAM_ID_RE,
 )
 from app.file_persistence import atomic_write_json
+from app.release_usage import normalize_usage
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -118,6 +119,7 @@ def public_job(job: dict[str, Any] | None) -> dict[str, Any] | None:
             "executor": agent_roles.validate_selection(checked["executor"]) if checked.get("executor") else None,
             "active": checked["state"] in ACTIVE_STATES,
             "target_short": checked["target_head"][:12],
+            "model_usage": normalize_usage((checked.get("luna_proof") or {}).get("token_usage")),
             "gate": {key: gate[key] for key in ("passed", "mode", "test_count", "duration_seconds") if key in gate},
             "verification": {key: verification[key] for key in ("state", "main_head", "code_stamp", "smoke_count", "protected_services_unchanged", "deployment_target", "deployment_id", "workflow_run_id", "smoke_http_status", "smoke_path") if key in verification}}
 
@@ -229,7 +231,10 @@ def _accept_selected(client: Any, models: list[dict[str, Any]], handoff: dict[st
     if (not isinstance(result, dict) or result.get("action") != "accept"
             or result.get("target_head") != handoff["target_head"]):
         raise LunaReleaseError("Vykonavatel balíček nepřevzal; řízení vrací Adamovi.")
-    return {**agent_roles.validate_selection(selected), "accepted": True, "target_head": result["target_head"]}
+    return {**agent_roles.validate_selection(selected), "accepted": True,
+            "target_head": result["target_head"],
+            # This ephemeral thread has exactly one turn, so its total is this handoff.
+            "token_usage": normalize_usage(getattr(receipt, "thread_token_usage", None))}
 
 
 def probe_release_executor_candidate(model: str, reasoning_effort: str, *,

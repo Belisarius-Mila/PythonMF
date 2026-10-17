@@ -171,3 +171,27 @@ nebo opakování push. Ostatní remotes zachovávají dosavadní transport.
 Implementace: `app/communication/luna_release.py`, `luna_release_worker.py`,
 nové registrované routy Cockpitu, úzké napojení chatu a návrat do session hubu.
 Kanonický stav a důkazy patří do handoffu/TVBCP `project-cockpit`.
+
+## Schválený pilot měření p+n (2026-10-17)
+
+- Číselné počítadlo jedné výslovně zvolené nativní relace čte registrované
+  `app.release_usage.native_usage_snapshot(thread_id)`. Žádný prompt, odpověď
+  nebo obsah jiných relací se nevrací. Změna modelu/nastavení či reset
+  počítadel blokují výpočet rozdílu.
+- App Server receipt zachycuje poslední `thread/tokenUsage/updated.total`
+  jako `thread_token_usage`; jde o celou historii vlákna, ne delta tahu.
+  Převzetí používá nové ephemeral vlákno s jediným tahem, takže jeho total
+  je přesná spotřeba převzetí. Veřejné `model_usage` propustí jen čísla.
+- Neznámá telemetrie se nevydává za nulu. Cached input je podmnožina vstupu
+  a reasoning podmnožina výstupu; při přepočtu se nepřičítají podruhé.
+- Standard sazby jsou časovaný odhad podle
+  https://learn.chatgpt.com/docs/pricing#token-rates (17. 10. 2026), ne
+  vyúčtování ani důkaz zbývajícího limitu účtu. Zrychlení není odhadováno.
+- Míla pro pilot výslovně schválil výjimku: první UI balíček provede Adam
+  přímo registrovanými GitHub/deploy kroky, druhý běžným předáním Luně.
+  Výjimka nemění centrální roli ani pravidla dalších vydání.
+- Měří se od hotového commitu do závěrečného read-only ověření včetně
+  předání, pomocníka, modelového převzetí a kontroly hlavním Adamem.
+  Společná příprava a psaní závěrečného reportu zůstávají mimo oba intervaly.
+  Bezpečný souhrn je logs/pn_cost_comparison_20261017.md; raw logy zůstávají
+  soukromé, nezveřejňují se a nekopírují se do Gitu.

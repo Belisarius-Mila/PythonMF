@@ -16,6 +16,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
 
+from app.release_usage import normalize_usage
+
 
 DEFAULT_CODEX_BIN = os.environ.get("CODEX_BIN") or shutil.which("codex") or "/usr/local/bin/codex"
 DEFAULT_APP_SERVER_DEVELOPER_INSTRUCTIONS = (
@@ -99,6 +101,7 @@ class TurnReceipt:
     user_item_count: int
     duration_ms: int
     generated_images: tuple[dict[str, str], ...] = ()
+    thread_token_usage: dict[str, int] | None = None
 
     @property
     def delivered(self) -> bool:
@@ -514,6 +517,7 @@ class CodexAppServerClient:
         agent_messages: list[str] = []
         generated_images: tuple[dict[str, str], ...] = ()
         status = ""
+        token_usage = None
         while not status:
             event = self.transport.receive(
                 lambda candidate: self._belongs_to_turn(candidate, thread_id=thread_id, turn_id=turn_id),
@@ -526,6 +530,11 @@ class CodexAppServerClient:
             if method == "turn/started":
                 turn_started_confirmed = True
                 started_at = utc_now()
+            if method == "thread/tokenUsage/updated":
+                # Thread total, not turn delta; includes all calls since thread creation.
+                raw_usage = params.get("tokenUsage")
+                token_usage = normalize_usage(raw_usage.get("total") if isinstance(raw_usage, dict) else None,
+                                              camel_case=True)
             item = params.get("item")
             if method == "item/completed" and isinstance(item, dict):
                 if item.get("type") == "userMessage" and item.get("clientId") == message_id:
@@ -589,6 +598,7 @@ class CodexAppServerClient:
             user_item_count=len(user_items),
             duration_ms=round((time.monotonic() - started_monotonic) * 1000),
             generated_images=generated_images,
+            thread_token_usage=token_usage,
         )
         if not receipt.delivered:
             raise AppServerContractError("Turn nebyl jednoznačně potvrzen jako doručený a dokončený.")

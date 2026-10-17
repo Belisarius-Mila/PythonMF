@@ -1767,3 +1767,22 @@ Technický důkaz:
 - Provozní důkaz p+n: read-only `GET /api/human-adam/luna-release/status`
   a deployment souhrn `GET /api/human-adam/status`; nečíst celé soukromé vlákno.
   Stav origin/main ověřit registrovaným GitHub batch auditem.
+
+### 2026-10-17 17:12 CEST — Příprava měření nákladů p+n
+
+Hotovo:
+- Připravené číselné měření vybrané relace a spotřeby modelového převzetí; do účtenky nepatří prompty ani odpovědi. Chybějící telemetrie je neznámá, nikoli nula.
+
+Rozhodnutí:
+- Míla schválil dva malé UI commity: identita balíčku s přímým p+n Adamem a výsledky kontrol s p+n Lunou. Společná příprava měření je mimo srovnání.
+- Porovnání zahrne Adamovo předání a závěrečnou kontrolu, nativního pomocníka i jednorázové modelové převzetí. Vývoj a závěrečné sepsání reportu jsou zvlášť.
+- Jde o jeden orientační pár, různé commity a existující dlouhý kontext Adama proti krátkému kontextu pomocníka. Kredity jsou odhad Standard dle ceníku 17. 10., nikoli účetní doklad ani procenta limitu.
+
+Další krok:
+- Ověřit a nasadit společné měření, potom postupně provést oba schválené UI kroky.
+
+Navrhované další kroky:
+- Fyzická přejímka UI a filmu zůstává samostatně.
+
+Technický důkaz:
+- 81 cílených testů PASS; plná brána přípravy 2032/2032 PASS a skutečný modelový tah vrátil číselnou spotřebu. Důkazy: logs/release_usage_targeted_20261017.log, logs/release_usage_full_gate_20261017.log, logs/release_usage_live_probe_20261017.log. Výsledné číselné srovnání bude logs/pn_cost_comparison_20261017.md; tento checkpoint žádné budoucí nasazení nepotvrzuje.

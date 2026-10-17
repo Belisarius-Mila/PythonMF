@@ -18,6 +18,33 @@ from app.codex_appserver import (
 
 
 class CodexContractTests(unittest.TestCase):
+    def test_token_receipt_uses_latest_matching_thread_total_and_discards_extras(self) -> None:
+        transport = _ScriptedTransport(completed_items=[])
+        usage = dict(inputTokens=100, cachedInputTokens=80, outputTokens=10,
+                     reasoningOutputTokens=4, totalTokens=110, private="must-not-leak")
+        transport._events[1:1] = [
+            {"method":"thread/tokenUsage/updated", "params":{
+                "threadId":"other-thread", "turnId":"turn-1", "tokenUsage":{"total":usage}}},
+            {"method":"thread/tokenUsage/updated", "params":{
+                "threadId":"thread-1", "turnId":"turn-1", "tokenUsage":{"total":usage}}},
+        ]
+        with patch("app.codex_appserver.read_codex_version", return_value=CodexVersion.parse("codex-cli 0.147.0")):
+            client = CodexAppServerClient(transport_factory=lambda **_kwargs: transport)
+            receipt = client.send_text(thread_id="thread-1", client_message_id="message-1", text="test")
+        self.assertEqual(receipt.thread_token_usage["total_tokens"], 110)
+        self.assertNotIn("must-not-leak", json.dumps(receipt.as_dict()))
+
+    def test_missing_or_bad_token_telemetry_does_not_break_delivery(self) -> None:
+        for raw in (None, "invalid", {"total": {"inputTokens": -1}}):
+            transport = _ScriptedTransport(completed_items=[])
+            transport._events.insert(1, {"method":"thread/tokenUsage/updated", "params":{
+                "threadId":"thread-1", "turnId":"turn-1", "tokenUsage":raw}})
+            with self.subTest(raw=raw), patch("app.codex_appserver.read_codex_version", return_value=CodexVersion.parse("codex-cli 0.147.0")):
+                client = CodexAppServerClient(transport_factory=lambda **_kwargs: transport)
+                receipt = client.send_text(thread_id="thread-1", client_message_id="message-1", text="test")
+            self.assertTrue(receipt.delivered)
+            self.assertIsNone(receipt.thread_token_usage)
+
     def test_turn_passes_structured_output_without_changing_model(self) -> None:
         transport = _ScriptedTransport(completed_items=[])
         with patch("app.codex_appserver.read_codex_version", return_value=CodexVersion.parse("codex-cli 0.147.0")):

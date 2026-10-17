@@ -12,6 +12,17 @@ from app.capabilities.models import (
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
+        capability_id="release_usage_snapshot",
+        label="Read numeric token counters for one selected release participant",
+        risk=RiskLevel.READ_ONLY,
+        reads=("explicit native Codex thread token counters and model configuration",),
+        writes=(), requires_confirmation=False,
+        voice_allowed=VoicePolicy.ALLOWED, mobile_allowed=MobilePolicy.ALLOWED,
+        audit=AuditPolicy.SAFE_SUMMARY,
+        tool="app.release_usage.native_usage_snapshot",
+        notes="Numeric-only selected-thread metadata. No prompts, answers, credentials, account-wide scan or billing claims.",
+    ),
+    CapabilityRecord(
         capability_id="probe_release_executor_candidate",
         label="Probe one explicitly selected replacement executor",
         risk=RiskLevel.EXTERNAL_SEND,

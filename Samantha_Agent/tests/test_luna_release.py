@@ -131,6 +131,16 @@ class LunaReleaseTests(unittest.TestCase):
         job["executor"]["private_extra"] = "must-not-leak"
         self.assertNotIn("must-not-leak", json.dumps(release.public_job(job)))
 
+    def test_handoff_usage_is_numeric_only_and_legacy_usage_is_unknown(self):
+        job = self.create()
+        self.assertIsNone(release.public_job(job)["model_usage"])
+        counts = dict(input_tokens=100, cached_input_tokens=80, output_tokens=10,
+                      reasoning_output_tokens=4, total_tokens=110)
+        job["luna_proof"] = {"token_usage": {**counts, "private":"must-not-leak"}}
+        public = release.public_job(job)
+        self.assertEqual(public["model_usage"], counts)
+        self.assertNotIn("must-not-leak", json.dumps(public))
+
     def test_client_cannot_replace_the_audited_executor(self):
         with self.assertRaises(release.LunaReleaseError):
             self.create(expected_executor={**EXECUTOR, "model":"different-executor"})
