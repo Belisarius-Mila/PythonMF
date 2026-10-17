@@ -54,11 +54,8 @@ def _sources() -> dict[str, Any]:
             "documentation": path.read_text(encoding="utf-8")}
 
 
-def _review(sources: dict[str, Any], selected: dict[str, Any], client: Any) -> dict[str, Any]:
-    payload = json.dumps(sources, ensure_ascii=False, sort_keys=True)
-    if len(payload.encode()) > MAX_INPUT_BYTES:
-        raise ValueError("Podklady překročily schválený rozsah; vrátit Adamovi.")
-    context = ROOT / "data/private/routine_tasks/empty_context"
+def start_data_only_thread(client: Any, context: Path, model: str, instructions: str) -> dict[str, Any]:
+    """One isolated context; only per-thread configuration, never global state."""
     context.mkdir(parents=True, exist_ok=True)
     if context.is_symlink() or any(context.iterdir()):
         raise ValueError("Kontext auditu musí být prázdný a bez symlinku.")
@@ -79,10 +76,20 @@ def _review(sources: dict[str, Any], selected: dict[str, Any], client: Any) -> d
     skills = [Path(skill["path"]) for row in skill_roots for skill in row.get("skills", [])]
     overrides["skills.config"] = [{"path": str(path.parent if path.name == "SKILL.md" else path),
                                     "enabled": False} for path in skills]
-    thread = client.start_thread(cwd=context, ephemeral=True, developer_instructions=INSTRUCTIONS,
+    thread = client.start_thread(cwd=context, ephemeral=True, developer_instructions=instructions,
                                  sandbox="read-only", approval_policy="never",
-                                 model=selected["model"], config_overrides=overrides,
-                                 base_instructions=INSTRUCTIONS)
+                                 model=model, config_overrides=overrides,
+                                 base_instructions=instructions)
+    return {"thread_id": thread, "disabled_skills": len(skills)}
+
+
+def _review(sources: dict[str, Any], selected: dict[str, Any], client: Any) -> dict[str, Any]:
+    payload = json.dumps(sources, ensure_ascii=False, sort_keys=True)
+    if len(payload.encode()) > MAX_INPUT_BYTES:
+        raise ValueError("Podklady překročily schválený rozsah; vrátit Adamovi.")
+    context = ROOT / "data/private/routine_tasks/empty_context"
+    isolated = start_data_only_thread(client, context, selected["model"], INSTRUCTIONS)
+    thread = isolated["thread_id"]
     receipt = client.send_text(thread_id=thread, text=payload, model=selected["model"],
         effort=selected["reasoning_effort"], approval_policy="never",
         sandbox_policy={"type": "readOnly", "networkAccess": False},
@@ -94,7 +101,7 @@ def _review(sources: dict[str, Any], selected: dict[str, Any], client: Any) -> d
               "input_bytes": len(payload.encode()), "model_turns": 1, "retries": 0,
               "token_usage": usage, "estimated_standard_credits": cost,
               "duration_ms": receipt.duration_ms, "state": "attention",
-              "writes_to_source": False, "disabled_skills": len(skills)}
+              "writes_to_source": False, "disabled_skills": isolated["disabled_skills"]}
     # This is a post-completion acceptance threshold, not a billing hard cap.
     if usage is None or cost is None:
         return {**result, "reason": "Chybí číselný důkaz spotřeby; neopakovat automaticky."}

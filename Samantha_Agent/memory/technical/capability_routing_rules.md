@@ -71,6 +71,9 @@ Aktualni registrovane reporty:
 | "Náhled rutinní kontroly dokumentace" | `app.routine_tasks.route_routine_task("report_documentation_review")` | přesný typ a role bez modelového tahu; neznámý typ vrátí Adamovi |
 | "Prověř dokumentaci reportů Solem" | `app.routine_tasks.run_routine_task("report_documentation_review", confirmed=True)` | po souhlasu jeden čtecí modelový tah nad pevnými veřejnými podklady; bez změn zdrojů, opakování a publikace |
 | "Ověř kandidáta rutinního kontrolora" | `app.routine_tasks.probe_routine_reviewer(model, reasoning_effort)` | jen po cenovém posouzení a výslovné volbě modelu; pevný syntetický vstup, neschvaluje ani nemění roli |
+| Jedna vhodná čistá Python funkce v povoleném vývoji | `app.simple_development.preview/run/accept` | bezplatné deterministické směrování, jedna izolovaná oprava a jednorázové převzetí; root pouze skutečný autorizovaný workspace, role pouze centrální konfigurace |
+| Stejná oprava přes Cockpit | `app.simple_development_portal.request` | jen s aktuálním serverovým blokem SIMPLE_DEVELOPMENT; lokální souborový kanál zachová síťový sandbox, server ověří writable tah/projekt/vlákno a nejvýše jeden úkol; bez Git operací |
+| Zkouška vývojové role a první aktivace | `app.simple_development_activation.probe_candidate/accept_probe/activation_plan/activate` | skutečný syntetický FAIL → PASS; aktivace pouze po nasazení kompatibilního runtime, čistém main a kontrole přesného důkazu; nemění release_executor ani služby |
 
 Kdyz pri praci vznikne novy opakovatelny ad hoc status, audit nebo report,
 Samantha se ma zeptat: "Udelame z toho novy systemovy report?" Pokud Mila

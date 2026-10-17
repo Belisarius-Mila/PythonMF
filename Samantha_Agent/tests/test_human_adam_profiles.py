@@ -7,7 +7,7 @@ import time
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from app.communication.human_adam_profiles import (
     HumanAdamProfileManager,
@@ -2961,6 +2961,32 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             read_only_input.index("[WORKSTREAM_LIVE_STATUS]"),
             read_only_input.index("[DEVELOPMENT_CONTROL]"),
         )
+
+    def test_delegation_ticket_is_only_in_writable_turn_and_always_revoked(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, _workspace, _library, hub, _library_hub = self.make_manager(Path(temp_dir))
+            manager.connect()
+            ticket = {"token": "a" * 64, "channel": "synthetic-private-channel"}
+            bridge = SimpleNamespace(
+                issue=Mock(side_effect=lambda **kw: ticket if kw["writable"] else ""),
+                revoke=Mock(),
+            )
+            manager.simple_development_portal = bridge
+            manager.send(text="Jen čti", client_message_id="read-delegation")
+            self.assertNotIn("[SIMPLE_DEVELOPMENT]", hub.last_send["model_input_text"])
+            manager.send(text="Oprav funkci", client_message_id="write-delegation", write_intent=True)
+            self.assertIn("[SIMPLE_DEVELOPMENT]", hub.last_send["model_input_text"])
+            self.assertEqual([call.kwargs["writable"] for call in bridge.issue.call_args_list], [False, True])
+            self.assertEqual(bridge.revoke.call_args.args, (ticket,))
+
+            def interrupted():
+                raise RuntimeError("interrupted authorized turn")
+
+            hub.on_send = interrupted
+            with self.assertRaises(RuntimeError):
+                manager.send(text="Oprav funkci", client_message_id="failed-delegation", write_intent=True)
+            self.assertEqual(bridge.revoke.call_count, 3)
+            self.assertEqual(bridge.revoke.call_args.args, (ticket,))
 
     def test_send_injects_same_redacted_live_snapshot_into_model_input(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

@@ -1,6 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-17 19:37 CEST: lokálně dokončené předávání jedné čisté Python funkce s testy přes simple_developer; skutečný Sol FAIL → PASS a převzetí ověřené. Portálový serverový souborový kanál funguje uvnitř networkAccess=false, aktuální writable grant se ruší po tahu. Centrální role neaktivní do samostatného p+n a chráněné konfigurační aktivace. Plná brána 2096/2096 PASS (299,646 s unit testů); návod v luna_release_orchestration.md, sekce Jednoduchý vývoj.
+
 - 2026-10-17: Po úspěšném pilotu je routine_reviewer opět neaktivní. Běžící Cockpit má starý parser vyžadující jedinou roli release_executor; původní config/agent_roles.json zůstává zachovaný. Pilotní schválení a výsledky jsou uložené v runtime logu. Aktivace nové role až po samostatném nasazení podpory více rolí, bez obcházení současného p+n.
 
 - 2026-10-17 19:06 CEST: omezený lokální pilot report_documentation_review přes samostatnou roli Sol/medium. Skutečný audit veřejného katalogu a dokumentace dokončen za 4,95 s bez doložených rozporů; 0,6515 Standard za kontrolora + 0,64077 za jedno převzetí hlavním Adamem = 1,29227 odhadovaného kreditu. Nulové přírůstky hlavního modelu během čekání, chráněné služby a role p+n přesně shodné. 63 cílených testů PASS, plná brána 2046/2046 PASS (261,278 s unit testů); logs/routine_full_gate_20261017.log. Zatím bez push/nasazení, bez obecného autonomního vývoje. Předchozí C je dokončené podle runtime účtenky a logs/pn_async_comparison_20261017.log.
@@ -1806,3 +1808,26 @@ Technický důkaz:
 - logs/routine_candidate_probe_20261017.log, logs/routine_pilot_completed_20261017.log, logs/routine_pilot_usage_20261017.log; souhrn v logs/routine_pilot_report_20261017.log. Náklady zavedení jsou oddělené, nevyvozují se z ceny samotného kontrolora.
 
 Doplnění k aktivaci pilotu: Novou roli nyní neaktivovat v centrálním JSON. Běžící starší Cockpit by odmítl celý seznam rolí, takže je po experimentu obnovena přesná původní konfigurace. Kód a měření jsou lokálně připravené; registrované spuštění bez schválené role bezpečně vrátí attention. Nejprve samostatně nasadit podporu více rolí, teprve potom aktivovat routine_reviewer v config/agent_roles.json.
+
+
+## 2026-10-17 19:37 CEST — Jednoduchý vývoj přes samostatnou roli
+
+Hotovo:
+- Jedna vhodná čistá Python funkce s původními testy se může předat Solovi bez dalšího modelového rozhodování. Program provede izolovanou opravu a testy, hlavní Adam jednou přebere přesný diff. Kritické, nejasné, triviální a rozpracované úkoly zůstávají Adamovi.
+- Skutečný Sol opravil syntetickou funkci; tři nezměněné testy přešly FAIL → PASS a návrh byl přijat. Souborový kanál skutečně prošel uvnitř síťově uzavřeného App Server sandboxu. Portál používá serverovou autoritu aktuálního writable tahu, projektu a vlákna, nejvýše jeden úkol a automatické zrušení grantu po skončení/chybě.
+
+Rozhodnutí:
+- Míla schválil dokončení vývojového předávání po upřesnění, že původní krok byl pouze čtecí pilot. Podporovaná třída je jedna čistá Python funkce, ne libovolný autonomní vývoj. Rozhodnutí o rozsahu je programové; checkpoint a p+n zachovávají vlastní oprávnění.
+- Žádná modelová kontrola během čekání, žádné automatické opakování nejistého kroku. Limit 30 000 tokenů / 4 Standard se kontroluje po dokončení; nejde o fakturační strop. Samotná cena pomocníka nedokazuje úsporu celého workflow.
+- Centrální role zatím původní: starý runtime by nové role odmítl. Registrovaná aktivace nejprve ověří již nasazený kompatibilní Cockpit a skutečnou přijatou zkoušku; teprve potom dovolí konfiguraci simple_developer. release_executor zůstává beze změny, routine_reviewer se tím nezapíná.
+
+Další krok:
+- Po samostatném p+n provést dvoufázové zavedení podle technického návodu: nasadit kód, registrovaně aktivovat ověřenou roli, commitnout přesnou konfiguraci a dokončit p+n. Další vývoj pro tuto aktivaci není potřeba.
+
+Navrhované další kroky:
+- Fyzická přejímka portálu/UI/filmu zůstává samostatně po nasazení.
+- Přínos delegace hodnotit včetně jednorázového převzetí hlavním Adamem; zatím není přímý kontrolní vývojový běh.
+
+Technický důkaz:
+- Skutečný probe 9396d97054df4e549a777d930622df1f: 11 093 tokenů a 0,58125 odhad Standard pomocníka; první zastavený test 0,55645. První nevyhovující odpověď nic nepřepsala; upřesnění zadání doložené novou zkouškou.
+- logs/simple_development_candidate_corrected_20261017.log, logs/simple_development_acceptance_20261017.log a logs/simple_development_portal_ipc_20261017.log; souhrn logs/simple_development_report_20261017.log. Plná brána 2096/2096 PASS (299,646 s unit testů), logs/simple_development_full_gate_20261017.log. Závěrečný živý chráněný snapshot a role p+n před/po přesně shodné; logs/simple_development_final_verification_20261017.log. Žádný push, restart, změna sítě ani Camino/autosave.

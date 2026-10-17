@@ -280,3 +280,86 @@ nasadit podporu více rolí; aktivace routine_reviewer v centrálním JSON je
 až následný krok s novým otiskem a kontrolou. Pilotní vazba a její důkazy
 jsou v logs/routine_pending_role_20261017.log, ne jako alternativní
 produkční konfigurace. Nové nasazení během tohoto úkolu nebylo autorizované.
+
+
+## Jednoduchý vývoj (17. 10. 2026)
+
+Míla autorizoval dokončení vývojového předávání. První podporovaná třída je
+jedna čistá vrcholová synchronní Python funkce v app/ s 1–3 existujícími
+unittest moduly. Hlavní Adam při plánování jednou vybere cíl, funkci a testy;
+program rozhodne způsobilost bez modelového klasifikátoru. Funkce do dvou
+řádků zůstává Adamovi kvůli režii. Nejde o obecné převzetí libovolného vývoje.
+
+Registrované app.simple_development.preview/run/accept používají čistý
+commitovaný autorizovaný workspace; root je důvěryhodný kontext volajícího,
+nikdy pole požadavku. Požadavek má přesně goal, path, function, test_modules.
+Nejvýše 100 řádků / 12 000 bajtů funkce, zachovaná signatura, žádné importy,
+vnější helpery, globální stav ani zápis do parametrů. Camino, Cockpit, role,
+autosave, přenosy, perzistence, zálohy, bezpečnost, publikace, e-mail a kalendář
+jsou vyloučené. Rozšíření rozsahu vyžaduje zvláštní vývojové rozhodnutí.
+
+Program z committed app/tests vytvoří kopii nejvýše 32 MiB bez odkazů.
+Původní testy spustí před i po opravě přes App Server command/exec bez modelu,
+v sandboxu workspaceWrite jen pro kopii a její tmp, bez sítě a globálního tmp.
+Chyba prostředí či nulový počet testů zastaví předání před placeným tahem.
+Pomocník dostane pouze cíl, funkci a názvy testů, žádnou historii ani celý
+projekt. Jediný datový tah používá centrální simple_developer, vypnuté nástroje,
+MCP, konektory, hooky, paměti a implicitní projektové instrukce/dovednosti.
+Testy se nemění; pouze vybraná funkce smí vytvořit diff. Účtenka obsahuje
+zmrazenou roli/head/hash, testy, spotřebu a přesný otisk návrhu. Překročení
+30 000 tokenů / 4 Standard je mez přijetí po dokončení, ne fakturační strop.
+Chybějící důkaz, přerušení nebo drift znamenají attention bez automatického
+opakování. Stejné zadání na stejném head má trvalé stejné job ID.
+
+Hlavní Adam zkontroluje jednou diff a testovou účtenku a v již autorizovaném
+tahu zavolá accept s přesným job ID a candidate_digest. Přenese se pouze
+ověřená funkce, bez Gitu. Stejné přijetí je idempotentní, pozdější změnu
+zdroje nepřepíše. V terminálu následuje obvyklý zápis a lokální commit;
+v Human–Adam zůstává checkpoint a integrace výhradně Cockpitu.
+
+### Cesta z portálu a dědění do nových proudů
+
+Izolovaný editor s networkAccess=false nemůže ani HTTP na localhost.
+Nespouštět v něm další App Server a nepovolovat síť kvůli předávání.
+ProfileManager vystaví pouze při existujícím writable=true a aktivní schválené
+roli krátkodobý blok SIMPLE_DEVELOPMENT s tokenem a soukromým kanálem.
+app.simple_development_portal.request předá run nebo accept souborovým IPC.
+Server určí root, projekt, thread i message ID a obslouží právě jeden úkol;
+cizí/ukončený/čtecí tah, jiný návrh nebo model/root z payloadu odmítne.
+Programové čekání neprobouzí hlavní model; po send včetně chyby se grant zruší.
+Žádný nový daemon, plánovač, veřejná API operace ani síťové oprávnění.
+
+Stejné společné AGENTS a ProfileManager se použijí i pro nově založené proudy.
+Bez platného bloku úkol zůstává hlavnímu Adamovi. V přímém terminálu se použije
+registrovaný run s root nastaveným na skutečný projektový adresář. Při čekání
+využít jeden programový běh, případně functions.exec s programovým čekáním na
+exec session; nevyvolávat model kvůli průběžným kontrolám.
+
+### První zavedení po samostatném p+n
+
+Centrální config/agent_roles.json je nyní beze změny: starý běžící Cockpit
+umí jen release_executor. Dokončený kód je lokální, produkční delegace neaktivní.
+První zavedení patří pod výslovné p+n a má dvě konfigurační fáze:
+
+1. Dosavadní registrovanou cestou publikovat a nasadit připravené commity.
+2. Na čistém main zavolat activation_plan s probe ID
+   9396d97054df4e549a777d930622df1f a activate(plan, confirmed=True).
+   Živý GET /api/human-adam/simple-development/capabilities musí doložit nový
+   parser. Plán zmrazí commit, původní konfiguraci a přijatý skutečný důkaz.
+   Starý runtime změnu odmítne před zápisem. Aktivuje se jen simple_developer;
+   původní release_executor zůstane přesně zachovaný. routine_reviewer se tím
+   nezapíná. Vazba bude pouze v centrálním config/agent_roles.json.
+3. Zkontrolovat a lokálně commitnout pouze tuto konfiguraci, zarovnat bezpečné
+   profily, provést nový audit přesného balíčku a dokončit autorizované p+n.
+   Nový vývoj není zapotřebí; konfigurační fáze má samostatné ověření a účtenku.
+
+Kandidát gpt-6.1-sol/medium má doložené cenové posouzení a skutečný suchý test.
+První zkouška správně skončila attention kvůli nepovolenému zřetězení metod;
+instrukce byly upřesněné a nový výslovný test prošel. Žádné automatické retry.
+Tři nezměněné testy přešly FAIL → PASS; hlavní Adam jednou převzal přesný diff.
+Úspěšný tah 11 093 tokenů / odhad 0,58125 Standard, první zastavený 0,55645.
+Jsou to ceny pomocníka, ne celkové úspory. Vývojová práce, režie hlavního Adama
+a jednorázová implementace se s cenou jedné opravy nesměšují; bez kontrolního
+běhu úspora neprokázaná. Číselný souhrn v logs/simple_development_report_20261017.log.
+Skutečná zkouška souborového IPC uvnitř networkAccess=false PASS; žádný modelový
+tah ani rozšíření sítě. Fyzická přejímka portálu zůstává až po nasazení.

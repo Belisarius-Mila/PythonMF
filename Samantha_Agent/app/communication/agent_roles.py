@@ -13,7 +13,8 @@ from app.codex_appserver import AppServerError
 
 ROLE = "release_executor"
 ROUTINE_ROLE = "routine_reviewer"
-KNOWN_ROLES = frozenset({ROLE, ROUTINE_ROLE})
+DEVELOPMENT_ROLE = "simple_developer"
+KNOWN_ROLES = frozenset({ROLE, ROUTINE_ROLE, DEVELOPMENT_ROLE})
 CONFIG_PATH = Path(__file__).resolve().parents[2] / "config/agent_roles.json"
 MODEL_ID = re.compile(r"[a-zA-Z0-9][a-zA-Z0-9._:-]{0,95}")
 EFFORTS = frozenset({"low", "medium", "high", "xhigh", "max", "ultra"})

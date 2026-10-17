@@ -107,15 +107,23 @@ Společné pracovní instrukce PythonMF; cesty níže jsou vůči `Samantha_Agen
   nástupce z katalogu samo nepovoluje přechod. Nedostupný model bez schválené
   kompatibilní náhrady zastaví předání před publikováním; model běžící úlohy
   se nepřepíná.
-- Rutinní delegace má zatím jediný schválený typ `report_documentation_review`
-  v `app/routine_tasks.py`: čtecí kontrolu veřejného katalogu reportů a jeho
-  dokumentace. Použij registrovaný náhled/spuštění; ostatní typy se vracejí
-  hlavnímu Adamovi. Role `routine_reviewer` má vlastní nastavení a nemění
-  vykonavatele p+n. Nepředávej historii relace ani soukromá data, neprováděj
-  modelový polling a neopakuj nejistý či nadlimitní krok automaticky.
-  Jde o omezený pilot, nikoli obecné schválení samostatného vývoje nebo publikace.
-  Role zůstává do samostatného nasazení podpory více rolí neaktivní; její
-  předčasné přidání do centrálního JSON by zablokovalo starší běžící Cockpit.
+- V autorizovaném vývoji zvaž jednou při plánování předání jedné čisté Python
+  funkce s existujícími testy přes `app.simple_development.run`. Rozsah určí
+  program bez dalšího modelu; kritické, nejasné, rozpracované nebo triviální
+  úkoly zůstávají hlavnímu Adamovi. Podrobnosti a aktivace jsou v
+  `memory/technical/luna_release_orchestration.md`, sekce Jednoduchý vývoj.
+  Pomocník má pouze vybranou funkci a cíl; testy provádí program v oddělené
+  kopii. Hlavní Adam jednou zkontroluje diff a účtenku a použije `accept`.
+  V Cockpitu používej pouze `app.simple_development_portal.request` s aktuálním
+  serverovým blokem SIMPLE_DEVELOPMENT; kořen určí server, ne model. Nespouštěj
+  App Server z izolovaného editoru. Bez tohoto bloku zůstává úkol Adamovi.
+  Checkpoint/commit/push/nasazení dál podléhají stávajícím pravidlům.
+- Samostatný čtecí pilot `report_documentation_review` v `app/routine_tasks.py`
+  má vlastní roli `routine_reviewer`; vývoj používá `simple_developer`.
+  Nepředávej historii ani soukromá data, neprováděj modelový polling a neopakuj
+  nejistý či nadlimitní krok automaticky. Čekání a testy obstará program.
+  Nové role zůstávají do samostatného nasazení podpory více rolí neaktivní;
+  jejich předčasné přidání do centrálního JSON by zablokovalo starší Cockpit.
 
 ## Technické preference
 

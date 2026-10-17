@@ -9770,6 +9770,10 @@ class CockpitServer:
                         human_adam_simple_main_deployment_audit_action(service=HUMAN_ADAM)
                     )
                     return
+                if parsed.path == "/api/human-adam/simple-development/capabilities":
+                    from app.simple_development_activation import capabilities
+                    self.respond_json(capabilities())
+                    return
                 if parsed.path == "/api/human-adam/luna-release/audit":
                     self.respond_json(human_adam_luna_release_audit_action(service=HUMAN_ADAM))
                     return

@@ -500,6 +500,8 @@ class HumanAdamProfileManager:
             )
         )
         self.github_batch_mode = bool(github_batch_mode)
+        from app.simple_development_portal import PortalDelegation
+        self.simple_development_portal = PortalDelegation()
         self._lazy_services: dict[str, HumanAdamService] = {}
         self._state_lock = threading.RLock()
         self._operation_lock = threading.Lock()
@@ -1839,6 +1841,12 @@ class HumanAdamProfileManager:
                     workspace_status=service.workspace.status(),
                     integration_deferred=integration_deferred,
                 )
+            from app.simple_development_portal import control_block
+            delegation_token = self.simple_development_portal.issue(
+                manager=self, service=service, workstream_id=self.active_workstream_id,
+                client_message_id=client_message_id, writable=writable,
+            )
+            development_control_block += control_block(delegation_token)
             try:
                 result = service.send(
                     **kwargs,
@@ -1886,6 +1894,8 @@ class HumanAdamProfileManager:
                     except (DeferredIntegrationError, OSError, TypeError, ValueError):
                         pass
                 raise
+            finally:
+                self.simple_development_portal.revoke(delegation_token)
             transient_images = result.pop("_generated_images", [])
             delivered_entry = result.get("entry")
             image_import = import_completed_generated_images(

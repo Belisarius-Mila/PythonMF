@@ -29,6 +29,13 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-074 — Delegace ze síťově uzavřeného editoru potřebuje místní serverový kanál
+
+- Problém: App Server sandbox s networkAccess=false odmítá i HTTP na localhost; vlastní nový App Server z editoru by navíc dědil jeho omezení.
+- Typ: opakující se
+- Řešení nalezeno: 17102026
+- Řešení: Zachovat sandbox. Server povolí souborový IPC kanál pouze pro aktuální autorizovaný writable tah, ověří projekt/thread/message a určí workspace i centrální roli sám. Nejvýše jeden úkol, jednorázové převzetí, zrušení grantu v finally i při chybě. Skutečný command/exec v networkAccess=false potvrdil funkční IPC bez rozšíření sítě. Nezaměňovat platnou syntetickou zkoušku za fyzickou přejímku nasazeného portálu.
+
 ### LL-073 — Krátké zadání není krátký kontext kontrolora
 
 - Problém: Čtecí Sol dostal 165 bajtů dat, ale implicitní kontext vytvořil 18 337 tokenů; režie může převážit užitečnou práci.
