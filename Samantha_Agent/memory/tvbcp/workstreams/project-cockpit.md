@@ -1986,3 +1986,22 @@ Navrhované další kroky:
 
 Technický důkaz:
 - 59 cílených testů PASS; skutečná Luna v syntetickém dry-run: jeden modelový tah, jeden worker, žádný odchozí zápis. Opakované volání vrátilo stejnou účtenku; ochranný snapshot shodný. logs/release_single_entry_dry_20261017.log. Plná brána 2109/2109 PASS (301,702 s unit testů); logs/release_single_entry_full_gate_20261017.log.
+
+
+## 2026-10-17 22:33 CEST — Společné p+n nasazené, předání do nového chatu
+
+Hotovo:
+- Nový jednotný postup úspěšně publikoval a nasadil celý dvoucommitový balíček přes jedinou Lunu. Konečné ověření potvrdilo funkční runtime, chráněné Camino/autosave a aktivní roli pro jednoduchý vývoj.
+
+Rozhodnutí:
+- Míla výslovně zadal p+n přes Lunu. Proběhlo přímým submit_release(wait=True), bez nativního modelového prostředníka či modelového pollingu. Další chat navazuje z dokumentace, již dokončenou aktivaci ani publikaci neopakuje.
+
+Další krok:
+- Navázat ve stejném projektu podle dalšího Mílova zadání; závěrečný dokumentační checkpoint zůstane lokální do příštího autorizovaného balíčku.
+
+Navrhované další kroky:
+- Fyzická přejímka portálu/UI/filmu a případné srovnatelné měření celkové režie dalšího běžného p+n; bez automatického rozšiřování vývoje.
+
+Technický důkaz:
+- b47b0bb609bb4eff5c6d0f5971350d007d73fbbe / stamp d769959026d9b405; účtenka cb55493cb02cdfe7055873e1d7485869 completed, 2109 testů PASS, smoke 5/5. Živý audit: GitHub aligned, oba profily aligned, simple_developer enabled=true, chráněné služby shodné. logs/release_single_entry_pn_final_20261017.log.
+- Programové čekání hlavního modelu: 0 nových tokenů; jde pouze o čekací interval, ne celý náklad p+n. logs/release_single_entry_pn_20261017.log.

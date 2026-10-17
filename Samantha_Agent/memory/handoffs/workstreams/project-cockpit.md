@@ -1,6 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-17 22:33 CEST: P+n nového společného postupu DOKONČENÉ přes jedinou Lunu. Oba schválené commity publikované, nasazený b47b0bb609bb4eff5c6d0f5971350d007d73fbbe / stamp d769959026d9b405; účtenka cb55493cb02cdfe7055873e1d7485869 completed, plná brána 2109 PASS a smoke 5/5. Konečný živý audit potvrdil čistý zarovnaný main/GitHub i oba profilové workspaces, simple_developer enabled=true a přesně zachované Camino/autosave. Důkaz: logs/release_single_entry_pn_final_20261017.log. Při navázání p+n ani aktivaci neopakovat; níže uvedené čekání na publikaci je historické. Tento závěrečný dokumentační checkpoint zůstává pouze lokální.
+
 - 2026-10-17 21:32 CEST: NOVÝ lokální krok — společný submit_release audituje a spouští jedinou Lunu, v terminálu bez nativního modelového pomocníka. Vyžaduje schválený head a projekt, programové čekání na přesnou účtenku a idempotenci. 59 cílených testů a skutečný syntetický dry-run PASS; plná brána 2109/2109 PASS. Bez push/nasazení. Starší ruční předání níže zachovává historický stav před touto úpravou.
 
 ### Předání pro příští relaci — 2026-10-17 21:18 CEST
@@ -1908,3 +1910,29 @@ Navrhované další kroky:
 
 Technický důkaz:
 - 59 cílených testů PASS; skutečná Luna v syntetickém dry-run: jeden modelový tah, jeden worker, žádný odchozí zápis. Opakované volání vrátilo stejnou účtenku; ochranný snapshot shodný. logs/release_single_entry_dry_20261017.log. Plná brána 2109/2109 PASS (301,702 s unit testů); logs/release_single_entry_full_gate_20261017.log.
+
+
+## 2026-10-17 22:33 CEST — Předání do nového chatu po dokončeném p+n
+
+Nazev: Úsporné předávání vývoje Solovi a p+n Luně
+Priorita: 1
+Stav: ceka na retest
+Pripomenout pri startu: ano
+Datum: 2026-10-17 22:33 CEST
+
+Co se resilo:
+- Uzavření dlouhé relace po úspěšném p+n novým společným vstupem.
+Co je hotove:
+- Hotový vývoj je na GitHubu a nasazený: b47b0bb6 / d769959026d9b405. Jedna Luna, dva commity, plná brána 2109 PASS a smoke 5/5; účtenka cb55493cb02cdfe7055873e1d7485869 completed.
+- Konečný živý audit potvrdil shodné heads i čisté profilové workspaces, Sol enabled=true, Camino a nepřetržité autosave přesně zachované. Během programového čekání přírůstek hlavního modelu 0 tokenů; tento dílčí údaj není celkovou úsporou vydání.
+Co neni hotove:
+- Fyzická přejímka portálu/UI/filmu a srovnatelné měření nákladů celého běžného p+n.
+Dalsi krok:
+- Nový chat ve stejném projektu načte aktuální AGENTS.md, index a tento handoff; potom pokračovat podle dalšího Mílova zadání. Hotové p+n ani aktivaci neopakovat.
+Navrhovane dalsi kroky:
+- Fyzický retest při vhodné příležitosti; při příštím samostatně zadaném běžném p+n případně zachytit celý náklad včetně startu a závěrečného převzetí.
+Zmenene nebo relevantni soubory:
+- luna_release_orchestration.md, tento handoff, odpovídající TVBCP, MEMORY_INDEX.md a ACTIVE_PROJECTS.md. Důkaz logs/release_single_entry_pn_final_20261017.log; měření čekání logs/release_single_entry_pn_20261017.log.
+- Tento závěrečný dokumentační checkpoint je pouze lokální a může jít do příštího autorizovaného balíčku; kód je již nasazený.
+Bezpecnost / neukladat:
+- Camino, autosave a centrální schválené role zachovat. Nic nemazat, nepřenášet soukromá data ani historii do modelových pomocníků, neprovádět automatický retry publikace.
