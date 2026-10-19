@@ -1,6 +1,13 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-19 22:10 CEST: Opraveno matoucí znění TXT o záloze Camina. Verze 1.2
+  hned nahoře potvrzuje dokončený snapshot `20261019_212828-78238a8a`
+  a úspěšnou celou souborovou obnovu. Odstraněna stará podmíněná pasáž
+  předcházející této záloze; totéž zpřesněno v kapitole 17. Projektová
+  a desktopová kopie shodné. Externí disk je odpojený, na něm zůstává 1.1;
+  [PRIPOMENOUT] po připojení přenést TXT 1.2. Datové zálohy a služby se nemění.
+
 - 2026-10-19 21:49 CEST: Doplněna skutečná šifrovaná záloha živého Camina
   `20261019_212828-78238a8a`: 1 587 souborů / 5 078 684 995 B, čtyři DB,
   304 originálů, filmové projekty, konfigurace a přesný nasazený release.

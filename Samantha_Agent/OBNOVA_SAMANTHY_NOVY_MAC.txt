@@ -1,13 +1,28 @@
 OBNOVA SAMANTHY NA NOVÉM MACU
 Podrobný postup po poruše SSD, ztrátě nebo výměně MacBooku
-Verze 1.1 — 19. října 2026
+Verze 1.2 — 19. října 2026
 Autor: Adam pro Mílu
 Formát: prostý text UTF-8. V dokumentu nejsou hesla ani přístupové tokeny.
 
 Tento soubor si ulož také mimo původní Mac. Samotný lokální soubor ani
 lokální Git commit tě při ztrátě počítače neochrání. Aktuální vydání musíš
 mít na dostupném externím disku, v důvěryhodném cloudu nebo na GitHubu.
-Zveřejnění dokumentu a doplnění zálohování jsou samostatné kroky.
+
+STAV ZÁLOH K 19. ŘÍJNU 2026
+===========================
+CAMINO JE ZÁLOHOVANÉ. Ostrá šifrovaná záloha z 19. 10. byla dokončena
+a celá zkušebně obnovena do oddělené složky. Kontrola všech souborů,
+čtyř databází a 304 originálů prošla. Záloha obsahuje také filmové projekty,
+soukromé nastavení a přesný serverový release.
+
+Pro obnovu použij společně:
+  - Samantha / PythonMF: projektový snapshot 20261018_210658.
+  - Živé Camino: samostatný snapshot 20261019_212828-78238a8a.
+  - Novější kód: Git bundle podle kapitoly 6.4.
+
+Obě datové části jsou ve šifrovaném kontejneru SamanthaSecureBackup na
+externím disku Falta. Přesné umístění a obnova Camina jsou v kapitolách
+1.4 a 12. Celková instalace na skutečném novém Macu zatím nebyla vyzkoušena.
 
 JAK TENTO NÁVOD POUŽÍVAT
 ======================
@@ -25,7 +40,7 @@ platí přesná věta uvedená v memory/technical/global_safety_brake.md.
 
 RYCHLÁ ORIENTACE
 ===============
-  1. Co přežije a co zatím chybí v záloze.
+  1. Dokončené zálohy Samanthy a Camina a jejich rozsah.
   2. Co mít připravené ještě před havárií.
   3. Programy a ověřený přehled současného Macu.
   4. Příprava nového macOS, účtu a nástrojů.
@@ -44,11 +59,12 @@ RYCHLÁ ORIENTACE
  17. Věta pro nového Adama a oficiální zdroje.
 
 
-1. CO PŘEŽIJE A KDE JE DNES MEZERA
-=================================
-Máme postup obnovy jádra Samanthy. Úplná obnova všech částí ekosystému
-z jediného současného projektového snapshotu zatím zaručená není.
-Níže je konkrétní hranice, nikoli obecné varování.
+1. DOKONČENÉ ZÁLOHY SAMANTHY A CAMINA
+====================================
+Máme projektovou zálohu Samanthy i dokončenou zálohu živého Camina.
+Jsou to dvě samostatné části na externím disku; pro obnovu použij obě.
+Kapitola 1.3 vyjmenovává další obsah Macu, který se instaluje nebo obnovuje
+zvlášť. Dokončenou zálohu Camina popisuje kapitola 1.4.
 
 1.1 Poslední doložená ostrá projektová záloha
 
@@ -62,10 +78,12 @@ Níže je konkrétní hranice, nikoli obecné varování.
 18. 10. byly ověřeny manifest, recovery návod, shodné SHA-256 čtyř
 vybraných souborů a obnova AGENTS.md do samostatné dočasné složky.
 To je výběrová kontrola, ne test obnovy celého nového Macu.
-19. 10. je disk Falta připojený a šifrovaný SamanthaSecureBackup odemčený;
+Při zálohovacím běhu 19. 10. byl disk Falta připojený a šifrovaný
+SamanthaSecureBackup odemčený;
 připojení a šifrování byly ověřeny. Projektový snapshot z 18. 10. zůstává
-beze změny. Tento nový návod je uložen samostatně na disku Falta;
-doplněk novějšího kódu popisuje kapitola 6.4.
+beze změny. Na disku Falta byla 19. 10. uložena samostatná kopie návodu
+verze 1.1; nejnovější vydání uchovej mimo Mac také. Doplněk novějšího
+kódu popisuje kapitola 6.4.
 
 1.2 Co standardní recovery záloha obsahuje
 
@@ -94,7 +112,11 @@ vnějších cílů. Pouhá velikost snapshotu není důkaz úplnosti.
   - Codex auth.json se záměrně nezálohuje a nikdy se neobnovuje.
   - Data na jiných discích a jinde v domovské složce.
 
-1.4 Živé Camino: samostatný šifrovaný doplněk
+1.4 Živé Camino: záloha dokončená a zkušebně obnovená
+
+Camino bylo 19. 10. ostře zazálohováno do samostatného šifrovaného
+snapshotu 20261019_212828-78238a8a. Kopie zahrnuje celý podporovaný archiv
+služby a její souborová obnova byla ověřena; podrobnosti jsou níže.
 
 Při čtecím auditu 19. 10. jsou skutečné databáze a média služby zde:
 
@@ -103,15 +125,9 @@ Při čtecím auditu 19. 10. jsou skutečné databáze a média služby zde:
 Jsou tam metadata.sqlite, media.sqlite, auth.sqlite, readers.sqlite,
 originals/, viewer-copies/, film-projects/, soukromá konfigurace a tokeny.
 Pevné serverové releasy jsou v sousední složce Camino/Releases/.
-Tyto skutečné cesty jsou mimo strom PythonMF ve starší projektové záloze.
-Ověření hashů originálů při vývoji není jejich další nezávislá záloha.
-
-Pokud původní Mac opravdu zanikne a nemáš samostatnou konzistentní kopii
-tohoto archivu, nelze poctivě slíbit obnovu celého Mac archivu Camina,
-jeho stavu synchronizace a uložených střihů jen z projektové zálohy.
-Starší kopie v PythonMF nemusí odpovídat současné službě.
-iPhone může obsahovat originály, ale samotný telefon nenahrazuje
-ověřenou kopii kompletního serverového stavu. Telefon nemaž ani neresetuj.
+Tyto cesty byly mimo rozsah projektového snapshotu z 18. 10. Dnešní
+samostatná záloha z 19. 10. je již obsahuje. Při obnově proto ber živý
+archiv Camina z tohoto nového snapshotu podle kapitoly 12.
 
 Od 19. 10. je doplněn registrovaný scripts/backup_camino.py. Nový recovery
 program ho také automaticky volá a do projektového manifestu zapisuje
@@ -1192,9 +1208,10 @@ služby a zachované soubory. Neopakuj běh automaticky naslepo.
   Zastavit další změny. Ověřit úplnost a identitu archivu. Telefon nemaž,
   neprováděj nový čistý bootstrap a neresetuj jeho journal.
 
-„Záloha je zelená, ale živé Camino není v ní“:
-  Zelené datum potvrzuje konkrétní projektový běh. Ověřit skutečný rozsah
-  v manifestu a kapitole 1.4. Nezaměňovat úspěšný běh s úplným pokrytím Macu.
+„Kde hledat zálohu Camina?“:
+  Ve vlastním snapshotu 20261019_212828-78238a8a v camino_snapshots,
+  nikoli uvnitř staršího projektového snapshotu. Kapitoly 1.4 a 12 uvádějí
+  dokončenou zálohu i její ověřenou souborovou obnovu.
 
 
 17. VĚTA PRO NOVÉHO ADAMA A ZDROJE
@@ -1204,8 +1221,9 @@ Tento text můžeš vložit do nového Codexu po instalaci a obnově projektu:
     Jsem Míla a obnovuji Samanthu na novém Macu. Pracuj česky jako Adam.
     Nejprve načti OBNOVA_SAMANTHY_NOVY_MAC.txt, AGENTS.md,
     memory/MEMORY_INDEX.md a kanonický handoff infrastruktury.
-    Zkontroluj skutečný rozsah dostupné zálohy. Živé Camino může být
-    mimo projektový snapshot v Library/Application Support/PythonMF/Camino.
+    Obnovu připrav ze dvou datových částí: projekt 20261018_210658
+    a živé Camino 20261019_212828-78238a8a. Ověřený doplněk Camina je
+    v camino_snapshots; pro novější kód použij Git bundle podle kapitoly 6.4.
     Nic nemaž, nepřepisuj existující data a nevypisuj tajemství.
     Neopakuj automaticky odchozí úlohy, push, nasazení ani stará potvrzení.
     Nejdřív obnovme Python a místní Cockpit, potom po kontrole další služby.

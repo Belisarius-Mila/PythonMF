@@ -2,10 +2,13 @@
 
 Projekt zalozen 2026-05-19.
 
-## Aktuální stav 2026-10-19 21:49 CEST
+## Aktuální stav 2026-10-19 22:10 CEST
 
-Podrobný lidský návod: `../../OBNOVA_SAMANTHY_NOVY_MAC.txt`, verze 1.1,
-17 kapitol včetně instalací a přejímky. Samostatná kopie je na SSD Falta.
+Podrobný lidský návod: `../../OBNOVA_SAMANTHY_NOVY_MAC.txt`, verze 1.2,
+17 kapitol včetně instalací a přejímky. Aktuální projektová a desktopová
+kopie mají shodný SHA-256. Na SSD Falta zůstává verze 1.1; disk je nyní
+odpojený. [PRIPOMENOUT] Po připojení přenést toto čistě textové upřesnění.
+Záloha Camina už existuje a její stav se touto úpravou nemění.
 Recovery karty směrují na tentýž TXT; Git bundle ve šifrovaném
 `SamanthaBackups/recovery_updates/` doplňuje kód od projektového snapshotu
 z 18. 10. a zachová i nové nástroje před samostatným pushem.
@@ -32,7 +35,7 @@ recovery program jej volá automaticky a zapíše `Camino supplement: <ID>`;
 selhání doplňku zabrání označení projektové zálohy jako dokončené.
 Profil safe tento soukromý doplněk nevytváří.
 
-Ověření: celý doplněk obnoven do nové soukromé dočasné složky; všechny
+Ověření zálohovacího běhu 19. 10.: celý doplněk obnoven do nové soukromé dočasné složky; všechny
 soubory SHA-256, čtyři quick_check a kompletní mediální účtenky PASS.
 Obnovená kopie nespouštěla druhou službu. Produkce HTTP/HTTPS zdravá,
 anonymní přístup odmítnut, archiv/config/Serve/Funnel shodné; Cockpit 200.
@@ -49,8 +52,9 @@ Macu neproběhla. Aplikace, interprety, Klíčenka, LaunchAgents, SSH/shell,
 kompletní ~/.codex a další externí data nadále nejsou obrazem tohoto backupu.
 `data/session_autosave/` je vyloučené; původní Codex sessions jsou jiný rozsah.
 
-Další krok: pravidelná recovery záloha aktualizovaným programem; celý nový
-Mac instalovat a přejímat podle TXT jako samostatnou řízenou obnovu.
+Další krok: po připojení disku přenést TXT 1.2; datové snapshoty ani původní
+Git bundle se kvůli opravě textu nepřepisují. Pravidelná recovery záloha
+a celková instalace nového Macu zůstávají samostatné kroky.
 
 ## Historie 2026-09-14 23:26 CEST
 
