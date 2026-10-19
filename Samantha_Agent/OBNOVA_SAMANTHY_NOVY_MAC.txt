@@ -1,0 +1,1156 @@
+OBNOVA SAMANTHY NA NOVÉM MACU
+Podrobný postup po poruše SSD, ztrátě nebo výměně MacBooku
+Verze 1.0 — 19. října 2026
+Autor: Adam pro Mílu
+Formát: prostý text UTF-8. V dokumentu nejsou hesla ani přístupové tokeny.
+
+Tento soubor si ulož také mimo původní Mac. Samotný lokální soubor ani
+lokální Git commit tě při ztrátě počítače neochrání. Aktuální vydání musíš
+mít na dostupném externím disku, v důvěryhodném cloudu nebo na GitHubu.
+Zveřejnění dokumentu a doplnění zálohování jsou samostatné kroky.
+
+JAK TENTO NÁVOD POUŽÍVAT
+======================
+Čti kapitoly postupně. Odsazené řádky jsou příkazy do Terminalu; kopíruj
+vždy jen příkazy příslušného kroku. Nespouštěj celý dokument jako skript.
+Příkaz pokračující znakem \ patří dohromady s následujícím řádkem.
+Proměnné znovu nastav, pokud zavřeš okno Terminalu.
+
+Dokument připravuje budoucí obnovu. Jeho vytvoření nic neinstaluje,
+nemění síť, neobnovuje soukromá data a nezapíná automatické odesílání.
+Na novém Macu potvrzuj systémové a soukromé zásahy podle AGENTS.md.
+Pokud pomáhá Adam, nic nemazat a před přepsáním existujících dat zastavit.
+Změny systému a LaunchAgents mají vlastní potvrzení; při globální brzdě
+platí přesná věta uvedená v memory/technical/global_safety_brake.md.
+
+RYCHLÁ ORIENTACE
+===============
+  1. Co přežije a co zatím chybí v záloze.
+  2. Co mít připravené ještě před havárií.
+  3. Programy a ověřený přehled současného Macu.
+  4. Příprava nového macOS, účtu a nástrojů.
+  5. Připojení zálohy a volba dokončeného snapshotu.
+  6. Obnova PythonMF bez přepsání jiné práce.
+  7. Python 3.12, knihovny a další Python aplikace.
+  8. Přihlášení a obnova Codexu / Adama.
+  9. První místní spuštění Cockpitu a kontrola dat.
+ 10. Autostart, autosave, ScanDocu a klávesová zkratka.
+ 11. Tailscale, iPhone a SSH.
+ 12. Samostatná obnova služby Camino a filmu.
+ 13. Xcode, iLoader, SideStore a zachování iPhone dat.
+ 14. Pošta, kalendář, oprávnění a doplňkové aplikace.
+ 15. Závěrečný přejímací seznam.
+ 16. Potíže a jejich bezpečné řešení.
+ 17. Věta pro nového Adama a oficiální zdroje.
+
+
+1. CO PŘEŽIJE A KDE JE DNES MEZERA
+=================================
+Máme postup obnovy jádra Samanthy. Úplná obnova všech částí ekosystému
+z jediného současného projektového snapshotu zatím zaručená není.
+Níže je konkrétní hranice, nikoli obecné varování.
+
+1.1 Poslední doložená ostrá projektová záloha
+
+  Snapshot:       20261018_210658
+  Profil:         recovery
+  Šifrovaný cíl:  SamanthaSecureBackup / SamanthaBackups / snapshots
+  Počet souborů:  90 833; přeskočeno 0; konečný exit 0.
+  Nově kopírováno 12 194, hardlinkem převzato 78 639 souborů.
+  Nově kopírováno 1 137 947 624 bajtů.
+
+18. 10. byly ověřeny manifest, recovery návod, shodné SHA-256 čtyř
+vybraných souborů a obnova AGENTS.md do samostatné dočasné složky.
+To je výběrová kontrola, ne test obnovy celého nového Macu.
+19. 10. není cílový svazek připojený; tento údaj vychází z uložené
+účtenky a data/backup/activity_state.json, nikoli z nového čtení disku.
+Tento nově napsaný návod ještě není součástí uvedeného snapshotu.
+
+1.2 Co standardní recovery záloha obsahuje
+
+  - Složku PythonMF včetně zdrojů, projektové paměti a přítomné .git.
+  - Lokální ignorovaná/soukromá data uvnitř tohoto stromu, pokud je
+    nevylučují filtry: např. .env, dokumenty, archivy a nastavení.
+  - Vybraná data Codexu: config.toml, history.jsonl a strom sessions.
+  - Manifest a kopii RECOVERY_FROM_BACKUP.md jako READ_ME_FIRST_RECOVERY.md.
+
+Profil recovery znamená širší soukromý obsah UVNITŘ stanoveného rozsahu;
+neznamená obraz celého Macu. Symlinky nejsou nezávislou kopií jejich
+vnějších cílů. Pouhá velikost snapshotu není důkaz úplnosti.
+
+1.3 Co se standardně neobnoví prostým zkopírováním tohoto snapshotu
+
+  - Programy z /Applications, Xcode a stažené simulátory/SDK.
+  - Python interprety, .venv/venv, node_modules, build/dist a cache.
+  - Obsah macOS Klíčenky, nové přihlášení Codexu a GitHubu.
+  - ~/.ssh, shellové profily, ~/Library/LaunchAgents, systémová oprávnění.
+  - Kompletní ~/.codex: zejména místní databáze stavu, pluginy, skills,
+    připojení a paměti této aplikace nejsou automaticky zahrnuty jen tím,
+    že se zálohuje výběr config/history/sessions. AGENTS.md a memory/
+    projektu se naopak obnoví s PythonMF.
+  - Nouzová data/session_autosave; filtr ji vylučuje i z recovery profilu.
+    Originální Codex sessions jsou jiná složka a recovery je zahrnuje.
+  - Codex auth.json se záměrně nezálohuje a nikdy se neobnovuje.
+  - Data na jiných discích a jinde v domovské složce.
+
+1.4 Konkrétní mezera: živé Camino mimo PythonMF
+
+Při čtecím auditu 19. 10. jsou skutečné databáze a média služby zde:
+
+    ~/Library/Application Support/PythonMF/Camino/Service/
+
+Jsou tam metadata.sqlite, media.sqlite, auth.sqlite, readers.sqlite,
+originals/, viewer-copies/, film-projects/, soukromá konfigurace a tokeny.
+Pevné serverové releasy jsou v sousední složce Camino/Releases/.
+Tyto skutečné cesty jsou mimo zdroj standardní projektové zálohy.
+Ověření hashů originálů při vývoji není jejich další nezávislá záloha.
+
+Pokud původní Mac opravdu zanikne a nemáš samostatnou konzistentní kopii
+tohoto archivu, nelze poctivě slíbit obnovu celého Mac archivu Camina,
+jeho stavu synchronizace a uložených střihů jen z projektové zálohy.
+Starší kopie v PythonMF nemusí odpovídat současné službě.
+iPhone může obsahovat originály, ale samotný telefon nenahrazuje
+ověřenou kopii kompletního serverového stavu. Telefon nemaž ani neresetuj.
+
+PRVNÍ SAMOSTATNÝ NÁSLEDUJÍCÍ ÚKOL PRO ZÁLOHOVÁNÍ:
+rozšířit registrované zálohování o konzistentní externí archiv Camina
+(databáze včetně jejich vzájemné identity, média, filmové projekty,
+konfiguraci a potřebný release), ověřit kopii a provést zkoušku obnovy.
+Živé SQLite databáze nekopírovat jednotlivě za běhu jako obyčejné soubory.
+Použít registrované offline zastavení vlastní služby nebo SQLite backup
+API a koordinovaný okamžik; zahrnout i potřebná WAL data konzistentně.
+Nynější dokumentace tuto chybějící schopnost sama neimplementuje.
+
+Samostatně uchovat originály rodinných filmů na externím disku Falta,
+potřebná IPA a jejich důkazy; Downloads ani celý externí disk nejsou
+automaticky součástí zálohy PythonMF.
+
+
+2. CO MÍT PŘIPRAVENÉ JEŠTĚ PŘED HAVÁRIÍ
+======================================
+[ ] Externí recovery disk uložený odděleně od notebooku.
+[ ] Heslo šifrovaného kontejneru dostupné i bez původního Macu.
+[ ] Přístup k Apple účtu, ChatGPT/OpenAI, GitHubu a Tailscale.
+[ ] Funkční druhý faktor / obnovovací kódy, nezávislé na ztraceném Macu.
+[ ] Tento TXT mimo Mac; hesla a obnovovací kódy do něj nedopisovat.
+[ ] Vyřešená samostatná kopie živého Camina podle kapitoly 1.4.
+[ ] Seznam dalšího potřebného obsahu mimo PythonMF; zejména rodinná média,
+    případné iMovie knihovny, dokumenty a místní instalační balíčky IPA.
+
+Když byl Mac ukradený, řeš také ochranu účtů a zařízení z důvěryhodného
+zařízení. Obnova souborů sama neodvolá přístupy ztraceného počítače.
+Neodvolávej naslepo jediný zbývající způsob přístupu k záloze.
+
+Má-li existující nezávislá Time Machine záloha dostatečné pokrytí, Apple
+Migration Assistant může obnovu domácí složky a aplikací podstatně zkrátit.
+Její existenci tento audit nedoložil. Projektový snapshot není Time Machine.
+Po migraci mezi Intel a Apple Silicon znovu vytvoř Python prostředí. [1]
+
+
+3. PROGRAMY A PŘEHLED SOUČASNÉHO MACU
+====================================
+Přehled byl přečten 19. 10. 2026. Verze jsou orientační diagnostický
+podklad, ne pokyn vždy instalovat starou verzi ani důkaz kompatibility
+libovolné budoucí verze. Obnovovací zkouška na novém zařízení zatím chybí.
+
+ZÁKLAD PRO SAMANTHU A VÝVOJ:
+  macOS              dnes 15.7.9, Intel x86_64; nový Mac může být arm64.
+  Python             pracovní .venv je 3.12.0rc3; použij stabilní 3.12.x,
+                     ne tento starý release candidate a ne náhodné python3.
+  Python/Tk          potřeba pro desktopové slovníčky a další Tk aplikace.
+  Git                dnes Apple Git 2.50.1; je součástí vývojových nástrojů.
+  Homebrew           dnes 6.0.11; správná instalace pro čip nového Macu.
+  Node.js + npm      dnes 24.15.0 / 11.12.1; potřebné i pro JS kontroly.
+  Codex CLI          dnes 0.163.0; samostatný program, ne pip knihovna.
+  Visual Studio Code dnes 1.140.0; editor, rozšíření Python/Pylance dle potřeby.
+  GitHub CLI gh      dnes 2.96.0; přihlášení, audit a publikační nástroje.
+  screen            dnes systémový /usr/bin/screen; drží SSH relaci.
+  ripgrep rg         vyhledávání v projektu, není povinný pro samotný server.
+
+FUNKCE SAMANTHY A SOUKROMÝ PŘÍSTUP:
+  Tailscale          dnes 1.102.4; Mac i iPhone, soukromý vzdálený přístup.
+  FFmpeg + ffprobe   dnes 8.1; média, kontroly a render filmů.
+  Tesseract          dnes 5.5.2; OCR; doplnit jazyk čeština/angličtina.
+  Poppler            dnes 26.04.0; např. pdftoppm pro render PDF/OCR.
+  edge-tts           Python balíček, ne samostatná macOS aplikace.
+
+CAMINO A IPHONE:
+  Xcode              dnes 26.3, build 17C529 podle xcodebuild.
+                     Potřeba pro Swift, iOS buildy, podpis a zařízení.
+  iLoader            dnes 2.3.4; Mac aplikace pro sideloading/SideStore.
+  SideStore          aplikace na iPhonu; není server Samanthy.
+  LocalDevVPN        aplikace/VPN na iPhonu pro SideStore obnovování podpisu.
+                     Nezaměňovat s Tailscale pro kontakt se serverem.
+
+DALŠÍ POUŽÍVANÉ APLIKACE, INSTALOVAT PODLE POTŘEBY:
+  ChatGPT, Claude, Cursor: doplňková rozhraní, ne náhrada Codex CLI.
+  Termius: iPhone/desktop SSH klient, znovu nastavit spojení a klíče.
+  LocalSend: přenosy balíčků mezi zařízeními.
+  iMovie: rodinné filmy; samotná aplikace nezahrnuje knihovny ani originály.
+  Audacity, VLC: zvuk a kontrolní přehrávání médií.
+  Word, Excel, PowerPoint, OneNote, OneDrive: z účtu Microsoft / App Store,
+    nejsou podmínkou startu jádra Samanthy.
+  HP: ovladače a skenování jen podle skutečné tiskárny/skeneru.
+  JANA COCKPIT a PythonRunner: místní obálky; po změně cesty/čipu zkontrolovat
+    nebo znovu sestavit, nejsou automaticky obnovované z /Applications.
+
+Není potřeba instalovat všechny programy starého Macu kvůli spuštění jádra.
+XcodeGen ani SoX nebyly při auditu v PATH; nevydávám je za nutnou součást.
+Docker není podmínkou zde popsaného místního provozu.
+
+
+4. PŘIPRAV NOVÝ MAC
+==================
+4.1 Základní nastavení
+
+  a) Dokonči nastavení macOS, přihlas se ke svému Apple účtu a ověř internet.
+  b) Nainstaluj běžné systémové aktualizace kompatibilní s vybraným Xcode.
+  c) Pro soukromá data používej vlastní účet a zapni šifrování FileVault.
+  d) Ověř dostatek místa pro zálohu, Xcode/SDK, nová prostředí a média.
+  e) U pracovního adresáře ověř, že jde o místní dostupné soubory,
+     nikoli pouze cloudové zástupce. Pozor na synchronizaci Plochy iCloudem.
+
+V Terminalu spusť:
+
+    whoami
+    printf '%s\n' "$HOME"
+    uname -m
+    sw_vers -productVersion
+
+Očekávej vlastní domovskou složku; čip arm64 nebo x86_64.
+Neměň proměnnou HOME. V dalších příkazech $HOME znamená tvůj skutečný účet.
+
+DŮLEŽITÉ PRO CESTY:
+Některé starší spouštěče mají natvrdo /Users/miloslavfalta/...
+Stejné krátké jméno nového uživatele obnovu zjednoduší, není však podmínkou.
+Při jiném jméně Adam nejprve cíleně zkontroluje aktivní spouštěče,
+konfiguraci služeb a cesty pracovních kopií. Neprovádět hromadné přepisování
+celé soukromé historie, databází nebo všech souborů textovým nahrazením.
+
+4.2 Apple vývojové nástroje
+
+Pro Git a první nástroje stačí Command Line Tools:
+
+    xcode-select --install
+
+Dokonči instalační dialog. Potom:
+
+    git --version
+    xcode-select -p
+
+Plný Xcode nainstaluj navíc pro Camino podle kapitoly 13.
+Plný Xcode obsahuje vlastní nástroje; nejde o dvě povinné paralelní sady. [2]
+
+4.3 Homebrew a správná architektura
+
+Otevři https://brew.sh a použij oficiální instalační příkaz z této stránky.
+Instalátor vysvětlí změny a případné vyžádání administrátorského hesla.
+Postup ani instalátor nestahuj z náhodného zrcadla. [3]
+
+Potom proveď jeho vypsané kroky pro PATH. Typické umístění:
+  Apple Silicon: /opt/homebrew
+  Intel:         /usr/local
+
+V aktuálním Terminalu podle příslušného čipu:
+
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+
+nebo na Intelu:
+
+    eval "$(/usr/local/bin/brew shellenv)"
+
+Stejný instalační řádek přidej jen jednou do souboru, který určí instalátor
+(obvykle ~/.zprofile). Existující soubor nepřepisuj celý. Ověř:
+
+    command -v brew
+    brew --version
+    brew --prefix
+
+Nepřenášej starý Intel Homebrew, jeho Cellar ani .venv na Apple Silicon.
+Na nepodporovaném starém Intelu může být nutná jiná podporovaná distribuční
+cesta; nevynucuj automaticky sestavení celého prostředí ze zdrojů.
+
+4.4 Základní balíčky
+
+    brew install python@3.12 python-tk@3.12 node@24 gh ripgrep
+    brew install ffmpeg tesseract tesseract-lang poppler
+
+Odkazy a formule: [4], [5], [6]. Python/Tk je zvlášť; pip tkinter neinstaluje.
+Node 24 je zde vybraná LTS řada podobná ověřenému prostředí, ne požadavek
+automaticky přejít na každou novou hlavní verzi.
+
+Node@24 je keg-only. Pro aktuální Terminal:
+
+    export PATH="$(brew --prefix node@24)/bin:$PATH"
+
+Jeho konkrétní cestu přidej do svého PATH podle pokynu Homebrew, např.
+/opt/homebrew/opt/node@24/bin na Apple Silicon. Nový Terminal musí najít node.
+Stejně musí nástroje později najít automaticky spouštěná služba, viz kap. 10.
+
+Kontrola:
+
+    "$(brew --prefix python@3.12)/bin/python3.12" --version
+    node --version
+    npm --version
+    gh --version
+    ffmpeg -version
+    ffprobe -version
+    tesseract --list-langs
+    pdftoppm -v
+    /usr/bin/screen --version
+
+U Tesseract očekávej eng a ces. Pokud chybí, zkontroluj tesseract-lang.
+Instalace FFmpeg sama nedokládá funkčnost konkrétního filmového kodeku;
+po obnově ověř skutečný náhled a render na syntetickém médiu.
+
+Alternativa pro Python: oficiální instalace z python.org, viz [7].
+Použij jeden vybraný stabilní Python 3.12, s funkčním Tk a certifikáty.
+U python.org instalace spusť přiložený Install Certificates.command.
+Python 3.12.10 má oficiální universal2 instalátor, ale není nejnovější
+bezpečnostní 3.12.x; pro běžnou obnovu preferuj aktualizovanou podporovanou
+cestu. Nepřecházej potichu na 3.13/3.14/3.15 jen kvůli novějšímu číslu.
+
+4.5 Visual Studio Code
+
+Z https://code.visualstudio.com/download stáhni správnou variantu pro čip,
+přesuň aplikaci do Applications a spusť ji. [8]
+V Command Palette (Cmd+Shift+P) vyber:
+  Shell Command: Install 'code' command in PATH
+Přidej oficiální rozšíření Python a Pylance podle potřeby.
+Při otevření projektu zvol interpret Samantha_Agent/.venv/bin/python;
+ne systémový Python. Codex rozšíření je volitelné; CLI funguje samostatně.
+
+
+5. PŘIPOJ ZÁLOHU A VYBER DOKONČENÝ SNAPSHOT
+=========================================
+Připoj externí disk. Ve Finderu otevři SamanthaSecureBackup.sparsebundle
+(historicky je na disku Falta). Heslo zadávej jen do systémového dialogu.
+Pokud svazek nejde otevřít, neformátuj disk a nevytvářej přes něj nový obraz.
+
+Očekávaná cesta po odemčení:
+
+    /Volumes/SamanthaSecureBackup/SamanthaBackups/snapshots/
+
+Výpis:
+
+    ls -1 "/Volumes/SamanthaSecureBackup/SamanthaBackups/snapshots"
+
+NEVYBÍREJ slepě poslední jméno přes tail -1. Neúspěšný běh může vytvořit
+novější nedokončenou složku. Prohlédni kandidáta a zkontroluj manifest.
+Pro poslední zde doložený snapshot nastav:
+
+    RECOVERY_SNAPSHOT="/Volumes/SamanthaSecureBackup/SamanthaBackups/snapshots/20261018_210658"
+    ls "$RECOVERY_SNAPSHOT"
+    cat "$RECOVERY_SNAPSHOT/backup_manifest.txt"
+
+Při budoucí novější záloze nahraď jen ID potvrzeného dokončeného snapshotu.
+Očekávej PythonMF/, codex_home/, backup_manifest.txt a recovery návod.
+Manifest musí uvádět Profile: recovery a správný zdroj/rozsah.
+Profil safe vynechává další citlivá data; není rovnocenný recovery.
+Ani recovery neobsahuje vše z kapitoly 1.3 a živé Camino z 1.4.
+
+V nejasném snapshotu nic neopravuj a nemaž. Zachovej původní disk jako zdroj.
+
+
+6. OBNOV PYTHONMF DO PRÁZDNÉHO CÍLE
+==================================
+6.1 Máš recovery snapshot
+
+    mkdir -p "$HOME/Desktop"
+    test -e "$HOME/Desktop/PythonMF" && echo "STOP: cil uz existuje"
+
+Pokud test vypíše STOP nebo je cesta symlink, nepokračuj kopírováním.
+Nejprve s Adamem domluv zachování existující složky a nový prázdný cíl.
+Nepoužívej mazání, automatické slučování ani rsync --delete.
+Jen při potvrzeném neexistujícím cíli pokračuj:
+
+    RECOVERY_PROJECT="$HOME/Desktop/PythonMF"
+    mkdir "$RECOVERY_PROJECT"
+    rsync -a "$RECOVERY_SNAPSHOT/PythonMF/" "$RECOVERY_PROJECT/"
+
+Koncové lomítko u zdroje je úmyslné. Cílem je přímo PythonMF, nikoli
+vnořená složka PythonMF/PythonMF. Kopíruje se i skrytá .git a .env.
+
+Ověř adresáře a čitelnost známého souboru:
+
+    test -f "$RECOVERY_PROJECT/Samantha_Agent/AGENTS.md" && echo "AGENTS OK"
+    cmp "$RECOVERY_SNAPSHOT/PythonMF/Samantha_Agent/AGENTS.md" \
+        "$RECOVERY_PROJECT/Samantha_Agent/AGENTS.md"
+    git -C "$RECOVERY_PROJECT" status --short --branch
+    git -C "$RECOVERY_PROJECT" log -1 --oneline
+
+cmp bez výstupu a exit 0 znamená shodu. Příkaz test při úspěchu hlásí AGENTS OK.
+Pokud chybí .git, je zdroj neúplný nebo jde o export; Git nekonstruuj naslepo
+uvnitř soukromých dat. Ponech obnovu a vyřeš samostatnou kopii repozitáře.
+
+6.2 Máš pouze GitHub, bez recovery dat
+
+Nejdřív přihlášení GitHubu podle kap. 8. Potom při neexistujícím cíli:
+
+    cd "$HOME/Desktop"
+    git clone https://github.com/Belisarius-Mila/PythonMF.git
+
+Tím získáš publikovaný kód a git-safe paměť. Nezískáš .env, ignorovaná
+soukromá data, kompletní archivy, nepřenesené lokální commity ani Camino
+z Library. Prázdný nový vault není důkaz úspěšné obnovy původních dat.
+
+6.3 Porovnej GitHub s obnoveným stavem, ale nezahoď novější lokální práci
+
+    cd "$HOME/Desktop/PythonMF"
+    git status --short --branch
+    git remote -v
+    git fetch origin
+    git rev-list --left-right --count main...origin/main
+
+Git remote zkontroluj místně; případnou URL s přístupovým tokenem nesdílej.
+Fetch mění jen vzdálené reference, nepřepisuje pracovní soubory.
+Výsledek 0 0 znamená shodu. Lokální náskok může být zachráněná nepublikovaná
+práce. Při divergenci nebo nečistém stavu zastav integraci a zachovej soubory.
+Jen při čisté main bez lokálního náskoku a pouze vzdáleném náskoku lze po
+kontrole rozsahu použít git merge --ff-only origin/main. Není to první krok
+obnovy. Nepoužívat automatický pull, rebase ani reset --hard.
+
+
+7. PYTHON PRO SAMANTHU A DALŠÍ APLIKACE
+=====================================
+7.1 Nové virtuální prostředí
+
+    cd "$HOME/Desktop/PythonMF/Samantha_Agent"
+    RECOVERY_PYTHON="$(brew --prefix python@3.12)/bin/python3.12"
+    "$RECOVERY_PYTHON" --version
+
+Při použití python.org nastav RECOVERY_PYTHON na jeho konkrétní interpret.
+Obecné python3 na starém Macu ukazuje na 3.11.5, ačkoli Samantha používá 3.12.
+Proto se při obnově nespoléhej na samotný název python3.
+
+Pokud .venv existuje, zastav se; neobnovuj prostředí přes staré binárky.
+Nech je zachované stranou po potvrzení a vytvoř nové na původní cílové cestě.
+Při neexistující .venv:
+
+    "$RECOVERY_PYTHON" -m venv .venv
+    .venv/bin/python -m pip install --upgrade pip
+    .venv/bin/python -m pip install -r requirements.txt
+    .venv/bin/python -m pip check
+
+Prostředí se vytváří znovu; přenášení .venv mezi počítači a čipy není
+spolehlivý způsob obnovy. Knihovny instaluj do .venv, ne přes sudo pip. [9]
+
+Základní requirements.txt při auditu obsahuje:
+  openai-agents, certifi, Pillow, pillow-heif, python-dotenv,
+  pdfplumber, opencv-python-headless.
+
+Přímé závislosti v tomto souboru nejsou připnuté na jednu přesnou verzi.
+Instalace později může stáhnout jiné verze. Čistý pip check a projektové
+testy jsou nutné; není to bitově reprodukovatelný obraz starého prostředí.
+
+7.2 Doplňky pro používané funkce
+
+Ve skutečném prostředí jsou i doplňky, které základní requirements.txt
+samy výslovně neuvádějí. Pro obnovu stejné šíře funkcí:
+
+    .venv/bin/python -m pip install edge-tts qrcode reportlab requests tabulate
+    .venv/bin/python -m pip check
+
+Ověřený přehled hlavních verzí z 19. 10. pro případ řešení regrese:
+  openai-agents 0.17.2; openai 2.36.0; certifi 2026.4.22;
+  Pillow 12.2.0; pillow_heif 1.3.0; python-dotenv 1.2.2;
+  pdfplumber 0.11.9; opencv-python-headless 4.13.0.92;
+  edge-tts 7.2.8; qrcode 8.2; reportlab 4.5.1;
+  requests 2.34.1; tabulate 0.10.0.
+Tyto hodnoty jsou podklad, ne kompletní lock všech tranzitivních závislostí.
+Při konkrétní regresi pinuj cíleně a testuj; nenahrazuj celý projekt novou sadou.
+
+Kontrola importů bez modelového požadavku a bez odesílání soukromých dat:
+
+    .venv/bin/python -c "import agents, certifi, PIL, pillow_heif, dotenv, pdfplumber, cv2; print('zakladni importy OK')"
+    .venv/bin/python -c "import edge_tts, qrcode, reportlab, requests, tabulate; print('doplnky OK')"
+    .venv/bin/python -c "import tkinter; print('Tk', tkinter.TkVersion)"
+
+Pro desktopové aplikace ověř také okno Tk na skutečné obrazovce:
+
+    .venv/bin/python -m tkinter
+
+Po kontrole ho zavři. Verze Tk z Homebrew se může lišit od původní 8.6;
+kompatibilitu konkrétního slovníčku/MultiLO nepovažuj za předem potvrzenou.
+
+7.3 Další Python aplikace a prostředí
+
+Samantha .venv není automaticky prostředím všech sourozeneckých projektů.
+Pro Vocabulary, výukové aplikace, MultiLO a další nástroje použij jejich
+README/requirements a existující schválené balíčky. Každé zaniklé prostředí
+obnov samostatně; například Tk a Pillow se musí najít i v jeho interpretu.
+Python na iPhonu/Pythonista a jeho data nejsou nahrazená instalací Pythonu
+na Mac. Neaktualizuj bez důvodu Janiny distribuované balíčky.
+
+Camino server má VLASTNÍ izolované prostředí, viz kapitola 12.
+To, že stará hlavní .venv obsahuje FastAPI, neopravňuje sloučit obě služby.
+
+7.4 Prostředí pro úplnou kontrolní bránu
+
+Úplná brána zahrnuje také serverové testy Camina a potřebuje jeho testovací
+importy FastAPI/httpx/uvicorn. Samotný základní requirements.txt je nezajistí.
+Pro tuto jednorázovou zkoušku lze po kontrole neexistujícího cíle vytvořit
+samostatné ověřovací prostředí, bez spuštění produkčního serveru:
+
+    "$RECOVERY_PYTHON" -m venv data/private/recovery_checks/venv
+    data/private/recovery_checks/venv/bin/python -m pip install --upgrade pip
+    data/private/recovery_checks/venv/bin/python -m pip install \
+        -r requirements.txt -r camino/server/requirements.txt \
+        edge-tts qrcode reportlab requests tabulate
+    data/private/recovery_checks/venv/bin/python -m pip check
+
+Toto je prostředí pro testy; Cockpit používá .venv a produkční Camino své
+vlastní venv v Service. Existující prostředí nikdy nevytvářet znovu přes něj.
+
+
+8. CODEX / ADAM A PŘIHLÁŠENÍ
+============================
+8.1 Nainstaluj Codex CLI jednou cestou
+
+Pro nový Mac s Homebrew:
+
+    brew install --cask codex
+    command -v codex
+    codex --version
+
+Homebrew cask je terminálový Codex, nikoli aplikace ChatGPT. [10]
+Alternativní oficiálně dokumentovaná instalace přes npm je:
+
+    npm install -g @openai/codex
+
+Obě varianty najednou neinstaluj. Při problému oprávnění npm nepřidávej
+naslepo sudo; zůstaň u vybrané instalační cesty. Po změně verze ověř
+kompatibilitu App Serveru s obnoveným projektem. [11]
+
+8.2 Nové přihlášení
+
+    codex login
+    codex login status
+
+Dokonči přihlášení v důvěryhodném prohlížeči ke správnému účtu. [12]
+Codex přihlášení a OPENAI_API_KEY pro jiné části Samanthy jsou různé věci.
+Placený modelový dotaz není potřeba jen ke kontrole přítomnosti programu.
+
+8.3 Pomocná data Codexu obnovuj výběrově
+
+Starý auth.json NEKOPÍRUJ. Není potřeba mazat čerstvé přihlášení nového Macu.
+V této projektové obnově nepoužívej žádný příkaz rm nad ~/.codex.
+Původní config.toml může obsahovat staré cesty, názvy modelů nebo MCP vazby.
+Nejdřív jej otevři místně, nevkládej jej celý do chatu.
+Nevynucuj starý model, který už pro účet není dostupný.
+
+Pokud máš codex_home ze snapshotu, nejdřív ho zkopíruj do NOVÉ oddělené
+pracovní složky, nikoli rovnou přes aktivní ~/.codex. Například při
+neexistujícím cíli:
+
+    mkdir "$HOME/Desktop/Codex_recovery_review"
+    rsync -a "$RECOVERY_SNAPSHOT/codex_home/" "$HOME/Desktop/Codex_recovery_review/"
+
+Tato složka obsahuje soukromou historii. Nesdílej ji veřejně ani ji nedávej
+do Gitu. S Adamem vyber kompatibilní nastavení a případné potřebné sessions.
+Čerstvou konfiguraci a přihlášení nepřepisuj hromadným rsync.
+Pluginy, účtová propojení a případná IDE rozšíření nainstaluj/připoj znovu.
+
+Chybějící sessions nebo databáze indexu mohou znemožnit resume původního
+vlákna. Nevymýšlej identitu vlákna a nemaž session stav, abys chybu obešel.
+Založ nové vlákno a obnov pracovní kontext z AGENTS.md, MEMORY_INDEX.md,
+handoffu a TVBCP. To obnoví projektovou kontinuitu, nikoli každý detail chatu.
+
+8.4 GitHub
+
+    gh auth login --hostname github.com --git-protocol https --web
+    gh auth status
+    gh auth setup-git
+
+Token nezapisuj do URL vzdáleného repozitáře ani do návodu. GitHub CLI umí
+využít systémové úložiště přihlašovacích údajů. [13]
+Pokud starý Git používá SSH remote, buď bezpečně obnov odpovídající klíč
+z nezávislého zdroje, nebo po kontrole nastav schválené HTTPS připojení.
+Samotný projektový snapshot nezálohuje ~/.ssh ani Klíčenku.
+
+8.5 .env
+
+Ověř místně jen existenci, nikoli výpis obsahu:
+
+    test -f .env && echo ".env je pritomen"
+
+Recovery snapshot jej může obsahovat. Je-li přítomen, NEPŘEPISUJ jej
+šablonou. Jen pokud chybí:
+
+    cp -n .env.example .env
+
+Doplň hodnoty ručně v místním editoru z bezpečného zdroje. Neposílej obsah
+do chatu, Gitu ani logu. Obnovené staré klíče nemusí být stále platné.
+
+
+9. PRVNÍ MÍSTNÍ SPUŠTĚNÍ COCKPITU
+=================================
+Nejdřív místní ruční běh, teprve potom autostart a vzdálené připojení.
+Než spustíš obnovené služby, nech Adama zkontrolovat nastavení odchozích
+automatizací a čekajících úloh. Staré potvrzení nebo PID není nové oprávnění
+k opakování e-mailu, SMS, kalendáře, pushnutí nebo nasazení.
+Případné čekající/nejasné doručení zachovat a řešit registrovaně.
+
+9.1 Předběžná kontrola bez serveru
+
+    cd "$HOME/Desktop/PythonMF/Samantha_Agent"
+    .venv/bin/python scripts/backup_status.py
+    .venv/bin/python scripts/work_context_guard.py
+    .venv/bin/python scripts/cockpit_quality_gate.py --skip-unit-tests
+
+Brána ověří mimo jiné syntaxi Pythonu a JavaScriptu. Nemá nahrazovat
+kontrolu soukromých dat. Selhání kvůli chybějícímu node není důvod měnit kód.
+Datum v backup_status znamená poslední evidovaný běh zálohy, ne čerstvou
+nezávislou zálohu nového počítače a ne pokrytí živého Camina.
+
+9.2 První start v Terminalu
+
+    .venv/bin/python scripts/cockpit_server.py --host 127.0.0.1 --port 8770
+
+Okno nech otevřené. V prohlížeči otevři:
+
+    http://127.0.0.1:8770
+
+Při obsazeném portu nepoužívej plošné kill. Zjisti vlastníka a zastav se,
+pokud jde o cizí proces. Ruční běh záměrně nepoužívá starý pevný uživatelský
+adresář ze start_cockpit.sh.
+
+V druhém Terminalu:
+
+    cd "$HOME/Desktop/PythonMF/Samantha_Agent"
+    .venv/bin/python scripts/cockpit_smoke_check.py
+
+Očekávej pět úspěšných kontrol 5/5 a zdravý místní server.
+Následně místně zkontroluj:
+  - Jsou v soukromých archivech očekávaná data, nikoli jen prázdné seznamy?
+  - Funguje otevření jednoho známého dokumentu bez jeho změny?
+  - Má Human–Adam dostupný runtime a správný projekt?
+  - Jsou původní pracovní kopie zachované; není vyžadována servisní obnova?
+
+Při chybě resume starého vlákna použij dokumentaci a nové vlákno, viz kap. 8.
+Samotné načtení domovské stránky nepotvrzuje fungujícího Adama.
+Modely rolí neměň automaticky; jediná centrální konfigurace je
+config/agent_roles.json a změny mají vlastní ověřovací postup.
+
+9.3 Úplnější technické ověření
+
+Po kontrole nastavení a vhodného prostředí:
+
+    data/private/recovery_checks/venv/bin/python scripts/cockpit_quality_gate.py
+
+Používá ověřovací prostředí připravené v kapitole 7.4. Trvá déle.
+Porovnávej skutečný výsledek, nepřipoutávej se navždy ke starému
+počtu testů. Úspěšné testy nevydávej za fyzickou přejímku telefonu nebo
+obnovu všech databází. Nic automaticky nepushují ani nenasazují.
+
+
+10. AUTOSTART, AUTOSAVE A SCANDOCU
+================================
+Tuto kapitolu prováděj až po místní funkční kontrole a výslovném potvrzení
+změn nového systému. Není to pokyn měnit nynější fungující Mac.
+
+10.1 Nejdřív zkontroluj cesty a PATH
+
+19. 10. mají některé skripty natvrdo původního uživatele. Zejména:
+  scripts/start_cockpit.sh
+  scripts/install_cockpit_local_launchd.sh
+  scripts/install_cockpit_tailscale_launchd.sh
+  scripts/install_cockpit_hotkey_agent.sh
+  scripts/start_scandocu.sh
+
+Na jiném účtu je Adam musí před použitím cíleně upravit a ověřit. Žádný
+plošný přepis soukromých archivů ani vytváření falešného /Users/starý_uživatel.
+Existující cizí LaunchAgent se nepřepisuje bez kontroly.
+
+LaunchAgent nedědí automaticky interaktivní ~/.zprofile. Před trvalým
+spuštěním musí jeho prostředí najít:
+  - správný codex (na Apple Silicon typicky /opt/homebrew/bin/codex),
+  - node@24/bin, ffmpeg, ffprobe, Tesseract a Poppler,
+  - absolutní interpreter projektu .venv/bin/python.
+
+Do NOVÉ příslušné definice služby nastav po kontrole EnvironmentVariables
+PATH s konkrétními ověřenými cestami a CODEX_BIN na výsledek command -v codex.
+Na Apple Silicon bývá nutné zahrnout /opt/homebrew/opt/node@24/bin a
+/opt/homebrew/bin; nespoléhej na původní /usr/local/bin z Intelu.
+Změny plist a jeho načtení provádí Adam jako jeden potvrzený servisní krok;
+samotné vyplnění této kapitoly není důkaz, že automatický runtime funguje.
+
+10.2 Místní Cockpit LaunchAgent
+
+Registrovaný instalátor po kontrole výše:
+
+    scripts/install_cockpit_local_launchd.sh
+
+Definice: com.miloslavfalta.samantha.cockpit
+Před instalací ukonči pouze vlastní ruční běh v jeho Terminalu pomocí Ctrl+C.
+Po nastavení a načtení služby opakuj smoke 5/5 a zkus nový read-only chat.
+Zkontroluj místní provozní logy, nesdílej jejich soukromý obsah.
+Neinstaluj starou druhou Tailscale serverovou instanci z cizího plist.
+
+10.3 Autosave jako vlastní služba
+
+Po otevření nového Codex vlákna můžeš nejprve spustit registrovaný lokální
+start bez systémové registrace:
+
+    .venv/bin/python scripts/start_autosave.py
+    .venv/bin/python scripts/autosave_status.py
+
+Trvalé nastavení má samostatnou přípravu a potvrzovanou instalaci:
+
+    .venv/bin/python scripts/autosave_launchd.py prepare
+
+Instalaci install proveď s Adamem podle náhledu a přesné potvrzovací věty
+vyžadované skriptem; tímto textem se žádná brána neobchází.
+Definice: com.miloslavfalta.samantha.autosave.
+Po instalaci čekej nový skutečně uložený záznam, přesně jeden watcher
+a žádnou chybu posledního pokusu. Prověř také návrat po novém přihlášení.
+Pouhá existence plist nebo starého latest_info.txt nestačí.
+Při prvním zavedení ponechat automatické mazání historie vypnuté.
+
+10.4 Příkaz samantha a screen
+
+Jednorázové spuštění bez změny shellových profilů:
+
+    "$HOME/Desktop/PythonMF/Samantha_Agent/scripts/samantha_codex.sh"
+
+Pokud chceš obnovit pohodlný příkaz, vlož do existujícího ~/.zshrc jen tuto
+jednu funkci (nejdřív ověř, zda tam už není):
+
+    samantha() { "$HOME/Desktop/PythonMF/Samantha_Agent/scripts/samantha_codex.sh" "$@"; }
+
+Otevři nový Terminal a spusť samantha. Celý ~/.zshrc nenahrazuj.
+Screen chrání živé spojení, nikoli soubory při zničení SSD.
+Odpojení bez ukončení: Ctrl+A, potom D. Zpět: samantha.
+
+10.5 ScanDocu
+
+Pro první místní kontrolu, až je port volný:
+
+    .venv/bin/python scripts/scandocu_server.py --port 8766
+
+Místní URL je http://127.0.0.1:8766. Trvalý původní label je
+com.miloslavfalta.samantha.scandocu; definici na novém Macu znovu vytvořit
+po kontrole skutečného uživatele, PATH a soukromého úložiště.
+Na iPhonu používej dokumentový tok v Cockpitu, ne odkaz 127.0.0.1:8766.
+Adresa 127.0.0.1 na telefonu označuje TELEFON, nikoli Mac.
+
+10.6 Klávesová zkratka a macOS oprávnění
+
+Volitelně po kontrole cesty a potvrzení:
+
+    scripts/install_cockpit_hotkey_agent.sh
+
+Znovu sestaví místní Swift binárku pro správný čip.
+Původní zkratka: Ctrl+Option+Cmd+C.
+V macOS povol jen skutečně používaným aplikacím vyžádaný přístup k Ploše,
+Dokumentům, externím diskům, mikrofonu a automatizaci. Plošný Full Disk
+Access není univerzální oprava. Rozhodující je skutečný funkční test.
+
+
+11. TAILSCALE, IPHONE A SSH
+=========================
+11.1 Tailscale na novém Macu
+
+Nainstaluj oficiální Tailscale a přihlas se do stejné vlastní sítě. [14]
+Používáme aplikaci v /Applications/Tailscale.app; skripty očekávají její
+CLI na /Applications/Tailscale.app/Contents/MacOS/Tailscale.
+Povol příslušné systémové síťové rozšíření podle instalačního dialogu.
+Nový Mac je nová síťová identita; staré jméno/IP/URL nemusí fungovat.
+Neobnovuj celé systémové VPN nastavení naslepo.
+
+Nejdřív ověř běžný internet, potom Tailscale a nakonec proxy. Na novém Macu
+zkontroluj lokální CLI bez zveřejnění výpisu síťových identit:
+
+    /Applications/Tailscale.app/Contents/MacOS/Tailscale status
+
+Na iPhonu se přihlas do stejné sítě. Konkrétní privátní hostname a tokeny
+zjisti místně; nejsou zapsané do tohoto veřejně bezpečného návodu.
+
+11.2 Soukromá HTTPS proxy do jednoho Cockpitu
+
+Teprve po funkčním localhost:8770 a schválení síťové změny použij
+registrovaný postup skriptu:
+
+    .venv/bin/python scripts/migrate_cockpit_single_instance.py --apply
+
+Před spuštěním načti jeho aktuální návod a potvrď změnu. Zachovává jediný
+místní Cockpit a nastavuje soukromý Tailscale vstup; není to veřejný web.
+HTTPS je nutné pro browserové nahrávání mikrofonu. Tailscale certifikát
+může zveřejnit jméno stroje v Certificate Transparency, proto nepoužívat
+citlivé jméno zařízení. Funnel nesmí být omylem zapnutý. [15]
+Na nové síti mohou být nutné souhlasy správce tailnetu s HTTPS certifikáty.
+
+Ověř ze skutečného iPhonu novou HTTPS adresu, stejné rozhraní, nový
+read-only chat a dokumentový náhled. Shoda PID/code stamp místního a HTTPS
+health potvrzuje stejnou instanci. Samotný HTTP 200 neověří mikrofon.
+Aktualizuj uložené záložky a zkratky na telefonu.
+
+11.3 SSH / Termius
+
+Jen pokud chceš terminálový přístup: v nastavení macOS Sdílení povol
+Vzdálené přihlášení pouze určenému účtu a schválenému způsobu přístupu.
+V Termius nastav nového uživatele a Tailscale adresu. Ověř novou identitu
+serveru, neignoruj automaticky varování o změně SSH klíče.
+Privátní klíč a heslo nepatří do projektu ani chatu.
+Po připojení použij samantha, nikoli další zbytečně souběžnou relaci.
+
+
+12. CAMINO SERVER A FILMOVÉ PROJEKTY
+==================================
+Tato část vyžaduje SAMOSTATNĚ OBNOVENÝ KOMPLETNÍ ARCHIV z kap. 1.4.
+Bez něj zde nelze pokračovat tvrzením, že serverový archiv je obnovený.
+Nový prázdný server není náhradou původního. Nespouštět clean bootstrap,
+prepare nebo generování nových identit jako způsob „opravy“ chybějících dat.
+
+12.1 Když samostatnou ověřenou kopii archivu máš
+
+  a) Obnov do nové prázdné místní soukromé složky úplný zazálohovaný celek:
+       ~/Library/Application Support/PythonMF/Camino/
+     Obsahuje Service a potřebný pevný release v Releases.
+     Použij skutečné rozložení doplňkové zálohy, které musí popisovat její
+     vlastní manifest. V dnešním projektovém snapshotu tento celek není.
+  b) Službu ještě nespouštěj a telefon nesměřuj na prázdnou náhradu.
+  c) Zkontroluj oprávnění pouze vlastníka a zákaz symlinků u datových cest.
+  d) U DB ověř integritu na kopii a vzájemnou shodu server_id/epoch/kurzoru,
+     médií, účtenek a hashů. Identitu archivu zachovat, nevyrábět novou.
+  e) Nezapomeň na film-projects: uložení střihů, manifesty a odvozeniny
+     mohou žít přímo v externím Service, nikoli ve zdrojovém repozitáři.
+
+Pokud kopie vznikla za běhu nekonzistentním kopírováním DB souborů,
+nezaměňuj její pouhou čitelnost za ověřenou úplnou obnovu.
+
+12.2 Nové oddělené Python prostředí pro službu
+
+Po potvrzení správného archivu nastav:
+
+    CAMINO_RECOVERY_ROOT="$HOME/Library/Application Support/PythonMF/Camino/Service"
+
+Při neexistujícím venv (případný starý předem zachovat po potvrzení):
+
+    "$RECOVERY_PYTHON" -m venv "$CAMINO_RECOVERY_ROOT/venv"
+    "$CAMINO_RECOVERY_ROOT/venv/bin/python" -m pip install \
+        -r "$HOME/Desktop/PythonMF/Samantha_Agent/camino/server/requirements.txt"
+    "$CAMINO_RECOVERY_ROOT/venv/bin/python" -m pip check
+
+Před instalací porovnej požadavky obnoveného pevného serverového releasu
+s uvedeným requirements. Pokud se liší, přednost má přesný schválený release
+a samostatné servisní rozhodnutí, nikoli náhodné nové závislosti.
+K 19. 10. jsou přímé serverové závislosti:
+  fastapi==0.141.1, httpx==0.28.1, uvicorn==0.53.0.
+
+12.3 Konfigurace, přihlašovací údaje a služba
+
+config.json a tokenové soubory jsou SOUKROMÉ. Neopisovat do návodu/chatů.
+Je nutné místně ověřit a případně cíleně opravit hodnoty:
+  metadata_db, media_db, auth_db, media_root, viewer_media_root,
+  python, code_root.
+Při novém jménu účtu jsou původní absolutní cesty neplatné.
+server_id, epoch a trip_id se tím nemění. Cíle musí splňovat současný
+service validator. Neodstraňuj kontrolu jen proto, aby služba naběhla.
+
+Po kompletní konfiguraci nejprve jen čtecí lokální stav:
+
+    .venv/bin/python scripts/camino_service_control.py status
+
+Registrované další kroky jsou install a start, každý s vlastním potvrzením
+podle aktuálního workflow; nepoužívat místo nich nový acceptance server.
+Install vytváří vlastní vypnutou definici; start je samostatný krok.
+Label je cz.pythonmf.camino.service. Loopback port je 8767.
+Port 8766 je ScanDocu, 8770 Cockpit. Nepoužívat zastaralý příklad se 8766.
+
+12.4 Síť a telefon až po místním ověření
+
+Registrované síťové řízení je scripts/camino_service_network.py.
+Před novým povolením /camino-api ověř místní službu, správnou identitu,
+vlastní definici a zdravý kořen Cockpitu. Původní serve-owner.json může
+odkazovat na starý hostname; zachovat ho jako důkaz a provést řízené nové
+navázání. Nesmazat ho naslepo a nepoužít reset celé Tailscale konfigurace.
+
+Ověřit owner health, odmítnutí anonymního přístupu, výslovná čtecí oprávnění
+Vieweru a vypnutý Funnel. Teprve potom aktualizovat serverovou URL na
+iPhonu a v readeru. Token předávat jen schváleným místním/skrytým způsobem.
+Při ztrátě Macu posoudit odvolání kompromitovaných přístupů samostatně.
+
+Na telefonu nejprve porovnat archiv/inventář a čekající operace. Chyba
+epochy ani inventory mismatch se neopravuje smazáním telefonu nebo resetem
+journalu. Změna serverové URL sama nepotvrzuje správně obnovená data.
+Přehrání jedné fotografie/videa a filmu ověřit fyzicky.
+
+
+13. XCODE, ILOADER, SIDESTORE A IPHONE
+====================================
+13.1 Xcode
+
+Z Mac App Store nebo Apple Developer Downloads nainstaluj plný Xcode
+kompatibilní s macOS nového Macu a cílovou verzí iOS. [16]
+Nejdřív jej otevři a dokonči licence, dodatečné komponenty a potřebné iOS
+platformy/simulátory. Následující volba vývojového adresáře je potvrzovaná
+změna nového systému:
+
+    sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
+    xcode-select -p
+    xcodebuild -version
+    xcrun swift --version
+
+Licence a první setup dokonči v GUI, případné další příkazy podle aktuálního
+dialogu Apple. Samotné Command Line Tools nestačí pro iOS vývoj.
+V Xcode se přihlas ke správnému Apple účtu, nastav tým a spáruj iPhone
+kabelem. Na telefonu potvrď důvěru a vyžadovaný Developer Mode. [17]
+
+Původní identita aplikace Camino je cz.pythonmf.camino.app.
+Otevři přesně camino/app/Camino.xcodeproj, nikoli starý audio prototyp.
+Lokální podpis používá ignorované LocalSigning.xcconfig; tým a nové profily
+ověřit podle aktuálního nastavení. Soukromý podpisový certifikát a Klíčenka
+nejsou automaticky obsahem projektové recovery zálohy.
+Nový certifikát/provisioning neřešit neuváženým odvoláním ostatních profilů.
+
+Nejprve můžeš ověřit nepodepsaný build bez instalace do telefonu:
+
+    cd "$HOME/Desktop/PythonMF/Samantha_Agent"
+    xcodebuild -project camino/app/Camino.xcodeproj -scheme Camino \
+        -configuration Debug -destination 'generic/platform=iOS' \
+        CODE_SIGNING_ALLOWED=NO build
+
+To ověří build, nikoli fyzickou aplikaci, mikrofon ani zachování dat.
+Instalace na skutečný telefon a nové podepsané IPA mají samostatné potvrzení.
+
+13.2 iLoader
+
+Oficiální zdroje jsou https://iloader.app a projekt nab138/iloader na GitHubu.
+Použij odpovídající macOS vydání, nainstaluj do Applications a spusť.
+macOS má potřebnou USB komunikaci; neinstaluj kvůli ní Windows iTunes. [18]
+Připoj a odemkni iPhone, potvrď důvěru, přihlaš Apple účet místně.
+Přístupové údaje nepiš do chatu. Párování starého Macu nemusí stačit.
+Pokud macOS blokuje důvěryhodný instalátor, ověř původ a podpis a použij
+jednotlivé povolení; globálně nevypínej Gatekeeper.
+
+13.3 SideStore a podpis Camina
+
+Na iPhonu je SideStore samostatná aplikace. Její aktuální instalační kroky
+kontroluj na https://docs.sidestore.io/docs/installation/prerequisites. [19]
+Pro instalaci/obnovení podpisu SideStore používá iPhone LocalDevVPN.
+Pro přenosy Camina na Mac používáme Tailscale. Jde o různé úkoly; nepřepínej
+VPN naslepo uprostřed přenosu. Po návratu Tailscale znovu ověř server.
+
+ZTRÁTA MACU SAMA O SOBĚ NENÍ DŮVOD ODINSTALOVAT CAMINO Z IPHONU.
+Neodstraňuj aplikaci ani její data. Nejprve ověř obnovu podpisu existující
+identity se stejným prověřeným IPA, týmem a bundle ID. Potřebný IPA musíš
+mít mimo ztracené Downloads nebo jej znovu správně sestavit a ověřit.
+Samotný nápis Sideloaded není důkaz správné obnovy dat.
+
+Dosavadní projektová konfigurace při známé obnově používala v SideStore
+Customize AppID zapnuté a Append Team ID vypnuté. To je historické nastavení
+pro stejnou identitu; před použitím s novou verzí ověř aktuální UI a bundle ID.
+Po aktualizaci/podpisu musí původní Camino otevřít původní cesty a Momenty.
+Nefunkční podpis není důvod resetovat synchronizaci nebo ztratit lokální data.
+
+
+14. POŠTA, KALENDÁŘ, OPRÁVNĚNÍ A DALŠÍ APLIKACE
+===============================================
+14.1 Klíčenka a přístupy
+
+Znovu nastavit je potřeba konkrétní účty a oprávnění, ne jen Python balíčky.
+Může jít o Apple app-specific hesla, OAuth souhlasy, oprávnění automatizace
+Mail/Zprávy, GitHub přihlášení a soukromé rodinné služby.
+iCloud synchronizace některých hesel není potvrzením obnovení všech
+programových položek místní Klíčenky. Ověř jen dostupnost, ne výpis hesla.
+
+Při nedostupném přístupu nepřepisuj existující archiv prázdným výsledkem.
+Nezaváděj nové odchozí e-maily/SMS ani kalendářové pozvánky jako test obnovy.
+Použij čtecí readiness, náhled a až potom samostatně potvrzený reálný test.
+
+14.2 Rodinný kalendář
+
+Obnovená private konfigurace může odkazovat na chybějící položku Klíčenky.
+Registrovaný náhled nastavení přihlašovací reference:
+
+    .venv/bin/python scripts/family_calendar_delivery_keychain_setup.py
+
+Bez --apply jde o náhled. Aplikaci a plánovač nepovolovat naslepo.
+Živý read-only report family_calendar_delivery_readiness ověří konfiguraci,
+stav fronty a dostupnost položky Klíčenky bez vypsání hesla a bez odeslání.
+Label plánovače: com.miloslavfalta.samantha.family-calendar.
+Před obnovením plánovače projít nejasné/čekající stavy, aby se nic neposlalo
+duplicitně. Postup má vlastní instalační a potvrzovací nástroje.
+
+14.3 Dokumenty a skenování
+
+Zkontroluj soukromý vault a přílohy. Otevři jeden již uložený dokument;
+nevyžaduj nový citlivý import jen jako důkaz chodu aplikace.
+Pro OCR musí být funkční Tesseract s češtinou a Poppler. Skenování fyzického
+zařízení může vyžadovat ovladač HP a nové macOS oprávnění pro dané zařízení.
+
+14.4 Ostatní používané programy
+
+LocalSend instaluj z https://localsend.org/download, aplikace Microsoft
+ze svého účtu Microsoft / App Store, iMovie z App Store, VS Code od Microsoftu,
+Termius od jeho vydavatele. Vždy vyber správnou architekturu.
+ChatGPT/Claude/Cursor znovu přihlas podle toho, které skutečně používáš.
+Licence, historie účtu, soukromé projekty, místní knihovny a cloudové soubory
+nejsou totéž co instalace jejich aplikací.
+Pro projektový zvuk používej afplay, browser nebo výslovně QuickTime Player.
+Nespouštěj obecné open nad MP3 a neimportuj projektové audio do Apple Music.
+
+
+15. ZÁVĚREČNÁ PŘEJÍMKA NOVÉHO MACU
+==================================
+Před prohlášením „celá Samantha obnovena“ projít a zapsat skutečný výsledek:
+
+[ ] Vybraný dokončený recovery snapshot, jeho rozsah a čitelnost ověřeny.
+[ ] Kód, .git, memory a soukromé projektové soubory jsou na správném místě.
+[ ] Nezanikly lokální commity a žádná cizí práce nebyla přepsaná.
+[ ] Správný stabilní Python 3.12 a nová .venv; pip check bez problémů.
+[ ] Importy, potřebné doplňky, Node a Tk okno fungují.
+[ ] Statická a plná brána mají zaznamenaný skutečný výsledek.
+[ ] Místní Cockpit: smoke 5/5, dostupný obsah a funkční read-only chat.
+[ ] Nový start služby najde správný Codex i FFmpeg/OCR nástroje bez Terminalu.
+[ ] Autosave opravdu ukládá; jeden watcher, čerstvý záznam, žádná chyba.
+[ ] Tailscale HTTPS z iPhonu funguje; Funnel vypnutý; nová URL v záložkách.
+[ ] Dokumentový náhled a případně mikrofon ověřeny fyzicky na iPhonu.
+[ ] Živé Camino obnoveno z vlastní konzistentní kopie, nikoli z prázdna.
+[ ] Archiv Camina má správné identity, DB, originály, hashe a střihy.
+[ ] Původní Camino na iPhonu má původní data a bezpečně naváže komunikaci.
+[ ] Přihlašovací reference dostupné; odchozí fronty se neopakovaly naslepo.
+[ ] Další používané aplikace mají obnovena skutečná data, nejen instalátory.
+[ ] Po novém přihlášení/restartu jsou ověřeny určené vlastní služby.
+[ ] Nový Mac i důležitý externí obsah mají novou nezávislou ověřenou zálohu.
+
+Pokud Camino nebo jiná položka chybí, označ ji jako NEOBNOVENO / NEOVĚŘENO.
+Funkční jádro může běžet dřív; nesmí zakrýt chybějící soukromý archiv.
+
+Novou standardní projektovou zálohu po dokončení nejdřív zkontroluj:
+
+    cd "$HOME/Desktop/PythonMF/Samantha_Agent"
+    .venv/bin/python scripts/backup_samantha_python.py --dry-run \
+        --profile recovery --target /Volumes/SamanthaSecureBackup/SamanthaBackups
+
+Ostrý běh až po kontrole cíle a výslovném souhlasu:
+
+    .venv/bin/python scripts/backup_samantha_python.py --execute \
+        --profile recovery --target /Volumes/SamanthaSecureBackup/SamanthaBackups
+
+Tím se samo neřeší mezera Camina popsaná v kapitole 1.4. Ta potřebuje vlastní
+implementované a ověřené rozšíření, ne jen opakování původního příkazu.
+
+
+16. KDYŽ NĚCO NEFUNGUJE
+======================
+„python3 je jiná verze“:
+  Použít konkrétní RECOVERY_PYTHON a .venv/bin/python; neměnit systémový Python.
+
+„pip importuje jinam / modul chybí“:
+  Ověřit .venv/bin/python -m pip --version a vybraný interpreter VS Code.
+  Instalovat do stejného prostředí, ne do systémového Pythonu.
+
+„SSL: CERTIFICATE_VERIFY_FAILED“:
+  U python.org dokončit Install Certificates.command, ověřit certifi a
+  správný CA store. Nevypínat kontrolu TLS a nepřidávat univerzální insecure.
+
+„bad CPU type / Exec format / binárka z Intelu“:
+  Nainstalovat nativní program a znovu vytvořit příslušné prostředí.
+  Neobnovovat celý starý /usr/local ani venv kopírováním.
+
+„Cockpit funguje ručně, ale po přihlášení ne“:
+  Zkontrolovat cesty, pracovní adresář, CODEX_BIN, PATH a macOS oprávnění
+  NOVÉ vlastní služby. Launchd nemá stejné prostředí jako Terminal.
+
+„thread not found / nelze navázat Adama“:
+  Zachovat původní soukromý stav; obnovit relevantní sessions jen po kontrole.
+  Použít nové vlákno s handoffem. Starý socket nebo PID se neobnovuje.
+
+„Na iPhonu nejde 127.0.0.1“:
+  To je telefon. Použít novou soukromou HTTPS adresu Macu přes Tailscale.
+
+„Port 8766/8767/8770 je obsazený“:
+  Zjistit vlastníka; nepoužívat plošné kill. 8766 ScanDocu, 8767 Camino,
+  8770 Cockpit. Nezakládat druhý server jako obcházení problému.
+
+„Camino hlásí jinou epochu / chybí média“:
+  Zastavit další změny. Ověřit úplnost a identitu archivu. Telefon nemaž,
+  neprováděj nový čistý bootstrap a neresetuj jeho journal.
+
+„Záloha je zelená, ale živé Camino není v ní“:
+  Zelené datum potvrzuje konkrétní projektový běh. Ověřit skutečný rozsah
+  v manifestu a kapitole 1.4. Nezaměňovat úspěšný běh s úplným pokrytím Macu.
+
+
+17. VĚTA PRO NOVÉHO ADAMA A ZDROJE
+=================================
+Tento text můžeš vložit do nového Codexu po instalaci a obnově projektu:
+
+    Jsem Míla a obnovuji Samanthu na novém Macu. Pracuj česky jako Adam.
+    Nejprve načti OBNOVA_SAMANTHY_NOVY_MAC.txt, AGENTS.md,
+    memory/MEMORY_INDEX.md a kanonický handoff infrastruktury.
+    Zkontroluj skutečný rozsah dostupné zálohy. Živé Camino může být
+    mimo projektový snapshot v Library/Application Support/PythonMF/Camino.
+    Nic nemaž, nepřepisuj existující data a nevypisuj tajemství.
+    Neopakuj automaticky odchozí úlohy, push, nasazení ani stará potvrzení.
+    Nejdřív obnovme Python a místní Cockpit, potom po kontrole další služby.
+    Rozlišuj ověřenou funkčnost jádra, přihlášení, obnovu soukromých dat
+    a fyzickou přejímku telefonu. Neoznačuj chybějící část za obnovenou.
+
+OFICIÁLNÍ ZDROJE, OVĚŘENÉ PŘI SEPSÁNÍ 19. 10. 2026
+Návody výrobců se mohou později změnit. Při rozporu ověř aktuální instalační
+postup; změny projektové architektury tím nejsou automaticky schválené.
+
+[1] Apple — Migration Assistant:
+    https://support.apple.com/en-us/102613
+[2] Apple — instalace Command Line Tools:
+    https://developer.apple.com/documentation/xcode/installing-the-command-line-tools
+[3] Homebrew — instalace a PATH:
+    https://docs.brew.sh/Installation
+[4] Homebrew — Python a Tk 3.12:
+    https://formulae.brew.sh/formula/python@3.12
+    https://formulae.brew.sh/formula/python-tk@3.12
+[5] Homebrew / Node.js — Node 24 a aktuální instalace:
+    https://formulae.brew.sh/formula/node@24
+    https://nodejs.org/en/download
+[6] Homebrew — média a OCR:
+    https://formulae.brew.sh/formula/ffmpeg
+    https://formulae.brew.sh/formula/tesseract
+    https://formulae.brew.sh/formula/poppler
+[7] Python — macOS a archiv univerzálního 3.12 instalátoru:
+    https://docs.python.org/3.12/using/mac.html
+    https://www.python.org/downloads/release/python-31210/
+[8] Microsoft — VS Code pro macOS:
+    https://code.visualstudio.com/docs/setup/mac
+[9] Python — virtuální prostředí:
+    https://docs.python.org/3.12/library/venv.html
+[10] Homebrew — Codex CLI cask:
+    https://formulae.brew.sh/cask/codex
+[11] OpenAI — dokumentované instalační příkazy CLI:
+    https://developers.openai.com/cookbook/examples/codex/using_goals_in_codex
+[12] OpenAI — přihlášení Codex CLI:
+    https://developers.openai.com/codex/auth
+[13] GitHub — přihlášení CLI:
+    https://cli.github.com/manual/gh_auth_login
+[14] Tailscale — instalace na macOS:
+    https://tailscale.com/docs/install/mac
+[15] Tailscale — Serve a HTTPS:
+    https://tailscale.com/docs/features/tailscale-serve
+    https://tailscale.com/docs/how-to/set-up-https-certificates
+[16] Apple — podporované macOS / Xcode / SDK:
+    https://developer.apple.com/xcode/system-requirements
+[17] Apple — Developer Mode:
+    https://developer.apple.com/documentation/xcode/enabling-developer-mode-on-a-device
+[18] iLoader — oficiální projekt a vydání:
+    https://github.com/nab138/iloader
+    https://github.com/nab138/iloader/releases
+[19] SideStore — příprava a instalace:
+    https://docs.sidestore.io/docs/installation/prerequisites
+
+MÍSTNÍ PODKLADY PRO ADAMA:
+  app/backup/incremental.py a scripts/backup_rsync_filter_always.rules
+  requirements.txt a camino/server/requirements.txt
+  scripts/cockpit_server.py, cockpit_smoke_check.py, cockpit_quality_gate.py
+  scripts/autosave_launchd.py a scripts/start_autosave.py
+  scripts/camino_service_control.py a scripts/camino_service_network.py
+  memory/projects/samantha_external_backup.md
+  memory/handoffs/workstreams/project-samantha-infrastructure.md
+  memory/tvbcp/workstreams/project-samantha-infrastructure.md
+
+ZÁVĚREČNÁ HRANICE OVĚŘENÍ:
+Příkazy a cesty byly porovnány se skutečným repozitářem, inventářem
+programů a oficiální dokumentací. Vytvořením návodu nebyla provedena
+instalace na prázdný Mac, plná obnova soukromých databází ani fyzická
+přejímka všech funkcí. Tyto důkazy musí vzniknout při skutečné zkoušce.

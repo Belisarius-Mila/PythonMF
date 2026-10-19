@@ -88,7 +88,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `projects/linux_workstation.md` - aktivní konzultační projekt pro bezpečnou instalaci Linuxu na nový SATA SSD, postupnou konfiguraci a běžnou práci; původní HDD s Windows se při první instalaci zachovává jako návratová cesta.
 - `projects/email_readonly_oauth.md` - e-mailová integrace Samanthy: read-only hledání, triage a archivace; UX0+UX1, ladění archivu i UX2 pravdivé navigace jsou nasazené. E-maily mají vlastní rozcestník Zpracování / Archiv a nejsou v katalogu Webových aplikací.
 - `projects/document_management_private_vault.md` - hlavní soukromý dokumentový systém mimo Git; servisní obrazovka od 2026-08-07 ukazuje nahoře pracovní stav inboxu a historické agregace až v technických podrobnostech. Další věcný krok je pozdější reálný e-mailový PDF/JPEG test.
-- `projects/samantha_external_backup.md` — recovery záloha `20260914_231439` ověřena 2026-09-14, včetně zkušební obnovy; aktuální stáří zjišťovat přes `backup_status.py`.
+- `projects/samantha_external_backup.md`; `../OBNOVA_SAMANTHY_NOVY_MAC.txt` — 19. 10. podrobný TXT obnovy nového Macu; poslední doložený projektový snapshot `20261018_210658` (90 833 souborů, 0 přeskočených, hash 4/4 a obnova souboru PASS). [PRIPOMENOUT] živé Camino v Library/Application Support je mimo standardní projektovou zálohu; konzistentní kopii a celkovou obnovu teprve doplnit. Návod zatím lokální.
 - `projects/janicka_cockpit_takeover.md` - Janička Cockpit je aktivní netechnický rozcestník k existujícím funkcím. Stará light komunikace a nouzové otevírání plného Adama jsou vyřazené; komunikace se vrátí až jako samostatný funkční Adam-R2.
 - `projects/janicka_r2_adam.md` - funkční samostatný R2-Adam pro Janičku: vlastní chat, soukromý kontext, TXT prostor, dokumentová lišta, čtečka a potvrzovaná práce s úplnými sadami read-only zdrojů. E2 živě ověřilo úplný tok e-mail -> vault -> create-only R2 TXT. E3 potvrdilo ruční revizi a backendovou dostupnost PDF; oprava lidského TXT je nasazená a čeká už jen na krátký vizuální retest.
 - `projects/janicka_cockpit_kucharka.md` - první git-safe kuchařka pro Janu k používání Janičky v Cockpitu: dokumenty, tisk, e-maily, Lékárna, rodinné projekty, Adam, připomenutí, nouzové převzetí a bezpečnostní hranice bez citlivých údajů.
@@ -98,13 +98,13 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `handoffs/colors_numbers_owl_pages_artifact_checkpoint_2026_07_27.md` - historický checkpoint odstranění sovího zápisu do `main`; krok přepnutí Pages byl později dokončen a současný stav je v projektovém souboru.
 - `projects/tomik_video_imovie.md` - rodinný video projekt; Family Video Organizer je napojený na skutečný soukromý dataset místo ukázkových dat. Další výběr a střih pokračuje až podle Mílova věcného zadání.
 - `projects/family_memory_films.md` - originály USA jsou od 2026-09-15 přesunuté na externí disk Falta (2 759 souborů, 33,10 GiB, SHA-256 ověřeno); před dalším výběrem upravit cestu k originálům a ověřit přehrávání. Historický stav: obecna platforma pro trideni rodinnych fotek/videi a pripravu vzpominkovych filmu; prvni dataset je USA 2019 na plose Macu, cisty seznam 15 dnu je odsouhlaseny, master prehled `Tomik 2` je ulozen mimo git, predstrihovy formular `03_overview/film_selection_form.html` ma autosave, CSV export, rating fotek/videi a prehravani videi a Adamuv prvni navrh ratingu je aplikovany.
-- `../START_HERE_RECOVERY.md` - krátký kořenový startovací soubor pro iPhone/GitHub: kam kliknout, když původní Mac nejde zapnout.
-- `RECOVERY_CARD_NEW_MAC.md` - polopatická nouzová karta pro obnovu Samanthy na novém Macu z GitHubu a externí recovery zálohy.
-- `RECOVERY_FROM_BACKUP.md` - podrobnější lidský a Codex návod pro obnovu Samanthy z externí zálohy na novém Macu.
+- `../../START_HERE_RECOVERY.md` - krátký kořenový startovací soubor pro iPhone/GitHub: kam kliknout, když původní Mac nejde zapnout.
+- `../RECOVERY_CARD_NEW_MAC.md` - krátký vstup na `../OBNOVA_SAMANTHY_NOVY_MAC.txt`; současný postup a hranice pokrytí zálohy.
+- `../RECOVERY_FROM_BACKUP.md` - vstup pro kopii recovery návodu ve snapshotu a registrovanou cílenou obnovu; podrobnosti v TXT.
 
 ## Infrastructure Recovery
 
-- `handoffs/workstreams/project-samantha-infrastructure.md`; `tvbcp/workstreams/project-samantha-infrastructure.md` — 16. 10. cílený úklid SSD po globální brzdě dokončený; 23.47 → 28.51 GiB, skutečný zisk 5.04 GiB. Camino i autosave zachované, nejnovější instalátor Wordu ponechaný. 2026-09-12: zjednodušené vstupní instrukce i sladěné serverové prompty Human–Adam/Knihovny/lazy proudů jsou pushnuté a nasazené. Plná brána OK (1 555 testů, 1 přeskočený), smoke 5/5, obnovené spojení a čisté kopie 2/2; zachované oprávnění a kanonický zápis.
+- `handoffs/workstreams/project-samantha-infrastructure.md`; `tvbcp/workstreams/project-samantha-infrastructure.md` — 19. 10. připraven podrobný TXT pro nový Mac a sjednocené recovery vstupy; statická brána a kontrola příkazů PASS, pouze lokální dokumentace. [PRIPOMENOUT] standardní záloha nepokrývá živý archiv Camina mimo PythonMF; samostatná konzistentní kopie a úplný restore drill zůstávají otevřené.
 
 - `handoffs/autosave_cleanup_ssd_space_recovery_2026_08_15.md` - [PRIPOMENOUT]
   priorita 1 po potvrzenem autosave cleanupu: restart a read-only mereni jsou

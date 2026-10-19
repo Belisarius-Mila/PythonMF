@@ -1,6 +1,17 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-19 07:36 CEST: Připraven podrobný `OBNOVA_SAMANTHY_NOVY_MAC.txt` pro nový Mac
+  (17 kapitol: instalace, Python/knihovny, VS Code, Xcode/iLoader, data,
+  služby, Codex, Tailscale, iPhone a přejímka); obě staré recovery karty
+  směrují na jeden aktuální TXT. Kontrola 27 místních cest, syntaxe 48
+  příkazových bloků, 19 zdrojových odkazů a rychlá statická brána PASS.
+  Dokumentace pouze lokální; publikace, nová záloha ani změny služeb
+  neproběhly. [PRIPOMENOUT] Živé Camino v Library/Application Support
+  je mimo standardní zálohu PythonMF. Kompletní konzistentní kopii jeho
+  DB/médií/střihů a skutečnou obnovu nového Macu teprve samostatně ověřit.
+  Záloha 18. 10. je doložená účtenkou, nyní není disk připojený.
+
 - 2026-10-16 21:59 CEST: po přesném potvrzení proveden omezený úklid SSD:
   čtyři starší stažené aktualizační balíčky Wordu a npm cache. Nejnovější
   instalátor zachovaný; měřené volné místo 23.47 → 28.51 GiB
@@ -304,3 +315,43 @@ Technický důkaz:
 - Redigované účtenky `logs/ssd_cleanup_receipt_20261016.log` a
   `logs/ssd_cleanup_camino_before_20261016.log` / `ssd_cleanup_camino_after_20261016.log`.
 - Jde o provozní úklid; aplikační kód se neměnil a publikování není součástí kroku.
+
+
+### 2026-10-19 07:36 CEST — Podrobný TXT návod obnovy nového Macu a rozsah zálohy
+
+Hotovo:
+- Jeden srozumitelný TXT obsahuje přípravu prázdného Macu, instalace aplikací,
+  Python 3.12, hlavní i doplňkové knihovny, Codex, data, služby, Tailscale,
+  Xcode/iLoader/SideStore a závěrečný kontrolní seznam. Stará recovery karta
+  a kopie návodu pro budoucí snapshoty odkazují na tento soubor.
+- Doložený projektový snapshot 20261018_210658 měl 90 833 souborů,
+  0 přeskočených, manifest, SHA-256 vzorků 4/4 a obnovu jednoho souboru.
+  Dnes jde o uloženou účtenku; externí svazek není připojený.
+
+Rozhodnutí:
+- Míla požádal o podrobný TXT pro případ ztráty Macu nebo poruchy SSD.
+  Rozsah je dokumentace; nejde o změnu zálohovacího programu, systému,
+  služeb, síťového nastavení ani o povolení publikace.
+- Oddělit obnovu jádra od úplného archivu Camina. Čtecí audit potvrdil živé
+  DB, originály a filmové projekty v Library/Application Support/PythonMF/Camino,
+  mimo zdroj standardní zálohy. Obecný recovery profil tuto mezeru neřeší.
+
+Další krok:
+- S Mílou vymezit samostatné rozšíření registrovaného zálohování o konzistentní
+  celek Camina a jeho ověřenou obnovu; nedeklarovat dnešní snapshot za úplnou
+  ochranu všech dat Macu.
+
+Navrhované další kroky:
+- Uložit schválený návod také mimo notebook; nynější lokální commit není
+  důkaz dostupnosti na GitHubu ani součást včerejšího snapshotu.
+- Při příležitosti provést skutečný obnovovací test na čistém Macu.
+
+Technický důkaz:
+- 27 lokálních cest existuje; 48 příkazových bloků prošlo zsh -n bez spuštění;
+  19 číslovaných zdrojových referencí je uzavřených. Instalační kroky byly
+  ověřeny v primární dokumentaci a porovnány s místními verzemi a skripty.
+- Rychlá statická Cockpit brána PASS: logs/recovery_guide_static_gate_20261019.log.
+  Žádný instalační/obnovovací příkaz z TXT se na současném Macu nespouštěl.
+- Rizika: plná obnova nebyla provedena; Keychain, systémová oprávnění,
+  aktuálnost nezamčených závislostí a změny uživatele/architektury vyžadují
+  vlastní kontrolu. Backup pokrytí Camina je otevřená funkční mezera.

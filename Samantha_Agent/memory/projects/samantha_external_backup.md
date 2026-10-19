@@ -2,7 +2,42 @@
 
 Projekt zalozen 2026-05-19.
 
-## Aktuální stav 2026-09-14 23:26 CEST
+## Aktuální stav 2026-10-19 07:36 CEST
+
+Podrobný lidský návod: `../../OBNOVA_SAMANTHY_NOVY_MAC.txt`; 17 kapitol
+včetně instalací, Python prostředí, programů, služeb a přejímky.
+`RECOVERY_CARD_NEW_MAC.md` a `RECOVERY_FROM_BACKUP.md` jsou krátké vstupy
+na tentýž TXT. Nový dokument je zatím pouze lokální, nikoli ve snapshotu
+18. 10. nebo prokazatelně na GitHubu.
+
+Poslední doložená ostrá záloha je `20261018_210658`, recovery:
+90 833 souborů, 12 194 kopírováno, 78 639 hardlinků, 0 přeskočeno,
+1 137 947 624 nově kopírovaných bajtů; exit 0. Manifest, recovery návod,
+SHA-256 vybraných souborů 4/4 i obnova jednoho souboru PASS.
+Důkaz: `logs/backup_recovery_20261018_verification.log` a
+`data/backup/activity_state.json`. 19. 10. není disk připojený; stav neznamená
+nové čtení zálohy ani test celkové obnovy Macu.
+
+[PRIPOMENOUT] **Známá mezera úplnosti:** standardní zálohovací program
+kopíruje PythonMF a jen vybrané Codex config/history/sessions. Živá služba
+Camino má podle skutečné konfigurace metadata/media/auth DB, readers,
+originály i film-projects v `~/Library/Application Support/PythonMF/Camino/`,
+mimo tento rozsah. Audit hashů archivu při vývoji není jeho další záloha.
+Úplná konzistentní externí kopie a zkouška obnovy této služby nebyly tímto
+krokem doloženy; doplnit registrovaným samostatným postupem. Živé SQLite
+nekopírovat nekonzistentně jednotlivými soubory. Projektový běh z 18. 10.
+zůstává platný pro svůj deklarovaný rozsah, nikoli pro celý Mac.
+
+Nezahrnuté jsou také aplikace, interprety/prostředí, systémová Klíčenka,
+LaunchAgents, SSH/shell nastavení, kompletní ~/.codex/pluginy a externí data.
+Nouzové `data/session_autosave/` se vylučuje i z recovery profilu;
+vybrané originální Codex sessions jsou jiná zálohovaná složka.
+
+Ověření návodu: existující cesty, syntaxe 48 příkazových bloků a rychlá
+statická brána PASS; žádná skutečná obnova nebo systémová instalace.
+Další krok: samostatně vymezit konzistentní zálohu a obnovu celého Camina.
+
+## Historie 2026-09-14 23:26 CEST
 
 Ostrá recovery záloha `20260914_231439` dokončena standardním registrovaným
 Pythonovým příkazem po výslovném zadání Míly a kontrole dry-runu.
