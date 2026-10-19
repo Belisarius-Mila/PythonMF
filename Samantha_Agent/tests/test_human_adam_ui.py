@@ -265,7 +265,7 @@ class HumanAdamUiTests(unittest.TestCase):
             match_source,
         )
 
-    def test_verified_deployment_survives_reload_and_reopens_work_panel_once(self) -> None:
+    def test_verified_deployment_survives_reload_without_opening_work_panel(self) -> None:
         store_start = HUMAN_ADAM_HTML.index("function storeVerifiedDeploymentResult(payload)")
         restore_end = HUMAN_ADAM_HTML.index("async function deployCheckpoint()", store_start)
         source = HUMAN_ADAM_HTML[store_start:restore_end]
@@ -286,13 +286,13 @@ class HumanAdamUiTests(unittest.TestCase):
         )
         no_record = restore_source.index("if (!record) return;")
         self.assertLess(no_record, reconnect)
-        self.assertIn("workPanel.hidden = false;", restore_source)
-        loaded = restore_source.index("await loadWork();")
+        self.assertNotIn("workPanel.hidden = false;", restore_source)
+        self.assertNotIn("await loadWork();", restore_source)
         confirmed = restore_source.index(
             "deployMeta.textContent = verifiedDeploymentSummary(record)"
         )
-        self.assertLess(reconnect, loaded)
-        self.assertLess(loaded, confirmed)
+        self.assertLess(reconnect, confirmed)
+        self.assertIn("Nasazení dokončeno · podrobnosti v Práci.", restore_source)
         self.assertIn("Human–Adam je znovu připojený.", restore_source)
         self.assertIn("restoreVerifiedDeploymentResult();", HUMAN_ADAM_HTML)
         self.assertIn("main ${record.main_short}", HUMAN_ADAM_HTML)
@@ -402,28 +402,28 @@ class HumanAdamUiTests(unittest.TestCase):
             HUMAN_ADAM_HTML,
         )
 
-    def test_mobile_summary_collapses_receipts_inside_status_details(self) -> None:
+    def test_compact_header_keeps_receipts_in_scrollable_work_panel(self) -> None:
         header = HUMAN_ADAM_HTML.index("<header>")
         summary = HUMAN_ADAM_HTML.index('id="mobileStatusSummary"', header)
-        details = HUMAN_ADAM_HTML.index('id="statusDetails"', summary)
+        header_end = HUMAN_ADAM_HTML.index("</header>", summary)
+        work_panel = HUMAN_ADAM_HTML.index('id="workPanel"', header_end)
+        details = HUMAN_ADAM_HTML.index('id="statusDetails"', work_panel)
         badges = HUMAN_ADAM_HTML.index('<div class="statusline">', details)
         turn = HUMAN_ADAM_HTML.index('id="turnActivity"', badges)
         step_receipt = HUMAN_ADAM_HTML.index('id="stepCompletionReceipt"', turn)
         deployment_receipt = HUMAN_ADAM_HTML.index('id="deploymentReceipt"', step_receipt)
-        details_end = HUMAN_ADAM_HTML.index("    </div>\n  </header>", deployment_receipt)
+        details_end = HUMAN_ADAM_HTML.index("    </section>", deployment_receipt)
 
-        self.assertLess(summary, details)
+        self.assertLess(summary, header_end)
+        self.assertLess(header_end, work_panel)
         self.assertLess(details, badges)
         self.assertLess(badges, turn)
         self.assertLess(turn, step_receipt)
         self.assertLess(step_receipt, deployment_receipt)
         self.assertLess(deployment_receipt, details_end)
-        self.assertIn('aria-expanded="false" aria-controls="statusDetails"', HUMAN_ADAM_HTML)
-        self.assertIn("#mobileStatusSummary { display:none;", HUMAN_ADAM_HTML)
-        self.assertIn("#mobileStatusSummary { display:flex; }", HUMAN_ADAM_HTML)
-
-        self.assertIn(".status-details { display:none; }", HUMAN_ADAM_HTML)
-        self.assertIn(".status-details.expanded { display:block; }", HUMAN_ADAM_HTML)
+        self.assertIn('aria-expanded="false" aria-controls="workPanel"', HUMAN_ADAM_HTML)
+        self.assertIn("#mobileStatusSummary { display:flex;", HUMAN_ADAM_HTML)
+        self.assertIn(".work-panel-body { flex:1; min-height:0; overflow:auto;", HUMAN_ADAM_HTML)
 
         summary_start = HUMAN_ADAM_HTML.index("function updateMobileStatusSummary()")
         summary_end = HUMAN_ADAM_HTML.index("function elapsedClock", summary_start)
@@ -431,9 +431,10 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn('text = turnActivity.textContent || "Adam pracuje', summary_source)
         self.assertIn('text = "Stav doručení je nejistý · obnov stav · pokyn neposílej znovu";', summary_source)
         self.assertIn('const adamText = sessionConnected ? "Adam čeká" : "Adam není připojen";', summary_source)
-        self.assertIn('text = `${activeWorkstreamLabel} · ${connectionText} · ${workspaceText} · ${adamText}`;', summary_source)
+        self.assertNotIn("lunaReleaseStatus.textContent", summary_source)
+        self.assertIn('text = `${connectionText} · ${adamText}${workspaceNote}`;', summary_source)
         self.assertIn('mobileStatusSummary.setAttribute("aria-expanded"', HUMAN_ADAM_HTML)
-        self.assertIn('mobileStatusToggleText.textContent = showDetails ? "Skrýt" : "Podrobnosti";', HUMAN_ADAM_HTML)
+        self.assertIn("if (expanded) return openWork();", HUMAN_ADAM_HTML)
         self.assertIn('mobileStatusSummary.addEventListener("click"', HUMAN_ADAM_HTML)
         self.assertIn("updateMobileStatusSummary();\n    turnTimerId", HUMAN_ADAM_HTML)
 
@@ -1082,16 +1083,16 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertNotIn("payload.deployment_confirmation", HUMAN_ADAM_HTML)
         self.assertNotIn("payload.deployment_diagnostic", HUMAN_ADAM_HTML)
 
-    def test_deployment_confirmation_stays_inside_sticky_header_below_badges(self) -> None:
+    def test_deployment_confirmation_is_outside_sticky_header(self) -> None:
         header = HUMAN_ADAM_HTML.index("<header>")
+        header_end = HUMAN_ADAM_HTML.index("</header>", header)
         badges = HUMAN_ADAM_HTML.index('<div class="statusline">', header)
         receipt = HUMAN_ADAM_HTML.index('id="deploymentReceipt"', badges)
-        header_end = HUMAN_ADAM_HTML.index("</header>", receipt)
         notice = HUMAN_ADAM_HTML.index('id="notice"', header_end)
 
         self.assertLess(header, badges)
         self.assertLess(badges, receipt)
-        self.assertLess(receipt, header_end)
+        self.assertLess(header_end, receipt)
         self.assertLess(header_end, notice)
         self.assertIn("header { position:sticky;", HUMAN_ADAM_HTML)
         self.assertIn("#deploymentReceipt { margin:8px 0 0; padding:6px 10px;", HUMAN_ADAM_HTML)
@@ -1447,8 +1448,8 @@ class HumanAdamUiTests(unittest.TestCase):
         status_end = HUMAN_ADAM_HTML.index("async function api(", status_start)
         status_source = HUMAN_ADAM_HTML[status_start:status_end]
         header = HUMAN_ADAM_HTML.index("<header>")
+        header_end = HUMAN_ADAM_HTML.index("</header>", header)
         activity = HUMAN_ADAM_HTML.index('id="turnActivity"', header)
-        header_end = HUMAN_ADAM_HTML.index("</header>", activity)
 
         self.assertIn("session && session.active_turn", render_source)
         self.assertIn('startTurnTimer(activeTurn.started_at || "");', render_source)
@@ -1457,7 +1458,7 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn('padStart(2, "0")', HUMAN_ADAM_HTML)
         self.assertNotIn("elapsedSeconds = 0", HUMAN_ADAM_HTML)
         self.assertLess(header, activity)
-        self.assertLess(activity, header_end)
+        self.assertLess(header_end, activity)
 
     def test_active_turn_disables_only_new_send_and_keeps_manual_status_available(self) -> None:
         controls_start = HUMAN_ADAM_HTML.index("function syncControls()")
@@ -1621,8 +1622,9 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertLess(connect, title)
         self.assertLess(title, tools)
         self.assertLess(tools, cockpit)
-        self.assertIn("grid-template-columns:auto minmax(0,1fr) auto", HUMAN_ADAM_HTML)
-        self.assertIn(".head-tools { grid-column:1/-1; grid-row:2; justify-content:center; }", HUMAN_ADAM_HTML)
+        self.assertIn('class="header-menu" id="headerMenu"', HUMAN_ADAM_HTML)
+        self.assertIn("<summary>Další</summary>", HUMAN_ADAM_HTML)
+        self.assertIn(".head { display:flex; flex-wrap:wrap; gap:6px; }", HUMAN_ADAM_HTML)
 
     def test_submit_clears_input_before_api_and_blocks_safari_restore(self) -> None:
         send_start = HUMAN_ADAM_HTML.index("async function sendMessage(event)")

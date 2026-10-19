@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-08-31 14:01 CEST
+- Obnoveno potvrzeným checkpointem: 2026-10-19 13:00 CEST
 
 ### Hotovo
-- Nově otevřený pracovní proud se spolehlivě zobrazí u poslední zprávy, aniž běžné obnovení rušilo čtení historie
+- Human–Adam upřednostňuje chat a aktuální stav; technické účtenky jsou dostupné v panelu Práce
 
 ### Otevřeno
 - Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
@@ -14,18 +14,18 @@
 - Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
 
 ### Další krok
-- Samostatně nasadit změnu a ověřit přepnutí dlouhého proudu na Linux PC
+- Po samostatném nasazení vizuálně ověřit čitelnost chatu a panel Práce na Linuxu a iPhonu
 
 ### Rozhodnutí
-- V tomto kroku nebylo přijato nové kanonické rozhodnutí.
+- Úvodní obrazovka zobrazuje stručný aktuální stav, technické účtenky a podrobnosti se otevírají v panelu Práce
 
 ### Navrhované další kroky
-- Po nasazení krátce zopakovat stejné ověření na iPhonu
+- Žádné další návrhy nad rámec bezprostředního kroku.
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `f2f529e82080`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `64f8a68a9cab` · je starší než ověřený main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-08-31T10:38:56+00:00.
+- Git před checkpointem: lokální `main` na `3538da49cd0c`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `2e14eaf244e9` · je starší než ověřený main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-10-17T22:14:52+00:00.
 - Read-only živý stav: main=`local_ahead`, deployment=`verified_other_main`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -2837,3 +2837,15 @@ Technický důkaz:
 - Rizika: Vlákno s rámcem nad 64 MiB zůstane správně odmítnuté. Další růst historie je signál k zachované rotaci vlákna, ne k neomezenému transportu.
 - Další krok: Spustit úplnou bránu, vytvořit jeden lokální commit, uzavřít GitHub balíček, nasadit Cockpit a ověřit reconnect plus read-only tah.
 - Ověření: Skutečná vnitřní příčina byla WebSocket `1009` pro rámec 46 323 050 B proti limitu 32 MiB; cílená sada prošla 176/176 a `git diff --check` je čistý.
+
+### Automatický checkpoint 2026-10-19 13:00 CEST
+
+- Pracovní proud: `layer-human-adam-development`
+- Hotovo: Human–Adam upřednostňuje chat a aktuální stav; technické účtenky jsou dostupné v panelu Práce
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.; Lokální commity čekají na samostatný denní GitHub balíček.
+- Rizika: Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: rychlá Cockpit brána syntaxe a whitespace: 5.8 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu
+- Změněné cesty před paměťovým zápisem (3): `Samantha_Agent/app/communication/human_adam_ui.py`, `Samantha_Agent/tests/luna_release_frontend.test.cjs`, `Samantha_Agent/tests/test_human_adam_ui.py`
+- Commit: `Zjednodušit úvodní obrazovku Human–Adam`
+- Další krok: Po samostatném nasazení vizuálně ověřit čitelnost chatu a panel Práce na Linuxu a iPhonu

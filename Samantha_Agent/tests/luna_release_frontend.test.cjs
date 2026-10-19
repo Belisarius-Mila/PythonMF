@@ -16,6 +16,10 @@ const source = [
   'const LUNA_RELEASE_POLL_INTERVAL_MS = 2500;',
   sourceBetween("function syncControls() {", "function lunaReleaseJobActive"),
   sourceBetween("function lunaReleaseJobActive", "function setBusy("),
+  sourceBetween("function updateMobileStatusSummary()", "function elapsedClock"),
+  sourceBetween("function setMobileStatusDetails(expanded)", "function updateMobileStatusSummary()"),
+  sourceBetween("async function openWork()", "function setWorkHelpOpen("),
+  sourceBetween("function closeWork()", "async function createCheckpoint()"),
   sourceBetween("function renderLunaReleaseJob", "function stopLunaReleasePoll"),
   sourceBetween("function stopLunaReleasePoll", "function scheduleLunaReleasePoll"),
   sourceBetween("function scheduleLunaReleasePoll", "async function loadLunaReleaseStatus"),
@@ -52,9 +56,12 @@ function harness(apiHandler, confirmResult=true) {
     hidden: false,
     value: "",
     textContent: "",
+    attributes: {},
+    focused: false,
     className: "",
-    classList: {add() {}, remove() {}, toggle() {}},
-    setAttribute() {},
+    classList: {add() {}, remove() {}, toggle() {}, contains() { return false; }},
+    setAttribute(name, value) { this.attributes[name] = value; },
+    focus() { this.focused = true; },
   });
   const names = [
     "connectBtn", "profileSelect", "profileSwitchBtn", "refreshBtn", "workOpenBtn",
@@ -64,7 +71,9 @@ function harness(apiHandler, confirmResult=true) {
     "developmentProject", "developmentHandoff", "developmentAcquireProfileBtn",
     "developmentAcquireTerminalBtn", "developmentPauseBtn", "developmentResumeBtn",
     "developmentReleaseBtn", "projectContinuityAuditBtn", "lunaReleaseMeta",
-    "lunaReleaseStatus", "connectionBadge",
+    "lunaReleaseStatus", "connectionBadge", "mobileStatusText", "mobileStatusSummary",
+    "workspaceBadge", "turnActivity", "workPanel", "deployMeta", "workCloseBtn",
+    "threadRotationPanel", "tvbcpPanel",
   ];
   const scope = Object.fromEntries(names.map((name) => [name, element()]));
   scope.input.value = "p+n";
@@ -77,6 +86,9 @@ function harness(apiHandler, confirmResult=true) {
   scope.voiceTranscribing = false;
   scope.activeWorkstreamId = "project-cockpit";
   scope.sessionConnected = true;
+  scope.deliveryUncertain = false;
+  scope.connectionBadge.textContent = "Připojeno";
+  scope.workPanel.hidden = true;
   scope.workstreamDevelopmentEnabled = true;
   scope.writeIntentArmed = false;
   scope.imageImportFailure = "";
@@ -112,10 +124,14 @@ function harness(apiHandler, confirmResult=true) {
   scope.renderSession = (session) => scope.renderedSessions.push(session);
   scope.renderTurnStates = [];
   scope.renderTurnState = (session) => scope.renderTurnStates.push(session);
-  scope.updateMobileStatusSummary = () => {};
   scope.renderStatus = (payload) => { scope.lastSession = payload.session || null; };
   scope.takeVerifiedDeploymentResult = () => null;
   scope.recentServerDeploymentRecord = () => null;
+  scope.reconnectAfterVerifiedDeployment = async (payload) => ({payload, reconnected:false});
+  scope.verifiedDeploymentSummary = () => "Ověřené nasazení";
+  scope.markVerifiedDeploymentSeen = () => {};
+  scope.loadWork = async () => null;
+  scope.setWorkHelpOpen = () => {};
   scope.setBusy = (value) => {
     scope.busy = value;
     scope.syncControls();
@@ -144,6 +160,8 @@ function harness(apiHandler, confirmResult=true) {
     loadLunaReleaseStatus,
     restoreLunaReleaseState,
     restoreVerifiedDeploymentResult,
+    updateMobileStatusSummary,
+    setMobileStatusDetails,
     get job() { return lunaReleaseJob; },
     get statusLoaded() { return lunaReleaseStatusLoaded; },
   };`, context);
@@ -268,6 +286,47 @@ async function main() {
   assert.equal(restored.scope.lastSession.messages[0].client_message_id, "human-adam-original-pn");
   assert.equal(restored.scope.lastSession.messages[0].answer, originalTranscript.messages[0].answer);
   assert.match(restored.scope.lunaReleaseStatus.textContent, /Adam má výsledek/);
+
+  // A persisted release receipt must never replace current conversation state.
+  const compact = harness(async () => emptyStatus);
+  compact.scope.lunaReleaseJob = {state:"completed", active:false};
+  compact.scope.lunaReleaseStatus.textContent = "Dlouhá historická účtenka ".repeat(80);
+  compact.test.updateMobileStatusSummary();
+  assert.equal(compact.scope.mobileStatusText.textContent, "Připojeno · Adam čeká");
+  compact.scope.sessionTurnBusy = true;
+  compact.scope.turnActivity.textContent = "Adam pracuje · 02:15";
+  compact.test.updateMobileStatusSummary();
+  assert.equal(compact.scope.mobileStatusText.textContent, "Adam pracuje · 02:15");
+  compact.scope.deliveryUncertain = true;
+  compact.scope.lunaReleaseJob = {state:"running", active:true};
+  compact.test.updateMobileStatusSummary();
+  assert.match(compact.scope.mobileStatusText.textContent, /Stav doručení je nejistý/);
+  compact.scope.deliveryUncertain = false;
+  compact.scope.sessionTurnBusy = false;
+  compact.test.updateMobileStatusSummary();
+  assert.equal(compact.scope.mobileStatusText.textContent, "Probíhá publikování · podrobnosti v Práci");
+  compact.scope.lunaReleaseJob = {state:"attention", active:false};
+  compact.test.updateMobileStatusSummary();
+  assert.match(compact.scope.mobileStatusText.textContent, /vyžaduje kontrolu/);
+  compact.scope.lunaReleaseStatusLoaded = false;
+  compact.scope.lunaReleaseJob = null;
+  compact.test.updateMobileStatusSummary();
+  assert.match(compact.scope.mobileStatusText.textContent, /Stav publikování se ověřuje/);
+  await compact.test.setMobileStatusDetails(true);
+  assert.equal(compact.scope.workPanel.hidden, false);
+  assert.equal(compact.scope.mobileStatusSummary.attributes["aria-expanded"], "true");
+  assert.equal(compact.scope.workCloseBtn.focused, true);
+  compact.test.setMobileStatusDetails(false);
+  assert.equal(compact.scope.workPanel.hidden, true);
+  assert.equal(compact.scope.mobileStatusSummary.attributes["aria-expanded"], "false");
+  assert.equal(compact.scope.mobileStatusSummary.focused, true);
+
+  // Restoring a fresh deployment announces it without covering the transcript.
+  restored.scope.takeVerifiedDeploymentResult = () => ({main_short:"123456789abc"});
+  await restored.test.restoreVerifiedDeploymentResult();
+  assert.equal(restored.scope.workPanel.hidden, true);
+  assert.match(restored.scope.notice.textContent, /Nasazení dokončeno/);
+  assert.equal(restored.scope.lastSession.messages[0].answer, originalTranscript.messages[0].answer);
 }
 
 main().catch((error) => {

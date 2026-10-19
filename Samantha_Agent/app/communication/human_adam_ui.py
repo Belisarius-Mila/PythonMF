@@ -30,11 +30,15 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     #workOpenBtn.work-clean { color:var(--ok); border-color:#86efac; background:#ecfdf3; }
     #workOpenBtn.work-attention { color:var(--warn); border-color:#fdba74; background:#fff7ed; }
     .statusline { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; color:var(--muted); font-size:13px; }
-    #mobileStatusSummary { display:none; width:100%; margin-top:10px; padding:8px 10px; align-items:center; justify-content:space-between; gap:10px; text-align:left; color:var(--muted); background:var(--soft); }
+    #mobileStatusSummary { display:flex; width:100%; margin-top:10px; padding:8px 10px; align-items:center; justify-content:space-between; gap:10px; text-align:left; color:var(--muted); background:var(--soft); }
     #mobileStatusSummary.warn { color:var(--warn); background:#fff7ed; }
     #mobileStatusSummary.ok { color:var(--ok); background:#ecfdf3; }
-    #mobileStatusText { min-width:0; overflow-wrap:anywhere; }
+    #mobileStatusText { min-width:0; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
     #mobileStatusToggleText { flex:0 0 auto; font-size:12px; font-weight:600; }
+    .status-details { flex:0 0 auto; padding:0 16px 14px; border-bottom:1px solid var(--line); }
+    .header-menu { position:relative; }
+    .header-menu summary { padding:10px 13px; border:1px solid var(--line); border-radius:11px; cursor:pointer; font-weight:700; }
+    .header-menu-actions { position:absolute; right:0; top:100%; min-width:150px; padding:8px; display:grid; gap:6px; border:1px solid var(--line); border-radius:11px; background:#fff; box-shadow:0 8px 24px #17203326; }
     .badge { padding:4px 8px; border-radius:999px; background:var(--soft); }
     button.sound-badge { padding:4px 8px; color:var(--muted); font-size:13px; font-weight:600; }
     .badge.ok { color:var(--ok); background:#ecfdf3; }
@@ -159,8 +163,16 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     .thread-rotation-box h3 { margin:0; font-size:15px; }
     .thread-rotation-actions { display:flex; gap:8px; flex-wrap:wrap; }
     #threadRotationConfirmation { width:100%; min-width:0; }
-    @media (max-width:620px) { .head { display:grid; grid-template-columns:auto minmax(0,1fr) auto; } .head h1 { text-align:center; } .head-tools { grid-column:1/-1; grid-row:2; justify-content:center; } .profile-tools { display:grid; grid-template-columns:auto minmax(0,1fr) auto; } .profile-tools select { min-width:0; width:100%; } .back { padding:8px 10px; } #mobileStatusSummary { display:flex; } .status-details { display:none; } .status-details.expanded { display:block; } .bubble { max-width:94%; } #chat { padding-left:12px; padding-right:12px; } }
+    @media (max-width:620px) { header { padding:8px 12px; } .head { display:flex; flex-wrap:wrap; gap:6px; } .head h1 { font-size:17px; } .head-tools { gap:6px; } .head button,.head summary,.back { padding:6px 8px; font-size:13px; } .profile-tools { display:grid; grid-template-columns:auto minmax(0,1fr) auto; margin-top:6px; } .profile-tools select { min-width:0; width:100%; padding:6px; } .profile-tools button { padding:6px 8px; font-size:13px; } #mobileStatusSummary { margin-top:6px; padding:6px 8px; font-size:13px; } .bubble { max-width:94%; } #chat { padding-left:12px; padding-right:12px; } }
     @media (max-width:620px) {
+      .composer { padding-top:8px; }
+      .composer textarea { min-height:64px; }
+      .compose-actions { display:flex; flex-wrap:wrap; gap:6px; }
+      .composer button { padding:8px; font-size:13px; }
+      .send-controls { margin-left:auto; }
+      #voiceStatus { order:3; flex-basis:100%; text-align:left; }
+      .tvbcp-head { flex:0 0 auto; flex-wrap:wrap; }
+      .tvbcp-head h2 { font-size:16px; }
       .tvbcp-panel { width:100%; max-width:100vw; min-width:0; overflow-x:hidden; }
       .tvbcp-head,.thread-rotation-panel-body { min-width:0; max-width:100%; }
       .thread-rotation-help { overflow-wrap:anywhere; }
@@ -180,10 +192,15 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       <button class="primary" id="connectBtn" type="button">Připojit</button>
       <h1>Human–Adam</h1>
       <div class="head-tools">
-        <button id="threadRotationOpenBtn" type="button">Vlákno</button>
-        <button id="tvbcpOpenBtn" type="button">TVBCP</button>
         <button id="workOpenBtn" type="button">Práce: stav</button>
-        <button id="refreshBtn" type="button">Stav</button>
+        <details class="header-menu" id="headerMenu">
+          <summary>Další</summary>
+          <div class="header-menu-actions">
+            <button id="threadRotationOpenBtn" type="button">Vlákno</button>
+            <button id="tvbcpOpenBtn" type="button">TVBCP</button>
+            <button id="refreshBtn" type="button">Obnovit stav</button>
+          </div>
+        </details>
       </div>
       <a class="back" href="/">← Cockpit</a>
     </div>
@@ -192,26 +209,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       <select id="profileSelect" aria-label="Pracovní proud Human–Adam"></select>
       <button id="profileSwitchBtn" type="button" disabled>Přepnout</button>
     </div>
-    <button id="mobileStatusSummary" type="button" aria-expanded="false" aria-controls="statusDetails">
-      <span id="mobileStatusText" role="status" aria-live="polite">Odpojeno · Izolovaný workspace · Adam není připojen</span>
+    <button id="mobileStatusSummary" type="button" aria-expanded="false" aria-controls="workPanel">
+      <span id="mobileStatusText" role="status" aria-live="polite">Odpojeno · Adam není připojen</span>
       <span id="mobileStatusToggleText">Podrobnosti</span>
     </button>
-    <div class="status-details" id="statusDetails">
-      <div class="statusline">
-        <span class="badge warn" id="connectionBadge">Odpojeno</span>
-        <span class="badge" id="profileBadge">Proud: Human–Adam</span>
-        <span class="badge" id="threadBadge">Relace: —</span>
-        <span class="badge" id="workspaceBadge">Izolovaný workspace</span>
-        <span class="badge warn legacy-work-control" id="developmentBadge">Vývoj: neověřen</span>
-        <button class="badge sound-badge warn" id="mediaSoundTestBtn" type="button">Zvuk odpovědi: vyzkoušet</button>
-        <audio id="completionMediaAudio" preload="auto" playsinline hidden></audio>
-        <audio id="answerSpeechAudio" preload="none" playsinline hidden></audio>
-      </div>
-      <div id="turnActivity" role="status" aria-live="polite" hidden></div>
-      <div id="stepCompletionReceipt" role="status" aria-live="polite" hidden></div>
-      <div id="deploymentReceipt" role="status" aria-live="polite" hidden></div>
-      <div id="lunaReleaseStatus" role="status" aria-live="polite" hidden></div>
-    </div>
   </header>
   <div id="notice" role="status" aria-live="polite"></div>
   <section id="chat" aria-label="Konverzace Human–Adam"></section>
@@ -267,6 +268,22 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       <button id="workCloseBtn" type="button">Zavřít</button>
     </div>
     <div class="work-panel-body">
+    <section class="status-details" id="statusDetails" aria-label="Stav a technické účtenky">
+      <div class="statusline">
+        <span class="badge warn" id="connectionBadge">Odpojeno</span>
+        <span class="badge" id="profileBadge">Proud: Human–Adam</span>
+        <span class="badge" id="threadBadge">Relace: —</span>
+        <span class="badge" id="workspaceBadge">Izolovaný workspace</span>
+        <span class="badge warn legacy-work-control" id="developmentBadge">Vývoj: neověřen</span>
+        <button class="badge sound-badge warn" id="mediaSoundTestBtn" type="button">Zvuk odpovědi: vyzkoušet</button>
+        <audio id="completionMediaAudio" preload="auto" playsinline hidden></audio>
+        <audio id="answerSpeechAudio" preload="none" playsinline hidden></audio>
+      </div>
+      <div id="turnActivity" role="status" aria-live="polite" hidden></div>
+      <div id="stepCompletionReceipt" role="status" aria-live="polite" hidden></div>
+      <div id="deploymentReceipt" role="status" aria-live="polite" hidden></div>
+      <div id="lunaReleaseStatus" role="status" aria-live="polite" hidden></div>
+    </section>
     <section class="workflow-help-panel work-help-panel" id="workHelpPanel" aria-labelledby="workHelpTitle" tabindex="-1" hidden>
       <div class="workflow-help-head">
         <h3 id="workHelpTitle">Jak pracovat a nasazovat</h3>
@@ -801,30 +818,33 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   }
 
   function setMobileStatusDetails(expanded) {
-    const showDetails = Boolean(expanded);
-    statusDetails.classList.toggle("expanded", showDetails);
-    mobileStatusSummary.setAttribute("aria-expanded", showDetails ? "true" : "false");
-    mobileStatusToggleText.textContent = showDetails ? "Skrýt" : "Podrobnosti";
+    if (expanded) return openWork();
+    closeWork();
   }
 
   function updateMobileStatusSummary() {
     let text = "";
     let tone = "";
-    if (lunaReleaseJob) {
-      const connectionText = connectionBadge.textContent || "Odpojeno";
-      text = `${connectionText} · ${lunaReleaseStatus.textContent || "Vykonavatel pracuje na balíčku."}`;
-      tone = lunaReleaseJobActive() || String(lunaReleaseJob.state || "") === "attention" ? "warn" : "ok";
+    if (deliveryUncertain) {
+      text = "Stav doručení je nejistý · obnov stav · pokyn neposílej znovu";
+      tone = "warn";
     } else if (sessionTurnBusy) {
       text = turnActivity.textContent || "Adam pracuje · čas neznámý · pokyn neposílej znovu";
       tone = "warn";
-    } else if (deliveryUncertain) {
-      text = "Stav doručení je nejistý · obnov stav · pokyn neposílej znovu";
+    } else if (lunaReleaseJobActive()) {
+      text = "Probíhá publikování · podrobnosti v Práci";
+      tone = "warn";
+    } else if (lunaReleaseJob && String(lunaReleaseJob.state || "") === "attention") {
+      text = "Publikování vyžaduje kontrolu · otevři Práci";
+      tone = "warn";
+    } else if (!lunaReleaseStatusLoaded) {
+      text = "Stav publikování se ověřuje · podrobnosti v Práci";
       tone = "warn";
     } else {
       const connectionText = connectionBadge.textContent || "Odpojeno";
-      const workspaceText = workspaceBadge.textContent || "Izolovaný workspace";
       const adamText = sessionConnected ? "Adam čeká" : "Adam není připojen";
-      text = `${activeWorkstreamLabel} · ${connectionText} · ${workspaceText} · ${adamText}`;
+      const workspaceNote = workspaceBadge.classList.contains("warn") ? " · workspace vyžaduje kontrolu" : "";
+      text = `${connectionText} · ${adamText}${workspaceNote}`;
       tone = sessionConnected && !workspaceBadge.classList.contains("warn") ? "ok" : "warn";
     }
     mobileStatusText.textContent = text;
@@ -1857,6 +1877,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     threadRotationPanel.hidden = true;
     workPanel.hidden = true;
     deploymentAudit = null;
+    mobileStatusSummary.setAttribute("aria-expanded", "false");
     try {
       const payload = await api("/api/human-adam/profile", {
         method:"POST",
@@ -2032,6 +2053,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   function openThreadRotation() {
     tvbcpPanel.hidden = true;
     workPanel.hidden = true;
+    mobileStatusSummary.setAttribute("aria-expanded", "false");
     threadRotationPanel.hidden = false;
   }
 
@@ -2131,6 +2153,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   function openTvbcp() {
     threadRotationPanel.hidden = true;
     workPanel.hidden = true;
+    mobileStatusSummary.setAttribute("aria-expanded", "false");
     tvbcpPanel.hidden = false;
     loadTvbcp();
   }
@@ -2624,6 +2647,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       lunaReleaseStatus.textContent = `Stav balíčku nelze ověřit: ${error.message}`;
       lunaReleaseStatus.className = "attention";
       lunaReleaseStatus.hidden = false;
+      updateMobileStatusSummary();
       scheduleLunaReleasePoll();
       syncControls();
       return null;
@@ -3073,6 +3097,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     threadRotationPanel.hidden = true;
     tvbcpPanel.hidden = true;
     workPanel.hidden = false;
+    mobileStatusSummary.setAttribute("aria-expanded", "true");
+    workCloseBtn.focus();
     if (payload && payload.github_batch_mode === true) await auditGithubBatch();
   }
 
@@ -3086,6 +3112,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   function closeWork() {
     setWorkHelpOpen(false);
     workPanel.hidden = true;
+    mobileStatusSummary.setAttribute("aria-expanded", "false");
+    mobileStatusSummary.focus();
   }
 
   async function createCheckpoint() {
@@ -3396,12 +3424,11 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     if (!record) return;
     const reconnectResult = await reconnectAfterVerifiedDeployment(statusPayload);
     statusPayload = reconnectResult.payload;
-    threadRotationPanel.hidden = true;
-    tvbcpPanel.hidden = true;
-    workPanel.hidden = false;
-    await loadWork();
     deployMeta.textContent = verifiedDeploymentSummary(record)
       + (reconnectResult.reconnected ? " Human–Adam je znovu připojený." : "");
+    notice.textContent = reconnectResult.payload && reconnectResult.payload.session && reconnectResult.payload.session.connected
+      ? "Nasazení dokončeno · podrobnosti v Práci."
+      : "Nasazení dokončeno · zkontroluj připojení; podrobnosti v Práci.";
     markVerifiedDeploymentSeen(record);
   }
 
@@ -3530,7 +3557,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   profileSelect.addEventListener("change", syncControls);
   profileSwitchBtn.addEventListener("click", switchProfile);
   mobileStatusSummary.addEventListener("click", () => {
-    setMobileStatusDetails(mobileStatusSummary.getAttribute("aria-expanded") !== "true");
+    setMobileStatusDetails(workPanel.hidden);
+  });
+  document.getElementById("headerMenu").addEventListener("click", (event) => {
+    if (event.target.closest("button")) event.currentTarget.removeAttribute("open");
   });
   mediaSoundTestBtn.addEventListener("click", testCompletionMediaSound);
   window.addEventListener("pagehide", () => {
