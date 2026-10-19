@@ -2,12 +2,14 @@
 
 Projekt zalozen 2026-05-19.
 
-## Aktuální stav 2026-10-19 22:10 CEST
+## Aktuální stav 2026-10-19 22:13 CEST
 
 Podrobný lidský návod: `../../OBNOVA_SAMANTHY_NOVY_MAC.txt`, verze 1.2,
-17 kapitol včetně instalací a přejímky. Aktuální projektová a desktopová
-kopie mají shodný SHA-256. Na SSD Falta zůstává verze 1.1; disk je nyní
-odpojený. [PRIPOMENOUT] Po připojení přenést toto čistě textové upřesnění.
+17 kapitol včetně instalací a přejímky. Projektová kopie, Plocha, kořen
+externího disku Falta a kořen iCloud Drive mají shodný SHA-256. Na obou
+úložištích je aktuální `OBNOVA_SAMANTHY_NOVY_MAC.txt` verze 1.2. macOS
+Foundation potvrzuje iCloud ubiquitous/uploaded true, uploading false,
+bez chyby uploadu; přenos textu mimo Mac je dokončený.
 Záloha Camina už existuje a její stav se touto úpravou nemění.
 Recovery karty směrují na tentýž TXT; Git bundle ve šifrovaném
 `SamanthaBackups/recovery_updates/` doplňuje kód od projektového snapshotu
@@ -52,9 +54,10 @@ Macu neproběhla. Aplikace, interprety, Klíčenka, LaunchAgents, SSH/shell,
 kompletní ~/.codex a další externí data nadále nejsou obrazem tohoto backupu.
 `data/session_autosave/` je vyloučené; původní Codex sessions jsou jiný rozsah.
 
-Další krok: po připojení disku přenést TXT 1.2; datové snapshoty ani původní
-Git bundle se kvůli opravě textu nepřepisují. Pravidelná recovery záloha
-a celková instalace nového Macu zůstávají samostatné kroky.
+Další krok: při obnově otevřít TXT z disku Falta nebo iCloud Drive;
+pravidelná recovery záloha a celková instalace nového Macu zůstávají
+samostatné kroky. Ověření distribuce návodu je v lokálním logu
+`logs/recovery_txt_external_icloud_20261019.log`.
 
 ## Historie 2026-09-14 23:26 CEST
 

@@ -81,8 +81,8 @@ To je výběrová kontrola, ne test obnovy celého nového Macu.
 Při zálohovacím běhu 19. 10. byl disk Falta připojený a šifrovaný
 SamanthaSecureBackup odemčený;
 připojení a šifrování byly ověřeny. Projektový snapshot z 18. 10. zůstává
-beze změny. Na disku Falta byla 19. 10. uložena samostatná kopie návodu
-verze 1.1; nejnovější vydání uchovej mimo Mac také. Doplněk novějšího
+beze změny. Aktuální návod je uložen také v kořeni disku Falta a v kořeni
+iCloud Drive pod názvem OBNOVA_SAMANTHY_NOVY_MAC.txt. Doplněk novějšího
 kódu popisuje kapitola 6.4.
 
 1.2 Co standardní recovery záloha obsahuje

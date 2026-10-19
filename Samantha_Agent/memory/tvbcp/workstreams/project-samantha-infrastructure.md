@@ -1,12 +1,12 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-10-19 22:10 CEST: Opraveno matoucí znění TXT o záloze Camina. Verze 1.2
-  hned nahoře potvrzuje dokončený snapshot `20261019_212828-78238a8a`
-  a úspěšnou celou souborovou obnovu. Odstraněna stará podmíněná pasáž
-  předcházející této záloze; totéž zpřesněno v kapitole 17. Projektová
-  a desktopová kopie shodné. Externí disk je odpojený, na něm zůstává 1.1;
-  [PRIPOMENOUT] po připojení přenést TXT 1.2. Datové zálohy a služby se nemění.
+- 2026-10-19 22:13 CEST: Aktuální TXT 1.2 uložen do kořene externího disku Falta
+  a do kořene iCloud Drive jako `OBNOVA_SAMANTHY_NOVY_MAC.txt`. Projekt,
+  Plocha, externí SSD i iCloud mají shodný SHA-256. macOS Foundation
+  potvrzuje uploaded true, uploading false a žádnou chybu uploadu.
+  Připomenutí přenosu TXT po připojení disku je vyřízené.
+  Důkaz: `logs/recovery_txt_external_icloud_20261019.log`.
 
 - 2026-10-19 21:49 CEST: Doplněna skutečná šifrovaná záloha živého Camina
   `20261019_212828-78238a8a`: 1 587 souborů / 5 078 684 995 B, čtyři DB,
@@ -425,3 +425,27 @@ Technický důkaz:
   nemění. Snapshot `20261019_212828-78238a8a` byl doložen dokončeným během
   a úspěšnou nezávislou souborovou obnovou v původních lokálních logách.
   Externí svazek při nynější opravě není připojený, nové čtení snapshotu neproběhlo.
+
+
+### 2026-10-19 22:13 CEST — Aktuální TXT na externím SSD a v iCloudu
+
+Hotovo:
+- Návod 1.2 je dostupný v kořeni disku Falta i iCloud Drive pod názvem
+  `OBNOVA_SAMANTHY_NOVY_MAC.txt`; všechny čtyři kopie včetně projektu
+  a Plochy mají shodný SHA-256. macOS potvrdil dokončené nahrání do cloudu.
+
+Rozhodnutí:
+- Míla výslovně zadal uložit aktuální TXT na připojený externí disk i do iCloudu.
+  Rozsah této distribuce je textový návod bez tajemství.
+
+Další krok:
+- Při obnově otevřít návod z disku Falta nebo z iCloud Drive.
+
+Navrhované další kroky:
+- Celková přejímka nového Macu zůstává dosavadní samostatnou úlohou.
+
+Technický důkaz:
+- SHA-256 čtyř souborů shodné; iCloud NSURL resource values:
+  ubiquitous=true, uploaded=true, uploading=false, upload_error_present=false.
+- Lokální receipt `logs/recovery_txt_external_icloud_20261019.log`.
+  Starší externí TXT zachovaný před přepsáním aktuální verzí.
