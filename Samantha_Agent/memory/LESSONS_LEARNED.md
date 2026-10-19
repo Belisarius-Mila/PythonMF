@@ -29,6 +29,13 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-075 — Záloha živého archivu potřebuje vlastní rozsah a skutečně zastavenou službu
+
+- Problém: zelená projektová záloha PythonMF nepokrývala živé Camino v Application Support. Návrat z launchctl bootout navíc ještě neznamenal dokončené zastavení; první pokus proto nevytvořil snapshot a služba vyžadovala řízený návrat.
+- Typ: opakující se
+- Řešení nalezeno: 19102026
+- Řešení: samostatný doplněk do ověřeného připojeného šifrovaného cíle; zámek filmových zápisů, po stop čekat na skutečné unloaded, pak stávající offline zámek a SQLite backup API včetně WAL. Ověřit všechny soubory SHA-256 a archiv vůči mediálním účtenkám. I po chybné odpovědi stop vyčkat na unloaded; samotné enable službu po bootout nevrátí. Timeout bootout musí pokrýt 330s ukončovací interval vlastní definice. V finally vrátit původně běžící vlastní službu, čekat na autentizovaný správný archiv a teprve pak vydat dokončený manifest. Při chybě zachovat soubory a nejprve zjistit stav; neopakovat slepě. Ověřeno na živém archivu a regresí asynchronního stop; úplný nový Mac má vlastní přejímku.
+
 ### LL-074 — Delegace ze síťově uzavřeného editoru potřebuje místní serverový kanál
 
 - Problém: App Server sandbox s networkAccess=false odmítá i HTTP na localhost; vlastní nový App Server z editoru by navíc dědil jeho omezení.

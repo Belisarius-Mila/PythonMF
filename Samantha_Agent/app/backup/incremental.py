@@ -143,6 +143,12 @@ def run_backup(
     )
     _copy_codex_home(plan=plan, rules=rules, stats=stats, progress_every=progress_every)
 
+    camino = None
+    if profile == "recovery":
+        from app.backup.camino import backup_camino
+        camino = backup_camino(backup_root=backup_root, mode=mode)
+        lines.append("Camino backup: " + str(camino.get("snapshot_id") or camino["state"]))
+
     lines.extend(_format_stats(stats))
 
     if plan.dry_run:
@@ -150,7 +156,7 @@ def run_backup(
         lines.append("Dry-run hotov. Nic nebylo zkopirovano.")
         return "\n".join(lines)
 
-    _write_manifest(plan, rules)
+    _write_manifest(plan, rules, camino=camino)
     record_backup_completed(target=str(plan.pythonmf_dest), mode=profile)
     state_path = SAMANTHA_DIR / "data" / "backup" / "activity_state.json"
     if state_path.exists():
@@ -309,7 +315,7 @@ def _latest_completed_snapshot(backup_root: Path) -> Path | None:
     return None
 
 
-def _write_manifest(plan: BackupPlan, rules: FilterRules) -> None:
+def _write_manifest(plan: BackupPlan, rules: FilterRules, *, camino: dict | None = None) -> None:
     recovery_copy = plan.snapshot_dir / "READ_ME_FIRST_RECOVERY.md"
     if RECOVERY_GUIDE.exists():
         _copy_file_chunked(RECOVERY_GUIDE, recovery_copy)
@@ -325,6 +331,8 @@ def _write_manifest(plan: BackupPlan, rules: FilterRules) -> None:
                 f"Target: {plan.pythonmf_dest}",
                 f"Codex target: {plan.codex_dest}",
                 f"Previous snapshot: {plan.previous_snapshot or 'none'}",
+                "Camino supplement: " + str((camino or {}).get("snapshot_id") or
+                                           (camino or {}).get("state") or "not_in_safe_profile"),
                 "",
                 "Filters:",
                 *rules.patterns,

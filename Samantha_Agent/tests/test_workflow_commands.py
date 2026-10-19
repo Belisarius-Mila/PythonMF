@@ -15,6 +15,15 @@ from app.workflows.commands import (
 
 
 class WorkflowCommandTests(unittest.TestCase):
+    def test_camino_backup_is_registered_with_separate_preview_and_confirmed_execute(self):
+        commands = {c.command_id: c for c in workflow_commands.WORKFLOW_COMMANDS}
+        preview, execute = commands["backup_camino_dry_run"], commands["backup_camino_execute"]
+        self.assertEqual(preview.argv[-1], "--dry-run")
+        self.assertFalse(preview.requires_confirmation)
+        self.assertEqual(execute.argv[-1], "--execute")
+        self.assertTrue(execute.requires_confirmation)
+        self.assertIn("backup_camino.py", execute.argv[1])
+
     def test_lists_registered_exact_commands(self) -> None:
         result = list_workflow_commands_text()
 

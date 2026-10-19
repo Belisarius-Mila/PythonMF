@@ -2,40 +2,55 @@
 
 Projekt zalozen 2026-05-19.
 
-## Aktuální stav 2026-10-19 07:36 CEST
+## Aktuální stav 2026-10-19 21:49 CEST
 
-Podrobný lidský návod: `../../OBNOVA_SAMANTHY_NOVY_MAC.txt`; 17 kapitol
-včetně instalací, Python prostředí, programů, služeb a přejímky.
-`RECOVERY_CARD_NEW_MAC.md` a `RECOVERY_FROM_BACKUP.md` jsou krátké vstupy
-na tentýž TXT. Nový dokument je zatím pouze lokální, nikoli ve snapshotu
-18. 10. nebo prokazatelně na GitHubu.
+Podrobný lidský návod: `../../OBNOVA_SAMANTHY_NOVY_MAC.txt`, verze 1.1,
+17 kapitol včetně instalací a přejímky. Samostatná kopie je na SSD Falta.
+Recovery karty směrují na tentýž TXT; Git bundle ve šifrovaném
+`SamanthaBackups/recovery_updates/` doplňuje kód od projektového snapshotu
+z 18. 10. a zachová i nové nástroje před samostatným pushem.
 
-Poslední doložená ostrá záloha je `20261018_210658`, recovery:
-90 833 souborů, 12 194 kopírováno, 78 639 hardlinků, 0 přeskočeno,
-1 137 947 624 nově kopírovaných bajtů; exit 0. Manifest, recovery návod,
-SHA-256 vybraných souborů 4/4 i obnova jednoho souboru PASS.
-Důkaz: `logs/backup_recovery_20261018_verification.log` a
-`data/backup/activity_state.json`. 19. 10. není disk připojený; stav neznamená
-nové čtení zálohy ani test celkové obnovy Macu.
+Projektové jádro: `20261018_210658`, recovery, 90 833 souborů,
+12 194 kopírováno, 78 639 hardlinků, 0 přeskočeno; 1 137 947 624 nových B.
+Původní manifest, hash 4/4 a obnova AGENTS.md doložené logem z 18. 10.
+Snapshot ani datum projektové evidence nebyly dnešním doplňkem přepsány.
 
-[PRIPOMENOUT] **Známá mezera úplnosti:** standardní zálohovací program
-kopíruje PythonMF a jen vybrané Codex config/history/sessions. Živá služba
-Camino má podle skutečné konfigurace metadata/media/auth DB, readers,
-originály i film-projects v `~/Library/Application Support/PythonMF/Camino/`,
-mimo tento rozsah. Audit hashů archivu při vývoji není jeho další záloha.
-Úplná konzistentní externí kopie a zkouška obnovy této služby nebyly tímto
-krokem doloženy; doplnit registrovaným samostatným postupem. Živé SQLite
-nekopírovat nekonzistentně jednotlivými soubory. Projektový běh z 18. 10.
-zůstává platný pro svůj deklarovaný rozsah, nikoli pro celý Mac.
+Živé Camino mimo PythonMF má nyní skutečný šifrovaný doplněk
+`20261019_212828-78238a8a` v `SamanthaBackups/camino_snapshots/`:
+1 587 souborů / 5 078 684 995 B; čtyři DB, 304 originálů /
+2 339 685 533 B, viewer-copies, film-projects, soukromá konfigurace,
+tokenové soubory a pevný nasazený release. Archiv má 893 operací,
+124 Momentů a 3 cesty. Dokončený `backup_manifest.json` je soukromý.
+Připojení skutečného šifrovaného cíle ověřeno před/po běhu.
 
-Nezahrnuté jsou také aplikace, interprety/prostředí, systémová Klíčenka,
-LaunchAgents, SSH/shell nastavení, kompletní ~/.codex/pluginy a externí data.
-Nouzové `data/session_autosave/` se vylučuje i z recovery profilu;
-vybrané originální Codex sessions jsou jiná zálohovaná složka.
+Registrované `scripts/backup_camino.py --dry-run|--execute` používá pevný
+šifrovaný cíl, filmový zámek, řízený stop vlastní služby a skutečné čekání
+na unloaded, offline zámek a SQLite backup API včetně WAL. Venv, cache,
+provozní log a zámky se nekopírují. Dokončený manifest vzniká až po
+ověření kopie a zdravém návratu původně běžící služby. Aktualizovaný
+recovery program jej volá automaticky a zapíše `Camino supplement: <ID>`;
+selhání doplňku zabrání označení projektové zálohy jako dokončené.
+Profil safe tento soukromý doplněk nevytváří.
 
-Ověření návodu: existující cesty, syntaxe 48 příkazových bloků a rychlá
-statická brána PASS; žádná skutečná obnova nebo systémová instalace.
-Další krok: samostatně vymezit konzistentní zálohu a obnovu celého Camina.
+Ověření: celý doplněk obnoven do nové soukromé dočasné složky; všechny
+soubory SHA-256, čtyři quick_check a kompletní mediální účtenky PASS.
+Obnovená kopie nespouštěla druhou službu. Produkce HTTP/HTTPS zdravá,
+anonymní přístup odmítnut, archiv/config/Serve/Funnel shodné; Cockpit 200.
+34 cílených testů a plná brána 2 133/2 133 PASS. Důkazy v `logs/`:
+`camino_backup_execute_20261019_r2.log`, `camino_backup_restore_20261019.log`,
+`camino_backup_after_20261019.log`, `camino_backup_full_gate_20261019_final2.log`.
+První pokus skončil bez snapshotu a vyžadoval řízený návrat služby;
+opravena asynchronní stop/start sekvence, poté jeden kontrolovaný běh.
+
+Hranice: nový recovery program je lokální zdrojová změna, bez push/deploy.
+Předchozí neshoda vlastnické účtenky Serve zůstává k samostatnému posouzení;
+skutečné HTTPS funguje a síť se zálohou neměnila. Úplná přejímka nového
+Macu neproběhla. Aplikace, interprety, Klíčenka, LaunchAgents, SSH/shell,
+kompletní ~/.codex a další externí data nadále nejsou obrazem tohoto backupu.
+`data/session_autosave/` je vyloučené; původní Codex sessions jsou jiný rozsah.
+
+Další krok: pravidelná recovery záloha aktualizovaným programem; celý nový
+Mac instalovat a přejímat podle TXT jako samostatnou řízenou obnovu.
 
 ## Historie 2026-09-14 23:26 CEST
 

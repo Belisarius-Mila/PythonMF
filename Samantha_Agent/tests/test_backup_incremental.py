@@ -10,6 +10,33 @@ from app.backup.incremental import run_backup
 
 
 class BackupIncrementalTests(unittest.TestCase):
+    def test_recovery_includes_camino_and_does_not_complete_if_it_fails(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            source = base / "source"
+            source.mkdir()
+            (source / "example.txt").write_text("synthetic")
+            target = base / "target"
+            with (patch("app.backup.incremental._is_secure_recovery_target", return_value=True),
+                  patch("app.backup.incremental._copy_codex_home"),
+                  patch("app.backup.incremental.RECOVERY_GUIDE", base / "missing"),
+                  patch("app.backup.incremental.record_backup_completed") as completed,
+                  patch("app.backup.camino.backup_camino") as camino):
+                camino.return_value = {"state": "completed", "snapshot_id": "verified-camino"}
+                run_backup(mode="execute", profile="recovery", backup_root=target,
+                           source_root=source, timestamp="one", progress_every=0)
+                manifest = target / "snapshots/one/backup_manifest.txt"
+                self.assertIn("Camino supplement: verified-camino", manifest.read_text())
+                camino.assert_called_once_with(backup_root=target, mode="execute")
+                completed.reset_mock()
+                camino.side_effect = RuntimeError("copy failed")
+                with self.assertRaises(RuntimeError):
+                    run_backup(mode="execute", profile="recovery", backup_root=target,
+                               source_root=source, timestamp="two", progress_every=0)
+                self.assertFalse((target / "snapshots/two/backup_manifest.txt").exists())
+                completed.assert_not_called()
+                self.assertTrue(manifest.is_file())
+
     def test_execute_skips_venv_globs_and_uses_completed_snapshot(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

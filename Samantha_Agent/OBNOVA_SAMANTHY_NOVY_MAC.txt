@@ -1,6 +1,6 @@
 OBNOVA SAMANTHY NA NOVÉM MACU
 Podrobný postup po poruše SSD, ztrátě nebo výměně MacBooku
-Verze 1.0 — 19. října 2026
+Verze 1.1 — 19. října 2026
 Autor: Adam pro Mílu
 Formát: prostý text UTF-8. V dokumentu nejsou hesla ani přístupové tokeny.
 
@@ -62,9 +62,10 @@ Níže je konkrétní hranice, nikoli obecné varování.
 18. 10. byly ověřeny manifest, recovery návod, shodné SHA-256 čtyř
 vybraných souborů a obnova AGENTS.md do samostatné dočasné složky.
 To je výběrová kontrola, ne test obnovy celého nového Macu.
-19. 10. není cílový svazek připojený; tento údaj vychází z uložené
-účtenky a data/backup/activity_state.json, nikoli z nového čtení disku.
-Tento nově napsaný návod ještě není součástí uvedeného snapshotu.
+19. 10. je disk Falta připojený a šifrovaný SamanthaSecureBackup odemčený;
+připojení a šifrování byly ověřeny. Projektový snapshot z 18. 10. zůstává
+beze změny. Tento nový návod je uložen samostatně na disku Falta;
+doplněk novějšího kódu popisuje kapitola 6.4.
 
 1.2 Co standardní recovery záloha obsahuje
 
@@ -93,7 +94,7 @@ vnějších cílů. Pouhá velikost snapshotu není důkaz úplnosti.
   - Codex auth.json se záměrně nezálohuje a nikdy se neobnovuje.
   - Data na jiných discích a jinde v domovské složce.
 
-1.4 Konkrétní mezera: živé Camino mimo PythonMF
+1.4 Živé Camino: samostatný šifrovaný doplněk
 
 Při čtecím auditu 19. 10. jsou skutečné databáze a média služby zde:
 
@@ -102,7 +103,7 @@ Při čtecím auditu 19. 10. jsou skutečné databáze a média služby zde:
 Jsou tam metadata.sqlite, media.sqlite, auth.sqlite, readers.sqlite,
 originals/, viewer-copies/, film-projects/, soukromá konfigurace a tokeny.
 Pevné serverové releasy jsou v sousední složce Camino/Releases/.
-Tyto skutečné cesty jsou mimo zdroj standardní projektové zálohy.
+Tyto skutečné cesty jsou mimo strom PythonMF ve starší projektové záloze.
 Ověření hashů originálů při vývoji není jejich další nezávislá záloha.
 
 Pokud původní Mac opravdu zanikne a nemáš samostatnou konzistentní kopii
@@ -112,14 +113,33 @@ Starší kopie v PythonMF nemusí odpovídat současné službě.
 iPhone může obsahovat originály, ale samotný telefon nenahrazuje
 ověřenou kopii kompletního serverového stavu. Telefon nemaž ani neresetuj.
 
-PRVNÍ SAMOSTATNÝ NÁSLEDUJÍCÍ ÚKOL PRO ZÁLOHOVÁNÍ:
-rozšířit registrované zálohování o konzistentní externí archiv Camina
-(databáze včetně jejich vzájemné identity, média, filmové projekty,
-konfiguraci a potřebný release), ověřit kopii a provést zkoušku obnovy.
+Od 19. 10. je doplněn registrovaný scripts/backup_camino.py. Nový recovery
+program ho také automaticky volá a do projektového manifestu zapisuje
+řádek Camino supplement s ID doplňku. Starý snapshot 18. 10. se tím nemění:
+pro obnovu je potřeba PROJEKTOVÝ SNAPSHOT A DOPLNĚK CAMINA.
+
+Doplněk používá jen připojený šifrovaný SamanthaSecureBackup. Pozastaví
+vlastní službu, vyloučí souběžné filmové zápisy, zachytí SQLite backup API
+včetně potvrzených WAL transakcí a ověří každý zkopírovaný soubor SHA-256.
+Zahrnuje čtyři DB, originály, viewer-copies, film-projects, soukromou
+konfiguraci a nasazený pevný release. Venv, cache a provozní zámky vynechá.
+Při chybě se pokusí vrátit původně běžící službu; dokončený manifest smí
+vzniknout až po úspěšném ověření kopie a zdravém návratu služby.
+
+Dokončený doplněk z 19. 10.:
+  ID:              20261019_212828-78238a8a
+  Umístění:        SamanthaBackups/camino_snapshots/<ID>/
+  Manifest:        backup_manifest.json (soukromý, nevypisovat do chatu)
+  Souborů / bajtů: 1 587 / 5 078 684 995 (přibližně 4,73 GiB)
+  Databáze:        4; originály: 304 / 2 339 685 533 bajtů
+  Archiv:          893 operací, 124 Momentů, 3 cesty
+
+Služba se vrátila zdravá přes owner HTTP i HTTPS, anonymní přístup byl
+odmítnut. Konfigurace, síť i archiv se shodují se stavem před zálohováním.
+Předchozí první neúspěšný pokus nevytvořil dokončený snapshot; bylo opraveno
+čekání na asynchronní stop/start launchd. Zálohování prošlo plnou bránou
+2 133 testů. Zkouška kopie a obnova jsou popsány v kapitole 12.
 Živé SQLite databáze nekopírovat jednotlivě za běhu jako obyčejné soubory.
-Použít registrované offline zastavení vlastní služby nebo SQLite backup
-API a koordinovaný okamžik; zahrnout i potřebná WAL data konzistentně.
-Nynější dokumentace tuto chybějící schopnost sama neimplementuje.
 
 Samostatně uchovat originály rodinných filmů na externím disku Falta,
 potřebná IPA a jejich důkazy; Downloads ani celý externí disk nejsou
@@ -133,7 +153,7 @@ automaticky součástí zálohy PythonMF.
 [ ] Přístup k Apple účtu, ChatGPT/OpenAI, GitHubu a Tailscale.
 [ ] Funkční druhý faktor / obnovovací kódy, nezávislé na ztraceném Macu.
 [ ] Tento TXT mimo Mac; hesla a obnovovací kódy do něj nedopisovat.
-[ ] Vyřešená samostatná kopie živého Camina podle kapitoly 1.4.
+[ ] Dostupný dokončený doplněk živého Camina podle kapitol 1.4 a 12.
 [ ] Seznam dalšího potřebného obsahu mimo PythonMF; zejména rodinná média,
     případné iMovie knihovny, dokumenty a místní instalační balíčky IPA.
 
@@ -347,7 +367,9 @@ Při budoucí novější záloze nahraď jen ID potvrzeného dokončeného snaps
 Očekávej PythonMF/, codex_home/, backup_manifest.txt a recovery návod.
 Manifest musí uvádět Profile: recovery a správný zdroj/rozsah.
 Profil safe vynechává další citlivá data; není rovnocenný recovery.
-Ani recovery neobsahuje vše z kapitoly 1.3 a živé Camino z 1.4.
+Ani recovery neobsahuje vše z kapitoly 1.3. Živé Camino obnovuj z jeho
+doplňku, nikoli hledáním starých dat ve stromu PythonMF. Nový recovery
+manifest na doplněk odkazuje; snapshot z 18. 10. tento odkaz ještě nemá.
 
 V nejasném snapshotu nic neopravuj a nemaž. Zachovej původní disk jako zdroj.
 
@@ -409,6 +431,35 @@ práce. Při divergenci nebo nečistém stavu zastav integraci a zachovej soubor
 Jen při čisté main bez lokálního náskoku a pouze vzdáleném náskoku lze po
 kontrole rozsahu použít git merge --ff-only origin/main. Není to první krok
 obnovy. Nepoužívat automatický pull, rebase ani reset --hard.
+
+6.4 Doplněk kódu uložený na SSD dne 19. 10.
+
+Vedle doplňku dat Camina je ve šifrovaném kontejneru uložen Git bundle:
+
+    RECOVERY_CODE_BUNDLE="/Volumes/SamanthaSecureBackup/SamanthaBackups/recovery_updates/SAMANTHA_KOD_DOPLNEK_20261019.bundle"
+
+Tento doplněk obsahuje změny kódu a git-safe dokumentace od projektového
+snapshotu 20261018_210658 včetně nového zálohovacího postupu. Jeho výchozí
+commit je 2e14eaf244e9633e6fea1b90b3bd35a0f59e38b1. Není to samostatná
+záloha celého repozitáře: potřebuje obnovenou historii uvedeného snapshotu.
+Soukromá data Camina obsahuje jiný doplněk podle kapitoly 12.
+
+Po obnově projektu ověř bundle a načti jeho větev do oddělené reference:
+
+    cd "$HOME/Desktop/PythonMF"
+    git bundle verify "$RECOVERY_CODE_BUNDLE"
+    git fetch "$RECOVERY_CODE_BUNDLE" main:refs/remotes/recovery-ssd/main
+    git log --oneline main..recovery-ssd/main
+    git status --short --branch
+
+Jen po kontrole, na čisté main a při potvrzeném přímém navázání:
+
+    git merge --ff-only recovery-ssd/main
+
+Pokud už máš novější stav z GitHubu, nebo vznikne divergence, nic nevracej
+zpět. Zachovej obě historie a rozhodni další integraci s Adamem. Na novém
+Macu tím získáš i scripts/backup_camino.py; samotná kopie starého snapshotu
+z 18. 10. tento nový program neobsahuje.
 
 
 7. PYTHON PRO SAMANTHU A DALŠÍ APLIKACE
@@ -797,18 +848,76 @@ Po připojení použij samantha, nikoli další zbytečně souběžnou relaci.
 
 12. CAMINO SERVER A FILMOVÉ PROJEKTY
 ==================================
-Tato část vyžaduje SAMOSTATNĚ OBNOVENÝ KOMPLETNÍ ARCHIV z kap. 1.4.
+Tato část vyžaduje DOKONČENÝ ŠIFROVANÝ DOPLNĚK z kap. 1.4.
 Bez něj zde nelze pokračovat tvrzením, že serverový archiv je obnovený.
 Nový prázdný server není náhradou původního. Nespouštět clean bootstrap,
 prepare nebo generování nových identit jako způsob „opravy“ chybějících dat.
 
-12.1 Když samostatnou ověřenou kopii archivu máš
+12.1 Volba doplňku, ověření a kopie do prázdného cíle
+
+Dne 19. 10. byl celý doplněk 20261019_212828-78238a8a obnoven do nové
+soukromé dočasné složky. Všech 1 587 souborů má správné SHA-256, čtyři DB
+prošly quick_check a všech 304 originálů souhlasí s mediálními účtenkami.
+Identita a obsah archivu se shodují se zdrojem. Z obnovené kopie nebyla
+spuštěna druhá služba. To ověřuje souborovou obnovu Camina; instalace
+a celková přejímka na skutečném novém Macu zatím neproběhla.
+
+Zvol ID z řádku Camino supplement projektového manifestu, nebo samostatný
+doložený doplněk. Novější neúplná složka bez backup_manifest.json není
+dokončená záloha. Manifest obsahuje soukromé názvy; nevypisuj ho do chatu.
+
+    RECOVERY_CAMINO_SNAPSHOT="/Volumes/SamanthaSecureBackup/SamanthaBackups/camino_snapshots/20261019_212828-78238a8a"
+    export RECOVERY_CAMINO_SNAPSHOT
+    test -f "$RECOVERY_CAMINO_SNAPSHOT/backup_manifest.json" && echo "Manifest existuje"
+
+Před kopírováním ověř VŠECHNY soubory a čtyři databáze bez spuštění služby.
+Použij již nainstalovaný RECOVERY_PYTHON z kapitoly 4; nepotřebuje knihovny:
+
+    "$RECOVERY_PYTHON" - <<'PY'
+    import hashlib, json, os, sqlite3
+    from pathlib import Path
+    root = Path(os.environ['RECOVERY_CAMINO_SNAPSHOT']).resolve()
+    manifest = json.loads((root / 'backup_manifest.json').read_text())
+    assert manifest['schema'] == 1 and manifest['scope'] == 'camino-recovery'
+    for relative, expected in manifest['files'].items():
+        rel = Path(relative)
+        path = root / rel
+        assert not rel.is_absolute() and '..' not in rel.parts
+        assert path.resolve() == path and path.is_file()
+        assert path.stat().st_size == expected['bytes']
+        with path.open('rb') as stream:
+            assert hashlib.file_digest(stream, 'sha256').hexdigest() == expected['sha256']
+    assert len(manifest['databases']) == 4
+    for relative in manifest['databases']:
+        assert relative in manifest['files']
+        db = sqlite3.connect((root / relative).as_uri() + '?mode=ro', uri=True)
+        try:
+            assert db.execute('PRAGMA quick_check').fetchall() == [('ok',)]
+        finally:
+            db.close()
+    print('PASS: SHA-256 vsech souboru a integrita 4 DB')
+    PY
+
+Při chybě nepokračuj. Po PASS ověř, že cíl neexistuje ani jako symlink:
+
+    CAMINO_RECOVERY_BASE="$HOME/Library/Application Support/PythonMF/Camino"
+    test -e "$CAMINO_RECOVERY_BASE" -o -L "$CAMINO_RECOVERY_BASE" && echo "STOP: cil uz existuje"
+
+Jen při neexistujícím cíli:
+
+    umask 077
+    mkdir -p "$HOME/Library/Application Support/PythonMF"
+    mkdir "$CAMINO_RECOVERY_BASE"
+    rsync -a "$RECOVERY_CAMINO_SNAPSHOT/Camino/" "$CAMINO_RECOVERY_BASE/"
+
+Kopíruje se Service/ a potřebný Releases/<release>/Samantha_Agent/.
+Zdrojovou zálohu neměň. Obnovené soubory jsou soukromé a nepatří do Gitu.
 
   a) Obnov do nové prázdné místní soukromé složky úplný zazálohovaný celek:
        ~/Library/Application Support/PythonMF/Camino/
      Obsahuje Service a potřebný pevný release v Releases.
-     Použij skutečné rozložení doplňkové zálohy, které musí popisovat její
-     vlastní manifest. V dnešním projektovém snapshotu tento celek není.
+     Rozložení právě provedené kopie popisuje vlastní backup_manifest.json.
+     V projektovém snapshotu z 18. 10. tento celek není.
   b) Službu ještě nespouštěj a telefon nesměřuj na prázdnou náhradu.
   c) Zkontroluj oprávnění pouze vlastníka a zákaz symlinků u datových cest.
   d) U DB ověř integritu na kopii a vzájemnou shodu server_id/epoch/kurzoru,
@@ -1029,8 +1138,22 @@ Ostrý běh až po kontrole cíle a výslovném souhlasu:
     .venv/bin/python scripts/backup_samantha_python.py --execute \
         --profile recovery --target /Volumes/SamanthaSecureBackup/SamanthaBackups
 
-Tím se samo neřeší mezera Camina popsaná v kapitole 1.4. Ta potřebuje vlastní
-implementované a ověřené rozšíření, ne jen opakování původního příkazu.
+Aktualizovaný recovery program při existující nakonfigurované službě
+automaticky vytvoří i doplněk Camina a zapíše jeho ID do projektového
+manifestu. Pokud doplněk selže, projektový běh nezíská dokončený manifest.
+Starý program ze snapshotu z 18. 10. tuto schopnost ještě nemá. Před novou
+zálohou ověř přítomnost aktualizovaného scripts/backup_camino.py.
+
+Samostatný doplněk bez opakování celého projektového snapshotu:
+
+    .venv/bin/python scripts/backup_camino.py --dry-run
+
+Po kontrole a výslovném souhlasu:
+
+    .venv/bin/python scripts/backup_camino.py --execute
+
+Běh krátce pozastaví vlastní službu; po chybném výsledku zkontroluj stav
+služby a zachované soubory. Neopakuj běh automaticky naslepo.
 
 
 16. KDYŽ NĚCO NEFUNGUJE

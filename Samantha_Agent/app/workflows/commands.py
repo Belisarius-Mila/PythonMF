@@ -318,6 +318,17 @@ def _camino_service_commands() -> tuple[WorkflowCommand, ...]:
 
 
 WORKFLOW_COMMANDS: tuple[WorkflowCommand, ...] = (
+    *(WorkflowCommand(
+        command_id="backup_camino_" + mode.replace("-", "_"),
+        title="Záloha živého Camina: " + mode,
+        purpose="Konzistentní šifrovaná kopie DB, originálů, filmů a pevného releasu; ověření hashů a návrat vlastní služby.",
+        aliases=("zálohuj camino",) if mode == "execute" else ("náhled zálohy camino",),
+        argv=(str(PYTHON_BIN), str(SAMANTHA_DIR / "scripts/backup_camino.py"), "--" + mode),
+        cwd=SAMANTHA_DIR,
+        risk="external_backup_write" if mode == "execute" else "read_only_preview",
+        writes="Nový šifrovaný doplněk zálohy; krátké pozastavení a návrat vlastní služby Camino." if mode == "execute" else "nic",
+        requires_confirmation=mode == "execute",
+    ) for mode in ("dry-run", "execute")),
     WorkflowCommand(
         command_id="preview_routine_report_review", title="Náhled předání kontroly dokumentace",
         purpose="Ukáže přesný typ a roli bez modelového tahu.",
@@ -391,7 +402,7 @@ WORKFLOW_COMMANDS: tuple[WorkflowCommand, ...] = (
     WorkflowCommand(
         command_id="backup_project_recovery",
         title="Ostra recovery zaloha PythonMF/Samantha",
-        purpose="Vytvori novy recovery snapshot projektu do sifrovaneho externiho kontejneru.",
+        purpose="Vytvoří recovery snapshot projektu a konzistentní doplněk nakonfigurovaného Camina; krátce pozastaví a vrátí vlastní službu.",
         aliases=(
             "uloz aktualni stav na externi disk",
             "zalohuj nas projekt na externi disk",

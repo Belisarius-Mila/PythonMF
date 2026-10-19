@@ -1,16 +1,22 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-10-19 07:36 CEST: Připraven podrobný `OBNOVA_SAMANTHY_NOVY_MAC.txt` pro nový Mac
-  (17 kapitol: instalace, Python/knihovny, VS Code, Xcode/iLoader, data,
-  služby, Codex, Tailscale, iPhone a přejímka); obě staré recovery karty
-  směrují na jeden aktuální TXT. Kontrola 27 místních cest, syntaxe 48
-  příkazových bloků, 19 zdrojových odkazů a rychlá statická brána PASS.
-  Dokumentace pouze lokální; publikace, nová záloha ani změny služeb
-  neproběhly. [PRIPOMENOUT] Živé Camino v Library/Application Support
-  je mimo standardní zálohu PythonMF. Kompletní konzistentní kopii jeho
-  DB/médií/střihů a skutečnou obnovu nového Macu teprve samostatně ověřit.
-  Záloha 18. 10. je doložená účtenkou, nyní není disk připojený.
+- 2026-10-19 21:49 CEST: Doplněna skutečná šifrovaná záloha živého Camina
+  `20261019_212828-78238a8a`: 1 587 souborů / 5 078 684 995 B, čtyři DB,
+  304 originálů, filmové projekty, konfigurace a přesný nasazený release.
+  Celá kopie obnovena do nové soukromé složky; všechny SHA-256, čtyři DB
+  a mediální účtenky PASS. Vlastní služba se vrátila zdravá HTTP/HTTPS;
+  archiv, konfigurace a Serve/Funnel přesně shodné, Cockpit HTTP 200.
+  Nový recovery program automaticky pořizuje doplněk a zapisuje jeho ID
+  do projektového manifestu; samostatné pevné CLI má dry-run/execute.
+  První neúspěšný pokus nevytvořil snapshot; opravené čekání na asynchronní
+  stop/start ověřeno 34 cílenými testy a plnou bránou 2 133/2 133.
+  TXT verze 1.1 směřuje na obě datové zálohy a doplněk kódu na SSD.
+  Projektový snapshot jádra zůstává `20261018_210658`; dnešní doplněk jej
+  nepřepisuje. Změna zdrojů je lokální, bez push/nasazení Cockpitu.
+  [PRIPOMENOUT] Úplná instalace a přejímka skutečného nového Macu neprovedena.
+  Dříve existující neshoda vlastnické účtenky Serve zachovaná: skutečné
+  HTTPS funguje, síť se neměnila; oprava není součástí zálohování.
 
 - 2026-10-16 21:59 CEST: po přesném potvrzení proveden omezený úklid SSD:
   čtyři starší stažené aktualizační balíčky Wordu a npm cache. Nejnovější
@@ -355,3 +361,36 @@ Technický důkaz:
 - Rizika: plná obnova nebyla provedena; Keychain, systémová oprávnění,
   aktuálnost nezamčených závislostí a změny uživatele/architektury vyžadují
   vlastní kontrolu. Backup pokrytí Camina je otevřená funkční mezera.
+
+
+### 2026-10-19 21:49 CEST — Šifrovaný doplněk Camina a návod na SSD
+
+Hotovo:
+- Živý archiv má samostatnou dokončenou externí kopii `20261019_212828-78238a8a`
+  včetně čtyř DB, všech médií, střihů, konfigurace a pevného releasu.
+- Celá kopie byla obnovena do nové soukromé složky a ověřena; produkční
+  služba je zpět zdravá. Návod v TXT obsahuje konkrétní obnovu a je na SSD,
+  spolu s doplňkem novějšího kódu pro projektový snapshot z 18. 10.
+
+Rozhodnutí:
+- Výslovný pokyn Míly pokrývá ostrý doplněk a uložení návodu na SSD.
+  Nový recovery běh přidává doplněk automaticky a odkazuje na něj manifestem.
+  Starší snapshoty se nepřepisují; žádný push/deploy ani nová iPhone instalace.
+
+Další krok:
+- Pravidelná recovery záloha aktualizovaným programem; úplná obnova nového
+  Macu zůstává samostatnou přejímkou podle TXT.
+
+Navrhované další kroky:
+- Samostatný restore test skutečného nového Macu; otevřená telefonní přejímka
+  střižny zůstává podle P2CD reportu, bez změny rozsahu.
+
+Technický důkaz:
+- 1 587 souborů / 5 078 684 995 B; čtyři DB, 304 originálů /
+  2 339 685 533 B, archiv 893 operací / 124 Momentů / 3 cesty.
+- Úplné SHA-256, quick_check, mediální účtenky a nezávislá souborová obnova PASS.
+  Produkce owner HTTP/HTTPS a anonymní odmítnutí PASS, archiv/config/síť shodné.
+- 34 cílených a plná brána 2 133/2 133 PASS; logy `camino_backup_*_20261019*`.
+  První pokus bez snapshotu vedl k ověřené opravě čekání na asynchronní stop/start.
+- Předchozí neshoda vlastnické účtenky Serve zachovaná; skutečné HTTPS funguje.
+  Systémová Klíčenka, další externí data a celková nová instalace nejsou tímto testem pokryté.

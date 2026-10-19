@@ -9,8 +9,9 @@ Tailscale, obnovu dat, služby, iPhone a závěrečné ověření.
 
 ## Kde začít
 
-1. Získej tento TXT z nezávislé kopie nebo z repozitáře, pokud už byl
-   publikován. Lokální commit není důkaz dostupnosti na GitHubu.
+1. Získej tento TXT z kořene SSD Falta nebo z repozitáře, pokud už byl
+   publikován. Ve šifrovaném kontejneru je také doplněk kódu pro starší
+   projektový snapshot; viz kapitola 6.4 TXT.
 2. Připrav přístupy a heslo šifrovaného recovery disku mimo ztracený Mac.
 3. Podle TXT připrav nový macOS, zvol správnou architekturu a Python 3.12.
 4. Vyber dokončený snapshot podle manifestu; nepoužívej slepě poslední
@@ -25,10 +26,12 @@ Klíčenku, kompletní konfiguraci systému ani celý `~/.codex`.
 Nouzové `data/session_autosave` se vylučuje i z recovery profilu;
 vybrané originální Codex sessions jsou samostatně zahrnuté.
 
-**Živý archiv Camina je mimo rozsah standardní projektové zálohy**, v
-`~/Library/Application Support/PythonMF/Camino/`. Jeho obnovení vyžaduje
-samostatnou konzistentní kopii. Podrobnosti a otevřený krok jsou v kapitole
-1.4 TXT. Funkční jádro Samanthy neznamená obnovený celý archiv Camina.
+**Živý archiv Camina má samostatný šifrovaný doplněk**
+`20261019_212828-78238a8a` v `SamanthaBackups/camino_snapshots/`:
+čtyři databáze, média, filmové projekty, konfigurace a přesný serverový release.
+Obnovuj jej podle kapitol 1.4 a 12 TXT spolu s projektovým snapshotem.
+Aktualizované recovery zálohování tento doplněk pořizuje automaticky;
+starší projektový snapshot z 18. 10. tím změněn nebyl.
 
 ## Co nedělat
 

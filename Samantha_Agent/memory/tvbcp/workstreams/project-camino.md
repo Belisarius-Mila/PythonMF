@@ -1,33 +1,45 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-10-15 20:29 CEST — p+n střižny dokončené, skutečný náhled z Cockpitu ověřený
+- Aktualizováno: 2026-10-19 21:49 CEST — doplněna externí záloha a zkouška souborové obnovy
 
 ### Hotovo
-- Přímý náhled celého videa, „Tady začít“ / „Tady skončit“, přehrání výběru a číselné doladění jsou pushnuté a nasazené do Cockpitu. Uložení vytváří dosavadní neměnné revize; výchozí video zůstává celé.
-- Živá přejímka opravila chybějící mediální nástroje ve službovém PATH. Jen novému filmovému workeru se přidávají známé adresáře; rodič, macOS a Camino se nemění. Kód `ff87ee2d`, runtime stamp `ba5bfa185ffd57b9`, nový proces a receipt deployed, smoke 5/5.
-- Plná místní brána 1941/1941 PASS a 24/24 cílených testů PASS. Skutečný nový zdrojový náhled z běžícího Cockpitu 8 763 ms / 1 484 481 B, celé dekódování a hash PASS. Oba původní filmy i nový náhled přes HTTP/HTTPS HEAD 200 / Range 206; TLS ověřené. Produkční střih dne 6. 10. stále revize 1, přesně shodný, bez nového renderu celého filmu.
-- Archiv před/po přesně shodný: 883 operací, 123 Momentů, všech 300 originálů / 2 316 799 213 B SHA-256 PASS a flags false. Camino stále `f60a33c98fd5`, PID 47332; konfigurace i Serve shodné, Funnel off. Owner HTTP/HTTPS a anonymní odmítnutí PASS. iPhone IPA ani přenosová služba se nepřepínaly.
-
-### Otevřeno
-- P2-C/E fyzická Safari/iPhone přejímka: vybrat úsek, uložit/reload a porovnat s renderovaným náhledem. API a render důkazy ji nenahrazují. Nástrojový prohlížeč nebyl dostupný.
-- GitHub brána nového opravného/případného navazujícího dokumentačního headu může ještě běžet; lokální úplná brána je hotová. P2-F a P2-A/MAC1 odděleně.
-
-### Rizika
-- První otevření připravuje chráněnou odvozeninu. Aktuální soukromí, manifest a hash se ověřují při každém výdeji; originály se novou HTTP cestou nevydávají. Jeden neúspěšný a dva hotové zdrojové pokusy jsou zachované.
-- Starší záloha z 27. 9. a zastavený autosave byly dnes oznámené; tato publikace je nemění.
+- Živý archiv Camina má skutečný šifrovaný doplněk `20261019_212828-78238a8a`:
+  1 587 souborů / 5 078 684 995 B, čtyři DB, 304 originálů, střihy a pevný release.
+  Celá kopie obnovena do oddělené soukromé složky a znovu ověřena:
+  všechny SHA-256, čtyři DB a mediální účtenky PASS.
+- Produkční služba se po záloze vrátila zdravá HTTP/HTTPS, anonymní přístup
+  odmítnut; archiv 893 operací / 124 Momentů / 3 cesty, konfigurace a síť
+  přesně shodné s výchozím stavem. Obnovená kopie nebyla spouštěna.
+- Aktualizovaný recovery program automaticky pořizuje doplněk; první
+  neúspěšný pokus bez snapshotu odhalil potřebu čekání na skutečný stop.
+  Oprava má 34 cílených a 2 133/2 133 plných testů PASS.
+- Střižna má nadále dříve dodaný přímý náhled a ruční trim; technické
+  důkazy z 15. 10. jsou v P2CD reportu. Zálohování nerozšiřuje telefonní přejímku.
 
 ### Rozhodnutí
-- Dokončeno „ok p+n“ pouze pro Cockpit, včetně nutné opravy odhalené živým zdrojovým náhledem. Bez nového iPhone buildu a bez změny služby Camino či sítě.
+- Míla výslovně zadal doplnění zálohy Camina a TXT na SSD. Jen řízené
+  pozastavení/návrat stejné vlastní služby, bez nového klienta či deploye.
+
+### Otevřeno / rizika
+- Úplná instalace a přejímka skutečného nového Macu neprovedena.
+- P2-C/E fyzické Safari/iPhone úsek/save/reload/náhled zůstává otevřené;
+  P2-F a P2-A/MAC1 odděleně, viz dřívější report.
+- Před zálohou zjištěná neshoda vlastnické účtenky Serve zachovaná;
+  skutečné HTTPS funguje a Serve/Funnel jsou shodné. Automatická oprava neproběhla.
+- Projektové jádro je snapshot 18. 10.; dnešní data služby jsou samostatný doplněk.
 
 ### Další krok
-- Obnovit Cockpit na iPhonu a ve Film Camino otevřít video, označit začátek/konec, přehrát výběr a ověřit uložení/reload. Pak porovnat výsledný náhled filmu.
+- Pravidelná recovery záloha aktualizovaným programem; při novém zařízení
+  společně použít projektový snapshot, doplněk dat a doplněk kódu podle TXT.
 
 ### Navrhované další kroky
-- P2-C/E pořadí dvou záběrů a délka fotografie; vícedenní film až po přijetí prvního dne.
+- Fyzická přejímka střižny a celkový restore test nového Macu jsou samostatné úlohy.
 
 ### Technický důkaz
-- `camino/docs/P2CD_EDITOR_MP4_REPORT.md`; finální worker deployment, preview a archive logy v `logs/`. Dokumentační uzavření nemění nasazený kódový otisk.
+- `logs/camino_backup_execute_20261019_r2.log`, `logs/camino_backup_restore_20261019.log`,
+  `logs/camino_backup_after_20261019.log`, `logs/camino_backup_full_gate_20261019_final2.log`.
+- `camino/docs/P2CD_EDITOR_MP4_REPORT.md` zůstává důkazem staršího vývoje střižny.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Camino
@@ -3777,3 +3789,36 @@ Technický důkaz:
 - Kód `ff87ee2d`, runtime otisk `ba5bfa185ffd57b9`, receipt deployed, nový proces potvrzený, smoke 5/5. Plná místní brána 1941/1941 PASS (331,381 s testů), cílené testy 24/24 PASS; při nasazení opakovaná statická brána nad shodným kódem.
 - Skutečný nový náhled SHA-256 `53170d49201fb43ec7d381124e9a2644c65d26903f5c9f5a125962cc1a27f173`. Důkazy `logs/camino_film_trim_worker_deployed_20261015.log`, `logs/camino_film_trim_final_preview_20261015.log`, `logs/camino_film_trim_final_archive_20261015.log`. Předchozí `298b6dc2` má vzdálenou bránu success; nová [GitHub brána 38785696792](https://github.com/Belisarius-Mila/PythonMF/actions/runs/38785696792) při zápisu ještě běží, její případné nahrazení dalším dokumentačním pushem není výsledek testů.
 - HTTP/API/render důkaz nenahrazuje fyzické ovládání a poslech na iPhonu. Nová telefonní přejímka zatím neprovedená; celá videa, uzavřený manifest a starší revize zachované.
+
+
+### 2026-10-19 21:49 CEST — Šifrovaný doplněk Camina a návod na SSD
+
+Hotovo:
+- Živý archiv má samostatnou dokončenou externí kopii `20261019_212828-78238a8a`
+  včetně čtyř DB, všech médií, střihů, konfigurace a pevného releasu.
+- Celá kopie byla obnovena do nové soukromé složky a ověřena; produkční
+  služba je zpět zdravá. Návod v TXT obsahuje konkrétní obnovu a je na SSD,
+  spolu s doplňkem novějšího kódu pro projektový snapshot z 18. 10.
+
+Rozhodnutí:
+- Výslovný pokyn Míly pokrývá ostrý doplněk a uložení návodu na SSD.
+  Nový recovery běh přidává doplněk automaticky a odkazuje na něj manifestem.
+  Starší snapshoty se nepřepisují; žádný push/deploy ani nová iPhone instalace.
+
+Další krok:
+- Pravidelná recovery záloha aktualizovaným programem; úplná obnova nového
+  Macu zůstává samostatnou přejímkou podle TXT.
+
+Navrhované další kroky:
+- Samostatný restore test skutečného nového Macu; otevřená telefonní přejímka
+  střižny zůstává podle P2CD reportu, bez změny rozsahu.
+
+Technický důkaz:
+- 1 587 souborů / 5 078 684 995 B; čtyři DB, 304 originálů /
+  2 339 685 533 B, archiv 893 operací / 124 Momentů / 3 cesty.
+- Úplné SHA-256, quick_check, mediální účtenky a nezávislá souborová obnova PASS.
+  Produkce owner HTTP/HTTPS a anonymní odmítnutí PASS, archiv/config/síť shodné.
+- 34 cílených a plná brána 2 133/2 133 PASS; logy `camino_backup_*_20261019*`.
+  První pokus bez snapshotu vedl k ověřené opravě čekání na asynchronní stop/start.
+- Předchozí neshoda vlastnické účtenky Serve zachovaná; skutečné HTTPS funguje.
+  Systémová Klíčenka, další externí data a celková nová instalace nejsou tímto testem pokryté.

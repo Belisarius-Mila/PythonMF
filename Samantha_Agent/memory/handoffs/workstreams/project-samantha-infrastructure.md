@@ -1,16 +1,22 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-10-19 07:36 CEST: Připraven podrobný `OBNOVA_SAMANTHY_NOVY_MAC.txt` pro nový Mac
-  (17 kapitol: instalace, Python/knihovny, VS Code, Xcode/iLoader, data,
-  služby, Codex, Tailscale, iPhone a přejímka); obě staré recovery karty
-  směrují na jeden aktuální TXT. Kontrola 27 místních cest, syntaxe 48
-  příkazových bloků, 19 zdrojových odkazů a rychlá statická brána PASS.
-  Dokumentace pouze lokální; publikace, nová záloha ani změny služeb
-  neproběhly. [PRIPOMENOUT] Živé Camino v Library/Application Support
-  je mimo standardní zálohu PythonMF. Kompletní konzistentní kopii jeho
-  DB/médií/střihů a skutečnou obnovu nového Macu teprve samostatně ověřit.
-  Záloha 18. 10. je doložená účtenkou, nyní není disk připojený.
+- 2026-10-19 21:49 CEST: Doplněna skutečná šifrovaná záloha živého Camina
+  `20261019_212828-78238a8a`: 1 587 souborů / 5 078 684 995 B, čtyři DB,
+  304 originálů, filmové projekty, konfigurace a přesný nasazený release.
+  Celá kopie obnovena do nové soukromé složky; všechny SHA-256, čtyři DB
+  a mediální účtenky PASS. Vlastní služba se vrátila zdravá HTTP/HTTPS;
+  archiv, konfigurace a Serve/Funnel přesně shodné, Cockpit HTTP 200.
+  Nový recovery program automaticky pořizuje doplněk a zapisuje jeho ID
+  do projektového manifestu; samostatné pevné CLI má dry-run/execute.
+  První neúspěšný pokus nevytvořil snapshot; opravené čekání na asynchronní
+  stop/start ověřeno 34 cílenými testy a plnou bránou 2 133/2 133.
+  TXT verze 1.1 směřuje na obě datové zálohy a doplněk kódu na SSD.
+  Projektový snapshot jádra zůstává `20261018_210658`; dnešní doplněk jej
+  nepřepisuje. Změna zdrojů je lokální, bez push/nasazení Cockpitu.
+  [PRIPOMENOUT] Úplná instalace a přejímka skutečného nového Macu neprovedena.
+  Dříve existující neshoda vlastnické účtenky Serve zachovaná: skutečné
+  HTTPS funguje, síť se neměnila; oprava není součástí zálohování.
 
 - 2026-10-16 21:59 CEST: po přesném potvrzení proveden omezený úklid SSD:
   čtyři starší stažené aktualizační balíčky Wordu a npm cache. Nejnovější
