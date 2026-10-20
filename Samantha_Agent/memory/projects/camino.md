@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-20 17:51 CEST — místní oprava mazání hotových renderů, nové nasazení čeká
+Aktualizováno: 2026-10-20 21:23 CEST — čtyři osiřelá metadata odstraněná; den 8. října platný
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,8 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-20 21:23 CEST: Po potvrzení globální brzdy offline odstraněny právě čtyři osiřelé video Asset řádky z 8. října. Míla přenos po metadatech zastavil a videa smazal na telefonu; žádné sessions/účtenky/originály na Macu neexistovaly. Pevný plán, kopie v paměti a metadata snapshot před transakcí, 10 ostatních tabulek, 894 operací, 124 Momentů, identity/kurzor i media DB zachované. Všech 304 originálů / 2 339 685 533 B a 797 filmových souborů SHA-256 shodných. Den 8 validní se 44 médii (24 foto/14 video/6 audio), projekty 6 a 7 validní. Původní služba zdravá, HTTPS 200, katalog OK, konfigurace a síť shodné. Nový projekt ani film nevznikl; další krok znovu uložit den 8 v Cockpitu. Další kontakt iPhonu neověřený. Mazání filmů `84336632` už nasazené přes Lunu a Mílou přijaté; MP4 dnů 6 a 7 má hotové. Log `logs/camino_metadata_cleanup_20261020.log`.
 
 - 2026-10-20 17:51 CEST: Po nasazení `3b129ded` Míla nahlásil nefunkční mazání. Čtecí diagnostika doložila chybné odmítnutí interního hardlinku hotového rendereru; nic se nesmazalo. Místní oprava uznává odkazy jen plně uvnitř vybrané varianty, kontroluje jejich počet před každým unlink a zahrnuje omezený strom pracovních podadresářů. Cizí odkazy a symlinky zůstávají blokované. 42 cílených testů včetně skutečného render → smazání PASS; všech 10 živých variant projde čtecím inventářem, 570 souborů shodných. Plná brána opravy 2 151/2 151 PASS. Oprava bez push/deploye a bez produkčního mazání; další krok samostatné p+n pouze Cockpitu přes Lunu a fyzická přejímka.
 

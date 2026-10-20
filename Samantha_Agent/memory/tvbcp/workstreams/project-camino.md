@@ -1,50 +1,50 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-10-20 17:51 CEST — oprava odmítání hotových MP4 při mazání, zatím místní
+- Aktualizováno: 2026-10-20 21:23 CEST — odstraněná čtyři osiřelá metadata videí, den 8. října znovu platný
 
 ### Hotovo
-- Předchozí „Smazat natrvalo“ bylo přes Lunu nasazené na `3b129ded`.
-  Míla při skutečné zkoušce zjistil, že náhledy zůstávají i po restartu.
-- Čtecí diagnostika doložila zastavení před odstraněním: renderer používá
-  interní hardlink `film.mp4` / `render.partial.mp4`, kontrola ho chybně odmítala.
-- Místní oprava přijímá pevné odkazy, jen když všechny jejich názvy patří
-  potvrzené variantě. Před každým unlink znovu ověří počet zbývajících odkazů.
-  Cizí odkazy, symlinky, jiné zařízení a změněné identity zůstávají blokované.
-- Zahrnuté jsou i pracovní podadresáře uvnitř známých pokusů, přes ověřené
-  deskriptory, s limitem hloubky/počtu a velikosti obnovovacího záznamu.
-- 42 cílených testů PASS, včetně skutečného rendereru a následného smazání,
-  přerušení mezi dvěma odkazy, obnovy a zachování originálu i zdrojového náhledu.
-- Čtecí inventář přijímá všech 10 současných variant; všech 570 kontrolovaných
-  produkčních souborů zůstalo shodných. V této opravě žádné produkční mazání.
+- Oprava mazání filmových variant `84336632` byla přes Lunu pushnutá a nasazená
+  pouze do Cockpitu. Míla potvrdil funkční mazání a hotová MP4 dnů 6. a 7. října.
+- Při zakládání filmu 8. října chyběly čtyři originály videí: jejich metadata
+  byla přijatá před zastavením přenosu, ale Míla videa potom smazal na telefonu.
+  Nebyla ve frontě, neměla upload session ani mediální účtenku.
+- Po přesném potvrzení globální brzdy a zkoušce na kopii v paměti odstraněny
+  pouze čtyři předem určené řádky živého inventáře Asset. Před změnou ověřená
+  obnovovací kopie metadata DB v private; transakce, FK a ostatní řádky PASS.
+- Zůstalo 304/304 ověřených originálů se shodnými SHA-256, všech 894 přijatých
+  operací, 124 Momentů, identity, kurzor, flags a ostatních 10 metadata tabulek.
+  Mediální DB i všech 797 existujících filmových souborů beze změny.
+- Den 8. října prošel skutečným validátorem: 44 zdrojů, 24 fotografií,
+  14 videí a 6 zvuků. Nový projekt ani MP4 se automaticky nevyráběly.
+- Camino bylo krátce zastavené registrovaným vlastněným řízením, offline
+  kontrola a záloha proběhly před zápisem, původní služba znovu běží.
+  HTTPS owner health 200 a Cockpit katalog OK; konfigurace a síť shodné.
 
 ### Rozhodnutí
-- Opravit chybu původního vývoje v témže rozsahu jedné vybrané varianty.
-- Konkrétní plán a přesná věta globální brzdy zůstávají při každém skutečném
-  smazání. Bez hromadného mazání, koše či nové mediální kopie.
+- Přesný jednorázový úklid čtyř nepřenesených videí tohoto dne podle Mílova
+  potvrzení. Historické synchronizační obálky a sekvence se nepřepisují.
+- Telefon, originály, střihy ani existující filmové varianty se nemažou.
 
 ### Otevřeno / rizika
-- Oprava zatím není pushnutá ani nasazená; běžící Cockpit má původní kontrolu.
-- Fyzické smazání z Macu/iPhonu musí být po novém nasazení znovu přijato.
-- Existující zálohy a stažené kopie jsou mimo akci; logický součet velikostí
-  není příslibem uvolněného APFS místa. Otevřený soubor může držet bloky.
+- Další skutečný kontakt iPhonu po opravě zatím není ověřený.
+- Obecný serverový kontrakt mazání při každém lokálním smazání tím nevznikl;
+  případný další takový úklid vyžaduje vlastní přesný inventář a potvrzení.
 
 ### Další krok
-- Po samostatném p+n přes Lunu nasadit pouze Cockpit a znovu vědomě smazat
-  jeden nepotřebný náhled; ověřit zmizení po reloadu a zachování ostatních.
+- V Cockpitu znovu uložit projekt pro 8. října a pokračovat střihem/MP4.
 
 ### Navrhované další kroky
-- Další úpravy druhého dne podle Mílových připomínek; P2-F spojování dnů později.
+- Další připomínky střihu podle Míly; P2-F spojování dnů zůstává později.
 
 ### Technický důkaz
-- Plná brána opravy 2 151/2 151 PASS, `camino_export_delete_fix_gate_20261020.log`.
-- Původní p+n `cb5a8c476ff62f035fbf48241bccafe4`: push/deploy confirmed,
-  plná brána 2 146 PASS, smoke 5/5, chráněné služby shodné. Účtenka převzatá
-  v terminálu; samostatný portálový návrat zůstal nepotvrzený.
-- Regrese před opravou reprodukovala odmítnutí interního hardlinku.
-  Logy `camino_export_delete_fix_reproduction_20261020.log`,
-  `camino_export_delete_fix_targeted_20261020.log`,
-  `camino_export_delete_fix_production_readonly_20261020.log`.
+- `logs/camino_metadata_cleanup_20261020.log`: rows_removed=4, zbytek 304,
+  FK/quick_check PASS, 304 originálů / 2 339 685 533 B SHA-256 zachovaných,
+  797 filmových souborů shodných, projekty 6. a 7. dne platné, den 8 validní.
+- Přesný plán, snapshot a účtenka jsou jen v `data/private/camino_metadata_cleanup/`.
+- Předchozí vydání opravy: účtenka `68228ea9cbb839b07316f30df8bd9322`,
+  push/deploy confirmed, 2 151 plných testů PASS a smoke 5/5.
+  Terminál účtenku převzal; samostatný portálový návrat nepotvrzený.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Camino
@@ -3939,3 +3939,35 @@ Technický důkaz:
   `camino_export_delete_fix_production_readonly_20261020.log`.
 - Původní vydání `3b129ded` potvrzené účtenkou `cb5a8c476ff62f035fbf48241bccafe4`,
   2 146 plných testů a smoke 5/5. Oprava je samostatný místní krok.
+
+
+### 2026-10-20 21:23 CEST — Odstranění osiřelých záznamů čtyř videí z 8. října
+
+Hotovo:
+- Osmý den znovu projde ověřením pro založení filmu: 24 fotografií,
+  14 videí a 6 zvuků. Odstraněny právě čtyři záznamy videí, která Míla po
+  přenosu metadat, ale před přenosem souborů smazal na telefonu.
+- Ostatních 304 originálů, 894 přijatých operací, 124 Momentů, synchronizační
+  identita/kurzor, ostatní tabulky a všechny existující filmové soubory zachované.
+- Původní Camino služba obnovená a zdravá přes HTTPS; konfigurace a síť shodné.
+- Míla již potvrdil funkční mazání variant po nasazení `84336632` a má MP4 dnů 6 a 7.
+
+Rozhodnutí:
+- Míla přesnou větou globální brzdy potvrdil tento konkrétní úklid čtyř osiřelých
+  položek. Pouze živý Asset inventář, historické synchronizační obálky zachované.
+- Žádné další mazání telefonu, originálů, filmů ani obecná změna serverového kontraktu.
+
+Další krok:
+- V Cockpitu znovu uložit projekt 8. října a pokračovat střihem/MP4.
+
+Navrhované další kroky:
+- Při dalším běžném kontaktu ověřit synchronizaci telefonu; P2-F později.
+
+Technický důkaz:
+- Kopie v paměti před potvrzením PASS; ostrý offline SQL zásah až po snapshotu,
+  přesném porovnání plánu a uzamčení filmových zápisů. 4 řádky odstraněné,
+  304 zůstaly, 10 ostatních metadata tabulek a celá media DB shodné.
+- FK/quick_check PASS; všech 304 originálů / 2 339 685 533 B SHA-256 PASS,
+  797 filmových souborů beze změny; původní projekty 6 a 7 platné, den 8 validní.
+- HTTPS owner health 200, Cockpit katalog OK. Další fyzický kontakt telefonu
+  neověřený. Log `logs/camino_metadata_cleanup_20261020.log`, detail a snapshot private.

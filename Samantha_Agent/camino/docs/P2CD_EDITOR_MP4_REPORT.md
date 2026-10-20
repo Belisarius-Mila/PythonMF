@@ -1,8 +1,8 @@
 # Camino P2-C/D — editor a MP4 z uzavřeného dne
 
-Stav k 20. 10. 17:51 CEST: mazání variant je nasazené na `3b129ded`, ale fyzická
-zkouška odhalila odmítání interních hardlinků rendereru. Oprava je místní,
-bez nového push/deploye.
+Stav k 20. 10. 21:23 CEST: oprava mazání `84336632` je nasazená a Mílou
+přijatá, MP4 dnů 6 a 7 hotová. Po přesném úklidu čtyř osiřelých video metadat
+projde 8. říjen validací se 44 zdroji; projekt tohoto dne zatím znovu neuložený.
 Míla 12. 10. výslovně zadal pokračování editorem a MP4 nad potvrzenou Mac
 sadou 6. 10. Telefon, běžící Camino, jeho archiv a síť se nemění.
 Míla potvrdil „ok p+n cockpit“; přesný `7c9547fc` je na GitHubu a nasazený pouze Cockpit. Hotové MP4 se znovu nevyráběly.
@@ -349,3 +349,35 @@ Implementační doplnění:
   položky v kořeni úlohy jsou odmítnuté; žádné obecné rm/rmtree.
 - Uváděná velikost je logický součet souborových jmen, včetně interních
   hardlinků; není to měření fyzicky uvolněného APFS místa.
+
+
+### 2026-10-20 21:23 CEST — Odstranění osiřelých záznamů čtyř videí z 8. října
+
+Hotovo:
+- Osmý den znovu projde ověřením pro založení filmu: 24 fotografií,
+  14 videí a 6 zvuků. Odstraněny právě čtyři záznamy videí, která Míla po
+  přenosu metadat, ale před přenosem souborů smazal na telefonu.
+- Ostatních 304 originálů, 894 přijatých operací, 124 Momentů, synchronizační
+  identita/kurzor, ostatní tabulky a všechny existující filmové soubory zachované.
+- Původní Camino služba obnovená a zdravá přes HTTPS; konfigurace a síť shodné.
+- Míla již potvrdil funkční mazání variant po nasazení `84336632` a má MP4 dnů 6 a 7.
+
+Rozhodnutí:
+- Míla přesnou větou globální brzdy potvrdil tento konkrétní úklid čtyř osiřelých
+  položek. Pouze živý Asset inventář, historické synchronizační obálky zachované.
+- Žádné další mazání telefonu, originálů, filmů ani obecná změna serverového kontraktu.
+
+Další krok:
+- V Cockpitu znovu uložit projekt 8. října a pokračovat střihem/MP4.
+
+Navrhované další kroky:
+- Při dalším běžném kontaktu ověřit synchronizaci telefonu; P2-F později.
+
+Technický důkaz:
+- Kopie v paměti před potvrzením PASS; ostrý offline SQL zásah až po snapshotu,
+  přesném porovnání plánu a uzamčení filmových zápisů. 4 řádky odstraněné,
+  304 zůstaly, 10 ostatních metadata tabulek a celá media DB shodné.
+- FK/quick_check PASS; všech 304 originálů / 2 339 685 533 B SHA-256 PASS,
+  797 filmových souborů beze změny; původní projekty 6 a 7 platné, den 8 validní.
+- HTTPS owner health 200, Cockpit katalog OK. Další fyzický kontakt telefonu
+  neověřený. Log `logs/camino_metadata_cleanup_20261020.log`, detail a snapshot private.

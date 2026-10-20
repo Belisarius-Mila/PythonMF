@@ -284,6 +284,8 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
   nový Moment, úplný recovery proof a pak skutečný kontakt telefonu.
   Nejde o podporu běžného serverového delete API ani návod na reset archivu.
 
+- Doplnění 20. 10.: po zastavení přenosu mezi metadata a médii může lokální smazání ponechat přijatý Asset na Macu bez session, účtenky a originálu. Prázdná fronta telefonu tedy neprokazuje úplný Mac den. Pro schválenou jednorázovou opravu ověřit přesné ID/body hash a absenci všech mediálních protějšků i živých vazeb, na kopii projít filmový validátor; offline po snapshotu odebrat jen tyto živé Asset řádky. Accepted obálky, kurzor, identity a ostatní tabulky zachovat. Čtyři video řádky odstraněné, 44 zdrojů dne a 304 celkových originálů ověřených; nejde o obecný serverový delete kontrakt.
+
 ### LL-055 — Camino „Mac není dostupný“ může být odmítnutý místní zápis
 
 - Problém: Po servisní obnově telefonu sync journal zůstal beze změn a aplikace
