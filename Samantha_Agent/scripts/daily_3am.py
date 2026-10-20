@@ -329,18 +329,29 @@ def update_owl_audio_source(script_path: Path, audio_src: str) -> bool:
 async def generate_edge_tts_mp3(text: str, output_path: Path, voice: str, rate: str) -> None:
     try:
         import edge_tts
+        import edge_tts.communicate as edge_communicate
+        from edge_tts.constants import TRUSTED_CLIENT_TOKEN
     except ImportError as exc:  # pragma: no cover - GitHub Actions installs this dependency.
         raise DailyTaskError("Missing dependency 'edge-tts' for ColorsAndNumbers owl TTS.") from exc
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     tmp_path = output_path.with_suffix(output_path.suffix + ".tmp")
+    original_endpoint = edge_communicate.WSS_URL
     try:
+        # The daily CLI is serialized by its file lock. Scope the upstream
+        # endpoint workaround to this request and preserve the voice/text.
+        # https://github.com/rany2/edge-tts/issues/490
+        edge_communicate.WSS_URL = (
+            "wss://api.msedgeservices.com/tts/cognitiveservices/websocket/v1"
+            f"?Ocp-Apim-Subscription-Key={TRUSTED_CLIENT_TOKEN}"
+        )
         communicate = edge_tts.Communicate(text=text, voice=voice, rate=rate)
         await communicate.save(str(tmp_path))
         if not tmp_path.exists() or tmp_path.stat().st_size <= 0:
             raise DailyTaskError("Generated ColorsAndNumbers MP3 is empty.")
         tmp_path.replace(output_path)
     finally:
+        edge_communicate.WSS_URL = original_endpoint
         if tmp_path.exists():
             tmp_path.unlink()
 

@@ -1,5 +1,7 @@
 # Obecna rutina pro automaticke opakujici se ukoly
 
+Aktuální navázání: viz časované záznamy z 20. 10. 2026 na konci souboru.
+
 ## Aktuální stav 2026-09-29 — opravená automatická publikace sovy
 
 - Na Mílův výslovný pokyn ručně zveřejněná doslovná promluva připravená večer
@@ -416,3 +418,25 @@ Navrhované další kroky: Zítra ověřit veřejné JS/MP3 a skutečný poslech
 Technický důkaz: Předpublikační audit 10 commitů / 31 cest, čistý main,
 oba profily zarovnané; origin je předkem main, žádný merge/rebase/force push.
 Zítřejší veřejné audio nyní není potvrzené, příprava není důkazem publikace.
+
+## 2026-10-20 07:59 CEST — Dnešní promluva a oprava připojení připravené
+
+Hotovo: Přesný dodaný text je v jediném řádku pro 20. října; ostatní řádky
+včetně default zůstaly shodné. Text se zde neopakuje. Lokální náhled má
+140 256 B / 23,376 s a prošel úplným dekódováním FFmpeg.
+
+Rozhodnutí: Míla výslovně zadal dnešní nasazení. Nutná úzká oprava připojení
+používá funkční Microsoft endpoint při zachování hlasu Antonin a rychlosti.
+Původní endpoint opakovaně neposílal audio ani po aktualizaci edge-tts na
+7.3.1; nejde o chybu CSV. Oprava je omezena na sériovou zamčenou rutinu,
+nastavení knihovny se obnoví i po chybě; žádné automatické opakování.
+
+Další krok: Plná publikační brána, auditovaný push přesného commitu a dnešní
+Pages workflow; teprve poté ověřit veřejné JS/MP3. Nasazení zatím nepotvrzené.
+
+Navrhované další kroky: Žádné nové. Poslech uživatele zůstává samostatný.
+
+Technický důkaz: 24 cílených testů PASS včetně obnovy nastavení připojení a
+zachování původního audia při chybě. Automatický běh 39375776815 nad
+aba9d2526726 selhal NoAudioReceived; veřejný web před změnou volil
+owl_191026.mp3. Náhled zůstává mimo Git.

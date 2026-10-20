@@ -2,6 +2,21 @@
 
 Tento dokument popisuje bezpecnou denni rutinu pro `Samantha_Agent`.
 
+## Připojení hlasové služby — 20. 10. 2026
+
+Původní Microsoft Read Aloud endpoint začal vracet HTTP 403 nebo
+`NoAudioReceived`, také s `edge-tts 7.3.1`. Generátor nyní po dobu jediné
+sériové TTS operace používá Microsoft endpoint
+`api.msedgeservices.com/tts/cognitiveservices/websocket/v1`; po dokončení i
+chybě obnoví původní nastavení knihovny. Text, hlas Antonin a rychlost se nemění.
+Knihovna neposkytuje parametr endpointu; tato kompatibilita proto zůstává
+omezena na samostatnou denní rutinu chráněnou souborovým zámkem.
+Zdroj: [upstream incident](https://github.com/rany2/edge-tts/issues/490).
+
+Ověřeno skutečným lokálním náhledem (140 256 B / 23,376 s) a regresí, že
+neúspěšná generace nepřepíše dřívější audio a obnoví nastavení připojení.
+Lokální náhled stále není důkazem nasazení Pages.
+
 ## Produkční Pages publikace — oprava 29. 9. 2026
 
 Plánovaný i ruční GitHub běh používají jediný příkaz:

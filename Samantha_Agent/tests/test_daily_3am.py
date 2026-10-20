@@ -3,6 +3,7 @@ import json
 import sys
 import tempfile
 import unittest
+from types import ModuleType
 from contextlib import nullcontext
 from datetime import datetime
 from pathlib import Path
@@ -24,6 +25,46 @@ SPEC.loader.exec_module(daily_3am)
 
 
 class Daily3AmTests(unittest.TestCase):
+    def test_tts_endpoint_is_scoped_and_audio_replacement_is_atomic(self):
+        for fail in (False, True):
+            with self.subTest(fail=fail), tempfile.TemporaryDirectory() as tmp:
+                edge = ModuleType("edge_tts")
+                transport = ModuleType("edge_tts.communicate")
+                constants = ModuleType("edge_tts.constants")
+                transport.WSS_URL = "wss://original.invalid"
+                constants.TRUSTED_CLIENT_TOKEN = "synthetic-test-value"
+                edge.communicate = transport
+                calls = []
+
+                class Communicate:
+                    def __init__(self, **kwargs):
+                        calls.append((kwargs, transport.WSS_URL))
+
+                    async def save(self, path):
+                        Path(path).write_bytes(b"partial" if fail else b"ID3-complete")
+                        if fail:
+                            raise RuntimeError("synthetic service failure")
+
+                edge.Communicate = Communicate
+                output = Path(tmp) / "owl.mp3"
+                output.write_bytes(b"previous-audio")
+                modules = {"edge_tts": edge, "edge_tts.communicate": transport,
+                           "edge_tts.constants": constants}
+                with patch.dict(sys.modules, modules):
+                    if fail:
+                        with self.assertRaisesRegex(RuntimeError, "synthetic service failure"):
+                            daily_3am.generate_mp3("Exact input.", output, "test-voice", "-10%")
+                    else:
+                        daily_3am.generate_mp3("Exact input.", output, "test-voice", "-10%")
+                self.assertEqual(calls, [(
+                    {"text": "Exact input.", "voice": "test-voice", "rate": "-10%"},
+                    "wss://api.msedgeservices.com/tts/cognitiveservices/websocket/v1"
+                    "?Ocp-Apim-Subscription-Key=synthetic-test-value",
+                )])
+                self.assertEqual(transport.WSS_URL, "wss://original.invalid")
+                self.assertEqual(output.read_bytes(), b"previous-audio" if fail else b"ID3-complete")
+                self.assertFalse(output.with_suffix(".mp3.tmp").exists())
+
     def test_github_workflow_deploys_pages_without_writing_main(self):
         workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
 
