@@ -48,6 +48,18 @@ class SimpleDevelopmentPortalTests(unittest.TestCase):
         self.engine.accept.assert_not_called()
         self.assertEqual(self.dispatch('accept', job_id='job', candidate_digest='digest')['state'], 'applied')
 
+    def test_explicit_multifile_route_uses_luna_engine_and_same_acceptance(self):
+        self.bridge._engine = portal.development
+        task = {'kind': 'explicit_project_change', 'explicit_luna': True}
+        with patch.object(portal.luna_development, 'preview', self.engine.preview), \
+                patch.object(portal.luna_development, 'run', self.engine.run), \
+                patch.object(portal.luna_development, 'accept', self.engine.accept):
+            self.assertEqual(self.dispatch('preview', task=task)['action'], 'delegate')
+            self.assertEqual(self.dispatch(task=task)['state'], 'ready_for_review')
+            self.assertEqual(self.dispatch('accept', job_id='job', candidate_digest='digest')['state'], 'applied')
+        self.engine.run.assert_called_once_with(task, root=self.root / 'workspace', confirmed=True)
+        self.engine.accept.assert_called_once_with('job', 'digest', root=self.root / 'workspace', confirmed=True)
+
     def test_changed_thread_workstream_or_read_only_turn_blocks_before_engine(self):
         for field, value in [('thread_id', 'other'), ('turn_busy', False), ('active_turn', {'client_message_id': 'readonly'})]:
             original = self.session[field]

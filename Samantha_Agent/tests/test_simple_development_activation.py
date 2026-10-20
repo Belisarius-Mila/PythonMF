@@ -76,6 +76,26 @@ class SimpleDevelopmentActivationTests(unittest.TestCase):
         self.assertEqual(activation.activate(plan, confirmed=True)['state'], 'blocked')
         self.assertEqual(self.config.read_bytes(), before)
 
+    def test_replacement_requires_explicit_plan_and_preserves_release(self):
+        probe = self.accepted_probe()
+        document = json.loads(self.config.read_bytes())
+        document['roles'][roles.DEVELOPMENT_ROLE] = {
+            'label': 'Previous approved developer', 'preferred_model': 'gpt-6-luna',
+            'approved_models': [{'model': 'gpt-6-luna', 'reasoning_effort': 'high',
+                                 'cost_review': 'Previous price review', 'dry_run_evidence': 'Previous real probe'}]}
+        self.config.write_text(json.dumps(document))
+        subprocess.run(['git', '-C', str(self.root), 'add', 'config/agent_roles.json'], check=True, capture_output=True)
+        subprocess.run(['git', '-C', str(self.root), '-c', 'user.name=Test', '-c', 'user.email=test@invalid',
+                        '-c', 'commit.gpgsign=false', 'commit', '-qm', 'Previous role'], check=True, capture_output=True)
+        self.assertEqual(activation.activation_plan(probe)['state'], 'blocked')
+        plan = activation.activation_plan(probe, replace_existing=True)
+        self.assertEqual(plan['state'], 'ready', plan)
+        self.assertTrue(plan['replace_existing'])
+        self.assertEqual(activation.activate(plan, confirmed=True)['state'], 'activated_locally')
+        updated = json.loads(self.config.read_bytes())
+        self.assertEqual(updated['roles']['release_executor'], self.document['roles']['release_executor'])
+        self.assertEqual(updated['roles'][roles.DEVELOPMENT_ROLE]['preferred_model'], 'gpt-6.1-sol')
+
     def test_stale_plan_and_changed_proof_cannot_activate(self):
         probe = self.accepted_probe()
         plan = activation.activation_plan(probe)

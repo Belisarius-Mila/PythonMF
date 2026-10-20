@@ -291,6 +291,50 @@ jsou v logs/routine_pending_role_20261017.log, ne jako alternativní
 produkční konfigurace. Nové nasazení během tohoto úkolu nebylo autorizované.
 
 
+## Výslovně zadaný vývoj Lunou — 20. 10. 2026
+
+Míla rozhodl: nejprve zprovoznit skutečný vývoj Lunou a používat jej vždy,
+když o něj výslovně požádá. Výslovná volba má přednost před heuristikou
+pro nabídku delšího levného úkolu i před původním pilotem jedné funkce.
+Adam připraví zadání, vymezí zdroje a ověření, jednou zkontroluje a integruje
+výsledek. Bez oznámené překážky vývoj nepřevezme sám ani nepoužije Sola.
+Bezpečnostní brzda, writable grant, Git a p+n zůstávají samostatně řízené.
+
+- `app.luna_development.preview/run/accept` je registrovaná terminálová cesta.
+  Portál používá tentýž engine přes stávající SIMPLE_DEVELOPMENT IPC grant;
+  model nesmí spouštět nový App Server ani získat síť kvůli předání.
+- Požadavek má přesně `kind="explicit_project_change"`, `explicit_luna=true`,
+  `request_id`, `goal`, `files`, `context`, `test_modules`. Root dodává pouze
+  důvěryhodný volající/server. files/context mapují veřejné relativní cesty
+  na seznamy `[první_řádek,poslední_řádek]`; prázdné files úseky povolují nový
+  soubor. Nejvýše 12 editovatelných a 12 čtených souborů, 180 kB podkladů;
+  větší úkol Adam rozdělí do navazujících předání. Nejde o limit jazyků.
+- Zdroje musí být commitnuté, textové a bez odkazů, z app/tests/scripts/config/
+  memory/docs/camino. Soukromá data a centrální nastavení modelu se nepředávají
+  k úpravě. Přijímací unittest moduly 1–10 zůstávají nezměněné; model dostane
+  pouze vybrané úseky, cíl a jejich názvy, žádnou historii či soukromá data.
+- Jediný modelový tah bez nástrojů/MCP/hooků/pamětí vrátí přesné náhrady old/new.
+  Program ověří jednoznačnost, nepřekrývání a rozsah; testy před/po běží
+  v committed kopii nejvýše 64 MiB přes sandboxované command/exec. Model
+  neprovádí příkazy. Nulové testy či chyba prostředí zastaví placený tah.
+- Zmrazená centrální role simple_developer musí být skutečná Luna; žádný Sol
+  fallback. Limit přijetí po tahu je 120 000 tokenů / 4 odhadované kredity
+  Standard, nikoli fakturační strop. Neúspěch či nejistota se neopakují.
+- Přijetí ověří všechny původní soubory, head, roli a otisk kandidáta před
+  prvním zápisem. Jednotlivé soubory se nahrazují atomicky; stav applying
+  zachytí přerušené převzetí více souborů a vyžaduje kontrolu bez retry.
+  Žádné mazání, commit, push či nasazení uvnitř vývojového enginu.
+
+Skutečná zkouška gpt-6-luna/high 20. 10.: tři FAIL → tři PASS, návrh převzatý;
+probe `3a1b667eeb634603be866357921150f5`. Odhad 0,02975 kreditu Standard.
+Cena ověřena v oficiálním ceníku: 2,5 vstup / 0,25 cache / 12,5 výstup
+kreditu za milion tokenů. Zdroj: https://learn.chatgpt.com/docs/pricing#token-rates.
+Důkaz soukromý, redigovaný souhrn logs/luna_development_probe_20261020.log.
+Přepnutí již existující role používá activation_plan(probe, replace_existing=True)
+a activate(plan, confirmed=True); zmrazí i původní konfiguraci a zachová
+release_executor. Následující část popisuje původní pilot a jeho historii,
+nikoli omezení výslovného vývoje přes nový engine.
+
 ## Jednoduchý vývoj (17. 10. 2026)
 
 ### Výběr vývojových kroků pro Lunu — dohoda 17. 10. 2026

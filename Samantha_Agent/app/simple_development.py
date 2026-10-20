@@ -119,9 +119,10 @@ def _lock(job):
         os.close(fd)
 
 
-def _archive(root, head, job):
+def _archive(root, head, job, *, allowed_roots=('app', 'tests'), max_bytes=32 * 1024 * 1024):
     prefix = _git(root, 'rev-parse', '--show-prefix').decode().strip()
-    roots = [prefix + 'app', prefix + 'tests']
+    present = set(_git(root, 'ls-tree', '--name-only', head, '--', '.').decode().splitlines())
+    roots = [prefix + name for name in allowed_roots if name in present]
     repository = Path(_git(root, 'rev-parse', '--show-toplevel').decode().strip())
     entries = _git(repository, 'ls-tree', '-r', '-l', '-z', head, '--', *roots).split(b'\0')
     size = 0
@@ -131,7 +132,7 @@ def _archive(root, head, job):
         if kind != b'blob' or mode not in (b'100644', b'100755'):
             raise ValueError('Izolovaná kopie obsahuje nepodporované objekty.')
         size += int(length)
-    if size > 32 * 1024 * 1024:
+    if size > max_bytes:
         raise ValueError('Izolovaná kopie přesahuje povolený rozsah.')
     archive = _git(repository, 'archive', '--format=tar', head, '--', *roots)
     _write(job / 'committed.tar', archive)
@@ -147,7 +148,7 @@ def _archive(root, head, job):
                     raise ValueError('Archiv překročil vymezený projekt.')
                 name = name[len(prefix):]
             parts = PurePosixPath(name).parts
-            if not parts or parts[0] not in ('app', 'tests') or name.startswith('/') or '..' in parts or not (item.isdir() or item.isfile()):
+            if not parts or parts[0] not in allowed_roots or name.startswith('/') or '..' in parts or not (item.isdir() or item.isfile()):
                 raise ValueError('Archiv obsahuje nepovolenou cestu nebo odkaz.')
             target = workspace.joinpath(*parts)
             if item.isdir():
@@ -165,10 +166,10 @@ def _manifest(workspace):
     return {str(p.relative_to(workspace)): _sha(p.read_bytes()) for p in workspace.rglob('*') if p.is_file()}
 
 
-def _tests(client, workspace, job, modules, stage):
+def _tests(client, workspace, job, modules, stage, *, timeout_ms=30000):
     response = client.transport.request('command/exec', {
         'command': [sys.executable, '-m', 'unittest', *modules], 'cwd': str(workspace),
-        'timeoutMs': 30000, 'outputBytesCap': 32000,
+        'timeoutMs': timeout_ms, 'outputBytesCap': 32000,
         'env': {'PYTHONDONTWRITEBYTECODE': '1', 'PYTHONNOUSERSITE': '1', 'PYTHONPATH': str(workspace), 'TMPDIR': str(job / 'tmp')},
         'sandboxPolicy': {'type': 'workspaceWrite', 'writableRoots': [str(workspace), str(job / 'tmp')],
                           'networkAccess': False, 'excludeTmpdirEnvVar': True, 'excludeSlashTmp': True}})

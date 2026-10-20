@@ -12,6 +12,7 @@ import time
 import uuid
 
 from app import simple_development as development
+from app import luna_development
 from app.communication import agent_roles as roles
 from app.file_persistence import atomic_write_json
 
@@ -92,15 +93,20 @@ class PortalDelegation:
                 raise ValueError('Expired or foreign turn')
             operation = payload.get('operation')
             if operation in ('preview', 'run') and set(payload) == {'token', 'operation', 'task'}:
+                engine = self._engine
+                if (engine is development and isinstance(payload['task'], dict)
+                        and payload['task'].get('kind') == luna_development.KIND):
+                    engine = luna_development
                 if operation == 'preview':
-                    return self._engine.preview(payload['task'], root=grant['root'])
+                    return engine.preview(payload['task'], root=grant['root'])
                 digest = hashlib.sha256(json.dumps(payload['task'], sort_keys=True).encode()).hexdigest()
                 if grant['request_digest'] is not None:
                     if digest != grant['request_digest']:
                         raise ValueError('Only one task per authorized turn')
                     return grant['result'] or {'state': 'attention', 'reason': 'Předání se přerušilo; neopakovat.'}
                 grant['request_digest'] = digest
-                grant['result'] = self._engine.run(payload['task'], root=grant['root'], confirmed=True)
+                grant['engine'] = engine
+                grant['result'] = engine.run(payload['task'], root=grant['root'], confirmed=True)
                 return grant['result']
             if operation == 'accept' and set(payload) == {'token', 'operation', 'job_id', 'candidate_digest'}:
                 result = grant['result'] or {}
@@ -108,7 +114,7 @@ class PortalDelegation:
                         or result.get('job_id') != payload['job_id']
                         or result.get('candidate_digest') != payload['candidate_digest']):
                     raise ValueError('Foreign or unreviewable candidate')
-                grant['result'] = self._engine.accept(payload['job_id'], payload['candidate_digest'],
+                grant['result'] = grant.get('engine', self._engine).accept(payload['job_id'], payload['candidate_digest'],
                                                        root=grant['root'], confirmed=True)
                 return grant['result']
             raise ValueError('Unsupported operation or fields')
@@ -122,11 +128,16 @@ def control_block(ticket):
     if not ticket:
         return ''
     return ('\n\n[SIMPLE_DEVELOPMENT]\n'
-            'Jednu vhodnou čistou Python funkci předávej registrovanému serverovému nástroji '
+            'Při výslovném pokynu Míly předej vývoj Luně, i pro více souborů a jiné jazyky. '
+            'Použij task kind="explicit_project_change", explicit_luna=true, request_id, goal, '
+            'files a context (mapy relativních cest na seznamy [první,poslední] řádek; '
+            'prázdný seznam ve files povoluje nový soubor), test_modules (nezměněné tests.test_*). '
+            'Menší navazující úkoly připrav Adam; nepřebírej výslovně zadaný vývoj bez oznámení překážky. '
+            'Starší čistá Python funkce dál používá původní schéma. Volej '
             'app.simple_development_portal.request(operation="run", token=..., channel=..., task=...). '
             'Nepouštěj další App Server z izolovaného workspace. Role se vybírá centrálně. '
             'Jeden výsledek zkontroluj a přijmi stejným nástrojem operation="accept", job_id a candidate_digest. '
-            'Nevhodný úkol nebo attention vyřeší hlavní Adam bez automatického opakování. '
+            'Při blocked/attention oznam konkrétní překážku; neopakuj nejistý modelový krok. '
             'Čekání je programové bez modelového pollingu; checkpoint a publikace zůstávají v Cockpitu.\n'
             f'token={ticket["token"]}\nchannel={ticket["channel"]}\n[/SIMPLE_DEVELOPMENT]')
 
@@ -149,10 +160,10 @@ def request(operation, *, token, channel, **data):
     else:
         atomic_write_json(path, json.loads(payload))
         path.chmod(0o600)
-    deadline = time.monotonic() + 240
+    deadline = time.monotonic() + 600
     while time.monotonic() < deadline:
         if response.exists():
-            if response.is_symlink() or response.stat().st_size > 64000:
+            if response.is_symlink() or response.stat().st_size > 512000:
                 raise ValueError('Neplatná lokální účtenka.')
             return json.loads(response.read_bytes())
         if (channel / 'closed.json').exists():

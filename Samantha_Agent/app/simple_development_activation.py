@@ -45,7 +45,7 @@ def capabilities():
         enabled = False
     return {'ok': True, 'protocol': PROTOCOL, 'role_schema': 2,
             'role': roles.DEVELOPMENT_ROLE, 'enabled': enabled,
-            'supported_task_kinds': ['pure_python_function']}
+            'supported_task_kinds': ['pure_python_function', 'explicit_project_change']}
 
 
 def probe_candidate(model, reasoning_effort, *, cost_review, confirmed=False, client_factory=new_luna_client):
@@ -114,7 +114,7 @@ def _proof(probe_id):
     return home, proof
 
 
-def activation_plan(probe_id):
+def activation_plan(probe_id, *, replace_existing=False):
     """Read-only: require a deployed compatible runtime plus an accepted real probe."""
     try:
         home, proof = _proof(probe_id)
@@ -132,9 +132,11 @@ def activation_plan(probe_id):
             raise ValueError('Role p+n se změnila.')
         document = json.loads(config.read_bytes())
         if roles.DEVELOPMENT_ROLE in document['roles']:
-            if document['roles'][roles.DEVELOPMENT_ROLE] != binding:
+            if document['roles'][roles.DEVELOPMENT_ROLE] == binding:
+                return {'state': 'active', 'probe_id': probe_id}
+            if replace_existing is not True:
                 raise ValueError('Vývojová role už má jiné schválení.')
-            return {'state': 'active', 'probe_id': probe_id}
+            roles.load_role(config, role=roles.DEVELOPMENT_ROLE)
         runtime = http_call('/api/human-adam/simple-development/capabilities')
         if (runtime.get('ok') is not True or runtime.get('protocol') != PROTOCOL
                 or runtime.get('role_schema') != 2 or runtime.get('role') != roles.DEVELOPMENT_ROLE):
@@ -142,9 +144,12 @@ def activation_plan(probe_id):
         development._clean(PROJECT_ROOT)
         if development._git(PROJECT_ROOT, 'branch', '--show-current').decode().strip() != 'main':
             raise ValueError('Aktivace patří pouze na čistý kanonický main.')
-        return {'state': 'ready', 'probe_id': probe_id, 'proof_digest': _digest(proof),
+        plan = {'state': 'ready', 'probe_id': probe_id, 'proof_digest': _digest(proof),
                 'config_digest': hashlib.sha256(config.read_bytes()).hexdigest(),
                 'source_head': development._head(PROJECT_ROOT), 'binding_digest': _digest(binding)}
+        if replace_existing is True:
+            plan['replace_existing'] = True
+        return plan
     except Exception:
         return {'state': 'blocked', 'reason': 'Aktivace vyžaduje nezměněnou přijatou zkoušku, čistý main a již nasazený kompatibilní Cockpit.'}
 
@@ -155,7 +160,7 @@ def activate(plan, *, confirmed=False):
         return {'state': 'not_applied'}
     if not isinstance(plan, dict) or plan.get('state') != 'ready':
         return {'state': 'blocked', 'reason': 'Chybí přesný plán aktivace.'}
-    current = activation_plan(plan.get('probe_id'))
+    current = activation_plan(plan.get('probe_id'), replace_existing=plan.get('replace_existing', False))
     if current != plan:
         return {'state': 'blocked', 'reason': 'Plán aktivace se změnil; nic nezapsáno.'}
     _, proof = _proof(plan['probe_id'])

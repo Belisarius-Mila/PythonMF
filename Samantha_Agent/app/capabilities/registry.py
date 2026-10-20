@@ -12,9 +12,32 @@ from app.capabilities.models import (
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
-        capability_id="portal_simple_development", label="Delegate one function through an authorized portal turn",
+        capability_id="preview_luna_development", label="Prepare explicit multi-file development by Luna",
+        risk=RiskLevel.READ_ONLY, reads=("selected committed public source sections", "fixed test modules and clean authorized workspace"),
+        writes=(), tool="app.luna_development.preview",
+        notes="Explicit Luna request takes precedence over the optional one-function heuristic. No model. Bounded text edits/new files; split larger tasks; no private data or role configuration edits.",
+    ),
+    CapabilityRecord(
+        capability_id="run_luna_development", label="Develop an explicitly delegated project change with Luna",
+        risk=RiskLevel.EXTERNAL_SEND, reads=("explicit goal and selected public source/context sections", "central reviewed developer role", "committed source for sandboxed tests"),
+        writes=("private isolated multi-file proposal and durable receipt", "one data-only Luna turn"),
+        tool="app.luna_development.run", requires_confirmation=True,
+        confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE,
+        voice_allowed=VoicePolicy.APPROVAL_ONLY, mobile_allowed=MobilePolicy.APPROVAL_CARD,
+        notes="Existing explicit development instruction authorizes the call. Exact root/head/task/model binding; no Sol fallback, tools, private model context, source edits, Git, service actions, automatic retry or publication. Unchanged guard tests before/after in isolated network-disabled sandbox. Usage limit is post-run acceptance, not billing ceiling.",
+    ),
+    CapabilityRecord(
+        capability_id="accept_luna_development", label="Accept one reviewed multi-file Luna proposal",
+        risk=RiskLevel.LOCAL_WRITE, reads=("exact candidate digest, frozen source/head/role and original test evidence",),
+        writes=("only reviewed selected source files in the authorized workspace", "private acceptance journal"),
+        tool="app.luna_development.accept", requires_confirmation=True,
+        confirmation_policy=ConfirmationPolicy.SUMMARY_BEFORE_ACTION,
+        notes="Main Adam reviews once within existing development authorization. All originals validated before writing; atomic individual files with applying journal for interruption. No deletions, Git, push, deployment or override of DEVELOPMENT_CONTROL.",
+    ),
+    CapabilityRecord(
+        capability_id="portal_simple_development", label="Delegate explicit Luna work through an authorized portal turn",
         risk=RiskLevel.EXTERNAL_SEND, reads=("one bounded public development task", "server-issued current writable-turn grant"),
-        writes=("private local request/receipt channel", "one isolated model candidate and optionally its reviewed function in caller workspace"),
+        writes=("private local request/receipt channel", "one isolated model candidate and optionally its reviewed source files in caller workspace"),
         tool="app.simple_development_portal.request", requires_confirmation=True,
         confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE,
         voice_allowed=VoicePolicy.APPROVAL_ONLY, mobile_allowed=MobilePolicy.APPROVAL_CARD,

@@ -117,19 +117,26 @@ Společné pracovní instrukce PythonMF; cesty níže jsou vůči `Samantha_Agen
   ad hoc úkolu nabídni jednou po analýze `Předat Luně: ano/ne`.
   Pevný časový práh zatím neurčuj; pravidlo dolaďuj s Mílou podle skutečné
   práce a celkových nákladů. Každé zvlášť autorizované p+n provádí Luna.
-- Volba Luny pro vývoj je schválený směr; není důkazem aktivace. Před prvním
-  použitím musí mít role `simple_developer` cenové posouzení a skutečnou
-  přijatou vývojovou zkoušku Luny. Do té doby ji nevydávej za aktivní ani
-  místo nabídnuté Luny tiše nepoužij Sola. Současný registrovaný rozsah je
-  jedna čistá Python funkce s existujícími testy přes
-  `app.simple_development.run`; samotné pravidlo jej nerozšiřuje. Způsobilost
-  určí program bez dalšího modelu. Podrobnosti a aktivace jsou v
-  `memory/technical/luna_release_orchestration.md`, sekce Jednoduchý vývoj.
-  Pomocník má pouze vybranou funkci a cíl; testy provádí program v oddělené
-  kopii. Hlavní Adam jednou zkontroluje diff a účtenku a použije `accept`.
+- **Výslovný pokyn Míly k vývoji Lunou má přednost před předchozí heuristikou
+  pro nabídku.** Vždy jej předej Luně registrovanou cestou; neomezuj ho na
+  jednu Python funkci ani tiše nepoužij Sola či vlastní vývoj. Adam připraví
+  potřebný kontext, přejímací testy a menší navazující úkoly. Skutečný blokátor
+  oznam a řeš v autorizovaném rozsahu; výslovná volba nemění bezpečnostní
+  brzdu, DEVELOPMENT_CONTROL ani oprávnění k publikaci.
+- Výslovný vývoj více souborů včetně JavaScriptu a Camina používá
+  `app.luna_development.preview/run/accept`. Požadavek obsahuje kind
+  `explicit_project_change`, explicit_luna=true, stabilní request_id, goal,
+  files/context jako mapy cest na úseky řádků a nezměněné test_modules.
+  Nový soubor se povoluje výslovně prázdným seznamem úseků ve files.
+  Starší pilot `app.simple_development` zůstává pro jednu čistou funkci.
+  Model role je pouze v `config/agent_roles.json`; aktivace vyžaduje cenové
+  posouzení a přijatou skutečnou vývojovou zkoušku. Program zmrazí zdroj/head,
+  úkol a roli, spustí testy v oddělené kopii a vrátí diff s účtenkou.
+  Hlavní Adam je jednou zkontroluje a použije accept s přesným otiskem.
   V Cockpitu používej pouze `app.simple_development_portal.request` s aktuálním
   serverovým blokem SIMPLE_DEVELOPMENT; kořen určí server, ne model. Nespouštěj
-  App Server z izolovaného editoru. Bez tohoto bloku zůstává úkol Adamovi.
+  App Server z izolovaného editoru. Bez tohoto bloku oznam chybějící serverové
+  oprávnění; výslovný pokyn k Luně nepřebírej tiše sám.
   Checkpoint/commit/push/nasazení dál podléhají stávajícím pravidlům.
 - Samostatný čtecí pilot `report_documentation_review` v `app/routine_tasks.py`
   má vlastní roli `routine_reviewer`; vývoj používá `simple_developer`.

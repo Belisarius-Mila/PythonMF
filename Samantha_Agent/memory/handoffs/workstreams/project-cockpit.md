@@ -1,6 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-20 22:03 CEST: Výslovný vývoj Lunou rozšířený lokálně na více souborů; skutečný syntetický návrh Luny převzatý (3 FAIL → 3 PASS). Aktivace centrální role, skutečná úprava fotografií a schválené p+n následují. Starší tvrzení o trvalém omezení jedné funkce je překonané novým rozhodnutím.
+
 - 2026-10-17 23:36 CEST: Schválené pravidlo pro nabídku Luny při vývoji je zapsané v AGENTS.md a technickém návodu: vždy delší, jasný a ověřitelný úkol s nízkým rizikem, očekávaný přínos včetně režie Adama; samotné opakování nestačí. Vícekrokový plán navrhne rozdělení předem, vhodný ad hoc úkol jednu nabídku ano/ne. Drobné a nové kritické úpravy bez nabídky. Pevný časový práh se zatím neurčuje. Technická role simple_developer zůstává Sol; před prvním použitím Luny zbývá vývojová zkouška a bezpečné přepnutí. Pravidlo nerozšiřuje omezení jedné funkce. Poslední ověřené p+n této relace publikovalo a nasadilo 8cda502f (účtenka 0944dbd793fb4450d6475882c7cb4cef, 2109 PASS, smoke 5/5); nynější pravidlo je jen nový lokální dokumentační krok. Každé zvlášť zadané p+n dál provádí Luna.
 
 - 2026-10-17 22:33 CEST: P+n nového společného postupu DOKONČENÉ přes jedinou Lunu. Oba schválené commity publikované, nasazený b47b0bb609bb4eff5c6d0f5971350d007d73fbbe / stamp d769959026d9b405; účtenka cb55493cb02cdfe7055873e1d7485869 completed, plná brána 2109 PASS a smoke 5/5. Konečný živý audit potvrdil čistý zarovnaný main/GitHub i oba profilové workspaces, simple_developer enabled=true a přesně zachované Camino/autosave. Důkaz: logs/release_single_entry_pn_final_20261017.log. Při navázání p+n ani aktivaci neopakovat; níže uvedené čekání na publikaci je historické. Tento závěrečný dokumentační checkpoint zůstává pouze lokální.
@@ -1960,3 +1962,11 @@ Navrhované další kroky:
 Technický důkaz:
 - Změněné jsou pouze společné instrukce a projektová dokumentace; config/agent_roles.json ani vykonávací kód se nemění. Registrovaný mechanismus nadále přijímá jednu čistou Python funkci s existujícími testy.
 - Předchozí p+n 8cda502f je uzavřené: účtenka 0944dbd793fb4450d6475882c7cb4cef completed, 2109 PASS, smoke 5/5 a chráněné služby zachované; logs/release_cockpit_handoff_pn_final_20261017.log. Nynější dokumentační pravidlo se automaticky nepublikuje.
+
+## 2026-10-20 22:03 CEST — Výslovný vývoj Lunou
+
+Hotovo: skutečná Luna prošla syntetickou vývojovou zkouškou 3 FAIL → 3 PASS a návrh byl převzatý. Lokálně je implementované výslovné předávání více souborů, JavaScriptu a Camina, izolované testy a kontrolované převzetí.
+Rozhodnutí: výslovný Mílův požadavek na vývoj Lunou má přednost před heuristikou pro nabídku i původním omezením jedné funkce. Žádný tichý Sol/Adam fallback; bezpečnost a samostatné p+n zůstávají.
+Další krok: dokončit bránu, přepnout centrální simple_developer podle přijaté zkoušky a skutečně předat Luně fotografické ovládání střižny.
+Navrhované další kroky: jediné již schválené p+n přes Lunu, pak fyzická přejímka v Cockpitu.
+Technický důkaz: probe 3a1b667eeb634603be866357921150f5, gpt-6-luna/high, 0,02975 odhadovaného Standard kreditu; 62 původních cílených kontrol a 39 rozšířených kontrol PASS (s překryvem). Plná sada: 2164 testů, jediný rozdíl očekávaného počtu capability 28 → 29 opraven, příslušné 3 testy a statická brána PASS; plná publikační přejímka následuje při p+n. Centrální role při tomto zápisu ještě Sol, nasazení nového enginu neprovedené. Riziko: přerušení vícesouborového převzetí vyžaduje kontrolu stavu applying; soukromá data se modelu nepředávají.
