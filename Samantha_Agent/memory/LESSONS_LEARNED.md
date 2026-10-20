@@ -36,6 +36,8 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Řešení nalezeno: 20102026
 - Řešení: potvrdit přesnou variantu a její inventář, vyloučit aktivní worker a cizí odkazy, před prvním unlink atomicky zapsat stav mazání bez mediální kopie. Odstranit všechny pracovní pokusy přes ověřené deskriptory; ponechat pouze malá metadata blokující staré request ID. Po pádu dokončit jen zbývající soubory potvrzené sady. Synteticky ověřeno odstranění všech pokusů, izolace podobných variant, souběh, přerušení a GET/HEAD/Range 404. Diskové bloky otevřeného souboru může OS držet do uzavření posledního přehrávání/stahování.
 
+- Doplnění 20. 10.: skutečný renderer zveřejňuje MP4 přes interní hardlink z pracovního MP4. Zákaz všech hardlinků blokoval každé hotové video; zjednodušený fake tento rozdíl skryl. Inventář musí ověřit, že všechny názvy stejného inode leží uvnitř jedné potvrzené varianty; před každým unlink kontrolovat zbývající počet a po přerušení ho nově odvodit. Pracovní podadresáře procházet pouze přes ověřené deskriptory s limity. Skutečný render → smazání, cizí třetí odkaz a přerušení uprostřed interní dvojice jsou povinné regrese.
+
 ### LL-076 — TTS může vracet prázdný zvuk i po aktualizaci knihovny
 
 - Problém: původní endpoint denní sovy vracel HTTP 403 s edge-tts 7.2.8 a `NoAudioReceived` také s 7.3.1; selhal i skutečný cloudový běh.

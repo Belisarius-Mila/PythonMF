@@ -197,6 +197,79 @@ class EditorTests(unittest.TestCase):
         with self.assertRaises(FilmError): deletion_plan(self.editor, selected)
         self.assertEqual(digest(original), before)
 
+    def test_delete_accepts_renderer_internal_links_and_nested_work_files(self):
+        _, selected, folder = self.ready_export()
+        attempt = next(folder.glob("attempt-*"))
+        os.link(attempt / "film.mp4", attempt / "render.partial.mp4")
+        qa = attempt / "qa"; qa.mkdir(mode=0o700)
+        (qa / "frame.png").write_bytes(b"synthetic frame")
+        protected = digest(next(self.f.media.objects.iterdir()))
+        payload = self.delete_payload(selected)
+        self.assertEqual(deletion_plan(self.editor, selected)["file_count"], 3)
+        self.assertTrue(delete_export(self.editor, payload)["deleted"])
+        self.assertFalse(list(folder.glob("attempt-*")))
+        self.assertEqual(self.editor.view()["jobs"], [])
+        self.assertEqual(digest(next(self.f.media.objects.iterdir())), protected)
+
+    def test_delete_refuses_any_link_outside_selected_variant_even_with_internal_pair(self):
+        _, selected, folder = self.ready_export()
+        attempt = next(folder.glob("attempt-*"))
+        os.link(attempt / "film.mp4", attempt / "render.partial.mp4")
+        foreign = self.root / "foreign.mp4"
+        os.link(attempt / "film.mp4", foreign)
+        before = digest(foreign)
+        with self.assertRaises(FilmError): self.delete_payload(selected)
+        self.assertEqual(digest(foreign), before)
+        self.assertEqual((attempt / "film.mp4").stat().st_nlink, 3)
+        self.assertEqual(self.editor.view()["jobs"][0]["state"], "ready")
+
+    def test_interrupted_delete_resumes_after_one_internal_link_was_removed(self):
+        _, selected, folder = self.ready_export()
+        attempt = next(folder.glob("attempt-*"))
+        os.link(attempt / "film.mp4", attempt / "render.partial.mp4")
+        qa = attempt / "qa"; qa.mkdir(mode=0o700)
+        (qa / "frame.png").write_bytes(b"frame")
+        payload = self.delete_payload(selected)
+        real_unlink = os.unlink; removed = []
+        def interrupt(name, *, dir_fd=None):
+            if dir_fd is not None:
+                if removed: raise OSError("synthetic interruption")
+                removed.append(name)
+            return real_unlink(name, dir_fd=dir_fd)
+        with patch("app.camino_film_cleanup.os.unlink", side_effect=interrupt):
+            with self.assertRaises(OSError): delete_export(self.editor, payload)
+        self.assertEqual(removed, ["film.mp4"])
+        self.assertEqual((attempt / "render.partial.mp4").stat().st_nlink, 1)
+        self.assertEqual(self.editor.view()["jobs"][0]["state"], "delete_pending")
+        self.assertEqual(deletion_plan(self.editor, selected)["plan_token"], payload["plan_token"])
+        self.assertTrue(delete_export(self.editor, payload)["deleted"])
+        self.assertEqual(self.editor.view()["jobs"], [])
+
+    def test_nested_work_directory_never_follows_external_symlinks(self):
+        _, selected, folder = self.ready_export()
+        attempt = next(folder.glob("attempt-*"))
+        qa = attempt / "qa"; qa.mkdir(mode=0o700)
+        (qa / "foreign").symlink_to(self.f.media.objects, target_is_directory=True)
+        before = {p: digest(p) for p in self.f.media.objects.iterdir()}
+        with self.assertRaises((FilmError, OSError)): self.delete_payload(selected)
+        self.assertEqual(before, {p: digest(p) for p in before})
+
+    def test_new_external_link_after_plan_blocks_unlink(self):
+        _, selected, folder = self.ready_export()
+        attempt = next(folder.glob("attempt-*"))
+        os.link(attempt / "film.mp4", attempt / "render.partial.mp4")
+        payload = self.delete_payload(selected)
+        foreign = self.root / "foreign.mp4"
+        def add_external_link(*args, **kwargs):
+            result = atomic_write_json(*args, **kwargs)
+            os.link(attempt / "film.mp4", foreign)
+            return result
+        with patch("app.camino_film_cleanup.atomic_write_json", side_effect=add_external_link):
+            with self.assertRaises(FilmError): delete_export(self.editor, payload)
+        self.assertEqual((attempt / "film.mp4").read_bytes(), b"synthetic mp4 bytes")
+        self.assertTrue((attempt / "render.partial.mp4").is_file())
+        self.assertTrue(foreign.is_file())
+
     def test_interrupted_delete_can_finish_without_restoring_or_delivering_bytes(self):
         _, selected, folder = self.ready_export()
         attempt = next(folder.glob("attempt-*")); (attempt / "segment.mkv").write_bytes(b"working")
@@ -618,6 +691,17 @@ class RenderTests(unittest.TestCase):
                     self.assertGreater(image.getpixel((640, 200))[channel], 200)
                     self.assertLess(max(image.getpixel((320, 200))[:3]), 15)
             self.assertEqual(e.source_preview({"project_id": pid, "asset_id": sid, "request_id": str(uuid4())}, background=False)["job_id"], source["job_id"])
+            self.assertEqual(digest(original), before)
+            # Exercise cleanup over the actual renderer's hardlinked MP4 pair,
+            # rather than a simplified fake renderer with only one output name.
+            self.assertTrue(os.path.samefile(trimmed, trimmed.parent / "render.partial.mp4"))
+            selected = {"project_id": pid, "job_id": render_id}
+            plan = deletion_plan(e, selected)
+            delete_export(e, {**selected, "plan_token": plan["plan_token"], "confirmation": DELETE_CONFIRMATION})
+            self.assertFalse(trimmed.exists())
+            self.assertFalse(trimmed.parent.exists())
+            self.assertEqual([j["job_id"] for j in e.view()["jobs"]], [source["job_id"]])
+            self.assertTrue(e.output(pid, source["job_id"]).is_file())
             self.assertEqual(digest(original), before)
 
     def test_mpo_main_photo_preserves_full_duration_and_exif_orientation(self):

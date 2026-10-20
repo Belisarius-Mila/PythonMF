@@ -1,7 +1,7 @@
 # Camino P2-C/D — editor a MP4 z uzavřeného dne
 
-Stav k 20. 10.: editor, přímý trim, „Moje filmy“ a volba dnů jsou nasazené
-na `96ce7bab`. Trvalé smazání jedné varianty je místně implementované,
+Stav k 20. 10. 17:51 CEST: mazání variant je nasazené na `3b129ded`, ale fyzická
+zkouška odhalila odmítání interních hardlinků rendereru. Oprava je místní,
 bez nového push/deploye.
 Míla 12. 10. výslovně zadal pokračování editorem a MP4 nad potvrzenou Mac
 sadou 6. 10. Telefon, běžící Camino, jeho archiv a síť se nemění.
@@ -27,8 +27,8 @@ varianty; změněné soubory vyžadují nové ověření. Originály, uložené 
 střihu, jiné varianty a zdrojové náhledy se touto akcí nemažou.
 
 Zámek chrání před souběhem s renderem a ostatními zápisy stejné střižny. Aktivní
-render a čekající varianta se odmítají; cizí/symbolické/pevné odkazy a jiný
-disk se neprocházejí. Pracuje se pouze přes ověřené adresáře a jejich
+render a čekající varianta se odmítají; symbolické odkazy, pevné odkazy mimo
+vybranou variantu a jiný disk se neprocházejí. Pracuje se pouze přes ověřené adresáře a jejich
 deskriptory. Před prvním odstraněním se atomicky uloží stav `delete_pending`
 s identitami potvrzených souborů bez jejich obsahu. Pád tak neobnoví výdej
 nebo render; „Dokončit smazání“ odstraní zbývající členy téže sady.
@@ -41,9 +41,9 @@ otevřený přehrávač/stahování může držet bloky do zavření souboru. P�
 se nevytváří kopie; existující stažené soubory, externí/iCloud zálohy a APFS
 snapshoty jsou mimo tuto operaci. Nejde o bezpečný přepis SSD.
 
-Cílené testy 71/71 a plná brána 2 146/2 146 PASS. Fyzická přejímka nového tlačítka
-na Macu/iPhonu je neprovedená. Produkční varianty se během vývoje nemažou.
-Důkazy `camino_export_delete_*_20261020.log`. Nasazení vyžaduje nové samostatné p+n.
+Původní implementace: 71 cílených a 2 146 plných testů PASS, nasazení `3b129ded`
+potvrzené. Následná fyzická zkouška mazání FAIL; oprava viz poslední záznam níže.
+Produkční varianty se během vývoje nemažou. Důkazy `camino_export_delete_*_20261020.log`.
 
 ## Moje filmy a výběr dnů — 20. 10. 2026
 
@@ -307,3 +307,45 @@ Technický důkaz:
 - Kód `ff87ee2d`, runtime otisk `ba5bfa185ffd57b9`, receipt deployed, nový proces potvrzený, smoke 5/5. Plná místní brána 1941/1941 PASS (331,381 s testů), cílené testy 24/24 PASS; při nasazení opakovaná statická brána nad shodným kódem.
 - Skutečný nový náhled SHA-256 `53170d49201fb43ec7d381124e9a2644c65d26903f5c9f5a125962cc1a27f173`. Důkazy `logs/camino_film_trim_worker_deployed_20261015.log`, `logs/camino_film_trim_final_preview_20261015.log`, `logs/camino_film_trim_final_archive_20261015.log`. Předchozí `298b6dc2` má vzdálenou bránu success; nová [GitHub brána 38785696792](https://github.com/Belisarius-Mila/PythonMF/actions/runs/38785696792) při zápisu ještě běží, její případné nahrazení dalším dokumentačním pushem není výsledek testů.
 - HTTP/API/render důkaz nenahrazuje fyzické ovládání a poslech na iPhonu. Nová telefonní přejímka zatím neprovedená; celá videa, uzavřený manifest a starší revize zachované.
+
+
+### 2026-10-20 17:51 CEST — Oprava mazání skutečných filmových výstupů
+
+Hotovo:
+- Dohledaná příčina Mílova neúspěšného mazání po nasazení: ochrana odmítla
+  dva interní názvy téhož MP4 vytvořené samotným rendererem. Produkční mazání
+  nezačalo; restart nemohl varianty odstranit.
+- Místní oprava uznává pouze plně vnitřní pevné odkazy a zahrnuje pracovní
+  podadresáře. Před každým odstraněním znovu kontroluje identitu a zbývající
+  počet odkazů; přerušení mezi názvy lze bezpečně dokončit.
+- 42 cílených testů PASS, včetně skutečného render → smazání. Všech 10 živých
+  variant projde pouze čtecím inventářem; 570 původních souborů shodných.
+
+Rozhodnutí:
+- Bez změny rozsahu: konkrétní varianta, potvrzený plán a globální brzda.
+  Žádné produkční mazání během opravy, nové kopie ani automatický p+n.
+
+Další krok:
+- Po samostatném p+n pouze Cockpitu zopakovat skutečné smazání nepotřebného
+  náhledu a ověřit zmizení po reloadu při zachování ostatních variant.
+
+Navrhované další kroky:
+- Další připomínky střihu druhého dne, společný vícedenní film P2-F až později.
+
+Technický důkaz:
+- Plná brána opravy 2 151/2 151 PASS (323,406 s testů), `camino_export_delete_fix_gate_20261020.log`.
+- Logy `camino_export_delete_fix_reproduction_20261020.log`,
+  `camino_export_delete_fix_targeted_20261020.log`,
+  `camino_export_delete_fix_production_readonly_20261020.log`.
+- Původní vydání `3b129ded` potvrzené účtenkou `cb5a8c476ff62f035fbf48241bccafe4`,
+  2 146 plných testů a smoke 5/5. Oprava je samostatný místní krok.
+
+Implementační doplnění:
+- Inventář připouští pevné odkazy pouze při shodě počtu všech názvů inode uvnitř
+  varianty se skutečným st_nlink. Při unlink se tento počet snižuje a ověřuje.
+  Zbývající inventář po přerušení musí být podmnožinou původně potvrzené sady.
+- Podadresáře pracovních pokusů mají limit hloubky 8 a 4 096 položek;
+  obnovovací JSON zůstává omezený na 950 kB. Symlinky, jiná zařízení a neznámé
+  položky v kořeni úlohy jsou odmítnuté; žádné obecné rm/rmtree.
+- Uváděná velikost je logický součet souborových jmen, včetně interních
+  hardlinků; není to měření fyzicky uvolněného APFS místa.

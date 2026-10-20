@@ -6,6 +6,7 @@ import json
 import os
 import re
 import stat
+from collections import Counter
 from contextlib import contextmanager
 
 from app.file_persistence import atomic_write_json
@@ -60,12 +61,40 @@ def _selected(editor, payload, *, deleting=False):
 
 
 def _inventory(directory):
-    """Only generated, flat attempt directories; never follow links or mounts."""
+    """Inventory bounded attempt trees, rejecting links outside this variant."""
     flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
-    entries = []
+    entries, links = [], []
     root = os.open(directory, flags)
     try:
         device = os.fstat(root).st_dev
+
+        def scan(child, path, depth):
+            info = os.fstat(child)
+            if info.st_dev != device or depth > 8:
+                raise FilmError("Pracovní adresář leží mimo povolený rozsah mazání.")
+            entries.append({"path": path, "kind": "directory", "device": device, "inode": info.st_ino})
+            for filename in sorted(os.listdir(child)):
+                if len(entries) >= 4096:
+                    raise FilmError("Varianta má příliš mnoho pracovních souborů pro bezpečné mazání v editoru.")
+                relative = path + "/" + filename
+                info = os.stat(filename, dir_fd=child, follow_symlinks=False)
+                if info.st_dev != device:
+                    raise FilmError("Pracovní soubor leží na jiném zařízení.")
+                if stat.S_ISDIR(info.st_mode):
+                    nested = os.open(filename, flags, dir_fd=child)
+                    try:
+                        if os.fstat(nested).st_ino != info.st_ino:
+                            raise FilmError("Pracovní adresář se během ověřování změnil.")
+                        scan(nested, relative, depth + 1)
+                    finally:
+                        os.close(nested)
+                elif stat.S_ISREG(info.st_mode):
+                    entries.append({"path": relative, "kind": "file", "device": device,
+                                    "inode": info.st_ino, "bytes": info.st_size, "mtime_ns": info.st_mtime_ns})
+                    links.append(((device, info.st_ino), info.st_nlink))
+                else:
+                    raise FilmError("Varianta obsahuje odkaz nebo neznámý soubor; smazání je zastavené.")
+
         for name in sorted(os.listdir(root)):
             if name in ("request.json", "status.json", "status.json.lock"):
                 info = os.stat(name, dir_fd=root, follow_symlinks=False)
@@ -78,18 +107,16 @@ def _inventory(directory):
                 raise FilmError("Varianta obsahuje neznámé pracovní soubory; smazání je zastavené.")
             child = os.open(name, flags, dir_fd=root)
             try:
-                info = os.fstat(child)
-                if info.st_dev != device:
-                    raise FilmError("Pracovní adresář leží na jiném zařízení.")
-                entries.append({"path": name, "kind": "directory", "device": device, "inode": info.st_ino})
-                for filename in sorted(os.listdir(child)):
-                    info = os.stat(filename, dir_fd=child, follow_symlinks=False)
-                    if not stat.S_ISREG(info.st_mode) or info.st_dev != device or info.st_nlink != 1:
-                        raise FilmError("Varianta obsahuje odkaz nebo neznámý soubor; smazání je zastavené.")
-                    entries.append({"path": name + "/" + filename, "kind": "file", "device": device,
-                                    "inode": info.st_ino, "bytes": info.st_size, "mtime_ns": info.st_mtime_ns})
+                if len(entries) >= 4096:
+                    raise FilmError("Varianta má příliš mnoho pracovních souborů pro bezpečné mazání v editoru.")
+                scan(child, name, 1)
             finally:
                 os.close(child)
+        # render_edit publishes film.mp4 with os.link(render.partial.mp4, ...).
+        # Accept that pair only if every hardlink is inside the selected variant.
+        counts = Counter(key for key, _ in links)
+        if any(counts[key] != count for key, count in links):
+            raise FilmError("Soubor varianty má odkaz mimo vybranou variantu; smazání je zastavené.")
         return entries
     finally:
         os.close(root)
@@ -133,6 +160,37 @@ def deletion_plan(editor, payload):
                 "already_deleted": state["state"] == "deleted", "confirmation_text": DELETE_CONFIRMATION}
 
 
+def _remove_attempt(child, path, by_path, remaining):
+    expected = by_path[path]
+    info = os.fstat(child)
+    if (info.st_dev, info.st_ino) != (expected["device"], expected["inode"]):
+        raise FilmError("Pracovní adresář se během mazání změnil.")
+    for filename in sorted(os.listdir(child)):
+        relative = path + "/" + filename
+        expected = by_path.get(relative)
+        info = os.stat(filename, dir_fd=child, follow_symlinks=False)
+        if not expected or (info.st_dev, info.st_ino) != (expected["device"], expected["inode"]):
+            raise FilmError("Soubor se během mazání změnil; pokračování je zastavené.")
+        if expected["kind"] == "directory" and stat.S_ISDIR(info.st_mode):
+            nested = os.open(filename, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=child)
+            try:
+                _remove_attempt(nested, relative, by_path, remaining)
+            finally:
+                os.close(nested)
+            info = os.stat(filename, dir_fd=child, follow_symlinks=False)
+            if (info.st_dev, info.st_ino) != (expected["device"], expected["inode"]):
+                raise FilmError("Pracovní adresář se během mazání změnil.")
+            os.rmdir(filename, dir_fd=child)
+        elif (expected["kind"] == "file" and stat.S_ISREG(info.st_mode)
+                and (info.st_size, info.st_mtime_ns) == (expected["bytes"], expected["mtime_ns"])
+                and info.st_nlink == remaining[(info.st_dev, info.st_ino)]):
+            os.unlink(filename, dir_fd=child)
+            remaining[(info.st_dev, info.st_ino)] -= 1
+        else:
+            raise FilmError("Soubor nebo jeho odkazy se během mazání změnily; pokračování je zastavené.")
+    os.fsync(child)
+
+
 def delete_export(editor, payload):
     with _selected(editor, payload, deleting=True) as (directory, spec, state):
         plan, entries = _plan(directory, spec, state)
@@ -146,25 +204,14 @@ def delete_export(editor, payload):
         root = os.open(directory, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
         try:
             by_path = {item["path"]: item for item in entries}
+            remaining = Counter((item["device"], item["inode"]) for item in entries if item["kind"] == "file")
             for item in entries:
-                if item["kind"] != "directory":
+                if item["kind"] != "directory" or "/" in item["path"]:
                     continue
                 name = item["path"]
                 child = os.open(name, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=root)
                 try:
-                    info = os.fstat(child)
-                    if (info.st_dev, info.st_ino) != (item["device"], item["inode"]):
-                        raise FilmError("Pracovní adresář se během mazání změnil.")
-                    names = os.listdir(child)
-                    for filename in names:
-                        expected = by_path.get(name + "/" + filename)
-                        info = os.stat(filename, dir_fd=child, follow_symlinks=False)
-                        if (not expected or not stat.S_ISREG(info.st_mode) or info.st_nlink != 1
-                                or (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns) !=
-                                (expected["device"], expected["inode"], expected["bytes"], expected["mtime_ns"])):
-                            raise FilmError("Soubor se během mazání změnil; pokračování je zastavené.")
-                        os.unlink(filename, dir_fd=child)
-                    os.fsync(child)
+                    _remove_attempt(child, name, by_path, remaining)
                 finally:
                     os.close(child)
                 # Do not remove a replacement directory swapped into this name.
@@ -175,6 +222,8 @@ def delete_export(editor, payload):
             os.fsync(root)
         finally:
             os.close(root)
+        if _inventory(directory):
+            raise FilmError("U varianty zůstaly neočekávané pracovní soubory; ověř přehled.")
         # Minimal metadata prevents old retry IDs from resurrecting deleted bytes.
         receipt = {k: plan[k] for k in ("token", "bytes", "file_count", "request_sha256")}
         atomic_write_json(directory / "status.json", {"state": "deleted", "progress": 0, "deletion": receipt})

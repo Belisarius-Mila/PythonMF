@@ -1,61 +1,50 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-10-20 17:20 CEST — trvalé mazání jedné filmové varianty místně implementované
+- Aktualizováno: 2026-10-20 17:51 CEST — oprava odmítání hotových MP4 při mazání, zatím místní
 
 ### Hotovo
-- „Moje filmy“ a volba dalších dnů byly přes Lunu nasazené v Cockpitu na
-  `96ce7bab`; Míla potom vyzkoušel druhý den a vytvořil MP4.
-- Místně přibylo „Smazat natrvalo“ u celého MP4, dílčího náhledu i neúspěšného
-  pokusu. Před potvrzením se ověří konkrétní projekt/varianta a zobrazí profil,
-  revize, časový úsek, počet souborů a jejich velikost.
-- Odstraňují se všechny pracovní pokusy vybrané varianty včetně MP4, segmentů,
-  PNG a neúplných souborů. Bez koše, přesunu do archivu či nové mediální kopie.
-  Zůstanou jen původní technická metadata a malý stav smazání bez médií.
-- Starý požadavek ani odkaz smazané video neobnoví. Přerušené mazání má
-  stav „Mazání nebylo dokončeno“ a lze bezpečně dokončit tutéž vybranou sadu.
-  Zdrojové náhledy, originály a uložené revize střihu se touto funkcí nemažou.
-- Nové mazání zatím není pushnuté ani nasazené. Během vývoje se skutečné
-  produkční varianty nemažou; kontrolní otisky jsou v samostatném lokálním logu.
+- Předchozí „Smazat natrvalo“ bylo přes Lunu nasazené na `3b129ded`.
+  Míla při skutečné zkoušce zjistil, že náhledy zůstávají i po restartu.
+- Čtecí diagnostika doložila zastavení před odstraněním: renderer používá
+  interní hardlink `film.mp4` / `render.partial.mp4`, kontrola ho chybně odmítala.
+- Místní oprava přijímá pevné odkazy, jen když všechny jejich názvy patří
+  potvrzené variantě. Před každým unlink znovu ověří počet zbývajících odkazů.
+  Cizí odkazy, symlinky, jiné zařízení a změněné identity zůstávají blokované.
+- Zahrnuté jsou i pracovní podadresáře uvnitř známých pokusů, přes ověřené
+  deskriptory, s limitem hloubky/počtu a velikosti obnovovacího záznamu.
+- 42 cílených testů PASS, včetně skutečného rendereru a následného smazání,
+  přerušení mezi dvěma odkazy, obnovy a zachování originálu i zdrojového náhledu.
+- Čtecí inventář přijímá všech 10 současných variant; všech 570 kontrolovaných
+  produkčních souborů zůstalo shodných. V této opravě žádné produkční mazání.
 
 ### Rozhodnutí
-- Míla výslovně změnil dosavadní zachovávání všech filmových variant:
-  nevyhovující výstupy chce mazat trvale kvůli místu. Vývoj provádí Adam.
-- Rozsah je jedna vědomě zvolená filmová varianta v této střižně, včetně
-  její pracovní složky. Žádné automatické či hromadné mazání všech starších revizí.
-- Přesná věta globální brzdy se zadává při potvrzení konkrétní varianty;
-  vyžaduje ji `global_safety_brake.md` pro mazání adresářů a více souborů.
+- Opravit chybu původního vývoje v témže rozsahu jedné vybrané varianty.
+- Konkrétní plán a přesná věta globální brzdy zůstávají při každém skutečném
+  smazání. Bez hromadného mazání, koše či nové mediální kopie.
 
 ### Otevřeno / rizika
-- Nové ovládání na skutečném Macu/iPhonu není fyzicky přijaté.
-- Akce neodstraňuje dříve stažené kopie ani existující externí/iCloud zálohy.
-  Nejde o bezpečný přepis SSD, APFS snapshotů nebo vzdálených kopií.
-- macOS uvolní bloky již otevřeného souboru po zavření posledního přehrávání/
-  stahování. Místní přehrávač vybrané varianty se před mazáním zastaví.
-- Aktivní render nebo čekající varianta se nemaže. Při cizím odkazu,
-  změně souborů či neplatné potvrzovací větě se operace zastaví.
+- Oprava zatím není pushnutá ani nasazená; běžící Cockpit má původní kontrolu.
+- Fyzické smazání z Macu/iPhonu musí být po novém nasazení znovu přijato.
+- Existující zálohy a stažené kopie jsou mimo akci; logický součet velikostí
+  není příslibem uvolněného APFS místa. Otevřený soubor může držet bloky.
 
 ### Další krok
-- Po samostatném p+n přes Lunu nasadit pouze Cockpit a fyzicky smazat
-  jeden vědomě vybraný nepotřebný dílčí náhled po zadání potvrzovací věty.
+- Po samostatném p+n přes Lunu nasadit pouze Cockpit a znovu vědomě smazat
+  jeden nepotřebný náhled; ověřit zmizení po reloadu a zachování ostatních.
 
 ### Navrhované další kroky
-- Ověřit zmizení řádku a původního odkazu po reloadu, zachování jiného
-  MP4, střihu a druhého dne. Případné přerušené mazání vědomě dokončit.
-- Další Mílovy úpravy druhého dne řešit podle konkrétních připomínek;
-  P2-F spojování dnů zůstává později.
+- Další úpravy druhého dne podle Mílových připomínek; P2-F spojování dnů později.
 
 ### Technický důkaz
-- Cílené testy 71/71 a plná brána 2 146/2 146 PASS. Nové testy ověřují
-  odstranění všech pracovních pokusů bez kopií, izolaci
-  dvou shodných dílčích náhledů, současné kliknutí, přerušení, blok starého ID,
-  odkazy/hardlinky, aktivní worker, HTTP Origin a GET/HEAD/Range po smazání.
-- Důkazy `logs/camino_export_delete_targeted_final_20261020.log`,
-  `logs/camino_export_delete_gate_verified_20261020.log` a kontrola zachování
-  `logs/camino_export_delete_preservation_20261020.log`.
-- Předchozí p+n: účtenka `673d99d6ba4b8e96beb96c5fdcdc6f68`, push/deploy
-  confirmed, plná brána 2 137 PASS, smoke 5/5 a chráněné služby shodné.
-  V terminálu byla účtenka převzatá zde, samostatný portálový návrat nepotvrzený.
+- Plná brána opravy 2 151/2 151 PASS, `camino_export_delete_fix_gate_20261020.log`.
+- Původní p+n `cb5a8c476ff62f035fbf48241bccafe4`: push/deploy confirmed,
+  plná brána 2 146 PASS, smoke 5/5, chráněné služby shodné. Účtenka převzatá
+  v terminálu; samostatný portálový návrat zůstal nepotvrzený.
+- Regrese před opravou reprodukovala odmítnutí interního hardlinku.
+  Logy `camino_export_delete_fix_reproduction_20261020.log`,
+  `camino_export_delete_fix_targeted_20261020.log`,
+  `camino_export_delete_fix_production_readonly_20261020.log`.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: Camino
@@ -3107,3 +3096,35 @@ Technický důkaz:
 - Staré externí zálohy a stažené kopie tato akce neodstraňuje; otevřený
   soubor může držet bloky do ukončení přehrávání/stahování. Nejde o SSD secure erase.
 - První plná sada: 2 145 testů, jedna kolize worker lease v existujícím testu předání Luny; samostatný modul 13/13 PASS. Produkční Luna se neměnila. První log zachovaný jako `camino_export_delete_gate_20261020.log`.
+
+
+### 2026-10-20 17:51 CEST — Oprava mazání skutečných filmových výstupů
+
+Hotovo:
+- Dohledaná příčina Mílova neúspěšného mazání po nasazení: ochrana odmítla
+  dva interní názvy téhož MP4 vytvořené samotným rendererem. Produkční mazání
+  nezačalo; restart nemohl varianty odstranit.
+- Místní oprava uznává pouze plně vnitřní pevné odkazy a zahrnuje pracovní
+  podadresáře. Před každým odstraněním znovu kontroluje identitu a zbývající
+  počet odkazů; přerušení mezi názvy lze bezpečně dokončit.
+- 42 cílených testů PASS, včetně skutečného render → smazání. Všech 10 živých
+  variant projde pouze čtecím inventářem; 570 původních souborů shodných.
+
+Rozhodnutí:
+- Bez změny rozsahu: konkrétní varianta, potvrzený plán a globální brzda.
+  Žádné produkční mazání během opravy, nové kopie ani automatický p+n.
+
+Další krok:
+- Po samostatném p+n pouze Cockpitu zopakovat skutečné smazání nepotřebného
+  náhledu a ověřit zmizení po reloadu při zachování ostatních variant.
+
+Navrhované další kroky:
+- Další připomínky střihu druhého dne, společný vícedenní film P2-F až později.
+
+Technický důkaz:
+- Plná brána opravy 2 151/2 151 PASS (323,406 s testů), `camino_export_delete_fix_gate_20261020.log`.
+- Logy `camino_export_delete_fix_reproduction_20261020.log`,
+  `camino_export_delete_fix_targeted_20261020.log`,
+  `camino_export_delete_fix_production_readonly_20261020.log`.
+- Původní vydání `3b129ded` potvrzené účtenkou `cb5a8c476ff62f035fbf48241bccafe4`,
+  2 146 plných testů a smoke 5/5. Oprava je samostatný místní krok.

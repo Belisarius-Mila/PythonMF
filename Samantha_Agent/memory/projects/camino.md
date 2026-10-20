@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-20 17:20 CEST — trvalé smazání vybrané filmové varianty místně; nové nasazení čeká
+Aktualizováno: 2026-10-20 17:51 CEST — místní oprava mazání hotových renderů, nové nasazení čeká
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,8 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-20 17:51 CEST: Po nasazení `3b129ded` Míla nahlásil nefunkční mazání. Čtecí diagnostika doložila chybné odmítnutí interního hardlinku hotového rendereru; nic se nesmazalo. Místní oprava uznává odkazy jen plně uvnitř vybrané varianty, kontroluje jejich počet před každým unlink a zahrnuje omezený strom pracovních podadresářů. Cizí odkazy a symlinky zůstávají blokované. 42 cílených testů včetně skutečného render → smazání PASS; všech 10 živých variant projde čtecím inventářem, 570 souborů shodných. Plná brána opravy 2 151/2 151 PASS. Oprava bez push/deploye a bez produkčního mazání; další krok samostatné p+n pouze Cockpitu přes Lunu a fyzická přejímka.
 
 - 2026-10-20 17:20 CEST: „Smazat natrvalo“ místně odstraňuje všechny mediální/pracovní pokusy jedné varianty bez koše a kopie. Jen drobný technický záznam brání obnovení starým ID; přerušené mazání lze dokončit. Konkrétní plán a přesná věta globální brzdy, worker a cizí odkazy blokované. Originály, střih a ostatní varianty se zachovají; existující zálohy a ručně stažené kopie jsou mimo tuto akci. 71 cílených a 2 146 plných testů PASS, nový push/deploy není schválený. Předchozí „Moje filmy“ nasazené `96ce7bab`, Míla vytvořil MP4 druhého dne.
 
