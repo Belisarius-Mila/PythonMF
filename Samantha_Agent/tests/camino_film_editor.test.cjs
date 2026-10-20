@@ -75,6 +75,11 @@ async function main() {
   assert.equal(nodes.shots.children.length, 1);
   assert(nodes.shots.children[0].children[0].textContent.includes("<script>"));
   assert.equal(nodes.shots.children[0].children[0].innerHTML, undefined);
+  const photoActions = nodes.shots.children[0].children.find(n => n.className === "actions").children;
+  const photoLink = photoActions.find(n => n.textContent === "Otevřít fotografii");
+  assert(photoLink); assert.equal(photoLink.href, `/api/camino/film/photo/${pid}/${sid}`);
+  assert.equal(photoLink.target, "_blank"); assert.equal(photoLink.rel, "noopener noreferrer");
+  assert(!photoActions.some(n => n.textContent === "Vytvořit náhled záběru s titulkem"));
   titleInput().value = "Manual title"; titleInput().emit("change");
   assert.equal(nodes.preview.disabled, true);
   const auto = clock.find(t => t.delay === 700); await auto.fn(); await flush();
@@ -122,6 +127,12 @@ async function main() {
   view.sources = [sid, second].map(asset_id => ({asset_id, kind: "video", duration_ms: 3000, title: "Video"}));
   view.draft.shots = [sid, second].map(asset_id => ({asset_id, title: "", in_ms: 0, out_ms: 3000, gain: 1, included: true}));
   view.jobs = []; await editor.check();
+  await editor.check();
+  for (const shot of nodes.shots.children) {
+    const actions = shot.children.find(n => n.className === "actions").children;
+    assert(actions.some(n => n.textContent === "Otevřít video pro střih"));
+    assert(actions.some(n => n.textContent === "Vytvořit náhled záběru s titulkem"));
+  }
   const open = index => nodes.shots.children[index].children.find(n => n.className === "actions").children.find(n => n.textContent === "Otevřít video pro střih").emit("click");
   await open(0); await flush();
   assert.equal(nodes.source.classList.contains("hidden"), false);

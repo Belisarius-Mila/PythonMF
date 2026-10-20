@@ -149,6 +149,10 @@
         if (source.kind === "video") {
           const open = text("button", "Otevřít video pro střih"); open.type = "button"; open.className = "secondary";
           open.addEventListener("click", () => selectVideo(row.asset_id)); actions.appendChild(open);
+        } else {
+          const open = text("a", "Otevřít fotografii");
+          open.href = `/api/camino/film/photo/${model.project_id}/${row.asset_id}`;
+          open.target = "_blank"; open.rel = "noopener noreferrer"; actions.appendChild(open);
         }
         for (const [label, delta] of [["↑ Dříve", -1], ["↓ Později", 1]]) {
           const b = text("button", label); b.type = "button"; b.className = "secondary";
@@ -159,17 +163,20 @@
             change(); renderRows();
           }); actions.appendChild(b);
         }
-        const preview = text("button", "Vytvořit náhled záběru s titulkem"); preview.type = "button"; preview.className = "secondary";
-        preview.addEventListener("click", async () => {
-          if (!await save()) return;
-          let start = 0;
-          for (const item of model.draft.shots) {
-            if (!item.included) continue;
-            if (item === row) { await render("preview", {start_ms: start, end_ms: start + row.out_ms - row.in_ms}); return; }
-            start += item.out_ms - item.in_ms;
-          }
-          nodes.status.textContent = "Záběr je vyřazený. Zařaď ho před vytvořením náhledu.";
-        }); actions.appendChild(preview); li.appendChild(actions); nodes.shots.appendChild(li);
+        if (source.kind === "video") {
+          const preview = text("button", "Vytvořit náhled záběru s titulkem"); preview.type = "button"; preview.className = "secondary";
+          preview.addEventListener("click", async () => {
+            if (!await save()) return;
+            let start = 0;
+            for (const item of model.draft.shots) {
+              if (!item.included) continue;
+              if (item === row) { await render("preview", {start_ms: start, end_ms: start + row.out_ms - row.in_ms}); return; }
+              start += item.out_ms - item.in_ms;
+            }
+            nodes.status.textContent = "Záběr je vyřazený. Zařaď ho před vytvořením náhledu.";
+          }); actions.appendChild(preview);
+        }
+        li.appendChild(actions); nodes.shots.appendChild(li);
       }
       for (const row of model.draft.voices) {
         const source = sources.get(row.asset_id), li = doc.createElement("li");

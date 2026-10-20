@@ -9662,6 +9662,9 @@ class CockpitServer:
                     else:
                         self.respond_json(film_editor_action("view", selection or None))
                     return
+                if parsed.path.startswith("/api/camino/film/photo/"):
+                    self.respond_film_photo(parsed)
+                    return
                 if parsed.path.startswith("/api/camino/film/output/"):
                     self.respond_film_output(parsed)
                     return
@@ -10869,10 +10872,37 @@ class CockpitServer:
             def do_HEAD(self) -> None:  # noqa: N802
                 self.validate_request_access(require_origin=False)
                 parsed = urlparse(self.path)
-                if parsed.path.startswith("/api/camino/film/output/"):
+                if parsed.path.startswith("/api/camino/film/photo/"):
+                    self.respond_film_photo(parsed)
+                elif parsed.path.startswith("/api/camino/film/output/"):
                     self.respond_film_output(parsed)
                 else:
                     self.send_error(HTTPStatus.METHOD_NOT_ALLOWED)
+
+            def respond_film_photo(self, parsed) -> None:
+                try:
+                    parts = parsed.path.split("/")
+                    if parsed.query or len(parts) != 7:
+                        raise ValueError("invalid photo request")
+                    data = production_editor().photo_bytes(parts[5], parts[6])
+                except Exception:
+                    if self.command == "HEAD":
+                        self.send_response(HTTPStatus.NOT_FOUND)
+                        self.send_header("Content-Length", "0")
+                        self.end_headers()
+                    else:
+                        self.respond_json({"ok": False, "message": "Fotografie není dostupná."},
+                                          status=HTTPStatus.NOT_FOUND)
+                    return
+                self.send_response(HTTPStatus.OK)
+                self.send_header("Content-Type", "image/png")
+                self.send_header("Content-Disposition", 'inline; filename="photo.png"')
+                self.send_header("Cache-Control", "no-store, private, max-age=0")
+                self.send_header("X-Content-Type-Options", "nosniff")
+                self.send_header("Content-Length", str(len(data)))
+                self.end_headers()
+                if self.command != "HEAD":
+                    self.wfile.write(data)
 
             def respond_film_output(self, parsed) -> None:
                 parts = parsed.path.split("/")

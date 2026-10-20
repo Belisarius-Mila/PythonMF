@@ -29,6 +29,13 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-078 — Nepřesná citace old nesmí spustit další placený modelový pokus
+
+- Problém: Luna dodala funkční vícesouborový návrh, ale nepřesně citovaný okolní řádek testu znemožnil jednoznačné převzetí.
+- Typ: opakující se
+- Řešení nalezeno: 20102026
+- Řešení: Zachovat původní odpověď a kontrolu rozsahu. Po jedné kontrole opravit pouze kotvu old přes review_anchors s přesným otiskem; path/new od Luny zůstanou shodné. Shodné vybrané zdroje/kontext/role, nová izolovaná kopie a testy vážou aktuální čistý head. Navazující účtenka odkazuje na původní modelový tah, nová modelová spotřeba je nula. Změna kontextu se odmítne. Ověřeno skutečným Camino/JS návrhem 4 FAIL → 4 PASS i převzetím, bez dalšího modelu a bez oslabení původní validace.
+
 ### LL-077 — Trvalé smazání filmové varianty zahrnuje všechny pracovní pokusy
 
 - Problém: odstranění samotného finálního MP4 ponechá velké segmenty, PNG a neúplné pokusy; opakovaný starý render požadavek může variantu obnovit.

@@ -265,6 +265,8 @@ TEST_MODULES = (
     "tests.test_camino_film",
     "tests.test_camino_mac_film",
     "tests.test_camino_film_editor",
+    "tests.test_camino_film_photo_contract",
+    "tests.test_camino_film_photo_http",
     "camino.server.tests.test_application",
     "tests.test_camino_metadata_diagnostics",
     "tests.test_camino_deleted_title_repair",

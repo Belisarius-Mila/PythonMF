@@ -3,15 +3,20 @@ from __future__ import annotations
 
 import copy
 import fcntl
+import hashlib
+import io
 import json
 import math
 import os
 import re
 import sqlite3
+import stat
 import subprocess
 from functools import lru_cache
 from pathlib import Path
 from uuid import UUID, uuid4
+
+from PIL import Image, ImageCms, ImageOps
 
 from app.camino_film_workshop import DAY, production_store
 from app.file_persistence import FilePersistenceError, atomic_write_json
@@ -107,6 +112,55 @@ class FilmEditor:
         if len(manifest["sources"]) > 256:
             raise FilmError("První editor podporuje nejvýše 256 zdrojů jednoho dne.")
         return folder, manifest
+
+    def photo_bytes(self, project_id, asset_id):
+        """Return a metadata-free PNG of a currently permitted original photo."""
+        project_id, asset_id = identifier(project_id), identifier(asset_id)
+        _, manifest = self.inputs(project_id)
+        before = fingerprint(manifest)
+        source = next((item for item in manifest["sources"]
+                       if item.get("asset_id") == asset_id and item.get("media_kind") == "photo"), None)
+        if source is None:
+            raise FilmError("Fotografie není v aktuálním projektu povolená.")
+        size = source.get("byte_count")
+        if type(size) is not int or not 0 <= size <= 64 * 1024 * 1024:
+            raise FilmError("Fotografie překračuje povolený limit.")
+        objects = Path(self.store.media.objects)
+        if objects.is_symlink():
+            raise FilmError("Původní fotografie nemá bezpečné umístění.")
+        path = objects / f"{asset_id}.bin"
+        try:
+            fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW)
+            with os.fdopen(fd, "rb") as handle:
+                info = os.fstat(handle.fileno())
+                if not stat.S_ISREG(info.st_mode) or info.st_size != size:
+                    raise FilmError("Původní fotografie neodpovídá uzavřeným vstupům.")
+                original = handle.read(64 * 1024 * 1024 + 1)
+            if len(original) != size or hashlib.sha256(original).hexdigest() != source.get("sha256"):
+                raise FilmError("Původní fotografie neodpovídá uzavřeným vstupům.")
+            with Image.open(io.BytesIO(original)) as image:
+                image.seek(0)
+                if max(image.size) > 4096:
+                    raise FilmError("Fotografie přesahuje rozměrový limit 4096 pixelů.")
+                photo = ImageOps.exif_transpose(image).convert("RGB")
+                if image.info.get("icc_profile"):
+                    photo = ImageCms.profileToProfile(photo,
+                        ImageCms.ImageCmsProfile(io.BytesIO(image.info["icc_profile"])),
+                        ImageCms.createProfile("sRGB"), outputMode="RGB")
+                photo.info.clear()
+                output = io.BytesIO()
+                photo.save(output, "PNG")
+                data = output.getvalue()
+            _, current = self.inputs(project_id)
+            current_source = next((item for item in current["sources"]
+                                   if item.get("asset_id") == asset_id and item.get("media_kind") == "photo"), None)
+            if fingerprint(current) != before or current_source != source:
+                raise FilmError("Povolení fotografie se během dekódování změnilo.")
+            return data
+        except FilmError:
+            raise
+        except Exception as error:
+            raise FilmError("Fotografii nelze bezpečně dekódovat.") from error
 
     def revision(self, folder, manifest, number=None):
         paths = list(folder.glob("edit-r*.json"))

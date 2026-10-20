@@ -381,3 +381,11 @@ Technický důkaz:
   797 filmových souborů beze změny; původní projekty 6 a 7 platné, den 8 validní.
 - HTTPS owner health 200, Cockpit katalog OK. Další fyzický kontakt telefonu
   neověřený. Log `logs/camino_metadata_cleanup_20261020.log`, detail a snapshot private.
+
+## 2026-10-20 22:23 CEST — Otevření fotografií ve střižně
+
+Fotografie mají lokálně Otevřít fotografii v nové kartě a nemají renderovaný náhled záběru. Read-only PNG bez EXIF/GPS a bez diskové kopie; správné natočení/ICC, aktuální projekt/soukromí/hash a kontrola po dekódování. Video ovládání zachované. Funkční kód skutečně vytvořila Luna, Adam zkontroloval a převzal; opravil pouze citaci old, testové literály, úklid testserveru a složený frontendový otisk.
+
+Skutečný model gpt-6-luna/high; původní job d67ea8e3a4c26b3c088fd33a821194e8, přijatá kontrola 393b9e1a2d6920d7ed27d41c74473cea, 4 původní FAIL → 4 PASS. Další modelový pokus neproběhl, původní odhad 0,161725 Standard, kontrola 0. Node PASS; integrační běh 69 testů, po opravě jediného fixture rozměru původních 68 PASS + konkrétní 1 PASS. Statická brána PASS. Důkazy logs/luna_photo_accepted_20261020.log, luna_photo_integration_tests_20261020.log, luna_photo_frontend_contract_final_20261020.log.
+
+Ověřit finální účtenku schváleného p+n 92b4b7704c6503fb8b2ed300b600c7f9 a živý audit. Při completed navázat fyzickou přejímkou fotografie v Cockpitu na Macu/iPhonu; p+n slepě neopakovat. Tento Git checkpoint zachycuje stav před vydáním; výsledek publikace/nasazení je v přesné účtence a logs/luna_photo_release_20261020.log.

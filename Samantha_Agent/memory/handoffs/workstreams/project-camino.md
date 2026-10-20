@@ -1,6 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-20 22:23 CEST: Fotografie mají lokálně Otevřít fotografii v nové kartě a nemají renderovaný náhled záběru. Read-only PNG bez EXIF/GPS a bez diskové kopie; správné natočení/ICC, aktuální projekt/soukromí/hash a kontrola po dekódování. Video ovládání zachované. Funkční kód skutečně vytvořila Luna, Adam zkontroloval a převzal; opravil pouze citaci old, testové literály, úklid testserveru a složený frontendový otisk. Ověřit finální účtenku schváleného p+n 92b4b7704c6503fb8b2ed300b600c7f9 a živý audit. Při completed navázat fyzickou přejímkou fotografie v Cockpitu na Macu/iPhonu; p+n slepě neopakovat. Tento Git checkpoint zachycuje stav před vydáním; výsledek publikace/nasazení je v přesné účtence a logs/luna_photo_release_20261020.log.
+
 - 2026-10-20 22:13 CEST: Míla potvrdil funkční opravu osiřelých metadat. Nově požaduje u fotografií Otevřít fotografii a odstranit jejich renderovaný náhled záběru. Vývoj i p+n výslovně Lunou; nejprve zprovoznit širší delegaci. Centrální vývojová role již gpt-6-luna/high, přejímací kontrakt připravený, samotná funkce zatím chybí.
 
 - Aktualizováno: 2026-10-20 21:23 CEST — odstraněná čtyři osiřelá metadata videí, den 8. října znovu platný
@@ -3170,3 +3172,11 @@ Rozhodnutí: fotografie otevřít v nové kartě bez renderu či diskové kopie,
 Další krok: předat vymezený kód a nezměnitelné syntetické testy skutečné Luně.
 Navrhované další kroky: kontrola návrhu a schválené p+n pouze Cockpitu.
 Technický důkaz: 4 přejímací testy záměrně FAIL pro chybějící metodu, bez chyb prostředí; originály a projekty nebyly změněné. Riziko: soukromí musí být ověřeno i po dekódování, žádná raw metadata v obrazu.
+
+## 2026-10-20 22:23 CEST — Fotografie ve střižně vyvinuté Lunou
+
+Hotovo: Fotografie mají lokálně Otevřít fotografii v nové kartě a nemají renderovaný náhled záběru. Read-only PNG bez EXIF/GPS a bez diskové kopie; správné natočení/ICC, aktuální projekt/soukromí/hash a kontrola po dekódování. Video ovládání zachované. Funkční kód skutečně vytvořila Luna, Adam zkontroloval a převzal; opravil pouze citaci old, testové literály, úklid testserveru a složený frontendový otisk.
+Rozhodnutí: výslovný vývoj Lunou i pro více souborů a JavaScript; žádná nová kopie médií, video zachovat.
+Další krok: Ověřit finální účtenku schváleného p+n 92b4b7704c6503fb8b2ed300b600c7f9 a živý audit. Při completed navázat fyzickou přejímkou fotografie v Cockpitu na Macu/iPhonu; p+n slepě neopakovat. Tento Git checkpoint zachycuje stav před vydáním; výsledek publikace/nasazení je v přesné účtence a logs/luna_photo_release_20261020.log.
+Navrhované další kroky: pokračovat v již rozpracovaném střihu dne 8; vícedenní film zůstává pozdější samostatný krok.
+Technický důkaz: Skutečný model gpt-6-luna/high; původní job d67ea8e3a4c26b3c088fd33a821194e8, přijatá kontrola 393b9e1a2d6920d7ed27d41c74473cea, 4 původní FAIL → 4 PASS. Další modelový pokus neproběhl, původní odhad 0,161725 Standard, kontrola 0. Node PASS; integrační běh 69 testů, po opravě jediného fixture rozměru původních 68 PASS + konkrétní 1 PASS. Statická brána PASS. Důkazy logs/luna_photo_accepted_20261020.log, luna_photo_integration_tests_20261020.log, luna_photo_frontend_contract_final_20261020.log. Riziko: fyzická přejímka uživatelem zatím neprovedená; pozdější změna soukromí nebo vstupů obraz správně zablokuje.

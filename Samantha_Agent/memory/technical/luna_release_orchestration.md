@@ -344,6 +344,13 @@ a activate(plan, confirmed=True); zmrazí i původní konfiguraci a zachová
 release_executor. Následující část popisuje původní pilot a jeho historii,
 nikoli omezení výslovného vývoje přes nový engine.
 
+První skutečný vícesouborový úkol 20. 10.: fotografie ve střižně, 5 souborů
+Python/JS/HTTP/testy, původní návrh Luny převzatý po kontrole citace old.
+Přejímací kontrakt 4 FAIL → 4 PASS, receipt 393b9e1a2d6920d7ed27d41c74473cea;
+původní modelový job d67ea8e3a4c26b3c088fd33a821194e8. Nebyl nový modelový
+tah při integraci; původní odhad 0,161725 Standard. Portálový IPC výběr nové
+větve a role dostane běžící Cockpit týmž schváleným p+n.
+
 ## Jednoduchý vývoj (17. 10. 2026)
 
 ### Výběr vývojových kroků pro Lunu — dohoda 17. 10. 2026

@@ -60,9 +60,9 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — 20. 10.: oprava čtyř osiřelých metadat Mílou přijatá. Nový krok fotografií ve střižně výslovně Lunou včetně p+n: otevřít fotografii bez renderu/kopie a bez foto preview. Přejímací kontrakt připravený, funkce čeká na skutečnou Lunu; 304 originálů a existující filmy zachované.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` — 2026-10-20 22:23 CEST: fotografie ve střižně vyvinuté skutečnou Lunou: otevření v nové kartě bez renderu/kopie, foto preview odstraněné, video zachované. Přejímka 4 FAIL → 4 PASS a HTTP/Node PASS; vydání ověřit v přesné účtence 92b4b7704c6503fb8b2ed300b600c7f9 a živém auditu. Originály a existující filmy se nemění.
 
-- `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md`; `technical/luna_release_orchestration.md` — 20. 10.: Míla vyžaduje skutečný vývoj Lunou vždy při výslovném pokynu. Nový engine více souborů včetně JS/Camino lokálně implementovaný, syntetická Luna 3 FAIL → 3 PASS a převzetí. Centrální role již aktivovaná na gpt-6-luna/high; skutečné předání fotografií střižny a schválené p+n následují; starší pilot není omezením explicitní cesty.
+- `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md`; `technical/luna_release_orchestration.md` — 2026-10-20 22:23 CEST: výslovný vývoj vždy Lunou, před heuristikou pro nabídku. Centrální role gpt-6-luna/high, skutečná zkouška i první vícesouborový Camino/JS úkol převzaté; žádný Sol fallback. Běžící portál a stav p+n ověřit podle účtenky 92b4b7704c6503fb8b2ed300b600c7f9; fyzická přejímka portálu zůstává samostatná.
 
 - `projects/python_se_samanthou.md`; `handoffs/python_se_samanthou_course_package_2026_09_06.md` - učebna Pythonu: Míla potvrdil 1.5/Codex na Linuxu. Nový samostatný balíček Praktické úlohy přidává 7 lekcí (celkem 21); kopíruje se jen do kurzy. 62 testů a GUI nad nezměněnou 1.5 prošly; obsahový ZIP v LocalSendu.
 - `projects/lekarna_domaci_leky.md` - projekt Lekarna: evidence domacich leku v `data/lekarna/`, vyhledavani podle potizi, audit lekarnicky a opakovatelny foto import workflow pres manifest.

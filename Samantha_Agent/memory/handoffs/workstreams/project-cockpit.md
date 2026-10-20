@@ -1,6 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-20 22:23 CEST: Výslovný vývoj Lunou je lokálně funkční i na skutečném vícesouborovém Camino/JS úkolu. Centrální simple_developer = gpt-6-luna/high, žádný Sol fallback. Ověřit finální účtenku schváleného p+n 92b4b7704c6503fb8b2ed300b600c7f9 a živý audit. Při completed navázat fyzickou přejímkou fotografie v Cockpitu na Macu/iPhonu; p+n slepě neopakovat. Tento Git checkpoint zachycuje stav před vydáním; výsledek publikace/nasazení je v přesné účtence a logs/luna_photo_release_20261020.log.
+
 - 2026-10-20 22:19 CEST: Skutečná Luna vytvořila vícesouborový návrh fotografií; přesné převzetí ho zastavilo kvůli jedné nepřesné citaci old v Node testu. Zdroje beze změny. Doplněná registrovaná jednorázová review_anchors opravuje pouze citaci původního textu, nové kódy Luny nepřepisuje; nová izolace a testy, žádný další modelový tah.
 
 - 2026-10-20 22:12 CEST: Centrální simple_developer přepnutý ověřenou aktivací na skutečnou gpt-6-luna/high; release_executor přesně zachovaný. Rozšířený engine je lokální; běžící portál dostane novou větev až schváleným p+n. Připravené nezměnitelné syntetické přejímací testy pro fotografie; samotnou funkci vyvine Luna.
@@ -1990,3 +1992,11 @@ Rozhodnutí: nejistý placený krok neopakovat. Jedna ruční kontrola citace je
 Další krok: ověřit původní návrh s opravenou citací a přijmout pouze úspěšný diff.
 Navrhované další kroky: již schválené p+n Lunou.
 Technický důkaz: původní job d67ea8e3a4c26b3c088fd33a821194e8, gpt-6-luna/high, základní testy 4 FAIL bez chyb prostředí, 0,161725 odhadovaného kreditu. 44 cílených kontrol integrace PASS. Riziko přerušení applying zůstává viditelné.
+
+## 2026-10-20 22:23 CEST — Skutečný vícesouborový vývoj Lunou převzatý
+
+Hotovo: Výslovný vývoj přes společný engine a aktuální portálový grant, testy v izolované kopii a převzetí přesných souborů fungují. První skutečný úkol fotografie ve střižně je převzatý.
+Rozhodnutí: výslovný pokyn Míly má vždy přednost před heuristikou pro nabídku; bezpečnostní a publikační oprávnění se nemění.
+Další krok: Ověřit finální účtenku schváleného p+n 92b4b7704c6503fb8b2ed300b600c7f9 a živý audit. Při completed navázat fyzickou přejímkou fotografie v Cockpitu na Macu/iPhonu; p+n slepě neopakovat. Tento Git checkpoint zachycuje stav před vydáním; výsledek publikace/nasazení je v přesné účtence a logs/luna_photo_release_20261020.log.
+Navrhované další kroky: fyzická přejímka portálového předání v některém následujícím výslovném úkolu, bez opakování dokončené aktivace.
+Technický důkaz: Skutečný model gpt-6-luna/high; původní job d67ea8e3a4c26b3c088fd33a821194e8, přijatá kontrola 393b9e1a2d6920d7ed27d41c74473cea, 4 původní FAIL → 4 PASS. Další modelový pokus neproběhl, původní odhad 0,161725 Standard, kontrola 0. Node PASS; integrační běh 69 testů, po opravě jediného fixture rozměru původních 68 PASS + konkrétní 1 PASS. Statická brána PASS. Důkazy logs/luna_photo_accepted_20261020.log, luna_photo_integration_tests_20261020.log, luna_photo_frontend_contract_final_20261020.log. Aktivace role doložená původním probe 3a1b667eeb634603be866357921150f5; release_executor zachovaný. Riziko: applying znamená přerušený vícesouborový zápis a vyžaduje kontrolu; žádné automatické retry.
