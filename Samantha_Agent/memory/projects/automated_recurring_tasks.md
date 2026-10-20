@@ -440,3 +440,29 @@ Technický důkaz: 24 cílených testů PASS včetně obnovy nastavení připoje
 zachování původního audia při chybě. Automatický běh 39375776815 nad
 aba9d2526726 selhal NoAudioReceived; veřejný web před změnou volil
 owl_191026.mp3. Náhled zůstává mimo Git.
+
+## 2026-10-20 08:09 CEST — Dnešní promluva veřejně nasazená
+
+Hotovo: Doslovná promluva pro 20. října je zveřejněná. Veřejná stránka vybírá
+owl_201026.mp3; MP3 vrací HTTP 200 / audio/mp3, 140 256 B a 23,376 s.
+Text se do paměti nekopíruje. Nutná oprava připojení používá stejného
+poskytovatele, hlas Antonin a původní rychlost; skutečný cloudový běh prošel.
+
+Rozhodnutí: Nasazení proběhlo na výslovný dnešní pokyn Míly. Generated audio
+zůstává pouze v Pages artifactu a ignorovaných lokálních náhledech, ne v main.
+Žádné další kanonické rozhodnutí.
+
+Další krok: Pro dnešní publikaci žádný další zásah. Ruční poslech uživatele
+nebyl potvrzený; technické dekódování celého veřejného MP3 prošlo.
+
+Navrhované další kroky: Žádné nové. Riziko: připojení závisí na upstream TTS;
+případná další chyba musí zastavit publikaci před uploadem.
+
+Technický důkaz: 24 cílených testů a plná brána 2133/2133 PASS (458,7 s).
+Zdroj d28f68a1aed92d6b195b388f94da2a1c99219172; Pages workflow
+39378642645 a deploy job 118482682417 success nad stejným head.
+Veřejný index volí app.js?v=eb13aeeaefe4107f; audio cache hash 21fa495574a6
+odpovídá skutečným bajtům. Main/origin po workflow shodné, workflow main nemění.
+Úplná redigovaná účtenka: data/daily_3am/receipts/20261020_publication.json
+(mimo Git). Místní dokumentační zápis výsledku je samostatný lokální checkpoint;
+nevypovídá o novém nasazení Cockpitu.
