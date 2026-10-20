@@ -98,7 +98,8 @@ class FilmEditor:
         self.day = day
 
     def inputs(self, project_id=None):
-        status = self.store.day_status(self.day, project_id=project_id)
+        status = (self.store.project_status(identifier(project_id)) if project_id is not None
+                  else self.store.day_status(self.day))
         if not status.get("valid"):
             raise FilmError("Projekt nebo jeho zdroje už nejsou platné. Ověř konečnou Mac sadu.")
         folder = self.store.root / status["project_id"]
@@ -135,8 +136,25 @@ class FilmEditor:
         validate_draft(record["draft"], manifest)
         return record
 
-    def view(self):
-        folder, manifest = self.inputs()
+    def catalog(self):
+        dates = self.store.available_dates()
+        projects = []
+        for project_id in self.store.project_ids():
+            try:
+                folder, manifest = self.inputs(project_id)
+                edit = self.revision(folder, manifest)
+                jobs = self.jobs(folder)
+                projects.append({"project_id": project_id, "local_date": manifest["local_date"],
+                                 "revision": edit["revision"],
+                                 "ready_exports": sum(j["state"] == "ready" and not j.get("source_asset_id") for j in jobs)})
+            except (ClosedDayError, FilmError, OSError, ValueError, KeyError, TypeError):
+                # Never expose stale titles/counts after privacy or input changes.
+                continue
+        projects.sort(key=lambda p: (p["local_date"], p["project_id"]), reverse=True)
+        return {"ok": True, "days": [{"local_date": day} for day in dates], "projects": projects}
+
+    def view(self, project_id=None):
+        folder, manifest = self.inputs(project_id)
         edit = self.revision(folder, manifest)
         return {"ok": True, "project_id": folder.name, "local_date": manifest["local_date"],
                 "revision": edit["revision"], "draft": edit["draft"],
@@ -382,8 +400,11 @@ def production_editor():
 def film_editor_action(operation, payload=None):
     try:
         editor = production_editor()
+        if operation == "catalog":
+            return editor.catalog()
         if operation == "view":
-            return editor.view()
+            exact(payload or {}, "project_id" if payload else "")
+            return editor.view((payload or {}).get("project_id"))
         if operation == "save":
             return editor.save(payload)
         if operation == "render":

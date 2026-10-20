@@ -174,6 +174,19 @@ class MacFilmTests(unittest.TestCase):
                 self.assertTrue(result["valid"])
                 self.assertEqual(result["source_count"], 3)
                 self.assertEqual(request("GET", "/api/camino/film/day?path=secret")[0], 400)
+                pid = result["project_id"]
+                code, chosen = request("GET", f"/api/camino/film/day?local_date={self.day}&project_id={pid}")
+                self.assertEqual(code, 200); self.assertEqual(chosen["project_id"], pid)
+                for query in ("local_date=2026-02-30", "local_date=", "project_id=../secret",
+                              f"project_id={pid}&project_id={pid}"):
+                    self.assertEqual(request("GET", "/api/camino/film/day?" + query)[0], 400)
+                self.assertFalse(request("GET", f"/api/camino/film/day?local_date=2026-09-26&project_id={pid}")[1]["ok"])
+                for value in (None, False, 26):
+                    self.assertEqual(request("POST", "/api/camino/film/close-mac-day",
+                        {"confirmed_final_mac_data": True, "local_date": value})[0], 400)
+                code, result = request("POST", "/api/camino/film/close-mac-day",
+                    {"confirmed_final_mac_data": True, "local_date": self.day})
+                self.assertEqual(code, 200); self.assertEqual(result["project_id"], pid)
                 conn.close()
             finally:
                 server.shutdown(); server.server_close(); thread.join(timeout=3)

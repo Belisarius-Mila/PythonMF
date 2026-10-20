@@ -11,6 +11,7 @@
       "sourceTitle", "selection", "start", "end", "playSelection"].map(key => [key, root.querySelector(`[data-film="${key}"]`)]));
     let model = null, active = false, dirty = false, saving = false, version = 0, epoch = 0;
     let pending = null, timer = null, refreshTimer = null, preserved = null, readRequest = 0;
+    let requestedProject = null;
     let selected = null, sourceJob = null, sourceRequest = 0, sourceTimer = null, selectionTimer = null, playingSelection = false;
     function text(tag, value) { const n = doc.createElement(tag); n.textContent = value; return n; }
     function stopPlayer() { nodes.player.pause(); nodes.player.removeAttribute("src"); nodes.player.load(); }
@@ -212,10 +213,11 @@
       if (!active || doc.hidden) return;
       const current = epoch, read = ++readRequest;
       try {
-        const response = await request("/api/camino/film/editor", {cache: "no-store"});
+        const response = await request("/api/camino/film/editor" + (requestedProject ? `?project_id=${encodeURIComponent(requestedProject)}` : ""), {cache: "no-store"});
         const data = await response.json();
         if (current !== epoch || read !== readRequest || !active || doc.hidden) return;
         if (!data.ok) { invalidate(data.message); return; }
+        if (requestedProject && data.project_id !== requestedProject) { invalidate("Odpověď patří jinému filmu. Znovu otevři projekt."); return; }
         if (preserved) {
           if (preserved.model.project_id === data.project_id) {
             model = preserved.model; pending = preserved.pending; version = preserved.version; dirty = true;
@@ -309,10 +311,22 @@
       else check();
     });
     return {
-      open() { active = true; root.classList.remove("hidden"); check(); cancel(refreshTimer);
-        const tick = () => { if (active) { check(); refreshTimer = later(tick, 10000); } }; refreshTimer = later(tick, 10000); },
+      open(projectId = null) {
+        if (requestedProject !== projectId) {
+          if (!this.canClose()) return false;
+          invalidate(); requestedProject = projectId;
+        }
+        active = true; root.classList.remove("hidden"); check(); cancel(refreshTimer);
+        const tick = () => { if (active) { check(); refreshTimer = later(tick, 10000); } }; refreshTimer = later(tick, 10000);
+        return true;
+      },
       close() { active = false; cancel(refreshTimer); invalidate(); root.classList.add("hidden"); },
-      canClose() { if (dirty || saving) { save(); nodes.status.textContent = "Nejprve dokonči uložení změn; potom můžeš okno zavřít."; return false; } return true; },
+      suspend() { active = false; cancel(refreshTimer); conceal(); root.classList.add("hidden"); },
+      canClose() {
+        if (preserved) { nodes.status.textContent = "Nejprve obnov spojení a ulož rozpracovaný střih."; return false; }
+        if (dirty || saving) { save(); nodes.status.textContent = "Nejprve dokonči uložení změn; potom můžeš přepnout nebo zavřít film."; return false; }
+        return true;
+      },
       check, invalidate, save,
     };
   }

@@ -1,9 +1,56 @@
 # Camino P2-C/D — editor a MP4 z uzavřeného dne
 
-Stav: editor nasazený v Cockpitu; skutečný náhled 720p a finále 1080p jsou ověřené a dostupné.
+Stav k 20. 10.: původní editor a přímý trim jsou nasazené; rozšíření „Moje filmy“
+a volba dalších dnů jsou místně implementované, bez nového push/deploye.
 Míla 12. 10. výslovně zadal pokračování editorem a MP4 nad potvrzenou Mac
 sadou 6. 10. Telefon, běžící Camino, jeho archiv a síť se nemění.
 Míla potvrdil „ok p+n cockpit“; přesný `7c9547fc` je na GitHubu a nasazený pouze Cockpit. Hotové MP4 se znovu nevyráběly.
+
+## Moje filmy a výběr dnů — 20. 10. 2026
+
+Po Mílově přijetí prvního filmu/střihu přibylo otevření dříve uloženého
+projektu a výběr dalšího Mac dne. Jde o více samostatných jednodenních filmů;
+společný vícedenní film, kapitoly a prolog/epilog P2-F zůstávají další etapou.
+
+Přehled nabízí jen aktuálně ověřené projekty nakonfigurované cesty. U každého
+uvádí den, revizi a počet hotových filmových exportů; zdrojové náhledy se do
+počtu nezahrnují. Seznam Mac dnů vychází z povolených obrazových zdrojů,
+vynechá soukromé/skryté dny a není potvrzením dokončeného přenosu.
+Nový projekt vznikne teprve po výslovném potvrzení konečnosti vybraného dne,
+úplné validaci jeho inventáře, originálů a účtenek. Originály se nemění.
+
+Výběr má každá karta vlastní, připomene si jej v `sessionStorage`; server nemá
+globální aktivní den. Editor, uložení, zdrojový náhled, worker a výdej MP4
+používají konkrétní projektové ID. Nepovolené parametry a nesoulad dne s ID
+jsou odmítnuté. Původní cesty bez parametru zůstávají kompatibilní s 6. 10.
+
+Přepnutí blokuje probíhající nebo nepotvrzené uložení. Při výpadku spojení
+editor skryje staré zdroje a zachová koncept v kartě; po obnovení lze úpravy
+uložit. Pozdní odpověď starého projektu ani jiná karta nemění nový výběr.
+Koncept není trvalá záloha po násilném zavření karty; uložené revize jsou
+trvalé. Aktuální soukromí a integrita se ověřují i při otevření a výdeji.
+
+Ověření: 60 cílených testů PASS, včetně dvou syntetických dnů s oddělenými
+revizemi a exporty, workeru druhého dne, odmítnutí cizích zdrojů/výstupů,
+read-only přehledu, změny soukromí, HTTP Origin/parametrů a UI závodů.
+Plná brána 2 137/2 137 PASS (415,624 s testů). Produkční film zůstává v revizi 5,
+osm původních JSON souborů a šest hotových výstupů má shodné SHA-256.
+Žádný produkční projekt ani render nevznikl. Logy `camino_film_library_*_20261020.log`.
+
+Po samostatném nasazení pouze Cockpitu přejímka:
+
+1. Otevřít Camino film a v „Moje filmy“ původní den; ověřit poslední střih
+   a přehrání stávajícího exportu.
+2. Zvolit jiný den. Až když jsou jeho Mac data konečná, potvrdit uložení
+   nového projektu. Neúplné či změněné zdroje musí vznik projektu zablokovat.
+3. Upravit jednu délku fotografie nebo ruční úsek videa, vyčkat na uloženou
+   revizi, obnovit stránku a zkontrolovat změnu. Náhled/export zadat vědomě.
+4. Vrátit se k původnímu projektu: jeho střih, revize i starší exporty musí
+   zůstat dostupné a shodné. Dvě karty musí držet nezávislý výběr.
+
+Fyzický retest nového přehledu na Macu/iPhonu nebyl proveden; nástrojový
+prohlížeč není dostupný. Mílovo hodnocení prvního filmu je uživatelský důkaz,
+nikoli samostatný PASS každého staršího P2-C/E přejímacího úkonu.
 
 ## Editor
 

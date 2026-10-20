@@ -1,5 +1,6 @@
 """Synthetic tests of edit persistence, consent routes, private output and real rendering."""
 import copy
+from dataclasses import replace
 import array
 import http.client
 import json
@@ -21,7 +22,9 @@ from app.camino_film_workshop import MacFilmProjectStore
 from app.file_persistence import atomic_write_json
 from camino.film.media import ffmpeg, probe, binary, run, FONT
 from camino.film.project import FilmError, digest
-from tests.camino_viewer_fixture import ViewerFixture
+from tests.camino_viewer_fixture import ViewerFixture, uid
+from camino.domain.codec import wire
+from camino.domain.model import JourneyDay, Privacy
 
 
 class EditorTests(unittest.TestCase):
@@ -43,6 +46,74 @@ class EditorTests(unittest.TestCase):
         v = self.editor.view()
         return {"project_id": self.pid, "expected_revision": v["revision"],
                 "request_id": str(uuid4()), "draft": copy.deepcopy(v["draft"])}
+
+    def second_day(self, *, close=True, private_only=False):
+        self.f.day = JourneyDay(uid(50), self.f.trip.id, "2026-09-26")
+        self.f.capture = replace(self.f.capture, local_wall="2026-09-26T10:00:00", utc_ms=self.f.capture.utc_ms + 86400000)
+        self.f.send("create_day", wire(self.f.day))
+        self.f.public = self.f.moment(51, Privacy.DIARY)
+        self.f.private = self.f.moment(52, Privacy.OWNER_ONLY)
+        self.f.upload(60, "photo", b"second synthetic photo", private=private_only)
+        self.f.upload(61, "video", b"second synthetic video", private=private_only)
+        return self.store.close_mac_day(self.f.day.local_date, confirmed=True)["project_id"] if close else None
+
+    def test_two_days_keep_revisions_sources_worker_and_exports_separate(self):
+        first = self.payload(); first["draft"]["shots"][0]["title"] = "First saved edit"
+        self.editor.save(first)
+        _, old_job = self.queue()
+        with patch("app.camino_film_render.render_edit", side_effect=self.fake_render): self.editor.run_queue(self.pid)
+        before = {p: digest(p) for p in (self.store.root / self.pid).rglob("*") if p.is_file()}
+        second = self.second_day()
+        view = self.editor.view(second)
+        self.assertEqual((view["project_id"], view["local_date"], view["revision"]), (second, "2026-09-26", 1))
+        draft = copy.deepcopy(view["draft"]); draft["shots"][0]["title"] = "Second saved edit"
+        self.editor.save({"project_id": second, "expected_revision": 1, "request_id": str(uuid4()), "draft": draft})
+        with self.assertRaises(FilmError):
+            self.editor.save({"project_id": second, "expected_revision": 2, "request_id": str(uuid4()), "draft": first["draft"]})
+        job = self.editor.enqueue({"project_id": second, "revision": 2, "request_id": str(uuid4()),
+            "profile": "preview", "range": None}, background=False)
+        with patch("app.camino_film_render.render_edit", side_effect=self.fake_render): self.editor.run_queue(second)
+        self.assertEqual(self.editor.output(second, job["job_id"]).read_bytes(), b"synthetic mp4 bytes")
+        with self.assertRaises(FilmError): self.editor.output(second, old_job["job_id"])
+        self.assertEqual(before, {p: digest(p) for p in before})
+        self.assertEqual(self.editor.view()["draft"]["shots"][0]["title"], "First saved edit")
+        self.assertEqual(self.editor.view(second)["draft"]["shots"][0]["title"], "Second saved edit")
+        catalog = self.editor.catalog()
+        self.assertEqual([p["project_id"] for p in catalog["projects"]], [second, self.pid])
+        self.assertEqual([(p["revision"], p["ready_exports"]) for p in catalog["projects"]], [(2, 1), (2, 1)])
+        self.assertNotIn("First saved edit", json.dumps(catalog))
+
+    def test_catalog_rechecks_privacy_without_hiding_the_other_day(self):
+        second = self.second_day()
+        self.f.lock()
+        catalog = self.editor.catalog()
+        self.assertEqual(catalog["days"], [{"local_date": "2026-09-25"}])
+        self.assertEqual([p["project_id"] for p in catalog["projects"]], [self.pid])
+        with self.assertRaises(FilmError): self.editor.view(second)
+        self.assertEqual(self.editor.view()["project_id"], self.pid)
+
+    def test_catalog_candidates_are_read_only_and_exclude_private_only_days(self):
+        self.second_day(close=False, private_only=True)
+        before = {p: digest(p) for p in self.root.rglob("*") if p.is_file()}
+        catalog = self.editor.catalog()
+        self.assertEqual(catalog["days"], [{"local_date": "2026-09-25"}])
+        self.assertEqual(before, {p: digest(p) for p in before})
+        empty = MacFilmProjectStore(self.root / "empty-projects", metadata_db=self.f.store.path,
+            media_db=self.f.media.database_path, media_root=self.f.media.root, trip_id=self.f.trip.id)
+        self.assertEqual(FilmEditor(empty).catalog()["projects"], [])
+        self.assertFalse(empty.root.exists())
+
+    def test_catalog_skips_unsafe_and_unconfirmed_projects(self):
+        foreign = self.root / "foreign"; foreign.mkdir()
+        (foreign / "manifest.json").write_text('{"PRIVATE": "foreign content"}')
+        (self.store.root / uid(80)).symlink_to(foreign, target_is_directory=True)
+        (self.store.root / uid(81)).mkdir()
+        catalog = self.editor.catalog()
+        self.assertEqual([p["project_id"] for p in catalog["projects"]], [self.pid])
+        self.assertNotIn("PRIVATE", json.dumps(catalog))
+        other_trip = MacFilmProjectStore(self.store.root, metadata_db=self.f.store.path,
+            media_db=self.f.media.database_path, media_root=self.f.media.root, trip_id=uid(99))
+        self.assertEqual(FilmEditor(other_trip).catalog(), {"ok": True, "days": [], "projects": []})
 
     def queue(self, **changes):
         payload = {"project_id": self.pid, "revision": self.editor.view()["revision"],
@@ -262,7 +333,7 @@ class EditorTests(unittest.TestCase):
         with patch("app.camino_film_render.render_edit", side_effect=self.fake_render): self.editor.run_queue(self.pid)
         server = ThreadingHTTPServer(("127.0.0.1", 0), cockpit.CockpitServer().make_handler())
         thread = threading.Thread(target=server.serve_forever, daemon=True)
-        with patch("app.camino_film_editor.production_editor", return_value=self.editor), patch.object(cockpit, "production_editor", return_value=self.editor), patch.object(self.editor, "start_worker"):
+        with patch("app.camino_film_editor.production_editor", return_value=self.editor), patch("app.camino_film_workshop.production_store", return_value=self.store), patch.object(cockpit, "production_editor", return_value=self.editor), patch.object(self.editor, "start_worker"):
             thread.start()
             try:
                 conn = http.client.HTTPConnection("127.0.0.1", server.server_port, timeout=10)
@@ -272,6 +343,23 @@ class EditorTests(unittest.TestCase):
                     r = conn.getresponse(); return r.status, dict(r.getheaders()), r.read()
                 code, _, body = request("GET", "/api/camino/film/editor")
                 self.assertEqual(code, 200); self.assertNotIn(b"PRIVATE", body)
+                original_public = self.f.public
+                self.second_day(close=False)
+                self.f.public = original_public
+                confirmation = {"local_date": self.f.day.local_date, "confirmed_final_mac_data": True}
+                self.assertEqual(request("POST", "/api/camino/film/close-mac-day", confirmation, {"Origin": "https://foreign.example"})[0], 403)
+                self.assertEqual(self.store.project_ids(), [self.pid])
+                code, _, body = request("POST", "/api/camino/film/close-mac-day", confirmation)
+                self.assertEqual(code, 200); second = json.loads(body)["project_id"]
+                self.assertEqual(json.loads(body)["local_date"], "2026-09-26")
+                code, _, body = request("GET", f"/api/camino/film/editor?project_id={second}")
+                self.assertEqual(code, 200); self.assertEqual(json.loads(body)["project_id"], second)
+                code, _, body = request("GET", "/api/camino/film/catalog")
+                self.assertEqual(code, 200); self.assertEqual(len(json.loads(body)["projects"]), 2)
+                for suffix in ("?project_id=", "?local_date=2026-09-26", "?project_id=../../secret",
+                               f"?project_id={self.pid}&project_id={second}"):
+                    self.assertEqual(request("GET", "/api/camino/film/editor" + suffix)[0], 400)
+                self.assertEqual(request("GET", "/api/camino/film/catalog?path=secret")[0], 400)
                 self.assertEqual(request("POST", "/api/camino/film/save", self.payload(), {"Origin": "https://foreign.example"})[0], 403)
                 self.assertEqual(request("POST", "/api/camino/film/save", self.payload())[0], 200)
                 self.assertEqual(request("POST", "/api/camino/film/render", {"project_id": self.pid, "revision": 2, "request_id": str(uuid4()), "profile": "preview", "range": None})[0], 200)

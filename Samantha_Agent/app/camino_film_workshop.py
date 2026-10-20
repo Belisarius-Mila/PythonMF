@@ -10,6 +10,7 @@ from datetime import date
 from pathlib import Path
 from types import SimpleNamespace
 from uuid import NAMESPACE_URL, UUID, uuid5
+from urllib.parse import parse_qs
 
 from camino.film.closed_day import (
     ClosedDayError, ClosedDayStore, _private_directory, _store_lock,
@@ -156,6 +157,45 @@ class MacFilmProjectStore(ClosedDayStore):
             raise ClosedDayError("project_invalid", "Projekt nemá platné potvrzení Mac vstupů.")
         return super().status(project_id)
 
+    def available_dates(self):
+        """Read candidate days, excluding hidden/private-only inputs.
+
+        Listing is not closure: close_mac_day still checks the full inventory,
+        receipts and bytes after the owner confirms the selected day.
+        """
+        with self._metadata_connection() as metadata:
+            metadata.execute("BEGIN")
+            state = metadata.execute("SELECT exports_blocked,reconciliation_required FROM meta WHERE singleton=1").fetchone()
+            if state is None or state[0] or state[1]:
+                raise ClosedDayError("archive_blocked", "Archiv nejprve vyžaduje dokončení obnovy.")
+            days = [json.loads(row[0]) for row in metadata.execute("SELECT body FROM days")]
+            days = {d["id"]: self._date(d["local_date"]) for d in days if d["trip_id"] == self.trip_id}
+            unique = Counter(days.values())
+            moments = [json.loads(row[0]) for row in metadata.execute("SELECT body FROM moments")]
+            permitted = {m["id"]: days[m["day_id"]] for m in moments
+                         if m.get("privacy") == "diary" and m.get("hidden") is False
+                         and m.get("day_id") in days and unique[days[m["day_id"]]] == 1}
+            assets = [json.loads(row[0]) for row in metadata.execute("SELECT body FROM assets")]
+            return sorted({permitted[a["moment_id"]] for a in assets
+                           if a.get("moment_id") in permitted and a.get("media_kind") in ("photo", "video")}, reverse=True)
+
+    def project_ids(self):
+        if not self.root.exists():
+            return []
+        result = []
+        for path in self.root.iterdir():
+            if path.is_symlink() or not path.is_dir():
+                continue
+            try:
+                if str(UUID(path.name)) == path.name:
+                    result.append(path.name)
+            except ValueError:
+                continue
+        return sorted(result)
+
+    def project_status(self, project_id):
+        return self._confirmed_status(project_id)
+
     def day_status(self, local_date: str, *, project_id: str | None = None):
         local_date = self._date(local_date)
         result = {"ok": True, "exists": False, "valid": False, "local_date": local_date}
@@ -205,19 +245,33 @@ def production_store():
         k: config[k] for k in ("metadata_db", "media_db", "media_root", "trip_id")})
 
 
-def camino_mac_film_project_action(*, confirmed=False, store=None):
+def film_project_query(query, *, allow_date=False):
+    values = parse_qs(query, keep_blank_values=True, strict_parsing=True, max_num_fields=2)
+    if set(values) - ({"project_id", "local_date"} if allow_date else {"project_id"}):
+        raise ValueError("Neznámý parametr filmového projektu.")
+    if any(len(v) != 1 or not v[0] for v in values.values()):
+        raise ValueError("Nejednoznačný výběr filmového projektu.")
+    result = {k: v[0] for k, v in values.items()}
+    if "local_date" in result:
+        MacFilmProjectStore._date(result["local_date"])
+    if "project_id" in result and str(UUID(result["project_id"])) != result["project_id"]:
+        raise ValueError("Neplatný identifikátor projektu.")
+    return result
+
+
+def camino_mac_film_project_action(*, confirmed=False, local_date=None, store=None):
     try:
         if confirmed is not True:
-            raise ClosedDayError("confirmation_required", "Potvrď konečnost dat 6. října na Macu.")
-        return (store or production_store()).close_mac_day(DAY, confirmed=True)
+            raise ClosedDayError("confirmation_required", "Potvrď konečnost dat vybraného dne na Macu.")
+        return (store or production_store()).close_mac_day(DAY if local_date is None else local_date, confirmed=True)
     except ClosedDayError as error:
         return {"ok": False, "error": error.code, "message": str(error)}
     except (OSError, ValueError, KeyError, sqlite3.DatabaseError):
         return {"ok": False, "error": "storage_unavailable", "message": "Projekt nelze bezpečně ověřit nebo uložit."}
 
 
-def camino_mac_film_project_status(*, store=None):
+def camino_mac_film_project_status(*, local_date=None, project_id=None, store=None):
     try:
-        return (store or production_store()).day_status(DAY)
+        return (store or production_store()).day_status(DAY if local_date is None else local_date, project_id=project_id)
     except (OSError, ValueError, KeyError, sqlite3.DatabaseError):
         return {"ok": False, "error": "storage_unavailable", "message": "Projekt nelze nyní na Macu ověřit."}

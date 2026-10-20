@@ -1,45 +1,57 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-10-19 21:49 CEST — doplněna externí záloha a zkouška souborové obnovy
+- Aktualizováno: 2026-10-20 10:35 CEST — Moje filmy a výběr dnů místně implementované
 
 ### Hotovo
-- Živý archiv Camina má skutečný šifrovaný doplněk `20261019_212828-78238a8a`:
-  1 587 souborů / 5 078 684 995 B, čtyři DB, 304 originálů, střihy a pevný release.
-  Celá kopie obnovena do oddělené soukromé složky a znovu ověřena:
-  všechny SHA-256, čtyři DB a mediální účtenky PASS.
-- Produkční služba se po záloze vrátila zdravá HTTP/HTTPS, anonymní přístup
-  odmítnut; archiv 893 operací / 124 Momentů / 3 cesty, konfigurace a síť
-  přesně shodné s výchozím stavem. Obnovená kopie nebyla spouštěna.
-- Aktualizovaný recovery program automaticky pořizuje doplněk; první
-  neúspěšný pokus bez snapshotu odhalil potřebu čekání na skutečný stop.
-  Oprava má 34 cílených a 2 133/2 133 plných testů PASS.
-- Střižna má nadále dříve dodaný přímý náhled a ruční trim; technické
-  důkazy z 15. 10. jsou v P2CD reportu. Zálohování nerozšiřuje telefonní přejímku.
+- Film Camino má místně přehled „Moje filmy“, otevření uloženého projektu
+  a výběr dalšího dne z Mac archivu. Každý projekt si drží vlastní střih,
+  neměnné revize, zdrojové náhledy a exporty. Výběr patří konkrétní kartě prohlížeče.
+- Nový projekt vznikne až po potvrzení konečnosti vybraného dne a dosavadním
+  úplném ověření Mac vstupů. Přehled kandidátních dnů sám není důkaz uzavření.
+  Soukromé, skryté, cizí a neplatné projekty se nenabízejí.
+- Přepnutí čeká na uložení; při výpadku spojení se rozpracovaný střih zachová
+  v kartě. Pozdní odpověď nesmí změnit nově vybraný projekt.
+- Míla potvrdil dobrý výsledek prvního filmu, plynulé přehrání v místním
+  přehrávači a funkční střih. Podrobná fyzická přejímka jednotlivých úkonů tím
+  není samostatně doložená.
+- Produkční film při kontrole stále revize 5: všech osm původních JSON souborů
+  a šest hotových výstupů má shodné SHA-256. Nový projekt ani render v produkci
+  nevznikl. Nová funkce není pushnutá ani nasazená.
+- Záloha z 19. 10. a zkouška její souborové obnovy zůstávají podle dřívějšího
+  záznamu; nová instalace Macu je samostatná přejímka.
 
 ### Rozhodnutí
-- Míla výslovně zadal doplnění zálohy Camina a TXT na SSD. Jen řízené
-  pozastavení/návrat stejné vlastní služby, bez nového klienta či deploye.
+- Míla schválil další navržený krok „Moje filmy“ a volbu dnů. Realizuje Adam.
+  Rozsah je více oddělených jednodenních projektů; společný vícedenní film,
+  kapitoly a prolog/epilog P2-F se nyní nesestavují. Push/deploy není schválený.
 
 ### Otevřeno / rizika
-- Úplná instalace a přejímka skutečného nového Macu neprovedena.
-- P2-C/E fyzické Safari/iPhone úsek/save/reload/náhled zůstává otevřené;
-  P2-F a P2-A/MAC1 odděleně, viz dřívější report.
-- Před zálohou zjištěná neshoda vlastnické účtenky Serve zachovaná;
-  skutečné HTTPS funguje a Serve/Funnel jsou shodné. Automatická oprava neproběhla.
-- Projektové jádro je snapshot 18. 10.; dnešní data služby jsou samostatný doplněk.
+- Nové ovládání na skutečném Macu/iPhonu je neprovedené; nástrojový prohlížeč
+  není dostupný. Starší P2-C/E úsek/save/reload/náhled zůstává samostatná přejímka.
+- Výběr dnů je omezený na nakonfigurovanou cestu a povolené obrazové zdroje.
+  Neúplné originály, konfliktní archiv nebo změněné soukromí blokují uzavření.
+- Neuložený střih se drží v otevřené kartě, není to trvalá záloha po jejím
+  násilném ukončení. Uložené revize a exporty jsou trvalé.
+- Dřívější nesoulad vlastnické účtenky Serve nebyl tímto krokem opravován.
 
 ### Další krok
-- Pravidelná recovery záloha aktualizovaným programem; při novém zařízení
-  společně použít projektový snapshot, doplněk dat a doplněk kódu podle TXT.
+- Po samostatném pokynu p+n předat schválený commit registrované Luně
+  pro push a nasazení pouze Cockpitu; následně fyzický retest dvou dnů.
 
 ### Navrhované další kroky
-- Fyzická přejímka střižny a celkový restore test nového Macu jsou samostatné úlohy.
+- Po nasazení otevřít původní film, přepnout jiný den, potvrdit jeho konečnost,
+  uložit úpravu/reload a vrátit se k nezměněnému původnímu filmu.
+- P2-F spojování dnů a kapitoly až po přijetí této práce s více projekty.
+- Celková obnova nového Macu zůstává samostatný úkol podle TXT.
 
 ### Technický důkaz
-- `logs/camino_backup_execute_20261019_r2.log`, `logs/camino_backup_restore_20261019.log`,
-  `logs/camino_backup_after_20261019.log`, `logs/camino_backup_full_gate_20261019_final2.log`.
-- `camino/docs/P2CD_EDITOR_MP4_REPORT.md` zůstává důkazem staršího vývoje střižny.
+- Cílené testy 60/60 PASS: dva syntetické dny, izolované revize/zdroje/worker/
+  exporty, aktuální soukromí, HTTP Origin/parametry a závody odpovědí v UI.
+- Důkazy: `logs/camino_film_library_targeted_final_20261020.log`,
+  `logs/camino_film_library_preservation_final_20261020.log`;
+  plná brána 2 137/2 137 PASS: `logs/camino_film_library_gate_final_20261020.log`.
+- Funkce a přejímací postup: `camino/docs/P2CD_EDITOR_MP4_REPORT.md`.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Camino
@@ -3822,3 +3834,42 @@ Technický důkaz:
   První pokus bez snapshotu vedl k ověřené opravě čekání na asynchronní stop/start.
 - Předchozí neshoda vlastnické účtenky Serve zachovaná; skutečné HTTPS funguje.
   Systémová Klíčenka, další externí data a celková nová instalace nejsou tímto testem pokryté.
+
+
+### 2026-10-20 10:35 CEST — Moje filmy a výběr dalšího dne
+
+Hotovo:
+- Místně implementovaný přehled ověřených filmových projektů a výběr dalšího
+  dne z Mac archivu. Samostatná karta drží svůj výběr; střih, revize a exporty
+  jsou vždy vázané na konkrétní projekt, také při práci workeru.
+- Neuložené změny brání přepnutí, síťový výpadek zachová koncept v kartě
+  a pozdní odpověď nemění vybraný den. Přehled nevydává soukromé/skryté
+  ani nově neplatné projekty.
+- Současný film má revizi 5; osm původních JSON souborů a všech šest hotových
+  výstupů před/po shodných SHA-256. Nevznikl žádný produkční projekt ani render.
+
+Rozhodnutí:
+- Míla schválil navržený další krok. Více jednodenních projektů nyní,
+  P2-F společný vícedenní film/kapitoly později. Adam realizuje tento zásah
+  do persistence a výběru; bez autorizace nového push/deploye.
+- Míla hodnotí první film/střih dobře a místní přehrávání plynule;
+  nejde o doložení všech jednotlivých fyzických testů editoru.
+
+Další krok:
+- Po samostatném p+n nasadit pouze Cockpit přes registrovanou Lunu
+  a fyzicky ověřit přepnutí dvou dnů se zachováním původního střihu.
+
+Navrhované další kroky:
+- V druhém dni uložit úpravu, ověřit reload a vrátit se k prvnímu filmu.
+- P2-F spojení dnů/kapitoly až po přijetí přehledu; celý nový Mac odděleně.
+
+Technický důkaz:
+- 60/60 cílených testů a plná brána 2 137/2 137 PASS.
+- Testy: dva syntetické dny, cizí zdroje a výstupy odmítnuté, vlastní revize,
+  worker druhého dne, read-only katalog, aktuální soukromí a HTTP parametry.
+  Node testy ověřují dvě nezávislé karty, neuložený/offline koncept a pozdní odpovědi.
+- Logy `camino_film_library_targeted_final_20261020.log`,
+  `camino_film_library_preservation_final_20261020.log`,
+  `camino_film_library_gate_final_20261020.log`; report `P2CD_EDITOR_MP4_REPORT.md`.
+- Nová UI přejímka Mac/iPhone neprovedená, nástrojový prohlížeč nedostupný.
+  Záloha z 19. 10. zachovaná, služba Camino a síť se nepřepínaly.

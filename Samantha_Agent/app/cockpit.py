@@ -53,6 +53,7 @@ from app.screen_sessions import ScreenSessionController
 from app.camino_film_workshop import (
     camino_mac_film_project_action,
     camino_mac_film_project_status,
+    film_project_query,
 )
 from app.camino_film_editor import film_editor_action, production_editor
 from app.screen_recovery import ScreenRecovery
@@ -8675,7 +8676,7 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
     },
     {
         "path": "/api/camino/film/close-mac-day",
-        "label": "Uložit filmový projekt z konečných Mac dat 6. října",
+        "label": "Uložit filmový projekt z konečných Mac dat vybraného dne",
         "risk": "private_write",
         "confirmation": "explicit_ui_confirmation_of_final_mac_inputs",
         "handler_name": "camino_mac_film_project_action",
@@ -9635,20 +9636,30 @@ class CockpitServer:
             def do_GET(self) -> None:  # noqa: N802
                 self.validate_request_access(require_origin=False)
                 parsed = urlparse(self.path)
-                if parsed.path == "/api/camino/film/editor":
+                if parsed.path == "/api/camino/film/catalog":
                     if parsed.query:
                         self.respond_json({"ok": False, "error": "invalid_request"}, status=HTTPStatus.BAD_REQUEST)
                     else:
-                        self.respond_json(film_editor_action("view"))
+                        self.respond_json(film_editor_action("catalog"))
+                    return
+                if parsed.path == "/api/camino/film/editor":
+                    try:
+                        selection = film_project_query(parsed.query)
+                    except ValueError:
+                        self.respond_json({"ok": False, "error": "invalid_request"}, status=HTTPStatus.BAD_REQUEST)
+                    else:
+                        self.respond_json(film_editor_action("view", selection or None))
                     return
                 if parsed.path.startswith("/api/camino/film/output/"):
                     self.respond_film_output(parsed)
                     return
                 if parsed.path == "/api/camino/film/day":
-                    if parsed.query:
+                    try:
+                        selection = film_project_query(parsed.query, allow_date=True)
+                    except ValueError:
                         self.respond_json({"ok": False, "error": "invalid_request"}, status=HTTPStatus.BAD_REQUEST)
                     else:
-                        self.respond_json(camino_mac_film_project_status())
+                        self.respond_json(camino_mac_film_project_status(**selection))
                     return
                 if parsed.path == "/api/screen/sessions":
                     self.respond_json(SCREEN_SESSIONS.status())
@@ -9958,10 +9969,12 @@ class CockpitServer:
                     return
                 if parsed.path == "/api/camino/film/close-mac-day":
                     payload = self.read_json()
-                    if parsed.query or set(payload) != {"confirmed_final_mac_data"}:
+                    if (parsed.query or set(payload) not in ({"confirmed_final_mac_data"}, {"confirmed_final_mac_data", "local_date"})
+                            or ("local_date" in payload and not isinstance(payload["local_date"], str))):
                         self.respond_json({"ok": False, "error": "invalid_request"}, status=HTTPStatus.BAD_REQUEST)
                         return
-                    result = camino_mac_film_project_action(confirmed=payload["confirmed_final_mac_data"])
+                    result = camino_mac_film_project_action(confirmed=payload["confirmed_final_mac_data"],
+                        **({"local_date": payload["local_date"]} if "local_date" in payload else {}))
                     self.respond_json(result, status=HTTPStatus.OK if result.get("ok") else HTTPStatus.CONFLICT)
                     return
                 if parsed.path == "/api/screen/sessions/attach":

@@ -366,11 +366,15 @@
   <div id="caminoFilmModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="caminoFilmTitle">
     <div class="modal">
       <div class="modal-header">
-        <h2 id="caminoFilmTitle">Camino — projekt filmu z 6. října</h2>
+        <h2 id="caminoFilmTitle">Moje filmy Camino</h2>
         <button class="secondary" id="caminoFilmCloseBtn" type="button">Zavřít</button>
       </div>
       <div class="modal-body">
         <p>Projekt používá konečná data na Macu. Výchozí návrh nabízí všechny fotografie a celá videa. Střih i exporty se ukládají odděleně od originálů.</p>
+        <section aria-label="Uložené filmy"><h3>Moje filmy</h3><ul id="caminoFilmProjects"></ul></section>
+        <label>Den na Macu<select id="caminoFilmDay" disabled aria-describedby="caminoFilmCatalogStatus"></select></label>
+        <div id="caminoFilmCatalogStatus" class="status-line" role="status" aria-live="polite"></div>
+        <h3 id="caminoFilmSelectedTitle">Vybraný film</h3>
         <div id="caminoFilmStatus" class="status-line" role="status" aria-live="polite"></div>
         <div id="caminoFilmSummary" class="message hidden"></div>
         <div class="actions">

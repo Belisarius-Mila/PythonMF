@@ -19,10 +19,10 @@ const sid = "00000000-0000-0000-0000-000000000001", pid = "00000000-0000-0000-00
 let view = {ok: true, project_id: pid, revision: 1, duration_ms: 3000,
   sources: [{asset_id: sid, kind: "photo", duration_ms: null, title: "<script>SAFE TEXT</script>"}],
   draft: {shots: [{asset_id: sid, title: "Title", in_ms: 0, out_ms: 3000, gain: 1, included: true}], voices: [], duck_gain: .2}, jobs: []};
-let saves = [], renderCalls = [], clock = [], loseReply = false, uuidCount = 10, offline = false, readWait = null;
+let saves = [], renderCalls = [], clock = [], loseReply = false, uuidCount = 10, offline = false, readWait = null, saveWait = null;
 let sourceCalls = [], sourceWait = null;
 const fetch = async (url, options) => {
-  if (url.endsWith("/editor")) {
+  if (url.split("?")[0].endsWith("/editor")) {
     if (offline) throw new Error("offline");
     if (readWait) return readWait;
     return {json: async () => JSON.parse(JSON.stringify(view))};
@@ -37,6 +37,7 @@ const fetch = async (url, options) => {
   }
   if (url.endsWith("/save")) {
     saves.push(p);
+    if (saveWait) return saveWait;
     if (loseReply) { loseReply = false; throw new Error("lost after save"); }
     view.revision = p.expected_revision + 1; view.draft = p.draft;
     return {json: async () => ({ok: true, revision: view.revision})};
@@ -121,6 +122,27 @@ async function main() {
   await open(1); await flush(); const latestUrl = nodes.sourcePlayer.src;
   releaseSource({json: async () => ({ok: true, job_id: sourceCalls.at(-2).request_id})});
   await stale; await flush(); assert.equal(nodes.sourcePlayer.src, latestUrl, "late source selection cannot replace a newer one");
+  const otherProject = "00000000-0000-0000-0000-000000000004";
+  const firstView = JSON.parse(JSON.stringify(view));
+  titleInput().value = "Must save before switch"; titleInput().emit("change");
+  let releaseSave; saveWait = new Promise(resolve => { releaseSave = resolve; });
+  assert.equal(editor.open(otherProject), false, "switch waits for the current save");
+  assert.equal(saves.at(-1).project_id, pid);
+  releaseSave({json: async () => ({ok: true, revision: ++view.revision})}); saveWait = null; await flush();
+  view = {...JSON.parse(JSON.stringify(view)), project_id: otherProject, jobs: []};
+  assert.equal(editor.open(otherProject), true); await flush();
+  titleInput().value = "Other project draft"; titleInput().emit("change");
+  offline = true; await editor.check();
+  assert.equal(editor.open(pid), false, "offline draft must be restored before switching");
+  offline = false; editor.open(otherProject); await flush();
+  assert.equal(titleInput().value, "Other project draft");
+  await editor.save(); assert.equal(saves.at(-1).project_id, otherProject);
+  let releaseRead; readWait = new Promise(resolve => { releaseRead = resolve; });
+  const oldRead = editor.check(); readWait = null;
+  view = firstView; editor.open(pid); await flush();
+  releaseRead({json: async () => ({...firstView, project_id: otherProject})}); await oldRead;
+  assert.equal(titleInput().value, firstView.draft.shots[0].title, "stale project response cannot replace the selected edit");
+  await open(1); await flush();
   nodes.sourcePlayer.readyState = 1; nodes.sourcePlayer.emit("loadedmetadata");
   nodes.sourcePlayer.emit("error");
   assert(nodes.start.disabled); assert(nodes.playSelection.disabled); assert.equal(nodes.sourcePlayer.src, undefined);

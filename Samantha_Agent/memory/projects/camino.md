@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-15 20:29 CEST — střižna pushnutá/nasazená, skutečný náhled a archiv ověřené
+Aktualizováno: 2026-10-20 10:35 CEST — Moje filmy a volba dnů místně, nasazení čeká na samostatný pokyn
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,8 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-20 10:35 CEST: Místně hotové „Moje filmy“ a volba Mac dne, oddělené projektové revize/zdroje/worker/exporty; výběr v konkrétní kartě. Nový projekt až po potvrzení konečnosti a úplné validaci. 60/60 cílených testů a plná brána 2 137/2 137 PASS. Produkční revize 5, osm JSON a šest hotových výstupů shodných SHA-256; žádný nový produkční projekt/render. Bez push/deploye. Nový fyzický Mac/iPhone retest čeká po samostatném nasazení pouze Cockpitu; P2-F společný vícedenní film až později. Míla přijímá první film/střih, podrobná P2-C/E přejímka není plně doložená.
 
 - 2026-10-19 21:49 CEST: Šifrovaný doplněk živého archivu `20261019_212828-78238a8a` dokončen: 1 587 souborů / 5 078 684 995 B, 4 DB, 304 originálů, filmové projekty a pevný release. Celá souborová obnova do nové soukromé složky, SHA-256, DB a mediální účtenky PASS. Produkce HTTP/HTTPS zdravá; archiv, konfigurace a síť přesně shodné. 34 cílených testů a 2 133 plná brána PASS. Nový recovery program doplněk automaticky zahrnuje; TXT a doplněk kódu na SSD. Předchozí síťová vlastnická účtenka má nesoulad, skutečné HTTPS funguje a síť se neměnila. Nový Mac ani fyzická P2-C/E přejímka tím nejsou ověřené. Kanonický handoff a TVBCP aktualizované.
 
@@ -3216,3 +3218,42 @@ Technický důkaz:
 - 68 Swift testů, 52 cílených API/HTTP/workflow testů, arm64 build, CRC/binární roundtrip a izolovaný import PASS. Nepodepsaný IPA 1247937 B, SHA-256 `42c964f9579fe09663632dbafc7a2dfc85e6e8d6424f2c9a7f04fef07ec64f51`. Živý diagnostický server nezměněný; report `METADATA_REJECTION_INCIDENT_20261014.md`.
 
 - Kompatibilita: dosavadní server `e815ae75dc38` přečetl syntetickou historii po stornu a přesně zopakoval všech osm přijatých obálek bez změny stavu; živý archiv se neotevřel pro zápis.
+
+
+### 2026-10-20 10:35 CEST — Moje filmy a výběr dalšího dne
+
+Hotovo:
+- Místně implementovaný přehled ověřených filmových projektů a výběr dalšího
+  dne z Mac archivu. Samostatná karta drží svůj výběr; střih, revize a exporty
+  jsou vždy vázané na konkrétní projekt, také při práci workeru.
+- Neuložené změny brání přepnutí, síťový výpadek zachová koncept v kartě
+  a pozdní odpověď nemění vybraný den. Přehled nevydává soukromé/skryté
+  ani nově neplatné projekty.
+- Současný film má revizi 5; osm původních JSON souborů a všech šest hotových
+  výstupů před/po shodných SHA-256. Nevznikl žádný produkční projekt ani render.
+
+Rozhodnutí:
+- Míla schválil navržený další krok. Více jednodenních projektů nyní,
+  P2-F společný vícedenní film/kapitoly později. Adam realizuje tento zásah
+  do persistence a výběru; bez autorizace nového push/deploye.
+- Míla hodnotí první film/střih dobře a místní přehrávání plynule;
+  nejde o doložení všech jednotlivých fyzických testů editoru.
+
+Další krok:
+- Po samostatném p+n nasadit pouze Cockpit přes registrovanou Lunu
+  a fyzicky ověřit přepnutí dvou dnů se zachováním původního střihu.
+
+Navrhované další kroky:
+- V druhém dni uložit úpravu, ověřit reload a vrátit se k prvnímu filmu.
+- P2-F spojení dnů/kapitoly až po přijetí přehledu; celý nový Mac odděleně.
+
+Technický důkaz:
+- 60/60 cílených testů a plná brána 2 137/2 137 PASS.
+- Testy: dva syntetické dny, cizí zdroje a výstupy odmítnuté, vlastní revize,
+  worker druhého dne, read-only katalog, aktuální soukromí a HTTP parametry.
+  Node testy ověřují dvě nezávislé karty, neuložený/offline koncept a pozdní odpovědi.
+- Logy `camino_film_library_targeted_final_20261020.log`,
+  `camino_film_library_preservation_final_20261020.log`,
+  `camino_film_library_gate_final_20261020.log`; report `P2CD_EDITOR_MP4_REPORT.md`.
+- Nová UI přejímka Mac/iPhone neprovedená, nástrojový prohlížeč nedostupný.
+  Záloha z 19. 10. zachovaná, služba Camino a síť se nepřepínaly.
