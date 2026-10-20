@@ -1,6 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-20 22:13 CEST: Míla potvrdil funkční opravu osiřelých metadat. Nově požaduje u fotografií Otevřít fotografii a odstranit jejich renderovaný náhled záběru. Vývoj i p+n výslovně Lunou; nejprve zprovoznit širší delegaci. Centrální vývojová role již gpt-6-luna/high, přejímací kontrakt připravený, samotná funkce zatím chybí.
+
 - Aktualizováno: 2026-10-20 21:23 CEST — odstraněná čtyři osiřelá metadata videí, den 8. října znovu platný
 
 ### Hotovo
@@ -3971,3 +3973,11 @@ Technický důkaz:
   797 filmových souborů beze změny; původní projekty 6 a 7 platné, den 8 validní.
 - HTTPS owner health 200, Cockpit katalog OK. Další fyzický kontakt telefonu
   neověřený. Log `logs/camino_metadata_cleanup_20261020.log`, detail a snapshot private.
+
+## 2026-10-20 22:13 CEST — Příprava fotografického ovládání pro Lunu
+
+Hotovo: Míla potvrdil funkční opravu osiřelých metadat. Nově požaduje u fotografií Otevřít fotografii a odstranit jejich renderovaný náhled záběru. Vývoj i p+n výslovně Lunou; nejprve zprovoznit širší delegaci. Centrální vývojová role již gpt-6-luna/high, přejímací kontrakt připravený, samotná funkce zatím chybí.
+Rozhodnutí: fotografie otevřít v nové kartě bez renderu či diskové kopie, video ovládání zachovat.
+Další krok: předat vymezený kód a nezměnitelné syntetické testy skutečné Luně.
+Navrhované další kroky: kontrola návrhu a schválené p+n pouze Cockpitu.
+Technický důkaz: 4 přejímací testy záměrně FAIL pro chybějící metodu, bez chyb prostředí; originály a projekty nebyly změněné. Riziko: soukromí musí být ověřeno i po dekódování, žádná raw metadata v obrazu.

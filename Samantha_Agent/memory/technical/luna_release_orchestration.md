@@ -330,6 +330,8 @@ probe `3a1b667eeb634603be866357921150f5`. Odhad 0,02975 kreditu Standard.
 Cena ověřena v oficiálním ceníku: 2,5 vstup / 0,25 cache / 12,5 výstup
 kreditu za milion tokenů. Zdroj: https://learn.chatgpt.com/docs/pricing#token-rates.
 Důkaz soukromý, redigovaný souhrn logs/luna_development_probe_20261020.log.
+Centrální simple_developer byl 20. 10. registrovaně přepnut na gpt-6-luna/high;
+release_executor zachovaný. Rozšířená portálová větev vyžaduje následné p+n.
 Přepnutí již existující role používá activation_plan(probe, replace_existing=True)
 a activate(plan, confirmed=True); zmrazí i původní konfiguraci a zachová
 release_executor. Následující část popisuje původní pilot a jeho historii,

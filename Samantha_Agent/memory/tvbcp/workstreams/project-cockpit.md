@@ -1,6 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-20 22:12 CEST: Centrální simple_developer přepnutý ověřenou aktivací na skutečnou gpt-6-luna/high; release_executor přesně zachovaný. Rozšířený engine je lokální; běžící portál dostane novou větev až schváleným p+n. Připravené nezměnitelné syntetické přejímací testy pro fotografie; samotnou funkci vyvine Luna.
+
 - 2026-10-20 22:03 CEST: Výslovný vývoj Lunou rozšířený lokálně na více souborů; skutečný syntetický návrh Luny převzatý (3 FAIL → 3 PASS). Aktivace centrální role, skutečná úprava fotografií a schválené p+n následují. Starší tvrzení o trvalém omezení jedné funkce je překonané novým rozhodnutím.
 
 - 2026-10-17: Po úspěšném pilotu je routine_reviewer opět neaktivní. Běžící Cockpit má starý parser vyžadující jedinou roli release_executor; původní config/agent_roles.json zůstává zachovaný. Pilotní schválení a výsledky jsou uložené v runtime logu. Aktivace nové role až po samostatném nasazení podpory více rolí, bez obcházení současného p+n.
@@ -2037,3 +2039,11 @@ Rozhodnutí: výslovný Mílův požadavek na vývoj Lunou má přednost před h
 Další krok: dokončit bránu, přepnout centrální simple_developer podle přijaté zkoušky a skutečně předat Luně fotografické ovládání střižny.
 Navrhované další kroky: jediné již schválené p+n přes Lunu, pak fyzická přejímka v Cockpitu.
 Technický důkaz: probe 3a1b667eeb634603be866357921150f5, gpt-6-luna/high, 0,02975 odhadovaného Standard kreditu; 62 původních cílených kontrol a 39 rozšířených kontrol PASS (s překryvem). Plná sada: 2164 testů, jediný rozdíl očekávaného počtu capability 28 → 29 opraven, příslušné 3 testy a statická brána PASS; plná publikační přejímka následuje při p+n. Centrální role při tomto zápisu ještě Sol, nasazení nového enginu neprovedené. Riziko: přerušení vícesouborového převzetí vyžaduje kontrolu stavu applying; soukromá data se modelu nepředávají.
+
+## 2026-10-20 22:12 CEST — Aktivace vývojové Luny
+
+Hotovo: Centrální simple_developer přepnutý ověřenou aktivací na skutečnou gpt-6-luna/high; release_executor přesně zachovaný. Rozšířený engine je lokální; běžící portál dostane novou větev až schváleným p+n. Připravené nezměnitelné syntetické přejímací testy pro fotografie; samotnou funkci vyvine Luna.
+Rozhodnutí: výslovné vývojové pokyny vždy předávat Luně; stejná centrální role i pro starší pilot.
+Další krok: skutečný vícesouborový úkol fotografie ve střižně.
+Navrhované další kroky: zkontrolovat výsledek a dokončit již schválené p+n.
+Technický důkaz: activation_plan replace_existing=true + activate → activated_locally, přijatý probe 3a1b667eeb634603be866357921150f5, binding a6e98e90294fc7cc47637ffd39aaf75c83acab3629027ffbdb3ccc6bf14fbe32. Riziko přerušeného applying zůstává viditelné; vývoj neuděluje oprávnění k mazání či publikaci.

@@ -15,13 +15,13 @@
     },
     "simple_developer": {
       "label": "Pomocník pro jednu čistou Python funkci",
-      "preferred_model": "gpt-6.1-sol",
+      "preferred_model": "gpt-6-luna",
       "approved_models": [
         {
-          "model": "gpt-6.1-sol",
-          "reasoning_effort": "medium",
-          "cost_review": "Mila 2026-10-17: Standard credits/MTok 50 input, 2.5 cached, 250 output; one bounded development turn; no upgrade",
-          "dry_run_evidence": "data/private/simple_development_probes/9396d97054df4e549a777d930622df1f/proof.json"
+          "model": "gpt-6-luna",
+          "reasoning_effort": "high",
+          "cost_review": "Mila explicit Luna development 2026-10-20; official Standard credits/MTok 2.5 input, 0.25 cached, 12.5 output; one bounded trial.",
+          "dry_run_evidence": "data/private/simple_development_probes/3a1b667eeb634603be866357921150f5/proof.json"
         }
       ]
     }
