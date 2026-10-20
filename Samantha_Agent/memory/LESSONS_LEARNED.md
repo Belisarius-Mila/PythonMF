@@ -29,6 +29,13 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-077 — Trvalé smazání filmové varianty zahrnuje všechny pracovní pokusy
+
+- Problém: odstranění samotného finálního MP4 ponechá velké segmenty, PNG a neúplné pokusy; opakovaný starý render požadavek může variantu obnovit.
+- Typ: opakující se
+- Řešení nalezeno: 20102026
+- Řešení: potvrdit přesnou variantu a její inventář, vyloučit aktivní worker a cizí odkazy, před prvním unlink atomicky zapsat stav mazání bez mediální kopie. Odstranit všechny pracovní pokusy přes ověřené deskriptory; ponechat pouze malá metadata blokující staré request ID. Po pádu dokončit jen zbývající soubory potvrzené sady. Synteticky ověřeno odstranění všech pokusů, izolace podobných variant, souběh, přerušení a GET/HEAD/Range 404. Diskové bloky otevřeného souboru může OS držet do uzavření posledního přehrávání/stahování.
+
 ### LL-076 — TTS může vracet prázdný zvuk i po aktualizaci knihovny
 
 - Problém: původní endpoint denní sovy vracel HTTP 403 s edge-tts 7.2.8 a `NoAudioReceived` také s 7.3.1; selhal i skutečný cloudový běh.

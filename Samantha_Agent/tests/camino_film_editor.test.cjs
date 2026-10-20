@@ -21,6 +21,8 @@ let view = {ok: true, project_id: pid, revision: 1, duration_ms: 3000,
   draft: {shots: [{asset_id: sid, title: "Title", in_ms: 0, out_ms: 3000, gain: 1, included: true}], voices: [], duck_gain: .2}, jobs: []};
 let saves = [], renderCalls = [], clock = [], loseReply = false, uuidCount = 10, offline = false, readWait = null, saveWait = null;
 let sourceCalls = [], sourceWait = null;
+let deleteCalls = [], deletePlanCalls = [], deleteAnswer = null, deleteWait = null, wrongDeletePlan = false, deleteLost = false;
+const deleteConfirmation = "Potvrzuji globální brzdu: rozumím riziku a chci pokračovat.";
 const fetch = async (url, options) => {
   if (url.split("?")[0].endsWith("/editor")) {
     if (offline) throw new Error("offline");
@@ -28,6 +30,21 @@ const fetch = async (url, options) => {
     return {json: async () => JSON.parse(JSON.stringify(view))};
   }
   const p = JSON.parse(options.body);
+  if (url.endsWith("/delete-plan")) {
+    deletePlanCalls.push(p);
+    const job = view.jobs.find(j => j.job_id === p.job_id);
+    return {json: async () => ({ok: true, ...p, project_id: wrongDeletePlan ? sid : p.project_id,
+      profile: job.profile, revision: job.revision, range: job.range ? {end_ms: job.range.end_ms, start_ms: job.range.start_ms} : null, plan_token: "a".repeat(64),
+      bytes: 20000000, file_count: 20, confirmation_text: deleteConfirmation})};
+  }
+  if (url.endsWith("/delete")) {
+    deleteCalls.push(p);
+    assert.equal(p.confirmation, deleteConfirmation);
+    view.jobs = view.jobs.filter(job => job.job_id !== p.job_id);
+    if (deleteWait) return deleteWait;
+    if (deleteLost) { deleteLost = false; throw new Error("lost deletion reply"); }
+    return {json: async () => ({ok: true, deleted: true})};
+  }
   if (url.endsWith("/source")) {
     sourceCalls.push(p);
     if (sourceWait) return sourceWait;
@@ -49,7 +66,8 @@ const context = {window: {}, console}; vm.createContext(context);
 vm.runInContext(fs.readFileSync("app/frontend/cockpit/film_editor.js", "utf8"), context);
 const editor = context.window.SamanthaFilmEditor.create(root, {document: doc, fetch,
   uuid: () => `00000000-0000-0000-0000-${String(++uuidCount).padStart(12, "0")}`,
-  setTimeout: (fn, delay) => { clock.push({fn, delay}); return clock.length; }, clearTimeout() {}, confirm: () => true});
+  setTimeout: (fn, delay) => { clock.push({fn, delay}); return clock.length; }, clearTimeout() {}, confirm: () => true,
+  prompt: message => { assert(message.includes("20")); assert(message.includes("Bez koše")); return deleteAnswer; }});
 const flush = () => new Promise(resolve => setImmediate(resolve));
 function titleInput() { return nodes.shots.children[0].children.find(n => n.className === "camino-film-fields").children[0].children[0]; }
 async function main() {
@@ -68,12 +86,33 @@ async function main() {
   nodes.final.emit("click"); await flush();
   assert.equal(renderCalls.at(-1).revision, view.revision);
   assert.equal(renderCalls.at(-1).profile, "final"); assert.equal(renderCalls.at(-1).range, null);
-  view.jobs = [{job_id: pid, revision: 1, profile: "preview", range: null, state: "failed"},
-    {job_id: sid, revision: 1, profile: "preview", range: null, state: "ready", url: `/api/camino/film/output/${pid}/${sid}`}];
+  view.jobs = [{job_id: pid, revision: 1, profile: "preview", range: {start_ms: 500, end_ms: 2500}, state: "failed"},
+    {job_id: sid, revision: 1, profile: "preview", range: {start_ms: 500, end_ms: 2500}, state: "ready", url: `/api/camino/film/output/${pid}/${sid}`}];
   await editor.check(); assert(nodes.jobs.children[0].textContent.includes("starší střih"));
   assert(nodes.jobs.children[1].textContent.includes("Starší neúspěšný pokus"));
-  assert.equal(nodes.jobs.children[1].children.length, 0, "replaced failed job must not appear as the current export failure");
+  assert.equal(nodes.jobs.children[1].children.length, 1, "a superseded failure only offers permanent deletion");
+  assert.equal(nodes.jobs.children[1].children[0].textContent, "Smazat natrvalo");
   nodes.jobs.children[0].children[0].emit("click"); assert(nodes.player.src.startsWith("/api/camino/film/output/"));
+  const remove = () => nodes.jobs.children[0].children.find(n => n.textContent === "Smazat natrvalo").emit("click");
+  titleInput().value = "Save before deletion"; titleInput().emit("change");
+  await remove(); assert.equal(deletePlanCalls.length, 0, "unsaved edits block the deletion flow"); await flush();
+  await remove(); assert.equal(deleteCalls.length, 0, "cancelling the confirmation never deletes");
+  deleteAnswer = "ano"; await remove(); assert.equal(deleteCalls.length, 0);
+  deleteAnswer = deleteConfirmation; wrongDeletePlan = true;
+  await remove(); assert.equal(deleteCalls.length, 0, "mismatched project plan cannot delete"); wrongDeletePlan = false;
+  let releaseDelete; deleteWait = new Promise(resolve => { releaseDelete = resolve; });
+  const deleting = remove(); await flush();
+  assert.equal(editor.canClose(), false, "project switching waits for deletion confirmation");
+  const planCount = deletePlanCalls.length; await remove(); assert.equal(deletePlanCalls.length, planCount);
+  releaseDelete({json: async () => ({ok: true, deleted: true})}); deleteWait = null; await deleting;
+  assert.equal(nodes.player.src, undefined, "the removed variant stops playing before unlink");
+  assert.equal(deleteCalls.length, 1); assert.equal(nodes.jobs.children.length, 1);
+  deleteLost = true; await remove(); assert.equal(deleteCalls.length, 2, "lost response never retries automatically");
+  assert.equal(view.jobs.length, 0);
+  view.jobs = [{job_id: pid, revision: 1, profile: "preview", range: null, state: "delete_pending"}];
+  await editor.check();
+  assert(nodes.jobs.children[0].textContent.includes("Mazání nebylo dokončeno"));
+  assert.equal(nodes.jobs.children[0].children[0].textContent, "Dokončit smazání"); view.jobs = [];
   titleInput().value = "Survives temporary offline"; titleInput().emit("change");
   offline = true; await editor.check(); assert.equal(nodes.shots.children.length, 0);
   offline = false; await editor.check(); assert.equal(titleInput().value, "Survives temporary offline");
@@ -112,7 +151,7 @@ async function main() {
   view.jobs.push({job_id: second, revision: 1, profile: "preview", range: null, state: "failed"});
   await editor.check();
   assert(nodes.jobs.children[0].textContent.includes("Selhalo"), "a ready source proxy must never hide a failed whole-film export");
-  assert.equal(nodes.jobs.children[0].children.length, 1, "whole-film retry remains available");
+  assert.equal(nodes.jobs.children[0].children.length, 2, "whole-film retry and permanent deletion remain available");
   editor.close(); editor.open(); await flush();
   const restored = nodes.shots.children[0].children.find(n => n.className === "camino-film-fields");
   assert.equal(restored.children[1].children[0].value, .75); assert.equal(restored.children[2].children[0].value, 1.25);

@@ -1,10 +1,49 @@
 # Camino P2-C/D — editor a MP4 z uzavřeného dne
 
-Stav k 20. 10.: původní editor a přímý trim jsou nasazené; rozšíření „Moje filmy“
-a volba dalších dnů jsou místně implementované, bez nového push/deploye.
+Stav k 20. 10.: editor, přímý trim, „Moje filmy“ a volba dnů jsou nasazené
+na `96ce7bab`. Trvalé smazání jedné varianty je místně implementované,
+bez nového push/deploye.
 Míla 12. 10. výslovně zadal pokračování editorem a MP4 nad potvrzenou Mac
 sadou 6. 10. Telefon, běžící Camino, jeho archiv a síť se nemění.
 Míla potvrdil „ok p+n cockpit“; přesný `7c9547fc` je na GitHubu a nasazený pouze Cockpit. Hotové MP4 se znovu nevyráběly.
+
+## Trvalé smazání jedné varianty — 20. 10. 2026
+
+Míla vyzkoušel vytvoření MP4 druhého dne a výslovně požaduje nevyhovující
+varianty trvale odstranit kvůli místu. To mění původní zachovávání všech exportů.
+U hotového filmu, dílčího náhledu a neúspěšného pokusu přibylo „Smazat natrvalo“.
+Před potvrzením se zobrazí přesný profil/revize/časový úsek a celkový počet
+a velikost souborů dané varianty. Seznam dílčích náhledů uvádí i jejich časy.
+
+Smažou se všechny její pracovní pokusy: finální MP4, neúplná videa, segmenty,
+PNG a ostatní pracovní soubory. Žádný koš, archivní přesun ani nová mediální
+kopie. V původním adresáři úlohy zůstanou jen request, malý stav smazání
+a nulový soubor zámku. Tato technická metadata neobsahují média a brání
+tomu, aby starý request ID znovu vytvořil smazaný výstup.
+
+Přesná potvrzovací věta je vyžadovaná podle `global_safety_brake.md` pro
+mazání adresářů a více souborů. Potvrzení je vázané na serverový plán konkrétní
+varianty; změněné soubory vyžadují nové ověření. Originály, uložené revize
+střihu, jiné varianty a zdrojové náhledy se touto akcí nemažou.
+
+Zámek chrání před souběhem s renderem a ostatními zápisy stejné střižny. Aktivní
+render a čekající varianta se odmítají; cizí/symbolické/pevné odkazy a jiný
+disk se neprocházejí. Pracuje se pouze přes ověřené adresáře a jejich
+deskriptory. Před prvním odstraněním se atomicky uloží stav `delete_pending`
+s identitami potvrzených souborů bez jejich obsahu. Pád tak neobnoví výdej
+nebo render; „Dokončit smazání“ odstraní zbývající členy téže sady.
+Úspěšně smazaná varianta se už nenabízí a starý GET/HEAD/Range vrací 404.
+Příliš velký záznam pro obnovu se odmítne ještě před prvním odstraněním;
+editor musí umět svůj stav mazání po pádu znovu načíst.
+
+Místní přehrávání vybrané varianty se zastaví před odstraněním. Jiný již
+otevřený přehrávač/stahování může držet bloky do zavření souboru. Při mazání
+se nevytváří kopie; existující stažené soubory, externí/iCloud zálohy a APFS
+snapshoty jsou mimo tuto operaci. Nejde o bezpečný přepis SSD.
+
+Cílené testy 71/71 a plná brána 2 146/2 146 PASS. Fyzická přejímka nového tlačítka
+na Macu/iPhonu je neprovedená. Produkční varianty se během vývoje nemažou.
+Důkazy `camino_export_delete_*_20261020.log`. Nasazení vyžaduje nové samostatné p+n.
 
 ## Moje filmy a výběr dnů — 20. 10. 2026
 
@@ -76,7 +115,8 @@ Soukromá fronta je trvalá, idempotentní a serializovaná systémovým zámkem
 Po vědomém zadání exportu běží samostatný místní proces; změna stránky či
 restart Cockpitu ho neukončí. Neinstaluje se služba ani LaunchAgent.
 Přerušený export se opakuje od začátku v novém adresáři. Starší hotové
-výsledky i neúplné pokusy zůstávají zachované; žádný úklid ani mazání.
+výsledky i neúplné pokusy zůstávají zachované do výslovného trvalého smazání
+jedné varianty popsaného výše; automatický úklid není zapnutý.
 
 FFmpeg běží s nice 10, dvěma vlákny a jedním filtrovacím vláknem. Záběry se
 normalizují postupně. Fotografie mají pracovní PNG hlavního obrazu, EXIF

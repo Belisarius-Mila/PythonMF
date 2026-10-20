@@ -219,6 +219,8 @@ class FilmEditor:
             identifier(directory.name)
             spec = self.store._read(directory / "request.json")
             state = self.store._read(directory / "status.json") if (directory / "status.json").exists() else {"state": "queued", "progress": 0}
+            if state["state"] == "deleted":
+                continue
             if state["state"] == "rendering" and not self.worker_busy(folder):
                 state = {"state": "interrupted", "progress": 0}
             item = {"job_id": directory.name, "revision": spec["revision"], "profile": spec["profile"],
@@ -283,6 +285,8 @@ class FilmEditor:
             target = root / spec["request_id"]
             if target.exists():
                 _private_directory(target)
+                if (target / "status.json").exists() and self.store._read(target / "status.json").get("state") in ("deleted", "delete_pending"):
+                    raise FilmError("Varianta byla trvale smazaná. Pro nový export zadej nový požadavek.")
                 if self.store._read(target / "request.json") != spec:
                     raise FilmError("Stejné ID exportu bylo použité pro jinou revizi nebo úsek.")
             else:
@@ -411,6 +415,9 @@ def film_editor_action(operation, payload=None):
             return editor.enqueue(payload)
         if operation == "source":
             return editor.source_preview(payload)
+        if operation in ("delete-plan", "delete"):
+            from app.camino_film_cleanup import deletion_plan, delete_export
+            return (deletion_plan if operation == "delete-plan" else delete_export)(editor, payload)
         raise FilmError("Neznámá filmová operace.")
     except FilmError as error:
         return {"ok": False, "message": str(error)}

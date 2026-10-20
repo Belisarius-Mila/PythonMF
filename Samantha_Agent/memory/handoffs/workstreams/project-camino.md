@@ -1,57 +1,61 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-10-20 10:35 CEST — Moje filmy a výběr dnů místně implementované
+- Aktualizováno: 2026-10-20 17:20 CEST — trvalé mazání jedné filmové varianty místně implementované
 
 ### Hotovo
-- Film Camino má místně přehled „Moje filmy“, otevření uloženého projektu
-  a výběr dalšího dne z Mac archivu. Každý projekt si drží vlastní střih,
-  neměnné revize, zdrojové náhledy a exporty. Výběr patří konkrétní kartě prohlížeče.
-- Nový projekt vznikne až po potvrzení konečnosti vybraného dne a dosavadním
-  úplném ověření Mac vstupů. Přehled kandidátních dnů sám není důkaz uzavření.
-  Soukromé, skryté, cizí a neplatné projekty se nenabízejí.
-- Přepnutí čeká na uložení; při výpadku spojení se rozpracovaný střih zachová
-  v kartě. Pozdní odpověď nesmí změnit nově vybraný projekt.
-- Míla potvrdil dobrý výsledek prvního filmu, plynulé přehrání v místním
-  přehrávači a funkční střih. Podrobná fyzická přejímka jednotlivých úkonů tím
-  není samostatně doložená.
-- Produkční film při kontrole stále revize 5: všech osm původních JSON souborů
-  a šest hotových výstupů má shodné SHA-256. Nový projekt ani render v produkci
-  nevznikl. Nová funkce není pushnutá ani nasazená.
-- Záloha z 19. 10. a zkouška její souborové obnovy zůstávají podle dřívějšího
-  záznamu; nová instalace Macu je samostatná přejímka.
+- „Moje filmy“ a volba dalších dnů byly přes Lunu nasazené v Cockpitu na
+  `96ce7bab`; Míla potom vyzkoušel druhý den a vytvořil MP4.
+- Místně přibylo „Smazat natrvalo“ u celého MP4, dílčího náhledu i neúspěšného
+  pokusu. Před potvrzením se ověří konkrétní projekt/varianta a zobrazí profil,
+  revize, časový úsek, počet souborů a jejich velikost.
+- Odstraňují se všechny pracovní pokusy vybrané varianty včetně MP4, segmentů,
+  PNG a neúplných souborů. Bez koše, přesunu do archivu či nové mediální kopie.
+  Zůstanou jen původní technická metadata a malý stav smazání bez médií.
+- Starý požadavek ani odkaz smazané video neobnoví. Přerušené mazání má
+  stav „Mazání nebylo dokončeno“ a lze bezpečně dokončit tutéž vybranou sadu.
+  Zdrojové náhledy, originály a uložené revize střihu se touto funkcí nemažou.
+- Nové mazání zatím není pushnuté ani nasazené. Během vývoje se skutečné
+  produkční varianty nemažou; kontrolní otisky jsou v samostatném lokálním logu.
 
 ### Rozhodnutí
-- Míla schválil další navržený krok „Moje filmy“ a volbu dnů. Realizuje Adam.
-  Rozsah je více oddělených jednodenních projektů; společný vícedenní film,
-  kapitoly a prolog/epilog P2-F se nyní nesestavují. Push/deploy není schválený.
+- Míla výslovně změnil dosavadní zachovávání všech filmových variant:
+  nevyhovující výstupy chce mazat trvale kvůli místu. Vývoj provádí Adam.
+- Rozsah je jedna vědomě zvolená filmová varianta v této střižně, včetně
+  její pracovní složky. Žádné automatické či hromadné mazání všech starších revizí.
+- Přesná věta globální brzdy se zadává při potvrzení konkrétní varianty;
+  vyžaduje ji `global_safety_brake.md` pro mazání adresářů a více souborů.
 
 ### Otevřeno / rizika
-- Nové ovládání na skutečném Macu/iPhonu je neprovedené; nástrojový prohlížeč
-  není dostupný. Starší P2-C/E úsek/save/reload/náhled zůstává samostatná přejímka.
-- Výběr dnů je omezený na nakonfigurovanou cestu a povolené obrazové zdroje.
-  Neúplné originály, konfliktní archiv nebo změněné soukromí blokují uzavření.
-- Neuložený střih se drží v otevřené kartě, není to trvalá záloha po jejím
-  násilném ukončení. Uložené revize a exporty jsou trvalé.
-- Dřívější nesoulad vlastnické účtenky Serve nebyl tímto krokem opravován.
+- Nové ovládání na skutečném Macu/iPhonu není fyzicky přijaté.
+- Akce neodstraňuje dříve stažené kopie ani existující externí/iCloud zálohy.
+  Nejde o bezpečný přepis SSD, APFS snapshotů nebo vzdálených kopií.
+- macOS uvolní bloky již otevřeného souboru po zavření posledního přehrávání/
+  stahování. Místní přehrávač vybrané varianty se před mazáním zastaví.
+- Aktivní render nebo čekající varianta se nemaže. Při cizím odkazu,
+  změně souborů či neplatné potvrzovací větě se operace zastaví.
 
 ### Další krok
-- Po samostatném pokynu p+n předat schválený commit registrované Luně
-  pro push a nasazení pouze Cockpitu; následně fyzický retest dvou dnů.
+- Po samostatném p+n přes Lunu nasadit pouze Cockpit a fyzicky smazat
+  jeden vědomě vybraný nepotřebný dílčí náhled po zadání potvrzovací věty.
 
 ### Navrhované další kroky
-- Po nasazení otevřít původní film, přepnout jiný den, potvrdit jeho konečnost,
-  uložit úpravu/reload a vrátit se k nezměněnému původnímu filmu.
-- P2-F spojování dnů a kapitoly až po přijetí této práce s více projekty.
-- Celková obnova nového Macu zůstává samostatný úkol podle TXT.
+- Ověřit zmizení řádku a původního odkazu po reloadu, zachování jiného
+  MP4, střihu a druhého dne. Případné přerušené mazání vědomě dokončit.
+- Další Mílovy úpravy druhého dne řešit podle konkrétních připomínek;
+  P2-F spojování dnů zůstává později.
 
 ### Technický důkaz
-- Cílené testy 60/60 PASS: dva syntetické dny, izolované revize/zdroje/worker/
-  exporty, aktuální soukromí, HTTP Origin/parametry a závody odpovědí v UI.
-- Důkazy: `logs/camino_film_library_targeted_final_20261020.log`,
-  `logs/camino_film_library_preservation_final_20261020.log`;
-  plná brána 2 137/2 137 PASS: `logs/camino_film_library_gate_final_20261020.log`.
-- Funkce a přejímací postup: `camino/docs/P2CD_EDITOR_MP4_REPORT.md`.
+- Cílené testy 71/71 a plná brána 2 146/2 146 PASS. Nové testy ověřují
+  odstranění všech pracovních pokusů bez kopií, izolaci
+  dvou shodných dílčích náhledů, současné kliknutí, přerušení, blok starého ID,
+  odkazy/hardlinky, aktivní worker, HTTP Origin a GET/HEAD/Range po smazání.
+- Důkazy `logs/camino_export_delete_targeted_final_20261020.log`,
+  `logs/camino_export_delete_gate_verified_20261020.log` a kontrola zachování
+  `logs/camino_export_delete_preservation_20261020.log`.
+- Předchozí p+n: účtenka `673d99d6ba4b8e96beb96c5fdcdc6f68`, push/deploy
+  confirmed, plná brána 2 137 PASS, smoke 5/5 a chráněné služby shodné.
+  V terminálu byla účtenka převzatá zde, samostatný portálový návrat nepotvrzený.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: Camino
@@ -3062,3 +3066,44 @@ Technický důkaz:
   `camino_film_library_gate_final_20261020.log`; report `P2CD_EDITOR_MP4_REPORT.md`.
 - Nová UI přejímka Mac/iPhone neprovedená, nástrojový prohlížeč nedostupný.
   Záloha z 19. 10. zachovaná, služba Camino a síť se nepřepínaly.
+
+
+### 2026-10-20 17:20 CEST — Trvalé mazání vybrané filmové varianty
+
+Hotovo:
+- Místně implementované „Smazat natrvalo“ pro celý export, dílčí náhled a
+  neúspěšný pokus. Nabízí konkrétní revizi/úsek a velikost všech pracovních
+  souborů; seznam dílčích náhledů nově ukazuje i časy úseků.
+- Fyzické odstranění všech pracovních pokusů vybrané varianty bez koše či
+  nové kopie. Malá technická metadata brání obnovení starým request ID.
+  Po přerušení lze dokončit zbývající již potvrzené soubory.
+- Dosavadní „Moje filmy“ bylo nasazené přes Lunu na `96ce7bab`;
+  Míla ověřil druhý den a vytvoření MP4. Nové mazání ještě nasazené není.
+
+Rozhodnutí:
+- Nový výslovný požadavek nahrazuje starší zachovávání všech exportů.
+  Platí jen pro vědomě vybranou filmovou variantu a její pracovní soubory;
+  originály, uložený střih, ostatní varianty a zdrojové náhledy se zachovají.
+- Přesná věta globální brzdy před konkrétním smazáním podle místního pravidla.
+  Žádné automatické čistění záloh ani produkční mazání během vývoje.
+
+Další krok:
+- Po samostatném p+n jen Cockpit přes Lunu, potom fyzicky potvrdit a smazat
+  jeden nepotřebný dílčí náhled; po reloadu ověřit zmizení a nedostupný odkaz.
+
+Navrhované další kroky:
+- Ověřit zachování přehratelného finále a úprav obou dnů.
+- Další úpravy druhého dne podle Míly, P2-F zůstává samostatnou etapou.
+
+Technický důkaz:
+- 71/71 cílených testů a plná brána 2 146/2 146 PASS.
+- Syntetické zkoušky zahrnují více pokusů/segmentů, dvě stejné dílčí varianty,
+  dvě současná mazání, výpadek uprostřed operace, bezpečné dokončení,
+  odmítnutí cizího projektu/odkazu/hardlinku a aktivního workeru.
+- HTTP potvrzení a Origin, zrušení/nesprávná věta v UI a GET/HEAD/Range 404;
+  staré render ID se neobnoví, nový výslovný render zůstává možný.
+- Logy `camino_export_delete_targeted_final_20261020.log`,
+  `camino_export_delete_gate_verified_20261020.log`, `camino_export_delete_preservation_20261020.log`.
+- Staré externí zálohy a stažené kopie tato akce neodstraňuje; otevřený
+  soubor může držet bloky do ukončení přehrávání/stahování. Nejde o SSD secure erase.
+- První plná sada: 2 145 testů, jedna kolize worker lease v existujícím testu předání Luny; samostatný modul 13/13 PASS. Produkční Luna se neměnila. První log zachovaný jako `camino_export_delete_gate_20261020.log`.

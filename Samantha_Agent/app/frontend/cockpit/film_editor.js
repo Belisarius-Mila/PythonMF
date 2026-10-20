@@ -6,12 +6,14 @@
     const uuid = options.uuid || (() => crypto.randomUUID());
     const later = options.setTimeout || setTimeout;
     const cancel = options.clearTimeout || clearTimeout;
+    const askDelete = options.prompt || (message => window.prompt(message));
     const nodes = Object.fromEntries(["status", "shots", "voices", "jobs", "save", "preview", "final",
       "range", "from", "to", "duck", "player", "reload", "source", "sourcePlayer", "sourceStatus",
       "sourceTitle", "selection", "start", "end", "playSelection"].map(key => [key, root.querySelector(`[data-film="${key}"]`)]));
     let model = null, active = false, dirty = false, saving = false, version = 0, epoch = 0;
     let pending = null, timer = null, refreshTimer = null, preserved = null, readRequest = 0;
     let requestedProject = null;
+    let deleting = false, deleteButtons = [];
     let selected = null, sourceJob = null, sourceRequest = 0, sourceTimer = null, selectionTimer = null, playingSelection = false;
     function text(tag, value) { const n = doc.createElement(tag); n.textContent = value; return n; }
     function stopPlayer() { nodes.player.pause(); nodes.player.removeAttribute("src"); nodes.player.load(); }
@@ -99,8 +101,9 @@
       invalidate(); preserved = keep;
     }
     function controls() {
-      nodes.save.disabled = !model || saving || !dirty;
-      for (const key of ["preview", "final", "range"]) nodes[key].disabled = !model || dirty || saving;
+      nodes.save.disabled = !model || saving || deleting || !dirty;
+      for (const key of ["preview", "final", "range"]) nodes[key].disabled = !model || dirty || saving || deleting;
+      for (const button of deleteButtons) button.disabled = deleting;
     }
     function change() {
       dirty = true; ++version; controls();
@@ -187,13 +190,14 @@
     }
     function renderJobs(jobs) {
       nodes.jobs.replaceChildren();
-      const labels = {queued: "Ve frontě", rendering: "Vytváří se", ready: "Hotovo", failed: "Selhalo — lze zopakovat", interrupted: "Přerušeno — lze zopakovat"};
+      deleteButtons = [];
+      const labels = {queued: "Ve frontě", rendering: "Vytváří se", ready: "Hotovo", failed: "Selhalo — lze zopakovat", interrupted: "Přerušeno — lze zopakovat", delete_pending: "Mazání nebylo dokončeno"};
       const key = j => JSON.stringify([j.revision, j.profile, j.range]);
       const exports = jobs.filter(j => !j.source_asset_id);
       const completed = new Set(exports.filter(j => j.state === "ready").map(key));
       for (const job of exports.slice().reverse()) {
         const superseded = ["failed", "interrupted"].includes(job.state) && completed.has(key(job));
-        const li = text("li", `${job.profile === "final" ? "MP4 1080p" : "Náhled 720p"} · revize ${job.revision}${job.revision !== model.revision ? " (starší střih)" : ""}${job.range ? " · dílčí úsek" : ""} · ${superseded ? "Starší neúspěšný pokus; hotový výsledek je výše" : labels[job.state] || "Neznámý stav"}${job.state === "rendering" ? ` ${job.progress} %` : ""}`);
+        const li = text("li", `${job.profile === "final" ? "MP4 1080p" : "Náhled 720p"} · revize ${job.revision}${job.revision !== model.revision ? " (starší střih)" : ""}${job.range ? ` · dílčí úsek ${(job.range.start_ms / 1000).toFixed(1)}–${(job.range.end_ms / 1000).toFixed(1)} s` : ""} · ${superseded ? "Starší neúspěšný pokus; hotový výsledek je výše" : labels[job.state] || "Neznámý stav"}${job.state === "rendering" ? ` ${job.progress} %` : ""}`);
         if (job.state === "ready" && safeOutput(job.url)) {
           const play = text("button", "Přehrát"); play.type = "button"; play.className = "secondary";
           play.addEventListener("click", () => { nodes.sourcePlayer.pause(); playingSelection = false; stopPlayer(); nodes.player.src = job.url; nodes.player.load(); });
@@ -206,11 +210,51 @@
           retry.addEventListener("click", () => render(job.profile, job.range, job.revision, job.state === "queued" || job.state === "interrupted" ? job.job_id : null));
           li.appendChild(retry);
         }
+        if (["ready", "failed", "interrupted", "delete_pending"].includes(job.state)) {
+          const remove = text("button", job.state === "delete_pending" ? "Dokončit smazání" : "Smazat natrvalo");
+          remove.type = "button"; remove.className = "secondary"; remove.disabled = deleting;
+          remove.addEventListener("click", () => removeExport(job)); deleteButtons.push(remove); li.appendChild(remove);
+        }
         nodes.jobs.appendChild(li);
       }
     }
+    async function removeExport(job) {
+      if (!model || deleting) return;
+      if (dirty || saving || preserved) { save(); nodes.status.textContent = "Nejprve dokonči uložení střihu; potom můžeš smazat variantu."; return; }
+      const current = epoch, selection = {project_id: model.project_id, job_id: job.job_id};
+      deleting = true; ++readRequest; controls(); let refresh = false, message = "";
+      try {
+        const response = await request("/api/camino/film/delete-plan", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(selection)});
+        const plan = await response.json();
+        if (current !== epoch || !active || doc.hidden) return;
+        if (!plan.ok) { message = plan.message || "Rozsah smazání nelze ověřit."; return; }
+        if (plan.project_id !== selection.project_id || plan.job_id !== selection.job_id ||
+            !/^[a-f0-9]{64}$/.test(plan.plan_token) || plan.revision !== job.revision || plan.profile !== job.profile ||
+            !(plan.range === null && job.range === null || plan.range && job.range &&
+              plan.range.start_ms === job.range.start_ms && plan.range.end_ms === job.range.end_ms)) { message = "Potvrzení patří jiné variantě. Znovu načti přehled."; return; }
+        if (plan.already_deleted) { refresh = true; message = "Varianta už byla trvale smazaná."; return; }
+        const label = `${plan.profile === "final" ? "MP4 1080p" : "Náhled 720p"} · revize ${plan.revision}` +
+          (plan.range ? ` · úsek ${(plan.range.start_ms / 1000).toFixed(1)}–${(plan.range.end_ms / 1000).toFixed(1)} s` : " · celý film");
+        const answer = askDelete(`${label}\n\nTrvale odstranit tuto variantu včetně pracovních souborů: ${(plan.bytes / 1000000).toLocaleString("cs-CZ", {maximumFractionDigits: 1})} MB, ${plan.file_count} souborů.\nBez koše a nové kopie. Zdrojové záznamy a uložený střih zůstanou.\n\nPro smazání napiš přesně:\n${plan.confirmation_text}`);
+        if (answer === null) return;
+        if (answer !== plan.confirmation_text) { message = "Potvrzovací věta nesouhlasí. Varianta zůstala zachovaná."; return; }
+        if (nodes.player.getAttribute("src") === job.url) stopPlayer();
+        refresh = true; nodes.status.textContent = "Trvale odstraňuji vybranou variantu…";
+        const removed = await request("/api/camino/film/delete", {method: "POST", headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({...selection, plan_token: plan.plan_token, confirmation: answer})});
+        const result = await removed.json();
+        message = result.ok ? "Varianta a její pracovní soubory byly trvale smazané." : (result.message || "Smazání se nedokončilo. Obnov přehled a zkontroluj stav.");
+      } catch (_) { message = "Výsledek smazání není potvrzený. Obnov přehled; smazání se automaticky neopakuje."; }
+      finally {
+        deleting = false;
+        if (current === epoch && active) {
+          if (refresh) await check();
+          controls(); if (message) nodes.status.textContent = message;
+        }
+      }
+    }
     async function check() {
-      if (!active || doc.hidden) return;
+      if (!active || doc.hidden || deleting) return;
       const current = epoch, read = ++readRequest;
       try {
         const response = await request("/api/camino/film/editor" + (requestedProject ? `?project_id=${encodeURIComponent(requestedProject)}` : ""), {cache: "no-store"});
@@ -323,6 +367,7 @@
       close() { active = false; cancel(refreshTimer); invalidate(); root.classList.add("hidden"); },
       suspend() { active = false; cancel(refreshTimer); conceal(); root.classList.add("hidden"); },
       canClose() {
+        if (deleting) { nodes.status.textContent = "Dokončuji smazání varianty. Před přepnutím počkej na výsledek."; return false; }
         if (preserved) { nodes.status.textContent = "Nejprve obnov spojení a ulož rozpracovaný střih."; return false; }
         if (dirty || saving) { save(); nodes.status.textContent = "Nejprve dokonči uložení změn; potom můžeš přepnout nebo zavřít film."; return false; }
         return true;

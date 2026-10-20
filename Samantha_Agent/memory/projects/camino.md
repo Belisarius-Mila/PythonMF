@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-20 10:35 CEST — Moje filmy a volba dnů místně, nasazení čeká na samostatný pokyn
+Aktualizováno: 2026-10-20 17:20 CEST — trvalé smazání vybrané filmové varianty místně; nové nasazení čeká
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,8 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-20 17:20 CEST: „Smazat natrvalo“ místně odstraňuje všechny mediální/pracovní pokusy jedné varianty bez koše a kopie. Jen drobný technický záznam brání obnovení starým ID; přerušené mazání lze dokončit. Konkrétní plán a přesná věta globální brzdy, worker a cizí odkazy blokované. Originály, střih a ostatní varianty se zachovají; existující zálohy a ručně stažené kopie jsou mimo tuto akci. 71 cílených a 2 146 plných testů PASS, nový push/deploy není schválený. Předchozí „Moje filmy“ nasazené `96ce7bab`, Míla vytvořil MP4 druhého dne.
 
 - 2026-10-20 10:35 CEST: Místně hotové „Moje filmy“ a volba Mac dne, oddělené projektové revize/zdroje/worker/exporty; výběr v konkrétní kartě. Nový projekt až po potvrzení konečnosti a úplné validaci. 60/60 cílených testů a plná brána 2 137/2 137 PASS. Produkční revize 5, osm JSON a šest hotových výstupů shodných SHA-256; žádný nový produkční projekt/render. Bez push/deploye. Nový fyzický Mac/iPhone retest čeká po samostatném nasazení pouze Cockpitu; P2-F společný vícedenní film až později. Míla přijímá první film/střih, podrobná P2-C/E přejímka není plně doložená.
 
@@ -3257,3 +3259,44 @@ Technický důkaz:
   `camino_film_library_gate_final_20261020.log`; report `P2CD_EDITOR_MP4_REPORT.md`.
 - Nová UI přejímka Mac/iPhone neprovedená, nástrojový prohlížeč nedostupný.
   Záloha z 19. 10. zachovaná, služba Camino a síť se nepřepínaly.
+
+
+### 2026-10-20 17:20 CEST — Trvalé mazání vybrané filmové varianty
+
+Hotovo:
+- Místně implementované „Smazat natrvalo“ pro celý export, dílčí náhled a
+  neúspěšný pokus. Nabízí konkrétní revizi/úsek a velikost všech pracovních
+  souborů; seznam dílčích náhledů nově ukazuje i časy úseků.
+- Fyzické odstranění všech pracovních pokusů vybrané varianty bez koše či
+  nové kopie. Malá technická metadata brání obnovení starým request ID.
+  Po přerušení lze dokončit zbývající již potvrzené soubory.
+- Dosavadní „Moje filmy“ bylo nasazené přes Lunu na `96ce7bab`;
+  Míla ověřil druhý den a vytvoření MP4. Nové mazání ještě nasazené není.
+
+Rozhodnutí:
+- Nový výslovný požadavek nahrazuje starší zachovávání všech exportů.
+  Platí jen pro vědomě vybranou filmovou variantu a její pracovní soubory;
+  originály, uložený střih, ostatní varianty a zdrojové náhledy se zachovají.
+- Přesná věta globální brzdy před konkrétním smazáním podle místního pravidla.
+  Žádné automatické čistění záloh ani produkční mazání během vývoje.
+
+Další krok:
+- Po samostatném p+n jen Cockpit přes Lunu, potom fyzicky potvrdit a smazat
+  jeden nepotřebný dílčí náhled; po reloadu ověřit zmizení a nedostupný odkaz.
+
+Navrhované další kroky:
+- Ověřit zachování přehratelného finále a úprav obou dnů.
+- Další úpravy druhého dne podle Míly, P2-F zůstává samostatnou etapou.
+
+Technický důkaz:
+- 71/71 cílených testů a plná brána 2 146/2 146 PASS.
+- Syntetické zkoušky zahrnují více pokusů/segmentů, dvě stejné dílčí varianty,
+  dvě současná mazání, výpadek uprostřed operace, bezpečné dokončení,
+  odmítnutí cizího projektu/odkazu/hardlinku a aktivního workeru.
+- HTTP potvrzení a Origin, zrušení/nesprávná věta v UI a GET/HEAD/Range 404;
+  staré render ID se neobnoví, nový výslovný render zůstává možný.
+- Logy `camino_export_delete_targeted_final_20261020.log`,
+  `camino_export_delete_gate_verified_20261020.log`, `camino_export_delete_preservation_20261020.log`.
+- Staré externí zálohy a stažené kopie tato akce neodstraňuje; otevřený
+  soubor může držet bloky do ukončení přehrávání/stahování. Nejde o SSD secure erase.
+- První plná sada: 2 145 testů, jedna kolize worker lease v existujícím testu předání Luny; samostatný modul 13/13 PASS. Produkční Luna se neměnila. První log zachovaný jako `camino_export_delete_gate_20261020.log`.

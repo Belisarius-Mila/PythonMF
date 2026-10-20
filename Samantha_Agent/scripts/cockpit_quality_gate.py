@@ -72,6 +72,7 @@ COMPILE_PATHS = (
     "app/camino_viewer_link.py",
     "app/camino_film_workshop.py",
     "app/camino_film_editor.py",
+    "app/camino_film_cleanup.py",
     "app/camino_film_render.py",
     "scripts/camino_film_editor.py",
     "scripts/camino_mac_film_project.py",

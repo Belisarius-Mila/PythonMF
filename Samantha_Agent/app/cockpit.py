@@ -8663,6 +8663,18 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "handler_name": "film_editor_action", "test_level": "direct",
     },
     {
+        "path": "/api/camino/film/delete-plan",
+        "label": "Zobrazit rozsah trvalého smazání jedné filmové varianty",
+        "risk": "read_only_via_post", "confirmation": "explicit_export_delete_button",
+        "handler_name": "film_editor_action", "test_level": "direct",
+    },
+    {
+        "path": "/api/camino/film/delete",
+        "label": "Trvale smazat vybranou filmovou variantu a pracovní soubory",
+        "risk": "delete_or_purge", "confirmation": "exact_global_safety_brake_and_frozen_variant_plan",
+        "handler_name": "film_editor_action", "test_level": "direct",
+    },
+    {
         "path": "/api/camino/film/save",
         "label": "Uložit novou revizi filmového střihu",
         "risk": "private_write", "confirmation": "explicit_editor_change_or_save",
@@ -9961,6 +9973,12 @@ class CockpitServer:
                 if parsed.path == "/api/camino/film/source":
                     self.respond_film_edit("source", parsed)
                     return
+                if parsed.path == "/api/camino/film/delete-plan":
+                    self.respond_film_edit("delete-plan", parsed)
+                    return
+                if parsed.path == "/api/camino/film/delete":
+                    self.respond_film_edit("delete", parsed)
+                    return
                 if parsed.path == "/api/camino/film/save":
                     self.respond_film_edit("save", parsed)
                     return
@@ -10838,6 +10856,8 @@ class CockpitServer:
             def respond_film_edit(self, operation, parsed) -> None:
                 payload = self.read_json()
                 keys = {"save": {"project_id", "expected_revision", "request_id", "draft"},
+                    "delete-plan": {"project_id", "job_id"},
+                    "delete": {"project_id", "job_id", "plan_token", "confirmation"},
                     "source": {"project_id", "asset_id", "request_id"},
                     "render": {"project_id", "revision", "request_id", "profile", "range"}}[operation]
                 if parsed.query or set(payload) != keys:
@@ -10860,6 +10880,7 @@ class CockpitServer:
                     if parsed.query or len(parts) != 7:
                         raise ValueError("invalid output request")
                     target = production_editor().output(parts[5], parts[6])
+                    handle = target.open("rb")
                 except (OSError, ValueError, KeyError):
                     if self.command == "HEAD":
                         self.send_response(HTTPStatus.NOT_FOUND)
@@ -10868,30 +10889,30 @@ class CockpitServer:
                     else:
                         self.respond_json({"ok": False, "message": "Film není hotový nebo už není povolený."}, status=HTTPStatus.NOT_FOUND)
                     return
-                size = target.stat().st_size
-                first, last = 0, size - 1
-                if self.headers.get("Range"):
-                    try:
-                        first, last = parse_single_http_byte_range(self.headers["Range"], size)
-                    except ValueError:
-                        self.send_response(HTTPStatus.REQUESTED_RANGE_NOT_SATISFIABLE)
-                        self.send_header("Content-Range", f"bytes */{size}")
-                        self.send_header("Content-Length", "0")
-                        self.end_headers()
+                with handle:
+                    size = os.fstat(handle.fileno()).st_size
+                    first, last = 0, size - 1
+                    if self.headers.get("Range"):
+                        try:
+                            first, last = parse_single_http_byte_range(self.headers["Range"], size)
+                        except ValueError:
+                            self.send_response(HTTPStatus.REQUESTED_RANGE_NOT_SATISFIABLE)
+                            self.send_header("Content-Range", f"bytes */{size}")
+                            self.send_header("Content-Length", "0")
+                            self.end_headers()
+                            return
+                    partial = bool(self.headers.get("Range"))
+                    self.send_response(HTTPStatus.PARTIAL_CONTENT if partial else HTTPStatus.OK)
+                    self.send_header("Content-Type", "video/mp4")
+                    self.send_header("Content-Disposition", 'inline; filename="Camino-2026-10-06.mp4"')
+                    self.send_header("Cache-Control", "no-store, max-age=0")
+                    self.send_header("Accept-Ranges", "bytes")
+                    self.send_header("Content-Length", str(last - first + 1))
+                    if partial:
+                        self.send_header("Content-Range", f"bytes {first}-{last}/{size}")
+                    self.end_headers()
+                    if self.command == "HEAD":
                         return
-                partial = bool(self.headers.get("Range"))
-                self.send_response(HTTPStatus.PARTIAL_CONTENT if partial else HTTPStatus.OK)
-                self.send_header("Content-Type", "video/mp4")
-                self.send_header("Content-Disposition", 'inline; filename="Camino-2026-10-06.mp4"')
-                self.send_header("Cache-Control", "no-store, max-age=0")
-                self.send_header("Accept-Ranges", "bytes")
-                self.send_header("Content-Length", str(last - first + 1))
-                if partial:
-                    self.send_header("Content-Range", f"bytes {first}-{last}/{size}")
-                self.end_headers()
-                if self.command == "HEAD":
-                    return
-                with target.open("rb") as handle:
                     handle.seek(first)
                     remaining = last - first + 1
                     while remaining:

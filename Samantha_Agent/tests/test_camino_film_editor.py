@@ -1,5 +1,6 @@
 """Synthetic tests of edit persistence, consent routes, private output and real rendering."""
 import copy
+import fcntl
 from dataclasses import replace
 import array
 import http.client
@@ -18,6 +19,7 @@ from uuid import uuid4
 
 from app import cockpit
 from app.camino_film_editor import FilmEditor, validate_draft
+from app.camino_film_cleanup import DELETE_CONFIRMATION, deletion_plan, delete_export
 from app.camino_film_workshop import MacFilmProjectStore
 from app.file_persistence import atomic_write_json
 from camino.film.media import ffmpeg, probe, binary, run, FONT
@@ -125,6 +127,170 @@ class EditorTests(unittest.TestCase):
         kwargs["revalidate"]()
         path = output / "film.mp4"; path.write_bytes(b"synthetic mp4 bytes")
         return {"bytes": path.stat().st_size, "sha256": digest(path)}
+
+    def ready_export(self):
+        payload, job = self.queue()
+        with patch("app.camino_film_render.render_edit", side_effect=self.fake_render): self.editor.run_queue(self.pid)
+        selected = {"project_id": self.pid, "job_id": job["job_id"]}
+        return payload, selected, self.store.root / self.pid / "jobs" / job["job_id"]
+
+    def delete_payload(self, selected):
+        plan = deletion_plan(self.editor, selected)
+        return {**selected, "plan_token": plan["plan_token"], "confirmation": DELETE_CONFIRMATION}
+
+    def test_permanent_delete_removes_every_attempt_but_keeps_sources_edits_and_other_day(self):
+        queued, selected, folder = self.ready_export()
+        abandoned = folder / ("attempt-" + uuid4().hex); abandoned.mkdir(mode=0o700)
+        for n in range(8): (abandoned / f"segment-{n}.mkv").write_bytes(b"working bytes" * 100)
+        (abandoned / "render.partial.mp4").write_bytes(b"partial")
+        second = self.second_day()
+        protected = [*(self.root / "archive").rglob("*"), *(self.store.root / second).rglob("*"),
+                     *(self.store.root / self.pid).glob("*.json")]
+        protected = {p: digest(p) for p in protected if p.is_file()}
+        original = {p: digest(p) for p in folder.rglob("*") if p.is_file()}
+        plan = deletion_plan(self.editor, selected)
+        self.assertEqual(original, {p: digest(p) for p in original}, "preview never changes the variant")
+        self.assertEqual(plan["file_count"], 10)
+        self.assertNotIn("entries", plan)
+        payload = {**selected, "plan_token": plan["plan_token"], "confirmation": DELETE_CONFIRMATION}
+        result = delete_export(self.editor, payload)
+        self.assertEqual(result["deleted_bytes"], plan["bytes"])
+        self.assertEqual({p.name for p in folder.iterdir()}, {"request.json", "status.json", "status.json.lock"})
+        self.assertEqual(protected, {p: digest(p) for p in protected})
+        self.assertEqual(self.editor.view()["jobs"], [])
+        self.assertEqual(next(p for p in self.editor.catalog()["projects"] if p["project_id"] == self.pid)["ready_exports"], 0)
+        self.assertTrue(delete_export(self.editor, payload)["already_deleted"])
+        with self.assertRaises(FilmError): self.editor.output(self.pid, selected["job_id"])
+        with self.assertRaises(FilmError): self.editor.enqueue(queued, background=False)
+        self.assertTrue(self.editor.enqueue({**queued, "request_id": str(uuid4())}, background=False)["queued"])
+
+    def test_delete_refuses_confirmation_changes_paths_source_proxy_and_busy_worker(self):
+        _, selected, folder = self.ready_export()
+        payload = self.delete_payload(selected)
+        for confirmation in (None, True, "ano", ""):
+            with self.assertRaises(FilmError): delete_export(self.editor, {**payload, "confirmation": confirmation})
+        with self.assertRaises(FilmError): deletion_plan(self.editor, {**selected, "job_id": "../archive"})
+        extra = folder / ("attempt-" + uuid4().hex); extra.mkdir(mode=0o700)
+        (extra / "new.mp4").write_bytes(b"new working bytes")
+        with self.assertRaises(FilmError): delete_export(self.editor, payload)
+        self.assertTrue((extra / "new.mp4").is_file())
+        current = self.delete_payload(selected)
+        lock = os.open(self.store.root / self.pid / ".render-worker", os.O_RDONLY)
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            with self.assertRaises(FilmError): deletion_plan(self.editor, selected)
+            with self.assertRaises(FilmError): delete_export(self.editor, current)
+        finally: os.close(lock)
+        source = self.editor.source_preview(self.source_payload(), background=False)
+        with patch("app.camino_film_render.render_edit", side_effect=self.fake_render): self.editor.run_queue(self.pid)
+        with self.assertRaises(FilmError): deletion_plan(self.editor, {**selected, "job_id": source["job_id"]})
+
+    def test_delete_refuses_links_and_never_traverses_into_originals(self):
+        _, selected, folder = self.ready_export()
+        attempt = next(folder.glob("attempt-*"))
+        original = next(self.f.media.objects.iterdir()); before = digest(original)
+        link = attempt / "foreign.bin"; link.symlink_to(original)
+        with self.assertRaises((FilmError, OSError)): deletion_plan(self.editor, selected)
+        self.assertEqual(digest(original), before)
+        # Replace only the synthetic link created by this test.
+        link.unlink(); os.link(original, link)
+        with self.assertRaises(FilmError): deletion_plan(self.editor, selected)
+        self.assertEqual(digest(original), before)
+
+    def test_interrupted_delete_can_finish_without_restoring_or_delivering_bytes(self):
+        _, selected, folder = self.ready_export()
+        attempt = next(folder.glob("attempt-*")); (attempt / "segment.mkv").write_bytes(b"working")
+        payload = self.delete_payload(selected)
+        real_unlink = os.unlink; deleted = []
+        def interrupt(name, *, dir_fd=None):
+            if dir_fd is not None:
+                if deleted: raise OSError("synthetic interruption")
+                deleted.append(name)
+            return real_unlink(name, dir_fd=dir_fd)
+        with patch("app.camino_film_cleanup.os.unlink", side_effect=interrupt):
+            with self.assertRaises(OSError): delete_export(self.editor, payload)
+        self.assertEqual(self.editor.view()["jobs"][0]["state"], "delete_pending")
+        with self.assertRaises(FilmError): self.editor.output(self.pid, selected["job_id"])
+        remaining = deletion_plan(self.editor, selected)
+        self.assertEqual(remaining["plan_token"], payload["plan_token"])
+        self.assertEqual(remaining["file_count"], 1)
+        self.assertTrue(delete_export(self.editor, payload)["deleted"])
+        self.assertFalse(list(folder.glob("attempt-*")))
+        self.assertEqual(self.editor.view()["jobs"], [])
+
+    def test_queued_or_foreign_project_delete_does_not_remove_a_variant(self):
+        _, selected, folder = self.ready_export()
+        second = self.second_day()
+        with self.assertRaises(FilmError): deletion_plan(self.editor, {**selected, "project_id": second})
+        _, queued = self.queue()
+        with self.assertRaises(FilmError): deletion_plan(self.editor, {**selected, "job_id": queued["job_id"]})
+        self.assertTrue(list(folder.glob("attempt-*")))
+
+    def test_delete_selects_one_partial_export_even_with_identical_revision_and_range(self):
+        interval = {"start_ms": 0, "end_ms": 1000}
+        _, first = self.queue(range=interval); _, second = self.queue(range=interval)
+        with patch("app.camino_film_render.render_edit", side_effect=self.fake_render): self.editor.run_queue(self.pid)
+        before = self.editor.output(self.pid, second["job_id"]); expected = digest(before)
+        selected = {"project_id": self.pid, "job_id": first["job_id"]}
+        self.assertEqual(deletion_plan(self.editor, selected)["range"], interval)
+        delete_export(self.editor, self.delete_payload(selected))
+        self.assertEqual(digest(self.editor.output(self.pid, second["job_id"])), expected)
+        self.assertEqual([j["job_id"] for j in self.editor.view()["jobs"]], [second["job_id"]])
+
+    def test_concurrent_deletes_are_idempotent_and_never_restore_the_variant(self):
+        _, selected, folder = self.ready_export()
+        payload = self.delete_payload(selected); barrier = threading.Barrier(2); results = []; errors = []
+        def remove():
+            barrier.wait(timeout=3)
+            try: results.append(delete_export(self.editor, payload))
+            except Exception as error: errors.append(type(error).__name__)
+        threads = [threading.Thread(target=remove) for _ in range(2)]
+        for thread in threads: thread.start()
+        for thread in threads: thread.join(timeout=5); self.assertFalse(thread.is_alive())
+        self.assertEqual(errors, [])
+        self.assertCountEqual([r["already_deleted"] for r in results], [False, True])
+        self.assertFalse(list(folder.glob("attempt-*")))
+
+    def test_oversized_recovery_record_is_refused_before_any_file_is_removed(self):
+        _, selected, folder = self.ready_export()
+        before = {p: digest(p) for p in folder.rglob("*") if p.is_file()}
+        inventory = [{"path": f"attempt-{'a' * 32}/segment-{n:06d}.mkv", "kind": "file",
+                      "device": 1, "inode": n + 1, "bytes": 100, "mtime_ns": 1} for n in range(6000)]
+        with patch("app.camino_film_cleanup._inventory", return_value=inventory):
+            with self.assertRaises(FilmError): deletion_plan(self.editor, selected)
+        self.assertEqual(before, {p: digest(p) for p in before})
+        self.assertEqual(self.editor.view()["jobs"][0]["state"], "ready")
+
+    def test_http_delete_is_origin_guarded_exact_confirmed_and_revokes_get_head_range(self):
+        _, selected, folder = self.ready_export()
+        server = ThreadingHTTPServer(("127.0.0.1", 0), cockpit.CockpitServer().make_handler())
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        with patch("app.camino_film_editor.production_editor", return_value=self.editor), patch.object(cockpit, "production_editor", return_value=self.editor):
+            thread.start()
+            try:
+                conn = http.client.HTTPConnection("127.0.0.1", server.server_port, timeout=10)
+                def request(method, path, value=None, headers=None):
+                    conn.request(method, path, body=None if value is None else json.dumps(value),
+                        headers={"Content-Type": "application/json", **(headers or {})})
+                    response = conn.getresponse(); return response.status, response.read()
+                base = "/api/camino/film/"
+                self.assertEqual(request("POST", base + "delete-plan", selected, {"Origin": "https://foreign.example"})[0], 403)
+                self.assertEqual(request("POST", base + "delete-plan?file=secret", selected)[0], 400)
+                code, body = request("POST", base + "delete-plan", selected)
+                self.assertEqual(code, 200); plan = json.loads(body)
+                payload = {**selected, "plan_token": plan["plan_token"], "confirmation": DELETE_CONFIRMATION}
+                self.assertEqual(request("POST", base + "delete", {**payload, "confirmation": "ano"})[0], 409)
+                self.assertEqual(request("POST", base + "delete", payload, {"Origin": "https://foreign.example"})[0], 403)
+                self.assertTrue(list(folder.glob("attempt-*")))
+                self.assertEqual(request("POST", base + "delete", payload)[0], 200)
+                self.assertEqual(request("POST", base + "delete", payload)[0], 200)
+                url = base + "output/" + self.pid + "/" + selected["job_id"]
+                for method, headers in (("GET", {}), ("HEAD", {}), ("GET", {"Range": "bytes=0-3"})):
+                    self.assertEqual(request(method, url, headers=headers)[0], 404)
+                self.assertFalse(list(folder.glob("attempt-*")))
+                conn.close()
+            finally:
+                server.shutdown(); server.server_close(); thread.join(timeout=3)
 
     def test_read_only_view_keeps_base_and_archive_unchanged(self):
         before = {p: digest(p) for p in (self.root / "archive").rglob("*") if p.is_file()}
