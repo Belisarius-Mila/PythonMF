@@ -12,6 +12,14 @@ from app.capabilities.models import (
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
+        capability_id="review_luna_development_anchors", label="Review a misquoted source anchor without another model turn",
+        risk=RiskLevel.LOCAL_WRITE, reads=("exact retained Luna answer digest", "unchanged selected public source/context and role"),
+        writes=("one deterministic private review receipt", "isolated copy and test evidence"),
+        tool="app.luna_development.review_anchors", requires_confirmation=True,
+        confirmation_policy=ConfirmationPolicy.SUMMARY_BEFORE_ACTION,
+        notes="One deliberate main-Adam integration review in existing development authorization, not an automatic model retry. Only OLD anchor text may change; Luna NEW code is retained. Fresh sandboxed tests; no caller edits or Git. Portal remains bound to the same grant/job.",
+    ),
+    CapabilityRecord(
         capability_id="preview_luna_development", label="Prepare explicit multi-file development by Luna",
         risk=RiskLevel.READ_ONLY, reads=("selected committed public source sections", "fixed test modules and clean authorized workspace"),
         writes=(), tool="app.luna_development.preview",

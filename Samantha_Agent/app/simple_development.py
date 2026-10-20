@@ -33,7 +33,8 @@ INSTRUCTIONS = ('Vrať pouze JSON function_source a summary, jednu náhradu doda
 SCHEMA = {'type': 'object', 'properties': {'function_source': {'type': 'string'}, 'summary': {'type': 'string'}},
           'required': ['function_source', 'summary'], 'additionalProperties': False}
 PUBLIC = ('job_id', 'state', 'reason', 'summary', 'diff', 'candidate_digest', 'baseline', 'after',
-          'model_usage', 'estimated_credits', 'root', 'source_head', 'executor')
+          'model_usage', 'estimated_credits', 'root', 'source_head', 'executor', 'proposal_origin_job', 'new_model_turn',
+          'answer_digest', 'proposal')
 
 
 def _sha(data):

@@ -320,6 +320,13 @@ Bezpečnostní brzda, writable grant, Git a p+n zůstávají samostatně řízen
 - Zmrazená centrální role simple_developer musí být skutečná Luna; žádný Sol
   fallback. Limit přijetí po tahu je 120 000 tokenů / 4 odhadované kredity
   Standard, nikoli fakturační strop. Neúspěch či nejistota se neopakují.
+- Při jedné nepřesně citované kotvě old smí Adam po přečtení původního návrhu
+  použít registrované `review_anchors(job_id, answer_digest, corrections, ...)`.
+  Korekce mění pouze old, nikoli path/new od Luny. Zdroje/kontext/role musí
+  zůstat shodné; nová izolace a obě testové fáze vážou aktuální čistý head.
+  Vzniká deterministická navazující účtenka bez placeného modelu, s odkazem
+  na původní návrh; nová spotřeba je nula, původní se nesčítá znovu.
+  Portál povoluje nejvýše jednu takovou kontrolu ve stejném grantu.
 - Přijetí ověří všechny původní soubory, head, roli a otisk kandidáta před
   prvním zápisem. Jednotlivé soubory se nahrazují atomicky; stav applying
   zachytí přerušené převzetí více souborů a vyžaduje kontrolu bez retry.

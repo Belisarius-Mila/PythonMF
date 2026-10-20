@@ -133,6 +133,8 @@ Společné pracovní instrukce PythonMF; cesty níže jsou vůči `Samantha_Agen
   posouzení a přijatou skutečnou vývojovou zkoušku. Program zmrazí zdroj/head,
   úkol a roli, spustí testy v oddělené kopii a vrátí diff s účtenkou.
   Hlavní Adam je jednou zkontroluje a použije accept s přesným otiskem.
+  Nepřesnou citaci old lze po kontrole jednou opravit review_anchors bez
+  změny new od Luny; nová izolace/testy, žádný další modelový pokus.
   V Cockpitu používej pouze `app.simple_development_portal.request` s aktuálním
   serverovým blokem SIMPLE_DEVELOPMENT; kořen určí server, ne model. Nespouštěj
   App Server z izolovaného editoru. Bez tohoto bloku oznam chybějící serverové

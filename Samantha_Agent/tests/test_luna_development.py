@@ -149,6 +149,36 @@ class LunaDevelopmentTests(unittest.TestCase):
         self.assertEqual(self.accept(result)['state'], 'attention')
         self.assertEqual((self.root / 'app/view.js').read_text(), 'const label = "OLD";\n')
 
+    def test_deliberate_anchor_review_reuses_same_new_code_without_a_model_retry(self):
+        self.client.answer['changes'][1]['old'] = 'MISQUOTED OLD'
+        result = self.run_job()
+        self.assertEqual(result['state'], 'attention')
+        raw = (self.store / result['job_id'] / 'answer.json').read_bytes()
+        self.client.commands.clear()
+        reviewed = engine.review_anchors(result['job_id'], engine.base._sha(raw), {'1': '"OLD"'},
+            root=self.root, confirmed=True, roles_path=self.roles_path, store_root=self.store,
+            client_factory=lambda: self.client)
+        self.assertEqual(reviewed['state'], 'ready_for_review', reviewed)
+        self.assertFalse(reviewed['new_model_turn'])
+        self.assertEqual(reviewed['proposal_origin_job'], result['job_id'])
+        self.assertEqual(len(self.client.turns), 1)
+        self.assertNotEqual(reviewed['job_id'], result['job_id'])
+        self.assertEqual(self.accept(reviewed)['state'], 'applied')
+
+    def test_anchor_review_rejects_changed_context_before_any_test_or_model(self):
+        self.client.answer['changes'][1]['old'] = 'MISQUOTED OLD'
+        result = self.run_job()
+        raw = (self.store / result['job_id'] / 'answer.json').read_bytes()
+        (self.root / 'app/view.js').write_text('const label = "CHANGED";\n')
+        self.commit()
+        count = len(self.client.commands)
+        reviewed = engine.review_anchors(result['job_id'], engine.base._sha(raw), {'1': '"CHANGED"'},
+            root=self.root, confirmed=True, roles_path=self.roles_path, store_root=self.store,
+            client_factory=lambda: self.client)
+        self.assertEqual(reviewed['state'], 'attention')
+        self.assertEqual(len(self.client.turns), 1)
+        self.assertEqual(len(self.client.commands), count)
+
 
 if __name__ == '__main__':
     unittest.main()

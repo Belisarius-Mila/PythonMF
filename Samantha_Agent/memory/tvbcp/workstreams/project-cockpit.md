@@ -1,6 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-20 22:19 CEST: Skutečná Luna vytvořila vícesouborový návrh fotografií; přesné převzetí ho zastavilo kvůli jedné nepřesné citaci old v Node testu. Zdroje beze změny. Doplněná registrovaná jednorázová review_anchors opravuje pouze citaci původního textu, nové kódy Luny nepřepisuje; nová izolace a testy, žádný další modelový tah.
+
 - 2026-10-20 22:12 CEST: Centrální simple_developer přepnutý ověřenou aktivací na skutečnou gpt-6-luna/high; release_executor přesně zachovaný. Rozšířený engine je lokální; běžící portál dostane novou větev až schváleným p+n. Připravené nezměnitelné syntetické přejímací testy pro fotografie; samotnou funkci vyvine Luna.
 
 - 2026-10-20 22:03 CEST: Výslovný vývoj Lunou rozšířený lokálně na více souborů; skutečný syntetický návrh Luny převzatý (3 FAIL → 3 PASS). Aktivace centrální role, skutečná úprava fotografií a schválené p+n následují. Starší tvrzení o trvalém omezení jedné funkce je překonané novým rozhodnutím.
@@ -2047,3 +2049,11 @@ Rozhodnutí: výslovné vývojové pokyny vždy předávat Luně; stejná centr�
 Další krok: skutečný vícesouborový úkol fotografie ve střižně.
 Navrhované další kroky: zkontrolovat výsledek a dokončit již schválené p+n.
 Technický důkaz: activation_plan replace_existing=true + activate → activated_locally, přijatý probe 3a1b667eeb634603be866357921150f5, binding a6e98e90294fc7cc47637ffd39aaf75c83acab3629027ffbdb3ccc6bf14fbe32. Riziko přerušeného applying zůstává viditelné; vývoj neuděluje oprávnění k mazání či publikaci.
+
+## 2026-10-20 22:19 CEST — Kontrola citací návrhu Luny
+
+Hotovo: Skutečná Luna vytvořila vícesouborový návrh fotografií; přesné převzetí ho zastavilo kvůli jedné nepřesné citaci old v Node testu. Zdroje beze změny. Doplněná registrovaná jednorázová review_anchors opravuje pouze citaci původního textu, nové kódy Luny nepřepisuje; nová izolace a testy, žádný další modelový tah.
+Rozhodnutí: nejistý placený krok neopakovat. Jedna ruční kontrola citace je integrace téhož návrhu, nikoli nový vývojový model.
+Další krok: ověřit původní návrh s opravenou citací a přijmout pouze úspěšný diff.
+Navrhované další kroky: již schválené p+n Lunou.
+Technický důkaz: původní job d67ea8e3a4c26b3c088fd33a821194e8, gpt-6-luna/high, základní testy 4 FAIL bez chyb prostředí, 0,161725 odhadovaného kreditu. 44 cílených kontrol integrace PASS. Riziko přerušení applying zůstává viditelné.

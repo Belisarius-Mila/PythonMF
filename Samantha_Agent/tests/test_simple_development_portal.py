@@ -70,6 +70,18 @@ class SimpleDevelopmentPortalTests(unittest.TestCase):
         self.assertEqual(self.dispatch(task={})['state'], 'blocked')
         self.engine.run.assert_not_called()
 
+    def test_anchor_review_stays_bound_to_the_original_job_and_turn(self):
+        self.bridge._engine = portal.development
+        with patch.object(portal.luna_development, 'run', return_value={'state': 'attention', 'job_id': 'parent'}), \
+                patch.object(portal.luna_development, 'review_anchors', return_value={
+                    'state': 'ready_for_review', 'job_id': 'child', 'candidate_digest': 'digest'}) as review:
+            self.dispatch(task={'kind': 'explicit_project_change'})
+            self.assertEqual(self.dispatch('review_anchors', job_id='foreign', answer_digest='sha', corrections={'0': 'old'})['state'], 'blocked')
+            review.assert_not_called()
+            self.assertEqual(self.dispatch('review_anchors', job_id='parent', answer_digest='sha', corrections={'0': 'old'})['job_id'], 'child')
+            review.assert_called_once_with('parent', 'sha', {'0': 'old'}, root=self.root / 'workspace', confirmed=True)
+            self.assertEqual(self.dispatch('review_anchors', job_id='parent', answer_digest='sha', corrections={'0': 'old'})['state'], 'blocked')
+
     def test_extra_root_model_or_roles_fields_are_not_accepted(self):
         for field in ['root', 'model', 'roles_path', 'confirmed']:
             self.assertEqual(self.dispatch(task={}, **{field: 'override'})['state'], 'blocked')

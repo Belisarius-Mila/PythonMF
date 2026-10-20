@@ -168,7 +168,68 @@ def _diff(originals, candidates):
         fromfile=name, tofile=name, n=3)) for name, data in sorted(candidates.items()))
 
 
-def run(request, *, root, confirmed=False, roles_path=roles.CONFIG_PATH, store_root=None, client_factory=new_luna_client):
+def _reviewed_answer(review, task, selected, store):
+    """A reviewer may correct only quoted OLD text, never the model's new code."""
+    parent_id, answer_digest, corrections = review
+    if not isinstance(parent_id, str) or not base.JOB_ID.fullmatch(parent_id):
+        raise ValueError('Neplatný původ návrhu.')
+    parent = Path(store) / parent_id
+    if any(p.is_symlink() for p in (parent, *parent.parents)):
+        raise ValueError('Neplatný původ návrhu.')
+    saved = json.loads(base._read(parent / 'receipt.json'))
+    raw = base._read(parent / 'answer.json')
+    comparable = lambda value: {k: v for k, v in value.items() if k != 'request_id'}
+    if (saved['state'] != 'attention' or saved.get('executor') != selected
+            or _identity(Path(saved['root']), saved['source_head'], saved['task']) != parent_id
+            or saved.get('proposal_origin_job') or base._sha(raw) != answer_digest
+            or comparable(saved['task']) != comparable(task)
+            or (parent / 'candidates.json').exists() or (parent / 'after-command.json').exists()
+            or not isinstance(corrections, dict) or not 1 <= len(corrections) <= 80):
+        raise ValueError('Změněný podklad nebo nevyhovující stav; převzetí zastaveno.')
+    usage = saved.get('model_usage')
+    credits = saved.get('estimated_credits')
+    if usage is None or credits is None or usage['total_tokens'] > 120000 or credits > 4:
+        raise ValueError('Chybí původní důkaz spotřeby.')
+    answer = json.loads(raw)
+    for index, old in corrections.items():
+        if (not isinstance(index, str) or not index.isdecimal() or str(int(index)) != index
+                or not 0 <= int(index) < len(answer['changes']) or not isinstance(old, str)
+                or not 1 <= len(old) <= 24000):
+            raise ValueError('Neplatná oprava citace.')
+        answer['changes'][int(index)]['old'] = old
+    return answer, usage
+
+
+def review_anchors(job_id, answer_digest, corrections, *, root, confirmed=False,
+                   store_root=None, roles_path=roles.CONFIG_PATH, client_factory=new_luna_client):
+    """One deliberate integration review, without another model turn or source write.
+
+    Reuses only an un-applied proposal with unchanged selected source/context and
+    role. A fresh isolated copy and both test stages bind the current clean HEAD.
+    A deterministic child receipt makes an interrupted review non-replayable.
+    """
+    if confirmed is not True:
+        return {'state': 'not_started'}
+    try:
+        if not isinstance(job_id, str) or not base.JOB_ID.fullmatch(job_id):
+            raise ValueError('Neplatné ID.')
+        store = Path(store_root or DEFAULT_STORE)
+        parent = store / job_id
+        if any(p.is_symlink() for p in (parent, *parent.parents)):
+            raise ValueError('Neplatný původ.')
+        saved = json.loads(base._read(parent / 'receipt.json'))
+        if saved['root'] != str(Path(root).resolve()):
+            raise ValueError('Cizí workspace.')
+        request = {k: saved['task'][k] for k in ('kind', 'explicit_luna', 'request_id', 'goal', 'files', 'context', 'test_modules')}
+        request['request_id'] = request['request_id'][:70] + '-review-' + base._sha(base._json(corrections))[:8]
+        return run(request, root=root, confirmed=True, store_root=store, roles_path=roles_path,
+                   client_factory=client_factory, _review=(job_id, answer_digest, corrections))
+    except Exception:
+        return {'state': 'attention', 'reason': 'Revize citací není ověřená; zdroje se nemění.'}
+
+
+def run(request, *, root, confirmed=False, roles_path=roles.CONFIG_PATH, store_root=None, client_factory=new_luna_client,
+        _review=None):
     route = preview(request, root=root)
     if route['action'] != 'delegate':
         return route
@@ -198,22 +259,36 @@ def run(request, *, root, confirmed=False, roles_path=roles.CONFIG_PATH, store_r
                 if not re.fullmatch(r'gpt-[A-Za-z0-9.]+-luna', selected['model']):
                     raise ValueError('Výslovný pokyn Luně nepovoluje jiný model.')
                 result['executor'] = selected
+                reviewed = _reviewed_answer(_review, task, selected, store_root or DEFAULT_STORE) if _review else None
                 result['baseline'] = base._tests(client, workspace, job, task['test_modules'], 'baseline', timeout_ms=120000)
                 if base._manifest(workspace) != frozen:
                     raise ValueError('Testy změnily vstupy.')
-                thread = routine_tasks.start_data_only_thread(client, job / 'empty_context', selected['model'], INSTRUCTIONS)
-                payload = {k: task[k] for k in ('goal', 'sources', 'context_sources', 'test_modules')}
-                reply = client.send_text(thread_id=thread['thread_id'], text=base._json(payload).decode(),
-                    model=selected['model'], effort=selected['reasoning_effort'], approval_policy='never',
-                    sandbox_policy={'type': 'readOnly', 'networkAccess': False}, output_schema=SCHEMA)
-                usage = normalize_usage(reply.thread_token_usage)
+                if reviewed:
+                    answer, usage = reviewed
+                    raw_answer = base._json(answer).decode()
+                    result.update(proposal_origin_job=_review[0], new_model_turn=False)
+                    base._write(job / 'review.json', base._json({'parent': _review[0], 'answer_digest': _review[1], 'corrections': _review[2]}))
+                else:
+                    thread = routine_tasks.start_data_only_thread(client, job / 'empty_context', selected['model'], INSTRUCTIONS)
+                    payload = {k: task[k] for k in ('goal', 'sources', 'context_sources', 'test_modules')}
+                    reply = client.send_text(thread_id=thread['thread_id'], text=base._json(payload).decode(),
+                        model=selected['model'], effort=selected['reasoning_effort'], approval_policy='never',
+                        sandbox_policy={'type': 'readOnly', 'networkAccess': False}, output_schema=SCHEMA)
+                    usage = normalize_usage(reply.thread_token_usage)
+                    raw_answer = str(reply.answer)
                 result.update(model_usage=usage, estimated_credits=estimate_standard_credits(selected['model'], usage))
                 base._save(job, result)
-                base._write(job / 'answer.json', str(reply.answer).encode())
+                base._write(job / 'answer.json', raw_answer.encode())
                 if usage is None or result['estimated_credits'] is None or usage['total_tokens'] > 120000 or result['estimated_credits'] > 4:
                     raise ValueError('Neúplná nebo nadlimitní spotřeba.')
-                answer = json.loads(reply.answer)
+                answer = json.loads(raw_answer)
+                result.update(answer_digest=base._sha(raw_answer.encode()))
+                if len(raw_answer.encode()) <= 240000:
+                    result['proposal'] = answer
+                if reviewed:
+                    result.update(model_usage=None, estimated_credits=0.0)
                 candidates = build_candidates(task, answer, originals)
+                result.pop('proposal', None)
                 expected = dict(frozen)
                 for name, data in candidates.items():
                     target = workspace / name

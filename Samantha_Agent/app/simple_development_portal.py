@@ -108,6 +108,15 @@ class PortalDelegation:
                 grant['engine'] = engine
                 grant['result'] = engine.run(payload['task'], root=grant['root'], confirmed=True)
                 return grant['result']
+            if operation == 'review_anchors' and set(payload) == {'token', 'operation', 'job_id', 'answer_digest', 'corrections'}:
+                result = grant['result'] or {}
+                if (grant.get('engine') is not luna_development or result.get('state') != 'attention'
+                        or result.get('job_id') != payload['job_id'] or grant.get('review_started')):
+                    raise ValueError('Foreign or repeated integration review')
+                grant['review_started'] = True
+                grant['result'] = luna_development.review_anchors(payload['job_id'], payload['answer_digest'], payload['corrections'],
+                                                                   root=grant['root'], confirmed=True)
+                return grant['result']
             if operation == 'accept' and set(payload) == {'token', 'operation', 'job_id', 'candidate_digest'}:
                 result = grant['result'] or {}
                 if (result.get('state') not in ('ready_for_review', 'applied')
@@ -137,6 +146,9 @@ def control_block(ticket):
             'app.simple_development_portal.request(operation="run", token=..., channel=..., task=...). '
             'Nepouštěj další App Server z izolovaného workspace. Role se vybírá centrálně. '
             'Jeden výsledek zkontroluj a přijmi stejným nástrojem operation="accept", job_id a candidate_digest. '
+            'Pouze nepřesnou citaci old můžeš po kontrole jednou opravit operation="review_anchors" '
+            's job_id, answer_digest a corrections (mapa indexu změny jako textu na přesné old); '
+            'new zůstává od Luny, další model se nevolá. '
             'Při blocked/attention oznam konkrétní překážku; neopakuj nejistý modelový krok. '
             'Čekání je programové bez modelového pollingu; checkpoint a publikace zůstávají v Cockpitu.\n'
             f'token={ticket["token"]}\nchannel={ticket["channel"]}\n[/SIMPLE_DEVELOPMENT]')
