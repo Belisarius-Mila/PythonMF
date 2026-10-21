@@ -129,7 +129,15 @@ class ProjectAuditReportTests(unittest.TestCase):
                         name="Knihovna",
                         canonical_newer_than_aggregate=False,
                     ),
-                )
+                ),
+                summary_freshness_candidates=(
+                    SimpleNamespace(
+                        summary_path="memory/samantha_core.md",
+                        summary_date="2026-07-30",
+                        canonical_path="memory/handoffs/workstreams/project-samantha-agent-rag.md",
+                        canonical_date="2026-08-07",
+                    ),
+                ),
             )
 
             with patch(
@@ -150,6 +158,8 @@ class ProjectAuditReportTests(unittest.TestCase):
         self.assertEqual(result.memory_drift_workstreams, ("Cockpit",))
         self.assertIn("1 proudů má novější kanonický handoff/TVBCP", text)
         self.assertIn("synchronizovat ACTIVE_PROJECTS.md", text)
+        self.assertIn("samantha_core.md (2026-07-30) je starší", text)
+        self.assertIn("Ručně zkontrolovat datovaný úvodní stav Samanthy", text)
         self.assertFalse(any("Cockpit Knihovna" in step for step in result.quick_recommendations))
         self.assertIsNone(result.registry_committed_at)
         self.assertIn("Poslední commit ACTIVE_PROJECTS.md: nezjištěný", text)

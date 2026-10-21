@@ -10,7 +10,11 @@ from typing import Callable, Sequence
 from app.backup.activity_state import DEFAULT_BACKUP_ACTIVITY_STATE_PATH, backup_activity_status
 from app.capability_audit import format_samantha_capability_audit
 from app.health_check import run_samantha_health_check
-from app.memory_truth_audit import git_file_evidence, run_memory_truth_audit
+from app.memory_truth_audit import (
+    SummaryFreshnessCandidate,
+    git_file_evidence,
+    run_memory_truth_audit,
+)
 from app.quantitative_status import run_samantha_quantitative_status
 
 
@@ -62,6 +66,7 @@ class ProjectAuditResult:
     reminder_count: int
     memory_drift_count: int
     memory_drift_workstreams: tuple[str, ...]
+    summary_freshness_candidates: tuple[SummaryFreshnessCandidate, ...]
     health_warnings: tuple[str, ...]
     quick_recommendations: tuple[str, ...]
     priority_1: tuple[ProjectAuditItem, ...]
@@ -152,6 +157,9 @@ def run_samantha_project_audit(
         for row in memory_truth.rows
         if row.canonical_newer_than_aggregate
     )
+    summary_freshness_candidates = tuple(
+        getattr(memory_truth, "summary_freshness_candidates", ())
+    )
 
     priority_1, priority_2, priority_3 = _prioritize_items(rows, reminders, normalized_mode)
     recommendations = _quick_recommendations(
@@ -159,6 +167,7 @@ def run_samantha_project_audit(
         backup_ok=bool(backup.get("ok")),
         reminder_count=len(reminders),
         memory_drift_count=len(memory_drift_workstreams),
+        summary_freshness_candidates=summary_freshness_candidates,
         capability=capability,
         priority_1=priority_1,
     )
@@ -179,6 +188,7 @@ def run_samantha_project_audit(
         reminder_count=len(reminders),
         memory_drift_count=len(memory_drift_workstreams),
         memory_drift_workstreams=memory_drift_workstreams,
+        summary_freshness_candidates=summary_freshness_candidates,
         health_warnings=tuple(_sanitize_text(warning) for warning in health.warnings),
         quick_recommendations=recommendations,
         priority_1=priority_1,
@@ -245,7 +255,7 @@ def format_project_audit_result(result: ProjectAuditResult) -> str:
         f"Datum: {result.created_at[:10]}",
         f"Sestaveno: {result.created_at}",
         f"Mode: {result.mode}",
-        "Zdroj: ACTIVE_PROJECTS.md, MEMORY_INDEX.md, audit autority paměti, health check, backup status, quantitative status, capability audit",
+        "Zdroj: ACTIVE_PROJECTS.md, MEMORY_INDEX.md, audit autority a stáří Samantha core, health check, backup status, quantitative status, capability audit",
         "Ucel: Opakovatelny lidsky itinerar pro vyber, na co navazat.",
         f"Poslední commit ACTIVE_PROJECTS.md: {result.registry_committed_at or 'nezjištěný'}.",
         "Čas souboru nedokazuje stáří jednotlivých údajů ani jejich pravdivost; obsah může mít lokální změny.",
@@ -264,6 +274,7 @@ def format_project_audit_result(result: ProjectAuditResult) -> str:
         f"- Zaloha: {result.backup_summary}",
         f"- Aktivnich `[PRIPOMENOUT]`: {result.reminder_count}",
         _memory_drift_line(result),
+        _summary_freshness_line(result),
         f"- Kvantitativne: lokalne {result.local_files} souboru / {result.local_lines} radku; git tracked {result.git_files} souboru / {result.git_lines} radku.",
         _capability_line(result.capability_summary),
         "",
@@ -321,6 +332,7 @@ def format_project_audit_result(result: ProjectAuditResult) -> str:
         f"- Git/provozni stav: {result.git_summary}.",
         f"- Pocet aktivnich `[PRIPOMENOUT]`: {result.reminder_count}.",
         f"- Kanonická paměť novější než ACTIVE_PROJECTS.md: {result.memory_drift_count} proudů.",
+        f"- Datované souhrny Samanthy k ruční revizi: {len(result.summary_freshness_candidates)}.",
         "- Automaticky report sklada fakta; konecny vyber priority porad potvrzuje Mila.",
         "",
         f"Nejmensi dalsi krok: {result.quick_recommendations[0] if result.quick_recommendations else 'Vybrat jeden aktivni projekt a potvrdit dalsi krok.'}",
@@ -357,6 +369,7 @@ def _quick_recommendations(
     backup_ok: bool,
     reminder_count: int,
     memory_drift_count: int,
+    summary_freshness_candidates: Sequence[SummaryFreshnessCandidate],
     capability: CapabilityAuditSummary,
     priority_1: Sequence[ProjectAuditItem],
 ) -> tuple[str, ...]:
@@ -371,6 +384,11 @@ def _quick_recommendations(
             "Nejdřív synchronizovat ACTIVE_PROJECTS.md s novějšími kanonickými "
             f"handoffy/TVBCP ({memory_drift_count} proudů); projektové stavy v tomto "
             "reportu mohou být zastaralé."
+        )
+    if summary_freshness_candidates:
+        items.append(
+            "Ručně zkontrolovat datovaný úvodní stav Samanthy proti aktuálnímu "
+            "handoffu; starší datum je signál k revizi, ne důkaz rozporu."
         )
     if reminder_count >= 40:
         items.append("Zmensit sum v pameti: vybrat malou davku zastaralych `[PRIPOMENOUT]` a presunout je mimo startovni pozornost.")
@@ -395,6 +413,17 @@ def _memory_drift_line(result: ProjectAuditResult) -> str:
         "- Drift projektové paměti: "
         f"{result.memory_drift_count} proudů má novější kanonický handoff/TVBCP "
         f"než ACTIVE_PROJECTS.md ({names}{suffix})."
+    )
+
+
+def _summary_freshness_line(result: ProjectAuditResult) -> str:
+    if not result.summary_freshness_candidates:
+        return "- Datovaný úvodní souhrn Samanthy: žádný starší kandidát na revizi."
+    candidate = result.summary_freshness_candidates[0]
+    return (
+        "- Datovaný úvodní souhrn Samanthy k ruční revizi: "
+        f"{candidate.summary_path} ({candidate.summary_date}) je starší než "
+        f"kanonický stav {candidate.canonical_date}; datum samo nedokazuje obsahový rozpor."
     )
 
 

@@ -1,35 +1,35 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Stav znovu ověřen: 2026-08-07 13:59 CEST
+- Stav znovu ověřen: 2026-10-21 18:45 CEST
 
 ### Hotovo
-- P7 je implementované a obsažené v živě nasazeném Cockpitu.
-- Samantha před aktuálním provozním tvrzením použije dostupný bezpečný live audit a bez něj přizná stáří i nejistotu paměti.
+- P7 live-first pravidlo zůstává součástí nasazeného Cockpitu.
+- P8 rozšířilo read-only paměťový audit o ruční revizi, když datované jádro
+  Samanthy předchází explicitnímu datu současného stavu v označeném handoffu.
+- Systémový report ukazuje kandidáta a doporučí ruční kontrolu.
+- Zastaralý P7 další krok byl odstraněn ze startup souhrnu.
 
 ### Otevřeno
-- Obsahová pravdivost všech 30 proudů není automaticky doložená; dnešní audit
-  proto opravuje jen prokazatelný drift.
+- Datum je pouze signál stáří, ne důkaz obsahového rozporu; případný kandidát
+  se musí porovnat s obsahem kanonického handoffu.
+- Bez explicitního data v některém z obou očekávaných markerů kontrola kandidáta
+  nevydá.
 
 ### Rizika
-- Žádné další doložené provozní riziko.
+- Kontrola je záměrně úzká pro datovaný stav `samantha_core.md` a označený
+  blok aktuálního stavu tohoto proudu; neopravuje paměť ani nečte private data.
 
 ### Další krok
-- Bez okamžité implementace; při příštím provozním dotazu ověřit live-first
-  chování na skutečné odpovědi.
+- Při budoucím kandidátu porovnat obsah core s handoffem před případnou opravou.
 
 ### Rozhodnutí
-- Dostupný bezpečný live audit má přednost; bez něj se uvádí stáří a nejistota snapshotu.
+- Starší datum se hlásí pouze jako review candidate; audit nesmí sám tvrdit
+  obsahový drift ani přepisovat zdroj.
 
-### Navrhované další kroky
-- Automatický projektový audit má nově přiznat, když je kanonická paměť novější
-  než `ACTIVE_PROJECTS.md`.
-
-### Technický stav checkpointu
-- Commit P7 `f4092fb` je předkem živě nasazeného commitu `91dc700`.
-- Cockpit deployment je serverově ověřený a smoke prošel 5/5.
-- Audit autority paměti před opravou našel šest proudů s novější kanonickou
-  pamětí než agregátem.
+### Technický stav
+- Cílené testy prošly 11/11; rychlý systémový audit po srovnání dat hlásí nula
+  kandidátů stáří souhrnu.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: Samantha Agent / RAG
@@ -152,3 +152,28 @@ Navrhované další kroky:
 
 Technický důkaz:
 - P7 commit `f4092fb` je obsažený v živě nasazeném `91dc700`; smoke 5/5.
+
+### 2026-10-21 18:45 CEST – Kontrola stáří startup souhrnu
+
+Hotovo:
+- Read-only audit porovnává datum `Aktuální kanonický stav` v `samantha_core.md`
+  s datem v označeném aktuálním stavu tohoto handoffu.
+- Starší datum se zobrazí jako kandidát k ruční revizi také v systémovém reportu.
+- Startup souhrn nyní odkazuje pro aktuální milníky a další kroky na kanonický
+  handoff a TVBCP.
+
+Rozhodnutí:
+- Časové pořadí je pouze signál k přezkoumání; audit z něj nesmí odvozovat
+  obsahový rozpor ani automaticky měnit paměť.
+
+Další krok:
+- Při budoucím kandidátu porovnat obsah s handoffem před případnou opravou.
+
+Navrhované další kroky:
+- Pokud v budoucnu audit označí kandidáta, porovnat konkrétní obsah a teprve
+  potom upravit kanonický souhrn.
+
+Technický důkaz:
+- Cílené testy `test_memory_truth_audit` a `test_project_audit_report`:
+  11/11 PASS po projektovém zápisu. Rychlý systémový audit v 18:45 hlásí
+  nula kandidátů po srovnání datovaného core a handoffu.

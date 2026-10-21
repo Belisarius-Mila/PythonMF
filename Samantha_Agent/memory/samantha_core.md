@@ -43,57 +43,27 @@ pro mazani, nevratne zasahy, odesilani ven a skutecne systemove riziko.
 - Python 3.12 je pripraveny.
 - OpenAI API key je pripraveny lokalne, ale nesmi se zapisovat do gitu ani do pametovych souboru.
 
-## Aktualni kanonicky stav 2026-07-30
+## Aktualni kanonicky stav 2026-10-21
 
-Samantha Agent/RAG ma prvni praktickou verzi nad OpenAI Agents SDK a lokalni
-markdown pameti.
+Samantha Agent/RAG je prakticky agent nad OpenAI Agents SDK a lokalni git-safe
+Markdown pameti. Toto je kompaktní startup kontext; podrobný stav, rozhodnutí a
+bezprostřední další krok jsou v kanonickém handoffu a TVBCP.
 
-- Startup kontext je kompaktní: nacita hlavne `samantha_core.md`,
-  `ACTIVE_PROJECTS.md` a `MEMORY_INDEX.md`.
-- Konkretni dlouhodoby kontext se dohledava pres `search_memory`.
-- Diagnostika pameti je dostupna pres `memory_status`.
-- `app/memory_store.py` ma textovy RAG-like index nad markdown pameti, in-memory
-  cache, tokenizaci nazvu souboru, podporu variant `read-only`/`readonly`,
-  jeden nejlepsi snippet za soubor a zkraceny textovy vystup.
-- `search_memory_text` ve vystupu ukazuje typ zdroje (`core`, `projects`,
-  `handoffs`, `technical`, `infrastructure`, `stories`) a podporuje volitelny
-  filtr `source_type`, aby historicke handoffy neprebijely kanonicky stav.
-- P0 pridal deterministicky read-only audit 30 pracovnich proudu bez cteni
-  private obsahu a bez automatickych oprav.
-- P1 oznacuje vysledky autoritou `canonical`, `aggregate`,
-  `aggregate_unverified`, `reference` nebo `historical`. Zvyseni autority se
-  uplatni jen na pracovni proud rozpoznany z dotazu.
-- P2 po vyslovnem souhlasu zalozilo kanonicky handoff a TVBCP pouze pro
-  `project-samantha-agent-rag`; podrobny soucasny stav je v teto dvojici.
-- P3 opravilo jediny formalni rozpor rezimu Mobile Input.
-- P4 prakticky proverilo sedm roadmapovych proudu a odkrylo chybne vynucovani
-  filtru `projects` agentem.
-- P5 zavedlo nefiltrovane prvni hledani podle autority a jednoznacne aliasy
-  `R2 Adam` a `Kalendář`; nasazeni `20180e2` i smoke 5/5 jsou potvrzene.
-- P6a provedlo obsahovy audit sedmi roadmapovych proudu a P6b narovnalo pouze
-  prokazatelne zastarale aktivni souhrny bez mazani historie a bez hromadneho
-  zakladani kanonickych dvojic.
-- Zivy audit 2026-08-01 odkryl hranici P6: promenliva runtime aktivace
-  Rodinneho kalendare se po provoznim kroku nepropsala do git-safe pameti.
-  Aktualni provozni tvrzeni proto musi pouzit redigovany live audit, ne pouze
-  pametovy snapshot.
-- Vyhledavani zatim neni vektorova databaze a nepouziva embeddings.
-- Lokalni smoke test 2026-05-23 bez OpenAI API po doplneni `source_type`:
-  - dotaz `Samantha Agent RAG search_memory ranking` vraci vysledky oznacene
-    typem zdroje a mezi prvnimi je kanonicky `core` kontext;
-  - `source_type='core'` omezi vysledky na `MEMORY_INDEX.md`,
-    `samantha_core.md` a `ACTIVE_PROJECTS.md`;
-  - `source_type='projects'` pro `email read-only workflow` vraci jako prvni
-    `projects/email_readonly_oauth.md`;
-  - `source_type='handoffs'` umi cilene najit historicke RAG handoffy.
-
-Aktualni dalsi krok:
-
-- P0-P6 zustavaji hotove pro autoritu a obsah git-safe pameti.
-- Novy P7 ma uzce doplnit ochranu promenliveho runtime stavu: live audit,
-  nebo priznane stari a nejistota snapshotu.
-- Embeddings resit jen pri novem praktickem dukazu, ze textove vyhledavani s
-  autoritou a cache nestaci.
+- Startup nacita hlavne `samantha_core.md`, `ACTIVE_PROJECTS.md` a
+  `MEMORY_INDEX.md`; konkretni kontext dohledava pres `search_memory`.
+- `app/memory_store.py` poskytuje textove hledani s cache, typem zdroje a
+  autoritou vysledku (`canonical`, `aggregate`, `aggregate_unverified`,
+  `reference`, `historical`). Vyhledavani nepouziva embeddings.
+- P0-P7 jsou hotove. P7 vyzaduje pro proměnlivá tvrzení registrovaný redigovaný
+  live audit, případně přiznání stáří a nejistoty snapshotu.
+- P8 rozšířilo read-only audit o kandidáta na ruční revizi, pokud je datum
+  aktuálního odstavce zde starší než datum v označeném aktuálním stavu handoffu.
+  Samotné datum není důkaz obsahového rozporu a audit nic neopravuje.
+- Nové milníky a provozně proměnlivý stav ověřuj v
+  `handoffs/workstreams/project-samantha-agent-rag.md` a
+  `tvbcp/workstreams/project-samantha-agent-rag.md`; nepřebírej další krok ze
+  staršího historického záznamu.
+- Embeddings zvažovat pouze po praktickém důkazu, že textové hledání nestačí.
 
 ## Historicke handoffy Samantha Agent/RAG
 

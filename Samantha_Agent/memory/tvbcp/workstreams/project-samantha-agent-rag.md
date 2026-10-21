@@ -65,6 +65,9 @@ dukazu, ze textove hledani nestaci.
 - Git-safe pamet je u promenliveho runtime stavu pouze casovany snapshot.
   Aktualni tvrzeni typu `aktivni`, `bezi` nebo `pripraveno` musi prednostne
   pouzit registrovany redigovany live audit, nebo priznat stari a nejistotu.
+- Starší explicitní datum v startup souhrnu proti označenému aktuálnímu stavu
+  handoffu je pouze kandidát k ruční revizi; časové pořadí samo nedokazuje
+  obsahový rozpor a audit paměť automaticky nemění.
 
 ## Milniky
 
@@ -78,6 +81,9 @@ dukazu, ze textove hledani nestaci.
 - P5: nefiltrovane prvni hledani autority a dva jednoznacne query aliasy.
 - P6: obsahovy audit sedmi roadmapovych proudu a narovnani pouze prokazatelne
   zastaralych aktivnich souhrnu.
+- P7: live-first ochrana pro proměnlivá provozní tvrzení.
+- P8: read-only kontrola stáří datovaného Samantha core souhrnu proti handoffu,
+  s review candidate v auditním výstupu.
 
 ## Otevrene kroky a rizika
 
@@ -89,8 +95,10 @@ dukazu, ze textove hledani nestaci.
 - Obecny `Cockpit` je skutecne nejednoznacny a nesmi dostat tichy alias.
 - Proudy bez materializovane kanonicke dvojice zustavaji
   `aggregate_unverified`; P6 je hromadne nematerializuje.
-- P6 neresi writeback redigovane provozni uctenky ani povinne live overeni
-  promenliveho runtime stavu.
+- Audit stáří core souhrnu kontroluje jen explicitní datum ve známém nadpisu a
+  označeném bloku handoffu; bez těchto markerů kandidáta nevydá.
+- Datový kandidát vyžaduje ruční kontrolu obsahu. P8 nepřidává automatický
+  rewrite, soukromé čtení ani tvrzení o prokázaném driftu.
 
 ## Chronologicke zaznamy
 
@@ -315,3 +323,32 @@ Navrhované další kroky:
 
 Technický důkaz:
 - P7 commit `f4092fb` je obsažený v živě nasazeném `91dc700`; smoke 5/5.
+
+### 2026-10-21 18:45 CEST – P8 stáří startup souhrnu
+
+#### Hotovo
+
+- `memory_truth_audit` porovnává explicitní datum v Samantha core souhrnu s
+  datem v označeném aktuálním stavu kanonického handoffu.
+- Starší souhrn je vypsán jako kandidát k ruční revizi v paměťovém i systémovém
+  auditu; systémový report doplní odpovídající doporučení.
+- `samantha_core.md` už neuvádí P7 jako otevřený další krok a odkazuje na
+  handoff/TVBCP pro aktuální stav.
+
+#### Rozhodnutí
+
+- Porovnání data je pouze review signal, ne důkaz obsahového rozporu.
+- Audit zůstává read-only a nepřepisuje paměť.
+
+#### Další krok
+
+- Při budoucím kandidátu obsahově porovnat souhrn s handoffem před opravou.
+
+#### Navrhované další kroky
+
+- Při budoucím kandidátu obsahově porovnat souhrn s handoffem před opravou.
+
+#### Technický důkaz
+
+- Cílené testy po zápisu projektu: 11/11 PASS. Rychlý systémový audit v 18:45
+  po srovnání dat hlásí nula kandidátů.

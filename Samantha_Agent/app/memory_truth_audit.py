@@ -5,10 +5,13 @@ P0 deliberately compares only machine-verifiable registry facts:
 - canonical workstream identity, lifecycle and priority,
 - matching rows in ``memory/ACTIVE_PROJECTS.md``,
 - existence of the canonical handoff and TVBCP,
-- Git commit timestamps as a review signal, never as proof of truth.
+- Git commit timestamps as a review signal, never as proof of truth,
+- explicit dates in the Samantha core summary and its current handoff status.
 
-The audit does not read canonical handoff/TVBCP contents, create missing files,
-repair memory, or inspect private data.
+The audit reads only the git-safe Samantha core summary and the handoff's marked
+current-status block for their explicit dates. It does not read other
+handoff/TVBCP contents, create missing files, repair memory, or inspect private
+data.
 """
 
 from __future__ import annotations
@@ -35,6 +38,10 @@ from app.communication.human_adam_workstream_memory import (
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 ACTIVE_PROJECTS_RELATIVE_PATH = "memory/ACTIVE_PROJECTS.md"
+SAMANTHA_CORE_RELATIVE_PATH = "memory/samantha_core.md"
+SAMANTHA_HANDOFF_RELATIVE_PATH = "memory/handoffs/workstreams/project-samantha-agent-rag.md"
+SAMANTHA_CURRENT_STATUS_START = "<!-- SAMANTHA_CURRENT_STATUS_START -->"
+SAMANTHA_CURRENT_STATUS_END = "<!-- SAMANTHA_CURRENT_STATUS_END -->"
 
 STATUS_PROVEN_CONTRADICTION = "proven_contradiction"
 STATUS_UNMATERIALIZED = "unmaterialized"
@@ -88,6 +95,14 @@ class MemoryTruthAuditRow:
 
 
 @dataclass(frozen=True)
+class SummaryFreshnessCandidate:
+    summary_path: str
+    summary_date: str
+    canonical_path: str
+    canonical_date: str
+
+
+@dataclass(frozen=True)
 class MemoryTruthAuditResult:
     generated_at: str
     active_projects_path: str
@@ -99,6 +114,7 @@ class MemoryTruthAuditResult:
     candidate_drift_count: int
     status_counts: dict[str, int]
     rows: tuple[MemoryTruthAuditRow, ...]
+    summary_freshness_candidates: tuple[SummaryFreshnessCandidate, ...] = ()
 
 
 EvidenceLoader = Callable[[str], GitFileEvidence]
@@ -234,6 +250,7 @@ def run_memory_truth_audit(
             STATUS_REGISTRY_CONSISTENT,
         )
     }
+    summary_freshness_candidates = find_summary_freshness_candidates(root)
     return MemoryTruthAuditResult(
         generated_at=generated_at or datetime.now().astimezone().isoformat(timespec="seconds"),
         active_projects_path=ACTIVE_PROJECTS_RELATIVE_PATH,
@@ -247,7 +264,71 @@ def run_memory_truth_audit(
         ),
         status_counts=status_counts,
         rows=audit_rows,
+        summary_freshness_candidates=summary_freshness_candidates,
     )
+
+
+def find_summary_freshness_candidates(
+    project_root: Path = PROJECT_ROOT,
+) -> tuple[SummaryFreshnessCandidate, ...]:
+    """Flag an older dated Samantha core status for review, without asserting drift."""
+
+    root = Path(project_root)
+    summary_path = root / SAMANTHA_CORE_RELATIVE_PATH
+    handoff_path = root / SAMANTHA_HANDOFF_RELATIVE_PATH
+    if not summary_path.is_file() or not handoff_path.is_file():
+        return ()
+
+    summary_text = summary_path.read_text(encoding="utf-8")
+    handoff_text = handoff_path.read_text(encoding="utf-8")
+    summary_date = _samantha_core_status_date(summary_text)
+    canonical_date = _samantha_handoff_status_date(handoff_text)
+    if not summary_date or not canonical_date:
+        return ()
+    parsed_summary_date = _parse_date(summary_date)
+    parsed_canonical_date = _parse_date(canonical_date)
+    if (
+        parsed_summary_date is None
+        or parsed_canonical_date is None
+        or parsed_summary_date >= parsed_canonical_date
+    ):
+        return ()
+    return (
+        SummaryFreshnessCandidate(
+            summary_path=SAMANTHA_CORE_RELATIVE_PATH,
+            summary_date=summary_date,
+            canonical_path=SAMANTHA_HANDOFF_RELATIVE_PATH,
+            canonical_date=canonical_date,
+        ),
+    )
+
+
+def _samantha_core_status_date(text: str) -> str | None:
+    for line in text.splitlines():
+        if not line.lstrip().startswith("##"):
+            continue
+        if "aktualni kanonicky stav" not in _normalized_label(line):
+            continue
+        match = re.search(r"\b(\d{4}-\d{2}-\d{2})\b", line)
+        if match and _parse_date(match.group(1)):
+            return match.group(1)
+    return None
+
+
+def _samantha_handoff_status_date(text: str) -> str | None:
+    start = text.find(SAMANTHA_CURRENT_STATUS_START)
+    end = text.find(SAMANTHA_CURRENT_STATUS_END, start + len(SAMANTHA_CURRENT_STATUS_START))
+    if start < 0 or end < 0:
+        return None
+    current_status = text[start + len(SAMANTHA_CURRENT_STATUS_START) : end]
+    match = re.search(
+        r"^\s*-\s*Stav znovu ověřen:\s*(\d{4}-\d{2}-\d{2})\b",
+        current_status,
+        flags=re.MULTILINE | re.IGNORECASE,
+    )
+    if not match or not _parse_date(match.group(1)):
+        return None
+    return match.group(1)
 
 
 def _audit_workstream(
@@ -358,6 +439,15 @@ def _parse_timestamp(value: str | None) -> datetime | None:
         return None
 
 
+def _parse_date(value: str | None) -> datetime | None:
+    if not value:
+        return None
+    try:
+        return datetime.strptime(value, "%Y-%m-%d")
+    except ValueError:
+        return None
+
+
 def _latest_timestamp(values: Iterable[str | None]) -> str | None:
     parsed = [
         (timestamp, value)
@@ -384,8 +474,9 @@ def format_memory_truth_audit(result: MemoryTruthAuditResult) -> str:
         f"Zdroj agregatu: {result.active_projects_path}",
         "",
         "Bezpecnost:",
-        "- Audit cetl pouze katalog, registry metadata a verejny git-safe agregat.",
-        "- Necetl obsah handoffu, TVBCP, private dat ani dokumentu.",
+        "- Audit cetl katalog, registry metadata, verejny git-safe agregat a",
+        "  pouze explicitni datum v core souhrnu a oznacenem aktualnim stavu handoffu.",
+        "- Necetl dalsi obsah handoffu/TVBCP, private data ani dokumenty.",
         "- Nic nevytvoril, neopravoval ani nematerializoval.",
         "- Datum commitu je pouze signal k rucni kontrole, nikoli dukaz pravdy.",
         "",
@@ -396,6 +487,7 @@ def format_memory_truth_audit(result: MemoryTruthAuditResult) -> str:
         f"- Kompletni kanonicka dvojice handoff + TVBCP: {result.memory_ready_count}",
         f"- Prokazane formalni rozpory: {result.proven_contradiction_count}",
         f"- Kandidati na kontrolu podle casu commitu: {result.candidate_drift_count}",
+        f"- Datovane souhrny k rucni revizi: {len(result.summary_freshness_candidates)}",
         "- Stavy: "
         + ", ".join(
             f"{status}={count}" for status, count in result.status_counts.items()
@@ -433,6 +525,16 @@ def format_memory_truth_audit(result: MemoryTruthAuditResult) -> str:
         for contradiction in row.contradictions:
             lines.append(f"- {row.workstream_id}: {contradiction}")
 
+    lines.extend(["", "Datovane souhrny k rucni revizi:"])
+    if not result.summary_freshness_candidates:
+        lines.append("- Zadny kandidat.")
+    for candidate in result.summary_freshness_candidates:
+        lines.append(
+            f"- {candidate.summary_path} ({candidate.summary_date}) je starsi nez "
+            f"aktualni stav {candidate.canonical_path} ({candidate.canonical_date}); "
+            "datum je pouze signal k rucni kontrole."
+        )
+
     lines.extend(
         [
             "",
@@ -441,6 +543,7 @@ def format_memory_truth_audit(result: MemoryTruthAuditResult) -> str:
             "- unmaterialized = lazy kanonicka dvojice jeste neni kompletni.",
             "- unverifiable = chybi srovnatelny radek agregatu.",
             "- candidate_drift = kanonicky dokument ma novejsi commit; obsah je nutne overit rucne.",
+            "- datovany souhrn k rucni revizi = datum core summary je starsi nez explicitni datum aktualniho handoffu; datum samo nedokazuje obsahovy rozpor.",
             "- registry_consistent = overena jsou jen formalni pole, nikoli pravdivost celeho textu.",
             "",
         ]

@@ -14,6 +14,7 @@ from app.memory_truth_audit import (
     STATUS_UNMATERIALIZED,
     STATUS_UNVERIFIABLE,
     format_memory_truth_audit,
+    find_summary_freshness_candidates,
     memory_truth_audit_json,
     parse_active_project_registry,
     run_memory_truth_audit,
@@ -179,6 +180,91 @@ class MemoryTruthAuditTests(unittest.TestCase):
         self.assertIn("mode_mismatch", text)
         self.assertIn('"workstream_count": 5', payload)
         self.assertNotIn("data/private/secret", text + payload)
+
+    def test_older_dated_core_summary_is_a_review_candidate_not_a_contradiction(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            memory = root / "memory"
+            handoff_dir = memory / "handoffs" / "workstreams"
+            handoff_dir.mkdir(parents=True)
+            (memory / "samantha_core.md").write_text(
+                "## Aktualni kanonicky stav 2026-07-30\nP7 je dalsi krok.\n",
+                encoding="utf-8",
+            )
+            (handoff_dir / "project-samantha-agent-rag.md").write_text(
+                "<!-- SAMANTHA_CURRENT_STATUS_START -->\n"
+                "## Aktualni stav\n"
+                "- Stav znovu ověřen: 2026-08-07 13:59 CEST\n"
+                "- P7 je hotove.\n"
+                "<!-- SAMANTHA_CURRENT_STATUS_END -->\n",
+                encoding="utf-8",
+            )
+
+            candidates = find_summary_freshness_candidates(root)
+
+        self.assertEqual(len(candidates), 1)
+        self.assertEqual(candidates[0].summary_date, "2026-07-30")
+        self.assertEqual(candidates[0].canonical_date, "2026-08-07")
+        self.assertEqual(candidates[0].summary_path, "memory/samantha_core.md")
+
+    def test_current_or_unparseable_summary_date_is_not_flagged(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            memory = root / "memory"
+            handoff_dir = memory / "handoffs" / "workstreams"
+            handoff_dir.mkdir(parents=True)
+            (memory / "samantha_core.md").write_text(
+                "## Aktualni kanonicky stav bez data\n",
+                encoding="utf-8",
+            )
+            (handoff_dir / "project-samantha-agent-rag.md").write_text(
+                "<!-- SAMANTHA_CURRENT_STATUS_START -->\n"
+                "- Stav znovu ověřen: 2026-08-07 13:59 CEST\n"
+                "<!-- SAMANTHA_CURRENT_STATUS_END -->\n",
+                encoding="utf-8",
+            )
+
+            self.assertEqual(find_summary_freshness_candidates(root), ())
+            (memory / "samantha_core.md").write_text(
+                "## Aktualni kanonicky stav 2026-08-08\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(find_summary_freshness_candidates(root), ())
+
+    def test_read_only_audit_reports_the_dated_core_review_candidate(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            memory = root / "memory"
+            handoff_dir = memory / "handoffs" / "workstreams"
+            handoff_dir.mkdir(parents=True)
+            (memory / "ACTIVE_PROJECTS.md").write_text(ACTIVE_SAMPLE, encoding="utf-8")
+            (memory / "samantha_core.md").write_text(
+                "## Aktualni kanonicky stav 2026-07-30\nP7 je dalsi krok.\n",
+                encoding="utf-8",
+            )
+            (handoff_dir / "project-samantha-agent-rag.md").write_text(
+                "<!-- SAMANTHA_CURRENT_STATUS_START -->\n"
+                "- Stav znovu ověřen: 2026-08-07 13:59 CEST\n"
+                "<!-- SAMANTHA_CURRENT_STATUS_END -->\n",
+                encoding="utf-8",
+            )
+
+            result = run_memory_truth_audit(
+                project_root=root,
+                catalog=CATALOG,
+                registry=WorkstreamMemoryRegistry(catalog=CATALOG, legacy_paths={}),
+                evidence_loader=lambda _: GitFileEvidence(),
+                generated_at="2026-08-08T10:00:00+02:00",
+            )
+
+        self.assertEqual(len(result.summary_freshness_candidates), 1)
+        rendered = format_memory_truth_audit(result)
+        self.assertIn("Datovane souhrny k rucni revizi: 1", rendered)
+        self.assertIn("2026-07-30", rendered)
+        self.assertIn("2026-08-07", rendered)
+        self.assertIn("datum samo nedokazuje obsahovy rozpor", rendered)
 
 
 if __name__ == "__main__":

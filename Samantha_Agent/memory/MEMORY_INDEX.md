@@ -14,8 +14,8 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   nového řešení; obsahuje soví lokální preview, obecnou kontrolu konzistence
   slovníkových aplikací a pravidlo živého ověření proměnlivého runtime stavu.
 - `samantha_core.md` - zakladni kontext: kdo je Mila, co je Samantha Agent, aktualni stav prostredi, souhrn vrstvy pameti/RAG a dlouhodoby cil.
-- `handoffs/workstreams/project-samantha-agent-rag.md` - kanonicky aktualni handoff proudu Samantha Agent / RAG; P0-P7 je hotové, P7 vyžaduje před proměnlivým provozním tvrzením redigovaný live audit nebo přiznání stáří a nejistoty paměti. Audit 2026-08-07 navíc odhalil zastarávání `ACTIVE_PROJECTS.md`; systémový report nyní tento drift výslovně hlásí.
-- `tvbcp/workstreams/project-samantha-agent-rag.md` - kanonicky rozhodovací dokument pravdivé paměti a RAG; precedence zdrojů, fail-honest fallback, P7 live-state pravidlo a pojistka proti tichému vydávání starého agregátu za aktuální stav.
+- `handoffs/workstreams/project-samantha-agent-rag.md` - kanonicky aktualni handoff proudu Samantha Agent / RAG; P0-P8 je hotové, P7 vyžaduje před proměnlivým provozním tvrzením redigovaný live audit nebo přiznání stáří a nejistoty paměti. P8 hlásí starší datum v Samantha core jako kandidáta k ruční revizi, ne jako důkaz driftu.
+- `tvbcp/workstreams/project-samantha-agent-rag.md` - kanonicky rozhodovací dokument pravdivé paměti a RAG; precedence zdrojů, fail-honest fallback, P7 live-state pravidlo a P8 kontrola stáří startup souhrnu bez automatického přepisu.
 - `contacts.md` - prakticke kontakty, ktere Mila vyslovne povolil ulozit do pameti.
 
 ## Reports
