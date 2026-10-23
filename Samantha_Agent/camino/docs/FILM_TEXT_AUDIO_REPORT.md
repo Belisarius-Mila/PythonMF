@@ -69,3 +69,14 @@ přejímka titulku, karty a vlastního hlasu v krátkém náhledu.
 
 Redigované čtecí účtenky jsou v data/private/camino_texts_20261023/;
 žádný osobní text ani nahrávka nejsou v tomto reportu nebo Gitu.
+
+## Kontrolní oprava po první publikační bráně
+
+První Luna úloha a3d0c4730ea1ef7a0e9f3b5f7a2336b7 se zastavila před
+pushem: 2174 testů, jediný FAIL v očekávané délce složené stránky. Fixture
+neobsahoval rozšíření nového panelu. Po kontrole diffu aktualizovaná délka,
+počet řádků a SHA-256; stejný cílený kontrakt 1/1 PASS. Kontroly se
+nepřeskakují. Živý GitHub nadále 07109721, nasazení nezačalo, Xcode
+nastavení obnovené. Důkaz nejistotu push_state řeší externím ověřením,
+původní účtenku nepřepisuje. Opravený checkpoint vyžaduje nové přesné
+předání celého čekajícího balíčku registrované Luně.

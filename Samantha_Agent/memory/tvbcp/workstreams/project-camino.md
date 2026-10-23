@@ -4053,3 +4053,31 @@ Technický důkaz:
 - Automatické testy a funkční render/Safari NEOVĚŘENO; nelze tvrdit provozní
   opravu. Hlas je umístěný absolutním časem, po změně obrazu zkontrolovat.
 - Podrobnosti camino/docs/FILM_TEXT_AUDIO_REPORT.md; čtecí účtenky pouze private.
+
+## 2026-10-23 09:53 CEST — Oprava kontrolního otisku před p+n
+
+Hotovo:
+- Očekávaná délka, počet řádků a SHA-256 složené stránky Cockpitu odpovídají
+  zkontrolovanému novému panelu. Cílený kontrakt znovu PASS; žádná jeho
+  kontrola nebyla vypnutá. Funkční kód panelu se touto opravou nemění.
+
+Rozhodnutí:
+- Míla výslovně zadal p+n Lunou. První úloha se neopakuje: plná brána
+  selhala před pushem, živý GitHub prokazatelně zůstal na 07109721 a
+  nasazení nezačalo. Po nutné opravě vznikne nový commit a přesné předání.
+
+Další krok:
+- Předat Luně opravený celý čekající balíček a vyčkat konečné účtenky.
+
+Navrhované další kroky:
+- Po potvrzeném nasazení fyzicky vyzkoušet text, kartu a poslech komentáře.
+
+Technický důkaz:
+- Účtenka a3d0c4730ea1ef7a0e9f3b5f7a2336b7: attention, bez potvrzeného
+  push/deploy. Zachovaný plný log: 2174 testů, jediný FAIL v původním
+  délkovém/otiskovém fixture; ostatní kontroly bez dalšího selhání.
+- Přímý ls-remote ověřil původní GitHub head. Opravený kontrakt 1/1 PASS,
+  kontroluje 564694 znaků, 11023 řádků a nový SHA-256. Soukromý důkaz
+  failure_resolution.json a původní first_failed_gate.log se zachovávají.
+- Plná nová brána a nasazení teprve přes další přesnou účtenku Luny;
+  Safari a nové větve renderu tím zatím nejsou přijaté.

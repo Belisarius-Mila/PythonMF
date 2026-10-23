@@ -29,6 +29,13 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-079 — Změna složené stránky vyžaduje nový kontrolní otisk
+
+- Problém: nový panel prošel statickou bránou, ale plné p+n zastavila původní očekávaná délka složeného Cockpitu.
+- Typ: opakující se
+- Řešení nalezeno: 23102026
+- Řešení: po kontrole skutečného diffu spočítat přes load_frontend_page délku, počet řádků a SHA-256 celé výsledné stránky; aktualizovat pouze příslušný EXPECTED_PAGES fixture a spustit stejný cílený kontrakt. Kontroly neodstraňovat ani nesnižovat. Ověřeno 1 FAIL → 1 PASS; plnou bránu následně vždy znovu provede registrované p+n.
+
 ### LL-078 — Nepřesná citace old nesmí spustit další placený modelový pokus
 
 - Problém: Luna dodala funkční vícesouborový návrh, ale nepřesně citovaný okolní řádek testu znemožnil jednoznačné převzetí.

@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-23 09:16 CEST — texty a komentáře lokálně implementované; funkční ověření otevřené
+Aktualizováno: 2026-10-23 09:53 CEST — opravený frontendový kontrakt; nové p+n čeká na Lunu
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,8 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-23 09:53 CEST: První p+n textů a komentářů zastavila plná brána na jediné zastaralé délce/otisku frontendu (2174 testů, 1 FAIL). Očekávané délka, řádky a SHA-256 složené stránky opravené; cílený kontrakt 1/1 PASS. GitHub zůstal 07109721, nasazení nezačalo; původní účtenka a důkaz zachované. Připravený opravný checkpoint pro nové přesné předání Luně. Safari a nové render větve stále neověřené.
 
 - 2026-10-23 09:16 CEST: Texty a komentáře jsou lokálně implementované ve střižně: přijatý text do titulku nebo samostatné karty, poslech a vložení hlasu k záběru. Statická brána PASS; funkční render, automatické testy a Safari NEOVĚŘENO. Bez push/nasazení a produkčního renderu. Report FILM_TEXT_AUDIO_REPORT.md. Předchozí p+n obou commitů přes Lunu potvrzené; Míla potvrzuje, že zoom funguje a zatím stačí.
 
@@ -3390,3 +3392,31 @@ Technický důkaz:
 - Automatické testy a funkční render/Safari NEOVĚŘENO; nelze tvrdit provozní
   opravu. Hlas je umístěný absolutním časem, po změně obrazu zkontrolovat.
 - Podrobnosti camino/docs/FILM_TEXT_AUDIO_REPORT.md; čtecí účtenky pouze private.
+
+## 2026-10-23 09:53 CEST — Oprava kontrolního otisku před p+n
+
+Hotovo:
+- Očekávaná délka, počet řádků a SHA-256 složené stránky Cockpitu odpovídají
+  zkontrolovanému novému panelu. Cílený kontrakt znovu PASS; žádná jeho
+  kontrola nebyla vypnutá. Funkční kód panelu se touto opravou nemění.
+
+Rozhodnutí:
+- Míla výslovně zadal p+n Lunou. První úloha se neopakuje: plná brána
+  selhala před pushem, živý GitHub prokazatelně zůstal na 07109721 a
+  nasazení nezačalo. Po nutné opravě vznikne nový commit a přesné předání.
+
+Další krok:
+- Předat Luně opravený celý čekající balíček a vyčkat konečné účtenky.
+
+Navrhované další kroky:
+- Po potvrzeném nasazení fyzicky vyzkoušet text, kartu a poslech komentáře.
+
+Technický důkaz:
+- Účtenka a3d0c4730ea1ef7a0e9f3b5f7a2336b7: attention, bez potvrzeného
+  push/deploy. Zachovaný plný log: 2174 testů, jediný FAIL v původním
+  délkovém/otiskovém fixture; ostatní kontroly bez dalšího selhání.
+- Přímý ls-remote ověřil původní GitHub head. Opravený kontrakt 1/1 PASS,
+  kontroluje 564694 znaků, 11023 řádků a nový SHA-256. Soukromý důkaz
+  failure_resolution.json a původní first_failed_gate.log se zachovávají.
+- Plná nová brána a nasazení teprve přes další přesnou účtenku Luny;
+  Safari a nové větve renderu tím zatím nejsou přijaté.
