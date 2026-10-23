@@ -1,8 +1,9 @@
 # Více cest a dovolených — základ, kroky 1–2
 
 Rozhodnutí Míly 23. 10. 2026: rozšířit stávající aplikaci na více projektů
-se stejným pořizováním a zpracováním dat. Nyní schválené kroky 1–2,
-nikoli automatické vydání, instalace nebo změna živého archivu.
+se stejným pořizováním a zpracováním dat. Základ kroků 1–2 doplňuje
+[ovládání projektů, krok 3](PROJECT_MANAGEMENT_UI_REPORT.md). Vývoj sám
+neznamená instalaci nebo změnu živého archivu.
 
 ## Společná identita a metadata
 
@@ -89,8 +90,8 @@ nebo soukromých textů ve verzované dokumentaci.
 
 ## Navazující kroky a vydání
 
-Krok 3 nabídne metadata/archivaci v ovládání telefonu; nyní jde o datový
-a přenosový základ. Krok 4 doplní výběr a oprávnění ve Vieweru/Macu, krok 5
+Krok 3 doplnil metadata/archivaci v ovládání telefonu; samostatný report
+uvádí přejímku a hranice instalace. Krok 4 doplní výběr a oprávnění ve Vieweru/Macu, krok 5
 projektový výběr střižny, krok 6 celkovou fyzickou přejímku. Spojení denních
 filmů do celé dovolené zůstává později. Nová aplikace, nový Human–Adam proud,
 nové TVBCP ani veřejné sdílení se nezakládají.

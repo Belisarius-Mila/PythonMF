@@ -6,10 +6,17 @@ nemigruje data ze samostatných prototypů Camino Audio a Camino Transfer Test.
 
 ## Aktuální používání — 23. 10. 2026
 
-Lokální vývoj kroků 1–2 přidává základ více projektů: termíny a archivaci
-v existujícím úložišti, přenosy svázané s původním projektem a blok změny
-projektu při přípravě záznamu. Nová ovládání budou až v kroku 3; dosavadní
-vydání tím není aktualizované. [Kontrakt a přejímka](../docs/MULTI_PROJECT_FOUNDATION.md).
+Vývoj kroků 1–3 nabízí více projektů: samostatný název, volitelné termíny,
+archivaci a oddělené záznamy/přenosy. Nabídka → **Projekty** otevře seznam
+Probíhající / Archivované, založení a **Upravit projekt**. Archiv lze číst;
+pro nové záznamy vypni archivaci a ulož. Termíny lze ponechat prázdné,
+neplatný rozsah se neuloží. Výběr projektu zůstává zachovaný po restartu.
+[Kontrakt](../docs/MULTI_PROJECT_FOUNDATION.md) a
+[ovládání/přejímka](../docs/PROJECT_MANAGEMENT_UI_REPORT.md).
+
+Jde o nové zdroje, nikoli aktualizaci nainstalovaného telefonu. Před
+instalací nejprve ověř samostatný server s project_details_v1; p+n Cockpitu
+telefon ani tuto službu neaktualizuje.
 
 Poslední připravený Release je 0.1.0 (20). Zoom Míla uživatelsky přijal;
 přesná nainstalovaná verze a všechny okrajové scénáře nejsou tímto

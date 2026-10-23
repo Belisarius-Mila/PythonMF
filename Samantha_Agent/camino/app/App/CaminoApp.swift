@@ -45,21 +45,45 @@ import SwiftUI
 
 private struct TripSetupView: View {
     @ObservedObject var model: CaminoViewModel
-    @State private var name = "Nová cesta"
+    @Environment(\.dismiss) private var dismiss
+    @State private var name = "Nový projekt"
+    @State private var hasStart = false
+    @State private var startDate = Date()
+    @State private var hasEnd = false
+    @State private var endDate = Date()
+
+    private var details: LocalProjectDetails {
+        LocalProjectDetails(startDate: hasStart ? ProjectDateSupport.string(startDate) : nil,
+                            endDate: hasEnd ? ProjectDateSupport.string(endDate) : nil)
+    }
 
     var body: some View {
         NavigationStack {
             Form {
-                Section("Cesta") {
-                    Text("Cestu můžeš založit bez Macu a bez připojení k síti.")
-                    TextField("Název cesty", text: $name)
+                Section("Projekt") {
+                    Text("Projekt můžeš založit bez Macu a bez připojení k síti.")
+                    TextField("Název projektu", text: $name)
                         .accessibilityIdentifier("tripName")
-                    Button("Vytvořit cestu") { model.createTrip(name: name) }
-                        .frame(minHeight: 48)
-                        .accessibilityIdentifier("createTrip")
+                    ProjectDateFields(hasStart: $hasStart, startDate: $startDate,
+                                      hasEnd: $hasEnd, endDate: $endDate,
+                                      startToggleID: "newProjectHasStart",
+                                      startDateID: "newProjectStartDate",
+                                      endToggleID: "newProjectHasEnd",
+                                      endDateID: "newProjectEndDate")
+                    if !details.valid {
+                        Text("Datum konce nesmí předcházet začátku.").foregroundStyle(.red)
+                    }
+                    Button("Vytvořit projekt") {
+                        if model.createTrip(name: name, details: details) { dismiss() }
+                    }
+                    .frame(minHeight: 48)
+                    .disabled(!model.canManageProjects || !details.valid || name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    .accessibilityIdentifier("createTrip")
                     Button("Založit Zkoušku") {
-                        model.createTrip(name: "Zkouška", isTest: true)
-                    }.frame(minHeight: 48)
+                        if model.createTrip(name: "Zkouška", isTest: true) { dismiss() }
+                    }
+                    .frame(minHeight: 48)
+                    .disabled(!model.canManageProjects)
                 }
                 Section("Záznam") {
                     Text("Mikrofon si vyžádá povolení až při prvním Komentáři nebo Úvaze.")
@@ -69,7 +93,7 @@ private struct TripSetupView: View {
                 }
                 if let message = model.message { Text(message).foregroundStyle(.red) }
             }
-            .navigationTitle("Připravit Camino")
+            .navigationTitle("Připravit projekt")
         }
     }
 }
@@ -112,6 +136,16 @@ private struct CaptureHomeView: View {
                             Text(trip.name).font(.headline)
                             Text(Date(), format: .dateTime.day().month(.wide).year())
                                 .font(.subheadline).foregroundStyle(.secondary)
+                            if let period = ProjectDateSupport.period(trip.projectDetails) {
+                                Text("Období: \(period)")
+                                    .font(.subheadline).foregroundStyle(.secondary)
+                                    .accessibilityIdentifier("projectPeriod")
+                            }
+                            if trip.projectDetails.status == .archived {
+                                Text("Archivovaný projekt – záznamy lze dál číst, nové pořizování je vypnuté.")
+                                    .font(.subheadline).foregroundStyle(.secondary)
+                                    .accessibilityIdentifier("archivedProjectBanner")
+                            }
                             if trip.isTest {
                                 Label("Zkušební cesta", systemImage: "testtube.2")
                                     .font(.subheadline)
@@ -244,9 +278,10 @@ private struct CaptureHomeView: View {
                         Button("Označit okamžik", systemImage: "mappin") {
                             model.markMoment()
                         }
-                        .disabled(model.audioBusy || model.awaitingLocation)
-                        Button("Cesty", systemImage: "map") { showTrips = true }
-                            .disabled(model.audioBusy)
+                        .disabled(!model.canCaptureInActiveProject || model.audioBusy || model.awaitingLocation)
+                        Button("Projekty", systemImage: "map") { showTrips = true }
+                            .accessibilityIdentifier("projectList")
+                            .disabled(!model.canManageProjects)
                         Button("Skryté (\(model.hiddenMoments.count))",
                                systemImage: "archivebox") { showArchive = true }
                             .disabled(model.audioBusy)
@@ -281,7 +316,7 @@ private struct CaptureHomeView: View {
                 .frame(maxWidth: .infinity, minHeight: 72)
         }
         .buttonStyle(.borderedProminent)
-        .disabled(model.audioBusy || model.cameraError != nil)
+        .disabled(!model.canCaptureInActiveProject || model.audioBusy || model.cameraError != nil)
         .accessibilityIdentifier(kind == .photo ? "startPhoto" : "startVideoCamera")
     }
 
@@ -292,7 +327,7 @@ private struct CaptureHomeView: View {
                 .frame(maxWidth: .infinity, minHeight: 72)
         }
         .buttonStyle(.borderedProminent)
-        .disabled(model.audioBusy || model.awaitingLocation)
+        .disabled(!model.canCaptureInActiveProject || model.audioBusy || model.awaitingLocation)
         .accessibilityIdentifier(kind == .comment ? "startComment" : "startReflection")
     }
 }
@@ -500,50 +535,133 @@ private struct CaminoHiddenArchiveView: View {
     }
 }
 
+private enum ProjectDateSupport {
+    static var timeZone: TimeZone { TimeZone(secondsFromGMT: 0)! }
+    static var calendar: Calendar {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = timeZone
+        return calendar
+    }
+
+    static func string(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.calendar = calendar
+        formatter.timeZone = timeZone
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: date)
+    }
+
+    static func date(_ value: String?) -> Date {
+        guard let value else { return Date() }
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.calendar = calendar
+        formatter.timeZone = timeZone
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.date(from: value) ?? Date()
+    }
+
+    static func period(_ details: LocalProjectDetails) -> String? {
+        switch (details.startDate, details.endDate) {
+        case let (start?, end?): return "\(start) – \(end)"
+        case let (start?, nil): return "od \(start)"
+        case let (nil, end?): return "do \(end)"
+        case (nil, nil): return nil
+        }
+    }
+}
+
+private struct ProjectDateFields: View {
+    @Binding var hasStart: Bool
+    @Binding var startDate: Date
+    @Binding var hasEnd: Bool
+    @Binding var endDate: Date
+    let startToggleID: String
+    let startDateID: String
+    let endToggleID: String
+    let endDateID: String
+
+    var body: some View {
+        Toggle("Má datum začátku", isOn: $hasStart)
+            .accessibilityIdentifier(startToggleID)
+        if hasStart {
+            DatePicker("Začátek", selection: $startDate, displayedComponents: .date)
+                .environment(\.calendar, ProjectDateSupport.calendar)
+                .environment(\.timeZone, ProjectDateSupport.timeZone)
+                .accessibilityIdentifier(startDateID)
+        }
+        Toggle("Má datum konce", isOn: $hasEnd)
+            .accessibilityIdentifier(endToggleID)
+        if hasEnd {
+            DatePicker("Konec", selection: $endDate, displayedComponents: .date)
+                .environment(\.calendar, ProjectDateSupport.calendar)
+                .environment(\.timeZone, ProjectDateSupport.timeZone)
+                .accessibilityIdentifier(endDateID)
+        }
+    }
+}
+
 private struct TripListView: View {
     @ObservedObject var model: CaminoViewModel
     @Environment(\.dismiss) private var dismiss
     @State private var name = ""
+    @State private var hasStart = false
+    @State private var startDate = Date()
+    @State private var hasEnd = false
+    @State private var endDate = Date()
     @State private var editingTrip: LocalTrip?
+
+    private var newProjectDetails: LocalProjectDetails {
+        LocalProjectDetails(startDate: hasStart ? ProjectDateSupport.string(startDate) : nil,
+                            endDate: hasEnd ? ProjectDateSupport.string(endDate) : nil)
+    }
 
     var body: some View {
         NavigationStack {
             Form {
                 if let trip = model.activeTrip {
-                    Section("Současná cesta") {
-                        Button("Upravit název cesty") { editingTrip = trip }
-                            .disabled(model.audioBusy)
+                    Section("Současný projekt") {
+                        Button("Upravit projekt") { editingTrip = trip }
+                            .accessibilityIdentifier("editCurrentProject")
+                            .disabled(!model.canManageProjects)
                     }
                 }
-                Section("Cesty") {
-                    ForEach(model.trips) { trip in
-                        Button {
-                            model.selectTrip(trip.id)
-                            dismiss()
-                        } label: {
-                            HStack {
-                                Text(trip.name + (trip.isTest ? " · Zkouška" : ""))
-                                Spacer()
-                                if trip.active { Image(systemName: "checkmark") }
-                            }
-                        }
-                        .disabled(model.audioBusy)
+                Section("Probíhající") {
+                    ForEach(model.trips.filter { $0.projectDetails.status == .active }) { trip in
+                        projectRow(trip)
                     }
                 }
-                Section("Nová cesta") {
-                    TextField("Název cesty", text: $name)
+                Section("Archivované") {
+                    ForEach(model.trips.filter { $0.projectDetails.status == .archived }) { trip in
+                        projectRow(trip)
+                    }
+                }
+                Section("Nový projekt") {
+                    TextField("Název projektu", text: $name)
+                        .accessibilityIdentifier("newProjectName")
+                    ProjectDateFields(hasStart: $hasStart, startDate: $startDate,
+                                      hasEnd: $hasEnd, endDate: $endDate,
+                                      startToggleID: "newProjectHasStart",
+                                      startDateID: "newProjectStartDate",
+                                      endToggleID: "newProjectHasEnd",
+                                      endDateID: "newProjectEndDate")
+                    if !newProjectDetails.valid {
+                        Text("Datum konce nesmí předcházet začátku.").foregroundStyle(.red)
+                    }
                     Button("Vytvořit") {
-                        model.createTrip(name: name)
-                        if model.message == nil { dismiss() }
-                    }.disabled(model.audioBusy)
+                        if model.createTrip(name: name, details: newProjectDetails) { dismiss() }
+                    }
+                    .accessibilityIdentifier("createProject")
+                    .disabled(!model.canManageProjects || !newProjectDetails.valid || name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     Button("Založit Zkoušku") {
-                        model.createTrip(name: "Zkouška", isTest: true)
-                        if model.message == nil { dismiss() }
-                    }.disabled(model.audioBusy)
+                        if model.createTrip(name: "Zkouška", isTest: true) { dismiss() }
+                    }
+                    .disabled(!model.canManageProjects)
                 }
                 if let message = model.message { Text(message).foregroundStyle(.red) }
             }
-            .navigationTitle("Cesty")
+            .navigationTitle("Projekty")
             .toolbar { ToolbarItem(placement: .topBarTrailing) {
                 Button("Hotovo") { dismiss() }
             } }
@@ -551,6 +669,20 @@ private struct TripListView: View {
                 TripEditView(model: model, trip: trip)
             }
         }
+    }
+
+    @ViewBuilder private func projectRow(_ trip: LocalTrip) -> some View {
+        Button {
+            if model.selectTrip(trip.id) { dismiss() }
+        } label: {
+            HStack {
+                Text(trip.name + (trip.isTest ? " · Zkouška" : ""))
+                Spacer()
+                if trip.active { Image(systemName: "checkmark") }
+            }
+        }
+        .accessibilityIdentifier("projectRow-\(trip.id.uuidString)")
+        .disabled(!model.canManageProjects)
     }
 }
 
@@ -560,28 +692,59 @@ private struct TripEditView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var name: String
     @State private var isTest: Bool
+    @State private var hasStart: Bool
+    @State private var startDate: Date
+    @State private var hasEnd: Bool
+    @State private var endDate: Date
+    @State private var isArchived: Bool
 
     init(model: CaminoViewModel, trip: LocalTrip) {
         self.model = model
         self.trip = trip
-        let convertingTrial = trip.isTest && trip.name == "Zkouška"
-        _name = State(initialValue: convertingTrial ? "Camino de Santiago" : trip.name)
-        _isTest = State(initialValue: convertingTrial ? false : trip.isTest)
+        _name = State(initialValue: trip.name)
+        _isTest = State(initialValue: trip.isTest)
+        _hasStart = State(initialValue: trip.projectDetails.startDate != nil)
+        _startDate = State(initialValue: ProjectDateSupport.date(trip.projectDetails.startDate))
+        _hasEnd = State(initialValue: trip.projectDetails.endDate != nil)
+        _endDate = State(initialValue: ProjectDateSupport.date(trip.projectDetails.endDate))
+        _isArchived = State(initialValue: trip.projectDetails.status == .archived)
     }
+
+    private var details: LocalProjectDetails {
+        LocalProjectDetails(startDate: hasStart ? ProjectDateSupport.string(startDate) : nil,
+                            endDate: hasEnd ? ProjectDateSupport.string(endDate) : nil,
+                            status: isArchived ? .archived : .active)
+    }
+    private var validName: Bool { !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
 
     var body: some View {
         NavigationStack {
             Form {
                 Section {
-                    TextField("Název cesty", text: $name)
+                    TextField("Název projektu", text: $name)
                         .accessibilityIdentifier("editTripName")
-                    Toggle("Zkušební cesta", isOn: $isTest)
+                    Toggle("Zkušební projekt", isOn: $isTest)
+                        .accessibilityIdentifier("editProjectIsTest")
+                    ProjectDateFields(hasStart: $hasStart, startDate: $startDate,
+                                      hasEnd: $hasEnd, endDate: $endDate,
+                                      startToggleID: "editProjectHasStart",
+                                      startDateID: "editProjectStartDate",
+                                      endToggleID: "editProjectHasEnd",
+                                      endDateID: "editProjectEndDate")
+                    Toggle("Archivovat projekt", isOn: $isArchived)
+                        .accessibilityIdentifier("editProjectArchived")
                 } footer: {
-                    Text("Okamžiky zůstanou v této cestě. Název se po přenosu změní také ve vieweru.")
+                    Text("Archivace ponechá existující záznamy i jejich přenosy. Projekt můžeš znovu otevřít vypnutím archivace a uložením.")
+                }
+                if !validName {
+                    Text("Zadej název projektu.").foregroundStyle(.red)
+                } else if !details.valid {
+                    Text("Zkontroluj data: použij platná data a datum konce nesmí předcházet začátku.")
+                        .foregroundStyle(.red)
                 }
                 if let message = model.message { Text(message).foregroundStyle(.red) }
             }
-            .navigationTitle("Upravit cestu")
+            .navigationTitle("Upravit projekt")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -589,9 +752,9 @@ private struct TripEditView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Uložit") {
-                        if model.updateTrip(trip.id, name: name, isTest: isTest) { dismiss() }
+                        if model.updateTrip(trip.id, name: name, isTest: isTest, details: details) { dismiss() }
                     }
-                    .disabled(model.audioBusy || name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    .disabled(!model.canManageProjects || !validName || !details.valid)
                 }
             }
         }

@@ -60,7 +60,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md`; `../camino/app/README.md` — 2026-10-23 21:59 CEST: Krok 3 — datová příprava v 176a6c66 hotová (Swift 82, plná brána 2185, iOS build PASS). UI návrh Luny 971d17d401d57207ca3ef7d762836191 není převzatý: rozsah dodaný Adamem vynechal závěrečnou závorku. Opravený požadavek připravený, nový placený pokus čeká na výslovné potvrzení; žádný retry ani změna UI neproběhly.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md`; `../camino/app/README.md` — 2026-10-23 22:28 CEST: Krok 3 — ovládání projektů převzaté od Luny c39307ba80c8e9e373149a9a7696c220 a integrované Adamem. Založení, termíny, přepínání, archivace/znovuotevření; Release a statická brána PASS, tři vybrané UI scénáře PASS (offline 1/1, projekty a přejmenování 2/2). Míla výslovně schválil nový pokus i p+n všech dokončených commitů; výsledek určuje účtenka c3aba0302d0661fbff03b131e65357a4. Telefon ani samostatná služba se tím neaktualizují.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md`; `technical/luna_release_orchestration.md`; `reports/human_adam_workstream_pn_fix_2026_10_23.md` — 2026-10-23 12:34 CEST: Lokální Xcode podpis opravený v a50a9007, živé Camino–MMTX–Camino PASS. Panel p+n lokálně rozlišuje aktuální/pending/blokované/neověřené stavy, čerstvý GitHub a správný cíl; opakování v dalších akcích. 93 cílených testů a JS syntaxe PASS. Commit a p+n celého balíčku Lunou výslovně schválené.
 

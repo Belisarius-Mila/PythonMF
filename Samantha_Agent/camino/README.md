@@ -5,13 +5,15 @@ soukromý Viewer a jednodenní film z povolených podkladů.
 
 ## Aktuální orientace — 23. 10. 2026
 
-Nově lokálně dokončené kroky zobecnění na více cest/dovolených: datový základ
-a oddělení projektů, kroky 1–2. Nejde o vydání ani změnu živých dat.
-Rozsah a kompatibilita: [více projektů](docs/MULTI_PROJECT_FOUNDATION.md).
+Více cest/dovolených má společný datový základ a oddělení projektů (kroky
+1–2, publikované v ffc933d5). Nový krok 3 doplňuje ovládání projektů,
+termínů a archivace v telefonu; [rozsah a přejímka](docs/PROJECT_MANAGEMENT_UI_REPORT.md).
+Instalace telefonu a aktualizace samostatné služby zůstávají oddělené.
 
-Lokálně opravené zpracování velkých fotografií ve střižně: vstup nad 4096
-pixelů už neblokuje náhled a film, pokud splní bezpečné limity. Celý rám
-a originál zůstávají zachované; [ověření a hranice vydání](docs/LARGE_PHOTO_REPORT.md).
+Oprava velkých fotografií ve střižně je publikovaná/nasazená v 8bc31d07
+přes Lunu 5b60714d658675cfedd05f1df1bafad7 (2185 testů, smoke 5/5, náhled
+HTTP 200). Celý rám a originál jsou zachované; [limity](docs/LARGE_PHOTO_REPORT.md).
+Celý film dne 14. 10. má samostatnou uživatelskou přejímku.
 
 - **iPhone:** fotografie i video mají zoom gestem dvěma prsty a podporované
   volby 0,5× / 1× / 2×. Míla potvrdil funkčnost a tento rozsah mu zatím stačí.

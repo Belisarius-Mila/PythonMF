@@ -1,6 +1,97 @@
 import XCTest
 
 @MainActor final class CaminoHomeUITests: XCTestCase {
+    private func setProjectSwitch(_ app: XCUIApplication, _ identifier: String, on: Bool) {
+        let control = app.switches[identifier]
+        XCTAssertTrue(control.waitForExistence(timeout: 5))
+        let expected = on ? "1" : "0"
+        if control.value as? String != expected {
+            for _ in 0..<5 where !control.isHittable { app.swipeUp() }
+            XCTAssertTrue(control.isHittable)
+            // SwiftUI exposes the whole labeled row as a switch; tap its trailing control.
+            control.coordinate(withNormalizedOffset: CGVector(dx: 0.93, dy: 0.5)).tap()
+        }
+        XCTAssertEqual(control.value as? String, expected)
+    }
+
+    func testMultipleProjectDatesArchiveReopenAndRelaunchStaySeparate() throws {
+        #if !targetEnvironment(simulator)
+        throw XCTSkip("Uses isolated simulator data only.")
+        #endif
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchEnvironment["CAMINO_UI_TEST_SESSION"] = UUID().uuidString
+        app.launch()
+        func replace(_ field: XCUIElement, with text: String) {
+            XCTAssertTrue(field.waitForExistence(timeout: 10))
+            field.tap()
+            let old = field.value as? String ?? ""
+            field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: old.count) + text)
+        }
+        func projects() {
+            app.buttons["Nabídka"].tap()
+            XCTAssertTrue(app.buttons["projectList"].waitForExistence(timeout: 5))
+            app.buttons["projectList"].tap()
+        }
+        func edit() {
+            XCTAssertTrue(app.buttons["editCurrentProject"].waitForExistence(timeout: 5))
+            app.buttons["editCurrentProject"].tap()
+        }
+        func row(_ name: String) -> XCUIElement {
+            app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND label CONTAINS %@", "projectRow-", name)).firstMatch
+        }
+        XCTAssertTrue(app.buttons["Založit Zkoušku"].waitForExistence(timeout: 15))
+        app.buttons["Založit Zkoušku"].tap()
+        app.buttons["Nabídka"].tap()
+        app.buttons["Označit okamžik"].tap()
+        XCTAssertTrue(app.buttons["momentRow"].waitForExistence(timeout: 20))
+        projects(); edit()
+        replace(app.textFields["editTripName"], with: "Synthetic project A")
+        setProjectSwitch(app, "editProjectIsTest", on: false)
+        setProjectSwitch(app, "editProjectHasStart", on: true)
+        setProjectSwitch(app, "editProjectHasEnd", on: true)
+        app.buttons["Uložit"].tap()
+        app.buttons["Hotovo"].tap()
+        XCTAssertTrue(app.staticTexts["Synthetic project A"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.descendants(matching: .any)["projectPeriod"].exists)
+        projects()
+        replace(app.textFields["newProjectName"], with: "Synthetic project B")
+        let create = app.buttons["createProject"]
+        if !create.isHittable { app.swipeUp() }
+        create.tap()
+        XCTAssertTrue(app.staticTexts["Synthetic project B"].waitForExistence(timeout: 10))
+        XCTAssertFalse(app.buttons["momentRow"].exists)
+        app.terminate(); app.launch()
+        XCTAssertTrue(app.staticTexts["Synthetic project B"].waitForExistence(timeout: 15))
+        XCTAssertFalse(app.buttons["momentRow"].exists)
+        projects()
+        XCTAssertTrue(row("Synthetic project A").waitForExistence(timeout: 10))
+        row("Synthetic project A").tap()
+        XCTAssertTrue(app.buttons["momentRow"].waitForExistence(timeout: 10))
+        projects(); edit()
+        XCTAssertEqual(app.switches["editProjectHasStart"].value as? String, "1")
+        XCTAssertEqual(app.switches["editProjectHasEnd"].value as? String, "1")
+        setProjectSwitch(app, "editProjectArchived", on: true)
+        app.buttons["Uložit"].tap(); app.buttons["Hotovo"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["archivedProjectBanner"].waitForExistence(timeout: 10))
+        XCTAssertFalse(app.buttons["startComment"].isEnabled)
+        XCTAssertFalse(app.buttons["startPhoto"].isEnabled)
+        let attachment = XCTAttachment(screenshot: app.screenshot())
+        attachment.name = "Archived project keeps its Moment and period"
+        attachment.lifetime = .keepAlways
+        add(attachment)
+        projects(); edit()
+        setProjectSwitch(app, "editProjectArchived", on: false)
+        app.buttons["Uložit"].tap(); app.buttons["Hotovo"].tap()
+        XCTAssertTrue(app.buttons["startComment"].isEnabled)
+        XCTAssertFalse(app.descendants(matching: .any)["archivedProjectBanner"].exists)
+        app.terminate(); app.launch()
+        XCTAssertTrue(app.staticTexts["Synthetic project A"].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.buttons["momentRow"].exists)
+        XCTAssertTrue(app.buttons["startComment"].isEnabled)
+        XCTAssertTrue(app.descendants(matching: .any)["projectPeriod"].exists)
+    }
+
     func testRenameExistingTrialKeepsMomentAndNewHeadingAfterRelaunch() throws {
         #if !targetEnvironment(simulator)
         throw XCTSkip("Uses an isolated simulator store.")
@@ -15,9 +106,13 @@ import XCTest
         app.buttons["Označit okamžik"].tap()
         XCTAssertTrue(app.staticTexts["Označený okamžik"].waitForExistence(timeout: 15))
         app.buttons["Nabídka"].tap()
-        app.buttons["Cesty"].tap()
-        app.buttons["Upravit název cesty"].tap()
-        XCTAssertEqual(app.textFields["editTripName"].value as? String, "Camino de Santiago")
+        app.buttons["projectList"].tap()
+        app.buttons["editCurrentProject"].tap()
+        let name = app.textFields["editTripName"]
+        XCTAssertEqual(name.value as? String, "Zkouška")
+        name.tap()
+        name.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 7) + "Camino de Santiago")
+        setProjectSwitch(app, "editProjectIsTest", on: false)
         app.buttons["Uložit"].tap()
         app.buttons["Hotovo"].tap()
         app.terminate()

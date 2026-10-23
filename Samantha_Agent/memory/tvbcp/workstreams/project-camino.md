@@ -1,6 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-23 22:28 CEST: Krok 3 — ovládání projektů převzaté od Luny c39307ba80c8e9e373149a9a7696c220 a integrované Adamem. Založení, termíny, přepínání, archivace/znovuotevření; Release a statická brána PASS, tři vybrané UI scénáře PASS (offline 1/1, projekty a přejmenování 2/2). Míla výslovně schválil nový pokus i p+n všech dokončených commitů (účtenka c3aba0302d0661fbff03b131e65357a4; výsledek ověřit živě). Telefon ani samostatná služba se tím neaktualizují.
+
 - 2026-10-23 21:59 CEST: Krok 3 — datová příprava v 176a6c66 hotová (Swift 82, plná brána 2185, iOS build PASS). UI návrh Luny 971d17d401d57207ca3ef7d762836191 není převzatý: rozsah dodaný Adamem vynechal závěrečnou závorku. Opravený požadavek připravený, nový placený pokus čeká na výslovné potvrzení; žádný retry ani změna UI neproběhly.
 
 - 2026-10-23 21:49 CEST: Pokračování víceprojektového Camina — připravené atomické uložení formuláře a správa versus pořizování v modelu. Swift 82 PASS, plná brána 2185 PASS a iOS build PASS. Navazuje ovládání projektů (krok 3) registrovanou Lunou, kontrola a integrace Adamem. Dřívější oba commity již publikované/nasazené přes job 5b60714d658675cfedd05f1df1bafad7, 2185 PASS, smoke 5/5 a velká fotografie HTTP 200.
@@ -4288,3 +4290,38 @@ Technický důkaz:
   pět citací leží v povolených úsecích. Žádné ruční obejití accept brány.
 - Důkazy data/private/camino_projects_ui_20261023/. Současná aplikace,
   originály, archiv i služby beze změny; nové commity nejsou publikované.
+
+
+## 2026-10-23 22:28 CEST — Krok 3, ovládání více projektů
+
+Hotovo:
+- Telefonní obrazovky nabízejí vlastní projekty, volitelné termíny, přepínání
+  a archivaci/znovuotevření. Archiv je čitelný, nové pořizování vypnuté.
+- Úprava načte skutečné hodnoty a uloží celý formulář atomicky. Zkouška
+  a původní záznamy zůstávají zachované; nové názvy nepřepisují identity.
+
+Rozhodnutí:
+- Míla výslovně schválil jeden nový vývojový pokus Lunou a p+n hotových
+  commitů. Registrovaný návrh byl zkontrolován a převzat; Adam doplnil
+  validační stav zakládání a identifikátor Zkoušky pro UI přejímku.
+- P+n nasazuje společný Cockpit. Aktualizace služby Camino a instalace
+  iPhonu vyžadují vlastní postup; nová fronta vyžaduje project_details_v1.
+
+Další krok:
+- Ověřit výsledek schváleného p+n v účtence c3aba0302d0661fbff03b131e65357a4;
+  po dokončení navázat krokem 4 (projektový Viewer/Mac).
+
+Navrhované další kroky:
+- Krok 4 projektový Viewer/Mac, krok 5 výběr projektu ve střižně.
+- Samostatná aktualizace služby a telefonu, poté fyzická přejímka dvou projektů.
+
+Technický důkaz:
+- Luna c39307ba80c8e9e373149a9a7696c220: baseline/after 15 PASS, accept applied.
+  První nepřevzatý návrh zůstává historií; opravený pokus schválil Míla.
+- Datová příprava 176a6c66: Swift 82 PASS, full 2185 PASS; UI Release
+  a rychlá statická brána PASS. tři vybrané UI scénáře PASS (offline 1/1, projekty a přejmenování 2/2).
+- Report camino/docs/PROJECT_MANAGEMENT_UI_REPORT.md; soukromé důkazy
+  data/private/camino_projects_ui_20261023/. Skutečný telefon, mikrofon,
+  kamera ani přenos nové verze nejsou tímto krokem přijaté.
+- Git checkpoint zachycuje stav před publikací; konečný výsledek určuje
+  přesná účtenka c3aba0302d0661fbff03b131e65357a4, nikoli předchozí p+n.
