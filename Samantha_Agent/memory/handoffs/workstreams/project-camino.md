@@ -1,6 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-23 21:59 CEST: Krok 3 — datová příprava v 176a6c66 hotová (Swift 82, plná brána 2185, iOS build PASS). UI návrh Luny 971d17d401d57207ca3ef7d762836191 není převzatý: rozsah dodaný Adamem vynechal závěrečnou závorku. Opravený požadavek připravený, nový placený pokus čeká na výslovné potvrzení; žádný retry ani změna UI neproběhly.
+
 - 2026-10-23 21:49 CEST: Pokračování víceprojektového Camina — připravené atomické uložení formuláře a správa versus pořizování v modelu. Swift 82 PASS, plná brána 2185 PASS a iOS build PASS. Navazuje ovládání projektů (krok 3) registrovanou Lunou, kontrola a integrace Adamem. Dřívější oba commity již publikované/nasazené přes job 5b60714d658675cfedd05f1df1bafad7, 2185 PASS, smoke 5/5 a velká fotografie HTTP 200.
 
 - 2026-10-23 21:03 CEST: Lokálně opravené velké fotografie v náhledu i filmu; pracovní kopie zachová celý rám a originál. Konkrétní zdroj dne 14. 10. prošel PNG a odděleným 1s QA v 720p/1080p, původní střihy/jobs shodné. 54 filmových + 18 gate testů a statická brána PASS. Bez p+n. Více projektů kroky 1–2 zůstávají dokončené lokálně; další vývoj krok 3.
@@ -3412,3 +3414,34 @@ Technický důkaz:
   job 5b60714d658675cfedd05f1df1bafad7, commit 8bc31d07, 2185 PASS, smoke 5/5.
 - Nová příprava není vydaná ani nainstalovaná. Telefonní a serverová
   aktualizace jsou samostatné operace; originály a živé projekty se nemění.
+
+
+## 2026-10-23 21:59 CEST — Krok 3, návrh obrazovek čeká na nové předání
+
+Hotovo:
+- Datová příprava je lokálně dokončená v 176a6c66, Swift 82 PASS, plná brána
+  2185 PASS a generic iOS build PASS. Uložení projektu je atomické.
+- Luna vytvořila návrh obrazovek; předané zdrojové úseky ale omylem končily
+  o jednu závorku dřív. Registrované převzetí návrh správně zastavilo.
+  UI zdroje se nezměnily, opravený rozsah a nová přejímka jsou připravené.
+
+Rozhodnutí:
+- Nový placený pokus se automaticky neopakuje. Mílovi je položená žádost
+  o jeden nový pokus se správným rozsahem. Oprava old bez změny new by
+  ponechala přebytečnou závorku, proto se tato cesta nepoužila.
+
+Další krok:
+- Po výslovném potvrzení použít připravený luna_request_scopefix.json přes
+  app.luna_development.run, pak kontrolu, accept a iOS/simulátor přejímku.
+
+Navrhované další kroky:
+- Dokončit krok 3; potom projektový Viewer/Mac (4), střižna (5), přejímka (6).
+
+Technický důkaz:
+- Návrh 971d17d401d57207ca3ef7d762836191, baseline 15 PASS, bez kandidáta
+  a bez after. Jen 1 původní modelový tah, odhad 0,1073875 Standard;
+  nejde o fakturační údaj. Privátní pracovní kopie návrhu prošla jen parse.
+- Zdrojový problém je přesně první rozsah 46–74 místo 46–75; ostatních
+  pět citací leží v povolených úsecích. Žádné ruční obejití accept brány.
+- Důkazy data/private/camino_projects_ui_20261023/. Současná aplikace,
+  originály, archiv i služby beze změny; nové commity nejsou publikované.
