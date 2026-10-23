@@ -4,6 +4,32 @@ import XCTest
 @testable import CaminoLocalCore
 
 @MainActor final class ProjectTests: XCTestCase {
+    func testProjectFormCreateAndEditAreAtomicAndKeepIdentityAcrossReopen() throws {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("camino-project-form-\(UUID())/metadata.sqlite")
+        let store = try CaminoLocalStore(storeURL: url)
+        let original = try store.createTrip(name: "Original", isTest: true)
+        let invalid = LocalProjectDetails(startDate: "2027-07-14", endDate: "2027-07-01")
+        XCTAssertThrowsError(try store.createTrip(name: "Incomplete", details: invalid))
+        XCTAssertEqual(try store.trips(), [original])
+        XCTAssertEqual(try store.activeTrip(), original)
+        XCTAssertThrowsError(try store.updateTrip(original.id, name: "Must not persist", isTest: false, details: invalid))
+        XCTAssertEqual(try store.trips(), [original])
+        let dates = LocalProjectDetails(startDate: "2027-07-01", endDate: "2027-07-14")
+        let next = try store.createTrip(name: "Holiday", details: dates)
+        XCTAssertEqual(next.projectDetails, dates)
+        XCTAssertEqual(next.detailsChanges.count, 1)
+        XCTAssertNil(next.startDate, "original create_trip must not be rewritten")
+        let archived = LocalProjectDetails(startDate: dates.startDate, endDate: dates.endDate, status: .archived)
+        let updated = try store.updateTrip(original.id, name: "Renamed", isTest: false, details: archived)
+        XCTAssertEqual(updated.id, original.id)
+        XCTAssertEqual(updated.originalName, original.name)
+        XCTAssertEqual(updated.projectDetails, archived)
+        XCTAssertFalse(updated.isTest)
+        let reopened = try CaminoLocalStore(storeURL: url)
+        XCTAssertEqual(try reopened.trips(), try store.trips())
+        XCTAssertEqual(try reopened.activeTrip()?.id, next.id)
+    }
+
     func testProjectDetailsReopenArchiveAndPendingIntentKeepOriginals() throws {
         let url = FileManager.default.temporaryDirectory.appendingPathComponent("camino-project-\(UUID())/metadata.sqlite")
         let store = try CaminoLocalStore(storeURL: url)

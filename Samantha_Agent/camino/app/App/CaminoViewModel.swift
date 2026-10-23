@@ -208,25 +208,38 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
         textByMoment[momentID] ?? LocalTextHistory()
     }
 
-    func createTrip(name: String, isTest: Bool = false) {
-        guard !audioBusy, !showAudio, !showCamera, !awaitingLocation, !importingMedia, let local else { return }
+    var canManageProjects: Bool {
+        !audioBusy && !showAudio && !showCamera && !awaitingLocation && !importingMedia
+    }
+
+    var canCaptureInActiveProject: Bool { activeTrip?.projectDetails.status == .active }
+
+    @discardableResult func createTrip(name: String, isTest: Bool = false,
+                                       details: LocalProjectDetails = LocalProjectDetails()) -> Bool {
+        guard canManageProjects, let local else { return false }
         do {
-            _ = try local.createTrip(name: name, isTest: isTest)
+            _ = try local.createTrip(name: name, isTest: isTest, details: details)
             message = nil
             refresh()
-        } catch { message = error.localizedDescription }
+            return true
+        } catch { message = error.localizedDescription; return false }
     }
 
-    func selectTrip(_ id: UUID) {
-        guard !audioBusy, !showAudio, !showCamera, !awaitingLocation, !importingMedia, let local else { return }
-        do { try local.selectTrip(id); message = nil; refresh() }
-        catch { message = error.localizedDescription }
-    }
-
-    func updateTrip(_ id: UUID, name: String, isTest: Bool) -> Bool {
-        guard !audioBusy, !showAudio, !showCamera, !awaitingLocation, !importingMedia, let local else { return false }
+    @discardableResult func selectTrip(_ id: UUID) -> Bool {
+        guard canManageProjects, let local else { return false }
         do {
-            _ = try local.updateTrip(id, name: name, isTest: isTest)
+            try local.selectTrip(id)
+            momentDetail = nil
+            message = nil
+            refresh()
+            return true
+        } catch { message = error.localizedDescription; return false }
+    }
+
+    func updateTrip(_ id: UUID, name: String, isTest: Bool, details: LocalProjectDetails? = nil) -> Bool {
+        guard canManageProjects, let local else { return false }
+        do {
+            _ = try local.updateTrip(id, name: name, isTest: isTest, details: details)
             message = nil
             refresh()
             return true
@@ -240,7 +253,7 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
     }
 
     func markMoment() {
-        guard !audioBusy, !showCamera, !awaitingLocation, local != nil else { return }
+        guard canCaptureInActiveProject, !audioBusy, !showCamera, !awaitingLocation, local != nil else { return }
         awaitingLocation = true
         message = "Ověřuji GPS…"
         Task { [weak self] in
@@ -262,7 +275,7 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
 
     func startAudio(_ kind: RecordingKind, targetMomentID: UUID? = nil,
                     relatedMomentID: UUID? = nil) {
-        guard !audioBusy, !showCamera, activeTrip != nil, audio != nil, !showAudio,
+        guard !audioBusy, !showCamera, canCaptureInActiveProject, audio != nil, !showAudio,
               !awaitingLocation else { return }
         let safety = storageAction(for: .audio)
         guard safety != .block else {
@@ -608,7 +621,7 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
     func openCamera(_ kind: LocalMediaKind, targetMomentID: UUID? = nil) {
         location.refresh()
         guard !audioBusy, !showAudio, !showCamera, mediaVault != nil,
-              activeTrip != nil else {
+              canCaptureInActiveProject else {
             message = cameraError ?? "Kamera teď není dostupná."
             return
         }
@@ -903,7 +916,7 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
     }
 
     func importFromPhotos(_ item: PhotosPickerItem, into momentID: UUID) async {
-        guard !importingMedia, !audioBusy, !showCamera, let mediaVault else { return }
+        guard canCaptureInActiveProject, !importingMedia, !audioBusy, !showCamera, let mediaVault else { return }
         importingMedia = true
         defer { importingMedia = false }
         message = "Načítám z Fotek… Pokud je soubor na iCloudu, může to chvíli trvat."

@@ -85,11 +85,13 @@ private struct LocalPendingMomentLink: Codable, Equatable {
     }
 
     @discardableResult public func createTrip(name: String, isTest: Bool = false,
-                                              id: UUID = UUID()) throws -> LocalTrip {
+                                              id: UUID = UUID(),
+                                              details: LocalProjectDetails = LocalProjectDetails()) throws -> LocalTrip {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty, trimmed.unicodeScalars.count <= 160,
               !trimmed.unicodeScalars.contains(where: { CharacterSet.controlCharacters.union(.newlines).contains($0) })
         else { throw LocalStoreError.invalidName }
+        guard details.valid else { throw LocalStoreError.invalidProjectDetails }
         guard try object("TripRecord", id: id) == nil else { throw LocalStoreError.duplicateIdentity }
         do {
             for old in try fetch("TripRecord") { old.setValue(false, forKey: "active") }
@@ -100,6 +102,10 @@ private struct LocalPendingMomentLink: Codable, Equatable {
             row.setValue(true, forKey: "active")
             row.setValue(isTest, forKey: "isTest")
             row.setValue(false, forKey: "viewerEnabled")
+            if details != LocalProjectDetails() {
+                try setEncodedSetting([LocalProjectDetailsChange(id: UUID(), details: details)],
+                                      key: "trip.details.\(id.uuidString.lowercased())")
+            }
             try save()
             return try decodeTrip(row)
         } catch { context.rollback(); throw error }
@@ -143,13 +149,14 @@ private struct LocalPendingMomentLink: Codable, Equatable {
     }
 
     /// Rename the existing trip without rewriting its original sync identity.
-    /// Both the title history and test flag are committed in one transaction.
+    /// Title, test flag and optional details are committed in one transaction.
     @discardableResult public func updateTrip(_ id: UUID, name: String,
-                                               isTest: Bool) throws -> LocalTrip {
+                                               isTest: Bool, details: LocalProjectDetails? = nil) throws -> LocalTrip {
         let title = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !title.isEmpty, title.unicodeScalars.count <= 160,
               !title.unicodeScalars.contains(where: { CharacterSet.controlCharacters.union(.newlines).contains($0) })
         else { throw LocalStoreError.invalidName }
+        guard details?.valid != false else { throw LocalStoreError.invalidProjectDetails }
         guard let row = try object("TripRecord", id: id) else { throw LocalStoreError.tripMissing }
         do {
             let current = try decodeTrip(row)
@@ -159,6 +166,10 @@ private struct LocalPendingMomentLink: Codable, Equatable {
                 try setEncodedSetting(changes, key: "trip.titles.\(id.uuidString.lowercased())")
             }
             row.setValue(isTest, forKey: "isTest")
+            if let details, details != current.projectDetails {
+                try setEncodedSetting(current.detailsChanges + [LocalProjectDetailsChange(id: UUID(), details: details)],
+                                      key: "trip.details.\(id.uuidString.lowercased())")
+            }
             try save()
             return try decodeTrip(row)
         } catch { context.rollback(); throw error }

@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-23 21:03 CEST — oprava větších fotografií ve střižně
+Aktualizováno: 2026-10-23 21:49 CEST — krok 3, příprava ovládání projektů
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,8 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-23 21:49 CEST: Pokračování víceprojektového Camina — připravené atomické uložení formuláře a správa versus pořizování v modelu. Swift 82 PASS, plná brána 2185 PASS a iOS build PASS. Navazuje ovládání projektů (krok 3) registrovanou Lunou, kontrola a integrace Adamem. Dřívější oba commity již publikované/nasazené přes job 5b60714d658675cfedd05f1df1bafad7, 2185 PASS, smoke 5/5 a velká fotografie HTTP 200.
 
 - 2026-10-23 21:03 CEST: Lokálně opravené velké fotografie v náhledu i filmu; pracovní kopie zachová celý rám a originál. Konkrétní zdroj dne 14. 10. prošel PNG a odděleným 1s QA v 720p/1080p, původní střihy/jobs shodné. 54 filmových + 18 gate testů a statická brána PASS. Bez p+n. Více projektů kroky 1–2 zůstávají dokončené lokálně; další vývoj krok 3.
 
@@ -3568,3 +3570,35 @@ Technický důkaz:
 - docs/LARGE_PHOTO_REPORT.md, soukromé důkazy data/private/camino_large_photo_20261023/.
 - Kód není nasazený; plná publikační brána až v samostatném p+n. Živá služba
   Camino a telefon se nemění. Nový commit naváže na lokální kroky 1–2 více projektů.
+
+
+## 2026-10-23 21:49 CEST — Krok 3, příprava formulářů projektů
+
+Hotovo:
+- Založení a úprava názvu, termínů, zkušebního příznaku a archivace v jedné
+  místní transakci. Neplatná data zachovají původní projekt i místní výběr.
+- Model nabízí rozlišené oprávnění spravovat projekty a nově zaznamenávat.
+  Archivace brání novému pořizování, nikoli čtení či doběhnutí přenosů.
+- Předchozí oprava velkých fotografií i základ více projektů jsou podle
+  účtenky Luny publikované a nasazené v Cockpitu; skutečný PNG HTTP 200.
+
+Rozhodnutí:
+- Míla zadal pokračování vývoje Camina. Výchozí návaznost je krok 3
+  schváleného plánu; otázka na přednost serveru/Macu je položená asynchronně.
+- Kritickou datovou část řeší Adam, jasně vymezené obrazovky navážou Lunou
+  podle již schváleného rozdělení; integrace a přejímka zůstávají Adamovi.
+
+Další krok:
+- Dokončit ověření datové přípravy a předat ohraničené obrazovky projektů Luně.
+
+Navrhované další kroky:
+- Krok 4 výběr projektu a oprávnění ve Vieweru/Macu, krok 5 střižna.
+- Krok 6 fyzický průchod dvěma projekty, později spojení denních filmů.
+
+Technický důkaz:
+- 82 Swift testů PASS; nově neplatné vytvoření/úprava, opětovné otevření DB,
+  nezměněná identita a původní create_trip. Plná brána 2185 PASS a iOS build PASS.
+- Důkazy data/private/camino_projects_ui_20261023/. Dřívější živé p+n:
+  job 5b60714d658675cfedd05f1df1bafad7, commit 8bc31d07, 2185 PASS, smoke 5/5.
+- Nová příprava není vydaná ani nainstalovaná. Telefonní a serverová
+  aktualizace jsou samostatné operace; originály a živé projekty se nemění.

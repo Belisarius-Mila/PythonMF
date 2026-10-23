@@ -28,6 +28,14 @@ privacy volba ani neměnný zámek již existujících textových revizí.
 
 ## Kontrakt vlastníka
 
+Příprava ovládání projektů (23. 10.): createTrip a updateTrip přijímají
+volitelné detaily formuláře a uloží název, příznak Zkoušky i detaily v jedné
+místní transakci. Neplatný termín nezaloží částečný projekt ani nepřejmenuje
+původní; stávající volání bez detailů zachovávají dosavadní význam.
+Výběr projektu vrací úspěch a vyčistí dřívější detail Momentu. Sdílené
+příznaky modelu oddělují možnost správy projektů od možnosti nového záznamu;
+archiv lze dál vybrat pro čtení, nové pořizování vyžaduje active.
+
 - GET /api/v1/projects: soukromý katalog přijatých projektů.
 - GET /api/v1/projects/{trip_id}: konkrétní přijatý projekt.
 - POST /api/v1/operations, kind=set_project_details, payload přesně
