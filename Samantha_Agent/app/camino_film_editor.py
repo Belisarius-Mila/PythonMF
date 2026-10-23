@@ -24,6 +24,7 @@ from camino.film.closed_day import ClosedDayError, _private_directory, _store_lo
 from camino.film.project import FilmError, digest, fingerprint, write_json
 
 MAX_MS = 3_600_000
+TEXT_CARD_FIT_ERROR = "Text se na kartu čitelně nevejde. Zkrať jej nebo rozděl do více karet."
 
 
 def exact(value, keys):
@@ -47,8 +48,37 @@ def identifier(value):
     return value
 
 
+def text_reference(value):
+    exact(value, "moment_id revision_id sha256")
+    identifier(value["moment_id"]); identifier(value["revision_id"])
+    if not isinstance(value["sha256"], str) or not re.fullmatch(r"[a-f0-9]{64}", value["sha256"]):
+        raise FilmError("Text nemá platnou vazbu na přijatou revizi.")
+
+
+def text_references(draft):
+    refs = [r["text_source"] for r in draft["shots"] if "text_source" in r]
+    refs += [r["text_source"] for r in draft.get("cards", [])]
+    for ref in refs:
+        text_reference(ref)
+    return refs
+
+
+def timeline_shots(draft):
+    """Interleave explicit text cards with media without changing legacy drafts."""
+    cards = draft.get("cards", [])
+    def after(anchor):
+        return [{"card_id": c["id"], "in_ms": 0, "out_ms": c["duration_ms"],
+                 "title": c["text"], "gain": 0, "included": c["included"]}
+                for c in cards if c["after_asset_id"] == anchor]
+    rows = after(None)
+    for row in draft["shots"]:
+        rows.append(row)
+        rows.extend(after(row["asset_id"]))
+    return rows
+
+
 def validate_draft(draft, manifest):
-    exact(draft, "shots voices duck_gain")
+    exact(draft, "shots voices duck_gain" + (" cards" if isinstance(draft, dict) and "cards" in draft else ""))
     gain(draft["duck_gain"])
     sources = {s["asset_id"]: s for s in manifest["sources"]}
     total, spans = 0, []
@@ -60,7 +90,8 @@ def validate_draft(draft, manifest):
             raise FilmError("Střih musí zachovat všechny nabídky; vyřazení označ výslovně.")
         seen = set()
         for row in rows:
-            exact(row, "asset_id in_ms out_ms gain included " + ("title" if kind == "visual" else "at_ms"))
+            exact(row, "asset_id in_ms out_ms gain included " + ("title" if kind == "visual" else "at_ms")
+                  + (" text_source" if kind == "visual" and isinstance(row, dict) and "text_source" in row else ""))
             sid = row["asset_id"]
             if not isinstance(sid, str) or sid not in expected or sid in seen:
                 raise FilmError("Střih odkazuje na cizí nebo duplicitní zdroj.")
@@ -88,6 +119,26 @@ def validate_draft(draft, manifest):
                 integer(row["at_ms"], 0, MAX_MS)
                 if row["included"]:
                     spans.append((row["at_ms"], row["at_ms"] + row["out_ms"] - row["in_ms"]))
+    cards = draft.get("cards", [])
+    if not isinstance(cards, list) or len(cards) > 32:
+        raise FilmError("Jeden film může mít nejvýše 32 textových karet.")
+    card_ids = set()
+    visual_ids = {r["asset_id"] for r in draft["shots"]}
+    for card in cards:
+        exact(card, "id after_asset_id text duration_ms included text_source")
+        card_id = identifier(card["id"])
+        if card_id in card_ids or card["after_asset_id"] is not None and card["after_asset_id"] not in visual_ids:
+            raise FilmError("Textová karta nemá jednoznačné místo v tomto filmu.")
+        card_ids.add(card_id)
+        if (not isinstance(card["text"], str) or not card["text"].strip() or len(card["text"]) > 1000
+                or any(ord(c) < 32 and c != "\n" for c in card["text"])):
+            raise FilmError("Textová karta vyžaduje 1 až 1000 znaků bez řídicích znaků kromě nového řádku.")
+        integer(card["duration_ms"], 100, 300_000)
+        if type(card["included"]) is not bool:
+            raise FilmError("Zařazení textové karty musí být výslovná volba.")
+        if card["included"]:
+            total += card["duration_ms"]
+    text_references(draft)
     integer(total, 100, MAX_MS)
     spans.sort()
     if any(end > total for _, end in spans):
@@ -112,6 +163,11 @@ class FilmEditor:
         if len(manifest["sources"]) > 256:
             raise FilmError("První editor podporuje nejvýše 256 zdrojů jednoho dne.")
         return folder, manifest
+
+    def verify_texts(self, manifest, draft):
+        refs = text_references(draft)
+        if refs:
+            self.store.text_choices(manifest, refs)
 
     def photo_bytes(self, project_id, asset_id):
         """Return a metadata-free PNG of a currently permitted original photo."""
@@ -214,7 +270,10 @@ class FilmEditor:
                 "revision": edit["revision"], "draft": edit["draft"],
                 "duration_ms": validate_draft(edit["draft"], manifest),
                 "sources": [{"asset_id": s["asset_id"], "kind": s["media_kind"],
-                    "duration_ms": s["duration_ms"], "title": s["title"]} for s in manifest["sources"]],
+                    "duration_ms": s["duration_ms"], "title": s["title"],
+                    "moment_id": s["moment_id"], "captured_local": s.get("capture_local_wall")}
+                    for s in manifest["sources"]],
+                "texts": self.store.text_choices(manifest),
                 "jobs": self.jobs(folder)}
 
     def save(self, payload):
@@ -223,6 +282,7 @@ class FilmEditor:
         request_id = identifier(payload["request_id"])
         folder, manifest = self.inputs(project_id)
         validate_draft(payload["draft"], manifest)
+        self.verify_texts(manifest, payload["draft"])
         request_hash = fingerprint(payload)
         with _store_lock(self.store.root):
             for path in folder.glob("edit-r*.json"):
@@ -281,6 +341,8 @@ class FilmEditor:
                 "range": spec["range"], "state": state["state"], "progress": state.get("progress", 0)}
             if "source_asset_id" in spec:
                 item["source_asset_id"] = spec["source_asset_id"]
+            if state.get("error_code") == "text_card_does_not_fit":
+                item["message"] = TEXT_CARD_FIT_ERROR
             if state["state"] == "ready":
                 item["url"] = f'/api/camino/film/output/{folder.name}/{directory.name}'
                 item["bytes"] = state["bytes"]
@@ -292,6 +354,7 @@ class FilmEditor:
         folder, manifest = self.inputs(identifier(payload["project_id"]))
         identifier(payload["request_id"])
         edit = self.revision(folder, manifest, payload["revision"])
+        self.verify_texts(manifest, edit["draft"])
         if payload["profile"] not in ("preview", "final"):
             raise FilmError("Vyber náhled 720p nebo finále 1080p.")
         total = validate_draft(edit["draft"], manifest)
@@ -311,9 +374,13 @@ class FilmEditor:
             return edit
         sid = identifier(spec["source_asset_id"])
         source = next((s for s in manifest["sources"] if s["asset_id"] == sid), None)
-        if source is None or source["media_kind"] != "video":
-            raise FilmError("Pro přímý náhled vyber video z uzavřené sady.")
+        if source is None or source["media_kind"] not in ("video", "audio"):
+            raise FilmError("Pro přímý náhled vyber video nebo komentář z uzavřené sady.")
         edit = copy.deepcopy(edit)
+        if source["media_kind"] == "audio":
+            return {**edit, "audio_preview": sid}
+        if "cards" in edit["draft"]:
+            edit["draft"]["cards"] = []
         for row in edit["draft"]["shots"]:
             row["included"] = row["asset_id"] == sid
             if row["included"]:
@@ -386,7 +453,7 @@ class FilmEditor:
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True, env=environment)
 
     def run_queue(self, project_id):
-        from app.camino_film_render import render_edit
+        from app.camino_film_render import render_edit, render_audio_preview
         folder, _ = self.inputs(identifier(project_id))
         fd = os.open(folder / ".render-worker", os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW, 0o600)
         try:
@@ -413,9 +480,16 @@ class FilmEditor:
                             if (fingerprint(current) != spec["manifest_sha256"]
                                     or fingerprint(self.job_edit(folder, current, spec)) != spec["edit_sha256"]):
                                 raise FilmError("Uložené podklady se během renderu změnily.")
-                        receipt = render_edit(edit, manifest, self.store.media.objects, attempt,
-                            spec["profile"], spec["range"], progress=progress,
-                            revalidate=revalidate)
+                            if "source_asset_id" not in spec:
+                                self.verify_texts(current, edit["draft"])
+                        revalidate()
+                        if "audio_preview" in edit:
+                            receipt = render_audio_preview(edit, manifest, self.store.media.objects,
+                                attempt, revalidate=revalidate)
+                        else:
+                            receipt = render_edit(edit, manifest, self.store.media.objects, attempt,
+                                spec["profile"], spec["range"], progress=progress,
+                                revalidate=revalidate)
                         revalidate()
                         atomic_write_json(state_path, {"state": "ready", "progress": 100,
                             "output": str((attempt / "film.mp4").relative_to(directory)),
@@ -423,11 +497,13 @@ class FilmEditor:
                     except Exception as error:
                         # FFmpeg paths, title text and raw private exceptions never become HTTP/log content.
                         atomic_write_json(state_path, {"state": "failed", "progress": 0,
-                            "error_type": type(error).__name__})
+                            "error_type": type(error).__name__,
+                            **({"error_code": "text_card_does_not_fit"}
+                               if type(error) is FilmError and str(error) == TEXT_CARD_FIT_ERROR else {})})
         finally:
             os.close(fd)
 
-    def output(self, project_id, job_id):
+    def output(self, project_id, job_id, *, with_content_type=False):
         folder, manifest = self.inputs(identifier(project_id))
         directory = folder / "jobs" / identifier(job_id)
         if not directory.is_dir():
@@ -436,6 +512,8 @@ class FilmEditor:
         _private_directory(directory)
         spec = self.store._read(directory / "request.json")
         edit = self.job_edit(folder, manifest, spec)
+        if "source_asset_id" not in spec:
+            self.verify_texts(manifest, edit["draft"])
         if fingerprint(edit) != spec["edit_sha256"] or fingerprint(manifest) != spec["manifest_sha256"]:
             raise FilmError("Export už neodpovídá uloženým podkladům.")
         state = self.store._read(directory / "status.json")
@@ -447,6 +525,9 @@ class FilmEditor:
             raise FilmError("Export nemá bezpečný soubor.")
         if target.stat().st_size != state["bytes"] or digest(target) != state["sha256"]:
             raise FilmError("Hotový export byl poškozený.")
+        if with_content_type:
+            source = next((s for s in manifest["sources"] if s["asset_id"] == spec.get("source_asset_id")), None)
+            return target, "audio/mp4" if source and source["media_kind"] == "audio" else "video/mp4"
         return target
 
 

@@ -8658,7 +8658,7 @@ def shell_quote_for_applescript(value: str) -> str:
 COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
     {
         "path": "/api/camino/film/source",
-        "label": "Připravit chráněný náhled celého zdrojového videa pro ruční střih",
+        "label": "Připravit chráněné přehrání celého videa nebo hlasového komentáře",
         "risk": "private_write", "confirmation": "explicit_source_preview_button",
         "handler_name": "film_editor_action", "test_level": "direct",
     },
@@ -10909,7 +10909,7 @@ class CockpitServer:
                 try:
                     if parsed.query or len(parts) != 7:
                         raise ValueError("invalid output request")
-                    target = production_editor().output(parts[5], parts[6])
+                    target, content_type = production_editor().output(parts[5], parts[6], with_content_type=True)
                     handle = target.open("rb")
                 except (OSError, ValueError, KeyError):
                     if self.command == "HEAD":
@@ -10933,8 +10933,9 @@ class CockpitServer:
                             return
                     partial = bool(self.headers.get("Range"))
                     self.send_response(HTTPStatus.PARTIAL_CONTENT if partial else HTTPStatus.OK)
-                    self.send_header("Content-Type", "video/mp4")
-                    self.send_header("Content-Disposition", 'inline; filename="Camino-2026-10-06.mp4"')
+                    self.send_header("Content-Type", content_type)
+                    self.send_header("Content-Disposition", 'inline; filename="Camino-comment.m4a"' if content_type == "audio/mp4"
+                                     else 'inline; filename="Camino-2026-10-06.mp4"')
                     self.send_header("Cache-Control", "no-store, max-age=0")
                     self.send_header("Accept-Ranges", "bytes")
                     self.send_header("Content-Length", str(last - first + 1))

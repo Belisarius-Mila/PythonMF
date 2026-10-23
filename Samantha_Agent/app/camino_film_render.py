@@ -9,10 +9,10 @@ import subprocess
 import time
 from pathlib import Path
 
-from PIL import Image, ImageCms, ImageOps
+from PIL import Image, ImageCms, ImageOps, ImageDraw, ImageFont
 
-from app.camino_film_editor import validate_draft
-from camino.film.media import binary, duration_ms, probe, title_image
+from app.camino_film_editor import validate_draft, timeline_shots, TEXT_CARD_FIT_ERROR
+from camino.film.media import FONT, binary, duration_ms, probe, title_image
 from camino.film.project import FilmError, digest, fingerprint, write_json
 from camino.film.render import DiskMeter, PROFILES
 
@@ -32,7 +32,7 @@ def ffmpeg(args, *, timeout=600):
 def window(draft, total, interval):
     start, end = (interval["start_ms"], interval["end_ms"]) if interval else (0, total)
     shots, voices, cursor = [], [], 0
-    for shot in draft["shots"]:
+    for shot in timeline_shots(draft):
         if not shot["included"]:
             continue
         length = shot["out_ms"] - shot["in_ms"]
@@ -76,6 +76,77 @@ def prepare_photo(source: Path, target: Path, size=None):
     target.chmod(0o600)
 
 
+def text_card_image(target, text, size):
+    """Fit the complete author-selected text, never silently clip or shorten it."""
+    width, height = size
+    image = Image.new("RGB", size, (20, 27, 38))
+    draw = ImageDraw.Draw(image)
+    for pixels in range(round(height * .055), round(height * .029) - 1, -1):
+        font = ImageFont.truetype(str(FONT), pixels)
+        lines = []
+        for paragraph in text.split("\n"):
+            line = ""
+            for word in paragraph.split():
+                if draw.textlength(word, font=font) > width * .84:
+                    lines = None
+                    break
+                candidate = (line + " " + word).strip()
+                if draw.textlength(candidate, font=font) > width * .84:
+                    lines.append(line); line = word
+                else:
+                    line = candidate
+            if lines is None:
+                break
+            lines.append(line)
+        spacing = round(pixels * 1.4)
+        if lines is not None and len(lines) * spacing <= height * .8:
+            top = (height - len(lines) * spacing) / 2
+            for i, line in enumerate(lines):
+                draw.text((width / 2, top + i * spacing), line, anchor="mt", fill="white", font=font)
+            with target.open("xb") as handle:
+                image.save(handle, "PNG")
+            target.chmod(0o600)
+            return
+    raise FilmError(TEXT_CARD_FIT_ERROR)
+
+
+def render_audio_preview(edit, manifest, objects, output, *, revalidate):
+    """Metadata-free AAC listening copy, never an original-media HTTP route."""
+    sid = edit["audio_preview"]
+    source = next(s for s in manifest["sources"] if s["asset_id"] == sid and s["media_kind"] == "audio")
+    path = objects / (sid + ".bin")
+    if path.is_symlink() or not path.is_file() or digest(path) != source["sha256"]:
+        raise FilmError("Komentář neodpovídá uzavřeným podkladům.")
+    info = probe(path)
+    if (len([s for s in info["streams"] if s["codec_type"] == "audio"]) != 1
+            or type(source["duration_ms"]) is not int or not 1 <= source["duration_ms"] <= 3_600_000
+            or abs(duration_ms(info, "audio") - source["duration_ms"]) > 60):
+        raise FilmError("Komentář nemá ověřenou délku a zvukovou stopu.")
+    if shutil.disk_usage(output).free < source["duration_ms"] * 100 + 128 * 1024**2:
+        raise FilmError("Chybí místo pro poslechovou kopii komentáře.")
+    revalidate()
+    partial = output / "render.partial.mp4"
+    ffmpeg(["-protocol_whitelist", "file,pipe", "-i", str(path), "-map", "0:a:0", "-vn",
+            "-map_metadata", "-1", "-map_chapters", "-1", "-c:a", "aac", "-b:a", "192k",
+            "-ar", "48000", "-movflags", "+faststart", str(partial)])
+    decoded = probe(partial)
+    if (any(s["codec_type"] == "video" for s in decoded["streams"])
+            or abs(duration_ms(decoded, "audio") - source["duration_ms"]) > 100):
+        raise FilmError("Poslechová kopie nemá správnou délku.")
+    ffmpeg(["-protocol_whitelist", "file,pipe", "-i", str(partial), "-f", "null", "-"])
+    revalidate()
+    final = output / "film.mp4"
+    os.link(partial, final)
+    with final.open("rb") as handle:
+        os.fsync(handle.fileno())
+    receipt = {"schema": 1, "scope": "camino-film-audio-preview", "state": "verified",
+        "project_id": edit["project_id"], "source_asset_id": sid, "edit_sha256": fingerprint(edit),
+        "manifest_sha256": fingerprint(manifest), "bytes": final.stat().st_size, "sha256": digest(final),
+        "audio_ms": duration_ms(decoded, "audio"), "decoded_entire_file": True}
+    write_json(output / "receipt.json", receipt)
+    return receipt
+
+
 def render_edit(edit, manifest, objects: Path, output: Path, profile, interval, *, progress, revalidate):
     total = validate_draft(edit["draft"], manifest)
     shots, voices, length = window(edit["draft"], total, interval)
@@ -86,7 +157,7 @@ def render_edit(edit, manifest, objects: Path, output: Path, profile, interval, 
         raise FilmError("Chybí místo pro bezpečný export včetně pracovních souborů.")
     sources = {s["asset_id"]: s for s in manifest["sources"]}
     info = {}
-    for sid in {r["asset_id"] for r in [*shots, *voices]}:
+    for sid in {r["asset_id"] for r in [*shots, *voices] if "asset_id" in r}:
         source = sources[sid]
         path = objects / (sid + ".bin")
         if path.is_symlink() or not path.is_file() or digest(path) != source["sha256"]:
@@ -110,23 +181,26 @@ def render_edit(edit, manifest, objects: Path, output: Path, profile, interval, 
         segments = []
         for index, shot in enumerate(shots):
             revalidate()
-            source = sources[shot["asset_id"]]
-            path = objects / (shot["asset_id"] + ".bin")
+            card = "card_id" in shot
+            source = sources[shot["asset_id"]] if not card else {"media_kind": "text"}
+            path = objects / (shot["asset_id"] + ".bin") if not card else output / f"card-{index:04d}.png"
             ms = shot["out_ms"] - shot["in_ms"]
             # Quantize cumulative boundaries, avoiding drift from rounding every clip independently.
             frames = round((shot["at_ms"] + ms) * 30 / 1000) - round(shot["at_ms"] * 30 / 1000)
             if frames < 1:
                 raise FilmError("Náhled obsahuje úsek kratší než jeden snímek.")
             seconds = frames / 30
-            photo = source["media_kind"] == "photo"
-            if photo:
+            photo = source["media_kind"] in ("photo", "text")
+            if card:
+                text_card_image(path, shot["title"], (width, height))
+            elif photo:
                 working = output / f"photo-{index:04d}.png"
                 prepare_photo(path, working, (width, height))
                 path = working
             args = ["-loop", "1", "-framerate", "30"] if photo else []
             args += ["-protocol_whitelist", "file,pipe", "-i", str(path)]
             title = output / f"title-{index:04d}.png"
-            title_image(title, shot["title"], (width, height))
+            title_image(title, "" if card else shot["title"], (width, height))
             title.chmod(0o600)
             args += ["-protocol_whitelist", "file,pipe", "-i", str(title)]
             start, end = (0, ms / 1000) if photo else (shot["in_ms"] / 1000, shot["out_ms"] / 1000)
@@ -136,7 +210,7 @@ def render_edit(edit, manifest, objects: Path, output: Path, profile, interval, 
                 f"tpad=stop_mode=clone:stop_duration=0.1,trim=duration={seconds}[base]",
                 f"[base][1:v]overlay=eof_action=repeat:shortest=0,trim=duration={seconds},"
                 "setparams=range=limited:color_primaries=bt709:color_trc=bt709:colorspace=bt709[video]"]
-            has_audio = any(s["codec_type"] == "audio" for s in info[shot["asset_id"]]["streams"])
+            has_audio = not card and any(s["codec_type"] == "audio" for s in info[shot["asset_id"]]["streams"])
             audio = f"[0:a]atrim=start={start}:end={end},asetpts=PTS-STARTPTS," if has_audio else "anullsrc=r=48000:cl=stereo,"
             graph.append(audio + "aresample=48000,aformat=sample_fmts=fltp:channel_layouts=stereo,"
                 f"volume={shot['gain']},apad,atrim=duration={seconds}[audio]")

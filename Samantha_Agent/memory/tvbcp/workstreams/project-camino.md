@@ -4018,3 +4018,38 @@ Technický důkaz:
 - Osiřelý prázdný index.lock bez držitele byl přesunut do technického archivu
   v projektu, původní Git index zachován. Nesouvisející změna Xcode projektu
   zůstává mimo tento checkpoint; profilový sync vyžaduje čistý zdrojový main.
+
+## 2026-10-23 09:16 CEST — Texty a komentáře ve střižně
+
+Hotovo:
+- Lokální panel nabízí povolené přijaté texty deníku, jejich úpravu pro film,
+  vložení do titulku nebo samostatné časované karty. Hlas má poslech celého
+  zdroje / ruční výběr úseku a výslovné vložení od vybraného záběru.
+- Předchozí dva commity jsou přes Lunu pushnuté a nasazené do Cockpitu
+  (účtenka 698ae54bb9df52516cd35c2821f88f4c, plná brána 2174, smoke 5/5).
+  Míla následně potvrzuje funkčnost zoomu; podrobný telefonní protokol tím nevznikl.
+
+Rozhodnutí:
+- Míla schválil vývoj navrženého panelu. Žádný souhlas s novým p+n, přepisem
+  audia, generovanou řečí nebo změnou existujícího produkčního střihu.
+- Film pinuje přijatou textovou revizi; originály, deník i starší střihy
+  zůstávají neměnné, Jen pro mě a skryté zdroje mimo film.
+
+Další krok:
+- Funkčně ověřit uložení, soukromí, kartu a poslechovou kopii před publikováním.
+
+Navrhované další kroky:
+- Po samostatném p+n Lunou krátký vlastní náhled s titulkem, kartou a hlasem.
+- Chybějící konkrétní text sledovat od uložení v telefonu po přijetí na Macu;
+  bez čerstvé telefonní evidence nepřisuzovat chybu přenosu.
+
+Technický důkaz:
+- Statická brána --skip-unit-tests, py_compile, Node --check a diff --check PASS.
+- Read-only revize 5 dne 6. 10.: 25 záběrů, 5 hlasových nabídek, 0 zapnutých
+  hlasů a 0 přijatých textů. Archiv má 8 append_text / textových revizí;
+  povolené texty v 5 dnech. Jedna textová nabídka i přesná reference ověřené
+  čtením jiného existujícího dne bez uložení. Žádný produkční render nebo
+  přepis projektu; původní Xcode nastavení SHA-256 shodné.
+- Automatické testy a funkční render/Safari NEOVĚŘENO; nelze tvrdit provozní
+  opravu. Hlas je umístěný absolutním časem, po změně obrazu zkontrolovat.
+- Podrobnosti camino/docs/FILM_TEXT_AUDIO_REPORT.md; čtecí účtenky pouze private.

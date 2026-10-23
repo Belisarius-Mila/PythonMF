@@ -386,21 +386,30 @@
           <h3>Střih</h3>
           <p>Úpravy se automaticky ukládají jako nové revize. Vyřazení odstraní záběr jen z filmu. Začátek a konec úseku vybíráš ručně.</p>
           <div data-film="status" role="status" aria-live="polite"></div>
-          <div class="actions"><button data-film="save" type="button">Uložit střih</button><button data-film="reload" type="button" class="secondary">Načíst poslední střih</button></div>
-          <section data-film="source" class="camino-film-source hidden" aria-label="Ruční výběr úseku videa">
+          <div class="actions"><button data-film="save" type="button">Uložit střih</button><button data-film="reload" type="button" class="secondary">Načíst poslední střih a texty</button></div>
+          <section data-film="source" class="camino-film-source hidden" aria-label="Poslech a ruční výběr úseku zdroje">
             <h4 data-film="sourceTitle"></h4>
             <p data-film="sourceStatus" role="status" aria-live="polite"></p>
-            <video data-film="sourcePlayer" controls playsinline preload="metadata" aria-label="Celé zdrojové video pro výběr střihu"></video>
+            <video data-film="sourcePlayer" controls playsinline preload="metadata" aria-label="Zdrojové video nebo hlasový komentář pro výběr úseku"></video>
             <p data-film="selection" aria-live="polite"></p>
             <div class="actions"><button data-film="start" type="button" disabled>Tady začít</button><button data-film="end" type="button" disabled>Tady skončit</button><button data-film="playSelection" type="button" class="secondary" disabled>Přehrát výběr</button></div>
-            <p class="muted">Časy můžeš doladit i číselně u záběru. Titulek a hlasový komentář uvidíš a uslyšíš ve vytvořeném náhledu filmu.</p>
+            <p class="muted">Časy můžeš doladit i číselně u záběru nebo komentáře. Titulky a souběh obrazu s hlasem ověříš ve vytvořeném náhledu filmu.</p>
           </section>
           <ol data-film="shots" class="camino-film-edit-list"></ol>
-          <details><summary>Hlasové komentáře</summary>
+          <section class="camino-film-materials" aria-label="Texty a komentáře">
+            <h3>Texty a komentáře</h3>
+            <h4>Texty deníku</h4>
+            <p>Přijatý text můžeš upravit pro film a vložit jako titulek nebo textovou kartu. Deník ani dřívější střihy se tím nepřepisují. Soukromé a skryté položky se nenabízejí.</p>
+            <ol data-film="texts" class="camino-film-edit-list"></ol>
+            <h4>Textové karty ve filmu</h4>
+            <p class="muted">Karta se přidá na 5 sekund za vybraný záběr. Níže můžeš změnit její délku, umístění i text nebo ji z filmu vyřadit.</p>
+            <ol data-film="cards" class="camino-film-edit-list"></ol>
+            <h4>Hlasové komentáře</h4>
             <p>Každá nabídka je celá původní zvuková část. Její umístění a případné zkrácení volíš ručně. Přesah hlasu vyžaduje prodloužení fotografie nebo doplnění obrazu.</p>
+            <p class="muted">Vložení k záběru nastaví čas začátku komentáře ve filmu. Po pozdější změně pořadí nebo délek záběrů jeho umístění zkontroluj, případně jej vlož k záběru znovu.</p>
             <label>Zvuk videa během komentáře (0–1)<input data-film="duck" type="number" min="0" max="1" step="0.05" value="0.2"></label>
             <ol data-film="voices" class="camino-film-edit-list"></ol>
-          </details>
+          </section>
           <h3>Náhled a MP4</h3>
           <div class="actions"><button data-film="preview" type="button">Vytvořit náhled 720p</button><button data-film="final" type="button">Vytvořit MP4 1080p</button></div>
           <div class="camino-film-fields"><label>Náhled od (s)<input data-film="from" type="number" min="0" step="0.001" value="0"></label><label>Do (s)<input data-film="to" type="number" min="0.1" step="0.001" value="10"></label><button data-film="range" type="button" class="secondary">Náhled úseku</button></div>

@@ -467,3 +467,6 @@
     .camino-film-source video { display: block; width: 100%; max-height: 55vh; background: #111; }
     #caminoFilmEditor video { width: 100%; max-height: 65vh; margin-top: .75rem; }
     #caminoFilmEditor a { margin-left: .75rem; }
+    .camino-film-materials textarea { display: block; width: 100%; box-sizing: border-box; min-height: 7em; resize: vertical; }
+    .camino-film-materials select { max-width: 100%; }
+    #caminoFilmEditor .audio-only video { height: 4rem; }

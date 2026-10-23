@@ -9,7 +9,7 @@
     const askDelete = options.prompt || (message => window.prompt(message));
     const nodes = Object.fromEntries(["status", "shots", "voices", "jobs", "save", "preview", "final",
       "range", "from", "to", "duck", "player", "reload", "source", "sourcePlayer", "sourceStatus",
-      "sourceTitle", "selection", "start", "end", "playSelection"].map(key => [key, root.querySelector(`[data-film="${key}"]`)]));
+      "sourceTitle", "selection", "start", "end", "playSelection", "texts", "cards"].map(key => [key, root.querySelector(`[data-film="${key}"]`)]));
     let model = null, active = false, dirty = false, saving = false, version = 0, epoch = 0;
     let pending = null, timer = null, refreshTimer = null, preserved = null, readRequest = 0;
     let requestedProject = null;
@@ -23,7 +23,7 @@
       nodes.source.classList.add("hidden");
       for (const key of ["start", "end", "playSelection"]) nodes[key].disabled = true;
     }
-    function selectedRow() { return model?.draft.shots.find(row => row.asset_id === selected); }
+    function selectedRow() { return model && [...model.draft.shots, ...model.draft.voices].find(row => row.asset_id === selected); }
     function safeOutput(url) {
       return typeof url === "string" && url.startsWith(`/api/camino/film/output/${model.project_id}/`)
         && url.split("/").length === 7 && /^[a-f0-9-]{36}$/.test(url.split("/")[6]);
@@ -31,7 +31,7 @@
     function syncSelection() {
       const row = selectedRow(); if (!row) return;
       const source = model.sources.find(s => s.asset_id === selected);
-      nodes.sourceTitle.textContent = `Video ${model.draft.shots.indexOf(row) + 1} · ${source.title || "Bez názvu"}`;
+      nodes.sourceTitle.textContent = `${source.kind === "audio" ? "Komentář" : "Video"} · ${source.title || "Bez názvu"}`;
       nodes.selection.textContent = `Vybraný úsek: ${(row.in_ms / 1000).toFixed(3)}–${(row.out_ms / 1000).toFixed(3)} s · ${((row.out_ms - row.in_ms) / 1000).toFixed(3)} s${row.included ? "" : " · vyřazeno z filmu"}`;
       const ready = !!nodes.sourcePlayer.getAttribute("src") && nodes.sourcePlayer.readyState >= 1;
       nodes.start.disabled = nodes.end.disabled = !ready;
@@ -46,11 +46,11 @@
         if (nodes.sourcePlayer.getAttribute("src") !== job.url) {
           nodes.sourcePlayer.src = job.url; nodes.sourcePlayer.load();
         }
-        nodes.sourceStatus.textContent = "Posuň video na požadované místo a označ začátek nebo konec. Přehrát výběr přehraje jen označenou část.";
+        nodes.sourceStatus.textContent = "Posuň přehrávač na požadované místo a označ začátek nebo konec. Přehrát výběr přehraje jen označenou část.";
       } else if (["failed", "interrupted"].includes(job.state)) {
         nodes.sourceStatus.textContent = "Náhled se nedokončil. Tlačítkem u záběru ho můžeš připravit znovu.";
       } else {
-        nodes.sourceStatus.textContent = `Připravuji náhled videa${job.state === "rendering" ? ` · ${job.progress} %` : " · ve frontě"}…`;
+        nodes.sourceStatus.textContent = `Připravuji zdroj k přehrání${job.state === "rendering" ? ` · ${job.progress} %` : " · ve frontě"}…`;
         sourceTimer = later(() => check(), 1500);
       }
       syncSelection();
@@ -59,8 +59,10 @@
       if (!model) return;
       stopSource(); stopPlayer(); selected = assetId;
       const current = epoch, selection = sourceRequest;
+      if (model.sources.find(s => s.asset_id === assetId)?.kind === "audio") nodes.source.classList.add("audio-only");
+      else nodes.source.classList.remove("audio-only");
       nodes.source.classList.remove("hidden"); syncSelection();
-      nodes.sourceStatus.textContent = "Ověřuji a připravuji náhled celého videa…";
+      nodes.sourceStatus.textContent = "Ověřuji a připravuji celý zdroj k přehrání…";
       nodes.source.scrollIntoView?.({block: "nearest", behavior: "smooth"});
       try {
         const response = await request("/api/camino/film/source", {method: "POST", headers: {"Content-Type": "application/json"},
@@ -70,7 +72,7 @@
         if (!data.ok) { nodes.sourceStatus.textContent = data.message; return; }
         sourceJob = data.job_id; check();
       } catch (_) {
-        if (current === epoch && selection === sourceRequest) nodes.sourceStatus.textContent = "Příprava se nepotvrdila. Zkus znovu otevřít video u záběru.";
+        if (current === epoch && selection === sourceRequest) nodes.sourceStatus.textContent = "Příprava se nepotvrdila. Zkus znovu otevřít zdroj.";
       }
     }
     function mark(key) {
@@ -92,7 +94,7 @@
     function invalidate(message = "Projekt nelze nyní ověřit. Starší film se nezobrazuje.") {
       ++epoch; model = null; dirty = false; pending = null; preserved = null;
       cancel(timer); stopPlayer(); stopSource();
-      for (const key of ["shots", "voices", "jobs"]) nodes[key].replaceChildren();
+      for (const key of ["shots", "voices", "jobs", "texts", "cards"]) nodes[key]?.replaceChildren();
       for (const key of ["save", "preview", "final", "range"]) nodes[key].disabled = true;
       nodes.status.textContent = message;
     }
@@ -167,12 +169,8 @@
           const preview = text("button", "Vytvořit náhled záběru s titulkem"); preview.type = "button"; preview.className = "secondary";
           preview.addEventListener("click", async () => {
             if (!await save()) return;
-            let start = 0;
-            for (const item of model.draft.shots) {
-              if (!item.included) continue;
-              if (item === row) { await render("preview", {start_ms: start, end_ms: start + row.out_ms - row.in_ms}); return; }
-              start += item.out_ms - item.in_ms;
-            }
+            const start = shotStart(row.asset_id);
+            if (start !== null) { await render("preview", {start_ms: start, end_ms: start + row.out_ms - row.in_ms}); return; }
             nodes.status.textContent = "Záběr je vyřazený. Zařaď ho před vytvořením náhledu.";
           }); actions.appendChild(preview);
         }
@@ -180,7 +178,7 @@
       }
       for (const row of model.draft.voices) {
         const source = sources.get(row.asset_id), li = doc.createElement("li");
-        li.appendChild(text("strong", `${source.title || "Zvuková část"} · ${source.duration_ms / 1000} s`));
+        li.appendChild(text("strong", `${source.title || "Zvuková část"} · ${source.duration_ms / 1000} s${source.captured_local ? ` · ${source.captured_local.replace("T", " ")}` : ""}`));
         const checkbox = doc.createElement("input"), label = text("label", "Použít jako komentář ");
         checkbox.type = "checkbox"; checkbox.checked = row.included;
         checkbox.addEventListener("change", () => { row.included = checkbox.checked; change(); });
@@ -190,10 +188,118 @@
         field(fields, "Začátek nahrávky (s)", row, "in_ms", {seconds: true, max: source.duration_ms / 1000});
         field(fields, "Konec nahrávky (s)", row, "out_ms", {seconds: true, max: source.duration_ms / 1000});
         field(fields, "Hlasitost (0–1)", row, "gain", {max: 1});
-        li.appendChild(fields); nodes.voices.appendChild(li);
+        li.appendChild(fields);
+        voiceActions(li, row, source);
+        nodes.voices.appendChild(li);
       }
+      if (!model.draft.voices.length) nodes.voices.appendChild(text("li", "Pro tento den není v uzavřené sadě žádný povolený hlasový komentář."));
+      renderTexts();
       nodes.duck.value = model.draft.duck_gain;
       syncSelection();
+    }
+    function timeline() {
+      const cards = model.draft.cards || [], rows = [];
+      function after(id) {
+        for (const card of cards) if (card.included && card.after_asset_id === id)
+          rows.push({in_ms: 0, out_ms: card.duration_ms});
+      }
+      after(null);
+      for (const row of model.draft.shots) { if (row.included) rows.push(row); after(row.asset_id); }
+      return rows;
+    }
+    function shotStart(assetId) {
+      let cursor = 0;
+      for (const row of timeline()) {
+        if (row.asset_id === assetId) return cursor;
+        cursor += row.out_ms - row.in_ms;
+      }
+      return null;
+    }
+    function shotChoice(parent, momentId, {cards = false, value = null} = {}) {
+      const label = text("label", cards ? "Kartu umístit " : "Obrazový záběr ");
+      const select = doc.createElement("select");
+      if (cards) { const o = text("option", "Na začátek filmu"); o.value = ""; select.appendChild(o); }
+      for (const [index, row] of model.draft.shots.entries()) {
+        if (!cards && !row.included) continue;
+        const source = model.sources.find(s => s.asset_id === row.asset_id);
+        const option = text("option", `${cards ? "Za " : ""}${index + 1}. ${source.title || (source.kind === "photo" ? "Fotografie" : "Video")}${row.included ? "" : " (obraz vyřazen)"}`);
+        option.value = row.asset_id; select.appendChild(option);
+      }
+      const related = model.draft.shots.find(r => r.included && model.sources.find(s => s.asset_id === r.asset_id)?.moment_id === momentId);
+      if (value !== null) select.value = value;
+      else if (related) select.value = related.asset_id;
+      label.appendChild(select); parent.appendChild(label); return select;
+    }
+    function voiceActions(li, row, source) {
+      const actions = doc.createElement("div"); actions.className = "actions";
+      const listen = text("button", "Poslechnout / vybrat úsek"); listen.type = "button"; listen.className = "secondary";
+      listen.addEventListener("click", () => selectVideo(row.asset_id)); actions.appendChild(listen);
+      const target = shotChoice(actions, source.moment_id);
+      const insert = text("button", "Vložit komentář k záběru"); insert.type = "button";
+      insert.addEventListener("click", () => {
+        const start = shotStart(target.value), duration = row.out_ms - row.in_ms;
+        if (start === null) { nodes.status.textContent = "Nejprve vyber zařazený obrazový záběr."; return; }
+        const end = start + duration, total = timeline().reduce((n, r) => n + r.out_ms - r.in_ms, 0);
+        if (end > total) { nodes.status.textContent = `Komentář přesahuje obraz o ${((end - total) / 1000).toFixed(1)} s. Prodluž fotografie, přidej textovou kartu nebo ručně vyber kratší úsek řeči.`; return; }
+        if (model.draft.voices.some(v => v !== row && v.included && start < v.at_ms + v.out_ms - v.in_ms && end > v.at_ms)) {
+          nodes.status.textContent = "Na tomto místě už je jiný komentář. Vyber jiný záběr nebo uprav umístění."; return;
+        }
+        row.at_ms = start; row.included = true; change(); renderRows();
+      });
+      actions.appendChild(insert); li.appendChild(actions);
+    }
+    function renderTexts() {
+      if (!nodes.texts || !nodes.cards) return;
+      nodes.texts.replaceChildren(); nodes.cards.replaceChildren();
+      const choices = model.texts || [];
+      if (!choices.length) nodes.texts.appendChild(text("li", "Pro tento den není na Macu žádný povolený přijatý text. Ulož text v deníku Camina, dokonči přenos a znovu načti podklady. Hlasové nahrávky se automaticky nepřepisují."));
+      for (const source of choices) {
+        const li = doc.createElement("li");
+        li.appendChild(text("strong", `${source.title || "Text deníku"}${source.captured_local ? ` · ${source.captured_local.replace("T", " ")}` : ""}`));
+        const label = text("label", "Text pro film (původní deník se nemění)");
+        const area = doc.createElement("textarea"), revisionId = source.reference.revision_id;
+        model.textEdits ||= {};
+        area.value = model.textEdits[revisionId] ?? source.text; area.rows = 5;
+        area.addEventListener("input", () => { model.textEdits[revisionId] = area.value; });
+        label.appendChild(area); li.appendChild(label);
+        const actions = doc.createElement("div"); actions.className = "actions";
+        const target = shotChoice(actions, source.reference.moment_id);
+        const caption = text("button", "Nahradit titulek záběru"); caption.type = "button";
+        caption.addEventListener("click", () => {
+          const value = area.value.trim(), row = model.draft.shots.find(r => r.asset_id === target.value && r.included);
+          if (!row) { nodes.status.textContent = "Vyber zařazený záběr pro titulek."; return; }
+          if (!value || value.length > 140 || /[\u0000-\u001f]/.test(value)) {
+            nodes.status.textContent = "Titulek musí mít 1 až 140 znaků na jednom řádku. Text můžeš upravit nebo použít jako kartu."; return;
+          }
+          row.title = value; row.text_source = {...source.reference}; change(); renderRows();
+        }); actions.appendChild(caption);
+        const card = text("button", "Přidat textovou kartu za záběr"); card.type = "button"; card.className = "secondary";
+        card.addEventListener("click", () => {
+          const value = area.value.trim();
+          if (!value || value.length > 1000 || /[\u0000-\u0009\u000b-\u001f]/.test(value)) {
+            nodes.status.textContent = "Jedna karta může mít 1 až 1000 znaků. Dlouhý text nejprve vědomě rozděl nebo uprav."; return;
+          }
+          if ((model.draft.cards || []).length >= 32) { nodes.status.textContent = "Film už má 32 textových karet."; return; }
+          (model.draft.cards ||= []).push({id: uuid(), after_asset_id: target.value || null,
+            text: value, duration_ms: 5000, included: true, text_source: {...source.reference}});
+          change(); renderRows();
+        }); actions.appendChild(card); li.appendChild(actions); nodes.texts.appendChild(li);
+      }
+      for (const card of model.draft.cards || []) {
+        const li = doc.createElement("li"); li.appendChild(text("strong", "Textová karta"));
+        const enabled = doc.createElement("input"), label = text("label", "Zařadit kartu do filmu ");
+        enabled.type = "checkbox"; enabled.checked = card.included;
+        enabled.addEventListener("change", () => { card.included = enabled.checked; change(); });
+        label.appendChild(enabled); li.appendChild(label);
+        const content = text("label", "Text karty"), area = doc.createElement("textarea");
+        area.value = card.text; area.maxLength = 1000; area.rows = 5;
+        area.addEventListener("change", () => { card.text = area.value; change(); });
+        content.appendChild(area); li.appendChild(content);
+        field(li, "Délka karty (s)", card, "duration_ms", {seconds: true, max: 300});
+        const anchor = shotChoice(li, null, {cards: true, value: card.after_asset_id || ""});
+        anchor.addEventListener("change", () => { card.after_asset_id = anchor.value || null; change(); });
+        nodes.cards.appendChild(li);
+      }
     }
     function renderJobs(jobs) {
       nodes.jobs.replaceChildren();
@@ -205,6 +311,7 @@
       for (const job of exports.slice().reverse()) {
         const superseded = ["failed", "interrupted"].includes(job.state) && completed.has(key(job));
         const li = text("li", `${job.profile === "final" ? "MP4 1080p" : "Náhled 720p"} · revize ${job.revision}${job.revision !== model.revision ? " (starší střih)" : ""}${job.range ? ` · dílčí úsek ${(job.range.start_ms / 1000).toFixed(1)}–${(job.range.end_ms / 1000).toFixed(1)} s` : ""} · ${superseded ? "Starší neúspěšný pokus; hotový výsledek je výše" : labels[job.state] || "Neznámý stav"}${job.state === "rendering" ? ` ${job.progress} %` : ""}`);
+        if (job.message) li.appendChild(text("p", job.message));
         if (job.state === "ready" && safeOutput(job.url)) {
           const play = text("button", "Přehrát"); play.type = "button"; play.className = "secondary";
           play.addEventListener("click", () => { nodes.sourcePlayer.pause(); playingSelection = false; stopPlayer(); nodes.player.src = job.url; nodes.player.load(); });
@@ -345,7 +452,7 @@
       if (selected) {
         playingSelection = false; sourceJob = null; cancel(sourceTimer); cancel(selectionTimer);
         nodes.sourcePlayer.pause(); nodes.sourcePlayer.removeAttribute("src"); nodes.sourcePlayer.load(); syncSelection();
-        nodes.sourceStatus.textContent = "Video nelze načíst. Znovu otevři video u záběru a ověř připojení.";
+        nodes.sourceStatus.textContent = "Zdroj nelze načíst. Znovu otevři video nebo komentář a ověř připojení.";
       }
     });
     nodes.preview.addEventListener("click", () => render("preview"));

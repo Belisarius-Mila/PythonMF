@@ -16,6 +16,8 @@ from camino.film.closed_day import (
     ClosedDayError, ClosedDayStore, _private_directory, _store_lock,
 )
 from camino.film.project import fingerprint, write_json
+from camino.domain.codec import decode_text
+from camino.domain.model import TextHistory
 from camino.server.service_safety import readonly
 
 DAY = "2026-10-06"
@@ -195,6 +197,97 @@ class MacFilmProjectStore(ClosedDayStore):
 
     def project_status(self, project_id):
         return self._confirmed_status(project_id)
+
+    def text_choices(self, manifest, references=None):
+        """Read permitted accepted text; a saved film pins an exact revision.
+
+        This supplements legacy media manifests without rewriting any project,
+        archive or edit. Text provenance must be wholly inside this allowed day.
+        """
+        with self._metadata_connection() as db:
+            db.execute("BEGIN")
+            state = db.execute("SELECT server_id,epoch,exports_blocked,reconciliation_required "
+                               "FROM meta WHERE singleton=1").fetchone()
+            if (not state or tuple(state[:2]) != (manifest["server_id"], manifest["epoch"])
+                    or state[2] or state[3]):
+                raise ClosedDayError("archive_blocked", "Texty nelze nyní bezpečně ověřit.")
+            moments = [json.loads(r[0]) for r in db.execute("SELECT body FROM moments")]
+            moments = [m for m in moments if m["day_id"] == manifest["day_id"]]
+            ids = {m["id"] for m in moments}
+            assets = [json.loads(r[0]) for r in db.execute("SELECT body FROM assets")]
+            assets = [a for a in assets if a["moment_id"] in ids]
+            inventory = {
+                "moments": sorted(({k: m[k] for k in
+                    ("id", "revision", "privacy", "hidden", "chapter_date")} for m in moments), key=lambda m: m["id"]),
+                "assets": sorted(({k: a[k] for k in
+                    ("id", "moment_id", "media_kind", "byte_count", "sha256")} for a in assets), key=lambda a: a["id"]),
+            }
+            if fingerprint(inventory) != manifest["inventory_sha256"]:
+                raise ClosedDayError("source_changed", "Povolené podklady dne se změnily.")
+            allowed = {m["id"] for m in moments if m["privacy"] == "diary" and m["hidden"] is False}
+            safe_ids = allowed | {a["id"] for a in assets if a["moment_id"] in allowed}
+            requested = {r["revision_id"]: r for r in references} if references is not None else None
+            if references is not None and any(requested[r["revision_id"]] != r for r in references):
+                raise ClosedDayError("text_changed", "Stejná textová revize má rozpornou vazbu.")
+            histories, bodies = {}, {}
+            for moment in moments:
+                if moment["id"] not in allowed:
+                    continue
+                history = TextHistory()
+                for row in db.execute("SELECT body FROM text_revisions WHERE moment_id=? ORDER BY rowid", (moment["id"],)):
+                    body = json.loads(row[0])
+                    revision = decode_text(body)
+                    if revision.moment_id != moment["id"]:
+                        raise ClosedDayError("text_changed", "Text nemá platnou vazbu na Moment.")
+                    history = history.add(revision)
+                    bodies[revision.id] = body
+                histories[moment["id"]] = history
+            safe = {}
+            def safe_revision(revision_id):
+                # Iterative traversal also rejects cycles without a recursion limit
+                # or leaking text from another/private Moment through ancestry.
+                visiting, pending = set(), [(revision_id, False)]
+                while pending:
+                    current, closing = pending.pop()
+                    if current in safe:
+                        continue
+                    body = bodies.get(current)
+                    if body is None:
+                        safe[current] = False
+                        continue
+                    links = [*body["source_ids"]]
+                    if body["parent_revision_id"] is not None:
+                        links.append(body["parent_revision_id"])
+                    if closing:
+                        safe[current] = all(sid in safe_ids or safe.get(sid, False) for sid in links)
+                        visiting.discard(current)
+                    elif current in visiting:
+                        safe[current] = False
+                    else:
+                        visiting.add(current)
+                        pending.append((current, True))
+                        pending.extend((sid, False) for sid in links if sid not in safe_ids)
+                return safe.get(revision_id, False)
+            result = []
+            for moment in moments:
+                if moment["id"] not in allowed:
+                    continue
+                history = histories[moment["id"]]
+                chosen = ([v for v in history.revisions if v.id in requested] if requested is not None
+                          else [history.reader_revision] if history.reader_revision else [])
+                for revision in chosen:
+                    if not revision.content.strip() or not safe_revision(revision.id):
+                        continue
+                    reference = {"moment_id": moment["id"], "revision_id": revision.id,
+                                 "sha256": fingerprint(bodies[revision.id])}
+                    if requested is not None and requested[revision.id] != reference:
+                        continue
+                    result.append({"reference": reference, "text": revision.content,
+                        "title": moment.get("title", ""), "role": revision.role,
+                        "captured_local": moment["captured"]["local_wall"]})
+            if requested is not None and {r["reference"]["revision_id"] for r in result} != set(requested):
+                raise ClosedDayError("text_changed", "Použitý text už není v povolených přijatých podkladech.")
+            return sorted(result, key=lambda r: (r["captured_local"] or "", r["reference"]["revision_id"]))
 
     def day_status(self, local_date: str, *, project_id: str | None = None):
         local_date = self._date(local_date)

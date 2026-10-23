@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-23 08:11 CEST — první krok zoomu lokálně dokončený, iPhone přejímka otevřená
+Aktualizováno: 2026-10-23 09:16 CEST — texty a komentáře lokálně implementované; funkční ověření otevřené
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,8 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-23 09:16 CEST: Texty a komentáře jsou lokálně implementované ve střižně: přijatý text do titulku nebo samostatné karty, poslech a vložení hlasu k záběru. Statická brána PASS; funkční render, automatické testy a Safari NEOVĚŘENO. Bez push/nasazení a produkčního renderu. Report FILM_TEXT_AUDIO_REPORT.md. Předchozí p+n obou commitů přes Lunu potvrzené; Míla potvrzuje, že zoom funguje a zatím stačí.
 
 - 2026-10-23 08:11 CEST: Zoom fotografie i videa je místně implementovaný: gesto dvěma prsty, skutečná aktuální hodnota a podporované volby 0,5×/1×/2×. Zadní kamera přednostně používá dostupný virtuální víceobjektivový přístroj, náhled začíná na 1×. Limity a měřítko se berou ze zařízení; 2× není slib optického teleobjektivu. Swift 79/79 PASS, arm64 Debug a Release 0.1.0 (20) PASS, nepodepsaná IPA ověřená. Instalace, fyzická přejímka, push a nasazení neprovedené. Další krok: aktualizace stejné aplikace přes SideStore a fyzické foto/video zkoušky podle CAMERA_ZOOM_REPORT.md; případné p+n pouze registrovanou Lunou.
 
@@ -3353,3 +3355,38 @@ Technický důkaz:
 - Osiřelý prázdný index.lock bez držitele byl přesunut do technického archivu
   v projektu, původní Git index zachován. Nesouvisející změna Xcode projektu
   zůstává mimo tento checkpoint; profilový sync vyžaduje čistý zdrojový main.
+
+## 2026-10-23 09:16 CEST — Texty a komentáře ve střižně
+
+Hotovo:
+- Lokální panel nabízí povolené přijaté texty deníku, jejich úpravu pro film,
+  vložení do titulku nebo samostatné časované karty. Hlas má poslech celého
+  zdroje / ruční výběr úseku a výslovné vložení od vybraného záběru.
+- Předchozí dva commity jsou přes Lunu pushnuté a nasazené do Cockpitu
+  (účtenka 698ae54bb9df52516cd35c2821f88f4c, plná brána 2174, smoke 5/5).
+  Míla následně potvrzuje funkčnost zoomu; podrobný telefonní protokol tím nevznikl.
+
+Rozhodnutí:
+- Míla schválil vývoj navrženého panelu. Žádný souhlas s novým p+n, přepisem
+  audia, generovanou řečí nebo změnou existujícího produkčního střihu.
+- Film pinuje přijatou textovou revizi; originály, deník i starší střihy
+  zůstávají neměnné, Jen pro mě a skryté zdroje mimo film.
+
+Další krok:
+- Funkčně ověřit uložení, soukromí, kartu a poslechovou kopii před publikováním.
+
+Navrhované další kroky:
+- Po samostatném p+n Lunou krátký vlastní náhled s titulkem, kartou a hlasem.
+- Chybějící konkrétní text sledovat od uložení v telefonu po přijetí na Macu;
+  bez čerstvé telefonní evidence nepřisuzovat chybu přenosu.
+
+Technický důkaz:
+- Statická brána --skip-unit-tests, py_compile, Node --check a diff --check PASS.
+- Read-only revize 5 dne 6. 10.: 25 záběrů, 5 hlasových nabídek, 0 zapnutých
+  hlasů a 0 přijatých textů. Archiv má 8 append_text / textových revizí;
+  povolené texty v 5 dnech. Jedna textová nabídka i přesná reference ověřené
+  čtením jiného existujícího dne bez uložení. Žádný produkční render nebo
+  přepis projektu; původní Xcode nastavení SHA-256 shodné.
+- Automatické testy a funkční render/Safari NEOVĚŘENO; nelze tvrdit provozní
+  opravu. Hlas je umístěný absolutním časem, po změně obrazu zkontrolovat.
+- Podrobnosti camino/docs/FILM_TEXT_AUDIO_REPORT.md; čtecí účtenky pouze private.
