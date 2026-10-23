@@ -60,7 +60,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md`; `../camino/README.md`; `../camino/film/README.md` — 2026-10-23 10:49 CEST: Dokumentace Camina a střižny odpovídá funkčnímu vydání d8d16f1b. Panel Texty a komentáře nasazený přes Lunu (účtenka 4b1ed8c23af048f133e00971d0ad1038, plná brána PASS / 2174 testů, smoke 5/5), HTTP znovu ověřené. Zoom Mílou obecně přijatý. Nové karty/poslechové kopie a Safari čekají na samostatnou funkční přejímku. Aktualizace návodů je samostatný dokumentační checkpoint pro již schválené p+n Lunou.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md`; `../camino/app/README.md` — 2026-10-23 12:22 CEST: Lokální podpis Xcode sjednocený přes ignorovaný LocalSigning.xcconfig; duplicitní tým mimo verzovaný projekt, skupina zachovaná. Debug/Release build settings potvrzují stejný tým a bundle ID. Následuje ověření přepnutí Camino–MMTX a oprava stavů p+n; celé vydání výslovně schválené Lunou.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md`; `technical/luna_release_orchestration.md` — 2026-10-20 22:23 CEST: výslovný vývoj vždy Lunou, před heuristikou pro nabídku. Centrální role gpt-6-luna/high, skutečná zkouška i první vícesouborový Camino/JS úkol převzaté; žádný Sol fallback. Běžící portál a stav p+n ověřit podle účtenky 92b4b7704c6503fb8b2ed300b600c7f9; fyzická přejímka portálu zůstává samostatná.
 

@@ -11,6 +11,15 @@ přesná nainstalovaná verze a všechny okrajové scénáře nejsou tímto
 potvrzením samostatně doložené. Podrobnosti a otevřené fyzické kontroly
 jsou v [reportu zoomu](../docs/CAMERA_ZOOM_REPORT.md).
 
+### Místní podpis při vývoji
+
+Osobní tým patří do ignorovaného `LocalSigning.xcconfig`, který načítá
+`Config.xcconfig` pro Debug i Release. Verzovaný projekt nemá vlastní
+přepis DEVELOPMENT_TEAM; tím zachová místní podpis a čistý main potřebný
+pro přepínání proudů Human–Adam. Změnu týmu prováděj v místním xcconfig;
+volba přímo v Xcode může vytvořit další přepis v projektu, který je třeba
+před další prací zkontrolovat. Osobní podpisové údaje necommituj.
+
 ### Foto a video se zoomem
 
 1. Vyber cestu a Moment; fotografii nebo video připoj ke správnému Momentu.

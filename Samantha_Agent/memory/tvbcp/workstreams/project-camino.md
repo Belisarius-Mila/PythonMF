@@ -4112,3 +4112,30 @@ Technický důkaz:
   účtenka; výsledek předchozího funkčního vydání jej nezastupuje.
 - Dokumentační kontrola: 11 Markdown souborů, 52 místních odkazů bez chyb;
   rychlá statická brána a diff --check PASS. Žádná funkční změna kódu.
+
+## 2026-10-23 12:22 CEST — Místní podpis Xcode bez blokování pracovních proudů
+
+Hotovo:
+- Verzovaný projekt už nemá dvě duplicitní hodnoty DEVELOPMENT_TEAM.
+  Debug i Release načítají stejný místní tým z ignorovaného LocalSigning.xcconfig.
+- Původní uspořádání Xcode skupiny se dvěma existujícími referencemi zachované;
+  celý původní soubor uložený pro obnovu jen v private. Žádný podpisový údaj
+  se nepřidává do Gitu, nevzniká nový build/IPA ani změna telefonních dat.
+
+Rozhodnutí:
+- Míla schválil vyřešení lokálního Xcode WIP a úpravu panelu p+n, následné
+  předání výsledných commitů registrované Luně. Bezpečnostní kontrola čistého
+  main pro přepínání proudů zůstává zachovaná.
+
+Další krok:
+- Po commitu zarovnat čisté profily a ověřit Camino → MMTX → Camino;
+  potom dokončit pravdivé stavy panelu p+n.
+
+Navrhované další kroky:
+- P+n celého opraveného balíčku Lunou a opakování přepnutí po nasazení.
+
+Technický důkaz:
+- Strukturální porovnání potvrdilo výhradně odstranění dvou duplicitních
+  nastavení; skupiny a reference zachované. xcodebuild -showBuildSettings
+  pro Debug i Release: místní tým účinný, bundle ID shodné. Původní lokální
+  xcconfig má shodný SHA-256. Účtenky pouze data/private/human_adam_switch_release_20261023/.

@@ -1215,6 +1215,8 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
 - Ověření: C04b potom získalo přesný profil, `codesign --verify` prošel a
   nové Camino 0.1.0 (1) se nainstalovalo a spustilo na iPhonu 14 Plus.
 
+- Doplnění 23102026: samotný LocalSigning.xcconfig nestačí, pokud target v project.pbxproj obsahuje duplicitní DEVELOPMENT_TEAM. Odstranit target override při zachování ostatního projektu; Debug i Release musí přes showBuildSettings potvrdit stejný účinný tým a bundle ID bez výpisu hodnot. Osobní konfigurace zůstává ignorovaná; zdrojový WIP jinak blokuje i přepnutí čistých profilů.
+
 ### LL-045 — Den bez sovího řádku nesmí znovu nasadit starý zdrojový zvuk
 
 - Problém: Pages workflow v den bez přesného CSV řádku nevytvořilo nové audio

@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-23 10:49 CEST — dokumentace po nasazení panelu; uživatelská přejímka otevřená
+Aktualizováno: 2026-10-23 12:22 CEST — místní Xcode konfigurace sjednocená; přepnutí a UI p+n navazují
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,8 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-23 12:22 CEST: Lokální podpis Xcode sjednocený přes ignorovaný LocalSigning.xcconfig; duplicitní tým mimo verzovaný projekt, skupina zachovaná. Debug/Release build settings potvrzují stejný tým a bundle ID. Následuje ověření přepnutí Camino–MMTX a oprava stavů p+n; celé vydání výslovně schválené Lunou.
 
 - 2026-10-23 10:49 CEST: Dokumentace Camina a střižny odpovídá funkčnímu vydání d8d16f1b. Panel Texty a komentáře nasazený přes Lunu (účtenka 4b1ed8c23af048f133e00971d0ad1038, plná brána PASS / 2174 testů, smoke 5/5), HTTP znovu ověřené. Zoom Mílou obecně přijatý. Nové karty/poslechové kopie a Safari čekají na samostatnou funkční přejímku. Aktualizace návodů je samostatný dokumentační checkpoint pro již schválené p+n Lunou.
 
@@ -3455,3 +3457,30 @@ Technický důkaz:
   účtenka; výsledek předchozího funkčního vydání jej nezastupuje.
 - Dokumentační kontrola: 11 Markdown souborů, 52 místních odkazů bez chyb;
   rychlá statická brána a diff --check PASS. Žádná funkční změna kódu.
+
+## 2026-10-23 12:22 CEST — Místní podpis Xcode bez blokování pracovních proudů
+
+Hotovo:
+- Verzovaný projekt už nemá dvě duplicitní hodnoty DEVELOPMENT_TEAM.
+  Debug i Release načítají stejný místní tým z ignorovaného LocalSigning.xcconfig.
+- Původní uspořádání Xcode skupiny se dvěma existujícími referencemi zachované;
+  celý původní soubor uložený pro obnovu jen v private. Žádný podpisový údaj
+  se nepřidává do Gitu, nevzniká nový build/IPA ani změna telefonních dat.
+
+Rozhodnutí:
+- Míla schválil vyřešení lokálního Xcode WIP a úpravu panelu p+n, následné
+  předání výsledných commitů registrované Luně. Bezpečnostní kontrola čistého
+  main pro přepínání proudů zůstává zachovaná.
+
+Další krok:
+- Po commitu zarovnat čisté profily a ověřit Camino → MMTX → Camino;
+  potom dokončit pravdivé stavy panelu p+n.
+
+Navrhované další kroky:
+- P+n celého opraveného balíčku Lunou a opakování přepnutí po nasazení.
+
+Technický důkaz:
+- Strukturální porovnání potvrdilo výhradně odstranění dvou duplicitních
+  nastavení; skupiny a reference zachované. xcodebuild -showBuildSettings
+  pro Debug i Release: místní tým účinný, bundle ID shodné. Původní lokální
+  xcconfig má shodný SHA-256. Účtenky pouze data/private/human_adam_switch_release_20261023/.
