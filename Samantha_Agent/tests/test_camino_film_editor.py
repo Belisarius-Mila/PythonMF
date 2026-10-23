@@ -655,6 +655,68 @@ class EditorTests(unittest.TestCase):
 
 @unittest.skipUnless(shutil.which("ffmpeg") and shutil.which("ffprobe") and FONT.is_file(), "Local FFmpeg and Czech font required")
 class RenderTests(unittest.TestCase):
+    def test_large_photo_full_frame_survives_both_output_profiles(self):
+        import io
+        from PIL import Image, ImageDraw, ImageCms
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as tmp:
+            root = Path(tmp); archive = root / 'archive'; archive.mkdir(mode=0o700)
+            f = ViewerFixture(archive)
+            with Image.new('RGB', (5918, 3860), 'lime') as photo:
+                draw = ImageDraw.Draw(photo)
+                draw.rectangle((0, 0, 400, 3859), fill='red')
+                draw.rectangle((5518, 0, 5917, 3859), fill='blue')
+                buffer = io.BytesIO()
+                photo.save(buffer, 'JPEG', icc_profile=ImageCms.ImageCmsProfile(ImageCms.createProfile('sRGB')).tobytes())
+            original = buffer.getvalue()
+            f.upload(30, 'photo', original)
+            store = MacFilmProjectStore(root / 'projects', metadata_db=f.store.path,
+                media_db=f.media.database_path, media_root=f.media.root, trip_id=f.trip.id)
+            pid = store.close_mac_day(f.day.local_date, confirmed=True)['project_id']
+            e = FilmEditor(store, day=f.day.local_date)
+            view = e.view()
+            view['draft']['shots'][0].update(in_ms=0, out_ms=1000, title='')
+            e.save({'project_id': pid, 'expected_revision': 1, 'request_id': str(uuid4()), 'draft': view['draft']})
+            for profile, dimensions, photo_size in [('preview', (1280, 720), (1104, 720)),
+                                                     ('final', (1920, 1080), (1656, 1080))]:
+                request = {'project_id': pid, 'revision': 2, 'request_id': str(uuid4()), 'profile': profile, 'range': None}
+                e.enqueue(request, background=False); e.run_queue(pid)
+                output = e.output(pid, request['request_id'])
+                data = probe(output)
+                video = next(s for s in data['streams'] if s['codec_type'] == 'video')
+                self.assertEqual((video['width'], video['height']), dimensions)
+                self.assertEqual(int(video['nb_frames']), 30)
+                receipt = json.loads((output.parent / 'receipt.json').read_text())
+                self.assertTrue(receipt['decoded_entire_file'])
+                with Image.open(output.parent / 'photo-0000.png') as working:
+                    self.assertEqual(working.size, photo_size)
+                    self.assertFalse(working.getexif())
+                frame = root / (profile + '.png')
+                ffmpeg(['-ss', '0.5', '-i', str(output), '-frames:v', '1', '-update', '1', str(frame)])
+                left = (dimensions[0] - photo_size[0]) // 2
+                with Image.open(frame) as decoded:
+                    self.assertLess(max(decoded.getpixel((left // 2, dimensions[1] // 2))[:3]), 15)
+                    self.assertGreater(decoded.getpixel((left + 20, dimensions[1] // 2))[0], 200)
+                    self.assertGreater(decoded.getpixel((dimensions[0] - left - 20, dimensions[1] // 2))[2], 200)
+            self.assertEqual((f.media.objects / (uid(30) + '.bin')).read_bytes(), original)
+
+    def test_video_dimension_and_hdr_guards_are_not_relaxed_for_large_photos(self):
+        from app.camino_film_render import render_edit
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); archive = root / 'archive'; archive.mkdir(mode=0o700)
+            f = ViewerFixture(archive)
+            f.upload(31, 'video', b'synthetic-video-for-preflight')
+            store = MacFilmProjectStore(root / 'projects', metadata_db=f.store.path,
+                media_db=f.media.database_path, media_root=f.media.root, trip_id=f.trip.id)
+            pid = store.close_mac_day(f.day.local_date, confirmed=True)['project_id']
+            e = FilmEditor(store, day=f.day.local_date)
+            folder, manifest = e.inputs(pid); edit = e.revision(folder, manifest)
+            for track in [{'codec_type': 'video', 'width': 4098, 'height': 100},
+                          {'codec_type': 'video', 'width': 1920, 'height': 1080, 'color_transfer': 'smpte2084'}]:
+                with self.subTest(track=track), patch('app.camino_film_render.probe', return_value={'streams': [track]}):
+                    with self.assertRaisesRegex(FilmError, 'SDR'):
+                        render_edit(edit, manifest, f.media.objects, root, 'preview', None,
+                                    progress=lambda _: None, revalidate=lambda: None)
+
     def test_full_source_preview_and_saved_trim_show_the_same_selected_frames(self):
         from PIL import Image
         with tempfile.TemporaryDirectory(dir="/private/tmp") as tmp:

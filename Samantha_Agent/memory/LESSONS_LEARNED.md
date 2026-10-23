@@ -200,6 +200,12 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
   zachovat celý rám a originál včetně dalších vrstev. Na výsledku ověřit
   i přesný počet snímků, nejen délku kontejneru. Syntetické dvouvrstvé
   MPO i skutečné 720p/1080p se všemi 25 záběry prošly.
+- Doplnění 23102026: rozlišení originálu fotografie není limit výstupního
+  videa. Platný JPEG 5918 × 3860 blokoval společný 4096px vstupní limit.
+  Sdílený dekodér připraví hlavní obraz do cílového rozměru (Lanczos, celý
+  rám, ICC/sRGB), při zachování limitů 64 MiB/64 Mpx/16384 px. Video/HDR
+  brány zůstávají. Ověřit i okraje a snímky obou profilů, ne pouze probe.
+  Skutečný originál a dosavadní střihy/jobs před/po hashově shodné.
 
 ### LL-062 — Konečná Mac sada potřebuje vlastní původ a read-only archiv
 

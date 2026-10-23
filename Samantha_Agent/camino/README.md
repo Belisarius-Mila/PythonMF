@@ -9,6 +9,10 @@ Nově lokálně dokončené kroky zobecnění na více cest/dovolených: datový
 a oddělení projektů, kroky 1–2. Nejde o vydání ani změnu živých dat.
 Rozsah a kompatibilita: [více projektů](docs/MULTI_PROJECT_FOUNDATION.md).
 
+Lokálně opravené zpracování velkých fotografií ve střižně: vstup nad 4096
+pixelů už neblokuje náhled a film, pokud splní bezpečné limity. Celý rám
+a originál zůstávají zachované; [ověření a hranice vydání](docs/LARGE_PHOTO_REPORT.md).
+
 - **iPhone:** fotografie i video mají zoom gestem dvěma prsty a podporované
   volby 0,5× / 1× / 2×. Míla potvrdil funkčnost a tento rozsah mu zatím stačí.
   Poslední připravený balíček je 0.1.0 (20); potvrzení nenahrazuje úplný

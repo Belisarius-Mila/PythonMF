@@ -30,6 +30,10 @@ není součástí editoru.
 - Záběry řaď šipkami Dříve/Později; výslovné vyřazení mění jen film.
 - U fotografie uprav délku a titulek. **Otevřít fotografii** zobrazí v nové
   kartě odvozený obraz bez původních EXIF/GPS; nevytváří se render záběru.
+  Lokální oprava větších fotografií přijímá vstupy do 64 Mpx/64 MiB a
+  zachovává celý rám. Náhled se přizpůsobí do 4096 × 4096; pracovní kopie
+  filmu do 720p/1080p s poměrem stran a případnými pruhy. Originál se nemění.
+  Nasazení této opravy je samostatné: [rozsah a ověření](../docs/LARGE_PHOTO_REPORT.md).
 - Video je výchozí celé. **Otevřít video pro střih** připraví chráněný náhled;
   vyber **Tady začít / Tady skončit**, případně dolaď číselné časy a použij
   **Přehrát výběr**. Tato volba nevyrábí nový filmový export.

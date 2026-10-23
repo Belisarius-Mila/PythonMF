@@ -88,6 +88,26 @@ class FilmPhotoHttpTests(unittest.TestCase):
                 self.assertEqual(json.loads(body)["message"], "Fotografie není dostupná.")
                 self.assertNotIn(str(self.editor.store.media.objects).encode(), body)
 
+    def test_large_photo_is_available_over_get_and_head(self):
+        buffer = io.BytesIO()
+        with Image.new('RGB', (5000, 100), (40, 100, 180)) as image:
+            image.save(buffer, 'JPEG')
+        original = buffer.getvalue()
+        self.fixture.upload(33, 'photo', original)
+        pid = self.editor.store.close_mac_day(self.fixture.day.local_date, confirmed=True)['project_id']
+        path = f'/api/camino/film/photo/{pid}/{uid(33)}'
+        status, headers, body = self.request('GET', path)
+        self.assertEqual(status, 200)
+        self.assertEqual(headers['Content-Type'], 'image/png')
+        self.assertIn('no-store', headers['Cache-Control'])
+        with Image.open(io.BytesIO(body)) as decoded:
+            self.assertEqual(decoded.size, (4096, 82))
+        status, head_headers, head_body = self.request('HEAD', path)
+        self.assertEqual(status, 200)
+        self.assertEqual(head_headers['Content-Length'], headers['Content-Length'])
+        self.assertEqual(head_body, b'')
+        self.assertEqual((self.fixture.media.objects / (uid(33) + '.bin')).read_bytes(), original)
+
     def test_privacy_revocation_blocks_subsequent_photo_requests(self):
         self.fixture.lock()
         status, _, body = self.request("GET", f"/api/camino/film/photo/{self.project_id}/{uid(30)}")

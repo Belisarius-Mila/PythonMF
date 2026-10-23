@@ -2,16 +2,16 @@
 from __future__ import annotations
 
 import math
-import io
 import os
 import shutil
 import subprocess
 import time
 from pathlib import Path
 
-from PIL import Image, ImageCms, ImageOps, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont
 
 from app.camino_film_editor import validate_draft, timeline_shots, TEXT_CARD_FIT_ERROR
+from app.camino_film_photo import PHOTO_VIEW_SIZE, decode_photo, read_photo
 from camino.film.media import FONT, binary, duration_ms, probe, title_image
 from camino.film.project import FilmError, digest, fingerprint, write_json
 from camino.film.render import DiskMeter, PROFILES
@@ -56,21 +56,7 @@ def window(draft, total, interval):
 
 def prepare_photo(source: Path, target: Path, size=None):
     """Decode the main SDR photo, not auxiliary MPO images; keep its complete frame."""
-    with Image.open(source) as image:
-        image.seek(0)
-        if max(image.size) > 4096:
-            raise FilmError("Fotografie přesahuje rozměrový limit 4096 pixelů.")
-        photo = ImageOps.exif_transpose(image).convert("RGB")
-        if image.info.get("icc_profile"):
-            try:
-                photo = ImageCms.profileToProfile(photo,
-                    ImageCms.ImageCmsProfile(io.BytesIO(image.info["icc_profile"])),
-                    ImageCms.createProfile("sRGB"), outputMode="RGB")
-            except (ImageCms.PyCMSError, OSError, ValueError) as error:
-                raise FilmError("Barevný profil fotografie nelze bezpečně převést do SDR.") from error
-        if size is not None:
-            photo.thumbnail(size, Image.Resampling.LANCZOS)
-        photo.info.clear()
+    with decode_photo(read_photo(source), size or PHOTO_VIEW_SIZE) as photo:
         with target.open("xb") as handle:
             photo.save(handle, "PNG")
     target.chmod(0o600)
@@ -168,10 +154,10 @@ def render_edit(edit, manifest, objects: Path, output: Path, profile, interval, 
         if len(streams) != 1:
             raise FilmError("Zdroj nemá jednoznačnou obrazovou nebo zvukovou stopu.")
         track = streams[0]
-        if kind == "video" and (max(track.get("width", 0), track.get("height", 0)) > 4096
+        if kind == "video" and ((source["media_kind"] != "photo" and max(track.get("width", 0), track.get("height", 0)) > 4096)
                 or track.get("color_transfer") in ("smpte2084", "arib-std-b67")
                 or track.get("color_primaries") == "bt2020"):
-            raise FilmError("Tato verze renderu vyžaduje SDR zdroje do 4096 pixelů; HDR se nepřevádí bez ověření.")
+            raise FilmError("Tato verze renderu vyžaduje SDR zdroje a video do 4096 pixelů; HDR se nepřevádí bez ověření.")
         if source["media_kind"] != "photo" and abs(duration_ms(data, kind) - source["duration_ms"]) > 60:
             raise FilmError("Skutečná délka média nesouhlasí s manifestem.")
         info[sid] = data

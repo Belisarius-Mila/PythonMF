@@ -16,9 +16,8 @@ from functools import lru_cache
 from pathlib import Path
 from uuid import UUID, uuid4
 
-from PIL import Image, ImageCms, ImageOps
-
 from app.camino_film_workshop import DAY, production_store
+from app.camino_film_photo import MAX_PHOTO_BYTES, decode_photo
 from app.file_persistence import FilePersistenceError, atomic_write_json
 from camino.film.closed_day import ClosedDayError, _private_directory, _store_lock
 from camino.film.project import FilmError, digest, fingerprint, write_json
@@ -179,7 +178,7 @@ class FilmEditor:
         if source is None:
             raise FilmError("Fotografie není v aktuálním projektu povolená.")
         size = source.get("byte_count")
-        if type(size) is not int or not 0 <= size <= 64 * 1024 * 1024:
+        if type(size) is not int or not 0 < size <= MAX_PHOTO_BYTES:
             raise FilmError("Fotografie překračuje povolený limit.")
         objects = Path(self.store.media.objects)
         if objects.is_symlink():
@@ -191,19 +190,10 @@ class FilmEditor:
                 info = os.fstat(handle.fileno())
                 if not stat.S_ISREG(info.st_mode) or info.st_size != size:
                     raise FilmError("Původní fotografie neodpovídá uzavřeným vstupům.")
-                original = handle.read(64 * 1024 * 1024 + 1)
+                original = handle.read(MAX_PHOTO_BYTES + 1)
             if len(original) != size or hashlib.sha256(original).hexdigest() != source.get("sha256"):
                 raise FilmError("Původní fotografie neodpovídá uzavřeným vstupům.")
-            with Image.open(io.BytesIO(original)) as image:
-                image.seek(0)
-                if max(image.size) > 4096:
-                    raise FilmError("Fotografie přesahuje rozměrový limit 4096 pixelů.")
-                photo = ImageOps.exif_transpose(image).convert("RGB")
-                if image.info.get("icc_profile"):
-                    photo = ImageCms.profileToProfile(photo,
-                        ImageCms.ImageCmsProfile(io.BytesIO(image.info["icc_profile"])),
-                        ImageCms.createProfile("sRGB"), outputMode="RGB")
-                photo.info.clear()
+            with decode_photo(original) as photo:
                 output = io.BytesIO()
                 photo.save(output, "PNG")
                 data = output.getvalue()

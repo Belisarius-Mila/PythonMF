@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from PIL import Image
+from PIL import Image, ImageCms
 from app.camino_film_editor import FilmEditor
 from app.camino_film_workshop import MacFilmProjectStore
 from tests.camino_viewer_fixture import ViewerFixture, uid
@@ -58,6 +58,32 @@ class FilmPhotoContractTests(unittest.TestCase):
                  for p in folder.rglob('*') if p.is_file()}
         self.assertEqual(before, after)
         self.assertFalse((folder / 'jobs').exists())
+
+    def test_large_sdr_photo_fits_preview_preserving_original_and_metadata_privacy(self):
+        exif = Image.Exif(); exif[270] = 'PRIVATE-LARGE-PHOTO'
+        buffer = io.BytesIO()
+        with Image.new('RGB', (5918, 3860), (40, 100, 180)) as image:
+            image.save(buffer, 'JPEG', exif=exif,
+                icc_profile=ImageCms.ImageCmsProfile(ImageCms.createProfile('sRGB')).tobytes())
+        original = buffer.getvalue()
+        self.fixture.upload(33, 'photo', original)
+        pid = self.store.close_mac_day(self.fixture.day.local_date, confirmed=True)['project_id']
+        data = self.method()(pid, uid(33))
+        with Image.open(io.BytesIO(data)) as decoded:
+            self.assertEqual(decoded.size, (4096, 2672))
+            self.assertFalse(decoded.getexif())
+            self.assertNotIn('icc_profile', decoded.info)
+        self.assertNotIn(b'PRIVATE-LARGE-PHOTO', data)
+        self.assertEqual((self.fixture.media.objects / (uid(33) + '.bin')).read_bytes(), original)
+        self.assertFalse((self.store.root / pid / 'jobs').exists())
+
+    def test_decoding_keeps_byte_pixel_and_edge_limits(self):
+        for setting, limit in [('MAX_PHOTO_BYTES', len(self.original) - 1),
+                               ('MAX_PHOTO_PIXELS', 5), ('MAX_PHOTO_EDGE', 2)]:
+            with self.subTest(setting=setting), patch('app.camino_film_photo.' + setting, limit):
+                with self.assertRaises(ValueError):
+                    self.method()(self.pid, uid(30))
+        self.assertEqual((self.fixture.media.objects / (uid(30) + '.bin')).read_bytes(), self.original)
 
     def test_foreign_private_nonphoto_and_malformed_ids_are_rejected(self):
         method = self.method()

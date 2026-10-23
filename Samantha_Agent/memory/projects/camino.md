@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-23 20:35 CEST — více projektů, kroky 1–2
+Aktualizováno: 2026-10-23 21:03 CEST — oprava větších fotografií ve střižně
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,8 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-23 21:03 CEST: Lokálně opravené velké fotografie v náhledu i filmu; pracovní kopie zachová celý rám a originál. Konkrétní zdroj dne 14. 10. prošel PNG a odděleným 1s QA v 720p/1080p, původní střihy/jobs shodné. 54 filmových + 18 gate testů a statická brána PASS. Bez p+n. Více projektů kroky 1–2 zůstávají dokončené lokálně; další vývoj krok 3.
 
 - 2026-10-23 20:35 CEST: Lokálně implementované kroky 1–2 zobecnění na více cest/dovolených. Stabilní Trip UUID, volitelné termíny a archivace jako revize; owner katalog, oddělení dat a zachované fronty. Swift 81 PASS, cíleně 57 Python PASS; plná brána 2180 PASS a iOS build PASS. Bez push, nasazení či instalace. Další krok 3: ovládání projektů.
 
@@ -3535,3 +3537,34 @@ Technický důkaz:
 - Živá služba, archiv, střihy ani iPhone se nemění. Fyzická přejímka nové
   verze NEOVĚŘENO. Neprovádět p+n ani instalaci bez odpovídajícího pokynu;
   samostatná služba Camino musí před novou operací umět project_details_v1.
+
+
+## 2026-10-23 21:03 CEST — Oprava větších fotografií ve střižně
+
+Hotovo:
+- Fotografie nad 4096 pixelů lze připravit pro náhled a film při omezeném
+  vstupu. Celý záběr, poměr stran a původní archiv zůstávají zachované.
+- Společný převod hlavního obrazu, orientace, ICC/sRGB a Lanczos pracovní
+  kopie; náhled do 4096, film dál 720p/1080p. Video a HDR ochrany zachované.
+- Konkrétní zdroj dne 14. 10. prošel PNG a odděleným 1s QA v obou profilech;
+  původní fotografie, uložené střihy a dosavadní exporty zůstaly shodné.
+
+Rozhodnutí:
+- Míla schválil opravu po vysvětlení přepočtu do rozlišení filmu. Žádná změna
+  rozlišení finálního profilu ani automatická úprava originálu.
+
+Další krok:
+- Samostatně schválené p+n registrovanou Lunou; potom finální export uložené
+  revize dne 14. 10. a jeho uživatelská přejímka.
+
+Navrhované další kroky:
+- Po vyřešení incidentu pokračovat krokem 3 více projektů (ovládání telefonu),
+  potom Viewer/Mac, střižna a fyzická přejímka celého toku.
+
+Technický důkaz:
+- 54 cílených filmových testů a 18 testů brány PASS, statická brána PASS.
+  Syntetický 5918 × 3860 obraz: oba výstupy, okraje/pruhy, 30 snímků, celé
+  dekódování; skutečný zdroj 720p/1080p QA PASS. Plný film čeká po vydání.
+- docs/LARGE_PHOTO_REPORT.md, soukromé důkazy data/private/camino_large_photo_20261023/.
+- Kód není nasazený; plná publikační brána až v samostatném p+n. Živá služba
+  Camino a telefon se nemění. Nový commit naváže na lokální kroky 1–2 více projektů.
