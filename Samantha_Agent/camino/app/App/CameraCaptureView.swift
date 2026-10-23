@@ -32,6 +32,7 @@ struct CameraCaptureView: View {
     @State private var silent = false
     @State private var lastAsset: LocalMediaAsset?
     @State private var leaveAfterFinish = false
+    @State private var pinchStartZoom: Double?
 
     private var kind: LocalMediaKind { model.selectedMediaKind }
     private var target: LocalMoment? {
@@ -97,6 +98,7 @@ struct CameraCaptureView: View {
         }
         .onDisappear { camera.shutdown() }
         .onChange(of: scenePhase) { _, phase in
+            pinchStartZoom = nil
             if phase == .active {
                 Task {
                     if camera.phase == .idle || camera.phase == .failed {
@@ -108,6 +110,10 @@ struct CameraCaptureView: View {
             } else {
                 camera.pauseForBackground()
             }
+        }
+        .onChange(of: camera.cameraPosition) { _, _ in pinchStartZoom = nil }
+        .onChange(of: camera.canAdjustZoom) { _, enabled in
+            if !enabled { pinchStartZoom = nil }
         }
         .onReceive(Timer.publish(every: 5, on: .main, in: .common).autoconnect()) { _ in
             if camera.phase == .recording && model.stopVideoForSafety() {
@@ -137,6 +143,13 @@ struct CameraCaptureView: View {
             .frame(height: 390)
             .background(.black)
             .clipShape(RoundedRectangle(cornerRadius: 18))
+            .gesture(MagnifyGesture(minimumScaleDelta: 0.01)
+                .onChanged { value in
+                    guard camera.canAdjustZoom else { return }
+                    if pinchStartZoom == nil { pinchStartZoom = camera.zoomFactor }
+                    camera.setZoom((pinchStartZoom ?? camera.zoomFactor) * Double(value.magnification))
+                }
+                .onEnded { _ in pinchStartZoom = nil })
             .overlay(alignment: .topLeading) {
                 if kind == .video {
                     Label(silent ? "Bez zvuku" : "Se zvukem",
@@ -147,11 +160,57 @@ struct CameraCaptureView: View {
                         .padding(12)
                 }
             }
+            .overlay(alignment: .bottom) { zoomControls }
+    }
+
+    private var zoomControls: some View {
+        HStack(spacing: 8) {
+            ForEach(camera.zoomPresets, id: \.self) { factor in
+                let selected = abs(camera.zoomFactor - factor) < 0.05
+                Button {
+                    pinchStartZoom = nil
+                    camera.setZoom(factor, animated: true)
+                } label: {
+                    Text(zoomLabel(factor)).font(.subheadline.bold())
+                        .frame(minWidth: 44, minHeight: 44)
+                        .background(selected ? Color.white : Color.black.opacity(0.65), in: Capsule())
+                        .foregroundStyle(selected ? Color.black : Color.white)
+                }
+                .buttonStyle(.plain)
+                .disabled(!camera.canAdjustZoom)
+                .accessibilityLabel("Přiblížení \(zoomLabel(factor))")
+                .accessibilityIdentifier("cameraZoomPreset\(Int(factor * 10))")
+            }
+            Spacer(minLength: 8)
+            Text(zoomLabel(camera.zoomFactor))
+                .font(.headline.monospacedDigit())
+                .foregroundStyle(.white)
+                .accessibilityLabel("Aktuální přiblížení")
+                .accessibilityValue(zoomLabel(camera.zoomFactor))
+                .accessibilityIdentifier("cameraZoomValue")
+                .accessibilityAdjustableAction { direction in
+                    switch direction {
+                    case .increment: camera.setZoom(camera.zoomFactor * 1.25, animated: true)
+                    case .decrement: camera.setZoom(camera.zoomFactor / 1.25, animated: true)
+                    @unknown default: break
+                    }
+                }
+        }
+        .padding(8)
+        .background(.black.opacity(0.65), in: Capsule())
+        .padding(12)
+    }
+
+    private func zoomLabel(_ factor: Double) -> String {
+        factor.formatted(.number.precision(.fractionLength(0...1))) + "×"
     }
 
     @ViewBuilder private var captureStatus: some View {
         Text(camera.message).font(.headline)
             .accessibilityIdentifier("cameraStatus")
+        if let zoomMessage = camera.zoomMessage {
+            Text(zoomMessage).font(.footnote).foregroundStyle(.orange)
+        }
         if let message = model.message {
             Text(message).font(.subheadline).foregroundStyle(.orange)
         }

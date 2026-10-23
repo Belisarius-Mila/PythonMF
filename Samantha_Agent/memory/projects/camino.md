@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-20 22:23 CEST — fotografické ovládání vyvinuté Lunou, stav vydání podle přesné účtenky
+Aktualizováno: 2026-10-23 08:11 CEST — první krok zoomu lokálně dokončený, iPhone přejímka otevřená
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,8 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-23 08:11 CEST: Zoom fotografie i videa je místně implementovaný: gesto dvěma prsty, skutečná aktuální hodnota a podporované volby 0,5×/1×/2×. Zadní kamera přednostně používá dostupný virtuální víceobjektivový přístroj, náhled začíná na 1×. Limity a měřítko se berou ze zařízení; 2× není slib optického teleobjektivu. Swift 79/79 PASS, arm64 Debug a Release 0.1.0 (20) PASS, nepodepsaná IPA ověřená. Instalace, fyzická přejímka, push a nasazení neprovedené. Další krok: aktualizace stejné aplikace přes SideStore a fyzické foto/video zkoušky podle CAMERA_ZOOM_REPORT.md; případné p+n pouze registrovanou Lunou.
 
 - 2026-10-20 22:23 CEST: Fotografie mají lokálně Otevřít fotografii v nové kartě a nemají renderovaný náhled záběru. Read-only PNG bez EXIF/GPS a bez diskové kopie; správné natočení/ICC, aktuální projekt/soukromí/hash a kontrola po dekódování. Video ovládání zachované. Funkční kód skutečně vytvořila Luna, Adam zkontroloval a převzal; opravil pouze citaci old, testové literály, úklid testserveru a složený frontendový otisk. Ověřit finální účtenku schváleného p+n 92b4b7704c6503fb8b2ed300b600c7f9 a živý audit. Při completed navázat fyzickou přejímkou fotografie v Cockpitu na Macu/iPhonu; p+n slepě neopakovat. Tento Git checkpoint zachycuje stav před vydáním; výsledek publikace/nasazení je v přesné účtence a logs/luna_photo_release_20261020.log.
 
@@ -3324,3 +3326,30 @@ Rozhodnutí: výslovný vývoj Lunou i pro více souborů a JavaScript; žádná
 Další krok: Ověřit finální účtenku schváleného p+n 92b4b7704c6503fb8b2ed300b600c7f9 a živý audit. Při completed navázat fyzickou přejímkou fotografie v Cockpitu na Macu/iPhonu; p+n slepě neopakovat. Tento Git checkpoint zachycuje stav před vydáním; výsledek publikace/nasazení je v přesné účtence a logs/luna_photo_release_20261020.log.
 Navrhované další kroky: pokračovat v již rozpracovaném střihu dne 8; vícedenní film zůstává pozdější samostatný krok.
 Technický důkaz: Skutečný model gpt-6-luna/high; původní job d67ea8e3a4c26b3c088fd33a821194e8, přijatá kontrola 393b9e1a2d6920d7ed27d41c74473cea, 4 původní FAIL → 4 PASS. Další modelový pokus neproběhl, původní odhad 0,161725 Standard, kontrola 0. Node PASS; integrační běh 69 testů, po opravě jediného fixture rozměru původních 68 PASS + konkrétní 1 PASS. Statická brána PASS. Důkazy logs/luna_photo_accepted_20261020.log, luna_photo_integration_tests_20261020.log, luna_photo_frontend_contract_final_20261020.log. Riziko: fyzická přejímka uživatelem zatím neprovedená; pozdější změna soukromí nebo vstupů obraz správně zablokuje.
+
+## 2026-10-23 08:11 CEST — První krok zoomu fotoaparátu
+
+Hotovo:
+- Zoom fotografie i videa je místně implementovaný: gesto dvěma prsty, skutečná aktuální hodnota a podporované volby 0,5×/1×/2×. Zadní kamera přednostně používá dostupný virtuální víceobjektivový přístroj, náhled začíná na 1×. Limity a měřítko se berou ze zařízení; 2× není slib optického teleobjektivu. Swift 79/79 PASS, arm64 Debug a Release 0.1.0 (20) PASS, nepodepsaná IPA ověřená. Instalace, fyzická přejímka, push a nasazení neprovedené. Další krok: aktualizace stejné aplikace přes SideStore a fyzické foto/video zkoušky podle CAMERA_ZOOM_REPORT.md; případné p+n pouze registrovanou Lunou.
+
+Rozhodnutí:
+- Míla schválil první krok: zoom gestem a rychlými volbami. Ostření dotykem,
+  expozice a blesk zůstávají mimo tento krok. Další p+n provádí Luna.
+
+Další krok:
+- Aktualizovat stejné Camino přes SideStore a fyzicky ověřit foto/video zoom,
+  zvuk, přední kameru a návrat z pozadí; aplikaci s daty neodinstalovávat.
+
+Navrhované další kroky:
+- Podle fyzické přejímky případná úzká oprava; případné p+n až samostatně
+  schválenou registrovanou cestou. Samotné serverové p+n neaktualizuje iPhone.
+
+Technický důkaz:
+- Pět nových testů měřítka a limitů; celá Swift sada 79/79 PASS. Arm64 iOS
+  Debug i Release build PASS. Release IPA 0.1.0 (20), stejné bundle ID,
+  ZIP/CRC a shoda kopie ve Stahování PASS. Telefonní hardware NEOVĚŘENO.
+- Report `camino/docs/CAMERA_ZOOM_REPORT.md`; logy a build receipt v
+  `data/private/camino_zoom_20261023/`. Žádná změna datového schématu ani synchronizačního kontraktu.
+- Osiřelý prázdný index.lock bez držitele byl přesunut do technického archivu
+  v projektu, původní Git index zachován. Nesouvisející změna Xcode projektu
+  zůstává mimo tento checkpoint; profilový sync vyžaduje čistý zdrojový main.

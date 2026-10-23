@@ -1,5 +1,46 @@
 import Foundation
 
+/// Converts a capture device's zoom into the familiar wide-angle = 1x scale.
+/// A virtual ultra-wide camera can report device 1x while displaying 0.5x.
+public struct LocalCameraZoomScale: Equatable, Sendable {
+    public let deviceRange: ClosedRange<Double>
+    public let displayMultiplier: Double
+
+    public init?(minimumDeviceFactor: Double, maximumDeviceFactor: Double,
+                 displayMultiplier: Double) {
+        guard minimumDeviceFactor.isFinite, maximumDeviceFactor.isFinite,
+              displayMultiplier.isFinite, minimumDeviceFactor > 0,
+              maximumDeviceFactor >= minimumDeviceFactor, displayMultiplier > 0,
+              (minimumDeviceFactor * displayMultiplier).isFinite,
+              (maximumDeviceFactor * displayMultiplier).isFinite,
+              minimumDeviceFactor * displayMultiplier > 0 else { return nil }
+        deviceRange = minimumDeviceFactor...maximumDeviceFactor
+        self.displayMultiplier = displayMultiplier
+    }
+
+    public var displayRange: ClosedRange<Double> {
+        (deviceRange.lowerBound * displayMultiplier)...(deviceRange.upperBound * displayMultiplier)
+    }
+
+    public var presets: [Double] {
+        [0.5, 1, 2].filter {
+            $0 >= displayRange.lowerBound - 0.000001 &&
+            $0 <= displayRange.upperBound + 0.000001
+        }
+    }
+
+    public func deviceFactor(forDisplayFactor factor: Double) -> Double? {
+        guard factor.isFinite else { return nil }
+        let displayed = min(max(factor, displayRange.lowerBound), displayRange.upperBound)
+        return min(max(displayed / displayMultiplier, deviceRange.lowerBound), deviceRange.upperBound)
+    }
+
+    public func displayFactor(forDeviceFactor factor: Double) -> Double? {
+        guard factor.isFinite else { return nil }
+        return min(max(factor, deviceRange.lowerBound), deviceRange.upperBound) * displayMultiplier
+    }
+}
+
 public enum LocalPrivacy: String, Codable, Sendable, CaseIterable {
     case ownerOnly = "owner_only"
     case diary

@@ -33,6 +33,10 @@ private final class CameraSessionBox: @unchecked Sendable {
     @Published private(set) var message = "Kamera se připravuje"
     @Published private(set) var recordedSeconds: Double = 0
     @Published private(set) var cameraPosition: AVCaptureDevice.Position = .back
+    @Published private(set) var zoomFactor: Double = 1
+    @Published private(set) var zoomPresets: [Double] = []
+    @Published private(set) var zoomRange: ClosedRange<Double> = 1...1
+    @Published private(set) var zoomMessage: String?
 
     private let hardware = CameraSessionBox()
     private let photoOutput = AVCapturePhotoOutput()
@@ -46,11 +50,16 @@ private final class CameraSessionBox: @unchecked Sendable {
     private var interrupted = false
     private var soundRequested = true
     private var pendingMovieURL: URL?
+    private var zoomObservations: [NSKeyValueObservation] = []
 
     var onPhoto: ((Data?, String?) -> Void)?
     var onMovie: ((URL, Bool, String?) -> Void)?
     var session: AVCaptureSession { hardware.session }
     var canCapture: Bool { phase == .ready && session.isRunning }
+    var canAdjustZoom: Bool {
+        (phase == .ready || phase == .recording) && session.isRunning &&
+        zoomRange.lowerBound < zoomRange.upperBound
+    }
     var isBusy: Bool { [.capturing, .starting, .recording, .finishing, .saving].contains(phase) }
 
     override init() {
@@ -122,6 +131,7 @@ private final class CameraSessionBox: @unchecked Sendable {
                 movieOutput.movieFragmentInterval = CMTime(seconds: 2, preferredTimescale: 600)
             }
             session.commitConfiguration()
+            configureZoom()
             if let device = videoInput?.device {
                 rotationCoordinator = AVCaptureDevice.RotationCoordinator(
                     device: device, previewLayer: previewLayer)
@@ -143,6 +153,7 @@ private final class CameraSessionBox: @unchecked Sendable {
         await hardware.stop()
         do {
             try configureVideoInput(position: cameraPosition == .back ? .front : .back)
+            configureZoom()
             if let device = videoInput?.device {
                 rotationCoordinator = AVCaptureDevice.RotationCoordinator(
                     device: device, previewLayer: previewLayer)
@@ -165,6 +176,29 @@ private final class CameraSessionBox: @unchecked Sendable {
         let settings = AVCapturePhotoSettings(format: [AVVideoCodecKey: AVVideoCodecType.jpeg])
         settings.photoQualityPrioritization = .balanced
         photoOutput.capturePhoto(with: settings, delegate: self)
+    }
+
+    /// Changes the captured image, without stopping the session or the movie.
+    func setZoom(_ factor: Double, animated: Bool = false) {
+        guard canAdjustZoom, factor.isFinite, let device = videoInput?.device else { return }
+        do {
+            try device.lockForConfiguration()
+            defer { device.unlockForConfiguration() }
+            // Re-read dynamic limits while holding the configuration lock.
+            guard let scale = zoomScale(for: device),
+                  let target = scale.deviceFactor(forDisplayFactor: factor) else { return }
+            device.cancelVideoZoomRamp()
+            if animated {
+                device.ramp(toVideoZoomFactor: CGFloat(target), withRate: 3)
+            } else {
+                device.videoZoomFactor = CGFloat(target)
+            }
+            zoomMessage = nil
+            refreshZoomState()
+        } catch {
+            // A zoom error must not stop a recording or change its audio mode.
+            zoomMessage = "Přiblížení teď nelze změnit."
+        }
     }
 
     /// Checks the requested audio path before the caller writes a video intent.
@@ -198,6 +232,7 @@ private final class CameraSessionBox: @unchecked Sendable {
             audioInput = input
         }
         session.commitConfiguration()
+        refreshZoomState()
         await hardware.start()
         guard session.isRunning else {
             phase = .failed
@@ -242,6 +277,7 @@ private final class CameraSessionBox: @unchecked Sendable {
     func resumePreview() async {
         guard phase == .ready else { return }
         await hardware.start()
+        refreshZoomState()
         if !session.isRunning {
             phase = .failed
             message = "Náhled kamery nelze obnovit. Záznam se nespustil."
@@ -255,26 +291,36 @@ private final class CameraSessionBox: @unchecked Sendable {
 
     func shutdown() {
         if [.starting, .recording].contains(phase) { stopMovie(interrupted: true) }
+        zoomObservations.removeAll()
         Task { await hardware.stop() }
     }
 
     private func configureVideoInput(position: AVCaptureDevice.Position) throws {
-        guard let device = AVCaptureDevice.default(.builtInWideAngleCamera,
-                                                    for: .video, position: position) else {
-            throw LocalStoreError.invalidMedia
-        }
-        let input = try AVCaptureDeviceInput(device: device)
         let session = hardware.session
         session.beginConfiguration()
-        if let videoInput { session.removeInput(videoInput) }
-        guard session.canAddInput(input) else {
+        let previous = videoInput
+        if let previous { session.removeInput(previous) }
+        let types: [AVCaptureDevice.DeviceType] = position == .back
+            ? [.builtInTripleCamera, .builtInDualWideCamera, .builtInDualCamera, .builtInWideAngleCamera]
+            : [.builtInWideAngleCamera]
+        var selected: AVCaptureDeviceInput?
+        for type in types {
+            guard let device = AVCaptureDevice.default(type, for: .video, position: position),
+                  let candidate = try? AVCaptureDeviceInput(device: device),
+                  session.canAddInput(candidate) else { continue }
+            session.addInput(candidate)
+            selected = candidate
+            break
+        }
+        guard let input = selected else {
+            if let previous, session.canAddInput(previous) { session.addInput(previous) }
             session.commitConfiguration()
             throw LocalStoreError.invalidMedia
         }
-        session.addInput(input)
         session.commitConfiguration()
         videoInput = input
         cameraPosition = position
+        let device = input.device
         if mode == .video {
             try device.lockForConfiguration()
             defer { device.unlockForConfiguration() }
@@ -288,6 +334,65 @@ private final class CameraSessionBox: @unchecked Sendable {
                 device.activeColorSpace = .sRGB
             }
         }
+    }
+
+    private func zoomScale(for device: AVCaptureDevice) -> LocalCameraZoomScale? {
+        let multiplier: Double
+        if #available(iOS 18.0, *) {
+            multiplier = Double(device.displayVideoZoomFactorMultiplier)
+        } else if device.deviceType == .builtInTripleCamera || device.deviceType == .builtInDualWideCamera,
+                  let wideAngleFactor = device.virtualDeviceSwitchOverVideoZoomFactors.first?.doubleValue,
+                  wideAngleFactor.isFinite, wideAngleFactor > 0 {
+            multiplier = 1 / wideAngleFactor
+        } else {
+            multiplier = 1
+        }
+        return LocalCameraZoomScale(minimumDeviceFactor: Double(device.minAvailableVideoZoomFactor),
+                                    maximumDeviceFactor: Double(device.maxAvailableVideoZoomFactor),
+                                    displayMultiplier: multiplier)
+    }
+
+    private func configureZoom() {
+        zoomObservations.removeAll()
+        zoomMessage = nil
+        guard let device = videoInput?.device else {
+            refreshZoomState()
+            return
+        }
+        var paths: [KeyPath<AVCaptureDevice, CGFloat>] = [\.videoZoomFactor,
+            \.minAvailableVideoZoomFactor, \.maxAvailableVideoZoomFactor]
+        if #available(iOS 18.0, *) { paths.append(\.displayVideoZoomFactorMultiplier) }
+        zoomObservations = paths.map { path in
+            device.observe(path, options: [.new]) { [weak self] _, _ in
+                Task { @MainActor [weak self] in self?.refreshZoomState() }
+            }
+        }
+        do {
+            try device.lockForConfiguration()
+            defer { device.unlockForConfiguration() }
+            device.cancelVideoZoomRamp()
+            // Start at the normal wide-angle view, including virtual cameras.
+            if let scale = zoomScale(for: device),
+               let normal = scale.deviceFactor(forDisplayFactor: 1) {
+                device.videoZoomFactor = CGFloat(normal)
+            }
+        } catch {
+            zoomMessage = "Výchozí přiblížení se nepodařilo nastavit."
+        }
+        refreshZoomState()
+    }
+
+    private func refreshZoomState() {
+        guard let device = videoInput?.device, let scale = zoomScale(for: device) else {
+            zoomFactor = 1
+            zoomRange = 1...1
+            zoomPresets = []
+            return
+        }
+        zoomRange = scale.displayRange
+        zoomPresets = scale.presets
+        zoomFactor = scale.displayFactor(forDeviceFactor: Double(device.videoZoomFactor))
+            ?? scale.displayRange.lowerBound
     }
 
     private func applyRotation() {
