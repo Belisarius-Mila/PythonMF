@@ -39,6 +39,8 @@ def archive_evidence(state: dict) -> dict:
     try:
         if db.execute("PRAGMA quick_check").fetchall() != [("ok",)]:
             raise ValueError("metadata integrity failed")
+        if db.execute("PRAGMA foreign_key_check").fetchall():
+            raise ValueError("metadata ownership references are invalid")
         identity = db.execute("SELECT server_id,epoch,cursor,writer_device_id FROM meta WHERE singleton=1").fetchone()
         trip_rows = db.execute("SELECT DISTINCT trip_id FROM moments").fetchall()
         trips = db.execute("SELECT id,body FROM trips ORDER BY id").fetchall()
@@ -48,8 +50,10 @@ def archive_evidence(state: dict) -> dict:
                 raise ValueError("exactly one selected trip required; explicit selection needed")
         else:
             service.RevisionStore._uuid(selected)
-            if selected not in {row[0] for row in trips} or any(row[0] != selected for row in trip_rows):
-                raise ValueError("configured trip is missing or another trip contains Moments")
+            if selected not in {row[0] for row in trips}:
+                raise ValueError("configured Viewer trip is missing")
+        # Selection scopes the legacy Viewer, never the whole owner archive.
+        # Preserve and hash all other projects, including populated ones.
         flags = db.execute("SELECT exports_blocked,reconciliation_required FROM meta WHERE singleton=1").fetchone()
         result = {"operations": db.execute("SELECT COUNT(*) FROM accepted_operations").fetchone()[0],
                   "moments": db.execute("SELECT COUNT(*) FROM moments").fetchone()[0],

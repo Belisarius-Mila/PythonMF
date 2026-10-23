@@ -22,7 +22,7 @@ from camino.domain.revision_store import RevisionStore, StoreConflict, StoreNotF
 MAX_REQUEST_BYTES = 1_048_576
 KINDS = frozenset({
     "create_trip", "create_day", "create_moment", "create_asset",
-    "update_metadata", "append_text", "create_audio_layout", "set_trip_title",
+    "update_metadata", "append_text", "create_audio_layout", "set_trip_title", "set_project_details",
 })
 
 
@@ -104,6 +104,12 @@ class CaminoV1Contract:
                 return self._error(404, "not_found", "route is unknown")
             if method == "GET" and path == "/api/v1/state" and not parsed_target.query:
                 return ApiResponse(200, self.store.state())
+            if method == "GET" and path == "/api/v1/projects" and not parsed_target.query:
+                return ApiResponse(200, {"contract_version": 1, "projects": self.store.projects()})
+            project_match = re.fullmatch(r"/api/v1/projects/([0-9a-f-]{36})", path)
+            if method == "GET" and project_match and not parsed_target.query:
+                return ApiResponse(200, {"contract_version": 1,
+                    "project": self.store.projects(_uuid(project_match.group(1)))[0]})
             if method == "GET" and path == "/api/v1/changes":
                 query = parse_qs(parsed_target.query, strict_parsing=True)
                 if set(query) != {"epoch", "cursor"} or any(len(values) != 1 for values in query.values()):

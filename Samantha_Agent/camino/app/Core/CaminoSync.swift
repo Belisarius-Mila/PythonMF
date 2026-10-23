@@ -839,6 +839,10 @@ public struct CaminoSyncJournal: Codable, Equatable, Sendable {
     }
 
     public func requireTitleSupport(serverFeatures: [String]?) throws {
+        if metadata.contains(where: { $0.phase != .accepted && $0.kind == "set_project_details" }),
+           serverFeatures?.contains("project_details_v1") != true {
+            throw CaminoSyncError.serverConflict("project_details_server_upgrade_required")
+        }
         if metadata.contains(where: { $0.phase != .accepted && $0.kind == "set_trip_title" }),
            serverFeatures?.contains("trip_title_v1") != true {
             throw CaminoSyncError.serverConflict("trip_title_server_upgrade_required")
@@ -1058,6 +1062,20 @@ public struct CaminoSyncDiscovery: Sendable {
                 media: [CaminoSyncMediaItem],
                 audioLayouts: [CaminoSyncAudioLayout] = [],
                 importedAssetIDs: Set<UUID> = []) throws {
+        // Never build a partial or ambiguous inventory using the current selection.
+        // All ownership follows stable Trip -> Day -> Moment -> Asset identities.
+        let tripIDs = Set(trips.map(\.id)), momentIDs = Set(moments.map { $0.moment.id })
+        let dayKeys = days.map { "\($0.tripID.uuidString.lowercased())|\($0.localDate)" }
+        guard tripIDs.count == trips.count, Set(days.map(\.id)).count == days.count,
+              Set(dayKeys).count == days.count, momentIDs.count == moments.count,
+              Set(media.map(\.id)).count == media.count,
+              Set(audioLayouts.map(\.clipID)).count == audioLayouts.count,
+              days.allSatisfy({ tripIDs.contains($0.tripID) }),
+              moments.allSatisfy({ tripIDs.contains($0.moment.tripID) }),
+              media.allSatisfy({ momentIDs.contains($0.momentID) }),
+              audioLayouts.allSatisfy({ momentIDs.contains($0.momentID) }) else {
+            throw CaminoSyncError.incompleteLocalInventory
+        }
         let dayByTripAndDate = Dictionary(uniqueKeysWithValues: days.map {
             ("\($0.tripID.uuidString.lowercased())|\($0.localDate)", $0)
         })
@@ -1077,6 +1095,16 @@ public struct CaminoSyncDiscovery: Sendable {
                     kind: "set_trip_title", objectID: trip.id,
                     expectedRevision: index + 1,
                     payload: ["trip_id": trip.id.uuidString.lowercased(), "title": change.title]))
+            }
+            for (index, change) in trip.detailsChanges.enumerated() {
+                guard change.details.valid else { throw CaminoSyncError.incompleteLocalInventory }
+                drafts.append(try Self.item(
+                    id: change.id, key: "project-details:\(change.id)", kind: "set_project_details", objectID: trip.id,
+                    expectedRevision: index + 1,
+                    payload: ["trip_id": trip.id.uuidString.lowercased(),
+                              "start_date": change.details.startDate.map { $0 as Any } ?? NSNull(),
+                              "end_date": change.details.endDate.map { $0 as Any } ?? NSNull(),
+                              "status": change.details.status.rawValue]))
             }
         }
         for day in days.sorted(by: { $0.localDate == $1.localDate

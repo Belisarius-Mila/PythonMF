@@ -373,11 +373,13 @@ class CaminoC03bContractTests(unittest.TestCase):
             "/api/v1/state", "/api/v1/operations", "/api/v1/changes",
             "/api/v1/moments/{moment_id}", "/api/v1/moments/{moment_id}/text",
             "/api/v1/reconcile",
+            "/api/v1/projects", "/api/v1/projects/{trip_id}",
         })
         self.assertEqual(set(spec["components"]["schemas"]["OperationEnvelope"]
                              ["properties"]["kind"]["enum"]), {
             "create_trip", "create_day", "create_moment", "create_asset",
             "update_metadata", "append_text", "create_audio_layout",
+            "set_trip_title", "set_project_details",
         })
         self.assertEqual(spec["security"], [{"ownerBearer": []}])
 

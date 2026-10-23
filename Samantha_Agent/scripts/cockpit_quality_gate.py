@@ -276,6 +276,7 @@ TEST_MODULES = (
     "tests.test_camino_service_network",
     "tests.test_camino_recovery",
     "tests.test_camino_c03b_contract",
+    "tests.test_camino_projects",
     "tests.test_camino_c05a_media_store",
     "tests.test_camino_c05a_loopback_smoke",
     "tests.test_camino_c02b_t043_control",

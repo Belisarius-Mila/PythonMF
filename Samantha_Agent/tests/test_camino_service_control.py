@@ -313,11 +313,17 @@ class CaminoServiceTests(unittest.TestCase):
             preparation.archive_evidence(self.preparation_state())
 
     def test_archive_audit_does_not_guess_between_two_populated_trips(self):
-        with self.f.store._connection() as db:
-            db.execute("INSERT INTO trips VALUES (?,?)", (uid(80), "{}"))
-            db.execute("UPDATE moments SET trip_id=? WHERE id=?", (uid(80), self.f.private.id))
+        self.f.send("create_trip", {**wire(self.f.trip), "id": uid(80), "name": "Second synthetic trip"})
+        self.f.send("create_day", {**wire(self.f.day), "id": uid(81), "trip_id": uid(80)})
+        self.f.send("create_moment", {**wire(self.f.public), "id": uid(82), "trip_id": uid(80), "day_id": uid(81)})
+        state = self.preparation_state()
+        state.pop("trip_id")
         with self.assertRaises(ValueError):
-            preparation.archive_evidence(self.preparation_state())
+            preparation.archive_evidence(state)
+        before = self.f.store.path.read_bytes()
+        evidence = preparation.archive_evidence(self.preparation_state())
+        self.assertEqual(evidence["trips"], 2)
+        self.assertEqual(self.f.store.path.read_bytes(), before)
 
     def test_archive_audit_preserves_empty_trips_only_with_explicit_valid_selection(self):
         self.f.send("create_trip", {**wire(self.f.trip), "id": uid(80), "name": "Empty synthetic trip"})
@@ -329,9 +335,9 @@ class CaminoServiceTests(unittest.TestCase):
         state.pop("trip_id")
         with self.assertRaises(ValueError):
             preparation.archive_evidence(state)
-        for selected in (uid(999), uid(80)):
-            with self.assertRaises(ValueError):
-                preparation.archive_evidence({**state, "trip_id": selected})
+        with self.assertRaises(ValueError):
+            preparation.archive_evidence({**state, "trip_id": uid(999)})
+        self.assertEqual(preparation.archive_evidence({**state, "trip_id": uid(80)})["trips"], 2)
         with self.f.store._connection() as db:
             db.execute("UPDATE trips SET body=? WHERE id=?", ('{}', uid(80)))
         self.assertNotEqual(preparation.archive_evidence(self.preparation_state())["trips_sha256"],

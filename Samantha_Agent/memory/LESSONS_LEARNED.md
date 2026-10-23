@@ -1411,3 +1411,18 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
   porovnat před/po. Bez výběru zůstává požadavek jediné cesty.
 - Ověření: sada služby 25/25 PASS; prázdné cesty zůstaly, neznámý výběr
   nebo jiná naplněná cesta byly odmítnuty, změna otisku byla rozpoznána.
+
+
+### 2026-10-23 — Vybraný Viewer projekt není celý owner archiv
+
+- Kontext: zobecnění Camina na souběžné cesty a dovolené.
+- Problém: původní kontrola upgradu odmítala další naplněné cesty, i když
+  jednoznačné trip_id pouze vybíralo dosavadní Viewer. Přepnutí telefonu
+  přitom nesmí přesměrovat již připravené přenosy.
+- Řešení: zachovat identity a přesné fronty; metadata projektu vést samostatně
+  v revizích. Explicitní výběr Vieweru kontrolovat jako existující cestu,
+  celý owner archiv včetně dalších projektů kontrolovat a hashovat společně.
+  Bez explicitního výběru se při více cestách dál nehádá.
+- Ověření: skutečný Swift dvouprojektový fixture → API/MediaStore, dokončení
+  rozpracovaného uploadu po přepnutí a restartu, původní bajty/identity i
+  oddělené Viewer granty PASS. Čtecí kontrola archivu zachovala oba projekty.

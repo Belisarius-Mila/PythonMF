@@ -94,6 +94,71 @@
           "503": { "$ref": "#/components/responses/Error" }
         }
       }
+    },
+    "/api/v1/projects": {
+      "get": {
+        "operationId": "listProjects",
+        "summary": "Read private owner project metadata",
+        "responses": {
+          "200": {
+            "description": "Accepted project metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectCatalog"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{trip_id}": {
+      "get": {
+        "operationId": "readProject",
+        "summary": "Read private owner project metadata",
+        "responses": {
+          "200": {
+            "description": "Accepted project metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "parameters": [
+          {
+            "name": "trip_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -126,7 +191,7 @@
           "operation_id": { "type": "string", "format": "uuid" },
           "device_id": { "type": "string", "format": "uuid" },
           "device_sequence": { "type": "integer", "minimum": 1 },
-          "kind": { "enum": ["create_trip", "create_day", "create_moment", "create_asset", "update_metadata", "append_text", "create_audio_layout"] },
+          "kind": { "enum": ["create_trip", "create_day", "create_moment", "create_asset", "update_metadata", "append_text", "create_audio_layout", "set_trip_title", "set_project_details"] },
           "expected_revision": { "oneOf": [{ "type": "integer", "minimum": 1 }, { "type": "null" }] },
           "payload": { "type": "object" }
         },
@@ -137,7 +202,47 @@
           { "if": { "properties": { "kind": { "const": "create_asset" } } }, "then": { "properties": { "expected_revision": { "type": "null" }, "payload": { "$ref": "#/components/schemas/Asset" } } } },
           { "if": { "properties": { "kind": { "const": "create_audio_layout" } } }, "then": { "properties": { "expected_revision": { "type": "null" }, "payload": { "$ref": "#/components/schemas/AudioLayout" } } } },
           { "if": { "properties": { "kind": { "const": "update_metadata" } } }, "then": { "properties": { "expected_revision": { "type": "integer", "minimum": 1 }, "payload": { "$ref": "#/components/schemas/MetadataPayload" } } } },
-          { "if": { "properties": { "kind": { "const": "append_text" } } }, "then": { "properties": { "expected_revision": { "type": "integer", "minimum": 1 }, "payload": { "$ref": "#/components/schemas/TextRevision" } } } }
+          { "if": { "properties": { "kind": { "const": "append_text" } } }, "then": { "properties": { "expected_revision": { "type": "integer", "minimum": 1 }, "payload": { "$ref": "#/components/schemas/TextRevision" } } } },
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "set_trip_title"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "expected_revision": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "payload": {
+                  "$ref": "#/components/schemas/TripTitlePayload"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "set_project_details"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "expected_revision": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "payload": {
+                  "$ref": "#/components/schemas/ProjectDetailsPayload"
+                }
+              }
+            }
+          }
         ]
       },
       "AudioLayout": {
@@ -352,6 +457,165 @@
             "code": { "type": "string" }, "message": { "type": "string" },
             "current_revision": { "type": "integer", "minimum": 1 }
           } }
+        }
+      },
+      "ProjectDetailsPayload": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "trip_id",
+          "start_date",
+          "end_date",
+          "status"
+        ],
+        "properties": {
+          "trip_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "start_date": {
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "end_date": {
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "enum": [
+              "active",
+              "archived"
+            ]
+          }
+        }
+      },
+      "TripTitlePayload": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "trip_id",
+          "title"
+        ],
+        "properties": {
+          "trip_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          }
+        }
+      },
+      "ProjectSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "language",
+          "start_date",
+          "end_date",
+          "status",
+          "details_revision",
+          "viewer_enabled"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "language": {
+            "type": "string"
+          },
+          "start_date": {
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "end_date": {
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "enum": [
+              "active",
+              "archived"
+            ]
+          },
+          "details_revision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "viewer_enabled": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ProjectCatalog": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "contract_version",
+          "projects"
+        ],
+        "properties": {
+          "contract_version": {
+            "const": 1
+          },
+          "projects": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProjectSummary"
+            }
+          }
+        }
+      },
+      "ProjectResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "contract_version",
+          "project"
+        ],
+        "properties": {
+          "contract_version": {
+            "const": 1
+          },
+          "project": {
+            "$ref": "#/components/schemas/ProjectSummary"
+          }
         }
       }
     }

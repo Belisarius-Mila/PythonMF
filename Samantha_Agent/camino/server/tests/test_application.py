@@ -65,6 +65,20 @@ class CaminoC05aFastAPITests(unittest.IsolatedAsyncioTestCase):
         async with httpx.AsyncClient(transport=transport, base_url="https://camino.test") as client:
             return await client.request(method, path, **kwargs)
 
+    async def test_project_catalog_is_owner_only_and_defaults_to_existing_trip(self):
+        path = "/api/v1/projects"
+        self.assertEqual((await self.request("GET", path)).status_code, 401)
+        response = await self.request("GET", path, headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+        project = response.json()["projects"][0]
+        self.assertEqual(project["id"], uid(1))
+        self.assertEqual(project["status"], "active")
+        self.assertIsNone(project["end_date"])
+        detail = await self.request("GET", path + "/" + uid(1), headers=self.headers)
+        self.assertEqual(detail.json()["project"], project)
+        state = await self.request("GET", "/api/v1/state", headers=self.headers)
+        self.assertIn("project_details_v1", state.json()["features"])
+
     async def test_closed_day_requires_phone_inventory_and_verified_private_originals(self):
         video = b"synthetic-video-bytes"
         private_audio = b"synthetic-private-audio"

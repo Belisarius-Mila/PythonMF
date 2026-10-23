@@ -176,6 +176,24 @@ class Trip:
 
 
 @dataclass(frozen=True, slots=True)
+class ProjectDetails:
+    """Mutable project metadata, separate from immutable Trip creation/selection."""
+
+    start_date: str | None = None
+    end_date: str | None = None
+    status: str = "active"
+
+    def __post_init__(self) -> None:
+        if self.status not in ("active", "archived"):
+            raise ContractError("project status must be active or archived")
+        for value in (self.start_date, self.end_date):
+            if value is not None:
+                _day(value)
+        if self.start_date is not None and self.end_date is not None and self.end_date < self.start_date:
+            raise ContractError("project end date precedes start date")
+
+
+@dataclass(frozen=True, slots=True)
 class JourneyDay:
     id: str
     trip_id: str

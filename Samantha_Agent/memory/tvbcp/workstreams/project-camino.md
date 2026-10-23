@@ -1,6 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-23 20:35 CEST: Lokálně implementované kroky 1–2 zobecnění na více cest/dovolených. Stabilní Trip UUID, volitelné termíny a archivace jako revize; owner katalog, oddělení dat a zachované fronty. Swift 81 PASS, cíleně 57 Python PASS; plná brána 2180 PASS a iOS build PASS. Bez push, nasazení či instalace. Další krok 3: ovládání projektů.
+
 - 2026-10-20 22:23 CEST: Fotografie mají lokálně Otevřít fotografii v nové kartě a nemají renderovaný náhled záběru. Read-only PNG bez EXIF/GPS a bez diskové kopie; správné natočení/ICC, aktuální projekt/soukromí/hash a kontrola po dekódování. Video ovládání zachované. Funkční kód skutečně vytvořila Luna, Adam zkontroloval a převzal; opravil pouze citaci old, testové literály, úklid testserveru a složený frontendový otisk. Ověřit finální účtenku schváleného p+n 92b4b7704c6503fb8b2ed300b600c7f9 a živý audit. Při completed navázat fyzickou přejímkou fotografie v Cockpitu na Macu/iPhonu; p+n slepě neopakovat. Tento Git checkpoint zachycuje stav před vydáním; výsledek publikace/nasazení je v přesné účtence a logs/luna_photo_release_20261020.log.
 
 - 2026-10-20 22:13 CEST: Míla potvrdil funkční opravu osiřelých metadat. Nově požaduje u fotografií Otevřít fotografii a odstranit jejich renderovaný náhled záběru. Vývoj i p+n výslovně Lunou; nejprve zprovoznit širší delegaci. Centrální vývojová role již gpt-6-luna/high, přejímací kontrakt připravený, samotná funkce zatím chybí.
@@ -4151,3 +4153,38 @@ Další krok: P+n obou commitů přes Lunu, následná kontrola a návrat do Cam
 Navrhované další kroky: Uživatel po obnově Human–Adam přepne na MMTX.
 Technický důkaz: Dva skutečné registrované profile POST úspěšné, bez zprávy
 či modelového tahu; redigovaný switch_before_ui.json pouze v private.
+
+
+## 2026-10-23 20:35 CEST — Více projektů: společný základ a oddělení dat (kroky 1–2)
+
+Hotovo:
+- Jeden projekt je dosavadní Trip UUID. Volitelné termíny a archivace jsou
+  samostatné revize, bez změny původních záznamů, front nebo DB schématu.
+- Soukromý owner katalog zpřístupní přijatá metadata projektů. Rozpracovaný
+  přenos A zůstane A po přepnutí na B i restartu; shodné názvy a dny se nemíchají.
+- Příprava záznamu chrání původní projekt. Archivace blokuje nové zachycení,
+  zachová čtení a dokončení již připravených záznamů/přenosů.
+
+Rozhodnutí:
+- Míla schválil celkový šestikrokový směr a nyní vývoj kroků 1–2 Adamem.
+  Ovládání telefonu, výběr Vieweru/střižny a vydání jsou další kroky.
+- Výběr projektu v telefonu je oddělený od archivace a povolení Vieweru.
+  Žádná nová identita aplikace, veřejné sdílení ani automatická migrace.
+
+Další krok:
+- Po uzavření tohoto vývojového checkpointu krok 3: jednoduché ovládání
+  projektů v telefonu, včetně termínů a archivace/znovuotevření.
+
+Navrhované další kroky:
+- Jasně vymezené obrazovky a návody navržené pro Lunu, integrace Adamem.
+- Krok 4 projektový Viewer/Mac, krok 5 střižna, krok 6 fyzická přejímka.
+- Později spojování denních filmů do celé dovolené.
+
+Technický důkaz:
+- 81 Swift testů a 57 cílených Python testů PASS. Skutečné Swift obálky,
+  izolované API, oba soubory a vazby, restart/replay, konflikty i oddělené
+  Viewer granty ověřené. Plná brána 2180 PASS a iOS build PASS.
+- docs/MULTI_PROJECT_FOUNDATION.md; důkazy jen data/private/camino_projects_20261023/.
+- Živá služba, archiv, střihy ani iPhone se nemění. Fyzická přejímka nové
+  verze NEOVĚŘENO. Neprovádět p+n ani instalaci bez odpovídajícího pokynu;
+  samostatná služba Camino musí před novou operací umět project_details_v1.

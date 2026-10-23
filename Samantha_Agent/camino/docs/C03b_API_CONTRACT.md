@@ -11,6 +11,14 @@ v `M2b_AUDIO_LAYOUT_REPORT.md`. Starý klient může doplňkové pole stavu igno
 
 ## Rozsah první verze
 
+Rozšíření 23. 10. 2026: projekt je stávající Trip UUID. Katalog vlastníka
+GET /api/v1/projects a GET /api/v1/projects/{trip_id} poskytuje přijatý název,
+volitelné termíny, active/archived stav a samostatnou details_revision.
+set_project_details mění přesně trip_id/start_date/end_date/status, s vlastní
+očekávanou revizí a capability project_details_v1. Původní create_trip a
+set_trip_title se nepřepisují. Podrobnosti, kompatibilita a nasazovací hranice:
+[více projektů](MULTI_PROJECT_FOUNDATION.md).
+
 `CaminoV1Contract` přijímá metodu, cestu, autentizační hlavičku a bajty JSON.
 Nemá síťový listener. Konstruktor vyžaduje autentizační funkci a kontroluje ji
 před čtením jakýchkoli dat. C05 připojí skutečný privátní HTTPS server,
@@ -20,6 +28,8 @@ se tímto krokem nespouští.
 | V1 cesta | Význam |
 | --- | --- |
 | `GET /api/v1/state` | Identita serveru, epocha, poslední souvislé číslo změny, blok výstupů. |
+| `GET /api/v1/projects` | Katalog metadat projektů vlastníka, nikoli Viewer. |
+| `GET /api/v1/projects/{trip_id}` | Metadata jednoho existujícího projektu. |
 | `POST /api/v1/operations` | Jedna sekvenční create nebo metadata/text revize; trvalá účtenka. |
 | `GET /api/v1/changes?epoch=…&cursor=…` | Nejvýše 100 přijatých změn po kurzoru vlastníka. |
 | `GET /api/v1/moments/{id}` | Aktuální přijatá metadata Momentu. |
@@ -41,6 +51,8 @@ neslučitelná změna dostane novou verzi kontraktu.
 | `kind` | Přesný `payload` |
 | --- | --- |
 | `create_trip` | Všechna pole `Trip` včetně `viewer_enabled` a případného `start_date`. |
+| `set_trip_title` | `trip_id`, `title`; samostatná historie názvu, bez změny create_trip. |
+| `set_project_details` | `trip_id`, `start_date`, `end_date`, `status`; termíny null nebo platná data, status active/archived, pouze po project_details_v1. |
 | `create_day` | Všechna pole `JourneyDay`; rodičovská cesta už existuje. |
 | `create_moment` | Všechna pole `Moment` v revizi 1 včetně provenience a případné polohy; Úvaha smí vzniknout jen `owner_only`. |
 | `create_asset` | Všechna pole `Asset`; jde o manifest, nikoli potvrzení souborových bajtů. |

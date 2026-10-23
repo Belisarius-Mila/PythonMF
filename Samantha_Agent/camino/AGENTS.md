@@ -19,6 +19,11 @@ Platí pro celý adresář `camino/` ve společném repozitáři PythonMF.
   minimalistický Viewer M1–M4, AI a širší produkt až později. V rozsahu,
   pořadí, procesové topologii a cestovní přejímce má přednost před starým
   plánem v0.5; U15, ochrana originálů a kořenové bezpečnostní brány platí dál.
+- Rozhodnutí Míly z 2026-10-23 rozšiřuje aplikaci na více cest/dovolených.
+  Základ a kontrakt kroků 1–2 jsou v `docs/MULTI_PROJECT_FOUNDATION.md`;
+  původní Camino zůstává existujícím projektem se stejnou identitou.
+  Povolený další krok vždy určuje kanonický handoff; schválení směru samo
+  nespouští aktualizaci služby, instalaci telefonu ani publikování.
 - Importované balíčky v0.4/v0.5 a jejich ZIPy zachovej jako původní podklady.
   Nové výsledky a novější rozhodnutí patří mimo ně, aby zůstaly ověřitelné
   původní manifesty.

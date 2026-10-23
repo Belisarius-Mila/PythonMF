@@ -209,7 +209,7 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
     }
 
     func createTrip(name: String, isTest: Bool = false) {
-        guard !audioBusy, !showCamera, let local else { return }
+        guard !audioBusy, !showAudio, !showCamera, !awaitingLocation, !importingMedia, let local else { return }
         do {
             _ = try local.createTrip(name: name, isTest: isTest)
             message = nil
@@ -218,13 +218,13 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
     }
 
     func selectTrip(_ id: UUID) {
-        guard !audioBusy, !showCamera, let local else { return }
+        guard !audioBusy, !showAudio, !showCamera, !awaitingLocation, !importingMedia, let local else { return }
         do { try local.selectTrip(id); message = nil; refresh() }
         catch { message = error.localizedDescription }
     }
 
     func updateTrip(_ id: UUID, name: String, isTest: Bool) -> Bool {
-        guard !audioBusy, !showCamera, let local else { return false }
+        guard !audioBusy, !showAudio, !showCamera, !awaitingLocation, !importingMedia, let local else { return false }
         do {
             _ = try local.updateTrip(id, name: name, isTest: isTest)
             message = nil
@@ -929,12 +929,16 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
     }
 
     @discardableResult func savePhoto(_ data: Data) async -> LocalMediaAsset? {
-        guard let mediaVault, showCamera else { return nil }
+        guard let mediaVault, showCamera, let captureTripID = activeTrip?.id else { return nil }
         let targetMomentID = cameraTargetMomentID
         if targetMomentID == nil { message = "Ověřuji GPS…" }
         let (fix, gpsWarning) = targetMomentID == nil
             ? await captureLocationForNewMoment()
             : (nil, nil)
+        guard activeTrip?.id == captureTripID else {
+            message = "Projekt se během přípravy změnil. Fotografie se nepřiřadila jinému projektu."
+            return nil
+        }
         do {
             let date = Date()
             let asset = try await mediaVault.savePhoto(data,
@@ -956,7 +960,8 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
     }
 
     func beginVideo(silent: Bool) async -> URL? {
-        guard let mediaVault, showCamera, activeVideoIntent == nil else { return nil }
+        guard let mediaVault, showCamera, activeVideoIntent == nil,
+              let captureTripID = activeTrip?.id else { return nil }
         let thermal = thermalPolicy.videoAction(for: thermalLevel)
         guard thermal != .block else {
             message = "Telefon hlásí kritickou teplotu. Video nezačalo a kvalita se skrytě nemění."
@@ -967,6 +972,10 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
         let (fix, gpsWarning) = targetMomentID == nil
             ? await captureLocationForNewMoment()
             : (nil, nil)
+        guard activeTrip?.id == captureTripID else {
+            message = "Projekt se během přípravy změnil. Video nezačalo v jiném projektu."
+            return nil
+        }
         do {
             let date = Date()
             let (intent, pendingURL, warning) = try mediaVault.beginVideo(

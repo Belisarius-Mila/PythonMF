@@ -6,6 +6,11 @@ nemigruje data ze samostatných prototypů Camino Audio a Camino Transfer Test.
 
 ## Aktuální používání — 23. 10. 2026
 
+Lokální vývoj kroků 1–2 přidává základ více projektů: termíny a archivaci
+v existujícím úložišti, přenosy svázané s původním projektem a blok změny
+projektu při přípravě záznamu. Nová ovládání budou až v kroku 3; dosavadní
+vydání tím není aktualizované. [Kontrakt a přejímka](../docs/MULTI_PROJECT_FOUNDATION.md).
+
 Poslední připravený Release je 0.1.0 (20). Zoom Míla uživatelsky přijal;
 přesná nainstalovaná verze a všechny okrajové scénáře nejsou tímto
 potvrzením samostatně doložené. Podrobnosti a otevřené fyzické kontroly

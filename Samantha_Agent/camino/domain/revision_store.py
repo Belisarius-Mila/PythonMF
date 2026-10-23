@@ -21,7 +21,7 @@ from .codec import (
     decode_asset, decode_change, decode_day, decode_moment, decode_text,
     decode_trip, encode_change, exact_object, wire,
 )
-from .model import ContractError, MomentHistory, Privacy, RevisionConflict, TextHistory, validate_title
+from .model import ContractError, MomentHistory, Privacy, ProjectDetails, RevisionConflict, TextHistory, validate_title
 from .audio_layout import decode_audio_layout
 
 
@@ -152,7 +152,8 @@ class RevisionStore:
             return {
                 "contract_version": 1,
                 "features": ["audio_layout_v1", "moment_title_v1", "attachment_title_v1", "trip_title_v1",
-                             "deleted_attachment_title_repair_v1", "deleted_audio_layout_repair_v1"],
+                             "deleted_attachment_title_repair_v1", "deleted_audio_layout_repair_v1",
+                             "project_details_v1"],
                 "server_id": meta["server_id"],
                 "epoch": meta["epoch"],
                 "cursor": meta["cursor"],
@@ -301,6 +302,21 @@ class RevisionStore:
         kind = envelope["kind"]
         payload = envelope["payload"]
         expected = envelope["expected_revision"]
+        if kind == "set_project_details":
+            data = exact_object(payload, {"trip_id", "start_date", "end_date", "status"})
+            trip_id = self._uuid(data["trip_id"])
+            ProjectDetails(data["start_date"], data["end_date"], data["status"])
+            if connection.execute("SELECT 1 FROM trips WHERE id=?", (trip_id,)).fetchone() is None:
+                raise StoreNotFound("project is missing")
+            revision = 1 + connection.execute(
+                "SELECT COUNT(*) FROM accepted_operations WHERE kind='set_project_details' AND object_id=?",
+                (trip_id,),
+            ).fetchone()[0]
+            if expected != revision:
+                raise StoreConflict("revision_conflict", "project details revision differs", revision)
+            # The accepted operation is the projection: never rewrite create_trip,
+            # infer Viewer grants, or reject old queued media because of archival.
+            return kind, trip_id, revision + 1, False
         if kind == "set_trip_title":
             data = exact_object(payload, {"trip_id", "title"})
             trip_id = self._uuid(data["trip_id"])
@@ -369,6 +385,9 @@ class RevisionStore:
             if kind == "create_day":
                 if connection.execute("SELECT 1 FROM trips WHERE id=?", (model.trip_id,)).fetchone() is None:
                     raise StoreNotFound("parent trip is missing")
+                if any(decode_day(json.loads(row["body"])).local_date == model.local_date for row in
+                       connection.execute("SELECT body FROM days WHERE trip_id=?", (model.trip_id,))):
+                    raise StoreConflict("identity_conflict", "project already has this calendar day")
                 connection.execute("INSERT INTO days VALUES (?,?,?)", (model.id, model.trip_id, body))
             elif kind == "create_moment":
                 if model.revision != 1:
@@ -739,6 +758,35 @@ class RevisionStore:
                 )
                 if model.privacy == Privacy.DIARY.value and not model.hidden
             ))
+
+    @staticmethod
+    def _project_summary(connection: sqlite3.Connection, trip) -> dict[str, Any]:
+        def history(kind):
+            return connection.execute(
+                "SELECT request_body FROM accepted_operations WHERE kind=? AND object_id=? "
+                "ORDER BY device_sequence", (kind, trip.id),
+            ).fetchall()
+        titles, details = history("set_trip_title"), history("set_project_details")
+        title = json.loads(titles[-1]["request_body"])["payload"]["title"] if titles else trip.name
+        payload = json.loads(details[-1]["request_body"])["payload"] if details else {}
+        profile = ProjectDetails(payload.get("start_date", trip.start_date), payload.get("end_date"),
+                                 payload.get("status", "active"))
+        return {"id": trip.id, "name": title, "language": trip.language,
+                **wire(profile), "details_revision": 1 + len(details),
+                "viewer_enabled": RevisionStore._viewer_enabled(connection, trip)}
+
+    def projects(self, trip_id: str | None = None) -> list[dict[str, Any]]:
+        """Private owner catalog. Dates are labels, never filters on stored content."""
+        if trip_id is not None:
+            self._uuid(trip_id)
+        with self._connection() as connection:
+            connection.execute("BEGIN")
+            rows = connection.execute("SELECT body FROM trips ORDER BY id").fetchall() if trip_id is None else connection.execute(
+                "SELECT body FROM trips WHERE id=?", (trip_id,),
+            ).fetchall()
+            if trip_id is not None and not rows:
+                raise StoreNotFound("project is missing")
+            return [self._project_summary(connection, decode_trip(json.loads(row["body"]))) for row in rows]
 
     def viewer_snapshot(self, trip_id: str) -> dict[str, Any]:
         """Read one consistent, allowlisted projection; never return owner metadata.

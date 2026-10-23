@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-23 12:22 CEST — místní Xcode konfigurace sjednocená; přepnutí a UI p+n navazují
+Aktualizováno: 2026-10-23 20:35 CEST — více projektů, kroky 1–2
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,8 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-23 20:35 CEST: Lokálně implementované kroky 1–2 zobecnění na více cest/dovolených. Stabilní Trip UUID, volitelné termíny a archivace jako revize; owner katalog, oddělení dat a zachované fronty. Swift 81 PASS, cíleně 57 Python PASS; plná brána 2180 PASS a iOS build PASS. Bez push, nasazení či instalace. Další krok 3: ovládání projektů.
 
 - 2026-10-23 12:34 CEST: Lokální Xcode podpis opravený v a50a9007, živé Camino–MMTX–Camino PASS. Panel p+n lokálně rozlišuje aktuální/pending/blokované/neověřené stavy, čerstvý GitHub a správný cíl; opakování v dalších akcích. 93 cílených testů a JS syntaxe PASS. Commit a p+n celého balíčku Lunou výslovně schválené.
 
@@ -3498,3 +3500,38 @@ Další krok: P+n obou commitů přes Lunu, následná kontrola a návrat do Cam
 Navrhované další kroky: Uživatel po obnově Human–Adam přepne na MMTX.
 Technický důkaz: Dva skutečné registrované profile POST úspěšné, bez zprávy
 či modelového tahu; redigovaný switch_before_ui.json pouze v private.
+
+
+## 2026-10-23 20:35 CEST — Více projektů: společný základ a oddělení dat (kroky 1–2)
+
+Hotovo:
+- Jeden projekt je dosavadní Trip UUID. Volitelné termíny a archivace jsou
+  samostatné revize, bez změny původních záznamů, front nebo DB schématu.
+- Soukromý owner katalog zpřístupní přijatá metadata projektů. Rozpracovaný
+  přenos A zůstane A po přepnutí na B i restartu; shodné názvy a dny se nemíchají.
+- Příprava záznamu chrání původní projekt. Archivace blokuje nové zachycení,
+  zachová čtení a dokončení již připravených záznamů/přenosů.
+
+Rozhodnutí:
+- Míla schválil celkový šestikrokový směr a nyní vývoj kroků 1–2 Adamem.
+  Ovládání telefonu, výběr Vieweru/střižny a vydání jsou další kroky.
+- Výběr projektu v telefonu je oddělený od archivace a povolení Vieweru.
+  Žádná nová identita aplikace, veřejné sdílení ani automatická migrace.
+
+Další krok:
+- Po uzavření tohoto vývojového checkpointu krok 3: jednoduché ovládání
+  projektů v telefonu, včetně termínů a archivace/znovuotevření.
+
+Navrhované další kroky:
+- Jasně vymezené obrazovky a návody navržené pro Lunu, integrace Adamem.
+- Krok 4 projektový Viewer/Mac, krok 5 střižna, krok 6 fyzická přejímka.
+- Později spojování denních filmů do celé dovolené.
+
+Technický důkaz:
+- 81 Swift testů a 57 cílených Python testů PASS. Skutečné Swift obálky,
+  izolované API, oba soubory a vazby, restart/replay, konflikty i oddělené
+  Viewer granty ověřené. Plná brána 2180 PASS a iOS build PASS.
+- docs/MULTI_PROJECT_FOUNDATION.md; důkazy jen data/private/camino_projects_20261023/.
+- Živá služba, archiv, střihy ani iPhone se nemění. Fyzická přejímka nové
+  verze NEOVĚŘENO. Neprovádět p+n ani instalaci bez odpovídajícího pokynu;
+  samostatná služba Camino musí před novou operací umět project_details_v1.

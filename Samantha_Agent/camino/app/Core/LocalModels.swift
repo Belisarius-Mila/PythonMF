@@ -86,6 +86,47 @@ public struct LocalTrip: Equatable, Identifiable, Sendable {
     // The original create_trip payload remains immutable after a rename.
     public let originalName: String
     public let titleChanges: [LocalTripTitleChange]
+    public let detailsChanges: [LocalProjectDetailsChange]
+
+    /// Selection (active) belongs to this phone; archival belongs to the project.
+    public var projectDetails: LocalProjectDetails {
+        detailsChanges.last?.details ?? LocalProjectDetails(startDate: startDate)
+    }
+}
+
+public enum LocalProjectStatus: String, Codable, Sendable {
+    case active, archived
+}
+
+public struct LocalProjectDetails: Codable, Equatable, Sendable {
+    public let startDate: String?
+    public let endDate: String?
+    public let status: LocalProjectStatus
+
+    public init(startDate: String? = nil, endDate: String? = nil,
+                status: LocalProjectStatus = .active) {
+        self.startDate = startDate; self.endDate = endDate; self.status = status
+    }
+
+    public var valid: Bool {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.timeZone = TimeZone(secondsFromGMT: 0)
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.isLenient = false
+        for value in [startDate, endDate].compactMap({ $0 }) {
+            guard value.range(of: #"^[0-9]{4}-[0-9]{2}-[0-9]{2}$"#, options: .regularExpression) != nil,
+                  let date = formatter.date(from: value), formatter.string(from: date) == value else { return false }
+        }
+        if let startDate, let endDate, endDate < startDate { return false }
+        return true
+    }
+}
+
+public struct LocalProjectDetailsChange: Codable, Equatable, Sendable {
+    public let id: UUID
+    public let details: LocalProjectDetails
 }
 
 public struct LocalTripTitleChange: Codable, Equatable, Sendable {
@@ -439,6 +480,8 @@ public struct LocalMomentSyncSnapshot: Equatable, Sendable {
 
 public enum LocalStoreError: Error, LocalizedError, Equatable {
     case invalidName
+    case invalidProjectDetails
+    case archivedTrip
     case noActiveTrip
     case tripMissing
     case momentMissing
@@ -458,6 +501,8 @@ public enum LocalStoreError: Error, LocalizedError, Equatable {
     public var errorDescription: String? {
         switch self {
         case .invalidName: "Zadej název cesty na jednom řádku (nejvýše 160 znaků)."
+        case .invalidProjectDetails: "Zkontroluj platná data projektu a jejich pořadí."
+        case .archivedTrip: "Projekt je archivovaný. Před novým záznamem ho znovu otevři."
         case .noActiveTrip: "Nejdřív vyber cestu."
         case .tripMissing: "Cesta není dostupná. Nic se nesmazalo."
         case .momentMissing: "Moment není dostupný. Nic se nesmazalo."

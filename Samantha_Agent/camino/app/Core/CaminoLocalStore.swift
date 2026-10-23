@@ -87,7 +87,9 @@ private struct LocalPendingMomentLink: Codable, Equatable {
     @discardableResult public func createTrip(name: String, isTest: Bool = false,
                                               id: UUID = UUID()) throws -> LocalTrip {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { throw LocalStoreError.invalidName }
+        guard !trimmed.isEmpty, trimmed.unicodeScalars.count <= 160,
+              !trimmed.unicodeScalars.contains(where: { CharacterSet.controlCharacters.union(.newlines).contains($0) })
+        else { throw LocalStoreError.invalidName }
         guard try object("TripRecord", id: id) == nil else { throw LocalStoreError.duplicateIdentity }
         do {
             for old in try fetch("TripRecord") { old.setValue(false, forKey: "active") }
@@ -111,6 +113,33 @@ private struct LocalPendingMomentLink: Codable, Equatable {
             }
             try save()
         } catch { context.rollback(); throw error }
+    }
+
+    /// Additive history in SettingRecord; original Trip and existing queues stay immutable.
+    @discardableResult public func setProjectDetails(_ id: UUID, details: LocalProjectDetails,
+                                                      operationID: UUID = UUID()) throws -> LocalTrip {
+        guard details.valid else { throw LocalStoreError.invalidProjectDetails }
+        guard let row = try object("TripRecord", id: id) else { throw LocalStoreError.tripMissing }
+        do {
+            let current = try decodeTrip(row)
+            if let old = current.detailsChanges.first(where: { $0.id == operationID }) {
+                guard old.details == details else { throw LocalStoreError.operationConflict }
+                return current
+            }
+            guard try !trips().contains(where: { $0.detailsChanges.contains(where: { $0.id == operationID }) })
+            else { throw LocalStoreError.operationConflict }
+            if current.projectDetails == details { return current }
+            try setEncodedSetting(current.detailsChanges + [LocalProjectDetailsChange(id: operationID, details: details)],
+                                  key: "trip.details.\(id.uuidString.lowercased())")
+            try save()
+            return try decodeTrip(row)
+        } catch { context.rollback(); throw error }
+    }
+
+    private func captureTrip() throws -> LocalTrip {
+        guard let trip = try activeTrip() else { throw LocalStoreError.noActiveTrip }
+        guard trip.projectDetails.status != .archived else { throw LocalStoreError.archivedTrip }
+        return trip
     }
 
     /// Rename the existing trip without rewriting its original sync identity.
@@ -162,7 +191,7 @@ private struct LocalPendingMomentLink: Codable, Equatable {
     @discardableResult public func markMoment(at date: Date = Date(),
                                                timeZone: TimeZone = .current,
                                                location: LocalLocationFix? = nil) throws -> LocalMoment {
-        guard let trip = try activeTrip() else { throw LocalStoreError.noActiveTrip }
+        let trip = try captureTrip()
         let stamp = CaptureStamp.record(date, timeZone: timeZone)
         let privacy = try newMomentPrivacy()
         do {
@@ -199,7 +228,7 @@ private struct LocalPendingMomentLink: Codable, Equatable {
               relatedMomentID == nil || kind == .reflection else {
             throw LocalStoreError.invalidAudioIntent
         }
-        guard let trip = try activeTrip() else { throw LocalStoreError.noActiveTrip }
+        let trip = try captureTrip()
         let target: LocalMoment?
         if let targetMomentID {
             guard kind == .comment,
@@ -358,7 +387,7 @@ private struct LocalPendingMomentLink: Codable, Equatable {
                                  silentRequested: Bool = false, imported: Bool = false, at date: Date = Date(),
                                  timeZone: TimeZone = .current,
                                  location: LocalLocationFix? = nil) throws -> LocalMediaIntent {
-        guard let trip = try activeTrip() else { throw LocalStoreError.noActiveTrip }
+        let trip = try captureTrip()
         guard kind == .video || !silentRequested else { throw LocalStoreError.invalidMediaIntent }
         let target: LocalMoment?
         if let targetMomentID {
@@ -1489,6 +1518,10 @@ private struct LocalPendingMomentLink: Codable, Equatable {
         let originalName: String = try required(row, "name")
         let changes: [LocalTripTitleChange] = try encodedSetting(
             "trip.titles.\(id.uuidString.lowercased())") ?? []
+        let details: [LocalProjectDetailsChange] = try encodedSetting(
+            "trip.details.\(id.uuidString.lowercased())") ?? []
+        guard Set(details.map(\.id)).count == details.count,
+              details.allSatisfy({ $0.details.valid }) else { throw LocalStoreError.inconsistentStore }
         guard Set(changes.map(\.id)).count == changes.count,
               changes.allSatisfy({ !$0.title.isEmpty && $0.title.unicodeScalars.count <= 160
                   && !$0.title.unicodeScalars.contains(where: { CharacterSet.controlCharacters.union(.newlines).contains($0) }) })
@@ -1498,7 +1531,7 @@ private struct LocalPendingMomentLink: Codable, Equatable {
                   active: try required(row, "active"), isTest: try required(row, "isTest"),
                   viewerEnabled: try required(row, "viewerEnabled"),
                   startDate: row.value(forKey: "startDate") as? String,
-                  originalName: originalName, titleChanges: changes)
+                  originalName: originalName, titleChanges: changes, detailsChanges: details)
     }
 
     // Additive metadata in the existing store, no Core Data schema migration.
