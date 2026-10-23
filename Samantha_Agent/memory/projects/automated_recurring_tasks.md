@@ -1,6 +1,6 @@
 # Obecna rutina pro automaticke opakujici se ukoly
 
-Aktuální navázání: viz časované záznamy z 20. 10. 2026 na konci souboru.
+Aktuální navázání: viz časovaný záznam z 23. 10. 2026 na konci souboru.
 
 ## Aktuální stav 2026-09-29 — opravená automatická publikace sovy
 
@@ -466,3 +466,27 @@ odpovídá skutečným bajtům. Main/origin po workflow shodné, workflow main n
 Úplná redigovaná účtenka: data/daily_3am/receipts/20261020_publication.json
 (mimo Git). Místní dokumentační zápis výsledku je samostatný lokální checkpoint;
 nevypovídá o novém nasazení Cockpitu.
+
+## 2026-10-23 07:42 CEST — Promluva pro 23. října veřejně publikovaná
+
+Hotovo: Doslovně dodaná promluva je veřejně dostupná jako owl_231026.mp3.
+Přehrávač vybírá dnešní soubor; HTTP 200 / audio/mp3, 134 064 B, 22,344 s.
+Úplné dekódování a cache otisky audia i app.js prošly. Text se do paměti nekopíruje.
+
+Rozhodnutí: Bez nového kanonického rozhodnutí; zachovaný hlas Antonin a původní rychlost.
+
+Další krok: Pro tuto veřejnou publikaci žádný další zásah; uživatelský poslech nepotvrzený.
+
+Navrhované další kroky: Po servisním vyřešení existujícího index.lock srovnat
+původní checkout a převzít tento dokumentační checkpoint. Zámek nebyl odstraněn.
+
+Technický důkaz: Zdroj 66df01c7916c387434b75ba6227105ba0f38672c,
+Pages workflow 39906967580 success nad stejným head. Cílených 24/24 a plná
+brána 2174/2174 PASS (618,0 s). Veřejná MP3 má SHA-256
+8b1a2f8892778197a4dbc143e5b88fd8af4bd9258c13afd65723cbb1578da9bd.
+Redigovaná účtenka v původním checkoutu: data/daily_3am/receipts/20261023_publication.json.
+
+Lokální stav: Publikace proběhla z izolovaného čistého main. Původní main
+zůstává o tento veřejný commit pozadu kvůli existujícímu .git/index.lock
+z 07:23 CEST; nesouvisející změna Camina byla zachovaná. Tento projektový
+zápis je lokální v izolovaném checkoutu a sám nepotvrzuje další push ani nasazení Cockpitu.
