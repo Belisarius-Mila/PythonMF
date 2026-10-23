@@ -172,7 +172,9 @@ class LunaReleaseStore:
 
     def status(self, job_id: str | None = None) -> dict[str, Any]:
         job = self.load(job_id)
-        if job and job["state"] in ACTIVE_STATES:
+        if (job and job["state"] in ACTIVE_STATES
+                and time.time() - float(job.get("queued_epoch", 0)) > 30):
+            # A fresh worker must acquire its lease without racing this probe.
             # Acquiring the detached process lease proves its absence. A crash
             # becomes an explicit handback; status never restarts a write.
             try:

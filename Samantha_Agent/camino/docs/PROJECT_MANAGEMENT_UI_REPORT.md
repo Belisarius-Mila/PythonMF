@@ -53,3 +53,14 @@ Telefonní instalace, fyzické foto/video/mikrofon a přejímka přenosu nové
 verze NEPROVEDENO. Termín je popis projektu, ne filtr záznamů. Krok 4
 projektový Viewer/Mac a krok 5 výběr střižny navazují; neslibuje se automatické
 sdílení nových dovolených ani společný vícedenní film.
+
+## 2026-10-23 22:39 CEST — výsledek prvního p+n
+
+Účtenka c3aba0302d0661fbff03b131e65357a4 skončila attention před pushem. Přímý živý
+GitHub zůstal na 8bc31d07; nasazení nezačalo. Plná brána spustila 2185 testů,
+jediný selhal na startovacím souběhu status probe / worker lock. Nový
+telefonní kód tuto kolizi nezpůsobil. Původní běh se neopakuje.
+
+Adam připravil úzkou opravu status probe ve stávající 30s lhůtě a regresní
+test. 57 cílených testů PASS; plná brána 2186 PASS (333,492 s unit část), opakovaný souběh 10/10 PASS. Nový placený pokus
+Luny až po konkrétním potvrzení; žádný ruční push či restart služeb.

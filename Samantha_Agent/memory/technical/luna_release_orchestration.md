@@ -560,3 +560,13 @@ celková úspora není změřená. Camino/autosave před/po shodné. Plná brán
 Tento krok je pouze lokální vývoj, bez push/nasazení; portál nový vstup použije
 po příštím samostatném p+n. Pro nativní spuštění není potřebná nová HTTP route
 ani konfigurační bootstrap. Historické benchmarky a jejich výsledky se nemění.
+
+## Startovací zámek — místní oprava 2026-10-23 22:39 CEST
+
+Kontrola stavu v prvních 30 sekundách od zařazení úlohy nezkouší worker
+lease. Původní kontrola jej sice hned uvolnila, ale krátce mohla odmítnout
+skutečný právě startující worker. Po startovací lhůtě zůstává kontrola
+mrtvého workeru, opakované čtení účtenky i zákaz dalšího workeru stejné.
+Nový regresní test vynutí nulový počet pokusů o lock během této lhůty.
+Stav opravy: 57 cílených testů PASS, plná brána 2186 PASS (333,492 s unit část), opakovaný souběh 10/10 PASS. Publikační
+překážka a přesná původní účtenka jsou v handoffu Camino i Cockpit.

@@ -483,6 +483,13 @@ class LunaReleaseTests(unittest.TestCase):
         with self.store.lock("worker"), self.assertRaises(BlockingIOError):
             release.run_release(job["job_id"], store=self.store)
 
+    def test_status_does_not_probe_worker_lease_during_startup_grace(self):
+        job = self.create()
+        with patch.object(self.store, "lock", side_effect=AssertionError("startup lease probe")):
+            status = self.store.status(job["job_id"])
+        self.assertEqual(status["job"]["state"], "queued")
+        self.assertEqual(self.launcher.call_count, 1)
+
     def test_dead_worker_becomes_attention_without_replaying_work(self):
         job = self.create()
         self.store.update(job["job_id"], queued_epoch=time.time() - 60, phase="push_requested")

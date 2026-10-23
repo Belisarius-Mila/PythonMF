@@ -1,6 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-23 22:39 CEST: UI projektů v 15e0467a ověřené (tři UI scénáře, Release PASS), ale p+n c3aba0302d0661fbff03b131e65357a4 zastavila plná brána před pushem: 1/2185 selhání kvůli souběhu status probe a startu workeru. GitHub živě stále 8bc31d07, nasazení nezačalo. Úzká oprava startovacího souběhu lokálně hotová, 57 cílených testů PASS, plná brána 2186 PASS (333,492 s unit část), opakovaný souběh 10/10 PASS. Nový placený pokus se automaticky neopakuje.
+
 - 2026-10-23 22:28 CEST: Krok 3 — ovládání projektů převzaté od Luny c39307ba80c8e9e373149a9a7696c220 a integrované Adamem. Založení, termíny, přepínání, archivace/znovuotevření; Release a statická brána PASS, tři vybrané UI scénáře PASS (offline 1/1, projekty a přejmenování 2/2). Míla výslovně schválil nový pokus i p+n všech dokončených commitů (účtenka c3aba0302d0661fbff03b131e65357a4; výsledek ověřit živě). Telefon ani samostatná služba se tím neaktualizují.
 
 - 2026-10-23 21:59 CEST: Krok 3 — datová příprava v 176a6c66 hotová (Swift 82, plná brána 2185, iOS build PASS). UI návrh Luny 971d17d401d57207ca3ef7d762836191 není převzatý: rozsah dodaný Adamem vynechal závěrečnou závorku. Opravený požadavek připravený, nový placený pokus čeká na výslovné potvrzení; žádný retry ani změna UI neproběhly.
@@ -4325,3 +4327,39 @@ Technický důkaz:
   kamera ani přenos nové verze nejsou tímto krokem přijaté.
 - Git checkpoint zachycuje stav před publikací; konečný výsledek určuje
   přesná účtenka c3aba0302d0661fbff03b131e65357a4, nikoli předchozí p+n.
+
+
+## 2026-10-23 22:39 CEST — Publikační překážka a oprava startovacího souběhu
+
+Hotovo:
+- Ovládání více projektů v 15e0467a má tři vybrané UI scénáře a Release PASS.
+  Záznamy obou projektů zůstávají oddělené i po restartu a archivaci.
+- Odhalená startovací kolize p+n má úzkou místní opravu: status během již
+  existující 30s startovací lhůty nezkouší zámek workeru. Kontrola mrtvého
+  workeru po lhůtě i zákaz souběžných workerů zůstávají zachované.
+
+Rozhodnutí:
+- P+n bylo výslovně předané Luně jednou a zastavilo se před publikací.
+  Původní účtenka je zachovaná; žádný nový placený pokus ani ruční push/deploy.
+- Prokázanou překážku opravil Adam v nezbytném rozsahu. Nové vydání až po
+  samostatném potvrzení konkrétního opraveného balíčku.
+
+Další krok:
+- Předložit ověřený opravený balíček pro nový konkrétní pokyn p+n.
+
+Navrhované další kroky:
+- Po úspěšném vydání navázat krokem 4 projektového Vieweru/Macu.
+- Službu Camino a stejnou aplikaci iPhonu aktualizovat samostatným postupem.
+
+Technický důkaz:
+- Původní účtenka c3aba0302d0661fbff03b131e65357a4: attention, push uncertain, deployment
+  not_started. Přímé git ls-remote potvrzuje GitHub na 8bc31d07; nic nepushnuto.
+- Brána: 2185 testů, 1 selhání test_native_one_call_runs_one_luna_and_returns_to_caller
+  s BlockingIOError. Čtecí probe před startovací lhůtou krátce vlastnil stejný
+  worker lock; skutečný worker jej proto nemohl získat.
+- Oprava má deterministický regresní test zákazu probe v čerstvé úloze.
+  57 cílených testů PASS, plná brána 2186 PASS (333,492 s unit část), opakovaný souběh 10/10 PASS. Důkazy pouze
+  data/private/camino_projects_ui_20261023/release/failed_full_gate.log a
+  release_lock_tests.log / release_fix_full_gate.log v nadřazené složce.
+- Živý Cockpit zůstává na předchozím vydání. Telefon, samostatná služba,
+  archiv i střihy se novým kódem neaktualizovaly.

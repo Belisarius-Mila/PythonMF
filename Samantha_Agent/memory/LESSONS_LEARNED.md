@@ -1432,3 +1432,16 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
 - Ověření: skutečný Swift dvouprojektový fixture → API/MediaStore, dokončení
   rozpracovaného uploadu po přepnutí a restartu, původní bajty/identity i
   oddělené Viewer granty PASS. Čtecí kontrola archivu zachovala oba projekty.
+
+### 2026-10-23 22:44 CEST — Status nesmí blokovat start vlastního workeru
+
+- Problém: čtecí status získal a hned uvolnil worker lock během startu;
+  současný worker používající LOCK_NB náhodně skončil BlockingIOError.
+  Selhal tak nativní integrační test p+n i celá publikační brána před pushem.
+- Typ: souběh při startu, potvrzený regresním testem.
+- Řešení: během existující 30s startovací lhůty worker lease nezkoušet.
+  Poté ponechat kontrolu opuštěného workeru, druhé čtení účtenky i zákaz
+  souběžného workeru; neopakovat přerušené p+n automaticky.
+- Ověření: 57 cílených testů, 10/10 souběžných integračních opakování
+  a plná brána 2186/2186 PASS. app/communication/luna_release.py;
+  tests/test_luna_release.py. Původní účtenka zůstává attention.

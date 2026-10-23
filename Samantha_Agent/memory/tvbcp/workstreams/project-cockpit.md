@@ -1,6 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-23 22:39 CEST: UI projektů v 15e0467a ověřené (tři UI scénáře, Release PASS), ale p+n c3aba0302d0661fbff03b131e65357a4 zastavila plná brána před pushem: 1/2185 selhání kvůli souběhu status probe a startu workeru. GitHub živě stále 8bc31d07, nasazení nezačalo. Úzká oprava startovacího souběhu lokálně hotová, 57 cílených testů PASS, plná brána 2186 PASS (333,492 s unit část), opakovaný souběh 10/10 PASS. Nový placený pokus se automaticky neopakuje.
+
 - 2026-10-20 22:23 CEST: Výslovný vývoj Lunou je lokálně funkční i na skutečném vícesouborovém Camino/JS úkolu. Centrální simple_developer = gpt-6-luna/high, žádný Sol fallback. Ověřit finální účtenku schváleného p+n 92b4b7704c6503fb8b2ed300b600c7f9 a živý audit. Při completed navázat fyzickou přejímkou fotografie v Cockpitu na Macu/iPhonu; p+n slepě neopakovat. Tento Git checkpoint zachycuje stav před vydáním; výsledek publikace/nasazení je v přesné účtence a logs/luna_photo_release_20261020.log.
 
 - 2026-10-20 22:19 CEST: Skutečná Luna vytvořila vícesouborový návrh fotografií; přesné převzetí ho zastavilo kvůli jedné nepřesné citaci old v Node testu. Zdroje beze změny. Doplněná registrovaná jednorázová review_anchors opravuje pouze citaci původního textu, nové kódy Luny nepřepisuje; nová izolace a testy, žádný další modelový tah.
@@ -2098,3 +2100,39 @@ Technický důkaz:
   shodné, živý round-trip proudů PASS. Fyzický Safari proklik neověřený.
 - Report reports/human_adam_workstream_pn_fix_2026_10_23.md; soukromé
   účtenky pouze private. Publikaci a nasazení doloží vlastní účtenka Luny.
+
+
+## 2026-10-23 22:39 CEST — Publikační překážka a oprava startovacího souběhu
+
+Hotovo:
+- Ovládání více projektů v 15e0467a má tři vybrané UI scénáře a Release PASS.
+  Záznamy obou projektů zůstávají oddělené i po restartu a archivaci.
+- Odhalená startovací kolize p+n má úzkou místní opravu: status během již
+  existující 30s startovací lhůty nezkouší zámek workeru. Kontrola mrtvého
+  workeru po lhůtě i zákaz souběžných workerů zůstávají zachované.
+
+Rozhodnutí:
+- P+n bylo výslovně předané Luně jednou a zastavilo se před publikací.
+  Původní účtenka je zachovaná; žádný nový placený pokus ani ruční push/deploy.
+- Prokázanou překážku opravil Adam v nezbytném rozsahu. Nové vydání až po
+  samostatném potvrzení konkrétního opraveného balíčku.
+
+Další krok:
+- Předložit ověřený opravený balíček pro nový konkrétní pokyn p+n.
+
+Navrhované další kroky:
+- Po úspěšném vydání navázat krokem 4 projektového Vieweru/Macu.
+- Službu Camino a stejnou aplikaci iPhonu aktualizovat samostatným postupem.
+
+Technický důkaz:
+- Původní účtenka c3aba0302d0661fbff03b131e65357a4: attention, push uncertain, deployment
+  not_started. Přímé git ls-remote potvrzuje GitHub na 8bc31d07; nic nepushnuto.
+- Brána: 2185 testů, 1 selhání test_native_one_call_runs_one_luna_and_returns_to_caller
+  s BlockingIOError. Čtecí probe před startovací lhůtou krátce vlastnil stejný
+  worker lock; skutečný worker jej proto nemohl získat.
+- Oprava má deterministický regresní test zákazu probe v čerstvé úloze.
+  57 cílených testů PASS, plná brána 2186 PASS (333,492 s unit část), opakovaný souběh 10/10 PASS. Důkazy pouze
+  data/private/camino_projects_ui_20261023/release/failed_full_gate.log a
+  release_lock_tests.log / release_fix_full_gate.log v nadřazené složce.
+- Živý Cockpit zůstává na předchozím vydání. Telefon, samostatná služba,
+  archiv i střihy se novým kódem neaktualizovaly.
