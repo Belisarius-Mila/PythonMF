@@ -72,6 +72,25 @@ GitHub HTTPS push může jednorázově použít již ověřené přihlášení G
 podle LL-060; bez změny globální konfigurace, nového přihlášení, tokenu v argv
 nebo opakování push. Ostatní remotes zachovávají dosavadní transport.
 
+## Stav panelu publikace — 23. 10. 2026
+
+Panel Práce rozlišuje aktuální, čekající, blokovaný a neověřený stav.
+Aktuální potvrzený main/GitHub a nasazení nezobrazují běžné tlačítko p+n;
+v uzavřených dalších akcích zůstává vědomé opakování a diagnostika.
+Pracovní změny zdroje blokují publikaci i přepínání proudů. Místní Xcode
+podpis proto patří do ignorovaného LocalSigning.xcconfig bez target override.
+
+Prezentace porovnává snímek aktivního proudu s čerstvým GitHub auditem.
+Cizí proud, rozporné heads a neúspěšný audit jsou neověřené; nezastoupí je
+starý origin/main nebo poslední globální účtenka. Pages vyžadují vlastní
+potvrzenou webovou účtenku stejného proudu/commitu, nikoli stav Cockpitu.
+Po dokončení se starý snímek obnoví. Čtecí obnova je dostupná i při chybě
+stavu vykonavatele. Render panelu sám nikdy nespustí předání.
+
+Explicitní p+n z textu a samostatné opakování dál používají stejný
+submit_release, přesný audit, potvrzení a původní bezpečnostní brány.
+Podrobnosti: [report opravy](../reports/human_adam_workstream_pn_fix_2026_10_23.md).
+
 ## Výměna modelu společné role
 
 - Jediným aktivním nastavením je `config/agent_roles.json`; název modelu

@@ -57,6 +57,7 @@ function harness(apiHandler, confirmResult=true) {
     value: "",
     textContent: "",
     attributes: {},
+    dataset: {},
     focused: false,
     className: "",
     classList: {add() {}, remove() {}, toggle() {}, contains() { return false; }},
@@ -72,6 +73,7 @@ function harness(apiHandler, confirmResult=true) {
     "developmentAcquireTerminalBtn", "developmentPauseBtn", "developmentResumeBtn",
     "developmentReleaseBtn", "projectContinuityAuditBtn", "lunaReleaseMeta",
     "lunaReleaseStatus", "connectionBadge", "mobileStatusText", "mobileStatusSummary",
+    "lunaReleaseRefreshBtn", "lunaReleaseRepeatActions", "lunaReleaseRepeatBtn",
     "workspaceBadge", "turnActivity", "workPanel", "deployMeta", "workCloseBtn",
     "threadRotationPanel", "tvbcpPanel",
   ];
@@ -85,6 +87,7 @@ function harness(apiHandler, confirmResult=true) {
   scope.voiceRecording = false;
   scope.voiceTranscribing = false;
   scope.activeWorkstreamId = "project-cockpit";
+  scope.activeWorkstreamLabel = "Cockpit";
   scope.sessionConnected = true;
   scope.deliveryUncertain = false;
   scope.connectionBadge.textContent = "Připojeno";
@@ -101,6 +104,9 @@ function harness(apiHandler, confirmResult=true) {
   scope.lunaReleaseStarting = false;
   scope.lunaReleaseStatusLoaded = true;
   scope.lunaReleasePollTimerId = null;
+  scope.currentWorkstreamLiveStatus = null;
+  scope.workstreamProductionTarget = "";
+  scope.githubBatchAudit = {ok:true,read_only:true,writes_performed:false,state:"aligned",local_head:"b".repeat(40),origin_head:"b".repeat(40)};
   scope.notice = {textContent:""};
   scope.window = {
     confirm: () => confirmResult,
@@ -161,6 +167,8 @@ function harness(apiHandler, confirmResult=true) {
     restoreLunaReleaseState,
     restoreVerifiedDeploymentResult,
     updateMobileStatusSummary,
+    lunaReleasePanelState,
+    syncControls,
     setMobileStatusDetails,
     get job() { return lunaReleaseJob; },
     get statusLoaded() { return lunaReleaseStatusLoaded; },
@@ -170,6 +178,92 @@ function harness(apiHandler, confirmResult=true) {
 
 async function main() {
   const emptyStatus = {ok:true, job:null};
+  const publication = harness(async () => emptyStatus);
+  const live = () => ({schema_version:1, read_only:true, writes_performed:false,
+    workstream_id:"project-cockpit", observed_at:"2026-10-23T10:00:00Z",
+    main:{state:"aligned",head_short:"b".repeat(12),origin_short:"b".repeat(12),origin_evidence_read_only:true,pending_change_count:0},
+    workspaces:{state:"aligned_clean",source_pending_change_count:0},
+    runtime:{state:"connected",turn_busy:false},
+    deployment:{state:"verified_current",current_head:true,code_stamp_verified:true,main_short:"b".repeat(12),smoke_count:5}});
+  publication.test.syncControls();
+  assert.equal(publication.scope.lunaReleaseStartBtn.hidden, true, "missing live proof cannot suggest pending publication");
+  publication.scope.currentWorkstreamLiveStatus = live();
+  publication.test.syncControls();
+  assert.equal(publication.test.lunaReleasePanelState().state, "current");
+  assert.equal(publication.scope.lunaReleaseStartBtn.hidden, true);
+  assert.equal(publication.scope.lunaReleaseStartBtn.disabled, true);
+  assert.equal(publication.scope.lunaReleaseRepeatActions.hidden, false);
+  assert.equal(publication.scope.lunaReleaseRepeatBtn.disabled, false);
+  assert.match(publication.scope.lunaReleaseMeta.textContent, /Vše je aktuální/);
+  assert.equal(publication.calls.length, 0, "rendering never starts or audits a release");
+  publication.scope.sessionTurnBusy = true;
+  publication.test.syncControls();
+  assert.equal(publication.scope.lunaReleaseStartBtn.disabled, true);
+  assert.equal(publication.scope.lunaReleaseRepeatBtn.disabled, true);
+  publication.scope.sessionTurnBusy = false;
+  publication.scope.currentWorkstreamLiveStatus.main.pending_change_count = 1;
+  publication.scope.currentWorkstreamLiveStatus.main.state = "dirty";
+  publication.test.syncControls();
+  assert.equal(publication.test.lunaReleasePanelState().state, "blocked");
+  assert.equal(publication.scope.lunaReleaseStartBtn.disabled, true);
+  assert.equal(publication.scope.lunaReleaseRepeatActions.hidden, true);
+  assert.match(publication.scope.lunaReleaseMeta.textContent, /1 pracovní změnu/);
+  publication.scope.currentWorkstreamLiveStatus = live();
+  publication.scope.currentWorkstreamLiveStatus.workspaces.source_pending_change_count = 1;
+  assert.equal(publication.test.lunaReleasePanelState().state, "blocked", "clean clones do not hide dirty source main");
+  publication.scope.currentWorkstreamLiveStatus = live();
+  publication.scope.currentWorkstreamLiveStatus.main.state = "local_ahead";
+  publication.scope.currentWorkstreamLiveStatus.main.origin_short = "a".repeat(12);
+  publication.scope.githubBatchAudit = {...publication.scope.githubBatchAudit,state:"ready",origin_head:"a".repeat(40)};
+  publication.test.syncControls();
+  assert.equal(publication.test.lunaReleasePanelState().state, "pending");
+  assert.equal(publication.scope.lunaReleaseStartBtn.disabled, false);
+  assert.match(publication.scope.lunaReleaseMeta.textContent, /Čeká publikace/);
+  publication.scope.githubBatchAudit = {...publication.scope.githubBatchAudit,state:"aligned",origin_head:"b".repeat(40)};
+  publication.scope.currentWorkstreamLiveStatus = live();
+  publication.scope.currentWorkstreamLiveStatus.deployment.state = "verified_other_main";
+  assert.match(publication.test.lunaReleasePanelState().message, /Čeká nasazení/);
+  publication.scope.currentWorkstreamLiveStatus = live();
+  publication.scope.currentWorkstreamLiveStatus.main.origin_evidence_read_only = false;
+  assert.equal(publication.test.lunaReleasePanelState().state, "unverified");
+  publication.scope.currentWorkstreamLiveStatus = live();
+  publication.scope.currentWorkstreamLiveStatus.main.origin_short = "a".repeat(12);
+  assert.equal(publication.test.lunaReleasePanelState().state, "unverified");
+  publication.scope.currentWorkstreamLiveStatus = live();
+  publication.scope.currentWorkstreamLiveStatus.runtime.state = "delivery_uncertain";
+  assert.equal(publication.test.lunaReleasePanelState().state, "blocked");
+  publication.scope.currentWorkstreamLiveStatus = live();
+  publication.scope.githubBatchAudit.ok = false;
+  assert.equal(publication.test.lunaReleasePanelState().state, "unverified", "stale tracking refs cannot replace a failed fresh audit");
+  publication.scope.githubBatchAudit.ok = true;
+  publication.scope.currentWorkstreamLiveStatus = live();
+  publication.scope.activeWorkstreamId = "project-mmtx";
+  assert.equal(publication.test.lunaReleasePanelState().state, "unverified", "Camino/Cockpit proof cannot leak into another workstream");
+  publication.scope.currentWorkstreamLiveStatus.workstream_id = "project-mmtx";
+  publication.scope.workstreamProductionTarget = "github_pages";
+  assert.equal(publication.test.lunaReleasePanelState().state, "unverified", "Cockpit deployment is not a Pages publication");
+  publication.scope.lunaReleaseJob = {workstream_id:"project-mmtx", deployment_target:"github_pages", state:"completed",
+    push_state:"confirmed",deployment_state:"confirmed",gate:{passed:true,mode:"full",test_count:10},
+    verification:{deployment_target:"github_pages",state:"deployed",smoke_http_status:200,main_head:"b".repeat(40)}};
+  assert.equal(publication.test.lunaReleasePanelState().state, "current");
+  publication.scope.lunaReleaseJob.workstream_id = "project-camino";
+  assert.equal(publication.test.lunaReleasePanelState().state, "unverified");
+  publication.scope.lunaReleaseStatusLoaded = false;
+  publication.test.syncControls();
+  assert.equal(publication.scope.lunaReleaseRefreshBtn.disabled, false, "read-only refresh remains usable after status failure");
+
+  const finished = harness(async () => ({ok:true,job:{state:"completed",active:false,updated_at:"2026-10-23T11:00:00Z"}}));
+  finished.scope.currentWorkstreamLiveStatus = live();
+  await finished.test.loadLunaReleaseStatus();
+  assert.equal(finished.scope.currentWorkstreamLiveStatus, null, "a newer terminal receipt invalidates stale work evidence");
+  assert.equal(finished.scope.lunaReleaseStartBtn.hidden, true);
+  assert.equal(finished.calls.some(call => call.path.endsWith("/start")), false);
+  const otherReceipt = harness(async () => ({ok:true,job:{state:"completed",active:false,workstream_id:"project-camino"}}));
+  otherReceipt.scope.profileSelect.options = [{value:"project-camino",textContent:"Camino"}];
+  await otherReceipt.test.loadLunaReleaseStatus();
+  assert.match(otherReceipt.scope.lunaReleaseStatus.textContent, /^Účtenka: Camino/);
+  assert.equal(otherReceipt.scope.lunaReleaseStartBtn.hidden, true);
+
   const exact = harness(async (path) => path.endsWith("/audit") ? audit : emptyStatus);
   for (const command of ["p+n", "p*n", "vše p+n", " P+N "]) {
     assert.equal(exact.test.exactLunaReleaseCommand(command), true, command);

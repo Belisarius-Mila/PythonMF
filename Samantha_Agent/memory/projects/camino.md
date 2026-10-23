@@ -12,6 +12,8 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 
 ## Aktuální stav
 
+- 2026-10-23 12:34 CEST: Lokální Xcode podpis opravený v a50a9007, živé Camino–MMTX–Camino PASS. Panel p+n lokálně rozlišuje aktuální/pending/blokované/neověřené stavy, čerstvý GitHub a správný cíl; opakování v dalších akcích. 93 cílených testů a JS syntaxe PASS. Commit a p+n celého balíčku Lunou výslovně schválené.
+
 - 2026-10-23 12:22 CEST: Lokální podpis Xcode sjednocený přes ignorovaný LocalSigning.xcconfig; duplicitní tým mimo verzovaný projekt, skupina zachovaná. Debug/Release build settings potvrzují stejný tým a bundle ID. Následuje ověření přepnutí Camino–MMTX a oprava stavů p+n; celé vydání výslovně schválené Lunou.
 
 - 2026-10-23 10:49 CEST: Dokumentace Camina a střižny odpovídá funkčnímu vydání d8d16f1b. Panel Texty a komentáře nasazený přes Lunu (účtenka 4b1ed8c23af048f133e00971d0ad1038, plná brána PASS / 2174 testů, smoke 5/5), HTTP znovu ověřené. Zoom Mílou obecně přijatý. Nové karty/poslechové kopie a Safari čekají na samostatnou funkční přejímku. Aktualizace návodů je samostatný dokumentační checkpoint pro již schválené p+n Lunou.
@@ -3484,3 +3486,15 @@ Technický důkaz:
   nastavení; skupiny a reference zachované. xcodebuild -showBuildSettings
   pro Debug i Release: místní tým účinný, bundle ID shodné. Původní lokální
   xcconfig má shodný SHA-256. Účtenky pouze data/private/human_adam_switch_release_20261023/.
+
+## 2026-10-23 12:34 CEST — Živé ověření přepnutí po sjednocení Xcode
+
+Hotovo: Po commitu a50a9007 a čistém zarovnání profilů skutečné přepnutí
+Camino → MMTX → Camino prošlo. Debug i Release zachovávají účinný místní
+podpisový tým; žádný podpisový údaj se nově necommitoval.
+Rozhodnutí: Schválené oba body a společné p+n Lunou; ochrana čistého main
+zůstává zachovaná. UI část je v kanonickém proudu project-cockpit.
+Další krok: P+n obou commitů přes Lunu, následná kontrola a návrat do Camina.
+Navrhované další kroky: Uživatel po obnově Human–Adam přepne na MMTX.
+Technický důkaz: Dva skutečné registrované profile POST úspěšné, bez zprávy
+či modelového tahu; redigovaný switch_before_ui.json pouze v private.

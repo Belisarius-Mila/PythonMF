@@ -1,6 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-23 12:34 CEST: Lokální Xcode podpis opravený v a50a9007, živé Camino–MMTX–Camino PASS. Panel p+n lokálně rozlišuje aktuální/pending/blokované/neověřené stavy, čerstvý GitHub a správný cíl; opakování v dalších akcích. 93 cílených testů a JS syntaxe PASS. Commit a p+n celého balíčku Lunou výslovně schválené.
+
 - 2026-10-20 22:23 CEST: Výslovný vývoj Lunou je lokálně funkční i na skutečném vícesouborovém Camino/JS úkolu. Centrální simple_developer = gpt-6-luna/high, žádný Sol fallback. Ověřit finální účtenku schváleného p+n 92b4b7704c6503fb8b2ed300b600c7f9 a živý audit. Při completed navázat fyzickou přejímkou fotografie v Cockpitu na Macu/iPhonu; p+n slepě neopakovat. Tento Git checkpoint zachycuje stav před vydáním; výsledek publikace/nasazení je v přesné účtence a logs/luna_photo_release_20261020.log.
 
 - 2026-10-20 22:19 CEST: Skutečná Luna vytvořila vícesouborový návrh fotografií; přesné převzetí ho zastavilo kvůli jedné nepřesné citaci old v Node testu. Zdroje beze změny. Doplněná registrovaná jednorázová review_anchors opravuje pouze citaci původního textu, nové kódy Luny nepřepisuje; nová izolace a testy, žádný další modelový tah.
@@ -2000,3 +2002,34 @@ Rozhodnutí: výslovný pokyn Míly má vždy přednost před heuristikou pro na
 Další krok: Ověřit finální účtenku schváleného p+n 92b4b7704c6503fb8b2ed300b600c7f9 a živý audit. Při completed navázat fyzickou přejímkou fotografie v Cockpitu na Macu/iPhonu; p+n slepě neopakovat. Tento Git checkpoint zachycuje stav před vydáním; výsledek publikace/nasazení je v přesné účtence a logs/luna_photo_release_20261020.log.
 Navrhované další kroky: fyzická přejímka portálového předání v některém následujícím výslovném úkolu, bez opakování dokončené aktivace.
 Technický důkaz: Skutečný model gpt-6-luna/high; původní job d67ea8e3a4c26b3c088fd33a821194e8, přijatá kontrola 393b9e1a2d6920d7ed27d41c74473cea, 4 původní FAIL → 4 PASS. Další modelový pokus neproběhl, původní odhad 0,161725 Standard, kontrola 0. Node PASS; integrační běh 69 testů, po opravě jediného fixture rozměru původních 68 PASS + konkrétní 1 PASS. Statická brána PASS. Důkazy logs/luna_photo_accepted_20261020.log, luna_photo_integration_tests_20261020.log, luna_photo_frontend_contract_final_20261020.log. Aktivace role doložená původním probe 3a1b667eeb634603be866357921150f5; release_executor zachovaný. Riziko: applying znamená přerušený vícesouborový zápis a vyžaduje kontrolu; žádné automatické retry.
+
+## 2026-10-23 12:34 CEST — Přepínání proudů a panel p+n
+
+Hotovo:
+- Lokální Xcode podpis se dědí z ignorovaného xcconfig a skutečné přepnutí
+  Camino → MMTX → Camino po commitu a50a9007 prošlo. Čistota main zůstává bránou.
+- Panel p+n rozlišuje aktuální stav, čekající publikaci/nasazení, blokující
+  změny a neověřený stav. Při aktuálním nasazení skrývá běžné předání;
+  opakování je samostatná vědomá akce s původním auditem a potvrzením.
+- Čerstvý GitHub audit a správný proud/cíl jsou nutné; MMTX/Pages se
+  neposuzují podle Cockpitu. Účtenka má název svého proudu, staré pracovní
+  snímky se po dokončení publikace obnovují.
+
+Rozhodnutí:
+- Míla schválil oba body a p+n výsledných commitů Lunou. Žádná změna
+  backendových bezpečnostních bran, role/modelu nebo publikačního postupu.
+
+Další krok:
+- Commit a p+n celého balíčku registrovanou Lunou v proudu Cockpit; po
+  dokončení ověřit nové UI a přepnutí, vrátit původní proud Camino.
+
+Navrhované další kroky:
+- Po obnovení Human–Adam uživatelsky zkontrolovat stav aktuální publikace
+  a výběr MMTX; samotný uzavřený panel dalších akcí nic nespouští.
+
+Technický důkaz:
+- 93 cílených UI/live-status/submission testů PASS včetně rozšířeného Node
+  scénáře; JavaScript syntaxe PASS. Debug/Release místní tým a bundle ID
+  shodné, živý round-trip proudů PASS. Fyzický Safari proklik neověřený.
+- Report reports/human_adam_workstream_pn_fix_2026_10_23.md; soukromé
+  účtenky pouze private. Publikaci a nasazení doloží vlastní účtenka Luny.

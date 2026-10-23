@@ -4139,3 +4139,15 @@ Technický důkaz:
   nastavení; skupiny a reference zachované. xcodebuild -showBuildSettings
   pro Debug i Release: místní tým účinný, bundle ID shodné. Původní lokální
   xcconfig má shodný SHA-256. Účtenky pouze data/private/human_adam_switch_release_20261023/.
+
+## 2026-10-23 12:34 CEST — Živé ověření přepnutí po sjednocení Xcode
+
+Hotovo: Po commitu a50a9007 a čistém zarovnání profilů skutečné přepnutí
+Camino → MMTX → Camino prošlo. Debug i Release zachovávají účinný místní
+podpisový tým; žádný podpisový údaj se nově necommitoval.
+Rozhodnutí: Schválené oba body a společné p+n Lunou; ochrana čistého main
+zůstává zachovaná. UI část je v kanonickém proudu project-cockpit.
+Další krok: P+n obou commitů přes Lunu, následná kontrola a návrat do Camina.
+Navrhované další kroky: Uživatel po obnově Human–Adam přepne na MMTX.
+Technický důkaz: Dva skutečné registrované profile POST úspěšné, bez zprávy
+či modelového tahu; redigovaný switch_before_ui.json pouze v private.
