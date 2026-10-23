@@ -1,11 +1,30 @@
 # Camino P2-C/D — editor a MP4 z uzavřeného dne
 
-Stav k 20. 10. 21:23 CEST: oprava mazání `84336632` je nasazená a Mílou
-přijatá, MP4 dnů 6 a 7 hotová. Po přesném úklidu čtyř osiřelých video metadat
-projde 8. říjen validací se 44 zdroji; projekt tohoto dne zatím znovu neuložený.
-Míla 12. 10. výslovně zadal pokračování editorem a MP4 nad potvrzenou Mac
-sadou 6. 10. Telefon, běžící Camino, jeho archiv a síť se nemění.
-Míla potvrdil „ok p+n cockpit“; přesný `7c9547fc` je na GitHubu a nasazený pouze Cockpit. Hotové MP4 se znovu nevyráběly.
+## Aktuální stav — 23. 10. 2026
+
+Editor a export jsou v Cockpitu dostupné pro uložené jednodenní projekty.
+Doplněný panel **Texty a komentáře** nabízí přijaté texty do titulku nebo
+samostatné karty a poslech/umístění původního hlasu. Ovládání krok za krokem
+je v [návodu střižny](../film/README.md), technické vazby a otevřené zkoušky
+v [reportu textů a komentářů](FILM_TEXT_AUDIO_REPORT.md).
+
+Funkční vydání panelu `d8d16f1b` je potvrzené účtenkou Luny
+`4b1ed8c23af048f133e00971d0ad1038`: completed, push a nasazení do Cockpitu
+confirmed, plná brána PASS (2 174 testů), kontroly po restartu 5/5.
+Nový HTML/JS panel je ověřený přes HTTP, chráněné Camino a autosave beze
+změny. Samostatná služba Camino ani iPhone klient se tímto p+n neaktualizovaly.
+Produkční film nebo nový střih se při vydání nevyráběl.
+
+Uživatelský proklik/poslech nového panelu a samostatný funkční důkaz nových
+render větví textové karty a poslechové kopie zůstávají otevřené.
+Obecné dřívější přijetí střižny ani plná regresní brána je nenahrazují.
+P2-F spojení více dnů do jednoho filmu je stále pozdější samostatná etapa.
+
+## Historické záznamy a technický rozsah
+
+Následující datované záznamy zachycují tehdejší stav. MP4 dnů 6 a 7 Míla
+přijal dříve; 20. 10. po přesném úklidu prošel den 8 validací se 44 zdroji.
+Tento dokumentační krok znovu nevytváří projekt tohoto dne ani jeho MP4.
 
 ## Trvalé smazání jedné varianty — 20. 10. 2026
 

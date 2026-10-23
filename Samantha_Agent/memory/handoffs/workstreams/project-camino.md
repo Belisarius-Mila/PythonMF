@@ -1,63 +1,21 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-10-23 09:53 CEST: První p+n textů a komentářů zastavila plná brána na jediné zastaralé délce/otisku frontendu (2174 testů, 1 FAIL). Očekávané délka, řádky a SHA-256 složené stránky opravené; cílený kontrakt 1/1 PASS. GitHub zůstal 07109721, nasazení nezačalo; původní účtenka a důkaz zachované. Připravený opravný checkpoint pro nové přesné předání Luně. Safari a nové render větve stále neověřené.
-
-- 2026-10-23 09:16 CEST: Texty a komentáře jsou lokálně implementované ve střižně: přijatý text do titulku nebo samostatné karty, poslech a vložení hlasu k záběru. Statická brána PASS; funkční render, automatické testy a Safari NEOVĚŘENO. Bez push/nasazení a produkčního renderu. Report FILM_TEXT_AUDIO_REPORT.md. Předchozí p+n obou commitů přes Lunu potvrzené; Míla potvrzuje, že zoom funguje a zatím stačí.
-
-- 2026-10-23 08:11 CEST: Zoom fotografie i videa je místně implementovaný: gesto dvěma prsty, skutečná aktuální hodnota a podporované volby 0,5×/1×/2×. Zadní kamera přednostně používá dostupný virtuální víceobjektivový přístroj, náhled začíná na 1×. Limity a měřítko se berou ze zařízení; 2× není slib optického teleobjektivu. Swift 79/79 PASS, arm64 Debug a Release 0.1.0 (20) PASS, nepodepsaná IPA ověřená. Instalace, fyzická přejímka, push a nasazení neprovedené. Další krok: aktualizace stejné aplikace přes SideStore a fyzické foto/video zkoušky podle CAMERA_ZOOM_REPORT.md; případné p+n pouze registrovanou Lunou.
-
-- 2026-10-20 22:23 CEST: Fotografie mají lokálně Otevřít fotografii v nové kartě a nemají renderovaný náhled záběru. Read-only PNG bez EXIF/GPS a bez diskové kopie; správné natočení/ICC, aktuální projekt/soukromí/hash a kontrola po dekódování. Video ovládání zachované. Funkční kód skutečně vytvořila Luna, Adam zkontroloval a převzal; opravil pouze citaci old, testové literály, úklid testserveru a složený frontendový otisk. Ověřit finální účtenku schváleného p+n 92b4b7704c6503fb8b2ed300b600c7f9 a živý audit. Při completed navázat fyzickou přejímkou fotografie v Cockpitu na Macu/iPhonu; p+n slepě neopakovat. Tento Git checkpoint zachycuje stav před vydáním; výsledek publikace/nasazení je v přesné účtence a logs/luna_photo_release_20261020.log.
-
-- 2026-10-20 22:13 CEST: Míla potvrdil funkční opravu osiřelých metadat. Nově požaduje u fotografií Otevřít fotografii a odstranit jejich renderovaný náhled záběru. Vývoj i p+n výslovně Lunou; nejprve zprovoznit širší delegaci. Centrální vývojová role již gpt-6-luna/high, přejímací kontrakt připravený, samotná funkce zatím chybí.
-
-- Aktualizováno: 2026-10-20 21:23 CEST — odstraněná čtyři osiřelá metadata videí, den 8. října znovu platný
-
-### Hotovo
-- Oprava mazání filmových variant `84336632` byla přes Lunu pushnutá a nasazená
-  pouze do Cockpitu. Míla potvrdil funkční mazání a hotová MP4 dnů 6. a 7. října.
-- Při zakládání filmu 8. října chyběly čtyři originály videí: jejich metadata
-  byla přijatá před zastavením přenosu, ale Míla videa potom smazal na telefonu.
-  Nebyla ve frontě, neměla upload session ani mediální účtenku.
-- Po přesném potvrzení globální brzdy a zkoušce na kopii v paměti odstraněny
-  pouze čtyři předem určené řádky živého inventáře Asset. Před změnou ověřená
-  obnovovací kopie metadata DB v private; transakce, FK a ostatní řádky PASS.
-- Zůstalo 304/304 ověřených originálů se shodnými SHA-256, všech 894 přijatých
-  operací, 124 Momentů, identity, kurzor, flags a ostatních 10 metadata tabulek.
-  Mediální DB i všech 797 existujících filmových souborů beze změny.
-- Den 8. října prošel skutečným validátorem: 44 zdrojů, 24 fotografií,
-  14 videí a 6 zvuků. Nový projekt ani MP4 se automaticky nevyráběly.
-- Camino bylo krátce zastavené registrovaným vlastněným řízením, offline
-  kontrola a záloha proběhly před zápisem, původní služba znovu běží.
-  HTTPS owner health 200 a Cockpit katalog OK; konfigurace a síť shodné.
-
-### Rozhodnutí
-- Přesný jednorázový úklid čtyř nepřenesených videí tohoto dne podle Mílova
-  potvrzení. Historické synchronizační obálky a sekvence se nepřepisují.
-- Telefon, originály, střihy ani existující filmové varianty se nemažou.
-
-### Otevřeno / rizika
-- Další skutečný kontakt iPhonu po opravě zatím není ověřený.
-- Obecný serverový kontrakt mazání při každém lokálním smazání tím nevznikl;
-  případný další takový úklid vyžaduje vlastní přesný inventář a potvrzení.
-
-### Další krok
-- V Cockpitu znovu uložit projekt pro 8. října a pokračovat střihem/MP4.
-
-### Navrhované další kroky
-- Další připomínky střihu podle Míly; P2-F spojování dnů zůstává později.
-
-### Technický důkaz
-- `logs/camino_metadata_cleanup_20261020.log`: rows_removed=4, zbytek 304,
-  FK/quick_check PASS, 304 originálů / 2 339 685 533 B SHA-256 zachovaných,
-  797 filmových souborů shodných, projekty 6. a 7. dne platné, den 8 validní.
-- Přesný plán, snapshot a účtenka jsou jen v `data/private/camino_metadata_cleanup/`.
-- Předchozí vydání opravy: účtenka `68228ea9cbb839b07316f30df8bd9322`,
-  push/deploy confirmed, 2 151 plných testů PASS a smoke 5/5.
-  Terminál účtenku převzal; samostatný portálový návrat nepotvrzený.
+- 2026-10-23 10:49 CEST: Dokumentace Camina a střižny odpovídá funkčnímu vydání d8d16f1b. Panel Texty a komentáře nasazený přes Lunu (účtenka 4b1ed8c23af048f133e00971d0ad1038, plná brána PASS / 2174 testů, smoke 5/5), HTTP znovu ověřené. Zoom Mílou obecně přijatý. Nové karty/poslechové kopie a Safari čekají na samostatnou funkční přejímku. Aktualizace návodů je samostatný dokumentační checkpoint pro již schválené p+n Lunou.
+- Praktické návody: `camino/README.md`, `camino/app/README.md`,
+  `camino/film/README.md`; reporty CAMERA_ZOOM_REPORT.md,
+  FILM_TEXT_AUDIO_REPORT.md a P2CD_EDITOR_MP4_REPORT.md.
+- Originály a existující střihy zachované. Hlas má uložený absolutní čas,
+  po změně pořadí/délek obrazu jej uživatel znovu zkontroluje. Jen pro mě,
+  skryté a nejasné zdroje zůstávají mimo film.
+- Nové p+n dokumentace je výslovně autorizované; bez produkčního renderu,
+  zásahu do iPhonu nebo samostatné služby Camino.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: Camino
+
+Následující původní handoff a datované záznamy jsou historie; aktuální bod
+navázání je v označeném bloku výše.
 
 Nazev: Camino
 Pracovni proud: project-camino
@@ -3276,3 +3234,34 @@ Technický důkaz:
   failure_resolution.json a původní first_failed_gate.log se zachovávají.
 - Plná nová brána a nasazení teprve přes další přesnou účtenku Luny;
   Safari a nové větve renderu tím zatím nejsou přijaté.
+
+## 2026-10-23 10:49 CEST — Aktuální dokumentace Camina a filmové střižny
+
+Hotovo:
+- Hlavní rozcestník, iPhone návod, střižna a technické reporty popisují zoom,
+  přijaté texty, titulky, karty, poslech, umístění hlasu a soukromé MP4.
+- Opravené zastaralé stavy čekajícího p+n; funkční panel je prokazatelně
+  pushnutý a nasazený. Historické etapy jsou označené jako historie.
+
+Rozhodnutí:
+- Míla výslovně zadal aktualizaci dokumentace, commit a jeho p+n Lunou.
+  Dokumentace nemění aplikaci, data, existující střihy ani rozsah funkcí.
+
+Další krok:
+- Předat dokumentační commit registrované Luně a ověřit konečnou účtenku.
+
+Navrhované další kroky:
+- Fyzicky projít panel Texty a komentáře, uložení/reload a krátký náhled
+  s titulkem, kartou a vlastním hlasem; podrobný zoom protokol jen podle potřeby.
+
+Technický důkaz:
+- Funkční vydání d8d16f1b: účtenka 4b1ed8c23af048f133e00971d0ad1038,
+  completed, push/deploy confirmed, plná brána PASS (2174 testů), smoke 5/5,
+  chráněné služby zachované. Při aktualizaci dokumentace HTTP znovu vrací
+  nový panel a runtime otisk shodný s účtenkou.
+- Obecné Mílovo potvrzení zoomu neprokazuje všechny telefonní scénáře.
+  Samostatné nové větve renderu karty/poslechu ani Safari nejsou přijaté.
+- Stav publikace tohoto dokumentačního checkpointu určí až jeho vlastní
+  účtenka; výsledek předchozího funkčního vydání jej nezastupuje.
+- Dokumentační kontrola: 11 Markdown souborů, 52 místních odkazů bez chyb;
+  rychlá statická brána a diff --check PASS. Žádná funkční změna kódu.

@@ -1,6 +1,14 @@
 # Camino — první krok zoomu fotoaparátu
 
-Stav: 2026-10-23 08:11 CEST; místní implementace a sestavení PASS, telefonní přejímka otevřená.
+Stav dokumentace: 23. 10. 2026. Zoom má Mílovo obecné potvrzení funkčnosti
+„funguje, zatím to stačí“. Jednotlivé scénáře níže nejsou tímto potvrzením
+samostatně přijaté; přesná instalovaná verze ani postup instalace nebyly
+v potvrzení doložené. Poslední připravený Release je 0.1.0 (20).
+
+Zdroj zoomu `07109721` byl pushnutý v balíčku přes registrovanou Lunu,
+účtenka `698ae54bb9df52516cd35c2821f88f4c`: push/deploy potvrzené,
+plná brána PASS (2 174 testů v účtence), kontroly Cockpitu 5/5. Toto p+n
+neinstalovalo klienta do iPhonu. [Praktický návod](../app/README.md).
 
 ## Rozsah
 
@@ -31,12 +39,12 @@ Datové schéma, soukromí, ukládání originálů a synchronizační kontrakt 
 - SHA-256: `b2c6eaab20343f569a87c4b6203f3078f83a881ec56d31efa6b5730d707bb031`.
 - Kopie ve Stahování má shodný hash. Balíček nemá podpis/profil pro zařízení;
   při instalaci jej musí podepsat SideStore při zachování identity stávající aplikace.
-- Sestavení nepředstavuje fyzické ověření kamery. Instalace, push ani nasazení
-  nebyly provedené. P+n provádí po samostatném pokynu registrovaná Luna;
-  instalace klienta do iPhonu je samostatný krok.
+- Sestavení nepředstavuje fyzické ověření kamery. Push a nasazení společného
+  runtime jsou již doložené účtenkou výše; telefonní instalace je samostatná.
+  Mílovo potvrzení funkčnosti není dokladem každého bodu podrobného plánu.
 - Logy, manifest a technický archiv Gitu: `data/private/camino_zoom_20261023/`.
 
-## Fyzická přejímka — vše dosud NEOVĚŘENO
+## Podrobná fyzická přejímka — jednotlivé scénáře NEOVĚŘENO
 
 1. Před aktualizací ověřit dostupnost původních dat. Aktualizovat stejnou
    aplikaci bez odinstalace; po spuštění zkontrolovat zachování záznamů.

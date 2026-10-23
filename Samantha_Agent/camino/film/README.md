@@ -1,4 +1,111 @@
-# Camino film
+# Camino — filmová střižna
+
+
+## Aktuální stav — 23. 10. 2026
+
+Střižna je dostupná v Cockpitu jako **Film Camino**. Vydání `d8d16f1b`
+zahrnuje panel **Texty a komentáře**; Luna doložila push, nasazení,
+plnou bránu PASS (2 174 testů v účtence) a kontroly po restartu 5/5.
+Účtenka `4b1ed8c23af048f133e00971d0ad1038`. Nový panel byl po nasazení
+ověřený na HTTP, jeho fyzický proklik a poslech uživatelem zatím čekají.
+Samostatné nové render větve karet a poslechových kopií nemají vlastní
+funkční přejímku. [Podrobný report](../docs/FILM_TEXT_AUDIO_REPORT.md).
+
+## Běžný postup
+
+### 1. Vyber film a připrav podklady
+
+Obnov stránku Cockpitu, otevři **Film Camino** a v **Moje filmy** vyber
+uložený film. Jiný den lze vybrat z Mac dat. Nový projekt ulož až po
+skutečném dokončení přenosů a vědomém potvrzení konečnosti dat tohoto dne
+na Macu. Prázdná fronta telefonu ani samotný seznam dnů úplnost nedokládají.
+Při chybě originálů, účtenek nebo soukromí se projekt nevytvoří.
+
+Každý uložený jednodenní film má vlastní revize a exporty. Přepnutí projektu
+čeká na dokončení uložení rozpracovaného střihu. Vícedenní film P2-F zatím
+není součástí editoru.
+
+### 2. Uprav obraz
+
+- Záběry řaď šipkami Dříve/Později; výslovné vyřazení mění jen film.
+- U fotografie uprav délku a titulek. **Otevřít fotografii** zobrazí v nové
+  kartě odvozený obraz bez původních EXIF/GPS; nevytváří se render záběru.
+- Video je výchozí celé. **Otevřít video pro střih** připraví chráněný náhled;
+  vyber **Tady začít / Tady skončit**, případně dolaď číselné časy a použij
+  **Přehrát výběr**. Tato volba nevyrábí nový filmový export.
+- **Vytvořit náhled záběru s titulkem** u videa už vytvoří dílčí render,
+  v němž je výsledný titulek i umístěný komentář.
+
+Platné úpravy se automaticky ukládají do nové revize. Před přepnutím nebo
+zavřením vyčkej na potvrzení **Uložena revize**. Při výpadku spojení zůstává
+koncept v otevřené kartě; není to trvalá záloha po jejím násilném zavření.
+
+### 3. Použij text deníku
+
+V panelu **Texty a komentáře → Texty deníku** vyber přijatý text pro tento
+den. Nabízí se přednostní lidská revize; skryté a soukromé podklady chybějí
+záměrně. Text lze pro film upravit bez změny deníku.
+
+- Vyber zařazený obrazový záběr a **Nahradit titulek záběru**. Titulek má
+  nejvýše 140 znaků na jednom řádku; dlouhý text se automaticky nezkracuje.
+- **Přidat textovou kartu za záběr** vytvoří samostatný obraz na tmavém
+  podkladu na 5 sekund. U karty změň délku, text, zařazení a umístění
+  na začátek nebo za konkrétní záběr. Karta je součástí uložené časové osy.
+- Jedna karta má nejvýše 1000 znaků, délku 0,1–300 s; film nejvýše 32 karet.
+  Pokud se text čitelně nevejde, export jej odmítne. Text vědomě rozděl do
+  více karet nebo uprav; neztrácí se tichým zkrácením.
+
+Filmová revize odkazuje na přesnou přijatou textovou revizi a její otisk.
+Pozdější úprava deníku starý střih automaticky nepřepíše. Pro nové podklady
+použij **Načíst poslední střih a texty**; neuložené změny filmu nejprve zachovej.
+
+### 4. Vlož vlastní komentář
+
+1. U zvukové části zvol **Poslechnout / vybrat úsek**. Po přípravě odvozené
+   poslechové kopie spusť přehrávač; originál se touto cestou nevydává.
+2. Výchozí nabídka je celá nahrávka. Případný začátek a konec vyber ručně.
+3. Vyber obrazový záběr a zvol **Vložit komentář k záběru**. Nastaví se
+   začátek hlasu na začátek tohoto záběru a komentář se zařadí do filmu.
+4. Překrytí jiného hlasu nebo přesah za obraz se odmítne. Prodluž obraz,
+   přidej záběry/kartu nebo vědomě uprav úsek řeči; automatické useknutí není.
+5. Dolaď hlasitost a zvuk videa během komentáře (výchozí poměr 0,2).
+   Ověř souběh v krátkém renderovaném náhledu.
+
+**Hlas má uložený absolutní čas.** Po změně pořadí či délek obrazu jeho
+umístění zkontroluj nebo jej vlož k záběru znovu. Automatický přepis,
+generovaný hlas, hudba a AI výběr nejsou součástí této funkce.
+
+### 5. Vyrob náhled a MP4
+
+Po potvrzeném uložení zvol **Náhled úseku** pro krátkou kontrolu, **Vytvořit
+náhled 720p** nebo **Vytvořit MP4 1080p**. Náhled a finále vycházejí ze stejné
+uložené revize; starý export zůstane označený svou revizí. Fronta přežije
+zavření stránky i restart Cockpitu. Přerušený export opakuj vědomě podle
+stavu fronty; před opakováním ztracené odpovědi nejprve obnov přehled.
+
+Hotový výstup přehraj celý se zvukem. Tlačítko **Otevřít / uložit MP4**
+slouží k soukromému stažení, nic veřejně nepublikuje. Vybranou nepotřebnou
+filmovou variantu lze po přesném potvrzení **Smazat natrvalo**; dialog ukáže
+rozsah a velikost. Originály a uložené střihy se tím nemažou. Otevřený
+přehrávač nebo stažené kopie mohou dál držet místo či vlastní kopii dat.
+
+## Když něco chybí
+
+- **Text:** zkontroluj správný den, vědomé Uložit v deníku a přijetí textu na
+  Macu; rozepsaný koncept ani přenesená fotografie nejsou důkazem přenosu
+  textu. Při auditu 23. 10. neměl 6. říjen přijatý text, měl však pět hlasových
+  nabídek. Jde o datovaný audit, nikoli pravidlo pro budoucí stav dne.
+- **Komentář:** musí patřit do povolených uzavřených podkladů a mít ověřené
+  médium. Samotná přítomnost nabídky ještě neznamená zařazení do filmu.
+- **Projekt nebo export přestal být dostupný:** obnov ověření zdrojů a
+  aktuálního soukromí. Starý odkaz ani náhled neobcházejí nové omezení.
+- **Dlouhý text nebo hlas:** délku a obsah uprav vědomě; cílová stopáž je
+  automaticky nezkrátí. Podrobná [technická omezení](../docs/P2CD_EDITOR_MP4_REPORT.md).
+
+## Technické a historické podklady
+
+Následující etapy popisují jednotlivé vrstvy a původní zkoušky. Současné
+uživatelské ovládání je uvedené výše, provozní důkaz je v přesné účtence.
 
 ## P2-A: syntetický prototyp
 
@@ -66,7 +173,7 @@ nikoli iPhone důkaz; telefonní fronty se nevymýšlejí. Uložení vytváří
 samostatné soukromé filmové soubory mimo archiv a Git. Službu ani aplikaci
 Camino nemění. Registrovaný create vyžaduje výslovnou konečnost Mac dat.
 Cockpit Film Camino zobrazí přehled uloženého dne, celá videa a počty audia;
-editor/render zůstávají další fáze. Každý přehled znovu ověřuje povolenost
+na samotné uzavření navazuje editor a render popsaný výše. Každý přehled znovu ověřuje povolenost
 a SHA-256, neplatný stav staré položky ani počty nevydá.
 
 ## P2-C/D: uložený střih a soukromý MP4 export
@@ -82,7 +189,8 @@ kopiích, ověří všechna média a znovu prověří zdroje i revizi. Náhled 7
 dílčí úsek a MP4 1080p jsou v soukromé idempotentní frontě. Neúplný výsledek
 se nevydává; každý GET/HEAD/Range kontroluje aktuální povolenost projektu.
 MPO foto používá hlavní SDR obraz s EXIF/ICC převodem, HDR video je zatím
-odmítnuté. Po přerušení se export opakuje od začátku a staré soubory se zachovají.
+odmítnuté. Po přerušení se export opakuje od začátku; staré varianty zůstávají
+do jejich výslovného trvalého smazání v editoru.
 
 Registrovaný workflow `camino_film_render` po výslovném zadání spouští:
 

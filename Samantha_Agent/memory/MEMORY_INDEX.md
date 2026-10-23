@@ -60,7 +60,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md`; `../camino/docs/FILM_TEXT_AUDIO_REPORT.md` — 2026-10-23 09:53 CEST: První p+n textů a komentářů zastavila plná brána na jediné zastaralé délce/otisku frontendu (2174 testů, 1 FAIL). Očekávané délka, řádky a SHA-256 složené stránky opravené; cílený kontrakt 1/1 PASS. GitHub zůstal 07109721, nasazení nezačalo; původní účtenka a důkaz zachované. Připravený opravný checkpoint pro nové přesné předání Luně. Safari a nové render větve stále neověřené.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md`; `../camino/README.md`; `../camino/film/README.md` — 2026-10-23 10:49 CEST: Dokumentace Camina a střižny odpovídá funkčnímu vydání d8d16f1b. Panel Texty a komentáře nasazený přes Lunu (účtenka 4b1ed8c23af048f133e00971d0ad1038, plná brána PASS / 2174 testů, smoke 5/5), HTTP znovu ověřené. Zoom Mílou obecně přijatý. Nové karty/poslechové kopie a Safari čekají na samostatnou funkční přejímku. Aktualizace návodů je samostatný dokumentační checkpoint pro již schválené p+n Lunou.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md`; `technical/luna_release_orchestration.md` — 2026-10-20 22:23 CEST: výslovný vývoj vždy Lunou, před heuristikou pro nabídku. Centrální role gpt-6-luna/high, skutečná zkouška i první vícesouborový Camino/JS úkol převzaté; žádný Sol fallback. Běžící portál a stav p+n ověřit podle účtenky 92b4b7704c6503fb8b2ed300b600c7f9; fyzická přejímka portálu zůstává samostatná.
 

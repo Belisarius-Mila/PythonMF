@@ -1,9 +1,51 @@
 # Camino
 
-Soukromý cestovní deník: offline záznam na iPhonu, soukromé zpracování na Macu
-a pozdější film z povolených zdrojů.
+Soukromý cestovní deník: offline záznam na iPhonu, ověřené originály na Macu,
+soukromý Viewer a jednodenní film z povolených podkladů.
 
-**Stav: autoritativní podklady v0.5 + U15. C04d a C05b jsou fyzicky přijaté v dostupném rozsahu. C05c má pushnutý zdroj `f0f714f4` a podepsané Camino 0.1.0 (4) je nainstalované a spuštěné jako aktualizace stejného bundle ID. Telefon, Mac, Další záloha a AI mají nezávislé pravdivé stavy; T054/T055 jsou zatím jen synteticky ověřené a fyzický průchod C05c čeká. C05b služba je zastavená, token odvolaný a Funnel vypnutý. Viewer patří C08c–C08f.**
+## Aktuální orientace — 23. 10. 2026
+
+- **iPhone:** fotografie i video mají zoom gestem dvěma prsty a podporované
+  volby 0,5× / 1× / 2×. Míla potvrdil funkčnost a tento rozsah mu zatím stačí.
+  Poslední připravený balíček je 0.1.0 (20); potvrzení nenahrazuje úplný
+  protokol jednotlivých telefonních scénářů.
+- **Střižna v Cockpitu:** Moje filmy a výběr dne, uložené revize střihu,
+  přímý náhled fotografií/videí, ruční střih a soukromý export 720p/1080p.
+  Panel **Texty a komentáře** nabízí přijaté texty, titulky, samostatné
+  textové karty a poslech/umístění původního hlasu.
+- **Doložené funkční vydání panelu střižny:** `d8d16f1b`, účtenka Luny
+  `4b1ed8c23af048f133e00971d0ad1038`, push a nasazení do Cockpitu potvrzené,
+  plná brána PASS (2 174 testů v účtence), kontroly po restartu 5/5.
+  Při aktualizaci této dokumentace byl nový panel znovu dostupný přes HTTP.
+- **Otevřeno:** fyzická přejímka nového panelu na Macu/iPhonu, samostatný
+  důkaz nových větví renderu textové karty a poslechové kopie. Spojování
+  více dnů do společného filmu P2-F zůstává pozdější samostatný krok.
+
+P+n pro tento proud nasazuje společný runtime Samanthy/Cockpitu. Aktualizace
+aplikace na iPhonu a samostatné služby Camino jsou odlišné operace. Provozní
+stav se ověřuje živým auditem a přesnou účtenkou; tento text je datovaný přehled.
+
+## Návody
+
+- [iPhone: záznam, zoom, text a přenos do Macu](app/README.md)
+- [Filmová střižna: postup od výběru dne po MP4](film/README.md)
+- [Zoom: rozsah, balíček a hranice telefonního potvrzení](docs/CAMERA_ZOOM_REPORT.md)
+- [Texty a komentáře: ovládání, soukromí a důkaz nasazení](docs/FILM_TEXT_AUDIO_REPORT.md)
+- [Editor a export: technický report a historie](docs/P2CD_EDITOR_MP4_REPORT.md)
+
+## Základní pravidla
+
+Originály a starší revize se nepřepisují. Jen pro mě, skryté a nejasně
+povolené podklady nevstupují do Vieweru ani filmu. Do deníku je stále
+soukromý obsah. Textový koncept se nejprve vědomě uloží, pak přenese;
+prázdná fronta sama nedokládá úplnost filmových vstupů. Přepis ani film
+nejsou záloha. Nic se automaticky veřejně nesdílí.
+
+## Specifikace, paměť a historické etapy
+
+Podklady v0.5 společně se závazným dodatkem U15 jsou autoritou zadání.
+Starší etapové reporty zachycují tehdejší stav, nikoli současný běh služeb.
+V Human–Adam se projekt jmenuje **Camino** (`project-camino`).
 
 - [Podklady v0.5](CAMINO_podklady_v0.5/README_v0.5.md)
 - [Funkční specifikace v0.5](CAMINO_podklady_v0.5/CAMINO_funkcni_specifikace_v0.5.md)
@@ -13,8 +55,6 @@ a pozdější film z povolených zdrojů.
 - [Projektová paměť](../memory/projects/camino.md)
 - [Handoff](../memory/handoffs/workstreams/project-camino.md)
 - [TVBCP](../memory/tvbcp/workstreams/project-camino.md)
-
-V Human–Adam se projekt jmenuje **Camino** (`project-camino`).
 
 - [Audit prostředí C00](docs/ENVIRONMENT_AUDIT.md)
 - [Připravenost Camino Vieweru](docs/VIEWER_READINESS.md)
@@ -42,19 +82,8 @@ V Human–Adam se projekt jmenuje **Camino** (`project-camino`).
 - [Audio prototyp](prototypes/audio/README.md)
 - [Transfer harness C02b](prototypes/transfer/README.md)
 - [První integrovaná iPhone aplikace C04a](app/README.md)
-- [Aktuální report a překážky](docs/C01a_AUDIO_PROTOTYPE_REPORT.md)
+- [Historický report C01a a tehdejší překážky](docs/C01a_AUDIO_PROTOTYPE_REPORT.md)
 
-C05b používá přijatý C03b manifest jako autoritu a C05a serverovou finalizaci
-jako jediný důkaz hotového média. Přenos je alespoň-jednou: po zámku, relaunchi
-nebo síťové chybě se nejdřív porovná stav a odešlou se jen chybějící části.
-Session-owned privátní služba pro fyzické přijetí není C06a trvalé nasazení;
-nemá párovací UI, `launchd` dohled ani druhou zálohu.
-
-C05c nad stejným journalem počítá úplné Momenty odděleně od operací, souborů
-a bajtů a nikdy nepovýší kopii na Macu na další zálohu. Produkční výchozí stav
-pravdivě uvádí, že další záloha není ověřená a AI není zapnutá. Skutečná druhá
-kopie patří C06b a skutečné AI zpracování C07.
-
-Rozbalené podklady v0.4 a v0.5 jsou verzované včetně manifestů. Původní ZIPy
-jsou zachované lokálně a ignorované Gitem; profilové workspaces přebírají
-dokumenty. Původní v0.5 se kvůli dodatku nepřepisuje.
+Rozbalené podklady v0.4/v0.5 a jejich původní manifesty zůstávají zachované.
+Původní ZIPy jsou lokální a ignorované Gitem; původní podklady se kvůli
+novějším dodatkům nebo návodům nepřepisují.

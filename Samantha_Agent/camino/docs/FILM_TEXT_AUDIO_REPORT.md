@@ -2,9 +2,17 @@
 
 ## Rozsah a stav
 
-Míla schválil vývoj nabídnutého panelu Texty a komentáře. Implementace je
-lokální, nenasazená. Telefon, Camino služba a archiv se neupravují.
-Neproběhl produkční render ani zápis do existujícího filmového projektu.
+Panel Texty a komentáře je pushnutý a nasazený do Cockpitu z `d8d16f1b`.
+Registrovaná Luna: účtenka `4b1ed8c23af048f133e00971d0ad1038`, stav completed,
+push_state a deployment_state confirmed; plná brána PASS (2 174 testů
+v účtence, 380,4 s), kontroly po restartu 5/5. Nový panel byl po nasazení
+a při této dokumentační aktualizaci znovu ověřený přes HTTP; runtime odpovídá
+účtence. Terminál převzal účtenku, samostatný portálový callback se netvrdí.
+
+Telefon, Camino služba a archiv zůstaly při vydání zachované podle ochranné
+kontroly. Nevznikl produkční render ani zápis do existujícího filmového
+projektu. Praktický postup je v [návodu střižny](../film/README.md).
+Fyzická přejímka nového panelu a samostatné nové render větve jsou otevřené.
 
 Read-only audit dne 6. října: uložená revize 5, 25 obrazových záběrů,
 pět povolených zvukových částí, žádná zapnutá. Pro tento den nejsou na Macu
@@ -59,24 +67,27 @@ dílčí náhled i finále používají shodné pořadí a délky.
   žádný zapnutý hlas, 0 textů; původní Xcode nastavení má shodný SHA-256.
 - Čtecí zachycení jednoho existujícího dne s textem bez uložení: jedna
   povolená textová nabídka a rozřešení její přesné reference PASS.
-- Automatické testy nebyly přidávané ani spouštěné. Plná publikační brána,
-  syntetický render karty i poslechové kopie a proklik Safari zůstávají
-  NEOVĚŘENO. Statická brána není jejich náhradou.
+- Po prvním lokálním kroku byla dokončená plná publikační brána Luny:
+  PASS, 2 174 testů v účtence. Opravený frontendový kontrakt také samostatně
+  1/1 PASS. Nové testy pro kartu a poslechovou kopii nebyly přidané.
+- Syntetický render nových větví karty i poslechové kopie a fyzický proklik
+  Safari zůstávají NEOVĚŘENO. Regresní brána ani HTTP nejsou jejich náhradou.
 
-Další krok: funkční ověření persistence, soukromí, renderu a ovládání;
-případné samostatně schválené p+n přes registrovanou Lunu, potom fyzická
-přejímka titulku, karty a vlastního hlasu v krátkém náhledu.
+Další krok: na krátkém náhledu fyzicky ověřit titulek, kartu a vlastní hlas,
+uložení/reload a souběh zvuku. Nová publikace této dokumentace má vlastní
+účtenku a nepředstavuje takovou funkční přejímku.
 
 Redigované čtecí účtenky jsou v data/private/camino_texts_20261023/;
 žádný osobní text ani nahrávka nejsou v tomto reportu nebo Gitu.
 
-## Kontrolní oprava po první publikační bráně
+## Historie první publikační brány a opravy
 
 První Luna úloha a3d0c4730ea1ef7a0e9f3b5f7a2336b7 se zastavila před
 pushem: 2174 testů, jediný FAIL v očekávané délce složené stránky. Fixture
 neobsahoval rozšíření nového panelu. Po kontrole diffu aktualizovaná délka,
 počet řádků a SHA-256; stejný cílený kontrakt 1/1 PASS. Kontroly se
-nepřeskakují. Živý GitHub nadále 07109721, nasazení nezačalo, Xcode
-nastavení obnovené. Důkaz nejistotu push_state řeší externím ověřením,
-původní účtenku nepřepisuje. Opravený checkpoint vyžaduje nové přesné
-předání celého čekajícího balíčku registrované Luně.
+nepřeskakují. V okamžiku této neúspěšné úlohy zůstal živý GitHub na
+07109721 a nasazení nezačalo. Původní účtenka se nepřepisovala; nejistotu
+push_state vyřešil přímý důkaz z GitHubu. Opravený balíček se dvěma commity
+následně vydala Luna pod úspěšnou účtenkou uvedenou v úvodu. Xcode
+nastavení bylo po každé uzavřené úloze obnovené se shodným SHA-256.

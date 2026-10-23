@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-23 09:53 CEST — opravený frontendový kontrakt; nové p+n čeká na Lunu
+Aktualizováno: 2026-10-23 10:49 CEST — dokumentace po nasazení panelu; uživatelská přejímka otevřená
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,10 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-23 10:49 CEST: Dokumentace Camina a střižny odpovídá funkčnímu vydání d8d16f1b. Panel Texty a komentáře nasazený přes Lunu (účtenka 4b1ed8c23af048f133e00971d0ad1038, plná brána PASS / 2174 testů, smoke 5/5), HTTP znovu ověřené. Zoom Mílou obecně přijatý. Nové karty/poslechové kopie a Safari čekají na samostatnou funkční přejímku. Aktualizace návodů je samostatný dokumentační checkpoint pro již schválené p+n Lunou.
+
+### Předchozí stavové záznamy (historie)
 
 - 2026-10-23 09:53 CEST: První p+n textů a komentářů zastavila plná brána na jediné zastaralé délce/otisku frontendu (2174 testů, 1 FAIL). Očekávané délka, řádky a SHA-256 složené stránky opravené; cílený kontrakt 1/1 PASS. GitHub zůstal 07109721, nasazení nezačalo; původní účtenka a důkaz zachované. Připravený opravný checkpoint pro nové přesné předání Luně. Safari a nové render větve stále neověřené.
 
@@ -3420,3 +3424,34 @@ Technický důkaz:
   failure_resolution.json a původní first_failed_gate.log se zachovávají.
 - Plná nová brána a nasazení teprve přes další přesnou účtenku Luny;
   Safari a nové větve renderu tím zatím nejsou přijaté.
+
+## 2026-10-23 10:49 CEST — Aktuální dokumentace Camina a filmové střižny
+
+Hotovo:
+- Hlavní rozcestník, iPhone návod, střižna a technické reporty popisují zoom,
+  přijaté texty, titulky, karty, poslech, umístění hlasu a soukromé MP4.
+- Opravené zastaralé stavy čekajícího p+n; funkční panel je prokazatelně
+  pushnutý a nasazený. Historické etapy jsou označené jako historie.
+
+Rozhodnutí:
+- Míla výslovně zadal aktualizaci dokumentace, commit a jeho p+n Lunou.
+  Dokumentace nemění aplikaci, data, existující střihy ani rozsah funkcí.
+
+Další krok:
+- Předat dokumentační commit registrované Luně a ověřit konečnou účtenku.
+
+Navrhované další kroky:
+- Fyzicky projít panel Texty a komentáře, uložení/reload a krátký náhled
+  s titulkem, kartou a vlastním hlasem; podrobný zoom protokol jen podle potřeby.
+
+Technický důkaz:
+- Funkční vydání d8d16f1b: účtenka 4b1ed8c23af048f133e00971d0ad1038,
+  completed, push/deploy confirmed, plná brána PASS (2174 testů), smoke 5/5,
+  chráněné služby zachované. Při aktualizaci dokumentace HTTP znovu vrací
+  nový panel a runtime otisk shodný s účtenkou.
+- Obecné Mílovo potvrzení zoomu neprokazuje všechny telefonní scénáře.
+  Samostatné nové větve renderu karty/poslechu ani Safari nejsou přijaté.
+- Stav publikace tohoto dokumentačního checkpointu určí až jeho vlastní
+  účtenka; výsledek předchozího funkčního vydání jej nezastupuje.
+- Dokumentační kontrola: 11 Markdown souborů, 52 místních odkazů bez chyb;
+  rychlá statická brána a diff --check PASS. Žádná funkční změna kódu.

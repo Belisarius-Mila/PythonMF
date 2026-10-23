@@ -1,8 +1,52 @@
-# Camino app — C04a až C05c
+# Camino — iPhone aplikace
 
 První integrovaná iPhone aplikace Camina. Má vlastní bundle ID
 `cz.pythonmf.camino.app` a vlastní Application Support kontejner; nepřebírá ani
 nemigruje data ze samostatných prototypů Camino Audio a Camino Transfer Test.
+
+## Aktuální používání — 23. 10. 2026
+
+Poslední připravený Release je 0.1.0 (20). Zoom Míla uživatelsky přijal;
+přesná nainstalovaná verze a všechny okrajové scénáře nejsou tímto
+potvrzením samostatně doložené. Podrobnosti a otevřené fyzické kontroly
+jsou v [reportu zoomu](../docs/CAMERA_ZOOM_REPORT.md).
+
+### Foto a video se zoomem
+
+1. Vyber cestu a Moment; fotografii nebo video připoj ke správnému Momentu.
+2. V náhledu použij gesto dvěma prsty nebo dostupné volby 0,5× / 1× / 2×.
+   Kamera nabízí jen podporovaný rozsah; výchozí pohled je 1×.
+3. Zoom můžeš měnit i při běžícím videu. Volba zvuku zůstává samostatná.
+   Vyšší digitální přiblížení může snížit kvalitu, 2× není příslib optického zoomu.
+4. Po ukončení záznamu ověř uloženou položku. Originály zůstávají v aplikaci;
+   automaticky se neukládají do Fotek a nemažou se.
+
+Ostření dotykem, ruční expozice a blesk nejsou součástí této změny.
+Při aktualizaci zachovej stávající identitu aplikace a neodinstalovávej
+Camino s daty; samotné p+n Cockpitu telefon neaktualizuje.
+
+### Text z deníku do střižny
+
+1. V detailu Momentu uprav text a vědomě zvol **Uložit**. Rozepsaný koncept
+   sám není přijatá textová revize na Macu.
+2. Dokonči přenos v **Uložení a přenosy** a ověř stav Macu. Místní uložení,
+   přenos médií a přijetí textové operace jsou odlišné kroky.
+3. V Cockpitu otevři **Film Camino**, správný den a uložený projekt.
+   Použij **Načíst poslední střih a texty**; před načtením zachovej nebo ulož
+   případné rozpracované úpravy filmu.
+4. V panelu **Texty a komentáře** se nabídne povolený přijatý text.
+   Vložení do titulku nebo karty upraví pouze filmovou revizi.
+
+**Jen pro mě** a skryté položky se ve filmu nenabízejí. Samostatnou Úvahu
+je nutné nejprve vědomě vložit do deníku a nechat přijmout změnu soukromí;
+film tuto volbu neobchází. Hlasové nahrávky se automaticky nepřepisují.
+Není-li text ve střižně, ověř den, skutečné Uložit a přijetí na Macu.
+Podrobný [návod střižny](../film/README.md) popisuje titulky, karty i vlastní hlas.
+
+## Starší technický přehled C04a–C05c
+
+Následující etapové popisy a datovaná přejímka jsou technická historie.
+Aktuální vydání určují přehled výše, projektová paměť a přesné účtenky.
 
 ## Výběr z Fotek (2026-10-03)
 
@@ -86,7 +130,8 @@ HEIC, iCloud a další okrajové scénáře zůstávají neověřené.
   nevytváří video. Funkce je zatím jen v lokálně sestaveném zdrojovém kódu;
   fyzická instalace a přejímka čekají.
 
-Párování, C06a spravovaná služba, Viewer a serverová záloha jsou další etapy.
+V historickém rozsahu C04a–C05c nebyly zahrnuté párování, spravovaná služba,
+Viewer ani serverová záloha; tento výčet není současný provozní stav.
 Hvězdička je pouze místní čtenářská pomůcka, protože C03b v1 pro její změnu
 nemá operaci. C04d je nainstalované a fyzicky přijaté v dostupném lokálním
 rozsahu. C05b fyzicky prošlo zámek, force quit, ztrátu a návrat tailnetu,
@@ -101,7 +146,7 @@ Cílené fyzické průchody jsou v `C04b_IPHONE_TEST_PLAN.md`,
 `C04d_IPHONE_TEST_PLAN.md`, `C05b_IPHONE_TEST_PLAN.md` a
 `C05c_IPHONE_TEST_PLAN.md`.
 
-## Vývojové ověření
+## Historické vývojové ověření C04a–M2b
 
 M2b (25. 9.) lokálně doplňuje do syncu pořadí a mezery z dokončených audio
 účtenek; recorder a Core Data se nemění. Telefon posílá nové layouty až po
