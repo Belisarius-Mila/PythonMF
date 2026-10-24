@@ -34,3 +34,9 @@ Nový klient je připravený build 22; samostatnou službu ani Cockpit tato UI o
 neaktualizuje. Telefon nyní používá build 21, jehož spuštění a žádost
 Míla potvrdil. Skutečný výmaz/obnova a fyzická přejímka nového UI zůstávají
 samostatné; místní ani serverová uživatelská data se při této opravě nemění.
+
+## Navazující úklid médií — 2026-10-24 21:15 CEST
+
+Telefon živě potvrzený na buildu 22; navazující IPA 23 zachovává tuto
+opravu a přidává potvrzený úklid nedokončených médií. Navigační UI scénář
+znovu PASS (88,193 s). [Výsledek a aktuální balíček](PENDING_MEDIA_REVIEW_REPORT.md).

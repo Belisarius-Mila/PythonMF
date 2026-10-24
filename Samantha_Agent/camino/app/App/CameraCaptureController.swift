@@ -245,8 +245,8 @@ private final class CameraSessionBox: @unchecked Sendable {
         return true
     }
 
-    func startMovie(at url: URL) {
-        guard mode == .video, canCapture, !movieOutput.isRecording else { return }
+    @discardableResult func startMovie(at url: URL) -> Bool {
+        guard mode == .video, canCapture, !movieOutput.isRecording else { return false }
         pendingMovieURL = url
         interrupted = false
         recordedSeconds = 0
@@ -254,6 +254,7 @@ private final class CameraSessionBox: @unchecked Sendable {
         message = soundRequested ? "Zahajuji video se zvukem" : "Zahajuji video bez zvuku"
         applyRotation()
         movieOutput.startRecording(to: url, recordingDelegate: self)
+        return true
     }
 
     func stopMovie(interrupted: Bool = false) {

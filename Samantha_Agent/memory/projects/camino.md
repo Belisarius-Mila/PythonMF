@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-24 20:41 CEST — oprava navigace koše a připravená IPA 22
+Aktualizováno: 2026-10-24 21:15 CEST — kontrola nedokončených médií a IPA 23
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -12,12 +12,12 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 
 ## Aktuální stav
 
-- 2026-10-24 20:41 CEST: Míla potvrdil spuštění IPA 21 a žádost o smazání projektu. Snímek ukázal navigační chybu: po skrytí aktivní cesty obrazovka Připravit projekt neměla cestu k ostatním projektům, koši ani přenosům.
-- Lokálně opravené UI: bez aktivní cesty dostupné Projekty a koš (při existujícím projektu/koši) a Uložení a přenosy. Lze vybrat jinou cestu, sledovat žádosti a doručit je Macu; pevné nepravdivé tvrzení o nepřipojeném Macu odstraněné. Mazací kontrakt, persistence a serverový kód beze změny.
-- Regresní scénář proti původní binárce reprodukoval chybějící tlačítko (FAIL 129,859 s); po opravě PASS 89,366 s: dvě cesty, zachovaný Moment jiné cesty, žádost o poslední cestu, restart, koš a otevření/zavření přenosů. Statická brána PASS; archiv/export/strict podpis/ZIP a přítomnost nových textů v Release PASS.
-- Podepsaná IPA 0.1.0 (22), Camino-Projects-Trash-22-20261024.ipa, 1074899 B, shodné kopie Downloads/iCloud Dokumenty; iCloud upload potvrzený, profil do 29. 10. 2026. Telefon aktuálně 21 dle Mílova testu; build 22 připravený, neinstalovaný. Při aktualizaci zachovat stejnou aplikaci a data, neodinstalovávat. Detail: camino/docs/PROJECT_TRASH_NAVIGATION_REPORT.md.
-- Samostatná služba byla při přejímce 19:48 ověřená na schématu 4, Cockpit koš vydaný přes Lunu b75c48be do 0a18db30; tato UI oprava je nepřepínala ani nepushovala. Poslední servisní důkaz: 4 ověřené místní DB snapshoty, původní tabulky a 316 originálů SHA/Viewer PASS; aktuální obsah žádostí se zde znovu neauditoval. Externí záložní svazek tehdy nepřipojený.
-- Další krok: nahradit stávající Camino IPA 22 a fyzicky ověřit návrat přes Projekty a koš. Celý sedmidenní výmaz a uvolnění místa dosud nepřijaté; praktický text, historie nahrávek, jejich koš, MP3/WAV a příjemnější český hlas zůstávají otevřené.
+- 2026-10-24 21:15 CEST: Read-only audit iPhonu a soukromé Core Data kopie (quick_check OK) potvrdil 2 prázdné video intenty z 13. 10. Nemají pending/original soubory, Asset ani Moment a nepatří k cestě v koši. Instalovaný klient živě ověřený jako 0.1.0 (22). Živá DB nebyla přepisovaná; 2 intenty zatím zůstávají v telefonu.
+- Lokálně hotový potvrzený úklid: Zkontrolovat a odstranit pokusy → Odstranit prázdné pokusy (2), případně jednotlivý nedokončený soubor. Potvrzení v klasickém alertu nabízí Zrušit a Odstranit natrvalo. Přijaté Assety, hotové Momenty, fronty a cesta držená sedmidenním košem chráněné; změna souboru/přijetí po kontrole zneplatní staré potvrzení. Bez automatického mazání neznámých souborů.
+- Prevence: příprava videa po zavření kamery během GPS už nevytvoří intent; odmítnutý start a neúspěch bez souboru ruší prázdný intent. Nepřijaté soubory zůstávají zachované ke kontrole; po pádu je dostupný ruční úklid. Obnova/zápis se nepřekrývají.
+- Ověření PASS: 95 Swift testů včetně 8 nových mazacích/preservačních scénářů; skutečné UI zrušení/potvrzení/poškozený testovací soubor/restart 31,631 s; projektová navigace 88,193 s; plná brána 2232 (unittest 465,698 s). Podepsaný archive/export/strict podpis/ZIP a release texty PASS, testovací seed v Release nepřítomný.
+- IPA Camino-Projects-Trash-23-20261024.ipa, 1103371 B, shodné Downloads/iCloud Dokumenty a upload potvrzený, profil do 29. 10. 2026. Build 23 připravený, neinstalovaný. Další krok: aktualizovat stávající Camino bez odinstalace a potvrdit cílený úklid v aplikaci. Detail: camino/docs/PENDING_MEDIA_REVIEW_REPORT.md.
+- Žádný nový push, p+n ani změna služby/Cockpitu. Dřívější služba schéma 4 a Cockpit 0a18db30/Luna b75c48be patří k předchozí samostatné přejímce. Fyzický koš celých cest/filmů, sedmidenní lhůta a uvolnění místa, text/historie nahrávek/jejich koš/MP3-WAV a český hlas zůstávají otevřené.
 
 ### Historické stavové záznamy
 

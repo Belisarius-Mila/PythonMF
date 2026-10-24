@@ -40,6 +40,9 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
     @Published private(set) var mediaByMoment: [UUID: [LocalMediaAsset]] = [:]
     @Published private(set) var mediaRecovery = LocalMediaRecovery(
         repairedCount: 0, pendingCount: 0, orphanCount: 0, missingCount: 0)
+    @Published private(set) var mediaReviewItems: [LocalPendingMediaReview] = []
+    @Published private(set) var mediaReviewError: String?
+    @Published private(set) var mediaReviewBusy = false
     @Published private(set) var cameraError: String?
     @Published private(set) var awaitingLocation = false
     @Published private(set) var importingMedia = false
@@ -99,6 +102,19 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
                UUID(uuidString: ProcessInfo.processInfo.environment["CAMINO_UI_TEST_SESSION"] ?? "") != nil,
                try local.trips().isEmpty {
                 try Self.seedAttachmentUITest(local: local, recording: recording)
+            }
+            if ProcessInfo.processInfo.environment["CAMINO_TEST_PENDING_MEDIA"] == "1",
+               UUID(uuidString: ProcessInfo.processInfo.environment["CAMINO_UI_TEST_SESSION"] ?? "") != nil,
+               try local.trips().isEmpty, let vault {
+                _ = try local.createTrip(name: "Synthetic media review", isTest: true)
+                let survivor = try local.markMoment()
+                _ = try local.setTitle(momentID: survivor.id, title: "Synthetic survivor")
+                _ = try local.beginMediaIntent(kind: .video)
+                _ = try local.beginMediaIntent(kind: .video)
+                let broken = try local.beginMediaIntent(kind: .video)
+                try Data([1, 2, 3]).write(to: root.appendingPathComponent(broken.pendingRelativePath))
+                let unstarted = try local.beginMediaIntent(kind: .video)
+                _ = try vault.cancelEmptyMediaIntent(unstarted)
             }
             #endif
             let driver = IOSAudioDriver()
@@ -213,7 +229,7 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
 
     var canManageProjects: Bool {
         !audioBusy && !showAudio && !showCamera && !awaitingLocation && !importingMedia
-            && local?.projectMaintenanceIdle == true
+            && !mediaReviewBusy && local?.projectMaintenanceIdle == true
     }
 
     var canCaptureInActiveProject: Bool { activeTrip?.projectDetails.status == .active }
@@ -674,6 +690,7 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
         showCamera = false
         cameraTargetMomentID = nil
         refresh()
+        Task { await reconcileMedia() }
     }
 
     func requestCommentFromCamera(momentID: UUID) {
@@ -939,7 +956,10 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
     func importFromPhotos(_ item: PhotosPickerItem, into momentID: UUID) async {
         guard canCaptureInActiveProject, !importingMedia, !audioBusy, !showCamera, let mediaVault else { return }
         importingMedia = true
-        defer { importingMedia = false }
+        defer {
+            importingMedia = false
+            Task { await reconcileMedia() }
+        }
         message = "Načítám z Fotek… Pokud je soubor na iCloudu, může to chvíli trvat."
         do {
             guard let picked = try await loadLibraryItem(item) else {
@@ -1006,8 +1026,8 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
         let (fix, gpsWarning) = targetMomentID == nil
             ? await captureLocationForNewMoment()
             : (nil, nil)
-        guard activeTrip?.id == captureTripID else {
-            message = "Projekt se během přípravy změnil. Video nezačalo v jiném projektu."
+        guard showCamera, activeTrip?.id == captureTripID else {
+            message = "Příprava videa byla zrušená nebo se změnil projekt. Video nezačalo."
             return nil
         }
         do {
@@ -1046,6 +1066,7 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
             await reconcileMedia()
             return asset
         } catch {
+            _ = try? mediaVault.cancelEmptyMediaIntent(intent)
             message = "Video nelze potvrdit jako uložené. Dostupný soubor zůstal zachovaný."
             await reconcileMedia()
             return nil
@@ -1054,6 +1075,45 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
 
     func originalURL(for asset: LocalMediaAsset) -> URL? {
         try? mediaVault?.originalURL(for: asset)
+    }
+
+    func cancelUnstartedVideo(at url: URL) {
+        guard let intent = activeVideoIntent,
+              url.lastPathComponent == URL(fileURLWithPath: intent.pendingRelativePath).lastPathComponent else { return }
+        activeVideoIntent = nil
+        _ = try? mediaVault?.cancelEmptyMediaIntent(intent)
+        endVideoBackgroundTask()
+        message = "Video nezačalo. Případný nedokončený soubor zůstává ke kontrole."
+        Task { await reconcileMedia() }
+    }
+
+    func canDiscardMedia(_ item: LocalPendingMediaReview) -> Bool {
+        canManageProjects && sync?.busy == false &&
+            !projectTrash.contains { $0.tripID == item.intent.tripID && $0.blocksProject }
+    }
+
+    func loadMediaReview() {
+        do {
+            guard canManageProjects, let mediaVault else { throw LocalStoreError.activeCapture }
+            mediaReviewItems = try mediaVault.pendingMediaReview()
+            mediaReviewError = nil
+        } catch { mediaReviewError = "Kontrola právě probíhá nebo není dostupná. Zkus Obnovit seznam." }
+    }
+
+    func discardMediaReview(_ items: [LocalPendingMediaReview]) async {
+        guard !items.isEmpty, items.allSatisfy({ canDiscardMedia($0) }), let mediaVault else { return }
+        mediaReviewBusy = true
+        defer { mediaReviewBusy = false }
+        do {
+            try mediaVault.discardPendingMedia(items)
+            mediaRecovery = try await mediaVault.reconcile()
+            mediaReviewItems = try mediaVault.pendingMediaReview()
+            mediaReviewError = nil
+            refresh()
+        } catch {
+            mediaReviewItems = (try? mediaVault.pendingMediaReview()) ?? mediaReviewItems
+            mediaReviewError = "Pokus se změnil nebo nejde bezpečně odstranit. Obnov seznam a zkontroluj zbývající položky."
+        }
     }
 
     func stopVideoForSafety() -> Bool {
@@ -1073,7 +1133,7 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
     }
 
     private func reconcileMedia() async {
-        guard let mediaVault else { return }
+        guard let mediaVault, !showCamera, activeVideoIntent == nil, !importingMedia else { return }
         do {
             mediaRecovery = try await mediaVault.reconcile()
             refresh()

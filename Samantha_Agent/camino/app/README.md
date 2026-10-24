@@ -6,7 +6,7 @@ nemigruje data ze samostatných prototypů Camino Audio a Camino Transfer Test.
 
 ## Aktuální používání — 24. 10. 2026
 
-Buildy 21 a 22 nabízejí **Projekty → Upravit projekt → Požádat o smazání celé
+Buildy 21 až 23 nabízejí **Projekty → Upravit projekt → Požádat o smazání celé
 cesty**. Žádost cestu skryje; přesun do společného sedmidenního koše potvrdíš
 na Macu. Telefon trvale maže až po ověřeném výmazu Macu a potvrdí dokončení.
 Obnovení je na Macu před koncem lhůty.
@@ -29,14 +29,20 @@ neplatný rozsah se neuloží. Výběr projektu zůstává zachovaný po restart
 Samostatná služba i telefon jsou aktualizované. Samotné p+n Cockpitu
 telefon ani tuto službu neaktualizuje; jejich vydání proběhlo zvlášť.
 
-Aktuálně připravená podepsaná IPA je **0.1.0 (22)**,
-`Camino-Projects-Trash-22-20261024.ipa`, v Downloads a iCloud Dokumentech.
-Opravuje chybějící návrat po žádosti o smazání aktivní cesty: na obrazovce
-**Připravit projekt** otevři **Projekty a koš**, případně **Uložení a přenosy**.
-Regresní UI scénář, Release archiv/export, strict podpis/ZIP a cloud upload
-PASS; profil do 29. 10. 2026. Telefon má dle Mílova testu build 21, nová 22
-ještě neinstalovaná. Aktualizuj stejnou aplikaci bez odinstalace.
-[Oprava a přejímka](../docs/PROJECT_TRASH_NAVIGATION_REPORT.md).
+Aktuálně připravená podepsaná IPA je **0.1.0 (23)**,
+`Camino-Projects-Trash-23-20261024.ipa`, v Downloads a iCloud Dokumentech.
+U hlášky **Média ke kontrole** otevři **Zkontrolovat a odstranit pokusy**.
+**Odstranit prázdné pokusy (2)** vyčistí dva ověřené staré video pokusy bez
+souborů až po volbě **Odstranit natrvalo**; **Zrušit** je zachová. Jednotlivý
+nedokončený soubor lze zkontrolovat podle data/velikosti a samostatně odstranit.
+Hotová média a cesta držená sedmidenním košem jsou chráněné. Neúspěšný start
+videa bez souboru už prázdný pokus ruší. [Rozsah a ověření](../docs/PENDING_MEDIA_REVIEW_REPORT.md).
+
+Swift 95, UI, full gate 2232 a podpis/ZIP/cloud upload PASS; profil do
+29. 10. 2026. Telefon živě ověřený na buildu 22, nová 23 ještě neinstalovaná.
+Aktualizuj stejnou aplikaci bez odinstalace a potvrď cílený úklid v aplikaci.
+Build 23 zachovává opravu návratu: bez aktivní cesty najdeš **Projekty a koš**
+a **Uložení a přenosy**. [Předchozí přejímka navigace](../docs/PROJECT_TRASH_NAVIGATION_REPORT.md).
 [Předchozí servisní přechod](../docs/CLIENT_21_SERVICE_UPGRADE_REPORT.md).
 
 Dřívější Release byl 0.1.0 (20). Zoom Míla uživatelsky přijal;
@@ -220,3 +226,8 @@ Samotný
 build ani simulátor
 netestují fyzickou kameru, mikrofon, orientaci, zámek, přerušení, přehrávání,
 skutečný nedostatek místa, skutečné zahřátí ani obnovu po pádu na iPhonu.
+
+Pouze v Debug simulátoru a s platným jednorázovým CAMINO_UI_TEST_SESSION
+vytvoří CAMINO_TEST_PENDING_MEDIA=1 syntetický Moment, dva prázdné video
+pokusy a jeden nepřijatý poškozený soubor pro UI zkoušku úklidu. V Release
+ani na fyzickém zařízení se tento seed neprovádí.

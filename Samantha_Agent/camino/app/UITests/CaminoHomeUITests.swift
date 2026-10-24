@@ -14,6 +14,48 @@ import XCTest
         XCTAssertEqual(control.value as? String, expected)
     }
 
+    func testPendingMediaReviewCancelsThenDiscardsEmptyAndBrokenAttemptsOnly() throws {
+        #if !targetEnvironment(simulator)
+        throw XCTSkip("Uses isolated simulator data only.")
+        #endif
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchEnvironment["CAMINO_UI_TEST_SESSION"] = UUID().uuidString
+        app.launchEnvironment["CAMINO_TEST_PENDING_MEDIA"] = "1"
+        app.launch()
+        XCTAssertTrue(app.staticTexts["Synthetic media review"].waitForExistence(timeout: 15))
+        func review() {
+            let button = app.buttons["reviewPendingMedia"]
+            for _ in 0..<6 where !button.isHittable { app.swipeUp() }
+            XCTAssertTrue(button.isHittable)
+            button.tap()
+            XCTAssertTrue(app.buttons["discardEmptyMedia"].waitForExistence(timeout: 10))
+        }
+        let rows = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "discardPendingMedia-"))
+        review()
+        XCTAssertEqual(app.buttons["discardEmptyMedia"].label, "Odstranit prázdné pokusy (2)")
+        app.buttons["discardEmptyMedia"].tap()
+        app.buttons["Zrušit"].tap()
+        XCTAssertEqual(app.buttons["discardEmptyMedia"].label, "Odstranit prázdné pokusy (2)")
+        app.buttons["discardEmptyMedia"].tap()
+        app.buttons["Odstranit natrvalo"].tap()
+        let emptyButton = app.buttons["discardEmptyMedia"]
+        let gone = XCTNSPredicateExpectation(predicate: NSPredicate(format: "exists == false"), object: emptyButton)
+        XCTAssertEqual(XCTWaiter.wait(for: [gone], timeout: 10), .completed)
+        let remaining = rows.firstMatch
+        for _ in 0..<4 where !remaining.isHittable { app.swipeUp() }
+        XCTAssertTrue(remaining.isHittable)
+        remaining.tap()
+        app.buttons["Odstranit natrvalo"].tap()
+        XCTAssertTrue(app.staticTexts["noPendingMedia"].waitForExistence(timeout: 10))
+        app.buttons["Hotovo"].tap()
+        app.terminate(); app.launch()
+        XCTAssertTrue(app.buttons["momentRow"].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.staticTexts["Synthetic survivor"].exists)
+        app.swipeUp()
+        XCTAssertFalse(app.buttons["reviewPendingMedia"].exists)
+    }
+
     func testTrashActiveAndLastProjectKeepsProjectsAndTransfersAccessible() throws {
         #if !targetEnvironment(simulator)
         throw XCTSkip("Uses isolated simulator data only.")

@@ -93,6 +93,14 @@ public struct LocalMediaRecovery: Equatable, Sendable {
     public let missingCount: Int
 }
 
+public struct LocalPendingMediaReview: Identifiable, Sendable {
+    public let intent: LocalMediaIntent
+    public let files: [CaminoErasureEntry]
+    public var id: UUID { intent.assetID }
+    public var byteCount: UInt64 { files.reduce(0) { $0 + $1.size } }
+    public var isEmpty: Bool { files.isEmpty }
+}
+
 /// Media originals live in Application Support. Pending and final paths are
 /// deterministic from an already persisted intent; neither path is overwritten.
 @MainActor public final class CaminoMediaVault {
@@ -101,6 +109,8 @@ public struct LocalMediaRecovery: Equatable, Sendable {
     private let files = FileManager.default
     private let capacity: any CaminoStorageCapacityProviding
     private let storagePolicy = CaminoStorageSafetyPolicy()
+    private var activeWrites = 0
+    private var reconciling = false
 
     public init(root: URL, metadata: CaminoLocalStore,
                 capacityProvider: (any CaminoStorageCapacityProviding)? = nil) throws {
@@ -141,11 +151,18 @@ public struct LocalMediaRecovery: Equatable, Sendable {
         _ = try checkSpace(for: .photo)
         let intent = try metadata.beginMediaIntent(kind: .photo, targetMomentID: targetMomentID,
                                                    at: date, timeZone: timeZone, location: location)
+        activeWrites += 1
+        defer { activeWrites -= 1 }
         let pending = url(intent.pendingRelativePath)
-        try await Task.detached(priority: .utility) {
-            try Self.writeExclusive(data, to: pending)
-        }.value
-        return try await finalize(intent, interrupted: false)
+        do {
+            try await Task.detached(priority: .utility) {
+                try Self.writeExclusive(data, to: pending)
+            }.value
+            return try await finalize(intent, interrupted: false)
+        } catch {
+            try? discardEmptyAfterFailure(intent)
+            throw error
+        }
     }
 
     /// Import only into an existing Moment. Preparation happens before the durable
@@ -154,6 +171,8 @@ public struct LocalMediaRecovery: Equatable, Sendable {
     @discardableResult public func importLibraryFile(
         _ source: URL, kind: LocalMediaKind, targetMomentID: UUID
     ) async throws -> LocalMediaAsset {
+        activeWrites += 1
+        defer { activeWrites -= 1 }
         try Task.checkCancellation()
         _ = try checkSpace(for: kind)
         let values = try source.resourceValues(forKeys: [.fileSizeKey, .isRegularFileKey])
@@ -250,6 +269,8 @@ public struct LocalMediaRecovery: Equatable, Sendable {
 
     @discardableResult public func finalize(_ intent: LocalMediaIntent,
                                             interrupted: Bool) async throws -> LocalMediaAsset {
+        activeWrites += 1
+        defer { activeWrites -= 1 }
         let pending = url(intent.pendingRelativePath)
         let original = url(intent.originalRelativePath)
         let source = files.fileExists(atPath: original.path) ? original : pending
@@ -275,6 +296,9 @@ public struct LocalMediaRecovery: Equatable, Sendable {
     /// Run at launch and on return. A valid pending file is linked; unknown
     /// files and unplayable partial clips remain present for later review.
     public func reconcile() async throws -> LocalMediaRecovery {
+        guard !reconciling, activeWrites == 0 else { throw LocalStoreError.activeCapture }
+        reconciling = true
+        defer { reconciling = false }
         let pending = try metadata.pendingMediaIntents()
         var repaired = 0
         for intent in pending {
@@ -300,6 +324,59 @@ public struct LocalMediaRecovery: Equatable, Sendable {
         let missingCount = assets.filter { !files.fileExists(atPath: url($0.relativePath).path) }.count
         return LocalMediaRecovery(repairedCount: repaired, pendingCount: remaining.count,
                                   orphanCount: orphanCount, missingCount: missingCount)
+    }
+
+    public func pendingMediaReview() throws -> [LocalPendingMediaReview] {
+        guard activeWrites == 0, !reconciling else { throw LocalStoreError.activeCapture }
+        return try metadata.pendingMediaIntents().map { intent in
+            let entries = try CaminoErasureEntry.inventory(root: root,
+                paths: [intent.pendingRelativePath, intent.originalRelativePath])
+            guard entries.allSatisfy({ !$0.directory }) else { throw LocalStoreError.invalidDeletion }
+            return LocalPendingMediaReview(intent: intent, files: entries)
+        }.sorted { $0.intent.capture.utcMilliseconds < $1.intent.capture.utcMilliseconds }
+    }
+
+    private func fileSignature(_ entries: [CaminoErasureEntry]) throws -> Data {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys]
+        return try encoder.encode(entries)
+    }
+
+    /// A confirmed, frozen review. Accepted assets and projects held by the
+    /// seven-day lifecycle are excluded even if the UI snapshot is stale.
+    public func discardPendingMedia(_ review: [LocalPendingMediaReview]) throws {
+        guard activeWrites == 0, !reconciling else { throw LocalStoreError.activeCapture }
+        try metadata.validateDiscardMediaIntents(review.map(\.intent))
+        for item in review {
+            let current = try CaminoErasureEntry.inventory(root: root,
+                paths: [item.intent.pendingRelativePath, item.intent.originalRelativePath])
+            guard current.allSatisfy({ !$0.directory }),
+                  try fileSignature(current) == fileSignature(item.files) else {
+                throw LocalStoreError.invalidDeletion
+            }
+        }
+        // If interrupted, the durable intent remains reviewable. A fresh review
+        // can finish after partial unlink; accepted media never enter this path.
+        for item in review { try CaminoErasureEntry.remove(root: root, entries: item.files) }
+        try metadata.discardMediaIntents(review.map(\.intent))
+    }
+
+    private func discardEmptyAfterFailure(_ intent: LocalMediaIntent) throws {
+        let entries = try CaminoErasureEntry.inventory(root: root,
+            paths: [intent.pendingRelativePath, intent.originalRelativePath])
+        guard entries.isEmpty else { throw LocalStoreError.invalidDeletion }
+        try metadata.discardMediaIntents([intent])
+    }
+
+    /// Only a caller that knows capture did not start/finish may use this.
+    /// Launch recovery retains old empty attempts for explicit review.
+    @discardableResult public func cancelEmptyMediaIntent(_ intent: LocalMediaIntent) throws -> Bool {
+        guard activeWrites == 0, !reconciling else { throw LocalStoreError.activeCapture }
+        let entries = try CaminoErasureEntry.inventory(root: root,
+            paths: [intent.pendingRelativePath, intent.originalRelativePath])
+        guard entries.isEmpty else { return false }
+        try metadata.discardMediaIntents([intent])
+        return true
     }
 
     public func originalURL(for asset: LocalMediaAsset) throws -> URL {

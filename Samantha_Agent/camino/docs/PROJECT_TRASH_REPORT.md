@@ -106,3 +106,10 @@ Finální plná projektová brána PASS: 2232 testů, unit část
 a instalace. Finální cílená přejímka 20 PASS včetně DOM a route kontraktů.
 Fyzický iPhone, Safari, skutečná sedmidenní produkční lhůta a uvolnění místa
 živého projektu NEOVĚŘENO; vyžadují příslušné vydání a samostatnou přejímku.
+
+## Nedokončená média — 2026-10-24 21:15 CEST
+
+Připravená IPA 23 přidává samostatný potvrzený úklid nepřijatých pokusů,
+včetně prázdných záznamů bez souborů. Intenty cesty držené tímto projektovým
+košem odstranit nezávisle nedovolí; sedmidenní kontrakt se nemění.
+[Postup a ověření](PENDING_MEDIA_REVIEW_REPORT.md).

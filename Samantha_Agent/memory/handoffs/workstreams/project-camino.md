@@ -1,13 +1,22 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-24 21:15 CEST: Read-only audit iPhonu a soukromé Core Data kopie (quick_check OK) potvrdil 2 prázdné video intenty z 13. 10. Nemají pending/original soubory, Asset ani Moment a nepatří k cestě v koši. Instalovaný klient živě ověřený jako 0.1.0 (22). Živá DB nebyla přepisovaná; 2 intenty zatím zůstávají v telefonu.
+- Lokálně hotový potvrzený úklid: Zkontrolovat a odstranit pokusy → Odstranit prázdné pokusy (2), případně jednotlivý nedokončený soubor. Potvrzení v klasickém alertu nabízí Zrušit a Odstranit natrvalo. Přijaté Assety, hotové Momenty, fronty a cesta držená sedmidenním košem chráněné; změna souboru/přijetí po kontrole zneplatní staré potvrzení. Bez automatického mazání neznámých souborů.
+- Prevence: příprava videa po zavření kamery během GPS už nevytvoří intent; odmítnutý start a neúspěch bez souboru ruší prázdný intent. Nepřijaté soubory zůstávají zachované ke kontrole; po pádu je dostupný ruční úklid. Obnova/zápis se nepřekrývají.
+- Ověření PASS: 95 Swift testů včetně 8 nových mazacích/preservačních scénářů; skutečné UI zrušení/potvrzení/poškozený testovací soubor/restart 31,631 s; projektová navigace 88,193 s; plná brána 2232 (unittest 465,698 s). Podepsaný archive/export/strict podpis/ZIP a release texty PASS, testovací seed v Release nepřítomný.
+- IPA Camino-Projects-Trash-23-20261024.ipa, 1103371 B, shodné Downloads/iCloud Dokumenty a upload potvrzený, profil do 29. 10. 2026. Build 23 připravený, neinstalovaný. Další krok: aktualizovat stávající Camino bez odinstalace a potvrdit cílený úklid v aplikaci. Detail: camino/docs/PENDING_MEDIA_REVIEW_REPORT.md.
+- Žádný nový push, p+n ani změna služby/Cockpitu. Dřívější služba schéma 4 a Cockpit 0a18db30/Luna b75c48be patří k předchozí samostatné přejímce. Fyzický koš celých cest/filmů, sedmidenní lhůta a uvolnění místa, text/historie nahrávek/jejich koš/MP3-WAV a český hlas zůstávají otevřené.
+<!-- SAMANTHA_CURRENT_STATUS_END -->
+
+### Předchozí stav po opravě návratu
+
 - 2026-10-24 20:41 CEST: Míla potvrdil spuštění IPA 21 a žádost o smazání projektu. Snímek ukázal navigační chybu: po skrytí aktivní cesty obrazovka Připravit projekt neměla cestu k ostatním projektům, koši ani přenosům.
 - Lokálně opravené UI: bez aktivní cesty dostupné Projekty a koš (při existujícím projektu/koši) a Uložení a přenosy. Lze vybrat jinou cestu, sledovat žádosti a doručit je Macu; pevné nepravdivé tvrzení o nepřipojeném Macu odstraněné. Mazací kontrakt, persistence a serverový kód beze změny.
 - Regresní scénář proti původní binárce reprodukoval chybějící tlačítko (FAIL 129,859 s); po opravě PASS 89,366 s: dvě cesty, zachovaný Moment jiné cesty, žádost o poslední cestu, restart, koš a otevření/zavření přenosů. Statická brána PASS; archiv/export/strict podpis/ZIP a přítomnost nových textů v Release PASS.
 - Podepsaná IPA 0.1.0 (22), Camino-Projects-Trash-22-20261024.ipa, 1074899 B, shodné kopie Downloads/iCloud Dokumenty; iCloud upload potvrzený, profil do 29. 10. 2026. Telefon aktuálně 21 dle Mílova testu; build 22 připravený, neinstalovaný. Při aktualizaci zachovat stejnou aplikaci a data, neodinstalovávat. Detail: camino/docs/PROJECT_TRASH_NAVIGATION_REPORT.md.
 - Samostatná služba byla při přejímce 19:48 ověřená na schématu 4, Cockpit koš vydaný přes Lunu b75c48be do 0a18db30; tato UI oprava je nepřepínala ani nepushovala. Poslední servisní důkaz: 4 ověřené místní DB snapshoty, původní tabulky a 316 originálů SHA/Viewer PASS; aktuální obsah žádostí se zde znovu neauditoval. Externí záložní svazek tehdy nepřipojený.
 - Další krok: nahradit stávající Camino IPA 22 a fyzicky ověřit návrat přes Projekty a koš. Celý sedmidenní výmaz a uvolnění místa dosud nepřijaté; praktický text, historie nahrávek, jejich koš, MP3/WAV a příjemnější český hlas zůstávají otevřené.
-<!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí stav po aktualizaci služby a telefonu
 
@@ -3733,3 +3742,28 @@ Technický důkaz:
 - Izolovaný UI scénář: původní binárka FAIL na chybějícím návratu (129,859 s), oprava PASS (89,366 s). Zachovaný Moment při návratu do jiné cesty, koš i přenosy dostupné po žádosti o poslední cestu a restartu. Statická brána PASS.
 - Release archive/export, strict codesign a ZIP/CRC PASS; IPA 0.1.0 (22), 1074899 B, profil do 29. 10. 2026, shodné kopie v Downloads/iCloud. Fyzická instalace/přejímka 22 NEPROVEDENO. Handoff a projektová paměť odkazují PROJECT_TRASH_NAVIGATION_REPORT.md.
 - Jen UI a syntetický simulátor: bez změny datového modelu, serveru, živých žádostí, smazání dat, nového push či p+n. Míla před opravou potvrdil spuštění 21 a žádost, původní blokátor zamčeného telefonu tím není aktuální.
+
+### 2026-10-24 21:15 CEST — potvrzený úklid nedokončených médií, IPA 23
+
+Hotovo:
+
+- Připravený klient nabízí odstranění prázdných pokusů a jednotlivých nedokončených souborů přímo v aplikaci. Neúspěšný start bez souboru už nezanechá prázdný intent. Podepsaná IPA 23 v Downloads/iCloud; stávající telefon 22 a jeho dva prázdné pokusy zatím zachované.
+
+Rozhodnutí:
+
+- Míla požádal o odstranění doložených zbytků a prevenci nebo možnost smazání v aplikaci. Použít potvrzenou aplikační operaci s ověřeným rozsahem; živá Core Data DB se zvenčí nepřepisuje. Přijaté záznamy ani sedmidenní koš se neobcházejí.
+
+Další krok:
+
+- Aktualizovat stávající Camino IPA 23 bez odinstalace a potvrdit Odstranit prázdné pokusy (2) v nové obrazovce kontroly. Fyzické vyčištění zatím NEPROVEDENO.
+
+Navrhované další kroky:
+
+- Dokončit koš syntetické celé cesty/filmu včetně obnovy a skutečné lhůty/uvolnění místa.
+- Navázat praktickou přejímkou textu, historie nahrávek, jejich koše a MP3/WAV; český hlas vybrat poslechem.
+
+Technický důkaz:
+
+- Read-only telefonní inventář + soukromá SQLite/WAL kopie: 2 video intenty z 13. 10., žádné soubory, Assety ani Momenty, žádný v blokovaném projektu. Klient 22 ověřený. Privátní obsah/ID do Gitu nepatří.
+- Swift 95 PASS (8 nových), nový UI scénář 31,631 s PASS, navigace 88,193 s PASS, plná brána 2232 PASS / 465,698 s unit část. Test ruší potvrzení, maže jen vybrané pokusy a po restartu zachová původní Moment. Finální UI test čerstvě zkompilovaný.
+- Archive/export/strict codesign/ZIP PASS, IPA 0.1.0 (23), 1103371 B, profil do 29. 10. 2026, shodné kopie a iCloud upload PASS; zdroje doložené hashy v privátní účtence. Fyzický klient 23, úklid těchto dvou řádků a skutečná kamera NEOVĚŘENO. Podrobnosti PENDING_MEDIA_REVIEW_REPORT.md. Bez nového push/p+n či zásahu do služby.

@@ -49,6 +49,7 @@ private struct TripSetupView: View {
     @State private var showTrips = false
     @State private var showSync = false
     @State private var name = "Nový projekt"
+    @State private var showMediaReview = false
     @State private var hasStart = false
     @State private var startDate = Date()
     @State private var hasEnd = false
@@ -68,6 +69,12 @@ private struct TripSetupView: View {
                             .accessibilityIdentifier("projectList")
                         Text("Vyber jiný projekt nebo se podívej na stav žádosti o smazání.")
                             .font(.footnote).foregroundStyle(.secondary)
+                    }
+                }
+                if model.mediaRecovery.pendingCount > 0 {
+                    Section("Média ke kontrole") {
+                        Button("Zkontrolovat a odstranit pokusy") { showMediaReview = true }
+                            .accessibilityIdentifier("reviewPendingMedia")
                     }
                 }
                 Section("Projekt") {
@@ -111,6 +118,7 @@ private struct TripSetupView: View {
             }
             .navigationTitle("Připravit projekt")
             .sheet(isPresented: $showTrips) { TripListView(model: model) }
+            .sheet(isPresented: $showMediaReview) { PendingMediaReviewView(model: model) }
             .sheet(isPresented: $showSync) {
                 if let sync = model.sync { CaminoSyncView(sync: sync) }
             }
@@ -129,6 +137,7 @@ private struct CaptureHomeView: View {
     @State private var showTrips = false
     @State private var showArchive = false
     @State private var showSync = false
+    @State private var showMediaReview = false
     @State private var selectedDay = Date()
     @State private var filter: CaminoMomentFilter = .all
 
@@ -278,6 +287,10 @@ private struct CaptureHomeView: View {
                               systemImage: "exclamationmark.triangle")
                             .font(.subheadline).foregroundStyle(.orange)
                     }
+                    if model.mediaRecovery.pendingCount > 0 {
+                        Button("Zkontrolovat a odstranit pokusy") { showMediaReview = true }
+                            .accessibilityIdentifier("reviewPendingMedia")
+                    }
                     if let message = model.message { Text(message).font(.subheadline) }
                 }
                 .padding()
@@ -314,6 +327,7 @@ private struct CaptureHomeView: View {
             }
             .sheet(isPresented: $showTrips) { TripListView(model: model) }
             .sheet(isPresented: $showArchive) { CaminoHiddenArchiveView(model: model) }
+            .sheet(isPresented: $showMediaReview) { PendingMediaReviewView(model: model) }
             .sheet(isPresented: $showSync) {
                 if let sync = model.sync { CaminoSyncView(sync: sync) }
             }
@@ -349,6 +363,82 @@ private struct CaptureHomeView: View {
         .buttonStyle(.borderedProminent)
         .disabled(!model.canCaptureInActiveProject || model.audioBusy || model.awaitingLocation)
         .accessibilityIdentifier(kind == .comment ? "startComment" : "startReflection")
+    }
+}
+
+private struct PendingMediaReviewView: View {
+    @ObservedObject var model: CaminoViewModel
+    @Environment(\.dismiss) private var dismiss
+    @State private var selection: [LocalPendingMediaReview] = []
+    @State private var confirming = false
+
+    private var emptyItems: [LocalPendingMediaReview] {
+        model.mediaReviewItems.filter { $0.isEmpty && model.canDiscardMedia($0) }
+    }
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    Text("Tady jsou nedokončené pokusy. Přijaté fotografie a videa zůstanou zachované.")
+                    if !emptyItems.isEmpty {
+                        Button("Odstranit prázdné pokusy (\(emptyItems.count))", role: .destructive) {
+                            selection = emptyItems
+                            confirming = true
+                        }
+                        .accessibilityIdentifier("discardEmptyMedia")
+                    }
+                    Button("Obnovit seznam") { model.loadMediaReview() }
+                        .disabled(model.mediaReviewBusy)
+                }
+                if let error = model.mediaReviewError { Text(error).foregroundStyle(.orange) }
+                if model.mediaReviewItems.isEmpty && model.mediaReviewError == nil {
+                    Text("Žádné nedokončené pokusy.")
+                        .accessibilityIdentifier("noPendingMedia")
+                }
+                ForEach(model.mediaReviewItems) { item in
+                    Section {
+                        Text(item.intent.kind == .video ? "Video" : "Fotografie").font(.headline)
+                        Text(Date(timeIntervalSince1970: Double(item.intent.capture.utcMilliseconds) / 1000),
+                             format: .dateTime.day().month().year().hour().minute())
+                        Text(model.trips.first { $0.id == item.intent.tripID }?.name ??
+                             "Projekt · \(item.intent.tripID.uuidString.suffix(8))")
+                            .foregroundStyle(.secondary)
+                        if item.isEmpty {
+                            Text("Prázdný pokus · žádný soubor")
+                        } else {
+                            Text("Nedokončený soubor · \(ByteCountFormatter.string(fromByteCount: Int64(clamping: item.byteCount), countStyle: .file))")
+                        }
+                        if model.projectTrash.contains(where: { $0.tripID == item.intent.tripID && $0.blocksProject }) {
+                            Text("Patří k cestě čekající na smazání. Její koš dokončíš na Macu.")
+                                .font(.footnote)
+                        }
+                        Button("Odstranit tento pokus", role: .destructive) {
+                            selection = [item]
+                            confirming = true
+                        }
+                        .disabled(!model.canDiscardMedia(item))
+                        .accessibilityIdentifier("discardPendingMedia-\(item.id.uuidString)")
+                    }
+                }
+            }
+            .navigationTitle("Nedokončená média")
+            .toolbar { ToolbarItem(placement: .topBarTrailing) {
+                Button("Hotovo") { dismiss() }.disabled(model.mediaReviewBusy)
+            } }
+            .onAppear { model.loadMediaReview() }
+            .alert("Odstranit vybrané nedokončené pokusy?", isPresented: $confirming) {
+                Button("Odstranit natrvalo", role: .destructive) {
+                    let reviewed = selection
+                    Task { await model.discardMediaReview(reviewed) }
+                }
+                Button("Zrušit", role: .cancel) {}
+            } message: {
+                Text(selection.allSatisfy(\.isEmpty)
+                    ? "Odstraní se \(selection.count) prázdných pokusů bez souboru. Hotové záznamy zůstanou zachované."
+                    : "Vybraný nedokončený soubor se smaže natrvalo. Hotové záznamy zůstanou zachované.")
+            }
+        }
     }
 }
 

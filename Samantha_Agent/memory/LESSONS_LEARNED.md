@@ -1507,3 +1507,11 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
 - Řešení nalezeno: 24102026
 - Řešení: i větev bez aktivního projektu musí zpřístupnit správu existujících projektů/koše a přenosy; skrytý projekt se neobnovuje automaticky.
 - Ověření: skutečný izolovaný UI scénář nejdřív reprodukoval chybu na původní binárce, po opravě prošel přes dvě cesty, zachovaný Moment, poslední cestu, restart, koš a přenosy. Podepsaná IPA 22 připravená; fyzický telefon se přejímá zvlášť.
+
+### LL-085 — Prázdný video intent zruš při odmítnutém startu, zbytky nabídni ke kontrole
+
+- Problém: dva staré video intenty bez souborů, Assetů a Momentů trvale zvyšovaly hlášku média ke kontrole. Start kamery mohl po uložení intentu odmítnout práci bez návratového výsledku.
+- Typ: opakující se
+- Řešení nalezeno: 24102026
+- Řešení: znovu ověř stav po GPS čekání, vrať výsledek startu a ruš pouze známý neúspěšný intent bez souborů. Staré/neprázdné pokusy nabídni k výslovnému úklidu; zmraz metadata/souborový inventář, revaliduj před unlinkem, chraň přijaté Assety a projektový koš. Při pádu zachovej intent pro čerstvou kontrolu. Pro výslovné Zrušit použij ověřený alert; lazy seznam neověřuj počtem pouze renderovaných řádků.
+- Ověření: Swift 95 PASS (8 nových), nový skutečný UI scénář PASS včetně zrušení a restartu, plná brána 2232 PASS. Telefonní audit četl jen nutná technická metadata/inventář; živý SQLite soubor se zvenčí nepřepisoval. IPA 23 připravená, fyzický úklid se potvrzuje samostatně.

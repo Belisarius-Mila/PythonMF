@@ -527,6 +527,47 @@ private struct LocalPendingMomentLink: Codable, Equatable {
             .map(decodeMediaIntent)
     }
 
+    /// Unaccepted attempts have no accepted Asset or outgoing sync operations.
+    /// The vault verifies their exact files before committing the discard.
+    public func validateDiscardMediaIntents(_ intents: [LocalMediaIntent]) throws {
+        guard projectMaintenanceIdle, !intents.isEmpty,
+              Set(intents.map(\.assetID)).count == intents.count else {
+            throw LocalStoreError.invalidDeletion
+        }
+        let held = Set(try projectTrash().filter(\.blocksProject).map(\.tripID))
+        for intent in intents {
+            guard !held.contains(intent.tripID),
+                  let row = try object("MediaIntentRecord", id: intent.assetID, key: "assetID"),
+                  row.value(forKey: "finalized") as? Bool == false,
+                  try decodeMediaIntent(row) == intent,
+                  try object("AssetRecord", id: intent.assetID) == nil else {
+                throw LocalStoreError.invalidDeletion
+            }
+            if !intent.attaching, try object("MomentRecord", id: intent.momentID) != nil {
+                throw LocalStoreError.invalidDeletion
+            }
+        }
+    }
+
+    public func discardMediaIntents(_ intents: [LocalMediaIntent]) throws {
+        try validateDiscardMediaIntents(intents)
+        do {
+            for intent in intents {
+                if let row = try object("MediaIntentRecord", id: intent.assetID, key: "assetID") {
+                    context.delete(row)
+                }
+                var keys = ["media.origin.\(intent.assetID.uuidString)"]
+                if !intent.attaching {
+                    keys.append("captureLocation:\(intent.momentID.uuidString.lowercased())")
+                }
+                for row in try fetch("SettingRecord", predicate: NSPredicate(format: "key IN %@", keys)) {
+                    context.delete(row)
+                }
+            }
+            try save()
+        } catch { context.rollback(); throw error }
+    }
+
     public func mediaAssets(momentID: UUID) throws -> [LocalMediaAsset] {
         try fetch("AssetRecord", predicate: NSPredicate(format: "momentID == %@", momentID as NSUUID))
             .map(decodeMediaAsset)
