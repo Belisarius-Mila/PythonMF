@@ -1467,3 +1467,5 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
 - Typ: opakující se
 - Řešení nalezeno: 24102026
 - Řešení: testovat skutečnou sekci s dlouhým textem, místní chybou a následným kliknutím, uložením, reloadem a přesunem fotografie. Textová karta mezi obrazy není vrstva přes fotografii. Čtení musí zachovat celý zvolený text a mít změřenou délku; chatový TTS helper s krácením pro film nepoužívat. Ověřeno syntetickým 3022znakovým vstupem, skutečnými MP4 a místním TTS.
+
+- Doplnění LL-080 (24. 10.): Node test spouštěný z Pythonu musí použít společný `scripts.cockpit_quality_gate.node_binary()`, ne mediální `binary("node")`. Regrese sama vynucuje `/usr/bin:/bin:/usr/sbin:/sbin`; terminálový PATH přítomnost Node ve službě neprokazuje.

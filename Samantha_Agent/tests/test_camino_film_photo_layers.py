@@ -24,6 +24,7 @@ from app.camino_film_workshop import MacFilmProjectStore
 from camino.film.project import FilmError, digest
 from camino.film.media import probe, duration_ms, binary
 from tests.camino_viewer_fixture import ViewerFixture, uid
+from scripts.cockpit_quality_gate import node_binary
 
 LONG_TEXT = ("Syntetický popis památky a okolní krajiny. " * 80)[:3022]
 
@@ -213,8 +214,9 @@ class PhotoLayerTests(unittest.TestCase):
             self.assertEqual(call("GET", url)[0], 404); self.assertEqual(call("HEAD", url)[0], 404)
 
     def test_photo_interactions_include_real_text_panel_and_async_races(self):
-        result = subprocess.run([binary("node"), "tests/camino_film_photo_layers.test.cjs"],
-            cwd=Path(__file__).resolve().parents[1], capture_output=True, text=True, timeout=30)
+        with patch.dict("os.environ", {"PATH": "/usr/bin:/bin:/usr/sbin:/sbin"}):
+            result = subprocess.run([node_binary(), "tests/camino_film_photo_layers.test.cjs"],
+                cwd=Path(__file__).resolve().parents[1], capture_output=True, text=True, timeout=30)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     @unittest.skipUnless(shutil.which("ffmpeg") and shutil.which("ffprobe"), "Local media tools required")

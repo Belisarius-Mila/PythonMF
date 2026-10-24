@@ -4440,3 +4440,31 @@ Technický důkaz:
 - Kontroly soukromí, vazby textu, symlinků a HTTP Origin/HEAD/Range PASS.
 - Plná brána 2206 PASS (450,207 s unit část), po závěrečné drobné úpravě ovládání 22 frontendových testů PASS. Safari/iPhone ani poslech uživatelem neověřené.
 - Podrobnosti: `camino/docs/PHOTO_TEXT_COMMENT_REPORT.md`.
+
+
+### 2026-10-24 11:20 CEST — Publikační brána a dohledání Node ve službě
+
+Hotovo:
+- Luna převzala oba připravené commity. Publikaci zastavilo jediné selhání
+  nového DOM testu: hledal Node pouze v PATH, které má Cockpit omezené.
+- Test nyní používá společný projektový `node_binary` a sám vynucuje
+  službové PATH. Rozhraní ani uložené filmy se touto opravou nemění.
+
+Rozhodnutí:
+- Míla výslovně zadal p+n Lunou. Neúspěšná účtenka se nepřepisuje ani neopakuje.
+- Nové placené předání po této opravě se automaticky nespouští.
+
+Další krok:
+- Před novým placeným pokusem ukázat Mílovi opravený balíček tří lokálních commitů.
+
+Navrhované další kroky:
+- Po úspěšném p+n fyzicky přijmout text a komentář na Safari/iPhonu.
+
+Technický důkaz:
+- Účtenka `570b4fc7ce1e29b96fac6a9b4f1654b2`: attention, push_state uncertain,
+  deployment_state not_started. Brána 2206 testů: 1 ERROR, 15 skipped,
+  405,950 s. Příčina pouze v dohledání Node v novém testu.
+- Přímé read-only ls-remote stále e11d949a; nový main nebyl na GitHubu potvrzený.
+- 21 cílených kontrol PASS, včetně původně selhávajícího DOM testu s vynuceným
+  službovým PATH a kontraktu celého frontendu. Závěrečná statická brána
+  rovněž pod omezeným PATH PASS. Produkční kód se touto opravou nemění.

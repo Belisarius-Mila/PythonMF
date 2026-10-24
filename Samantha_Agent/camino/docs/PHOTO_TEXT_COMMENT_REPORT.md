@@ -96,3 +96,22 @@ Pracovní AIFF a starší odvozeniny zůstávají soukromě zachované; jejich
 Další krok: samostatné p+n registrovanou Lunou, poté fyzicky ověřit
 předání textu a poslech na Safari/iPhonu. Konkrétní film uživatele vyrobit
 teprve jeho vědomým ovládáním z přijatého střihu.
+
+
+## Pokus p+n a testové prostředí — 2026-10-24 11:20 CEST
+
+Registrovaná Luna převzala oba commity, účtenka
+`570b4fc7ce1e29b96fac6a9b4f1654b2`. Publikační brána skončila jedním
+ERROR v novém DOM testu (2206 celkem, 15 skipped, 405,950 s): test hledal
+Node pouze v omezeném PATH služby. V terminálovém prostředí byl Node dostupný.
+Push účtenka označuje jako uncertain; přímý čtecí audit GitHubu po běhu stále
+ukazuje původní e11d949a, nasazení nezačalo. Nejde o vydanou funkci.
+
+Úzká oprava testu používá společný `node_binary()` s existujícími absolutními
+fallbacky a v testu přímo vynucuje službové PATH. Produkční kód, Node instalace,
+prostředí služeb ani filmová data se neopravují. Nový placený běh se neopakuje
+automaticky; vyžaduje samostatné potvrzení připraveného balíčku.
+
+Ověření opravy: 21 cílených kontrol PASS (původně selhávající DOM scénář
+přímo pod omezeným PATH a kontrakty frontendu). Statická brána pod stejným
+PATH PASS. Před novým pokusem zůstává přesný balíček lokálně, bez dalšího push.
