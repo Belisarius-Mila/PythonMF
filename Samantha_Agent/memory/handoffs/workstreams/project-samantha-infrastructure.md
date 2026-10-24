@@ -1,6 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-24 15:45 CEST: Závěrečné měření po dokončení cache a profilového checkpointu: skutečně +30,20 GiB, volno 49,28 GiB. Cíl +30 GiB splněný; hlavní aplikace a chráněné služby shodné. Další mazání se neprovádí.
+
 - 2026-10-24 15:43 CEST: Schválený úklid SSD dokončen: skutečně +30,10 GiB, volno 19,07 → 49,18 GiB. Publikační kopie, instalační zbytky, vybrané sestavovací cache a syntetické testovací payloady uklizené; potřebná data a účtenky zachované. Systémová cache 4,28 GiB zůstala nedotčená po odmítnutí macOS i se správcem; žádná změna ochran/oprávnění. Ukončeni pouze čekající aktualizační pomocníci, hlavní aplikace běží se shodnými binárními otisky. Camino/Cockpit/autosave před/po shodné. Další krok: návrat k praktické přejímce střižny, bez dalšího mazání.
 
 - 2026-10-24 15:30 CEST: Po výslovné globální brzdě proveden schválený úklid SSD. Čtecí měření 19,08 → 41,38 GiB volných, skutečný zisk 22,30 GiB; cíl dalších 30 GiB dosud nesplněn. Publikační kopie odstraněné po ověřené záchraně ignorovaných souborů; dokončené buildy, staré autosave a DeviceSupport uklizené. Starý simulátor odstraněný až po zachování dat. Camino/Cockpit/autosave před/po shodné. Zbývá systémová cache (správce macOS) a novější čekající aktualizace aplikací; aktivní instalátory se nemazaly. Private účtenka a zachované soubory: data/private/ssd_cleanup_20261024/.
@@ -416,3 +418,7 @@ Technický důkaz:
   dokumentační checkpoint zůstává místní bez push/nasazení.
 - Závěrečná rychlá statická brána PASS; data obnovy a chráněné runtime
   metadata ověřené. Symboly/kompilační cache se mohou při práci znovu vytvořit.
+- Finální kontrola 15:45 CEST po poslední regenerovatelné Swift cache:
+  skutečně +30,20 GiB, volno 49,28 GiB; hlavní aplikace i chráněné služby
+  nadále shodné. Kompilační cache izolovaného workspace byla ignorovaná,
+  bez běžící kompilace či otevřených souborů; zdroje workspace beze změny.

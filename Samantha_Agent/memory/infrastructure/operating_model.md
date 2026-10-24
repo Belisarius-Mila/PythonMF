@@ -91,10 +91,10 @@ Ulozit datovou vetu jen kdyz Mila vyslovne chce snapshot:
   konfiguraci.
 
 
-## Úklid SSD — 2026-10-24 15:43 CEST
+## Úklid SSD — 2026-10-24 15:45 CEST
 
-Úklid po výslovné globální brzdě dokončen: měřených +30,10 GiB
-(19,07 → 49,18 GiB volných). Systémová cache zůstala zachovaná po
+Úklid po výslovné globální brzdě dokončen: měřených +30,20 GiB
+(19,07 → 49,28 GiB volných). Systémová cache zůstala zachovaná po
 odmítnutí macOS; ochrany a oprávnění se neměnily. Potřebná data, účtenky
 a malá hashově ověřená obnova syntetických testů jsou v soukromé evidenci.
 Camino/Cockpit/autosave před/po shodné. Podrobnosti jsou v kanonickém
