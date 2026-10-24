@@ -9,7 +9,9 @@ Místně doplněný **koš celých cest a filmů na 7 dní**: žádost na iPhonu
 kontrola a potvrzení ve střižně, obnovení do lhůty a následný výmaz
 spravovaných dat včetně telefonu po jeho spojení. Samostatný film ponechá
 originály cesty. [Postup, rozsah a hranice vydání](docs/PROJECT_TRASH_REPORT.md).
-Tato změna zatím není nasazená ani nainstalovaná v telefonu.
+Ovládání ve střižně je nasazené v `0a18db30` (Luna `b75c48be`, 2232 PASS,
+smoke 5/5). Celý koš ještě vyžaduje samostatný upgrade služby Camino
+a instalaci iPhonu; tyto části běžné p+n neaktualizovalo.
 
 Nově místně: původní text z iPhonu a upravitelná pracovní kopie u fotografie,
 historie čtení, obnovitelný koš a import MP3/WAV.

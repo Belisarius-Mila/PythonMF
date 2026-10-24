@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-24 17:32 CEST — vývoj sedmidenního koše cest a filmů
+Aktualizováno: 2026-10-24 17:56 CEST — p+n koše do Cockpitu potvrzené
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,12 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-24 17:56 CEST: P+n sedmidenního koše proběhlo napoprvé registrovanou Lunou. Pět commitů do 0a18db3038e0b9cf1069d52714a69b0f16d9ff26 je na GitHubu, Cockpit je nasazený. Účtenka b75c48be083a1f26e8e7296ccf5997de: completed, push/deployment confirmed, plná brána 2232 PASS, smoke 5/5, chráněné služby shodné.
+- Hlavní Adam jednou ověřil účtenku a živý stav: GitHub/main 0/0 na vydaném headu, health OK, code_stamp 7ae887842f089e5c. Automatický portálový návrat returned_to_adam=false; výsledek skutečně převzal a ověřil Adam zde v terminálu. Publikování se neopakuje kvůli tomuto poli.
+- Nasazené je ovládání ve střižně. Samostatná služba Camino a iPhone se tímto p+n neaktualizovaly; kompletní koš stále vyžaduje jejich samostatné vydání. Bez schématu 4 vrací ovládání požadavek na upgrade. Skutečné cesty ani média se nemazaly.
+- Další krok: samostatně schválit upgrade služby Camino a instalaci iPhonu, potom fyzická přejímka syntetické cesty a filmu. Praktická editace textu, historie nahrávek, jejich koš, import MP3/WAV a příjemnější český hlas zůstávají otevřené.
+- Zápis tohoto výsledku je následný dokumentační checkpoint pro další GitHub balíček; nemění vydaný funkční kód. Postup: camino/docs/PROJECT_TRASH_REPORT.md.
 
 - 2026-10-24 17:32 CEST: Místně implementovaný společný sedmidenní koš cest a filmů. Celou cestu zahajuje iPhone; Mac potvrdí rozsah, umožní obnovu a po lhůtě vymaže spravovaná data. Telefon smaže až po ověřeném výmazu Macu a potvrdí ACK. Samostatný film zachová originály cesty.
 - Ověřeno: 16 syntetických Python/HTTP testů koše, DOM potvrzení/obnovy a 87 Swift/Core Data testů PASS; iOS Release PASS. Finální plná brána PASS: 2232 testů bez selhání, unit část 381,487 s.

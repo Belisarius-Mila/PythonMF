@@ -62,7 +62,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md`; `../camino/docs/PROJECT_TRASH_REPORT.md` — 2026-10-24 17:32 CEST: Místní vývoj sedmidenního koše cest a filmů; žádost z iPhonu, potvrzení/obnova na Macu, řízený výmaz a ACK telefonu. 16 Python + DOM a 87 Swift PASS, iOS Release PASS; plná brána 2232 testů PASS. Bez vydání, instalace a skutečného mazání. Živé vydání zůstává 0cb79f32 (Luna d7d836b8). Potom samostatné vydání a fyzická přejímka; starší zkoušky textu/hlasů a příjemnější hlas otevřené.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md`; `../camino/docs/PROJECT_TRASH_REPORT.md` — 2026-10-24 17:56 CEST: P+n Lunou napoprvé potvrzené, 5 commitů do 0a18db30 publikovaných a Cockpit nasazený; job b75c48be083a1f26e8e7296ccf5997de, 2232 PASS, smoke 5/5, chráněné služby shodné. Účtenku ověřil terminálový Adam; automatický portálový návrat false. Služba Camino/iPhone čekají na samostatné vydání; potom fyzická přejímka koše, střižny a hlasu.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md`; `technical/luna_release_orchestration.md` — 2026-10-24 09:52 CEST: Oprava startovacího souběhu p+n je publikovaná/nasazená v e11d949a. Účtenka e47cdb394ec5441c5d25632f11c8c995 má potvrzený push 4 commitů a nasazení Cockpitu, plnou bránu 2186 a smoke 5/5. Nativní účtenku ověřil hlavní Adam; nový místní vývoj pokračuje v project-camino. Předchozí attention c3aba030 je historie a neopakuje se.
 

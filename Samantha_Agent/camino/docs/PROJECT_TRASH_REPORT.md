@@ -4,6 +4,19 @@ Vývoj 24. 10. 2026 podle Mílova schválení. Jde o místní změnu zdrojů;
 push, nasazení Cockpitu, aktualizace služby Camino, instalace iPhonu ani
 mazání skutečných projektů nejsou součástí tohoto kroku.
 
+## Následné p+n — 2026-10-24 17:56 CEST
+
+Pět schválených commitů do `0a18db30` je publikovaných a Cockpit nasazený
+přes jedinou Lunu. Účtenka `b75c48be083a1f26e8e7296ccf5997de`: completed,
+push/deploy confirmed, plná brána 2232 PASS, smoke 5/5. Živě ověřený stamp
+`7ae887842f089e5c`, GitHub/main shodné; chráněné služby nezměněné.
+Automatický portálový návrat je nepotvrzený (`returned_to_adam=false`);
+účtenku zde převzal a ověřil terminálový Adam.
+
+Toto vydání aktualizovalo pouze společný runtime/Cockpit. Samostatná služba
+Camino a iPhone ještě potřebují vlastní schválené vydání; bez nového schématu
+služby koš vrací požadavek na upgrade. Skutečná data se nemazala.
+
 ## Používání po samostatném vydání
 
 1. Na iPhonu otevři **Projekty → Upravit projekt → Požádat o smazání celé

@@ -1,12 +1,21 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-24 17:56 CEST: P+n sedmidenního koše proběhlo napoprvé registrovanou Lunou. Pět commitů do 0a18db3038e0b9cf1069d52714a69b0f16d9ff26 je na GitHubu, Cockpit je nasazený. Účtenka b75c48be083a1f26e8e7296ccf5997de: completed, push/deployment confirmed, plná brána 2232 PASS, smoke 5/5, chráněné služby shodné.
+- Hlavní Adam jednou ověřil účtenku a živý stav: GitHub/main 0/0 na vydaném headu, health OK, code_stamp 7ae887842f089e5c. Automatický portálový návrat returned_to_adam=false; výsledek skutečně převzal a ověřil Adam zde v terminálu. Publikování se neopakuje kvůli tomuto poli.
+- Nasazené je ovládání ve střižně. Samostatná služba Camino a iPhone se tímto p+n neaktualizovaly; kompletní koš stále vyžaduje jejich samostatné vydání. Bez schématu 4 vrací ovládání požadavek na upgrade. Skutečné cesty ani média se nemazaly.
+- Další krok: samostatně schválit upgrade služby Camino a instalaci iPhonu, potom fyzická přejímka syntetické cesty a filmu. Praktická editace textu, historie nahrávek, jejich koš, import MP3/WAV a příjemnější český hlas zůstávají otevřené.
+- Zápis tohoto výsledku je následný dokumentační checkpoint pro další GitHub balíček; nemění vydaný funkční kód. Postup: camino/docs/PROJECT_TRASH_REPORT.md.
+<!-- SAMANTHA_CURRENT_STATUS_END -->
+
+### Předchozí stav před p+n 24. 10. 2026
+
 - 2026-10-24 17:32 CEST: Místně implementovaný společný sedmidenní koš cest a filmů. Celou cestu zahajuje iPhone; Mac potvrdí rozsah, umožní obnovu a po lhůtě vymaže spravovaná data. Telefon smaže až po ověřeném výmazu Macu a potvrdí ACK. Samostatný film zachová originály cesty.
 - Ověřeno: 16 syntetických Python/HTTP testů koše, DOM potvrzení/obnovy a 87 Swift/Core Data testů PASS; iOS Release PASS. Finální plná brána PASS: 2232 testů bez selhání, unit část 381,487 s.
 - Rozsah a hranice: `camino/docs/PROJECT_TRASH_CONTRACT.md`, `camino/docs/PROJECT_TRASH_REPORT.md`. Schéma 4, oba filmové kořeny, originály, historie/fronty, Viewer a místní SQLite/WAL. Nejasné historické kopie výmaz zastaví; zálohy, Fotky a ruční kopie mimo Camino jsou samostatné.
 - Jen vývoj: bez nového push, nasazení, upgradu služby, instalace iPhonu či výmazu skutečných dat. Předchozí funkční vydání je 0cb79f32, Luna d7d836b810818f61162d4a887686f3a2 (p+n dokončené; returned_to_adam=false). Předchozí datovaná oprávnění neopravňují vydat nynější koš. Živá kontrola 17:32 CEST: PIDy a chráněné konfigurace shodné, Cockpit health OK.
 - Další krok: samostatně schválit vydání příslušných částí (služba Camino, Cockpit, iPhone), potom fyzicky přijmout syntetickou cestu. Vývojový checkpoint je hotový; aktuální commit zjisti v git log podle Add seven-day project trash lifecycle. Otevřená zůstává praktická editace textu, historie nahrávek, jejich koš, import MP3/WAV a výběr příjemnějšího českého hlasu poslechem.
-<!-- SAMANTHA_CURRENT_STATUS_END -->
+
 
 ### Historické stavové záznamy před vývojem koše
 
@@ -3607,3 +3616,23 @@ Technický důkaz:
 - Swift/Core Data 87 PASS a iOS Release PASS. Synteticky ověřené odstranění osobního textu z DB/WAL, zmenšení DB, přesné retry bez obnovení projektu, zachování druhé cesty, pozdní upload, interní/cizí hardlinky, alias kořene kontejneru, přerušený unlink i VACUUM a shoda potvrzených úložišť.
 - Živá read-only kontrola 17:32 CEST: Camino/Cockpit/autosave PIDy i chráněné konfigurace shodné se zahájením; Cockpit health OK. Bez produkčních médií nebo tajemství v Gitu.
 - Kontrakt a postup: camino/docs/PROJECT_TRASH_CONTRACT.md a camino/docs/PROJECT_TRASH_REPORT.md. Fyzická iPhone/Safari přejímka nového koše NEOVĚŘENO.
+
+
+### 2026-10-24 17:56 CEST — p+n koše Lunou potvrzené
+
+Hotovo:
+- GitHub a Cockpit obsahují všech pět schválených commitů včetně 0a18db30. Ovládání koše ve střižně je nasazené. Vydání prošlo napoprvé; oprava ani další modelový pokus nebyly potřeba.
+
+Rozhodnutí:
+- Míla výslovně autorizoval p+n Lunou a při skutečném selhání opravu a další předání Luně až do úspěchu. Použit jediný registrovaný submit_release s wait=True; nejistý výsledek nebyl zaměněný za chybu ani opakovaný.
+
+Další krok:
+- Samostatně schválit upgrade služby Camino a instalaci nového iPhonu; běžné p+n tyto části nepřepíná. Potom fyzická přejímka syntetického koše.
+
+Navrhované další kroky:
+- Dokončit dřívější praktickou přejímku textu, hlasových pokusů, jejich koše a MP3/WAV; vybrat příjemnější český hlas poslechem.
+
+Technický důkaz:
+- Účtenka b75c48be083a1f26e8e7296ccf5997de: completed; push_state=confirmed; deployment_state=confirmed; 5 commitů; gate 2232 PASS / 550,9 s; smoke 5/5; protected_services_unchanged=true. Centrální release_executor gpt-6-luna/high beze změny.
+- Adamova závěrečná živá kontrola: GitHub/main aligned 0/0 na 0a18db30, Cockpit health OK, code_stamp 7ae887842f089e5c a nový PID 10531. Samostatná služba Camino/autosave a jejich konfigurace nezměněné.
+- returned_to_adam=false označuje nepotvrzený automatický portálový návrat. Účtenku skutečně převzal a jednou ověřil terminálový Adam; nejde o důvod opakovat potvrzené p+n. Fyzický iPhone/Safari a celý koš po aktualizaci služby dosud NEOVĚŘENO.

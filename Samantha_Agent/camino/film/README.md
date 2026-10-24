@@ -3,10 +3,11 @@
 
 ## Aktuální stav — 24. 10. 2026
 
-Místně přidaný **Koš projektů a žádosti z iPhonu · 7 dní**: kontrola rozsahu,
+V `0a18db30` nasazené ovládání **Koš projektů a žádosti z iPhonu · 7 dní**: kontrola rozsahu,
 přesné potvrzení, obnovení a přehled dokončení iPhonu. **Smazat celý film…**
 odstraní po lhůtě film se všemi revizemi, hlasy a exporty; originály zůstanou.
-Celou cestu zahaj smazat na iPhonu.
+Celou cestu zahaj smazat na iPhonu. Kompletní koš vyžaduje samostatný
+upgrade služby Camino a instalaci nového klienta; dosud neproběhly.
 [Rozsah, ověření a nutné samostatné vydání](../docs/PROJECT_TRASH_REPORT.md).
 
 Nový místní krok odděluje **původní text z iPhonu** od **pracovního textu**
