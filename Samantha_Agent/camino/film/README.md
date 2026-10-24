@@ -3,6 +3,10 @@
 
 ## Aktuální stav — 24. 10. 2026
 
+Nový místní krok odděluje **původní text z iPhonu** od **pracovního textu**
+a přidává historii nahrávek, obnovitelný koš i import MP3/WAV.
+[Postup a ověření pracovního cyklu](../docs/COMMENTARY_WORKFLOW_REPORT.md).
+
 Místní nový vývoj doplňuje **Cesta nebo dovolená** před výběrem dne a filmu.
 Záznamy, revize a exporty se drží vybrané cesty i při shodném datu/názvu.
 Před přepnutím dokonči uložení střihu. Výběr je vlastní každé kartě.
@@ -62,7 +66,9 @@ U fotografie otevři **Text a komentář**. Můžeš napsat vlastní text nebo
 převzít celý přijatý text deníku; tlačítko **Předat celý text na fotografii**
 je také dole v nabídce přijatých textů. Filmový text se ukládá průběžně,
 původní deník zůstává zachovaný. Titulek záběru má samostatný limit 140 znaků;
-text fotografie dovolí až 6000 znaků.
+text fotografie dovolí až 6000 znaků. Pracovní pole je ručně upravitelné;
+původní načtený text je vedle zvlášť, pouze pro čtení. Tlačítko
+**Obnovit pracovní text z originálu** jej kdykoliv vrátí.
 
 Vyber **Statický text přes fotografii**, **Plynulý text v okně**, případně
 zatím **Pouze uložit text**. Dlouhý statický text vyžaduje výběr úryvku;
@@ -76,11 +82,16 @@ Samostatné textové karty mezi obrazy zůstávají dole odděleně: každá do
 
 ### 4. Připoj hlas k fotografii
 
-- Pro čtení filmového textu zvol **Přečíst jako komentář — syntetický hlas**,
+- Pro čtení filmového textu zvol **Komentář — čtení nebo MP3/WAV**,
   **Vytvořit místní čtení**, poslechni si zvuk a až pak **Použít čtení ve filmu**.
   Čte český hlas Zuzana místně na Macu. Namluvení nic neodesílá do externí TTS.
 - Vytvořený zvuk zůstává uložený pro poslech i po obnovení stránky. Jeho
-  vytvoření jej samo nezařadí do filmu. Změna textu vyžaduje nové čtení.
+  vytvoření jej samo nezařadí do filmu. Změna textu vyžaduje nové čtení;
+  předchozí pokus se zachová v **Uložené pokusy a nahrávky** se svým textem.
+- **Importovat MP3/WAV k fotografii** přijme hotový komentář nebo vlastní
+  namluvení (do 64 MiB a 300 s). Po importu jej poslechni a výslovně použij.
+- **Smazat pokus do koše** odstraní pokus z běžného přehledu; v koši jej
+  lze obnovit. Texty a starší filmy zůstanou. Koš neuvolňuje místo na disku.
 - U fotografie můžeš také vybrat původní nahrávku, poslechnout a připojit ji.
   Ruční začátek a konec nastav v **Poslechnout / vybrat úsek** u komentářů dole.
 - Hlas musí vejít do vlastní fotografie. **Prodloužit fotografii pro nahrávku**

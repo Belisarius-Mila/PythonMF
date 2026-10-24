@@ -55,7 +55,7 @@ from app.camino_film_workshop import (
     camino_mac_film_project_status,
     film_project_query,
 )
-from app.camino_film_editor import film_editor_action, production_editor
+from app.camino_film_editor import film_editor_action, production_editor, film_narration_import_action
 from app.screen_recovery import ScreenRecovery
 from app.cockpit_document_routes import DocumentReadRoutes
 from app.cockpit_email_archive_routes import EmailArchiveReadRoutes
@@ -8669,6 +8669,18 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "handler_name": "film_editor_action", "test_level": "direct",
     },
     {
+        "path": "/api/camino/film/narration-trash",
+        "label": "Přesunout hlasový pokus do obnovitelného koše nebo jej obnovit",
+        "risk": "private_write", "confirmation": "explicit_take_trash_or_restore_button",
+        "handler_name": "film_editor_action", "test_level": "direct",
+    },
+    {
+        "path": "/api/camino/film/narration-import",
+        "label": "Importovat MP3 nebo WAV jako komentář fotografie",
+        "risk": "private_write", "confirmation": "explicit_photo_audio_file_upload",
+        "handler_name": "film_narration_import_action", "test_level": "direct",
+    },
+    {
         "path": "/api/camino/film/delete-plan",
         "label": "Zobrazit rozsah trvalého smazání jedné filmové varianty",
         "risk": "read_only_via_post", "confirmation": "explicit_export_delete_button",
@@ -9998,6 +10010,12 @@ class CockpitServer:
                 if parsed.path == "/api/camino/film/narration":
                     self.respond_film_edit("narration", parsed)
                     return
+                if parsed.path == "/api/camino/film/narration-trash":
+                    self.respond_film_edit("narration-trash", parsed)
+                    return
+                if parsed.path == "/api/camino/film/narration-import":
+                    self.respond_film_narration_import(parsed)
+                    return
                 if parsed.path == "/api/camino/film/delete-plan":
                     self.respond_film_edit("delete-plan", parsed)
                     return
@@ -10883,6 +10901,7 @@ class CockpitServer:
                 payload = self.read_json()
                 keys = {"save": {"project_id", "expected_revision", "request_id", "draft"},
                     "narration": {"project_id", "revision", "asset_id", "request_id"},
+                    "narration-trash": {"project_id", "asset_id", "narration_id", "revision", "deleted"},
                     "delete-plan": {"project_id", "job_id"},
                     "delete": {"project_id", "job_id", "plan_token", "confirmation"},
                     "source": {"project_id", "asset_id", "request_id"},
@@ -10904,6 +10923,33 @@ class CockpitServer:
                     self.respond_film_output(parsed)
                 else:
                     self.send_error(HTTPStatus.METHOD_NOT_ALLOWED)
+
+            def respond_film_narration_import(self, parsed) -> None:
+                from app.camino_film_narration import MAX_IMPORT_BYTES
+                from camino.film.project import FilmError
+                try:
+                    length = int(self.headers.get("Content-Length", "0"))
+                    if parsed.query or self.headers.get("Transfer-Encoding") or not 0 < length <= MAX_IMPORT_BYTES:
+                        raise FilmError("Vyber nahrávku MP3/WAV do 64 MiB bez přenosu po blocích.")
+                    payload = {"project_id": self.headers.get("X-Camino-Project-Id", ""),
+                        "asset_id": self.headers.get("X-Camino-Asset-Id", ""),
+                        "revision": int(self.headers.get("X-Camino-Revision", "0")),
+                        "request_id": self.headers.get("X-Camino-Request-Id", "")}
+                    editor = production_editor(project_id=payload["project_id"])
+                    editor.inputs(payload["project_id"])
+                    body = self.rfile.read(length)
+                    if len(body) != length:
+                        raise FilmError("Nahrávka nedorazila celá.")
+                    result = film_narration_import_action(payload, body)
+                except FilmError as error:
+                    self.close_connection = True
+                    self.respond_json({"ok": False, "message": str(error)}, status=HTTPStatus.CONFLICT)
+                    return
+                except Exception:
+                    self.close_connection = True
+                    self.respond_json({"ok": False, "message": "Nahrávku nelze bezpečně importovat."}, status=HTTPStatus.BAD_REQUEST)
+                    return
+                self.respond_json(result, status=HTTPStatus.OK if result.get("ok") else HTTPStatus.CONFLICT)
 
             def respond_film_narration(self, parsed) -> None:
                 from app.camino_film_narration import narration_bytes

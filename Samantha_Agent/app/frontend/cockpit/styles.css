@@ -476,3 +476,6 @@
     .camino-film-edit-list details { margin-top: .75rem; }
     .camino-film-edit-list summary { cursor: pointer; padding: .5rem 0; font-weight: 600; }
     .camino-film-edit-list select, .camino-film-edit-list audio { max-width: 100%; }
+
+    .camino-film-take { padding: .6rem; margin: .6rem 0; border: 1px solid var(--border, #ddd); border-radius: .4rem; }
+    .camino-film-edit-list textarea[readonly] { background: var(--input-bg, #f4f5f7); opacity: .85; }

@@ -113,11 +113,11 @@
     }
     function controls() {
       nodes.save.disabled = !model || saving || deleting || !dirty;
-      for (const key of ["preview", "final", "range"]) nodes[key].disabled = !model || dirty || saving || deleting;
+      for (const key of ["preview", "final", "range"]) nodes[key].disabled = !model || dirty || saving || deleting || narrating;
       for (const button of deleteButtons) button.disabled = deleting;
     }
     function change() {
-      dirty = true; ++version; controls();
+      dirty = true; ++version; ++readRequest; controls();
       if (playingSelection) nodes.sourcePlayer.pause();
       playingSelection = false; cancel(selectionTimer); syncSelection();
       nodes.status.textContent = "Úpravy čekají na uložení…";
@@ -284,7 +284,7 @@
     }
     function focusPhoto(id) { photoPanels.get(id)?.scrollIntoView?.({block: "start", behavior: "smooth"}); }
     function photoStatus(message) { for (const node of photoStatuses) node.textContent = message; }
-    function emptyLayer() { return {text: "", mode: "none", text_source: null, narration: null}; }
+    function emptyLayer() { return {text: "", original_text: "", mode: "none", text_source: null, narration: null}; }
     function readingMs(value) { return Math.max(5000, Math.ceil(Math.max(value.trim().split(/\s+/).filter(Boolean).length / 2.5, value.length / 15)) * 1000); }
     function photoPanel(parent, row) {
       const panel = doc.createElement("details"); photoPanels.set(row.asset_id, panel); panel.open = photoOpen === row.asset_id;
@@ -293,9 +293,14 @@
       const image = doc.createElement("img"); image.src = `/api/camino/film/photo/${model.project_id}/${row.asset_id}`;
       image.alt = "Fotografie pro text a komentář"; image.loading = "lazy"; image.className = "camino-film-photo"; panel.appendChild(image);
       const layer = () => row.photo_text ||= emptyLayer();
-      const label = text("label", "Text fotografie — původní deník se nemění");
-      const area = doc.createElement("textarea"); area.rows = 7; area.value = row.photo_text?.text || "";
+      const label = text("label", "Text pro čtení a zobrazení — zde můžeš ručně upravovat");
+      const area = doc.createElement("textarea"); area.rows = 7; area.name = "film-working-text"; area.readOnly = false; area.value = row.photo_text?.text || "";
       label.appendChild(area); panel.appendChild(label);
+      panel.appendChild(text("p", "Toto je pracovní kopie. Úpravy se ukládají do filmu; původní text z iPhonu zůstává zachovaný."));
+      const original = doc.createElement("details"); original.appendChild(text("summary", "Původní načtený text z iPhonu"));
+      const originalArea = doc.createElement("textarea"); originalArea.rows = 5; originalArea.readOnly = true; originalArea.name = "film-original-text";
+      originalArea.value = row.photo_text?.original_text ?? (model.texts || []).find(t => t.reference.revision_id === row.photo_text?.text_source?.revision_id)?.text ?? "";
+      original.appendChild(originalArea); panel.appendChild(original);
       const count = text("p", ""), feedback = text("p", "Úpravy se ukládají automaticky."); feedback.role = "status";
       photoStatuses.push(feedback);
       function lengthInfo() {
@@ -304,7 +309,7 @@
           `orientační čas pro celý text ${readingMs(area.value) / 1000} s` + (n ? ` · čtení ${(n.duration_ms / 1000).toFixed(1)} s` : "");
       }
       const modeLabel = text("label", "Způsob použití textu"), mode = doc.createElement("select");
-      for (const [value, title] of [["none", "Pouze uložit text"], ["static", "Statický text přes fotografii"], ["scroll", "Plynulý text v okně"], ["narration", "Přečíst jako komentář — syntetický hlas"]]) {
+      for (const [value, title] of [["none", "Pouze uložit text"], ["static", "Statický text přes fotografii"], ["scroll", "Plynulý text v okně"], ["narration", "Komentář — čtení nebo MP3/WAV"]]) {
         const option = text("option", title); option.value = value; mode.appendChild(option);
       }
       mode.value = row.photo_text?.mode || "none"; modeLabel.appendChild(mode); panel.appendChild(modeLabel);
@@ -312,6 +317,7 @@
       if (row.photo_text?.narration) audio.src = `/api/camino/film/narration/${model.project_id}/${row.photo_text.narration.id}`;
       area.addEventListener("input", () => {
         const current = layer(); current.text = area.value; current.narration = null;
+        if (current.mode === "narration") { current.mode = "none"; mode.value = "none"; }
         audio.pause(); audio.removeAttribute("src"); audio.load(); change(); lengthInfo();
       });
       mode.addEventListener("change", () => {
@@ -323,6 +329,15 @@
       shotTextChoice(panel, row);
       const actions = doc.createElement("div"); actions.className = "actions";
       function button(title, fn) { const b = text("button", title); b.type = "button"; b.addEventListener("click", fn); actions.appendChild(b); return b; }
+      button("Upravit text pro čtení", () => { panel.open = true; area.readOnly = false; area.focus?.(); feedback.textContent = "Uprav pracovní text v poli výše. Původní text je zvlášť a nemění se."; });
+      button("Uložit pracovní text", () => save());
+      button("Obnovit pracovní text z originálu", () => {
+        if (!originalArea.value) { feedback.textContent = "Nejprve převezmi původní text z deníku."; return; }
+        if (area.value !== originalArea.value && !(options.confirm || confirm)("Nahradit pracovní text původním textem z iPhonu? Uložené hlasové pokusy zůstanou zachované.")) return;
+        const current = layer(); current.text = originalArea.value; current.narration = null;
+        if (current.mode === "narration") current.mode = "none";
+        change(); renderRows();
+      });
       button("Prodloužit pro celý text / čtení", () => {
         const current = layer(), ms = current.mode === "narration" && current.narration ? current.narration.duration_ms : readingMs(current.text);
         if (ms > 300000) { feedback.textContent = "Celý text potřebuje více než 300 sekund. Vyber kratší část textu."; return; }
@@ -333,7 +348,7 @@
         if (!layer().text.trim()) { feedback.textContent = "Nejprve napiš nebo vyber text."; return; }
         if (!await save()) return;
         const currentEpoch = epoch, snapshot = JSON.stringify(row.photo_text), project = model.project_id;
-        narrating = true; generate.disabled = true; feedback.textContent = "Vytvářím místní české čtení na Macu…";
+        narrating = true; controls(); generate.disabled = true; feedback.textContent = "Vytvářím místní české čtení na Macu…";
         try {
           const response = await request("/api/camino/film/narration", {method: "POST", headers: {"Content-Type": "application/json"},
             body: JSON.stringify({project_id: project, revision: model.revision, asset_id: row.asset_id, request_id: uuid()})});
@@ -342,10 +357,11 @@
           const live = model.draft.shots.find(r => r.asset_id === row.asset_id);
           if (JSON.stringify(live?.photo_text) !== snapshot) { feedback.textContent = "Text se mezitím změnil. Čtení se nepřipojilo."; return; }
           if (!data.ok) { feedback.textContent = data.message; return; }
+          model.narrations = data.narrations || model.narrations || [];
           live.photo_text.narration = data.narration; change();
           if (await save()) { renderRows(); photoStatus("Čtení je uložené. Poslechni si ho a pak použij ve filmu."); }
         } catch (_) { if (currentEpoch === epoch) feedback.textContent = "Výsledek čtení není potvrzený. Automaticky jej neopakuji; text zůstává uložený."; }
-        finally { narrating = false; generate.disabled = false; }
+        finally { narrating = false; generate.disabled = false; controls(); }
       });
       button("Použít čtení ve filmu", () => {
         const current = layer(), n = current.narration;
@@ -385,9 +401,91 @@
       }); extendRecording.disabled = !model.draft.voices.length;
       const listenRecording = button("Poslechnout vybranou nahrávku", () => { const voice = recording(); if (voice) selectVideo(voice.asset_id); });
       listenRecording.disabled = !model.draft.voices.length;
+      const uploadLabel = text("label", "Hotový komentář MP3 nebo WAV (nejvýše 64 MiB / 300 s)");
+      const upload = doc.createElement("input"); upload.type = "file"; upload.accept = ".mp3,.wav,audio/mpeg,audio/wav";
+      uploadLabel.appendChild(upload); panel.appendChild(uploadLabel);
+      const importButton = button("Importovat MP3/WAV k fotografii", async () => {
+        const file = upload.files?.[0];
+        if (!file || !file.size || file.size > 64 * 1024 * 1024) { feedback.textContent = "Vyber soubor MP3/WAV do 64 MiB."; return; }
+        if (narrating) { feedback.textContent = "Nejprve počkej na dokončení předchozí operace s nahrávkou."; return; }
+        if (!row.photo_text) { row.photo_text = emptyLayer(); change(); }
+        if (!await save()) return;
+        const currentEpoch = epoch, snapshot = JSON.stringify(row.photo_text);
+        narrating = true; controls(); importButton.disabled = true; feedback.textContent = "Nahrávám a ověřuji celý zvuk…";
+        try {
+          const response = await request("/api/camino/film/narration-import", {method: "POST", headers: {
+            "Content-Type": "application/octet-stream", "X-Camino-Project-Id": model.project_id,
+            "X-Camino-Asset-Id": row.asset_id, "X-Camino-Revision": String(model.revision), "X-Camino-Request-Id": uuid()}, body: file});
+          const data = await response.json();
+          if (currentEpoch !== epoch || !active || doc.hidden) return;
+          if (!data.ok) { feedback.textContent = data.message; return; }
+          model.narrations = data.narrations || [];
+          const live = model.draft.shots.find(r => r.asset_id === row.asset_id);
+          if (JSON.stringify(live?.photo_text) !== snapshot) { feedback.textContent = "Pracovní text se změnil. Import najdeš mezi uloženými pokusy; k novému textu se nepřipojil."; return; }
+          live.photo_text.narration = data.narration; change();
+          if (await save()) { renderRows(); photoStatus("Import je uložený pro poslech. Do filmu jej zařaď až po kontrole."); }
+        } catch (_) { if (currentEpoch === epoch) feedback.textContent = "Import není potvrzený. Obnov seznam pokusů; nahrávání se samo neopakuje."; }
+        finally { narrating = false; importButton.disabled = false; controls(); }
+      });
+      button("Obnovit seznam pokusů", async () => { if (!await save()) return; await check(); renderRows(); });
       panel.appendChild(count); panel.appendChild(actions); panel.appendChild(audio); panel.appendChild(feedback);
-      if (row.photo_text?.narration) panel.appendChild(text("p", row.photo_text.mode === "narration" && row.photo_text.narration.included ? "Syntetický komentář je zařazený do filmu." : "Čtení je uložené pro poslech, ve filmu zatím nezní."));
+      photoAttempts(panel, row, feedback);
+      if (row.photo_text?.narration) panel.appendChild(text("p", row.photo_text.mode === "narration" && row.photo_text.narration.included ? "Vybraný komentář je zařazený do filmu." : "Čtení je uložené pro poslech, ve filmu zatím nezní."));
       lengthInfo(); parent.appendChild(panel);
+    }
+    function photoAttempts(panel, row, feedback) {
+      const attempts = (model.narrations || []).filter(t => t.asset_id === row.asset_id);
+      const activeList = doc.createElement("section"), trash = doc.createElement("details");
+      activeList.appendChild(text("h4", "Uložené pokusy a nahrávky"));
+      trash.appendChild(text("summary", `Koš pokusů (${attempts.filter(t => t.deleted).length})`));
+      trash.appendChild(text("p", "Pokus lze obnovit. Koš nemaže soubory ani starší filmy a neuvolňuje místo na disku."));
+      if (!attempts.some(t => !t.deleted)) activeList.appendChild(text("p", "Zatím tu není žádný uložený pokus. Vytvoř čtení nebo importuj MP3/WAV."));
+      for (const [index, take] of attempts.entries()) {
+        const item = doc.createElement("div"); item.className = "camino-film-take";
+        const used = row.photo_text?.narration?.id === take.id;
+        item.appendChild(text("strong", `Pokus ${index + 1} · ${take.label || "Komentář"} · ${(take.duration_ms / 1000).toFixed(1)} s${used ? " · vybraný u fotografie" : ""}`));
+        const actions = doc.createElement("div"); actions.className = "actions";
+        function button(title, fn) { const b = text("button", title); b.type = "button"; b.addEventListener("click", fn); actions.appendChild(b); return b; }
+        if (!take.deleted) {
+          const player = doc.createElement("audio"); player.controls = true; player.preload = "none";
+          player.src = `/api/camino/film/narration/${model.project_id}/${take.id}`; photoAudios.push(player); item.appendChild(player);
+          function adopt(include) {
+            if (include && take.duration_ms > row.out_ms) { feedback.textContent = "Pokus je delší než fotografie. Nejprve ji prodluž pro tento pokus."; return; }
+            if (row.photo_text?.text !== take.text && !(options.confirm || confirm)("Převzít uložený pracovní text tohoto pokusu? Původní text z jeho deníku zůstane zachovaný.")) return;
+            row.photo_text = {text: take.text, original_text: take.original_text || "", text_source: take.text_source,
+              mode: include ? "narration" : "none", narration: include ? {id: take.id, duration_ms: take.duration_ms, sha256: take.sha256, included: true} : null};
+            change(); renderRows();
+          }
+          button("Upravit text tohoto pokusu", () => adopt(false));
+          button("Použít tento pokus ve filmu", () => adopt(true));
+          button("Prodloužit fotografii pro tento pokus", () => {
+            if (take.duration_ms > 300000) { feedback.textContent = "Pokus je delší než 300 sekund. Použij kratší text nebo nahrávku."; return; }
+            row.out_ms = Math.max(row.out_ms, take.duration_ms); change(); renderRows();
+          });
+        }
+        button(take.deleted ? "Obnovit pokus" : "Smazat pokus do koše", async () => {
+          if (narrating) { feedback.textContent = "Počkej na dokončení operace s nahrávkou."; return; }
+          if (!take.deleted && row.photo_text?.narration?.id === take.id) {
+            row.photo_text.narration = null;
+            if (row.photo_text.mode === "narration") row.photo_text.mode = "none";
+            change();
+          }
+          if (!await save()) return;
+          const currentEpoch = epoch; narrating = true; controls();
+          try {
+            const response = await request("/api/camino/film/narration-trash", {method: "POST", headers: {"Content-Type": "application/json"},
+              body: JSON.stringify({project_id: model.project_id, asset_id: row.asset_id, narration_id: take.id, revision: model.revision, deleted: !take.deleted})});
+            const data = await response.json();
+            if (currentEpoch !== epoch || !active || doc.hidden) return;
+            if (!data.ok) { feedback.textContent = data.message; return; }
+            model.narrations = data.narrations; renderRows();
+            photoStatus(take.deleted ? "Pokus je obnovený pro poslech a další použití." : "Pokus je v koši. Pracovní text i původní text zůstaly uložené.");
+          } catch (_) { if (currentEpoch === epoch) feedback.textContent = "Změna není potvrzená. Obnov seznam pokusů před dalším krokem."; }
+          finally { narrating = false; controls(); }
+        });
+        item.appendChild(actions); (take.deleted ? trash : activeList).appendChild(item);
+      }
+      panel.appendChild(activeList); panel.appendChild(trash);
     }
     function shotTextChoice(panel, row) {
       const select = doc.createElement("select"), label = text("label", "Nabídka přijatých textů deníku");
@@ -398,7 +496,7 @@
         const source = model.texts[Number(select.value || 0)]; if (!source) return;
         if (source.text.length > 6000) { photoStatus("Text má více než 6000 znaků. Vlož do fotografie vědomě vybraný úryvek."); return; }
         if (row.photo_text?.text && !(options.confirm || confirm)("Nahradit uložený text této fotografie vybraným textem deníku?")) return;
-        row.photo_text = {text: source.text, mode: "none", text_source: {...source.reference}, narration: null};
+        row.photo_text = {text: source.text, original_text: source.text, mode: "none", text_source: {...source.reference}, narration: null};
         photoOpen = row.asset_id; change(); renderRows(); focusPhoto(row.asset_id);
       }); panel.appendChild(use); return select;
     }
@@ -418,7 +516,7 @@
           if (!row) { feedback.textContent = "Vyber zařazenou fotografii."; return; }
           if (source.text.length > 6000) { feedback.textContent = "Text přesahuje 6000 znaků. Vlož u fotografie vlastní úryvek."; return; }
           if (row.photo_text?.text && !(options.confirm || confirm)("Nahradit text vybrané fotografie?")) return;
-          row.photo_text = {text: source.text, mode: "none", text_source: {...source.reference}, narration: null};
+          row.photo_text = {text: source.text, original_text: source.text, mode: "none", text_source: {...source.reference}, narration: null};
           photoOpen = row.asset_id; change(); renderRows(); focusPhoto(row.asset_id);
           photoStatus("Celý text je u fotografie. Vyber statické zobrazení, plynulý text nebo čtení.");
         }); actions.appendChild(transfer);
@@ -507,7 +605,7 @@
       }
     }
     async function check() {
-      if (!active || doc.hidden || deleting) return;
+      if (!active || doc.hidden || deleting || narrating) return;
       const current = epoch, read = ++readRequest;
       try {
         const response = await request("/api/camino/film/editor" + (requestedProject ? `?project_id=${encodeURIComponent(requestedProject)}` : ""), {cache: "no-store"});
@@ -528,6 +626,7 @@
         }
         if (model.project_id !== data.project_id) { invalidate("Uzavřená sada se změnila. Znovu načti editor."); return; }
         if (dirty && model.revision !== data.revision && !saving) nodes.status.textContent = "Jiné okno uložilo novější střih. Tvoje změny zůstávají zde; před pokračováním načti poslední revizi.";
+        model.narrations = data.narrations || [];
         renderJobs(data.jobs); updateSource(data.jobs); controls();
       } catch (_) { if (current === epoch && read === readRequest) conceal(); }
     }
@@ -546,6 +645,7 @@
         const data = await response.json();
         if (current !== epoch) return false;
         if (!data.ok) { pending = null; nodes.status.textContent = data.message; photoStatus(data.message); return false; }
+        ++readRequest;
         model.revision = data.revision; pending = null; dirty = version !== captured.version;
         nodes.status.textContent = `Uložena revize ${data.revision}.${dirty ? " Zbývající úpravy se ukládají…" : ""}`;
         photoStatus(nodes.status.textContent);
@@ -622,7 +722,7 @@
       close() { active = false; cancel(refreshTimer); invalidate(); root.classList.add("hidden"); },
       suspend() { active = false; cancel(refreshTimer); conceal(); root.classList.add("hidden"); },
       canClose() {
-        if (narrating) { nodes.status.textContent = "Nejprve počkej na dokončení čtení fotografie."; return false; }
+        if (narrating) { nodes.status.textContent = "Nejprve počkej na dokončení operace s komentářem fotografie."; return false; }
         if (deleting) { nodes.status.textContent = "Dokončuji smazání varianty. Před přepnutím počkej na výsledek."; return false; }
         if (preserved) { nodes.status.textContent = "Nejprve obnov spojení a ulož rozpracovaný střih."; return false; }
         if (dirty || saving) { save(); nodes.status.textContent = "Nejprve dokonči uložení změn; potom můžeš přepnout nebo zavřít film."; return false; }

@@ -108,7 +108,7 @@ class PhotoLayerTests(unittest.TestCase):
         self.save_text(); request, result = self.prepare()
         with patch("app.camino_film_narration.synthesize") as speech:
             self.assertEqual(prepare_narration(self.editor, request), result); speech.assert_not_called()
-        with self.assertRaises(FilmError): narration_bytes(self.editor, self.pid, request["request_id"])
+        self.assertEqual(narration_bytes(self.editor, self.pid, request["request_id"]), b"synthetic audio derivative")
         self.attach(result)
         self.assertEqual(narration_bytes(self.editor, self.pid, request["request_id"]), b"synthetic audio derivative")
         self.assertFalse(any(v.get("narration_id") for v in resolved_voices(self.editor.view()["draft"])))
@@ -258,3 +258,177 @@ class PhotoLayerTests(unittest.TestCase):
         pcm = subprocess.run([binary("ffmpeg"), "-v", "error", "-i", str(out / "film.mp4"),
             "-map", "0:a:0", "-f", "s16le", "-"], capture_output=True, check=True).stdout
         self.assertGreater(len(set(pcm)), 20)
+
+    def trash(self, nid, deleted=True, **changes):
+        from app.camino_film_narration import trash_narration
+        payload = {"project_id": self.pid, "asset_id": uid(30), "narration_id": nid,
+            "revision": self.editor.view()["revision"], "deleted": deleted, **changes}
+        return trash_narration(self.editor, payload)
+
+    def test_iphone_original_is_immutable_while_working_script_is_editable_and_legacy_is_preserved(self):
+        p = self.payload(); source = self.editor.view()["texts"][0]
+        p["draft"]["shots"][0]["photo_text"] = {"text": "Upravená verze pro přednes.",
+            "original_text": source["text"], "text_source": source["reference"], "mode": "none", "narration": None}
+        self.editor.save(p)
+        p = self.payload(); p["draft"]["shots"][0]["photo_text"]["text"] = "Další ruční úprava."
+        self.editor.save(p)
+        self.assertEqual(self.editor.view()["draft"]["shots"][0]["photo_text"]["original_text"], source["text"])
+        p = self.payload(); p["draft"]["shots"][0]["photo_text"]["original_text"] = "Pokus přepsat originál."
+        with self.assertRaisesRegex(FilmError, "Původní text"): self.editor.save(p)
+        # Older edits gain a read-only projection; their saved bytes remain unchanged.
+        p = self.payload(); del p["draft"]["shots"][0]["photo_text"]["original_text"]
+        number = self.editor.save(p)["revision"]
+        path = self.store.root / self.pid / f"edit-r{number:06d}.json"; before = digest(path)
+        self.assertEqual(self.editor.view()["draft"]["shots"][0]["photo_text"]["original_text"], source["text"])
+        self.assertEqual(digest(path), before)
+
+    def test_previous_takes_survive_edit_reload_trash_and_restore_without_media_deletion(self):
+        self.save_text(); first_request, first = self.prepare(); self.attach(first)
+        p = self.payload(); layer = p["draft"]["shots"][0]["photo_text"]
+        layer.update(text="Druhá pracovní verze.", mode="none", narration=None); self.editor.save(p)
+        second_request = self.narration_payload()
+        with patch("app.camino_film_narration.synthesize", side_effect=self.fake_speech):
+            second = prepare_narration(self.editor, second_request)
+        takes = FilmEditor(self.store).view(self.pid)["narrations"]
+        self.assertEqual({t["text"] for t in takes}, {LONG_TEXT, "Druhá pracovní verze."})
+        media_before = {p: digest(p) for p in self.f.media.objects.iterdir() if p.is_file()}
+        audio = self.store.root / self.pid / "narrations" / first_request["request_id"] / "speech.m4a"
+        original_hash = digest(audio)
+        self.trash(first_request["request_id"])
+        with self.assertRaisesRegex(FilmError, "koši"): narration_bytes(self.editor, self.pid, first_request["request_id"])
+        self.assertEqual(digest(audio), original_hash)
+        self.assertEqual(self.editor.view()["draft"]["shots"][0]["photo_text"]["text"], "Druhá pracovní verze.")
+        self.assertTrue(next(t for t in self.editor.view()["narrations"] if t["id"] == first_request["request_id"])["deleted"])
+        self.trash(first_request["request_id"], False)
+        self.assertEqual(narration_bytes(self.editor, self.pid, first_request["request_id"]), b"synthetic audio derivative")
+        self.assertEqual(media_before, {p: digest(p) for p in media_before})
+
+    def test_trash_rejects_current_attachment_foreign_photo_and_stale_revision(self):
+        self.save_text(); request, result = self.prepare(); self.attach(result)
+        with self.assertRaisesRegex(FilmError, "odpoj"): self.trash(request["request_id"])
+        with self.assertRaisesRegex(FilmError, "jiné fotografii"): self.trash(request["request_id"], asset_id=uid(31))
+        with self.assertRaisesRegex(FilmError, "Jiné okno"): self.trash(request["request_id"], revision=1)
+        with self.assertRaises(FilmError): self.trash(request["request_id"], revision=True)
+        p = self.payload(); p["draft"]["shots"][0]["photo_text"].update(narration=None, mode="none"); self.editor.save(p)
+        self.trash(request["request_id"])
+        with self.assertRaisesRegex(FilmError, "koši"):
+            self.attach(result)
+
+    def test_trash_preserves_already_rendered_film_and_its_frozen_derivative(self):
+        self.save_text(); request, result = self.prepare(); self.attach(result, included=True, duration=42000)
+        job = self.editor.enqueue({"project_id": self.pid, "revision": self.editor.view()["revision"],
+            "request_id": str(uuid4()), "profile": "preview", "range": None}, background=False)
+        def fake_render(edit, manifest, objects, out, *args, **kwargs):
+            kwargs["revalidate"]()
+            self.assertIn(request["request_id"], kwargs["narration_paths"])
+            path = out / "film.mp4"; path.write_bytes(b"synthetic completed movie")
+            return {"bytes": path.stat().st_size, "sha256": digest(path)}
+        with patch("app.camino_film_render.render_edit", side_effect=fake_render): self.editor.run_queue(self.pid)
+        original = self.editor.output(self.pid, job["job_id"]); before = digest(original)
+        p = self.payload(); p["draft"]["shots"][0]["photo_text"].update(narration=None, mode="none"); self.editor.save(p)
+        self.trash(request["request_id"])
+        self.assertEqual(digest(self.editor.output(self.pid, job["job_id"])), before)
+        self.assertEqual(original.read_bytes(), b"synthetic completed movie")
+
+    @staticmethod
+    def wav_bytes():
+        import wave
+        import math
+        import struct
+        data = io.BytesIO()
+        with wave.open(data, "wb") as handle:
+            handle.setnchannels(1); handle.setsampwidth(2); handle.setframerate(16000)
+            handle.writeframes(b"".join(struct.pack("<h", round(8000 * math.sin(i * 440 * 2 * math.pi / 16000))) for i in range(16000)))
+        return data.getvalue()
+
+    @unittest.skipUnless(shutil.which("ffmpeg") and shutil.which("ffprobe"), "Local media tools required")
+    def test_actual_wav_import_is_private_idempotent_and_can_be_used_without_text(self):
+        from app.camino_film_narration import import_narration
+        self.save_text(text="")
+        payload = self.narration_payload(); body = self.wav_bytes()
+        with patch.dict("os.environ", {"PATH": "/usr/bin:/bin:/usr/sbin:/sbin"}):
+            result = import_narration(self.editor, payload, body)
+            self.assertEqual(import_narration(self.editor, payload, body), result)
+        self.assertTrue(900 <= result["narration"]["duration_ms"] <= 1100)
+        self.attach(result, included=True)
+        view = self.editor.view(); self.assertIsNone(view["narrations"][0]["synthetic"])
+        audio = narration_bytes(self.editor, self.pid, payload["request_id"])
+        self.assertNotEqual(audio, body)
+        self.assertFalse(view["narrations"][0]["deleted"])
+        folder, manifest = self.editor.inputs(self.pid)
+        validate_draft(view["draft"], manifest, for_render=True)
+        with self.assertRaisesRegex(FilmError, "jinému"):
+            import_narration(self.editor, {**payload, "revision": view["revision"]}, body + b"different")
+
+    def test_import_rejects_playlists_and_unknown_bytes_without_creating_an_attempt(self):
+        from app.camino_film_narration import import_narration
+        self.save_text(); payload = self.narration_payload()
+        for data in (b"", b"#EXTM3U\nfile:///private/secret.wav", b"not audio"):
+            with self.assertRaises(FilmError): import_narration(self.editor, payload, data)
+        self.assertFalse((self.store.root / self.pid / "narrations").exists())
+
+    def test_history_rechecks_text_origin_and_photo_privacy(self):
+        self.save_text(); request, result = self.prepare()
+        self.assertEqual(len(self.editor.view()["narrations"]), 1)
+        self.f.lock()
+        with self.assertRaises(FilmError): self.editor.view()
+        with self.assertRaises(FilmError): self.trash(request["request_id"])
+        with self.assertRaises(FilmError): narration_bytes(self.editor, self.pid, request["request_id"])
+
+    @unittest.skipUnless(shutil.which("ffmpeg") and shutil.which("ffprobe"), "Local media tools required")
+    def test_http_audio_import_trash_restore_and_origin_checks(self):
+        self.save_text()
+        request = self.narration_payload()
+        server = ThreadingHTTPServer(("127.0.0.1", 0), cockpit.CockpitServer().make_handler())
+        thread = threading.Thread(target=server.serve_forever, daemon=True); thread.start()
+        self.addCleanup(thread.join, 3); self.addCleanup(server.server_close); self.addCleanup(server.shutdown)
+        def call(path, data, headers):
+            conn = http.client.HTTPConnection("127.0.0.1", server.server_port, timeout=20)
+            conn.request("POST", path, body=data, headers=headers)
+            response = conn.getresponse(); value = response.read(); code = response.status; conn.close()
+            return code, json.loads(value)
+        headers = {"Content-Type": "application/octet-stream", "X-Camino-Project-Id": self.pid,
+            "X-Camino-Asset-Id": uid(30), "X-Camino-Revision": str(request["revision"]), "X-Camino-Request-Id": request["request_id"]}
+        with patch.object(cockpit, "production_editor", return_value=self.editor), patch("app.camino_film_editor.production_editor", return_value=self.editor):
+            self.assertEqual(call("/api/camino/film/narration-import", b"test", {**headers, "Origin": "https://foreign.invalid"})[0], 403)
+            self.assertEqual(call("/api/camino/film/narration-import?x=1", b"test", headers)[0], 409)
+            self.assertEqual(call("/api/camino/film/narration-import", b"", {**headers, "Content-Length": str(64 * 1024**2 + 1)})[0], 409)
+            code, result = call("/api/camino/film/narration-import", self.wav_bytes(), headers)
+            self.assertEqual(code, 200)
+            trash = {"project_id": self.pid, "asset_id": uid(30), "narration_id": result["narration"]["id"], "revision": request["revision"], "deleted": True}
+            encoded = json.dumps(trash)
+            self.assertEqual(call("/api/camino/film/narration-trash", encoded, {"Content-Type": "application/json", "Origin": "https://foreign.invalid"})[0], 403)
+            code, result = call("/api/camino/film/narration-trash", encoded, {"Content-Type": "application/json"})
+            self.assertEqual(code, 200); self.assertTrue(result["narrations"][0]["deleted"])
+            trash["deleted"] = False
+            code, result = call("/api/camino/film/narration-trash", json.dumps(trash), {"Content-Type": "application/json"})
+            self.assertEqual(code, 200); self.assertFalse(result["narrations"][0]["deleted"])
+
+    @unittest.skipUnless(shutil.which("ffmpeg") and shutil.which("ffprobe"), "Local media tools required")
+    def test_actual_mp3_import_preserves_complete_audio_and_uses_service_tool_resolution(self):
+        from app.camino_film_narration import import_narration
+        self.save_text()
+        encoded = subprocess.run([binary("ffmpeg"), "-v", "error", "-f", "wav", "-i", "pipe:0",
+            "-map", "0:a:0", "-map_metadata", "-1", "-f", "mp3", "pipe:1"],
+            input=self.wav_bytes(), capture_output=True, check=True, timeout=30).stdout
+        with patch.dict("os.environ", {"PATH": "/usr/bin:/bin:/usr/sbin:/sbin"}):
+            result = import_narration(self.editor, self.narration_payload(), encoded)
+        self.assertTrue(950 <= result["narration"]["duration_ms"] <= 1200)
+        take = result["narrations"][0]
+        self.assertEqual(take["label"], "Importovaná nahrávka MP3")
+        self.assertEqual(take["text"], LONG_TEXT)
+
+    def test_legacy_take_keeps_its_original_script_after_later_text_edits(self):
+        self.save_text(text="Starší pracovní verze.")
+        request = self.narration_payload()
+        with patch("app.camino_film_narration.synthesize", side_effect=self.fake_speech):
+            prepare_narration(self.editor, request)
+        path = self.store.root / self.pid / "narrations" / request["request_id"] / "receipt.json"
+        receipt = json.loads(path.read_text())
+        for key in ("text", "created_at", "label"): receipt.pop(key, None)
+        path.write_text(json.dumps(receipt))
+        before = digest(path)
+        p = self.payload(); p["draft"]["shots"][0]["photo_text"]["text"] = "Nová pracovní verze."
+        self.editor.save(p)
+        self.assertEqual(self.editor.view()["narrations"][0]["text"], "Starší pracovní verze.")
+        self.assertEqual(digest(path), before)

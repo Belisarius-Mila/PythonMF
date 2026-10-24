@@ -1,6 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-24 12:21 CEST: Místně hotový cyklus komentáře fotografie: neměnný původní text z iPhonu, ručně upravitelná pracovní kopie, historie nahrávek s vlastním textem, obnovitelný koš a import MP3/WAV. 45 cílených kontrol PASS včetně skutečných formátů pod PATH služby a zachování staršího filmu. Plná brána 2216 PASS (458,188 s unit část). Nové p+n neproběhlo; osobní střih se neměnil. Předchozí vydání 5cd323ef je živě potvrzené (Luna 4f7f51ee, smoke 5/5); starší failure 570b4fc7 je historie. Příjemnější hlas a fyzická přejímka této verze zůstávají otevřené.
+
 - 2026-10-24 11:20 CEST: P+n 570b4fc7ce1e29b96fac6a9b4f1654b2 zastavilo jedno selhání testu pod službovým PATH (Node); 2206 testů, 1 ERROR, 15 přeskočených. GitHub čtecím auditem stále e11d949a, nasazení nezačalo. Test opraven na projektový node_binary; 21 cílených kontrol PASS včetně přímého běhu pod omezeným PATH; bez nového předání či změny produkčních dat.
 
 - 2026-10-24 11:02 CEST: Místní přepracování textu a komentáře přímo u fotografie: celý text do 6000 znaků, statický panel, plynulé okno a uložené místní čtení Zuzana; původní nahrávka i syntetický hlas se vážou na fotografii. 72 cílených testů PASS, skutečné syntetické MP4 720p/1080p a celé čtení 3022 znaků PASS. Plná brána 2206 PASS (450,207 s unit část), závěrečné frontendové kontroly 22 PASS. Bez p+n a bez změny osobního střihu; Safari/iPhone NEOVĚŘENO.

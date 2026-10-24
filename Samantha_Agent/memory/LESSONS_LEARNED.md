@@ -1469,3 +1469,19 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
 - Řešení: testovat skutečnou sekci s dlouhým textem, místní chybou a následným kliknutím, uložením, reloadem a přesunem fotografie. Textová karta mezi obrazy není vrstva přes fotografii. Čtení musí zachovat celý zvolený text a mít změřenou délku; chatový TTS helper s krácením pro film nepoužívat. Ověřeno syntetickým 3022znakovým vstupem, skutečnými MP4 a místním TTS.
 
 - Doplnění LL-080 (24. 10.): Node test spouštěný z Pythonu musí použít společný `scripts.cockpit_quality_gate.node_binary()`, ne mediální `binary("node")`. Regrese sama vynucuje `/usr/bin:/bin:/usr/sbin:/sbin`; terminálový PATH přítomnost Node ve službě neprokazuje.
+
+
+### LL-081 — Pracovní text a historie hlasových pokusů se nesmějí přepisovat navzájem
+
+- Problém: samotné přepsání textu a nahrazení aktuálního audio odkazu neumožní porovnat pokusy ani obnovit jejich znění; skrytí záznamu navíc nesmí poškodit starší film.
+- Typ: opakující se
+- Řešení nalezeno: 24102026
+- Řešení: uchovat neměnný zdrojový text a samostatnou pracovní kopii, každý pokus svázat s vlastním textem a původem. Smazání pokusu řešit obnovitelným košem s odpojením aktuálního odkazu; historické exporty dál čtou zachované odvozeniny s kontrolou soukromí. Staré účtenky doplnit pouze čtecím rozřešením zdrojové revize. Ověřeno editací/reloadem, více pokusy, košem/obnovou a neměnným hotovým filmem.
+
+
+### LL-082 — Opožděný poll nesmí vrátit pracovní text před potvrzené uložení
+
+- Problém: průběžný GET zahájený před psaním nebo během autosave mohl dorazit po potvrzení nové revize a nahradit ji starší odpovědí; editace pak působila jako nefunkční.
+- Typ: opakující se
+- Řešení nalezeno: 24102026
+- Řešení: lokální změna a úspěšné potvrzení save zvýší generaci čtecích požadavků. Odpověď s původní generací se nesmí aplikovat ani skrýt rozpracovaný formulář. Ověřit oba souběhy s řízenými odpověďmi, nejen běžné uložení/reload. Nový DOM scénář FAIL před opravou → PASS po ní; žádná migrace uložených dat.

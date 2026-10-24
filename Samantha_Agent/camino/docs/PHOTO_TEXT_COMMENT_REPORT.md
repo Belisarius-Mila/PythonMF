@@ -1,5 +1,8 @@
 # Text a komentář přímo u fotografie — 24. 10. 2026
 
+Novější místní doplnění odděluje původní/pracovní text a přidává historii,
+obnovitelný koš a import: [pracovní cyklus komentáře](COMMENTARY_WORKFLOW_REPORT.md).
+
 ## Rozsah a stav
 
 Místní vývoj podle schváleného návrhu Míly. Není tím doložený push, nasazení

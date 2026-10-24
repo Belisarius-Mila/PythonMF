@@ -40,12 +40,14 @@ def layout(text, size):
 
 
 def validate_layer(layer, *, exact, identifier, integer, text_reference):
-    exact(layer, "text mode text_source narration")
+    exact(layer, "text mode text_source narration" + (" original_text" if isinstance(layer, dict) and "original_text" in layer else ""))
     text = layer["text"]
     if (not isinstance(text, str) or len(text) > MAX_TEXT
             or any(ord(c) < 32 and c != "\n" for c in text)):
         raise FilmError("Text fotografie může mít nejvýše 6000 znaků; nový řádek je povolený.")
-    if layer["mode"] not in MODES or layer["mode"] != "none" and not text.strip():
+    if "original_text" in layer and (not isinstance(layer["original_text"], str) or len(layer["original_text"]) > MAX_TEXT):
+        raise FilmError("Původní text fotografie není platný.")
+    if layer["mode"] not in MODES or layer["mode"] in ("static", "scroll") and not text.strip():
         raise FilmError("Vyber režim a vyplň text fotografie.")
     if layer["text_source"] is not None:
         text_reference(layer["text_source"])

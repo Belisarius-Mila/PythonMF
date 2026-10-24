@@ -4468,3 +4468,42 @@ Technický důkaz:
 - 21 cílených kontrol PASS, včetně původně selhávajícího DOM testu s vynuceným
   službovým PATH a kontraktu celého frontendu. Závěrečná statická brána
   rovněž pod omezeným PATH PASS. Produkční kód se touto opravou nemění.
+
+
+### 2026-10-24 12:21 CEST — Upravitelný text, hlasové pokusy a obnovitelný koš
+
+Hotovo:
+- U fotografie je původní text z iPhonu pouze pro čtení a samostatná ručně
+  upravitelná pracovní verze. Lze ji uložit, vrátit k originálu a opakovaně číst.
+- Předchozí nahrávky zůstávají v seznamu se svým přesným pracovním textem.
+  Lze je použít, jejich text znovu upravit, smazat pokus do koše a obnovit.
+- Import MP3/WAV umožní dodat hotový přirozenější komentář nebo vlastní hlas.
+
+Rozhodnutí:
+- Míla schválil pokračování a výslovně požádal o smazání pokusů, zachování
+  původního textu a opakovaný cyklus ruční editace a čtení.
+- Smazání je obnovitelný koš; není to trvalé mazání originálů či souborů.
+  Starší uložené filmy a zdrojové texty zůstávají platné a nezměněné.
+- Místní hlas je zatím Zuzana. Příjemnější hlas vyžaduje zvláštní poslechovou
+  zkoušku; osobní text se nyní neposílal do externí TTS a neproběhl placený pokus.
+
+Další krok:
+- Předat dokončený místní krok k samostatnému p+n Lunou, poté prakticky přijmout na Safari/iPhonu.
+
+Navrhované další kroky:
+- Po nasazení fyzicky přijmout celý cyklus u fotografie na Safari/iPhonu.
+- Poslechem vybrat vhodnější český hlas; import MP3 již má společnou cestu.
+- Víceprojektový krok 6 a oddělený Python pilot zůstávají otevřené.
+
+Technický důkaz:
+- 45 cílených kontrol PASS: 23 testů komentářů, 20 frontendových kontraktů,
+  2 kontroly POST registru. Skutečné WAV/MP3 pod PATH služby, HTTP původ/limity,
+  koš/obnovení, starší nahrávka, neměnný originál i hotový film PASS.
+- Souběh opožděného načítání s ruční editací/autosave reprodukovaný jako FAIL;
+  oprava generace čtení a oba řízené souběhy v DOM PASS. Bez prohlížeče
+  ve dostupných plochách zůstává fyzický proklik otevřený.
+- Plná brána 2216 PASS (458,188 s unit část). Osobní střih ani produkční nahrávky se neměnily.
+- Předchozí vydání 5cd323ef: účtenka 4f7f51ee421b4fd20b71e09b454c509f
+  potvrzuje push tří commitů, plnou bránu 2206, nasazení a smoke 5/5.
+  Živý registrovaný audit 24. 10. to potvrdil; 570b4fc7 není poslední vydání.
+- Postup a hranice: `camino/docs/COMMENTARY_WORKFLOW_REPORT.md`.

@@ -18,23 +18,38 @@ const root = node(); root.querySelector = s => nodes[s.match(/"(.*?)"/)[1]];
 const doc = {hidden: false, createElement: node, addEventListener() {}};
 const id = n => `00000000-0000-0000-0000-${String(n).padStart(12, "0")}`;
 const long = ("Syntetický text o památce a krajině. ".repeat(100)).slice(0, 3022);
-const view = {ok: true, project_id: id(1), revision: 1, duration_ms: 30000, jobs: [],
+const view = {ok: true, project_id: id(1), revision: 1, duration_ms: 30000, jobs: [], narrations: [],
   texts: [{title: "Syntetický text", text: long, reference: {moment_id: id(7), revision_id: id(8), sha256: "a".repeat(64)}}],
   sources: [{asset_id: id(2), kind: "photo", title: "První"}, {asset_id: id(3), kind: "photo", title: "Druhá"}, {asset_id: id(4), kind: "video", title: "Video", duration_ms: 1000}, {asset_id: id(5), kind: "audio", title: "Hlas", duration_ms: 3000}],
   draft: {shots: [2, 3, 4].map((n, i) => ({asset_id: id(n), title: "", in_ms: 0, out_ms: i === 0 ? 25000 : 1000, included: true, gain: 1})),
     voices: [{asset_id: id(5), in_ms: 0, out_ms: 3000, at_ms: 0, gain: 1, included: false}], duck_gain: .2}};
-let saves = [], renders = [], generations = [], serial = 50, waitGeneration = null, failSave = false;
+let saves = [], renders = [], generations = [], uploads = [], serial = 50, waitGeneration = null, failSave = false, delayedRead = null, delayedSave = null;
+function recordTake(p, imported = false) {
+  const layer = view.draft.shots.find(r => r.asset_id === p.asset_id).photo_text;
+  const n = {id: p.request_id, duration_ms: imported ? 2400 : 45000, sha256: "b".repeat(64), included: false};
+  view.narrations.push({...n, asset_id: p.asset_id, text: layer.text, original_text: layer.original_text || "", text_source: layer.text_source, deleted: false, label: imported ? "Import MP3" : "Místní čtení"});
+  return {ok: true, narration: n, narrations: JSON.parse(JSON.stringify(view.narrations))};
+}
 const fetch = async (url, options = {}) => {
-  if (url.includes("/editor")) return {json: async () => JSON.parse(JSON.stringify(view))};
+  if (url.includes("/editor")) return delayedRead || {json: async () => JSON.parse(JSON.stringify(view))};
+  if (url.endsWith("/narration-import")) {
+    uploads.push(options); const p = {asset_id: options.headers["X-Camino-Asset-Id"], request_id: options.headers["X-Camino-Request-Id"]};
+    return {json: async () => recordTake(p, true)};
+  }
   const p = JSON.parse(options.body);
+  if (url.endsWith("/narration-trash")) {
+    view.narrations.find(t => t.id === p.narration_id).deleted = p.deleted;
+    assert(!p.deleted || !view.draft.shots.some(r => r.photo_text?.narration?.id === p.narration_id), "detach and save before moving an attached take to trash");
+    return {json: async () => ({ok: true, narrations: JSON.parse(JSON.stringify(view.narrations))})};
+  }
   if (url.endsWith("/save")) {
-    saves.push(p); if (failSave) return {json: async () => ({ok: false, message: "Viditelná chyba u fotografie"})};
+    saves.push(p); if (delayedSave) return delayedSave; if (failSave) return {json: async () => ({ok: false, message: "Viditelná chyba u fotografie"})};
     view.draft = p.draft; view.revision++;
     return {json: async () => ({ok: true, revision: view.revision})};
   }
   if (url.endsWith("/narration")) {
     generations.push(p); if (waitGeneration) return waitGeneration;
-    return {json: async () => ({ok: true, narration: {id: p.request_id, duration_ms: 45000, sha256: "b".repeat(64), included: false}})};
+    return {json: async () => recordTake(p)};
   }
   assert(url.endsWith("/render")); renders.push(p); return {json: async () => ({ok: true})};
 };
@@ -58,9 +73,24 @@ async function main() {
   assert.equal(area().value, long); assert.equal(photo().open, true); assert.equal(photo().scrolled, true);
   await editor.save(); assert.equal(saves.at(-1).draft.shots[0].photo_text.text.length, 3022);
   assert.equal(saves.at(-1).draft.shots[0].out_ms, 25000, "transfer does not silently change photo duration");
+  const staleView = JSON.parse(JSON.stringify(view)); let releaseRead;
+  delayedRead = new Promise(resolve => { releaseRead = resolve; });
+  const oldRead = editor.check(); delayedRead = null;
   area().value += "\nVlastní závěr."; area().emit("input"); await editor.save();
+  releaseRead({json: async () => staleView}); await oldRead;
+  assert(area().value.endsWith("Vlastní závěr."), "a delayed poll must not replace a newly saved script");
+  area().value += "\nDruhý dodatek."; area().emit("input");
+  let releaseSave; delayedSave = new Promise(resolve => { releaseSave = resolve; });
+  const savingNow = editor.save(); await flush();
+  const beforeAcknowledgment = JSON.parse(JSON.stringify(view));
+  delayedRead = new Promise(resolve => { releaseRead = resolve; });
+  const readDuringSave = editor.check(); delayedRead = null;
+  view.draft = saves.at(-1).draft; view.revision++;
+  releaseSave({json: async () => ({ok: true, revision: view.revision})}); delayedSave = null; await savingNow;
+  releaseRead({json: async () => beforeAcknowledgment}); await readDuringSave;
+  assert(area().value.endsWith("Druhý dodatek."), "a poll begun during save must not roll back the acknowledged revision");
   nodes.reload.emit("click"); await flush();
-  assert(area().value.endsWith("Vlastní závěr."), "edited text survives a real editor reload");
+  assert(area().value.endsWith("Druhý dodatek."), "edited text survives a real editor reload");
   mode().value = "scroll"; mode().emit("change");
   find(photo(), "Prodloužit pro celý text / čtení").emit("click"); await editor.save();
   assert(saves.at(-1).draft.shots[0].out_ms > 25000);
@@ -105,6 +135,36 @@ async function main() {
   assert.equal(await editor.save(), false);
   assert(all(photo(1)).some(n => n.textContent === "Viditelná chyba u fotografie"));
   failSave = false; assert.equal(await editor.save(), true);
+  assert.equal(all(photo(1)).find(n => n.name === "film-original-text").readOnly, true);
+  assert.equal(all(photo(1)).find(n => n.name === "film-original-text").value, long, "iPhone original survives every manual edit");
+  assert.equal(area(1).readOnly, false, "working script is visibly editable");
+  await find(photo(1), "Vytvořit místní čtení").emit("click");
+  assert.equal(view.narrations.length, 2, "a new reading keeps the previous take");
+  function takeItem(index) { return all(photo(1)).filter(n => n.className === "camino-film-take").find(n => n.children[0].textContent.startsWith(`Pokus ${index} ·`)); }
+  const workingBeforeTrash = area(1).value;
+  await find(takeItem(2), "Smazat pokus do koše").emit("click");
+  assert.equal(view.narrations[1].deleted, true);
+  assert.equal(area(1).value, workingBeforeTrash, "deleting a take preserves the working script");
+  assert.equal(view.draft.shots[1].photo_text.narration, null);
+  assert(all(photo(1)).some(n => n.textContent === "Koš pokusů (1)"));
+  await find(takeItem(2), "Obnovit pokus").emit("click");
+  assert.equal(view.narrations[1].deleted, false);
+  find(takeItem(1), "Upravit text tohoto pokusu").emit("click"); await editor.save();
+  assert.equal(area(1).value, long + "\nVlastní závěr.\nDruhý dodatek.", "previous takes retain their exact scripts");
+  assert.equal(view.draft.shots[1].photo_text.original_text, long);
+  find(photo(1), "Obnovit pracovní text z originálu").emit("click"); await editor.save();
+  assert.equal(area(1).value, long);
+  const input = all(photo(1)).find(n => n.type === "file");
+  const file = {size: 1500, name: "recording.mp3"}; input.files = [file];
+  await find(photo(1), "Importovat MP3/WAV k fotografii").emit("click");
+  assert.equal(uploads.length, 1); assert.equal(uploads[0].body, file);
+  assert.equal(view.narrations.length, 3); assert.equal(view.draft.shots[1].photo_text.narration.included, false);
+  find(takeItem(3), "Použít tento pokus ve filmu").emit("click"); await editor.save();
+  assert.equal(view.draft.shots[1].photo_text.narration.included, true);
+  await find(takeItem(3), "Smazat pokus do koše").emit("click");
+  assert.equal(view.draft.shots[1].photo_text.mode, "none");
+  assert.equal(view.narrations[2].deleted, true);
+  assert.equal(view.draft.shots[1].photo_text.original_text, long);
   console.log("Camino photo text and narration interactions: PASS");
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });

@@ -2,15 +2,17 @@
 from __future__ import annotations
 
 import fcntl
+from datetime import datetime, timezone
 import hashlib
 import os
 import shutil
 import stat
 import subprocess
 
-from camino.film.closed_day import _private_directory
+from camino.film.closed_day import _private_directory, _store_lock
 from camino.film.media import duration_ms, probe
 from camino.film.project import FilmError, digest, fingerprint, write_json
+from app.file_persistence import atomic_write_json
 
 MAX_AUDIO_BYTES = 32 * 1024**2
 
@@ -58,13 +60,15 @@ def verify_record(editor, manifest, sid, layer, nid, *, project_id):
     return receipt, path, data
 
 
-def narration_paths(editor, manifest, draft, *, project_id):
+def narration_paths(editor, manifest, draft, *, project_id, allow_deleted=True):
     result = {}
     for row in draft["shots"]:
         layer = row.get("photo_text", {})
         ref = layer.get("narration")
         if ref:
             receipt, path, _ = verify_record(editor, manifest, row["asset_id"], layer, ref["id"], project_id=project_id)
+            if not allow_deleted and is_trashed(editor.store, path.parent):
+                raise FilmError("Tento pokus je v koši. Před použitím jej obnov.")
             if receipt["sha256"] != ref["sha256"] or receipt["duration_ms"] != ref["duration_ms"]:
                 raise FilmError("Vazba hlasového komentáře byla změněná.")
             result[ref["id"]] = path
@@ -117,13 +121,15 @@ def prepare_narration(editor, payload):
             raise FilmError("Jiné místní čtení se právě vytváří. Počkej na jeho dokončení.") from error
         directory = root / nid
         if directory.exists():
+            if is_trashed(editor.store, directory):
+                raise FilmError("Pokus je v koši; nejprve jej obnov.")
             receipt, _, _ = verify_record(editor, manifest, sid, layer, nid, project_id=folder.name)
             request = editor.store._read(directory / "request.json")
             if request != payload:
                 raise FilmError("Stejný požadavek byl použitý pro jiné čtení.")
         else:
-            if len(list(root.glob("*/request.json"))) >= 64:
-                raise FilmError("Projekt má již 64 hlasových verzí; další čtení vyžaduje správu úložiště.")
+            if len(list(root.glob("*/request.json"))) >= 256:
+                raise FilmError("Projekt má již 256 hlasových verzí; další čtení vyžaduje správu úložiště.")
             directory = _private_directory(directory)
             write_json(directory / "request.json", payload)
             length = synthesize(layer["text"], directory)
@@ -140,24 +146,187 @@ def prepare_narration(editor, payload):
             receipt = {"schema": 1, "scope": "camino-photo-narration", "project_id": folder.name,
                 "asset_id": sid, "manifest_sha256": fingerprint(manifest), "text_sha256": text_hash(layer),
                 "text_source": layer["text_source"], "duration_ms": length, "bytes": path.stat().st_size,
-                "sha256": digest(path), "voice": "Zuzana", "synthetic": True}
+                "sha256": digest(path), "voice": "Zuzana", "synthetic": True,
+                "text": layer["text"], "created_at": datetime.now(timezone.utc).isoformat(), "label": "Místní čtení Zuzana"}
             write_json(directory / "receipt.json", receipt)
             checked_audio(directory, receipt)
         return {"ok": True, "narration": {"id": nid, "duration_ms": receipt["duration_ms"],
             "sha256": receipt["sha256"], "included": False},
-            "url": f"/api/camino/film/narration/{folder.name}/{nid}"}
+            "url": f"/api/camino/film/narration/{folder.name}/{nid}",
+            "narrations": list_narrations(editor, folder, manifest)}
     finally:
         os.close(lock)
+
+
+def is_trashed(store, directory):
+    path = directory / "trash.json"
+    return path.exists() and store._read(path).get("deleted") is True
+
+
+def attempt_record(editor, folder, manifest, nid):
+    """A previous take keeps its own script; current photo edits never rewrite it."""
+    from app.camino_film_editor import identifier
+    directory = folder / "narrations" / identifier(nid)
+    if folder.is_symlink() or directory.parent.is_symlink() or directory.is_symlink():
+        raise FilmError("Pokus nemá bezpečné umístění.")
+    receipt = editor.store._read(directory / "receipt.json")
+    sid = receipt.get("asset_id")
+    if (receipt.get("project_id") != folder.name or receipt.get("scope") != "camino-photo-narration"
+            or receipt.get("manifest_sha256") != fingerprint(manifest)
+            or not any(s["asset_id"] == sid and s["media_kind"] == "photo" for s in manifest["sources"])):
+        raise FilmError("Pokus nepatří k povolené fotografii tohoto filmu.")
+    if "text" in receipt:
+        text = receipt["text"]
+    else:
+        # Legacy takes already have an immutable source edit; recover without rewriting it.
+        request = editor.store._read(directory / "request.json")
+        edit = editor.revision(folder, manifest, request["revision"])
+        row = next((r for r in edit["draft"]["shots"] if r["asset_id"] == sid), None)
+        if not row or "photo_text" not in row:
+            raise FilmError("Chybí uložený text tohoto pokusu.")
+        text = row["photo_text"]["text"]
+    if not isinstance(text, str) or len(text) > 6000 or text_hash({"text": text}) != receipt.get("text_sha256"):
+        raise FilmError("Uložený text pokusu byl změněný.")
+    original = ""
+    if receipt.get("text_source") is not None:
+        original = editor.store.text_choices(manifest, [receipt["text_source"]])[0]["text"]
+    return {**receipt, "text": text, "original_text": original}, directory
+
+
+def list_narrations(editor, folder, manifest):
+    root = folder / "narrations"
+    if not root.exists():
+        return []
+    if root.is_symlink():
+        raise FilmError("Pokusy nemají bezpečný projekt.")
+    result = []
+    for directory in sorted(root.iterdir()):
+        if not directory.is_dir() or directory.name.startswith("."):
+            continue
+        if directory.is_symlink():
+            raise FilmError("Pokus nemá bezpečné umístění.")
+        if not (directory / "receipt.json").exists():
+            continue  # Interrupted or currently generating attempts are never offered as playable.
+        receipt, directory = attempt_record(editor, folder, manifest, directory.name)
+        result.append({"id": directory.name, "asset_id": receipt["asset_id"],
+            "duration_ms": receipt["duration_ms"], "sha256": receipt["sha256"],
+            "text": receipt["text"], "original_text": receipt["original_text"], "text_source": receipt["text_source"],
+            "synthetic": receipt.get("synthetic", True), "label": receipt.get("label", "Místní čtení Zuzana"),
+            "created_at": receipt.get("created_at"), "deleted": is_trashed(editor.store, directory),
+            "url": f"/api/camino/film/narration/{folder.name}/{directory.name}"})
+    return sorted(result, key=lambda r: (r["created_at"] or "", r["id"]))
+
+
+def trash_narration(editor, payload):
+    from app.camino_film_editor import exact, identifier, integer
+    exact(payload, "project_id asset_id narration_id revision deleted")
+    integer(payload["revision"], 1, 999999)
+    if type(payload["deleted"]) is not bool:
+        raise FilmError("Vyber smazání do koše nebo obnovení pokusu.")
+    folder, manifest = editor.inputs(identifier(payload["project_id"]))
+    sid = identifier(payload["asset_id"])
+    receipt, directory = attempt_record(editor, folder, manifest, payload["narration_id"])
+    if receipt["asset_id"] != sid:
+        raise FilmError("Pokus patří jiné fotografii.")
+    # All changes are reversible metadata. Media, previous edits and exported films stay intact.
+    with _store_lock(editor.store.root):
+        _, current = editor.inputs(folder.name)
+        latest = editor.revision(folder, current)
+        if payload["revision"] != latest["revision"]:
+            raise FilmError("Jiné okno změnilo střih. Obnov přehled pokusů.")
+        if payload["deleted"] and any((r.get("photo_text", {}).get("narration") or {}).get("id") == directory.name for r in latest["draft"]["shots"]):
+            raise FilmError("Nejprve odpoj pokus od fotografie a ulož střih.")
+        attempt_record(editor, folder, current, directory.name)
+        atomic_write_json(directory / "trash.json", {"schema": 1, "deleted": payload["deleted"]})
+    return {"ok": True, "deleted": payload["deleted"], "narrations": list_narrations(editor, folder, current)}
 
 
 def narration_bytes(editor, project_id, nid):
     from app.camino_film_editor import identifier
     folder, manifest = editor.inputs(identifier(project_id))
-    edit = editor.revision(folder, manifest)
+    receipt, directory = attempt_record(editor, folder, manifest, nid)
+    if is_trashed(editor.store, directory):
+        raise FilmError("Tento pokus je v koši.")
+    data = checked_audio(directory, receipt)[1]
+    # Recheck permission after reading so a changed privacy revision cannot release the take.
+    _, current = editor.inputs(folder.name)
+    attempt_record(editor, folder, current, nid)
+    if is_trashed(editor.store, directory):
+        raise FilmError("Tento pokus je v koši.")
+    return data
+
+
+MAX_IMPORT_BYTES = 64 * 1024**2
+
+
+def import_narration(editor, payload, body):
+    """Import one bounded MP3/WAV as a film derivative, never as an archive Asset."""
+    from app.camino_film_editor import exact, identifier
+    from app.camino_film_render import ffmpeg
+    exact(payload, "project_id revision asset_id request_id")
+    if not isinstance(body, bytes) or not 0 < len(body) <= MAX_IMPORT_BYTES:
+        raise FilmError("Nahrávka musí mít 1 až 64 MiB.")
+    if body[:4] == b"RIFF" and body[8:12] == b"WAVE":
+        kind = "wav"
+    elif body[:3] == b"ID3" or len(body) >= 2 and body[0] == 255 and body[1] & 224 == 224:
+        kind = "mp3"
+    else:
+        raise FilmError("Vyber skutečný soubor MP3 nebo WAV.")
+    folder, manifest = editor.inputs(identifier(payload["project_id"]))
+    nid, sid = identifier(payload["request_id"]), identifier(payload["asset_id"])
+    edit = editor.revision(folder, manifest, payload["revision"])
+    if edit["revision"] != editor.revision(folder, manifest)["revision"]:
+        raise FilmError("Nejprve načti a ulož poslední střih.")
+    row = next((r for r in edit["draft"]["shots"] if r["asset_id"] == sid), None)
+    if not row or not any(s["asset_id"] == sid and s["media_kind"] == "photo" for s in manifest["sources"]) or "photo_text" not in row:
+        raise FilmError("Nejprve ulož textový panel vybrané fotografie.")
+    layer = row["photo_text"]
     editor.verify_texts(manifest, edit["draft"], project_id=folder.name)
-    # Only a saved attachment may be served, and it must still match current text/privacy.
-    for row in edit["draft"]["shots"]:
-        layer = row.get("photo_text", {})
-        if (layer.get("narration") or {}).get("id") == nid:
-            return verify_record(editor, manifest, row["asset_id"], layer, nid, project_id=folder.name)[2]
-    raise FilmError("Komentář není připojený k aktuální fotografii.")
+    root = _private_directory(folder / "narrations")
+    lock = os.open(root / ".generation", os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW, 0o600)
+    spec = {**payload, "content_sha256": hashlib.sha256(body).hexdigest()}
+    try:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError as error:
+            raise FilmError("Jiná nahrávka se právě připravuje. Počkej na její dokončení.") from error
+        directory = root / nid
+        if directory.exists():
+            if editor.store._read(directory / "request.json") != spec or is_trashed(editor.store, directory):
+                raise FilmError("Požadavek už patří jinému nebo smazanému pokusu.")
+            receipt, _, _ = verify_record(editor, manifest, sid, layer, nid, project_id=folder.name)
+        else:
+            if len(list(root.glob("*/request.json"))) >= 256:
+                raise FilmError("Projekt již má 256 uložených pokusů. Je nutná správa archivu.")
+            directory = _private_directory(directory)
+            write_json(directory / "request.json", spec)
+            source = directory / "source.bin"
+            fd = os.open(source, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
+            with os.fdopen(fd, "wb") as handle:
+                handle.write(body); handle.flush(); os.fsync(handle.fileno())
+            # Force a single-file decoder. Never autodetect uploaded playlists or external references.
+            path = directory / "speech.m4a"
+            ffmpeg(["-protocol_whitelist", "file,pipe", "-f", kind, "-i", str(source), "-map", "0:a:0", "-vn",
+                "-map_metadata", "-1", "-map_chapters", "-1", "-c:a", "aac", "-b:a", "128k", "-ar", "48000",
+                "-movflags", "+faststart", str(path)], executable=media_binary("ffmpeg"))
+            info = probe(path, executable=media_binary("ffprobe")); length = duration_ms(info, "audio")
+            if len(info["streams"]) != 1 or not 1 <= length <= 300000:
+                raise FilmError("Importovaná nahrávka musí být zvuk o délce nejvýše 300 sekund.")
+            ffmpeg(["-protocol_whitelist", "file,pipe", "-i", str(path), "-f", "null", "-"], executable=media_binary("ffmpeg"))
+            _, current = editor.inputs(folder.name); latest = editor.revision(folder, current)
+            live_row = next((r for r in latest["draft"]["shots"] if r["asset_id"] == sid), None)
+            if fingerprint(current) != fingerprint(manifest) or not live_row or live_row.get("photo_text") != layer:
+                raise FilmError("Text nebo povolení se během importu změnilo. Nahrávka se nepřipojila.")
+            editor.verify_texts(current, latest["draft"], project_id=folder.name)
+            with path.open("rb") as handle:
+                os.fsync(handle.fileno())
+            receipt = {"schema": 1, "scope": "camino-photo-narration", "project_id": folder.name,
+                "asset_id": sid, "manifest_sha256": fingerprint(manifest), "text_sha256": text_hash(layer),
+                "text_source": layer["text_source"], "text": layer["text"], "duration_ms": length,
+                "bytes": path.stat().st_size, "sha256": digest(path), "synthetic": None,
+                "label": "Importovaná nahrávka " + kind.upper(), "created_at": datetime.now(timezone.utc).isoformat()}
+            write_json(directory / "receipt.json", receipt); checked_audio(directory, receipt)
+        return {"ok": True, "narration": {"id": nid, "duration_ms": receipt["duration_ms"],
+            "sha256": receipt["sha256"], "included": False}, "narrations": list_narrations(editor, folder, manifest)}
+    finally:
+        os.close(lock)

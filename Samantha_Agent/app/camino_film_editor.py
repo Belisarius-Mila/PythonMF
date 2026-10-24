@@ -209,12 +209,18 @@ class FilmEditor:
             raise FilmError("První editor podporuje nejvýše 256 zdrojů jednoho dne.")
         return folder, manifest
 
-    def verify_texts(self, manifest, draft, *, project_id=None):
+    def verify_texts(self, manifest, draft, *, project_id=None, allow_deleted=True):
         refs = text_references(draft)
         if refs:
-            self.store.text_choices(manifest, refs)
+            choices = self.store.text_choices(manifest, refs)
+            originals = {c["reference"]["revision_id"]: c["text"] for c in choices}
+            for row in draft["shots"]:
+                layer = row.get("photo_text", {})
+                ref = layer.get("text_source")
+                if ref and "original_text" in layer and layer["original_text"] != originals[ref["revision_id"]]:
+                    raise FilmError("Původní text z iPhonu nelze přepsat. Uprav pouze text pro čtení.")
         from app.camino_film_narration import narration_paths
-        return narration_paths(self, manifest, draft, project_id=project_id)
+        return narration_paths(self, manifest, draft, project_id=project_id, allow_deleted=allow_deleted)
 
     def photo_bytes(self, project_id, asset_id):
         """Return a metadata-free PNG of a currently permitted original photo."""
@@ -305,15 +311,21 @@ class FilmEditor:
         folder, manifest = self.inputs(project_id)
         edit = self.revision(folder, manifest)
         self.verify_texts(manifest, edit["draft"], project_id=folder.name)
+        draft = copy.deepcopy(edit["draft"])
+        for row in draft["shots"]:
+            layer = row.get("photo_text", {})
+            if layer.get("text_source") and "original_text" not in layer:
+                layer["original_text"] = self.store.text_choices(manifest, [layer["text_source"]])[0]["text"]
+        from app.camino_film_narration import list_narrations
         return {"ok": True, "project_id": folder.name, "local_date": manifest["local_date"],
-                "revision": edit["revision"], "draft": edit["draft"],
+                "revision": edit["revision"], "draft": draft,
                 "duration_ms": validate_draft(edit["draft"], manifest),
                 "sources": [{"asset_id": s["asset_id"], "kind": s["media_kind"],
                     "duration_ms": s["duration_ms"], "title": s["title"],
                     "moment_id": s["moment_id"], "captured_local": s.get("capture_local_wall")}
                     for s in manifest["sources"]],
                 "texts": self.store.text_choices(manifest),
-                "jobs": self.jobs(folder)}
+                "jobs": self.jobs(folder), "narrations": list_narrations(self, folder, manifest)}
 
     def save(self, payload):
         exact(payload, "project_id expected_revision request_id draft")
@@ -324,6 +336,7 @@ class FilmEditor:
         self.verify_texts(manifest, payload["draft"], project_id=folder.name)
         request_hash = fingerprint(payload)
         with _store_lock(self.store.root):
+            self.verify_texts(manifest, payload["draft"], project_id=folder.name, allow_deleted=False)
             for path in folder.glob("edit-r*.json"):
                 record = self.store._read(path)
                 if record.get("request_id") == request_id:
@@ -577,6 +590,17 @@ def production_editor(*, trip_id=None, project_id=None):
                       if trip_id is not None or project_id is not None else production_store())
 
 
+def film_narration_import_action(payload, body):
+    try:
+        from app.camino_film_narration import import_narration
+        editor = production_editor(project_id=identifier(payload["project_id"]))
+        return import_narration(editor, payload, body)
+    except FilmError as error:
+        return {"ok": False, "message": str(error)}
+    except (ClosedDayError, FilePersistenceError, sqlite3.DatabaseError, OSError, ValueError, KeyError, TypeError):
+        return {"ok": False, "message": "Nahrávku nelze bezpečně importovat."}
+
+
 def film_editor_action(operation, payload=None):
     try:
         if payload is not None and not isinstance(payload, dict):
@@ -605,6 +629,9 @@ def film_editor_action(operation, payload=None):
         if operation == "narration":
             from app.camino_film_narration import prepare_narration
             return prepare_narration(editor, payload)
+        if operation == "narration-trash":
+            from app.camino_film_narration import trash_narration
+            return trash_narration(editor, payload)
         if operation in ("delete-plan", "delete"):
             from app.camino_film_cleanup import deletion_plan, delete_export
             return (deletion_plan if operation == "delete-plan" else delete_export)(editor, payload)
