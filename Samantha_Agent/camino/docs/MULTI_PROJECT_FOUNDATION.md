@@ -91,8 +91,9 @@ nebo soukromých textů ve verzované dokumentaci.
 ## Navazující kroky a vydání
 
 Krok 3 doplnil metadata/archivaci v ovládání telefonu; samostatný report
-uvádí přejímku a hranice instalace. Krok 4 doplní výběr a oprávnění ve Vieweru/Macu, krok 5
-projektový výběr střižny, krok 6 celkovou fyzickou přejímku. Spojení denních
+uvádí přejímku a hranice instalace. Kroky 4–5 doplnily místní
+[výběr a oprávnění Vieweru/Macu i projektový výběr střižny](MULTI_PROJECT_ACCESS_REPORT.md).
+Krok 6 je celková fyzická přejímka. Spojení denních
 filmů do celé dovolené zůstává později. Nová aplikace, nový Human–Adam proud,
 nové TVBCP ani veřejné sdílení se nezakládají.
 

@@ -4,6 +4,8 @@ No archive reads, persistence, routing service, or independent permission cache.
 """
 
 from camino.domain.model import ContractError
+from uuid import UUID
+from html import escape
 
 
 def checked_root(root_path: str) -> str:
@@ -12,8 +14,17 @@ def checked_root(root_path: str) -> str:
     return root_path
 
 
-def route_snapshot(snapshot: dict, *, root_path: str = "") -> dict:
-    root = checked_root(root_path)
+def viewer_prefix(root_path: str = "", trip_id: str | None = None) -> str:
+    root = checked_root(root_path) + "/viewer"
+    if trip_id is not None:
+        if not isinstance(trip_id, str) or str(UUID(trip_id)) != trip_id:
+            raise ContractError("invalid Viewer project")
+        root += "/projects/" + trip_id
+    return root
+
+
+def route_snapshot(snapshot: dict, *, root_path: str = "", trip_id: str | None = None) -> dict:
+    prefix = viewer_prefix(root_path, trip_id)
     points = []
     for moment in snapshot["moments"]:
         fix = moment["map_point"]
@@ -28,7 +39,7 @@ def route_snapshot(snapshot: dict, *, root_path: str = "") -> dict:
             "uncertain": moment["capture_uncertain"],
             "latitude": fix["latitude"], "longitude": fix["longitude"],
             "accuracy_m": fix["accuracy_m"],
-            "href": f'{root}/viewer/days/{moment["day"]}#moment-{moment["id"]}',
+            "href": f'{prefix}/days/{moment["day"]}#moment-{moment["id"]}',
         })
     points.sort(key=lambda p: (p["utc_ms"] is None, p["utc_ms"] or 0, p["id"]))
     previous = None
@@ -41,18 +52,20 @@ def route_snapshot(snapshot: dict, *, root_path: str = "") -> dict:
     return {"points": points}
 
 
-def map_page(root_path: str = "") -> str:
+def map_page(root_path: str = "", *, trip_id: str | None = None, project_name: str | None = None) -> str:
     root = checked_root(root_path)
+    prefix = viewer_prefix(root_path, trip_id)
+    heading = "Mapa cesty" + (" · " + escape(project_name) if project_name else "")
     return f'''<!doctype html><html lang="cs"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="referrer" content="origin"><title>Mapa cesty · Camino</title>
+<meta name="referrer" content="origin"><title>{heading} · Camino</title>
 <link rel="stylesheet" href="{root}/viewer/map-assets/leaflet.css">
 <link rel="stylesheet" href="{root}/viewer/map-assets/map.css">
 <script src="{root}/viewer/map-assets/leaflet.js" defer></script>
 <script src="{root}/viewer/map-assets/map.js" defer></script></head>
-<body data-map-url="{root}/viewer/map-data"><header>
-<a href="{root}/viewer/">← Zpět do deníku</a><p class="eyebrow">CAMINO · PRO JANU</p>
-<h1>Mapa cesty</h1><p>Místa záznamů, postupně přibývající po synchronizaci.</p>
+<body data-map-url="{prefix}/map-data"><header>
+<a href="{prefix}/">← Zpět do deníku</a><p class="eyebrow">CAMINO · PRO JANU</p>
+<h1>{heading}</h1><p>Místa záznamů, postupně přibývající po synchronizaci.</p>
 <p class="notice">Přerušované spojnice jsou orientační, nikoli přesně prošlá trasa.
 Každý nový GPS bod se spojí s předchozím bodem; nepřesnost, velká vzdálenost
 nebo časová mezera proto mohou vytvořit dlouhý či nepřesný úsek.

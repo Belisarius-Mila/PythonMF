@@ -3,7 +3,17 @@
 Soukromý cestovní deník: offline záznam na iPhonu, ověřené originály na Macu,
 soukromý Viewer a jednodenní film z povolených podkladů.
 
-## Aktuální orientace — 23. 10. 2026
+## Aktuální orientace — 24. 10. 2026
+
+Nový místní krok 4–5 přidává výběr povolených cest ve Vieweru a volbu cesty
+před dnem/filmem ve střižně. V aplikaci se zobrazí období i rozlišení shodných
+názvů; nový projekt začíná bez přístupu pro Janu.
+[Ovládání, oprávnění a ověření](docs/MULTI_PROJECT_ACCESS_REPORT.md).
+Jde o vývojový checkpoint; živé vydání a instalace jsou samostatné kroky.
+
+Předchozí balíček do e11d949a byl 24. 10. ověřeně pushnutý a nasazený do
+Cockpitu přes Lunu e47cdb394ec5441c5d25632f11c8c995 (plná brána 2186,
+smoke 5/5). Původní neúspěšné předání c3aba030 je uzavřená historie.
 
 Více cest/dovolených má společný datový základ a oddělení projektů (kroky
 1–2, publikované v ffc933d5). Nový krok 3 doplňuje ovládání projektů,

@@ -239,6 +239,52 @@ class CaminoServiceTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.f.store.set_viewer_permission(self.f.trip.id, enabled="yes")
 
+    def test_project_grants_are_independent_and_keep_reader_and_original_operations(self):
+        other = self.f.add_project(200)
+        self.control("enable-viewer")
+        token = service.active_reader(self.runtime)
+        readers = RevocableTokenStore(self.runtime / "readers.sqlite")
+        with self.f.store._connection() as db:
+            trips = db.execute("SELECT body FROM trips ORDER BY id").fetchall()
+            operations = db.execute("SELECT request_body FROM accepted_operations ORDER BY device_sequence").fetchall()
+        def selected(action, trip_id):
+            return service.control(action, self.runtime, trip_id=trip_id, runner=self.runner, agents=self.agents)
+        granted = selected("enable-viewer", other.trip.id)
+        self.assertFalse(granted["reader_credentials_changed"])
+        self.assertTrue(self.f.store.viewer_safe_ids(other.trip.id))
+        selected("disable-viewer", self.f.trip.id)
+        self.assertFalse(self.f.store.viewer_safe_ids(self.f.trip.id))
+        self.assertTrue(self.f.store.viewer_safe_ids(other.trip.id))
+        self.assertTrue(service.viewer_granted(service.load_config(self.runtime), any_project=True))
+        self.assertFalse(service.viewer_granted(service.load_config(self.runtime)))
+        self.assertTrue(readers.authenticate("Bearer " + token))
+        self.assertEqual(service.active_reader(self.runtime), token)
+        self.assertEqual(len(list(self.runtime.glob("reader-token-*.txt"))), 1)
+        selected("disable-viewer", other.trip.id)
+        self.assertFalse(service.viewer_granted(service.load_config(self.runtime), any_project=True))
+        self.assertTrue(readers.authenticate("Bearer " + token), "project revoke is not reader revoke")
+        with self.f.store._connection() as db:
+            self.assertEqual(db.execute("SELECT body FROM trips ORDER BY id").fetchall(), trips)
+            self.assertEqual(db.execute("SELECT request_body FROM accepted_operations ORDER BY device_sequence").fetchall(), operations)
+
+    def test_project_grant_requires_existing_reader_and_explicit_viewer_action(self):
+        other = self.f.add_project(200)
+        with self.assertRaises(ValueError):
+            service.control("enable-viewer", self.runtime, trip_id=other.trip.id,
+                            runner=self.runner, agents=self.agents)
+        self.assertFalse(service.viewer_granted(service.load_config(self.runtime), any_project=True))
+        for action, trip in (("status", other.trip.id), ("start", other.trip.id),
+                             ("enable-viewer", other.trip.id.upper())):
+            with self.assertRaises(ValueError):
+                service.control(action, self.runtime, trip_id=trip, runner=self.runner, agents=self.agents)
+        with patch.object(service, "load_config") as load, patch("builtins.print"):
+            self.assertEqual(service.main(["disable-viewer", "--trip-id", "", "--confirm"]), 1)
+            load.assert_not_called()
+        with patch.object(service, "prepare_metadata") as prepare:
+            with self.assertRaises(ValueError):
+                service.control("disable-viewer", self.runtime, trip_id=uid(999), runner=self.runner, agents=self.agents)
+            prepare.assert_not_called()
+
     def test_failure_during_token_creation_keeps_trip_closed(self):
         with patch.object(RevocableTokenStore, "add", side_effect=OSError("disk full")):
             with self.assertRaises(OSError):

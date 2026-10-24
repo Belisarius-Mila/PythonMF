@@ -94,3 +94,15 @@ ověřený SQLite snapshot vedle původní DB. Původní Trip/operace se neměn�
 samostatná tabulka uchovává explicitní grant Vieweru. Snapshot na témže disku
 není nezávislá záloha. Nasazení, reader token, Serve a telefon jsou samostatné
 potvrzované kroky, fyzický návrat launchd procesu zatím není ověřený.
+
+## Více projektů — místní rozšíření 24. 10. 2026
+
+Viewer má katalog /viewer/projects a oddělené adresy
+/viewer/projects/{trip_id}/ pro dny, mapu/map-data a média. Zobrazuje jen
+povolené projekty; staré přímé odkazy zůstávají na konfigurační výchozí cestě.
+Odvozeniny připravuje pro všechny aktuálně povolené projekty sériově.
+Grant jednoho projektu se spravuje registrovaným servisním programem
+explicitním --trip-id a --confirm nad zastaveným archivem; čtecí přihlášení
+se tím nemění. Bez ID má globální disable původní význam odvolání čtenáře.
+[Podrobný kontrakt a přejímka](../docs/MULTI_PROJECT_ACCESS_REPORT.md).
+Nová verze služby se tímto zápisem ani vývojem automaticky nenasazuje.

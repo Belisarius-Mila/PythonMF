@@ -788,6 +788,22 @@ class RevisionStore:
                 raise StoreNotFound("project is missing")
             return [self._project_summary(connection, decode_trip(json.loads(row["body"]))) for row in rows]
 
+    def viewer_projects(self) -> list[dict[str, Any]]:
+        """Allowlisted reader catalog; no ungranted names or private counts."""
+        with self._connection() as connection:
+            connection.execute("BEGIN")
+            meta = self._meta(connection)
+            if meta["exports_blocked"] or meta["reconciliation_required"]:
+                return []
+            result = []
+            for row in connection.execute("SELECT body FROM trips ORDER BY id"):
+                trip = decode_trip(json.loads(row["body"]))
+                if self._viewer_enabled(connection, trip):
+                    summary = self._project_summary(connection, trip)
+                    result.append({key: summary[key] for key in
+                                   ("id", "name", "start_date", "end_date", "status")})
+            return result
+
     def viewer_snapshot(self, trip_id: str) -> dict[str, Any]:
         """Read one consistent, allowlisted projection; never return owner metadata.
 

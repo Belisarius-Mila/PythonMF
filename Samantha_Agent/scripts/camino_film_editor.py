@@ -21,13 +21,13 @@ def main():
     parser.add_argument("--execute", action="store_true")
     parser.add_argument("--project-id")
     args = parser.parse_args()
-    editor = production_editor()
+    editor = production_editor(project_id=args.project_id) if args.project_id else production_editor()
     if args.action == "work":
         if not args.project_id:
             parser.error("work requires --project-id")
         editor.run_queue(args.project_id)
         return 0
-    view = editor.view()
+    view = editor.view(args.project_id) if args.project_id else editor.view()
     requested = []
     if args.action == "render":
         if not args.execute:
@@ -37,7 +37,7 @@ def main():
                 "request_id": str(uuid4()), "profile": profile, "range": None}, background=False)
             requested.append(queued["job_id"])
         editor.run_queue(view["project_id"])
-        view = editor.view()
+        view = editor.view(args.project_id) if args.project_id else editor.view()
     print(json.dumps({k:view[k] for k in ("ok", "local_date", "revision", "duration_ms")} |
                      {"jobs": [{k:v for k,v in j.items() if k not in ("job_id", "url")} for j in view["jobs"]]}))
     states = {j["job_id"]: j["state"] for j in view["jobs"]}

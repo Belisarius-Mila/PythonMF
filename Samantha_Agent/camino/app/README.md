@@ -4,7 +4,11 @@ První integrovaná iPhone aplikace Camina. Má vlastní bundle ID
 `cz.pythonmf.camino.app` a vlastní Application Support kontejner; nepřebírá ani
 nemigruje data ze samostatných prototypů Camino Audio a Camino Transfer Test.
 
-## Aktuální používání — 23. 10. 2026
+## Aktuální používání — 24. 10. 2026
+
+Nově místně doplněné období v seznamu a krátké rozlišení stejně pojmenovaných
+projektů. Nová cesta připomíná vypnutý Viewer; povolení pro Janu se spravuje
+na Macu. [Návaznost Vieweru a filmu](../docs/MULTI_PROJECT_ACCESS_REPORT.md).
 
 Vývoj kroků 1–3 nabízí více projektů: samostatný název, volitelné termíny,
 archivaci a oddělené záznamy/přenosy. Nabídka → **Projekty** otevře seznam

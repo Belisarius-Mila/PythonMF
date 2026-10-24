@@ -12,42 +12,52 @@ function node() {
     addEventListener(event, fn) { listeners[event] = fn; }, emit(event) { return listeners[event]?.(); }};
 }
 const pidA = "00000000-0000-0000-0000-000000000001", pidB = "00000000-0000-0000-0000-000000000002";
+const tripA = "00000000-0000-0000-0000-000000000501", tripB = "00000000-0000-0000-0000-000000000502";
+const otherPid = "00000000-0000-0000-0000-000000000601";
 const dayA = "2026-09-25", dayB = "2026-09-26", dayC = "2026-09-27";
 const project = (project_id, local_date) => ({project_id, local_date, revision: 2, ready_exports: 1});
-const valid = (project_id, local_date) => ({ok: true, exists: true, valid: true, project_id, local_date,
+const valid = (project_id, local_date, trip_id = tripA) => ({trip_id, ok: true, exists: true, valid: true, project_id, local_date,
   message: "Verified " + local_date, photo_count: 1, video_count: 1, audio_count: 1,
   shots: [{kind: "video", title: "<script>SAFE TEXT</script>", duration_ms: 1500}]});
 let catalog = {ok: true, days: [dayC, dayB, dayA].map(local_date => ({local_date})),
   projects: [project(pidB, dayB), project(pidA, dayA)]};
+let otherCatalog = {ok: true, days: [{local_date:dayA}], projects:[project(otherPid, dayA)]};
 const context = {window: {}, URLSearchParams, console}; vm.createContext(context);
 vm.runInContext(fs.readFileSync("app/frontend/cockpit/film_library.js", "utf8"), context);
-function fixture() {
+function fixture(savedStorage = new Map()) {
   const nodes = {}, docListeners = {};
   const root = {querySelector(selector) { return nodes[selector.slice(1)] ||= node(); }};
   const doc = {hidden: false, createElement: node, addEventListener(event, fn) { docListeners[event] = fn; }};
-  const storage = new Map(), opened = [], calls = [], confirmation = [];
+  const storage = savedStorage, opened = [], calls = [], confirmation = [];
   let mayClose = true, consent = false, fetcher, suspended = 0;
   const editor = {open(id) { opened.push(id); }, close() {}, canClose: () => mayClose, suspend() { ++suspended; }};
   const response = data => ({json: async () => data});
   fetcher = async (url, options = {}) => {
     calls.push({url, options});
-    if (url === "/api/camino/film/catalog") return response(catalog);
+    if (url === "/api/camino/film/trips") return response({ok:true, default_trip_id:tripA,
+      trips:[{id:tripA,name:"Same holiday",status:"active"},{id:tripB,name:"Same holiday",status:"archived"}]});
+    if (url.startsWith("/api/camino/film/catalog?")) {
+      const selected = new URL(url,"http://localhost").searchParams.get("trip_id");
+      return response({...selected === tripB ? otherCatalog : catalog, trip_id:selected});
+    }
     if (url === "/api/camino/film/close-mac-day") {
       const body = JSON.parse(options.body);
-      assert.equal(body.confirmed_final_mac_data, true); assert.equal(body.local_date, dayC);
+      assert.equal(body.confirmed_final_mac_data, true); assert.equal(body.local_date, dayC); assert.equal(body.trip_id, tripA);
       const created = "00000000-0000-0000-0000-000000000003";
       catalog = {...catalog, projects: [project(created, dayC), ...catalog.projects]};
       return response(valid(created, dayC));
     }
     const params = new URL(url, "http://localhost").searchParams;
     const local_date = params.get("local_date"), id = params.get("project_id");
-    return response(id ? valid(id, local_date) : {ok: true, valid: false, exists: false, local_date});
+    const trip_id = params.get("trip_id");
+    return response(id ? valid(id, local_date, trip_id) : {trip_id, ok: true, valid: false, exists: false, local_date});
   };
+  const defaultFetch = fetcher;
   const library = context.window.SamanthaFilmLibrary.create(root, {document: doc, editor,
     fetch: (...args) => fetcher(...args), confirm: message => { confirmation.push(message); return consent; },
     setInterval: () => 1, clearInterval() {},
     storage: {getItem: key => storage.get(key), setItem: (key, value) => storage.set(key, value)}});
-  return {library, nodes, opened, calls, doc, docListeners, response, confirmation,
+  return {library, nodes, opened, calls, doc, docListeners, response, confirmation, defaultFetch,
     set fetch(fn) { fetcher = fn; }, set mayClose(value) { mayClose = value; }, set consent(value) { consent = value; },
     get suspended() { return suspended; }};
 }
@@ -58,10 +68,10 @@ async function main() {
   assert(a.nodes.caminoFilmShots.children[0].textContent.includes("<script>"));
   assert.equal(a.nodes.caminoFilmShots.children[0].innerHTML, undefined);
   const b = fixture(); await b.library.open();
-  await a.library.choose({local_date: dayA, project_id: pidA});
+  await a.library.choose({trip_id:tripA, local_date: dayA, project_id: pidA});
   assert.equal(a.opened.at(-1), pidA); assert.equal(b.opened.at(-1), pidB, "tabs keep their own selection");
   a.mayClose = false;
-  assert.equal(await a.library.choose({local_date: dayB, project_id: pidB}), false);
+  assert.equal(await a.library.choose({trip_id:tripA, local_date: dayB, project_id: pidB}), false);
   assert.equal(a.nodes.caminoFilmDay.value, dayA); assert.equal(a.opened.at(-1), pidA);
   a.mayClose = true;
   let resolveA;
@@ -70,7 +80,7 @@ async function main() {
     return date === dayA ? new Promise(resolve => { resolveA = resolve; }) : Promise.resolve(a.response(valid(pidB, dayB)));
   };
   const late = a.library.check();
-  await a.library.choose({local_date: dayB, project_id: pidB});
+  await a.library.choose({trip_id:tripA, local_date: dayB, project_id: pidB});
   resolveA(a.response(valid(pidA, dayA))); await late;
   assert.equal(a.opened.at(-1), pidB, "late response cannot switch the selected day");
   a.fetch = async () => a.response(valid(pidA, dayA));
@@ -86,7 +96,7 @@ async function main() {
   release(a.response(valid(pidB, dayB))); await closing;
   assert.equal(a.nodes.caminoFilmShots.children.length, 0);
   const c = fixture(); await c.library.open();
-  await c.library.choose({local_date: dayC, project_id: null});
+  await c.library.choose({trip_id:tripA, local_date: dayC, project_id: null});
   const before = c.calls.length; await c.library.createProject();
   assert.equal(c.calls.length, before, "declined owner confirmation never writes");
   c.consent = true; await c.library.createProject();
@@ -102,6 +112,35 @@ async function main() {
   e.doc.hidden = true; e.docListeners.visibilitychange();
   assert.equal(e.nodes.caminoFilmProjects.children.length, 0, "backgrounding conceals the old catalog");
   assert.equal(e.nodes.caminoFilmDay.children.length, 0);
+  const shared = new Map(), x = fixture(shared), y = fixture();
+  await x.library.open(); await y.library.open();
+  assert.notEqual(x.nodes.caminoFilmTrip.children[0].textContent, x.nodes.caminoFilmTrip.children[1].textContent,
+    "duplicate holiday names have distinguishable labels");
+  x.mayClose = false;
+  assert.equal(await x.library.chooseTrip(tripB), false, "dirty edit blocks a different holiday too");
+  assert.equal(x.nodes.caminoFilmTrip.value, tripA);
+  x.mayClose = true; await x.library.chooseTrip(tripB);
+  assert.equal(x.opened.at(-1), otherPid); assert.equal(x.nodes.caminoFilmDay.value, dayA);
+  assert.equal(y.opened.at(-1), pidA, "another tab keeps the first holiday on the same date");
+  const reloaded = fixture(shared); await reloaded.library.open();
+  assert.equal(reloaded.nodes.caminoFilmTrip.value, tripB); assert.equal(reloaded.opened.at(-1), otherPid);
+  let lateHoliday;
+  x.fetch = (url, options) => {
+    const params = new URL(url,"http://localhost").searchParams;
+    if (url.includes("/day?") && params.get("trip_id") === tripB)
+      return new Promise(resolve => {lateHoliday = resolve;});
+    return x.defaultFetch(url,options);
+  };
+  const pendingHoliday = x.library.check(); await x.library.chooseTrip(tripA);
+  lateHoliday(x.response(valid(otherPid,dayA,tripB))); await pendingHoliday;
+  assert.equal(x.opened.at(-1),pidA,"late response from a different holiday is ignored");
+  x.fetch = async () => x.response(valid(pidA,dayA,tripB)); await x.library.check();
+  assert.equal(x.nodes.caminoFilmSummary.textContent, "", "same date and film ID with wrong trip are refused");
+  const emptyStorage = new Map(); otherCatalog = {ok:true,days:[],projects:[]};
+  const empty = fixture(emptyStorage); await empty.library.open(); await empty.library.chooseTrip(tripB);
+  assert.equal(empty.nodes.caminoFilmDay.disabled,true); assert.equal(empty.nodes.caminoFilmCreateBtn.disabled,true);
+  const emptyReloaded = fixture(emptyStorage); await emptyReloaded.library.open();
+  assert.equal(emptyReloaded.nodes.caminoFilmTrip.value,tripB,"empty holiday selection survives reload");
   console.log("Camino film library frontend: PASS");
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });

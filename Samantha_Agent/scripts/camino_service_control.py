@@ -14,7 +14,7 @@ import subprocess
 import sys
 from contextlib import contextmanager
 from pathlib import Path
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
@@ -120,12 +120,16 @@ def require_private_network(runner=run_command):
             raise ValueError("public Funnel is forbidden for Camino")
 
 
-def viewer_granted(config: dict) -> bool:
+def viewer_granted(config: dict, *, any_project=False) -> bool:
     connection = readonly(config["metadata_db"])
     try:
         if not connection.execute("SELECT 1 FROM sqlite_master WHERE name='viewer_permissions'").fetchone():
             return False
-        row = connection.execute("SELECT enabled FROM viewer_permissions WHERE trip_id=?", (config["trip_id"],)).fetchone()
+        if any_project:
+            row = connection.execute("SELECT enabled FROM viewer_permissions WHERE enabled=1 "
+                                     "AND trip_id IN (SELECT id FROM trips) LIMIT 1").fetchone()
+        else:
+            row = connection.execute("SELECT enabled FROM viewer_permissions WHERE trip_id=?", (config["trip_id"],)).fetchone()
         return row is not None and row[0] == 1
     finally:
         connection.close()
@@ -190,7 +194,11 @@ def active_reader(root: Path) -> str | None:
     return None
 
 
-def control(action: str, root: Path = ROOT, *, runner=run_command, agents: Path = LAUNCH_AGENTS):
+def control(action: str, root: Path = ROOT, *, runner=run_command, agents: Path = LAUNCH_AGENTS,
+            trip_id: str | None = None):
+    if trip_id is not None:
+        if action not in ("enable-viewer", "disable-viewer") or str(UUID(trip_id)) != trip_id:
+            raise ValueError("project selection requires a canonical UUID and a Viewer control")
     if action == "status" and not (root / "config.json").exists():
         return {"configured": False, "live_checked": False}
     config = load_config(root)
@@ -206,7 +214,7 @@ def control(action: str, root: Path = ROOT, *, runner=run_command, agents: Path 
         except (OSError, ValueError):
             pass
         return {"configured": True, "owned_definition": owned, "loaded": result.returncode == 0,
-                "viewer_granted": viewer_granted(config),
+                "viewer_granted": viewer_granted(config, any_project=True),
                 "running": owned and result.returncode == 0 and "state = running" in result.stdout,
                 "https_checked": False, "data_delivery_checked": False}
     if action == "stage-client-update":
@@ -283,6 +291,19 @@ def control(action: str, root: Path = ROOT, *, runner=run_command, agents: Path 
         return {"start_requested": True, "https_checked": False}
     if action in ("enable-viewer", "disable-viewer"):
         with offline(config, runner):
+            if trip_id is not None:
+                if action == "enable-viewer" and (not (root / "readers.sqlite").is_file() or active_reader(root) is None):
+                    raise ValueError("provision the separate reader credential before granting a project")
+                connection = readonly(config["metadata_db"])
+                try:
+                    if not connection.execute("SELECT 1 FROM trips WHERE id=?", (trip_id,)).fetchone():
+                        raise ValueError("selected project is not in the archive")
+                finally:
+                    connection.close()
+                store = prepare_metadata(config)
+                store.set_viewer_permission(trip_id, enabled=action == "enable-viewer")
+                return {"viewer_project_id": trip_id, "viewer_enabled": action == "enable-viewer",
+                        "reader_credentials_changed": False, "started": False}
             store = prepare_metadata(config)
             # Close first, so every partial failure is private. Original create_trip is immutable.
             store.set_viewer_permission(config["trip_id"], enabled=False)
@@ -321,7 +342,7 @@ def serve(root: Path):
     os.environ["CAMINO_P2B_ROOT"] = str(root / "film-projects")
     os.environ["CAMINO_CLIENT_UPDATE_ROOT"] = str(root / "client-update")
     reader_path = root / "readers.sqlite"
-    if reader_path.exists() and viewer_granted(config):
+    if reader_path.exists() and viewer_granted(config, any_project=True):
         connection = readonly(reader_path)
         try:
             active = connection.execute("SELECT COUNT(*) FROM owner_tokens WHERE revoked_at IS NULL").fetchone()[0]
@@ -340,13 +361,16 @@ def main(argv=None):
     parser.add_argument("action", choices=("status", "install", "upgrade", "start", "stop", "stage-client-update", "enable-viewer", "disable-viewer", "copy-reader", "run"))
     parser.add_argument("--root", type=Path, default=ROOT)
     parser.add_argument("--confirm", action="store_true")
+    parser.add_argument("--trip-id", help="Only this existing project's Viewer grant; reader credentials are preserved")
     args = parser.parse_args(argv)
+    if args.trip_id is not None and args.action not in ("enable-viewer", "disable-viewer"):
+        parser.error("--trip-id is only valid for explicit Viewer permission controls")
     if args.action not in ("status", "run") and not args.confirm:
         parser.error("mutating controls require explicit --confirm")
     try:
         if args.action == "run":
             return serve(args.root)
-        print(json.dumps(control(args.action, args.root), sort_keys=True))
+        print(json.dumps(control(args.action, args.root, **({"trip_id": args.trip_id} if args.trip_id is not None else {})), sort_keys=True))
         return 0
     except Exception as error:
         # Paths, credentials, SQL and process output never enter a public workflow report.

@@ -20,6 +20,8 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Reports
 
+- `reports/python_315_assessment_2026_10_24.md` — 2026-10-24 09:49 CEST: Python 3.15.1 posouzen proti místnímu 3.12.0rc3, 18 metadat a úspěšný binární resolver pro Mac/arm64. Doporučený oddělený pilot, žádná instalace nebo změna provozu.
+
 - `reports/cockpit_ui_u06_2026_09_14.json` - U06 navigace a 16 dialogů, zachované drafty při návratu; 28 cílených testů a tři browser scénáře včetně vnořených návratů a šesti hash odkazů. Lokálně bez nasazení.
 - `reports/cockpit_ui_u05_2026_09_14.json` - U05 jedna prioritní fronta, práce oddělená od alarmů; 24 cílených testů, 10 browser scénářů a statická brána OK. Lokálně bez nasazení.
 - `reports/cockpit_ui_u04_2026_09_14.json` - stránkování: 23 položek přes skutečné HTTP, 27 cílených testů, čtyři browser scénáře; plná brána 1677 testů OK. Lokálně bez nasazení.
@@ -60,9 +62,9 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md`; `../camino/docs/PROJECT_MANAGEMENT_UI_REPORT.md` — 2026-10-23 22:39 CEST: UI projektů v 15e0467a ověřené (tři UI scénáře, Release PASS), ale p+n c3aba0302d0661fbff03b131e65357a4 zastavila plná brána před pushem: 1/2185 selhání kvůli souběhu status probe a startu workeru. GitHub živě stále 8bc31d07, nasazení nezačalo. Úzká oprava startovacího souběhu lokálně hotová, 57 cílených testů PASS, plná brána 2186 PASS (333,492 s unit část), opakovaný souběh 10/10 PASS. Nový placený pokus se automaticky neopakuje.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md`; `../camino/docs/MULTI_PROJECT_ACCESS_REPORT.md` — 2026-10-24 09:49 CEST: Místně dokončené kroky 4–5 více projektů: aplikace rozlišuje stejné názvy/období, Viewer má katalog povolených cest a oddělené deníky/mapy/média, granty jsou samostatné, střižna volí cestu a její den. Worker/export používají manifest konkrétního filmu. 34 integračních, Node a skutečné syntetické PNG přes HTTP PASS; iOS Release PASS. plná brána 2193 PASS (453,570 s unit část), závěrečné 3 testy dispatcheru PASS. Bez nového vydání, iPhone/Safari nepřijaté. Python 3.15.1 navržený k oddělenému pilotu, bez instalace.
 
-- `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md`; `technical/luna_release_orchestration.md` — 2026-10-23 22:39 CEST: UI projektů v 15e0467a ověřené (tři UI scénáře, Release PASS), ale p+n c3aba0302d0661fbff03b131e65357a4 zastavila plná brána před pushem: 1/2185 selhání kvůli souběhu status probe a startu workeru. GitHub živě stále 8bc31d07, nasazení nezačalo. Úzká oprava startovacího souběhu lokálně hotová, 57 cílených testů PASS, plná brána 2186 PASS (333,492 s unit část), opakovaný souběh 10/10 PASS. Nový placený pokus se automaticky neopakuje.
+- `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md`; `technical/luna_release_orchestration.md` — 2026-10-24 09:52 CEST: Oprava startovacího souběhu p+n je publikovaná/nasazená v e11d949a. Účtenka e47cdb394ec5441c5d25632f11c8c995 má potvrzený push 4 commitů a nasazení Cockpitu, plnou bránu 2186 a smoke 5/5. Nativní účtenku ověřil hlavní Adam; nový místní vývoj pokračuje v project-camino. Předchozí attention c3aba030 je historie a neopakuje se.
 
 - `projects/python_se_samanthou.md`; `handoffs/python_se_samanthou_course_package_2026_09_06.md` - učebna Pythonu: Míla potvrdil 1.5/Codex na Linuxu. Nový samostatný balíček Praktické úlohy přidává 7 lekcí (celkem 21); kopíruje se jen do kurzy. 62 testů a GUI nad nezměněnou 1.5 prošly; obsahový ZIP v LocalSendu.
 - `projects/lekarna_domaci_leky.md` - projekt Lekarna: evidence domacich leku v `data/lekarna/`, vyhledavani podle potizi, audit lekarnicky a opakovatelny foto import workflow pres manifest.

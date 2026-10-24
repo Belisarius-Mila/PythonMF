@@ -1,7 +1,15 @@
 # Camino — filmová střižna
 
 
-## Aktuální stav — 23. 10. 2026
+## Aktuální stav — 24. 10. 2026
+
+Místní nový vývoj doplňuje **Cesta nebo dovolená** před výběrem dne a filmu.
+Záznamy, revize a exporty se drží vybrané cesty i při shodném datu/názvu.
+Před přepnutím dokonči uložení střihu. Výběr je vlastní každé kartě.
+[Ověření a hranice vydání](../docs/MULTI_PROJECT_ACCESS_REPORT.md).
+
+Následující vydání panelu Texty a komentáře je dřívější funkční základ:
+
 
 Střižna je dostupná v Cockpitu jako **Film Camino**. Vydání `d8d16f1b`
 zahrnuje panel **Texty a komentáře**; Luna doložila push, nasazení,
@@ -15,8 +23,8 @@ funkční přejímku. [Podrobný report](../docs/FILM_TEXT_AUDIO_REPORT.md).
 
 ### 1. Vyber film a připrav podklady
 
-Obnov stránku Cockpitu, otevři **Film Camino** a v **Moje filmy** vyber
-uložený film. Jiný den lze vybrat z Mac dat. Nový projekt ulož až po
+Obnov stránku Cockpitu, otevři **Film Camino**, vyber **Cesta nebo dovolená**
+a v **Moje filmy** vyber uložený film pro tuto cestu. Jiný den lze vybrat z Mac dat. Nový projekt ulož až po
 skutečném dokončení přenosů a vědomém potvrzení konečnosti dat tohoto dne
 na Macu. Prázdná fronta telefonu ani samotný seznam dnů úplnost nedokládají.
 Při chybě originálů, účtenek nebo soukromí se projekt nevytvoří.
@@ -30,7 +38,7 @@ není součástí editoru.
 - Záběry řaď šipkami Dříve/Později; výslovné vyřazení mění jen film.
 - U fotografie uprav délku a titulek. **Otevřít fotografii** zobrazí v nové
   kartě odvozený obraz bez původních EXIF/GPS; nevytváří se render záběru.
-  Lokální oprava větších fotografií přijímá vstupy do 64 Mpx/64 MiB a
+  Oprava větších fotografií přijímá vstupy do 64 Mpx/64 MiB a
   zachovává celý rám. Náhled se přizpůsobí do 4096 × 4096; pracovní kopie
   filmu do 720p/1080p s poměrem stran a případnými pruhy. Originál se nemění.
   Nasazení této opravy je samostatné: [rozsah a ověření](../docs/LARGE_PHOTO_REPORT.md).

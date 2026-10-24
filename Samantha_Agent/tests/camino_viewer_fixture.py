@@ -5,6 +5,7 @@ import io
 import json
 import subprocess
 from pathlib import Path
+from types import SimpleNamespace
 
 from camino.domain.codec import wire
 from camino.domain.model import Asset, CaptureTime, JourneyDay, MomentKind, Privacy, TextRevision, TimeSource, Trip, create_moment
@@ -53,6 +54,24 @@ class ViewerFixture:
     def lock(self):
         self.send("update_metadata", {"moment_id": self.public.id, "change": {
             "type": "privacy", "new_privacy": "owner_only", "user_action": "lock"}}, expected=1)
+
+    def add_project(self, n, *, name="Second holiday", photo=b"second-project-photo", location=None):
+        trip = Trip(uid(n), name, "cs", False, False)
+        day = JourneyDay(uid(n + 1), trip.id, self.day.local_date)
+        self.send("create_trip", wire(trip))
+        self.send("create_day", wire(day))
+        moment = create_moment(id=uid(n + 2), trip=trip, day=day, kind=MomentKind.COMMENT,
+            captured=self.capture, new_moment_privacy=Privacy.DIARY, location=location)
+        self.send("create_moment", wire(moment))
+        self.text(moment, n + 4, "PUBLIC TEXT OF " + name)
+        asset = Asset(uid(n + 3), moment.id, "photo", "camera", len(photo),
+                      hashlib.sha256(photo).hexdigest(), None)
+        self.send("create_asset", wire(asset))
+        self.media.create_session(asset.id)
+        self.media.receive_chunk(asset.id, 0, content_length=len(photo), expected_sha256=asset.sha256,
+                                 stream=io.BytesIO(photo))
+        self.media.finalize(asset.id)
+        return SimpleNamespace(trip=trip, day=day, moment=moment, asset=wire(asset))
 
     def upload(self, n, kind, content, *, private=False, complete=True):
         asset = Asset(uid(n), self.private.id if private else self.public.id, kind,

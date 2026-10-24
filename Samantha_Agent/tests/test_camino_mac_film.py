@@ -190,3 +190,116 @@ class MacFilmTests(unittest.TestCase):
                 conn.close()
             finally:
                 server.shutdown(); server.server_close(); thread.join(timeout=3)
+
+
+class MultiProjectFilmTests(unittest.TestCase):
+    def setUp(self):
+        from app.camino_film_editor import production_editor
+        from scripts import camino_service_control as service
+        self.tmp = tempfile.TemporaryDirectory(dir='/private/tmp'); self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name); archive = self.root / 'archive'; archive.mkdir(mode=0o700)
+        self.f = ViewerFixture(archive)
+        self.a = self.f.upload(30, 'photo', b'FIRST-PHOTO')
+        self.b = self.f.add_project(200, name=self.f.trip.name, photo=b'SECOND-PHOTO')
+        self.f.send('set_project_details', {'trip_id':self.b.trip.id,'start_date':None,
+            'end_date':None,'status':'archived'}, expected=1)
+        self.config = {'metadata_db':self.f.store.path, 'media_db':self.f.media.database_path,
+                       'media_root':self.f.media.root, 'trip_id':self.f.trip.id}
+        (self.root/'support').mkdir(mode=0o700)
+        for patcher in (patch.object(service,'ROOT',self.root/'support/Camino/Service'),
+                        patch.object(service,'load_config',return_value=self.config)):
+            patcher.start(); self.addCleanup(patcher.stop)
+        production_editor.cache_clear(); self.addCleanup(production_editor.cache_clear)
+        self.store = workshop.production_store(); self.other = workshop.production_store(trip_id=self.b.trip.id)
+        self.day = self.f.day.local_date
+
+    def hashes(self, root):
+        return {str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest()
+                for p in root.rglob('*') if p.is_file()}
+
+    def close_both(self):
+        return (self.store.close_mac_day(self.day,confirmed=True)['project_id'],
+                self.other.close_mac_day(self.day,confirmed=True)['project_id'])
+
+    def test_same_name_and_day_catalog_edit_and_binding_keep_original_archive(self):
+        from app.camino_film_editor import production_editor, film_editor_action
+        before = self.hashes(self.root/'archive')
+        a,b = self.close_both(); self.assertNotEqual(a,b)
+        catalog = film_editor_action('trips')
+        self.assertEqual({t['id'] for t in catalog['trips']},{self.f.trip.id,self.b.trip.id})
+        self.assertEqual(catalog['default_trip_id'],self.f.trip.id)
+        self.assertFalse(next(t for t in catalog['trips'] if t['id']==self.b.trip.id)['viewer_enabled'])
+        self.assertEqual([p['project_id'] for p in film_editor_action('catalog',{'trip_id':self.b.trip.id})['projects']],[b])
+        self.assertEqual([p['project_id'] for p in film_editor_action('catalog',{'trip_id':self.f.trip.id})['projects']],[a])
+        view_b = film_editor_action('view',{'project_id':b})
+        self.assertEqual({s['asset_id'] for s in view_b['sources']},{self.b.asset['id']})
+        self.assertEqual({s['asset_id'] for s in film_editor_action('view',{'project_id':a})['sources']},{self.a['id']})
+        self.assertEqual(production_editor(project_id=b).store.trip_id,self.b.trip.id)
+        with self.assertRaises(ClosedDayError): workshop.production_store(trip_id=self.f.trip.id,project_id=b)
+        with self.assertRaises(ClosedDayError): self.store.project_status(b)
+        import copy
+        draft = copy.deepcopy(view_b['draft']); draft['shots'][0]['asset_id']=self.a['id']
+        from uuid import uuid4
+        refused = film_editor_action('save',{'project_id':b,'expected_revision':1,'request_id':str(uuid4()),'draft':draft})
+        self.assertFalse(refused['ok']); self.assertEqual(production_editor(project_id=b).view(b)['revision'],1)
+        with patch('app.camino_film_editor.production_editor', side_effect=AssertionError('malformed request read an archive')):
+            for malformed in (['bad'], 'bad', True, 5):
+                self.assertFalse(film_editor_action('view', malformed)['ok'])
+        self.assertEqual(before,self.hashes(self.root/'archive'))
+
+    def test_render_worker_and_output_follow_project_manifest_not_configured_trip(self):
+        from app.camino_film_editor import production_editor
+        from uuid import uuid4
+        a,b = self.close_both()
+        def render(edit,manifest,objects,output,profile,interval,**kwargs):
+            kwargs['revalidate'](); content=('SYNTHETIC-'+manifest['trip_id']).encode()
+            (output/'film.mp4').write_bytes(content)
+            return {'bytes':len(content),'sha256':hashlib.sha256(content).hexdigest()}
+        with patch('app.camino_film_render.render_edit',side_effect=render):
+            first = production_editor(project_id=a)
+            ja = first.enqueue({'project_id':a,'revision':1,'request_id':str(uuid4()),'profile':'preview','range':None},background=False)['job_id']
+            first.run_queue(a)
+            original = self.hashes(self.store.root/a)
+            second = production_editor(project_id=b)
+            jb = second.enqueue({'project_id':b,'revision':1,'request_id':str(uuid4()),'profile':'preview','range':None},background=False)['job_id']
+            second.run_queue(b)
+            self.assertEqual(second.output(b,jb).read_bytes(),('SYNTHETIC-'+self.b.trip.id).encode())
+            self.assertEqual(first.output(a,ja).read_bytes(),('SYNTHETIC-'+self.f.trip.id).encode())
+            self.assertEqual(original,self.hashes(self.store.root/a))
+            from camino.film.project import FilmError
+            with self.assertRaises(FilmError): second.output(b,ja)
+            from scripts import camino_film_editor as cli
+            with patch.object(cli,'production_editor',wraps=production_editor) as factory, patch.object(second,'run_queue') as work, patch('sys.argv',['editor','work','--project-id',b]):
+                self.assertEqual(cli.main(),0); factory.assert_called_once_with(project_id=b); work.assert_called_once_with(b)
+
+    def test_http_project_selection_and_strict_query_do_not_change_default(self):
+        from app.camino_film_editor import production_editor
+        a,b = self.close_both()
+        before = self.hashes(self.root/'archive')
+        server = ThreadingHTTPServer(('127.0.0.1',0),cockpit.CockpitServer().make_handler())
+        thread = threading.Thread(target=server.serve_forever,daemon=True); thread.start()
+        try:
+            connection = http.client.HTTPConnection('127.0.0.1',server.server_port,timeout=10)
+            def request(method,path,payload=None):
+                connection.request(method,path,body=json.dumps(payload) if payload is not None else None,
+                                   headers={'Content-Type':'application/json'})
+                response=connection.getresponse();return response.status,json.loads(response.read())
+            self.assertTrue(request('GET','/api/camino/film/trips')[1]['ok'])
+            code,data=request('GET',f'/api/camino/film/catalog?trip_id={self.b.trip.id}')
+            self.assertEqual(code,200);self.assertEqual(data['trip_id'],self.b.trip.id)
+            self.assertEqual([p['project_id'] for p in data['projects']],[b])
+            code,data=request('GET',f'/api/camino/film/day?trip_id={self.b.trip.id}&local_date={self.day}&project_id={b}')
+            self.assertEqual(code,200);self.assertTrue(data['valid']);self.assertEqual(data['trip_id'],self.b.trip.id)
+            code,data=request('POST','/api/camino/film/close-mac-day',{'trip_id':self.b.trip.id,'local_date':self.day,'confirmed_final_mac_data':True})
+            self.assertEqual(code,200);self.assertEqual(data['project_id'],b)
+            code,data=request('GET',f'/api/camino/film/day?trip_id={self.f.trip.id}&local_date={self.day}&project_id={b}')
+            self.assertFalse(data['ok']);self.assertNotIn('shots',data)
+            for query in (f'trip_id={self.b.trip.id}&trip_id={self.f.trip.id}','trip_id=../../private',f'project_id={b}'):
+                self.assertEqual(request('GET','/api/camino/film/catalog?'+query)[0],400)
+            code,data=request('GET','/api/camino/film/catalog')
+            self.assertEqual([p['project_id'] for p in data['projects']],[a])
+            self.assertEqual(production_editor().store.trip_id,self.f.trip.id)
+            connection.close()
+        finally:
+            server.shutdown();server.server_close();thread.join(3)
+        self.assertEqual(before,self.hashes(self.root/'archive'))

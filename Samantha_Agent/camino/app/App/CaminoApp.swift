@@ -638,6 +638,8 @@ private struct TripListView: View {
                     }
                 }
                 Section("Nový projekt") {
+                    Text("Nový projekt začíná s Viewerem vypnutým. Přístup pro Janu povolíš na Macu.")
+                        .font(.footnote).foregroundStyle(.secondary)
                     TextField("Název projektu", text: $name)
                         .accessibilityIdentifier("newProjectName")
                     ProjectDateFields(hasStart: $hasStart, startDate: $startDate,
@@ -676,7 +678,16 @@ private struct TripListView: View {
             if model.selectTrip(trip.id) { dismiss() }
         } label: {
             HStack {
-                Text(trip.name + (trip.isTest ? " · Zkouška" : ""))
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(trip.name + (trip.isTest ? " · Zkouška" : ""))
+                    if let period = ProjectDateSupport.period(trip.projectDetails) {
+                        Text(period).font(.caption).foregroundStyle(.secondary)
+                    }
+                    if model.trips.filter({ $0.name == trip.name }).count > 1 {
+                        Text("Projekt · \(trip.id.uuidString.suffix(8))")
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                }
                 Spacer()
                 if trip.active { Image(systemName: "checkmark") }
             }

@@ -1,6 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-24 09:52 CEST: Oprava startovacího souběhu p+n je publikovaná/nasazená v e11d949a. Účtenka e47cdb394ec5441c5d25632f11c8c995 má potvrzený push 4 commitů a nasazení Cockpitu, plnou bránu 2186 a smoke 5/5. Nativní účtenku ověřil hlavní Adam; nový místní vývoj pokračuje v project-camino. Předchozí attention c3aba030 je historie a neopakuje se.
+
 - 2026-10-23 22:39 CEST: UI projektů v 15e0467a ověřené (tři UI scénáře, Release PASS), ale p+n c3aba0302d0661fbff03b131e65357a4 zastavila plná brána před pushem: 1/2185 selhání kvůli souběhu status probe a startu workeru. GitHub živě stále 8bc31d07, nasazení nezačalo. Úzká oprava startovacího souběhu lokálně hotová, 57 cílených testů PASS, plná brána 2186 PASS (333,492 s unit část), opakovaný souběh 10/10 PASS. Nový placený pokus se automaticky neopakuje.
 
 - 2026-10-20 22:23 CEST: Výslovný vývoj Lunou je lokálně funkční i na skutečném vícesouborovém Camino/JS úkolu. Centrální simple_developer = gpt-6-luna/high, žádný Sol fallback. Ověřit finální účtenku schváleného p+n 92b4b7704c6503fb8b2ed300b600c7f9 a živý audit. Při completed navázat fyzickou přejímkou fotografie v Cockpitu na Macu/iPhonu; p+n slepě neopakovat. Tento Git checkpoint zachycuje stav před vydáním; výsledek publikace/nasazení je v přesné účtence a logs/luna_photo_release_20261020.log.
@@ -2136,3 +2138,26 @@ Technický důkaz:
   release_lock_tests.log / release_fix_full_gate.log v nadřazené složce.
 - Živý Cockpit zůstává na předchozím vydání. Telefon, samostatná služba,
   archiv i střihy se novým kódem neaktualizovaly.
+
+
+## 2026-10-24 09:52 CEST — Uzavření předchozí publikační překážky
+
+Hotovo:
+- Oprava startu release workeru a telefonní správa projektů z předchozího
+  balíčku jsou pushnuté a nasazené do Cockpitu na e11d949a.
+
+Rozhodnutí:
+- Míla 24. 10. výslovně potvrdil nové předání opravených čtyř commitů.
+
+Další krok:
+- Další místní vývoj aplikace, Vieweru a střižny sledovat v project-camino.
+
+Navrhované další kroky:
+- Nový checkpoint vydávat až podle dalšího konkrétního pokynu p+n.
+
+Technický důkaz:
+- e47cdb394ec5441c5d25632f11c8c995: completed, push/deploy confirmed, full 2186,
+  smoke 5/5 a chráněné služby zachované. Následný audit ověřil head, GitHub,
+  čisté profily a runtime verified_current. Účtenka vrácena nativnímu
+  volajícímu, nikoli portálovým callbackem; hlavní Adam výsledek převzal.
+- Důkaz data/private/camino_projects_ui_20261023/release_startupfix_20261024/.

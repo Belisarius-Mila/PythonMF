@@ -20,7 +20,7 @@ from camino.domain.revision_store import RevisionStore
 from camino.server.auth import RevocableTokenStore
 from camino.server.media_store import MediaStore
 from camino.server.viewer_media import OUTPUTS, ViewerMedia
-from camino.server.viewer_map import map_page, route_snapshot
+from camino.server.viewer_map import map_page, route_snapshot, viewer_prefix
 from camino.server.client_update import client_update_response
 
 
@@ -148,40 +148,42 @@ class CaminoViewer:
     def build_pending(self, *, should_stop: Callable[[], bool] = lambda: False) -> dict[str, int]:
         """A serial batch invoked offline or by the lifespan worker, never GET."""
         report = {"ready": 0, "waiting": 0}
-        for moment in self.metadata.viewer_snapshot(self.trip_id)["moments"]:
-            for asset in moment["assets"]:
-                if should_stop():
-                    return report
-                # Recheck permission before starting each potentially long conversion.
-                if moment["id"] not in self.metadata.viewer_safe_ids(self.trip_id):
-                    break
-                if self.copies.ready(asset, verify=False):
-                    report["ready"] += 1
-                    continue
-                if self._conversion_failures.get(asset["id"], 0) >= 3:
-                    # A broken source must not create private pending files forever.
-                    # Three attempts per process; a service restart permits retry.
-                    report["waiting"] += 1
-                    continue
-                source = self.media.verified_source(asset["id"])
-                if source and self.copies.build(asset, source, should_stop=should_stop):
-                    report["ready"] += 1
-                    self._conversion_failures.pop(asset["id"], None)
-                else:
-                    if source and not should_stop():
-                        self._conversion_failures[asset["id"]] = self._conversion_failures.get(asset["id"], 0) + 1
-                    report["waiting"] += 1
+        for project in self.metadata.viewer_projects():
+            for moment in self.metadata.viewer_snapshot(project["id"])["moments"]:
+                for asset in moment["assets"]:
+                    if should_stop():
+                        return report
+                    # Recheck permission before starting each potentially long conversion.
+                    if moment["id"] not in self.metadata.viewer_safe_ids(project["id"]):
+                        break
+                    if self.copies.ready(asset, verify=False):
+                        report["ready"] += 1
+                        continue
+                    if self._conversion_failures.get(asset["id"], 0) >= 3:
+                        # A broken source must not create private pending files forever.
+                        # Three attempts per process; a service restart permits retry.
+                        report["waiting"] += 1
+                        continue
+                    source = self.media.verified_source(asset["id"])
+                    if source and self.copies.build(asset, source, should_stop=should_stop):
+                        report["ready"] += 1
+                        self._conversion_failures.pop(asset["id"], None)
+                    else:
+                        if source and not should_stop():
+                            self._conversion_failures[asset["id"]] = self._conversion_failures.get(asset["id"], 0) + 1
+                        report["waiting"] += 1
         self.last_build = datetime.now(timezone.utc).isoformat(timespec="seconds")
         return report
 
-    def asset(self, asset_id: str) -> dict | None:
-        for moment in self.metadata.viewer_snapshot(self.trip_id)["moments"]:
+    def asset(self, asset_id: str, trip_id: str | None = None) -> dict | None:
+        for moment in self.metadata.viewer_snapshot(self.trip_id if trip_id is None else trip_id)["moments"]:
             for asset in moment["assets"]:
                 if asset["id"] == asset_id:
                     return asset
         return None
 
-    def audio_html(self, moment: dict, root_path: str) -> tuple[str, set[str]]:
+    def audio_html(self, moment: dict, root_path: str, trip_id: str | None = None) -> tuple[str, set[str]]:
+        prefix = viewer_prefix(root_path, trip_id)
         groups, used = ordered_audio_groups(moment["assets"], moment["audio_layouts"])
         body = ""
         for group_index, group in enumerate(groups, 1):
@@ -210,24 +212,28 @@ class CaminoViewer:
                     if following and ready[following["asset_id"]] and not following["discontinuity_before"]:
                         next_attr = f' data-next="audio-{following["asset_id"]}"'
                     body += (f'<figure><audio id="audio-{identifier}"{next_attr} controls preload="none" '
-                             f'src="{root_path}/viewer/media/{identifier}/audio.m4a">Prohlížeč neumí přehrát audio.</audio>'
+                             f'src="{prefix}/media/{identifier}/audio.m4a">Prohlížeč neumí přehrát audio.</audio>'
                              f'<figcaption>{caption}</figcaption></figure>')
                 if clip["missing_tail"]:
                     body += '<p class="notice">Konec této části není úplný; délka chybějícího konce není známá.</p>'
             body += '</section>'
         return body, used
 
-    def page(self, day: str | None = None, *, root_path: str = "") -> str | None:
+    def page(self, day: str | None = None, *, root_path: str = "",
+             trip_id: str | None = None) -> str | None:
         if root_path not in ("", "/camino-api"):
             raise ContractError("unsupported Viewer proxy prefix")
-        snapshot = self.metadata.viewer_snapshot(self.trip_id)
+        if not self.project_allowed(trip_id):
+            return None
+        prefix = viewer_prefix(root_path, trip_id)
+        snapshot = self.metadata.viewer_snapshot(self.trip_id if trip_id is None else trip_id)
         moments = snapshot["moments"]
         days = sorted({m["day"] for m in moments}, reverse=True)
         if day is not None and day not in days:
             return None
         title = escape(snapshot["name"])
         body = '<nav aria-label="Dny cesty">' + ''.join(
-            f'<a href="{root_path}/viewer/days/{d}">{d[8:10]}. {d[5:7]}. {d[:4]}</a>' for d in days
+            f'<a href="{prefix}/days/{d}">{d[8:10]}. {d[5:7]}. {d[:4]}</a>' for d in days
         ) + '</nav>'
         if not days:
             body += '<p class="notice">Zatím tu nejsou žádné dostupné záznamy.</p>'
@@ -262,7 +268,7 @@ class CaminoViewer:
                              'Otevřít místo v mapě</a>'
                              f'<p class="muted">{approximate}Odhad přesnosti ±{point["accuracy_m"]:.0f} m. '
                              'Kliknutím předáš tento bod Apple Mapám.</p></div>')
-                audio_body, ordered_ids = self.audio_html(moment, root_path)
+                audio_body, ordered_ids = self.audio_html(moment, root_path, trip_id)
                 body += audio_body
                 media_tiles = []
                 other_media = []
@@ -275,7 +281,7 @@ class CaminoViewer:
                     if not ready:
                         other_media.append(f'<p class="notice">{caption}: Médium zatím není připravené k přehrání.</p>')
                         continue
-                    base = f'{root_path}/viewer/media/{asset["id"]}/'
+                    base = f'{prefix}/media/{asset["id"]}/'
                     kind = asset["media_kind"]
                     if kind == "photo":
                         preview = f'{base}preview.jpg'
@@ -309,8 +315,8 @@ class CaminoViewer:
 <script src="{root_path}/viewer/player.js" defer></script>
 <style>{CSS}</style></head><body><header><p class="label">CAMINO · PRO JANU</p>
 <h1>{title}</h1><p class="muted">Malé zprávy z cesty. Fotografie, slova a původní hlas.</p>
-<nav><a href="{root_path}/viewer/">Všechny dny</a>
-<a href="{root_path}/viewer/map">Mapa cesty</a></nav></header><main>{body}</main><footer>
+<nav><a href="{root_path}/viewer/projects">Projekty</a><a href="{prefix}/">Všechny dny</a>
+<a href="{prefix}/map">Mapa cesty</a></nav></header><main>{body}</main><footer>
 Příprava médií: {built}<br>{state}<br>Zobrazuji doručené záznamy. Další mohou ještě čekat v telefonu.
 <br>Stránku obnovíš běžným tlačítkem prohlížeče.</footer>
 <button id="backToTop" type="button" class="back-to-top" aria-label="Zpět nahoru" hidden>↑ Nahoru</button>
@@ -318,6 +324,34 @@ Příprava médií: {built}<br>{state}<br>Zobrazuji doručené záznamy. Další
 <button type="button" class="media-lightbox-close" aria-label="Zavřít zvětšenou fotografii">×</button>
 <img id="mediaLightboxImage" alt=""></div>
 <p id="audioPlaybackStatus" role="status" aria-live="polite"></p></body></html>'''
+
+    def project_allowed(self, trip_id: str | None) -> bool:
+        return trip_id is None or any(p["id"] == trip_id for p in self.metadata.viewer_projects())
+
+    def projects_page(self, root_path: str = "") -> str:
+        viewer_prefix(root_path)  # Validate the reverse proxy prefix before emitting links.
+        projects = self.metadata.viewer_projects()
+        body = ""
+        for status, title in (("active", "Probíhající"), ("archived", "Archivované")):
+            links = ""
+            for project in projects:
+                if project["status"] != status:
+                    continue
+                start, end = project["start_date"], project["end_date"]
+                period = f"{start or '…'} – {end or '…'}" if start or end else ""
+                duplicate = sum(p["name"] == project["name"] for p in projects) > 1
+                label = project["name"] + (" · " + project["id"][-8:] if duplicate else "")
+                links += (f'<article><a href="{viewer_prefix(root_path, project["id"])}/">'
+                          f'{escape(label)}</a><p class="muted">{escape(period)}</p></article>')
+            if links:
+                body += f'<section><h2>{title}</h2>{links}</section>'
+        if not body:
+            body = '<p class="notice">Zatím není dostupný žádný povolený projekt.</p>'
+        return f'''<!doctype html><html lang="cs"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Cesty a dovolené · Camino</title>
+<style>{CSS}</style></head><body><header><p class="label">CAMINO · PRO JANU</p>
+<h1>Cesty a dovolené</h1><p>Vyber projekt pro čtení deníku a mapy.</p></header>
+<main>{body}</main><footer>Zobrazují se pouze projekty povolené pro tento soukromý Viewer.</footer></body></html>'''
 
     def router(self, *, client_update_root: Path | None = None) -> APIRouter:
         router = APIRouter(prefix="/viewer", include_in_schema=False)
@@ -340,22 +374,31 @@ Příprava médií: {built}<br>{state}<br>Zobrazuji doručené záznamy. Další
             return FileResponse(Path(__file__).with_name("viewer_player.js"),
                                 media_type="text/javascript", headers=HEADERS)
 
+        @router.get("/projects/{trip_id}/map")
         @router.get("/map")
         def route_page(request: Request):
             if not self.authorized(request):
                 return denied()
             try:
-                return HTMLResponse(map_page(request.scope.get("root_path", "")), headers=MAP_HEADERS)
+                trip_id = request.path_params.get("trip_id")
+                if not self.project_allowed(trip_id):
+                    return Response(status_code=404, headers=HEADERS)
+                name = self.metadata.viewer_snapshot(trip_id)["name"] if trip_id is not None else None
+                return HTMLResponse(map_page(request.scope.get("root_path", ""), trip_id=trip_id, project_name=name), headers=MAP_HEADERS)
             except ContractError:
                 return Response(status_code=503, headers=HEADERS)
 
+        @router.get("/projects/{trip_id}/map-data")
         @router.get("/map-data")
         def route_data(request: Request):
             if not self.authorized(request):
                 return denied()
             try:
-                return JSONResponse(route_snapshot(self.metadata.viewer_snapshot(self.trip_id),
-                                    root_path=request.scope.get("root_path", "")), headers=HEADERS)
+                trip_id = request.path_params.get("trip_id")
+                if not self.project_allowed(trip_id):
+                    return Response(status_code=404, headers=HEADERS)
+                return JSONResponse(route_snapshot(self.metadata.viewer_snapshot(self.trip_id if trip_id is None else trip_id),
+                                    root_path=request.scope.get("root_path", ""), trip_id=trip_id), headers=HEADERS)
             except (OSError, sqlite3.DatabaseError, ContractError):
                 return Response("Mapa teď není dostupná.", status_code=503, headers=HEADERS)
 
@@ -370,23 +413,35 @@ Příprava médií: {built}<br>{state}<br>Zobrazuji doručené záznamy. Další
             return FileResponse(Path(__file__).with_name("map_assets") / name,
                                 media_type=files[name], headers=HEADERS)
 
+        @router.get("/projects")
+        def projects(request: Request):
+            if not self.authorized(request):
+                return denied()
+            try:
+                return HTMLResponse(self.projects_page(request.scope.get("root_path", "")), headers=HEADERS)
+            except (OSError, sqlite3.DatabaseError, ContractError):
+                return Response("Přehled teď není dostupný.", status_code=503, headers=HEADERS)
+
+        @router.get("/projects/{trip_id}/")
+        @router.get("/projects/{trip_id}/days/{day}")
         @router.get("/")
         @router.get("/days/{day}")
         def page(request: Request, day: str | None = None):
             try:
                 if not self.authorized(request):
                     return denied()
-                content = self.page(day, root_path=request.scope.get("root_path", ""))
+                content = self.page(day, root_path=request.scope.get("root_path", ""), trip_id=request.path_params.get("trip_id"))
                 return HTMLResponse(content, headers=HEADERS) if content else Response(status_code=404, headers=HEADERS)
             except (OSError, sqlite3.DatabaseError, ContractError):
                 return Response("Přehled teď není dostupný.", status_code=503, headers=HEADERS)
 
+        @router.api_route("/projects/{trip_id}/media/{asset_id}/{name}", methods=["GET", "HEAD"])
         @router.api_route("/media/{asset_id}/{name}", methods=["GET", "HEAD"])
         def media(request: Request, asset_id: str, name: str):
             try:
                 if not self.authorized(request):
                     return denied()
-                asset = self.asset(asset_id)
+                asset = self.asset(asset_id, request.path_params.get("trip_id"))
                 if asset is None or name not in OUTPUTS[asset["media_kind"]]:
                     return Response(status_code=404, headers=HEADERS)
                 paths = self.copies.ready(asset)

@@ -9648,11 +9648,21 @@ class CockpitServer:
             def do_GET(self) -> None:  # noqa: N802
                 self.validate_request_access(require_origin=False)
                 parsed = urlparse(self.path)
-                if parsed.path == "/api/camino/film/catalog":
+                if parsed.path == "/api/camino/film/trips":
                     if parsed.query:
                         self.respond_json({"ok": False, "error": "invalid_request"}, status=HTTPStatus.BAD_REQUEST)
                     else:
-                        self.respond_json(film_editor_action("catalog"))
+                        self.respond_json(film_editor_action("trips"))
+                    return
+                if parsed.path == "/api/camino/film/catalog":
+                    try:
+                        selection = film_project_query(parsed.query, allow_trip=True)
+                        if set(selection) - {"trip_id"}:
+                            raise ValueError("Invalid catalog selection")
+                    except ValueError:
+                        self.respond_json({"ok": False, "error": "invalid_request"}, status=HTTPStatus.BAD_REQUEST)
+                    else:
+                        self.respond_json(film_editor_action("catalog", selection) if selection else film_editor_action("catalog"))
                     return
                 if parsed.path == "/api/camino/film/editor":
                     try:
@@ -9670,7 +9680,7 @@ class CockpitServer:
                     return
                 if parsed.path == "/api/camino/film/day":
                     try:
-                        selection = film_project_query(parsed.query, allow_date=True)
+                        selection = film_project_query(parsed.query, allow_date=True, allow_trip=True)
                     except ValueError:
                         self.respond_json({"ok": False, "error": "invalid_request"}, status=HTTPStatus.BAD_REQUEST)
                     else:
@@ -9990,12 +10000,13 @@ class CockpitServer:
                     return
                 if parsed.path == "/api/camino/film/close-mac-day":
                     payload = self.read_json()
-                    if (parsed.query or set(payload) not in ({"confirmed_final_mac_data"}, {"confirmed_final_mac_data", "local_date"})
-                            or ("local_date" in payload and not isinstance(payload["local_date"], str))):
+                    if (parsed.query or "confirmed_final_mac_data" not in payload
+                            or set(payload) - {"confirmed_final_mac_data", "local_date", "trip_id"}
+                            or any(not isinstance(payload[key], str) for key in ("local_date", "trip_id") if key in payload)):
                         self.respond_json({"ok": False, "error": "invalid_request"}, status=HTTPStatus.BAD_REQUEST)
                         return
                     result = camino_mac_film_project_action(confirmed=payload["confirmed_final_mac_data"],
-                        **({"local_date": payload["local_date"]} if "local_date" in payload else {}))
+                        **{key: payload[key] for key in ("local_date", "trip_id") if key in payload})
                     self.respond_json(result, status=HTTPStatus.OK if result.get("ok") else HTTPStatus.CONFLICT)
                     return
                 if parsed.path == "/api/screen/sessions/attach":
@@ -10884,7 +10895,7 @@ class CockpitServer:
                     parts = parsed.path.split("/")
                     if parsed.query or len(parts) != 7:
                         raise ValueError("invalid photo request")
-                    data = production_editor().photo_bytes(parts[5], parts[6])
+                    data = production_editor(project_id=parts[5]).photo_bytes(parts[5], parts[6])
                 except Exception:
                     if self.command == "HEAD":
                         self.send_response(HTTPStatus.NOT_FOUND)
@@ -10909,7 +10920,7 @@ class CockpitServer:
                 try:
                     if parsed.query or len(parts) != 7:
                         raise ValueError("invalid output request")
-                    target, content_type = production_editor().output(parts[5], parts[6], with_content_type=True)
+                    target, content_type = production_editor(project_id=parts[5]).output(parts[5], parts[6], with_content_type=True)
                     handle = target.open("rb")
                 except (OSError, ValueError, KeyError):
                     if self.command == "HEAD":

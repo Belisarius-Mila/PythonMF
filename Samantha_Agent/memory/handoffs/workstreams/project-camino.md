@@ -1,6 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-24 09:49 CEST: Místně dokončené kroky 4–5 více projektů: aplikace rozlišuje stejné názvy/období, Viewer má katalog povolených cest a oddělené deníky/mapy/média, granty jsou samostatné, střižna volí cestu a její den. Worker/export používají manifest konkrétního filmu. 34 integračních, Node a skutečné syntetické PNG přes HTTP PASS; iOS Release PASS. plná brána 2193 PASS (453,570 s unit část), závěrečné 3 testy dispatcheru PASS. Bez nového vydání, iPhone/Safari nepřijaté. Python 3.15.1 navržený k oddělenému pilotu, bez instalace.
+
 - 2026-10-23 22:39 CEST: UI projektů v 15e0467a ověřené (tři UI scénáře, Release PASS), ale p+n c3aba0302d0661fbff03b131e65357a4 zastavila plná brána před pushem: 1/2185 selhání kvůli souběhu status probe a startu workeru. GitHub živě stále 8bc31d07, nasazení nezačalo. Úzká oprava startovacího souběhu lokálně hotová, 57 cílených testů PASS, plná brána 2186 PASS (333,492 s unit část), opakovaný souběh 10/10 PASS. Nový placený pokus se automaticky neopakuje.
 
 - 2026-10-23 22:28 CEST: Krok 3 — ovládání projektů převzaté od Luny c39307ba80c8e9e373149a9a7696c220 a integrované Adamem. Založení, termíny, přepínání, archivace/znovuotevření; Release a statická brána PASS, tři vybrané UI scénáře PASS (offline 1/1, projekty a přejmenování 2/2). Míla výslovně schválil nový pokus i p+n všech dokončených commitů (účtenka c3aba0302d0661fbff03b131e65357a4; výsledek ověřit živě). Telefon ani samostatná služba se tím neaktualizují.
@@ -3520,3 +3522,48 @@ Technický důkaz:
   release_lock_tests.log / release_fix_full_gate.log v nadřazené složce.
 - Živý Cockpit zůstává na předchozím vydání. Telefon, samostatná služba,
   archiv i střihy se novým kódem neaktualizovaly.
+
+
+## 2026-10-24 09:49 CEST — Více projektů, Viewer a střižna (kroky 4–5)
+
+Hotovo:
+- Nabídka telefonu ukazuje období, rozliší shodná jména a připomíná vypnutý
+  Viewer nového projektu. Viewer nabízí pouze povolené cesty; každá má
+  vlastní deník, mapu a odkazy médií, staré odkazy zůstávají použitelné.
+- Jednotlivý grant lze výslovně povolit/odvolat bez změny čtecího přihlášení
+  a ostatních cest. Obnova, konflikt, odvolání i staré URL zůstávají uzavřené.
+- Střižna vybírá cestu před dnem a filmem. Stejná data/názvy se nemíchají,
+  karty mají vlastní volbu a neuložený střih brání přepnutí. Render worker
+  i výdej fotografie/exportu se řídí konkrétním uzavřeným manifestem.
+- Předchozí opravený balíček do e11d949a má potvrzený push a nasazení
+  Cockpitu v účtence e47cdb394ec5441c5d25632f11c8c995 (2186, smoke 5/5).
+  Dřívější neúspěšná účtenka c3aba030 zůstává zachovanou historií.
+
+Rozhodnutí:
+- Míla zadal pokračování aplikace/Vieweru/střižny a posouzení Pythonu 3.15.
+  Propojené bezpečnostní změny a integraci provedl Adam. Nové vydání služby,
+  instalace telefonu a systémový upgrade mají samostatný postup/oprávnění.
+- Python 3.15.1 je vhodný kandidát pro paralelní test. Místní 3.12.0rc3
+  zasluhuje pozdější výměnu; resolver není skutečná provozní přejímka.
+
+Další krok:
+- Převzít místní checkpoint a samostatně určit vydání a fyzickou přejímku.
+
+Navrhované další kroky:
+- Schválené p+n Cockpitu; odděleně služba project_details_v1 a stejná aplikace
+  iPhonu bez odinstalace, se zálohou/otisky a následnou kontrolou zachování.
+- Krok 6: dvě cesty, přenos, Viewer a film na skutečném zařízení/Safari.
+- Paralelní pilot Pythonu 3.15.1 s oddělenými závislostmi a plnou bránou;
+  společný vícedenní film až jako další samostatná etapa.
+
+Technický důkaz:
+- 34 cílených integračních testů PASS, Node přepínání/karty/late response
+  a reload PASS. Skutečné dva syntetické JPEG → PNG 1024×768 bez EXIF,
+  jiné pixely a cizí asset HTTP 404. Archivy i původní filmové soubory shodné.
+- iOS Release generic build PASS; plná brána 2193 PASS (453,570 s unit část), závěrečné 3 testy dispatcheru PASS. Browser v tomto
+  prostředí není registrovaný; fyzické Safari/iPhone/přenos nové verze NEOVĚŘENO.
+- Report camino/docs/MULTI_PROJECT_ACCESS_REPORT.md, soukromé důkazy jen
+  data/private/camino_projects_20261024/. Žádná změna živých oprávnění,
+  produkčního archivu, střihů, sítě, služby ani instalace aplikace.
+- Python: reports/python_315_assessment_2026_10_24.md. Oficiální 3.15.1
+  ověřené, 18 položek metadat a binární dry-run závislostí; bez instalace.

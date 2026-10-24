@@ -17,7 +17,9 @@ from camino.film.closed_day import (
 )
 from camino.film.project import fingerprint, write_json
 from camino.domain.codec import decode_text
+from camino.domain.codec import decode_trip
 from camino.domain.model import TextHistory
+from camino.domain.revision_store import RevisionStore
 from camino.server.service_safety import readonly
 
 DAY = "2026-10-06"
@@ -181,6 +183,16 @@ class MacFilmProjectStore(ClosedDayStore):
             return sorted({permitted[a["moment_id"]] for a in assets
                            if a.get("moment_id") in permitted and a.get("media_kind") in ("photo", "video")}, reverse=True)
 
+    def travel_projects(self):
+        """Owner-only catalog through read-only connections; never migrate an archive."""
+        with self._metadata_connection() as metadata:
+            metadata.execute("BEGIN")
+            state = metadata.execute("SELECT exports_blocked,reconciliation_required FROM meta WHERE singleton=1").fetchone()
+            if state is None or state[0] or state[1]:
+                raise ClosedDayError("archive_blocked", "Archiv nejprve vyžaduje dokončení obnovy.")
+            return [RevisionStore._project_summary(metadata, decode_trip(json.loads(row[0])))
+                    for row in metadata.execute("SELECT body FROM trips ORDER BY id")]
+
     def project_ids(self):
         if not self.root.exists():
             return []
@@ -291,7 +303,8 @@ class MacFilmProjectStore(ClosedDayStore):
 
     def day_status(self, local_date: str, *, project_id: str | None = None):
         local_date = self._date(local_date)
-        result = {"ok": True, "exists": False, "valid": False, "local_date": local_date}
+        result = {"ok": True, "exists": False, "valid": False, "local_date": local_date,
+                  "trip_id": self.trip_id}
         if not self.root.exists():
             return result
         if project_id is None:
@@ -329,42 +342,74 @@ class MacFilmProjectStore(ClosedDayStore):
                 "message": "Projekt je uložený na Macu a jeho zdroje jsou ověřené."}
 
 
-def production_store():
+def production_store(*, trip_id=None, project_id=None):
     # Configuration validation is read-only; never instantiate archive stores
     # that create schemas, migrate databases or recover upload journals.
     from scripts import camino_service_control as service
     config = service.load_config(service.ROOT)
-    return MacFilmProjectStore(service.ROOT.parents[1] / "CaminoFilmProjects", **{
+    store = MacFilmProjectStore(service.ROOT.parents[1] / "CaminoFilmProjects", **{
         k: config[k] for k in ("metadata_db", "media_db", "media_root", "trip_id")})
+    if project_id is not None:
+        project_id = canonical_id(project_id)
+        directory = store.root / project_id
+        if directory.is_symlink() or not directory.is_dir():
+            raise ClosedDayError("project_missing", "Filmový projekt není dostupný.")
+        bound_trip = canonical_id(store._read(directory / "manifest.json")["trip_id"])
+        if trip_id is not None and canonical_id(trip_id) != bound_trip:
+            raise ClosedDayError("project_mismatch", "Film nepatří vybrané cestě.")
+        trip_id = bound_trip
+    if trip_id is not None:
+        trip_id = canonical_id(trip_id)
+        if trip_id not in {p["id"] for p in store.travel_projects()}:
+            raise ClosedDayError("trip_missing", "Vybraný projekt není v Mac archivu.")
+        if trip_id != store.trip_id:
+            store = MacFilmProjectStore(store.root, metadata_db=store.metadata_db,
+                media_db=store.media_db, media_root=store.media_root, trip_id=trip_id)
+    return store
 
 
-def film_project_query(query, *, allow_date=False):
-    values = parse_qs(query, keep_blank_values=True, strict_parsing=True, max_num_fields=2)
-    if set(values) - ({"project_id", "local_date"} if allow_date else {"project_id"}):
+def canonical_id(value):
+    if not isinstance(value, str) or str(UUID(value)) != value:
+        raise ValueError("Neplatný identifikátor projektu.")
+    return value
+
+
+def film_project_query(query, *, allow_date=False, allow_trip=False):
+    values = parse_qs(query, keep_blank_values=True, strict_parsing=True, max_num_fields=3)
+    allowed = {"project_id"} | ({"local_date"} if allow_date else set()) | ({"trip_id"} if allow_trip else set())
+    if set(values) - allowed:
         raise ValueError("Neznámý parametr filmového projektu.")
     if any(len(v) != 1 or not v[0] for v in values.values()):
         raise ValueError("Nejednoznačný výběr filmového projektu.")
     result = {k: v[0] for k, v in values.items()}
     if "local_date" in result:
         MacFilmProjectStore._date(result["local_date"])
-    if "project_id" in result and str(UUID(result["project_id"])) != result["project_id"]:
-        raise ValueError("Neplatný identifikátor projektu.")
+    for key in ("project_id", "trip_id"):
+        if key in result:
+            canonical_id(result[key])
     return result
 
 
-def camino_mac_film_project_action(*, confirmed=False, local_date=None, store=None):
+def camino_mac_film_project_action(*, confirmed=False, local_date=None, trip_id=None, store=None):
     try:
         if confirmed is not True:
             raise ClosedDayError("confirmation_required", "Potvrď konečnost dat vybraného dne na Macu.")
-        return (store or production_store()).close_mac_day(DAY if local_date is None else local_date, confirmed=True)
+        selected = store or (production_store(trip_id=trip_id) if trip_id is not None else production_store())
+        if trip_id is not None and selected.trip_id != canonical_id(trip_id):
+            raise ValueError("Project mismatch")
+        return selected.close_mac_day(DAY if local_date is None else local_date, confirmed=True)
     except ClosedDayError as error:
         return {"ok": False, "error": error.code, "message": str(error)}
     except (OSError, ValueError, KeyError, sqlite3.DatabaseError):
         return {"ok": False, "error": "storage_unavailable", "message": "Projekt nelze bezpečně ověřit nebo uložit."}
 
 
-def camino_mac_film_project_status(*, local_date=None, project_id=None, store=None):
+def camino_mac_film_project_status(*, local_date=None, project_id=None, trip_id=None, store=None):
     try:
-        return (store or production_store()).day_status(DAY if local_date is None else local_date, project_id=project_id)
+        selected = store or (production_store(trip_id=trip_id, project_id=project_id)
+                            if trip_id is not None or project_id is not None else production_store())
+        if trip_id is not None and selected.trip_id != canonical_id(trip_id):
+            raise ValueError("Project mismatch")
+        return selected.day_status(DAY if local_date is None else local_date, project_id=project_id)
     except (OSError, ValueError, KeyError, sqlite3.DatabaseError):
         return {"ok": False, "error": "storage_unavailable", "message": "Projekt nelze nyní na Macu ověřit."}

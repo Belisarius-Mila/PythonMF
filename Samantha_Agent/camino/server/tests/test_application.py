@@ -22,6 +22,10 @@ from camino.server.application import create_app
 from camino.server.auth import RevocableTokenStore
 from camino.server.media_store import MediaStore
 from camino.film.closed_day import ClosedDayStore
+from camino.server.viewer import CaminoViewer
+from camino.domain.model import LocationFix
+from tests.camino_viewer_fixture import ViewerFixture
+from types import SimpleNamespace
 
 
 def uid(number: int) -> str:
@@ -465,6 +469,100 @@ class CaminoC05aFastAPITests(unittest.IsolatedAsyncioTestCase):
         )
         self.assertEqual(set(declared["paths"]), expected)
         self.assertEqual(declared["servers"], [])
+
+
+class MultiProjectViewerTests(unittest.IsolatedAsyncioTestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory(dir='/private/tmp')
+        self.addCleanup(self.tmp.cleanup)
+        root = Path(self.tmp.name)
+        self.f = ViewerFixture(root, location=LocationFix(50, 14, 1790323200000, 8))
+        self.a = self.f.upload(30, 'photo', b'A-PHOTO-COPY')
+        self.b = self.f.add_project(200, name='Second <holiday>', photo=b'B-PHOTO-COPY',
+                                   location=LocationFix(51, 15, 1790323200000, 8))
+        self.c = self.f.add_project(300, name='NEVER-GRANTED-SECRET')
+        self.paths = {}
+        for asset, content in ((self.a, b'A-PHOTO-COPY'), (self.b.asset, b'B-PHOTO-COPY')):
+            path = root / (asset['id'] + '.jpg'); path.write_bytes(content)
+            self.paths[asset['id']] = path
+        self.readers = RevocableTokenStore(root / 'readers.sqlite')
+        self.token = 'synthetic-multi-project-reader-credential'
+        self.token_id = self.readers.add(self.token, label='synthetic Jana')
+        self.viewer = CaminoViewer(self.f.store, self.f.media,
+            SimpleNamespace(ready=lambda asset, **kwargs: {'preview.jpg': self.paths[asset['id']]}),
+            self.readers, self.f.trip.id)
+        from fastapi import FastAPI
+        self.app = FastAPI(); self.app.include_router(self.viewer.router())
+
+    async def test_project_catalog_paths_media_map_revocation_and_proxy_prefix(self):
+        before = self.f.store.path.read_bytes()
+        transport = httpx.ASGITransport(app=self.app, root_path='/camino-api')
+        async with httpx.AsyncClient(transport=transport, base_url='https://camino.test') as client:
+            async def get(path, **kwargs):
+                return await client.get(path, auth=httpx.BasicAuth('jana', self.token), **kwargs)
+            self.assertEqual((await client.get('/viewer/projects')).status_code, 401)
+            denied = await client.get('/viewer/projects', headers={'Authorization': 'Bearer '+self.token})
+            self.assertEqual(denied.status_code, 401)
+            catalog = await get('/viewer/projects')
+            self.assertEqual(catalog.status_code, 200)
+            self.assertNotIn('Second', catalog.text); self.assertNotIn('NEVER-GRANTED', catalog.text)
+            self.assertEqual((await get(f'/viewer/projects/{self.b.trip.id}/')).status_code, 404)
+            self.assertEqual(self.f.store.path.read_bytes(), before, 'read-only catalog must not change the archive')
+            self.f.store.set_viewer_permission(self.b.trip.id, enabled=True)
+            self.f.send('set_project_details', {'trip_id':self.b.trip.id,'start_date':'2027-07-01',
+                'end_date':'2027-07-14','status':'archived'}, expected=1)
+            catalog = await get('/viewer/projects')
+            self.assertIn('Second &lt;holiday&gt;', catalog.text)
+            self.assertIn('Archivované', catalog.text)
+            self.assertNotIn('NEVER-GRANTED', catalog.text)
+            prefix = f'/viewer/projects/{self.b.trip.id}'
+            page = await get(prefix + '/days/' + self.b.day.local_date)
+            self.assertEqual(page.status_code, 200)
+            self.assertIn(self.b.asset['id'], page.text); self.assertNotIn(self.a['id'], page.text)
+            self.assertIn('/camino-api'+prefix+'/media/', page.text)
+            self.assertIn('/camino-api'+prefix+'/map', page.text)
+            self.assertNotIn('TAJNA', page.text)
+            a_page = await get(f'/viewer/projects/{self.f.trip.id}/days/{self.f.day.local_date}')
+            self.assertIn(self.a['id'], a_page.text); self.assertNotIn(self.b.asset['id'], a_page.text)
+            data = await get(prefix + '/map-data')
+            self.assertEqual([p['id'] for p in data.json()['points']], [self.b.moment.id])
+            self.assertTrue(data.json()['points'][0]['href'].startswith('/camino-api'+prefix+'/days/'))
+            route = await get(prefix + '/map')
+            self.assertIn('data-map-url="/camino-api'+prefix+'/map-data"', route.text)
+            media_url = prefix + '/media/' + self.b.asset['id'] + '/preview.jpg'
+            media = await get(media_url, headers={'Range':'bytes=0-3'})
+            self.assertEqual(media.status_code, 206); self.assertEqual(media.content, b'B-PH')
+            foreign = prefix + '/media/' + self.a['id'] + '/preview.jpg'
+            self.assertEqual((await get(foreign)).status_code, 404)
+            self.f.store.set_viewer_permission(self.b.trip.id, enabled=False)
+            for path in (prefix+'/', prefix+'/map', prefix+'/map-data', media_url):
+                self.assertEqual((await get(path)).status_code, 404)
+            self.assertEqual((await client.head(media_url, auth=httpx.BasicAuth('jana', self.token))).status_code, 404)
+            self.assertEqual((await get(f'/viewer/projects/{self.f.trip.id}/')).status_code, 200)
+            self.assertEqual((await get('/viewer/')).status_code, 200, 'legacy bookmark still works')
+            self.readers.revoke(self.token_id)
+            self.assertEqual((await get('/viewer/projects')).status_code, 401)
+
+    async def test_catalog_and_worker_fail_closed_on_grants_and_restore(self):
+        self.assertEqual({p['id'] for p in self.f.store.viewer_projects()}, {self.f.trip.id})
+        self.f.store.set_viewer_permission(self.b.trip.id, enabled=True)
+        builds = []
+        def build(asset, source, **kwargs):
+            builds.append(asset['id'])
+            if asset['id'] == self.a['id']:
+                self.f.store.set_viewer_permission(self.b.trip.id, enabled=False)
+            return True
+        self.viewer.copies = SimpleNamespace(ready=lambda *args, **kwargs: {}, build=build)
+        self.viewer.build_pending()
+        self.assertEqual(builds, [self.a['id']], 'grant is checked again when a project is reached')
+        self.f.store.set_viewer_permission(self.b.trip.id, enabled=True)
+        self.viewer.copies.build = lambda asset, source, **kwargs: builds.append(asset['id']) or True
+        builds.clear(); self.viewer.build_pending()
+        self.assertEqual(set(builds), {self.a['id'],self.b.asset['id']})
+        for flags in ('exports_blocked=1', 'exports_blocked=0,reconciliation_required=1'):
+            with self.f.store._connection() as db: db.execute('UPDATE meta SET '+flags)
+            self.assertEqual(self.f.store.viewer_projects(), [])
+            builds.clear(); self.viewer.build_pending(); self.assertEqual(builds, [])
 
 
 if __name__ == "__main__":

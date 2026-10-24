@@ -1445,3 +1445,17 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
 - Ověření: 57 cílených testů, 10/10 souběžných integračních opakování
   a plná brána 2186/2186 PASS. app/communication/luna_release.py;
   tests/test_luna_release.py. Původní účtenka zůstává attention.
+
+### 2026-10-24 09:52 CEST — Projekt filmu patří manifestu, nikoli globální volbě
+
+- Kontext: více cest se stejnými názvy a dny, souběžně otevřené karty.
+- Řešení: konfigurační cestu ponechat jen jako legacy výchozí volbu.
+  Nový výběr nese trip_id a datum; uložený project_id znovu svázat s trip_id
+  neměnného manifestu při čtení, renderu i výdeji. Neměnit sdílený objekt
+  podle posledního UI výběru. Viewer katalog i URL jsou projektově omezené
+  a povolení se ověřuje z aktuální projekce.
+- Ověření: stejné názvy/dny, oddělené manifesty a syntetické exporty,
+  odmítnuté cizí asset/job, Node late response/tab/reload a skutečné PNG HTTP.
+
+- Závěrečná přejímka kroku: plná brána 2193 PASS, iOS Release PASS a
+  explicitní odmítnutí chybného tvaru požadavku před otevřením archivu.

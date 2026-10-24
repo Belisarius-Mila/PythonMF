@@ -521,16 +521,28 @@ class FilmEditor:
         return target
 
 
-@lru_cache(maxsize=1)
-def production_editor():
-    return FilmEditor(production_store())
+@lru_cache(maxsize=64)
+def production_editor(*, trip_id=None, project_id=None):
+    return FilmEditor(production_store(trip_id=trip_id, project_id=project_id)
+                      if trip_id is not None or project_id is not None else production_store())
 
 
 def film_editor_action(operation, payload=None):
     try:
-        editor = production_editor()
+        if payload is not None and not isinstance(payload, dict):
+            raise FilmError("Neplatná struktura filmového požadavku.")
+        if operation == "trips":
+            store = production_store()
+            return {"ok": True, "trips": store.travel_projects(), "default_trip_id": store.trip_id}
         if operation == "catalog":
-            return editor.catalog()
+            exact(payload or {}, "trip_id" if payload else "")
+            editor = production_editor(trip_id=identifier(payload["trip_id"])) if payload else production_editor()
+        else:
+            pid = (payload or {}).get("project_id")
+            editor = production_editor(project_id=identifier(pid)) if pid is not None else production_editor()
+        if operation == "catalog":
+            result = editor.catalog()
+            return {**result, "trip_id": editor.store.trip_id} if payload else result
         if operation == "view":
             exact(payload or {}, "project_id" if payload else "")
             return editor.view((payload or {}).get("project_id"))

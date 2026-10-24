@@ -64,3 +64,11 @@ telefonní kód tuto kolizi nezpůsobil. Původní běh se neopakuje.
 Adam připravil úzkou opravu status probe ve stávající 30s lhůtě a regresní
 test. 57 cílených testů PASS; plná brána 2186 PASS (333,492 s unit část), opakovaný souběh 10/10 PASS. Nový placený pokus
 Luny až po konkrétním potvrzení; žádný ruční push či restart služeb.
+
+## 2026-10-24 — navázání
+
+Opravený balíček do e11d949a úspěšně pushnutý/nasazený do Cockpitu přes
+účtenku e47cdb394ec5441c5d25632f11c8c995, plná brána 2186 a smoke 5/5.
+Kroky 4–5 navazují [samostatným místním checkpointem](MULTI_PROJECT_ACCESS_REPORT.md),
+včetně období a rozlišení shodných jmen v nabídce telefonu. iPhone se běžným
+p+n neinstaloval; fyzická přejímka nové verze zůstává samostatná.
