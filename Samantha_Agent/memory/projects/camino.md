@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-24 19:24 CEST — podepsaná IPA 21 a servisní preflight
+Aktualizováno: 2026-10-24 19:48 CEST — služba schéma 4 a iPhone build 21
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -12,11 +12,13 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 
 ## Aktuální stav
 
-- 2026-10-24 19:24 CEST: Podepsaná IPA Camino 0.1.0 (21) hotová: Camino-Projects-Trash-21-20261024.ipa, 1072250 B; archive/export/strict codesign/ZIP PASS, profil do 29. 10. 2026. Downloads a iCloud Dokumenty mají shodný hash, iCloud upload potvrzený. iPhone je dostupný s buildem 20; verze 21 neinstalovaná.
-- Servisní preflight PASS: zdravé schéma 3, 921 operací, 132 Momentů, 4 cesty a 316/316 ověřených originálů. Migrace 3→4 na kopii v paměti zachovala původní řádky, nové tabulky prázdné; izolovaný import ve venv služby a shoda requirements PASS. Služba ani její data se neměnily.
-- Aktuální autorizace pokrývá přípravu IPA i zamýšlenou aktualizaci. Před změnou LaunchAgentu ještě chybí přesná globální věta pro tento servisní krok; původní potvrzení bylo k SSD. Externí záložní svazek nyní nepřipojený. Před upgradem budou ověřené čtyři místní DB snapshoty; původní data/config/Serve zachovat.
-- Další krok: po potvrzení registrovaný stop/upgrade/start a ověření schématu 4, owner HTTP/HTTPS/Viewer, řádků/identit/SHA/Serve; potom aktualizovat stejnou aplikaci buildem 21 bez odinstalace a fyzicky ověřit data. Detail: camino/docs/CLIENT_21_SERVICE_UPGRADE_REPORT.md.
-- Předchozí p+n Cockpitu do 0a18db30 zůstává potvrzené (Luna b75c48be, 2232 PASS, smoke 5/5). Nový push, služba ani telefon se tímto přípravným checkpointem nevydávají.
+- 2026-10-24 19:48 CEST: Samostatná služba Camino aktualizovaná registrovaným stop/snapshot/upgrade/start na schéma 4, release f00fcb13; project_trash_v1 potvrzené. Čtyři ověřené místní DB snapshoty, původní konfigurace/release zachované. Externí šifrovaný svazek nepřipojený; místní snapshot není nezávislá záloha.
+- Všechny původní tabulky čtyř DB a archiv po přechodu shodné: 921 operací, 132 Momentů, 4 cesty, 316/316 originálů / 2 379 212 189 B SHA-256 PASS. Serve, identity, přístupová oprávnění a flags zachované; žádná skutečná cesta ani média se nemazaly.
+- Owner HTTP/HTTPS a auth PASS; Viewer katalog, deník, mapa a map-data 200, fotografie/zvuk/video Range 206. Poslední registrovaný status služby running=true a owner health PASS. Cockpit koš dostupný, seznam prázdný; dřívější p+n Luna b75c48be do 0a18db30 zůstává potvrzené.
+- Na stejném iPhonu nainstalované Camino 0.1.0 (21), stejné bundle ID, bez odinstalace. Všech 7 původních položek kontejneru zachovaných; velikosti a časy změn SQLite/WAL/SHM před prvním spuštěním přesně shodné. První spuštění přes CoreDevice odmítl zamčený telefon; zobrazení původních záznamů a fyzický tok koše zatím NEOVĚŘENO.
+- Podepsaná IPA Camino-Projects-Trash-21-20261024.ipa v Downloads/iCloud Dokumentech, podpis/ZIP/hash/upload PASS, profil do 29. 10. 2026. SideStore evidenci přímá instalace neověřila; pro obnovu použít IPA 21 a zachovat identitu aplikace. Další krok: odemknout a otevřít Camino, potvrdit původní data; potom syntetická fyzická přejímka koše. Praktická editace textu, historie nahrávek, jejich koš, MP3/WAV a český hlas zůstávají otevřené. Detail: camino/docs/CLIENT_21_SERVICE_UPGRADE_REPORT.md.
+
+### Historické stavové záznamy
 
 - 2026-10-24 17:56 CEST: P+n sedmidenního koše proběhlo napoprvé registrovanou Lunou. Pět commitů do 0a18db3038e0b9cf1069d52714a69b0f16d9ff26 je na GitHubu, Cockpit je nasazený. Účtenka b75c48be083a1f26e8e7296ccf5997de: completed, push/deployment confirmed, plná brána 2232 PASS, smoke 5/5, chráněné služby shodné.
 - Hlavní Adam jednou ověřil účtenku a živý stav: GitHub/main 0/0 na vydaném headu, health OK, code_stamp 7ae887842f089e5c. Automatický portálový návrat returned_to_adam=false; výsledek skutečně převzal a ověřil Adam zde v terminálu. Publikování se neopakuje kvůli tomuto poli.

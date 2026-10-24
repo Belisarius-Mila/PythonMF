@@ -62,7 +62,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md`; `../camino/docs/CLIENT_21_SERVICE_UPGRADE_REPORT.md` — 2026-10-24 19:24 CEST: Podepsaná IPA 21 hotová, strict podpis/ZIP a iCloud upload PASS. Servisní preflight i RAM migrace 3→4 PASS; skutečná služba zůstává na 3, iPhone na buildu 20. Čeká přesná globální věta pro změnu LaunchAgentu, pak registrovaný upgrade a instalace stejné aplikace. Externí šifrovaná záloha nepřipojená; lokální snapshoty vzniknou před upgradem.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md`; `../camino/docs/CLIENT_21_SERVICE_UPGRADE_REPORT.md` — 2026-10-24 19:48 CEST: Služba schéma 4 a iPhone 21 aktualizované bez odinstalace. Čtyři DB snapshoty, původní tabulky/316 SHA/Viewer PASS, kontejner telefonu zachovaný. První spuštění blokuje zamčený telefon; vizuální záznamy a fyzický koš NEOVĚŘENO. IPA v Downloads/iCloud, profil do 29. 10.; externí záloha nyní nepřipojená.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md`; `technical/luna_release_orchestration.md` — 2026-10-24 09:52 CEST: Oprava startovacího souběhu p+n je publikovaná/nasazená v e11d949a. Účtenka e47cdb394ec5441c5d25632f11c8c995 má potvrzený push 4 commitů a nasazení Cockpitu, plnou bránu 2186 a smoke 5/5. Nativní účtenku ověřil hlavní Adam; nový místní vývoj pokračuje v project-camino. Předchozí attention c3aba030 je historie a neopakuje se.
 

@@ -13,9 +13,12 @@ push/deploy confirmed, plná brána 2232 PASS, smoke 5/5. Živě ověřený stam
 Automatický portálový návrat je nepotvrzený (`returned_to_adam=false`);
 účtenku zde převzal a ověřil terminálový Adam.
 
-Toto vydání aktualizovalo pouze společný runtime/Cockpit. Samostatná služba
-Camino a iPhone ještě potřebují vlastní schválené vydání; bez nového schématu
-služby koš vrací požadavek na upgrade. Skutečná data se nemazala.
+Toto p+n aktualizovalo pouze společný runtime/Cockpit. Následně po samostatném
+schválení a přesné globální větě proběhl upgrade služby na schéma 4 a stejné
+iPhone aplikace na build 21 bez odinstalace. Původní archiv/316 SHA a Viewer
+PASS, kontejner telefonu zachovaný. První spuštění blokuje zámek telefonu;
+fyzický tok koše dosud nepřijatý. Skutečná data se nemazala.
+[Podrobnosti samostatného vydání](CLIENT_21_SERVICE_UPGRADE_REPORT.md).
 
 ## Používání po samostatném vydání
 
@@ -83,9 +86,9 @@ Tato funkce je nemaže a neslibuje vymazání historických záloh/snapshotů.
   při vydání je nutný registrovaný upgrade služby včetně předchozího
   snapshotu. Cockpit samotný archiv nemigruje; bez nového schématu koš
   vrací požadavek na aktualizaci. Nový iPhone vyžaduje `project_trash_v1`.
-- Pořadí budoucího vydání: samostatně autorizovaný upgrade služby Camino,
-  odpovídající Cockpit a instalace nového iPhonu; potom syntetická
-  fyzická přejímka. Samotné p+n společného runtime tyto kroky nenahrazuje.
+- Samostatně autorizovaný upgrade služby a instalace buildu 21 jsou hotové;
+  navazuje syntetická fyzická přejímka. Samotné p+n společného runtime
+  tyto kroky nenahrazuje.
 
 ## Ověření
 

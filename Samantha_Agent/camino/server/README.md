@@ -93,7 +93,9 @@ Launcher drží zámek jedné instance a před upgradem metadat na schéma 4 po�
 ověřený SQLite snapshot vedle původní DB. Samotný upgrade nemění původní Trip/operace;
 samostatná tabulka uchovává explicitní grant Vieweru. Snapshot na témže disku
 není nezávislá záloha. Nasazení, reader token, Serve a telefon jsou samostatné
-potvrzované kroky, fyzický návrat launchd procesu zatím není ověřený.
+potvrzované kroky. Dne 24. 10. 2026 proběhl schválený upgrade na schéma 4
+a návrat vlastněné služby/owner health PASS, původní archiv a Serve shodné.
+[Servisní přejímka](../docs/CLIENT_21_SERVICE_UPGRADE_REPORT.md).
 
 ## Více projektů — místní rozšíření 24. 10. 2026
 

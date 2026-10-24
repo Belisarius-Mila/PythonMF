@@ -10,8 +10,9 @@ kontrola a potvrzení ve střižně, obnovení do lhůty a následný výmaz
 spravovaných dat včetně telefonu po jeho spojení. Samostatný film ponechá
 originály cesty. [Postup, rozsah a hranice vydání](docs/PROJECT_TRASH_REPORT.md).
 Ovládání ve střižně je nasazené v `0a18db30` (Luna `b75c48be`, 2232 PASS,
-smoke 5/5). Celý koš ještě vyžaduje samostatný upgrade služby Camino
-a instalaci iPhonu; tyto části běžné p+n neaktualizovalo.
+smoke 5/5). Samostatně aktualizovaná služba má schéma 4, iPhone build 21
+bez odinstalace; původní archiv a Viewer PASS. První otevření telefonu
+a fyzická přejímka koše dosud nepotvrzené. [Výsledek](docs/CLIENT_21_SERVICE_UPGRADE_REPORT.md).
 
 Nově místně: původní text z iPhonu a upravitelná pracovní kopie u fotografie,
 historie čtení, obnovitelný koš a import MP3/WAV.

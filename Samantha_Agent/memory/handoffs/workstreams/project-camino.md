@@ -1,12 +1,20 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-24 19:48 CEST: Samostatná služba Camino aktualizovaná registrovaným stop/snapshot/upgrade/start na schéma 4, release f00fcb13; project_trash_v1 potvrzené. Čtyři ověřené místní DB snapshoty, původní konfigurace/release zachované. Externí šifrovaný svazek nepřipojený; místní snapshot není nezávislá záloha.
+- Všechny původní tabulky čtyř DB a archiv po přechodu shodné: 921 operací, 132 Momentů, 4 cesty, 316/316 originálů / 2 379 212 189 B SHA-256 PASS. Serve, identity, přístupová oprávnění a flags zachované; žádná skutečná cesta ani média se nemazaly.
+- Owner HTTP/HTTPS a auth PASS; Viewer katalog, deník, mapa a map-data 200, fotografie/zvuk/video Range 206. Poslední registrovaný status služby running=true a owner health PASS. Cockpit koš dostupný, seznam prázdný; dřívější p+n Luna b75c48be do 0a18db30 zůstává potvrzené.
+- Na stejném iPhonu nainstalované Camino 0.1.0 (21), stejné bundle ID, bez odinstalace. Všech 7 původních položek kontejneru zachovaných; velikosti a časy změn SQLite/WAL/SHM před prvním spuštěním přesně shodné. První spuštění přes CoreDevice odmítl zamčený telefon; zobrazení původních záznamů a fyzický tok koše zatím NEOVĚŘENO.
+- Podepsaná IPA Camino-Projects-Trash-21-20261024.ipa v Downloads/iCloud Dokumentech, podpis/ZIP/hash/upload PASS, profil do 29. 10. 2026. SideStore evidenci přímá instalace neověřila; pro obnovu použít IPA 21 a zachovat identitu aplikace. Další krok: odemknout a otevřít Camino, potvrdit původní data; potom syntetická fyzická přejímka koše. Praktická editace textu, historie nahrávek, jejich koš, MP3/WAV a český hlas zůstávají otevřené. Detail: camino/docs/CLIENT_21_SERVICE_UPGRADE_REPORT.md.
+<!-- SAMANTHA_CURRENT_STATUS_END -->
+
+### Předchozí stav přípravy IPA a služby
+
 - 2026-10-24 19:24 CEST: Podepsaná IPA Camino 0.1.0 (21) hotová: Camino-Projects-Trash-21-20261024.ipa, 1072250 B; archive/export/strict codesign/ZIP PASS, profil do 29. 10. 2026. Downloads a iCloud Dokumenty mají shodný hash, iCloud upload potvrzený. iPhone je dostupný s buildem 20; verze 21 neinstalovaná.
 - Servisní preflight PASS: zdravé schéma 3, 921 operací, 132 Momentů, 4 cesty a 316/316 ověřených originálů. Migrace 3→4 na kopii v paměti zachovala původní řádky, nové tabulky prázdné; izolovaný import ve venv služby a shoda requirements PASS. Služba ani její data se neměnily.
 - Aktuální autorizace pokrývá přípravu IPA i zamýšlenou aktualizaci. Před změnou LaunchAgentu ještě chybí přesná globální věta pro tento servisní krok; původní potvrzení bylo k SSD. Externí záložní svazek nyní nepřipojený. Před upgradem budou ověřené čtyři místní DB snapshoty; původní data/config/Serve zachovat.
 - Další krok: po potvrzení registrovaný stop/upgrade/start a ověření schématu 4, owner HTTP/HTTPS/Viewer, řádků/identit/SHA/Serve; potom aktualizovat stejnou aplikaci buildem 21 bez odinstalace a fyzicky ověřit data. Detail: camino/docs/CLIENT_21_SERVICE_UPGRADE_REPORT.md.
 - Předchozí p+n Cockpitu do 0a18db30 zůstává potvrzené (Luna b75c48be, 2232 PASS, smoke 5/5). Nový push, služba ani telefon se tímto přípravným checkpointem nevydávají.
-<!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí stav po p+n Cockpitu
 
@@ -3666,3 +3674,28 @@ Technický důkaz:
 - Archive/export i strict codesign/ZIP PASS; verze 0.1.0 (21), stejné bundle ID, 1072250 B, profil do 29. 10. 2026; hashe uložené v CLIENT_21_SERVICE_UPGRADE_REPORT.md.
 - Zdrojový archiv: 921 operací, 132 Momentů, 4 cesty, 316 originálů / 2 379 212 189 B SHA PASS, flags false. Schema 3→4 pouze v paměti, původní tabulky shodné; service venv import a požadavky PASS.
 - Živý upgrade, instalace a fyzická přejímka NEPROVEDENO. Externí šifrovaná záloha nyní nepřipojená.
+
+### 2026-10-24 19:48 CEST — služba schéma 4 a iPhone 21 aktualizované
+
+Hotovo:
+
+- Služba podporuje společný sedmidenní koš. iPhone aktualizovaný ze stejné aplikace 20 na 21 bez odinstalace, původní kontejner zachovaný. Viewer, deník, mapa a média po upgradu dostupné.
+
+Rozhodnutí:
+
+- Míla dodal přesnou globální větu pro konkrétní servisní přechod a aktualizaci telefonu. Tím se nepovoluje smazání skutečné cesty. Žádné nové funkční rozhodnutí ani TVBCP.
+
+Další krok:
+
+- Odemknout iPhone, otevřít Camino a vizuálně potvrdit původní cesty a záznamy; vzdálené spuštění odmítnuté kvůli zámku telefonu.
+
+Navrhované další kroky:
+
+- Fyzicky přijmout koš na syntetické cestě a filmu včetně obnovy; produkční sedmidenní lhůta a skutečné uvolnění místa dosud NEOVĚŘENO.
+- Dokončit praktickou editaci textu, historii hlasů, jejich koš a import MP3/WAV; český hlas vybrat poslechem.
+
+Technický důkaz:
+
+- Čtyři DB snapshoty quick_check/SHA PASS; všechny původní tabulky i archiv shodné: 921 operací, 132 Momentů, 4 cesty a 316 originálů / 2 379 212 189 B SHA PASS. Serve/auth/identity zachované. Owner HTTP/HTTPS a Viewer PASS, všechna tři média Range 206.
+- CoreDevice install a dotaz na build 21 PASS; všech 7 původních položek a velikosti/mtime SQLite/WAL/SHM před prvním spuštěním shodné. Toto není úplná hashová ani vizuální přejímka telefonu. Profil IPA do 29. 10. 2026; SideStore evidenci přímá instalace neověřila.
+- Důkazy pouze v ignorovaném private adresáři, veřejný souhrn CLIENT_21_SERVICE_UPGRADE_REPORT.md. Externí šifrovaná záloha nepřipojená; ověřené místní snapshoty nejsou externí záloha. Zdrojový kód se neměnil; předchozí plná brána 2232 PASS. Závěrečná statická brána a git diff --check PASS.

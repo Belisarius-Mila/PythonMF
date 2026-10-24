@@ -1,39 +1,66 @@
-# Camino 21 a příprava aktualizace služby
+# Camino 21 a aktualizace služby
 
-Stav: 2026-10-24 19:24 CEST. Míla výslovně zadal dokončit novou IPA a aktualizaci služby.
+Stav: 2026-10-24 19:48 CEST. Míla výslovně zadal novou IPA, aktualizaci
+služby a stejné aplikace na iPhonu; před provedením potvrdil přesnou globální
+brzdu pro tento servisní přechod. Služba je aktualizovaná, build 21 nainstalovaný.
 
-## Hotový instalační balíček
+## Instalační balíček a telefon
 
 - `Camino-Projects-Trash-21-20261024.ipa`, verze 0.1.0 (21), bundle ID `cz.pythonmf.camino.app`.
-- Podepsaný iOS archive i export PASS; strict codesign exportované aplikace, ZIP/CRC a přítomnost `project_trash_v1` v binárce PASS.
-- 1072250 B; SHA-256 `f307048f0cd33b85c91dbe5a6a5a776b7af95444f246000cb49270be40ae1e54`. Zdroj `e7f2c598e8b82646ddabba24474674d56a725e89`; žádná změna kódu nebo datového modelu oproti ověřenému koši.
-- Profil platí do 2026-10-29 19:01:14 UTC. Podpisové identity, profil a zařízení zůstávají mimo Git.
-- Create-only kopie v Downloads a iCloud Drive/Dokumenty; oba hashe shodné. iCloud metadata potvrzují uploaded=true, uploading=false. Starší IPA zachované.
-- iPhone se po navázání spojení stal dostupným, potvrzená instalovaná verze 0.1.0 (20) se stejným bundle ID. Nová verze 21 nebyla instalovaná. Zachovat stávající aplikaci/data, neodinstalovávat; SideStore postup zachovává Customize AppID zapnuté a Append Team ID vypnuté.
+- Podepsaný iOS archive/export, strict codesign čisté exportované aplikace, ZIP/CRC a `project_trash_v1` v binárce PASS.
+- 1072250 B; SHA-256 `f307048f0cd33b85c91dbe5a6a5a776b7af95444f246000cb49270be40ae1e54`. Zdroj `e7f2c598e8b82646ddabba24474674d56a725e89`; funkční kód odpovídá ověřenému `0a18db30`.
+- Profil platí do 2026-10-29 19:01:14 UTC a zahrnuje připojený iPhone. Podpisové identity, profil a identifikátor zařízení zůstávají mimo Git.
+- Create-only kopie v Downloads a iCloud Drive/Dokumenty; oba hashe shodné. iCloud metadata uploaded=true, uploading=false. Starší IPA zachované.
+- Přímá CoreDevice aktualizace téže aplikace z buildu 20 na 21 PASS; následný dotaz potvrdil verzi a stejné bundle ID. Odinstalace neproběhla.
+- Před prvním spuštěním zůstalo všech sedm původních položek Application Support/Camino; velikosti i lastModDate metadata.sqlite, WAL a SHM přesně shodné. Nejde o úplný hashový audit všech telefonních dat ani fyzickou přejímku.
+- Historická složka Sync-before obsahovala pouze prázdný technický journal bez položek media/metadata; nic se neuklízelo.
+- Spuštění přes CoreDevice odmítl zamčený telefon (Locked). Míla musí telefon odemknout, otevřít Camino a potvrdit své původní záznamy.
+- SideStore evidenci přímá instalace neověřila. Pro další obnovu použít novou IPA 21, zachovat stejnou identitu a neodinstalovávat; dosavadní nastavení Customize AppID zapnuté a Append Team ID vypnuté.
 
-## Připravený servisní krok
+## Provedený servisní přechod
 
-- Vlastněná služba je dostupná, owner HTTP 200, anonymní 401. Stávající schéma 3, projektový koš zatím nepodporuje. Exports/reconciliation flags false.
-- Quick_check/FK a úplná kontrola SHA všech 316 originálů / 2 379 212 189 B PASS. Stav: 921 přijatých operací, 132 Momentů, 4 cesty. Soukromé identity a texty se neuvádějí.
-- Přechod 3→4 na SQLite kopii v paměti PASS: všechny původní tabulky obsahově shodné, nové tabulky koše prázdné, quick_check/FK PASS. Živá databáze se neměnila.
-- Izolovaný import aktuálního registrovaného release balíčku ve skutečném Pythonu služby PASS; requirements jsou byte-for-byte shodné. Serve a konfigurace mají uložené soukromé výchozí otisky.
-- Externí šifrovaná záložní jednotka nyní není připojená. Před změnou se registrovaným upgradem po zastavení vytvoří ověřené místní SQLite snapshoty metadat, médií, owner auth a reader auth. Snapshot na stejném SSD nenahrazuje nezávislou externí zálohu.
+1. Read-only preflight, migrace kopie v RAM a izolovaný import ve skutečném venv služby PASS; requirements beze změny.
+2. Pod lifecycle zámkem registrované zastavení a ověřené uvolnění služby.
+3. Registrovaný upgrade na immutable release `f00fcb1311a77d4c4066cb1fa43e375df077f693`, zachovaná původní konfigurace a LaunchAgent definice. Funkční zdroje shodné s ověřenou verzí koše.
+4. Čtyři místní SQLite snapshoty metadata/media/owner-auth/reader-auth ověřené pomocí SHA-256 a quick_check; všechny původní tabulky přesně shodné.
+5. Registrovaný start a migrace 3→4; `project_trash_v1` potvrzené, nové tabulky koše při přejímce prázdné. Poslední registrovaný status owned/running=true a owner health PASS.
 
-## Čekající potvrzení a přesný další krok
+Po přechodu jsou všechny původní tabulky čtyř DB a archiv shodné:
+921 přijatých operací, 132 Momentů, 4 cesty, všech 316 originálů /
+2 379 212 189 B se shodnými SHA-256. Identity, epochs, cursor, granty,
+exports/reconciliation flags false a Serve zachované. Žádná skutečná cesta
+ani média se nemazaly.
 
-Aktualizace služby přepíná její vlastněnou LaunchAgent definici. Podle
-`memory/technical/global_safety_brake.md` vyžadují změny LaunchAgents přesnou
-potvrzovací větu. Dřívější věta v tomto rozhovoru platila pro úklid SSD, ne
-pro nynější servisní přechod. Živé stop/upgrade/start zatím neproběhly.
+Owner HTTP/HTTPS a autentizace PASS, anonymní přístup 401. Viewer katalog,
+deník, mapa a map-data HTTPS 200; fotografie, audio a video Range 206
+(ověřený krátký úsek každého média). Cockpit seznam projektového koše OK,
+bez žádostí.
 
-Po odpovídajícím potvrzení: registrovaný stop a vyčkání na uvolnění DB →
-upgrade s ověřenými čtyřmi DB snapshoty a zachováním definice/config-before
-→ start a migrace 3→4 → owner HTTP/HTTPS + auth + Viewer kontroly, shodné
-původní řádky/identity/316 SHA a Serve → aktualizace stejné aplikace na
-iPhonu bez odinstalace, ověření buildu 21 a zachování dat.
+Při zápisu průběhové účtenky po stopu odmítl create-only writer přepsání
+souboru. Upgrade ještě nezačal; pokračování vyšlo z ověřeného zastaveného
+stavu a použilo nové append-only účtenky. Stop se neopakoval.
+Finder přidal desktopové extrakci metadata odmítaná strict codesign;
+instalace proto použila čistou extrakci ověřené IPA v privátním `/private/tmp`
+a podpis ověřený bezprostředně před instalací (existující postup LL-037).
+IPA ani zdrojový kód se kvůli tomu neměnily.
 
-Novou IPA instalovat až po ověření kompatibilní služby. Celý fyzický tok
-koše a ověření osobních záznamů v telefonu zůstávají NEOVĚŘENO.
+Externí šifrovaná záložní jednotka nebyla připojená. Čtyři ověřené místní DB
+snapshoty a původní release/config umožňují servisní obnovu; snapshot na
+stejném SSD nenahrazuje nezávislou externí zálohu.
 
-Důkazy a podpisové soubory jsou pouze v ignorovaném private vývojovém
-adresáři; do Gitu nepatří profily, IPA, tokeny ani soukromé databáze.
+## Rozsah ověření a další krok
+
+Cockpit byl již vydaný Lunou `b75c48be083a1f26e8e7296ccf5997de` do
+`0a18db30` (2232 testů PASS, smoke 5/5). Nynější samostatný servisní krok
+aktualizoval službu a telefon; nový p+n ani push dokumentace neproběhl.
+Závěrečná statická brána a git diff --check PASS; zdrojový kód beze změny.
+
+První další krok: odemknout a otevřít Camino, potvrdit původní cesty a
+záznamy. Fyzický tok koše na syntetické cestě/filmu, skutečná sedmidenní
+lhůta a uvolnění místa zůstávají NEOVĚŘENO. Praktická editace textu,
+historie nahrávek, jejich koš, MP3/WAV a český hlas zůstávají otevřené.
+
+Technické účtenky `service-upgrade-final.json`, `viewer-upgrade-check.json`,
+`viewer-media-upgrade-check.json`, `phone-install.json`, `phone-app-after.json`,
+`phone-preservation-check.json` a `phone-launch.json` jsou jen v ignorovaném
+private vývojovém adresáři. Do Gitu nepatří profily, IPA, tokeny ani databáze.

@@ -6,12 +6,13 @@ nemigruje data ze samostatných prototypů Camino Audio a Camino Transfer Test.
 
 ## Aktuální používání — 24. 10. 2026
 
-Místní vývoj přidává **Projekty → Upravit projekt → Požádat o smazání celé
+Build 21 nabízí **Projekty → Upravit projekt → Požádat o smazání celé
 cesty**. Žádost cestu skryje; přesun do společného sedmidenního koše potvrdíš
 na Macu. Telefon trvale maže až po ověřeném výmazu Macu a potvrdí dokončení.
 Obnovení je na Macu před koncem lhůty.
-[Postup a ověření](../docs/PROJECT_TRASH_REPORT.md). Vyžaduje samostatný
-upgrade služby s `project_trash_v1` a instalaci nového klienta; zatím neproběhly.
+[Postup a ověření](../docs/PROJECT_TRASH_REPORT.md). Vyžaduje samostatnou
+službu s `project_trash_v1`; aktualizace služby na schéma 4 a telefonu na 21
+proběhly. Fyzická přejímka koše zůstává otevřená.
 
 Nově místně doplněné období v seznamu a krátké rozlišení stejně pojmenovaných
 projektů. Nová cesta připomíná vypnutý Viewer; povolení pro Janu se spravuje
@@ -25,14 +26,15 @@ neplatný rozsah se neuloží. Výběr projektu zůstává zachovaný po restart
 [Kontrakt](../docs/MULTI_PROJECT_FOUNDATION.md) a
 [ovládání/přejímka](../docs/PROJECT_MANAGEMENT_UI_REPORT.md).
 
-Jde o nové zdroje, nikoli aktualizaci nainstalovaného telefonu. Před
-instalací nejprve ověř samostatný server s project_details_v1; p+n Cockpitu
-telefon ani tuto službu neaktualizuje.
+Samostatná služba i telefon jsou aktualizované. Samotné p+n Cockpitu
+telefon ani tuto službu neaktualizuje; jejich vydání proběhlo zvlášť.
 
-Poslední připravená podepsaná IPA je 0.1.0 (21),
+Poslední nainstalovaná verze a podepsaná IPA je 0.1.0 (21),
 `Camino-Projects-Trash-21-20261024.ipa`, v Downloads a iCloud Dokumentech.
-Podpis/ZIP a cloud upload PASS; profil do 29. 10. 2026. Instalace čeká na
-kompatibilní službu. [Předání](../docs/CLIENT_21_SERVICE_UPGRADE_REPORT.md).
+Podpis/ZIP a cloud upload PASS; profil do 29. 10. 2026. Instalace proběhla
+bez odinstalace, původní kontejner zachovaný. První spuštění blokuje zámek
+telefonu; otevření a původní záznamy musí potvrdit Míla. SideStore obnovu
+provádět z IPA 21 při zachování identity. [Předání](../docs/CLIENT_21_SERVICE_UPGRADE_REPORT.md).
 
 Dřívější Release byl 0.1.0 (20). Zoom Míla uživatelsky přijal;
 přesná nainstalovaná verze a všechny okrajové scénáře nejsou tímto

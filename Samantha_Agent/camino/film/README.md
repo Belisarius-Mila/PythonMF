@@ -6,8 +6,9 @@
 V `0a18db30` nasazené ovládání **Koš projektů a žádosti z iPhonu · 7 dní**: kontrola rozsahu,
 přesné potvrzení, obnovení a přehled dokončení iPhonu. **Smazat celý film…**
 odstraní po lhůtě film se všemi revizemi, hlasy a exporty; originály zůstanou.
-Celou cestu zahaj smazat na iPhonu. Kompletní koš vyžaduje samostatný
-upgrade služby Camino a instalaci nového klienta; dosud neproběhly.
+Žádost o smazání celé cesty zahaj na iPhonu. Samostatná služba je nyní
+na schématu 4 a telefon aktualizovaný na build 21 bez odinstalace; fyzický
+tok koše dosud nepřijatý. [Aktualizace](../docs/CLIENT_21_SERVICE_UPGRADE_REPORT.md).
 [Rozsah, ověření a nutné samostatné vydání](../docs/PROJECT_TRASH_REPORT.md).
 
 Nový místní krok odděluje **původní text z iPhonu** od **pracovního textu**
