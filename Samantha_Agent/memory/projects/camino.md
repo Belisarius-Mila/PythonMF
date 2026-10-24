@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-24 21:15 CEST — kontrola nedokončených médií a IPA 23
+Aktualizováno: 2026-10-24 21:44 CEST — p+n pěti commitů Lunou dokončené
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -12,12 +12,12 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 
 ## Aktuální stav
 
-- 2026-10-24 21:15 CEST: Read-only audit iPhonu a soukromé Core Data kopie (quick_check OK) potvrdil 2 prázdné video intenty z 13. 10. Nemají pending/original soubory, Asset ani Moment a nepatří k cestě v koši. Instalovaný klient živě ověřený jako 0.1.0 (22). Živá DB nebyla přepisovaná; 2 intenty zatím zůstávají v telefonu.
-- Lokálně hotový potvrzený úklid: Zkontrolovat a odstranit pokusy → Odstranit prázdné pokusy (2), případně jednotlivý nedokončený soubor. Potvrzení v klasickém alertu nabízí Zrušit a Odstranit natrvalo. Přijaté Assety, hotové Momenty, fronty a cesta držená sedmidenním košem chráněné; změna souboru/přijetí po kontrole zneplatní staré potvrzení. Bez automatického mazání neznámých souborů.
-- Prevence: příprava videa po zavření kamery během GPS už nevytvoří intent; odmítnutý start a neúspěch bez souboru ruší prázdný intent. Nepřijaté soubory zůstávají zachované ke kontrole; po pádu je dostupný ruční úklid. Obnova/zápis se nepřekrývají.
-- Ověření PASS: 95 Swift testů včetně 8 nových mazacích/preservačních scénářů; skutečné UI zrušení/potvrzení/poškozený testovací soubor/restart 31,631 s; projektová navigace 88,193 s; plná brána 2232 (unittest 465,698 s). Podepsaný archive/export/strict podpis/ZIP a release texty PASS, testovací seed v Release nepřítomný.
-- IPA Camino-Projects-Trash-23-20261024.ipa, 1103371 B, shodné Downloads/iCloud Dokumenty a upload potvrzený, profil do 29. 10. 2026. Build 23 připravený, neinstalovaný. Další krok: aktualizovat stávající Camino bez odinstalace a potvrdit cílený úklid v aplikaci. Detail: camino/docs/PENDING_MEDIA_REVIEW_REPORT.md.
-- Žádný nový push, p+n ani změna služby/Cockpitu. Dřívější služba schéma 4 a Cockpit 0a18db30/Luna b75c48be patří k předchozí samostatné přejímce. Fyzický koš celých cest/filmů, sedmidenní lhůta a uvolnění místa, text/historie nahrávek/jejich koš/MP3-WAV a český hlas zůstávají otevřené.
+- 2026-10-24 21:44 CEST: P+n všech pěti čekajících commitů do 3590c288 dokončené napoprvé registrovanou Lunou. Účtenka a2500be19e301dc26e6db4cd9fb597a8: completed, push/deployment confirmed, projekt project-camino, cíl Cockpit, release_executor gpt-6-luna/high; role beze změny.
+- Publikační plná brána 2232 PASS / 454,2 s, smoke 5/5, protected_services_unchanged=true. Adamova jedna závěrečná kontrola: GitHub/main aligned 0/0 na 3590c288 před tímto výsledkovým checkpointem; Cockpit health OK, code_stamp 7ae887842f089e5c, PID 41492. Stejný stamp je očekávaný: balíček měnil Swift klienta a dokumentaci.
+- Účtenku převzal a ověřil terminálový Adam zde; return_channel=caller. Automatický portálový návrat returned_to_adam=false, není potvrzený a není důvodem opakovat úspěšné vydání.
+- Samostatná služba Camino, autosave a chráněné konfigurace/Serve zachované. Toto p+n neinstaluje IPA ani neprovádí úklid telefonu. IPA Camino-Projects-Trash-23-20261024.ipa je připravená v Downloads/iCloud (podpis/ZIP/hash/upload PASS), profil do 29. 10. 2026. Poslední přímý audit telefonu potvrdil 22 a 2 prázdné video intenty bez souborů; novější instalace/úklid nejsou ověřené.
+- Další krok: v telefonu přijmout IPA 23 při zachování stejné aplikace bez odinstalace, poté Zkontrolovat a odstranit pokusy → Odstranit prázdné pokusy → potvrdit. Swift 95 a oba UI scénáře byly ověřené před vydáním; fyzická přejímka 23, celé cesty/filmu v koši a skutečná lhůta/uvolnění místa zůstávají otevřené. Dále text/historie nahrávek/jejich koš/MP3-WAV a český hlas.
+- Tento následný zápis účtenky je lokální dokumentační checkpoint pro další GitHub balíček; vydaný funkční kód zůstává 3590c288. Podrobnosti: camino/docs/PENDING_MEDIA_REVIEW_REPORT.md.
 
 ### Historické stavové záznamy
 

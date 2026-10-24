@@ -17,6 +17,8 @@ na 22 s opravou navigace. Podepsaná IPA **23** v Downloads/iCloud doplňuje
 **Zkontrolovat a odstranit pokusy** pro dva staré prázdné video intenty a
 jednotlivá nedokončená média. Swift 95, UI a full gate 2232 PASS; telefon 23
 a jeho skutečný úklid zatím nepřijaté. [Postup a ověření](docs/PENDING_MEDIA_REVIEW_REPORT.md).
+Všech pět commitů do `3590c288` bylo následně vydáno Lunou `a2500be1`: full gate
+2232 PASS, smoke 5/5 a zdravý Cockpit; instalace IPA a fyzický úklid jsou samostatné.
 
 Nově místně: původní text z iPhonu a upravitelná pracovní kopie u fotografie,
 historie čtení, obnovitelný koš a import MP3/WAV.

@@ -70,3 +70,18 @@ zatím nebyly odstraněné; fyzický úklid a přejímka se neoznačují za PASS
 Odmítnutý start na skutečné kameře se tímto simulátorovým testem nepotvrdil.
 Samostatná služba/Cockpit ani jejich data se tímto krokem nepřepínají;
 nový push a p+n neproběhly. Poslední ověření a zápis: 2026-10-24 21:15 CEST.
+
+## Následné p+n — 2026-10-24 21:44 CEST
+
+Všech pět čekajících commitů 0a18db30→3590c288 je publikovaných a Cockpit
+nasazený registrovanou Lunou. Účtenka a2500be19e301dc26e6db4cd9fb597a8:
+completed, push/deployment confirmed, full gate 2232 PASS / 454,2 s, smoke
+5/5 a protected_services_unchanged=true. Živá kontrola před výsledkovým
+checkpointem potvrdila GitHub/main 0/0, health OK, stamp 7ae887842f089e5c
+a PID 41492. Funkční kód IPA odpovídá vydanému 3590c288.
+
+return_channel=caller; returned_to_adam=false znamená nepotvrzený automatický
+portálový návrat. Účtenku převzal a ověřil původní terminálový Adam; úspěšné
+p+n se neopakuje. Samostatná služba a telefon se běžným p+n neaktualizují.
+Fyzická instalace 23 a odstranění dvou řádků v telefonu zůstávají neověřené.
+Tento následný zápis je lokální dokumentační checkpoint pro další balíček.
