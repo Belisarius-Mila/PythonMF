@@ -16,8 +16,10 @@ Automatický portálový návrat je nepotvrzený (`returned_to_adam=false`);
 Toto p+n aktualizovalo pouze společný runtime/Cockpit. Následně po samostatném
 schválení a přesné globální větě proběhl upgrade služby na schéma 4 a stejné
 iPhone aplikace na build 21 bez odinstalace. Původní archiv/316 SHA a Viewer
-PASS, kontejner telefonu zachovaný. První spuštění blokuje zámek telefonu;
-fyzický tok koše dosud nepřijatý. Skutečná data se nemazala.
+PASS, kontejner telefonu zachovaný. Míla později potvrdil spuštění 21 a
+žádost o smazání; odhalený chybějící návrat je opravený v připravené IPA 22
+([ověření](PROJECT_TRASH_NAVIGATION_REPORT.md)). Fyzický tok koše dosud
+nepřijatý. Při servisním přechodu se skutečná data nemazala.
 [Podrobnosti samostatného vydání](CLIENT_21_SERVICE_UPGRADE_REPORT.md).
 
 ## Používání po samostatném vydání

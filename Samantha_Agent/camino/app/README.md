@@ -6,7 +6,7 @@ nemigruje data ze samostatných prototypů Camino Audio a Camino Transfer Test.
 
 ## Aktuální používání — 24. 10. 2026
 
-Build 21 nabízí **Projekty → Upravit projekt → Požádat o smazání celé
+Buildy 21 a 22 nabízejí **Projekty → Upravit projekt → Požádat o smazání celé
 cesty**. Žádost cestu skryje; přesun do společného sedmidenního koše potvrdíš
 na Macu. Telefon trvale maže až po ověřeném výmazu Macu a potvrdí dokončení.
 Obnovení je na Macu před koncem lhůty.
@@ -29,12 +29,15 @@ neplatný rozsah se neuloží. Výběr projektu zůstává zachovaný po restart
 Samostatná služba i telefon jsou aktualizované. Samotné p+n Cockpitu
 telefon ani tuto službu neaktualizuje; jejich vydání proběhlo zvlášť.
 
-Poslední nainstalovaná verze a podepsaná IPA je 0.1.0 (21),
-`Camino-Projects-Trash-21-20261024.ipa`, v Downloads a iCloud Dokumentech.
-Podpis/ZIP a cloud upload PASS; profil do 29. 10. 2026. Instalace proběhla
-bez odinstalace, původní kontejner zachovaný. První spuštění blokuje zámek
-telefonu; otevření a původní záznamy musí potvrdit Míla. SideStore obnovu
-provádět z IPA 21 při zachování identity. [Předání](../docs/CLIENT_21_SERVICE_UPGRADE_REPORT.md).
+Aktuálně připravená podepsaná IPA je **0.1.0 (22)**,
+`Camino-Projects-Trash-22-20261024.ipa`, v Downloads a iCloud Dokumentech.
+Opravuje chybějící návrat po žádosti o smazání aktivní cesty: na obrazovce
+**Připravit projekt** otevři **Projekty a koš**, případně **Uložení a přenosy**.
+Regresní UI scénář, Release archiv/export, strict podpis/ZIP a cloud upload
+PASS; profil do 29. 10. 2026. Telefon má dle Mílova testu build 21, nová 22
+ještě neinstalovaná. Aktualizuj stejnou aplikaci bez odinstalace.
+[Oprava a přejímka](../docs/PROJECT_TRASH_NAVIGATION_REPORT.md).
+[Předchozí servisní přechod](../docs/CLIENT_21_SERVICE_UPGRADE_REPORT.md).
 
 Dřívější Release byl 0.1.0 (20). Zoom Míla uživatelsky přijal;
 přesná nainstalovaná verze a všechny okrajové scénáře nejsou tímto

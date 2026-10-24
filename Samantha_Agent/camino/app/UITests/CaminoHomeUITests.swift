@@ -14,6 +14,69 @@ import XCTest
         XCTAssertEqual(control.value as? String, expected)
     }
 
+    func testTrashActiveAndLastProjectKeepsProjectsAndTransfersAccessible() throws {
+        #if !targetEnvironment(simulator)
+        throw XCTSkip("Uses isolated simulator data only.")
+        #endif
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchEnvironment["CAMINO_UI_TEST_SESSION"] = UUID().uuidString
+        app.launch()
+        func openProjects() {
+            app.buttons["Nabídka"].tap()
+            app.buttons["projectList"].tap()
+        }
+        func requestTrash() {
+            app.buttons["editCurrentProject"].tap()
+            let request = app.buttons["requestProjectTrash"]
+            for _ in 0..<6 where !request.isHittable { app.swipeUp() }
+            XCTAssertTrue(request.isHittable)
+            request.tap()
+            app.buttons["Skrýt cestu a odeslat žádost Macu"].tap()
+            XCTAssertTrue(app.navigationBars["Připravit projekt"].waitForExistence(timeout: 10))
+        }
+        XCTAssertTrue(app.buttons["Založit Zkoušku"].waitForExistence(timeout: 15))
+        app.buttons["Založit Zkoušku"].tap()
+        app.buttons["Nabídka"].tap()
+        app.buttons["Označit okamžik"].tap()
+        XCTAssertTrue(app.buttons["momentRow"].waitForExistence(timeout: 10))
+        openProjects()
+        app.textFields["newProjectName"].tap()
+        app.textFields["newProjectName"].typeText("Synthetic disposable")
+        let create = app.buttons["createProject"]
+        for _ in 0..<4 where !create.isHittable { app.swipeUp() }
+        create.tap()
+        XCTAssertTrue(app.staticTexts["Synthetic disposable"].waitForExistence(timeout: 10))
+        openProjects(); requestTrash()
+        XCTAssertTrue(app.buttons["projectList"].waitForExistence(timeout: 5))
+        app.buttons["projectList"].tap()
+        XCTAssertTrue(app.staticTexts["Koš a žádosti o smazání"].waitForExistence(timeout: 5))
+        let survivor = app.buttons.matching(NSPredicate(
+            format: "identifier BEGINSWITH %@ AND label CONTAINS %@", "projectRow-", "Zkouška")).firstMatch
+        XCTAssertTrue(survivor.exists)
+        survivor.tap()
+        XCTAssertTrue(app.buttons["momentRow"].waitForExistence(timeout: 10))
+        openProjects(); requestTrash()
+        app.terminate(); app.launch()
+        XCTAssertTrue(app.buttons["projectList"].waitForExistence(timeout: 15))
+        app.buttons["projectList"].tap()
+        XCTAssertTrue(app.staticTexts["Koš a žádosti o smazání"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons.matching(NSPredicate(
+            format: "identifier BEGINSWITH %@", "projectRow-")).firstMatch.exists)
+        app.buttons["Hotovo"].tap()
+        let transfers = app.buttons["setupSync"]
+        for _ in 0..<4 where !transfers.isHittable { app.swipeUp() }
+        XCTAssertTrue(transfers.isHittable)
+        transfers.tap()
+        XCTAssertTrue(app.textFields["syncServerURL"].waitForExistence(timeout: 5))
+        app.buttons["Hotovo"].tap()
+        XCTAssertTrue(app.navigationBars["Připravit projekt"].waitForExistence(timeout: 5))
+        let screenshot = XCTAttachment(screenshot: app.screenshot())
+        screenshot.name = "No active project retains project trash and transfer navigation"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+    }
+
     func testMultipleProjectDatesArchiveReopenAndRelaunchStaySeparate() throws {
         #if !targetEnvironment(simulator)
         throw XCTSkip("Uses isolated simulator data only.")

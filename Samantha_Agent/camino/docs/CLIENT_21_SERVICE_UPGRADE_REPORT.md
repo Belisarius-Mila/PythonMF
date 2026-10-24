@@ -64,3 +64,10 @@ Technické účtenky `service-upgrade-final.json`, `viewer-upgrade-check.json`,
 `viewer-media-upgrade-check.json`, `phone-install.json`, `phone-app-after.json`,
 `phone-preservation-check.json` a `phone-launch.json` jsou jen v ignorovaném
 private vývojovém adresáři. Do Gitu nepatří profily, IPA, tokeny ani databáze.
+
+## Navazující fyzický test a oprava — 2026-10-24 20:41 CEST
+
+Míla potvrdil instalaci/spuštění 21 a žádost o smazání projektu; původní
+blokátor zamčeného telefonu tím odpadl. Doložil chybějící návrat z přípravy
+projektu. Oprava je v podepsané IPA 22, připravené bez nové instalace či
+změny služby: [výsledek](PROJECT_TRASH_NAVIGATION_REPORT.md).

@@ -1499,3 +1499,11 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
 - Typ: opakující se
 - Řešení nalezeno: 24102026
 - Řešení: po uzavřeném kroku dlouhého vlákna doporuč Mílovi `/new` pro nový chat ve stejném CLI a projektu. Nejprve zachovej stav, necommitovanou práci a připrav stručný startovní pokyn s kanonickým handoffem, posledním relevantním commitem/publikační účtenkou a otevřenými kroky; navazující relace nejdřív jen obnoví kontext a ověří stav. Pro návrat k existujícímu uloženému rozhovoru použij `/resume`. Příkaz nespouštěj automaticky, původní chat nemaž a nevymýšlej limit délky ani zbývající kapacitu. Význam příkazů ověřen v oficiální dokumentaci Codex CLI; samotný přechod do nového chatu zde nebyl prakticky testován. Kanonický postup: [Nový chat po dlouhé práci](technical/session_recovery_rules.md#nový-chat-po-dlouhé-práci).
+
+### LL-084 — Po skrytí aktivní cesty musí zůstat správa projektů a přenosy
+
+- Problém: žádost o smazání správně skryla aktivní cestu, ale kořenový přechod na přípravu projektu odstranil jedinou nabídku ostatních cest, koše i přenosů. Testy datového koše tuto UI chybu nezachytily.
+- Typ: opakující se
+- Řešení nalezeno: 24102026
+- Řešení: i větev bez aktivního projektu musí zpřístupnit správu existujících projektů/koše a přenosy; skrytý projekt se neobnovuje automaticky.
+- Ověření: skutečný izolovaný UI scénář nejdřív reprodukoval chybu na původní binárce, po opravě prošel přes dvě cesty, zachovaný Moment, poslední cestu, restart, koš a přenosy. Podepsaná IPA 22 připravená; fyzický telefon se přejímá zvlášť.

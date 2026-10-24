@@ -46,6 +46,8 @@ import SwiftUI
 private struct TripSetupView: View {
     @ObservedObject var model: CaminoViewModel
     @Environment(\.dismiss) private var dismiss
+    @State private var showTrips = false
+    @State private var showSync = false
     @State private var name = "Nový projekt"
     @State private var hasStart = false
     @State private var startDate = Date()
@@ -60,6 +62,14 @@ private struct TripSetupView: View {
     var body: some View {
         NavigationStack {
             Form {
+                if !model.trips.isEmpty || !model.projectTrash.isEmpty {
+                    Section("Tvoje projekty") {
+                        Button("Projekty a koš", systemImage: "map") { showTrips = true }
+                            .accessibilityIdentifier("projectList")
+                        Text("Vyber jiný projekt nebo se podívej na stav žádosti o smazání.")
+                            .font(.footnote).foregroundStyle(.secondary)
+                    }
+                }
                 Section("Projekt") {
                     Text("Projekt můžeš založit bez Macu a bez připojení k síti.")
                     TextField("Název projektu", text: $name)
@@ -89,11 +99,21 @@ private struct TripSetupView: View {
                     Text("Mikrofon si vyžádá povolení až při prvním Komentáři nebo Úvaze.")
                 }
                 Section("Domácí Mac") {
-                    Text("Zatím není připojený. Místní záznam funguje samostatně.")
+                    Button("Uložení a přenosy", systemImage: "arrow.triangle.2.circlepath") {
+                        showSync = true
+                    }
+                    .disabled(model.sync == nil || model.audioBusy)
+                    .accessibilityIdentifier("setupSync")
+                    Text("Tady připojíš Mac a ověříš doručení žádosti o smazání. Obnovení cesty potvrdíš na Macu.")
+                        .font(.footnote).foregroundStyle(.secondary)
                 }
                 if let message = model.message { Text(message).foregroundStyle(.red) }
             }
             .navigationTitle("Připravit projekt")
+            .sheet(isPresented: $showTrips) { TripListView(model: model) }
+            .sheet(isPresented: $showSync) {
+                if let sync = model.sync { CaminoSyncView(sync: sync) }
+            }
         }
     }
 }

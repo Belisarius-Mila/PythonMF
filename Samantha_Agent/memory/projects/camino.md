@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-24 19:48 CEST — služba schéma 4 a iPhone build 21
+Aktualizováno: 2026-10-24 20:41 CEST — oprava navigace koše a připravená IPA 22
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -12,11 +12,12 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 
 ## Aktuální stav
 
-- 2026-10-24 19:48 CEST: Samostatná služba Camino aktualizovaná registrovaným stop/snapshot/upgrade/start na schéma 4, release f00fcb13; project_trash_v1 potvrzené. Čtyři ověřené místní DB snapshoty, původní konfigurace/release zachované. Externí šifrovaný svazek nepřipojený; místní snapshot není nezávislá záloha.
-- Všechny původní tabulky čtyř DB a archiv po přechodu shodné: 921 operací, 132 Momentů, 4 cesty, 316/316 originálů / 2 379 212 189 B SHA-256 PASS. Serve, identity, přístupová oprávnění a flags zachované; žádná skutečná cesta ani média se nemazaly.
-- Owner HTTP/HTTPS a auth PASS; Viewer katalog, deník, mapa a map-data 200, fotografie/zvuk/video Range 206. Poslední registrovaný status služby running=true a owner health PASS. Cockpit koš dostupný, seznam prázdný; dřívější p+n Luna b75c48be do 0a18db30 zůstává potvrzené.
-- Na stejném iPhonu nainstalované Camino 0.1.0 (21), stejné bundle ID, bez odinstalace. Všech 7 původních položek kontejneru zachovaných; velikosti a časy změn SQLite/WAL/SHM před prvním spuštěním přesně shodné. První spuštění přes CoreDevice odmítl zamčený telefon; zobrazení původních záznamů a fyzický tok koše zatím NEOVĚŘENO.
-- Podepsaná IPA Camino-Projects-Trash-21-20261024.ipa v Downloads/iCloud Dokumentech, podpis/ZIP/hash/upload PASS, profil do 29. 10. 2026. SideStore evidenci přímá instalace neověřila; pro obnovu použít IPA 21 a zachovat identitu aplikace. Další krok: odemknout a otevřít Camino, potvrdit původní data; potom syntetická fyzická přejímka koše. Praktická editace textu, historie nahrávek, jejich koš, MP3/WAV a český hlas zůstávají otevřené. Detail: camino/docs/CLIENT_21_SERVICE_UPGRADE_REPORT.md.
+- 2026-10-24 20:41 CEST: Míla potvrdil spuštění IPA 21 a žádost o smazání projektu. Snímek ukázal navigační chybu: po skrytí aktivní cesty obrazovka Připravit projekt neměla cestu k ostatním projektům, koši ani přenosům.
+- Lokálně opravené UI: bez aktivní cesty dostupné Projekty a koš (při existujícím projektu/koši) a Uložení a přenosy. Lze vybrat jinou cestu, sledovat žádosti a doručit je Macu; pevné nepravdivé tvrzení o nepřipojeném Macu odstraněné. Mazací kontrakt, persistence a serverový kód beze změny.
+- Regresní scénář proti původní binárce reprodukoval chybějící tlačítko (FAIL 129,859 s); po opravě PASS 89,366 s: dvě cesty, zachovaný Moment jiné cesty, žádost o poslední cestu, restart, koš a otevření/zavření přenosů. Statická brána PASS; archiv/export/strict podpis/ZIP a přítomnost nových textů v Release PASS.
+- Podepsaná IPA 0.1.0 (22), Camino-Projects-Trash-22-20261024.ipa, 1074899 B, shodné kopie Downloads/iCloud Dokumenty; iCloud upload potvrzený, profil do 29. 10. 2026. Telefon aktuálně 21 dle Mílova testu; build 22 připravený, neinstalovaný. Při aktualizaci zachovat stejnou aplikaci a data, neodinstalovávat. Detail: camino/docs/PROJECT_TRASH_NAVIGATION_REPORT.md.
+- Samostatná služba byla při přejímce 19:48 ověřená na schématu 4, Cockpit koš vydaný přes Lunu b75c48be do 0a18db30; tato UI oprava je nepřepínala ani nepushovala. Poslední servisní důkaz: 4 ověřené místní DB snapshoty, původní tabulky a 316 originálů SHA/Viewer PASS; aktuální obsah žádostí se zde znovu neauditoval. Externí záložní svazek tehdy nepřipojený.
+- Další krok: nahradit stávající Camino IPA 22 a fyzicky ověřit návrat přes Projekty a koš. Celý sedmidenní výmaz a uvolnění místa dosud nepřijaté; praktický text, historie nahrávek, jejich koš, MP3/WAV a příjemnější český hlas zůstávají otevřené.
 
 ### Historické stavové záznamy
 

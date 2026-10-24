@@ -11,8 +11,10 @@ spravovaných dat včetně telefonu po jeho spojení. Samostatný film ponechá
 originály cesty. [Postup, rozsah a hranice vydání](docs/PROJECT_TRASH_REPORT.md).
 Ovládání ve střižně je nasazené v `0a18db30` (Luna `b75c48be`, 2232 PASS,
 smoke 5/5). Samostatně aktualizovaná služba má schéma 4, iPhone build 21
-bez odinstalace; původní archiv a Viewer PASS. První otevření telefonu
-a fyzická přejímka koše dosud nepotvrzené. [Výsledek](docs/CLIENT_21_SERVICE_UPGRADE_REPORT.md).
+bez odinstalace; původní archiv a Viewer PASS. Míla potvrdil spuštění 21
+a doložil chybějící návrat po žádosti o smazání. Oprava navigace je v podepsané
+IPA 22, připravené v Downloads/iCloud; regresní UI PASS, telefon zatím 21.
+[Fyzická přejímka a oprava](docs/PROJECT_TRASH_NAVIGATION_REPORT.md).
 
 Nově místně: původní text z iPhonu a upravitelná pracovní kopie u fotografie,
 historie čtení, obnovitelný koš a import MP3/WAV.
