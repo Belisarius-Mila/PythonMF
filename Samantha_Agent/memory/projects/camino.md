@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-24 17:56 CEST — p+n koše do Cockpitu potvrzené
+Aktualizováno: 2026-10-24 19:24 CEST — podepsaná IPA 21 a servisní preflight
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,12 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-24 19:24 CEST: Podepsaná IPA Camino 0.1.0 (21) hotová: Camino-Projects-Trash-21-20261024.ipa, 1072250 B; archive/export/strict codesign/ZIP PASS, profil do 29. 10. 2026. Downloads a iCloud Dokumenty mají shodný hash, iCloud upload potvrzený. iPhone je dostupný s buildem 20; verze 21 neinstalovaná.
+- Servisní preflight PASS: zdravé schéma 3, 921 operací, 132 Momentů, 4 cesty a 316/316 ověřených originálů. Migrace 3→4 na kopii v paměti zachovala původní řádky, nové tabulky prázdné; izolovaný import ve venv služby a shoda requirements PASS. Služba ani její data se neměnily.
+- Aktuální autorizace pokrývá přípravu IPA i zamýšlenou aktualizaci. Před změnou LaunchAgentu ještě chybí přesná globální věta pro tento servisní krok; původní potvrzení bylo k SSD. Externí záložní svazek nyní nepřipojený. Před upgradem budou ověřené čtyři místní DB snapshoty; původní data/config/Serve zachovat.
+- Další krok: po potvrzení registrovaný stop/upgrade/start a ověření schématu 4, owner HTTP/HTTPS/Viewer, řádků/identit/SHA/Serve; potom aktualizovat stejnou aplikaci buildem 21 bez odinstalace a fyzicky ověřit data. Detail: camino/docs/CLIENT_21_SERVICE_UPGRADE_REPORT.md.
+- Předchozí p+n Cockpitu do 0a18db30 zůstává potvrzené (Luna b75c48be, 2232 PASS, smoke 5/5). Nový push, služba ani telefon se tímto přípravným checkpointem nevydávají.
 
 - 2026-10-24 17:56 CEST: P+n sedmidenního koše proběhlo napoprvé registrovanou Lunou. Pět commitů do 0a18db3038e0b9cf1069d52714a69b0f16d9ff26 je na GitHubu, Cockpit je nasazený. Účtenka b75c48be083a1f26e8e7296ccf5997de: completed, push/deployment confirmed, plná brána 2232 PASS, smoke 5/5, chráněné služby shodné.
 - Hlavní Adam jednou ověřil účtenku a živý stav: GitHub/main 0/0 na vydaném headu, health OK, code_stamp 7ae887842f089e5c. Automatický portálový návrat returned_to_adam=false; výsledek skutečně převzal a ověřil Adam zde v terminálu. Publikování se neopakuje kvůli tomuto poli.

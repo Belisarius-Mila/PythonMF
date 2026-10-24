@@ -29,7 +29,12 @@ Jde o nové zdroje, nikoli aktualizaci nainstalovaného telefonu. Před
 instalací nejprve ověř samostatný server s project_details_v1; p+n Cockpitu
 telefon ani tuto službu neaktualizuje.
 
-Poslední připravený Release je 0.1.0 (20). Zoom Míla uživatelsky přijal;
+Poslední připravená podepsaná IPA je 0.1.0 (21),
+`Camino-Projects-Trash-21-20261024.ipa`, v Downloads a iCloud Dokumentech.
+Podpis/ZIP a cloud upload PASS; profil do 29. 10. 2026. Instalace čeká na
+kompatibilní službu. [Předání](../docs/CLIENT_21_SERVICE_UPGRADE_REPORT.md).
+
+Dřívější Release byl 0.1.0 (20). Zoom Míla uživatelsky přijal;
 přesná nainstalovaná verze a všechny okrajové scénáře nejsou tímto
 potvrzením samostatně doložené. Podrobnosti a otevřené fyzické kontroly
 jsou v [reportu zoomu](../docs/CAMERA_ZOOM_REPORT.md).

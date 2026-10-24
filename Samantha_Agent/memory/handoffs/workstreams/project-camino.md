@@ -1,12 +1,21 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-24 19:24 CEST: Podepsaná IPA Camino 0.1.0 (21) hotová: Camino-Projects-Trash-21-20261024.ipa, 1072250 B; archive/export/strict codesign/ZIP PASS, profil do 29. 10. 2026. Downloads a iCloud Dokumenty mají shodný hash, iCloud upload potvrzený. iPhone je dostupný s buildem 20; verze 21 neinstalovaná.
+- Servisní preflight PASS: zdravé schéma 3, 921 operací, 132 Momentů, 4 cesty a 316/316 ověřených originálů. Migrace 3→4 na kopii v paměti zachovala původní řádky, nové tabulky prázdné; izolovaný import ve venv služby a shoda requirements PASS. Služba ani její data se neměnily.
+- Aktuální autorizace pokrývá přípravu IPA i zamýšlenou aktualizaci. Před změnou LaunchAgentu ještě chybí přesná globální věta pro tento servisní krok; původní potvrzení bylo k SSD. Externí záložní svazek nyní nepřipojený. Před upgradem budou ověřené čtyři místní DB snapshoty; původní data/config/Serve zachovat.
+- Další krok: po potvrzení registrovaný stop/upgrade/start a ověření schématu 4, owner HTTP/HTTPS/Viewer, řádků/identit/SHA/Serve; potom aktualizovat stejnou aplikaci buildem 21 bez odinstalace a fyzicky ověřit data. Detail: camino/docs/CLIENT_21_SERVICE_UPGRADE_REPORT.md.
+- Předchozí p+n Cockpitu do 0a18db30 zůstává potvrzené (Luna b75c48be, 2232 PASS, smoke 5/5). Nový push, služba ani telefon se tímto přípravným checkpointem nevydávají.
+<!-- SAMANTHA_CURRENT_STATUS_END -->
+
+### Předchozí stav po p+n Cockpitu
+
 - 2026-10-24 17:56 CEST: P+n sedmidenního koše proběhlo napoprvé registrovanou Lunou. Pět commitů do 0a18db3038e0b9cf1069d52714a69b0f16d9ff26 je na GitHubu, Cockpit je nasazený. Účtenka b75c48be083a1f26e8e7296ccf5997de: completed, push/deployment confirmed, plná brána 2232 PASS, smoke 5/5, chráněné služby shodné.
 - Hlavní Adam jednou ověřil účtenku a živý stav: GitHub/main 0/0 na vydaném headu, health OK, code_stamp 7ae887842f089e5c. Automatický portálový návrat returned_to_adam=false; výsledek skutečně převzal a ověřil Adam zde v terminálu. Publikování se neopakuje kvůli tomuto poli.
 - Nasazené je ovládání ve střižně. Samostatná služba Camino a iPhone se tímto p+n neaktualizovaly; kompletní koš stále vyžaduje jejich samostatné vydání. Bez schématu 4 vrací ovládání požadavek na upgrade. Skutečné cesty ani média se nemazaly.
 - Další krok: samostatně schválit upgrade služby Camino a instalaci iPhonu, potom fyzická přejímka syntetické cesty a filmu. Praktická editace textu, historie nahrávek, jejich koš, import MP3/WAV a příjemnější český hlas zůstávají otevřené.
 - Zápis tohoto výsledku je následný dokumentační checkpoint pro další GitHub balíček; nemění vydaný funkční kód. Postup: camino/docs/PROJECT_TRASH_REPORT.md.
-<!-- SAMANTHA_CURRENT_STATUS_END -->
+
 
 ### Předchozí stav před p+n 24. 10. 2026
 
@@ -3636,3 +3645,24 @@ Technický důkaz:
 - Účtenka b75c48be083a1f26e8e7296ccf5997de: completed; push_state=confirmed; deployment_state=confirmed; 5 commitů; gate 2232 PASS / 550,9 s; smoke 5/5; protected_services_unchanged=true. Centrální release_executor gpt-6-luna/high beze změny.
 - Adamova závěrečná živá kontrola: GitHub/main aligned 0/0 na 0a18db30, Cockpit health OK, code_stamp 7ae887842f089e5c a nový PID 10531. Samostatná služba Camino/autosave a jejich konfigurace nezměněné.
 - returned_to_adam=false označuje nepotvrzený automatický portálový návrat. Účtenku skutečně převzal a jednou ověřil terminálový Adam; nejde o důvod opakovat potvrzené p+n. Fyzický iPhone/Safari a celý koš po aktualizaci služby dosud NEOVĚŘENO.
+
+
+### 2026-10-24 19:24 CEST — podepsaná IPA 21 připravená, upgrade čeká na globální potvrzení
+
+Hotovo:
+- Nový podepsaný instalační balíček 21 ověřený a dostupný v Downloads i iCloud Dokumentech; cloud upload potvrzený. Stávající iPhone build 20 zachovaný.
+- Read-only servisní preflight a migrace v RAM PASS; živá služba/archiv/config/Serve beze změny.
+
+Rozhodnutí:
+- Míla zadal vytvoření nové IPA a aktualizaci služby. Pro konkrétní změnu LaunchAgentu ještě chybí přesná věta podle globální brzdy; dřívější SSD souhlas se nerozšiřuje. Nový TVBCP nevznikl.
+
+Další krok:
+- Vyžádat přesnou globální větu pro předložený stop/snapshot/upgrade/start; potom ověřit službu a navázat aktualizací stejné aplikace v telefonu.
+
+Navrhované další kroky:
+- Fyzicky ověřit zachování dat a syntetický koš, následně dřívější přejímku střižny a českého hlasu.
+
+Technický důkaz:
+- Archive/export i strict codesign/ZIP PASS; verze 0.1.0 (21), stejné bundle ID, 1072250 B, profil do 29. 10. 2026; hashe uložené v CLIENT_21_SERVICE_UPGRADE_REPORT.md.
+- Zdrojový archiv: 921 operací, 132 Momentů, 4 cesty, 316 originálů / 2 379 212 189 B SHA PASS, flags false. Schema 3→4 pouze v paměti, původní tabulky shodné; service venv import a požadavky PASS.
+- Živý upgrade, instalace a fyzická přejímka NEPROVEDENO. Externí šifrovaná záloha nyní nepřipojená.
