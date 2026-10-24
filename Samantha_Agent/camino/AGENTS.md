@@ -24,6 +24,11 @@ Platí pro celý adresář `camino/` ve společném repozitáři PythonMF.
   původní Camino zůstává existujícím projektem se stejnou identitou.
   Povolený další krok vždy určuje kanonický handoff; schválení směru samo
   nespouští aktualizaci služby, instalaci telefonu ani publikování.
+- Novější výslovné rozhodnutí Míly z 2026-10-24 povoluje vývoj sedmidenního
+  koše celých cest a filmů podle `docs/PROJECT_TRASH_CONTRACT.md` a
+  `docs/PROJECT_TRASH_REPORT.md`. Žádost o celou cestu začíná na iPhonu,
+  potvrzení a obnova na Macu; obsah se zpět nesynchronizuje. Vývoj nepovoluje
+  skutečný výmaz, upgrade služby, instalaci telefonu ani publikaci.
 - Importované balíčky v0.4/v0.5 a jejich ZIPy zachovej jako původní podklady.
   Nové výsledky a novější rozhodnutí patří mimo ně, aby zůstaly ověřitelné
   původní manifesty.

@@ -637,6 +637,22 @@ private struct TripListView: View {
                         projectRow(trip)
                     }
                 }
+                if !model.projectTrash.isEmpty {
+                    Section("Koš a žádosti o smazání") {
+                        ForEach(model.projectTrash.filter { $0.state != "restored" }) { item in
+                            VStack(alignment: .leading) {
+                                Text(item.name.isEmpty ? "Projekt · \(item.tripID.uuidString.suffix(8))" : item.name)
+                                Text(item.statusText).font(.footnote).foregroundStyle(.secondary)
+                                if let deadline = item.purgeMilliseconds {
+                                    Text("Lhůta Macu: \(Date(timeIntervalSince1970: Double(deadline) / 1000).formatted())")
+                                        .font(.caption)
+                                }
+                            }
+                        }
+                        Text("Celou cestu smažeš žádostí zde a potvrzením ve střižně na Macu. Offline telefon čeká na ověřený výmaz Macu.")
+                            .font(.footnote)
+                    }
+                }
                 Section("Nový projekt") {
                     Text("Nový projekt začíná s Viewerem vypnutým. Přístup pro Janu povolíš na Macu.")
                         .font(.footnote).foregroundStyle(.secondary)
@@ -708,6 +724,7 @@ private struct TripEditView: View {
     @State private var hasEnd: Bool
     @State private var endDate: Date
     @State private var isArchived: Bool
+    @State private var confirmProjectTrash = false
 
     init(model: CaminoViewModel, trip: LocalTrip) {
         self.model = model
@@ -754,6 +771,19 @@ private struct TripEditView: View {
                         .foregroundStyle(.red)
                 }
                 if let message = model.message { Text(message).foregroundStyle(.red) }
+                Section {
+                    Button("Požádat o smazání celé cesty", role: .destructive) { confirmProjectTrash = true }
+                        .disabled(!model.canManageProjects || model.sync?.busy == true)
+                        .accessibilityIdentifier("requestProjectTrash")
+                } footer: {
+                    Text("Cesta se skryje a zastaví se její přenosy. Na Macu potvrdíš přesun do koše na 7 dní; tam ji můžeš včas obnovit. Po výmazu Macu odstraní iPhone i místní data. Kopie v aplikaci Fotky a mimo Camino zůstávají samostatné.")
+                }
+            }
+            .confirmationDialog("Požádat o smazání celé cesty a všech jejích dat?", isPresented: $confirmProjectTrash,
+                                titleVisibility: .visible) {
+                Button("Skrýt cestu a odeslat žádost Macu", role: .destructive) {
+                    if model.requestProjectTrash(trip.id) { dismiss() }
+                }
             }
             .navigationTitle("Upravit projekt")
             .navigationBarTitleDisplayMode(.inline)

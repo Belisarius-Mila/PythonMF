@@ -27,6 +27,8 @@ private struct LocalPendingMomentLink: Codable, Equatable {
 @MainActor public final class CaminoLocalStore {
     private let container: NSPersistentContainer
     private var context: NSManagedObjectContext { container.viewContext }
+    private var backgroundWrites = 0
+    public var projectMaintenanceIdle: Bool { backgroundWrites == 0 }
 
     public init(storeURL: URL? = nil, inMemory: Bool = false) throws {
         let container = NSPersistentContainer(name: "CaminoLocal", managedObjectModel: Self.model())
@@ -47,6 +49,7 @@ private struct LocalPendingMomentLink: Codable, Equatable {
             #endif
             description.url = url
             description.type = NSSQLiteStoreType
+            description.setOption(["secure_delete": "ON"] as NSDictionary, forKey: NSSQLitePragmasOption)
         }
         description.shouldMigrateStoreAutomatically = false
         description.shouldInferMappingModelAutomatically = false
@@ -59,14 +62,17 @@ private struct LocalPendingMomentLink: Codable, Equatable {
         self.container = container
     }
 
-    public func trips() throws -> [LocalTrip] {
-        try fetch("TripRecord").map(decodeTrip).sorted { $0.name < $1.name }
+    public func trips(includingTrash: Bool = false) throws -> [LocalTrip] {
+        let blocked = Set(try projectTrash().filter(\.blocksProject).map(\.tripID))
+        return try fetch("TripRecord").map(decodeTrip).filter { includingTrash || !blocked.contains($0.id) }
+            .sorted { $0.name < $1.name }
     }
 
     public func activeTrip() throws -> LocalTrip? {
         let rows = try fetch("TripRecord", predicate: NSPredicate(format: "active == YES"))
         guard rows.count <= 1 else { throw LocalStoreError.inconsistentStore }
-        return try rows.first.map(decodeTrip)
+        guard let trip = try rows.first.map(decodeTrip) else { return nil }
+        return try projectTrash().contains(where: { $0.tripID == trip.id && $0.blocksProject }) ? nil : trip
     }
 
     public func days(tripID: UUID) throws -> [LocalDay] {
@@ -92,6 +98,9 @@ private struct LocalPendingMomentLink: Codable, Equatable {
               !trimmed.unicodeScalars.contains(where: { CharacterSet.controlCharacters.union(.newlines).contains($0) })
         else { throw LocalStoreError.invalidName }
         guard details.valid else { throw LocalStoreError.invalidProjectDetails }
+        guard try !projectTrash().contains(where: { $0.tripID == id && $0.blocksProject }) else {
+            throw LocalStoreError.duplicateIdentity
+        }
         guard try object("TripRecord", id: id) == nil else { throw LocalStoreError.duplicateIdentity }
         do {
             for old in try fetch("TripRecord") { old.setValue(false, forKey: "active") }
@@ -112,6 +121,9 @@ private struct LocalPendingMomentLink: Codable, Equatable {
     }
 
     public func selectTrip(_ id: UUID) throws {
+        guard try !projectTrash().contains(where: { $0.tripID == id && $0.blocksProject }) else {
+            throw LocalStoreError.tripMissing
+        }
         guard try object("TripRecord", id: id) != nil else { throw LocalStoreError.tripMissing }
         do {
             for row in try fetch("TripRecord") {
@@ -124,6 +136,7 @@ private struct LocalPendingMomentLink: Codable, Equatable {
     /// Additive history in SettingRecord; original Trip and existing queues stay immutable.
     @discardableResult public func setProjectDetails(_ id: UUID, details: LocalProjectDetails,
                                                       operationID: UUID = UUID()) throws -> LocalTrip {
+        try requireWritableProject(id)
         guard details.valid else { throw LocalStoreError.invalidProjectDetails }
         guard let row = try object("TripRecord", id: id) else { throw LocalStoreError.tripMissing }
         do {
@@ -144,6 +157,9 @@ private struct LocalPendingMomentLink: Codable, Equatable {
 
     private func captureTrip() throws -> LocalTrip {
         guard let trip = try activeTrip() else { throw LocalStoreError.noActiveTrip }
+        guard try !projectTrash().contains(where: { $0.tripID == trip.id && $0.blocksProject }) else {
+            throw LocalStoreError.noActiveTrip
+        }
         guard trip.projectDetails.status != .archived else { throw LocalStoreError.archivedTrip }
         return trip
     }
@@ -152,6 +168,7 @@ private struct LocalPendingMomentLink: Codable, Equatable {
     /// Title, test flag and optional details are committed in one transaction.
     @discardableResult public func updateTrip(_ id: UUID, name: String,
                                                isTest: Bool, details: LocalProjectDetails? = nil) throws -> LocalTrip {
+        try requireWritableProject(id)
         let title = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !title.isEmpty, title.unicodeScalars.count <= 160,
               !title.unicodeScalars.contains(where: { CharacterSet.controlCharacters.union(.newlines).contains($0) })
@@ -527,6 +544,7 @@ private struct LocalPendingMomentLink: Codable, Equatable {
             throw LocalStoreError.invalidDeletion
         }
         let asset = try decodeMediaAsset(row)
+        try requireWritableMoment(asset.momentID)
         guard !asset.deleted, let moment = try object("MomentRecord", id: asset.momentID),
               let current = try? decodeMoment(moment), !current.deleted else {
             throw LocalStoreError.invalidDeletion
@@ -541,6 +559,7 @@ private struct LocalPendingMomentLink: Codable, Equatable {
     /// is a standalone comment/reflection or an attached comment.
     @discardableResult public func deleteAudioSession(sessionID: UUID, momentID: UUID,
                                                        at date: Date = Date()) throws -> LocalDeletionRecord {
+        try requireWritableMoment(momentID)
         guard let momentRow = try object("MomentRecord", id: momentID),
               let moment = try? decodeMoment(momentRow), !moment.deleted,
               try audioSessionIDs(momentID: momentID).contains(sessionID) else {
@@ -555,6 +574,7 @@ private struct LocalPendingMomentLink: Codable, Equatable {
     /// Deletes the complete Moment and its local attachments. An empty parent
     /// remains a separate Moment when only one attachment is deleted.
     @discardableResult public func deleteMoment(momentID: UUID, at date: Date = Date()) throws -> [LocalDeletionRecord] {
+        try requireWritableMoment(momentID)
         guard let row = try object("MomentRecord", id: momentID),
               let moment = try? decodeMoment(row), !moment.deleted else {
             throw LocalStoreError.invalidDeletion
@@ -633,6 +653,7 @@ private struct LocalPendingMomentLink: Codable, Equatable {
     /// A draft is durable local state, but never a published text revision.
     public func saveTextDraft(momentID: UUID, content: String,
                               at date: Date = Date()) throws {
+        try requireWritableMoment(momentID)
         guard let row = try object("MomentRecord", id: momentID) else {
             throw LocalStoreError.momentMissing
         }
@@ -650,6 +671,7 @@ private struct LocalPendingMomentLink: Codable, Equatable {
     }
 
     public func discardTextDraft(momentID: UUID) throws {
+        try requireWritableMoment(momentID)
         guard let row = try object("MomentRecord", id: momentID) else {
             throw LocalStoreError.momentMissing
         }
@@ -667,6 +689,7 @@ private struct LocalPendingMomentLink: Codable, Equatable {
         momentID: UUID, revisionID: UUID = UUID(), operationID: UUID = UUID(),
         expectedRevision: Int? = nil, at date: Date = Date()
     ) throws -> LocalTextRevision {
+        try requireWritableMoment(momentID)
         guard let row = try object("MomentRecord", id: momentID) else {
             throw LocalStoreError.momentMissing
         }
@@ -712,6 +735,7 @@ private struct LocalPendingMomentLink: Codable, Equatable {
         revisionID: UUID = UUID(), operationID: UUID = UUID(),
         expectedRevision: Int? = nil, at date: Date = Date()
     ) throws -> LocalTextRevision {
+        try requireWritableMoment(momentID)
         guard !content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
               let row = try object("MomentRecord", id: momentID) else {
             throw LocalStoreError.invalidText
@@ -764,6 +788,7 @@ private struct LocalPendingMomentLink: Codable, Equatable {
         operationID: UUID = UUID(), expectedRevision: Int? = nil,
         at date: Date = Date()
     ) throws -> LocalMoment {
+        try requireWritableMoment(momentID)
         guard let row = try object("MomentRecord", id: momentID) else {
             throw LocalStoreError.momentMissing
         }
@@ -808,6 +833,7 @@ private struct LocalPendingMomentLink: Codable, Equatable {
         momentID: UUID, title: String, operationID: UUID = UUID(),
         expectedRevision: Int? = nil, at date: Date = Date()
     ) throws -> LocalMoment {
+        try requireWritableMoment(momentID)
         let title = title.trimmingCharacters(in: .whitespacesAndNewlines)
         guard LocalMoment.validTitle(title) else { throw LocalStoreError.invalidMetadataChange }
         guard let row = try object("MomentRecord", id: momentID) else {
@@ -841,6 +867,7 @@ private struct LocalPendingMomentLink: Codable, Equatable {
         momentID: UUID, kind: LocalAttachmentTitle.Kind, targetID: UUID, title: String,
         operationID: UUID = UUID(), expectedRevision: Int? = nil, at date: Date = Date()
     ) throws -> LocalMoment {
+        try requireWritableMoment(momentID)
         let value = LocalAttachmentTitle(kind: kind, targetID: targetID,
             title: title.trimmingCharacters(in: .whitespacesAndNewlines))
         guard LocalMoment.validTitle(value.title) else { throw LocalStoreError.invalidMetadataChange }
@@ -891,8 +918,11 @@ private struct LocalPendingMomentLink: Codable, Equatable {
         momentID: UUID, title: String, attachment: LocalAttachmentTitle? = nil,
         operationID: UUID = UUID(), expectedRevision: Int? = nil, at date: Date = Date()
     ) async throws -> LocalMoment {
+        try requireWritableMoment(momentID)
+        backgroundWrites += 1
+        defer { backgroundWrites -= 1 }
         let container = self.container
-        return try await withCheckedThrowingContinuation { continuation in
+        let result: LocalMoment = try await withCheckedThrowingContinuation { continuation in
             let background = container.newBackgroundContext()
             background.perform {
                 do {
@@ -907,12 +937,18 @@ private struct LocalPendingMomentLink: Codable, Equatable {
                 }
             }
         }
+        // The background save has completed, but automatic merge notifications
+        // may still be queued. Refresh the main-context revision and journal
+        // together before a caller reads either half of that transaction.
+        context.refreshAllObjects()
+        return result
     }
 
     @discardableResult public func setHidden(
         momentID: UUID, hidden: Bool, operationID: UUID = UUID(),
         expectedRevision: Int? = nil, at date: Date = Date()
     ) throws -> LocalMoment {
+        try requireWritableMoment(momentID)
         guard let row = try object("MomentRecord", id: momentID) else {
             throw LocalStoreError.momentMissing
         }
@@ -947,6 +983,7 @@ private struct LocalPendingMomentLink: Codable, Equatable {
         operationID: UUID = UUID(), expectedRevision: Int? = nil,
         at date: Date = Date()
     ) throws -> LocalMoment {
+        try requireWritableMoment(momentID)
         guard validChapterDate(chapterDate),
               let row = try object("MomentRecord", id: momentID) else {
             throw LocalStoreError.invalidMetadataChange
@@ -985,6 +1022,7 @@ private struct LocalPendingMomentLink: Codable, Equatable {
     /// the versioned wire contract, which does not yet define this operation.
     @discardableResult public func setImportant(momentID: UUID,
                                                 important: Bool) throws -> LocalMoment {
+        try requireWritableMoment(momentID)
         guard let row = try object("MomentRecord", id: momentID) else {
             throw LocalStoreError.momentMissing
         }
@@ -1470,6 +1508,129 @@ private struct LocalPendingMomentLink: Codable, Equatable {
             throw LocalStoreError.inconsistentStore
         }
         try setSettingValue(string, key: key)
+    }
+
+    public func projectTrash() throws -> [LocalProjectTrash] {
+        try fetch("SettingRecord", predicate: NSPredicate(format: "key BEGINSWITH %@", "project.trash."))
+            .map { row in
+                let value: String = try required(row, "value")
+                return try JSONDecoder().decode(LocalProjectTrash.self, from: Data(value.utf8))
+            }
+    }
+
+    public func saveProjectTrash(_ record: LocalProjectTrash) throws {
+        do {
+            try setEncodedSetting(record, key: "project.trash." + record.id.uuidString.lowercased())
+            if record.blocksProject, let trip = try object("TripRecord", id: record.tripID) {
+                trip.setValue(false, forKey: "active")
+            }
+            try save()
+        } catch { context.rollback(); throw error }
+    }
+
+    @discardableResult public func requestProjectTrash(_ tripID: UUID) throws -> LocalProjectTrash {
+        guard projectMaintenanceIdle else { throw LocalStoreError.inconsistentStore }
+        guard let trip = try object("TripRecord", id: tripID) else { throw LocalStoreError.tripMissing }
+        if let old = try projectTrash().first(where: { $0.tripID == tripID && $0.blocksProject }) { return old }
+        let record = LocalProjectTrash(tripID: tripID, name: try decodeTrip(trip).name,
+            momentIDs: try projectMomentIDs(tripID))
+        try saveProjectTrash(record)
+        return record
+    }
+
+    /// All file ownership comes from persisted identities, never a project name.
+    public func projectErasurePaths(_ tripID: UUID) throws -> (paths: [String], sessions: Set<UUID>) {
+        var paths: [String] = []
+        var sessions: Set<UUID> = []
+        for row in try fetch("AssetRecord", predicate: NSPredicate(format: "tripID == %@", tripID as NSUUID)) {
+            let asset = try decodeMediaAsset(row)
+            guard asset.relativePath == "Media/Originals/\(asset.id.uuidString).\(asset.kind.fileExtension)" else {
+                throw LocalStoreError.inconsistentStore
+            }
+            paths += [asset.relativePath, "Media/Pending/\(asset.id.uuidString).\(asset.kind.fileExtension)"]
+        }
+        for row in try fetch("MediaIntentRecord", predicate: NSPredicate(format: "tripID == %@", tripID as NSUUID)) {
+            let intent = try decodeMediaIntent(row)
+            paths += [intent.pendingRelativePath, intent.originalRelativePath]
+        }
+        for entity in ["AudioIntentRecord", "AudioAttachmentRecord"] {
+            for row in try fetch(entity, predicate: NSPredicate(format: "tripID == %@", tripID as NSUUID)) {
+                let session: UUID = try required(row, "sessionID"); sessions.insert(session)
+            }
+        }
+        for row in try fetch("MomentRecord", predicate: NSPredicate(format: "tripID == %@", tripID as NSUUID)) {
+            if let session = row.value(forKey: "audioSessionID") as? UUID { sessions.insert(session) }
+        }
+        return (paths, sessions)
+    }
+
+    public func eraseProjectMetadata(_ tripID: UUID, receiptID: UUID) throws {
+        guard projectMaintenanceIdle else { throw LocalStoreError.inconsistentStore }
+        guard var record = try projectTrash().first(where: { $0.id == receiptID && $0.tripID == tripID }),
+              record.state == "purged" else { throw LocalStoreError.inconsistentStore }
+        do {
+            let ownership = try projectErasurePaths(tripID)
+            let momentIDs = record.momentIDs.union(try projectMomentIDs(tripID))
+            let assetIDs = try fetch("AssetRecord", predicate: NSPredicate(format: "tripID == %@", tripID as NSUUID))
+                .compactMap { $0.value(forKey: "id") as? UUID }
+            let pendingAssetIDs = try fetch("MediaIntentRecord", predicate: NSPredicate(format: "tripID == %@", tripID as NSUUID))
+                .compactMap { $0.value(forKey: "assetID") as? UUID }
+            let owned = momentIDs.union(ownership.sessions).union(assetIDs).union(pendingAssetIDs).union([tripID])
+            let markers = owned.map { $0.uuidString.lowercased() }
+            for row in try fetch("SettingRecord") {
+                let key: String = try required(row, "key")
+                if !key.hasPrefix("project.trash.") && markers.contains(where: { key.lowercased().contains($0) }) {
+                    context.delete(row)
+                }
+            }
+            for entity in ["AudioAttachmentRecord", "AudioIntentRecord", "AssetRecord", "MediaIntentRecord", "MomentRecord", "DayRecord"] {
+                for row in try fetch(entity, predicate: NSPredicate(format: "tripID == %@", tripID as NSUUID)) {
+                    context.delete(row)
+                }
+            }
+            if let row = try object("TripRecord", id: tripID) { context.delete(row) }
+            for var prior in try projectTrash() where prior.tripID == tripID && prior.id != record.id {
+                prior.name = ""; prior.momentIDs = []; prior.files = nil
+                try setEncodedSetting(prior, key: "project.trash." + prior.id.uuidString.lowercased())
+            }
+            // Erase names and the frozen file inventory, retain only an ACK receipt.
+            record.state = "phone_deleted"; record.name = ""; record.files = nil; record.momentIDs = []
+            try setEncodedSetting(record, key: "project.trash." + record.id.uuidString.lowercased())
+            try save()
+        } catch { context.rollback(); throw error }
+    }
+
+    public func projectMomentIDs(_ tripID: UUID) throws -> Set<UUID> {
+        Set(try fetch("MomentRecord", predicate: NSPredicate(format: "tripID == %@", tripID as NSUUID))
+            .compactMap { $0.value(forKey: "id") as? UUID })
+    }
+
+    /// Reopen with Core Data's supported VACUUM option after the durable deletion.
+    /// Retried before ACK if reopening/compaction was interrupted.
+    public func compactAfterProjectErasure() throws {
+        guard projectMaintenanceIdle else { throw LocalStoreError.inconsistentStore }
+        try save()
+        let coordinator = container.persistentStoreCoordinator
+        guard let store = coordinator.persistentStores.first, store.type == NSSQLiteStoreType,
+              let url = store.url else { return }
+        context.reset()
+        var options = container.persistentStoreDescriptions[0].options
+        options[NSSQLiteManualVacuumOption] = NSNumber(value: true)
+        try coordinator.remove(store)
+        _ = try coordinator.addPersistentStore(ofType: NSSQLiteStoreType, configurationName: nil,
+                                               at: url, options: options)
+    }
+
+    private func requireWritableMoment(_ momentID: UUID) throws {
+        guard let row = try object("MomentRecord", id: momentID) else { throw LocalStoreError.momentMissing }
+        let tripID: UUID = try required(row, "tripID")
+        try requireWritableProject(tripID)
+    }
+
+    private func requireWritableProject(_ tripID: UUID) throws {
+        guard try !projectTrash().contains(where: { $0.tripID == tripID && $0.blocksProject }) else {
+            throw LocalStoreError.tripMissing
+        }
     }
 
     private func settingValue(_ key: String) throws -> String? {

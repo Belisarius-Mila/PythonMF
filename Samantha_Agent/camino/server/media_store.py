@@ -90,6 +90,7 @@ class MediaStore:
         root: str | Path,
         *,
         asset_lookup: Callable[[str], dict[str, Any]],
+        asset_blocked: Callable[[str], bool] = lambda _id: False,
         max_asset_bytes: int = DEFAULT_MAX_ASSET_BYTES,
         max_chunk_bytes: int = DEFAULT_CHUNK_BYTES,
         reserve_bytes: int = DEFAULT_RESERVE_BYTES,
@@ -103,6 +104,7 @@ class MediaStore:
         self.database_path = self._private_database(database_path)
         self.root = self._private_root(root)
         self.asset_lookup = asset_lookup
+        self.asset_blocked = asset_blocked
         self.max_asset_bytes = max_asset_bytes
         self.max_chunk_bytes = max_chunk_bytes
         self.reserve_bytes = reserve_bytes
@@ -265,6 +267,7 @@ class MediaStore:
         expected_sha256: str,
     ) -> ChunkReservation:
         asset_id = _uuid(asset_id, label="Asset ID")
+        self._accepted_manifest(asset_id)
         expected_sha256 = _sha256(expected_sha256)
         with self._lock:
             session = self._session(asset_id)
@@ -398,6 +401,7 @@ class MediaStore:
 
     def finalize(self, asset_id: str) -> tuple[dict[str, Any], bool]:
         asset_id = _uuid(asset_id, label="Asset ID")
+        self._accepted_manifest(asset_id)
         with self._lock:
             existing = self._verified_receipt(asset_id)
             if existing is not None:
@@ -527,6 +531,8 @@ class MediaStore:
                 journals = [dict(row) for row in connection.execute("SELECT * FROM finalization_journal")]
             known_chunks = {(row["asset_id"], row["chunk_index"]) for row in chunks}
             for row in chunks:
+                if self.asset_blocked(row['asset_id']):
+                    continue
                 path = self._chunk_path(row["asset_id"], row["chunk_index"])
                 if self._valid_file(path, row["byte_count"], row["sha256"]):
                     if row["state"] != "stored":
@@ -546,11 +552,15 @@ class MediaStore:
                 except ValueError:
                     index = -1
                 asset_id = path.parent.parent.name
+                if self.asset_blocked(asset_id):
+                    continue
                 if (asset_id, index) not in known_chunks:
                     self._preserve(path, "orphan_chunk", asset_id if self._looks_uuid(asset_id) else None)
                     report["files_quarantined"] += 1
             session_map = {row["asset_id"]: row for row in sessions}
             for journal in journals:
+                if self.asset_blocked(journal['asset_id']):
+                    continue
                 if journal["phase"] == "complete":
                     continue
                 session = session_map.get(journal["asset_id"])
@@ -561,10 +571,14 @@ class MediaStore:
                     report["assets_recovered"] += 1
             known_assets = set(session_map)
             for path in self.objects.glob("*.bin"):
+                if self.asset_blocked(path.stem):
+                    continue
                 if path.stem not in known_assets:
                     self._preserve(path, "orphan_object", path.stem if self._looks_uuid(path.stem) else None)
                     report["files_quarantined"] += 1
             for session in sessions:
+                if self.asset_blocked(session['asset_id']):
+                    continue
                 if session["state"] == "verified" and self._verified_receipt(session["asset_id"]) is None:
                     with self._transaction() as connection:
                         self._mark_recovery_required(connection, session["asset_id"], "verified_asset_incomplete")
@@ -748,7 +762,8 @@ class MediaStore:
 
     def _preserve(self, source: Path, reason: str, asset_id: str | None) -> Path:
         safe_reason = re.sub(r"[^a-z0-9_]+", "_", reason.lower()).strip("_") or "preserved"
-        destination = self.quarantine / f"{source.name}.{safe_reason}.{uuid4()}"
+        owner = f'asset.{asset_id}.' if asset_id else 'unbound.'
+        destination = self.quarantine / f"{owner}{source.name}.{safe_reason}.{uuid4()}"
         os.replace(source, destination)
         self._fsync_directory(self.quarantine)
         with self._transaction() as connection:

@@ -56,6 +56,7 @@ from app.camino_film_workshop import (
     film_project_query,
 )
 from app.camino_film_editor import film_editor_action, production_editor, film_narration_import_action
+from app.camino_project_trash import project_trash_action
 from app.screen_recovery import ScreenRecovery
 from app.cockpit_document_routes import DocumentReadRoutes
 from app.cockpit_email_archive_routes import EmailArchiveReadRoutes
@@ -8681,6 +8682,12 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "handler_name": "film_narration_import_action", "test_level": "direct",
     },
     {
+        "path": "/api/camino/film/project-trash",
+        "label": "Potvrdit nebo obnovit projekt v sedmidenním koši Camina",
+        "risk": "delete_or_purge", "confirmation": "exact_global_safety_brake_and_frozen_project_plan",
+        "handler_name": "project_trash_action", "test_level": "direct",
+    },
+    {
         "path": "/api/camino/film/delete-plan",
         "label": "Zobrazit rozsah trvalého smazání jedné filmové varianty",
         "risk": "read_only_via_post", "confirmation": "explicit_export_delete_button",
@@ -10015,6 +10022,13 @@ class CockpitServer:
                     return
                 if parsed.path == "/api/camino/film/narration-import":
                     self.respond_film_narration_import(parsed)
+                    return
+                if parsed.path == "/api/camino/film/project-trash":
+                    if parsed.query:
+                        self.respond_json({'ok': False, 'error': 'invalid_request'}, status=HTTPStatus.BAD_REQUEST)
+                        return
+                    result = project_trash_action(self.read_json())
+                    self.respond_json(result, status=HTTPStatus.OK if result.get('ok') else HTTPStatus.CONFLICT)
                     return
                 if parsed.path == "/api/camino/film/delete-plan":
                     self.respond_film_edit("delete-plan", parsed)

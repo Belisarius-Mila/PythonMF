@@ -23,6 +23,9 @@ from .codec import (
 )
 from .model import ContractError, MomentHistory, Privacy, ProjectDetails, RevisionConflict, TextHistory, validate_title
 from .audio_layout import decode_audio_layout
+from .project_lifecycle import shared, project_blocked
+from .project_trash import initialize_schema, operation_trip, operation_identity, erased_envelope
+from .project_trash import object_trip
 
 
 class StoreConflict(Exception):
@@ -36,7 +39,7 @@ class StoreNotFound(Exception):
     pass
 
 
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 4
 _PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -88,7 +91,7 @@ class RevisionStore:
     def _initialize(self) -> None:
         with self._connection() as connection:
             version = connection.execute("PRAGMA user_version").fetchone()[0]
-            if version not in (0, 1, 2, SCHEMA_VERSION):
+            if version not in (0, 1, 2, 3, SCHEMA_VERSION):
                 raise ContractError("unsupported Camino database schema version")
             connection.execute("BEGIN IMMEDIATE")
             try:
@@ -130,6 +133,7 @@ class RevisionStore:
                     (str(uuid4()), str(uuid4())),
                 )
                 connection.execute(f"PRAGMA user_version={SCHEMA_VERSION}")
+                initialize_schema(connection)
                 connection.commit()
             except Exception:
                 connection.rollback()
@@ -200,7 +204,7 @@ class RevisionStore:
                     raise StoreConflict("empty_bootstrap_not_pristine", "server is not a pristine empty bootstrap target")
                 for table in (
                     "moments", "moment_revisions", "assets", "text_revisions",
-                    "audio_layouts", "conflict_candidates", "viewer_permissions",
+                    "audio_layouts", "conflict_candidates", "viewer_permissions", "project_trash",
                 ):
                     if connection.execute(f"SELECT 1 FROM {table} LIMIT 1").fetchone():
                         raise StoreConflict("empty_bootstrap_not_pristine", "server is not a pristine empty bootstrap target")
@@ -229,6 +233,7 @@ class RevisionStore:
         connection.execute("UPDATE meta SET exports_blocked=1 WHERE singleton=1")
         connection.commit()
 
+    @shared(lambda self: self.path)
     def apply(self, envelope: dict[str, Any], raw: bytes) -> dict[str, Any]:
         """Atomically append one contiguous operation or return an exact retry."""
         digest = hashlib.sha256(raw).hexdigest()
@@ -268,7 +273,20 @@ class RevisionStore:
                 sequence = envelope["device_sequence"]
                 if sequence != meta["cursor"] + 1:
                     raise StoreConflict("sequence_gap", "device operations must be contiguous")
-                kind, object_id, revision, reused = self._project(connection, envelope)
+                trip = operation_trip(connection, envelope)
+                if trip and project_blocked(connection, trip):
+                    permanent = connection.execute("SELECT 1 FROM project_trash WHERE target_kind='trip' "
+                        "AND trip_id=? AND state IN ('purging','compacting','purged')", (trip,)).fetchone()
+                    if not permanent:
+                        raise StoreConflict("project_in_trash", "project is awaiting deletion or restoration")
+                    erased_kind, object_id = operation_identity(envelope)
+                    connection.execute('INSERT OR IGNORE INTO purged_project_objects VALUES (?,?,?)',
+                                       (erased_kind, object_id, trip))
+                    kind = envelope['kind']
+                    revision, reused = None, True
+                    raw = self._json(erased_envelope(envelope, trip)).encode()
+                else:
+                    kind, object_id, revision, reused = self._project(connection, envelope)
                 receipt = {
                     "contract_version": 1, "server_id": meta["server_id"],
                     "epoch": meta["epoch"], "cursor": sequence,
@@ -290,7 +308,10 @@ class RevisionStore:
                 return receipt
             except StoreConflict as error:
                 connection.rollback()
-                if error.code in {"operation_id_conflict", "identity_conflict", "revision_conflict"}:
+                erased_trip = operation_trip(connection, envelope)
+                erased = connection.execute("SELECT 1 FROM project_trash WHERE target_kind='trip' "
+                    "AND trip_id=? AND state IN ('purging','compacting','purged')", (erased_trip,)).fetchone()
+                if not erased and error.code in {"operation_id_conflict", "identity_conflict", "revision_conflict"}:
                     self._save_conflict(connection, envelope, raw, digest, error)
                 raise
             except Exception:
@@ -700,9 +721,13 @@ class RevisionStore:
             row = connection.execute(
                 "SELECT body FROM assets WHERE id=?", (asset_id,),
             ).fetchone()
-            if row is None:
+            if row is None or project_blocked(connection, object_trip(connection, 'asset', asset_id)):
                 raise StoreNotFound("Asset is missing")
             return json.loads(row["body"])
+
+    def asset_in_trash(self, asset_id: str) -> bool:
+        with self._connection() as connection:
+            return project_blocked(connection, object_trip(connection, 'asset', asset_id))
 
     def moment_history(self, moment_id: str) -> tuple[dict[str, Any], ...]:
         with self._connection() as connection:
@@ -734,6 +759,8 @@ class RevisionStore:
 
     @staticmethod
     def _viewer_enabled(connection, trip) -> bool:
+        if project_blocked(connection, trip.id):
+            return False
         row = connection.execute(
             "SELECT enabled FROM viewer_permissions WHERE trip_id=?", (trip.id,),
         ).fetchone()
@@ -786,7 +813,8 @@ class RevisionStore:
             ).fetchall()
             if trip_id is not None and not rows:
                 raise StoreNotFound("project is missing")
-            return [self._project_summary(connection, decode_trip(json.loads(row["body"]))) for row in rows]
+            return [self._project_summary(connection, decode_trip(json.loads(row["body"]))) for row in rows
+                    if not project_blocked(connection, json.loads(row['body'])['id'])]
 
     def viewer_projects(self) -> list[dict[str, Any]]:
         """Allowlisted reader catalog; no ungranted names or private counts."""

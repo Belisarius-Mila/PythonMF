@@ -4,9 +4,9 @@ const vm = require("node:vm");
 const source = fs.readFileSync("app/frontend/cockpit/app.js", "utf8");
 assert(source.includes("window.SamanthaFilmLibrary.create"));
 assert(source.includes("caminoFilmLibrary.open()"));
-function node() {
+function node(tagName) {
   const classes = new Set(), listeners = {};
-  return {textContent: "", value: "", disabled: false, children: [],
+  return {tagName, textContent: "", value: "", disabled: false, children: [], closest() { return this; },
     classList: {add: x => classes.add(x), remove: x => classes.delete(x), contains: x => classes.has(x)},
     replaceChildren() { this.children = []; }, appendChild(x) { this.children.push(x); },
     addEventListener(event, fn) { listeners[event] = fn; }, emit(event) { return listeners[event]?.(); }};
@@ -22,7 +22,7 @@ const valid = (project_id, local_date, trip_id = tripA) => ({trip_id, ok: true, 
 let catalog = {ok: true, days: [dayC, dayB, dayA].map(local_date => ({local_date})),
   projects: [project(pidB, dayB), project(pidA, dayA)]};
 let otherCatalog = {ok: true, days: [{local_date:dayA}], projects:[project(otherPid, dayA)]};
-const context = {window: {}, URLSearchParams, console}; vm.createContext(context);
+const context = {window: {}, URLSearchParams, console, crypto: require("node:crypto")}; vm.createContext(context);
 vm.runInContext(fs.readFileSync("app/frontend/cockpit/film_library.js", "utf8"), context);
 function fixture(savedStorage = new Map()) {
   const nodes = {}, docListeners = {};
@@ -34,6 +34,7 @@ function fixture(savedStorage = new Map()) {
   const response = data => ({json: async () => data});
   fetcher = async (url, options = {}) => {
     calls.push({url, options});
+    if (url === "/api/camino/film/project-trash") return response({ok:true,requests:[]});
     if (url === "/api/camino/film/trips") return response({ok:true, default_trip_id:tripA,
       trips:[{id:tripA,name:"Same holiday",status:"active"},{id:tripB,name:"Same holiday",status:"archived"}]});
     if (url.startsWith("/api/camino/film/catalog?")) {
@@ -101,7 +102,7 @@ async function main() {
   assert.equal(c.calls.length, before, "declined owner confirmation never writes");
   c.consent = true; await c.library.createProject();
   assert(c.confirmation.at(-1).includes("27. 9. 2026"));
-  assert.equal(c.calls.filter(call => call.options.method === "POST").length, 1);
+  assert.equal(c.calls.filter(call => call.url === "/api/camino/film/close-mac-day" && call.options.method === "POST").length, 1);
   assert.equal(c.opened.at(-1), "00000000-0000-0000-0000-000000000003");
   const d = fixture(); await d.library.open(); d.mayClose = false;
   catalog = {...catalog, projects: [project(pidA, dayA)]};
@@ -141,6 +142,49 @@ async function main() {
   assert.equal(empty.nodes.caminoFilmDay.disabled,true); assert.equal(empty.nodes.caminoFilmCreateBtn.disabled,true);
   const emptyReloaded = fixture(emptyStorage); await emptyReloaded.library.open();
   assert.equal(emptyReloaded.nodes.caminoFilmTrip.value,tripB,"empty holiday selection survives reload");
+  catalog = {...catalog, projects:[project(pidB,dayB),project(pidA,dayA)]};
+  const t = fixture(); t.consent = true;
+  const row = {request_id:pidA, target_kind:"trip", target_id:tripA, trip_id:tripA,
+    state:"requested", name:"<script>private name</script>", waiting_for_phone:false};
+  const controlCalls = [];
+  t.fetch = async (url, options) => {
+    if (url !== "/api/camino/film/project-trash") return t.defaultFetch(url,options);
+    const payload = JSON.parse(options.body); controlCalls.push(payload);
+    if (payload.operation === "list") return t.response({ok:true,requests:row.state === "restored" ? [] : [row]});
+    if (payload.operation === "preview") return t.response({ok:true,request:{...row,plan_token:"frozen-plan",bytes:1024,
+      moment_count:2,asset_count:3,film_count:1,file_count:5}});
+    if (payload.operation === "confirm") {
+      assert.equal(payload.plan_token,"frozen-plan");
+      assert.equal(payload.confirmation,"Potvrzuji globální brzdu: rozumím riziku a chci pokračovat.");
+      row.state = "trashed"; row.purge_ms = Date.now() + 604800000;
+    } else if (payload.operation === "restore") row.state = "restored";
+    else if (payload.operation === "film") {
+      assert.equal(payload.project_id,pidB); assert.equal(payload.trip_id,tripA);
+      row.target_kind = "film"; row.target_id = pidB; row.state = "requested";
+    } else throw new Error("unexpected control");
+    return t.response({ok:true,request:row});
+  };
+  await t.library.open();
+  const trash = t.nodes.caminoProjectTrash;
+  assert(trash.children[0].children[0].textContent.includes("<script>private name</script>"));
+  assert.equal(trash.children[0].children[0].innerHTML,undefined,"names are rendered as text");
+  await trash.children[0].children.find(x => x.textContent === "Zkontrolovat rozsah").emit("click");
+  const label = trash.children.find(x => x.tagName === "label"), input = label.children[0];
+  const submit = trash.children.find(x => x.textContent === "Potvrdit koš na 7 dní");
+  assert.equal(submit.disabled,true);
+  input.value = "ano"; input.emit("input"); assert.equal(submit.disabled,true);
+  input.value = "Potvrzuji globální brzdu: rozumím riziku a chci pokračovat."; input.emit("input");
+  assert.equal(submit.disabled,false); await submit.emit("click");
+  assert.equal(controlCalls.filter(x => x.operation === "confirm").length,1);
+  await trash.children[0].children.find(x => x.textContent === "Obnovit projekt").emit("click");
+  assert.equal(row.state,"restored");
+  const removeFilm = t.nodes.caminoFilmProjects.children.find(li => li.children[0].textContent.includes("26. 9. 2026"))
+    .children.find(x => x.textContent === "Smazat celý film…");
+  await removeFilm.emit("click");
+  assert.equal(row.target_kind,"film");
+  assert(trash.children[0].textContent.startsWith("Pouze film"));
+  assert.equal(controlCalls.filter(x => x.operation === "confirm").length,1,"film request alone is not confirmation");
+  assert(!controlCalls.some(x => x.operation === "trip"),"whole-trip initiation is absent on Mac");
   console.log("Camino film library frontend: PASS");
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });

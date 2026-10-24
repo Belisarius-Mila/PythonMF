@@ -16,6 +16,7 @@ from typing import Any
 from uuid import UUID
 
 from camino.domain.revision_store import RevisionStore
+from camino.domain.project_lifecycle import shared, project_blocked, film_blocked
 from camino.server.media_store import MediaStore
 from .project import fingerprint, write_json
 
@@ -145,6 +146,7 @@ class ClosedDayStore:
         self.metadata = metadata
         self.media = media
 
+    @shared(lambda self: self.metadata.path)
     def close(self, raw_proof: object) -> dict[str, Any]:
         proof = validate_phone_proof(raw_proof)
         project_id = proof["request_id"]
@@ -172,6 +174,8 @@ class ClosedDayStore:
             "SELECT server_id,epoch,cursor,writer_device_id,exports_blocked,"
             "reconciliation_required FROM meta WHERE singleton=1"
         ).fetchone()
+        if project_blocked(metadata, proof['trip_id']) or film_blocked(metadata, proof['request_id']):
+            raise ClosedDayError('project_in_trash', 'Projekt čeká v koši nebo na potvrzení smazání.')
         if (state is None or state[4] or state[5]
                 or (state[0], state[1], state[2], state[3]) !=
                 (proof["server_id"], proof["epoch"], proof["cursor"], proof["device_id"])):
@@ -326,6 +330,9 @@ class ClosedDayStore:
             raise ClosedDayError("unsafe_store", "Projekt má neplatný adresář.")
         try:
             manifest = self._read(directory / "manifest.json")
+            with self.metadata._connection() as metadata:
+                if project_blocked(metadata, manifest['trip_id']) or film_blocked(metadata, directory.name):
+                    raise ClosedDayError('project_in_trash', 'Projekt čeká v koši nebo na potvrzení smazání.')
             project = self._read(directory / "project-r1.json")
             receipt = self._read(directory / "receipt.json")
         except (OSError, ValueError) as error:
@@ -369,6 +376,8 @@ class ClosedDayStore:
             state = metadata.execute(
                 "SELECT server_id,epoch,exports_blocked,reconciliation_required "
                 "FROM meta WHERE singleton=1").fetchone()
+            if project_blocked(metadata, manifest['trip_id']) or film_blocked(metadata, project_id):
+                return {**receipt, 'valid': False, 'reason': 'project_in_trash'}
             if (state is None or state[0] != manifest["server_id"] or state[1] != manifest["epoch"]
                     or state[2] or state[3]):
                 return {**receipt, "valid": False, "reason": "server_state_changed"}

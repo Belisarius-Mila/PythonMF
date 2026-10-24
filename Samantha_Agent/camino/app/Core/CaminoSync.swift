@@ -92,6 +92,14 @@ public struct CaminoSyncMetadataItem: Codable, Equatable, Identifiable, Sendable
         return UUID(uuidString: raw)
     }
 
+    public func belongsToProject(_ tripID: UUID, momentIDs: Set<UUID>) -> Bool {
+        if relatedMomentID.map(momentIDs.contains) == true { return true }
+        if kind == "create_trip" { return objectID == tripID }
+        guard let p = try? JSONSerialization.jsonObject(with: payload) as? [String: Any],
+              let raw = p["trip_id"] as? String else { return false }
+        return UUID(uuidString: raw) == tripID
+    }
+
     public var isTitleChange: Bool {
         guard kind == "update_metadata",
               let object = try? JSONSerialization.jsonObject(with: payload) as? [String: Any],
@@ -958,15 +966,17 @@ public struct CaminoSyncJournal: Codable, Equatable, Sendable {
         }
     }
 
-    public func nextWork(networkAvailable: Bool, expensive: Bool) -> CaminoSyncNextWork {
+    public func nextWork(networkAvailable: Bool, expensive: Bool,
+                         excludedMetadataIDs: Set<UUID> = [], excludedMomentIDs: Set<UUID> = []) -> CaminoSyncNextWork {
         guard !paused, networkAvailable, !reconciliationRequired else { return .none }
         guard !expensive || cellularBatchID != nil else { return .none }
-        if let item = metadata.first(where: { $0.phase != .accepted }) {
+        if let item = metadata.first(where: { $0.phase != .accepted && !excludedMetadataIDs.contains($0.id) }) {
             return item.phase == .pending ? .metadata(item.id) : .none
         }
         let candidate = media
             .filter { item in
-                guard item.phase != .verified && item.phase != .needsAttention else { return false }
+                guard item.phase != .verified && item.phase != .needsAttention,
+                      !excludedMomentIDs.contains(item.momentID) else { return false }
                 return !expensive || item.batchID == cellularBatchID
             }
             .sorted { lhs, rhs in
@@ -975,6 +985,20 @@ public struct CaminoSyncJournal: Codable, Equatable, Sendable {
                     : lhs.kind.priority < rhs.kind.priority
             }.first
         return candidate.map { .media($0.id) } ?? .none
+    }
+
+    /// Erase private accepted packets too; retain the global cursor so the next
+    /// project cannot reuse an erased sequence. Frozen unaccepted packets must
+    /// have an authenticated receipt before this method is allowed.
+    public mutating func eraseProject(_ tripID: UUID, momentIDs: Set<UUID>) throws {
+        let belongs: (CaminoSyncMetadataItem) -> Bool = { $0.belongsToProject(tripID, momentIDs: momentIDs) }
+        guard !metadata.contains(where: { belongs($0) && $0.sequence != nil && $0.phase != .accepted }) else {
+            throw CaminoSyncError.invalidJournal
+        }
+        metadata.removeAll(where: belongs)
+        media.removeAll { momentIDs.contains($0.momentID) }
+        rejectedTitleHistory?.removeAll { belongs($0.original) }
+        rejectedAudioLayoutHistory?.removeAll { belongs($0.original) }
     }
 
     public mutating func exactEnvelope(for id: UUID) throws -> Data {

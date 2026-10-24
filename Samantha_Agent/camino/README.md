@@ -5,6 +5,12 @@ soukromý Viewer a jednodenní film z povolených podkladů.
 
 ## Aktuální orientace — 24. 10. 2026
 
+Místně doplněný **koš celých cest a filmů na 7 dní**: žádost na iPhonu,
+kontrola a potvrzení ve střižně, obnovení do lhůty a následný výmaz
+spravovaných dat včetně telefonu po jeho spojení. Samostatný film ponechá
+originály cesty. [Postup, rozsah a hranice vydání](docs/PROJECT_TRASH_REPORT.md).
+Tato změna zatím není nasazená ani nainstalovaná v telefonu.
+
 Nově místně: původní text z iPhonu a upravitelná pracovní kopie u fotografie,
 historie čtení, obnovitelný koš a import MP3/WAV.
 [Pracovní cyklus komentáře](docs/COMMENTARY_WORKFLOW_REPORT.md).

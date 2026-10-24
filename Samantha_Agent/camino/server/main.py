@@ -13,6 +13,7 @@ import uvicorn
 
 from camino.api.v1 import CaminoV1Contract
 from camino.domain.revision_store import RevisionStore, SCHEMA_VERSION
+from camino.domain.project_lifecycle import lifecycle_lock
 from camino.server.service_safety import database_lock, snapshot_before_upgrade
 from camino.server.application import create_app
 from camino.server.auth import RevocableTokenStore
@@ -98,14 +99,16 @@ def _serve(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
     tokens = RevocableTokenStore(_required_path(parser, "CAMINO_C05A_AUTH_DB"))
     if tokens.active_count() < 1:
         parser.error("at least one active owner token must be provisioned offline")
-    media = MediaStore(
-        _required_path(parser, "CAMINO_C05A_MEDIA_DB"),
-        _required_path(parser, "CAMINO_C05A_MEDIA_ROOT"),
-        asset_lookup=metadata.asset,
-        reserve_bytes=int(_nonnegative_number(
-            parser, "CAMINO_C05A_RESERVE_BYTES", str(512 * 1024 * 1024)
-        )),
-    )
+    with lifecycle_lock(metadata.path):
+        media = MediaStore(
+            _required_path(parser, "CAMINO_C05A_MEDIA_DB"),
+            _required_path(parser, "CAMINO_C05A_MEDIA_ROOT"),
+            asset_lookup=metadata.asset,
+            asset_blocked=metadata.asset_in_trash,
+            reserve_bytes=int(_nonnegative_number(
+                parser, "CAMINO_C05A_RESERVE_BYTES", str(512 * 1024 * 1024)
+            )),
+        )
     contract = CaminoV1Contract(metadata, authenticate=tokens.authenticate)
     film_root = os.environ.get("CAMINO_P2B_ROOT")
     closed_day_store = ClosedDayStore(Path(film_root), metadata, media) if film_root else None
@@ -121,6 +124,10 @@ def _serve(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
             closed_day_store=closed_day_store,
             client_update_root=Path(os.environ["CAMINO_CLIENT_UPDATE_ROOT"])
                 if os.environ.get("CAMINO_CLIENT_UPDATE_ROOT") else None,
+            trash_film_roots=(Path(os.environ['CAMINO_MAC_FILM_ROOT']),)
+                if os.environ.get('CAMINO_MAC_FILM_ROOT') else (),
+            trash_viewer_root=Path(os.environ['CAMINO_TRASH_VIEWER_ROOT'])
+                if os.environ.get('CAMINO_TRASH_VIEWER_ROOT') else None,
             **_viewer_options(parser, metadata, media, tokens),
         ),
         host=args.host,

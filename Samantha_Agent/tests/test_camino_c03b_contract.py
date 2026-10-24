@@ -96,7 +96,7 @@ class CaminoC03bContractTests(unittest.TestCase):
         self.assertEqual(reopened.asset(self.asset.id), wire(self.asset))
         with sqlite3.connect(self.database) as connection:
             self.assertEqual(json.loads(connection.execute("SELECT body FROM trips").fetchone()[0]), wire(self.trip))
-            self.assertEqual(connection.execute("PRAGMA user_version").fetchone()[0], 3)
+            self.assertEqual(connection.execute("PRAGMA user_version").fetchone()[0], 4)
         second = self.send(self.envelope(7, "set_trip_title", {
             "trip_id": self.trip.id, "title": "Další jméno",
         }, expected_revision=2))

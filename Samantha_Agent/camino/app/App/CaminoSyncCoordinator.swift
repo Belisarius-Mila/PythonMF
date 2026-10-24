@@ -112,6 +112,23 @@ private enum CaminoSyncAPIError: Error, Equatable {
     case server(Int, String)
 }
 
+private struct CaminoTrashReceipt: Decodable {
+    let request_id: UUID
+    let target_kind: String
+    let trip_id: UUID
+    let device_id: UUID?
+    let state: String
+    let name: String
+    let purge_ms: Int64?
+    let phone_purged_ms: Int64?
+}
+
+private struct CaminoTrashList: Decodable {
+    let server_id: UUID
+    let epoch: UUID
+    let requests: [CaminoTrashReceipt]
+}
+
 private struct CaminoSyncAPI: Sendable {
     let baseURL: URL
     let token: String
@@ -131,6 +148,28 @@ private struct CaminoSyncAPI: Sendable {
 
     func state() async throws -> CaminoServerState {
         try await send(path: ["api", "v1", "state"], method: "GET")
+    }
+
+    func projectTrash(deviceID: UUID) async throws -> CaminoTrashList {
+        try await send(path: ["api", "v1", "project-trash"], method: "GET",
+                       query: [URLQueryItem(name: "device_id", value: deviceID.uuidString.lowercased())])
+    }
+
+    func requestProjectTrash(_ record: LocalProjectTrash, deviceID: UUID,
+                             state: CaminoServerState) async throws -> CaminoTrashReceipt {
+        let body = try JSONSerialization.data(withJSONObject: [
+            "request_id": record.id.uuidString.lowercased(), "trip_id": record.tripID.uuidString.lowercased(),
+            "device_id": deviceID.uuidString.lowercased(), "server_id": state.serverID.uuidString.lowercased(),
+            "epoch": state.epoch.uuidString.lowercased(), "name": record.name])
+        return try await send(path: ["api", "v1", "project-trash"], method: "POST",
+                              contentType: "application/json", body: body)
+    }
+
+    func acknowledgeProjectTrash(_ record: LocalProjectTrash, deviceID: UUID) async throws -> CaminoTrashReceipt {
+        let body = try JSONSerialization.data(withJSONObject: ["request_id": record.id.uuidString.lowercased(),
+                                                              "device_id": deviceID.uuidString.lowercased()])
+        return try await send(path: ["api", "v1", "project-trash", "ack"], method: "POST",
+                              contentType: "application/json", body: body)
     }
 
     func moment(_ id: UUID) async throws -> CaminoServerMoment {
@@ -264,8 +303,12 @@ private struct CaminoSyncAPI: Sendable {
 
     private func send<T: Decodable>(path: [String], method: String,
                                     contentType: String? = nil,
-                                    body: Data? = nil) async throws -> T {
+                                    body: Data? = nil, query: [URLQueryItem] = []) async throws -> T {
         var request = request(path: path, method: method)
+        if !query.isEmpty, let url = request.url,
+           var components = URLComponents(url: url, resolvingAgainstBaseURL: false) {
+            components.queryItems = query; request.url = components.url
+        }
         request.httpBody = body
         if let contentType { request.setValue(contentType, forHTTPHeaderField: "Content-Type") }
         let configuration = URLSessionConfiguration.ephemeral
@@ -413,6 +456,25 @@ final class CaminoSyncBackgroundDriver: NSObject, URLSessionTaskDelegate,
         for task in await sessionStorage.allTasks { task.resume() }
     }
 
+    func cancelUploads(assetIDs: Set<UUID>? = nil) async throws {
+        for task in await sessionStorage.allTasks {
+            let parts = (task.taskDescription ?? "").split(separator: ":")
+            if assetIDs == nil || (parts.count == 3 && UUID(uuidString: String(parts[1])).map { assetIDs!.contains($0) } == true) {
+                task.cancel()
+            }
+        }
+        for _ in 0..<100 {
+            let descriptions = await activeDescriptions()
+            let pending = descriptions.contains { value in
+                let parts = value.split(separator: ":")
+                return assetIDs == nil || (parts.count == 3 && UUID(uuidString: String(parts[1])).map { assetIDs!.contains($0) } == true)
+            }
+            if !pending { return }
+            try await Task.sleep(for: .milliseconds(50))
+        }
+        throw CaminoSyncError.serverConflict("upload_cancellation_pending")
+    }
+
     func urlSession(_ session: URLSession, task: URLSessionTask,
                     didCompleteWithError error: (any Error)?) {
         handler(.completed(
@@ -453,6 +515,9 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
     @Published private(set) var dashboard = CaminoC05cDashboard.initial
     @Published private(set) var filmDays: [LocalDay] = []
     @Published private(set) var filmResult = "Vyber den až po dokončení přenosu."
+    @Published private(set) var projectTrash: [LocalProjectTrash] = []
+    var canEraseLocalProject: () -> Bool = { false }
+    var projectTrashChanged: () -> Void = {}
 
     private let local: CaminoLocalStore
     private let recording: IntentRecordingStore
@@ -462,6 +527,17 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
     private var journal: CaminoSyncJournal
     private var path = CaminoNetworkState(available: false, expensive: false)
     private var running = false
+
+    @discardableResult func requestProjectTrash(_ tripID: UUID) -> Bool {
+        guard !running, canEraseLocalProject() else { return false }
+        do {
+            _ = try local.requestProjectTrash(tripID)
+            projectTrash = try local.projectTrash()
+            projectTrashChanged()
+            synchronizeNow()
+            return true
+        } catch { handle(error); return false }
+    }
     private var localMomentIDs: Set<UUID> = []
     private var macCopyState: CaminoMacCopyState = .preparing
     private var backupCopyState: CaminoBackupCopyState = .notVerified
@@ -478,6 +554,7 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
         self.local = local
         self.recording = recording
         self.root = root.standardizedFileURL
+        projectTrash = try local.projectTrash()
         journalStore = CaminoSyncJournalStore(
             url: root.appendingPathComponent("Sync/c05b-journal.json"))
         journal = try journalStore.loadOrCreate()
@@ -838,6 +915,9 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
     }
 
     private func discover() async throws {
+        let held = try local.projectTrash().filter(\.blocksProject)
+        let heldMoments = held.reduce(into: Set<UUID>()) { $0.formUnion($1.momentIDs) }
+        try await driver.cancelUploads(assetIDs: Set(journal.media.filter { heldMoments.contains($0.momentID) }.map(\.id)))
         let trips = try local.trips()
         var days: [LocalDay] = []
         var snapshots: [LocalMomentSyncSnapshot] = []
@@ -847,7 +927,8 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
                 snapshots.append(try local.syncSnapshot(momentID: moment.id))
             }
         }
-        let localAssets = try local.allMediaAssets()
+        let visibleMomentIDs = Set(snapshots.map(\.moment.id))
+        let localAssets = try local.allMediaAssets().filter { visibleMomentIDs.contains($0.momentID) }
         var candidates = localAssets.map { asset in
             CaminoSyncMediaItem(
                 id: asset.id, momentID: asset.momentID,
@@ -981,11 +1062,17 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
             }
             try journal.requireTitleSupport(serverFeatures: state.features)
             try journal.mergeAudioLayouts(discoveredAudioLayouts, serverFeatures: state.features)
+            try await synchronizeProjectTrash(api: api, state: state)
             // Optional backfill and edits while hashing must obey fresh tombstones too.
             try suppressLocalDeletedContent()
             try journalStore.save(journal)
             while true {
-                switch journal.nextWork(networkAvailable: true, expensive: path.expensive) {
+                let blocked = projectTrash.filter(\.blocksProject)
+                let held = Set(journal.metadata.filter { item in blocked.contains {
+                    item.belongsToProject($0.tripID, momentIDs: $0.momentIDs) } }.map(\.id))
+                let heldMoments = blocked.reduce(into: Set<UUID>()) { $0.formUnion($1.momentIDs) }
+                switch journal.nextWork(networkAvailable: true, expensive: path.expensive,
+                                       excludedMetadataIDs: held, excludedMomentIDs: heldMoments) {
                 case .metadata(let id):
                     try await sendMetadata(id: id, api: api)
                 case .media(let id):
@@ -1003,6 +1090,105 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
         } catch {
             handle(error)
         }
+    }
+
+    private func synchronizeProjectTrash(api: CaminoSyncAPI, state: CaminoServerState) async throws {
+        projectTrash = try local.projectTrash()
+        guard state.features?.contains("project_trash_v1") == true else {
+            if projectTrash.contains(where: \.blocksProject) {
+                throw CaminoSyncError.serverConflict("project_trash_server_upgrade_required")
+            }
+            return
+        }
+        let remote = try await api.projectTrash(deviceID: journal.deviceID)
+        guard remote.server_id == state.serverID, remote.epoch == state.epoch else {
+            throw CaminoSyncAPIError.invalidResponse
+        }
+        var restored = false
+        let allTrips = try local.trips(includingTrash: true)
+        for receipt in remote.requests {
+            guard receipt.target_kind == "trip", receipt.device_id == journal.deviceID,
+                  ["requested", "trashed", "purging", "compacting", "purged", "restored"].contains(receipt.state) else {
+                throw CaminoSyncAPIError.invalidResponse
+            }
+            var record = projectTrash.first(where: { $0.id == receipt.request_id }) ??
+                LocalProjectTrash(id: receipt.request_id, tripID: receipt.trip_id, name: receipt.name)
+            guard record.tripID == receipt.trip_id,
+                  record.serverID == nil || record.serverID == state.serverID,
+                  record.epoch == nil || record.epoch == state.epoch else { throw CaminoSyncAPIError.invalidResponse }
+            record.serverID = state.serverID; record.epoch = state.epoch
+            if allTrips.contains(where: { $0.id == record.tripID }) {
+                record.momentIDs.formUnion(try local.projectMomentIDs(record.tripID))
+            }
+            if receipt.state == "restored", record.state != "restored" { restored = true }
+            if !["phone_deleted", "phone_ack"].contains(record.state) ||
+                allTrips.contains(where: { $0.id == record.tripID }) {
+                record.state = receipt.state
+            }
+            record.purgeMilliseconds = receipt.purge_ms
+            try local.saveProjectTrash(record)
+        }
+        projectTrash = try local.projectTrash()
+        let blockedMoments = projectTrash.filter(\.blocksProject).reduce(into: Set<UUID>()) { $0.formUnion($1.momentIDs) }
+        let assets = Set(journal.media.filter { blockedMoments.contains($0.momentID) }.map(\.id))
+        try await driver.cancelUploads(assetIDs: assets)
+
+        // A frozen packet may already have reached the server. Finish exact
+        // retries in sequence order before issuing any out-of-band request.
+        for item in journal.metadata.filter({ $0.sequence != nil && $0.phase != .accepted })
+            .sorted(by: { $0.sequence! < $1.sequence! }) {
+            try await sendMetadata(id: item.id, api: api)
+        }
+        for original in projectTrash {
+            var record = original
+            if record.state == "local_request" {
+                guard record.serverID == nil || record.serverID == state.serverID,
+                      record.epoch == nil || record.epoch == state.epoch else { throw CaminoSyncAPIError.invalidResponse }
+                record.serverID = state.serverID; record.epoch = state.epoch
+                try local.saveProjectTrash(record)
+                let response = try await api.requestProjectTrash(record, deviceID: journal.deviceID, state: state)
+                guard response.request_id == record.id, response.trip_id == record.tripID,
+                      response.state == "requested" || response.state == "trashed" || response.state == "purged" else {
+                    throw CaminoSyncAPIError.invalidResponse
+                }
+                record.state = response.state; record.purgeMilliseconds = response.purge_ms
+                try local.saveProjectTrash(record)
+            }
+            if record.state == "purged", canEraseLocalProject() {
+                try await driver.cancelUploads()
+                if record.files == nil {
+                    let ownership = try local.projectErasurePaths(record.tripID)
+                    let attempts = try recording.media.projectAttemptURLs(sessionIDs: ownership.sessions)
+                    var paths = ownership.paths
+                    for url in attempts {
+                        guard let relative = relativePath(for: url) else { throw CaminoSyncError.incompleteLocalInventory }
+                        paths.append(relative)
+                    }
+                    // Rebuildable upload staging is shared; all upload tasks
+                    // are stopped before its one bounded slot is discarded.
+                    paths.append("Sync/Prepared")
+                    record.files = try CaminoErasureEntry.inventory(root: root, paths: paths)
+                    try local.saveProjectTrash(record)
+                }
+                try CaminoErasureEntry.remove(root: root, entries: record.files!)
+                try journal.eraseProject(record.tripID, momentIDs: record.momentIDs)
+                try journalStore.save(journal)
+                discoveredAudioLayouts.removeAll { $0.relatedMomentID.map(record.momentIDs.contains) == true }
+                try local.eraseProjectMetadata(record.tripID, receiptID: record.id)
+                record = try local.projectTrash().first(where: { $0.id == record.id })!
+            }
+            if record.state == "phone_deleted", canEraseLocalProject() {
+                try local.compactAfterProjectErasure()
+                let receipt = try await api.acknowledgeProjectTrash(record, deviceID: journal.deviceID)
+                guard receipt.request_id == record.id, receipt.state == "purged",
+                      receipt.phone_purged_ms != nil else { throw CaminoSyncAPIError.invalidResponse }
+                record.state = "phone_ack"
+                try local.saveProjectTrash(record)
+            }
+        }
+        projectTrash = try local.projectTrash()
+        projectTrashChanged()
+        if restored { try await discover() }
     }
 
     private func sendMetadata(id: UUID, api: CaminoSyncAPI) async throws {
@@ -1346,6 +1532,7 @@ final class CaminoAppDelegate: NSObject, UIApplicationDelegate {
     }
 
     private func resolvedMacCopyState(status: Int?, code: String) -> CaminoMacCopyState {
+        if code == "project_trash_server_upgrade_required" { return .serverUpgradeRequired }
         if code == "moment_title_server_upgrade_required" { return .serverUpgradeRequired }
         if code == "attachment_title_server_upgrade_required" { return .serverUpgradeRequired }
         if code == "trip_title_server_upgrade_required" { return .serverUpgradeRequired }

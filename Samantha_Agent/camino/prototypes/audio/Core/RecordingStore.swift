@@ -159,6 +159,27 @@ private struct SegmentScan {
     }
 
     /// Remove one complete logical session, including all continuation parts.
+    /// Include incomplete attempts too. The caller persists and validates a
+    /// complete erasure plan before removing any of these paths.
+    public func projectAttemptURLs(sessionIDs: Set<UUID>) throws -> [URL] {
+        var result: [URL] = []
+        for directory in try FileManager.default.contentsOfDirectory(at: root,
+            includingPropertiesForKeys: [.isSymbolicLinkKey]) {
+            guard UUID(uuidString: directory.lastPathComponent) != nil else { continue }
+            guard try directory.resourceValues(forKeys: [.isSymbolicLinkKey]).isSymbolicLink != true,
+                  directory.resolvingSymlinksInPath() == root.resolvingSymlinksInPath()
+                    .appendingPathComponent(directory.lastPathComponent).standardizedFileURL else {
+                throw AudioPrototypeError.invalidMetadata
+            }
+            let started = directory.appendingPathComponent("started.json")
+            guard FileManager.default.fileExists(atPath: started.path) else { continue }
+            let draft = try JSONDecoder().decode(RecordingDraft.self, from: Data(contentsOf: started))
+            guard draft.id.uuidString == directory.lastPathComponent else { throw AudioPrototypeError.invalidMetadata }
+            if sessionIDs.contains(draft.sessionID) { result.append(directory) }
+        }
+        return result
+    }
+
     public func delete(sessionID: UUID) throws {
         let session = try library().sessions.first { $0.id == sessionID }
         guard let session else { return }

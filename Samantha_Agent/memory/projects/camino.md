@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-24 12:21 CEST — pracovní cyklus textu a komentáře fotografie
+Aktualizováno: 2026-10-24 17:32 CEST — vývoj sedmidenního koše cest a filmů
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,12 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-24 17:32 CEST: Místně implementovaný společný sedmidenní koš cest a filmů. Celou cestu zahajuje iPhone; Mac potvrdí rozsah, umožní obnovu a po lhůtě vymaže spravovaná data. Telefon smaže až po ověřeném výmazu Macu a potvrdí ACK. Samostatný film zachová originály cesty.
+- Ověřeno: 16 syntetických Python/HTTP testů koše, DOM potvrzení/obnovy a 87 Swift/Core Data testů PASS; iOS Release PASS. Finální plná brána PASS: 2232 testů bez selhání, unit část 381,487 s.
+- Rozsah a hranice: `camino/docs/PROJECT_TRASH_CONTRACT.md`, `camino/docs/PROJECT_TRASH_REPORT.md`. Schéma 4, oba filmové kořeny, originály, historie/fronty, Viewer a místní SQLite/WAL. Nejasné historické kopie výmaz zastaví; zálohy, Fotky a ruční kopie mimo Camino jsou samostatné.
+- Jen vývoj: bez nového push, nasazení, upgradu služby, instalace iPhonu či výmazu skutečných dat. Předchozí funkční vydání je 0cb79f32, Luna d7d836b810818f61162d4a887686f3a2 (p+n dokončené; returned_to_adam=false). Předchozí datovaná oprávnění neopravňují vydat nynější koš. Živá kontrola 17:32 CEST: PIDy a chráněné konfigurace shodné, Cockpit health OK.
+- Další krok: samostatně schválit vydání příslušných částí (služba Camino, Cockpit, iPhone), potom fyzicky přijmout syntetickou cestu. Vývojový checkpoint je hotový; aktuální commit zjisti v git log podle Add seven-day project trash lifecycle. Otevřená zůstává praktická editace textu, historie nahrávek, jejich koš, import MP3/WAV a výběr příjemnějšího českého hlasu poslechem.
 
 - 2026-10-24 12:21 CEST: Místně hotový cyklus komentáře fotografie: neměnný původní text z iPhonu, ručně upravitelná pracovní kopie, historie nahrávek s vlastním textem, obnovitelný koš a import MP3/WAV. 45 cílených kontrol PASS včetně skutečných formátů pod PATH služby a zachování staršího filmu. Plná brána 2216 PASS (458,188 s unit část). Nové p+n neproběhlo; osobní střih se neměnil. Předchozí vydání 5cd323ef je živě potvrzené (Luna 4f7f51ee, smoke 5/5); starší failure 570b4fc7 je historie. Příjemnější hlas a fyzická přejímka této verze zůstávají otevřené.
 

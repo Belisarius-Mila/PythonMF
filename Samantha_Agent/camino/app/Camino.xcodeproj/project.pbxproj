@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A10000000000000000000099 /* CaminoProjectTrash.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000099 /* CaminoProjectTrash.swift */; };
 		A10000000000000000000001 /* CaminoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000001 /* CaminoApp.swift */; };
 		A10000000000000000000002 /* CaminoViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000002 /* CaminoViewModel.swift */; };
 		A10000000000000000000003 /* IntentRecordingStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000003 /* IntentRecordingStore.swift */; };
@@ -38,6 +39,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		A20000000000000000000099 /* CaminoProjectTrash.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaminoProjectTrash.swift; sourceTree = "<group>"; };
 		A20000000000000000000001 /* CaminoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaminoApp.swift; sourceTree = "<group>"; };
 		A20000000000000000000002 /* CaminoViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaminoViewModel.swift; sourceTree = "<group>"; };
 		A20000000000000000000003 /* IntentRecordingStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentRecordingStore.swift; sourceTree = "<group>"; };
@@ -121,6 +123,7 @@
 			children = (
 				A20000000000000000000004 /* LocalModels.swift */,
 				A20000000000000000000005 /* CaminoLocalStore.swift */,
+				A20000000000000000000099 /* CaminoProjectTrash.swift */,
 				A2000000000000000000000E /* CaminoMediaVault.swift */,
 				A20000000000000000000011 /* CaminoSync.swift */,
 			);
@@ -241,6 +244,7 @@
 				A10000000000000000000003 /* IntentRecordingStore.swift in Sources */,
 				A10000000000000000000004 /* LocalModels.swift in Sources */,
 				A10000000000000000000005 /* CaminoLocalStore.swift in Sources */,
+				A10000000000000000000099 /* CaminoProjectTrash.swift in Sources */,
 				A10000000000000000000006 /* ../prototypes/audio/Core/AudioTypes.swift in Sources */,
 				A10000000000000000000007 /* ../prototypes/audio/Core/AudioController.swift in Sources */,
 				A10000000000000000000008 /* ../prototypes/audio/Core/RecordingStore.swift in Sources */,

@@ -87,7 +87,7 @@ class ProjectWireTests(unittest.TestCase):
         for packet in self.initial + self.continued:
             self.assertEqual(self.send(packet).status, 200)
         with sqlite3.connect(self.store.path) as db:
-            self.assertEqual(db.execute("PRAGMA user_version").fetchone()[0], 3)
+            self.assertEqual(db.execute("PRAGMA user_version").fetchone()[0], 4)
             self.assertEqual(db.execute("SELECT body FROM trips WHERE id=?", (a["id"],)).fetchone()[0], original)
             for row in moments:
                 self.assertEqual(db.execute("SELECT * FROM moments WHERE id=?", (row[0],)).fetchone(), row)

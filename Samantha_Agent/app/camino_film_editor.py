@@ -22,6 +22,11 @@ from app.camino_film_layers import validate_layer, validate_display
 from app.file_persistence import FilePersistenceError, atomic_write_json
 from camino.film.closed_day import ClosedDayError, _private_directory, _store_lock
 from camino.film.project import FilmError, digest, fingerprint, write_json
+from camino.domain.project_lifecycle import shared
+
+
+def editor_database(editor):
+    return getattr(editor.store, 'metadata_db', None) or editor.store.metadata.path
 
 MAX_MS = 3_600_000
 TEXT_CARD_FIT_ERROR = "Text se na kartu čitelně nevejde. Zkrať jej nebo rozděl do více karet."
@@ -222,6 +227,7 @@ class FilmEditor:
         from app.camino_film_narration import narration_paths
         return narration_paths(self, manifest, draft, project_id=project_id, allow_deleted=allow_deleted)
 
+    @shared(editor_database)
     def photo_bytes(self, project_id, asset_id):
         """Return a metadata-free PNG of a currently permitted original photo."""
         project_id, asset_id = identifier(project_id), identifier(asset_id)
@@ -327,6 +333,7 @@ class FilmEditor:
                 "texts": self.store.text_choices(manifest),
                 "jobs": self.jobs(folder), "narrations": list_narrations(self, folder, manifest)}
 
+    @shared(editor_database)
     def save(self, payload):
         exact(payload, "project_id expected_revision request_id draft")
         project_id = identifier(payload["project_id"])
@@ -401,6 +408,7 @@ class FilmEditor:
             result.append(item)
         return result
 
+    @shared(editor_database)
     def enqueue(self, payload, *, background=True):
         exact(payload, "project_id revision request_id profile range")
         folder, manifest = self.inputs(identifier(payload["project_id"]))
@@ -442,6 +450,7 @@ class FilmEditor:
         validate_draft(edit["draft"], manifest)
         return edit
 
+    @shared(editor_database)
     def source_preview(self, payload, *, background=True):
         exact(payload, "project_id asset_id request_id")
         folder, manifest = self.inputs(identifier(payload["project_id"]))
@@ -504,6 +513,7 @@ class FilmEditor:
             "work", "--project-id", identifier(project_id)], cwd=root, stdin=subprocess.DEVNULL,
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True, env=environment)
 
+    @shared(editor_database)
     def run_queue(self, project_id):
         from app.camino_film_render import render_edit, render_audio_preview
         folder, _ = self.inputs(identifier(project_id))

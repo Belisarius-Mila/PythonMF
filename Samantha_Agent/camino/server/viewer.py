@@ -17,6 +17,7 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response
 from camino.domain.model import ContractError
 from camino.domain.audio_layout import ordered_audio_groups
 from camino.domain.revision_store import RevisionStore
+from camino.domain.project_lifecycle import shared
 from camino.server.auth import RevocableTokenStore
 from camino.server.media_store import MediaStore
 from camino.server.viewer_media import OUTPUTS, ViewerMedia
@@ -145,6 +146,7 @@ class CaminoViewer:
         except (ValueError, UnicodeError, binascii.Error):
             return False
 
+    @shared(lambda self: self.metadata.path)
     def build_pending(self, *, should_stop: Callable[[], bool] = lambda: False) -> dict[str, int]:
         """A serial batch invoked offline or by the lifespan worker, never GET."""
         report = {"ready": 0, "waiting": 0}

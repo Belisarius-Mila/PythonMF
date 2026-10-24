@@ -20,6 +20,7 @@ from camino.domain.codec import decode_text
 from camino.domain.codec import decode_trip
 from camino.domain.model import TextHistory
 from camino.domain.revision_store import RevisionStore
+from camino.domain.project_lifecycle import shared, project_blocked, film_blocked, has_trash_schema
 from camino.server.service_safety import readonly
 
 DAY = "2026-10-06"
@@ -104,6 +105,16 @@ class MacFilmProjectStore(ClosedDayStore):
                         "trip_id": self.trip_id, "day_id": days[0]["id"],
                         "inventory": fingerprint(inventory)}
             project_id = str(uuid5(NAMESPACE_URL, fingerprint(identity)))
+            if project_blocked(metadata, self.trip_id):
+                raise ClosedDayError('project_in_trash', 'Cesta čeká v koši nebo na potvrzení smazání.')
+            # A new explicit closure may rebuild a previously erased film, under
+            # a new identity. Old saved requests can never address its folder.
+            if has_trash_schema(metadata):
+                prior = metadata.execute("SELECT request_id FROM project_trash WHERE target_kind='film' "
+                    "AND trip_id=? AND state='purged' ORDER BY requested_ms,request_id", (self.trip_id,)).fetchall()
+                for deleted in prior:
+                    if film_blocked(metadata, project_id):
+                        project_id = str(uuid5(NAMESPACE_URL, project_id + ':' + deleted[0]))
             evidence = {
                 "origin": ORIGIN, "owner_confirmed_final": True, "local_date": local_date,
                 "request_id": project_id, "trip_id": self.trip_id, "day_id": days[0]["id"],
@@ -119,6 +130,7 @@ class MacFilmProjectStore(ClosedDayStore):
             project["manifest_sha256"] = fingerprint(manifest)
             return evidence, manifest, project
 
+    @shared(lambda self: self.metadata_db)
     def close_mac_day(self, local_date: str, *, confirmed: bool):
         local_date = self._date(local_date)
         if confirmed is not True:
@@ -148,6 +160,9 @@ class MacFilmProjectStore(ClosedDayStore):
             return self.day_status(local_date, project_id=project_id)
 
     def _confirmed_status(self, project_id: str):
+        with self._metadata_connection() as db:
+            if project_blocked(db, self.trip_id) or film_blocked(db, project_id):
+                raise ClosedDayError('project_in_trash', 'Projekt čeká v koši nebo na potvrzení smazání.')
         directory = self.root / str(UUID(project_id))
         if directory.is_symlink() or not directory.is_dir():
             raise ClosedDayError("unsafe_store", "Projekt nemá bezpečný adresář.")
@@ -191,7 +206,8 @@ class MacFilmProjectStore(ClosedDayStore):
             if state is None or state[0] or state[1]:
                 raise ClosedDayError("archive_blocked", "Archiv nejprve vyžaduje dokončení obnovy.")
             return [RevisionStore._project_summary(metadata, decode_trip(json.loads(row[0])))
-                    for row in metadata.execute("SELECT body FROM trips ORDER BY id")]
+                    for row in metadata.execute("SELECT body FROM trips ORDER BY id")
+                    if not project_blocked(metadata, json.loads(row[0])['id'])]
 
     def project_ids(self):
         if not self.root.exists():

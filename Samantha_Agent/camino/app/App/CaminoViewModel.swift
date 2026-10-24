@@ -16,6 +16,7 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
 @MainActor final class CaminoViewModel: ObservableObject {
     let location = CaminoLocationProvider()
     @Published private(set) var trips: [LocalTrip] = []
+    @Published private(set) var projectTrash: [LocalProjectTrash] = []
     @Published private(set) var activeTrip: LocalTrip?
     @Published private(set) var moments: [LocalMoment] = []
     @Published private(set) var hiddenMoments: [LocalMoment] = []
@@ -107,6 +108,8 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
             self.mediaVault = vault
             self.audio = audio
             self.sync = try? CaminoSyncCoordinator(local: local, recording: recording, root: root)
+            self.sync?.canEraseLocalProject = { [weak self] in self?.canManageProjects == true }
+            self.sync?.projectTrashChanged = { [weak self] in self?.refresh() }
             recording.locationAtCapture = { [weak location] date in location?.snapshot(at: date) }
             startupError = nil
             cameraError = vault == nil ? "Místní úložiště fotek a videí není dostupné." : nil
@@ -210,6 +213,7 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
 
     var canManageProjects: Bool {
         !audioBusy && !showAudio && !showCamera && !awaitingLocation && !importingMedia
+            && local?.projectMaintenanceIdle == true
     }
 
     var canCaptureInActiveProject: Bool { activeTrip?.projectDetails.status == .active }
@@ -234,6 +238,20 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
             refresh()
             return true
         } catch { message = error.localizedDescription; return false }
+    }
+
+    @discardableResult func requestProjectTrash(_ id: UUID) -> Bool {
+        guard canManageProjects, sync?.busy == false else {
+            message = "Počkej na dokončení právě běžící práce nebo přenosu."
+            return false
+        }
+        guard sync?.requestProjectTrash(id) == true else {
+            message = "Žádost na smazání se nepodařilo uložit. Data zůstávají zachovaná."
+            return false
+        }
+        momentDetail = nil
+        refresh()
+        return true
     }
 
     func updateTrip(_ id: UUID, name: String, isTest: Bool, details: LocalProjectDetails? = nil) -> Bool {
@@ -590,6 +608,7 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
         guard let local else { return }
         do {
             trips = try local.trips()
+            projectTrash = try local.projectTrash()
             activeTrip = try local.activeTrip()
             newPrivacy = try local.newMomentPrivacy()
             let all = try activeTrip.map {
@@ -607,6 +626,8 @@ private struct CaminoSimulatedCapacityProvider: CaminoStorageCapacityProviding {
             if let selected = momentDetail,
                let current = all.first(where: { $0.id == selected.id }) {
                 momentDetail = current
+            } else if momentDetail != nil {
+                momentDetail = nil
             }
             pendingAudioCount = try local.pendingAudioIntents().count
         } catch {

@@ -458,6 +458,8 @@ class CaminoC05aFastAPITests(unittest.IsolatedAsyncioTestCase):
         paths = set(self.app.openapi()["paths"])
         expected = {
             "/healthz",
+            "/api/v1/project-trash",
+            "/api/v1/project-trash/ack",
             "/api/v1/assets/{asset_id}/upload-session",
             "/api/v1/assets/{asset_id}/upload-status",
             "/api/v1/assets/{asset_id}/chunks/{chunk_index}",

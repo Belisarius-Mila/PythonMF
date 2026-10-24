@@ -6,6 +6,13 @@ nemigruje data ze samostatných prototypů Camino Audio a Camino Transfer Test.
 
 ## Aktuální používání — 24. 10. 2026
 
+Místní vývoj přidává **Projekty → Upravit projekt → Požádat o smazání celé
+cesty**. Žádost cestu skryje; přesun do společného sedmidenního koše potvrdíš
+na Macu. Telefon trvale maže až po ověřeném výmazu Macu a potvrdí dokončení.
+Obnovení je na Macu před koncem lhůty.
+[Postup a ověření](../docs/PROJECT_TRASH_REPORT.md). Vyžaduje samostatný
+upgrade služby s `project_trash_v1` a instalaci nového klienta; zatím neproběhly.
+
 Nově místně doplněné období v seznamu a krátké rozlišení stejně pojmenovaných
 projektů. Nová cesta připomíná vypnutý Viewer; povolení pro Janu se spravuje
 na Macu. [Návaznost Vieweru a filmu](../docs/MULTI_PROJECT_ACCESS_REPORT.md).

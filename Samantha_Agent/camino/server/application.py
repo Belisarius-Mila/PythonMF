@@ -24,6 +24,8 @@ from camino.film.closed_day import ClosedDayError, ClosedDayStore
 from camino.server.viewer_worker import ViewerWorker
 from camino.server.recovery import complete_recovery
 from camino.domain.revision_store import StoreConflict
+from camino.domain.project_trash import ProjectTrash
+from camino.server.project_trash import ProjectLeaseMiddleware, TrashWorker, phone_router
 
 if TYPE_CHECKING:
     from camino.server.viewer import CaminoViewer
@@ -87,6 +89,8 @@ def create_app(
     root_path: str = "",
     closed_day_store: ClosedDayStore | None = None,
     client_update_root: Path | None = None,
+    trash_film_roots: tuple[Path, ...] = (),
+    trash_viewer_root: Path | None = None,
 ) -> FastAPI:
     if not 0 <= finalize_delay_seconds <= 15:
         raise ValueError("finalize delay must stay between 0 and 15 seconds")
@@ -95,14 +99,20 @@ def create_app(
     if viewer_interval_seconds is not None and viewer is None:
         raise ValueError("Viewer worker requires an explicitly configured Viewer")
     worker = ViewerWorker(viewer, interval=viewer_interval_seconds) if viewer_interval_seconds is not None else None
+    trash = ProjectTrash(metadata_api.store.path, media_store.database_path, media_store.root,
+        film_roots=(*trash_film_roots, *((closed_day_store.root,) if closed_day_store else ())),
+        viewer_root=trash_viewer_root or (viewer.copies.root if viewer else None))
+    trash_worker = TrashWorker(trash)
 
     @asynccontextmanager
     async def lifespan(_app):
+        trash_worker.start()
         if worker is not None:
             worker.start()
         try:
             yield
         finally:
+            await asyncio.to_thread(trash_worker.stop)
             if worker is not None:
                 await asyncio.to_thread(worker.stop)
 
@@ -120,6 +130,9 @@ def create_app(
     app.state.token_store = token_store
     app.state.viewer_worker = worker
     app.state.closed_day_store = closed_day_store
+    app.state.project_trash = trash
+    app.state.trash_worker = trash_worker
+    app.add_middleware(ProjectLeaseMiddleware, database=metadata_api.store.path)
     if viewer is not None:
         if viewer.tokens.path == token_store.path:
             raise ValueError("Viewer must have a separate read-only credential store")
@@ -129,6 +142,13 @@ def create_app(
 
     def authorized(request: Request) -> bool:
         return token_store.authenticate(_authorization(request))
+
+    async def trash_json(request, expected):
+        if request.headers.get('content-type') != 'application/json' or request.url.query:
+            raise ValueError('Vyžadován je požadavek JSON.')
+        return _exact_json(await request.body(), expected)
+
+    app.include_router(phone_router(trash, authorized, trash_json))
 
     @app.get("/healthz", include_in_schema=True)
     async def health(request: Request):
@@ -339,6 +359,7 @@ def create_app(
             record_metadata_rejection(response, raw)
         if request.method == "GET" and target == "/api/v1/state" and response.status == 200:
             response.body["features"].append("identical_recovery_v1")
+            response.body["features"].append("project_trash_v1")
             if closed_day_store is not None:
                 response.body["features"].append("film_closed_day_v1")
         return _json(response.status, response.body)

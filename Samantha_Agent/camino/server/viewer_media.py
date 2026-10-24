@@ -79,7 +79,7 @@ class ViewerMedia:
         # Do not overwrite a broken old cache or remove any original/file.
         if destination.exists() or destination.is_symlink():
             return False
-        work = Path(tempfile.mkdtemp(prefix="pending-", dir=self.root))
+        work = Path(tempfile.mkdtemp(prefix="pending-" + asset['id'] + '-', dir=self.root))
         kind = asset["media_kind"]
         commands = []
         if kind == "photo":

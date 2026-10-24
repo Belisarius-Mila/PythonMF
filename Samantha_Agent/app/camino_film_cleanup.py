@@ -12,6 +12,7 @@ from contextlib import contextmanager
 from app.file_persistence import atomic_write_json
 from camino.film.closed_day import _private_directory, _store_lock
 from camino.film.project import FilmError, fingerprint
+from camino.domain.project_lifecycle import shared
 
 DELETE_CONFIRMATION = "Potvrzuji globální brzdu: rozumím riziku a chci pokračovat."
 
@@ -191,6 +192,7 @@ def _remove_attempt(child, path, by_path, remaining):
     os.fsync(child)
 
 
+@shared(lambda editor: getattr(editor.store, 'metadata_db', None) or editor.store.metadata.path)
 def delete_export(editor, payload):
     with _selected(editor, payload, deleting=True) as (directory, spec, state):
         plan, entries = _plan(directory, spec, state)

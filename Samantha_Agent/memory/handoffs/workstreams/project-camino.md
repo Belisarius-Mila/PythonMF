@@ -1,6 +1,15 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-24 17:32 CEST: Místně implementovaný společný sedmidenní koš cest a filmů. Celou cestu zahajuje iPhone; Mac potvrdí rozsah, umožní obnovu a po lhůtě vymaže spravovaná data. Telefon smaže až po ověřeném výmazu Macu a potvrdí ACK. Samostatný film zachová originály cesty.
+- Ověřeno: 16 syntetických Python/HTTP testů koše, DOM potvrzení/obnovy a 87 Swift/Core Data testů PASS; iOS Release PASS. Finální plná brána PASS: 2232 testů bez selhání, unit část 381,487 s.
+- Rozsah a hranice: `camino/docs/PROJECT_TRASH_CONTRACT.md`, `camino/docs/PROJECT_TRASH_REPORT.md`. Schéma 4, oba filmové kořeny, originály, historie/fronty, Viewer a místní SQLite/WAL. Nejasné historické kopie výmaz zastaví; zálohy, Fotky a ruční kopie mimo Camino jsou samostatné.
+- Jen vývoj: bez nového push, nasazení, upgradu služby, instalace iPhonu či výmazu skutečných dat. Předchozí funkční vydání je 0cb79f32, Luna d7d836b810818f61162d4a887686f3a2 (p+n dokončené; returned_to_adam=false). Předchozí datovaná oprávnění neopravňují vydat nynější koš. Živá kontrola 17:32 CEST: PIDy a chráněné konfigurace shodné, Cockpit health OK.
+- Další krok: samostatně schválit vydání příslušných částí (služba Camino, Cockpit, iPhone), potom fyzicky přijmout syntetickou cestu. Vývojový checkpoint je hotový; aktuální commit zjisti v git log podle Add seven-day project trash lifecycle. Otevřená zůstává praktická editace textu, historie nahrávek, jejich koš, import MP3/WAV a výběr příjemnějšího českého hlasu poslechem.
+<!-- SAMANTHA_CURRENT_STATUS_END -->
+
+### Historické stavové záznamy před vývojem koše
+
 - 2026-10-24 12:21 CEST: Místně hotový cyklus komentáře fotografie: neměnný původní text z iPhonu, ručně upravitelná pracovní kopie, historie nahrávek s vlastním textem, obnovitelný koš a import MP3/WAV. 45 cílených kontrol PASS včetně skutečných formátů pod PATH služby a zachování staršího filmu. Plná brána 2216 PASS (458,188 s unit část). Nové p+n neproběhlo; osobní střih se neměnil. Předchozí vydání 5cd323ef je živě potvrzené (Luna 4f7f51ee, smoke 5/5); starší failure 570b4fc7 je historie. Příjemnější hlas a fyzická přejímka této verze zůstávají otevřené.
 
 - 2026-10-24 11:20 CEST: P+n 570b4fc7ce1e29b96fac6a9b4f1654b2 zastavilo jedno selhání testu pod službovým PATH (Node); 2206 testů, 1 ERROR, 15 přeskočených. GitHub čtecím auditem stále e11d949a, nasazení nezačalo. Test opraven na projektový node_binary; 21 cílených kontrol PASS včetně přímého běhu pod omezeným PATH; bez nového předání či změny produkčních dat.
@@ -34,7 +43,7 @@
   skryté a nejasné zdroje zůstávají mimo film.
 - Nové p+n dokumentace je výslovně autorizované; bez produkčního renderu,
   zásahu do iPhonu nebo samostatné služby Camino.
-<!-- SAMANTHA_CURRENT_STATUS_END -->
+
 
 # Handoff pracovního proudu: Camino
 
@@ -3573,3 +3582,28 @@ Technický důkaz:
   produkčního archivu, střihů, sítě, služby ani instalace aplikace.
 - Python: reports/python_315_assessment_2026_10_24.md. Oficiální 3.15.1
   ověřené, 18 položek metadat a binární dry-run závislostí; bez instalace.
+
+
+### 2026-10-24 17:32 CEST — sedmidenní koš celé cesty a filmu: místní vývoj dokončen
+
+Hotovo:
+- iPhone ukládá žádost o smazání celé cesty, skryje ji a pozastaví její práci. Mac ve střižně ukáže přesný rozsah, přijme potvrzení do koše a umožní obnovení před společnou sedmidenní lhůtou. Samostatný filmový projekt má vlastní koš a zachová originály cesty.
+- Po lhůtě služba odstraní spravované soubory, textovou historii, fronty, odvozeniny a upload zbytky. Telefon čeká na ověřené dokončení Macu, smaže vlastní data a odešle ACK. Přerušený unlink i kompaktace jsou obnovitelné; nejasné starší kopie nebo změněné kořeny výmaz zastaví.
+- Jen lokální zdroje a checkpoint. Žádný nový push, deploy, upgrade služby, instalace iPhonu ani mazání skutečného projektu. Předchozí funkční vydání zůstává 0cb79f32; dokončená Luna účtenka d7d836b810818f61162d4a887686f3a2 patří dřívějšímu komentářovému cyklu (returned_to_adam=false).
+
+Rozhodnutí:
+- Míla schválil koš na 7 dní a vývoj jednosměrného postupu: žádost iPhone → Mac, potvrzení/obnova na Macu, zpět pouze řízení a výsledky. Koš nevytváří mediální kopii. Zálohy, Fotky a ruční exporty mimo spravované kořeny zůstávají samostatné. Nový TVBCP se nezakládal.
+
+Další krok:
+- Samostatně schválit a provést odpovídající vydání služby Camino se schématem 4, Cockpitu a iPhonu; potom fyzická přejímka jedné syntetické cesty a filmu. P+n společného runtime tyto samostatné aktualizace nenahrazuje.
+
+Navrhované další kroky:
+- Na iPhonu/Safari přijmout offline žádost, potvrzení a obnovení na Macu, dokončení výmazu/ACK a skutečné uvolnění místa. Produkční čekání 7 dní zatím neověřené.
+- Dokončit praktickou editaci textu fotografie, historii nahrávek, jejich koš a import MP3/WAV z dřívějšího vydání.
+- Poslechem vybrat příjemnější český hlas.
+
+Technický důkaz:
+- Plná brána PASS: 2232 testů, unit část 381,487 s. Cílená finální přejímka 20 PASS: 16 testů koše, DOM scénář, frontend otisk a oba route kontrakty.
+- Swift/Core Data 87 PASS a iOS Release PASS. Synteticky ověřené odstranění osobního textu z DB/WAL, zmenšení DB, přesné retry bez obnovení projektu, zachování druhé cesty, pozdní upload, interní/cizí hardlinky, alias kořene kontejneru, přerušený unlink i VACUUM a shoda potvrzených úložišť.
+- Živá read-only kontrola 17:32 CEST: Camino/Cockpit/autosave PIDy i chráněné konfigurace shodné se zahájením; Cockpit health OK. Bez produkčních médií nebo tajemství v Gitu.
+- Kontrakt a postup: camino/docs/PROJECT_TRASH_CONTRACT.md a camino/docs/PROJECT_TRASH_REPORT.md. Fyzická iPhone/Safari přejímka nového koše NEOVĚŘENO.

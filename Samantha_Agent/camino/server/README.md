@@ -89,8 +89,8 @@ Instalace sama server nespouští; start sám nepovoluje Janě obsah ani nenasta
 proxy. Pro službu je port 8767; výše uvedený port 8766 je starý obecný příklad
 a na Mílově Macu je obsazený ScanDocu.
 
-Launcher drží zámek jedné instance a před upgradem metadat na schéma 3 pořídí
-ověřený SQLite snapshot vedle původní DB. Původní Trip/operace se nemění;
+Launcher drží zámek jedné instance a před upgradem metadat na schéma 4 pořídí
+ověřený SQLite snapshot vedle původní DB. Samotný upgrade nemění původní Trip/operace;
 samostatná tabulka uchovává explicitní grant Vieweru. Snapshot na témže disku
 není nezávislá záloha. Nasazení, reader token, Serve a telefon jsou samostatné
 potvrzované kroky, fyzický návrat launchd procesu zatím není ověřený.
@@ -106,3 +106,16 @@ explicitním --trip-id a --confirm nad zastaveným archivem; čtecí přihláše
 se tím nemění. Bez ID má globální disable původní význam odvolání čtenáře.
 [Podrobný kontrakt a přejímka](../docs/MULTI_PROJECT_ACCESS_REPORT.md).
 Nová verze služby se tímto zápisem ani vývojem automaticky nenasazuje.
+
+## Koš projektů — místní vývoj 24. 10. 2026
+
+Schéma 4 přidává trvalý ledger sedmidenního koše. Privátní owner API přijímá
+žádost iPhonu a ACK; potvrzení a obnovení jsou vlastnické operace střižny.
+Lifespan worker každých 60 sekund dokončuje pouze potvrzené prošlé žádosti,
+po restartu pokračuje v uloženém plánu. Běží nezávisle na otevřeném Cockpitu.
+Při vypnuté službě výmaz čeká na její příští start.
+
+Registrovaný launcher předává oba filmové kořeny a Viewer úložiště i při
+vypnutém Vieweru. Výmaz blokují aktivní přenosy/rendery a nejasné historické
+pracovní kopie; nevykazuje se pak dokončení telefonu ani úplný výmaz.
+[Kontrakt, uživatelský postup a samostatná přejímka](../docs/PROJECT_TRASH_REPORT.md).

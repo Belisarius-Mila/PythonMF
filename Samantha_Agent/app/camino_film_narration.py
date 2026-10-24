@@ -13,6 +13,11 @@ from camino.film.closed_day import _private_directory, _store_lock
 from camino.film.media import duration_ms, probe
 from camino.film.project import FilmError, digest, fingerprint, write_json
 from app.file_persistence import atomic_write_json
+from camino.domain.project_lifecycle import shared
+
+
+def _database(editor):
+    return getattr(editor.store, 'metadata_db', None) or editor.store.metadata.path
 
 MAX_AUDIO_BYTES = 32 * 1024**2
 
@@ -99,6 +104,7 @@ def synthesize(text, directory):
         raise FilmError("Místní čtení se nedokončilo. Uložený text zůstává zachovaný.") from error
 
 
+@shared(_database)
 def prepare_narration(editor, payload):
     from app.camino_film_editor import exact, identifier
     exact(payload, "project_id revision asset_id request_id")
@@ -217,6 +223,7 @@ def list_narrations(editor, folder, manifest):
     return sorted(result, key=lambda r: (r["created_at"] or "", r["id"]))
 
 
+@shared(_database)
 def trash_narration(editor, payload):
     from app.camino_film_editor import exact, identifier, integer
     exact(payload, "project_id asset_id narration_id revision deleted")
@@ -259,6 +266,7 @@ def narration_bytes(editor, project_id, nid):
 MAX_IMPORT_BYTES = 64 * 1024**2
 
 
+@shared(_database)
 def import_narration(editor, payload, body):
     """Import one bounded MP3/WAV as a film derivative, never as an archive Asset."""
     from app.camino_film_editor import exact, identifier

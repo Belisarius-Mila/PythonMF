@@ -29,6 +29,13 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-084 — Výmaz projektu zahrnuje historii fronty a nezařazené pracovní kopie
+
+- Problém: samotné odstranění projektových řádků a finálních médií ponechá texty v přijatých obálkách, dříve smazané záznamy, karanténu a odvozeniny; stará fronta může projekt znovu založit.
+- Typ: opakující se
+- Řešení nalezeno: 24102026
+- Řešení: inventář odvozovat ze všech trvalých vazeb včetně accepted manifestů po opravě projekce a již smazaných místních Momentů. Nejasně přiřazené starší kopie blokují výmaz k auditu. Společný zámek chrání přenos/render/recovery, uložený plán dovolí pokračovat po pádu. Osobní obsah fronty odstranit, zachovat pouze UUID/otisky/kurzor proti obnovení a databáze zkompaktovat; telefon potvrzuje ACK až po vlastním výmazu. Ověřeno syntetickým kontraktem a skutečným Core Data SQLite/WAL; fyzický telefon po vydání zvlášť. Viz `camino/docs/PROJECT_TRASH_REPORT.md`.
+
 ### LL-079 — Změna složené stránky vyžaduje nový kontrolní otisk
 
 - Problém: nový panel prošel statickou bránou, ale plné p+n zastavila původní očekávaná délka složeného Cockpitu.

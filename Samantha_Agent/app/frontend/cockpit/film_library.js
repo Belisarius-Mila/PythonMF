@@ -9,6 +9,9 @@
     const catalogStatus = node("caminoFilmCatalogStatus"), title = node("caminoFilmSelectedTitle");
     const status = node("caminoFilmStatus"), summary = node("caminoFilmSummary"), shots = node("caminoFilmShots");
     const createButton = node("caminoFilmCreateBtn"), refreshButton = node("caminoFilmRefreshBtn");
+    const trash = node("caminoProjectTrash");
+    const brake = "Potvrzuji globální brzdu: rozumím riziku a chci pokračovat.";
+    let trashReview = null, trashBusy = false;
     const storageKey = "samantha.camino.film.selection.v2";
     const validDate = value => typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value);
     const validId = value => typeof value === "string" && /^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/.test(value);
@@ -16,6 +19,81 @@
     let selection = null, catalog = null, journeys = null, active = false, creating = false;
     let epoch = 0, read = 0, catalogRead = 0, timer = null;
     function text(tag, value) { const n = doc.createElement(tag); n.textContent = value; return n; }
+    function button(label, action) {
+      const b = text("button", label); b.type = "button"; b.className = "secondary";
+      b.addEventListener("click", action); return b;
+    }
+    async function trashAction(payload) {
+      const response = await request("/api/camino/film/project-trash", {method: "POST",
+        headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload)});
+      const data = await response.json();
+      if (!data.ok) throw new Error(data.message || "Koš teď nelze ověřit.");
+      return data;
+    }
+    async function refreshTrash() {
+      if (!trash || trashReview || trashBusy || !active || doc.hidden) return;
+      try {
+        const data = await trashAction({operation: "list"});
+        if (!active || doc.hidden || trashReview) return;
+        trash.replaceChildren();
+        for (const row of data.requests.filter(r => r.state !== "restored")) {
+          const card = text("section", "");
+          card.appendChild(text("h4", `${row.target_kind === "trip" ? "Celá cesta" : "Pouze film"}: ${row.name || "Smazaný projekt"} · ${row.target_id.slice(-8)}`));
+          if (row.target_kind === "film") card.appendChild(text("p", `Cesta · ${row.trip_id.slice(-8)}`));
+          const states = {requested: "Čeká na potvrzení na Macu.", trashed: "V sedmidenním koši.",
+            purging: "Probíhá výmaz. Při překážce zůstává projekt uzavřený a vyžaduje kontrolu.",
+            compacting: "Dokončuji uvolnění místa v databázích. Telefon zatím data uchovává.",
+            purged: row.waiting_for_phone ? "Mac smazán. Čeká na spojení a výmaz iPhonu." : "Výmaz dokončen."};
+          card.appendChild(text("p", states[row.state] || "Stav vyžaduje kontrolu."));
+          if (row.purge_ms) card.appendChild(text("p", `Lhůta Macu: ${new Date(row.purge_ms).toLocaleString("cs-CZ")}`));
+          if (["requested", "trashed"].includes(row.state)) {
+            card.appendChild(button("Zkontrolovat rozsah", () => reviewTrash(row.request_id)));
+            card.appendChild(button(row.state === "requested" ? "Zrušit žádost a obnovit" : "Obnovit projekt", async () => {
+              if (!canSwitch() || !confirmAction("Obnovit tento projekt a znovu povolit jeho práci a přenosy?")) return;
+              try { await trashAction({operation: "restore", request_id: row.request_id}); await refresh(); }
+              catch (error) { status.textContent = error.message; }
+            }));
+          }
+          trash.appendChild(card);
+        }
+        if (!trash.children.length) trash.appendChild(text("p", "Koš je prázdný. Žádosti o smazání celé cesty přicházejí z iPhonu."));
+      } catch (error) { trash.textContent = error.message; }
+    }
+    async function reviewTrash(id) {
+      if (!canSwitch() || trashBusy) return;
+      trashBusy = true;
+      try {
+        const {request: row} = await trashAction({operation: "preview", request_id: id});
+        if (!active) return;
+        trashReview = id; trash.replaceChildren(); trash.closest("details").open = true;
+        trash.appendChild(text("h4", row.target_kind === "trip" ? "Celá cesta včetně originálů a všech filmů" : "Pouze film včetně všech revizí, hlasů, náhledů a exportů"));
+        trash.appendChild(text("p", `Rozsah na Macu: ${row.moment_count || 0} záznamů, ${row.asset_count || 0} originálů, ${row.film_count || 0} filmů, ${row.file_count || 0} souborů · ${((row.bytes || 0) / 1024 ** 3).toFixed(3)} GiB.`));
+        if (row.target_kind === "trip") trash.appendChild(text("p", "Telefon může obsahovat další dosud nepřenesená data. Smaže je až po potvrzení výmazu Macu. Obnovovat lze před uplynutím společné sedmidenní lhůty."));
+        if (row.state === "requested" && row.plan_token) {
+          const label = text("label", `Pro přesun do koše napiš přesně: ${brake}`), input = doc.createElement("textarea");
+          input.rows = 3; label.appendChild(input); trash.appendChild(label);
+          const submit = button("Potvrdit koš na 7 dní", async () => {
+            submit.disabled = true;
+            try {
+              await trashAction({operation: "confirm", request_id: id, plan_token: row.plan_token, confirmation: input.value});
+              trashReview = null; editor.close(); await refresh();
+            } catch (error) { status.textContent = error.message; submit.disabled = input.value !== brake; }
+          });
+          submit.disabled = true; input.addEventListener("input", () => { submit.disabled = input.value !== brake; });
+          trash.appendChild(submit);
+        }
+        trash.appendChild(button("Zpět do přehledu koše", () => { trashReview = null; refreshTrash(); }));
+      } catch (error) { status.textContent = error.message; }
+      finally { trashBusy = false; }
+    }
+    async function requestFilmTrash(item) {
+      if (!trash || !canSwitch() || trashBusy || !confirmAction("Připravit smazání tohoto filmu včetně všech střihů, hlasů a exportů? Originály cesty zůstanou zachované. Rozsah ještě zkontroluješ před potvrzením koše.")) return;
+      try {
+        const result = await trashAction({operation: "film", request_id: crypto.randomUUID(),
+          project_id: item.project_id, trip_id: selection.trip_id});
+        editor.close(); await refresh(); await reviewTrash(result.request.request_id);
+      } catch (error) { status.textContent = error.message; }
+    }
     function storage() { try { return options.storage || window.sessionStorage; } catch (_) { return null; } }
     function remember() { try { storage()?.setItem(storageKey, JSON.stringify(selection)); } catch (_) {} }
     function remembered() {
@@ -61,6 +139,10 @@
         button.type = "button"; button.className = "secondary"; button.disabled = creating;
         button.addEventListener("click", () => choose({...item, trip_id: selection.trip_id}));
         li.appendChild(button); projects.appendChild(li);
+        if (trash) {
+          const remove = text("button", "Smazat celý film…"); remove.type = "button"; remove.className = "secondary";
+          remove.addEventListener("click", () => requestFilmTrash(item)); li.appendChild(remove);
+        }
       }
       catalogStatus.textContent = catalog?.days.length
         ? "Vyber uložený film nebo den vybrané cesty. Před novým filmem potvrdíš konečnost dat na Macu."
@@ -115,6 +197,7 @@
       await check(); return true;
     }
     async function refresh() {
+      await refreshTrash();
       const current = epoch, serial = ++catalogRead;
       catalogStatus.textContent = "Načítám projekty, dny a uložené filmy…";
       try {

@@ -340,6 +340,8 @@ def serve(root: Path):
     for key in ("metadata_db", "auth_db", "media_db", "media_root"):
         os.environ["CAMINO_C05A_" + key.upper()] = str(config[key])
     os.environ["CAMINO_P2B_ROOT"] = str(root / "film-projects")
+    os.environ['CAMINO_MAC_FILM_ROOT'] = str(root.parents[1] / 'CaminoFilmProjects')
+    os.environ['CAMINO_TRASH_VIEWER_ROOT'] = str(config['viewer_media_root'])
     os.environ["CAMINO_CLIENT_UPDATE_ROOT"] = str(root / "client-update")
     reader_path = root / "readers.sqlite"
     if reader_path.exists() and viewer_granted(config, any_project=True):
