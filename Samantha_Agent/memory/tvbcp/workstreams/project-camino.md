@@ -4410,3 +4410,33 @@ Technický důkaz:
   produkčního archivu, střihů, sítě, služby ani instalace aplikace.
 - Python: reports/python_315_assessment_2026_10_24.md. Oficiální 3.15.1
   ověřené, 18 položek metadat a binární dry-run závislostí; bez instalace.
+
+
+### 2026-10-24 11:02 CEST — Text a komentář přímo u fotografie
+
+Hotovo:
+- Celý text se předává a ukládá u fotografie, kde se volí statické zobrazení,
+  plynulé okno nebo uložené české čtení. Původní nahrávky i nové čtení lze
+  navázat na fotografii; přesun obrazu neponechá hlas na starém místě.
+- Chyby jsou u ovládání; náhled fotografie obsahuje skutečný text i zvuk.
+
+Rozhodnutí:
+- Míla schválil všechny tři navržené vývojové kroky. Čtení je místní,
+  bez tichého krácení; prodloužení fotografie a zařazení zvuku jsou výslovné.
+- Původní deník, média a osobní střih se při vývoji nemění. Starší střihy,
+  samostatné karty a ruční časy komentářů zůstávají zpětně kompatibilní.
+
+Další krok:
+- Předat dokončený místní balíček k samostatnému p+n Lunou a poté přejít k přejímce.
+
+Navrhované další kroky:
+- Po nasazení fyzicky ověřit převzetí textu a poslech na Safari/iPhonu.
+- Zachovat přejímku dvou cest, víceprojektový krok 6 a oddělený Python pilot.
+
+Technický důkaz:
+- 72 cílených testů PASS, včetně 13 nových regresí a DOM scénáře s texty/kartami.
+- Syntetický text 3022 znaků u fotografie 25 s: uložení/reload, vědomé prodloužení,
+  přesun, místní TTS a skutečné dekódované MP4 v 720p/1080p PASS.
+- Kontroly soukromí, vazby textu, symlinků a HTTP Origin/HEAD/Range PASS.
+- Plná brána 2206 PASS (450,207 s unit část), po závěrečné drobné úpravě ovládání 22 frontendových testů PASS. Safari/iPhone ani poslech uživatelem neověřené.
+- Podrobnosti: `camino/docs/PHOTO_TEXT_COMMENT_REPORT.md`.

@@ -5,6 +5,11 @@ soukromý Viewer a jednodenní film z povolených podkladů.
 
 ## Aktuální orientace — 24. 10. 2026
 
+Místní přepracování střižny přidává **Text a komentář** přímo u fotografie:
+celý text, statický panel, plynulé okno a uložené české čtení. Hlas připojený
+k fotografii se přesouvá s ní; prodloužení obrazu je výslovné.
+[Postup, ověření a hranice vydání](docs/PHOTO_TEXT_COMMENT_REPORT.md).
+
 Nový místní krok 4–5 přidává výběr povolených cest ve Vieweru a volbu cesty
 před dnem/filmem ve střižně. V aplikaci se zobrazí období i rozlišení shodných
 názvů; nový projekt začíná bez přístupu pro Janu.

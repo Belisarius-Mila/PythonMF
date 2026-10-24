@@ -1,6 +1,6 @@
 # Camino
 
-Aktualizováno: 2026-10-24 09:49 CEST — více projektů, Viewer/Mac a filmová střižna
+Aktualizováno: 2026-10-24 11:02 CEST — text a komentář fotografie ve střižně
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Cíl a hranice
@@ -11,6 +11,8 @@ Offline deník na iPhonu, bezpečné originály a osobní deník na Macu. Celý 
 žádný veřejný web. P1 výběr dalším lidem a P2 film zůstávají oddělené etapy.
 
 ## Aktuální stav
+
+- 2026-10-24 11:02 CEST: Místní přepracování textu a komentáře přímo u fotografie: celý text do 6000 znaků, statický panel, plynulé okno a uložené místní čtení Zuzana; původní nahrávka i syntetický hlas se vážou na fotografii. 72 cílených testů PASS, skutečné syntetické MP4 720p/1080p a celé čtení 3022 znaků PASS. Plná brána 2206 PASS (450,207 s unit část), závěrečné frontendové kontroly 22 PASS. Bez p+n a bez změny osobního střihu; Safari/iPhone NEOVĚŘENO.
 
 - 2026-10-24 09:49 CEST: Místně dokončené kroky 4–5 více projektů: aplikace rozlišuje stejné názvy/období, Viewer má katalog povolených cest a oddělené deníky/mapy/média, granty jsou samostatné, střižna volí cestu a její den. Worker/export používají manifest konkrétního filmu. 34 integračních, Node a skutečné syntetické PNG přes HTTP PASS; iOS Release PASS. plná brána 2193 PASS (453,570 s unit část), závěrečné 3 testy dispatcheru PASS. Bez nového vydání, iPhone/Safari nepřijaté. Python 3.15.1 navržený k oddělenému pilotu, bez instalace.
 

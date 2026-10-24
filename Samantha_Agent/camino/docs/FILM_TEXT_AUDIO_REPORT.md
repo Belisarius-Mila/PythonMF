@@ -1,5 +1,8 @@
 # Texty a komentáře ve střižně — 23. 10. 2026
 
+Tento report popisuje historické vydání. Novější místní přepracování
+textu a hlasu přímo u fotografie je v [reportu z 24. 10.](PHOTO_TEXT_COMMENT_REPORT.md).
+
 ## Rozsah a stav
 
 Panel Texty a komentáře je pushnutý a nasazený do Cockpitu z `d8d16f1b`.

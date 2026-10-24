@@ -8,6 +8,10 @@ Záznamy, revize a exporty se drží vybrané cesty i při shodném datu/názvu.
 Před přepnutím dokonči uložení střihu. Výběr je vlastní každé kartě.
 [Ověření a hranice vydání](../docs/MULTI_PROJECT_ACCESS_REPORT.md).
 
+Místně je také přepracované **Text a komentář** přímo u fotografie:
+statický panel, plynulý text nebo uložené místní české čtení.
+[Nový postup, ověření a hranice vydání](../docs/PHOTO_TEXT_COMMENT_REPORT.md).
+
 Následující vydání panelu Texty a komentáře je dřívější funkční základ:
 
 
@@ -45,47 +49,49 @@ není součástí editoru.
 - Video je výchozí celé. **Otevřít video pro střih** připraví chráněný náhled;
   vyber **Tady začít / Tady skončit**, případně dolaď číselné časy a použij
   **Přehrát výběr**. Tato volba nevyrábí nový filmový export.
-- **Vytvořit náhled záběru s titulkem** u videa už vytvoří dílčí render,
+- **Vytvořit náhled záběru s titulkem** vytvoří u videa i fotografie dílčí render,
   v němž je výsledný titulek i umístěný komentář.
 
 Platné úpravy se automaticky ukládají do nové revize. Před přepnutím nebo
 zavřením vyčkej na potvrzení **Uložena revize**. Při výpadku spojení zůstává
 koncept v otevřené kartě; není to trvalá záloha po jejím násilném zavření.
 
-### 3. Použij text deníku
+### 3. Přidej text přímo k fotografii
 
-V panelu **Texty a komentáře → Texty deníku** vyber přijatý text pro tento
-den. Nabízí se přednostní lidská revize; skryté a soukromé podklady chybějí
-záměrně. Text lze pro film upravit bez změny deníku.
+U fotografie otevři **Text a komentář**. Můžeš napsat vlastní text nebo
+převzít celý přijatý text deníku; tlačítko **Předat celý text na fotografii**
+je také dole v nabídce přijatých textů. Filmový text se ukládá průběžně,
+původní deník zůstává zachovaný. Titulek záběru má samostatný limit 140 znaků;
+text fotografie dovolí až 6000 znaků.
 
-- Vyber zařazený obrazový záběr a **Nahradit titulek záběru**. Titulek má
-  nejvýše 140 znaků na jednom řádku; dlouhý text se automaticky nezkracuje.
-- **Přidat textovou kartu za záběr** vytvoří samostatný obraz na tmavém
-  podkladu na 5 sekund. U karty změň délku, text, zařazení a umístění
-  na začátek nebo za konkrétní záběr. Karta je součástí uložené časové osy.
-- Jedna karta má nejvýše 1000 znaků, délku 0,1–300 s; film nejvýše 32 karet.
-  Pokud se text čitelně nevejde, export jej odmítne. Text vědomě rozděl do
-  více karet nebo uprav; neztrácí se tichým zkrácením.
+Vyber **Statický text přes fotografii**, **Plynulý text v okně**, případně
+zatím **Pouze uložit text**. Dlouhý statický text vyžaduje výběr úryvku;
+pro celý text zvol plynulý režim a **Prodloužit pro celý text / čtení**.
+Délka se sama nemění. Nejvýše 300 sekund na fotografii; delší obsah vědomě
+zkrať. Náhled odmítne nečitelný či příliš rychlý text s vysvětlením u fotografie.
 
-Filmová revize odkazuje na přesnou přijatou textovou revizi a její otisk.
-Pozdější úprava deníku starý střih automaticky nepřepíše. Pro nové podklady
-použij **Načíst poslední střih a texty**; neuložené změny filmu nejprve zachovej.
+**Náhled fotografie s textem a zvukem** ukáže skutečný filmový výsledek.
+Samostatné textové karty mezi obrazy zůstávají dole odděleně: každá do
+1000 znaků, nejvýše 32 karet, výchozí délka 5 sekund. Nejde o text přes fotografii.
 
-### 4. Vlož vlastní komentář
+### 4. Připoj hlas k fotografii
 
-1. U zvukové části zvol **Poslechnout / vybrat úsek**. Po přípravě odvozené
-   poslechové kopie spusť přehrávač; originál se touto cestou nevydává.
-2. Výchozí nabídka je celá nahrávka. Případný začátek a konec vyber ručně.
-3. Vyber obrazový záběr a zvol **Vložit komentář k záběru**. Nastaví se
-   začátek hlasu na začátek tohoto záběru a komentář se zařadí do filmu.
-4. Překrytí jiného hlasu nebo přesah za obraz se odmítne. Prodluž obraz,
-   přidej záběry/kartu nebo vědomě uprav úsek řeči; automatické useknutí není.
-5. Dolaď hlasitost a zvuk videa během komentáře (výchozí poměr 0,2).
-   Ověř souběh v krátkém renderovaném náhledu.
+- Pro čtení filmového textu zvol **Přečíst jako komentář — syntetický hlas**,
+  **Vytvořit místní čtení**, poslechni si zvuk a až pak **Použít čtení ve filmu**.
+  Čte český hlas Zuzana místně na Macu. Namluvení nic neodesílá do externí TTS.
+- Vytvořený zvuk zůstává uložený pro poslech i po obnovení stránky. Jeho
+  vytvoření jej samo nezařadí do filmu. Změna textu vyžaduje nové čtení.
+- U fotografie můžeš také vybrat původní nahrávku, poslechnout a připojit ji.
+  Ruční začátek a konec nastav v **Poslechnout / vybrat úsek** u komentářů dole.
+- Hlas musí vejít do vlastní fotografie. **Prodloužit fotografii pro nahrávku**
+  či **Prodloužit pro celý text / čtení** mění délku teprve po tvém kliknutí.
+  Překrývající se hlasy server odmítne; nenásleduje automatické useknutí.
+- Nové komentáře se přesouvají se svou fotografií. Starší komentář s ručně
+  nastaveným absolutním časem zůstává beze změny; lze jej nově připojit.
 
-**Hlas má uložený absolutní čas.** Po změně pořadí či délek obrazu jeho
-umístění zkontroluj nebo jej vlož k záběru znovu. Automatický přepis,
-generovaný hlas, hudba a AI výběr nejsou součástí této funkce.
+Hlasitost nahrávky a zvuk videa během komentáře (výchozí poměr 0,2) doladíš
+dole. Souběh ověř krátkým renderovaným náhledem. Neprovádí se automatický
+přepis původních nahrávek ani AI výběr obsahu.
 
 ### 5. Vyrob náhled a MP4
 

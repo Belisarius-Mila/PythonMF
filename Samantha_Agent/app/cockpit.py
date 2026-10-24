@@ -8663,6 +8663,12 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "handler_name": "film_editor_action", "test_level": "direct",
     },
     {
+        "path": "/api/camino/film/narration",
+        "label": "Vytvořit místní české čtení uloženého textu fotografie",
+        "risk": "private_write", "confirmation": "explicit_photo_narration_button",
+        "handler_name": "film_editor_action", "test_level": "direct",
+    },
+    {
         "path": "/api/camino/film/delete-plan",
         "label": "Zobrazit rozsah trvalého smazání jedné filmové varianty",
         "risk": "read_only_via_post", "confirmation": "explicit_export_delete_button",
@@ -9675,6 +9681,9 @@ class CockpitServer:
                 if parsed.path.startswith("/api/camino/film/photo/"):
                     self.respond_film_photo(parsed)
                     return
+                if parsed.path.startswith("/api/camino/film/narration/"):
+                    self.respond_film_narration(parsed)
+                    return
                 if parsed.path.startswith("/api/camino/film/output/"):
                     self.respond_film_output(parsed)
                     return
@@ -9985,6 +9994,9 @@ class CockpitServer:
                         return
                 if parsed.path == "/api/camino/film/source":
                     self.respond_film_edit("source", parsed)
+                    return
+                if parsed.path == "/api/camino/film/narration":
+                    self.respond_film_edit("narration", parsed)
                     return
                 if parsed.path == "/api/camino/film/delete-plan":
                     self.respond_film_edit("delete-plan", parsed)
@@ -10870,6 +10882,7 @@ class CockpitServer:
             def respond_film_edit(self, operation, parsed) -> None:
                 payload = self.read_json()
                 keys = {"save": {"project_id", "expected_revision", "request_id", "draft"},
+                    "narration": {"project_id", "revision", "asset_id", "request_id"},
                     "delete-plan": {"project_id", "job_id"},
                     "delete": {"project_id", "job_id", "plan_token", "confirmation"},
                     "source": {"project_id", "asset_id", "request_id"},
@@ -10885,10 +10898,50 @@ class CockpitServer:
                 parsed = urlparse(self.path)
                 if parsed.path.startswith("/api/camino/film/photo/"):
                     self.respond_film_photo(parsed)
+                elif parsed.path.startswith("/api/camino/film/narration/"):
+                    self.respond_film_narration(parsed)
                 elif parsed.path.startswith("/api/camino/film/output/"):
                     self.respond_film_output(parsed)
                 else:
                     self.send_error(HTTPStatus.METHOD_NOT_ALLOWED)
+
+            def respond_film_narration(self, parsed) -> None:
+                from app.camino_film_narration import narration_bytes
+                try:
+                    parts = parsed.path.split("/")
+                    if parsed.query or len(parts) != 7:
+                        raise ValueError("invalid narration request")
+                    data = narration_bytes(production_editor(project_id=parts[5]), parts[5], parts[6])
+                except Exception:
+                    if self.command == "HEAD":
+                        self.send_response(HTTPStatus.NOT_FOUND)
+                        self.send_header("Content-Length", "0")
+                        self.end_headers()
+                        return
+                    self.respond_json({"ok": False, "message": "Komentář není dostupný."}, status=HTTPStatus.NOT_FOUND)
+                    return
+                first, last = 0, len(data) - 1
+                partial = bool(self.headers.get("Range"))
+                if partial:
+                    try:
+                        first, last = parse_single_http_byte_range(self.headers["Range"], len(data))
+                    except ValueError:
+                        self.send_response(HTTPStatus.REQUESTED_RANGE_NOT_SATISFIABLE)
+                        self.send_header("Content-Range", f"bytes */{len(data)}")
+                        self.send_header("Content-Length", "0")
+                        self.end_headers()
+                        return
+                self.send_response(HTTPStatus.PARTIAL_CONTENT if partial else HTTPStatus.OK)
+                self.send_header("Content-Type", "audio/mp4")
+                self.send_header("Cache-Control", "no-store, private, max-age=0")
+                self.send_header("X-Content-Type-Options", "nosniff")
+                self.send_header("Accept-Ranges", "bytes")
+                self.send_header("Content-Length", str(last - first + 1))
+                if partial:
+                    self.send_header("Content-Range", f"bytes {first}-{last}/{len(data)}")
+                self.end_headers()
+                if self.command != "HEAD":
+                    self.wfile.write(data[first:last + 1])
 
             def respond_film_photo(self, parsed) -> None:
                 try:

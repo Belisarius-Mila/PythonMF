@@ -13,7 +13,7 @@ function node() {
 }
 const doc = {hidden: false, createElement: node, addEventListener() {}};
 const nodes = Object.fromEntries(["status", "shots", "voices", "jobs", "save", "preview", "final", "range", "from", "to", "duck", "player", "reload",
-  "source", "sourcePlayer", "sourceStatus", "sourceTitle", "selection", "start", "end", "playSelection"].map(k => [k, node()]));
+  "source", "sourcePlayer", "sourceStatus", "sourceTitle", "selection", "start", "end", "playSelection", "texts", "cards"].map(k => [k, node()]));
 const root = node(); root.querySelector = selector => nodes[selector.match(/"(.*?)"/)[1]];
 const sid = "00000000-0000-0000-0000-000000000001", pid = "00000000-0000-0000-0000-000000000002";
 let view = {ok: true, project_id: pid, revision: 1, duration_ms: 3000,
@@ -79,7 +79,7 @@ async function main() {
   const photoLink = photoActions.find(n => n.textContent === "Otevřít fotografii");
   assert(photoLink); assert.equal(photoLink.href, `/api/camino/film/photo/${pid}/${sid}`);
   assert.equal(photoLink.target, "_blank"); assert.equal(photoLink.rel, "noopener noreferrer");
-  assert(!photoActions.some(n => n.textContent === "Vytvořit náhled záběru s titulkem"));
+  assert(photoActions.some(n => n.textContent === "Vytvořit náhled záběru s titulkem"));
   titleInput().value = "Manual title"; titleInput().emit("change");
   assert.equal(nodes.preview.disabled, true);
   const auto = clock.find(t => t.delay === 700); await auto.fn(); await flush();

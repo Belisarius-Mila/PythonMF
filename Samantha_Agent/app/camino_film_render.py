@@ -10,16 +10,17 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
-from app.camino_film_editor import validate_draft, timeline_shots, TEXT_CARD_FIT_ERROR
+from app.camino_film_editor import validate_draft, timeline_shots, resolved_voices, TEXT_CARD_FIT_ERROR
+from app.camino_film_layers import layer_image
 from app.camino_film_photo import PHOTO_VIEW_SIZE, decode_photo, read_photo
 from camino.film.media import FONT, binary, duration_ms, probe, title_image
 from camino.film.project import FilmError, digest, fingerprint, write_json
 from camino.film.render import DiskMeter, PROFILES
 
 
-def ffmpeg(args, *, timeout=600):
+def ffmpeg(args, *, timeout=600, executable=None):
     try:
-        result = subprocess.run(["/usr/bin/nice", "-n", "10", binary("ffmpeg"), "-nostdin", "-hide_banner",
+        result = subprocess.run(["/usr/bin/nice", "-n", "10", executable or binary("ffmpeg"), "-nostdin", "-hide_banner",
              "-v", "error", "-xerror", "-n", "-threads", "2", "-filter_complex_threads", "1",
              *args], stdin=subprocess.DEVNULL, capture_output=True, timeout=timeout,
              check=False, umask=0o077)
@@ -40,9 +41,10 @@ def window(draft, total, interval):
         if hi > lo:
             offset = lo - cursor
             shots.append({**shot, "in_ms": shot["in_ms"] + offset,
-                "out_ms": shot["in_ms"] + offset + hi - lo, "at_ms": lo - start})
+                "out_ms": shot["in_ms"] + offset + hi - lo, "at_ms": lo - start,
+                "photo_offset_ms": offset, "photo_duration_ms": length})
         cursor += length
-    for voice in draft["voices"]:
+    for voice in resolved_voices(draft):
         if not voice["included"]:
             continue
         lo = max(start, voice["at_ms"])
@@ -133,8 +135,9 @@ def render_audio_preview(edit, manifest, objects, output, *, revalidate):
     return receipt
 
 
-def render_edit(edit, manifest, objects: Path, output: Path, profile, interval, *, progress, revalidate):
-    total = validate_draft(edit["draft"], manifest)
+def render_edit(edit, manifest, objects: Path, output: Path, profile, interval, *, progress, revalidate, narration_paths=None):
+    total = validate_draft(edit["draft"], manifest, for_render=True)
+    narration_paths = narration_paths or {}
     shots, voices, length = window(edit["draft"], total, interval)
     width, height, quality = PROFILES[profile]
     estimate = math.ceil(length / 1000 * 8_000_000) + 64 * 1024**2
@@ -195,7 +198,23 @@ def render_edit(edit, manifest, objects: Path, output: Path, profile, interval, 
                 f"pad={width}:{height}:(ow-iw)/2:(oh-ih)/2,setsar=1,format=yuv420p,"
                 f"tpad=stop_mode=clone:stop_duration=0.1,trim=duration={seconds}[base]",
                 f"[base][1:v]overlay=eof_action=repeat:shortest=0,trim=duration={seconds},"
-                "setparams=range=limited:color_primaries=bt709:color_trc=bt709:colorspace=bt709[video]"]
+                "setparams=range=limited:color_primaries=bt709:color_trc=bt709:colorspace=bt709[captioned]"]
+            layer = shot.get("photo_text", {})
+            mode = layer.get("mode")
+            if mode in ("static", "scroll"):
+                panel = output / f"text-{index:04d}.png"
+                layer_image(panel, layer["text"], (width, height), mode)
+                args += ["-loop", "1", "-framerate", "30", "-protocol_whitelist", "file,pipe", "-i", str(panel)]
+                if mode == "static":
+                    graph.append("[captioned][2:v]overlay=eof_action=repeat:shortest=0[video]")
+                else:
+                    win = round(height * .43)
+                    offset, duration = shot["photo_offset_ms"] / 1000, shot["photo_duration_ms"] / 1000
+                    graph.append(f"[2:v]format=rgba,pad=iw:ih+{win*2}:0:{win}:color=0x0c121ceb,"
+                        f"crop=iw:{win}:0:y='(ih-oh)*(t+{offset})/{duration}'[flow]")
+                    graph.append(f"[captioned][flow]overlay=x={round(width*.07)}:y={round(height*.49)}:shortest=1[video]")
+            else:
+                graph.append("[captioned]null[video]")
             has_audio = not card and any(s["codec_type"] == "audio" for s in info[shot["asset_id"]]["streams"])
             audio = f"[0:a]atrim=start={start}:end={end},asetpts=PTS-STARTPTS," if has_audio else "anullsrc=r=48000:cl=stereo,"
             graph.append(audio + "aresample=48000,aformat=sample_fmts=fltp:channel_layouts=stereo,"
@@ -222,7 +241,11 @@ def render_edit(edit, manifest, objects: Path, output: Path, profile, interval, 
             end = at + (voice["out_ms"] - voice["in_ms"]) / 1000
             graph.append(f"[{bed}]volume={edit['draft']['duck_gain']}:enable='between(t,{at},{end})'[duck{index}]")
             bed = f"duck{index}"
-            args += ["-protocol_whitelist", "file,pipe", "-i", str(objects / (voice["asset_id"] + ".bin"))]
+            path = (narration_paths.get(voice["narration_id"]) if "narration_id" in voice
+                    else objects / (voice["asset_id"] + ".bin"))
+            if path is None:
+                raise FilmError("Chybí ověřený hlas fotografie.")
+            args += ["-protocol_whitelist", "file,pipe", "-i", str(path)]
             graph.append(f"[{index+1}:a]atrim=start={voice['in_ms']/1000}:end={voice['out_ms']/1000},"
                 "asetpts=PTS-STARTPTS,aresample=48000,aformat=sample_fmts=fltp:channel_layouts=stereo,"
                 f"volume={voice['gain']},adelay={voice['at_ms']}:all=1,apad,atrim=duration={length/1000}[voice{index}]")

@@ -18,6 +18,7 @@ from uuid import UUID, uuid4
 
 from app.camino_film_workshop import DAY, production_store
 from app.camino_film_photo import MAX_PHOTO_BYTES, decode_photo
+from app.camino_film_layers import validate_layer, validate_display
 from app.file_persistence import FilePersistenceError, atomic_write_json
 from camino.film.closed_day import ClosedDayError, _private_directory, _store_lock
 from camino.film.project import FilmError, digest, fingerprint, write_json
@@ -57,6 +58,8 @@ def text_reference(value):
 def text_references(draft):
     refs = [r["text_source"] for r in draft["shots"] if "text_source" in r]
     refs += [r["text_source"] for r in draft.get("cards", [])]
+    refs += [r["photo_text"]["text_source"] for r in draft["shots"]
+             if r.get("photo_text", {}).get("text_source") is not None]
     for ref in refs:
         text_reference(ref)
     return refs
@@ -76,7 +79,36 @@ def timeline_shots(draft):
     return rows
 
 
-def validate_draft(draft, manifest):
+def resolved_voices(draft):
+    """Photo identity is authoritative; absolute timing remains for legacy edits."""
+    starts, cursor = {}, 0
+    photos = {r["asset_id"]: r for r in draft["shots"]}
+    for row in timeline_shots(draft):
+        if row["included"]:
+            if "asset_id" in row:
+                starts[row["asset_id"]] = cursor
+            cursor += row["out_ms"] - row["in_ms"]
+    voices = []
+    for row in draft["voices"]:
+        item = dict(row)
+        if row.get("photo_asset_id") is not None and row["included"]:
+            sid = row["photo_asset_id"]
+            if sid not in starts or row["out_ms"] - row["in_ms"] > photos[sid]["out_ms"]:
+                raise FilmError("Komentář přesahuje svou fotografii nebo je fotografie vyřazená. Prodluž ji nebo komentář vyřaď.")
+            item["at_ms"] = starts[sid]
+        voices.append(item)
+    for sid, row in photos.items():
+        layer = row.get("photo_text", {})
+        n = layer.get("narration")
+        if row["included"] and layer.get("mode") == "narration" and n and n["included"]:
+            if n["duration_ms"] > row["out_ms"]:
+                raise FilmError("Čtení přesahuje fotografii. Prodluž ji podle komentáře nebo vyber kratší text.")
+            voices.append({"narration_id": n["id"], "at_ms": starts[sid], "in_ms": 0,
+                "out_ms": n["duration_ms"], "gain": 1, "included": True})
+    return voices
+
+
+def validate_draft(draft, manifest, *, for_render=False):
     exact(draft, "shots voices duck_gain" + (" cards" if isinstance(draft, dict) and "cards" in draft else ""))
     gain(draft["duck_gain"])
     sources = {s["asset_id"]: s for s in manifest["sources"]}
@@ -90,12 +122,25 @@ def validate_draft(draft, manifest):
         seen = set()
         for row in rows:
             exact(row, "asset_id in_ms out_ms gain included " + ("title" if kind == "visual" else "at_ms")
-                  + (" text_source" if kind == "visual" and isinstance(row, dict) and "text_source" in row else ""))
+                  + (" text_source" if kind == "visual" and isinstance(row, dict) and "text_source" in row else "")
+                  + (" photo_text" if kind == "visual" and isinstance(row, dict) and "photo_text" in row else "")
+                  + (" photo_asset_id" if kind == "audio" and isinstance(row, dict) and "photo_asset_id" in row else ""))
             sid = row["asset_id"]
             if not isinstance(sid, str) or sid not in expected or sid in seen:
                 raise FilmError("Střih odkazuje na cizí nebo duplicitní zdroj.")
             seen.add(sid)
             source = sources[sid]
+            if "photo_text" in row:
+                if source["media_kind"] != "photo":
+                    raise FilmError("Textová vrstva patří pouze k fotografii.")
+                validate_layer(row["photo_text"], exact=exact, identifier=identifier,
+                               integer=integer, text_reference=text_reference)
+                if for_render:
+                    validate_display(row)
+            if "photo_asset_id" in row:
+                target = sources.get(row["photo_asset_id"])
+                if target is None or target["media_kind"] != "photo":
+                    raise FilmError("Komentář vyžaduje fotografii z tohoto filmu.")
             if type(row["included"]) is not bool:
                 raise FilmError("Zařazení musí být výslovná volba.")
             integer(row["in_ms"], 0, MAX_MS)
@@ -116,8 +161,6 @@ def validate_draft(draft, manifest):
                     total += row["out_ms"] - row["in_ms"]
             else:
                 integer(row["at_ms"], 0, MAX_MS)
-                if row["included"]:
-                    spans.append((row["at_ms"], row["at_ms"] + row["out_ms"] - row["in_ms"]))
     cards = draft.get("cards", [])
     if not isinstance(cards, list) or len(cards) > 32:
         raise FilmError("Jeden film může mít nejvýše 32 textových karet.")
@@ -138,6 +181,9 @@ def validate_draft(draft, manifest):
         if card["included"]:
             total += card["duration_ms"]
     text_references(draft)
+    for voice in resolved_voices(draft):
+        if voice["included"]:
+            spans.append((voice["at_ms"], voice["at_ms"] + voice["out_ms"] - voice["in_ms"]))
     integer(total, 100, MAX_MS)
     spans.sort()
     if any(end > total for _, end in spans):
@@ -163,10 +209,12 @@ class FilmEditor:
             raise FilmError("První editor podporuje nejvýše 256 zdrojů jednoho dne.")
         return folder, manifest
 
-    def verify_texts(self, manifest, draft):
+    def verify_texts(self, manifest, draft, *, project_id=None):
         refs = text_references(draft)
         if refs:
             self.store.text_choices(manifest, refs)
+        from app.camino_film_narration import narration_paths
+        return narration_paths(self, manifest, draft, project_id=project_id)
 
     def photo_bytes(self, project_id, asset_id):
         """Return a metadata-free PNG of a currently permitted original photo."""
@@ -256,6 +304,7 @@ class FilmEditor:
     def view(self, project_id=None):
         folder, manifest = self.inputs(project_id)
         edit = self.revision(folder, manifest)
+        self.verify_texts(manifest, edit["draft"], project_id=folder.name)
         return {"ok": True, "project_id": folder.name, "local_date": manifest["local_date"],
                 "revision": edit["revision"], "draft": edit["draft"],
                 "duration_ms": validate_draft(edit["draft"], manifest),
@@ -272,7 +321,7 @@ class FilmEditor:
         request_id = identifier(payload["request_id"])
         folder, manifest = self.inputs(project_id)
         validate_draft(payload["draft"], manifest)
-        self.verify_texts(manifest, payload["draft"])
+        self.verify_texts(manifest, payload["draft"], project_id=folder.name)
         request_hash = fingerprint(payload)
         with _store_lock(self.store.root):
             for path in folder.glob("edit-r*.json"):
@@ -344,10 +393,10 @@ class FilmEditor:
         folder, manifest = self.inputs(identifier(payload["project_id"]))
         identifier(payload["request_id"])
         edit = self.revision(folder, manifest, payload["revision"])
-        self.verify_texts(manifest, edit["draft"])
+        self.verify_texts(manifest, edit["draft"], project_id=folder.name)
         if payload["profile"] not in ("preview", "final"):
             raise FilmError("Vyber náhled 720p nebo finále 1080p.")
-        total = validate_draft(edit["draft"], manifest)
+        total = validate_draft(edit["draft"], manifest, for_render=True)
         if payload["range"] is not None:
             exact(payload["range"], "start_ms end_ms")
             start, end = payload["range"]["start_ms"], payload["range"]["end_ms"]
@@ -471,15 +520,16 @@ class FilmEditor:
                                     or fingerprint(self.job_edit(folder, current, spec)) != spec["edit_sha256"]):
                                 raise FilmError("Uložené podklady se během renderu změnily.")
                             if "source_asset_id" not in spec:
-                                self.verify_texts(current, edit["draft"])
+                                self.verify_texts(current, edit["draft"], project_id=folder.name)
                         revalidate()
                         if "audio_preview" in edit:
                             receipt = render_audio_preview(edit, manifest, self.store.media.objects,
                                 attempt, revalidate=revalidate)
                         else:
+                            paths = self.verify_texts(manifest, edit["draft"], project_id=folder.name)
                             receipt = render_edit(edit, manifest, self.store.media.objects, attempt,
                                 spec["profile"], spec["range"], progress=progress,
-                                revalidate=revalidate)
+                                revalidate=revalidate, **({"narration_paths": paths} if paths else {}))
                         revalidate()
                         atomic_write_json(state_path, {"state": "ready", "progress": 100,
                             "output": str((attempt / "film.mp4").relative_to(directory)),
@@ -503,7 +553,7 @@ class FilmEditor:
         spec = self.store._read(directory / "request.json")
         edit = self.job_edit(folder, manifest, spec)
         if "source_asset_id" not in spec:
-            self.verify_texts(manifest, edit["draft"])
+            self.verify_texts(manifest, edit["draft"], project_id=folder.name)
         if fingerprint(edit) != spec["edit_sha256"] or fingerprint(manifest) != spec["manifest_sha256"]:
             raise FilmError("Export už neodpovídá uloženým podkladům.")
         state = self.store._read(directory / "status.json")
@@ -552,6 +602,9 @@ def film_editor_action(operation, payload=None):
             return editor.enqueue(payload)
         if operation == "source":
             return editor.source_preview(payload)
+        if operation == "narration":
+            from app.camino_film_narration import prepare_narration
+            return prepare_narration(editor, payload)
         if operation in ("delete-plan", "delete"):
             from app.camino_film_cleanup import deletion_plan, delete_export
             return (deletion_plan if operation == "delete-plan" else delete_export)(editor, payload)

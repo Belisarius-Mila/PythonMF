@@ -39,8 +39,8 @@ def ffmpeg(args: list[str], *, timeout: int = 180) -> None:
          '-threads', '2', '-filter_complex_threads', '1', *args], timeout=timeout)
 
 
-def probe(path: Path) -> dict:
-    result = run([binary('ffprobe'), '-v', 'error', '-protocol_whitelist', 'file,pipe',
+def probe(path: Path, *, executable: str | None = None) -> dict:
+    result = run([executable or binary('ffprobe'), '-v', 'error', '-protocol_whitelist', 'file,pipe',
                   '-show_streams', '-show_format', '-of', 'json', str(path)])
     return json.loads(result.stdout)
 

@@ -1459,3 +1459,11 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
 
 - Závěrečná přejímka kroku: plná brána 2193 PASS, iOS Release PASS a
   explicitní odmítnutí chybného tvaru požadavku před otevřením archivu.
+
+
+### LL-080 — Ovládání textu fotografie potřebuje skutečný DOM scénář
+
+- Problém: dlouhý text odmítly limity titulku/karty, chyba byla daleko od tlačítka; původní DOM test vůbec nevytvářel kontejnery textů a karet.
+- Typ: opakující se
+- Řešení nalezeno: 24102026
+- Řešení: testovat skutečnou sekci s dlouhým textem, místní chybou a následným kliknutím, uložením, reloadem a přesunem fotografie. Textová karta mezi obrazy není vrstva přes fotografii. Čtení musí zachovat celý zvolený text a mít změřenou délku; chatový TTS helper s krácením pro film nepoužívat. Ověřeno syntetickým 3022znakovým vstupem, skutečnými MP4 a místním TTS.
