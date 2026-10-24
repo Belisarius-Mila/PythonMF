@@ -1485,3 +1485,10 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
 - Typ: opakující se
 - Řešení nalezeno: 24102026
 - Řešení: lokální změna a úspěšné potvrzení save zvýší generaci čtecích požadavků. Odpověď s původní generací se nesmí aplikovat ani skrýt rozpracovaný formulář. Ověřit oba souběhy s řízenými odpověďmi, nejen běžné uložení/reload. Nový DOM scénář FAIL před opravou → PASS po ní; žádná migrace uložených dat.
+
+### LL-083 — Po uzavřeném kroku dlouhého vlákna doporuč nový chat s bodem navázání
+
+- Problém: dlouhý rozhovor zatěžuje pracovní kontext; přechod bez uloženého stavu ztěžuje navázání a záměna `/new` za obnovu může odvést od existujícího návrhu.
+- Typ: opakující se
+- Řešení nalezeno: 24102026
+- Řešení: po uzavřeném kroku dlouhého vlákna doporuč Mílovi `/new` pro nový chat ve stejném CLI a projektu. Nejprve zachovej stav, necommitovanou práci a připrav stručný startovní pokyn s kanonickým handoffem, posledním relevantním commitem/publikační účtenkou a otevřenými kroky; navazující relace nejdřív jen obnoví kontext a ověří stav. Pro návrat k existujícímu uloženému rozhovoru použij `/resume`. Příkaz nespouštěj automaticky, původní chat nemaž a nevymýšlej limit délky ani zbývající kapacitu. Význam příkazů ověřen v oficiální dokumentaci Codex CLI; samotný přechod do nového chatu zde nebyl prakticky testován. Kanonický postup: [Nový chat po dlouhé práci](technical/session_recovery_rules.md#nový-chat-po-dlouhé-práci).

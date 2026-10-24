@@ -14,6 +14,24 @@ nevyžaduje opakované čtení celého návodu ani opakování startovací diagn
 2. Projektova pamet v `memory/` chrani dlouhodoby kontext, kdyz spadne samotny Codex
    nebo je potreba zacit novy chat.
 
+## Nový chat po dlouhé práci
+
+Po uzavřeném kroku dlouhého vlákna doporuč Mílovi `/new`, pokud chce pokračovat
+s čerstvým kontextem ve stejném projektu a CLI. Pevný limit délky nestanovuj;
+bez měření netvrď, kolik kontextu zbývá. Příkaz zadává Míla.
+
+Před přechodem zachovej obnovitelný stav podle sekce `Ruční handoff a předání
+práce`; necommitované změny nezahazuj. Připrav krátký startovní pokyn s projektem,
+kanonickým handoffem, posledním relevantním commitem a případnou publikační
+účtenkou, otevřenými kroky a požadavkem nejdřív jen obnovit kontext a ověřit stav.
+Citlivý obsah do něj nekopíruj. Nový chat automaticky nepřebírá celý rozhovor.
+
+Pro návrat k existujícímu uloženému rozhovoru nebo rozpracovanému návrhu použij
+`/resume` a vyber příslušnou relaci. Původní chat nemaž. `/new` zahajuje nový chat;
+není to restart terminálu ani služby. Význam příkazů ověřen v
+[oficiálním přehledu Codex CLI](https://learn.chatgpt.com/docs/developer-commands#built-in-slash-commands)
+dne 24. 10. 2026; opakovatelná zásada je také v LL-083.
+
 ## Doporučený start
 
 Pro beznou praci pouzit:
