@@ -106,6 +106,8 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Infrastructure Recovery
 
+- `infrastructure/operating_model.md`; `handoffs/workstreams/project-samantha-infrastructure.md`; `tvbcp/workstreams/project-samantha-infrastructure.md` — [PRIPOMENOUT] 24. 10. schválené první dávky úklidu SSD: skutečně +22,30 GiB, volno 41,38 GiB; cíl +30 GiB ještě otevřený. Pokračování potřebuje správce pro systémovou cache a bezpečné dokončení čekajících aktualizací. Camino/Cockpit/autosave zachované.
+
 - `handoffs/workstreams/project-samantha-infrastructure.md`; `tvbcp/workstreams/project-samantha-infrastructure.md` — 19. 10. TXT 1.2 uložen na externí Falta a do iCloud Drive, shodný SHA-256 všech čtyř kopií a dokončený cloud upload potvrzený. Dřívější záloha Camina a souborová obnova PASS, 34 cílených a plná brána 2 133/2 133. [PRIPOMENOUT] úplný nový Mac má samostatnou přejímku.
 
 - `handoffs/autosave_cleanup_ssd_space_recovery_2026_08_15.md` - [PRIPOMENOUT]

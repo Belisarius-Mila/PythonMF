@@ -1,6 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-24 15:30 CEST: Po výslovné globální brzdě proveden schválený úklid SSD. Čtecí měření 19,08 → 41,38 GiB volných, skutečný zisk 22,30 GiB; cíl dalších 30 GiB dosud nesplněn. Publikační kopie odstraněné po ověřené záchraně ignorovaných souborů; dokončené buildy, staré autosave a DeviceSupport uklizené. Starý simulátor odstraněný až po zachování dat. Camino/Cockpit/autosave před/po shodné. Zbývá systémová cache (správce macOS) a novější čekající aktualizace aplikací; aktivní instalátory se nemazaly. Private účtenka a zachované soubory: data/private/ssd_cleanup_20261024/.
+
 - 2026-10-19 22:13 CEST: Aktuální TXT 1.2 uložen do kořene externího disku Falta
   a do kořene iCloud Drive jako `OBNOVA_SAMANTHY_NOVY_MAC.txt`. Projekt,
   Plocha, externí SSD i iCloud mají shodný SHA-256. macOS Foundation
@@ -322,3 +324,48 @@ Technický důkaz:
 - Rizika: plná obnova nebyla provedena; Keychain, systémová oprávnění,
   aktuálnost nezamčených závislostí a změny uživatele/architektury vyžadují
   vlastní kontrolu. Backup pokrytí Camina je otevřená funkční mezera.
+
+
+### 2026-10-24 15:30 CEST — Schválený úklid SSD, první dávky a zbývající překážky
+
+Hotovo:
+- SSD má při kontrole 41,38 GiB volných proti výchozím 19,08 GiB; skutečný
+  přírůstek je 22,30 GiB. Cíl uvolnit dalších 30 GiB zůstává otevřený.
+- Odstraněné čisté publikační kopie ze září/října po ověření dosažitelnosti
+  historie a zachování 3 798 ignorovaných souborů se shodnými SHA-256.
+- Uklizený nevyužívaný aktualizační balíček Claude, přesné dokončené buildy
+  a testovací výstupy, zbytky instalace Microsoftu, DerivedData a 134 starých
+  autosave souborů. Posledních 12 dvojic a všechny aktuální obnovy zachované.
+- Obě složky symbolů iPhonu v DeviceSupport odstraněné. Starý vypnutý
+  simulátor Camino UI odstraněný přes simctl až po ověřené záchraně dat
+  aplikací, médií, předvoleb a testovacího keychainu (583 souborů / 161 MB).
+
+Rozhodnutí:
+- Míla výslovně potvrdil globální brzdu pro postupné body 1–4 návrhu.
+- Produkční data Camina, rodinná média, iCloud/CloudKit, Claude VM a historie
+  Codexu zůstávají mimo úklid. Přesun rodinného archivu není autorizovaný.
+- Stažené balíčky VS Code, Notion a ChatGPT jsou novější než instalované
+  aplikace; jejich čekající aktualizátory nebyly ukončeny ani smazány.
+
+Další krok:
+- Dokončit administrátorem schválený omezený úklid systémové cache simulátoru
+  a dořešit čekající aktualizace bez ztráty otevřených relací; znovu změřit df.
+
+Navrhované další kroky:
+- Po dosažení cíle vrátit se k praktické přejímce střižny Camino.
+- Nová recovery záloha po připojení externího disku; poslední jádro je 18. 10.
+
+Technický důkaz:
+- Private receipt.json, preservation manifesty a jednorázové helpery jsou
+  pouze data/private/ssd_cleanup_20261024/; necommitovat jejich obsah.
+- Registrovaný protected_snapshot před/po shodný: Camino PID 1761, původní
+  konfigurace a Serve, autosave jeden proces 1855; automatický úklid vypnutý.
+  Cockpit health HTTP 200, PID 59746 a otisk aee39190d9dd21aa zachované.
+- Git reference a pracovní main po úklidu shodné. Systémová dyld cache 4,28 GiB
+  má root vlastníka; sudo -n není dostupné. Připravený helper dosud nespuštěný.
+- Logické/alokované velikosti nejsou zisk df: například instalační zbytky
+  Microsoftu sdílely bloky a odstranění simulátoru doběhlo asynchronně.
+- Rychlá statická brána PASS; aplikační kód se neměnil, plná vývojová sada
+  se neopakovala. Push, nasazení ani restart neproběhly.
+- Prázdný osiřelý index.lock starý 36 minut archivovaný do private evidence
+  po ověření nulových otevřených držitelů a nepřítomnosti Git procesu.

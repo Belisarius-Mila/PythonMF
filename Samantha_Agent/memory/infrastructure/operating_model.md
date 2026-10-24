@@ -89,3 +89,14 @@ Ulozit datovou vetu jen kdyz Mila vyslovne chce snapshot:
 - Systemove reporty maji zustat agregovane a bez soukromeho obsahu.
 - Sitove a SSH dokumenty nesmi obsahovat privatni klice, auth keys ani citlivou
   konfiguraci.
+
+
+## Úklid SSD — 2026-10-24 15:30 CEST
+
+Schválené první dávky uvolnily měřených 22,30 GiB (19,08 → 41,38 GiB
+volných). Cíl dalších 30 GiB zatím nesplněný; systémová cache potřebuje
+správce macOS a novější aktualizace čekají na bezpečné dokončení.
+Aktuální postup a hranice jsou v kanonickém handoffu a TVBCP
+`project-samantha-infrastructure`; zachované soubory i private účtenky
+jsou v `data/private/ssd_cleanup_20261024/`. Před pokračováním číst receipt
+a znovu měřit df; neopakovat slepě mazání.
