@@ -91,12 +91,12 @@ Ulozit datovou vetu jen kdyz Mila vyslovne chce snapshot:
   konfiguraci.
 
 
-## Úklid SSD — 2026-10-24 15:30 CEST
+## Úklid SSD — 2026-10-24 15:43 CEST
 
-Schválené první dávky uvolnily měřených 22,30 GiB (19,08 → 41,38 GiB
-volných). Cíl dalších 30 GiB zatím nesplněný; systémová cache potřebuje
-správce macOS a novější aktualizace čekají na bezpečné dokončení.
-Aktuální postup a hranice jsou v kanonickém handoffu a TVBCP
-`project-samantha-infrastructure`; zachované soubory i private účtenky
-jsou v `data/private/ssd_cleanup_20261024/`. Před pokračováním číst receipt
-a znovu měřit df; neopakovat slepě mazání.
+Úklid po výslovné globální brzdě dokončen: měřených +30,10 GiB
+(19,07 → 49,18 GiB volných). Systémová cache zůstala zachovaná po
+odmítnutí macOS; ochrany a oprávnění se neměnily. Potřebná data, účtenky
+a malá hashově ověřená obnova syntetických testů jsou v soukromé evidenci.
+Camino/Cockpit/autosave před/po shodné. Podrobnosti jsou v kanonickém
+handoffu a TVBCP `project-samantha-infrastructure`; další krok je návrat
+k praktické přejímce střižny Camino. Cache se při práci mohou znovu vytvářet.

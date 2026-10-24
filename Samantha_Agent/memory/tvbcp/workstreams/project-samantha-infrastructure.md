@@ -1,6 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-24 15:43 CEST: Schválený úklid SSD dokončen: skutečně +30,10 GiB, volno 19,07 → 49,18 GiB. Publikační kopie, instalační zbytky, vybrané sestavovací cache a syntetické testovací payloady uklizené; potřebná data a účtenky zachované. Systémová cache 4,28 GiB zůstala nedotčená po odmítnutí macOS i se správcem; žádná změna ochran/oprávnění. Ukončeni pouze čekající aktualizační pomocníci, hlavní aplikace běží se shodnými binárními otisky. Camino/Cockpit/autosave před/po shodné. Další krok: návrat k praktické přejímce střižny, bez dalšího mazání.
+
 - 2026-10-24 15:30 CEST: Po výslovné globální brzdě proveden schválený úklid SSD. Čtecí měření 19,08 → 41,38 GiB volných, skutečný zisk 22,30 GiB; cíl dalších 30 GiB dosud nesplněn. Publikační kopie odstraněné po ověřené záchraně ignorovaných souborů; dokončené buildy, staré autosave a DeviceSupport uklizené. Starý simulátor odstraněný až po zachování dat. Camino/Cockpit/autosave před/po shodné. Zbývá systémová cache (správce macOS) a novější čekající aktualizace aplikací; aktivní instalátory se nemazaly. Private účtenka a zachované soubory: data/private/ssd_cleanup_20261024/.
 
 - 2026-10-19 22:13 CEST: Aktuální TXT 1.2 uložen do kořene externího disku Falta
@@ -496,3 +498,48 @@ Technický důkaz:
   se neopakovala. Push, nasazení ani restart neproběhly.
 - Prázdný osiřelý index.lock starý 36 minut archivovaný do private evidence
   po ověření nulových otevřených držitelů a nepřítomnosti Git procesu.
+
+
+### 2026-10-24 15:43 CEST — Úklid SSD dokončen, měřený zisk přes 30 GiB
+
+Hotovo:
+- Cíl splněn: volno 19,07 → 49,18 GiB, skutečný přírůstek 30,10 GiB.
+- Dokončen úklid čekajících instalačních balíčků a regenerovatelných Swift
+  a Xcode sestavovacích cache. Hlavní aplikace ChatGPT, VS Code a Notion
+  běží se stejnými PID a shodnými otisky executable/Info.plist.
+- Dvanáct starých syntetických přenosových vzorků obsahovalo totožná
+  generovaná data. Před odstraněním 168 binárních souborů byly ověřené
+  všechny SHA-256; malá gzip kopie (390 851 B) prošla úplnou obnovou hashů.
+  Původní JSON účtenky, manifesty a výsledky testů zůstaly zachované.
+
+Rozhodnutí:
+- Pokračování pokrývala již udělená globální brzda a Mílův pokyn pokračovat.
+- Čekající aktualizační pomocníci ukončeni šetrně, hlavní aplikace zachované;
+  odstraněné novější instalační balíčky se při další aktualizaci stáhnou znovu.
+- Systémový dialog správce potvrzen, ale macOS odmítl přímé odstranění
+  souborů dyld cache. Jejích 4,28 GiB zůstává zachovaných; žádná změna SIP,
+  systémových oprávnění, Full Disk Access ani instalovaného runtime.
+- Produkční Camino, rodinná média, Claude VM, iCloud/CloudKit a historie
+  Codexu nebyly mazány. Rezervní přesun rodinného archivu nebyl použit.
+
+Další krok:
+- Vrátit se k praktické přejímce střižny podle project-camino; další mazání
+  se pro dosažený cíl neprovádí.
+
+Navrhované další kroky:
+- Po připojení externího disku nová recovery záloha; předchozí jádro je 18. 10.
+
+Technický důkaz:
+- Registrovaný protected_snapshot a health před/po shodné: Camino PID 1761,
+  konfigurace/Serve zachované, Cockpit PID 59746 / aee39190d9dd21aa,
+  autosave jediný PID 1855, čerstvé uložení bez chyby; approval karta vyčištěná.
+- Private final-verification.json, receipt.json, synthetic-payload-plan.json
+  a komprimovaná obnova jsou v data/private/ssd_cleanup_20261024/.
+  Gzip se rozbalí na přesně 100 663 553 B a původní SHA-256; každý chunk
+  lze obnovit podle offsetu/délky v manifestu. Nejde o osobní audio/video.
+- První systémové pokusy nevykonaly žádné smazání; macOS omezil čtení
+  helperu z Plochy, další pokus odmítl samotné soubory cache.
+- Soukromé důkazy a helpery nejsou v Gitu. Aplikační kód nezměněn;
+  dokumentační checkpoint zůstává místní bez push/nasazení.
+- Závěrečná rychlá statická brána PASS; data obnovy a chráněné runtime
+  metadata ověřené. Symboly/kompilační cache se mohou při práci znovu vytvořit.
