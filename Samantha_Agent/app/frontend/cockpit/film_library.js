@@ -18,6 +18,9 @@
     const dateLabel = value => { const [y, m, d] = value.split("-"); return `${Number(d)}. ${Number(m)}. ${y}`; };
     let selection = null, catalog = null, journeys = null, active = false, creating = false;
     let epoch = 0, read = 0, catalogRead = 0, timer = null;
+    function report(message, kind = "info", channel = "library") {
+      status.textContent = message; options.feedback?.({message, kind, channel});
+    }
     function text(tag, value) { const n = doc.createElement(tag); n.textContent = value; return n; }
     function button(label, action) {
       const b = text("button", label); b.type = "button"; b.className = "secondary";
@@ -51,13 +54,13 @@
             card.appendChild(button(row.state === "requested" ? "Zrušit žádost a obnovit" : "Obnovit projekt", async () => {
               if (!canSwitch() || !confirmAction("Obnovit tento projekt a znovu povolit jeho práci a přenosy?")) return;
               try { await trashAction({operation: "restore", request_id: row.request_id}); await refresh(); }
-              catch (error) { status.textContent = error.message; }
+              catch (error) { report(error.message, "error", "trash"); }
             }));
           }
           trash.appendChild(card);
         }
         if (!trash.children.length) trash.appendChild(text("p", "Koš je prázdný. Žádosti o smazání celé cesty přicházejí z iPhonu."));
-      } catch (error) { trash.textContent = error.message; }
+      } catch (error) { trash.textContent = error.message; report(error.message, "error", "trash"); }
     }
     async function reviewTrash(id) {
       if (!canSwitch() || trashBusy) return;
@@ -77,13 +80,13 @@
             try {
               await trashAction({operation: "confirm", request_id: id, plan_token: row.plan_token, confirmation: input.value});
               trashReview = null; editor.close(); await refresh();
-            } catch (error) { status.textContent = error.message; submit.disabled = input.value !== brake; }
+            } catch (error) { report(error.message, "error", "trash"); submit.disabled = input.value !== brake; }
           });
           submit.disabled = true; input.addEventListener("input", () => { submit.disabled = input.value !== brake; });
           trash.appendChild(submit);
         }
         trash.appendChild(button("Zpět do přehledu koše", () => { trashReview = null; refreshTrash(); }));
-      } catch (error) { status.textContent = error.message; }
+      } catch (error) { report(error.message, "error", "trash"); }
       finally { trashBusy = false; }
     }
     async function requestFilmTrash(item) {
@@ -92,7 +95,7 @@
         const result = await trashAction({operation: "film", request_id: crypto.randomUUID(),
           project_id: item.project_id, trip_id: selection.trip_id});
         editor.close(); await refresh(); await reviewTrash(result.request.request_id);
-      } catch (error) { status.textContent = error.message; }
+      } catch (error) { report(error.message, "error", "trash"); }
     }
     function storage() { try { return options.storage || window.sessionStorage; } catch (_) { return null; } }
     function remember() { try { storage()?.setItem(storageKey, JSON.stringify(selection)); } catch (_) {} }
@@ -115,10 +118,10 @@
     }
     function unavailable(message) {
       clearSummary(); projects.replaceChildren(); day.replaceChildren(); day.disabled = true;
-      status.textContent = message; editor.suspend();
+      report(message, "error"); editor.suspend();
     }
     function canSwitch() {
-      if (creating) { status.textContent = "Dokončuji uložení projektu. Před přepnutím počkej na výsledek."; return false; }
+      if (creating) { report("Dokončuji uložení projektu. Před přepnutím počkej na výsledek.", "busy"); return false; }
       return editor.canClose();
     }
     function renderTrips() {
@@ -159,12 +162,12 @@
         if (data.exists) {
           catalog.projects = catalog.projects.filter(p => p.local_date !== selection.local_date); renderCatalog();
         }
-        editor.close(); status.textContent = data.message || "Tento den zatím nemá ověřený film. Potvrď konečná data a ulož projekt.";
+        editor.close(); report(data.message || "Tento den zatím nemá ověřený film. Potvrď konečná data a ulož projekt.", "warning");
         createButton.disabled = creating; return;
       }
       if (!validId(data.project_id)) { unavailable("Projekt nemá platný identifikátor."); return; }
       selection.project_id = data.project_id; remember(); renderCatalog();
-      status.textContent = data.message || "Projekt je ověřený.";
+      report(data.message || "Projekt je ověřený.", "success");
       summary.textContent = `Uzavřené zdroje: ${data.photo_count} fotografií · ${data.video_count} celých videí · ${data.audio_count} zvukových voleb.`;
       summary.classList.remove("hidden");
       for (const shot of data.shots || []) shots.appendChild(text("li", `${shot.kind === "photo" ? "Fotografie" : "Video"} · ${shot.title || "Bez názvu"} · ${(shot.duration_ms / 1000).toLocaleString("cs-CZ")} s`));
@@ -190,7 +193,7 @@
           !(next.project_id === null || validId(next.project_id))) return false;
       const changed = selection?.local_date !== next.local_date || selection?.project_id !== next.project_id;
       if (!initial && changed && !canSwitch()) { day.value = selection?.local_date || ""; return false; }
-      if (changed) { ++epoch; ++read; editor.close(); clearSummary(); }
+      if (changed) { options.clearFeedback?.(); ++epoch; ++read; editor.close(); clearSummary(); }
       selection = {trip_id: next.trip_id, local_date: next.local_date, project_id: next.project_id};
       remember(); day.value = next.local_date;
       title.textContent = `${selectedTrip()?.name || "Projekt"} · Film z ${dateLabel(next.local_date)}`;
@@ -246,7 +249,7 @@
       if (!journeys?.trips.some(t => t.id === tripId)) return false;
       if (tripId === selection?.trip_id) return true;
       if (!canSwitch()) { trip.value = selection?.trip_id || ""; return false; }
-      ++epoch; ++read; ++catalogRead; editor.close(); clearSummary();
+      options.clearFeedback?.(); ++epoch; ++read; ++catalogRead; editor.close(); clearSummary();
       catalog = null; selection = {trip_id: tripId, local_date: null, project_id: null}; remember(); renderCatalog();
       await refresh(); return true;
     }
@@ -255,7 +258,7 @@
       const captured = {...selection};
       if (!confirmAction(`Potvrzuji, že všechna data a metadata projektu ${selectedTrip().name} dne ${dateLabel(captured.local_date)} jsou na Macu konečná. Uložit z nich filmový projekt?`)) return;
       const current = epoch; creating = true; ++read; clearSummary(); renderCatalog();
-      status.textContent = "Kontroluji originály a ukládám projekt…";
+      report("Kontroluji originály a ukládám projekt…", "busy");
       try {
         const response = await request("/api/camino/film/close-mac-day", {method: "POST", headers: {"Content-Type": "application/json"},
           body: JSON.stringify({trip_id: captured.trip_id, local_date: captured.local_date, confirmed_final_mac_data: true})});
@@ -263,9 +266,9 @@
         if (current !== epoch || !active || doc.hidden) return;
         creating = false;
         if (data.ok) { renderDay(data); await refresh(); }
-        else { status.textContent = data.message || "Projekt se nepodařilo uložit."; createButton.disabled = false; }
+        else { report(data.message || "Projekt se nepodařilo uložit.", "error"); createButton.disabled = false; }
       } catch (_) {
-        if (current === epoch && active) status.textContent = "Odpověď se ztratila. Znovu ověř přehled filmů před dalším uložením.";
+        if (current === epoch && active) report("Odpověď se ztratila. Znovu ověř přehled filmů před dalším uložením.", "error");
       } finally { creating = false; if (catalog && active) renderCatalog(); }
     }
     trip.addEventListener("change", () => chooseTrip(trip.value));
@@ -282,7 +285,7 @@
     });
     return {
       open() { active = true; stop(timer); timer = every(refresh, 60000); return refresh(); },
-      close() { active = false; ++epoch; ++read; ++catalogRead; stop(timer); clearSummary(); editor.close(); },
+      close() { options.clearFeedback?.(); active = false; ++epoch; ++read; ++catalogRead; stop(timer); clearSummary(); editor.close(); },
       refresh, check, choose, chooseTrip, createProject,
     };
   }

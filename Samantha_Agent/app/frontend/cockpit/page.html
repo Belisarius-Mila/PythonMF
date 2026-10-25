@@ -368,6 +368,11 @@
       <div class="modal-header">
         <h2 id="caminoFilmTitle">Moje filmy Camino</h2>
         <button class="secondary" id="caminoFilmCloseBtn" type="button">Zavřít</button>
+        <section id="caminoFilmFeedback" class="camino-film-feedback hidden" aria-label="Stav práce ve střižně">
+          <strong data-film-feedback-label></strong>
+          <div data-film-feedback-message role="status" aria-atomic="true"></div>
+          <button type="button" class="secondary" aria-label="Zavřít zprávu">Zavřít zprávu</button>
+        </section>
       </div>
       <div class="modal-body">
         <p>Projekt používá konečná data na Macu. Výchozí návrh nabízí všechny fotografie a celá videa. Střih i exporty se ukládají odděleně od originálů.</p>
@@ -391,7 +396,8 @@
           <h3>Střih</h3>
           <p>Úpravy se automaticky ukládají jako nové revize. Vyřazení odstraní záběr jen z filmu. Začátek a konec úseku vybíráš ručně.</p>
           <div data-film="status" role="status" aria-live="polite"></div>
-          <div class="actions"><button data-film="save" type="button">Uložit střih</button><button data-film="reload" type="button" class="secondary">Načíst poslední střih a texty</button></div>
+          <div class="actions"><button data-film="save" type="button" aria-describedby="caminoFilmSaveReason">Uložit střih</button><button data-film="reload" type="button" class="secondary">Načíst poslední střih a texty</button></div>
+          <p data-film="saveReason" id="caminoFilmSaveReason" class="status-line"></p>
           <section data-film="source" class="camino-film-source hidden" aria-label="Poslech a ruční výběr úseku zdroje">
             <h4 data-film="sourceTitle"></h4>
             <p data-film="sourceStatus" role="status" aria-live="polite"></p>
@@ -416,8 +422,9 @@
             <ol data-film="voices" class="camino-film-edit-list"></ol>
           </section>
           <h3>Náhled a MP4</h3>
-          <div class="actions"><button data-film="preview" type="button">Vytvořit náhled 720p</button><button data-film="final" type="button">Vytvořit MP4 1080p</button></div>
-          <div class="camino-film-fields"><label>Náhled od (s)<input data-film="from" type="number" min="0" step="0.001" value="0"></label><label>Do (s)<input data-film="to" type="number" min="0.1" step="0.001" value="10"></label><button data-film="range" type="button" class="secondary">Náhled úseku</button></div>
+          <div class="actions"><button data-film="preview" type="button" aria-describedby="caminoFilmBlocked">Vytvořit náhled 720p</button><button data-film="final" type="button" aria-describedby="caminoFilmBlocked">Vytvořit MP4 1080p</button></div>
+          <p data-film="blocked" id="caminoFilmBlocked" class="camino-film-blocked" role="status"></p>
+          <div class="camino-film-fields"><label>Náhled od (s)<input data-film="from" type="number" min="0" step="0.001" value="0"></label><label>Do (s)<input data-film="to" type="number" min="0.1" step="0.001" value="10"></label><button data-film="range" type="button" class="secondary" aria-describedby="caminoFilmBlocked">Náhled úseku</button></div>
           <p class="muted">Náhled a MP4 používají konkrétní uloženou revizi. Starší výsledek zůstává označený. Export se při přerušení zopakuje od začátku; nic se veřejně nesdílí.</p>
           <ul data-film="jobs"></ul>
           <video data-film="player" controls playsinline preload="none" aria-label="Film Camino z uloženého střihu"></video>

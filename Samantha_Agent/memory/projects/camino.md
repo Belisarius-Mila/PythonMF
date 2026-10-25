@@ -1,7 +1,15 @@
 # Camino
 
-Aktualizováno: 2026-10-24 21:44 CEST — p+n pěti commitů Lunou dokončené
+Aktualizováno: 2026-10-25 20:28 CET — první UI krok střižny lokálně hotový
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
+
+## Aktuální UI krok střižny
+
+- 2026-10-25 20:28 CET: První UI krok střižny lokálně hotový: společná sticky stavová lišta, odlišené probíhající práce/chyby/podmínky, procenta exportu nahoře a vysvětlení nedostupného ukládání/náhledu/MP4. Chybu fotografie nepřekryje běžné Uloženo.
+- Návrat z fotografie/skryté karty i překreslení zachová pozici, kotvu a otevřený/zavřený panel; soukromý DOM se při skrytí nadále odstraňuje. Ochrany stale GET, textu, revizí a mazání zachované; žádné změny backendu ani osobních dat.
+- Ověření: 102 cílených Python testů PASS (49,366 s) včetně Node scénářů panelu, návratu a původních ochranných kontraktů; rychlá statická brána PASS. Skutečný browser/Safari/iPhone a viditelnost/překrytí při scrollu NEOVĚŘENO — žádný prohlížeč není připojený.
+- Jen lokální vývojový checkpoint, bez nového push/nasazení, produkčního renderu či změny iPhonu/služby. Předchozí společné p+n v této relaci c9c3a5af je historie; tento nový UI kód v něm není. Detail: memory/reports/camino_film_ui_feedback_20261025.md.
+- Další krok: samostatné p+n, potom fyzicky ověřit návrat od fotografie, hlášky při práci dole v seznamu a dostupné důvody blokací. Větší rozložení editoru a český hlas zůstávají dalšími kroky.
 
 ## Cíl a hranice
 

@@ -1,13 +1,21 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-25 20:28 CET: První UI krok střižny lokálně hotový: společná sticky stavová lišta, odlišené probíhající práce/chyby/podmínky, procenta exportu nahoře a vysvětlení nedostupného ukládání/náhledu/MP4. Chybu fotografie nepřekryje běžné Uloženo.
+- Návrat z fotografie/skryté karty i překreslení zachová pozici, kotvu a otevřený/zavřený panel; soukromý DOM se při skrytí nadále odstraňuje. Ochrany stale GET, textu, revizí a mazání zachované; žádné změny backendu ani osobních dat.
+- Ověření: 102 cílených Python testů PASS (49,366 s) včetně Node scénářů panelu, návratu a původních ochranných kontraktů; rychlá statická brána PASS. Skutečný browser/Safari/iPhone a viditelnost/překrytí při scrollu NEOVĚŘENO — žádný prohlížeč není připojený.
+- Jen lokální vývojový checkpoint, bez nového push/nasazení, produkčního renderu či změny iPhonu/služby. Předchozí společné p+n v této relaci c9c3a5af je historie; tento nový UI kód v něm není. Detail: memory/reports/camino_film_ui_feedback_20261025.md.
+- Další krok: samostatné p+n, potom fyzicky ověřit návrat od fotografie, hlášky při práci dole v seznamu a dostupné důvody blokací. Větší rozložení editoru a český hlas zůstávají dalšími kroky.
+<!-- SAMANTHA_CURRENT_STATUS_END -->
+
+### Předchozí stav po p+n klienta
+
 - 2026-10-24 21:44 CEST: P+n všech pěti čekajících commitů do 3590c288 dokončené napoprvé registrovanou Lunou. Účtenka a2500be19e301dc26e6db4cd9fb597a8: completed, push/deployment confirmed, projekt project-camino, cíl Cockpit, release_executor gpt-6-luna/high; role beze změny.
 - Publikační plná brána 2232 PASS / 454,2 s, smoke 5/5, protected_services_unchanged=true. Adamova jedna závěrečná kontrola: GitHub/main aligned 0/0 na 3590c288 před tímto výsledkovým checkpointem; Cockpit health OK, code_stamp 7ae887842f089e5c, PID 41492. Stejný stamp je očekávaný: balíček měnil Swift klienta a dokumentaci.
 - Účtenku převzal a ověřil terminálový Adam zde; return_channel=caller. Automatický portálový návrat returned_to_adam=false, není potvrzený a není důvodem opakovat úspěšné vydání.
 - Samostatná služba Camino, autosave a chráněné konfigurace/Serve zachované. Toto p+n neinstaluje IPA ani neprovádí úklid telefonu. IPA Camino-Projects-Trash-23-20261024.ipa je připravená v Downloads/iCloud (podpis/ZIP/hash/upload PASS), profil do 29. 10. 2026. Poslední přímý audit telefonu potvrdil 22 a 2 prázdné video intenty bez souborů; novější instalace/úklid nejsou ověřené.
 - Další krok: v telefonu přijmout IPA 23 při zachování stejné aplikace bez odinstalace, poté Zkontrolovat a odstranit pokusy → Odstranit prázdné pokusy → potvrdit. Swift 95 a oba UI scénáře byly ověřené před vydáním; fyzická přejímka 23, celé cesty/filmu v koši a skutečná lhůta/uvolnění místa zůstávají otevřené. Dále text/historie nahrávek/jejich koš/MP3-WAV a český hlas.
 - Tento následný zápis účtenky je lokální dokumentační checkpoint pro další GitHub balíček; vydaný funkční kód zůstává 3590c288. Podrobnosti: camino/docs/PENDING_MEDIA_REVIEW_REPORT.md.
-<!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí stav před p+n úklidu médií
 
@@ -4735,3 +4743,28 @@ Technický důkaz:
 - Účtenka a2500be19e301dc26e6db4cd9fb597a8: completed, 5 commitů 0a18db30→3590c288, push_state/deployment_state=confirmed; full gate 2232 PASS / 454,2 s, smoke 5/5, protected_services_unchanged=true.
 - Adamova závěrečná kontrola GitHub/main 0/0 na vydaném headu, health OK, stamp 7ae887842f089e5c, PID 41492. Zápis výsledku je následný lokální dokumentační checkpoint, nikoli další funkční vydání.
 - return_channel=caller, returned_to_adam=false: portálový automatický návrat nepotvrzený; původní terminálový Adam účtenku skutečně převzal a jednou ověřil. Úspěšné p+n se kvůli tomu neopakuje. Předchozí Swift 95/UI a IPA podpis/ZIP/cloud PASS; fyzický telefon 23 zatím NEOVĚŘENO.
+
+
+### 2026-10-25 20:28 CET — první UI krok filmové střižny
+
+Hotovo:
+
+- Střižna má společnou viditelnou odezvu, vysvětlené hlavní blokace a návrat na rozpracované místo po fotografii. Provedeno lokálně.
+
+Rozhodnutí:
+
+- Míla schválil první krok z UI analýzy; nejprve zpětná vazba a orientace, větší přestavba plochy později. Původní datové a bezpečnostní kontrakty zachované.
+
+Další krok:
+
+- Po samostatném pokynu p+n ověřit skutečný prohlížeč podle přejímky v reportu.
+
+Navrhované další kroky:
+
+- Prostornější pracovní plocha a jasné hlavní akce.
+- Praktická přejímka textu/nahrávek/importu a příjemnější český hlas.
+
+Technický důkaz:
+
+- 102 cílených testů PASS a rychlá statická brána PASS; Node regrese pozice, hlášek, podmínek, procent exportu, soukromí a stale odpovědí.
+- Browser viditelnost/overlap a fyzický Safari/iPhone NEOVĚŘENO. Bez nového vydání či změny osobního filmu; report camino_film_ui_feedback_20261025.md.

@@ -24,6 +24,7 @@ const view = {ok: true, project_id: id(1), revision: 1, duration_ms: 30000, jobs
   draft: {shots: [2, 3, 4].map((n, i) => ({asset_id: id(n), title: "", in_ms: 0, out_ms: i === 0 ? 25000 : 1000, included: true, gain: 1})),
     voices: [{asset_id: id(5), in_ms: 0, out_ms: 3000, at_ms: 0, gain: 1, included: false}], duck_gain: .2}};
 let saves = [], renders = [], generations = [], uploads = [], serial = 50, waitGeneration = null, failSave = false, delayedRead = null, delayedSave = null;
+const feedback = [];
 function recordTake(p, imported = false) {
   const layer = view.draft.shots.find(r => r.asset_id === p.asset_id).photo_text;
   const n = {id: p.request_id, duration_ms: imported ? 2400 : 45000, sha256: "b".repeat(64), included: false};
@@ -55,7 +56,7 @@ const fetch = async (url, options = {}) => {
 };
 const context = {window: {}, console}; vm.createContext(context);
 vm.runInContext(fs.readFileSync("app/frontend/cockpit/film_editor.js", "utf8"), context);
-const editor = context.window.SamanthaFilmEditor.create(root, {document: doc, fetch, uuid: () => id(++serial), setTimeout() {}, clearTimeout() {}, confirm: () => true});
+const editor = context.window.SamanthaFilmEditor.create(root, {document: doc, fetch, feedback: event => feedback.push(event), uuid: () => id(++serial), setTimeout() {}, clearTimeout() {}, confirm: () => true});
 const flush = () => new Promise(resolve => setImmediate(resolve));
 function all(n) { return [n, ...n.children.flatMap(all)]; }
 function find(n, text) { const result = all(n).find(x => x.textContent === text); assert(result, `Missing: ${text}`); return result; }
@@ -105,6 +106,7 @@ async function main() {
   lengthField.value = 25; lengthField.emit("change"); await editor.save();
   find(photo(), "Použít čtení ve filmu").emit("click");
   assert(all(photo()).some(n => n.textContent.includes("Nejprve prodluž")));
+  assert(feedback.some(e => e.kind === "warning" && e.message.includes("Fotografie 1") && e.message.includes("Nejprve prodluž")), "the prerequisite is also visible outside the long photo panel");
   find(photo(), "Prodloužit pro celý text / čtení").emit("click");
   find(photo(), "Použít čtení ve filmu").emit("click"); await editor.save();
   assert.equal(saves.at(-1).draft.shots[0].out_ms, 45000);
@@ -125,6 +127,7 @@ async function main() {
   assert.equal(saves.at(-1).draft.shots[1].photo_text.narration, null);
   let release; waitGeneration = new Promise(resolve => { release = resolve; });
   const generating = find(photo(1), "Vytvořit místní čtení").emit("click"); await flush();
+  assert(feedback.some(e => e.kind === "busy" && e.channel === "photo"), "in-flight narration reaches the shared status panel");
   assert.equal(editor.canClose(), false, "project switching waits for in-flight synthesis");
   area(1).value = "Změněno během čtení."; area(1).emit("input"); await editor.save();
   release({json: async () => ({ok: true, narration: {id: id(90), duration_ms: 1000, sha256: "c".repeat(64), included: false}})});

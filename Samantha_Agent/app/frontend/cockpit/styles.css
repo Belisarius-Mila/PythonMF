@@ -458,6 +458,22 @@
     .toolbar button { min-height: 44px; }
     @media (max-width: 900px) { .toolbar { gap: 12px; } }
     .camino-film-edit-list { padding-left: 1.5rem; }
+    #caminoFilmModal .modal-header { position: sticky; top: 0; z-index: 3; flex-wrap: wrap; }
+    .camino-film-feedback { flex: 1 0 100%; box-sizing: border-box; display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; padding: 10px 12px; border-left: 4px solid #315fa6; border-radius: 6px; background: #eef4ff; color: #183d76; overflow-wrap: anywhere; }
+    .camino-film-feedback strong { grid-column: 1; }
+    .camino-film-feedback [data-film-feedback-message] { grid-column: 1; max-height: 20vh; overflow: auto; white-space: pre-wrap; }
+    .camino-film-feedback button { grid-column: 2; grid-row: 1 / 3; align-self: start; min-height: 44px; }
+    .camino-film-feedback[data-kind="success"] { background: #e9f7ef; color: #175c37; border-left-color: #26824e; }
+    .camino-film-feedback[data-kind="warning"] { background: #fff4da; color: #704500; border-left-color: #a76c00; }
+    .camino-film-feedback[data-kind="error"] { background: #fff0ef; color: #922b22; border-left-color: #b53b32; }
+    .camino-film-feedback.hidden, .camino-film-blocked:empty { display: none; }
+    .camino-film-blocked { padding: 8px 10px; background: #fff4da; color: #704500; border-radius: 6px; }
+    #caminoFilmModal button:disabled { cursor: not-allowed; }
+    #caminoFilmModal button[aria-busy="true"] { cursor: progress; }
+    @media (max-width: 480px) {
+      .camino-film-feedback { grid-template-columns: 1fr; }
+      .camino-film-feedback button { grid-column: 1; grid-row: auto; justify-self: start; }
+    }
     .camino-film-edit-list > li { margin: 1rem 0; padding: .75rem; border: 1px solid var(--border, #ddd); border-radius: .5rem; }
     .camino-film-edit-list label { display: block; margin: .4rem 0; }
     .camino-film-fields { display: flex; flex-wrap: wrap; gap: .75rem; align-items: end; }
@@ -471,7 +487,7 @@
     .camino-film-materials select { max-width: 100%; }
     #caminoFilmEditor .audio-only video { height: 4rem; }
 
-    .camino-film-photo { display: block; width: 100%; max-height: 40vh; object-fit: contain; background: #111; }
+    .camino-film-photo { display: block; width: 100%; height: 40vh; max-height: 400px; object-fit: contain; background: #111; }
     .camino-film-edit-list textarea { display: block; width: 100%; box-sizing: border-box; min-height: 7em; resize: vertical; }
     .camino-film-edit-list details { margin-top: .75rem; }
     .camino-film-edit-list summary { cursor: pointer; padding: .5rem 0; font-weight: 600; }

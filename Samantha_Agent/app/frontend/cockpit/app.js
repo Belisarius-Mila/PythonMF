@@ -22,8 +22,9 @@
     const caminoFilmCreateBtn = document.getElementById("caminoFilmCreateBtn");
     const caminoFilmRefreshBtn = document.getElementById("caminoFilmRefreshBtn");
     const caminoFilmTest = document.getElementById("caminoFilmTest");
-    const caminoFilmEditor = window.SamanthaFilmEditor.create(document.getElementById("caminoFilmEditor"));
-    const caminoFilmLibrary = window.SamanthaFilmLibrary.create(caminoFilmModal, {editor: caminoFilmEditor});
+    const caminoFilmFeedback = window.SamanthaFilmFeedback.create(document.getElementById("caminoFilmFeedback"));
+    const caminoFilmEditor = window.SamanthaFilmEditor.create(document.getElementById("caminoFilmEditor"), {feedback: caminoFilmFeedback.report});
+    const caminoFilmLibrary = window.SamanthaFilmLibrary.create(caminoFilmModal, {editor: caminoFilmEditor, feedback: caminoFilmFeedback.report, clearFeedback: caminoFilmFeedback.clear});
     const projectsBtn = document.getElementById("projectsBtn");
     const remindersBtn = document.getElementById("remindersBtn");
     const emailProcessingBtn = document.getElementById("emailProcessingBtn");

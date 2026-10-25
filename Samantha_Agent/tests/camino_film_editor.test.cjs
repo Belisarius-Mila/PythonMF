@@ -1,6 +1,7 @@
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const vm = require("node:vm");
+require("./camino_film_feedback.test.cjs");
 function node() {
   const classes = new Set(), listeners = {};
   return {children: [], value: "", textContent: "", disabled: false, paused: false, readyState: 0, currentTime: 0,
@@ -11,15 +12,17 @@ function node() {
     pause() { this.paused = true; }, play() { this.paused = false; return Promise.resolve(); },
     load() { this.readyState = 0; }, getAttribute(k) { return this[k] || null; }, removeAttribute(k) { delete this[k]; }};
 }
-const doc = {hidden: false, createElement: node, addEventListener() {}};
+const docEvents = {};
+const doc = {hidden: false, createElement: node, addEventListener(event, fn) { docEvents[event] = fn; }};
 const nodes = Object.fromEntries(["status", "shots", "voices", "jobs", "save", "preview", "final", "range", "from", "to", "duck", "player", "reload",
-  "source", "sourcePlayer", "sourceStatus", "sourceTitle", "selection", "start", "end", "playSelection", "texts", "cards"].map(k => [k, node()]));
+  "source", "sourcePlayer", "sourceStatus", "sourceTitle", "selection", "start", "end", "playSelection", "texts", "cards", "blocked", "saveReason"].map(k => [k, node()]));
 const root = node(); root.querySelector = selector => nodes[selector.match(/"(.*?)"/)[1]];
 const sid = "00000000-0000-0000-0000-000000000001", pid = "00000000-0000-0000-0000-000000000002";
 let view = {ok: true, project_id: pid, revision: 1, duration_ms: 3000,
   sources: [{asset_id: sid, kind: "photo", duration_ms: null, title: "<script>SAFE TEXT</script>"}],
   draft: {shots: [{asset_id: sid, title: "Title", in_ms: 0, out_ms: 3000, gain: 1, included: true}], voices: [], duck_gain: .2}, jobs: []};
 let saves = [], renderCalls = [], clock = [], loseReply = false, uuidCount = 10, offline = false, readWait = null, saveWait = null;
+const feedback = [];
 let sourceCalls = [], sourceWait = null;
 let deleteCalls = [], deletePlanCalls = [], deleteAnswer = null, deleteWait = null, wrongDeletePlan = false, deleteLost = false;
 const deleteConfirmation = "Potvrzuji globální brzdu: rozumím riziku a chci pokračovat.";
@@ -65,6 +68,7 @@ const fetch = async (url, options) => {
 const context = {window: {}, console}; vm.createContext(context);
 vm.runInContext(fs.readFileSync("app/frontend/cockpit/film_editor.js", "utf8"), context);
 const editor = context.window.SamanthaFilmEditor.create(root, {document: doc, fetch,
+  feedback: event => feedback.push(event),
   uuid: () => `00000000-0000-0000-0000-${String(++uuidCount).padStart(12, "0")}`,
   setTimeout: (fn, delay) => { clock.push({fn, delay}); return clock.length; }, clearTimeout() {}, confirm: () => true,
   prompt: message => { assert(message.includes("20")); assert(message.includes("Bez koše")); return deleteAnswer; }});
@@ -80,14 +84,41 @@ async function main() {
   assert(photoLink); assert.equal(photoLink.href, `/api/camino/film/photo/${pid}/${sid}`);
   assert.equal(photoLink.target, "_blank"); assert.equal(photoLink.rel, "noopener noreferrer");
   assert(photoActions.some(n => n.textContent === "Vytvořit náhled záběru s titulkem"));
+  // Simulate layout collapsing when the private DOM is removed in a hidden tab.
+  const host = {scrollTop: 420, getBoundingClientRect: () => ({top: 0})};
+  root.closest = () => host;
+  const originalReplace = nodes.shots.replaceChildren;
+  nodes.shots.replaceChildren = function () { originalReplace.call(this); host.scrollTop = 0; };
+  const originalAppend = nodes.shots.appendChild;
+  nodes.shots.appendChild = function (li) {
+    li.getBoundingClientRect = () => ({top: -host.scrollTop, bottom: 500 - host.scrollTop});
+    originalAppend.call(this, li);
+  };
+  nodes.shots.children[0].getBoundingClientRect = () => ({top: -host.scrollTop, bottom: 500 - host.scrollTop});
+  photoActions.find(n => n.textContent === "Text a komentář").emit("click");
+  assert.equal(host.scrollTop, 420, "opening photo details preserves the current position");
+  doc.hidden = true; docEvents.visibilitychange();
+  assert.equal(nodes.shots.children.length, 0, "hidden tab still removes private images and text");
+  doc.hidden = false; docEvents.visibilitychange(); await flush();
+  assert.equal(host.scrollTop, 420, "returning from the photo tab restores the scroll position");
+  let panel = nodes.shots.children[0].children.find(n => n.open);
+  assert(panel, "the selected photo panel is restored");
+  panel.open = false; panel.emit("toggle");
+  doc.hidden = true; docEvents.visibilitychange();
+  doc.hidden = false; docEvents.visibilitychange(); await flush();
+  assert(!nodes.shots.children[0].children.some(n => n.open), "a deliberately closed panel stays closed");
+  delete root.closest; nodes.shots.replaceChildren = originalReplace; nodes.shots.appendChild = originalAppend;
   titleInput().value = "Manual title"; titleInput().emit("change");
   assert.equal(nodes.preview.disabled, true);
+  assert(nodes.blocked.textContent.includes("ulož"), "disabled export explains the prerequisite beside its actions");
   const auto = clock.find(t => t.delay === 700); await auto.fn(); await flush();
   assert.equal(saves.length, 1); assert.equal(saves[0].draft.shots[0].title, "Manual title");
   assert.equal(nodes.preview.disabled, false);
   titleInput().value = "Another title"; titleInput().emit("change"); loseReply = true;
   assert.equal(await editor.save(), false); const lostId = saves.at(-1).request_id;
+  assert(feedback.some(e => e.channel === "save" && e.kind === "error"), "save failure reaches the visible shared panel");
   assert.equal(await editor.save(), true); assert.equal(saves.at(-1).request_id, lostId);
+  assert.equal(nodes.blocked.textContent, "");
   nodes.final.emit("click"); await flush();
   assert.equal(renderCalls.at(-1).revision, view.revision);
   assert.equal(renderCalls.at(-1).profile, "final"); assert.equal(renderCalls.at(-1).range, null);
@@ -163,6 +194,11 @@ async function main() {
   await editor.check();
   assert(nodes.jobs.children[0].textContent.includes("Selhalo"), "a ready source proxy must never hide a failed whole-film export");
   assert.equal(nodes.jobs.children[0].children.length, 2, "whole-film retry and permanent deletion remain available");
+  view.jobs.push({job_id: "00000000-0000-0000-0000-000000000099", revision: view.revision, profile: "final", range: null, state: "rendering", progress: 42});
+  await editor.check();
+  assert(feedback.some(e => e.channel === "render" && e.kind === "busy" && e.message.includes("42 %")), "current export progress is visible outside the bottom history list");
+  view.jobs.at(-1).state = "ready"; await editor.check();
+  assert.equal(feedback.filter(e => e.channel === "render").at(-1).kind, "success");
   editor.close(); editor.open(); await flush();
   const restored = nodes.shots.children[0].children.find(n => n.className === "camino-film-fields");
   assert.equal(restored.children[1].children[0].value, .75); assert.equal(restored.children[2].children[0].value, 1.25);

@@ -15,16 +15,45 @@
     const askDelete = options.prompt || (message => window.prompt(message));
     const nodes = Object.fromEntries(["status", "shots", "voices", "jobs", "save", "preview", "final",
       "range", "from", "to", "duck", "player", "reload", "source", "sourcePlayer", "sourceStatus",
-      "sourceTitle", "selection", "start", "end", "playSelection", "texts", "cards"].map(key => [key, root.querySelector(`[data-film="${key}"]`)]));
+      "sourceTitle", "selection", "start", "end", "playSelection", "texts", "cards", "blocked", "saveReason"].map(key => [key, root.querySelector(`[data-film="${key}"]`)]));
     let model = null, active = false, dirty = false, saving = false, version = 0, epoch = 0;
     let pending = null, timer = null, refreshTimer = null, preserved = null, readRequest = 0;
     let requestedProject = null, photoOpen = null, narrating = false;
     let photoStatuses = [], photoAudios = [], photoPanels = new Map();
     let deleting = false, deleteButtons = [];
     let selected = null, sourceJob = null, sourceRequest = 0, sourceTimer = null, selectionTimer = null, playingSelection = false;
+    let position = null, shotNodes = new Map(), exportStatus = "", sourceState = "";
+    function announce(node, message, kind = "info", channel = null) {
+      node.textContent = message || "";
+      options.feedback?.({message: node.filmContext ? `${node.filmContext}: ${message}` : message,
+        kind, channel: channel || (node === nodes.sourceStatus ? "source" : node === nodes.status ? "editor" : "photo")});
+    }
+    function capturePosition() {
+      const host = root.closest?.(".modal");
+      if (!host || !model) return null;
+      const top = host.getBoundingClientRect().top;
+      const anchor = [...shotNodes].find(([, node]) => node.getBoundingClientRect().bottom > top);
+      const focus = doc.activeElement;
+      return {project: model.project_id, top: host.scrollTop, photo: photoOpen,
+        anchor: anchor?.[0], offset: anchor?.[1].getBoundingClientRect().top - top,
+        focus: focus && root.contains?.(focus) ? {asset: focus.closest?.("[data-film-asset]")?.getAttribute("data-film-asset"), name: focus.name, label: focus.textContent, tag: focus.tagName} : null};
+    }
+    function restorePosition(saved) {
+      const host = root.closest?.(".modal");
+      if (!host || saved?.project !== model.project_id) return;
+      const anchor = shotNodes.get(saved.anchor);
+      host.scrollTop = saved.top;
+      if (anchor) host.scrollTop += anchor.getBoundingClientRect().top - host.getBoundingClientRect().top - saved.offset;
+      const focus = saved.focus, row = focus && shotNodes.get(focus.asset);
+      if (row) {
+        const candidate = [...row.querySelectorAll("button, input, textarea, select, summary, a")].find(n => n.tagName === focus.tag && (focus.name ? n.name === focus.name : n.textContent === focus.label));
+        candidate?.focus({preventScroll: true});
+      }
+    }
     function text(tag, value) { const n = doc.createElement(tag); n.textContent = value; return n; }
     function stopPlayer() { nodes.player.pause(); nodes.player.removeAttribute("src"); nodes.player.load(); }
     function stopSource() {
+      sourceState = "";
       ++sourceRequest; cancel(sourceTimer); cancel(selectionTimer); selected = null; sourceJob = null; playingSelection = false;
       nodes.sourcePlayer.pause(); nodes.sourcePlayer.removeAttribute("src"); nodes.sourcePlayer.load();
       nodes.source.classList.add("hidden");
@@ -49,15 +78,17 @@
       if (!selected || !sourceJob) return;
       const job = jobs.find(j => j.job_id === sourceJob && j.source_asset_id === selected);
       if (!job) return;
+      const signature = JSON.stringify([job.job_id, job.state, job.progress]);
+      const changed = sourceState !== signature; sourceState = signature;
       if (job.state === "ready" && safeOutput(job.url)) {
         if (nodes.sourcePlayer.getAttribute("src") !== job.url) {
           nodes.sourcePlayer.src = job.url; nodes.sourcePlayer.load();
         }
-        nodes.sourceStatus.textContent = "Posuň přehrávač na požadované místo a označ začátek nebo konec. Přehrát výběr přehraje jen označenou část.";
+        if (changed) announce(nodes.sourceStatus, "Zdroj je připravený. Posuň přehrávač a označ začátek nebo konec úseku.", "success");
       } else if (["failed", "interrupted"].includes(job.state)) {
-        nodes.sourceStatus.textContent = "Náhled se nedokončil. Tlačítkem u záběru ho můžeš připravit znovu.";
+        if (changed) announce(nodes.sourceStatus, "Náhled se nedokončil. Tlačítkem u záběru ho můžeš připravit znovu.", "error");
       } else {
-        nodes.sourceStatus.textContent = `Připravuji zdroj k přehrání${job.state === "rendering" ? ` · ${job.progress} %` : " · ve frontě"}…`;
+        if (changed) announce(nodes.sourceStatus, `Připravuji zdroj k přehrání${job.state === "rendering" ? ` · ${job.progress} %` : " · ve frontě"}…`, "busy");
         sourceTimer = later(() => check(), 1500);
       }
       syncSelection();
@@ -69,17 +100,17 @@
       if (model.sources.find(s => s.asset_id === assetId)?.kind === "audio") nodes.source.classList.add("audio-only");
       else nodes.source.classList.remove("audio-only");
       nodes.source.classList.remove("hidden"); syncSelection();
-      nodes.sourceStatus.textContent = "Ověřuji a připravuji celý zdroj k přehrání…";
+      announce(nodes.sourceStatus, "Ověřuji a připravuji celý zdroj k přehrání…", "busy");
       nodes.source.scrollIntoView?.({block: "nearest", behavior: "smooth"});
       try {
         const response = await request("/api/camino/film/source", {method: "POST", headers: {"Content-Type": "application/json"},
           body: JSON.stringify({project_id: model.project_id, asset_id: assetId, request_id: uuid()})});
         const data = await response.json();
         if (current !== epoch || selection !== sourceRequest || !active || doc.hidden) return;
-        if (!data.ok) { nodes.sourceStatus.textContent = data.message; return; }
+        if (!data.ok) { announce(nodes.sourceStatus, data.message, "error"); return; }
         sourceJob = data.job_id; check();
       } catch (_) {
-        if (current === epoch && selection === sourceRequest) nodes.sourceStatus.textContent = "Příprava se nepotvrdila. Zkus znovu otevřít zdroj.";
+        if (current === epoch && selection === sourceRequest) announce(nodes.sourceStatus, "Příprava se nepotvrdila. Zkus znovu otevřít zdroj.", "error");
       }
     }
     function mark(key) {
@@ -87,7 +118,7 @@
       const source = model.sources.find(s => s.asset_id === selected);
       const ms = Math.max(0, Math.min(source.duration_ms, Math.round(nodes.sourcePlayer.currentTime * 1000)));
       if (!Number.isFinite(ms) || (key === "in_ms" ? ms > row.out_ms - 100 : ms < row.in_ms + 100)) {
-        nodes.sourceStatus.textContent = "Konec musí být alespoň 0,1 sekundy za začátkem. Posuň video nebo uprav číselné časy."; return;
+        announce(nodes.sourceStatus, "Konec musí být alespoň 0,1 sekundy za začátkem. Posuň video nebo uprav číselné časy.", "warning"); return;
       }
       playingSelection = false; nodes.sourcePlayer.pause(); row[key] = ms; change(); renderRows();
     }
@@ -98,35 +129,48 @@
         playingSelection = false; nodes.sourcePlayer.pause(); nodes.sourcePlayer.currentTime = row.out_ms / 1000;
       } else if (!nodes.sourcePlayer.paused) selectionTimer = later(boundSelection, 40);
     }
-    function invalidate(message = "Projekt nelze nyní ověřit. Starší film se nezobrazuje.") {
+    function invalidate(message = "", keepPosition = false, kind = "error") {
+      if (!keepPosition) position = null;
+      shotNodes = new Map();
+      exportStatus = "";
       for (const audio of photoAudios) { audio.pause(); audio.removeAttribute("src"); audio.load(); }
       photoAudios = []; photoStatuses = []; photoOpen = null;
+      photoPanels = new Map();
       ++epoch; model = null; dirty = false; pending = null; preserved = null;
       cancel(timer); stopPlayer(); stopSource();
       for (const key of ["shots", "voices", "jobs", "texts", "cards"]) nodes[key]?.replaceChildren();
       for (const key of ["save", "preview", "final", "range"]) nodes[key].disabled = true;
-      nodes.status.textContent = message;
+      if (message) announce(nodes.status, message, kind);
+      else nodes.status.textContent = "";
     }
-    function conceal() {
+    function conceal(message = "") {
+      position = capturePosition() || position;
       const keep = model && (dirty || pending) ? {model, pending, version} : preserved;
-      invalidate(); preserved = keep;
+      invalidate(message, true); preserved = keep;
     }
     function controls() {
+      const reason = !model ? "Znovu ověř projekt a načti střih." : deleting ? "Dokončuji smazání varianty. Počkej na potvrzení výsledku." :
+        narrating ? "Dokončuji práci s komentářem fotografie. Počkej na výsledek." : saving ? "Ukládám střih. Počkej na potvrzení." : dirty ? "Nejprve ulož změny střihu; automatické uložení se připravuje." : "";
       nodes.save.disabled = !model || saving || deleting || !dirty;
       for (const key of ["preview", "final", "range"]) nodes[key].disabled = !model || dirty || saving || deleting || narrating;
       for (const button of deleteButtons) button.disabled = deleting;
+      if (nodes.blocked) nodes.blocked.textContent = reason;
+      if (nodes.saveReason) nodes.saveReason.textContent = !model || saving || deleting ? reason : dirty ? "Změny můžeš uložit hned tlačítkem Uložit střih." : "Všechny změny střihu jsou uložené.";
+      for (const key of ["preview", "final", "range", "save"]) nodes[key].setAttribute?.("aria-busy", String(saving || deleting || narrating));
+      if (model && !deleting && !narrating && !dirty && !saving && !preserved) options.feedback?.({message: "", channel: "guard"});
     }
     function change() {
       dirty = true; ++version; ++readRequest; controls();
       if (playingSelection) nodes.sourcePlayer.pause();
       playingSelection = false; cancel(selectionTimer); syncSelection();
-      nodes.status.textContent = "Úpravy čekají na uložení…";
+      announce(nodes.status, "Úpravy čekají na uložení…", "info", "save");
       photoStatus("Úpravy čekají na uložení…");
       cancel(timer); timer = later(() => save(), 700);
     }
     function field(parent, label, row, key, {seconds = false, max = null} = {}) {
       const wrapper = text("label", label);
       const input = doc.createElement("input");
+      input.name = `film-field-${key}`;
       input.type = key === "title" ? "text" : "number";
       if (input.type === "text") input.maxLength = 140;
       else { input.min = "0"; input.step = seconds ? "0.001" : "0.05"; if (max !== null) input.max = String(max); }
@@ -138,12 +182,16 @@
       wrapper.appendChild(input); parent.appendChild(wrapper);
     }
     function renderRows() {
+      const saved = position || capturePosition(); position = null;
+      if (saved?.project === model.project_id) photoOpen = saved.photo;
+      shotNodes = new Map();
       const sources = new Map(model.sources.map(s => [s.asset_id, s]));
       for (const audio of photoAudios) audio.pause();
       photoAudios = []; photoStatuses = []; photoPanels = new Map();
       nodes.shots.replaceChildren(); nodes.voices.replaceChildren();
       for (const [index, row] of model.draft.shots.entries()) {
         const source = sources.get(row.asset_id), li = doc.createElement("li");
+        li.setAttribute?.("data-film-asset", row.asset_id); shotNodes.set(row.asset_id, li);
         const heading = text("strong", `${index + 1}. ${source.kind === "photo" ? "Fotografie" : "Video"} · ${source.title || "Bez názvu"}`);
         li.appendChild(heading);
         const checkbox = doc.createElement("input"), label = text("label", "Zařadit do filmu ");
@@ -183,7 +231,7 @@
             if (!await save()) return;
             const start = shotStart(row.asset_id);
             if (start !== null) { await render("preview", {start_ms: start, end_ms: start + row.out_ms - row.in_ms}); return; }
-            nodes.status.textContent = "Záběr je vyřazený. Zařaď ho před vytvořením náhledu.";
+            announce(nodes.status, "Záběr je vyřazený. Zařaď ho před vytvořením náhledu.", "warning");
           }); actions.appendChild(preview);
         }
         if (source.kind === "photo") {
@@ -219,6 +267,7 @@
       renderTexts();
       nodes.duck.value = model.draft.duck_gain;
       syncSelection();
+      restorePosition(saved);
     }
     function timeline() {
       const cards = model.draft.cards || [], rows = [];
@@ -262,13 +311,13 @@
       const insert = text("button", "Vložit komentář k záběru"); insert.type = "button";
       insert.addEventListener("click", () => {
         const start = shotStart(target.value), duration = row.out_ms - row.in_ms;
-        if (start === null) { feedback.textContent = "Nejprve vyber zařazenou fotografii."; return; }
+        if (start === null) { announce(feedback, "Nejprve vyber zařazenou fotografii.", "warning"); return; }
         const photo = model.draft.shots.find(r => r.asset_id === target.value);
-        if (duration > photo.out_ms) { feedback.textContent = `Komentář potřebuje ${(duration / 1000).toFixed(1)} s. Prodluž fotografii nebo vyber kratší úsek.`; return; }
+        if (duration > photo.out_ms) { announce(feedback, `Komentář potřebuje ${(duration / 1000).toFixed(1)} s. Prodluž fotografii nebo vyber kratší úsek.`, "warning"); return; }
         const end = start + duration, total = timeline().reduce((n, r) => n + r.out_ms - r.in_ms, 0);
-        if (end > total) { nodes.status.textContent = `Komentář přesahuje obraz o ${((end - total) / 1000).toFixed(1)} s. Prodluž fotografie, přidej textovou kartu nebo ručně vyber kratší úsek řeči.`; return; }
+        if (end > total) { announce(nodes.status, `Komentář přesahuje obraz o ${((end - total) / 1000).toFixed(1)} s. Prodluž fotografie, přidej textovou kartu nebo ručně vyber kratší úsek řeči.`, "warning"); return; }
         if (model.draft.voices.some(v => { const at = v.photo_asset_id ? shotStart(v.photo_asset_id) : v.at_ms; return v !== row && v.included && at !== null && start < at + v.out_ms - v.in_ms && end > at; })) {
-          feedback.textContent = "Na tomto místě už je jiný komentář. Vyber jinou fotografii nebo uprav umístění."; return;
+          announce(feedback, "Na tomto místě už je jiný komentář. Vyber jinou fotografii nebo uprav umístění.", "warning"); return;
         }
         row.at_ms = start; row.photo_asset_id = photo.asset_id; row.included = true; change(); renderRows();
       });
@@ -278,17 +327,24 @@
       const extend = text("button", "Prodloužit fotografii pro komentář"); extend.type = "button";
       extend.addEventListener("click", () => {
         const photo = model.draft.shots.find(r => r.asset_id === target.value), duration = row.out_ms - row.in_ms;
-        if (!photo || duration > 300000) { feedback.textContent = "Vyber fotografii a úsek nejvýše 300 sekund."; return; }
+        if (!photo || duration > 300000) { announce(feedback, "Vyber fotografii a úsek nejvýše 300 sekund.", "warning"); return; }
         photo.out_ms = Math.max(photo.out_ms, duration); change(); renderRows();
       }); actions.appendChild(extend); li.appendChild(actions); li.appendChild(feedback);
     }
     function focusPhoto(id) { photoPanels.get(id)?.scrollIntoView?.({block: "start", behavior: "smooth"}); }
-    function photoStatus(message) { for (const node of photoStatuses) node.textContent = message; }
+    function photoStatus(message, kind = "info", channel = "save") {
+      for (const node of photoStatuses) node.textContent = message;
+      options.feedback?.({message, kind, channel});
+    }
     function emptyLayer() { return {text: "", original_text: "", mode: "none", text_source: null, narration: null}; }
     function readingMs(value) { return Math.max(5000, Math.ceil(Math.max(value.trim().split(/\s+/).filter(Boolean).length / 2.5, value.length / 15)) * 1000); }
     function photoPanel(parent, row) {
       const panel = doc.createElement("details"); photoPanels.set(row.asset_id, panel); panel.open = photoOpen === row.asset_id;
-      panel.addEventListener("toggle", () => { if (panel.open) photoOpen = row.asset_id; });
+      panel.addEventListener("toggle", () => {
+        if (panel.isConnected === false) return;
+        if (panel.open) photoOpen = row.asset_id;
+        else if (photoOpen === row.asset_id) photoOpen = null;
+      });
       panel.appendChild(text("summary", "Text a komentář fotografie"));
       const image = doc.createElement("img"); image.src = `/api/camino/film/photo/${model.project_id}/${row.asset_id}`;
       image.alt = "Fotografie pro text a komentář"; image.loading = "lazy"; image.className = "camino-film-photo"; panel.appendChild(image);
@@ -302,6 +358,7 @@
       originalArea.value = row.photo_text?.original_text ?? (model.texts || []).find(t => t.reference.revision_id === row.photo_text?.text_source?.revision_id)?.text ?? "";
       original.appendChild(originalArea); panel.appendChild(original);
       const count = text("p", ""), feedback = text("p", "Úpravy se ukládají automaticky."); feedback.role = "status";
+      feedback.filmContext = `Fotografie ${model.draft.shots.indexOf(row) + 1}`;
       photoStatuses.push(feedback);
       function lengthInfo() {
         const n = row.photo_text?.narration;
@@ -322,17 +379,17 @@
       });
       mode.addEventListener("change", () => {
         layer().mode = mode.value; change();
-        feedback.textContent = mode.value === "scroll" ? "Pro celý text zkontroluj doporučenou délku. Náhled i export používají stejné okno." :
+        announce(feedback, mode.value === "scroll" ? "Pro celý text zkontroluj doporučenou délku. Náhled i export používají stejné okno." :
           mode.value === "static" ? "Dlouhý statický text vyžaduje výběr úryvku. Celý dlouhý text zobrazí plynulý režim." :
-          mode.value === "narration" ? "Vytvoř čtení, poslechni si ho a pak ho výslovně použij ve filmu." : "Text se ukládá bez zobrazení ve filmu.";
+          mode.value === "narration" ? "Vytvoř čtení, poslechni si ho a pak ho výslovně použij ve filmu." : "Text se ukládá bez zobrazení ve filmu.", "warning");
       });
       shotTextChoice(panel, row);
       const actions = doc.createElement("div"); actions.className = "actions";
       function button(title, fn) { const b = text("button", title); b.type = "button"; b.addEventListener("click", fn); actions.appendChild(b); return b; }
-      button("Upravit text pro čtení", () => { panel.open = true; area.readOnly = false; area.focus?.(); feedback.textContent = "Uprav pracovní text v poli výše. Původní text je zvlášť a nemění se."; });
+      button("Upravit text pro čtení", () => { panel.open = true; area.readOnly = false; area.focus?.(); announce(feedback, "Uprav pracovní text v poli výše. Původní text je zvlášť a nemění se.", "warning"); });
       button("Uložit pracovní text", () => save());
       button("Obnovit pracovní text z originálu", () => {
-        if (!originalArea.value) { feedback.textContent = "Nejprve převezmi původní text z deníku."; return; }
+        if (!originalArea.value) { announce(feedback, "Nejprve převezmi původní text z deníku.", "warning"); return; }
         if (area.value !== originalArea.value && !(options.confirm || confirm)("Nahradit pracovní text původním textem z iPhonu? Uložené hlasové pokusy zůstanou zachované.")) return;
         const current = layer(); current.text = originalArea.value; current.narration = null;
         if (current.mode === "narration") current.mode = "none";
@@ -340,33 +397,36 @@
       });
       button("Prodloužit pro celý text / čtení", () => {
         const current = layer(), ms = current.mode === "narration" && current.narration ? current.narration.duration_ms : readingMs(current.text);
-        if (ms > 300000) { feedback.textContent = "Celý text potřebuje více než 300 sekund. Vyber kratší část textu."; return; }
+        if (ms > 300000) { announce(feedback, "Celý text potřebuje více než 300 sekund. Vyber kratší část textu.", "warning"); return; }
         row.out_ms = Math.max(row.out_ms, ms); change(); renderRows();
       });
       const generate = button("Vytvořit místní čtení", async () => {
-        if (narrating) { feedback.textContent = "Čtení se již vytváří. Počkej na výsledek."; return; }
-        if (!layer().text.trim()) { feedback.textContent = "Nejprve napiš nebo vyber text."; return; }
+        if (narrating) { announce(feedback, "Čtení se již vytváří. Počkej na výsledek.", "warning"); return; }
+        if (!layer().text.trim()) { announce(feedback, "Nejprve napiš nebo vyber text.", "warning"); return; }
         if (!await save()) return;
         const currentEpoch = epoch, snapshot = JSON.stringify(row.photo_text), project = model.project_id;
-        narrating = true; controls(); generate.disabled = true; feedback.textContent = "Vytvářím místní české čtení na Macu…";
+        narrating = true; controls(); generate.disabled = true; announce(feedback, "Vytvářím místní české čtení na Macu…", "busy");
         try {
           const response = await request("/api/camino/film/narration", {method: "POST", headers: {"Content-Type": "application/json"},
             body: JSON.stringify({project_id: project, revision: model.revision, asset_id: row.asset_id, request_id: uuid()})});
           const data = await response.json();
           if (currentEpoch !== epoch || !active || doc.hidden) return;
           const live = model.draft.shots.find(r => r.asset_id === row.asset_id);
-          if (JSON.stringify(live?.photo_text) !== snapshot) { feedback.textContent = "Text se mezitím změnil. Čtení se nepřipojilo."; return; }
-          if (!data.ok) { feedback.textContent = data.message; return; }
+          if (JSON.stringify(live?.photo_text) !== snapshot) { announce(feedback, "Text se mezitím změnil. Čtení se nepřipojilo.", "warning"); return; }
+          if (!data.ok) { announce(feedback, data.message, "error"); return; }
           model.narrations = data.narrations || model.narrations || [];
           live.photo_text.narration = data.narration; change();
-          if (await save()) { renderRows(); photoStatus("Čtení je uložené. Poslechni si ho a pak použij ve filmu."); }
-        } catch (_) { if (currentEpoch === epoch) feedback.textContent = "Výsledek čtení není potvrzený. Automaticky jej neopakuji; text zůstává uložený."; }
-        finally { narrating = false; generate.disabled = false; controls(); }
+          if (await save()) { renderRows(); photoStatus("Čtení je uložené. Poslechni si ho a pak použij ve filmu.", "success", "photo"); }
+        } catch (_) { if (currentEpoch === epoch) announce(feedback, "Výsledek čtení není potvrzený. Automaticky jej neopakuji; text zůstává uložený.", "warning"); }
+        finally {
+          narrating = false; generate.disabled = false; controls();
+          options.feedback?.({message: "Operace s komentářem skončila. Obnov seznam pokusů a ověř výsledek.", kind: "warning", channel: "photo", onlyIfBusy: true});
+        }
       });
       button("Použít čtení ve filmu", () => {
         const current = layer(), n = current.narration;
-        if (!n) { feedback.textContent = "Nejprve vytvoř a poslechni čtení."; return; }
-        if (n.duration_ms > row.out_ms) { feedback.textContent = `Čtení má ${(n.duration_ms / 1000).toFixed(1)} s. Nejprve prodluž fotografii nebo zkrať text.`; return; }
+        if (!n) { announce(feedback, "Nejprve vytvoř a poslechni čtení.", "warning"); return; }
+        if (n.duration_ms > row.out_ms) { announce(feedback, `Čtení má ${(n.duration_ms / 1000).toFixed(1)} s. Nejprve prodluž fotografii nebo zkrať text.`, "warning"); return; }
         current.mode = "narration"; n.included = true; change(); renderRows();
       });
       button("Vyřadit čtení z filmu", () => {
@@ -377,7 +437,7 @@
       button("Náhled fotografie s textem a zvukem", async () => {
         if (!await save()) return;
         const start = shotStart(row.asset_id);
-        if (start === null) { feedback.textContent = "Nejprve zařaď fotografii do filmu."; return; }
+        if (start === null) { announce(feedback, "Nejprve zařaď fotografii do filmu.", "warning"); return; }
         await render("preview", {start_ms: start, end_ms: start + row.out_ms});
       });
       const recordings = doc.createElement("select"), recordingLabel = text("label", "Původní nahrávka k fotografii");
@@ -389,43 +449,47 @@
       const recording = () => model.draft.voices.find(v => v.asset_id === recordings.value) || model.draft.voices[0];
       const attach = button("Připojit vybranou nahrávku k fotografii", () => {
         const voice = recording(); if (!voice) return;
-        if (!row.included) { feedback.textContent = "Nejprve zařaď fotografii do filmu."; return; }
-        if (voice.out_ms - voice.in_ms > row.out_ms) { feedback.textContent = "Nahrávka je delší než fotografie. Prodluž fotografii pro nahrávku nebo vyber kratší úsek řeči."; return; }
+        if (!row.included) { announce(feedback, "Nejprve zařaď fotografii do filmu.", "warning"); return; }
+        if (voice.out_ms - voice.in_ms > row.out_ms) { announce(feedback, "Nahrávka je delší než fotografie. Prodluž fotografii pro nahrávku nebo vyber kratší úsek řeči.", "warning"); return; }
         voice.photo_asset_id = row.asset_id; voice.at_ms = shotStart(row.asset_id) || 0; voice.included = true; change(); renderRows();
       }); attach.disabled = !model.draft.voices.length;
       const extendRecording = button("Prodloužit fotografii pro nahrávku", () => {
         const voice = recording(); if (!voice) return;
         const duration = voice.out_ms - voice.in_ms;
-        if (duration > 300000) { feedback.textContent = "Nahrávka přesahuje 300 sekund; nejprve ručně vyber kratší úsek."; return; }
+        if (duration > 300000) { announce(feedback, "Nahrávka přesahuje 300 sekund; nejprve ručně vyber kratší úsek.", "warning"); return; }
         row.out_ms = Math.max(row.out_ms, duration); change(); renderRows();
       }); extendRecording.disabled = !model.draft.voices.length;
       const listenRecording = button("Poslechnout vybranou nahrávku", () => { const voice = recording(); if (voice) selectVideo(voice.asset_id); });
       listenRecording.disabled = !model.draft.voices.length;
+      if (!model.draft.voices.length) panel.appendChild(text("p", "Připojení, prodloužení a poslech původní nahrávky nejsou dostupné: tento film nemá původní hlasovou nahrávku. Můžeš vytvořit čtení nebo importovat MP3/WAV."));
       const uploadLabel = text("label", "Hotový komentář MP3 nebo WAV (nejvýše 64 MiB / 300 s)");
       const upload = doc.createElement("input"); upload.type = "file"; upload.accept = ".mp3,.wav,audio/mpeg,audio/wav";
       uploadLabel.appendChild(upload); panel.appendChild(uploadLabel);
       const importButton = button("Importovat MP3/WAV k fotografii", async () => {
         const file = upload.files?.[0];
-        if (!file || !file.size || file.size > 64 * 1024 * 1024) { feedback.textContent = "Vyber soubor MP3/WAV do 64 MiB."; return; }
-        if (narrating) { feedback.textContent = "Nejprve počkej na dokončení předchozí operace s nahrávkou."; return; }
+        if (!file || !file.size || file.size > 64 * 1024 * 1024) { announce(feedback, "Vyber soubor MP3/WAV do 64 MiB.", "warning"); return; }
+        if (narrating) { announce(feedback, "Nejprve počkej na dokončení předchozí operace s nahrávkou.", "warning"); return; }
         if (!row.photo_text) { row.photo_text = emptyLayer(); change(); }
         if (!await save()) return;
         const currentEpoch = epoch, snapshot = JSON.stringify(row.photo_text);
-        narrating = true; controls(); importButton.disabled = true; feedback.textContent = "Nahrávám a ověřuji celý zvuk…";
+        narrating = true; controls(); importButton.disabled = true; announce(feedback, "Nahrávám a ověřuji celý zvuk…", "busy");
         try {
           const response = await request("/api/camino/film/narration-import", {method: "POST", headers: {
             "Content-Type": "application/octet-stream", "X-Camino-Project-Id": model.project_id,
             "X-Camino-Asset-Id": row.asset_id, "X-Camino-Revision": String(model.revision), "X-Camino-Request-Id": uuid()}, body: file});
           const data = await response.json();
           if (currentEpoch !== epoch || !active || doc.hidden) return;
-          if (!data.ok) { feedback.textContent = data.message; return; }
+          if (!data.ok) { announce(feedback, data.message, "error"); return; }
           model.narrations = data.narrations || [];
           const live = model.draft.shots.find(r => r.asset_id === row.asset_id);
-          if (JSON.stringify(live?.photo_text) !== snapshot) { feedback.textContent = "Pracovní text se změnil. Import najdeš mezi uloženými pokusy; k novému textu se nepřipojil."; return; }
+          if (JSON.stringify(live?.photo_text) !== snapshot) { announce(feedback, "Pracovní text se změnil. Import najdeš mezi uloženými pokusy; k novému textu se nepřipojil.", "warning"); return; }
           live.photo_text.narration = data.narration; change();
-          if (await save()) { renderRows(); photoStatus("Import je uložený pro poslech. Do filmu jej zařaď až po kontrole."); }
-        } catch (_) { if (currentEpoch === epoch) feedback.textContent = "Import není potvrzený. Obnov seznam pokusů; nahrávání se samo neopakuje."; }
-        finally { narrating = false; importButton.disabled = false; controls(); }
+          if (await save()) { renderRows(); photoStatus("Import je uložený pro poslech. Do filmu jej zařaď až po kontrole.", "success", "photo"); }
+        } catch (_) { if (currentEpoch === epoch) announce(feedback, "Import není potvrzený. Obnov seznam pokusů; nahrávání se samo neopakuje.", "warning"); }
+        finally {
+          narrating = false; importButton.disabled = false; controls();
+          options.feedback?.({message: "Import skončil. Obnov seznam pokusů a ověř výsledek.", kind: "warning", channel: "photo", onlyIfBusy: true});
+        }
       });
       button("Obnovit seznam pokusů", async () => { if (!await save()) return; await check(); renderRows(); });
       panel.appendChild(count); panel.appendChild(actions); panel.appendChild(audio); panel.appendChild(feedback);
@@ -450,7 +514,7 @@
           const player = doc.createElement("audio"); player.controls = true; player.preload = "none";
           player.src = `/api/camino/film/narration/${model.project_id}/${take.id}`; photoAudios.push(player); item.appendChild(player);
           function adopt(include) {
-            if (include && take.duration_ms > row.out_ms) { feedback.textContent = "Pokus je delší než fotografie. Nejprve ji prodluž pro tento pokus."; return; }
+            if (include && take.duration_ms > row.out_ms) { announce(feedback, "Pokus je delší než fotografie. Nejprve ji prodluž pro tento pokus.", "warning"); return; }
             if (row.photo_text?.text !== take.text && !(options.confirm || confirm)("Převzít uložený pracovní text tohoto pokusu? Původní text z jeho deníku zůstane zachovaný.")) return;
             row.photo_text = {text: take.text, original_text: take.original_text || "", text_source: take.text_source,
               mode: include ? "narration" : "none", narration: include ? {id: take.id, duration_ms: take.duration_ms, sha256: take.sha256, included: true} : null};
@@ -459,12 +523,12 @@
           button("Upravit text tohoto pokusu", () => adopt(false));
           button("Použít tento pokus ve filmu", () => adopt(true));
           button("Prodloužit fotografii pro tento pokus", () => {
-            if (take.duration_ms > 300000) { feedback.textContent = "Pokus je delší než 300 sekund. Použij kratší text nebo nahrávku."; return; }
+            if (take.duration_ms > 300000) { announce(feedback, "Pokus je delší než 300 sekund. Použij kratší text nebo nahrávku.", "warning"); return; }
             row.out_ms = Math.max(row.out_ms, take.duration_ms); change(); renderRows();
           });
         }
         button(take.deleted ? "Obnovit pokus" : "Smazat pokus do koše", async () => {
-          if (narrating) { feedback.textContent = "Počkej na dokončení operace s nahrávkou."; return; }
+          if (narrating) { announce(feedback, "Počkej na dokončení operace s nahrávkou.", "warning"); return; }
           if (!take.deleted && row.photo_text?.narration?.id === take.id) {
             row.photo_text.narration = null;
             if (row.photo_text.mode === "narration") row.photo_text.mode = "none";
@@ -477,10 +541,10 @@
               body: JSON.stringify({project_id: model.project_id, asset_id: row.asset_id, narration_id: take.id, revision: model.revision, deleted: !take.deleted})});
             const data = await response.json();
             if (currentEpoch !== epoch || !active || doc.hidden) return;
-            if (!data.ok) { feedback.textContent = data.message; return; }
+            if (!data.ok) { announce(feedback, data.message, "error"); return; }
             model.narrations = data.narrations; renderRows();
-            photoStatus(take.deleted ? "Pokus je obnovený pro poslech a další použití." : "Pokus je v koši. Pracovní text i původní text zůstaly uložené.");
-          } catch (_) { if (currentEpoch === epoch) feedback.textContent = "Změna není potvrzená. Obnov seznam pokusů před dalším krokem."; }
+            photoStatus(take.deleted ? "Pokus je obnovený pro poslech a další použití." : "Pokus je v koši. Pracovní text i původní text zůstaly uložené.", "success", "photo");
+          } catch (_) { if (currentEpoch === epoch) announce(feedback, "Změna není potvrzená. Obnov seznam pokusů před dalším krokem.", "warning"); }
           finally { narrating = false; controls(); }
         });
         item.appendChild(actions); (take.deleted ? trash : activeList).appendChild(item);
@@ -494,7 +558,7 @@
       const use = text("button", "Převzít celý vybraný text k fotografii"); use.type = "button"; use.disabled = !(model.texts || []).length;
       use.addEventListener("click", () => {
         const source = model.texts[Number(select.value || 0)]; if (!source) return;
-        if (source.text.length > 6000) { photoStatus("Text má více než 6000 znaků. Vlož do fotografie vědomě vybraný úryvek."); return; }
+        if (source.text.length > 6000) { photoStatus("Text má více než 6000 znaků. Vlož do fotografie vědomě vybraný úryvek.", "warning", "photo"); return; }
         if (row.photo_text?.text && !(options.confirm || confirm)("Nahradit uložený text této fotografie vybraným textem deníku?")) return;
         row.photo_text = {text: source.text, original_text: source.text, mode: "none", text_source: {...source.reference}, narration: null};
         photoOpen = row.asset_id; change(); renderRows(); focusPhoto(row.asset_id);
@@ -513,8 +577,8 @@
         const transfer = text("button", "Předat celý text na fotografii"); transfer.type = "button";
         transfer.addEventListener("click", () => {
           const row = model.draft.shots.find(r => r.asset_id === target.value);
-          if (!row) { feedback.textContent = "Vyber zařazenou fotografii."; return; }
-          if (source.text.length > 6000) { feedback.textContent = "Text přesahuje 6000 znaků. Vlož u fotografie vlastní úryvek."; return; }
+          if (!row) { announce(feedback, "Vyber zařazenou fotografii.", "warning"); return; }
+          if (source.text.length > 6000) { announce(feedback, "Text přesahuje 6000 znaků. Vlož u fotografie vlastní úryvek.", "warning"); return; }
           if (row.photo_text?.text && !(options.confirm || confirm)("Nahradit text vybrané fotografie?")) return;
           row.photo_text = {text: source.text, original_text: source.text, mode: "none", text_source: {...source.reference}, narration: null};
           photoOpen = row.asset_id; change(); renderRows(); focusPhoto(row.asset_id);
@@ -522,8 +586,8 @@
         }); actions.appendChild(transfer);
         const card = text("button", "Přidat samostatnou textovou kartu za fotografii"); card.type = "button"; card.className = "secondary";
         card.addEventListener("click", () => {
-          if (!target.value || source.text.length > 1000) { feedback.textContent = "Samostatná karta vyžaduje fotografii a nejvýše 1000 znaků. Delší text předej přímo na fotografii."; return; }
-          if ((model.draft.cards || []).length >= 32) { feedback.textContent = "Film už má 32 samostatných karet."; return; }
+          if (!target.value || source.text.length > 1000) { announce(feedback, "Samostatná karta vyžaduje fotografii a nejvýše 1000 znaků. Delší text předej přímo na fotografii.", "warning"); return; }
+          if ((model.draft.cards || []).length >= 32) { announce(feedback, "Film už má 32 samostatných karet.", "warning"); return; }
           (model.draft.cards ||= []).push({id: uuid(), after_asset_id: target.value, text: source.text,
             duration_ms: 5000, included: true, text_source: {...source.reference}}); change(); renderRows();
         }); actions.appendChild(card); li.appendChild(actions); li.appendChild(feedback); nodes.texts.appendChild(li);
@@ -544,6 +608,14 @@
       const labels = {queued: "Ve frontě", rendering: "Vytváří se", ready: "Hotovo", failed: "Selhalo — lze zopakovat", interrupted: "Přerušeno — lze zopakovat", delete_pending: "Mazání nebylo dokončeno"};
       const key = j => JSON.stringify([j.revision, j.profile, j.range]);
       const exports = jobs.filter(j => !j.source_asset_id);
+      const latest = exports.filter(j => j.revision === model.revision).at(-1);
+      const signature = latest && JSON.stringify([latest.job_id, latest.state, latest.progress]);
+      if (latest && signature !== exportStatus) {
+        exportStatus = signature;
+        const name = latest.profile === "final" ? "MP4 1080p" : "Náhled 720p";
+        const kind = ["failed", "interrupted", "delete_pending"].includes(latest.state) ? "error" : latest.state === "ready" ? "success" : "busy";
+        options.feedback?.({message: `${name}: ${labels[latest.state] || "Ověřuji stav"}${latest.state === "rendering" ? ` · ${latest.progress} %` : ""}${latest.message ? ` — ${latest.message}` : ""}`, kind, channel: "render"});
+      }
       const completed = new Set(exports.filter(j => j.state === "ready").map(key));
       for (const job of exports.slice().reverse()) {
         const superseded = ["failed", "interrupted"].includes(job.state) && completed.has(key(job));
@@ -571,9 +643,9 @@
     }
     async function removeExport(job) {
       if (!model || deleting) return;
-      if (dirty || saving || preserved) { save(); nodes.status.textContent = "Nejprve dokonči uložení střihu; potom můžeš smazat variantu."; return; }
+      if (dirty || saving || preserved) { save(); announce(nodes.status, "Nejprve dokonči uložení střihu; potom můžeš smazat variantu.", "warning"); return; }
       const current = epoch, selection = {project_id: model.project_id, job_id: job.job_id};
-      deleting = true; ++readRequest; controls(); let refresh = false, message = "";
+      deleting = true; ++readRequest; controls(); let refresh = false, message = "", messageKind = "warning";
       try {
         const response = await request("/api/camino/film/delete-plan", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(selection)});
         const plan = await response.json();
@@ -590,17 +662,18 @@
         if (answer === null) return;
         if (answer !== plan.confirmation_text) { message = "Potvrzovací věta nesouhlasí. Varianta zůstala zachovaná."; return; }
         if (nodes.player.getAttribute("src") === job.url) stopPlayer();
-        refresh = true; nodes.status.textContent = "Trvale odstraňuji vybranou variantu…";
+        refresh = true; announce(nodes.status, "Trvale odstraňuji vybranou variantu…", "busy", "delete");
         const removed = await request("/api/camino/film/delete", {method: "POST", headers: {"Content-Type": "application/json"},
           body: JSON.stringify({...selection, plan_token: plan.plan_token, confirmation: answer})});
         const result = await removed.json();
+        messageKind = result.ok ? "success" : "error";
         message = result.ok ? "Varianta a její pracovní soubory byly trvale smazané." : (result.message || "Smazání se nedokončilo. Obnov přehled a zkontroluj stav.");
-      } catch (_) { message = "Výsledek smazání není potvrzený. Obnov přehled; smazání se automaticky neopakuje."; }
+      } catch (_) { messageKind = "error"; message = "Výsledek smazání není potvrzený. Obnov přehled; smazání se automaticky neopakuje."; }
       finally {
         deleting = false;
         if (current === epoch && active) {
           if (refresh) await check();
-          controls(); if (message) nodes.status.textContent = message;
+          controls(); if (message) announce(nodes.status, message, messageKind, "delete");
         }
       }
     }
@@ -616,59 +689,59 @@
         if (preserved) {
           if (preserved.model.project_id === data.project_id) {
             model = preserved.model; pending = preserved.pending; version = preserved.version; dirty = true;
-            renderRows(); nodes.status.textContent = "Neuložené úpravy jsou obnovené. Ulož je nebo načti poslední revizi.";
+            renderRows(); announce(nodes.status, "Neuložené úpravy jsou obnovené. Ulož je nebo načti poslední revizi.", "info");
           }
           preserved = null;
         }
         if (!model || (!dirty && !saving && model.revision !== data.revision)) {
           model = data; renderRows();
-          nodes.status.textContent = `Uložená revize ${data.revision} · ${(data.duration_ms / 1000).toLocaleString("cs-CZ")} s. Úpravy se ukládají automaticky.`;
+          announce(nodes.status, `Uložená revize ${data.revision} · ${(data.duration_ms / 1000).toLocaleString("cs-CZ")} s. Úpravy se ukládají automaticky.`, "success");
         }
         if (model.project_id !== data.project_id) { invalidate("Uzavřená sada se změnila. Znovu načti editor."); return; }
-        if (dirty && model.revision !== data.revision && !saving) nodes.status.textContent = "Jiné okno uložilo novější střih. Tvoje změny zůstávají zde; před pokračováním načti poslední revizi.";
+        if (dirty && model.revision !== data.revision && !saving) announce(nodes.status, "Jiné okno uložilo novější střih. Tvoje změny zůstávají zde; před pokračováním načti poslední revizi.", "warning");
         model.narrations = data.narrations || [];
         renderJobs(data.jobs); updateSource(data.jobs); controls();
-      } catch (_) { if (current === epoch && read === readRequest) conceal(); }
+      } catch (_) { if (current === epoch && read === readRequest) conceal("Projekt nelze nyní ověřit. Obnov spojení a znovu načti stav; rozpracované úpravy zůstávají v této kartě."); }
     }
     async function save() {
       cancel(timer);
       if (!model) return false;
-      if (saving) { nodes.status.textContent = "Ukládání právě probíhá. Počkej na potvrzení."; return false; }
+      if (saving) { announce(nodes.status, "Ukládání právě probíhá. Počkej na potvrzení.", "busy", "save"); return false; }
       if (!dirty && !pending) return true;
       const current = epoch;
       if (!pending) pending = {version, payload: {project_id: model.project_id, expected_revision: model.revision,
         request_id: uuid(), draft: JSON.parse(JSON.stringify(model.draft))}};
       const captured = pending;
-      saving = true; controls();
+      saving = true; controls(); announce(nodes.status, "Ukládám střih…", "busy", "save");
       try {
         const response = await request("/api/camino/film/save", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(captured.payload)});
         const data = await response.json();
         if (current !== epoch) return false;
-        if (!data.ok) { pending = null; nodes.status.textContent = data.message; photoStatus(data.message); return false; }
+        if (!data.ok) { pending = null; announce(nodes.status, data.message, "error", "save"); photoStatus(data.message, "error"); return false; }
         ++readRequest;
         model.revision = data.revision; pending = null; dirty = version !== captured.version;
-        nodes.status.textContent = `Uložena revize ${data.revision}.${dirty ? " Zbývající úpravy se ukládají…" : ""}`;
-        photoStatus(nodes.status.textContent);
+        announce(nodes.status, `Uložena revize ${data.revision}.${dirty ? " Zbývající úpravy se ukládají…" : ""}`, "info", "save");
+        photoStatus(nodes.status.textContent, "success");
         if (dirty) timer = later(() => save(), 100);
         return !dirty;
       } catch (_) {
-        if (current === epoch) { nodes.status.textContent = "Odpověď se ztratila. Zkus Uložit střih znovu; stejné uložení se neduplikuje."; photoStatus(nodes.status.textContent); }
+        if (current === epoch) { announce(nodes.status, "Odpověď se ztratila. Zkus Uložit střih znovu; stejné uložení se neduplikuje.", "error", "save"); photoStatus(nodes.status.textContent, "error"); }
         return false;
       } finally { saving = false; controls(); }
     }
     async function render(profile, interval = null, revision = null, requestId = null) {
-      if (!model || dirty || saving) { nodes.status.textContent = "Nejprve počkej na uložení střihu."; return; }
+      if (!model || dirty || saving || deleting || narrating) { announce(nodes.status, nodes.blocked?.textContent || "Nejprve počkej na uložení střihu.", "warning", "render"); return; }
       const current = epoch;
+      announce(nodes.status, "Odesílám požadavek na export…", "busy", "render");
       try {
         const response = await request("/api/camino/film/render", {method: "POST", headers: {"Content-Type": "application/json"},
           body: JSON.stringify({project_id: model.project_id, revision: revision || model.revision,
             request_id: requestId || uuid(), profile, range: interval})});
         const data = await response.json();
         if (current !== epoch) return;
-        nodes.status.textContent = data.ok ? "Export je ve frontě. Stav se průběžně aktualizuje." : data.message;
-        photoStatus(nodes.status.textContent);
+        announce(nodes.status, data.ok ? "Export je ve frontě. Stav se průběžně aktualizuje." : data.message, data.ok ? "busy" : "error", "render");
         if (data.ok) check();
-      } catch (_) { if (current === epoch) nodes.status.textContent = "Požadavek se nepotvrdil. Znovu načti stav fronty před opakováním."; }
+      } catch (_) { if (current === epoch) announce(nodes.status, "Požadavek se nepotvrdil. Znovu načti stav fronty před opakováním.", "error", "render"); }
     }
     nodes.save.addEventListener("click", () => save());
     nodes.start.addEventListener("click", () => mark("in_ms"));
@@ -678,7 +751,7 @@
       nodes.player.pause(); nodes.sourcePlayer.currentTime = row.in_ms / 1000; playingSelection = true;
       const current = sourceRequest;
       nodes.sourcePlayer.play().catch(() => {
-        if (current === sourceRequest) { playingSelection = false; nodes.sourceStatus.textContent = "Přehrávání se nespustilo. Zkus Přehrát výběr znovu."; }
+        if (current === sourceRequest) { playingSelection = false; announce(nodes.sourceStatus, "Přehrávání se nespustilo. Zkus Přehrát výběr znovu.", "error"); }
       });
     });
     nodes.sourcePlayer.addEventListener("loadedmetadata", syncSelection);
@@ -693,7 +766,7 @@
       if (selected) {
         playingSelection = false; sourceJob = null; cancel(sourceTimer); cancel(selectionTimer);
         nodes.sourcePlayer.pause(); nodes.sourcePlayer.removeAttribute("src"); nodes.sourcePlayer.load(); syncSelection();
-        nodes.sourceStatus.textContent = "Zdroj nelze načíst. Znovu otevři video nebo komentář a ověř připojení.";
+        announce(nodes.sourceStatus, "Zdroj nelze načíst. Znovu otevři video nebo komentář a ověř připojení.", "error");
       }
     });
     nodes.preview.addEventListener("click", () => render("preview"));
@@ -702,7 +775,7 @@
     nodes.duck.addEventListener("change", () => { if (model) { model.draft.duck_gain = Number(nodes.duck.value); change(); } });
     nodes.reload.addEventListener("click", () => {
       if (dirty && !(options.confirm || confirm)("Zahodit zdejší neuložené změny a načíst poslední uložený střih?")) return;
-      invalidate("Načítám poslední uloženou revizi…"); check();
+      invalidate("Načítám poslední uloženou revizi…", false, "busy"); check();
     });
     doc.addEventListener("visibilitychange", () => {
       if (!active) return;
@@ -722,10 +795,10 @@
       close() { active = false; cancel(refreshTimer); invalidate(); root.classList.add("hidden"); },
       suspend() { active = false; cancel(refreshTimer); conceal(); root.classList.add("hidden"); },
       canClose() {
-        if (narrating) { nodes.status.textContent = "Nejprve počkej na dokončení operace s komentářem fotografie."; return false; }
-        if (deleting) { nodes.status.textContent = "Dokončuji smazání varianty. Před přepnutím počkej na výsledek."; return false; }
-        if (preserved) { nodes.status.textContent = "Nejprve obnov spojení a ulož rozpracovaný střih."; return false; }
-        if (dirty || saving) { save(); nodes.status.textContent = "Nejprve dokonči uložení změn; potom můžeš přepnout nebo zavřít film."; return false; }
+        if (narrating) { announce(nodes.status, "Nejprve počkej na dokončení operace s komentářem fotografie.", "warning", "guard"); return false; }
+        if (deleting) { announce(nodes.status, "Dokončuji smazání varianty. Před přepnutím počkej na výsledek.", "busy", "guard"); return false; }
+        if (preserved) { announce(nodes.status, "Nejprve obnov spojení a ulož rozpracovaný střih.", "warning", "guard"); return false; }
+        if (dirty || saving) { save(); announce(nodes.status, "Nejprve dokonči uložení změn; potom můžeš přepnout nebo zavřít film.", "warning", "guard"); return false; }
         return true;
       },
       check, invalidate, save,
