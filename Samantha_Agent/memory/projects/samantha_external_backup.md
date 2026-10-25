@@ -2,7 +2,15 @@
 
 Projekt zalozen 2026-05-19.
 
-## Aktuální stav 2026-10-19 22:13 CEST
+## Aktuální stav 2026-10-25 14:53 CET
+
+- 2026-10-25 14:53 CET: Nová schválená recovery záloha dokončená a ověřená. Projekt `20261025_142837`: 63 143 souborů, 17 050 kopírovaných, 46 092 hardlinků, 1 symlink, 0 skipped; 4 309 588 279 nových B. Skutečně připojený šifrovaný cíl ověřený před/po; starší snapshoty zachované.
+- Živé Camino `20261025_143650-abf7e7e5`: 1 647 souborů / 5 167 041 733 B, čtyři DB; 921 operací, 132 Momentů, 4 cesty a 316 originálů / 2379212189 B. Registrovaný běh ověřil úplné SHA, DB i mediální účtenky a shodný zmrazený zdroj.
+- Závěrečná kontrola PASS: čtyři projektové SHA a skutečná rekonstrukce do nové dočasné složky; čtyři DB quick_check; auth.json a nouzové autosave vyloučené. Soukromá .env shodná, bez výpisu citlivých dat. Camino owner HTTP/HTTPS zpět, config/Serve a Cockpit PID/stamp shodné.
+- backup_status nyní potvrzuje 25. 10. 2026; na šifrovaném cíli ~406 GiB volných. Zdrojový kód ani síť se neměnily, žádná starší data/záloha se nemazala. Není to obraz celého Macu; kompletní instalace a fyzická přejímka náhradního počítače zůstává samostatná.
+- Podrobnosti: memory/reports/backup_recovery_20261025.md; shodný souhrn na SSD v recovery_updates, soukromé důkazy v data/private/backup_recovery_20261025/. TXT 1.2 zachovává historické příklady; aktuální dvojici snapshotů určuje dnešní manifest. Další krok: pravidelná další záloha, k původnímu tématu upozornění se vrátit samostatně. Tento výsledkový zápis je jen lokální dokumentační checkpoint, bez push/deploy.
+
+## Historie 2026-10-19 22:13 CEST
 
 Podrobný lidský návod: `../../OBNOVA_SAMANTHY_NOVY_MAC.txt`, verze 1.2,
 17 kapitol včetně instalací a přejímky. Projektová kopie, Plocha, kořen

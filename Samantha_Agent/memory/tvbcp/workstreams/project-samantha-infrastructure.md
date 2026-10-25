@@ -1,6 +1,15 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-25 14:53 CET: Nová schválená recovery záloha dokončená a ověřená. Projekt `20261025_142837`: 63 143 souborů, 17 050 kopírovaných, 46 092 hardlinků, 1 symlink, 0 skipped; 4 309 588 279 nových B. Skutečně připojený šifrovaný cíl ověřený před/po; starší snapshoty zachované.
+- Živé Camino `20261025_143650-abf7e7e5`: 1 647 souborů / 5 167 041 733 B, čtyři DB; 921 operací, 132 Momentů, 4 cesty a 316 originálů / 2379212189 B. Registrovaný běh ověřil úplné SHA, DB i mediální účtenky a shodný zmrazený zdroj.
+- Závěrečná kontrola PASS: čtyři projektové SHA a skutečná rekonstrukce do nové dočasné složky; čtyři DB quick_check; auth.json a nouzové autosave vyloučené. Soukromá .env shodná, bez výpisu citlivých dat. Camino owner HTTP/HTTPS zpět, config/Serve a Cockpit PID/stamp shodné.
+- backup_status nyní potvrzuje 25. 10. 2026; na šifrovaném cíli ~406 GiB volných. Zdrojový kód ani síť se neměnily, žádná starší data/záloha se nemazala. Není to obraz celého Macu; kompletní instalace a fyzická přejímka náhradního počítače zůstává samostatná.
+- Podrobnosti: memory/reports/backup_recovery_20261025.md; shodný souhrn na SSD v recovery_updates, soukromé důkazy v data/private/backup_recovery_20261025/. TXT 1.2 zachovává historické příklady; aktuální dvojici snapshotů určuje dnešní manifest. Další krok: pravidelná další záloha, k původnímu tématu upozornění se vrátit samostatně. Tento výsledkový zápis je jen lokální dokumentační checkpoint, bez push/deploy.
+<!-- SAMANTHA_CURRENT_STATUS_END -->
+
+### Předchozí stav infrastruktury
+
 - 2026-10-24 15:45 CEST: Závěrečné měření po dokončení cache a profilového checkpointu: skutečně +30,20 GiB, volno 49,28 GiB. Cíl +30 GiB splněný; hlavní aplikace a chráněné služby shodné. Další mazání se neprovádí.
 
 - 2026-10-24 15:43 CEST: Schválený úklid SSD dokončen: skutečně +30,10 GiB, volno 19,07 → 49,18 GiB. Publikační kopie, instalační zbytky, vybrané sestavovací cache a syntetické testovací payloady uklizené; potřebná data a účtenky zachované. Systémová cache 4,28 GiB zůstala nedotčená po odmítnutí macOS i se správcem; žádná změna ochran/oprávnění. Ukončeni pouze čekající aktualizační pomocníci, hlavní aplikace běží se shodnými binárními otisky. Camino/Cockpit/autosave před/po shodné. Další krok: návrat k praktické přejímce střižny, bez dalšího mazání.
@@ -70,7 +79,6 @@
   otisk `d12a6e19e855247f`, rychlá brána 9,4 s, smoke 5/5.
 - Živý audit 20:49 CEST: `verified_current`, main=origin, kopie 2/2 čisté,
   runtime připojený a nečinný, bez nejistého doručení a bez blokátorů.
-<!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Samantha Infrastructure
 
@@ -549,3 +557,28 @@ Technický důkaz:
   skutečně +30,20 GiB, volno 49,28 GiB; hlavní aplikace i chráněné služby
   nadále shodné. Kompilační cache izolovaného workspace byla ignorovaná,
   bez běžící kompilace či otevřených souborů; zdroje workspace beze změny.
+
+### 2026-10-25 14:53 CET — nová ověřená recovery záloha včetně živého Camina
+
+Hotovo:
+
+- Šifrovaná recovery záloha projektů a samostatného živého archivu Camina dokončená. Služba se vrátila zdravá; zkouška souborové obnovy prošla. Zastaralé upozornění na chybějící novou zálohu je vyřešené.
+
+Rozhodnutí:
+
+- Míla výslovně požádal nyní provést zálohu. Použit stávající registrovaný recovery postup včetně náhledu, šifrovaného cíle a řízené pauzy/návratu Camina; žádná změna zálohovacího kódu, sítě ani retenční mazání. Provozní evidence navazuje na existující vazbu zálohy v ACTIVE_PROJECTS a infrastrukturním handoffu/TVBCP; nový TVBCP nevznikl.
+
+Další krok:
+
+- Pro obnovu vybírat dokončený snapshot 20261025_142837 a jeho manifest s Camino doplňkem 20261025_143650-abf7e7e5; další pravidelná záloha podle živého stavu.
+
+Navrhované další kroky:
+
+- Samostatně navázat opravou potvrzení urgentních zpráv z iPhonu a převzetí po probuzení.
+- Kompletní instalace/přejímka skutečného náhradního Macu zůstává samostatná.
+
+Technický důkaz:
+
+- Exit 0; 63 143 projektových souborů, 17 050 copied, 46 092 linked, 1 symlink, 0 skipped, 4 309 588 279 nových B; správná evidence 25. 10. 2026.
+- Camino 1 647 souborů / 5 167 041 733 B, 4 DB; 316 mediálních originálů SHA/účtenky PASS. Čtyři vybrané projektové SHA a jejich skutečná zkušební obnova PASS, čtyři DB quick_check PASS.
+- Šifrovaný mount před/po ověřený; auth.json/autosave vyloučené, HTTP/HTTPS i config/Serve/Cockpit shodné. Přesný souhrn backup_recovery_20261025.md je v projektu i v šifrovaném recovery_updates; soukromá evidence mimo Git. Zápis výsledku následný lokální checkpoint, bez push/deploy.
