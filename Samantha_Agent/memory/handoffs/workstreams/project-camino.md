@@ -1,13 +1,13 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-10-26 13:48 CET: Lokálně hotový další UI krok: zvětšení fotografie přímo nad střižnou, ze středu nebo Otevřít fotografii. Zavření tlačítkem/Esc/mimo obsah obnoví scroll, pozici navigátoru, fokus a stejný záběr i rozepsané pole. Prohlížení nepřestavuje editor a nevytváří save/source/render.
-- Velký obrázek až na kliknutí přes stejný soukromý read-only PNG endpoint. Zavření/skrytí/neplatný projekt/oprávnění odstraní obrázek, src i název. Návrat do karty okno sám neotevře. Nový obrazový uzel/identita/epocha oddělují staré load/error; pozdní close nesmaže nové okno, pozdní load nepřekryje chybu.
-- Nativní dialog s popisem a fokusem na Zavřít. Nepodporovaný či odmítnutý dialog ponechá dosavadní novou kartu; modifikované kliknutí zachované. Seznam 256px a pracovní náhled 1600px zůstávají; žádný backend/persistence/produkční render ani zásah do originálů, střihů, služby či iPhonu.
-- Ověřeno 88 cílených testů PASS / 60,868 s včetně nových Node scénářů dialogu a předchozích textů/hlasů/koše/importu; HTML struktura a otisk PASS. Rychlá statická brána PASS. Skutečný browser/Safari/iPhone, rozložení a nativní Tab/fokus NEOVĚŘENO: aktuální CUA inventář je prázdný.
-- Jen místní krok bez nového p+n; poslední nasazený kód d99093c1, Luna 51926adfe2cd519ff4d8d57a66916024, gate 2243 a smoke 5/5. Předchozí P2-A výmaz dokončený; nová testovací produkční data nevznikala.
-- Čtecí inventář místních hlasů nabízí pouze českou Zuzanu; jiný hlas nebyl instalovaný ani zvolený. Praktická přejímka historie/koše/importu a příjemnější český hlas poslechem zůstávají otevřené.
-- Další krok: samostatné p+n Lunou, potom fyzicky ověřit otevření/zavření, scroll/rozepsaný text, fokus a skrytí karty podle memory/reports/camino_film_photo_dialog_20261026.md.
+- 2026-10-26 14:02 CET: Zvětšení fotografie přímo ve střižně publikované a nasazené registrovanou Lunou do 004ec7e1be229561426217993e8955e81f63f770. Účtenka 05b42458927b15403b14a7eaf4eb3bb9: completed, push/deployment confirmed, 2 commity, project-camino → Cockpit, release_executor gpt-6-luna/high.
+- Plná publikační brána 2243 PASS / 431.0 s, smoke 5/5, protected_services_unchanged=true. Adam jednou převzal konečnou účtenku a ověřil health OK a HTTP 200 s přesnou shodou složeného HTML se zdrojem včetně dialogu a jeho obsluhy. Code stamp dd0a0d1332d72444; skutečný frontend dokládá shoda HTML, nikoli pouze stamp.
+- Kliknutí na fotografii ve středu nebo Otevřít fotografii nabízí nativní zvětšovací okno; zavření/Esc/mimo obsah obnoví scroll, navigátor, fokus a stejné rozepsané pole. Velký obrázek až na ruční kliknutí, zavření/skrytí/neplatné oprávnění vyčistí obrázek/src/název. Návrat do karty okno sám neotevře. Staré obrazové události ani pozdní close nemění nový pohled; fallback nové karty a modifikované kliknutí zachované.
+- Automatické ověření před vydáním: 88 cílených kontrol PASS / 60,868 s, po finální CSS úpravě znovu 21 frontendových PASS / 2,579 s a rychlá statická brána. Skutečné rozložení, nativní Tab/fokus/Esc na Macu/Safari/iPhonu a celková rychlost stránky NEOVĚŘENO; aktuální poslední CUA inventář byl prázdný.
+- Backend/persistence/originály/střihy/služba/iPhone se tímto UI krokem neměnily, žádný produkční render. Předchozí optimalizace a potvrzený výmaz P2-A zůstávají součástí historie; nedělají se znovu. Místní hlasový inventář nabízí jen českou Zuzanu, lepší hlas není zvolený.
+- return_channel=caller: terminálový Adam účtenku skutečně obdržel a jednou ověřil. returned_to_adam=false je nepotvrzený automatický portálový návrat a není důvodem opakovat úspěšné vydání. Tento zápis výsledku je následný lokální dokumentační checkpoint, bez dalšího p+n.
+- Další krok: uložit rozpracovaný střih, obnovit Cockpit, otevřít fotografii uprostřed filmu a zavřít tlačítkem/Esc; ověřit stejné pole/pozici a skrytí karty podle memory/reports/camino_film_photo_dialog_20261026.md. Praktická přejímka nahrávek/historie/koše/importu a příjemnější český hlas poslechem zůstávají otevřené.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí stav po p+n UI 1
@@ -4029,3 +4029,28 @@ Technický důkaz:
 - 88 cílených kontrol PASS / 60,868 s; Node regrese návratu, nulových save/source/render, zrušení při skrytí/oprávnění, starých událostí a fallbacku PASS. HTML struktura/otisk PASS; rychlá statická brána PASS.
 - Nový obrázek/identita/epocha při každém otevření, při zavření a invalidaci odstraněné src/DOM/název. Backend, originály, revize a produkční render beze změny. Report camino_film_photo_dialog_20261026.md.
 - Žádný připojený browser; fyzická vizuální/klávesová přejímka NEOVĚŘENO. Lokální checkpoint, bez nového push/nasazení. Poslední vydání d99093c1/Luna 51926adf zůstává předchozím odděleným výsledkem.
+
+
+### 2026-10-26 14:02 CET — Luna p+n zvětšovacího okna dokončené
+
+Hotovo:
+
+- Cockpit podává verzi s fotografickým oknem přímo ve střižně. Podávané HTML přesně odpovídá novému kódu; fyzický proklik v uživatelově prohlížeči ještě čeká na přejímku.
+
+Rozhodnutí:
+
+- Míla výslovně zadal „Ok luna p+n“. Jediné registrované submit_release s wait=True předalo celý přesný balíček dvou commitů; bez nativního pomocníka a bez retry.
+
+Další krok:
+
+- Po uloženém střihu obnovit Cockpit a fyzicky ověřit zvětšení/zavření, Esc, scroll/fokus a rozepsaný text.
+
+Navrhované další kroky:
+
+- Praktická přejímka nahrávek/historie/koše/importu a příjemnější český hlas poslechem.
+
+Technický důkaz:
+
+- Účtenka 05b42458927b15403b14a7eaf4eb3bb9, 2 commity do 004ec7e1, push/deployment confirmed. Plná brána 2243 PASS / 431.0 s, smoke 5/5, protected_services_unchanged=true.
+- Adamova jedna kontrola: health OK, HTTP 200 a přesná shoda složeného HTML včetně dialogu/obsluhy. HTML SHA-256 996571f43ceeb225384e0d6173a06421e3d91a057edc985abc91304ae040b0ab, code stamp dd0a0d1332d72444; shoda obsahu je důkaz frontendu i při stejném stampu.
+- Return caller převzatý, returned_to_adam=false neprokazuje automatický portálový návrat. Fyzický browser/Safari/iPhone NEOVĚŘENO. Následný výsledkový zápis je místní, bez dalšího publikování.

@@ -1,6 +1,6 @@
 # Camino — zvětšení fotografie přímo ve střižně
 
-Stav: 2026-10-26 13:48 CET, místní UI krok; bez nového push/nasazení.
+Stav: 2026-10-26 14:02 CET, publikované a nasazené do 004ec7e1 přes Lunu 05b42458927b15403b14a7eaf4eb3bb9.
 Pracovní proud: `project-camino`.
 
 ## Výsledek
@@ -51,16 +51,33 @@ nové karty; Cmd/Ctrl/Shift/Alt kliknutí zachovává obvyklé chování odkazu.
 
 ## Další krok
 
-Samostatně zadané p+n přes registrovanou Lunu. Potom uložit rozpracovaný
-střih, obnovit Cockpit a otevřít fotografii uprostřed delšího filmu, zavřít
+P+n je dokončené (viz účtenka níže). Uložit rozpracovaný střih, obnovit Cockpit a otevřít fotografii uprostřed delšího filmu, zavřít
 ji tlačítkem a Esc; ověřit stejné pole/pozici, fokus, čitelnost a zavření na
 úzkém displeji. Při skrytí karty nesmí zůstat velký obrázek ani se sám vrátit.
 
-Předchozí funkční vydání d99093c1/Luna 51926adfe2cd519ff4d8d57a66916024 je
-historicky potvrzené (gate 2243, smoke 5/5); nynější dialog v něm není.
-Míla po něm zadal další vývoj, nové p+n se automaticky nespouští.
+Před tímto vydáním byl nasazený základ d99093c1/Luna
+51926adfe2cd519ff4d8d57a66916024 (gate 2243, smoke 5/5). Dialog přidává
+až nynější výslovně zadané p+n do 004ec7e1, doložené níže.
 
 Čtecí `/usr/bin/say -v '?'` v tomto kroku nabízí jediný český hlas Zuzana.
 Další hlas se neinstaloval, nastavení systému ani placená syntéza se neměnily.
 Výběr příjemnějšího hlasu poslechem a praktická přejímka nahrávek/koše/importu
 zůstávají samostatné otevřené kroky.
+
+## Publikace — 2026-10-26 14:02 CET
+
+Účtenka `05b42458927b15403b14a7eaf4eb3bb9`: completed, 2 commity do
+`004ec7e1be229561426217993e8955e81f63f770`, push_state=confirmed,
+deployment_state=confirmed, project-camino → Cockpit.
+Vykonavatel release_executor gpt-6-luna/high.
+Publikační plná brána 2243 PASS / 431.0 s,
+smoke 5/5, protected_services_unchanged=true.
+
+Adam jednou převzal účtenku a ověřil health OK a přesnou shodu nového složeného
+HTML přes HTTP 200 včetně dialogu a jeho obsluhy. SHA-256
+`996571f43ceeb225384e0d6173a06421e3d91a057edc985abc91304ae040b0ab`, code stamp `dd0a0d1332d72444`.
+Shoda obsahu dokládá frontend i při stejném code stampu jako předchozí vydání.
+Return caller skutečně převzatý; returned_to_adam=false není potvrzení
+automatického portálového návratu a nevede k opakování úspěšného vydání.
+Fyzický proklik podle přejímky výše stále NEOVĚŘENO. Tento následný
+výsledkový zápis je jen místní dokumentační checkpoint.
