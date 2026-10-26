@@ -1,15 +1,16 @@
 # Camino
 
-Aktualizováno: 2026-10-26 16:33 CET — čtyři české hlasy k poslechovému výběru
+Aktualizováno: 2026-10-26 17:01 CET — vybraný Orus, připojení čeká na Google Cloud
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Aktuální UI krok střižny
 
-- 2026-10-26 16:33 CET: Připravené čtyři české katalogové ukázky Google Chirp 3 HD: A Kore (ženský), B Aoede (ženský), C Charon (mužský), D Orus (mužský). Čtyři skutečné MP3 / 194 796 B, úplné dekódování/délky/hashy PASS; index.html s volbou tempa a jednotlivým přehráním, JavaScript syntax PASS. Místní poslechová stránka otevřená příkazem v Safari; lidský výběr a skutečný poslech NEOVĚŘENO.
-- Soubory i zdrojové URL/otisky v ignorovaném data/private/camino/voice-audition-20261026/. Jde o oficiální referenční ukázky, nikoli vlastní text. Registrovaný pokus Microsoft Edge TTS vrátil první HTTP 429, vzniklo 0 nových syntéz; bez retry série. Staré reference PlayHT nedostupné; výsledné vzorky jsou výhradně aktuální Google katalog. Platby/účty/instalace a systémová konfigurace se neměnily.
-- Střižna stále používá Zuzanu; nebyl vybraný ani zapojený nový hlas. Následná integrace vyžaduje ověření API/ceny/rozpočtu a oprávnění pro daný text; globální souhlas na veřejnou/smyšlenou tvorbu nepokrývá soukromý deník. Zachovat celý komentář do 6000 znaků; chatový Edge helper s limitem 1500 znaků nelze přímo převzít.
-- Poslední funkční UI je nasazené v 004ec7e1 přes Lunu 05b42458927b15403b14a7eaf4eb3bb9, gate 2243 a smoke 5/5 PASS, přesné nové HTML/health potvrzené. Nynější hlasový krok měnil jen místní poslechové podklady a dokumentaci, bez nového p+n či změny služby/iPhonu/originálů/střihů.
-- Další krok: Míla poslechne A–D v index.html a zvolí hlas/tempo. Potom připravit konkrétní integraci vybraného hlasu; fyzická přejímka editoru a nahrávek/koše/importu zůstává otevřená. P2-F vícedenní film/kapitoly/prolog/závěr je plánovaná další etapa po přijetí skutečného dne. Detail: memory/reports/camino_voice_audition_20261026.md.
+- 2026-10-26 17:01 CET: Míla výslovně vybral D — Orus, přesný hlas cs-CZ-Chirp3-HD-Orus. Volba uložená v místním manifestu a zvýrazněná na poslechové stránce; změna hlasu ve střižně ještě neprovedená.
+- Read-only přístupový audit: žádné Google/GCP/Gemini/TTS nastavení v projektovém .env ani odpovídající Google proměnné v shellu, běžný místní ADC soubor chybí; google.auth a google.cloud.texttospeech nejsou instalované. Nejde o důkaz, že Míla nemá cloudový účet — na jeho existenci/ID se Adam zeptal asynchronně. Nebylo přihlašování, instalace ani změna fakturace či placený API požadavek.
+- Ověřený ceník Google Chirp 3 HD: dokumentovaná kvóta 1 milion znaků měsíčně zdarma, potom 30 USD/milion; fakturace musí být zapnutá i pro bezplatnou kvótu. Skutečný nárok/zůstatek kvóty účtu NEOVĚŘENO. 6000 znaků nejvýše 0,18 USD při placené sazbě; navržená první smyšlená zkouška do 1000 znaků nejvýše 0,03 USD, rozpočet zatím neschválený.
+- Konkrétní soukromý integration-plan.json vedle ukázek: vybraný Orus, přístup/billing/rozpočet čekají, žádné soukromé texty povolené k odeslání. Oficiální limit 5000 UTF-8 bajtů na požadavek; budoucí adaptér musí rozdělit celý komentář do 6000 znaků beze ztráty, spojit řeč a zachovat původní text/nahrávky, žádné tiché nahrazení jiným hlasem.
+- Poslední nasazený UI kód 004ec7e1, Luna 05b42458927b15403b14a7eaf4eb3bb9 (gate 2243, smoke 5/5). Nynější krok je volba a příprava připojení, bez změny produkčního kódu/hlasu, služby, iPhonu či nového p+n. Původní Zuzana zatím technicky zůstává.
+- Další krok: získat informaci o existujícím Google Cloud projektu nebo zadání přípravy nového připojení; vyřešit přístup a výslovné oprávnění k aktivaci/fakturaci/rozpočtu před první syntézou. Žádná tajemství do chatu/Gitu. Pak ověřit Orus na smyšleném textu a dokončit integraci s výslovným potvrzením odeslání konkrétního textu. Detail: memory/reports/camino_voice_audition_20261026.md.
 
 ## Cíl a hranice
 

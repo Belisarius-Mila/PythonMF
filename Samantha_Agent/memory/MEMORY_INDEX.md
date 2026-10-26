@@ -62,7 +62,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md`; `reports/camino_voice_audition_20261026.md` — 2026-10-26 16:33 CET: připravené 4 české katalogové ukázky Google Chirp 3 HD (Kore/Aoede/Charon/Orus), MP3 celkem 190 KiB, decode/hash/JS PASS a místní poslechová stránka. Microsoft vlastní syntézu odmítl HTTP 429; žádný placený API požadavek ani nový hlas ve střižně. Dále Mílův výběr a konkrétní integrace/cena/soukromí. Poslední UI 004ec7e1 zůstává nasazené; nový zápis je místní.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md`; `reports/camino_voice_audition_20261026.md` — 2026-10-26 17:01 CET: vybraný D — Orus. Místní volba uložená, bez změny hlasu ve střižně; žádné GCP nastavení/ADC nenalezené, účet/billing/rozpočet čekají na Mílu. Oficiální cena/limity ověřené a integrační plán připravený. Bez instalace, placené syntézy a p+n; poslední UI 004ec7e1.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md`; `technical/luna_release_orchestration.md` — 2026-10-24 09:52 CEST: Oprava startovacího souběhu p+n je publikovaná/nasazená v e11d949a. Účtenka e47cdb394ec5441c5d25632f11c8c995 má potvrzený push 4 commitů a nasazení Cockpitu, plnou bránu 2186 a smoke 5/5. Nativní účtenku ověřil hlavní Adam; nový místní vývoj pokračuje v project-camino. Předchozí attention c3aba030 je historie a neopakuje se.
 

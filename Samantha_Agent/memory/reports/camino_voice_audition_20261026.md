@@ -1,6 +1,6 @@
 # Camino — české hlasy k poslechovému výběru
 
-Stav: 2026-10-26 16:33 CET, čtyři místní katalogové ukázky připravené; hlas nevybraný,
+Stav: 2026-10-26 16:33 CET, čtyři místní katalogové ukázky připravené; hlas D — Orus vybraný,
 žádná změna kódu střižny, generátoru, služby či iPhonu a žádné nové p+n.
 
 ## Hotový poslech
@@ -58,6 +58,51 @@ SHA-256 i lokální odkazy v poslechové stránce ověřené. JavaScript porovn�
 stránky prošel node --check. Produkční kód se neměnil, jeho plná brána se
 neopakovala. Předchozí vydání 004ec7e1/Luna 05b42458 zůstává doložené zvlášť.
 
-Míla poslechne A–D a vybere hlas/tempo, případně odmítne všechny. Teprve potom
-připravit konkrétní proveditelnou integraci pro vlastní filmový komentář.
+Míla vybral D — Orus. Konkrétní připojení je popsané níže; stále chybí
+přístup ke Google Cloud a schválení aktivace/rozpočtu.
 Vícedenní film P2-F zůstává pozdější etapa po přijetí střihu skutečného dne.
+
+## Vybraný D — Orus, 2026-10-26 17:01 CET
+
+Volba Míly uložená v manifestu a označená na index.html, přesně
+`cs-CZ-Chirp3-HD-Orus`. Tempo nebylo zvlášť zvolené. Vlastní texty se tímto
+krokem nesyntetizovaly a výchozí hlas aplikace zatím není přepnutý.
+
+Read-only audit konfigurace: žádné související Google/GCP/Gemini/TTS hodnoty
+v projektovém .env, odpovídající shellové proměnné nenastavené, běžný místní
+ADC soubor chybí a google.auth/google.cloud.texttospeech nejsou instalované.
+To neprokazuje neexistenci účtu nebo projektu u Googlu. Míla dostal asynchronní
+otázku na existující projekt, bez žádosti o hesla či klíče do chatu.
+
+### Konkrétní postup připojení
+
+1. Určit Mílův Google Cloud projekt a ověřit povolený Cloud Text-to-Speech
+   a billing; nevytvářet účet/placenou konfiguraci bez příslušného souhlasu.
+2. Bezpečně nastavit místní přístup dle oficiální ADC autentizace, bez
+   tajemství v Gitu/chatu. Konkrétní způsob závisí na Mílově projektu;
+   nic se zatím neinstalovalo ani nepřihlašovalo.
+3. Po schválení rozpočtu provést jedinou první smyšlenou zkoušku do 1000
+   znaků; odhad nejvýše 0,03 USD při placené sazbě, bez předpokladu dostupné
+   bezplatné kvóty. Při nejistotě či chybě neprovádět automatickou novou syntézu.
+4. Integrovat Orus pro celý komentář do 6000 znaků: API má limit 5000 UTF-8
+   bajtů na požadavek, proto dělit beze ztráty a spojit v původním pořadí.
+   Nepoužít zkracující chatový helper, zachovat historii/koš a starší filmy.
+   Vždy předem výslovně potvrdit odeslání daného textu Googlu a cenu;
+   běžný globální souhlas necitlivé tvorby nepovoluje soukromý deník.
+5. Ověřit skutečný celý zvuk, délku, revizi/text/oprávnění před i po pomalé
+   operaci. Žádný automatický fallback na jiný hlas. Publikace/nasazení
+   zůstávají samostatné p+n.
+
+Soukromý integration-plan.json zmrazuje hlas, navržený rozsah zkoušky,
+cenové podklady a čekající přístup/billing/rozpočet. Není hotovým adaptérem
+ani důkazem úspěšné syntézy. Zatím žádný placený API požadavek.
+
+Oficiální ceník ověřený 26. 10. 2026: Chirp 3 HD uvádí 1 milion znaků měsíčně
+zdarma, potom 30 USD/milion znaků. Billing je nutný i pro bezplatnou kvótu;
+aktuální nárok a vyčerpání konkrétního účtu neověřené. 6000 znaků odpovídá
+0,18 USD při zveřejněné placené sazbě; approved_budget_usd v plánu zůstává null.
+
+Zdroje: https://cloud.google.com/text-to-speech/pricing ;
+https://docs.cloud.google.com/text-to-speech/docs/get-started ;
+https://docs.cloud.google.com/text-to-speech/docs/authentication ;
+https://docs.cloud.google.com/text-to-speech/quotas .
