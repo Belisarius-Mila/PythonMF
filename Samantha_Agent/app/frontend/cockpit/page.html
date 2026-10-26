@@ -417,8 +417,8 @@
             <section class="camino-film-stage" aria-label="Náhled vybraného záběru">
               <h3 data-film="shotTitle">Vyber záběr</h3>
               <figure data-film="visual" class="camino-film-visual hidden">
-                <img data-film="visualImage" alt="Vybraná fotografie">
-                <figcaption>Zdrojová fotografie. Text a zvuk ověříš v náhledu filmu.</figcaption>
+                <a data-film="enlarge" target="_blank" rel="noopener noreferrer" aria-label="Zvětšit fotografii"><img data-film="visualImage" alt="Vybraná fotografie"></a>
+                <figcaption>Kliknutím fotografii zvětšíš. Text a zvuk ověříš v náhledu filmu.</figcaption>
               </figure>
               <div data-film="videoPlaceholder" class="hidden">
                 <p>Celé video zůstává zachované. Přehrání a výběr úseku spustíš ručně.</p>
@@ -438,6 +438,15 @@
               <ol data-film="shots" class="camino-film-edit-list"></ol>
             </section>
           </div>
+          <dialog data-film="photoDialog" class="camino-film-photo-dialog" aria-labelledby="caminoPhotoDialogTitle" aria-describedby="caminoPhotoDialogHelp">
+            <div class="camino-film-photo-dialog-header">
+              <h3 data-film="photoDialogTitle" id="caminoPhotoDialogTitle"></h3>
+              <button data-film="photoDialogClose" type="button" class="secondary" autofocus>Zavřít fotografii</button>
+            </div>
+            <div data-film="photoDialogBody" class="camino-film-photo-dialog-body"></div>
+            <p data-film="photoDialogStatus" role="status" aria-live="polite"></p>
+            <p id="caminoPhotoDialogHelp">Zavři tlačítkem nebo klávesou Esc. Vrátíš se ke stejnému záběru a rozepsanému textu.</p>
+          </dialog>
           <details class="camino-film-tools"><summary>Texty deníku, karty a původní komentáře</summary>
           <section class="camino-film-materials" aria-label="Texty a komentáře">
             <h3>Texty a komentáře</h3>

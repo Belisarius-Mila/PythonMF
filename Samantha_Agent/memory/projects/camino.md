@@ -1,17 +1,17 @@
 # Camino
 
-Aktualizováno: 2026-10-26 11:48 CET — optimalizace načítání nasazená Lunou
+Aktualizováno: 2026-10-26 13:48 CET — vlastní zvětšení fotografie lokálně
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Aktuální UI krok střižny
 
-- 2026-10-26 11:48 CET: Odstranění testovací ukázky P2-A a optimalizace načítání publikované a nasazené registrovanou Lunou do d99093c176113133925cdd55cbe59d2128b90ad7. Účtenka 51926adfe2cd519ff4d8d57a66916024: completed, push/deployment confirmed, 3 commity, project-camino → Cockpit, release_executor gpt-6-luna/high.
-- Plná publikační brána 2243 PASS / 431.5 s; smoke 5/5, protected_services_unchanged=true. Adam jednou převzal konečnou účtenku a ověřil health OK, HTTP 200 a přesnou shodu složeného HTML se zdrojem. Nové thumbnail/image-preview cesty přítomné, ukázka chybí, starý P2-A odkaz HTTP 404. Code stamp dd0a0d1332d72444.
-- Nasazené miniatury 256px, hlavní náhled 1600px a omezené čtecí RAM ověření souborů; aktuální soukromí/koš/manifest se ověřují pokaždé, vlastní fotografie SHA-256 pokaždé. Uložení/uzavření/render/výstup zachovávají úplné ověření bajtů. Před nasazením měřeno: miniatura 5,287 → 0,192 s / 16,2 MB → 100 KB, stav 45 záběrů 1,324 → 0,039 s při již ověřených souborech.
-- Potvrzený skutečný výmaz P2-A z předchozího kroku zůstává dokončený: 4 běhy / 109 souborů / 16 adresářů, kořen znovu ověřený prázdný, soukromá účtenka completed. 69,04 MiB logicky včetně interních hardlinků, 41,36 MiB unikátních alokovaných bloků před výmazem. Skutečné projekty, originály, historické zálohy a samostatná služba/iPhone zachované.
-- Míla kladně hodnotí vzhled UI 2. Celkový čas načtení po tomto nasazení, fyzický Mac/Safari/iPhone a poslech NEOVĚŘENO; časy výše jsou místní serverová měření před vydáním.
-- return_channel=caller: terminálový Adam konečnou účtenku obdržel a jednou ověřil. Automatický portálový návrat returned_to_adam=false není důvodem opakovat úspěšné p+n. Tento výsledkový zápis je následný místní dokumentační checkpoint, bez dalšího publikování.
-- Další krok: uložit rozpracovaný střih, obnovit Cockpit a ověřit dobu načtení stejného filmu a reakci při výběru fotografií. Praktické nahrávky/import a příjemnější český hlas zůstávají otevřené. Detail: memory/reports/camino_film_loading_20261026.md.
+- 2026-10-26 13:48 CET: Lokálně hotový další UI krok: zvětšení fotografie přímo nad střižnou, ze středu nebo Otevřít fotografii. Zavření tlačítkem/Esc/mimo obsah obnoví scroll, pozici navigátoru, fokus a stejný záběr i rozepsané pole. Prohlížení nepřestavuje editor a nevytváří save/source/render.
+- Velký obrázek až na kliknutí přes stejný soukromý read-only PNG endpoint. Zavření/skrytí/neplatný projekt/oprávnění odstraní obrázek, src i název. Návrat do karty okno sám neotevře. Nový obrazový uzel/identita/epocha oddělují staré load/error; pozdní close nesmaže nové okno, pozdní load nepřekryje chybu.
+- Nativní dialog s popisem a fokusem na Zavřít. Nepodporovaný či odmítnutý dialog ponechá dosavadní novou kartu; modifikované kliknutí zachované. Seznam 256px a pracovní náhled 1600px zůstávají; žádný backend/persistence/produkční render ani zásah do originálů, střihů, služby či iPhonu.
+- Ověřeno 88 cílených testů PASS / 60,868 s včetně nových Node scénářů dialogu a předchozích textů/hlasů/koše/importu; HTML struktura a otisk PASS. Rychlá statická brána PASS. Skutečný browser/Safari/iPhone, rozložení a nativní Tab/fokus NEOVĚŘENO: aktuální CUA inventář je prázdný.
+- Jen místní krok bez nového p+n; poslední nasazený kód d99093c1, Luna 51926adfe2cd519ff4d8d57a66916024, gate 2243 a smoke 5/5. Předchozí P2-A výmaz dokončený; nová testovací produkční data nevznikala.
+- Čtecí inventář místních hlasů nabízí pouze českou Zuzanu; jiný hlas nebyl instalovaný ani zvolený. Praktická přejímka historie/koše/importu a příjemnější český hlas poslechem zůstávají otevřené.
+- Další krok: samostatné p+n Lunou, potom fyzicky ověřit otevření/zavření, scroll/rozepsaný text, fokus a skrytí karty podle memory/reports/camino_film_photo_dialog_20261026.md.
 
 ## Cíl a hranice
 

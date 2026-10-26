@@ -7,7 +7,9 @@ function node() {
   return {children: [], value: "", textContent: "", disabled: false, paused: false, readyState: 0, currentTime: 0,
     classList: {add: x => classes.add(x), remove: x => classes.delete(x), contains: x => classes.has(x)},
     addEventListener(event, fn) { listeners[event] = fn; },
-    emit(event) { return listeners[event]?.(); },
+    emit(event, payload) { return listeners[event]?.(payload); },
+    focus(options) { doc.activeElement = this; this.focusOptions = options; },
+    getBoundingClientRect() { return {top: 0, bottom: 1000}; },
     appendChild(n) { this.children.push(n); }, replaceChildren() { this.children = []; },
     pause() { this.paused = true; }, play() { this.paused = false; return Promise.resolve(); },
     load() { this.readyState = 0; }, setAttribute(k, v) { this[k] = v; }, getAttribute(k) { return this[k] || null; }, removeAttribute(k) { delete this[k]; }};
@@ -16,7 +18,10 @@ const docEvents = {};
 const doc = {hidden: false, createElement: node, addEventListener(event, fn) { docEvents[event] = fn; }};
 const nodes = Object.fromEntries(["status", "shots", "voices", "jobs", "save", "preview", "final", "range", "from", "to", "duck", "player", "reload",
   "source", "sourcePlayer", "sourceStatus", "sourceTitle", "selection", "start", "end", "playSelection", "texts", "cards", "blocked", "saveReason",
-  "shotNav", "shotTitle", "overview", "visual", "visualImage", "videoPlaceholder", "openSource", "watch", "watchReason", "outputs"].map(k => [k, node()]));
+  "shotNav", "shotTitle", "overview", "visual", "visualImage", "videoPlaceholder", "openSource", "watch", "watchReason", "outputs",
+  "enlarge", "photoDialog", "photoDialogTitle", "photoDialogClose", "photoDialogBody", "photoDialogStatus"].map(k => [k, node()]));
+nodes.photoDialog.showModal = function () { this.open = true; };
+nodes.photoDialog.close = function () { this.open = false; this.emit("close"); };
 const toolbarKeys = new Set(["save", "preview", "final", "saveReason", "blocked", "watch", "watchReason"]);
 const root = node(); root.querySelector = selector => { const key = selector.match(/"(.*?)"/)[1]; return toolbarKeys.has(key) ? null : nodes[key]; };
 const toolbar = node(); toolbar.querySelector = selector => nodes[selector.match(/"(.*?)"/)[1]];
@@ -90,6 +95,58 @@ async function main() {
   const photoLink = photoActions.find(n => n.textContent === "Otevřít fotografii");
   assert(photoLink); assert.equal(photoLink.href, `/api/camino/film/photo/${pid}/${sid}`);
   assert.equal(photoLink.target, "_blank"); assert.equal(photoLink.rel, "noopener noreferrer");
+  // Enlarging is a read-only view: preserve the live controls and never save/render.
+  const beforeViewer = {saves: saves.length, renders: renderCalls.length, sources: sourceCalls.length};
+  const titleBeforeViewer = titleInput(); titleBeforeViewer.value = "Rozepsaný text";
+  const viewerHost = {scrollTop: 345, getBoundingClientRect: () => ({top: 0})}; root.closest = () => viewerHost;
+  nodes.shotNav.scrollTop = 87;
+  assert.equal(nodes.photoDialogBody.children.length, 0, "no large image is created until requested");
+  let prevented = false;
+  nodes.enlarge.emit("click", {preventDefault() { prevented = true; }});
+  assert(prevented); assert(nodes.photoDialog.open);
+  const firstLarge = nodes.photoDialogBody.children[0];
+  assert.equal(firstLarge.src, `/api/camino/film/photo/${pid}/${sid}`);
+  assert.equal(doc.activeElement, nodes.photoDialogClose);
+  firstLarge.emit("load"); assert(nodes.photoDialogStatus.textContent.includes("načtená"));
+  viewerHost.scrollTop = 0; nodes.shotNav.scrollTop = 0;
+  nodes.photoDialog.emit("cancel", {preventDefault() {}, stopPropagation() {}});
+  assert(!nodes.photoDialog.open); assert.equal(firstLarge.src, undefined);
+  assert.equal(nodes.photoDialogBody.children.length, 0); assert.equal(nodes.photoDialogTitle.textContent, "");
+  assert.equal(viewerHost.scrollTop, 345); assert.equal(nodes.shotNav.scrollTop, 87);
+  assert.equal(doc.activeElement, nodes.enlarge);
+  assert.equal(titleInput(), titleBeforeViewer); assert.equal(titleInput().value, "Rozepsaný text");
+  photoLink.emit("click", {preventDefault() {}});
+  const secondLarge = nodes.photoDialogBody.children[0];
+  firstLarge.emit("error"); assert(nodes.photoDialogStatus.textContent.includes("Načítám"), "old errors cannot affect a new view");
+  nodes.photoDialog.emit("close"); assert(nodes.photoDialog.open, "a queued old close event cannot clear the new dialog");
+  secondLarge.emit("error"); assert(nodes.photoDialogStatus.textContent.includes("nelze načíst"));
+  secondLarge.emit("load"); assert(nodes.photoDialogStatus.textContent.includes("nelze načíst"), "late load cannot hide the error");
+  nodes.photoDialogClose.emit("click");
+  nodes.enlarge.emit("click", {preventDefault() {}});
+  const hiddenLarge = nodes.photoDialogBody.children[0];
+  doc.hidden = true; docEvents.visibilitychange();
+  assert(!nodes.photoDialog.open); assert.equal(hiddenLarge.src, undefined); assert.equal(nodes.enlarge.href, undefined);
+  hiddenLarge.emit("load"); assert.equal(nodes.photoDialogStatus.textContent, "");
+  doc.hidden = false; docEvents.visibilitychange(); await flush();
+  assert(!nodes.photoDialog.open, "returning never automatically downloads or reopens the large photo");
+  nodes.enlarge.emit("click", {preventDefault() {}});
+  const revokedImage = nodes.photoDialogBody.children[0], permittedView = view;
+  view = {ok: false, message: "Permission changed"}; await editor.check();
+  assert(!nodes.photoDialog.open); assert.equal(revokedImage.src, undefined); assert.equal(nodes.photoDialogBody.children.length, 0);
+  revokedImage.emit("error"); assert.equal(nodes.photoDialogStatus.textContent, "");
+  view = permittedView; await editor.check();
+  assert.deepEqual({saves: saves.length, renders: renderCalls.length, sources: sourceCalls.length}, beforeViewer);
+  delete root.closest;
+  const showModal = nodes.photoDialog.showModal; delete nodes.photoDialog.showModal;
+  prevented = false; nodes.enlarge.emit("click", {preventDefault() { prevented = true; }});
+  assert(!prevented, "browsers without modal dialogs retain the ordinary private photo link");
+  nodes.photoDialog.showModal = showModal;
+  nodes.enlarge.emit("click", {metaKey: true, preventDefault() { throw new Error("preserve modified clicks"); }});
+  assert(!nodes.photoDialog.open);
+  nodes.photoDialog.showModal = () => { throw new Error("unavailable dialog"); };
+  prevented = false; nodes.enlarge.emit("click", {preventDefault() { prevented = true; }});
+  assert(!prevented); assert.equal(nodes.photoDialogBody.children.length, 0);
+  nodes.photoDialog.showModal = showModal;
   assert(photoActions.some(n => n.textContent === "Vytvořit náhled záběru s titulkem"));
   // Simulate layout collapsing when the private DOM is removed in a hidden tab.
   const host = {scrollTop: 420, getBoundingClientRect: () => ({top: 0})};

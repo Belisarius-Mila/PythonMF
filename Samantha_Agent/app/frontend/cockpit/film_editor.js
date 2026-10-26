@@ -16,7 +16,8 @@
     const nodes = Object.fromEntries(["status", "shots", "voices", "jobs", "save", "preview", "final",
       "range", "from", "to", "duck", "player", "reload", "source", "sourcePlayer", "sourceStatus",
       "sourceTitle", "selection", "start", "end", "playSelection", "texts", "cards", "blocked", "saveReason",
-      "shotNav", "shotTitle", "overview", "visual", "visualImage", "videoPlaceholder", "openSource", "watch", "watchReason", "outputs"].map(key =>
+      "shotNav", "shotTitle", "overview", "visual", "visualImage", "videoPlaceholder", "openSource", "watch", "watchReason", "outputs",
+      "enlarge", "photoDialog", "photoDialogTitle", "photoDialogClose", "photoDialogBody", "photoDialogStatus"].map(key =>
       [key, root.querySelector(`[data-film="${key}"]`) || options.toolbar?.querySelector(`[data-film="${key}"]`)]));
     let model = null, active = false, dirty = false, saving = false, version = 0, epoch = 0;
     let pending = null, timer = null, refreshTimer = null, preserved = null, readRequest = 0;
@@ -26,11 +27,53 @@
     let selected = null, sourceJob = null, sourceRequest = 0, sourceTimer = null, selectionTimer = null, playingSelection = false;
     let position = null, shotNodes = new Map(), exportStatus = "", sourceState = "";
     let viewSelected = null, navButtons = new Map(), navLabels = new Map(), watchJob = null, playbackGeneration = 0;
+    let photoViewer = null;
+    function closePhoto(restoreFocus = true) {
+      const viewer = photoViewer; photoViewer = null;
+      viewer?.image.removeAttribute("src");
+      nodes.photoDialogBody?.replaceChildren();
+      if (nodes.photoDialogTitle) nodes.photoDialogTitle.textContent = "";
+      if (nodes.photoDialogStatus) nodes.photoDialogStatus.textContent = "";
+      if (nodes.photoDialog?.open) nodes.photoDialog.close();
+      if (restoreFocus && viewer && active && !doc.hidden && model?.project_id === viewer.project) {
+        if (viewer.host) viewer.host.scrollTop = viewer.scrollTop;
+        if (nodes.shotNav) nodes.shotNav.scrollTop = viewer.navTop;
+        const target = viewer.trigger?.isConnected ? viewer.trigger : nodes.enlarge || navButtons.get(viewer.asset);
+        target?.focus?.({preventScroll: true});
+      }
+    }
+    function openPhoto(asset, trigger, event) {
+      const dialog = nodes.photoDialog;
+      if (event && (event.button > 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)) return false;
+      if (!dialog?.showModal || !active || doc.hidden || !model) return false;
+      const row = model.draft.shots.find(r => r.asset_id === asset);
+      if (!row || !model.sources.some(s => s.asset_id === asset && s.kind === "photo")) return false;
+      closePhoto(false);
+      const image = doc.createElement("img"); image.alt = row.title || "Zvětšená fotografie";
+      const host = root.closest?.(".modal");
+      const viewer = {image, project: model.project_id, asset, trigger, epoch, host, scrollTop: host?.scrollTop, navTop: nodes.shotNav?.scrollTop}; photoViewer = viewer;
+      const current = () => photoViewer === viewer && !viewer.failed && active && !doc.hidden && epoch === viewer.epoch && model?.project_id === viewer.project;
+      nodes.photoDialogTitle.textContent = row.title || "Fotografie";
+      nodes.photoDialogStatus.textContent = "Načítám fotografii…";
+      image.addEventListener("load", () => { if (current()) nodes.photoDialogStatus.textContent = "Fotografie je načtená."; });
+      image.addEventListener("error", () => {
+        if (!current()) return;
+        viewer.failed = true; image.removeAttribute("src"); nodes.photoDialogBody.replaceChildren();
+        nodes.photoDialogStatus.textContent = "Fotografii nelze načíst. Zavři náhled a znovu ověř projekt.";
+      });
+      nodes.photoDialogBody.appendChild(image);
+      try { dialog.showModal(); }
+      catch (_) { closePhoto(false); return false; }
+      event?.preventDefault(); nodes.photoDialogClose.focus?.({preventScroll: true});
+      image.src = `/api/camino/film/photo/${viewer.project}/${asset}`;
+      return true;
+    }
     function show(node, visible) { if (node) node.classList[visible ? "remove" : "add"]("hidden"); }
     function syncWorkspace() {
       if (!nodes.shotNav || !model) return;
       if (!model.draft.shots.some(row => row.asset_id === viewSelected)) viewSelected = model.draft.shots[0]?.asset_id || null;
       const row = model.draft.shots.find(r => r.asset_id === viewSelected);
+      if (photoViewer && (photoViewer.project !== model.project_id || photoViewer.asset !== row?.asset_id)) closePhoto(false);
       for (const [id, node] of shotNodes) show(node, id === viewSelected);
       for (const [id, button] of navButtons) {
         button.setAttribute?.("aria-current", id === viewSelected ? "true" : "false");
@@ -47,6 +90,10 @@
       if (nodes.overview) nodes.overview.textContent = `${included} z ${model.draft.shots.length} záběrů ve filmu · délka ${(duration / 1000).toLocaleString("cs-CZ")} s`;
       if (!row) { show(nodes.visual, false); show(nodes.videoPlaceholder, false); return; }
       const source = model.sources.find(s => s.asset_id === row.asset_id);
+      if (nodes.enlarge) {
+        if (source.kind === "photo") nodes.enlarge.href = `/api/camino/film/photo/${model.project_id}/${row.asset_id}`;
+        else nodes.enlarge.removeAttribute("href");
+      }
       if (nodes.shotTitle) nodes.shotTitle.textContent = `${model.draft.shots.indexOf(row) + 1}. ${source.kind === "photo" ? "Fotografie" : "Video"} · ${row.title || source.title || "Bez názvu"}${row.included ? "" : " · vyřazeno z filmu"}`;
       show(nodes.visual, source.kind === "photo");
       if (nodes.visualImage) {
@@ -195,6 +242,7 @@
       } else if (!nodes.sourcePlayer.paused) selectionTimer = later(boundSelection, 40);
     }
     function invalidate(message = "", keepPosition = false, kind = "error") {
+      closePhoto(false);
       if (!keepPosition) position = null;
       shotNodes = new Map();
       navButtons = new Map(); navLabels = new Map(); viewSelected = null; watchJob = null;
@@ -205,7 +253,7 @@
       ++epoch; model = null; dirty = false; pending = null; preserved = null;
       cancel(timer); stopPlayer(); stopSource();
       for (const key of ["shots", "voices", "jobs", "texts", "cards", "shotNav"]) nodes[key]?.replaceChildren();
-      nodes.visualImage?.removeAttribute("src"); show(nodes.visual, false); show(nodes.videoPlaceholder, false);
+      nodes.visualImage?.removeAttribute("src"); nodes.enlarge?.removeAttribute("href"); show(nodes.visual, false); show(nodes.videoPlaceholder, false);
       if (nodes.shotTitle) nodes.shotTitle.textContent = "Vyber záběr";
       if (nodes.overview) nodes.overview.textContent = "";
       if (nodes.watch) nodes.watch.disabled = true;
@@ -291,6 +339,7 @@
           const open = text("a", "Otevřít fotografii");
           open.href = `/api/camino/film/photo/${model.project_id}/${row.asset_id}`;
           open.target = "_blank"; open.rel = "noopener noreferrer"; actions.appendChild(open);
+          open.addEventListener("click", event => openPhoto(row.asset_id, open, event));
         }
         for (const [label, delta] of [["↑ Dříve", -1], ["↓ Později", 1]]) {
           const b = text("button", label); b.type = "button"; b.className = "secondary";
@@ -874,6 +923,12 @@
       if (dirty && !(options.confirm || confirm)("Zahodit zdejší neuložené změny a načíst poslední uložený střih?")) return;
       invalidate("Načítám poslední uloženou revizi…", false, "busy"); check();
     });
+    nodes.enlarge?.addEventListener("click", event => openPhoto(viewSelected, nodes.enlarge, event));
+    nodes.photoDialogClose?.addEventListener("click", () => closePhoto());
+    nodes.photoDialog?.addEventListener("cancel", event => { event.preventDefault(); event.stopPropagation(); closePhoto(); });
+    nodes.photoDialog?.addEventListener("keydown", event => { if (event.key === "Escape") event.stopPropagation(); });
+    nodes.photoDialog?.addEventListener("click", event => { if (event.target === nodes.photoDialog) closePhoto(); });
+    nodes.photoDialog?.addEventListener("close", () => { if (!nodes.photoDialog.open) closePhoto(); });
     doc.addEventListener("visibilitychange", () => {
       if (!active) return;
       if (doc.hidden) { if (dirty) save(); conceal(); }

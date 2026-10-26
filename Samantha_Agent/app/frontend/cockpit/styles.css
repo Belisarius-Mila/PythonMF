@@ -481,6 +481,17 @@
     .camino-film-shot-choice strong, .camino-film-shot-choice small { display: block; }
     .camino-film-shot-choice small { font-size: 12px; margin-top: 4px; }
     .camino-film-visual { margin: 0; }
+    .camino-film-visual > a { display: block; cursor: zoom-in; border-radius: 6px; }
+    .camino-film-visual > a:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+    .camino-film-photo-dialog { box-sizing: border-box; width: min(96vw, 1500px); max-width: 96vw; max-height: 94vh; padding: 16px; border: 0; border-radius: 10px; background: #101820; color: #fff; }
+    .camino-film-photo-dialog:not([open]) { display: none; }
+    .camino-film-photo-dialog::backdrop { background: rgb(0 0 0 / 78%); }
+    .camino-film-photo-dialog-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .camino-film-photo-dialog-header h3 { margin: 0; overflow-wrap: anywhere; }
+    .camino-film-photo-dialog-header button { min-height: 44px; }
+    .camino-film-photo-dialog-body { margin-top: 12px; }
+    .camino-film-photo-dialog-body img { display: block; width: 100%; height: 65vh; height: 65dvh; object-fit: contain; }
+    .camino-film-photo-dialog p { margin: 10px 0 0; }
     .camino-film-visual figcaption { margin-top: 8px; color: var(--muted); font-size: 13px; }
     .camino-film-visual img { display: block; width: 100%; height: 48vh; max-height: 520px; object-fit: contain; background: #111; border-radius: 6px; }
     .camino-film-inspector .camino-film-edit-list { list-style: none; padding: 0; margin: 0; }
