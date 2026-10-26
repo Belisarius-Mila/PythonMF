@@ -1,13 +1,13 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-10-26 11:29 CET: Lokální kód 11098612 odstraňuje dolní Testovací ukázku P2-A a zrychluje náhledy. Potvrzený výmaz jejích syntetických dat nyní skutečně dokončený. Kód dosud bez nového push/nasazení; vzhled UI 2 Míla kladně hodnotil, celkovou rychlost je nutné přijmout po nasazení.
-- Změřená příčina: každý obrázek dvakrát hashoval všechny zdroje projektu a miniatury používaly až 4096px PNG. Nové 256px miniatury, 1600px hlavní náhled a omezené RAM ověření souborů: stejná miniatura 5,287 → 0,192 s a 16,2 MB → 100 KB; stav 45 záběrů 1,324 → 0,039 s při již ověřených souborech.
-- Ochrany: aktuální soukromí/koš/manifest pokaždé, vlastní fotografie pokaždé SHA-256, metadata-free PNG a no-store/private. Hashy jen RAM/1024/30 s bez prodlužování, identita/size/mtime/ctime a kontrola souběhu/symlinku. Uložení, uzavření, render/výstup nadále úplně ověřují všechny zdrojové bajty.
-- Ověření: finální plná brána 2243 PASS / 458,763 s unit část; 45 cílených kontrol a dalších 6 HTTP/route kontrol PASS včetně Node scénářů. První plnou bránu zastavila nerozpoznaná tuple-prefix cesta; opravené explicitní GET/HEAD větve, test neoslaben. Celá stránka přes Safari/iPhone a síť po nasazení NEOVĚŘENO; uvedené časy jsou serverová měření.
-- Výmaz P2-A dokončený po přesné globální větě Míly: znovu ověřený inventář, identity a SHA-256; odstraněny pouze 4 syntetické běhy / 109 souborů / 16 adresářů. Kořen data/private/camino/p2a zůstal prázdný. Logické velikosti 72 396 174 B (69,04 MiB), 101 unikátních inode / 43 364 352 B (41,36 MiB) alokovaných bloků před výmazem; některé soubory byly hardlinky. Čistý přírůstek volného místa celého SSD se neměřil. Soukromá receipt.json vedle původního nezměněného plánu: completed, remaining_entries=0.
-- Poslední nasazený UI kód zůstává 41ac2e1d (Luna aedb878e). Nynější krok je pouze lokální checkpoint; další push/nasazení nebyly zadané. Detail: memory/reports/camino_film_loading_20261026.md.
-- Další krok: samostatně zadané p+n lokálního kódu 11098612 přes Lunu, potom fyzicky ověřit rychlost stejného filmu. Praktické nahrávky/import a český hlas zůstávají otevřené. Tento zápis výmazu je jen lokální checkpoint.
+- 2026-10-26 11:48 CET: Odstranění testovací ukázky P2-A a optimalizace načítání publikované a nasazené registrovanou Lunou do d99093c176113133925cdd55cbe59d2128b90ad7. Účtenka 51926adfe2cd519ff4d8d57a66916024: completed, push/deployment confirmed, 3 commity, project-camino → Cockpit, release_executor gpt-6-luna/high.
+- Plná publikační brána 2243 PASS / 431.5 s; smoke 5/5, protected_services_unchanged=true. Adam jednou převzal konečnou účtenku a ověřil health OK, HTTP 200 a přesnou shodu složeného HTML se zdrojem. Nové thumbnail/image-preview cesty přítomné, ukázka chybí, starý P2-A odkaz HTTP 404. Code stamp dd0a0d1332d72444.
+- Nasazené miniatury 256px, hlavní náhled 1600px a omezené čtecí RAM ověření souborů; aktuální soukromí/koš/manifest se ověřují pokaždé, vlastní fotografie SHA-256 pokaždé. Uložení/uzavření/render/výstup zachovávají úplné ověření bajtů. Před nasazením měřeno: miniatura 5,287 → 0,192 s / 16,2 MB → 100 KB, stav 45 záběrů 1,324 → 0,039 s při již ověřených souborech.
+- Potvrzený skutečný výmaz P2-A z předchozího kroku zůstává dokončený: 4 běhy / 109 souborů / 16 adresářů, kořen znovu ověřený prázdný, soukromá účtenka completed. 69,04 MiB logicky včetně interních hardlinků, 41,36 MiB unikátních alokovaných bloků před výmazem. Skutečné projekty, originály, historické zálohy a samostatná služba/iPhone zachované.
+- Míla kladně hodnotí vzhled UI 2. Celkový čas načtení po tomto nasazení, fyzický Mac/Safari/iPhone a poslech NEOVĚŘENO; časy výše jsou místní serverová měření před vydáním.
+- return_channel=caller: terminálový Adam konečnou účtenku obdržel a jednou ověřil. Automatický portálový návrat returned_to_adam=false není důvodem opakovat úspěšné p+n. Tento výsledkový zápis je následný místní dokumentační checkpoint, bez dalšího publikování.
+- Další krok: uložit rozpracovaný střih, obnovit Cockpit a ověřit dobu načtení stejného filmu a reakci při výběru fotografií. Praktické nahrávky/import a příjemnější český hlas zůstávají otevřené. Detail: memory/reports/camino_film_loading_20261026.md.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí stav po p+n UI 1
@@ -4913,3 +4913,28 @@ Technický důkaz:
 - Plan SHA-256 b0bcf0c26c660467b7dbe3aabbd07a4262b37507d3a8359d93ea1e80b5859034 ověřený; 109 souborů se shodnými metadaty a SHA-256, pouze očekávané názvy a interní hardlinky. Výmaz přes otevřené adresáře bez následování symlinků, před každým unlink opět identita/hash; průběžná soukromá účtenka.
 - Receipt cleanup_receipts/camino_p2a_20261026/receipt.json: completed, 109 souborů, 16 adresářů, 72 396 174 logických B; následná nezávislá kontrola prázdného kořene a účtenky PASS. Unikátní alokované bloky před výmazem 43 364 352 B (41,36 MiB); součet 69,04 MiB zahrnoval hardlinky. Čistá změna volných bloků celého SSD NEOVĚŘENO.
 - Produkční kód se neměnil; předchozí plná brána 2243 PASS se neopakovala. Bez push/nasazení a bez zásahu do telefonu/služby.
+
+
+### 2026-10-26 11:48 CET — Luna p+n optimalizace načítání dokončené
+
+Hotovo:
+
+- Cockpit podává střižnu s menšími obrázky a bez nepotřebné P2-A ukázky. Nové HTML přesně odpovídá vydávanému kódu; skutečnou rychlost v uživatelově prohlížeči je ještě nutné přijmout.
+
+Rozhodnutí:
+
+- Míla výslovně zadal „luna p+n roger!“. Jeden registrovaný submit_release s wait=True předal celý přesný balíček; bez nativního pomocníka a bez opakování.
+
+Další krok:
+
+- Po uloženém střihu obnovit Cockpit a porovnat načtení stejného filmu a přepínání fotografií.
+
+Navrhované další kroky:
+
+- Praktické nahrávky/import a výběr příjemnějšího českého hlasu poslechem.
+
+Technický důkaz:
+
+- Účtenka 51926adfe2cd519ff4d8d57a66916024, 3 commity do d99093c1, push/deployment confirmed. Plná brána 2243 PASS / 431.5 s, smoke 5/5 a protected_services_unchanged=true.
+- Jedna Adamova kontrola účtenky: health OK, nové složené HTML HTTP 200 a přesná shoda se zdrojem, thumbnail/image-preview přítomné, demo chybí, starý odkaz HTTP 404. P2-A datový kořen znovu prázdný. Code stamp dd0a0d1332d72444.
+- Return caller převzatý; returned_to_adam=false neprokazuje automatický portálový návrat a nevede k retry. Celá stránka přes fyzický browser/iPhone NEOVĚŘENO. Následuje jen místní výsledkový zápis.

@@ -62,7 +62,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md`; `reports/camino_film_loading_20261026.md` — 2026-10-26 11:29 CET: po přesné globální větě odstraněné 4 syntetické P2-A běhy / 109 souborů / 16 adresářů. Účtenka completed, kořen prázdný; 69,04 MiB logicky včetně hardlinků, 41,36 MiB unikátních alokovaných bloků před výmazem. UI odstranění a rychlé náhledy jsou lokálně v 11098612 (gate 2243 PASS), bez nového push/nasazení. Dále samostatné p+n a fyzická přejímka rychlosti.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md`; `reports/camino_film_loading_20261026.md` — 2026-10-26 11:48 CET: rychlé náhledy a odstraněná P2-A ukázka nasazené do d99093c1 přes Lunu 51926adfe2cd519ff4d8d57a66916024. Push/deploy confirmed, gate 2243 a smoke 5/5 PASS, chráněné služby shodné. Health/přesné HTML HTTP 200 a starý odkaz 404 PASS. P2-A data smazaná, kořen prázdný. Skutečný čas celé stránky po nasazení NEOVĚŘENO. Následný zápis je místní checkpoint.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md`; `technical/luna_release_orchestration.md` — 2026-10-24 09:52 CEST: Oprava startovacího souběhu p+n je publikovaná/nasazená v e11d949a. Účtenka e47cdb394ec5441c5d25632f11c8c995 má potvrzený push 4 commitů a nasazení Cockpitu, plnou bránu 2186 a smoke 5/5. Nativní účtenku ověřil hlavní Adam; nový místní vývoj pokračuje v project-camino. Předchozí attention c3aba030 je historie a neopakuje se.
 

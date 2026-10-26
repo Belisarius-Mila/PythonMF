@@ -1,6 +1,6 @@
 # Camino — odstranění P2-A a rychlejší procházení filmu
 
-Stav: 2026-10-26 11:29 CET, výmaz P2-A dokončený; kód 11098612 místní, bez nového push/nasazení.
+Stav: 2026-10-26 11:48 CET, výmaz P2-A dokončený; kód publikovaný/nasazený do d99093c1 přes Lunu 51926adfe2cd519ff4d8d57a66916024.
 Pracovní proud: `project-camino`.
 
 ## Zadání a výsledek
@@ -96,9 +96,25 @@ originály a historické zálohy nebyly součástí výmazu.
 - Finální kanonická plná brána PASS: 2243 testů / 458,763 s unit část; statické a Node kontroly PASS.
 - Fyzický Safari/iPhone a celkový čas stránky po nasazení NEOVĚŘENO.
 
+## Výsledek p+n
+
+2026-10-26 11:48 CET: jedno autorizované předání registrované Luně, účtenka `51926adfe2cd519ff4d8d57a66916024`.
+Celý balíček 3 commitů do `d99093c176113133925cdd55cbe59d2128b90ad7`,
+push_state=confirmed, deployment_state=confirmed, state=completed.
+Publikační plná brána 2243 PASS / 431.5 s,
+smoke 5/5 a protected_services_unchanged=true.
+
+Adamova jedna kontrola: health OK, HTTP 200 a přesná shoda podávané stránky
+s novým zdrojem; přítomné obě cesty malých náhledů a nepřítomná P2-A ukázka,
+starý review odkaz HTTP 404. Testovací datový kořen zůstal prázdný.
+Code stamp `dd0a0d1332d72444`, HTML SHA-256 `7c2de17c1b88edba3a08473d842a9ad54b98d02115a2213e83ffe1a982180a33`.
+Return caller skutečně převzal; returned_to_adam=false není
+ověření automatického portálového návratu ani důvod k opakování.
+
 ## Další krok
 
-Výmaz dat je dokončený a ověřený. Nový lokální kód ještě vyžaduje
-samostatně zadané p+n přes registrovanou Lunu;
-poté přejímku stejného filmu na Macu a případně iPhonu. Zachovat otevřené
-praktické nahrávky/import a výběr příjemnějšího českého hlasu.
+Uložit rozpracovaný střih, obnovit Cockpit a porovnat skutečné načtení stejného
+filmu a přepínání fotografií. Celkový čas stránky po nasazení/Safari/iPhone
+NEOVĚŘENO. Praktické nahrávky/import a výběr příjemnějšího českého hlasu
+zůstávají otevřené. Tento zápis účtenky je následný místní dokumentační
+checkpoint; nepřidává další push/nasazení ani změnu klienta/služby Camino.
