@@ -28,3 +28,20 @@ Fotografie se v tomto kroku nadále otevírá v nové kartě; vlastní zvětšov
 4. Po dokončení práce zkontrolovat zmizení dočasné blokace a čitelné potvrzení; během ukládání otestovat dostupnost vysvětlení u náhledu/MP4.
 
 Krok je lokální vývoj s dokumentací a commitem. Push, nasazení, restart služby, produkční export a zásah do iPhonu neproběhly. Předchozí p+n v této konverzaci dokončilo c9c3a5af; nové p+n vyžaduje samostatný pokyn. Další návrh je prostornější pracovní plocha a sjednocení hlavních akcí.
+
+
+## Publikace — 2026-10-26 09:28 CET
+
+Předchozí odstavec o místním stavu je historický: Míla 26. 10. výslovně zadal
+p+n Lunou a UI bc1fe4ad je nyní na GitHubu i nasazené v Cockpitu.
+Účtenka 1173a162fd7197d9f5281e76a0f9d400: completed, push/deployment confirmed,
+jeden commit, project-camino, cíl Cockpit, gpt-6-luna/high.
+Plná brána 2232 PASS / 345,9 s, smoke 5/5, protected_services_unchanged=true.
+Adam jednou ověřil GitHub/main 0/0, připravené profily, health a HTTP 200
+s přesnou shodou nového HTML; code_stamp 28c8f0a83e59bc1b.
+Terminálový caller účtenku převzal; returned_to_adam=false neprokazuje
+portálový automatický návrat. Vydání se neopakuje.
+
+Fyzická browserová přejímka výše zůstává NEOVĚŘENO. Po uložení střihu
+obnovit Cockpit a prověřit skutečnou viditelnost/překrytí a návrat z fotografie.
+Tento výsledkový záznam tvoří následný lokální dokumentační checkpoint.

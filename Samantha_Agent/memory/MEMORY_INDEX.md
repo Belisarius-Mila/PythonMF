@@ -62,7 +62,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md`; `reports/camino_film_ui_feedback_20261025.md` — 2026-10-25 20:28 CET: První UI krok střižny lokálně hotový: společné hlášky, vysvětlené blokace, zachovaná pozice/panel po fotografii. 102 cílených testů a statická brána PASS. Bez nového p+n; browser viditelnost a fyzický Safari/iPhone NEOVĚŘENO. Další krok: samostatné vydání a proklik.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md`; `reports/camino_film_ui_feedback_20261025.md` — 2026-10-26 09:28 CET: První UI krok nasazený v bc1fe4ad, Luna 1173a162fd7197d9f5281e76a0f9d400. Push/deployment confirmed, gate 2232, smoke 5/5, health/nové HTML PASS, chráněné služby shodné. Terminálový Adam převzal; portálový návrat nepotvrzený. Následuje fyzický proklik hlášek/pozice, Safari/iPhone NEOVĚŘENO. Zápis účtenky je lokální dokumentační checkpoint.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md`; `technical/luna_release_orchestration.md` — 2026-10-24 09:52 CEST: Oprava startovacího souběhu p+n je publikovaná/nasazená v e11d949a. Účtenka e47cdb394ec5441c5d25632f11c8c995 má potvrzený push 4 commitů a nasazení Cockpitu, plnou bránu 2186 a smoke 5/5. Nativní účtenku ověřil hlavní Adam; nový místní vývoj pokračuje v project-camino. Předchozí attention c3aba030 je historie a neopakuje se.
 

@@ -1,15 +1,16 @@
 # Camino
 
-Aktualizováno: 2026-10-25 20:28 CET — první UI krok střižny lokálně hotový
+Aktualizováno: 2026-10-26 09:28 CET — první UI krok střižny nasazený Lunou
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Aktuální UI krok střižny
 
-- 2026-10-25 20:28 CET: První UI krok střižny lokálně hotový: společná sticky stavová lišta, odlišené probíhající práce/chyby/podmínky, procenta exportu nahoře a vysvětlení nedostupného ukládání/náhledu/MP4. Chybu fotografie nepřekryje běžné Uloženo.
-- Návrat z fotografie/skryté karty i překreslení zachová pozici, kotvu a otevřený/zavřený panel; soukromý DOM se při skrytí nadále odstraňuje. Ochrany stale GET, textu, revizí a mazání zachované; žádné změny backendu ani osobních dat.
-- Ověření: 102 cílených Python testů PASS (49,366 s) včetně Node scénářů panelu, návratu a původních ochranných kontraktů; rychlá statická brána PASS. Skutečný browser/Safari/iPhone a viditelnost/překrytí při scrollu NEOVĚŘENO — žádný prohlížeč není připojený.
-- Jen lokální vývojový checkpoint, bez nového push/nasazení, produkčního renderu či změny iPhonu/služby. Předchozí společné p+n v této relaci c9c3a5af je historie; tento nový UI kód v něm není. Detail: memory/reports/camino_film_ui_feedback_20261025.md.
-- Další krok: samostatné p+n, potom fyzicky ověřit návrat od fotografie, hlášky při práci dole v seznamu a dostupné důvody blokací. Větší rozložení editoru a český hlas zůstávají dalšími kroky.
+- 2026-10-26 09:28 CET: První UI krok střižny publikovaný a nasazený registrovanou Lunou do bc1fe4adfa5c006570058769d62d91a436263d3b. Účtenka 1173a162fd7197d9f5281e76a0f9d400: completed, push/deployment confirmed, jeden commit, project-camino → Cockpit, release_executor gpt-6-luna/high.
+- Plná publikační brána 2232 PASS / 345,9 s, smoke 5/5, protected_services_unchanged=true. Adam jednou převzal účtenku; GitHub/main aligned 0/0 na vydaném headu před tímto dokumentačním zápisem, profily ready. Health OK a HTTP 200 podává přesně nové složené HTML včetně společné odezvy; code_stamp 28c8f0a83e59bc1b.
+- Nasazené jsou společné hlášky, důvody nedostupného ukládání/náhledu/MP4 a obnova pozice/panelu po návratu od fotografie. Soukromé zdroje, backendové kontrakty, osobní střihy, iPhone a samostatná služba Camino beze změny.
+- return_channel=caller: účtenku skutečně převzal terminálový Adam zde. Automatický portálový návrat returned_to_adam=false zůstává nepotvrzený a není důvodem opakovat úspěšné vydání.
+- Skutečný browser/Safari/iPhone proklik viditelnosti, překrytí a návratu po fotografii NEOVĚŘENO. Další krok: po uloženém střihu obnovit Cockpit a provést přejímku v memory/reports/camino_film_ui_feedback_20261025.md. Větší rozložení pracovní plochy a český hlas zůstávají dalšími kroky.
+- Tento výsledkový zápis je následný lokální dokumentační checkpoint, bez dalšího p+n. Vydaný UI kód je bc1fe4ad; další lokální zápis účtenky ho nemění.
 
 ## Cíl a hranice
 
