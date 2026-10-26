@@ -1,12 +1,13 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-10-26 10:28 CET: Druhý UI krok střižny publikovaný a nasazený registrovanou Lunou do 41ac2e1dd1300cbffe943971aa54755fc0de6e96. Účtenka aedb878e354d3771056c54fa12acc909: completed, push/deployment confirmed, dva commity, project-camino → Cockpit, release_executor gpt-6-luna/high.
-- Plná publikační brána 2233 PASS / 350,9 s, smoke 5/5, protected_services_unchanged=true. Adam jednou převzal účtenku a ověřil GitHub/main 0/0 před tímto výsledkovým zápisem, profily ready a health OK. HTTP 200 podává přesně nové složené HTML včetně workspace a toolbaru; code_stamp 28c8f0a83e59bc1b.
-- Nasazená je prostornější pracovní plocha seznam/náhled/nastavení, sbalitelné projekty/nástroje/historie a hlavní akce v záhlaví. Výběr zachovává text a identitu záběru; přehrání hotového celého výsledku aktuální revize nevytváří export. Originály, osobní střihy, iPhone a samostatná služba Camino zachované.
-- UI 1 v bc1fe4ad Míla přijal slovy „Funguje to skvěle!“; prohlížeč/zařízení neurčené. Nové UI 2 zatím nemá uživatelskou vizuální přejímku. Skutečné rozložení, scroll a ovládání na Macu/úzkém displeji NEOVĚŘENO.
-- return_channel=caller: terminálový Adam účtenku obdržel a jednou ověřil. Automatický portálový návrat returned_to_adam=false zůstává nepotvrzený a úspěšné p+n se kvůli němu neopakuje.
-- Další krok: po uložení střihu obnovit Cockpit a provést přejímku výběru/rozložení podle memory/reports/camino_film_workspace_20261026.md. Příjemnější český hlas a nahrávky/import zůstávají samostatné. Tento zápis účtenky je následný lokální dokumentační checkpoint, bez dalšího p+n.
+- 2026-10-26 11:25 CET: Lokálně odstraněná dolní Testovací ukázka P2-A včetně staré HTTP cesty. Kladná Mílova odezva hodnotí vzhled UI 2; současně hlásí 1–2 minuty načítání. Nové optimalizace ani výmaz dat nejsou nasazené.
+- Změřená příčina: každý obrázek dvakrát hashoval všechny zdroje projektu a miniatury používaly až 4096px PNG. Nové 256px miniatury, 1600px hlavní náhled a omezené RAM ověření souborů: stejná miniatura 5,287 → 0,192 s a 16,2 MB → 100 KB; stav 45 záběrů 1,324 → 0,039 s při již ověřených souborech.
+- Ochrany: aktuální soukromí/koš/manifest pokaždé, vlastní fotografie pokaždé SHA-256, metadata-free PNG a no-store/private. Hashy jen RAM/1024/30 s bez prodlužování, identita/size/mtime/ctime a kontrola souběhu/symlinku. Uložení, uzavření, render/výstup nadále úplně ověřují všechny zdrojové bajty.
+- Ověření: finální plná brána 2243 PASS / 458,763 s unit část; 45 cílených kontrol a dalších 6 HTTP/route kontrol PASS včetně Node scénářů. První plnou bránu zastavila nerozpoznaná tuple-prefix cesta; opravené explicitní GET/HEAD větve, test neoslaben. Celá stránka přes Safari/iPhone a síť po nasazení NEOVĚŘENO; uvedené časy jsou serverová měření.
+- Přesný výmaz čeká na novou globální větu pro tento rozsah: pouze data/private/camino/p2a, 4 syntetické běhy / 109 souborů / 72 396 174 B (69,04 MiB), žádné symlinky, projekty/hashy ověřené. Soukromý ignorovaný plán cleanup_receipts/camino_p2a_20261026/plan.json; 0 souborů smazáno. Revalidovat před výmazem, nepřidávat zálohy ani skutečná média.
+- Poslední nasazený UI kód zůstává 41ac2e1d (Luna aedb878e). Nynější krok je pouze lokální checkpoint; další push/nasazení nebyly zadané. Detail: memory/reports/camino_film_loading_20261026.md.
+- Další krok: vyžádat přesné potvrzení dle global_safety_brake.md a dokončit jen připravený výmaz. Potom samostatné p+n Lunou a fyzická přejímka rychlosti stejného filmu. Praktické nahrávky/import a český hlas zůstávají otevřené.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí stav po p+n UI 1
@@ -3928,3 +3929,28 @@ Technický důkaz:
 - Účtenka aedb878e354d3771056c54fa12acc909, dva commity do 41ac2e1d, push/deployment confirmed; plná brána 2233 PASS / 350,9 s, smoke 5/5, protected_services_unchanged=true.
 - Adamova jedna kontrola: GitHub/main 0/0 na vydaném headu, profily ready, health OK a HTTP 200 přesně shodné s novým frontendovým HTML včetně workspace/toolbaru. Code stamp 28c8f0a83e59bc1b; nové UI ověřené skutečným HTML, ne pouze stampem.
 - Return caller skutečně převzal; returned_to_adam=false neprokazuje portálový automatický návrat. Fyzický browser UI 2 NEOVĚŘENO. Následuje jen lokální výsledkový zápis, nikoli další publikování.
+
+
+### 2026-10-26 11:25 CET — odstranění ukázky a optimalizace načítání, lokálně
+
+Hotovo:
+
+- Z lokálního UI zmizela nepoužívaná P2-A ukázka a její stará HTTP cesta. Menší obrázky a odstraněné opakované plné čtení filmu výrazně zrychlily serverové operace; skutečná přejímka celé stránky čeká na nasazení.
+
+Rozhodnutí:
+
+- Odstranit jen ověřené syntetické P2-A běhy podle zmrazeného inventáře. Mazání čeká na přesnou globální větu pro tento rozsah. Oprávnění se nikdy necachují; plné ověření při ukládání/renderu zachované.
+
+Další krok:
+
+- Po přesném potvrzení znovu ověřit inventář a odstranit pouze 4 testovací běhy / 109 souborů / 69,04 MiB; dosud 0 smazaných souborů.
+
+Navrhované další kroky:
+
+- Samostatně zadané p+n Lunou, potom porovnat načtení stejného filmu v prohlížeči. Praktické nahrávky/import a příjemnější český hlas zůstávají otevřené.
+
+Technický důkaz:
+
+- Finální plná brána 2243 PASS / 458,763 s unit část, cíleně 45 + 6 kontrol PASS. Teplé ověření stavů i malé PNG chrání změnu soukromí, poškození se stejnou velikostí/mtime, symlink a změnu při hashování. První selhání evidence tuple-prefixů opravené bez oslabení testu.
+- Miniatura 5,287 → 0,192 s, 16 227 034 → 100 491 B; stav editoru 45 záběrů 1,324 → 0,039 s při již ověřených souborech. Studená kontrola zdrojů 1,241 s. Místní serverová měření, nikoli celá stránka; originály a střihy zachované.
+- Soukromý plán: cleanup_receipts/camino_p2a_20261026/plan.json, SHA-256 b0bcf0c26c660467b7dbe3aabbd07a4262b37507d3a8359d93ea1e80b5859034. Report camino_film_loading_20261026.md. Bez push/nasazení, bez výmazu dat.

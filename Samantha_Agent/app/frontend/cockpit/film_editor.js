@@ -51,7 +51,7 @@
       show(nodes.visual, source.kind === "photo");
       if (nodes.visualImage) {
         if (source.kind === "photo") {
-          const url = `/api/camino/film/photo/${model.project_id}/${row.asset_id}`;
+          const url = `/api/camino/film/image-preview/${model.project_id}/${row.asset_id}`;
           if (nodes.visualImage.getAttribute("src") !== url) nodes.visualImage.src = url;
         } else nodes.visualImage.removeAttribute("src");
       }
@@ -68,7 +68,7 @@
         button.setAttribute?.("data-film-nav", row.asset_id);
         if (source.kind === "photo") {
           const image = doc.createElement("img"); image.alt = ""; image.loading = "lazy";
-          image.src = `/api/camino/film/photo/${model.project_id}/${row.asset_id}`; button.appendChild(image);
+          image.src = `/api/camino/film/thumbnail/${model.project_id}/${row.asset_id}`; button.appendChild(image);
         } else button.appendChild(text("span", "VIDEO"));
         const caption = doc.createElement("span");
         const title = text("strong", ""), detail = text("small", "");
@@ -427,8 +427,10 @@
         else if (photoOpen === row.asset_id) photoOpen = null;
       });
       panel.appendChild(text("summary", "Text a komentář fotografie"));
-      const image = doc.createElement("img"); image.src = `/api/camino/film/photo/${model.project_id}/${row.asset_id}`;
-      image.alt = "Fotografie pro text a komentář"; image.loading = "lazy"; image.className = "camino-film-photo"; panel.appendChild(image);
+      if (!nodes.visualImage) {
+        const image = doc.createElement("img"); image.src = `/api/camino/film/photo/${model.project_id}/${row.asset_id}`;
+        image.alt = "Fotografie pro text a komentář"; image.loading = "lazy"; image.className = "camino-film-photo"; panel.appendChild(image);
+      }
       const layer = () => row.photo_text ||= emptyLayer();
       const label = text("label", "Text pro čtení a zobrazení — zde můžeš ručně upravovat");
       const area = doc.createElement("textarea"); area.rows = 7; area.name = "film-working-text"; area.readOnly = false; area.value = row.photo_text?.text || "";

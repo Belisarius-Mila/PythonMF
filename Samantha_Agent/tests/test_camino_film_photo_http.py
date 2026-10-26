@@ -113,3 +113,19 @@ class FilmPhotoHttpTests(unittest.TestCase):
         status, _, body = self.request("GET", f"/api/camino/film/photo/{self.project_id}/{uid(30)}")
         self.assertEqual(status, 404)
         self.assertEqual(json.loads(body)["message"], "Fotografie není dostupná.")
+
+    def test_small_image_routes_keep_no_store_and_current_privacy(self):
+        for kind in ('thumbnail', 'image-preview'):
+            path = f'/api/camino/film/{kind}/{self.project_id}/{uid(30)}'
+            status, headers, body = self.request('GET', path)
+            self.assertEqual(status, 200)
+            self.assertIn('no-store', headers['Cache-Control'])
+            self.assertIn('private', headers['Cache-Control'])
+            self.assertEqual(headers['Content-Type'], 'image/png')
+            with Image.open(io.BytesIO(body)) as image:
+                self.assertFalse(image.getexif())
+            self.assertEqual(self.request('HEAD', path)[0], 200)
+            self.assertEqual(self.request('GET', path+'?width=9000')[0], 404)
+        self.fixture.lock()
+        for kind in ('thumbnail', 'image-preview'):
+            self.assertEqual(self.request('GET', f'/api/camino/film/{kind}/{self.project_id}/{uid(30)}')[0], 404)

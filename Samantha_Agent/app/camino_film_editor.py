@@ -203,9 +203,9 @@ class FilmEditor:
         self.store = store
         self.day = day
 
-    def inputs(self, project_id=None):
-        status = (self.store.project_status(identifier(project_id)) if project_id is not None
-                  else self.store.day_status(self.day))
+    def inputs(self, project_id=None, *, cached_files=False):
+        status = (self.store.project_status(identifier(project_id), cached_files=cached_files) if project_id is not None
+                  else self.store.day_status(self.day, cached_files=cached_files))
         if not status.get("valid"):
             raise FilmError("Projekt nebo jeho zdroje už nejsou platné. Ověř konečnou Mac sadu.")
         folder = self.store.root / status["project_id"]
@@ -228,10 +228,13 @@ class FilmEditor:
         return narration_paths(self, manifest, draft, project_id=project_id, allow_deleted=allow_deleted)
 
     @shared(editor_database)
-    def photo_bytes(self, project_id, asset_id):
+    def photo_bytes(self, project_id, asset_id, *, image_kind="photo"):
         """Return a metadata-free PNG of a currently permitted original photo."""
         project_id, asset_id = identifier(project_id), identifier(asset_id)
-        _, manifest = self.inputs(project_id)
+        sizes = {"photo": (4096, 4096), "image-preview": (1600, 1600), "thumbnail": (256, 256)}
+        if image_kind not in sizes:
+            raise FilmError("Neplatný typ náhledu.")
+        _, manifest = self.inputs(project_id, cached_files=True)
         before = fingerprint(manifest)
         source = next((item for item in manifest["sources"]
                        if item.get("asset_id") == asset_id and item.get("media_kind") == "photo"), None)
@@ -253,11 +256,11 @@ class FilmEditor:
                 original = handle.read(MAX_PHOTO_BYTES + 1)
             if len(original) != size or hashlib.sha256(original).hexdigest() != source.get("sha256"):
                 raise FilmError("Původní fotografie neodpovídá uzavřeným vstupům.")
-            with decode_photo(original) as photo:
+            with decode_photo(original, size=sizes[image_kind], fast_preview=image_kind != "photo") as photo:
                 output = io.BytesIO()
                 photo.save(output, "PNG")
                 data = output.getvalue()
-            _, current = self.inputs(project_id)
+            _, current = self.inputs(project_id, cached_files=True)
             current_source = next((item for item in current["sources"]
                                    if item.get("asset_id") == asset_id and item.get("media_kind") == "photo"), None)
             if fingerprint(current) != before or current_source != source:
@@ -301,7 +304,7 @@ class FilmEditor:
         projects = []
         for project_id in self.store.project_ids():
             try:
-                folder, manifest = self.inputs(project_id)
+                folder, manifest = self.inputs(project_id, cached_files=True)
                 edit = self.revision(folder, manifest)
                 jobs = self.jobs(folder)
                 projects.append({"project_id": project_id, "local_date": manifest["local_date"],
@@ -314,7 +317,7 @@ class FilmEditor:
         return {"ok": True, "days": [{"local_date": day} for day in dates], "projects": projects}
 
     def view(self, project_id=None):
-        folder, manifest = self.inputs(project_id)
+        folder, manifest = self.inputs(project_id, cached_files=True)
         edit = self.revision(folder, manifest)
         self.verify_texts(manifest, edit["draft"], project_id=folder.name)
         draft = copy.deepcopy(edit["draft"])

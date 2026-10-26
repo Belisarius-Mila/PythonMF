@@ -82,7 +82,8 @@ async function main() {
   assert(!toolbar.classList.contains("hidden"), "the primary actions outside the editor bind through the toolbar");
   assert.equal(nodes.shots.children.length, 1);
   assert.equal(nodes.shotNav.children.length, 1);
-  assert.equal(nodes.visualImage.src, `/api/camino/film/photo/${pid}/${sid}`);
+  assert.equal(nodes.visualImage.src, `/api/camino/film/image-preview/${pid}/${sid}`);
+  assert.equal(nodes.shotNav.children[0].children[0].children[0].src, `/api/camino/film/thumbnail/${pid}/${sid}`);
   assert(nodes.shots.children[0].children[0].textContent.includes("<script>"));
   assert.equal(nodes.shots.children[0].children[0].innerHTML, undefined);
   const photoActions = nodes.shots.children[0].children.find(n => n.className === "actions").children;

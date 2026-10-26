@@ -15,13 +15,11 @@
     const caminoFilmBtn = document.getElementById("caminoFilmBtn");
     const caminoFilmModal = document.getElementById("caminoFilmModal");
     const caminoFilmCloseBtn = document.getElementById("caminoFilmCloseBtn");
-    const caminoFilmVideo = document.getElementById("caminoFilmVideo");
     const caminoFilmStatus = document.getElementById("caminoFilmStatus");
     const caminoFilmSummary = document.getElementById("caminoFilmSummary");
     const caminoFilmShots = document.getElementById("caminoFilmShots");
     const caminoFilmCreateBtn = document.getElementById("caminoFilmCreateBtn");
     const caminoFilmRefreshBtn = document.getElementById("caminoFilmRefreshBtn");
-    const caminoFilmTest = document.getElementById("caminoFilmTest");
     const caminoFilmFeedback = window.SamanthaFilmFeedback.create(document.getElementById("caminoFilmFeedback"));
     const caminoFilmEditor = window.SamanthaFilmEditor.create(document.getElementById("caminoFilmEditor"), {feedback: caminoFilmFeedback.report, toolbar: document.getElementById("caminoFilmToolbar")});
     const caminoFilmLibrary = window.SamanthaFilmLibrary.create(caminoFilmModal, {editor: caminoFilmEditor, feedback: caminoFilmFeedback.report, clearFeedback: caminoFilmFeedback.clear});
@@ -6543,11 +6541,7 @@ ${item.context || ""}`);
     function closeCaminoFilm() {
       if (!caminoFilmEditor.canClose()) return;
       caminoFilmLibrary.close();
-      caminoFilmVideo.pause();
-      caminoFilmVideo.removeAttribute("src");
-      caminoFilmVideo.load();
       caminoFilmModal.classList.add("hidden");
-      caminoFilmTest.open = false;
     }
 
     function closeJanickaModal() {
@@ -6700,14 +6694,7 @@ ${item.context || ""}`);
 
     janickaBtn.addEventListener("click", openJanickaModal);
     caminoFilmBtn.addEventListener("click", openCaminoFilm);
-    caminoFilmTest.addEventListener("toggle", () => {
-      if (caminoFilmTest.open) caminoFilmVideo.src = "/local-apps/camino-p2a-review/final-fed41c8f9697/film.mp4";
-      else { caminoFilmVideo.pause(); caminoFilmVideo.removeAttribute("src"); caminoFilmVideo.load(); }
-    });
     caminoFilmCloseBtn.addEventListener("click", closeCaminoFilm);
-    caminoFilmVideo.addEventListener("error", () => {
-      if (caminoFilmVideo.error) caminoFilmStatus.textContent = `Video se nepodařilo načíst (kód ${caminoFilmVideo.error.code}).`;
-    });
     caminoFilmModal.addEventListener("click", (event) => {
       if (event.target === caminoFilmModal) closeCaminoFilm();
     });

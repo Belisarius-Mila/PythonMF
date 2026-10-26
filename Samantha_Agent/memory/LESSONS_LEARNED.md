@@ -1522,3 +1522,11 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
 - Problém: index se po přesunu vztahuje k jinému záběru; přestavba miniatur při každém vstupu může opakovat drahé soukromé GET. Pozdní odmítnutí play() může patřit již zavřenému filmu.
 - Řešení: výběr držet odděleně podle Asset ID bez změny draftu a bez renderu/proxy. Při psaní měnit jen popisky, obrázky zachovat. Hotový výsledek vybírat podle aktuální revize a celé délky; chybu přehrávání vázat na epochu/generaci.
 - Ověření: Node regrese výběru bez zápisů, zachování textu/identity/miniatur, vyloučení staršího a částečného filmu a pozdní play rejection PASS. Vizuální browserová přejímka samostatně; reports/camino_film_workspace_20261026.md.
+
+### LL-086 — Miniatura nesmí znovu hashovat celý film
+
+- Problém: editor s 29 fotografiemi posílal pro každou miniaturu až 16MB PNG a dvakrát hashoval všechny zdroje filmu; čekání na stránku narůstalo na minuty.
+- Typ: opakující se
+- Řešení nalezeno: 26102026
+- Řešení: samostatné malé metadata-free PNG (256px seznam, 1600px pracovní náhled), bez skrytého duplicitního obrázku. Čtecí kontrola může krátce využít ověřené hashy v omezené RAM pouze při shodě device/inode/size/mtime_ns/ctime_ns a kontrole změn při čtení. Aktuální soukromí/manifest/koš se znovu ověřují vždy, vlastní obrázek se vždy hashově ověří. Uložení a render používají úplné ověření bajtů; bez persistentního cache nebo cache oprávnění.
+- Ověření: stejné místní vstupy, miniatura 5,287 → 0,192 s a 16,2 MB → 100 KB, stav editoru 1,324 → 0,039 s při již ověřených souborech. Plná brána 2243 PASS; regrese změny soukromí, stejné velikosti/obnoveného mtime, symlinku, souběhu a expirace PASS. Čas celé stránky po nasazení se přijímá samostatně. Report camino_film_loading_20261026.md.

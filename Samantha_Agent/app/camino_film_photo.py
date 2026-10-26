@@ -25,7 +25,7 @@ def read_photo(source: Path) -> bytes:
         return handle.read(MAX_PHOTO_BYTES + 1)
 
 
-def decode_photo(original: bytes, size=PHOTO_VIEW_SIZE) -> Image.Image:
+def decode_photo(original: bytes, size=PHOTO_VIEW_SIZE, *, fast_preview=False) -> Image.Image:
     """Fit the complete main image; never crop, upscale, or modify the source."""
     if not 0 < len(original) <= MAX_PHOTO_BYTES:
         raise FilmError("Fotografie překračuje povolený limit souboru.")
@@ -35,7 +35,13 @@ def decode_photo(original: bytes, size=PHOTO_VIEW_SIZE) -> Image.Image:
             width, height = image.size
             if max(width, height) > MAX_PHOTO_EDGE or width * height > MAX_PHOTO_PIXELS:
                 raise FilmError("Fotografie překračuje limit 64 Mpx nebo 16384 pixelů na stranu.")
+            if fast_preview:
+                # JPEG can decode at a smaller resolution; never change the
+                # established full-photo or film-render color pipeline.
+                image.draft("RGB", size)
             photo = ImageOps.exif_transpose(image).convert("RGB")
+            if fast_preview:
+                photo.thumbnail(size, Image.Resampling.LANCZOS)
             if image.info.get("icc_profile"):
                 try:
                     photo = ImageCms.profileToProfile(photo,
@@ -43,7 +49,8 @@ def decode_photo(original: bytes, size=PHOTO_VIEW_SIZE) -> Image.Image:
                         ImageCms.createProfile("sRGB"), outputMode="RGB")
                 except (ImageCms.PyCMSError, OSError, ValueError) as error:
                     raise FilmError("Barevný profil fotografie nelze bezpečně převést do SDR.") from error
-            photo.thumbnail(size, Image.Resampling.LANCZOS)
+            if not fast_preview:
+                photo.thumbnail(size, Image.Resampling.LANCZOS)
             photo.info.clear()
             return photo
     except FilmError:

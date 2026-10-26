@@ -344,7 +344,7 @@ class ClosedDayStore:
             raise ClosedDayError("request_conflict", "Stejné ID uzavření bylo použité pro jiný stav.")
         return receipt
 
-    def status(self, project_id: str) -> dict[str, Any]:
+    def status(self, project_id: str, *, cached_files: bool = False) -> dict[str, Any]:
         """Recheck current permission and bytes before any future render or delivery."""
         _uuid(project_id)
         directory = self.root / project_id
@@ -412,8 +412,12 @@ class ClosedDayStore:
                 if (verified is None or path.is_symlink() or not path.is_file()
                         or path.stat().st_size != source["byte_count"]):
                     return {**receipt, "valid": False, "reason": "media_missing"}
-                with path.open("rb") as stream:
-                    actual = hashlib.file_digest(stream, "sha256").hexdigest()
+                if cached_files:
+                    from .digest_cache import verified_digest
+                    actual = verified_digest(path, source["sha256"])
+                else:
+                    with path.open("rb") as stream:
+                        actual = hashlib.file_digest(stream, "sha256").hexdigest()
                 if not hmac.compare_digest(actual, source["sha256"]):
                     return {**receipt, "valid": False, "reason": "media_changed"}
         return {**receipt, "valid": True, "reason": None}

@@ -419,13 +419,7 @@ def family_video_organizer_app_root(
 
 LOCAL_WEB_APPS = {
     "family-video-organizer": family_video_organizer_app_root(),
-    "camino-p2a-review": PROJECT_ROOT / "data" / "private" / "camino" / "p2a" / "run-112rz9am",
 }
-CAMINO_P2A_REVIEW_FILES = frozenset({
-    "review.html",
-    "preview-8bb3a5793fc9/film.mp4",
-    "final-fed41c8f9697/film.mp4",
-})
 DESKTOP_APP_CATALOG: tuple[dict[str, Any], ...] = (
     {
         "id": "multilo",
@@ -9700,6 +9694,12 @@ class CockpitServer:
                 if parsed.path.startswith("/api/camino/film/photo/"):
                     self.respond_film_photo(parsed)
                     return
+                if parsed.path.startswith("/api/camino/film/thumbnail/"):
+                    self.respond_film_photo(parsed, image_kind="thumbnail")
+                    return
+                if parsed.path.startswith("/api/camino/film/image-preview/"):
+                    self.respond_film_photo(parsed, image_kind="image-preview")
+                    return
                 if parsed.path.startswith("/api/camino/film/narration/"):
                     self.respond_film_narration(parsed)
                     return
@@ -10931,6 +10931,10 @@ class CockpitServer:
                 parsed = urlparse(self.path)
                 if parsed.path.startswith("/api/camino/film/photo/"):
                     self.respond_film_photo(parsed)
+                elif parsed.path.startswith("/api/camino/film/thumbnail/"):
+                    self.respond_film_photo(parsed, image_kind="thumbnail")
+                elif parsed.path.startswith("/api/camino/film/image-preview/"):
+                    self.respond_film_photo(parsed, image_kind="image-preview")
                 elif parsed.path.startswith("/api/camino/film/narration/"):
                     self.respond_film_narration(parsed)
                 elif parsed.path.startswith("/api/camino/film/output/"):
@@ -11003,12 +11007,14 @@ class CockpitServer:
                 if self.command != "HEAD":
                     self.wfile.write(data[first:last + 1])
 
-            def respond_film_photo(self, parsed) -> None:
+            def respond_film_photo(self, parsed, *, image_kind="photo") -> None:
                 try:
                     parts = parsed.path.split("/")
                     if parsed.query or len(parts) != 7:
                         raise ValueError("invalid photo request")
-                    data = production_editor(project_id=parts[5]).photo_bytes(parts[5], parts[6])
+                    editor = production_editor(project_id=parts[5])
+                    data = (editor.photo_bytes(parts[5], parts[6]) if image_kind == "photo" else
+                            editor.photo_bytes(parts[5], parts[6], image_kind=image_kind))
                 except Exception:
                     if self.command == "HEAD":
                         self.send_response(HTTPStatus.NOT_FOUND)
@@ -11117,6 +11123,9 @@ class CockpitServer:
                     self.respond_json({"error": "not_found"}, status=HTTPStatus.NOT_FOUND)
                     return
                 app_id = parts[1]
+                if app_id == "camino-p2a-review":
+                    self.respond_json({"error": "not_found"}, status=HTTPStatus.NOT_FOUND)
+                    return
                 root = LOCAL_WEB_APPS.get(app_id)
                 if root is None:
                     self.respond_json({"error": "not_found"}, status=HTTPStatus.NOT_FOUND)
@@ -11128,9 +11137,6 @@ class CockpitServer:
                     relative = Path(*rel_parts) / "index.html"
                 else:
                     relative = Path(*rel_parts)
-                if app_id == "camino-p2a-review" and relative.as_posix() not in CAMINO_P2A_REVIEW_FILES:
-                    self.respond_json({"error": "not_found"}, status=HTTPStatus.NOT_FOUND)
-                    return
                 try:
                     root_resolved = root.resolve(strict=True)
                     target = (root / relative).resolve(strict=True)

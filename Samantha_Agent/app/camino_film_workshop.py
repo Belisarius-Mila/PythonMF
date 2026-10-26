@@ -159,7 +159,7 @@ class MacFilmProjectStore(ClosedDayStore):
                     os.close(descriptor)
             return self.day_status(local_date, project_id=project_id)
 
-    def _confirmed_status(self, project_id: str):
+    def _confirmed_status(self, project_id: str, *, cached_files=False):
         with self._metadata_connection() as db:
             if project_blocked(db, self.trip_id) or film_blocked(db, project_id):
                 raise ClosedDayError('project_in_trash', 'Projekt čeká v koši nebo na potvrzení smazání.')
@@ -174,7 +174,7 @@ class MacFilmProjectStore(ClosedDayStore):
                 or manifest.get("trip_id") != self.trip_id
                 or fingerprint(confirmation) != manifest.get("mac_confirmation_sha256")):
             raise ClosedDayError("project_invalid", "Projekt nemá platné potvrzení Mac vstupů.")
-        return super().status(project_id)
+        return super().status(project_id, cached_files=cached_files)
 
     def available_dates(self):
         """Read candidate days, excluding hidden/private-only inputs.
@@ -223,8 +223,8 @@ class MacFilmProjectStore(ClosedDayStore):
                 continue
         return sorted(result)
 
-    def project_status(self, project_id):
-        return self._confirmed_status(project_id)
+    def project_status(self, project_id, *, cached_files=False):
+        return self._confirmed_status(project_id, cached_files=cached_files)
 
     def text_choices(self, manifest, references=None):
         """Read permitted accepted text; a saved film pins an exact revision.
@@ -317,7 +317,7 @@ class MacFilmProjectStore(ClosedDayStore):
                 raise ClosedDayError("text_changed", "Použitý text už není v povolených přijatých podkladech.")
             return sorted(result, key=lambda r: (r["captured_local"] or "", r["reference"]["revision_id"]))
 
-    def day_status(self, local_date: str, *, project_id: str | None = None):
+    def day_status(self, local_date: str, *, project_id: str | None = None, cached_files=False):
         local_date = self._date(local_date)
         result = {"ok": True, "exists": False, "valid": False, "local_date": local_date,
                   "trip_id": self.trip_id}
@@ -338,7 +338,7 @@ class MacFilmProjectStore(ClosedDayStore):
                     break
         if project_id is None:
             return result
-        status = self._confirmed_status(project_id)
+        status = self._confirmed_status(project_id, cached_files=cached_files)
         if status["local_date"] != local_date:
             raise ClosedDayError("project_invalid", "Projekt patří jinému dni.")
         result.update(exists=True, valid=status["valid"])
@@ -426,6 +426,6 @@ def camino_mac_film_project_status(*, local_date=None, project_id=None, trip_id=
                             if trip_id is not None or project_id is not None else production_store())
         if trip_id is not None and selected.trip_id != canonical_id(trip_id):
             raise ValueError("Project mismatch")
-        return selected.day_status(DAY if local_date is None else local_date, project_id=project_id)
+        return selected.day_status(DAY if local_date is None else local_date, project_id=project_id, cached_files=True)
     except (OSError, ValueError, KeyError, sqlite3.DatabaseError):
         return {"ok": False, "error": "storage_unavailable", "message": "Projekt nelze nyní na Macu ověřit."}
