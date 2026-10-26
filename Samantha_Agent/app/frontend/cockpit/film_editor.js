@@ -15,7 +15,9 @@
     const askDelete = options.prompt || (message => window.prompt(message));
     const nodes = Object.fromEntries(["status", "shots", "voices", "jobs", "save", "preview", "final",
       "range", "from", "to", "duck", "player", "reload", "source", "sourcePlayer", "sourceStatus",
-      "sourceTitle", "selection", "start", "end", "playSelection", "texts", "cards", "blocked", "saveReason"].map(key => [key, root.querySelector(`[data-film="${key}"]`)]));
+      "sourceTitle", "selection", "start", "end", "playSelection", "texts", "cards", "blocked", "saveReason",
+      "shotNav", "shotTitle", "overview", "visual", "visualImage", "videoPlaceholder", "openSource", "watch", "watchReason", "outputs"].map(key =>
+      [key, root.querySelector(`[data-film="${key}"]`) || options.toolbar?.querySelector(`[data-film="${key}"]`)]));
     let model = null, active = false, dirty = false, saving = false, version = 0, epoch = 0;
     let pending = null, timer = null, refreshTimer = null, preserved = null, readRequest = 0;
     let requestedProject = null, photoOpen = null, narrating = false;
@@ -23,6 +25,65 @@
     let deleting = false, deleteButtons = [];
     let selected = null, sourceJob = null, sourceRequest = 0, sourceTimer = null, selectionTimer = null, playingSelection = false;
     let position = null, shotNodes = new Map(), exportStatus = "", sourceState = "";
+    let viewSelected = null, navButtons = new Map(), navLabels = new Map(), watchJob = null, playbackGeneration = 0;
+    function show(node, visible) { if (node) node.classList[visible ? "remove" : "add"]("hidden"); }
+    function syncWorkspace() {
+      if (!nodes.shotNav || !model) return;
+      if (!model.draft.shots.some(row => row.asset_id === viewSelected)) viewSelected = model.draft.shots[0]?.asset_id || null;
+      const row = model.draft.shots.find(r => r.asset_id === viewSelected);
+      for (const [id, node] of shotNodes) show(node, id === viewSelected);
+      for (const [id, button] of navButtons) {
+        button.setAttribute?.("aria-current", id === viewSelected ? "true" : "false");
+        button.classList[id === viewSelected ? "add" : "remove"]("is-selected");
+      }
+      for (const [index, item] of model.draft.shots.entries()) {
+        const source = model.sources.find(s => s.asset_id === item.asset_id), labels = navLabels.get(item.asset_id);
+        if (!labels) continue;
+        labels.title.textContent = `${index + 1}. ${item.title || source.title || (source.kind === "photo" ? "Fotografie" : "Video")}`;
+        labels.detail.textContent = `${source.kind === "photo" ? "Fotografie" : "Video"} · ${((item.out_ms - item.in_ms) / 1000).toLocaleString("cs-CZ")} s · ${item.included ? "ve filmu" : "vyřazeno"}`;
+      }
+      const included = model.draft.shots.filter(r => r.included).length;
+      const duration = timeline().reduce((ms, r) => ms + r.out_ms - r.in_ms, 0);
+      if (nodes.overview) nodes.overview.textContent = `${included} z ${model.draft.shots.length} záběrů ve filmu · délka ${(duration / 1000).toLocaleString("cs-CZ")} s`;
+      if (!row) { show(nodes.visual, false); show(nodes.videoPlaceholder, false); return; }
+      const source = model.sources.find(s => s.asset_id === row.asset_id);
+      if (nodes.shotTitle) nodes.shotTitle.textContent = `${model.draft.shots.indexOf(row) + 1}. ${source.kind === "photo" ? "Fotografie" : "Video"} · ${row.title || source.title || "Bez názvu"}${row.included ? "" : " · vyřazeno z filmu"}`;
+      show(nodes.visual, source.kind === "photo");
+      if (nodes.visualImage) {
+        if (source.kind === "photo") {
+          const url = `/api/camino/film/photo/${model.project_id}/${row.asset_id}`;
+          if (nodes.visualImage.getAttribute("src") !== url) nodes.visualImage.src = url;
+        } else nodes.visualImage.removeAttribute("src");
+      }
+      show(nodes.videoPlaceholder, source.kind === "video" && selected !== row.asset_id);
+    }
+    function renderNavigation() {
+      if (!nodes.shotNav || !model) return;
+      const top = nodes.shotNav.scrollTop;
+      nodes.shotNav.replaceChildren(); navButtons = new Map(); navLabels = new Map();
+      for (const row of model.draft.shots) {
+        const source = model.sources.find(s => s.asset_id === row.asset_id);
+        const item = doc.createElement("li"), button = doc.createElement("button");
+        button.type = "button"; button.className = "camino-film-shot-choice";
+        button.setAttribute?.("data-film-nav", row.asset_id);
+        if (source.kind === "photo") {
+          const image = doc.createElement("img"); image.alt = ""; image.loading = "lazy";
+          image.src = `/api/camino/film/photo/${model.project_id}/${row.asset_id}`; button.appendChild(image);
+        } else button.appendChild(text("span", "VIDEO"));
+        const caption = doc.createElement("span");
+        const title = text("strong", ""), detail = text("small", "");
+        caption.appendChild(title); caption.appendChild(detail); navLabels.set(row.asset_id, {title, detail});
+        button.appendChild(caption); button.addEventListener("click", () => chooseShot(row.asset_id));
+        item.appendChild(button); nodes.shotNav.appendChild(item); navButtons.set(row.asset_id, button);
+      }
+      nodes.shotNav.scrollTop = top;
+      syncWorkspace();
+    }
+    function chooseShot(id) {
+      if (!model || !active || doc.hidden || !model.draft.shots.some(r => r.asset_id === id)) return false;
+      if (selected && selected !== id) stopSource();
+      viewSelected = id; syncWorkspace(); return true;
+    }
     function announce(node, message, kind = "info", channel = null) {
       node.textContent = message || "";
       options.feedback?.({message: node.filmContext ? `${node.filmContext}: ${message}` : message,
@@ -30,28 +91,30 @@
     }
     function capturePosition() {
       const host = root.closest?.(".modal");
-      if (!host || !model) return null;
-      const top = host.getBoundingClientRect().top;
-      const anchor = [...shotNodes].find(([, node]) => node.getBoundingClientRect().bottom > top);
+      if (!model) return null;
+      const top = host?.getBoundingClientRect().top || 0;
+      const anchor = host && [...shotNodes].find(([, node]) => !node.classList.contains("hidden") && node.getBoundingClientRect().bottom > top);
       const focus = doc.activeElement;
-      return {project: model.project_id, top: host.scrollTop, photo: photoOpen,
+      return {project: model.project_id, top: host?.scrollTop || 0, photo: photoOpen, shot: viewSelected, navTop: nodes.shotNav?.scrollTop,
         anchor: anchor?.[0], offset: anchor?.[1].getBoundingClientRect().top - top,
-        focus: focus && root.contains?.(focus) ? {asset: focus.closest?.("[data-film-asset]")?.getAttribute("data-film-asset"), name: focus.name, label: focus.textContent, tag: focus.tagName} : null};
+        focus: focus && root.contains?.(focus) ? {asset: focus.closest?.("[data-film-asset]")?.getAttribute("data-film-asset"), nav: focus.getAttribute?.("data-film-nav"), name: focus.name, label: focus.textContent, tag: focus.tagName} : null};
     }
     function restorePosition(saved) {
       const host = root.closest?.(".modal");
       if (!host || saved?.project !== model.project_id) return;
       const anchor = shotNodes.get(saved.anchor);
+      if (nodes.shotNav) nodes.shotNav.scrollTop = saved.navTop;
       host.scrollTop = saved.top;
       if (anchor) host.scrollTop += anchor.getBoundingClientRect().top - host.getBoundingClientRect().top - saved.offset;
       const focus = saved.focus, row = focus && shotNodes.get(focus.asset);
+      if (focus?.nav) navButtons.get(focus.nav)?.focus?.({preventScroll: true});
       if (row) {
         const candidate = [...row.querySelectorAll("button, input, textarea, select, summary, a")].find(n => n.tagName === focus.tag && (focus.name ? n.name === focus.name : n.textContent === focus.label));
         candidate?.focus({preventScroll: true});
       }
     }
     function text(tag, value) { const n = doc.createElement(tag); n.textContent = value; return n; }
-    function stopPlayer() { nodes.player.pause(); nodes.player.removeAttribute("src"); nodes.player.load(); }
+    function stopPlayer() { ++playbackGeneration; nodes.player.pause(); nodes.player.removeAttribute("src"); nodes.player.load(); }
     function stopSource() {
       sourceState = "";
       ++sourceRequest; cancel(sourceTimer); cancel(selectionTimer); selected = null; sourceJob = null; playingSelection = false;
@@ -95,11 +158,13 @@
     }
     async function selectVideo(assetId) {
       if (!model) return;
+      if (model.draft.shots.some(r => r.asset_id === assetId)) chooseShot(assetId);
       stopSource(); stopPlayer(); selected = assetId;
       const current = epoch, selection = sourceRequest;
       if (model.sources.find(s => s.asset_id === assetId)?.kind === "audio") nodes.source.classList.add("audio-only");
       else nodes.source.classList.remove("audio-only");
       nodes.source.classList.remove("hidden"); syncSelection();
+      syncWorkspace();
       announce(nodes.sourceStatus, "Ověřuji a připravuji celý zdroj k přehrání…", "busy");
       nodes.source.scrollIntoView?.({block: "nearest", behavior: "smooth"});
       try {
@@ -132,13 +197,19 @@
     function invalidate(message = "", keepPosition = false, kind = "error") {
       if (!keepPosition) position = null;
       shotNodes = new Map();
+      navButtons = new Map(); navLabels = new Map(); viewSelected = null; watchJob = null;
       exportStatus = "";
       for (const audio of photoAudios) { audio.pause(); audio.removeAttribute("src"); audio.load(); }
       photoAudios = []; photoStatuses = []; photoOpen = null;
       photoPanels = new Map();
       ++epoch; model = null; dirty = false; pending = null; preserved = null;
       cancel(timer); stopPlayer(); stopSource();
-      for (const key of ["shots", "voices", "jobs", "texts", "cards"]) nodes[key]?.replaceChildren();
+      for (const key of ["shots", "voices", "jobs", "texts", "cards", "shotNav"]) nodes[key]?.replaceChildren();
+      nodes.visualImage?.removeAttribute("src"); show(nodes.visual, false); show(nodes.videoPlaceholder, false);
+      if (nodes.shotTitle) nodes.shotTitle.textContent = "Vyber záběr";
+      if (nodes.overview) nodes.overview.textContent = "";
+      if (nodes.watch) nodes.watch.disabled = true;
+      if (nodes.watchReason) nodes.watchReason.textContent = "";
       for (const key of ["save", "preview", "final", "range"]) nodes[key].disabled = true;
       if (message) announce(nodes.status, message, kind);
       else nodes.status.textContent = "";
@@ -157,6 +228,9 @@
       if (nodes.blocked) nodes.blocked.textContent = reason;
       if (nodes.saveReason) nodes.saveReason.textContent = !model || saving || deleting ? reason : dirty ? "Změny můžeš uložit hned tlačítkem Uložit střih." : "Všechny změny střihu jsou uložené.";
       for (const key of ["preview", "final", "range", "save"]) nodes[key].setAttribute?.("aria-busy", String(saving || deleting || narrating));
+      const ready = model && !dirty && !saving && !deleting && !narrating && watchJob?.revision === model.revision && safeOutput(watchJob.url);
+      if (nodes.watch) nodes.watch.disabled = !ready;
+      if (nodes.watchReason) nodes.watchReason.textContent = ready ? `${watchJob.profile === "final" ? "MP4 1080p" : "Náhled 720p"} · uložená revize ${watchJob.revision}.` : reason || "Pro tuto revizi ještě není hotový výsledek. Nejprve vytvoř náhled nebo MP4.";
       if (model && !deleting && !narrating && !dirty && !saving && !preserved) options.feedback?.({message: "", channel: "guard"});
     }
     function change() {
@@ -166,6 +240,7 @@
       announce(nodes.status, "Úpravy čekají na uložení…", "info", "save");
       photoStatus("Úpravy čekají na uložení…");
       cancel(timer); timer = later(() => save(), 700);
+      syncWorkspace();
     }
     function field(parent, label, row, key, {seconds = false, max = null} = {}) {
       const wrapper = text("label", label);
@@ -184,6 +259,7 @@
     function renderRows() {
       const saved = position || capturePosition(); position = null;
       if (saved?.project === model.project_id) photoOpen = saved.photo;
+      if (saved?.project === model.project_id) viewSelected = saved.shot;
       shotNodes = new Map();
       const sources = new Map(model.sources.map(s => [s.asset_id, s]));
       for (const audio of photoAudios) audio.pause();
@@ -236,7 +312,7 @@
         }
         if (source.kind === "photo") {
           const edit = text("button", "Text a komentář"); edit.type = "button";
-          edit.addEventListener("click", () => { photoOpen = row.asset_id; renderRows(); }); actions.appendChild(edit);
+          edit.addEventListener("click", () => { chooseShot(row.asset_id); photoOpen = row.asset_id; renderRows(); }); actions.appendChild(edit);
         }
         li.appendChild(actions);
         if (source.kind === "photo") photoPanel(li, row);
@@ -267,6 +343,7 @@
       renderTexts();
       nodes.duck.value = model.draft.duck_gain;
       syncSelection();
+      renderNavigation();
       restorePosition(saved);
     }
     function timeline() {
@@ -331,7 +408,11 @@
         photo.out_ms = Math.max(photo.out_ms, duration); change(); renderRows();
       }); actions.appendChild(extend); li.appendChild(actions); li.appendChild(feedback);
     }
-    function focusPhoto(id) { photoPanels.get(id)?.scrollIntoView?.({block: "start", behavior: "smooth"}); }
+    function focusPhoto(id) {
+      chooseShot(id);
+      const panel = photoPanels.get(id);
+      if (panel) { photoOpen = id; panel.open = true; panel.scrollIntoView?.({block: "nearest", behavior: "smooth"}); }
+    }
     function photoStatus(message, kind = "info", channel = "save") {
       for (const node of photoStatuses) node.textContent = message;
       options.feedback?.({message, kind, channel});
@@ -608,6 +689,7 @@
       const labels = {queued: "Ve frontě", rendering: "Vytváří se", ready: "Hotovo", failed: "Selhalo — lze zopakovat", interrupted: "Přerušeno — lze zopakovat", delete_pending: "Mazání nebylo dokončeno"};
       const key = j => JSON.stringify([j.revision, j.profile, j.range]);
       const exports = jobs.filter(j => !j.source_asset_id);
+      watchJob = exports.filter(j => j.state === "ready" && j.revision === model.revision && !j.range && safeOutput(j.url)).at(-1) || null;
       const latest = exports.filter(j => j.revision === model.revision).at(-1);
       const signature = latest && JSON.stringify([latest.job_id, latest.state, latest.progress]);
       if (latest && signature !== exportStatus) {
@@ -744,6 +826,19 @@
       } catch (_) { if (current === epoch) announce(nodes.status, "Požadavek se nepotvrdil. Znovu načti stav fronty před opakováním.", "error", "render"); }
     }
     nodes.save.addEventListener("click", () => save());
+    nodes.openSource?.addEventListener("click", () => {
+      if (viewSelected && model?.sources.find(s => s.asset_id === viewSelected)?.kind === "video") selectVideo(viewSelected);
+    });
+    nodes.watch?.addEventListener("click", () => {
+      if (nodes.watch.disabled || !watchJob || !model || watchJob.revision !== model.revision || !safeOutput(watchJob.url)) return;
+      nodes.sourcePlayer.pause(); playingSelection = false; stopPlayer();
+      const current = epoch, playback = playbackGeneration;
+      if (nodes.outputs) nodes.outputs.open = true;
+      nodes.player.src = watchJob.url; nodes.player.load(); nodes.player.scrollIntoView?.({block: "nearest"});
+      nodes.player.play().catch(() => {
+        if (current === epoch && playback === playbackGeneration && active && !doc.hidden) announce(nodes.status, "Přehrávání se nespustilo. Použij ovládání přehrávače v Náhledech a hotových filmech.", "warning", "player");
+      });
+    });
     nodes.start.addEventListener("click", () => mark("in_ms"));
     nodes.end.addEventListener("click", () => mark("out_ms"));
     nodes.playSelection.addEventListener("click", () => {
@@ -788,12 +883,12 @@
           if (!this.canClose()) return false;
           invalidate(); requestedProject = projectId;
         }
-        active = true; root.classList.remove("hidden"); check(); cancel(refreshTimer);
+        active = true; root.classList.remove("hidden"); show(options.toolbar, true); check(); cancel(refreshTimer);
         const tick = () => { if (active) { check(); refreshTimer = later(tick, 10000); } }; refreshTimer = later(tick, 10000);
         return true;
       },
-      close() { active = false; cancel(refreshTimer); invalidate(); root.classList.add("hidden"); },
-      suspend() { active = false; cancel(refreshTimer); conceal(); root.classList.add("hidden"); },
+      close() { active = false; cancel(refreshTimer); invalidate(); root.classList.add("hidden"); show(options.toolbar, false); },
+      suspend() { active = false; cancel(refreshTimer); conceal(); root.classList.add("hidden"); show(options.toolbar, false); },
       canClose() {
         if (narrating) { announce(nodes.status, "Nejprve počkej na dokončení operace s komentářem fotografie.", "warning", "guard"); return false; }
         if (deleting) { announce(nodes.status, "Dokončuji smazání varianty. Před přepnutím počkej na výsledek.", "busy", "guard"); return false; }

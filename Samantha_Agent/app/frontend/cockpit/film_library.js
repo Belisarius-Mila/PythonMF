@@ -10,6 +10,7 @@
     const status = node("caminoFilmStatus"), summary = node("caminoFilmSummary"), shots = node("caminoFilmShots");
     const createButton = node("caminoFilmCreateBtn"), refreshButton = node("caminoFilmRefreshBtn");
     const trash = node("caminoProjectTrash");
+    const libraryPanel = node("caminoFilmLibraryPanel");
     const brake = "Potvrzuji globální brzdu: rozumím riziku a chci pokračovat.";
     let trashReview = null, trashBusy = false;
     const storageKey = "samantha.camino.film.selection.v2";
@@ -117,6 +118,7 @@
       summary.textContent = ""; summary.classList.add("hidden"); shots.replaceChildren(); createButton.disabled = true;
     }
     function unavailable(message) {
+      if (libraryPanel) libraryPanel.open = true;
       clearSummary(); projects.replaceChildren(); day.replaceChildren(); day.disabled = true;
       report(message, "error"); editor.suspend();
     }
@@ -159,6 +161,7 @@
         unavailable("Vybraný projekt nelze bezpečně ověřit. Znovu načti přehled filmů."); return;
       }
       if (!data.valid) {
+        if (libraryPanel) libraryPanel.open = true;
         if (data.exists) {
           catalog.projects = catalog.projects.filter(p => p.local_date !== selection.local_date); renderCatalog();
         }
@@ -236,7 +239,8 @@
         if (chosen) await choose({...chosen, trip_id: tripId}, {initial: true});
         else {
           selection = {trip_id: tripId, local_date: null, project_id: null}; remember(); editor.close(); clearSummary();
-          title.textContent = selectedTrip().name; status.textContent = "Vyber den po dokončení přenosu do Macu.";
+          if (libraryPanel) libraryPanel.open = true;
+          title.textContent = selectedTrip().name; report("Vyber den po dokončení přenosu do Macu.");
         }
       } catch (_) {
         if (current === epoch && serial === catalogRead && active) {

@@ -36,14 +36,46 @@ EXPECTED_PAGES = {
     ),
     "cockpit": (
         COCKPIT_HTML,
-        607722,
-        11550,
-        "ca31872cb9ed131ddf5bb01ecc054037356b4469f5aa44d32664037c6953bdf6",
+        621030,
+        11734,
+        "1ced9c5a190189f52623fa4b5ad71956806baa531a9360d98d61c5215e454475",
     ),
 }
 
 
 class CockpitFrontendContractTests(unittest.TestCase):
+    def test_film_workspace_has_balanced_markup_and_unique_controls(self) -> None:
+        from html.parser import HTMLParser
+        source = (FRONTEND_ROOT / "cockpit" / "page.html").read_text()
+        fragment = source[source.index('  <div id="caminoFilmModal"'):source.index('  <div id="emailHubModal"')]
+
+        class Structure(HTMLParser):
+            def __init__(self):
+                super().__init__()
+                self.stack, self.controls, self.ids, self.errors = [], [], [], []
+
+            def handle_starttag(self, tag, attrs):
+                attrs = dict(attrs)
+                if tag not in {"input", "img", "source", "br", "hr", "meta", "link"}:
+                    self.stack.append(tag)
+                if "data-film" in attrs:
+                    self.controls.append(attrs["data-film"])
+                if "id" in attrs:
+                    self.ids.append(attrs["id"])
+
+            def handle_endtag(self, tag):
+                if not self.stack or self.stack[-1] != tag:
+                    self.errors.append((tag, list(self.stack)))
+                elif self.stack:
+                    self.stack.pop()
+
+        parsed = Structure()
+        parsed.feed(fragment)
+        self.assertFalse(parsed.errors)
+        self.assertFalse(parsed.stack)
+        self.assertEqual(len(parsed.ids), len(set(parsed.ids)))
+        self.assertEqual(len(parsed.controls), len(set(parsed.controls)))
+
     def test_calendar_delivery_status_rejects_stale_failed_and_closed_responses(self) -> None:
         source = (FRONTEND_ROOT / "cockpit" / "app.js").read_text()
         start = source.index("    async function refreshFamilyCalendarDeliveryStatus()")

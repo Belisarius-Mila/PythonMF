@@ -10,13 +10,16 @@ function node() {
     emit(event) { return listeners[event]?.(); },
     appendChild(n) { this.children.push(n); }, replaceChildren() { this.children = []; },
     pause() { this.paused = true; }, play() { this.paused = false; return Promise.resolve(); },
-    load() { this.readyState = 0; }, getAttribute(k) { return this[k] || null; }, removeAttribute(k) { delete this[k]; }};
+    load() { this.readyState = 0; }, setAttribute(k, v) { this[k] = v; }, getAttribute(k) { return this[k] || null; }, removeAttribute(k) { delete this[k]; }};
 }
 const docEvents = {};
 const doc = {hidden: false, createElement: node, addEventListener(event, fn) { docEvents[event] = fn; }};
 const nodes = Object.fromEntries(["status", "shots", "voices", "jobs", "save", "preview", "final", "range", "from", "to", "duck", "player", "reload",
-  "source", "sourcePlayer", "sourceStatus", "sourceTitle", "selection", "start", "end", "playSelection", "texts", "cards", "blocked", "saveReason"].map(k => [k, node()]));
-const root = node(); root.querySelector = selector => nodes[selector.match(/"(.*?)"/)[1]];
+  "source", "sourcePlayer", "sourceStatus", "sourceTitle", "selection", "start", "end", "playSelection", "texts", "cards", "blocked", "saveReason",
+  "shotNav", "shotTitle", "overview", "visual", "visualImage", "videoPlaceholder", "openSource", "watch", "watchReason", "outputs"].map(k => [k, node()]));
+const toolbarKeys = new Set(["save", "preview", "final", "saveReason", "blocked", "watch", "watchReason"]);
+const root = node(); root.querySelector = selector => { const key = selector.match(/"(.*?)"/)[1]; return toolbarKeys.has(key) ? null : nodes[key]; };
+const toolbar = node(); toolbar.querySelector = selector => nodes[selector.match(/"(.*?)"/)[1]];
 const sid = "00000000-0000-0000-0000-000000000001", pid = "00000000-0000-0000-0000-000000000002";
 let view = {ok: true, project_id: pid, revision: 1, duration_ms: 3000,
   sources: [{asset_id: sid, kind: "photo", duration_ms: null, title: "<script>SAFE TEXT</script>"}],
@@ -67,7 +70,7 @@ const fetch = async (url, options) => {
 };
 const context = {window: {}, console}; vm.createContext(context);
 vm.runInContext(fs.readFileSync("app/frontend/cockpit/film_editor.js", "utf8"), context);
-const editor = context.window.SamanthaFilmEditor.create(root, {document: doc, fetch,
+const editor = context.window.SamanthaFilmEditor.create(root, {document: doc, fetch, toolbar,
   feedback: event => feedback.push(event),
   uuid: () => `00000000-0000-0000-0000-${String(++uuidCount).padStart(12, "0")}`,
   setTimeout: (fn, delay) => { clock.push({fn, delay}); return clock.length; }, clearTimeout() {}, confirm: () => true,
@@ -76,7 +79,10 @@ const flush = () => new Promise(resolve => setImmediate(resolve));
 function titleInput() { return nodes.shots.children[0].children.find(n => n.className === "camino-film-fields").children[0].children[0]; }
 async function main() {
   editor.open(); await flush();
+  assert(!toolbar.classList.contains("hidden"), "the primary actions outside the editor bind through the toolbar");
   assert.equal(nodes.shots.children.length, 1);
+  assert.equal(nodes.shotNav.children.length, 1);
+  assert.equal(nodes.visualImage.src, `/api/camino/film/photo/${pid}/${sid}`);
   assert(nodes.shots.children[0].children[0].textContent.includes("<script>"));
   assert.equal(nodes.shots.children[0].children[0].innerHTML, undefined);
   const photoActions = nodes.shots.children[0].children.find(n => n.className === "actions").children;
@@ -108,7 +114,10 @@ async function main() {
   doc.hidden = false; docEvents.visibilitychange(); await flush();
   assert(!nodes.shots.children[0].children.some(n => n.open), "a deliberately closed panel stays closed");
   delete root.closest; nodes.shots.replaceChildren = originalReplace; nodes.shots.appendChild = originalAppend;
+  const thumbnailBeforeTyping = nodes.shotNav.children[0];
   titleInput().value = "Manual title"; titleInput().emit("change");
+  assert.equal(nodes.shotNav.children[0], thumbnailBeforeTyping, "typing must not rebuild and reload thumbnails");
+  assert(nodes.shotTitle.textContent.includes("Manual title"));
   assert.equal(nodes.preview.disabled, true);
   assert(nodes.blocked.textContent.includes("ulož"), "disabled export explains the prerequisite beside its actions");
   const auto = clock.find(t => t.delay === 700); await auto.fn(); await flush();
@@ -159,6 +168,20 @@ async function main() {
   view.draft.shots = [sid, second].map(asset_id => ({asset_id, title: "", in_ms: 0, out_ms: 3000, gain: 1, included: true}));
   view.jobs = []; await editor.check();
   await editor.check();
+  const beforeNavigation = {saves: saves.length, renders: renderCalls.length, sources: sourceCalls.length};
+  nodes.shotNav.children[1].children[0].emit("click");
+  assert(nodes.shots.children[0].classList.contains("hidden"));
+  assert(!nodes.shots.children[1].classList.contains("hidden"));
+  assert.equal(nodes.shotNav.children[1].children[0].getAttribute("aria-current"), "true");
+  assert.equal(saves.length, beforeNavigation.saves); assert.equal(renderCalls.length, beforeNavigation.renders);
+  assert.equal(sourceCalls.length, beforeNavigation.sources, "browsing a video never starts its proxy or export");
+  assert.equal(nodes.visualImage.src, undefined, "selecting a video removes the previous photo URL");
+  assert(!nodes.videoPlaceholder.classList.contains("hidden"));
+  doc.hidden = true; docEvents.visibilitychange();
+  assert.equal(nodes.shotNav.children.length, 0);
+  doc.hidden = false; docEvents.visibilitychange(); await flush();
+  assert(nodes.shots.children[0].classList.contains("hidden"));
+  assert(!nodes.shots.children[1].classList.contains("hidden"), "the selected video survives a hidden-tab round trip");
   for (const shot of nodes.shots.children) {
     const actions = shot.children.find(n => n.className === "actions").children;
     assert(actions.some(n => n.textContent === "Otevřít video pro střih"));
@@ -197,9 +220,27 @@ async function main() {
   view.jobs.push({job_id: "00000000-0000-0000-0000-000000000099", revision: view.revision, profile: "final", range: null, state: "rendering", progress: 42});
   await editor.check();
   assert(feedback.some(e => e.channel === "render" && e.kind === "busy" && e.message.includes("42 %")), "current export progress is visible outside the bottom history list");
-  view.jobs.at(-1).state = "ready"; await editor.check();
+  view.jobs.at(-1).state = "ready"; view.jobs.at(-1).url = `/api/camino/film/output/${pid}/00000000-0000-0000-0000-000000000099`; await editor.check();
   assert.equal(feedback.filter(e => e.channel === "render").at(-1).kind, "success");
-  editor.close(); editor.open(); await flush();
+  assert.equal(nodes.watch.disabled, false);
+  const queuedBeforeWatch = renderCalls.length;
+  nodes.watch.emit("click");
+  assert.equal(nodes.player.src, view.jobs.at(-1).url);
+  assert.equal(nodes.outputs.open, true);
+  assert.equal(renderCalls.length, queuedBeforeWatch, "watch only plays an existing whole-film result");
+  let rejectPlayback;
+  const normalPlay = nodes.player.play;
+  nodes.player.play = () => new Promise((resolve, reject) => { rejectPlayback = reject; });
+  nodes.watch.emit("click"); nodes.player.play = normalPlay;
+  view.jobs.at(-1).range = {start_ms: 0, end_ms: 1000}; await editor.check();
+  assert(nodes.watch.disabled, "a ready partial preview is never presented as the whole film");
+  view.jobs.at(-1).range = null; view.jobs.at(-1).revision--; await editor.check();
+  assert(nodes.watch.disabled, "a ready older revision is never presented as the current film");
+  editor.close();
+  const messagesAfterClose = feedback.length;
+  rejectPlayback(new Error("late browser playback failure")); await flush();
+  assert.equal(feedback.length, messagesAfterClose, "a stale playback failure cannot appear in another or closed project");
+  editor.open(); await flush();
   const restored = nodes.shots.children[0].children.find(n => n.className === "camino-film-fields");
   assert.equal(restored.children[1].children[0].value, .75); assert.equal(restored.children[2].children[0].value, 1.25);
   let releaseSource;
@@ -235,10 +276,12 @@ async function main() {
   await open(1); await flush();
   view = {ok: false, message: "Privacy changed"}; await editor.check();
   assert.equal(nodes.shots.children.length, 0); assert.equal(nodes.jobs.children.length, 0);
+  assert.equal(nodes.shotNav.children.length, 0); assert.equal(nodes.visualImage.src, undefined);
   assert.equal(nodes.player.src, undefined); assert(nodes.player.paused); assert(nodes.final.disabled);
   assert.equal(nodes.sourcePlayer.src, undefined); assert(nodes.sourcePlayer.paused);
   assert(nodes.source.classList.contains("hidden")); assert(nodes.start.disabled);
   editor.close(); assert(root.classList.contains("hidden"));
+  assert(toolbar.classList.contains("hidden"));
   let resolve; readWait = new Promise(r => { resolve = r; }); editor.open();
   editor.close(); resolve({json: async () => ({ok: true, project_id: pid, revision: 99})});
   await flush(); assert.equal(nodes.shots.children.length, 0); assert.equal(nodes.jobs.children.length, 0);

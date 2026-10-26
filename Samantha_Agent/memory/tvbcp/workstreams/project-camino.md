@@ -1,13 +1,22 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-26 09:59 CET: Míla po nasazení UI 1 bc1fe4ad potvrdil „Funguje to skvěle!“ a schválil pokračování. Jde o jeho uživatelské přijetí prvního kroku; konkrétní zařízení/prohlížeč a úplná matice šířek nejsou určené.
+- Druhý UI krok lokálně hotový: prostornější střižna se seznamem záběrů a miniaturami vlevo, zdrojovým náhledem uprostřed a nastavením jediného vybraného záběru vpravo. Na menší šířce se panely skládají pod sebe. Projekty, textové nástroje a historie exportů jsou sbalitelné.
+- Hlavní uložení, vytvoření náhledu a export jsou v sticky záhlaví se zachovanou odezvou a důvody blokací. Přehrát výsledek otevře pouze hotový celý film aktuální revize; nevytváří render a nenabízí starší/částečný výsledek jako současný.
+- Výběr záběru nemění draft ani nespouští přípravu videa. Zachová se rozpracovaný text, identita záběru po přesunu, výběr při návratu z jiné karty, soukromí nových miniatur a ochrany stale odpovědí. Při psaní se miniatury znovu nevytvářejí; opožděná chyba přehrávání se nepřenese do jiného filmu.
+- Ověření: 103 cílených testů PASS / 47,818 s, závěrečné Node interakce editoru/foto i 21 frontendových kontraktů PASS / 2,216 s; rychlá statická brána PASS. Vizuální přejímka UI 2 na Macu/úzkém displeji NEOVĚŘENO — dostupný browser inventory je prázdný. Detail: memory/reports/camino_film_workspace_20261026.md.
+- Jen lokální vývojový checkpoint, bez nového push/nasazení, produkčního renderu, změny iPhonu či samostatné služby. Poslední vydané UI zůstává bc1fe4ad / Luna 1173a162fd7197d9f5281e76a0f9d400. Další krok: samostatné p+n druhého kroku a proklik výběru/rozložení.
+<!-- SAMANTHA_CURRENT_STATUS_END -->
+
+### Předchozí stav po p+n UI 1
+
 - 2026-10-26 09:28 CET: První UI krok střižny publikovaný a nasazený registrovanou Lunou do bc1fe4adfa5c006570058769d62d91a436263d3b. Účtenka 1173a162fd7197d9f5281e76a0f9d400: completed, push/deployment confirmed, jeden commit, project-camino → Cockpit, release_executor gpt-6-luna/high.
 - Plná publikační brána 2232 PASS / 345,9 s, smoke 5/5, protected_services_unchanged=true. Adam jednou převzal účtenku; GitHub/main aligned 0/0 na vydaném headu před tímto dokumentačním zápisem, profily ready. Health OK a HTTP 200 podává přesně nové složené HTML včetně společné odezvy; code_stamp 28c8f0a83e59bc1b.
 - Nasazené jsou společné hlášky, důvody nedostupného ukládání/náhledu/MP4 a obnova pozice/panelu po návratu od fotografie. Soukromé zdroje, backendové kontrakty, osobní střihy, iPhone a samostatná služba Camino beze změny.
 - return_channel=caller: účtenku skutečně převzal terminálový Adam zde. Automatický portálový návrat returned_to_adam=false zůstává nepotvrzený a není důvodem opakovat úspěšné vydání.
 - Skutečný browser/Safari/iPhone proklik viditelnosti, překrytí a návratu po fotografii NEOVĚŘENO. Další krok: po uloženém střihu obnovit Cockpit a provést přejímku v memory/reports/camino_film_ui_feedback_20261025.md. Větší rozložení pracovní plochy a český hlas zůstávají dalšími kroky.
 - Tento výsledkový zápis je následný lokální dokumentační checkpoint, bez dalšího p+n. Vydaný UI kód je bc1fe4ad; další lokální zápis účtenky ho nemění.
-<!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí lokální UI stav před p+n
 
@@ -4803,3 +4812,28 @@ Technický důkaz:
 - Účtenka 1173a162fd7197d9f5281e76a0f9d400, jeden commit do bc1fe4ad, push/deployment confirmed; plná brána 2232 PASS / 345,9 s, smoke 5/5, chráněné služby shodné.
 - Jedna kontrola Adama: GitHub/main 0/0 a profily ready, health OK, HTTP 200 a přesná shoda nového frontendového HTML, code_stamp 28c8f0a83e59bc1b. Skutečný browser/Safari/iPhone NEOVĚŘENO.
 - return_channel=caller, returned_to_adam=false: portálový automatický návrat nepotvrzený, terminálové převzetí a kontrola proběhly. Následný lokální zápis účtenky; žádné další publikování.
+
+
+### 2026-10-26 09:59 CET — přijatý UI 1 a lokální pracovní plocha UI 2
+
+Hotovo:
+
+- Míla potvrdil první UI krok jako fungující. Nově lokálně připravená přehlednější pracovní plocha, výběr záběru a dostupné hlavní akce; změny zůstávají uložené při přepínání pohledu.
+
+Rozhodnutí:
+
+- Na Mílův pokyn pokračovat navazuje druhý krok z odsouhlasené UI analýzy. Adam zachoval datové kontrakty a řešil pouze pohled/ovládání; nové TVBCP ani trvalé úložiště nevzniklo.
+
+Další krok:
+
+- Samostatné p+n druhého kroku, poté skutečná přejímka rozložení a výběru podle reportu.
+
+Navrhované další kroky:
+
+- Praktická přejímka textu/nahrávek/importu a příjemnější český hlas.
+
+Technický důkaz:
+
+- 103 cílených testů PASS / 47,818 s; závěrečné Node interakce a 21 frontendových kontraktů PASS / 2,216 s; rychlá statická brána PASS.
+- Bez renderu při procházení/přehrání hotového výsledku, zachované texty, pořadí podle identity, skryté privátní URL a ignorování opožděné chyby přehrávání. Skutečný browser UI 2 NEOVĚŘENO.
+- Report camino_film_workspace_20261026.md; předchozí UI 1 vydané v bc1fe4ad, uživatelské přijetí bez určení zařízení. Tento krok je lokální, bez dalšího push/nasazení či zásahu do telefonu/služby.

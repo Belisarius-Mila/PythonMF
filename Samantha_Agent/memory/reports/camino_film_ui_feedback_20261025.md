@@ -45,3 +45,11 @@ portálový automatický návrat. Vydání se neopakuje.
 Fyzická browserová přejímka výše zůstává NEOVĚŘENO. Po uložení střihu
 obnovit Cockpit a prověřit skutečnou viditelnost/překrytí a návrat z fotografie.
 Tento výsledkový záznam tvoří následný lokální dokumentační checkpoint.
+
+
+## Uživatelské přijetí — 2026-10-26 09:59 CET
+
+Míla po vydání odpověděl „Funguje to skvěle!“ a schválil pokračování vývoje.
+První UI krok má uživatelské přijetí; přesné zařízení/prohlížeč a úplná matice
+šířek nejsou uvedené. Nová pracovní plocha UI 2 má samostatný lokální report
+camino_film_workspace_20261026.md a samostatnou přejímku po vydání.

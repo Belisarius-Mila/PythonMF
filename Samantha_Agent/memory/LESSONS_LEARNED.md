@@ -1515,3 +1515,10 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
 - Řešení nalezeno: 24102026
 - Řešení: znovu ověř stav po GPS čekání, vrať výsledek startu a ruš pouze známý neúspěšný intent bez souborů. Staré/neprázdné pokusy nabídni k výslovnému úklidu; zmraz metadata/souborový inventář, revaliduj před unlinkem, chraň přijaté Assety a projektový koš. Při pádu zachovej intent pro čerstvou kontrolu. Pro výslovné Zrušit použij ověřený alert; lazy seznam neověřuj počtem pouze renderovaných řádků.
 - Ověření: Swift 95 PASS (8 nových), nový skutečný UI scénář PASS včetně zrušení a restartu, plná brána 2232 PASS. Telefonní audit četl jen nutná technická metadata/inventář; živý SQLite soubor se zvenčí nepřepisoval. IPA 23 připravená, fyzický úklid se potvrzuje samostatně.
+
+
+### 2026-10-26 — Výběr v editoru je pohled, ne nový střih
+- Kontext: Camino, seznam záběrů/náhled/nastavení a přehrání hotového filmu.
+- Problém: index se po přesunu vztahuje k jinému záběru; přestavba miniatur při každém vstupu může opakovat drahé soukromé GET. Pozdní odmítnutí play() může patřit již zavřenému filmu.
+- Řešení: výběr držet odděleně podle Asset ID bez změny draftu a bez renderu/proxy. Při psaní měnit jen popisky, obrázky zachovat. Hotový výsledek vybírat podle aktuální revize a celé délky; chybu přehrávání vázat na epochu/generaci.
+- Ověření: Node regrese výběru bez zápisů, zachování textu/identity/miniatur, vyloučení staršího a částečného filmu a pozdní play rejection PASS. Vizuální browserová přejímka samostatně; reports/camino_film_workspace_20261026.md.

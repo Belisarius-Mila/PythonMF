@@ -12,7 +12,7 @@ function node(tag = "div") {
     pause() { this.paused = true; }, load() {}, play() { this.paused = false; return Promise.resolve(); },
     removeAttribute(k) { delete this[k]; }, getAttribute(k) { return this[k] || null; }, scrollIntoView() { this.scrolled = true; }};
 }
-const keys = ["status", "shots", "voices", "jobs", "save", "preview", "final", "range", "from", "to", "duck", "player", "reload", "source", "sourcePlayer", "sourceStatus", "sourceTitle", "selection", "start", "end", "playSelection", "texts", "cards"];
+const keys = ["status", "shots", "voices", "jobs", "save", "preview", "final", "range", "from", "to", "duck", "player", "reload", "source", "sourcePlayer", "sourceStatus", "sourceTitle", "selection", "start", "end", "playSelection", "texts", "cards", "shotNav", "shotTitle", "overview", "visual", "visualImage", "videoPlaceholder", "openSource", "watch", "watchReason", "outputs"];
 const nodes = Object.fromEntries(keys.map(k => [k, node()]));
 const root = node(); root.querySelector = s => nodes[s.match(/"(.*?)"/)[1]];
 const doc = {hidden: false, createElement: node, addEventListener() {}};
@@ -72,6 +72,12 @@ async function main() {
   assert(all(materials).some(n => n.textContent.includes("nejvýše 1000")), "card rejection is beside its button");
   find(materials, "Předat celý text na fotografii").emit("click");
   assert.equal(area().value, long); assert.equal(photo().open, true); assert.equal(photo().scrolled, true);
+  const writesBeforeSelection = saves.length;
+  nodes.shotNav.children[1].children[0].emit("click");
+  assert(nodes.shots.children[0].classList.contains("hidden"));
+  nodes.shotNav.children[0].children[0].emit("click");
+  assert.equal(area().value, long, "switching the inspector preserves the unsaved working script");
+  assert.equal(saves.length, writesBeforeSelection, "selection does not create a revision");
   await editor.save(); assert.equal(saves.at(-1).draft.shots[0].photo_text.text.length, 3022);
   assert.equal(saves.at(-1).draft.shots[0].out_ms, 25000, "transfer does not silently change photo duration");
   const staleView = JSON.parse(JSON.stringify(view)); let releaseRead;
@@ -117,6 +123,7 @@ async function main() {
   find(photo(), "Použít čtení ve filmu").emit("click"); await editor.save();
   find(nodes.shots.children[0], "↓ Později").emit("click"); await editor.save();
   assert.equal(saves.at(-1).draft.shots[1].asset_id, id(2));
+  assert(nodes.shotNav.children[1].children[0].classList.contains("is-selected"), "reordering retains the selected asset identity");
   assert.equal(saves.at(-1).draft.shots[1].photo_text.narration.duration_ms, 45000);
   // A new recording attaches to the second photo, with an identity rather than a fragile absolute time.
   find(photo(0), "Prodloužit fotografii pro nahrávku").emit("click");
