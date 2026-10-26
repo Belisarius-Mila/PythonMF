@@ -62,7 +62,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md`; `reports/camino_voice_audition_20261026.md` — 2026-10-26 17:01 CET: vybraný D — Orus. Místní volba uložená, bez změny hlasu ve střižně; žádné GCP nastavení/ADC nenalezené, účet/billing/rozpočet čekají na Mílu. Oficiální cena/limity ověřené a integrační plán připravený. Bez instalace, placené syntézy a p+n; poslední UI 004ec7e1.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md`; `reports/camino_voice_audition_20261026.md` — 2026-10-26 17:16 CET: dokumentace výběru Orusu publikovaná/nasazená do 4dc65832 přes Lunu c418d280bd7f24e0146cf90fabe2e4c6, gate 2243 a smoke 5/5 PASS, chráněné služby shodné. Pouze memory rozsah, původní UI 004ec7e1 zachované. Orus vybraný, ale není zapojený: čeká GCP projekt/přístup a aktivace/rozpočet. Následný výsledkový zápis je místní pro příští vývoj.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md`; `technical/luna_release_orchestration.md` — 2026-10-24 09:52 CEST: Oprava startovacího souběhu p+n je publikovaná/nasazená v e11d949a. Účtenka e47cdb394ec5441c5d25632f11c8c995 má potvrzený push 4 commitů a nasazení Cockpitu, plnou bránu 2186 a smoke 5/5. Nativní účtenku ověřil hlavní Adam; nový místní vývoj pokračuje v project-camino. Předchozí attention c3aba030 je historie a neopakuje se.
 

@@ -1,11 +1,13 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-26 17:16 CET: Dokumentační balíček volby Orusu publikovaný a nasazený registrovanou Lunou do 4dc658324465859f71e8294d880738cd306fd35d. Účtenka c418d280bd7f24e0146cf90fabe2e4c6: completed, 3 commity, push/deployment confirmed, project-camino → Cockpit. Rozsah vůči 004ec7e1 obsahoval pouze memory soubory; Orus zůstává vybraný, ale není zapojený do generování.
+- Publikační plná brána 2243 PASS / 430.7 s, smoke 5/5, protected_services_unchanged=true. Adam jednou převzal účtenku a ověřil health OK a přesnou shodu HTML přes HTTP 200; code stamp dd0a0d1332d72444. Původní funkční UI z 004ec7e1 zachované. Return caller převzatý, returned_to_adam=false není důvodem retry. Tento následný výsledkový zápis je místní a přibalí se k příštímu vývoji.
+
 - 2026-10-26 17:01 CET: Míla výslovně vybral D — Orus, přesný hlas cs-CZ-Chirp3-HD-Orus. Volba uložená v místním manifestu a zvýrazněná na poslechové stránce; změna hlasu ve střižně ještě neprovedená.
 - Read-only přístupový audit: žádné Google/GCP/Gemini/TTS nastavení v projektovém .env ani odpovídající Google proměnné v shellu, běžný místní ADC soubor chybí; google.auth a google.cloud.texttospeech nejsou instalované. Nejde o důkaz, že Míla nemá cloudový účet — na jeho existenci/ID se Adam zeptal asynchronně. Nebylo přihlašování, instalace ani změna fakturace či placený API požadavek.
 - Ověřený ceník Google Chirp 3 HD: dokumentovaná kvóta 1 milion znaků měsíčně zdarma, potom 30 USD/milion; fakturace musí být zapnutá i pro bezplatnou kvótu. Skutečný nárok/zůstatek kvóty účtu NEOVĚŘENO. 6000 znaků nejvýše 0,18 USD při placené sazbě; navržená první smyšlená zkouška do 1000 znaků nejvýše 0,03 USD, rozpočet zatím neschválený.
 - Konkrétní soukromý integration-plan.json vedle ukázek: vybraný Orus, přístup/billing/rozpočet čekají, žádné soukromé texty povolené k odeslání. Oficiální limit 5000 UTF-8 bajtů na požadavek; budoucí adaptér musí rozdělit celý komentář do 6000 znaků beze ztráty, spojit řeč a zachovat původní text/nahrávky, žádné tiché nahrazení jiným hlasem.
-- Poslední nasazený UI kód 004ec7e1, Luna 05b42458927b15403b14a7eaf4eb3bb9 (gate 2243, smoke 5/5). Nynější krok je volba a příprava připojení, bez změny produkčního kódu/hlasu, služby, iPhonu či nového p+n. Původní Zuzana zatím technicky zůstává.
 - Další krok: získat informaci o existujícím Google Cloud projektu nebo zadání přípravy nového připojení; vyřešit přístup a výslovné oprávnění k aktivaci/fakturaci/rozpočtu před první syntézou. Žádná tajemství do chatu/Gitu. Pak ověřit Orus na smyšleném textu a dokončit integraci s výslovným potvrzením odeslání konkrétního textu. Detail: memory/reports/camino_voice_audition_20261026.md.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -4103,3 +4105,28 @@ Technický důkaz:
 - Místní manifest: selected_voice=cs-CZ-Chirp3-HD-Orus, selection_pending=false, installed_in_editor=false. Privátní integration-plan.json neobsahuje klíče; approved_budget_usd=null a new_paid_requests=0.
 - V projektovém prostředí nenalezené nastavení Google, místní ADC ani Google auth/TTS balíčky; kontrola četla jen přítomnost, nevypisovala žádné hodnoty tajemství. Oficiální API vyžaduje projekt, povolené TTS a fakturaci; limit 5000 UTF-8 bajtů/požadavek, celý filmový text má zůstat do 6000 znaků bez krácení.
 - Ceník 30 USD/milion znaků po dokumentované bezplatné kvótě, ověřeno 26. 10. 2026. Žádná skutečná syntéza Orus, instalace, přihlašování, aktivace či p+n. Report camino_voice_audition_20261026.md.
+
+
+### 2026-10-26 17:16 CET — Luna p+n dokumentace Orusu dokončené
+
+Hotovo:
+
+- Projektová dokumentace vybraného hlasu a konkrétního připojení je publikovaná. Samotný Orus stále čeká na Google Cloud přístup; toto vydání jej neaktivovalo.
+
+Rozhodnutí:
+
+- Míla výslovně zadal p+n Lunou. Jediný registrovaný submit_release s wait=True vydal celý přesný dokumentační balíček, bez opakování.
+
+Další krok:
+
+- Získat informaci o existujícím Google Cloud projektu nebo přípravu nového připojení; poté vyřešit přístup a aktivaci/rozpočet před první skutečnou syntézou.
+
+Navrhované další kroky:
+
+- První malá smyšlená zkouška Orusu, potom integrace celého komentáře s výslovným potvrzením externího zpracování. Přejímka editoru a později P2-F.
+
+Technický důkaz:
+
+- Účtenka c418d280bd7f24e0146cf90fabe2e4c6, 3 commity do 4dc65832, push/deployment confirmed; gate 2243 PASS / 430.7 s, smoke 5/5 a protected_services_unchanged=true.
+- Jedna Adamova kontrola: Git rozsah vůči 004ec7e1 pouze memory, health OK, HTML HTTP 200 přesně shodné se zdrojem a SHA-256 996571f43ceeb225384e0d6173a06421e3d91a057edc985abc91304ae040b0ab. Soukromý manifest vybraný Orus/installed_in_editor=false potvrzený. Code stamp dd0a0d1332d72444.
+- Return caller převzatý; returned_to_adam=false neprokazuje automatický portálový návrat a nevede k opakování. Následný výsledkový zápis je místní checkpoint pro příští vývoj.

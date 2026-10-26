@@ -106,3 +106,19 @@ Zdroje: https://cloud.google.com/text-to-speech/pricing ;
 https://docs.cloud.google.com/text-to-speech/docs/get-started ;
 https://docs.cloud.google.com/text-to-speech/docs/authentication ;
 https://docs.cloud.google.com/text-to-speech/quotas .
+
+## Publikace dokumentace — 2026-10-26 17:16 CET
+
+Účtenka `c418d280bd7f24e0146cf90fabe2e4c6`: completed, 3 commity do
+`4dc658324465859f71e8294d880738cd306fd35d`, push/deployment confirmed,
+project-camino → Cockpit. Plná publikační brána 2243 PASS /
+430.7 s, smoke 5/5, protected_services_unchanged=true.
+
+Adam jednou převzal účtenku a ověřil, že rozsah od funkčního 004ec7e1 obsahuje
+pouze memory soubory. Health OK, přesné HTML HTTP 200, SHA-256
+`996571f43ceeb225384e0d6173a06421e3d91a057edc985abc91304ae040b0ab`, code stamp `dd0a0d1332d72444`.
+Soukromý manifest stále selected_voice=Orus a installed_in_editor=false.
+Toto vydání nezprovoznilo Google Cloud přístup ani nový hlas v aplikaci.
+Return caller převzatý, returned_to_adam=false není důvodem retry.
+Následný výsledkový zápis je místní checkpoint pro příští vývoj; další krok
+je chybějící Google Cloud projekt/přístup a schválení aktivace/rozpočtu.
