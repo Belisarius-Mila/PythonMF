@@ -1,17 +1,15 @@
 # Camino
 
-Aktualizováno: 2026-10-26 14:02 CET — zvětšení fotografie nasazené Lunou
+Aktualizováno: 2026-10-26 16:33 CET — čtyři české hlasy k poslechovému výběru
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Aktuální UI krok střižny
 
-- 2026-10-26 14:02 CET: Zvětšení fotografie přímo ve střižně publikované a nasazené registrovanou Lunou do 004ec7e1be229561426217993e8955e81f63f770. Účtenka 05b42458927b15403b14a7eaf4eb3bb9: completed, push/deployment confirmed, 2 commity, project-camino → Cockpit, release_executor gpt-6-luna/high.
-- Plná publikační brána 2243 PASS / 431.0 s, smoke 5/5, protected_services_unchanged=true. Adam jednou převzal konečnou účtenku a ověřil health OK a HTTP 200 s přesnou shodou složeného HTML se zdrojem včetně dialogu a jeho obsluhy. Code stamp dd0a0d1332d72444; skutečný frontend dokládá shoda HTML, nikoli pouze stamp.
-- Kliknutí na fotografii ve středu nebo Otevřít fotografii nabízí nativní zvětšovací okno; zavření/Esc/mimo obsah obnoví scroll, navigátor, fokus a stejné rozepsané pole. Velký obrázek až na ruční kliknutí, zavření/skrytí/neplatné oprávnění vyčistí obrázek/src/název. Návrat do karty okno sám neotevře. Staré obrazové události ani pozdní close nemění nový pohled; fallback nové karty a modifikované kliknutí zachované.
-- Automatické ověření před vydáním: 88 cílených kontrol PASS / 60,868 s, po finální CSS úpravě znovu 21 frontendových PASS / 2,579 s a rychlá statická brána. Skutečné rozložení, nativní Tab/fokus/Esc na Macu/Safari/iPhonu a celková rychlost stránky NEOVĚŘENO; aktuální poslední CUA inventář byl prázdný.
-- Backend/persistence/originály/střihy/služba/iPhone se tímto UI krokem neměnily, žádný produkční render. Předchozí optimalizace a potvrzený výmaz P2-A zůstávají součástí historie; nedělají se znovu. Místní hlasový inventář nabízí jen českou Zuzanu, lepší hlas není zvolený.
-- return_channel=caller: terminálový Adam účtenku skutečně obdržel a jednou ověřil. returned_to_adam=false je nepotvrzený automatický portálový návrat a není důvodem opakovat úspěšné vydání. Tento zápis výsledku je následný lokální dokumentační checkpoint, bez dalšího p+n.
-- Další krok: uložit rozpracovaný střih, obnovit Cockpit, otevřít fotografii uprostřed filmu a zavřít tlačítkem/Esc; ověřit stejné pole/pozici a skrytí karty podle memory/reports/camino_film_photo_dialog_20261026.md. Praktická přejímka nahrávek/historie/koše/importu a příjemnější český hlas poslechem zůstávají otevřené.
+- 2026-10-26 16:33 CET: Připravené čtyři české katalogové ukázky Google Chirp 3 HD: A Kore (ženský), B Aoede (ženský), C Charon (mužský), D Orus (mužský). Čtyři skutečné MP3 / 194 796 B, úplné dekódování/délky/hashy PASS; index.html s volbou tempa a jednotlivým přehráním, JavaScript syntax PASS. Místní poslechová stránka otevřená příkazem v Safari; lidský výběr a skutečný poslech NEOVĚŘENO.
+- Soubory i zdrojové URL/otisky v ignorovaném data/private/camino/voice-audition-20261026/. Jde o oficiální referenční ukázky, nikoli vlastní text. Registrovaný pokus Microsoft Edge TTS vrátil první HTTP 429, vzniklo 0 nových syntéz; bez retry série. Staré reference PlayHT nedostupné; výsledné vzorky jsou výhradně aktuální Google katalog. Platby/účty/instalace a systémová konfigurace se neměnily.
+- Střižna stále používá Zuzanu; nebyl vybraný ani zapojený nový hlas. Následná integrace vyžaduje ověření API/ceny/rozpočtu a oprávnění pro daný text; globální souhlas na veřejnou/smyšlenou tvorbu nepokrývá soukromý deník. Zachovat celý komentář do 6000 znaků; chatový Edge helper s limitem 1500 znaků nelze přímo převzít.
+- Poslední funkční UI je nasazené v 004ec7e1 přes Lunu 05b42458927b15403b14a7eaf4eb3bb9, gate 2243 a smoke 5/5 PASS, přesné nové HTML/health potvrzené. Nynější hlasový krok měnil jen místní poslechové podklady a dokumentaci, bez nového p+n či změny služby/iPhonu/originálů/střihů.
+- Další krok: Míla poslechne A–D v index.html a zvolí hlas/tempo. Potom připravit konkrétní integraci vybraného hlasu; fyzická přejímka editoru a nahrávek/koše/importu zůstává otevřená. P2-F vícedenní film/kapitoly/prolog/závěr je plánovaná další etapa po přijetí skutečného dne. Detail: memory/reports/camino_voice_audition_20261026.md.
 
 ## Cíl a hranice
 
