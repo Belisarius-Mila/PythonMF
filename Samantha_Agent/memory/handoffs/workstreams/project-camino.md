@@ -1,13 +1,13 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-10-26 11:25 CET: Lokálně odstraněná dolní Testovací ukázka P2-A včetně staré HTTP cesty. Kladná Mílova odezva hodnotí vzhled UI 2; současně hlásí 1–2 minuty načítání. Nové optimalizace ani výmaz dat nejsou nasazené.
+- 2026-10-26 11:29 CET: Lokální kód 11098612 odstraňuje dolní Testovací ukázku P2-A a zrychluje náhledy. Potvrzený výmaz jejích syntetických dat nyní skutečně dokončený. Kód dosud bez nového push/nasazení; vzhled UI 2 Míla kladně hodnotil, celkovou rychlost je nutné přijmout po nasazení.
 - Změřená příčina: každý obrázek dvakrát hashoval všechny zdroje projektu a miniatury používaly až 4096px PNG. Nové 256px miniatury, 1600px hlavní náhled a omezené RAM ověření souborů: stejná miniatura 5,287 → 0,192 s a 16,2 MB → 100 KB; stav 45 záběrů 1,324 → 0,039 s při již ověřených souborech.
 - Ochrany: aktuální soukromí/koš/manifest pokaždé, vlastní fotografie pokaždé SHA-256, metadata-free PNG a no-store/private. Hashy jen RAM/1024/30 s bez prodlužování, identita/size/mtime/ctime a kontrola souběhu/symlinku. Uložení, uzavření, render/výstup nadále úplně ověřují všechny zdrojové bajty.
 - Ověření: finální plná brána 2243 PASS / 458,763 s unit část; 45 cílených kontrol a dalších 6 HTTP/route kontrol PASS včetně Node scénářů. První plnou bránu zastavila nerozpoznaná tuple-prefix cesta; opravené explicitní GET/HEAD větve, test neoslaben. Celá stránka přes Safari/iPhone a síť po nasazení NEOVĚŘENO; uvedené časy jsou serverová měření.
-- Přesný výmaz čeká na novou globální větu pro tento rozsah: pouze data/private/camino/p2a, 4 syntetické běhy / 109 souborů / 72 396 174 B (69,04 MiB), žádné symlinky, projekty/hashy ověřené. Soukromý ignorovaný plán cleanup_receipts/camino_p2a_20261026/plan.json; 0 souborů smazáno. Revalidovat před výmazem, nepřidávat zálohy ani skutečná média.
+- Výmaz P2-A dokončený po přesné globální větě Míly: znovu ověřený inventář, identity a SHA-256; odstraněny pouze 4 syntetické běhy / 109 souborů / 16 adresářů. Kořen data/private/camino/p2a zůstal prázdný. Logické velikosti 72 396 174 B (69,04 MiB), 101 unikátních inode / 43 364 352 B (41,36 MiB) alokovaných bloků před výmazem; některé soubory byly hardlinky. Čistý přírůstek volného místa celého SSD se neměřil. Soukromá receipt.json vedle původního nezměněného plánu: completed, remaining_entries=0.
 - Poslední nasazený UI kód zůstává 41ac2e1d (Luna aedb878e). Nynější krok je pouze lokální checkpoint; další push/nasazení nebyly zadané. Detail: memory/reports/camino_film_loading_20261026.md.
-- Další krok: vyžádat přesné potvrzení dle global_safety_brake.md a dokončit jen připravený výmaz. Potom samostatné p+n Lunou a fyzická přejímka rychlosti stejného filmu. Praktické nahrávky/import a český hlas zůstávají otevřené.
+- Další krok: samostatně zadané p+n lokálního kódu 11098612 přes Lunu, potom fyzicky ověřit rychlost stejného filmu. Praktické nahrávky/import a český hlas zůstávají otevřené. Tento zápis výmazu je jen lokální checkpoint.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí stav po p+n UI 1
@@ -3954,3 +3954,28 @@ Technický důkaz:
 - Finální plná brána 2243 PASS / 458,763 s unit část, cíleně 45 + 6 kontrol PASS. Teplé ověření stavů i malé PNG chrání změnu soukromí, poškození se stejnou velikostí/mtime, symlink a změnu při hashování. První selhání evidence tuple-prefixů opravené bez oslabení testu.
 - Miniatura 5,287 → 0,192 s, 16 227 034 → 100 491 B; stav editoru 45 záběrů 1,324 → 0,039 s při již ověřených souborech. Studená kontrola zdrojů 1,241 s. Místní serverová měření, nikoli celá stránka; originály a střihy zachované.
 - Soukromý plán: cleanup_receipts/camino_p2a_20261026/plan.json, SHA-256 b0bcf0c26c660467b7dbe3aabbd07a4262b37507d3a8359d93ea1e80b5859034. Report camino_film_loading_20261026.md. Bez push/nasazení, bez výmazu dat.
+
+
+### 2026-10-26 11:29 CET — potvrzený úklid syntetických dat P2-A dokončený
+
+Hotovo:
+
+- Všechny čtyři staré testovací běhy P2-A jsou odstraněné. Zůstává prázdný kořen a malá soukromá účtenka, žádné testovací médium v tomto kořeni.
+
+Rozhodnutí:
+
+- Míla dodal přesnou globální větu pro předem připravený výmaz. Rozsah zůstal shodný s potvrzeným plánem; skutečné projekty, originály a historické zálohy nebyly součástí výmazu.
+
+Další krok:
+
+- Samostatně zadané p+n kódu odstraněné ukázky a optimalizací přes Lunu; zatím místně v 11098612.
+
+Navrhované další kroky:
+
+- Přijmout skutečnou rychlost celé stránky po nasazení; navázat nahrávkami/importem a českým hlasem.
+
+Technický důkaz:
+
+- Plan SHA-256 b0bcf0c26c660467b7dbe3aabbd07a4262b37507d3a8359d93ea1e80b5859034 ověřený; 109 souborů se shodnými metadaty a SHA-256, pouze očekávané názvy a interní hardlinky. Výmaz přes otevřené adresáře bez následování symlinků, před každým unlink opět identita/hash; průběžná soukromá účtenka.
+- Receipt cleanup_receipts/camino_p2a_20261026/receipt.json: completed, 109 souborů, 16 adresářů, 72 396 174 logických B; následná nezávislá kontrola prázdného kořene a účtenky PASS. Unikátní alokované bloky před výmazem 43 364 352 B (41,36 MiB); součet 69,04 MiB zahrnoval hardlinky. Čistá změna volných bloků celého SSD NEOVĚŘENO.
+- Produkční kód se neměnil; předchozí plná brána 2243 PASS se neopakovala. Bez push/nasazení a bez zásahu do telefonu/služby.

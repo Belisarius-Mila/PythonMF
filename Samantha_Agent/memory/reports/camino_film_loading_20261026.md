@@ -1,6 +1,6 @@
 # Camino — odstranění P2-A a rychlejší procházení filmu
 
-Stav: 2026-10-26, místní vývoj; bez nového push/nasazení a bez výmazu dat.
+Stav: 2026-10-26 11:29 CET, výmaz P2-A dokončený; kód 11098612 místní, bez nového push/nasazení.
 Pracovní proud: `project-camino`.
 
 ## Zadání a výsledek
@@ -53,7 +53,7 @@ První kontrola po startu či expiraci nadále čte všechny zdrojové bajty.
 - Obrázky nemají EXIF/GPS, HTTP zůstává no-store/private; žádné diskové
   kopie náhledů ani nová veřejná cesta. Ověření oprávnění se necachuje.
 
-## Připravený výmaz P2-A — dosud 0 smazaných souborů
+## Výmaz P2-A dokončený
 
 Jediný kořen: `data/private/camino/p2a`, čtyři syntetické běhy:
 
@@ -69,13 +69,21 @@ Všechny čtyři experimenty a projekty jsou synthetic-p2a, zdroje synthetic=tru
 validace projektů a hashů prošla. Bez symlinků a bez skutečných médií cest.
 Přesný soukromý inventář včetně hashů a identity souborů je v ignorovaném
 `data/private/cleanup_receipts/camino_p2a_20261026/plan.json`, režim 0600,
-adřazený adresář 0700; stav awaiting_global_brake_confirmation.
+nadřazený adresář 0700. Původní plán zůstává nezměněný ve stavu před potvrzením;
+aktuální výsledek drží soukromá `receipt.json` vedle plánu.
 Otisk plánu: `b0bcf0c26c660467b7dbe3aabbd07a4262b37507d3a8359d93ea1e80b5859034`.
 
-Před výmazem vyžádat přesnou větu dle `global_safety_brake.md` pro tento rozsah,
-pak znovu ověřit celý inventář a odmítnout změny či nové soubory. Nevztahuje se
-na historické zálohy, Git ani skutečné projekty/originály. Dřívější potvrzení
-brzdy k SSD/službě se na nový výmaz nepřenáší.
+2026-10-26 11:29 CET: Míla dodal přesnou globální větu pro tento rozsah. Před výmazem
+znovu ověřený otisk plánu, všechny názvy/metadata/identity a SHA-256, bez
+symlinků a bez odkazů mimo plán. Před každým unlink další ověření souboru,
+výmaz přes otevřené adresáře, průběžná soukromá účtenka. Odstraněno všech
+109 souborů a 16 adresářů; kořen zůstal prázdný. Receipt state=completed,
+remaining_entries=0; nezávislá závěrečná kontrola PASS. Účtenka má režim 0600.
+
+Součet velikostí 72 396 174 B (69,04 MiB) zahrnoval interní hardlinky.
+101 unikátních inode mělo před výmazem 43 364 352 B (41,36 MiB) alokovaných
+bloků. Čistá změna volných bloků celého SSD se neměřila. Skutečné projekty,
+originály a historické zálohy nebyly součástí výmazu.
 
 ## Ověření
 
@@ -90,7 +98,7 @@ brzdy k SSD/službě se na nový výmaz nepřenáší.
 
 ## Další krok
 
-Po přesném potvrzení provést pouze připravený výmaz a uložit účtenku. Nový
-lokální kód ještě vyžaduje samostatně zadané p+n přes registrovanou Lunu;
+Výmaz dat je dokončený a ověřený. Nový lokální kód ještě vyžaduje
+samostatně zadané p+n přes registrovanou Lunu;
 poté přejímku stejného filmu na Macu a případně iPhonu. Zachovat otevřené
 praktické nahrávky/import a výběr příjemnějšího českého hlasu.
