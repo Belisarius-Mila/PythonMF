@@ -44,3 +44,22 @@ Při běžném psaní se přepisují pouze popisky, nikoli celé miniatury.
 Jen místní vývoj, bez push, nasazení nebo produkčního renderu. Na poslední
 vydané UI bc1fe4ad nový krok nemá vliv do samostatného p+n. Příjemnější český
 hlas a další praktická přejímka nahrávek/importu zůstávají samostatné.
+
+
+## Publikace — 2026-10-26 10:28 CET
+
+Předchozí místní stav je historie: po výslovném p+n Lunou je UI 2 v 41ac2e1d
+na GitHubu i nasazené v Cockpitu. Účtenka aedb878e354d3771056c54fa12acc909:
+completed, push/deployment confirmed, dva commity, project-camino, Cockpit,
+release_executor gpt-6-luna/high. Plná brána 2233 PASS / 350,9 s, smoke 5/5,
+protected_services_unchanged=true.
+
+Adam jednou převzal účtenku a ověřil GitHub/main 0/0, profily ready, health OK
+a HTTP 200 s přesnou shodou nového frontendového HTML včetně pracovní plochy
+a toolbaru. Code stamp 28c8f0a83e59bc1b; skutečné nové UI ověřuje shoda HTML.
+Return caller účtenku obdržel; returned_to_adam=false neprokazuje portálový
+návrat a není důvodem opakovat úspěšné vydání.
+
+Vizuální browserová přejímka UI 2 výše zůstává NEOVĚŘENO. První UI krok má
+Mílovo uživatelské přijetí, které se automaticky nepřenáší na nové rozložení.
+Tento výsledkový zápis je následný lokální dokumentační checkpoint.

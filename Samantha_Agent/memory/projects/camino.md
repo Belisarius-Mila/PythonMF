@@ -1,16 +1,16 @@
 # Camino
 
-Aktualizováno: 2026-10-26 09:59 CET — přijatý UI 1, pracovní plocha UI 2 lokálně
+Aktualizováno: 2026-10-26 10:28 CET — pracovní plocha UI 2 nasazená Lunou
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Aktuální UI krok střižny
 
-- 2026-10-26 09:59 CET: Míla po nasazení UI 1 bc1fe4ad potvrdil „Funguje to skvěle!“ a schválil pokračování. Jde o jeho uživatelské přijetí prvního kroku; konkrétní zařízení/prohlížeč a úplná matice šířek nejsou určené.
-- Druhý UI krok lokálně hotový: prostornější střižna se seznamem záběrů a miniaturami vlevo, zdrojovým náhledem uprostřed a nastavením jediného vybraného záběru vpravo. Na menší šířce se panely skládají pod sebe. Projekty, textové nástroje a historie exportů jsou sbalitelné.
-- Hlavní uložení, vytvoření náhledu a export jsou v sticky záhlaví se zachovanou odezvou a důvody blokací. Přehrát výsledek otevře pouze hotový celý film aktuální revize; nevytváří render a nenabízí starší/částečný výsledek jako současný.
-- Výběr záběru nemění draft ani nespouští přípravu videa. Zachová se rozpracovaný text, identita záběru po přesunu, výběr při návratu z jiné karty, soukromí nových miniatur a ochrany stale odpovědí. Při psaní se miniatury znovu nevytvářejí; opožděná chyba přehrávání se nepřenese do jiného filmu.
-- Ověření: 103 cílených testů PASS / 47,818 s, závěrečné Node interakce editoru/foto i 21 frontendových kontraktů PASS / 2,216 s; rychlá statická brána PASS. Vizuální přejímka UI 2 na Macu/úzkém displeji NEOVĚŘENO — dostupný browser inventory je prázdný. Detail: memory/reports/camino_film_workspace_20261026.md.
-- Jen lokální vývojový checkpoint, bez nového push/nasazení, produkčního renderu, změny iPhonu či samostatné služby. Poslední vydané UI zůstává bc1fe4ad / Luna 1173a162fd7197d9f5281e76a0f9d400. Další krok: samostatné p+n druhého kroku a proklik výběru/rozložení.
+- 2026-10-26 10:28 CET: Druhý UI krok střižny publikovaný a nasazený registrovanou Lunou do 41ac2e1dd1300cbffe943971aa54755fc0de6e96. Účtenka aedb878e354d3771056c54fa12acc909: completed, push/deployment confirmed, dva commity, project-camino → Cockpit, release_executor gpt-6-luna/high.
+- Plná publikační brána 2233 PASS / 350,9 s, smoke 5/5, protected_services_unchanged=true. Adam jednou převzal účtenku a ověřil GitHub/main 0/0 před tímto výsledkovým zápisem, profily ready a health OK. HTTP 200 podává přesně nové složené HTML včetně workspace a toolbaru; code_stamp 28c8f0a83e59bc1b.
+- Nasazená je prostornější pracovní plocha seznam/náhled/nastavení, sbalitelné projekty/nástroje/historie a hlavní akce v záhlaví. Výběr zachovává text a identitu záběru; přehrání hotového celého výsledku aktuální revize nevytváří export. Originály, osobní střihy, iPhone a samostatná služba Camino zachované.
+- UI 1 v bc1fe4ad Míla přijal slovy „Funguje to skvěle!“; prohlížeč/zařízení neurčené. Nové UI 2 zatím nemá uživatelskou vizuální přejímku. Skutečné rozložení, scroll a ovládání na Macu/úzkém displeji NEOVĚŘENO.
+- return_channel=caller: terminálový Adam účtenku obdržel a jednou ověřil. Automatický portálový návrat returned_to_adam=false zůstává nepotvrzený a úspěšné p+n se kvůli němu neopakuje.
+- Další krok: po uložení střihu obnovit Cockpit a provést přejímku výběru/rozložení podle memory/reports/camino_film_workspace_20261026.md. Příjemnější český hlas a nahrávky/import zůstávají samostatné. Tento zápis účtenky je následný lokální dokumentační checkpoint, bez dalšího p+n.
 
 ## Cíl a hranice
 
