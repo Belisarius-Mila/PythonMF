@@ -326,6 +326,7 @@ class FilmEditor:
             if layer.get("text_source") and "original_text" not in layer:
                 layer["original_text"] = self.store.text_choices(manifest, [layer["text_source"]])[0]["text"]
         from app.camino_film_narration import list_narrations
+        from app.camino_film_orus import voice_profile
         return {"ok": True, "project_id": folder.name, "local_date": manifest["local_date"],
                 "revision": edit["revision"], "draft": draft,
                 "duration_ms": validate_draft(edit["draft"], manifest),
@@ -334,7 +335,8 @@ class FilmEditor:
                     "moment_id": s["moment_id"], "captured_local": s.get("capture_local_wall")}
                     for s in manifest["sources"]],
                 "texts": self.store.text_choices(manifest),
-                "jobs": self.jobs(folder), "narrations": list_narrations(self, folder, manifest)}
+                "jobs": self.jobs(folder), "narrations": list_narrations(self, folder, manifest),
+                "narration_voice": voice_profile()}
 
     @shared(editor_database)
     def save(self, payload):

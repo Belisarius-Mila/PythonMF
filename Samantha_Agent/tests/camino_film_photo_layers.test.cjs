@@ -19,6 +19,7 @@ const doc = {hidden: false, createElement: node, addEventListener() {}};
 const id = n => `00000000-0000-0000-0000-${String(n).padStart(12, "0")}`;
 const long = ("Syntetický text o památce a krajině. ".repeat(100)).slice(0, 3022);
 const view = {ok: true, project_id: id(1), revision: 1, duration_ms: 30000, jobs: [], narrations: [],
+  narration_voice: {voice: "cs-CZ-Chirp3-HD-Orus", tempo: 0.9, microusd_per_character: 30, ready: true},
   texts: [{title: "Syntetický text", text: long, reference: {moment_id: id(7), revision_id: id(8), sha256: "a".repeat(64)}}],
   sources: [{asset_id: id(2), kind: "photo", title: "První"}, {asset_id: id(3), kind: "photo", title: "Druhá"}, {asset_id: id(4), kind: "video", title: "Video", duration_ms: 1000}, {asset_id: id(5), kind: "audio", title: "Hlas", duration_ms: 3000}],
   draft: {shots: [2, 3, 4].map((n, i) => ({asset_id: id(n), title: "", in_ms: 0, out_ms: i === 0 ? 25000 : 1000, included: true, gain: 1})),
@@ -63,6 +64,8 @@ function find(n, text) { const result = all(n).find(x => x.textContent === text)
 function photo(index = 0) { return nodes.shots.children[index].children.find(n => n.tag === "details"); }
 function area(index = 0) { return all(photo(index)).find(n => n.tag === "textarea"); }
 function mode(index = 0) { return all(photo(index)).find(n => n.tag === "select"); }
+function consent(index = 0) { return all(photo(index)).find(n => n.name === "film-orus-consent"); }
+function approve(index = 0) { consent(index).checked = true; consent(index).emit("change"); }
 async function main() {
   editor.open(); await flush();
   const materials = nodes.texts.children[1];
@@ -105,7 +108,16 @@ async function main() {
   assert.equal(renders.at(-1).range.start_ms, 0);
   assert.equal(renders.at(-1).range.end_ms, saves.at(-1).draft.shots[0].out_ms);
   mode().value = "narration"; mode().emit("change");
-  await find(photo(), "Vytvořit místní čtení").emit("click");
+  assert.equal(find(photo(), "Vytvořit čtení Orus · −10 %").disabled, true);
+  await find(photo(), "Vytvořit čtení Orus · −10 %").emit("click");
+  assert.equal(generations.length, 0, "private text never leaves without explicit consent");
+  approve();
+  assert.equal(find(photo(), "Vytvořit čtení Orus · −10 %").disabled, false);
+  await find(photo(), "Vytvořit čtení Orus · −10 %").emit("click");
+  assert.equal(generations[0].cloud_consent.text, area().value);
+  assert.equal(generations[0].cloud_consent.max_cost_microusd, Array.from(area().value).length * 30);
+  assert.equal(generations[0].cloud_consent.tempo, 0.9);
+  assert.equal(consent().checked, false, "consent is consumed by one attempt");
   assert.equal(generations.length, 1); assert.equal(saves.at(-1).draft.shots[0].photo_text.narration.included, false);
   assert(all(photo()).some(n => n.tag === "audio" && n.src.includes("/narration/")), "saved listening copy has a protected URL");
   const lengthField = nodes.shots.children[0].children.find(n => n.className === "camino-film-fields").children[1].children[0];
@@ -133,7 +145,10 @@ async function main() {
   area(1).value = "Nový text."; area(1).emit("input"); await editor.save();
   assert.equal(saves.at(-1).draft.shots[1].photo_text.narration, null);
   let release; waitGeneration = new Promise(resolve => { release = resolve; });
-  const generating = find(photo(1), "Vytvořit místní čtení").emit("click"); await flush();
+  approve(1);
+  const generating = find(photo(1), "Vytvořit čtení Orus · −10 %").emit("click"); await flush();
+  await find(photo(1), "Vytvořit čtení Orus · −10 %").emit("click");
+  assert.equal(generations.length, 2, "repeated click during generation cannot create a second billable request");
   assert(feedback.some(e => e.kind === "busy" && e.channel === "photo"), "in-flight narration reaches the shared status panel");
   assert.equal(editor.canClose(), false, "project switching waits for in-flight synthesis");
   area(1).value = "Změněno během čtení."; area(1).emit("input"); await editor.save();
@@ -148,7 +163,12 @@ async function main() {
   assert.equal(all(photo(1)).find(n => n.name === "film-original-text").readOnly, true);
   assert.equal(all(photo(1)).find(n => n.name === "film-original-text").value, long, "iPhone original survives every manual edit");
   assert.equal(area(1).readOnly, false, "working script is visibly editable");
-  await find(photo(1), "Vytvořit místní čtení").emit("click");
+  approve(1);
+  area(1).value += " Úprava po souhlasu."; area(1).emit("input");
+  assert.equal(consent(1).checked, false, "editing invalidates the old text consent");
+  assert.equal(find(photo(1), "Vytvořit čtení Orus · −10 %").disabled, true);
+  approve(1);
+  await find(photo(1), "Vytvořit čtení Orus · −10 %").emit("click");
   assert.equal(view.narrations.length, 2, "a new reading keeps the previous take");
   function takeItem(index) { return all(photo(1)).filter(n => n.className === "camino-film-take").find(n => n.children[0].textContent.startsWith(`Pokus ${index} ·`)); }
   const workingBeforeTrash = area(1).value;
@@ -175,6 +195,11 @@ async function main() {
   assert.equal(view.draft.shots[1].photo_text.mode, "none");
   assert.equal(view.narrations[2].deleted, true);
   assert.equal(view.draft.shots[1].photo_text.original_text, long);
+  view.narration_voice.ready = false; view.narration_voice.reason = "Chybí bezpečný místní přístup.";
+  nodes.reload.emit("click"); await flush();
+  approve(1);
+  assert.equal(find(photo(1), "Vytvořit čtení Orus · −10 %").disabled, true);
+  assert(all(photo(1)).some(n => n.textContent === "Chybí bezpečný místní přístup."));
   console.log("Camino photo text and narration interactions: PASS");
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });

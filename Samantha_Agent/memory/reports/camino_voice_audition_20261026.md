@@ -122,3 +122,7 @@ Toto vydání nezprovoznilo Google Cloud přístup ani nový hlas v aplikaci.
 Return caller převzatý, returned_to_adam=false není důvodem retry.
 Následný výsledkový zápis je místní checkpoint pro příští vývoj; další krok
 je chybějící Google Cloud projekt/přístup a schválení aktivace/rozpočtu.
+
+## Navazující stav — 2026-10-27 18:05 CET
+
+Míla založil camino-orus a povolil Cloud TTS. Místní klíč chráněný (0600 / adresář 0700), bez obsahu v chatu/Gitu. Přihlášení a český Orus ověřené seznamem hlasů. Po souhlasu se stropem 0,01 USD vznikla jediná smyšlená syntéza 166 znaků / 11,184 s; žádný skutečný deník. Přijatá výslovnost a příjemnost, z místních variant zvoleno tempo 0,90 / 12,414 s. Další cloudová syntéza neproběhla. Aktuální integrace a ověření jsou v camino_orus_integration_20261027.md; starší chybějící přístup a rychlost výše jsou historie.

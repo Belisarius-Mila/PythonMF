@@ -5,3 +5,4 @@ pillow-heif
 python-dotenv
 pdfplumber
 opencv-python-headless
+google-auth[requests]>=2.40,<3

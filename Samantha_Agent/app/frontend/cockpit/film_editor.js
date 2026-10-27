@@ -490,12 +490,26 @@
       originalArea.value = row.photo_text?.original_text ?? (model.texts || []).find(t => t.reference.revision_id === row.photo_text?.text_source?.revision_id)?.text ?? "";
       original.appendChild(originalArea); panel.appendChild(original);
       const count = text("p", ""), feedback = text("p", "Úpravy se ukládají automaticky."); feedback.role = "status";
+      const voice = model.narration_voice;
+      const cloudConsent = doc.createElement("input"); cloudConsent.type = "checkbox"; cloudConsent.checked = false;
+      cloudConsent.name = "film-orus-consent";
+      const consentLabel = text("label", "Souhlasím s odesláním tohoto textu Googlu pro vytvoření hlasu Orus za uvedenou cenu. ");
+      consentLabel.appendChild(cloudConsent);
+      const quote = text("p", ""); quote.role = "status";
+      panel.appendChild(text("p", "Český hlas Orus · klidnější tempo −10 %. Text pro namluvení zpracuje Google Cloud."));
+      panel.appendChild(quote); panel.appendChild(consentLabel);
+      let consentedText = null;
+      const cost = () => Array.from(area.value).length * (voice?.microusd_per_character || 30);
+      cloudConsent.addEventListener("change", () => { consentedText = cloudConsent.checked ? area.value : null; lengthInfo(); });
       feedback.filmContext = `Fotografie ${model.draft.shots.indexOf(row) + 1}`;
       photoStatuses.push(feedback);
       function lengthInfo() {
         const n = row.photo_text?.narration;
         count.textContent = `${area.value.length} / 6000 znaků · fotografie ${(row.out_ms / 1000).toFixed(1)} s · ` +
           `orientační čas pro celý text ${readingMs(area.value) / 1000} s` + (n ? ` · čtení ${(n.duration_ms / 1000).toFixed(1)} s` : "");
+        quote.textContent = voice?.ready ? `Cena tohoto vytvoření nejvýše ${(Math.ceil(cost() / 1000) / 1000).toFixed(3)} USD před případnou bezplatnou kvótou. Každé nové vytvoření se počítá znovu. Potvrď souhlas pro tento text.` :
+          voice?.reason || "Orus není připojený. Obnov střižnu po dokončení připojení hlasu.";
+        generate.disabled = !voice?.ready || !cloudConsent.checked || !area.value.trim() || narrating;
       }
       const modeLabel = text("label", "Způsob použití textu"), mode = doc.createElement("select");
       for (const [value, title] of [["none", "Pouze uložit text"], ["static", "Statický text přes fotografii"], ["scroll", "Plynulý text v okně"], ["narration", "Komentář — čtení nebo MP3/WAV"]]) {
@@ -505,6 +519,7 @@
       const audio = doc.createElement("audio"); audio.controls = true; audio.preload = "none"; photoAudios.push(audio);
       if (row.photo_text?.narration) audio.src = `/api/camino/film/narration/${model.project_id}/${row.photo_text.narration.id}`;
       area.addEventListener("input", () => {
+        cloudConsent.checked = false; consentedText = null;
         const current = layer(); current.text = area.value; current.narration = null;
         if (current.mode === "narration") { current.mode = "none"; mode.value = "none"; }
         audio.pause(); audio.removeAttribute("src"); audio.load(); change(); lengthInfo();
@@ -532,15 +547,23 @@
         if (ms > 300000) { announce(feedback, "Celý text potřebuje více než 300 sekund. Vyber kratší část textu.", "warning"); return; }
         row.out_ms = Math.max(row.out_ms, ms); change(); renderRows();
       });
-      const generate = button("Vytvořit místní čtení", async () => {
+      const generate = button("Vytvořit čtení Orus · −10 %", async () => {
         if (narrating) { announce(feedback, "Čtení se již vytváří. Počkej na výsledek.", "warning"); return; }
         if (!layer().text.trim()) { announce(feedback, "Nejprve napiš nebo vyber text.", "warning"); return; }
-        if (!await save()) return;
-        const currentEpoch = epoch, snapshot = JSON.stringify(row.photo_text), project = model.project_id;
-        narrating = true; controls(); generate.disabled = true; announce(feedback, "Vytvářím místní české čtení na Macu…", "busy");
+        if (!voice?.ready || !cloudConsent.checked || consentedText !== layer().text) {
+          announce(feedback, voice?.ready ? "Potvrď souhlas s odesláním tohoto textu Googlu a zobrazenou cenou." : quote.textContent, "warning"); return;
+        }
+        const currentEpoch = epoch, project = model.project_id;
+        const consent = {text: consentedText, max_cost_microusd: cost(), voice: voice.voice, tempo: voice.tempo};
+        cloudConsent.checked = false; consentedText = null;
+        narrating = true; controls(); generate.disabled = true;
         try {
+          if (!await save() || currentEpoch !== epoch || !active || doc.hidden) return;
+          if (layer().text !== consent.text) { announce(feedback, "Text se při ukládání změnil. Potvrď nový text a cenu.", "warning"); return; }
+          const snapshot = JSON.stringify(row.photo_text);
+          announce(feedback, "Orus vytváří český komentář. Delší text může chvíli trvat…", "busy");
           const response = await request("/api/camino/film/narration", {method: "POST", headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({project_id: project, revision: model.revision, asset_id: row.asset_id, request_id: uuid()})});
+            body: JSON.stringify({project_id: project, revision: model.revision, asset_id: row.asset_id, request_id: uuid(), cloud_consent: consent})});
           const data = await response.json();
           if (currentEpoch !== epoch || !active || doc.hidden) return;
           const live = model.draft.shots.find(r => r.asset_id === row.asset_id);
@@ -551,7 +574,7 @@
           if (await save()) { renderRows(); photoStatus("Čtení je uložené. Poslechni si ho a pak použij ve filmu.", "success", "photo"); }
         } catch (_) { if (currentEpoch === epoch) announce(feedback, "Výsledek čtení není potvrzený. Automaticky jej neopakuji; text zůstává uložený.", "warning"); }
         finally {
-          narrating = false; generate.disabled = false; controls();
+          narrating = false; lengthInfo(); controls();
           options.feedback?.({message: "Operace s komentářem skončila. Obnov seznam pokusů a ověř výsledek.", kind: "warning", channel: "photo", onlyIfBusy: true});
         }
       });

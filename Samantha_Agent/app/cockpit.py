@@ -8659,8 +8659,8 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
     },
     {
         "path": "/api/camino/film/narration",
-        "label": "Vytvořit místní české čtení uloženého textu fotografie",
-        "risk": "private_write", "confirmation": "explicit_photo_narration_button",
+        "label": "Vytvořit české čtení fotografie hlasem Orus nebo starším místním hlasem",
+        "risk": "external_ai", "confirmation": "explicit_photo_text_cloud_consent_and_cost",
         "handler_name": "film_editor_action", "test_level": "direct",
     },
     {
@@ -10920,6 +10920,8 @@ class CockpitServer:
                     "delete": {"project_id", "job_id", "plan_token", "confirmation"},
                     "source": {"project_id", "asset_id", "request_id"},
                     "render": {"project_id", "revision", "request_id", "profile", "range"}}[operation]
+                if operation == "narration" and "cloud_consent" in payload:
+                    keys = keys | {"cloud_consent"}
                 if parsed.query or set(payload) != keys:
                     self.respond_json({"ok": False, "error": "invalid_request"}, status=HTTPStatus.BAD_REQUEST)
                     return

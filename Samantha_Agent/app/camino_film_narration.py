@@ -107,7 +107,8 @@ def synthesize(text, directory):
 @shared(_database)
 def prepare_narration(editor, payload):
     from app.camino_film_editor import exact, identifier
-    exact(payload, "project_id revision asset_id request_id")
+    cloud = "cloud_consent" in payload
+    exact(payload, "project_id revision asset_id request_id" + (" cloud_consent" if cloud else ""))
     folder, manifest = editor.inputs(identifier(payload["project_id"]))
     sid, nid = identifier(payload["asset_id"]), identifier(payload["request_id"])
     edit = editor.revision(folder, manifest, payload["revision"])
@@ -118,6 +119,18 @@ def prepare_narration(editor, payload):
     if not layer or not layer["text"].strip():
         raise FilmError("Nejprve ulož text u vybrané fotografie.")
     editor.verify_texts(manifest, edit["draft"], project_id=folder.name)
+    if cloud:
+        from app.camino_film_orus import consent_cost, synthesize_orus, VOICE, TEMPO
+        cost = consent_cost(layer["text"], payload["cloud_consent"])
+
+    def revalidate():
+        _, current = editor.inputs(folder.name)
+        latest = editor.revision(folder, current)
+        current_row = next((r for r in latest["draft"]["shots"] if r["asset_id"] == sid), None)
+        if fingerprint(current) != fingerprint(manifest) or not current_row or current_row.get("photo_text") != layer:
+            raise FilmError("Text nebo povolení se během čtení změnilo. Nový komentář se nepřipojil.")
+        editor.verify_texts(current, latest["draft"], project_id=folder.name)
+
     root = _private_directory(folder / "narrations")
     lock = os.open(root / ".generation", os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW, 0o600)
     try:
@@ -129,6 +142,8 @@ def prepare_narration(editor, payload):
         if directory.exists():
             if is_trashed(editor.store, directory):
                 raise FilmError("Pokus je v koši; nejprve jej obnov.")
+            if not (directory / "receipt.json").exists():
+                raise FilmError("Předchozí pokus není potvrzený. Obnov seznam pokusů; čtení se samo neopakuje.")
             receipt, _, _ = verify_record(editor, manifest, sid, layer, nid, project_id=folder.name)
             request = editor.store._read(directory / "request.json")
             if request != payload:
@@ -138,22 +153,21 @@ def prepare_narration(editor, payload):
                 raise FilmError("Projekt má již 256 hlasových verzí; další čtení vyžaduje správu úložiště.")
             directory = _private_directory(directory)
             write_json(directory / "request.json", payload)
-            length = synthesize(layer["text"], directory)
+            length = (synthesize_orus(layer["text"], directory, payload["cloud_consent"], revalidate)
+                      if cloud else synthesize(layer["text"], directory))
             # Recheck privacy and current exact text after the relatively slow speech operation.
-            _, current = editor.inputs(folder.name)
-            latest = editor.revision(folder, current)
-            current_row = next((r for r in latest["draft"]["shots"] if r["asset_id"] == sid), None)
-            if fingerprint(current) != fingerprint(manifest) or not current_row or current_row.get("photo_text") != layer:
-                raise FilmError("Text nebo povolení se během čtení změnilo. Nový komentář se nepřipojil.")
-            editor.verify_texts(current, latest["draft"], project_id=folder.name)
+            revalidate()
             path = directory / "speech.m4a"
             with path.open("rb") as handle:
                 os.fsync(handle.fileno())
             receipt = {"schema": 1, "scope": "camino-photo-narration", "project_id": folder.name,
                 "asset_id": sid, "manifest_sha256": fingerprint(manifest), "text_sha256": text_hash(layer),
                 "text_source": layer["text_source"], "duration_ms": length, "bytes": path.stat().st_size,
-                "sha256": digest(path), "voice": "Zuzana", "synthetic": True,
-                "text": layer["text"], "created_at": datetime.now(timezone.utc).isoformat(), "label": "Místní čtení Zuzana"}
+                "sha256": digest(path), "voice": VOICE if cloud else "Zuzana", "synthetic": True,
+                "text": layer["text"], "created_at": datetime.now(timezone.utc).isoformat(),
+                "label": "Orus · tempo −10 %" if cloud else "Místní čtení Zuzana"}
+            if cloud:
+                receipt.update(provider="google-cloud-tts", tempo=TEMPO, max_cost_microusd=cost)
             write_json(directory / "receipt.json", receipt)
             checked_audio(directory, receipt)
         return {"ok": True, "narration": {"id": nid, "duration_ms": receipt["duration_ms"],

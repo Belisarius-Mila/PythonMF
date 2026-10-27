@@ -1478,6 +1478,8 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
 - Doplnění LL-080 (24. 10.): Node test spouštěný z Pythonu musí použít společný `scripts.cockpit_quality_gate.node_binary()`, ne mediální `binary("node")`. Regrese sama vynucuje `/usr/bin:/bin:/usr/sbin:/sbin`; terminálový PATH přítomnost Node ve službě neprokazuje.
 
 
+- Doplnění LL-080 (27. 10., Orus): cloudový limit ověřuj v UTF-8 bajtech, cenu v Unicode znacích; celý text a mezery musí po spojení částí souhlasit. Souhlas navazuj na přesný uložený text, hlas, tempo a cenu, při editaci jej zruš a před každým přenosem znovu ověř povolení. Nejasný placený požadavek nikdy automaticky neopakuj; zvolených 90 % tempa ověř místním atempo a skutečnou délkou. Ověřeno 6000 emoji, full decode, HTTP/DOM regresí; camino_orus_integration_20261027.md.
+
 ### LL-081 — Pracovní text a historie hlasových pokusů se nesmějí přepisovat navzájem
 
 - Problém: samotné přepsání textu a nahrazení aktuálního audio odkazu neumožní porovnat pokusy ani obnovit jejich znění; skrytí záznamu navíc nesmí poškodit starší film.

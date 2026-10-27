@@ -1,14 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-10-26 17:16 CET: Dokumentační balíček volby Orusu publikovaný a nasazený registrovanou Lunou do 4dc658324465859f71e8294d880738cd306fd35d. Účtenka c418d280bd7f24e0146cf90fabe2e4c6: completed, 3 commity, push/deployment confirmed, project-camino → Cockpit. Rozsah vůči 004ec7e1 obsahoval pouze memory soubory; Orus zůstává vybraný, ale není zapojený do generování.
-- Publikační plná brána 2243 PASS / 430.7 s, smoke 5/5, protected_services_unchanged=true. Adam jednou převzal účtenku a ověřil health OK a přesnou shodu HTML přes HTTP 200; code stamp dd0a0d1332d72444. Původní funkční UI z 004ec7e1 zachované. Return caller převzatý, returned_to_adam=false není důvodem retry. Tento následný výsledkový zápis je místní a přibalí se k příštímu vývoji.
-
-- 2026-10-26 17:01 CET: Míla výslovně vybral D — Orus, přesný hlas cs-CZ-Chirp3-HD-Orus. Volba uložená v místním manifestu a zvýrazněná na poslechové stránce; změna hlasu ve střižně ještě neprovedená.
-- Read-only přístupový audit: žádné Google/GCP/Gemini/TTS nastavení v projektovém .env ani odpovídající Google proměnné v shellu, běžný místní ADC soubor chybí; google.auth a google.cloud.texttospeech nejsou instalované. Nejde o důkaz, že Míla nemá cloudový účet — na jeho existenci/ID se Adam zeptal asynchronně. Nebylo přihlašování, instalace ani změna fakturace či placený API požadavek.
-- Ověřený ceník Google Chirp 3 HD: dokumentovaná kvóta 1 milion znaků měsíčně zdarma, potom 30 USD/milion; fakturace musí být zapnutá i pro bezplatnou kvótu. Skutečný nárok/zůstatek kvóty účtu NEOVĚŘENO. 6000 znaků nejvýše 0,18 USD při placené sazbě; navržená první smyšlená zkouška do 1000 znaků nejvýše 0,03 USD, rozpočet zatím neschválený.
-- Konkrétní soukromý integration-plan.json vedle ukázek: vybraný Orus, přístup/billing/rozpočet čekají, žádné soukromé texty povolené k odeslání. Oficiální limit 5000 UTF-8 bajtů na požadavek; budoucí adaptér musí rozdělit celý komentář do 6000 znaků beze ztráty, spojit řeč a zachovat původní text/nahrávky, žádné tiché nahrazení jiným hlasem.
-- Další krok: získat informaci o existujícím Google Cloud projektu nebo zadání přípravy nového připojení; vyřešit přístup a výslovné oprávnění k aktivaci/fakturaci/rozpočtu před první syntézou. Žádná tajemství do chatu/Gitu. Pak ověřit Orus na smyšleném textu a dokončit integraci s výslovným potvrzením odeslání konkrétního textu. Detail: memory/reports/camino_voice_audition_20261026.md.
+- 2026-10-27 18:04 CET: Orus cs-CZ-Chirp3-HD-Orus a tempo 0,90 přijaté Mílou poslechem. Google Cloud projekt camino-orus, povolené TTS a chráněný místní přístup funkční; jedna schválená smyšlená syntéza 166 znaků / 11,184 s HTTP 200, pomalejší poslech 12,414 s vznikl místně bez další syntézy.
+- Místně implementované zapojení do střižny: celý text do 6000 znaků, části do 5000 UTF-8 B beze ztráty, spojení a zpomalení atempo=0.9, historie/koš/import zachované. Před každým novým vytvořením checkbox pro konkrétní text a cenu; editace souhlas ruší. Před každým odesláním a připojením opětovná kontrola povolení/textu. Bez automatického opakování, bez náhradního hlasu při chybě Orusu.
+- Cílené ověření: 100 kontrol PASS / 62,419 s a nový HTTP test souhlasu/origin/idempotence PASS / 0,770 s. Plná brána: 2256 PASS / 482,110 s unit část, celkem 496,501 s. Google-auth 2.62.0 v projektovém venv a skutečný read-only přístup přes nový adaptér potvrzené; žádná další syntéza ani soukromý text při vývoji.
+- Jen místní vývoj, bez nového p+n, restartu či změny samostatné služby a iPhonu. Nasazená funkční verze zatím zůstává předchozí. Další krok: samostatně autorizované Luna p+n a fyzická přejímka ovládání ve střižně. Detail: memory/reports/camino_orus_integration_20261027.md.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí stav po p+n UI 1
@@ -5064,3 +5060,26 @@ Technický důkaz:
 - Účtenka c418d280bd7f24e0146cf90fabe2e4c6, 3 commity do 4dc65832, push/deployment confirmed; gate 2243 PASS / 430.7 s, smoke 5/5 a protected_services_unchanged=true.
 - Jedna Adamova kontrola: Git rozsah vůči 004ec7e1 pouze memory, health OK, HTML HTTP 200 přesně shodné se zdrojem a SHA-256 996571f43ceeb225384e0d6173a06421e3d91a057edc985abc91304ae040b0ab. Soukromý manifest vybraný Orus/installed_in_editor=false potvrzený. Code stamp dd0a0d1332d72444.
 - Return caller převzatý; returned_to_adam=false neprokazuje automatický portálový návrat a nevede k opakování. Následný výsledkový zápis je místní checkpoint pro příští vývoj.
+
+### 2026-10-27 18:05 CET — Orus s klidnějším tempem a místní integrace
+
+Hotovo:
+
+- Přístup Google funguje a Orus přečetl vlastní smyšlenou ukázku. Míla přijal výslovnost a příjemnost a vybral prostřední tempo o 10 % pomalejší. Nový hlas je zapojený v místním kódu střižny.
+
+Rozhodnutí:
+
+- Použít cs-CZ-Chirp3-HD-Orus a tempo 0,90 se zachováním výšky hlasu. Rozpočet 0,01 USD platil pro jedinou syntetickou zkoušku; nové UI vyžaduje samostatný souhlas a cenu pro každý konkrétní text.
+
+Další krok:
+
+- Samostatně zadat Luna p+n; po vydání fyzicky přijmout nové ovládání a komentář.
+
+Navrhované další kroky:
+
+- Po vydání fyzicky ověřit ovládání souhlasu, přesný celý komentář a umístění do filmu; zachovat přejímku historie, koše a MP3/WAV, později P2-F.
+
+Technický důkaz:
+
+- První syntéza: HTTP 200, 166 znaků, MP3 44 736 B / 11,184 s, full decode PASS. Přijaté místní tempo 0,90 má 12,414 s, bez dalšího cloudového generování. Nový adaptér s google-auth ověřený přihlášením a read-only seznamem hlasů. Klíč jen v ignorované chráněné složce.
+- 100 cílených kontrol PASS / 62,419 s a nový HTTP test PASS / 0,770 s. Plná brána: 2256 PASS / 482,110 s unit část, celkem 496,501 s. Bez nového p+n, změny skutečných projektů, samostatné služby či iPhonu. Nové UI fyzicky NEOVĚŘENO. Detail: camino_orus_integration_20261027.md.
