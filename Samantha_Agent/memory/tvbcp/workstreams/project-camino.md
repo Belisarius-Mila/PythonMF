@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-10-27 18:04 CET: Orus cs-CZ-Chirp3-HD-Orus a tempo 0,90 přijaté Mílou poslechem. Google Cloud projekt camino-orus, povolené TTS a chráněný místní přístup funkční; jedna schválená smyšlená syntéza 166 znaků / 11,184 s HTTP 200, pomalejší poslech 12,414 s vznikl místně bez další syntézy.
-- Místně implementované zapojení do střižny: celý text do 6000 znaků, části do 5000 UTF-8 B beze ztráty, spojení a zpomalení atempo=0.9, historie/koš/import zachované. Před každým novým vytvořením checkbox pro konkrétní text a cenu; editace souhlas ruší. Před každým odesláním a připojením opětovná kontrola povolení/textu. Bez automatického opakování, bez náhradního hlasu při chybě Orusu.
-- Cílené ověření: 100 kontrol PASS / 62,419 s a nový HTTP test souhlasu/origin/idempotence PASS / 0,770 s. Plná brána: 2256 PASS / 482,110 s unit část, celkem 496,501 s. Google-auth 2.62.0 v projektovém venv a skutečný read-only přístup přes nový adaptér potvrzené; žádná další syntéza ani soukromý text při vývoji.
-- Jen místní vývoj, bez nového p+n, restartu či změny samostatné služby a iPhonu. Nasazená funkční verze zatím zůstává předchozí. Další krok: samostatně autorizované Luna p+n a fyzická přejímka ovládání ve střižně. Detail: memory/reports/camino_orus_integration_20261027.md.
+- 2026-10-27 18:23 CET: První p+n Orusu (8855740144231119c4ac01e1d8de5657) zastavila publikační brána: 1 ERROR z 2256, 18 skipped / 438,979 s. Test skutečného spojeného audia hledal ffprobe pouze v PATH služby; produkční adaptér již používal media_binary. Živý GitHub zůstává na 4dc65832, nasazení nezačalo. Účtenka attention/push_state=uncertain je zachovaná; příčina i neprovedený push jsou doložené samostatně.
+- Test opravený na explicitní media_binary("ffprobe") a sám nyní vynucuje omezený PATH /usr/bin:/bin:/usr/sbin:/sbin. Cílený modul Orusu 13 PASS. Produkční hlasový kód se touto opravou nemění; dřívější místní plná brána 2256 PASS platila v terminálovém prostředí, nepředstavovala publikační ověření.
+- Platí přijatý cs-CZ-Chirp3-HD-Orus a tempo 0,90. Celý komentář, souhlas/cena pro konkrétní text, historie/koš/import a žádné automatické opakování či náhradní hlas zachované. Žádná další cloudová syntéza ani skutečný deník při opravě.
+- Další krok: po statické kontrole a checkpointu nové p+n registrovanou Lunou podle Mílova výslovného pokynu po opravě opakovat do úspěchu. Neopakovat nejistou původní účtenku. Fyzická přejímka nového UI až po vydání. Detail: memory/reports/camino_orus_integration_20261027.md.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí stav po p+n UI 1
@@ -5083,3 +5083,25 @@ Technický důkaz:
 
 - První syntéza: HTTP 200, 166 znaků, MP3 44 736 B / 11,184 s, full decode PASS. Přijaté místní tempo 0,90 má 12,414 s, bez dalšího cloudového generování. Nový adaptér s google-auth ověřený přihlášením a read-only seznamem hlasů. Klíč jen v ignorované chráněné složce.
 - 100 cílených kontrol PASS / 62,419 s a nový HTTP test PASS / 0,770 s. Plná brána: 2256 PASS / 482,110 s unit část, celkem 496,501 s. Bez nového p+n, změny skutečných projektů, samostatné služby či iPhonu. Nové UI fyzicky NEOVĚŘENO. Detail: camino_orus_integration_20261027.md.
+
+### 2026-10-27 18:23 CET — Oprava testu před opakovaným p+n
+
+Hotovo:
+
+- Zjištěná a opravená odlišnost publikačního prostředí: test skutečného audia nyní vyhledává ffprobe stejně jako produkční adaptér a vždy vynucuje omezený PATH. První p+n nic nepublikovalo ani nenasadilo.
+
+Rozhodnutí:
+
+- Pokračovat po opravě registrovanou Lunou podle dřívějšího výslovného pokynu Míly opakovat p+n po opravě do úspěchu. Neopakovat nejistou účtenku; zachovat její výsledek a vytvořit nové předání opraveného commitu. Hlas a tempo se nemění.
+
+Další krok:
+
+- Po statické kontrole a místním commitu předat nový balíček Luně.
+
+Navrhované další kroky:
+
+- Po vydání fyzicky přijmout souhlas, poslech a celý komentář ve střižně.
+
+Technický důkaz:
+
+- Účtenka 8855740144231119c4ac01e1d8de5657: attention, push_state uncertain, deployment not_started. Publikační log: 2256 testů, 1 ERROR (ffprobe v testu), 18 skipped, 438,979 s. Přímý GitHub read-only audit ukazuje stále 4dc65832. Cílený opravený modul Orusu: 13 PASS. Žádný nový audio API požadavek; produkční kód beze změny.

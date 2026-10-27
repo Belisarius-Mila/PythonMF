@@ -62,7 +62,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md`; `reports/camino_orus_integration_20261027.md` — 2026-10-27 18:05 CET: Míla přijal Orus a tempo −10 %. Cloud přístup a jedna smyšlená syntéza ověřené; nové zapojení se souhlasem/cenou pro konkrétní text, celým komentářem a bez retry implementované místně. 101 cílených kontrol PASS, plná brána 2256 PASS. Bez nového p+n; fyzická přejímka ovládání po vydání.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md`; `reports/camino_orus_integration_20261027.md` — 2026-10-27 18:23 CET: První p+n Orusu 88557401 zastavila jediná chyba testu ffprobe v PATH služby (2256 / 1 ERROR). GitHub stále 4dc65832, bez nasazení. Oprava testu vynucuje službový PATH a explicitní media_binary; 13 cílených PASS. Hlas Orus/tempo −10 % zachované. Po checkpointu nové p+n Lunou dle pokynu opakovat po opravě.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md`; `technical/luna_release_orchestration.md` — 2026-10-24 09:52 CEST: Oprava startovacího souběhu p+n je publikovaná/nasazená v e11d949a. Účtenka e47cdb394ec5441c5d25632f11c8c995 má potvrzený push 4 commitů a nasazení Cockpitu, plnou bránu 2186 a smoke 5/5. Nativní účtenku ověřil hlavní Adam; nový místní vývoj pokračuje v project-camino. Předchozí attention c3aba030 je historie a neopakuje se.
 

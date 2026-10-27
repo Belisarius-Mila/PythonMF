@@ -1,14 +1,14 @@
 # Camino
 
-Aktualizováno: 2026-10-27 18:05 CET — Orus a tempo −10 %, místní integrace
+Aktualizováno: 2026-10-27 18:23 CET — oprava publikačního testu Orusu
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Aktuální UI krok střižny
 
-- 2026-10-27 18:04 CET: Orus cs-CZ-Chirp3-HD-Orus a tempo 0,90 přijaté Mílou poslechem. Google Cloud projekt camino-orus, povolené TTS a chráněný místní přístup funkční; jedna schválená smyšlená syntéza 166 znaků / 11,184 s HTTP 200, pomalejší poslech 12,414 s vznikl místně bez další syntézy.
-- Místně implementované zapojení do střižny: celý text do 6000 znaků, části do 5000 UTF-8 B beze ztráty, spojení a zpomalení atempo=0.9, historie/koš/import zachované. Před každým novým vytvořením checkbox pro konkrétní text a cenu; editace souhlas ruší. Před každým odesláním a připojením opětovná kontrola povolení/textu. Bez automatického opakování, bez náhradního hlasu při chybě Orusu.
-- Cílené ověření: 100 kontrol PASS / 62,419 s a nový HTTP test souhlasu/origin/idempotence PASS / 0,770 s. Plná brána: 2256 PASS / 482,110 s unit část, celkem 496,501 s. Google-auth 2.62.0 v projektovém venv a skutečný read-only přístup přes nový adaptér potvrzené; žádná další syntéza ani soukromý text při vývoji.
-- Jen místní vývoj, bez nového p+n, restartu či změny samostatné služby a iPhonu. Nasazená funkční verze zatím zůstává předchozí. Další krok: samostatně autorizované Luna p+n a fyzická přejímka ovládání ve střižně. Detail: memory/reports/camino_orus_integration_20261027.md.
+- 2026-10-27 18:23 CET: První p+n Orusu (8855740144231119c4ac01e1d8de5657) zastavila publikační brána: 1 ERROR z 2256, 18 skipped / 438,979 s. Test skutečného spojeného audia hledal ffprobe pouze v PATH služby; produkční adaptér již používal media_binary. Živý GitHub zůstává na 4dc65832, nasazení nezačalo. Účtenka attention/push_state=uncertain je zachovaná; příčina i neprovedený push jsou doložené samostatně.
+- Test opravený na explicitní media_binary("ffprobe") a sám nyní vynucuje omezený PATH /usr/bin:/bin:/usr/sbin:/sbin. Cílený modul Orusu 13 PASS. Produkční hlasový kód se touto opravou nemění; dřívější místní plná brána 2256 PASS platila v terminálovém prostředí, nepředstavovala publikační ověření.
+- Platí přijatý cs-CZ-Chirp3-HD-Orus a tempo 0,90. Celý komentář, souhlas/cena pro konkrétní text, historie/koš/import a žádné automatické opakování či náhradní hlas zachované. Žádná další cloudová syntéza ani skutečný deník při opravě.
+- Další krok: po statické kontrole a checkpointu nové p+n registrovanou Lunou podle Mílova výslovného pokynu po opravě opakovat do úspěchu. Neopakovat nejistou původní účtenku. Fyzická přejímka nového UI až po vydání. Detail: memory/reports/camino_orus_integration_20261027.md.
 
 ## Cíl a hranice
 

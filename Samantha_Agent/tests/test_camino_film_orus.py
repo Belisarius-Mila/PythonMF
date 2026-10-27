@@ -17,7 +17,7 @@ from urllib.error import HTTPError, URLError
 import wave
 
 from app import camino_film_orus as orus
-from app.camino_film_narration import prepare_narration, narration_bytes
+from app.camino_film_narration import prepare_narration, narration_bytes, media_binary
 from camino.film.project import FilmError
 from tests import test_camino_film_photo_layers as photo_layers
 
@@ -113,7 +113,7 @@ class OrusContractTests(unittest.TestCase):
 
     def test_real_joined_audio_keeps_full_6000_characters_and_slower_tempo(self):
         from camino.film.media import probe, duration_ms
-        with tempfile.TemporaryDirectory() as tmp:
+        with tempfile.TemporaryDirectory() as tmp, patch.dict(os.environ, {"PATH": "/usr/bin:/bin:/usr/sbin:/sbin"}):
             directory = Path(tmp)
             text = "🙂" * 6000
             parts = orus.split_text(text)
@@ -125,7 +125,7 @@ class OrusContractTests(unittest.TestCase):
             self.assertEqual(request.call_count, len(parts))
             self.assertEqual(revalidate.call_count, len(parts) + 1)
             self.assertAlmostEqual(length, 500 * len(parts) / .9, delta=150)
-            self.assertEqual(duration_ms(probe(directory / "speech.m4a"), "audio"), length)
+            self.assertEqual(duration_ms(probe(directory / "speech.m4a", executable=media_binary("ffprobe")), "audio"), length)
             self.assertEqual(len(list(directory.glob("cloud-part-*-request.json"))), len(parts))
 
     def test_privacy_change_stops_before_next_part_and_never_falls_back(self):

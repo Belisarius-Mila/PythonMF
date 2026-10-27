@@ -93,3 +93,9 @@ https://docs.cloud.google.com/text-to-speech/docs/reference/rest/v1/text/synthes
 https://google-auth.readthedocs.io/en/latest/reference/google.oauth2.service_account.html .
 
 Závěrečná klasifikace endpointu v registru: external_ai; souhlas se váže na konkrétní text a cenu. Po této metadatové úpravě 2 cílené kontroly registru PASS; závěrečná statická brána PASS / 8,406 s.
+
+## 2026-10-27 18:23 CET — První p+n zastavené a oprava
+
+Účtenka 8855740144231119c4ac01e1d8de5657, stav attention, push_state uncertain, deployment not_started. Publikační gate v profilovém workspace: 2256 testů / 1 ERROR / 18 skipped / 438,979 s. Jediná chyba byla v závěrečném probe uvnitř nového testu, který nepředal executable; službový PATH nezahrnuje ffprobe. Produkční adaptér již všude používá media_binary a nemění se. GitHub přímo čtecím dotazem zůstal 4dc65832, tedy žádný publish ani nasazení.
+
+Oprava: test používá explicitní media_binary("ffprobe") a sám vynucuje /usr/bin:/bin:/usr/sbin:/sbin; modul 13 PASS. Předchozí místní plná brána je pravdivý terminálový důkaz, ne náhrada chybějící publikační brány. Po statické kontrole a checkpointu nový běh Lunou dle Mílova dřívějšího výslovného pokynu po opravě opakovat do úspěchu. Původní nejistá účtenka se neopakuje. Žádná další syntéza ani soukromé texty.
