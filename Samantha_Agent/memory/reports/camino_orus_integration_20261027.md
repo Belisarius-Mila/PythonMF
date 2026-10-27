@@ -1,6 +1,6 @@
 # Camino — Orus ve střižně, tempo −10 %
 
-Stav: 2026-10-27, místní vývoj, bez nového p+n. Proud: project-camino.
+Stav: 2026-10-27 18:34 CET, publikované a nasazené do dcb89967. Proud: project-camino.
 
 ## Výsledek
 
@@ -76,9 +76,9 @@ používají pouze syntetické mock odpovědi a místní WAV. Od první zkoušky
 - Složený HTML kontrakt: 627842 znaků, 11816 řádků, SHA-256
   768f4c4f47414927c3a1974f63b30b0d0199bba8daacb31224bc26cded16ce0a.
 
-## Hranice a další krok
+## Hranice před p+n
 
-Pouze místní vývoj. Bez nového push/nasazení, restartu služby či instalace
+Před vydáním šlo pouze o místní vývoj, bez nového push/nasazení, restartu služby či instalace
 iPhonu. Originály, skutečné projekty a staré nahrávky nebyly měněné.
 Poslech hlasu/tempa přijatý; fyzické ovládání nového souhlasu a nový komentář
 skutečné fotografie ve vydané střižně zůstávají NEOVĚŘENO.
@@ -99,3 +99,11 @@ Závěrečná klasifikace endpointu v registru: external_ai; souhlas se váže n
 Účtenka 8855740144231119c4ac01e1d8de5657, stav attention, push_state uncertain, deployment not_started. Publikační gate v profilovém workspace: 2256 testů / 1 ERROR / 18 skipped / 438,979 s. Jediná chyba byla v závěrečném probe uvnitř nového testu, který nepředal executable; službový PATH nezahrnuje ffprobe. Produkční adaptér již všude používá media_binary a nemění se. GitHub přímo čtecím dotazem zůstal 4dc65832, tedy žádný publish ani nasazení.
 
 Oprava: test používá explicitní media_binary("ffprobe") a sám vynucuje /usr/bin:/bin:/usr/sbin:/sbin; modul 13 PASS. Předchozí místní plná brána je pravdivý terminálový důkaz, ne náhrada chybějící publikační brány. Po statické kontrole a checkpointu nový běh Lunou dle Mílova dřívějšího výslovného pokynu po opravě opakovat do úspěchu. Původní nejistá účtenka se neopakuje. Žádná další syntéza ani soukromé texty.
+
+## 2026-10-27 18:34 CET — Úspěšné p+n a převzetí
+
+Nová účtenka 127671e05758329f122c4ab4214f118b: completed, 3 commity do dcb89967312f6f918660000c60405ca27e726d52, push/deployment confirmed. Publikační full gate 2256 testů / 478,2 s, smoke 5/5, protected_services_unchanged=true. Centrální role release_executor beze změny.
+
+Adam jednou převzal výsledek zde v terminálu. Přímý GitHub/main audit potvrdil vydaný head, HTML HTTP 200 přesně odpovídá zdroji a jeho výše uvedenému SHA-256. Server má code_stamp 296a14675318a23b. Živý editor odpovídá ok=true a narration_voice: cs-CZ-Chirp3-HD-Orus, tempo 0.9, ready=true; nebyl spuštěný nový hlasový požadavek.
+
+return_channel=caller je převzatý; automatické returned_to_adam=false není důkaz portálového návratu a není důvodem retry. Samostatná služba Camino a iPhone se tímto vydáním neměnily. Hlas a tempo byly poslechem přijaty; fyzická přejímka nového souhlasu a celého komentáře skutečné fotografie zůstává NEOVĚŘENO. Obnovit Cockpit a vyzkoušet přímo ve střižně. Tento následný výsledkový zápis je místní pro příští balíček, bez dalšího automatického p+n.

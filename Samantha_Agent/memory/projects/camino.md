@@ -1,14 +1,14 @@
 # Camino
 
-Aktualizováno: 2026-10-27 18:23 CET — oprava publikačního testu Orusu
+Aktualizováno: 2026-10-27 18:34 CET — Orus/tempo −10 % publikované a nasazené
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Aktuální UI krok střižny
 
-- 2026-10-27 18:23 CET: První p+n Orusu (8855740144231119c4ac01e1d8de5657) zastavila publikační brána: 1 ERROR z 2256, 18 skipped / 438,979 s. Test skutečného spojeného audia hledal ffprobe pouze v PATH služby; produkční adaptér již používal media_binary. Živý GitHub zůstává na 4dc65832, nasazení nezačalo. Účtenka attention/push_state=uncertain je zachovaná; příčina i neprovedený push jsou doložené samostatně.
-- Test opravený na explicitní media_binary("ffprobe") a sám nyní vynucuje omezený PATH /usr/bin:/bin:/usr/sbin:/sbin. Cílený modul Orusu 13 PASS. Produkční hlasový kód se touto opravou nemění; dřívější místní plná brána 2256 PASS platila v terminálovém prostředí, nepředstavovala publikační ověření.
-- Platí přijatý cs-CZ-Chirp3-HD-Orus a tempo 0,90. Celý komentář, souhlas/cena pro konkrétní text, historie/koš/import a žádné automatické opakování či náhradní hlas zachované. Žádná další cloudová syntéza ani skutečný deník při opravě.
-- Další krok: po statické kontrole a checkpointu nové p+n registrovanou Lunou podle Mílova výslovného pokynu po opravě opakovat do úspěchu. Neopakovat nejistou původní účtenku. Fyzická přejímka nového UI až po vydání. Detail: memory/reports/camino_orus_integration_20261027.md.
+- 2026-10-27 18:34 CET: Orus cs-CZ-Chirp3-HD-Orus s přijatým tempem 0,90 publikovaný a nasazený do dcb89967312f6f918660000c60405ca27e726d52 registrovanou Lunou. Účtenka 127671e05758329f122c4ab4214f118b: completed, 3 commity, push/deployment confirmed, project-camino → Cockpit. První attention 88557401 je historie opraveného testu PATH; nešlo o opakování nejistého push.
+- Publikační plná brána 2256 testů PASS / 478,2 s, smoke 5/5, protected_services_unchanged=true. Jedna Adamova závěrečná kontrola: živý GitHub přesně dcb89967, HTML HTTP 200 přesně shodné se zdrojem (SHA-256 768f4c4f47414927c3a1974f63b30b0d0199bba8daacb31224bc26cded16ce0a), server code_stamp 296a14675318a23b. Živý editor vrací Orus/tempo 0.9/ready=true.
+- Terminálový Adam účtenku skutečně převzal a ověřil; return_channel=caller, automatické returned_to_adam=false není důvodem retry. Souhlas/cena pro konkrétní text, celý komentář, historie/koš/import a žádné automatické opakování či náhradní hlas zůstávají součástí vydané verze. Žádná další cloudová syntéza ani skutečný deník při p+n.
+- Poslech hlasu a tempa Míla přijal; fyzické ovládání nového souhlasu a komentář skutečné fotografie ve vydané střižně ještě NEOVĚŘENO. Další krok: obnovit Cockpit a přejmout souhlas, celý komentář, poslech a umístění do filmu. Tento výsledkový zápis je místní pro příští GitHub balíček. Detail: memory/reports/camino_orus_integration_20261027.md.
 
 ## Cíl a hranice
 
