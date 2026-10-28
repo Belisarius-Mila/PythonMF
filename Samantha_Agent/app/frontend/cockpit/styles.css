@@ -457,8 +457,10 @@
     .toolbar button { min-height: 44px; }
     @media (max-width: 900px) { .toolbar { gap: 12px; } }
     .camino-film-edit-list { padding-left: 1.5rem; }
-    #caminoFilmModal { padding: 20px; }
-    #caminoFilmModal > .modal { box-sizing: border-box; width: min(1440px, 100%); height: calc(100vh - 40px); height: calc(100dvh - 40px); max-height: calc(100vh - 40px); }
+    #caminoFilmModal { padding: 12px; }
+    #caminoFilmModal > .modal { box-sizing: border-box; width: min(1680px, 100%); height: calc(100vh - 24px); height: calc(100dvh - 24px); max-height: calc(100vh - 24px); max-height: calc(100dvh - 24px); }
+    .camino-film-window-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-left: auto; }
+    .camino-film-window-actions button { min-height: 44px; }
     .camino-film-toolbar { flex: 1 0 100%; min-width: 0; }
     .camino-film-toolbar .actions { margin-top: 0; }
     .camino-film-toolbar p { margin: 4px 0 0; }
@@ -518,6 +520,8 @@
       .camino-film-toolbar .actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
       .camino-film-toolbar button { min-height: 44px; font-size: 13px; }
     }
+    #caminoFilmModal.is-expanded { padding: 0; background: white; }
+    #caminoFilmModal.is-expanded > .modal { width: 100%; height: 100vh; height: 100dvh; max-height: 100vh; max-height: 100dvh; border: 0; border-radius: 0; box-shadow: none; }
     #caminoFilmModal .modal-header { position: sticky; top: 0; z-index: 3; flex-wrap: wrap; }
     .camino-film-feedback { flex: 1 0 100%; box-sizing: border-box; display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; padding: 10px 12px; border-left: 4px solid #315fa6; border-radius: 6px; background: #eef4ff; color: #183d76; overflow-wrap: anywhere; }
     .camino-film-feedback strong { grid-column: 1; }

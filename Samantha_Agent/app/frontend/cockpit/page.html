@@ -367,7 +367,10 @@
     <div class="modal">
       <div class="modal-header">
         <h2 id="caminoFilmTitle">Filmová střižna Camino</h2>
-        <button class="secondary" id="caminoFilmCloseBtn" type="button">Zavřít</button>
+        <div class="camino-film-window-actions">
+          <button class="secondary" data-film-window="toggle" type="button" aria-pressed="false" title="Zvětšit střižnu na celou obrazovku">Celá obrazovka</button>
+          <button class="secondary" id="caminoFilmCloseBtn" type="button">Zavřít</button>
+        </div>
         <div id="caminoFilmToolbar" class="camino-film-toolbar hidden" aria-label="Hlavní akce filmu">
           <div class="actions">
             <button data-film="save" type="button" aria-describedby="caminoFilmSaveReason">Uložit střih</button>

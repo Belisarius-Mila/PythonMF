@@ -1028,8 +1028,60 @@
         if (dirty || saving) { save(); announce(nodes.status, "Nejprve dokonči uložení změn; potom můžeš přepnout nebo zavřít film.", "warning", "guard"); return false; }
         return true;
       },
-      check, invalidate, save,
+      check, invalidate, save, resize: scheduleNavigationLayout,
     };
   }
-  window.SamanthaFilmEditor = {create};
+  // Window presentation stays independent of the film, draft and media requests.
+  function createWindow(modal, options = {}) {
+    const doc = options.document || modal.ownerDocument;
+    const button = modal.querySelector('[data-film-window="toggle"]');
+    let expanded = false, nativeSeen = false, pending = false, generation = 0;
+    const ownsFullscreen = () => !!doc.fullscreenElement &&
+      (doc.fullscreenElement === modal || modal.contains(doc.fullscreenElement));
+    function show(value) {
+      expanded = value;
+      modal.classList.toggle("is-expanded", value);
+      button.textContent = value ? "Zmenšit" : "Celá obrazovka";
+      button.setAttribute("aria-pressed", String(value));
+      button.title = value ? "Vrátit běžnou velikost střižny (Escape)" : "Zvětšit střižnu na celou obrazovku";
+      options.onResize?.();
+    }
+    function leaveNative() {
+      if (!ownsFullscreen() || !doc.exitFullscreen) return;
+      try { Promise.resolve(doc.exitFullscreen()).catch(() => {
+        if (ownsFullscreen() && !modal.classList.contains("hidden")) show(true);
+      }); } catch (_) { /* Browser Escape remains available. */ }
+    }
+    function reset() { generation++; nativeSeen = false; show(false); leaveNative(); }
+    function toggle() {
+      if (expanded) { reset(); return; }
+      show(true);
+      // The viewport-sized fallback also works without the Fullscreen API.
+      if (!modal.requestFullscreen || pending || doc.fullscreenElement) return;
+      const token = ++generation;
+      pending = true;
+      try {
+        Promise.resolve(modal.requestFullscreen()).then(() => {
+          if (token !== generation || !expanded || modal.classList.contains("hidden")) {
+            nativeSeen = false; leaveNative();
+          }
+        }).catch(() => { /* Keep the usable viewport-sized fallback. */ })
+          .finally(() => { pending = false; });
+      } catch (_) { pending = false; }
+    }
+    button.addEventListener("click", toggle);
+    modal.addEventListener("keydown", event => {
+      if (event.key !== "Escape" || !expanded || event.defaultPrevented || event.isComposing) return;
+      // The photo viewer handles its own Escape before this event bubbles here.
+      event.preventDefault(); event.stopPropagation(); reset();
+    });
+    doc.addEventListener("fullscreenchange", () => {
+      if (ownsFullscreen()) {
+        if (!expanded || modal.classList.contains("hidden")) leaveNative();
+        else nativeSeen = true;
+      } else if (nativeSeen) { nativeSeen = false; generation++; show(false); }
+    });
+    return {reset};
+  }
+  window.SamanthaFilmEditor = {create, createWindow};
 })();

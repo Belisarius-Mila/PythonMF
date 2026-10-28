@@ -15,6 +15,7 @@
     const caminoFilmBtn = document.getElementById("caminoFilmBtn");
     const caminoFilmModal = document.getElementById("caminoFilmModal");
     const caminoFilmCloseBtn = document.getElementById("caminoFilmCloseBtn");
+    const caminoFilmWindow = window.SamanthaFilmEditor.createWindow(caminoFilmModal, {onResize: () => caminoFilmEditor.resize()});
     const caminoFilmStatus = document.getElementById("caminoFilmStatus");
     const caminoFilmSummary = document.getElementById("caminoFilmSummary");
     const caminoFilmShots = document.getElementById("caminoFilmShots");
@@ -6540,6 +6541,7 @@ ${item.context || ""}`);
 
     function closeCaminoFilm() {
       if (!caminoFilmEditor.canClose()) return;
+      caminoFilmWindow.reset();
       caminoFilmLibrary.close();
       caminoFilmModal.classList.add("hidden");
     }

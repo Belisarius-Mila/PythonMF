@@ -36,14 +36,21 @@ EXPECTED_PAGES = {
     ),
     "cockpit": (
         COCKPIT_HTML,
-        631713,
-        11870,
-        "3eb90bc9f8e36c18f7d7806c4fb5f8fab4c9c4e921f249d8ce0258ce275c98d3",
+        635171,
+        11931,
+        "23faa858e96af264b405a3af1b7a5a78255d2e41eda3652d449b9a42393056dc",
     ),
 }
 
 
 class CockpitFrontendContractTests(unittest.TestCase):
+    def test_film_window_fullscreen_fallback_and_lifecycle(self) -> None:
+        result = subprocess.run(
+            [node_binary(), str(Path(__file__).with_name("camino_film_window.test.cjs"))],
+            capture_output=True, text=True, timeout=30, check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
     def test_film_navigation_fills_available_window_and_tracks_header(self) -> None:
         result = subprocess.run(
             [node_binary(), str(Path(__file__).with_name("camino_film_navigation_layout.test.cjs"))],

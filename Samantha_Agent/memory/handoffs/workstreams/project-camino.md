@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-10-28 10:30 CET: Oprava levého seznamu miniatur publikovaná a nasazená do 37ec47c6ee52d01920c4769ecf8e6371791fd297. Luna 31d808ef56f854fb28dac81977d0c546: completed, 2 commity, push/deployment confirmed, project-camino → Cockpit. Desktop využívá dostupnou výšku pod hlavičkou, seznam má vlastní scroll a levý panel zůstává při práci vpravo sticky; na úzké ploše kompaktní zobrazení.
-- Publikační plná brána 2257 testů PASS / 471,9 s, smoke 5/5, protected_services_unchanged=true. Jedna Adamova kontrola: GitHub/main přesně 37ec47c6, health HTTP 200, živé HTML HTTP 200 přesně shodné se zdrojem; SHA-256 3eb90bc9f8e36c18f7d7806c4fb5f8fab4c9c4e921f249d8ce0258ce275c98d3, starý strop 60vh nepřítomný, nové ovládání výšky přítomné. Code stamp 296a14675318a23b je zachovaný, měnil se frontend.
-- 102 cílených kontrol PASS / 70,365 s včetně nové geometrie navigace, zachované pozice/uzlů, nulových dodatečných requestů a lifecycle. CUA nemá připojený prohlížeč; fyzická Safari přejímka nové výšky a skutečného wheel scrollu ještě NEOVĚŘENO. Backend, skutečné projekty, média a souhlasy Orusu beze změny.
-- Caller účtenku skutečně převzal terminálový Adam; returned_to_adam=false není důvodem retry. Další krok: po obnovení Cockpitu fyzicky ověřit výšku, poslední položku seznamu a zachování pozice. Kompaktní panel textu/hlasu zůstává navazující samostatný návrh. Tento výsledkový zápis je místní pro příští GitHub balíček. Report: memory/reports/camino_film_navigation_height_20261028.md.
+- 2026-10-28 11:50 CET: Větší okno a přepínač Celá obrazovka jsou hotové místně. Základní šířka až 1680 px, okraje 12 px. Tlačítko zvětší střižnu na celou obrazovku; při nepodpoře/odmítnutí API vyplní okno prohlížeče. Zmenšit nebo první Escape vrací běžnou velikost bez zavření filmu. Zavření respektuje původní ochranu neuloženého střihu.
+- 67 cílených kontrol PASS / 38,739 s; nové scénáře nativního fullscreen, fallbacku, Escape, přepočtu navigace a opožděného vstupu po zavření. Přepnutí nepřestavuje editor, nemění draft ani nevolá média/Orus. Skutečná Safari přejímka tohoto nového režimu NEOVĚŘENO. Report: memory/reports/camino_film_window_20261028.md.
+- Míla v této konverzaci přijal předchozí opravu miniatur: „Funguje super“. Poslední p+n 226b44f2e1aa9eea783f91a5e66429dd dokončilo 205789da; push/deployment confirmed, plná brána 2257 PASS, smoke 5/5. To je nasazený základ, nový fullscreen krok zatím bez push/nasazení.
+- Další krok: samostatné p+n a fyzicky ověřit Celá obrazovka → Zmenšit/Escape, fotografii a scroll miniatur. Kompaktní panel textu/hlasu zůstává další samostatný návrh.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí stav po p+n UI 1
