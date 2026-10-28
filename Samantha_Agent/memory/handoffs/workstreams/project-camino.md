@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-10-27 18:34 CET: Orus cs-CZ-Chirp3-HD-Orus s přijatým tempem 0,90 publikovaný a nasazený do dcb89967312f6f918660000c60405ca27e726d52 registrovanou Lunou. Účtenka 127671e05758329f122c4ab4214f118b: completed, 3 commity, push/deployment confirmed, project-camino → Cockpit. První attention 88557401 je historie opraveného testu PATH; nešlo o opakování nejistého push.
-- Publikační plná brána 2256 testů PASS / 478,2 s, smoke 5/5, protected_services_unchanged=true. Jedna Adamova závěrečná kontrola: živý GitHub přesně dcb89967, HTML HTTP 200 přesně shodné se zdrojem (SHA-256 768f4c4f47414927c3a1974f63b30b0d0199bba8daacb31224bc26cded16ce0a), server code_stamp 296a14675318a23b. Živý editor vrací Orus/tempo 0.9/ready=true.
-- Terminálový Adam účtenku skutečně převzal a ověřil; return_channel=caller, automatické returned_to_adam=false není důvodem retry. Souhlas/cena pro konkrétní text, celý komentář, historie/koš/import a žádné automatické opakování či náhradní hlas zůstávají součástí vydané verze. Žádná další cloudová syntéza ani skutečný deník při p+n.
-- Poslech hlasu a tempa Míla přijal; fyzické ovládání nového souhlasu a komentář skutečné fotografie ve vydané střižně ještě NEOVĚŘENO. Další krok: obnovit Cockpit a přejmout souhlas, celý komentář, poslech a umístění do filmu. Tento výsledkový zápis je místní pro příští GitHub balíček. Detail: memory/reports/camino_orus_integration_20261027.md.
+- 2026-10-28 08:54 CET: Míla prakticky potvrdil, že práce s textem a převod na hlas fungují skvěle. Připomínka se týká přehlednosti: mnoho textu a široká výběrová pole pod sebou. Na výslovný pokyn je uložený návrh kompaktního panelu Text a komentář fotografie; nejde o implementaci.
+- Návrh: Text z deníku a Použití textu vedle sebe, hlavní text s krátkým stavem, jeden blok Orus/tempo/cena/souhlas/Vytvořit čtení, poslech a použití ve filmu. Originál na vyžádání, nahrávky/import/další možnosti sbalené, delší vysvětlení v Nápovědě. Důvod neaktivního tlačítka přímo u něj; souhlas a cena zůstávají viditelné.
+- Funkční hranice: celý text, originál, uložení, historie/koš/import, Orus/tempo 0,90 a souhlas pro konkrétní text i pokus se zachovají. Kód, provoz a skutečná média se tímto návrhem nemění. Předchozí vydání dcb89967 a účtenka Luna 127671e0 jsou poslední doložené p+n; dnes se nové p+n nespouští.
+- Další krok: na navazující zadání realizovat kompaktní panel a fyzicky přijmout jeho přehlednost. Koš, import a celá filmová časová osa zůstávají přijaté jen v již výslovně doloženém rozsahu. Návrh: memory/reports/camino_text_voice_ui_proposal_20261028.md.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí stav po p+n UI 1

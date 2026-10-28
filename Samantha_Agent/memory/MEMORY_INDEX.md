@@ -62,7 +62,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md`; `reports/camino_orus_integration_20261027.md` — 2026-10-27 18:34 CET: Orus/tempo −10 % publikované a nasazené do dcb89967 přes Lunu 127671e0, plná brána 2256 a smoke 5/5 PASS. Živé HTML shodné, editor Orus/0.9/ready=true, chráněné služby shodné. Souhlas/cena pro daný text, celý komentář bez retry zachované. Fyzické nové UI po obnově Cockpitu; výsledkový zápis místní pro příští balíček.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md`; `reports/camino_text_voice_ui_proposal_20261028.md` — 2026-10-28 08:54 CET: Míla přijal funkci textu/hlasu a zadal uložit návrh kompaktního UI. Dva užší výběry vedle sebe, kratší popisky, jeden blok Orus/cena/souhlas/tlačítko, sbalené doplňky. Pouze návrh a projektový zápis, bez implementace/p+n. Následuje realizace až na navazující zadání.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md`; `technical/luna_release_orchestration.md` — 2026-10-24 09:52 CEST: Oprava startovacího souběhu p+n je publikovaná/nasazená v e11d949a. Účtenka e47cdb394ec5441c5d25632f11c8c995 má potvrzený push 4 commitů a nasazení Cockpitu, plnou bránu 2186 a smoke 5/5. Nativní účtenku ověřil hlavní Adam; nový místní vývoj pokračuje v project-camino. Předchozí attention c3aba030 je historie a neopakuje se.
 
