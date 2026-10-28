@@ -98,3 +98,22 @@ a návrat 6 → 5. Bez volitelných postav a bez dveří do scény 7.
 Bezprostřední další krok: Mílův první obrazový/textový průchod a rozhodnutí
 o hlasech. Po doplnění všech stop následuje samostatná hlasová a fyzická
 přejímka; případné zveřejnění vyžaduje samostatný pokyn.
+
+### 2026-10-28 14:17 CET — Terra p+n: push potvrzený, Pages zablokované sovím audiem
+
+Hotovo:
+- Schválené dva commity včetně scény 6 jsou na GitHubu do 5564aec3. Místní pracovní náhled zachovaný; veřejné vydání scény zatím neproběhlo.
+
+Rozhodnutí:
+- Míla výslovně zadal „OK, terra p+n“. Jediné registrované submit_release(wait=True) zmrazilo projekt MMTX, oba heads a Terru 6.1/high; bez nativního pomocníka, přepínání modelu nebo retry.
+
+Další krok:
+- Vyřešit chybu sdíleného generování sovího audia před novým výslovným publikačním pokusem.
+
+Navrhované další kroky:
+- Doplnit 142 řečových stop scény 6 a provést skutečnou obrazovou/hlasovou přejímku; do té doby místní pracovní náhled.
+
+Technický důkaz:
+- Účtenka eab22667ea9a7286189f6fc1a1f563e2 attention, push_state=confirmed, deployment_state=uncertain, failure_phase=publish_requested; plná brána 2260 PASS / 481,8 s. GitHub main přesně 5564aec373f4e87c0187bc9a1d2d2f10dc338668 a lokální main 0/0 před tímto zápisem.
+- Pages workflow 40694554621 / build-pages 122837760412: Generate and verify today's owl before publication failure/exit20; Edge TTS websocket Invalid response status, upload i deploy skipped. Pro tento head není deployment, veřejná nová scéna HTTP404. Původní účtenka neměněná, žádná opakovaná publikace.
+- Caller účtenku převzal a Adam jednou ověřil GitHub, původní workflow a veřejný stav. returned_to_adam=false neprokazuje automatický portálový návrat. Závěrečné potvrzení protected_services_unchanged v neúspěšné účtence není; dostupný živý Cockpit má code_stamp b90aa847fa54ce76. Bez nového Cockpit deploymentu, zásahu do hlasů scény6 či souvisejících služeb.

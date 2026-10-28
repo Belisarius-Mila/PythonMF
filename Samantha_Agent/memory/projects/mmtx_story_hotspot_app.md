@@ -2,11 +2,11 @@
 
 ## Aktuální stav
 
-- 2026-10-28 13:35 CET: Terra 6.1 připravila místní pracovní náhled scény 6 „Příchod k jezeru“ podle schváleného TXT. Hlavní cesta má 72 replik EN/CZ, setkání s Daisy/Freddiem/Dotty/Olliem, čtyři nové ilustrace, čtyři bublinky a krátkou jezerní melodii. Čtyři volitelná setkání A–D a jejich větvení nejsou implementovaná.
-- Lokální napojení 5 → 6 až po dokončení mostu, návrat 6 → 5 i před spuštěním audia. Produkční docs a mirror jsou byteově shodné. Žádný nový push ani Pages/Cockpit deployment; poslední zde doložené veřejné vydání navigace 1–5 zůstává 0e1906b8.
-- BLOKÁTOR: původní řečové hlasy mají jen 2/144 stop (EN 000/001); chybí 142. Edge nejprve NoAudioReceived, jedna cílená zkouška doloženého kompatibilního endpointu HTTP 429. Další síťová generace zastavená, hlasy nenahrazené. Offline --check správně končí neúspěchem kvůli neúplnosti. Není to hotová hlasová hra pro dítě, které neumí číst.
-- Ověření: 71 cílených MMTX testů PASS včetně průchodu stavovým automatem, EN/CZ, Repeat, interakcí, dokončení, přerušení audia a vazby MP3 na text/hlas. Obě existující MP3 dekódované. Místní HTTP 200 a přesná shoda 13/13 zdrojů, ilustrace vizuálně zkontrolované. Browser/Safari/iPhone a skutečný lidský poslech NEOVĚŘENO; dostupný CUA nemá připojený prohlížeč.
-- Další krok: Mílova první obrazová/textová přejímka na Macu přes http://127.0.0.1:8802/scene06_lake_arrival/ a rozhodnutí o hlasech. Bez potvrzení dočasné náhrady zachovat původní přiřazení, chybějící audio dokončit až po odblokování služby. Obrazy jsou statické, některá komická gesta nejsou animovaná; report mmtx_scene06_lake_arrival_20261028.md.
+- 2026-10-28 14:17 CET: P+n přes Terru skončilo částečně. Oba schválené commity jsou na GitHubu do 5564aec373f4e87c0187bc9a1d2d2f10dc338668; Pages scény 6 se nezveřejnily. Účtenka eab22667ea9a7286189f6fc1a1f563e2: attention, push_state=confirmed, deployment_state=uncertain, return_channel=caller. Žádný automatický retry.
+- Plná publikační brána 2260 PASS / 481,8 s. Registrovaný cíl project-mmtx → github_pages, vykonavatel gpt-6.1-terra/high. GitHub/main jednou živě ověřené 0/0 na schváleném headu před výsledkovým zápisem.
+- Původní Pages běh 40694554621 nad přesným headem selhal v kroku „Generate and verify today's owl before publication“, výstup 20. Edge TTS websocket handshake odmítnutý (HTTP 200 Invalid response status). Upload i deploy se přeskočily; nový Pages deployment pro tento SHA chybí a veřejná scene06_lake_arrival/ vrací HTTP 404. Selhání je ve společném generování sovího audia; workflow se při této kontrole neměnilo a znovu nespouštělo.
+- Místní náhled scény 6 zůstává dostupný na Macu přes http://127.0.0.1:8802/scene06_lake_arrival/. Hlavní cesta bez options má 72 EN/CZ replik a čtyři ilustrace, 71 cílených MMTX testů PASS. Původní řečové audio stále pouze 2/144 stop, 142 chybí, hlasy nenahrazené. Browser/Safari/iPhone a poslech NEOVĚŘENO.
+- Další krok: vyřešit chybu společného Pages kroku generování sovího audia před novým výslovným publikačním pokusem; původní úspěšný push neopakovat. Odděleně zůstává doplnění hlasů scény 6 a přejímka. Výsledkový zápis je následný místní dokumentační checkpoint pro příští balíček; report mmtx_scene06_lake_arrival_20261028.md.
 
 ## Stav
 
@@ -413,3 +413,22 @@ Technický důkaz:
 - 71 MMTX testů PASS / 2,384 s; Node kontrola syntaxe a automatický stavový průchod PASS. HTTP 200 a přesná shoda 13/13 zdrojů. Čtyři ilustrace vizuálně zkontrolované, přesné prompty v image_prompts.txt, vestavěný ImageGen.
 - Audio pouze 2/144, 142 chybějících: první Edge dávka NoAudioReceived, jediná další sériová zkouška kompatibilního endpointu HTTP 429, pak zastavení. Existující EN000/001 FFmpeg dekódování PASS; --check exit 1 je očekávaná neúplnost. Reprodukovatelný builder chrání text/hlas/rate/SHA-256 a neprovádí automatický retry či přepis.
 - Žádný připojený browser, takže Safari/iPhone/proklik i lidský poslech NEOVĚŘENO; konzervativní výpočet geometrie je pouze pomocná kontrola. Statické obrazy nemají všechna navržená komická gesta; písnička je krátká syntetická melodie s postupným světlem bublin. Pracovní checkpoint, bez nového push/nasazení a bez zásahu do Camina.
+
+### 2026-10-28 14:17 CET — Terra p+n: push potvrzený, Pages zablokované sovím audiem
+
+Hotovo:
+- Schválené dva commity včetně scény 6 jsou na GitHubu do 5564aec3. Místní pracovní náhled zachovaný; veřejné vydání scény zatím neproběhlo.
+
+Rozhodnutí:
+- Míla výslovně zadal „OK, terra p+n“. Jediné registrované submit_release(wait=True) zmrazilo projekt MMTX, oba heads a Terru 6.1/high; bez nativního pomocníka, přepínání modelu nebo retry.
+
+Další krok:
+- Vyřešit chybu sdíleného generování sovího audia před novým výslovným publikačním pokusem.
+
+Navrhované další kroky:
+- Doplnit 142 řečových stop scény 6 a provést skutečnou obrazovou/hlasovou přejímku; do té doby místní pracovní náhled.
+
+Technický důkaz:
+- Účtenka eab22667ea9a7286189f6fc1a1f563e2 attention, push_state=confirmed, deployment_state=uncertain, failure_phase=publish_requested; plná brána 2260 PASS / 481,8 s. GitHub main přesně 5564aec373f4e87c0187bc9a1d2d2f10dc338668 a lokální main 0/0 před tímto zápisem.
+- Pages workflow 40694554621 / build-pages 122837760412: Generate and verify today's owl before publication failure/exit20; Edge TTS websocket Invalid response status, upload i deploy skipped. Pro tento head není deployment, veřejná nová scéna HTTP404. Původní účtenka neměněná, žádná opakovaná publikace.
+- Caller účtenku převzal a Adam jednou ověřil GitHub, původní workflow a veřejný stav. returned_to_adam=false neprokazuje automatický portálový návrat. Závěrečné potvrzení protected_services_unchanged v neúspěšné účtence není; dostupný živý Cockpit má code_stamp b90aa847fa54ce76. Bez nového Cockpit deploymentu, zásahu do hlasů scény6 či souvisejících služeb.
