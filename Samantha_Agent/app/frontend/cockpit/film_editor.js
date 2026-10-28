@@ -809,6 +809,17 @@
         anchor.addEventListener("change", () => { card.after_asset_id = anchor.value || null; change(); }); nodes.cards.appendChild(li);
       }
     }
+    function exportCreatedLabel(job) {
+      const value = job.created_at;
+      if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}T.*(?:Z|[+-]\d{2}:\d{2})$/.test(value)) return "Čas vytvoření není k dispozici";
+      const date = new Date(value);
+      if (!Number.isFinite(date.getTime())) return "Čas vytvoření není k dispozici";
+      const stamp = new Intl.DateTimeFormat("cs-CZ", {
+        timeZone: "Europe/Prague", day: "numeric", month: "numeric", year: "numeric",
+        hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23",
+      }).format(date);
+      return `Vytvořeno${job.created_at_estimated ? " přibližně" : ""} ${stamp}`;
+    }
     function renderJobs(jobs) {
       nodes.jobs.replaceChildren();
       deleteButtons = [];
@@ -827,7 +838,7 @@
       const completed = new Set(exports.filter(j => j.state === "ready").map(key));
       for (const job of exports.slice().reverse()) {
         const superseded = ["failed", "interrupted"].includes(job.state) && completed.has(key(job));
-        const li = text("li", `${job.profile === "final" ? "MP4 1080p" : "Náhled 720p"} · revize ${job.revision}${job.revision !== model.revision ? " (starší střih)" : ""}${job.range ? ` · dílčí úsek ${(job.range.start_ms / 1000).toFixed(1)}–${(job.range.end_ms / 1000).toFixed(1)} s` : ""} · ${superseded ? "Starší neúspěšný pokus; hotový výsledek je výše" : labels[job.state] || "Neznámý stav"}${job.state === "rendering" ? ` ${job.progress} %` : ""}`);
+        const li = text("li", `${job.profile === "final" ? "MP4 1080p" : "Náhled 720p"}${job.state === "ready" ? ` · ${exportCreatedLabel(job)}` : ""} · revize ${job.revision}${job.revision !== model.revision ? " (starší střih)" : ""}${job.range ? ` · dílčí úsek ${(job.range.start_ms / 1000).toFixed(1)}–${(job.range.end_ms / 1000).toFixed(1)} s` : ""} · ${superseded ? "Starší neúspěšný pokus; hotový výsledek je výše" : labels[job.state] || "Neznámý stav"}${job.state === "rendering" ? ` ${job.progress} %` : ""}`);
         if (job.message) li.appendChild(text("p", job.message));
         if (job.state === "ready" && safeOutput(job.url)) {
           const play = text("button", "Přehrát"); play.type = "button"; play.className = "secondary";

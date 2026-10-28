@@ -1,10 +1,11 @@
 # Camino
 
-Aktualizováno: 2026-10-28 12:21 CET — větší střižna nasazená přes Terru 6.1
+Aktualizováno: 2026-10-28 12:42 CET — datum a čas exportu místně doplněné
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Aktuální UI krok střižny
 
+- 2026-10-28 12:42 CET: Datum a čas vytvoření hotových MP4/náhledů místně doplněné před revizi. Nový export ukládá přesný UTC čas dokončení; starší používají pouze čtený mtime status.json a viditelné „přibližně“. Zobrazení česky v Europe/Prague včetně sekund a letního/zimního času. 69 cílených kontrol PASS / 41,071 s; plná brána 2260 testů PASS (494,814 s unit část, 501,4 s fáze). Bez nového p+n; poslední nasazený základ f336fd47 přes Terru. Report: memory/reports/camino_export_created_time_20261028.md.
 - 2026-10-28 12:21 CET: Větší okno a Celá obrazovka střižny jsou publikované a nasazené do f336fd47e0b77420baeab25683cbc2bb39441ed3. Registrovaný vykonavatel skutečně použil gpt-6.1-terra/high, účtenka 6bf0ff7d29efba5a7da3eff147e08d59: completed, 2 commity, push/deployment confirmed, project-camino → Cockpit. Výchozí šířka až 1680 px, Celá obrazovka/Zmenšit a Escape; při nepodpoře API plné okno prohlížeče.
 - Plná publikační brána 2258 PASS / 445,5 s, smoke 5/5, protected_services_unchanged=true. Předtím místní plná brána 2258 PASS (493,520 s unit část), 53 cílených kontrol rolí a 67 kontrol editoru/frontendu PASS. Adam převzal a jednou ověřil účtenku: GitHub/main přesně vydaný head, health i stránka HTTP 200, živé HTML přesně shodné se zdrojem; SHA-256 23faa858e96af264b405a3af1b7a5a78255d2e41eda3652d449b9a42393056dc, nové tlačítko přítomné. returned_to_adam=false je portálový příznak; terminálový caller výsledek převzal, neopakovat vydání.
 - Míla schválil cenu a zkoušku Terry při hlášeném vyčerpaném kreditu Luny. Kandidátský probe Terra/high prošel 11:01:43 UTC, bez publikace. Centrální release_executor zůstává preferovaně Terra/high do dalšího rozhodnutí; simple_developer se neměnil. Převzetí balíčku 26588 tokenů, odhad 0,6719 Standard kreditu za samotný tento tah (bez probe a Adama; není faktura). Report: memory/reports/terra_release_trial_20261028.md.

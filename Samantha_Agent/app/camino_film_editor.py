@@ -12,6 +12,7 @@ import re
 import sqlite3
 import stat
 import subprocess
+from datetime import datetime, timezone
 from functools import lru_cache
 from pathlib import Path
 from uuid import UUID, uuid4
@@ -410,6 +411,11 @@ class FilmEditor:
             if state["state"] == "ready":
                 item["url"] = f'/api/camino/film/output/{folder.name}/{directory.name}'
                 item["bytes"] = state["bytes"]
+                # Older exports have no explicit completion clock. Read their
+                # status-file time without rewriting any historical metadata.
+                item["created_at"] = state.get("completed_at") or datetime.fromtimestamp(
+                    (directory / "status.json").stat().st_mtime, timezone.utc).isoformat(timespec="seconds")
+                item["created_at_estimated"] = not bool(state.get("completed_at"))
             result.append(item)
         return result
 
@@ -560,6 +566,7 @@ class FilmEditor:
                                 revalidate=revalidate, **({"narration_paths": paths} if paths else {}))
                         revalidate()
                         atomic_write_json(state_path, {"state": "ready", "progress": 100,
+                            "completed_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
                             "output": str((attempt / "film.mp4").relative_to(directory)),
                             "bytes": receipt["bytes"], "sha256": receipt["sha256"]})
                     except Exception as error:

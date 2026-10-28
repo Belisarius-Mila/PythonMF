@@ -192,6 +192,18 @@ async function main() {
   view.jobs = [{job_id: pid, revision: 1, profile: "preview", range: {start_ms: 500, end_ms: 2500}, state: "failed"},
     {job_id: sid, revision: 1, profile: "preview", range: {start_ms: 500, end_ms: 2500}, state: "ready", url: `/api/camino/film/output/${pid}/${sid}`}];
   await editor.check(); assert(nodes.jobs.children[0].textContent.includes("starší střih"));
+  assert(nodes.jobs.children[0].textContent.includes("Čas vytvoření není k dispozici"));
+  view.jobs[1].created_at = "2026-10-28T11:34:56+00:00";
+  await editor.check();
+  assert.match(nodes.jobs.children[0].textContent, /Vytvořeno 28\.\s*10\.\s*2026.*12:34:56/);
+  assert(nodes.jobs.children[0].textContent.indexOf("Vytvořeno") < nodes.jobs.children[0].textContent.indexOf("revize"));
+  view.jobs[1].created_at = "2026-07-01T08:09:10Z"; view.jobs[1].created_at_estimated = true;
+  await editor.check();
+  assert.match(nodes.jobs.children[0].textContent, /Vytvořeno přibližně 1\.\s*7\.\s*2026.*10:09:10/);
+  view.jobs[1].created_at = "invalid-private-value";
+  await editor.check();
+  assert(nodes.jobs.children[0].textContent.includes("Čas vytvoření není k dispozici"));
+  assert(!nodes.jobs.children[0].textContent.includes("invalid-private-value"));
   assert(nodes.jobs.children[1].textContent.includes("Starší neúspěšný pokus"));
   assert.equal(nodes.jobs.children[1].children.length, 1, "a superseded failure only offers permanent deletion");
   assert.equal(nodes.jobs.children[1].children[0].textContent, "Smazat natrvalo");

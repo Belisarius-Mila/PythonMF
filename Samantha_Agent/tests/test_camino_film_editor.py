@@ -12,6 +12,7 @@ import subprocess
 import tempfile
 import threading
 import unittest
+from datetime import datetime, timezone
 from http.server import ThreadingHTTPServer
 from pathlib import Path
 from unittest.mock import patch, Mock
@@ -133,6 +134,37 @@ class EditorTests(unittest.TestCase):
         with patch("app.camino_film_render.render_edit", side_effect=self.fake_render): self.editor.run_queue(self.pid)
         selected = {"project_id": self.pid, "job_id": job["job_id"]}
         return payload, selected, self.store.root / self.pid / "jobs" / job["job_id"]
+
+    def test_export_completion_time_is_exact_and_survives_reads_and_duplicate_request(self):
+        instant = datetime(2026, 10, 28, 11, 34, 56, tzinfo=timezone.utc)
+        with patch("app.camino_film_editor.datetime") as clock:
+            clock.now.return_value = instant
+            payload, selected, folder = self.ready_export()
+        status = json.loads((folder / "status.json").read_text())
+        self.assertEqual(status["completed_at"], "2026-10-28T11:34:56+00:00")
+        original = {name: (folder / name).read_bytes() for name in ("request.json", "status.json")}
+        for _ in range(2):
+            job = self.editor.view()["jobs"][0]
+            self.assertEqual(job["created_at"], status["completed_at"])
+            self.assertFalse(job["created_at_estimated"])
+            self.assertEqual(job["job_id"], selected["job_id"])
+        self.editor.enqueue(payload, background=False)
+        self.editor.run_queue(self.pid)
+        self.assertEqual(original, {name: (folder / name).read_bytes() for name in original})
+
+    def test_old_export_time_is_estimated_from_metadata_without_migration(self):
+        _, _, folder = self.ready_export()
+        path = folder / "status.json"
+        status = json.loads(path.read_text()); status.pop("completed_at")
+        atomic_write_json(path, status)
+        stamp = datetime(2026, 7, 1, 8, 9, 10, tzinfo=timezone.utc).timestamp()
+        os.utime(path, (stamp, stamp))
+        before = path.read_bytes(), path.stat().st_mtime_ns
+        for _ in range(2):
+            job = self.editor.view()["jobs"][0]
+            self.assertEqual(job["created_at"], "2026-07-01T08:09:10+00:00")
+            self.assertTrue(job["created_at_estimated"])
+        self.assertEqual(before, (path.read_bytes(), path.stat().st_mtime_ns))
 
     def delete_payload(self, selected):
         plan = deletion_plan(self.editor, selected)
