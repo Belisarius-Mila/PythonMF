@@ -1,7 +1,7 @@
 # Camino — návrh kompaktního panelu textu a hlasu
 
 Datum: 2026-10-28. Pracovní proud: project-camino.
-Stav: návrh uložený na výslovný pokyn Míly; bez implementace a bez p+n.
+Stav: návrh publikovaný přes Lunu do 643c93ec; bez implementace nového UI.
 
 ## Podnět a cíl
 
@@ -97,10 +97,18 @@ Orus · tempo −10 %           Cena: …
 - Regrese opožděného pollu, zachování rozepsaného textu a pozice.
 - Nakonec fyzická přejímka Mílou v Safari; samotný automatický test ji nenahrazuje.
 
-## Rozsah nynějšího commitu
+## Rozsah návrhového commitu
 
 Pouze tento návrh a související projektové záznamy. Uživatelské potvrzení
 funkce textu a hlasu platí pro popsanou vyzkoušenou práci; nepotvrzuje
 automaticky všechny scénáře koše, importu a celé filmové časové osy.
 Kód, skutečné projekty a média se nemění. Implementace návrhu, případná
-delegace, publikace a nasazení potřebují navazující zadání.
+delegace a vydání jeho realizace potřebují navazující zadání.
+
+## 2026-10-28 09:41 CET — Publikace návrhu
+
+Míla výslovně zadal „Luna cc = p+n“. Jediný registrovaný submit_release s wait=True vydal oba čekající dokumentační commity. Účtenka 4b73bdbe1a6d9377f6e084dd26f20eb6: completed, head 643c93ecc88365e1d8016b06df362a11a2ac5d1d, push/deployment confirmed, project-camino → Cockpit, plná brána 2256 testů / 513,5 s, smoke 5/5, protected_services_unchanged=true.
+
+Jedna Adamova kontrola: živý GitHub přesně na vydaném headu, rozsah oproti dcb89967 pouze memory. Živé HTML HTTP 200 přesně shodné se zdrojem a SHA-256 768f4c4f47414927c3a1974f63b30b0d0199bba8daacb31224bc26cded16ce0a, health HTTP 200, code_stamp 296a14675318a23b. Publikovaný je návrh, nové rozložení zatím není v aplikaci.
+
+return_channel=caller převzal Adam zde v terminálu; automatické returned_to_adam=false není důvodem retry. Následný výsledkový zápis je místní pro příští balíček. Další krok zůstává realizace až na navazující zadání, pak fyzická přejímka přehlednosti.

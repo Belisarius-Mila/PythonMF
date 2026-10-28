@@ -62,7 +62,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md`; `reports/camino_text_voice_ui_proposal_20261028.md` — 2026-10-28 08:54 CET: Míla přijal funkci textu/hlasu a zadal uložit návrh kompaktního UI. Dva užší výběry vedle sebe, kratší popisky, jeden blok Orus/cena/souhlas/tlačítko, sbalené doplňky. Pouze návrh a projektový zápis, bez implementace/p+n. Následuje realizace až na navazující zadání.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md`; `reports/camino_text_voice_ui_proposal_20261028.md` — 2026-10-28 09:41 CET: Návrh kompaktního UI publikovaný/nasazený jako dokumentace do 643c93ec přes Lunu 4b73bdbe, plná brána 2256 a smoke 5/5 PASS. Pouze memory rozsah; funkční UI/Orus zachované, nové rozložení neimplementované. Míla přijal text/hlas; další krok realizace až na navazující zadání. Výsledkový zápis místní pro příští balíček.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md`; `technical/luna_release_orchestration.md` — 2026-10-24 09:52 CEST: Oprava startovacího souběhu p+n je publikovaná/nasazená v e11d949a. Účtenka e47cdb394ec5441c5d25632f11c8c995 má potvrzený push 4 commitů a nasazení Cockpitu, plnou bránu 2186 a smoke 5/5. Nativní účtenku ověřil hlavní Adam; nový místní vývoj pokračuje v project-camino. Předchozí attention c3aba030 je historie a neopakuje se.
 

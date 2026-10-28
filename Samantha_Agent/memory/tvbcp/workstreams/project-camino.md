@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-10-28 08:54 CET: Míla prakticky potvrdil, že práce s textem a převod na hlas fungují skvěle. Připomínka se týká přehlednosti: mnoho textu a široká výběrová pole pod sebou. Na výslovný pokyn je uložený návrh kompaktního panelu Text a komentář fotografie; nejde o implementaci.
-- Návrh: Text z deníku a Použití textu vedle sebe, hlavní text s krátkým stavem, jeden blok Orus/tempo/cena/souhlas/Vytvořit čtení, poslech a použití ve filmu. Originál na vyžádání, nahrávky/import/další možnosti sbalené, delší vysvětlení v Nápovědě. Důvod neaktivního tlačítka přímo u něj; souhlas a cena zůstávají viditelné.
-- Funkční hranice: celý text, originál, uložení, historie/koš/import, Orus/tempo 0,90 a souhlas pro konkrétní text i pokus se zachovají. Kód, provoz a skutečná média se tímto návrhem nemění. Předchozí vydání dcb89967 a účtenka Luna 127671e0 jsou poslední doložené p+n; dnes se nové p+n nespouští.
-- Další krok: na navazující zadání realizovat kompaktní panel a fyzicky přijmout jeho přehlednost. Koš, import a celá filmová časová osa zůstávají přijaté jen v již výslovně doloženém rozsahu. Návrh: memory/reports/camino_text_voice_ui_proposal_20261028.md.
+- 2026-10-28 09:41 CET: Návrh kompaktního panelu textu a hlasu je publikovaný a nasazený jako dokumentace do 643c93ecc88365e1d8016b06df362a11a2ac5d1d. Luna 4b73bdbe1a6d9377f6e084dd26f20eb6: completed, 2 commity, push/deployment confirmed, project-camino → Cockpit. Balíček obsahuje pouze memory soubory; nové rozložení zatím není implementované.
+- Publikační plná brána 2256 testů PASS / 513,5 s, smoke 5/5, protected_services_unchanged=true. Adam jednou převzal účtenku a ověřil GitHub/main přesně na 643c93ec, health HTTP 200 a živé HTML HTTP 200 přesně shodné se zdrojem. Code stamp 296a14675318a23b a HTML SHA-256 768f4c4f47414927c3a1974f63b30b0d0199bba8daacb31224bc26cded16ce0a potvrzují zachované funkční UI.
+- Míla prakticky přijal práci s textem a hlasem Orus/tempo 0,90. Uložený návrh: dva užší výběry vedle sebe, kratší popisky, souvislý blok Orus/cena/souhlas/tlačítko, originál na vyžádání a sbalené nahrávky/import/další možnosti. Zachovat celý text, souhlas pro konkrétní text a pokus, historii/koš/import a viditelný důvod neaktivního tlačítka.
+- Return caller účtenku skutečně převzal terminálový Adam; returned_to_adam=false není důvodem retry. Další krok: na navazující zadání realizovat kompaktní panel a fyzicky přijmout jeho přehlednost. Tento výsledkový zápis je místní pro příští GitHub balíček. Návrh: memory/reports/camino_text_voice_ui_proposal_20261028.md.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí stav po p+n UI 1
@@ -5150,3 +5150,26 @@ Navrhované další kroky:
 Technický důkaz:
 
 - Rozbor film_editor.js, styles.css a page.html; obecná šířka select 100 % a svislé seskupení dlouhých akcí. Návrh a přejímací scénáře jsou v camino_text_voice_ui_proposal_20261028.md. Pouze projektová dokumentace, bez změn funkčního kódu, skutečných dat, služby či telefonu. Předchozí vydání zůstává doložené zvlášť; automatizované funkční testy se kvůli návrhu neopakují.
+
+### 2026-10-28 09:41 CET — Luna p+n návrhu panelu dokončené
+
+Hotovo:
+
+- Návrh kompaktního panelu textu a hlasu je publikovaný v projektových podkladech. Stávající funkce střižny jsou zachované; nové uspořádání se teprve bude realizovat.
+
+Rozhodnutí:
+
+- Míla pokynem „Luna cc = p+n“ výslovně zadal předání čekajícího balíčku Luně. Vydané jsou dva dokumentační commity včetně výsledku předchozího p+n. Tímto krokem není zadaná implementace návrhu.
+
+Další krok:
+
+- Na navazující zadání realizovat kompaktní panel podle uloženého návrhu.
+
+Navrhované další kroky:
+
+- Fyzicky přijmout nové rozložení a zachování funkcí; zachovat přejímku historie/koše/importu a pozdější P2-F.
+
+Technický důkaz:
+
+- Účtenka 4b73bdbe1a6d9377f6e084dd26f20eb6: completed, 2 commity do 643c93ec, push/deployment confirmed, plná brána 2256 / 513,5 s, smoke 5/5, chráněné služby shodné. Jedna Adamova kontrola: GitHub/main přesně vydaný head, pouze memory diff; health a přesné HTML HTTP 200, code_stamp 296a14675318a23b.
+- Terminálový caller účtenku převzal. returned_to_adam=false neprokazuje automatický portálový návrat a není důvodem opakování. Tento následný výsledkový zápis je místní pro příští balíček; žádné nové audio API požadavky ani změny soukromých dat.
