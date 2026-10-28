@@ -1,5 +1,13 @@
 # MMTX: příběhová hotspot aplikace pro Matýska
 
+## Aktuální stav
+
+- 2026-10-28 13:35 CET: Terra 6.1 připravila místní pracovní náhled scény 6 „Příchod k jezeru“ podle schváleného TXT. Hlavní cesta má 72 replik EN/CZ, setkání s Daisy/Freddiem/Dotty/Olliem, čtyři nové ilustrace, čtyři bublinky a krátkou jezerní melodii. Čtyři volitelná setkání A–D a jejich větvení nejsou implementovaná.
+- Lokální napojení 5 → 6 až po dokončení mostu, návrat 6 → 5 i před spuštěním audia. Produkční docs a mirror jsou byteově shodné. Žádný nový push ani Pages/Cockpit deployment; poslední zde doložené veřejné vydání navigace 1–5 zůstává 0e1906b8.
+- BLOKÁTOR: původní řečové hlasy mají jen 2/144 stop (EN 000/001); chybí 142. Edge nejprve NoAudioReceived, jedna cílená zkouška doloženého kompatibilního endpointu HTTP 429. Další síťová generace zastavená, hlasy nenahrazené. Offline --check správně končí neúspěchem kvůli neúplnosti. Není to hotová hlasová hra pro dítě, které neumí číst.
+- Ověření: 71 cílených MMTX testů PASS včetně průchodu stavovým automatem, EN/CZ, Repeat, interakcí, dokončení, přerušení audia a vazby MP3 na text/hlas. Obě existující MP3 dekódované. Místní HTTP 200 a přesná shoda 13/13 zdrojů, ilustrace vizuálně zkontrolované. Browser/Safari/iPhone a skutečný lidský poslech NEOVĚŘENO; dostupný CUA nemá připojený prohlížeč.
+- Další krok: Mílova první obrazová/textová přejímka na Macu přes http://127.0.0.1:8802/scene06_lake_arrival/ a rozhodnutí o hlasech. Bez potvrzení dočasné náhrady zachovat původní přiřazení, chybějící audio dokončit až po odblokování služby. Obrazy jsou statické, některá komická gesta nejsou animovaná; report mmtx_scene06_lake_arrival_20261028.md.
+
 ## Stav
 
 Nový směr anglické hry pro Matýska byl oddělen od `anglictina_matysek_V3.py`.
@@ -385,3 +393,23 @@ Technický důkaz:
 - Publikace: commit `0e1906b8578d`, Pages run `34768695626`, deployment `6423781674`; HTTP 200 a byte-shoda všech 10 změněných veřejných souborů.
 - Plná brána 1 640/1 640, cílené MMTX testy 63/63; mirror 537/537 souborů shodný. Browser: 18 lokálních návratů/pokračování včetně Enter a dalších 18 skutečných kliknutí na veřejné produkci, vždy desktop 1440 × 900 a mobilní viewport 390 × 844, bez JS chyb.
 - Test se soustředil na navigaci a nastavoval dokončený stav; neověřoval znovu celý příběh a fyzický poslech na iPhonu. Následný dokumentační commit nemění nasazené webové soubory.
+
+
+### 2026-10-28 13:35 CET — Scéna 6: místní pracovní náhled bez volitelných setkání
+
+Hotovo:
+- Příchod k jezeru lze místně projít přes čtyři nová setkání až k písničce a zakončení. 72 krátkých replik EN/CZ, velké klikací cíle, Repeat, změna jazyka a napojení na pátou scénu. Čtyři nové ilustrace zachovávají původní postavy; kopie docs/mirror shodné.
+
+Rozhodnutí:
+- Míla výslovně schválil scénář vytvořený Terrou 6.1 a zadal stejné Terře jeho naprogramování bez options: vynechané Tilly/Pip/Lulu/Momo a volitelná větvení. Výběr nemění centrální role ani nepovoluje publikaci. Kvůli nedostupné službě nebyl bez potvrzení nahrazen žádný původní hlas.
+
+Další krok:
+- Mílův první obrazový/textový průchod místním náhledem a rozhodnutí o chybějících hlasech; bez náhrady dokončit původní audio až po odblokování Edge.
+
+Navrhované další kroky:
+- Po doplnění zvuku provést skutečnou hlasovou přejímku celé scény; potom samostatně rozhodnout o případném vydání.
+
+Technický důkaz:
+- 71 MMTX testů PASS / 2,384 s; Node kontrola syntaxe a automatický stavový průchod PASS. HTTP 200 a přesná shoda 13/13 zdrojů. Čtyři ilustrace vizuálně zkontrolované, přesné prompty v image_prompts.txt, vestavěný ImageGen.
+- Audio pouze 2/144, 142 chybějících: první Edge dávka NoAudioReceived, jediná další sériová zkouška kompatibilního endpointu HTTP 429, pak zastavení. Existující EN000/001 FFmpeg dekódování PASS; --check exit 1 je očekávaná neúplnost. Reprodukovatelný builder chrání text/hlas/rate/SHA-256 a neprovádí automatický retry či přepis.
+- Žádný připojený browser, takže Safari/iPhone/proklik i lidský poslech NEOVĚŘENO; konzervativní výpočet geometrie je pouze pomocná kontrola. Statické obrazy nemají všechna navržená komická gesta; písnička je krátká syntetická melodie s postupným světlem bublin. Pracovní checkpoint, bez nového push/nasazení a bez zásahu do Camina.

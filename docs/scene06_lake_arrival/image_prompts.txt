@@ -1,0 +1,14 @@
+Built-in image_gen, reference for each prompt: docs/scene05_log_bridge/scene05_friends_farewell_smooth_q90.webp
+Final project images converted to WebP q88.
+
+arrival.webp
+Create a wide children's 3D story illustration for the next chapter, keeping exactly the five character identities and costumes from reference: brown-eared puppy Benji green scarf backpack, white-gray rabbit Bunny, red squirrel Sunny yellow coat, fox Fiona pink coat purple scarf, badger Bruno green coat yellow vest holding lantern. They reach a luminous peaceful lake on dry grassy shore. A cloud reflected in water resembles rabbit ears. Warm expressive faces, coherent smooth high-quality 3D picture-book style as reference; scenic landscape composition, no text, no extra characters, no beaver. Characters visually identifiable and anatomically correct.
+
+duckfrog.webp
+Create a wide children's 3D story illustration matching reference and preserving all five characters exactly: puppy green scarf and backpack, gray-white rabbit, red squirrel yellow coat, fox pink coat purple scarf, badger green coat yellow vest with lantern. On dry grass beside lake a friendly little yellow duck greets rabbit and a small green frog with a large leaf drum greets the badger. Duck and frog prominent distinct and large in foreground; group nearby, beautiful sunny lake, polished smooth 3D storybook art, no text, no extra animals, no beaver.
+
+flyotter.webp
+Create a wide children's 3D story illustration matching reference and preserving five characters and outfits exactly: puppy green scarf and backpack, gray-white rabbit, red squirrel yellow coat, fox pink coat purple scarf, badger green coat yellow vest holding lantern. At sunny lake on dry grass a friendly conspicuous large dragonfly sitting on a blade of grass greets fox, and friendly otter sitting on dry rock offers two shells to squirrel. Dragonfly, otter and shells easy to see, group nearby, 3D storybook smooth high quality, no text, no extra animals or beaver.
+
+final.webp
+Create a wide children's 3D story illustration matching reference identity and style: five friends puppy green scarf backpack, gray-white rabbit, red squirrel yellow coat, fox pink coat purple scarf, badger green coat yellow vest with lantern sit safely on grass at a sunny lake. With them are a friendly yellow duck, green frog with leaf, dragonfly, and otter holding two shells. They celebrate a welcoming song around one large green leaf, expressive warm faces and joyful friendship, smooth polished 3D picture book, no text, no extra animals, no beaver.

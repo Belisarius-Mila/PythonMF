@@ -1,0 +1,14 @@
+{
+  "en/000": {
+    "rate": "-10%",
+    "sha256": "c7f6b4b5eae4eb7da4bcbc0a5e65a8fd8fb23e817c351c3ea700337316a9acaa",
+    "text": "Bye, Logan!",
+    "voice": "en-US-AnaNeural"
+  },
+  "en/001": {
+    "rate": "-10%",
+    "sha256": "69ea861c6bb6112060111c806286ccdba22bce0708094e19c649088a1b440fcd",
+    "text": "Bye, friends!",
+    "voice": "en-US-ChristopherNeural"
+  }
+}
