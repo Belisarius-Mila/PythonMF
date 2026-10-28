@@ -1,5 +1,15 @@
 # Obecna rutina pro automaticke opakujici se ukoly
 
+## 2026-10-28 14:45 CET — Zrušení soví automatiky zveřejněné
+
+Opravený balíček do 30d3c58b je na GitHubu a Pages. Terra p+n 6b2cea8e completed,
+push/deployment confirmed; plná publikační brána 2260 PASS/472,6 s. Workflow40699075925
+success a deployment 7387046778. Automatické soví TTS a denní cron jsou pryč;
+místní běžná rutina sovu nevolá. Historické soubory a přehrávač zachované.
+Na původní pokyn Terra p+n navázal po konkrétní Mílově opravě nový balíček;
+původní neúspěšná účtenka se neměnila ani znovu nespouštěla.
+Následný místní výsledkový zápis neprovádí další publikování.
+
 ## 2026-10-28 14:24 CET — Automatické soví audio zrušené lokálně
 
 Míla výslovně zrušil soví audio při opravě neúspěšné publikace MMTX.
@@ -509,3 +519,23 @@ Lokální stav: Publikace proběhla z izolovaného čistého main. Původní mai
 zůstává o tento veřejný commit pozadu kvůli existujícímu .git/index.lock
 z 07:23 CEST; nesouvisející změna Camina byla zachovaná. Tento projektový
 zápis je lokální v izolovaném checkoutu a sám nepotvrzuje další push ani nasazení Cockpitu.
+
+
+### 2026-10-28 14:45 CET — Soví automatika zrušená a MMTX veřejně nasazené
+
+Hotovo:
+- Automatické soví TTS už není součástí běžné místní rutiny ani sdílených Pages. Opravený web je zveřejněný; scéna 6 i přechod ze scény 5 se podávají ve správné verzi. Historické soubory a přehrávač zachované.
+
+Rozhodnutí:
+- Adam navázal na Mílův předchozí pokyn Terra p+n a konkrétní opravu „Soví audio zruš.“ Nové předání zmrazilo nový opravený balíček do 30d3c58b; původní neúspěšná účtenka zůstala zachovaná. Žádná změna hlasů scény 6 či centrálních rolí.
+
+Další krok:
+- Mílův obrazový/textový průchod veřejnou scénou 6.
+
+Navrhované další kroky:
+- Samostatně dokončit 142 řečových stop scény 6 a fyzickou/poslechovou přejímku.
+
+Technický důkaz:
+- Účtenka 6b2cea8ea2f983ae95be21cb287ee2e4 completed, push_state/deployment_state=confirmed, Terra 6.1/high, 2 commity do 30d3c58be7aee89d1003864a0c8b0335fe8e20f7. Publikační full gate 2260 PASS/472,6 s, protected_services_unchanged=true. Pages workflow 40699075925 success, deployment 7387046778.
+- Jedna Adamova kontrola: GitHub/main 0/0 na vydaném headu před tímto zápisem, HTTP 200 + přesná shoda 13/13 zdrojů. HTML SHA-256 f538f932e84b00eea2b817ea11610b7e407e2650c8885711b41bab628788b719. Nový build pouze Checkout→Configure Pages→Upload→Deploy, bez TTS a bez denního cronu.
+- return_channel=caller: terminálový Adam převzal a ověřil; returned_to_adam=false nepotvrzuje automatický portálový návrat a není důvodem retry. Předchozí gate 2260/511,838 s a 43 cílených kontrol/YAML PASS. Řeči scény 6 nadále 2/144 a fyzický browser/poslech NEOVĚŘENO. Následný lokální dokumentační checkpoint.

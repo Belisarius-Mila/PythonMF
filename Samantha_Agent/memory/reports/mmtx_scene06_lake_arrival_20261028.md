@@ -115,8 +115,8 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Účtenka eab22667ea9a7286189f6fc1a1f563e2 attention, push_state=confirmed, deployment_state=uncertain, failure_phase=publish_requested; plná brána 2260 PASS / 481,8 s. GitHub main přesně 5564aec373f4e87c0187bc9a1d2d2f10dc338668 a lokální main 0/0 před tímto zápisem.
-- Pages workflow 40694554621 / build-pages 122837760412: Generate and verify today's owl before publication failure/exit20; Edge TTS websocket Invalid response status, upload i deploy skipped. Pro tento head není deployment, veřejná nová scéna HTTP404. Původní účtenka neměněná, žádná opakovaná publikace.
-- Caller účtenku převzal a Adam jednou ověřil GitHub, původní workflow a veřejný stav. returned_to_adam=false neprokazuje automatický portálový návrat. Závěrečné potvrzení protected_services_unchanged v neúspěšné účtence není; dostupný živý Cockpit má code_stamp b90aa847fa54ce76. Bez nového Cockpit deploymentu, zásahu do hlasů scény6 či souvisejících služeb.
+- Pages workflow 40694554621 / build-pages 122837760412: Generate and verify today's owl before publication failure/exit20; Edge TTS websocket Invalid response status, upload i deploy skipped. Pro tento head není deployment, veřejná nová scéna HTTP 404. Původní účtenka neměněná, žádná opakovaná publikace.
+- Caller účtenku převzal a Adam jednou ověřil GitHub, původní workflow a veřejný stav. returned_to_adam=false neprokazuje automatický portálový návrat. Závěrečné potvrzení protected_services_unchanged v neúspěšné účtence není; dostupný živý Cockpit má code_stamp b90aa847fa54ce76. Bez nového Cockpit deploymentu, zásahu do hlasů scény 6 či souvisejících služeb.
 
 ### 2026-10-28 14:24 CET — Zrušení automatického sovího audia
 
@@ -130,7 +130,26 @@ Další krok:
 - Po úspěšné plné bráně a lokálním commitu nový samostatný Terra p+n; původní úspěšný push a neúspěšné vydání se neopakují automaticky.
 
 Navrhované další kroky:
-- Odděleně doplnit hlasové stopy scény6 a udělat fyzickou přejímku.
+- Odděleně doplnit hlasové stopy scény 6 a udělat fyzickou přejímku.
 
 Technický důkaz:
 - 43 cílených testů PASS včetně regrese, že ani při připraveném CSV běžná rutina nezavolá TTS ani nepřepíše app.js. Obě workflow kopie shodné a YAML validní; plná brána 2260 PASS (511,838 s unit část), log cancel_automatic_owl_gate_20261028.log. Žádné soubory smazané, žádná nová řečová síťová generace, žádný nový push/nasazení či restart.
+
+### 2026-10-28 14:45 CET — Soví automatika zrušená a MMTX veřejně nasazené
+
+Hotovo:
+- Automatické soví TTS už není součástí běžné místní rutiny ani sdílených Pages. Opravený web je zveřejněný; scéna 6 i přechod ze scény 5 se podávají ve správné verzi. Historické soubory a přehrávač zachované.
+
+Rozhodnutí:
+- Adam navázal na Mílův předchozí pokyn Terra p+n a konkrétní opravu „Soví audio zruš.“ Nové předání zmrazilo nový opravený balíček do 30d3c58b; původní neúspěšná účtenka zůstala zachovaná. Žádná změna hlasů scény 6 či centrálních rolí.
+
+Další krok:
+- Mílův obrazový/textový průchod veřejnou scénou 6.
+
+Navrhované další kroky:
+- Samostatně dokončit 142 řečových stop scény 6 a fyzickou/poslechovou přejímku.
+
+Technický důkaz:
+- Účtenka 6b2cea8ea2f983ae95be21cb287ee2e4 completed, push_state/deployment_state=confirmed, Terra 6.1/high, 2 commity do 30d3c58be7aee89d1003864a0c8b0335fe8e20f7. Publikační full gate 2260 PASS/472,6 s, protected_services_unchanged=true. Pages workflow 40699075925 success, deployment 7387046778.
+- Jedna Adamova kontrola: GitHub/main 0/0 na vydaném headu před tímto zápisem, HTTP 200 + přesná shoda 13/13 zdrojů. HTML SHA-256 f538f932e84b00eea2b817ea11610b7e407e2650c8885711b41bab628788b719. Nový build pouze Checkout→Configure Pages→Upload→Deploy, bez TTS a bez denního cronu.
+- return_channel=caller: terminálový Adam převzal a ověřil; returned_to_adam=false nepotvrzuje automatický portálový návrat a není důvodem retry. Předchozí gate 2260/511,838 s a 43 cílených kontrol/YAML PASS. Řeči scény 6 nadále 2/144 a fyzický browser/poslech NEOVĚŘENO. Následný lokální dokumentační checkpoint.

@@ -1,11 +1,12 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-10-28 14:17 CET: P+n přes Terru skončilo částečně. Oba schválené commity jsou na GitHubu do 5564aec373f4e87c0187bc9a1d2d2f10dc338668; Pages scény 6 se nezveřejnily. Účtenka eab22667ea9a7286189f6fc1a1f563e2: attention, push_state=confirmed, deployment_state=uncertain, return_channel=caller. Žádný automatický retry.
-- Plná publikační brána 2260 PASS / 481,8 s. Registrovaný cíl project-mmtx → github_pages, vykonavatel gpt-6.1-terra/high. GitHub/main jednou živě ověřené 0/0 na schváleném headu před výsledkovým zápisem.
-- Původní Pages běh 40694554621 nad přesným headem selhal v kroku „Generate and verify today's owl before publication“, výstup 20. Edge TTS websocket handshake odmítnutý (HTTP 200 Invalid response status). Upload i deploy se přeskočily; nový Pages deployment pro tento SHA chybí a veřejná scene06_lake_arrival/ vrací HTTP 404. Selhání je ve společném generování sovího audia; workflow se při této kontrole neměnilo a znovu nespouštělo.
-- Místní náhled scény 6 zůstává dostupný na Macu přes http://127.0.0.1:8802/scene06_lake_arrival/. Hlavní cesta bez options má 72 EN/CZ replik a čtyři ilustrace, 71 cílených MMTX testů PASS. Původní řečové audio stále pouze 2/144 stop, 142 chybí, hlasy nenahrazené. Browser/Safari/iPhone a poslech NEOVĚŘENO.
-- 2026-10-28 14:24 CET: Míla zrušil automatické soví audio. Místně odstraněná TTS závislost Pages a denní cron, místní denní rutina už soví úkol nevolá; soubory a přehrávač zachované. Změna zatím nepublikovaná. Další krok po plné bráně: nový samostatný Terra p+n. Hlasy scény6 zůstávají odděleně 2/144; report mmtx_scene06_lake_arrival_20261028.md.
+- 2026-10-28 14:45 CET: Automatické soví audio je zrušené a opravené Pages vydání dokončené do 30d3c58be7aee89d1003864a0c8b0335fe8e20f7. Sdílený workflow nemá denní cron, TTS krok ani Python/TTS instalaci; běžná místní rutina už soví generátor nevolá. Historická média, CSV, přehrávač a explicitní ruční nástroje zachované.
+- Terra p+n 6b2cea8ea2f983ae95be21cb287ee2e4 completed, push/deployment confirmed, 2 commity, project-mmtx → github_pages. Plná publikační brána 2260 PASS / 472,6 s; předtím místní plná brána 2260 PASS (511,838 s unit část), 43 cílených testů a YAML kontrola PASS. Chráněné služby beze změny podle účtenky.
+- Pages workflow 40699075925 success, deployment 7387046778 pro přesný head. Adamova jedna kontrola: GitHub/main shodné 0/0 před následným výsledkovým zápisem; veřejné HTTP 200 a přesné bajty 13/13 zdrojů scény 6 i napojení scény 5. HTML SHA-256 f538f932e84b00eea2b817ea11610b7e407e2650c8885711b41bab628788b719. Veřejná scéna https://belisarius-mila.github.io/PythonMF/scene06_lake_arrival/ .
+- Původní účtenka eab22667 zůstává historické attention/confirmed push/uncertain deployment; nebyla změněná ani automaticky opakovaná. Na původní pokyn „Terra p+n“ a navazující zrušení sovího audia navázalo nové předání nového opraveného commitu. Caller účtenku převzal, returned_to_adam=false není důvodem retry.
+- Scéna 6 je veřejný pracovní náhled hlavní cesty bez options: 72 EN/CZ replik, čtyři ilustrace a setkání s Daisy/Freddiem/Dotty/Olliem. Její vlastní řečové audio stále pouze 2/144, 142 chybí; hlasy nenahrazené. Statické obrazy a krátká syntetická melodie; browser/Safari/iPhone a lidský poslech NEOVĚŘENO.
+- Další krok: Mílův obrazový/textový průchod veřejnou scénou 6; její hlasové stopy a skutečná přejímka jsou samostatně otevřené. Následný výsledkový zápis je místní dokumentační checkpoint pro příští balíček, bez dalšího p+n.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: MMTX
@@ -1237,8 +1238,8 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Účtenka eab22667ea9a7286189f6fc1a1f563e2 attention, push_state=confirmed, deployment_state=uncertain, failure_phase=publish_requested; plná brána 2260 PASS / 481,8 s. GitHub main přesně 5564aec373f4e87c0187bc9a1d2d2f10dc338668 a lokální main 0/0 před tímto zápisem.
-- Pages workflow 40694554621 / build-pages 122837760412: Generate and verify today's owl before publication failure/exit20; Edge TTS websocket Invalid response status, upload i deploy skipped. Pro tento head není deployment, veřejná nová scéna HTTP404. Původní účtenka neměněná, žádná opakovaná publikace.
-- Caller účtenku převzal a Adam jednou ověřil GitHub, původní workflow a veřejný stav. returned_to_adam=false neprokazuje automatický portálový návrat. Závěrečné potvrzení protected_services_unchanged v neúspěšné účtence není; dostupný živý Cockpit má code_stamp b90aa847fa54ce76. Bez nového Cockpit deploymentu, zásahu do hlasů scény6 či souvisejících služeb.
+- Pages workflow 40694554621 / build-pages 122837760412: Generate and verify today's owl before publication failure/exit20; Edge TTS websocket Invalid response status, upload i deploy skipped. Pro tento head není deployment, veřejná nová scéna HTTP 404. Původní účtenka neměněná, žádná opakovaná publikace.
+- Caller účtenku převzal a Adam jednou ověřil GitHub, původní workflow a veřejný stav. returned_to_adam=false neprokazuje automatický portálový návrat. Závěrečné potvrzení protected_services_unchanged v neúspěšné účtence není; dostupný živý Cockpit má code_stamp b90aa847fa54ce76. Bez nového Cockpit deploymentu, zásahu do hlasů scény 6 či souvisejících služeb.
 
 ### 2026-10-28 14:24 CET — Zrušení automatického sovího audia
 
@@ -1252,7 +1253,26 @@ Další krok:
 - Po úspěšné plné bráně a lokálním commitu nový samostatný Terra p+n; původní úspěšný push a neúspěšné vydání se neopakují automaticky.
 
 Navrhované další kroky:
-- Odděleně doplnit hlasové stopy scény6 a udělat fyzickou přejímku.
+- Odděleně doplnit hlasové stopy scény 6 a udělat fyzickou přejímku.
 
 Technický důkaz:
 - 43 cílených testů PASS včetně regrese, že ani při připraveném CSV běžná rutina nezavolá TTS ani nepřepíše app.js. Obě workflow kopie shodné a YAML validní; plná brána 2260 PASS (511,838 s unit část), log cancel_automatic_owl_gate_20261028.log. Žádné soubory smazané, žádná nová řečová síťová generace, žádný nový push/nasazení či restart.
+
+### 2026-10-28 14:45 CET — Soví automatika zrušená a MMTX veřejně nasazené
+
+Hotovo:
+- Automatické soví TTS už není součástí běžné místní rutiny ani sdílených Pages. Opravený web je zveřejněný; scéna 6 i přechod ze scény 5 se podávají ve správné verzi. Historické soubory a přehrávač zachované.
+
+Rozhodnutí:
+- Adam navázal na Mílův předchozí pokyn Terra p+n a konkrétní opravu „Soví audio zruš.“ Nové předání zmrazilo nový opravený balíček do 30d3c58b; původní neúspěšná účtenka zůstala zachovaná. Žádná změna hlasů scény 6 či centrálních rolí.
+
+Další krok:
+- Mílův obrazový/textový průchod veřejnou scénou 6.
+
+Navrhované další kroky:
+- Samostatně dokončit 142 řečových stop scény 6 a fyzickou/poslechovou přejímku.
+
+Technický důkaz:
+- Účtenka 6b2cea8ea2f983ae95be21cb287ee2e4 completed, push_state/deployment_state=confirmed, Terra 6.1/high, 2 commity do 30d3c58be7aee89d1003864a0c8b0335fe8e20f7. Publikační full gate 2260 PASS/472,6 s, protected_services_unchanged=true. Pages workflow 40699075925 success, deployment 7387046778.
+- Jedna Adamova kontrola: GitHub/main 0/0 na vydaném headu před tímto zápisem, HTTP 200 + přesná shoda 13/13 zdrojů. HTML SHA-256 f538f932e84b00eea2b817ea11610b7e407e2650c8885711b41bab628788b719. Nový build pouze Checkout→Configure Pages→Upload→Deploy, bez TTS a bez denního cronu.
+- return_channel=caller: terminálový Adam převzal a ověřil; returned_to_adam=false nepotvrzuje automatický portálový návrat a není důvodem retry. Předchozí gate 2260/511,838 s a 43 cílených kontrol/YAML PASS. Řeči scény 6 nadále 2/144 a fyzický browser/poslech NEOVĚŘENO. Následný lokální dokumentační checkpoint.
