@@ -1,7 +1,7 @@
 # Camino — výška levého seznamu záběrů
 
 Datum: 2026-10-28. Proud: project-camino.
-Stav: místní implementace, čeká commit a výslovně zadané p+n Lunou.
+Stav: publikované a nasazené do 37ec47c6 přes Lunu; fyzická přejímka čeká.
 
 ## Zadání a rozsah
 
@@ -51,8 +51,8 @@ visual viewport, zachování pozice a stejných uzlů miniatur, slučování
 událostí, nulové další požadavky, skrytí/návrat, close/reopen/suspend,
 starý callback a fallback bez ResizeObserver/RAF. Samostatně PASS.
 
-Cílená sada: 102 PASS / 70,365 s (frontend, editor, foto vrstvy, Orus). Statická brána PASS; plnou publikační
-bránu provede Luna v zadaném p+n. Složený HTML kontrakt aktualizovaný:
+Cílená sada: 102 PASS / 70,365 s (frontend, editor, foto vrstvy, Orus). Statická brána PASS; plná publikační
+brána Luny 2257 testů PASS / 471,9 s, smoke 5/5. Složený HTML kontrakt aktualizovaný:
 631713 znaků, 11870 řádků, SHA-256
 3eb90bc9f8e36c18f7d7806c4fb5f8fab4c9c4e921f249d8ce0258ce275c98d3.
 
@@ -72,3 +72,11 @@ prázdné). Node geometrii nepovažujeme za fyzickou Safari přejímku.
 
 Fyzický výsledek je zatím NEOVĚŘENO. Navazující zjednodušení textu/hlasu
 je popsané v camino_text_voice_ui_proposal_20261028.md.
+
+## 2026-10-28 10:30 CET — Vydání a převzetí
+
+Jediný registrovaný submit_release s wait=True vydal celý přesný balíček. Účtenka 31d808ef56f854fb28dac81977d0c546: completed, 2 commity do 37ec47c6ee52d01920c4769ecf8e6371791fd297, push/deployment confirmed, project-camino → Cockpit, full gate 2257 / 471,9 s, smoke 5/5, protected_services_unchanged=true.
+
+Adam jednou převzal účtenku a ověřil živý GitHub/main přesně na vydaném headu, health HTTP 200 a úplnou shodu živého HTML se zdrojem a výše uvedeným SHA-256. Původní desktopový strop 60vh není podávaný; nové data-film=navigator a proměnné výšky jsou přítomné. Code stamp 296a14675318a23b se při čistě frontendové změně nezměnil.
+
+Return caller skutečně převzatý v terminálu. returned_to_adam=false není důvodem opakování. Fyzický browserový wheel/resize a Safari přejímka zůstávají NEOVĚŘENO; nástroje nemají připojený prohlížeč. Následný výsledkový zápis je místní pro příští GitHub balíček, bez dalšího automatického p+n.

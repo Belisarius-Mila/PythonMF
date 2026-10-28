@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-10-28 10:18 CET: Místně opravený levý seznam miniatur fotografií/videí: desktop využívá dostupnou výšku okna pod skutečnou hlavičkou, levý panel zůstává sticky při práci vpravo a seznam má vlastní scroll. Původní strop 60vh odstraněný, výška reaguje na resize, stavové hlášky a posun dialogu. Na úzké ploše zůstává kompaktní seznam nad editorem.
-- 102 cílených kontrol PASS / 70,365 s: frontend včetně nové geometrie navigace, editor, foto vrstvy a Orus. Kontrola zachování uzlů/pozice, slučování resize/scroll, odpojení při skrytí/zavření, fallback bez ResizeObserver/RAF a nulových dalších síťových/zapisovacích požadavků. Skutečný prohlížeč k nástrojům nepřipojený; fyzická přejímka po nasazení NEOVĚŘENO.
-- Míla výslovně zadal commit a plynulé předání Luně k p+n. Předchozí vydání 643c93ec/Luna 4b73bdbe publikovalo jen návrh textového panelu; tento krok realizuje pouze seznam miniatur. Kompaktní text/hlas zůstává další samostatný krok. Originály, skutečné projekty, hlasové souhlasy a backend se touto opravou neměnily.
-- Další krok: místní commit a schválené p+n registrovanou Lunou; potom fyzicky ověřit výšku, poslední položku seznamu a zachování pozice. Report: memory/reports/camino_film_navigation_height_20261028.md.
+- 2026-10-28 10:30 CET: Oprava levého seznamu miniatur publikovaná a nasazená do 37ec47c6ee52d01920c4769ecf8e6371791fd297. Luna 31d808ef56f854fb28dac81977d0c546: completed, 2 commity, push/deployment confirmed, project-camino → Cockpit. Desktop využívá dostupnou výšku pod hlavičkou, seznam má vlastní scroll a levý panel zůstává při práci vpravo sticky; na úzké ploše kompaktní zobrazení.
+- Publikační plná brána 2257 testů PASS / 471,9 s, smoke 5/5, protected_services_unchanged=true. Jedna Adamova kontrola: GitHub/main přesně 37ec47c6, health HTTP 200, živé HTML HTTP 200 přesně shodné se zdrojem; SHA-256 3eb90bc9f8e36c18f7d7806c4fb5f8fab4c9c4e921f249d8ce0258ce275c98d3, starý strop 60vh nepřítomný, nové ovládání výšky přítomné. Code stamp 296a14675318a23b je zachovaný, měnil se frontend.
+- 102 cílených kontrol PASS / 70,365 s včetně nové geometrie navigace, zachované pozice/uzlů, nulových dodatečných requestů a lifecycle. CUA nemá připojený prohlížeč; fyzická Safari přejímka nové výšky a skutečného wheel scrollu ještě NEOVĚŘENO. Backend, skutečné projekty, média a souhlasy Orusu beze změny.
+- Caller účtenku skutečně převzal terminálový Adam; returned_to_adam=false není důvodem retry. Další krok: po obnovení Cockpitu fyzicky ověřit výšku, poslední položku seznamu a zachování pozice. Kompaktní panel textu/hlasu zůstává navazující samostatný návrh. Tento výsledkový zápis je místní pro příští GitHub balíček. Report: memory/reports/camino_film_navigation_height_20261028.md.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí stav po p+n UI 1
@@ -5195,3 +5195,26 @@ Navrhované další kroky:
 Technický důkaz:
 
 - 102 cílených kontrol PASS / 70,365 s. Nový syntetický DOM scénář ověřuje dostupnou výšku, scroll, resize/hlášku, visual viewport, zachovanou pozici/uzly, žádné další requesty, lifecycle a fallback. HTML SHA-256 3eb90bc9f8e36c18f7d7806c4fb5f8fab4c9c4e921f249d8ce0258ce275c98d3. Bez připojeného prohlížeče nelze tvrdit fyzickou Safari přejímku. Report camino_film_navigation_height_20261028.md.
+
+### 2026-10-28 10:30 CET — Luna p+n výšky miniatur dokončené
+
+Hotovo:
+
+- Nasazená oprava levého seznamu záběrů využívá dostupnou výšku okna pod hlavičkou a umožňuje vlastní scroll při práci v dlouhém pravém panelu. Server podává přesně nové HTML/CSS/JS.
+
+Rozhodnutí:
+
+- Provedené výslovně zadané plynulé předání commitu Luně k p+n. Rozsah zůstává navigátor; nový kompaktní panel textu/hlasu se tímto krokem neimplementoval. Další rozhodnutí nevzniklo.
+
+Další krok:
+
+- Obnovit Cockpit a fyzicky ověřit plnou výšku, dojetí k poslední miniatuře, přidržení sloupce při práci vpravo a návrat od fotografie bez ztráty pozice.
+
+Navrhované další kroky:
+
+- Po přejímce na navazující zadání kompaktní textový/hlasový panel; zachovat přejímku historie/koše/importu a pozdější P2-F.
+
+Technický důkaz:
+
+- Účtenka 31d808ef56f854fb28dac81977d0c546: completed, 2 commity do 37ec47c6, push/deployment confirmed, plná brána 2257 / 471,9 s, smoke 5/5, chráněné služby shodné. Jedna Adamova kontrola: GitHub/main přesně vydaný head, health HTTP 200, přesné nové HTML HTTP 200, SHA-256 3eb90bc9f8e36c18f7d7806c4fb5f8fab4c9c4e921f249d8ce0258ce275c98d3 a odstraněný desktopový strop 60vh. Code stamp 296a14675318a23b zachovaný u frontendové změny.
+- Caller návrat převzatý zde v terminálu; returned_to_adam=false neprokazuje portálový automatický návrat a není důvodem opakování. Cílených 102 kontrol PASS; fyzický Safari proklik NEOVĚŘENO. Následný výsledkový zápis místní pro další GitHub balíček.
