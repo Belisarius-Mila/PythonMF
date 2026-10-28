@@ -1,11 +1,12 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-10-28 15:14 CET: Lokálně opravené výchozí otevření střižny. Nabízí poslední platný uložený střih napříč cestami podle času poslední editovací revize, nikoli dne fotografií, staré volby karty nebo konfiguračního výchozího projektu. Neupravovaný film používá čas svého založení.
-- Během otevřené práce zůstává ručně vybraný film při refreshi zachovaný; po zavření/otevření se nejnovější nabídka znovu ověří. Neplatný, soukromý či nedostupný film se nevybírá. Bez nového trvalého ukazatele, migrace, změny starých střihů, zdrojů či renderu.
-- Ověření: 86 cílených testů PASS / 31,137 s včetně Node průchodu, dvou cest se stejným názvem/dnem, staršího dne upraveného později, vynechání soukromého filmu, zachování bajtů/mtime a otevřeného dirty střihu. Metadata se porovnají před validací kandidáta; bez skenování exportních úloh ostatních filmů. Místní čtecí kontrola 0,771 s / 0,027 s, nikoli čas celé stránky. Browser/Safari/iPhone NEOVĚŘENO.
-- Nová oprava není publikovaná ani nasazená. Poslední funkční Cockpit vydání Camina je nadále 668321f8/Terra 8e735788 (čas vytvoření exportů; publikační 2260 PASS a smoke 5/5). Následné Pages vydání MMTX 30d3c58b bylo samostatný cíl.
-- Další krok: samostatné Terra p+n pro project-camino → Cockpit, potom po uloženém střihu obnovit stránku a přijmout výchozí nabídku, ruční volbu a nové otevření. Záznam: camino_film_resume_latest_20261028.md.
+- 2026-10-28 15:37 CET: Oprava výchozího otevření střižny je publikovaná a nasazená do 03b9047fb81a4c610fb097d7f8bad7f6e8cf18f2. Střižna nabízí poslední platný uložený střih napříč cestami podle času poslední editovací revize; během práce zachovává ruční výběr a při novém otevření nabídku znovu ověří.
+- Registrované Terra p+n df3e2ff061892d509ed9a09c354af6d6 completed, push/deployment confirmed, dva commity, project-camino → Cockpit, gpt-6.1-terra/high. Plná publikační brána 2262 PASS / 381,8 s, smoke 5/5, protected_services_unchanged=true. Předtím 86 cílených testů a rychlá statická brána PASS.
+- Jedna Adamova kontrola: GitHub/main přesně na vydaném headu 0/0 před tímto zápisem; health a stránka HTTP 200, živé HTML přesně odpovídá zdroji (SHA-256 d9c0bb7bb6c2b68f2be5203add479324757d7795f7bce51b14c7537695ed776c), code_stamp 693ef47d90d9a288. Živá nabídka resume_project patří ověřené cestě i katalogu; soukromé názvy, ID a obsah se do zápisu nekopírují.
+- Žádný nový trvalý ukazatel, migrace nebo přepis osobních střihů. Původní data a renderové revize zachované; mimo platná oprávnění/koš se film nevybere. Fyzický browser/Safari/iPhone výběr zatím NEOVĚŘENO.
+- Účtenku převzal a ověřil terminálový Adam. return_channel=caller, returned_to_adam=false nepotvrzuje automatický portálový návrat a nevyvolává retry.
+- Další krok: po uloženém střihu obnovit Cockpit a otevřít střižnu; přijmout poslední rozpracovaný film, ruční volbu, refresh bez přepnutí a nové otevření. Následný výsledkový zápis je místní dokumentační checkpoint pro další balíček, bez dalšího p+n. Report camino_film_resume_latest_20261028.md.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí stav po p+n UI 1
@@ -4145,3 +4146,22 @@ Navrhované další kroky:
 Technický důkaz:
 - Rychlá statická brána PASS. 86 cílených testů PASS / 31,137 s, nové regrese FAIL→PASS pro řazení podle poslední práce a návrat napříč cestami. Oprávnění/koš/manifest i textové vazby ověřené, neprocházejí se cizí exportní úlohy; hashy a mtime osobních revizí se nezapisují. Syntetické Node ověření staré volby, ručního refresh a opakovaného otevření PASS.
 - Kontrolní místní API 0,771 s / 0,027 s; soukromé názvy, ID a obsah do zápisu nevstupují. Frontend SHA-256 d9c0bb7bb6c2b68f2be5203add479324757d7795f7bce51b14c7537695ed776c. Skutečný browser/Safari/iPhone NEOVĚŘENO. Bez nového push/nasazení, produkčního renderu nebo změny telefonu/služby. Report camino_film_resume_latest_20261028.md.
+
+### 2026-10-28 15:37 CET — Terra p+n posledního rozpracovaného filmu dokončené
+
+Hotovo:
+- Cockpit podává opravenou střižnu s nabídkou posledního uloženého rozpracování napříč cestami. Aktuální HTML i serverová nabídka jsou živě ověřené; fyzická přejímka v prohlížeči zůstává otevřená.
+
+Rozhodnutí:
+- Míla výslovně zadal „Ok, terra p+n.“ Jeden registrovaný submit_release(wait=True) předal přesné dva commity a centrálně schválenou Terru 6.1/high; bez nativního pomocného agenta, změny modelu nebo retry.
+
+Další krok:
+- Po uloženém střihu obnovit Cockpit a ověřit poslední film po otevření, ruční volbu a opakované otevření.
+
+Navrhované další kroky:
+- Zachované dříve otevřené přejímky komentářů/importu a času vytvoření exportů.
+
+Technický důkaz:
+- Účtenka df3e2ff061892d509ed9a09c354af6d6 completed, push_state/deployment_state=confirmed, dva commity do 03b9047fb81a4c610fb097d7f8bad7f6e8cf18f2. Plná brána 2262 PASS / 381,8 s, smoke 5/5, protected_services_unchanged=true.
+- Jedna kontrola Adama: GitHub/main 0/0 na vydaném headu před zápisem, health/HTML HTTP 200 a přesná shoda HTML SHA-256 d9c0bb7bb6c2b68f2be5203add479324757d7795f7bce51b14c7537695ed776c, code_stamp 693ef47d90d9a288. Živé resume_project patří povolené cestě a ověřenému filmovému katalogu; osobní identifikátory ani data nejsou v zápisu.
+- Caller účtenku převzal; returned_to_adam=false nepotvrzuje automatický portálový návrat a není důvodem opakování. Předchozí 86 cílených testů PASS; browser/Safari/iPhone proklik NEOVĚŘENO. Následuje jen lokální výsledkový checkpoint, žádná další publikace.
