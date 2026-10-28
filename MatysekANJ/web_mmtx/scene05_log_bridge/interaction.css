@@ -287,3 +287,22 @@ button { font: inherit; }
   .final-scene, .story-state { transition-duration: 1ms; }
   .character-target { animation: none; }
 }
+
+/* Adult shortcut, matching the lower-left corner in preceding scenes. */
+.scene-quick-skip {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 16%;
+  height: 24%;
+  min-width: 44px;
+  min-height: 44px;
+  z-index: 22;
+  background: transparent;
+  cursor: pointer;
+}
+.scene-quick-skip:focus-visible {
+  outline: 3px solid rgba(255, 216, 107, 0.82);
+  outline-offset: -6px;
+}
+.scene:has(.dictionary-panel:not(.hidden)) .scene-quick-skip { display: none; }

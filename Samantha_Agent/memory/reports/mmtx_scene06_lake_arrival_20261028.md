@@ -153,3 +153,20 @@ Technický důkaz:
 - Účtenka 6b2cea8ea2f983ae95be21cb287ee2e4 completed, push_state/deployment_state=confirmed, Terra 6.1/high, 2 commity do 30d3c58be7aee89d1003864a0c8b0335fe8e20f7. Publikační full gate 2260 PASS/472,6 s, protected_services_unchanged=true. Pages workflow 40699075925 success, deployment 7387046778.
 - Jedna Adamova kontrola: GitHub/main 0/0 na vydaném headu před tímto zápisem, HTTP 200 + přesná shoda 13/13 zdrojů. HTML SHA-256 f538f932e84b00eea2b817ea11610b7e407e2650c8885711b41bab628788b719. Nový build pouze Checkout→Configure Pages→Upload→Deploy, bez TTS a bez denního cronu.
 - return_channel=caller: terminálový Adam převzal a ověřil; returned_to_adam=false nepotvrzuje automatický portálový návrat a není důvodem retry. Předchozí gate 2260/511,838 s a 43 cílených kontrol/YAML PASS. Řeči scény 6 nadále 2/144 a fyzický browser/poslech NEOVĚŘENO. Následný lokální dokumentační checkpoint.
+
+### 2026-10-28 15:58 CET — Obvyklá levá dolní zkratka ze scény 5 do scény 6, lokálně
+
+Hotovo:
+- Doplněný místní odkaz z levého dolního rohu páté scény přímo k jezeru. Funguje i před zahájením dialogu; běžné dokončovací dveře zachované.
+
+Rozhodnutí:
+- Míla chtěl otevření nové scény obvyklým kliknutím vlevo dole ve scéně 5. Převzít rozměry stávající zkratky ze scény 4, minimální cíl 44 px a vrstvu nad audio bránou. Při otevřeném slovníčku zkratku skrýt, aby nepřekrývala jeho položky.
+
+Další krok:
+- Samostatné p+n MMTX a fyzický proklik rohu scény 5; přímá URL scény 6 je veřejně dostupná už nyní.
+
+Navrhované další kroky:
+- Zachované doplnění řečí scény 6 a skutečná přejímka hlavního průchodu.
+
+Technický důkaz:
+- Rychlá statická brána PASS. 71 MMTX testů PASS / 2,262 s, odkaz i byteová shoda obou kopií ověřené. CSS má plochu 16%×24%, min. 44 px, z-index 22 nad audio bránou 20 a fokusový rámeček; cache parametr upravený. Skutečný browserový proklik NEOVĚŘENO. Bez nového push/publikace, bez změny audia nebo děje.
