@@ -117,3 +117,20 @@ Technický důkaz:
 - Účtenka eab22667ea9a7286189f6fc1a1f563e2 attention, push_state=confirmed, deployment_state=uncertain, failure_phase=publish_requested; plná brána 2260 PASS / 481,8 s. GitHub main přesně 5564aec373f4e87c0187bc9a1d2d2f10dc338668 a lokální main 0/0 před tímto zápisem.
 - Pages workflow 40694554621 / build-pages 122837760412: Generate and verify today's owl before publication failure/exit20; Edge TTS websocket Invalid response status, upload i deploy skipped. Pro tento head není deployment, veřejná nová scéna HTTP404. Původní účtenka neměněná, žádná opakovaná publikace.
 - Caller účtenku převzal a Adam jednou ověřil GitHub, původní workflow a veřejný stav. returned_to_adam=false neprokazuje automatický portálový návrat. Závěrečné potvrzení protected_services_unchanged v neúspěšné účtence není; dostupný živý Cockpit má code_stamp b90aa847fa54ce76. Bez nového Cockpit deploymentu, zásahu do hlasů scény6 či souvisejících služeb.
+
+### 2026-10-28 14:24 CET — Zrušení automatického sovího audia
+
+Hotovo:
+- V místním kódu je zrušené automatické soví TTS: Pages bez generování, Python/TTS instalace a denního cronu; místní rutina už soví úkol nevolá. Historické soubory i přehrávač zachované.
+
+Rozhodnutí:
+- Míla výslovně zadal „Soví audio zruš.“ Sdílený ruční Pages publisher a jeho ochrany zůstávají pro MMTX a další weby, bez závislosti na sovím audiu. Nový publikační pokus tímto krokem spuštěný nebyl.
+
+Další krok:
+- Po úspěšné plné bráně a lokálním commitu nový samostatný Terra p+n; původní úspěšný push a neúspěšné vydání se neopakují automaticky.
+
+Navrhované další kroky:
+- Odděleně doplnit hlasové stopy scény6 a udělat fyzickou přejímku.
+
+Technický důkaz:
+- 43 cílených testů PASS včetně regrese, že ani při připraveném CSV běžná rutina nezavolá TTS ani nepřepíše app.js. Obě workflow kopie shodné a YAML validní; plná brána 2260 PASS (511,838 s unit část), log cancel_automatic_owl_gate_20261028.log. Žádné soubory smazané, žádná nová řečová síťová generace, žádný nový push/nasazení či restart.

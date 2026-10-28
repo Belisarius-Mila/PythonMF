@@ -1,5 +1,24 @@
 # Obecna rutina pro automaticke opakujici se ukoly
 
+## 2026-10-28 14:24 CET — Automatické soví audio zrušené lokálně
+
+Míla výslovně zrušil soví audio při opravě neúspěšné publikace MMTX.
+Obě kopie sdíleného Pages workflow už negenerují řeč, neinstalují Python/TTS
+závislosti a nemají denní cron. Zůstává ruční workflow_dispatch a stávající
+Pages deployment se stejnými právy, skupinou souběhu a názvem používaným publisherem.
+Místní run_daily_tasks už soví úkol nespouští; obecný scheduler a jeho zámky
+zůstávají. Historické MP3, CSV texty, přehrávač ColorsAndNumbers i explicitní
+ruční generátor jsou zachované. Žádná nová TTS žádost ani systémová změna.
+
+Tato změna je zatím pouze v místním kódu. Původní p+n účtenka eab22667
+zůstává attention, push do 5564aec3 potvrzený, Pages nezveřejněné.
+Živé GitHub workflow se změní až po samostatně autorizovaném novém p+n.
+Nejde o doplnění chybějících hlasů scény 6, které zůstávají 2/144.
+Cíleně 43 testů PASS, obě kopie workflow shodné a YAML validní.
+Plná brána 2260 PASS (511,838 s unit část); log cancel_automatic_owl_gate_20261028.log.
+
+Následující starší datované části jsou historie původní soví automatiky.
+
 Aktuální navázání: viz časovaný záznam z 23. 10. 2026 na konci souboru.
 
 ## Aktuální stav 2026-09-29 — opravená automatická publikace sovy

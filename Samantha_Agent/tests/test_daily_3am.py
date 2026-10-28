@@ -79,12 +79,28 @@ class Daily3AmTests(unittest.TestCase):
         self.assertNotIn("git add", workflow)
         self.assertNotIn("git commit", workflow)
         self.assertNotIn("git push", workflow)
-        self.assertIn("python scripts/daily_3am.py --publish-owl", workflow)
+        self.assertIn("workflow_dispatch:", workflow)
+        self.assertNotIn("schedule:", workflow)
+        self.assertNotIn("daily_3am.py", workflow)
+        self.assertNotIn("edge-tts", workflow)
+        self.assertNotIn("actions/setup-python", workflow)
         self.assertNotIn("--window-start-hour", workflow)
         self.assertNotIn("continue-on-error", workflow)
-        self.assertLess(workflow.index("--publish-owl"), workflow.index("actions/upload-pages-artifact"))
         self.assertIn("needs: build-pages", workflow)
         self.assertEqual(workflow, (SCRIPT_PATH.parents[1] / '.github/workflows/samantha-daily-3am.yml').read_text())
+
+    def test_daily_routine_does_not_generate_cancelled_owl_audio(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            context, _ = self.publication_fixture(Path(tmp))
+            app = context.project_dir.parent / daily_3am.DOCS_COLORS_NUMBERS_APP_DIR / 'app.js'
+            before = app.read_bytes()
+            with patch.object(daily_3am, 'run_colors_numbers_owl_task', side_effect=AssertionError('Cancelled owl task ran')) as owl:
+                with patch.object(daily_3am, 'generate_mp3', side_effect=AssertionError('Unexpected TTS request')) as tts:
+                    result = daily_3am.run_daily_tasks(context)
+            owl.assert_not_called()
+            tts.assert_not_called()
+            self.assertEqual(result['tasks'][0]['status'], 'completed')
+            self.assertEqual(app.read_bytes(), before)
 
     def publication_fixture(self, root):
         project = root / 'Samantha_Agent'

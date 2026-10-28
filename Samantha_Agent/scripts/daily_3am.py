@@ -657,8 +657,8 @@ def mark_failed(context: DailyContext, error: str) -> None:
 def run_daily_tasks(context: DailyContext) -> dict:
     """Run configured daily work.
 
-    Concrete tasks keep their own date gates and write allowlists. Pages uses
-    the separate fail-closed publication mode; neither path commits or pushes.
+    Automatic owl speech was cancelled. Keep the scheduler available for
+    other maintenance; legacy owl helpers are explicit manual operations only.
     """
 
     logging.info("Daily 3 AM routine started for %s.", context.run_date)
@@ -671,7 +671,6 @@ def run_daily_tasks(context: DailyContext) -> dict:
                 "status": "completed",
                 "message": "Daily scheduler is active.",
             },
-            run_colors_numbers_owl_task(context),
         ]
     }
 
