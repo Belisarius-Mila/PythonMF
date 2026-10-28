@@ -300,6 +300,14 @@ class FilmEditor:
         validate_draft(record["draft"], manifest)
         return record
 
+    @staticmethod
+    def last_edited_ms(folder, revision):
+        path = folder / (f"edit-r{revision:06d}.json" if revision > 1 else "project-r1.json")
+        edited = path.stat(follow_symlinks=False)
+        if not stat.S_ISREG(edited.st_mode):
+            raise FilmError("Neplatný soubor uloženého střihu.")
+        return edited.st_mtime_ns // 1_000_000
+
     def catalog(self):
         dates = self.store.available_dates()
         projects = []
@@ -310,11 +318,12 @@ class FilmEditor:
                 jobs = self.jobs(folder)
                 projects.append({"project_id": project_id, "local_date": manifest["local_date"],
                                  "revision": edit["revision"],
+                                 "last_edited_ms": self.last_edited_ms(folder, edit["revision"]),
                                  "ready_exports": sum(j["state"] == "ready" and not j.get("source_asset_id") for j in jobs)})
             except (ClosedDayError, FilmError, OSError, ValueError, KeyError, TypeError):
                 # Never expose stale titles/counts after privacy or input changes.
                 continue
-        projects.sort(key=lambda p: (p["local_date"], p["project_id"]), reverse=True)
+        projects.sort(key=lambda p: (p["last_edited_ms"], p["local_date"], p["project_id"]), reverse=True)
         return {"ok": True, "days": [{"local_date": day} for day in dates], "projects": projects}
 
     def view(self, project_id=None):
@@ -612,6 +621,37 @@ def production_editor(*, trip_id=None, project_id=None):
                       if trip_id is not None or project_id is not None else production_store())
 
 
+def latest_saved_project(store, trip_ids):
+    # Rank saved edit metadata first. Only validate candidates until one is
+    # usable; opening the editor need not scan every other film's render jobs.
+    candidates = []
+    for project_id in store.project_ids():
+        try:
+            folder = store.root / project_id
+            paths = list(folder.glob("edit-r*.json"))
+            if any(p.is_symlink() or not re.fullmatch(r"edit-r[0-9]{6}\.json", p.name) for p in paths):
+                continue
+            revision = max([1, *(int(p.stem[6:]) for p in paths)])
+            candidates.append((FilmEditor.last_edited_ms(folder, revision), project_id))
+        except (FilmError, OSError, ValueError):
+            continue
+    for _, project_id in sorted(candidates, reverse=True):
+        try:
+            editor = production_editor(project_id=project_id)
+            if editor.store.trip_id not in trip_ids:
+                continue
+            folder, manifest = editor.inputs(project_id, cached_files=True)
+            edit = editor.revision(folder, manifest)
+            editor.verify_texts(manifest, edit["draft"], project_id=project_id)
+            return {"trip_id": editor.store.trip_id, "project_id": project_id,
+                    "local_date": manifest["local_date"],
+                    "last_edited_ms": editor.last_edited_ms(folder, edit["revision"])}
+        except (ClosedDayError, FilmError, FilePersistenceError, sqlite3.DatabaseError,
+                OSError, ValueError, KeyError, TypeError):
+            continue
+    return None
+
+
 def film_narration_import_action(payload, body):
     try:
         from app.camino_film_narration import import_narration
@@ -629,7 +669,9 @@ def film_editor_action(operation, payload=None):
             raise FilmError("Neplatná struktura filmového požadavku.")
         if operation == "trips":
             store = production_store()
-            return {"ok": True, "trips": store.travel_projects(), "default_trip_id": store.trip_id}
+            trips = store.travel_projects()
+            latest = latest_saved_project(store, {trip["id"] for trip in trips})
+            return {"ok": True, "trips": trips, "default_trip_id": store.trip_id, "resume_project": latest}
         if operation == "catalog":
             exact(payload or {}, "trip_id" if payload else "")
             editor = production_editor(trip_id=identifier(payload["trip_id"])) if payload else production_editor()

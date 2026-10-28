@@ -1542,3 +1542,11 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
 - Řešení nalezeno: 28102026
 - Řešení: sticky panel pod měřenou hlavičkou, flex seznam s min-height:0 a vlastním overflow. Výšku odvozovat od aktuální polohy a viditelného spodního okraje; resize a změny hlavičky/obsahu spojit přes RAF, posluchače odpojit při zavření či skrytí. Výpočet nesmí přestavovat miniatury, měnit draft nebo spouštět další requesty.
 - Ověření: syntetický DOM scénář geometrie/lifecycle a 102 cílených kontrol PASS. Skutečný browserový wheel/resize a Safari zůstávají samostatná přejímka; camino_film_navigation_height_20261028.md.
+
+### LL-088 — Poslední rozpracovaný film není nejnovější den fotografií
+
+- Problém: střižna otevírala starou volbu karty nebo konfigurační cestu; katalog řadil podle data zdrojů místo posledního uložení střihu.
+- Typ: opakující se
+- Řešení nalezeno: 28102026
+- Řešení: číst čas existující poslední editovací revize (u nového filmu project-r1), ověřit kandidáta proti současným oprávněním a nabídnout jej napříč cestami pouze při novém otevření. Při refreshi zachovat ruční/dirty výběr. Nejprve porovnat metadata; kvůli výběru nečíst exportní úlohy všech filmů. Čtení/render nesmí měnit hodiny uloženého střihu.
+- Ověření: 86 cílených kontrol PASS včetně dvou cest, staršího dne uloženého později, změny soukromí, read-only bajtů/mtime a Node stale/refresh/reopen. Místní čtení 0,771 s / 0,027 s; browserová přejímka zůstává samostatná. Report camino_film_resume_latest_20261028.md.

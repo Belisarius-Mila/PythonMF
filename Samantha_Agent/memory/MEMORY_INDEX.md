@@ -62,7 +62,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md`; `reports/camino_export_created_time_20261028.md` — 2026-10-28 13:03 CET: Čas vytvoření videí nasazený do 668321f8 přes Terru 6.1/high, účtenka 8e735788, 2260 PASS, smoke 5/5. Živé HTML přesně nové. Nové exporty přesný čas dokončení; starší přibližný bez přepisu. Safari přejímka času čeká; kompaktní text/hlas samostatně.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md`; `reports/camino_film_resume_latest_20261028.md` — 2026-10-28 15:14 CET: místně opravená výchozí nabídka posledního uloženého střihu napříč cestami podle editovací revize. Ruční volba při práci zachovaná; 86 testů PASS. Bez nového p+n, čeká Cockpit a fyzická přejímka. Předchozí čas exportů nasazený v 668321f8.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md`; `technical/luna_release_orchestration.md` — 2026-10-24 09:52 CEST: Oprava startovacího souběhu p+n je publikovaná/nasazená v e11d949a. Účtenka e47cdb394ec5441c5d25632f11c8c995 má potvrzený push 4 commitů a nasazení Cockpitu, plnou bránu 2186 a smoke 5/5. Nativní účtenku ověřil hlavní Adam; nový místní vývoj pokračuje v project-camino. Předchozí attention c3aba030 je historie a neopakuje se.
 

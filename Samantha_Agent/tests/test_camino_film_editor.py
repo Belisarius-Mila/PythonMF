@@ -95,6 +95,26 @@ class EditorTests(unittest.TestCase):
         with self.assertRaises(FilmError): self.editor.view(second)
         self.assertEqual(self.editor.view()["project_id"], self.pid)
 
+    def test_catalog_prefers_last_saved_edit_not_capture_day_or_export_time(self):
+        second = self.second_day()
+        first_edit = self.payload()
+        first_edit['draft']['shots'][0]['title'] = 'Resumed older day'
+        self.editor.save(first_edit)
+        first_path = self.store.root / self.pid / 'edit-r000002.json'
+        second_path = self.store.root / second / 'project-r1.json'
+        os.utime(second_path, ns=(2_000_000_000, 2_000_000_000))
+        os.utime(first_path, ns=(3_000_000_000, 3_000_000_000))
+        before = {p: (digest(p), p.stat().st_mtime_ns) for p in self.store.root.rglob('*') if p.is_file()}
+        catalog = self.editor.catalog()
+        self.assertEqual([p['project_id'] for p in catalog['projects']], [self.pid, second])
+        self.assertEqual(catalog['projects'][0]['last_edited_ms'], 3000)
+        self.assertEqual(before, {p: (digest(p), p.stat().st_mtime_ns) for p in before})
+        _, job = self.queue()
+        with patch('app.camino_film_render.render_edit', side_effect=self.fake_render):
+            self.editor.run_queue(self.pid)
+        # Reading/rendering a film does not update the saved draft clock.
+        self.assertEqual(self.editor.catalog()['projects'][0]['last_edited_ms'], 3000)
+
     def test_catalog_candidates_are_read_only_and_exclude_private_only_days(self):
         self.second_day(close=False, private_only=True)
         before = {p: digest(p) for p in self.root.rglob("*") if p.is_file()}

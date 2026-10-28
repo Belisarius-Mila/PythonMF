@@ -1,10 +1,11 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-10-28 13:03 CET: Datum a čas vytvoření hotových MP4/náhledů jsou publikované a nasazené do 668321f8446fad749a00d1adefc95e149f1cd867. Údaj je před revizí, česky v Europe/Prague včetně sekund. Nové výstupy mají přesný UTC čas dokončení; starší bez něj používají pouze čtený mtime status.json s označením „přibližně“, bez migrace nebo přepisu.
-- Registrované p+n 8e735788255921fdc8bbd83f491714fa: completed, gpt-6.1-terra/high, 2 commity, push/deployment confirmed, project-camino → Cockpit. Plná publikační brána 2260 PASS / 439,8 s, smoke 5/5, protected_services_unchanged=true. Předtím 69 cílených kontrol a místní plná brána 2260 PASS. Jedna Adamova kontrola: GitHub/main přesně 668321f8, health i stránka HTTP 200, živé HTML přesně shodné se zdrojem, SHA-256 e9fdd86775febeaa2c24d4e1d9422af75f09cb4d58bae1664fdf85a4f57c0ee6. Code stamp b90aa847fa54ce76; nový popisek přítomný.
-- Terminálový Adam účtenku převzal a zkontroloval; portálový příznak returned_to_adam=false není důvodem retry. Terra/high zůstává preferovaným vykonavatelem p+n do dalšího rozhodnutí Míly, simple_developer beze změny. Větší okno/fullscreen z předchozího kroku zůstávají nasazené.
-- Další krok: obnovit Cockpit a fyzicky ověřit datum u existujícího výstupu i nově dokončeného videa a jeho zachování po reloadu. Skutečný Safari proklik nového času NEOVĚŘENO; skutečný nový export nebyl při vývoji/p+n vytvářen. Kompaktní panel textu/hlasu zůstává samostatný návrh. Report: memory/reports/camino_export_created_time_20261028.md. Závěrečný zápis je místní dokumentační checkpoint pro příští balíček, bez další změny kódu.
+- 2026-10-28 15:14 CET: Lokálně opravené výchozí otevření střižny. Nabízí poslední platný uložený střih napříč cestami podle času poslední editovací revize, nikoli dne fotografií, staré volby karty nebo konfiguračního výchozího projektu. Neupravovaný film používá čas svého založení.
+- Během otevřené práce zůstává ručně vybraný film při refreshi zachovaný; po zavření/otevření se nejnovější nabídka znovu ověří. Neplatný, soukromý či nedostupný film se nevybírá. Bez nového trvalého ukazatele, migrace, změny starých střihů, zdrojů či renderu.
+- Ověření: 86 cílených testů PASS / 31,137 s včetně Node průchodu, dvou cest se stejným názvem/dnem, staršího dne upraveného později, vynechání soukromého filmu, zachování bajtů/mtime a otevřeného dirty střihu. Metadata se porovnají před validací kandidáta; bez skenování exportních úloh ostatních filmů. Místní čtecí kontrola 0,771 s / 0,027 s, nikoli čas celé stránky. Browser/Safari/iPhone NEOVĚŘENO.
+- Nová oprava není publikovaná ani nasazená. Poslední funkční Cockpit vydání Camina je nadále 668321f8/Terra 8e735788 (čas vytvoření exportů; publikační 2260 PASS a smoke 5/5). Následné Pages vydání MMTX 30d3c58b bylo samostatný cíl.
+- Další krok: samostatné Terra p+n pro project-camino → Cockpit, potom po uloženém střihu obnovit stránku a přijmout výchozí nabídku, ruční volbu a nové otevření. Záznam: camino_film_resume_latest_20261028.md.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí stav po p+n UI 1
@@ -5334,3 +5335,21 @@ Obnovit Cockpit a fyzicky ověřit čas u staršího a nového videa včetně re
 ### Technický důkaz
 
 Účtenka 8e735788255921fdc8bbd83f491714fa: completed, Terra 6.1/high, push/deploy confirmed do 668321f8, 2260 PASS, smoke 5/5, chráněné služby shodné. GitHub přesně odpovídá vydání; health a nové HTML HTTP 200, obsah přesně odpovídá zdroji. Skutečná Safari přejímka nového údaje NEOVĚŘENO.
+
+### 2026-10-28 15:14 CET — Poslední rozpracovaný film jako výchozí nabídka, lokálně
+
+Hotovo:
+- Střižna místně nabízí poslední platný uložený střih napříč cestami. Ruční volba zůstává při otevřené práci zachovaná a po novém otevření se nabídka znovu ověří.
+
+Rozhodnutí:
+- Míla požádal, aby se místo staršího Camino filmu nabízel poslední rozpracovaný. Použít existující čas poslední uložené revize, bez nového trvalého ukazatele nebo přepisu osobních střihů. Nové publikování či restart Cockpitu nebyly součástí tohoto kroku.
+
+Další krok:
+- Samostatné p+n do Cockpitu a potom skutečná přejímka výchozí nabídky po otevření.
+
+Navrhované další kroky:
+- Zachované dříve otevřené přejímky editoru, komentářů/importu a času vytvoření exportů.
+
+Technický důkaz:
+- Rychlá statická brána PASS. 86 cílených testů PASS / 31,137 s, nové regrese FAIL→PASS pro řazení podle poslední práce a návrat napříč cestami. Oprávnění/koš/manifest i textové vazby ověřené, neprocházejí se cizí exportní úlohy; hashy a mtime osobních revizí se nezapisují. Syntetické Node ověření staré volby, ručního refresh a opakovaného otevření PASS.
+- Kontrolní místní API 0,771 s / 0,027 s; soukromé názvy, ID a obsah do zápisu nevstupují. Frontend SHA-256 d9c0bb7bb6c2b68f2be5203add479324757d7795f7bce51b14c7537695ed776c. Skutečný browser/Safari/iPhone NEOVĚŘENO. Bez nového push/nasazení, produkčního renderu nebo změny telefonu/služby. Report camino_film_resume_latest_20261028.md.

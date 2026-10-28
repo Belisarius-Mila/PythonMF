@@ -22,6 +22,7 @@ const valid = (project_id, local_date, trip_id = tripA) => ({trip_id, ok: true, 
 let catalog = {ok: true, days: [dayC, dayB, dayA].map(local_date => ({local_date})),
   projects: [project(pidB, dayB), project(pidA, dayA)]};
 let otherCatalog = {ok: true, days: [{local_date:dayA}], projects:[project(otherPid, dayA)]};
+let resumeProject = null;
 const context = {window: {}, URLSearchParams, console, crypto: require("node:crypto")}; vm.createContext(context);
 vm.runInContext(fs.readFileSync("app/frontend/cockpit/film_library.js", "utf8"), context);
 function fixture(savedStorage = new Map()) {
@@ -35,7 +36,7 @@ function fixture(savedStorage = new Map()) {
   fetcher = async (url, options = {}) => {
     calls.push({url, options});
     if (url === "/api/camino/film/project-trash") return response({ok:true,requests:[]});
-    if (url === "/api/camino/film/trips") return response({ok:true, default_trip_id:tripA,
+    if (url === "/api/camino/film/trips") return response({ok:true, default_trip_id:tripA, resume_project:resumeProject,
       trips:[{id:tripA,name:"Same holiday",status:"active"},{id:tripB,name:"Same holiday",status:"archived"}]});
     if (url.startsWith("/api/camino/film/catalog?")) {
       const selected = new URL(url,"http://localhost").searchParams.get("trip_id");
@@ -185,6 +186,29 @@ async function main() {
   assert(trash.children[0].textContent.startsWith("Pouze film"));
   assert.equal(controlCalls.filter(x => x.operation === "confirm").length,1,"film request alone is not confirmation");
   assert(!controlCalls.some(x => x.operation === "trip"),"whole-trip initiation is absent on Mac");
+  // A new opening resumes actual saved work on the server, even on another
+  // journey, instead of the old tab's saved selection or configured default.
+  otherCatalog = {ok:true, days:[{local_date:dayA}], projects:[project(otherPid,dayA)]};
+  resumeProject = {trip_id:tripB, project_id:otherPid, local_date:dayA};
+  const stale = new Map([["samantha.camino.film.selection.v2",
+    JSON.stringify({trip_id:tripA,project_id:pidA,local_date:dayA})]]);
+  const resumed = fixture(stale); await resumed.library.open();
+  assert.equal(resumed.opened.at(-1),otherPid,"last saved film overrides stale tab/default journey");
+  assert.equal(resumed.nodes.caminoFilmTrip.value,tripB);
+  await resumed.library.chooseTrip(tripA);
+  await resumed.library.choose({trip_id:tripA,project_id:pidA,local_date:dayA});
+  await resumed.library.refresh();
+  assert.equal(resumed.opened.at(-1),pidA,"refresh keeps an explicit current choice");
+  resumed.mayClose = false;
+  await resumed.library.refresh();
+  assert.equal(resumed.opened.at(-1),pidA,"latest work elsewhere never replaces an open edit");
+  resumed.mayClose = true; resumed.library.close(); await resumed.library.open();
+  assert.equal(resumed.opened.at(-1),otherPid,"reopening rechecks the most recent saved work");
+  const invalidResume = fixture();
+  resumeProject = {trip_id:"00000000-0000-0000-0000-000000000999",project_id:otherPid,local_date:dayA};
+  await invalidResume.library.open();
+  assert.equal(invalidResume.opened.length,0,"resume outside the verified journey list is refused");
+  resumeProject = null;
   console.log("Camino film library frontend: PASS");
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });

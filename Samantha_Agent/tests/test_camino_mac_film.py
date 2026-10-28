@@ -2,6 +2,7 @@
 import hashlib
 import http.client
 import json
+import os
 import sqlite3
 import subprocess
 import tempfile
@@ -220,6 +221,24 @@ class MultiProjectFilmTests(unittest.TestCase):
     def close_both(self):
         return (self.store.close_mac_day(self.day,confirmed=True)['project_id'],
                 self.other.close_mac_day(self.day,confirmed=True)['project_id'])
+
+    def test_resume_project_uses_latest_saved_film_across_trips_and_is_read_only(self):
+        from app.camino_film_editor import film_editor_action
+        self.assertIsNone(film_editor_action('trips')['resume_project'])
+        a, b = self.close_both()
+        os.utime(self.store.root / a / 'project-r1.json', ns=(1_000_000_000, 1_000_000_000))
+        os.utime(self.store.root / b / 'project-r1.json', ns=(2_000_000_000, 2_000_000_000))
+        before = self.hashes(self.root)
+        with patch('app.camino_film_editor.FilmEditor.jobs', side_effect=AssertionError('Unneeded render job scan')):
+            result = film_editor_action('trips')
+        self.assertEqual(result['default_trip_id'], self.f.trip.id)
+        self.assertEqual(result['resume_project'], {'trip_id':self.b.trip.id,
+            'project_id':b, 'local_date':self.day, 'last_edited_ms':2000})
+        self.assertEqual(before, self.hashes(self.root))
+        # A now-private newest project must never remain the resume target.
+        self.f.send('update_metadata', {'moment_id':self.b.moment.id, 'change':{
+            'type':'privacy', 'new_privacy':'owner_only', 'user_action':'lock'}}, expected=1)
+        self.assertEqual(film_editor_action('trips')['resume_project']['project_id'], a)
 
     def test_same_name_and_day_catalog_edit_and_binding_keep_original_archive(self):
         from app.camino_film_editor import production_editor, film_editor_action

@@ -214,7 +214,10 @@
             new Set(data.trips.map(t => t.id)).size !== data.trips.length ||
             data.trips.some(t => !validId(t.id) || typeof t.name !== "string" || !["active", "archived"].includes(t.status))) throw new Error("invalid trips");
         journeys = data;
-        const saved = selection || remembered();
+        const resume = data.resume_project;
+        if (resume != null && (!validId(resume.trip_id) || !validId(resume.project_id) ||
+            !validDate(resume.local_date) || !data.trips.some(t => t.id === resume.trip_id))) throw new Error("invalid resume project");
+        const saved = selection || resume || remembered();
         const tripId = saved?.trip_id || data.default_trip_id;
         if (!data.trips.some(t => t.id === tripId)) {
           unavailable("Vybraná cesta není v Mac archivu. Vyber jiný projekt."); renderTrips(); return;
@@ -289,7 +292,7 @@
     });
     return {
       open() { active = true; stop(timer); timer = every(refresh, 60000); return refresh(); },
-      close() { options.clearFeedback?.(); active = false; ++epoch; ++read; ++catalogRead; stop(timer); clearSummary(); editor.close(); },
+      close() { options.clearFeedback?.(); active = false; ++epoch; ++read; ++catalogRead; stop(timer); clearSummary(); editor.close(); selection = null; },
       refresh, check, choose, chooseTrip, createProject,
     };
   }
