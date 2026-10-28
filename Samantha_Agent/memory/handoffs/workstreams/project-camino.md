@@ -1,6 +1,7 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-10-28 12:02 CET: Míla schválil cenu a pokus Terry 6.1 pro p+n při hlášeném vyčerpání Luny. Skutečný kandidátský probe Terra/high PASS (11:01:43 UTC); centrální release_executor preferuje Terru do dalšího rozhodnutí. simple_developer beze změny. Připravuje se jediné p+n celého balíčku s fullscreen e95b9874; Plná místní brána 2258 testů PASS (493,520 s unit část; 502,1 s fáze), 53 cílených testů rolí/předání PASS. Důkaz logs/terra_release_precommit_gate_20261028.log. Ostré vydání zatím čeká. Report: memory/reports/terra_release_trial_20261028.md.
 - 2026-10-28 11:50 CET: Větší okno a přepínač Celá obrazovka jsou hotové místně. Základní šířka až 1680 px, okraje 12 px. Tlačítko zvětší střižnu na celou obrazovku; při nepodpoře/odmítnutí API vyplní okno prohlížeče. Zmenšit nebo první Escape vrací běžnou velikost bez zavření filmu. Zavření respektuje původní ochranu neuloženého střihu.
 - 67 cílených kontrol PASS / 38,739 s; nové scénáře nativního fullscreen, fallbacku, Escape, přepočtu navigace a opožděného vstupu po zavření. Přepnutí nepřestavuje editor, nemění draft ani nevolá média/Orus. Skutečná Safari přejímka tohoto nového režimu NEOVĚŘENO. Report: memory/reports/camino_film_window_20261028.md.
 - Míla v této konverzaci přijal předchozí opravu miniatur: „Funguje super“. Poslední p+n 226b44f2e1aa9eea783f91a5e66429dd dokončilo 205789da; push/deployment confirmed, plná brána 2257 PASS, smoke 5/5. To je nasazený základ, nový fullscreen krok zatím bez push/nasazení.

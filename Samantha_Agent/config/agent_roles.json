@@ -3,13 +3,19 @@
   "roles": {
     "release_executor": {
       "label": "Vykonavatel p+n",
-      "preferred_model": "gpt-6-luna",
+      "preferred_model": "gpt-6.1-terra",
       "approved_models": [
         {
           "model": "gpt-6-luna",
           "reasoning_effort": "high",
           "cost_review": "Mila 2026-10-17: approved current budget executor; no automatic upgrade",
           "dry_run_evidence": "logs/luna_general_live_dry_run_20261017.log"
+        },
+        {
+          "model": "gpt-6.1-terra",
+          "reasoning_effort": "high",
+          "cost_review": "Mila 2026-10-28 approved trial and p+n: Standard credits/MTok 25 input, 1.25 cached, 125 output; Luna quota reported exhausted. https://learn.chatgpt.com/docs/pricing",
+          "dry_run_evidence": "data/private/communication/release_candidate_probes/terra_20261028.json"
         }
       ]
     },
