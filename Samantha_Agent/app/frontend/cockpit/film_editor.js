@@ -16,7 +16,7 @@
     const nodes = Object.fromEntries(["status", "shots", "voices", "jobs", "save", "preview", "final",
       "range", "from", "to", "duck", "player", "reload", "source", "sourcePlayer", "sourceStatus",
       "sourceTitle", "selection", "start", "end", "playSelection", "texts", "cards", "blocked", "saveReason",
-      "shotNav", "shotTitle", "overview", "visual", "visualImage", "videoPlaceholder", "openSource", "watch", "watchReason", "outputs",
+      "shotNav", "navigator", "shotTitle", "overview", "visual", "visualImage", "videoPlaceholder", "openSource", "watch", "watchReason", "outputs",
       "enlarge", "photoDialog", "photoDialogTitle", "photoDialogClose", "photoDialogBody", "photoDialogStatus"].map(key =>
       [key, root.querySelector(`[data-film="${key}"]`) || options.toolbar?.querySelector(`[data-film="${key}"]`)]));
     let model = null, active = false, dirty = false, saving = false, version = 0, epoch = 0;
@@ -28,6 +28,57 @@
     let position = null, shotNodes = new Map(), exportStatus = "", sourceState = "";
     let viewSelected = null, navButtons = new Map(), navLabels = new Map(), watchJob = null, playbackGeneration = 0;
     let photoViewer = null;
+    const view = options.window || doc.defaultView;
+    let layoutHost = null, layoutHeader = null, layoutObserver = null, layoutFrame = null;
+    function fitNavigation() {
+      if (!active || doc.hidden || !layoutHost || !nodes.navigator) return;
+      const style = nodes.navigator.style;
+      if (view.innerWidth <= 720) {
+        style.removeProperty("--film-nav-top"); style.removeProperty("--film-nav-height"); return;
+      }
+      const host = layoutHost.getBoundingClientRect(), header = layoutHeader.getBoundingClientRect();
+      const nav = nodes.navigator.getBoundingClientRect(), viewport = view.visualViewport;
+      if (!(host.height > 0) || !(view.innerHeight > 0)) return;
+      const bottom = Math.min(host.bottom, viewport ? viewport.offsetTop + viewport.height : view.innerHeight) - 12;
+      const top = Math.max(nav.top, header.bottom + 10);
+      const values = {"--film-nav-top": `${Math.max(0, Math.ceil(header.bottom - host.top + 10))}px`,
+        "--film-nav-height": `${Math.max(0, Math.floor(bottom - top))}px`};
+      for (const [key, value] of Object.entries(values)) {
+        if (style.getPropertyValue(key) !== value) style.setProperty(key, value);
+      }
+    }
+    function scheduleNavigationLayout() {
+      if (!active || doc.hidden || layoutFrame !== null) return;
+      if (!view?.requestAnimationFrame) { fitNavigation(); return; }
+      layoutFrame = view.requestAnimationFrame(() => { layoutFrame = null; fitNavigation(); });
+    }
+    function startNavigationLayout() {
+      if (layoutHost || !nodes.navigator?.style || !view?.addEventListener) return;
+      const host = root.closest?.(".modal"), header = host?.querySelector?.(".modal-header");
+      if (!host || !header) return;
+      layoutHost = host; layoutHeader = header;
+      host.addEventListener("scroll", scheduleNavigationLayout, {passive: true});
+      view.addEventListener("resize", scheduleNavigationLayout, {passive: true});
+      view.visualViewport?.addEventListener("resize", scheduleNavigationLayout, {passive: true});
+      view.visualViewport?.addEventListener("scroll", scheduleNavigationLayout, {passive: true});
+      const Observer = options.ResizeObserver || view.ResizeObserver;
+      if (Observer) {
+        layoutObserver = new Observer(scheduleNavigationLayout);
+        for (const target of [host, header, host.querySelector(".modal-body")].filter(Boolean)) layoutObserver.observe(target);
+      }
+      scheduleNavigationLayout();
+    }
+    function stopNavigationLayout() {
+      layoutObserver?.disconnect(); layoutObserver = null;
+      layoutHost?.removeEventListener("scroll", scheduleNavigationLayout);
+      view?.removeEventListener?.("resize", scheduleNavigationLayout);
+      view?.visualViewport?.removeEventListener("resize", scheduleNavigationLayout);
+      view?.visualViewport?.removeEventListener("scroll", scheduleNavigationLayout);
+      if (layoutFrame !== null) view?.cancelAnimationFrame?.(layoutFrame);
+      layoutFrame = null; layoutHost = null; layoutHeader = null;
+      nodes.navigator?.style?.removeProperty("--film-nav-top");
+      nodes.navigator?.style?.removeProperty("--film-nav-height");
+    }
     function closePhoto(restoreFocus = true) {
       const viewer = photoViewer; photoViewer = null;
       viewer?.image.removeAttribute("src");
@@ -394,6 +445,7 @@
       syncSelection();
       renderNavigation();
       restorePosition(saved);
+      scheduleNavigationLayout();
     }
     function timeline() {
       const cards = model.draft.cards || [], rows = [];
@@ -954,8 +1006,8 @@
     nodes.photoDialog?.addEventListener("close", () => { if (!nodes.photoDialog.open) closePhoto(); });
     doc.addEventListener("visibilitychange", () => {
       if (!active) return;
-      if (doc.hidden) { if (dirty) save(); conceal(); }
-      else check();
+      if (doc.hidden) { stopNavigationLayout(); if (dirty) save(); conceal(); }
+      else { startNavigationLayout(); check(); }
     });
     return {
       open(projectId = null) {
@@ -963,12 +1015,12 @@
           if (!this.canClose()) return false;
           invalidate(); requestedProject = projectId;
         }
-        active = true; root.classList.remove("hidden"); show(options.toolbar, true); check(); cancel(refreshTimer);
+        active = true; root.classList.remove("hidden"); show(options.toolbar, true); startNavigationLayout(); check(); cancel(refreshTimer);
         const tick = () => { if (active) { check(); refreshTimer = later(tick, 10000); } }; refreshTimer = later(tick, 10000);
         return true;
       },
-      close() { active = false; cancel(refreshTimer); invalidate(); root.classList.add("hidden"); show(options.toolbar, false); },
-      suspend() { active = false; cancel(refreshTimer); conceal(); root.classList.add("hidden"); show(options.toolbar, false); },
+      close() { active = false; stopNavigationLayout(); cancel(refreshTimer); invalidate(); root.classList.add("hidden"); show(options.toolbar, false); },
+      suspend() { active = false; stopNavigationLayout(); cancel(refreshTimer); conceal(); root.classList.add("hidden"); show(options.toolbar, false); },
       canClose() {
         if (narrating) { announce(nodes.status, "Nejprve počkej na dokončení operace s komentářem fotografie.", "warning", "guard"); return false; }
         if (deleting) { announce(nodes.status, "Dokončuji smazání varianty. Před přepnutím počkej na výsledek.", "busy", "guard"); return false; }

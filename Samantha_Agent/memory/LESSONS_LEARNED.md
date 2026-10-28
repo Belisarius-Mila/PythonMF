@@ -1534,3 +1534,11 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
 - Řešení nalezeno: 26102026
 - Řešení: samostatné malé metadata-free PNG (256px seznam, 1600px pracovní náhled), bez skrytého duplicitního obrázku. Čtecí kontrola může krátce využít ověřené hashy v omezené RAM pouze při shodě device/inode/size/mtime_ns/ctime_ns a kontrole změn při čtení. Aktuální soukromí/manifest/koš se znovu ověřují vždy, vlastní obrázek se vždy hashově ověří. Uložení a render používají úplné ověření bajtů; bez persistentního cache nebo cache oprávnění.
 - Ověření: stejné místní vstupy, miniatura 5,287 → 0,192 s a 16,2 MB → 100 KB, stav editoru 1,324 → 0,039 s při již ověřených souborech. Plná brána 2243 PASS; regrese změny soukromí, stejné velikosti/obnoveného mtime, symlinku, souběhu a expirace PASS. Čas celé stránky po nasazení se přijímá samostatně. Report camino_film_loading_20261026.md.
+
+### LL-087 — Výška navigátoru závisí na skutečné hlavičce a viewportu
+
+- Problém: miniatury končily na max-height:60vh a při scrollu dlouhého pravého editoru mizely z dohledu.
+- Typ: opakující se
+- Řešení nalezeno: 28102026
+- Řešení: sticky panel pod měřenou hlavičkou, flex seznam s min-height:0 a vlastním overflow. Výšku odvozovat od aktuální polohy a viditelného spodního okraje; resize a změny hlavičky/obsahu spojit přes RAF, posluchače odpojit při zavření či skrytí. Výpočet nesmí přestavovat miniatury, měnit draft nebo spouštět další requesty.
+- Ověření: syntetický DOM scénář geometrie/lifecycle a 102 cílených kontrol PASS. Skutečný browserový wheel/resize a Safari zůstávají samostatná přejímka; camino_film_navigation_height_20261028.md.

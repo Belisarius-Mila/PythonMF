@@ -62,7 +62,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md`; `reports/camino_text_voice_ui_proposal_20261028.md` — 2026-10-28 09:41 CET: Návrh kompaktního UI publikovaný/nasazený jako dokumentace do 643c93ec přes Lunu 4b73bdbe, plná brána 2256 a smoke 5/5 PASS. Pouze memory rozsah; funkční UI/Orus zachované, nové rozložení neimplementované. Míla přijal text/hlas; další krok realizace až na navazující zadání. Výsledkový zápis místní pro příští balíček.
+- `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md`; `reports/camino_film_navigation_height_20261028.md` — 2026-10-28 10:18 CET: Místně opravená výška/scroll levých miniatur podle dostupného okna a hlavičky. 102 cílených PASS; fyzické Safari NEOVĚŘENO. Míla zadal commit a plynulé p+n Lunou. Kompaktní panel textu/hlasu zůstává další návrh.
 
 - `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md`; `technical/luna_release_orchestration.md` — 2026-10-24 09:52 CEST: Oprava startovacího souběhu p+n je publikovaná/nasazená v e11d949a. Účtenka e47cdb394ec5441c5d25632f11c8c995 má potvrzený push 4 commitů a nasazení Cockpitu, plnou bránu 2186 a smoke 5/5. Nativní účtenku ověřil hlavní Adam; nový místní vývoj pokračuje v project-camino. Předchozí attention c3aba030 je historie a neopakuje se.
 

@@ -36,14 +36,21 @@ EXPECTED_PAGES = {
     ),
     "cockpit": (
         COCKPIT_HTML,
-        627842,
-        11816,
-        "768f4c4f47414927c3a1974f63b30b0d0199bba8daacb31224bc26cded16ce0a",
+        631713,
+        11870,
+        "3eb90bc9f8e36c18f7d7806c4fb5f8fab4c9c4e921f249d8ce0258ce275c98d3",
     ),
 }
 
 
 class CockpitFrontendContractTests(unittest.TestCase):
+    def test_film_navigation_fills_available_window_and_tracks_header(self) -> None:
+        result = subprocess.run(
+            [node_binary(), str(Path(__file__).with_name("camino_film_navigation_layout.test.cjs"))],
+            capture_output=True, text=True, timeout=30, check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
     def test_film_workspace_has_balanced_markup_and_unique_controls(self) -> None:
         from html.parser import HTMLParser
         source = (FRONTEND_ROOT / "cockpit" / "page.html").read_text()

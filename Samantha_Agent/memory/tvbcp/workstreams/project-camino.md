@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-10-28 09:41 CET: Návrh kompaktního panelu textu a hlasu je publikovaný a nasazený jako dokumentace do 643c93ecc88365e1d8016b06df362a11a2ac5d1d. Luna 4b73bdbe1a6d9377f6e084dd26f20eb6: completed, 2 commity, push/deployment confirmed, project-camino → Cockpit. Balíček obsahuje pouze memory soubory; nové rozložení zatím není implementované.
-- Publikační plná brána 2256 testů PASS / 513,5 s, smoke 5/5, protected_services_unchanged=true. Adam jednou převzal účtenku a ověřil GitHub/main přesně na 643c93ec, health HTTP 200 a živé HTML HTTP 200 přesně shodné se zdrojem. Code stamp 296a14675318a23b a HTML SHA-256 768f4c4f47414927c3a1974f63b30b0d0199bba8daacb31224bc26cded16ce0a potvrzují zachované funkční UI.
-- Míla prakticky přijal práci s textem a hlasem Orus/tempo 0,90. Uložený návrh: dva užší výběry vedle sebe, kratší popisky, souvislý blok Orus/cena/souhlas/tlačítko, originál na vyžádání a sbalené nahrávky/import/další možnosti. Zachovat celý text, souhlas pro konkrétní text a pokus, historii/koš/import a viditelný důvod neaktivního tlačítka.
-- Return caller účtenku skutečně převzal terminálový Adam; returned_to_adam=false není důvodem retry. Další krok: na navazující zadání realizovat kompaktní panel a fyzicky přijmout jeho přehlednost. Tento výsledkový zápis je místní pro příští GitHub balíček. Návrh: memory/reports/camino_text_voice_ui_proposal_20261028.md.
+- 2026-10-28 10:18 CET: Místně opravený levý seznam miniatur fotografií/videí: desktop využívá dostupnou výšku okna pod skutečnou hlavičkou, levý panel zůstává sticky při práci vpravo a seznam má vlastní scroll. Původní strop 60vh odstraněný, výška reaguje na resize, stavové hlášky a posun dialogu. Na úzké ploše zůstává kompaktní seznam nad editorem.
+- 102 cílených kontrol PASS / 70,365 s: frontend včetně nové geometrie navigace, editor, foto vrstvy a Orus. Kontrola zachování uzlů/pozice, slučování resize/scroll, odpojení při skrytí/zavření, fallback bez ResizeObserver/RAF a nulových dalších síťových/zapisovacích požadavků. Skutečný prohlížeč k nástrojům nepřipojený; fyzická přejímka po nasazení NEOVĚŘENO.
+- Míla výslovně zadal commit a plynulé předání Luně k p+n. Předchozí vydání 643c93ec/Luna 4b73bdbe publikovalo jen návrh textového panelu; tento krok realizuje pouze seznam miniatur. Kompaktní text/hlas zůstává další samostatný krok. Originály, skutečné projekty, hlasové souhlasy a backend se touto opravou neměnily.
+- Další krok: místní commit a schválené p+n registrovanou Lunou; potom fyzicky ověřit výšku, poslední položku seznamu a zachování pozice. Report: memory/reports/camino_film_navigation_height_20261028.md.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí stav po p+n UI 1
@@ -5173,3 +5173,25 @@ Technický důkaz:
 
 - Účtenka 4b73bdbe1a6d9377f6e084dd26f20eb6: completed, 2 commity do 643c93ec, push/deployment confirmed, plná brána 2256 / 513,5 s, smoke 5/5, chráněné služby shodné. Jedna Adamova kontrola: GitHub/main přesně vydaný head, pouze memory diff; health a přesné HTML HTTP 200, code_stamp 296a14675318a23b.
 - Terminálový caller účtenku převzal. returned_to_adam=false neprokazuje automatický portálový návrat a není důvodem opakování. Tento následný výsledkový zápis je místní pro příští balíček; žádné nové audio API požadavky ani změny soukromých dat.
+
+### 2026-10-28 10:18 CET — Levý seznam miniatur podle dostupné výšky
+
+Hotovo:
+
+- Implementované využití dostupné výšky okna vlevo, vlastní posouvání miniatur a přidržení sloupce při práci v dlouhém pravém panelu. Výběr záběru a pozice seznamu se při přepočtu nemění.
+
+Rozhodnutí:
+
+- Míla po analýze výslovně zadal commit a plynulé p+n Lunou. Rozsah je oprava navigátoru; kompaktní textový/hlasový panel se teprve bude řešit jako další krok.
+
+Další krok:
+
+- Po místním commitu předat přesný čekající balíček registrované Luně k p+n.
+
+Navrhované další kroky:
+
+- Fyzická přejímka navigace po nasazení; poté na navazující zadání kompaktní panel textu a hlasu. Zachovat přejímku historie/koše/importu a pozdější P2-F.
+
+Technický důkaz:
+
+- 102 cílených kontrol PASS / 70,365 s. Nový syntetický DOM scénář ověřuje dostupnou výšku, scroll, resize/hlášku, visual viewport, zachovanou pozici/uzly, žádné další requesty, lifecycle a fallback. HTML SHA-256 3eb90bc9f8e36c18f7d7806c4fb5f8fab4c9c4e921f249d8ce0258ce275c98d3. Bez připojeného prohlížeče nelze tvrdit fyzickou Safari přejímku. Report camino_film_navigation_height_20261028.md.
