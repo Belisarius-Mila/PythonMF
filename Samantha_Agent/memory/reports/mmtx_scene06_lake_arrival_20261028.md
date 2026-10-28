@@ -1,9 +1,10 @@
 # MMTX — scéna 6: Příchod k jezeru
 
-Stav 2026-10-28 13:35 CET: místní pracovní náhled, audio blokované externí
-službou. Scénář a implementaci na výslovný pokyn Míly připravila Terra 6.1;
-Adam zkontroloval integraci. Žádný nový push, Pages deployment ani nasazení
-Cockpitu. Předchozí místní dokumentační commit Camina e8375e7e zachovaný.
+Stav 2026-10-28 19:19 CET: scéna 6 a rohová zkratka z pětky jsou veřejně
+nasazené do 46173ef9. Řečové audio zůstává neúplné (2/144). Scénář a hlavní
+implementaci na výslovný pokyn Míly připravila Terra 6.1; Adam zkontroloval
+integraci a doplnil obvyklou rohovou zkratku. Podrobné výsledky p+n jsou
+v časovaných záznamech níže; předchozí místní stavy jsou historie.
 
 ## Rozsah
 
@@ -170,3 +171,22 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Rychlá statická brána PASS. 71 MMTX testů PASS / 2,262 s, odkaz i byteová shoda obou kopií ověřené. CSS má plochu 16%×24%, min. 44 px, z-index 22 nad audio bránou 20 a fokusový rámeček; cache parametr upravený. Skutečný browserový proklik NEOVĚŘENO. Bez nového push/publikace, bez změny audia nebo děje.
+
+### 2026-10-28 19:19 CET — Terra p+n rohové zkratky 5→6 dokončené
+
+Hotovo:
+- Veřejná pátá scéna má obvyklou zkratku vlevo dole přímo do šestky, dostupnou i před spuštěním příběhu. Nové HTML a CSS se skutečně podávají, běžné dokončovací dveře zachované.
+
+Rozhodnutí:
+- Míla výslovně zadal „ok, terra p+n“. Jedno registrované submit_release(wait=True) předalo přesné dva commity a schválenou Terru 6.1/high. Bez nativního prostředníka, změny rolí či opakování.
+
+Další krok:
+- Obnovit veřejnou pětku a přijmout proklik vlevo dole i před audio bránou.
+
+Navrhované další kroky:
+- Zachované doplnění vlastních řečových stop šestky a skutečná obrazová/poslechová přejímka.
+
+Technický důkaz:
+- Účtenka 46daf0cd2eae60a54363365d9f52a290 completed, push_state/deployment_state=confirmed, dva commity do 46173ef987c345ebf6875c24301f38532471434f. Plná publikační brána 2262 PASS / 466,3 s, protected_services_unchanged=true. Pages workflow 40743712328 success, deployment 7393736182, smoke HTTP 200.
+- Adamova jedna kontrola: GitHub/main 0/0 na vydaném headu před zápisem, veřejné 3/3 HTML/CSS zdroje HTTP 200 a přesné bajty. Pětka SHA-256 e96ca0b045dfbfe9f5bc76948baf165174ea652bb9cee4e580dacbf86f4b904e; CSS 3982bedefa5210387d97c16411f972e517dfdf62de18f3147a4eaa3042ec6a79; šestka f538f932e84b00eea2b817ea11610b7e407e2650c8885711b41bab628788b719. Odkaz i verzovaný CSS parametr ověřené.
+- Caller účtenku převzal; returned_to_adam=false nepotvrzuje automatický portálový návrat a nevyvolává retry. Fyzický proklik/Safari/iPhone a poslech NEOVĚŘENO. Řeči šestky stále 2/144, zrušené soví TTS se neobnovilo. Bez nového Cockpit deploymentu či zásahu do chráněných služeb. Následný lokální výsledkový zápis pro další balíček.

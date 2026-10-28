@@ -1,14 +1,13 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-10-28 14:45 CET: Automatické soví audio je zrušené a opravené Pages vydání dokončené do 30d3c58be7aee89d1003864a0c8b0335fe8e20f7. Sdílený workflow nemá denní cron, TTS krok ani Python/TTS instalaci; běžná místní rutina už soví generátor nevolá. Historická média, CSV, přehrávač a explicitní ruční nástroje zachované.
-- Terra p+n 6b2cea8ea2f983ae95be21cb287ee2e4 completed, push/deployment confirmed, 2 commity, project-mmtx → github_pages. Plná publikační brána 2260 PASS / 472,6 s; předtím místní plná brána 2260 PASS (511,838 s unit část), 43 cílených testů a YAML kontrola PASS. Chráněné služby beze změny podle účtenky.
-- Pages workflow 40699075925 success, deployment 7387046778 pro přesný head. Adamova jedna kontrola: GitHub/main shodné 0/0 před následným výsledkovým zápisem; veřejné HTTP 200 a přesné bajty 13/13 zdrojů scény 6 i napojení scény 5. HTML SHA-256 f538f932e84b00eea2b817ea11610b7e407e2650c8885711b41bab628788b719. Veřejná scéna https://belisarius-mila.github.io/PythonMF/scene06_lake_arrival/ .
-- Původní účtenka eab22667 zůstává historické attention/confirmed push/uncertain deployment; nebyla změněná ani automaticky opakovaná. Na původní pokyn „Terra p+n“ a navazující zrušení sovího audia navázalo nové předání nového opraveného commitu. Caller účtenku převzal, returned_to_adam=false není důvodem retry.
-- Scéna 6 je veřejný pracovní náhled hlavní cesty bez options: 72 EN/CZ replik, čtyři ilustrace a setkání s Daisy/Freddiem/Dotty/Olliem. Její vlastní řečové audio stále pouze 2/144, 142 chybí; hlasy nenahrazené. Statické obrazy a krátká syntetická melodie; browser/Safari/iPhone a lidský poslech NEOVĚŘENO.
-- 2026-10-28 15:58 CET: Místně doplněná obvyklá zkratka v levém dolním rohu scény 5 → scéna 6, také před audio bránou. Stejná plocha 16%×24% jako v předchozích scénách, min. 44 px, přístupný odkaz a fokus; při otevřeném slovníčku skrytá. Dveře po dokončení zůstávají. Obě kopie shodné, 71 MMTX testů PASS / 2,262 s; nová zkratka zatím nepublikovaná.
-- Další krok: samostatné MMTX p+n pro novou rohovou zkratku; nynější veřejnou scénu 6 lze otevřít přímo přes její URL nebo po dokončení pětky dveřmi. Hlasy scény 6 zůstávají 2/144 a fyzická přejímka otevřená.
-
+- 2026-10-28 19:19 CET: Zkratka z levého dolního rohu scény 5 do scény 6 je publikovaná na Pages do 46173ef987c345ebf6875c24301f38532471434f. Je nad audio bránou, min. 44 px, s klávesovým fokusem; při otevřeném slovníčku je skrytá. Běžné dveře po dokončení pětky zachované.
+- Terra p+n 46daf0cd2eae60a54363365d9f52a290 completed, push/deployment confirmed, dva commity, project-mmtx → github_pages, gpt-6.1-terra/high. Plná brána 2262 PASS / 466,3 s, HTTP smoke 200, protected_services_unchanged=true. Předtím 71 cílených MMTX testů a rychlá statická brána PASS.
+- Pages workflow 40743712328 success, build-pages i deploy-pages success, deployment 7393736182 pro přesný head. Adamova jedna kontrola: GitHub/main shodné 0/0 před tímto výsledkovým zápisem; veřejné HTML pětky, její verzované CSS a HTML šestky HTTP 200 a přesná shoda bajtů 3/3. Nový rohový odkaz a cache parametr CSS přítomné.
+- Otevření: https://belisarius-mila.github.io/PythonMF/scene05_log_bridge/ a klik vlevo dole; přímá šestka https://belisarius-mila.github.io/PythonMF/scene06_lake_arrival/ . Skutečný browser/Safari/iPhone proklik NEOVĚŘENO.
+- Scéna 6 zůstává pracovní náhled hlavní cesty bez options: 72 EN/CZ replik, čtyři ilustrace a setkání s Daisy/Freddiem/Dotty/Olliem. Vlastní řečové audio stále 2/144, 142 chybí; hlasy se neměnily. Zrušená soví automatika zůstává vypnutá. Cockpit se tímto Pages vydáním nenasazoval.
+- Terminálový Adam účtenku převzal a jednou ověřil. return_channel=caller, returned_to_adam=false neprokazuje automatický portálový návrat a není důvodem retry.
+- Další krok: obnovit veřejnou pětku a přijmout proklik levého dolního rohu, také před startem audia; běžné dveře po dokončení zůstávají. Následný výsledkový zápis je místní dokumentační checkpoint pro další balíček, bez další publikace.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: MMTX
@@ -727,3 +726,22 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Rychlá statická brána PASS. 71 MMTX testů PASS / 2,262 s, odkaz i byteová shoda obou kopií ověřené. CSS má plochu 16%×24%, min. 44 px, z-index 22 nad audio bránou 20 a fokusový rámeček; cache parametr upravený. Skutečný browserový proklik NEOVĚŘENO. Bez nového push/publikace, bez změny audia nebo děje.
+
+### 2026-10-28 19:19 CET — Terra p+n rohové zkratky 5→6 dokončené
+
+Hotovo:
+- Veřejná pátá scéna má obvyklou zkratku vlevo dole přímo do šestky, dostupnou i před spuštěním příběhu. Nové HTML a CSS se skutečně podávají, běžné dokončovací dveře zachované.
+
+Rozhodnutí:
+- Míla výslovně zadal „ok, terra p+n“. Jedno registrované submit_release(wait=True) předalo přesné dva commity a schválenou Terru 6.1/high. Bez nativního prostředníka, změny rolí či opakování.
+
+Další krok:
+- Obnovit veřejnou pětku a přijmout proklik vlevo dole i před audio bránou.
+
+Navrhované další kroky:
+- Zachované doplnění vlastních řečových stop šestky a skutečná obrazová/poslechová přejímka.
+
+Technický důkaz:
+- Účtenka 46daf0cd2eae60a54363365d9f52a290 completed, push_state/deployment_state=confirmed, dva commity do 46173ef987c345ebf6875c24301f38532471434f. Plná publikační brána 2262 PASS / 466,3 s, protected_services_unchanged=true. Pages workflow 40743712328 success, deployment 7393736182, smoke HTTP 200.
+- Adamova jedna kontrola: GitHub/main 0/0 na vydaném headu před zápisem, veřejné 3/3 HTML/CSS zdroje HTTP 200 a přesné bajty. Pětka SHA-256 e96ca0b045dfbfe9f5bc76948baf165174ea652bb9cee4e580dacbf86f4b904e; CSS 3982bedefa5210387d97c16411f972e517dfdf62de18f3147a4eaa3042ec6a79; šestka f538f932e84b00eea2b817ea11610b7e407e2650c8885711b41bab628788b719. Odkaz i verzovaný CSS parametr ověřené.
+- Caller účtenku převzal; returned_to_adam=false nepotvrzuje automatický portálový návrat a nevyvolává retry. Fyzický proklik/Safari/iPhone a poslech NEOVĚŘENO. Řeči šestky stále 2/144, zrušené soví TTS se neobnovilo. Bez nového Cockpit deploymentu či zásahu do chráněných služeb. Následný lokální výsledkový zápis pro další balíček.
