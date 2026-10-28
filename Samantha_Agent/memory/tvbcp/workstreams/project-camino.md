@@ -1,11 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-10-28 12:42 CET: Datum a čas vytvoření hotových MP4/náhledů místně doplněné před revizi. Nový export ukládá přesný UTC čas dokončení; starší používají pouze čtený mtime status.json a viditelné „přibližně“. Zobrazení česky v Europe/Prague včetně sekund a letního/zimního času. 69 cílených kontrol PASS / 41,071 s; plná brána 2260 testů PASS (494,814 s unit část, 501,4 s fáze). Bez nového p+n; poslední nasazený základ f336fd47 přes Terru. Report: memory/reports/camino_export_created_time_20261028.md.
-- 2026-10-28 12:21 CET: Větší okno a Celá obrazovka střižny jsou publikované a nasazené do f336fd47e0b77420baeab25683cbc2bb39441ed3. Registrovaný vykonavatel skutečně použil gpt-6.1-terra/high, účtenka 6bf0ff7d29efba5a7da3eff147e08d59: completed, 2 commity, push/deployment confirmed, project-camino → Cockpit. Výchozí šířka až 1680 px, Celá obrazovka/Zmenšit a Escape; při nepodpoře API plné okno prohlížeče.
-- Plná publikační brána 2258 PASS / 445,5 s, smoke 5/5, protected_services_unchanged=true. Předtím místní plná brána 2258 PASS (493,520 s unit část), 53 cílených kontrol rolí a 67 kontrol editoru/frontendu PASS. Adam převzal a jednou ověřil účtenku: GitHub/main přesně vydaný head, health i stránka HTTP 200, živé HTML přesně shodné se zdrojem; SHA-256 23faa858e96af264b405a3af1b7a5a78255d2e41eda3652d449b9a42393056dc, nové tlačítko přítomné. returned_to_adam=false je portálový příznak; terminálový caller výsledek převzal, neopakovat vydání.
-- Míla schválil cenu a zkoušku Terry při hlášeném vyčerpaném kreditu Luny. Kandidátský probe Terra/high prošel 11:01:43 UTC, bez publikace. Centrální release_executor zůstává preferovaně Terra/high do dalšího rozhodnutí; simple_developer se neměnil. Převzetí balíčku 26588 tokenů, odhad 0,6719 Standard kreditu za samotný tento tah (bez probe a Adama; není faktura). Report: memory/reports/terra_release_trial_20261028.md.
-- Předchozí výšku miniatur Míla přijal slovy „Funguje super“. Nová fyzická Safari přejímka fullscreen NEOVĚŘENO. Další krok: obnovit Cockpit a ověřit Celá obrazovka → Zmenšit/Escape, fotografii a scroll miniatur. Kompaktní panel textu/hlasu zůstává samostatný návrh. Závěrečný zápis je místní dokumentační checkpoint pro příští balíček, ne další změna nasazeného UI.
+- 2026-10-28 13:03 CET: Datum a čas vytvoření hotových MP4/náhledů jsou publikované a nasazené do 668321f8446fad749a00d1adefc95e149f1cd867. Údaj je před revizí, česky v Europe/Prague včetně sekund. Nové výstupy mají přesný UTC čas dokončení; starší bez něj používají pouze čtený mtime status.json s označením „přibližně“, bez migrace nebo přepisu.
+- Registrované p+n 8e735788255921fdc8bbd83f491714fa: completed, gpt-6.1-terra/high, 2 commity, push/deployment confirmed, project-camino → Cockpit. Plná publikační brána 2260 PASS / 439,8 s, smoke 5/5, protected_services_unchanged=true. Předtím 69 cílených kontrol a místní plná brána 2260 PASS. Jedna Adamova kontrola: GitHub/main přesně 668321f8, health i stránka HTTP 200, živé HTML přesně shodné se zdrojem, SHA-256 e9fdd86775febeaa2c24d4e1d9422af75f09cb4d58bae1664fdf85a4f57c0ee6. Code stamp b90aa847fa54ce76; nový popisek přítomný.
+- Terminálový Adam účtenku převzal a zkontroloval; portálový příznak returned_to_adam=false není důvodem retry. Terra/high zůstává preferovaným vykonavatelem p+n do dalšího rozhodnutí Míly, simple_developer beze změny. Větší okno/fullscreen z předchozího kroku zůstávají nasazené.
+- Další krok: obnovit Cockpit a fyzicky ověřit datum u existujícího výstupu i nově dokončeného videa a jeho zachování po reloadu. Skutečný Safari proklik nového času NEOVĚŘENO; skutečný nový export nebyl při vývoji/p+n vytvářen. Kompaktní panel textu/hlasu zůstává samostatný návrh. Report: memory/reports/camino_export_created_time_20261028.md. Závěrečný zápis je místní dokumentační checkpoint pro příští balíček, bez další změny kódu.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí stav po p+n UI 1
@@ -5312,3 +5311,26 @@ Samostatně schválené p+n, potom fyzicky ověřit čas nového a staršího v�
 ### Technický důkaz
 
 69 cílených kontrol PASS / 41,071 s. Ověřený přesný UTC čas, zachování při opakovaném čtení a stejném požadavku, starší záznamy bez přepisu a české zobrazení v zimním i letním čase. Plná brána 2260 testů PASS (494,814 s unit část, 501,4 s fáze); fyzická Safari přejímka nového údaje NEOVĚŘENO.
+
+
+## 2026-10-28 13:03 CET — Nasazený čas vytvoření videa
+
+### Hotovo
+
+Střižna u hotových videí a náhledů ukazuje datum a čas vytvoření před revizí. Nové výstupy mají přesný čas dokončení, historické odhad označený jako přibližný.
+
+### Rozhodnutí
+
+Provedeno Mílou výslovně schválené p+n přes Terru. Žádné další kanonické rozhodnutí.
+
+### Další krok
+
+Obnovit Cockpit a fyzicky ověřit čas u staršího a nového videa včetně reloadu.
+
+### Navrhované další kroky
+
+- Kompaktní panel textu/hlasu podle přijatého návrhu.
+
+### Technický důkaz
+
+Účtenka 8e735788255921fdc8bbd83f491714fa: completed, Terra 6.1/high, push/deploy confirmed do 668321f8, 2260 PASS, smoke 5/5, chráněné služby shodné. GitHub přesně odpovídá vydání; health a nové HTML HTTP 200, obsah přesně odpovídá zdroji. Skutečná Safari přejímka nového údaje NEOVĚŘENO.
