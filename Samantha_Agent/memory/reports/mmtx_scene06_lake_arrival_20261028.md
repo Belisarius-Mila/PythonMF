@@ -1,11 +1,11 @@
 # MMTX — scéna 6: Příchod k jezeru
 
-Stav 2026-10-30 09:28 CET: místní audio 5/144, chybí 139 stop. Dnešní generace
-přidala tři stopy, ale Microsoft TTS znovu vrací HTTP 429 i po pauze a při
-10s rozestupech. Hlasy a tempo zachované, další síťový pokus neběží.
-Poslední doložená veřejná verze je z 28. 10. do 46173ef9 s audiem 2/144;
-dnešní změny nejsou publikované. Podrobnosti původního vývoje a p+n jsou
-historie níže; aktuální pokus je v posledním časovaném záznamu.
+Stav 2026-10-30 10:20 CET: místní audio 7/144, chybí 137 stop. Poslední pokus
+na Mílův pokyn po pěti přidal CZ 002 a EN 003; třetí požadavek CZ 003
+vrátil HTTP 429 bez Retry-After i po více než 50min pauze a s 10s rozestupy.
+První pětice tedy neprošla, další dávka ani retry se nespustily. Hlasy a tempo
+zachované. Veřejná verze z 28. 10. do 46173ef9 má stále 2/144; dnešní změny
+nejsou publikované. Podrobnosti a předchozí výsledky jsou v záznamech níže.
 
 ## Rozsah
 
@@ -209,3 +209,21 @@ Navrhované další kroky:
 Technický důkaz:
 - 71 MMTX testů PASS; offline kontrola potvrzuje 5/144 a očekávaný exit 1 kvůli 139 chybějícím stopám. MP3 mají odpovídající text/hlas/-10%/SHA-256 a dekódují se. Dvě původní EN stopy zůstaly beze změny.
 - První sériový běh přidal CZ 000, CZ 001 a EN 002, potom HTTP 429. Jedno pokračování po pauze s 10s rozestupy opět HTTP 429 bez Retry-After, žádný další síťový pokus. Logy mmtx_scene06_audio_20261030.log a mmtx_scene06_audio_paced_20261030.log. Zdrojový generátor ani společná speech vrstva se neměnily; bez push/nasazení.
+
+### 2026-10-30 10:20 CET — Pokus o pětici: dvě nové stopy, další zastavila chyba 429
+
+Hotovo:
+- Zachované dvě nové řečové stopy CZ 002 a EN 003; místní audio nyní 7/144, zbývá 137.
+
+Rozhodnutí:
+- Na Mílův pokyn pokračovat v dávkách po pěti, další dávku spustit jen po úspěšné předchozí. Původní hlasy a tempo zachovat. Při HTTP 429 zastavit bez retry.
+
+Další krok:
+- Po uvolnění Microsoft TTS navázat od CZ 003. První pětice byla neúplná, další se nespustila.
+
+Navrhované další kroky:
+- Po všech 144 stopách ověřit skutečný proklik a poslech; publikace vyžaduje samostatný pokyn.
+
+Technický důkaz:
+- 4 cílené testy scény 6 PASS; MP3/vazby/mirror ověřené. Offline --check: 7/144, očekávaný exit 1 pro neúplné audio. Generátor ani společná speech vrstva se neměnily.
+- Běh po více než 50min pauze: 10s před novým požadavkem, 30s pauza připravená mezi úspěšnými pěticemi. Dvě úspěšné stopy, potom CZ 003 → HTTP 429 bez Retry-After. Dokončených pětic 0, opakování 0; výsledek a kurzor v logs/mmtx_scene06_batches_20261030_1018_state.log. Bez push/nasazení.

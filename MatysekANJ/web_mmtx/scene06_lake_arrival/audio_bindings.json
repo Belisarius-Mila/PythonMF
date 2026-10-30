@@ -11,6 +11,12 @@
     "text": "Ahoj, kamarádi!",
     "voice": "cs-CZ-VlastaNeural"
   },
+  "cs/002": {
+    "rate": "-10%",
+    "sha256": "38597cee834c7f3eb3d6e8f45600e3e2eecb1f5c55287454c126a8d829618bfc",
+    "text": "Moje lampa je v bezpečí.",
+    "voice": "cs-CZ-VlastaNeural"
+  },
   "en/000": {
     "rate": "-10%",
     "sha256": "c7f6b4b5eae4eb7da4bcbc0a5e65a8fd8fb23e817c351c3ea700337316a9acaa",
@@ -28,5 +34,11 @@
     "sha256": "eae4308afd699fb8c4b29e44bef8d91ad4b5037a8a42ef41a23cfaaea258549d",
     "text": "My lamp is safe.",
     "voice": "en-US-GuyNeural"
+  },
+  "en/003": {
+    "rate": "-10%",
+    "sha256": "52438092bfc7f48789458bb4c642fc3392c8cfadbb5080df2a98c61446190f7c",
+    "text": "Look! The lake!",
+    "voice": "en-US-AndrewNeural"
   }
 }

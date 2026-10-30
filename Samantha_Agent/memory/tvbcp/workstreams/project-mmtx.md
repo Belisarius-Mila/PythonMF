@@ -1,11 +1,11 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-10-30 09:28 CET: doplňování audia šestky lokálně postoupilo z 2/144 na 5/144. Nové jsou CZ 000, CZ 001 a EN 002; zbývá 139 stop. Původní dvě EN stopy zachované, texty/hlasy/tempo beze změny. MP3, vazby a manifesty jsou shodné v docs i web_mmtx.
-- Blokátor: první sériová dávka po třech nových stopách skončila HTTP 429. Jedno další pokračování po pauze s desetisekundovými rozestupy skončilo opět HTTP 429 hned na první chybějící stopě; Retry-After chybí. Žádný automatický retry ani změna hlasů; další generace nyní neběží.
-- Ověření: 71 cílených MMTX testů PASS; offline --check potvrdil platné vazby/dekódování 5 stop a správně vrací exit 1 pro chybějících 139. Proklik a skutečný poslech na Macu/iPhonu NEOVĚŘENO.
-- Poslední doložená veřejná publikace je z 28. 10. do 46173ef9: scéna 6 a rohová zkratka 5→6, audio 2/144. Dnešní tři nové stopy jsou pouze místní, bez push/Pages/Cockpit nasazení. Soví automatika zůstává vypnutá.
-- Další krok: po uvolnění Microsoft TTS navázat přes build_scene06_audio.py na první chybějící CZ 002 a dokončit 139 stop se stejnými hlasy; potom úplná offline kontrola, fyzická přejímka a samostatně autorizované p+n. Neoznačovat audio za dokončené.
+- 2026-10-30 10:20 CET: místní audio šestky 7/144; zbývá 137 stop. Poslední pokus přidal CZ 002 a EN 003. Texty, původní hlasy a tempo -10% zachované; obě kopie scény mají shodné MP3, vazby a manifesty.
+- Míla zadal pokračovat po pěti a po úspěšné dávce navázat další pěticí. První dávka od stavu 5/144 měla 10s rozestupy; po dvou úspěšných stopách třetí požadavek CZ 003 vrátil HTTP 429 bez Retry-After. Dávka nebyla dokončená, žádná další pětice ani retry se nespustily.
+- Ověření: 4 cílené testy scény 6 PASS; offline --check potvrzuje platné vazby/dekódování 7 stop a správně vrací exit 1 kvůli 137 chybějícím. Dřívějších 71 MMTX testů PASS je doloženo v předchozím záznamu. Skutečný proklik a poslech Mac/iPhone NEOVĚŘENO.
+- Poslední doložená veřejná publikace je z 28. 10. do 46173ef9 s audiem 2/144 a rohovou zkratkou 5→6. Dnešních pět nových stop je pouze místních; bez push/Pages/Cockpit nasazení. Soví automatika zůstává vypnutá.
+- Další krok: po uvolnění Microsoft TTS navázat od CZ 003 v dávkách po pěti. Po dokončení 144 stop úplná offline kontrola, fyzický poslech/proklik a samostatně autorizované p+n. Audio stále není dokončené.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: MMTX
@@ -1329,3 +1329,21 @@ Navrhované další kroky:
 Technický důkaz:
 - 71 MMTX testů PASS; offline kontrola potvrzuje 5/144 a očekávaný exit 1 kvůli 139 chybějícím stopám. MP3 mají odpovídající text/hlas/-10%/SHA-256 a dekódují se. Dvě původní EN stopy zůstaly beze změny.
 - První sériový běh přidal CZ 000, CZ 001 a EN 002, potom HTTP 429. Jedno pokračování po pauze s 10s rozestupy opět HTTP 429 bez Retry-After, žádný další síťový pokus. Logy mmtx_scene06_audio_20261030.log a mmtx_scene06_audio_paced_20261030.log. Zdrojový generátor ani společná speech vrstva se neměnily; bez push/nasazení.
+
+### 2026-10-30 10:20 CET — Pokus o pětici: dvě nové stopy, další zastavila chyba 429
+
+Hotovo:
+- Zachované dvě nové řečové stopy CZ 002 a EN 003; místní audio nyní 7/144, zbývá 137.
+
+Rozhodnutí:
+- Na Mílův pokyn pokračovat v dávkách po pěti, další dávku spustit jen po úspěšné předchozí. Původní hlasy a tempo zachovat. Při HTTP 429 zastavit bez retry.
+
+Další krok:
+- Po uvolnění Microsoft TTS navázat od CZ 003. První pětice byla neúplná, další se nespustila.
+
+Navrhované další kroky:
+- Po všech 144 stopách ověřit skutečný proklik a poslech; publikace vyžaduje samostatný pokyn.
+
+Technický důkaz:
+- 4 cílené testy scény 6 PASS; MP3/vazby/mirror ověřené. Offline --check: 7/144, očekávaný exit 1 pro neúplné audio. Generátor ani společná speech vrstva se neměnily.
+- Běh po více než 50min pauze: 10s před novým požadavkem, 30s pauza připravená mezi úspěšnými pěticemi. Dvě úspěšné stopy, potom CZ 003 → HTTP 429 bez Retry-After. Dokončených pětic 0, opakování 0; výsledek a kurzor v logs/mmtx_scene06_batches_20261030_1018_state.log. Bez push/nasazení.
