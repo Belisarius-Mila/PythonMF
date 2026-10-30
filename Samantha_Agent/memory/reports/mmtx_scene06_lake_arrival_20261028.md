@@ -1,11 +1,12 @@
 # MMTX — scéna 6: Příchod k jezeru
 
-Stav 2026-10-30 10:20 CET: místní audio 7/144, chybí 137 stop. Poslední pokus
-na Mílův pokyn po pěti přidal CZ 002 a EN 003; třetí požadavek CZ 003
-vrátil HTTP 429 bez Retry-After i po více než 50min pauze a s 10s rozestupy.
-První pětice tedy neprošla, další dávka ani retry se nespustily. Hlasy a tempo
-zachované. Veřejná verze z 28. 10. do 46173ef9 má stále 2/144; dnešní změny
-nejsou publikované. Podrobnosti a předchozí výsledky jsou v záznamech níže.
+Stav 2026-10-30 15:55 CET: místní audio 16/144, chybí 128 stop. Poslední pokračování
+po pěti přidalo devět stop při 30s rozestupech a 60s mezi úspěšnými pěticemi.
+První pětice dokončená, druhá 4/5. Přechodná chyba DNS byla čtecím ověřením
+potvrzená jako odeznělá; další pokračování nakonec zastavilo HTTP 429 na
+EN 008 bez Retry-After. Další dávka neběží. Hlasy a tempo zachované.
+Veřejná verze doložená 28. 10. do 46173ef9 má stále 2/144; dnešní změny
+nejsou publikované. Podrobnosti jsou v posledním časovaném záznamu níže.
 
 ## Rozsah
 
@@ -227,3 +228,22 @@ Navrhované další kroky:
 Technický důkaz:
 - 4 cílené testy scény 6 PASS; MP3/vazby/mirror ověřené. Offline --check: 7/144, očekávaný exit 1 pro neúplné audio. Generátor ani společná speech vrstva se neměnily.
 - Běh po více než 50min pauze: 10s před novým požadavkem, 30s pauza připravená mezi úspěšnými pěticemi. Dvě úspěšné stopy, potom CZ 003 → HTTP 429 bez Retry-After. Dokončených pětic 0, opakování 0; výsledek a kurzor v logs/mmtx_scene06_batches_20261030_1018_state.log. Bez push/nasazení.
+
+### 2026-10-30 15:55 CET — Devět nových stop v dávkách po pěti, další blokuje 429
+
+Hotovo:
+- Místní audio šestky rozšířené ze 7 na 16 stop, zbývá 128. První pětice kompletní, druhá má 4/5; všechny úspěšné výsledky zachované a synchronizované.
+
+Rozhodnutí:
+- Na Mílův pokyn pokračovat po pěti. Po více než pěti hodinách od předchozího pokusu použít 30s rozestupy a 60s mezi úspěšnými pěticemi; původní hlasy a tempo zachovat. Při HTTP 429 zastavit.
+
+Další krok:
+- Po uvolnění poskytovatele doplnit EN 008 jako poslední stopu rozpracované druhé pětice; teprve po jejím ověření navázat třetí pěticí.
+
+Navrhované další kroky:
+- Po kompletních 144 stopách skutečný proklik a poslech; publikaci zadat samostatně.
+
+Technický důkaz:
+- 4 cílené testy scény 6 PASS; offline --check ověřil 16/144 a očekávaný exit 1 kvůli neúplnému audiu. Předchozích sedm MP3 zachovaných; obě kopie stejné. Generátor ani společná speech vrstva se neměnily.
+- První běh přidal sedm stop, potom EN 007 → ClientConnectorDNSError/gaierror. Čtecí DNS kontrola domény služby i microsoft.com prošla; obnovení zachovalo stav pětic a přidalo EN 007/CZ 007. Následně EN 008 → HTTP 429 bez Retry-After, další dávka se nespustila.
+- Průběh a kurzor v logs/mmtx_scene06_batches_20261030_154314_state.log a logs/mmtx_scene06_batches_20261030_155259_state.log. Bez push/nasazení; fyzický poslech/proklik NEOVĚŘENO.

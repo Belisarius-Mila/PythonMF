@@ -1,11 +1,11 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-10-30 10:20 CET: místní audio šestky 7/144; zbývá 137 stop. Poslední pokus přidal CZ 002 a EN 003. Texty, původní hlasy a tempo -10% zachované; obě kopie scény mají shodné MP3, vazby a manifesty.
-- Míla zadal pokračovat po pěti a po úspěšné dávce navázat další pěticí. První dávka od stavu 5/144 měla 10s rozestupy; po dvou úspěšných stopách třetí požadavek CZ 003 vrátil HTTP 429 bez Retry-After. Dávka nebyla dokončená, žádná další pětice ani retry se nespustily.
-- Ověření: 4 cílené testy scény 6 PASS; offline --check potvrzuje platné vazby/dekódování 7 stop a správně vrací exit 1 kvůli 137 chybějícím. Dřívějších 71 MMTX testů PASS je doloženo v předchozím záznamu. Skutečný proklik a poslech Mac/iPhone NEOVĚŘENO.
-- Poslední doložená veřejná publikace je z 28. 10. do 46173ef9 s audiem 2/144 a rohovou zkratkou 5→6. Dnešních pět nových stop je pouze místních; bez push/Pages/Cockpit nasazení. Soví automatika zůstává vypnutá.
-- Další krok: po uvolnění Microsoft TTS navázat od CZ 003 v dávkách po pěti. Po dokončení 144 stop úplná offline kontrola, fyzický poslech/proklik a samostatně autorizované p+n. Audio stále není dokončené.
+- 2026-10-30 15:55 CET: místní audio šestky 16/144, zbývá 128 stop. Poslední pokračování přidalo devět stop od CZ 003 po CZ 007. Původní hlasy, texty a tempo -10% zachované; MP3, vazby a manifesty jsou shodné v docs i web_mmtx.
+- Běh po pěti měl 30s rozestupy a 60s pauzu mezi pěticemi. První pětice ověřená; druhou po dvou stopách přerušila chyba DNS. Po samostatném ověření obnoveného překladu domény bezpečně navázal na dvě uložené stopy a přidal další dvě. Poslední požadavek druhé pětice EN 008 vrátil HTTP 429 bez Retry-After. Druhá dávka tedy 4/5; třetí dávka ani další síťový pokus neběží.
+- Ověření: 4 cílené testy scény 6 PASS; offline --check potvrzuje platné vazby a dekódování 16 stop, očekávaný exit 1 pro 128 chybějících. Předchozích sedm stop zachovaných. Skutečný proklik a poslech Mac/iPhone NEOVĚŘENO.
+- Poslední doložená veřejná publikace je z 28. 10. do 46173ef9 s audiem 2/144 a rohovou zkratkou 5→6. Místních 16 stop není nynějším krokem publikovaných; bez push/Pages/Cockpit nasazení. Soví automatika zůstává vypnutá.
+- Další krok: po uvolnění Microsoft TTS dokončit druhou pětici stopou EN 008 a pokračovat dalšími pěticemi. Po 144/144 úplná offline kontrola, skutečný poslech/proklik a samostatně autorizované p+n. Audio není dokončené.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: MMTX
@@ -1347,3 +1347,22 @@ Navrhované další kroky:
 Technický důkaz:
 - 4 cílené testy scény 6 PASS; MP3/vazby/mirror ověřené. Offline --check: 7/144, očekávaný exit 1 pro neúplné audio. Generátor ani společná speech vrstva se neměnily.
 - Běh po více než 50min pauze: 10s před novým požadavkem, 30s pauza připravená mezi úspěšnými pěticemi. Dvě úspěšné stopy, potom CZ 003 → HTTP 429 bez Retry-After. Dokončených pětic 0, opakování 0; výsledek a kurzor v logs/mmtx_scene06_batches_20261030_1018_state.log. Bez push/nasazení.
+
+### 2026-10-30 15:55 CET — Devět nových stop v dávkách po pěti, další blokuje 429
+
+Hotovo:
+- Místní audio šestky rozšířené ze 7 na 16 stop, zbývá 128. První pětice kompletní, druhá má 4/5; všechny úspěšné výsledky zachované a synchronizované.
+
+Rozhodnutí:
+- Na Mílův pokyn pokračovat po pěti. Po více než pěti hodinách od předchozího pokusu použít 30s rozestupy a 60s mezi úspěšnými pěticemi; původní hlasy a tempo zachovat. Při HTTP 429 zastavit.
+
+Další krok:
+- Po uvolnění poskytovatele doplnit EN 008 jako poslední stopu rozpracované druhé pětice; teprve po jejím ověření navázat třetí pěticí.
+
+Navrhované další kroky:
+- Po kompletních 144 stopách skutečný proklik a poslech; publikaci zadat samostatně.
+
+Technický důkaz:
+- 4 cílené testy scény 6 PASS; offline --check ověřil 16/144 a očekávaný exit 1 kvůli neúplnému audiu. Předchozích sedm MP3 zachovaných; obě kopie stejné. Generátor ani společná speech vrstva se neměnily.
+- První běh přidal sedm stop, potom EN 007 → ClientConnectorDNSError/gaierror. Čtecí DNS kontrola domény služby i microsoft.com prošla; obnovení zachovalo stav pětic a přidalo EN 007/CZ 007. Následně EN 008 → HTTP 429 bez Retry-After, další dávka se nespustila.
+- Průběh a kurzor v logs/mmtx_scene06_batches_20261030_154314_state.log a logs/mmtx_scene06_batches_20261030_155259_state.log. Bez push/nasazení; fyzický poslech/proklik NEOVĚŘENO.

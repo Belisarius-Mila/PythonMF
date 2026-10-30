@@ -17,6 +17,36 @@
     "text": "Moje lampa je v bezpečí.",
     "voice": "cs-CZ-VlastaNeural"
   },
+  "cs/003": {
+    "rate": "-10%",
+    "sha256": "1e1f5dbeeee922d11410e33104fb64b959124f4f8d74f245ec41278157b5d934",
+    "text": "Podívejte! Jezero!",
+    "voice": "cs-CZ-VlastaNeural"
+  },
+  "cs/004": {
+    "rate": "-10%",
+    "sha256": "4e02754e239ec30abb3916f6fee9790d114e411973cc86e2415b22c083b16091",
+    "text": "Klepni na světlo!",
+    "voice": "cs-CZ-VlastaNeural"
+  },
+  "cs/005": {
+    "rate": "-10%",
+    "sha256": "f6e9063676aaaf9cd50c3238c90e1f6de64539b39bbe41fcca0b429f35487c86",
+    "text": "Podívejte! Moje uši!",
+    "voice": "cs-CZ-VlastaNeural"
+  },
+  "cs/006": {
+    "rate": "-10%",
+    "sha256": "52ce130a7c9f3c9bca6b3ad798dfec7da737f7248a995fd4676cb199355d48a4",
+    "text": "Velké uši!",
+    "voice": "cs-CZ-VlastaNeural"
+  },
+  "cs/007": {
+    "rate": "-10%",
+    "sha256": "6ca1d0d0a22fb7224fe3c3c1960a1e08e799533dc5f46d98670c4acd77315d0f",
+    "text": "Mračná ouška!",
+    "voice": "cs-CZ-VlastaNeural"
+  },
   "en/000": {
     "rate": "-10%",
     "sha256": "c7f6b4b5eae4eb7da4bcbc0a5e65a8fd8fb23e817c351c3ea700337316a9acaa",
@@ -40,5 +70,29 @@
     "sha256": "52438092bfc7f48789458bb4c642fc3392c8cfadbb5080df2a98c61446190f7c",
     "text": "Look! The lake!",
     "voice": "en-US-AndrewNeural"
+  },
+  "en/004": {
+    "rate": "-10%",
+    "sha256": "35b3d59112fa1b062c61a85d224a687e4f94b092f3b1324dc5d5a063a4354343",
+    "text": "Tap the light!",
+    "voice": "en-US-AndrewNeural"
+  },
+  "en/005": {
+    "rate": "-10%",
+    "sha256": "a93d29b87586afc393885dfb8433fa930bb15f887fe736c7a36af8e012033c9b",
+    "text": "Look! My ears!",
+    "voice": "en-US-AnaNeural"
+  },
+  "en/006": {
+    "rate": "-10%",
+    "sha256": "53aa1b1449c0357991b67350dd3f833a43e9b6a816c2f38b5043149d1d4ea123",
+    "text": "Big ears!",
+    "voice": "en-US-MichelleNeural"
+  },
+  "en/007": {
+    "rate": "-10%",
+    "sha256": "336f2e198a8183c5a7820dac71fc7a522d25522459dc3382944399c01e4a4721",
+    "text": "Cloud ears!",
+    "voice": "en-US-AnaNeural"
   }
 }
