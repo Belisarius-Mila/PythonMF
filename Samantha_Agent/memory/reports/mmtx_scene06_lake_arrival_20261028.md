@@ -1,10 +1,11 @@
 # MMTX — scéna 6: Příchod k jezeru
 
-Stav 2026-10-28 19:19 CET: scéna 6 a rohová zkratka z pětky jsou veřejně
-nasazené do 46173ef9. Řečové audio zůstává neúplné (2/144). Scénář a hlavní
-implementaci na výslovný pokyn Míly připravila Terra 6.1; Adam zkontroloval
-integraci a doplnil obvyklou rohovou zkratku. Podrobné výsledky p+n jsou
-v časovaných záznamech níže; předchozí místní stavy jsou historie.
+Stav 2026-10-30 09:28 CET: místní audio 5/144, chybí 139 stop. Dnešní generace
+přidala tři stopy, ale Microsoft TTS znovu vrací HTTP 429 i po pauze a při
+10s rozestupech. Hlasy a tempo zachované, další síťový pokus neběží.
+Poslední doložená veřejná verze je z 28. 10. do 46173ef9 s audiem 2/144;
+dnešní změny nejsou publikované. Podrobnosti původního vývoje a p+n jsou
+historie níže; aktuální pokus je v posledním časovaném záznamu.
 
 ## Rozsah
 
@@ -190,3 +191,21 @@ Technický důkaz:
 - Účtenka 46daf0cd2eae60a54363365d9f52a290 completed, push_state/deployment_state=confirmed, dva commity do 46173ef987c345ebf6875c24301f38532471434f. Plná publikační brána 2262 PASS / 466,3 s, protected_services_unchanged=true. Pages workflow 40743712328 success, deployment 7393736182, smoke HTTP 200.
 - Adamova jedna kontrola: GitHub/main 0/0 na vydaném headu před zápisem, veřejné 3/3 HTML/CSS zdroje HTTP 200 a přesné bajty. Pětka SHA-256 e96ca0b045dfbfe9f5bc76948baf165174ea652bb9cee4e580dacbf86f4b904e; CSS 3982bedefa5210387d97c16411f972e517dfdf62de18f3147a4eaa3042ec6a79; šestka f538f932e84b00eea2b817ea11610b7e407e2650c8885711b41bab628788b719. Odkaz i verzovaný CSS parametr ověřené.
 - Caller účtenku převzal; returned_to_adam=false nepotvrzuje automatický portálový návrat a nevyvolává retry. Fyzický proklik/Safari/iPhone a poslech NEOVĚŘENO. Řeči šestky stále 2/144, zrušené soví TTS se neobnovilo. Bez nového Cockpit deploymentu či zásahu do chráněných služeb. Následný lokální výsledkový zápis pro další balíček.
+
+### 2026-10-30 09:28 CET — Audio šestky: tři nové stopy, poskytovatel dál blokuje dokončení
+
+Hotovo:
+- Místní scéna obsahuje pět platných řečových stop místo dvou; úspěšné výsledky jsou zachované i v druhé kopii aplikace.
+
+Rozhodnutí:
+- Navázat na Mílův pokyn dokončit audio. Zachovat původní hlasy a tempo; po doloženém 429 neprovádět další automatické pokusy ani hlasovou náhradu.
+
+Další krok:
+- Po uvolnění služby doplnit zbývajících 139 stop od CZ 002. Dokončení nyní blokuje externí Microsoft TTS.
+
+Navrhované další kroky:
+- Po úplné generaci provést proklik a poslech na Macu/iPhonu; publikaci zadat samostatně.
+
+Technický důkaz:
+- 71 MMTX testů PASS; offline kontrola potvrzuje 5/144 a očekávaný exit 1 kvůli 139 chybějícím stopám. MP3 mají odpovídající text/hlas/-10%/SHA-256 a dekódují se. Dvě původní EN stopy zůstaly beze změny.
+- První sériový běh přidal CZ 000, CZ 001 a EN 002, potom HTTP 429. Jedno pokračování po pauze s 10s rozestupy opět HTTP 429 bez Retry-After, žádný další síťový pokus. Logy mmtx_scene06_audio_20261030.log a mmtx_scene06_audio_paced_20261030.log. Zdrojový generátor ani společná speech vrstva se neměnily; bez push/nasazení.

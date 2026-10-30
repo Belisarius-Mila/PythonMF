@@ -1,4 +1,16 @@
 {
+  "cs/000": {
+    "rate": "-10%",
+    "sha256": "3b0b2a7dfbf680443bc910d6465d11562d1054f429daf729aec90f42bf73a1b9",
+    "text": "Ahoj, Logane!",
+    "voice": "cs-CZ-VlastaNeural"
+  },
+  "cs/001": {
+    "rate": "-10%",
+    "sha256": "c2964fd501a4bfdf11ee9c995b0da3c6406f2239bc53c0b420d9ab92eed4d951",
+    "text": "Ahoj, kamarádi!",
+    "voice": "cs-CZ-VlastaNeural"
+  },
   "en/000": {
     "rate": "-10%",
     "sha256": "c7f6b4b5eae4eb7da4bcbc0a5e65a8fd8fb23e817c351c3ea700337316a9acaa",
@@ -10,5 +22,11 @@
     "sha256": "69ea861c6bb6112060111c806286ccdba22bce0708094e19c649088a1b440fcd",
     "text": "Bye, friends!",
     "voice": "en-US-ChristopherNeural"
+  },
+  "en/002": {
+    "rate": "-10%",
+    "sha256": "eae4308afd699fb8c4b29e44bef8d91ad4b5037a8a42ef41a23cfaaea258549d",
+    "text": "My lamp is safe.",
+    "voice": "en-US-GuyNeural"
   }
 }

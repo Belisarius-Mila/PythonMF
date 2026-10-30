@@ -2,13 +2,11 @@
 
 ## Aktuální stav
 
-- 2026-10-28 19:19 CET: Zkratka z levého dolního rohu scény 5 do scény 6 je publikovaná na Pages do 46173ef987c345ebf6875c24301f38532471434f. Je nad audio bránou, min. 44 px, s klávesovým fokusem; při otevřeném slovníčku je skrytá. Běžné dveře po dokončení pětky zachované.
-- Terra p+n 46daf0cd2eae60a54363365d9f52a290 completed, push/deployment confirmed, dva commity, project-mmtx → github_pages, gpt-6.1-terra/high. Plná brána 2262 PASS / 466,3 s, HTTP smoke 200, protected_services_unchanged=true. Předtím 71 cílených MMTX testů a rychlá statická brána PASS.
-- Pages workflow 40743712328 success, build-pages i deploy-pages success, deployment 7393736182 pro přesný head. Adamova jedna kontrola: GitHub/main shodné 0/0 před tímto výsledkovým zápisem; veřejné HTML pětky, její verzované CSS a HTML šestky HTTP 200 a přesná shoda bajtů 3/3. Nový rohový odkaz a cache parametr CSS přítomné.
-- Otevření: https://belisarius-mila.github.io/PythonMF/scene05_log_bridge/ a klik vlevo dole; přímá šestka https://belisarius-mila.github.io/PythonMF/scene06_lake_arrival/ . Skutečný browser/Safari/iPhone proklik NEOVĚŘENO.
-- Scéna 6 zůstává pracovní náhled hlavní cesty bez options: 72 EN/CZ replik, čtyři ilustrace a setkání s Daisy/Freddiem/Dotty/Olliem. Vlastní řečové audio stále 2/144, 142 chybí; hlasy se neměnily. Zrušená soví automatika zůstává vypnutá. Cockpit se tímto Pages vydáním nenasazoval.
-- Terminálový Adam účtenku převzal a jednou ověřil. return_channel=caller, returned_to_adam=false neprokazuje automatický portálový návrat a není důvodem retry.
-- Další krok: obnovit veřejnou pětku a přijmout proklik levého dolního rohu, také před startem audia; běžné dveře po dokončení zůstávají. Následný výsledkový zápis je místní dokumentační checkpoint pro další balíček, bez další publikace.
+- 2026-10-30 09:28 CET: doplňování audia šestky lokálně postoupilo z 2/144 na 5/144. Nové jsou CZ 000, CZ 001 a EN 002; zbývá 139 stop. Původní dvě EN stopy zachované, texty/hlasy/tempo beze změny. MP3, vazby a manifesty jsou shodné v docs i web_mmtx.
+- Blokátor: první sériová dávka po třech nových stopách skončila HTTP 429. Jedno další pokračování po pauze s desetisekundovými rozestupy skončilo opět HTTP 429 hned na první chybějící stopě; Retry-After chybí. Žádný automatický retry ani změna hlasů; další generace nyní neběží.
+- Ověření: 71 cílených MMTX testů PASS; offline --check potvrdil platné vazby/dekódování 5 stop a správně vrací exit 1 pro chybějících 139. Proklik a skutečný poslech na Macu/iPhonu NEOVĚŘENO.
+- Poslední doložená veřejná publikace je z 28. 10. do 46173ef9: scéna 6 a rohová zkratka 5→6, audio 2/144. Dnešní tři nové stopy jsou pouze místní, bez push/Pages/Cockpit nasazení. Soví automatika zůstává vypnutá.
+- Další krok: po uvolnění Microsoft TTS navázat přes build_scene06_audio.py na první chybějící CZ 002 a dokončit 139 stop se stejnými hlasy; potom úplná offline kontrola, fyzická přejímka a samostatně autorizované p+n. Neoznačovat audio za dokončené.
 
 ## Stav
 
@@ -506,3 +504,21 @@ Technický důkaz:
 - Účtenka 46daf0cd2eae60a54363365d9f52a290 completed, push_state/deployment_state=confirmed, dva commity do 46173ef987c345ebf6875c24301f38532471434f. Plná publikační brána 2262 PASS / 466,3 s, protected_services_unchanged=true. Pages workflow 40743712328 success, deployment 7393736182, smoke HTTP 200.
 - Adamova jedna kontrola: GitHub/main 0/0 na vydaném headu před zápisem, veřejné 3/3 HTML/CSS zdroje HTTP 200 a přesné bajty. Pětka SHA-256 e96ca0b045dfbfe9f5bc76948baf165174ea652bb9cee4e580dacbf86f4b904e; CSS 3982bedefa5210387d97c16411f972e517dfdf62de18f3147a4eaa3042ec6a79; šestka f538f932e84b00eea2b817ea11610b7e407e2650c8885711b41bab628788b719. Odkaz i verzovaný CSS parametr ověřené.
 - Caller účtenku převzal; returned_to_adam=false nepotvrzuje automatický portálový návrat a nevyvolává retry. Fyzický proklik/Safari/iPhone a poslech NEOVĚŘENO. Řeči šestky stále 2/144, zrušené soví TTS se neobnovilo. Bez nového Cockpit deploymentu či zásahu do chráněných služeb. Následný lokální výsledkový zápis pro další balíček.
+
+### 2026-10-30 09:28 CET — Audio šestky: tři nové stopy, poskytovatel dál blokuje dokončení
+
+Hotovo:
+- Místní scéna obsahuje pět platných řečových stop místo dvou; úspěšné výsledky jsou zachované i v druhé kopii aplikace.
+
+Rozhodnutí:
+- Navázat na Mílův pokyn dokončit audio. Zachovat původní hlasy a tempo; po doloženém 429 neprovádět další automatické pokusy ani hlasovou náhradu.
+
+Další krok:
+- Po uvolnění služby doplnit zbývajících 139 stop od CZ 002. Dokončení nyní blokuje externí Microsoft TTS.
+
+Navrhované další kroky:
+- Po úplné generaci provést proklik a poslech na Macu/iPhonu; publikaci zadat samostatně.
+
+Technický důkaz:
+- 71 MMTX testů PASS; offline kontrola potvrzuje 5/144 a očekávaný exit 1 kvůli 139 chybějícím stopám. MP3 mají odpovídající text/hlas/-10%/SHA-256 a dekódují se. Dvě původní EN stopy zůstaly beze změny.
+- První sériový běh přidal CZ 000, CZ 001 a EN 002, potom HTTP 429. Jedno pokračování po pauze s 10s rozestupy opět HTTP 429 bez Retry-After, žádný další síťový pokus. Logy mmtx_scene06_audio_20261030.log a mmtx_scene06_audio_paced_20261030.log. Zdrojový generátor ani společná speech vrstva se neměnily; bez push/nasazení.
