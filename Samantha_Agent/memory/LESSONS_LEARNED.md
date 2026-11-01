@@ -1550,3 +1550,11 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
 - Řešení nalezeno: 28102026
 - Řešení: číst čas existující poslední editovací revize (u nového filmu project-r1), ověřit kandidáta proti současným oprávněním a nabídnout jej napříč cestami pouze při novém otevření. Při refreshi zachovat ruční/dirty výběr. Nejprve porovnat metadata; kvůli výběru nečíst exportní úlohy všech filmů. Čtení/render nesmí měnit hodiny uloženého střihu.
 - Ověření: 86 cílených kontrol PASS včetně dvou cest, staršího dne uloženého později, změny soukromí, read-only bajtů/mtime a Node stale/refresh/reopen. Místní čtení 0,771 s / 0,027 s; browserová přejímka zůstává samostatná. Report camino_film_resume_latest_20261028.md.
+
+### 2026-11-01 — Azure ukázky před pokračováním přerušovaného Edge TTS
+
+- Kontext: MMTX scéna 6, opakované HTTP 429 zastavily Edge na 16/144 stopách.
+- Typ: opakující se
+- Řešení: výslovný Azure provider, původní hlasová ID a -10 %, přesné escapované SSML bez krácení textu. Nejprve oddělený poslech chybějících hlasů, potom teprve věcné přijetí a doplnění scény. Hotové MP3 a účtenky vždy ověřit a zachovat.
+- Náklady a tajemství: celý plán zkontrolovat před sítí; rezervovat účtované znaky před každým POST. Limit 10 000 znaků na běh, žádný automatický retry/refund při nejisté odpovědi. Klíč pouze v místním .env a stdin konfiguraci curl, nikdy v argv nebo chybovém výpisu.
+- Ověření: šest skutečných Azure MP3, 274 účtovaných znaků, 22,488s spojený poslech a přesně shodné SHA-256 všech původních souborů obou kopií scény. 44 cílených testů PASS. Lidské přijetí celého zvuku je samostatný krok; viz mmtx_scene06_azure_preview_20261101.md.

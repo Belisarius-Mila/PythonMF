@@ -24,6 +24,8 @@ NODE_FALLBACK_PATHS = (
 )
 
 COMPILE_PATHS = (
+    "app/speech/azure_tts_mp3.py",
+    "../MatysekANJ/build_scene06_audio.py",
     "app/backup/camino.py",
     "scripts/backup_camino.py",
     "app/codex_sessions.py",
@@ -247,6 +249,8 @@ SHELL_PATHS = (
 )
 
 TEST_MODULES = (
+    "tests.test_speech_azure_tts_mp3",
+    "tests.test_mmtx_scene06_azure_audio",
     "tests.test_backup_camino",
     "tests.test_backup_run_tools",
     "tests.test_cockpit_quality_gate",

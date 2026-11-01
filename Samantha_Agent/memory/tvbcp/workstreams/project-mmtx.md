@@ -1366,3 +1366,20 @@ Technický důkaz:
 - 4 cílené testy scény 6 PASS; offline --check ověřil 16/144 a očekávaný exit 1 kvůli neúplnému audiu. Předchozích sedm MP3 zachovaných; obě kopie stejné. Generátor ani společná speech vrstva se neměnily.
 - První běh přidal sedm stop, potom EN 007 → ClientConnectorDNSError/gaierror. Čtecí DNS kontrola domény služby i microsoft.com prošla; obnovení zachovalo stav pětic a přidalo EN 007/CZ 007. Následně EN 008 → HTTP 429 bez Retry-After, další dávka se nespustila.
 - Průběh a kurzor v logs/mmtx_scene06_batches_20261030_154314_state.log a logs/mmtx_scene06_batches_20261030_155259_state.log. Bez push/nasazení; fyzický poslech/proklik NEOVĚŘENO.
+
+### 2026-11-01 21:35 CET — Azure generátor a šest poslechových ukázek
+
+Hotovo:
+- Připravený Azure generátor a šest ukázek původních hlasů, společný poslech 22,488 s. Kanonické audio zůstává 16/144 a oba mirrory beze změny.
+
+Rozhodnutí:
+- Na Mílův pokyn napojit již vytvořený Azure účet a před doplněním celé scény připravit ukázky. Zachovat hlasy, texty a -10 %; výslovná volba Azure, limit 10 000 znaků na běh, žádný automatický retry ani publikace.
+
+Další krok:
+- Přijmout zvuk ukázek a následně doplnit zbývajících 128 stop přes Azure.
+
+Navrhované další kroky:
+- Po úplné generaci offline kontrola a fyzický proklik/poslech Mac/iPhone; publikaci zadat samostatně.
+
+Technický důkaz:
+- 44 cílených testů PASS; šest platných MP3, 274 účtovaných znaků, shodné původní SHA-256 obou kopií scény. Plná projektová brána 2273 testů PASS. Report mmtx_scene06_azure_preview_20261101.md. Lidské přijetí NEOVĚŘENO.

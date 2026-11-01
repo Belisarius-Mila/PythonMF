@@ -2,11 +2,12 @@
 
 ## Aktuální stav
 
-- 2026-10-30 15:55 CET: místní audio šestky 16/144, zbývá 128 stop. Poslední pokračování přidalo devět stop od CZ 003 po CZ 007. Původní hlasy, texty a tempo -10% zachované; MP3, vazby a manifesty jsou shodné v docs i web_mmtx.
-- Běh po pěti měl 30s rozestupy a 60s pauzu mezi pěticemi. První pětice ověřená; druhou po dvou stopách přerušila chyba DNS. Po samostatném ověření obnoveného překladu domény bezpečně navázal na dvě uložené stopy a přidal další dvě. Poslední požadavek druhé pětice EN 008 vrátil HTTP 429 bez Retry-After. Druhá dávka tedy 4/5; třetí dávka ani další síťový pokus neběží.
-- Ověření: 4 cílené testy scény 6 PASS; offline --check potvrzuje platné vazby a dekódování 16 stop, očekávaný exit 1 pro 128 chybějících. Předchozích sedm stop zachovaných. Skutečný proklik a poslech Mac/iPhone NEOVĚŘENO.
-- Poslední doložená veřejná publikace je z 28. 10. do 46173ef9 s audiem 2/144 a rohovou zkratkou 5→6. Místních 16 stop není nynějším krokem publikovaných; bez push/Pages/Cockpit nasazení. Soví automatika zůstává vypnutá.
-- Další krok: po uvolnění Microsoft TTS dokončit druhou pětici stopou EN 008 a pokračovat dalšími pěticemi. Po 144/144 úplná offline kontrola, skutečný poslech/proklik a samostatně autorizované p+n. Audio není dokončené.
+- 2026-11-01 21:35 CET: místně napojené Azure Speech pro scénu 6, výslovné --provider azure; původní hlasy a tempo -10 % zachované. Klíč pouze v místním .env mimo Git.
+- Šest samostatných poslechových ukázek a společný 22,488s MP3; 274 účtovaných znaků. Jenny, Vlasta, Andrew, Ana, Michelle, Guy. Dekódování a SHA-256 PASS; společná ukázka přehraná přes afplay, lidské přijetí NEOVĚŘENO.
+- Kanonické audio zůstává 16/144, chybí 128. Všechny soubory docs i web_mmtx mají před/po shodné SHA-256; ukázky jsou oddělené a nevložené do scény.
+- Limit nejvýše 10 000 účtovaných znaků na běh; plán se ověří před sítí a každý požadavek rezervuje spotřebu před odesláním. Bez automatického retry, přepnutí služby nebo výpisu klíče. Při chybě hotové výsledky zůstávají zachované.
+- 44 cílených testů PASS; plná projektová brána 2273 testů PASS. Report mmtx_scene06_azure_preview_20261101.md. Bez push/Pages/nasazení; poslední doložená veřejná publikace do 46173ef9 má 2/144.
+- Další krok: přijmout poslechové ukázky, potom doplnit zbývajících 128 stop přes Azure. Fyzický proklik a poslech celé scény i samostatně autorizované p+n zůstávají otevřené.
 
 ## Stav
 

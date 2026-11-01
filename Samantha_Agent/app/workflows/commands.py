@@ -318,6 +318,17 @@ def _camino_service_commands() -> tuple[WorkflowCommand, ...]:
 
 
 WORKFLOW_COMMANDS: tuple[WorkflowCommand, ...] = (
+    WorkflowCommand(
+        command_id="mmtx_scene06_azure_preview",
+        title="Poslechové ukázky šesti hlasů MMTX přes Azure",
+        purpose="Vytvoří oddělené verzované MP3 ukázky, zachová scénu a hotové audio; limit 10000 znaků bez retry.",
+        aliases=("mmtx azure ukázky",),
+        argv=(str(PYTHON_BIN), str(PROJECT_ROOT / "MatysekANJ/build_scene06_audio.py"), "--preview", "--provider", "azure"),
+        cwd=SAMANTHA_DIR,
+        risk="external_generation",
+        writes="oddělené ukázky v data/private/mmtx/scene06_azure_preview; Azure spotřeba podle znaků",
+        requires_confirmation=True,
+    ),
     *(WorkflowCommand(
         command_id="backup_camino_" + mode.replace("-", "_"),
         title="Záloha živého Camina: " + mode,
