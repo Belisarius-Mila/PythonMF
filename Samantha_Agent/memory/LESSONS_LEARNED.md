@@ -1558,3 +1558,5 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
 - Řešení: výslovný Azure provider, původní hlasová ID a -10 %, přesné escapované SSML bez krácení textu. Nejprve oddělený poslech chybějících hlasů, potom teprve věcné přijetí a doplnění scény. Hotové MP3 a účtenky vždy ověřit a zachovat.
 - Náklady a tajemství: celý plán zkontrolovat před sítí; rezervovat účtované znaky před každým POST. Limit 10 000 znaků na běh, žádný automatický retry/refund při nejisté odpovědi. Klíč pouze v místním .env a stdin konfiguraci curl, nikdy v argv nebo chybovém výpisu.
 - Ověření: šest skutečných Azure MP3, 274 účtovaných znaků, 22,488s spojený poslech a přesně shodné SHA-256 všech původních souborů obou kopií scény. 44 cílených testů PASS. Lidské přijetí celého zvuku je samostatný krok; viz mmtx_scene06_azure_preview_20261101.md.
+
+- Doplnění 2026-11-01 po přijetí ukázek: zbývajících 128 stop dokončeno 128 unikátními Azure požadavky, 5 870 znaků; plná sada 144/144 a staré MP3 beze změny. Testy výběru ukázek a překročení rozpočtu mají používat syntetická data, aby po dokončení scény nezávisely na skutečně chybějících stopách.

@@ -2,12 +2,13 @@
 
 ## Aktuální stav
 
-- 2026-11-01 21:35 CET: místně napojené Azure Speech pro scénu 6, výslovné --provider azure; původní hlasy a tempo -10 % zachované. Klíč pouze v místním .env mimo Git.
-- Šest samostatných poslechových ukázek a společný 22,488s MP3; 274 účtovaných znaků. Jenny, Vlasta, Andrew, Ana, Michelle, Guy. Dekódování a SHA-256 PASS; společná ukázka přehraná přes afplay, lidské přijetí NEOVĚŘENO.
-- Kanonické audio zůstává 16/144, chybí 128. Všechny soubory docs i web_mmtx mají před/po shodné SHA-256; ukázky jsou oddělené a nevložené do scény.
-- Limit nejvýše 10 000 účtovaných znaků na běh; plán se ověří před sítí a každý požadavek rezervuje spotřebu před odesláním. Bez automatického retry, přepnutí služby nebo výpisu klíče. Při chybě hotové výsledky zůstávají zachované.
-- 44 cílených testů PASS; plná projektová brána 2273 testů PASS. Report mmtx_scene06_azure_preview_20261101.md. Bez push/Pages/nasazení; poslední doložená veřejná publikace do 46173ef9 má 2/144.
-- Další krok: přijmout poslechové ukázky, potom doplnit zbývajících 128 stop přes Azure. Fyzický proklik a poslech celé scény i samostatně autorizované p+n zůstávají otevřené.
+- 2026-11-01 22:29 CET: místně hotové audio scény 6, 144/144 stop (72 EN + 72 CZ), chybí 0. Přibylo 128 Azure MP3, 128 unikátních úspěšných požadavků, 5 870 účtovaných znaků v limitu 10 000. Původní hlasy a -10 % zachované.
+- Míla přijal šest hlasových ukázek a zadal pokračování. Celý fyzický proklik a poslech scény na Macu/iPhonu NEOVĚŘENO.
+- Původních 16 MP3 i jejich vazby beze změny, ostatní původní soubory scény zachované. Kompletní docs a web_mmtx bajtově shodné; všech 144 stop odpovídá textu, hlasu, tempu a SHA-256 a dekóduje se.
+- Ověření: 24 cílených testů před během PASS, 4 testy scény na hotových datech PASS; plná brána 2273 testů PASS. Offline --check: 144/144, chybí 0, exit 0.
+- Workflow mmtx_scene06_azure_complete, stav completed / exit 0. Report mmtx_scene06_azure_complete_20261101.md. Klíč pouze místně mimo Git; bez retry nebo změny jiné hlasové cesty.
+- Výsledek je místní, bez push/Pages/nasazení. Poslední doložená veřejná publikace do 46173ef9 s audiem 2/144 je historický stav z 28. 10.; dnes nebyla znovu auditovaná.
+- Další krok: praktický proklik a poslech celé scény, potom samostatně autorizované p+n. Zvukové soubory jsou dokončené.
 
 ## Stav
 

@@ -19,12 +19,15 @@ class Scene06AzureTests(unittest.TestCase):
 
     def test_remaining_plan_and_preview_cover_six_original_voices(self):
         b = self.builder
-        story = json.loads((b.ROOT/'story.json').read_text())
-        selection = b.preview_selection(story)
-        self.assertEqual(len(selection), 6)
-        voices = {b.VOICES[row[0]] if lang == 'en' else 'cs-CZ-VlastaNeural' for _,lang,row in selection}
-        self.assertEqual(len(voices), 6)
-        for i,lang,_ in selection:self.assertFalse((b.ROOT/'audio'/lang/f'{i:03}.mp3').exists())
+        story = [[speaker, 'Hello!', 'Ahoj!'] for speaker in ('logan','fiona','benji','bunny','sunny','bruno')]
+        with tempfile.TemporaryDirectory() as tmp, patch.object(b,'ROOT',Path(tmp)):
+            for lang in ('en','cs'):
+                p=b.ROOT/'audio'/lang/'000.mp3';p.parent.mkdir(parents=True);p.write_bytes(b'existing')
+            selection = b.preview_selection(story)
+            self.assertEqual(len(selection), 6)
+            voices = {b.VOICES[row[0]] if lang == 'en' else 'cs-CZ-VlastaNeural' for _,lang,row in selection}
+            self.assertEqual(len(voices), 6)
+            for i,lang,_ in selection:self.assertFalse((b.ROOT/'audio'/lang/f'{i:03}.mp3').exists())
 
     def test_existing_valid_clip_is_preserved_without_network(self):
         b = self.builder
@@ -64,9 +67,11 @@ class Scene06AzureTests(unittest.TestCase):
 
     def test_whole_plan_over_limit_sends_nothing(self):
         b=self.builder
-        with patch.object(b,'synthesize_azure_tts_mp3_sync') as synth:
+        with tempfile.TemporaryDirectory() as tmp, patch.object(b,'ROOT',Path(tmp)), patch.object(b,'synthesize_azure_tts_mp3_sync') as synth:
+            (b.ROOT/'story.json').write_text(json.dumps([['benji','Hello!','Ahoj!']]))
+            (b.ROOT/'audio_bindings.json').write_text('{}')
             with self.assertRaisesRegex(RuntimeError,'žádný požadavek'):
-                asyncio.run(b.main(['--preview','--provider','azure','--max-characters','1']))
+                asyncio.run(b.main(['--apply','--provider','azure','--max-characters','1']))
             synth.assert_not_called()
 
 

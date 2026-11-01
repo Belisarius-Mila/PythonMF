@@ -20,7 +20,7 @@ Pracovní proud: project-mmtx
 - Šest MP3 dekódováno; vazby na text, hlas, tempo a SHA-256 PASS. Spojený MP3 také dekódován a přehrán přes afplay.
 - Plná projektová brána PASS: 2273 testů, 0 chyb (514,733 s unittest; 520,7 s včetně běhu). Log mmtx_scene06_azure_full_gate_20261101.log.
 - Původní Edge, nová Azure ukázka i spojený poslech: MP3 mono 24 kHz / 48 kb/s.
-- Lidské přijetí zvuku Mac/iPhone: NEOVĚŘENO.
+- Následná přejímka 2026-11-01: Míla přijal šest hlasových ukázek a zadal pokračování. Celý proklik/poslech scény je samostatný otevřený krok.
 
 ## Registrovaný postup
 
@@ -36,7 +36,7 @@ Při 16/144 je očekávaný exit 1 kvůli neúplnému audiu, nikoli neplatným s
 
 ## Další krok a rizika
 
-- Míla poslechne ukázky a rozhodne o doplnění zbývajících 128 stop. Skutečný proklik celé scény a fyzický poslech Mac/iPhone zůstávají otevřené.
+- Míla ukázky přijal; následné místní dokončení 144/144 je v mmtx_scene06_azure_complete_20261101.md. Skutečný proklik celé scény a fyzický poslech Mac/iPhone zůstávají otevřené.
 - Limit platí pro jeden běh, nikoli pro jiné aplikace nebo samostatně znovu spuštěné běhy. Skutečné vyúčtování určuje Azure; místní účtenka eviduje rezervované znaky.
 - Při chybě se zachovají hotové soubory a zbytek se negeneruje automaticky. Existující text/hlas/tempo/hash musí nadále odpovídat, jinak se výstup zachová a běh skončí.
 - Bez push, Pages publikace, nasazení Cockpitu nebo změny jiných hlasových cest.

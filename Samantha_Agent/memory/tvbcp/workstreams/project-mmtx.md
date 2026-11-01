@@ -1383,3 +1383,21 @@ Navrhované další kroky:
 
 Technický důkaz:
 - 44 cílených testů PASS; šest platných MP3, 274 účtovaných znaků, shodné původní SHA-256 obou kopií scény. Plná projektová brána 2273 testů PASS. Report mmtx_scene06_azure_preview_20261101.md. Lidské přijetí NEOVĚŘENO.
+
+### 2026-11-01 22:29 CET — Dokončené audio šesté scény: 144/144
+
+Hotovo:
+- Celá sada 72 anglických a 72 českých MP3 je připravená místně v obou kopiích hry. Původní nahrávky, hlasy, texty a tempo zachované.
+
+Rozhodnutí:
+- Míla přijal šest hlasových ukázek a výslovně zadal dokončení přes Azure. Zachován limit 10 000 znaků na běh a zastavení bez automatického retry.
+
+Další krok:
+- Prakticky projít a poslechnout celou scénu na Macu/iPhonu.
+
+Navrhované další kroky:
+- Po přejímce samostatně zadat p+n.
+
+Technický důkaz:
+- 128 nových MP3 / 128 unikátních úspěšných požadavků / 5 870 účtovaných znaků. Původních 16 souborů a vazeb přesně shodných. Oba mirrory shodné; offline --check 144/144, chybí 0, exit 0.
+- 4 závěrečné testy scény a plná brána 2273 testů PASS. Report mmtx_scene06_azure_complete_20261101.md. Výsledek pouze místně; fyzická přejímka celé scény zatím NEOVĚŘENO.
