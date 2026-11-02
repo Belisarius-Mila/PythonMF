@@ -1482,6 +1482,8 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
 
 - Doplnění LL-080 (27. 10., publikační PATH): i závěrečný kontrolní probe v testu musí předat executable=media_binary("ffprobe"). Nestačí, že produkční adaptér cestu rozšiřuje. Regrese musí sama vynutit PATH služby; Orus modul 13 PASS.
 
+- Doplnění LL-080 (2. 11., MMTX rozpočet): test odmítnutí placeného požadavku nemá vyžadovat instalované FFmpeg. Mockovat dohledání nástroje, vynutit PATH služby a ověřit skutečnou rozpočtovou chybu i nulové dekódování/odeslání. Reprodukce FAIL→PASS, Azure/builder 11 PASS v obou prostředích; skutečné mediální kontroly zůstávají samostatné.
+
 ### LL-081 — Pracovní text a historie hlasových pokusů se nesmějí přepisovat navzájem
 
 - Problém: samotné přepsání textu a nahrazení aktuálního audio odkazu neumožní porovnat pokusy ani obnovit jejich znění; skrytí záznamu navíc nesmí poškodit starší film.

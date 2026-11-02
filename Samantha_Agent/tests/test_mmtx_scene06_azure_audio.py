@@ -67,11 +67,20 @@ class Scene06AzureTests(unittest.TestCase):
 
     def test_whole_plan_over_limit_sends_nothing(self):
         b=self.builder
-        with tempfile.TemporaryDirectory() as tmp, patch.object(b,'ROOT',Path(tmp)), patch.object(b,'synthesize_azure_tts_mp3_sync') as synth:
+        with (
+            tempfile.TemporaryDirectory() as tmp,
+            patch.object(b, 'ROOT', Path(tmp)),
+            patch.dict('os.environ', {'PATH': '/usr/bin:/bin:/usr/sbin:/sbin'}),
+            patch.object(b.shutil, 'which', return_value='test-ffmpeg') as which,
+            patch.object(b, 'decode') as decode,
+            patch.object(b, 'synthesize_azure_tts_mp3_sync') as synth,
+        ):
             (b.ROOT/'story.json').write_text(json.dumps([['benji','Hello!','Ahoj!']]))
             (b.ROOT/'audio_bindings.json').write_text('{}')
             with self.assertRaisesRegex(RuntimeError,'žádný požadavek'):
                 asyncio.run(b.main(['--apply','--provider','azure','--max-characters','1']))
+            which.assert_called_once_with('ffmpeg')
+            decode.assert_not_called()
             synth.assert_not_called()
 
 

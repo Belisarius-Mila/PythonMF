@@ -1,11 +1,11 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-11-02 07:20 CET: audio scény 6 je místně dokončené 144/144, ale výslovně zadané Terra p+n zastavila publikační brána. GitHub/main ověřený na 46173ef9; schválený lokální head 2270248c se neodeslal. Nasazení nezačalo.
-- Účtenka dc35a8df61b2ce0ff6b55c4293b6a454, project-mmtx → github_pages, gpt-6.1-terra/high. Stav attention, push_state=uncertain; samostatná čtecí kontrola GitHub headu a logu potvrdila selhání před push. Žádné opakování vydání.
-- Plná publikační brána: 2273 testů, 1 chyba, 18 přeskočených, 449,410 s unit testů. Jediná chyba test_whole_plan_over_limit_sends_nothing vznikla před rozpočtovou kontrolou: službový PATH nenalezl ffmpeg. Na Macu existuje /usr/local/bin/ffmpeg; rozpočtový test tuto externí závislost neizoluje. Dřívější terminálový PASS není důkaz průchodu ve službě.
-- Původních 16 MP3, nových 128 MP3, přijaté hlasové ukázky a místní offline kontrola 144/144 zůstávají zachované. Celý fyzický proklik a poslech Mac/iPhone NEOVĚŘENO.
-- Další krok: samostatně opravit závislost rozpočtového testu na FFmpeg/PATH, ověřit pod službovým PATH a připravit nový přesný balíček pro p+n. Systémové prostředí ani běžící Cockpit se kvůli neúspěchu neměnily; před auditem byl existujícím ovladačem spuštěn chybějící místní Codex App Server.
+- 2026-11-02 08:08 CET: rozpočtový test Azure je izolovaný od skutečného FFmpeg a vynucuje službový PATH. Kontroluje odmítnutí překročeného rozpočtu před dekódováním i síťovým požadavkem. Produkční generátor, MP3 ani prostředí Cockpitu se neměnily.
+- Původní chyba pod /usr/bin:/bin:/usr/sbin:/sbin reprodukovaná před opravou. Po opravě 11 Azure/builder testů PASS v běžném i službovém prostředí. Plná publikační brána proběhne v novém předání.
+- Míla výslovně zadal opravu, ověření a nové předání balíčku. Nové p+n přes centrálně schválenou Terru 6.1/high je autorizované; před startem se zmrazí nový přesný head. Původní neúspěšná účtenka dc35a8df61b2ce0ff6b55c4293b6a454 se neopakuje.
+- Audio scény 6 zůstává místně hotové 144/144 (původních 16 a nových 128 MP3); ukázky přijaté, fyzický proklik/poslech celé scény Mac/iPhone NEOVĚŘENO. Poslední živě ověřený GitHub head z předchozího kroku je 46173ef9; nové vydání zatím není potvrzené.
+- Další krok: commit opravy a nové registrované Terra p+n s plnou branou; poté jedna kontrola účtenky, GitHubu a veřejných souborů.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: MMTX
@@ -1420,3 +1420,21 @@ Technický důkaz:
 - Účtenka dc35a8df61b2ce0ff6b55c4293b6a454: attention, push_state=uncertain, deployment_state=not_started. Jedna Adamova kontrola: GitHub/main stále 46173ef987c345ebf6875c24301f38532471434f, main čistý napřed o šest; health OK se stejným code_stamp ae3b321d9492092a.
 - Log human_adam_deploy_gate.log: 2273 testů / 449,410 s, FAILED(errors=1, skipped=18). test_whole_plan_over_limit_sends_nothing místo očekávané rozpočtové chyby skončil SystemExit kvůli nenalezenému ffmpeg. FFmpeg je instalovaný v /usr/local/bin, test závisí na PATH a tuto závislost neizoluje. Brána selhala před voláním push; žádný Pages workflow/deployment nevznikl.
 - Před auditem existující LocalAppServerProcessController.start() spustil chybějící místní Codex App Server. Bez změny zdrojů, konfigurace služby, sítě nebo audio dat. Fyzická přejímka zůstává otevřená. Tento výsledkový zápis je místní pro další balíček.
+
+### 2026-11-02 08:08 CET — Izolace rozpočtového testu před novým Terra p+n
+
+Hotovo:
+- Rozpočtový test už nepotřebuje skutečný FFmpeg. Při překročení rozpočtu ověřuje nulové dekódování i nulové požadavky na Azure pod stejným PATH jako služba.
+
+Rozhodnutí:
+- Míla výslovně zadal opravit izolaci, ověřit a znovu předat balíček. Jen lokální test; produkční generátor, audio i službové prostředí zachované. Nové předání používá nový request ID a nový přesný commit; stará účtenka zůstává zachovaná.
+
+Další krok:
+- Nový přesný balíček předat Terře přes submit_release(wait=True), včetně plné publikační brány.
+
+Navrhované další kroky:
+- Po potvrzeném vydání veřejná kontrola souborů; celý fyzický proklik/poslech Mac/iPhone zůstává otevřený.
+
+Technický důkaz:
+- Před opravou cílený test pod PATH=/usr/bin:/bin:/usr/sbin:/sbin reprodukoval SystemExit kvůli nenalezenému ffmpeg. Po opravě Azure/builder sada 11/11 PASS v běžném i službovém PATH. Test mockuje pouze dohledání nástroje; skutečnou rozpočtovou podmínku i assert_not_called zachovává.
+- Změna tests/test_mmtx_scene06_azure_audio.py, bez nového generování nebo odchozího placeného požadavku. Předpublikační plná brána a samotné vydání zatím čekají.

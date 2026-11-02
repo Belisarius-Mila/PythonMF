@@ -2,11 +2,11 @@
 
 ## Aktuální stav
 
-- 2026-11-02 07:20 CET: audio scény 6 je místně dokončené 144/144, ale výslovně zadané Terra p+n zastavila publikační brána. GitHub/main ověřený na 46173ef9; schválený lokální head 2270248c se neodeslal. Nasazení nezačalo.
-- Účtenka dc35a8df61b2ce0ff6b55c4293b6a454, project-mmtx → github_pages, gpt-6.1-terra/high. Stav attention, push_state=uncertain; samostatná čtecí kontrola GitHub headu a logu potvrdila selhání před push. Žádné opakování vydání.
-- Plná publikační brána: 2273 testů, 1 chyba, 18 přeskočených, 449,410 s unit testů. Jediná chyba test_whole_plan_over_limit_sends_nothing vznikla před rozpočtovou kontrolou: službový PATH nenalezl ffmpeg. Na Macu existuje /usr/local/bin/ffmpeg; rozpočtový test tuto externí závislost neizoluje. Dřívější terminálový PASS není důkaz průchodu ve službě.
-- Původních 16 MP3, nových 128 MP3, přijaté hlasové ukázky a místní offline kontrola 144/144 zůstávají zachované. Celý fyzický proklik a poslech Mac/iPhone NEOVĚŘENO.
-- Další krok: samostatně opravit závislost rozpočtového testu na FFmpeg/PATH, ověřit pod službovým PATH a připravit nový přesný balíček pro p+n. Systémové prostředí ani běžící Cockpit se kvůli neúspěchu neměnily; před auditem byl existujícím ovladačem spuštěn chybějící místní Codex App Server.
+- 2026-11-02 08:08 CET: rozpočtový test Azure je izolovaný od skutečného FFmpeg a vynucuje službový PATH. Kontroluje odmítnutí překročeného rozpočtu před dekódováním i síťovým požadavkem. Produkční generátor, MP3 ani prostředí Cockpitu se neměnily.
+- Původní chyba pod /usr/bin:/bin:/usr/sbin:/sbin reprodukovaná před opravou. Po opravě 11 Azure/builder testů PASS v běžném i službovém prostředí. Plná publikační brána proběhne v novém předání.
+- Míla výslovně zadal opravu, ověření a nové předání balíčku. Nové p+n přes centrálně schválenou Terru 6.1/high je autorizované; před startem se zmrazí nový přesný head. Původní neúspěšná účtenka dc35a8df61b2ce0ff6b55c4293b6a454 se neopakuje.
+- Audio scény 6 zůstává místně hotové 144/144 (původních 16 a nových 128 MP3); ukázky přijaté, fyzický proklik/poslech celé scény Mac/iPhone NEOVĚŘENO. Poslední živě ověřený GitHub head z předchozího kroku je 46173ef9; nové vydání zatím není potvrzené.
+- Další krok: commit opravy a nové registrované Terra p+n s plnou branou; poté jedna kontrola účtenky, GitHubu a veřejných souborů.
 
 ## Stav
 
