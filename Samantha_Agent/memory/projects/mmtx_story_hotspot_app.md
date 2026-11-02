@@ -2,13 +2,11 @@
 
 ## Aktuální stav
 
-- 2026-11-01 22:29 CET: místně hotové audio scény 6, 144/144 stop (72 EN + 72 CZ), chybí 0. Přibylo 128 Azure MP3, 128 unikátních úspěšných požadavků, 5 870 účtovaných znaků v limitu 10 000. Původní hlasy a -10 % zachované.
-- Míla přijal šest hlasových ukázek a zadal pokračování. Celý fyzický proklik a poslech scény na Macu/iPhonu NEOVĚŘENO.
-- Původních 16 MP3 i jejich vazby beze změny, ostatní původní soubory scény zachované. Kompletní docs a web_mmtx bajtově shodné; všech 144 stop odpovídá textu, hlasu, tempu a SHA-256 a dekóduje se.
-- Ověření: 24 cílených testů před během PASS, 4 testy scény na hotových datech PASS; plná brána 2273 testů PASS. Offline --check: 144/144, chybí 0, exit 0.
-- Workflow mmtx_scene06_azure_complete, stav completed / exit 0. Report mmtx_scene06_azure_complete_20261101.md. Klíč pouze místně mimo Git; bez retry nebo změny jiné hlasové cesty.
-- Výsledek je místní, bez push/Pages/nasazení. Poslední doložená veřejná publikace do 46173ef9 s audiem 2/144 je historický stav z 28. 10.; dnes nebyla znovu auditovaná.
-- Další krok: praktický proklik a poslech celé scény, potom samostatně autorizované p+n. Zvukové soubory jsou dokončené.
+- 2026-11-02 07:20 CET: audio scény 6 je místně dokončené 144/144, ale výslovně zadané Terra p+n zastavila publikační brána. GitHub/main ověřený na 46173ef9; schválený lokální head 2270248c se neodeslal. Nasazení nezačalo.
+- Účtenka dc35a8df61b2ce0ff6b55c4293b6a454, project-mmtx → github_pages, gpt-6.1-terra/high. Stav attention, push_state=uncertain; samostatná čtecí kontrola GitHub headu a logu potvrdila selhání před push. Žádné opakování vydání.
+- Plná publikační brána: 2273 testů, 1 chyba, 18 přeskočených, 449,410 s unit testů. Jediná chyba test_whole_plan_over_limit_sends_nothing vznikla před rozpočtovou kontrolou: službový PATH nenalezl ffmpeg. Na Macu existuje /usr/local/bin/ffmpeg; rozpočtový test tuto externí závislost neizoluje. Dřívější terminálový PASS není důkaz průchodu ve službě.
+- Původních 16 MP3, nových 128 MP3, přijaté hlasové ukázky a místní offline kontrola 144/144 zůstávají zachované. Celý fyzický proklik a poslech Mac/iPhone NEOVĚŘENO.
+- Další krok: samostatně opravit závislost rozpočtového testu na FFmpeg/PATH, ověřit pod službovým PATH a připravit nový přesný balíček pro p+n. Systémové prostředí ani běžící Cockpit se kvůli neúspěchu neměnily; před auditem byl existujícím ovladačem spuštěn chybějící místní Codex App Server.
 
 ## Stav
 

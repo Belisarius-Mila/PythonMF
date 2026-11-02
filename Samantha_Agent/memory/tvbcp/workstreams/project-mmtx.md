@@ -1,11 +1,11 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-10-30 15:55 CET: místní audio šestky 16/144, zbývá 128 stop. Poslední pokračování přidalo devět stop od CZ 003 po CZ 007. Původní hlasy, texty a tempo -10% zachované; MP3, vazby a manifesty jsou shodné v docs i web_mmtx.
-- Běh po pěti měl 30s rozestupy a 60s pauzu mezi pěticemi. První pětice ověřená; druhou po dvou stopách přerušila chyba DNS. Po samostatném ověření obnoveného překladu domény bezpečně navázal na dvě uložené stopy a přidal další dvě. Poslední požadavek druhé pětice EN 008 vrátil HTTP 429 bez Retry-After. Druhá dávka tedy 4/5; třetí dávka ani další síťový pokus neběží.
-- Ověření: 4 cílené testy scény 6 PASS; offline --check potvrzuje platné vazby a dekódování 16 stop, očekávaný exit 1 pro 128 chybějících. Předchozích sedm stop zachovaných. Skutečný proklik a poslech Mac/iPhone NEOVĚŘENO.
-- Poslední doložená veřejná publikace je z 28. 10. do 46173ef9 s audiem 2/144 a rohovou zkratkou 5→6. Místních 16 stop není nynějším krokem publikovaných; bez push/Pages/Cockpit nasazení. Soví automatika zůstává vypnutá.
-- Další krok: po uvolnění Microsoft TTS dokončit druhou pětici stopou EN 008 a pokračovat dalšími pěticemi. Po 144/144 úplná offline kontrola, skutečný poslech/proklik a samostatně autorizované p+n. Audio není dokončené.
+- 2026-11-02 07:20 CET: audio scény 6 je místně dokončené 144/144, ale výslovně zadané Terra p+n zastavila publikační brána. GitHub/main ověřený na 46173ef9; schválený lokální head 2270248c se neodeslal. Nasazení nezačalo.
+- Účtenka dc35a8df61b2ce0ff6b55c4293b6a454, project-mmtx → github_pages, gpt-6.1-terra/high. Stav attention, push_state=uncertain; samostatná čtecí kontrola GitHub headu a logu potvrdila selhání před push. Žádné opakování vydání.
+- Plná publikační brána: 2273 testů, 1 chyba, 18 přeskočených, 449,410 s unit testů. Jediná chyba test_whole_plan_over_limit_sends_nothing vznikla před rozpočtovou kontrolou: službový PATH nenalezl ffmpeg. Na Macu existuje /usr/local/bin/ffmpeg; rozpočtový test tuto externí závislost neizoluje. Dřívější terminálový PASS není důkaz průchodu ve službě.
+- Původních 16 MP3, nových 128 MP3, přijaté hlasové ukázky a místní offline kontrola 144/144 zůstávají zachované. Celý fyzický proklik a poslech Mac/iPhone NEOVĚŘENO.
+- Další krok: samostatně opravit závislost rozpočtového testu na FFmpeg/PATH, ověřit pod službovým PATH a připravit nový přesný balíček pro p+n. Systémové prostředí ani běžící Cockpit se kvůli neúspěchu neměnily; před auditem byl existujícím ovladačem spuštěn chybějící místní Codex App Server.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: MMTX
@@ -1401,3 +1401,22 @@ Navrhované další kroky:
 Technický důkaz:
 - 128 nových MP3 / 128 unikátních úspěšných požadavků / 5 870 účtovaných znaků. Původních 16 souborů a vazeb přesně shodných. Oba mirrory shodné; offline --check 144/144, chybí 0, exit 0.
 - 4 závěrečné testy scény a plná brána 2273 testů PASS. Report mmtx_scene06_azure_complete_20261101.md. Výsledek pouze místně; fyzická přejímka celé scény zatím NEOVĚŘENO.
+
+### 2026-11-02 07:20 CET — Terra p+n zastavené publikační bránou
+
+Hotovo:
+- Audio šestky zůstává místně dokončené 144/144. Výslovně zadané vydání nepřešlo přes testovací bránu; nic nového se nepublikovalo.
+
+Rozhodnutí:
+- Míla zadal „ok, předej Terra p+n“. Jedno submit_release(wait=True) předalo šest commitů do 2270248c, project-mmtx → GitHub Pages, centrálně schválené Terře 6.1/high. Bez změny role a bez automatického opakování.
+
+Další krok:
+- Opravit izolaci rozpočtového testu vůči FFmpeg/PATH a ověřit jej také pod službovým PATH; pak připravit nový přesný balíček.
+
+Navrhované další kroky:
+- Zachovaný praktický proklik a poslech celé scény Mac/iPhone; po úspěšném vydání ověřit veřejné soubory.
+
+Technický důkaz:
+- Účtenka dc35a8df61b2ce0ff6b55c4293b6a454: attention, push_state=uncertain, deployment_state=not_started. Jedna Adamova kontrola: GitHub/main stále 46173ef987c345ebf6875c24301f38532471434f, main čistý napřed o šest; health OK se stejným code_stamp ae3b321d9492092a.
+- Log human_adam_deploy_gate.log: 2273 testů / 449,410 s, FAILED(errors=1, skipped=18). test_whole_plan_over_limit_sends_nothing místo očekávané rozpočtové chyby skončil SystemExit kvůli nenalezenému ffmpeg. FFmpeg je instalovaný v /usr/local/bin, test závisí na PATH a tuto závislost neizoluje. Brána selhala před voláním push; žádný Pages workflow/deployment nevznikl.
+- Před auditem existující LocalAppServerProcessController.start() spustil chybějící místní Codex App Server. Bez změny zdrojů, konfigurace služby, sítě nebo audio dat. Fyzická přejímka zůstává otevřená. Tento výsledkový zápis je místní pro další balíček.
