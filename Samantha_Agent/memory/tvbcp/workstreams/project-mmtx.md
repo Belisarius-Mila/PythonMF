@@ -1,11 +1,12 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-11-02 08:08 CET: rozpočtový test Azure je izolovaný od skutečného FFmpeg a vynucuje službový PATH. Kontroluje odmítnutí překročeného rozpočtu před dekódováním i síťovým požadavkem. Produkční generátor, MP3 ani prostředí Cockpitu se neměnily.
-- Původní chyba pod /usr/bin:/bin:/usr/sbin:/sbin reprodukovaná před opravou. Po opravě 11 Azure/builder testů PASS v běžném i službovém prostředí. Plná publikační brána proběhne v novém předání.
-- Míla výslovně zadal opravu, ověření a nové předání balíčku. Nové p+n přes centrálně schválenou Terru 6.1/high je autorizované; před startem se zmrazí nový přesný head. Původní neúspěšná účtenka dc35a8df61b2ce0ff6b55c4293b6a454 se neopakuje.
-- Audio scény 6 zůstává místně hotové 144/144 (původních 16 a nových 128 MP3); ukázky přijaté, fyzický proklik/poslech celé scény Mac/iPhone NEOVĚŘENO. Poslední živě ověřený GitHub head z předchozího kroku je 46173ef9; nové vydání zatím není potvrzené.
-- Další krok: commit opravy a nové registrované Terra p+n s plnou branou; poté jedna kontrola účtenky, GitHubu a veřejných souborů.
+- 2026-11-02 08:18 CET: kompletní audio scény 6 je publikované na GitHub Pages, 144/144 stop (72 EN + 72 CZ). Původních 16 MP3 zachovaných; nových 128 Azure MP3 a izolace rozpočtového testu vydané do b0b4e172ab8b2fe69216af9d7520a23e22e2f624.
+- Terra 6.1/high dokončila jediné nové registrované p+n osmi commitů. Účtenka 81db27cc7794d9ba88dcd888156b35b6: completed, push_state/deployment_state=confirmed. Pages workflow 41405199009, deployment 7486464591, HTTP smoke 200; chráněné služby beze změny.
+- Plná publikační brána prošla: 2273 testů, 0 chyb, 18 přeskočených, 342,3 s celkem (unit 332,552 s). Rozpočtový test je izolovaný od skutečného FFmpeg; cílená Azure/builder sada 11 PASS v běžném i službovém PATH. Produkční generátor a službové prostředí se neměnily.
+- Jedna Adamova kontrola: GitHub/main přesně na vydaném headu; veřejná šestka má HTML, story.json, audio_bindings.json a všech 144 MP3 HTTP 200 a přesné bajty včetně otisků audio vazeb (147/147). Důkaz logs/mmtx_scene06_terra_public_verification_20261102.json. Cockpit zdravý se stejným PID a code_stamp ae3b321d9492092a.
+- Caller převzal konečnou účtenku; returned_to_adam=false je portálový příznak, ne důvod k retry. Původní neúspěšná účtenka zachovaná. Tento výsledkový zápis je místní checkpoint pro další balíček; další p+n se nespouští.
+- Další krok: prakticky projít a poslechnout celou scénu Mac/iPhone. Hlasové ukázky přijaté; fyzická přejímka celé scény nadále NEOVĚŘENO.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: MMTX
@@ -1438,3 +1439,22 @@ Navrhované další kroky:
 Technický důkaz:
 - Před opravou cílený test pod PATH=/usr/bin:/bin:/usr/sbin:/sbin reprodukoval SystemExit kvůli nenalezenému ffmpeg. Po opravě Azure/builder sada 11/11 PASS v běžném i službovém PATH. Test mockuje pouze dohledání nástroje; skutečnou rozpočtovou podmínku i assert_not_called zachovává.
 - Změna tests/test_mmtx_scene06_azure_audio.py, bez nového generování nebo odchozího placeného požadavku. Předpublikační plná brána a samotné vydání zatím čekají.
+
+### 2026-11-02 08:18 CET — Kompletní audio šestky publikované přes Terru
+
+Hotovo:
+- Šestá scéna veřejně podává všech 144 řečových stop. Opravený rozpočtový test prošel i ve skutečné publikační bráně.
+
+Rozhodnutí:
+- Na Mílův výslovný pokyn k opravě, ověření a novému předání proběhlo jedno nové submit_release(wait=True), osm commitů do b0b4e172, centrálně schválená Terra 6.1/high. Bez přepínání modelu, změny produkčního generátoru, placené regenerace nebo systémového prostředí.
+
+Další krok:
+- Praktický proklik a poslech celé scény na Macu/iPhonu.
+
+Navrhované další kroky:
+- Žádné nové rozšíření; zachované dřívější fyzické přejímky navigace.
+
+Technický důkaz:
+- Účtenka 81db27cc7794d9ba88dcd888156b35b6 completed, push_state/deployment_state=confirmed; osm commitů do b0b4e172ab8b2fe69216af9d7520a23e22e2f624. Plná brána 2273 testů / 0 chyb / 18 přeskočených, 342,3 s (unit 332,552 s), protected_services_unchanged=true.
+- Pages workflow 41405199009, deployment 7486464591, smoke HTTP 200. Jedna Adamova kontrola: skutečný GitHub head shodný; veřejných 147/147 souborů (HTML, dva JSON, 144 MP3) HTTP 200 a byte/SHA-256 shoda s vydanými zdroji. Důkaz logs/mmtx_scene06_terra_public_verification_20261102.json.
+- Cockpit health OK, stejný PID 1866 a code_stamp ae3b321d9492092a. Caller účtenku převzal; returned_to_adam=false nepředstavuje portálové doručení a není důvodem retry. Bez dalšího vydání nebo restartu Cockpitu; následný výsledkový zápis místně pro další balíček. Fyzický poslech/proklik celé scény NEOVĚŘENO.
