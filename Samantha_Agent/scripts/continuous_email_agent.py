@@ -16,6 +16,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from app.email.continuous_agent import ContinuousEmailAgent
 from app.email.service import ServiceSettings, launch_agent_preview, readiness, service_tick
+from app.email.pushcut import pushcut_status
 
 
 def main() -> int:
@@ -24,7 +25,7 @@ def main() -> int:
     args = parser.parse_args()
     if args.command == "synthetic-test":
         return subprocess.run(
-            [sys.executable, "-m", "unittest", "tests.test_continuous_email_agent", "tests.test_hourly_email_agent", "tests.test_cockpit_email_agent", "tests.test_agent_reply", "tests.test_email_agent_service", "-q"],
+            [sys.executable, "-m", "unittest", "tests.test_continuous_email_agent", "tests.test_hourly_email_agent", "tests.test_cockpit_email_agent", "tests.test_agent_reply", "tests.test_email_agent_service", "tests.test_email_pushcut", "-q"],
             cwd=PROJECT_ROOT, check=False,
         ).returncode
     if args.command == "service-preview":
@@ -48,6 +49,7 @@ def main() -> int:
                     for item in state["sources"].values()],
         "schedule": state.get("schedule", {}),
         "service": state.get("service", {}),
+        "pushcut": pushcut_status(),
     }, ensure_ascii=False))
     return 0
 

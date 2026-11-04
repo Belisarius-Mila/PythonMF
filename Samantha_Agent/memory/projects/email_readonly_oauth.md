@@ -2,6 +2,24 @@
 
 ## Aktuální směr 2026-11-04 — průběžný osobní agent
 
+- Stav 23:24 CET: příprava hodinového vstupu je vydaná po 77f7e12f,
+  Terra p+n 742135a3ba9990edc0afe6734d125166, plná brána 2368 PASS,
+  smoke 5/5, GitHub CI success. Trvalá služba ani modelová role neaktivované.
+- Míla zvolil nejdřív notifikaci a výslovně Pushcut. Lokálně je hotová
+  trvalá hodinová fronta nových důležitých karet, plain POST předdefinované
+  notifikace a nastavení/test v Cockpitu. Text, zvuk i otevření odkazu
+  se definují v iPhone aplikaci; backend nevyužívá placený dynamický obsah.
+- Fronta je atomická s kartou, jeden pokus je zapsaný před sítí a nejistý
+  výsledek se neopakuje. Staré/nevyřešené karty při zapnutí nezvoní zpětně,
+  ignorované/vyřízené se před odesláním přeskočí. Těla zpráv se dál čtou celá.
+- Cíleně 147 scénářů PASS včetně celého frontend kontraktu. První plná
+  brána měla jediný FAIL ve starém otisku rozšířené stránky; fixture opraven,
+  kontrola ponechaná. Míla výslovně schválil p+n, plnou bránu znovu provede
+  registrovaný vydavatel podle LL-079. Skutečný webhook chybí,
+  nastavení je vypnuté, živý Pushcut ani další model/SMTP se nevolaly.
+  Fyzický tón/klepnutí a p+n nového kódu čekají. Postup a důkazy:
+  `../reports/email_pushcut_20261104.md`.
+
 - Stav 22:40 CET: paměť důležitosti je již vydaná po 592d247b; místní plná
   brána i GitHub CI 2352 PASS, živá stránka/stamp ověřené. Fyzické QA čeká.
 - Pokračování připravuje samostatnou hodinovou službu: registrovaný čtecí

@@ -29,6 +29,13 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-095 — Úspěšný test oznámení patří ke konkrétnímu nastavení
+
+- Problém: po změně notifikační adresy nebo cílového odkazu by starý úspěšný test klamně potvrzoval nové nastavení; pád po HTTP pokusu by zase mohl způsobit dvojí zvuk.
+- Typ: opakující se
+- Řešení nalezeno: 04112026
+- Řešení: svázat test s revizí webhooku/odkazu a před sítí trvale zapsat pokus. Stejné request ID vrací původní stav; přerušené `sending` přejde na nejistý výsledek bez retry. API přijetí označit jako přijetí, fyzický zvuk/klepnutí ověřit na telefonu. Lokální testy ověřily změnu revize, dvojklik, souběh, pád po rezervaci a žádné opakování po restartu.
+
 ### LL-094 — Změna UIDVALIDITY nesmí sama znovu spustit celou historii
 
 - Problém: po přestavbě IMAP schránky se staré UID nepoužijí; reset kurzoru na nulu by bez rozhodnutí uživatele znovu posuzoval historickou poštu.

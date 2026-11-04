@@ -5,6 +5,8 @@
   let pendingReply = null;
   let replyBusy = false;
   let replyOutcomeLocked = false;
+  let pushcutDirty = false;
+  let pushcutBusy = false;
   function node(tag, text, className) {
     const element = document.createElement(tag);
     if (text !== undefined) element.textContent = text;
@@ -109,6 +111,15 @@
     if (editor.open) return;
     const data = await request("/api/email-agent/overview");
     const last = data.schedule.completed_at;
+    const pushcut = data.pushcut || {};
+    if (!pushcutDirty && !pushcutBusy) {
+      byId("pushcutEnabled").checked = Boolean(pushcut.enabled);
+      const remoteOrigin = window.location?.protocol === "https:" ? window.location.origin : "";
+      byId("pushcutCockpitUrl").value = pushcut.cockpit_url || (remoteOrigin ? remoteOrigin + "/emails-to-resolve/" : "");
+    }
+    const counts = pushcut.counts || {};
+    byId("pushcutStatus").textContent = !pushcut.configured ? "Pushcut zatím není připojený."
+      : `Upozornění ${pushcut.enabled ? "zapnutá" : "vypnutá"}. Čeká: ${counts.pending || 0}. Výsledek vyžaduje ověření: ${(counts.delivery_unknown || 0) + (counts.sending || 0) + (counts.rejected || 0)}.`;
     byId("status").textContent = last ? `Poslední dokončená kontrola: ${new Date(last).toLocaleString("cs-CZ")}.` : "Průběžná kontrola zatím nebyla spuštěna.";
     const sourceErrors = data.sources.some(source => source.health === "error");
     if (sourceErrors || data.assessment_errors) byId("status").textContent += " Některé kontroly nebo návrhy vyžadují ověření.";
@@ -137,6 +148,49 @@
     data.archived.forEach(item => archived.append(node("p", item.proposal.metadata.title)));
     if (!data.archived.length) archived.append(node("p", "Zatím žádné uložené zprávy."));
   }
+  function setPushcutBusy(busy) {
+    pushcutBusy = busy;
+    byId("savePushcut").disabled = busy;
+    byId("testPushcut").disabled = busy;
+    byId("pushcutWebhook").readOnly = busy;
+    byId("pushcutCockpitUrl").readOnly = busy;
+    byId("pushcutEnabled").disabled = busy;
+  }
+  for (const id of ["pushcutWebhook", "pushcutCockpitUrl", "pushcutEnabled"]) {
+    byId(id).addEventListener("input", () => { pushcutDirty = true; });
+  }
+  byId("pushcutForm").addEventListener("submit", async event => {
+    event.preventDefault();
+    if (pushcutBusy) return;
+    setPushcutBusy(true);
+    try {
+      await request("/api/email-agent/pushcut/configure", {
+        webhook_url: byId("pushcutWebhook").value.trim(), cockpit_url: byId("pushcutCockpitUrl").value.trim(),
+        enabled: byId("pushcutEnabled").checked
+      });
+      pushcutDirty = false;
+      byId("pushcutWebhook").value = "";
+      byId("pushcutTestStatus").textContent = "Nastavení uloženo. Ověř zvuk a otevření odkazu testem na iPhonu.";
+    } catch (error) { byId("pushcutTestStatus").textContent = error.message; }
+    finally { setPushcutBusy(false); }
+    await refresh();
+  });
+  byId("testPushcut").addEventListener("click", async () => {
+    if (pushcutBusy) return;
+    if (pushcutDirty) { byId("pushcutTestStatus").textContent = "Nejdřív ulož změněné nastavení."; return; }
+    setPushcutBusy(true);
+    try {
+      const result = await request("/api/email-agent/pushcut/test", {
+        request_id: Date.now().toString(36) + "_" + Math.random().toString(36).slice(2), confirmed: true
+      });
+      byId("pushcutTestStatus").textContent = result.status === "accepted"
+        ? "Pushcut test přijal. Na iPhonu ověř zvuk a klepnutím otevři E-maily k řešení."
+        : result.status === "rejected" ? "Pushcut test odmítl. Ověř Copy URL a existenci oznámení v aplikaci."
+        : "Výsledek testu není potvrzený. Před dalším pokusem zkontroluj iPhone.";
+    } catch (error) { byId("pushcutTestStatus").textContent = error.message; }
+    finally { setPushcutBusy(false); }
+    await refresh();
+  });
   byId("closeEditor").addEventListener("click", () => { if (!replyBusy) editor.close(); });
   editor.addEventListener("cancel", event => { if (replyBusy) event.preventDefault(); });
   byId("replyForm").addEventListener("submit", async event => {

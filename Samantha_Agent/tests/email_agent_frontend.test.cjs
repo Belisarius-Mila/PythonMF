@@ -25,7 +25,9 @@ function find(element, label) {
 (async () => {
   const ids = Object.fromEntries(['replyEditor','replyRecipient','replySubject','replyBody','replyStatus','replyForm',
     'closeEditor','status','notice','cards','hours','archived','replyConfirmation','replyQuestion','replySender',
-    'reallySendReply','backToReply','prepareReplySend','saveReplyDraft','importancePreferences'].map(id => [id, new Element(id)]));
+    'reallySendReply','backToReply','prepareReplySend','saveReplyDraft','importancePreferences',
+    'pushcutForm','pushcutCockpitUrl','pushcutWebhook','pushcutEnabled','savePushcut','testPushcut',
+    'pushcutStatus','pushcutTestStatus'].map(id => [id, new Element(id)]));
   const metadata = {title: 'Podklady', domain: 'work', document_type: 'email', counterparty: 'Firma', tags: ['schůzka']};
   const data = {schedule: {}, sources: [], assessment_errors: 0, archived: [], importance_preferences: [],
     cards: [{id: 'important', header: {subject: '<img src=x onerror=alert(1)>', sender: 'Firma', date: '4. 11.'},
@@ -37,11 +39,19 @@ function find(element, label) {
   let confirmChoice = true;
   let preparationCount = 0;
   let preparationHold = null;
+  let pushcutHold = null;
   const context = {document: {getElementById: id => ids[id], createElement: tag => new Element(tag)},
     window: {setInterval: fn => intervals.push(fn), confirm: () => confirmChoice},
     fetch: async (url, options) => {
       const payload = options?.body ? JSON.parse(options.body) : null;
       calls.push({url, payload});
+      if (url.endsWith('/pushcut/configure')) data.pushcut = {
+        enabled: payload.enabled, configured: true, cockpit_url: payload.cockpit_url, counts: {}
+      };
+      if (url.endsWith('/pushcut/test')) {
+        if (pushcutHold) await pushcutHold;
+        return {ok: true, json: async () => ({ok: true, status: 'accepted'})};
+      }
       if (url.endsWith('/edit')) { data.cards[0].proposal = payload.proposal; data.cards[0].proposal_digest = 'new-digest'; }
       if (url.endsWith('/prepare-reply')) {
         if (preparationHold) await preparationHold;
@@ -136,5 +146,28 @@ function find(element, label) {
   assert.equal(calls.find(call => call.url.endsWith('/archive')).payload.proposal_digest, 'new-digest');
   assert.equal(data.cards.length, 0);
   assert.equal(calls.some(call => /purge|trash/.test(call.url)), false);
+  ids.pushcutWebhook.value = 'https://api.pushcut.io/browser-test-secret/notifications/SamanthaEmail';
+  ids.pushcutCockpitUrl.value = 'https://synthetic.example.test/emails-to-resolve/';
+  ids.pushcutEnabled.checked = true;
+  ids.pushcutWebhook.listeners.input({});
+  await intervals[0]();
+  assert.equal(ids.pushcutEnabled.checked, true, 'Polling preserves unsaved notification choices');
+  assert.match(ids.pushcutWebhook.value, /browser-test-secret/);
+  await ids.testPushcut.click();
+  assert.equal(calls.filter(call => call.url.endsWith('/pushcut/test')).length, 0, 'Save changes before testing');
+  await ids.pushcutForm.listeners.submit({preventDefault() {}});
+  const configuration = calls.find(call => call.url.endsWith('/pushcut/configure'));
+  assert.equal(configuration.payload.enabled, true);
+  assert.equal(ids.pushcutWebhook.value, '', 'Saved webhook is never returned to the field');
+  let releasePushcut;
+  pushcutHold = new Promise(resolve => { releasePushcut = resolve; });
+  const testing = ids.testPushcut.click();
+  await flush(); await ids.testPushcut.click();
+  assert.equal(calls.filter(call => call.url.endsWith('/pushcut/test')).length, 1, 'Double click sends one test');
+  releasePushcut(); await testing;
+  const testCall = calls.find(call => call.url.endsWith('/pushcut/test'));
+  assert.equal(testCall.payload.confirmed, true);
+  assert.match(testCall.payload.request_id, /^[a-z0-9_]{8,100}$/);
+  assert.match(ids.pushcutTestStatus.textContent, /Pushcut test přijal/);
   console.log('Email agent frontend: editor, polling, two-step reply, dismissal and archive OK');
 })().catch(error => { console.error(error); process.exitCode = 1; });

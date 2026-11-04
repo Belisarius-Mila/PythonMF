@@ -1,4 +1,4 @@
-# Průběžný osobní agent — pilot a paměť důležitosti
+# Průběžný osobní agent — e-mailový provoz a Pushcut
 
 Nazev: Průběžný osobní agent pro e-maily a Apple/iCloud kalendář
 Priorita: 1
@@ -6,7 +6,35 @@ Stav: rozpracovane
 Pripomenout pri startu: ano
 Datum: 2026-11-04
 
-## Aktuální stav 2026-11-04 22:40 CET
+## Aktuální stav 2026-11-04 23:24 CET
+
+- Příprava hodinového vstupu je již vydaná po 77f7e12f: Terra p+n
+  `742135a3ba9990edc0afe6734d125166`, 2368 PASS, smoke 5/5 a GitHub CI
+  41922126605 success. Živý stamp i obsah stránky shodné, main/GitHub čisté.
+- Míla upřednostnil dokončit notifikaci před hodinovou aktivací a zvolil
+  Pushcut. Nový lokální kód sdružuje nové důležité karty do jednoho oznámení
+  za kontrolní hodinu, s trvalým stavem pokusu a bez opakování po restartu.
+- Karta a fronta vznikají atomicky. Vyřazené/ignorované karty, nízká
+  důležitost a modelové chyby nezvoní. Zapnutí nezahrnuje staré karty zpětně.
+- Plain POST spouští v aplikaci předdefinovaný text/zvuk/URL bez placeného
+  dynamického obsahu. Kód ani tento krok nevytvořily placený tarif.
+- V E-mailech k řešení přibylo nastavení Pushcutu a výslovný test s request
+  ID i při vypnuté hodinové službě. Prázdné pole zachovává uložený webhook,
+  přehled jej nevrací. Polling nepřepisuje rozepsané nastavení.
+- 147 cílených scénářů PASS včetně HTTP, JS a celého frontend kontraktu.
+  První plná brána měla jediný FAIL ve starém pevném otisku rozšířené
+  stránky; fixture opraven, kontrola ponechaná. Nové plné ověření provede
+  schválené registrované p+n podle LL-079 před publikací.
+  Čtecí audit ověřil HTTPS Cockpit a připravil private odkaz s vypnutými
+  oznámeními. Skutečný webhook zatím chybí; žádný živý Pushcut POST,
+  placený model, archivace ani SMTP. Staré čtyři položky zachované.
+- Míla během testů výslovně schválil p+n. Nový kód zatím není nasazený;
+  po commitu jej převezme Terra bez dalšího dotazu.
+  Podrobnosti: `reports/email_pushcut_20261104.md`.
+  Následuje p+n, skutečné propojení a fyzický test zvuku/odkazu; potom
+  řízená instalace a aktivace. Vlastní modelová role zůstává neaktivní.
+
+## Předchozí stav 2026-11-04 22:40 CET
 
 - Míla zadal pokračovat na e-mailech, zatímco druhý terminál Data samostatně
   ověřuje App Server SDK. Produkční App Server klient ani runtime se zde nemění.
@@ -313,11 +341,11 @@ odsouhlasený rozsah čtení k potvrzování jednotlivých zpráv.
 
 ## Další krok
 
-Nejprve samostatné p+n kompatibilního runtime, potom aktivace nové role;
-starší běžící parser ji ještě nezná. Dokončit profil Terry a počet/rozpočet, připravit výchozí
-pozici Seznamu a řízenou instalaci/aktivaci. Dosavadní iCloud kurzor zachovat.
-Příště nedůležité už je vydané, fyzická přejímka volby/zrušení a živý test
-potvrzené archivace/metadat zůstávají otevřené. Editor/SMTP jsou přijaté.
+Samostatné p+n Pushcutu, propojení skutečné notifikace a fyzický test zvuku
+a otevření E-mailů k řešení na iPhonu. Potom řízený instalátor a aktivace,
+profil Terry/počet/rozpočet a výchozí pozice Seznamu; iCloud kurzor zachovat.
+Runtime rozpoznávající vlastní roli je už vydaný. Příště nedůležité také,
+jeho fyzické QA a živá přejímka archivace/metadat čekají. Editor/SMTP přijaté.
 
 ## Navrhované další kroky
 

@@ -24,6 +24,7 @@ NODE_FALLBACK_PATHS = (
 )
 
 COMPILE_PATHS = (
+    "app/email/pushcut.py",
     "app/email/service.py",
     "app/email/agent_reply.py",
     "app/cockpit_email_agent.py",
@@ -418,6 +419,7 @@ TEST_MODULES = (
     "tests.test_email_work_repository",
     "tests.test_continuous_email_agent",
     "tests.test_email_agent_service",
+    "tests.test_email_pushcut",
     "tests.test_hourly_email_agent",
     "tests.test_cockpit_email_agent",
     "tests.test_agent_reply",

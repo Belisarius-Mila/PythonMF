@@ -18,6 +18,7 @@ from .continuous_agent import ContinuousEmailAgent, DEFAULT_ROOT
 from .continuous_source import IMAPAgentSource
 from .codex_proposer import CodexEmailProposer
 from .hourly_agent import HourlyEmailScheduler, PRAGUE, hourly_slot
+from .pushcut import PushcutNotifier, pushcut_status
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -75,7 +76,8 @@ def readiness(*, settings_path: Path = SETTINGS_PATH, worker=None,
             blockers.append(provider + "_configuration_unavailable")
     return {"ready": not blockers, "blockers": blockers, "sources": sources,
             "enabled": settings.enabled, "role": EMAIL_ROLE,
-            "hours": "07:00–22:00 Europe/Prague", "max_assessments_per_day": settings.max_assessments_per_day}
+            "hours": "07:00–22:00 Europe/Prague", "max_assessments_per_day": settings.max_assessments_per_day,
+            "pushcut": pushcut_status(worker)}
 
 
 def launch_agent_preview(*, project: Path = PROJECT_ROOT, python: Path | None = None) -> dict:
@@ -117,6 +119,8 @@ def service_tick(*, settings_path: Path = SETTINGS_PATH, worker=None, now: datet
     if hourly_slot(now) is None:
         return {"status": "outside_hours", "proposals": 0}
     worker = worker or ContinuousEmailAgent()
+    def finish(result):
+        return {**result, "notifications": PushcutNotifier(worker).drain()}
     try:
         with exclusive_file_lock(worker.root / "service", timeout=0):
             sources = [source_factory(provider) for provider in settings.providers]
@@ -127,7 +131,7 @@ def service_tick(*, settings_path: Path = SETTINGS_PATH, worker=None, now: datet
                 return {"status": "needs_initialization", "proposals": 0}
             slot = hourly_slot(now)
             if state.get("schedule", {}).get("completed_slot") == slot:
-                return {"status": "already_completed", "proposals": 0}
+                return finish({"status": "already_completed", "proposals": 0})
             day = now.astimezone(PRAGUE).date().isoformat()
 
             def paused():
@@ -137,7 +141,7 @@ def service_tick(*, settings_path: Path = SETTINGS_PATH, worker=None, now: datet
                         or used >= current.max_assessments_per_day)
 
             if paused():
-                return {"status": "paused", "proposals": 0}
+                return finish({"status": "paused", "proposals": 0})
             selected = select_model()
             selection_validator(selected, role=EMAIL_ROLE)
             proposer = proposer_factory(selected["model"], effort=selected["reasoning_effort"])
@@ -150,7 +154,7 @@ def service_tick(*, settings_path: Path = SETTINGS_PATH, worker=None, now: datet
                 worker._update(reserve)
                 return proposer(observed)
 
-            return HourlyEmailScheduler(worker).tick(sources, propose, now=now,
-                batch_size=settings.batch_size, max_batches=settings.max_batches, should_stop=paused)
+            return finish(HourlyEmailScheduler(worker).tick(sources, propose, now=now,
+                batch_size=settings.batch_size, max_batches=settings.max_batches, should_stop=paused))
     except FileLockTimeoutError:
         return {"status": "busy", "proposals": 0}

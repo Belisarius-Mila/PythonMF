@@ -16,6 +16,8 @@ from app.cockpit_email_agent import (email_agent_dismiss_action, email_agent_edi
                                    email_agent_remember_importance_action, email_agent_forget_importance_action)
 from app.cockpit_frontend import EMAIL_AGENT_HTML
 from app.email.continuous_agent import ContinuousEmailAgent
+from app.email.pushcut import PushcutNotifier
+from app.cockpit_email_agent import email_agent_pushcut_configure_action, email_agent_pushcut_test_action
 from tests.test_continuous_email_agent import FakeSource, observed, proposal
 from scripts.cockpit_quality_gate import node_binary
 
@@ -104,6 +106,20 @@ class EmailAgentHTTPTests(unittest.TestCase):
         self.assertNotIn("/api/email-processing/purge-trash", EMAIL_AGENT_HTML)
         self.assertIn("/api/email-agent/send-reply", EMAIL_AGENT_HTML)
         self.assertIn("Opravdu odeslat odpověď", EMAIL_AGENT_HTML)
+
+    def test_pushcut_setup_and_explicit_test_over_http_never_return_webhook(self):
+        calls=[]
+        notifier=PushcutNotifier(self.worker,sender=lambda url: calls.append(url) or {"status":"accepted"})
+        with patch("app.cockpit.email_agent_pushcut_configure_action",side_effect=lambda data: email_agent_pushcut_configure_action(data,notifier=notifier)):
+            _, raw, _ = self.request("/api/email-agent/pushcut/configure",{
+                "webhook_url":"https://api.pushcut.io/http-test-secret/notifications/SamanthaEmail",
+                "cockpit_url":"https://synthetic.example.test/emails-to-resolve/","enabled":False})
+        self.assertTrue(json.loads(raw)["pushcut"]["configured"])
+        self.assertNotIn(b"http-test-secret",raw)
+        with patch("app.cockpit.email_agent_pushcut_test_action",side_effect=lambda data: email_agent_pushcut_test_action(data,notifier=notifier)):
+            _, raw, _ = self.request("/api/email-agent/pushcut/test",{"request_id":"http_test_01","confirmed":True})
+        self.assertEqual(json.loads(raw)["status"],"accepted")
+        self.assertEqual(len(calls),1)
 
     def test_editor_polling_double_send_confirmation_and_archive_frontend(self):
         result = subprocess.run([node_binary(), str(Path(__file__).with_name("email_agent_frontend.test.cjs"))],

@@ -10,6 +10,7 @@ from zoneinfo import ZoneInfo
 from app.email.continuous_agent import ContinuousEmailAgent, EmailProposal
 from app.email.continuous_source import IMAPAgentSource
 from app.email.agent_reply import AgentReplyService
+from app.email.pushcut import PushcutNotifier, pushcut_status
 from app.file_persistence import FilePersistenceError
 from app.work_repository import WorkRepositoryError
 
@@ -50,7 +51,27 @@ def email_agent_overview(*, worker=None) -> dict:
     return {"ok": True, "cards": sorted(cards, key=lambda item: item["created_at"], reverse=True),
             "hours": rows, "archived": archived, "schedule": state.get("schedule", {}),
             "sources": list(state["sources"].values()), "importance_preferences": preferences,
-            "assessment_errors": sum(counts[s] for s in ("analysis_failed", "analysis_interrupted", "analyzing"))}
+            "assessment_errors": sum(counts[s] for s in ("analysis_failed", "analysis_interrupted", "analyzing")),
+            "pushcut": pushcut_status(worker or ContinuousEmailAgent())}
+
+
+def email_agent_pushcut_configure_action(payload: dict, *, notifier=None) -> dict:
+    try:
+        status = (notifier or PushcutNotifier()).configure(
+            webhook_url=payload.get("webhook_url", ""), cockpit_url=payload.get("cockpit_url", ""),
+            enabled=payload.get("enabled"))
+        return {"ok": True, "pushcut": status}
+    except Exception:
+        return {"ok": False, "message": "Nastavení se nepodařilo uložit. Ověř adresu z Pushcutu a HTTPS odkaz na E-maily k řešení."}
+
+
+def email_agent_pushcut_test_action(payload: dict, *, notifier=None) -> dict:
+    try:
+        outcome = (notifier or PushcutNotifier()).test(request_id=payload.get("request_id", ""),
+                                                      confirmed=payload.get("confirmed") is True)
+        return {"ok": True, **outcome}
+    except Exception:
+        return {"ok": False, "message": "Test se nepodařilo spustit. Nejdřív ulož nastavení; případný předchozí výsledek ověř na iPhonu."}
 
 
 def email_agent_remember_importance_action(payload: dict, *, worker=None) -> dict:

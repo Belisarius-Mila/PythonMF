@@ -201,10 +201,16 @@ class ContinuousEmailAgent:
                             status="analysis_failed", error=type(exc).__name__))
                     else:
                         visible_message = {"body_text": observed.source.body_text} if proposal["important"] else {}
-                        self._update(lambda d: d["items"][item_id].update(
-                            status="awaiting_confirmation" if proposal["important"] else "hourly_summary",
-                            message=visible_message, proposal=proposal,
-                            proposal_digest=proposal_digest(proposal)))
+                        def save_assessment(document):
+                            document["items"][item_id].update(
+                                status="awaiting_confirmation" if proposal["important"] else "hourly_summary",
+                                message=visible_message, proposal=proposal,
+                                proposal_digest=proposal_digest(proposal))
+                            if proposal["important"] and document.get("pushcut", {}).get("enabled"):
+                                event = document.setdefault("notification_hours", {}).setdefault(hour, {
+                                    "status": "pending", "created_at": _now(), "item_ids": []})
+                                event["item_ids"].append(item_id)
+                        self._update(save_assessment)
                         created += 1
                 elif existing["status"] == "analyzing":
                     self._update(lambda d: d["items"][item_id].update(status="analysis_interrupted"))

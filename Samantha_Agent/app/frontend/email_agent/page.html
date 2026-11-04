@@ -4,6 +4,17 @@
 <body><main><header><div><p class="eyebrow">SAMANTHA · KOMUNIKACE</p><h1>E-maily k řešení</h1></div>
 <a href="/">Zpět do Cockpitu</a></header>
 <p id="status" role="status">Načítám přehled…</p><p id="notice" role="status"></p>
+<details><summary>Upozornění na iPhone</summary>
+<p>V Pushcutu vytvoř oznámení <strong>SamanthaEmail</strong> s textem „Zkontroluj e-maily v Cockpitu.“ a vyber zvuk.
+Do <strong>Default Action → URL</strong> vlož níže uvedený odkaz na Cockpit. Potom zkopíruj <strong>Copy URL</strong> do pole Adresa notifikace.</p>
+<form id="pushcutForm">
+<label>Odkaz na E-maily k řešení dostupný z iPhonu<input id="pushcutCockpitUrl" type="url" placeholder="https://…/emails-to-resolve/" required></label>
+<label>Adresa notifikace z Pushcutu<input id="pushcutWebhook" type="password" autocomplete="off" placeholder="Vlož Copy URL; prázdné pole zachová uloženou adresu."></label>
+<label><input id="pushcutEnabled" type="checkbox"> Upozorňovat na nové důležité zprávy</label>
+<div class="actions"><button id="savePushcut" type="submit">Uložit nastavení</button>
+<button id="testPushcut" type="button" class="secondary">Poslat test na iPhone</button></div>
+</form><p id="pushcutStatus" role="status"></p><p id="pushcutTestStatus" role="status"></p>
+<p>Jedno upozornění na nové důležité zprávy z kontrolní hodiny. Staré karty znovu nezvoní. Test lze poslat i s vypnutou hodinovou službou.</p></details>
 <section aria-labelledby="importantTitle"><h2 id="importantTitle">Důležité zprávy</h2><div id="cards"></div></section>
 <section aria-labelledby="hoursTitle"><h2 id="hoursTitle">Ostatní pošta po hodinách</h2><div id="hours"></div></section>
 <details><summary>Předvolby důležitosti</summary>
