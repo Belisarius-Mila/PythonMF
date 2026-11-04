@@ -1,0 +1,384 @@
+{
+  "checked_at": "2026-11-04 Europe/Prague",
+  "baseline_commit": "592d247bf213476bd2874986311d26249104ded0",
+  "branch": "data/parallel-20261104",
+  "python": "3.11.5",
+  "environment": ".venv (only this worktree; ignored)",
+  "installed_global_cli": "0.166.0",
+  "sdk": "0.163.0",
+  "sdk_bundled_cli": "0.163.0",
+  "paid_model_turns": 0,
+  "sdk_source": "https://pypi.org/pypi/openai-codex/0.163.0/json",
+  "packages": {
+    "PyJWT": "2.15.1",
+    "annotated-types": "0.8.0",
+    "anyio": "4.16.0",
+    "attrs": "26.1.0",
+    "certifi": "2026.10.23",
+    "cffi": "2.1.1",
+    "charset-normalizer": "3.5.2",
+    "click": "8.5.0",
+    "cryptography": "45.0.7",
+    "distro": "1.9.0",
+    "griffelib": "2.4.1",
+    "h11": "0.16.0",
+    "httpcore": "1.0.9",
+    "httpx": "0.28.1",
+    "httpx-sse": "0.4.3",
+    "idna": "3.20",
+    "jiter": "0.18.0",
+    "jsonschema": "4.26.0",
+    "jsonschema-specifications": "2025.9.1",
+    "mcp": "1.30.0",
+    "openai": "2.54.0",
+    "openai-agents": "0.17.2",
+    "openai-codex": "0.163.0",
+    "openai-codex-cli-bin": "0.163.0",
+    "packaging": "26.3",
+    "pillow": "13.0.0",
+    "pip": "23.2.1",
+    "pycparser": "3.12",
+    "pydantic": "2.14.2",
+    "pydantic-settings": "2.16.2",
+    "pydantic_core": "2.50.2",
+    "python-dotenv": "1.2.4",
+    "python-multipart": "0.0.33",
+    "referencing": "0.37.0",
+    "requests": "2.34.2",
+    "rpds-py": "2026.9.1",
+    "setuptools": "65.5.0",
+    "sniffio": "1.3.1",
+    "sse-starlette": "3.6.0",
+    "starlette": "1.10.0",
+    "tqdm": "4.70.1",
+    "types-requests": "2.33.0.20261030",
+    "typing-inspection": "0.4.5",
+    "typing_extensions": "4.16.0",
+    "urllib3": "2.8.0",
+    "uvicorn": "0.54.0",
+    "websockets": "16.0"
+  },
+  "production_sha256": {
+    "app/codex_appserver.py": "74665af5384b4fcb5c02c05da0ce68fbbc62d1971da3e62d77eb166985a4f4e0",
+    "app/communication/local_runtime.py": "c62f6257ed203b7271cc566646b60f590221c9cbe4e459b774c69db02e9268db",
+    "app/communication/session_hub.py": "68136d51a0527d2630768e113bfe84709ba87cdf8d280845127a337835ac4373",
+    "config/agent_roles.json": "1217409512a6f7eed6e9b8f1ec9c9eaf06ffa523f5b8fd0968e769e41923bfd6",
+    "requirements.txt": "f321d63e73e2c6b86544649aa078cc150ee2d3933d04e3f0754fe2f510131bd2"
+  },
+  "cli_schema_inventory": {
+    "global_cli_0.166.0": {
+      "ThreadResumeParams": {
+        "sha256": "8dceca415b2c16693b55658ea629cba5ffc82ac300dcd403db0ba7455e491496",
+        "required": [
+          "threadId"
+        ],
+        "properties": [
+          "approvalPolicy",
+          "approvalsReviewer",
+          "baseInstructions",
+          "config",
+          "cwd",
+          "developerInstructions",
+          "excludeTurns",
+          "model",
+          "modelProvider",
+          "personality",
+          "sandbox",
+          "serviceTier",
+          "threadId"
+        ]
+      },
+      "ThreadResumeResponse": {
+        "sha256": "2f8aa868ca008731622673d518b12f70ea8920eaf00fa5e80bfeb49cd8f2a77c",
+        "required": [
+          "approvalPolicy",
+          "approvalsReviewer",
+          "cwd",
+          "model",
+          "modelProvider",
+          "sandbox",
+          "thread"
+        ],
+        "properties": [
+          "approvalPolicy",
+          "approvalsReviewer",
+          "collaborationMode",
+          "cwd",
+          "disabledPluginIds",
+          "instructionSources",
+          "itemsBackwardsCursor",
+          "model",
+          "modelProvider",
+          "reasoningEffort",
+          "sandbox",
+          "serviceTier",
+          "thread",
+          "turnsBackwardsCursor"
+        ]
+      },
+      "ThreadTurnsListParams": {
+        "sha256": "2a8b93d7d4437cc25e16a1dde16d8db3c338d39e16c5eece2a56e943a21577d7",
+        "required": [
+          "threadId"
+        ],
+        "properties": [
+          "cursor",
+          "itemsView",
+          "limit",
+          "sortDirection",
+          "threadId"
+        ]
+      },
+      "ThreadTurnsListResponse": {
+        "sha256": "7953d842384fbc572c0b33f03c0fb1c6b746d3a3cc9c25302e6a03f9dce6d46a",
+        "required": [
+          "data"
+        ],
+        "properties": [
+          "backwardsCursor",
+          "data",
+          "nextCursor"
+        ]
+      },
+      "ThreadItemsListParams": {
+        "sha256": "d5cf9784413f1d1abba756e04e48b273a9d12ab2c5675442e91b6a4ee55e19f0",
+        "required": [
+          "threadId"
+        ],
+        "properties": [
+          "cursor",
+          "limit",
+          "sortDirection",
+          "threadId",
+          "turnId"
+        ]
+      },
+      "ThreadItemsListResponse": {
+        "sha256": "5bcd27fa23f443b790dcae8d0045a700b4aff6025602b032cb2c558694c921e6",
+        "required": [
+          "data"
+        ],
+        "properties": [
+          "backwardsCursor",
+          "data",
+          "nextCursor"
+        ]
+      },
+      "TurnStartParams": {
+        "sha256": "49e53282f327c25e7b39d97afacd038ef10ad5c4fb0431608b354d3a7bf6bcea",
+        "required": [
+          "input",
+          "threadId"
+        ],
+        "properties": [
+          "approvalPolicy",
+          "approvalsReviewer",
+          "clientUserMessageId",
+          "cwd",
+          "disabledPluginIds",
+          "effort",
+          "input",
+          "model",
+          "outputSchema",
+          "parentTurnId",
+          "personality",
+          "rootTurnId",
+          "sandboxPolicy",
+          "serviceTier",
+          "serviceTierForTurn",
+          "summary",
+          "threadId",
+          "toolOutput",
+          "turnTrigger"
+        ]
+      },
+      "ErrorNotification": {
+        "sha256": "4b6e588b00241f0d1565b92991ec83b73bfdcf8dea0b96707278834ce719b444",
+        "required": [
+          "error",
+          "threadId",
+          "turnId",
+          "willRetry"
+        ],
+        "properties": [
+          "error",
+          "threadId",
+          "turnId",
+          "willRetry"
+        ]
+      },
+      "ItemCompletedNotification": {
+        "sha256": "f12a69b4f26a7fd2accadd87db4edd5e96e67ff78a1cac203dd12b91462031d7",
+        "required": [
+          "completedAtMs",
+          "item",
+          "threadId",
+          "turnId"
+        ],
+        "properties": [
+          "completedAtMs",
+          "item",
+          "threadId",
+          "turnId"
+        ]
+      }
+    },
+    "sdk_cli_0.163.0": {
+      "ThreadResumeParams": {
+        "sha256": "8dceca415b2c16693b55658ea629cba5ffc82ac300dcd403db0ba7455e491496",
+        "required": [
+          "threadId"
+        ],
+        "properties": [
+          "approvalPolicy",
+          "approvalsReviewer",
+          "baseInstructions",
+          "config",
+          "cwd",
+          "developerInstructions",
+          "excludeTurns",
+          "model",
+          "modelProvider",
+          "personality",
+          "sandbox",
+          "serviceTier",
+          "threadId"
+        ]
+      },
+      "ThreadResumeResponse": {
+        "sha256": "3f19a9c3a9891526685b0f61ce781098ddd65bfa2aed8c24ba4722fef10e08fe",
+        "required": [
+          "approvalPolicy",
+          "approvalsReviewer",
+          "cwd",
+          "model",
+          "modelProvider",
+          "sandbox",
+          "thread"
+        ],
+        "properties": [
+          "approvalPolicy",
+          "approvalsReviewer",
+          "collaborationMode",
+          "cwd",
+          "disabledPluginIds",
+          "instructionSources",
+          "itemsBackwardsCursor",
+          "model",
+          "modelProvider",
+          "reasoningEffort",
+          "sandbox",
+          "serviceTier",
+          "thread",
+          "turnsBackwardsCursor"
+        ]
+      },
+      "ThreadTurnsListParams": {
+        "sha256": "2a8b93d7d4437cc25e16a1dde16d8db3c338d39e16c5eece2a56e943a21577d7",
+        "required": [
+          "threadId"
+        ],
+        "properties": [
+          "cursor",
+          "itemsView",
+          "limit",
+          "sortDirection",
+          "threadId"
+        ]
+      },
+      "ThreadTurnsListResponse": {
+        "sha256": "eba82395d4479bb28091bbe6f39c929c7c66a30d7b0eeabedac39057ce72aceb",
+        "required": [
+          "data"
+        ],
+        "properties": [
+          "backwardsCursor",
+          "data",
+          "nextCursor"
+        ]
+      },
+      "ThreadItemsListParams": {
+        "sha256": "d5cf9784413f1d1abba756e04e48b273a9d12ab2c5675442e91b6a4ee55e19f0",
+        "required": [
+          "threadId"
+        ],
+        "properties": [
+          "cursor",
+          "limit",
+          "sortDirection",
+          "threadId",
+          "turnId"
+        ]
+      },
+      "ThreadItemsListResponse": {
+        "sha256": "0ecf37ff62571c8411aab271ea65d22be4da1108cc2fd2dffb15a7034bfedb28",
+        "required": [
+          "data"
+        ],
+        "properties": [
+          "backwardsCursor",
+          "data",
+          "nextCursor"
+        ]
+      },
+      "TurnStartParams": {
+        "sha256": "835e0d4ca1a0ddc4fb6db1e2b3249dd67f07c50ac2506092ba81543efc92829b",
+        "required": [
+          "input",
+          "threadId"
+        ],
+        "properties": [
+          "approvalPolicy",
+          "approvalsReviewer",
+          "clientUserMessageId",
+          "cwd",
+          "disabledPluginIds",
+          "effort",
+          "input",
+          "model",
+          "outputSchema",
+          "parentTurnId",
+          "personality",
+          "rootTurnId",
+          "sandboxPolicy",
+          "serviceTier",
+          "serviceTierForTurn",
+          "summary",
+          "threadId",
+          "toolOutput",
+          "turnTrigger"
+        ]
+      },
+      "ErrorNotification": {
+        "sha256": "63518d8faae38b8eb73518d59b113f77603d238dd0cf36260b4232f381f43f8c",
+        "required": [
+          "error",
+          "threadId",
+          "turnId",
+          "willRetry"
+        ],
+        "properties": [
+          "error",
+          "threadId",
+          "turnId",
+          "willRetry"
+        ]
+      },
+      "ItemCompletedNotification": {
+        "sha256": "940dcfba0740e86a7e62b0eacf1bb53c634fdbe8b75fa3163b6e366a55f85fae",
+        "required": [
+          "completedAtMs",
+          "item",
+          "threadId",
+          "turnId"
+        ],
+        "properties": [
+          "completedAtMs",
+          "item",
+          "threadId",
+          "turnId"
+        ]
+      }
+    }
+  }
+}
